@@ -905,7 +905,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					buffer = lpUpDownClient->GetUserName();
 				//MORPH START - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 				CString tempStr;
-				tempStr.Format(_T("(%i)"),lpUpDownClient->m_OtherRequests_list.GetCount()+1+lpUpDownClient->m_OtherNoNeeded_list.GetCount(),buffer);
+				tempStr.Format(_T("(%i) %s"),lpUpDownClient->m_OtherRequests_list.GetCount()+1+lpUpDownClient->m_OtherNoNeeded_list.GetCount(),buffer);
 				buffer = tempStr;
 				//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 
