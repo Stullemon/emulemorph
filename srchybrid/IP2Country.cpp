@@ -77,8 +77,8 @@ CIP2Country::CIP2Country(){
 		Load();
 	}
 
-	AddLogLine(false, GetDlgItem(IDS_IP2COUNTRY_MSG1));
-	AddLogLine(false, GetDlgItem(IDS_IP2COUNTRY_MSG2));
+	AddLogLine(false, GetResString(IDS_IP2COUNTRY_MSG1));
+	AddLogLine(false, GetResString(IDS_IP2COUNTRY_MSG2));
 	m_bRunning = true;
 }
 
@@ -96,7 +96,7 @@ void CIP2Country::Load(){
 
 	if(m_bRunning) Reset();
 
-	AddLogLine(false, GetDlgItem(IDS_IP2COUNTRY_LOADED));
+	AddLogLine(false, GetResString(IDS_IP2COUNTRY_LOADED));
 }
 
 void CIP2Country::Unload(){
@@ -109,7 +109,7 @@ void CIP2Country::Unload(){
 	RemoveAllIPs();
 	RemoveAllFlags();
 
-	AddDebugLogLine(false, GetDlgItem(IDS_IP2COUNTRY_UNLOADED));
+	AddDebugLogLine(false, GetResString(IDS_IP2COUNTRY_UNLOADED));
 }
 
 void CIP2Country::Reset(){
@@ -181,8 +181,8 @@ bool CIP2Country::LoadFromFile(){
 				}
 				
 				if(error){
-					AddLogLine(false, GetDlgItem(IDS_IP2COUNTRY_ERROR1), iCount+1);
-					AddLogLine(false, _T("%s %s"), GetDlgItem(IDS_IP2COUNTRY_ERROR2), ip2countryCSVfile);
+					AddLogLine(false, GetResString(IDS_IP2COUNTRY_ERROR1), iCount+1);
+					AddLogLine(false, _T("%s %s"), GetResString(IDS_IP2COUNTRY_ERROR2), ip2countryCSVfile);
 					continue;
 				}
 				//tempStr[4] is full country name, capitalize country name from rayita
@@ -232,13 +232,13 @@ bool CIP2Country::LoadFromFile(){
 
 			if (thePrefs.GetVerbose())
 			{
-				AddDebugLogLine(false, GetDlgItem(IDS_IP2COUNTRY_LOADED2), ip2countryCSVfile, GetTickCount()-startMesure);
-				AddDebugLogLine(false, GetDlgItem(IDS_IP2COUNTRY_INFO), iLine, iCount, iDuplicate, iMerged);
+				AddDebugLogLine(false, GetResString(IDS_IP2COUNTRY_LOADED2), ip2countryCSVfile, GetTickCount()-startMesure);
+				AddDebugLogLine(false, GetResString(IDS_IP2COUNTRY_INFO), iLine, iCount, iDuplicate, iMerged);
 			}
 
 		}
 		else{
-			throw CString(GetDlgItem(IDS_IP2COUNTRY_ERROR3));
+			throw CString(GetResString(IDS_IP2COUNTRY_ERROR3));
 		}
 	}
 	catch(CString strerror){
@@ -269,7 +269,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 		_hCountryFlagDll = LoadLibrary(ip2countryCountryFlag); 
 		if (_hCountryFlagDll == NULL) 
 		{ 
-			throw CString(GetDlgItem(IDS_IP2COUNTRY_ERROR4));
+			throw CString(GetResString(IDS_IP2COUNTRY_ERROR4));
 		} 
 
 		uint16	resID[] = {
@@ -378,7 +378,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], cur_pos);
 
 			iconHandle = LoadIcon(_hCountryFlagDll, MAKEINTRESOURCE(resID[cur_pos]));
-			if(iconHandle == NULL) throw CString(GetDlgItem(IDS_IP2COUNTRY_ERROR5));
+			if(iconHandle == NULL) throw CString(GetResString(IDS_IP2COUNTRY_ERROR5));
 			
 			CountryFlagImageList.Add(iconHandle);
 		}
@@ -396,7 +396,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 	//free lib
 	if(_hCountryFlagDll != NULL) FreeLibrary(_hCountryFlagDll);
 
-	AddDebugLogLine(false, GetDlgItem(IDS_IP2COUNTRY_FLAGLOAD));
+	AddDebugLogLine(false, GetResString(IDS_IP2COUNTRY_FLAGLOAD));
 	return true;
 
 }
@@ -407,7 +407,7 @@ void CIP2Country::RemoveAllIPs(){
 		delete m_iplist[i];
 	m_iplist.RemoveAll();
 
-	AddDebugLogLine(false, GetDlgItem(IDS_IP2COUNTRY_FILELOAD));
+	AddDebugLogLine(false, GetResString(IDS_IP2COUNTRY_FILELOAD));
 }
 
 void CIP2Country::RemoveAllFlags(){
@@ -418,7 +418,7 @@ void CIP2Country::RemoveAllFlags(){
 	//also clean out the map table
 	CountryIDtoFlagIndex.RemoveAll();
 
-	AddLogLine(false, GetDlgItem(IDS_IP2COUNTRY_FLAGUNLD));
+	AddLogLine(false, GetResString(IDS_IP2COUNTRY_FLAGUNLD));
 }
 
 void CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString& shortCountryName, CString& midCountryName, CString& longCountryName){
@@ -521,13 +521,13 @@ void CIP2Country::UpdateIP2CountryURL()
 	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
 
 	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_strTitle = GetDlgItem(IDS_IP2COUNTRY_VERFILE);
+	dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_VERFILE);
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		_tremove(szTempFilePath);
-		AddLogLine(true, GetDlgItem(IDS_LOG_ERRDWN), strURL);
+		AddLogLine(true, GetResString(IDS_LOG_ERRDWN), strURL);
 		return;
 	}
 	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
@@ -548,13 +548,13 @@ void CIP2Country::UpdateIP2CountryURL()
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
-		dlgDownload.m_strTitle = GetDlgItem(IDS_IP2COUNTRY_DWNFILE);
+		dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_DWNFILE);
 		dlgDownload.m_sURLToDownload = IP2CountryURL;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			LogError(LOG_STATUSBAR, GetDlgItem(IDS_IP2COUNTRY_ERROR6));
+			LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR6));
 			return;
 		}
         
@@ -584,10 +584,10 @@ void CIP2Country::UpdateIP2CountryURL()
 					bUnzipped = true;
 				}
 				else
-					LogError(LOG_STATUSBAR, GetDlgItem(IDS_IP2COUNTRY_ERROR7), szTempFilePath);
+					LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR7), szTempFilePath);
 			}
 			else
-				LogError(LOG_STATUSBAR, GetDlgItem(IDS_IP2COUNTRY_ERROR8), szTempFilePath); //File not found inside the zip-file
+				LogError(LOG_STATUSBAR, GetResString(IDS_IP2COUNTRY_ERROR8), szTempFilePath); //File not found inside the zip-file
 
 			zip.Close();
 		}
@@ -604,9 +604,9 @@ void CIP2Country::UpdateIP2CountryURL()
 
 		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
 			theApp.ip2country->Unload();
-			AddLogLine(false,GetDlgItem(IDS_IP2COUNTRY_UPUNLOAD));
+			AddLogLine(false,GetResString(IDS_IP2COUNTRY_UPUNLOAD));
 			theApp.ip2country->Load();
-			AddLogLine(false,GetDlgItem(IDS_IP2COUNTRY_UPLOAD));
+			AddLogLine(false,GetResString(IDS_IP2COUNTRY_UPLOAD));
 		}
 
 		thePrefs.SetIP2CountryVersion(_tstoi(sbuffer)); //Commander - Added: Update version number

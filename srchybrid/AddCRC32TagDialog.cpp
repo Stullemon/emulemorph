@@ -125,27 +125,27 @@ void CCRC32CalcWorker::Run () {
 		// Let's hope the creator of this Worker thread has set the filename so we can
 		// display it...
 		if (m_FilePath == "") {
-			AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_WRN1));
+			AddLogLine (false, GetResString(IDS_LOG_CRC32_WRN1));
 		} else {
-			AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_WRN2),m_FilePath);
+			AddLogLine (false, GetResString(IDS_LOG_CRC32_WRN2),m_FilePath);
 		}
 		return;         
 	}
 	if (f->IsCRC32Calculated ()) {     
 		// We already have the CRC
-		AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_SKIP1),
+		AddLogLine (false, GetResString(IDS_LOG_CRC32_SKIP1),
 						   f->GetFileName ());
 		UnlockSharedFilesList ();
 		return;
 	}
 	if (f->IsPartFile ()) {     
 		// We can't add a CRC suffix to files which are not complete
-		AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_SKIP2),
+		AddLogLine (false, GetResString(IDS_LOG_CRC32_SKIP2),
 						   f->GetFileName ());
 		UnlockSharedFilesList ();
 		return;
 	}
-	AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_CALC),f->GetFileName ());
+	AddLogLine (false, GetResString(IDS_LOG_CRC32_CALC),f->GetFileName ());
 	CString Filename = f->GetFileName ();
 	// Release the lock while computing...
 	UnlockSharedFilesList ();
@@ -180,7 +180,7 @@ void CCRC32CalcWorker::Run () {
 		if (m_pOwner->IsTerminating ()) {
 			// Calculation aborted; this will stop all calculations, so we can tell
 			// the user its completly stopped.
-			AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_ADORT));
+			AddLogLine (false, GetResString(IDS_LOG_CRC32_ADORT));
 			return;
 		}
 
@@ -191,7 +191,7 @@ void CCRC32CalcWorker::Run () {
 										  (int) FinalCRC32 [2],
 										  (int) FinalCRC32 [1],
 										  (int) FinalCRC32 [0]);
-		AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_COMPLETED),Filename,sCRC32);
+		AddLogLine (false, GetResString(IDS_LOG_CRC32_COMPLETED),Filename,sCRC32);
 
 		// relock the list, get the file pointer
 		f = ValidateKnownFile (m_fileHashToProcess);
@@ -212,7 +212,7 @@ void CCRC32CalcWorker::Run () {
 					0, (LPARAM) m_fileHashToProcess);
 	} else {
 		// File cannot be accessed
-		AddLogLine (false, GetDlgItem(IDS_LOG_CRC32_WRN3),
+		AddLogLine (false, GetResString(IDS_LOG_CRC32_WRN3),
 						   Filename);
 	}
 
