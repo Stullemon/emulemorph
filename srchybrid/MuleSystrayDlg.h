@@ -1,3 +1,19 @@
+#if !defined(AFX_INPUTBOX_H__25CB82F9_AFE9_4640_9574_3E211C6D0452__INCLUDED_)
+#define AFX_INPUTBOX_H__25CB82F9_AFE9_4640_9574_3E211C6D0452__INCLUDED_
+#if _MSC_VER > 1000
+#pragma once
+#endif 
+
+class CInputBox : public CEdit
+{
+protected:
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+
+    DECLARE_MESSAGE_MAP()
+};
+
+#endif
+
 #if !defined(AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_)
 #define AFX_MULESYSTRAYDLG_H__A3BFC8BE_562C_4838_936D_C3D7CF647DA9__INCLUDED_
 
@@ -17,7 +33,7 @@ class CMuleSystrayDlg : public CDialog
 {
 	// Construction
 public:
-	CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown);
+	CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown, int iMinUp);
 	~CMuleSystrayDlg();
 
 	// Dialog Data
@@ -30,6 +46,9 @@ public:
 	CSliderCtrl	m_ctrlUpSpeedSld;
 	CSliderCtrl	m_ctrlDownSpeedSld;
 	CSliderCtrl	m_ctrlMinUpSpeedSld;
+	CInputBox	m_DownSpeedInput;
+	CInputBox	m_UpSpeedInput;
+	CInputBox	m_MinUpSpeedInput;
 	int		m_nMinUpSpeedTxt;
 	int		m_nDownSpeedTxt;
 	int		m_nUpSpeedTxt;
@@ -52,9 +71,9 @@ protected:
 	CTrayMenuBtn m_ctrlRestore;
 	CTrayMenuBtn m_ctrlDisconnect;
 	CTrayMenuBtn m_ctrlConnect;
+	CTrayMenuBtn m_ctrlExit;
 	CTrayMenuBtn m_ctrlPreferences;
 	CTrayMenuBtn m_ctrlReloadShares;
-	CTrayMenuBtn m_ctrlExit;
 
 	bool m_bClosingDown;
 

@@ -148,13 +148,13 @@ void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
   			char buffer[100]; buffer [0] = 0;
 			for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,toupdate->m_abyUserhash[i]);
 			#ifdef MIGHTY_TWEAKS
-			theApp.emuledlg->AddLogLine(false, "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s",
+			AddLogLine(false, "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s",
 										(LPCTSTR) OldName, (LPCTSTR) toupdate->m_strName, (uint8)toupdate->m_dwLastUsedIP, 
 										(uint8)(toupdate->m_dwLastUsedIP>>8), 
 										(uint8)(toupdate->m_dwLastUsedIP>>16),(uint8)(toupdate->m_dwLastUsedIP>>24), 
 										toupdate->m_nLastUsedPort, buffer);
 			#else
-			theApp.emuledlg->AddLogLine(false, "Friend changed his name: '%s'->'%s', hash %s",
+			AddLogLine(false, "Friend changed his name: '%s'->'%s', hash %s",
 										(LPCTSTR) OldName, (LPCTSTR) toupdate->m_strName, buffer);
 			#endif
 		}
@@ -417,7 +417,7 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	{
 		case 0:
 			//TODO avoid crash here in some case
-			iResult = _tcsicmp(item1->m_strName, item2->m_strName);
+			iResult = item1->m_strName.CompareNoCase(item2->m_strName);
 			break;
 		default:
 			return 0;

@@ -1489,7 +1489,8 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 		thePrefs.GetMaxGraphUploadRate(), 
 		thePrefs.GetMaxGraphDownloadRate(),
 		thePrefs.GetMaxUpload(),
-		thePrefs.GetMaxDownload());
+		thePrefs.GetMaxDownload(),
+		thePrefs.GetMinUpload());
 	if(m_pSystrayDlg)
 	{
 		UINT nResult = m_pSystrayDlg->DoModal();

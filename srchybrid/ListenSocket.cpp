@@ -502,6 +502,79 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						Debug("  Start2=%u  End2=%u  Size=%u\n", auStartOffsets[1], auEndOffsets[1], auEndOffsets[1] - auStartOffsets[1]);
 						Debug("  Start3=%u  End3=%u  Size=%u\n", auStartOffsets[2], auEndOffsets[2], auEndOffsets[2] - auStartOffsets[2]);
 					}
+					//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
+					uchar tempfileid[16];
+                    md4clr(tempfileid);
+					//MORPH START - Added by SiRoB, Anti-leecher feature
+					if(client->IsLeecher()) {
+						// Flag blocks to delete
+                        auStartOffsets[0] = 0; auEndOffsets[0] = 0; 
+                        auStartOffsets[1] = 0; auEndOffsets[1] = 0; 
+                        auStartOffsets[2] = 0; auEndOffsets[2] = 0; 
+
+						// Remove client from the upload queue
+						theApp.uploadqueue->RemoveFromUploadQueue(client,GetResString(IDS_UPSTOPPEDLEECHER), true, true);
+						AddDebugLogLine(false, GetResString(IDS_LEECHERDETREM));
+						
+						theApp.uploadqueue->AddClientToQueue(client);
+						AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
+						client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqfilehash));
+					}
+					//MORPH END   - Added by SiRoB, Anti-leecher feature
+					// Remark: There is a security leak that a leecher mod might exploit here.
+					//         A client might send reqblock for another file than the one it 
+					//         was granted to download. As long as the file ID in reqblock
+					//         is the same in all reqblocks, it won't be rejected.  
+					//         With this a client might be in a waiting queue with a high 
+					//         priority but download block of a file set to a lower priority.
+					else if(md4cmp(reqfilehash, client->GetUploadFileID()) != 0 && md4cmp(reqfilehash, tempfileid) != 0 && client->GetSessionUp() == 0){
+						// client requested another file than it queued up for. Try to decide if the swith should be allowed.
+						bool allowSwitch = false;
+
+	                    CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(reqfilehash);
+                        if(!currequpfile) {
+                            // save original file id asked for, to be able to log it
+							uchar uploadFileId[16];
+							md4cpy(uploadFileId, client->GetUploadFileID());
+
+							if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
+								allowSwitch = true;
+							} else {
+								client->SetUploadFileID(currequpfile);
+
+                                // we need to compare with the client that would get to replace this if we kick it out
+								CUpDownClient* bestQueuedClient = theApp.uploadqueue->FindBestClientInQueue();
+
+                                // This checks if which of client and bestClient would be on top on the queue, if client is put back.
+                                // Allow switch of file if bestClient wouldn't be on top. Clients score is calculated with the new file
+                                // it requested, since we used SetUploadFileID above.
+								if(bestQueuedClient == NULL || !theApp.uploadqueue->RightClientIsBetter(client, client->GetScore(false), bestQueuedClient, bestQueuedClient->GetScore(false))) {
+									allowSwitch = true;
+								}
+							}
+							if(allowSwitch == false) {
+                                // Flag blocks to delete
+                                auStartOffsets[0] = 0; auEndOffsets[0] = 0; 
+                                auStartOffsets[1] = 0; auEndOffsets[1] = 0; 
+                                auStartOffsets[2] = 0; auEndOffsets[2] = 0; 
+
+								// Put client back on queue and trace some info
+								AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
+									client->GetUserName(), md4str(uploadFileId), md4str(reqfilehash));
+
+								// Remove client from the upload queue
+								theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_IPSTOPPEDOTHFILE), true, true);
+	
+								// Put back with wating time intact
+								theApp.uploadqueue->AddClientToQueue(client, true, true);
+
+								AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
+						
+								client->SetUploadFileID(currequpfile);
+							}
+						}
+					}
+					//MORPH END - Added by SiRoB, ZZ Upload System
 					for (int i = 0; i < ARRSIZE(auStartOffsets); i++)
 					{
 						if (auEndOffsets[i] > auStartOffsets[i])
@@ -511,70 +584,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 							reqblock->EndOffset = auEndOffsets[i];
 							md4cpy(reqblock->FileID, reqfilehash);
 							reqblock->transferred = 0;
-							//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
-							uchar tempfileid[16];
-                    		md4clr(tempfileid);
-							//MORPH START - Added by SiRoB, Anti-leecher feature
-							if(client->IsLeecher()) {
-								// Remove client from the upload queue
-								theApp.uploadqueue->RemoveFromUploadQueue(client,GetResString(IDS_UPSTOPPEDLEECHER), true, true);
-								AddDebugLogLine(false, GetResString(IDS_LEECHERDETREM));
-						
-								theApp.uploadqueue->AddClientToQueue(client);
-								AddDebugLogLine(false, GetResString(IDS_LEECHERPUTBACK));
-								client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock->FileID));
-								delete reqblock;
-								break;
-							}
-							//MORPH END   - Added by SiRoB, Anti-leecher feature
-							// Remark: There is a security leak that a leecher mod might exploit here.
-							//         A client might send reqblock for another file than the one it 
-							//         was granted to download. As long as the file ID in reqblock
-							//         is the same in all reqblocks, it won't be rejected.  
-							//         With this a client might be in a waiting queue with a high 
-							//         priority but download block of a file set to a lower priority.
-							else if(md4cmp(reqblock->FileID, client->GetUploadFileID()) != 0 && md4cmp(reqblock->FileID, tempfileid) != 0 && client->GetSessionUp() == 0){
-								// client requested another file than it queued up for. Try to decide if the swith should be allowed.
-								bool allowSwitch = false;
-
-								// save original file id asked for, to be able to log it
-								uchar uploadFileId[16];
-								md4cpy(uploadFileId, client->GetUploadFileID());
-
-								if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
-									allowSwitch = true;
-								} else {
-									client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock->FileID));
-
-									// we need to compare with the client that would get to replace this if we kick it out
-									CUpDownClient* bestQueuedClient = theApp.uploadqueue->FindBestClientInQueue();
-
-									// This checks if which of client and bestClient would be on top on the queue, if client is put back.
-									// Allow switch of file if bestClient wouldn't be on top. Clients score is calculated with the new file
-									// it requested, since we used SetUploadFileID above.
-									if(bestQueuedClient == NULL || !theApp.uploadqueue->RightClientIsBetter(client, client->GetScore(false), bestQueuedClient, bestQueuedClient->GetScore(false))) {
-										allowSwitch = true;
-									}
-								}
-								if(allowSwitch == false) {
-									// Ban client and trace some info
-									AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
-										client->GetUserName(), md4str(uploadFileId), md4str(reqblock->FileID));
-
-									// Remove client from the upload queue
-									theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_IPSTOPPEDOTHFILE), true, true);
-	
-									// Put back with wating time intact
-									theApp.uploadqueue->AddClientToQueue(client, true, true);
-
-									AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
-						
-									client->SetUploadFileID(theApp.sharedfiles->GetFileByID(reqblock->FileID));
-									delete reqblock;
-									break;
-								}
-							}
-							//MORPH END - Added by SiRoB, ZZ Upload System
 							client->AddReqBlock(reqblock);
 						}
 						else

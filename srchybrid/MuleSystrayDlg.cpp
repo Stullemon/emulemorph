@@ -17,10 +17,19 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+//Cax2 - new class without context menu
+BEGIN_MESSAGE_MAP(CInputBox, CEdit)
+    ON_WM_CONTEXTMENU()
+END_MESSAGE_MAP()
+void CInputBox::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	//Cax2 - nothing to see here!
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CMuleSystrayDlg dialog
 
-CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown)
+CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown, int iMinUp)
 : CDialog(CMuleSystrayDlg::IDD, pParent)
 {
 	if(iCurDown == UNLIMITED)
@@ -31,7 +40,7 @@ CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxD
 	//{{AFX_DATA_INIT(CMuleSystrayDlg)
 	m_nDownSpeedTxt = iMaxDown < iCurDown ? iMaxDown : iCurDown;
 	m_nUpSpeedTxt = iMaxUp < iCurUp ? iMaxUp : iCurUp;
-	m_nMinUpSpeedTxt = thePrefs.GetMinUpload();
+	m_nMinUpSpeedTxt = iMinUp;
 	//}}AFX_DATA_INIT
 
 	m_iMaxUp = iMaxUp;
@@ -68,6 +77,9 @@ void CMuleSystrayDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_UPSLD, m_ctrlUpSpeedSld);
 	DDX_Control(pDX, IDC_DOWNSLD, m_ctrlDownSpeedSld);
 	DDX_Control(pDX, IDC_MINUPSLD, m_ctrlMinUpSpeedSld);
+	DDX_Control(pDX, IDC_DOWNTXT, m_DownSpeedInput);
+	DDX_Control(pDX, IDC_UPTXT, m_UpSpeedInput);
+	DDX_Control(pDX, IDC_MINUPTXT, m_MinUpSpeedInput);
 	DDX_Text(pDX, IDC_DOWNTXT, m_nDownSpeedTxt);
 	DDX_Text(pDX, IDC_UPTXT, m_nUpSpeedTxt);
 	DDX_Text(pDX, IDC_MINUPTXT, m_nMinUpSpeedTxt);
@@ -88,7 +100,6 @@ BEGIN_MESSAGE_MAP(CMuleSystrayDlg, CDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_CAPTURECHANGED()
 	//}}AFX_MSG_MAP
-
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -163,7 +174,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlSpeed.m_bUseIcon = true;
 		m_ctrlSpeed.m_sIcon.cx = 16;
 		m_ctrlSpeed.m_sIcon.cy = 16;
-		m_ctrlSpeed.m_hIcon = theApp.LoadIcon("TRAY_SPEED", m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy, 0);
+		m_ctrlSpeed.m_hIcon = theApp.LoadIcon("TRAY_SPEED", m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy);
 		m_ctrlSpeed.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -184,16 +195,37 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlAllToMax.m_nBtnID = IDC_TOMAX;
 		//p->GetWindowText(m_ctrlAllToMax.m_strText);
 		m_ctrlAllToMax.m_strText = GetResString(IDS_PW_UA);
+		m_ctrlAllToMax.m_strText.Remove(_T('&'));
 
 		m_ctrlAllToMax.m_bUseIcon = true;
 		m_ctrlAllToMax.m_sIcon.cx = 16;
 		m_ctrlAllToMax.m_sIcon.cy = 16;
-		m_ctrlAllToMax.m_hIcon = theApp.LoadIcon("TRAY_TOMAX", m_ctrlAllToMax.m_sIcon.cx, m_ctrlAllToMax.m_sIcon.cy, 0);
+		m_ctrlAllToMax.m_hIcon = theApp.LoadIcon("TRAY_TOMAX", m_ctrlAllToMax.m_sIcon.cx, m_ctrlAllToMax.m_sIcon.cy);
 		m_ctrlAllToMax.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlAllToMax.m_cfFont.CreateFontIndirect(&lfStaticFont);
 	}
+/*
+	p = GetDlgItem(IDC_TOMIN);
+	if(p)
+	{
+		p->GetWindowRect(r);
+		ScreenToClient(r);
+		m_ctrlAllToMin.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_TOMIN);
+		m_ctrlAllToMin.m_nBtnID = IDC_TOMIN;
+		//p->GetWindowText(m_ctrlAllToMin.m_strText);
+		m_ctrlAllToMin.m_strText = GetResString(IDS_PW_PA);
+		m_ctrlAllToMin.m_strText.Remove(_T('&'));
 
+		m_ctrlAllToMin.m_bUseIcon = true;
+		m_ctrlAllToMin.m_sIcon.cx = 16;
+		m_ctrlAllToMin.m_sIcon.cy = 16;
+		m_ctrlAllToMin.m_hIcon = theApp.LoadIcon("TRAY_TOMIN", m_ctrlAllToMin.m_sIcon.cx, m_ctrlAllToMin.m_sIcon.cy);
+		m_ctrlAllToMin.m_bParentCapture = true;
+		if(bValidFont)
+			m_ctrlAllToMin.m_cfFont.CreateFontIndirect(&lfStaticFont);
+	}
+*/
 	p = GetDlgItem(IDC_RESTORE);
 	if(p)
 	{
@@ -203,11 +235,12 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlRestore.m_nBtnID = IDC_RESTORE;
 		//p->GetWindowText(m_ctrlRestore.m_strText);
 		m_ctrlRestore.m_strText = GetResString(IDS_MAIN_POPUP_RESTORE);
+		m_ctrlRestore.m_strText.Remove(_T('&'));
 
 		m_ctrlRestore.m_bUseIcon = true;
 		m_ctrlRestore.m_sIcon.cx = 16;
 		m_ctrlRestore.m_sIcon.cy = 16;
-		m_ctrlRestore.m_hIcon = theApp.LoadIcon("TRAY_RESTORE", m_ctrlRestore.m_sIcon.cx, m_ctrlRestore.m_sIcon.cy, 0);
+		m_ctrlRestore.m_hIcon = theApp.LoadIcon("TRAY_RESTORE", m_ctrlRestore.m_sIcon.cx, m_ctrlRestore.m_sIcon.cy);
 		m_ctrlRestore.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -226,12 +259,12 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlConnect.m_nBtnID = IDC_CONNECT;
 		//p->GetWindowText(m_ctrlConnect.m_strText);
 		m_ctrlConnect.m_strText = GetResString(IDS_MAIN_BTN_CONNECT);
-		m_ctrlConnect.m_strText.Remove('&');
+		m_ctrlConnect.m_strText.Remove(_T('&'));
 
 		m_ctrlConnect.m_bUseIcon = true;
 		m_ctrlConnect.m_sIcon.cx = 16;
 		m_ctrlConnect.m_sIcon.cy = 16;
-		m_ctrlConnect.m_hIcon = theApp.LoadIcon("TRAY_CONNECT", m_ctrlConnect.m_sIcon.cx, m_ctrlConnect.m_sIcon.cy, 0);
+		m_ctrlConnect.m_hIcon = theApp.LoadIcon("BN_CONNECT", m_ctrlConnect.m_sIcon.cx, m_ctrlConnect.m_sIcon.cy);
 		m_ctrlConnect.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlConnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -246,12 +279,12 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlDisconnect.m_nBtnID = IDC_DISCONNECT;
 		//p->GetWindowText(m_ctrlDisconnect.m_strText);
 		m_ctrlDisconnect.m_strText = GetResString(IDS_MAIN_BTN_DISCONNECT);
-		m_ctrlDisconnect.m_strText.Remove('&');
+		m_ctrlDisconnect.m_strText.Remove(_T('&'));
 
 		m_ctrlDisconnect.m_bUseIcon = true;
 		m_ctrlDisconnect.m_sIcon.cx = 16;
 		m_ctrlDisconnect.m_sIcon.cy = 16;
-		m_ctrlDisconnect.m_hIcon = theApp.LoadIcon("TRAY_DISCONNECT", m_ctrlDisconnect.m_sIcon.cx, m_ctrlDisconnect.m_sIcon.cy, 0);
+		m_ctrlDisconnect.m_hIcon = theApp.LoadIcon("BN_DISCONNECT", m_ctrlDisconnect.m_sIcon.cx, m_ctrlDisconnect.m_sIcon.cy);
 		m_ctrlDisconnect.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlDisconnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -265,12 +298,12 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlPreferences.m_nBtnID = IDC_PREFERENCES;
 		//p->GetWindowText(m_ctrlPreferences.m_strText);
 		m_ctrlPreferences.m_strText = GetResString(IDS_EM_PREFS);
-		m_ctrlPreferences.m_strText.Remove('&');
+		m_ctrlPreferences.m_strText.Remove(_T('&'));
 
 		m_ctrlPreferences.m_bUseIcon = true;
 		m_ctrlPreferences.m_sIcon.cx = 16;
 		m_ctrlPreferences.m_sIcon.cy = 16;
-		m_ctrlPreferences.m_hIcon = theApp.LoadIcon("PREF_GENERAL", m_ctrlPreferences.m_sIcon.cx, m_ctrlPreferences.m_sIcon.cy, 0);
+		m_ctrlPreferences.m_hIcon = theApp.LoadIcon("PREF_GENERAL", m_ctrlPreferences.m_sIcon.cx, m_ctrlPreferences.m_sIcon.cy);
 		m_ctrlPreferences.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlPreferences.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -303,12 +336,12 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlExit.m_nBtnID = IDC_TRAY_EXIT;
 		//p->GetWindowText(m_ctrlExit.m_strText);
 		m_ctrlExit.m_strText = GetResString(IDS_EXIT);
-		m_ctrlExit.m_strText.Remove('&');
+		m_ctrlExit.m_strText.Remove(_T('&'));
 
 		m_ctrlExit.m_bUseIcon = true;
 		m_ctrlExit.m_sIcon.cx = 16;
 		m_ctrlExit.m_sIcon.cy = 16;
-		m_ctrlExit.m_hIcon = theApp.LoadIcon("TRAY_EXIT", m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy, 0);
+		m_ctrlExit.m_hIcon = theApp.LoadIcon("TRAY_EXIT", m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy);
 		m_ctrlExit.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -363,7 +396,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 
 	m_ctrlSidebar.SetHorizontal(false);
 	m_ctrlSidebar.SetFont(&Font);
-	m_ctrlSidebar.SetWindowText((CString)"eMule v"+theApp.m_strCurVersionLong);
+	m_ctrlSidebar.SetWindowText("eMule v"+theApp.m_strCurVersionLong);
 
 	CRect rDesktop;
 	CWnd *pDesktopWnd = GetDesktopWindow();
@@ -386,7 +419,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	MoveWindow(xpos, ypos, r.Width(), r.Height());
 	SetCapture();
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CMuleSystrayDlg::OnChangeDowntxt() 
@@ -435,7 +468,7 @@ void CMuleSystrayDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	if(pScrollBar == (CScrollBar*)&m_ctrlDownSpeedSld)
 	{
-		m_nDownSpeedTxt = m_ctrlDownSpeedSld.GetPos();;
+		m_nDownSpeedTxt = m_ctrlDownSpeedSld.GetPos();
 		UpdateData(FALSE);
 		thePrefs.SetMaxDownload(m_nDownSpeedTxt);
 	}

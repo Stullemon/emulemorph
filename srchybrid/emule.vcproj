@@ -114,14 +114,12 @@
 				AdditionalOptions="/fixed:no"
 				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Release\ResizableLib.lib ADSIId.lib"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="wsock32.lib"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="0"
-				SetChecksum="TRUE"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -1958,12 +1956,6 @@
 			</File>
 			<File
 				RelativePath=".\res\suc.ico">
-			</File>
-			<File
-				RelativePath=".\res\systray_connect.ico">
-			</File>
-			<File
-				RelativePath=".\res\systray_disconnect.ico">
 			</File>
 			<File
 				RelativePath="res\systray_exit.ico">

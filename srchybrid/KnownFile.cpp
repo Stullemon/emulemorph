@@ -715,7 +715,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 		CString hashfilename;
 		hashfilename.Format ("%s\\%s",in_directory, in_filename);
 		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
-		theApp.emuledlg->AddLogLine(false, "Hashing file: '%s'", (const char*) hashfilename);
+		AddLogLine(false, "Hashing file: '%s'", (const char*) hashfilename);
 	}
 	// [end] Mighty Knife
 
@@ -796,7 +796,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 		CString hashfilename;
 		hashfilename.Format ("%s\\%s",in_directory, in_filename);
 		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
-		theApp.emuledlg->AddLogLine(false, "Hashing of file '%s' completed.", (const char*) hashfilename);
+		AddLogLine(false, "Hashing of file '%s' completed.", (const char*) hashfilename);
 	}
 	// [end] Mighty Knife
 	return true;	
@@ -2317,7 +2317,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 			partspread[i] = 0;
 	}
 
-	if (!thePrefs.IsSelectiveShareEnabled())
+	if ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled())
 		return parts;
 
 	uint8 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
