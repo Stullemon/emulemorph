@@ -1,17 +1,18 @@
--------------------------------------- 
-Changelog for eMule 0.42b MorphXT v1.?
--------------------------------------- 
-MERGED: Code merged to 0.42b [SiRoB]
-MERGED: Code merged to 0.42c [SiRoB]
-
-FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]
-FIXED  : The prio for category is now well updated in the CAT Popup [SiRoB]
-FIXED  : The opening slot should be right now [SiRoB]
-ADDED  : Infinite Queue option from SlugFiller-itsonlyme
-
-CHANGED: Powershare is now only applied for secured client [SiRoB]
-CHANGED: The ratio is now activated only if the download is under the 10kB/s [SiRoB]
-
+--------------------------------------   
+Changelog for eMule 0.42c MorphXT v2.0  
+--------------------------------------   
+MERGED: Code merged to 0.42b [SiRoB]  
+MERGED: Code merged to 0.42c [SiRoB]  
+  
+FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]  
+FIXED  : The prio for category is now well updated in the CAT Popup [SiRoB]  
+FIXED  : The opening slot should be right now [SiRoB]  
+ADDED  : Infinite Queue option from SlugFiller-itsonlyme  
+ADDED  : Pay Back First Tweak [SiRoB/AndCycle/Yun.SF3]  
+CHANGED: Powershare is now only applied for secured client [SiRoB]  
+CHANGED: The ratio is now activated only if the upload rate is under the 10kB/s and when PowerShare is forced on downloading file [SiRoB]  
+CHANGED: Include New Nice Flag from Commander[GER] [AndCycle] 
+  
 TWEAKED: Friend Slot Management, Show slot assignement in the message window and visual fix [SiRoB]
 
 ---------------------------------------- 
