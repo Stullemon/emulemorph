@@ -436,7 +436,7 @@ LRESULT CTransferWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 					GetDlgItem(IDC_UPLOAD_ICO)->MoveWindow(10,rcSpl.top-4,170,18);
 					//SLAHAM: ADDED Switch Lists Icons =>
 					m_btnULChangeView.MoveWindow(211, rcSpl.top-4, 18, 18);
-					GetDlgItem(IDC_STATIC7)->MoveWindow(233, rcSpl.top-2, 1, 15);
+					GetDlgItem(IDC_STATIC7)->MoveWindow(233, rcSpl.top-2, 2, 15);
 					m_btnULUploads.MoveWindow(238, rcSpl.top-4, 18, 18);
 					m_btnULQueue.MoveWindow(259, rcSpl.top-4, 18, 18);
 					m_btnULClients.MoveWindow(280, rcSpl.top-4, 18, 18);
