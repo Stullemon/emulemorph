@@ -70,6 +70,12 @@ BOOL CClientDetailPage::OnInitDialog()
 	AddAnchor(IDC_STATIC50, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_DDOWNLOADING, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_UPLOADING, TOP_LEFT, TOP_RIGHT);
+	//MORPH - Added by SiRoB, WebCache
+	AddAnchor(IDC_STATIC57, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_WCSTATISTICS, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_Webcache, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_TRUSTEDOHCBSENDER, TOP_LEFT, TOP_RIGHT);
+	//MORPH - Added by SiRoB, WebCache
 
 	Localize();
 	return TRUE;

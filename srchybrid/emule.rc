@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1300,7 +1300,7 @@ BEGIN
     LTEXT           "Static",IDC_WCSTATISTICS,110,242,197,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
-    LTEXT           "Static",IDC_DLOC,84,69,92,8
+    LTEXT           "Static",IDC_DLOC,84,69,224,8
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
     LTEXT           "WebCache:",IDC_STATIC56,19,229,64,10
     LTEXT           "Static",IDC_Webcache,110,229,197,10
@@ -2936,12 +2936,12 @@ OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -3796,12 +3796,16 @@ BEGIN
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Part %i: imported for ICH handling."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
                             "Part %i: skipped, doesn't match partially completed block."
-    IDS_SR13_IMPORTPARTS_IMPORTFINISH
-                            "Import finished. %i parts were imported to %s."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
                             "%i bad parts were imported for A/ICH. Initiating rehash."
     IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
                             "Another import is already in progress. Please wait until it is finished."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
+                            "Import finished. %i parts were imported to %s."
 END
 
 STRINGTABLE 
@@ -4743,7 +4747,7 @@ BEGIN
     IDS_SELSKINPROFILEDIR   "Select skin profile directory"
     IDS_ASKDLINCOMPLETE     "Potentially incomplete file:\r\n\r\n%s\r\n\r\nThis file is supposed to be incomplete in the network and can therefore most likely not downloaded successfully! Do you really want to download this file?"
     IDS_DEADSOURCES         "Dead Sources"
-     IDS_LARGEICONS          "Large Icons"
+    IDS_LARGEICONS          "Large Icons"
     IDS_SMALLICONS          "Small Icons"
     IDS_SHORTTAGS           "Short tags"
     IDS_THELOAD             "Load"
@@ -4776,7 +4780,7 @@ END
 
 STRINGTABLE 
 BEGIN
-	IDS_RESET               "Reset"
+    IDS_RESET               "Reset"
     IDS_SPREADBAR           "Spreadbar"
     IDS_SPREADBAR_DEFAULT_CHECKBOX "Enable SpreadBar by default"
 END
@@ -5539,6 +5543,9 @@ BEGIN
     IDS_SOURCE_LOADER_SAVER "SLS"
     IDS_NEWFRIEND           "New friend:"
     IDS_REMOVEDFRIEND       "Removed friend:"
+    IDS_FRIENDNAME_CHANGED1 "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
+    IDS_FRIENDNAME_CHANGED2 "Friend changed his name: '%s'->'%s', hash %s"
+    IDS_FAILEDTOLOAD        "Failed to load"
 END
 
 STRINGTABLE 
@@ -5568,13 +5575,6 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Scheduled FAKES.DAT-update initiated."
     IDS_SCHED_UPDATE_WARNING 
                             "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_FRIENDNAME_CHANGED1 "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
-    IDS_FRIENDNAME_CHANGED2 "Friend changed his name: '%s'->'%s', hash %s"
-    IDS_FAILEDTOLOAD        "Failed to load"
 END
 
 #endif    // Anglais (États-Unis) resources
