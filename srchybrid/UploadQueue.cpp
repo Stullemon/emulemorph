@@ -473,7 +473,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		POSITION renumberPosition = insertPosition;
 		uint32 renumberSlotNumber = posCounter;
 	    
-		//uploadinglist.GetNext(renumberPosition); //MORPH - Removed by SiRoB, Fix first sorting
+		//uploadinglist.GetNext(renumberPosition); //MORPH - Removed by SiRoB, first sorting -Fix-
 		while(renumberPosition != NULL) {
 			renumberSlotNumber++;
 
@@ -699,12 +699,16 @@ void CUploadQueue::Process() {
 	UpdateActiveClientsInfo(curTick);
 
     CheckForHighPrioClient();
+	
+	//MORPH START - Changed vy SiRoB, cache (uint32)uploadinglist.GetCount()
 	//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
 	/*
 	if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	*/
-	if(thePrefs.DoRemoveSpareTrickleSlot() && uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
+	uint32 iCount = (uint32)uploadinglist.GetCount();
+	if(thePrefs.DoRemoveSpareTrickleSlot() && iCount > 0 && iCount > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(iCount-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
+	//MORPH END   - Changed by SiRoB, 
         // we need to close a trickle slot and put it back first on the queue
 
         POSITION lastpos = uploadinglist.GetTailPosition();
@@ -882,11 +886,12 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 	}
 
     uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
-    if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetSize()) {
+    uint32 iCount = (uint32)uploadinglist.GetSize();
+	if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > iCount) {
         // uploadThrottler requests another slot. If throttler says it needs another slot, we will allow more slots
         // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
         if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
-            AddDebugLogLine(false, _T("UploadQueue: Added new slot since throttler needs it. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i uploadinglist.GetSize(): %i tick: %i"), m_iHighestNumberOfFullyActivatedSlotsSinceLastCall, uploadinglist.GetSize(), ::GetTickCount());
+            AddDebugLogLine(false, _T("UploadQueue: Added new slot since throttler needs it. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i uploadinglist.GetSize(): %i tick: %i"), m_iHighestNumberOfFullyActivatedSlotsSinceLastCall, iCount, ::GetTickCount());
 			return true;
     }
 
@@ -952,7 +957,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CUpDownClient* cur_client = waitinglist.GetAt(pos2);
 		if (cur_client == client)
 		{	
-			//MORPH - Removed by SiRoB, Bug Fix possible disturb of the uploadinglist
+			//MORPH - Removed by SiRoB, Bug -Fix- possible disturb of the uploadinglist 
 			/*
 			//already on queue
             // VQB LowID Slot Patch, enhanced in ZZUL
@@ -1147,6 +1152,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 	POSITION pos = uploadinglist.Find(client);
 	POSITION pos2 = tempUploadinglist.Find(client);
 	if (pos2){
+		if (pos) uploadinglist.RemoveAt(pos);
 		slotCounter = uploadinglist.GetCount()+1;
 		tmpuploadinglist = &tempUploadinglist;
 	}
@@ -1170,9 +1176,9 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
 			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
     	    
-            //if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved)) {
-            //    AddDebugLogLine(false, _T("UploadQueue: Didn't find socket to delete. Adress: 0x%x"), client->socket);
-            //}
+			if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
+                DebugLogError(false, _T("UploadQueue: Didn't find socket to delete. socket: 0x%x, PCUpSocket: 0x%x, WCUpSocket: 0x%x"), client->socket,client->m_pPCUpSocket,client->m_pWCUpSocket);
+            }
 			//EastShare Start - added by AndCycle, Pay Back First
 			//client normal leave the upload queue, check does client still satisfy requirement
 			if(earlyabort == false){
@@ -1632,45 +1638,63 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
  */
 void CUploadQueue::ReSortUploadSlots(bool force) {
     DWORD curtick = ::GetTickCount();
+	//MORPH START - Added by SiRoB, ResortUploadSlot Fix
+	static uint32 Nb_ReSort = 0;
+	++Nb_ReSort;
+	if (Nb_ReSort > 1){
+		LogError(_T("ReSortUploadSlots() Allready Called %u times since %us"),Nb_ReSort,curtick-m_dwLastResortedUploadSlots);
+		return;
+	}
+	//MORPH END  - Added by SiRoB, ResortUploadSlot Fix
 	if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000)
 	{
-    	theApp.uploadBandwidthThrottler->Pause(true);
-		// Remove all clients from uploading list and store in tempList
-   		POSITION ulpos = uploadinglist.GetHeadPosition();
-   		while (ulpos != NULL) {
-   			POSITION curpos = ulpos;
-   			uploadinglist.GetNext(ulpos);
-   			// Get and remove the client from upload list.
-			CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
+		m_dwLastResortedUploadSlots = curtick;
+		theApp.uploadBandwidthThrottler->Pause(true);
+		//MORPH START - Added by SiRoB, ResortUploadSlot Fix
+		while (Nb_ReSort > 0)
+		{
+			Nb_ReSort = 0;
+		//MORPH END  - Added by SiRoB, ResortUploadSlot Fix
+			// Remove all clients from uploading list and store in tempList
+   			POSITION ulpos = uploadinglist.GetHeadPosition();
+   			while (ulpos != NULL) {
+   				POSITION curpos = ulpos;
+   				uploadinglist.GetNext(ulpos);
+   				// Get and remove the client from upload list.
+				CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
 
-   			//MORPH - Moved by SiRoB, See below ResortUploadSlot Fix
-			//uploadinglist.RemoveAt(curpos);
-			
-			// Remove the found Client from UploadBandwidthThrottler
-   			theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
-			//MORPH START - Added by SiRoB, due to zz upload system WebCache
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
-			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
-   			tempUploadinglist.AddTail(cur_client);
-			uploadinglist.RemoveAt(curpos);
-		}
+   				//MORPH - Moved by SiRoB, See below ResortUploadSlot Fix
+				//uploadinglist.RemoveAt(curpos);
+				
+				// Remove the found Client from UploadBandwidthThrottler
+   				theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+				theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
+				//MORPH START - Added by SiRoB, due to zz upload system WebCache
+				theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
+				//MORPH END   - Added by SiRoB, due to zz upload system WebCache
+   				tempUploadinglist.AddTail(cur_client);
+				uploadinglist.RemoveAt(curpos);
+			}
 
-		// Remove one at a time from temp list and reinsert in correct position in uploading list
-   		POSITION tempPos = tempUploadinglist.GetHeadPosition();
-   		while(tempPos != NULL) {
-   			POSITION curpos = tempPos;
-   			tempUploadinglist.GetNext(tempPos);
+			// Remove one at a time from temp list and reinsert in correct position in uploading list
+   			POSITION tempPos = tempUploadinglist.GetHeadPosition();
+   			while(tempPos != NULL) {
+   				POSITION curpos = tempPos;
+   				tempUploadinglist.GetNext(tempPos);
 
-			// Get and remove the client from upload list.
-			CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
+				// Get and remove the client from upload list.
+				CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
 
-			tempUploadinglist.RemoveAt(curpos);
+   				//MORPH - Moved by SiRoB, See below ResortUploadSlot Fix
+				//tempUploadinglist.RemoveAt(curpos);
 
-			// This will insert in correct place
-   			InsertInUploadingList(cur_client);
+				// This will insert in correct place
+   				InsertInUploadingList(cur_client);
+				tempUploadinglist.RemoveAt(curpos);
+			}
 		}
 		theApp.uploadBandwidthThrottler->Pause(false);
+		Nb_ReSort = 0;
 	}
 }
 
