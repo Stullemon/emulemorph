@@ -1784,7 +1784,11 @@ bool CClientReqSocket::Create(){
 }
 
 SocketSentBytes CClientReqSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket) {
-    SocketSentBytes returnStatus = CEMSocket::Send(maxNumberOfBytesToSend, onlyAllowedToSendControlPacket);
+    //MORPH - CHanged by SiRoB, HOT Fix code missing in zz upload system
+	/*
+	SocketSentBytes returnStatus = CEMSocket::Send(maxNumberOfBytesToSend, onlyAllowedToSendControlPacket);
+	*/
+	SocketSentBytes returnStatus = CEMSocket::Send(maxNumberOfBytesToSend, 512, onlyAllowedToSendControlPacket);
 
     if(returnStatus.success && (returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)) {
         ResetTimeOutTimer();
