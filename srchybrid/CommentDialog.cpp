@@ -114,7 +114,12 @@ BOOL CCommentDialog::OnSetActive()
 		m_bSelf = true;
 		SetDlgItemText(IDC_CMT_TEXT, strComment);
 		((CEdit*)GetDlgItem(IDC_CMT_TEXT))->SetLimitText(MAXFILECOMMENTLEN);
+		//MORPH START - Changed by SiRoB, Proper rating order
+		/*
 		m_ratebox.SetCurSel(iRating);
+		*/
+		m_ratebox.SetCurSel((iRating==4)?3:(iRating==3)?4:iRating);
+		//MORPH END   - Changed by SiRoB, Proper rating order
 		m_bSelf = false;
 
 		m_bDataChanged = false;
@@ -149,7 +154,12 @@ BOOL CCommentDialog::OnApply()
 		    if (!strComment.IsEmpty() || !m_bMergedComment)
 			    file->SetFileComment(strComment);
 		    if (iRating != -1)
-			    file->SetFileRating(iRating);
+			    //MORPH START - Changed by SiRoB, Proper rating order
+				/*
+				file->SetFileRating(iRating);
+				*/
+				file->SetFileRating((iRating==3)?4:(iRating==4)?3:iRating);
+				//MORPH END   - Changed by SiRoB, Proper rating order
 	    }
 	}
 	return CResizablePage::OnApply();
@@ -172,7 +182,9 @@ void CCommentDialog::Localize(void)
 	iml.Add(CTempIconLoader(_T("Rating_Fake"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Poor"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Fair"), 16, 16));
+	//MORPH START - Moved by FrankyFive, Proper rating order
 	iml.Add(CTempIconLoader(_T("Rating_Good"), 16, 16));
+	//MORPH END   - Moved by FrankyFive, Proper rating order
 	iml.Add(CTempIconLoader(_T("Rating_Excellent"), 16, 16));
 	m_ratebox.SetImageList(&iml);
 	m_imlRating.DeleteImageList();
@@ -183,7 +195,9 @@ void CCommentDialog::Localize(void)
 	m_ratebox.AddItem(GetResString(IDS_CMT_FAKE), 1);
 	m_ratebox.AddItem(GetResString(IDS_CMT_POOR), 2);
 	m_ratebox.AddItem(GetResString(IDS_CMT_FAIR), 3);
+	//MORPH START - Moved by FrankyFive, Proper rating order
 	m_ratebox.AddItem(GetResString(IDS_CMT_GOOD), 4);
+	//MORPH END   - Moved by FrankyFive, Proper rating order
 	m_ratebox.AddItem(GetResString(IDS_CMT_EXCELLENT), 5);
 	UpdateHorzExtent(m_ratebox, 16); // adjust dropped width to ensure all strings are fully visible
 }
