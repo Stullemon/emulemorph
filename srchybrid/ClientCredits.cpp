@@ -123,6 +123,8 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
 	}else if(m_bCheckScoreRatio = false){
 		return m_fLastScoreRatio;
+	}else if(m_bCheckScoreRatio = true){
+		m_bCheckScoreRatio = false;
 	}
 	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
 
@@ -297,7 +299,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			}
 		}break;
 	}
-	
+
 	return m_fLastScoreRatio = result;
 	//EastShare END - Added by linekin, CreditSystem 
 
