@@ -836,6 +836,17 @@ bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings)
 void CDownloadQueue::Process(){
 	
 	ProcessLocalRequests(); // send src requests to local server
+	// WebCache ////////////////////////////////////////////////////////////////////////////////////
+	////JP Proxy configuration testing START!!! This should probably be somewhere else.
+	if (thePrefs.expectingWebCachePing && (::GetTickCount() - thePrefs.WebCachePingSendTime > SEC2MS(30)))
+	{
+		thePrefs.expectingWebCachePing = false;
+		thePrefs.WebCacheDisabledThisSession = true; //Disable webcache downloads for the current proxy settings
+		//JP we need a modeless dialogue here!!
+		//			AfxMessageBox(_T("Proxy configuration Test Failed please review your proxy-settings"));
+		theApp.QueueLogLine(false, _T("Proxy configuration Test Failed please review your proxy-settings. Webcache downloads have been deactivated until emule is restarted."));
+	}
+	////JP Proxy configuration testing END!!! This should probably be somewhere else.
 
 	uint32 downspeed = 0;
 	// ZZ:UploadSpeedSense -->
