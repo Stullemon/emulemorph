@@ -5083,6 +5083,9 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_NONEWMVERVERSION    "No new eMule Morph version detected."
+    IDS_NEWMVERSIONAVL      "A new version of eMule Morph is available! Check the project-homepage for more information."
+    IDS_NEWMVERSIONAVLPOPUP "A new version of eMule Morph is available. Click here to read about the new version!"
     IDS_CTRLKEY             "CTRL"
     IDS_ALTKEY              "ALT"
     IDS_SHIFTKEY            "SHIFT"

@@ -132,12 +132,14 @@ BOOL CServerWnd::OnInitDialog()
 		servermsgbox->ApplySkin();
 		servermsgbox->SetTitle(GetResString(IDS_SV_SERVERINFO));
 
-		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
 		/*
 		servermsgbox->AppendText(CString(CString("eMule v")+theApp.m_strCurVersionLong+CString("\n")));
 		*/
-		servermsgbox->AppendText(CString(CString(_T("eMule v")) + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]") + CString("\n")));
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+		m_strMorphNewVersion = CString(CString(_T("eMule v")) + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
+		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strMorphNewVersion,_T(""),false);
+		servermsgbox->AppendText(CString("\n"));
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
 
 		// MOD Note: Do not remove this part - Merkur
 		m_strClickNewVersion = GetResString(IDS_EMULEW) + _T(" ") + GetResString(IDS_EMULEW3) + _T(" ") + GetResString(IDS_EMULEW2);
@@ -866,6 +868,10 @@ void CServerWnd::OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult)
 					strUrl = thePrefs.GetVersionCheckBaseURL()+strUrl;
 			// MOD Note: end
 		}
+		//MORPH START - Added by SiRoB, New Version Check
+		else if (strUrl == m_strMorphNewVersion)
+			strUrl = _T("http://emulemorph.sourceforge.net/");
+		//MORPH END   - Added by SiRoB, New Version Check
 		ShellExecute(NULL, NULL, strUrl, NULL, NULL, SW_SHOWDEFAULT);
 		*pResult = 1;
 	}

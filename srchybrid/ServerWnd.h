@@ -138,6 +138,9 @@ private:
 	CHARFORMAT m_cfBold;
 	CCustomAutoComplete* m_pacServerMetURL;
 	CString m_strClickNewVersion;
+	//MORPH START - Changed by SiRoB, New Version Check
+	CString m_strMorphNewVersion;
+	//MORPH END   - Changed by SiRoB, New Version Check
 	LCID m_uLangID;
 public:
 	afx_msg void OnBnClickedFeedchange();

@@ -169,6 +169,9 @@ protected:
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
 
+	//MORPH - Added by SiRoB, New Version check
+	afx_msg LRESULT OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam);
+
 	// Peercache DNS
 	afx_msg LRESULT OnPeerCacheResponse(WPARAM wParam, LPARAM lParam);
 	
@@ -219,7 +222,11 @@ private:
 	void ShowToolPopup(bool toolsonly=false);
 	void SetAllIcons();
 
+	
 	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH START - Added by SiRoB, Version check
+	char m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH END   - Added by SiRoB, Version check
 
 //Commander - Added: Invisible Mode [TPT] - Start	
 public:
@@ -272,8 +279,11 @@ enum EEmuleUserMsgs
 
 	// Mighty Knife: CRC32-Tag - save rename
 	WM_CRC32_RENAMEFILE,
-	WM_CRC32_UPDATEFILE
+	WM_CRC32_UPDATEFILE,
 	// [end] Mighty Knife
+	//MORPH START - Added by SiRoB, Version check
+	WM_MVERSIONCHECK_RESPONSE
+	//MORPH END   - Added by SiRoB, Version check
 };
 
 enum EEmlueAppMsgs

@@ -271,7 +271,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 
 	// Version Check DNS
 	ON_MESSAGE(WM_VERSIONCHECK_RESPONSE, OnVersionCheckResponse)
-
+	//MORPH - Added by SiRoB, New Version check
+	ON_MESSAGE(WM_MVERSIONCHECK_RESPONSE, OnMVersionCheckResponse)
+	
 	// PeerCache DNS
 	ON_MESSAGE(WM_PEERCHACHE_RESPONSE, OnPeerCacheResponse)
 
@@ -553,6 +555,11 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 	if (WSAAsyncGetHostByName(m_hWnd, WM_VERSIONCHECK_RESPONSE, "vcdns2.emule-project.org", m_acVCDNSBuffer, sizeof(m_acVCDNSBuffer)) == 0){
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
+	//MORPH START - Added by SiRoB, New Version check
+	if (WSAAsyncGetHostByName(m_hWnd, WM_MVERSIONCHECK_RESPONSE, "morphvercheck.dyndns.info", m_acMVCDNSBuffer, sizeof(m_acMVCDNSBuffer)) == 0){
+		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
+	}
+	//MORPH END   - Added by SiRoB, New Version check
 }
 
 
@@ -1880,6 +1887,16 @@ void CemuleDlg::ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink, bool bF
 				iSoundPrio = 1;
 			}
 			break;
+		//MORPH START - Added by SiRoB, New Version Check
+		case TBN_NEWMVERSION:
+			{	
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
+				ShowIt = true;
+				pszSoundEvent = _T("startup.wav");
+				iSoundPrio = 1;
+			}
+			break;
+		//MORPH END   - Added by SiRoB, New Version Check
 		case TBN_NULL:
             m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 			ShowIt = true;			
@@ -1955,6 +1972,13 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 			ShellExecute(NULL, NULL, theUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
 			break;
 		}
+		//MORPH START - Added by SiRoB, New Version Check
+		case TBN_NEWMVERSION:
+		{
+			ShellExecute(NULL, NULL, _T("http://emulemorph.sourceforge.net/"), NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+			break;
+		}
+		//MORPH END   - Added by SiRoB, New Version Check
 	}
     return 0;
 }
@@ -2531,6 +2555,41 @@ LRESULT CemuleDlg::OnVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 	AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	return 0;
 }
+//MORPH START - Added by SiRoB, New Version check
+LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam)
+{
+	if (WSAGETASYNCERROR(lParam) == 0)
+	{
+		int iBufLen = WSAGETASYNCBUFLEN(lParam);
+		if (iBufLen >= sizeof(HOSTENT))
+		{
+			LPHOSTENT pHost = (LPHOSTENT)m_acMVCDNSBuffer;
+			if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
+			{
+				uint32 dwResult = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
+				uint8 abyCurVer[4] = { 1, MOD_VERSION_MIN, MOD_VERSION_MJR, 0};
+				dwResult &= 0x00FFFFFF;
+				if (dwResult > *(uint32*)abyCurVer){
+					thePrefs.UpdateLastVC();
+					SetActiveWindow();
+					AddLogLine(true,GetResString(IDS_NEWMVERSIONAVL));
+					ShowNotifier(GetResString(IDS_NEWMVERSIONAVLPOPUP), TBN_NEWMVERSION);
+					if (AfxMessageBox(GetResString(IDS_NEWVERSIONAVL)+GetResString(IDS_VISITVERSIONCHECK),MB_YESNO)==IDYES) {
+						ShellExecute(NULL, NULL, _T("http://emulemorph.sourceforge.net/"), NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+					}
+				}
+				else{
+					thePrefs.UpdateLastVC();
+					AddLogLine(true,GetResString(IDS_NONEWMVERVERSION));
+				}
+				return 0;
+			}
+		}
+	}
+	AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
+	return 0;
+}
+//MORPH END   - Added by SiRoB, New Version check
 
 void CemuleDlg::ShowSplash()
 {

@@ -17,7 +17,8 @@ enum TbnMsg {
 	TBN_LOG,
 	TBN_IMPORTANTEVENT,
 	TBN_NEWVERSION,
-	TBN_DLOADADDED
+	TBN_DLOADADDED,
+	TBN_NEWMVERSION //MORPH - Added by SiRoB, New Version Check
 };
 //END - enkeyDEV(kei-kun) -TaskbarNotifier-
 

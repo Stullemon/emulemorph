@@ -2038,8 +2038,6 @@
 #define IDC_FD_RECOV                    2795
 #define IDC_FD_COMPR                    2796
 #define IDC_UPDATEURL                   2797
-#define IDC_WC_REQ_SUCC                 27970
-#define IDC_WC_DOWNLOADED               27980
 #define IDC_DD                          2799
 #define IDC_TRAY_EXIT                   2802
 #define IDC_DOWNKB                      2803
@@ -2137,35 +2135,11 @@
 #define IDC_LD_HOSTNAMECHE              2909
 #define IDC_SOURCE_TYPE                 2909
 #define IDC_UIP                         2910
-// MORPH START - Added by Commander, WebCache 1.2e
 #define IDC_ADVANCEDCONTROLS            2914
 #define IDC_BLOCKSTEXT                  2915
 #define IDC_TestProxy                   2916
-#define IDS_PWEBCACHE                   10646
-#define IDS_WrongPortforWebcache        11387
-#define IDD_PPG_WEBCACHESETTINGS        12787
-#define IDC_Webcache                    12847
-#define IDC_webcacheName                12848
-#define IDC_webcachePort                12849
-#define IDC_Activatewebcachedownloads   12850
-#define IDC_WrongPortWarning            12851
-#define IDC_DETECTWEBCACHE              12852
-#define IDC_BLOCKSTEXT2                 12855
-#define IDC_BLOCKS                      12856
-#define IDC_EXTRATIMEOUT                12857
-#define IDC_LOCALTRAFFIC                12858
-#define IDC_WEBCACHELINK                12859
-#define IDC_WEBCACHELINK2               12860
-#define IDC_PERSISTENT_PROXY_CONNS      12861
-#define IDS_PW_WEBCACHE                 20646
-#define IDC_WCSTATISTICS                22540
-#define IDC_TRUSTEDOHCBSENDER           22570
-#define IDC_WCReq                       27820
-#define IDC_WCDownl                     27830
-// MORPH END - Added by Commander, WebCache 1.2e
 #define IDS_LD_ADDPHPBB                 3306
 #define IDS_POWERSHAER_INTERPRIO        3307
-
 #define IDC_INVISIBLE_MODE_GROUP_BOX    3308
 #define IDC_INVISIBLE_MODE              3309
 #define IDC_INVISIBLE_MODE_MODIFIER_STATIC 3310
@@ -2618,8 +2592,11 @@
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
+#define IDS_NONEWMVERVERSION            5113
+#define IDS_NEWMVERSIONAVL              5114
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
 #define IDS_CHAT_COUNTRY                5115
+#define IDS_NEWMVERSIONAVLPOPUP         5115
 #define IDC_SHOWCLIENTPERCENTAGE        5116
 #define IDC_FRIENDS_DESCARGADO_EDIT2    5116
 #define IDC_FRIENDS_COUNTRY             5116
@@ -2755,6 +2732,22 @@
 #define IDS_FOLDERICONS                 6150
 #define IDS_DOWNLOADEMFRIENDSMET        6160
 #define IDS_EMFRIENDSMETURL             6161
+#define IDS_PWEBCACHE                   10646
+#define IDS_WrongPortforWebcache        11387
+#define IDD_PPG_WEBCACHESETTINGS        12787
+#define IDC_Webcache                    12847
+#define IDC_webcacheName                12848
+#define IDC_webcachePort                12849
+#define IDC_Activatewebcachedownloads   12850
+#define IDC_WrongPortWarning            12851
+#define IDC_DETECTWEBCACHE              12852
+#define IDC_BLOCKSTEXT2                 12855
+#define IDC_BLOCKS                      12856
+#define IDC_EXTRATIMEOUT                12857
+#define IDC_LOCALTRAFFIC                12858
+#define IDC_WEBCACHELINK                12859
+#define IDC_WEBCACHELINK2               12860
+#define IDC_PERSISTENT_PROXY_CONNS      12861
 #define IDC_AUTOBACKUP                  13000
 #define IDC_AUTOBACKUP2                 13001
 #define IDC_RANDOMPORTS                 20102
@@ -2765,6 +2758,7 @@
 #define IDC_SPIN_MAX                    20107
 #define IDC_SPIN_MIN                    20108
 #define IDC_BTN_MENU                    20120
+#define IDS_PW_WEBCACHE                 20646
 #define IDS_UPNPNAT                     21009
 #define IDS_UPNPNATEMULE                21010
 #define IDS_UPNPNATTRYRANDOM            21011
@@ -2782,6 +2776,12 @@
 #define IDS_GETMYFRIENDED2KLINK         21067
 #define IDS_GETMYHTMLFRIENDED2KLINK     21068
 #define IDS_FRIENDLINKMENUTITLE         21070
+#define IDC_WCSTATISTICS                22540
+#define IDC_TRUSTEDOHCBSENDER           22570
+#define IDC_WCReq                       27820
+#define IDC_WCDownl                     27830
+#define IDC_WC_REQ_SUCC                 27970
+#define IDC_WC_DOWNLOADED               27980
 #define IDC_EDTINFO                     40125
 #define IDC_BACKUP_FILEFRAME            50501
 #define IDC_BACKUP_AUTO                 50503
@@ -2811,7 +2811,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6201
+#define _APS_NEXT_RESOURCE_VALUE        6202
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         6200
 #define _APS_NEXT_SYMED_VALUE           106
