@@ -275,7 +275,7 @@ bool CUpDownClient::AskForDownload()
 	m_bUDPPending = false;
     SwapToAnotherFile(_T("A4AF check before tcp file reask. CUpDownClient::AskForDownload()"), true, false, false, NULL, true, true); // ZZ:DownloadManager
 	SetDownloadState(DS_CONNECTING);
-	return TryToConnect();
+	return TryToConnect(true); //MORPH - Changed by SiRoB, -Fix-
 }
 
 bool CUpDownClient::IsSourceRequestAllowed() const
@@ -991,17 +991,6 @@ void CUpDownClient::SendBlockRequests(){
 	if (!reqfile)
 		return;
 	// MORPH START - Added by Commander, WebCache 1.2e
-	// Superlexx - COtN - start
-	byte WC_TestFileHash[16] = { 0xE9, 0x05, 0x7A, 0xDC, 0x38, 0x05, 0x4A, 0xFA, 0x24, 0x81, 0x6E, 0x86, 0xBB, 0x08, 0xD2, 0x70 };
-	bool isTestFile = !(bool)md4cmp(reqfile->GetFileHash(), WC_TestFileHash);
-	bool doCache = false;
-	CreateBlockRequests(1);
-	if (m_PendingBlocks_list.IsEmpty())
-	{
-		SendCancelTransfer();
-		SetDownloadState(DS_NONEEDEDPARTS);
-		return;
-	}
 	if (thePrefs.GetLogWebCacheEvents()) //JP log webcache events
 		AddDebugLogLine(false, _T("Proxy-Connections for this file: %u Allowed: %u"), reqfile->GetNumberOfCurrentWebcacheConnectionsForThisFile(), reqfile->GetMaxNumberOfWebcacheConnectionsForThisFile());
 	if( thePrefs.IsWebCacheDownloadEnabled()
@@ -1016,6 +1005,18 @@ void CUpDownClient::SendBlockRequests(){
 		&& (thePrefs.GetWebCacheCachesLocalTraffic() || !IsBehindOurWebCache()) //JP changed to new IsBehindOurWebCache-function 		// WC-TODO: Shorter names?
 		&& reqfile->GetNumberOfCurrentWebcacheConnectionsForThisFile() < reqfile->GetMaxNumberOfWebcacheConnectionsForThisFile() ) //JP Throttle OHCB-production
 	{
+		if (!m_PendingBlocks_list.IsEmpty()) return; //Added by SiRoB
+		// Superlexx - COtN - start
+		byte WC_TestFileHash[16] = { 0xE9, 0x05, 0x7A, 0xDC, 0x38, 0x05, 0x4A, 0xFA, 0x24, 0x81, 0x6E, 0x86, 0xBB, 0x08, 0xD2, 0x70 };
+		bool isTestFile = !(bool)md4cmp(reqfile->GetFileHash(), WC_TestFileHash);
+		bool doCache = false;
+		CreateBlockRequests(1);
+		if (m_PendingBlocks_list.IsEmpty())
+		{
+			SendCancelTransfer();
+			SetDownloadState(DS_NONEEDEDPARTS);
+			return;
+		}
 		if (isTestFile)
 			doCache = true;
 		else
@@ -1026,20 +1027,19 @@ void CUpDownClient::SendBlockRequests(){
 #endif _DEBUG
 				doCache = true;
 		}
-	}
 	
-	if( doCache ) {
-		ASSERT( GetDownloadState() == DS_DOWNLOADING );
-		Crypt.useNewKey = true;
-		SendWebCacheBlockRequests();
-		return;
+		if( doCache ) {
+			ASSERT( GetDownloadState() == DS_DOWNLOADING );
+			Crypt.useNewKey = true;
+			SendWebCacheBlockRequests();
+			return;
+		}
 	}
 // Superlexx - COtN - end
 // MORPH END - Added by Commander, WebCache 1.2e
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
-	//CreateBlockRequests(3);
-	CreateBlockRequests(2); // Superlexx - COtN - one block request already created, 2 left
+	CreateBlockRequests(3);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SendCancelTransfer();
 		SetDownloadState(DS_NONEEDEDPARTS);
