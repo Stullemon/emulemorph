@@ -4835,13 +4835,13 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 		return false;
 	if (!curCat->viewfilters.bTransferring && ((GetStatus()==PS_READY|| GetStatus()==PS_EMPTY) && GetTransferingSrcCount()>0))
 		return false;
-	if (!curCat->viewfilters.bComplete && !IsPartFile())
+	if (!curCat->viewfilters.bComplete && GetStatus() == PS_COMPLETE && !IsPartFile())
 		return false;
 	if (!curCat->viewfilters.bCompleting && GetStatus() == PS_COMPLETING)
 		return false;
 	if (!curCat->viewfilters.bHashing && GetStatus() == PS_HASHING)
 		return false;
-	if (!curCat->viewfilters.bPaused && GetStatus()==PS_PAUSED)
+	if (!curCat->viewfilters.bPaused && GetStatus()==PS_PAUSED && !IsStopped())
 		return false;
 	if (!curCat->viewfilters.bStopped && IsStopped() && IsPartFile())
 		return false;
