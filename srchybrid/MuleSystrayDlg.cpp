@@ -82,6 +82,7 @@ BEGIN_MESSAGE_MAP(CMuleSystrayDlg, CDialog)
 	ON_EN_CHANGE(IDC_MINUPTXT, OnChangeMinUptxt)
 	ON_WM_HSCROLL()
 	ON_WM_LBUTTONUP()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_KILLFOCUS()
 	ON_WM_SHOWWINDOW()
 	ON_WM_CAPTURECHANGED()
@@ -458,6 +459,22 @@ void CMuleSystrayDlg::OnLButtonUp(UINT nFlags, CPoint point)
 	m_bClosingDown = true;
 
 	CDialog::OnLButtonUp(nFlags, point);
+}
+
+//bond006: systray menu gets stuck (bugfix)
+void CMuleSystrayDlg::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	CRect systrayRect;
+	GetClientRect(&systrayRect);
+
+	if(point.x<=systrayRect.left || point.x>=systrayRect.right || point.y<=systrayRect.top || point.y>=systrayRect.bottom)
+	{
+		ReleaseCapture();
+		EndDialog(m_nExitCode);
+		m_bClosingDown = true;
+	}
+
+	CDialog::OnRButtonDown(nFlags,point);
 }
 
 void CMuleSystrayDlg::OnKillFocus(CWnd* pNewWnd) 
