@@ -6,6 +6,10 @@ FIXED  : HideOS Display Info in SharedFile [SiRoB]
 FIXED  : Ed2k Friend link past crash when they have wroung format [SiRoB]
 FIXED  : Columns in SharedFile where not displayed correctly when first column is hiddeen [SiRoB]
 
+CHANGED: Don't remove custumization folder when we start emule [SiRoB]
+CHANGED: Removed controversal MODSTRING detection [SiRoB]
+CHANGED: Show ProgressQueueBar disable by default in preferency [SiRoB]
+
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
 
