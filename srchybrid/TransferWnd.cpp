@@ -608,6 +608,7 @@ void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
 		m_mnuCatViewFilter.CheckMenuItem(MP_CAT_SET0+14, (curCat->viewfilters.bImages) ? MF_CHECKED : MF_UNCHECKED);
 		m_mnuCatViewFilter.CheckMenuItem(MP_CAT_SET0+15, (curCat->viewfilters.bSuspendFilters) ? MF_CHECKED : MF_UNCHECKED);
 		
+		m_mnuCatViewFilter.CheckMenuItem(MP_CAT_SET0+16, (curCat->viewfilters.bSeenComplet) ? MF_CHECKED : MF_UNCHECKED); //MORPH - Added by SiRoB, Seen Complet filter
 		// Check the appropriate menu item for the A4AF menu...
 		//MORPH START - Changed by SiRoB, Use Radio button
 		//for (int i = 0; i < 3; i++)
@@ -660,6 +661,13 @@ void CTransferWnd::CreateCategoryMenus()
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+9, GetResString(IDS_HASHING));
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+10, GetResString(IDS_ERRORLIKE));	
 	
+	//MORPH START - Added by SiRoB, Seen Complet filter
+	m_mnuCatViewFilter.AppendMenu(MF_SEPARATOR);
+	CString strtemp = GetResString(IDS_LASTSEENCOMPL);
+	strtemp.Remove(':');
+	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+16, strtemp);	
+	//MORPH END - Added by SiRoB, Seen Complet filter
+
 	m_mnuCatViewFilter.AppendMenu(MF_SEPARATOR);
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+11, GetResString(IDS_VIDEO));
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+12, GetResString(IDS_AUDIO));
@@ -668,7 +676,11 @@ void CTransferWnd::CreateCategoryMenus()
 	
 	m_mnuCatViewFilter.AppendMenu(MF_SEPARATOR);
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+15, GetResString(IDS_CAT_SUSPENDFILTERS));
+	//MORPH - Changed by SiRoB, Seen Complet filter
+	/*
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+16, GetResString(IDS_COL_MORECOLORS));
+	*/
+	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+17, GetResString(IDS_COL_MORECOLORS));
 
 	// Create the main menu...
 	m_mnuCategory.CreatePopupMenu();
@@ -817,7 +829,11 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			break;
 		}
 		// khaos::categorymod+						 
+		//MORPH - Changed by SiRoB, Seen Complet filter
+		/*
 		case MP_CAT_SET0+16:
+		*/
+		case MP_CAT_SET0+17:
 		case MP_CAT_EDIT: {
 			m_nLastCatTT=-1;
 			CCatDialog dialog(rightclickindex);
@@ -994,9 +1010,19 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			curCat->viewfilters.bSuspendFilters = curCat->viewfilters.bSuspendFilters ? false : true;
 			break;
 		}
+		//MORPH START - Added by SiRoB, Seen Complet filter
+		case MP_CAT_SET0+16: {
+			curCat->viewfilters.bSeenComplet = curCat->viewfilters.bSeenComplet ? false : true;
+			break;
+		}
+		//MORPH END   - Added by SiRoB, Seen Complet filter
 	}
 
+	//MORPH - Changed by SiRoB, Seen Complet filter
+	/*
 	if (wParam >= MP_CAT_SET0 && wParam <= MP_CAT_SET0 + 15)
+	*/
+	if (wParam >= MP_CAT_SET0 && wParam <= MP_CAT_SET0 + 16)
 		downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
 	if (wParam >= MP_CAT_A4AF && wParam <= MP_CAT_A4AF + 2)
 		curCat->iAdvA4AFMode = wParam - MP_CAT_A4AF;
@@ -1069,6 +1095,7 @@ int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newc
 	newcat->viewfilters.bAudio = true;
 	newcat->viewfilters.bComplete = true;
 	newcat->viewfilters.bCompleting = true;
+	newcat->viewfilters.bSeenComplet = true; //MORPH START - Added by SiRoB, Seen Complet filter
 	newcat->viewfilters.bErrorUnknown = true;
 	newcat->viewfilters.bHashing = true;
 	newcat->viewfilters.bImages = true;
