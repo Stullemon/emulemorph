@@ -656,7 +656,9 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						delete newtag;
 						break;
 					}
+				   //Commander - Removed: Since the official version saves those values too, they would be doubled at the end of the session!
 				   // statistics
+				  /* Remove - Start
 					case FT_ATTRANSFERED:{
 						ASSERT( newtag->IsInt() );
 						if (newtag->IsInt())
@@ -693,6 +695,8 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						delete newtag;
 						break;
 					}
+					*/        
+					//Remove - End
 
 					// old tags: as long as they are not needed, take the chance to purge them
 					case FT_PERMISSIONS:
