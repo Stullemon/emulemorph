@@ -724,7 +724,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				//Morph Start - added by AndCycle, Equal Chance For Each File
 				if(result == 0 && theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE)
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				else if (result == 0 && file1 != file2){
+				if (result == 0 && file1 != file2 && theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 					result =
 						file1->GetEqualChanceValue() < file2->GetEqualChanceValue() ? 1 :
 						file1->GetEqualChanceValue() > file2->GetEqualChanceValue() ? -1 :
