@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.44d MorphXT v5.1x
+Changelog for eMule 0.44d MorphXT v5.12
 --------------------------------------
 MERGED : Some merge from emulEspana arround randomport and folder icone [SiRoB]
 
@@ -15,13 +15,15 @@ REMOVED: Itsonlyme UDPCacheSearch [SiRoB]
 
 CHANGED: USC: Global Upload Limit are now respected [SiRoB]
 CHANGED: New Morph Version Check use Official setting now [SiRoB]
-CHANGED: Now Country Flag  are displayed in a separated column [SiRoB]
+CHANGED: Now Country Flag  can be displayed in a separated column [SiRoB]
 CHANGED: Open Folder on SharedFilesList enabled for PartFiles (TempFolder will be opened) [Commander]
+CHANGED: Activated all SNAFU test [SiRoB]
 
-ADDED  : Don't add client in uploadinglist not accepted by trytoconnect to avoid failed upload (banned,filtered) [SiRoB]
+ADDED  : Don't add client in uploadinglist not accepted by trytoconnect to avoid failed upload (banned,filtered,etc) [SiRoB]
 ADDED  : Intermediate temp var for file datarate to avoid 0kb/s display when GUI refresh the file item [SiRoB]
 ADDED  : Country column in download window [SiRoB]
 ADDED  : Fading window on exit (only for XP) [Commander]
+ADDED  : Ban Ghost mod (ie: mod client that don't provide modID) [SiRoB]
 
 TEAWED: Better datarate mesurement for low and high speed [SiRoB]
 
