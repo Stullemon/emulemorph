@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.44b MorphXT v5.x
+--------------------------------------
+FIXED  : The AutoSetResumeOrder have been corrected to work properly in all case [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.6
 --------------------------------------
 FIXED  : Fixed Upload Splitting Class Powershare and Friend slot don't override datarate limit anymore [SiRoB]
