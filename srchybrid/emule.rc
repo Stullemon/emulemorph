@@ -1857,7 +1857,7 @@ BEGIN
     GROUPBOX        "Webcache Controls",IDC_STATIC_CONTROLS,7,7,216,30
     CONTROL         "Enable Webcached Downloads",
                     IDC_Activatewebcachedownloads,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,14,17,121,12
+                    WS_TABSTOP,14,17,118,12
     CTEXT           "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!",
                     IDC_WrongPortWarning,21,203,194,34,NOT WS_VISIBLE
     PUSHBUTTON      "Autodetect Webcache",IDC_DETECTWEBCACHE,14,163,201,12,
