@@ -460,6 +460,15 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				m_byEmuleVersion = 0x99;
 				dwEmuleTags |= 4;
 				break;
+			//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
+			case ET_MOD_VERSION: 
+				m_clientModString = temptag.tag.stringvalue;
+				//MOPRH START - Added by SiRoB, Is Morph Client?
+				m_bIsMorph = StrStrI(m_clientModString,"Morph");
+				//MOPRH END   - Added by SiRoB, Is Morph Client?
+				break;
+			//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
+	
 		}
 	}
 	m_nUserPort = nUserPort;
@@ -773,7 +782,7 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	uint16 nPort = theApp.glob_prefs->GetPort();
 	data->Write(&nPort,2);
 
-	uint32 tagcount = 5;
+	uint32 tagcount = 6/*5*/;//MORPH - Changed by SiRoB, MOD_VERSION tag
 	data->Write(&tagcount,4);
 	// eD2K Name
 	//MORPH START - Added by IceCream, Anti-leecher feature
@@ -831,7 +840,21 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 //				(RESERVED			     ) 
 				);
 	tagMuleVersion.WriteTagToFile(data);
-
+	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+	//MORPH START - Added by SiRoB, Anti-leecher feature
+	if (StrStrI(m_clientModString,"Mison")||StrStrI(m_clientModString,"eVort")||StrStrI(m_clientModString,"booster")||IsLeecher())
+	{
+		CTag tagMODVersion(ET_MOD_VERSION, m_clientModString);
+		tagMODVersion.WriteTagToFile(data);
+	}
+	else
+	{
+		CTag tagMODVersion(ET_MOD_VERSION, MOD_VERSION);
+		tagMODVersion.WriteTagToFile(data);
+	}
+	//MORPH END   - Added by SiRoB, Anti-leecher feature
+	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+	
 	uint32 dwIP;
 	if (theApp.serverconnect->IsConnected()){
 		dwIP = theApp.serverconnect->GetCurrentServer()->GetIP();
