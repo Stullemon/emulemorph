@@ -426,13 +426,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 */
 	// "Full" speed sockets
 	// Any bandwidth that hasn't been used yet are used for the fully activated upload slots.
-        for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize() && bytesToSpend > 0 && spentBytes+minFragSize <= (uint64)bytesToSpend; slotCounter++) {
+        for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize() && bytesToSpend > 0 && spentBytes <= (uint64)bytesToSpend; slotCounter++) {
 		CEMSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 
 		if(socket != NULL) {
 			bool firstLoop = true;
 			uint32 lastSpentBytes = 0;
-                	while((lastSpentBytes > 0 || firstLoop == true) && bytesToSpend > 0 && spentBytes+minFragSize <= (uint64)bytesToSpend) {
+                	while((lastSpentBytes > 0 || firstLoop == true) && bytesToSpend > 0 && spentBytes <= (uint64)bytesToSpend) {
 				SocketSentBytes socketSentBytes = socket->Send(bytesToSpend-spentBytes);
 				lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 

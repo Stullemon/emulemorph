@@ -192,7 +192,7 @@ BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 3 Khaos*/
 INT	CPreferences::downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
 uint16	CPreferences::uploadColumnWidths[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
 BOOL	CPreferences::uploadColumnHidden[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
-INT	CPreferences::uploadColumnOrder[8];  /*8+ 1 MOD_VERSION+1 Compression+1 Community*/
+INT	CPreferences::uploadColumnOrder[14];  /*8+ 1 MOD_VERSION+1 Compression+1 Community*/
 uint16	CPreferences::queueColumnWidths[12];  /*10+1 MOD_VERSION+1 Community*/
 BOOL	CPreferences::queueColumnHidden[12];  /*10+1 MOD_VERSION+1 Community*/
 INT	CPreferences::queueColumnOrder[12];  /*10+1 MOD_VERSION+1 Community*/
@@ -2318,7 +2318,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("CreditSystemMode", creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteInt("EqualChanceForEachFileMode", equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool("ECFEFallTime", m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
 	ini.WriteBool("IsBoostFriends", isboostfriends);//Added by Yun.SF3, boost friends
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
@@ -2430,6 +2429,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("DynUpNumberOfPings", m_iDynUpNumberOfPings);
 	ini.WriteBool("DynUpLog", m_bDynUpLog);
 	ini.WriteInt("DynUpPingLimit", m_iDynUpPingLimit); // EastShare - Add by TAHO, USS limit
+	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 	// ZZ:UploadSpeedSense -->
 	ini.WriteBool("USSEnabled", m_bDynUpEnabled, "eMule");
@@ -3099,6 +3099,7 @@ void CPreferences::LoadPreferences(){
 	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
 	m_bDynUpLog = ini.GetBool("DynUpLog", false);
 	m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
+	m_bIsUSSLimit = ini.GetBool("IsUSSLimit",false); // EastShare - Added by TAHO, does USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
 
     LoadCats();

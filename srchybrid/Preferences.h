@@ -193,7 +193,7 @@ public:
 	static	INT		downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
 	static	uint16	uploadColumnWidths[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
 	static	BOOL	uploadColumnHidden[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
-	static	INT		uploadColumnOrder[8];  /*8+ 1 MOD_VERSION+1 Compression+1 Community*/
+	static	INT		uploadColumnOrder[14];  /*8+1 MOD_VERSION+1 Compression+1 Community*/
 	static	uint16	queueColumnWidths[12];  /*10+1 MOD_VERSION+1 Community*/
 	static	BOOL	queueColumnHidden[12];  /*10+1 MOD_VERSION+1 Community*/
 	static	INT		queueColumnOrder[12];  /*10+1 MOD_VERSION+1 Community*/

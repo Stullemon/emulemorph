@@ -89,9 +89,9 @@
 //Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
 #define	UPLOAD_LOW_CLIENT_DR	2400	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
 //Morph End - added by AndCycle, ZZ Upload System 20040106-1735
-#define	UPLOAD_CLIENT_DATARATE	3072	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
+#define	UPLOAD_CLIENT_DATARATE	5120	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
 //MORPH START - Added by Yun.SF3, ZZ Upload System 20030807-1911
-#define MINNUMBEROFTRICKLEUPLOADS 0 /*Old 2*/
+#define MINNUMBEROFTRICKLEUPLOADS 0
 #define MINWAITBEFOREOPENANOTHERSLOTMS 3000
 //MORPH END   - Added by Yun.SF3, ZZ Upload System 20030807-1911
 #define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
