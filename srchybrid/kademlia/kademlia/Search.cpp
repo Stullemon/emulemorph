@@ -82,10 +82,10 @@ CSearch::CSearch()
 	m_keywordPublish = NULL;
 	m_fileName = "";
 	m_stoping = false;
-	theApp.emuledlg->kademliawnd->searchList->SearchAdd(this);
 	bio1 = NULL;
 	bio2 = NULL;
 	bio3 = NULL;
+	theApp.emuledlg->kademliawnd->searchList->SearchAdd(this);
 }
 
 CSearch::~CSearch()
@@ -464,7 +464,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 							CSafeMemFile bio(34);
 							bio.WriteUInt128(&m_target);
 							if( m_fileIDs.size() != 1)
-								throw;
+								throw CString(_T("Kademlia.CSearch.processResponse: m_fileIDs.size() != 1"));
 							bio.WriteUInt128(&m_fileIDs.front());
 							bio.WriteUInt16(thePrefs.GetPort());
 							udpListner->sendPacket( &bio, KADEMLIA_FINDSOURCE_REQ, from->getIPAddress(), from->getUDPPort());

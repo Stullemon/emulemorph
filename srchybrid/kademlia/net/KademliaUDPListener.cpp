@@ -1211,12 +1211,12 @@ void CKademliaUDPListener::processPublishNotesRequest (const byte *packetData, u
 
 	if( entry == NULL )
 	{
-		throw;
+		throw CString(_T("CKademliaUDPListener::processPublishNotesRequest: entry == NULL"));
 	}
 	else if( entry->taglist.size() == 0 || entry->taglist.size() > 2)
 	{
 		delete entry;
-		throw;
+		throw CString(_T("CKademliaUDPListener::processPublishNotesRequest: entry->taglist.size() == 0 || entry->taglist.size() > 2"));
 	}
 
 	if( indexed->AddNotes(target, source, entry ) )

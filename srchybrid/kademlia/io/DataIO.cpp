@@ -223,7 +223,7 @@ CTag *CDataIO::readTag(bool bOptACP)
 				AddDebugLogLine(false, _T("****************************"));
 				AddDebugLogLine(false, _T("Found Unknown TAG Type (0x%02X)"), type);
 				AddDebugLogLine(false, _T("****************************"));
-				throw;
+				retVal = NULL;
 		}
 		delete [] name;
 		name = NULL;
@@ -235,7 +235,7 @@ CTag *CDataIO::readTag(bool bOptACP)
 			delete[] name;
 		if( retVal )
 			delete retVal;
-		delete ioe;
+		ioe->Delete();
 		return NULL;
 	}
 	catch (...) 
