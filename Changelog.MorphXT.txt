@@ -1,7 +1,17 @@
 --------------------------------------
-Changelog for eMule 0.44b MorphXT v5.0
+Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
 
+FIXED  : HideOS Display Info in SharedFile [SiRoB]
+FIXED  : Ed2k Friend link past crash when they have wroung format [SiRoB]
+FIXED  : Columns in SharedFile where not displayed correctly when first column is hiddeen [SiRoB]
+
+TODO   : DynIP [Commander]
+TODO   : CPU Usage and progressbar [Commander]
+
+--------------------------------------
+Changelog for eMule 0.44b MorphXT v5.0
+--------------------------------------
 MERGED : Code merged to 0.44a [SiRoB]
 MERGED : Code merged to 0.44b [SiRoB]
 MERGED : UNICODE related [AndCycle/Commander/SiRoB]
@@ -32,9 +42,6 @@ ADDED  : Option to stop removing trickle client from uploading [AndCycle]
 ADDED  : Adding UPNP,RandomPort,Inproved ICF from emulEspaña [SiRoB]
 ADDED  : Itsonlyme -modname- [SiRoB]
 ADDED  : Adding partial SNAFU code from eWombat [SiRoB]
-
-TODO   : DynIP [Commander]
-TODO   : CPU Usage and progressbar [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
