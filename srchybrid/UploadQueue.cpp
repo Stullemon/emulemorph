@@ -865,23 +865,24 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
 	if (reqfile)
 		reqfile->statistic.AddRequest();
-		// better way to cap the list
-		uint32 softQueueLimit;
-		uint32 hardQueueLimit;
+// <<---- start of change ---->
 
-	// the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
-	// high ranking clients after soft limit has been reached
-        softQueueLimit = theApp.glob_prefs->GetQueueSize();
-        hardQueueLimit = theApp.glob_prefs->GetQueueSize() + max(theApp.glob_prefs->GetQueueSize()/4, 200);
+   // better ways to cap the list
+   uint32 softQueueLimit;
+   uint32 hardQueueLimit;
 
-		// if soft queue limit has been reached, only let in high ranking clients
-		if ((uint32)waitinglist.GetCount() > softQueueLimit && // soft queue limit is reached
-            (client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
-			client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) { // and client has lower credits/wants lower prio file than average client in queue
+   // these proportions could be tweaked. Right now it's 50/50, and that seems to work
+       softQueueLimit = (theApp.glob_prefs->GetQueueSize())/2;
+       hardQueueLimit = theApp.glob_prefs->GetQueueSize();
 
-			// then block client from getting on queue
-			return;
-        	}
+    if ((uint32)waitinglist.GetCount() > hardQueueLimit ||
+       (uint32)waitinglist.GetCount() > softQueueLimit &&
+       (client->IsFriend() == false || client->GetFriendSlot() == false) &&
+        client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {
+ return;
+   }
+
+// <<---- end of change ---->
 
 		if (client->IsDownloading()){
 			// he's already downloading and wants probably only another file
