@@ -2376,7 +2376,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                         curClientReducedDownload = friendReduceddownload;
                     }
 
-					if(curClientReducedDownload)
+					if(curClientReducedDownload && cur_datarate)
 					{
 						uint32 limit = curClientReducedDownload*cur_datarate/1000;
 						if(limit<1000 && curClientReducedDownload == 200)
@@ -2465,7 +2465,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	                    if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
                     	    curClientReducedDownload = friendReduceddownload;
                     	}
-						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
+						if (curClientReducedDownload && cur_datarate && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
 							if (limit < 1000 && curClientReducedDownload == 200)
@@ -2743,7 +2743,8 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 
 	UINT debug_lowiddropped = 0;
 	UINT debug_possiblesources = 0;
-	for (UINT i = 0; i < count; i++)
+	//for (UINT i = 0; i < count; i++)
+	for (UINT i = 1; i < count; i++)	// WiZaRd memory exception fix
 	{
 		uint32 userid = sources->ReadUInt32();
 		uint16 port = sources->ReadUInt16();
@@ -3840,7 +3841,7 @@ void CPartFile::StopFile(bool bCancel, bool resort)
 	datarate = 0;
 	memset(m_anStates,0,sizeof(m_anStates));
 	//MORPH START - Added by SiRoB, -Fix-
-	memset(net_stats,0,sizeof(net_stats));
+	memset(src_stats,0,sizeof(src_stats));
 	memset(net_stats,0,sizeof(net_stats));
 	//MORPH END   - Added by SiRoB, -Fix-
 	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
