@@ -871,28 +871,29 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	}
 
     if(addInFirstPlace == false) {
-	// statistic values
-	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
-	if (reqfile)
-		reqfile->statistic.AddRequest();
+		// statistic values
+		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
+		if (reqfile)
+			reqfile->statistic.AddRequest();
 // <<---- start of change ---->
 
-   // better ways to cap the list
-   uint32 softQueueLimit;
-   uint32 hardQueueLimit;
+		// better ways to cap the list
+		uint32 softQueueLimit;
+		uint32 hardQueueLimit;
 
-   // these proportions could be tweaked. take 10 precent of queue size to buffer new client
-       softQueueLimit = theApp.glob_prefs->GetQueueSize() - theApp.glob_prefs->GetQueueSize()/10;
-       hardQueueLimit = theApp.glob_prefs->GetQueueSize();
+		// these proportions could be tweaked. take 20 precent of queue size to buffer new client
+		softQueueLimit = theApp.glob_prefs->GetQueueSize() - theApp.glob_prefs->GetQueueSize()/5;
+		hardQueueLimit = theApp.glob_prefs->GetQueueSize();
 
-	if ((uint32)waitinglist.GetCount() > hardQueueLimit ||//let hard limit really hard
-		(uint32)waitinglist.GetCount() > softQueueLimit && // soft queue limit is reached
-		(client->IsFriend() == false || client->GetFriendSlot() == false) && // client is not a friend with friend slot
-		client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
-		client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
-	// then block client from getting on queue
-	return;
-}
+		if ((uint32)waitinglist.GetCount() > hardQueueLimit ||//let hard limit really hard
+			(uint32)waitinglist.GetCount() > softQueueLimit && // soft queue limit is reached
+			(client->IsFriend() == false || client->GetFriendSlot() == false) && // client is not a friend with friend slot
+			client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
+			client->GetPowerShared() == false && // client don't want powershared file //Morph - Added by AndCycle
+			client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
+			// then block client from getting on queue
+			return;
+		}
 
 // <<---- end of change ---->
 
