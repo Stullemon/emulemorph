@@ -783,7 +783,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	if (reqfile)
 		reqfile->statistic.AddRequest();
 
-	if(!thePrefs.IsInfiniteQueueEnabled()){ //Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	//Morph Start - added by AndCycle, SLUGFILLER: infiniteQueue
+	if(!thePrefs.IsInfiniteQueueEnabled()){
 		// cap the list
     	// the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
     	// high ranking clients after soft limit has been reached
@@ -802,16 +803,17 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				// then block client from getting on queue
 				return;
 			}
-			if (client->IsDownloading())
-			{
-				// he's already downloading and wants probably only another file
-			if (thePrefs.GetDebugClientTCPLevel() > 0)
-				DebugSend("OP__AcceptUploadReq", client);
-				Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
-				theStats.AddUpDataOverheadFileRequest(packet->size);
-				client->socket->SendPacket(packet,true);
-				return;
-			}
+	}
+	//Morph End - added by AndCycle, SLUGFILLER: infiniteQueue
+	if (client->IsDownloading())
+	{
+		// he's already downloading and wants probably only another file
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__AcceptUploadReq", client);
+		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
+		theStats.AddUpDataOverheadFileRequest(packet->size);
+		client->socket->SendPacket(packet,true);
+		return;
 	}
 	if (waitinglist.IsEmpty() && AcceptNewClient())
 	{
