@@ -2898,7 +2898,7 @@ void CPartFile::UpdatePartsInfo()
 	}
 	if(iCompleteSourcesCountInfoReceived)
 		iCompleteSourcesCountInfoReceived /= 2+GetNotCurrentSourcesCount();
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0)),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi<=1) || m_nVirtualCompleteSourcesCount==1),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	UpdateDisplayedInfo();
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation

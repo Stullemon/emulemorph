@@ -9,6 +9,8 @@ FIXED  : WebCache: timeout fix [SiRoB]
 
 ADDED  : Ip Country for ProxyClient [SiRoB]
 
+CHANGED: Advised PowerShare for partfile [SiRoB]
+
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.15
 --------------------------------------
