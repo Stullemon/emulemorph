@@ -14,6 +14,7 @@ ADDED: "Yes To All" selection for the popup confirmation message in the BackUp U
 ADDED: Add USS settings in scheduler tab [Pretender]
 ADDED: Pay Back First [AndCycle]
 ADDED: Delete Shared File (TheBlackHand) [linekin]
+TWEAKED: PowerShare Limit more occurate [SiRoB]
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.6
