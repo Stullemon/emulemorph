@@ -489,7 +489,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		// add it at found pos
 		newclient->SetSlotNumber(posCounter+1);
 		uploadinglist.InsertBefore(insertPosition, newclient);
-		if (newclient->GetFriendSlot())
+		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
 		else if (newclient->GetPowerShared())
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,1);
@@ -497,7 +497,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,2);
 	}	else{
 		// Add it last
-		if (newclient->GetFriendSlot())
+		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
 		else if (newclient->GetPowerShared())
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,1);
@@ -1057,8 +1057,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			(client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
     	     client->IsPBForPS() == false && // client don't want powershared file
 			(
-				client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && !thePrefs.IsEqualChanceEnable() ||
-				client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.IsEqualChanceEnable()//Morph - added by AndCycle, Equal Chance For Each File
+				!thePrefs.IsEqualChanceEnable() && client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() ||
+				thePrefs.IsEqualChanceEnable() && client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit()//Morph - added by AndCycle, Equal Chance For Each File
 			)// and client has lower credits/wants lower prio file than average client in queue
 			) {
 				// then block client from getting on queue
