@@ -908,7 +908,7 @@ bool CPreferences::IsZZRatioDoesWork(){
 		return true;
 	if (thePrefs.GetPayBackFirstLimit() < 10)
 		return true;
-	return theApp.statistics->GetAvgUploadRate(0)<10240;
+	return theApp.statistics->GetAvgUploadRate(0)<10.240;
 }
 //MORPH - Added by SiRoB, ZZ ratio
 

@@ -1,4 +1,20 @@
 --------------------------------------
+Changelog for eMule 0.42d MorphXT v2.?
+--------------------------------------
+FIXED  : Systray Fix to avoid all the schedulable parameter to not correctly be saved at shutdown [SiRoB]
+FIXED  : Some little fix [SiRoB]
+FIXED  : A wroung test causing zz ratio allways activated since the 2.0 version :) [SiRoB]
+ADDED  : modID Statistic from Slugfiller and code improvement from TPT [SiRoB]
+CHANGED: The current Download, Upload Slot+Overhead, Upload Friend Slot & Upload Slot are drawn in in solid in Statistic Window [SiRoB]
+CHANGED: The average speed rate are dynamicly mesured from 1'' to 30'' depending on the number of sample [SiRoB]
+CHANGED: Update Code to the latest ZZ Upload System [SiRoB]
+CHANGED: Update SUWQT code from MoonLight [AndCycle]
+
+NOTE: About average speed mesurement change, i do this to show as much as possible the possible perturbation of the data rate.
+In the official and different mod the average speed datarate is calculated from 15'' to 40'' and are note exactly right.
+So don't be afraid to see strange data speed rate.
+
+--------------------------------------
 Changelog for eMule 0.42d MorphXT v2.3
 --------------------------------------
 FIXED  : All the schedulable parameter accessible in Morph Preferency are now correctly saved at shutdown [SiRoB]

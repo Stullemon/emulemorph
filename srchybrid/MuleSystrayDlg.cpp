@@ -9,6 +9,7 @@
 #include "kademlia/kademlia/Kademlia.h"
 #include "preferences.h"
 #include "OtherFunctions.h"
+#include "Scheduler.h" //MORPH - Added by SiRoB, Fix for Param used in scheduler
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -397,7 +398,7 @@ void CMuleSystrayDlg::OnChangeDowntxt()
 		
 		m_ctrlDownSpeedSld.SetPos(m_nDownSpeedTxt);
 		thePrefs.SetMaxDownload(m_nDownSpeedTxt);
-		
+		theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
 		UpdateData(FALSE);
 	}
 }
@@ -411,6 +412,7 @@ void CMuleSystrayDlg::OnChangeUptxt()
 		
 		m_ctrlUpSpeedSld.SetPos(m_nUpSpeedTxt);
 		thePrefs.SetMaxUpload(m_nUpSpeedTxt);
+		theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
 		UpdateData(FALSE);
 	}
 }
@@ -424,6 +426,7 @@ void CMuleSystrayDlg::OnChangeMinUptxt()
 		
 		m_ctrlMinUpSpeedSld.SetPos(m_nMinUpSpeedTxt);
 		thePrefs.SetMinUpload(m_nMinUpSpeedTxt);
+		theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
 		UpdateData(FALSE);
 	}
 }
@@ -448,7 +451,7 @@ void CMuleSystrayDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		UpdateData(FALSE);
 		thePrefs.SetMinUpload(m_nMinUpSpeedTxt);
 	}
-
+	theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 

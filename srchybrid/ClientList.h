@@ -25,10 +25,6 @@ namespace Kademlia{
 };
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-#include <map>
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-
 #define BAN_CLEANUP_TIME	1200000 // 20 min
 
 
@@ -59,6 +55,10 @@ public:
 	void	AddClient(CUpDownClient* toadd,bool bSkipDupTest = false);
 	void	RemoveClient(CUpDownClient* toremove);
 	void	GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkey=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkeyHybrid=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEMule=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionLMule=NULL); // xrmb : statsclientstatus
+	//MORPH START - Slugfiller: modid
+	void	GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
+	void	ReleaseModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
+	//MORPH END   - Slugfiller: modid
 	void	DeleteAll();
 	bool	AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket* sender);
 	CUpDownClient* FindClientByIP(uint32 clientip, UINT port) const;
@@ -98,33 +98,6 @@ private:
 	uint32	m_dwLastTrackedCleanUp;
 	CUpDownClientPtrList RequestTCPList;
 	CCriticalSection m_RequestTCPLock;
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-public:
-	void AddClientType(EClientSoftware clientSoft, const CString& description);
-	void RemoveClientType(EClientSoftware clientSoft, const CString& description);
-
-	// Used for construction of statistic tree
-	typedef std::map<CString, uint32> ClientMap; // The CMap class does not sort correctly the string
-	uint32 GetTotalclient() const {return list.GetCount();}
-	const ClientMap& GeteMuleMap() const {return m_eMuleMap;}
-	const ClientMap& GetlMuleMap() const {return m_lMuleMap;}
-	const ClientMap& GeteDonkeyMap() const {return m_eDonkeyMap;}
-	const ClientMap& GeteDonkeyHybridMap() const {return m_eDonkeyHybridMap;}
-	const ClientMap& GetcDonkeyMap() const {return m_cDonkeyMap;}
-	const ClientMap& GetoldMlDonkeyMap() const {return m_oldMlDonkeyMap;}
-	const ClientMap& GetShareazaMap() const {return m_shareazaMap;}
-	const ClientMap& GetUnknownMap() const {return m_unknownMap;}
-
-private:
-	ClientMap m_eMuleMap;
-	ClientMap m_lMuleMap;
-	ClientMap m_eDonkeyMap;
-	ClientMap m_eDonkeyHybridMap;
-	ClientMap m_cDonkeyMap;
-	ClientMap m_oldMlDonkeyMap;
-	ClientMap m_shareazaMap;
-	ClientMap m_unknownMap;
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 
 //EastShare Start - added by AndCycle, IP to Country
 public:

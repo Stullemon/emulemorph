@@ -73,13 +73,31 @@
 *
 * <--- End cut --->
 */
+
+/*---------------------------------------------------------------------
+* Reworked (tag UDPing) to use UDP packets and ICMP_TTL_EXPIRE responses
+* to avoid problems with some ISPs disallowing or limiting ICMP_ECHO
+* (ping) requests. This has downside on NT based systems - raw sockets
+* can be used only by administrative users; thereby current code has to
+* implement both approaches.
+*
+* Example code and ideas used from (credits go to articles authors):
+* http://tangentsoft.net/wskfaq/examples/rawping.html
+* http://www.cs.concordia.ca/~teaching/comp445/labs/webpage/ch16.htm
+* http://www.networksorcery.com/enp/protocol/icmp.htm
+*
+* NB! Take care about winsock libraries - look below for IP_TTL!
+*
+* Partial copyright (c) 2003 by DonQ
+*/
+
 #include "stdafx.h"
 #include "emule.h"
 #include "Pinger.h"
+#include "OtherFunctions.h" //Added by SiRoB
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #endif
-#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -134,13 +152,35 @@ char *aszSendEchoErr[] = {
 };
 
 Pinger::Pinger() {
-//    WSADATA wsaData;
-//    int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
-//    if (nRet) {
-//        theApp.emuledlg->QueueDebugLogLine(false,"Pinger: WSAStartup() failed, err: %d\n", nRet);
-//        return;
-//    }
+    // udp start
+    sockaddr_in sa;     // for UDP and raw sockets
 
+    // ICMP must accept all responses
+    sa.sin_family = AF_INET;
+    sa.sin_addr.s_addr = INADDR_ANY;	
+    sa.sin_port = 0;
+
+    udpStarted = false;
+    // attempt to initialize raw ICMP socket
+    is = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+    if (is != INVALID_SOCKET) {
+        int nRet = bind(is, (sockaddr *)&sa, sizeof(sa));
+        if (nRet==SOCKET_ERROR) { 
+            nRet = WSAGetLastError();
+            closesocket(is);        // ignore return value - error close anyway
+        } else {
+            // attempt to initialize ordinal UDP socket - why should this fail???
+            // NB! no need to bind this at a moment - will be bound later, implicitly at sendto
+            us = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+            if (us == INVALID_SOCKET) {
+                closesocket(is);            // ignore return value - we need to close it anyway!
+            }
+
+            udpStarted = true;
+        }
+    }
+    // udp end
+ 
     // Open ICMP.DLL
     hICMP_DLL = LoadLibrary("ICMP.DLL");
     if (hICMP_DLL == 0) {
@@ -163,8 +203,9 @@ Pinger::Pinger() {
     // Open the ping service
     hICMP = (HANDLE) lpfnIcmpCreateFile();
     if (hICMP == INVALID_HANDLE_VALUE) {
-        theApp.emuledlg->QueueDebugLogLine(false, GetResString(IDS_USSPINGERICFFAIL));
-        PIcmpErr(GetLastError());
+		int nErr = GetLastError();
+        theApp.emuledlg->QueueDebugLogLine(false, GetResString(IDS_USSPINGERICFFAIL), nErr);
+        PIcmpErr(nErr);
         return;
     }
 
@@ -176,22 +217,208 @@ Pinger::Pinger() {
 }
 
 Pinger::~Pinger() {
+    // UDPing reworked cleanup -->
+    if (udpStarted) {
+        closesocket(is);                // close UDP socket
+        closesocket(us);                // close raw ICMP socket
+    }
+    // UDPing reworked cleanup end <--
+
     // Close the ICMP handle
     BOOL fRet = lpfnIcmpCloseHandle(hICMP);
     if (fRet == FALSE) {
         int nErr = GetLastError();
-
-        theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERICMPENDERR));
-        PIcmpErr(GetLastError());
+        theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERICMPENDERR), nErr);
+        PIcmpErr(nErr);
     }
 
     // Shut down...
     FreeLibrary(hICMP_DLL);
-
-//    VERIFY( WSACleanup() == 0 );
 }
 
-PingStatus Pinger::Ping(uint32 lAddr, uint32 ttl, bool doLog) {
+PingStatus Pinger::Ping(uint32 lAddr, uint32 ttl, bool doLog, bool useUdp) {
+    if(useUdp && udpStarted) {
+        return PingUDP(lAddr, ttl, doLog);
+    } else {
+        return PingICMP(lAddr, ttl, doLog);
+    }
+}
+
+PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
+	// UDPing reworked ping sequence -->
+	int nTTL = ttl;
+	int nRet;
+	sockaddr_in sa;
+	int nAddrLen = sizeof(struct sockaddr_in); 
+	char bufICMP[1500];             // allow full MTU
+
+	// clear ICMP socket before sending UDP - not best solution, but may be needed to exclude late responses etc
+	u_long bytes2read = 0;
+	do {
+		nRet = ioctlsocket(is, FIONREAD, &bytes2read);
+		if (bytes2read > 0) {       // ignore errors here
+			sa.sin_family = AF_INET;
+			sa.sin_addr.s_addr = INADDR_ANY;	
+			sa.sin_port = 0;
+
+			nRet = recvfrom (is,    /* socket */ 
+				(LPSTR)bufICMP,     /* buffer */ 
+				1500,               /* length */ 
+				0,                  /* flags  */ 
+				(sockaddr*)&sa,     /* source */ 
+				&nAddrLen);         /* addrlen*/
+
+			//if (lastTimeOut) lastTimeOut--;
+			//if (!lastTimeOut && toNowTimeOut) {
+			//		toNowTimeOut--;
+			//		if (toNowTimeOut) lastTimeOut = 3;
+			//}
+		}
+	} while (bytes2read > 0);
+
+	// set TTL value for UDP packet - should success with winsock 2
+	// NB! take care about IP_TTL value - it's redefined in Ws2tcpip.h!
+	// TODO: solve next problem correctly:
+	// eMule is linking sockets functions using wsock32.lib (IP_TTL=7)
+	// to use IP_TTL define, we must enforce linker to bind this function 
+	// to ws2_32.lib (IP_TTL=4) (linker options: ignore wsock32.lib)
+	nRet = setsockopt(us, IPPROTO_IP, IP_TTL, (char*)&nTTL, sizeof(int));
+	if (nRet==SOCKET_ERROR) { 
+		DWORD lastError = WSAGetLastError();
+        PingStatus returnValue;
+		returnValue.success = false;
+		returnValue.delay = TIMEOUT;
+		returnValue.error = lastError;
+		//if (toNowTimeOut < 3) toNowTimeOut++;
+		//	lastTimeOut = 3;
+		return returnValue;
+	} 
+
+	sa.sin_family = AF_INET;
+	sa.sin_addr.s_addr = lAddr;	
+	sa.sin_port = htons(UDP_PORT);
+
+	// send lonely UDP packet with almost minimal content (0 bytes is allowed too, but no data will be sent then)
+	nRet = sendto(us, (LPSTR)&nTTL, 4, 0, (sockaddr*)&sa, sizeof(sa));  // send four bytes - TTL :)
+    CTimeTick m_time;
+    m_time.Tick();
+	if (nRet==SOCKET_ERROR) { 
+		DWORD lastError = WSAGetLastError();
+        PingStatus returnValue;
+		returnValue.success = false;
+		returnValue.error = lastError;
+
+//    VERIFY( WSACleanup() == 0 );
+		return returnValue;
+	} 
+
+	IPHeader* reply = (IPHeader*)bufICMP;
+
+	bytes2read = 0;
+	int timeoutOpt = TIMEOUT;
+	bool noRcvTimeOut = false;
+	nRet = setsockopt(is, SOL_SOCKET, SO_RCVTIMEO, (const char*) &timeoutOpt, sizeof(timeoutOpt));
+	if (nRet==SOCKET_ERROR)
+		noRcvTimeOut = true;
+
+    float usResTime = 0.0f;
+	while((usResTime += m_time.Tick()) < TIMEOUT){
+		if (noRcvTimeOut){
+			nRet = ioctlsocket(is, FIONREAD, &bytes2read);
+			if (nRet != 0) {
+				DWORD lastError = WSAGetLastError();
+                PingStatus returnValue;
+				returnValue.success = false;
+				returnValue.delay = TIMEOUT;
+				returnValue.error = lastError;
+				//if (toNowTimeOut < 3) toNowTimeOut++;
+				//	lastTimeOut = 3;
+				return returnValue;
+			}
+			if (bytes2read > 0) {       // read and filter incoming ICMP
+
+			} else {
+				Sleep(1);         // share time with other threads
+				continue;
+			}
+		}
+		sa.sin_family = AF_INET;
+		sa.sin_addr.s_addr = INADDR_ANY;	
+		sa.sin_port = 0;
+		nRet = recvfrom (is,    /* socket */ 
+			(LPSTR)bufICMP,     /* buffer */ 
+			1500,               /* length */ 
+			0,                  /* flags  */ 
+			(sockaddr*)&sa,     /* source */ 
+			&nAddrLen);         /* addrlen*/ 
+
+		usResTime += m_time.Tick();
+		if (nRet==SOCKET_ERROR) { 
+			DWORD lastError = WSAGetLastError();
+            PingStatus returnValue;
+			returnValue.success = false;
+			returnValue.delay = TIMEOUT;
+			returnValue.error = lastError;
+			//if (toNowTimeOut < 3) toNowTimeOut++;
+			//	lastTimeOut = 3;
+			return returnValue;
+		} 
+
+		unsigned short header_len = reply->h_len * 4;
+		ICMPHeader* icmphdr = (ICMPHeader*)(bufICMP + header_len);
+		IN_ADDR stDestAddr;
+
+		stDestAddr.s_addr = reply->source_ip;
+
+		if (((icmphdr->type == ICMP_TTL_EXPIRE) || (icmphdr->type == ICMP_DEST_UNREACH)) &&
+			(icmphdr->UDP.dest_port == htons(UDP_PORT)) && (icmphdr->hdrsent.dest_ip == lAddr)) {
+
+            PingStatus returnValue;
+			returnValue.success = true;
+			returnValue.status = (icmphdr->type == ICMP_DEST_UNREACH) ? IP_SUCCESS : IP_TTL_EXPIRED_TRANSIT;
+			returnValue.delay = usResTime;
+			returnValue.destinationAddress = stDestAddr.s_addr;
+			returnValue.ttl = (icmphdr->type == ICMP_TTL_EXPIRE)?ttl:(64 - (reply->ttl & 63));
+
+			if(doLog) {
+				theApp.emuledlg->QueueDebugLogLine(false,"Reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i",
+					inet_ntoa(stDestAddr),
+					nRet,
+					usResTime,
+					returnValue.ttl);
+			}
+			return returnValue;
+		} else {              // verbose log filtered packets info (not seen yet...)
+			//if (lastTimeOut) lastTimeOut--;
+			//if (!lastTimeOut && toNowTimeOut) {
+			//		toNowTimeOut--;
+			//		if (toNowTimeOut) lastTimeOut = 3;
+			//}
+			if(doLog) {
+				theApp.emuledlg->QueueDebugLogLine(false,"Filtered reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i type=%i",
+					inet_ntoa(stDestAddr),
+					nRet,
+					usResTime,
+					64 - (reply->ttl & 63),
+					icmphdr->type);
+			}
+		}
+}
+
+	//	if (toNowTimeOut < 3) toNowTimeOut++;
+	//	lastTimeOut = 3;
+	//}
+	// UDPing reworked ping sequence end <--
+
+    PingStatus returnValue;
+	returnValue.success = false;
+	returnValue.delay = TIMEOUT;
+	returnValue.error = IP_REQ_TIMED_OUT;
+
+    return returnValue;
+}
+
+PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
     PingStatus returnValue;
     IN_ADDR stDestAddr;
     char achRepData[sizeof(ICMPECHO) + BUFSIZE];
@@ -200,6 +427,8 @@ PingStatus Pinger::Ping(uint32 lAddr, uint32 ttl, bool doLog) {
     stDestAddr.s_addr = lAddr;
     stIPInfo.Ttl = ttl;
 
+    CTimeTick m_time;
+	m_time.Tick();
     // Send the ICMP Echo Request and read the Reply
     DWORD dwReplyCount = lpfnIcmpSendEcho(hICMP, 
                                     stDestAddr.s_addr,
@@ -210,15 +439,17 @@ PingStatus Pinger::Ping(uint32 lAddr, uint32 ttl, bool doLog) {
                                     sizeof(achRepData), 
                                     TIMEOUT
                          );
-
+	float usResTime=m_time.Tick();
     if (dwReplyCount != 0) {
+        long pingTime = *(u_long *) &(achRepData[8]);
+
         IN_ADDR stDestAddr;
 
         stDestAddr.s_addr = *(u_long *)achRepData;
 
         returnValue.success = true;
         returnValue.status = *(DWORD *) &(achRepData[4]);
-        returnValue.delay = *(u_long *) &(achRepData[8]);
+		returnValue.delay = (m_time.isPerformanceCounter() && (pingTime <= 20 || pingTime%10 == 0) ? usResTime : pingTime);
         returnValue.destinationAddress = stDestAddr.s_addr;
         returnValue.ttl = (returnValue.status != IP_SUCCESS)?ttl:(*(char *)&(achRepData[20]))&0x00FF;
 
@@ -227,12 +458,19 @@ PingStatus Pinger::Ping(uint32 lAddr, uint32 ttl, bool doLog) {
                                                         inet_ntoa(stDestAddr),
                                                         *(u_long *) &(achRepData[12]),
                                                         returnValue.delay, 
+                                                        m_time.isPerformanceCounter() ? usResTime : -1.0f, 
+                                                        (u_long)(achRepData[8]),
                                                         returnValue.ttl);
         }
     } else {
         DWORD lastError = GetLastError();
         returnValue.success = false;
         returnValue.error = lastError;
+        if(doLog) {
+			theApp.emuledlg->QueueDebugLogLine(false,"Error from %s: Error=%i",
+				inet_ntoa(stDestAddr),
+				returnValue.error);
+        }
     }
 
     return returnValue;

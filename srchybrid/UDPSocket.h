@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "loggable.h"
+#include "UploadBandwidthThrottler.h" // ZZ:UploadBandWithThrottler (UDP)
 
 #define WM_DNSLOOKUPDONE	(WM_USER+0x101)
 
@@ -45,7 +46,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // CUDPSocket
 
-class CUDPSocket : public CAsyncSocket, public CLoggable
+class CUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	friend class CServerConnect;
 
@@ -54,6 +55,7 @@ public:
 	~CUDPSocket();
 
 	bool	Create();
+    SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket); // ZZ:UploadBandWithThrottler (UDP)
 	void	SendPacket(Packet* packet,CServer* host);
 	void	DnsLookupDone(WPARAM wp, LPARAM lp);
 
@@ -86,4 +88,6 @@ private:
 
 	bool	IsBusy() const { return m_bWouldBlock; }
 	int		SendTo(uint8* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort);
+
+    CCriticalSection sendLocker; // ZZ:UploadBandWithThrottler (UDP)
 };

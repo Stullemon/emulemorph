@@ -19,13 +19,6 @@
 #include "StatisticsTree.h"
 #include "OScopeCtrl.h"
 #include "ColorFrameCtrl.h"
-#include <list>
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-#include <map>
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-using namespace std;
-
-// CStatisticsDlg dialog
 
 class CStatisticsDlg : public CResizableDialog
 {
@@ -116,22 +109,7 @@ private:
 	HTREEITEM h_debug,h_blocks,debug1,debug2,debug3,debug4,debug5;
 	CMap<const unsigned char *,const unsigned char *,HTREEITEM *,HTREEITEM *> blockFiles;
 #endif
- 	//MORPH START - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	typedef std::map<CString, uint32> ClientMap; // Pseudo-foward declaration
-	void updateClientBranch(CArray<HTREEITEM>& clientArray, const ClientMap& clientMap, uint32 count);
 
-	enum EClientSoftware{
-		CS_EMULE,
-		CS_CDONKEY,
-		CS_XMULE,
-		CS_SHAREAZA,
-		CS_EDONKEYHYBRID,
-		CS_EDONKEY,
-		CS_MLDONKEY,
-		CS_UNKNOWN
-	};
-	CArray<HTREEITEM> clientSoft[CS_UNKNOWN+1];
- 	//MORPH END   - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 protected:
 	void SetAllIcons();
 

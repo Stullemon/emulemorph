@@ -16,6 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
+#include "ThrottledSocket.h" // ZZ:UploadBandWithThrottler (UDP)
+
 class CEMSocket;
 
 class UploadBandwidthThrottler :
@@ -26,26 +28,29 @@ public:
     ~UploadBandwidthThrottler(void);
 
     uint64 GetNumberOfSentBytesSinceLastCallAndReset();
-    uint64 GetNumberOfSentBytesExcludingOverheadSinceLastCallAndReset();
+    uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
     uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
     void AddToStandardList(uint32 index, CEMSocket* socket);
     void RemoveFromStandardList(CEMSocket* socket);
 
-    void QueueForSendingControlPacket(CEMSocket* socket);
+    void QueueForSendingControlPacket(ThrottledSocket* socket); // ZZ:UploadBandWithThrottler (UDP)
+    void RemoveFromAllQueues(ThrottledSocket* socket, bool lock = true); // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(CEMSocket* socket);
 
     void EndThread();
 
     void SetAllowedDataRate(uint32 newValue);
+
+    void Pause(bool paused);
 private:
     static UINT RunProc(LPVOID pParam);
     UINT RunInternal();
 
     void RemoveFromStandardListNoLock(CEMSocket* socket);
 
-    CTypedPtrList<CPtrList, CEMSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them.
-    CTypedPtrList<CPtrList, CEMSocket*> m_TempControlQueue_list; // sockets that wants to enter m_ControlQueue_list
+    CTypedPtrList<CPtrList, ThrottledSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
+    CTypedPtrList<CPtrList, ThrottledSocket*> m_TempControlQueue_list; // sockets that wants to enter m_ControlQueue_list // ZZ:UploadBandWithThrottler (UDP)
 
     CArray<CEMSocket*, CEMSocket*> m_StandardOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
 
@@ -53,6 +58,7 @@ private:
     CCriticalSection tempQueueLocker;
 
     CEvent* threadEndedEvent;
+    CEvent* pauseEvent;
 
     uint64 m_SentBytesSinceLastCall;
     uint64 m_SentBytesSinceLastCallExcludingOverhead;

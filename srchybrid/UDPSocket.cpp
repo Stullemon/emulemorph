@@ -74,6 +74,8 @@ CUDPSocket::CUDPSocket(CServerConnect* in_serverconnect){
 }
 
 CUDPSocket::~CUDPSocket(){
+    theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this); // ZZ:UploadBandWithThrottler (UDP)
+
 	delete m_cur_server;
 	delete[] m_sendbuffer;
 	POSITION pos = controlpacket_queue.GetHeadPosition();
@@ -459,15 +461,46 @@ void CUDPSocket::OnSend(int nErrorCode){
 		return;
 	}
 	m_bWouldBlock = false;
-	while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy())
+
+// ZZ:UploadBandWithThrottler (UDP) -->
+    sendLocker.Lock();
+    if(!controlpacket_queue.IsEmpty()) {
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    }
+    sendLocker.Unlock();
+// <-- ZZ:UploadBandWithThrottler (UDP)
+}
+
+SocketSentBytes CUDPSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket) { // ZZ:UploadBandWithThrottler (UDP)
+// ZZ:UploadBandWithThrottler (UDP) -->
+    sendLocker.Lock();
+
+    uint32 sentBytes = 0;
+// <-- ZZ:UploadBandWithThrottler (UDP)
+    while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy() && sentBytes < maxNumberOfBytesToSend) // ZZ:UploadBandWithThrottler (UDP)
 	{
 		SServerUDPPacket* packet = controlpacket_queue.GetHead();
-		if (SendTo(packet->packet, packet->size, packet->dwIP, packet->nPort) > 0){
+        int sendSuccess = SendTo(packet->packet, packet->size, packet->dwIP, packet->nPort);
+		if (sendSuccess >= 0){
+            if(sendSuccess > 0) {
+            sentBytes += packet->size; // ZZ:UploadBandWithThrottler (UDP)
+            }
+
 			controlpacket_queue.RemoveHead();
 			delete[] packet->packet;
 			delete packet;
 		}
 	}
+
+// ZZ:UploadBandWithThrottler (UDP) -->
+    if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    }
+    sendLocker.Unlock();
+
+    SocketSentBytes returnVal = { true, 0, sentBytes };
+    return returnVal;
+// <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
 int CUDPSocket::SendTo(uint8* lpBuf, int nBufLen, uint32 dwIP, uint16 nPort){
@@ -492,18 +525,18 @@ int CUDPSocket::SendTo(uint8* lpBuf, int nBufLen, uint32 dwIP, uint16 nPort){
 void CUDPSocket::SendBuffer(){
 	if(m_cur_server && m_sendbuffer){
 		u_short nPort = ntohs(m_SaveAddr.sin_port);
-		if (IsBusy() || SendTo(m_sendbuffer, m_sendblen, m_SaveAddr.sin_addr.s_addr, nPort) < 0){
+// ZZ:UploadBandWithThrottler (UDP) -->
 			SServerUDPPacket* newpending = new SServerUDPPacket;
 			newpending->dwIP = m_SaveAddr.sin_addr.s_addr;
 			newpending->nPort = nPort;
 			newpending->packet = m_sendbuffer;
 			newpending->size = m_sendblen;
+        sendLocker.Lock();
 			controlpacket_queue.AddTail(newpending);
-		}
-		else{
-			// on success or error, delete the packet
-			delete[] m_sendbuffer;
-		}
+        sendLocker.Unlock();
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+// <-- ZZ:UploadBandWithThrottler (UDP)
+
 		m_sendbuffer = NULL;
 		m_sendblen = 0;
 		delete m_cur_server;

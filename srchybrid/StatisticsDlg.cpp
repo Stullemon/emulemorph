@@ -328,14 +328,18 @@ void CStatisticsDlg::RepaintMeters() {
 	Buffer.Format(" (%u %s)",thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT),2);
+	m_DownloadOMeter.SetBarsPlot(true,2);
 
 	m_UploadOMeter.SetYUnits(GetResString(IDS_ST_UPLOAD));
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),0);
 	Buffer.Format(" (%u %s)",thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),2);
+	m_UploadOMeter.SetBarsPlot(true,2);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),3);
+	m_UploadOMeter.SetBarsPlot(true,3);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),4);
+	m_UploadOMeter.SetBarsPlot(true,4);
 
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION/*IDS_CONNECTIONSTATISTICS*/));
 	Buffer.Format("%s (1:%u)", GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());
@@ -1772,18 +1776,13 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 	//								sions being displayed the way they are, it makes sense.
 	//								Who wants to stare at totally blank tree items?  ;)
 	if (forceUpdate || stattree.IsExpanded(h_clients)) {
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-/*
 		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkey;
 		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkeyHybrid;
 		CMap<uint16, uint16, uint32, uint32>	clientVersionEMule;
 		CMap<uint16, uint16, uint32, uint32>	clientVersionLMule;
-*/ 
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 		uint32									totalclient;
 		int										myStats[15];
-		theApp.clientlist->GetStatistics(totalclient, myStats); //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-		//theApp.clientlist->GetStatistics(totalclient, myStats, &clientVersionEDonkey, &clientVersionEDonkeyHybrid, &clientVersionEMule, &clientVersionLMule);
+		theApp.clientlist->GetStatistics(totalclient, myStats, &clientVersionEDonkey, &clientVersionEDonkeyHybrid, &clientVersionEMule, &clientVersionLMule);
 
 		cbuffer.Format("%s: %u ", GetResString(IDS_CLIENTLIST), totalclient);
 		stattree.SetItemText(cligen[5], cbuffer);
@@ -1799,84 +1798,127 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 
 		// CLIENTS -> CLIENT SOFTWARE SECTION
 		if (forceUpdate || stattree.IsExpanded(hclisoft)) {			
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			// Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			const uint32 totalClients = theApp.clientlist->GetTotalclient();
+			cbuffer.Format("eMule: %i (%1.1f%%)",myStats[2],(double)100*myStats[2]/totalclient);stattree.SetItemText(clisoft[0], cbuffer);
+			cbuffer.Format("eD Hybrid: %i (%1.1f%%)",myStats[4],(double)100*myStats[4]/totalclient);stattree.SetItemText(clisoft[1], cbuffer);
+			cbuffer.Format("eDonkey: %i (%1.1f%%)",myStats[1],(double)100*myStats[1]/totalclient);stattree.SetItemText(clisoft[2], cbuffer);
+			cbuffer.Format("eM Compat: %i (%1.1f%%)",myStats[10],(double)100*myStats[10]/totalclient);stattree.SetItemText(clisoft[3], cbuffer);
+			cbuffer.Format("MLdonkey: %i (%1.1f%%)",myStats[3],(double)100*myStats[3]/totalclient);stattree.SetItemText(clisoft[4], cbuffer);
+			cbuffer.Format("cDonkey: %i (%1.1f%%)",myStats[5],(double)100*myStats[5]/totalclient);stattree.SetItemText(clisoft[5], cbuffer);
+			cbuffer.Format("Shareaza: %i (%1.1f%%)",myStats[11],(double)100*myStats[11]/totalclient);stattree.SetItemText(clisoft[6], cbuffer);
+			cbuffer.Format(GetResString(IDS_STATS_UNKNOWNCLIENT)+" (%1.1f%%)",myStats[0] , (double)100*myStats[0]/totalclient);stattree.SetItemText(clisoft[7], cbuffer);
 
-			// Update the root of all types of client
-			if(totalClients > 0){
-				// eMule	
-				uint32 count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GeteMuleMap().begin(); 
-					it != theApp.clientlist->GeteMuleMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("eMule: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_EMULE][0], cbuffer);
-				updateClientBranch(clientSoft[CS_EMULE], theApp.clientlist->GeteMuleMap(), count);
-	
-				// eM Compat:
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GetlMuleMap().begin(); 
-					it != theApp.clientlist->GetlMuleMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("eM Compat: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_XMULE][0], cbuffer);
-				updateClientBranch(clientSoft[CS_XMULE], theApp.clientlist->GetlMuleMap(), count);
-				// eDonkey
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GeteDonkeyMap().begin(); 
-					it != theApp.clientlist->GeteDonkeyMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("eDonkey: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_EDONKEY][0], cbuffer);
-				updateClientBranch(clientSoft[CS_EDONKEY], theApp.clientlist->GeteDonkeyMap(), count);
-				// eDonkeyHybrid
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GeteDonkeyHybridMap().begin(); 
-					it != theApp.clientlist->GeteDonkeyHybridMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("eD Hybrid: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_EDONKEYHYBRID][0], cbuffer);
-				updateClientBranch(clientSoft[CS_EDONKEYHYBRID], theApp.clientlist->GeteDonkeyHybridMap(), count);
-				// cDonkey
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GetcDonkeyMap().begin(); 
-					it != theApp.clientlist->GetcDonkeyMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("cDonkey: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_CDONKEY][0], cbuffer);
-				updateClientBranch(clientSoft[CS_CDONKEY], theApp.clientlist->GetcDonkeyMap(), count);
-				// MlDonkey
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GetoldMlDonkeyMap().begin(); 
-					it != theApp.clientlist->GetoldMlDonkeyMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("MLdonkey: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_MLDONKEY][0], cbuffer);
-				updateClientBranch(clientSoft[CS_MLDONKEY], theApp.clientlist->GetoldMlDonkeyMap(), count);
-				// Shareaza
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GetShareazaMap().begin(); 
-					it != theApp.clientlist->GetShareazaMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("Shareaza: %i (%1.1f%%)"), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_SHAREAZA][0], cbuffer);
-				updateClientBranch(clientSoft[CS_SHAREAZA], theApp.clientlist->GetShareazaMap(), count);
-				// Unknown
-				count = 0;
-				for(ClientMap::const_iterator it = theApp.clientlist->GetUnknownMap().begin(); 
-					it != theApp.clientlist->GetUnknownMap().end(); 
-					it++) count += it->second;
-				cbuffer.Format(_T("%s: %i (%1.1f%%)"), GetResString(IDS_UNKNOWN), count, (float)count*100.0f/totalClients);
-				stattree.SetItemText(clientSoft[CS_UNKNOWN][0], cbuffer);
-				updateClientBranch(clientSoft[CS_UNKNOWN], theApp.clientlist->GetUnknownMap(), count);
+			// CLIENTS -> CLIENT SOFTWARE -> EDONKEY SECTION
+			if (forceUpdate || stattree.IsExpanded(clisoft[2]) || cli_lastCount[2] == 0) {				
+				uint32 verCount = 0;
+				
+				//--- find top 4 eDonkey client versions ---
+				uint32	currtop = 0;
+				uint32	lasttop = 0xFFFFFFFF;
+				uint32	totalOther = 0;
+				for(uint32 i=0; i<8; i++)
+				{
+					POSITION pos=clientVersionEDonkey.GetStartPosition();
+					uint32 topver=0;
+					uint32 topcnt=0;
+					double topper=0;
+					while(pos)
+					{
+						uint16	ver;
+						uint32	cnt;
+						clientVersionEDonkey.GetNextAssoc(pos, ver, cnt);
+						if(currtop<ver && ver<lasttop )
+						{
+							if (ver==0xFFFFFFFF) continue;
+							topper=(double)cnt/myStats[1];
+							topver=ver;
+							topcnt=cnt;
+							currtop=ver;
+						}
 					}
-			// Maella end
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+					lasttop=currtop;
+					currtop=0;
 
-		} // - End Clients -> Client Software Section
+					if (topcnt){
+						UINT verMaj = topver/(100*10*100);
+						UINT verMin = (topver - (verMaj*100*10*100))/(100*10);
+						UINT verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
+						cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
+					}
+					else
+						continue;
 
-/*					verCount++;
+					if (i > 3) totalOther += topcnt;
+
+					if (i >= cli_lastCount[2]) {
+						if (i == 4) cli_other[2] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), clisoft[2]);
+						if (i > 3) cli_versions[i+16] = stattree.InsertItem(cbuffer, cli_other[2]);
+						else cli_versions[i+16] = stattree.InsertItem(cbuffer, clisoft[2]);
+					}
+					else stattree.SetItemText(cli_versions[i+16], cbuffer);
+
+					verCount++;
+				}
+				if (verCount > 4) {
+					cbuffer.Format("%s: %i (%1.1f%%)", GetResString(IDS_STATS_OLDCLIENTS), totalOther, (double) 100 * totalOther / myStats[1]);
+					stattree.SetItemText(cli_other[2], cbuffer);
+				}
+				if (verCount < cli_lastCount[2]) for (uint32 i=0; i<(cli_lastCount[2]-verCount); i++) {
+					stattree.DeleteItem(cli_versions[cli_lastCount[2]+15-i]);
+					if ((cli_lastCount[2]+15-i) == 4) stattree.DeleteItem(cli_other[2]);
+				}
+				cli_lastCount[2] = verCount;
+			} // End Clients -> Client Software -> eDonkey Section
+
+			// CLIENTS -> CLIENT SOFTWARE -> eD HYBRID SECTION
+			if (forceUpdate || stattree.IsExpanded(clisoft[1]) || cli_lastCount[1] == 0) {				
+				uint32 verCount = 0;
+				
+				//--- find top 4 eD Hybrid client versions ---
+				uint32	currtop = 0;
+				uint32	lasttop = 0xFFFFFFFF;
+				uint32	totalOther = 0;
+				for(uint32 i=0; i<8; i++)
+				{
+					POSITION pos=clientVersionEDonkeyHybrid.GetStartPosition();
+					uint32 topver=0;
+					uint32 topcnt=0;
+					double topper=0;
+					while(pos)
+					{
+						uint16	ver;
+						uint32	cnt;
+						clientVersionEDonkeyHybrid.GetNextAssoc(pos, ver, cnt);
+						if(currtop<ver && ver<lasttop )
+						{
+							if (ver==0xFFFFFFFF) continue;
+							topper=(double)cnt/myStats[4];
+							topver=ver;
+							topcnt=cnt;
+							currtop=ver;
+						}
+					}
+					lasttop=currtop;
+					currtop=0;
+
+					if (topcnt){
+						UINT verMaj = topver/(100*10*100);
+						UINT verMin = (topver - (verMaj*100*10*100))/(100*10);
+						UINT verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
+						cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
+					}
+					else
+						continue;
+ 
+					if (i > 3) totalOther += topcnt;
+
+					if (i >= cli_lastCount[1]) {
+						if (i == 4) cli_other[1] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), clisoft[1]);
+						if (i > 3) cli_versions[i+8] = stattree.InsertItem(cbuffer, cli_other[1]);
+						else cli_versions[i+8] = stattree.InsertItem(cbuffer, clisoft[1]);
+					}
+					else stattree.SetItemText(cli_versions[i+8], cbuffer);
+
+					verCount++;
 				}
 				if (verCount > 4) {
 					cbuffer.Format("%s: %i (%1.1f%%)", GetResString(IDS_STATS_OLDCLIENTS), totalOther, (double) 100 * totalOther / myStats[4]);
@@ -1893,7 +1935,13 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			if (forceUpdate || stattree.IsExpanded(clisoft[0]) || cli_lastCount[0] == 0) {
 				uint32 verCount = 0;
 				
-				//--- find top 4 eMule client versions ---
+				//MORPH START - Added by SiRoB, Slugfiller: modid
+				CRBMap<uint16, CRBMap<CString, uint32>* > clientMods;
+
+				theApp.clientlist->GetModStatistics(&clientMods);
+				//MORPH END  - Added by SiRoB, Slugfiller: modid
+
+				//--- find top 6 eMule client versions ---
 				uint32	currtop = 0;
 				uint32	lasttop = 0xFFFFFFFF;
 				uint32	totalOther = 0;
@@ -1938,6 +1986,53 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					}
 					else stattree.SetItemText(cli_versions[i], cbuffer);
 
+
+					//MORPH START - Added by SIRoB, modID Slugfiller: modid
+					CRBMap<CString, uint32> *versionMods;
+
+					if (clientMods.Lookup(topver, versionMods)) {
+						POSITION mpos = versionMods->GetHeadPosition();
+						if (stattree.ItemHasChildren(cli_versions[i])){
+							HTREEITEM hChild; 
+							hChild = stattree.GetChildItem(cli_versions[i]);
+							while( hChild != NULL && mpos != NULL )
+							{
+								CString name;
+								uint32 count;
+								versionMods->GetNextAssoc(mpos, name, count);
+								if (name.IsEmpty())
+									name = "Official eMule";
+								cbuffer.Format("%s: %i (%1.1f%%)", name, count, (double)count/topcnt*100);
+								stattree.SetItemText(hChild, cbuffer);
+								hChild = stattree.GetNextSiblingItem( hChild );
+							}
+							while (hChild != NULL){
+								HTREEITEM hTemp = hChild;
+								hChild = stattree.GetNextSiblingItem( hChild );
+								stattree.DeleteItem(hTemp);
+							}
+						}
+						while (mpos != NULL){
+							CString name;
+							uint32 count;
+							versionMods->GetNextAssoc(mpos, name, count);
+							if (name.IsEmpty())
+								name = "Official eMule";
+							cbuffer.Format("%s: %i (%1.1f%%)", name, count, (double)count/topcnt*100);
+							stattree.InsertItem(cbuffer, cli_versions[i]);
+						}
+					}
+					else if (stattree.ItemHasChildren(cli_versions[i])){
+						HTREEITEM hChild; 
+						hChild = stattree.GetChildItem(cli_versions[i]);
+						while( hChild != NULL) {
+							HTREEITEM hTemp = hChild;
+							hChild = stattree.GetNextSiblingItem( hChild );
+							stattree.DeleteItem(hTemp);
+						}
+					}
+					//MORPH END   - Added by SiRoB, modID Slugfiller: modid
+
 					verCount++;
 				}
 				if (verCount > 6) {
@@ -1950,6 +2045,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				}
 				cli_lastCount[0] = verCount;
 
+				theApp.clientlist->ReleaseModStatistics(&clientMods);	//MORPH - Added by SiRoB - Slugfiller: modid
 			} // - End Clients -> Client Software -> eMule Section
 
 			// CLIENTS -> CLIENT SOFTWARE -> XMULE SECTION
@@ -2014,7 +2110,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				cli_lastCount[3] = verCount;
 			} // - End Clients -> Client Software -> eM Compat Section
 
-		} // - End Clients -> Client Software Section*/
+		} // - End Clients -> Client Software Section
 		// CLIENTS -> PORT SECTION
 		if (forceUpdate || stattree.IsExpanded(hcliport)) {
 			
@@ -2458,16 +2554,7 @@ void CStatisticsDlg::CreateMyTree() {
 	h_clients = stattree.InsertItem(GetResString(IDS_CLIENTS),3,3);							// Clients Section
 	cligen[5] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 		hclisoft = stattree.InsertItem(GetResString(IDS_CLIENTSOFTWARE),h_clients);				// Client Software Section
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-//			for(int i = 0; i<8; i++) clisoft[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft);
-		    clientSoft[CS_EMULE].RemoveAll();clientSoft[CS_EMULE].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_CDONKEY].RemoveAll();clientSoft[CS_CDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_XMULE].RemoveAll();clientSoft[CS_XMULE].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_SHAREAZA].RemoveAll();clientSoft[CS_SHAREAZA].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_EDONKEYHYBRID].RemoveAll();clientSoft[CS_EDONKEYHYBRID].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_EDONKEY].RemoveAll();clientSoft[CS_EDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_MLDONKEY].RemoveAll();clientSoft[CS_MLDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_UNKNOWN].RemoveAll();clientSoft[CS_UNKNOWN].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			for(int i = 0; i<8; i++) clisoft[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft);
 		hcliport = stattree.InsertItem(GetResString(IDS_PORT),h_clients);						// Client Port Section
 			for(int i = 0; i<2; i++) cliport[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hcliport);
 		
@@ -2539,36 +2626,3 @@ void CStatisticsDlg::CreateMyTree() {
 
 	// End Tree Setup
 }
-
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-// Maella -Support for tag ET_MOD_VERSION 0x55 II-
-void CStatisticsDlg::updateClientBranch(CArray<HTREEITEM>& clientArray, const ClientMap& clientMap, uint32 count){
-
-	// Check number of active subBranchs
-	while(clientArray.GetCount() < (int)clientMap.size()+1){ // +1 for root 
-		// Add branch(s)
-		clientArray.Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), clientArray[0]));
-	}
-	while(clientArray.GetCount() > (int)clientMap.size()+1){ // +1 for root
-		// Remove branch(s)
-		stattree.DeleteItem(clientArray[clientArray.GetCount()-1]);
-		clientArray.RemoveAt(clientArray.GetCount()-1);
-	}
-
-	// Update Subtree for expanded client branch
-	if(stattree.GetItemState(clientArray[0], TVIS_EXPANDED) != 0) {
-		if(clientMap.size() > 0){
-			// init branch(s)
-			int index = 0;
-			CString description;
-			for(ClientMap::const_reverse_iterator it = clientMap.rbegin(); it != clientMap.rend(); it++){
-				// Set text for all branch
-				description.Format(_T("%s: %i (%1.1f%%)"), it->first, it->second, (float)it->second*100.0f/count);
-				stattree.SetItemText(clientArray.GetAt(++index), description);
-			}
-		}
-	}
-}
-// Maella end
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-

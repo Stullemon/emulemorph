@@ -21,6 +21,7 @@ public:
 	// <-----khaos-
 	//MORPH START - Added by SiRoB, Legend Graph
 	void SetLegendLabel(CString string,int iTrend);
+	void SetBarsPlot(bool BarsPlot,int iTrend);
 	//MORPH END  - Added by SiRoB, Legend Graph
 	void SetRange(double dLower, double dUpper, int iTrend = 0);
 	void SetRanges(double dLower, double dUpper);
@@ -90,6 +91,7 @@ public:
 		// <-----khaos-
 		//MORPH START - Added by SiRoB
 		CString LegendLabel;
+		bool BarsPlot;
 		//MORPH END - Added by SiRoB
 		CList<double,double> lstPoints;
 	} PlotData_t;

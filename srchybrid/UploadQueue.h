@@ -27,17 +27,20 @@ public:
 	~CUploadQueue();
 
 	void	Process();
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+//MORPH START - Added by Yun.SF3, ZZ upload system
 	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
 	bool	RemoveFromUploadQueue(CUpDownClient* client, CString reason = NULL, bool updatewindow = true, bool earlyabort = false);
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+//MORPH END   - Added by Yun.SF3, ZZ upload system
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
 	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0);}
 
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+//MORPH START - Added by Yun.SF3, ZZ upload system
     void    UpdateDatarates();
 	uint32	GetDatarate();
+	uint32  GetToNetworkDatarate();
+//MORPH END   - Added by Yun.SF3, ZZ upload system
+
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	uint32	GetAvgRespondTime(uint8 index)	{return AvgRespondTime[index]>10 ? AvgRespondTime[index] : 1500;}
 	void	SetAvgRespondTime(uint8 index,uint32 in_AvgRespondTime)	{AvgRespondTime[index]=in_AvgRespondTime;}
@@ -46,8 +49,6 @@ public:
 	//void	SetMaxVUR(uint32 in_MaxVUR, uint32 min, uint32 max){MaxVUR=((in_MaxVUR>max)?max:((in_MaxVUR<min)?min:in_MaxVUR));}//[lovelace]
 	void	SetMaxVUR(uint32 in_MaxVUR){MaxVUR=in_MaxVUR;}
 	//MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	uint32  GetToNetworkDatarate();
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 
 	bool	CheckForTimeOver(CUpDownClient* client);
 	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
@@ -148,9 +149,15 @@ private:
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 	void	ReSortUploadSlots(bool force = false);
 
-	CList<uint64,uint64> avarage_dr_list;
-	CList<uint64,uint64> avarage_friend_dr_list;
-	CList<DWORD,DWORD> avarage_tick_list;
+	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	typedef struct TransferredData {
+		uint32	datalen;
+		DWORD	timestamp;
+	};
+	CList<TransferredData,TransferredData> avarage_dr_list;
+	CList<TransferredData,TransferredData> avarage_friend_dr_list;
+	//CList<DWORD,DWORD> avarage_tick_list;
+	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 
@@ -190,9 +197,9 @@ private:
 	bool	lastupslotHighID; // VQB lowID alternation
 
 	// By BadWolf - Accurate Speed Measurement
-	//MORPH START - Changed by SiRoB, ZZ Upload system 20030818-1923
-	CList<uint64,uint64>	m_AvarageUDRO_list;
-	//MORPH END - Changed by SiRoB, ZZ Upload system 20030818-1923
+	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	CList<TransferredData,TransferredData>	m_AvarageUDRO_list;
+	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint32	sumavgUDRO;
 	// END By BadWolf - Accurate Speed Measurement	
 

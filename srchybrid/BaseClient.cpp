@@ -67,10 +67,6 @@ CUpDownClient::CUpDownClient(CClientReqSocket* sender)
 	socket = sender;
 	reqfile = NULL;
 	Init();
-
-	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	theApp.clientlist->AddClientType(GetClientSoft(), GetClientSoftVer());
-	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 }
 
 CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid,uint32 in_serverip, uint16 in_serverport, bool ed2kID)
@@ -221,7 +217,9 @@ void CUpDownClient::Init()
 	m_fNoViewSharedFiles = 0;
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
-
+	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
+	m_strModVersion.Empty();
+	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 	// khaos::kmod+
 	m_iLastSwapAttempt = 0;
 	m_iLastActualSwap = 0;
@@ -229,20 +227,12 @@ void CUpDownClient::Init()
 	// khaos::kmod-
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	m_dwLastCheckedForEvictTick = 0;
-    	//MORPH END   - Added by SiRoB, ZZ Upload System
-	//MORPH STRAT - Added by SiRoB, Better Download & Upload rate calcul
-	m_AvarageDDRlastRemovedHeadTimestamp = 0;
-	m_AvarageUDRlastRemovedHeadTimestamp = 0;
-	//MORPH END   - Added by SiRoB, Better Download & Upload rate calcul
-
+   	//MORPH END   - Added by SiRoB, ZZ Upload System
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session
 }
 
 CUpDownClient::~CUpDownClient(){
-	//MORPH START - Added by IceCream, Maella -Support for tag ET_MOD_VERSION 
-	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientSoftVer());
-	//MORPH END  - Added by IceCream, Maella -Support for tag ET_MOD_VERSION 
 	theApp.clientlist->RemoveClient(this);
 	if (m_Friend){
 		//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
@@ -506,7 +496,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strModVersion = _T("ModID=<Unknwon>");
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat("  Mod=%s", m_strModVersion);
-				
 				break;
 			//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 			case CT_EMULE_UDPPORTS:
@@ -1407,9 +1396,6 @@ void CUpDownClient::ReGetClientSoft()
 		m_clientSoft = SO_UNKNOWN;
 		return;
 	}
-	//MORPH START - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
-	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientSoftVer());
-	//MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 
 	int iHashType = GetHashType();
 	if (iHashType == SO_EMULE){
@@ -1575,13 +1561,11 @@ void CUpDownClient::ReGetClientSoft()
 	}
 //MORPH START - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 suite:
-	if(m_strModVersion.IsEmpty() == false){
+	if (m_strModVersion.IsEmpty() == false){
 		m_strClientSoftware += _T(" [");
 		m_strClientSoftware += m_strModVersion;
 		m_strClientSoftware += _T("]");
 	}	
-
-	theApp.clientlist->AddClientType(GetClientSoft(), GetClientSoftVer());
 //MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 }
 

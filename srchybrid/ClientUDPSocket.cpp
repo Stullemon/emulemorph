@@ -48,6 +48,8 @@ CClientUDPSocket::CClientUDPSocket()
 
 CClientUDPSocket::~CClientUDPSocket()
 {
+    theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this); // ZZ:UploadBandWithThrottler (UDP)
+
 	POSITION pos = controlpacket_queue.GetHeadPosition();
 	while (pos){
 		UDPPack* p = controlpacket_queue.GetNext(pos);
@@ -348,8 +350,26 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 			AddDebugLogLine(false, _T("Error: Client UDP socket, error on send event: %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
+
+// ZZ:UploadBandWithThrottler (UDP) -->
+    sendLocker.Lock();
 	m_bWouldBlock = false;
-	while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy()){
+
+    if(!controlpacket_queue.IsEmpty()) {
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    }
+    sendLocker.Unlock();
+// <-- ZZ:UploadBandWithThrottler (UDP)
+}
+
+SocketSentBytes CClientUDPSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket) { // ZZ:UploadBandWithThrottler (UDP)
+// ZZ:UploadBandWithThrottler (UDP) -->
+    sendLocker.Lock();
+
+    uint32 sentBytes = 0;
+// <-- ZZ:UploadBandWithThrottler (UDP)
+
+	while (!controlpacket_queue.IsEmpty() && !IsBusy() && sentBytes < maxNumberOfBytesToSend){ // ZZ:UploadBandWithThrottler (UDP)
 		UDPPack* cur_packet = controlpacket_queue.GetHead();
 		if( GetTickCount() - cur_packet->dwTime < UDPMAXQUEUETIME )
 		{
@@ -357,6 +377,8 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 			memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 			if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
+                sentBytes += cur_packet->packet->size+2; // ZZ:UploadBandWithThrottler (UDP)
+
 				controlpacket_queue.RemoveHead();
 				delete cur_packet->packet;
 				delete cur_packet;
@@ -370,6 +392,16 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 			delete cur_packet;
 		}
 	}
+
+// ZZ:UploadBandWithThrottler (UDP) -->
+    if(!IsBusy() && !controlpacket_queue.IsEmpty()) {
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+    }
+    sendLocker.Unlock();
+
+    SocketSentBytes returnVal = { true, 0, sentBytes };
+    return returnVal;
+// <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
 int CClientUDPSocket::SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort){
@@ -394,22 +426,14 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 	newpending->nPort = nPort;
 	newpending->packet = packet;
 	newpending->dwTime = GetTickCount();
-	if (IsBusy()){
+// ZZ:UploadBandWithThrottler (UDP) -->
+    sendLocker.Lock();
 		controlpacket_queue.AddTail(newpending);
+    sendLocker.Unlock();
+
+    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
 		return true;
-	}
-	char* sendbuffer = new char[packet->size+2];
-	memcpy(sendbuffer,packet->GetUDPHeader(),2);
-	memcpy(sendbuffer+2,packet->pBuffer,packet->size);
-	if (SendTo(sendbuffer, packet->size+2, dwIP, nPort)){
-		controlpacket_queue.AddTail(newpending);
-	}
-	else{
-		delete newpending->packet;
-		delete newpending;
-	}
-	delete[] sendbuffer;
-	return true;
+// <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
 bool CClientUDPSocket::Create(){

@@ -21,6 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				InlineFunctionExpansion="0"
 				AdditionalIncludeDirectories=".,..;..\id3lib\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1"
 				MinimalRebuild="TRUE"
@@ -114,6 +115,7 @@
 				AdditionalOptions="/fixed:no"
 				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
 				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="wsock32.lib"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -400,6 +402,9 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="TimeTick.cpp">
 			</File>
 			<File
 				RelativePath="UDPSocket.cpp">
@@ -699,6 +704,12 @@
 			</File>
 			<File
 				RelativePath="Stdafx.h">
+			</File>
+			<File
+				RelativePath="ThrottledSocket.h">
+			</File>
+			<File
+				RelativePath="TimeTick.h">
 			</File>
 			<File
 				RelativePath="Types.h">

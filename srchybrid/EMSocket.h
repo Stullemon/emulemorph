@@ -16,7 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "AsyncSocketEx.h"
-#include "OtherFunctions.h" //MORPH - Added by SiRoB, ZZ Upload
+#include "OtherFunctions.h"
+#include "ThrottledSocket.h" // ZZ:UploadBandWithThrottler (UDP)
 
 class CAsyncProxySocketLayer;
 class Packet;
@@ -30,25 +31,19 @@ class Packet;
 
 #define PACKET_HEADER_SIZE	6
 
-struct SocketSentBytes {
-    bool    success;
-	uint32	sentBytesStandardPackets;
-	uint32	sentBytesControlPackets;
-};
-
 struct StandardPacketQueueEntry {
     uint32 actualPayloadSize;
     Packet* packet;
 };
 
-class CEMSocket : public CAsyncSocketEx
+class CEMSocket : public CAsyncSocketEx, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
 {
-    friend class UploadBandwidthThrottler;
+//    friend class UploadBandwidthThrottler;
 public:
 	CEMSocket(void);
 	~CEMSocket(void);
 
-	void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
     bool    HasQueues();
     bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
@@ -75,6 +70,9 @@ public:
     uint64 GetSentPayloadSinceLastCallAndReset();
     void TruncateQueues();
 
+    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
+
+    uint32	GetNeededBytes();
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -95,17 +93,11 @@ protected:
 	bool	m_ProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 
-	//MORPH - Changed by SiRoB, ZZ Upload
-    /*
-	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
-	*/
-    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, bool onlyAllowedToSendControlPacket = false);
-
 private:
 	void	ClearQueues();	
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
 
-	uint32	GetNeededBytes(); //MORPH - Added by SiRoB, ZZ Upload
+    uint32 GetNextFragSize(uint32 current, uint32 minFragSize);
 
 	// Download (pseudo) rate control	
 	uint32	downloadLimit;
@@ -139,9 +131,9 @@ private:
     uint64 m_numberOfSentBytesControlPacket;
     bool m_currentPackageIsFromPartFile;
 
-	bool	m_bAccelerateUpload; //MORPH - Added by SiRoB, ZZ Upload
+	bool	m_bAccelerateUpload;
     DWORD lastCalledSend;
-	uint32	lastFinishedStandard; //MORPH - Added by SiRoB, ZZ Upload
+	uint32	lastFinishedStandard;
 
     //void StoppedSendSoUpdateStats();
     //void CleanSendLatencyList();
@@ -153,4 +145,6 @@ private:
 
     uint32 m_actualPayloadSize;
     uint32 m_actualPayloadSizeSent;
+
+    boolean m_bBusy;
 };

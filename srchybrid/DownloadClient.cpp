@@ -1193,7 +1193,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 
 	// Patch By BadWolf - Accurate datarate Calculation
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	//MORPH START - Modified by SiRoB, Better Download rate calcul
+	//MORPH START - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint32 cur_tick = ::GetTickCount();
     if(m_nDownDataRateMS > 0) {
 		TransferredData newitem = {m_nDownDataRateMS,cur_tick};
@@ -1203,21 +1203,25 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp)> 30*1000){
-			m_AvarageDDRlastRemovedHeadTimestamp = m_AvarageDDR_list.GetHead().timestamp;
+		if(m_AvarageDDR_list.GetCount() > 60000 / (1 + cur_tick - m_AvarageDDR_list.GetHead().timestamp) ||
+			(cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000) {
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		}else
 			break;
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
-		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - (m_AvarageDDRlastRemovedHeadTimestamp?m_AvarageDDRlastRemovedHeadTimestamp:m_dwDownStartTime);
-		m_nDownDatarate = (1000 * m_nSumForAvgDownDataRate) / ((dwDuration>1000)?dwDuration:1000);
+		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
+		if(dwDuration<1000) dwDuration = 30000;
+		if (m_AvarageDDR_list.GetCount() == 1)
+			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / dwDuration;
+		else
+			m_nDownDatarate = ((m_nSumForAvgDownDataRate - m_AvarageDDR_list.GetHead().datalen)*1000) / dwDuration;
 	}else
 		m_nDownDatarate = 0;
 	
 	UpdateDisplayedInfo();
 
-	//MORPH END   - Modified by SiRoB, Better Download rate calcul
+	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 
 	if ((::GetTickCount() - m_dwLastBlockReceived) > DOWNLOADTIMEOUT){
 		if (!GetSentCancelTransfer()){

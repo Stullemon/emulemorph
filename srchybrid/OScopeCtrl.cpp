@@ -86,6 +86,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 		// <-----khaos-
 		//MORPH START - Added by SiRoB, Legend Graph
 		m_PlotData[i].LegendLabel.Format("Legend %i",i);
+		m_PlotData[i].BarsPlot = false;
 		//MORPH END - Added by SiRoB, Legend Graph
 
 	}
@@ -227,6 +228,11 @@ void COScopeCtrl::SetTrendRatio(int iTrend, unsigned int iRatio)
 void COScopeCtrl::SetLegendLabel(CString string, int iTrend)
 {
 	m_PlotData[iTrend].LegendLabel = string;
+	InvalidateCtrl(false);
+}
+void COScopeCtrl::SetBarsPlot(bool BarsPlot, int iTrend)
+{
+	m_PlotData[iTrend].BarsPlot = BarsPlot;
 	InvalidateCtrl(false);
 }
 //MORPH END - Added by SiRoB, Legend Graph
@@ -762,7 +768,7 @@ void COScopeCtrl::DrawPoint()
 			ScrollRect = m_rectPlot;
 			ScrollRect.right ++;
 			m_dcPlot.ScrollDC(-m_nShiftPixels, 0, (LPCRECT)&ScrollRect, (LPCRECT)&ScrollRect, NULL, NULL);
-			
+
 			// establish a rectangle over the right side of plot
 			// which now needs to be cleaned up proir to adding the new point
 			rectCleanUp = m_rectPlot;
@@ -795,6 +801,7 @@ void COScopeCtrl::DrawPoint()
 			currY = m_rectPlot.bottom -
 				(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			m_PlotData[iTrend].nPrevY = currY;
+			/*
 			if(abs(prevX - currX) > abs(prevY - currY))
 			{
 				currX += prevX - currX>0 ? -1 : 1;
@@ -803,8 +810,9 @@ void COScopeCtrl::DrawPoint()
 			{
 				currY += prevY - currY>0 ? -1 : 1;
 			}
+			*/
 			m_dcPlot.LineTo(currX - 1, currY);
-			if(drawBars)
+			if(drawBars || m_PlotData[iTrend].BarsPlot)
 				m_dcPlot.LineTo(currX - 1, m_rectPlot.bottom);
 			// m_dcPlot.Rectangle(currX-1,currY,currX-1,m_rectPlot.bottom);
 			

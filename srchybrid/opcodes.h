@@ -79,7 +79,7 @@
 #define RSAKEYSIZE				384		//384 bits
 #define	MAX_SOURCES_FILE_SOFT	500
 #define	MAX_SOURCES_FILE_UDP	50
-#define SESSIONMAXTRANS			(9.3*1024*1024) // 9.3 Mbytes. "Try to send complete chunks" always sends this amount of data
+#define SESSIONMAXTRANS			(10*1024*1024) // 10 MBytes. "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
 // MOD Note: end
 
@@ -100,8 +100,9 @@
 #define	MAX_PURGEQUEUETIME		HR2MS(1) 
 #define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
 #define CONNECTION_LATENCY		22050	// latency for responces
-#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   1000
+#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   3000
 #define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
+#define MINWAIT_BEFORE_CALCULATE_DL_RATE        1000
 #define MAXAVERAGETIME			SEC2MS(40) //millisecs
 #define CLIENTBANTIME			HR2MS(2)	// 2h
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
@@ -110,9 +111,6 @@
 #define DISKSPACERECHECKTIME	MIN2MS(15)	// SLUGFILLER: checkDiskspace
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
-//MOPRH START - Added by SiRoB, ZZ Upload System 20030824-2238
-#define SESSIONAMOUNT			(10*1024*1024) // 10 Mbytes. "Try to send complete chunks" always sends this amount of data
-//MOPRH END   - Added by SiRoB, ZZ Upload System 20030824-2238
 #define	MAXFRAGSIZE				1300
 #define EMBLOCKSIZE				184320
 #define OP_EDONKEYHEADER		0xE3

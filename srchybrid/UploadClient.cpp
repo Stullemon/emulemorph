@@ -799,7 +799,7 @@ uint32 CUpDownClient::SendBlockData(){
 			bool useChunkLimit = false; // PENDING: Get from prefs, or enforce?
 
 			bool wasRemoved = false;
-			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONAMOUNT && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
+			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONMAXTRANS && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
 				m_dwLastCheckedForEvictTick = curTick;
 				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
 				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
@@ -808,7 +808,7 @@ uint32 CUpDownClient::SendBlockData(){
 				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 			}
 
-			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONAMOUNT > m_curSessionAmountNumber) {
+			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONMAXTRANS > m_curSessionAmountNumber) {
 				// Should we end this upload?
 
 				//EastShare Start - added by AndCycle, Pay Back First
@@ -852,21 +852,23 @@ uint32 CUpDownClient::SendBlockData(){
 			
 	// remove to old values in list
 	while (m_AvarageUDR_list.GetCount() > 0)
-		if ((curTick - m_AvarageUDR_list.GetHead().timestamp) > 30*1000) {
+		if (m_AvarageUDR_list.GetCount() > 60000 / (1 + curTick - m_AvarageUDR_list.GetHead().timestamp) ||
+			(curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
 			// keep sum of all values in list up to date
-			m_AvarageUDRlastRemovedHeadTimestamp = m_AvarageUDR_list.GetHead().timestamp;
 			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else
 			break;
 
 	// Calculate average speed for this slot
     if(m_AvarageUDR_list.GetCount() > 0) {
-        DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - (m_AvarageUDRlastRemovedHeadTimestamp?m_AvarageUDRlastRemovedHeadTimestamp:m_dwUploadTime);
-		m_nUpDatarate = (1000 * sumavgUDR) / ((dwDuration>1000)?dwDuration:1000);
-	} else {
-		// not enough values to calculate trustworthy speed. Use -1 to tell this
+		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
+		if (dwDuration<1000) dwDuration = 30000;
+		if(m_AvarageUDR_list.GetCount() == 1)
+			m_nUpDatarate = (sumavgUDR*1000) / dwDuration;
+		else
+			m_nUpDatarate = ((sumavgUDR - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
+	} else
         m_nUpDatarate = 0;
-	}
 	//MORPH END   - Modified by SiRoB, Better Upload rate calcul
 
 	// Check if it's time to update the display.

@@ -472,7 +472,7 @@ void CKnownFile::AssertValid() const
 
 	//MORPH - Added by SiRoB, Keep permission flag	
 	// Mighty Knife: Community visible filelist
-	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE || m_iPermissions == PERM_COMMUNITY);
+	//ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE || m_iPermissions == PERM_COMMUNITY);
 	// [end] Mighty Knife
 
 	CHECK_BOOL(m_bAutoUpPriority);

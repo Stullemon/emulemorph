@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "Loggable.h"
+#include "UploadBandwidthThrottler.h" // ZZ:UploadBandWithThrottler (UDP)
 
 class Packet;
 
@@ -30,7 +31,7 @@ struct UDPPack
 };
 #pragma pack()
 
-class CClientUDPSocket : public CAsyncSocket, public CLoggable
+class CClientUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 public:
 	CClientUDPSocket();
@@ -38,6 +39,7 @@ public:
 
 	bool	Create();
 	bool	SendPacket(Packet* packet, uint32 dwIP, uint16 nPort);
+    SocketSentBytes  Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket); // ZZ:UploadBandWithThrottler (UDP)
 	bool	IsBusy() const { return m_bWouldBlock; }
 
 protected:
@@ -51,4 +53,6 @@ private:
 	bool	m_bWouldBlock;
 
 	CTypedPtrList<CPtrList, UDPPack*> controlpacket_queue;
+
+    CCriticalSection sendLocker; // ZZ:UploadBandWithThrottler (UDP)
 };

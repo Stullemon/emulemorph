@@ -139,7 +139,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 	// check the client ident status
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 		// bad guy - no credits for you
-		return 1;
+		return m_fLastScoreRatio = 1;
 	}
 
 	//Morph Start - Modified by AndCycle, reduce a little CPU usage for ratio count
@@ -675,11 +675,13 @@ void CClientCredits::InitalizeIdent(){
 		memset(m_abyPublicKey,0,80); // for debugging
 		m_nPublicKeyLen = 0;
 		IdentState = IS_NOTAVAILABLE;
+		m_bCheckScoreRatio = true; //Morph - Added by SiRoB, reduce a little CPU usage for ratio count (Hotfix)
 	}
 	else{
 		m_nPublicKeyLen = m_pCredits->nKeySize;
 		memcpy(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
 		IdentState = IS_IDNEEDED;
+		m_bCheckScoreRatio = true; //Morph - Added by SiRoB, reduce a little CPU usage for ratio count (Hotfix)
 	}
 	m_dwCryptRndChallengeFor = 0;
 	m_dwCryptRndChallengeFrom = 0;
@@ -703,6 +705,7 @@ void CClientCredits::Verified(uint32 dwForIP){
 		}
 	}
 	IdentState = IS_IDENTIFIED;
+	m_bCheckScoreRatio = true; //Morph - Added by SiRoB, reduce a little CPU usage for ratio count (Hotfix)
 }
 
 bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verified Public key cannot change, use only if there is not public key yet
@@ -711,6 +714,7 @@ bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verif
 	memcpy(m_abyPublicKey,pachIdent, nIdentLen);
 	m_nPublicKeyLen = nIdentLen;
 	IdentState = IS_IDNEEDED;
+	m_bCheckScoreRatio = true; //Morph - Added by SiRoB, reduce a little CPU usage for ratio count (Hotfix)
 	return true;
 }
 

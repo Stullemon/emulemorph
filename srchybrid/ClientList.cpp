@@ -99,12 +99,9 @@ void CClientList::GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, u
 				break;
 			case SO_EMULE   :
 			case SO_OLDEMULE:
-				//MORPH START - Moved by SiRoB, Due to Maella -Support for tag ET_MOD_VERSION 0x55 II- in client software tree
-				++stats[2];
-				//MORPH END   - Moved by SiRoB, Due to Maella -Support for tag ET_MOD_VERSION 0x55 II- in client software tree
 				if(clientVersionEMule)
 				{
-					//++stats[2];
+					++stats[2];
 					uint8 version = cur_client->GetMuleVersion();
 					if (version == 0xFF || version == 0x66 || version==0x69 || version==0x90 || version==0x33 || version==0x60)
 						continue;
@@ -156,6 +153,58 @@ void CClientList::GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, u
 }
 // <-----khaos-
 
+//MOPRH START - Added by SiRoB, Slugfiller: modid
+void CClientList::GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods){
+	if (!clientMods)
+		return;
+	clientMods->RemoveAll();
+	
+	// [TPT] Code improvement
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL;) {		
+		CUpDownClient* cur_client =	list.GetNext(pos);
+
+		switch (cur_client->GetClientSoft()) {
+		case SO_EMULE   :
+		case SO_OLDEMULE:
+			break;
+		default:
+			continue;
+		}
+
+		CRBMap<CString, uint32> *versionMods;
+
+		if (!clientMods->Lookup(cur_client->GetVersion(), versionMods)){
+			versionMods = new CRBMap<CString, uint32>;
+			versionMods->RemoveAll();
+			clientMods->SetAt(cur_client->GetVersion(), versionMods);
+		}
+
+		uint32 count;
+
+		if (!versionMods->Lookup(cur_client->GetClientModVer(), count))
+			count = 1;
+		else
+			count++;
+
+		versionMods->SetAt(cur_client->GetClientModVer(), count);
+	}
+	// [TPT] end
+}
+
+void CClientList::ReleaseModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods){
+	if (!clientMods)
+		return;
+	POSITION pos = clientMods->GetHeadPosition();
+	while(pos != NULL)
+	{
+		uint16 version;
+		CRBMap<CString, uint32> *versionMods;
+		clientMods->GetNextAssoc(pos, version, versionMods);
+		delete versionMods;
+	}
+	clientMods->RemoveAll();
+}
+//MOPRH END - Added by SiRoB, modID Slugfiller: modid
 
 void CClientList::AddClient(CUpDownClient* toadd, bool bSkipDupTest)
 {
@@ -543,156 +592,6 @@ CDeletedClient::CDeletedClient(CUpDownClient* pClient)
 	PORTANDHASH porthash = { pClient->GetUserPort(), pClient->Credits()};
 	m_ItemsList.Add(porthash);
 }
-
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-void CClientList::AddClientType(EClientSoftware clientSoft, const CString& description){
-	// Update in real time the maps
-	switch(clientSoft){
-		case SO_EDONKEY:{
-				ClientMap::iterator it = m_eDonkeyMap.find(description);
-				if(it == m_eDonkeyMap.end())
-					m_eDonkeyMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		case SO_EDONKEYHYBRID:{
-				ClientMap::iterator it = m_eDonkeyHybridMap.find(description);
-				if(it == m_eDonkeyHybridMap.end())
-					m_eDonkeyHybridMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		case SO_EMULE:{
-				ClientMap::iterator it = m_eMuleMap.find(description);
-				if(it == m_eMuleMap.end())
-					m_eMuleMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		case SO_CDONKEY:{
-				ClientMap::iterator it = m_cDonkeyMap.find(description);
-				if(it == m_cDonkeyMap.end())
-					m_cDonkeyMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		case SO_XMULE:{
-				ClientMap::iterator it = m_lMuleMap.find(description);
-				if(it == m_lMuleMap.end())
-					m_lMuleMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		case SO_SHAREAZA:{
-				ClientMap::iterator it = m_shareazaMap.find(description);
-				if(it == m_shareazaMap.end())
-					m_shareazaMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		case SO_MLDONKEY:{
-				ClientMap::iterator it = m_oldMlDonkeyMap.find(description);
-				if(it == m_oldMlDonkeyMap.end())
-					m_oldMlDonkeyMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break;
-		default:{ // Don't forget to add here new type of clients
-				ClientMap::iterator it = m_unknownMap.find(description);
-				if(it == m_unknownMap.end())
-					m_unknownMap[description] = 1; // First inscription
-				else
-					it->second++;
-			}
-			break; 
-	}
-}
-
-void CClientList::RemoveClientType(EClientSoftware clientSoft, const CString& description){
-	// Update in real time the maps
-	switch(clientSoft){
-		case SO_EDONKEY:{
-				ClientMap::iterator it = m_eDonkeyMap.find(description);
-				if(it != m_eDonkeyMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_eDonkeyMap.erase(it);
-			}
-			break;
-		case SO_EDONKEYHYBRID:{
-				ClientMap::iterator it = m_eDonkeyHybridMap.find(description);
-				if(it != m_eDonkeyHybridMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_eDonkeyHybridMap.erase(it);
-			}
-			break;
-		case SO_EMULE:{
-				ClientMap::iterator it = m_eMuleMap.find(description);
-				if(it != m_eMuleMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_eMuleMap.erase(it);
-			}
-			break;
-		case SO_CDONKEY:{
-				ClientMap::iterator it = m_cDonkeyMap.find(description);
-				if(it != m_cDonkeyMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_cDonkeyMap.erase(it);
-			}
-			break;
-		case SO_XMULE:{
-				ClientMap::iterator it = m_lMuleMap.find(description);
-				if(it != m_lMuleMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_lMuleMap.erase(it);
-			}
-			break;
-		case SO_SHAREAZA:{
-				ClientMap::iterator it = m_shareazaMap.find(description);
-				if(it != m_shareazaMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_shareazaMap.erase(it);
-			}
-			break;
-		case SO_MLDONKEY:{
-				ClientMap::iterator it = m_oldMlDonkeyMap.find(description);
-				if(it != m_oldMlDonkeyMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_oldMlDonkeyMap.erase(it);
-			}
-			break;
-		default:{  // Don't forget to add here new type of clients
-				ClientMap::iterator it = m_unknownMap.find(description);
-				if(it != m_unknownMap.end())
-					if(it->second > 1)
-						it->second--;
-					else
-						m_unknownMap.erase(it);
-			}
-			break;
-	}
-}
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 
 //EastShare Start - added by AndCycle, IP to Country
 void CClientList::ResetIP2Country(){

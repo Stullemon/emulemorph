@@ -70,6 +70,9 @@
 */
 #pragma once
 
+#include <Ws2tcpip.h>       // UDPing - raw socket and TTL setting support
+#include "TimeTick.h"
+
 #define DEFAULT_TTL 64
 
 #define IP_STATUS_BASE 11000
@@ -143,29 +146,96 @@ typedef DWORD WINAPI IcmpSendEcho(
 struct PingStatus {
     bool success;
     DWORD status;
-    u_long delay;
+    float delay;
     uint32 destinationAddress;
     uint32 ttl;
 
     DWORD error;
 };
 
+// UDPing - required constants and structures -->
+
+// ICMP packet types
+#define ICMP_ECHO_REPLY 0
+#define ICMP_DEST_UNREACH 3
+#define ICMP_TTL_EXPIRE 11
+#define ICMP_ECHO_REQUEST 8
+
+// Minimum ICMP packet size, in bytes
+#define ICMP_MIN 8
+
+#ifdef _MSC_VER
+// The following two structures need to be packed tightly, but unlike
+// Borland C++, Microsoft C++ does not do this by default.
+#pragma pack(1)
+#endif
+
+// The IP header
+struct IPHeader {
+    BYTE h_len:4;           // Length of the header in dwords
+    BYTE version:4;         // Version of IP
+    BYTE tos;               // Type of service
+    USHORT total_len;       // Length of the packet in dwords
+    USHORT ident;           // unique identifier
+    USHORT flags;           // Flags
+    BYTE ttl;               // Time to live
+    BYTE proto;             // Protocol number (TCP, UDP etc)
+    USHORT checksum;        // IP checksum
+    ULONG source_ip;
+    ULONG dest_ip;
+};
+
+// ICMP header for DEST_UNREACH and TTL_EXPIRE replys
+struct ICMPHeader {
+    BYTE type;          // ICMP packet type
+    BYTE code;          // Type sub code
+    USHORT checksum;
+    BYTE unused[4];     // may be used for various data, we don't need it
+    IPHeader hdrsent;   // original IP header
+    union {
+        BYTE data[8];   // data next to IP header (UDP header)
+        struct {
+            USHORT src_port;
+            USHORT dest_port;
+            USHORT length;
+            USHORT checksum;
+        } UDP;
+    };
+};
+
+#ifdef _MSC_VER
+#pragma pack()
+#endif
+
+#define UDP_PORT 33434  // UDP/TCP traceroute port by iana.org - should not be filtered by routers/ISP
+
+// UDPing - required constants and structures end <--
+
+
 class Pinger {
 public:
     Pinger();
     ~Pinger();
 
-    PingStatus Ping(uint32 lAddr, uint32 ttl = DEFAULT_TTL, bool doLog = false);
+    PingStatus Ping(uint32 lAddr, uint32 ttl = DEFAULT_TTL, bool doLog = false, bool useUdp = false);
+
     void PIcmpErr(int nICMPErr);
 
 private:
     void DisplayErr(int nWSAErr);
 
+    bool udpStarted;
+
     IcmpCreateFile* lpfnIcmpCreateFile;
     IcmpCloseHandle* lpfnIcmpCloseHandle;
     IcmpSendEcho* lpfnIcmpSendEcho;
+    PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog);
+    PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog);
 
     HANDLE hICMP;
     HMODULE hICMP_DLL; // PENDING: was HANDLE
     IPINFO stIPInfo;
+
+    SOCKET us;          // UDP socket to send requests
+    SOCKET is;          // raw ICMP socket to catch responses
 };

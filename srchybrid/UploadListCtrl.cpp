@@ -445,10 +445,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					{//Morph - modified by AndCycle, upRemain
 						sint32 timeleft;
 						if(client->GetDatarate() == 0)	timeleft = -1;
-						else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONAMOUNT)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
-						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONAMOUNT) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+						else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						else if(file)
-							if (file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetQueueSessionUp())/client->GetDatarate();
+							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
 							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						Sbuffer.Format("%s (+%s)", CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain

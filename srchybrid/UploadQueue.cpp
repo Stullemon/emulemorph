@@ -153,7 +153,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	){
 
 		// Remove client from ul list to make room for higher/same prio client
-		AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(SESSIONAMOUNT*max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)), (sint32)client->GetQueueSessionPayloadUp()-SESSIONAMOUNT*(max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)));
+		AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(SESSIONMAXTRANS*max(1, client->GetQueueSessionPayloadUp()/SESSIONMAXTRANS)), (sint32)client->GetQueueSessionPayloadUp()-SESSIONMAXTRANS*(max(1, client->GetQueueSessionPayloadUp()/SESSIONMAXTRANS)));
 
 		theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULSUCCESS));
 		theApp.uploadqueue->AddClientToQueue(client,true);
@@ -265,16 +265,6 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		) &&
 		(!rightClient->IsBanned()) && // don't allow banned client to be best
 		IsDownloading(rightClient) == false // don't allow downloading clients to be best
-		//EastShare Start- added by AndCycle, dont allow identificaion failed client get upload?
-		&& 
-		!(
-			(
-				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDFAILED || 
-				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDBADGUY || 
-				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDNEEDED
-			) && theApp.clientcredits->CryptoAvailable()
-		)
-		//EastShare End- added by AndCycle, dont allow identificaion failed client get upload?
 	) {
 		return true;
 	} else {
@@ -648,8 +638,9 @@ void CUploadQueue::Process() {
 	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
 
 	// How many slots should be open? Trickle slots included (at least 2 trickles, 30% of total, and the slots are expected to use UPLOAD_CLIENT_REALISTIC_AVERAGE_DATARATE in average, whichever number is largest)
-	sint32 wantedNumberOfTotalUploads = max((uint32)(estadatarate/UPLOAD_CLIENT_DATARATE), m_MaxActiveClientsShortTime + MINNUMBEROFTRICKLEUPLOADS);
-	wantedNumberOfTotalUploads = max(wantedNumberOfTotalUploads, m_MaxActiveClientsShortTime*1.3);
+	//sint32 wantedNumberOfTotalUploads = max((uint32)(estadatarate/UPLOAD_CLIENT_DATARATE), m_MaxActiveClientsShortTime + MINNUMBEROFTRICKLEUPLOADS);
+	//wantedNumberOfTotalUploads = max(wantedNumberOfTotalUploads, m_MaxActiveClientsShortTime*1.3);
+	sint32 wantedNumberOfTotalUploads = m_MaxActiveClientsShortTime;
 
 	// PENDING: Each 3 seconds
 	if(curTick - m_dwLastCheckedForHighPrioClient >= 3*1000) {
@@ -715,52 +706,78 @@ void CUploadQueue::Process() {
 			// the client is allowed to keep its waiting position in the queue, since it was pre-empted
 			AddClientToQueue(lastClient, true, true);
 		}
-	} else if(theApp.lastCommonRouteFinder->AcceptNewClient() &&
-			(
-				highestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetCount()
-			)
-			) {
-		// we have given all slots bandwidth this round, and couldn't have given them more.
-		if(m_FirstRanOutOfSlotsTick == 0) {
-			m_FirstRanOutOfSlotsTick = curTick;
-		}
+	} else if(theApp.lastCommonRouteFinder->AcceptNewClient()) {
+		if(highestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetCount()) {
+			// we have given all slots bandwidth this round, and couldn't have given them more.
+			if(m_FirstRanOutOfSlotsTick == 0) {
+				m_FirstRanOutOfSlotsTick = curTick;
+			} else if(curTick-m_FirstRanOutOfSlotsTick > 500 && AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0
+                && (curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)
+            ) {
+				// open an extra slot so that we always have enough trickle slots
+				// There's not enough open uploads. Open another one.
+				AddUpNextClient();
 
-		// open an extra slot so that we always have enough trickle slots
-		if(m_FirstRanOutOfSlotsTick != 0 && curTick-m_FirstRanOutOfSlotsTick > 500 &&
-           AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0 /*&&
-           (curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)*/
-		) {
-			// There's not enough open uploads. Open another one.
-			AddUpNextClient();
-
+				m_FirstRanOutOfSlotsTick = 0;
+			}
+		} else {
 			m_FirstRanOutOfSlotsTick = 0;
 		}
-	} else {
-		m_FirstRanOutOfSlotsTick = 0;
-	}
+    } else {
+        m_FirstRanOutOfSlotsTick = 0;
+    }
 
 	// Save used bandwidth for speed calculations
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
-	avarage_dr_list.AddTail(sentBytes);
-	m_avarage_dr_sum += sentBytes;
-
-	uint64 sentBytesExcludingOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesExcludingOverheadSinceLastCallAndReset();
-	m_AvarageUDRO_list.AddTail(sentBytesExcludingOverhead);
-	sumavgUDRO += sentBytesExcludingOverhead;
-
-	avarage_friend_dr_list.AddTail(theApp.stat_sessionSentBytesToFriend);
-
+	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	if (sentBytes>0) {
+		TransferredData newitem = {sentBytes,curTick};
+		avarage_dr_list.AddTail(newitem);
+		m_avarage_dr_sum += sentBytes;
+	}
+	
+	uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
+	if (sentBytesOverhead>0) {
+		TransferredData newitem = {sentBytesOverhead,curTick};
+		m_AvarageUDRO_list.AddTail(newitem);
+		sumavgUDRO += sentBytesOverhead;
+	}
+	
+	TransferredData newitem = {theApp.stat_sessionSentBytesToFriend,curTick};
+	avarage_friend_dr_list.AddTail(newitem);
+	
 	// Save time beetween each speed snapshot
-	avarage_tick_list.AddTail(curTick);
+	//avarage_tick_list.AddTail(curTick);
 
+	/*
 	// don't save more than 30 secs of data
 	while(avarage_tick_list.GetCount() > 3 && ::GetTickCount()-avarage_tick_list.GetHead() > 30*1000) {
    		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		sumavgUDRO -= m_AvarageUDRO_list.RemoveHead();
 		avarage_friend_dr_list.RemoveHead();
 		avarage_tick_list.RemoveHead();
-	}
+	}*/
+	
+	while(avarage_dr_list.GetCount() > 0)
+		if (avarage_dr_list.GetCount() > 60000 / (1 + curTick - avarage_dr_list.GetHead().timestamp) ||
+			(curTick - avarage_dr_list.GetHead().timestamp) > 30000) {
+			m_avarage_dr_sum -= avarage_dr_list.RemoveHead().datalen;
+		}else
+			break;
+	while(m_AvarageUDRO_list.GetCount() > 0)
+		if (m_AvarageUDRO_list.GetCount() > 60000 / (1 + curTick - m_AvarageUDRO_list.GetHead().timestamp) ||
+			(curTick - m_AvarageUDRO_list.GetHead().timestamp) > 30000) {
+			sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
+		}else
+			break;
+	while(avarage_friend_dr_list.GetCount() > 0)
+		if (avarage_friend_dr_list.GetCount() > 60000 / (1 + curTick - avarage_friend_dr_list.GetHead().timestamp) ||
+			(curTick - avarage_friend_dr_list.GetHead().timestamp) > 30000) {
+			avarage_friend_dr_list.RemoveHead();
+		}else
+			break;
 
+	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 	// Don't save more than three minutes of data about number of fully active clients
 	while(curTick-activeClients_tick_list.GetHead() > 3*60*1000) {
 		activeClients_tick_list.RemoveHead();
@@ -774,6 +791,10 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 		return true;
 	//else if (numberOfUploads >= MAX_UP_CLIENTS_ALLOWED)
 	//	return false;
+
+    //if(numberOfUploads > 3) return false;
+
+    //if(thePrefs.GetMaxUpload() != UNLIMITED && GetDatarate() < (uint32)max(thePrefs.GetMaxUpload()*1024, 1024)-512) return true;
 
 	//now the final check
 	if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
@@ -1075,8 +1096,8 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 		if(earlyabort == true){
 			client->Credits()->SaveUploadQueueWaitTime();
 		}
-		else if(client->GetSessionUp() < SESSIONAMOUNT){
-			int keeppct = (100 - (100 * client->GetSessionUp()/SESSIONAMOUNT)) - 10;// At least 10% time credit 'penalty'
+		else if(client->GetSessionUp() < SESSIONMAXTRANS){
+			int keeppct = (100 - (100 * client->GetSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
 			if (keeppct < 0)    keeppct = 0;
 			client->Credits()->SaveUploadQueueWaitTime(keeppct);
 		}
@@ -1411,6 +1432,8 @@ void CUploadQueue::UpdateDatarates() {
 	if(::GetTickCount()-m_lastCalculatedDataRateTick > 500) {
 		m_lastCalculatedDataRateTick = ::GetTickCount();
 
+		//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+		/*
 		if(avarage_dr_list.GetSize() >= 2 && m_AvarageUDRO_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
 			datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
 			m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
@@ -1420,6 +1443,30 @@ void CUploadQueue::UpdateDatarates() {
 			m_nUpDatarateOverhead = 0;
 			friendDatarate = 0;
 		}
+		*/
+		if (avarage_dr_list.GetCount() > 0){
+			DWORD dwDuration = avarage_dr_list.GetTail().timestamp - avarage_dr_list.GetHead().timestamp;
+			if (dwDuration<1000) dwDuration = 30000;
+			if (avarage_dr_list.GetCount() == 1)
+				datarate = (m_avarage_dr_sum*1000) / dwDuration;
+			else
+				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead().datalen)*1000) / dwDuration;
+		}else
+			datarate = 0;
+		if (m_AvarageUDRO_list.GetCount() > 0){
+			DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
+			if (dwDuration<1000) dwDuration = 30000;
+			if (m_AvarageUDRO_list.GetCount() == 1)
+				m_nUpDatarateOverhead = (sumavgUDRO*1000) / dwDuration;
+			else
+				m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead().datalen)*1000) / dwDuration;
+		}else
+			m_nUpDatarateOverhead = 0;
+		if (avarage_friend_dr_list.GetCount() > 1)
+			friendDatarate = ((avarage_friend_dr_list.GetTail().datalen-avarage_friend_dr_list.GetHead().datalen)*1000) / (avarage_friend_dr_list.GetTail().timestamp-avarage_friend_dr_list.GetHead().timestamp);
+		else
+			friendDatarate = 0;
+		//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 	}
 }
 
@@ -1466,6 +1513,8 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 
     m_dwLastResortedUploadSlots = curtick;
 
+	theApp.uploadBandwidthThrottler->Pause(true);
+
     CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
 
     // Remove all clients from uploading list and store in tempList
@@ -1500,6 +1549,7 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
         InsertInUploadingList(cur_client);
 	}
 
+	theApp.uploadBandwidthThrottler->Pause(false);
 }
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -1507,5 +1557,4 @@ uint32	CUploadQueue::GetMaxVUR()
 {
 	return min(max(MaxVUR,(uint32)1024*thePrefs.GetMinUpload()),(uint32)1024*thePrefs.GetMaxUpload());
 }
-
 //MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

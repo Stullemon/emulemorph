@@ -427,9 +427,6 @@ public:
 	void 			SetUpStartTime()
 					{
 						m_dwUploadTime = ::GetTickCount();
-	//MORPH START - Added by SiRoB, Better Upload rate Calcul	
-						m_AvarageUDRlastRemovedHeadTimestamp = 0;
-	//MORPH END   - Changed by SiRoB, Better Upload rate Calcul	
 					}
 	
 	void			SendHashsetPacket(char* forfileid);
@@ -636,7 +633,6 @@ public:
 	void			SetDownStartTime()
 					{
 						m_dwDownStartTime = ::GetTickCount();
-						m_AvarageDDRlastRemovedHeadTimestamp = 0;
 					}
 	//MORPH END   - Changed by SiRoB, Better Download rate calcul
 	uint32			GetDownTimeDifference()
@@ -798,7 +794,7 @@ public:
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
-	uint32 GetSlotNumber() const { return m_slotNumber; }
+	uint32 GetSlotNumber() const { return m_AvarageUDR_list.GetCount(); }
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	bool		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
 	//MORPH START - Added by SiRoB, Is Morph Client
@@ -993,10 +989,6 @@ private:
 
 	// By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 	CList<TransferredData,TransferredData>			 m_AvarageDDR_list;
-	//MORPH START - Added by SiRoB, Better Download & Upload Speed calcul
-	uint32	m_AvarageDDRlastRemovedHeadTimestamp;
-	uint32	m_AvarageUDRlastRemovedHeadTimestamp;
-	//MORPH END   - Added by SiRoB, Better Download & Upload Speed calcul
 	sint32	sumavgUDR;
 	// END By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 
