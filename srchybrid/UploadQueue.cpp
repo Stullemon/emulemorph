@@ -585,7 +585,6 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	// tell the client that we are now ready to upload
 	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
-		tempUploadinglist.AddTail(newclient);
 		newclient->SetUploadState(US_CONNECTING);
 		if (!newclient->TryToConnect(true))
 			return false;
