@@ -367,30 +367,33 @@ void CClientCreditsList::LoadList()
 	CFileException fexp;
 
 	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
-	//Morph Start - added by AndCycle, choose .met to load
+//Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
 
-	const int	totalLoadFile = 12;
+	const int	totalLoadFile = 13;
 
 	CString		loadFileName[totalLoadFile];
 	CFileStatus	loadFileStatus[totalLoadFile];
 	bool		successLoadFile[totalLoadFile];
 
-	//SUQWTv2.met must have bigger number than original clients.met to have higher prio
-	loadFileName[0].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir());
-	loadFileName[1].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir());
-	loadFileName[2].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
-	loadFileName[3].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir());
-	loadFileName[4].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[5].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[6].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[7].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[8].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	loadFileName[9].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	loadFileName[10].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	loadFileName[11].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	int	countFile = 0;
 
+	//SUQWTv2.met must have bigger number than original clients.met to have higher prio
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".MSUQWT"), m_pAppPrefs->GetConfigDir());//Pawcio
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir());
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	//totalLoadFile = 13;
 
 	int	lastFile = -1;
 	for(int curFile = 0; curFile < totalLoadFile; curFile++){
@@ -403,7 +406,13 @@ void CClientCreditsList::LoadList()
 				lastFile = curFile;
 			}
 			//SUQWTv2.met have bigger number than clients.met, so it will replace the clients.met that have the same m_mtime
-			else if(loadFileStatus[curFile].m_mtime >= loadFileStatus[lastFile].m_mtime){
+			else if(m_bSaveUploadQueueWaitTime){
+				if(loadFileStatus[curFile].m_mtime >= loadFileStatus[lastFile].m_mtime){
+					lastFile = curFile;
+				}
+			}
+			//take client.met
+			else if(loadFileStatus[curFile].m_mtime > loadFileStatus[lastFile].m_mtime){
 				lastFile = curFile;
 			}
 		}
