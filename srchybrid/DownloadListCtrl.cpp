@@ -1570,10 +1570,26 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_GETED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_GETHTMLED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 
-			//MORPH START - Added by SiRoB, xMule_MOD: showSharePermissions
+			//MORPH START - Added by SiRoB, Show Share Permissions
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMNONE, uPermMenuItem, 0);
-			//MORPH END   - Added by SiRoB, xMule_MOD: showSharePermissions
+			CString buffer;
+			switch (theApp.glob_prefs->GetPermissions()){
+				case PERM_ALL:
+					buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
+					break;
+				case PERM_FRIENDS:
+					buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
+					break;
+				case PERM_NOONE:
+					buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
+					break;
+				default:
+					buffer = " (?)";
+					break;
+			}
+			m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
+			//MORPH END   - Added by SiRoB, Show Share Permissions
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK_US, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
@@ -2699,24 +2715,9 @@ void CDownloadListCtrl::CreateMenues() {
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_OTHER, GetResString(IDS_ALL_A4AF_TO_OTHER)); // sivka
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]
 	
-	CString buffer;
 	// xMule_MOD: showSharePermissions
 	m_PermMenu.CreateMenu();
-	switch (theApp.glob_prefs->GetPermissions()){
-		case PERM_ALL:
-			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
-			break;
-		case PERM_FRIENDS:
-			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
-			break;
-		case PERM_NOONE:
-			buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
-			break;
-		default:
-			buffer = " (?)";
-			break;
-	}
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT) + buffer);
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
