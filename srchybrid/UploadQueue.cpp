@@ -843,7 +843,8 @@ void CUploadQueue::Process() {
 				m_abOnClientOverHideClientDatarate[classID] = true;
 			for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
 				++m_aiSlotCounter[i];
-		}
+		}else
+			++m_aiSlotCounter[LAST_CLASS];
 	}
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
@@ -1018,8 +1019,14 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
         activeSlots = m_MaxActiveClientsShortTime;
     }
 
-    if(m_abOnClientOverHideClientDatarate[LAST_CLASS] || curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
-		curUploadSlots/*+1*/ < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+    //MORPH START - Added by SiRoB, Upload Splitting Class
+	for (uint32 classID=0; classID<NB_SPLITTING_CLASS; classID++)
+		if (m_abOnClientOverHideClientDatarate[classID])
+			return true;
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
+
+	if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
+		curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
     }
 
