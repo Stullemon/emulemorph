@@ -328,7 +328,7 @@ public:
 	//MORPH START - Added by SiRoB, Show Permissions
 	// shared file view permissions (all, only friends, no one)
 	int		GetPermissions(void) const	{ return m_iPermissions; }
-	void	SetPermissions(int iNewPermissions)
+	void	SetPermissions(int iNewPermissions);
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 	void    SetPowerShared(int newValue) {m_powershared = newValue;}
