@@ -283,9 +283,15 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1){
 		if (m_abyPartStatus){
-			delete[] m_abyPartStatus;
+			//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+			uint8* thisStatus;
+			m_PartStatus_list.Lookup(reqfile, thisStatus);
+			if (thisStatus==m_abyPartStatus)
+			//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
+				delete[] m_abyPartStatus;
 			m_abyPartStatus = NULL;
 		}
+		//MORPH   END - Changed by SiRoB, HotFix related to khaos::kmod+ 
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by SiRoB, Hot Fix for m_PartStatus_list
@@ -325,12 +331,15 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	}
 	uint16 nED2KPartCount;
 	data.Read(&nED2KPartCount,2);
+	
 	if (m_abyPartStatus){
-		delete[] m_abyPartStatus;
+		//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+		uint8* thisStatus;
+		m_PartStatus_list.Lookup(reqfile, thisStatus);
+		if (thisStatus==m_abyPartStatus)
+		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
+			delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
-		// khaos::kmod+ 
-		m_PartStatus_list[reqfile] = NULL;
-		// khaos::kmod-
 	}
 	bool bPartsNeeded = false;
 	if (!nED2KPartCount){
