@@ -101,6 +101,16 @@ const static UINT UWM_ARE_YOU_EMULE = RegisterWindowMessage(EMULE_GUID);
 
 IMPLEMENT_DYNAMIC(CMsgBoxException, CException)
 
+//Commander - Added: Invisible Mode [TPT] - Start
+// Allows "invisible mode" on multiple instances of eMule
+#ifdef _DEBUG
+#define EMULE_GUID_INVMODE				"EMULE-{4EADC6FC-516F-4b7c-9066-97D893649569}-DEBUG-INVISIBLEMODE"
+#else
+#define EMULE_GUID_INVMODE				"EMULE-{4EADC6FC-516F-4b7c-9066-97D893649569}-INVISIBLEMODE"
+#endif
+const static UINT UWM_RESTORE_WINDOW_IM=RegisterWindowMessage(_T(EMULE_GUID_INVMODE));
+//Commander - Added: Invisible Mode [TPT] - End
+
 // CemuleDlg Dialog
 
 CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
@@ -211,7 +221,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SYSCOLORCHANGE()
 	ON_MESSAGE(WM_COPYDATA, OnWMData)
 	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
-
+	ON_MESSAGE(WM_HOTKEY, OnHotKey)	//Commander - Added: Invisible Mode [TPT]
 	///////////////////////////////////////////////////////////////////////////
 	// WM_COMMAND messages
 	//
@@ -227,6 +237,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	// quick-speed changer -- based on xrmb	
 
 	ON_REGISTERED_MESSAGE(UWM_ARE_YOU_EMULE, OnAreYouEmule)
+	ON_REGISTERED_MESSAGE(UWM_RESTORE_WINDOW_IM, OnRestoreWindowInvisibleMode) //Commander - Added: Invisible Mode [TPT]
 	ON_BN_CLICKED(IDC_HOTMENU, OnBnClickedHotmenu)
 
 	///////////////////////////////////////////////////////////////////////////
@@ -475,13 +486,15 @@ BOOL CemuleDlg::OnInitDialog()
 		}
 	}
 
+	if(thePrefs.GetInvisibleMode()) RegisterInvisibleHotKey();//Commander - Added: Invisible Mode [TPT]
 	VERIFY( m_pDropTarget->Register(this) );
 
 	// initalize PeerCache
 	theApp.m_pPeerCache->Init(thePrefs.GetPeerCacheLastSearch(), thePrefs.WasPeerCacheFound(), thePrefs.IsPeerCacheDownloadEnabled(), thePrefs.GetPeerCachePort());
 
+    //Commander - Removed Invisible Mode
 	//EastShare, Added by linekin HotKey
-	RegisterHotKey(this->m_hWnd,100,MOD_WIN,'S'); 
+	//RegisterHotKey(this->m_hWnd,100,MOD_WIN,'S'); 
 	//EastShare, Added by linekin HotKey
 
 	return TRUE;
@@ -1054,10 +1067,16 @@ void CemuleDlg::ShowPing() {
 void CemuleDlg::OnCancel()
 {
 	if (*thePrefs.GetMinTrayPTR()){
-		TrayShow();
+		//Commander - Modified: Invisible Mode [TPT] - Start
+		if (!thePrefs.GetInvisibleMode())
+		{
+			if(TrayShow())
 		ShowWindow(SW_HIDE);
 	}
-	else{
+		else
+			ShowWindow(SW_HIDE);
+		//Commander - Modified: Invisible Mode [TPT] - End
+	} else {
 		ShowWindow(SW_MINIMIZE);
 	}
 	ShowTransferRate();
@@ -1445,6 +1464,8 @@ void CemuleDlg::OnClose()
 		theApp.ppgbackup->Backup("*.met", false);
 	}
 	//EastShare END - Pretender, TBH-AutoBackup
+
+	if(thePrefs.GetInvisibleMode()) UnRegisterInvisibleHotKey(); //Commander - Added: Invisible Mode [TPT]
 
 	// explicitly delete all listview items which may hold ptrs to objects which will get deleted
 	// by the dtors (some lines below) to avoid potential problems during application shutdown.
@@ -2656,25 +2677,80 @@ void CemuleDlg::OutputExtDebugMessages () {
 }
 // [end] Mighty Knife
 
+//Commander - Removed Invisible Mode
 //EastShare start, Added by linekin, HotKey
-LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
+
+//Commander - Added: Invisible Mode [TPT] - Start
+       LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
 {
-	static boolean b_TrayWasVisible = TrayIsVisible();;
-	static boolean b_HideApp = false;
-	b_HideApp = !b_HideApp && thePrefs.InvisibleMode();
-	if (b_HideApp)
-	{
-		b_TrayWasVisible = TrayIsVisible();
-		TrayHide();
-		ShowWindow(SW_HIDE);
-	}
-	else{
-		if(b_TrayWasVisible)
-			TrayShow();
-		else
-			ShowWindow(SW_SHOW);
-	}
+	if(wParam == HOTKEY_INVISIBLEMODE_ID) RestoreWindow();
+
+	// Allows "invisible mode" on multiple instances of eMule
+	// Restore the rest of hidden emules
+	EnumWindows(AskEmulesForInvisibleMode, INVMODE_RESTOREWINDOW);
+	
 	return 0;
 }
-//EastShare end, Added by linekin, HotKey
 
+BOOL CemuleDlg::RegisterInvisibleHotKey()
+{
+	if(m_hWnd && IsRunning()){
+		bool res = RegisterHotKey( this->m_hWnd, HOTKEY_INVISIBLEMODE_ID ,
+						   thePrefs.GetInvisibleModeHKKeyModifier(),
+						   thePrefs.GetInvisibleModeHKKey());
+		return res;
+	} else
+		return false;
+}
+
+BOOL CemuleDlg::UnRegisterInvisibleHotKey()
+{
+	if(m_hWnd){
+		bool res = !(UnregisterHotKey(this->m_hWnd, HOTKEY_INVISIBLEMODE_ID));
+
+		// Allows "invisible mode" on multiple instances of eMule
+		// Only one app (eMule) can register the hotkey, if we unregister, we need
+		// to register the hotkey in other emule.
+		EnumWindows(AskEmulesForInvisibleMode, INVMODE_REGISTERHOTKEY);
+		return res;
+	} else
+		return false;
+}
+
+// Allows "invisible mode" on multiple instances of eMule
+// LOWORD(WPARAM) -> HotKey KeyModifier
+// HIWORD(WPARAM) -> HotKey VirtualKey
+// LPARAM		  -> int:	INVMODE_RESTOREWINDOW	-> Restores the window
+//							INVMODE_REGISTERHOTKEY	-> Registers the hotkey
+LRESULT CemuleDlg::OnRestoreWindowInvisibleMode(WPARAM wParam, LPARAM lParam)
+{
+	if (thePrefs.GetInvisibleMode() &&
+		(UINT)LOWORD(wParam) == thePrefs.GetInvisibleModeHKKeyModifier() &&
+		(char)HIWORD(wParam) == thePrefs.GetInvisibleModeHKKey()) {
+			switch(lParam){
+				case INVMODE_RESTOREWINDOW:
+					RestoreWindow();
+					break;
+				case INVMODE_REGISTERHOTKEY:
+					RegisterInvisibleHotKey();
+					break;
+			}
+			return UWM_RESTORE_WINDOW_IM;
+	} else
+		return false;
+} 
+
+// Allows "invisible mode" on multiple instances of eMule
+BOOL CALLBACK CemuleDlg::AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam){
+	DWORD dwMsgResult;
+	WPARAM msgwParam;
+
+	msgwParam=MAKEWPARAM(thePrefs.GetInvisibleModeHKKeyModifier(),
+				thePrefs.GetInvisibleModeHKKey());
+
+	LRESULT res = ::SendMessageTimeout(hWnd,UWM_RESTORE_WINDOW_IM, msgwParam, lParam,
+				SMTO_BLOCK |SMTO_ABORTIFHUNG,10000,&dwMsgResult);
+	
+	return res; 
+} 
+//Commander - Added: Invisible Mode [TPT] - End

@@ -331,9 +331,8 @@ BEGIN
     LTEXT           "Remove dead servers after",IDC_REMOVEDEAD,7,8,106,8
 END
 
-IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 241
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 257
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "General"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
@@ -350,23 +349,37 @@ BEGIN
     CONTROL         "Prompt on exit",IDC_EXIT,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,14,98,202,10
     CONTROL         "Check for new version on startup",IDC_CHECK4UPDATE,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,134,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,126,
                     135,10
     CONTROL         "",IDC_CHECKDAYS,"msctls_trackbar32",TBS_AUTOTICKS | 
                     TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,159,
-                    134,53,10,WS_EX_STATICEDGE
+                    126,53,10,WS_EX_STATICEDGE
     CONTROL         "Show splashscreen",IDC_SPLASHON,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,146,192,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,138,192,10
     CONTROL         "Startup Minimized",IDC_STARTMIN,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,157,190,10
-    PUSHBUTTON      "Edit Web Services...",IDC_WEBSVEDIT,14,222,100,12,
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,149,190,10
+    PUSHBUTTON      "Edit Web Services...",IDC_WEBSVEDIT,14,235,100,12,
                     BS_FLAT
-    PUSHBUTTON      "eD2K Links",IDC_ED2KFIX,155,222,62,12,BS_FLAT
+    PUSHBUTTON      "eD2K Links",IDC_ED2KFIX,155,235,62,12,BS_FLAT
     GROUPBOX        "Nick:",IDC_NICK_FRM,7,7,104,33,BS_FLAT
-    GROUPBOX        "Misc:",IDC_MISC_FRM,7,47,216,190,BS_FLAT
+    GROUPBOX        "Misc:",IDC_MISC_FRM,7,47,216,203,BS_FLAT
     GROUPBOX        "Language:",IDC_LANG_FRM,114,7,109,33,BS_FLAT
-    GROUPBOX        "Static",IDC_STARTUP,14,119,202,56
-    LTEXT           "days",IDC_DAYS,161,124,48,9
+    GROUPBOX        "Static",IDC_STARTUP,14,111,202,56
+    LTEXT           "days",IDC_DAYS,161,116,48,9
+    GROUPBOX        "Invisible Mode",IDC_INVISIBLE_MODE_GROUP_BOX,14,168,202,
+                    60
+    CONTROL         "Aktivate Invisible Mode",IDC_INVISIBLE_MODE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,18,179,146,8
+    LTEXT           "Select the hotkey to restore the window",
+                    IDC_INVISIBLE_MODE_SELECT_STATIC,18,190,146,8
+    LTEXT           "Modifier Keys:",IDC_INVISIBLE_MODE_MODIFIER_STATIC,18,
+                    200,93,8
+    LTEXT           "Key:",IDC_INVISIBLE_MODE_KEY_STATIC,142,200,60,8
+    COMBOBOX        IDC_INVISIBLE_MODE_KEY_COMBO,18,211,95,30,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INVISIBLE_MODE_SELECT_COMBO,142,211,63,30,
+                    CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "+",IDC_INVISIBLE_MODE_SYMBOL_STATIC,125,213,8,8
 END
 
 IDD_PPG_FILES DIALOGEX 0, 0, 229, 243
@@ -1759,7 +1772,7 @@ BEGIN
         VERTGUIDE, 121
         VERTGUIDE, 216
         TOPMARGIN, 7
-        BOTTOMMARGIN, 234
+        BOTTOMMARGIN, 250
         HORZGUIDE, 33
         HORZGUIDE, 40
         HORZGUIDE, 47
@@ -4528,7 +4541,7 @@ BEGIN
     IDS_ENABLE_CHUNKDOTS    "Enable ChunkDots in progress bar"
     IDS_COMMUNITY           "Community"
     IDS_COMMUNITYTAG        "Community Tags (separated by '|')"
-    IDS_INVISIBLEMODE       "Invisible Mode (Winkey+S to switch)"
+    IDS_INVISIBLEMODE       "Invisible Mode"
 END
 
 STRINGTABLE 
@@ -4586,6 +4599,14 @@ STRINGTABLE
 BEGIN
     IDS_CHAT_NAME           "Name:"
     IDS_CLIENTPERCENTAGE    "Show Client Percentage"
+    IDS_CTRLKEY             "CTRL"
+    IDS_ALTKEY              "ALT"
+    IDS_SHIFTKEY            "SHIFT"
+    IDS_INVMODE_GROUP       "Invisible Mode"
+    IDS_INVMODE             "Activate Invisible Mode"
+    IDS_INVMODE_HOTKEY      "Select the hotkey to restore the window"
+    IDS_INVMODE_MODKEY      "Modifier Keys:"
+    IDS_INVMODE_VKEY        "Key:"
 END
 
 #endif    // Englisch (USA) resources

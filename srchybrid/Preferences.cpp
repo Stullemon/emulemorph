@@ -549,8 +549,10 @@ bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
 
 bool	CPreferences::m_bEnableChunkDots;
 //EastShare - Added by Pretender, Option for ChunkDots
+
+//Commander - Removed Invisible Mode
 //EastShare - Added by Pretender, Invisible Mode
-bool	CPreferences::m_bInvisibleMode;
+//bool	CPreferences::m_bInvisibleMode;
 //EastShare - Added by Pretender, Invisible Mode
 
 char	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
@@ -631,6 +633,12 @@ int		CPreferences::m_iDynUpPingToleranceMilliseconds;
 bool	CPreferences::m_bDynUpUseMillisecondPingTolerance;
 bool	CPreferences::m_bDynUpLog;
 //MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+
+//Commander - Added: Invisible Mode [TPT] - Start
+bool	CPreferences::m_bInvisibleMode;		
+UINT	CPreferences::m_iInvisibleModeHotKeyModifier;
+char	CPreferences::m_cInvisibleModeHotKey;
+//Commander - Added: Invisible Mode [TPT] - End
 
 // ZZ:DownloadManager -->
 bool    CPreferences::m_bA4AFSaveCpu;
@@ -2342,8 +2350,10 @@ void CPreferences::SavePreferences()
 	//EastShare - Added by Pretender, Option for ChunkDots
 	ini.WriteInt("EnableChunkDots", m_bEnableChunkDots,"eMule");
 	//EastShare - Added by Pretender, Option for ChunkDots
+
+	//Commander - Removed Invisible Mode
 	//EastShare - Added by Pretender, Invisible Mode
-	ini.WriteInt("InvisibleMode", m_bInvisibleMode,"eMule");
+	//ini.WriteInt("InvisibleMode", m_bInvisibleMode,"eMule");
 	//EastShare - Added by Pretender, Invisible Mode
 
 	//EastShare - added by AndCycle, IP to Country
@@ -2422,6 +2432,12 @@ void CPreferences::SavePreferences()
 	ini.WriteInt("SplitterbarPositionIRC",splitterbarPositionIRC+2,"eMule");
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
         ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
+
+        //Commander - Added: Invisible Mode [TPT] - Start
+        ini.WriteBool("InvisibleMode", m_bInvisibleMode);
+	ini.WriteInt("InvisibleModeHKKey", (int)m_cInvisibleModeHotKey);
+	ini.WriteInt("InvisibleModeHKKeyModifier", m_iInvisibleModeHotKeyModifier);
+        //Commander - Added: Invisible Mode [TPT] - End        
 }
 
 void CPreferences::SaveCats(){
@@ -2833,7 +2849,13 @@ void CPreferences::LoadPreferences()
 	enableZeroFilledTest = ini.GetBool(_T("EnableZeroFilledTest"), false);
 	// Maella end
 	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
-        
+
+        //Commander - Added: Invisible Mode [TPT] - Start
+        SetInvisibleMode( ini.GetBool("InvisibleMode", false),
+	ini.GetInt("InvisibleModeHKKeyModifier", MOD_CONTROL | MOD_SHIFT | MOD_ALT),
+        (char)ini.GetInt("InvisibleModeHKKey", (int)'E'));
+        //Commander - Added: Invisible Mode [TPT] - End
+
         m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
 	enableDownloadInRed = ini.GetBool(_T("EnableDownloadInRed"), true); //MORPH - Added by IceCream, show download in red
 	enableDownloadInBold = ini.GetBool(_T("EnableDownloadInBold"), true); //MORPH - Added by SiRoB, show download in Bold
@@ -2842,7 +2864,7 @@ void CPreferences::LoadPreferences()
 	enableHighProcess = ini.GetBool(_T("EnableHighProcess"), false); //MORPH - Added by IceCream, high process priority
 	creditSystemMode = (CreditSystemSelection)ini.GetInt(_T("CreditSystemMode"), CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
-
+        
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	m_IPfilterVersion=ini.GetInt(_T("IPfilterVersion"),0); //added by milobac: Ipfilter.dat update
 	AutoUpdateIPFilter=ini.GetBool(_T("AutoUPdateIPFilter"),false); //added by milobac: Ipfilter.dat update
@@ -2907,8 +2929,10 @@ void CPreferences::LoadPreferences()
 	//EastShare - Added by Pretender, Option for ChunkDots
 	m_bEnableChunkDots=ini.GetBool(_T("EnableChunkDots"),true);
 	//EastShare - Added by Pretender, Option for ChunkDots
+
+	//Commander - Removed Invisible Mode
 	//EastShare - Added by Pretender, Invisible Mode
-	m_bInvisibleMode=ini.GetBool(_T("InvisibleMode"),false);
+	//m_bInvisibleMode=ini.GetBool(_T("InvisibleMode"),false);
 	//EastShare - Added by Pretender, Invisible Mode
 
 	isautodynupswitching=ini.GetBool(_T("AutoDynUpSwitching"),false);
@@ -3845,3 +3869,17 @@ void	CPreferences::SetMinUpload(uint16 in)
 	minupload = (in) ? in : UNLIMITED;
 }
 //MORPH END  - Added by SiRoB, (SUC) & (USS)
+
+//Commander - Added: Invisible Mode [TPT] - Start
+void CPreferences::SetInvisibleMode(bool on, UINT keymodifier, char key) 
+{
+	m_bInvisibleMode = on;
+	m_iInvisibleModeHotKeyModifier = keymodifier;
+	m_cInvisibleModeHotKey = key;
+	if(theApp.emuledlg!=NULL){
+		//Always unregister, the keys could be different.
+		theApp.emuledlg->UnRegisterInvisibleHotKey();
+		if(m_bInvisibleMode)	theApp.emuledlg->RegisterInvisibleHotKey();
+	}
+}	
+//Commander - Added: Invisible Mode [TPT] - End

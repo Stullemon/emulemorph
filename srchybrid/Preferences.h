@@ -618,8 +618,10 @@ public:
 	//EastShare - Added by Pretender, Option for ChunkDots
 	static bool	m_bEnableChunkDots;
 	//EastShare - Added by Pretender, Option for ChunkDots
+
+	//Commander - Removed Invisible Mode
 	//EastShare - Added by Pretender, Invisible Mode
-	static bool	m_bInvisibleMode;
+	//static bool	m_bInvisibleMode;
 	//EastShare - Added by Pretender, Invisible Mode
 
 	static char	UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
@@ -703,7 +705,13 @@ public:
 
 	static bool		m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
 
-    static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
+        //Commander - Added: Invisible Mode [TPT] - Start
+        static bool		m_bInvisibleMode;		
+	static UINT		m_iInvisibleModeHotKeyModifier;
+	static char		m_cInvisibleModeHotKey;
+        //Commander - Added: Invisible Mode [TPT] - End
+
+        static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
 
 	static	CStringList shareddir_list;
 	static	CStringList adresses_list;
@@ -1554,6 +1562,13 @@ public:
 	// khaos::accuratetimerem+
 	static	uint8	GetTimeRemainingMode()	{ return m_iTimeRemainingMode; }
 	// khaos::accuratetimerem-
+
+        //Commander - Added: Invisible Mode [TPT] - Start
+        static	bool GetInvisibleMode() { return m_bInvisibleMode; }
+	static	UINT GetInvisibleModeHKKeyModifier() { return m_iInvisibleModeHotKeyModifier; }
+	static	char GetInvisibleModeHKKey() { return m_cInvisibleModeHotKey; }
+	static	void SetInvisibleMode(bool on, UINT keymodifier, char key);
+        //Commander - Added: Invisible Mode [TPT] - End
 protected:
 	static	CString appdir;
 	static	CString configdir;

@@ -69,12 +69,32 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_WEBSVEDIT , OnBnClickedEditWebservices)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnBnClickedCheck4Update)
+        //Commander - Added: Invisible Mode [TPT] - Start
+	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_SELECT_COMBO, OnSettingsChange)
+	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_KEY_COMBO, OnCbnSelchangeKeymodcombo)
+	ON_BN_CLICKED(IDC_INVISIBLE_MODE, OnBoxesChange)
+	//Commander - Added: Invisible Mode [TPT] - End
 	ON_WM_HSCROLL()
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 void CPPgGeneral::LoadSettings(void)
 {
+	//Commander - Added: Invisible Mode [TPT] - Start
+	m_iActualKeyModifier = thePrefs.GetInvisibleModeHKKeyModifier();
+	((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->SelectString(-1, CString(thePrefs.GetInvisibleModeHKKey()));
+	if (!thePrefs.GetInvisibleMode()){
+		GetDlgItem(IDC_INVISIBLE_MODE_SELECT_STATIC)->EnableWindow(false);
+		GetDlgItem(IDC_INVISIBLE_MODE_MODIFIER_STATIC)->EnableWindow(false);
+		GetDlgItem(IDC_INVISIBLE_MODE_KEY_STATIC)->EnableWindow(false);
+		GetDlgItem(IDC_INVISIBLE_MODE_SYMBOL_STATIC)->EnableWindow(false);
+		GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO)->EnableWindow(false);
+		GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO)->EnableWindow(false);
+		CheckDlgButton(IDC_INVISIBLE_MODE, 0);
+	} else 
+		CheckDlgButton(IDC_INVISIBLE_MODE, 1);
+	//Commander - Added: Invisible Mode [TPT] - End
+
 	USES_CONVERSION;
 	GetDlgItem(IDC_NICK)->SetWindowText(A2CT(thePrefs.GetUserNick()));
 
@@ -143,6 +163,14 @@ BOOL CPPgGeneral::OnInitDialog()
 	sliderUpdate->SetRange(2, 7, true);
 	sliderUpdate->SetPos(thePrefs.GetUpdateDays());
 	
+	//Commander - Added: Invisible Mode [TPT] - Start
+	// Add keys to ComboBox
+	for(int i='A'; i<='Z'; i++)
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->AddString(_T(CString((char)(i))));
+	for(int i='0'; i<='9'; i++)
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->AddString(_T(CString((char)(i))));
+	//Commander - Added: Invisible Mode [TPT] - End
+
 	LoadSettings();
 	Localize();
 	GetDlgItem(IDC_CHECKDAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE) ? SW_SHOW : SW_HIDE );
@@ -154,6 +182,15 @@ BOOL CPPgGeneral::OnInitDialog()
 
 BOOL CPPgGeneral::OnApply()
 {
+	//Commander - Added: Invisible Mode [TPT] - Start
+	CString sKey;
+	((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetLBText(((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetCurSel(), sKey);
+	if (IsDlgButtonChecked(IDC_INVISIBLE_MODE))
+		thePrefs.SetInvisibleMode(true,m_iActualKeyModifier,sKey[0]);
+	else
+		thePrefs.SetInvisibleMode(false,m_iActualKeyModifier,sKey[0]);
+	//Commander - Added: Invisible Mode [TPT] - End
+
 	CString strNick;
 	GetDlgItem(IDC_NICK)->GetWindowText(strNick);
 	strNick.Trim();
@@ -239,6 +276,37 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_ED2KFIX)->SetWindowText(GetResString(IDS_ED2KLINKFIX));
 		GetDlgItem(IDC_CHECK4UPDATE)->SetWindowText(GetResString(IDS_CHECK4UPDATE));
 		GetDlgItem(IDC_STARTUP)->SetWindowText(GetResString(IDS_STARTUP));
+		
+		//Commander - Added: Invisible Mode [TPT] - Start
+		// Add key modifiers to ComboBox
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->ResetContent();
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_ALTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_SHIFTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + " + " + GetResString(IDS_ALTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + " + " + GetResString(IDS_SHIFTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_ALTKEY) + " + " + GetResString(IDS_SHIFTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + " + " + GetResString(IDS_ALTKEY) + " + " + GetResString(IDS_SHIFTKEY));
+
+		CString key_modifier;
+		if (m_iActualKeyModifier & MOD_CONTROL)
+			key_modifier=GetResString(IDS_CTRLKEY);
+		if (m_iActualKeyModifier & MOD_ALT){
+			if (!key_modifier.IsEmpty()) key_modifier += " + ";
+			key_modifier+=GetResString(IDS_ALTKEY);
+		}
+		if (m_iActualKeyModifier & MOD_SHIFT){
+			if (!key_modifier.IsEmpty()) key_modifier += " + ";
+			key_modifier+=GetResString(IDS_SHIFTKEY);
+		}
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->SelectString(-1,key_modifier);
+		
+		GetDlgItem(IDC_INVISIBLE_MODE_GROUP_BOX)->SetWindowText(GetResString(IDS_INVMODE_GROUP));
+		GetDlgItem(IDC_INVISIBLE_MODE)->SetWindowText(GetResString(IDS_INVMODE));
+		GetDlgItem(IDC_INVISIBLE_MODE_SELECT_STATIC)->SetWindowText(GetResString(IDS_INVMODE_HOTKEY));
+		GetDlgItem(IDC_INVISIBLE_MODE_MODIFIER_STATIC)->SetWindowText(GetResString(IDS_INVMODE_MODKEY));
+		GetDlgItem(IDC_INVISIBLE_MODE_KEY_STATIC)->SetWindowText(GetResString(IDS_INVMODE_VKEY));
+		//Commander - Added: Invisible Mode [TPT] - End
 	}
 }
 
@@ -334,3 +402,35 @@ BOOL CPPgGeneral::OnHelpInfo(HELPINFO* pHelpInfo)
 	OnHelp();
 	return TRUE;
 }
+
+//Commander - Added: Invisible Mode [TPT] - Start
+void CPPgGeneral::SetBoxes()
+{	
+	bool bImode = IsDlgButtonChecked(IDC_INVISIBLE_MODE);
+
+	GetDlgItem(IDC_INVISIBLE_MODE_SELECT_STATIC)->EnableWindow(bImode);
+	GetDlgItem(IDC_INVISIBLE_MODE_MODIFIER_STATIC)->EnableWindow(bImode);
+	GetDlgItem(IDC_INVISIBLE_MODE_KEY_STATIC)->EnableWindow(bImode);
+	GetDlgItem(IDC_INVISIBLE_MODE_SYMBOL_STATIC)->EnableWindow(bImode);
+	GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO)->EnableWindow(bImode);
+	GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO)->EnableWindow(bImode);
+
+	SetModified();
+}
+
+void CPPgGeneral::OnCbnSelchangeKeymodcombo()
+{
+	CString sKeyMod;
+	
+	((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->GetLBText(((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->GetCurSel(), sKeyMod);
+	m_iActualKeyModifier = 0;
+	if (sKeyMod.Find(GetResString(IDS_CTRLKEY))!=-1)
+		m_iActualKeyModifier |= MOD_CONTROL;
+	if (sKeyMod.Find(GetResString(IDS_ALTKEY))!=-1)
+		m_iActualKeyModifier |= MOD_ALT;
+	if (sKeyMod.Find(GetResString(IDS_SHIFTKEY))!=-1)
+		m_iActualKeyModifier |= MOD_SHIFT;
+	
+	SetModified();
+}
+//Commander - Added: Invisible Mode [TPT] - End

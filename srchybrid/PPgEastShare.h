@@ -34,9 +34,10 @@ protected:
 	int m_bEnableChunkDots;
 	HTREEITEM m_htiEnableChunkDots;
 	//EastShare - Added by Pretender, Option for ChunkDots
+	//Commander - Removed Invisible Mode
 	//EastShare - Added by Pretender, Invisible Mode
-	int m_bInvisibleMode;
-	HTREEITEM m_htiInvisibleMode;
+	//int m_bInvisibleMode;
+	//HTREEITEM m_htiInvisibleMode;
 	//EastShare - Added by Pretender, Invisible Mode
 
 	//EastShare - added by AndCycle, IP to Country

@@ -112,8 +112,9 @@ public:
 	CFont			m_fontHyperText;
 	CFont			m_fontMarlett;
 	CFont			m_fontLog;
+	//Commander - Removed Invisible Mode
 	//EastShare, Added by linekin HotKey
-	LRESULT			OnHotKey(WPARAM wParam, LPARAM lParam); 
+	//LRESULT   OnHotKey(WPARAM wParam, LPARAM lParam); 
 	//EastShare, Added by linekin HotKey
 protected:
 	HICON m_hIcon;
@@ -236,6 +237,18 @@ public:
 	void AddExtDebugDump (CString _headline, const char* _data, int _size, CString _subscript="");
 	void OutputExtDebugMessages ();
 	// [end] Mighty Knife
+
+//Commander - Added: Invisible Mode [TPT] - Start	
+public:
+	BOOL	RegisterInvisibleHotKey();
+	BOOL	UnRegisterInvisibleHotKey();
+protected:
+	LRESULT	OnHotKey(WPARAM wParam, LPARAM lParam);
+
+	// Allows "invisible mode" on multiple instances of eMule
+	afx_msg LRESULT OnRestoreWindowInvisibleMode(WPARAM, LPARAM);
+	static BOOL CALLBACK AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam);
+//Commander - Added: Invisible Mode [TPT] - End
 };
 
 
@@ -280,3 +293,16 @@ enum EEmlueAppMsgs
 	TM_FILECOMPLETED,
 	TM_FILEOPPROGRESS
 };
+
+//Commander - Added: Invisible Mode [TPT] - Start
+enum EEmuleHotKeysIDs
+{
+	HOTKEY_INVISIBLEMODE_ID
+};
+
+enum EEMuleInvisibleModeEnumOptions
+{
+	INVMODE_RESTOREWINDOW,
+	INVMODE_REGISTERHOTKEY
+};
+//Commander - Added: Invisible Mode [TPT] - End
