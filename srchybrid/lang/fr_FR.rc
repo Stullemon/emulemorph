@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// French (France) resources
+// Français (France) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
 #ifdef _WIN32
@@ -472,6 +472,7 @@ BEGIN
     IDS_NOTHING             "Rien"
     IDS_SETUPSPEED          "Limite en émission"
     IDS_SETDOWNSPEED        "Limite en réception"
+    IDS_UNDO                "Annuler"
     IDS_DAYLY               "quotidien"
 END
 
@@ -753,6 +754,7 @@ BEGIN
     IDS_STREE               "Arbre de statistique"
     IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
     IDS_STATSSETUPINFO      "Statistiques"
+    IDS_IRC_SOUNDEVENTS     "Evénements sonores"
 END
 
 STRINGTABLE 
@@ -842,8 +844,7 @@ BEGIN
     IDS_IRC_PERFORM         "Exécution"
     IDS_IRC_USEPERFORM      "Exécuter un script à la connexion."
     IDS_IRC_ADDTOFRIENDLIST "Ajouter à la liste des amis"
-    IDS_IRC_LOADCHANNELLISTONCON 
-                            "Charger la liste des salons à la connexion"
+    IDS_IRC_LOADCHANNELLISTONCON "Charger la liste des salons à la connexion"
     IDS_IRC_ADDASFRIEND     "Vous a ajouté comme ami !"
     IDS_PW_WARNING          "La valeur choisie ""%s"" est trop importante pour être supportée par votre système d'exploitation :  %d\nCela peux rendre votre système instable.\n\nEtes-vous sûrs de vouloir faire cela ?"
     IDS_TAKEOVER            "Recouvrir"
@@ -941,8 +942,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_MAXDL         "Meilleure vitesse de réception: %.2f Ko/s"
-    IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
-                            "Ignorer les messages d'ajout d'ami"
+    IDS_IRC_EMULEPROTO_IGNOREADDFRIEND "Ignorer les messages d'ajout d'ami"
     IDS_PW_FASTSRVCON       "Connexion serveur respectueuse"
     IDS_SOURCELINKFAILED    "Vous devez avoir un HighID pour créer un Lien avec IP source valide"
     IDS_CREATESOURCELINK    "Copier lien ED2k (avec IP source)"
@@ -1032,8 +1032,7 @@ BEGIN
     IDS_DESCRIPTIONRECV     "Commentaire du fichier '%s' : %s"
     IDS_WEBSERVICES         "WebServices"
     IDS_WEBSVEDIT           "Editer WebServices"
-    IDS_IRC_EMULEPROTO_IGNORESENDLINK 
-                            "Ignorer les messages d'envoi de lien"
+    IDS_IRC_EMULEPROTO_IGNORESENDLINK "Ignorer les messages d'envoi de lien"
     IDS_CHECK4UPDATE        "Vérifier nouvelle version"
     IDS_STARTUP             "Démarrage"
     IDS_NEWVERSIONAVL       "Une nouvelle version de eMule est disponible. Regardez sur http://emule.sourceforge.net pour plus d'infos."
@@ -1073,6 +1072,7 @@ BEGIN
     IDS_COMMENT             "Commentaire"
     IDS_IPFILTERED          "IP filtrée : %s (%s)"
     IDS_DL_TRANSFCOMPL      "Accompli"
+    IDS_DL_ACTIVE_TIME      "Temps de réception"
     IDS_STATS_FILTEREDCLIENTS "Filtrés : %i"
     IDS_FILTERLABEL         "Les messages filtrés contiennent : (Séparateur | )"
     IDS_ERR_LARGEREQBLOCK   "Le client demande un bloc trop important."
@@ -1391,6 +1391,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_CUT                 "Couper"
     IDS_STATS_SECUREIDENT   "Identification sécurisée (OK : Echec )"
     IDS_ONDISK              "Taille sur le disque: "
     IDS_CLIENTCOL           "Attention: Un client identique à un autre actuellement connecté a été trouvé : %s (%s) et %s (%s)"
@@ -1413,6 +1414,7 @@ STRINGTABLE
 BEGIN
     IDS_VERSION             "Version"
     IDS_ALL_A4AF_TO_THIS    "Passer toutes les sources à ce fichier"
+    IDS_PASTE               "Coller"
     IDS_ALL_A4AF_TO_OTHER   "Passer toutes les sources à l'un des autres fichiers"
     IDS_ALL_A4AF_AUTO       "Passer automatiquement toutes les sources (A4AF) à ce fichier"
     IDS_SWAP_A4AF_TO_THIS   "Passer la source à ce fichier maintenant"
@@ -1544,6 +1546,7 @@ BEGIN
     IDS_CMT_COPYCLIPBOARD   "Copier le commentaire dans le presse-papiers"
     IDS_ASKDOWNLOADLANG     "Le langage que vous avez sélectionné n'est pas installé sur votre système. Voulez-vous qu'eMule télécharge la traduction à partir de emule-project.net ?"
     IDS_ASKDOWNLOADLANGCAP  "Télécharger la traduction"
+    IDS_DELETESELECTED      "Supprimer"
     IDS_ERR_FAILEDDOWNLOADLANG 
                             "Echec du téléchargement et de l'installation du langage sélectionné à partir de %s!"
     IDS_ERR_BADFOLDER       "Répertoire invalide.\nLe répertoire ne peut être créé. Vérifiez le nom et l'emplacement."
@@ -1579,6 +1582,7 @@ BEGIN
     IDS_KADUDPPORTERR       "Le port UDP de Kad est en conflit avec le port UDP d'eMule ou le port UDP Serveurs. Le port a été changé en %u."
     IDS_CONFIRM_FILEDELETE  "Voulez-vous vraiment supprimer du disque tous les fichiers sélectionnés ?"
     IDS_OPENFOLDER          "Ouvrir le dossier"
+    IDS_RUNASUSER           "Run eMule as unprivileged User"
     IDS_DELETE              "Supprimer du disque"
     IDS_BOOTSTRAP           "Amorçage"
     IDS_VIAED2KSQ           "via ED2K Serveur/Queue"
@@ -1620,7 +1624,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Voulez-vous vraiment supprimer les filtres IP sélectionnés?"
     IDS_TOTAL_IPFILTER_LABEL "Nombre de Filtres IP:"
     IDS_TOTAL_IPS_LABEL     "Nombre d'IP:"
-    IDS_DELETESELECTED             "Supprimer"
+    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
     IDS_APPEND              "Ajouter..."
     IDS_SAVE                "Enregistrer"
     IDS_IP_START            "Début"
@@ -1635,20 +1639,13 @@ STRINGTABLE
 BEGIN
     IDS_ERR_NOTCONNECTEDKAD "Vous n'êtes pas connecté au réseau Kad!"
     IDS_IRC_NOSFS           "Aucun fichier partagé n'est sélectionné"
+    IDS_RESETLABEL          "Saisie semi-automatique (historique)"
     IDS_IRC_IGNOREMISCMESSAGE "Ignorer les messages d'infos diverses"
     IDS_KNOWN               "Connu"
-    IDS_DL_ACTIVE_TIME      "Temps de réception"
-    IDS_RESETLABEL          "Saisie semi-automatique (historique)"
-    IDS_PASTE               "Coller"
-    IDS_UNDO                "Annuler"
-    IDS_CUT                 "Couper"
-    IDS_IRC_SOUNDEVENTS     "Evénements sonores"
-    IDS_KADCONTACTSREAD    "lu %ld contacts à partir du fichier."
-    IDS_ERR_KADCONTACTS    "Aucun contact trouvé, veuillez amorcer ou téléchargez un fichier nodes.dat."
-    IDS_RUNASUSER           "Run eMule as unprivileged User"
     IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
     IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
-    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
+    IDS_KADCONTACTSREAD     "lu %ld contacts à partir du fichier."
+    IDS_ERR_KADCONTACTS     "Aucun contact trouvé, veuillez amorcer ou téléchargez un fichier nodes.dat."
 END
 
 STRINGTABLE 
@@ -1656,7 +1653,8 @@ BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "Vérifier si le fichier est complet avant téléchargement"
     IDS_DL_FORCE            "Forcer le téléchargement"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Sauvegarder le temps d'attente des clients en upload"
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 
+                            "Sauvegarder le temps d'attente des clients en upload"
     IDS_DATEFILENAMELOG     "Sauver par date les logs"
     IDS_ECFEF               "Chance égale pour chaque fichier"
     IDS_ALL_TIME            "Dans tous les cas"
@@ -1788,7 +1786,8 @@ BEGIN
     IDS_SUC_LOW             "Low pass (default %i)"
     IDS_SUC_PITCH           "Pitch (default %i)"
     IDS_SUC_DRIFT           "Drift (default %i)"
-    IDS_SHOWSECUREDCONNECTION "Afficher les informations des clients sécurisés"
+    IDS_SHOWSECUREDCONNECTION 
+                            "Afficher les informations des clients sécurisés"
     IDS_ZERO_FILLED_TEST    "Refuser les blocks sur-compressés"
     IDS_SUC_LOG             "Montrer l'activité dans la fenêtre de debug"
     IDS_A4AF_SHOWDEBUG      "Montrer l'activité dans la fenêtre de debug"
@@ -2012,30 +2011,32 @@ STRINGTABLE
 BEGIN
     IDS_HIDEOS              "Masquer les chunks sur-partagés"
     IDS_SHAREONLYTHENEED    "Partager seulement le necéssaire"
-    IDS_SHAREONLYTHENEEDDEFAULT "Partager seulement le necéssaire (0 = Désactivé)"
+    IDS_SHAREONLYTHENEEDDEFAULT 
+                            "Partager seulement le necéssaire (0 = Désactivé)"
 END
 
-STRINGTABLE   
-BEGIN  
-    IDS_COUNTRYNAME_SHORT   "Afficher 2 lettres"  
-    IDS_COUNTRYNAME_MID     "Afficher 3 lettres"  
-    IDS_COUNTRYNAME_LONG    "Afficher le nom complet"  
+STRINGTABLE 
+BEGIN
+    IDS_COUNTRYNAME_SHORT   "Afficher 2 lettres"
+    IDS_COUNTRYNAME_MID     "Afficher 3 lettres"
+    IDS_COUNTRYNAME_LONG    "Afficher le nom complet"
     IDS_COUNTRYNAME_SHOWFLAG "Montrer les drapeaux"
     IDS_REMOVEALLFRIENDSLOT "Retirer tous les Slots Amis"
     IDS_INFINITEQUEUE       "File d'attente infinie"
     IDS_PAYBACKFIRSTLIMIT   "Quantité avant de le déclancher (Défaut 10MB)"
     IDS_COMMUNITY           "Communauté"
     IDS_COMMUNITYTAG        "Communauté Tags (separée par '|')"
-END  
-  
-STRINGTABLE  
-BEGIN  
+END
+
+STRINGTABLE 
+BEGIN
     IDS_AUXPORTS            "Ports Aux."
     IDS_SOLIDGRAPH          "Dessiner des graphs plein"
-    IDS_POWERSHARE_LIMITED  "Limiter"
-    IDS_POWERSHARE_LIMIT    "Complète source limite"
+    IDS_POWERSHARE_LIMITED  "Limité"
+    IDS_POWERSHARE_LIMIT    "Limite de source complète"
 END
-#endif    // French (France) resources
+
+#endif    // Français (France) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
