@@ -464,7 +464,9 @@ void CUploadQueue::Process() {
 
     DWORD curTick = ::GetTickCount();
 
-    UpdateActiveClientsInfo(curTick);
+	ReSortUploadSlots(); //MORPH - Added by SiRoB
+
+	UpdateActiveClientsInfo(curTick);
 
 	if (ForceNewClient()){
         // There's not enough open uploads. Open another one.
