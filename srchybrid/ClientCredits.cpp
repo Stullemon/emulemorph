@@ -210,37 +210,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 				return 1.0f;
 		}break;
 		//EastShare End - added by AndCycle, Pawcio credit
-/*
-		case CS_BOOST_LESS:	//Boost less uploaded files
-		//MORPH START - Added by Yun.SF3, Boost the less uploaded files
-		//if (theApp.glob_prefs->IsBoostLess())
-		{
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-			// bad guy - no credits for you
-				return 1;
-			}
-			if (!GetDownloadedTotal())
-				return 1;
-			float result = 0;
-			if (!GetUploadedTotal())
-				result = 10000;
-			else
-				result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
-			float result2 = 0;
-			result2 = (float)GetDownloadedTotal()/1024.0;
-			result2 += 2;
-			result2 = (double)sqrt((double)result2);
-			if (result > result2)
-				result = result2;
-
-			if (result < 1)
-				return 1;
-			else if (result > 10000)
-				return 10000;
-			return result;
-		}break;
-*/		
+	
 		// EastShare START - Added by TAHO, new Credit System //Modified by Pretender
 		case CS_EASTSHARE:{
 			// check the client ident status
@@ -265,35 +235,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		// EastShare END - Added by TAHO, new Credit System
 
 		case CS_OFFICIAL:{
-		//MORPH START - Added by Yun.SF3, Boost the less uploaded files
-		if (theApp.glob_prefs->IsBoostLess())
-		{
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-			// bad guy - no credits for you
-				return 1;
-			}
-			if (!GetDownloadedTotal())
-				return 1;
-			float result = 0;
-			if (!GetUploadedTotal())
-				result = 10000;
-			else
-				result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
-			float result2 = 0;
-			result2 = (float)GetDownloadedTotal()/1024.0;
-			result2 += 2;
-			result2 = (double)sqrt((double)result2);
-			if (result > result2)
-				result = result2;
 
-			if (result < 1)
-				return 1;
-			else if (result > 10000)
-				return 10000;
-			return result;
-		}
-			else{
 			// check the client ident status
 			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 			// bad guy - no credits for you
@@ -319,7 +261,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			return 10;
 		return result;
 			}
-	}
+	
 
 		default:{
 			// check the client ident status
