@@ -2243,7 +2243,6 @@
 #define IDS_COUNTRYNAME_MID             4881
 #define IDS_COUNTRYNAME_LONG            4882
 #define IDS_COUNTRYNAME_SHOWFLAG        4883
-
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2252,7 +2251,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        4877
+#define _APS_NEXT_RESOURCE_VALUE        4878
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         4878
 #define _APS_NEXT_SYMED_VALUE           106
