@@ -255,6 +255,10 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	}
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
+	//MORPH START - Added by Yun.SF3, boost friend
+	if ((IsFriend()) && (theApp.glob_prefs->IsBoostFriends()) && (theApp.glob_prefs->UseCreditSystem()) && ((credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED) || theApp.glob_prefs->GetEnableAntiCreditHack() || ((!IsEmuleClient()) && (GetSourceExchangeVersion()==0)))) //MORPH - Added by IceCream, only boost for secured friend
+		fBaseValue *=1.5f;
+	//MORPH END - Added by Yun.SF3, boost friend
 	if (!isdownloading && !onlybasevalue){
 		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
 			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
