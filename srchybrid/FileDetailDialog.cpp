@@ -388,7 +388,7 @@ void CFileDetailDialogInfo::RefreshData()
 		uCompression += file->GetCompressionGain();
 		uDataRate += file->GetDatarate();
 		uCompleted += file->GetCompletedSize();
-		iHashsetAvailable += (file->GetHashCount() == file->GetED2KPartHashCount()) ? 1 : 0;
+		iHashsetAvailable += (file->GetHashCount() == file->GetED2KPartCount()) ? 1 : 0;	// SLUGFILLER: SafeHash - use GetED2KPartCount
 
 		//MORPH START - Changed by SiRoB, WebCache 1.2f
 		uWebcacherequests += file->Webcacherequests;//jp webcache

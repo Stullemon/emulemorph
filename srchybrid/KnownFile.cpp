@@ -1144,7 +1144,7 @@ bool CKnownFile::LoadHashsetFromFile(CFileDataIO* file, bool checkhash){
 		return false;	// wrong file?
 	}
 	else{
-		if (parts != GetED2KPartHashCount()){
+		if (parts != GetED2KPartCount()){	// SLUGFILLER: SafeHash - use GetED2KPartCount
 			// delete hashset
 			for (int i = 0; i < hashlist.GetSize(); i++)
 				delete[] hashlist[i];

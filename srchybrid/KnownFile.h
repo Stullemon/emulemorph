@@ -241,8 +241,11 @@ public:
 	const CArray<uchar*, uchar*>& GetHashset() const { return hashlist; }
 	bool	SetHashset(const CArray<uchar*, uchar*>& aHashset);
 
+	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
+	/*
 	// nr. of part hashs according the file size wrt ED2K protocol
 	UINT	GetED2KPartHashCount() const { return m_iED2KPartHashCount; }
+	*/
 
 	// nr. of 9MB parts (file data)
 	__inline uint16 GetPartCount() const { return m_iPartCount; }

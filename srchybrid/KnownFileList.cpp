@@ -94,7 +94,7 @@ bool CKnownFileList::Init()
 			pRecord = new CKnownFile();
 			if (!pRecord->LoadFromFile(&file)){
 				TRACE(_T("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n"), i, 
-					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartHashCount());
+					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartCount());	// SLUGFILLER: SafeHash - removed unnececery hash counter
 				delete pRecord;
 				pRecord = NULL;
 				continue;

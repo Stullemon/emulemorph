@@ -115,7 +115,7 @@ BOOL CED2kLinkDlg::OnSetActive()
 		BOOL bShow = FALSE;
 		for (int i = 0; i != m_paFiles->GetSize(); i++){
 			const CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
-			if (!(file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartHashCount())){
+			if (!(file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartCount())){	// SLUGFILLER: SafeHash - use GetED2KPartCount
 				continue;
 			}
 			bShow = TRUE;
@@ -210,7 +210,7 @@ void CED2kLinkDlg::UpdateLink()
 		//EastShare End - added by AndCycle, phpBB URL-Tags style link
 		strLinks += CreateED2kLink(file, false);
 		
-		if (bHashset && file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartHashCount()){
+		if (bHashset && file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartCount()){	// SLUGFILLER: SafeHash - use GetED2KPartCount
 			strLinks += _T("p=");
 			for (int j = 0; j < file->GetHashCount(); j++)
 			{

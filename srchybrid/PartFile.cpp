@@ -1124,7 +1124,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		//Morph End - added by AndCycle, ICS
 		SetStatus(PS_EMPTY);
 		// check hashcount, filesatus etc
-		if (GetHashCount() != GetED2KPartHashCount()){
+		if (GetHashCount() != GetED2KPartCount()){	// SLUGFILLER: SafeHash - use GetED2KPartCount
 			ASSERT( hashlist.GetSize() == 0 );
 			hashsetneeded = true;
 			return true;
