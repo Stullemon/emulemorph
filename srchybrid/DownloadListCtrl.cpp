@@ -2681,10 +2681,18 @@ void CDownloadListCtrl::CreateMenues() {
 	// xMule_MOD: showSharePermissions
 	m_PermMenu.CreateMenu();
 	switch (theApp.glob_prefs->GetPermissions()){
-		case PERM_ALL: buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
-		case PERM_FRIENDS: buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
-		case PERM_NOONE: buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
-		default: buffer = " (?)";
+		case PERM_ALL:
+			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
+			break;
+		case PERM_FRIENDS:
+			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
+			break;
+		case PERM_NOONE:
+			buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
+			break;
+		default:
+			buffer = " (?)";
+			break;
 	}
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT) + buffer);
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
