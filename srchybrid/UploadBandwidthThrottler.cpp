@@ -492,7 +492,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	    }
         	} else {
         	    if (classID == LAST_CLASS) lastLoopTick = thisLoopTick; //MORPH - Added by SiRoB, lastLoopTick Fix
-				realBytesToSpend = 0/*_I64_MAX*/;
+				realBytesToSpend = _I64_MAX;
         	    bytesToSpend = _I32_MAX;
         	}
 		//MORPH START - Added by SiRoB, Upload Splitting Class
