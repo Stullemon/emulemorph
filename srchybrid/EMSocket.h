@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "AsyncSocketEx.h"
+#include "OtherFunctions.h" //MORPH - Added by SiRoB, ZZ Upload
 
 class CAsyncProxySocketLayer;
 class Packet;
@@ -47,7 +48,11 @@ public:
 	CEMSocket(void);
 	~CEMSocket(void);
 
+	//MORPH - Changed by SiRoB, ZZ Upload
+	/*
 	void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	*/
+	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
     bool    HasQueues();
     bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
@@ -94,11 +99,17 @@ protected:
 	bool	m_ProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 
-    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
+	//MORPH - Changed by SiRoB, ZZ Upload
+    /*
+	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
+	*/
+    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, bool onlyAllowedToSendControlPacket = false);
 
 private:
 	void	ClearQueues();	
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
+
+	uint32	GetNeededBytes(); //MORPH - Added by SiRoB, ZZ Upload
 
 	// Download (pseudo) rate control	
 	uint32	downloadLimit;
@@ -132,7 +143,9 @@ private:
     uint64 m_numberOfSentBytesControlPacket;
     bool m_currentPackageIsFromPartFile;
 
+	bool	m_bAccelerateUpload; //MORPH - Added by SiRoB, ZZ Upload
     DWORD lastCalledSend;
+	uint32	lastFinishedStandard; //MORPH - Added by SiRoB, ZZ Upload
 
     //void StoppedSendSoUpdateStats();
     //void CleanSendLatencyList();

@@ -861,7 +861,7 @@ uint32 CUpDownClient::SendBlockData(){
         m_nUpDatarate = (sumavgUDR*1000) / (curTick-m_AvarageUDR_list.GetHead().timestamp);
 	} else {
 		// not enough values to calculate trustworthy speed. Use -1 to tell this
-        m_nUpDatarate = 0; //-1;
+        m_nUpDatarate = -1;
 	}
 
 	// Check if it's time to update the display.

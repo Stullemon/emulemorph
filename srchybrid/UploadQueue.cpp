@@ -774,12 +774,12 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 	// check if we can allow a new client to start downloading form us
 	if (numberOfUploads < MIN_UP_CLIENTS_ALLOWED)
 		return true;
-	else if (numberOfUploads >= MAX_UP_CLIENTS_ALLOWED)
-		return false;
+	//else if (numberOfUploads >= MAX_UP_CLIENTS_ALLOWED)
+	//	return false;
 
 	//now the final check
 	if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
-        GetDatarate() < UPLOAD_LOW_CLIENT_DR*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
+        GetDatarate() < UPLOAD_CHECK_CLIENT_DR*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
 			return true;
 	//nope
 	return false;
@@ -1056,7 +1056,8 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			//wistily
 			uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
 			client->Add2UpTotalTime(tempUpStartTimeDelay);
-			client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
+			if (client->GetUpTotalTime() > 999) //Added by SiRoB, to avoid div by zero
+				client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
 			/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
 			totaluploadtime += tempUpStartTimeDelay/1000;
 
@@ -1237,7 +1238,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 
 		// Send allowed data rate to UploadBandWidthThrottler in a thread safe way
 		//MOPRH START - Modified by SiRoB
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():thePrefs.GetMaxUpload()*1024, (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 5);
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():thePrefs.GetMaxUpload()*1024, thePrefs.IsUSSLimit(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingLimit(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20);
 		//MOPRH END   - Modified by SiRoB
 		//MORPH END    - Added by SiRoB, ZZ UPload System 20030818-1923
 

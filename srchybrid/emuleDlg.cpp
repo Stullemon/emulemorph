@@ -1085,28 +1085,26 @@ void CemuleDlg::ShowPing() {
     if(IsWindowVisible()) {
         CurrentPingStruct lastPing = theApp.lastCommonRouteFinder->GetCurrentPing();
 
-        char buffer[50];
+        CString buffer = "";
 
         if(thePrefs.IsDynUpEnabled()) {
-            if(lastPing.latency > 0) {
+            if(lastPing.state.GetLength() == 0) {
 				if (!thePrefs.IsUSSLimit()){
-					if(lastPing.lowest > 0) {
-						sprintf(buffer,"USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+					if(lastPing.lowest > 0 ) {
+						buffer.Format("USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
 					} else {
-						sprintf(buffer,"USS %i ms %.1f%s/s",lastPing.latency, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+						buffer.Format("USS %i ms %.1f%s/s",lastPing.latency, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
 					}
 				} else
-					sprintf(buffer,"USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingLimit(), (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+					buffer.Format("USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingLimit(), (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
 			} else {
-                sprintf(buffer,"Preparing...",lastPing);
+                buffer.SetString(lastPing.state);
             }
 		//MORPH START - Added by SiRoB, Related to SUC
 		} else if (thePrefs.IsSUCDoesWork()){
-			sprintf(buffer,"SUC r:%i vur:%.1f%s/s",theApp.uploadqueue->GetAvgRespondTime(0), (float)theApp.uploadqueue->GetMaxVUR()/1024,GetResString(IDS_KBYTES));
+			buffer.Format("SUC r:%i vur:%.1f%s/s",theApp.uploadqueue->GetAvgRespondTime(0), (float)theApp.uploadqueue->GetMaxVUR()/1024,GetResString(IDS_KBYTES));
 		//MORPH END   - Added by SiRoB, Related to SUC
-		} else {
-            sprintf(buffer,"");
-        }
+		}
 		statusbar->SetText(buffer,4,0);
     }
 }

@@ -2389,7 +2389,7 @@ void CPreferences::SavePreferences(){
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("USSLog", m_bDynUpLog,"eMule");
 	ini.WriteInt("USSPingLimit", m_iDynUpPingLimit,"eMule"); // EastShare - Add by TAHO, USS limit
-	ini.WriteBool("isUSSLimit", m_bIsUSSLimit,"eMule"); // EastShare - Added by TAHO, does USS limit
+	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit,"eMule"); // EastShare - Added by TAHO, does USS limit
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 	// ZZ:UploadSpeedSense -->
 	ini.WriteBool("USSEnabled", m_bDynUpEnabled, "eMule");
@@ -2837,7 +2837,8 @@ void CPreferences::LoadPreferences(){
 	shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	m_iKnownMetDays = ini.GetInt("KnownMetDays", 0);
+	m_iKnownMetDays = ini.GetInt("KnownMetDays", 150);
+	if (m_iKnownMetDays = 0) m_iKnownMetDays = 150;
 	// EastShare END - Added by TAHO, .met file control
 	isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
 	m_bDateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
@@ -3057,7 +3058,7 @@ void CPreferences::LoadPreferences(){
 	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
 	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
 	m_bDynUpLog = ini.GetBool("DynUpLog", false);
-	m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
+	m_iDynUpPingLimit = ini.GetInt("USSPingLimit", 200); // EastShare - Added by TAHO, USS limit
 	m_bIsUSSLimit = ini.GetBool("IsUSSLimit",false); // EastShare - Added by TAHO, does USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
 

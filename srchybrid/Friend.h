@@ -51,11 +51,8 @@ public:
 	static const char sm_abyNullHash[16];
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	void SetFriendSlot(bool newValue);
-	bool GetFriendSlot();
+	bool GetFriendSlot() const;
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-	//MORPH START - Added by SiRoB, Friend Addon
-	bool GetFS() const; //KTS
-	//MORPH END   - Added by SiRoB, Friend Addon
 	
 private:
 	bool HasUserhash();

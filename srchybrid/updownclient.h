@@ -476,6 +476,7 @@ public:
 					{
 						m_nCurSessionUp = m_nTransferedUp;
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp();
+						//m_nCurQueueSessionPayloadUp = 0;
 					}
 	uint32			GetQueueSessionUp()	const
 					{

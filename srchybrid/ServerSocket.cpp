@@ -607,8 +607,7 @@ void CServerSocket::SetConnectionState(sint8 newstate){
 	}
 }
 
-bool CServerSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket){
+void CServerSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
 	m_dwLastTransmission = GetTickCount();
-	/*return */ CEMSocket::SendPacket(packet, delpacket, controlpacket);
-    return true; // PENDING: this is a workaround, but SendPacket always returned true anyway (?)
+	CEMSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize);
 }

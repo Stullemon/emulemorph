@@ -22,6 +22,7 @@ typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 struct CurrentPingStruct {
 	//uint32	datalen;
+    CString state;
 	uint32	latency;
 	uint32	lowest;
 };
@@ -42,7 +43,7 @@ public:
     CurrentPingStruct GetCurrentPing();
     bool AcceptNewClient();
 
-    void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, double pPingTolerance, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
+    void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
 
     uint32 GetUpload();
 private:
@@ -76,6 +77,8 @@ private:
     uint32 m_upload;
 
     double m_pingTolerance;
+    uint32 m_iPingToleranceMilliseconds;
+    bool m_bUseMillisecondPingTolerance;
     uint32 m_goingUpDivider;
     uint32 m_goingDownDivider;
     uint32 m_iNumberOfPingsForAverage;
@@ -83,4 +86,6 @@ private:
     uint32 m_pingAverage;
     uint32 m_lowestPing;
     uint64 m_LowestInitialPingAllowed;
+
+    CString m_state;
 };

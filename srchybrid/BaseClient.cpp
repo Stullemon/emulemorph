@@ -646,7 +646,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		// Link the friend to that client
 		//MORPH START - Added by Yun.SF3, ZZ Upload System
 		m_Friend->SetLinkedClient(this);
-		theApp.friendlist->RefreshFriend(m_Friend);
 		//MORPH END - Added by Yun.SF3, ZZ Upload System
 	}
 	else{
@@ -1120,7 +1119,7 @@ bool CUpDownClient::Disconnected(CString strReason, bool bFromSocket){
 	if (GetUploadState() == US_UPLOADING)
 	{
 		//MORPH START - Changed by SiRoB, Disconnect circonstance
-		theApp.uploadqueue->RemoveFromUploadQueue(this,"Client Disconnected");
+		theApp.uploadqueue->RemoveFromUploadQueue(this,strReason);
 		//MORPH END   - Changed by SiRoB, Disconnect circonstance
 	}
 	if (GetDownloadState() == DS_DOWNLOADING){

@@ -15,7 +15,9 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include "emule.h"
 #include "Friend.h"
+#include "FriendList.h"
 #include "OtherFunctions.h"
 #include "UpDownClient.h"
 #include "Packets.h"
@@ -71,14 +73,9 @@ CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedI
 CFriend::CFriend(CUpDownClient* client){
 	ASSERT ( client );
 	//MORPH START - Modified by SiRoB, ZZ Upload System
-	//m_dwLastSeen = time(NULL);
-	//m_dwLastUsedIP = client->GetIP();
-	//m_nLastUsedPort = client->GetUserPort();
-	//m_dwLastChatted = 0;
-	//m_strName = client->GetUserName();
-	//md4cpy(m_abyUserhash,client->GetUserHash());
-	//m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
-	//m_LinkedClient = client;
+	m_dwLastSeen = time(NULL);
+	m_dwLastUsedIP = client->GetIP();
+	m_nLastUsedPort = client->GetUserPort();
 	m_dwLastChatted = 0;
 	m_LinkedClient = NULL;
 	m_friendSlot = false;
@@ -177,7 +174,7 @@ void CFriend::SetFriendSlot(bool newValue) {
     m_friendSlot = newValue;
 }
 
-bool CFriend::GetFriendSlot() {
+bool CFriend::GetFriendSlot() const {
     if(m_LinkedClient != NULL) {
         return m_LinkedClient->GetFriendSlot();
     } else {
@@ -206,19 +203,12 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 
 	if(linkedClient != m_LinkedClient) {
 		if(m_LinkedClient != NULL) {
-			// the old client is no longer friend, since it is no longer the linked client
+            // the old client is no longer friend, since it is no longer the linked client
 			m_LinkedClient->SetFriendSlot(false);
 			m_LinkedClient->m_Friend = NULL;
 		}
 		m_LinkedClient = linkedClient;
 	}
-};
-//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System//MORPH START - Added by SiRoB, Friend Addon
-bool CFriend::GetFS() const{
-	if(m_LinkedClient != NULL) {
-		return m_LinkedClient->GetFriendSlot();
-	} else {
-		return m_friendSlot;
-	}
+    theApp.friendlist->RefreshFriend(this);
 }
-//MORPH END   - Added by SiRoB, Friend Addon
+//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System

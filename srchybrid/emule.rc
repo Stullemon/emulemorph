@@ -94,7 +94,7 @@ BEGIN
     CONTROL         "",IDC_QUEUELIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | NOT 
                     WS_VISIBLE | WS_TABSTOP,5,215,500,63,WS_EX_STATICEDGE
-    ICON            "",IDC_DOWNLOAD_ICO,5,3,21,20
+    ICON            "",IDC_DOWNLOAD_ICO,5,3,20,20
     PUSHBUTTON      "Text",IDC_UPLOAD_ICO,1,99,34,15,BS_ICON | BS_FLAT
     PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,437,278,68,11,BS_FLAT | 
                     NOT WS_VISIBLE
@@ -4381,7 +4381,7 @@ BEGIN
     IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
     IDS_MULTIPLEINSTANCE    "Multiple Instances (requires restart)"
     IDS_INFINITEQUEUE       "Infinite Queue"
-    IDS_PAYBACKFIRSTLIMIT   "Amout before triggering (Default 10Mo)"
+    IDS_PAYBACKFIRSTLIMIT   "Amount before triggering (Default 10MB)"
 END
 
 #endif    // Anglais (États-Unis) resources

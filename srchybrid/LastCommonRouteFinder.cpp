@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "Opcodes.h"
 #include "LastCommonRouteFinder.h"
 #include "Server.h"
 #include "OtherFunctions.h"
@@ -39,11 +40,15 @@ LastCommonRouteFinder::LastCommonRouteFinder() {
     m_upload = _UI32_MAX;
     m_CurUpload = 1;
 
+    m_iPingToleranceMilliseconds = 200;
+    m_bUseMillisecondPingTolerance = false;
     m_iNumberOfPingsForAverage = 0;
     m_pingAverage = 0;
     m_lowestPing = 0;
-    m_LowestInitialPingAllowed = 5;
+    m_LowestInitialPingAllowed = 20;
     pingDelaysTotal = 0;
+
+    m_state = "";
 
     needMoreHosts = false;
 
@@ -170,13 +175,18 @@ bool LastCommonRouteFinder::AddHostsToCheck(CUpDownClientPtrList &list) {
 
 
 CurrentPingStruct LastCommonRouteFinder::GetCurrentPing() {
-    CurrentPingStruct returnVal = { 0, 0 };
+    CurrentPingStruct returnVal;
 
     if(m_enabled) {
         pingLocker.Lock();
+        returnVal.state = m_state;
         returnVal.latency = m_pingAverage;
         returnVal.lowest = m_lowestPing;
         pingLocker.Unlock();
+    } else {
+        returnVal.state = "";
+        returnVal.latency = 0;
+        returnVal.lowest = 0;
     }
 
     return returnVal;
@@ -190,7 +200,7 @@ bool LastCommonRouteFinder::AcceptNewClient() {
     return acceptNewClient || !m_enabled; // if enabled, then return acceptNewClient, otherwise return true
 }
 
-void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, double pPingTolerance, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed) {
+void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed) {
     bool sendEvent = false;
 
     prefsLocker.Lock();
@@ -222,7 +232,9 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
         prefsEvent->ResetEvent();
     }
     m_enabled = pEnabled;
+    m_bUseMillisecondPingTolerance = pUseMillisecondPingTolerance;
     m_pingTolerance = pPingTolerance;
+    m_iPingToleranceMilliseconds = pPingToleranceMilliseconds;
     m_goingUpDivider = pGoingUpDivider;
     m_goingDownDivider = pGoingDownDivider;
     m_CurUpload = pCurUpload;
@@ -297,14 +309,13 @@ UINT AFX_CDECL LastCommonRouteFinder::RunProc(LPVOID pParam) {
  */
 UINT LastCommonRouteFinder::RunInternal() {
     Pinger pinger;
+    bool hasSucceededAtLeastOnce = false;
 
     while(doRun) {
         // wait for updated prefs
         prefsEvent->Lock();
 
         bool enabled = m_enabled;
-
-        int tries = 0;
 
         // retry loop. enabled will be set to false in end of this loop, if to many failures (tries too large)
         while(doRun && enabled) {
@@ -321,6 +332,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             pingLocker.Lock();
             m_pingAverage = 0;
             m_lowestPing = 0;
+            m_state = "Preparing...";
             pingLocker.Unlock();
 
             // Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
@@ -328,8 +340,8 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             bool atLeastOnePingSucceded = false;
             while(doRun && enabled && foundLastCommonHost == false) {
-                int traceRouteTries = 0;
-                while(doRun && enabled && foundLastCommonHost == false && traceRouteTries < 3 && hostsToTraceRoute.GetCount() < 10) {
+                uint32 traceRouteTries = 0;
+                while(doRun && enabled && foundLastCommonHost == false && (traceRouteTries < 5 || hasSucceededAtLeastOnce && traceRouteTries < _UI32_MAX) && hostsToTraceRoute.GetCount() < 10) {
                     traceRouteTries++;
 
                     lastCommonHost = 0;
@@ -367,6 +379,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSFINDLASTCOMMON));
                     // for the tracerouting phase (preparing...) we need to disable uploads so we get a faster traceroute and better ping values.
                     SetUpload(512);
+                    Sleep(SEC2MS(1));
 
                     if(m_enabled == false) {
                         enabled = false;
@@ -425,7 +438,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                 }
                             }
 
-                            if(pingStatus.success == true && pingStatus.status != IP_SUCCESS) {
+                            if(pingStatus.success == true && pingStatus.status == IP_TTL_EXPIRED_TRANSIT) {
                                 if(curHost == 0) {
                                     curHost = pingStatus.destinationAddress;
                                 }
@@ -493,6 +506,16 @@ UINT LastCommonRouteFinder::RunInternal() {
                             }
                         }
                     }
+
+                    if(foundLastCommonHost == false && traceRouteTries >= 3) {
+                        theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Tracerouting failed several times. Waiting a few minutes before trying again.");
+
+                        pingLocker.Lock();
+                        m_state = "Waiting...";
+                        pingLocker.Unlock();
+
+                        prefsEvent->Lock(3*60*1000);
+                    }
                 }
 
 				//MORPH - Modified by SiRoB, USS log debug
@@ -515,7 +538,9 @@ UINT LastCommonRouteFinder::RunInternal() {
 					//MORPH - Modified by SiRoB, USS log debug
 					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSTRACEFAILDIS));
                     enabled = false;
-
+					pingLocker.Lock();
+                    m_state = "Error.";
+                    pingLocker.Unlock();
                     // PENDING: this may not be thread safe
                     thePrefs.SetDynUpEnabled(false);
                 }
@@ -537,9 +562,6 @@ UINT LastCommonRouteFinder::RunInternal() {
             prefsLocker.Unlock();
 
             uint32 initial_ping = _I32_MAX;
-
-            //// lock to prevent GetUpload(), and thereby preventing UploadBandwidthThrottler to loop and send() during this part.
-            //uploadLocker.Lock();
 
             // finding lowest ping
             for(int initialPingCounter = 0; doRun && enabled && initialPingCounter < 10; initialPingCounter++) {
@@ -564,7 +586,8 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             // Set the upload to a good starting point
             SetUpload(startUpload);
-            //uploadLocker.Unlock();
+            Sleep(SEC2MS(1));
+            DWORD initTime = ::GetTickCount();
 
             // if all pings returned 0, initial_ping will not have been changed from default value.
             // then set initial_ping to lowestInitialPingAllowed
@@ -573,6 +596,8 @@ UINT LastCommonRouteFinder::RunInternal() {
             }
 
             uint32 upload = 0;
+
+            hasSucceededAtLeastOnce = true;
 
             if(doRun && enabled) {
 				//MORPH - Modified by SiRoB, USS log debug
@@ -601,12 +626,17 @@ UINT LastCommonRouteFinder::RunInternal() {
                 if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSREADY));
             }
 
+            pingLocker.Lock();
+            m_state = "";
+            pingLocker.Unlock();
+
             // There may be several reasons to start over with tracerouting again.
             // Currently we only restart if we get an unexpected ip back from the
             // ping at the set TTL.
             bool restart = false;
 
             DWORD lastLoopTick = ::GetTickCount();
+            DWORD lastUploadReset = 0;
 
             while(doRun && enabled && restart == false) {
                 DWORD ticksBetweenPings = 1000;
@@ -636,16 +666,32 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                 prefsLocker.Lock();
                 double pingTolerance = m_pingTolerance;
+                uint32 pingToleranceMilliseconds = m_iPingToleranceMilliseconds;
+                bool useMillisecondPingTolerance = m_bUseMillisecondPingTolerance;
                 uint32 goingUpDivider = m_goingUpDivider;
                 uint32 goingDownDivider = m_goingDownDivider;
                 uint32 numberOfPingsForAverage = m_iNumberOfPingsForAverage;
                 lowestInitialPingAllowed = m_LowestInitialPingAllowed; // PENDING
                 prefsLocker.Unlock();
 
+                {
+                    DWORD tempTick = ::GetTickCount();
+
+                    if(tempTick - initTime < SEC2MS(60)) {
+                        goingUpDivider = 1;
+                        goingDownDivider = 1;
+                    } else if(/*tempTick - lastUploadReset > SEC2MS(5) ||*/ tempTick - initTime < SEC2MS(61)) {
+                        lastUploadReset = tempTick;
+                        prefsLocker.Lock();
+                        upload = m_CurUpload;
+                        prefsLocker.Unlock();
+                    }
+                }
+
                 uint32 soll_ping = initial_ping*pingTolerance;
                 // EastShare START - Add by TAHO, USS limit
-				if ( thePrefs.IsUSSLimit() ) {
-					soll_ping = thePrefs.GetDynUpPingLimit(); 
+				if ( useMillisecondPingTolerance ) {
+                    soll_ping = pingToleranceMilliseconds; 
 				}else{
 					soll_ping = initial_ping*pingTolerance; // ZZ, USS
 				}
@@ -654,19 +700,21 @@ UINT LastCommonRouteFinder::RunInternal() {
                 uint32 raw_ping = soll_ping; // this value will cause the upload speed not to change at all.
 
                 bool pingFailure = false;        
-                for(int pingTries = 0; doRun && enabled && (pingTries == 0 || pingFailure) && pingTries < 2; pingTries++) {
+                for(uint64 pingTries = 0; doRun && enabled && (pingTries == 0 || pingFailure) && pingTries < 60; pingTries++) {
                     // ping the host to ping
                     PingStatus pingStatus = pinger.Ping(hostToPing, lastCommonTTL);
 
-                    if(pingStatus.success) {
+                    if(pingStatus.success && pingStatus.status == IP_TTL_EXPIRED_TRANSIT) {
                         if(pingStatus.destinationAddress != lastCommonHost) {
                             // something has changed about the topology! We got another ip back from this ttl than expected.
                             // Do the tracerouting again to figure out new topology
                             IN_ADDR stLastCommonHostAddr;
                             stLastCommonHostAddr.s_addr = lastCommonHost;
+                            CString lastCommonHostAddressString = inet_ntoa(stLastCommonHostAddr);
 
                             IN_ADDR stDestinationAddr;
                             stDestinationAddr.s_addr = pingStatus.destinationAddress;
+                            CString destinationAddressString = inet_ntoa(stDestinationAddr);
 
                             //MORPH - Modified by SiRoB, USS log debug
 							if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSNEWTRACEROUTE), lastCommonTTL, inet_ntoa(stLastCommonHostAddr), inet_ntoa(stDestinationAddr));
@@ -679,18 +727,16 @@ UINT LastCommonRouteFinder::RunInternal() {
                             // only several pings in row should fails, the total doesn't count, so reset for each successful ping
                             pingFailure = false;
 
-                            //MORPH - Modified by SiRoB, USS log debug
-			//				if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGNUMCONTINUE), pingTries);
-                        } else {
-                            // if we have successful pings, then something must be right. So we reset the main tries count.
-                            // this way we will not abort unnessesary after a few days, just because there has been transient errors several times.
-                            tries = 0;
-                        }
+                            //theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Ping #%i successful. Continuing.", pingTries);
+						}
                     } else {
                         raw_ping = soll_ping*3+initial_ping*3; // this value will cause the upload speed be lowered.
 
                         pingFailure = true;
 
+						if(pingTries > 3) {
+                            Sleep(1000);
+                        }
                         //MORPH - Modified by SiRoB, USS log debug
 			//			if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGFAILED), pingTries);
                         //pinger.PIcmpErr(pingStatus.error);

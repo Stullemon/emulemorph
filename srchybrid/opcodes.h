@@ -52,7 +52,7 @@
 #define MAX_RESULTS				100		// max global search results
 #define	MAX_MORE_SEARCH_REQ		5		// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
 #define MAX_CLIENTCONNECTIONTRY	2
-#define CONNECTION_TIMEOUT		SEC2MS(40)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
+#define CONNECTION_TIMEOUT		SEC2MS(80)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
 #define	FILEREASKTIME			MIN2MS(29)	//29 mins
 #define SERVERREASKTIME			MIN2MS(15)	//15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
 #define UDPSERVERREASKTIME		MIN2MS(30)	//30 mins
@@ -87,16 +87,11 @@
 #define MAXCONPER5SEC			20	
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
-//Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
-#define	UPLOAD_LOW_CLIENT_DR	3072	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
-//Morph End - added by AndCycle, ZZ Upload System 20040106-1735
-#define	UPLOAD_CLIENT_DATARATE	5120	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
-//MORPH START - Added by Yun.SF3, ZZ Upload System 20030807-1911
+#define	UPLOAD_CLIENT_DATARATE	4000		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
+//#define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
+#define	MIN_UP_CLIENTS_ALLOWED	1		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define MINNUMBEROFTRICKLEUPLOADS 0
-#define MINWAITBEFOREOPENANOTHERSLOTMS 3000
-//MORPH END   - Added by Yun.SF3, ZZ Upload System 20030807-1911
-#define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
-#define	MIN_UP_CLIENTS_ALLOWED	2		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
+#define MINWAITBEFOREOPENANOTHERSLOTMS 1000
 #define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				50

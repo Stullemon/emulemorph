@@ -121,6 +121,7 @@ CEMSocket::CEMSocket(void){
     m_numberOfSentBytesControlPacket = 0;
 
     lastCalledSend = ::GetTickCount();
+	m_bAccelerateUpload = false; //MORPH - Added by SiRoB, ZZ Upload
 
     m_actualPayloadSize = 0;
     m_actualPayloadSizeSent = 0;
@@ -490,8 +491,16 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
             // queue up for controlpacket
             theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
 	    } else {
+            bool first = !((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty()); //MORPH - Added by SiRoB, ZZ Upload
             StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
 		    standartpacket_queue.AddTail(queueEntry);
+			//MORPH START - Added by SiRoB, ZZ Upload
+            // reset timeout for the first time
+            if (first) {
+                lastFinishedStandard = ::GetTickCount();
+                m_bAccelerateUpload = true;	// Always accelerate first packet in a block
+            }
+			//MORPH END  - Added by SiRoB, ZZ Upload
 	    }
     }
 
@@ -617,7 +626,11 @@ void CEMSocket::OnSend(int nErrorCode){
  *
  * @return the actual number of bytes that were put on the socket.
  */
+//MORPH - Changed by SiRoB, ZZ Upload
+/*
 SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket) {
+*/
+SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, bool onlyAllowedToSendControlPacket) {
 	//EMTrace("CEMSocket::Send linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
     sendLocker.Lock();
 
@@ -637,6 +650,8 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
            sendbuffer == NULL && !controlpacket_queue.IsEmpty() || // There's a control packet in queue, and we are not currently sending anything, so we will handle the control packet next
            sendbuffer != NULL && m_currentPacket_is_controlpacket == true || // We are in the progress of sending a control packet. We are always allowed to send those
            sendbuffer != NULL && m_currentPacket_is_controlpacket == false && !controlpacket_queue.IsEmpty() && ::GetTickCount()-lastCalledSend > 3*1000)) { // We have waited to long to clean the current packet (which may be a standard packet that is in the way). Proceed no matter what the value of onlyAllowedToSendControlPacket.
+
+        lastCalledSend = ::GetTickCount(); //MORPH - Added by SiRoB, ZZ Upload
 
         // If we are currently not in the progress of sending a packet, we will need to find the next one to send
         if(sendbuffer == NULL) {
@@ -677,10 +692,22 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
         // At this point we've got a packet to send in sendbuffer. Try to send it. Loop until entire packet
         // is sent, or until we reach maximum bytes to send for this call, or until we get an error.
         // NOTE! If send would block (returns WSAEWOULDBLOCK), we will return from this method INSIDE this loop.
-        while (sent < sendblen && sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false){
+        //MORPH - Changed by SiRoB, ZZ Upload
+		/*
+		while (sent < sendblen && sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false){
+		*/
+		while (sent < sendblen && sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < max(maxNumberOfBytesToSend, overchargeMaxBytesToSend) && anErrorHasOccured == false){
+		
 		    uint32 tosend = sendblen-sent;
-		    if (maxNumberOfBytesToSend >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
-			    tosend = maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
+            if(maxNumberOfBytesToSend > overchargeMaxBytesToSend) { //MORPH - Changed by SiRoB, ZZ Upload
+		    	if (maxNumberOfBytesToSend >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
+				    tosend = maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
+            //MORPH START - Added by SiRoB, ZZ Upload
+			} else {
+    		    if (overchargeMaxBytesToSend >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > overchargeMaxBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
+                    tosend = overchargeMaxBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
+            }
+			//MORPH END  - Added by SiRoB, ZZ Upload
 		    ASSERT (tosend != 0);
     		
             //DWORD tempStartSendTick = ::GetTickCount();
@@ -709,7 +736,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
                 }
             } else {
                 // we managed to send some bytes. Perform bookkeeping.
-                lastCalledSend = ::GetTickCount();
+                //lastCalledSend = ::GetTickCount(); //MORPH - Commented by SiRoB, ZZ Upload
                 sent += result;
 
                 // Log send bytes in correct class
@@ -738,6 +765,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
             if(!m_currentPacket_is_controlpacket) {
                 m_actualPayloadSizeSent += m_actualPayloadSize;
                 m_actualPayloadSize = 0;
+
+				//MORPH START - Added by SiRoB, ZZ Upload
+                lastFinishedStandard = ::GetTickCount(); // reset timeout
+                m_bAccelerateUpload = false; // Safe until told otherwise
+				//MORPH END   - Added by SiRoB, ZZ Upload
             }
 
             sent = 0;
@@ -760,7 +792,58 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
     SocketSentBytes returnVal = { !anErrorHasOccured, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
     return returnVal;
 }
+//MORPH START - Added by SiRoB, ZZ Upload
+/**
+ * Decides the (minimum) amount the socket needs to send to prevent timeout.
+ * 
+ * @author SlugFiller
+ */
+uint32 CEMSocket::GetNeededBytes() {
+	sendLocker.Lock();
+	if (byConnected == ES_DISCONNECTED) {
+		sendLocker.Unlock();
+		return 0;
+	}
 
+    if (!((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty())) {
+		sendLocker.Unlock();
+		return 1;	// Queues empty, try to fill
+	}
+
+	if (((sendbuffer && !m_currentPacket_is_controlpacket)) && !controlpacket_queue.IsEmpty())
+		m_bAccelerateUpload = true;	// We might be trying to send a block request, accelerate packet
+
+	uint32 sendgap = ::GetTickCount() - lastCalledSend;
+
+	uint64 timetotal = m_bAccelerateUpload?45000:90000;
+	uint64 timeleft = ::GetTickCount() - lastFinishedStandard;
+	uint64 sizeleft, sizetotal;
+	if (sendbuffer && !m_currentPacket_is_controlpacket) {
+		sizeleft = sendblen-sent;
+		sizetotal = sendblen;
+	}
+	else {
+		sizeleft = sizetotal = standartpacket_queue.GetHead().packet->GetRealPacketSize();
+	}
+	sendLocker.Unlock();
+
+	if (timeleft >= timetotal)
+		return sizeleft;
+	timeleft = timetotal-timeleft;
+	if (timeleft*sizetotal >= timetotal*sizeleft) {
+		if (sendgap > CONNECTION_TIMEOUT/2)
+			return 1;	// Don't let the socket itself time out - Might happen when switching from spread(non-focus) slot to trickle slot
+		return 0;
+	}
+	uint64 decval = timeleft*sizetotal/timetotal;
+	if (!decval)
+		return sizeleft;
+	if (decval < sizeleft)
+		return sizeleft-decval+1;	// Round up
+	else
+		return 1;
+}
+//MORPH END   - Added by SiRoB, ZZ Upload
 // pach2:
 // written this overriden Receive to handle transparently FIN notifications coming from calls to recv()
 // This was maybe(??) the cause of a lot of socket error, notably after a brutal close from peer
@@ -927,7 +1010,7 @@ void CEMSocket::TruncateQueues() {
     sendLocker.Lock();
 
     // Clear the standard queue totally
-    // Please not! There may still be a standardpacket in the sendbuffer variable!
+    // Please note! There may still be a standardpacket in the sendbuffer variable!
 	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; )
 		delete standartpacket_queue.GetNext(pos).packet;
 	standartpacket_queue.RemoveAll();

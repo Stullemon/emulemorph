@@ -36,8 +36,8 @@ public:
 	char*	GetPacket();
 	char*	DetachPacket();
 	uint32	GetRealPacketSize()		{return size+6;}
-	bool	IsSplitted()			{return m_bSplitted;}
-	bool	IsLastSplitted()		{return m_bLastSplitted;}
+//	bool	IsSplitted()			{return m_bSplitted;}
+//	bool	IsLastSplitted()		{return m_bLastSplitted;}
 	void	PackPacket();
 	bool	UnPackPacket(UINT uMaxDecompressedSize = 50000);
 	char*	pBuffer;

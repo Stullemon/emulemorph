@@ -660,7 +660,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			//wistily start
 			uint32 tempDownTimeDifference= GetDownTimeDifference();
 			Add2DownTotalTime(tempDownTimeDifference);
-			if (m_nDownTotalTime>1000) //Added by SiRoB, to avoid div by zero
+			if (m_nDownTotalTime > 999) //Added by SiRoB, to avoid div by zero
 				m_nAvDownDatarate = m_nTransferedDown/(m_nDownTotalTime/1000);
 			thePrefs.Add2DownSAvgTime(tempDownTimeDifference/1000);
 			/*thePrefs.Add2DownSAvgTime(GetDownTimeDifference()/1000);*/
