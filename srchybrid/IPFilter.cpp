@@ -435,9 +435,8 @@ void CIPFilter::UpdateIPFilterURL()
 	remove(strTempFilename);
 	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
 	if ((thePrefs.GetIPfilterVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
-		thePrefs.SetIpfilterVersion(atoi(sbuffer));
 	// [end] Mighty Knife
-		thePrefs.Save(); //MORPH - Added by SiRoB, Fix the continuous update while emule have not been shutdown in case used in an autoupdater
+
 		CString IPFilterURL = strURL.TrimRight(".txt") + ".dat";
 		strTempFilename.Format(CString(thePrefs.GetConfigDir())+"ipfilter.dat");
 
@@ -499,14 +498,22 @@ void CIPFilter::UpdateIPFilterURL()
 			_tremove(theApp.ipfilter->GetDefaultFilePath());
 			_trename(szTempFilePath, theApp.ipfilter->GetDefaultFilePath());
 		}
+        //Commander - Fixed: Versionnumber on failed download - Start
+		if(bIsZipFile && !bUnzipped){
+			return;
+		}
 			LoadFromDefaultFile();
+            
+			thePrefs.SetIpfilterVersion(atoi(sbuffer));
+			thePrefs.Save();
+		//Commander - Fixed: Versionnumber on failed download - End
 	}
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 //Commander - Added: IP2Country auto-updating - Start
 void CIPFilter::UpdateIP2CountryURL()
-{
+{   
 	char buffer[9]; //Versionformat: Ymmdd -> 20040101
 	int lenBuf = 9;
 	CString sbuffer;
@@ -530,11 +537,14 @@ void CIPFilter::UpdateIP2CountryURL()
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
 	remove(strTempFilename);
+
     // Compare the Version numbers
 	if ((thePrefs.GetIP2CountryVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
-		thePrefs.SetIP2CountryVersion(atoi(sbuffer));
 		
-		thePrefs.Save(); //Save in order to save the first/newer version to the preferences.ini
+		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+			theApp.ip2country->Unload();
+			AddLogLine(false,"IP2Country.csv unloaded due to update in progress");
+		}
 		CString IP2CountryURL = strURL;
 		CString ext;
 		
@@ -550,7 +560,7 @@ void CIPFilter::UpdateIP2CountryURL()
 
 		TCHAR szTempFilePath[MAX_PATH];
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
-        
+
 		CHttpDownloadDlg dlgDownload;
 		dlgDownload.m_strTitle = _T("Downloading IP2Country file");
 		dlgDownload.m_sURLToDownload = IP2CountryURL;
@@ -559,9 +569,13 @@ void CIPFilter::UpdateIP2CountryURL()
 		{
 			_tremove(szTempFilePath);
 			AddLogLine(true, _T("IP2Country file download failed"));
+			if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+				theApp.ip2country->Load();
+				AddLogLine(false,"IP2Country.csv loaded after unsuccessful update (backup file loaded)");
+			}
 			return;
 		}
-
+        
 		bool bIsZipFile = false;
 		bool bUnzipped = false;
 		CZIPFile zip;
@@ -596,13 +610,22 @@ void CIPFilter::UpdateIP2CountryURL()
 
 			zip.Close();
 		}
-        //Unload the current file and load the new one
-		if(theApp.ip2country->IsIP2Country()){
-        if(PathFileExists(thePrefs.GetConfigDir()+_T("ip-to-country.csv")))
-		theApp.ip2country->Unload();
+		else 
+			_trename(szTempFilePath, thePrefs.GetConfigDir()+_T("ip-to-country.csv")); //If its not a zipfile, rename it to its destination name
+		
         
-		theApp.ip2country->Load();
+		if(bIsZipFile && bUnzipped == false){ //Is Zipfile and failed to unzip
+			return;
 		}
+
+        //load the new one
+		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+		  theApp.ip2country->Load();
+		  AddLogLine(false,"IP2Country.csv loaded after successful update");
+		}
+
+		thePrefs.SetIP2CountryVersion(atoi(sbuffer)); //Commander - Added: Update version number
+		thePrefs.Save();
 	}
 }
 //Commander - Added: IP2Country auto-updating - End
