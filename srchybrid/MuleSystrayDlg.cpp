@@ -174,7 +174,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlSpeed.m_bUseIcon = true;
 		m_ctrlSpeed.m_sIcon.cx = 16;
 		m_ctrlSpeed.m_sIcon.cy = 16;
-		m_ctrlSpeed.m_hIcon = theApp.LoadIcon(_T("SPEED"), m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy);
+		m_ctrlSpeed.m_hIcon = theApp.LoadIcon(_T("STATSCLIENTS"), m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy);
 		m_ctrlSpeed.m_bParentCapture = true;
 		if(bValidFont)
 		{	
