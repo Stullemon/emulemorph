@@ -39,6 +39,7 @@ IMPLEMENT_DYNAMIC(CMuleStatusBarCtrl, CStatusBarCtrl)
 
 BEGIN_MESSAGE_MAP(CMuleStatusBarCtrl, CStatusBarCtrl)
 	ON_WM_LBUTTONDBLCLK()
+	ON_NOTIFY_RANGE(TTN_GETDISPINFO, 0,SBarChatMsg, OnToolTipNotify)//MORPH - Added by SiRoB, Show zz ratio activation reason
 END_MESSAGE_MAP()
 
 CMuleStatusBarCtrl::CMuleStatusBarCtrl()
@@ -116,12 +117,12 @@ CString CMuleStatusBarCtrl::GetPaneToolTipText(EStatusBarPane iPane) const
 	case SBarUpDown:
 		{
 			uint8 ActivatedRatioReason = thePrefs.IsZZRatioDoesWork();
-			strText.Format(_T("zzRatio: %s"),(ActivatedRatioReason)?_T("Activated"):_T("Not activated"));
-			strText.AppendFormat(_T("\r\n\x2022 1/3 Ratio reached: %s"),(theApp.downloadqueue->IsZZRatioInWork())?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\r\n\x2022 PowerSharing incomplet file: %s"),(ActivatedRatioReason & 1)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\r\n\x2022 Using friend slot: %s"),(ActivatedRatioReason & 2)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\r\n\x2022 Upload limit under 10KB/s: %s"),(ActivatedRatioReason & 4)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\r\n\x2022 Average upload under 10KB/s: %s"),(ActivatedRatioReason & 8)?_T("Yes"):_T("No"));
+			strText.Format(_T("zzRatio: %s"),(ActivatedRatioReason)?_T("is activated"):_T("isn't activated"));
+			strText.AppendFormat(_T("\n\r\x2022 1/3 Ratio reached: %s"),(theApp.downloadqueue->IsZZRatioInWork())?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\n\r\x2022 PowerSharing incomplet file: %s"),(ActivatedRatioReason & 1)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\n\r\x2022 Using friend slot: %s"),(ActivatedRatioReason & 2)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\n\r\x2022 Upload limit under 10KB/s: %s"),(ActivatedRatioReason & 4)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\n\r\x2022 Average upload under 10KB/s: %s"),(ActivatedRatioReason & 8)?_T("Yes"):_T("No"));
 			break;
 		}
 	//MORPH END   - Added by SiRoB, Show zz ratio activation reason
@@ -144,7 +145,12 @@ int CMuleStatusBarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 				pTI->uId = (UINT_PTR)iPane;
 				pTI->uFlags &= ~TTF_IDISHWND;
 				pTI->uFlags |= TTF_NOTBUTTON|TTF_ALWAYSTIP;
+				//MORPH START - Added by SiRoB, Show zz ratio activation reason
+				/*
 				pTI->lpszText = _tcsdup(strToolTipText); // gets freed by MFC
+				*/
+				pTI->lpszText = LPSTR_TEXTCALLBACK;
+				//MORPH END   - Added by SiRoB, Show zz ratio activation reason
 				GetRect(iPane, &pTI->rect);
 				iHit = iPane;
 			}
@@ -152,3 +158,13 @@ int CMuleStatusBarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	}
 	return iHit;
 }
+//MORPH START - Added by SiRoB, Show zz ratio activation reason
+static TCHAR pzToolTipText[512];
+void CMuleStatusBarCtrl::OnToolTipNotify( UINT id, NMHDR * pNotifyStruct, LRESULT * result )
+{
+	TOOLTIPTEXTW* pTI = (TOOLTIPTEXTW*)pNotifyStruct;
+    _stprintf(pzToolTipText, GetPaneToolTipText( (EStatusBarPane)pNotifyStruct->idFrom ));
+	::SendMessage(pNotifyStruct->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
+	pTI->lpszText = pzToolTipText;
+}
+//MORPH END    - Added by SiRoB, Show zz ratio activation reason
