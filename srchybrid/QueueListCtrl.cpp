@@ -821,9 +821,21 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 104: { 
 			//return CompareUnsigned(item2->GetScore(false), item1->GetScore(false));
        		int result = 0;
+
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+
 			if( (file1 != NULL) && (file2 != NULL)){
+
+				//Morph - modified by AndCycle, definitely a correct compare to show queue
+				CUpDownClient *rClient = (CUpDownClient*)item1, *lClient = (CUpDownClient*)item2;
+
+				uint32 lScore = lClient->GetScore(false), rScore = rClient->GetScore(false);
+				result = 
+					theApp.uploadqueue->RightClientIsBetter(lClient, lScore, rClient, rScore) ? 1 :
+					theApp.uploadqueue->RightClientIsBetter(rClient, rScore, lClient, lScore) ? -1 :
+					0;
+				/*
 				//sort invalid client as no prio
 				if((item1->credits->GetCurrentIdentState(item1->GetIP()) == IS_IDFAILED || 
 					item1->credits->GetCurrentIdentState(item1->GetIP()) == IS_IDBADGUY || 
@@ -848,6 +860,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 							((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) :
 						0;
 				}
+				*/
 				/* original PowerShare judge function
 				if(result == 0){
 					result = 
@@ -860,6 +873,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				*/
 				//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
 
+				/*
 				//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
 				if(result == 0){
 					result =
@@ -879,6 +893,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				if(result == 0){
 					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 				}
+				*/
 
 			}
 			else if( file1 == NULL )

@@ -378,10 +378,21 @@ double CUpDownClient::GetEqualChanceValue() const
 
 //Morph Start - added by AndCycle, Pay Back First
 bool CUpDownClient::IsMoreUpThanDown() const{
-	if (!credits || !theApp.clientcredits->CryptoAvailable()) return false;
-	return (thePrefs.IsPayBackFirst() && credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED)? credits->GetPayBackFirstStatus() : false ;
+	if(!IsSecure()) return false;
+	return thePrefs.IsPayBackFirst() ? credits->GetPayBackFirstStatus() : false ;
 }
 //Morph End - added by AndCycle, Pay Back First
+
+//Morph Start - added by AndCycle, separate secure check
+bool CUpDownClient::IsSecure() const
+{
+	if(	!credits || !theApp.clientcredits->CryptoAvailable() || 
+		credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED	) {
+		return false;
+	}
+	return true;
+}
+//Morph End - added by AndCycle, separate secure check
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
@@ -391,9 +402,8 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 */
 bool CUpDownClient::GetPowerShared() const {
 	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	if (!credits || !theApp.clientcredits->CryptoAvailable()) return false;
-	if (credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED) return false;
-			
+	if(!IsSecure()) return false;
+
 	bool bPowerShared;
 	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		bPowerShared = theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();

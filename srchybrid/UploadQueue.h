@@ -122,6 +122,9 @@ public:
 	bool RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore);
 	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
 
+	//Morph - added by AndCycle, separate special prio compare
+	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient);
+
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
 //	POSITION	GetWaitingClient(CUpDownClient* client);
