@@ -157,6 +157,9 @@ void CFakecheck::DownloadFakeList()
 	int lenBuf = 5;
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLFakeList();
+	strURL.TrimRight(".txt");
+	strURL.TrimRight(".dat");
+	strURL.Append(".txt");
 	CString strTempFilename;
 	strTempFilename.Format(CString(thePrefs.GetAppDir())+"fakes.txt");
 	FILE* readFile= fopen(strTempFilename, "r");
@@ -175,9 +178,7 @@ void CFakecheck::DownloadFakeList()
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
 	remove(strTempFilename);
-	CString FakeCheckURL;
-	//FakeCheckURL = "http://www.emuleitor.com/downloads/Morph/fakes.dat";
-	FakeCheckURL = thePrefs.GetUpdateURLFakeList().TrimRight(".txt")+".dat";
+	CString FakeCheckURL = strURL.TrimRight(".txt")+".dat";
 	strTempFilename.Format(CString(thePrefs.GetConfigDir())+"fakes.dat");
 	readFile= fopen(strTempFilename, "r");
 	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message

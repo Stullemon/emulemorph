@@ -395,6 +395,9 @@ void CIPFilter::UpdateIPFilterURL()
 	int lenBuf = 5;
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLIPFilter();
+	strURL.TrimRight(".txt");
+	strURL.TrimRight(".dat");
+	strURL.Append(".txt");
 	CString strTempFilename;
 	strTempFilename.Format(CString(thePrefs.GetAppDir())+"ipfilter.txt");
 	FILE* readFile= fopen(strTempFilename, "r");
@@ -413,9 +416,7 @@ void CIPFilter::UpdateIPFilterURL()
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
 	remove(strTempFilename);
-	CString IPFilterURL;
-	//IPFilterURL = "http://pages.xtn.net/~charliey/FoX/Morph/ipfilter.dat";
-	IPFilterURL = thePrefs.GetUpdateURLIPFilter().TrimRight(".txt") + ".dat";
+	CString IPFilterURL = strURL.TrimRight(".txt") + ".dat";
 	strTempFilename.Format(CString(thePrefs.GetConfigDir())+"ipfilter.dat");
 	readFile= fopen(strTempFilename, "r");
 	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
