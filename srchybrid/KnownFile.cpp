@@ -104,8 +104,6 @@ void CFileStatistic::MergeFileStats(CFileStatistic *toMerge)
 		}
 	}
 	// SLUGFILLER: Spreadbars
-
-	m_bCheckEqualChanceValue = true;//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 }
 
 void CFileStatistic::AddRequest(){
@@ -120,7 +118,6 @@ void CFileStatistic::AddAccepted(){
 	alltimeaccepted++;
 	theApp.knownfiles->accepted++;
 	theApp.sharedfiles->UpdateFile(fileParent);
-	m_bCheckEqualChanceValue = true;	//Morph - added by AndCycle, Equal Chance For Each File
 }
 	
 void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
@@ -129,7 +126,7 @@ void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added
 	theApp.knownfiles->transferred += bytes;
 	AddBlockTransferred(start, start+bytes+1, 1);	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	theApp.sharedfiles->UpdateFile(fileParent);
-	m_bCheckEqualChanceValue = true;	//Morph - added by AndCycle, Equal Chance For Each File
+	m_bInChangedEqualChanceValue = false;	//Morph - added by AndCycle, Equal Chance For Each File
 }
 
 //MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
@@ -142,7 +139,7 @@ void CFileStatistic::AddBlockTransferred(uint32 start, uint32 end, uint32 count)
 	InChangedSpreadBar = false;
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 	
-		if (spreadlist.IsEmpty())
+	if (spreadlist.IsEmpty())
 		spreadlist.SetAt(0, 0);
 
 	POSITION endpos = spreadlist.FindFirstKeyAfter(end+1);
@@ -325,14 +322,14 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 //Morph Start - added by AndCycle, Equal Chance For Each File
 double CFileStatistic::GetEqualChanceValue()
 {
-	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 	if(!thePrefs.IsEqualChanceEnable()){
 		return 0;
 	}
-	else if(!m_bCheckEqualChanceValue){
+	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
+	else if(m_bInChangedEqualChanceValue){
 		return m_dLastEqualChanceSemiValue/GetSharedTime();
 	}
-	m_bCheckEqualChanceValue = false;
+	m_bInChangedEqualChanceValue = true;
 	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 	//smaller value means greater priority

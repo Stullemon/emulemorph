@@ -55,7 +55,7 @@ public:
 
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
 		shareStartTime = time(NULL);//this value init will be done in other place 
-		m_bCheckEqualChanceValue = true;
+		m_bInChangedEqualChanceValue = false;
 		m_dLastEqualChanceSemiValue = 0;
 		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
@@ -113,7 +113,7 @@ private:
 
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	uint32	shareStartTime;
-	bool	m_bCheckEqualChanceValue;
+	bool	m_bInChangedEqualChanceValue;
 	double	m_dLastEqualChanceSemiValue;
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 };
