@@ -46,6 +46,6 @@
   #endif
 #endif
 
-#define MOD_VERSION		"MorphXT v1.1" //MORPH - Added by SiRoB
+#define MOD_VERSION		"MorphXT v1.2" //MORPH - Added by SiRoB
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(" [") MOD_VERSION _T("]")
 #endif /* !__VERSION_H__ */
