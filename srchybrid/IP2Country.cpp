@@ -339,7 +339,7 @@ HICON CIP2Country::GetCountryFlagByIndex(int index){
 
 int CIP2Country::GetCountryFlagAmount(){
 
-	return CountryFlagIcon.count();
+	return CountryFlagIcon.size();
 }
 
 bool CIP2Country::ShowCountryFlag(){
