@@ -836,6 +836,9 @@
 		<File
 			RelativePath=".\resource.h">
 		</File>
+		<File
+			RelativePath=".\res\uk.ico">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

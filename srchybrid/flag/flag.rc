@@ -266,6 +266,7 @@ IDI_COUNTRY_FLAG_YU     ICON                    "res\\yu.ico"
 IDI_COUNTRY_FLAG_ZA     ICON                    "res\\za.ico"
 IDI_COUNTRY_FLAG_ZM     ICON                    "res\\zm.ico"
 IDI_COUNTRY_FLAG_ZW     ICON                    "res\\zw.ico"
+IDI_COUNTRY_FLAG_UK     ICON                    "res\\uk.ico"
 #endif    // ¤¤©Ê resources
 /////////////////////////////////////////////////////////////////////////////
 
