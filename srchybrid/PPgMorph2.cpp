@@ -237,4 +237,6 @@ void CPPgMorph2::OnBnClickedResetipcurl()
 	strBuffer = _T("http://ip-to-country.webhosting.info/downloads/latest");
 	GetDlgItem(IDC_UPDATE_VER_URL_IP2COUNTRY)->SetWindowText(strBuffer);
 	thePrefs.m_IP2CountryVersion = 0;
+	strBuffer.Format(_T("v.%u"), thePrefs.GetIP2CountryVersion());
+	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
 }
