@@ -57,6 +57,7 @@
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
+			UseOfMFC="1"
 			CharacterSet="2"
 			WholeProgramOptimization="TRUE">
 			<Tool
@@ -69,7 +70,7 @@
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="FALSE"
+				OptimizeForWindowsApplication="TRUE"
 				PreprocessorDefinitions="NDEBUG"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
