@@ -1954,12 +1954,9 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 			// This file contains a valid CRC, but not in uppercase - replace it!
 			int i=fnup.Find(f->GetLastCalculatedCRC32());
 			NewFn = fn;
-			LPTSTR FnBuf = NewFn.GetBuffer();
 			p3 = f->GetLastCalculatedCRC32();
-			LPTSTR CRCBuf = p3.GetBuffer();
-			memcpy (FnBuf+i,CRCBuf,p3.GetLength());
-			p3.ReleaseBuffer ();
-			NewFn.ReleaseBuffer ();
+			NewFn.Delete (i,p3.GetLength ());
+			NewFn.Insert (i,p3);
 		}
 	} else {
 		// We have to add the CRC32/Releaser tag to the filename.

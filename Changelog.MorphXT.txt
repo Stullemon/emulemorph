@@ -1,6 +1,7 @@
 FIXED  : Possible crash in mass-rename if filename contains "%"-characters [MightyKnife]
 FIXED  : Various display bugs. [MightyKnife]
 FIXED  : Possible "Divide by 0"-crash. [MightyKnife]
+FIXED  : Renaming existing CRC32 to uppercase only worked for the first 4 characters in Unicode built. [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.13
