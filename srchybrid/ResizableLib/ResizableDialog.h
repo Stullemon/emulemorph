@@ -25,7 +25,7 @@
 #include "ResizableGrip.h"
 #include "ResizableMinMax.h"
 #include "ResizableState.h"
-#include "../loggable.h"
+#include "loggable.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CResizableDialog window

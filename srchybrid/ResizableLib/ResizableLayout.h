@@ -90,6 +90,20 @@ private:
 
 	void CalcNewChildPosition(const CResizableLayout::LayoutInfo &layout,
 		const CRect &rectParent, CRect &rectChild, UINT& uFlags);
+public:
+		// remove an anchored control from the layout, given its HWND
+	BOOL RemoveAnchor(HWND hWnd)
+	{
+		POSITION pos;
+		if (!m_mapLayout.Lookup(hWnd, pos))
+			return FALSE;
+
+		m_listLayout.RemoveAt(pos);
+		return m_mapLayout.RemoveKey(hWnd);
+	}
+
+	// add anchors to a control, given its HWND
+	void AddAnchor(HWND hWnd, CSize sizeTypeTL, CSize sizeTypeBR = NOANCHOR);
 
 protected:
 	// override to initialize resize properties (clipping, refresh)
@@ -114,7 +128,13 @@ protected:
 	// override for scrollable or expanding parent windows
 	virtual void GetTotalClientRect(LPRECT lpRect);
 
-	
+	// add anchors to a control, given its ID
+	void AddAnchor(UINT nID, CSize sizeTypeTL, CSize sizeTypeBR = NOANCHOR)
+	{
+		AddAnchor(::GetDlgItem(GetResizableWnd()->GetSafeHwnd(), nID),
+			sizeTypeTL, sizeTypeBR);
+	}
+
 	// add a callback (control ID or HWND is unknown or may change)
 	void AddAnchorCallback(UINT nCallbackID);
 
@@ -140,7 +160,11 @@ protected:
 			rectParent, rectChild, lpFlags);
 	}
 
-
+	// remove an anchored control from the layout, given its HWND
+	BOOL RemoveAnchor(UINT nID)
+	{
+		return RemoveAnchor(::GetDlgItem(GetResizableWnd()->GetSafeHwnd(), nID));
+	}
 
 	// reset layout content
 	void RemoveAllAnchors()
@@ -162,31 +186,6 @@ protected:
 public:
 	CResizableLayout() { }
 
-	// add anchors to a control, given its HWND
-	void AddAnchor(HWND hWnd, CSize sizeTypeTL, CSize sizeTypeBR = NOANCHOR);
-
-	// add anchors to a control, given its ID
-	void AddAnchor(UINT nID, CSize sizeTypeTL, CSize sizeTypeBR = NOANCHOR)
-	{
-		AddAnchor(::GetDlgItem(GetResizableWnd()->GetSafeHwnd(), nID),
-			sizeTypeTL, sizeTypeBR);
-	}
-	// remove an anchored control from the layout, given its HWND
-	BOOL RemoveAnchor(HWND hWnd)
-	{
-		POSITION pos;
-		if (!m_mapLayout.Lookup(hWnd, pos))
-			return FALSE;
-
-		m_listLayout.RemoveAt(pos);
-		return m_mapLayout.RemoveKey(hWnd);
-	}
-
-	// remove an anchored control from the layout, given its HWND
-	BOOL RemoveAnchor(UINT nID)
-	{
-		return RemoveAnchor(::GetDlgItem(GetResizableWnd()->GetSafeHwnd(), nID));
-	}
 	virtual ~CResizableLayout()
 	{
 		// just for safety
