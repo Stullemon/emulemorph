@@ -108,11 +108,11 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			return 1;
 		float result = 0;
 		if (!GetUploadedTotal())
-			result = 10000;
+			result = 100000;
 		else
-			result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
+			result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
 		float result2 = 0;
-		result2 = (float)GetDownloadedTotal()/1024.0;
+		result2 = (float)GetDownloadedTotal()/1048576.0;
 		result2 += 2;
 		result2 = (double)sqrt((double)result2);
 		if (result > result2)
@@ -120,8 +120,8 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 
 		if (result < 1)
 			return 1;
-		else if (result > 10000)
-			return 10000;
+		else if (result > 100000)
+			return 100000;
 		return result;
 	}
 	else
