@@ -1502,14 +1502,14 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 10000)
+		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000)
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		else
 			break;
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
 		if (m_AvarageDDR_list.GetCount() == 1)
-			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 10000;
+			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 30000;
 		else{
 			DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
 			if ((m_AvarageDDR_list.GetCount() - 1)*(cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
