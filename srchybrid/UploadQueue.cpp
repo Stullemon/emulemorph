@@ -132,7 +132,10 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 
         client->SetWaitStartTime();
 	    theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULSUCCESS));
-	    theApp.uploadqueue->AddClientToQueue(client,true);
+	    //MORPH START - Removed by SiRoB, done in SendBlockData OP_OUTOFPARTREQS
+		/*
+		theApp.uploadqueue->AddClientToQueue(client,true);
+		*/
 
         return true;
     } else if(onlyCheckForRemove == false) {
@@ -452,18 +455,8 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	while(pos != NULL && foundposition == false) {
 		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
 
-		int iSuperior;//Morph - added by AndCycle, separate special prio compare
-		if(
-			(iSuperior = RightClientIsSuperior(newclient, uploadingClient)) > 0 ||
-			iSuperior == 0 && 
-			(
-             //uploadingClient->GetDatarate() > newclient->GetDatarate() ||
-             //uploadingClient->GetDatarate() == newclient->GetDatarate() &&
-             (!newclient->HasLowID() || !newclient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick ||
-             newclient->HasLowID() && newclient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick && (::GetTickCount()-newclient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick) <= uploadingClient->GetUpStartTimeDelay()
-             )
-            )
-		) {
+		if(RightClientIsSuperior(newclient, uploadingClient) >= 0)
+		{
 			foundposition = true;
 		} else {
 			insertPosition = pos;
@@ -537,7 +530,19 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 							// Remove last client from ul list to make room for higher prio client
 							theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
 
-							// add to queue again.
+							//Taken from the SenBlockData()
+							//OP_OUTOFPARTREQS will tell the downloading client to go back to OnQueue..
+							//The main reason for this is that if we put the client back on queue and it goes
+							//back to the upload before the socket times out... We get a situation where the
+							//downloader things it already send the requested blocks and the uploader thinks
+							//the downloader didn't send any reqeust blocks. Then the connection times out..
+							//I did some tests with eDonkey also and it seems to work well with them also..
+							if (thePrefs.GetDebugClientTCPLevel() > 0)
+								DebugSend("OP__OutOfPartReqs P", lastClient);
+							Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
+							theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
+							lastClient->socket->SendPacket(pCancelTransferPacket,true,true);
+            				// add to queue again.
 							// the client is allowed to keep its waiting position in the queue, since it was pre-empted
                             AddClientToQueue(lastClient,true, true);
                         } else {
@@ -586,43 +591,15 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		if (!newclient->socket) // Pawcio: BC
 			return false;
 	}
-	//MORPH - Removed by SiRoB, -Fix-
-	//Comment: since the client is not in the uploadinglist he never got the OP_ACCEPTUPLOADREQ if we pass in the first condition
-	/*else
+	else
 	{
-	*/
-		//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
-		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(newclient->GetUploadFileID());
-		if (reqfile){
-			CSafeMemFile data(16+16);
-			data.WriteHash16(reqfile->GetFileHash());
-			bool send = true;
-			if (reqfile->IsPartFile()){
-				((CPartFile*)reqfile)->WritePartStatus(&data, newclient);	// SLUGFILLER: hideOS
-				send = reqfile->HideOSInWork();
-			}
-			else if (!reqfile->ShareOnlyTheNeed(&data, newclient)) // Wistly SOTN
-				if (!reqfile->HideOvershares(&data, newclient))	// Slugfiller: HideOS
-					send = false;
-			if (send){
-				Packet* packet = new Packet(&data);
-				packet->opcode = OP_FILESTATUS;
-				theStats.AddUpDataOverheadFileRequest(packet->size);
-				newclient->socket->SendPacket(packet,true);
-			}
-			else {
-				BYTE* tmp = data.Detach();
-				free(tmp);
-			}
-		}
-		//MORPH END   - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__AcceptUploadReq", newclient);
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
 		theStats.AddUpDataOverheadFileRequest(packet->size);
 		newclient->socket->SendPacket(packet,true);
 		newclient->SetUploadState(US_UPLOADING);
-	//} Removed by SiRoB, see comment above
+	}
 
 	newclient->SetUpStartTime();
 	newclient->ResetSessionUp();
@@ -644,7 +621,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
     }
 
 	// statistic
-	//CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
+	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
 	if (reqfile){
 		reqfile->statistic.AddAccepted();
 	}
@@ -658,7 +635,6 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     // Save number of active clients for statistics
     uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
-    /*
 	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
         // debug info, will remove this when I'm done.
         //AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
@@ -667,7 +643,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
         	tempHighest = uploadinglist.GetSize();
 		}
     }
-	*/
+
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = tempHighest;
 
     // save 15 minutes of data about number of fully active clients
@@ -765,7 +741,20 @@ void CUploadQueue::Process() {
             // Remove from upload list.
             RemoveFromUploadQueue(lastClient, _T("Too many upload slots opened."), true, true);
 
-		    // add to queue again.
+		    //MORPH START - Added by SiRoB, Taken from the SenBlockData()
+			//OP_OUTOFPARTREQS will tell the downloading client to go back to OnQueue..
+			//The main reason for this is that if we put the client back on queue and it goes
+			//back to the upload before the socket times out... We get a situation where the
+			//downloader things it already send the requested blocks and the uploader thinks
+			//the downloader didn't send any reqeust blocks. Then the connection times out..
+			//I did some tests with eDonkey also and it seems to work well with them also..
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__OutOfPartReqs T", lastClient);
+			Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
+			theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
+			lastClient->socket->SendPacket(pCancelTransferPacket,true,true);
+			//MORPH END - Added by SiRoB, Taken from the SenBlockData()
+			// add to queue again.
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             AddClientToQueue(lastClient,true, true);
         }
@@ -1243,35 +1232,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
 			client->SetUploadState(US_NONE);
 			client->ClearUploadBlockRequests();
-			if (client->socket){ 
-				//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
-				if (requestedFile){
-					CSafeMemFile data(16+16);
-					data.WriteHash16(requestedFile->GetFileHash());
-					bool send = true;
-					if (requestedFile->IsPartFile()){
-						((CPartFile*)requestedFile)->WritePartStatus(&data);	// SLUGFILLER: hideOS
-						send = requestedFile->GetHideOS()>=0 ? requestedFile->GetHideOS() : thePrefs.GetHideOvershares();
-					}
-					else {
-						if (!requestedFile->ShareOnlyTheNeed(&data, client)) // Wistly SOTN
-							if (!requestedFile->HideOvershares(&data, client))	// Slugfiller: HideOS
-								send = false;
-						data.WriteUInt16(0);
-					}
-					if (send){
-						Packet* packet = new Packet(&data);
-						packet->opcode = OP_FILESTATUS;
-						theStats.AddUpDataOverheadFileRequest(packet->size);
-						client->socket->SendPacket(packet,true);
-					}
-					else {
-						BYTE* tmp = data.Detach();
-						free(tmp);
-					}
-				}
-				//MORPH END   - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
-			}
+
             m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 
 			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1716,16 +1677,10 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 			Nb_ReSort = 0;
 		//MORPH END  - Added by SiRoB, ResortUploadSlot Fix
 			// Remove all clients from uploading list and store in tempList
-   			POSITION ulpos = uploadinglist.GetHeadPosition();
-   			while (ulpos != NULL) {
-   				POSITION curpos = ulpos;
-   				uploadinglist.GetNext(ulpos);
+   			while (uploadinglist.GetHeadPosition() != NULL) {
    				// Get and remove the client from upload list.
-				CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
-
-   				//MORPH - Moved by SiRoB, See below ResortUploadSlot Fix
-				//uploadinglist.RemoveAt(curpos);
-				
+				CUpDownClient* cur_client = uploadinglist.GetHead();
+			
 				// Remove the found Client from UploadBandwidthThrottler
    				theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
 				theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
@@ -1733,24 +1688,16 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 				theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
 				//MORPH END   - Added by SiRoB, due to zz upload system WebCache
    				tempUploadinglist.AddTail(cur_client);
-				uploadinglist.RemoveAt(curpos);
+				uploadinglist.RemoveHead();
 			}
 
 			// Remove one at a time from temp list and reinsert in correct position in uploading list
-   			POSITION tempPos = tempUploadinglist.GetHeadPosition();
-   			while(tempPos != NULL) {
-   				POSITION curpos = tempPos;
-   				tempUploadinglist.GetNext(tempPos);
-
-				// Get and remove the client from upload list.
-				CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
-
-   				//MORPH - Moved by SiRoB, See below ResortUploadSlot Fix
-				//tempUploadinglist.RemoveAt(curpos);
-
-				// This will insert in correct place
+   			while(tempUploadinglist.GetHeadPosition() != NULL) {
+   				// Get and remove the client from upload list.
+				CUpDownClient* cur_client = tempUploadinglist.GetHead();
+   				// This will insert in correct place
    				InsertInUploadingList(cur_client);
-				tempUploadinglist.RemoveAt(curpos);
+				tempUploadinglist.RemoveHead();
 			}
 		}
 		theApp.uploadBandwidthThrottler->Pause(false);

@@ -2,17 +2,33 @@
 Changelog for eMule 0.44d MorphXT v5.x
 --------------------------------------
 FIXED  : Credit file priority load has been corrected [SiRoB]
-FIXED  : Systray icone didn't display the speed bar in some case [Commander]
-FIXED  : Official Web Template can be used now [SiRoB]
-FIXED  : Powershared client in uploadinglist are correctly sorted when other client lose this state [SiRoB]
+FIXED  : GUI: Systray icone didn't display the speed bar in some case [Commander]
+FIXED  : Webserver: Official Web Template can be used now [SiRoB]
+FIXED  : Powershare: Powershared client in uploadinglist are correctly sorted when other client lose this state [SiRoB]
+FIXED  : zz Upload system: 'Successful completion of upload' were counted as failed upload [SiRoB]
+FIXED  : Found the guilty for the nasty crash arround ICS use [SiRoB]
+FIXED  : zz UPload system: Reworked  ResortUploadSlot Fix [SiRoB]
+FIXED  : zz upload system: sendOP_OUTOFPARTREQS when remove trickle slot or removeormovedown occur [SiRoB]
+
+REMOVED: Resend FilePartstatus in some circonstance from Pawcio [SiRoB]
 
 ADDED  : Show permission: default state display in sharedfile window [SiRoB]
 ADDED  : Import Parts from SR13 [SiRoB]
 
-CHANGED: USS: Trickle datarate is now 0.5kB/s for low speed datarate [SiRoB]
+CHANGED: USS: Trickle datarate is now 0.1kB/s for low speed datarate (i.e <6kB/s)[SiRoB]
 CHANGED: USC: Try to open new slot smoothly [SiRoB]
+CHANGED: New systray icone [SiRoB]
+CHANGED: SOTH: Stricly upload the rarest chunk [SiRoB]
+CHANGED: zz Upload system: No more uploadinglist prio on score [SiRoB]
 
-NOTE   : For win2k user you can have 256 colors systray display by patching your explorer.exe
+NOTE-1: For win2k user you can have 256 colors systray display by patching your explorer.exe ;)
+NOTE-2: About Import Parts
+General idea from xmrb's CKnownFile::ImportParts()
+Unlike xmrb's version which scans entire file designated for import and then tries
+to match each PARTSIZE bytes with all parts of partfile, my version assumes that
+in file you're importing all parts stay on same place as they should be in partfile
+(for example you're importing damaged version of file to recover some parts from ED2K)
+That way it works much faster and almost always it is what expected from this function.
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.8
