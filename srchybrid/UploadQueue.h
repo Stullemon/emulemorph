@@ -108,11 +108,11 @@ private:
     void InsertInUploadingList(CUpDownClient* newclient);
     double GetAverageCombinedFilePrioAndCredit();
 	uint32 GetWantedNumberOfTrickleUploads();
-    void CheckForHighPrioClient();
+	void CheckForHighPrioClient();
 
 	CUpDownClientPtrList	waitinglist;
 	CUpDownClientPtrList	uploadinglist;
-
+	CCriticalSection uploaddinglistblock;
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
 		uint32	datalen;

@@ -134,19 +134,8 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
     } else if(onlyCheckForRemove == false) {
         // Move down
         // first find the client in the uploadinglist
-        uint32 posCounter = 0;
-        POSITION foundPos = NULL;
-        POSITION pos = uploadinglist.GetHeadPosition();
-	    while(pos != NULL && foundPos == NULL) {
-		    if (uploadinglist.GetAt(pos) == client){
-                foundPos = pos;
-            } else {
-                uploadinglist.GetNext(pos);
-                posCounter++;
-            }
-	    }
-
-        if(foundPos != NULL) {
+        POSITION foundPos = uploadinglist.Find(client);
+		if(foundPos != NULL) {
             // Remove the found Client
 		    uploadinglist.RemoveAt(foundPos);
             theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
@@ -635,7 +624,8 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     // Save number of active clients for statistics
     uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
-    if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
+    /*
+	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
         // debug info, will remove this when I'm done.
         //AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
 
@@ -643,7 +633,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
         	tempHighest = uploadinglist.GetSize();
 		}
     }
-
+	*/
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = tempHighest;
 
     // save 15 minutes of data about number of fully active clients
@@ -712,7 +702,7 @@ void CUploadQueue::Process() {
 	/*
 	if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	*/
-	if(thePrefs.DoRemoveSpareTrickleSlot() && uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
+	/*if(thePrefs.DoRemoveSpareTrickleSlot() && uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
         // we need to close a trickle slot and put it back first on the queue
 
@@ -737,7 +727,7 @@ void CUploadQueue::Process() {
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             AddClientToQueue(lastClient,true, true);
         }
-    } else if (ForceNewClient()){
+    } else*/ if (ForceNewClient()){
         // There's not enough open uploads. Open another one.
 		AddUpNextClient();
 	}
@@ -796,12 +786,12 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
 
-    uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
+	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
     if(curUploadSlots > m_MaxActiveClients+wantedNumberOfTrickles) {
 		return false;
     }
-	
-	uint16 MaxSpeed;
+
+   	uint16 MaxSpeed;
 
     if (thePrefs.IsDynUpEnabled())
         MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
@@ -961,6 +951,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CUpDownClient* cur_client = waitinglist.GetAt(pos2);
 		if (cur_client == client)
 		{	
+			//MORPH - Removed by SiRoB, Bug Fix possible disturb of the uploading list
+			/*
 			//already on queue
             // VQB LowID Slot Patch, enhanced in ZZUL
             if (addInFirstPlace == false && client->HasLowID() &&
@@ -974,6 +966,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 					return;
 			}
 			// VQB end
+			*/
 			client->SendRankingInfo();
 			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(client);
 			return;			
@@ -1152,8 +1145,9 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
             client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
-            uploadinglist.RemoveAt(curPos);
-
+            uploaddinglistblock.Lock();
+			uploadinglist.RemoveAt(curPos);
+			uploaddinglistblock.Unlock();
             bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
             bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 			//MORPH START - Added by SiRoB, due to zz upload system WebCache
@@ -1627,7 +1621,7 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 		theApp.uploadBandwidthThrottler->Pause(true);
 
     	CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
-
+		uploaddinglistblock.Lock();
     	// Remove all clients from uploading list and store in tempList
     	POSITION ulpos = uploadinglist.GetHeadPosition();
     	while (ulpos != NULL) {
@@ -1662,7 +1656,7 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
     	    // This will insert in correct place
     	    InsertInUploadingList(cur_client);
 		}
-
+		uploaddinglistblock.Unlock();
 		theApp.uploadBandwidthThrottler->Pause(false);
 	}
 }
@@ -1682,12 +1676,14 @@ void CUploadQueue::CheckForHighPrioClient() {
 // MORPH START - Added by Commander, WebCache 1.2e
 CUpDownClient*	CUploadQueue::FindClientByWebCacheUploadId(const uint32 id) // Superlexx - webcache - can be made more efficient
 {
+	uploaddinglistblock.Lock();
 	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
 		if ( cur_client->m_uWebCacheUploadId == id )
 			return cur_client;
 	}
+	uploaddinglistblock.Unlock();
 	return 0;
 }
 // MORPH END - Added by Commander, WebCache 1.2e
