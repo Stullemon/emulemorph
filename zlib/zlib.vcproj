@@ -60,13 +60,15 @@
 			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				GlobalOptimizations="FALSE"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_LIB;NDEBUG"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -79,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libz.lib"/>
+				OutputFile="$(OutDir)/zlib.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
