@@ -938,13 +938,13 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,0));
 							}
 							else if(m_iDifference == lpUpDownClient->GetRemoteQueueRank()){
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,207));//new source
+								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,191));//new source
 							}
 							else if(m_iDifference > 0){
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(207,0,0));
+								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(191,0,0));
 							}
 							else if(m_iDifference < 0){
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,207,0));
+								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,191,0));
 							}
 							buffer.Format("QR: %u (%+i)",lpUpDownClient->GetRemoteQueueRank(), m_iDifference);
 							dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
