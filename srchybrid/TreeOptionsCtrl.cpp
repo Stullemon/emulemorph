@@ -1735,7 +1735,7 @@ void CTreeOptionsCtrl::SetEditText(HTREEITEM hItem, const CString& sEditText)
 		int buffLen = sEditText.GetLength()+1;
 		buffer = new TCHAR[buffLen];
 		if(buffer){
-			memset(buffer, '*', buffLen-1);
+			_tcsnset(buffer, '*',buffLen-1); //Fixed by SiRoB, not very clean but it work
 			buffer[buffLen-1] = '\0';
 			sNewText = buffer;
 			delete[] buffer;
