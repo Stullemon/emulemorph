@@ -2799,8 +2799,6 @@ long FileSize(LPCTSTR fileName){
 //Morph Start - added by AndCycle, minor tweak - prime
 uint32 getPrime(uint32 lower_bound)
 {
-	if(lower_bound < 2) return 2;//safe check
-
 	std::list<uint32> prime_no_list;
 	prime_no_list.push_back(2);
 

@@ -85,7 +85,7 @@ public:
 
 	bool    RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove = false);
 	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL);
-	bool RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore);
+	bool	RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore);
 	void	ReSortUploadSlots(bool force = false);
 
 	//Morph - added by AndCycle, separate special prio compare

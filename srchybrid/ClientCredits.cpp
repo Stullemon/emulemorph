@@ -486,7 +486,17 @@ void CClientCreditsList::LoadList()
 			}
 
 			UINT count = file.ReadUInt32();
+			//Morph Start - added by AndCycle, minor tweak - prime
+			/*
 			m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
+			*/
+			int iPrime = 5003;
+			if(count > 5003){
+				iPrime = getPrime(count*1.2);
+			}
+			AddDebugLogLine(false, _T("m_mapClients.InitHashTable with %i"), iPrime);
+			m_mapClients.InitHashTable(iPrime);
+			//Morph End - added by AndCycle, minor tweak - prime
 
 			const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
 			uint32 cDeleted = 0;

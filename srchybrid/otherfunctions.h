@@ -340,3 +340,4 @@ uint16 GetRandomUInt16();
 uint32 GetRandomUInt32();
 
 long FileSize(LPCTSTR fileName); //MORPH - Added by SiRoB, Used for Fake and ipfilter updater
+uint32 getPrime(uint32 lower_bound); //Morph - added by AndCycle, minor tweak - prime
