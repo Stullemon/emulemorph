@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.42d MorphXT v2.?
+Changelog for eMule 0.42d MorphXT v2.4
 --------------------------------------
 FIXED  : Systray Fix to avoid all the schedulable parameter to not correctly be saved at shutdown [SiRoB]
 FIXED  : A wroung test causing zz ratio allways activated since the 2.0 version :) [SiRoB]

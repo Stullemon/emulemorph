@@ -38,6 +38,7 @@
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
+#include "UploadQueue.h" //MORPH - Added by SiRoB, ZZ Upload SyStem
 
 #ifdef _DEBUG
 #undef THIS_FILE
