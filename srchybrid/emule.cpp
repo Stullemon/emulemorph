@@ -199,8 +199,14 @@ BOOL CemuleApp::InitInstance()
 	AfxOleInit();
 
 	pendinglink = 0;
-	if (ProcessCommandline())
+	//Morph Start - added by AndCycle, VQB: multipleInstance - moved this here...
+	// create & initalize all the important stuff 
+	glob_prefs = new CPreferences();
+	if (ProcessCommandline()){
+		delete glob_prefs;	// must be delete
 		return false;
+	}
+	//Morph End - added by AndCycle, VQB: multipleInstance
 	// InitCommonControls() ist für Windows XP erforderlich, wenn ein Anwendungsmanifest
 	// die Verwendung von ComCtl32.dll Version 6 oder höher zum Aktivieren
 	// von visuellen Stilen angibt. Ansonsten treten beim Erstellen von Fenstern Fehler auf.
@@ -239,8 +245,8 @@ BOOL CemuleApp::InitInstance()
 			AfxMessageBox(_T("No Rich Edit control library found!")); // should never happen..
 	}
 
-	// create & initalize all the important stuff 
-	glob_prefs = new CPreferences();
+	//Morph - moved by AndCycle, VQB: multipleInstance remove - moved up
+	
 	//MORPH START - Added by IceCream, high process priority
 	if (glob_prefs->GetEnableHighProcess())
 		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
@@ -432,7 +438,13 @@ bool CemuleApp::ProcessCommandline()
 		}
     }
     // khaos::removed: return (maininst || bAlreadyRunning);
-	return false; // khaos::multiple_instances
+	// return false; // khaos::multiple_instances
+	//Morph Start - added by AndCycle, VQB: multipleInstance
+	if (theApp.glob_prefs->IsMultipleInstanceEnabled())
+		return false;
+	else
+	//Morph End - added by AndCycle, VQB: multipleInstance
+		return (maininst || bAlreadyRunning);
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){

@@ -32,6 +32,7 @@ protected:
 	int m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	float m_fMinFreeDiskSpaceMB;
 	CString m_sYourHostname;	// itsonlyme: hostnameSource
+	int m_iMultipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	// ZZ:UploadSpeedSense -->
     int m_iDynUpEnabled;
@@ -63,6 +64,7 @@ protected:
 	HTREEITEM m_htiCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	HTREEITEM m_htiMinFreeDiskSpace;
 	HTREEITEM m_htiYourHostname;	// itsonlyme: hostnameSource
+	HTREEITEM m_htiMultipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	// ZZ:UploadSpeedSense -->
     HTREEITEM m_htiDynUp;

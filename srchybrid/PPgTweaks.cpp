@@ -73,6 +73,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
 
+	m_htiMultipleInstance = NULL;	//Morph - added by AndCycle, VQB: multipleInstance
 	/* Temp removed until further testing
 	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
@@ -146,6 +147,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEdit));
 		// itsonlyme: hostnameSource
 
+		m_htiMultipleInstance = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MULTIPLEINSTANCE), TVI_ROOT, m_iMultipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
 		/*
 		// ZZ:UploadSpeedSense -->
         m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
@@ -199,6 +201,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);	// itsonlyme: hostnameSource
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiMultipleInstance, m_iMultipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
 
 	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
 
@@ -241,7 +244,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iCheckDiskspace = app_prefs->prefs->checkDiskspace;	// SLUGFILLER: checkDiskspace
 	m_fMinFreeDiskSpaceMB = (float)(app_prefs->prefs->m_uMinFreeDiskSpace / (1024.0 * 1024.0));
 	m_sYourHostname = app_prefs->GetYourHostname();	// itsonlyme: hostnameSource
-
+	m_iMultipleInstance = app_prefs->prefs->multipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 	/*
 	// ZZ:UploadSpeedSense -->
     m_iDynUpEnabled = app_prefs->IsDynUpEnabled();
@@ -343,6 +346,7 @@ BOOL CPPgTweaks::OnApply()
 	app_prefs->prefs->checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	app_prefs->prefs->m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	app_prefs->SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
+	app_prefs->prefs->multipleInstance = m_iMultipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	/*
 	// ZZ:UploadSpeedSense -->
@@ -408,6 +412,8 @@ void CPPgTweaks::Localize(void)
 		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));	// SLUGFILLER: checkDiskspace
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
+		
+		if (m_htiMultipleInstance) m_ctrlTreeOptions.SetItemText(m_htiMultipleInstance, GetResString(IDS_MULTIPLEINSTANCE));	//Morph - added by AndCycle, VQB: multipleInstance
 
 		/*
 		// ZZ:UploadSpeedSense -->
@@ -453,6 +459,8 @@ void CPPgTweaks::OnDestroy()
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+	
+	m_htiMultipleInstance = NULL;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	/*
 	// ZZ:UploadSpeedSense -->
