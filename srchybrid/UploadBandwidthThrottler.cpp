@@ -150,7 +150,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
         sendLocker.Unlock();
 //	} else {
 //		if (thePrefs.GetVerbose())
-//			AddDebugLogLine(true,"Tried to add NULL socket to UploadBandwidthThrottler Standard list! Prevented.");
+//		DebugLogError(LOG_STATUSBAR,_T("Tried to add NULL socket to UploadBandwidthThrottler Standard list! Prevented."));
     }
 }
 
@@ -200,12 +200,11 @@ bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket*
             slotCounter++;
         }
     }
-	
-    if(foundSocket && m_highestNumberOfFullyActivatedSlots > (uint32)m_StandardOrder_list.GetSize()) {
-        m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize();
-    }
 
-    return foundSocket;
+    if(foundSocket && m_highestNumberOfFullyActivatedSlots >= (uint32)m_StandardOrder_list.GetSize() && m_highestNumberOfFullyActivatedSlots > 0) {
+        --m_highestNumberOfFullyActivatedSlots;
+    }
+	return foundSocket;
 }
 
 /**
@@ -636,8 +635,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					        //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i"), realBytesToSpend, newRealBytesToSpend);
 	           				realBytesToSpendClass[classID] = newRealBytesToSpend;
 							if(thisLoopTick-lastTickReachedBandwidth > max(1000, timeSinceLastLoop*2)) {
-	           		            m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;
-								templastTickReachedBandwidth = thisLoopTick;
+	           		            if (classID==LAST_CLASS)
+								{
+									m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;
+									templastTickReachedBandwidth = thisLoopTick;
+								}
 	           		            //theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
 	       					}
 	           		    } else {
