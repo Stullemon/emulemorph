@@ -43,7 +43,11 @@ public:
     CurrentPingStruct GetCurrentPing();
     bool AcceptNewClient();
 
-    void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
+    //MORPH - Changed by SiRoB, Log Flag to trace or not the USS activities
+	/*
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
+	*/
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog);
 
     uint32 GetUpload();
 private:
@@ -86,6 +90,8 @@ private:
     uint32 m_pingAverage;
     uint32 m_lowestPing;
     uint64 m_LowestInitialPingAllowed;
+
+	bool m_bIsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 
     CString m_state;
 };
