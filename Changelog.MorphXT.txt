@@ -1,11 +1,18 @@
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.?
 ---------------------------------------- 
+ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list,
+         right-click and choose 'Mass rename...'. [MightyKnife]
+
+---------------------------------------- 
+Changelog for eMule 0.41b29 MorphXT v1.4
+---------------------------------------- 
 FIXED  : Soft Limiter for Queue [Yun.SF3]
 FIXED  : The default view value (HideOS, SelectiveChunk,  Permissions & Share Only the Need) in the DownloadFile and SharedFile popup [SiRoB]
 FIXED  : When using the SmartA4AFSwapping the requested download list is not well updated [SiRoB]
 FIXED  : Popup Category causing crash when NULL is returned by GetCategory() [SiRoB]
 FIXED  : Set the minupload and not the maxupload by using the minupload's textbox in the popup systray [SiRoB]
+FIXED  : The high cpu usage should be out caused by checking every time if we need to remove (from the upload list) or not a client geting more than 10Mo [SiRoB]
 ADDED  : Patch against daylight saving bug. Prevents EMule from rehashing all known files after 6 months when daylight saving comes into effect.
          Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
 ADDED  : Limited community support with community tags: Community icon, Columns for community affiliation in up-/client-/queuelist, Shared files visible for community.
@@ -16,10 +23,7 @@ ADDED  : CRC32 calculation/testing for files. Right click on a file in the share
          Furthermore a releaser tag can be added (together with the CRC) to the filename (of course for multiple files at once, too).
          The calculated CRC is shown in a column on the right - together with an info whether the calculated CRC was found in 
          the filename. (Hint: The calculated CRC32 will not be stored in known.met) [MightyKnife]
-ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list,
-         right-click and choose 'Mass rename...'. [MightyKnife]
 ADDED  : searchCatch and cacheUDPsearchResults from [SlugFiller-itsonlyme]
-NOTE   : IP2Country now support to display flag of the country, this require countryflag.dll, also put it at /config/, currently you can get this from Morph CVS
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.3
