@@ -265,7 +265,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 				if (thePrefs.GetLowIdRetried()){
 					if (la->clientid < 16777216 ){
 						SetConnectionState(CS_ERROR);
-					theApp.emuledlg->AddLogLine(true,GetResString(IDS_LOWIDRETRYING),thePrefs.GetLowIdRetried());
+						AddLogLine(true,GetResString(IDS_LOWIDRETRYING),thePrefs.GetLowIdRetried());
 						thePrefs.SetLowIdRetried();
 						break;
 					}

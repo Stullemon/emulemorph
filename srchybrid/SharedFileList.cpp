@@ -312,7 +312,7 @@ CSharedFileList::CSharedFileList(CServerConnect* in_server)
 	m_lastPublishKadSrc = 0;
 	m_currFileKey = 0;
 	m_lastProcessPublishKadKeywordList = 0;
-	//Removed by SiRoB - SAfe hash	
+	//Removed by SiRoB - Safehash	
 	/*
 	FindSharedFiles();
 	*/
@@ -425,7 +425,7 @@ void CSharedFileList::FindSharedFiles()
 				CString hashfilename;
 				hashfilename.Format ("%s\\%s",f->strDirectory, f->strName);
 				if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",f->strDirectory, f->strName);
-				theApp.emuledlg->AddLogLine(false, "New file: '%s'", (const char*) hashfilename);
+				AddLogLine(false, "New file: '%s'", (const char*) hashfilename);
 				waitingforhash_list.GetNext (p);
 			}
 		}
@@ -1016,7 +1016,7 @@ void CSharedFileList::HashNextFile(){
 	// Mighty Knife: Report hashing files
 	if (waitingforhash_list.IsEmpty()) {
 		if (thePrefs.GetReportHashingFiles ()) {
-			theApp.emuledlg->AddLogLine(false, "Hashing of new files completed.");
+			AddLogLine(false, "Hashing of new files completed.");
 		}
 	}
 	// [end] Mighty Knife

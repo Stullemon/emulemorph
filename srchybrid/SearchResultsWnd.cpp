@@ -341,27 +341,22 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 
 	int useCat;
 	bool	bCreatedNewCat = false;
-	if (m_cattabs.GetCurSel()==-1){
-		if(thePrefs.SelectCatForNewDL())
-		{
-			CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
-			getCatDlg->DoModal();
+	if (m_cattabs.GetCurSel()==-1 && thePrefs.SelectCatForNewDL())
+	{
+		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
+		getCatDlg->DoModal();
 
-			// Returns 0 on 'Cancel', otherwise it returns the selected category
-			// or the index of a newly created category.  Users can opt to add the
-			// links into a new category.
-			useCat = getCatDlg->GetInput();
-			bCreatedNewCat = getCatDlg->CreatedNewCat();
-			bool	bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
-			delete getCatDlg;
-			if (bCanceled)
-				return;
-		}
-		else if(thePrefs.UseActiveCatForLinks())
-			useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
-		else
-			useCat = 0;
+		// Returns 0 on 'Cancel', otherwise it returns the selected category
+		// or the index of a newly created category.  Users can opt to add the
+		// links into a new category.
+		useCat = getCatDlg->GetInput();
+		bCreatedNewCat = getCatDlg->CreatedNewCat();
+		bool	bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
+		delete getCatDlg;
+		if (bCanceled)
+			return;
 	}
+
 	int useOrder = theApp.downloadqueue->GetMaxCatResumeOrder(useCat);
 	// khaos::categorymod-
 
