@@ -261,21 +261,24 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 //Morph Start - added by AndCycle, separate special prio compare
 int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient)
 {
+	//MORPH - Removed by SiRoB, After checking the code seems to be not needed
+	/*
 	if(leftClient == NULL){
 		return 1;
 	}
 	if(rightClient == NULL){
 		return -1;
 	}
+	*/
 
+	//MORPH START - Changed by SiRoB, Code Optimization
+	/*
 	if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == false && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == true){
 		return 1;
 	}
 	if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == true && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == false){
 		return -1;
 	}
-	//MORPH START - Changed by SiRoB, Code Optimization
-	/*
 	if(leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == true){
 		return 1;
 	}
@@ -295,13 +298,18 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 	return 0;
 	*/
 	int retvalue = 0;
-	if (leftClient->IsPBForPS()) --retvalue;
-	if (rightClient->IsPBForPS()){
-		++retvalue;
-		//Morph - added by AndCyle, selective PS internal Prio
-		if(thePrefs.IsPSinternalPrioEnable() && retvalue == 0)
-			return rightClient->GetFilePrioAsNumber() - leftClient->GetFilePrioAsNumber();
-		//Morph - added by AndCyle, selective PS internal Prio
+	if(leftClient->IsFriend() && leftClient->GetFriendSlot()) --retvalue;
+	if(rightClient->IsFriend() && rightClient->GetFriendSlot()) ++retvalue;
+	if(retvalue==0)
+	{
+		if (leftClient->IsPBForPS()) --retvalue;
+		if (rightClient->IsPBForPS()){
+			++retvalue;
+			//Morph - added by AndCyle, selective PS internal Prio
+			if(thePrefs.IsPSinternalPrioEnable() && retvalue == 0)
+				retvalue = rightClient->GetFilePrioAsNumber() - leftClient->GetFilePrioAsNumber();
+			//Morph - added by AndCyle, selective PS internal Prio
+		}
 	}
 	return retvalue;
 	//MORPH END   - Changed by SiRoB, Code Optimization
@@ -1402,10 +1410,10 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				theApp.emuledlg->ShowTransferRate();
 				*/
 				//Commander - Removed: Blinking Tray Icon On Message Recieve [emulEspaña] - End
-				
+				/*
 				if (!thePrefs.TransferFullChunks())
 					theApp.uploadqueue->UpdateMaxClientScore();
-
+				*/
 				// update cat-titles with downloadinfos only when needed
 				if (thePrefs.ShowCatTabInfos() && 
 					theApp.emuledlg->activewnd == theApp.emuledlg->transferwnd && 
