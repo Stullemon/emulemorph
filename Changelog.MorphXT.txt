@@ -2,6 +2,8 @@
 Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
 
+CHANGED: Intelligent Chunk Selection now use the advanced per file setting for the preview first and last chunk [SiRoB]
+
 ADDED  : "Using phpBB URL-Tags style" checkbox in FileDetail for ed2kFileLink creation [AndCycle]
 ADDED  : Options to Enable/Disable PowerShare internal File Priority [AndCycle]
 
