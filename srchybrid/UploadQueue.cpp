@@ -317,7 +317,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		rightGetQueueFile = false;
 	}
 	else if(!rightClient || !leftClient){
-
+		rightGetQueueFile = false;
 	}
 	else if(
 		(rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
