@@ -116,7 +116,7 @@ bool CFakecheck::IsFake(CString Hash2test, uint32 lenght){
 	} while (it!=Fakelist.begin());
 	return false;
 }
-bool CFakecheck::DownloadFakeList(){
+void CFakecheck::DownloadFakeList(){
 	char buffer[5];
 	int lenBuf = 5;
 	CString sbuffer;
@@ -130,7 +130,7 @@ bool CFakecheck::DownloadFakeList(){
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
-		return false;
+		return;
 	}
 	readFile= fopen(strTempFilename, "r");
 	fgets(buffer,lenBuf,readFile);
@@ -147,18 +147,17 @@ bool CFakecheck::DownloadFakeList(){
 	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
 	if ((thePrefs.GetFakesDatVersion() < (uint32) atoi(sbuffer))) {
 		thePrefs.SetFakesDatVersion(atoi(sbuffer));
-	if (readFile!=NULL) {
-		fclose(readFile);
-		remove(strTempFilename);
-	}
-	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_sURLToDownload = FakeCheckURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilename;
-	if (dlgDownload.DoModal() != IDOK)
-	{
-		theApp.emuledlg->AddLogLine(true,GetResString(IDS_FAKECHECKUPERROR));
-		return false;
+		thePrefs.Save(); //MORPH - Added by SiRoB, Fix the continuous update while emule have not been shutdown in case used in an autoupdater
+		if (readFile!=NULL) {
+			fclose(readFile);
+			remove(strTempFilename);
 		}
+		CHttpDownloadDlg dlgDownload;
+		dlgDownload.m_sURLToDownload = FakeCheckURL;
+		dlgDownload.m_sFileToDownloadInto = strTempFilename;
+		if (dlgDownload.DoModal() != IDOK)
+			theApp.emuledlg->AddLogLine(true,GetResString(IDS_FAKECHECKUPERROR));
+		else
+			LoadFromFile();
 	}
-	return (LoadFromFile()>0);
 }

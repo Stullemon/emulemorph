@@ -39,7 +39,7 @@ public:
 	int		LoadFromFile();
 	CString GetLastHit() { return lasthit;}
 	bool	IsFake(CString Hash2test, uint32 lenght);
-	bool	DownloadFakeList();
+	void	DownloadFakeList();
 private:
 	CString lasthit;
 	//CMutex m_Mutex;

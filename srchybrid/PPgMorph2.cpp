@@ -146,8 +146,7 @@ void CPPgMorph2::Localize(void)
 
 void CPPgMorph2::OnBnClickedUpdatefakes()
 {
-	if(!theApp.FakeCheck->DownloadFakeList())
-		theApp.emuledlg->AddLogLine(true, GetResString(IDS_FAKECHECKUPERROR));
+	theApp.FakeCheck->DownloadFakeList();
 }
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update

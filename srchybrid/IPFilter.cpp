@@ -422,22 +422,18 @@ void CIPFilter::UpdateIPFilterURL()
 	if ((thePrefs.GetIPfilterVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
 		thePrefs.SetIpfilterVersion(atoi(sbuffer));
 	// [end] Mighty Knife
-	if (readFile!=NULL) {
-		fclose(readFile);
-		remove(strTempFilename);
-	}
-	CHttpDownloadDlg dlgDownload;
-	dlgDownload.m_sURLToDownload = IPFilterURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilename;
-	if (dlgDownload.DoModal() != IDOK)
-	{
-		theApp.emuledlg->AddLogLine(true,GetResString(IDS_UPDATEIPFILTERERROR));
-	}
-	else
-	{
-	RemoveAllIPs();
-	int count=LoadFromDefaultFile();
-	}
+		thePrefs.Save(); //MORPH - Added by SiRoB, Fix the continuous update while emule have not been shutdown in case used in an autoupdater
+		if (readFile!=NULL) {
+			fclose(readFile);
+			remove(strTempFilename);
+		}
+		CHttpDownloadDlg dlgDownload;
+		dlgDownload.m_sURLToDownload = IPFilterURL;
+		dlgDownload.m_sFileToDownloadInto = strTempFilename;
+		if (dlgDownload.DoModal() != IDOK)
+			theApp.emuledlg->AddLogLine(true,GetResString(IDS_UPDATEIPFILTERERROR));
+		else
+			LoadFromDefaultFile();
 	}
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
