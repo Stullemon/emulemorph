@@ -217,8 +217,10 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
             slotCounter++;
         }
     }
-	if(foundSocket && m_highestNumberOfFullyActivatedSlots > (uint32)m_StandardOrder_list.GetSize()) {
-        m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize();
+	if(foundSocket){
+		if(m_highestNumberOfFullyActivatedSlots > (uint32)m_StandardOrder_list.GetSize()){
+			m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize();
+		}
 		return 2;
     }
 	//MORPH START - Added by SiRoB, Upload Splitting Class	
@@ -232,9 +234,11 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
             slotCounter++;
         }
     }
-	if(foundSocket && m_highestNumberOfFullyActivatedSlotsPowerShare > (uint32)m_PowerShareOrder_list.GetSize() ) {
-		m_highestNumberOfFullyActivatedSlotsPowerShare = (uint32)m_PowerShareOrder_list.GetSize();
-		return 0;
+	if(foundSocket){
+		if(m_highestNumberOfFullyActivatedSlotsPowerShare > (uint32)m_PowerShareOrder_list.GetSize() ) {
+			m_highestNumberOfFullyActivatedSlotsPowerShare = (uint32)m_PowerShareOrder_list.GetSize();
+		}
+		return 1;
 	}
 	slotCounter = 0;
 	while(slotCounter < m_FriendOrder_list.GetSize() && foundSocket == false) {
@@ -247,9 +251,11 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
         }
     }
 	
-	if(foundSocket && m_highestNumberOfFullyActivatedSlotsFriend > (uint32)m_FriendOrder_list.GetSize()) {
-        m_highestNumberOfFullyActivatedSlotsFriend = m_FriendOrder_list.GetSize();
-        return 1;
+	if(foundSocket){
+		if(m_highestNumberOfFullyActivatedSlotsFriend > (uint32)m_FriendOrder_list.GetSize()) {
+			m_highestNumberOfFullyActivatedSlotsFriend = m_FriendOrder_list.GetSize();
+		}
+		return 0;
 	}
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
     return -1;
