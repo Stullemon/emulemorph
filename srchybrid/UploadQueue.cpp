@@ -650,9 +650,10 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	uint32 newclientClassID = newclient->GetClassID();
 	if(thePrefs.GetLogUlDlEvents()){
 		CString buffer;
-		buffer.Format(_T("USC: Added new slot in class %i -"),newclientClassID);
+		buffer.Format(_T("USC: Added Slot in class %i -"),newclientClassID);
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			buffer.AppendFormat(_T("[C%i %i/%i %i]-"),classID,m_aiSlotCounter[classID],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID],m_abOnClientOverHideClientDatarate[classID]);
+		buffer.AppendFormat(_T( Client: %s"),newclient->DbgGetClientInfo());
 		DebugLog(LOG_USC,buffer);
 	}
 	m_abOnClientOverHideClientDatarate[newclientClassID] = False;
@@ -931,7 +932,7 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < 1000 && datarate < 102400)
 	*/
-	if (::GetTickCount() - m_nLastStartUpload < 10000)
+	if (::GetTickCount() - m_nLastStartUpload < 3000)
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -1220,15 +1221,19 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
 
 			// Mighty Knife: more detailed logging
+			/*
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- Main socket %ssuccessully removed from upload list."),removed ? _T("") : _T("NOT "));
+			*/
 			// [end] Mighty Knife
 
 			bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 
 			// Mighty Knife: more detailed logging
+			/*
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- PeerCache-socket %ssuccessully removed from upload list."),pcRemoved ? _T("") : _T("NOT "));
+			*/
 			// [end] Mighty Knife
 
 			//MORPH START - Added by SiRoB, due to zz upload system WebCache
@@ -1236,8 +1241,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
 
 			// Mighty Knife: more detailed logging
+			/*
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- WebCache-socket %ssuccessully removed from upload list."),wcRemoved ? _T("") : _T("NOT "));
+			*/
 			// [end] Mighty Knife
 
 			/*if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
