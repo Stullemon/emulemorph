@@ -417,7 +417,7 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	{
 		case 0:
 			//TODO avoid crash here in some case
-			iResult = item1->m_strName.CompareNoCase(item2->m_strName);
+			iResult = item1->m_strName.CompareNoCase(item2->m_strName.GetBuffer());
 			break;
 		default:
 			return 0;
