@@ -764,7 +764,7 @@ void CUploadQueue::Process() {
 			case 1: maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();break;
 			default: maxdatarate = thePrefs.GetMaxClientDataRate();break;
 		}
-		if (maxdatarate > 0 && m_nLastStartUpload + 5000 < curTick && cur_client->GetDatarate()*10 >= 11*maxdatarate)
+		if (maxdatarate > 0 && m_nLastStartUpload + 10000 < curTick && cur_client->GetDatarate()*10 >= 11*maxdatarate)
 			m_abOnClientOverHideClientDatarate[classID] = true;
 		++m_aiSlotCounter[classID];
 		if (classID<LAST_CLASS)
