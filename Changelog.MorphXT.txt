@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.17
+--------------------------------------
+FIXED  : HOS: Properly desactivated when not welcome [SiRoB]
+FIXED  : crash in some strange circonstance (div by zero) [SiRoB]
+
+CHANGED: Updated the wecaches.cvs in the package from webcache official site [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.16
 --------------------------------------
 FIXED  : Removed a check in AcceptNewClient that could block the open of new slot [SiRoB]
