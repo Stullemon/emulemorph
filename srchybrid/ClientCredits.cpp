@@ -567,7 +567,6 @@ void CClientCreditsList::SaveList()
 		AddLogLine(true, _T("%s"), strError);
 		return;
 	}
-	fileBack.Seek(5, CFile::begin);
 	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
 	uint32 count = m_mapClients.GetCount();
