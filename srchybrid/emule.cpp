@@ -415,9 +415,12 @@ BOOL CemuleApp::InitInstance()
 	m_pMainWnd = &dlg;
 	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
         
-	//MORPH START - Added by Commander, Custom incoming folder icon [emulEspaña]
-	theApp.AddIncomingFolderIcon();
-    //MORPH END   - Added by Commander, Custom incoming folder icon [emulEspaña]
+	//MORPH START - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
+	if(thePrefs.ShowFolderIcons()){
+		theApp.AddIncomingFolderIcon();
+		theApp.AddTempFolderIcon();
+	}
+    //MORPH END   - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
@@ -1666,7 +1669,7 @@ BOOL CemuleApp::RemoveUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping){
 }
 //MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 
-// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 void CemuleApp::AddIncomingFolderIcon(){
 	CString desktopFile, exePath;
 	
@@ -1692,13 +1695,41 @@ void CemuleApp::RemoveIncomingFolderIcon(){
 	desktopIni.DeleteKey(_T("IconFile"));
 	desktopIni.DeleteKey(_T("IconIndex"));
 }
-// Commander - Added: Custom incoming folder icon [emulEspaña] - End
+// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
 
-// Added by Announ [Announ: -Friend eLinks-]
+// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
+void CemuleApp::AddTempFolderIcon(){
+	CString desktopFile, exePath;
+
+	desktopFile = CString(thePrefs.GetTempDir()) + _T("\\Desktop.ini");
+	exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+
+	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+
+	desktopIni.WriteString(_T("IconFile"),exePath);
+	desktopIni.WriteInt(_T("IconIndex"),2);
+
+	SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
+	PathMakeSystemFolder(thePrefs.GetTempDir());
+}
+
+void CemuleApp::RemoveTempFolderIcon(){
+	CString desktopFile;
+
+	desktopFile = CString(thePrefs.GetTempDir()) + _T("\\Desktop.ini");
+
+	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+
+	desktopIni.DeleteKey(_T("IconFile"));
+	desktopIni.DeleteKey(_T("IconIndex"));
+}
+// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
+
+// Commander - Added: FriendLinks [emulEspaña] - Start
 
 bool CemuleApp::IsEd2kFriendLinkInClipboard()
 {
 	static const CHAR _szEd2kFriendLink[] = "ed2k://|friend|";
 	return IsEd2kLinkInClipboard(_szEd2kFriendLink, ARRSIZE(_szEd2kFriendLink)-1);
 }
-// End -Friend eLinks-
+// Commander - Added: FriendLinks [emulEspaña] - End

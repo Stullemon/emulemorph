@@ -156,7 +156,7 @@ BOOL CTransferWnd::OnInitDialog()
 	queueBar.SetBkColor(GetSysColor(COLOR_WINDOW));
 	queueBar.SetShowPercent();
 	queueBar.SetGradientColors(RGB(0,255,0),RGB(255,0,0));
-	if(thePrefs.IsInfiniteQueueEnabled()){
+	if(thePrefs.IsInfiniteQueueEnabled() || !thePrefs.ShowClientQueueProgressBar()){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
 	}
 	//Commander - Added: ClientQueueProgressBar - End
@@ -168,7 +168,7 @@ void CTransferWnd::ShowQueueCount(uint32 number){
 	_stprintf(buffer,_T("%u / %u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"),number,(thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200)),theApp.clientlist->GetBannedCount()); //Commander - Modified: ClientQueueProgressBar
 	GetDlgItem(IDC_QUEUECOUNT)->SetWindowText(buffer);
     //Commander - Added: ClientQueueProgressBar - Start
-	if(thePrefs.IsInfiniteQueueEnabled()){
+	if(thePrefs.IsInfiniteQueueEnabled() || !thePrefs.ShowClientQueueProgressBar()){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
 	}
 	else{

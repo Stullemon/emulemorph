@@ -53,6 +53,8 @@ CPPgMorphShare::CPPgMorphShare()
 	m_htiPermCommunity = NULL;
 	// [end] Mighty Knife
 	//MORPH END   - Added by SiRoB, Show Permission
+	m_htiFolderIcons = NULL;
+	m_htiDisplay = NULL;
 }
 
 CPPgMorphShare::~CPPgMorphShare()
@@ -68,12 +70,14 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		int iImgSFM = 8;
 		int iImgPerm = 8;
 		int iImgPS = 8;
+		int iImgDisp = 8;
 
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgSFM = piml->Add(CTempIconLoader(_T("SHAREDFILES")));
 			iImgPS = piml->Add(CTempIconLoader(_T("PREF_FILES"))); //MORPH - Added by SiRoB, POWERSHARE Limit
 			iImgPerm = piml->Add(CTempIconLoader(_T("ClientCompatible"))); //MORPH - Added by SiRoB, Show Permission
+			iImgDisp = piml->Add(CTempIconLoader(_T("PREF_DISPLAY")));
 		}
 		
 		CString Buffer;
@@ -109,8 +113,14 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
 
+		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, TVI_ROOT);
+		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_iFolderIcons);
+
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiHideOS, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiPermissions, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiPowershareMode, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiDisplay, TVE_EXPAND);
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
 		m_bInitializedTreeOpts = true;
 	}
@@ -132,6 +142,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//MORPH START - Added by SiRoB, Show Permission
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
 	//MORPH END   - Added by SiRoB, Show Permission
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplay, m_iFolderIcons);
 }
 
 
@@ -143,6 +154,7 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_iShareOnlyTheNeed = thePrefs.ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_iPowerShareLimit = thePrefs.PowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
+	m_iFolderIcons = thePrefs.m_bShowFolderIcons;
 	
 	CPropertyPage::OnInitDialog();
 	Localize();
@@ -175,6 +187,7 @@ BOOL CPPgMorphShare::OnApply()
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
+	thePrefs.m_bShowFolderIcons = m_iFolderIcons;
 
 	//theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
 
@@ -219,6 +232,7 @@ void CPPgMorphShare::Localize(void)
 		if (m_htiPermCommunity) m_ctrlTreeOptions.SetItemText(m_htiPermCommunity, GetResString(IDS_COMMUNITY));
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
+		if (m_htiFolderIcons) m_ctrlTreeOptions.SetItemText(m_htiFolderIcons, GetResString(IDS_FOLDERICONS));
 
 	}
 
@@ -247,6 +261,9 @@ void CPPgMorphShare::OnDestroy()
 	m_htiPermNone = NULL;
 	m_htiPermCommunity = NULL;
 	//MORPH END   - Added by SiRoB, Show Permission
+	m_htiFolderIcons = NULL;
+	m_htiDisplay = NULL;
+
 	CPropertyPage::OnDestroy();
 }
 LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)

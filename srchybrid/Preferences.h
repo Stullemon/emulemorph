@@ -640,6 +640,14 @@ public:
 	static TCHAR UpdateURLIP2Country[256]; //Commander - Added: IP2Country auto-updating
 	static TCHAR UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
 
+    //MORPH START - Added by Commander, ClientQueueProgressBar
+    static bool m_bClientQueueProgressBar;
+	//MORPH END - Added by Commander, ClientQueueProgressBar
+
+	//MORPH START - Added by Commander, FolderIcons
+	static bool m_bShowFolderIcons;
+	//MORPH END - Added by Commander, FolderIcons
+
 	static bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	static uint8	m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
 	static bool	m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
@@ -1452,6 +1460,14 @@ public:
 	static	bool	GetUseClientPercentage()					{ return m_bShowClientPercentage;}
 	static	void	SetUseClientPercentage(bool in)				{ m_bShowClientPercentage=in;}
 	//Commander - Added: Client Percentage - End
+
+	//MORPH START - Added by Commander, ClientQueueProgressBar
+	static bool ShowClientQueueProgressBar()					{ return m_bClientQueueProgressBar;}
+    //MORPH END - Added by Commander, ClientQueueProgressBar
+
+	//MORPH START - Added by Commander, FolderIcons
+	static bool ShowFolderIcons()					{ return m_bShowFolderIcons;}
+	//MORPH END - Added by Commander, FolderIcons
 
 	//Toolbar
 	static	CString GetToolbarSettings()						{ return m_sToolbarSettings; }

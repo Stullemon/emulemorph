@@ -203,10 +203,12 @@ protected:
 	bool m_bAutoStart;
 public:
 	void OptimizerInfo(void); // Commander - Added: Optimizer [ePlus]
-       // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+    // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 	void	AddIncomingFolderIcon();
 	void	RemoveIncomingFolderIcon();
-       // Commander - Added: Custom incoming folder icon [emulEspaña] - End
+	void	AddTempFolderIcon();
+	void	RemoveTempFolderIcon();
+	// Commander - Added: Custom incoming folder icon [emulEspaña] - End
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 public:

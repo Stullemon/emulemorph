@@ -2375,7 +2375,7 @@
 #define IDS_EXPIRED_KNOWN               4013
 #define IDS_DELETEFILE                  4014
 #define IDS_PAWCIO_CREDIT               4015
-#define IDD_PPG_MORPH_SHARE              4100
+#define IDD_PPG_MORPH_SHARE             4100
 #define IDS_UPDATEIPFILTER              4742
 #define IDS_UPDATEIPFILTERONSTART       4743
 #define IDS_UPDATEIPFILTERERROR         4744
@@ -2661,13 +2661,8 @@
 #define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 5601
 #define IDC_URL_FOR_UPDATING_IP2COUNTRY 5602
 #define IDS_URL_FOR_UPDATING_IP2COUNTRY 5602
-
 #define IDC_MORPH3_OPTS                 5700
-
-#define IDS_AUTOUPIP2COUNTRY            6032
-#define IDS_UPDATEIPCURL                6033
-
-#define IDD_PPG_EMULESPANA1				6000
+#define IDD_PPG_EMULESPANA1             6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
 #define IDS_WAP_ADMINLOGIN              6003
@@ -2693,10 +2688,11 @@
 #define IDS_WAP_BASICDATA               6023
 #define IDS_WAP_REFRESH                 6024
 #define IDS_WAP_SORTBY                  6025
-
+#define IDS_AUTOUPIP2COUNTRY            6032
+#define IDS_UPDATEIPCURL                6033
+#define IDS_CLIENTQUEUEPROGRESSBAR      6040
 #define IDS_CHECK_DYNDNS_ENABLED        6100
 #define IDC_CHECK_DYNDNS_ENABLED        6100
-
 #define IDS_STATIC_DYNDNS_USERNAME      6101
 #define IDC_STATIC_DYNDNS_USERNAME      6101
 #define IDC_EDIT_DYNDNS_USERNAME        6102
@@ -2721,10 +2717,9 @@
 #define IDC_STATIC_DYNDNS_LASTUPDATE_ARROW 6117
 #define IDC_STATIC_DYNDNS_CURRENTIP_ARROW 6118
 #define IDC_RE_DYNDNS_HELP              6119
-
-#define	IDC_AUTOBACKUP					13000
-#define	IDC_AUTOBACKUP2					13001
-
+#define IDS_FOLDERICONS                 6150
+#define IDC_AUTOBACKUP                  13000
+#define IDC_AUTOBACKUP2                 13001
 #define IDC_RANDOMPORTS                 20102
 #define IDC_LBL_MIN                     20103
 #define IDC_LBL_MAX                     20104
@@ -2732,20 +2727,17 @@
 #define IDC_MAXPORT                     20106
 #define IDC_SPIN_MAX                    20107
 #define IDC_SPIN_MIN                    20108
-
-#define IDS_UPNPNAT						21009
-#define IDS_UPNPNATEMULE				21010
-#define IDS_UPNPNATTRYRANDOM			21011
+#define IDC_BTN_MENU                    20120
+#define IDS_UPNPNAT                     21009
+#define IDS_UPNPNATEMULE                21010
+#define IDS_UPNPNATTRYRANDOM            21011
 #define IDS_RANDOMPORTS                 21012
 #define IDS_MINPORT                     21013
 #define IDS_MAXPORT                     21014
-
-#define IDS_ICFSUPPORT					21027
-#define IDS_ICFSUPPORTFIRST				21028
-#define IDS_ICF							21029
-#define IDS_ICF_SERVERUDP				21030
-
-#define IDC_BTN_MENU                    20120
+#define IDS_ICFSUPPORT                  21027
+#define IDS_ICFSUPPORTFIRST             21028
+#define IDS_ICF                         21029
+#define IDS_ICF_SERVERUDP               21030
 #define IDS_USER_ALREADY_FRIEND         21062
 #define IDS_GETFRIENDED2KLINK           21063
 #define IDS_GETHTMLFRIENDED2KLINK       21064
@@ -2782,7 +2774,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6200
+#define _APS_NEXT_RESOURCE_VALUE        6201
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         6200
 #define _APS_NEXT_SYMED_VALUE           106

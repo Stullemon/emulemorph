@@ -20,6 +20,7 @@ protected:
 	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	int m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	int m_iPermissions; //MORPH - Added by SiRoB, Show Permissions
+	int m_iFolderIcons;
 	
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
@@ -44,6 +45,8 @@ protected:
 	HTREEITEM m_htiPermCommunity;
 	// [end] Mighty Knife
 	//MORPH END   - Added by SiRoB, Show Permission
+	HTREEITEM m_htiDisplay;
+	HTREEITEM m_htiFolderIcons;
 	
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();

@@ -134,19 +134,27 @@ BOOL CPPgDirectories::OnApply()
 		AfxMessageBox(GetResString(IDS_WRN_INCTEMP_SAME));
 		return FALSE;
 	}
-
-	// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+    
+	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
+	if(thePrefs.ShowFolderIcons()){
 	if(CString(thePrefs.GetIncomingDir()).Trim().MakeLower() != CString(strIncomingDir).Trim().MakeLower())
 		theApp.RemoveIncomingFolderIcon();
-	// Commander - Added: Custom incoming folder icon [emulEspaña] - End
+	if(CString(thePrefs.GetTempDir()).Trim().MakeLower() != CString(strTempDir).Trim().MakeLower())
+		theApp.RemoveTempFolderIcon();
+	}
+	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
+	
 
 	_sntprintf(thePrefs.incomingdir, ARRSIZE(thePrefs.incomingdir), _T("%s"), strIncomingDir);
 	MakeFoldername(thePrefs.incomingdir);
 	_stprintf(thePrefs.GetCategory(0)->incomingpath,_T("%s"),thePrefs.incomingdir);
 
-	// Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
+	if(thePrefs.ShowFolderIcons()){
 	theApp.AddIncomingFolderIcon();
-	// Commander - Added: Custom incoming folder icon [emulEspaña] - End
+	theApp.AddTempFolderIcon();
+	}
+	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
 
 	_sntprintf(thePrefs.tempdir, ARRSIZE(thePrefs.tempdir), _T("%s"), strTempDir);
 	MakeFoldername(thePrefs.tempdir);

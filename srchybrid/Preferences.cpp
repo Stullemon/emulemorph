@@ -489,6 +489,14 @@ TCHAR	CPreferences::m_sWebLowPassword[256];
 CArray<DynDNS_Struct*,DynDNS_Struct*> CPreferences::DynDNSMap;
 //MORPH END   - Added by SiRoB/Commander, DynDNS
 
+//MORPH START - Added by Commander, ClientQueueProgressBar
+bool CPreferences::m_bClientQueueProgressBar;
+//MORPH END - Added by Commander, ClientQueueProgressBar
+
+//MORPH START - Added by Commander, FolderIcons
+bool CPreferences::m_bShowFolderIcons;
+//MORPH END - Added by Commander, FolderIcons
+
 uint16	CPreferences::m_nWebPort;
 bool	CPreferences::m_bWebEnabled;
 bool	CPreferences::m_bWebUseGzip;
@@ -2460,6 +2468,14 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("WapLowEnable"), m_bWapLowEnabled, _T("WapServer"));
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]        
 
+	//MORPH START - Added by Commander, ClientQueueProgressBar  
+	ini.WriteBool(_T("ClientQueueProgressBar"),m_bClientQueueProgressBar, _T("eMule"));
+	//MORPH END - Added by Commander, ClientQueueProgressBar
+
+	//MORPH START - Added by Commander, FolderIcons  
+	ini.WriteBool(_T("ShowFolderIcons"),m_bShowFolderIcons, _T("eMule"));
+	//MORPH END - Added by Commander, FolderIcons
+
 	ini.WriteBool(_T("InfiniteQueue"),infiniteQueue,_T("eMule"));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
 	ini.WriteBool(_T("AutoDynUpSwitching"),isautodynupswitching,_T("eMule"));//MORPH - Added by Yun.SF3, Auto DynUp changing
@@ -3053,6 +3069,14 @@ void CPreferences::LoadPreferences()
 	ini.GetInt(_T("InvisibleModeHKKeyModifier"), MOD_CONTROL | MOD_SHIFT | MOD_ALT),
     (char)ini.GetInt(_T("InvisibleModeHKKey"), (int)'E'));
     //Commander - Added: Invisible Mode [TPT] - End
+
+    //MORPH START - Added by Commander, ClientQueueProgressBar
+	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),true);
+    //MORPH END - Added by Commander, ClientQueueProgressBar
+
+	//MORPH START - Added by Commander, FolderIcons
+	m_bShowFolderIcons=ini.GetBool(_T("ShowFolderIcons"),true);
+	//MORPH END - Added by Commander, FolderIcons
 
     m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
 	enableDownloadInRed = ini.GetBool(_T("EnableDownloadInRed"), true); //MORPH - Added by IceCream, show download in red
