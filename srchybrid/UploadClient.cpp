@@ -780,7 +780,7 @@ uint32 CUpDownClient::SendBlockData(){
 			bool useChunkLimit = false; // PENDING: Get from prefs, or enforce?
 
 			bool wasRemoved = false;
-			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONAMOUNT && curTick-m_dwLastCheckedForEvictTick >= 5) {
+			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONAMOUNT && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
 				m_dwLastCheckedForEvictTick = curTick;
 				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
 			}
