@@ -316,16 +316,21 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 	// if the remote client answers the OP_FILEREQUEST with OP_FILEREQANSWER the file is shared by the remote client. if we
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1){
+		//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+		uint8* thisStatus;
+		if(m_PartStatus_list.Lookup(reqfile, thisStatus)){
+			if (thisStatus){
+				delete[] thisStatus;
+				if (thisStatus==m_abyPartStatus)
+					m_abyPartStatus = NULL;
+				thisStatus = NULL;
+			}
+		}
+		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+
 		if (m_abyPartStatus){
-			//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-			uint8* thisStatus;
-			m_PartStatus_list.Lookup(reqfile, thisStatus);
-			if (thisStatus==m_abyPartStatus)
-			//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
-				delete[] m_abyPartStatus;
+			delete[] m_abyPartStatus;
 			m_abyPartStatus = NULL;
 		}
-		//MORPH   END - Changed by SiRoB, HotFix related to khaos::kmod+ 
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by SiRoB, Hot Fix for m_PartStatus_list
@@ -367,12 +372,14 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	data.Read(&nED2KPartCount,2);
 	
 	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-	uint8* thisStatus = NULL;
-	m_PartStatus_list.Lookup(reqfile, thisStatus);
-	if (thisStatus){
-		delete[] thisStatus;
-		if (thisStatus==m_abyPartStatus)
-			m_abyPartStatus = NULL;
+	uint8* thisStatus;
+	if(m_PartStatus_list.Lookup(reqfile, thisStatus)){
+		if (thisStatus){
+			delete[] thisStatus;
+			if (thisStatus==m_abyPartStatus)
+				m_abyPartStatus = NULL;
+			thisStatus = NULL;
+		}
 	}
 	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
 		
