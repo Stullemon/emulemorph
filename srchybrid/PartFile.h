@@ -319,8 +319,6 @@ public:
 	// khaos::categorymod+
 	void	SetCatResumeOrder(uint16 order)	{ m_catResumeOrder = order; SavePartFile(); }
 	uint16	GetCatResumeOrder() const				{ return m_catResumeOrder; }
-	uint16	GetFileGroup() const					{ return m_catFileGroup; }
-	void	SetFileGroup(uint16 group)		{ m_catFileGroup = group; SavePartFile(); }
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
 	void	SetActivatedTick()				{ m_dwActivatedTick = GetTickCount(); }
@@ -422,7 +420,6 @@ private:
 	void	PharseICHResult();	// SLUGFILLER: SafeHash
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;
-	uint16	m_catFileGroup;
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
 	uint32	m_nSecondsActive;

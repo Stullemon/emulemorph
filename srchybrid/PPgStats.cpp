@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CPPgStats, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_CRATIO, OnCbnSelchangeCRatio)
 	ON_EN_CHANGE(IDC_CGRAPHSCALE, OnEnChangeCGraphScale)
 	ON_WM_HELPINFO()
+	ON_BN_CLICKED(IDC_SOLIDGRAPH, OnBnClickedSolidGraph) //MORPH - Added by SiRoB, New Graph
 END_MESSAGE_MAP()
 
 CPPgStats::CPPgStats()
@@ -96,7 +97,12 @@ BOOL CPPgStats::OnInitDialog()
 	int n = thePrefs.GetStatsConnectionsGraphRatio();
 	m_cratio.SetCurSel((n==10)?5:((n==20)?6:n-1));
 	// <-----khaos-
-
+	//MORPH START - Added by SiRoB, New Graph
+	if(thePrefs.IsSolidGraph())
+		CheckDlgButton(IDC_SOLIDGRAPH,1);
+	else
+		CheckDlgButton(IDC_SOLIDGRAPH,0);
+	//MORPH END   - Added by SiRoB, New Graph
 	Localize();
 	SetModified(FALSE);
 
@@ -148,7 +154,14 @@ BOOL CPPgStats::OnApply()
 			thePrefs.SetStatsConnectionsGraphRatio(iRatio); 
 			bInvalidateGraphs = true;
 		}
-
+		//MORPH START - Added by SiRoB, New Graph
+		bool bSolidGraph = IsDlgButtonChecked(IDC_SOLIDGRAPH);
+		if(thePrefs.IsSolidGraph() != bSolidGraph){
+			thePrefs.m_bSolidGraph = bSolidGraph;
+			bInvalidateGraphs = true;
+		}
+		//MORPH END   - Added by SiRoB, New Graph
+	
 		if (bInvalidateGraphs){
 			theApp.emuledlg->statisticswnd->UpdateConnectionsGraph(); // Set new Y upper bound and Y ratio for active connections.
 			theApp.emuledlg->statisticswnd->Localize();
@@ -171,7 +184,8 @@ void CPPgStats::Localize(void)
 		GetDlgItem(IDC_STATIC_CGRAPHRATIO)->SetWindowText(GetResString(IDS_PPGSTATS_ACRATIO));
 		SetWindowText(GetResString(IDS_STATSSETUPINFO));
 		GetDlgItem(IDC_PREFCOLORS)->SetWindowText(GetResString(IDS_COLORS));
-
+	
+		GetDlgItem(IDC_SOLIDGRAPH)->SetWindowText(GetResString(IDS_SOLIDGRAPH)); //MORPH - Added by SiRoB, New Graph		
 		m_colors.ResetContent();
 		m_colors.AddString(GetResString(IDS_SP_BACKGROUND));
 		m_colors.AddString(GetResString(IDS_SP_GRID));

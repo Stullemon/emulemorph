@@ -187,9 +187,9 @@ int		CPreferences::maxGraphDownloadRate;
 int		CPreferences::maxGraphUploadRate;
 uint8	CPreferences::beepOnError;
 uint8	CPreferences::confirmExit;
-uint16	CPreferences::downloadColumnWidths[16]; /*13 Official+ 3 Khaos*/
-BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 3 Khaos*/
-INT 	CPreferences::downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
+uint16	CPreferences::downloadColumnWidths[15]; /*13 Official+ 2 Khaos*/
+BOOL	CPreferences::downloadColumnHidden[15]; /*13 Official+ 2 Khaos*/
+INT 	CPreferences::downloadColumnOrder[15];  /*13 Official+ 2 Khaos*/
 uint16	CPreferences::uploadColumnWidths[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
 BOOL	CPreferences::uploadColumnHidden[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
 INT 	CPreferences::uploadColumnOrder[15];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
@@ -405,8 +405,8 @@ bool	CPreferences::m_bTransflstRemain;
 uint8	CPreferences::versioncheckdays;
 // SLUGFILLER: multiSort - save multiple params
 // SLUGFILLER: DLsortFix - double, for client-only sorting
-int	CPreferences::tableSortItemDownload[32];
-BOOL	CPreferences::tableSortAscendingDownload[32];
+int	CPreferences::tableSortItemDownload[30];
+BOOL	CPreferences::tableSortAscendingDownload[30];
 // SLUGFILLER: DLsortFix
 int	CPreferences::tableSortItemUpload[15];
 BOOL	CPreferences::tableSortAscendingUpload[15];
@@ -600,7 +600,7 @@ uint16	CPreferences::m_iSUCPitch;
 uint16	CPreferences::m_iSUCDrift;
 bool	CPreferences::m_bSUCLog;
 //MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-
+bool	CPreferences::m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
 //MORPH START - Added by SiRoB, ZZ Upload system (USS)
 bool	CPreferences::m_bDynUpEnabled;
 int	CPreferences::m_iDynUpPingTolerance;
@@ -2403,7 +2403,7 @@ void CPreferences::SavePreferences(){
 	temp.Format ("\"%s\"",m_sCRC32Suffix);
 	ini.WriteString("LastCRC32Suffix",temp,"eMule");
 	// [end] Mighty Knife
-
+	ini.WriteBool("SolidGraph", m_bSolidGraph,"eMule"); //MORPH - Added by SiRoB, New Graph
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("USSLog", m_bDynUpLog,"eMule");
 	ini.WriteInt("USSPingLimit", m_iDynUpPingLimit,"eMule"); // EastShare - Add by TAHO, USS limit
@@ -2848,7 +2848,7 @@ void CPreferences::LoadPreferences(){
 	autobackup = ini.GetBool("AutoBackup",true);
 	autobackup2 = ini.GetBool("AutoBackup2",true);
 	//EastShare - Added by Pretender, TBH-AutoBackup
-
+	m_bSolidGraph = ini.GetBool("SolidGraph", false); //MORPH - Added by SiRoB, New Graph
 	infiniteQueue=ini.GetBool("InfiniteQueue",false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);

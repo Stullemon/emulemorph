@@ -119,10 +119,9 @@ void CDownloadListCtrl::Init()
 	// khaos::categorymod+ Two new ResStrings, too.
 	InsertColumn(12, GetResString(IDS_CAT_COLCATEGORY),LVCFMT_LEFT,60);
 	InsertColumn(13, GetResString(IDS_CAT_COLORDER),LVCFMT_LEFT,60);
-	InsertColumn(14, GetResString(IDS_CAT_GROUP), LVCFMT_LEFT, 60);
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
-	InsertColumn(15, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
+	InsertColumn(14, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
 	// khaos::accuratetimerem-
 
 	SetAllIcons();
@@ -301,17 +300,12 @@ void CDownloadListCtrl::Localize()
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(13, &hdi);
 	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_CAT_GROUP);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(14, &hdi);
-	strRes.ReleaseBuffer();
 	// khaos::categorymod-
 
 	// khaos::accuratetimerem+
 	strRes = GetResString(IDS_REMAININGSIZE);
 	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(15, &hdi);
+	pHeaderCtrl->SetItem(14, &hdi);
 	strRes.ReleaseBuffer();
 	// khaos::accuratetimerem-
 
@@ -770,15 +764,9 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 				dc->DrawText(buffer, (int) strlen(buffer), lpRect, DLC_DT_TEXT);
 				break;
 			}
-		case 14: // Group
-			{
-				buffer.Format("%u", lpPartFile->GetFileGroup());
-				dc->DrawText(buffer, (int) strlen(buffer), lpRect, DLC_DT_TEXT);
-				break;
-			}
 		// khaos::categorymod-
 		// khaos::accuratetimerem+
-		case 15:		// remaining size
+		case 14:		// remaining size
 			{
 				if (lpPartFile->GetStatus()!=PS_COMPLETING && lpPartFile->GetStatus()!=PS_COMPLETE ){
 					//size 
@@ -1636,7 +1624,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)CatsMenu.m_hMenu, GetResString(IDS_TOCAT));
 			
 			// khaos::categorymod+			
-			//m_FileMenu.AppendMenu(MF_STRING, MP_SETFILEGROUP, GetResString(IDS_CAT_SETFILEGROUP));
 			CTitleMenu mnuOrder;
 			if (this->GetSelectedCount() > 1) {
 				mnuOrder.CreatePopupMenu();
@@ -2118,23 +2105,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 				//MORPH END - Added by IceCream, copy feedback feature
 				// khaos::categorymod+
-				case MP_SETFILEGROUP: {
-					InputBox inputGroup;
-					CString currGroup;
-
-					currGroup.Format("%u", file->GetFileGroup());
-					inputGroup.SetLabels(GetResString(IDS_CAT_SETFILEGROUP), GetResString(IDS_CAT_SETFILEGROUPMSG), currGroup);
-					inputGroup.SetNumber(true);
-					if (inputGroup.DoModal() == IDOK)
-					{
-						int newGroup = inputGroup.GetInputInt();
-						if (newGroup < 1 || newGroup == file->GetFileGroup()) break;
-
-						file->SetFileGroup(newGroup);
-						Invalidate();
-					}
-					break;
-				}
 				// This is only called when there is a single selection, so we'll handle it thusly.
 				case MP_CAT_SETRESUMEORDER: {
 					InputBox	inputOrder;
@@ -2651,14 +2621,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 			return -1;
 		else
 			return 0;
-	case 14: // File Group
-		if (file1->GetFileGroup() > file2->GetFileGroup())
-			return 1;
-		else if (file1->GetFileGroup() < file2->GetFileGroup())
-			return -1;
-		else
-			return 0;
-	case 15: // Remaining Bytes
+	case 14: // Remaining Bytes
 		if ((file1->GetFileSize() - file1->GetCompletedSize()) > (file2->GetFileSize() - file2->GetCompletedSize()))
 			return 1;
 		else if ((file1->GetFileSize() - file1->GetCompletedSize()) < (file2->GetFileSize() - file2->GetCompletedSize()))

@@ -189,9 +189,9 @@ public:
 	static	int		maxGraphUploadRate;
 	static	uint8	beepOnError;
 	static	uint8	confirmExit;
-	static	uint16	downloadColumnWidths[16]; /*13 Official+ 3 Khaos*/
-	static	BOOL	downloadColumnHidden[16]; /*13 Official+ 3 Khaos*/
-	static	INT		downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
+	static	uint16	downloadColumnWidths[15]; /*13 Official+ 2 Khaos*/
+	static	BOOL	downloadColumnHidden[15]; /*13 Official+ 2 Khaos*/
+	static	INT		downloadColumnOrder[15];  /*13 Official+ 2 Khaos*/
 	static	uint16	uploadColumnWidths[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
 	static	BOOL	uploadColumnHidden[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
 	static	INT		uploadColumnOrder[15];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
@@ -460,8 +460,8 @@ public:
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
 	// SLUGFILLER: multiSort - save multiple params
 	// SLUGFILLER: DLsortFix - double, for client-only sorting
-	static	int		tableSortItemDownload[32];
-	static	BOOL	tableSortAscendingDownload[32];
+	static	int		tableSortItemDownload[30];
+	static	BOOL	tableSortAscendingDownload[30];
 	// SLUGFILLER: DLsortFix
 	static	int		tableSortItemUpload[15];
 	static	BOOL	tableSortAscendingUpload[15];
@@ -682,7 +682,7 @@ public:
 	static bool		m_bIsUSSLimit; // EastShare - Added by linekin, USS limit applied?
 	static bool		m_bDynUpLog;
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
-
+	static bool		m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
 	static	CStringList shareddir_list;
 	static	CStringList adresses_list;
 
@@ -1392,7 +1392,7 @@ public:
 
 	//EastShare - added by AndCycle, IP to Country
 	IP2CountryNameSelection	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
-	bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}
+	static bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}
 	//EastShare - added by AndCycle, IP to Country
 	static	void	SetMinUpload(uint16 in); //MORPH - Added by SiRoB, (SUC) & (USS)
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
@@ -1438,7 +1438,8 @@ public:
 	static	void	SetCRC32Suffix (CString _s)				{ sprintf (m_sCRC32Suffix,"%s",_s); }
 	// [end] Mighty Knife
 
-	bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; } //MORPH START added by Yun.SF3: Ipfilter.dat update
+	static bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; } //MORPH START added by Yun.SF3: Ipfilter.dat update
+	static bool	IsSolidGraph()	{ return m_bSolidGraph;} //MORPH - Added by SiRoB, New Graph
 
 	// khaos::categorymod+
 	static	bool	ShowValidSrcsOnly()		{ return m_bValidSrcsOnly; }

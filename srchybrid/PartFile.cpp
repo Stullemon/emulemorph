@@ -257,7 +257,6 @@ void CPartFile::Init(){
 	//MORPH END - HotFix by SiRoB, khaos 14.6 missing
 	// khaos::categorymod+
 	m_catResumeOrder=0;
-	m_catFileGroup=0;
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
 	m_nSecondsActive = 0;
@@ -682,17 +681,6 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						}
 						// SLUGFILLER: SafeHash
 						m_catResumeOrder = newtag->tag.intvalue;
-						delete newtag;
-						break;
-					}
-					case FT_CATFILEGROUP:{
-						// SLUGFILLER: SafeHash - tag-type verification
-						if (newtag->tag.type != 3) {
-							taglist.Add(newtag);
-							break;
-						}
-						// SLUGFILLER: SafeHash
-						m_catFileGroup = newtag->tag.intvalue;
 						delete newtag;
 						break;
 					}
@@ -1189,10 +1177,6 @@ bool CPartFile::SavePartFile()
 		// khaos::categorymod+
 		CTag catresumetag(FT_CATRESUMEORDER, m_catResumeOrder );
 		catresumetag.WriteTagToFile(&file);
-
-		//CTag catfilegroup(FT_CATFILEGROUP, m_catFileGroup);
-		//catfilegroup.WriteTagToFile(&file);
-		// khaos::categorymod-
 
 		// khaos::compcorruptfix+
 		CTag savedtag(FT_COMPRESSIONBYTES, (uint32)m_iGainDueToCompression + m_iSesCompressionBytes);

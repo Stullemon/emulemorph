@@ -1942,7 +1942,6 @@
 #define IDC_KADICO2                     2839
 #define IDC_CATLABEL                    2840
 #define IDC_CATS                        2841
-
 #define IDC_PARTMET                     3345
 #define IDD_PPG_BACKUP                  3378
 #define IDS_SWITCHSUC                   3468
@@ -2336,7 +2335,6 @@
 #define IDS_INFINITEQUEUE               4886
 #define IDS_PAYBACKFIRSTLIMIT           4887
 #define IDC_FILENAMELEFT                4888
-
 #define IDC_FILENAMERIGHT               4889
 #define IDS_COMMUNITY                   4889
 #define IDC_NEWFILENAMESEDITRIGHT       4890
@@ -2344,6 +2342,8 @@
 #define IDC_RESETBUTTON                 4891
 #define IDC_RICHEDIT21                  4897
 #define IDS_AUXPORTS                    5000
+#define IDC_SOLIDGRAPH                  5001
+#define IDS_SOLIDGRAPH                  5001
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2354,7 +2354,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        5001
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5001
+#define _APS_NEXT_CONTROL_VALUE         5002
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

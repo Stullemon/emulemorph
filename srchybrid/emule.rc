@@ -81,14 +81,9 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     ICON            "",IDC_DOWNLOAD_ICO,5,5,20,20
-    /*//MORPH START - Changed by SiRoB, Khaos Category
-	CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,18,6,94,8
-    */
-	CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
+    CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,21,6,140,8
-	//MORPH RND  - Changed by SiRoB, Khaos Category
-	CONTROL         "",IDC_DOWNLOADLIST,"SysListView32",LVS_REPORT | 
+    CONTROL         "",IDC_DOWNLOADLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | WS_TABSTOP,5,17,500,82,WS_EX_STATICEDGE
     CONTROL         "",IDC_UPLOADLIST,"SysListView32",LVS_REPORT | 
@@ -199,50 +194,6 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-/*//MORPH START - Changed by SiRoB, New Graph
-    CONTROL         "",IDC_C1_2,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,266,
-                    157,16,8
-    LTEXT           "session average",IDC_STATIC_U3,285,157,103,8
-    LTEXT           "current",IDC_STATIC_U2,403,148,77,8
-    LTEXT           "Download-Speed",IDC_STATIC_D3,265,3,115,8
-    LTEXT           "session average",IDC_STATIC_D2,284,12,98,8
-    CONTROL         "",IDC_C0_2,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,265,
-                    12,16,8
-    CONTROL         "",IDC_SCOPE_U,"Static",SS_ETCHEDFRAME | SS_SUNKEN | NOT 
-                    WS_VISIBLE,266,166,239,120
-    LTEXT           "active downloads",IDC_STATIC_S2,23,179,86,8
-    LTEXT           "active connections",IDC_STATIC_S0,148,170,98,8
-    LTEXT           "active uploads",IDC_STATIC_S1,148,179,90,8
-    CONTROL         "",IDC_S3,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,4,179,
-                    16,8
-    CONTROL         "",IDC_S1,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,130,
-                    179,16,8
-    CONTROL         "",IDC_S0,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,130,
-                    170,16,8
-    CONTROL         "",IDC_STATSSCOPE,"Static",SS_WHITEFRAME | SS_SUNKEN | 
-                    NOT WS_VISIBLE,3,188,258,98
-    LTEXT           "Upload-Speed",IDC_STATIC_U,267,147,97,8
-    LTEXT           "current",IDC_STATIC_D,410,3,91,8
-    CONTROL         "",IDC_C1,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,383,
-                    148,16,8
-    CONTROL         "",IDC_C0,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,390,3,
-                    16,8
-    CONTROL         "",IDC_SCOPE_D,"Static",SS_ETCHEDFRAME | SS_SUNKEN | NOT 
-                    WS_VISIBLE,265,21,240,122
-    CONTROL         "",IDC_C1_3,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,383,
-                    157,16,8
-    LTEXT           "time average",IDC_TIMEAVG2,403,157,93,8
-    LTEXT           "time average",IDC_TIMEAVG1,410,12,90,8
-    CONTROL         "",IDC_C0_3,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,390,
-                    12,16,8
-    CONTROL         "",IDC_STATTREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP | 0x800,3,19,259,147
-    LTEXT           "Static",IDC_STATIC_CONNSTATS,4,169,103,8
-    LTEXT           "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,23,
-                    7,204,10
-    PUSHBUTTON      "v",IDC_BNMENU,3,4,14,13,BS_FLAT
-*/
     CONTROL         "",IDC_SCOPE_U,"Static",SS_ETCHEDFRAME | SS_RIGHTJUST | 
                     SS_REALSIZEIMAGE | SS_SUNKEN | NOT WS_VISIBLE,221,112,
                     284,107
@@ -256,10 +207,9 @@ BEGIN
     PUSHBUTTON      "V",IDC_BNMENU,198,8,16,14,BS_FLAT
     LTEXT           "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,3,
                     11,192,11
-//MORPH END - Changed by SiRoB, New Graph
 END
 
-IDD_PPG_STATS DIALOGEX 0, 0, 229, 222
+IDD_PPG_STATS DIALOGEX 0, 0, 229, 229
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | 
     WS_CAPTION
 CAPTION "Statistics"
@@ -287,6 +237,8 @@ BEGIN
     LTEXT           "Update Interval",IDC_SLIDERINFO2,13,172,181,10
     CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
                     TBS_NOTICKS | WS_TABSTOP,13,185,180,12,WS_EX_STATICEDGE
+    CONTROL         "Show solid graph",IDC_SOLIDGRAPH,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,217,202,10
 END
 
 IDD_SPLASH DIALOGEX 0, 0, 234, 185
@@ -592,10 +544,6 @@ BEGIN
     CONTROL         "Shared Files",IDC_TRAFFIC_TEXT,"Static",
                     SS_LEFTNOWORDWRAP | WS_GROUP,18,6,142,8
     ICON            "",IDC_FILES_ICO,5,5,20,20
-//MORPH START - Added by SiRoB, Share Category
-//	CONTROL         "",IDC_STAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
-//                    TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
-//MORPH END   - Added by SiRoB, Share Category
 END
 
 IDD_PPG_NOTIFY DIALOGEX 0, 0, 229, 218
@@ -825,31 +773,6 @@ BEGIN
     LTEXT           "Static",IDC_CMSTATUS,4,117,236,9
 END
 
-/*//MORPH START - Changed by SiRoB, Khaos Category
-IDD_CAT DIALOGEX 0, 0, 230, 169
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
-CAPTION "Categories"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    EDITTEXT        IDC_TITLE,21,16,64,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_COMMENT,21,43,181,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_INCOMING,21,68,181,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BROWSE,207,67,16,12,BS_FLAT
-    COMBOBOX        IDC_PRIOCOMBO,21,92,79,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
-    EDITTEXT        IDC_AUTOCATEXT,21,119,181,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "",IDC_CATCOLOR,21,148,34,16,BS_FLAT
-    DEFPUSHBUTTON   "OK",IDOK,121,152,47,12,BS_FLAT
-    PUSHBUTTON      "&Cancel",IDCANCEL,173,152,50,12,BS_FLAT
-    LTEXT           "Title:",IDC_STATIC_TITLE,7,6,216,8
-    LTEXT           "Comment:",IDC_STATIC_COMMENT,7,33,216,8
-    LTEXT           "Color",IDC_STATIC_COLOR,7,138,123,8
-    LTEXT           "Static",IDC_STATIC_PRIO,7,82,216,8
-    LTEXT           "Incoming Dir:",IDC_STATIC_INCOMING,7,58,216,8
-    LTEXT           "Autocat",IDC_STATIC_AUTOCAT,7,108,216,8
-END
-*/
 IDD_CAT DIALOGEX 0, 0, 309, 300
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -908,7 +831,6 @@ BEGIN
     CONTROL         "Advanced Filter Mask (Separator: | )",IDC_CHECK_MASK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,242,256,8
 END
-//MORPH END   - Changed by SiRoB, Khaos Category
 
 IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -1020,10 +942,8 @@ BEGIN
     PUSHBUTTON      "&Cleanup",IDC_CLEANFILENAME,2,38,59,14,BS_FLAT
     DEFPUSHBUTTON   "OK",IDOK,143,38,50,14,BS_FLAT
     PUSHBUTTON      "Abbrechen",IDCANCEL,197,38,50,14,BS_FLAT
-//MORPH START - Added by SiRoB, Khaos Category
     EDITTEXT        IDC_TEXTNUM,2,25,245,12,ES_AUTOHSCROLL | ES_NUMBER | NOT 
                     WS_VISIBLE
-//MORPH START - Added by SiRoB, Khaos Category
 END
 
 IDD_SELCATEGORY DIALOGEX 0, 0, 186, 60
@@ -1290,10 +1210,8 @@ BEGIN
     DEFPUSHBUTTON   "&Close",IDOK,268,207,47,14,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC48,19,102,86,8
     LTEXT           "Static",IDC_UPLOADING,110,102,202,8
-//MORPH START - Added by SiRoB, IP to Country
     LTEXT           "Static",IDC_DLOC,215,58,92,8
     LTEXT           "Location:",IDC_DLOC2,163,58,49,8
-//MORPH END   - Added by SiRoB, IP to Country
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -1432,47 +1350,6 @@ BEGIN
                     WS_BORDER | WS_TABSTOP,2,4,227,226
 END
 
-/*
-IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 166
-STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
-EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
-FONT 8, "MS Sans Serif", 400, 0, 0x0
-BEGIN
-    LTEXT           "eMule Speed",IDC_SPEED,17,0,161,14,NOT WS_VISIBLE | 
-                    WS_BORDER
-    LTEXT           "All to max",IDC_TOMAX,17,50,161,14,NOT WS_VISIBLE | 
-                    WS_BORDER
-    LTEXT           "Restore",IDC_RESTORE,17,134,161,15,NOT WS_VISIBLE | 
-                    WS_BORDER
-    LTEXT           "All to min",IDC_TOMIN,17,66,161,14,NOT WS_VISIBLE | 
-                    WS_BORDER
-    LTEXT           "Connect to any server",IDC_CONNECT,17,84,161,14,NOT 
-                    WS_VISIBLE | WS_BORDER
-    LTEXT           "Disconnect",IDC_DISCONNECT,17,98,161,15,NOT WS_VISIBLE | 
-                    WS_BORDER
-    LTEXT           "Preferences",IDC_PREFERENCES,17,116,161,15,NOT 
-                    WS_VISIBLE | WS_BORDER
-    LTEXT           "Exit",IDC_TRAY_EXIT,17,152,161,14,NOT WS_VISIBLE | 
-                    WS_BORDER
-    LTEXT           "Download:",IDC_DOWNLBL,32,18,37,12,SS_CENTERIMAGE
-    CONTROL         "",IDC_DOWNSLD,"msctls_trackbar32",0x0,71,18,56,12
-    EDITTEXT        IDC_DOWNTXT,131,18,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_NUMBER | NOT WS_TABSTOP
-    LTEXT           "Upload:",IDC_UPLBL,32,34,37,12,SS_CENTERIMAGE
-    CONTROL         "",IDC_UPSLD,"msctls_trackbar32",0x0,71,34,56,12
-    EDITTEXT        IDC_UPTXT,131,34,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
-                    ES_NUMBER | NOT WS_TABSTOP
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,150,162,1
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,132,162,1
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,114,162,1
-    LTEXT           "KB/s",IDC_DOWNKB,159,18,19,12,SS_CENTERIMAGE
-    LTEXT           "KB/s",IDC_UPKB,159,34,19,12,SS_CENTERIMAGE
-    LTEXT           "eMule",IDC_SIDEBAR,0,0,16,166
-    ICON            "",IDC_TRAYDOWN,18,18,20,20
-    ICON            "",IDC_TRAYUP,18,34,20,20
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,82,162,1
-END
-*/
 IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 180
 STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
 EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
@@ -1812,7 +1689,7 @@ BEGIN
     BEGIN
         LEFTMARGIN, 4
         RIGHTMARGIN, 224
-        BOTTOMMARGIN, 220
+        BOTTOMMARGIN, 227
     END
 
     IDD_SPLASH, DIALOG
@@ -2449,12 +2326,12 @@ KADWORDSEARCH           ICON                    "res\\KadWordSearch.ico"
 KADNODESEARCH           ICON                    "res\\KadNodeSearch.ico"
 KADSTOREFILE            ICON                    "res\\KadStoreFile.ico"
 KADSTOREWORD            ICON                    "res\\KadStoreWord.ico"
-TRAY_TOMAX           ICON                    "res\\systray_tomax.ico"
-TRAY_SPEED           ICON                    "res\\systray_speed.ico"
-TRAY_RESTORE         ICON                    "res\\systray_restore.ico"
-TRAY_CONNECT         ICON                    "res\\systray_connect.ico"
-TRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
-TRAY_EXIT            ICON                    "res\\systray_exit.ico"
+TRAY_TOMAX              ICON                    "res\\systray_tomax.ico"
+TRAY_SPEED              ICON                    "res\\systray_speed.ico"
+TRAY_RESTORE            ICON                    "res\\systray_restore.ico"
+TRAY_CONNECT            ICON                    "res\\systray_connect.ico"
+TRAY_DISCONNECT         ICON                    "res\\systray_disconnect.ico"
+TRAY_EXIT               ICON                    "res\\systray_exit.ico"
 CLIENTSKNOWN            ICON                    "res\\ClientsKnown.ico"
 CLIENTSONQUEUE          ICON                    "res\\ClientsOnQueue.ico"
 KADCURRENTSEARCHES      ICON                    "res\\KadCurrentSearches.ico"
@@ -2578,7 +2455,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -4360,9 +4237,7 @@ BEGIN
     IDS_CAT_USEAUTOCAT      "Add new downloads to categories using view filters"
     IDS_SLS_USESLS          "Enable saving and loading of sources"
     IDS_CAT_MERGE           "Merge category"
-    IDS_CAT_SETFILEGROUP    "Set file group"
     IDS_CAT_GROUP           "Group"
-    IDS_CAT_SETFILEGROUPMSG "Enter the non-zero number of the file group you wish to assign this file to."
     IDS_A4AF_FORCEALL       "Get all A4AF"
     IDS_A4AF_FLAGS          "Advanced A4AF flags"
     IDS_A4AF_ONFLAG         "Force A4AF On"
@@ -4574,7 +4449,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_AUXPORTS            "Aux Ports"
+    IDS_SOLIDGRAPH          "Show solid graph"
 END
+
 #endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 

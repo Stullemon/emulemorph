@@ -34,6 +34,7 @@ protected:
 	afx_msg LONG OnColorPopupSelChange(UINT lParam, LONG wParam);
 	afx_msg void OnEnChangeCGraphScale() { SetModified(); }
 	afx_msg void OnCbnSelchangeCRatio()	{ SetModified(); }
+	afx_msg void OnBnClickedSolidGraph()	{ SetModified(); } //MORPH - Added by SiRoB, New Graph
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

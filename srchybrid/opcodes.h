@@ -312,9 +312,6 @@
 #define FT_COMPRESSIONBYTES		0x56
 #define FT_CORRUPTIONBYTES		0x57
 // <-----khaos-
-// khaos::categorymod+
-#define FT_CATFILEGROUP			0x58
-// khaos::categorymod-
 // khaos::accuratetimerem+
 #define	FT_SECONDSACTIVE		0x80
 #define	FT_INITIALBYTES			0x81

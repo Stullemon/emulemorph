@@ -29,6 +29,7 @@
 #include "ServerList.h"
 #include "SharedFileList.h"
 #include "UpDownClient.h"
+#include ".\statisticsdlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -329,18 +330,18 @@ void CStatisticsDlg::RepaintMeters() {
 	Buffer.Format(" (%u %s)",thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT),2);
-	m_DownloadOMeter.SetBarsPlot(true,2);
+	m_DownloadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),2);
 
 	m_UploadOMeter.SetYUnits(GetResString(IDS_ST_UPLOAD));
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),0);
 	Buffer.Format(" (%u %s)",thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),2);
-	m_UploadOMeter.SetBarsPlot(true,2);
+	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),2);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),3);
-	m_UploadOMeter.SetBarsPlot(true,3);
+	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),3);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),4);
-	m_UploadOMeter.SetBarsPlot(true,4);
+	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),4);
 
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION/*IDS_CONNECTIONSTATISTICS*/));
 	Buffer.Format("%s (1:%u)", GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());

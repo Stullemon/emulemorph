@@ -1549,7 +1549,13 @@
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest">
 			<File
+				RelativePath=".\res\About.jpg">
+			</File>
+			<File
 				RelativePath="res\back.ICO">
+			</File>
+			<File
+				RelativePath=".\res\backup.ico">
 			</File>
 			<File
 				RelativePath="res\bn_connect.ico">
@@ -1595,6 +1601,9 @@
 			</File>
 			<File
 				RelativePath="res\close.ico">
+			</File>
+			<File
+				RelativePath=".\res\community.ico">
 			</File>
 			<File
 				RelativePath="res\compatible.ICO">
@@ -1645,6 +1654,12 @@
 				RelativePath="res\convert.ico">
 			</File>
 			<File
+				RelativePath=".\res\CreditOvl.ico">
+			</File>
+			<File
+				RelativePath=".\res\CreditSecureOvl.ico">
+			</File>
+			<File
 				RelativePath="res\CumulativeStats.ico">
 			</File>
 			<File
@@ -1663,6 +1678,12 @@
 				RelativePath="res\Download.ico">
 			</File>
 			<File
+				RelativePath=".\res\EastShare.ico">
+			</File>
+			<File
+				RelativePath=".\res\eDonkey.ico">
+			</File>
+			<File
 				RelativePath="res\eDonkeyHybrid.ico">
 			</File>
 			<File
@@ -1675,6 +1696,9 @@
 				RelativePath="res\emule.rc2">
 			</File>
 			<File
+				RelativePath=".\res\EQfile.ico">
+			</File>
+			<File
 				RelativePath="res\Filedonkey.ico">
 			</File>
 			<File
@@ -1684,13 +1708,28 @@
 				RelativePath="res\Friend.ico">
 			</File>
 			<File
+				RelativePath=".\res\FriendOvl.ico">
+			</File>
+			<File
 				RelativePath="res\friends1.ico">
+			</File>
+			<File
+				RelativePath=".\res\friends1slot.ICO">
 			</File>
 			<File
 				RelativePath="res\friends2.ico">
 			</File>
 			<File
+				RelativePath=".\res\friends2slot.ICO">
+			</File>
+			<File
 				RelativePath="res\friends3.ICO">
+			</File>
+			<File
+				RelativePath=".\res\friends3slot.ICO">
+			</File>
+			<File
+				RelativePath=".\res\FriendSlotOvl.ico">
 			</File>
 			<File
 				RelativePath="res\global.ico">
@@ -1757,6 +1796,9 @@
 			</File>
 			<File
 				RelativePath="res\mldonk.ico">
+			</File>
+			<File
+				RelativePath=".\res\Morph.ico">
 			</File>
 			<File
 				RelativePath="res\mpending.ICO">
@@ -1846,6 +1888,24 @@
 				RelativePath="res\PROVIDER.ICO">
 			</File>
 			<File
+				RelativePath=".\res\Rating-Excellent.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Fair.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Fake.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Good.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-NotRated.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Poor.ico">
+			</File>
+			<File
 				RelativePath="res\Rating.ico">
 			</File>
 			<File
@@ -1895,6 +1955,15 @@
 			</File>
 			<File
 				RelativePath="res\Stats_HD.ico">
+			</File>
+			<File
+				RelativePath=".\res\suc.ico">
+			</File>
+			<File
+				RelativePath=".\res\systray_connect.ico">
+			</File>
+			<File
+				RelativePath=".\res\systray_disconnect.ico">
 			</File>
 			<File
 				RelativePath="res\systray_exit.ico">
@@ -1962,5 +2031,8 @@
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="emule.rc"/>
 	</Globals>
 </VisualStudioProject>
