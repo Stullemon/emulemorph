@@ -820,28 +820,27 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS, MP_HIDEOS_5, uHideOSMenuItem, 0);
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, iSelectedItems > 0 && uHideOSMenuItem>=MP_HIDEOS_1 && uHideOSMenuItem<=MP_HIDEOS_5 ? MF_ENABLED : MF_GRAYED);
-	m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
 	CString buffer;
 	if (theApp.glob_prefs->GetHideOvershares()==0)
 		buffer.Format(" (%s)",GetResString(IDS_DISABLED));
 	else
 		buffer.Format(" (%u)",theApp.glob_prefs->GetHideOvershares());
 	m_HideOSMenu.ModifyMenu(MP_HIDEOS, MF_STRING,MP_HIDEOS, GetResString(IDS_DEFAULT) + buffer);
+	m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS, MP_HIDEOS_5, uHideOSMenuItem, 0);
 	buffer.Format(" (%s)",theApp.glob_prefs->IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
 	m_SelectiveChunkMenu.ModifyMenu(MP_SELECTIVE_CHUNK, MF_STRING, MP_SELECTIVE_CHUNK, GetResString(IDS_DEFAULT) + buffer);
+	m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, iSelectedItems > 0 && iCompleteFileSelected ==1 ? MF_ENABLED : MF_GRAYED);
-	m_ShareOnlyTheNeedMenu.CheckMenuRadioItem(MP_SHAREONLYTHENEED, MP_SHAREONLYTHENEED_1, uShareOnlyTheNeedMenuItem, 0);
 	buffer.Format(" (%s)",theApp.glob_prefs->GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
 	m_ShareOnlyTheNeedMenu.ModifyMenu(MP_SHAREONLYTHENEED, MF_STRING, MP_SHAREONLYTHENEED, GetResString(IDS_DEFAULT) + buffer);
+	m_ShareOnlyTheNeedMenu.CheckMenuRadioItem(MP_SHAREONLYTHENEED, MP_SHAREONLYTHENEED_1, uShareOnlyTheNeedMenuItem, 0);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
 	//MORPH START - Added by SiRoB, Show Share Permissions
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMNONE, uPermMenuItem, 0);
 	switch (theApp.glob_prefs->GetPermissions()){
 		case PERM_ALL:
 			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
@@ -857,6 +856,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			break;
 	}
 	m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
+	m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMNONE, uPermMenuItem, 0);
 	//MORPH END   - Added by SiRoB, Show Share Permissions
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare

@@ -1572,7 +1572,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			//MORPH START - Added by SiRoB, Show Share Permissions
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMNONE, uPermMenuItem, 0);
 			CString buffer;
 			switch (theApp.glob_prefs->GetPermissions()){
 				case PERM_ALL:
@@ -1589,6 +1588,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 					break;
 			}
 			m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
+			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMNONE, uPermMenuItem, 0);
 			//MORPH END   - Added by SiRoB, Show Share Permissions
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
