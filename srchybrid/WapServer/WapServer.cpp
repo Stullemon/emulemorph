@@ -219,7 +219,13 @@ void CWapServer::_SetSharedFilePriority(CString hash, uint8 priority)
 	}
 	else if(priority == 5)// && cur_file->IsPartFile())
 	{
-		cur_file->SetAutoUpPriority(true);
+		//MORPH START - Added by SiRoB, force savepart to update auto up flag since i removed the update in UpdateAutoUpPriority optimization
+		if(cur_file->IsPartFile() &&  !cur_file->IsAutoUpPriority()){
+			cur_file->SetAutoUpPriority(true);
+			((CPartFile*)cur_file)->SavePartFile();
+		}else
+			cur_file->SetAutoUpPriority(true);
+		//MORPH END   - Added by SiRoB, force savepart to update auto up flag since i removed the update in UpdateAutoUpPriority optimization
 		cur_file->UpdateAutoUpPriority(); 
 	}
 }
