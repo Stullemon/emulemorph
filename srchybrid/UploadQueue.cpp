@@ -157,7 +157,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
                 uploadinglist.GetNext(pos);
                 posCounter++;
             }
-	}
+		}
 
         if(foundPos != NULL) {
             // Remove the found Client
@@ -289,46 +289,46 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 	CUpDownClient* newclient = NULL;
 	CUpDownClient* lowclient = NULL;
 
-		POSITION pos1, pos2;
-		for (pos1 = waitinglist.GetHeadPosition();( pos2 = pos1 ) != NULL;){
-			waitinglist.GetNext(pos1);
-			CUpDownClient* cur_client =	waitinglist.GetAt(pos2);
-			// clear dead clients
-			ASSERT ( cur_client->GetLastUpRequest() );
-			if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) ){
-				RemoveFromWaitingQueue(pos2,true);	
-				if (!cur_client->socket)
-				cur_client->Disconnected("Socket it NULL. 1");
-        } else {
+	POSITION pos1, pos2;
+	for (pos1 = waitinglist.GetHeadPosition();( pos2 = pos1 ) != NULL;){
+		waitinglist.GetNext(pos1);
+		CUpDownClient* cur_client =	waitinglist.GetAt(pos2);
+		// clear dead clients
+		ASSERT ( cur_client->GetLastUpRequest() );
+		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) ){
+			RemoveFromWaitingQueue(pos2,true);	
+			if (!cur_client->socket)
+			cur_client->Disconnected("Socket it NULL. 1");
+		} else {
 			// finished clearing
 			uint32 cur_score = cur_client->GetScore(false);
 
-		    if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score)) {
-                // cur_client is more worthy than current best client that is ready to go (connected).
-                if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected())) {
-                    // this client is a HighID or a lowID client that is ready to go (connected)
-                    // and it is more worthy
-				bestscore = cur_score;
-				toadd = pos2;
-                    newclient = waitinglist.GetAt(toadd);
-                } else if(allowLowIdAddNextConnectToBeSet && !cur_client->m_bAddNextConnect) {
-                    // this client is a lowID client that is not ready to go (not connected)
+			if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score)) {
+				// cur_client is more worthy than current best client that is ready to go (connected).
+				if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected())) {
+					// this client is a HighID or a lowID client that is ready to go (connected)
+					// and it is more worthy
+					bestscore = cur_score;
+					toadd = pos2;
+					newclient = waitinglist.GetAt(toadd);
+				} else if(allowLowIdAddNextConnectToBeSet && !cur_client->m_bAddNextConnect) {
+					// this client is a lowID client that is not ready to go (not connected)
 
-                    // now that we know this client is not ready to go, compare it to the best not ready client
-                    // the best not ready client may be better than the best ready client, so we need to check
-                    // against that client
-                    if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score)){
-                        // it is more worthy, keep it
-					bestlowscore = cur_score;
-					toaddlow = pos2;
-                        lowclient = waitinglist.GetAt(toaddlow);
-				    }
-                }
-            } else {
-                // cur_client is more worthy. Save it.
+					// now that we know this client is not ready to go, compare it to the best not ready client
+					// the best not ready client may be better than the best ready client, so we need to check
+					// against that client
+					if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score)){
+						// it is more worthy, keep it
+						bestlowscore = cur_score;
+						toaddlow = pos2;
+						lowclient = waitinglist.GetAt(toaddlow);
+					}
 				}
+			} else {
+				// cur_client is more worthy. Save it.
 			}
 		}
+	}
 		
 	if (lowclient != NULL && bestlowscore > bestscore && allowLowIdAddNextConnectToBeSet) {
 		newclient = waitinglist.GetAt(toaddlow);
@@ -493,9 +493,9 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 						)
 						) {
 
-				//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
-                                // Remove last client from ul list to make room for higher prio client
-		                	theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
+						//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
+						// Remove last client from ul list to make room for higher prio client
+						theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
 
 		                // add to queue again.
                         // the client is allowed to keep its waiting position in the queue, since it was pre-empted
@@ -508,8 +508,8 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 		    //RemoveFromWaitingQueue(toadd, true);
             RemoveFromWaitingQueue(newclient, true);
-		theApp.emuledlg->transferwnd.ShowQueueCount(waitinglist.GetCount());
-	}
+			theApp.emuledlg->transferwnd.ShowQueueCount(waitinglist.GetCount());
+		}
 	} else
 		newclient = directadd;
 
@@ -542,13 +542,13 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 	InsertInUploadingList(newclient);
 	
-        if(newclient->GetQueueSessionUp() > 0) {
-            // this client has already gotten a successfullupcount++ when it was early removed
-            // negate that successfullupcount++ so we can give it a new one when this session ends
-            // this prevents a client that gets put back first on queue, being counted twice in the
-            // stats.
-            successfullupcount--;
-        }
+	if(newclient->GetQueueSessionUp() > 0) {
+		// this client has already gotten a successfullupcount++ when it was early removed
+		// negate that successfullupcount++ so we can give it a new one when this session ends
+		// this prevents a client that gets put back first on queue, being counted twice in the
+		// stats.
+		successfullupcount--;
+	}
 
 	// statistic
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
@@ -793,19 +793,19 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	POSITION pos1, pos2;
 	for (pos1 = waitinglist.GetHeadPosition();( pos2 = pos1 ) != NULL;){
 		waitinglist.GetNext(pos1);
-		CUpDownClient* cur_client= waitinglist.GetAt(pos2);
+		CUpDownClient* cur_client = waitinglist.GetAt(pos2);
 		if (cur_client == client){	//already on queue
 // VQB LowID Slot Patch, enhanced in ZZUL
-            if (addInFirstPlace == false && client->HasLowID()&&
-                client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount())) {
+			if (addInFirstPlace == false && client->HasLowID()&&
+				client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount())) {
 
-		RemoveFromWaitingQueue(client, true);
-		AddUpNextClient(client);
-                client->m_bAddNextConnect = false;
-                //theApp.emuledlg->AddDebugLogLine(true,"Added Low ID User On Reconnect: " + (CString)client->GetUserName()); // VQB:  perhaps only add to debug log?
+				RemoveFromWaitingQueue(client, true);
+				AddUpNextClient(client);
+				client->m_bAddNextConnect = false;
+				//theApp.emuledlg->AddDebugLogLine(true,"Added Low ID User On Reconnect: " + (CString)client->GetUserName()); // VQB:  perhaps only add to debug log?
 				return;
-            } //else if(client->HasLowID())
-                //theApp.emuledlg->AddDebugLogLine(true, "Skipped LowID User on Reconnect: " + (CString)client->GetUserName());
+			} //else if(client->HasLowID())
+			//theApp.emuledlg->AddDebugLogLine(true, "Skipped LowID User on Reconnect: " + (CString)client->GetUserName());
 // VQB end
 			client->SendRankingInfo();
 			theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(client);
@@ -841,8 +841,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 					}
 				}
 			return;
+			}
 		}
-	}
 		else if (client->GetIP() == cur_client->GetIP()){
 			// same IP, different port, different userhash
 			cSameIP++;
@@ -932,7 +932,7 @@ float CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 		    CUpDownClient* cur_client =	waitinglist.GetAt(pos2);
 
             sum += cur_client->GetCombinedFilePrioAndCredit();
-}
+		}
 
         m_fAverageCombinedFilePrioAndCredit = sum/waitinglist.GetSize();
     }
