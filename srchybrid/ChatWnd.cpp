@@ -144,7 +144,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	// Identification
 	if (pFriend->GetLinkedClient())
 	{
-		if (theApp.clientcredits->CryptoAvailable())
+		if (pFriend->GetLinkedClient()->Credits() && theApp.clientcredits->CryptoAvailable())
 		{
 			switch(pFriend->GetLinkedClient()->Credits()->GetCurrentIdentState(pFriend->GetLinkedClient()->GetIP()))
 			{
