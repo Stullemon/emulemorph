@@ -588,7 +588,14 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 			SetUpCompleteSourcesCount(nCount);
 		}
 	}
-	tempreqfile->NewAvailPartsInfo();
+	//MORPH START - Changed by SiRoB, HotFix Due to Complete Source Feature
+	//tempreqfile->NewAvailPartsInfo();
+	if(!tempreqfile->IsPartFile())
+		tempreqfile->NewAvailPartsInfo();
+	else
+		((CPartFile*)tempreqfile)->NewSrcPartsInfo();
+	//MORPH END   - Changed by SiRoB, HotFix Due to Complete Source Feature
+	
 	theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(this);
 }
 
