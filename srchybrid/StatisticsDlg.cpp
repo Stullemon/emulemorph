@@ -2343,7 +2343,6 @@ void CStatisticsDlg::OnMenuButtonClicked()
 
 void CStatisticsDlg::CreateMyTree() {
 	stattree.DeleteAllItems();
-
 	// Setup Tree
 	h_transfer = stattree.InsertItem(GetResString(IDS_FSTAT_TRANSFER),1,1);				// Transfers Section
 		CString buffer;
@@ -2461,14 +2460,14 @@ void CStatisticsDlg::CreateMyTree() {
 		hclisoft = stattree.InsertItem(GetResString(IDS_CLIENTSOFTWARE),h_clients);				// Client Software Section
  //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 //			for(int i = 0; i<8; i++) clisoft[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft);
-		    clientSoft[CS_EMULE].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_CDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_XMULE].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_SHAREAZA].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_EDONKEYHYBRID].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_EDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_MLDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
-			clientSoft[CS_UNKNOWN].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+		    clientSoft[CS_EMULE].RemoveAll();clientSoft[CS_EMULE].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_CDONKEY].RemoveAll();clientSoft[CS_CDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_XMULE].RemoveAll();clientSoft[CS_XMULE].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_SHAREAZA].RemoveAll();clientSoft[CS_SHAREAZA].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_EDONKEYHYBRID].RemoveAll();clientSoft[CS_EDONKEYHYBRID].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_EDONKEY].RemoveAll();clientSoft[CS_EDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_MLDONKEY].RemoveAll();clientSoft[CS_MLDONKEY].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
+			clientSoft[CS_UNKNOWN].RemoveAll();clientSoft[CS_UNKNOWN].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
 		hcliport = stattree.InsertItem(GetResString(IDS_PORT),h_clients);						// Client Port Section
 			for(int i = 0; i<2; i++) cliport[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hcliport);
 		
