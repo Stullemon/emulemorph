@@ -1018,10 +1018,30 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break; 
 			}
 			case MP_CMT:
+				//MORPH START - Added by SiRoB, derivated from SLUGFILLER: batchComment
+				/*
 				if (file)
-					ShowComments(file);
-					
-                break; 
+					ShowComments(file);	
+				break; 
+				*/
+				{
+					if (file == NULL) file = selectedList.GetHead();
+					CCommentDialog dialog(file); 
+					if (dialog.DoModal() == IDOK) {
+						POSITION pos = selectedList.GetHeadPosition();
+						while (pos != NULL)
+						{
+							CKnownFile* otherfile = selectedList.GetNext(pos);
+							if (otherfile == file)
+								continue;
+							otherfile->SetFileComment(file->GetFileComment());
+							otherfile->SetFileRate(file->GetFileRate());
+							UpdateFile(otherfile);
+						}
+					}
+					break; 
+				}
+			//MORPH END - Added by SiRoB, derivated from SLUGFILLER: batchComment
 			case MPG_ALTENTER:
 			case MP_DETAIL:
 				if (file){
@@ -1592,20 +1612,6 @@ void CSharedFilesCtrl::ShowComments(CKnownFile* file)
 	if (file){
     	CCommentDialog dialog(file); 
 		dialog.DoModal(); 
-		//MORPH START - Added by IceCream, SLUGFILLER: batchComment
-		if (dialog.DoModal() == IDOK) {
-			POSITION pos = this->GetFirstSelectedItemPosition();
-			while( pos != NULL )
-			{
-				int iSel=this->GetNextSelectedItem(pos);
-				CKnownFile* otherfile = (CKnownFile*)this->GetItemData(iSel);
-				if (otherfile == file)
-					continue;
-				otherfile->SetFileComment(file->GetFileComment());
-				otherfile->SetFileRate(file->GetFileRate());
-			}
-		}
-		//MORPH END   - Added by IceCream, SLUGFILLER: batchComment
 	}
 }
 
