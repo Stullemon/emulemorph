@@ -233,8 +233,8 @@ protected:
 	afx_msg LRESULT OnRestoreWindowInvisibleMode(WPARAM, LPARAM);
 	static BOOL CALLBACK AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam);
 
-	//MORPH - Added by SiRoB, Toggle Show Hide window
 private:
+	//MORPH - Added by SiRoB, Toggle Show Hide window
 	void	ToggleShow();
 	void	ToggleHide();
 	bool	b_TrayWasVisible;
