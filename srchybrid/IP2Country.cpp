@@ -88,7 +88,7 @@ void CIP2Country::Load(){
 
 	if(m_bRunning) Reset();
 
-	AddDebugLogLine(false, "IP2Country loaded");
+	AddLogLine(false, "IP2Country loaded");
 }
 
 void CIP2Country::Unload(){
@@ -369,7 +369,7 @@ void CIP2Country::RemoveAllFlags(){
 	//also clean out the map table
 	CountryIDtoFlagIndex.RemoveAll();
 
-	AddDebugLogLine(false, "Country Flags have been unloaded");
+	AddLogLine(false, "Country Flags have been unloaded");
 }
 
 bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName){

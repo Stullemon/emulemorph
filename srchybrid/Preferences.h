@@ -627,6 +627,8 @@ public:
 
 	static char	UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	static char	UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
+	static char UpdateURLIP2Country[256]; //Commander - Added: IP2Country auto-updating
+	static char UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
 
 	static bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	static uint8	m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
@@ -639,10 +641,16 @@ public:
 	static uint32		m_FakesDatVersion;
 	static bool		UpdateFakeStartup;
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static bool		AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
 	static uint32		m_IPfilterVersion; //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	static bool		AutoUpdateIP2Country; 
+	static uint32	m_IP2CountryVersion;
+        //Commander - Added: IP2Country Auto-updating - End
 
 	//EastShare - added by AndCycle, IP to Country
 	static IP2CountryNameSelection	m_iIP2CountryNameMode;
@@ -714,11 +722,11 @@ public:
 
 	static bool		m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
 
-        //Commander - Added: Invisible Mode [TPT] - Start
-        static bool		m_bInvisibleMode;		
+    //Commander - Added: Invisible Mode [TPT] - Start
+    static bool		m_bInvisibleMode;		
 	static UINT		m_iInvisibleModeHotKeyModifier;
 	static char		m_cInvisibleModeHotKey;
-        //Commander - Added: Invisible Mode [TPT] - End
+    //Commander - Added: Invisible Mode [TPT] - End
 
         static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
 
@@ -1345,10 +1353,10 @@ public:
 	static	bool	GetUseDwlPercentage()						{ return m_bShowDwlPercentage;}
 	static	void	SetUseDwlPercentage(bool in)				{ m_bShowDwlPercentage=in;}
         
-        //Commander - Added: Client Percentage - Start
+    //Commander - Added: Client Percentage - Start
 	static	bool	GetUseClientPercentage()					{ return m_bShowClientPercentage;}
 	static	void	SetUseClientPercentage(bool in)				{ m_bShowClientPercentage=in;}
-	 //Commander - Added: Client Percentage - End
+	//Commander - Added: Client Percentage - End
 
 	//Toolbar
 	static	CString GetToolbarSettings()						{ return m_sToolbarSettings; }
@@ -1478,16 +1486,21 @@ public:
 	static	bool	SaveUploadQueueWaitTime()			{return m_bSaveUploadQueueWaitTime;}//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	static	CString	GetUpdateURLFakeList()				{return CString(UpdateURLFakeList);}		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	static	CString	GetUpdateURLIPFilter()				{return CString(UpdateURLIPFilter);}//MORPH START added by Yun.SF3: Ipfilter.dat update
+	static  CString GetUpdateURLIP2Country()			{return CString(UpdateURLIP2Country);}//Commander - Added: IP2Country auto-updating
+	static  CString GetUpdateVerURLIP2Country()			{return CString(UpdateVerURLIP2Country);}//Commander - Added: IP2Country auto-updating
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	static	uint32	GetFakesDatVersion()				{return m_FakesDatVersion;}
 	static	void	SetFakesDatVersion(uint32 version)	{m_FakesDatVersion = version;} 
 	static	bool	IsUpdateFakeStartupEnabled()		{ return UpdateFakeStartup; }
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static	uint32	GetIPfilterVersion()				{return m_IPfilterVersion;}
 	static	void	SetIpfilterVersion(uint32 version)	{m_IPfilterVersion = version;}
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
+	static uint32   GetIP2CountryVersion()				{return m_IP2CountryVersion;}//Commander - Added: IP2Country auto-updating
+	static void		SetIP2CountryVersion(uint32 version){m_IP2CountryVersion = version;}//Commander - Added: IP2Country auto-updating
 	//EastShare - added by AndCycle, IP to Country
 	IP2CountryNameSelection	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
 	static bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}
@@ -1563,6 +1576,7 @@ public:
 	// [end] Mighty Knife
 
 	static bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; } //MORPH START added by Yun.SF3: Ipfilter.dat update
+	static bool IsAutoUPdateIP2CountryEnabled()    { return AutoUpdateIP2Country; } //Commander - Added: IP2Country Auto-updating
 	static bool	IsSolidGraph()	{ return m_bSolidGraph;} //MORPH - Added by SiRoB, New Graph
 
 	// khaos::categorymod+
@@ -1586,12 +1600,12 @@ public:
 	static	uint8	GetTimeRemainingMode()	{ return m_iTimeRemainingMode; }
 	// khaos::accuratetimerem-
 
-        //Commander - Added: Invisible Mode [TPT] - Start
-        static	bool GetInvisibleMode() { return m_bInvisibleMode; }
+    //Commander - Added: Invisible Mode [TPT] - Start
+    static	bool GetInvisibleMode() { return m_bInvisibleMode; }
 	static	UINT GetInvisibleModeHKKeyModifier() { return m_iInvisibleModeHotKeyModifier; }
 	static	char GetInvisibleModeHKKey() { return m_cInvisibleModeHotKey; }
 	static	void SetInvisibleMode(bool on, UINT keymodifier, char key);
-        //Commander - Added: Invisible Mode [TPT] - End
+   //Commander - Added: Invisible Mode [TPT] - End
 protected:
 	static	CString appdir;
 	static	CString configdir;

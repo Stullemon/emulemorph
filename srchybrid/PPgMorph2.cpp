@@ -47,6 +47,12 @@ BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
 	ON_BN_CLICKED(IDC_UPDATEIPFURL, OnBnClickedUpdateipfurl)
 	ON_BN_CLICKED(IDC_AUTOUPIPFILTER , OnSettingsChange)
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+	//Commander - Added: IP2Country Auto-updating - Start
+	ON_EN_CHANGE(IDC_UPDATE_URL_IP2COUNTRY, OnSettingsChange)
+    ON_EN_CHANGE(IDC_UPDATE_VER_URL_IP2COUNTRY, OnSettingsChange)
+	ON_BN_CLICKED(IDC_UPDATEIPCURL, OnBnClickedUpdateipcurl)
+	ON_BN_CLICKED(IDC_AUTOUPIP2COUNTRY , OnSettingsChange)
+		//Commander - Added: IP2Country Auto-updating - End
 END_MESSAGE_MAP()
 
 
@@ -88,12 +94,44 @@ void CPPgMorph2::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_AUTOUPIPFILTER,0);
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->SetWindowText(thePrefs.UpdateURLIP2Country);
+	if(thePrefs.AutoUpdateIP2Country)
+		CheckDlgButton(IDC_AUTOUPIP2COUNTRY,1);
+	else
+		CheckDlgButton(IDC_AUTOUPIP2COUNTRY,0);
+	//Commander - Added: IP2Country Auto-updating - End
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	GetDlgItem(IDC_UPDATE_VER_URL_IP2COUNTRY)->SetWindowText(thePrefs.UpdateVerURLIP2Country);
+	//if(thePrefs.AutoUpdateIP2Country)
+	//	CheckDlgButton(IDC_AUTOUPIP2COUNTRY,1);
+	//else
+	//	CheckDlgButton(IDC_AUTOUPIP2COUNTRY,0);
+	//Commander - Added: IP2Country Auto-updating - End
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	strBuffer.Format("v.%u", thePrefs.GetIP2CountryVersion());
+	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
+	//Commander - Added: IP2Country Auto-updating - End
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	strBuffer.Format("v.%u", thePrefs.GetFakesDatVersion());
+	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
+	//Commander - Added: IP2Country Auto-updating - End
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	strBuffer.Format("v.%u", thePrefs.GetIPfilterVersion());
+	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	//Commander - Added: IP2Country Auto-updating - End
 }
 
 BOOL CPPgMorph2::OnApply()
 {
 
 	CString buffer;
+	
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	if(GetDlgItem(IDC_LOWIDRETRY)->GetWindowTextLength())
 	{
@@ -113,7 +151,19 @@ BOOL CPPgMorph2::OnApply()
 	strcpy(thePrefs.UpdateURLIPFilter, buffer);
 	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER);
 	//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
-	
+
+    //Commander - Added: IP2Country Auto-updating - Start
+    GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->GetWindowText(buffer);
+	strcpy(thePrefs.UpdateURLIP2Country, buffer);
+	thePrefs.AutoUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY);
+	//Commander - Added: IP2Country Auto-updating - End
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	GetDlgItem(IDC_UPDATE_VER_URL_IP2COUNTRY)->GetWindowText(buffer);
+	strcpy(thePrefs.UpdateVerURLIP2Country, buffer);
+	//thePrefs.AutoVerUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY);
+	//Commander - Added: IP2Country Auto-updating - End
+
 	LoadSettings();
 	SetModified(FALSE);
 	
@@ -155,3 +205,10 @@ void CPPgMorph2::OnBnClickedUpdateipfurl()
 	theApp.ipfilter->UpdateIPFilterURL();
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
+
+//Commander - Added: IP2Country Auto-updating - Start
+void CPPgMorph2::OnBnClickedUpdateipcurl()
+{
+	theApp.ipfilter->UpdateIP2CountryURL();
+}
+//Commander - Added: IP2Country Auto-updating - End

@@ -560,6 +560,8 @@ bool	CPreferences::m_bEnableChunkDots;
 
 char	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 char	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
+char	CPreferences::UpdateURLIP2Country[256];//Commander - Added: IP2Country auto-updating
+char	CPreferences::UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
 
 bool	CPreferences::m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 uint8	CPreferences::m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
@@ -576,6 +578,11 @@ bool	CPreferences::UpdateFakeStartup;
 bool	CPreferences::AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
 uint32	CPreferences::m_IPfilterVersion; //added by milobac: Ipfilter.dat update
 //MORPH END added by Yun.SF3: Ipfilter.dat update
+
+//Commander - Added: IP2Country Auto-updating - Start
+bool	CPreferences::AutoUpdateIP2Country;
+uint32	CPreferences::m_IP2CountryVersion; 
+//Commander - Added: IP2Country Auto-updating - End
 
 //EastShare - added by AndCycle, IP to Country
 IP2CountryNameSelection	CPreferences::m_iIP2CountryNameMode;
@@ -2343,10 +2350,15 @@ void CPreferences::SavePreferences()
 	ini.WriteInt("ShowSharePermissions",permissions,"eMule");
 	//MORPH END   - Added by SiRoB, Show Permissions
 
-//MORPH START added by Yun.SF3: Ipfilter.dat update
+    //MORPH START added by Yun.SF3: Ipfilter.dat update
 	ini.WriteInt("IPfilterVersion",m_IPfilterVersion,"eMule"); //added by milobac: Ipfilter.dat update
 	ini.WriteBool("AutoUPdateIPFilter",AutoUpdateIPFilter,"eMule"); //added by milobac: Ipfilter.dat update
-//MORPH END added by Yun.SF3: Ipfilter.dat update
+    //MORPH END added by Yun.SF3: Ipfilter.dat update
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	ini.WriteInt("IP2CountryVersion",m_IP2CountryVersion,"eMule"); 
+	ini.WriteBool("AutoUPdateIP2Country",AutoUpdateIP2Country,"eMule");
+	//Commander - Added: IP2Country Auto-updating - End
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ini.WriteInt("FakesDatVersion",m_FakesDatVersion,"eMule");
@@ -2355,6 +2367,8 @@ void CPreferences::SavePreferences()
 
 	ini.WriteString("UpdateURLFakeList",UpdateURLFakeList,"eMule");		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	ini.WriteString("UpdateURLIPFilter",UpdateURLIPFilter,"eMule");//MORPH START added by Yun.SF3: Ipfilter.dat update
+    ini.WriteString("UpdateURLIP2Country",UpdateURLIP2Country,"eMule");//Commander - Added: IP2Country auto-updating
+	ini.WriteString("UpdateVerURLIP2Country",UpdateVerURLIP2Country,"eMule");//Commander - Added: IP2Country auto-updating
 
 	//EastShare Start - PreferShareAll by AndCycle
 	ini.WriteBool("ShareAll",shareall,"eMule");	// SLUGFILLER: preferShareAll
@@ -2896,6 +2910,11 @@ void CPreferences::LoadPreferences()
 	m_IPfilterVersion=ini.GetInt(_T("IPfilterVersion"),0); //added by milobac: Ipfilter.dat update
 	AutoUpdateIPFilter=ini.GetBool(_T("AutoUPdateIPFilter"),false); //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
+    
+    //Commander - Added: IP2Country Auto-updating - Start
+	m_IP2CountryVersion=ini.GetInt(_T("IP2CountryVersion"),0); 
+	AutoUpdateIP2Country=ini.GetBool(_T("AutoUPdateIP2Country"),false);
+    //Commander - Added: IP2Country Auto-updating - End
 
 	//EastShare - added by AndCycle, IP to Country
 	m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt(_T("IP2Country"), IP2CountryName_DISABLE); 
@@ -2931,6 +2950,12 @@ void CPreferences::LoadPreferences()
 	m_FakesDatVersion=ini.GetInt(_T("FakesDatVersion"),0);
 	UpdateFakeStartup=ini.GetBool(_T("UpdateFakeStartup"),false);
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
+	//Commander - Added: IP2Country Auto-updating - Start
+	//m_IP2CountryVersion=ini.GetBool(_T("IP2CountryVersion"),0);
+	//UpdateIP2CountryStartup=ini.GetBool(_T("UpdateIP2CountryStartup"),false);
+	//Commander - Added: IP2Country Auto-updating - End
+
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	m_bSUCEnabled = ini.GetBool(_T("SUCEnabled"),false);
 	m_bSUCLog =  ini.GetBool(_T("SUCLog"),false);
@@ -2970,6 +2995,8 @@ void CPreferences::LoadPreferences()
 	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("")));//MORPH START added by Yun.SF3: Ipfilter.dat update
+	_stprintf(UpdateURLIP2Country,_T("%s"),ini.GetString(_T("UpdateURLIP2Country"),_T("")));//Commander - Added: IP2Country auto-updating
+	_stprintf(UpdateVerURLIP2Country,_T("%s"),ini.GetString(_T("UpdateVerURLIP2Country"),_T("")));//Commander - Added: IP2Country auto-updating
 	if (StrStrI(UpdateURLFakeList,_T("http://www.emuleitor.com/downloads/Morph/fakes.txt")) ||
 		StrStrI(UpdateURLFakeList,_T("http://membres.lycos.fr/ipfilter/fakes.txt")))
 		sprintf(UpdateURLFakeList,_T("%s"),_T(""));
