@@ -2718,16 +2718,26 @@ CString CastItoUIXBytes(uint32 count)
 //MORPH START - Added by SiRoB, XML News [O²]
 void HTMLParse(CString &buffer)
 {
-	//ISO 8859-1 entity for XML? I don't know :X, AndCycle
-	buffer.Replace(_T("&amp;"),_T("&"));
+	//ISO 8859-1 entity for XML? I don't know, http://www.bbsinc.com/iso8859.html, http://www.asciitable.com/, AndCycle
+
 	buffer.Replace(_T("&#34;"),_T("\""));
+	buffer.Replace(_T("&#034;"),_T("\""));
 	buffer.Replace(_T("&quot;"),_T("\""));
-	buffer.Replace(_T("&#38;"),_T("?"));
+	buffer.Replace(_T("&#38;"),_T("&"));
+	buffer.Replace(_T("&#038;"),_T("&"));
+	buffer.Replace(_T("&amp;"),_T("&"));
+	buffer.Replace(_T("&#39;"),_T("'"));
 	buffer.Replace(_T("&#039;"),_T("'"));
+	buffer.Replace(_T("&apos;"),_T("'"));
 	buffer.Replace(_T("&#60;"),_T("<"));
+	buffer.Replace(_T("&#060;"),_T("<"));
 	buffer.Replace(_T("&#lt;"),_T("<"));
 	buffer.Replace(_T("&#62;"),_T(">"));
+	buffer.Replace(_T("&#062;"),_T(">"));
 	buffer.Replace(_T("&#gt;"),_T(">"));
+	buffer.Replace(_T("&#63;"),_T("?"));
+	buffer.Replace(_T("&#063;"),_T("?"));
+	buffer.Replace(_T("&quest;"),_T("?"));
 	buffer.Replace(_T("&ccedil;"),_T("\xE7"));
 	buffer.Replace(_T("&eacute;"),_T("\xE9"));
 	buffer.Replace(_T("&egrave;"),_T("\xE8"));
