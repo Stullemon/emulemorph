@@ -136,6 +136,9 @@ BOOL CPPgEastShare::OnKillActive()
 
 BOOL CPPgEastShare::OnApply()
 {
+
+	bool bRestartApp = false;
+
 	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
@@ -147,6 +150,7 @@ BOOL CPPgEastShare::OnApply()
 	app_prefs->prefs->m_bAutoClearComplete = m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	app_prefs->prefs->m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	app_prefs->prefs->m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	if((bool)m_bSaveUploadQueueWaitTime != app_prefs->prefs->m_bSaveUploadQueueWaitTime)	bRestartApp = true;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	app_prefs->prefs->m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 /*	theApp.emuledlg->serverwnd.ToggleDebugWindow();
@@ -157,6 +161,10 @@ BOOL CPPgEastShare::OnApply()
 	app_prefs->SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
 
 	SetModified(FALSE);
+
+	if (bRestartApp){
+		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
+	}
 
 	return CPropertyPage::OnApply();
 }
