@@ -1042,7 +1042,7 @@ bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool forceSmart){
 		}
 		//MORPH END - Added by SiRoB, A4AF counter
 		addReqFile = false;
-		}
+	}
 	CPartFile* pSwap = NULL;
 	if (!m_OtherRequests_list.IsEmpty())
 	{
@@ -1335,7 +1335,7 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 	m_iLastActualSwap = GetTickCount();
 
 	if (theApp.glob_prefs->ShowA4AFDebugOutput()) theApp.emuledlg->AddDebugLogLine(false, "%s: Just swapped '%s' from '%s' to '%s'. (%s)", iDebugMode==2?"Smart A4AF Swapping":"Advanced A4AF Handling", GetUserName(), reqfile->GetFileName(), pNewFile->GetFileName(), iDebugMode==0?"Balancing":iDebugMode==1?"Stacking":iDebugMode==2?"Forced":"N/A");
-	
+		
 	//MORPH START  - Added by SiRoB, A4AF counter
 	//if (bAddReqFile) m_OtherRequests_list.AddHead(reqfile);
 	if (bAddReqFile) {
@@ -1344,7 +1344,7 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 		theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(reqfile,this,true);
 	}else
 		theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(this,reqfile);
-	
+		
 	POSITION pos = m_OtherRequests_list.Find(pNewFile);
 	if (pos)
 		//m_OtherRequests_list.RemoveAt(pos);
@@ -1354,38 +1354,34 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 	if (pos)
 		m_OtherNoNeeded_list.RemoveAt(pos);
 
-	ResetFileStatusInfo();
-    uint8* thisStatus;
+	POSITION pos2 = reqfile->srclists[sourcesslot].Find(this);
+	if(pos2)	reqfile->srclists[sourcesslot].RemoveAt(pos2);
+	reqfile->RemoveDownloadingSource(this);
+	reqfile->UpdateAvailablePartsCount();
+	reqfile->NewSrcPartsInfo();
+	SetDownloadState(DS_NONE);
+	m_nRemoteQueueRank = 0;
+	m_nUpCompleteSourcesCount = 0;
+	m_strClientFilename = "";
+	m_iRate=0;
+	m_strComment="";
+	
+	uint8* thisStatus;
 	if (m_PartStatus_list.Lookup(pNewFile, thisStatus))
 	{
 		m_abyPartStatus = thisStatus;
 		m_nPartCount = pNewFile->GetPartCount();
+		pNewFile->NewSrcPartsInfo();
+		pNewFile->UpdateAvailablePartsCount();
 	}
 	else
 	{
 		m_nPartCount = 0;
 		m_abyPartStatus = NULL;
 	}
-	
-	SetDownloadState(DS_NONE);
-	m_nRemoteQueueRank = 0;
 		
-	reqfile->NewSrcPartsInfo();
-	theApp.downloadqueue->RemoveSource(this, false, false);
-
 	pNewFile->srclists[sourcesslot].AddTail(this);
 	theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(pNewFile, this, false);
-	pNewFile->UpdateAvailablePartsCount();
-
 	reqfile = pNewFile;
-	
-	// If we have no info for this source then we should reask for it sometime
-	// in the next two minutes...
-	if (m_abyPartStatus == 0)
-	{
-		DWORD dwReAskTime = GetTickCount() - GetRandRange(FILEREASKTIME-120000,FILEREASKTIME);
-		if (dwReAskTime > m_dwLastAskedTime)
-			m_dwLastAskedTime = dwReAskTime;
-	}
 }
 // khaos::kmod-
