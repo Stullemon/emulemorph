@@ -548,9 +548,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                 ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 				Socket_stat* stat = m_StandardOrder_list_stat.GetAt(slotCounter);
 				uint32 classID = stat->classID;
-				if (classID==SCHED_CLASS)
-					classID=LAST_CLASS;
-     			if (ClientDataRate[classID]>0)
+				if (ClientDataRate[classID]>0 && classID<SCHED_CLASS)
 					if (_I64_MAX/sumtimeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*sumtimeSinceLastLoop > stat->realBytesToSpend)
 						stat->realBytesToSpend += ClientDataRate[classID]*sumtimeSinceLastLoop;
 					else
@@ -594,7 +592,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if(bytesToSpendClass[classID] <= 0 || spentBytesClass[classID] >= (uint64)bytesToSpendClass[classID])
 							break;
 						Socket_stat* stat = m_StandardOrder_list_stat.GetAt(maxCounter);
-						if(stat->realBytesToSpend > 0 && stat->classID < NB_SPLITTING_CLASS)
+						if(stat->realBytesToSpend > 0 && stat->classID < SCHED_CLASS)
 						{
 							SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
 							uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
@@ -664,7 +662,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				else
 					allowedDataRate = allowedDataRateClass[classID];
 				realBytesToSpend = realBytesToSpendClass[classID];
-
+				if (allowedDataRateClass[classID] == 0 && realBytesToSpendClass[LAST_CLASS]>realBytesToSpendClass[classID])
+					realBytesToSpend = realBytesToSpendClass[LAST_CLASS];
+				
 				for(uint32 maxCounter = sumofclientinclass; maxCounter < sumofclientinclass+slotCounterClass[classID]; maxCounter++) {
 					Socket_stat* stat = m_StandardOrder_list_stat.GetAt(maxCounter);
 					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*10000)
@@ -689,11 +689,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
        			realBytesToSpendClass[classID] = realBytesToSpend;
 			}
-			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-			{
-				if (m_highestNumberOfFullyActivatedSlots[classID] > 0 && m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
-					m_highestNumberOfFullyActivatedSlots[classID] = m_highestNumberOfFullyActivatedSlots[LAST_CLASS];
-			}	
 			//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
        		m_SentBytesSinceLastCall += spentBytesClass[LAST_CLASS];
