@@ -361,6 +361,7 @@ double CUpDownClient::GetEqualChanceValue() const
 //Morph End - added by AndCycle, Equal Chance For Each File
 
 //Morph Start - added by AndCycle, Pay Back First
+//Comment : becarefull when changing this function don't forget to change IsPBForPS() 
 bool CUpDownClient::IsMoreUpThanDown() const{
 	if(!IsSecure()) return false;
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
@@ -380,6 +381,24 @@ bool CUpDownClient::IsSecure() const
 }
 //Morph End - added by AndCycle, separate secure check
 
+//MORPH START - Added by SiRoB, Code Optimization PBForPS()
+bool CUpDownClient::IsPBForPS() const
+{
+	//replacement for return (IsMoreUpThanDown() || GetPowerShared());
+	//<--Commun to both call
+	if(!IsSecure()) return false;
+	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+	if (currentReqFile != NULL)
+		return false;
+	//-->Commun to both call
+	if (currentReqFile->GetPowerShared())
+		return true;
+	if(thePrefs.IsPayBackFirst() && currentReqFile->IsPartFile()==false)
+		return credits->GetPayBackFirstStatus();
+	return (m_bPowerShared && GetUploadState()==US_UPLOADING);
+}
+//MORPH END   - Added by SiRoB, Code Optimization PBForPS()
+
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
 * Checks if the file this client has requested has release priority.
@@ -387,15 +406,13 @@ bool CUpDownClient::IsSecure() const
 * @return true if the requested file has release priority
 */
 bool CUpDownClient::GetPowerShared() const {
+//Comment : becarefull when changing this function don't forget to change IsPBForPS() 
 	if(!IsSecure()) return false;
 	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	bool bPowerShared;
-	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
-		bPowerShared = theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
-	} else {
-		bPowerShared = false;
-	}
-	return (m_bPowerShared && GetUploadState()==US_UPLOADING) || bPowerShared;
+	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+	if (currentReqFile != NULL && currentReqFile->GetPowerShared())
+		return true;
+	return (m_bPowerShared && GetUploadState()==US_UPLOADING);
 	//MORPH END   - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 }
 //MORPH END - Added by Yun.SF3, ZZ Upload System

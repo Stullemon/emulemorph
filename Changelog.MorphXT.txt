@@ -18,6 +18,7 @@ TEAWKED: The auto powershare mecanisme have been changed to wait some complet so
 TWEAKED: IP2Country have been improuved (some tweak from emule+) and binairy search methode have been implemented [SiRoB]
 TWEAKED: Don't draw hidden columns (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
 TWEAKED: Don't draw hidden rect (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
+TWEAKED: Some Code Optimization to reduce CPU load when client on queue grow [SiRoB]
 
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
