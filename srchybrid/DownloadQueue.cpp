@@ -865,18 +865,13 @@ void CDownloadQueue::Process(){
         // then limit its download speed from all clients but friends
         // limit will be removed as soon as upload has catched up to download
 	
-		  //MORPH START - Changed by IceCream, Increase the ZZ upload:download ratio from 1:3 to 1:4 [IceCream]
-//        if(theApp.stat_sessionReceivedBytes/3 > theApp.stat_sessionSentBytes && 
-//           datarate > 1500) {
-		  if(theApp.stat_sessionReceivedBytes/4 > theApp.stat_sessionSentBytes && 
-             datarate > 1500) {
-
+        if(theApp.stat_sessionReceivedBytes/3 > theApp.stat_sessionSentBytes && 
+           datarate > 1500) {
             // calc allowed dl speed for rest of network (those clients that don't have
             // friend slots. Since you don't upload as much to them, you won't be able to download
             // as much from them. This will only be lower than friends speed if you are currently
             // uploading to a friend slot, otherwise they are the same.
-//            uint32 secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-theApp.stat_sessionSentBytes)/(theApp.uploadqueue->GetToNetworkDatarate()+1);
-            uint32 secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/4-theApp.stat_sessionSentBytes)/(theApp.uploadqueue->GetToNetworkDatarate()+1);
+            uint32 secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-theApp.stat_sessionSentBytes)/(theApp.uploadqueue->GetToNetworkDatarate()+1);
           uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
 
  			//MORPH END   - Changed by IceCream, Increase the ZZ upload:download ratio from 1:3 to 1:4 [IceCream]
@@ -890,15 +885,10 @@ void CDownloadQueue::Process(){
         // then limit its download speed from all friends
         // limit will be removed as soon as upload has catched up to download
 
-		 //MORPH START - Changed by IceCream, Increase the ZZ upload:download ratio from 1:3 to 1:4 [IceCream]
-//		if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend) &&
-//           datarate > 1500) {
-		if(theApp.stat_sessionReceivedBytes/4 > (theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend) &&
+		if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend) &&
            datarate > 1500) {
-//            float secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-(theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend))/(theApp.uploadqueue->GetDatarate()+1);
-            float secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/4-(theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend))/(theApp.uploadqueue->GetDatarate()+1);
+            float secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-(theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend))/(theApp.uploadqueue->GetDatarate()+1);
 			uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
-		//MORPH END   - Changed by IceCream, Increase the ZZ upload:download ratio from 1:3 to 1:4 [IceCream]
 
 			if(friendDownspeed == 0 || tempDownspeed < friendDownspeed) {
                 friendDownspeed = tempDownspeed;
