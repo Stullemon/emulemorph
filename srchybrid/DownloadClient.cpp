@@ -1479,7 +1479,6 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 
 		if(DoSwap(pSwap, false, 0)){
 			m_OtherRequests_list.RemoveAt(finalpos);
-			finalpos = pos;
 			return true;
 		}
 	}
@@ -1567,7 +1566,6 @@ bool CUpDownClient::StackA4AFSources()
 		
 		if(DoSwap(pSwap, false, 1)){
 			m_OtherRequests_list.RemoveAt(finalpos);
-			finalpos = pos;
 			return true;
 		}
 	}

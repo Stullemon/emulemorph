@@ -84,24 +84,20 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 					sender->UDPFileReasked();
 					if ((sender->GetUDPVersion() > 2) && (size > 17))
 					{
-						if (size == 18){
-							uint16 nCompleteCountLast= sender->GetUpCompleteSourcesCount();
-							uint16 nCompleteCountNew= *(uint16*)(packet+16);
-							sender->SetUpCompleteSourcesCount(nCompleteCountNew);
-							if (nCompleteCountLast != nCompleteCountNew)
+						uint16 nCompleteCountLast= sender->GetUpCompleteSourcesCount();
+						uint16 nCompleteCountNew= *(uint16*)(packet+16);
+						sender->SetUpCompleteSourcesCount(nCompleteCountNew);
+						if (nCompleteCountLast != nCompleteCountNew)
+						{
+							if(reqfile->IsPartFile())
 							{
-								if(reqfile->IsPartFile())
-								{
-									((CPartFile*)reqfile)->NewSrcPartsInfo();
-								}
-								else
-								{
-									reqfile->NewAvailPartsInfo();
-								}
+								((CPartFile*)reqfile)->NewSrcPartsInfo();
 							}
-						}else
-							AddDebugLogLine(false,"%s:%s:%i!=18" ,sender->GetUserName(),sender->GetClientSoftVer(),size);
-						
+							else
+							{
+								reqfile->NewAvailPartsInfo();
+							}
+						}
 					}
 					break;
 				}
