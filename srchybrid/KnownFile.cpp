@@ -2560,31 +2560,33 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 
 //MORPH - Changed by SiRoB, Avoid Sharing Nothing :( the return should be conditional
 //Wistily : Share only the need START (Inspired by lovelace release feature, adapted from Slugfiller hideOS code)
-bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file)
+bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 {
+	if (((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())==0)
+		return false;
 	UINT parts = GetED2KPartCount();
-	//SHARE_ONLY_THE_NEED
-	uint8 ShareOnlyTheNeed = (GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed();
-	if (!parts || /*!m_bPowerShareAuto ||*/  ShareOnlyTheNeed==0)
-		return FALSE;
-		
-	file->WriteUInt16(parts);
+	bool partsneeded = false;
+	if (client->m_abyUpPartStatus)
+		for (UINT i = 0; i < parts; i++)
+			if (m_AvailPartFrequency[i] <= 2 && !client->IsPartAvailable(i))
+				partsneeded = true;
+	if (!partsneeded)
+		return false;
+
 	UINT done = 0;
-	bool ok = false; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
+	file->WriteUInt16(parts);
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= m_nVirtualCompleteSourcesCount)
+			if (m_AvailPartFrequency[done] <= 2)
 				towrite |= (1<<i);
 			done++;
 			if (done == parts)
 				break;
 		}
-		ok |= (towrite!=0); //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 		file->WriteUInt8(towrite);
 	}
-	//return TRUE;
-	return ok; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
+	return true;
 }
 //Wistily : Share only the need STOP
 
