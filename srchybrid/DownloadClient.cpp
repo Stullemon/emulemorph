@@ -82,9 +82,8 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
-	uint8* thisStatus = NULL;
-	m_PartStatus_list.Lookup(file,thisStatus);
-	if(thisStatus){
+	uint8* thisStatus;
+	if(m_PartStatus_list.Lookup(file,thisStatus)){
 		if (file != reqfile)
 			crClientOnly = RGB(192, 100, 255);
 	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
@@ -317,18 +316,13 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1){
 		//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-		uint8* thisStatus = NULL;
-		m_PartStatus_list.Lookup(reqfile, thisStatus);
-		if(thisStatus){
+		//if (m_abyPartStatus){
+		//	delete[] m_abyPartStatus;
+		//	m_abyPartStatus = NULL;
+		//}
+		uint8* thisStatus;
+		if(m_PartStatus_list.Lookup(reqfile, thisStatus))
 			delete[] thisStatus;
-			if (thisStatus==m_abyPartStatus)
-				m_abyPartStatus = NULL;
-			m_PartStatus_list.RemoveKey(reqfile);
-			if (m_abyPartStatus){
-				delete[] m_abyPartStatus;
-				m_abyPartStatus = NULL;
-			}
-		}
 		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
@@ -371,17 +365,14 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	data.Read(&nED2KPartCount,2);
 	
 	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-	uint8* thisStatus = NULL;
-	m_PartStatus_list.Lookup(reqfile, thisStatus);
-	if(thisStatus){
+	//if (m_abyPartStatus){
+	//	delete[] m_abyPartStatus;
+	//	m_abyPartStatus = NULL;
+	//}
+	uint8* thisStatus;
+	if(m_PartStatus_list.Lookup(reqfile, thisStatus)){
 		delete[] thisStatus;
-		if (thisStatus==m_abyPartStatus)
-			m_abyPartStatus = NULL;
 		m_PartStatus_list.RemoveKey(reqfile);
-		if (m_abyPartStatus){
-			delete[] m_abyPartStatus;
-			m_abyPartStatus = NULL;
-		}
 	}
 	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
 	bool bPartsNeeded = false;
@@ -1238,9 +1229,8 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 		theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(SwapTo,this,false);
 
 		//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-		uint8* thisStatus = NULL;
-		m_PartStatus_list.Lookup(SwapTo, thisStatus);
-		if (thisStatus)
+		uint8* thisStatus;
+		if (m_PartStatus_list.Lookup(SwapTo, thisStatus))
 		{
 			m_abyPartStatus = thisStatus;
 			m_nPartCount = SwapTo->GetPartCount();
