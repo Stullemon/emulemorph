@@ -1295,3 +1295,19 @@ void CSharedFileList::DeletePartFileInstances() const
 		}
 	}
 }
+//MORPH START - Added by SiRoB, POWERSHARE Limit
+void CSharedFileList::UpdatePartsInfo()
+{
+	if (m_Files_map.IsEmpty())
+		return;
+	CCKey bufKey;
+	CKnownFile* file;
+	POSITION pos;
+	for(pos=m_Files_map.GetStartPosition(); pos!=0;)
+	{
+		m_Files_map.GetNextAssoc(pos, bufKey, file);
+		if (((file->GetPowerSharedMode()>=0)?file->GetPowerSharedMode():thePrefs.GetPowerShareMode()) == 3)
+			file->UpdatePartsInfo();
+	}
+}
+//MORPH END - Added by SiRoB, POWERSHARE Limit

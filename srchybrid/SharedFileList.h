@@ -63,7 +63,7 @@ public:
 	void	AddKeywords(CKnownFile* pFile);
 	void	RemoveKeywords(CKnownFile* pFile);
 	void	DeletePartFileInstances() const;
-
+	void	UpdatePartsInfo(); //MORPH - Added by SiRoB, POWERSHARE Limit
 private:
 	bool	AddFile(CKnownFile* pFile);
 	void	FindSharedFiles();

@@ -653,7 +653,7 @@ void CKnownFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
 
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, count.GetSize() && (m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
@@ -2541,7 +2541,7 @@ CString CKnownFile::GetEqualChanceValueString(bool detail){
 bool CKnownFile::GetPowerShared() const
 {
 	int temppowershared = (m_powershared>=0)?m_powershared:thePrefs.GetPowerShareMode();
-	return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto) || ((m_powershared == 3) && m_bPowerShareLimited) && m_bPowerShareAuthorized);
+	return ((temppowershared == 1) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
 }
 //MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	

@@ -9,7 +9,7 @@
 #include "OtherFunctions.h"
 #include "Scheduler.h" //MORPH - Added by SiRoB, Fix for Param used in scheduler
 #include "searchDlg.h"
-
+#include "sharedfilelist.h" //MORPH - Added by SiRoB, POWERSHARE Limit
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -503,8 +503,10 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	thePrefs.selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	thePrefs.ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	thePrefs.PowerShareLimit = m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
-	
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	thePrefs.PowerShareLimit = m_iPowerShareLimit;
+	theApp.sharedfiles->UpdatePartsInfo();
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();

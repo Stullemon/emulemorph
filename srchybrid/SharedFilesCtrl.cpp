@@ -1314,27 +1314,23 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					switch (wParam) {
 						case MP_POWERSHARE_DEFAULT:
 							file->SetPowerShared(-1);
-							UpdateFile(file);
 							break;
 						case MP_POWERSHARE_ON:
 							file->SetPowerShared(1);
-							UpdateFile(file);
 							break;
 						case MP_POWERSHARE_OFF:
 							file->SetPowerShared(0);
-							UpdateFile(file);
 							break;
 						case MP_POWERSHARE_AUTO:
 							file->SetPowerShared(2);
-							UpdateFile(file);
 							break;
 						//MORPH START - Added by SiRoB, POWERSHARE Limit
 						case MP_POWERSHARE_LIMITED:
 							file->SetPowerShared(3);
-							UpdateFile(file);
 							break;
 						//MORPH END   - Added by SiRoB, POWERSHARE Limit
 					}
+					UpdateFile(file);
 				}
 				break;
 			}
@@ -1364,6 +1360,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					file = selectedList.GetNext(pos);
 					if  (newPowerShareLimit == file->GetPowerShareLimit()) break;
 					file->SetPowerShareLimit(newPowerShareLimit);
+					file->UpdatePartsInfo();
 					UpdateFile(file);
 					break;
 				}
