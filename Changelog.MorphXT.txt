@@ -1,8 +1,8 @@
 --------------------------------------
-Changelog for eMule 0.44d MorphXT v5.x
+Changelog for eMule 0.44d MorphXT v5.14
 --------------------------------------
 FIXED  : Possible crash in mass-rename if filename contains "%"-characters [MightyKnife]
-FIXED  : Various display bugs. [MightyKnife]
+FIXED  : Various display bugs. [MightyKnife/SiRoB]
 FIXED  : Possible "Divide by 0"-crash. [MightyKnife]
 FIXED  : Renaming existing CRC32 to uppercase only worked for the first 4 characters in Unicode built. [MightyKnife]
 FIXED  : Improper treatment of sets of empty parameters in preferences.ini. [MightyKnife]
@@ -10,10 +10,13 @@ FIXED  : Oscop mouse cursor fix by apph [SiRoB]
 FIXED  : USC: Friend, Powershare and Pay Back First slots are properly added by respecting setting [SiRoB]
 FIXED  : USC: Small mistake that create some extra slot open while we remove one [SiRoB]
 FIXED  : Put back completsourcecount fix in ResetFileStatusInfo() to avoid file completsourcecount mix (A4AF) [SiRoB]
+FIXED  : Renumber slot [SiRoB]
+FIXED  : Maybe the shared credit violation [SiRoB]
 
 REMOVED: Defeat zero filled part sender (use less now) [SiRoB]
 
 ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
+ADDED  : localization of many text [FrankyFive]
 
 CHANGED: ImportParts: you can take temp part file without the need to copy them manualy [SiRoB]
 CHANGED: Overhead datarate calcul has been changed to 10'' instead of 40'' [SiRoB]
