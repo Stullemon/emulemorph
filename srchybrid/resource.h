@@ -1452,6 +1452,9 @@
 #define IDS_NOTES                       1500
 #define IDS_KADSEARCHALREADY            1501
 #define IDS_ALPHABETIC2NDSORT           1502
+#define IDS_CRASHRPT_DONE               1502
+#define IDS_CRASHRPT_AV                 1503
+#define IDS_CRASHRPT_NOTAV              1504
 #define IDS_UPLOAD_COMPLETED            1510
 #define IDS_UPLOAD_PREEMPTED            1511
 #define IDS_UPLOAD_TOO_MANY_SLOTS       1512
@@ -2128,8 +2131,8 @@
 #define IDC_SOURCE_TYPE                 2909
 #define IDC_UIP                         2910
 #define IDC_REGEXPR                     2912
-#define IDC_SEARCHKAD                   2913
 #define IDC_STATIC_ADDRESS              2912
+#define IDC_SEARCHKAD                   2913
 #define IDC_STATIC_PORT                 2913
 #define IDC_STATIC_CONTROLS             2914
 #define IDC_STATIC_NRBLOCKS             2915
@@ -2360,8 +2363,6 @@
 #define IDS_DYNUPLOAD                   3822
 #define IDS_HIDEOVERSHARES              3823
 #define IDS_SELECTIVESHARE              3824
-
-// Mighty Knife: More scheduling events
 #define IDS_SCHED_BACKUP                3830
 #define IDS_SCHED_UPDATE_IPCONFIG       3831
 #define IDS_SCHED_UPDATE_FAKES          3832
@@ -2369,8 +2370,6 @@
 #define IDS_SCHED_UPDATE_IPCONFIG_LOG   3841
 #define IDS_SCHED_UPDATE_FAKES_LOG      3842
 #define IDS_SCHED_UPDATE_WARNING        3850
-// [end] Mighty Knife
-
 #define IDS_BACKUP                      4001
 #define IDS_USS_MAXPING                 4002
 #define IDS_PAYBACKFIRST                4003
@@ -2763,8 +2762,6 @@
 #define IDS_CRC_PREFIX                  6207
 #define IDS_CRC_SUFFIX                  6208
 #define IDS_COUNTWCSESSIONSTATS         6209
-
-//MORPH START - Added by FrankyFive
 #define IDS_WEBCACHE_NOPROXY            6210
 #define IDS_CD_WCSUCCFAIL               6211
 #define IDS_CD_WCTRUSTSENDER            6212
@@ -2834,8 +2831,6 @@
 #define IDS_FRIENDNAME_CHANGED1         6281
 #define IDS_FRIENDNAME_CHANGED2         6282
 #define IDS_FAILEDTOLOAD                6283
-//MORPH END - Added by FrankyFive
-
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053

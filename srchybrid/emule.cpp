@@ -80,6 +80,24 @@
 CLogFile theLog;
 CLogFile theVerboseLog;
 
+//Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
+// gnaddelwarz: crashRpt
+#include "../crashrpt/crashrpt/include/crashrptDL.h"
+HMODULE CrashRptDLL;
+BOOL WINAPI CrashCallback(LPVOID lpvState)
+{
+	if (thePrefs.GetLog2Disk())
+		AddFileDL(CrashRptDLL, _T("eMule.log"), _T("Log File"));
+	if (thePrefs.GetDebug2Disk())
+		AddFileDL(CrashRptDLL, _T("eMule_Verbose.log"), _T("Verbose Log File"));
+	AddFileDL(CrashRptDLL, _T("config\\preferences.ini"), _T("INI File"));
+	AddRegistryHiveDL(CrashRptDLL, _T("HKEY_CLASSES_ROOT\\ed2k"), _T("Registry: Classes"));
+	AddRegistryHiveDL(CrashRptDLL, _T("HKEY_CURRENT_USER\\Software\\eMule"), _T("Registry: Install location"));
+	return true;
+}
+// gnaddelwarz: crashRpt
+//Morph End   - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -519,6 +537,21 @@ BOOL CemuleApp::InitInstance()
 	m_pPeerCache = new CPeerCacheFinder();
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
+
+	//Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
+	// gnaddelwarz: crashRpt
+	CrashRptDLL = GetInstanceDL(thePrefs.GetConfigDir()+_T("CrashRpt.dll"));
+	CString buffer;
+	buffer.Format(GetResString(IDS_CRASHRPT_DONE));
+	if(InstallDL(CrashRptDLL, CrashCallback, NULL, buffer))
+		AddLogLine(false, GetResString(IDS_CRASHRPT_AV));
+	else {
+		CString logline;
+		logline.Format(GetResString(IDS_CRASHRPT_NOTAV));
+		AddLogLine(false, logline); 
+	}
+	// gnaddelwarz: crashRpt
+	//Morph End   - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
 
 	thePerfLog.Startup();
 	dlg.DoModal();
@@ -1321,7 +1354,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			else
 			{
 				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
-				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
+				// scheme 'Windows-Standard (extragro?' -> always try to use 'LoadImage'!
 				//
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!

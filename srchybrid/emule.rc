@@ -12,12 +12,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(950)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1830,7 +1830,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -2936,12 +2936,12 @@ OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4776,6 +4776,8 @@ BEGIN
     IDS_STORENOTES          "Store Notes"
     IDS_NOTES               "Notes"
     IDS_KADSEARCHALREADY    "Another search is already in progress. Please try again later!"
+    IDS_CRASHRPT_DONE       "Crash report has been generated."
+    IDS_CRASHRPT_AV         "CrashReporter is available and running."
 END
 
 STRINGTABLE 
@@ -4823,7 +4825,8 @@ END
 
 STRINGTABLE 
 BEGIN
-	IDS_UPLOAD_COMPLETED    "Completing"
+    IDS_CRASHRPT_NOTAV      "CrashReporter not found in emule's directory. If you want to help us debug our mod, please download the CrashRpt.dll"
+    IDS_UPLOAD_COMPLETED    "Completing"
     IDS_UPLOAD_PREEMPTED    "Pre-empted by higher prio upload"
     IDS_UPLOAD_TOO_MANY_SLOTS "Too many slots"
 END
@@ -5584,7 +5587,7 @@ BEGIN
                             "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

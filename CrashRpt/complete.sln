@@ -1,0 +1,39 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CrashRpt", "crashrpt\src\CrashRpt.vcproj", "{DC823107-4CD6-45E7-B7EB-36EA94E2689F}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CrashRptTest", "crashrpttest\src\CrashRptTest.vcproj", "{12A13809-C173-4C8F-86BB-1F66630A0B73}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DC823107-4CD6-45E7-B7EB-36EA94E2689F} = {DC823107-4CD6-45E7-B7EB-36EA94E2689F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crashcon", "crashcon\src\crashcon.vcproj", "{C39FFE66-445B-429D-BD70-ECF80A70300F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DC823107-4CD6-45E7-B7EB-36EA94E2689F} = {DC823107-4CD6-45E7-B7EB-36EA94E2689F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{DC823107-4CD6-45E7-B7EB-36EA94E2689F}.Debug.ActiveCfg = Debug|Win32
+		{DC823107-4CD6-45E7-B7EB-36EA94E2689F}.Debug.Build.0 = Debug|Win32
+		{DC823107-4CD6-45E7-B7EB-36EA94E2689F}.Release.ActiveCfg = Release|Win32
+		{DC823107-4CD6-45E7-B7EB-36EA94E2689F}.Release.Build.0 = Release|Win32
+		{12A13809-C173-4C8F-86BB-1F66630A0B73}.Debug.ActiveCfg = Debug|Win32
+		{12A13809-C173-4C8F-86BB-1F66630A0B73}.Debug.Build.0 = Debug|Win32
+		{12A13809-C173-4C8F-86BB-1F66630A0B73}.Release.ActiveCfg = Release|Win32
+		{12A13809-C173-4C8F-86BB-1F66630A0B73}.Release.Build.0 = Release|Win32
+		{C39FFE66-445B-429D-BD70-ECF80A70300F}.Debug.ActiveCfg = Debug|Win32
+		{C39FFE66-445B-429D-BD70-ECF80A70300F}.Debug.Build.0 = Debug|Win32
+		{C39FFE66-445B-429D-BD70-ECF80A70300F}.Release.ActiveCfg = Release|Win32
+		{C39FFE66-445B-429D-BD70-ECF80A70300F}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
