@@ -1,3 +1,10 @@
+-----------------------------------------
+Changelog for eMule 0.41a10 MorphKad 0.??
+-----------------------------------------
+ADDED: Show download in bold in morph preferency [SiRoB]
+FIXED: color interference between transfert in red and the category color [SiRoB]
+FIXED: InputBox trouble causing some feature to not work (Renaming, Scheduler...) [AndCycle]
+
 ----------------------------------------
 Changelog for eMule 0.41a10 MorphKad 0.9
 ----------------------------------------
