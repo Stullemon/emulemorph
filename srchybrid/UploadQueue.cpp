@@ -782,7 +782,7 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 
 	//Morph Start - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
 	//if there are still bandwidth remain, allow accept new client
-	if(m_RemainBytes > 100){
+	if(theApp.glob_prefs->IsDynUpEnabled() && m_RemainBytes > 100){
 		return true;
 	}
 	//Morph End - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
