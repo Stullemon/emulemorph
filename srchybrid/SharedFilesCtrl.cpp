@@ -1158,12 +1158,14 @@ void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	if (iSel != -1) {
 		CKnownFile* file = (CKnownFile*)GetItemData(iSel);
 		if (file){
-			if (GetKeyState(VK_MENU) & 0x8000){
+			//MORPH Changed by SiRoB - Double click unfinished files in SharedFile window display FileDetail
+			//if (GetKeyState(VK_MENU) & 0x8000){
+			if (GetKeyState(VK_MENU) & 0x8000 || file->IsPartFile()){
 				CSharedFileDetailsSheet sheet(file);
 				sheet.DoModal();
 			}
 			else
-			OpenFile(file);
+				OpenFile(file);
 	}
 	}
 	*pResult = 0;
