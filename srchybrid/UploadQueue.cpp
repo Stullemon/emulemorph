@@ -680,7 +680,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 	
 	// save 15 minutes of data about number of fully active clients
     uint32 tempMaxRemoved = -1;
-    while(!activeClients_tick_list.IsEmpty() && !activeClients_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 2*60*1000) {
+    while(!activeClients_tick_list.IsEmpty() && !activeClients_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 10*1000) {
             activeClients_tick_list.RemoveHead();
 	        uint32 removed = activeClients_list.RemoveHead();
 
