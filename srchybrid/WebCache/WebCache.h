@@ -20,8 +20,6 @@
 
 #define WC_SOCKETEXTRATIMEOUT	300	// 5 minutes extra timeout when the proxy waits until the whole 180kB block is transferred
 
-#define MOD_VERSION  _T( "WebCache 1.2f" )
-
 class CUpDownClient; //JP proxy configuration test
 extern CUpDownClient* ProxyTestClient; //JP proxy configuration test
 
