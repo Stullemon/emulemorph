@@ -212,8 +212,8 @@ bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket*
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	if(resort == false && foundSocket) {
-        if (m_highestNumberOfFullyActivatedSlots[classID] > 0) --m_highestNumberOfFullyActivatedSlots[classID];
-		if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] > 0) --m_highestNumberOfFullyActivatedSlots[LAST_CLASS];
+        for (uint32 i = classID; i <= LAST_CLASS;i++)
+			if (m_highestNumberOfFullyActivatedSlots[classID] > 0) --m_highestNumberOfFullyActivatedSlots[classID];
     }
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
 
@@ -664,10 +664,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			}
 
 			//MORPH START - Added by SiRoB, Upload Splitting Class
+			uint32 sumofclientinclass = 0;
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{
-				if (allowedDataRateClass[classID] && (slotCounterClass[classID]>0 || classID==LAST_CLASS))
+				if (slotCounterClass[classID]>0 || classID==LAST_CLASS)
 				{
+					sumofclientinclass += slotCounterClass[classID];
 					realBytesToSpend = realBytesToSpendClass[classID];
 					if(realBytesToSpend < -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000) {
 	           			sint64 newRealBytesToSpend = -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000;
@@ -680,7 +682,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					        //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i"), realBytesToSpend, newRealBytesToSpend);
 	           				realBytesToSpend = newRealBytesToSpend;
 							if(thisLoopTick-lastTickReachedBandwidth[classID] > max(1000, timeSinceLastLoop*2)) {
-								if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1){
+								if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1){
 									m_highestNumberOfFullyActivatedSlots[classID] = m_highestNumberOfFullyActivatedSlots[classID]+1;
 									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS]<m_highestNumberOfFullyActivatedSlots[classID])
 										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
