@@ -997,6 +997,9 @@ void CUpDownClient::Ban(){
 	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if ( !IsBanned() ){
 		AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
+		//Morph Start - added by AndCycle, some special case could be happened
+		if(theApp.uploadqueue->IsDownloading(this))	theApp.uploadqueue->RemoveFromUploadQueue(this);
+		//Morph End - added by AndCycle, some special case could be happened
 	}
 #ifdef _DEBUG
 	else
