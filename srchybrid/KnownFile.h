@@ -282,7 +282,7 @@ public:
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 	void    SetPowerShared(int newValue) {m_powershared = newValue;};
-	bool    GetPowerShared() const {return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto) || ((m_powershared == 3) && m_bPowerShareLimited) && m_bPowerShareAuthorized);}
+	bool    GetPowerShared() const;
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, HIDEOS
 	void	SetHideOS(int newValue) {m_iHideOS = newValue;};

@@ -2538,7 +2538,7 @@ CString CKnownFile::GetEqualChanceValueString(bool detail){
 //Morph End - added by AndCycle, Equal Chance For Each File
 
 //MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-bool    GetPowerShared() const
+bool CKnownFile::GetPowerShared() const
 {
 	int temppowershared = (m_powershared>=0)?m_powershared:thePrefs.GetPowerShareMode();
 	return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto) || ((m_powershared == 3) && m_bPowerShareLimited) && m_bPowerShareAuthorized);
