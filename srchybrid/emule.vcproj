@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="7.10"
 	Name="emule"
 	ProjectGUID="{584EA69D-3443-4197-8994-364880FC1B9B}"
 	Keyword="MFCProj">
@@ -293,7 +293,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
+				OptimizeForProcessor="0"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".,..;..\id3lib\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1"
@@ -313,6 +313,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/LTCG:STATUS"
 				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
@@ -1956,13 +1957,28 @@
 				RelativePath=".\res\Banner_Morph.jpg">
 			</File>
 			<File
+				RelativePath=".\res\Banner_Morph.jpg">
+			</File>
+			<File
+				RelativePath="res\bn_connect.ico">
+			</File>
+			<File
 				RelativePath="res\bn_connect.ico">
 			</File>
 			<File
 				RelativePath="res\bn_disconnect.ico">
 			</File>
 			<File
+				RelativePath="res\bn_disconnect.ico">
+			</File>
+			<File
 				RelativePath="res\bn_messages.ico">
+			</File>
+			<File
+				RelativePath="res\bn_messages.ico">
+			</File>
+			<File
+				RelativePath="res\bn_statistics.ico">
 			</File>
 			<File
 				RelativePath="res\bn_statistics.ico">
@@ -1974,7 +1990,16 @@
 				RelativePath="res\cancel.ICO">
 			</File>
 			<File
+				RelativePath="res\cancel.ICO">
+			</File>
+			<File
 				RelativePath="res\chat.ico">
+			</File>
+			<File
+				RelativePath="res\chat.ico">
+			</File>
+			<File
+				RelativePath="res\client0.ICO">
 			</File>
 			<File
 				RelativePath="res\client0.ICO">
@@ -1983,13 +2008,28 @@
 				RelativePath="res\client1.ICO">
 			</File>
 			<File
+				RelativePath="res\client1.ICO">
+			</File>
+			<File
+				RelativePath="res\client2.ICO">
+			</File>
+			<File
 				RelativePath="res\client2.ICO">
 			</File>
 			<File
 				RelativePath="res\client3.ICO">
 			</File>
 			<File
+				RelativePath="res\client3.ICO">
+			</File>
+			<File
 				RelativePath="res\client4.ICO">
+			</File>
+			<File
+				RelativePath="res\client4.ICO">
+			</File>
+			<File
+				RelativePath="res\ClientaMule.ico">
 			</File>
 			<File
 				RelativePath="res\ClientaMule.ico">
@@ -2016,7 +2056,16 @@
 				RelativePath=".\res\community.ico">
 			</File>
 			<File
+				RelativePath=".\res\community.ico">
+			</File>
+			<File
 				RelativePath="res\compatible.ICO">
+			</File>
+			<File
+				RelativePath="res\compatible.ICO">
+			</File>
+			<File
+				RelativePath="res\ConnectedHighHigh.ico">
 			</File>
 			<File
 				RelativePath="res\ConnectedHighHigh.ico">
@@ -2025,40 +2074,40 @@
 				RelativePath="res\ConnectedHighLow.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedHighNot.ico">
+				RelativePath=".\res\ConnectedHighNot.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedLowHigh.ico">
+				RelativePath=".\res\ConnectedLowHigh.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedLowLow.ico">
+				RelativePath=".\res\ConnectedLowLow.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedLowNot.ico">
+				RelativePath=".\res\ConnectedLowNot.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedNotHigh.ico">
+				RelativePath=".\res\ConnectedNotHigh.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedNotLow.ico">
+				RelativePath=".\res\ConnectedNotLow.ico">
 			</File>
 			<File
-				RelativePath="res\ConnectedNotNot.ico">
+				RelativePath=".\res\ConnectedNotNot.ico">
 			</File>
 			<File
-				RelativePath="res\Contact0.ico">
+				RelativePath=".\res\Contact0.ico">
 			</File>
 			<File
-				RelativePath="res\Contact1.ico">
+				RelativePath=".\res\Contact1.ico">
 			</File>
 			<File
-				RelativePath="res\Contact2.ico">
+				RelativePath=".\res\Contact2.ico">
 			</File>
 			<File
-				RelativePath="res\Contact3.ico">
+				RelativePath=".\res\Contact3.ico">
 			</File>
 			<File
-				RelativePath="res\Contact4.ico">
+				RelativePath=".\res\Contact4.ico">
 			</File>
 			<File
 				RelativePath="res\convert.ico">
@@ -2070,13 +2119,10 @@
 				RelativePath=".\res\CreditSecureOvl.ico">
 			</File>
 			<File
-				RelativePath="res\CumulativeStats.ico">
+				RelativePath=".\res\CumulativeStats.ico">
 			</File>
 			<File
-				RelativePath="res\DirectDownload.ico">
-			</File>
-			<File
-				RelativePath="res\Display.ico">
+				RelativePath=".\res\Display.ico">
 			</File>
 			<File
 				RelativePath="res\down.bmp">
@@ -2518,5 +2564,8 @@
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="emule.rc"/>
 	</Globals>
 </VisualStudioProject>
