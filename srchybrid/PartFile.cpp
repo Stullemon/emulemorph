@@ -2187,8 +2187,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 						if(limit<1000 && curClientReducedDownload == 200)
 						//MORPH - Added by Yun.SF3, ZZ Upload System
 							limit +=1000;
-						else if(limit<1)
-							limit = 1;
+						else if(limit<20)
+							limit = 20;
 						cur_src->socket->SetDownloadLimit(limit);
 						if (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket && cur_src->m_pPCDownSocket->IsConnected())
 							cur_src->m_pPCDownSocket->SetDownloadLimit(limit);
@@ -2259,8 +2259,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							if (limit < 1000 && curClientReducedDownload == 200)
 						//MORPH - Added by Yun.SF3, ZZ Upload System
 								limit += 1000;
-							else if (limit < 1)
-								limit = 1;
+							else if (limit < 20)
+								limit = 20;
 							cur_src->socket->SetDownloadLimit(limit);
 							if (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket && cur_src->m_pPCDownSocket->IsConnected())
 								cur_src->m_pPCDownSocket->SetDownloadLimit(limit);
