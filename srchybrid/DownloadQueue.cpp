@@ -901,7 +901,7 @@ void CDownloadQueue::Process(){
 
            if(downspeed == 0 || tempDownspeed < downspeed) {
                 downspeed = tempDownspeed;
-                //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
+                //AddLogLine(true, "Limiting downspeed");
 		   }
 		}
 
