@@ -876,6 +876,7 @@ uint32 CUpDownClient::SendBlockData(){
 			DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
 			if ((m_AvarageUDR_list.GetCount() - 1)*(curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
 				dwDuration = curTick - m_AvarageUDR_list.GetHead().timestamp - dwDuration / (m_AvarageUDR_list.GetCount() - 1);
+			if (dwDuration < 5000) dwDuration = 5000;
 			m_nUpDatarate = ((sumavgUDR - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
 		}
 	} else

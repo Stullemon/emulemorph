@@ -1484,6 +1484,7 @@ void CUploadQueue::UpdateDatarates() {
 				DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
 				if ((avarage_tick_list.GetCount() - 1) * (m_lastCalculatedDataRateTick - avarage_tick_list.GetTail()) > dwDuration)
 					dwDuration = m_lastCalculatedDataRateTick - avarage_tick_list.GetHead() - dwDuration / (avarage_tick_list.GetCount()-1);
+				if (dwDuration < 5000) dwDuration = 5000;
 				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / dwDuration;
 				m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead())*1000) / dwDuration;
 				friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / dwDuration;
