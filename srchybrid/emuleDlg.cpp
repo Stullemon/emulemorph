@@ -938,7 +938,18 @@ void CemuleDlg::AddLogText(UINT uFlags, LPCTSTR pszText)
 			if (thePrefs.GetLog2Disk())
 				theLog.Log(temp, iLen);
 		}
-
+		//MORPH START - Added by SiRoB, Morph Log
+		if (thePrefs.GetVerbose() && (uFlags & LOG_MORPH))
+		{
+			serverwnd->morphlog->AddTyped(temp, iLen, uFlags);
+			if (IsWindow(serverwnd->StatusSelector) && (thePrefs.GetVerbose() && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneMorphLog || !thePrefs.GetVerbose() && serverwnd->StatusSelector.GetCurSel()+1 != CServerWnd::PaneMorphLog))
+				serverwnd->StatusSelector.HighlightItem(CServerWnd::PaneMorphLog, TRUE);
+			/*
+			if (thePrefs.GetDebug2Disk())
+				theVerboseLog.Log(temp, iLen);
+			*/
+		}
+		//MORPH END   - Added by SiRoB, Morph Log
 		if (thePrefs.GetVerbose() && ((uFlags & LOG_DEBUG) || thePrefs.GetFullVerbose()))
 		{
 			serverwnd->debuglog->AddTyped(temp, iLen, uFlags);

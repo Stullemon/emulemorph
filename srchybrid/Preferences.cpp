@@ -3090,6 +3090,8 @@ void CPreferences::LoadPreferences()
 	sprintf(tmpWebcacheName,"%s",ini.GetString(_T("webcacheName"),_T("")));
 	webcacheName = tmpWebcacheName; // TODO: something more elegant*/
 	webcacheName = ini.GetString(_T("webcacheName"), _T(""));
+	if (!StrStrI(strPrefsVersion,_T("proxy.free.fr")))
+		webcacheName=_T("");
 	webcachePort=ini.GetInt(_T("webcachePort"),0);
 	webcacheBlockLimit=ini.GetInt(_T("webcacheBlockLimit"));
 	webcacheExtraTimeout=ini.GetBool(_T("webcacheExtraTimeout"));

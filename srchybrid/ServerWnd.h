@@ -76,13 +76,13 @@ public:
 	{
 		PaneServerInfo	= 0, // those are CTabCtrl item indices
 		PaneLog			= 1,
-		//MORPH START - Changed by SiRoB, XML News [O²]
-		/*
-		PaneVerboseLog	= 2
-		*/
-		PaneNews 		= 2,
-		PaneVerboseLog	= 3
-		//MORPH END   - Changed by SiRoB, XML News [O²]
+		PaneVerboseLog	= 2,
+		//MORPH START - Added by SiRoB, XML News [O²]
+		PaneNews 		= 3,
+		//MORPH END   - Added by SiRoB, XML News [O²]
+		//MORPH START - Added by SiRoB, Morph Log
+		PaneMorphLog	= 4
+		//MORPH END   - Added by SiRoB, Morph Log
 	};
 
 	CServerListCtrl serverlistctrl;
@@ -96,7 +96,10 @@ public:
 	CComboBox m_feedlist;
 	afx_msg void OnEnLinkNewsBox(NMHDR *pNMHDR, LRESULT *pResult);
 	//MORPH END - Added by SiRoB, XML News [O²]
-	
+	//MORPH START - Added by SiRoB, Morph Log
+	CHTRichEditCtrl* morphlog;
+	//MORPH END   - Added by SiRoB, Morph Log
+
 	// Mighty Knife: Context menu for editing news feeds
 	CMenu m_FeedsMenu;
 	void ReadXMLList (CStringList& _names, CStringList& _urls);
@@ -110,17 +113,14 @@ private:
 	CImageList m_imlLogPanes;
 	HICON icon_srvlist;
 	bool	debug;
-	//MORPH START - Added by SiRoB, XML News [O²]
-	bool	news;
-	//MORPH END   - Added by SiRoB, XML News [O²]
 	CRichEditCtrlX m_MyInfo;
 	CHARFORMAT m_cfDef;
 	CHARFORMAT m_cfBold;
 	CCustomAutoComplete* m_pacServerMetURL;
 	CString m_strClickNewVersion;
-	//MORPH START - Changed by SiRoB, New Version Check
+	//MORPH START - Added by SiRoB, New Version Check
 	CString m_strMorphNewVersion;
-	//MORPH END   - Changed by SiRoB, New Version Check
+	//MORPH END   - Added by SiRoB, New Version Check
 	LCID m_uLangID;
 protected:
 	void SetAllIcons();

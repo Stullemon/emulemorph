@@ -96,6 +96,9 @@ CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
 	//MORPH START - Added by SiRoB, XML News [O²]
 	newsmsgbox = new CHTRichEditCtrl; // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
+	//MORPH START - Added by SiRoB, Morph Log
+	morphlog = new CHTRichEditCtrl;
+	//MORPH END   - Added by SiRoB, Morph Log
 	m_pacServerMetURL=NULL;
 	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
 	icon_srvlist = NULL;
@@ -115,9 +118,9 @@ CServerWnd::~CServerWnd()
 	delete debuglog;
 	delete logbox;
 	delete servermsgbox;
-	//MORPH START - Added by SiRoB, XML News [O²]
-	delete newsmsgbox; // Added by N_OxYdE: XML News
-	//MORPH END   - Added by SiRoB, XML News [O²]
+	delete newsmsgbox; //MORPH - Added by SiRoB, XML News [O²]
+	delete morphlog;//MORPH - Added by SiRoB, Morph Log
+
 }
 
 BOOL CServerWnd::OnInitDialog()
@@ -178,6 +181,21 @@ BOOL CServerWnd::OnInitDialog()
 		logbox->SetTitle(GetResString(IDS_SV_LOG));
 		logbox->SetAutoURLDetect(FALSE);
 	}
+
+	GetDlgItem(IDC_DEBUG_LOG)->GetWindowRect(rect);
+	GetDlgItem(IDC_DEBUG_LOG)->DestroyWindow();
+	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
+	if (debuglog->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_DEBUG_LOG)){
+		debuglog->SetProfileSkinKey(_T("VerboseLog"));
+		debuglog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		debuglog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		if (theApp.m_fontLog.m_hObject)
+			debuglog->SetFont(&theApp.m_fontLog);
+		debuglog->ApplySkin();
+		debuglog->SetTitle(SZ_DEBUG_LOG_TITLE);
+		debuglog->SetAutoURLDetect(FALSE);
+	}
+
 	//MORPH START - Added by SiRoB, XML News [O²]
 	GetDlgItem(IDC_NEWSMSG)->GetWindowRect(rect);
 	GetDlgItem(IDC_NEWSMSG)->DestroyWindow();
@@ -193,19 +211,21 @@ BOOL CServerWnd::OnInitDialog()
 	}
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
-	GetDlgItem(IDC_DEBUG_LOG)->GetWindowRect(rect);
-	GetDlgItem(IDC_DEBUG_LOG)->DestroyWindow();
+	//MORPH START - Added by SiRoB, Morph Log
+	GetDlgItem(IDC_MORPH_LOG)->GetWindowRect(rect);
+	GetDlgItem(IDC_MORPH_LOG)->DestroyWindow();
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	if (debuglog->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_DEBUG_LOG)){
-		debuglog->SetProfileSkinKey(_T("VerboseLog"));
-		debuglog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
-		debuglog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+	if (morphlog->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_MORPH_LOG)){
+		morphlog->SetProfileSkinKey(_T("MorphLog"));
+		morphlog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		morphlog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 		if (theApp.m_fontLog.m_hObject)
 			debuglog->SetFont(&theApp.m_fontLog);
-		debuglog->ApplySkin();
-		debuglog->SetTitle(SZ_DEBUG_LOG_TITLE);
-		debuglog->SetAutoURLDetect(FALSE);
+		morphlog->ApplySkin();
+		morphlog->SetTitle(GetResString(IDS_MORPH_LOG));
+		morphlog->SetAutoURLDetect(FALSE);
 	}
+	//MORPH END   - Added by SiRoB, Morph Log
 
 	SetAllIcons();
 	Localize();
@@ -228,6 +248,12 @@ BOOL CServerWnd::OnInitDialog()
 	newitem.iImage = 0;
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneLog );
 
+	name=SZ_DEBUG_LOG_TITLE;
+	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+	newitem.iImage = 0;
+	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneVerboseLog );
+
 	//MORPH START - Added by SiRoB, XML News [O²]
 	name = GetResString(IDS_FEED);
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
@@ -236,11 +262,13 @@ BOOL CServerWnd::OnInitDialog()
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneNews );
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
-	name=SZ_DEBUG_LOG_TITLE;
+	//MORPH START - Added by SiRoB, Morph Log
+	name = GetResString(IDS_MORPH_LOG);
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
-	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneVerboseLog );
+	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneMorphLog );
+	//MORPH END   - Added by SiRoB, Morph Log
 
 	AddAnchor(serverlistctrl, TOP_LEFT, MIDDLE_RIGHT);
 	AddAnchor(m_ctrlNewServerFrm, TOP_RIGHT);
@@ -258,31 +286,28 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_SERVERMETURL,TOP_RIGHT);
 	AddAnchor(IDC_UPDATESERVERMETFROMURL,TOP_RIGHT);
 	AddAnchor(StatusSelector, MIDDLE_LEFT, BOTTOM_RIGHT);
-	AddAnchor(IDC_LOGRESET, MIDDLE_RIGHT); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
-	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
-	AddAnchor(IDC_DD,TOP_RIGHT);
-
 	//MORPH START - Added by SiRoB, XML News [O²]
 	AddAnchor(IDC_FEEDUPDATE, MIDDLE_RIGHT);
 	AddAnchor(IDC_FEEDCHANGE, MIDDLE_RIGHT);
 	AddAnchor(IDC_FEEDLIST, MIDDLE_LEFT, MIDDLE_RIGHT);
 	//MORPH END   - Added by SiRoB, XML News [O²]
-	
+	AddAnchor(IDC_LOGRESET, MIDDLE_RIGHT); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
+	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
+	AddAnchor(IDC_DD,TOP_RIGHT);
+
+	// The resizing of those log controls (rich edit controls) works 'better' when added as last anchors (?)
 	AddAnchor(*servermsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*logbox, MIDDLE_LEFT, BOTTOM_RIGHT);
 	AddAnchor(*debuglog, MIDDLE_LEFT, BOTTOM_RIGHT);
 	debug = true;
-	//MORPH START - Added by SiRoB, XML News [O²]
-	AddAnchor(*newsmsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);
-	news = true;
-	//MORPH END   - Added by SiRoB, XML News [O²]	
+	AddAnchor(*newsmsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);//MORPH - Added by SiRoB, XML News [O²]
+	AddAnchor(*morphlog, MIDDLE_LEFT, BOTTOM_RIGHT); //MORPH - Added by SiRoB, Morph Log
 	ToggleDebugWindow();
 
+	morphlog->ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Morph Log
+	newsmsgbox->ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, XML News [O²]
 	debuglog->ShowWindow(SW_HIDE);
 	logbox->ShowWindow(SW_HIDE);
-	//MORPH START - Added by SiRoB, XML News [O²]
-	newsmsgbox->ShowWindow(SW_HIDE); // Added by N_OxYdE: XML News
-	//MORPH END   - Added by SiRoB, XML News [O²]
 	servermsgbox->ShowWindow(SW_SHOW);
 
 	// Mighty Knife: Context menu for editing news feeds
@@ -464,6 +489,11 @@ void CServerWnd::Localize()
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneLog, &item);
 
+	    name = SZ_DEBUG_LOG_TITLE;
+	    item.mask = TCIF_TEXT;
+		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		StatusSelector.SetItem(PaneVerboseLog, &item);
+
 	    //MORPH START - Added by SiRoB, XML News [O²]
 		name = GetResString(IDS_FEED);
 	    item.mask = TCIF_TEXT;
@@ -471,10 +501,12 @@ void CServerWnd::Localize()
 		StatusSelector.SetItem(PaneNews, &item);
 		//MORPH END   - Added by SiRoB, XML News [O²]
 
-	    name = SZ_DEBUG_LOG_TITLE;
+	    //MORPH START - Added by SiRoB, Morph LOg
+		name = GetResString(IDS_MORPH_LOG);
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
-		StatusSelector.SetItem(PaneVerboseLog, &item);
+		StatusSelector.SetItem(PaneMorphLog, &item);
+		//MORPH END   - Added by SiRoB, Morph Log
 	}
 
 	UpdateLogTabSelection();
@@ -645,12 +677,23 @@ void CServerWnd::OnBnClickedResetLog()
 	int cur_sel = StatusSelector.GetCurSel();
 	if (cur_sel == -1)
 		return;
-	//MORPH START - Changed by SiRoB, XML News [O²]
-	/*
+	//MORPH START - Changed by SiRoB, Morph Log
+	int cur_sel_offset = cur_sel;
+	if (!debug && cur_sel>=PaneVerboseLog) ++cur_sel_offset;
+	if( cur_sel_offset == PaneMorphLog)
+	{
+		morphlog->Reset();
+		theApp.emuledlg->statusbar->SetText(_T(""), SBarLog, 0);
+	}
+	else
+	//MORPH START - Changed by SiRoB, XML News
+	if (cur_sel_offset == PaneNews)
+	{
+		newsmsgbox->Reset();
+	}
+	else
+	//MORPH END   - Added by SiRoB, XML News
 	if (cur_sel == PaneVerboseLog)
-	*/
-	if( (cur_sel == 3 && news) || (cur_sel == 2 && !news) )
-	//MORPH END   - Changed by SiRoB, XML News [O²]
 	{
 		theApp.emuledlg->ResetDebugLog();
 		theApp.emuledlg->statusbar->SetText(_T(""), SBarLog, 0);
@@ -665,15 +708,6 @@ void CServerWnd::OnBnClickedResetLog()
 		servermsgbox->Reset();
 		// the statusbar does not contain any server log related messages, so it's not cleared.
 	}
-
-	//MORPH START - Changed by SiRoB, XML News [O²]
-	if( cur_sel == 2  && news )
-	//if (cur_sel == PaneNews)
-	{
-		newsmsgbox->Reset();
-		// the statusbar does not contain any server log related messages, so it's not cleared.
-	}
-	//MORPH END   - Changed by SiRoB, XML News [O²]
 }
 
 void CServerWnd::OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult)
@@ -687,18 +721,43 @@ void CServerWnd::UpdateLogTabSelection()
 	int cur_sel = StatusSelector.GetCurSel();
 	if (cur_sel == -1)
 		return;
-	//MORPH START - Changed by SiRoB, XML News [O²]
-	/*
+
+	//MORPH START - Added by SiRoB, Morph Log
+	int cur_sel_offset = cur_sel;
+	if (!debug) ++cur_sel_offset;
+	if( cur_sel_offset == PaneMorphLog)
+	{
+		servermsgbox->ShowWindow(SW_HIDE);
+		logbox->ShowWindow(SW_HIDE);
+		debuglog->ShowWindow(SW_HIDE);
+		//MORPH START - Added by SiRoB, XML News [O²]
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
+		//MORPH START - Added by SiRoB, XML News [O²]
+		morphlog->ShowWindow(SW_SHOW);
+		morphlog->Invalidate();
+		StatusSelector.HighlightItem(cur_sel, FALSE);
+	}else
+	//MORPH END   - Added by SiRoB, Morph Log
+	//MORPH START - Added by SiRoB, XML News
+	if( cur_sel_offset == PaneNews)
+	{
+		servermsgbox->ShowWindow(SW_HIDE);
+		logbox->ShowWindow(SW_HIDE);
+		debuglog->ShowWindow(SW_HIDE);
+		morphlog->ShowWindow(SW_HIDE); //Morph Log
+		newsmsgbox->ShowWindow(SW_SHOW);
+		newsmsgbox->Invalidate();
+		StatusSelector.HighlightItem(cur_sel, FALSE);
+	}else
+	//MORPH END   - Added by SiRoB, XML News
 	if (cur_sel == PaneVerboseLog)
-	*/
-	if( (cur_sel == 3 && news) || (cur_sel == 2 && !news) )
-	//MORPH END   - Changed by SiRoB, XML News [O²]
 	{
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox->ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
+		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		debuglog->ShowWindow(SW_SHOW);
 		debuglog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
@@ -707,10 +766,11 @@ void CServerWnd::UpdateLogTabSelection()
 	{
 		debuglog->ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
+		logbox->ShowWindow(SW_SHOW);
 		//MORPH START - Added by SiRoB, XML News [O²]
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
-		logbox->ShowWindow(SW_SHOW);
+		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		logbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -721,33 +781,16 @@ void CServerWnd::UpdateLogTabSelection()
 		//MORPH START - Added by SiRoB, XML News [O²]
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
+		morphlog->ShowWindow(SW_HIDE); //Morph Log
 		servermsgbox->ShowWindow(SW_SHOW);
 		servermsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
-	
-	//MORPH START - Added by SiRoB, XML News [O²]	
-	if( cur_sel == 2  && news )
-	//if (cur_sel == PaneNews)
-	{
-		debuglog->ShowWindow(SW_HIDE);
-		logbox->ShowWindow(SW_HIDE);
-		servermsgbox->ShowWindow(SW_HIDE);
-		// eMule O?
-		newsmsgbox->ShowWindow(SW_SHOW); // added by O? XML News
-		newsmsgbox->Invalidate();
-		// END eMule O?
-		
-		StatusSelector.HighlightItem(cur_sel, FALSE);
-	}
-	//MORPH END   - Added by SiRoB, XML News [O²]
 }
 
 void CServerWnd::ToggleDebugWindow()
 {
 	int cur_sel = StatusSelector.GetCurSel();
-	//MORPH START - Changed by SiRoB, XML News [O²]
-	/*
 	if (thePrefs.GetVerbose() && !debug)	
 	{
 		TCITEM newitem;
@@ -756,7 +799,11 @@ void CServerWnd::ToggleDebugWindow()
 		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		newitem.iImage = 0;
+		//MORPH START - Changed by SiRoB, XML News & Morph Log
+		/*
 		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
+		*/
+		StatusSelector.InsertItem(PaneVerboseLog,&newitem);
 		debug = true;
 	}
 	else if (!thePrefs.GetVerbose() && debug)
@@ -766,58 +813,14 @@ void CServerWnd::ToggleDebugWindow()
 			StatusSelector.SetCurSel(PaneLog);
 			StatusSelector.SetFocus();
 		}
+		morphlog->ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Morph Log
+		newsmsgbox->ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, XML News
 		debuglog->ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox->ShowWindow(SW_SHOW);
 		StatusSelector.DeleteItem(PaneVerboseLog);
 		debug = false;
 	}
-	*/
-	if( (cur_sel == 2) || (cur_sel == 3) ){
-		// StatusSelector.SetCurSel(2);
-		StatusSelector.SetCurSel(1);
-		// END Added by O? XML News
-		// END eMule O?
-		StatusSelector.SetFocus();
-	}
-	servermsgbox->ShowWindow(SW_HIDE);
-	newsmsgbox->ShowWindow(SW_HIDE);
-	debuglog->ShowWindow(SW_HIDE);
-	logbox->ShowWindow(SW_SHOW);
-
-	StatusSelector.DeleteItem(3);
-	StatusSelector.DeleteItem(2);
-
-	debug = false;
-	news = false;
-
-	GetDlgItem(IDC_FEEDUPDATE)->ShowWindow(SW_HIDE);
-	GetDlgItem(IDC_FEEDLIST)->ShowWindow(SW_HIDE);
-	if (thePrefs.GetNews()) {
-		TCITEM newitem;
-		CString name;
-		name = "News";
-		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
-		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
-		newitem.iImage = 0;
-		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
-		news = true; 
-
-		GetDlgItem(IDC_FEEDUPDATE)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_FEEDLIST)->ShowWindow(SW_SHOW);
-	}
-
-	if (thePrefs.GetVerbose()) {
-		TCITEM newitem;
-		CString name;
-		name = SZ_DEBUG_LOG_TITLE;
-		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
-		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
-		newitem.iImage = 0;
-		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
-		debug = true;
-	}
-	//MORPH END   - Changed by SiRoB, XML News [O²]
 }
 
 void CServerWnd::UpdateMyInfo()
@@ -1162,7 +1165,7 @@ void CServerWnd::ParseNewsFile(LPCTSTR strTempFilename)
 
 	// Look if the news file exists in the "feed" subdirectory
 	if (!PathFileExists(strTempFilename)){
-		StatusSelector.SetCurSel(2);
+		StatusSelector.SetCurSel(PaneNews-(debug?0:1));
 		UpdateLogTabSelection();
 		return;
 	}
@@ -1218,7 +1221,7 @@ void CServerWnd::ParseNewsFile(LPCTSTR strTempFilename)
 	}
 	delete xml;
 	newsmsgbox->ScrollToFirstLine();
-	StatusSelector.SetCurSel(2);
+	StatusSelector.SetCurSel(PaneNews-(debug?0:1));
 	UpdateLogTabSelection();
 }
 

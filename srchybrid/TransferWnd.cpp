@@ -855,7 +855,7 @@ void CTransferWnd::Localize()
 	clientlistctrl.Localize();
 	downloadclientsctrl.Localize(); //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons
 
-	//UpdateListCount(m_uWnd2);
+	UpdateListCount(m_uWnd2);
 }
 
 void CTransferWnd::OnBnClickedQueueRefreshButton()

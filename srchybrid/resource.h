@@ -2552,6 +2552,7 @@
 #define IDC_FEEDUPDATE                  5008
 #define IDS_CLIENTPERCENTAGE            5009
 #define IDC_NEWSMSG                     5010
+#define IDC_MORPH_LOG                   5011
 #define IDC_BUTTONEDIT                  5014
 #define IDC_BUTTONCHANGE                5015
 #define IDC_CHARSOURCE                  5016
@@ -2755,6 +2756,7 @@
 #define IDC_COUNTRYFLAG                 6200
 #define IDC_GRAPHOPTIONS                6201
 #define IDS_GRAPHOPTIONS                6201
+#define IDC_RICHEDIT22                  6201
 #define IDS_CRC_CALCULATED              6202
 #define IDS_CRC_CHECKOK                 6203
 #define IDS_CRC_FORCEADDING             6204
@@ -2923,6 +2925,7 @@
 #define IDS_MORPH_RFHA                  51541
 #define IDS_MORPH_RAIF                  51542
 #define IDS_MORPH_KSSERV                51543
+#define IDS_MORPH_LOG                   51544
 #define IDS_WEBSERVER_LINK              51561
 
 // Next default values for new objects
@@ -2931,7 +2934,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6208
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         6201
+#define _APS_NEXT_CONTROL_VALUE         6202
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
