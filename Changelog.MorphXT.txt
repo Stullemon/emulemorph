@@ -23,6 +23,7 @@ ADDED  : CountryFlag to serverlist [Commander/Iberica]
 CHANGED: Client Percentage-> SRCPAINT instead of SRCINVERT->better readable now [Commander]
 FIXED  : Ip2Country column settings saved
 TWEAKED: Mass-Rename SimpleCleanup tweaked [MightyKnife]
+CHANGED: Added dots '...' behind some items in the Morph preferences tab to indicate that they can be expanded with a double click (at least in the english version) [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
