@@ -410,7 +410,27 @@ void CSharedFileList::FindSharedFiles()
 	else
 		AddLogLine(false,GetResString(IDS_SHAREDFOUNDHASHING), m_Files_map.GetCount(), waitingforhash_list.GetCount());
 	
-	HashNextFile();
+	// Mighty Knife: Report hashing files
+	if (!waitingforhash_list.IsEmpty()) {
+		if (thePrefs.GetReportHashingFiles ()) {
+			POSITION p = waitingforhash_list.GetHeadPosition ();
+			while (p != NULL) {
+				UnknownFile_Struct* f = waitingforhash_list.GetAt (p);
+				CString hashfilename;
+				hashfilename.Format (_T("%s\\%s"),f->strDirectory, f->strName);
+				if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),f->strDirectory, f->strName);
+				Log(GetResString(IDS_HASHING_NEWFILE), hashfilename);
+				waitingforhash_list.GetNext (p);
+			}
+		}
+		HashNextFile();
+						  // so i moved the call into this if clause. This also removes
+					      // an unnecessary message "All files hashed", which is added to
+						  // the log there.
+	}
+	// HashNextFile();
+	// [end] Mighty Knife
+
 }
 
 void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
