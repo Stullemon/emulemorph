@@ -330,16 +330,6 @@ int CUpDownClient::GetFilePrioAsNumber() const
 	return filepriority;
 }
 
-//EastShare Start - added by AndCycle, Pay Back First
-bool CUpDownClient::MoreUpThanDown() const
-{
-	if(!theApp.glob_prefs->IsPayBackFirst()){
-		return false;
-	}
-	return credits->GetPayBackFirstStatus();
-}
-//EastShare End - added by AndCycle, Pay Back First
-
 //Morph Start - added by AndCycle, Equal Chance For Each File
 double CUpDownClient::GetEqualChanceValue() const
 {
@@ -706,6 +696,48 @@ void CUpDownClient::SetUploadFileID(const uchar* tempreqfileid)
 
 void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock){
 
+// SLUGFILLER: reqBlocksClipping
+	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(reqblock->FileID);
+	if (!currequpfile) {
+		delete reqblock;
+		return;
+	}
+	uint32 filesize = currequpfile->GetFileSize();
+	// Handle file wrap-around
+	reqblock->StartOffset %= filesize;
+	reqblock->EndOffset %= filesize;
+	if (!reqblock->EndOffset)
+		reqblock->EndOffset = filesize;
+	if (reqblock->StartOffset == reqblock->EndOffset) {
+		delete reqblock;
+		return;
+	}
+	if (reqblock->EndOffset < reqblock->StartOffset) {
+		Requested_Block_Struct* block = new Requested_Block_Struct;
+		block->StartOffset = reqblock->StartOffset;
+		block->EndOffset = filesize;
+		md4cpy(block->FileID, reqblock->FileID);
+		AddReqBlock(block);
+		reqblock->StartOffset = 0;
+	}
+	// Handle part overflows and block-size overflows
+	while(true) {
+		uint32 next = (reqblock->StartOffset/PARTSIZE+1)*PARTSIZE;
+		if (next > reqblock->StartOffset+184320)
+			next = reqblock->StartOffset+184320;
+		if (next < reqblock->EndOffset) {
+			Requested_Block_Struct* block = new Requested_Block_Struct;
+			block->StartOffset = reqblock->StartOffset;
+			block->EndOffset = next;
+			md4cpy(block->FileID, reqblock->FileID);
+			AddReqBlock(block);
+			reqblock->StartOffset = next;
+			continue;
+		}
+		break;
+	}
+// SLUGFILLER: reqBlocksClipping
+
 	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;m_DoneBlocks_list.GetNext(pos)){
 		if (reqblock->StartOffset == m_DoneBlocks_list.GetAt(pos)->StartOffset && reqblock->EndOffset == m_DoneBlocks_list.GetAt(pos)->EndOffset){
 			delete reqblock;
@@ -745,6 +777,9 @@ uint32 CUpDownClient::SendBlockData(){
 		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
 		m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
 		credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
+		//EastShare Start - added by AndCycle, Pay Back First
+		TestMoreUpThanDown();
+		//EastShare End - added by AndCycle, Pay Back First
 
 		sentBytesPayload = socket->GetSentPayloadSinceLastCallAndReset();
 		m_nCurQueueSessionPayloadUp += sentBytesPayload;
@@ -760,6 +795,11 @@ uint32 CUpDownClient::SendBlockData(){
 
 			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONAMOUNT > m_curSessionAmountNumber) {
 				// Should we end this upload?
+
+				//EastShare Start - added by AndCycle, Pay Back First
+				//check again does client satisfy the conditions
+				InitMoreUpThanDown();
+				//EastShare End - added by AndCycle, Pay Back First
 
 				// first clear the average speed, to show ?? as speed in upload slot display
 				m_AvarageUDR_list.RemoveAll();
@@ -952,9 +992,6 @@ void CUpDownClient::Ban(){
 	if ( !IsBanned() ){
 		if (theApp.glob_prefs->GetLogBannedClients())
 			AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
-		//Morph Start - added by AndCycle, some special case could be happened
-		if(theApp.uploadqueue->IsDownloading(this))	theApp.uploadqueue->RemoveFromUploadQueue(this);
-		//Morph End - added by AndCycle, some special case could be happened
 	}
 #ifdef _DEBUG
 	else{

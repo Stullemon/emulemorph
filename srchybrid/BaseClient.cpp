@@ -134,7 +134,7 @@ void CUpDownClient::Init(){
 	m_abyPartStatus = 0;
 	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
 	m_PartStatus_list.RemoveAll();
-	//MORPH END   - Added by SiRoB, HotFix related to khaos::kmod+
+	//MORPH END   - Added by SiRoB, HotFix related to khaos::kmod-
 	m_abyUpPartStatus = 0;
 	m_dwLastAskedTime = 0;
 	m_nDownloadState = DS_NONE;
@@ -219,7 +219,7 @@ void CUpDownClient::Init(){
 	// khaos::kmod-
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	m_dwLastCheckedForEvictTick = 0;
-    	m_addedPayloadQueueSession = 0;
+    m_addedPayloadQueueSession = 0;
 	//MORPH END   - Added by SiRoB, ZZ Upload System
 	//MORPH STRAT - Added by SiRoB, Better Download rate calcul
 	m_AvarageDDRlastRemovedHeadTimestamp = 0;
@@ -370,6 +370,35 @@ bool CUpDownClient::TestLeecher(){
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
 
+//EastShare Start - added by AndCycle, Pay Back First
+
+//check at entry point
+void CUpDownClient::InitMoreUpThanDown(){
+	m_bPayBackFirstTag = credits->GetPayBackFirstStatus() && NeedMoreUpThanDown();
+}
+
+//does client satisfy the need?
+bool CUpDownClient::NeedMoreUpThanDown(){
+	return	credits->GetDownloadedTotal() > credits->GetUploadedTotal()+SESSIONAMOUNT;
+}
+
+//check status during up&down
+void CUpDownClient::TestMoreUpThanDown(){
+	if(credits->GetPayBackFirstStatus()){
+		if(NeedMoreUpThanDown()){
+			m_bPayBackFirstTag = true;
+		}
+	}
+	else{
+		m_bPayBackFirstTag = false;
+	}
+}
+
+bool CUpDownClient::IsMoreUpThanDown() const{
+	return theApp.glob_prefs->IsPayBackFirst() ? m_bPayBackFirstTag : false ;
+}
+//EastShare End - added by AndCycle, Pay Back First
+
 void CUpDownClient::ClearHelloProperties()
 {
 	m_nUDPPort = 0;
@@ -437,6 +466,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 					m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
 				else if((strncmp(m_pszUsername, "http://emule",12)==0)
 					||(strncmp(m_pszUsername, "http://www.emule",16)==0)
+					||(strncmp(m_pszUsername, "www.emule",9)==0)
+					||(strncmp(m_pszUsername, "www.shareaza",12)==0)
 					||(strncmp(m_pszUsername, "eMule v",7)==0)
 					||(strncmp(m_pszUsername, "eMule Plus",10)==0)
 					||(strncmp(m_pszUsername, "eMule OX",8)==0)
@@ -554,7 +585,11 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 			if (theApp.glob_prefs->GetLogBannedClients())
 				AddDebugLogLine(false, "Clients: %s (%s), Banreason: Userhash changed (Found in TrackedClientsList)", GetUserName(), GetFullIP()); 
 			Ban();
-		}	
+		}
+		//EastShare Start - added by AndCycle, Pay Back First
+		//here the credits has been init, so we can set default tag now
+		InitMoreUpThanDown();
+		//EastShare End - added by AndCycle, Pay Back First
 	}
 	else if (credits != pFoundCredits){
 		// userhash change ok, however two hours "waittime" before it can be used
@@ -562,6 +597,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 		if (theApp.glob_prefs->GetLogBannedClients())
 			AddDebugLogLine(false, "Clients: %s (%s), Banreason: Userhash changed", GetUserName(),GetFullIP()); 
 		Ban();
+		//EastShare Start - added by AndCycle, Pay Back First
+		//here the credits has been init, so we can set default tag now
+		InitMoreUpThanDown();
+		//EastShare End - added by AndCycle, Pay Back First
 	}
 
 	if ((m_Friend = theApp.friendlist->SearchFriend((uchar*)m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){

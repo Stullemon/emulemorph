@@ -475,8 +475,13 @@ public:
 	//MORPH END   - Added by SiRoB, Is Morph Client
 
 	//EastShare Start - Added by AndCycle, PayBackFirst
-	bool	MoreUpThanDown() const;
+	bool	IsMoreUpThanDown() const;
 	//EastShare End - Added by AndCycle, PayBackFirst
+
+	//Morph Start - added by AndCycle, take PayBackFirst have same class with PowerShare
+	//this is used to replace all "GetPowerShared()" with "IsPBForPS()" in UploadQueue.cpp
+	bool	IsPBForPS() const{return (IsMoreUpThanDown() || GetPowerShared());}
+	//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
 
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue() const;
@@ -554,7 +559,7 @@ private:
 	CTypedPtrList<CPtrList, Packet*> m_WaitingPackets_list;
 	CList<PartFileStamp, PartFileStamp> m_DontSwap_list;
 	DWORD	m_lastRefreshedDLDisplay;
-        DWORD	m_lastRefreshedULDisplay;
+	DWORD	m_lastRefreshedULDisplay;
 
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
@@ -602,8 +607,13 @@ private:
 	uint32      m_slotNumber;
 	DWORD       m_dwLastCheckedForEvictTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
-	bool		m_bPayBackFirstTag; //EastShare - added by AndCycle, Pay Back First
-	bool		m_bFullChunkTransferTag;//Morph - added by AndCycle, keep full chunk transfer
+
+	//EastShare Start - Added by AndCycle, PayBackFirst
+	bool		m_bPayBackFirstTag;
+	void		InitMoreUpThanDown();
+	bool		NeedMoreUpThanDown();
+	void		TestMoreUpThanDown();
+	//EastShare End - Added by AndCycle, PayBackFirst
 
 	//download
 	EDownloadState m_nDownloadState;

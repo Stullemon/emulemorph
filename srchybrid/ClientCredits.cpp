@@ -986,6 +986,8 @@ void CClientCredits::ClearWaitStartTime(){
 
 //EastShare Start - added by AndCycle, Pay Back First
 void CClientCredits::TestPayBackFirstStatus(){
-	m_bPayBackFirst = false;//GetDownloadedTotal() > GetUploadedTotal()+SESSIONAMOUNT;
+
+	m_bPayBackFirst = GetDownloadedTotal() > GetUploadedTotal();
+
 }
 //EastShare End - added by AndCycle, Pay Back First
