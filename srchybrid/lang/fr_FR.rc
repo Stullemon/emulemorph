@@ -1250,9 +1250,9 @@ BEGIN
     IDS_SHAREDREQ2          "L'utilisateur %s (%u) a demandé votre liste de fichiers partagés pour le répertoire '%s' -> %s"
     IDS_SHAREDANSW          "L'utilisateur %s (%u) partage le répertoire '%s'"
     IDS_SHAREDANSW2         "L'utilisateur %s (%u) a envoyé une liste des répertoires partagés non-demandée - ignoré"
-    IDS_SHAREDINFO1         "L'utilisateur %s (%u) a envoyé la liste des fichiers partagés pour le repértoire '%s'"
+    IDS_SHAREDINFO1         "L'utilisateur %s (%u) a envoyé la liste des fichiers partagés pour le répertoire '%s'"
     IDS_SHAREDINFO2         "L'utilisateur %s (%u) a fini d'envoyer la liste de ses fichiers partagés"
-    IDS_SHAREDANSW3         "L'utilisateur %s (%u) a envoyé une liste de fichiers partagés pour le répertoire '%s' non-demandée - ignoré"
+    IDS_SHAREDANSW3         "L'utilisateur %s (%u) a envoyé une liste de fichiers partagés pour le répertoire '%s' non-demandé - ignoré"
 END
 
 STRINGTABLE 
@@ -1312,7 +1312,7 @@ BEGIN
     IDS_STATS_BNRESET       "RAZ des statistiques"
     IDS_STATS_BNRESTORE     "Restaurer les stats"
     IDS_CONNECTIONSTATISTICS "Statistique de connexions"
-    IDS_PPGSTATS_YSCALE     "Echelle de l'axe Y pour les stats des connexions:"
+    IDS_PPGSTATS_YSCALE     "Echelle de l'axe Y (connexions) :"
 END
 
 STRINGTABLE 
@@ -1451,7 +1451,7 @@ BEGIN
     IDS_TIMEBEFORE          "(il y a %s)"
     IDS_FD_TIMEDATE         "Dates"
     IDS_FILEINFORMATION     "Information Fichier"
-    IDS_STATS_FREESPACE     "Espace libre sur le disque temporaire: "
+    IDS_STATS_FREESPACE     "Free Space"
     IDS_IRC_HELPCHANNEL     "Se connecter aux canaux d'aide."
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-french"
     IDS_IRC_ACCEPTLINKSFRIENDS "Venant d'amis seulement."
@@ -1544,10 +1544,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_KAD_NODE            "Découverte d'un noeud (%i:%i)"
-    IDS_KAD_STOREFILE       "Enregistrement fichier (%i:%i)"
-    IDS_KAD_STOREKW         "Enregistrement mot-clé (%i:%i)"
-    IDS_KAD_UNKNOWN         "Inconnu (%i:%i)"
+    IDS_KAD_NODE            "Découverte d'un noeud"
+    IDS_KAD_STOREFILE       "Enregistrement fichier"
+    IDS_KAD_STOREKW         "Enregistrement mot-clé"
+    IDS_KAD_UNKNOWN         "Inconnu"
     IDS_SRV_TCPCOMPR        "Compression TCP"
     IDS_KADSEARCHLAB        "Recherches en cours"
     IDS_SRV_UDPSR           "Protocole UDP étendu pour les requêtes de sources"
@@ -1599,8 +1599,8 @@ BEGIN
     IDS_KADDISTANCE         "Distance"
     IDS_KEY                 "Clé"
     IDS_NUMBER              "Nombre"
-    IDS_KAD_SEARCHSRC       "Recherche de sources (%i:%i)"
-    IDS_KAD_SEARCHKW        "Recherche de mots-clés (%i:%i)"
+    IDS_KAD_SEARCHSRC       "Recherche de sources"
+    IDS_KAD_SEARCHKW        "Recherche de mots-clés"
 END
 
 STRINGTABLE 
@@ -1635,7 +1635,7 @@ BEGIN
     IDS_KADCONTACTSREAD     "lu %ld contacts à partir du fichier."
     IDS_ERR_KADCONTACTS     "Aucun contact trouvé, veuillez amorcer ou téléchargez un fichier nodes.dat."
     IDS_METATAGS            "Décompte Meta Balise:"
-    IDS_FILEFORMAT          "Format de fichier"
+    IDS_FILEFORMAT          "Format :"
     IDS_UDPREASKS           "Réinterrogations UDP fichier"
 END
 
@@ -1657,7 +1657,7 @@ BEGIN
     IDS_INSTALL_SKIN_PKG_ERROR "Ce fichier n'est pas un Thème Interface eMule valide."
     IDS_NEXT_REASK          "Prochaine demande à ce client"
     IDS_A4AF_FILES          "Fichiers A4AF"
-    IDS_STATS_FRATIO        "Ratio de session E:R (hors slots amis):"
+    IDS_STATS_FRATIO        "Taux de session E:R (hors slots amis):"
     IDS_STATS_UDATA_FRIENDS "Données envoyées aux slots amis (Session): %s" 
 END
 
@@ -1809,6 +1809,35 @@ BEGIN
     IDS_SELSKINPROFILEDIR   "Choisir l'emplacement des thèmes interface"
     IDS_ASKDLINCOMPLETE     "Fichier potentiellement incomplet :\r\n\r\n%s\r\n\r\nCe fichier ne paraît pas être complet sur le réseau et ne pourra très probablement pas être téléchargé avec succès ! Voulez-vous quand même le télécharger ?"
     IDS_DEADSOURCES         "Sources inactives"
+    IDS_LARGEICONS          "Grandes icônes"
+    IDS_SMALLICONS          "Petites icônes"
+    IDS_SHORTTAGS           "Balises courtes"
+    IDS_THELOAD             "Charge"
+    IDS_PACKSENT            "Paquets envoyés"
+    IDS_RESPONSES           "Réponses"
+    IDS_EXTRACT_META_DATA   "Extraire les meta data"
+    IDS_META_DATA_MEDIADET  "DirectShow (pour tous les autres fichiers audio/vidéo)"
+    IDS_META_DATA_ID3LIB    "ID3 Library (Seulement pour les fichiers MPEG audio)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COMCTRL32_DLL_TOOOLD 
+                           "Votre bibliothèque Windows COMCTL32.DLL est trop ancienne!\r\n\r\neMule a détecté une version trop ancienne. Pour assurer le bon fonctionnement d'eMule, nous vous recommandons vivement de mettre à jour votre version actuelle vers au minimum la version 5.8.\r\n\r\nInstallez une mise à jour de la bibliothèque COMCTL32.DLL après l'avoir téléchargée sur le Centre de Téléchargement de Microsoft ®. Voulez-vous visiter le site correspondant?"
+    IDS_ASREGEXPR          "En tant qu'expression régulière"
+    IDS_STATIC_REGEXP      "Expression régulière pour filtre de visualisation:"
+    IDS_CARE4ALL           "Tester tous les fichiers"
+    IDS_REGEXPRESSION      "Expression régulière"
+    IDS_SEARCHKAD          "Recherche Kad"
+    IDS_DWL_IPFILTERFILE   "Téléchargement du fichier de filtres IP"
+    IDS_DWLIPFILTERFAILED  "Echec du téléchargement du fichier de filtres IP"
+    IDS_FINDBUDDY          "Trouver un relai"
+    IDS_ERR_IPFILTERZIPEXTR "Echec d'extraction du fichier de filtres IP ""%s"".ZIP."
+    IDS_ERR_IPFILTERCONTENTERR
+                           "Le fichier de filtresIP ""%s"".ZIP contient des données inexploitables."
+    IDS_STORENOTES         "Archivage des notes"
+    IDS_NOTES              "Notes"
+    IDS_KADSEARCHALREADY   "Une recherche est actuellement en cours. Essayez ultérieurement!"
 END
 
 STRINGTABLE 
@@ -1816,22 +1845,26 @@ BEGIN
     IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
                             "Importation abandonnée: Impossible d'importer vers un fichier complet."
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
-                            "Importation abandonnée: hashage incomplet pour %s (%i hash pour %i parties)."
+                            "Importation abandonnée: jeu de hash incomplet pour %s (%i hash pour %i parties)."
     IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Importation abandonnée: Impossible d'ouvrir %s."
     IDS_SR13_IMPORTPARTS_IMPORTSTART 
                             "Importation de %i parties (depuis 0 à %i) vers %s."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
-                            "Partie %i: non-traitée, dèjà complète."
+                            "Partie %i: ignorée, dèjà complète."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Partie %i: importée."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Partie %i: importée pour restauration ICH."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
-                            "Partie %i: non-traitée, bloc partiellement complet ne correspondant pas."
-    IDS_SR13_IMPORTPARTS_IMPORTFINISH
-                            "Importation terminée. %i parties ont été importées vers %s."
+                            "Partie %i: ignorée, ne correspond pas au bloc partiellement complet."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
                             "%i mauvaises parties ont été importées pour A/ICH. Lancement du re-hash."
     IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
                             "Une autre importation est dèjà en cours. Attendez le temps qu'elle soit terminée."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH
+                            "Importation terminée. %i parties ont été importées vers %s."
 END
 
 STRINGTABLE 
@@ -2058,7 +2091,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_TRANSFERED "Transférés: %s (%s)"
+    IDS_FEEDBACK_Transferred "Transférés: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Demandes: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Demandes Acceptées: %i (%i)"
     IDS_FEEDBACK_FROM       "Statistiques de %s utilisant [%s]"
@@ -2560,15 +2593,11 @@ BEGIN
     IDS_IPFILTER_SAVERR     "Erreur de sauvegarde du filtre IP dans le fichier ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Non disponible"
     IDS_IPFILTER_DLVERSION  "Téléchargement de la version de IPfilter"
-    IDS_IPFILTER_DLFILE     "Téléchargement du fichier IPfilter"
     IDS_LOG_ERRDWN          "Erreur de téléchargement %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_IPFILTER_DLFAIL "Ipfilter : Téléchargement echoué"
-    IDS_LOG_IPFILTER_ERR1   "Erreur durant l'extraction du fichier ZIP Ipfilter ""%s""."
-    IDS_LOG_IPFILTER_ERR2   "Le fichier Ipfilter téléchargé ""%s"" est un fichier ZIP contenant des données erronées."
     IDS_DOWNFAKECHECKVER    "Téléchargement de la version du fichier Fake Check"
     IDS_DOWNFAKECHECKFILE   "Téléchargement du fichier Fake Check"
     IDS_FC_LOADED           "%i Fichier Fake Check chargé"
@@ -2612,7 +2641,6 @@ BEGIN
     IDS_IP2COUNTRY_NALONG   "Non applicable"
     IDS_IP2COUNTRY_NASHORT  "N/A"
     IDS_SOURCE_LOADER_SAVER "Source Sauvée"
-    IDS_SHORTTAGS           "Tags courts"
     IDS_NEWFRIEND           "Nouvel ami:"
     IDS_REMOVEDFRIEND       "Ami retiré:"
 END

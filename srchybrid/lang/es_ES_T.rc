@@ -147,7 +147,7 @@ BEGIN
     IDS_TYPE                "Tipo"
     IDS_FILEID              "Identificador de archivo"
     IDS_FILE                "Archivo"
-    IDS_DOWNLOAD            "Descargar"
+    IDS_DOWNLOAD            "Descarga"
     IDS_SL_SERVERNAME       "Nombre del servidor"
 END
 
@@ -650,7 +650,7 @@ BEGIN
     IDS_SCORE               "Puntuación"
     IDS_ASKED               "Pedido"
     IDS_LASTSEEN            "Última comprobación"
-    IDS_BANNED              "bloqueado"
+    IDS_BANNED              "bloqueado(s)"
     IDS_PRIOVERYHIGH        "Muy alta"
     IDS_UUSERS              "Usuarios"
     IDS_UFAILED             "Error"
@@ -774,7 +774,7 @@ BEGIN
     IDS_VERBOSE             "Información extra (respuesta del programa)"
     IDS_FLAT                "plano"
     IDS_ROUND               "3D"
-    IDS_SAMEUSERHASH        "Los clientes '%s' y '%s' tienen el mismo hash de usuario o IP - eliminados '%s'"
+    IDS_SAMEUSERHASH        "Los clientes '%s' y '%s' tienen el mismo hash de usuario o IP - eliminado '%s'"
     IDS_SEARCHEXTENTION     "Extensión"
     IDS_SEARCHAVAIL         "Disponibilidad"
 END
@@ -970,8 +970,8 @@ BEGIN
     IDS_PW_UAP              "Añadir nuevos archivos compartidos con auto prioridad"
     IDS_MAXCLIENT           "Máx.Us."
     IDS_PW_TWEAK            "Opciones adicionales"
-    IDS_TWEAKS_WARNING      "Advertencia:  No cambies éste parámetro a menos que sepas lo que estás haciendo. De lo contrario puedes empeorarlo.\neMule funciona bien sin ajustar éste parámetro."
-    IDS_ADDAFRIEND          "Añadir un amigo"
+    IDS_TWEAKS_WARNING      "Advertencia:  No cambies este parámetro a menos que sepas lo que estás haciendo. De lo contrario puedes empeorarlo.\neMule funciona bien sin modificar este parámetro."
+    IDS_ADDAFRIEND          "Añadir Amigo"
     IDS_PAF_REQINFO         "Información requerida"
     IDS_PAF_MOREINFO        "Información adicional"
 END
@@ -982,10 +982,10 @@ BEGIN
                             "¡Tienes que introducir una IP y puertos válidos!"
     IDS_ADD                 "Añadir"
     IDS_RECOVERED_PARTMET   "Recuperado archivo part.met de: %s"
-    IDS_CMT_QUEST           "Comentar éste archivo! (El texto de éste archivo se mostrará a todos los usuarios)"
+    IDS_CMT_QUEST           "Comentar este archivo! (El texto de este archivo se mostrará a todos los usuarios)"
     IDS_CMT_AIDE            "Para una película, puedes poner su duración, su descripción, el idioma... y si es una falsificación (fake) puedes informar a un usuario de Emule... "
     IDS_CMT_TITLE           "%s comentario del archivo"
-    IDS_CMT_ADD             "Cambiar el com&entario de éste archivo..."
+    IDS_CMT_ADD             "Cambiar el com&entario de este archivo..."
     IDS_CMT_NONE            "Sin comentarios"
     IDS_CMT_READ            "Comentario de archivo:"
     IDS_CMT_NOTCONNECTED    "Todavía no estás conectado..."
@@ -1013,7 +1013,7 @@ BEGIN
     IDS_SMARTLOWIDCHECK     "Control inteligente de LowID al conectar."
     IDS_SF_SRVOCC           "Ocupación de Servidores: %.2f%%"
     IDS_3DDEP               "Estilo Barra de progreso"
-    IDS_AUTOTAKEED2KLINKS   "Capturar automát. enlaces ED2K sólo durante ésta sesión"
+    IDS_AUTOTAKEED2KLINKS   "Capturar automát. enlaces ED2K sólo durante esta sesión"
     IDS_ADDNEWFILESPAUSED   "Añadir archivos para descargar en modo pausado"
 END
 
@@ -1034,7 +1034,7 @@ BEGIN
     IDS_CHECK4UPDATE        "Comprobar si hay una nueva versión"
     IDS_STARTUP             "Al iniciar"
     IDS_NEWVERSIONAVL       "Existe una nueva versión de eMule! Para mas información ve a la web de emule-project."
-    IDS_NEWVERSIONAVLPOPUP  "Existe una nueva versión de eMule. Haz clic aquí para ver las novedades de ésta versión!"
+    IDS_NEWVERSIONAVLPOPUP  "Existe una nueva versión de eMule. Haz clic aquí para ver las novedades de esta versión!"
     IDS_NEWVERSIONFAILED    "No se puede comprobar si hay una nueva versión."
 END
 
@@ -1093,14 +1093,14 @@ BEGIN
     IDS_CAT_INVADD          "Mostrar todos los disponibles"
     IDS_CAT_REINVADD        "Mostrar todo"
     IDS_INDICATERATINGS     "Mostrar un icono en las descargas con comentarios"
-    IDS_ALLOTHERS           "sin catalogar"
+    IDS_ALLOTHERS           "Sin catalogar"
     IDS_TOCAT               "Asignar a categoría"
     IDS_CAT_UNASSIGN        "(sin asignar)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADDDOWNLOADSFROMCB  "¿Añadir éstos enlaces ED2k para descargar?\n"
+    IDS_ADDDOWNLOADSFROMCB  "¿Añadir estos enlaces ED2k para descargar?\n"
     IDS_ADDDOWNLOADSFROMCBTITLE "Enlace ED2k en el portapapeles"
     IDS_PF_WATCHCB          "Buscar en el portapapeles enlaces ED2k"
     IDS_SECURITY            "Seguridad"
@@ -1136,7 +1136,7 @@ BEGIN
     IDS_FIRSTSAFECON        "¿Quieres que eMule al conectar utilice el Modo seguro?\r\rDesactivándolo permites a eMule conectar a los servidores un poco mas rápido, pero puedes conseguir mas conexiones con una baja ID.\r\r(Por defecto No)"
     IDS_FIRSTRUNASSIST      "¿Quieres que se inicie el asistente de configuración la primera vez?"
     IDS_FIRSTAUTOCON        "¿Quieres que eMule se conecte al inicio?\r\r(Por defecto No)"
-    IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas éstas configuraciones y más pueden cambiarse en el icono de Preferencias. Para mas información acude a la ayuda pulsando F1 dentro de eMule!"
+    IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas configuraciones y más pueden cambiarse en el icono de Preferencias. Para mas información acude a la ayuda pulsando F1 dentro de eMule!"
 END
 
 STRINGTABLE 
@@ -1157,7 +1157,7 @@ BEGIN
     IDS_WEB_ENTER_PASSWORD  "Introduce tu contraseña aquí"
     IDS_WEB_LOGIN_NOW       "Iniciar sesión ahora"
     IDS_WEB_CONFIRM_REMOVE_SERVER 
-                            "¿Estás seguro de que deseas eliminar éste servidor de la lista?"
+                            "¿Estás seguro de que deseas eliminar este servidor de la lista?"
     IDS_WEB_CONTROL         "Panel de control Web"
     IDS_WEB_LOGOUT          "Cerrar sesión"
     IDS_WEB_ACTIONS         "Acciones"
@@ -1234,11 +1234,11 @@ BEGIN
     IDS_WIZ1_WELCOME_BTN_HINT "Para continuar, pulsar Siguiente."
     IDS_WIZ1_END_TITLE      "Completando el asistente"
     IDS_WIZ1                "Iniciando el asistente de eMule por primera vez"
-    IDS_WIZ1_END_BTN_HINT   "Para cerrar éste asistente, pulsa Finalizar."
+    IDS_WIZ1_END_BTN_HINT   "Para cerrar este asistente, pulsa Finalizar."
     IDS_WIZ1_UPLOAD_SUBTITLE "Transferencia Partes Completas"
     IDS_DL_RESUMENEXT       "Reanudar siguiente archivo pausado"
     IDS_DONTCHANGE          "Sin cambios"
-    IDS_STARTPRIO           "Prioridad para ésta categoría"
+    IDS_STARTPRIO           "Prioridad para esta categoría"
     IDS_PREF_STARTNEXTFILECAT "misma categoría"
     IDS_REPAINTGRAPHS       "No redibujar gráficos de estadísticas al cambiar de tamaño"
     IDS_SOFTFILES           "Límite de archivo bajo"
@@ -1408,11 +1408,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_VERSION             "Versión"
-    IDS_ALL_A4AF_TO_THIS    "Intercambiar ahora todas las fuentes a ÉSTE archivo"
+    IDS_ALL_A4AF_TO_THIS    "Intercambiar ahora todas las fuentes a este archivo"
     IDS_PASTE               "Pegar"
     IDS_ALL_A4AF_TO_OTHER   "Intercambiar ahora todas las fuentes a OTRO archivo"
-    IDS_ALL_A4AF_AUTO       "Intercambiar automáticamente todas las fuentes (A4AF) a ÉSTE archivo"
-    IDS_SWAP_A4AF_TO_THIS   "Intercambiar fuente (A4AF) a ÉSTE archivo"
+    IDS_ALL_A4AF_AUTO       "Intercambiar automáticamente todas las fuentes (A4AF) a este archivo"
+    IDS_SWAP_A4AF_TO_THIS   "Intercambiar fuente (A4AF) a este archivo"
     IDS_SWAP_A4AF_TO_OTHER  "Intercambiar fuente (A4AF) a OTRO archivo"
     IDS_A4AF                "Fuentes (A4AF)"
     IDS_MOBILEMULE          "MobileMule"
@@ -1459,7 +1459,7 @@ BEGIN
     IDS_TIMEBEFORE          "(hace %s)"
     IDS_FD_TIMEDATE         "Fechas"
     IDS_FILEINFORMATION     "Información de archivo"
-    IDS_STATS_FREESPACE     "Free Space"
+    IDS_STATS_FREESPACE     "Espacio libre"
     IDS_IRC_HELPCHANNEL     "Conectar a canales de ayuda."
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-spanish"
     IDS_IRC_ACCEPTLINKSFRIENDS "Solo de amigos."
@@ -1472,7 +1472,7 @@ STRINGTABLE
 BEGIN
     IDS_MATCH_KEYWORDS      "Palabras clave"
     IDS_FAILEDREOPEN        "Error Grave: Al reabrir el archivo de partes '%s' (%s)!"
-    IDS_ERR_PREVIEWALREADY  "Ya existe una petición de previsualización pendiente para éste cliente"
+    IDS_ERR_PREVIEWALREADY  "Ya existe una petición de previsualización pendiente para este cliente"
     IDS_ERR_PREVIEWFAILED   "Previsualización por el usuario '%s' errónea"
     IDS_DWTOT               "Espacio en disco"
     IDS_DWTOT_NR            "Número de descargas: %d"
@@ -1572,10 +1572,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_KAD_NODE            "Búsqueda de Nodo (%i:%i)"
-    IDS_KAD_STOREFILE       "Guardar archivo (%i:%i)"
-    IDS_KAD_STOREKW         "Guardar Palabra clave (%i:%i)"
-    IDS_KAD_UNKNOWN         "Desconocido (%i:%i)"
+    IDS_KAD_NODE            "Búsqueda de Nodo"
+    IDS_KAD_STOREFILE       "Guardar archivo"
+    IDS_KAD_STOREKW         "Guardar Palabra clave"
+    IDS_KAD_UNKNOWN         "Desconocido"
     IDS_SRV_TCPCOMPR        "Compresión TCP"
     IDS_KADSEARCHLAB        "Búsquedas actuales"
     IDS_SRV_UDPSR           "Protocolo UDP extendido para peticiones de fuentes"
@@ -1593,9 +1593,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_TEXTLABELSONRIGHT   "derecha del icono"
+    IDS_TEXTLABELSONRIGHT   "Derecha del icono"
     IDS_TEXTLABELS          "Etiquetas de texto"
-    IDS_ENABLETEXTLABELS    "debajo del icono"
+    IDS_ENABLETEXTLABELS    "Debajo del icono"
     IDS_CUSTOMIZETOOLBAR    "Personalizar barra de herramientas"
     IDS_MINBITRATE          "Bitrate min. [kBit/s]"
     IDS_KAD_RECHECKFW       "Comprobar Cortafuegos"
@@ -1607,8 +1607,8 @@ BEGIN
     IDS_KADDISTANCE         "Distancia"
     IDS_KEY                 "clave"
     IDS_NUMBER              "Número"
-    IDS_KAD_SEARCHSRC       "Buscar Fuentes (%i:%i)"
-    IDS_KAD_SEARCHKW        "Buscar Palabras clave (%i:%i)"
+    IDS_KAD_SEARCHSRC       "Buscar Fuentes"
+    IDS_KAD_SEARCHKW        "Buscar Palabras clave"
 END
 
 STRINGTABLE 
@@ -1620,7 +1620,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "¿Quieres realmente eliminar los filtros IP seleccionados?"
     IDS_TOTAL_IPFILTER_LABEL "Total de IP filtradas:"
     IDS_TOTAL_IPS_LABEL     "Total IPs:"
-    IDS_RAU_WARNING         "Ésta configuración proporcionará una seguridad adicional a eMule contra ataques y exploits y recomendamos el uso de ésta opción.\nSin embargo recomendamos encarecidamente leer el manual antes de activarlo!\n\nLos cambios tendrán efecto después de reiniciar eMule."
+    IDS_RAU_WARNING         "Ésta configuración proporcionará una seguridad adicional a eMule contra ataques y exploits y recomendamos el uso de esta opción.\nSin embargo recomendamos encarecidamente leer el manual antes de activarlo!\n\nLos cambios tendrán efecto después de reiniciar eMule."
     IDS_APPEND              "Añadir..."
     IDS_SAVE                "Guardar"
     IDS_IP_START            "Inicio"
@@ -1664,7 +1664,7 @@ BEGIN
     IDS_INSTALL_SKIN_FILE_ERROR 
                             "Error al extraer el archivo ""%s"" desde el archivo local de Temas visuales de eMule ""%s"" - %s"
     IDS_INSTALL_SKIN_PKG_ERROR "Éste no es un paquete de archivos válido de Temas visuales para eMule.."
-    IDS_NEXT_REASK          "Siguiente petición para éste cliente"
+    IDS_NEXT_REASK          "Siguiente petición para este cliente"
     IDS_A4AF_FILES          "Archivos A4AF"
     IDS_STATS_FRATIO        "Sesión Índice SU:DE (Excluidas Subidas a amigos):"
     IDS_STATS_UDATA_FRIENDS "Datos subidos a puestos reservados de amigos (Sesión): %s"
@@ -1672,19 +1672,19 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FO_TEMPTCP_S        "Puerto abierto %u (TCP) en cortafuegos interno de WinXP para ésta sesión de eMule"
-    IDS_FO_TEMPTCP_F        "Error al abrir el puerto %u (TCP) en cortafuegos interno de WinXP para ésta sesión de eMule"
-    IDS_FO_TEMPUDP_S        "Puerto abierto %u (UDP) en cortafuegos interno de WinXP para ésta sesión de eMule"
-    IDS_FO_TEMPUDP_F        "Error al abrir el puerto %u (UDP) en cortafuegos interno de WinXP para ésta sesión de eMule"
-    IDS_FO_PREFBUTTON       "Abrir éstos puertos en el cortafuegos interno de WinXP"
+    IDS_FO_TEMPTCP_S        "Puerto abierto %u (TCP) en cortafuegos interno de WinXP para esta sesión de eMule"
+    IDS_FO_TEMPTCP_F        "Error al abrir el puerto %u (TCP) en cortafuegos interno de WinXP para esta sesión de eMule"
+    IDS_FO_TEMPUDP_S        "Puerto abierto %u (UDP) en cortafuegos interno de WinXP para esta sesión de eMule"
+    IDS_FO_TEMPUDP_F        "Error al abrir el puerto %u (UDP) en cortafuegos interno de WinXP para esta sesión de eMule"
+    IDS_FO_PREFBUTTON       "Abrir estos puertos en el cortafuegos interno de WinXP"
     IDS_FO_PREF_SUCCCEEDED  "Puertos abiertos con éxito en el cortafuegos interno de WinXP.\nTener en cuenta que esto no afecta a los routers ó cortafuegos de terceros!"
     IDS_FO_PREF_EXISTED     "eMule ha detectado que existen reglas para los puertos seleccionados, las cuales no pueden ser reemplazadas. Se han añadido las reglas que faltan.\nTener en cuenta que esto no afecta a los Routers ó cortafuegos de terceros!"
     IDS_FO_PREF_FAILED      "Error al configurar el cortafuegos interno de WinXP para los puertos seleccionados!"
     IDS_FO_PREF_STARTUP     "Abrir/Cerrar puertos en el cortafuegos de WinXP cuando se inicia/cierra eMule"
-    IDS_LOG_LEVEL           "Registrar Nivel"
+    IDS_LOG_LEVEL           "Nivel de registro"
     IDS_DISABLEPEERACHE     "Desactivar descarga desde PeerCache"
     IDS_SOURCESWAPBLOCKED   "Intercambio bloqueado"
-    IDS_A4AF_CHECK_THIS_NOW "Comprobar ésta fuente ahora (debug)"
+    IDS_A4AF_CHECK_THIS_NOW "Comprobar esta fuente ahora (debug)"
     IDS_SOURCEEXCHANGESWAP  "Intercambio de Fuentes Temporales"
     IDS_NEWMSG              "Nuevo Mensaje de '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "solo en la misma categoría"
@@ -1697,11 +1697,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_IMP_ERR_BADFORMAT   "Archivo temp con formato erróneo ó desconocido."
-    IDS_SEARCH_INVALIDCHAR  "Expresión de búsqueda contiene caracteres no válidos. Has introducido un carácter '?' ó caracteres que no pueden usarse en la red eD2K."
+    IDS_SEARCH_INVALIDCHAR  "Expresión de búsqueda contiene caracteres no válidos. Has introducido un carácter '?' ó caracteres que no pueden usarse en esta red."
     IDS_PORTSCON            "Puertos y Conexión"
     IDS_PORTINFO            "eMule utiliza dos puertos de comunicación con servidores y clientes. Estos puertos deben estar libres y disponibles para clientes remotos. El puerto TCP debe estar disponible para asegurar el funcionamiento básico de eMule. El puerto UDP es utilizado por Kad (red sin servidores) y reduce el uso de la red (Sobrecarga).\n\nPuedes cambiar los puertos mientras no haya empezado la actividad en la red."
     IDS_STARTTEST           "Comprobar Puertos"
-    IDS_TESTINFO            "Aquí puedes hacer pruebas, para comprobar si tus puertos TCP y UDP son accesibles desde el exterior. El éxito de ésta prueba es fundamental para que se conecten contigo servidores y clientes. ¡El puerto TCP tiene que funcionar!"
+    IDS_TESTINFO            "Aquí puedes hacer pruebas, para comprobar si tus puertos TCP y UDP son accesibles desde el exterior. El éxito de esta prueba es fundamental para que se conecten contigo servidores y clientes. ¡El puerto TCP tiene que funcionar!"
     IDS_CONNECTIONTEST      "Prueba de Conexión"
     IDS_NOPORTCHANGEPOSSIBLE 
                             "El cambio de puertos no es posible después de conectarse a clientes o mientras se sigue conectado a un servidor/Kad!\n\nPor favor reinicia eMule si cambias la configuración de puertos."
@@ -1816,8 +1816,37 @@ BEGIN
     IDS_NEGATEFILTER        "Anular filtro"
     IDS_SEENCOMPL           "Nunca visto completo"
     IDS_SELSKINPROFILEDIR   "Seleccionar carpeta para Perfiles de Temas visuales"
-    IDS_ASKDLINCOMPLETE     "Archivo potencialmente incompleto:\r\n\r\n%s\r\n\r\nEste archivo puede que esté incompleto en la red y lo mas probable es que no se descargue completamente! ¿Quieres realmente descargar éste archivo?"
+    IDS_ASKDLINCOMPLETE     "Archivo potencialmente incompleto:\r\n\r\n%s\r\n\r\nEste archivo puede que esté incompleto en la red y lo mas probable es que no se descargue completamente! ¿Quieres realmente descargar este archivo?"
     IDS_DEADSOURCES         "Fuentes desaparecidas"
+    IDS_LARGEICONS          "Iconos grandes"
+    IDS_SMALLICONS          "Iconos pequeños"
+    IDS_SHORTTAGS           "Etiquetas cortas"
+    IDS_THELOAD             "Cargar"
+    IDS_PACKSENT            "Paquetes enviados"
+    IDS_RESPONSES           "Respuestas"
+    IDS_EXTRACT_META_DATA   "Extraer datos propios"
+    IDS_META_DATA_MEDIADET  "DirectShow (para todos los demás archivos de audio/video)"
+    IDS_META_DATA_ID3LIB    "Librería ID3 (solo para archivos de audio MPEG)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COMCTRL32_DLL_TOOOLD 
+                            "El archivo Windows Common Controls (COMCTL32.DLL) es demasiado antiguo!\r\n\r\neMule ha detectado que la versión de ""Windows Common Controls library (COMCTL32.DLL)"" es demasiado antigua para funcionar correctamente con eMule. Para asegurarse un funcionamiento perfecto de eMule recomendamos firmememente actualizarse a la última versión 5.8 de ""Windows Common Controls library (COMCTL32.DLL)"".\r\n\r\nDescarga e instala la actualización de ""Windows Common Controls library (COMCTL32.DLL)"" desde Microsoft (R) Download Center. ¿Quieres descargarlo ahora?"
+    IDS_ASREGEXPR           "Expresiones habituales"
+    IDS_STATIC_REGEXP       "Expresión habitual para la vista de filtros:"
+    IDS_CARE4ALL            "Evaluar todos los archivos"
+    IDS_REGEXPRESSION       "Expresión habitual"
+    IDS_SEARCHKAD           "Búsqueda Kad"
+    IDS_DWL_IPFILTERFILE    "Descargando archivo de filtros IP"
+    IDS_DWLIPFILTERFAILED   "Error al descargar filtros IP"
+    IDS_FINDBUDDY           "Encontrar Mediador"
+    IDS_ERR_IPFILTERZIPEXTR "Error al extraer el archivo de filtros IP del archivo ZIP descargado ""%s""."
+    IDS_ERR_IPFILTERCONTENTERR 
+                            "El archivo de filtros IP descargado ""%s"" es un archivo ZIP con contenido desconocido."
+    IDS_STORENOTES          "Guardar Notas"
+    IDS_NOTES               "Notas"
+    IDS_KADSEARCHALREADY    "Otra búsqueda ya está en curso. Por favor inténtalo otra vez mas tarde!"
 END
 
 STRINGTABLE 
@@ -1835,12 +1864,16 @@ BEGIN
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Parte %i: importada para manejo de ICH."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
                             "Parte %i: saltada, no cuadra con el bloque parcialmente completo."
-    IDS_SR13_IMPORTPARTS_IMPORTFINISH
-                            "Importación finalizada. %i partes fueron importadas a %s."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
                             "%i partes corruptas fueron importadas para A/ICH. Iniciando nuevo hash."
     IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
                             "Otra importación ya está en proceso. Por favor espere a que haya terminado."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH
+                            "Importación finalizada. %i partes fueron importadas a %s."
 END
 
 STRINGTABLE 
@@ -2067,7 +2100,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_TRANSFERED "Transferido: %s (%s)"
+    IDS_FEEDBACK_Transferred "Transferido: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Solicitado: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Solicitudes Aceptadas: %i (%i)"
     IDS_FEEDBACK_FROM       "Información de %s sobre [%s]"
@@ -2569,15 +2602,11 @@ BEGIN
     IDS_IPFILTER_SAVERR     "No pudo guardar el filtro de IP al archivo ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "No disponible"
     IDS_IPFILTER_DLVERSION  "Descargando versión de archivo de filtro de IPs"
-    IDS_IPFILTER_DLFILE     "Descargando archivo de filtro de IPs"
     IDS_LOG_ERRDWN          "Error en la descarga %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_IPFILTER_DLFAIL "Descarga de filtro de IP fallada"
-    IDS_LOG_IPFILTER_ERR1   "No se pudo extraer el archivo de filtro de IPs del ZIP descargado (""%s"")."
-    IDS_LOG_IPFILTER_ERR2   "El archivo de filtro de IPs ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
     IDS_DOWNFAKECHECKVER    "Descargando la versión de archivo de comprobador de Fakes"
     IDS_DOWNFAKECHECKFILE   "Descargando el comprobador de Fakes"
     IDS_FC_LOADED           "El comprobador de Fakes %i ha sido cargado correctamente"
@@ -2621,9 +2650,11 @@ BEGIN
     IDS_IP2COUNTRY_NALONG   "No Aplicable"
     IDS_IP2COUNTRY_NASHORT  "N/A"
     IDS_SOURCE_LOADER_SAVER "SLS"
-    IDS_SHORTTAGS           "Etiquetas Cortas"
     IDS_NEWFRIEND           "Nuevo amigo:"
     IDS_REMOVEDFRIEND       "Amigo Eliminado:"
+    IDS_FRIENDNAME_CHANGED1 "Amigo cambió su nombre: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
+    IDS_FRIENDNAME_CHANGED2 "Amigo cambió sy nombre: '%s'->'%s', hash %s"
+    IDS_FAILEDTOLOAD        "No se pudo cargar"
 END
 
 STRINGTABLE 
@@ -2653,13 +2684,6 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Actualización del FAKES.DAT programada iniciada."
     IDS_SCHED_UPDATE_WARNING 
                             "No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana es más que suficiente."
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_FRIENDNAME_CHANGED1 "Amigo cambió su nombre: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
-    IDS_FRIENDNAME_CHANGED2 "Amigo cambió sy nombre: '%s'->'%s', hash %s"
-    IDS_FAILEDTOLOAD        "No se pudo cargar"
 END
 
 #endif    // Spanish (Castilian) resources
