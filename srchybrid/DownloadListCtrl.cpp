@@ -462,7 +462,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 				dc->SetTextColor(RGB(192,0,0));
 		//MORPH END   - Added by IceCream, show download in red
 		//MORPH START - Moved by SiRoB, Due to Don't draw hidden Rect
-		if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
+			else if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
 				dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
 		//MORPH END   - Moved by SiRoB, Due to Don't draw hidden Rect
 		switch(nColumn)
