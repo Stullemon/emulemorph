@@ -2025,8 +2025,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	ASSERT(hideOS != 0);
 
 	bool resetSentCount = false;
-	uint32 prevmin = min;
-
+	
 	if (m_PartSentCount.GetSize() != partspread.GetSize())
 		resetSentCount = true;
 	else {
@@ -2049,14 +2048,16 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 
 	if (resetSentCount) {
 		m_PartSentCount.RemoveAll();
-		min = prevmin;
+		min = 0;
 		mincount = 0;
 		for (i = 0; i < parts; i++){
 			m_PartSentCount.Add(partspread[i]);
-			if (partsavail[i] && partspread[i] == min)
+			if (partsavail[i] && !partspread[i])
 				mincount++;
 		}
-		ASSERT(mincount >= 1);
+		if (!mincount)
+		  return parts; // We're a no-needed source already
+
 	}
 
 	mincount = (rand() % mincount) + 1;
