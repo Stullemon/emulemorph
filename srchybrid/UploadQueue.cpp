@@ -961,7 +961,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
             CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
             if(requestedFile != NULL) {
-                requestedFile->NewAvailPartsInfo();
+                //MORPH START - Changed by SiRoB, HotFix Due to Complete Source Feature
+				//tempreqfile->NewAvailPartsInfo();
+				if(!requestedFile->IsPartFile())
+					requestedFile->NewAvailPartsInfo();
+				else
+					((CPartFile*)requestedFile)->NewSrcPartsInfo();
+				//MORPH END   - Changed by SiRoB, HotFix Due to Complete Source Feature
             }
 
 			client->SetUploadState(US_NONE);
