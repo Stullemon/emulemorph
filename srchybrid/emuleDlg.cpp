@@ -2585,7 +2585,7 @@ LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 			if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
 			{
 				uint32 dwResult = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
-				uint8 abyCurVer[4] = { 1, MOD_VERSION_MIN, MOD_VERSION_MJR, 0};
+				uint8 abyCurVer[4] = { 1+MOD_VERSION_BUILD, MOD_VERSION_MIN, MOD_VERSION_MJR, 0};
 				dwResult &= 0x00FFFFFF;
 				if (dwResult > *(uint32*)abyCurVer){
 					thePrefs.UpdateLastMVC();
