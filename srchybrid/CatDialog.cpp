@@ -35,7 +35,7 @@ IMPLEMENT_DYNAMIC(CCatDialog, CDialog)
 CCatDialog::CCatDialog(int index)
 	: CDialog(CCatDialog::IDD, 0)
 {
-	m_myCat=theApp.glob_prefs->GetCategory(index);
+	m_myCat=thePrefs.GetCategory(index);
 	if (m_myCat==NULL) return;
 }
 
@@ -65,9 +65,12 @@ void CCatDialog::UpdateData(){
 	m_ctlColor.SetColor(selcolor);
 
 	// HoaX_69: AutoCat
-	//MORPH - Changed by SiRoB, Due to Khaos Categorie
-	//GetDlgItem(IDC_AUTOCATEXT)->SetWindowText(m_myCat->autocat);
+	//MORPH START - Changed by SiRoB, Due to Khaos Categorie
+	/*
+	GetDlgItem(IDC_AUTOCATEXT)->SetWindowText(m_myCat->autocat);
+	*/
 	GetDlgItem(IDC_AUTOCATEXT)->SetWindowText(m_myCat->viewfilters.sAdvancedFilterMask);
+	//MORPH END   - Changed by SiRoB, Due to Khaos Categorie
 
 	m_prio.SetCurSel(m_myCat->prio);
 
@@ -196,35 +199,41 @@ void CCatDialog::OnBnClickedBrowse()
 
 void CCatDialog::OnBnClickedOk()
 {
-	CString oldpath=CString(m_myCat->incomingpath);
+	CString oldpath = m_myCat->incomingpath;
 
-	if (GetDlgItem(IDC_TITLE)->GetWindowTextLength()>0) GetDlgItem(IDC_TITLE)->GetWindowText(m_myCat->title,64);
-	if (GetDlgItem(IDC_INCOMING)->GetWindowTextLength()>2) GetDlgItem(IDC_INCOMING)->GetWindowText(m_myCat->incomingpath,MAX_PATH);
-	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->comment,255);
+	if (GetDlgItem(IDC_TITLE)->GetWindowTextLength()>0)
+		GetDlgItem(IDC_TITLE)->GetWindowText(m_myCat->title, ARRSIZE(m_myCat->title));
+
+	if (GetDlgItem(IDC_INCOMING)->GetWindowTextLength()>2)
+		GetDlgItem(IDC_INCOMING)->GetWindowText(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath));
+
+	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->comment, ARRSIZE(m_myCat->comment));
 
 	MakeFoldername(m_myCat->incomingpath);
-
-	if (!theApp.glob_prefs->IsShareableDirectory(m_myCat->incomingpath)){
-		_snprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), theApp.glob_prefs->GetIncomingDir());
+	if (!thePrefs.IsShareableDirectory(m_myCat->incomingpath)){
+		_snprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), "%s", thePrefs.GetIncomingDir());
 		MakeFoldername(m_myCat->incomingpath);
 	}
 
-	if (!PathFileExists(m_myCat->incomingpath))
-		if (! ::CreateDirectory(m_myCat->incomingpath,0))
-		{
-			MessageBox(GetResString(IDS_ERR_BADFOLDER),GetResString(IDS_ERROR));
+	if (!PathFileExists(m_myCat->incomingpath)){
+		if (!::CreateDirectory(m_myCat->incomingpath, 0)){
+			AfxMessageBox(GetResString(IDS_ERR_BADFOLDER));
 			strcpy(m_myCat->incomingpath,oldpath);
 			return;
 		}
+	}
 
 	if (CString(m_myCat->incomingpath).CompareNoCase(oldpath)!=0)
 		theApp.sharedfiles->Reload();
 
 	m_myCat->color=newcolor;
 	m_myCat->prio=m_prio.GetCurSel();
-	//MORPH - Changed by SiRoB, Due to Khoas categori
-	//GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->autocat.GetBuffer() ,255);
+	//MORPH STRAT - Changed by SiRoB, Due to Khoas categorie
+	/*
+	GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->autocat);
+	*/
 	GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->viewfilters.sAdvancedFilterMask);
+	//MORPH END   - Changed by SiRoB, Due to Khoas categorie
 
 	// khaos::kmod+ Category Advanced A4AF Mode and Auto Cat
 	m_myCat->iAdvA4AFMode = m_comboA4AF.GetCurSel();

@@ -136,6 +136,12 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 	m_bCheckScoreRatio = false;
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
+	// check the client ident status
+	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+		// bad guy - no credits for you
+		return 1;
+	}
+
 	//Morph Start - Modified by AndCycle, reduce a little CPU usage for ratio count
 
 	float result = 0;//everybody share one result.
@@ -291,9 +297,8 @@ bool CClientCredits::IsActive(uint32 dwExpired) {
 }
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
-CClientCreditsList::CClientCreditsList(CPreferences* in_prefs)
+CClientCreditsList::CClientCreditsList()
 {
-	m_pAppPrefs = in_prefs;
 	m_nLastSaved = ::GetTickCount();
 	LoadList();
 	
@@ -310,22 +315,18 @@ CClientCreditsList::~CClientCreditsList()
 		m_mapClients.GetNextAssoc(pos, tmpkey, cur_credit);
 		delete cur_credit;
 	}
-	m_mapClients.RemoveAll();
-	if (m_pSignkey){
 		delete m_pSignkey;
-		m_pSignkey = NULL;
-	}
 }
 
 // Moonlight: SUQWT: Change the file import 0.30c format.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCreditsList::LoadList()
 {
-	CString strFileName = m_pAppPrefs->GetConfigDir() + CString(CLIENTS_MET_FILENAME);
+	CString strFileName = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
 	const int iOpenFlags = CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary;
 	CSafeBufferedFile file;
 	CFileException fexp;
 
-	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
+	m_bSaveUploadQueueWaitTime = thePrefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 //Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
@@ -394,17 +395,8 @@ void CClientCreditsList::LoadList()
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 	
 	try{
-		uint8 version;
-		file.Read(&version, 1);
+		uint8 version = file.ReadUint();
 		//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		// Moonlight: SUQWT - Import CreditStruct from 0.30c and SUQWTv1
-		if (version != CREDITFILE_VERSION_30_SUQWTv1 && version != CREDITFILE_VERSION_30_SUQWTv2 &&
-			version != CREDITFILE_VERSION_30 && version != CREDITFILE_VERSION_29){
-			AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
-			file.Close();
-			return;
-		}
-		//original commented out
 		/*
 		if (version != CREDITFILE_VERSION && version != CREDITFILE_VERSION_29){
 			AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
@@ -412,12 +404,23 @@ void CClientCreditsList::LoadList()
 			return;
 		}
 		*/
+		// Moonlight: SUQWT - Import CreditStruct from 0.30c and SUQWTv1
+		if (version != CREDITFILE_VERSION_30_SUQWTv1 && version != CREDITFILE_VERSION_30_SUQWTv2 &&
+			version != CREDITFILE_VERSION_30 && version != CREDITFILE_VERSION_29){
+			AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
+			file.Close();
+			return;
+		}
 		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
 		// everything is ok, lets see if the backup exist...
 		CString strBakFileName;
-		//strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());//original commented out
-		strBakFileName.Format(_T("%s") _T(".BAK"), strFileName);//Morph - modify by AndCycle, backup loaded file
+		//Morph start - modify by AndCycle, backup loaded file
+		/*
+		strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), thePrefs.GetConfigDir());
+		*/
+		strBakFileName.Format(_T("%s") _T(".BAK"), strFileName);
+		//Morph end - modify by AndCycle, backup loaded file
 
 		DWORD dwBakFileSize = 0;
 		BOOL bCreateBackup = TRUE;
@@ -461,20 +464,32 @@ void CClientCreditsList::LoadList()
 			file.Seek(1, CFile::begin); //set filepointer behind file version byte
 		}
 
-		uint32 count;
-		file.Read(&count, 4);
+		UINT count = file.ReadUInt32();
 		m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
 
 		const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
 		uint32 cDeleted = 0;
-		CreditStruct* newcstruct;//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		CreditStruct* newcstruct;
+		//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
-		for (uint32 i = 0; i < count; i++){
-			newcstruct = new CreditStruct;//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			//CreditStruct* newcstruct = new CreditStruct;//original commented out
+		for (UINT i = 0; i < count; i++){
+			//Morph Start - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			/*
+			CreditStruct* newcstruct = new CreditStruct;
+			*/
+			newcstruct = new CreditStruct;
+			//Morph End   - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			
 			memset(newcstruct, 0, sizeof(CreditStruct));
-//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		// --> Moonlight: SUQWT - import 0.30c and 30c-SUQWTv1 structures.
+			//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			/*
+			if (version == CREDITFILE_VERSION_29)
+				file.Read(newcstruct, sizeof(CreditStruct_29a));
+			else
+				file.Read(newcstruct, sizeof(CreditStruct));
+			*/
+			// --> Moonlight: SUQWT - import 0.30c and 30c-SUQWTv1 structures.
 			if (version == CREDITFILE_VERSION)
 				file.Read(newcstruct, sizeof(CreditStruct_30c_SUQWTv2));
 			else if (version == CREDITFILE_VERSION_30_SUQWTv1) {
@@ -485,15 +500,8 @@ void CClientCreditsList::LoadList()
 				file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c));
 			else
 				file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_29a));
-		// <-- Moonlight: SUQWT			
-			//original commented out
-			/*
-			if (version == CREDITFILE_VERSION_29)
-				file.Read(newcstruct, sizeof(CreditStruct_29a));
-			else
-				file.Read(newcstruct, sizeof(CreditStruct));
-			*/
-//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)			
+			// <-- Moonlight: SUQWT			
+			//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		
 			if (newcstruct->nLastSeen < dwExpired){
 				cDeleted++;
@@ -525,14 +533,27 @@ void CClientCreditsList::LoadList()
 // Moonlight: SUQWT - Save the wait times before saving the list.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCreditsList::SaveList()
 {
-	if (theApp.glob_prefs->GetLogFileSaving())
-		DEBUG_ONLY(AddDebugLogLine(false, "Saved Credit list"));
+	if (thePrefs.GetLogFileSaving())
+		AddDebugLogLine(false, "Saving clients credit list file \"%s\"", CLIENTS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
-	CString name = m_pAppPrefs->GetConfigDir() + CString(CLIENTS_MET_FILENAME);
+	CString name = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
 	CFile file;// no buffering needed here since we swap out the entire array
 	CFileException fexp;
-	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
+	//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
+	/*
+	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+			strError += _T(" - ");
+			strError += szError;
+		}
+		AddLogLine(true, _T("%s"), strError);
+		return;
+	}
+	*/
+	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -543,7 +564,7 @@ void CClientCreditsList::SaveList()
 		return;
 	}
 
-//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	CFile fileBack; // Moonlight: SUQWT - Also open a file to save original 30c format.
 	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
@@ -557,18 +578,28 @@ void CClientCreditsList::SaveList()
 	}
 
 	fileBack.Seek(5, CFile::begin);
-//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
 	uint32 count = m_mapClients.GetCount();
 	BYTE* pBuffer = new BYTE[count*sizeof(CreditStruct)];
 	CClientCredits* cur_credit;
 	CCKey tempkey(0);
 	POSITION pos = m_mapClients.GetStartPosition();
-	const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
+	//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	count = 0;
 	while (pos)
 	{
-//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
+		//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		/*
+		if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
+		{
+			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+			count++; 
+		}
+		*/
 		if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 			if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 			{
@@ -577,8 +608,7 @@ void CClientCreditsList::SaveList()
 				fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
 				count++; 
 			}
-		}
-		else{
+		}else{
 			//official way to clean out client
 			if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
 			{
@@ -588,32 +618,23 @@ void CClientCreditsList::SaveList()
 				count++; 
 			}
 		}
-		//original commented out
-		/*
-		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
-		if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
-		{
-			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
-			count++; 
-		}
-		*/
-//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	}
-//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	uint8 version = CREDITFILE_VERSION_30;//Morph - modified by AndCycle, corrected version
 	fileBack.SeekToBegin();
 	fileBack.Write(&version, 1);
 	fileBack.Write(&count, 4);
 	fileBack.Flush();
 	fileBack.Close();
-//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	try{
 		version = CREDITFILE_VERSION;//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		//uint8 version = CREDITFILE_VERSION;//original commented out
 		file.Write(&version, 1);
 		file.Write(&count, 4);
 		file.Write(pBuffer, count*sizeof(CreditStruct));
-		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
+		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
 			file.Flush();
 		file.Close();
 	}
@@ -677,7 +698,8 @@ void CClientCredits::Verified(uint32 dwForIP){
 			m_pCredits->nDownloadedLo = 1;
 			m_pCredits->nUploadedHi = 0;
 			m_pCredits->nUploadedLo = 1; // in order to safe this client, set 1 byte
-			DEBUG_ONLY(AddDebugLogLine(false, "Credits deleted due to new SecureIdent"));
+			if (thePrefs.GetVerbose())
+				DEBUG_ONLY(AddDebugLogLine(false, "Credits deleted due to new SecureIdent"));
 		}
 	}
 	IdentState = IS_IDENTIFIED;
@@ -711,11 +733,11 @@ void CClientCreditsList::InitalizeCrypting(){
 	m_nMyPublicKeyLen = 0;
 	memset(m_abyMyPublicKey,0,80); // not really needed; better for debugging tho
 	m_pSignkey = NULL;
-	if (!m_pAppPrefs->IsSecureIdentEnabled())
+	if (!thePrefs.IsSecureIdentEnabled())
 		return;
 	// check if keyfile is there
 	bool bCreateNewKey = false;
-	HANDLE hKeyFile = ::CreateFile(m_pAppPrefs->GetConfigDir() + CString("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
+	HANDLE hKeyFile = ::CreateFile(thePrefs.GetConfigDir() + CString("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
 										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hKeyFile != INVALID_HANDLE_VALUE)
 	{
@@ -731,7 +753,7 @@ void CClientCreditsList::InitalizeCrypting(){
 	// load key
 	try{
 		// load private key
-		FileSource filesource(CString(m_pAppPrefs->GetConfigDir() + CString("cryptkey.dat")), true,new Base64Decoder);
+		FileSource filesource(CString(thePrefs.GetConfigDir() + CString("cryptkey.dat")), true,new Base64Decoder);
 		m_pSignkey = new RSASSA_PKCS1v15_SHA_Signer(filesource);
 		// calculate and store public key
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(*m_pSignkey);
@@ -758,15 +780,17 @@ bool CClientCreditsList::CreateKeyPair(){
 		InvertibleRSAFunction privkey;
 		privkey.Initialize(rng,RSAKEYSIZE);
 
-		Base64Encoder privkeysink(new FileSink(CString(m_pAppPrefs->GetConfigDir())+"cryptkey.dat"));
+		Base64Encoder privkeysink(new FileSink(CString(thePrefs.GetConfigDir())+"cryptkey.dat"));
 		privkey.DEREncode(privkeysink);
 		privkeysink.MessageEnd();
 
-		AddDebugLogLine(false, "Created new RSA keypair");
+		if (thePrefs.GetLogSecureIdent())
+			AddDebugLogLine(false, "Created new RSA keypair");
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Failed to create new RSA keypair");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Failed to create new RSA keypair");
 		ASSERT ( false );
 		return false;
 	}
@@ -794,12 +818,12 @@ uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOu
 		// 4 additional bytes random data send from this client
 		uint32 challenge = pTarget->m_dwCryptRndChallengeFrom;
 		ASSERT ( challenge != 0 );
-		memcpy(abyBuffer+keylen,&challenge,4);
+		PokeUInt32(abyBuffer+keylen, challenge);
 		uint16 ChIpLen = 0;
 		if ( byChaIPKind != 0){
 			ChIpLen = 5;
-			memcpy(abyBuffer+keylen+4,&ChallengeIP,4);
-			memcpy(abyBuffer+keylen+4+4,&byChaIPKind,1);
+			PokeUInt32(abyBuffer+keylen+4, ChallengeIP);
+			PokeUInt8(abyBuffer+keylen+4+4, byChaIPKind);
 		}
 		sigkey->SignMessage(rng, abyBuffer ,keylen+4+ChIpLen , sbbSignature.begin());
 		ArraySink asink(pachOutput, nMaxSize);
@@ -830,7 +854,7 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 		memcpy(abyBuffer,m_abyMyPublicKey,m_nMyPublicKeyLen);
 		uint32 challenge = pTarget->m_dwCryptRndChallengeFor;
 		ASSERT ( challenge != 0 );
-		memcpy(abyBuffer+m_nMyPublicKeyLen,&challenge,4);
+		PokeUInt32(abyBuffer+m_nMyPublicKeyLen, challenge);
 		
 		// v2 security improvments (not supported by 29b, not used as default by 29c)
 		uint8 nChIpSize = 0;
@@ -843,7 +867,8 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 					break;
 				case CRYPT_CIP_REMOTECLIENT:
 					if (theApp.serverconnect->GetClientID() == 0 || theApp.serverconnect->IsLowID()){
-						AddDebugLogLine(false, "Warning: Maybe SecureHash Ident fails because LocalIP is unknown");
+						if (thePrefs.GetLogSecureIdent())
+							AddDebugLogLine(false, "Warning: Maybe SecureHash Ident fails because LocalIP is unknown");
 						ChallengeIP = theApp.serverconnect->GetLocalIP();
 					}
 					else
@@ -853,8 +878,8 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 					ChallengeIP = 0;
 					break;
 			}
-			memcpy(abyBuffer+m_nMyPublicKeyLen+4,&ChallengeIP,4);
-			memcpy(abyBuffer+m_nMyPublicKeyLen+4+4,&byChaIPKind,1);
+			PokeUInt32(abyBuffer+m_nMyPublicKeyLen+4, ChallengeIP);
+			PokeUInt8(abyBuffer+m_nMyPublicKeyLen+4+4, byChaIPKind);
 		}
 		//v2 end
 
@@ -862,7 +887,8 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, _T("Error: Unknown exception in %s"), __FUNCTION__);
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Error: Unknown exception in %s"), __FUNCTION__);
 		//ASSERT(0);
 		bResult = false;
 	}
@@ -877,7 +903,7 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 }
 
 bool CClientCreditsList::CryptoAvailable(){
-	return (m_nMyPublicKeyLen > 0 && m_pSignkey != 0 && m_pAppPrefs->IsSecureIdentEnabled() );
+	return (m_nMyPublicKeyLen > 0 && m_pSignkey != 0 && thePrefs.IsSecureIdentEnabled() );
 }
 
 
@@ -892,7 +918,7 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 	byte abyPublicKey[80];
 	ArraySink asink(abyPublicKey, 80);
 	pub.DEREncode(asink);
-	int8 PublicKeyLen = asink.TotalPutLength();
+	uint8 PublicKeyLen = asink.TotalPutLength();
 	asink.MessageEnd();
 	uint32 challenge = rand();
 	// create fake client which pretends to be this emule
@@ -949,7 +975,7 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 					buffer2.Format("%02X",this->m_pCredits->abyKey[i]);
 					buffer+=buffer2;
 				}
-				//if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
+				if (thePrefs.GetLogSecureIdent())
 					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
 				if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 					m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)

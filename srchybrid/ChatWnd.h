@@ -32,6 +32,7 @@ public:
 	enum { IDD = IDD_CHAT };
 	void StartSession(CUpDownClient* client);
 	void Localize();
+	void UpdateFriendlistCount(uint16 count);
 
 	CFriendListCtrl m_FriendListCtrl;
 

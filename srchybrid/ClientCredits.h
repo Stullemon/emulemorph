@@ -21,8 +21,6 @@
 #include <crypto51/rsa.h>
 #pragma warning(default:4516)
 
-class CPreferences;
-
 #define	 MAXPUBKEYSIZE		80
 
 #define CRYPT_CIP_REMOTECLIENT	10
@@ -187,7 +185,7 @@ private:
 class CClientCreditsList: public CLoggable
 {
 public:
-	CClientCreditsList(CPreferences* in_prefs);
+	CClientCreditsList();
 	~CClientCreditsList();
 	
 			// return signature size, 0 = Failed | use sigkey param for debug only
@@ -211,7 +209,6 @@ protected:
 #endif
 private:
 	CMap<CCKey, const CCKey&, CClientCredits*, CClientCredits*> m_mapClients;
-	CPreferences*	m_pAppPrefs;
 	uint32			m_nLastSaved;
 	CryptoPP::RSASSA_PKCS1v15_SHA_Signer*		m_pSignkey;
 	byte			m_abyMyPublicKey[80];

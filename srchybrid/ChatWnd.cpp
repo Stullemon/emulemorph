@@ -180,3 +180,11 @@ void CChatWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
  	VERIFY( ChatMenu.DestroyMenu() );
 }
+
+void CChatWnd::UpdateFriendlistCount(uint16 count) {
+	CString temp;
+	temp.Format(" (%i)",count);
+	temp=GetResString(IDS_CW_FRIENDS)+temp;
+
+	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(temp);
+}

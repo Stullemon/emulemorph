@@ -74,6 +74,7 @@ protected:
 	afx_msg void OnTcnSelchangeChatsel(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCsend();
 	afx_msg void OnBnClickedCclose();
+	afx_msg void OnSysColorChange();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
@@ -92,4 +93,5 @@ private:
 	CWnd* m_pMessageBox;
 	CWnd* m_pCloseBtn;
 	CWnd* m_pSendBtn;
+	CImageList m_imlChat;
 };

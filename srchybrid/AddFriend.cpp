@@ -66,17 +66,17 @@ BOOL CAddFriend::OnInitDialog(){
 
 		if (m_pShowFriend->m_dwLastSeen){
 			CTime t((time_t)m_pShowFriend->m_dwLastSeen);
-			SetDlgItemText(IDC_EDIT2, t.Format(theApp.glob_prefs->GetDateTimeFormat()));
+			SetDlgItemText(IDC_EDIT2, t.Format(thePrefs.GetDateTimeFormat()));
 		}
 		/*if (m_pShowFriend->m_dwLastChatted){
 			CTime t((time_t)m_pShowFriend->m_dwLastChatted);
-			SetDlgItemText(IDC_LAST_CHATTED, t.Format(theApp.glob_prefs->GetDateTimeFormat()));
+			SetDlgItemText(IDC_LAST_CHATTED, t.Format(thePrefs.GetDateTimeFormat()));
 		}*/
 
 		GetDlgItem(IDC_ADD)->ShowWindow(SW_HIDE);
 	}
 	else{
-		((CEdit*)GetDlgItem(IDC_USERNAME))->SetLimitText(MAX_NICK_LENGTH);
+		((CEdit*)GetDlgItem(IDC_USERNAME))->SetLimitText(thePrefs.GetMaxUserNickLength());
 		SetDlgItemText(IDC_USERHASH, _T(""));
 	}
 	return TRUE;
@@ -133,7 +133,7 @@ void CAddFriend::OnAddBtn() {
 		CString strUserName;
 		GetDlgItemText(IDC_USERNAME, strUserName);
 		strUserName.Trim();
-		strUserName = strUserName.Left(MAX_NICK_LENGTH);
+		strUserName = strUserName.Left(thePrefs.GetMaxUserNickLength());
 
 		// why did we offer an edit control for entering the userhash but did not store it?
 		;
