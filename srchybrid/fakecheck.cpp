@@ -160,6 +160,7 @@ void CFakecheck::DownloadFakeList()
 	CString strURL = thePrefs.GetUpdateURLFakeList();
 	strURL.TrimRight(_T(".txt"));
 	strURL.TrimRight(_T(".dat"));
+	strURL.TrimRight(_T(".zip"));
 	strURL.Append(_T(".txt"));
 
 	TCHAR szTempFilePath[_MAX_PATH];
