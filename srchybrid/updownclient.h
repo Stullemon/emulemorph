@@ -921,7 +921,7 @@ protected:
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
 	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
-	bool    m_bNotOfficial; //MORPH - Added by SiRoB, Anti Ghost Mod
+	CString m_strNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
 	uint32  m_uNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
 	////////////////////////////////////////////////////////////////////////
 	// Upload

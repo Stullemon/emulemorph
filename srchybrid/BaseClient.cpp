@@ -504,7 +504,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		}
 	}
 	*/
-	if (m_bNotOfficial && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
+	if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
 		return _T("Ghost Mod Detected");
 	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion < MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
 		return _T("Fake MODSTRING Detected");
@@ -586,7 +586,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	uint32 tagcount = data->ReadUInt32();
 	if (bDbgInfo)
 		m_strHelloInfo.AppendFormat(_T("  Tags=%u"), tagcount);
-	m_bNotOfficial = false; //MOPRH - Added by SiRoB, GhostMod
+	m_strNotOfficial.Empty(); //MOPRH - Added by SiRoB, Control Mod Tag
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(data, true);
 		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
@@ -621,7 +621,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				nUserPort = temptag.GetInt();
 				break;
 			case CT_MOD_VERSION:
-				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
+				m_strNotOfficial.AppendFormat(_T(",MID=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
@@ -639,12 +639,12 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 			// MORPH START - Added by Commander, WebCache 1.2e
 			case WC_TAG_VOODOO:
-				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
+				m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if( temptag.IsInt() && temptag.GetInt() == 'ARC4' )
 					m_bWebCacheSupport = true;
 				break;
 			case WC_TAG_FLAGS:
-				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
+				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (m_bWebCacheSupport && temptag.IsInt())
 				{
 					m_uWebCacheFlags = temptag.GetInt();
@@ -734,7 +734,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
-				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
+				m_strNotOfficial.AppendFormat(_T(",ICS=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				m_incompletepartVer = temptag.GetInt();
 				break;
 			// <--- enkeyDEV: ICS
@@ -1080,7 +1080,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 					m_strMuleInfo.AppendFormat(_T("\n  SecIdent=%u  Preview=%u"), m_bySupportSecIdent, m_fSupportsPreview);
 				break;
  			case ET_MOD_VERSION: 
-				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
+				m_strNotOfficial.AppendFormat(_T(",mid=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
@@ -1099,7 +1099,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
-				m_bNotOfficial = true; //MOPRH - Added by SiRoB, GhostMod
+				m_strNotOfficial.AppendFormat(_T(",ics=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				m_incompletepartVer = temptag.GetInt();
 				break;
 			// <--- enkeyDEV: ICS
@@ -3048,7 +3048,7 @@ void CUpDownClient::ProcessUnknownHelloTag(CTag *tag)
 {
 if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
 	return;
-m_bNotOfficial = true;
+m_strNotOfficial.AppendFormat(_T(",%s"),tag->GetFullInfo());
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
 	{
@@ -3095,7 +3095,7 @@ void CUpDownClient::ProcessUnknownInfoTag(CTag *tag)
 {
 if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
 	return;
-m_bNotOfficial = true;
+m_strNotOfficial.AppendFormat(_T(",%s"),tag->GetFullInfo());
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
 	{
