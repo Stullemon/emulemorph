@@ -2556,7 +2556,7 @@ bool CListenSocket::StartListening(){
 void CListenSocket::ReStartListening(){
 	bListening = true;
 	if (m_nPendingConnections){
-		m_nPendingConnections--;
+		//m_nPendingConnections--;
 		OnAccept(0);
 	}
 }
@@ -2583,6 +2583,8 @@ void CListenSocket::OnAccept(int nErrorCode){
 		uint32 nFataErrors = 0;
 		while( m_nPendingConnections )
 		{
+			m_nPendingConnections--;
+			AddConnection();
 			// MORPH START - Added by SiRoB, WebCache 1.2f
 			// JP detect fake HighID
 			// MOD BEGIN netfinity: Fake HighID
@@ -2618,9 +2620,6 @@ void CListenSocket::OnAccept(int nErrorCode){
 				}
 				continue;
 			}
-
-			m_nPendingConnections--;
-			AddConnection();
 
 			if (SockAddr.sin_addr.S_un.S_addr == 0) // for safety..
 			{
