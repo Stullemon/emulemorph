@@ -307,10 +307,14 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			}break;
 		}
 	}
-//Morph End - added by AndCycle, Equal Chance For Each File
-
-	// they both want powershare file
-	if(rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == true){
+	//Morph End - added by AndCycle, Equal Chance For Each File
+	
+	//MORPH - Changed by SiRoB,  fix the Pay Back First order to extract next user in the queue
+	//// they both want powershare file
+	//if(rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == true){
+	// they both want powershare file or both need Pay Back First
+	if((rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == true) ||
+		(rightClient->MoreUpThanDown() == true && leftClient->MoreUpThanDown() == true)){
 		// and rightClient wants higher prio file, so rightClient is better
 		if(rightClient->GetFilePrioAsNumber() > leftClient->GetFilePrioAsNumber()){
 			return	true;
@@ -339,11 +343,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		return	true;
 	}
 	// but rightClient has better score, so rightClient is better
-	else if(leftClient->GetPowerShared() == false &&
-		    rightClient->GetPowerShared() == false &&
-			leftClient->MoreUpThanDown() == false &&
-			rightClient->MoreUpThanDown() == false &&
-			rightScore > leftScore){
+	else if(rightScore > leftScore){
 		return	true;
 	}
 	return	false;
