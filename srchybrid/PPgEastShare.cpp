@@ -27,10 +27,10 @@ CPPgEastShare::CPPgEastShare()
 	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
 	m_bInitializedTreeOpts = false;
-//	m_htiIsBoostLess = NULL;//Added by Yun.SF3, boost the less uploaded files //EastShare removed by linekin for CreditSystem integration
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
 	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;
 	m_htiOfficialCredit = NULL;
@@ -65,7 +65,8 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		}
 		m_htiEnablePreferShareAll = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFER_SHARE_ALL), TVI_ROOT, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 		m_htiAutoClearComplete = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTO_CLEAR_COMPLETE), TVI_ROOT, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
-		
+		m_htiOnlyDownloadCompleteFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES), TVI_ROOT, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+
 		// EastShare START - Added by linekin, new creditsystem by [lovelace]  // Modified by Pretender
 		m_htiCreditSystem = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_CREDIT_SYSTEM), iImgCS, TVI_ROOT);
 		//EastShare Start - CreditSystemSelection
@@ -73,7 +74,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiLovelaceCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_LOVELACE_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_LOVELACE);
 //		m_htiRatioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_RATIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_RATIO);
 		m_htiPawcioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PAWCIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_PAWCIO);
-//		m_htiBoostLess = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_BOOST_LESS), m_htiCreditSystem, m_iCreditSystem == CS_BOOST_LESS);
 		m_htiESCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_EASTSHARE_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_EASTSHARE);
 		//EastShare End - CreditSystemSelection
 		m_htiIsPayBackFirst = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PAYBACKFIRST), m_htiCreditSystem, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
@@ -102,6 +102,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnablePreferShareAll, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIsPayBackFirst, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiAutoClearComplete, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiOnlyDownloadCompleteFiles, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 }
 
 
@@ -109,8 +110,10 @@ BOOL CPPgEastShare::OnInitDialog()
 {
 
 	m_bEnablePreferShareAll = app_prefs->prefs->shareall;//EastShare - PreferShareAll by AndCycle
-	m_bAutoClearComplete = app_prefs->prefs->m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_bIsPayBackFirst = app_prefs->prefs->m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	m_bAutoClearComplete = app_prefs->prefs->m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	m_bOnlyDownloadCompleteFiles = app_prefs->prefs->m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
 	m_iKnownMetDays = app_prefs->GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	
@@ -140,6 +143,7 @@ BOOL CPPgEastShare::OnApply()
 	app_prefs->prefs->shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	app_prefs->prefs->m_bAutoClearComplete = m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	app_prefs->prefs->m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	app_prefs->prefs->m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 /*	theApp.emuledlg->serverwnd.ToggleDebugWindow();
 	theApp.emuledlg->serverwnd.UpdateLogTabSelection(); */
@@ -186,13 +190,14 @@ void CPPgEastShare::OnDestroy()
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
 	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;
 	m_htiOfficialCredit = NULL;
 	m_htiLovelaceCredit = NULL;
 	m_htiRatioCredit = NULL;
 	m_htiPawcioCredit = NULL;
-//	m_htiBoostLess = NULL;
 	m_htiESCredit = NULL;
 	//EastShare END - Added by Pretender
 

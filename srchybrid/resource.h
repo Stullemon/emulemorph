@@ -1179,6 +1179,8 @@
 #define IDS_IMP_SIZE                    1223
 #define IDS_IMP_STATUS                  1224
 #define IDS_AUTO_CLEAR_COMPLETE         1225
+#define IDS_ONLY_DOWNLOAD_COMPLETE_FILES 1226
+#define IDS_DL_FORCE                    1227
 #define IDS_BOOTSTRAP                   1300
 #define IDS_VIAED2KSQ                   1301
 #define IDS_EM_KADEMLIA                 1302
@@ -2239,7 +2241,7 @@
 #define IDS_PAYBACKFIRST                4003
 #define IDS_USS_USEMAXPING              4004
 #define IDS_CREDIT_SYSTEM               4005
-#define IDS_OFFICIAL_CREDIT              4006
+#define IDS_OFFICIAL_CREDIT             4006
 #define IDS_LOVELACE_CREDIT             4007
 #define IDS_RATIO_CREDIT                4008
 #define IDS_EASTSHARE_CREDIT            4009

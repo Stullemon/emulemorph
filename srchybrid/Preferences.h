@@ -482,6 +482,7 @@ struct Preferences_Struct{
 	bool	m_bFirstStart;
 	bool	m_bCreditSystem;
 	bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	bool	m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	int		m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
 
 	bool	log2disk;
@@ -1152,6 +1153,7 @@ public:
 	void	SetKnownMetDays(int m_iInKnownMetDays)	{prefs->m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
 	bool	IsPayBackFirst()					{return prefs->m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
 	bool	IsAutoClearComplete()				{return prefs->m_bAutoClearComplete; }	//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	bool	OnlyDownloadCompleteFiles()			{return prefs->m_bOnlyDownloadCompleteFiles;} //EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 	char*	GetTxtEditor()						{return prefs->TxtEditor;}
 	CString	GetVideoPlayer()					{if (strlen(prefs->VideoPlayer)==0) return ""; else return CString(prefs->VideoPlayer);}

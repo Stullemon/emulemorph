@@ -1638,6 +1638,10 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								break; 
 						}
 						case DS_ONQUEUE:{
+							//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && (lastseencomplete==NULL) && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+								break;//shadow#(onlydownloadcompletefiles)
+							//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 							if( cur_src->IsRemoteQueueFull() ) {
 								if( ((dwCurTick - lastpurgetime) > 60000) && (this->GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )) ){
 									theApp.downloadqueue->RemoveSource( cur_src );
@@ -2610,6 +2614,9 @@ void CPartFile::StopFile(bool setVars){
 	// khaos::kmod-
 	datarate = 0;
 	memset(m_anStates,0,sizeof(m_anStates));
+	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+	if ((status!=PS_COMPLETE)&&(status!=PS_COMPLETING)) lastseencomplete = NULL;//shadow#(onlydownloadcompletefiles)
+	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	FlushBuffer();
 	theApp.downloadqueue->SortByPriority();
 	theApp.downloadqueue->CheckDiskspace();	// SLUGFILLER: checkDiskspace

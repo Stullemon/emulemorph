@@ -1488,6 +1488,7 @@ void CPreferences::SavePreferences(){
 
 	ini.WriteBool("IsPayBackFirst",prefs->m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
 	ini.WriteBool("AutoClearComplete", prefs->m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	ini.WriteBool("OnlyDownloadCompleteFiles", prefs->m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 	ini.WriteBool("SaveLogToDisk",prefs->log2disk);
 	ini.WriteBool("SaveDebugToDisk",prefs->debug2disk);
@@ -2031,6 +2032,7 @@ void CPreferences::LoadPreferences(){
 
 	prefs->m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
 	prefs->m_bAutoClearComplete = ini.GetBool("AutoClearComplete", false );//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	prefs->m_bOnlyDownloadCompleteFiles = ini.GetBool("OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 	prefs->scheduler=ini.GetBool("EnableScheduler",false);
 	prefs->msgonlyfriends=ini.GetBool("MessagesFromFriendsOnly",false);

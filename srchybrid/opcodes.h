@@ -116,6 +116,7 @@
 #define MINFRAGSIZE             2500/*512*/
 //MOPRH END   - Added by SiRoB, ZZ Upload System 20030824-2238
 #define	MAXFRAGSIZE				1300
+#define MP_FORCE 10200//shadow#(onlydownloadcompletefiles) //EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 #define	PARTSIZE				9728000
 #define EMBLOCKSIZE				184320
 #define OP_EDONKEYHEADER		0xE3
