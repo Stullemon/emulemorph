@@ -1707,7 +1707,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		// Ok, the filename already contains the CRC. Normally we won't rename it, except for
 		// we have to make sure it's uppercase
 		if ((!worker->m_CRC32ForceUppercase) || (fn.Find(f->GetLastCalculatedCRC32()) != -1)) {
-			theApp.AddLogLine (false, _T("File '%s' already containes the correct CRC32 tag, won't be renamed."), fn);
+			theApp.AddLogLine (false, _T("File '%s' already contains the correct CRC32 tag, won't be renamed."), fn);
 			return 0;
 		} else {
 			// This file contains a valid CRC, but not in uppercase - replace it!
