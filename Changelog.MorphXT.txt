@@ -6,6 +6,7 @@ FIXED  : Default ShareOnlyTheNeed State not saved [SiRoB]
 FIXED  : Give access to Multiple Comment Changing [SiRoB]
 FIXED  : Systray Popup doesn't disapair in some case (bond006) [SiRoB]
 FIXED  : New Download File in Auto or Disable PowerShareMode [SiRoB]
+FIXED  : The software client statistic bug, during language change, seems to be out [SiRoB]
 ADDED  : IP2Country from Superlexx, http://forum.emule-project.net/index.php?showtopic=38374
 ADDED  : Preferency default for Show share permission [SiRoB]
 ADDED  : Boost Friend option from Yun.SF3 [SiRoB]
