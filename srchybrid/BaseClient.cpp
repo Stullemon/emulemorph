@@ -739,6 +739,8 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	}
 
 	CSafeMemFile data(128);
+	data.WriteUInt8(theApp.m_uCurVersionShort);
+	data.WriteUInt8(EMULE_PROTOCOL);
 	data.WriteUInt32(8/*7 OFFICIAL+1 ET_MOD_VERSION*/); // nr. of tags
 	CTag tag(ET_COMPRESSION,1);
 	tag.WriteTagToFile(&data);

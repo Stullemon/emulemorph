@@ -209,7 +209,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	else
 		ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
 	*/
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | ((!cur_friend->m_LinkedClient->HasLowID() && cur_friend->m_LinkedClient->GetFriendSlot())? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFS()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
 	//MORPH END   - Added by SiRoB, Friend Addon

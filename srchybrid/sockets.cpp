@@ -435,8 +435,8 @@ bool CServerConnect::Disconnect(){
 		theApp.emuledlg->AddServerMessageLine(_T(""));
 		theApp.emuledlg->AddServerMessageLine(_T(""));
 		theApp.emuledlg->AddServerMessageLine(_T(""));
-		theApp.stat_serverConnectTime=0;
 		// -khaos--+++> Tell our total server duration thinkymajig to update...
+		theApp.stat_serverConnectTime=0;
 		theApp.statistics->Add2TotalServerDuration();
 		// <-----khaos-
 		return true;

@@ -1,7 +1,7 @@
----------------------------------------- 
-Changelog for eMule 0.42b14 MorphXT v1.?
----------------------------------------- 
-MERGED: Merging in progress [SiRoB]
+-------------------------------------- 
+Changelog for eMule 0.42b MorphXT v1.?
+-------------------------------------- 
+MERGED: Code merged to 0.42b [SiRoB]
 
 FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]
 

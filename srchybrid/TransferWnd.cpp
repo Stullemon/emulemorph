@@ -953,7 +953,9 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 void CTransferWnd::UpdateCatTabTitles() {
 	for (uint8 i=0;i<m_dlTab.GetItemCount();i++)
 		//MORPH START - Changed by SiRoB, Due to Khaos Category
-		//EditCatTabLabel(i,(i==0)? GetCatTitle( thePrefs.GetAllcatType() ):thePrefs.GetCategory(i)->title);
+		/*
+		EditCatTabLabel(i,(i==0)? GetCatTitle( thePrefs.GetAllcatType() ):thePrefs.GetCategory(i)->title);
+		*/
 		EditCatTabLabel(i, thePrefs.GetCategory(i)->title);
 		//MORPH END   - Changed by SiRoB, Due to Khaos Category
 }

@@ -36,12 +36,8 @@ public:
 	char*	GetPacket();
 	char*	DetachPacket();
 	uint32	GetRealPacketSize()		{return size+6;}
-	//Morph Start - removed by AndCycle, ZZ Upload System 20040106-1735
-	/*
 	bool	IsSplitted()			{return m_bSplitted;}
 	bool	IsLastSplitted()		{return m_bLastSplitted;}
-	*/
-	//Morph End - removed by AndCycle, ZZ Upload System 20040106-1735
 	void	PackPacket();
 	bool	UnPackPacket(UINT uMaxDecompressedSize = 50000);
 	char*	pBuffer;

@@ -327,8 +327,14 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 			cur_client->ClearWaitStartTime();
 			RemoveFromWaitingQueue(pos2,true);	
 			if (!cur_client->socket)
+			{
 				if(cur_client->Disconnected("AddUpNextClient - purged"))
+				{
 					delete cur_client;
+					cur_client = NULL;
+				}
+			}
+			continue;
 		}
 
 		// finished clearing

@@ -113,9 +113,7 @@ CEMSocket::CEMSocket(void){
     //m_latency_sum = 0;
     //m_wasBlocked = false;
 
-	//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
-    m_currentPacket_is_controlpacket = true; // set to true, since default value of GetSockOpt(SO_SNDBUF) corresponds to this.
-    //Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
+    m_currentPacket_is_controlpacket = false;
 	m_currentPackageIsFromPartFile = false;
 
     m_numberOfSentBytesCompleteFile = 0;
@@ -915,7 +913,6 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 	return 1;
 }
 // end deadlake
-
 
 /**
  * Removes all packets from the standard queue that don't have to be sent for the socket to be able to send a control packet.

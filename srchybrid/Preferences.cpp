@@ -2297,139 +2297,134 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("Enabled", m_bMMEnabled);
 	ini.WriteInt("Port", m_nMMPort);
 
-	ini.WriteBool("InfiniteQueue",infiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	ini.WriteBool("MultipleInstance",multipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
+	ini.WriteBool("InfiniteQueue",infiniteQueue,"eMule");	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	ini.WriteBool("MultipleInstance",multipleInstance,"eMule");	//Morph - added by AndCycle, VQB: multipleInstance
 
-	ini.WriteBool("AutoDynUpSwitching",isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteBool("AutoPowershareNewDownloadFile",m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool("AutoDynUpSwitching",isautodynupswitching,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteBool("AutoPowershareNewDownloadFile",m_bisautopowersharenewdownloadfile,"eMule"); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	ini.WriteBool("EnableZeroFilledTest", enableZeroFilledTest);
+	ini.WriteBool("EnableZeroFilledTest", enableZeroFilledTest,"eMule");
 	// Maella end
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
-	ini.WriteBool("EnableHighProcess", enableHighProcess); //MORPH - Added by IceCream, high process priority
+	ini.WriteBool("EnableHighProcess", enableHighProcess,"eMule"); //MORPH - Added by IceCream, high process priority
 
-	ini.WriteBool("EnableDownloadInRed", enableDownloadInRed); //MORPH - Added by IceCream, show download in red
-	ini.WriteBool("EnableDownloadInBold", enableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
-	ini.WriteBool("EnableAntiLeecher", enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
-	ini.WriteBool("EnableAntiCreditHack", enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
-	ini.WriteInt("CreditSystemMode", creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
-	ini.WriteInt("EqualChanceForEachFileMode", equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool("ECFEFallTime", m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool("IsBoostFriends", isboostfriends);//Added by Yun.SF3, boost friends
+	ini.WriteBool("EnableDownloadInRed", enableDownloadInRed,"eMule"); //MORPH - Added by IceCream, show download in red
+	ini.WriteBool("EnableDownloadInBold", enableDownloadInBold,"eMule"); //MORPH - Added by SiRoB, show download in Bold
+	ini.WriteBool("EnableAntiLeecher", enableAntiLeecher,"eMule"); //MORPH - Added by IceCream, enable AntiLeecher
+	ini.WriteBool("EnableAntiCreditHack", enableAntiCreditHack,"eMule"); //MORPH - Added by IceCream, enable AntiCreditHack
+	ini.WriteInt("CreditSystemMode", creditSystemMode,"eMule");// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteInt("EqualChanceForEachFileMode", equalChanceForEachFileMode,"eMule");//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool("ECFEFallTime", m_bECFEFallTime,"eMule");//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool("IsBoostFriends", isboostfriends,"eMule");//Added by Yun.SF3, boost friends
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	ini.WriteInt("ReconnectOnLowIdRetries",LowIdRetries);	// SLUGFILLER: lowIdRetry
+	ini.WriteInt("ReconnectOnLowIdRetries",LowIdRetries,"eMule");	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	ini.WriteInt("HideOvershares",hideOS);
-	ini.WriteBool("SelectiveShare",selectiveShare);
+	ini.WriteInt("HideOvershares",hideOS,"eMule");
+	ini.WriteBool("SelectiveShare",selectiveShare,"eMule");
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	ini.WriteBool("ShareOnlyTheNeed",ShareOnlyTheNeed);
+	ini.WriteBool("ShareOnlyTheNeed",ShareOnlyTheNeed,"eMule");
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, Show Permissions
-	ini.WriteBool("ShowSharePermissions",permissions);
+	ini.WriteBool("ShowSharePermissions",permissions,"eMule");
 	//MORPH END   - Added by SiRoB, Show Permissions
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
-	ini.WriteInt("IPfilterVersion",m_IPfilterVersion); //added by milobac: Ipfilter.dat update
-	ini.WriteBool("AutoUPdateIPFilter",AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
+	ini.WriteInt("IPfilterVersion",m_IPfilterVersion,"eMule"); //added by milobac: Ipfilter.dat update
+	ini.WriteBool("AutoUPdateIPFilter",AutoUpdateIPFilter,"eMule"); //added by milobac: Ipfilter.dat update
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ini.WriteInt("FakesDatVersion",m_FakesDatVersion);
-	ini.WriteBool("UpdateFakeStartup",UpdateFakeStartup);
+	ini.WriteInt("FakesDatVersion",m_FakesDatVersion,"eMule");
+	ini.WriteBool("UpdateFakeStartup",UpdateFakeStartup,"eMule");
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
-	ini.WriteString("UpdateURLFakeList",UpdateURLFakeList);		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	ini.WriteString("UpdateURLIPFilter",UpdateURLIPFilter);//MORPH START added by Yun.SF3: Ipfilter.dat update
+	ini.WriteString("UpdateURLFakeList",UpdateURLFakeList,"eMule");		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	ini.WriteString("UpdateURLIPFilter",UpdateURLIPFilter,"eMule");//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 	//EastShare Start - PreferShareAll by AndCycle
-	ini.WriteBool("ShareAll",shareall);	// SLUGFILLER: preferShareAll
+	ini.WriteBool("ShareAll",shareall,"eMule");	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	ini.WriteInt("KnownMetDays", m_iKnownMetDays);
+	ini.WriteInt("KnownMetDays", m_iKnownMetDays,"eMule");
 	// EastShare END - Added by TAHO, .met file control
 
 	//EastShare - added by AndCycle, IP to Country
-	ini.WriteInt("IP2Country", m_iIP2CountryNameMode); 
-	ini.WriteBool("IP2CountryShowFlag", m_bIP2CountryShowFlag);
+	ini.WriteInt("IP2Country", m_iIP2CountryNameMode,"eMule"); 
+	ini.WriteBool("IP2CountryShowFlag", m_bIP2CountryShowFlag,"eMule");
 	//EastShare - added by AndCycle, IP to Country
 
 	// khaos::categorymod+ Save Preferences
-	ini.WriteBool("ValidSrcsOnly", m_bValidSrcsOnly);
-	ini.WriteBool("ShowCatName", m_bShowCatNames);
-	ini.WriteBool("ActiveCatDefault", m_bActiveCatDefault);
-	ini.WriteBool("SelCatOnAdd", m_bSelCatOnAdd);
-	ini.WriteBool("AutoSetResumeOrder", m_bAutoSetResumeOrder);
-	ini.WriteBool("SmallFileDLPush", m_bSmallFileDLPush);
-	ini.WriteInt("StartDLInEmptyCats", m_iStartDLInEmptyCats);
-	ini.WriteBool("UseAutoCat", m_bUseAutoCat);
+	ini.WriteBool("ValidSrcsOnly", m_bValidSrcsOnly,"eMule");
+	ini.WriteBool("ShowCatName", m_bShowCatNames,"eMule");
+	ini.WriteBool("ActiveCatDefault", m_bActiveCatDefault,"eMule");
+	ini.WriteBool("SelCatOnAdd", m_bSelCatOnAdd,"eMule");
+	ini.WriteBool("AutoSetResumeOrder", m_bAutoSetResumeOrder,"eMule");
+	ini.WriteBool("SmallFileDLPush", m_bSmallFileDLPush,"eMule");
+	ini.WriteInt("StartDLInEmptyCats", m_iStartDLInEmptyCats,"eMule");
+	ini.WriteBool("UseAutoCat", m_bUseAutoCat,"eMule");
 	// khaos::categorymod-
 	// khaos::kmod+
-	ini.WriteBool("SmartA4AFSwapping", m_bSmartA4AFSwapping);
-	ini.WriteInt("AdvancedA4AFMode", m_iAdvancedA4AFMode);
-	ini.WriteBool("ShowA4AFDebugOutput", m_bShowA4AFDebugOutput);
-	ini.WriteBool("RespectMaxSources", m_bRespectMaxSources);
-	ini.WriteBool("UseSaveLoadSources", m_bUseSaveLoadSources);
+	ini.WriteBool("SmartA4AFSwapping", m_bSmartA4AFSwapping,"eMule");
+	ini.WriteInt("AdvancedA4AFMode", m_iAdvancedA4AFMode,"eMule");
+	ini.WriteBool("ShowA4AFDebugOutput", m_bShowA4AFDebugOutput,"eMule");
+	ini.WriteBool("RespectMaxSources", m_bRespectMaxSources,"eMule");
+	ini.WriteBool("UseSaveLoadSources", m_bUseSaveLoadSources,"eMule");
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
-	ini.WriteInt("TimeRemainingMode", m_iTimeRemainingMode);
+	ini.WriteInt("TimeRemainingMode", m_iTimeRemainingMode,"eMule");
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteBool("SUCEnabled",m_bSUCEnabled);
-	ini.WriteInt("SUCLog",m_bSUCLog);
-	ini.WriteInt("SUCHigh",m_iSUCHigh);
-	ini.WriteInt("SUCLow",m_iSUCLow);
-	ini.WriteInt("SUCDrift",m_iSUCDrift);
-	ini.WriteInt("SUCPitch",m_iSUCPitch);
+	ini.WriteBool("SUCEnabled",m_bSUCEnabled,"eMule");
+	ini.WriteInt("SUCLog",m_bSUCLog,"eMule");
+	ini.WriteInt("SUCHigh",m_iSUCHigh,"eMule");
+	ini.WriteInt("SUCLow",m_iSUCLow,"eMule");
+	ini.WriteInt("SUCDrift",m_iSUCDrift,"eMule");
+	ini.WriteInt("SUCPitch",m_iSUCPitch,"eMule");
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteInt("MaxConnectionsSwitchBorder",maxconnectionsswitchborder);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteInt("MaxConnectionsSwitchBorder",maxconnectionsswitchborder,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
 
-	ini.WriteBool("IsPayBackFirst",m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
-	ini.WriteBool("OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	ini.WriteBool("DateFileNameLog", m_bDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+	ini.WriteBool("IsPayBackFirst",m_bPayBackFirst,"eMule");//EastShare - added by AndCycle, Pay Back First
+	ini.WriteBool("OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles,"eMule");//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime,"eMule");//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	ini.WriteBool("DateFileNameLog", m_bDateFileNameLog,"eMule");//Morph - added by AndCycle, Date File Name Log
 
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
-	ini.WriteBool("DaylightSavingPatchEnabled",m_iDaylightSavingPatch);
+	ini.WriteBool("DaylightSavingPatchEnabled",m_iDaylightSavingPatch,"eMule");
 	// #endif
 
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
-	ini.WriteBool("AutoBackup",autobackup);
-	ini.WriteBool("AutoBackup2",autobackup2);
+	ini.WriteBool("AutoBackup",autobackup,"eMule");
+	ini.WriteBool("AutoBackup2",autobackup2,"eMule");
 	//EastShare End - Added by Pretender, TBH-AutoBackup
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	ini.WriteString("CommunityName",GetCommunityName());
-	ini.WriteBool ("ReportHashingFiles",GetReportHashingFiles ());
-	ini.WriteBool ("LogFriendlistActivities",GetLogFriendlistActivities ());
+	ini.WriteString("CommunityName",GetCommunityName(),"eMule");
+	ini.WriteBool ("ReportHashingFiles",GetReportHashingFiles (),"eMule");
+	ini.WriteBool ("LogFriendlistActivities",GetLogFriendlistActivities (),"eMule");
 	// [end] Mighty Knife
 
 	// Mighty Knife: CRC32-Tag
-	ini.WriteBool ("DontAddCRC32ToFilename",GetDontAddCRCToFilename ());
+	ini.WriteBool ("DontAddCRC32ToFilename",GetDontAddCRCToFilename (),"eMule");
 	CString temp;
 	// Encapsule these strings by "" because space characters are allowed at the
 	// beginning/end of the prefix/suffix !
 	temp.Format ("\"%s\"",GetCRC32Prefix ());
-	ini.WriteString("LastCRC32Prefix",temp);
+	ini.WriteString("LastCRC32Prefix",temp,"eMule");
 	temp.Format ("\"%s\"",GetCRC32Suffix());
-	ini.WriteString("LastCRC32Suffix",temp);
+	ini.WriteString("LastCRC32Suffix",temp,"eMule");
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	ini.WriteBool("DynUpEnabled", m_bDynUpEnabled);
-	ini.WriteInt("DynUpPingTolerance", m_iDynUpPingTolerance);
-	ini.WriteInt("DynUpGoingUpDivider", m_iDynUpGoingUpDivider);
-	ini.WriteInt("DynUpGoingDownDivider", m_iDynUpGoingDownDivider);
-	ini.WriteInt("DynUpNumberOfPings", m_iDynUpNumberOfPings);
-	ini.WriteBool("DynUpLog", m_bDynUpLog);
-	ini.WriteInt("DynUpPingLimit", m_iDynUpPingLimit); // EastShare - Add by TAHO, USS limit
-	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
+	ini.WriteBool("USSLog", m_bDynUpLog,"eMule");
+	ini.WriteInt("USSPingLimit", m_iDynUpPingLimit,"eMule"); // EastShare - Add by TAHO, USS limit
+	ini.WriteBool("isUSSLimit", m_bIsUSSLimit,"eMule"); // EastShare - Added by TAHO, does USS limit
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 	// ZZ:UploadSpeedSense -->
 	ini.WriteBool("USSEnabled", m_bDynUpEnabled, "eMule");
@@ -2556,7 +2551,6 @@ void CPreferences::LoadPreferences(){
 //			// -khaos--+++> Set this to 2 so that LoadStats will load 'em from ini.old
 //			loadstatsFromOld = 2;
 //			// <-----khaos-
-//		}
 	}
 	CIni ini(strFileName, "eMule");
 	//--- end Ozon :)
@@ -2802,6 +2796,21 @@ void CPreferences::LoadPreferences(){
 	m_iStraightWindowStyles=ini.GetInt("StraightWindowStyles",0);
 	_sntprintf(m_szSkinProfile, ARRSIZE(m_szSkinProfile), "%s", ini.GetString(_T("SkinProfile"), _T("")));
 	_sntprintf(m_szSkinProfileDir, ARRSIZE(m_szSkinProfileDir), "%s", ini.GetString(_T("SkinProfileDir"), _T("")));
+	//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
+	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
+	enableZeroFilledTest = ini.GetBool("EnableZeroFilledTest", false);
+	// Maella end
+	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
+
+	enableDownloadInRed = ini.GetBool("EnableDownloadInRed", true); //MORPH - Added by IceCream, show download in red
+	enableDownloadInBold = ini.GetBool("EnableDownloadInBold", true); //MORPH - Added by SiRoB, show download in Bold
+	enableAntiLeecher = ini.GetBool("EnableAntiLeecher", true); //MORPH - Added by IceCream, enable AntiLeecher
+	enableAntiCreditHack = ini.GetBool("EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack
+	enableHighProcess = ini.GetBool("EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
+	creditSystemMode = (CreditSystemSelection)ini.GetInt("CreditSystemMode", CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
+	equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
+	m_bECFEFallTime = ini.GetBool("ECFEFallTime", false);//Morph - added by AndCycle, Equal Chance For Each File
+	isboostfriends = ini.GetBool("IsBoostFriends", false);//Added by Yun.SF3, boost friends
 
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	m_IPfilterVersion=ini.GetInt("IPfilterVersion",0); //added by milobac: Ipfilter.dat update
@@ -3068,15 +3077,26 @@ void CPreferences::LoadPreferences(){
 	m_bMMEnabled = ini.GetBool("Enabled", false);
 	m_nMMPort = ini.GetInt("Port", 80);
 
-/*
+	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
+	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
+
+	m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
+	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
+	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
+	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
+	m_bDynUpLog = ini.GetBool("DynUpLog", false);
+	m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
+	m_bIsUSSLimit = ini.GetBool("IsUSSLimit",false); // EastShare - Added by TAHO, does USS limit
+	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
+
 	// ZZ:UploadSpeedSense -->
-    m_bDynUpEnabled = ini.GetBool("USSEnabled", false, "eMule");
-    m_iDynUpPingTolerance = ini.GetInt("USSPingTolerance", 800, "eMule");
-    m_iDynUpGoingUpDivider = ini.GetInt("USSGoingUpDivider", 1000, "eMule");
-    m_iDynUpGoingDownDivider = ini.GetInt("USSGoingDownDivider", 1000, "eMule");
-    m_iDynUpNumberOfPings = ini.GetInt("USSNumberOfPings", 1, "eMule");
+    if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool("USSEnabled", m_bDynUpEnabled, "eMule");
+    m_iDynUpPingTolerance = ini.GetInt("USSPingTolerance", m_iDynUpPingTolerance, "eMule");
+    m_iDynUpGoingUpDivider = ini.GetInt("USSGoingUpDivider", m_iDynUpGoingDownDivider, "eMule");
+    m_iDynUpGoingDownDivider = ini.GetInt("USSGoingDownDivider", m_iDynUpGoingDownDivider, "eMule");
+    m_iDynUpNumberOfPings = ini.GetInt("USSNumberOfPings", m_iDynUpNumberOfPings, "eMule");
 	// ZZ:UploadSpeedSense <--
-*/
+
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	sprintf (m_sCommunityName,"%s",ini.GetString ("CommunityName"));
 	m_bReportHashingFiles = ini.GetBool ("ReportHashingFiles",true);
@@ -3090,18 +3110,7 @@ void CPreferences::LoadPreferences(){
 	SetCRC32Suffix (ini.GetString("LastCRC32Suffix","\"]\"").Trim ("\""));
 	// [end] Mighty Knife
 
-	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
-
-	m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
-	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
-	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
-	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
-	m_bDynUpLog = ini.GetBool("DynUpLog", false);
-	m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
-	m_bIsUSSLimit = ini.GetBool("IsUSSLimit",false); // EastShare - Added by TAHO, does USS limit
-	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
-
+	
     LoadCats();
 	//MORPH - Khaos Obsolete //if (GetCatCount()==1) SetAllcatType(0);
 
