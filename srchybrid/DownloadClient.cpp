@@ -1022,7 +1022,7 @@ void CUpDownClient::SendBlockRequests(){
 		if (m_PendingBlocks_list.IsEmpty())
 		{
 			SendCancelTransfer();
-			SetDownloadState(DS_ONQUEUE);	// SLUGFILLER: noNeededRequeue
+			SetDownloadState(DS_ONQUEUE, _T("noNeededRequeue"));	// SLUGFILLER: noNeededRequeue
 			return;
 		}
 		if (isTestFile)
@@ -1054,7 +1054,7 @@ void CUpDownClient::SendBlockRequests(){
 	CreateBlockRequests(3);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SendCancelTransfer();
-		SetDownloadState(DS_ONQUEUE);	// SLUGFILLER: noNeededRequeue
+		SetDownloadState(DS_ONQUEUE, _T("noNeededRequeue"));	// SLUGFILLER: noNeededRequeue
 		return;
 	}
 	const int iPacketSize = 16+(3*4)+(3*4); // 40
