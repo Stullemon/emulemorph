@@ -1121,7 +1121,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
 			#ifdef _UNICODE
-				TCHAR symbol[4] = _T("\n\x25E6 ");
+				TCHAR symbol[4] = _T("\n\x2022 ");
 			#else
 				TCHAR symbol[2] = "o ";
 			#endif
