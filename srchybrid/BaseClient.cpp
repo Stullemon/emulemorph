@@ -62,6 +62,8 @@
 #include "FunnyNick.h" //MORPH - Added by IceCream, xrmb FunnyNick
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
+#include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -270,6 +272,33 @@ void CUpDownClient::Init()
 	m_incompletepartVer = 0;
 	// <--- enkeyDev: ICS
 	//Morph End - added by AndCycle, ICS
+
+    // MORPH START - Added by Commander, WebCache 1.2e
+    m_bProxy = false;
+	m_bIsAcceptingOurOhcbs = true;
+	m_bIsTrustedOHCBSender = true;
+	m_bIsAllowedToSendOHCBs = true;
+	m_uWebCacheFlags = 0;
+	m_pWCDownSocket = NULL;
+	m_pWCUpSocket = NULL;
+	m_WA_webCacheIndex = -1;
+	m_bWebCacheSupport = false;
+	m_uWebCacheDownloadId = 0;
+	m_uWebCacheUploadId = 0;
+	m_eWebCacheDownState = WCDS_NONE;
+	m_eWebCacheUpState = WCUS_NONE;
+	//blocksLoaded = 0; //JP blocks are counted in the WCDownSocket code now
+	b_webcacheInfoNeeded = false;
+	//JP trusted OHCB-Senders Start
+	WebCachedBlockRequests = 0;
+	SuccessfulWebCachedBlockDownloads = 0;
+	//JP trusted OHCB-Senders END
+	// Superlexx - encryption
+	Crypt.useNewKey = true;
+	Crypt.isProxy = false;
+	GenerateKey(Crypt.remoteMasterKey);	// generate a key - will be done right before sending
+	for (int i=0; i<WC_KEYLENGTH; i++) Crypt.localMasterKey[i] = 0; // fill with zeroes so we can say if the key is valid
+    // MORPH END - Added by Commander, WebCache 1.2e
 }
 
 CUpDownClient::~CUpDownClient(){
@@ -316,6 +345,16 @@ CUpDownClient::~CUpDownClient(){
 		m_pPCUpSocket->client = NULL;
 		m_pPCUpSocket->Safe_Delete();
 	}
+	// MORPH START - Added by Commander, WebCache 1.2e
+	if (m_pWCDownSocket){
+		m_pWCDownSocket->client = NULL;
+		m_pWCDownSocket->Safe_Delete();
+	}
+	if (m_pWCUpSocket){
+		m_pWCUpSocket->client = NULL;
+		m_pWCUpSocket->Safe_Delete();
+	}
+	// MORPH END - Added by Commander, WebCache 1.2e
 	if (m_pszUsername)
 		free(m_pszUsername);
 	if (m_abyPartStatus){
@@ -386,7 +425,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("dodgethis"))|| //Updated
 			StrStrI(m_strModVersion,_T("DM-"))|| //hotfix
 			StrStrI(m_strModVersion,_T("|X|"))||
-			StrStrI(m_strModVersion,_T("eVortex"))||
+			StrStrI(m_strModVersion,_T("eVorte"))||
 			StrStrI(m_strModVersion,_T("Mison"))||
 			StrStrI(m_strModVersion,_T("father"))||
 			StrStrI(m_strModVersion,_T("Dragon"))||
@@ -568,6 +607,20 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strHelloInfo.AppendFormat(_T("\n  ModID=%s"), m_strModVersion);
 				CheckForGPLEvilDoer();
 				break;
+			// MORPH START - Added by Commander, WebCache 1.2e
+			case WC_TAG_VOODOO:
+				if( temptag.IsInt() && temptag.GetInt() == 'ARC4' )
+					m_bWebCacheSupport = true;
+				break;
+			case WC_TAG_FLAGS:
+				if (m_bWebCacheSupport && temptag.IsInt())
+				{
+					m_uWebCacheFlags = temptag.GetInt();
+					b_webcacheInfoNeeded = m_uWebCacheFlags & WC_FLAGS_INFO_NEEDED;
+				}
+				break;
+			// Superlexx webcache - moved to the multipacket
+			// MORPH END - Added by Commander, WebCache 1.2e
 			case CT_EMULE_UDPPORTS:
 				// 16 KAD Port
 				// 16 UDP Port
@@ -858,7 +911,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	tag7.WriteTagToFile(&data);
 	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH START - Added by IceCream, Anti-leecher feature
-		if (StrStrI(m_strModVersion,_T("Mison"))||StrStrI(m_strModVersion,_T("eVort"))||StrStrI(m_strModVersion,_T("booster"))||IsLeecher()){
+		if (IsLeecher()){
 			CTag tag8(ET_MOD_VERSION, m_strModVersion);
 			tag8.WriteTagToFile(&data);
 		}
@@ -1083,7 +1136,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
-	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
+	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/+1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 
 	data->WriteUInt32(tagcount);
@@ -1164,7 +1217,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	if (bSendModVersion) { //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 		//MORPH START - Added by SiRoB, Anti-leecher feature
-		if (StrStrI(m_strModVersion,_T("Mison"))||StrStrI(m_strModVersion,_T("eVort"))||StrStrI(m_strModVersion,_T("booster"))||IsLeecher()){
+		if (IsLeecher()){
 			CTag tagMODVersion(ET_MOD_VERSION, m_strModVersion);
 			tagMODVersion.WriteTagToFile(data);
 		}
@@ -1173,7 +1226,21 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 			tagMODVersion.WriteTagToFile(data);
 		}
 		//MORPH END   - Added by SiRoB, Anti-leecher feature
-		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+    	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+
+		// MORPH START - Added by SiRoB, WebCache 1.2f
+		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC4' );
+		tagWebCacheVoodoo.WriteTagToFile(data);
+		uint32 flags = WC_FLAGS_UDP | WC_FLAGS_NO_OHCBS;
+		bool localMasterKeyNeeded = true;
+		for(int i=0; localMasterKeyNeeded && i < WC_KEYLENGTH; i++)
+			localMasterKeyNeeded = Crypt.localMasterKey[i]==0 ? true : false;
+		if (b_webcacheInfoNeeded || m_WA_webCacheIndex == -1 || localMasterKeyNeeded)
+			flags |= WC_FLAGS_INFO_NEEDED;
+		CTag tagWebCacheFlags( WC_TAG_FLAGS, flags);
+		tagWebCacheFlags.WriteTagToFile(data);
+		// MORPH END   - Added by SiRoB, WebCache 1.2f
+
 		//Morph Start - added by AndCycle, ICS
 		// enkeyDev: ICS
 		CTag tagIncompleteParts(ET_INCOMPLETEPARTS,1);
@@ -1379,6 +1446,18 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 			m_pPCUpSocket->client = NULL;
 			m_pPCUpSocket->Safe_Delete();
 		}
+		// MORPH START - Added by Commander, WebCache 1.2e
+		SetWebCacheDownState(WCDS_NONE);
+		SetWebCacheUpState(WCUS_NONE);
+		if (m_pWCDownSocket){
+			m_pWCDownSocket->client = NULL;
+			m_pWCDownSocket->Safe_Delete();
+		}
+		if (m_pWCUpSocket){
+			m_pWCUpSocket->client = NULL;
+			m_pWCUpSocket->Safe_Delete();
+		}
+		// MORPH END - Added by Commander, WebCache 1.2e
 		return false;
 	}
 }
@@ -2677,6 +2756,20 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 		strState += _T(" Hit");
 #endif
 
+	// MORPH START - Added by Commander, WebCache 1.2e
+	switch (m_eWebCacheDownState)
+	{
+	case WCDS_WAIT_CLIENT_REPLY:
+		strState += _T(" ProxyWait");
+		break;
+	case WCDS_WAIT_CACHE_REPLY:
+		strState += _T(" WC-Bug:CacheWait"); // not needed...
+		break;
+	case WCDS_DOWNLOADING:
+		strState += _T(" Via Proxy");
+		break;
+	}
+	// MORPH END - Added by Commander, WebCache 1.2e
 	return strState;
 }
 
@@ -2729,6 +2822,12 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	if (m_ePeerCacheUpState != PCUS_NONE && m_bPeerCacheUpHit)
 		strState += _T(" Hit");
 #endif
+
+	// MORPH START - Added by Commander, WebCache 1.2e
+	if( m_eWebCacheUpState == WCUS_UPLOADING )
+		strState += _T(" Via Proxy");
+	// MORPH START - Added by Commander, WebCache 1.2e
+
 	return strState;
 }
 

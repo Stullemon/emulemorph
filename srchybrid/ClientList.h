@@ -111,6 +111,11 @@ public:
     void ProcessA4AFClients(); // ZZ:DownloadManager
 	CDeadSourceList	m_globDeadSourceList;
 
+// MORPH START - Added by Commander, WebCache 1.2e
+// yonatan - not 2 be confused with the one in CUploadQueue!
+	CUpDownClient*	FindClientByWebCacheUploadId(const uint32 id);
+// MORPH END - Added by Commander, WebCache 1.2e
+
 protected:
 	void	CleanUpClientList();
 

@@ -49,10 +49,12 @@ public:
 	/*
 	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
 	*/
-	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog, uint32 FriendByteToSend);
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog, uint32 minDataRateFriend, uint32 ClientDataRateFriend, uint32 minDataRatePowerShare, uint32 ClientDataRatePowerShare, uint32 ClientDataRate);
 
     uint32 GetUpload();
-	uint32 GetFriendByteToSend();
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	void GetClassByteToSend(uint32* AllowedDataRate,uint32* ClientDataRate);
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 private:
     static UINT RunProc(LPVOID pParam);
     UINT RunInternal();
@@ -99,7 +101,11 @@ private:
 	bool m_bIsUSSLog;
 	//MORPH END   - Added by SiRoB, Log Flag to trace or not the USS activities
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	CCriticalSection FriendUploadLocker;
-	uint32 m_iMaxFriendByteToSend;
+	CCriticalSection ClassUploadLocker;
+	uint32 m_iMinDataRateFriend;
+	uint32 m_iMinDataRatePowerShare;
+	uint32 m_iMaxClientDataRateFriend;
+	uint32 m_iMaxClientDataRatePowerShare;
+	uint32 m_iMaxClientDataRate;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 };

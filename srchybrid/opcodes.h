@@ -121,6 +121,12 @@
 #define OP_PACKEDPROT			0xD4
 #define OP_EMULEPROT			0xC5
 #define OP_MLDONKEYPROT			0x00
+//MORPH START - Added by SiRoB, WebCache 1.2f
+// yonatan http start //////////////////////////////////////////////////////////////////////////
+#define OP_WEBCACHEPROT			0x57 
+#define OP_THE_LETTER_G			0x47	// yonatan http - first byte in an http GET header
+// yonatan http end ////////////////////////////////////////////////////////////////////////////
+//MORPH END   - Added by SiRoB, WebCache 1.2f
 #define	MET_HEADER				0x0E
 	
 #define UNLIMITED				0xFFFF
@@ -246,6 +252,14 @@
 #define OP_AICHANSWER			0x9C	// <HASH 16><uint16><HASH aichhashlen> <data>
 #define OP_AICHFILEHASHANS		0x9D	  
 #define OP_AICHFILEHASHREQ		0x9E
+
+//MORPH START - Added by SiRoB, WebCache 1.2f
+// yonatan http start //////////////////////////////////////////////////////////////////////////
+#define OP_DONT_SEND_OHCBS			0xFE	// protocol == OP_WEBCACHEPROT
+#define	OP_RESUME_SEND_OHCBS		0xFD	// protocol == OP_WEBCACHEPROT
+#define OP_HTTP_CACHED_BLOCK		0xFF	// <Proxy-ip 4><IP 4><PORT 2><filehash 16><startoffset 4><endoffset 4>
+// yonatan http end ////////////////////////////////////////////////////////////////////////////
+//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 // extened prot client <-> extened prot client UDP
 #define OP_REASKFILEPING		0x90	// <HASH 16>

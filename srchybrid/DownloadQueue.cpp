@@ -376,6 +376,18 @@ void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, int theCat, boo
 		}
 	}
 
+    // MORPH START - Added by Commander, WebCache 1.2e
+	if (!sharedfilelist->GetFileByID(pLink->GetHashKey())	// not already in the shared files list
+		&& partfile							// valid pointer
+		&& !partfile->hashsetneeded			// hash set not needed
+		&& thePrefs.IsWebCacheDownloadEnabled()			// webcache downloading on
+		&& partfile->GetStatus() == PS_EMPTY)	// file not stopped or paused
+	{
+			partfile->SetStatus(PS_READY);
+		theApp.sharedfiles->SafeAddKFile(partfile);
+	}
+	// MORPH END - Added by Commander, WebCache 1.2e
+
 	if(pLink->HasHostnameSources())
 	{
 		POSITION pos = pLink->m_HostnameSourcesList.GetHeadPosition();
@@ -481,6 +493,17 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 				}
 			}
 		}
+	    // MORPH START - Added by SiRoB, WebCache 1.2f
+		if (!sharedfilelist->GetFileByID(pLink->GetHashKey())	// not already in the shared files list
+			&& partfile							// valid pointer
+			&& !partfile->hashsetneeded			// hash set not needed
+			&& thePrefs.IsWebCacheDownloadEnabled()			// webcache downloading on
+			&& partfile->GetStatus() == PS_EMPTY)	// file not stopped or paused
+		{
+				partfile->SetStatus(PS_READY);
+			theApp.sharedfiles->SafeAddKFile(partfile);
+		}
+		// MORPH END - Added by SiRoB, WebCache 1.2f
 
 		if(pLink->HasHostnameSources())
 		{
@@ -785,6 +808,9 @@ void CDownloadQueue::AddDownload(CPartFile* newfile,bool paused) {
 	msgTemp.Format(GetResString(IDS_NEWDOWNLOAD) + _T("\n"), newfile->GetFileName());
 	theApp.emuledlg->ShowNotifier(msgTemp, TBN_DLOADADDED);
 	ExportPartMetFilesOverview();
+	// MORPH START - Added by Commander, WebCache 1.2e
+	thePrefs.UpdateWebcacheReleaseAllowed(); //JP webcache release
+	// MORPH END - Added by Commander, WebCache 1.2e
 }
 
 bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings)
@@ -2311,4 +2337,16 @@ bool CDownloadQueue::IsFilesPowershared()
 	}
 	return false;
 }
-//MORPH END   - Added by SiRoB, ZZ Ratio
+//MORPH END   - Added by SiRoB, ZZ Ratio// MORPH START - Added by Commander, WebCache 1.2e
+bool CDownloadQueue::ContainsUnstoppedFiles()
+{
+	bool returnval = false;
+	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )
+	{
+		CPartFile* pPartFile = filelist.GetNext(pos);
+		if (pPartFile->IsPartFile() && !pPartFile->IsStopped())
+			returnval = true;
+	}
+	return returnval;
+}
+// MORPH END - Added by Commander, WebCache 1.2e

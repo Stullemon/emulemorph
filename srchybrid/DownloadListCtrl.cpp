@@ -129,6 +129,9 @@ void CDownloadListCtrl::Init()
 	// khaos::accuratetimerem+
 	InsertColumn(14, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
 	// khaos::accuratetimerem-
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	InsertColumn(15, _T("Webcache Sources") ,LVCFMT_LEFT, 100); //JP Webcache column
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 	SetAllIcons();
 	Localize();
@@ -225,9 +228,10 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("RATING_GOOD")));  // 24
 	m_ImageList.Add(CTempIconLoader(_T("RATING_FAIR")));  // 25
 	m_ImageList.Add(CTempIconLoader(_T("RATING_EXCELLENT")));  // 26
-
 	//MORPH END   - Added by IceCream, eMule Plus rating icones
-
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	m_ImageList.Add(CTempIconLoader(_T("PREF_WEBCACHE"))); // 27// jp webcacheclient icon
+	//MORPH END   - Added by SiRoB, WebCache 1.2
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -796,6 +800,39 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			}
 			break;
 		// khaos::accuratetimerem-
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		//JP Webcache START
+		//JP added code from Gnaddelwarz
+		case 15: //WebCache
+			{
+				uint16 wcsc = lpPartFile->GetWebcacheSourceCount();
+				uint16 wcsc_our;
+				uint16 wcsc_not_our;
+				if(thePrefs.IsExtControlsEnabled())
+				{
+				wcsc_our = lpPartFile->GetWebcacheSourceOurProxyCount();
+				wcsc_not_our = lpPartFile->GetWebcacheSourceNotOurProxyCount();
+				}
+
+				uint16 sc = lpPartFile->GetSourceCount();
+				double PercentWCClients;
+				if (sc !=0)
+					PercentWCClients = (double) 100 * wcsc / sc;
+				else
+					PercentWCClients = 0;
+                if(wcsc > 0 && !(lpPartFile->GetStatus() == PS_PAUSED && wcsc == 0) && lpPartFile->GetStatus() != PS_COMPLETE) {
+					if(thePrefs.IsExtControlsEnabled())
+						buffer.Format(_T("%i/%i/%i (%1.1f%%)"), wcsc, wcsc_our, wcsc_not_our, PercentWCClients);
+					else
+                    buffer.Format(_T("%i (%1.1f%%)"), wcsc, PercentWCClients);
+                } else {
+                    buffer = _T("");
+				}
+				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
+			}
+			break;
+		//JP Webcache END
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		}
 	}
 }
@@ -873,6 +910,12 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					m_ImageList.Draw(dc, 14, point2, ILD_NORMAL | uOvlImg);
 				else if (lpUpDownClient->GetClientSoft() == SO_LPHANT)
 					m_ImageList.Draw(dc, 15, point2, ILD_NORMAL | uOvlImg);
+				//MORPH START - Added by SiRoB, WebCache 1.2f
+				// jp webcacheclient icon START 
+				else if (lpUpDownClient->GetClientSoft() == SO_WEBCACHE)
+					m_ImageList.Draw(dc, 27, point2, ILD_NORMAL | uOvlImg);
+				// jp webcacheclient icon END
+				//MORPH END   - Added by SiRoB, WebCache 1.2f
 				else if (lpUpDownClient->ExtProtocolAvailable())
 					m_ImageList.Draw(dc, (lpUpDownClient->IsMorph())?18:5, point2, ILD_NORMAL | uOvlImg);
 				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY)
@@ -1125,6 +1168,31 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 			break;
 		case 12:	// category
 			break;
+		case 13:	// linear priority
+			break;
+		case 14:	// remaining size
+			break;
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		//JP Webcache START
+		case 15: {
+			if (lpUpDownClient->SupportsWebCache())
+			{
+				buffer = lpUpDownClient->GetWebCacheName();
+				if (lpUpDownClient->IsBehindOurWebCache())
+					dc->SetTextColor(RGB(0, 180, 0)); //if is behind our webcache display green
+				else if (buffer != "")
+					dc->SetTextColor(RGB(255, 0, 0)); // if webcache info is there but not our own set red
+				else
+					buffer = "no proxy set";	// if no webcache info colour is black
+			}
+			else
+				buffer = "";
+			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
+ 			dc->SetTextColor(RGB(0, 0, 0));
+			break;
+		}
+		//JP Webcache END
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		}
 	}
 }
@@ -2739,6 +2807,11 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 		else
 			return 0;
 	// khaos::categorymod-
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	//JP Webcache
+	case 15:
+		return file1->GetWebcacheSourceCount() - file2->GetWebcacheSourceCount();
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	//MORPH START - Added by IceCream, SLUGFILLER: DLsortFix
 	case 0x8000:
 		return file1->GetPartMetFileName().CompareNoCase(file2->GetPartMetFileName());
@@ -2832,6 +2905,15 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			//MORPH END   - Added by IceCream, SLUGFILLER: DLsortFix
 		}
 		return client2->GetDownloadState() - client1->GetDownloadState();	//MORPH - Added by IceCream, SLUGFILLER: DLsortFix - match status sorting
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	//JP Webcache START 
+	case 15:
+		if (client1->SupportsWebCache() && client2->SupportsWebCache() )
+		return CompareLocaleStringNoCase(client1->GetWebCacheName(),client2->GetWebCacheName());
+		else
+			return client1->SupportsWebCache() - client2->SupportsWebCache();
+	//JP Webcache END
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	default:
 		return 0;
 	}

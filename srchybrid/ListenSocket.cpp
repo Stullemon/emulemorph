@@ -48,6 +48,13 @@
 
 #include "FirewallOpener.h" //MORPH - Added by SiRoB, [MoNKi: -Random Ports-]
 
+// MORPH START - Added by Commander, WebCache 1.2e
+#include "WebCache/WebCacheSocket.h"
+#include "WebCache/WebCachedBlock.h"
+#include "WebCache/WebCacheProxyClient.h"
+#include "WebCache/WebCachedBlockList.h"
+// MORPH END - Added by Commander, WebCache 1.2e
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -1212,6 +1219,21 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					client->SetFileListRequested(0);
                     break;
                 }
+        		// MORPH START - Added by Commander, WebCache 1.2e
+				case OP_HTTP_CACHED_BLOCK:
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP__Http_Cached_Block", client);
+					theStats.AddDownDataOverheadOther(size);
+					if( thePrefs.IsWebCacheDownloadEnabled() && client->SupportsWebCache() ) {
+						// CHECK HANDSHAKE?
+						if (thePrefs.GetLogWebCacheEvents())
+						AddDebugLogLine( false, _T("Received WCBlock - TCP") );
+						CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, client ); // Starts DL or places block on queue
+					}
+					break;
+				}
+                // MORPH END - Added by Commander, WebCache 1.2e
 				default:
 					theStats.AddDownDataOverheadOther(size);
 					PacketToDebugLogLine(_T("eDonkey"), packet, size, opcode, DLP_LOW);
@@ -1272,6 +1294,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 			{
 				case OP_MULTIPACKET:
 				{
+					bool webcacheInfoReceived = false; // MORPH - Added by Commander, WebCache 1.2e
+
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_MultiPacket", client, packet);
 					theStats.AddDownDataOverheadFileRequest(size);
@@ -1299,8 +1323,10 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 					}
 
 					// EastShare START - Marked by TAHO, modified SUQWT
-					//if (!client->GetWaitStartTime())
-					//	client->SetWaitStartTime();
+					/*
+					if (!client->GetWaitStartTime())
+						client->SetWaitStartTime();
+					*/
 					// EastShare END - Marked by TAHO, modified SUQWT
 					// if we are downloading this file, this could be a new source
 					// no passive adding of files with only one part
@@ -1413,11 +1439,84 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								break;
 							}
 
+							// MORPH START - Added by Commander, WebCache 1.2e                                
+							// Superlexx - webcache - moved WC_TAG_WEBCACHENAME, WC_TAG_WEBCACHEID and WC_TAG_MASTERKEY here from the hello packet
+							case WC_TAG_WEBCACHENAME:
+							{
+								CString webcachename = data_in.ReadString( false ); // shouldn't these always be ASCII?
+								if( client->SupportsWebCache() )
+								{
+									webcacheInfoReceived = true;
+									webcachename.Trim();
+									webcachename.MakeLower();
+									if ( webcachename.IsEmpty() )
+										client->m_WA_webCacheIndex = -1;
+									else
+									{
+										int index = GetWebCacheIndex(webcachename);
+										client->m_WA_webCacheIndex = (index >= 0) ? index : AddWebCache(webcachename);
+									}
+								}
+								break;
+							}
+							/*case WC_TAG_WEBCACHEID:
+							{
+								uint32 tmpID;
+								tmpID = data_in.ReadUInt32();
+								if( client->SupportsWebCache() )
+								{
+									webcacheInfoReceived = true;
+									client->m_uWebCacheDownloadId = tmpID;
+								}
+								break;
+							}*/
+							case WC_TAG_MASTERKEY:
+							{
+								byte tmpKey[WC_KEYLENGTH];
+								data_in.Read( tmpKey, WC_KEYLENGTH );
+								if( client->SupportsWebCache() )
+								{
+									webcacheInfoReceived = true;
+									for(int i=0;i<WC_KEYLENGTH;i++)
+										client->Crypt.localMasterKey[i] = tmpKey[i];
+
+									byte tmpID[4];
+									for (int i=0; i<4; i++)
+										tmpID[i] = client->Crypt.localMasterKey[i] ^ (client->GetUserHash())[i];
+									client->m_uWebCacheDownloadId = *((uint32*)tmpID);
+								}
+								break;
+							}
+							// MORPH END - Added by Commander, WebCache 1.2e
 							default:
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
 									Debug(_T("***NOTE: Invalid sub opcode 0x%02x with OP_MultiPacket received; %s"), opcode_in, client->DbgGetClientInfo());
 						}
 					}
+
+					// MORPH START - Added by Commander, WebCache 1.2e
+					// Superlexx - webcache - send webcacheInfo in the answer when needed
+					if( client->SupportsWebCache() && (client->WebCacheInfoNeeded() || webcacheInfoReceived))
+					{
+						data_out.WriteUInt8(WC_TAG_WEBCACHENAME);
+						data_out.WriteString(thePrefs.webcacheName);
+						
+						/*data_out.WriteUInt8(WC_TAG_WEBCACHEID);
+						client->m_uWebCacheUploadId = GetRandomUInt32();
+						data_out.WriteUInt32(client->m_uWebCacheUploadId);*/
+						
+						data_out.WriteUInt8(WC_TAG_MASTERKEY);
+						data_out.Write( client->Crypt.remoteMasterKey, WC_KEYLENGTH );
+
+						byte tmpID[4];
+						for (int i=0; i<4; i++)
+							tmpID[i] = client->Crypt.remoteMasterKey[i] ^ (thePrefs.GetUserHash())[i];
+						client->m_uWebCacheUploadId = *((uint32*)tmpID);
+						
+						client->SetWebCacheInfoNeeded(false);
+					}
+					// MORPH END - Added by Commander, WebCache 1.2e
+
 					if( data_out.GetLength() > 16 )
 					{
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -1488,6 +1587,52 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 							}
 							// <--- enkeyDEV: ICS
 							//Morph End - added by AndCycle, ICS
+                                                        // MORPH START - Added by Commander, WebCache 1.2e
+                                                        // WebCache ////////////////////////////////////////////////////////////////////////////////////
+							// Superlexx - webcache - moved WC_TAG_WEBCACHENAME, WC_TAG_WEBCACHEID and WC_TAG_MASTERKEY here from the hello packet
+							case WC_TAG_WEBCACHENAME:
+							{
+								CString webcachename = data_in.ReadString(false);
+								if( client->SupportsWebCache() )
+								{
+									webcachename.Trim();
+									webcachename.MakeLower();
+									if ( webcachename.IsEmpty() )
+										client->m_WA_webCacheIndex = -1;
+									else
+									{
+										int index = GetWebCacheIndex(webcachename);
+										client->m_WA_webCacheIndex = (index >= 0) ? index : AddWebCache(webcachename);
+									}
+								}
+								break;
+							}
+							/*case WC_TAG_WEBCACHEID:
+							{
+								client->m_uWebCacheDownloadId = data_in.ReadUInt32();
+								if( !client->SupportsWebCache() )
+									client->m_uWebCacheDownloadId = 0;
+								break;
+							}*/
+							case WC_TAG_MASTERKEY:
+							{
+								byte tmpKey[WC_KEYLENGTH];
+								data_in.Read( tmpKey, WC_KEYLENGTH );
+								//data_in.Read( client->Crypt.remoteMasterKey, WC_KEYLENGTH );
+								if( client->SupportsWebCache() )
+								{
+									for(int i=0;i<WC_KEYLENGTH;i++)
+										client->Crypt.localMasterKey[i] = tmpKey[i];
+
+									byte tmpID[4];
+									for (int i=0; i<4; i++)
+										tmpID[i] = client->Crypt.localMasterKey[i] ^ (client->GetUserHash())[i];
+									client->m_uWebCacheDownloadId = *((uint32*)tmpID);
+								}
+								break;
+							}
+							// Superlexx - webcache - end
+							// MORPH END - Added by Commander, WebCache 1.2e
 							default:
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
 									Debug(_T("***NOTE: Invalid sub opcode 0x%02x with OP_MultiPacketAns received; %s"), opcode_in, client->DbgGetClientInfo());
@@ -2118,6 +2263,14 @@ bool CClientReqSocket::PacketReceivedCppEH(Packet* packet)
 		case OP_EMULEPROT:
 			bResult = ProcessExtPacket(packet->pBuffer, packet->size, packet->opcode, uRawSize);
 			break;
+// MORPH START - Added by Commander, WebCache 1.2f
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		// yonatan - webcache protocol packets
+		case OP_WEBCACHEPROT:
+			bResult = ProcessWebCachePacket(packet->pBuffer, packet->size, packet->opcode, uRawSize);
+			break;
+		// yonatan - webcache protocol packets end
+// MORPH END - Added by SiRoB, WebCache 1.2f
 		default:{
 			theStats.AddDownDataOverheadOther(uRawSize);
 			if (thePrefs.GetVerbose())
@@ -2404,6 +2557,13 @@ void CListenSocket::OnAccept(int nErrorCode){
 	
 		for (/**/; m_nPendingConnections; AddConnection())
 		{
+			// MORPH START - Added by SiRoB, WebCache 1.2f
+			// JP detect fake HighID
+			// MOD BEGIN netfinity: Fake HighID
+			thePrefs.m_bHighIdPossible = true;
+			// MOD END netfinity
+			// MORPH END   - Added by SiRoB, WebCache 1.2f
+
 			m_nPendingConnections--;
 
 			CClientReqSocket* newclient = new CClientReqSocket();
@@ -2450,6 +2610,13 @@ void CListenSocket::Process(){
 	POSITION pos2;
 	m_OpenSocketsInterval = 0;
 	opensockets = 0;
+	// MORPH START - Added by Commander, WebCache 1.2e
+	if( !SINGLEProxyClient )
+		WebCachedBlockList.TryToDL();
+	else
+		SINGLEProxyClient->CheckDownloadTimeout();
+	// MORPH END - Added by Commander, WebCache 1.2e
+
 	//MORPH START - Added by Yun.SF3, Auto DynUp changing
 	if (per5average)
 		per5average /= 2;
@@ -2650,3 +2817,52 @@ void CListenSocket::SwitchSUC(bool bSetSUCOn)
 	}
 }
 //MORPH END - Added by Yun.SF3, Auto DynUp changing
+
+// MORPH START - Added by SiRoB, WebCache 1.2f
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+// yonatan - webcache protocol packets
+bool CClientReqSocket::ProcessWebCachePacket(char* packet, uint32 size, UINT opcode, UINT uRawSize)
+{
+	if (thePrefs.m_iDbgHeap >= 2)
+		ASSERT_VALID(client);
+	switch(opcode)
+	{
+		case OP_DONT_SEND_OHCBS:
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugRecv("OP__Dont_Send_Ohcbs recv", client);
+			if (thePrefs.GetLogWebCacheEvents())
+			AddDebugLogLine( false, _T("OP__Dont_Send_Ohcbs RECEIVED")); // yonatan tmp
+			theStats.AddDownDataOverheadOther(size);
+			if( client->SupportsWebCache() && client->SupportsOhcbSuppression() )
+				client->m_bIsAcceptingOurOhcbs = false;
+			return true;
+		//JP for a future version
+		case OP_RESUME_SEND_OHCBS:
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugRecv("OP_RESUME_SEND_OHCBS received from", client);
+			if (thePrefs.GetLogWebCacheEvents())
+				AddDebugLogLine( false, _T("Received OP_RESUME_SEND_OHCBS from %s "), client->DbgGetClientInfo() );
+			theStats.AddDownDataOverheadOther(size);
+			if( client->SupportsWebCache() && client->SupportsOhcbSuppression() )
+				client->m_bIsAcceptingOurOhcbs = true;
+			return true;
+		case OP_HTTP_CACHED_BLOCK:
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugRecv("OP__Http_Cached_Block", client);
+			theStats.AddDownDataOverheadOther(size);
+			if( thePrefs.IsWebCacheDownloadEnabled() && client->SupportsWebCache() ) 
+			{
+				// CHECK HANDSHAKE?
+				if (thePrefs.GetLogWebCacheEvents())
+					AddDebugLogLine( false, _T("Received WCBlock - TCP") );
+				CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, client ); // Starts DL or places block on queue
+			}
+			return true;
+		default:
+			theStats.AddDownDataOverheadOther(uRawSize);
+			PacketToDebugLogLine(_T("WebCache"), packet, size, opcode, DLP_DEFAULT);
+			return false;
+	}
+}
+// yonatan - webcache protocol packets end
+// MORPH END   - Added by SiRoB, WebCache 1.2f

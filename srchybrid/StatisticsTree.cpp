@@ -38,6 +38,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+int j=0;
 
 IMPLEMENT_DYNAMIC(CStatisticsTree, CTreeCtrl)
 
@@ -498,9 +499,12 @@ bool CStatisticsTree::CopyText(int copyMode)
 //					bdy		= The BODY tag.  Used to control the background color.
 CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, int theItemLevel, bool firstItem)
 {
-	CString		strBuffer, strItem;
+	CString		strBuffer, strItem, strImage, strChild, strTab;
+	int			nImage=0, nSelectedImage=0;
 	HTREEITEM	hCurrent;
 	
+	CString strDivStart, strDiv, strDivA, strDivEnd, strJ, strName;
+
 	strBuffer.Empty();
 
 	if (firstItem) hCurrent = GetRootItem();
@@ -508,13 +512,66 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 
 	while (hCurrent != NULL)
 	{
-		if (IsBold(hCurrent)) strItem = _T("<span id=\"sec\">") + GetItemText(hCurrent) + _T("</span>");
-		else strItem = _T("<span id=\"item\">") + GetItemText(hCurrent) + _T("</span>");
-		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("&nbsp;&nbsp;&nbsp;");
+		strItem.Empty();
+		if (ItemHasChildren(hCurrent))
+		{
+			j++;
+			strJ.Format(_T("%d"),j);
+			if (IsExpanded(hCurrent))
+			{
+				strChild = _T("visible");
+				strDiv = CString(_T("<div id=\"T")) + strJ + CString(_T("\" style=\"margin-left:18px\">"));
+			}
+			else
+			{
+				strChild = _T("hidden");
+				strDiv = CString(_T("<div id=\"T")) + strJ + CString(_T("\" style=\"margin-left:18px; visibility:hidden; position:absolute\">"));
+			}
+			strDivStart = CString(_T("<a href=\"javascript:togglevisible('")) + strJ + CString(_T("')\">"));
+			strDivEnd = CString(_T("</div>"));
+			strDivA = CString(_T("</a>"));
+			strName = CString(_T("name=\"I")) + strJ + CString(_T("\""));
+		}
+		else
+		{
+			strChild = _T("space");
+			strDiv=_T("");
+			strDivStart=_T("");
+			strDivEnd=_T("");
+			strName=_T("");
+		}
+		strBuffer += _T("\n");
+		for (int i = 0; i < theItemLevel; i++)
+			strBuffer += _T("\t");
+
+		strItem += strDivStart;
+		strItem += CString(_T("<img ")) + strName + CString(_T("src=\"stats_")) + strChild + CString(_T(".gif\" align=\"middle\">&nbsp;"));
+		strItem += strDivA;
+
+		if (GetItemImage(hCurrent, nImage, nSelectedImage))
+			strImage.Format(_T("%u"),nImage);
+		else
+			strImage.Format(_T("%u"),0);
+
+		strItem += CString(_T("<img src=\"stats_")) + strImage + CString(_T(".gif\" align=\"middle\">&nbsp;"));
+
+		if (IsBold(hCurrent))
+			strItem += CString(_T("<b>")) + GetItemText(hCurrent) + CString(_T("</b>"));
+		else
+			strItem += GetItemText(hCurrent);
+
 		if (theItemLevel==0) strBuffer .Append(_T("\n"));
 		strBuffer += strItem + _T("<br>");
-		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
-			strBuffer += (CString) GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
+
+		if (ItemHasChildren(hCurrent) /*&& (!onlyVisible || IsExpanded(hCurrent))*/)
+		{
+			strTab = _T("\n");
+			for (int i = 0; i < theItemLevel; i++)
+				strTab += _T("\t");
+			strBuffer += strTab + strDiv;
+			strBuffer += strTab + _T("\t") + (CString) GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
+			strBuffer += strTab + strDivEnd;
+		}
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
 	}
 	return strBuffer;
@@ -524,37 +581,74 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 void CStatisticsTree::ExportHTML(bool onlyvisible)
 {
 	CFile htmlFile;
-	CString htmlFileName;
-	CStringA theHTML;
 
-	theApp.emuledlg->statisticswnd->ShowStatistics(!onlyvisible);
+	TCHAR szDir[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, szDir);
 
 	CFileDialog saveAsDlg (false, _T("html"), _T("*.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
-	if (saveAsDlg.DoModal() == IDOK) {
+	if (saveAsDlg.DoModal() == IDOK)
+	{
+		CString		strHTML;
+        CString     test;
+		strHTML.Format( _T("<html>\r\n<header>\r\n<title>")+test+_T(" %s [%s]</title>\r\n")
 		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
-		/*
-		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%s]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-		*/
-		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s [%s] %s [%s]</title>\r\n", theApp.m_strCurVersionLong,theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
-		theHTML += "<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n";
-		theHTML += "#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n";
-		theHTML += "#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n";
-		theHTML += "#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n";
-		theHTML += "<body id=\"bdy\">\r\n";
-		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
-		/*
-		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-		*/
-		theHTML.Format("%s<span id=\"pghdr\">eMule v%s [%s] %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong,theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
-		theHTML += GetHTMLForExport(onlyvisible) + _T("</body></html>");
+			_T("<style type=\"text/css\">\r\n")
+			_T("#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n")
+			_T("#pghdr2 { color: #000F80; font: bold 10pt/12pt Verdana, Courier New, Helvetica; }\r\n")
+			_T("img { border: 0px; }\r\n")
+			_T("a { text-decoration: none; }\r\n")
+			_T("#sec { color: #000000; font: bold 9pt/11pt Verdana, Courier New, Helvetica; }\r\n")
+			_T("#item { color: #000000; font: normal 8pt/10pt Verdana, Courier New, Helvetica; }\r\n")
+			_T("#bdy { color: #000000; font: normal 8pt/10pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n")
+			_T("<script language=\"JavaScript1.2\" type=\"text/javascript\">\r\n")
+			_T("function obj(menu)\r\n")
+			_T("{\r\n")
+			_T("return (navigator.appName == \"Microsoft Internet Explorer\")?this[menu]:document.getElementById(menu);\r\n")
+			_T("}\r\n")
+			_T("function togglevisible(treepart)\r\n")
+			_T("{\r\n")
+			_T("if (this.obj(\"T\"+treepart).style.visibility == \"hidden\")\r\n")
+			_T("{\r\n")
+			_T("this.obj(\"T\"+treepart).style.position=\"\";\r\n")
+			_T("this.obj(\"T\"+treepart).style.visibility=\"\";\r\n")
+			_T("document[\"I\"+treepart].src=\"stats_visible.gif\";\r\n")
+			_T("}\r\n")
+			_T("else\r\n")
+			_T("{\r\n")
+			_T("this.obj(\"T\"+treepart).style.position=\"absolute\";\r\n")
+			_T("this.obj(\"T\"+treepart).style.visibility=\"hidden\";\r\n")
+			_T("document[\"I\"+treepart].src=\"stats_hidden.gif\";\r\n")
+			_T("}\r\n")
+			_T("}\r\n")
+			_T("</script>\r\n")
+			_T("<body id=\"bdy\">\r\n")
 
-		htmlFileName = saveAsDlg.GetPathName();
-		htmlFile.Open(htmlFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
-		htmlFile.Write(theHTML.GetString(), strlen(theHTML.GetString()));
+			_T("<span id=\"pghdr\"><b>")+test+_T(" %s</b></span><br><span id=\"pghdr2\">%s %s</span>\r\n<br><br>\r\n")
+			_T("%s</body></html>"),
+			GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick(),
+			GetResString(IDS_SF_STATISTICS), GetResString(IDS_CD_UNAME), thePrefs.GetUserNick(),
+			GetHTMLForExport(onlyvisible) );
+
+		htmlFile.Open(saveAsDlg.GetPathName(), CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
+		htmlFile.Write(strHTML, strHTML.GetLength());
 		htmlFile.Close();
+
+		static const TCHAR *const s_apcFileNames[] = {
+			_T("stats_0.gif"), _T("stats_1.gif"), _T("stats_2.gif"), _T("stats_3.gif"), _T("stats_4.gif"),
+			_T("stats_5.gif"), _T("stats_6.gif"), _T("stats_7.gif"), _T("stats_8.gif"), _T("stats_9.gif"),
+			_T("stats_10.gif"), _T("stats_11.gif"), _T("stats_12.gif"), _T("stats_13.gif"),
+			_T("stats_14.gif"), _T("stats_15.gif"), _T("stats_16.gif"),
+			_T("stats_hidden.gif"), _T("stats_space.gif"), _T("stats_visible.gif")
+		};
+		CString		strDst = saveAsDlg.GetPathName().Left(saveAsDlg.GetPathName().GetLength() - saveAsDlg.GetFileName().GetLength());// EC - what if directory name == filename? this should fix this
+		CString		strSrc = thePrefs.GetAppDir();
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+
 	}
+
+	SetCurrentDirectory(szDir);
 }
 
 // Expand all the tree sections.  Recursive.

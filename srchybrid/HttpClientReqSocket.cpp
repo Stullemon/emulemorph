@@ -23,6 +23,10 @@
 #include "HttpClientReqSocket.h"
 #include "Preferences.h"
 #include "Statistics.h"
+// MORPH START - Added by Commander, WebCache 1.2e
+#include "WebCache/WebCachedBlockList.h"
+#include "WebCache/WebCacheProxyClient.h" 
+// MORPH END - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -80,6 +84,7 @@ void CHttpClientReqSocket::OnConnect(int nErrorCode)
 
 void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 {
+	USES_CONVERSION; // yonatan - unicode bugfix // MORPH - Added by Commander, WebCache 1.2e
 	bool bResult = false;
 	CString strError;
 	try
@@ -97,7 +102,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 	{
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		ex->GetErrorMessage(szError, ARRSIZE(szError));
-		strError.Format(_T("Error: HTTP socket: File exception - %s"), szError);
+		strError.Format(_T("Error: HTTP socket: File exception - %s; %s"), szError, DbgGetClientInfo()); // MORPH - Modified by Commander, WebCache 1.2e
 		if (thePrefs.GetVerbose())
 			theApp.AddDebugLogLine(false, _T("%s"), strError);
 		ex->Delete();
@@ -111,6 +116,17 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 #endif
 		if (thePrefs.GetVerbose())
 			theApp.AddDebugLogLine(false, _T("%s"), strError);
+		// MORPH START - Added by Commander, WebCache 1.2e
+		// client removal experiment
+		if( GetClient() && GetClient()->IsProxy() ) {
+			Debug( _T("Restarting Proxy Downloads\n") );
+			SINGLEProxyClient->SetDownloadState( DS_NONE );
+			SINGLEProxyClient->SetWebCacheDownState( WCDS_NONE );
+			if (SINGLEProxyClient->ProxyClientIsBusy())
+				SINGLEProxyClient->DeleteBlock(); // make SingleProxyClient not busy
+			WebCachedBlockList.TryToDL(); // download next block
+		}
+		// MORPH END - Added by Commander, WebCache 1.2e
 	}
 
 	if (!bResult && !deletethis)
@@ -118,7 +134,9 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 		if (thePrefs.GetVerbose() && thePrefs.GetDebugClientTCPLevel() <= 0)
 		{
 			for (int i = 0; i < m_astrHttpHeaders.GetCount(); i++)
-				theApp.AddDebugLogLine(false, _T("<%s"), m_astrHttpHeaders.GetAt(i));
+				// MORPH START - Added by Commander, WebCache 1.2e
+				theApp.AddDebugLogLine(false, _T("<%s"), CA2T(m_astrHttpHeaders.GetAt(i))); // yonatan - unicode bugfix
+				// MORPH END - Added by Commander, WebCache 1.2e
 		}
 
 		// In case this socket is attached to an CUrlClient, we are dealing with the real CUpDownClient here
@@ -203,7 +221,12 @@ bool CHttpClientReqSocket::ProcessHttpPacket(const BYTE* pucData, UINT uSize)
 	}
 	else{
 		theStats.AddDownDataOverheadFileRequest(uSize);
-		throw CString("Invalid HTTP socket state");
+		// MORPH START - Added by Commander, WebCache 1.2e
+		//throw CString("Invalid HTTP socket state");
+		CString tmp;
+		tmp.Format( _T("Invalid HTTP socket state: %u"), GetHttpState() );
+		throw tmp;
+		// MORPH END - Added by Commander, WebCache 1.2e
 	}
 
 	return true;

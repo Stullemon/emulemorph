@@ -18,6 +18,15 @@
 
 #include "ThrottledSocket.h" // ZZ:UploadBandWithThrottler (UDP)
 
+//MORPH START - Added by SiRoB & AndCycle, Upload Splitting Class
+#define NB_SPLITTING_CLASS 3
+struct Socket_stat{
+	int	classID;
+	sint64 realBytesToSpend;
+};
+//MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
+
+
 class UploadBandwidthThrottler :
     public CWinThread 
 {
@@ -28,21 +37,15 @@ public:
     uint64 GetNumberOfSentBytesSinceLastCallAndReset();
     uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
     uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
-	//MORPH START - Changed by SiRoB, Upload Splitting Class
-	/*
     uint32 GetStandardListSize() { return m_StandardOrder_list.GetSize(); };
-	*/
-	uint32 GetStandardListSize() { return m_StandardOrder_list.GetSize() + m_PowerShareOrder_list.GetSize() + m_FriendOrder_list.GetSize(); };
-	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
     /*
 	void AddToStandardList(uint32 index, ThrottledFileSocket* socket);
-	bool RemoveFromStandardList(ThrottledFileSocket* socket);
 	*/
-	void AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID);
-	int RemoveFromStandardList(ThrottledFileSocket* socket);
+	void AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID = NB_SPLITTING_CLASS-1);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
+	bool RemoveFromStandardList(ThrottledFileSocket* socket);
 
     void QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent = false); // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledControlSocket* socket) { RemoveFromAllQueues(socket, true); }; // ZZ:UploadBandWithThrottler (UDP)
@@ -56,12 +59,7 @@ private:
     UINT RunInternal();
 
     void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
-	//MORPH START - Changed by SiRoB, Upload Splitting Class
-	/*
 	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
-	*/
-	int RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
-	//MORPH END   - Changed by SiRoB, Upload Splitting Class
     
 	CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueueFirst_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
@@ -69,10 +67,9 @@ private:
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_TempControlQueueFirst_list; // sockets that wants to enter m_ControlQueue_list and has been able to send before // ZZ:UploadBandWithThrottler (UDP)
 
     CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_StandardOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
-	//MORPH START - Added by SiRoB, Upload Splitting Class
-	CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_PowerShareOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
-	CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_FriendOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
-	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	//MORPH START - Added by SiRoB & AndCycle, Upload Splitting Class
+	CArray<Socket_stat*, Socket_stat*> m_StandardOrder_list_stat;
+	//MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
     CCriticalSection sendLocker;
     CCriticalSection tempQueueLocker;
 
@@ -83,8 +80,7 @@ private:
     uint64 m_SentBytesSinceLastCallOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots;
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	uint32 m_highestNumberOfFullyActivatedSlotsPowerShare;
-	uint32 m_highestNumberOfFullyActivatedSlotsFriend;
+	uint32 m_highestNumberOfFullyActivatedSlotsClass[NB_SPLITTING_CLASS];
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
     uint32 m_allowedDataRate;
 

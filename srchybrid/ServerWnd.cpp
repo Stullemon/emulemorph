@@ -1084,7 +1084,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			aXMLUrls.Add(i->first_element_by_path(_T("./link")).child(0).value());
 			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
-			newsmsgbox->AppendText(_T("\n?"));
+			newsmsgbox->AppendText(_T("\n\x2022"));
 			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 			aXMLNames.Add(sbuffer);
 			if (!i->first_element_by_path(_T("./author")).child(0).empty())

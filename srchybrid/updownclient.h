@@ -17,6 +17,31 @@
 #pragma once
 #include "loggable.h"
 #include "BarShader.h"
+// MORPH START - Added by Commander, WebCache 1.2e
+#include "Preferences.h"
+#include "WebCache/WebCache.h"
+#include "WebCache/WebCacheCryptography.h"
+//#include <crypto51/arc4.h>
+
+// USING_NAMESPACE(CryptoPP)
+
+enum EWebCacheDownState{
+	WCDS_NONE = 0,
+	WCDS_WAIT_CLIENT_REPLY,
+	WCDS_WAIT_CACHE_REPLY,
+	WCDS_DOWNLOADING
+};
+
+enum EWebCacheUpState{
+	WCUS_NONE = 0,
+	WCUS_UPLOADING
+};
+
+
+class CWebCacheDownSocket;
+class CWebCacheUpSocket;
+// MORPH END - Added by Commander, WebCache 1.2e
+
 #include "Opcodes.h"
 class CTag; //Added by SiRoB, SNAFU
 class CClientReqSocket;
@@ -140,6 +165,7 @@ enum EClientSoftware{
 	SO_EDONKEY,
 	SO_OLDEMULE,
 	SO_URL,
+	SO_WEBCACHE, // Superlexx - webcache - statistics // MORPH - Added by Commander, WebCache 1.2e
 	SO_UNKNOWN
 };
 
@@ -186,6 +212,61 @@ public:
 	CUpDownClient(CClientReqSocket* sender = 0);
 	CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid, uint32 in_serverup, uint16 in_serverport, bool ed2kID = false);
 	virtual ~CUpDownClient();
+
+	///////////////////////////////////////////////////////////////////////////
+	// PeerCache client
+private:
+	bool m_bIsTrustedOHCBSender;
+	bool m_bIsAllowedToSendOHCBs;
+	uint32 m_uWebCacheFlags;
+	EWebCacheDownState m_eWebCacheDownState;
+	EWebCacheUpState m_eWebCacheUpState;
+	bool b_webcacheInfoNeeded;
+protected:
+	bool m_bProxy;
+public:
+	bool m_bIsAcceptingOurOhcbs; // default - true, set to false on OP_DONT_SEND_OHCBS
+	CWebCacheDownSocket* m_pWCDownSocket;
+	CWebCacheUpSocket* m_pWCUpSocket;
+
+	bool SupportsWebCacheUDP() const {return (m_uWebCacheFlags & WC_FLAGS_UDP) && SupportsUDP();}
+	bool SupportsOhcbSuppression() const {return (m_uWebCacheFlags & WC_FLAGS_NO_OHCBS);}
+	bool SupportsWebCacheProtocol() const {return SupportsOhcbSuppression();} // this is the first version that supports that
+	bool IsProxy() const {return m_bProxy;}
+	bool IsUploadingToWebCache() const;
+	bool IsDownloadingFromWebCache() const;
+	bool ProcessWebCacheDownHttpResponse(const CStringAArray& astrHeaders);
+	bool ProcessWebCacheDownHttpResponseBody(const BYTE* pucData, UINT uSize);
+	bool ProcessWebCacheUpHttpResponse(const CStringAArray& astrHeaders);
+	UINT ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeaders);
+	void OnWebCacheDownSocketClosed(int nErrorCode);
+	void OnWebCacheDownSocketTimeout();
+	void SetWebCacheDownState(EWebCacheDownState eState);
+	EWebCacheDownState CUpDownClient::GetWebCacheDownState() const {return m_eWebCacheDownState;}
+	void SetWebCacheUpState(EWebCacheUpState eState);
+	EWebCacheUpState CUpDownClient::GetWebCacheUpState() const {return m_eWebCacheUpState;}
+	virtual bool SendWebCacheBlockRequests();
+	void PublishWebCachedBlock( const Requested_Block_Struct* block );
+	bool IsWebCacheUpSocketConnected() const;
+	bool IsWebCacheDownSocketConnected() const;
+//	uint16 blocksLoaded;	// Superlexx - block transfer limiter //JP blocks are counted in the socket code now
+	uint16 GetNumberOfClientsBehindOurWebCacheAskingForSameFile();	// what a name ;)
+	uint16 GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending); // Superlexx - COtN - it's getting better all the time...
+	bool WebCacheInfoNeeded() {return b_webcacheInfoNeeded;}
+	void SetWebCacheInfoNeeded(bool value) {b_webcacheInfoNeeded = value;}
+//JP trusted-OHCB-senders START
+	uint32 WebCachedBlockRequests;
+	uint32 SuccessfulWebCachedBlockDownloads;
+	bool IsTrustedOHCBSender() const {return m_bIsTrustedOHCBSender;}
+	void AddWebCachedBlockToStats( bool IsGood );
+//JP trusted-OHCB-senders END
+//JP stop sendig OHCBs START
+	void SendStopOHCBSending();
+	void SendResumeOHCBSendingTCP();
+	void SendResumeOHCBSendingUDP();
+//JP stop sendig OHCBs END
+	CWebCacheCryptography Crypt; // Superlexx - encryption
+// MORPH END - Added by Commander, WebCache 1.2f
 
 	///////////////////////////////////////////////////////////////////////////
 	// PeerCache client
@@ -956,6 +1037,40 @@ public:
 	uint32  GetUpTotalTime() const  {return m_nUpTotalTime;}
 	uint32  GetAvUpDatarate()const;
 	//wistily stop
+        // MORPH START - Added by Commander, WebCache 1.2e
+	// Squid defaults..
+	bool			UsesCachedTCPPort() { return ( (GetUserPort()==80)
+													|| (GetUserPort()==21)
+													|| (GetUserPort()==443)
+													|| (GetUserPort()==563)
+													|| (GetUserPort()==70)
+													|| (GetUserPort()==210)
+													|| ((GetUserPort()>=1025) && (GetUserPort()<=65535)));}
+	bool			SupportsWebCache() const { return m_bWebCacheSupport; }
+	bool			IsBehindOurWebCache() const
+					{
+						// WC-TODO: make this more efficient
+						return( thePrefs.webcacheName == GetWebCacheName() );
+					}
+// jp webcache
+	CString			GetWebCacheName() const 
+					{ 
+						if (SupportsWebCache())
+							return WebCacheIndex2Name(m_WA_webCacheIndex);
+						else
+							return _T("");
+					}
+	bool			m_bWebCacheSupport;
+	// Superlexx - webcache
+	int		m_WA_webCacheIndex;	// index of the webcache name
+	uint16	m_WA_HTTPPort;		// remote webserver port
+	uint32	m_uWebCacheDownloadId;	// we must attach this ID when sending HTTP download request to the remote client.
+	uint32	m_uWebCacheUploadId;	// incoming HTTP requests are identified as WC-requests,
+									// if the header contains this ID and there is a known client with same ID in downloading state.
+									// used for client authorization, should be substituted by a HttpIdList? later
+									// for efficiency reasons.
+	// Superlexx end
+        // MORPH END - Added by Commander, WebCache 1.2e
 protected:
 	// base
 	void	Init();

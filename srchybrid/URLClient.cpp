@@ -26,6 +26,11 @@
 #include "Statistics.h"
 #include "ClientCredits.h"
 
+#include "WebCache\WebCacheProxyClient.h"
+#include "WebCache\WebCachedBlockList.h"
+#include "WebCache\WebCacheSocket.h"	// Superlexx - block transfer limiter
+// MORPH END - Added by Commander, WebCache 1.2e
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -54,6 +59,10 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 		memset(m_abyPartStatus, 1, m_nPartCount);
 		m_bCompleteSource = true;
 	}
+    // MORPH START - Added by Commander, WebCache 1.2e
+	else
+		ResetFileStatusInfo(); // Superlexx - from 0.44a code
+	// MORPH END - Added by Commander, WebCache 1.2e
 }
 
 bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
@@ -368,12 +377,18 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 //		Debug("  Start=%u  End=%u  Size=%u  %s\n", nStartPos, nEndPos, size, DbgGetFileInfo(reqfile->GetFileHash()));
 
 	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS))
-		throw CString("Failed to process HTTP data block - Invalid download state");
+         // MORPH START - Added by Commander, WebCache 1.2e
+	{ // yonatan http
 
+		CString err;
+		err.Format( _T("Failed to process HTTP data block - Invalid download state: %u"), GetDownloadState() );
+		throw err;
+	}
+         // MORPH END - Added by Commander, WebCache 1.2e
 	m_dwLastBlockReceived = ::GetTickCount();
 
 	if (nEndPos == nStartPos || uSize != nEndPos - nStartPos)
-		throw CString("Failed to process HTTP data block - Invalid block start/end offsets");
+		throw CString(_T("Failed to process HTTP data block - Invalid block start/end offsets"));
 
 	thePrefs.Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, false, uSize);
 	m_nDownDataRateMS += uSize;
@@ -387,14 +402,33 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 		Pending_Block_Struct *cur_block = m_PendingBlocks_list.GetNext(pos);
 		if (cur_block->block->StartOffset <= nStartPos && nStartPos <= cur_block->block->EndOffset)
 		{
-			if (thePrefs.GetDebugClientTCPLevel() > 0){
+			// MORPH START - Modified by Commander, WebCache 1.2e
+			if (thePrefs.GetDebugClientTCPLevel() > 1) { // yonatan http - used to be > 0){
 				// NOTE: 'Left' is only accurate in case we have one(!) request block!
 				void* p = m_pPCDownSocket ? (void*)m_pPCDownSocket : (void*)socket;
 				Debug(_T("%08x  Start=%u  End=%u  Size=%u  Left=%u  %s\n"), p, nStartPos, nEndPos, uSize, cur_block->block->EndOffset - (nStartPos + uSize) + 1, DbgGetFileInfo(reqfile->GetFileHash()));
 			}
 
+			// MORPH START - Added by Commander, WebCache 1.2e
+			byte* dec_pucData = (byte*)pucData;
+
+			if (IsDownloadingFromWebCache()) // Superlexx - encryption - decrypt the data
+			{
+				if (Crypt.useNewKey)	// we must use a new key
+				{
+					Crypt.RefreshRemoteKey();
+					Crypt.decryptor.SetKey(Crypt.remoteKey, WC_KEYLENGTH);
+					Crypt.useNewKey = false;
+
+					Crypt.decryptor.DiscardBytes(16); // we must throw away 16 bytes of the key stream since they were already used once, 16 is the file hash length
+				}
+				Crypt.decryptor.ProcessString(dec_pucData, uSize);
+			}
+            // MORPH END - Added by Commander, WebCache 1.2e
 			m_nLastBlockOffset = nStartPos;
-			uint32 lenWritten = reqfile->WriteToBuffer(uSize, pucData, nStartPos, nEndPos, cur_block->block, this);
+            // MORPH START - Modified by Commander, WebCache 1.2e
+			uint32 lenWritten = reqfile->WriteToBuffer(uSize, dec_pucData, nStartPos, nEndPos, cur_block->block, this); // Superlexx: write decrypted data
+            // MORPH END - Modified by Commander, WebCache 1.2e
 			if (lenWritten > 0)
 			{
 				m_nTransferedDown += lenWritten;
@@ -403,16 +437,43 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 				if (nEndPos >= cur_block->block->EndOffset)
 				{
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
-					delete cur_block->block;
-					delete cur_block;
+                                         // MORPH START - Added by Commander, WebCache 1.2e
+					if (m_pWCDownSocket)
+						m_pWCDownSocket->blocksloaded++; //count downloaded blocks for this socket
+					//JP moved to CUpDownClient::SendWebCacheBlockRequests() and CWebCacheProxyClient::UpdateClient
+					if( !IsProxy() )
+					{
+						PublishWebCachedBlock( cur_block->block );
+					} 
+					else 
+					{
+						SINGLEProxyClient->OnWebCachedBlockDownloaded( cur_block->block );
+						// JP moved to CWebCacheProxyClient::OnWebCachedBlockDownloaded
+					}
+                                        // MORPH END - Added by Commander, WebCache 1.2e
+// WC-TODO:
+					delete cur_block->block;	//do we still need OnWebCachedBlockDownloaded with this????
+					delete cur_block;	//do we still need OnWebCachedBlockDownloaded with this????
 					m_PendingBlocks_list.RemoveAt(posLast);
-
+                                        // MORPH START - Added by Commander, WebCache 1.2e
+					if( IsProxy() ) {
+						SetDownloadState( DS_NONE );
+						SetWebCacheDownState( WCDS_NONE );
+						WebCachedBlockList.TryToDL();
+						return;
+					}
+                                        // MORPH END - Added by Commander, WebCache 1.2e
 					if (m_PendingBlocks_list.IsEmpty())
 					{
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("More block requests", this);
 						m_nUrlStartPos = -1;
-						SendHttpBlockRequests();
+						// MORPH START - Added by Commander, WebCache 1.2e
+						if( GetWebCacheDownState() == WCDS_NONE )
+							SendHttpBlockRequests(); // original emule code
+						else
+							SendBlockRequests();
+						// MORPH END - Added by Commander, WebCache 1.2e
 					}
 				}
 //				else
@@ -423,7 +484,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 		}
 	}
 
-	TRACE("%s - Dropping packet\n", __FUNCTION__);
+	TRACE(_T("%s - Dropping packet\n"), __FUNCTION__);
 }
 
 void CUrlClient::SendCancelTransfer(Packet* packet)

@@ -29,6 +29,10 @@ protected:
 	int m_iLogFileSaving;
     int m_iLogA4AF; // ZZ:DownloadManager
 	int m_iLogUlDlEvents;
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	int m_iLogWebCacheEvents;//JP log webcache events
+	int m_iLogICHEvents;//JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	int m_iCreditSystem;
 	int m_iLog2Disk;
 	int m_iDebug2Disk;
@@ -72,6 +76,11 @@ protected:
 	HTREEITEM m_htiLogFileSaving;
     HTREEITEM m_htiLogA4AF; // ZZ:DownloadManager
 	HTREEITEM m_htiLogUlDlEvents;
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	HTREEITEM m_htiLogWebCacheEvents; //jp log webcache events
+	HTREEITEM m_htiLogICHEvents; //JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
+
 	HTREEITEM m_htiCreditSystem;
 	HTREEITEM m_htiLog2Disk;
 	HTREEITEM m_htiDebug2Disk;

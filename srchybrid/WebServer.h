@@ -158,6 +158,7 @@ typedef struct
 	CString sStats;
 	CString sPreferences;
 	CString	sLogin;
+	CString sFailedLogin;
 	CString	sConnectedServer;
 	CString	sAddServerBox;
 	CString	sWebSearch;
@@ -207,6 +208,7 @@ private:
 	static CString	_GetStats(ThreadData);
 	static CString	_GetPreferences(ThreadData);
 	static CString	_GetLoginScreen(ThreadData);
+	static CString  _GetFailedLoginScreen(ThreadData);
 	static CString	_GetConnectedServer(ThreadData);
 	static CString 	_GetAddServerBox(ThreadData Data);
 	static void		_RemoveServer(CString sIP, int nPort);

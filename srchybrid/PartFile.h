@@ -477,4 +477,43 @@ private:
     // <--- enkeyDev: ICS
     //Morph End - added by AndCycle, ICS
 
+//MORPH START - Added by SiRoB, WebCache 1.2f
+/*removed by SiRoB use the official way in process() call
+	// JP added netfinity download throttler
+	// MOD BEGIN netfinity:
+	public:
+	void ProcessDL(CUpDownClient *cur_src, uint32 reducedownload, uint32 allowed);
+	// MOD END netfinity
+*/
+	// JP added handling of proxy-sources on pause/cancel/resume START
+	public:
+	void CancelProxyDownloads();
+	void PauseProxyDownloads();
+	void ResumeProxyDownloads();
+	// JP added handling of proxy-sources on pause/cancel/resume END
+	
+	//JP webcache column START
+	//JP added stuff from Gnaddelwarz
+	uint16	GetWebcacheSourceCount() const; //JP webcache column
+	uint16 GetWebcacheSourceOurProxyCount() const;
+	uint16 GetWebcacheSourceNotOurProxyCount() const;
+	void	CountWebcacheSources() const;
+	uint16	WebcacheSources;
+	uint16 WebcacheSourcesOurProxy;
+	uint16 WebcacheSourcesNotOurProxy;
+	uint32  LastWebcacheSourceCountTime; //JP speed up webcache column
+	//JP webcache column END
+
+	//JP webcache file detail dialogue START
+	uint32	Webcacherequests;
+	uint32	SuccessfulWebcacherequests;
+	void	AddWebCachedBlockToStats( bool IsGood );
+	//JP webcache file detail dialogue END
+
+	//JP Throttle OHCB-production START
+	uint32 GetNumberOfBlocksForThisFile();
+	uint16 GetMaxNumberOfWebcacheConnectionsForThisFile();
+	uint16 GetNumberOfCurrentWebcacheConnectionsForThisFile();
+	//JP Throttle OHCB-production END
+//MORPH END   - Added by SiRoB, WebCache 1.2f
 };

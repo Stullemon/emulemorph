@@ -1429,8 +1429,6 @@
 #define IDS_FEATURES                    1469
 #define IDS_IRC_NEWNICK                 1470
 #define IDS_IRC_NEWNICKDESC             1471
-#define IDS_LD_ADDPHPBB                 1472
-#define IDS_POWERSHAER_INTERPRIO        1473
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -2030,7 +2028,7 @@
 #define IDC_CORRUPTED                   2786
 #define IDD_IPFILTER                    2786
 #define IDC_COMPRESSION                 2787
-#define IDD_ED2KLINK                    2787
+#define IDD_ED2KLINK                    2788
 #define IDC_TIMELEFTTEXT                2789
 #define IDC_TRANSFER_RATE_LABEL         2790
 #define IDC_RADIP                       2791
@@ -2040,6 +2038,8 @@
 #define IDC_FD_RECOV                    2795
 #define IDC_FD_COMPR                    2796
 #define IDC_UPDATEURL                   2797
+#define IDC_WC_REQ_SUCC                 27970
+#define IDC_WC_DOWNLOADED               27980
 #define IDC_DD                          2799
 #define IDC_TRAY_EXIT                   2802
 #define IDC_DOWNKB                      2803
@@ -2104,9 +2104,7 @@
 #define IDC_EDIT1                       2877
 #define IDC_LD_LINKEDI                  2877
 #define IDC_CLIENTDETAIL_KADCON         2878
-#define IDC_EDIT11                      2878
 #define IDC_SEARCH_UNICODE              2879
-#define IDC_EDIT12                      2879
 #define IDC_AUTOSTART                   2880
 #define IDC_STARTWIN                    2882
 #define IDC_RADIO1                      2883
@@ -2128,7 +2126,6 @@
 #define IDC_RADIO7                      2898
 #define IDC_BUTTON1                     2899
 #define IDC_LD_LINKGROUP                2900
-#define IDC_BUTTON2                     2900
 #define IDC_LD_BASICGROUP               2901
 #define IDC_LD_ADVANCEDGROUP            2902
 #define IDC_LD_CLIPBOARDBUT             2903
@@ -2140,6 +2137,35 @@
 #define IDC_LD_HOSTNAMECHE              2909
 #define IDC_SOURCE_TYPE                 2909
 #define IDC_UIP                         2910
+// MORPH START - Added by Commander, WebCache 1.2e
+#define IDC_ADVANCEDCONTROLS            2914
+#define IDC_BLOCKSTEXT                  2915
+#define IDC_TestProxy                   2916
+#define IDS_PWEBCACHE                   10646
+#define IDS_WrongPortforWebcache        11387
+#define IDD_PPG_WEBCACHESETTINGS        12787
+#define IDC_Webcache                    12847
+#define IDC_webcacheName                12848
+#define IDC_webcachePort                12849
+#define IDC_Activatewebcachedownloads   12850
+#define IDC_WrongPortWarning            12851
+#define IDC_DETECTWEBCACHE              12852
+#define IDC_BLOCKSTEXT2                 12855
+#define IDC_BLOCKS                      12856
+#define IDC_EXTRATIMEOUT                12857
+#define IDC_LOCALTRAFFIC                12858
+#define IDC_WEBCACHELINK                12859
+#define IDC_WEBCACHELINK2               12860
+#define IDC_PERSISTENT_PROXY_CONNS      12861
+#define IDS_PW_WEBCACHE                 20646
+#define IDC_WCSTATISTICS                22540
+#define IDC_TRUSTEDOHCBSENDER           22570
+#define IDC_WCReq                       27820
+#define IDC_WCDownl                     27830
+// MORPH END - Added by Commander, WebCache 1.2e
+#define IDS_LD_ADDPHPBB                 3306
+#define IDS_POWERSHAER_INTERPRIO        3307
+
 #define IDC_INVISIBLE_MODE_GROUP_BOX    3308
 #define IDC_INVISIBLE_MODE              3309
 #define IDC_INVISIBLE_MODE_MODIFIER_STATIC 3310
@@ -2660,6 +2686,11 @@
 #define IDC_QUEUEBORDER                 5507
 #define IDS_DONTREMOVESPARETRICKLESLOT  5508
 #define IDS_MAXUPLOADFRIEND             5509
+#define IDS_MINDATARATEFRIEND           5509
+#define IDS_MINDATARATEPOWERSHARE       5510
+#define IDS_MAXCLIENTDATARATEFRIEND     5511
+#define IDS_MAXCLIENTDATARATEPOWERSHARE 5512
+#define IDS_MAXCLIENTDATARATE           5513
 #define IDS_ADVANCED                    5600
 #define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 5601
 #define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 5601

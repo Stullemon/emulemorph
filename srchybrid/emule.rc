@@ -1245,13 +1245,13 @@ BEGIN
                     358,111,148,59
 END
 
-IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 231
+IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 289
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Client Details"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "General",IDC_STATIC30,7,1,308,80,BS_FLAT
+    GROUPBOX        "General",IDC_STATIC30,7,1,308,82,BS_FLAT
     LTEXT           "Username:",IDC_STATIC31,19,14,60,8
     LTEXT           "Static",IDC_DNAME,84,14,224,8
     LTEXT           "Userhash:",IDC_STATIC32,19,25,59,8
@@ -1265,35 +1265,42 @@ BEGIN
     LTEXT           "Static",IDC_DSNAME,219,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
     LTEXT           "Static",IDC_CDIDENT,84,58,106,8
-    GROUPBOX        "Transfer",IDC_STATIC40,7,86,308,71,BS_FLAT
-    LTEXT           "Currently downloading:",IDC_STATIC41,19,96,86,8
-    LTEXT           "Static",IDC_DDOWNLOADING,110,96,202,8
-    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,118,87,8
-    LTEXT           "Static",IDC_DDOWN,110,118,53,8
-    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,129,86,8
-    LTEXT           "Static",IDC_DAVDR,110,129,53,8
-    LTEXT           "Downloaded total:",IDC_STATIC44,19,140,83,8
-    LTEXT           "Static",IDC_DDOWNTOTAL,110,140,53,8
-    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,118,93,8
-    LTEXT           "Static",IDC_DDUP,256,118,51,8
-    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,129,93,8
-    LTEXT           "Static",IDC_DAVUR,256,129,50,8
-    LTEXT           "Uploaded total:",IDC_STATIC47,163,140,93,8
-    LTEXT           "Static",IDC_DUPTOTAL,256,140,50,8
-    GROUPBOX        "Scores",IDC_STATIC50,7,161,308,47,BS_FLAT
-    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,174,87,8
-    LTEXT           "Static",IDC_DRATIO,110,174,53,8
-    LTEXT           "Rating (total):",IDC_STATIC52,19,185,84,8
-    LTEXT           "Static",IDC_DRATING,110,185,53,8
-    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,196,91,8
-    LTEXT           "Static",IDC_DSCORE,110,196,105,8
-    DEFPUSHBUTTON   "&Close",IDOK,268,213,47,14,BS_FLAT
-    LTEXT           "Currently downloading:",IDC_STATIC48,19,107,86,8
-    LTEXT           "Static",IDC_UPLOADING,110,107,202,8
+    GROUPBOX        "Transfer",IDC_STATIC40,7,89,308,71,BS_FLAT
+    LTEXT           "Currently downloading:",IDC_STATIC41,19,99,86,8
+    LTEXT           "Static",IDC_DDOWNLOADING,110,99,202,8
+    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,121,87,8
+    LTEXT           "Static",IDC_DDOWN,110,121,53,8
+    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,132,86,8
+    LTEXT           "Static",IDC_DAVDR,110,132,53,8
+    LTEXT           "Downloaded total:",IDC_STATIC44,19,143,83,8
+    LTEXT           "Static",IDC_DDOWNTOTAL,110,143,53,8
+    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,121,93,8
+    LTEXT           "Static",IDC_DDUP,256,121,51,8
+    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,132,93,8
+    LTEXT           "Static",IDC_DAVUR,256,132,50,8
+    LTEXT           "Uploaded total:",IDC_STATIC47,163,143,93,8
+    LTEXT           "Static",IDC_DUPTOTAL,256,143,50,8
+    GROUPBOX        "Scores",IDC_STATIC50,7,164,308,47,BS_FLAT
+    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,177,87,8
+    LTEXT           "Static",IDC_DRATIO,110,177,53,8
+    LTEXT           "Rating (total):",IDC_STATIC52,19,188,84,8
+    LTEXT           "Static",IDC_DRATING,110,188,53,8
+    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,199,91,8
+    LTEXT           "Static",IDC_DSCORE,110,199,105,8
+    DEFPUSHBUTTON   "&Close",IDOK,268,271,47,14,BS_FLAT
+    LTEXT           "Requested to upload:",IDC_STATIC48,19,110,86,8
+    LTEXT           "Static",IDC_UPLOADING,110,110,202,8
+    LTEXT           "Static",IDC_WCSTATISTICS,110,242,197,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
     LTEXT           "Static",IDC_DLOC,84,69,92,8
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
+    LTEXT           "WebCache:",IDC_STATIC,19,229,64,10
+    LTEXT           "Static",IDC_Webcache,110,229,197,10
+    GROUPBOX        "Webcache",IDC_STATIC,7,218,308,48
+    LTEXT           "Successfull/Requested:",IDC_STATIC,19,242,84,10
+    LTEXT           "Is trusted OHCB sender:",IDC_STATIC,19,255,83,10
+    LTEXT           "Static",IDC_TRUSTEDOHCBSENDER,110,255,197,8
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -1357,7 +1364,7 @@ BEGIN
     CONTROL         "Compression:",IDC_FD_COMPR,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,14,162,72,8
     CONTROL         "Static",IDC_COMPRESSION,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,162,222,8
+                    SS_NOPREFIX | WS_GROUP,92,162,72,8
     CONTROL         "Completed:",IDC_FD_X12,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,201,142,70,8
     CONTROL         "Static",IDC_COMPLSIZE,"Static",SS_LEFTNOWORDWRAP | 
@@ -1389,6 +1396,14 @@ BEGIN
                     WS_GROUP,14,54,72,8
     EDITTEXT        IDC_FD_AICHHASH,92,54,224,12,ES_AUTOHSCROLL | 
                     ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
+    CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
+                    SS_NOPREFIX | WS_GROUP,246,152,79,8
+    CONTROL         "not working yet",IDC_WCDownl,"Static",SS_LEFTNOWORDWRAP | 
+                    SS_NOPREFIX | WS_GROUP,246,162,79,8
+    CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,190,152,54,8
+    CONTROL         "WC-Download:",IDC_WC_DOWNLOADED,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,190,162,54,8
 END
 
 IDD_PREVIEWDIALOG DIALOGEX 0, 0, 280, 233
@@ -1869,6 +1884,47 @@ BEGIN
     CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
                     WS_BORDER | WS_TABSTOP,7,46,216,204
     LTEXT           "Static",IDC_WARNING,7,7,213,39
+END
+
+IDD_PPG_WEBCACHESETTINGS DIALOGEX 0, 0, 230, 244
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Connection"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "ISP Proxyserver Settings",IDC_Webcache,7,41,216,161
+    EDITTEXT        IDC_webcacheName,55,52,159,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_webcachePort,55,67,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Port",IDC_STATIC,14,70,38,9
+    LTEXT           "Address",IDC_STATIC,14,55,38,9
+    GROUPBOX        "Webcache Controls",IDC_STATIC,7,7,216,30
+    CONTROL         "Enable Webcached Downloads",
+                    IDC_Activatewebcachedownloads,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,17,121,12
+    CTEXT           "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!",
+                    IDC_WrongPortWarning,21,203,194,34,NOT WS_VISIBLE
+    PUSHBUTTON      "Autodetect Webcache",IDC_DETECTWEBCACHE,14,163,201,12,
+                    BS_FLAT
+    LTEXT           "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)",
+                    IDC_BLOCKSTEXT,14,97,124,28
+    RTEXT           "180k-Blocks",IDC_BLOCKSTEXT2,174,113,41,8
+    EDITTEXT        IDC_BLOCKS,141,108,30,13,ES_AUTOHSCROLL
+    CONTROL         "Extra long timeout for webcache connections",
+                    IDC_EXTRATIMEOUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,124,168,13
+    CONTROL         "This webcache does NOT cache traffic within the same ISP",
+                    IDC_LOCALTRAFFIC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    14,136,201,14
+    CONTROL         "",IDC_WEBCACHELINK,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,14,178,201,10
+    CONTROL         "",IDC_WEBCACHELINK2,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,14,190,201,10
+    CONTROL         "Persistent connections for proxy downloads",
+                    IDC_PERSISTENT_PROXY_CONNS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,149,201,14
+    PUSHBUTTON      "show advanced controls",IDC_ADVANCEDCONTROLS,133,16,82,
+                    17
+    PUSHBUTTON      "Test webcache configuration. Might take up to 30 Seconds",
+                    IDC_TestProxy,14,82,201,15
 END
 
 
@@ -2371,7 +2427,7 @@ BEGIN
         VERTGUIDE, 215
         VERTGUIDE, 256
         TOPMARGIN, 7
-        BOTTOMMARGIN, 227
+        BOTTOMMARGIN, 267
         HORZGUIDE, 28
         HORZGUIDE, 39
         HORZGUIDE, 50
@@ -2718,6 +2774,7 @@ PREF_EMULESPANA         ICON                    "res\\emulespana.ico"
 TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
 TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
 TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
+PREF_WEBCACHE           ICON                    "res\\Prefs_Webcache.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3670,6 +3727,11 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_PW_WEBCACHE         "Webcache"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_FO_PREF_EXISTED     "eMule detected existing rules for the selected ports, which were not overwritten or replaced. Missing rules have been added successfully.\nPlease note that third-party desktopfirewalls and routers are not affected by this!"
     IDS_FO_PREF_FAILED      "Failed to configure the internal WinXP firewall for the selected ports!"
     IDS_FO_PREF_STARTUP     "Open/close ports on WinXP firewall when starting/exiting eMule"
@@ -3686,6 +3748,12 @@ BEGIN
     IDS_PR_SHORT_HIGH       "[Hi]"
     IDS_STATS_FRATIO        "Session UL:DL ratio (friends UL excluded):"
     IDS_STATS_UDATA_FRIENDS "Uploaded data to friend slots (Session): %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WrongPortforWebcache 
+                            "Webcache Download disabled: Only transfers on Port   21, 70,  80, 210, 443, 563 and in the range from 1025 to 65535 are cached. Please use one of these Ports if you want to enable the Webcache Feature"
 END
 
 STRINGTABLE 
@@ -5103,7 +5171,11 @@ STRINGTABLE
 BEGIN
     IDS_CRC32_ABORT         "Abort calculation"
     IDS_DONTREMOVESPARETRICKLESLOT "Don't remove spare trickle slot"
-    IDS_MAXUPLOADFRIEND     "Max Global  friend upload (Default 3kB/s)"
+    IDS_MINDATARATEFRIEND   "Global datarate (Default 0kB/s=unlimited)"
+    IDS_MINDATARATEPOWERSHARE "Global datarate (Default 0kB/s=unlimited)"
+    IDS_MAXCLIENTDATARATEFRIEND "Client datarate (Dafault 0kB/s=focused)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Client datarate (Dafault 0kB/s=focused)"
+    IDS_MAXCLIENTDATARATE   "Client datarate (Dafault 0kB/s=focused)"
 END
 
 STRINGTABLE 

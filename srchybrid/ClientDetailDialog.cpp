@@ -119,25 +119,31 @@ BOOL CClientDetailDialog::OnInitDialog(){
 
 	GetDlgItem(IDC_DDOWN)->SetWindowText(CastItoXBytes(m_client->GetTransferedUp(), false, false));
 
-	//wistily
+	//MORPH START - Changed by SiRoB, Average display [wistily]
 	/*
 	buffer.Format(_T("%s"), CastItoXBytes(m_client->GetDownloadDatarate(), false, true));
-	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
-
-	buffer.Format(_T("%s"),CastItoXBytes(m_client->GetDatarate(), false, true));
-	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
 	*/
 	buffer.Format(_T("%s"), CastItoXBytes(m_client->GetAvDownDatarate(), false, true));
+	//MORPH END   - Changed by SiRoB, Average display [wistily]
 	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
 
+	//MORPH START - Changed by SiRoB, Average display [wistily]
+	/*
+	buffer.Format(_T("%s"),CastItoXBytes(m_client->GetDatarate(), false, true));
+	*/
 	buffer.Format(_T("%s"),CastItoXBytes(m_client->GetAvUpDatarate(), false, true));
+	//MORPH END   - Changed by SiRoB, Average display [wistily]
 	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
-	//wistily stop
 	
 	if (m_client->Credits()){
 		GetDlgItem(IDC_DUPTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetDownloadedTotal(), false, false));
 		GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetUploadedTotal(), false, false));
-		buffer.Format(_T("%.1f  [%.1f]"),(float)m_client->Credits()->GetScoreRatio(m_client->GetIP()),(float)m_client->Credits()->GetMyScoreRatio(m_client->GetIP()));	// MORPH - Added by IceCream, VQB: ownCredits
+		//MORPH START - Changed by IceCream, VQB: ownCredits
+		/*
+		buffer.Format(_T("%.1f"),(float)m_client->Credits()->GetScoreRatio(m_client->GetIP()));
+		*/
+		buffer.Format(_T("%.1f  [%.1f]"),(float)m_client->Credits()->GetScoreRatio(m_client->GetIP()),(float)m_client->Credits()->GetMyScoreRatio(m_client->GetIP()));
+		//MORPH END   - Changed by IceCream, VQB: ownCredits
 		GetDlgItem(IDC_DRATIO)->SetWindowText(buffer);
 		
 		if (theApp.clientcredits->CryptoAvailable()){
@@ -218,7 +224,19 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	m_sAdditionalInfo.SetFont (&m_fStdFont);
 	#endif
 	// [MightyKnife] end: Private Modifications
-
+	//MORPH START - Added by SiRoB, Webcache 1.2f
+	GetDlgItem(IDC_Webcache)->SetWindowText(m_client->GetWebCacheName()); // Superlexx - webcache //JP changed to new GetWebcacheName-function
+	double percentSessions = 0;
+	if (m_client->WebCachedBlockRequests != 0)
+		percentSessions = (double) 100 * m_client->SuccessfulWebCachedBlockDownloads / m_client->WebCachedBlockRequests;
+	buffer.Format( _T("%u/%u (%1.1f%%)"), m_client->SuccessfulWebCachedBlockDownloads, m_client->WebCachedBlockRequests, percentSessions );
+	GetDlgItem(IDC_WCSTATISTICS)->SetWindowText(buffer); //JP Client WC-Statistics
+	if (m_client->IsTrustedOHCBSender())
+		buffer.Format(_T("Yes"));
+	else
+		buffer.Format(_T("No"));
+	GetDlgItem(IDC_TRUSTEDOHCBSENDER)->SetWindowText(buffer); //JP Is trusted OHCB sender
+	//MORPH END   - Added by SiRoB, Webcache 1.2f
 	return true;
 }
 

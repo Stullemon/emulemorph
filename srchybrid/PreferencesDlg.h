@@ -25,6 +25,7 @@
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "PPgEastShare.h" //EastShare - Added by Pretender
 #include "PPgEmulEspana.h" //MORPH - Added by SiRoB, eMulEspana Preferency
+#include "WebCache\PPgWebcachesettings.h" //MORPH - Added by SiRoB, WebCache 1.2f
 #include "KCSideBannerWnd.h" //Commander - Added: Preferences Banner [TPT]
 #include "SlideBar.h" //MORPH - Added by SiRoB, ePLus Group
 
@@ -60,7 +61,7 @@ public:
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 	CPPgEmulespana	m_wndEmulespana; //MORPH - Added by SiRoB, emulEspaña preferency
-
+	CPPgWebcachesettings	m_wndWebcachesettings; //MORPH - Added by SiRoB, WebCache 1.2f
 	CListBoxST		m_listbox;
 	CButton			m_groupbox;
 	CImageList		ImageList;

@@ -880,6 +880,17 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("URL: %s (%1.1f%%)") , CastItoXBytes( DownDataClient, false, false ), percentClientTransferred );
 						stattree.SetItemText( down_scb[i] , cbuffer );
 						i++;
+						//MORPH START - Added by SiRoB, WebCache 1.2f
+						//jp webcache statistics START
+						DownDataClient = thePrefs.GetDownData_WEBCACHE();
+						if ( DownDataTotal!=0 && DownDataClient!=0 )
+							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( _T("WEBCACHE: %s (%1.1f%%)") , CastItoXBytes( DownDataClient ), percentClientTransferred );
+						stattree.SetItemText( down_scb[i] , cbuffer );
+						i++;
+						//MORPH END   - Added by SiRoB, WebCache 1.2f
 					}
 					// Downloaded Data By Port
 					if (forceUpdate || stattree.IsExpanded(hdown_spb)) 
@@ -1013,6 +1024,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						percentSessions = 0; // No sessions at all, or no bad ones.
 					cbuffer.Format( _T("%s: %u (%1.1f%%)") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions );
 					stattree.SetItemText( down_ssessions[1] , cbuffer );
+					// Set Average Download Time
+					//MORPH START - Added by SiRoB, WebCache 1.2f
+					// jp webcache statistics START
+					// Set Successful webcacherequests
+					percentSessions = 0;
+					if (thePrefs.ses_WEBCACHEREQUESTS > 0)
+						percentSessions = (double) 100 * thePrefs.ses_successfull_WCDOWNLOADS / thePrefs.ses_WEBCACHEREQUESTS;
+					else 
+						percentSessions = (double) 0;
+
+					cbuffer.Format( _T("Successful WC-DL/WC-Requests: %u/%u (%1.1f%%)"), thePrefs.ses_successfull_WCDOWNLOADS, thePrefs.ses_WEBCACHEREQUESTS, percentSessions );
+					stattree.SetItemText( down_ssessions[4] , cbuffer ); // Set Succ WC Sessions
+					//MORPH END   - Added by SiRoB, WebCache 1.2f
+		
 					// Set Average Download Time
 					cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDLTIME), CastSecondsToLngHM(thePrefs.GetDownS_AvgTime()));
 					stattree.SetItemText( down_ssessions[3] , cbuffer );
@@ -1152,6 +1177,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("URL: %s (%1.1f%%)") , CastItoXBytes( DownDataClient, false, false ), percentClientTransferred );
 						stattree.SetItemText( down_tcb[i] , cbuffer );
 						i++;
+						//MORPH START - Added by SiRoB, WebCache 1.2f
+						//jp webcache statistics START
+						DownDataClient = thePrefs.GetCumDownData_WEBCACHE();
+						if ( DownDataTotal!=0 && DownDataClient!=0 )
+							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( _T("WEBCACHE: %s (%1.1f%%)") , CastItoXBytes( DownDataClient ), percentClientTransferred );
+						stattree.SetItemText( down_tcb[i] , cbuffer );
+						i++;
+						//jp webcache statistics END
+						//MORPH END   - Added by SiRoB, WebCache 1.2f
 					}
 					// Downloaded Data By Port
 					if (forceUpdate || stattree.IsExpanded(hdown_tpb)) 
@@ -2252,6 +2289,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								cbuffer.Format( _T("URL: %s (%1.1f%%)") , CastItoXBytes( DownDataClient, false, false ), percentClientTransferred );
 								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer );
 								i++;
+								//MORPH START - Added by SiRoB, WebCache 1.2f
+								//jp webcache statistics START
+								DownDataClient = (uint64) thePrefs.GetCumDownData_WEBCACHE() * avgModifier[mx];
+								if ( DownDataTotal!=0 && DownDataClient!=0 )
+									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+								else
+									percentClientTransferred = 0;
+								cbuffer.Format( _T("WEBCACHE: %s (%1.1f%%)") , CastItoXBytes( DownDataClient ), percentClientTransferred );
+								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer );
+								i++;
+								//jp webcache statistics END
+								//MORPH END   - Added by SiRoB, WebCache 1.2f
 							}
 							// Downloaded Data By Port
 							if (forceUpdate || stattree.IsExpanded(time_aap_down_hd[mx][1])) 
@@ -3162,14 +3211,16 @@ void CStatisticsDlg::CreateMyTree()
 	for(int i = 0; i<8; i++) 
 		down_S[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_down_session);
 	  hdown_scb= stattree.InsertItem(GetResString(IDS_CLIENTS),down_S[0]);						// Clients Section
-	for(int i = 0; i<8; i++) 
+	//MORPH - Changed by SiRoB, WebCache 1.2f
+		for(int i = 0; i<9/* changed to 9 jp webcache statistics */; i++) 
 		down_scb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_scb);
 	  hdown_spb= stattree.InsertItem(GetResString(IDS_PORT),down_S[0]);							// Ports Section
 	for(int i = 0; i<2; i++) 
 		down_spb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_spb);
 	for(int i = 0; i<21; i++) 
 		down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
-	for(int i = 0; i<4; i++) 
+	//MORPH - Changed by SiRoB, WebCache 1.2f
+	for(int i = 0; i<5/* changed to 5 jp webcache statistics */; i++) 
 		down_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[4]);
 	hdown_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_session);				// Downline Overhead (Session)
 	for(int i = 0; i<ARRSIZE(down_soh); i++) 
@@ -3178,7 +3229,8 @@ void CStatisticsDlg::CreateMyTree()
 	for(int i = 0; i<6; i++)
 		down_T[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_down_total);
 	  hdown_tcb= stattree.InsertItem(GetResString(IDS_CLIENTS),down_T[0]);						// Clients Section
-	for(int i = 0; i<8; i++) 
+	//MORPH - Changed by SiRoB, WebCache 1.2f
+	for(int i = 0; i<9/* changed to 9 jp webcache statistics */; i++) 
 		down_tcb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_tcb);
 	  hdown_tpb= stattree.InsertItem(GetResString(IDS_PORT),down_T[0]);							// Ports Section
 	for(int i = 0; i<2; i++) 
@@ -3248,7 +3300,8 @@ void CStatisticsDlg::CreateMyTree()
 		for(int i = 0; i<7; i++)
 			time_aap_down[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING),time_aap_hdown[x]);
 						time_aap_down_hd[x][0] = stattree.InsertItem(GetResString(IDS_CLIENTS),time_aap_down[x][0]);							// Clients Section
-		for(int i = 0; i<8; i++)
+		//MORPH - Changed by SiRoB, WebCache 1.2f
+		for(int i = 0; i<9/* changed to 9 jp webcache statistics */; i++)
 			time_aap_down_dc[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down_hd[x][0]);
 						time_aap_down_hd[x][1] = stattree.InsertItem(GetResString(IDS_PORT),time_aap_down[x][0]);								// Ports Section
 		for(int i = 0; i<2; i++)
@@ -3338,7 +3391,8 @@ void CStatisticsDlg::CreateMyTree()
 	stattree.Init();
 
 	// -khaos--+++>  Initialize our client version counts
-	for (int i = 0; i < 5; i++)	cli_lastCount[i] = 0;
+	for (int i = 0; i < ARRSIZE(cli_lastCount); i++)
+		cli_lastCount[i] = 0;
 
 	// End Tree Setup
 }

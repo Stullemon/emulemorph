@@ -68,6 +68,10 @@ CPPgTweaks::CPPgTweaks()
 	m_iLogFileSaving = 0;
 	m_iLogA4AF = 0; 
 	m_iLogUlDlEvents = 0;
+//MORPH START - Added by SiRoB, WebCache 1.2f
+	m_iLogWebCacheEvents = 0; //JP log webcache events
+	m_iLogICHEvents = 0; //JP log ICH events
+//MORPH END   - Added by SiRoB, WebCache 1.2f
 	m_iCreditSystem = 0;
 	m_iLog2Disk = 0;
 	m_iDebug2Disk = 0;
@@ -110,6 +114,10 @@ CPPgTweaks::CPPgTweaks()
 	m_htiLogFilteredIPs = NULL;
 	m_htiLogFileSaving = NULL;
 	m_htiLogUlDlEvents = NULL;
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	m_htiLogWebCacheEvents = NULL; //jp log webcache events
+	m_htiLogICHEvents = NULL; //JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	m_htiCreditSystem = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
@@ -222,6 +230,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			m_htiLogFileSaving = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILE_SAVING), m_htiVerboseGroup, m_iLogFileSaving);
 			m_htiLogA4AF = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_A4AF), m_htiVerboseGroup, m_iLogA4AF); // ZZ:DownloadManager
 			m_htiLogUlDlEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_ULDL_EVENTS), m_htiVerboseGroup, m_iLogUlDlEvents);
+			//MORPH START - Added by SiRoB, WebCache 1.2f
+			m_htiLogWebCacheEvents = m_ctrlTreeOptions.InsertCheckBox(_T("Log WebCache Events:"), m_htiVerboseGroup, m_iLogWebCacheEvents); //JP log webcache events
+			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(_T("Log IACH Events:"), m_htiVerboseGroup, m_iLogICHEvents); //JP log ICH events
+			//MORPH END   - Added by SiRoB, WebCache 1.2f
 		}
 
 		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);
@@ -289,6 +301,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_htiLogFileSaving)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFileSaving, m_iLogFileSaving);
 	if (m_htiLogA4AF)			    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogA4AF, m_iLogA4AF); // ZZ:DownloadManager
 	if (m_htiLogUlDlEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogUlDlEvents, m_iLogUlDlEvents);
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	if (m_htiLogWebCacheEvents)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogWebCacheEvents, m_iLogWebCacheEvents);//jp log webcache events
+	if (m_htiLogICHEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogICHEvents, m_iLogICHEvents);//JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	/*
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
@@ -319,6 +335,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_iVerbose);
 	if (m_htiLogA4AF)               m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, m_iVerbose); // ZZ:DownloadManager
 	if (m_htiLogUlDlEvents)         m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, m_iVerbose);
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	if (m_htiLogWebCacheEvents)     m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogWebCacheEvents, m_iVerbose);//jp log webcache events
+	if (m_htiLogICHEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogICHEvents, m_iVerbose);//JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	if (m_htiLogLevel){
 		DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiLogLevel, m_iLogLevel);
 		DDV_MinMaxInt(pDX, m_iLogLevel, 1, 5);
@@ -375,6 +395,10 @@ BOOL CPPgTweaks::OnInitDialog()
 		m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
         m_iLogA4AF = thePrefs.m_bLogA4AF;                   		    // do *not* use the according 'Get...' function here! // ZZ:DownloadManager
 		m_iLogUlDlEvents = thePrefs.m_bLogUlDlEvents;
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		m_iLogWebCacheEvents = thePrefs.m_bLogWebCacheEvents;//JP log webcache events
+		m_iLogICHEvents = thePrefs.m_bLogICHEvents;//JP log ICH events
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		m_iLogLevel = 5 - thePrefs.m_byLogLevel;
 	}
 	m_iLog2Disk = thePrefs.log2disk;
@@ -500,6 +524,10 @@ BOOL CPPgTweaks::OnApply()
 		thePrefs.m_bLogFileSaving = m_iLogFileSaving;
         thePrefs.m_bLogA4AF = m_iLogA4AF; // ZZ:DownloadManager
 		thePrefs.m_bLogUlDlEvents = m_iLogUlDlEvents;
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		thePrefs.m_bLogWebCacheEvents = m_iLogWebCacheEvents;//JP log webcache events
+		thePrefs.m_bLogICHEvents = m_iLogICHEvents;//JP log ICH events
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		thePrefs.m_byLogLevel = 5 - m_iLogLevel;
 
 		thePrefs.m_bVerbose = m_iVerbose; // store after related options were stored!
@@ -597,6 +625,11 @@ void CPPgTweaks::Localize(void)
 		if (m_htiLogA4AF) m_ctrlTreeOptions.SetItemText(m_htiLogA4AF, GetResString(IDS_LOG_A4AF));
 		if (m_htiLogUlDlEvents) m_ctrlTreeOptions.SetItemText(m_htiLogUlDlEvents, GetResString(IDS_LOG_ULDL_EVENTS));
 
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		if (m_htiLogWebCacheEvents) m_ctrlTreeOptions.SetItemText(m_htiLogWebCacheEvents, _T("Log WebCache Events:"));//jp log webcache events
+		if (m_htiLogICHEvents) m_ctrlTreeOptions.SetItemText(m_htiLogICHEvents, _T("Log IACH Events:"));//JP log ICH events
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
+
 		if (m_htiCommit) m_ctrlTreeOptions.SetItemText(m_htiCommit, GetResString(IDS_COMMITFILES));
 		if (m_htiCommitNever) m_ctrlTreeOptions.SetItemText(m_htiCommitNever, GetResString(IDS_NEVER));
 		if (m_htiCommitOnShutdown) m_ctrlTreeOptions.SetItemText(m_htiCommitOnShutdown, GetResString(IDS_ONSHUTDOWN));
@@ -654,6 +687,10 @@ void CPPgTweaks::OnDestroy()
     m_htiLogA4AF = NULL; // ZZ:DownloadManager
 	m_htiLogLevel = NULL;
 	m_htiLogUlDlEvents = NULL;
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	m_htiLogWebCacheEvents = NULL;//jp log webcache events
+	m_htiLogICHEvents = NULL;//JP log ICH events
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	m_htiCreditSystem = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
@@ -715,6 +752,10 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 				if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
                 if (m_htiLogA4AF)			    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, bCheck); // ZZ:DownloadManager
 				if (m_htiLogUlDlEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, bCheck);
+				//MORPH START - Added by SiRoB, WebCache 1.2f
+				if (m_htiLogWebCacheEvents)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogWebCacheEvents, bCheck);//jp log webcache events
+				if (m_htiLogICHEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogICHEvents, bCheck);//JP log ICH events
+				//MORPH END   - Added by SiRoB, WebCache 1.2f
 				if (m_htiDateFileNameLog)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDateFileNameLog, bCheck);//Morph - added by AndCycle, Date File Name Log
 			}
 		}

@@ -146,6 +146,7 @@ void CWebServer::ReloadTemplates()
 			m_Templates.sStats = _LoadTemplate(sAll,_T("TMPL_STATS"));
 			m_Templates.sPreferences = _LoadTemplate(sAll,_T("TMPL_PREFERENCES_KAD"));
 			m_Templates.sLogin = _LoadTemplate(sAll,_T("TMPL_LOGIN"));
+			m_Templates.sFailedLogin = _LoadTemplate(sAll,_T("TMPL_FAILEDLOGIN"));
 			m_Templates.sConnectedServer = _LoadTemplate(sAll,_T("TMPL_CONNECTED_SERVER"));
 			m_Templates.sAddServerBox = _LoadTemplate(sAll,_T("TMPL_ADDSERVERBOX"));
 			m_Templates.sWebSearch = _LoadTemplate(sAll,_T("TMPL_WEBSEARCH"));
@@ -534,7 +535,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				if ( pThis->m_Params.badlogins[i].datalen==ip ) faults++;
 
 			if (faults>4) {
-				Out += _GetPlainResString(IDS_ACCESSDENIED);
+				Out += _GetFailedLoginScreen(Data);
 				
 				// set 15 mins ban by using the badlist
 				BadLogin preventive={ip, ::GetTickCount() + (15*60*1000) };
@@ -2113,7 +2114,7 @@ CString CWebServer::_GetStats(ThreadData Data)
 	theApp.emuledlg->statisticswnd->ShowStatistics(true);
 
 	CString Out = pThis->m_Templates.sStats;
-	Out.Replace(_T("[STATSDATA]"), theApp.emuledlg->statisticswnd->stattree.GetHTML(false));
+	Out.Replace(_T("[Stats]"), theApp.emuledlg->statisticswnd->stattree.GetHTMLForExport());
 
 	return Out;
 
@@ -2321,6 +2322,36 @@ CString CWebServer::_GetLoginScreen(ThreadData Data)
 	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 	Out.Replace(_T("[Login]"), _GetPlainResString(IDS_WEB_LOGIN));
 	Out.Replace(_T("[EnterPassword]"), _GetPlainResString(IDS_WEB_ENTER_PASSWORD));
+	Out.Replace(_T("[LoginNow]"), _GetPlainResString(IDS_WEB_LOGIN_NOW));
+	Out.Replace(_T("[WebControl]"), _GetPlainResString(IDS_WEB_CONTROL));
+
+	return Out;
+}
+
+CString CWebServer::_GetFailedLoginScreen(ThreadData Data)
+{
+
+	CWebServer *pThis = (CWebServer *)Data.pThis;
+	if(pThis == NULL)
+		return _T("");
+
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
+
+	CString Out = _T("");
+
+	Out += pThis->m_Templates.sFailedLogin;
+
+	Out.Replace(_T("[CharSet]"), _GetWebCharSet());
+	Out.Replace(_T("[eMulePlus]"), _T("eMule"));
+	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
+	Out.Replace(_T("[version]"), theApp.m_strCurVersionLong);
+	*/
+	Out.Replace(_T("[version]"), theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+	Out.Replace(_T("[Login]"), _GetPlainResString(IDS_WEB_LOGIN));
+	Out.Replace(_T("[BanMessage]"), _T("You have been banned for 15 min due to failed login attempts!"));
 	Out.Replace(_T("[LoginNow]"), _GetPlainResString(IDS_WEB_LOGIN_NOW));
 	Out.Replace(_T("[WebControl]"), _GetPlainResString(IDS_WEB_CONTROL));
 

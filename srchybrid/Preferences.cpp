@@ -191,15 +191,15 @@ int		CPreferences::maxGraphDownloadRate;
 int		CPreferences::maxGraphUploadRate;
 uint8	CPreferences::beepOnError;
 uint8	CPreferences::confirmExit;
-uint16	CPreferences::downloadColumnWidths[15]; /*13 Official+ 2 Khaos*/
-BOOL	CPreferences::downloadColumnHidden[15]; /*13 Official+ 2 Khaos*/
-INT 	CPreferences::downloadColumnOrder[15];  /*13 Official+ 2 Khaos*/
+uint16	CPreferences::downloadColumnWidths[16]; /*13 Official+ 2 Khaos*+1 WC*/
+BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 2 Khaos+1 WC*/
+INT 	CPreferences::downloadColumnOrder[16];  /*13 Official+ 2 Khaos+1 WC*/
 uint16	CPreferences::uploadColumnWidths[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 BOOL	CPreferences::uploadColumnHidden[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 INT 	CPreferences::uploadColumnOrder[16];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
-uint16	CPreferences::queueColumnWidths[14];  /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country*/
-BOOL	CPreferences::queueColumnHidden[14];  /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country*/
-INT 	CPreferences::queueColumnOrder[14];   /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country*/
+uint16	CPreferences::queueColumnWidths[15];  /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country+1 WC*/
+BOOL	CPreferences::queueColumnHidden[15];  /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country+1 WC*/
+INT 	CPreferences::queueColumnOrder[15];   /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country+1 WC*/
 uint16	CPreferences::searchColumnWidths[15]; /*14+1 Fakecheck*/
 BOOL	CPreferences::searchColumnHidden[15]; /*14+1 Fakecheck*/
 INT 	CPreferences::searchColumnOrder[15];  /*14+1 Fakecheck*/
@@ -290,6 +290,7 @@ uint64	CPreferences::cumDownData_AMULE;
 uint64	CPreferences::cumDownData_EMULECOMPAT;
 uint64	CPreferences::cumDownData_SHAREAZA;
 uint64	CPreferences::cumDownData_URL;
+uint64	CPreferences::cumDownData_WEBCACHE; //jp webcache statistics // MORPH - Added by Commander, WebCache 1.2e
 uint64	CPreferences::sesDownData_EDONKEY;
 uint64	CPreferences::sesDownData_EDONKEYHYBRID;
 uint64	CPreferences::sesDownData_EMULE;
@@ -298,6 +299,11 @@ uint64	CPreferences::sesDownData_AMULE;
 uint64	CPreferences::sesDownData_EMULECOMPAT;
 uint64	CPreferences::sesDownData_SHAREAZA;
 uint64	CPreferences::sesDownData_URL;
+// MORPH START - Added by Commander, WebCache 1.2e
+uint64	CPreferences::sesDownData_WEBCACHE; //jp webcache statistics
+uint32	CPreferences::ses_WEBCACHEREQUESTS; //jp webcache statistics needs to be uint32 or the statistics won't work
+uint32	CPreferences::ses_successfull_WCDOWNLOADS; //jp webcache statistics needs to be uint32 or the statistics won't work
+// MORPH END - Added by Commander, WebCache 1.2e
 uint64	CPreferences::cumDownDataPort_4662;
 uint64	CPreferences::cumDownDataPort_OTHER;
 uint64	CPreferences::sesDownDataPort_4662;
@@ -401,6 +407,10 @@ bool	CPreferences::m_bLogFilteredIPs;
 bool	CPreferences::m_bLogFileSaving;
 bool	CPreferences::m_bLogA4AF; // ZZ:DownloadManager
 bool	CPreferences::m_bLogUlDlEvents;
+// MORPH START - Added by Commander, WebCache 1.2e
+bool	CPreferences::m_bLogWebCacheEvents;//JP log webcache events
+bool	CPreferences::m_bLogICHEvents;//JP log ICH events
+// MORPH END - Added by Commander, WebCache 1.2e
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 bool	CPreferences::m_bUseDebugDevice = true;
 #else
@@ -427,13 +437,13 @@ bool	CPreferences::m_bTransflstRemain;
 uint8	CPreferences::versioncheckdays;
 // SLUGFILLER: multiSort - save multiple params
 // SLUGFILLER: DLsortFix - double, for client-only sorting
-int	CPreferences::tableSortItemDownload[30];
-BOOL	CPreferences::tableSortAscendingDownload[30];
+int	CPreferences::tableSortItemDownload[32];
+BOOL	CPreferences::tableSortAscendingDownload[32];
 // SLUGFILLER: DLsortFix
 int	CPreferences::tableSortItemUpload[16];
 BOOL	CPreferences::tableSortAscendingUpload[16];
-int	CPreferences::tableSortItemQueue[14];
-BOOL	CPreferences::tableSortAscendingQueue[14];
+int	CPreferences::tableSortItemQueue[15];
+BOOL	CPreferences::tableSortAscendingQueue[15];
 int	CPreferences::tableSortItemSearch[15];
 BOOL	CPreferences::tableSortAscendingSearch[15];
 int	CPreferences::tableSortItemShared[22];
@@ -548,7 +558,13 @@ uint16	CPreferences::maxconnectionsswitchborder;
 bool	CPreferences::autobackup;
 bool	CPreferences::autobackup2;
 //EastShare End - Added by Pretender, TBH-AutoBackup
-uint16	CPreferences::maxuploadfriend;//MORPH - Added by SiRoB, Upload Splitting Class
+//MORPH START - Added by SiRoB, Upload Splitting Class
+uint16	CPreferences::mindataratefriend;
+uint16	CPreferences::mindataratepowershare;
+uint16	CPreferences::maxclientdataratefriend;
+uint16	CPreferences::maxclientdataratepowershare;
+uint16	CPreferences::maxclientdatarate;
+//MORPH END   - Added by SiRoB, Upload Splitting Class
 //MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 uint8	CPreferences::LowIdRetries;
 uint8	CPreferences::LowIdRetried;
@@ -748,11 +764,64 @@ bool	CPreferences::enableNEWS;
 	bool	CPreferences::m_bWapLowEnabled;
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
+// MORPH START - Added by Commander, WebCache 1.2e
+CString	CPreferences::webcacheName;
+uint16	CPreferences::webcachePort;
+bool	CPreferences::webcacheReleaseAllowed; //jp webcache release
+uint16	CPreferences::webcacheBlockLimit;
+bool	CPreferences::PersistentConnectionsForProxyDownloads; //jp persistent proxy connections
+bool	CPreferences::webcacheExtraTimeout;
+bool	CPreferences::webcacheCachesLocalTraffic;
+bool	CPreferences::webcacheEnabled;
+bool	CPreferences::detectWebcacheOnStartup; //jp detect webcache on startup
+uint32	CPreferences::webcacheLastSearch;
+CString	CPreferences::webcacheLastResolvedName;
+uint32	CPreferences::webcacheLastGlobalIP;
+bool	CPreferences::UsesCachedTCPPort()  //jp
+{
+	if ((thePrefs.port==80) || (thePrefs.port==21) || (thePrefs.port==443) || (thePrefs.port==563) || (thePrefs.port==70) || (thePrefs.port==210) || ((thePrefs.port>=1025) && (thePrefs.port<=65535))) return true;
+	else return false;
+}
+//JP proxy configuration test start
+bool	CPreferences::m_bHighIdPossible;
+//JP proxy configuration test start
+bool	CPreferences::WebCacheDisabledThisSession;//jp temp disabled
+uint32	CPreferences::WebCachePingSendTime;//jp check proxy config
+bool	CPreferences::expectingWebCachePing;//jp check proxy config
+bool	CPreferences::IsWebCacheTestPossible()//jp check proxy config
+{
+	return (theApp.GetPublicIP() != 0 //we have a public IP
+		&& theApp.serverconnect->IsConnected() //connected to a server
+		&& !theApp.serverconnect->IsLowID()//don't have LowID
+		&& m_bHighIdPossible);// no fake high ID
+}
+//JP proxy configuration test end
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+//JP webcache release START
+bool	CPreferences::UpdateWebcacheReleaseAllowed()
+{
+	webcacheReleaseAllowed = true;
+	if (theApp.downloadqueue->ContainsUnstoppedFiles())
+		webcacheReleaseAllowed = false;
+	return webcacheReleaseAllowed;
+}
+//JP webcache release END
+// MORPH END - Added by Commander, WebCache 1.2e
+
 CPreferences::CPreferences()
 {
 #ifdef _DEBUG
 	m_iDbgHeap = 1;
 #endif
+// MORPH START - Added by Commander, WebCache 1.2e
+//JP set standard values for stuff that doesn't need to be saved. This should probably be somewhere else START
+expectingWebCachePing = false;
+WebCachePingSendTime = 0;
+WebCacheDisabledThisSession = false;
+webcacheReleaseAllowed = true; //jp webcache release
+m_bHighIdPossible = false; // JP detect fake HighID (from netfinity)
+//JP set standard values for stuff that doesn't need to be saved. This should probably be somewhere else END
+// MORPH END - Added by Commander, WebCache 1.2e
 }
 
 CPreferences::~CPreferences()
@@ -1117,9 +1186,25 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 }
 
 //MORPH START - Added by SiRoB, Upload Splitting Class
-uint32	CPreferences::GetMaxFriendByteToSend()
+uint32	CPreferences::GetMinDataRateFriend()
 {
-	return maxuploadfriend*1024;//_UI32_MAX;
+	return mindataratefriend*1024;//_UI32_MAX;
+}
+uint32	CPreferences::GetMaxClientDataRateFriend()
+{
+	return maxclientdataratefriend*1024;
+}
+uint32	CPreferences::GetMinDataRatePowerShare()
+{
+	return mindataratepowershare*1024;//_UI32_MAX;
+}
+uint32	CPreferences::GetMaxClientDataRatePowerShare()
+{
+	return maxclientdataratepowershare*1024;
+}
+uint32	CPreferences::GetMaxClientDataRate()
+{
+	return maxclientdatarate*1024;
 }
 //MORPH END   - Added by SiRoB, Upload Splitting Class
 // -khaos--+++> A whole bunch of methods!  Keep going until you reach the end tag.
@@ -1160,6 +1245,9 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(_T("DownData_AMULE"), GetCumDownData_AMULE());
 	ini.WriteUInt64(_T("DownData_SHAREAZA"), GetCumDownData_SHAREAZA());
 	ini.WriteUInt64(_T("DownData_URL"), GetCumDownData_URL());
+	// MORPH START - Added by Commander, WebCache 1.2e
+	ini.WriteUInt64(_T("DownData_WEBCACHE"), GetCumDownData_WEBCACHE()); // Superlexx - webcache - statistics
+	// MORPH END - Added by Commander, WebCache 1.2e
 	ini.WriteUInt64(_T("DownDataPort_4662"), GetCumDownDataPort_4662());
 	ini.WriteUInt64(_T("DownDataPort_OTHER"), GetCumDownDataPort_OTHER());
 
@@ -1435,6 +1523,9 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 				case SO_LPHANT:
 				case SO_XMULE:			sesDownData_EMULECOMPAT+=bytes;	break;
 				case SO_URL:			sesDownData_URL+=bytes;			break;
+				// MORPH START - Added by Commander, WebCache 1.2e
+				case SO_WEBCACHE:		sesDownData_WEBCACHE+=bytes;	break; // Superlexx - webcache - statistics
+				// MORPH END - Added by Commander, WebCache 1.2e
 			}
 
 			switch (uClientPort){
@@ -1511,6 +1602,9 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumDownData_EMULECOMPAT=0;
 	cumDownData_SHAREAZA=0;
 	cumDownData_URL=0;
+	// MORPH START - Added by Commander, WebCache 1.2e
+	cumDownData_WEBCACHE=0; // Superlexx - webcache - statistics
+	// MORPH END - Added by Commander, WebCache 1.2e
 	cumDownDataPort_4662=0;
 	cumDownDataPort_OTHER=0;
 	cumConnAvgDownRate=0;
@@ -1653,6 +1747,9 @@ bool CPreferences::LoadStats(int loadBackUp)
 	cumDownData_AMULE				= ini.GetUInt64(_T("DownData_AMULE"));
 	cumDownData_SHAREAZA			= ini.GetUInt64(_T("DownData_SHAREAZA"));
 	cumDownData_URL					= ini.GetUInt64(_T("DownData_URL"));
+	// MORPH START - Added by Commander, WebCache 1.2e
+	cumDownData_WEBCACHE			= ini.GetUInt64(_T("DownData_WEBCACHE")); // Superlexx - webcache - statistics
+	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Load cumulative port breakdown stats for received bytes
 	cumDownDataPort_4662			= ini.GetUInt64(_T("DownDataPort_4662"));
@@ -1755,6 +1852,12 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesDownData_EMULECOMPAT		= 0;
 		sesDownData_SHAREAZA		= 0;
 		sesDownData_URL				= 0;
+		// MORPH START - Added by Commander, WebCache 1.2e
+		sesDownData_WEBCACHE		= 0; // Superlexx - webcache - statistics
+		ses_WEBCACHEREQUESTS		= 0; //jp webcache statistics
+		ses_successfull_WCDOWNLOADS	= 0; //jp webcache statistics
+		// MORPH END - Added by Commander, WebCache 1.2e
+
 		sesDownDataPort_4662		= 0;
 		sesDownDataPort_OTHER		= 0;
 
@@ -2092,6 +2195,19 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("Port"),port);
 	ini.WriteInt(_T("UDPPort"),udpport);
 	ini.WriteInt(_T("ServerUDPPort"), nServerUDPPort);
+	// MORPH START - Added by Commander, WebCache 1.2e
+	ini.WriteString(_T("webcacheName"), webcacheName);
+	ini.WriteInt(_T("webcachePort"), webcachePort);
+	ini.WriteInt(_T("WebCacheBlockLimit"), webcacheBlockLimit);
+	ini.WriteBool(_T("PersistentConnectionsForProxyDownloads"), PersistentConnectionsForProxyDownloads); //JP persistent proxy connections
+	ini.WriteBool(_T("WebCacheExtraTimeout"), webcacheExtraTimeout);
+	ini.WriteBool(_T("WebCacheCachesLocalTraffic"), webcacheCachesLocalTraffic);
+	ini.WriteBool(_T("WebCacheEnabled"), webcacheEnabled);
+	ini.WriteBool(_T("detectWebcacheOnStartup"), detectWebcacheOnStartup); // jp detect webcache on startup
+	ini.WriteUInt64(_T("WebCacheLastSearch"), (uint64)webcacheLastSearch);
+	ini.WriteUInt64(_T("WebCacheLastGlobalIP"), (uint64)webcacheLastGlobalIP);
+	ini.WriteString(_T("WebCacheLastResolvedName"), webcacheLastResolvedName);
+	// MORPH END - Added by Commander, WebCache 1.2e
 	ini.WriteInt(_T("MaxSourcesPerFile"),maxsourceperfile );
 	ini.WriteWORD(_T("Language"),m_wLanguageID);
 	ini.WriteInt(_T("SeeShare"),m_iSeeShares);
@@ -2204,6 +2320,10 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("LogFileSaving"), m_bLogFileSaving);				// do *not* use the according 'Get...' function here!
     ini.WriteBool(_T("LogA4AF"), m_bLogA4AF);                           // do *not* use the according 'Get...' function here!
 	ini.WriteBool(_T("LogUlDlEvents"), m_bLogUlDlEvents);
+	// MORPH START - Added by Commander, WebCache 1.2f
+	ini.WriteBool(_T("LogWebCacheEvents"), m_bLogWebCacheEvents);//JP log webcache events
+	ini.WriteBool(_T("LogICHEvents"), m_bLogICHEvents);//JP log ICH events
+	// MORPH END - Added by Commander, WebCache 1.2f
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	// following options are for debugging or when using an external debug device viewer only.
 	ini.WriteInt(_T("DebugServerTCP"),m_iDebugServerTCPLevel);
@@ -2493,7 +2613,13 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteInt(_T("MaxUploadFriend"),maxuploadfriend,_T("eMule"));//MORPH - Added by SiRoB, Upload Splitting Class
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	ini.WriteInt(_T("MinDataRateFriend"),mindataratefriend,_T("eMule"));
+	ini.WriteInt(_T("MinDataRatePowerShare"),mindataratepowershare,_T("eMule"));
+	ini.WriteInt(_T("MaxClientDataRateFriend"),maxclientdataratefriend,_T("eMule"));
+	ini.WriteInt(_T("MaxClientDataRatePowerShare"),maxclientdataratepowershare,_T("eMule"));
+	ini.WriteInt(_T("MaxClientDataRate"),maxclientdatarate,_T("eMule"));
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ini.WriteInt(_T("ReconnectOnLowIdRetries"),LowIdRetries,_T("eMule"));	// SLUGFILLER: lowIdRetry
@@ -2801,6 +2927,24 @@ void CPreferences::LoadPreferences()
 	port=ini.GetInt(_T("Port"), DEFAULT_TCP_PORT);
 	udpport=ini.GetInt(_T("UDPPort"),port+10);
 	nServerUDPPort = ini.GetInt(_T("ServerUDPPort"), -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
+	// MORPH START - Added by Commander, WebCache 1.2e
+	// Superlexx - webcache
+	/*char tmpWebcacheName[100];
+	sprintf(tmpWebcacheName,"%s",ini.GetString(_T("webcacheName"),_T("")));
+	webcacheName = tmpWebcacheName; // TODO: something more elegant*/
+	webcacheName = ini.GetString(_T("webcacheName"), _T(""));
+	webcachePort=ini.GetInt(_T("webcachePort"),0);
+	webcacheBlockLimit=ini.GetInt(_T("webcacheBlockLimit"));
+	webcacheExtraTimeout=ini.GetBool(_T("webcacheExtraTimeout"));
+	PersistentConnectionsForProxyDownloads=ini.GetBool(_T("PersistentConnectionsForProxyDownloads"), false);
+	webcacheCachesLocalTraffic=ini.GetBool(_T("webcacheCachesLocalTraffic"), true);
+	webcacheEnabled=ini.GetBool(_T("webcacheEnabled"),false); //webcache disabled on first start so webcache detection on start gets called.
+	detectWebcacheOnStartup=ini.GetBool(_T("detectWebcacheOnStartup"), true); // jp detect webcache on startup
+	webcacheLastSearch=(uint32)ini.GetUInt64(_T("webcacheLastSearch"));
+	webcacheLastGlobalIP=(uint32)ini.GetUInt64(_T("webcacheLastGlobalIP"));
+	webcacheLastResolvedName=ini.GetString(_T("webcacheLastResolvedName"),0);
+	// webcache end
+        // MORPH END - Added by Commander, WebCache 1.2e
 	maxsourceperfile=ini.GetInt(_T("MaxSourcesPerFile"),400 );
 	m_wLanguageID=ini.GetWORD(_T("Language"),0);
 	m_iSeeShares=(EViewSharedFilesAccess)ini.GetInt(_T("SeeShare"),vsfaNobody);
@@ -2938,6 +3082,10 @@ void CPreferences::LoadPreferences()
 		m_bLogFileSaving=ini.GetBool(_T("LogFileSaving"),false);
         m_bLogA4AF=ini.GetBool(_T("LogA4AF"),false); // ZZ:DownloadManager
 		m_bLogUlDlEvents=ini.GetBool(_T("LogUlDlEvents"),true);
+		// MORPH START - Added by Commander, WebCache 1.2e
+		m_bLogWebCacheEvents=ini.GetBool(_T("LogWebCacheEvents"),true);//JP log webcache events
+		m_bLogICHEvents=ini.GetBool(_T("LogICHEvents"),true);//JP log ICH events
+		// MORPH END - Added by Commander, WebCache 1.2e
 	}
 	else
 	{
@@ -3101,8 +3249,14 @@ void CPreferences::LoadPreferences()
 	m_bIP2CountryShowFlag = ini.GetBool(_T("IP2CountryShowFlag"), false);
 	//EastShare - added by AndCycle, IP to Country
 	
-	maxuploadfriend=ini.GetInt(_T("MaxUploadFriend"),3);//MORPH - Added by SiRoB, Upload Splitting Class
-	
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	mindataratefriend=ini.GetInt(_T("MinDataRateFriend"),0);
+	mindataratepowershare=ini.GetInt(_T("MinDataRatePowerShare"),0);
+	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
+	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
+	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),3);
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	LowIdRetries=ini.GetInt(_T("ReconnectOnLowIdRetries"),3);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
@@ -3170,7 +3324,7 @@ void CPreferences::LoadPreferences()
 	m_bPayBackFirst=ini.GetBool(_T("IsPayBackFirst"),false);//EastShare - added by AndCycle, Pay Back First
 	m_iPayBackFirstLimit=ini.GetInt(_T("PayBackFirstLimit"),10);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), false/*true cahnged by sirob*/);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), true);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.dat")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip")));//MORPH START added by Yun.SF3: Ipfilter.dat update

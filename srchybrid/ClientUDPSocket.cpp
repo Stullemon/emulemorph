@@ -36,6 +36,11 @@
 #include "IPFilter.h"
 #include "FirewallOpener.h" // emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
 
+// MORPH START - Added by Commander, WebCache 1.2e
+#include "WebCache/WebCachedBlock.h" // yonatan http
+#include "SafeFile.h" // yonatan http (for udp ohcbs)
+// MORPH END - Added by Commander, WebCache 1.2e
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -133,6 +138,19 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 						throw CString(_T("Packet too short"));
 					break;
 				}
+//MORPH START - Added by SiRoB, WebCache 1.2f
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+				//JP WEBCACHE START
+				case OP_WEBCACHEPROT:
+				{
+					if (length >= 2)
+						ProcessWebCachePacket(buffer+2, length-2, buffer[1], sockAddr.sin_addr.S_un.S_addr, ntohs(sockAddr.sin_port));
+					else
+						throw CString(_T("Packet too short"));
+					break;
+				}
+				//JP WEBCACHE END
+// MORPH END   - Added by SiRoB, WebCache 1.2f
 				default:
 				{
 					CString strError;
@@ -393,6 +411,92 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 				}
 			break;
 		}
+                // MORPH START - Added by Commander, WebCache 1.2e
+		case OP_HTTP_CACHED_BLOCK:
+		{
+			theStats.AddDownDataOverheadOther(size);
+			uint32 *id = (uint32*)((BYTE*)packet+50);
+//			if (thePrefs.GetLogWebCacheEvents())
+//				AddDebugLogLine( false, _T("Recv UDP-WCB: %d"), *id );
+			CUpDownClient* sender = theApp.clientlist->FindClientByWebCacheUploadId( *id );
+
+			if( sender ) 
+			{
+				if (thePrefs.GetDebugClientUDPLevel() > 0)
+					DebugRecv("OP__Http_Cached_Block (UDP)", sender, NULL, ip);
+				if( thePrefs.IsWebCacheDownloadEnabled() )
+				{
+					if (thePrefs.GetLogWebCacheEvents())
+					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
+					CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, sender ); // Starts DL or places block on queue
+				}
+			} 
+			else 
+				if (thePrefs.GetLogWebCacheEvents())
+				AddDebugLogLine( false, _T("Received cached block info from unknown client (UDP)") );
+
+			break;
+		}
+                // MORPH END - Added by Commander, WebCache 1.2e
+		default:
+			theStats.AddDownDataOverheadOther(size);
+			if (thePrefs.GetDebugClientUDPLevel() > 0)
+			{
+				CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP_UDP(ip, port);
+				Debug(_T("Unknown client UDP packet: host=%s:%u (%s) opcode=0x%02x  size=%u\n"), ipstr(ip), port, sender ? sender->DbgGetClientInfo() : _T(""), opcode, size);
+			}
+			return false;
+	}
+	return true;
+}
+// MORPH START - Added by SiRoB, WebCache 1.2f
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+// WebCache START
+bool CClientUDPSocket::ProcessWebCachePacket(BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port)
+{
+	switch(opcode)
+	{
+		case OP_HTTP_CACHED_BLOCK:
+		{
+			theStats.AddDownDataOverheadOther(size);
+			uint32 *id = (uint32*)((BYTE*)packet+50);
+			CUpDownClient* sender = theApp.clientlist->FindClientByWebCacheUploadId( *id );
+
+			if( sender ) 
+			{
+				if (thePrefs.GetDebugClientUDPLevel() > 0)
+					DebugRecv("OP__Http_Cached_Block (UDP)", sender, NULL, ip);
+				if( thePrefs.IsWebCacheDownloadEnabled() )
+				{
+					if (thePrefs.GetLogWebCacheEvents())
+					AddDebugLogLine( false, _T("Received WCBlock - UDP") );
+					CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, sender ); // Starts DL or places block on queue
+				}
+			} 
+			else 
+				if (thePrefs.GetLogWebCacheEvents())
+				AddDebugLogLine( false, _T("Received cached block info from unknown client (UDP)") );
+
+			break;
+		}
+		//JP for a future version
+		case OP_RESUME_SEND_OHCBS:
+		{
+			theStats.AddDownDataOverheadOther(size);
+			uint32 *id = (uint32*)((BYTE*)packet);
+			CUpDownClient* sender = theApp.clientlist->FindClientByWebCacheUploadId( *id );
+
+			if( sender ) 
+			{
+				sender->m_bIsAcceptingOurOhcbs = true;
+				if (thePrefs.GetLogWebCacheEvents())
+					AddDebugLogLine( false, _T("Received OP_RESUME_SEND_OHCBS from %s "), sender->DbgGetClientInfo() );
+			} 
+			else 
+				if (thePrefs.GetLogWebCacheEvents())
+				AddDebugLogLine( false, _T("Received OP_RESUME_SEND_OHCBS from unknown client") );
+			break;
+		}
 		default:
 			theStats.AddDownDataOverheadOther(size);
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
@@ -405,6 +509,7 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 	return true;
 }
 
+// MORPH END - Added by SiRoB, WebCache 1.2f
 void CClientUDPSocket::OnSend(int nErrorCode){
 	if (nErrorCode){
 		if (thePrefs.GetVerbose())

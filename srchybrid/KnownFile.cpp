@@ -388,6 +388,7 @@ IMPLEMENT_DYNAMIC(CKnownFile, CAbstractFile)
 
 CKnownFile::CKnownFile()
 {
+	ReleaseViaWebCache = false; //JP webcache release // MORPH - Added by Commander, WebCache 1.2e
 	m_iPartCount = 0;
 	m_iED2KPartCount = 0;
 	m_iED2KPartHashCount = 0;
@@ -825,6 +826,8 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	}
 	else{
 		// now something went pretty wrong
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		theApp.QueueDebugLogLine(true,_T("Failed to calculate AICH Hashset from file %s"), GetFileName());
 	}
 
@@ -921,6 +924,8 @@ bool CKnownFile::CreateAICHHashSetOnly()
 	}
 	else{
 		// now something went pretty wrong
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		theApp.QueueDebugLogLine(true,_T("Failed to calculate AICH Hashset from file %s"), GetFileName());
 	}
 	
@@ -1906,7 +1911,8 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 		if( rcvstatus )
 		{
 			uint8* srcstatus = cur_src->GetUpPartStatus();
-			if( srcstatus )
+			// MORPH - Modified by Commander, WebCache 1.2e
+			if( srcstatus && (!forClient->SupportsWebCache() && !cur_src->SupportsWebCache())) // Superlexx - IFP - if both clients do support webcache, then they have IFP and might find empty sources useful; send that source even if they both are not behind same proxy to improve found webcache-enabled source number on those clients
 			{
 				if( cur_src->GetUpPartCount() == forClient->GetUpPartCount() )
 				{
@@ -2786,4 +2792,49 @@ uint8	CKnownFile::HideOSInWork() const
 	else
 		return 0;
 }
-//MORPH END   - Added by SiRoB, Avoid misusing of HideOS
+//MORPH END   - Added by SiRoB, Avoid misusing of HideOS// MORPH START - Added by Commander, WebCache 1.2e
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+//JP webcache release START
+uint32 CKnownFile::GetNumberOfClientsRequestingThisFileUsingThisWebcache(CString webcachename, uint32 maxCount)
+{
+	if (maxCount == 0)
+		maxCount = 0xFFFFFFFF; //be careful with using 0 (unlimited) when calling this function cause it is O(n^2) and gets called for every webcache enabled client
+uint32 returncounter = 0;
+CList<uint32,uint32&> IP_List; //JP only count unique IPs
+POSITION pos = m_ClientUploadList.GetHeadPosition();
+while (pos != NULL)
+{
+	CUpDownClient* cur_client = m_ClientUploadList.GetNext(pos);
+	if (cur_client->GetWebCacheName() == webcachename && !cur_client->HasLowID() && !cur_client->IsBanned())
+	{
+		//search for IP in IP_List
+		bool found = false;
+		POSITION pos2 = IP_List.GetHeadPosition();
+			uint32 cur_IP;
+		while (pos2 != NULL)
+		{
+			cur_IP = IP_List.GetNext(pos2);
+			if (cur_IP == cur_client->GetIP())
+			{
+				found = true;
+			}
+			//leave while look if IP was found
+			if (found) break;
+		}
+
+		//if not found add IP to list
+		if (!found)
+		{
+			uint32 user_IP = cur_client->GetIP();
+			IP_List.AddTail(user_IP);
+				returncounter++;
+		}
+	}
+	//Don't let this list get longer than 10 so we don't waste CPU-cycles
+	if (returncounter >= maxCount) break; 
+}
+IP_List.RemoveAll();
+return returncounter;
+}
+//JP webcache release END
+// MORPH END - Added by Commander, WebCache 1.2e

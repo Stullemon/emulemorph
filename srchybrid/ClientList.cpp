@@ -795,7 +795,10 @@ void CClientList::CleanUpClientList(){
 				&& pCurClient->GetDownloadState() == DS_NONE
 				&& pCurClient->GetChatState() == MS_NONE
 				&& pCurClient->GetKadState() == KS_NONE
-				&& pCurClient->socket == NULL)
+				&& pCurClient->socket == NULL
+				//MORPH START - Added by SiRoB, Webcache 1.2f
+				&& !pCurClient->IsProxy()) //JP don't delete SINGLEProxyClient
+				//MORPH END   - Added by SiRoB, Webcache 1.2f
 			{
 				cDeleted++;
 				delete pCurClient;
@@ -845,3 +848,17 @@ void CClientList::ResetIP2Country(){
 
 }
 //EastShare End - added by AndCycle, IP to Country
+// MORPH START - Added by Commander, WebCache 1.2e
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+// yonatan - not 2 be confused with the one in CUploadQueue!
+CUpDownClient*	CClientList::FindClientByWebCacheUploadId(const uint32 id)
+{
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL;)
+	{
+		CUpDownClient* cur_client = list.GetNext(pos);
+		if ( cur_client->m_uWebCacheUploadId == id )
+			return cur_client;
+	}
+	return 0;
+}
+// MORPH END - Added by Commander, WebCache 1.2e

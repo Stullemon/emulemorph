@@ -490,19 +490,19 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		newclient->SetSlotNumber(posCounter+1);
 		uploadinglist.InsertBefore(insertPosition, newclient);
 		if (newclient->IsFriend() && newclient->GetFriendSlot())
-			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
-		else if (newclient->GetPowerShared())
-			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,1);
+			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),0);
+		else if (newclient->IsPBForPS())
+			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),1);
 		else
-			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,2);
+			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
 	}	else{
 		// Add it last
 		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
-		else if (newclient->GetPowerShared())
-			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,1);
+		else if (newclient->IsPBForPS())
+			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),1);
 		else
-			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),2);
+			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
 		uploadinglist.AddTail(newclient);
 		newclient->SetSlotNumber(uploadinglist.GetCount());
 	}
@@ -785,9 +785,9 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 
     uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
     if(curUploadSlots > m_MaxActiveClients+wantedNumberOfTrickles) {
-        return false;
+		return false;
     }
-
+	
 	uint16 MaxSpeed;
 
     if (thePrefs.IsDynUpEnabled())
@@ -1039,50 +1039,50 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 
     if(addInFirstPlace == false) {
 	    // statistic values
-	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
-	if (reqfile)
-		reqfile->statistic.AddRequest();
+		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
+		if (reqfile)
+			reqfile->statistic.AddRequest();
 
-	//Morph Start - added by AndCycle, SLUGFILLER: infiniteQueue
-	if(!thePrefs.IsInfiniteQueueEnabled()){
-		// cap the list
-    	// the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
-    	// high ranking clients after soft limit has been reached
-    	uint32 softQueueLimit = thePrefs.GetQueueSize();
-    	uint32 hardQueueLimit = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
+		//Morph Start - added by AndCycle, SLUGFILLER: infiniteQueue
+		if(!thePrefs.IsInfiniteQueueEnabled()){
+			// cap the list
+			// the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
+			// high ranking clients after soft limit has been reached
+			uint32 softQueueLimit = thePrefs.GetQueueSize();
+			uint32 hardQueueLimit = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
 
-        // if soft queue limit has been reached, only let in high ranking clients
-		if ((uint32)waitinglist.GetCount() >= hardQueueLimit ||
-			(uint32)waitinglist.GetCount() >= softQueueLimit && // soft queue limit is reached
-			(client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
-    	     client->IsPBForPS() == false && // client don't want powershared file
-			(
-				!thePrefs.IsEqualChanceEnable() && client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() ||
-				thePrefs.IsEqualChanceEnable() && client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit()//Morph - added by AndCycle, Equal Chance For Each File
-			)// and client has lower credits/wants lower prio file than average client in queue
-			) {
+			// if soft queue limit has been reached, only let in high ranking clients
+			if ((uint32)waitinglist.GetCount() >= hardQueueLimit ||
+				(uint32)waitinglist.GetCount() >= softQueueLimit && // soft queue limit is reached
+				(client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
+				client->IsPBForPS() == false && // client don't want powershared file
+				(
+					!thePrefs.IsEqualChanceEnable() && client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() ||
+					thePrefs.IsEqualChanceEnable() && client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit()//Morph - added by AndCycle, Equal Chance For Each File
+				)// and client has lower credits/wants lower prio file than average client in queue
+			   ) {
 				// then block client from getting on queue
 				return;
 			}
-	}
-	//Morph End - added by AndCycle, SLUGFILLER: infiniteQueue
-	if (client->IsDownloading())
-	{
-		// he's already downloading and wants probably only another file
-		if (thePrefs.GetDebugClientTCPLevel() > 0)
-			DebugSend("OP__AcceptUploadReq", client);
-		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
-		theStats.AddUpDataOverheadFileRequest(packet->size);
-		client->socket->SendPacket(packet,true);
-		return;
-	}
+		}
+		//Morph End - added by AndCycle, SLUGFILLER: infiniteQueue
+		if (client->IsDownloading())
+		{
+			// he's already downloading and wants probably only another file
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__AcceptUploadReq", client);
+			Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
+			theStats.AddUpDataOverheadFileRequest(packet->size);
+			client->socket->SendPacket(packet,true);
+			return;
+		}
     
         client->ResetQueueSessionUp();
+		// EastShare - Added by TAHO, modified SUQWT
+		client->Credits()->SetSecWaitStartTime();
+		// EastShare - Added by TAHO, modified SUQWT
 	}
 
-	// EastShare - Added by TAHO, modified SUQWT
-	client->Credits()->SetSecWaitStartTime();
-	// EastShare - Added by TAHO, modified SUQWT
 	waitinglist.AddTail(client);
 	client->SetUploadState(US_ONUPLOADQUEUE);
 
@@ -1296,8 +1296,8 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog(),thePrefs.GetMaxFriendByteToSend());
-		//MOPRH END   - Modified by SiRoB
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog(), thePrefs.GetMinDataRateFriend(), thePrefs.GetMaxClientDataRateFriend(), thePrefs.GetMinDataRatePowerShare(), thePrefs.GetMaxClientDataRatePowerShare(), thePrefs.GetMaxClientDataRate());
+		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
 		theApp.uploadqueue->Process();
 		theApp.downloadqueue->Process();
@@ -1536,16 +1536,16 @@ uint32 CUploadQueue::GetToNetworkDatarate() {
 }
 
 uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
-    uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
-
-    //if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
-    //    minNumber = 2;
-    //} else
-    if(minNumber < 1 && GetDatarate() >= 2*1024 /*thePrefs.GetMaxUpload() >= 2*/) {
-        minNumber = 1;
-    }
-
-    return max(((uint32)uploadinglist.GetCount())*0.2, minNumber);
+//    uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
+//	uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
+//    //if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
+//    //    minNumber = 2;
+//    //} else
+//    if(minNumber < 1 && GetDatarate() >= 2*1024 /*thePrefs.GetMaxUpload() >= 2*/) {
+//        minNumber = 1;
+//    }
+//	return max(((uint32)uploadinglist.GetCount())*0.2, minNumber);
+	return 1;
 }
 
 /**
@@ -1610,6 +1610,18 @@ void CUploadQueue::CheckForHighPrioClient() {
         }
 	}
 }
+// MORPH START - Added by Commander, WebCache 1.2e
+CUpDownClient*	CUploadQueue::FindClientByWebCacheUploadId(const uint32 id) // Superlexx - webcache - can be made more efficient
+{
+	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != NULL;)
+	{
+		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
+		if ( cur_client->m_uWebCacheUploadId == id )
+			return cur_client;
+	}
+	return 0;
+}
+// MORPH END - Added by Commander, WebCache 1.2e
 
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

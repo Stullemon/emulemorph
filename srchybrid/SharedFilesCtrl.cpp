@@ -824,6 +824,10 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	UINT uHideOSMenuItem = 0; //MORPH - Added by SiRoB, HIDEOS
 	UINT uSelectiveChunkMenuItem = 0; //MORPH - Added by SiRoB, HIDEOS
 	UINT uShareOnlyTheNeedMenuItem = 0; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	bool uWCReleaseItem = true; //JP webcache release
+	bool uGreyOutWCRelease = true; //JP webcache release
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	const CKnownFile* pSingleSelFile = NULL;
 	POSITION pos = GetFirstSelectedItemPosition();
 	while (pos)
@@ -957,11 +961,31 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			uShareOnlyTheNeedMenuItem = 0;
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		//jp webcache release start
+		if (!pFile->ReleaseViaWebCache)
+			uWCReleaseItem = false;
+		if (!pFile->IsPartFile())
+			uGreyOutWCRelease = false;
+		//jp webcache release end
+		//MORPH END  - Added by SiRoB, WebCache 1.2f
+
 		bFirstItem = false;
 	}
 
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PrioMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_PrioMenu.CheckMenuRadioItem(MP_PRIOVERYLOW, MP_PRIOAUTO, uPrioMenuItem, 0);
+
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	//jp webcache release START
+	m_PrioMenu.EnableMenuItem(MP_PRIOWCRELEASE, (thePrefs.UpdateWebcacheReleaseAllowed() && !uGreyOutWCRelease) ? MF_ENABLED : MF_GRAYED);
+	if (uWCReleaseItem && thePrefs.IsWebcacheReleaseAllowed()) //JP webcache release
+		m_PrioMenu.CheckMenuItem(MP_PRIOWCRELEASE, MF_CHECKED);
+	else
+		m_PrioMenu.CheckMenuItem(MP_PRIOWCRELEASE, MF_UNCHECKED);
+	//jp webcache relesae END
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
+
 
 	bool bSingleCompleteFileSelected = (iSelectedItems == 1 && iCompleteFileSelected == 1);
 	m_SharedFilesMenu.EnableMenuItem(MP_OPEN, bSingleCompleteFileSelected ? MF_ENABLED : MF_GRAYED);
@@ -1318,8 +1342,26 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_PRIONORMAL:
 			case MP_PRIOHIGH:
 			case MP_PRIOVERYHIGH:
+			//MORPH START - Added by SiRoB, WebCache 1.2f
+			case MP_PRIOWCRELEASE: //JP webcache release
+			//MORPH END   - Added by SiRoB, WebCache 1.2f
 			case MP_PRIOAUTO:
 				{
+					//MORPH START - Added by SiRoB, WebCache 1.2f
+					//jp webcache release START 
+					// check if a click on MP_PRIOWCRELEASE should activate WC-release
+					bool activateWCRelease = false;
+					POSITION pos2 = selectedList.GetHeadPosition();
+					CKnownFile* cur_file = NULL;
+					while (pos2 != NULL)
+					{
+						cur_file = selectedList.GetNext(pos2);
+						if (!cur_file->ReleaseViaWebCache)
+							activateWCRelease = true;
+					}
+					//jp webcache release END
+					//MORPH END   - Added by SiRoB, WebCache 1.2f
+
 					POSITION pos = selectedList.GetHeadPosition();
 					while (pos != NULL)
 					{
@@ -1355,9 +1397,21 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 								file->UpdateAutoUpPriority();
 								UpdateFile(file); 
 								break;
+							//MORPH START - Added by SiRoB, WebCache 1.2f
+							//jp webcache release start
+							case MP_PRIOWCRELEASE:
+								if (!file->IsPartFile())
+									file->SetReleaseViaWebCache(activateWCRelease);
+								else
+									file->SetReleaseViaWebCache(false);
+								break;
+							//jp webcache release end
+							//MORPH END   - Added by SiRoB, WebCache 1.2f
+
 						}
 					}
 					break;
+
 				}
 			//MORPH START - Added by SiRoB, ZZ Upload System
 			case MP_POWERSHARE_ON:
@@ -2193,6 +2247,10 @@ void CSharedFilesCtrl::CreateMenues()
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOVERYHIGH, GetResString(IDS_PRIORELEASE));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOAUTO, GetResString(IDS_PRIOAUTO));//UAP
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	m_PrioMenu.AppendMenu(MF_STRING|MF_SEPARATOR);//jp webcache release
+	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOWCRELEASE, _T("WC-Release"));//jp webcache release
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 	//MORPH START - Added by SiRoB, Show Permissions
 	m_PermMenu.CreateMenu();

@@ -2747,6 +2747,7 @@ void HTMLParse(CString &buffer)
 	if (buffer.Right(4) == "<br>")
 		buffer.Left(buffer.GetLength()-4);
 	buffer.Replace(_T("<br>"),_T("\n"));
+	buffer.Replace(_T("<br />"),_T("\n"));
 }
 //MORPH END  - Added by SiRoB, XML News [O²]
 

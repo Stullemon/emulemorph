@@ -113,6 +113,9 @@
 #define MP_PRIOHIGH				10303
 #define MP_PRIOVERYHIGH			10304
 #define MP_PRIOAUTO				10317
+//MORPH START - Added by SiRoB, WebCache 1.2f
+#define MP_PRIOWCRELEASE		20000 //jp webcache release
+//MORPH END   - Added by SiRoB, WebCache 1.2f
 #define MP_GETED2KLINK			10305
 #define MP_METINFO				10307
 //MORPH - Removed by SiRoB, See on top

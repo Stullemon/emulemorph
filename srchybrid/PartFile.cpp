@@ -56,6 +56,13 @@
 #include "PeerCacheSocket.h"
 #include "ServerList.h" //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
+// MORPH START - Added by Commander, WebCache 1.2e
+#include "WebCache/WebCacheSocket.h" // yonatan http
+#include "WebCache/WebCachedBlockList.h" //JP remove all blocks if download stopped
+#include "WebCache/ThrottledChunkList.h" // jp Don't request chunks for which we are currently receiving proxy sources
+#include "WebCache/WebCacheProxyClient.h" // jp stalled proxy download fix attempt
+// MORPH END - Added by Commander, WebCache 1.2e
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -217,6 +224,14 @@ CPartFile::CPartFile(CED2KFileLink* fileLink)
 }
 
 void CPartFile::Init(){
+	// MORPH START - Added by Commander, WebCache 1.2f
+	LastWebcacheSourceCountTime = ::GetTickCount(); //JP speed up sorting webcache column
+	WebcacheSources = 0; //JP speed up sorting webcache column
+	WebcacheSourcesOurProxy = 0; //JP added from Gnaddelwarz
+	WebcacheSourcesNotOurProxy = 0;//JP added from Gnaddelwarz
+	Webcacherequests = 0; //JP WC-Filedetails
+	SuccessfulWebcacherequests = 0; //JP WC-Filedetails
+	// MORPH END - Added by Commander, WebCache 1.2f
 	newdate = true;
 	lastsearchtime = 0;
 	lastsearchtimeKad = 0;
@@ -1031,6 +1046,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					break;
 				}
 			}
+			// MORPH START - Added by Commander, WebCache 1.2e
+			if (GetStatus() == PS_EMPTY		// no complete chunk, but file ready for downloading
+				&& thePrefs.IsWebCacheDownloadEnabled()	// webcached downloading on
+				&& GetPartCount() > 1)		// file size > CHUNKSIZE
+				SetStatus(PS_READY);
+			// MORPH END - Added by Commander, WebCache 1.2e
 		}
 
 		if (gaplist.IsEmpty()){	// is this file complete already?
@@ -1484,6 +1505,8 @@ void CPartFile::PartFileHashFinished(CKnownFile* result){
 		result->SetAICHHashset(NULL);
 	}
 	else if (status == PS_COMPLETING){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(false, _T("Failed to store new AICH Hashset for completed file %s"), GetFileName());
 	}
 
@@ -2236,9 +2259,12 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				ASSERT_VALID( cur_src );
 			if(cur_src && cur_src->GetDownloadState() == DS_DOWNLOADING)
 			{
-				ASSERT( cur_src->socket );
+				ASSERT( cur_src->socket || cur_src->m_pWCDownSocket);
+				//MORPH - Removed by SiRoB, WebCache
+				/*
 				if (cur_src->socket)
 				{
+				*/
 					cur_src->CheckDownloadTimeout();
 					cur_datarate = cur_src->CalculateDownloadRate();
 					datarate+=cur_datarate;
@@ -2249,11 +2275,16 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							limit +=1000;
 						else if(limit<1)
 							limit = 1;
-						cur_src->socket->SetDownloadLimit(limit);
+						if (cur_src->socket) // MORPH - Added by SiRoB, WebCache
+							cur_src->socket->SetDownloadLimit(limit);
 						if (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket && cur_src->m_pPCDownSocket->IsConnected())
 							cur_src->m_pPCDownSocket->SetDownloadLimit(limit);
+						// MORPH START - Added by SiRoB, WebCache
+						if (cur_src->IsProxy() && cur_src->IsDownloadingFromWebCache() && cur_src->m_pWCDownSocket->IsConnected()) // yonatan http
+							cur_src->m_pWCDownSocket->SetDownloadLimit(limit);// yonatan http
+						// MORPH END   - Added by SiRoB, WebCache
 					}
-				}
+				//} //MORPH - Removed by SiRoB, WebCache
 			}
 		}
 	}
@@ -2303,9 +2334,12 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                     if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
                         curClientReducedDownload = friendReduceddownload;
                     }
-					ASSERT( cur_src->socket );
+					ASSERT( cur_src->socket || cur_src->m_pWCDownSocket);
+					// MORPH START - Added by SiRoB, WebCache
+					/*
 					if (cur_src->socket)
 					{
+					*/
 						cur_src->CheckDownloadTimeout();
 						uint32 cur_datarate = cur_src->CalculateDownloadRate();
 						datarate += cur_datarate;
@@ -2316,17 +2350,26 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								limit += 1000;
 							else if (limit < 1)
 								limit = 1;
-							cur_src->socket->SetDownloadLimit(limit);
+							if (cur_src->socket) // MORPH - Added by SiRoB, WebCache
+								cur_src->socket->SetDownloadLimit(limit);
 							if (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket && cur_src->m_pPCDownSocket->IsConnected())
 								cur_src->m_pPCDownSocket->SetDownloadLimit(limit);
+							// MORPH START - Added by SiRoB, WebCache
+							if (cur_src->IsProxy() && cur_src->IsDownloadingFromWebCache() && cur_src->m_pWCDownSocket && cur_src->m_pWCDownSocket->IsConnected()) // yonatan http
+								cur_src->m_pWCDownSocket->SetDownloadLimit(limit);// yonatan http
+							// MORPH END   - Added by SiRoB, WebCache
 						}
 						else{
+							if (cur_src->socket) // MORPH - Added by SiRoB, WebCache
 							cur_src->socket->DisableDownloadLimit();
 							if (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket && cur_src->m_pPCDownSocket->IsConnected())
 								cur_src->m_pPCDownSocket->DisableDownloadLimit();
+							// MORPH START - Added by SiRoB, WebCache
+							if (cur_src->IsDownloadingFromWebCache() && cur_src->m_pWCDownSocket && cur_src->m_pWCDownSocket->IsConnected()) // yonatan http
+								cur_src->m_pWCDownSocket->DisableDownloadLimit(); // yonatan http
+							// MORPH END   - Added by SiRoB, WebCache
 						}
-
-					}
+					//} // MORPH - Removed by SiRoB, WebCache
 					break;
 				}
 				// Do nothing with this client..
@@ -3630,6 +3673,11 @@ void CPartFile::StopFile(bool bCancel, bool resort)
 	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	if (!bCancel)
 		FlushBuffer(true);
+	// MORPH START - Added by Commander, WebCache 1.2e
+	//JP Cancel Proxy Downloads
+		CancelProxyDownloads();
+	thePrefs.UpdateWebcacheReleaseAllowed(); //JP webcache release
+	// MORPH END - Added by Commander, WebCache 1.2e
     if(resort) {
 		theApp.downloadqueue->SortByPriority();
 		theApp.downloadqueue->CheckDiskspace();	// SLUGFILLER: checkDiskspace
@@ -3683,6 +3731,7 @@ void CPartFile::PauseFile(bool bInsufficient, bool resort)
 
 	if (status==PS_COMPLETE || status==PS_COMPLETING)
 		return;
+	PauseProxyDownloads(); //JP Pause Proxy Downloads // MORPH - Added by Commander, WebCache 1.2e
 
 	Packet* packet = new Packet(OP_CANCELTRANSFER,0);
 	for( POSITION pos = srclist.GetHeadPosition(); pos != NULL; )
@@ -3690,8 +3739,27 @@ void CPartFile::PauseFile(bool bInsufficient, bool resort)
 		CUpDownClient* cur_src = srclist.GetNext(pos);
 		if (cur_src->GetDownloadState() == DS_DOWNLOADING)
 		{
-			cur_src->SendCancelTransfer(packet);
-			cur_src->SetDownloadState(DS_ONQUEUE);
+			// MORPH START - Added by Commander, WebCache 1.2e
+			if( cur_src->IsProxy() ) { // yonatan http - quick fix - WC-TODO: !!!
+                SINGLEProxyClient->SetDownloadState(DS_NONE);
+				SINGLEProxyClient->SetWebCacheDownState( WCDS_NONE );
+				//jp stalled proxy-download on paused file fix attempt
+				if (SINGLEProxyClient->ProxyClientIsBusy())
+				{
+					SINGLEProxyClient->DeleteBlock(); // so SingleProxyClient is not busy any more
+				}
+// JP taken care of in WCProxyClient::UpdateClient or WCProxyClient::WCProxyClient
+//				else
+//				{
+//					if( SINGLEProxyClient->m_pWCDownSocket ) // if we get a 504 is the socket already deleted?
+//						SINGLEProxyClient->m_pWCDownSocket->Safe_Delete(); // should this even be here?
+//				}
+				WebCachedBlockList.TryToDL(); //JP if we reach this point SingleProxyClient can't be busy
+			} else {
+			// MORPH END - Added by Commander, WebCache 1.2e// MORPH END - Added by Commander, WebCache 1.2e
+				cur_src->SendCancelTransfer(packet);
+				cur_src->SetDownloadState(DS_ONQUEUE);
+			}
 		}
 	}
 	delete packet;
@@ -3741,6 +3809,9 @@ void CPartFile::ResumeFile(bool resort)
 	paused = false;
 	stopped = false;
 	SetActive(theApp.IsConnected());
+	// MORPH START - Added by Commander, WebCache 1.2e
+	ResumeProxyDownloads(); //JP Resume Proxy Downloads
+	// MORPH END - Added by Commander, WebCache 1.2e
 	lastsearchtime = 0;
     if(resort) {
 		theApp.downloadqueue->SortByPriority();
@@ -3748,6 +3819,9 @@ void CPartFile::ResumeFile(bool resort)
     }
 	SavePartFile();
 	UpdateDisplayedInfo(true);
+	// MORPH START - Added by Commander, WebCache 1.2e
+	thePrefs.UpdateWebcacheReleaseAllowed(); //jp webcache release
+	// MORPH END - Added by Commander, WebCache 1.2e
 }
 
 // SLUGFILLER: checkDiskspace
@@ -3760,8 +3834,14 @@ void CPartFile::ResumeFileInsufficient()
 	AddLogLine(false, _T("Resuming download of \"%s\""), GetFileName());
 	insufficient = false;
 	SetActive(theApp.IsConnected());
+	// MORPH START - Added by Commander, WebCache 1.2e
+	ResumeProxyDownloads(); //JP Resume Proxy Downloads
+	// MORPH END - Added by Commander, WebCache 1.2e
 	lastsearchtime = 0;
 	UpdateDisplayedInfo(true);
+	// MORPH START - Added by Commander, WebCache 1.2e
+	thePrefs.UpdateWebcacheReleaseAllowed(); //jp webcache release
+	// MORPH END - Added by Commander, WebCache 1.2e
 }
 // SLUGFILLER: checkDiskspace
 
@@ -4109,10 +4189,20 @@ Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 	for (POSITION pos = srclist.GetHeadPosition();pos != 0;){
 		bNeeded = false;
 		CUpDownClient* cur_src = srclist.GetNext(pos);
-		if (cur_src->HasLowID() || !cur_src->IsValidSource())
+		// MORPH START - Added by Commander, WebCache 1.2e
+		if (cur_src->HasLowID() || !cur_src->IsValidSource() || cur_src->IsProxy()) // Superlexx - webcache
+		// MORPH END - Added by Commander, WebCache 1.2e
 			continue;
+		// MORPH START - Added by Commander, WebCache 1.2e
+		if (cur_src->SupportsWebCache()) // Superlexx - webcache
+			bNeeded = true;
+		// MORPH END - Added by Commander, WebCache 1.2e
 		uint8* srcstatus = cur_src->GetPartStatus();
+		// MORPH - Changed by Commander, WebCache 1.2e
+		/*
 		if (srcstatus){
+		*/
+		if (srcstatus && !bNeeded){ // Superlexx - webcache
 			if (cur_src->GetPartCount() == GetPartCount()){
 				uint8* reqstatus = forClient->GetPartStatus();
 				if (reqstatus){
@@ -5240,6 +5330,16 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 				for(POSITION pos = chunksList.GetHeadPosition(); pos != NULL; ){
 					Chunk& cur_chunk = chunksList.GetNext(pos);
 
+					// MORPH START - Added by Commander, WebCache 1.2e
+					// jp Don't request chunks for which we are currently receiving proxy sources START
+					ThrottledChunk cur_ThrottledChunk;
+					md4cpy(cur_ThrottledChunk.FileID, GetFileHash());
+					cur_ThrottledChunk.ChunkNr=cur_chunk.part;
+					cur_ThrottledChunk.timestamp=GetTickCount();
+					bool isthrottled = ThrottledChunkList.CheckList(cur_ThrottledChunk, false); //compare this chunk to chunks in list and throttle it if it is found
+					// jp Don't request chunks for which we are currently receiving proxy sources END
+					// MORPH END - Added by Commander, WebCache 1.2e
+
 					// Offsets of chunk
 					const uint32 uStart = cur_chunk.part * PARTSIZE;
 					const uint32 uEnd  = ((GetFileSize() - 1) < (uStart + PARTSIZE - 1)) ? 
@@ -5301,12 +5401,21 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 						cur_chunk.rank = (25 * cur_chunk.frequency) +      // Criterion 1
 										((critPreview == true) ? 0 : 1) + // Criterion 2
 										(100 - critCompletion);           // Criterion 4
+                                                // MORPH START - Added by Commander, WebCache 1.2e
+						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
+						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
+                                                // MORPH END - Added by Commander, WebCache 1.2e
+					
 					}
 					else if(critPreview == true){
 						// 10000..10100  unrequested preview chunks
 						// 30000..30100  requested preview chunks
 						cur_chunk.rank = ((critRequested == false) ? 10000 : 30000) + // Criterion 3
 										(100 - critCompletion);                      // Criterion 4
+                                                // MORPH START - Added by Commander, WebCache 1.2e
+						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
+						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
+                                                // MORPH END - Added by Commander, WebCache 1.2e
 					}
 					else if(cur_chunk.frequency <= rareBound){
 						// 10101..1xxxx  unrequested rare chunks
@@ -5314,12 +5423,21 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 						cur_chunk.rank = (25 * cur_chunk.frequency) +                 // Criterion 1 
 										((critRequested == false) ? 10101 : 30101) + // Criterion 3
 										(100 - critCompletion);                      // Criterion 4
+                                                // MORPH START - Added by Commander, WebCache 1.2e
+						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
+						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
+                                                // MORPH END - Added by Commander, WebCache 1.2e
+					
 					}
 					else { // common chunk
 						if(critRequested == false){ // Criterion 3
 							// 20000..2xxxx  unrequested common chunks
 							cur_chunk.rank = 20000 +                // Criterion 3
 											(100 - critCompletion); // Criterion 4
+                                                // MORPH START - Added by Commander, WebCache 1.2e
+						if (isthrottled) cur_chunk.rank += (critCompletion+1);  // jp Don't request chunks for which we are currently receiving proxy sources
+						//if (isthrottled && (critCompletion<=80)) cur_chunk.rank += (critCompletion+1); //jp not needed any more because we only add valid chunks to throttled chunks list now
+						// MORPH END - Added by Commander, WebCache 1.2e
 						}
 						else{
 							// 40000..4xxxx  requested common chunks
@@ -5731,18 +5849,24 @@ int CPartFile::RightFileHasHigherPrio(CPartFile* left, CPartFile* right) {
 
 void CPartFile::RequestAICHRecovery(uint16 nPart){
 	if (!m_pAICHHashSet->HasValidMasterHash() || (m_pAICHHashSet->GetStatus() != AICH_TRUSTED && m_pAICHHashSet->GetStatus() != AICH_VERIFIED)){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Unable to request AICH Recoverydata because we have no trusted Masterhash"));
 		return;
 	}
 	if (GetFileSize() <= EMBLOCKSIZE || GetFileSize() - PARTSIZE*nPart <= EMBLOCKSIZE)
 		return;
 	if (CAICHHashSet::IsClientRequestPending(this, nPart)){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("RequestAICHRecovery: Already a request for this part pending"));
 		return;
 	}
 
 	// first check if we have already the recoverydata, no need to rerequest it then
 	if (m_pAICHHashSet->IsPartDataAvailable(nPart*PARTSIZE)){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Found PartRecoveryData in memory"));
 		AICHRecoveryDataAvailable(nPart);
 		return;
@@ -5765,6 +5889,8 @@ void CPartFile::RequestAICHRecovery(uint16 nPart){
 		}
 	}
 	if ((cAICHClients | cAICHLowIDClients) == 0){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Unable to request AICH Recoverydata because found no client who supports it and has the same hash as the trusted one"));
 		return;
 	}
@@ -5798,6 +5924,8 @@ void CPartFile::RequestAICHRecovery(uint16 nPart){
 		ASSERT( false );
 		return;
 	}
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+	if(thePrefs.GetLogICHEvents()) //JP log ICH events
 	AddDebugLogLine(DLP_DEFAULT, false, _T("Requesting AICH Hash (%s) form client %s"),cAICHClients? _T("HighId"):_T("LowID"), pClient->DbgGetClientInfo());
 	pClient->SendAICHRequest(this, nPart);
 }
@@ -5815,6 +5943,8 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 	}	
 	// if the part was already ok, it would now be complete
 	if (IsComplete(nPart*PARTSIZE, ((nPart*PARTSIZE)+length)-1)){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: The part (%u) is already complete, canceling"));
 		return;
 	}
@@ -5823,6 +5953,8 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 
 	CAICHHashTree* pVerifiedHash = m_pAICHHashSet->m_pHashTree.FindHash(nPart*PARTSIZE, length);
 	if (pVerifiedHash == NULL || !pVerifiedHash->m_bHashValid){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: Unable to get verified hash from hashset (should never happen)"));
 		ASSERT( false );
 		return;
@@ -5837,6 +5969,8 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 		return;
 	}
 	if (!htOurHash.m_bHashValid){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		if(thePrefs.GetLogICHEvents()) //JP log ICH events
 		AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: Failed to retrieve AICH Hashset of corrupt part"));
 		ASSERT( false );
 		return;
@@ -5864,6 +5998,8 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 		// this is a bad, but it could probably happen under some rare circumstances
 		// make sure that MD4 agrres to this fact too
 		if (!HashSinglePart(nPart)){
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+			if(thePrefs.GetLogICHEvents()) //JP log ICH events
 			AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: The part (%u) got completed while recovering - but MD4 says it corrupt! Setting hashset to error state, deleting part"));
 			// now we are fu... unhappy
 			m_pAICHHashSet->SetStatus(AICH_ERROR);
@@ -5872,6 +6008,8 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 			return;
 		}
 		else{
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+			if(thePrefs.GetLogICHEvents()) //JP log ICH events
 			AddDebugLogLine(DLP_DEFAULT, false, _T("Processing AICH Recovery data: The part (%u) got completed while recovering and MD4 agrees"));
 			// alrighty not so bad
 			POSITION posCorrupted = corrupted_list.Find(nPart);
@@ -5970,3 +6108,203 @@ bool	CPartFile::notSeenCompleteSource() const
 
 }
 //Morph - added by AndCycle, Only download complete files v2.1 (shadow)
+// MORPH START - Added by SiRoB, WebCache
+// JP added handling of proxy-sources on pause/cancel/resume START
+// JP cancel proxy downloads
+//remove all sources for this file from WCBlockList, StoppedWCBlockList and ThrottledChunkList
+void CPartFile::CancelProxyDownloads()
+{
+uchar currenthash[16];
+md4cpy(currenthash, GetFileHash());
+
+//remove all proxy-sources from WebCachedBlockList
+POSITION pos = WebCachedBlockList.GetHeadPosition();
+int i = 0;
+while (i < WebCachedBlockList.GetCount())
+{
+	CWebCachedBlock* cur_block = WebCachedBlockList.GetAt(WebCachedBlockList.FindIndex(i));
+	if (!(bool)md4cmp(cur_block->m_FileID, currenthash))
+	{
+		WebCachedBlockList.RemoveAt(WebCachedBlockList.FindIndex(i));
+		delete cur_block;
+	}
+	else
+		i++;
+}
+
+//remove all proxy-sources from StoppedWebCachedBlockList
+pos = StoppedWebCachedBlockList.GetHeadPosition();
+i = 0;
+while (i < StoppedWebCachedBlockList.GetCount())
+{
+	CWebCachedBlock* cur_block = StoppedWebCachedBlockList.GetAt(StoppedWebCachedBlockList.FindIndex(i));
+	if (!(bool)md4cmp(cur_block->m_FileID, currenthash))
+	{
+		StoppedWebCachedBlockList.RemoveAt(StoppedWebCachedBlockList.FindIndex(i));
+		delete cur_block;
+	}
+	else
+		i++;
+}
+
+//remove all throttled chunks for this file from ThrottledChunkList
+pos = ThrottledChunkList.GetHeadPosition();
+i = 0;
+while (i < ThrottledChunkList.GetCount())
+	{
+	ThrottledChunk cur_chunk = ThrottledChunkList.GetAt(ThrottledChunkList.FindIndex(i));
+	if (!(bool)md4cmp(cur_chunk.FileID, currenthash))
+		ThrottledChunkList.RemoveAt(ThrottledChunkList.FindIndex(i));
+	else
+		i++;
+	}
+}
+
+
+//JP pause proxy downloads
+//jp swap blocks from WCBlockList to StoppedWCBlockList
+void CPartFile::PauseProxyDownloads()
+{
+uchar currenthash[16];
+md4cpy(currenthash, GetFileHash());
+
+POSITION pos = WebCachedBlockList.GetHeadPosition();
+int i = 0;
+while (i < WebCachedBlockList.GetCount())
+{
+	CWebCachedBlock* cur_block = WebCachedBlockList.GetAt(WebCachedBlockList.FindIndex(i));
+	if (!(bool)md4cmp(cur_block->m_FileID, currenthash))
+	{
+		WebCachedBlockList.RemoveAt(WebCachedBlockList.FindIndex(i));
+		StoppedWebCachedBlockList.AddTail(cur_block);
+	}
+	else
+		i++;
+}
+}
+
+//JP resume proxy downloads
+//jp swap blocks from StoppedWCBlockList to WCBlockList
+void CPartFile::ResumeProxyDownloads()
+{
+uchar currenthash[16];
+md4cpy(currenthash, GetFileHash());
+
+POSITION pos = StoppedWebCachedBlockList.GetHeadPosition();
+int i = 0;
+while (i < StoppedWebCachedBlockList.GetCount())
+{
+	CWebCachedBlock* cur_block = StoppedWebCachedBlockList.GetAt(StoppedWebCachedBlockList.FindIndex(i));
+	if (!(bool)md4cmp(cur_block->m_FileID, currenthash))
+	{
+		StoppedWebCachedBlockList.RemoveAt(StoppedWebCachedBlockList.FindIndex(i));
+		WebCachedBlockList.AddTail(cur_block);
+	}
+	else
+		i++;
+}
+	if (!SINGLEProxyClient || !SINGLEProxyClient->ProxyClientIsBusy()) WebCachedBlockList.TryToDL();
+}
+
+//JP WC-Source count START
+//JP added stuff from Gnaddelwarz
+uint16 CPartFile::GetWebcacheSourceCount() const
+{
+if (::GetTickCount() - LastWebcacheSourceCountTime > SEC2MS(1))
+	CountWebcacheSources();
+return WebcacheSources;
+}
+
+uint16 CPartFile::GetWebcacheSourceOurProxyCount() const
+{
+if (::GetTickCount() - LastWebcacheSourceCountTime > SEC2MS(1))
+	CountWebcacheSources();
+return WebcacheSourcesOurProxy;
+}
+
+uint16 CPartFile::GetWebcacheSourceNotOurProxyCount() const
+{
+if (::GetTickCount() - LastWebcacheSourceCountTime > SEC2MS(1))
+	CountWebcacheSources();
+return WebcacheSourcesNotOurProxy;
+}
+
+
+void CPartFile::CountWebcacheSources() const
+{
+const_cast< CPartFile * >( this )->LastWebcacheSourceCountTime = ::GetTickCount();
+UINT counter = 0;
+UINT counterOur = 0;
+UINT counterNotOur = 0;
+
+for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
+{
+		CUpDownClient* cur_client = srclist.GetNext(pos);
+		if (cur_client->SupportsWebCache() || cur_client->IsProxy() )
+			counter++;
+	if (cur_client->SupportsWebCache())
+	{
+		if (cur_client->IsBehindOurWebCache())
+			++counterOur;
+		else if (cur_client->GetWebCacheName() != "")
+			++counterNotOur;
+	}
+}
+CPartFile* self = const_cast< CPartFile * >( this );
+self->WebcacheSources = counter;
+self->WebcacheSourcesOurProxy = counterOur;
+self->WebcacheSourcesNotOurProxy = counterNotOur;
+}
+//JP WC-Source count END
+
+//JP Throttle OHCB-production START
+uint16 CPartFile::GetMaxNumberOfWebcacheConnectionsForThisFile()
+{
+uint32 blocks = GetNumberOfBlocksForThisFile();
+if (blocks > 500) return 0;
+else if (blocks > 400) return 1;
+else if (blocks > 300) return 2;
+else if (blocks > 200) return 3;
+else if (blocks > 100) return 4;
+else return 5;
+}
+
+uint32 CPartFile::GetNumberOfBlocksForThisFile()
+{
+uchar currenthash[16];
+md4cpy(currenthash, GetFileHash());
+
+POSITION pos = WebCachedBlockList.GetHeadPosition();
+int counter = 0;
+int i = 0;
+while (i < WebCachedBlockList.GetCount())
+{
+	CWebCachedBlock* cur_block = WebCachedBlockList.GetAt(WebCachedBlockList.FindIndex(i));
+	if (!(bool)md4cmp(cur_block->m_FileID, currenthash))
+		counter++;
+	i++;
+}
+return counter;
+}
+
+uint16 CPartFile::GetNumberOfCurrentWebcacheConnectionsForThisFile()
+{
+	int counter = 0;
+	for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
+	{
+		CUpDownClient* cur_client = srclist.GetNext(pos);
+		if (cur_client->IsDownloadingFromWebCache() && !cur_client->IsProxy())
+			counter++;
+	}
+	return counter;
+}
+
+//JP Throttle OHCB-production END
+
+void CPartFile::AddWebCachedBlockToStats( bool IsGood )
+{
+	Webcacherequests++;
+	if (IsGood)
+		SuccessfulWebcacherequests++;
+}
+// MORPH END  - Added by SiRoB, WebCache

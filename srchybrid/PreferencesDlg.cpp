@@ -60,7 +60,8 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
-	
+	m_wndWebcachesettings.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, WebCache 1.2f
+
 	//	WARNING: Pages must be added with the same order as the slidebar group items.
 	//General group
 	AddPage(&m_wndGeneral);
@@ -88,6 +89,7 @@ CPreferencesDlg::CPreferencesDlg()
 //	AddPage(&m_wndMorph3); //Commander - Added: Morph III
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
+	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
 	m_nActiveWnd = 0;
 	m_iPrevPage = -1;
 }
@@ -241,6 +243,8 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH"))); //Commander - Added: Morph III
 	ImageList.Add(CTempIconLoader(_T("CLIENTEASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	ImageList.Add(CTempIconLoader(_T("PREF_EMULESPANA")));  //MORPH - Added by IceCream, eMulEspaña Preferency
+	ImageList.Add(CTempIconLoader(_T("PREF_WEBCACHE")));  //MORPH - Added by SiRoB, WebCache 1.2f
+	
 	/*
 		m_listbox.SetImageList(&ImageList);
 
@@ -271,7 +275,7 @@ void CPreferencesDlg::Localize()
 	m_wndMorph3.Localize(); //Commander - Added: Morph III
 	m_wndEastShare.Localize();
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
-
+	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
 	m_slideBar.ResetContent();
 
 //	Official group
@@ -303,7 +307,7 @@ void CPreferencesDlg::Localize()
 	//m_slideBar.AddGroupItem(_T("Morph DynDNS"), iGroup, 18); //Commander - Added: Morph III
 	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 19);
 	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, 20); //MORPH - Added by SiRoB, emulEspaña preferency
-
+	m_slideBar.AddGroupItem(GetResString(IDS_PW_WEBCACHE), iGroup, 21); //MORPH - Added by SiRoB, WebCache 1.2f
 	//	Determines the width needed to the slidebar, and its position
 	int width = m_slideBar.GetGreaterStringWidth();
 	CTabCtrl* tab = GetTabControl();

@@ -36,7 +36,11 @@ public:
 	void	SetClient(CUpDownClient* pClient);
 	void	Disconnect(LPCTSTR pszReason);
 	void	WaitForOnConnect();
+	//MORPH - Changed by SiRoB, WebCache 1.2f
+	/*
 	void	ResetTimeOutTimer();
+	*/
+	virtual void	ResetTimeOutTimer(); // yonatan http - made virtual, WC-TODO ?
 	bool	CheckTimeOut();
 	virtual UINT GetTimeOut();
 	virtual void Safe_Delete();
@@ -68,6 +72,9 @@ protected:
 
 	bool	ProcessPacket(char* packet, uint32 size,UINT opcode);
 	bool	ProcessExtPacket(char* packet, uint32 size, UINT opcode, UINT uRawSize);
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	bool	ProcessWebCachePacket(char* packet, uint32 size, UINT opcode, UINT uRawSize); // yonatan - webcache protocol packets
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	void	PacketToDebugLogLine(LPCTSTR protocol, const char* packet, uint32 size, UINT opcode, EDebugLogPriority dlpPriority);
 	void	SetConState(SocketState val);
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

@@ -22,6 +22,7 @@
 #include <locale.h>
 #include <io.h>
 #include <share.h>
+#include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
 #include "version.h"
 #include "opcodes.h"
@@ -48,7 +49,7 @@
 #include "Statistics.h"
 #include "OtherFunctions.h"
 #include "WebServer.h"
-#include "WapServer/WapServer.h"	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
+#include "WapServer/WapServer.h" //MORPH - Added by SiRoB / Commander, Wapserver [emulEspaña]
 #include "UploadQueue.h"
 #include "SharedFileList.h"
 #include "ServerList.h"
@@ -60,9 +61,10 @@
 #include "UpDownClient.h"
 #include "ED2KLink.h"
 #include "Preferences.h"
-#include "secrunasuser.h"
+//#include "secrunasuser.h" // MORPH - Modified by Commander, WebCache 1.2e
 #include "SafeFile.h"
 #include "PeerCacheFinder.h"
+#include "WebCache/WebCache.h" // jp detect webcache on startup // MORPH - Added by Commander, WebCache 1.2e
 #include "emuleDlg.h"
 #include "SearchDlg.h"
 #include "enbitmap.h"
@@ -1100,6 +1102,18 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 		AddDebugLogLine(DLP_VERYLOW, false, _T("Deleted public IP"));
 	
 	m_dwPublicIP = dwIP;
+
+        // MORPH START - Added by Commander, WebCache 1.2e
+	// jp detect Webcache on Startup START
+	if (thePrefs.detectWebcacheOnStartup
+		&& m_dwPublicIP != 0
+		&& !thePrefs.webcacheEnabled) //Note: don't use IsWebCacheDownloadEnabled() here
+	{
+		thePrefs.detectWebcacheOnStartup = false;
+		detectWebcacheOnStart();
+	}
+	// MORPH END - Added by Commander, WebCache 1.2e
+
 }
 
 

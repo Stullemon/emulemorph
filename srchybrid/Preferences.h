@@ -190,15 +190,15 @@ public:
 	static	int		maxGraphUploadRate;
 	static	uint8	beepOnError;
 	static	uint8	confirmExit;
-	static	uint16	downloadColumnWidths[15]; /*13 Official+ 2 Khaos*/
-	static	BOOL	downloadColumnHidden[15]; /*13 Official+ 2 Khaos*/
-	static	INT		downloadColumnOrder[15];  /*13 Official+ 2 Khaos*/
+	static	uint16	downloadColumnWidths[16]; /*13 Official+ 2 Khaos+1 WC*/
+	static	BOOL	downloadColumnHidden[16]; /*13 Official+ 2 Khaos+1 WC*/
+	static	INT		downloadColumnOrder[16];  /*13 Official+ 2 Khaos+1 WC*/
 	static	uint16	uploadColumnWidths[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 	static	BOOL	uploadColumnHidden[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 	static	INT		uploadColumnOrder[16];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
-	static	uint16	queueColumnWidths[14];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country*/
-	static	BOOL	queueColumnHidden[14];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country*/
-	static	INT		queueColumnOrder[14];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country*/
+	static	uint16	queueColumnWidths[15];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country+1 WC*/
+	static	BOOL	queueColumnHidden[15];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country+1 WC*/
+	static	INT		queueColumnOrder[15];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country+1 WC*/
 	static	uint16	searchColumnWidths[15]; /*14+1 Fakecheck*/
 	static	BOOL	searchColumnHidden[15]; /*14+1 Fakecheck*/
 	static	INT		searchColumnOrder[15];  /*14+1 Fakecheck*/
@@ -313,6 +313,7 @@ public:
 	static	uint64	cumDownData_EMULECOMPAT;
 	static	uint64	cumDownData_SHAREAZA;
 	static	uint64	cumDownData_URL;
+	static	uint64	cumDownData_WEBCACHE; //jp webcache statistics // MORPH - Added by Commander, WebCache 1.2e
 	// Session client breakdown stats for received bytes...
 	static	uint64	sesDownData_EDONKEY;
 	static	uint64	sesDownData_EDONKEYHYBRID;
@@ -322,6 +323,11 @@ public:
 	static	uint64	sesDownData_EMULECOMPAT;
 	static	uint64	sesDownData_SHAREAZA;
 	static	uint64	sesDownData_URL;
+	// MORPH START - Added by Commander, WebCache 1.2e
+	static	uint64	sesDownData_WEBCACHE; //jp webcache statistics
+	static  uint32	ses_WEBCACHEREQUESTS; //jp webcache statistics
+	static	uint32	ses_successfull_WCDOWNLOADS;  //jp webcache statistics
+	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Cumulative port breakdown stats for received bytes...
 	static	uint64	cumDownDataPort_4662;
@@ -456,6 +462,10 @@ public:
 	static	bool	m_bLogFileSaving;
     static  bool    m_bLogA4AF; // ZZ:DownloadManager
 	static	bool	m_bLogUlDlEvents;
+	// MORPH START - Added by Commander, WebCache 1.2f
+	static	bool	m_bLogWebCacheEvents;//JP log webcache events
+	static	bool	m_bLogICHEvents;//JP log ICH events
+	// MORPH END   - Added by Commander, WebCache 1.2f
 	static	bool	m_bUseDebugDevice;
 	static	int		m_iDebugServerTCPLevel;
 	static	int		m_iDebugServerUDPLevel;
@@ -481,13 +491,13 @@ public:
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
 	// SLUGFILLER: multiSort - save multiple params
 	// SLUGFILLER: DLsortFix - double, for client-only sorting
-	static	int		tableSortItemDownload[30];
-	static	BOOL	tableSortAscendingDownload[30];
+	static	int		tableSortItemDownload[32];
+	static	BOOL	tableSortAscendingDownload[32];
 	// SLUGFILLER: DLsortFix
 	static	int		tableSortItemUpload[16];
 	static	BOOL	tableSortAscendingUpload[16];
-	static	int		tableSortItemQueue[14];
-	static	BOOL	tableSortAscendingQueue[14];
+	static	int		tableSortItemQueue[15];
+	static	BOOL	tableSortAscendingQueue[15];
 	static	int		tableSortItemSearch[15];
 	static	BOOL	tableSortAscendingSearch[15];
 	static	int		tableSortItemShared[22];
@@ -604,7 +614,13 @@ public:
 	static bool	autobackup;
 	static bool	autobackup2;
 	//EastShare End - Added by Pretender, TBH-AutoBackup
-	static uint16	maxuploadfriend;//MORPH - Added by SiRoB, Upload Splitting Class
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	static uint16	mindataratefriend;
+	static uint16	mindataratepowershare;
+	static uint16	maxclientdataratefriend;
+	static uint16	maxclientdataratepowershare;
+	static uint16	maxclientdatarate;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	static uint8	LowIdRetries;
 	static uint8	LowIdRetried;
@@ -814,6 +830,43 @@ public:
 	static bool		m_bTrustEveryHash;
 
 	static uint8	m_byLogLevel;
+
+	// MORPH START - Added by Commander, WebCache 1.2f
+	static	bool	m_bHighIdPossible; // JP detect fake HighID (from netfinity)
+	static	bool	WebCacheDisabledThisSession; //JP temp disabler
+	static	uint32	WebCachePingSendTime;//jp check proxy config
+	static	bool	expectingWebCachePing;//jp check proxy config
+	static	bool	IsWebCacheTestPossible(); //jp check proxy config
+	static	CString	webcacheName;		//jp move these to private?? and make member functions to set and change them??
+	static	uint16	webcachePort;
+	static	bool	webcacheReleaseAllowed; //jp webcache release
+	static	bool	IsWebcacheReleaseAllowed() {return webcacheReleaseAllowed;}//jp webcache release
+	static	bool	UpdateWebcacheReleaseAllowed();//jp webcache release
+	static	bool	WebCacheIsTransparent() {return webcacheName.GetLength() > 15 && webcacheName.Left(12) == "transparent@";}
+	static	uint16	webcacheBlockLimit;
+	static	void	SetWebCacheBlockLimit(uint16 limit) {webcacheBlockLimit = limit;}
+	static	uint16	GetWebCacheBlockLimit() {return webcacheBlockLimit;}
+	static	bool	webcacheExtraTimeout;
+	static	bool	PersistentConnectionsForProxyDownloads;
+	static	void	SetWebCacheExtraTimeout(bool value) {webcacheExtraTimeout = value;}
+	static	bool	GetWebCacheExtraTimeout() {return webcacheExtraTimeout;}
+	static	bool	webcacheCachesLocalTraffic;
+	static	void	SetWebCacheCachesLocalTraffic(bool value) {webcacheCachesLocalTraffic = value;}
+	static	bool	GetWebCacheCachesLocalTraffic() {return webcacheCachesLocalTraffic;}
+	static	bool	webcacheEnabled;
+	static	bool	IsWebCacheDownloadEnabled() {return webcacheEnabled && !WebCacheDisabledThisSession;} //jp
+	static	bool	UsesCachedTCPPort();	//jp
+	static	bool	detectWebcacheOnStartup; // jp detect webcache on startup
+	static	uint32	webcacheLastSearch;
+	static	void	SetWebCacheLastSearch(uint32 time) {webcacheLastSearch = time;}
+	static	uint32	GetWebCacheLastSearch() {return webcacheLastSearch;}
+	static	uint32	webcacheLastGlobalIP;
+	static	void	SetWebCacheLastGlobalIP(uint32 IP) {webcacheLastGlobalIP = IP;}
+	static	uint32	GetWebCacheLastGlobalIP() {return webcacheLastGlobalIP;}
+	static	CString	webcacheLastResolvedName;
+	static	void	SetLastResolvedName(CString name) {webcacheLastResolvedName = name;}
+	static	CString	GetLastResolvedName()	{return webcacheLastResolvedName;}
+	// MORPH END - Added by Commander, WebCache 1.2f
 
 	enum Table
 	{
@@ -1057,7 +1110,9 @@ public:
 															 + GetCumDownData_AMULE()
 															 + GetCumDownData_EMULECOMPAT()
 															 + GetCumDownData_SHAREAZA()
-															 + GetCumDownData_URL(); }
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+															 + GetCumDownData_URL()
+															  + GetCumDownData_WEBCACHE(); } // jp webcache statistics
 	static	uint64	GetCumDownData_EDONKEY()		{ return (cumDownData_EDONKEY +			sesDownData_EDONKEY);}
 	static	uint64	GetCumDownData_EDONKEYHYBRID()	{ return (cumDownData_EDONKEYHYBRID +	sesDownData_EDONKEYHYBRID);}
 	static	uint64	GetCumDownData_EMULE()			{ return (cumDownData_EMULE +			sesDownData_EMULE);}
@@ -1066,6 +1121,9 @@ public:
 	static	uint64	GetCumDownData_EMULECOMPAT()	{ return (cumDownData_EMULECOMPAT +		sesDownData_EMULECOMPAT);}
 	static	uint64	GetCumDownData_SHAREAZA()		{ return (cumDownData_SHAREAZA +			sesDownData_SHAREAZA );}
 	static	uint64	GetCumDownData_URL()			{ return (cumDownData_URL +				sesDownData_URL);}
+	// MORPH START - Added by Commander, WebCache 1.2e
+	static	uint64	GetCumDownData_WEBCACHE()		{ return (cumDownData_WEBCACHE +		sesDownData_WEBCACHE);} //jp webcache statistics
+	// MORPH END - Added by Commander, WebCache 1.2e
 	// Session client breakdown stats for received bytes
 	static	uint64	GetDownSessionClientData()		{ return   sesDownData_EDONKEY 
 															  + sesDownData_EDONKEYHYBRID 
@@ -1074,7 +1132,9 @@ public:
 															 + sesDownData_AMULE
 															 + sesDownData_EMULECOMPAT
 															 + sesDownData_SHAREAZA
-															 + sesDownData_URL; }
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+															  + sesDownData_URL
+															  + sesDownData_WEBCACHE; } // jp webcache statistics
 	static	uint64	GetDownData_EDONKEY()			{ return sesDownData_EDONKEY;}
 	static	uint64	GetDownData_EDONKEYHYBRID()		{ return sesDownData_EDONKEYHYBRID;}
 	static	uint64	GetDownData_EMULE()				{ return sesDownData_EMULE;}
@@ -1083,6 +1143,9 @@ public:
 	static	uint64	GetDownData_EMULECOMPAT()		{ return sesDownData_EMULECOMPAT;}
 	static	uint64	GetDownData_SHAREAZA()			{ return sesDownData_SHAREAZA;}
 	static	uint64	GetDownData_URL()				{ return sesDownData_URL;}
+	// MORPH START - Added by Commander, WebCache 1.2e
+	static	uint64	GetDownData_WEBCACHE()			{ return sesDownData_WEBCACHE;} //jp webcache statistics
+	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Cumulative port breakdown stats for received bytes...
 	static	uint64	GetDownTotalPortData()			{ return (GetCumDownDataPort_4662() +			GetCumDownDataPort_OTHER() );}
@@ -1528,7 +1591,9 @@ public:
 	static	bool	GetLogFilteredIPs()					{return m_bVerbose && m_bLogFilteredIPs;}
 	static	bool	GetLogFileSaving()					{return m_bVerbose && m_bLogFileSaving;}
     static	bool	GetLogA4AF()    					{return m_bVerbose && m_bLogA4AF;} // ZZ:DownloadManager
-	static	bool	GetLogUlDlEvents()					{return m_bVerbose && m_bLogUlDlEvents;}
+	static	bool	GetLogUlDlEvents()					{return m_bVerbose && m_bLogUlDlEvents;} // MORPH - Added by Commander, WebCache 1.2e
+	static	bool	GetLogWebCacheEvents()				{return m_bVerbose && m_bLogWebCacheEvents;}//JP log webcache events
+	static	bool	GetLogICHEvents()					{return m_bVerbose && m_bLogICHEvents;}//JP log ICH events
 	static	bool	GetUseDebugDevice()					{return m_bUseDebugDevice;}
 	static	int		GetDebugServerTCPLevel()			{return m_iDebugServerTCPLevel;}
 	static	int		GetDebugServerUDPLevel() 			{return m_iDebugServerUDPLevel;}
@@ -1722,8 +1787,14 @@ public:
 	static	void SetInvisibleMode(bool on, UINT keymodifier, char key);
    //Commander - Added: Invisible Mode [TPT] - End
 
-	static	uint32	GetMaxFriendByteToSend();  //MORPH - Added by SiRoB, Upload Splitting Class
-	
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	static	uint32	GetMinDataRateFriend();
+	static	uint32	GetMinDataRatePowerShare();
+	static	uint32	GetMaxClientDataRateFriend();
+	static	uint32	GetMaxClientDataRatePowerShare();
+	static	uint32	GetMaxClientDataRate();
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
 	//MORPH START - Added by SiRoB, DynDNS
 	static	void	SaveDynDNS();
 	static	void	LoadDynDNS();

@@ -187,7 +187,13 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_PARTCOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_HASHSET, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_COMPLSIZE, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_DATARATE, TOP_LEFT, TOP_RIGHT);
+//MORPH START - Changed by SiRoB, WebCache 1.2f
+/*
+	AddAnchor(IDC_DATARATE, TOP_LEFT, TOP_RIGHT); //JP
+*/
+	AddAnchor(IDC_WCReq, TOP_LEFT, TOP_RIGHT); //JP
+	AddAnchor(IDC_WCDownl, TOP_LEFT, TOP_RIGHT); //JP
+//MORPH END   - Changed by SiRoB, WebCache 1.2f
 	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_RECOVERED, TOP_LEFT, TOP_RIGHT);
 
@@ -339,6 +345,11 @@ void CFileDetailDialogInfo::RefreshData()
 	UINT uValidSources = 0;
 	UINT uNNPSources = 0;
 	UINT uA4AFSources = 0;
+	//MORPH START - Changed by SiRoB, WebCache 1.2f
+	uint32	uWebcacherequests = 0; //JP webcache
+	uint32	uSuccessfulWebcacherequests = 0;//jp webcache
+	//MORPH END   - Changed by SiRoB, WebCache 1.2f
+
 	for (int i = 0; i < m_paFiles->GetSize(); i++)
 	{
 		uFileSize += (*m_paFiles)[i]->GetFileSize();
@@ -350,6 +361,11 @@ void CFileDetailDialogInfo::RefreshData()
 		uDataRate += (*m_paFiles)[i]->GetDatarate();
 		uCompleted += (*m_paFiles)[i]->GetCompletedSize();
 		iHashsetAvailable += ((*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartHashCount()) ? 1 : 0;
+
+		//MORPH START - Changed by SiRoB, WebCache 1.2f
+		uWebcacherequests += (*m_paFiles)[i]->Webcacherequests;//jp webcache
+		uSuccessfulWebcacherequests += (*m_paFiles)[i]->SuccessfulWebcacherequests;//jp webcache
+		//MORPH END   - Changed by SiRoB, WebCache 1.2f
 
 		if ((*m_paFiles)[i]->IsPartFile())
 		{
@@ -390,6 +406,14 @@ void CFileDetailDialogInfo::RefreshData()
 
 	str.Format(GetResString(IDS_SOURCESINFO), uSources, uValidSources, uNNPSources, uA4AFSources);
 	SetDlgItemText(IDC_SOURCECOUNT, str);
+
+	//MORPH START - Changed by SiRoB, WebCache 1.2f
+	double percentSessions = 0;
+	if (uWebcacherequests != 0)
+		percentSessions = (double) 100 * uSuccessfulWebcacherequests / uWebcacherequests;
+	str.Format( _T("%u/%u (%1.1f%%)"), uSuccessfulWebcacherequests, uWebcacherequests, percentSessions );
+	SetDlgItemText(IDC_WCReq, str);
+	//MORPH END   - Changed by SiRoB, WebCache 1.2f
 }
 
 void CFileDetailDialogInfo::OnDestroy()

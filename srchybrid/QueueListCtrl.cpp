@@ -92,7 +92,11 @@ void CQueueListCtrl::Init()
 	InsertColumn(13,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,13);
 	// Commander - Added: IP2Country column - End
 
-        SetAllIcons();
+	//MORPH START - Added by SiRoB, WebCache 1.2f
+	InsertColumn(14, _T("Webcache Sources") ,LVCFMT_LEFT, 100,14); //JP Webcache column
+	//MORPH END   - Added by SiRoB, WebCache 1.2f
+
+	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableQueue);
 	// Barry - Use preferred sort order from preferences
@@ -523,6 +527,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								Sbuffer = tempStr;
 							}
 							//EastShare END - Added by TAHO, Pay Back First
+
+							//Morph Start - added by AndCycle, show out keep full chunk transfer
+							if(client->GetQueueSessionUp() > 0){
+								Sbuffer.Append(_T(" F"));
+							}
+							//Morph End - added by AndCycle, show out keep full chunk transfer
 						}
 						break;
 					case 5:
@@ -570,8 +580,27 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer.Format(_T("%s"), client->GetCountryName());
 						break;
 					// Commander - Added: IP2Country column - End
+					//MORPH START - Added by SiRoB, WebCache 1.2f
+					case 14: {
+						if (client->SupportsWebCache())
+						{
+							Sbuffer = client->GetWebCacheName();
+							if (client->IsBehindOurWebCache())
+								dc->SetTextColor(RGB(0, 180, 0)); //if is behind our webcache display green
+							else if (Sbuffer != "")
+								dc->SetTextColor(RGB(255, 0, 0)); // if webcache info is there but not our own set red
+							else
+								Sbuffer = "no proxy set";	// if no webcache info colour is black
+						   }
+						else
+							Sbuffer = "";
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+ 						dc->SetTextColor(RGB(0, 0, 0));
+						break;
+					}
+					//MORPH END   - Added by SiRoB, WebCache 1.2f
 				}
-				if( iColumn != 9 && iColumn != 0)
+				if( iColumn != 9 && iColumn != 0  && iColumn != 14) //JP Webcache added Column 14
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			}//MORPH - Added by SiRoB, Don't draw hidden colums
 			cur_rec.left += GetColumnWidth(iColumn);
@@ -976,7 +1005,20 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			else
 				return -1;
                 // Commander - Added: IP2Country column - End
-
+		//MORPH START - Add by SiRoB, WebCache 1.2f
+		//JP Webcache START 
+		case 14:
+			if (item1->SupportsWebCache() && item2->SupportsWebCache() )
+				return CompareLocaleStringNoCase(item1->GetWebCacheName(),item2->GetWebCacheName());
+			else
+				return item1->SupportsWebCache() - item2->SupportsWebCache();
+		case 114:
+			if (item2->SupportsWebCache() && item1->SupportsWebCache() )
+				return CompareLocaleStringNoCase(item2->GetWebCacheName(),item1->GetWebCacheName());
+			else
+				return item2->SupportsWebCache() - item1->SupportsWebCache();
+		//JP Webcache END
+		//MORPH END   - Add by SiRoB, WebCache 1.2f
 		default:
 			return 0;
 	}

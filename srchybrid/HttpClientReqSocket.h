@@ -16,6 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
+#include "ListenSocket.h" // yonatan http // MORPH - Added by Commander, WebCache 1.2e
+
 class Packet;
 
 typedef enum EHttpSocketState
@@ -55,7 +57,11 @@ protected:
 	CStringAArray		m_astrHttpHeaders;
 	int					m_iHttpHeadersSize;
 
+// MORPH START - Added by Commander, WebCache 1.2e
+public: // yonatan http - for ugly webcache cast in EMSocket.cpp
 	bool ProcessHttpPacket(const BYTE* packet, UINT size);
+
+protected: // yonatan http
 	void ProcessHttpHeaderPacket(const char* packet, UINT size, LPBYTE& pBody, int& iSizeBody);
 
 	virtual bool ProcessHttpResponse();
