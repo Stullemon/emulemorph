@@ -46,7 +46,6 @@
 #include "StatisticsDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Kademlia/Prefs.h"
-#include "PartFile.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -78,7 +77,10 @@ CUploadQueue::CUploadQueue()
 	// -khaos--+++>
 	iupdateconnstats=0;
 	// <-----khaos-
-
+	//Removed By SiRoB, Not used due to zz Upload System
+	/*
+	m_dwRemovedClientByScore = ::GetTickCount();
+	*/
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 	m_MaxActiveClients = 0;
 	m_MaxActiveClientsShortTime = 0;
@@ -352,14 +354,16 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		CUpDownClient* cur_client =	waitinglist.GetAt(pos2);
 		// clear dead clients
 		ASSERT ( cur_client->GetLastUpRequest() );
-		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) )
+		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()))
 		{
+			//This client has either not been seen in a long time, or we no longer share the file he wanted anymore..
+			cur_client->ClearWaitStartTime();
 			RemoveFromWaitingQueue(pos2,true);
 			continue;
 		}
 		else
 		{
-			// finished clearing
+		    // finished clearing
 			uint32 cur_score = cur_client->GetScore(false);
 
 			if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score))
@@ -377,24 +381,22 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
                     // now that we know this client is not ready to go, compare it to the best not ready client
                     // the best not ready client may be better than the best ready client, so we need to check
                     // against that client
-					if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score)){
-						// it is more worthy, keep it
+					if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score))
+					{
+                        // it is more worthy, keep it
 						bestlowscore = cur_score;
 						toaddlow = pos2;
                         lowclient = waitinglist.GetAt(toaddlow);
 					}
 				}
 			} else {
-					// cur_client is more worthy. Save it.
+                // cur_client is more worthy. Save it.
 			}
 		}
 	}
 		
 	if (bestlowscore > bestscore && lowclient && allowLowIdAddNextConnectToBeSet)
 	{
-		newclient = waitinglist.GetAt(toaddlow);
-
-		// is newclient in same or better class as lowIdClientMustBeInSameOrBetterClassAsThisClient?
 		if(lowIdClientMustBeInSameOrBetterClassAsThisClient == NULL ||
 			RightClientIsSuperior(lowIdClientMustBeInSameOrBetterClassAsThisClient, newclient) >= 0
 		){
@@ -460,7 +462,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		int iSuperior;//Morph - added by AndCycle, separate special prio compare
 		if(
 			(iSuperior = RightClientIsSuperior(newclient, uploadingClient)) > 0 ||
-			iSuperior == 0 &&
+			iSuperior == 0 && 
 			(
              //uploadingClient->GetDatarate() > newclient->GetDatarate() ||
              //uploadingClient->GetDatarate() == newclient->GetDatarate() &&
@@ -573,6 +575,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		return false;
 	}
 
+	//Removed by SiRoB, Not used due to zz Upload system
 	/*
 	if (!thePrefs.TransferFullChunks())
 		UpdateMaxClientScore(); // refresh score caching, now that the highest score is removed
@@ -1238,6 +1241,10 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 		RemoveFromWaitingQueue(pos,updatewindow);
 		if (updatewindow)
 			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
+		//Removed by SiRoB, due to zz way m_dwWouldHaveGottenUploadSlotIfNotLowIdTick
+		/*
+		client->m_bAddNextConnect = false;
+		*/
 		return true;
 	}
 	else
@@ -1270,6 +1277,45 @@ void CUploadQueue::UpdateMaxClientScore()
 	}
 }
 
+//Removed by SiRoB, not used due to zz way
+/*
+bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
+	//If we have nobody in the queue, do NOT remove the current uploads..
+	//This will save some bandwidth and some unneeded swapping from upload/queue/upload..
+	if ( waitinglist.IsEmpty() || client->GetFriendSlot() )
+		return false;
+	if (!thePrefs.TransferFullChunks()){
+	    if( client->GetUpStartTimeDelay() > SESSIONMAXTIME){ // Try to keep the clients from downloading for ever
+		    if (thePrefs.GetLogUlDlEvents())
+			    AddDebugLogLine(DLP_LOW, false, _T("%s: Upload session ended due to max time %s."), client->GetUserName(), CastSecondsToHM(SESSIONMAXTIME/1000));
+		    return true;
+	    }
+
+		// Cache current client score
+		const uint32 score = client->GetScore(true, true);
+
+		// Check if another client has a bigger score
+		if (score < GetMaxClientScore() && m_dwRemovedClientByScore < GetTickCount()) {
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, false, _T("%s: Upload session ended due to score."), client->GetUserName());
+			//Set timer to prevent to many uploadslot getting kick do to score.
+			//Upload slots are delayed by a min of 1 sec and the maxscore is reset every 5 sec.
+			//So, I choose 6 secs to make sure the maxscore it updated before doing this again.
+			m_dwRemovedClientByScore = GetTickCount()+SEC2MS(6);
+			return true;
+		}
+	}
+	else{
+		// Allow the client to download a specified amount per session
+		if( client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS ){
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_DEFAULT, false, _T("%s: Upload session ended due to max transfered amount. %s"), client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS, false, false));
+			return true;
+		}
+	}
+	return false;
+}
+*/
 void CUploadQueue::DeleteAll(){
 	waitinglist.RemoveAll();
 	uploadinglist.RemoveAll();
@@ -1596,9 +1642,9 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
     	    // Remove the found Client from UploadBandwidthThrottler
     	    theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
             theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
-			//MORPH START - Added by SiRoB, WebCache due to zz upload system
+			//MORPH START - Added by SiRoB, due to zz upload system WebCache
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
-			//MORPH END   - Added by SiRoB, WebCache due to zz upload system
+			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
     	    tempUploadinglist.AddTail(cur_client);
     	}
 
