@@ -2073,8 +2073,7 @@ void CIrcMain::Connect()
 		version = _T("eMule") + theApp.m_strCurVersionLong + (CString)Irc_Version;
 		user = _T("USER ") + ident + _T(" 8 * :") + version;
 		ircsocket->Create();
-		//TODO: Make this multilanguage..
-		m_pwndIRC->AddStatus( _T("Connecting") );
+		m_pwndIRC->AddStatus( GetResString(IDS_CONNECTING) ); // ADDED: "IDS_CONNECTING" by FrankyFive
 		ircsocket->Connect();
 	}
 	catch(...)
