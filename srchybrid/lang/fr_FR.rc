@@ -1938,6 +1938,19 @@ BEGIN
     IDS_SHAREONLYTHENEED    "Partager seulement le necéssaire"
     IDS_SHAREONLYTHENEEDDEFAULT "Partager seulement le necéssaire (0 = Désactivé)"
 END
+
+STRINGTABLE   
+BEGIN  
+    IDS_COUNTRYNAME_SHORT   "Afficher 2 lettres"  
+    IDS_COUNTRYNAME_MID     "Afficher 3 lettres"  
+    IDS_COUNTRYNAME_LONG    "Afficher le nom complet"  
+    IDS_COUNTRYNAME_SHOWFLAG "Montrer les drapeaux"  
+END  
+  
+STRINGTABLE  
+BEGIN  
+    IDS_REMOVEALLFRIENDSLOT "Retirer tous les Slots Amis"  
+END
 #endif    // French (France) resources
 /////////////////////////////////////////////////////////////////////////////
 
