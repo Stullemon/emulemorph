@@ -23,7 +23,8 @@ void CWebCacheProxyClient::UpdateClient(CWebCachedBlock* iBlock) // don't delete
 	//remove client from all lists
 	theApp.clientlist->RemoveClient(this);
 	if( reqfile ) {
-		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( this, reqfile );
+		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( this, reqfile );        
+		theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this); // MORPH - Added by Commander, ProxyClient Crash fix
 		POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(this);
 		if( pos )
 			reqfile->srclist.RemoveAt(pos);
@@ -76,6 +77,7 @@ CWebCacheProxyClient::~CWebCacheProxyClient(void)
 	theApp.clientlist->RemoveClient(this);
 	if( reqfile ) {
 		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( this, reqfile );
+		theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this); // MORPH - Added by Commander, ProxyClient Crash fix
 		POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(this);
 		if( pos )
 			reqfile->srclist.RemoveAt(pos);
