@@ -664,7 +664,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//MORPH START - Changed by SiRoB, Avoid misusing of HideOS
 					{
 						uint8 hideOSInWork = file->HideOSInWork();
-						buffer = _T("[") + GetResString((hideOSInWork)?IDS_POWERSHARE_ON_LABEL:IDS_POWERSHARE_OFF_LABEL) + _T("] ");
+						buffer = _T("[") + GetResString((hideOSInWork>0)?IDS_POWERSHARE_ON_LABEL:IDS_POWERSHARE_OFF_LABEL) + _T("] ");
 						if(file->GetHideOS()<0)
 							buffer.Append(_T(" ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". "));
 						if (hideOSInWork){
@@ -673,13 +673,13 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								if (file->GetSelectiveChunk())
 									buffer.AppendFormat(_T(" + %s") ,GetResString(IDS_SELECTIVESHARE));
 							buffer.Append(_T(" ("));
-							if (file->GetPowerShareAuthorized())
-								buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
-							else
-								buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
-							buffer.Append(_T(")"));
 						}else
-							buffer = GetResString(IDS_DISABLED);
+							buffer.Append(GetResString(IDS_DISABLED));
+						if (file->GetPowerShareAuthorized())
+							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
+						else
+							buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
+						buffer.Append(_T(")"));
 						break;
 						//MORPH START - Changed by SiRoB, Avoid misusing of HideOS
 					}
@@ -721,7 +721,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				if( iColumn == 0 )
 					//MORPH - Changed by SiRoB, for rating icon
 					//cur_rec.left -= iIconDrawWidth;
-					cur_rec.left -= iIconDrawWidth + 9;
+					cur_rec.left -= iIconDrawWidth + 11;
 			//MORPH START - Added by SiRoB, Don't draw hidden coloms
 			}
 			//MORPH END   - Added by SiRoB, Don't draw hidden coloms
