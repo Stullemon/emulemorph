@@ -1552,16 +1552,16 @@ bool CUpDownClient::StackA4AFSources()
 	{
 		if (!pSwap->ForceAllA4AF())
 		{
-		if (pSwap->GetCatResumeOrder() > reqfile->GetCatResumeOrder())
-			return false;
-		else if (pSwap->GetCatResumeOrder() == reqfile->GetCatResumeOrder())
-		{
-			if (pSwap->GetAvailableSrcCount() >= reqfile->GetAvailableSrcCount())
+			if (pSwap->GetCatResumeOrder() > reqfile->GetCatResumeOrder())
 				return false;
-			// If the difference in source counts is less than 10%, leave this source right where it is.
-			if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
-				return false;
-		}
+			else if (pSwap->GetCatResumeOrder() == reqfile->GetCatResumeOrder())
+			{
+				if (pSwap->GetAvailableSrcCount() >= reqfile->GetAvailableSrcCount())
+					return false;
+				// If the difference in source counts is less than 10%, leave this source right where it is.
+				if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
+					return false;
+			}
 		}
 		
 		if(DoSwap(pSwap, false, 1)){
