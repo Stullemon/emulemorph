@@ -39,6 +39,7 @@ protected:
 public:
 	virtual BOOL OnApply();
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnKillActive();
 	void Localize(void);
 	void LoadSettings(void);
 	afx_msg void OnSettingsChange() {SetModified();}

@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgMorph3.h"
-#include "emuleDlg.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
 
@@ -173,7 +172,7 @@ void CPPgMorph3::Localize(void)
 {
 	if ( m_hWnd )
 	{
-		SetWindowText(GetResString(IDS_PW_EMULESPANA));
+		//SetWindowText(GetResString(IDS_PW_EMULESPANA));
 
 		// Added by MoNKi [ MoNKi: -Wap Server- ]
 		if(m_htiWapRoot){
@@ -187,6 +186,14 @@ void CPPgMorph3::Localize(void)
 		}
 		// End MoNKi
 	}
+}
+
+BOOL CPPgMorph3::OnKillActive()
+{
+	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// data from an open edit control
+	m_ctrlTreeOptions.HandleChildControlLosingFocus();
+	return CPropertyPage::OnKillActive();
 }
 
 LRESULT CPPgMorph3::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
