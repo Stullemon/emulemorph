@@ -13,9 +13,8 @@
 #define _PUGXML_
 #pragma once
 
-
-#define PUGOPT_MEMFIL //Uncomment to enable memory-mapped file parsing support.
-#define PUGOPT_NONSEG //Uncomment to enable non-destructive (non-segmenting) parsing support.
+//#define PUGOPT_MEMFIL //Uncomment to enable memory-mapped file parsing support.
+//#define PUGOPT_NONSEG //Uncomment to enable non-destructive (non-segmenting) parsing support.
 
 
 #ifdef PUGOPT_MEMFIL
@@ -1389,7 +1388,7 @@ LOC_PCDATA: //'>...<'
 //<param name="tempsize">Temporary read buffer size.</param>
 //<returns>Success if file at 'path' was opened and bytes were read into memory.</returns>
 //<remarks>Memory is allocated at '*buffer'. Free with 'free'.</remarks>
-inline static bool load_file(const TCHAR* path,TCHAR** buffer,unsigned long* size,unsigned long tempsize = 40960)
+inline static bool load_file(const TCHAR* path,TCHAR** buffer,unsigned long* size,unsigned long tempsize = 4096)
 {
 	if(!path || !buffer || !size) return false;
 	*size = 0;
@@ -1976,7 +1975,7 @@ public:
 	//<summary>Set attribute to std::string.</summary>
 	//<param name="rhs">Value std::string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
-	//xml_attribute& operator=(const std::string& rhs){ value(rhs.c_str()); return *this; }
+//	xml_attribute& operator=(const std::string& rhs){ value(rhs.c_str()); return *this; }
 	//<summary>Set attribute to string.</summary>
 	//<param name="rhs">Value string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
