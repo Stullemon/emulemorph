@@ -32,10 +32,10 @@
 ******************************************************************************/
 #pragma once
 
-void* __stdcall memcpy_optimized(void *dest, const void *src, size_t n);
+void * __cdecl memcpy_optimized(void *dest, const void *src, size_t n);
 
-void* __stdcall memset_optimized(void *dest, int c, size_t n);
+void* __cdecl memset_optimized(void *dest, int c, size_t n);
 
-void __stdcall memzero_optimized(void *dest, size_t n);
+void __cdecl memzero_optimized(void *dest, size_t n);
 
 unsigned long get_cpu_type();

@@ -33,7 +33,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "memcpy_amd.h"
 
 /*****************************************************************************
 MEMCPY_AMD.CPP
@@ -149,7 +148,7 @@ static unsigned long memcpyProc = 0;
 static unsigned long memsetProc = 0;
 static unsigned long memzeroProc = 0;
 
-void* __stdcall memcpy_optimized(void *dest, const void *src, size_t n)
+void * memcpy_optimized(void *dest, const void *src, size_t n)
 {
   __asm
   {
@@ -526,7 +525,7 @@ $memcpy_exit:
     }
 }
 
-void* __stdcall memset_optimized(void *dest, int c, size_t n)
+void* memset_optimized(void *dest, int c, size_t n)
 {
   __asm
   {
@@ -763,7 +762,7 @@ $memset_exit:
     }
 }
 
-void __stdcall memzero_optimized(void *dest, size_t n)
+void memzero_optimized(void *dest, size_t n)
 {
   __asm
   {

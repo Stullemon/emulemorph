@@ -51,7 +51,6 @@
 #include <atlcoll.h>
 #include <afxcoll.h>
 #include <afxtempl.h>
-#include ".\Optimizer\optimize.h" // Commander - Added: Optimizer [ePlus]
 
 //TODO: To be removed and properly resolved in the sources!!
 #pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union
@@ -90,3 +89,11 @@ typedef	CStringArray CStringAArray;
 #endif
 
 extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);
+
+//MORPH START - Added by SiRoB, Optimizer inspired from espania
+#include <wchar.h>
+#include ".\Optimizer\Optimize.h" // Commander - Added: Optimizer [ePlus]
+#define memcpy(a, b, c)	memcpy_optimized(a, b, c)
+#define memset(a, b, c) memset_optimized(a, b, c)
+#define memzero(a, b) memzero_optimized(a, b)
+//MORPH END   - Added by SiRoB, Optimizer inspired from espania

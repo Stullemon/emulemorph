@@ -67,7 +67,8 @@
 #endif // _WIN32
 
 // Include generic C / C++ header files.
-#include <memory.h>
+//MORPH - Removed by SiRoB, Optimizer
+//#include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
 
