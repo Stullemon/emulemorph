@@ -10,6 +10,7 @@
 #include "Scheduler.h" //MORPH - Added by SiRoB, Fix for Param used in scheduler
 #include "searchDlg.h"
 #include "sharedfilelist.h" //MORPH - Added by SiRoB, POWERSHARE Limit
+#include "uploadqueue.h" //MORPH - Added by SiRoB, PS Internal prio
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -194,6 +195,8 @@ BOOL CPPgMorphShare::OnApply()
 	thePrefs.PowerShareLimit = m_iPowerShareLimit;
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	if(thePrefs.m_bPowershareInternalPrio != (m_iPowershareInternalPrio==1))
+		theApp.uploadqueue->ReSortUploadSlots(true);
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	thePrefs.m_bPowershareInternalPrio = m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	if(thePrefs.m_bShowFolderIcons != (m_iFolderIcons == 1))
