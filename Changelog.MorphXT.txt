@@ -1,4 +1,10 @@
 ---------------------------------------- 
+Changelog for eMule 0.41b29 MorphXT v1.3
+---------------------------------------- 
+FIXED  : Connection trouble [SiRoB]
+CHANGED: Color code in sharedfile [SiRoB/IceCream]
+
+---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.2
 ---------------------------------------- 
 FIXED  : the wrong construction of the A4AF available part causing messageBox (invalide parameter) [SiRoB]
