@@ -32,8 +32,12 @@ public:
 	void	Safe_Delete();
 	
 	bool	Create();
-	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
-
+	//MORPH - Changed by SiRoB, zz Upload system
+	/*
+    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
+	*/
+	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend, bool onlyAllowedToSendControlPacket = false);
+	
 	void	DbgAppendClientInfo(CString& str);
 	CString DbgGetClientInfo();
 
