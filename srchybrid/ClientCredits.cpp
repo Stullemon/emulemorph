@@ -366,8 +366,8 @@ void CClientCreditsList::LoadList()
 		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
 			prioOrderfile[index++]=curFile;
-			loadFile.Close();
 		}
+		loadFile.Close();
 	}
 	uint8 tmpprioOrderfile;
 	uint8 maxavailablefile = index;
