@@ -16,6 +16,7 @@ public:
 	void	RemoveServer(CServer* todel);
 	bool	AddServermetToList(const CString& strFile);
 	void	RefreshServer(const CServer* server);
+	void	RefreshAllServer();//EastShare - added by AndCycle, IP to Country
 	void	RemoveDeadServer();
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}

@@ -26,6 +26,8 @@
 #include "MenuCmds.h"
 #include "ServerWnd.h"
 #include "IrcWnd.h"
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+#include "MemDC.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -75,7 +77,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 		i--;
 		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableServer, i);
 		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableServer, i);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
 
@@ -244,7 +246,19 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	CString temp;
 	temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
 	SetItemText(itemnr, 1, temp);
+
+	//EastShare Start - added by AndCycle, IP to Country
+	CString tempServerName;
+	tempServerName = server->GetCountryName();
+	tempServerName.Append(server->GetListName()?(LPCTSTR)server->GetListName():_T(""));
+	SetItemText(itemnr,0,tempServerName);
+
+	/*
+	//original
 	SetItemText(itemnr,0,server->GetListName()?(LPCTSTR)server->GetListName():_T(""));
+	*/
+	//EastShare End - added by AndCycle, IP to Country
+
 	SetItemText(itemnr,2,server->GetDescription()?(LPCTSTR)server->GetDescription():_T(""));
 
 	// Ping
@@ -336,6 +350,17 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	}
 	SetItemText(itemnr,12,temp);
 }
+
+//EastShare Start - added by AndCycle, IP to Country
+void CServerListCtrl::RefreshAllServer(){
+
+	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;){
+		RefreshServer(server_list->list.GetAt(pos));
+		server_list->list.GetNext(pos);
+	}
+
+}
+//EastShare End - added by AndCycle, IP to Country
 
 BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl) 
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick) 

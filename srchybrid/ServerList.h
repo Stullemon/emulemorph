@@ -84,4 +84,9 @@ private:
 	CPreferences*	app_prefs;
 	uint32		delservercount;
 	uint32		m_nLastSaved;
+
+//EastShare Start - added by AndCycle, IP to Country
+public:
+	void ResetIP2Country();
+//EastShare End - added by AndCycle, IP to Country
 };

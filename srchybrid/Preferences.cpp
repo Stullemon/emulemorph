@@ -33,14 +33,12 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 #include "SafeFile.h"
-//EastShare Start - added by AndCycle, IP to Country
-#include "IP2Country.h"
-//EastShare End - added by AndCycle, IP to Country
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
 #endif
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE

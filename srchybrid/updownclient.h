@@ -31,9 +31,7 @@ class CxImage;
 struct Requested_Block_Struct;
 class CSafeMemFile;
 
-//EastShare Start - added by AndCycle, IP to Country
-struct IPRange_Struct2;
-//EastShare End - added by AndCycle, IP to Country
+struct IPRange_Struct2; //EastShare - added by AndCycle, IP to Country
 
 struct Pending_Block_Struct{
 	Requested_Block_Struct*	block;
@@ -159,11 +157,6 @@ public:
 	uint32			GetIP() const				{return m_dwUserIP;}
 	bool			HasLowID() const;
 	LPCSTR			GetFullIP() const			{return m_szFullUserIP;}
-
-	//EastShare Start - added by AndCycle, IP to Country
-	CString			GetCountryName(bool longName = false) const;
-	int				GetCountryFlagIndex() const;
-	//EastShare End - added by AndCycle, IP to Country
 
 	uint16			GetUserPort() const			{return m_nUserPort;}
 	void			SetUserPort( uint16 val )	{m_nUserPort = val;}
@@ -525,9 +518,6 @@ private:
 	
 	
 	uint32	m_dwUserIP;
-	//EastShare Start - added by AndCycle, IP to Country
-	struct	IPRange_Struct2* m_structUserCountry;
-	//EastShare End - added by AndCycle, IP to Country
 	uint32	m_dwServerIP;
 	uint32	m_nUserIDHybrid;
 	uint16	m_nUserPort;
@@ -680,6 +670,15 @@ private:
 	// khaos::kmod-
 	uint32 m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
 	uint32 m_nUpTotalTime;//wistily total lenght of this client's uploads during this session in ms
+
+//EastShare Start - added by AndCycle, IP to Country
+public:
+	CString			GetCountryName(bool longName = false) const;
+	int				GetCountryFlagIndex() const;
+	void			ResetIP2Country();
+private:
+	struct	IPRange_Struct2* m_structUserCountry; //EastShare - added by AndCycle, IP to Country
+//EastShare End - added by AndCycle, IP to Country
 };
 //#pragma pack()
 

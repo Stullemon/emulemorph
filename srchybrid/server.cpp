@@ -293,7 +293,7 @@ void CServer::SetLastDescPingedCount(bool bReset)
 CString CServer::GetCountryName() const{
 	CString tempStr;
 
-	if(!theApp.ip2country->IsIP2Country()) return "";
+	if(theApp.ip2country->IsIP2Country() == false) return "";
 
 	switch(theApp.glob_prefs->GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:

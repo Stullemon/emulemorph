@@ -42,15 +42,13 @@ class CClientCreditsList;
 class CFriendList;
 class CClientUDPSocket;
 class CIPFilter;
-//EastShare Start - added by AndCycle, IP to Country
-class CIP2Country;
-//EastShare End - added by AndCycle, IP to Country
 class CWebServer;
 class CMMServer;
 class CStatistics;
 class CAbstractFile;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
+class CIP2Country; //EastShare - added by AndCycle, IP to Country
 
 enum AppState{
 	APP_STATE_RUNNING=0,
@@ -80,15 +78,13 @@ public:
 	CFriendList*		friendlist;
 	CClientUDPSocket*	clientudp;
 	CIPFilter*			ipfilter;
-	//EastShare Start - added by AndCycle, IP to Country
-	CIP2Country*		ip2country;
-	//EastShare End - added by AndCycle, IP to Country
 	CWebServer*			webserver;
 	CScheduler*			scheduler;
 	CMMServer*			mmserver;
 	CStatistics*		statistics;
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup
+	CIP2Country*		ip2country; //EastShare - added by AndCycle, IP to Country
 
 	uint64				stat_sessionReceivedBytes;
 	uint64				stat_sessionSentBytes;

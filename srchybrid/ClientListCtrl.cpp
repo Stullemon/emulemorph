@@ -35,9 +35,7 @@
 #include "KnownFile.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "sharedfilelist.h" //MORPH - Added by SiRoB
-//EastShare Start - added by AndCycle, IP to Country
-#include "IP2Country.h"
-//EastShare End - added by AndCycle, IP to Country
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -127,14 +125,6 @@ void CClientListCtrl::SetAllIcons()
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
-
-	//Morph Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->LoadedCountryFlag()){
-		for(int count = 0; count < theApp.ip2country->GetCountryFlagAmount(); count++){
-			imagelist.Add(theApp.ip2country->GetCountryFlagByIndex(count));
-		}
-	}
-	//Morph End- added by AndCycle, IP to Country
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -335,15 +325,15 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = client->GetUserName();
 
 					//EastShare Start - added by AndCycle, IP to Country
-					if(theApp.ip2country->IsIP2Country()){
-						CString tempStr;
-						tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
-						Sbuffer = tempStr;
-					}
+					CString tempStr;
+					tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
+					Sbuffer = tempStr;
+
 					if(theApp.ip2country->ShowCountryFlag()){
 						cur_rec.left+=20;
 						POINT point2= {cur_rec.left,cur_rec.top+1};
-						imagelist.DrawIndirect(dc, client->GetCountryFlagIndex() + 11, point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
+						int index = client->GetCountryFlagIndex();
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
 					}
 					//EastShare End - added by AndCycle, IP to Country
 

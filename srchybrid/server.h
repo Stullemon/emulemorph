@@ -18,6 +18,8 @@
 
 class CTag;
 
+struct IPRange_Struct2; //EastShare - added by AndCycle, IP to Country
+
 #pragma pack(1)
 struct ServerMet_Struct {
 	uint32	ip;
@@ -118,4 +120,14 @@ private:
 	CString		m_strVersion;
 	uint32		m_uTCPFlags;
 	uint32		m_uUDPFlags;
+
+//EastShare Start - added by AndCycle, IP to Country
+public:
+	CString	GetCountryName() const;
+	int		GetCountryFlagIndex() const;
+	void	ResetIP2Country();
+
+private:
+	struct	IPRange_Struct2* m_structServerCountry;
+ //EastShare End - added by AndCycle, IP to Country
 };

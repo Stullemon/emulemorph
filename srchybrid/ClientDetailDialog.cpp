@@ -24,9 +24,7 @@
 #include "Server.h"
 #include "ServerList.h"
 #include "SharedFileList.h"
-//EastShare Start - added by AndCycle, IP to Country
-#include "IP2Country.h"
-//EastShare End - added by AndCycle, IP to Country
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -21,29 +21,44 @@ class CIP2Country: public CLoggable
 		CIP2Country(void);
 		~CIP2Country(void);
 		
+		void	Load();
+		void	Unload();
+
+		//reset ip2country referense
+		void	Reset();
+
+		//refresh passive windows
+		void	Refresh();
+
 		bool	IsIP2Country()			{return EnableIP2Country;}
-		bool	LoadedCountryFlag()		{return EnableCountryFlag;}
 		bool	ShowCountryFlag();
-		IPRange_Struct2*	GetDefaultIP2Country()	{return &defaultIP2Country;}
+
+		IPRange_Struct2*	GetDefaultIP2Country() {return &defaultIP2Country;}
+
 		bool	LoadFromFile();
 		bool	LoadCountryFlagLib();
 		void	RemoveAllIPs();
 		void	RemoveAllFlags();
+
 		bool	AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName);
+
 		IPRange_Struct2*	GetCountryFromIP(uint32 IP);
-		HICON	GetCountryFlagByIndex(int index);
-		int		GetCountryFlagAmount(){return FlagAmount;};
 		WORD	GetFlagResIDfromCountryCode(CString shortCountryName);
+
+		CImageList* GetFlagImageList() {return &CountryFlagImageList;}
 	private:
+
+		//check is program current running, if it's under init or shutdown, set to false
+		bool	m_bRunning;
+
 		HINSTANCE _hCountryFlagDll;
-		int		FlagAmount;
+		CImageList	CountryFlagImageList;
 
 		bool	EnableIP2Country;
 		bool	EnableCountryFlag;
 		struct	IPRange_Struct2 defaultIP2Country;
 
 		CRBMap<uint32, IPRange_Struct2*> iplist;
-		CRBMap<uint16, HICON>	CountryFlagIcon;
 		CRBMap<CString, uint16>	CountryIDtoFlagIndex;
 };
 

@@ -37,9 +37,7 @@
 #include "TransferWnd.h"
 #include "SharedFileList.h" //MORPH - Added by SiRoB
 #include "version.h" //MORPH - Added by SiRoB
-//EastShare Start - added by AndCycle, IP to Country
-#include "IP2Country.h"
-//EastShare End - added by AndCycle, IP to Country
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -196,14 +194,6 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader("RATING_POOR"));  // 22
 	m_ImageList.Add(CTempIconLoader("RATING_FAKE"));  // 23
 	//MORPH END   - Added by IceCream, eMule Plus rating icones
-
-	//Morph Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->LoadedCountryFlag()){
-		for(int count = 0; count< theApp.ip2country->GetCountryFlagAmount(); count++){
-			m_ImageList.Add(theApp.ip2country->GetCountryFlagByIndex(count));
-		}
-	}
-	//Morph End - added by AndCycle, IP to Country
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -903,9 +893,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
 				//Morph Start - added by AndCycle, IP to Country
-				if(theApp.glob_prefs->IsIP2CountryShowFlag()){
+				if(theApp.ip2country->ShowCountryFlag()){
 					POINT point3= {cur_rec.left,cur_rec.top+1};
-					m_ImageList.DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex() + 24, point3, CSize(16,16), CPoint(0,0), ILD_NORMAL);
+					theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex(), point3, CSize(16,16), CPoint(0,0), ILD_NORMAL);
 					cur_rec.left+=20;
 				}
 				//Morph End - added by AndCycle, IP to Country
@@ -922,11 +912,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				}
 
 				//EastShare Start - added by AndCycle, IP to Country
-				if(theApp.ip2country->IsIP2Country()){
-					CString tempStr2;
-					tempStr2.Format("%s%s", lpUpDownClient->GetCountryName(), buffer);
-					buffer = tempStr2;
-				}
+				CString tempStr2;
+				tempStr2.Format("%s%s", lpUpDownClient->GetCountryName(), buffer);
+				buffer = tempStr2;
 				//EastShare End - added by AndCycle, IP to Country
 
 				dc->DrawText(buffer,buffer.GetLength(),&cur_rec, DLC_DT_TEXT);

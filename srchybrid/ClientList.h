@@ -125,4 +125,9 @@ private:
 	ClientMap m_shareazaMap;
 	ClientMap m_unknownMap;
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+
+//EastShare Start - added by AndCycle, IP to Country
+public:
+	void ResetIP2Country();
+//EastShare End - added by AndCycle, IP to Country
 };

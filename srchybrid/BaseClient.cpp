@@ -34,9 +34,6 @@
 #include "Server.h"
 #include "ClientCredits.h"
 #include "IPFilter.h"
-//EastShare Start - added by AndCycle, IP to Country
-#include "IP2Country.h"
-//EastShare End - added by AndCycle, IP to Country
 #include "UploadQueue.h"
 #include "KademliaMain.h"
 #include "Version.h"
@@ -53,6 +50,8 @@
 #include "PreviewDlg.h"
 #endif
 #include "FunnyNick.h" //MORPH - Added by IceCream, xrmb FunnyNick
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -118,9 +117,7 @@ void CUpDownClient::Init(){
 	m_nUpDatarate = 0;
 	m_pszUsername = 0;
 	m_dwUserIP = 0;
-	//EastShare Start - added by AndCycle, IP to Country
-	m_structUserCountry = theApp.ip2country->GetDefaultIP2Country();
-	//EastShare End - added by AndCycle, IP to Country
+	m_structUserCountry = theApp.ip2country->GetDefaultIP2Country(); //EastShare - added by AndCycle, IP to Country
 	m_nUserIDHybrid = 0;
 	m_nServerPort = 0;
 	m_bLeecher = false; //MORPH - Added by IceCream, Antileecher feature
@@ -184,10 +181,8 @@ void CUpDownClient::Init(){
 		uint32 nSockAddrLen = sizeof(sockAddr);
 		socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 		//EastShare Start - added by AndCycle, IP to Country
-		if(theApp.ip2country->IsIP2Country()){
-			if(sockAddr.sin_addr.S_un.S_addr != m_dwUserIP){
-				m_structUserCountry = theApp.ip2country->GetCountryFromIP(sockAddr.sin_addr.S_un.S_addr);
-			}
+		if(sockAddr.sin_addr.S_un.S_addr != m_dwUserIP){
+			m_structUserCountry = theApp.ip2country->GetCountryFromIP(sockAddr.sin_addr.S_un.S_addr);
 		}
 		//EastShare End - added by AndCycle, IP to Country
 		m_dwUserIP = sockAddr.sin_addr.S_un.S_addr;
@@ -2047,9 +2042,12 @@ uint32	CUpDownClient::GetL2HACTime()
 // Superlexx - client's location
 CString	CUpDownClient::GetCountryName(bool longName) const {
 
-	if(longName){
-		return m_structUserCountry->LongCountryName;
-	}
+	//display in client detail
+	if(longName && theApp.ip2country->IsIP2Country() == false)	return GetResString(IDS_DISABLED);
+
+	if(theApp.ip2country->IsIP2Country() == false) return "";
+
+	if(longName) return m_structUserCountry->LongCountryName;
 
 	CString tempStr;
 
@@ -2069,5 +2067,8 @@ CString	CUpDownClient::GetCountryName(bool longName) const {
 
 int CUpDownClient::GetCountryFlagIndex() const {
 	return m_structUserCountry->FlagIndex;
+}
+void CUpDownClient::ResetIP2Country(){
+	m_structUserCountry = theApp.ip2country->GetCountryFromIP(m_dwUserIP);
 }
 //EastShare End - added by AndCycle, IP to Country

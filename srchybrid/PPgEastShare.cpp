@@ -5,7 +5,10 @@
 #include "emule.h"
 #include "PPgEastShare.h"
 #include "OtherFunctions.h"
+
+//EastShare Start - added by AndCycle, IP to Country
 #include "ip2country.h"
+//EastShare End - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -171,10 +174,10 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bOnlyDownloadCompleteFiles = app_prefs->prefs->m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = app_prefs->prefs->m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
-	//EastShare - added by AndCycle, IP to Country
+	//EastShare Start - added by AndCycle, IP to Country
 	m_iIP2CountryName = app_prefs->GetIP2CountryNameMode(); 
 	m_bIP2CountryShowFlag = app_prefs->IsIP2CountryShowFlag();
-	//EastShare - added by AndCycle, IP to Country
+	//EastShare End - added by AndCycle, IP to Country
 
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
 	m_iEqualChanceForEachFile = app_prefs->GetEqualChanceForEachFileMode();//Morph - added by AndCycle, Equal Chance For Each File
@@ -215,10 +218,17 @@ BOOL CPPgEastShare::OnApply()
 	//EastShare Start - added by AndCycle, IP to Country
 	if(	(app_prefs->prefs->m_iIP2CountryNameMode != IP2CountryName_DISABLE || app_prefs->prefs->m_bIP2CountryShowFlag) !=
 		((IP2CountryNameSelection)m_iIP2CountryName != IP2CountryName_DISABLE || m_bIP2CountryShowFlag)	){
-		bRestartApp = true;
+		//check if need to load or unload DLL and ip table
+		if((IP2CountryNameSelection)m_iIP2CountryName != IP2CountryName_DISABLE || m_bIP2CountryShowFlag){
+			theApp.ip2country->Load();
+		}
+		else{
+			theApp.ip2country->Unload();
+		}
 	}
 	app_prefs->prefs->m_iIP2CountryNameMode = m_iIP2CountryName;
 	app_prefs->prefs->m_bIP2CountryShowFlag = m_bIP2CountryShowFlag;
+	theApp.ip2country->Refresh();//refresh passive windows
 	//EastShare End - added by AndCycle, IP to Country
 
 	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)

@@ -23,6 +23,15 @@ flags are from http://sf.net/projects/flags/
 #include "otherfunctions.h"
 #include <flag/resource.h>
 
+//refresh list
+#include "serverlist.h"
+#include "clientlist.h"
+
+//refresh server list ctrl
+#include "emuledlg.h"
+#include "serverwnd.h"
+#include "serverlistctrl.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -44,8 +53,10 @@ CString FirstCharCap(CString target){
 	return target;
 }
 
-CIP2Country::CIP2Country()
-{
+CIP2Country::CIP2Country(){
+
+	m_bRunning = false;
+
 	defaultIP2Country.IPstart = 0;
 	defaultIP2Country.IPend = 0;
 
@@ -55,32 +66,62 @@ CIP2Country::CIP2Country()
 
 	defaultIP2Country.FlagIndex = NO_FLAG;
 
-	FlagAmount = 0;
 	EnableIP2Country = false;
 	EnableCountryFlag = false;
 
 	if(theApp.glob_prefs->GetIP2CountryNameMode() != IP2CountryName_DISABLE || 
 		theApp.glob_prefs->IsIP2CountryShowFlag()){
-
-		EnableCountryFlag = LoadCountryFlagLib();//flag lib first, so ip range can map to flag
-		EnableIP2Country = LoadFromFile();
-
-		AddLogLine(false, "IP2Country uses the IP-to-Country Database provided by WebHosting.Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info.");
+		Load();
 	}
+
+	AddLogLine(false, "IP2Country uses the IP-to-Country Database provided by WebHosting.Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info.");
+
+	m_bRunning = true;
 }
 
-CIP2Country::~CIP2Country()
-{
+CIP2Country::~CIP2Country(){
+
+	m_bRunning = false;
+
+	Unload();
+}
+
+void CIP2Country::Load(){
+
+	EnableCountryFlag = LoadCountryFlagLib();//flag lib first, so ip range can map to flag
+	EnableIP2Country = LoadFromFile();
+
+	if(m_bRunning) Reset();
+
+	AddDebugLogLine(false, "IP2Country loaded");
+}
+
+void CIP2Country::Unload(){
+
+	EnableIP2Country = false;
+	EnableCountryFlag = false;
+
+	if(m_bRunning) Reset();
+
 	RemoveAllIPs();
 	RemoveAllFlags();
+
+	AddDebugLogLine(false, "IP2Country unloaded");
+}
+
+void CIP2Country::Reset(){
+	theApp.serverlist->ResetIP2Country();
+	theApp.clientlist->ResetIP2Country();
+}
+
+void CIP2Country::Refresh(){
+	theApp.emuledlg->serverwnd->serverlistctrl.RefreshAllServer();
 }
 
 bool CIP2Country::LoadFromFile(){
 
 	char buffer[1024];
 	int	lenBuf = 1024;
-
-	RemoveAllIPs();
 
 	CString ip2countryCSVfile = theApp.glob_prefs->GetConfigDir()+"ip-to-country.csv";
 
@@ -144,7 +185,7 @@ bool CIP2Country::LoadFromFile(){
 		RemoveAllIPs();
 		return false;
 	}
-	AddLogLine(false, "IP2Countryfile loaded");
+	AddDebugLogLine(false, "IP2Countryfile has been loaded");
 	return true;
 
 }
@@ -254,26 +295,36 @@ bool CIP2Country::LoadCountryFlagLib(){
 
 		HICON iconHandle;
 
+		CountryFlagImageList.DeleteImageList();
+		CountryFlagImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+		CountryFlagImageList.SetBkColor(CLR_NONE);
+
 		for(int cur_pos = 0; resID[cur_pos] != NO_FLAG; cur_pos++){
 
 			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], cur_pos);
 
 			iconHandle = LoadIcon(_hCountryFlagDll, MAKEINTRESOURCE(resID[cur_pos]));
 			if(iconHandle == NULL) throw CString(_T("Invalid resID"));
-		
-			FlagAmount++;
-
-			CountryFlagIcon.SetAt(cur_pos, iconHandle);
+			
+			CountryFlagImageList.Add(iconHandle);
 		}
+	
 
 	}
 	catch(CString error){
 		AddLogLine(false, "%s in %s", error, ip2countryCountryFlag);
 		RemoveAllFlags();
+		//free lib
+		if(_hCountryFlagDll != NULL) FreeLibrary(_hCountryFlagDll);
 		return false;
 	}
-	AddLogLine(false, "Country Flags have been loaded");
+
+	//free lib
+	if(_hCountryFlagDll != NULL) FreeLibrary(_hCountryFlagDll);
+
+	AddDebugLogLine(false, "Country Flags have been loaded");
 	return true;
+
 }
 
 void CIP2Country::RemoveAllIPs(){
@@ -289,24 +340,18 @@ void CIP2Country::RemoveAllIPs(){
 	}
 	iplist.RemoveAll();
 
+	AddDebugLogLine(false, "IP2Countryfile has been unloaded");
 }
 
 void CIP2Country::RemoveAllFlags(){
 
-
-	uint16 key;
-	HICON value;
-	POSITION pos1;
-	for(POSITION pos = iplist.GetHeadPosition(); pos1 = pos; )
-	{
-		CountryFlagIcon.GetNextAssoc(pos, key, value);
-		if(value != NULL)	DestroyIcon(value);
-		CountryFlagIcon.RemoveAt(pos1);
-	}
-	CountryFlagIcon.RemoveAll();
+	//destory all image
+	CountryFlagImageList.DeleteImageList();
 
 	//also clean out the map table
 	CountryIDtoFlagIndex.RemoveAll();
+
+	AddDebugLogLine(false, "Country Flags have been unloaded");
 }
 
 bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName){
@@ -340,12 +385,15 @@ bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName
 
 struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
 
-	if(iplist.IsEmpty()){
-		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP iplist doesn't exist");
+	if(EnableIP2Country == false){
 		return &defaultIP2Country;
 	}
 	else if (ClientIP == 0){
-		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP doesn't have ip to search for");
+		//AddDebugLogLine(false, "CIP2Country::GetCountryFromIP doesn't have ip to search for");
+		return &defaultIP2Country;
+	}
+	else if(iplist.IsEmpty()){
+		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP iplist doesn't exist");
 		return &defaultIP2Country;
 	}
 
@@ -367,22 +415,15 @@ struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
 	return &defaultIP2Country;
 }
 
-HICON CIP2Country::GetCountryFlagByIndex(int index){
-
-	if(index == NO_FLAG) return NULL;
-
-	const CRBMap<uint16, HICON>::CPair* pair;
-	pair = CountryFlagIcon.Lookup(index);
-
-	if(pair == NULL){
-		return NULL;
-	}
-	return pair->m_value;
-}
-
 bool CIP2Country::ShowCountryFlag(){
 
-	return (theApp.glob_prefs->IsIP2CountryShowFlag() && EnableCountryFlag && EnableIP2Country);
+	return 
+		//user wanna see flag,
+		(theApp.glob_prefs->IsIP2CountryShowFlag() && 
+		//flag have been loaded
+		EnableCountryFlag && 
+		//ip table have been loaded
+		EnableIP2Country);
 }
 
 //EastShare End - added by AndCycle, IP to Country

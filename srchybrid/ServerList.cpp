@@ -781,3 +781,15 @@ void CServerList::Process()
 	if (::GetTickCount() - m_nLastSaved > MIN2MS(17))
 		SaveServermetToFile();
 }
+
+//EastShare Start - added by AndCycle, IP to Country
+void CServerList::ResetIP2Country(){
+
+	CServer *cur_server;
+
+	for(POSITION pos = list.GetHeadPosition(); pos != NULL; list.GetNext(pos)){
+		cur_server = list.GetAt(pos);
+		cur_server->ResetIP2Country();
+	}
+}
+//EastShare End - added by AndCycle, IP to Country

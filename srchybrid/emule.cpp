@@ -42,9 +42,6 @@
 #include "ClientUDPSocket.h"
 #include "DownloadQueue.h"
 #include "IPFilter.h"
-//EastShare Start - added by AndCycle, IP to Country
-#include "IP2Country.h"
-//EastShare End - added by AndCycle, IP to Country
 #include "MMServer.h"
 #include "Statistics.h"
 #include "OtherFunctions.h"
@@ -62,6 +59,7 @@
 #include "SearchDlg.h"
 #endif
 #include "fakecheck.h" //MORPH - Added by SiRoB
+#include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
 CLog theLog;
 CLog theVerboseLog;
@@ -298,15 +296,13 @@ BOOL CemuleApp::InitInstance()
 	downloadqueue = new CDownloadQueue(glob_prefs,sharedfiles);	// bugfix - do this before creating the uploadqueue
 	uploadqueue = new CUploadQueue(glob_prefs);
 	ipfilter 	= new CIPFilter();
-	//EastShare Start - added by AndCycle, IP to Country
-	ip2country = new CIP2Country();
-	//EastShare End - added by AndCycle, IP to Country
 	webserver = new CWebServer(); // Webserver [kuchin]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
 	statistics = new CStatistics();
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	
+	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
+
 	// reset statistic values
 	theApp.stat_sessionReceivedBytes=0;
 	theApp.stat_sessionSentBytes=0;
