@@ -671,7 +671,6 @@ bool CUpDownClient::SendPeerCacheFileRequest()
 		ASSERT(0);
 		return false;
 	}
-
 	m_uPeerCacheDownloadPushId = GetRandomUInt32();
 
 	CSafeMemFile data(128);

@@ -194,6 +194,11 @@ uint8	CPreferences::confirmExit;
 uint16	CPreferences::downloadColumnWidths[16]; /*13 Official+ 2 Khaos*+1 WC*/
 BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 2 Khaos+1 WC*/
 INT 	CPreferences::downloadColumnOrder[16];  /*13 Official+ 2 Khaos+1 WC*/
+//SLAHAM: ADDED DownloadClientsCtrl =>
+uint16	CPreferences::downloadClientsColumnWidths[12];
+BOOL	CPreferences::downloadClientsColumnHidden[12];
+INT	CPreferences::downloadClientsColumnOrder[12];
+//SLAHAM: ADDED DownloadClientsCtrl <=
 uint16	CPreferences::uploadColumnWidths[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 BOOL	CPreferences::uploadColumnHidden[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 INT 	CPreferences::uploadColumnOrder[16];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
@@ -441,6 +446,10 @@ uint8	CPreferences::versioncheckdays;
 int	CPreferences::tableSortItemDownload[32];
 BOOL	CPreferences::tableSortAscendingDownload[32];
 // SLUGFILLER: DLsortFix
+//SLAHAM: ADDED DownloadClientsCtrl =>
+int		CPreferences::tableSortItemdownloadClients[8];
+BOOL	CPreferences::tableSortAscendingdownloadClients[8];
+//SLAHAM: ADDED DownloadClientsCtrl <=
 int	CPreferences::tableSortItemUpload[16];
 BOOL	CPreferences::tableSortAscendingUpload[16];
 int	CPreferences::tableSortItemQueue[15];
@@ -2024,6 +2033,10 @@ int CPreferences::GetColumnWidth(Table t, int index)
 	switch(t) {
 	case tableDownload:
 		return downloadColumnWidths[index];
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	case tabledownloadClients:
+		return downloadClientsColumnWidths[index];
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	case tableUpload:
 		return uploadColumnWidths[index];
 	case tableQueue:
@@ -2047,6 +2060,11 @@ void CPreferences::SetColumnWidth(Table t, int index, int width) {
 	case tableDownload:
 		downloadColumnWidths[index] = width;
 		break;
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	case tabledownloadClients:
+		downloadClientsColumnWidths[index] = width;
+		break;
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	case tableUpload:
 		uploadColumnWidths[index] = width;
 		break;
@@ -2076,6 +2094,10 @@ BOOL CPreferences::GetColumnHidden(Table t, int index)
 	switch(t) {
 	case tableDownload:
 		return downloadColumnHidden[index];
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	case tabledownloadClients:
+		return downloadClientsColumnHidden[index];
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	case tableUpload:
 		return uploadColumnHidden[index];
 	case tableQueue:
@@ -2099,6 +2121,11 @@ void CPreferences::SetColumnHidden(Table t, int index, BOOL bHidden) {
 	case tableDownload:
 		downloadColumnHidden[index] = bHidden;
 		break;
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	case tabledownloadClients:
+		downloadClientsColumnHidden[index] = bHidden;
+		break;
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	case tableUpload:
 		uploadColumnHidden[index] = bHidden;
 		break;
@@ -2128,6 +2155,10 @@ int CPreferences::GetColumnOrder(Table t, int index)
 	switch(t) {
 	case tableDownload:
 		return downloadColumnOrder[index];
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	case tabledownloadClients:
+		return downloadClientsColumnOrder[index];
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	case tableUpload:
 		return uploadColumnOrder[index];
 	case tableQueue:
@@ -2151,6 +2182,11 @@ void CPreferences::SetColumnOrder(Table t, INT *piOrder) {
 	case tableDownload:
 		memcpy(downloadColumnOrder, piOrder, sizeof(downloadColumnOrder));
 		break;
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	case tabledownloadClients:
+		memcpy(downloadClientsColumnOrder, piOrder, sizeof(downloadClientsColumnOrder));
+		break;
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	case tableUpload:
 		memcpy(uploadColumnOrder, piOrder, sizeof(uploadColumnOrder));
 		break;
@@ -2425,6 +2461,14 @@ void CPreferences::SavePreferences()
 		ARRSIZE(downloadColumnHidden), _T("DownloadColumnHidden"));
 	ini.SerGet(false, downloadColumnOrder,
 		ARRSIZE(downloadColumnOrder), _T("DownloadColumnOrder"));
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	ini.SerGet(false, downloadClientsColumnWidths,
+		ARRSIZE(downloadClientsColumnWidths), _T("DownloadClientsColumnWidths"));
+	ini.SerGet(false, downloadClientsColumnHidden,
+		ARRSIZE(downloadClientsColumnHidden), _T("DownloadClientsColumnHidden"));
+	ini.SerGet(false, downloadClientsColumnOrder,
+		ARRSIZE(downloadClientsColumnOrder), _T("DownloadClientsColumnOrder"));
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	ini.SerGet(false, uploadColumnWidths,
 		ARRSIZE(uploadColumnWidths), _T("UploadColumnWidths"));
 	ini.SerGet(false, uploadColumnHidden,
@@ -2473,6 +2517,10 @@ void CPreferences::SavePreferences()
 	// SLUGFILLER: multiSort - save multiple params
 	ini.SerGet(false, tableSortItemDownload,
 		GetColumnSortCount(tableDownload), _T("TableSortItemDownload"));
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	ini.SerGet(false, tableSortItemdownloadClients,
+		GetColumnSortCount(tabledownloadClients), _T("TableSortItemdownloadClients"));
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	ini.SerGet(false, tableSortItemUpload,
 		GetColumnSortCount(tableUpload), _T("TableSortItemUpload"));
 	ini.SerGet(false, tableSortItemQueue,
@@ -2489,6 +2537,10 @@ void CPreferences::SavePreferences()
 		GetColumnSortCount(tableFilenames), _T("TableSortItemFilenames"));
 	ini.SerGet(false, tableSortAscendingDownload,
 		GetColumnSortCount(tableDownload), _T("TableSortAscendingDownload"));
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	ini.SerGet(false, tableSortAscendingdownloadClients,
+		GetColumnSortCount(tabledownloadClients), _T("TableSortAscendingdownloadClients"));
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	ini.SerGet(false, tableSortAscendingUpload,
 		GetColumnSortCount(tableUpload), _T("TableSortAscendingUpload"));
 	ini.SerGet(false, tableSortAscendingQueue,
@@ -3416,6 +3468,14 @@ void CPreferences::LoadPreferences()
 		ARRSIZE(downloadColumnHidden), _T("DownloadColumnHidden"));
 	ini.SerGet(true, downloadColumnOrder,
 		ARRSIZE(downloadColumnOrder), _T("DownloadColumnOrder"));
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	ini.SerGet(true, downloadClientsColumnWidths,
+		ARRSIZE(downloadClientsColumnWidths), _T("DownloadClientsColumnWidths"));
+	ini.SerGet(true, downloadClientsColumnHidden,
+		ARRSIZE(downloadClientsColumnHidden), _T("DownloadClientsColumnHidden"));
+	ini.SerGet(true, downloadClientsColumnOrder,
+		ARRSIZE(downloadClientsColumnOrder), _T("DownloadClientsColumnOrder"));
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	ini.SerGet(true, uploadColumnWidths,
 		ARRSIZE(uploadColumnWidths), _T("UploadColumnWidths"));
 	ini.SerGet(true, uploadColumnHidden,
@@ -3464,6 +3524,10 @@ void CPreferences::LoadPreferences()
 	// SLUGFILLER: multiSort - load multiple params
 	ini.SerGet(true, tableSortItemDownload,
 		ARRSIZE(tableSortItemDownload), _T("TableSortItemDownload"), NULL, -1);
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	ini.SerGet(true, tableSortItemdownloadClients,
+		ARRSIZE(tableSortItemdownloadClients), _T("TableSortItemDownloadClients"), NULL, -1);
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	ini.SerGet(true, tableSortItemUpload,
 		ARRSIZE(tableSortItemUpload), _T("TableSortItemUpload"), NULL, -1);
 	ini.SerGet(true, tableSortItemQueue,
@@ -3499,6 +3563,12 @@ void CPreferences::LoadPreferences()
 		tableSortItemDownload[0] = 0;
 		tableSortAscendingDownload[0] = true;
 	}
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	if (tableSortItemdownloadClients[0] == -1) {
+		tableSortItemdownloadClients[0] = 0;
+		tableSortAscendingdownloadClients[0] = true;
+	} 
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	if (tableSortItemUpload[0] == -1) {
 		tableSortItemUpload[0] = 0;
 		tableSortAscendingUpload[0] = true;
@@ -3892,6 +3962,10 @@ int CPreferences::GetColumnSortItem(Table t, int column)	// SLUGFILLER: multiSor
 	{
 		case tableDownload:
 			return tableSortItemDownload[column];	// SLUGFILLER: multiSort
+		//SLAHAM: ADDED DownloadClientsCtrl =>
+		case tabledownloadClients:
+			return tableSortItemdownloadClients[column];
+		//SLAHAM: ADDED DownloadClientsCtrl <=
 		case tableUpload:
 			return tableSortItemUpload[column];	// SLUGFILLER: multiSort
 		case tableQueue:
@@ -3917,6 +3991,10 @@ bool CPreferences::GetColumnSortAscending(Table t, int column)	// SLUGFILLER: mu
 	{
 		case tableDownload:
 			return tableSortAscendingDownload[column];	// SLUGFILLER: multiSort
+		//SLAHAM: ADDED DownloadClientsCtrl =>
+		case tabledownloadClients:
+			return tableSortAscendingdownloadClients[column];
+		//SLAHAM: ADDED DownloadClientsCtrl <=
 		case tableUpload:
 			return tableSortAscendingUpload[column];	// SLUGFILLER: multiSort
 		case tableQueue:
@@ -3946,6 +4024,13 @@ int CPreferences::GetColumnSortCount(Table t)
 				if (tableSortItemDownload[i] == -1)
 					break;
 			return i;
+		//SLAHAM: ADDED DownloadClientsCtrl =>
+		case tabledownloadClients:
+			for (i = 0; i < ARRSIZE(tableSortItemdownloadClients); i++)
+				if (tableSortItemdownloadClients[i] == -1)
+					break;
+			return i;		
+		//SLAHAM: ADDED DownloadClientsCtrl <=
 		case tableUpload:
 			for (i = 0; i < ARRSIZE(tableSortItemUpload); i++)
 				if (tableSortItemUpload[i] == -1)
@@ -4005,6 +4090,21 @@ void CPreferences::SetColumnSortItem(Table t, int sortItem)
 			tableSortItemDownload[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
+		//SLAHAM: ADDED DownloadClientsCtrl =>
+		// SLUGFILLER: multiSort
+		case tabledownloadClients:
+			for (i = 0; i < ARRSIZE(tableSortItemdownloadClients)-1; i++)
+				if (tableSortItemdownloadClients[i] == sortItem ||
+					tableSortItemdownloadClients[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				tableSortItemdownloadClients[i] = tableSortItemdownloadClients[i-1];
+				tableSortAscendingdownloadClients[i] = tableSortAscendingdownloadClients[i-1];
+		}
+		tableSortItemdownloadClients[0] = sortItem;
+		// SLUGFILLER: multiSort
+		//SLAHAM: ADDED DownloadClientsCtrl <=
+		break;
 		case tableUpload:
 			// SLUGFILLER: multiSort - roll params
 			for (i = 0; i < ARRSIZE(tableSortItemUpload)-1; i++)
@@ -4107,6 +4207,11 @@ void CPreferences::SetColumnSortAscending(Table t, bool sortAscending)
 		case tableDownload:
 			tableSortAscendingDownload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
+		//SLAHAM: ADDED DownloadClientsCtrl =>
+		case tabledownloadClients:
+			tableSortAscendingdownloadClients[0] = sortAscending;
+			break;
+		//SLAHAM: ADDED DownloadClientsCtrl <=
 		case tableUpload:
 			tableSortAscendingUpload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;

@@ -2546,6 +2546,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	UINT realparts = GetPartCount();
 	uint32 min;
 	UINT mincount;
+	UINT mincount2;
 	UINT i;
 
 	ASSERT(client != NULL);
@@ -2680,6 +2681,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	if (resetSentCount) {
 		min = 0;
 		mincount = 0;
+		mincount2 = 0;
 		m_PartSentCount.SetSize(parts);
 		for (i = 0; i < parts; i++){
 			m_PartSentCount[i] = partspread[i];
@@ -2691,6 +2693,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	}
 
 	mincount = (rand() % mincount) + 1;
+	mincount2 = mincount;
 	for (i = 0; i < parts; i++) {
 		if (!partsavail[i])
 			continue;
@@ -2702,13 +2705,35 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 			break;
 	}
 	ASSERT(i < parts);
+	if (mincount)
+		return parts;
 	m_PartSentCount[i]++;
 	mincount = i;
+	for (i = 0; i < parts; i++) {
+		if (!partsavail[i])
+			continue;
+		if (m_PartSentCount[i] > min)
+			continue;
+		ASSERT(m_PartSentCount[i] == min);
+		mincount2--;
+		if (!mincount2)
+			break;
+	}
+	if (mincount2)
+		return parts;
+	m_PartSentCount[i]++;
+	mincount2 = i;
+	/*
 	for (i = 0; i < mincount; i++)
 		partspread[i] = hideOS;
 	for (i = mincount+1; i < parts; i++)
 		partspread[i] = hideOS;
-
+	*/
+	for (i = 0; i < parts; i++)
+	{	
+		if ( i != mincount && i != mincount2)
+			partspread[i] = hideOS;
+	}
 	return parts;
 };
 
@@ -2780,22 +2805,27 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	client->m_abyUpPartStatusHidden = new uint8[parts];
 	memset(client->m_abyUpPartStatusHidden,0,parts);
 	UINT iMinAvailablePartFrenquency = (UINT)-1;
-	bool	revelatleastonechunk = false;
-	if (!m_AvailPartFrequency.IsEmpty())
-		for (UINT i = 0; i < parts; i++)
-			if (!client->IsPartAvailable(i) && m_AvailPartFrequency[i]<iMinAvailablePartFrenquency)
-			{
-				iMinAvailablePartFrenquency = m_AvailPartFrequency[i];
-				revelatleastonechunk = true;
-			}
-	if (revelatleastonechunk==false)
+	UINT iMinAvailablePartFrenquencyPrev = (UINT)-1;
+	if (m_AvailPartFrequency.IsEmpty())
+		return false;
+	for (UINT i = 0; i < parts; i++)
+	{
+		if (!client->IsPartAvailable(i))
+		{
+			if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquency)
+				iMinAvailablePartFrenquency = m_AvailPartFrequency[i];				
+			else if (m_AvailPartFrequency[i]<iMinAvailablePartFrenquencyPrev)
+				iMinAvailablePartFrenquencyPrev = m_AvailPartFrequency[i];
+		}
+	}
+	if (iMinAvailablePartFrenquency == (UINT)-1)
 		return false;
 	UINT done = 0;
 	file->WriteUInt16(parts);
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquency)
+			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquencyPrev)
 				towrite |= (1<<i);
 			else
 				client->m_abyUpPartStatusHidden[done] = 1;

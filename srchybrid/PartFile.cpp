@@ -2315,7 +2315,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					cur_src->CheckDownloadTimeout();
 					cur_datarate = cur_src->CalculateDownloadRate();
 					datarate+=cur_datarate;
-					if(reducedownload)
+					if(reducedownload && cur_datarate)
 					{
 						uint32 limit = reducedownload*cur_datarate/1000;
 						if(limit<1000 && reducedownload == 200)
@@ -2396,7 +2396,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 						cur_src->CheckDownloadTimeout();
 						uint32 cur_datarate = cur_src->CalculateDownloadRate();
 						datarate += cur_datarate;
-						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
+						if (curClientReducedDownload && cur_datarate)
 						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
 							if (limit < 1000 && curClientReducedDownload == 200)
@@ -2423,14 +2423,28 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							// MORPH END   - Added by SiRoB, WebCache
 						}
 					//} // MORPH - Removed by SiRoB, WebCache
+					if(!cur_src->dwStartDLTime){
+						cur_src->uiStartDLCount++;
+						cur_src->dwStartDLTime = dwCurTick;
+					}
+					else
+						cur_src->dwTotalDLTime -= cur_src->dwSessionDLTime;
+
+					cur_src->dwSessionDLTime = dwCurTick - cur_src->dwStartDLTime;
+					cur_src->dwTotalDLTime += cur_src->dwSessionDLTime;
+					//SLAHAM: ADDED Show Downloading Time <=
 					break;
 				}
 				// Do nothing with this client..
 				case DS_BANNED:
 					break;	
+				case DS_ERROR:
+				cur_src->dwStartDLTime = 0; //SLAHAM: ADDED Show Downloading Time
+					break;	
 				// Check if something has changed with our or their ID state..
 				case DS_LOWTOLOWIP:
 				{
+					cur_src->dwStartDLTime = 0; //SLAHAM: ADDED Show Downloading Time
 					// To Mods, please stop instantly removing these sources..
 					// This causes sources to pop in and out creating extra overhead!
 					//Make sure this source is still a LowID Client..
@@ -2454,6 +2468,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				}
 				case DS_NONEEDEDPARTS:
 				{
+					cur_src->dwStartDLTime = 0; //SLAHAM: ADDDED Show Downloading Time
 					// To Mods, please stop instantly removing these sources..
 					// This causes sources to pop in and out creating extra overhead!
 					if( (dwCurTick - lastpurgetime) > SEC2MS(40) ){
@@ -2475,6 +2490,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				}
 				case DS_ONQUEUE:
 				{
+					cur_src->dwStartDLTime = 0; //SLAHAM: ADDED Show Downloading Time
 					// To Mods, please stop instantly removing these sources..
 					// This causes sources to pop in and out creating extra overhead!
 					if( cur_src->IsRemoteQueueFull() )
@@ -2501,6 +2517,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				case DS_WAITCALLBACK:
 				case DS_WAITCALLBACKKAD:
 				{
+					cur_src->dwStartDLTime = 0; //SLAHAM: ADDED Show Downloading Time
 					if (theApp.IsConnected() && cur_src->GetTimeUntilReask() == 0 && ::GetTickCount()-cur_src->getLastTriedToConnectTime() > 20*60*1000) // ZZ:DownloadManager (one resk timestamp for each file)
 					{
 						if(!cur_src->AskForDownload()) // NOTE: This may *delete* the client!!

@@ -106,6 +106,18 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 
 void CUpDownClient::Init()
 {
+	//SLAHAM: ADDED Known Since/Last Asked =>
+	uiDLAskingCounter = 0;
+	dwThisClientIsKnownSince = ::GetTickCount();
+	//SLAHAM: ADDED Known Since/Last Asked <=
+
+	//SLAHAM: ADDED Show Downloading Time =>
+	uiStartDLCount = 0;
+	dwStartDLTime = 0;
+	dwSessionDLTime = 0;
+	dwTotalDLTime = 0;
+	//SLAHAM: ADDED Show Downloading Time <=
+
 	credits = 0;
 	m_nSumForAvgUpDataRate = 0;
 	//MORPH START - Changed by SiRoB, ZZUL_20040904	
@@ -2481,6 +2493,15 @@ void CUpDownClient::AssertValid() const
 {
 	CObject::AssertValid();
 
+	//SLAHAM: ADDED =>
+	(void)uiStartDLCount;
+	(void)dwStartDLTime;
+	(void)dwSessionDLTime;
+	(void)dwTotalDLTime;
+	(void)uiDLAskingCounter;
+	(void)dwThisClientIsKnownSince;
+	//SLAHAM: ADDED <=
+
 	CHECK_OBJ(socket);
 	CHECK_PTR(credits);
 	CHECK_PTR(m_Friend);
@@ -2695,7 +2716,7 @@ void CUpDownClient::CheckForGPLEvilDoer()
 		if (_tcsnicmp(pszModVersion, _T("LH"), 2)==0 ||
 			_tcsnicmp(pszModVersion, _T("LIO"), 3)==0 ||
 			_tcsnicmp(pszModVersion, _T("PLUS PLUS"), 9)==0 ||
-			_tcsnicmp(pszModVersion, _T("WAREZFAW"),8)==0)
+			_tcsnicmp(pszModVersion, _T("WAREZFAW.COM 2.0"),16)==0)
 			m_bGPLEvildoer = true;
 	}
 }
@@ -2722,7 +2743,19 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			if (IsRemoteQueueFull())
 				strState = GetResString(IDS_QUEUEFULL);
 			else
+			// EastShare START - Modified by TAHO, moved and moddified from Priority column
+			//strState = GetResString(IDS_ONQUEUE);
+			{
+				if ( GetRemoteQueueRank()){
+					//Morph - modified by AndCycle, DiffQR
+					strState.Format(_T("QR: %u (%i)"), GetRemoteQueueRank(), GetDiffQR());
+					//Morph - modified by AndCycle, DiffQR
+				}
+				else{
 				strState = GetResString(IDS_ONQUEUE);
+				}
+			}
+			// EastShare END - Modified by TAHO, moved and moddified from Priority column
 			break;
 		case DS_DOWNLOADING:
 			strState = GetResString(IDS_TRANSFERRING);

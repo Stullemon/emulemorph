@@ -274,6 +274,7 @@ bool CUpDownClient::AskForDownload()
 	}
 	m_bUDPPending = false;
     SwapToAnotherFile(_T("A4AF check before tcp file reask. CUpDownClient::AskForDownload()"), true, false, false, NULL, true, true); // ZZ:DownloadManager
+	uiDLAskingCounter +=1; //SLAHAM: ADDED Last Asked Counter
 	SetDownloadState(DS_CONNECTING);
 	return TryToConnect(true); //MORPH - Changed by SiRoB, -Fix-
 }
@@ -868,6 +869,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 		if (reqfile){
 			if(nNewState == DS_DOWNLOADING){
 				reqfile->AddDownloadingSource(this);
+				theApp.emuledlg->transferwnd->downloadclientsctrl.AddClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
 			}
 			else if(m_nDownloadState == DS_DOWNLOADING){
 				reqfile->RemoveDownloadingSource(this);
@@ -875,7 +877,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 		}
 
 		if (m_nDownloadState == DS_DOWNLOADING ){
-
+			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
 				thePrefs.Add2DownSuccessfulSessions(); // Increment our counters for successful sessions (Cumulative AND Session)
@@ -1122,6 +1124,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 		return;
 	}
 
+	theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
 	const int HEADER_SIZE = 24;
 
 	// Update stats
@@ -1502,14 +1505,14 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000)
+		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 10000)
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		else
 			break;
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
 		if (m_AvarageDDR_list.GetCount() == 1)
-			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 30000;
+			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 10000;
 		else{
 			DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
 			if ((m_AvarageDDR_list.GetCount() - 1)*(cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
@@ -1609,6 +1612,7 @@ void CUpDownClient::UDPReaskACK(uint16 nNewQR){
 	m_bUDPPending = false;
 	SetRemoteQueueRank(nNewQR);
     SetLastAskedTime(); // ZZ:DownloadManager
+	uiDLAskingCounter +=1; //SLAHAM: ADDED Last Asked Counter
 }
 
 void CUpDownClient::UDPReaskFNF(){

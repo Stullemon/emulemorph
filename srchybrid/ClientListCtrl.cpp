@@ -210,7 +210,7 @@ void CClientListCtrl::ShowKnownClients()
 		Update(iItem);
 		iItemCount++;
 	}
-	theApp.emuledlg->transferwnd->UpdateListCount(0, iItemCount);
+	theApp.emuledlg->transferwnd->UpdateListCount(3, iItemCount); //SLAHAM: MODIFIED [TPT] - TBH Transfer Window Buttons
 }
 
 void CClientListCtrl::AddClient(const CUpDownClient* client)
@@ -223,7 +223,7 @@ void CClientListCtrl::AddClient(const CUpDownClient* client)
 	int iItemCount = GetItemCount();
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,iItemCount,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)client);
 	Update(iItem);
-	theApp.emuledlg->transferwnd->UpdateListCount(0, iItemCount+1);
+	theApp.emuledlg->transferwnd->UpdateListCount(3, iItemCount+1); //SLAHAM: MODIFIED [TPT] - TBH Transfer Window Buttons
 }
 
 void CClientListCtrl::RemoveClient(const CUpDownClient* client)
@@ -237,7 +237,7 @@ void CClientListCtrl::RemoveClient(const CUpDownClient* client)
 	sint32 result = FindItem(&find);
 	if (result != -1){
 		DeleteItem(result);
-		theApp.emuledlg->transferwnd->UpdateListCount(0);
+		theApp.emuledlg->transferwnd->UpdateListCount(3); //SLAHAM: MODIFIED [TPT] - TBH Transfer Window Buttons
 	}
 }
 
@@ -252,7 +252,7 @@ void CClientListCtrl::RefreshClient(const CUpDownClient* client)
 		return;
 
 	//MORPH START - SiRoB, Don't Refresh item if not needed
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || theApp.emuledlg->transferwnd->clientlistctrl.IsWindowVisible() == false )
 		return;
 	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	

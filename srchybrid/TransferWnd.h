@@ -24,6 +24,7 @@
 #include "QueueListCtrl.h"
 #include "ClientListCtrl.h"
 #include "progressctrlx.h" //Commander - Added: ClientQueueProgressBar
+#include "DownloadClientsCtrl.h" //SLAHAM: ADDED DownloadClientsCtrl
 
 class CUploadListCtrl;
 class CDownloadListCtrl;
@@ -42,6 +43,9 @@ public:
 	void	UpdateListCount(uint8 listindex, int iCount = -1);
 	void	Localize();
 	void UpdateCatTabTitles(bool force=true);
+	void	UpdateDownloadClientsCount(int count); //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
+	bool 	isUploadQueueVisible() { return (m_uWnd2 == 0); } //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
+	bool	isDownloadListVisible() { return ((showlist == IDC_DOWNLOADLIST) || (showlist == IDC_DOWNLOADLIST+IDC_UPLOADLIST)); } //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
 	void	VerifyCatTabSize();
 	void SwitchUploadList();
 
@@ -55,7 +59,22 @@ public:
 	CDownloadListCtrl	downloadlistctrl;
 	CQueueListCtrl		queuelistctrl;
 	CClientListCtrl		clientlistctrl;
+	CDownloadClientsCtrl	downloadclientsctrl; //SLAHAM: ADDED DownloadClientsCtrl
 	CToolTipCtrl		m_tooltipCats;
+
+	bool bQl;
+	bool bKl;
+
+	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
+	void OnBnClickedChangeView();
+	void OnBnClickedDownUploads();
+	void OnBnClickedDownloads();
+	void OnBnClickedUploads();
+	void OnBnClickedQueue();
+	void OnBnClickedClient();
+	void OnBnClickedTransfers();
+	uint16 showlist;	
+	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
 
 protected:
 	CSplitterControl m_wndSplitter;
@@ -73,6 +92,23 @@ protected:
 	POINT m_pLastMousePoint;
 	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
 	CFont bold;//Commander - Added: ClientQueueProgressBar
+	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
+	CButtonST	m_btnChangeView;
+	CButtonST	m_btnDownUploads;
+	CButtonST	m_btnDownloads;
+	CButtonST	m_btnUploads;
+	CButtonST	m_btnQueue;
+	CButtonST	m_btnTransfers;
+	CButtonST	m_btnClient;
+	void ShowList(uint16 list);
+	//SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons <=
+	//SLAHAM: ADDED Switch Lists Icons =>
+	CButtonST	m_btnULChangeView;
+	CButtonST	m_btnULUploads;
+	CButtonST	m_btnULQueue;
+	CButtonST	m_btnULTransfers;
+	CButtonST	m_btnULClients;	
+	//SLAHAM: ADDED Switch Lists Icons <=
 
 	void ShowWnd2(uint8 uList);
 	void SetWnd2(uint8 uWnd2);

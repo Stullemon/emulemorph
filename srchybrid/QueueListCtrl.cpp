@@ -300,7 +300,7 @@ void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
 	if( !theApp.emuledlg->IsRunning())
 		return;
 	//MORPH START - SiRoB, Don't Refresh item if not needed
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || theApp.emuledlg->transferwnd->queuelistctrl.IsWindowVisible() == false )
 		return;
 	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	LVFINDINFO find;

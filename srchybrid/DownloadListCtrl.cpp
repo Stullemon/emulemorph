@@ -492,7 +492,7 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 	if (!theApp.emuledlg->IsRunning())
 		return;
 	//MORPH START - SiRoB, Don't Refresh item if not needed
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd  || theApp.emuledlg->transferwnd->downloadlistctrl.IsWindowVisible() == false )
 		return;
 	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	
@@ -538,16 +538,19 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			if (theApp.GetSystemImageList() != NULL)
 				::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), rcDraw.left, rcDraw.top, ILD_NORMAL|ILD_TRANSPARENT);
 			rcDraw.left += theApp.GetSmallSytemIconSize().cx;
-			if ( thePrefs.ShowRatingIndicator() && (lpPartFile->HasComment() || lpPartFile->HasRating())){
- 				//MORPH START - Modified by SiRoB, eMule plus rating icon
-				/*
-				m_ImageList.Draw(dc, (lpPartFile->HasRating() && lpPartFile->HasBadRating()) ? 10 : 9, rcDraw.TopLeft(), ILD_NORMAL);
-				rcDraw.left += 8;
-				*/
-				m_ImageList.Draw(dc, lpPartFile->GetRating()+21, rcDraw.TopLeft(), ILD_NORMAL);
- 				//MORPH END   - Modified by SiRoB, eMule plus rating icon
+			if ( thePrefs.ShowRatingIndicator() ){
+				if  (lpPartFile->HasComment() || lpPartFile->HasRating()){
+ 					//MORPH START - Modified by SiRoB, eMule plus rating icon
+					/*
+					m_ImageList.Draw(dc, (lpPartFile->HasRating() && lpPartFile->HasBadRating()) ? 10 : 9, rcDraw.TopLeft(), ILD_NORMAL);
+					rcDraw.left += 8;
+					*/
+					m_ImageList.Draw(dc, lpPartFile->GetRating()+21, rcDraw.TopLeft(), ILD_NORMAL);
+ 					//MORPH END   - Modified by SiRoB, eMule plus rating icon
+				}
+				rcDraw.left += 11/*8+3*/; //MORPH - Changed by SiRoB, to keep alignement (blank space when no comment or rating )
 			}
-			rcDraw.left += 14/*3+8+3*/; //MORPH - Changed by SiRoB, to keep alignement (blank space when no comment or rating )
+			rcDraw.left += 3;
 			dc->DrawText(lpPartFile->GetFileName(), lpPartFile->GetFileName().GetLength(),&rcDraw, DLC_DT_TEXT);
 			break;
 		}
@@ -1093,7 +1096,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 			break;
 		}
 
-		case 7:		// prio
+		case 7:	{	// prio
+				// EastShare START - Removed by TAHO, move to Status Column
+				/*
 			if (lpUpDownClient->GetDownloadState()==DS_ONQUEUE){
 				if( lpUpDownClient->IsRemoteQueueFull() ){
 					buffer = GetResString(IDS_QUEUEFULL);
@@ -1124,6 +1129,16 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				}
 			} else {
 				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
+				*/
+				// EastShare END - Removed by TAHO, move to Status Column
+				// EastShare START - Addeded by TAHO, last asked time
+				uint32 lastAskedTime = lpUpDownClient->GetLastAskedTime();
+				if ( lastAskedTime )
+					buffer = CastSecondsToHM(( ::GetTickCount() - lastAskedTime) /1000);
+				else
+					buffer = "?";
+				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), (DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT);
+				// EastShare END - Addeded by TAHO, last asked time
 			}
 
 			break;
@@ -1156,13 +1171,82 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
             }
 // ZZ:DownloadManager <--
 
+			COLORREF crOldTxtColor; // EastShare - Moddified by TAHO, color
+			if (lpCtrlItem->type == AVAILABLE_SOURCE){
+				switch (lpUpDownClient->GetDownloadState()) {
+					case DS_CONNECTING:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(210,210,10));
+						break;
+					case DS_CONNECTED:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(210,210,10));
+						break;
+					case DS_WAITCALLBACK:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(210,210,10));
+						break;
+					case DS_ONQUEUE:
+						if( lpUpDownClient->IsRemoteQueueFull() ){
+							crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,130,160));
+						}
+						else {
+							if ( lpUpDownClient->GetRemoteQueueRank()){
+								int	m_iDifference = lpUpDownClient->GetDiffQR();
+								if(m_iDifference == 0){
+									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,180,50));
+								}
+								else if(m_iDifference > 0){
+									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(60,10,240));
+								}
+								else if(m_iDifference < 0){
+									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(240,125,10));
+								}
+							}
+							else{
+								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(50,80,140));
+							}
+						}
+						break;
+					case DS_DOWNLOADING:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(192,0,0));
+						break;
+					case DS_REQHASHSET:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(245,240,100));
+						break;
+					case DS_NONEEDEDPARTS:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(30,200,240)); 
+						break;
+					case DS_LOWTOLOWIP:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
+						break;
+					case DS_TOOMANYCONNS:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
+						break;
+					default:
+						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
+				}
+			}
+			else {
+				crOldTxtColor = dc->SetTextColor((COLORREF)RGB(200,80,200));
+			}
+			// EastShare END - Added by TAHO, color
 			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
+			dc->SetTextColor(crOldTxtColor); // EastShare - Added by TAHO, color
 			break;
 				}
+		//SLAHAM: ADDED Show Downloading Time =>
 		case 9:		// remaining time & size
+			buffer.Format(_T("DT: %s (%s)[%u]"), CastSecondsToHM(lpUpDownClient->dwSessionDLTime/1000), CastSecondsToHM(lpUpDownClient->dwTotalDLTime/1000), lpUpDownClient->uiStartDLCount);
+			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
 			break;
+			//SLAHAM: ADDED Show Downloading Time <=
+			//SLAHAM: ADDED Known Since =>
 		case 10:	// last seen complete
+			if( lpUpDownClient->dwThisClientIsKnownSince )
+				buffer.Format(_T("Known Since %s"), CastSecondsToHM((::GetTickCount()-lpUpDownClient->dwThisClientIsKnownSince)/1000));
+			else
+				buffer.Format(_T("WHO IS THAT???"));
+			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
 			break;
+			//SLAHAM: ADDED Known Since <=
 		case 11:	// last received
 			break;
 		case 12:	// category
@@ -2877,6 +2961,9 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		else
 		return client1->GetClientSoft() - client2->GetClientSoft();
 		// Maella end
+
+//EastShare START - Modified by TAHO, @@
+/*
  //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 	case 7: //qr asc
 		//MORPH START - Added by IceCream, SLUGFILLER: DLsortFix - needed complete revamping
@@ -2920,6 +3007,87 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			//MORPH END   - Added by IceCream, SLUGFILLER: DLsortFix
 		}
 		return client2->GetDownloadState() - client1->GetDownloadState();	//MORPH - Added by IceCream, SLUGFILLER: DLsortFix - match status sorting
+*/
+		case 7: {//priority asc
+			uint32 lastAskedTime1 = client1->GetLastAskedTime();
+			uint32 lastAskedTime2 = client2->GetLastAskedTime();
+			if ( lastAskedTime1 != 0){
+				if ( lastAskedTime2 != 0){
+					if (lastAskedTime1 > lastAskedTime2){
+						return 1;
+					} else if (lastAskedTime1 < lastAskedTime2) {
+						return -1;
+					} else {
+						return 0;
+					}
+				}
+				return 1;
+			}
+			else
+				return (lastAskedTime2 == 0) ? -1 : 0;
+		}
+		case 8: {//Status asc
+			EDownloadState clientState1 = client1->GetDownloadState();
+			EDownloadState clientState2 = client2->GetDownloadState();
+
+			if ( clientState1 == DS_DOWNLOADING ){
+				if ( clientState2 == DS_DOWNLOADING) {
+					return CompareUnsigned(client1->GetDownloadDatarate(), client2->GetDownloadDatarate());
+				}
+				return 1;
+			} else if ( clientState2 == DS_DOWNLOADING) {
+				return -1;
+			}
+
+			if ( clientState1 == DS_ONQUEUE ){
+				if ( clientState2 == DS_ONQUEUE ) {
+					if ( client1->IsRemoteQueueFull() ){
+						return (client2->IsRemoteQueueFull()) ? 0 : -1;
+					}
+					else if ( client2->IsRemoteQueueFull() ){
+						return 1;
+					}
+
+					if ( client1->GetRemoteQueueRank() ){
+						return (client2->GetRemoteQueueRank()) ? client2->GetRemoteQueueRank() - client1->GetRemoteQueueRank() : 1;
+					}
+					return (client2->GetRemoteQueueRank()) ? -1 : 0;
+				}
+				return 1;
+			} else if ( clientState2 == DS_ONQUEUE ){
+				return -1;
+			}
+
+			if ( clientState1 == DS_NONEEDEDPARTS && clientState2 != DS_NONEEDEDPARTS)
+				return 1;
+
+			if ( clientState1 == DS_TOOMANYCONNS && clientState2 != DS_TOOMANYCONNS)
+				return -1;
+
+			return 0;
+		}
+
+//EastShare END - Modified by TAHO, @@
+			//SLAHAM: ADDED Show Downloading Time =>
+	case 9: 
+		return client1->dwSessionDLTime - client2->dwSessionDLTime;
+	case 90: 
+		return client1->dwTotalDLTime - client2->dwTotalDLTime;
+		//SLAHAM: ADDED Show Downloading Time <=
+		//SLAHAM: ADDED Known Since =>
+	case 10:
+		{
+			uint32 known1 = client2->dwThisClientIsKnownSince;
+			uint32 known2 = client1->dwThisClientIsKnownSince;
+			return known1==known2? 0 : known1<known2? -1 : 1;
+		}
+	case 110:
+		{
+			uint32 known1 = client1->dwThisClientIsKnownSince;
+			uint32 known2 = client2->dwThisClientIsKnownSince;
+			return known1==known2? 0 : known1<known2? -1 : 1;
+		}
+		//SLAHAM: ADDED Known Since <=
 	//MORPH START - Added by SiRoB, WebCache 1.2f
 	//JP Webcache START 
 	case 15:

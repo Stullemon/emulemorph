@@ -1636,6 +1636,9 @@
 					RelativePath="ClientListCtrl.cpp">
 				</File>
 				<File
+					RelativePath=".\DownloadClientsCtrl.cpp">
+				</File>
+				<File
 					RelativePath="DownloadListCtrl.cpp">
 				</File>
 				<File
@@ -2042,6 +2045,9 @@
 					RelativePath="ClientListCtrl.h">
 				</File>
 				<File
+					RelativePath=".\DownloadClientsCtrl.h">
+				</File>
+				<File
 					RelativePath="DownloadListCtrl.h">
 				</File>
 				<File
@@ -2298,6 +2304,9 @@
 				RelativePath=".\res\Mod\CreditSecureOvl.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\CycleView.ico">
+			</File>
+			<File
 				RelativePath="res\Delete.ico">
 			</File>
 			<File
@@ -2520,6 +2529,9 @@
 				RelativePath="res\KadWordSearch.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\known.ico">
+			</File>
+			<File
 				RelativePath="res\ListAdd.ico">
 			</File>
 			<File
@@ -2614,6 +2626,9 @@
 			</File>
 			<File
 				RelativePath="res\Proxy.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -2757,6 +2772,9 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\transfers.ico">
+			</File>
+			<File
 				RelativePath="res\TransferUpDown.ico">
 			</File>
 			<File
@@ -2812,6 +2830,9 @@
 			</File>
 			<File
 				RelativePath="res\UserMessage.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\ViewUpload.ico">
 			</File>
 			<File
 				RelativePath="res\Web.ico">

@@ -2021,9 +2021,10 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 							if(sender->GetUDPVersion() > 3)
 							{
 								if (reqfile->IsPartFile())
-									((CPartFile*)reqfile)->WritePartStatus(&data_out);
-								else
-									data_out.WriteUInt16(0);
+									((CPartFile*)reqfile)->WritePartStatus(&data_out, client);	// SLUGFILLER: hideOS
+								else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
+									if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+										data_out.WriteUInt16(0);
 							}
 							data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
 							if (thePrefs.GetDebugClientUDPLevel() > 0)

@@ -1494,6 +1494,7 @@ void CemuleDlg::OnClose()
 
 	theApp.knownfiles->Save();
 	transferwnd->downloadlistctrl.SaveSettings(CPreferences::tableDownload);
+	transferwnd->downloadclientsctrl.SaveSettings(CPreferences::tabledownloadClients);  //SLAHAM: ADDED DownloadClientsCtrl
 	transferwnd->uploadlistctrl.SaveSettings(CPreferences::tableUpload);
 	transferwnd->queuelistctrl.SaveSettings(CPreferences::tableQueue);
 	transferwnd->clientlistctrl.SaveSettings(CPreferences::tableClientList);

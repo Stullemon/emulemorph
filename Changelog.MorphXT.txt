@@ -4,6 +4,17 @@ Changelog for eMule 0.44d MorphXT v5.11
 FIXED  : HideOS: right HotFix [SiRoB]
 FIXED  : Webcache: Avanced control are now available again [SiRoB]
 
+CHANGED: SOTN: Enforce to show more than one chunk [SiRoB]
+CHANGED: HOS: Enforce to show more than one chunk with selective chunk enable [SiRoB]
+
+ADDED  : TBH Transfer Window Buttons from EastShare [SiRoB]
+ADDED  : DownloadClientsCtrl by SHALAM from EastShare + 1 Fix arround addclient ;) [SiRoB]
+ADDED  : Switch Lists Icons by SHALAM form EastShare [SiRoB]
+ADDED  : Show Downloading Time by SHALAM form EastShare [SiRoB]
+
+TWEAKED: ImportParts: Use a thread to keep upload and download [SiRoB]
+TWEAKED: Don't Refresh item if not needed [SiRoB]
+
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.10
 --------------------------------------

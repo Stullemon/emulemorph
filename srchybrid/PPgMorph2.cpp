@@ -160,6 +160,7 @@ void CPPgMorph2::Localize(void)
 		//SetWindowText(GetResString(IDS_MORPH2));
 		
 		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+		GetDlgItem(IDC_MORPH2_FILE)->SetWindowText(GetResString(IDS_FILES));
 		GetDlgItem(IDC_UPDATEFAKES)->SetWindowText(GetResString(IDS_UPDATEFAKES));
 		GetDlgItem(IDC_UPDATEFAKELISTSTART)->SetWindowText(GetResString(IDS_UPDATEFAKECHECKONSTART));
 		GetDlgItem(IDC_URL_FOR_UPDATING)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
@@ -167,6 +168,7 @@ void CPPgMorph2::Localize(void)
 		//MORPH END   - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 		
 		//MORPH START - Added by Yun.SF3: Ipfilter.dat update
+		GetDlgItem(IDC_MORPH2_SECURITY)->SetWindowText(GetResString(IDS_SECURITY));
 		GetDlgItem(IDC_AUTOUPIPFILTER)->SetWindowText(GetResString(IDS_UPDATEIPFILTERONSTART));
 		GetDlgItem(IDC_UPDATEIPCURL)->SetWindowText(GetResString(IDS_UPDATEIPFILTER));
 		GetDlgItem(IDC_URL_FOR_UPDATING)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
@@ -174,6 +176,7 @@ void CPPgMorph2::Localize(void)
 		//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
 		//MORPH START - Added by Commander: IP2Country update
+		GetDlgItem(IDC_MORPH2_COUNTRY)->SetWindowText(GetResString(IDS_COUNTRY));
 		GetDlgItem(IDC_AUTOUPIP2COUNTRY)->SetWindowText(GetResString(IDS_AUTOUPIP2COUNTRY));
 		GetDlgItem(IDC_UPDATEIPCURL)->SetWindowText(GetResString(IDS_UPDATEIPCURL));
 		GetDlgItem(IDC_URL_FOR_UPDATING_IP2COUNTRY)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING_IP2COUNTRY));

@@ -24,6 +24,7 @@
 #include "KadContactListCtrl.h"
 #include "KadSearchListCtrl.h"
 #include "DownloadListCtrl.h"
+#include "DownloadClientsCtrl.h" //SLAHAM: ADDED DownloadClientsCtrl
 #include "UploadListCtrl.h"
 #include "QueueListCtrl.h"
 #include "ClientListCtrl.h"

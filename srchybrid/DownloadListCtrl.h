@@ -43,6 +43,7 @@ struct CtrlItem_Struct{
 class CDownloadListCtrl : public CMuleListCtrl
 {
 	DECLARE_DYNAMIC(CDownloadListCtrl)
+	friend class CDownloadClientsCtrl; //SLAHAM: ADDED DownloadClientsCtrl
 
 public:
 	CDownloadListCtrl();

@@ -192,7 +192,6 @@ protected:
 class CKnownFile : public CAbstractFile
 {
 	DECLARE_DYNAMIC(CKnownFile)
-
 public:
 	CKnownFile();
 	~CKnownFile();

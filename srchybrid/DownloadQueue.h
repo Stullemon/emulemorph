@@ -64,6 +64,7 @@ private:
 class CDownloadQueue
 {
 	friend class CAddFileThread;
+	friend class CImportPartsFileThread;
 	friend class CServerSocket;
 
 public:

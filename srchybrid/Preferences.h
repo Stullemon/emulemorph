@@ -171,6 +171,11 @@ public:
 	static	uint16	downloadColumnWidths[16]; /*13 Official+ 2 Khaos+1 WC*/
 	static	BOOL	downloadColumnHidden[16]; /*13 Official+ 2 Khaos+1 WC*/
 	static	INT		downloadColumnOrder[16];  /*13 Official+ 2 Khaos+1 WC*/
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	static uint16	downloadClientsColumnWidths[12];
+	static BOOL		downloadClientsColumnHidden[12];
+	static INT		downloadClientsColumnOrder[12];
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	static	uint16	uploadColumnWidths[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 	static	BOOL	uploadColumnHidden[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
 	static	INT		uploadColumnOrder[16];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
@@ -473,6 +478,10 @@ public:
 	static	int		tableSortItemDownload[32];
 	static	BOOL	tableSortAscendingDownload[32];
 	// SLUGFILLER: DLsortFix
+	//SLAHAM: ADDED DownloadClientsCtrl =>
+	static	int		tableSortItemdownloadClients[8]; 	
+	static	BOOL	tableSortAscendingdownloadClients[8]; 
+	//SLAHAM: ADDED DownloadClientsCtrl <=
 	static	int		tableSortItemUpload[16];
 	static	BOOL	tableSortAscendingUpload[16];
 	static	int		tableSortItemQueue[15];
@@ -860,6 +869,7 @@ public:
 	enum Table
 	{
 		tableDownload, 
+		tabledownloadClients,  //SLAHAM: ADDED DownloadClientsCtrl
 		tableUpload, 
 		tableQueue, 
 		tableSearch,

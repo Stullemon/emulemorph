@@ -100,10 +100,12 @@ void CSplashScreen::OnPaint()
 			CBitmap* pOldBM = dcMem.SelectObject(&m_imgSplash);
 			BITMAP BM;
 			m_imgSplash.GetBitmap(&BM);
-			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, SRCCOPY);
+			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, WHITENESS);
 			if (pOldBM)
 				dcMem.SelectObject(pOldBM);
-			CRect rc(2, 0, BM.bmWidth, BM.bmHeight);//Commander - Changed
+			long htext = dc.GetTextExtent(_T("T")).cy;
+			CRect rc(2, BM.bmHeight - 2*htext - 2, BM.bmWidth, BM.bmHeight);//Commander - Changed
+			
 			//Commander - Removed
 			//dc.FillSolidRect(rc.left+1, rc.top+1, rc.Width()-2, rc.Height()-2, RGB(255,255,255));
 
@@ -137,7 +139,7 @@ void CSplashScreen::OnPaint()
 				mode += GetResString(IDS_SSE_ACTIVE);
 				break;
 			}
-			rc.top = 0.95 * BM.bmHeight;
+			rc.top = BM.bmHeight - htext - 2;
 			rc.top += dc.DrawText( mode, &rc, DT_RIGHT | DT_NOPREFIX | DT_BOTTOM);
 			if (pOldFont)
 				dc.SetBkMode(iOMode);

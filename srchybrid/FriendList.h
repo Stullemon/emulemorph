@@ -28,6 +28,7 @@ friend class CClientListCtrl;
 friend class CUploadListCtrl;
 friend class CDownloadListCtrl;
 friend class CQueueListCtrl;
+friend class CDownloadClientsCtrl;  //SLAHAM: ADDED DownloadClientsCtrl
 //MORPH END   - Added by SiRoB, Friend Addon
 	CFriendList();
 	~CFriendList();

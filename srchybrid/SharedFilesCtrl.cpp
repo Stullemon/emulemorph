@@ -468,17 +468,20 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer = file->GetFileName();
 						//MORPH START - Added by IceCream, SLUGFILLER: showComments
 						CKnownFile* pfile =(CKnownFile*)lpDrawItemStruct->itemData;
-						if ( thePrefs.ShowRatingIndicator() && ( !pfile->GetFileComment().IsEmpty() || pfile->GetFileRating() )){ //Modified by IceCream, eMule plus rating icon
-							POINT point= {cur_rec.left-3,cur_rec.top};
-							int the_rating=0;
-							if (pfile->GetFileRating())
-								the_rating = pfile->GetFileRating();
-							m_ImageList.Draw(dc,
-								pfile->GetFileRating(), //Modified by IceCream, eMule plus rating icon
-								point,
-								ILD_NORMAL);
+						if ( thePrefs.ShowRatingIndicator() ){
+							if ( !pfile->GetFileComment().IsEmpty() || pfile->GetFileRating() ){ //Modified by IceCream, eMule plus rating icon
+								POINT point= {cur_rec.left-3,cur_rec.top};
+								int the_rating=0;
+								if (pfile->GetFileRating())
+									the_rating = pfile->GetFileRating();
+								m_ImageList.Draw(dc,
+									pfile->GetFileRating(), //Modified by IceCream, eMule plus rating icon
+									point,
+									ILD_NORMAL);
+							}
+							cur_rec.left+=11; //Modified by IceCream, eMule plus rating icon
 						}
-						cur_rec.left+=11; //Modified by IceCream, eMule plus rating icon
+						
 						//MORPH END   - Added by IceCream, SLUGFILLER: showComments
 						break;
 					}

@@ -111,7 +111,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiPowerShareLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, POWERSHARE Limit
 		//Morph Start - added by AndCyle, selective PS internal Prio
-		m_htiPowershareInternalPrio = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHAER_INTERPRIO), m_htiPowershareMode, m_iPowershareInternalPrio);
+		m_htiPowershareInternalPrio = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_INTERPRIO), m_htiPowershareMode, m_iPowershareInternalPrio);
 		//Morph End - added by AndCyle, selective PS internal Prio
 		
 		//MORPH START - Added by SiRoB, Show Permission
@@ -262,7 +262,7 @@ void CPPgMorphShare::Localize(void)
 		if (m_htiPowerShareLimit) m_ctrlTreeOptions.SetEditLabel(m_htiPowerShareLimit, GetResString(IDS_POWERSHARE_LIMIT));
 		//MORPH END   - Added by SiRoB, POWERSHARE Limit
 		//Morph Start - added by AndCyle, selective PS internal Prio
-		if (m_htiPowershareInternalPrio) m_ctrlTreeOptions.SetItemText(m_htiPowershareInternalPrio, GetResString(IDS_POWERSHAER_INTERPRIO));
+		if (m_htiPowershareInternalPrio) m_ctrlTreeOptions.SetItemText(m_htiPowershareInternalPrio, GetResString(IDS_POWERSHARE_INTERPRIO));
 		//Morph End - added by AndCyle, selective PS internal Prio
 		//MORPH START - Added by SiRoB, Show Permission
 		if (m_htiPermissions) m_ctrlTreeOptions.SetItemText(m_htiPermissions, GetResString(IDS_PERMISSION));

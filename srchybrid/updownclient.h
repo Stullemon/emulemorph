@@ -450,7 +450,7 @@ public:
 	bool			IsRemoteQueueFull() const						{ return m_bRemoteQueueFull; }
 	void			SetRemoteQueueFull(bool flag)					{ m_bRemoteQueueFull = flag; }
 	//Morph START - added by AndCycle, DiffQR
-	int				GetDiffQR()					{return m_iDifferenceQueueRank;}
+	int				GetDiffQR()	const				{return m_iDifferenceQueueRank;}
 	//Morph END   - added by AndCycle, DiffQR
 	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
 	/*
@@ -1009,6 +1009,18 @@ public:
 	CString			GetCountryName(bool longName = false) const;
 	int				GetCountryFlagIndex() const;
 	void			ResetIP2Country();
+
+	//SLAHAM: ADDED Show Downloading Time =>
+	uint16	uiStartDLCount;
+	DWORD	dwStartDLTime;
+	DWORD	dwSessionDLTime;
+	DWORD	dwTotalDLTime;
+	//SLAHAM: ADDED Show Downloading Time <=
+
+	//SLAHAM: ADDED Known Since/Last Asked Counter =>
+	uint16	uiDLAskingCounter; 
+	DWORD	dwThisClientIsKnownSince;
+	//SLAHAM: ADDED Known Since/Last Asked Counter <=
 private:
 	struct	IPRange_Struct2* m_structUserCountry; //EastShare - added by AndCycle, IP to Country
 //EastShare End - added by AndCycle, IP to Country

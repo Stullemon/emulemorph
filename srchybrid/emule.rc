@@ -104,6 +104,23 @@ BEGIN
     CONTROL         "",IDC_DLTAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
                     TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
     CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,190,281,243,6
+    PUSHBUTTON      "",IDC_DL_CHANGEVIEW,167,3,13,12
+    PUSHBUTTON      "",IDC_DL_DOWN_UPLOADS,186,3,13,12
+    PUSHBUTTON      "",IDC_DL_DOWNLOADS,201,3,13,12
+    PUSHBUTTON      "",IDC_DL_UPLOADS,216,3,13,12
+    PUSHBUTTON      "",IDC_DL_QUEUE,231,3,13,12
+    PUSHBUTTON      "",IDC_DL_CLIENT,246,3,13,12
+    PUSHBUTTON      "",IDC_DL_TRANSFERS,261,3,13,12
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDVERT,183,4,1,11
+    CONTROL         "",IDC_DOWNLOADCLIENTS,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | NOT 
+                    WS_VISIBLE | WS_TABSTOP,5,226,500,43,WS_EX_STATICEDGE
+    PUSHBUTTON      "",IDC_UL_CHANGEVIEW,167,101,13,12
+    PUSHBUTTON      "",IDC_UL_UPLOADS,186,101,13,12
+    PUSHBUTTON      "",IDC_UL_QUEUE,201,101,13,12
+    PUSHBUTTON      "",IDC_UL_CLIENTS,216,101,13,12
+    PUSHBUTTON      "",IDC_UL_TRANSFERS,231,101,13,12
+    CONTROL         "",IDC_STATIC7,"Static",SS_ETCHEDVERT,183,102,1,9
 END
 
 IDD_SERVER DIALOGEX 0, 35, 511, 289
@@ -1675,7 +1692,7 @@ BEGIN
     EDITTEXT        IDC_UPDATE_URL_IP2COUNTRY,14,182,202,12,ES_AUTOHSCROLL
     LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING_IP2COUNTRY,
                     14,171,202,8,0,WS_EX_TRANSPARENT
-    GROUPBOX        "Country",IDC_MORPH2_SECURITY2,7,148,217,98,BS_FLAT
+    GROUPBOX        "Country",IDC_MORPH2_COUNTRY,7,148,217,98,BS_FLAT
     EDITTEXT        IDC_UPDATE_VER_URL_IP2COUNTRY,14,211,202,12,
                     ES_AUTOHSCROLL
     LTEXT           "Version-File-URL for updating",
@@ -2780,6 +2797,13 @@ CATEDIT                 ICON                    "res\\MOD\\catedit.ico"
 CATREMOVE               ICON                    "res\\MOD\\catremove.ico"
 CATMERGE                ICON                    "res\\MOD\\catmerge.ico"
 FRIENDSLOTREMOVE        ICON                    "res\\MOD\\FriendslotRemove.ico"
+VIEWCYCLE               ICON                    "res\\MOD\\CycleView.ico"
+VIEWTRANSFERSONLY       ICON                    "res\\MOD\\transfers.ico"
+VIEWQUEUEONLY           ICON                    "res\\MOD\\queue.ico"
+VIEWKNOWNONLY           ICON                    "res\\MOD\\known.ico"
+VIEWDOWNLOAD            ICON                    "res\\DirectDownload.ico"
+VIEWUPLOAD              ICON                    "res\\MOD\\ViewUpload.ico"
+VIEWUPDOWN              ICON                    "res\\Up1down1.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4677,7 +4701,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
-                            "check file availability before starting download"
+                            "Check file availability before starting download"
     IDS_DL_FORCE            "Force Download"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Save Upload Queue Wait Time"
     IDS_DATEFILENAMELOG     "Log File Name in date "
@@ -5136,6 +5160,14 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_AVAILABLE_PART      "Available Part"
+    IDS_LAST_ASKED          "Last Asked"
+    IDS_DOWNL_TIME          "Downloading Time"
+    IDS_KNOWN_SINCE         "Known Since"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_FEEDNEW             "New..."
     IDS_FEEDEDIT            "Edit..."
     IDS_FEEDDELETE          "Delete"
@@ -5305,7 +5337,15 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LD_ADDPHPBB         "Using phpBB URL-Tags style"
-    IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
+    IDS_POWERSHARE_INTERPRIO "Enable PS internal file priority"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_TW_TRANSFERS        "Transfers"
+    IDS_DL_ULDL             "Download/Upload"
+    IDS_TRANSDN             "Down"
+    IDS_TRANSUP             "Up"
 END
 
 STRINGTABLE 

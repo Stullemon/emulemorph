@@ -2118,7 +2118,7 @@
 #define IDS_WC_HIDE_ADV                 3227
 #define IDS_WC_SUBMIT_WEB               3228
 #define IDS_LD_ADDPHPBB                 3306
-#define IDS_POWERSHAER_INTERPRIO        3307
+#define IDS_POWERSHARE_INTERPRIO        3307
 #define IDC_INVISIBLE_MODE_GROUP_BOX    3308
 #define IDC_INVISIBLE_MODE              3309
 #define IDC_INVISIBLE_MODE_MODIFIER_STATIC 3310
@@ -2699,6 +2699,20 @@
 #define IDS_UPDATEIPCURL                6033
 #define IDS_CLIENTQUEUEPROGRESSBAR      6040
 #define IDS_WEBCACHE_NOSUPPORT          6041
+#define IDC_STATIC7                     6057
+#define IDC_DOWNLOADCLIENTS             6063
+#define IDC_DL_CHANGEVIEW               6064
+#define IDC_DL_DOWN_UPLOADS             6065
+#define IDC_DL_DOWNLOADS                6066
+#define IDC_DL_UPLOADS                  6067
+#define IDC_DL_QUEUE                    6068
+#define IDC_DL_TRANSFERS                6069
+#define IDC_DL_CLIENT                   6070
+#define IDC_UL_CHANGEVIEW               6071
+#define IDC_UL_UPLOADS                  6072
+#define IDC_UL_QUEUE                    6073
+#define IDC_UL_CLIENTS                  6074
+#define IDC_UL_TRANSFERS                6075
 #define IDS_CHECK_DYNDNS_ENABLED        6100
 #define IDC_CHECK_DYNDNS_ENABLED        6100
 #define IDS_STATIC_DYNDNS_USERNAME      6101
@@ -2729,7 +2743,14 @@
 #define IDS_DOWNLOADEMFRIENDSMET        6160
 #define IDS_EMFRIENDSMETURL             6161
 #define IDC_COUNTRYFLAG                 6200
-#define IDI_ICON1                       6204
+#define IDS_TW_TRANSFERS                7051
+#define IDS_DL_ULDL                     7052
+#define IDS_TRANSDN                     7053
+#define IDS_TRANSUP                     7054
+#define IDS_AVAILABLE_PART              7080
+#define IDS_LAST_ASKED                  7081
+#define IDS_DOWNL_TIME                  7082
+#define IDS_KNOWN_SINCE                 7083
 #define IDS_PWEBCACHE                   10646
 #define IDS_WrongPortforWebcache        11387
 #define IDD_PPG_WEBCACHESETTINGS        12787
@@ -2791,7 +2812,7 @@
 #define IDC_MORPH2_SERVER               50522
 #define IDC_MORPH2_FILE                 50523
 #define IDC_MORPH2_SECURITY             50524
-#define IDC_MORPH2_SECURITY2            50525
+#define IDC_MORPH2_COUNTRY              50525
 #define IDS_BACKUP_FILEFRAME            51501
 #define IDS_BACKUP_SELECTALL            51502
 #define IDS_BACKUP_AUTOFRAME            51503
@@ -2807,6 +2828,10 @@
 #define IDS_MORPH_RFHA                  51541
 #define IDS_MORPH_RAIF                  51542
 #define IDS_WEBSERVER_LINK              51561
+#define IDS_CCRC32                      51562
+#define IDS_ARTCTF                      51563
+#define IDS_ARC32C                      51564
+#define IDS_MASSRN                      51565
 
 // Next default values for new objects
 // 
