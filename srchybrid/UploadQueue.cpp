@@ -434,14 +434,14 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 				(
 					uploadingClient->IsPBForPS() == true && newclient->IsPBForPS() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() ||
 					uploadingClient->IsPBForPS() == false && newclient->IsPBForPS() == false
+				) &&
+				(
+					!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
+					newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
+					// Compare scores is more right than comparing waittime.
 				)
-			)/*&&
-			(
-				!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
-				newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
-				// Compare scores is more right than comparing waittime.
-			)*/
-			/*
+			)
+			/* Every thing should be right now, it was a wrong parenthesis place :X
 				//Morph - commented by AndCycle, 
 				if there are client A and B, 
 				A have PBF or PS, high ID, lower score,
