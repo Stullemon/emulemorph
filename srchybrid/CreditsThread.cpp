@@ -449,7 +449,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Mighty Knife"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:Milobac"));
+	m_arCredits.Add(_T("01:06:Milobac (inactive)"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Morpheus (founder)(retired)"));
 	m_arCredits.Add(_T("S:5"));
