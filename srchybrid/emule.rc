@@ -5500,7 +5500,7 @@ END
 STRINGTABLE
 BEGIN
 	IDS_SCHED_BACKUP           "Backup CONFIG-folder"
-	IDS_SCHED_UPDATE_IPCONFIG  "Update IPCONFIG.DAT-file"
+	IDS_SCHED_UPDATE_IPCONFIG  "Update IPFILTER.DAT-file"
 	IDS_SCHED_UPDATE_FAKES     "Update FAKES.DAT-file"
 	IDS_SCHED_BACKUP_LOG            "Scheduled backup initiated."
 	IDS_SCHED_UPDATE_IPCONFIG_LOG   "Scheduled IPFILTER.DAT-update initiated."
