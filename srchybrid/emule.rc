@@ -4704,6 +4704,8 @@ BEGIN
     IDS_INSERTTEXTCOLUMN    "&Insert text column from clipboard"
     IDS_MASSRENAME2         "Original filenames:"
     IDS_MASSRENAME3         "New filenames:"
+    IDS_NOTENOUGHFILENAMES  "Not enough filenames in the list of new filenames. Rename not possible."
+    IDS_IDENTICALFILENAMES  "Two or more equal filenames within the same directory are not allowed (Line %d). Rename not possible."
 END
 
 STRINGTABLE 

@@ -2454,7 +2454,6 @@
 #define IDC_SC_STATIC2                  5029
 #define IDC_SC_STATIC3                  5030
 #define IDC_SC_STATIC4                  5031
-#define IDC_MR_STATIC                   5032
 #define IDC_MR_STATIC1                  5032
 #define IDC_MR_STATIC3                  5033
 #define IDC_MR_STATIC2                  5034
@@ -2506,6 +2505,8 @@
 #define IDS_INSERTTEXTCOLUMN            5305
 #define IDS_MASSRENAME2                 5306
 #define IDS_MASSRENAME3                 5307
+#define IDS_NOTENOUGHFILENAMES          5308
+#define IDS_IDENTICALFILENAMES          5309
 #define IDS_CHECKDOTTOSPACE             5400
 #define IDS_CHECKUNDERLINETOSPACE       5401
 #define IDS_CHECKCONVERTAPOSTROPHES     5402

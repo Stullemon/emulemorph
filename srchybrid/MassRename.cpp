@@ -248,7 +248,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	}
 
 	if (NFNEdit->GetLineCount () < m_FileList.GetCount()) {
-		AfxMessageBox (_T("Not enough filenames in the list of new filenames. Rename not possible."),
+		AfxMessageBox (_T(GetResString (IDS_NOTENOUGHFILENAMES)),
 					   MB_OK|MB_ICONEXCLAMATION);
 		return;
 	}
@@ -295,7 +295,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	for (int i=1; i < (int) sList.size(); i++) {
 		if (sList.at (i-1) == sList.at (i)) {
 			CString er;
-			er.Format (_T("Two or more equal filenames within the same directory are not allowed (Line %d). Rename not possible."),i+1);
+			er.Format (_T(GetResString (IDS_IDENTICALFILENAMES)),i+1);
 			AfxMessageBox (er,MB_OK|MB_ICONEXCLAMATION);
 			return;
 		}
