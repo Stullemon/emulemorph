@@ -835,16 +835,24 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
 
-	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
 
-    // if throttler doesn't require another slot, go with a slightly more restrictive method
+	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
+	//MOPRH START - Changed by SiRoB, Upload Splitting Class
+	/*
+	// if throttler doesn't require another slot, go with a slightly more restrictive method
 	if( MaxSpeed > 20 || MaxSpeed == UNLIMITED)
 		upPerClient += datarate/43;
 
 	if( upPerClient > 7680 )
 		upPerClient = 7680;
+	*/
+	if(thePrefs.GetMaxClientDataRate())
+		upPerClient = thePrefs.GetMaxClientDataRate();
+	else
+		upPerClient = _I32_MAX;
+	//MOPRH END   - Changed by SiRoB, Upload Splitting Class
 
-	//now the final check
+    //now the final check
 
 	if ( MaxSpeed == UNLIMITED )
 	{
