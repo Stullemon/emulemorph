@@ -99,8 +99,12 @@ private:
 	uint32			m_dwSecureWaitTime;
 	uint32			m_dwUnSecureWaitTime;
 	uint32			m_dwWaitTimeIP;			   // client IP assigned to the waittime
-	float			lastscore; // EastShare - Added by linekin, new creditsystem by [lovelace]
-	DWORD			lastscoretime; // EastShare - Added by linekin, new creditsystem by [lovelace]
+
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	bool			m_bCheckScoreRatio;
+	float			m_fLastScoreRatio;
+	CreditSystemSelection	m_cssCurrentCreditSystem;
+	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
 };
 
 class CClientCreditsList: public CLoggable

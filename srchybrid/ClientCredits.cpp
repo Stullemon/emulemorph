@@ -42,8 +42,12 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 	m_dwWaitTimeIP = 0;
-	lastscore=1.0f; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
-	lastscoretime=0; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
+
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	m_bCheckScoreRatio = true;
+	m_fLastScoreRatio = 1;
+	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
+	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -55,8 +59,12 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_dwUnSecureWaitTime = ::GetTickCount();
 	m_dwSecureWaitTime = ::GetTickCount();
 	m_dwWaitTimeIP = 0;
-	lastscore=1.0f; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
-	lastscoretime=0; //EastShare - Added by linekin ,CreditSystem lovelace CreditSys
+
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	m_bCheckScoreRatio = true;
+	m_fLastScoreRatio = 1;
+	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
 }
 
 CClientCredits::~CClientCredits()
@@ -75,6 +83,8 @@ void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
 	//recode
 	m_pCredits->nDownloadedLo=(uint32)current;
 	m_pCredits->nDownloadedHi=(uint32)(current>>32);
+
+	m_bCheckScoreRatio = true;
 }
 
 void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
@@ -88,6 +98,8 @@ void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
 	//recode
 	m_pCredits->nUploadedLo=(uint32)current;
 	m_pCredits->nUploadedHi=(uint32)(current>>32);
+
+	m_bCheckScoreRatio = true;
 }
 
 uint64	CClientCredits::GetUploadedTotal(){
@@ -100,24 +112,31 @@ uint64	CClientCredits::GetDownloadedTotal(){
 
 float CClientCredits::GetScoreRatio(uint32 dwForIP)
 {
-	float result = 0.0f;//everybody share one result.(?)
+	// check the client ident status
+	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+		// bad guy - no credits for you
+		return 1;
+	}
+
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	if(m_cssCurrentCreditSystem != theApp.glob_prefs->GetCreditSystem()){
+		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
+	}else if(m_bCheckScoreRatio = false){
+		return m_fLastScoreRatio;
+	}
+	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
+
+	//Morph Start - Modified by AndCycle, reduce a litte CPU usage for rating count
+
+	float result = 0;//everybody share one result.
     //EastShare START - Added by linekin, CreditSystem 
-	
-	switch (theApp.glob_prefs->GetCreditSystem())	{
+	switch (m_cssCurrentCreditSystem)	{
 
 		case CS_LOVELACE: // EastShare - Added by linekin, lovelace Credit
 		{
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-				// bad guy - no credits for you
-				return 0.0f;//lovelace
-			}
-
 			// new creditsystem by [lovelace]
 			double cl_up,cl_down; 
 			if (this->m_pCredits){
-				if (this->lastscoretime > GetTickCount()) 
-					return this->lastscore; 
 				cl_up = GetUploadedTotal()/(double)1048576;
 			  	cl_down = GetDownloadedTotal()/(double)1048576;
 			  	result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
@@ -128,37 +147,14 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 					result=0.1f;
 			   	if (((m_pCredits->nKeySize == 0)||(GetCurrentIdentState(dwForIP)!=IS_IDENTIFIED))&&(result>10.0f)) 
 					result=10.0f;
-			  	this->lastscoretime=GetTickCount()+120000;
-		  		this->lastscore=result;
-		  		return (result);
+			}else{
+		 		result = 0.1f;
 			}
-		 	return 0.1f;
 			// end new creditsystem by [lovelace]
 		}break;
+
 		case CS_RATIO: //Ratio mod Credit
 		{
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-			// bad guy - no credits for you
-			return 1;
-			}
-			/* Official
-				if (GetDownloadedTotal() < 1000000)
-				return 1;
-			*/
-			//removed by linekin start
-			/* New--Ratio, UL:DL > 0:2 -> Ratio=0.5
-				if (GetDownloadedTotal() < 1048576){
-				if (theApp.uploadqueue->IsSessionCredits()){
-					if (GetUploadedTotal() > 2432000) // PARTSIZE / 4
-						return 0.5f;
-					else
-						return 1.1f;
-				}
-				else
-					return 1;
-			}*/
-			//removed by linekin end
 			if (!GetUploadedTotal())
 				result = 10;
 			else
@@ -167,34 +163,23 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			result2 = (float)GetDownloadedTotal()/1048576.0;
 			result2 += 2;
 			result2 = (double)sqrt((double)result2);
-				if (result > result2)
+			if (result > result2)
 				result = result2;
-				if (result < 1)
-					return 1;
-			/* Official
-				else if (result > 10)
-					return 10;
-			*/
-			// New--Ratio, Max = ¡Û
-			/*	if (theApp.uploadqueue->IsSessionCredits()){
-				}
-				else if (result > 10)
-					return 10; //Removed by linekin */
-			return result;
+			if (result < 1)
+				result = 1;
 		}break;
 
 		//EastShare Start - added by AndCycle, Pawcio credit
 		case CS_PAWCIO:{	
-	// check the client ident status
-	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-	// bad guy - no credits for you
-	return 1;
-	}
 			//Pawcio: Credits
 			if ((GetDownloadedTotal() < 1000000)&&(GetUploadedTotal() > 1000000)){
-				return 1.0f;
+				result = 1.0f;
+				break;
 			}
-			else if ((GetDownloadedTotal() < 1000000)&&(GetUploadedTotal()<1000000)) return 3.0f;
+			else if ((GetDownloadedTotal() < 1000000)&&(GetUploadedTotal()<1000000)) {
+				result = 3.0f;
+				break;
+			}
 			result = 0;
 			if (GetUploadedTotal()<1000000)
 				result = 100.0f;
@@ -204,20 +189,19 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			else if ((GetDownloadedTotal() > 50000000)&&(GetUploadedTotal()<GetDownloadedTotal()+5000000)&&(result<25)) result=25;
 			else if ((GetDownloadedTotal() > 25000000)&&(GetUploadedTotal()<GetDownloadedTotal()+3000000)&&(result<12)) result=12;
 			else if ((GetDownloadedTotal() > 10000000)&&(GetUploadedTotal()<GetDownloadedTotal()+2000000)&&(result<5)) result=5;
-			if (result > 100.0f)
-				return 100.0f;
-			if (result < 1.0f)
-				return 1.0f;
+			if (result > 100.0f){
+				result = 100.0f;
+				break;
+			}
+			if (result < 1.0f){
+				result = 1.0f;
+				break;
+			}
 		}break;
 		//EastShare End - added by AndCycle, Pawcio credit
-	
+
 		// EastShare START - Added by TAHO, new Credit System //Modified by Pretender
 		case CS_EASTSHARE:{
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-				// bad guy - no credits for you
-				return 0.0f;//lovelace
-			}
 			result = ((m_pCredits->nKeySize == 0)||(GetCurrentIdentState(dwForIP)!=IS_IDENTIFIED)) ? 80 : 100;
 			
 			if (GetDownloadedTotal() < GetUploadedTotal())
@@ -227,50 +211,71 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			else
 				result += (float)((double)GetDownloadedTotal()/174762.7 - (double)GetUploadedTotal()/174762.7 + (double)pow((double)GetDownloadedTotal()/1048576.0,0.7));
 			
-			if ( result < 10 ) {result = 10;}
-			else if ( result > 2500 ) { result = 2500;}
+			if ( result < 10 ) {
+				result = 10;
+			}else if ( result > 2500 ) {
+				result = 2500;
+			}
 			result = result / 100;
-			return result;
 		}break;
 		// EastShare END - Added by TAHO, new Credit System
 
 		case CS_OFFICIAL:{
+			//MORPH START - Added by Yun.SF3, Boost the less uploaded files
+			if (theApp.glob_prefs->IsBoostLess())
+			{
+				if (!GetDownloadedTotal()){
+					result = 1;
+					break;
+				}
+				if (!GetUploadedTotal())
+					result = 10000;
+				else
+					result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
+				float result2 = 0;
+				result2 = (float)GetDownloadedTotal()/1024.0;
+				result2 += 2;
+				result2 = (double)sqrt((double)result2);
+				if (result > result2)
+					result = result2;
 
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-			// bad guy - no credits for you
-				return 1;
+				if (result < 1){
+					result = 1;
+					break;
+				}else if (result > 10000){
+					result = 10000;
+					break;
+				}
+			}else{
+				if (GetDownloadedTotal() < 1000000){
+					result = 1;
+					break;
+				}
+				if (!GetUploadedTotal())
+					result = 10;
+				else
+					result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
+				float result2 = 0;
+				result2 = (float)GetDownloadedTotal()/1048576.0;
+				result2 += 2;
+				result2 = (double)sqrt((double)result2);
+				if (result > result2)
+				result = result2;
+				if (result < 1){
+					result = 1;
+					break;
+				}else if (result > 10){
+					result = 10;
+					break;
+				}
 			}
-		if (GetDownloadedTotal() < 1000000)
-			return 1;
-		if (!GetUploadedTotal())
-			result = 10;
-		else
-			result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
-		float result2 = 0;
-		result2 = (float)GetDownloadedTotal()/1048576.0;
-		result2 += 2;
-		result2 = (double)sqrt((double)result2);
-
-		if (result > result2)
-			result = result2;
-
-		if (result < 1)
-			return 1;
-		else if (result > 10)
-			return 10;
-		return result;
-			}
-	
+		}break;
 
 		default:{
-			// check the client ident status
-			if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-			// bad guy - no credits for you
-				return 1;
+			if (GetDownloadedTotal() < 1000000){
+				result = 1;
+				break;
 			}
-			if (GetDownloadedTotal() < 1000000)
-				return 1;
 			if (!GetUploadedTotal())
 				result = 10;
 			else
@@ -283,15 +288,20 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			if (result > result2)
 				result = result2;
 
-			if (result < 1)
-				return 1;
-			else if (result > 10)
-				return 10;
-			return result;
-		}
+			if (result < 1){
+				result = 1;
+				break;
+			}else if (result > 10){
+				result = 10;
+				break;
+			}
+		}break;
 	}
-	return result;//becareful for this, at least return something.
+	
+	return m_fLastScoreRatio = result;
 	//EastShare END - Added by linekin, CreditSystem 
+
+	//Morph End - Modified by AndCycle, reduce a litte CPU usage for rating count
 }
 //MORPH START - Added by IceCream, VQB: ownCredits
 float CClientCredits::GetMyScoreRatio(uint32 dwForIP)

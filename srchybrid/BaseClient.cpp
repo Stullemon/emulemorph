@@ -209,7 +209,7 @@ void CUpDownClient::Init(){
 
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session
-	}
+}
 
 CUpDownClient::~CUpDownClient(){
 	//MORPH START - Added by IceCream, Maella -Support for tag ET_MOD_VERSION 
