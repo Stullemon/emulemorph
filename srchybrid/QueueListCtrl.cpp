@@ -384,59 +384,13 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 							//Morph Start - added by AndCycle, Equal Chance For Each File
 							if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
-
-								CString ecfef;
-
-								switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
-									case ECFEF_ACCEPTED:{
-										if(theApp.glob_prefs->IsECFEFallTime()){
-											ecfef.Format("%u", file->statistic.GetAllTimeAccepts());
-										}
-										else{
-											ecfef.Format("%u", file->statistic.GetAccepts());
-										}
-									}break;
-
-									case ECFEF_ACCEPTED_COMPLETE:{
-										if(theApp.glob_prefs->IsECFEFallTime()){
-											ecfef.Format("%.2f = %u/%u", file->GetEqualChanceValue(), file->statistic.GetAllTimeAccepts(), file->GetPartCount());
-										}
-										else{
-											ecfef.Format("%.2f = %u/%u", file->GetEqualChanceValue(), file->statistic.GetAccepts(), file->GetPartCount());
-										}
-									}break;
-
-									case ECFEF_TRANSFERRED:{
-										if(theApp.glob_prefs->IsECFEFallTime()){
-											ecfef.Format("%s", CastItoXBytes(file->statistic.GetAllTimeTransferred()));
-										}
-										else{
-											ecfef.Format("%s", CastItoXBytes(file->statistic.GetTransferred()));
-										}
-									}break;
-
-									case ECFEF_TRANSFERRED_COMPLETE:{
-										if(theApp.glob_prefs->IsECFEFallTime()){
-											ecfef.Format("%.2f = %s/%s", file->GetEqualChanceValue(), CastItoXBytes(file->statistic.GetAllTimeTransferred()), CastItoXBytes(file->GetFileSize()));
-										}
-										else{
-											ecfef.Format("%.2f = %s/%s", file->GetEqualChanceValue(), CastItoXBytes(file->statistic.GetTransferred()), CastItoXBytes(file->GetFileSize()));
-										}
-									}break;
-
-									default:{
-										ecfef.Empty();
-									}break;
-								}
-								if(file->GetPowerShared()){//keep PS file prio
+								if(file->GetPowerShared()){//keep file prio at PS
 									Sbuffer.Append(" ");
-									Sbuffer.Append(ecfef);
+									Sbuffer.Append(file->GetEqualChanceValueString());
 								}
 								else{
-									Sbuffer = ecfef;
+									Sbuffer = file->GetEqualChanceValueString();
 								}
-
 							}
 							//Morph End - added by AndCycle, Equal Chance For Each File
 
@@ -449,16 +403,6 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								Sbuffer = tempString;
 							}
 							//MORPH END - Added by SiRoB, ZZ Upload System
-
-							//EastShare START - Added by TAHO, Pay Back First
-							if(client->MoreUpThanDown()) {
-								CString tempString2 = "PBF ";
-								tempString2.Append(Sbuffer);
-								Sbuffer.Empty();
-								Sbuffer = tempString2;
-							}
-							//EastShare END - Added by TAHO, Pay Back First
-
 						}
 						else
 							Sbuffer = "?";
@@ -475,6 +419,18 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							}
 							else
 								Sbuffer.Format("%i",client->GetScore(false));
+
+							//EastShare START - Added by TAHO, Pay Back First
+							if(client->IsMoreUpThanDown()) {
+								Sbuffer.Format("%s %s", "PBF", Sbuffer);
+							}
+							//EastShare END - Added by TAHO, Pay Back First
+
+							//Morph Start - added by AndCycle, show out keep full chunk transfer
+							if(client->GetQueueSessionUp() > 0){
+								Sbuffer.Append(" F");
+							}
+							//Morph End - added by AndCycle, show out keep full chunk transfer
 						}
 						break;
 					case 5:
@@ -772,16 +728,27 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 					result ++;
 				}
 
+
+				//Morph Start - added by AndCycle, take PayBackFirst have same class with PowerShare
 				if(result == 0){
 					result = 
-						item1->MoreUpThanDown() == true && item2->MoreUpThanDown() == false ? 1 :
-						item1->MoreUpThanDown() == false && item2->MoreUpThanDown() == true ? -1 :
+						item1->IsPBForPS() == true && item2->IsPBForPS() == false ? 1 :
+						item1->IsPBForPS() == false && item2->IsPBForPS() == true ? -1 :
+						item1->IsPBForPS() == true && item2->IsPBForPS() == true ? 
+							((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) :
+						0;
+				}
+				/* original PowerShare judge function
+				if(result == 0){
+					result = 
 						item1->GetPowerShared() == true && item2->GetPowerShared() == false ? 1 :
 						item1->GetPowerShared() == false && item2->GetPowerShared() == true ? -1 :
 						item1->GetPowerShared() == true && item2->GetPowerShared() == true ? 
 							((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) :
 						0;
 				}
+				*/
+				//Morph End - added by AndCycle, take PayBackFirst have same class with PowerShare
 
 				//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
 				if(result == 0){
@@ -791,6 +758,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 						0;
 				}
 
+				//Morph - added by AndCycle, Equal Chance For Each File
 				if(result == 0 && file1 != file2){
 					result =
 						item1->GetEqualChanceValue() < item2->GetEqualChanceValue() ? 1 :

@@ -341,59 +341,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//Morph Start - added by AndCycle, Equal Chance For Each File
 						//Morph - added by AndCycle, more detail...for debug?
 						if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
-
-							CString ecfef;
-
-							switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
-								case ECFEF_ACCEPTED:{
-									if(theApp.glob_prefs->IsECFEFallTime()){
-										ecfef.Format("%u", file->statistic.GetAllTimeAccepts());
-									}
-									else{
-										ecfef.Format("%u", file->statistic.GetAccepts());
-									}
-								}break;
-
-								case ECFEF_ACCEPTED_COMPLETE:{
-									if(theApp.glob_prefs->IsECFEFallTime()){
-										ecfef.Format("%.2f = %u/%u", (float)file->statistic.GetAllTimeAccepts()/file->GetPartCount(), file->statistic.GetAllTimeAccepts(), file->GetPartCount());
-									}
-									else{
-										ecfef.Format("%.2f = %u/%u", (float)file->statistic.GetAccepts()/file->GetPartCount(), file->statistic.GetAccepts(), file->GetPartCount());
-									}
-								}break;
-
-								case ECFEF_TRANSFERRED:{
-									if(theApp.glob_prefs->IsECFEFallTime()){
-										ecfef.Format("%s", CastItoXBytes(file->statistic.GetAllTimeTransferred()));
-									}
-									else{
-										ecfef.Format("%s", CastItoXBytes(file->statistic.GetTransferred()));
-									}
-								}break;
-
-								case ECFEF_TRANSFERRED_COMPLETE:{
-									if(theApp.glob_prefs->IsECFEFallTime()){
-										ecfef.Format("%.2f = %s/%s", (double)file->statistic.GetAllTimeTransferred()/file->GetFileSize(), CastItoXBytes(file->statistic.GetAllTimeTransferred()), CastItoXBytes(file->GetFileSize()));
-									}
-									else{
-										ecfef.Format("%.2f = %s/%s", (double)file->statistic.GetTransferred()/file->GetFileSize(), CastItoXBytes(file->statistic.GetTransferred()), CastItoXBytes(file->GetFileSize()));
-									}
-								}break;
-
-								default:{
-									ecfef.Empty();
-								}break;
-							}
-							CString tempStr;
-							tempStr.Format("%s : ", ecfef);
-							tempStr.Append(Sbuffer);
-							Sbuffer = tempStr;
+							Sbuffer.Format("%s :%s", file->GetEqualChanceValueString(false), Sbuffer);
 						}
 						//Morph - added by AndCycle, more detail...for debug?
 						//Morph End - added by AndCycle, Equal Chance For Each File
-
 					}
 					else
 						Sbuffer = "?";
@@ -417,7 +368,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else{
 							// PENDING: ZZ: Debug printout of current buffer size for socket
 							Sbuffer.Format("%s (%s-%s)", CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
-		
 						}
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 					}
@@ -432,7 +382,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					{//Morph - modified by AndCycle, upRemain
 						sint32 timeleft;
 						if(client->GetDatarate() == 0)	timeleft = -1;
-						else if(client->MoreUpThanDown() && client->GetQueueSessionUp() > SESSIONAMOUNT)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+						else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONAMOUNT)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
 						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONAMOUNT) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						else if(file)
 							if (file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetQueueSessionUp())/client->GetDatarate();
@@ -453,7 +403,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							break;
 						default:
 							Sbuffer = GetResString(IDS_UNKNOWN);
-						}
+					}
 					break;
 				case 7:
 				//MORPH START - Modified by SiRoB, ZZ Upload System 20030724-0336
@@ -507,21 +457,21 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else
 							Sbuffer.Format("%s",GetResString(IDS_UNKNOWN));
 					
-				}
+					}
 					break;	
 					//MORPH END - Added By Yun.SF3, Remote Status
 
 				case 11:{
 					Sbuffer.Format("%i", client->GetSlotNumber());
 					//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
-					//EastShare START - Added by TAHO, Pay Back First
-					if (client->MoreUpThanDown())
-						Sbuffer.Append(" PBF");
-					//EastShare END - Added by TAHO, Pay Back First
-					if (client->GetFriendSlot() && client->IsFriend())
+					if (client->GetFriendSlot() && client->IsFriend()){
 						Sbuffer.Append(" FS");
-					else if (client->GetPowerShared()){
-						Sbuffer.Append(" PS");
+					}
+					//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
+					else if (client->IsPBForPS()){
+						if(client->IsMoreUpThanDown() && client->GetPowerShared())	Sbuffer.Append(" PBF/PS");
+						else if (client->IsMoreUpThanDown())	Sbuffer.Append(" PBF");
+						else if (client->GetPowerShared())	Sbuffer.Append(" PS");
 
 						CString tempFilePrio;
 
