@@ -464,12 +464,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		// Calculate how many bytes we can spend
 		sint64 bytesToSpend = 0;
-		lastLoopTick = thisLoopTick; //MORPH - Moved by SiRoB, -Fix-
 
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		sint64 bytesToSpendClass[NB_SPLITTING_CLASS];
 		memzero(bytesToSpendClass,sizeof(bytesToSpendClass));
 		DWORD temptimeSinceLastLoop = timeSinceLastLoop;
+		DWORD templastLoopTick = thisLoopTick; //MORPH - Moved by SiRoB, -Fix-
 		for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 		{
 			allowedDataRate = allowedDataRateClass[classID];
@@ -482,7 +482,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	        // no time has passed, so don't add any bytes. Shouldn't happen.
         	        bytesToSpend = 0; //realBytesToSpend/1000;
         	    } else if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpend) {
-        	        if(timeSinceLastLoop > sleepTime + 2000) {
+        	        if (classID == LAST_CLASS) lastLoopTick = thisLoopTick; //MORPH - Added by SiRoB, lastLoopTick Fix
+					if(timeSinceLastLoop > sleepTime + 2000) {
 				        if (classID == LAST_CLASS)
 							theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims"), timeSinceLastLoop, sleepTime, sleepTime + 2000);
         
@@ -495,11 +496,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
         	        bytesToSpend = realBytesToSpend/1000;
         		} else {
+					if (classID == LAST_CLASS) lastLoopTick = thisLoopTick; //MORPH - Added by SiRoB, lastLoopTick Fix
         		    realBytesToSpend = _I64_MAX;
         	        bytesToSpend = _I32_MAX;
         	    }
         	} else {
-        	    realBytesToSpend = _I64_MAX;
+        	    if (classID == LAST_CLASS) lastLoopTick = thisLoopTick; //MORPH - Added by SiRoB, lastLoopTick Fix
+				realBytesToSpend = _I64_MAX;
         	    bytesToSpend = _I32_MAX;
         	}
 		//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -511,7 +514,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 		if(bytesToSpendClass[LAST_CLASS] >= 1) {
-        	uint64 spentBytesClass[NB_SPLITTING_CLASS];
+			uint64 spentBytesClass[NB_SPLITTING_CLASS];
 			memzero(spentBytesClass,sizeof(spentBytesClass));
 			uint64 spentOverheadClass[NB_SPLITTING_CLASS];
 			memzero(spentOverheadClass,sizeof(spentOverheadClass));
