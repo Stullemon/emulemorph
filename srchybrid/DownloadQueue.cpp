@@ -293,13 +293,15 @@ bool CDownloadQueue::StartNextFile(int cat){
 	// Standard operation of StartNextFile is supported by passing -1 for Category...
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
-		if (cur_file->GetStatus() == PS_PAUSED && (cur_file->GetCategory()==cat || cat == -1)) {
+		if (cur_file->GetStatus() == PS_PAUSED) {
 			if (!pfile)
 				pfile = cur_file;
 			else {
-				if (pfile->GetCategory()!=cat && cat!=-1 && theApp.glob_prefs->GetResumeSameCat()) {
-					pfile = cur_file;
-					if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
+				if (pfile->GetCategory()!=cat && cur_file->GetCategory()==cat  && cat!=-1) {
+					if (theApp.glob_prefs->GetResumeSameCat()){
+						pfile = cur_file;
+						if (pfile->GetDownPriority() == PR_HIGH && pfile->GetCatResumeOrder() == 0) break; continue;
+					}
 				}
 				else if (cur_file->GetCatResumeOrder() < pfile->GetCatResumeOrder()) {
 					pfile = cur_file;
@@ -1916,12 +1918,7 @@ void CDownloadQueue::ProcessLocalRequests()
 		{
 			// create one 'packet' which contains all buffered OP_GETSOURCES eD2K packets to be sent with one TCP frame
 			// server credits: 16*iMaxFilesPerTcpFrame+1 = 241
-			//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
-			Packet* packet = new Packet(new char[iSize], dataTcpFrame.GetLength(), false);
-			/*
 			Packet* packet = new Packet(new char[iSize], dataTcpFrame.GetLength(), true, false);
-			*/
-			//Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
 			dataTcpFrame.Seek(0, CFile::begin);
 			dataTcpFrame.Read(packet->GetPacket(), iSize);
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
