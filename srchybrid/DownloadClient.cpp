@@ -623,7 +623,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	// <-----khaos-
 
 	m_nDownDataRateMS += size - HEADER_SIZE;
-	credits->AddDownloaded(size - HEADER_SIZE, GetIP());
+	credits->AddDownloaded((size - HEADER_SIZE)/reqfile->m_nCompleteSourcesCount, GetIP());//Give more credits to rare files uploaders [Yun.SF3]
 	// Move end back one, should be inclusive
 	nEndPos--;
 
