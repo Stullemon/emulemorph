@@ -794,7 +794,7 @@ public:
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
-	uint32 GetSlotNumber() const { return m_AvarageUDR_list.GetCount(); }
+	uint32 GetSlotNumber() const { return m_slotNumber; }
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	bool		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
 	//MORPH START - Added by SiRoB, Is Morph Client
