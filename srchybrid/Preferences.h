@@ -129,7 +129,7 @@ enum EqualChanceForEachFileSelection{
 
 	ECFEF_DISABLE = 0,
 	ECFEF_ACCEPTED,				//accroading the file accepted
-	ECFEF_ACCEPTED_COMPLETE,		//file accepted base, one complete file
+	ECFEF_ACCEPTED_COMPLETE,	//file accepted base, one complete file
 	ECFEF_TRANSFERRED,			//accroading transfered
 	ECFEF_TRANSFERRED_COMPLETE	//transfered base, one complete file
 
@@ -149,6 +149,7 @@ struct Preferences_Struct{
 	bool	isboostless;//Added by Yun.SF3, boost the less uploaded files
 	CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
+	bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
 	bool	isboostfriends;//Added by Yun.SF3, boost friends
 	bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -765,6 +766,7 @@ public:
 
 	CreditSystemSelection  GetCreditSystem() const {return prefs->creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
 	EqualChanceForEachFileSelection	GetEqualChanceForEachFileMode() const {return prefs->equalChanceForEachFileMode;}	//Morph - added by AndCycle, Equal Chance For Each File
+	bool	IsECFEFallTime()	const	{return prefs->m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
 	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	bool IsBoostFriends() const {return prefs->isboostfriends;}//Added by Yun.SF3, boost friends
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing

@@ -49,6 +49,7 @@ CPPgEastShare::CPPgEastShare()
 	m_htiECFEF_ACCEPTED_COMPLETE = NULL;
 	m_htiECFEF_TRANSFERRED = NULL;
 	m_htiECFEF_TRANSFERRED_COMPLETE = NULL;
+	m_htiECFEF_ALLTIME = NULL;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
 	//EastShare START - Added by TAHO, .met control
@@ -74,7 +75,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgCS = piml->Add(CTempIconLoader("STATSCLIENTS")); // EastShare START - Added by Pretender, CS icon
 			iImgMETC = piml->Add(CTempIconLoader("HARDDISK")); // EastShare START - Added by TAHO, .met control
-			iImgECFEF = piml->Add(CTempIconLoader("File"));//Morph - added by AndCycle, Equal Chance For Each File
+			iImgECFEF = piml->Add(CTempIconLoader("EQFILE"));//Morph - added by AndCycle, Equal Chance For Each File
 		}
 		m_htiEnablePreferShareAll = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFER_SHARE_ALL), TVI_ROOT, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 		m_htiAutoClearComplete = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTO_CLEAR_COMPLETE), TVI_ROOT, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
@@ -100,6 +101,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiECFEF_ACCEPTED_COMPLETE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_ACCEPTS) + " " + GetResString(IDS_COMPLETE), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_ACCEPTED_COMPLETE);
 		m_htiECFEF_TRANSFERRED = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_TRANSFERRED), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_TRANSFERRED);
 		m_htiECFEF_TRANSFERRED_COMPLETE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_TRANSFERRED) + " " + GetResString(IDS_COMPLETE), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_TRANSFERRED_COMPLETE);
+		m_htiECFEF_ALLTIME = m_ctrlTreeOptions.InsertCheckBox("All Time", m_htiECFEF, m_bECFEFallTime);
 		//Morph - added by AndCycle, Equal Chance For Each File
 
 		// EastShare START - Added by TAHO, .met control // Modified by Pretender
@@ -109,6 +111,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		// EastShare END - Added by TAHO, .met control
 
 		// EastShare START - Added by Pretender
+		m_ctrlTreeOptions.Expand(m_htiCreditSystem, TVE_EXPAND);//EastShare
 		m_ctrlTreeOptions.Expand(m_htiMetControl, TVE_EXPAND);
 		// EastShare END - Added by Pretender
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
@@ -119,6 +122,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem, (int &)m_iCreditSystem); //EastShare - added by linekin , CreditSystem
 	
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiECFEF, (int &)m_iEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiECFEF_ALLTIME, m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
 
 	// EastShare START - Added by TAHO, .met flies Control
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiKnownMet, m_iKnownMetDays);
@@ -142,7 +146,10 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bSaveUploadQueueWaitTime = app_prefs->prefs->m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
+
 	m_iEqualChanceForEachFile = app_prefs->GetEqualChanceForEachFileMode();//Morph - added by AndCycle, Equal Chance For Each File
+	m_bECFEFallTime = app_prefs->IsECFEFallTime();//Morph - added by AndCycle, Equal Chance For Each File
+
 	m_iKnownMetDays = app_prefs->GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	
 	CPropertyPage::OnInitDialog();
@@ -183,7 +190,10 @@ BOOL CPPgEastShare::OnApply()
 
 
 	app_prefs->prefs->creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
+
 	app_prefs->prefs->equalChanceForEachFileMode = m_iEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
+	app_prefs->prefs->m_bECFEFallTime = m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
+
 	app_prefs->SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
 
 	SetModified(FALSE);
@@ -250,6 +260,7 @@ void CPPgEastShare::OnDestroy()
 	m_htiECFEF_ACCEPTED_COMPLETE = NULL;
 	m_htiECFEF_TRANSFERRED = NULL;
 	m_htiECFEF_TRANSFERRED_COMPLETE = NULL;
+	m_htiECFEF_ALLTIME = NULL;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
 	//EastShare START - Added by TAHO, .met control

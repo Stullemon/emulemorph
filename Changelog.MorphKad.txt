@@ -10,6 +10,7 @@ REMOVED: On The Fly Optimization (eWombat) [AndCycle]
 
 From SlugFiller-itsonlyme
 	ADDED: (xMule_MOD: showSharePermissions) [AndCycle]
+	ADDED: display different QR
 	FIXED: Fixed bug in operations on multiple selected files (itsonlyme: selFix) [AndCycle]
 	CHANGED: hideOS to current version [AndCycle]
 	CHANGED: SafeHash to current version [AndCycle]

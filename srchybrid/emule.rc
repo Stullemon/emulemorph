@@ -2201,7 +2201,7 @@ SYSTRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
 SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
 PREF_BACKUP             ICON                    "res\\backup.ico"
 CLIENTEASTSHARE         ICON                    "res\\EastShare.ico"
-FILE                    ICON                    "res\\file.ico"
+EQFILE                  ICON                    "res\\EQfile.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

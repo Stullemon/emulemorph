@@ -356,19 +356,39 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 								switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 
 									case ECFEF_ACCEPTED:{
-										ecfef.Format("%u", file->statistic.GetAccepts());
+										if(theApp.glob_prefs->IsECFEFallTime()){
+											ecfef.Format("%u", file->statistic.GetAllTimeAccepts());
+										}
+										else{
+											ecfef.Format("%u", file->statistic.GetAccepts());
+										}
 									}break;
 
 									case ECFEF_ACCEPTED_COMPLETE:{
-										ecfef.Format("%.2f: %u/%u", (float)file->statistic.GetAccepts()/file->GetPartCount(), file->statistic.GetAccepts(), file->GetPartCount());
+										if(theApp.glob_prefs->IsECFEFallTime()){
+											ecfef.Format("%.2f: %u/%u", (float)file->statistic.GetAllTimeAccepts()/file->GetPartCount(), file->statistic.GetAllTimeAccepts(), file->GetPartCount());
+										}
+										else{
+											ecfef.Format("%.2f: %u/%u", (float)file->statistic.GetAccepts()/file->GetPartCount(), file->statistic.GetAccepts(), file->GetPartCount());
+										}
 									}break;
 
 									case ECFEF_TRANSFERRED:{
-										ecfef.Format("%s", CastItoXBytes(file->statistic.GetTransferred()));
+										if(theApp.glob_prefs->IsECFEFallTime()){
+											ecfef.Format("%s", CastItoXBytes(file->statistic.GetAllTimeTransferred()));
+										}
+										else{
+											ecfef.Format("%s", CastItoXBytes(file->statistic.GetTransferred()));
+										}
 									}break;
 
 									case ECFEF_TRANSFERRED_COMPLETE:{
-										ecfef.Format("%.2f: %s/%s", (float)file->statistic.GetTransferred()/file->GetFileSize(), CastItoXBytes(file->statistic.GetTransferred()), CastItoXBytes(file->GetFileSize()));
+										if(theApp.glob_prefs->IsECFEFallTime()){
+											ecfef.Format("%.2f: %s/%s", (float)file->statistic.GetAllTimeTransferred()/file->GetFileSize(), CastItoXBytes(file->statistic.GetAllTimeTransferred()), CastItoXBytes(file->GetFileSize()));
+										}
+										else{
+											ecfef.Format("%.2f: %s/%s", (float)file->statistic.GetTransferred()/file->GetFileSize(), CastItoXBytes(file->statistic.GetTransferred()), CastItoXBytes(file->GetFileSize()));
+										}
 									}break;
 
 									default:{
@@ -662,16 +682,36 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if (result == 0){
 					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 							case ECFEF_ACCEPTED:
-								result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									result = file2->statistic.GetAllTimeAccepts() - file1->statistic.GetAllTimeAccepts();
+								}
+								else{
+									result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
+								}
 								break;
 							case ECFEF_ACCEPTED_COMPLETE:
-								result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									result = (float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount();
+								}
+								else{
+									result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+								}
 								break;
 							case ECFEF_TRANSFERRED:
-								result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									result = file2->statistic.GetAllTimeTransferred() - file1->statistic.GetAllTimeTransferred();
+								}
+								else{
+									result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
+								}
 								break;
 							case ECFEF_TRANSFERRED_COMPLETE:
-								result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									result = (float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() - (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize();
+								}
+								else{
+									result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+								}
 								break;
 							default:
 								result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
@@ -714,16 +754,36 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if(result == 0)
 					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 						case ECFEF_ACCEPTED:
-							result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = file2->statistic.GetAllTimeAccepts() - file1->statistic.GetAllTimeAccepts();
+							}
+							else{
+								result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
+							}
 							break;
 						case ECFEF_ACCEPTED_COMPLETE:
-							result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = (float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount();
+							}
+							else{
+								result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+							}
 							break;
 						case ECFEF_TRANSFERRED:
-							result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = file2->statistic.GetAllTimeTransferred() - file1->statistic.GetAllTimeTransferred();
+							}
+							else{
+								result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
+							}
 							break;
 						case ECFEF_TRANSFERRED_COMPLETE:
-							result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = (float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() - (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize();
+							}
+							else{
+								result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+							}
 							break;
 						default:
 							result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));

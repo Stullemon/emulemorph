@@ -236,7 +236,6 @@ void CSharedFileList::Reload(){
 	this->FindSharedFiles();
 		output->ShowFileList(this);
 	// SLUGFILLER: SafeHash
-
 }
 
 void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl){

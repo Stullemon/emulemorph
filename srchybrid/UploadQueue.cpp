@@ -310,14 +310,13 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
 	bool	rightGetQueueFile = false;
+	bool	bothGetQueueFile = true;
 	CKnownFile* rightReqFile;
 	CKnownFile* leftReqFile;
 
-	if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
+	if(!rightClient || !leftClient){
 		rightGetQueueFile = false;
-	}
-	else if(!rightClient || !leftClient){
-		rightGetQueueFile = false;
+		bothGetQueueFile = true;
 	}
 	else if(
 		(rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
@@ -326,29 +325,77 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 
 			case ECFEF_ACCEPTED:{
-				rightGetQueueFile = 
-					rightReqFile->statistic.GetAccepts() < leftReqFile->statistic.GetAccepts();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					rightGetQueueFile = 
+						rightReqFile->statistic.GetAllTimeAccepts() < leftReqFile->statistic.GetAllTimeAccepts();
+					bothGetQueueFile =
+						rightReqFile->statistic.GetAllTimeAccepts() == leftReqFile->statistic.GetAllTimeAccepts();
+
+				}
+				else{
+					rightGetQueueFile = 
+						rightReqFile->statistic.GetAccepts() < leftReqFile->statistic.GetAccepts();
+					bothGetQueueFile =
+						rightReqFile->statistic.GetAccepts() == leftReqFile->statistic.GetAccepts();
+				}
 			}break;
 
 			case ECFEF_ACCEPTED_COMPLETE:{
-				rightGetQueueFile =
-					(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() <	
-					(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					rightGetQueueFile =
+						(float)rightReqFile->statistic.GetAllTimeAccepts()/rightReqFile->GetPartCount() <	
+						(float)leftReqFile->statistic.GetAllTimeAccepts()/leftReqFile->GetPartCount() ;
+					bothGetQueueFile =
+						(float)rightReqFile->statistic.GetAllTimeAccepts()/rightReqFile->GetPartCount() ==	
+						(float)leftReqFile->statistic.GetAllTimeAccepts()/leftReqFile->GetPartCount() ;
+				}
+				else{
+					rightGetQueueFile =
+						(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() <	
+						(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
+					bothGetQueueFile =
+						(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() ==	
+						(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
+				}
 			}break;
 
 			case ECFEF_TRANSFERRED:{
-				rightGetQueueFile =
-					rightReqFile->statistic.GetTransferred() < leftReqFile->statistic.GetTransferred();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					rightGetQueueFile =
+						rightReqFile->statistic.GetAllTimeTransferred() < leftReqFile->statistic.GetTransferred();
+					bothGetQueueFile =
+						rightReqFile->statistic.GetAllTimeTransferred() == leftReqFile->statistic.GetTransferred();
+				}
+				else{
+					rightGetQueueFile =
+						rightReqFile->statistic.GetTransferred() < leftReqFile->statistic.GetTransferred();
+					bothGetQueueFile =
+						rightReqFile->statistic.GetTransferred() == leftReqFile->statistic.GetTransferred();
+				}
 			}break;
 
 			case ECFEF_TRANSFERRED_COMPLETE:{
-				rightGetQueueFile =
-					(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
-					(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					rightGetQueueFile =
+						(float)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() < 
+						(float)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
+					bothGetQueueFile =
+						(float)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() == 
+						(float)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
+				}
+				else{
+					rightGetQueueFile =
+						(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
+						(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+					bothGetQueueFile =
+						(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() == 
+						(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+				}
 			}break;
 
-			default:{
+			default:{//ECFEF_DISABLE
 				rightGetQueueFile = false;
+				bothGetQueueFile = true;
 			}break;
 		}
 	}
@@ -370,16 +417,16 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 						(
 							leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
 							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
-							rightGetQueueFile == true || //Morph - added by AndCycle, Equal Chance For Each File
-							rightGetQueueFile == false &&//Morph - added by AndCycle, Equal Chance For Each File
+							rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
+							bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
 							(
 								rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
 							)
 						) ||  
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
 						(
-							rightGetQueueFile == true || //Morph - added by AndCycle, Equal Chance For Each File
-							rightGetQueueFile == false &&//Morph - added by AndCycle, Equal Chance For Each File
+							rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
+							bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
 							(
 								rightScore > leftScore  // but rightClient has better score, so rightClient is better
 							)

@@ -1031,6 +1031,8 @@ uint16 CUpDownClient::GetAvailablePartCount(){
 }
 
 void CUpDownClient::SetRemoteQueueRank(uint16 nr){
+
+	m_iDifferenceQueueRank = (nr-m_nRemoteQueueRank);//Morph - added by AndCycle, DiffQR
 	m_nRemoteQueueRank = nr;
 	UpdateDisplayedInfo();
 }
@@ -1270,6 +1272,7 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 		SetDownloadState(DS_NONE);
 		ResetFileStatusInfo();
 		m_nRemoteQueueRank = 0;
+		m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
 
 		reqfile->NewSrcPartsInfo();
 		reqfile->UpdateAvailablePartsCount();

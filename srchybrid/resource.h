@@ -1102,7 +1102,6 @@
 #define IDS_SERVER_LIMITS               1147
 #define IDS_SERVERINFO                  1148
 #define IDS_KBITSSEC                    1149
-#define IDI_ICON3                       1149
 #define IDS_KBYTESSEC                   1150
 #define IDS_ERR_CREATE_DIR              1151
 #define IDS_WRN_INCFILE_RESERVED        1152

@@ -53,6 +53,8 @@ protected:
 	HTREEITEM m_htiECFEF_ACCEPTED_COMPLETE;
 	HTREEITEM m_htiECFEF_TRANSFERRED;
 	HTREEITEM m_htiECFEF_TRANSFERRED_COMPLETE;
+	int m_bECFEFallTime;
+	HTREEITEM m_htiECFEF_ALLTIME;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
 	// EastShare START - Added by TAHO, .met control

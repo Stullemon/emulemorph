@@ -3883,9 +3883,9 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 				const uint16 veryRareBound = limit;
 				const uint16 rareBound = 2*limit;
 
-    // Cache Preview state (Criterion 2)
-    const bool isPreviewEnable = theApp.glob_prefs->GetPreviewPrio() && 
-           (IsArchive() || IsMovie() || IsMusic()); //MORPH - Added by IceCream, preview also music file
+    			// Cache Preview state (Criterion 2)
+    			const bool isPreviewEnable = theApp.glob_prefs->GetPreviewPrio() && 
+           									(IsArchive() || IsMovie() || IsMusic()); //MORPH - Added by IceCream, preview also music file
 
 				// Collect and calculate criteria for all chunks
 				for(POSITION pos = chunksList.GetHeadPosition(); pos != NULL; ){

@@ -291,6 +291,7 @@ public:
 	uint32			GetDownloadDatarate()		{return m_nDownDatarate;}
 	uint16			GetRemoteQueueRank()		{return m_nRemoteQueueRank;}
 	void			SetRemoteQueueFull( bool flag )	{m_bRemoteQueueFull = flag;}
+	int				GetDiffQR()					{return m_iDifferenceQueueRank;}	//Morph - added by AndCycle, DiffQR
 	bool			IsRemoteQueueFull()			{return m_bRemoteQueueFull;}
 	void			SetRemoteQueueRank(uint16 nr);
 	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
@@ -546,6 +547,7 @@ private:
 	uint16		m_cShowDR;
 	uint32		m_dwLastBlockReceived;
 	uint16		m_nRemoteQueueRank;
+	int			m_iDifferenceQueueRank;	//Morph - added by AndCycle, DiffQR
 	bool		m_bCompleteSource;
 	bool		m_bReaskPending;
 	bool		m_bUDPPending;

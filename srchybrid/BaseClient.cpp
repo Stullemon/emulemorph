@@ -132,6 +132,7 @@ void CUpDownClient::Init(){
 	m_byAcceptCommentVer = 0;
 	m_byExtendedRequestsVer = 0;
 	m_nRemoteQueueRank = 0;
+	m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
 	m_dwLastSourceRequest = 0;
 	m_dwLastSourceAnswer = 0;
 	m_dwLastAskedForSources = 0;
