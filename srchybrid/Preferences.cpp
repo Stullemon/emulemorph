@@ -492,6 +492,9 @@ UINT	CPreferences::m_iQueueSize;
 int		CPreferences::m_iCommitFiles;
 uint16	CPreferences::maxmsgsessions;
 uint32	CPreferences::versioncheckLastAutomatic;
+//MORPH START - Added by SiRoB, New Version check
+uint32	CPreferences::mversioncheckLastAutomatic;
+//MORPH START - Added by SiRoB, New Version check
 TCHAR	CPreferences::messageFilter[512];
 CString	CPreferences::commentFilter;
 TCHAR	CPreferences::filenameCleanups[512];
@@ -1111,7 +1114,9 @@ void CPreferences::SetStandartValues()
 	defaultWPM.showCmd=0;
 	EmuleWindowPlacement=defaultWPM;
 	versioncheckLastAutomatic=0;
-
+	//MORPH START - Added by SiRoB, New Version check
+	mversioncheckLastAutomatic=0;
+	//MORPH END   - Added by SiRoB, New Version check
 //	Save();
 }
 
@@ -2439,6 +2444,9 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("UseSimpleTimeRemainingcomputation"),m_bUseOldTimeRemaining);
 
 	ini.WriteInt(_T("VersionCheckLastAutomatic"), versioncheckLastAutomatic);
+	//MORPH START - Added by SiRoB, New Version check
+	ini.WriteInt(_T("MVersionCheckLastAutomatic"), mversioncheckLastAutomatic);
+	//MORPH END   - Added by SiRoB, New Version check
 	ini.WriteInt(_T("FilterLevel"),filterlevel);
 
 	ini.WriteBool(_T("SecureIdent"), m_bUseSecureIdent);// change the name in future version to enable it by default
@@ -3259,6 +3267,9 @@ void CPreferences::LoadPreferences()
 	m_bExtControls =ini.GetBool(_T("ShowExtControls"),false);
 
 	versioncheckLastAutomatic=ini.GetInt(_T("VersionCheckLastAutomatic"),0);
+	//MORPH START - Added by SiRoB, New Version check
+	mversioncheckLastAutomatic=ini.GetInt(_T("MVersionCheckLastAutomatic"),0);
+	//MORPH END   - Added by SiRoB, New Version check
 	m_bDisableKnownClientList=ini.GetInt(_T("DisableKnownClientList"),false);
 	m_bDisableQueueList=ini.GetInt(_T("DisableQueueList"),false);
 	/*
@@ -4355,7 +4366,12 @@ void CPreferences::UpdateLastVC()
 {
 	versioncheckLastAutomatic = safe_mktime(CTime::GetCurrentTime().GetLocalTm());
 }
-
+//MORPH START - Added by SiRoB, New Version check
+void CPreferences::UpdateLastMVC()
+{
+	mversioncheckLastAutomatic = safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+}
+//MORPH END   - Added by SiRoB, New Version check
 void CPreferences::SetWSPass(CString strNewPass)
 {
 	_stprintf(m_sWebPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));

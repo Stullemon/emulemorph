@@ -528,6 +528,9 @@ public:
 
 	static	uint16	maxmsgsessions;
 	static	uint32	versioncheckLastAutomatic;
+	//MORPH START - Added by SiRoB, New Version check
+	static	uint32	mversioncheckLastAutomatic;
+	//MORPH START - Added by SiRoB, New Version check
 	static	TCHAR	messageFilter[512];
 	static	CString	commentFilter;
 	static	TCHAR	filenameCleanups[512];
@@ -1412,6 +1415,10 @@ public:
 	static	uint8	GetUpdateDays()			{return versioncheckdays;}
 	static	uint32	GetLastVC()				{return versioncheckLastAutomatic;}
 	static	void	UpdateLastVC();
+	//MORPH START - Added by SiRoB, New Version check
+	static	uint32	GetLastMVC()				{return mversioncheckLastAutomatic;}
+	static	void	UpdateLastMVC();
+	//MORPH END   - Added by SiRoB, New Version check
 	static	int		GetIPFilterLevel()		{ return filterlevel;}
 	static	CString GetMessageFilter()		{ return CString(messageFilter);}
 	static	const CString& GetCommentFilter(){ return commentFilter; }

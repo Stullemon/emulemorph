@@ -555,6 +555,15 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 }
 //MORPH START - Added by SiRoB, New Version check
 void CemuleDlg::DoMVersioncheck(bool manual) {
+	
+	if (!manual && thePrefs.GetLastMVC()!=0) {
+		CTime last(thePrefs.GetLastMVC());
+		time_t tLast=safe_mktime(last.GetLocalTm());
+		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+
+		if ( (difftime(tNow,tLast) / 86400)<thePrefs.GetUpdateDays() )
+			return;
+	}
 	if (WSAAsyncGetHostByName(m_hWnd, WM_MVERSIONCHECK_RESPONSE, "morphvercheck.dyndns.info", m_acMVCDNSBuffer, sizeof(m_acMVCDNSBuffer)) == 0){
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
@@ -644,7 +653,7 @@ void CemuleDlg::StopTimer(){
 	}
 	if (thePrefs.UpdateNotify()) DoVersioncheck(false);
 	//MORPH START - Added by SiRoB, New Version check
-	DoMVersioncheck(false);
+	if (thePrefs.UpdateNotify()) DoMVersioncheck(false);
 	//MORPH END   - Added by SiRoB, New Version check
 	if (theApp.pendinglink){
 		OnWMData(NULL,(LPARAM) &theApp.sendstruct);//changed by Cax2 28/10/02
@@ -2568,7 +2577,7 @@ LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 				uint8 abyCurVer[4] = { 1, MOD_VERSION_MIN, MOD_VERSION_MJR, 0};
 				dwResult &= 0x00FFFFFF;
 				if (dwResult > *(uint32*)abyCurVer){
-					thePrefs.UpdateLastVC();
+					thePrefs.UpdateLastMVC();
 					SetActiveWindow();
 					Log(LOG_SUCCESS|LOG_STATUSBAR,GetResString(IDS_NEWMVERSIONAVL));
 					ShowNotifier(GetResString(IDS_NEWMVERSIONAVLPOPUP), TBN_NEWMVERSION);
@@ -2577,6 +2586,7 @@ LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 					}
 				}
 				else{
+					thePrefs.UpdateLastMVC();
 					AddLogLine(true,GetResString(IDS_NONEWMVERVERSION));
 				}
 				return 0;
