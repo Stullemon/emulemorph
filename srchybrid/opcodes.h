@@ -358,7 +358,6 @@
 #define FT_SPREADEND			0x71
 #define FT_SPREADCOUNT			0x72
 //MORPH - Added by IceCream, SLUGFILLER: Spreadbars
-#define FT_LASTUSED				0x95	// <uint32> // EastShare - Added by TAHO, .met file control
 #define FT_ATSHARED				0x96	// <uint32> // Morph - Added by AndCycle, Equal Chance For Each File
 #define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
 #define	 FT_MEDIA_ARTIST		 0xD0	// <string>

@@ -139,10 +139,10 @@ void CKnownFileList::Save()
 		file.WriteUInt8(MET_HEADER);
 
 		UINT nRecordsNumber = m_Files_map.GetCount();
-		// SLUGFILLER: mergeKnown
+		// SLUGFILLER: mergeKnown, for TAHO, .met file control
 		POSITION pos = m_Files_map.GetStartPosition();
 		// clean-up
-		const uint32 dwExpired = time(NULL) - thePrefs.GetKnownMetDays()*86400;	// Morph - modified by AndCycle, .met file control
+		const uint32 dwExpired = time(NULL) - (thePrefs.GetKnownMetDays() == 0 ? 12960000 : thePrefs.GetKnownMetDays()*86400);	// Morph - modified by AndCycle, .met file control
 		while( pos != NULL )
 		{
 			CKnownFile* pFile;
@@ -153,15 +153,15 @@ void CKnownFileList::Save()
 			else if (pFile->GetLastSeen() < dwExpired)
 				nRecordsNumber--;
 		}
-		file.WriteUInt32(nRecordsNumber/* + theApp.downloadqueue->GetPartFilesCount()*/);
+		file.WriteUInt32(nRecordsNumber);
 		pos = m_Files_map.GetStartPosition();
-		// SLUGFILLER: mergeKnown
+		// SLUGFILLER: mergeKnown, for TAHO, .met file control
 		while( pos != NULL )
 		{
 			CKnownFile* pFile;
 			CCKey key;
 			m_Files_map.GetNextAssoc( pos, key, pFile );
-			if (pFile->GetLastSeen() >= dwExpired)	// SLUGFILLER: mergeKnown
+			if (pFile->GetLastSeen() >= dwExpired)	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 				pFile->WriteToFile(&file);
 		}
 		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){

@@ -14,6 +14,7 @@ FIXED  : Minor gui display bug arround the category priority [SiRoB]
 FIXED  : Definitly fixed the Resume Next in the category context menu, this is not anymore a globaly Resume Next but a per-category resume [SiRoB]
 FIXED  : Temporary banned client by ip detected by the zerofilled feature are well done (resort ip binary array) [SiRoB]
 FIXED  : Localized / hardcoded IDS's [Commander]
+FIXED  : fix known.met, rehashing known file problem [AndCycle]
 
 CHANGED: Removed the "..." and changed the tree in Morph preferency to [+] [SiRoB]
 CHANGED: Make one menu for CRC32 related function [SiRoB]

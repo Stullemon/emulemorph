@@ -631,7 +631,6 @@ void CSharedFileList::RemoveFile(CKnownFile* pFile)
 	m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
 	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
 	m_keywords->RemoveKeywords(pFile);
-	pFile->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
 }
 
 void CSharedFileList::Reload()

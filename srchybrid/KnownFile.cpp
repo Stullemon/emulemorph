@@ -1240,15 +1240,15 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				delete newtag;
 				break;
 			}
-			// EastShare START - Added by TAHO, .met file control
-			case FT_LASTUSED:{
+			// SLUGFILLER: mergeKnown, for TAHO, .met file control
+			case FT_LASTSEENCOMPLETE:{
 				ASSERT( newtag->IsInt() );
 				if (newtag->IsInt())
-					statistic.SetLastUsed(newtag->GetInt());
+					m_dwLastSeen = newtag->GetInt();
 				delete newtag;
 				break;
 			}
-			// EastShare END - Added by TAHO, .met file control
+			// SLUGFILLER: mergeKnown, for TAHO, .met file control
 			//Morph - Added by AndCycle, Equal Chance For Each File
 			case FT_ATSHARED:{
 				ASSERT( newtag->IsInt() );
@@ -1439,11 +1439,11 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	}
 	//MOPRH END   - Added by SiRoB, Show Permissions
 
-	//EastShare START - Added by TAHO, .met file control
-	CTag lastUsedTag(FT_LASTUSED, ( theApp.sharedfiles->GetFileByID(GetFileHash())) ? time(NULL) : statistic.GetLastUsed());
-	lastUsedTag.WriteTagToFile(file);
+	// SLUGFILLER: mergeKnown, for TAHO, .met file control
+	CTag lsctag(FT_LASTSEENCOMPLETE, m_dwLastSeen);
+	lsctag.WriteTagToFile(file);
 	uTagCount++;
-	//EastShare END - Added by TAHO, .met file control
+	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	CTag sharedTime(FT_ATSHARED, statistic.GetSharedTime());

@@ -56,7 +56,6 @@ public:
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
 		//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
-		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
 		shareStartTime = time(NULL);//this value init will be done in other place 
@@ -84,8 +83,6 @@ public:
 	uint64	GetAllTimeTransferred() const	{return alltimetransferred;}
 	
 	CKnownFile* fileParent;
-	uint32	GetLastUsed()				{return lastused;} // EastShare - Added by TAHO, .met fiel control
-	void	SetLastUsed(uint32 inLastUsed)				{lastused = inLastUsed;} // EastShare - Added by TAHO, .met fiel control
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	void	SetSharedTime(uint32 sharedTime)		{ shareStartTime = time(NULL) - sharedTime; }
 	uint32	GetSharedTime()							{ return time(NULL) - shareStartTime; }
@@ -114,7 +111,6 @@ private:
 	uint32 alltimerequested;
 	uint64 alltimetransferred;
 	uint32 alltimeaccepted;
-	uint32 lastused; //EastShare - Added by TAHO, .met file control
 
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	uint32	shareStartTime;
@@ -201,10 +197,10 @@ public:
 	const CString& GetFilePath() const { return m_strFilePath; }
 	void SetFilePath(LPCTSTR pszFilePath);
 
-	// SLUGFILLER: mergeKnown
+	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 	void	SetLastSeen()	{ m_dwLastSeen = time(NULL); }
 	uint32	GetLastSeen()	{ return m_dwLastSeen; }
-	// SLUGFILLER: mergeKnown
+	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 
 	virtual bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
 	virtual bool IsPartFile() const { return false; }
@@ -387,7 +383,7 @@ private:
 	uint32	m_PublishedKadSrc;
 	Kademlia::WordList wordlist;
 	UINT	m_uMetaDataVer;
-	uint32	m_dwLastSeen;	// SLUGFILLER: mergeKnown
+	uint32	m_dwLastSeen;	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;
