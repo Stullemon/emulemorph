@@ -1489,7 +1489,7 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
 						)
 						&&
 						(
-							!(thePrefs.UseSmartA4AFSwapping() && cur_file->ForceA4AFOff()) &&
+							!(thePrefs.UseSmartA4AFSwapping() && (cur_file->ForceA4AFOff() || SwapTo->ForceAllA4AF())) &&
 						//MORPH END   - Added by SiRoB, ForcedA4AF
 							!SwapTo->IsA4AFAuto() &&
 							(
