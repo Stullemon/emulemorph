@@ -96,6 +96,11 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	}
 	// SLUGFILLER: multiSort
 	ShowServerCount();
+    
+	// Commander - Added: IP2Country column - Start
+	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
+		HideColumn (15);
+	// Commander - Added: IP2Country column - End
 
 	return true;
 } 
@@ -1077,8 +1082,9 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//Sbuffer = tempStr;
                     
 					//Draw Country Flag
+
 					POINT point2= {cur_rec.left,cur_rec.top+1};
-					if(theApp.ip2country->ShowCountryFlag()){
+					if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(15)){
 						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 					}
 					else
@@ -1211,19 +1217,22 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 				//Commander - Country Column
 				case 15:{
-					if(server->GetCountryName()){
-						CString tempStr3;
-						tempStr3.Format(_T("%s"), server->GetCountryName());
-						Sbuffer = tempStr3;
-					}
-					else{
-                        Sbuffer = _T("");
+					Sbuffer.Format(_T("%s"), server->GetCountryName());
+					if(theApp.ip2country->ShowCountryFlag()){
+						POINT point2= {cur_rec.left,cur_rec.top+1};
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						cur_rec.left+=20;
+						}
+				    dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+
+				    if(theApp.ip2country->ShowCountryFlag()){
+					    cur_rec.left-=20;
 					}
 					break;
 				}
 }//End of Switch
 				
-					if(iColumn != 0 )
+					if(iColumn != 0 && iColumn != 15)
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec, DT_LEFT);
 					cur_rec.left += GetColumnWidth(iColumn);
 				}

@@ -736,6 +736,11 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		uint32	statGoodSessions =				0;
 		uint32	statBadSessions =				0;
 		double	percentSessions =				0;
+		//MORPH START - Added by Commander, Show failed WC sessions
+		double  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
+		uint32  totalDLSessions =				statGoodSessions + statBadSessions;
+		//MORPH END - Added by Commander, Show failed WC sessions
+
 		// Transfer Ratios
 		if ( theStats.sessionReceivedBytes>0 && theStats.sessionSentBytes>0 ) 
 		{
@@ -1007,8 +1012,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					i++;
 				}
 				// Set Download Sessions
-				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
-				statBadSessions =	thePrefs.GetDownS_FailedSessions();
+				statGoodSessions =	(thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]) - thePrefs.ses_successfull_WCDOWNLOADS; // Add Active Downloads //MORPH - Changed by Commander, Show failed WC sessions
+				statBadSessions =	thePrefs.GetDownS_FailedSessions() - failedWCSessions; //MORPH - Changed by Commander, Show failed WC sessions
 				cbuffer.Format( _T("%s: %u") , GetResString(IDS_STATS_DLSES) , statGoodSessions + statBadSessions );
 				stattree.SetItemText( down_S[4] , cbuffer );
 				if (forceUpdate || stattree.IsExpanded(down_S[4])) 
@@ -1047,7 +1052,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					cbuffer.Format( _T("Successful WC-DL/WC-Requests: %u/%u (%1.1f%%)"), thePrefs.ses_successfull_WCDOWNLOADS, thePrefs.ses_WEBCACHEREQUESTS, percentSessions );
 					stattree.SetItemText( down_ssessions[4] , cbuffer ); // Set Succ WC Sessions
 					//MORPH END   - Added by SiRoB, WebCache 1.2f
-		
+		            
+                    //MORPH START - Added by Commander, Show failed WC sessions
+                    percentSessions = 0;
+					if (failedWCSessions > 0 && totalDLSessions > 0)
+                         percentSessions = (double) 100 * failedWCSessions / totalDLSessions;
+					else
+						percentSessions = (double) 0;
+
+					cbuffer.Format( _T("Failed WebCache Sessions: %u (%1.1f%%)"), failedWCSessions, percentSessions);
+					stattree.SetItemText( down_ssessions[5] , cbuffer );
+					//MORPH END - Added by Commander, Show failed WC sessions
+                    
 					// Set Average Download Time
 					cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDLTIME), CastSecondsToLngHM(thePrefs.GetDownS_AvgTime()));
 					stattree.SetItemText( down_ssessions[3] , cbuffer );
@@ -3233,7 +3249,7 @@ void CStatisticsDlg::CreateMyTree()
 	for(int i = 0; i<ARRSIZE(down_sources); i++) 
 		down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
 	//MORPH - Changed by SiRoB, WebCache 1.2f
-	for(int i = 0; i<5/* changed to 5 jp webcache statistics */; i++) 
+	for(int i = 0; i<6/* changed to 5 jp webcache statistics+1 */; i++) 
 		down_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[4]);
 	hdown_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_session);				// Downline Overhead (Session)
 	for(int i = 0; i<ARRSIZE(down_soh); i++) 
