@@ -1,8 +1,6 @@
 #pragma once
 #include "TreeOptionsCtrlEx.h"
 
-// CPPgTweaks dialog
-
 class CPPgTweaks : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgTweaks)
@@ -34,7 +32,7 @@ protected:
 	int m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	float m_fMinFreeDiskSpaceMB;
 	CString m_sYourHostname;	// itsonlyme: hostnameSource
-	
+
 	// ZZ:UploadSpeedSense -->
     int m_iDynUpEnabled;
     int m_iDynUpMinUpload;
@@ -44,7 +42,7 @@ protected:
     int m_iDynUpNumberOfPings;
 	// ZZ:UploadSpeedSense <--
 
-	CTreeOptionsCtrlEx m_ctrlTreeOptions;
+    CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiMaxCon5Sec;
 	HTREEITEM m_htiAutoTakeEd2kLinks;
@@ -65,7 +63,7 @@ protected:
 	HTREEITEM m_htiCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	HTREEITEM m_htiMinFreeDiskSpace;
 	HTREEITEM m_htiYourHostname;	// itsonlyme: hostnameSource
-	
+
 	// ZZ:UploadSpeedSense -->
     HTREEITEM m_htiDynUp;
 	HTREEITEM m_htiDynUpEnabled;
@@ -76,7 +74,7 @@ protected:
     HTREEITEM m_htiDynUpNumberOfPings;
 	// ZZ:UploadSpeedSense <--
 
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 

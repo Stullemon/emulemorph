@@ -1,5 +1,3 @@
-// TVCreditsDlg.cpp : implementation file
-//
 /*
 		You may NOT modify this copyright message. You may add your name, if you
 		changed or improved this code, but you mot not delete any part of this message or

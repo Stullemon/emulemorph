@@ -227,15 +227,15 @@ void UploadBandwidthThrottler::RemoveFromAllQueues(CEMSocket* socket) {
     if(doRun) {
         // Remove this socket from control packet queue
         {
-        POSITION pos1, pos2;
-	    for (pos1 = m_ControlQueue_list.GetHeadPosition();( pos2 = pos1 ) != NULL;) {
-		    m_ControlQueue_list.GetNext(pos1);
-		    CEMSocket* socketinQueue = m_ControlQueue_list.GetAt(pos2);
+            POSITION pos1, pos2;
+	        for (pos1 = m_ControlQueue_list.GetHeadPosition();( pos2 = pos1 ) != NULL;) {
+		        m_ControlQueue_list.GetNext(pos1);
+		        CEMSocket* socketinQueue = m_ControlQueue_list.GetAt(pos2);
 
-            if(socketinQueue == socket) {
-                m_ControlQueue_list.RemoveAt(pos2);
+                if(socketinQueue == socket) {
+                    m_ControlQueue_list.RemoveAt(pos2);
+                }
             }
-        }
         }
         
         tempQueueLocker.Lock();

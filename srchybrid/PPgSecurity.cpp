@@ -28,8 +28,6 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-// CPPgSecurity dialog
-
 IMPLEMENT_DYNAMIC(CPPgSecurity, CPropertyPage)
 CPPgSecurity::CPPgSecurity()
 	: CPropertyPage(CPPgSecurity::IDD)
@@ -50,7 +48,6 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 	ON_BN_CLICKED(IDC_FILTERSERVERBYIPFILTER , OnSettingsChange)
 	ON_BN_CLICKED(IDC_RELOADFILTER, OnReloadIPFilter)
 	ON_BN_CLICKED(IDC_EDITFILTER, OnEditIPFilter)
-
 	ON_EN_CHANGE(IDC_FILTERLEVEL, OnSettingsChange)
 	ON_EN_CHANGE(IDC_FILTER, OnSettingsChange)
 	ON_EN_CHANGE(IDC_COMMENTFILTER, OnSettingsChange)
@@ -105,6 +102,7 @@ BOOL CPPgSecurity::OnInitDialog()
 	//MORPH END   - Added by SiRoB, Allways use securedid
 	LoadSettings();
 	Localize();
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }

@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// UploadListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "UploadListCtrl.h"
@@ -182,7 +178,7 @@ void CUploadListCtrl::Localize()
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(6, &hdi);
 	strRes.ReleaseBuffer();
-	
+
 	strRes = GetResString(IDS_UPSTATUS);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(7, &hdi);
@@ -432,11 +428,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					{//Morph - modified by AndCycle, upRemain
 						sint32 timeleft;
 						if(client->GetDatarate() == 0)	timeleft = -1;
-						else if(client->MoreUpThanDown() && client->GetSessionUp() > SESSIONAMOUNT)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
-						else if(client->GetPowerShared() && client->GetSessionUp() > SESSIONAMOUNT) timeleft = -1; //(float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
+						else if(client->MoreUpThanDown() && client->GetQueueSessionUp() > SESSIONAMOUNT)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONAMOUNT) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						else if(file)
-							if (file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetSessionUp())/client->GetDatarate();
-							else timeleft = (float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
+							if (file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetQueueSessionUp())/client->GetDatarate();
+							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						Sbuffer.Format("%s (+%s)", CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain
 					break;

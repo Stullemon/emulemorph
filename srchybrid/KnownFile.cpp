@@ -1,5 +1,4 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
-
 //this file is part of eMule
 //Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
@@ -60,9 +59,7 @@ _DEFINE_GUID(MEDIATYPE_Audio, 0x73647561, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa
 _DEFINE_GUID(FORMAT_VideoInfo,0x05589f80, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 _DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 #include <qedit.h>
-//#include <amvideo.h>
 typedef struct tagVIDEOINFOHEADER {
-
     RECT            rcSource;          // The bit we really want to use
     RECT            rcTarget;          // Where the video should go
     DWORD           dwBitRate;         // Approximate bit data rate
@@ -83,6 +80,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
 void CFileStatistic::AddRequest(){
 	requested++;
 	alltimerequested++;
@@ -97,15 +95,6 @@ void CFileStatistic::AddAccepted(){
 	theApp.sharedfiles->UpdateFile(fileParent);
 }
 	
-//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
-void CFileStatistic::DelAccepted(){
-	accepted--;
-	alltimeaccepted--;
-	theApp.knownfiles->accepted--;
-	theApp.sharedfiles->UpdateFile(fileParent);
-}
-//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
-
 void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	transferred += bytes;
 	alltimetransferred += bytes;
@@ -335,6 +324,7 @@ CAbstractFile::CAbstractFile()
 	m_nFileSize = 0;
 	m_iRate = 0;
 }
+
 #ifdef _DEBUG
 void CAbstractFile::AssertValid() const
 {
@@ -432,7 +422,7 @@ void CKnownFile::AssertValid() const
 	CHECK_BOOL(m_bCommentLoaded);
 	(void)m_iPartCount;
 	(void)m_iED2KPartCount;
-	//(void)m_iED2KPartHashCount;
+	(void)m_iED2KPartHashCount;
 	ASSERT( m_iUpPriority == PR_VERYLOW || m_iUpPriority == PR_LOW || m_iUpPriority == PR_NORMAL || m_iUpPriority == PR_HIGH || m_iUpPriority == PR_VERYHIGH );
 	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
 	CHECK_BOOL(m_bAutoUpPriority);
@@ -544,24 +534,24 @@ void CKnownFile::NewAvailPartsInfo()
 	for(int i = 0; i < partcount; i++)
 		m_AvailPartFrequency[i] = 1;
 
-	CArray<uint16,uint16> count;
+	CArray<uint16, uint16> count;
 	if (flag)
 		count.SetSize(0, m_ClientUploadList.GetSize());
-
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
 		CUpDownClient* cur_src = m_ClientUploadList.GetNext(pos);
 		for (uint16 i = 0; i < partcount; i++)
 		{
 			if (cur_src->IsUpPartAvailable(i))
-				m_AvailPartFrequency[i] +=1;
+				m_AvailPartFrequency[i] += 1;
 		}
 
 		uint16 cur_count;
 		if ( flag && (cur_count = cur_src->GetUpCompleteSourcesCount()) != 0 )
 			count.Add(cur_count);
 	}
-	if(flag)
+
+	if (flag)
 	{
 		m_nCompleteSourcesCount = m_nCompleteSourcesCountLo = m_nCompleteSourcesCountHi = 0;
 
@@ -575,7 +565,7 @@ void CKnownFile::NewAvailPartsInfo()
 	
 		if (m_nCompleteSourcesCount)
 			count.Add(m_nCompleteSourcesCount);
-
+	
 		int32 n = count.GetSize();
 		if (n > 0)
 		{
@@ -590,6 +580,7 @@ void CKnownFile::NewAvailPartsInfo()
 				HeapSort(count, 0, r-1);
 			}
 			// SLUGFILLER: heapsortCompletesrc
+			
 			// calculate range
 			int32 i= n >> 1;		// (n / 2)
 			int32 j= (n * 3) >> 2;	// (n * 3) / 4
@@ -850,7 +841,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 	file->Read(&checkid, 16);
 	//TRACE("File size: %u (%u full parts + %u bytes)\n", GetFileSize(), GetFileSize()/PARTSIZE, GetFileSize()%PARTSIZE);
 	//TRACE("File hash: %s\n", md4str(checkid));
-	uint16	parts;
+	uint16 parts;
 	file->Read(&parts, 2);
 	//TRACE("Nr. hashs: %u\n", (UINT)parts);
 	for (UINT i = 0; i < (UINT)parts; i++){
@@ -864,7 +855,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 	if (!checkhash){
 		md4cpy(m_abyFileHash, checkid);
 		if (parts <= 1)	// nothing to check
-		return true;
+			return true;
 	}
 	else if (md4cmp(m_abyFileHash, checkid))
 		return false;	// wrong file?
@@ -944,7 +935,6 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 				break;
 			}
 			case FT_ULPRIORITY:{
-				uint8 autoprio = PR_AUTO;
 				m_iUpPriority = newtag->tag.intvalue;
 				if( m_iUpPriority == PR_AUTO ){
 					m_iUpPriority = PR_HIGH;
@@ -1095,7 +1085,7 @@ bool CKnownFile::WriteToFile(CFile* file){
 	
 	CTag nametag(FT_FILENAME, GetFileName());
 	nametag.WriteTagToFile(file);
-		
+	
 	CTag sizetag(FT_FILESIZE, m_nFileSize);
 	sizetag.WriteTagToFile(file);
 	
@@ -1200,7 +1190,7 @@ void CKnownFile::CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar*
 		for (uint32 i = 0; i < len; i++) 
         { 
            MD4Transform(Hash, (uint32*)(X + i*64)); 
-		}
+        }
 		Required -= len*64;
 	}
 	// bytes to read
@@ -1498,6 +1488,7 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient){
 
 	if (!nCount)
 		return 0;
+
 	data.Seek(16,0);
 	data.Write(&nCount,2);
 
@@ -1680,7 +1671,7 @@ void CKnownFile::GetMetaDataTags()
 						strText.Trim();
 						if (!strText.IsEmpty()){
 							CTag* pTag = new CTag(FT_MEDIA_ARTIST, strText);
-						AddTagUnique(pTag);
+							AddTagUnique(pTag);
 						}
 						delete[] pszText;
 						break;
@@ -1691,7 +1682,7 @@ void CKnownFile::GetMetaDataTags()
 						strText.Trim();
 						if (!strText.IsEmpty()){
 							CTag* pTag = new CTag(FT_MEDIA_ALBUM, strText);
-						AddTagUnique(pTag);
+							AddTagUnique(pTag);
 						}
 						delete[] pszText;
 						break;
@@ -1702,7 +1693,7 @@ void CKnownFile::GetMetaDataTags()
 						strText.Trim();
 						if (!strText.IsEmpty()){
 							CTag* pTag = new CTag(FT_MEDIA_TITLE, strText);
-						AddTagUnique(pTag);
+							AddTagUnique(pTag);
 						}
 						delete[] pszText;
 						break;
@@ -1856,6 +1847,7 @@ void CKnownFile::GetMetaDataTags()
 		}
 	}
 }
+
 void CKnownFile::SetPublishedED2K(bool val){
 	m_PublishedED2K = val;
 	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
@@ -1878,8 +1870,6 @@ bool CKnownFile::PublishSrc(Kademlia::CUInt128 *nextID)
 	m_lastPublishTimeKadSrc = (uint32)time(NULL);
 	return true;
 }
-
-
 
 bool CKnownFile::IsMovie(){
 	return (ED2KFT_VIDEO == GetED2KFileTypeID(GetFileName()) );

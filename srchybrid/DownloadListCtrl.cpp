@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// DownloadListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "DownloadListCtrl.h"
@@ -54,6 +50,7 @@ static char THIS_FILE[]=__FILE__;
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 #define DLC_BARUPDATE 512
+
 
 IMPLEMENT_DYNAMIC(CDownloadListCtrl, CListBox)
 CDownloadListCtrl::CDownloadListCtrl() {
@@ -286,68 +283,68 @@ void CDownloadListCtrl::Localize()
 }
 
 void CDownloadListCtrl::AddFile(CPartFile* toadd){
-		// Create new Item
-        CtrlItem_Struct* newitem = new CtrlItem_Struct;
-        uint16 itemnr = GetItemCount();
-        newitem->owner = NULL;
-        newitem->type = FILE_TYPE;
-        newitem->value = toadd;
-        newitem->parent = NULL;
-		newitem->dwUpdated = 0; 
+	// Create new Item
+    CtrlItem_Struct* newitem = new CtrlItem_Struct;
+    uint16 itemnr = GetItemCount();
+    newitem->owner = NULL;
+    newitem->type = FILE_TYPE;
+    newitem->value = toadd;
+    newitem->parent = NULL;
+	newitem->dwUpdated = 0; 
 
-		// The same file shall be added only once
-		ASSERT(m_ListItems.find(toadd) == m_ListItems.end());
-		m_ListItems.insert(ListItemsPair(toadd, newitem));
+	// The same file shall be added only once
+	ASSERT(m_ListItems.find(toadd) == m_ListItems.end());
+	m_ListItems.insert(ListItemsPair(toadd, newitem));
 
-		if (toadd->CheckShowItemInGivenCat(curTab))
+	if (toadd->CheckShowItemInGivenCat(curTab))
 		InsertItem(LVIF_PARAM|LVIF_TEXT,itemnr,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)newitem);
 
-		ShowFilesCount();
+	ShowFilesCount();
 }
 
 void CDownloadListCtrl::AddSource(CPartFile* owner,CUpDownClient* source,bool notavailable){
-		// Create new Item
-        CtrlItem_Struct* newitem = new CtrlItem_Struct;
-        newitem->owner = owner;
-        newitem->type = (notavailable) ? UNAVAILABLE_SOURCE : AVAILABLE_SOURCE;
-        newitem->value = source;
-		newitem->dwUpdated = 0; 
+	// Create new Item
+    CtrlItem_Struct* newitem = new CtrlItem_Struct;
+    newitem->owner = owner;
+    newitem->type = (notavailable) ? UNAVAILABLE_SOURCE : AVAILABLE_SOURCE;
+    newitem->value = source;
+	newitem->dwUpdated = 0; 
 
-		// Update cross link to the owner
-		ListItems::const_iterator ownerIt = m_ListItems.find(owner);
-		ASSERT(ownerIt != m_ListItems.end());
-		CtrlItem_Struct* ownerItem = ownerIt->second;
-		ASSERT(ownerItem->value == owner);
-		newitem->parent = ownerItem;
+	// Update cross link to the owner
+	ListItems::const_iterator ownerIt = m_ListItems.find(owner);
+	ASSERT(ownerIt != m_ListItems.end());
+	CtrlItem_Struct* ownerItem = ownerIt->second;
+	ASSERT(ownerItem->value == owner);
+	newitem->parent = ownerItem;
 
-		// The same source could be added a few time but only one time per file 
-		{
-			// Update the other instances of this source
-			bool bFound = false;
-			std::pair<ListItems::const_iterator, ListItems::const_iterator> rangeIt = m_ListItems.equal_range(source);
-			for(ListItems::const_iterator it = rangeIt.first; it != rangeIt.second; it++){
-				CtrlItem_Struct* cur_item = it->second;
+	// The same source could be added a few time but only one time per file 
+	{
+		// Update the other instances of this source
+		bool bFound = false;
+		std::pair<ListItems::const_iterator, ListItems::const_iterator> rangeIt = m_ListItems.equal_range(source);
+		for(ListItems::const_iterator it = rangeIt.first; it != rangeIt.second; it++){
+			CtrlItem_Struct* cur_item = it->second;
 
-				// Check if this source has been already added to this file => to be sure
-				if(cur_item->owner == owner){
-					// Update this instance with its new setting
-					cur_item->type = newitem->type;
-					cur_item->dwUpdated = 0;
-					bFound = true;
-				}
-				else if(notavailable == false){
-					// The state 'Available' is exclusive
-					cur_item->type = UNAVAILABLE_SOURCE;
-					cur_item->dwUpdated = 0;
-				}
+			// Check if this source has been already added to this file => to be sure
+			if(cur_item->owner == owner){
+				// Update this instance with its new setting
+				cur_item->type = newitem->type;
+				cur_item->dwUpdated = 0;
+				bFound = true;
 			}
-
-			if(bFound == true){
-				delete newitem; 
-				return;
+			else if(notavailable == false){
+				// The state 'Available' is exclusive
+				cur_item->type = UNAVAILABLE_SOURCE;
+				cur_item->dwUpdated = 0;
 			}
 		}
-		m_ListItems.insert(ListItemsPair(source, newitem));
+
+		if(bFound == true){
+			delete newitem; 
+			return;
+		}
+	}
+	m_ListItems.insert(ListItemsPair(source, newitem));
 
 	if (owner->srcarevisible) {
 		// find parent from the CListCtrl to add source
@@ -537,7 +534,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 
 		case 3:		// transfered complete
 			buffer = CastItoXBytes(lpPartFile->GetCompletedSize());
-			dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT | DT_RIGHT);	
+			dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT | DT_RIGHT);
 			break;
 		case 4:		// speed
 			if (lpPartFile->GetTransferingSrcCount())
@@ -571,7 +568,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 					rec_status.bottom = iHeight; 
 					rec_status.right = iWidth; 
 					lpPartFile->DrawStatusBar(&cdcStatus,  &rec_status, theApp.glob_prefs->UseFlatBar()); 
-					
+
 					lpCtrlItem->dwUpdated = dwTicks + (rand() % 128); 
 				} else 
 					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->status); 
@@ -958,38 +955,36 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 		}
 
 		case 7:		// prio
-			if (lpCtrlItem->type == AVAILABLE_SOURCE){
-				if (lpUpDownClient->GetDownloadState()==DS_ONQUEUE){
-					if( lpUpDownClient->IsRemoteQueueFull() ){
-						buffer = GetResString(IDS_QUEUEFULL);
-						dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
-					}
-					else{
-						if ( lpUpDownClient->GetRemoteQueueRank()){
-							//Morph - modified by AndCycle, DiffQR
-							COLORREF crOldTxtColor;
-							int	m_iDifference = lpUpDownClient->GetDiffQR();
-							if(m_iDifference == 0){
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,0));
-							}
-							else if(m_iDifference > 0){
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(191,0,0));
-							}
-							else if(m_iDifference < 0){
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,191,0));
-							}
-							buffer.Format("QR: %u (%+i)",lpUpDownClient->GetRemoteQueueRank(), m_iDifference);
-							dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
-							dc->SetTextColor(crOldTxtColor);
-							//Morph - modified by AndCycle, DiffQR
-						}
-						else{
-							dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
-						}
-					}
-				} else {	
+			if (lpUpDownClient->GetDownloadState()==DS_ONQUEUE){
+				if( lpUpDownClient->IsRemoteQueueFull() ){
+					buffer = GetResString(IDS_QUEUEFULL);
 					dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
 				}
+				else{
+					if ( lpUpDownClient->GetRemoteQueueRank()){
+						//Morph - modified by AndCycle, DiffQR
+						COLORREF crOldTxtColor;
+						int	m_iDifference = lpUpDownClient->GetDiffQR();
+						if(m_iDifference == 0){
+							crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,0));
+						}
+						else if(m_iDifference > 0){
+							crOldTxtColor = dc->SetTextColor((COLORREF)RGB(191,0,0));
+						}
+						else if(m_iDifference < 0){
+							crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,191,0));
+						}
+						buffer.Format("QR: %u (%+i)",lpUpDownClient->GetRemoteQueueRank(), m_iDifference);
+						dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
+						dc->SetTextColor(crOldTxtColor);
+						//Morph - modified by AndCycle, DiffQR
+					}
+					else{
+						dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
+					}
+				}
+			} else {
+				dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
 			}
 			break;
 
@@ -1152,8 +1147,8 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		(lpDrawItemStruct->itemState & ODS_SELECTED) &&
 		(content->type == FILE_TYPE))
 	{
-			RECT outline_rec;
-			memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		RECT outline_rec;
+		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -1164,14 +1159,12 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		outline_rec.right--;
 
 		if(notFirst && (GetItemState(lpDrawItemStruct->itemID - 1, LVIS_SELECTED))) {
-
 			CtrlItem_Struct* prev = (CtrlItem_Struct*)this->GetItemData(lpDrawItemStruct->itemID - 1);
 			if(prev->type == FILE_TYPE)
 				outline_rec.top--;
 		} 
 
 		if(notLast && (GetItemState(lpDrawItemStruct->itemID + 1, LVIS_SELECTED))) {
-
 			CtrlItem_Struct* next = (CtrlItem_Struct*)this->GetItemData(lpDrawItemStruct->itemID + 1);
 			if(next->type == FILE_TYPE)
 				outline_rec.bottom++;
@@ -1182,7 +1175,6 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		else
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
-
 	//draw focus rectangle around non-highlightable items when they have the focus
 	else if (((lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS) && (GetFocus() == this))
 	{
@@ -1413,7 +1405,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PrioMenu.m_hMenu,((!filedone) ? MF_ENABLED:MF_GRAYED));
 
-
 			m_PrioMenu.CheckMenuItem(MP_PRIOAUTO, ((file->IsAutoDownPriority()) ? MF_CHECKED:MF_UNCHECKED));
 			m_PrioMenu.CheckMenuItem(MP_PRIOHIGH, ((file->GetDownPriority() == PR_HIGH && !file->IsAutoDownPriority()) ? MF_CHECKED:MF_UNCHECKED));
 			m_PrioMenu.CheckMenuItem(MP_PRIONORMAL, ((file->GetDownPriority() == PR_NORMAL && !file->IsAutoDownPriority()) ? MF_CHECKED:MF_UNCHECKED));
@@ -1500,7 +1491,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 					mc_A4AFMenu.AppendMenu(MF_STRING,MP_SWAP_A4AF_TO_THIS,GetResString(IDS_SWAP_A4AF_TO_THIS)); // Added by sivka [Ambdribant]
 				if (content->type == AVAILABLE_SOURCE)
 					mc_A4AFMenu.AppendMenu(MF_STRING,MP_SWAP_A4AF_TO_OTHER,GetResString(IDS_SWAP_A4AF_TO_OTHER)); // Added by sivka
-
 				if (mc_A4AFMenu.GetMenuItemCount()>0) 
 					m_ClientMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)mc_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));				
 			}
@@ -1587,8 +1577,8 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 							if(selectedList.GetAt(pos)->GetStatus() != PS_COMPLETING && selectedList.GetAt(pos)->GetStatus() != PS_COMPLETE){
 								validdelete = true;
 								if (selectedCount<50) fileList.Append("\n"+CString(selectedList.GetAt(pos)->GetFileName())); 
-						} 
-						} 
+							} 
+						}
 
 						CString quest;
 						if (selectedCount==1)
@@ -1706,11 +1696,11 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 								partfile->ResumeFileInsufficient();
 							else
 								partfile->ResumeFile();
-							selectedList.RemoveHead(); 
+							selectedList.RemoveHead();
 						}
 						SetRedraw(true);
 						break; 
-					} 
+					}
 					if (file->GetStatus() == PS_INSUFFICIENT)
 						file->ResumeFileInsufficient();
 					else
@@ -1794,10 +1784,10 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					if (selectedCount == 1 && (file->GetStatus(false) == PS_READY || file->GetStatus(false) == PS_EMPTY))
 					{
 						theApp.downloadqueue->DisableAllA4AFAuto();
-						
+
 						POSITION pos1, pos2;
 						for (pos1 = file->srclist.GetHeadPosition(); (pos2 = pos1) != NULL;)
-								{
+						{
 							file->srclist.GetNext(pos1);
 							file->srclist.GetAt(pos2)->SwapToAnotherFile(false, false, false, NULL);
 						}
@@ -2146,11 +2136,11 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				}
 				// khaos::kmod-				
 			}
-			//ChangeCategory(curTab); Commented lines for bug of A4AF changing cats (a part of catmod from khaos, no longer remains here...)
 		}
 		else{
 			CUpDownClient* client = (CUpDownClient*)content->value;
 			CPartFile* file = (CPartFile*)content->owner; // added by sivka
+
 			switch (wParam){
 				case MP_SHOWLIST:
 					client->RequestSharedFileList();
@@ -2163,7 +2153,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					break;
 				}
 				case MPG_ALTENTER:
-				case MP_DETAIL: {
+				case MP_DETAIL:{
 					CClientDetailDialog dialog(client);
 					dialog.DoModal();
 					break;
@@ -2823,6 +2813,7 @@ void CDownloadListCtrl::MoveCompletedfilesCat(uint8 from, uint8 to){
 		}
 	}
 }
+
 void CDownloadListCtrl::OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult)
 {
     NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pNMHDR;
@@ -2916,7 +2907,7 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 
 				info.Format(GetResString(IDS_NICKNAME) + _T(" %s\n")
 							+ GetResString(IDS_SERVER) + _T(": %s:%d\n")
-					+GetResString(IDS_SOURCEINFO),
+							+ GetResString(IDS_SOURCEINFO),
 							client->GetUserName(),
 							inet_ntoa(server), client->GetServerPort(),
 							client->GetAskedCountDown(), client->GetAvailablePartCount());

@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// ClientListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ClientListCtrl.h"
@@ -92,6 +88,7 @@ void CClientListCtrl::Init()
 CClientListCtrl::~CClientListCtrl()
 {
 }
+
 void CClientListCtrl::OnSysColorChange()
 {
 	CMuleListCtrl::OnSysColorChange();
@@ -292,7 +289,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						image = 6;
 					else
 						image = 0;
-						
+
 					POINT point = {cur_rec.left, cur_rec.top+1};
 					imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
 					//MORPH END - Modified by SiRoB, More client icon
@@ -494,7 +491,7 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				break;
 			}
 			case MPG_ALTENTER:
-			case MP_DETAIL: {
+			case MP_DETAIL:{
 				CClientDetailDialog dialog(client);
 				dialog.DoModal();
 				break;

@@ -14,9 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// handling incoming connections (up or downloadrequests)
-
 #pragma once
 #include "EMSocket.h"
 
@@ -41,6 +38,7 @@ public:
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030818-1923
 
 	CUpDownClient*	client;
+
 protected:
 	virtual void Close()	{CAsyncSocketEx::Close();} // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	virtual	void OnInit();
@@ -64,16 +62,15 @@ private:
 	uint32	timeout_timer;
 	bool	deletethis;
 	uint32	deltimer;
-
 };
 
 
-// CListenSocket command target
 class CListenSocket : public CAsyncSocketEx
 {
 public:
 	CListenSocket(CPreferences* in_prefs);
 	~CListenSocket();
+
 	bool	StartListening();
 	void	StopListening();
 	virtual void OnAccept(int nErrorCode);
@@ -115,4 +112,3 @@ private:
 	uint16	per5average;
 	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 };
-

@@ -14,8 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "SearchListCtrl.h"
@@ -23,7 +21,6 @@
 #include "IconStatic.h"
 #include "EditX.h"
 #include "ComboBoxEx2.h"
-#include "kademlia/utils/UInt128.h"
 
 class CCustomAutoComplete;
 class CJigleSOAPThread;
@@ -160,7 +157,6 @@ private:
 	bool		m_guardCBPrompt;
 	CCustomAutoComplete* m_pacSearchString;
 	CString	ToQueryString(CString str);
-
 	HICON icon_search;
 	CIconStatic m_ctrlSearchFrm;
 	CIconStatic m_ctrlDirectDlFrm;

@@ -14,11 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// TransferWnd.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
@@ -677,9 +672,8 @@ void CTransferWnd::OnMouseMove(UINT nFlags, CPoint point)
 	if (m_bIsDragging){
 		CPoint pt(point);           //get our current mouse coordinates
 		ClientToScreen(&pt);        //convert to screen coordinates
-		m_nDropIndex=GetTabUnderMouse(&pt);
 
-		//// Move the drag image
+		m_nDropIndex=GetTabUnderMouse(&pt);
 		m_dlTab.SetCurSel(m_nDropIndex);
 		m_dlTab.Invalidate();
 		

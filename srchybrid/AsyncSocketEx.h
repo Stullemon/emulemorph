@@ -66,7 +66,6 @@ to tim.kosse@gmx.de
 
 #pragma once
 #define FD_FORCEREAD (1<<15)
-
 #include "winsock.h"
 #include "loggable.h"
 

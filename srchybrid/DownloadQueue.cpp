@@ -1,3 +1,4 @@
+//this file is part of eMule
 //Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
@@ -822,6 +823,7 @@ bool CDownloadQueue::IsFileExisting(const uchar* fileid){
 
  //MORPH - Added by Yun.SF3, ZZ Upload System
 void CDownloadQueue::Process(){
+	
 	ProcessLocalRequests(); // send src requests to local server
 
 	uint32 downspeed = 0;
@@ -1012,7 +1014,6 @@ bool CDownloadQueue::IsTempFile(const CString& rstrDirectory, const CString& rst
 // SLUGFILLER: SafeHash
 
 void CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
-	// if we block loopbacks at this point it should prevent us from connecting to ourself
 	if (sender->IsStopped()){
 		delete source;
 		return;
@@ -1376,13 +1377,14 @@ bool CDownloadQueue::SendNextUDPPacket()
 	if (!bSentPacket && dataGlobGetSources.GetLength() > 0)
 		SendGlobGetSourcesUDPPacket(&dataGlobGetSources);
 
-	// send max 40 udp request to one server per interval, if we have more than 40 files, we rotate the list and use it as Queue
+	// send max 35 UDP request to one server per interval
+	// if we have more than 35 files, we rotate the list and use it as queue
 	if (m_cRequestsSentToServer >= MAX_REQUESTS_PER_SERVER)
 	{
 		if (theApp.glob_prefs->GetDebugServerUDP() && theApp.glob_prefs->GetDebugServerSources())
 			Debug("Rotating file list\n");
 
-		// move the last 40 files to the head
+		// move the last 35 files to the head
 		if (filelist.GetCount() >= MAX_REQUESTS_PER_SERVER){
 			for (int i = 0; i != MAX_REQUESTS_PER_SERVER; i++){
 				filelist.AddHead( filelist.RemoveTail() );
@@ -1577,6 +1579,7 @@ void CDownloadQueue::GetDownloadStats(int results[]) {
 
 	for (POSITION pos =theApp.downloadqueue->filelist.GetHeadPosition();pos != 0;theApp.downloadqueue->filelist.GetNext(pos)){
 		CPartFile* cur_file = filelist.GetAt(pos);
+
 		results[0]+=cur_file->GetSourceCount();
 		results[1]+=cur_file->GetTransferingSrcCount();
 		// -khaos-/
@@ -1696,12 +1699,12 @@ void CDownloadQueue::SetCatStatus(int cat, int newstatus){
 			(cat==0 && cur_file->CheckShowItemInGivenCat(cat))
 			 || ( cat>0 && cat==cur_file->GetCategory() ) )
 		{
-			switch (newstatus) {
+			 switch (newstatus) {
 				case MP_CANCEL:cur_file->DeleteFile();reset=true;break;
 				case MP_PAUSE:cur_file->PauseFile();break;
 				case MP_STOP:cur_file->StopFile();break;
 				case MP_RESUME: if (cur_file->GetStatus()==PS_PAUSED) cur_file->ResumeFile();break;
-		}
+			}
 		}
 		filelist.GetNext(pos);
 		if (reset) {reset=false;pos= filelist.GetHeadPosition();}
@@ -1751,7 +1754,6 @@ uint16 CDownloadQueue::GetPausedFileCount(){
 	}
 	return result;
 }
-
 
 void CDownloadQueue::DisableAllA4AFAuto(void)
 {
@@ -1835,7 +1837,6 @@ void CDownloadQueue::RemoveLocalServerRequest(CPartFile* pFile)
 	}
 }
 
-
 void CDownloadQueue::ProcessLocalRequests()
 {
 	if ( (!m_localServerReqQueue.IsEmpty()) && (m_dwNextTCPSrcReq < ::GetTickCount()) )
@@ -1910,6 +1911,7 @@ void CDownloadQueue::ProcessLocalRequests()
 		m_dwNextTCPSrcReq = ::GetTickCount() + SEC2MS(iMaxFilesPerTcpFrame*(16+4));
 	}
 }
+
 void CDownloadQueue::SendLocalSrcRequest(CPartFile* sender){
 	ASSERT ( !m_localServerReqQueue.Find(sender) );
 	m_localServerReqQueue.AddTail(sender);

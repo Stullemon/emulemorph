@@ -1,8 +1,19 @@
-//////////////////////////////////
-// MuleListCtrl.cpp
-// : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "MemDC.h"
@@ -331,7 +342,7 @@ void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
 		else if (IsKindOf(RUNTIME_CLASS(CUploadListCtrl)))
 			strKey = _T("UploadsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CQueueListCtrl)))
-			strKey = "QueuedLv";
+			strKey = _T("QueuedLv");
 		else if (IsKindOf(RUNTIME_CLASS(CClientListCtrl)))
 			strKey = _T("ClientsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CFriendListCtrl)))
@@ -1237,7 +1248,7 @@ BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC)
 	GetItemRect(topIndex, &itemRect, LVIR_BOUNDS);
 	clientRect.bottom = itemRect.top;
 	if (m_crWindowTextBk != CLR_NONE)
-	pDC->FillSolidRect(&clientRect,GetBkColor());
+		pDC->FillSolidRect(&clientRect,GetBkColor());
 	else
 		rcClip.top = itemRect.top;
 
@@ -1248,7 +1259,7 @@ BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC)
 		clientRect.top = itemRect.bottom;
 		rcClip.bottom = itemRect.bottom;
 		if (m_crWindowTextBk != CLR_NONE)
-		pDC->FillSolidRect(&clientRect, GetBkColor());
+			pDC->FillSolidRect(&clientRect, GetBkColor());
 	}
 
 	//draw right half if we need to
@@ -1257,7 +1268,7 @@ BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC)
 		clientRect.left = itemRect.right;
 		rcClip.right = itemRect.right;
 		if (m_crWindowTextBk != CLR_NONE)
-		pDC->FillSolidRect(&clientRect, GetBkColor());
+			pDC->FillSolidRect(&clientRect, GetBkColor());
 	}
 
 	if (m_crWindowTextBk == CLR_NONE){
@@ -1367,7 +1378,6 @@ BOOL CDlgListSearchListSearch::OnInitDialog()
 	SetWindowText(GetResString(IDS_SW_SEARCHBOX));
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_TEXT_LBL, GetResString(IDS_SEARCH_TEXT) + _T(':'));
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_COLUMN_LBL, GetResString(IDS_SEARCH_COLUMN) + _T(':'));
-	
 	SetDlgItemText(IDCANCEL, GetResString(IDS_CANCEL));	
 
 	if (m_pListView != NULL)

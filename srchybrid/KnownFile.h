@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "Loggable.h"
 #include "BarShader.h"
@@ -47,7 +46,6 @@ public:
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	void	AddRequest();
 	void	AddAccepted();
-	void	DelAccepted();//Morph - added by AndCycle, for zz prio system there are some situation need to take care with
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	void	AddTransferred(uint32 start, uint32 bytes);
 	void	AddBlockTransferred(uint32 start, uint32 end, uint32 count);
@@ -153,7 +151,7 @@ public:
 	~CKnownFile();
 
 	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
-	
+
 	const CString& GetPath() const	{return m_strDirectory;}
 	void	SetPath(LPCTSTR path);
 
@@ -163,6 +161,7 @@ public:
 	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
 	virtual	bool	IsPartFile()	{return false;}
 	virtual bool	LoadFromFile(CFile* file);	//load date, hashset and tags from a .met file
+
 	bool	WriteToFile(CFile* file);	
 	CTime	GetCFileDate()			{return CTime(date);}
 	uint32	GetFileDate()			{return date;}
@@ -232,6 +231,7 @@ public:
 	bool	IsMovie();
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
+
 	uint32	date;
 	uint32	dateC;
 	CFileStatistic statistic;
@@ -285,6 +285,7 @@ protected:
 
 private:
 	void	CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar* Output, uchar* = 0);
+
 	bool	m_bCommentLoaded;
 	uint16	m_iPartCount;
 	uint16  m_iED2KPartCount;
@@ -368,4 +369,3 @@ private:
 }
 
 static void MD4Transform(uint32 Hash[4], uint32 x[16]);
-

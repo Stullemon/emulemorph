@@ -66,7 +66,6 @@ Packet::Packet(char* header){
 	prot = head->eDonkeyID;
 }
 
-
 // -khaos--+++> Slightly modified for our stats uses...
 Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// only used for splitted packets!
 	m_bFromPF = bFromPF;
@@ -140,7 +139,6 @@ char* Packet::GetPacket(){
 		tempbuffer = new char[size+10];
 		memcpy(tempbuffer,GetHeader(),6);
 		memcpy(tempbuffer+6,pBuffer,size);
-
 		return tempbuffer;
 	}
 }
@@ -197,9 +195,7 @@ void Packet::PackPacket(){
 	}
 	prot = OP_PACKEDPROT;
 	memcpy(pBuffer,output,newsize);
-	//MORPH START - Added by IceCream, Hotfix by MKThunderStorm about the source exchange compression
 	size = newsize;
-	//MORPH END   - Added by IceCream, Hotfix by MKThunderStorm about the source exchange compression
 	delete[] output;
 	m_bPacked = true;
 }
@@ -221,7 +217,7 @@ bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
 		delete[] pBuffer;
 		pBuffer = (char*)unpack;
 		prot =  OP_EMULEPROT;
-		return true;				
+		return true;
 	}
 	delete[] unpack;
 	return false;

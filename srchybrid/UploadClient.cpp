@@ -61,51 +61,38 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		crBoth = RGB(104, 104, 104);
 	} 
 
-	crNeither = RGB(224, 224, 224);
+    crNeither = RGB(224, 224, 224);
 	crClientOnly = RGB(0, 220, 255);
 	crSending = RGB(0, 150, 0);
 	crNextSending = RGB(255,208,0);
 	crBuffer = RGB(255, 100, 100);
 
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030724-0336
-	uint16 partCount = 0;
+	// wistily: UpStatusFix
+	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	uint32 filesize;
+	if (currequpfile)
+		filesize=currequpfile->GetFileSize();
+	else
+		filesize=PARTSIZE*(m_nUpPartCount);
+	// wistily: UpStatusFix
 
-	if(m_nUpPartCount > 0) {
-		partCount = m_nUpPartCount;
-	} else if(GetUploadFileID() != NULL) {
-        	CKnownFile* knownFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
-        	if(knownFile != NULL) {
-		partCount = knownFile->GetPartCount();
-        	} else {
-            		partCount = 0;
-        	}
+	s_UpStatusBar.SetFileSize(filesize); 
+	s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
+	s_UpStatusBar.SetWidth(rect->right - rect->left); 
+	s_UpStatusBar.Fill(crNeither); 
+	if (!onlygreyrect && m_abyUpPartStatus) { 
+		for (uint32 i = 0;i < m_nUpPartCount;i++)
+			if(m_abyUpPartStatus[i])
+				s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crBoth);
 	}
-
-	if(partCount > 0) {
-		//uint32 filesize = PARTSIZE*(partCount);// wrong: the last part is not 9.28 MB
-		//wistily correct filesize calculation START
-		CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
-		if(!currequpfile)  return;
-		uint32 filesize = currequpfile->GetFileSize();
-		//wistily end
-
-		s_UpStatusBar.SetFileSize(filesize); 
-		s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
-		s_UpStatusBar.SetWidth(rect->right - rect->left); 
-		s_UpStatusBar.Fill(crNeither); 
-		if (!onlygreyrect && m_abyUpPartStatus) { 
-			for (uint32 i = 0;i < m_nUpPartCount;i++)
-				if(m_abyUpPartStatus[i])
-					s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crBoth);
+	Requested_Block_Struct* block;
+	if (!m_BlockRequests_queue.IsEmpty()){
+		block = m_BlockRequests_queue.GetHead();
+		if(block){
+			uint32 start = block->StartOffset/PARTSIZE;
+			s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
 		}
-		Requested_Block_Struct* block;
-		if (!m_BlockRequests_queue.IsEmpty()){
-			block = m_BlockRequests_queue.GetHead();
-			if(block){
-				uint32 start = block->StartOffset/PARTSIZE;
-				s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
-			}
-		}
+	}
     // PENDING: this is currently commented so that a yellow block is only shown for the next
     //          requested package. I would like for this to be commented the next test release.
     //          When we have confirmed that sockets no longer just stop requesting blocks,
@@ -117,7 +104,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	//		s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
 	//	}
 	//}
-		if (!m_DoneBlocks_list.IsEmpty()){
+	if (!m_DoneBlocks_list.IsEmpty()){
 		//for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
 		//	Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
 		//	s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
@@ -126,12 +113,12 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
         // Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
         uint32 total = 0;
 
-			for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
-				Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
+		for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
+			Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
 
             if(total + (block->EndOffset-block->StartOffset) < GetQueueSessionPayloadUp()) {
                 // block is sent
-				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+			    s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
                 total += block->EndOffset-block->StartOffset;
             } else if(total < GetQueueSessionPayloadUp()) {
                 // block partly sent, partly in buffer
@@ -146,11 +133,9 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
                 total += block->EndOffset-block->StartOffset;
     			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
             }
-			}
 		}
-		s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 	}
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
+   	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
 void CUpDownClient::SetUploadState(EUploadState news){
@@ -423,10 +408,10 @@ void CUpDownClient::CreateNextBlockPackage(){
     // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
     if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
        m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready (at least 0.2 MBytes there)
-          return;
-	}
+        return;
+    }
 
-	CFile file;
+    CFile file;
 	byte* filedata = 0;
 	CString fullname;
 	// -khaos--+++> Statistic to breakdown uploaded data by complete file vs. partfile.
@@ -461,19 +446,19 @@ void CUpDownClient::CreateNextBlockPackage(){
 				fullname.Format("%s\\%s",srcfile->GetPath(),srcfile->GetFileName());
 			}
 		
-            uint32 togo;
+			uint32 togo;
 			if (currentblock->StartOffset > currentblock->EndOffset){
 				togo = currentblock->EndOffset + (srcfile->GetFileSize() - currentblock->StartOffset);
-            }
+			}
 			else{
 				togo = currentblock->EndOffset - currentblock->StartOffset;
 				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1))
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
-            }
+			}
 
 			if( togo > EMBLOCKSIZE*3 )
 				throw GetResString(IDS_ERR_LARGEREQBLOCK);
-
+			
 			if (!srcfile->IsPartFile()){
 				// -khaos--+++> This is not a part file...
 				bFromPF = false;
@@ -526,7 +511,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			//srcfile->statistic.AddTransferred(togo);
 			srcfile->statistic.AddTransferred(currentblock->StartOffset, togo);
 			//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
-			m_addedPayloadQueueSession += togo;
+            m_addedPayloadQueueSession += togo;
 
 			m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 			delete[] filedata;
@@ -555,7 +540,6 @@ void CUpDownClient::CreateNextBlockPackage(){
 //	AddDebugLogLine(false,"Debug: Packet done. Size: %i",blockpack->GetLength());
 	//return true;
 }
-
 
 void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 	if (m_abyUpPartStatus) {
@@ -1070,12 +1054,14 @@ void CUpDownClient::SetWaitStartTime(){
 	}
 	credits->SetSecWaitStartTime(GetIP());
 }
+
 void CUpDownClient::ClearWaitStartTime(){
 	if (credits == NULL){
 		return;
 	}
 	credits->ClearWaitStartTime();
 }
+
 
 bool CUpDownClient::GetFriendSlot(){
 	if (credits && theApp.clientcredits->CryptoAvailable()){

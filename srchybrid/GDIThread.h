@@ -1,4 +1,3 @@
-
 #pragma once
 
 // GDIThread.h : header file

@@ -421,7 +421,6 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 		}
 	}
 
-	//theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
 	UpdateDisplayedInfo();
 	reqfile->UpdateAvailablePartsCount();
     
@@ -495,7 +494,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;){
 				Requested_Block_Struct* cur_block = m_DownloadBlocks_list.GetNext(pos);
 				if (reqfile)
-				reqfile->RemoveBlockFromList(cur_block->StartOffset,cur_block->EndOffset);
+					reqfile->RemoveBlockFromList(cur_block->StartOffset,cur_block->EndOffset);
 				delete cur_block;
 			}
 			m_DownloadBlocks_list.RemoveAll();
@@ -639,7 +638,7 @@ void CUpDownClient::SendBlockRequests(){
 void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 {
 #ifndef _DEBUG
-  try {
+  	try{
 #endif
 	// Ignore if no data required
 	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS))
@@ -885,7 +884,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
   	int err = Z_DATA_ERROR;
 #ifndef _DEBUG
   	try
-  	{
+	{
 #endif
 	    // Save some typing
 	    z_stream *zS = block->zStream;
@@ -913,7 +912,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 			    return err;
 			}
 		}
-    
+
 	    // Use whatever input is provided
 	    zS->next_in  = zipped;
 	    zS->avail_in = lenZipped;
@@ -939,7 +938,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 			    return err;
 			}
 			TRACE_UNZIP("; Z_STREAM_END\n");
-    
+
 		    // Got a good result, set the size to the amount unzipped in this call (including all recursive calls)
 		    (*lenUnzipped) = (zS->total_out - block->totalUnzipped);
 		    block->totalUnzipped = zS->total_out;
@@ -956,9 +955,9 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
     
 		    // Copy any data that was successfully unzipped to new array
 		    BYTE *temp = new BYTE[newLength];
-		    ASSERT( zS->total_out - block->totalUnzipped <= newLength );
+			ASSERT( zS->total_out - block->totalUnzipped <= newLength );
 		    memcpy(temp, (*unzipped), (zS->total_out - block->totalUnzipped));
-			delete [] (*unzipped);
+		    delete [] (*unzipped);
 		    (*unzipped) = temp;
 		    (*lenUnzipped) = newLength;
     
@@ -1141,13 +1140,13 @@ void CUpDownClient::ShowDownloadingParts(CString *partsYN)
 }
 
 void CUpDownClient::UpdateDisplayedInfo(boolean force) {
-	DWORD curTick = ::GetTickCount();
+    DWORD curTick = ::GetTickCount();
 
     if(force || curTick-m_lastRefreshedDLDisplay > MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000))) {
 	    theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
-		m_lastRefreshedDLDisplay = curTick;
-	}
+        m_lastRefreshedDLDisplay = curTick;
+    }
 }
 
 
@@ -1227,6 +1226,7 @@ bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensio
 		}
 	}
 
+
 	if (!SwapTo && bIgnoreNoNeeded){
 		usedList = &m_OtherNoNeeded_list;
 		for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition();pos != 0;m_OtherNoNeeded_list.GetNext(pos)){
@@ -1304,6 +1304,7 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 			if (!bRemoveCompletely)
 				theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(reqfile,this,true);
 		}
+
 
 		SetDownloadState(DS_NONE);
 		ResetFileStatusInfo();

@@ -55,6 +55,7 @@ private:
 	char m_aucHostnameBuffer[MAXGETHOSTSTRUCT];
 };
 // SLUGFILLER: hostnameSources
+
 class CDownloadQueue: public CLoggable
 {
 	friend class CAddFileThread;
@@ -217,7 +218,7 @@ private:
 	uint32 sumavgDDRO;
 	// END By BadWolf - Accurate Speed Measurement
 
-	//DWORD m_lastRefreshedDLDisplay;
+    //DWORD m_lastRefreshedDLDisplay;
 	CSourceHostnameResolveWnd m_srcwnd;		// SLUGFILLER: hostnameSources
 
 	// khaos::categorymod+ For queuing ED2K link additions.

@@ -109,4 +109,3 @@ private:
 	CED2KServerListLink& operator=(const CED2KFileLink&); // Not defined
 	CString m_address;
 };
-

@@ -266,7 +266,6 @@ CUpDownClient::~CUpDownClient(){
 	// khaos::kmod-
 	if (m_abyPartStatus)
 		delete[] m_abyPartStatus;
-	
 	if (m_abyUpPartStatus)
 		delete[] m_abyUpPartStatus;
 	ClearUploadBlockRequests();
@@ -289,7 +288,7 @@ CUpDownClient::~CUpDownClient(){
 	}
 	for (POSITION pos =m_WaitingPackets_list.GetHeadPosition();pos != 0;m_WaitingPackets_list.GetNext(pos))
 		delete m_WaitingPackets_list.GetAt(pos);
-
+	
 	if (m_iRate>0 || m_strComment.GetLength()>0) {
 		m_iRate=0; m_strComment="";
 		reqfile->UpdateFileRatingCommentAvail();
@@ -422,7 +421,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	uint16 nUserPort = 0;
 	data->Read(&nUserPort,2); // hmm clientport is sent twice - why?
 
-	uint32	tagcount;
+	uint32 tagcount;
 	data->Read(&tagcount,4);
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(data);
@@ -592,6 +591,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 			m_bLeecher = false;
 		//MORPH END   - Added by SiRoB, Anti-leecher feature
 	}
+
 	return bIsMule;
 }
 
@@ -614,7 +614,7 @@ void CUpDownClient::SendHelloPacket(){
 		theApp.stat_filteredclients++;
 		return;
 	}
-	
+
 	CSafeMemFile data(128);
 	uint8 hashsize = 16;
 	data.Write(&hashsize,1);
@@ -764,8 +764,9 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize){
 				m_byCompatibleClient = temptag.tag.intvalue;
 				break;
 			case ET_FEATURES:
-				// Bits 31- 1: 0 - reserved
-				// Bit      0: secure identification
+				// Bits 31- 8: 0 - reserved
+				// Bit	    7: Preview
+				// Bit   6- 0: secure identification
 				m_bySupportSecIdent = temptag.tag.intvalue & 3;
 				m_bSupportsPreview = (temptag.tag.intvalue & 128) > 0;
 				break;
@@ -845,6 +846,7 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	//MORPH END   - Added by IceCream, Anti-leecher feature
 	CTag tagName(CT_NAME,strUsedName);
 	tagName.WriteTagToFile(data);
+
 	// eD2K Version
 	CTag tagVersion(CT_VERSION,EDONKEYVERSION);
 	tagVersion.WriteTagToFile(data);
@@ -914,6 +916,7 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	}
 	data->Write(&dwIP,4);
 	data->Write(&nPort,2);
+//	data->Write(&dwIP,4); //The Hybrid added some bits here, what ARE THEY FOR?
 }
 
 void CUpDownClient::ProcessMuleCommentPacket(char* pachPacket, uint32 nSize){
@@ -963,14 +966,11 @@ void CUpDownClient::ProcessMuleCommentPacket(char* pachPacket, uint32 nSize){
 	}
 }
 
-bool CUpDownClient::Disconnected(bool bFromSocket){
+bool CUpDownClient::Disconnected( bool bFromSocket){
 	//If this is a KAD client object, just delete it!
 	if(this->GetKadIPCheckState() != KS_NONE){
 		return true;
-	}	
-	// There is at least one case where this ASSERT will give a false warning. When a new client instance is created
-	// on receiving OP_HELLO and the packet is parsed, it may throw an exception which let us delete/Disconnect that
-	// client which is not yet in the client-list.
+	}
 	ASSERT(theApp.clientlist->IsValidClient(this));
 
 	if (GetUploadState() == US_UPLOADING)
@@ -997,7 +997,7 @@ bool CUpDownClient::Disconnected(bool bFromSocket){
 		// or it just doesn't has this file, so try to swap first
 		if (!SwapToAnotherFile(true, true, true, NULL)){
 			theApp.downloadqueue->RemoveSource(this);
-			//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
+			//DEBUG_ONLY(AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
 		}
 	}
 		
@@ -1049,11 +1049,11 @@ bool CUpDownClient::Disconnected(bool bFromSocket){
 		socket->Safe_Delete();
 	}
 	socket = 0;
-	if (m_iFileListRequested){
+    if (m_iFileListRequested){
 		AddDebugLogLine(false,GetResString(IDS_SHAREDFILES_FAILED),GetUserName());
-		m_iFileListRequested = 0;
+        m_iFileListRequested = 0;
 	}
- 	if (m_Friend)
+	if (m_Friend)
 		theApp.friendlist->RefreshFriend(m_Friend);
 	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 	if (bDelete){
@@ -1066,6 +1066,9 @@ bool CUpDownClient::Disconnected(bool bFromSocket){
 	}
 }
 
+//Returned bool is not if the TryToConnect is successful or not..
+//false means the client was deleted!
+//true means the client was not deleted!
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected())){
 		if(Disconnected()){
@@ -1199,9 +1202,9 @@ void CUpDownClient::ConnectionEstablished(){
 	}
 }
 
-
-void CUpDownClient::ReGetClientSoft(){
-	if(m_pszUsername == NULL){
+void CUpDownClient::ReGetClientSoft()
+{
+	if (m_pszUsername == NULL){
 		m_clientSoft = SO_UNKNOWN;
 		return;
 	}
@@ -1210,7 +1213,7 @@ void CUpDownClient::ReGetClientSoft(){
 	//MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 
 	int iHashType = GetHashType();
-	if(iHashType == SO_EMULE){
+	if (iHashType == SO_EMULE){
 		LPCTSTR pszSoftware;
 		switch(m_byCompatibleClient){
 			case SO_CDONKEY:
@@ -1264,8 +1267,9 @@ void CUpDownClient::ReGetClientSoft(){
 		}
 		goto suite;//return; //MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 	}
+
 	if (m_bIsHybrid){
-		m_clientSoft=SO_EDONKEYHYBRID;
+		m_clientSoft = SO_EDONKEYHYBRID;
 		// seen:
 		// 105010	50.10
 		// 10501	50.1
@@ -1299,13 +1303,13 @@ void CUpDownClient::ReGetClientSoft(){
 			nClientMinVersion = uMin;
 			nClientUpVersion = m_nClientVersion - uMin*10;
 		}
-		else {
+		else{
 			nClientMajVersion = 0;
 			nClientMinVersion = m_nClientVersion;
 			nClientUpVersion = 0;
 		}
 		m_nClientVersion = nClientMajVersion*100*10*100 + nClientMinVersion*100*10 + nClientUpVersion*100;
-		
+
 		int iLen;
 		TCHAR szSoftware[128];
 		if (nClientUpVersion)
@@ -1413,7 +1417,7 @@ void CUpDownClient::SetUserHash(uchar* m_achTempUserHash){
 }
 
 void CUpDownClient::SendPublicKeyPacket(){
-	///* delete this line later*/DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "sending public key to '%s'", GetUserName()));
+	///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "sending public key to '%s'", GetUserName()));
 	// send our public key to the client who requested it
 	if (socket == NULL || credits == NULL || m_SecureIdentState != IS_KEYANDSIGNEEDED){
 		ASSERT ( false );
@@ -1441,8 +1445,8 @@ void CUpDownClient::SendSignaturePacket(){
 		return;
 	if (credits->GetSecIDKeyLen() == 0)
 		return; // We don't have his public key yet, will be back here later
-		///* delete this line later*/ DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "sending signature key to '%s'", GetUserName()));
-	// do we have a challenge value recieved (actually we should if we are in this function)
+		///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "sending signature key to '%s'", GetUserName()));
+	// do we have a challenge value received (actually we should if we are in this function)
 	if (credits->m_dwCryptRndChallengeFrom == 0){
 		AddDebugLogLine(false, "Want to send signature but challenge value is invalid ('%s')", GetUserName());
 		return;
@@ -1488,7 +1492,7 @@ void CUpDownClient::SendSignaturePacket(){
 void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 	theApp.clientlist->AddTrackClient(this);
 
-	///* delete this line later*/ DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "recieving public key from '%s'", GetUserName()));
+	///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "recieving public key from '%s'", GetUserName()));
 	if (socket == NULL || credits == NULL || pachPacket[0] != nSize-1
 		|| nSize == 0 || nSize > 250){
 		ASSERT ( false );
@@ -1513,7 +1517,7 @@ void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 }
 
 void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
-	///* delete this line later*/ DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "receiving signature from '%s'", GetUserName()));
+	///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "receiving signature from '%s'", GetUserName()));
 	// here we spread the good guys from the bad ones ;)
 
 	if (socket == NULL || credits == NULL || nSize == 0 || nSize > 250){
@@ -1530,6 +1534,7 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 		ASSERT ( false );
 		return;
 	}
+
 	if (!theApp.clientcredits->CryptoAvailable())
 		return;
 	
@@ -1569,13 +1574,13 @@ void CUpDownClient::SendSecIdentStatePacket(){
 				nValue = IS_SIGNATURENEEDED;
 		}
 		if (nValue == 0){
-			//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "Not sending SecIdentState Packet, because State is Zero"));
+			//DEBUG_ONLY(AddDebugLogLine(false, "Not sending SecIdentState Packet, because State is Zero"));
 			return;
 		}
 		// crypt: send random data to sign
 		uint32 dwRandom = rand()+1;
 		credits->m_dwCryptRndChallengeFor = dwRandom;
-		//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "sending SecIdentState Packet, state: %i (to '%s')", nValue, GetUserName() ));
+		//DEBUG_ONLY(AddDebugLogLine(false, "sending SecIdentState Packet, state: %i (to '%s')", nValue, GetUserName() ));
 		Packet* packet = new Packet(OP_SECIDENTSTATE,5,OP_EMULEPROT);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 		packet->pBuffer[0] = nValue;
@@ -1607,7 +1612,7 @@ void CUpDownClient::ProcessSecIdentStatePacket(uchar* pachPacket, uint32 nSize){
 	uint32 dwRandom;
 	memcpy(&dwRandom, pachPacket+1,4);
 	credits->m_dwCryptRndChallengeFrom = dwRandom;
-	//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "recieved SecIdentState Packet, state: %i", pachPacket[0]));
+	//DEBUG_ONLY(AddDebugLogLine(false, "received SecIdentState Packet, state: %i", pachPacket[0]));
 }
 
 void CUpDownClient::InfoPacketsReceived(){
@@ -1620,6 +1625,7 @@ void CUpDownClient::InfoPacketsReceived(){
 		SendSecIdentStatePacket();
 	}
 }
+
 void CUpDownClient::ResetFileStatusInfo(){
 	//MORPH START - Removed by SiRoB, khaos::+
 	/*if (m_abyPartStatus){
@@ -1744,7 +1750,7 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 
 // sends a packet, if needed it will establish a connection before
 // options used: ignore max connections, control packet, delete packet
-// !if the functions returns false it is _possible_ that this clientobject was deleted, because the connectiontry fails 
+// !if the functions returns false that client object was deleted because the connection try failed and the object wasn't needed anymore.
 bool CUpDownClient::SafeSendPacket(Packet* packet){
 	if (socket && socket->IsConnected()){
 		socket->SendPacket(packet);

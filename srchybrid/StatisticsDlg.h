@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "StatisticsTree.h"
@@ -142,6 +141,7 @@ protected:
 	virtual BOOL OnInitDialog(); 
 	virtual void OnSize(UINT nType,int cx,int cy);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSysColorChange();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);

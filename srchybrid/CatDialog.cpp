@@ -1,5 +1,5 @@
 //this file is part of eMule
-//created by Ornis
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,9 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// CatDialog.cpp : implementation file
-
 #include "stdafx.h"
 #include "emule.h"
 #include "CatDialog.h"
@@ -186,7 +183,7 @@ void CCatDialog::Localize(){
 	m_prio.AddString(GetResString(IDS_PRIONORMAL));
 	m_prio.AddString(GetResString(IDS_PRIOHIGH));
 	m_prio.AddString(GetResString(IDS_PRIOAUTO));
-	m_prio.SetCurSel(m_myCat->prio);	
+	m_prio.SetCurSel(m_myCat->prio);
 }
 
 void CCatDialog::OnBnClickedBrowse()

@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
 #include "emule.h"
 #include "Sockets.h"
@@ -62,7 +61,7 @@ void CServerConnect::TryAnotherConnectionrequest(){
 				{
 					// 05-Nov-2003: If we have a very short server list, we could put serious load on those few servers
 					// if we start the next connection tries without waiting.
-				AddLogLine(true,GetResString(IDS_OUTOFSERVERS));
+					AddLogLine(true,GetResString(IDS_OUTOFSERVERS));
 					AddLogLine(false,GetResString(IDS_RECONNECT), CS_RETRYCONNECTTIME);
 					VERIFY( (m_idRetryTimer = SetTimer(NULL, 0, 1000*CS_RETRYCONNECTTIME, RetryConnectTimer)) != NULL );
 					if (!m_idRetryTimer)
@@ -200,17 +199,22 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 
 		CSafeMemFile data(256);
 		data.Write(theApp.glob_prefs->GetUserHash(),16);
+
 		uint32 clientid = GetClientID();
 		data.Write(&clientid,4);
+
 		uint16 port = app_prefs->GetPort();
 		data.Write(&port,2);
 
 		uint32 tagcount = 4;
 		data.Write(&tagcount,4);
+
 		CTag tagName(CT_NAME,app_prefs->GetUserNick());
 		tagName.WriteTagToFile(&data);
+
 		CTag tagVersion(CT_VERSION,EDONKEYVERSION);
 		tagVersion.WriteTagToFile(&data);
+
 		CTag tagPort(CT_PORT,app_prefs->GetPort());
 		tagPort.WriteTagToFile(&data);
 
@@ -249,6 +253,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 	}
 	theApp.emuledlg->ShowConnectionState();
 }
+
 bool CServerConnect::SendPacket(Packet* packet,bool delpacket, CServerSocket* to){
 	if (!to){
 		if (connected){
@@ -449,7 +454,7 @@ CServerConnect::CServerConnect(CServerList* in_serverlist, CPreferences* in_pref
 	clientid = 0;
 	singleconnecting = false;
 	if (in_prefs->GetServerUDPPort() != 0){
-	udpsocket = new CUDPSocket(this); // initalize socket for udp packets
+	    udpsocket = new CUDPSocket(this); // initalize socket for udp packets
 		if (!udpsocket->Create()){
 			delete udpsocket;
 			udpsocket = NULL;
@@ -470,9 +475,9 @@ CServerConnect::~CServerConnect(){
 	connectedsocket = NULL;
 	// close udp socket
 	if (udpsocket){
-		udpsocket->Close();
-		delete udpsocket;
-	}
+	    udpsocket->Close();
+	    delete udpsocket;
+    }
 }
 
 CServer* CServerConnect::GetCurrentServer(){

@@ -267,7 +267,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				if (m_pRecvBuffer[1]!=90 || m_pRecvBuffer[0]!=0)
 				{
 					DoLayerCallback(LAYERCALLBACK_LAYERSPECIFIC, PROXYERROR_REQUESTFAILED, 0);
-						if (m_nProxyOpID==PROXYOP_CONNECT)
+					if (m_nProxyOpID==PROXYOP_CONNECT)
 						TriggerEvent(FD_CONNECT, WSAECONNABORTED, TRUE);
 					else
 						TriggerEvent(FD_ACCEPT, WSAECONNABORTED, TRUE);

@@ -41,6 +41,7 @@ struct PORTANDHASH{
 	uint16 nPort;
 	void* pHash;
 };
+
 class CDeletedClient{
 public:
 	CDeletedClient(CUpDownClient* pClient);
@@ -68,7 +69,7 @@ public:
 	CUpDownClient* FindClientByServerID(uint32 uServerIP, uint32 uUserID);
 	CUpDownClient* FindClientByID_KadPort(uint32 clientID,uint16 kadPort);
 	void	GetClientListByFileID(CUpDownClientPtrList *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
-	
+
 	void	AddBannedClient(uint32 dwIP);
 	bool	IsBannedClient(uint32 dwIP);
 	void	RemoveBannedClient(uint32 dwIP);
@@ -81,7 +82,7 @@ public:
 	void	Process();
 	void	RequestTCP(Kademlia::CContact* contact);
 	void	RemoveTCP(CUpDownClient* torem);
-	
+
 	bool	IsValidClient(CUpDownClient* tocheck);
 	void	Debug_SocketDeleted(CClientReqSocket* deleted);
 

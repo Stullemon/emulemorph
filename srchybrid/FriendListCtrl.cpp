@@ -14,9 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-// FriendListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "FriendListCtrl.h"
@@ -68,6 +65,7 @@ END_MESSAGE_MAP()
 void CFriendListCtrl::Init()
 {
 	SetExtendedStyle(LVS_EX_FULLROWSELECT);
+
 	RECT rcWindow;
 	GetWindowRect(&rcWindow);
 	InsertColumn(0, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, rcWindow.right - rcWindow.left - 4, 0);
@@ -102,7 +100,7 @@ void CFriendListCtrl::Localize()
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
 	CString strRes;
-	
+
 	strRes = GetResString(IDS_QL_USERNAME);
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(0, &hdi);
@@ -308,7 +306,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	if (iSel != -1)
+	if (iSel != -1) 
 		ShowFriendDetails((CFriend*)GetItemData(iSel));
 	*pResult = 0;
 }

@@ -14,11 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// ServerWnd.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ServerWnd.h"
@@ -82,7 +77,7 @@ BOOL CServerWnd::OnInitDialog()
 	SetAllIcons();
 	Localize();
 	serverlistctrl.Init(theApp.serverlist);
-	
+
 	m_ctrlNewServerFrm.Init("AddServer");
 	m_ctrlUpdateServerFrm.Init("ServerUpdateMET");
 	m_ctrlMyInfo.Init("MyInfo");
@@ -161,7 +156,7 @@ BOOL CServerWnd::OnInitDialog()
 	m_MyInfo.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 	m_MyInfo.SetAutoURLDetect();
 	m_MyInfo.SetEventMask(m_MyInfo.GetEventMask() | ENM_LINK);
-	
+
 	PARAFORMAT pf = {0};
 	pf.cbSize = sizeof pf;
 	if (m_MyInfo.GetParaFormat(pf)){
@@ -298,7 +293,6 @@ void CServerWnd::Localize()
 
 	UpdateLogTabSelection();
 	UpdateControlsState();
-
 }
 
 BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)

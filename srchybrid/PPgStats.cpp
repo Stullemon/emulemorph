@@ -1,6 +1,19 @@
-// PPgStats.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgStats.h"
@@ -92,7 +105,7 @@ BOOL CPPgStats::OnInitDialog()
 	SetModified(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CPPgStats::OnApply()
@@ -102,7 +115,7 @@ BOOL CPPgStats::OnApply()
 	{
 		bool bInvalidateGraphs = false;
 		if (app_prefs->GetTrafficOMeterInterval() != mystats1){
-		theApp.glob_prefs->SetTrafficOMeterInterval(mystats1);
+			theApp.glob_prefs->SetTrafficOMeterInterval(mystats1);
 			bInvalidateGraphs = true;
 		}
 		if (app_prefs->GetStatsInterval() != mystats2){
@@ -146,7 +159,7 @@ BOOL CPPgStats::OnApply()
 			theApp.emuledlg->statisticswnd->ShowInterval();
 		}
 		theApp.emuledlg->statisticswnd->RepaintMeters();
-		theApp.emuledlg->statisticswnd->GetDlgItem(IDC_STATTREE)->EnableWindow(theApp.glob_prefs->GetStatsInterval()>0);
+		theApp.emuledlg->statisticswnd->GetDlgItem(IDC_STATTREE)->EnableWindow(theApp.glob_prefs->GetStatsInterval() > 0);
 		SetModified(FALSE);
 	}
 	return CPropertyPage::OnApply();
@@ -163,7 +176,6 @@ void CPPgStats::Localize(void)
 		GetDlgItem(IDC_STATIC_CGRAPHRATIO)->SetWindowText(GetResString(IDS_PPGSTATS_ACRATIO));
 		// <-----khaos-
 		SetWindowText(GetResString(IDS_STATSSETUPINFO));
-
 		GetDlgItem(IDC_PREFCOLORS)->SetWindowText(GetResString(IDS_COLORS));
 
 		m_colors.ResetContent();
@@ -187,7 +199,7 @@ void CPPgStats::Localize(void)
 		m_colors.AddString(GetResString(IDS_SP_ULSLOTSNOOVERHEAD)); //MORPH - Added by SiRoB, ZZ Upload System 20030818-1923
 
 		m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
-		m_ctlColor.DefaultText = NULL;	
+		m_ctlColor.DefaultText = NULL;
 
 		m_colors.SetCurSel(0);
 		OnCbnSelchangeColorselector();
@@ -197,20 +209,20 @@ void CPPgStats::Localize(void)
 
 void CPPgStats::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	CSliderCtrl* slider =(CSliderCtrl*)pScrollBar;
+	CSliderCtrl* slider = (CSliderCtrl*)pScrollBar;
 	int position = slider->GetPos();
 
 	if (pScrollBar == GetDlgItem(IDC_SLIDER))
 	{
 		if (mystats1 != position){
-		mystats1=position;
+			mystats1 = position;
 			SetModified(TRUE);
 		}
 	}
 	else if (pScrollBar == GetDlgItem(IDC_SLIDER2))
 	{
 		if (mystats2 != position){
-			mystats2=position;
+			mystats2 = position;
 			SetModified(TRUE);
 		}
 	}
@@ -250,18 +262,18 @@ void CPPgStats::ShowInterval()
 
 void CPPgStats::OnCbnSelchangeColorselector()
 {
-	int sel=m_colors.GetCurSel();
-	COLORREF selcolor=theApp.glob_prefs->GetStatsColor(sel);
+	int sel = m_colors.GetCurSel();
+	COLORREF selcolor = theApp.glob_prefs->GetStatsColor(sel);
 	m_ctlColor.SetColor(selcolor);
 }
 
 LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
 {
-	COLORREF setcolor=m_ctlColor.GetColor();
+	COLORREF setcolor = m_ctlColor.GetColor();
 	int iCurColor = theApp.glob_prefs->GetStatsColor(m_colors.GetCurSel());
 	if (iCurColor != setcolor){
-	theApp.glob_prefs->SetStatsColor(m_colors.GetCurSel(),setcolor);
-	SetModified(TRUE);
+		theApp.glob_prefs->SetStatsColor(m_colors.GetCurSel(), setcolor);
+		SetModified(TRUE);
 	}
 	return TRUE;
 }

@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
 #include "emule.h"
 #include "OtherFunctions.h"
@@ -282,7 +281,6 @@ CString MakeStringEscaped(CString in) {
 	return in;
 }
 
-
 bool Ask4RegFix(bool checkOnly, bool dontAsk){
 
 	// Barry - Make backup first
@@ -502,29 +500,28 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 
 CString GetRateString(uint16 rate)
 { 
-      switch (rate){ 
-      case 0: 
-         return GetResString(IDS_CMT_NOTRATED); 
-         break; 
-      case 1: 
-         return GetResString(IDS_CMT_FAKE); 
-         break; 
-      case 2: 
-         return GetResString(IDS_CMT_POOR); 
-         break; 
-      case 3: 
-         return GetResString(IDS_CMT_GOOD); 
-         break; 
-      case 4: 
-         return GetResString(IDS_CMT_FAIR); 
-         break; 
-      case 5: 
-         return GetResString(IDS_CMT_EXCELLENT); 
-         break; 
-      } 
-      return GetResString(IDS_CMT_NOTRATED); 
+	switch (rate){ 
+	case 0: 
+		return GetResString(IDS_CMT_NOTRATED); 
+		break; 
+	case 1: 
+		return GetResString(IDS_CMT_FAKE); 
+		break; 
+	case 2: 
+		return GetResString(IDS_CMT_POOR); 
+		break; 
+	case 3: 
+		return GetResString(IDS_CMT_GOOD); 
+		break; 
+	case 4: 
+		return GetResString(IDS_CMT_FAIR); 
+		break; 
+	case 5: 
+		return GetResString(IDS_CMT_EXCELLENT); 
+		break; 
+	} 
+	return GetResString(IDS_CMT_NOTRATED); 
 } 
-//end rate File//
 
 // Returns a BASE32 encoded byte array
 //
@@ -642,7 +639,6 @@ void UpdateURLMenu(CMenu &menu,int &counter){
 			if (fgets(buffer,lenBuf,readFile)==0) break;
 			sbuffer=buffer;
 			
-			
 			// ignore comments & too short lines
 			//MORPH START - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
 			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength()<3)
@@ -684,7 +680,6 @@ void RunURL(CAbstractFile* file, CString urlpattern)
 
 		// add filename to the url
 		urlpattern.Replace("#filename",URLEncode(file->GetFileName()));
-	
 	}
 	// Open URL
 	ShellExecute(NULL, NULL, urlpattern, NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
@@ -1339,12 +1334,15 @@ int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2)
 	return strDir1.CompareNoCase(strDir2);		// compare again
 }
 
+// ZZ:UploadSpeedSense -->
 bool IsGoodIP(uint32 nIP, bool forceCheck)
+// ZZ:UploadSpeedSense <--
 {
 	// always filter following IP's
 	// -------------------------------------------
 	//	 0.0.0.0
 	// 127.*.*.*						localhost
+	// 255.255.255.255					invalid
 
 	if (nIP==0 || (uint8)nIP==127 || nIP==INADDR_NONE)
 		return false;
@@ -1352,6 +1350,7 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 	// ZZ:UploadSpeedSense <--
 	if (!theApp.glob_prefs->FilterBadIPs() && !forceCheck)
 		return true;
+	// ZZ:UploadSpeedSense <--
 
 	// filter LAN IP's
 	// -------------------------------------------
@@ -1421,6 +1420,7 @@ CString GetFormatedUInt(ULONG ulVal)
 		strVal = szVal;
 	return strVal;
 }
+
 void Debug(LPCTSTR pszFmtMsg, ...)
 {
 	va_list pArgs;

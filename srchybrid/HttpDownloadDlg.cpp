@@ -268,6 +268,7 @@ BOOL CHttpDownloadDlg::OnInitDialog()
 
 	//Let the parent class do its thing
 	CDialog::OnInitDialog();
+	InitWindowStyles(this);
 
 	//Setup the animation control
 	m_ctrlAnimate.Open(IDR_HTTPDOWNLOAD_ANIMATION);

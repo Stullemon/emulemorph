@@ -14,11 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// SharedFilesCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "emuledlg.h"
@@ -583,6 +578,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	{
 		RECT outline_rec;
 		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+
 		outline_rec.top--;
 		outline_rec.bottom++;
 		dc->FrameRect(&outline_rec, &CBrush(m_crWindow));
@@ -644,6 +640,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		file = (CKnownFile*)GetItemData(iSel);
 		uFlags = MF_ENABLED;
 	}
+
 	m_PrioMenu.EnableMenuItem(MP_PRIOVERYLOW, uFlags);
 	m_PrioMenu.EnableMenuItem(MP_PRIOLOW, uFlags);
 	m_PrioMenu.EnableMenuItem(MP_PRIONORMAL, uFlags);
@@ -689,7 +686,6 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem(MP_GETHTMLED2KLINK, uFlags);
 	m_SharedFilesMenu.EnableMenuItem(MP_GETSOURCEED2KLINK, (file && theApp.IsConnected() && !theApp.IsFirewalled()) ? MF_ENABLED : MF_GRAYED);
 
-
 	// itsonlyme: hostnameSource
 	if (file && theApp.IsConnected() && !theApp.IsFirewalled() &&
 		!CString(theApp.glob_prefs->GetYourHostname()).IsEmpty() &&
@@ -707,7 +703,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	UpdateURLMenu(Web,counter);
 	UINT flag2 = ((counter == 0) || !file) ? MF_GRAYED : MF_STRING;
 	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)Web.m_hMenu, GetResString(IDS_WEBSERVICES));
-
+	
 	GetPopupMenuPos(*this, point);
 	m_SharedFilesMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
 
@@ -1063,6 +1059,7 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			return _tcsicmp(item1->GetPath(),item2->GetPath());
 		case 30: //folder desc
 			return _tcsicmp(item2->GetPath(),item1->GetPath());
+
 		// #zegzav:completesrc
 		case 11: //complete sources asc
 			return CompareUnsigned(item1->m_nCompleteSourcesCount, item2->m_nCompleteSourcesCount);
@@ -1206,7 +1203,7 @@ void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 			}
 			else
 				OpenFile(file);
-	}
+		}
 	}
 	*pResult = 0;
 }

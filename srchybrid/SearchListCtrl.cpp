@@ -14,11 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// SearchListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ResizableLib/ResizableSheet.h"
@@ -131,7 +126,7 @@ CSearchListCtrl::CSearchListCtrl() {
 
 void CSearchListCtrl::SetStyle() {
 	if (theApp.glob_prefs->IsDoubleClickEnabled())
-	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	else
 		SetExtendedStyle(LVS_EX_ONECLICKACTIVATE | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 }
@@ -288,7 +283,7 @@ void CSearchListCtrl::AddResult(CSearchFile* toshow)
 		{
 			if (searchselect.GetItem(tabCounter, &tabitem) && tabitem.lParam != NULL)
 				if (((const SSearchParams*)tabitem.lParam)->dwSearchID == toshow->GetSearchID())
-				break;
+					break;
 		}
 
 		if (tabitem.lParam != -1 && tabitem.lParam != NULL && ((const SSearchParams*)tabitem.lParam)->dwSearchID == toshow->GetSearchID())
@@ -309,7 +304,7 @@ void CSearchListCtrl::AddResult(CSearchFile* toshow)
 				CString sourceStr;
 				sourceStr.Format(_T("%s (%u)"), szText, searchlist->GetFoundFiles(toshow->GetSearchID()));
 
-			tabitem.mask = TCIF_TEXT;
+				tabitem.mask = TCIF_TEXT;
 				tabitem.pszText = const_cast<LPTSTR>((LPCTSTR)sourceStr);
 				searchselect.SetItem(tabCounter, &tabitem);
 			}
@@ -737,6 +732,7 @@ void CSearchListCtrl::CreateMenues() {
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVESELECTED, GetResString(IDS_REMOVESELECTED));
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_REMOVESEARCHSTRING));
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALLSEARCH));
+
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
 
 }

@@ -1,7 +1,4 @@
 #pragma once
-// TVCreditsDlg.h : header file
-//
-
 #include "GDIThread.h"
 #include "resource.h"
 #include "enbitmap.h"

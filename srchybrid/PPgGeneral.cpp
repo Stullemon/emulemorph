@@ -1,6 +1,19 @@
-// PPgGeneral.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
@@ -23,8 +36,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-// CPPgGeneral dialog
 
 IMPLEMENT_DYNAMIC(CPPgGeneral, CPropertyPage)
 CPPgGeneral::CPPgGeneral()
@@ -112,7 +123,7 @@ BOOL CPPgGeneral::OnInitDialog()
 	InitWindowStyles(this);
 
 	((CEdit*)GetDlgItem(IDC_NICK))->SetLimitText(MAX_NICK_LENGTH);
-	
+
 	CWordArray aLanguageIDs;
 	app_prefs->GetLanguages(aLanguageIDs);
 	for (int i = 0; i < aLanguageIDs.GetSize(); i++){
@@ -144,7 +155,7 @@ BOOL CPPgGeneral::OnApply()
 		WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
 		if (app_prefs->GetLanguageID() != byNewLang){
 			app_prefs->SetLanguageID(byNewLang);
-			
+		
 			theApp.glob_prefs->SetLanguage();
 
 			theApp.emuledlg->preferenceswnd->Localize();
@@ -224,6 +235,7 @@ void CPPgGeneral::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void CPPgGeneral::OnBnClickedEditWebservices(){
 	ShellExecute(NULL, "open", theApp.glob_prefs->GetTxtEditor(), "\""+CString(theApp.glob_prefs->GetConfigDir())+"webservices.dat\"", NULL, SW_SHOW); 
 }
+
 void CPPgGeneral::OnLangChange()
 {
 #define MIRRORS_URL	"http://langmirror%i.emule-project.org/lang/%i%i%i%i/"

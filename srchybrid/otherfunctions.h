@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 
 class CAbstractFile;
@@ -79,6 +78,7 @@ CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen);
 int	DecodeLengthBase16(int base16Length);
 void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer);
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // File/Path string helpers
 //
@@ -87,6 +87,7 @@ CString RemoveFileExtension(const CString& rstrFilePath);
 int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in,uint16 length);
 CString CleanupFilename(CString filename);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // GUI helpers
@@ -102,6 +103,7 @@ void RunURL(CAbstractFile* file,CString urlpattern);
 void InitWindowStyles(CWnd* pWnd);
 CString GetRateString(uint16 rate);
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Resource strings
 //
@@ -116,6 +118,7 @@ CString _GetResString(RESSTRIDTYPE StringID);
 CString GetResString(RESSTRIDTYPE StringID);
 #define _GetResString(id)	GetResString(id)
 #endif//!USE_STRING_IDS
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Error strings, Debugging, Logging
@@ -133,6 +136,7 @@ CString DbgGetFileInfo(const uchar* hash);
 LPCTSTR DbgGetHashTypeString(const uchar* hash);
 CString DbgGetClientID(uint32 nClientID);
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Win32 specifics
 //
@@ -148,10 +152,11 @@ int GetMaxWindowsTCPConnections();
 #define _WINVER_ME_		0x5A04
 #define _WINVER_2K_		0x0005
 #define _WINVER_XP_		0x0105
-WORD	DetectWinVersion();
-uint64	GetFreeDiskSpaceX(LPCTSTR pDirectory);
+WORD DetectWinVersion();
+uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory);
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
-int		GetAppImageListColorFlag();
+int GetAppImageListColorFlag();
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // MD4 helpers
@@ -190,6 +195,10 @@ void md4str(const uchar* hash, char* pszHash);
 bool strmd4(const char* pszHash, uchar* hash);
 bool strmd4(const CString& rstr, uchar* hash);
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Compar helpers
+//
 __inline int CompareUnsigned(uint32 uSize1, uint32 uSize2)
 {
 	if (uSize1 < uSize2)
@@ -229,8 +238,11 @@ enum EED2KFileType
 CString GetFiletypeByName(LPCTSTR pszFileName);
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
- 
-//MORPH - Modified by SiRoB, ZZ Upload system (USS)
+
+
+///////////////////////////////////////////////////////////////////////////////
+// IP/UserID
+//
 bool IsGoodIP(uint32 nIP, bool forceCheck = false);
 bool IsGoodIPPort(uint32 nIP, uint16 nPort);
 __inline bool IsLowIDHybrid(uint32 id){

@@ -68,7 +68,6 @@
 * for the request to complete. IcmpCreateFile() and IcmpCloseHandle() 
 * functions are used to create and destroy the context handle.</P>
 */
-
 #pragma once
 
 #define DEFAULT_TTL 64

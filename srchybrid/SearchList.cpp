@@ -181,7 +181,7 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 			Debug("  %s\n", toadd->GetFullInfo());
 		ConvertED2KTag(toadd);
 		if (toadd)
-		taglist.Add(toadd);
+			taglist.Add(toadd);
 	}
 
 	// here we have two choices
@@ -247,7 +247,7 @@ uint32 CSearchFile::AddSources(uint32 count){
 					pTag->tag.intvalue = count;
 			}
 			else
-			pTag->tag.intvalue += count;
+				pTag->tag.intvalue += count;
 			return pTag->tag.intvalue;
 		}
 	}
@@ -447,8 +447,6 @@ uint16 CSearchList::GetResultCount() const {
 	return GetResultCount(m_nCurrentSearch);
 }
 
-
-
 CString CSearchList::GetWebList(CString linePattern,int sortby,bool asc) const {
 	CString buffer;
 	CString temp;
@@ -467,7 +465,7 @@ CString CSearchList::GetWebList(CString linePattern,int sortby,bool asc) const {
 		
 		for (uint16 i1=0;i1<sortarray.GetCount();++i1) {
 			sf2 = sortarray.GetAt(i1);
-
+			
 			switch (sortby) {
 				case 0: swap=sf1->GetFileName().CompareNoCase(sf2->GetFileName()); break;
 				case 1: swap=sf1->GetFileSize()-sf2->GetFileSize();break;

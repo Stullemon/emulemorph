@@ -14,8 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "SplitterControl.h"
@@ -54,11 +52,12 @@ public:
 
 	// Dialog Data
 	enum { IDD = IDD_TRANSFER };
-	CUploadListCtrl			uploadlistctrl;
-	CDownloadListCtrl		downloadlistctrl;
-	CQueueListCtrl			queuelistctrl;
-	CClientListCtrl			clientlistctrl;
-	CToolTipCtrl m_tooltip;
+	CUploadListCtrl		uploadlistctrl;
+	CDownloadListCtrl	downloadlistctrl;
+	CQueueListCtrl		queuelistctrl;
+	CClientListCtrl		clientlistctrl;
+	CToolTipCtrl		m_tooltip;
+
 protected:
 	void DoResize(int delta);
 	void UpdateSplitterRange();

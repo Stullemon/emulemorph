@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ServerSocket.h"
@@ -140,51 +139,51 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				while (!message.IsEmpty())
 				{
 					bool bOutputMessage = true;
-				if (strnicmp(message, "server version", 14) == 0){
-					CString strVer = message.Mid(14);
-					strVer.Trim();
-					strVer = strVer.Left(64); // truncate string to avoid misuse by servers in showing ads
-					CServer* eserver = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
-						if (eserver){
-						eserver->SetVersion(strVer);
-							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(eserver);
-							theApp.emuledlg->serverwnd->UpdateMyInfo();
-					}
-						if (theApp.glob_prefs->GetDebugServerTCP())
-							Debug("%s\n", message);
-				}
-				else if (strncmp(message, "ERROR", 5) == 0){
-					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
-						AddLogLine(true, _T("%s %s (%s:%u) - %s"), 
-						GetResString(IDS_ERROR),
-						pServer ? pServer->GetListName() : GetResString(IDS_PW_SERVER), 
-						cur_server->GetAddress(), cur_server->GetPort(), message.Mid(5).Trim(_T(" :")));
-					bOutputMessage = false;
-				}
-				else if (strncmp(message, "WARNING", 7) == 0){
-					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
-						AddLogLine(true, _T("%s %s (%s:%u) - %s"), 
-							GetResString(IDS_WARNING),
-						pServer ? pServer->GetListName() : GetResString(IDS_PW_SERVER), 
-						cur_server->GetAddress(), cur_server->GetPort(), message.Mid(7).Trim(_T(" :")));
-					bOutputMessage = false;
-				}
-
-				if (message.Find("[emDynIP: ") != (-1) && message.Find("]") != (-1) && message.Find("[emDynIP: ") < message.Find("]")){
-					CString dynip = message.Mid(message.Find("[emDynIP: ")+10,message.Find("]") - (message.Find("[emDynIP: ")+10));
-					dynip.Trim(" ");
-					if ( dynip.GetLength() && dynip.GetLength() < 51){
+					if (strnicmp(message, "server version", 14) == 0){
+						CString strVer = message.Mid(14);
+						strVer.Trim();
+						strVer = strVer.Left(64); // truncate string to avoid misuse by servers in showing ads
 						CServer* eserver = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
 						if (eserver){
-							eserver->SetDynIP(dynip.GetBuffer());
-							cur_server->SetDynIP(dynip.GetBuffer());
+							eserver->SetVersion(strVer);
+							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(eserver);
+							theApp.emuledlg->serverwnd->UpdateMyInfo();
+						}
+						if (theApp.glob_prefs->GetDebugServerTCP())
+							Debug("%s\n", message);
+					}
+					else if (strncmp(message, "ERROR", 5) == 0){
+						CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
+						AddLogLine(true, _T("%s %s (%s:%u) - %s"), 
+							GetResString(IDS_ERROR),
+							pServer ? pServer->GetListName() : GetResString(IDS_PW_SERVER), 
+							cur_server->GetAddress(), cur_server->GetPort(), message.Mid(5).Trim(_T(" :")));
+						bOutputMessage = false;
+					}
+					else if (strncmp(message, "WARNING", 7) == 0){
+						CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
+						AddLogLine(true, _T("%s %s (%s:%u) - %s"), 
+							GetResString(IDS_WARNING),
+							pServer ? pServer->GetListName() : GetResString(IDS_PW_SERVER), 
+							cur_server->GetAddress(), cur_server->GetPort(), message.Mid(7).Trim(_T(" :")));
+						bOutputMessage = false;
+					}
+
+					if (message.Find("[emDynIP: ") != (-1) && message.Find("]") != (-1) && message.Find("[emDynIP: ") < message.Find("]")){
+						CString dynip = message.Mid(message.Find("[emDynIP: ")+10,message.Find("]") - (message.Find("[emDynIP: ")+10));
+						dynip.Trim(" ");
+						if ( dynip.GetLength() && dynip.GetLength() < 51){
+							CServer* eserver = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
+							if (eserver){
+								eserver->SetDynIP(dynip.GetBuffer());
+								cur_server->SetDynIP(dynip.GetBuffer());
 								theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(eserver);
 								theApp.emuledlg->serverwnd->UpdateMyInfo();
+							}
 						}
 					}
-				}
-				if (bOutputMessage)
-				theApp.emuledlg->AddServerMessageLine(message);
+					if (bOutputMessage)
+						theApp.emuledlg->AddServerMessageLine(message);
 
 					message = strMessages.Tokenize("\r\n", iPos);
 				}
@@ -196,7 +195,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				if (size < sizeof(LoginAnswer_Struct)){
 					throw GetResString(IDS_ERR_BADSERVERREPLY);
 				}
-				LoginAnswer_Struct* la = (LoginAnswer_Struct*) packet;
+				LoginAnswer_Struct* la = (LoginAnswer_Struct*)packet;
 
 				// save TCP flags in 'cur_server'
 				ASSERT( cur_server );
@@ -216,10 +215,8 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				}
 
 				if (la->clientid == 0){
-//					SetConnectionState(CS_ERROR);
 					uint8 state = theApp.glob_prefs->GetSmartIdState();
 					if ( state > 0 ){
-//						SetConnectionState(CS_ERROR);
 						state++;
 						if( state > 3 )
 							theApp.glob_prefs->SetSmartIdState(0);
@@ -234,7 +231,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					else{
 						uint8 state = theApp.glob_prefs->GetSmartIdState();
 						if ( state > 0 ){
-//							SetConnectionState(CS_ERROR);
 							state++;
 							if( state > 3 )
 								theApp.glob_prefs->SetSmartIdState(0);
@@ -254,10 +250,9 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					}
 				}
 				//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
-				// we need to know our client when sending our shared files (done indirectly on SetConnectionState)
-				// TODO: test this, if there are no side effects if we set the clientid *before* SetConnectionState
+				// we need to know our client's HighID when sending our shared files (done indirectly on SetConnectionState)
 				serverconnect->clientid = la->clientid;
-				
+
 				if (connectionstate != CS_CONNECTED) {
 					SetConnectionState(CS_CONNECTED);
 					theApp.OnlineSig();       // Added By Bouc7 
@@ -313,7 +308,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				}
 				break;
 			}
-						case OP_SERVERIDENT:{
+			case OP_SERVERIDENT:{
 				// OP_SERVERIDENT - this is sent by the server only if we send a OP_GETSERVERLIST
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_ServerIdent\n");

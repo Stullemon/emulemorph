@@ -230,11 +230,11 @@ bool CClientList::AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket*
 			//we found the same client instance (client may have sent more than one OP_HELLO). do not delete that client!
 			return true;
 		}
-			if (sender){
+		if (sender){
 			if (found_client->socket){
 				if (found_client->socket->IsConnected() 
 					&& (found_client->GetIP() != tocheck->GetIP() || found_client->GetUserPort() != tocheck->GetUserPort() ) )
-					{
+				{
 					// if found_client is connected and has the IS_IDENTIFIED, it's safe to say that the other one is a bad guy
 					if (found_client->Credits() && found_client->Credits()->GetCurrentIdentState(found_client->GetIP()) == IS_IDENTIFIED){
 						AddDebugLogLine(false, GetResString(IDS_BANHASHINVALID), tocheck->GetUserName(),tocheck->GetFullIP()); 
@@ -248,19 +248,15 @@ bool CClientList::AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket*
 				}
 				found_client->socket->client = 0;
 				found_client->socket->Safe_Delete();
-				}
-			found_client->socket = sender;
-				tocheck->socket = 0;
 			}
-			*client = 0;
-			delete tocheck;
-			// TODO: I think we should reset some client properties here (like m_byEmuleVersion, 
-			// m_byDataCompVer, m_bySourceExchangeVer,...). If we attach to a client instance 
-			// which has already set some eMule specific properties but is no longer responding
-			// to an OP_EMULEINFO message we may deal with that client in a wrong way.
-		*client = found_client;
-			return true;
+			found_client->socket = sender;
+			tocheck->socket = 0;
 		}
+		*client = 0;
+		delete tocheck;
+		*client = found_client;
+		return true;
+	}
 	return false;
 }
 
@@ -330,13 +326,13 @@ bool CClientList::IsBannedClient(uint32 dwIP){
 			return true;
 		else
 			RemoveBannedClient(dwIP);
-		}
+	}
 	return false; 
 }
 
 void CClientList::RemoveBannedClient(uint32 dwIP){
 	m_bannedList.RemoveKey(dwIP);
-	}
+}
 
 void CClientList::AddTrackClient(CUpDownClient* toadd){
 	CDeletedClient* pResult = 0;
@@ -415,7 +411,7 @@ void CClientList::Process(){
 	}
 
 	//We need to try to connect to the clients in RequestTCPList
-	//If connected, remove them from the list and send a message back to ON so we can send a ACK.
+	//If connected, remove them from the list and send a message back to Kad so we can send a ACK.
 	//If we don't connect, we need to remove the client..
 	//The sockets timeout should delete this object.
 	POSITION pos1, pos2;

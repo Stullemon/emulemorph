@@ -13,7 +13,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "KnownFile.h"
 
@@ -102,7 +101,7 @@ public:
 	CPartFile(CString edonkeylink);
 	CPartFile(class CED2KFileLink* fileLink);
 	virtual ~CPartFile();
-	
+
 	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	void	InitializeFromLink(CED2KFileLink* fileLink);
@@ -188,7 +187,6 @@ public:
 
 	// Barry - Added to prevent list containing deleted blocks on shutdown
 	void	RemoveAllRequestedBlocks(void);
-
 	void	RemoveBlockFromList(uint32 start,uint32 end);
 	void	RemoveAllSources(bool bTryToSwap);
 	void	DeleteFile();
@@ -240,7 +238,7 @@ public:
 	void	SetCategory(uint8 cat);
 	bool	CheckShowItemInGivenCat(int inCategory);
 	void	GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uint32& pui32NeededSpace);
-	
+
 	uint8*	MMCreatePartStatus();
 	
 	void	PerformFirstHash();		// SLUGFILLER: SafeHash	
@@ -285,6 +283,7 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+
 protected:
 	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result);
 	bool	IsAlreadyRequested(uint32 start, uint32 end);

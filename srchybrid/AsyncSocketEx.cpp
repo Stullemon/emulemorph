@@ -69,6 +69,7 @@ to tim.kosse@gmx.de
 #include "wtypes.h"
 #include "oleauto.h"
 #include "atlconv.h"
+
 #ifndef NOLAYERS
 #include "AsyncSocketExLayer.h"
 #endif //NOLAYERS

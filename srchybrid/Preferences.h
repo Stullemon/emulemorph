@@ -14,10 +14,8 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "loggable.h"
-
 
 const CString strDefaultToolbar = _T("0099010203040506070899091011");
 
@@ -556,6 +554,7 @@ struct Preferences_Struct{
 	char		m_sMMPassword[256];
 	bool		m_bMMEnabled;
 	uint16		m_nMMPort;
+
 	bool		networkkademlia;
 	bool		networked2k;
 

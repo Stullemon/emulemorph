@@ -59,6 +59,7 @@ CStatistics::~CStatistics()
 {
 }
 
+
 // -khaos--+++> This function is going to basically calculate and save a bunch of averages.
 //				I made a seperate funtion so that it would always run instead of having
 //				the averages not be calculated if the graphs are disabled (Which is bad!).
@@ -217,4 +218,3 @@ float CStatistics::GetAvgUploadRate(int averageType) {
 	}
 }
 // <-----khaos-
-

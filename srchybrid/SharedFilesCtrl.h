@@ -14,13 +14,10 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
 #include "MuleListCtrl.h"
 #include "TitleMenu.h"
 
-// CSharedFilesCtrl
 class CSharedFileList;
 class CKnownFile;
 class CPartFile; //MORPH - Added by SiRoB, delete shared file
@@ -32,6 +29,7 @@ class CSharedFilesCtrl : public CMuleListCtrl
 public:
 	CSharedFilesCtrl();
 	virtual ~CSharedFilesCtrl();
+
 	void	Init();
 	void	CreateMenues();
 	void	ShowFileList(CSharedFileList* in_sflist);
@@ -41,6 +39,7 @@ public:
 	void	Localize();
 	void	ShowFilesCount();
 	void	ShowComments(int index);
+
 protected:
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
@@ -52,6 +51,7 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+
 private:
 	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
 	CTitleMenu	m_SharedFilesMenu;

@@ -1,6 +1,19 @@
-// PPgFiles.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgFiles.h"
@@ -14,8 +27,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-// CPPgFiles dialog
 
 IMPLEMENT_DYNAMIC(CPPgFiles, CPropertyPage)
 CPPgFiles::CPPgFiles()
@@ -61,7 +72,7 @@ BOOL CPPgFiles::OnInitDialog()
 	//MORPH END   - Added by SiRoB, Allways use transfertfull chunk
 	LoadSettings();
 	Localize();
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -118,6 +129,7 @@ void CPPgFiles::LoadSettings(void)
 		CheckDlgButton(IDC_WATCHCB,1);
 	else
 		CheckDlgButton(IDC_WATCHCB,0);
+	
 	GetDlgItem(IDC_STARTNEXTFILECAT)->EnableWindow(IsDlgButtonChecked(IDC_STARTNEXTFILE));
 }
 
@@ -165,6 +177,7 @@ BOOL CPPgFiles::OnApply()
 		app_prefs->prefs->watchclipboard = true;
 	else
 		app_prefs->prefs->watchclipboard = false;
+
 	app_prefs->prefs->addnewfilespaused = (int8)IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED);
 	app_prefs->prefs->autofilenamecleanup=(int8)IsDlgButtonChecked(IDC_FNCLEANUP);
 

@@ -22,7 +22,6 @@
 //
 // This class implements a memory Device Context which allows
 // flicker free drawing.
-
 #pragma once
 
 class CMemDC : public CDC {

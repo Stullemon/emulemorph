@@ -437,7 +437,7 @@ void CClientCreditsList::LoadList()
 		return;
 	}
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-
+	
 	try{
 		uint8 version;
 		file.Read(&version, 1);
@@ -468,7 +468,7 @@ void CClientCreditsList::LoadList()
 		BOOL bCreateBackup = TRUE;
 
 		HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-											OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hBakFile != INVALID_HANDLE_VALUE)
 		{
 			// Ok, the backup exist, get the size
@@ -504,7 +504,6 @@ void CClientCreditsList::LoadList()
 			}
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.Seek(1, CFile::begin); //set filepointer behind file version byte
-
 		}
 
 		uint32 count;
@@ -901,7 +900,7 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 	}
 	if (!bResult){
 		if (pTarget->IdentState == IS_IDNEEDED)
-		pTarget->IdentState = IS_IDFAILED;
+			pTarget->IdentState = IS_IDFAILED;
 	}
 	else{
 		pTarget->Verified(dwForIP);
@@ -1027,6 +1026,7 @@ void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	m_dwWaitTimeIP = dwForIP;
 }
+
 void CClientCredits::ClearWaitStartTime(){
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;

@@ -1,7 +1,4 @@
 #pragma once
-
-
-// CPPgProxy dialog
 #include "Preferences.h"
 
 class CPPgProxy : public CPropertyPage

@@ -32,7 +32,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-// CPPgConnection dialog
 
 IMPLEMENT_DYNAMIC(CPPgConnection, CPropertyPage)
 CPPgConnection::CPPgConnection()
@@ -123,8 +122,8 @@ void CPPgConnection::LoadSettings(void)
 {
 	if(m_hWnd)
 	{
-		if( app_prefs->prefs->maxupload != 0)
-			app_prefs->prefs->maxdownload = app_prefs->GetMaxDownload();
+		if( app_prefs->prefs->maxupload != 0 )
+			app_prefs->prefs->maxdownload =app_prefs->GetMaxDownload();
 
 		CString strBuffer;
 		
@@ -140,7 +139,7 @@ void CPPgConnection::LoadSettings(void)
 
 		strBuffer.Format("%d", app_prefs->prefs->maxGraphDownloadRate);
 		GetDlgItem(IDC_DOWNLOAD_CAP)->SetWindowText(strBuffer);
-		
+
 		((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetRange(1, app_prefs->prefs->maxGraphDownloadRate);
 
 		strBuffer.Format("%d", app_prefs->prefs->maxGraphUploadRate);
@@ -244,7 +243,7 @@ BOOL CPPgConnection::OnApply()
 
 	if (app_prefs->GetMaxDownload()!=UNLIMITED)
 	((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetPos(app_prefs->GetMaxDownload());
-	
+
 	if(GetDlgItem(IDC_PORT)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_PORT)->GetWindowText(buffer,20);
@@ -297,7 +296,7 @@ BOOL CPPgConnection::OnApply()
 		app_prefs->prefs->networked2k = true;
 	else
 		app_prefs->prefs->networked2k = false;
-	
+
 	//	if(IsDlgButtonChecked(IDC_UDPDISABLE)) app_prefs->prefs->udpport=0;
 	GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE));
 
@@ -359,7 +358,7 @@ void CPPgConnection::Localize(void)
 		GetDlgItem(IDC_UCAP_LBL)->SetWindowText(GetResString(IDS_PW_CON_UPLBL));
 		
 		GetDlgItem(IDC_LIMITS_FRM)->SetWindowText(GetResString(IDS_PW_CON_LIMITFRM));
-
+		
 		GetDlgItem(IDC_DLIMIT_LBL)->SetWindowText(GetResString(IDS_PW_DOWNL));
 		GetDlgItem(IDC_ULIMIT_LBL)->SetWindowText(GetResString(IDS_PW_UPL));
 

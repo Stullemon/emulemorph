@@ -15,10 +15,9 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef _DEBUG
-	#define _CRTDBG_MAP_ALLOC
-	#include <crtdbg.h>
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
 #endif
-
 #include "stdafx.h"
 #include <locale.h>
 #include "emule.h"
@@ -69,6 +68,7 @@ int _iDbgHeap = 1;
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+
 
 static CMemoryState oldMemState, newMemState, diffMemState;
 
@@ -413,14 +413,16 @@ bool CemuleApp::ProcessCommandline()
 
 	CCommandLineInfo cmdInfo;
     ParseCommandLine(cmdInfo);
+    
 
-    m_hMutexOneInstance = ::CreateMutex(NULL, FALSE,_T(EMULE_GUID));
+	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE,_T(EMULE_GUID));	
+
 	// Maella -Allow multi-intance with debug-
 	HWND maininst = NULL;
 	bool bAlreadyRunning = false;
 	if (!bIgnoreRunningInstances){
 		bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
-    if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
+    	if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
 	}
 
     if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen) {
@@ -516,6 +518,7 @@ CString CemuleApp::CreateED2kHostnameSourceLink( CAbstractFile* f )
 }
 // itsonlyme: hostnameSource
 
+//TODO: Move to emule-window
 bool CemuleApp::CopyTextToClipboard( CString strText )
 {
 	//allocate global memory & lock it
@@ -548,12 +551,13 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 	return bResult;
 }
 
-// Get text from clipboard [enkeyDEV(Ottavio84)]
+//TODO: Move to emule-window
 CString CemuleApp::CopyTextFromClipboard() 
 {
 	HGLOBAL	hglb; 
 	LPTSTR  lptstr; 
 	CString	retstring;
+
 	if (!IsClipboardFormatAvailable(CF_TEXT)) 
 		return ""; 
 	if (!OpenClipboard(NULL)) 
@@ -567,7 +571,7 @@ CString CemuleApp::CopyTextFromClipboard()
 			retstring = lptstr;
 	} 
 	CloseClipboard();
-	
+
 	return retstring;
 }
 
@@ -617,10 +621,10 @@ void CemuleApp::OnlineSig() // Added By Bouc7
       file.Write("0",1); 
 
     file.Write("\n",1); 
-    sprintf(buffer,"%.1f",(float)downloadqueue->GetDatarate()/1024);
+    sprintf(buffer,"%.1f",(float)downloadqueue->GetDatarate()/1024); 
     file.Write(buffer,strlen(buffer)); 
     file.Write("|",1); 
-    sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate()/1024);
+    sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate()/1024); 
     file.Write(buffer,strlen(buffer)); 
     file.Write("|",1); 
     itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
@@ -822,7 +826,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			else
 			{
 				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
-				// scheme 'Windows-Standard (extragro?' -> always try to use 'LoadImage'!
+				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
 				//
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!

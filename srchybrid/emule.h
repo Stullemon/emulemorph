@@ -14,13 +14,10 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
 #endif
-
 #include "resource.h"
 #include "loggable.h"
 
@@ -65,7 +62,7 @@ public:
 	UploadBandwidthThrottler* uploadBandwidthThrottler; //MORPH - Added by Yun.SF3, ZZ Upload System
 	LastCommonRouteFinder*    lastCommonRouteFinder; //MORPH - Added by SiRoB, ZZ Upload system (USS)
 	CKademliaMain*		kademlia;
-	CemuleDlg*		emuledlg;
+	CemuleDlg*			emuledlg;
 	CClientList*		clientlist;
 	CKnownFileList*		knownfiles;
 	CPreferences*		glob_prefs;
@@ -107,7 +104,7 @@ public:
 	ULONGLONG			m_ullComCtrlVer;
 
 	CArray<CString,CString> webservices;
-	AppState	m_app_state; // defines application state for shutdown 
+	AppState			m_app_state; // defines application state for shutdown 
 	CMutex				hashing_mut;
 	CString*			pendinglink;
 	tagCOPYDATASTRUCT	sendstruct;
@@ -121,7 +118,7 @@ public:
 	CString		CreateHTMLED2kLink( CAbstractFile* f );
 	bool		CopyTextToClipboard( CString strText );
 	CString		CopyTextFromClipboard();
-	void		OnlineSig(); 
+	void		OnlineSig();
 	void		UpdateReceivedBytes(int32 bytesToAdd);
 	void		UpdateSentBytes(int32 bytesToAdd, bool sentToFriend = false); //MORPH - Added by Yun.SF3, ZZ Upload System
 
@@ -149,6 +146,7 @@ protected:
 	CMapStringToPtr m_aExtToSysImgIdx;
 	CSize m_sizSmallSystemIcon;
 };
+
 extern CemuleApp theApp;
 
 

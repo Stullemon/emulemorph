@@ -1,3 +1,19 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "mdump.h"
 #if _MSC_VER < 1300
@@ -71,9 +87,9 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 			char szScratch [_MAX_PATH];
 
 			// work out a good place for the dump file
-				::GetModuleFileName(0,szDumpPath, 490);
-				LPTSTR pszFileName = _tcsrchr(szDumpPath, '\\') + 1;
-				*pszFileName = '\0';
+			::GetModuleFileName(0,szDumpPath, 490);
+			LPTSTR pszFileName = _tcsrchr(szDumpPath, '\\') + 1;
+			*pszFileName = '\0';
 			//if (!GetTempPath( _MAX_PATH, szDumpPath ))
 			//	_tcscpy( szDumpPath, "c:\\temp\\" );
 
@@ -85,7 +101,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 			{
 				// create the file
 				HANDLE hFile = ::CreateFile( szDumpPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
-											FILE_ATTRIBUTE_NORMAL, NULL );
+											 FILE_ATTRIBUTE_NORMAL, NULL );
 
 				if (hFile!=INVALID_HANDLE_VALUE)
 				{

@@ -24,10 +24,8 @@
 // 
 // version : 1.0
 //
-
 #include "stdafx.h"
 #include "ProgressCtrlX.h"
-
 #include "MemDC.h"
 #include "DrawGdiX.h"
 
@@ -36,6 +34,7 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 // CProgressCtrlX

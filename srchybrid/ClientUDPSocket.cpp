@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// ClientUDPSocket.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ClientUDPSocket.h"
@@ -61,7 +57,6 @@ void CClientUDPSocket::OnReceive(int nErrorCode){
 	int32 length = ReceiveFrom(buffer,5000,serverbuffer,port);
 	if (((uint8)buffer[0] == OP_EMULEPROT) && length != SOCKET_ERROR)
 		ProcessPacket(buffer+2,length-2,buffer[1],serverbuffer.GetBuffer(),port);
-	
 }
 
 bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char* host, uint16 port){
@@ -121,19 +116,9 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP_UDP(inet_addr(host), port);
 				if (sender){
-					//TRACE("CClientUDPSocket: OP_QUEUEFULL from client %s UDP:%u\n", host, port);
 					sender->SetRemoteQueueFull(true);
 					sender->UDPReaskACK(0);
 				}
-//			#ifdef _DEBUG
-//				else{
-//					CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP(inet_addr(host));
-//					if (sender)
-//						TRACE("*** CClientUDPSocket: OP_QUEUEFULL from unknown client %s UDP:%u (found client with same IP but diff. UDP port %u)\n", host, port, sender->GetUDPPort());
-//					else
-//						TRACE("*** CClientUDPSocket: OP_QUEUEFULL from unknown client %s UDP:%u\n", host, port);
-//				}
-//			#endif
 				break;
 			}
 			case OP_REASKACK:
@@ -197,14 +182,13 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 		char* sendbuffer = new char[cur_packet->packet->size+2];
 		memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
 		memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
-		if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort) ){
+		if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
 			controlpacket_queue.RemoveHead();
 			delete cur_packet->packet;
 			delete cur_packet;
 		}
 		delete[] sendbuffer;
 	}
-
 }
 
 int CClientUDPSocket::SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort){
@@ -220,13 +204,12 @@ int CClientUDPSocket::SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort){
 	return 0;
 }
 
-
 bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 	UDPPack* newpending = new UDPPack;
 	newpending->dwIP = dwIP;
 	newpending->nPort = nPort;
 	newpending->packet = packet;
-	if ( IsBusy() ){
+	if (IsBusy()){
 		controlpacket_queue.AddTail(newpending);
 		return true;
 	}
@@ -244,7 +227,7 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 	return true;
 }
 
-bool  CClientUDPSocket::Create(){
+bool CClientUDPSocket::Create(){
 	if (theApp.glob_prefs->GetUDPPort())
 		return CAsyncSocket::Create(theApp.glob_prefs->GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
 	else

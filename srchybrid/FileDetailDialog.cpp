@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// FileDetailDialog.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "OtherFunctions.h"
@@ -186,7 +182,7 @@ void CFileDetailDialogInfo::RefreshData()
 	if (m_file->GetTransferingSrcCount()>0) bufferS.Format(GetResString(IDS_PARTINFOS2),m_file->GetTransferingSrcCount());
 		else bufferS=m_file->getPartfileStatus();
 	GetDlgItem(IDC_PFSTATUS)->SetWindowText(bufferS);
-	
+		
 	bufferS.Format("%i",m_file->GetHashCount());
 	GetDlgItem(IDC_PARTCOUNT)->SetWindowText(bufferS);
 
@@ -224,7 +220,7 @@ void CFileDetailDialogInfo::RefreshData()
 	if (m_file->GetFileDate() != NULL && m_file->GetRealFileSize() > 0){
 		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
 				m_file->GetCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
-			CastSecondsToLngHM(time(NULL)- m_file->GetFileDate()));
+				CastSecondsToLngHM(time(NULL) - m_file->GetFileDate()));
 	}
 	else
 		bufferS=GetResString(IDS_UNKNOWN);
@@ -234,13 +230,13 @@ void CFileDetailDialogInfo::RefreshData()
 		bufferS.Format(_T("(%s %s)"), GetResString(IDS_ONDISK), CastItoXBytes(m_file->GetRealFileSize()));
 	else
 		bufferS.Empty();
-	GetDlgItem(IDC_FSIZE2)->SetWindowText(bufferS );
+	GetDlgItem(IDC_FSIZE2)->SetWindowText(bufferS);
 
-	if (m_file->GetCrFileDate()!=NULL) {
+	if (m_file->GetCrFileDate() != NULL){
 		time_t fromtime = (m_file->GetStatus() != PS_COMPLETE) ? time(NULL) : m_file->GetFileDate();
 		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
 				m_file->GetCrCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
-			CastSecondsToLngHM(fromtime - m_file->GetCrFileDate()));
+				CastSecondsToLngHM(fromtime - m_file->GetCrFileDate()));
 	}
 	else
 		bufferS = GetResString(IDS_UNKNOWN);

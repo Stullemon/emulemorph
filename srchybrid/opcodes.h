@@ -70,7 +70,7 @@
 #define MINCOMMONPENALTY		9
 #define UDPSERVERSTATTIME		5000	//5 secs
 #define UDPSERVSTATREASKTIME	14400	//4 hours
-#define	UDPSERVERPORT			4665	// default udp port
+#define	UDPSERVERPORT			4665	//default udp port
 #define RSAKEYSIZE				384		//384 bits
 // MOD Note: end
 
@@ -239,23 +239,23 @@
 #define	ST_UDPFLAGS				0x92	// <int>
 
 //file tags
-#define FT_FILENAME				0x01
+#define FT_FILENAME				 0x01
 #define TAG_NAME				"\x01"
-#define FT_FILESIZE				0x02	// <int>
+#define FT_FILESIZE				 0x02	// <int>
 #define TAG_SIZE				"\x02"
-#define FT_FILETYPE				0x03	// <string>
+#define FT_FILETYPE				 0x03	// <string>
 #define TAG_TYPE				"\x03"
-#define FT_FILEFORMAT			0x04	// <string>
+#define FT_FILEFORMAT			 0x04	// <string>
 #define TAG_FORMAT				"\x04"
-#define FT_LASTSEENCOMPLETE		0x05
+#define FT_LASTSEENCOMPLETE		 0x05
 #define TAG_COLLECTION			"\x05"
 #define	TAG_PART_PATH			"\x06"
 #define	TAG_PART_HASH			"\x07"
-#define FT_TRANSFERED			0x08	// <int>
+#define FT_TRANSFERED			 0x08	// <int>
 #define	TAG_COPIED				"\x08"
-#define FT_GAPSTART				0x09
+#define FT_GAPSTART				 0x09
 #define	TAG_GAP_START			"\x09"
-#define FT_GAPEND				0x0A
+#define FT_GAPEND				 0x0A
 #define	TAG_GAP_END				"\x0A"
 #define	TAG_DESCRIPTION			"\x0B"
 #define	TAG_PING				"\x0C"
@@ -264,20 +264,20 @@
 #define TAG_PORT				"\x0F"
 #define TAG_IP_ADDRESS			"\x10"
 #define TAG_VERSION				"\x11"
-#define FT_PARTFILENAME			0x12	// <string>
+#define FT_PARTFILENAME			 0x12	// <string>
 #define TAG_TEMPFILE			"\x12"
-//#define FT_PRIORITY			0x13	// Not used anymore
+//#define FT_PRIORITY			 0x13	// Not used anymore
 #define TAG_PRIORITY			"\x13"
-#define FT_STATUS				0x14
+#define FT_STATUS				 0x14
 #define TAG_STATUS				"\x14"
-#define FT_SOURCES				0x15
+#define FT_SOURCES				 0x15
 #define TAG_AVAILABILITY		"\x15"
-#define FT_PERMISSIONS			0x16
+#define FT_PERMISSIONS			 0x16
 #define TAG_QTIME				"\x16"
-//#define FT_ULPRIORITY			0x17	// Not used anymore
+//#define FT_ULPRIORITY			 0x17	// Not used anymore
 #define TAG_PARTS				"\x17"
-#define FT_DLPRIORITY			0x18	// Was 13
-#define FT_ULPRIORITY			0x19	// Was 17
+#define FT_DLPRIORITY			 0x18	// Was 13
+#define FT_ULPRIORITY			 0x19	// Was 17
 #define FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
 #define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
 #define	TAG_MEDIA_ARTIST		"\xD0"	// <string>

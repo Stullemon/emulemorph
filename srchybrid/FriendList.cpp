@@ -35,6 +35,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
 #define EMFRIENDS_MET_FILENAME	_T("emfriends.met")
 
 CFriendList::CFriendList()
@@ -218,7 +219,7 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 	toadd->m_Friend = NewFriend;
 	m_listFriends.AddTail(NewFriend);
 	if (m_wndOutput){
-		m_wndOutput->AddFriend(NewFriend);	
+		m_wndOutput->AddFriend(NewFriend);
 		m_wndOutput->UpdateList();
 	}
 	SaveList();
@@ -231,9 +232,9 @@ void CFriendList::RemoveFriend(CFriend* todel){
 		ASSERT ( false );
 		return;
 	}
-//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-todel->SetLinkedClient(NULL);
-//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	todel->SetLinkedClient(NULL);
+	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 
 	if (m_wndOutput)
 		m_wndOutput->RemoveFriend(todel);

@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
-
 class InputBox : public CDialog
 {
 	DECLARE_DYNAMIC(InputBox)

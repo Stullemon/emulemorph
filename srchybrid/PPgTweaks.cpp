@@ -1,6 +1,19 @@
-// PgTweaks.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
@@ -155,7 +168,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		// ZZ:UploadSpeedSense <--
 		*/
 
-		m_ctrlTreeOptions.Expand(m_htiSaveLogs, TVE_EXPAND);
+        m_ctrlTreeOptions.Expand(m_htiSaveLogs, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
 		/*
@@ -164,7 +177,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		// ZZ:UploadSpeedSense <--
 		*/
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
-		m_bInitializedTreeOpts = true;
+
+        m_bInitializedTreeOpts = true;
 	}
 
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiMaxCon5Sec, m_iMaxConnPerFive);
@@ -209,6 +223,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	// ZZ:UploadSpeedSense <--
 	*/
 }
+
 BOOL CPPgTweaks::OnInitDialog()
 {
 	m_iMaxConnPerFive = app_prefs->GetMaxConperFive();
@@ -238,7 +253,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	// ZZ:UploadSpeedSense <--
 	*/
 
-	CPropertyPage::OnInitDialog();
+    CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
 	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(1,100,true);
@@ -295,6 +310,7 @@ BOOL CPPgTweaks::OnApply()
 	else if (app_prefs->prefs->debug2disk && !m_iDebug2Disk)
 		theVerboseLog.Close();
 	app_prefs->prefs->debug2disk = m_iDebug2Disk;
+
 	app_prefs->prefs->m_iCommitFiles = m_iCommitFiles;
 	app_prefs->prefs->filterBadIP = m_iFilterLANIPs;
 	app_prefs->prefs->m_iFileBufferSize = m_iFileBufferSize;
@@ -321,7 +337,7 @@ BOOL CPPgTweaks::OnApply()
 	// ZZ:UploadSpeedSense <--
 	*/
 
-	theApp.emuledlg->serverwnd->ToggleDebugWindow();
+    theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 	theApp.downloadqueue->CheckDiskspace();
 
@@ -387,7 +403,7 @@ void CPPgTweaks::Localize(void)
 		// ZZ:UploadSpeedSense <--
 		*/
 
-		CString temp;
+        CString temp;
 		temp.Format( GetResString(IDS_FILEBUFFERSIZE), m_iFileBufferSize*15000 );
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
 		temp.Format( GetResString(IDS_QUEUESIZE), m_iQueueSize*100 );
@@ -432,7 +448,7 @@ void CPPgTweaks::OnDestroy()
 	// ZZ:UploadSpeedSense <--
 	*/
     
-	CPropertyPage::OnDestroy();
+    CPropertyPage::OnDestroy();
 }
 
 LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)

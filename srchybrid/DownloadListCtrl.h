@@ -14,7 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "MuleListCtrl.h"
 #include "TitleMenu.h"
@@ -69,10 +68,11 @@ public:
 	void	ExpandCollapseItem(int item,uint8 expand,bool collapsesource=false);
 	void	GetDisplayedFiles(CArray<CPartFile*,CPartFile*> *list);
 	void	MoveCompletedfilesCat(uint8 from, uint8 to);
+
 protected:
 	void SetAllIcons();
-	void	DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
-	void	DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
+	void DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
+	void DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
     static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(CPartFile* file1, CPartFile* file2, LPARAM lParamSort);
     static int Compare(CUpDownClient* client1, CUpDownClient* client2, LPARAM lParamSort, int sortMod);

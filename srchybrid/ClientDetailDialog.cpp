@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// ClientDetailDialog.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ClientDetailDialog.h"
@@ -176,7 +172,6 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	}
 	else
 		GetDlgItem(IDC_DSCORE)->SetWindowText("-");
-
 	return true;
 }
 

@@ -1,6 +1,7 @@
-// stdafx.h : Includedatei für Standardsystem-Includedateien,
-// oder häufig verwendete, projektspezifische Includedateien,
-// die nur in unregelmäßigen Abständen geändert werden.
+// stdafx.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
 
 #pragma once
 
@@ -9,9 +10,6 @@
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
-
-// Ändern Sie folgende Definitionen für Plattformen, die älter als die unten angegebenen sind.
-// Unter MSDN finden Sie die neuesten Informationen über die entsprechenden Werte für die unterschiedlichen Plattformen.
 
 #ifndef WINVER
 #define WINVER 0x0400			// 0x0400 == Windows 98 and Windows NT 4.0 (because of '_WIN32_WINDOWS=0x0410')

@@ -328,6 +328,7 @@ void CSharedFileList::FindSharedFiles(){
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 		CSingleLock sLock1(&list_mut,true); // list thread safe
 		m_Files_map.RemoveAll();
+		//m_keywords->RemoveAllKeywords();
 		sLock1.Unlock();
 		ASSERT( theApp.downloadqueue );
 		if (theApp.downloadqueue)
@@ -335,7 +336,6 @@ void CSharedFileList::FindSharedFiles(){
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 
 	// khaos::kmod+ Fix: Shared files loaded multiple times.
-	// TODO: Use a different list or array or something other which does not force use finally produce lowercased directory names
 	CStringList l_sAdded;
 	CString stemp;
 	CString tempDir;
@@ -370,7 +370,6 @@ void CSharedFileList::FindSharedFiles(){
 		}
 	}
 	// khaos::kmod-
-
 	if (waitingforhash_list.IsEmpty())
 		AddLogLine(false,GetResString(IDS_SHAREDFOUND), m_Files_map.GetCount());
 	else
@@ -426,10 +425,8 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 		if (toadd){
 			toadd->SetPath(rstrDirectory);
 			toadd->SetFilePath(ff.GetFilePath());
-			/*CSingleLock sLock(&list_mut,true);
-			m_Files_map.SetAt(CCKey(toadd->GetFileHash()),toadd);
-			sLock.Unlock();
-			toadd->UpdateClientUploadList();		// #zegzav:updcliuplst*/
+			AddFile(toadd);
+			toadd->UpdateClientUploadList();		// #zegzav:updcliuplst
 			SafeAddKFile(toadd, true);	// SLUGFILLER: mergeKnown - no unmanagad adds
 		}
 		else{
@@ -491,7 +488,6 @@ void CSharedFileList::AddFile(CKnownFile* pFile)
 	sLock.Unlock();
 }
 
-// removes first occurrence of 'toremove' in 'list'
 void CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
 	if (output)	// SLUGFILLER: mergeKnown - prevent crash in case of no output
@@ -613,7 +609,6 @@ void CSharedFileList::SendListToServer(){
 	server->SendPacket(packet,true);
 }
 
-
 CKnownFile* CSharedFileList::GetFileByIndex(int index){
 	int count=0;
 	CKnownFile* cur_file;
@@ -707,11 +702,11 @@ void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* fil
 			// skip string tags with empty string values
 			if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
 				continue;
-
+			
 			// skip integer tags with '0' values
 			if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
 				continue;
-	
+			
 			if (bSendED2KTags)
 			{
 				if (_aMetaTags[i].nED2KType == 2 && pTag->tag.type == 2)
@@ -734,7 +729,7 @@ void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* fil
 	}
 
 	uint32 uTagCount = tags.GetSize();
-	files->Write(&uTagCount,4);
+	files->Write(&uTagCount, 4);
 	for (int i = 0; i < tags.GetSize(); i++){
 		tags[i]->WriteTagToFile(files);
 		delete tags[i];
@@ -764,19 +759,20 @@ uint64 CSharedFileList::GetDatasize(uint64 &pbytesLargest) {
 
 CKnownFile*	CSharedFileList::GetFileByID(const uchar* filehash){
 	if (filehash){
-	CKnownFile* result;
-	CCKey tkey(filehash);
+		CKnownFile* result;
+		CCKey tkey(filehash);
 		if (m_Files_map.Lookup(tkey,result))
-		return result;
+			return result;
 	}
 	return NULL;
 }
 
 void CSharedFileList::HashNextFile(){
 	// SLUGFILLER: SafeHash
-	if (!theApp.emuledlg || !theApp.emuledlg->IsRunning() || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
+	if (!theApp.emuledlg || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
 		return;
-	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
+	if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
 	if (!currentlyhashing_list.IsEmpty())	// one hash at a time
 		return;
 	// SLUGFILLER: SafeHash
@@ -818,7 +814,7 @@ void CSharedFileList::RemoveFromHashing(CKnownFile* hashed){
 		}
 	}
 }
-	
+
 void CSharedFileList::HashFailed(UnknownFile_Struct* hashed){
 	for (POSITION pos = currentlyhashing_list.GetHeadPosition(); pos != 0; ){
 		POSITION posLast = pos;
@@ -828,7 +824,7 @@ void CSharedFileList::HashFailed(UnknownFile_Struct* hashed){
 			delete pFile;
 			HashNextFile();			// start next hash if possible, but only if a previous hash finished
 			break;
-}
+		}
 	}
 	ASSERT(0);
 	delete hashed;
@@ -903,8 +899,6 @@ void CSharedFileList::Publish()
 		{
 			if( (!m_lastProcessPublishKadKeywordList || (::GetTickCount() - m_lastProcessPublishKadKeywordList) > KADEMLIAPUBLISHTIME) )
 			{
-				if(m_currFileKey > GetCount())
-					m_currFileKey = 0;
 				CSingleLock sLock(&list_mut,true);
 				if (tNow >= m_keywords->GetNextPublishTime())
 				{
@@ -917,20 +911,20 @@ void CSharedFileList::Publish()
 					int iCheckedKeywords = 0;
 					CPublishKeyword* pPubKw = m_keywords->GetNextKeyword();
 					while (pPubKw)
-				{
+					{
 						iCheckedKeywords++;
 						UINT tNextKwPublishTime = pPubKw->GetNextPublishTime();
 
 						ASSERT( pPubKw->GetRefCount() != 0 );
 
 						if (tNextKwPublishTime == 0 || tNextKwPublishTime <= tNow)
-					{
+						{
 							DEBUG_ONLY( Debug("pkwlst: %-18s  Refs=%3u  Published=%2u  NextPublish=%s  Publishing\n", pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
 
 							Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, pPubKw->GetKadID());
-						if (pSearch)
-						{
-							pSearch->setSearchTypes(Kademlia::CSearch::STOREKEYWORD);
+							if (pSearch)
+							{
+								pSearch->setSearchTypes(Kademlia::CSearch::STOREKEYWORD);
 
 								// add all file IDs which relate to the current keyword to be published
 								const CSimpleKnownFileArray& aFiles = pPubKw->GetReferences();
@@ -948,8 +942,8 @@ void CSharedFileList::Publish()
 
 								pSearch->PreparePacket();
 
-							if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
-								Kademlia::CSearchManager::deleteSearch(pSearch);
+								if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
+									Kademlia::CSearchManager::deleteSearch(pSearch);
 								else
 								{
 									pPubKw->SetNextPublishTime(tNow + KADEMLIAREPUBLISHTIME);
@@ -969,7 +963,7 @@ void CSharedFileList::Publish()
 							// time to the min. time the next keyword has to be published.
 							m_keywords->SetNextPublishTime(tMinNextPublishTime);
 							break;
-					}
+						}
 
 						pPubKw = m_keywords->GetNextKeyword();
 					}
@@ -983,7 +977,8 @@ void CSharedFileList::Publish()
 				m_lastProcessPublishKadKeywordList = GetTickCount();
 			}
 		}
-		if( theApp.kademlia->getStatus()->m_totalStoreSrc< KADEMLIATOTALSTORESRC)
+		
+		if( theApp.kademlia->getStatus()->m_totalStoreSrc < KADEMLIATOTALSTORESRC)
 		{
 			if( (!m_lastPublishKadSrc || (::GetTickCount() - m_lastPublishKadSrc) > KADEMLIAPUBLISHTIME) )
 			{
@@ -1013,9 +1008,9 @@ void CSharedFileList::Publish()
 				// only every KADEMLIAPUBLISHTIME seconds.
 				m_lastPublishKadSrc = ::GetTickCount();
 			}
-			}
 		}
 	}
+}
 
 void CSharedFileList::AddKeywords(CKnownFile* pFile)
 {

@@ -5,7 +5,6 @@
 //  AfxBeginMsgMapTemplate.hpp
 //  zegzav - 1/10/2002 - eMule project (http://www.emule-project.net)
 // ------------------------------------------------------------
-
 #pragma once
 
 #if _MFC_VER >= 0x0600 && _MFC_VER < 0x0700

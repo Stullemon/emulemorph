@@ -1,8 +1,4 @@
-
-// ColorFrameCtrl.cpp : implementation file//
-
 #include "stdafx.h"
-
 #include "ColorFrameCtrl.h"
 
 #ifdef _DEBUG

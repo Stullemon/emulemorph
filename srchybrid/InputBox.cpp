@@ -59,13 +59,9 @@ END_MESSAGE_MAP()
 void InputBox::OnOK()
 {	char buffer[510];
 	m_cancel=false;
-	CWnd* textBox;
-	if (!isNumber) textBox = GetDlgItem(IDC_TEXT);
-	else textBox = GetDlgItem(IDC_TEXTNUM);
-
-	if(textBox->GetWindowTextLength())
+	if(GetDlgItem(IDC_TEXT)->GetWindowTextLength())
 	{ 
-		textBox->GetWindowText(buffer,510);
+		GetDlgItem(IDC_TEXT)->GetWindowText(buffer,510);
 		m_return.Format("%s",buffer);
 	}
 	CDialog::OnOK();
@@ -119,6 +115,7 @@ BOOL InputBox::OnInitDialog(){
 
 	return TRUE;
 }
+
 void InputBox::OnCleanFilename() {
 	CString filename;
 	GetDlgItem(IDC_TEXT)->GetWindowText(filename);

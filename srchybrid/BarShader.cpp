@@ -186,6 +186,7 @@ void CBarShader::Draw(CDC* dc, int iLeft, int iTop, bool bFlat) {
 			float fBlue = 0;
 			uint32 iEnd = start + iBytesInOnePixel;
 			int iLast = start;
+			// SLUGFILLER: speedBarShader
 			do {
 				float fWeight = (min(m_Spans.GetKeyAt(pos), iEnd) - iLast) * m_dPixelsPerByte;
 				fRed   += GetRValue(color) * fWeight;

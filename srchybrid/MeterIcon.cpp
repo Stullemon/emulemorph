@@ -1,10 +1,6 @@
-// MeterIcon.cpp: implementation of the CMeterIcon class.
-//
 // Created: 04/02/2001 {mm/dm/yyyyy}
 // Written by: Anish Mistry http://am-productions.yi.org/
 /* This code is licensed under the GNU GPL.  See License.txt or (http://www.gnu.org/copyleft/gpl.html). */
-//////////////////////////////////////////////////////////////////////
-
 #include "stdafx.h"
 #include "MeterIcon.h"
 

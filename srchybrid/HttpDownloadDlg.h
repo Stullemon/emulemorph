@@ -10,7 +10,6 @@ All rights reserved.
 
 
 ////////////////////////////////// Macros ///////////////////////////
-
 #pragma once
 #include <afxinet.h>
 
@@ -88,5 +87,3 @@ protected:
   CFile         m_FileToWrite;
   CWinThread*   m_pThread;
 };
-
-

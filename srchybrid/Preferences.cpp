@@ -325,7 +325,6 @@ bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rst
 
 	return false;
 }
-
 // SLUGFILLER: SafeHash
 
 //MORPH - Added by SiRoB, ZZ Ratio
@@ -1054,9 +1053,9 @@ CString CPreferences::GetStatsLastResetStr(bool formatLong)
 	// false: DateTime format from the .ini for the log
 	CString	returnStr;
 	if (GetStatsLastResetLng()) {
-		tm		*statsReset;
+		tm *statsReset;
 		TCHAR szDateReset[128];
-		time_t	lastResetDateTime = (time_t) GetStatsLastResetLng();
+		time_t lastResetDateTime = (time_t) GetStatsLastResetLng();
 		statsReset = localtime(&lastResetDateTime);
 		if (statsReset){
 			_tcsftime(szDateReset, ARRSIZE(szDateReset), formatLong ? GetDateTimeFormat() : GetDateTimeFormat4Log(), statsReset);
@@ -1153,6 +1152,7 @@ void CPreferences::CreateUserHash(){
 	userhash[5] = 14;
 	userhash[14] = 111;
 }
+
 int CPreferences::GetColumnWidth(Table t, int index) const {
 	switch(t) {
 	case tableDownload:
@@ -1287,7 +1287,6 @@ void CPreferences::SetColumnOrder(Table t, INT *piOrder) {
 		break;
 	case tableClientList:
 		memcpy(prefs->clientListColumnOrder, piOrder, sizeof(prefs->clientListColumnOrder));
-
 		break;
 	}
 }
@@ -1577,7 +1576,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteString("SkinProfileDir", prefs->m_szSkinProfileDir);
 
 
-ini.SerGet(false, prefs->downloadColumnWidths,
+	ini.SerGet(false, prefs->downloadColumnWidths,
 		ARRSIZE(prefs->downloadColumnWidths), "DownloadColumnWidths");
 	ini.SerGet(false, prefs->downloadColumnHidden,
 		ARRSIZE(prefs->downloadColumnHidden), "DownloadColumnHidden");
@@ -1689,7 +1688,7 @@ ini.SerGet(false, prefs->downloadColumnWidths,
 	ini.WriteBool("UseGzip", prefs->m_bWebUseGzip);
 	ini.WriteInt("PageRefreshTime", prefs->m_nWebPageRefresh);
 	ini.WriteBool("UseLowRightsUser", prefs->m_bWebLowEnabled);
-	
+
 	//mobileMule
 	ini.WriteString("Password", GetMMPass(), "MobileMule");
 	ini.WriteBool("Enabled", prefs->m_bMMEnabled);
@@ -1703,7 +1702,6 @@ ini.SerGet(false, prefs->downloadColumnWidths,
 	ini.WriteInt("DynUpNumberOfPings", prefs->m_iDynUpNumberOfPings);
 	ini.WriteBool("DynUpLog", prefs->m_bDynUpLog);
 	ini.WriteInt("DynUpPingLimit", prefs->m_iDynUpPingLimit); // EastShare - Add by TAHO, USS limit
-	
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 }
 
@@ -1716,8 +1714,8 @@ void CPreferences::SaveCats(){
 
 		CIni catini( catinif, "Category" );
 		catini.WriteInt("Count",catMap.GetCount()-1,"General");
-	catini.WriteInt("CategoryVersion", 2, "General"); // khaos::categorymod+
-	for (int ix=0;ix<catMap.GetCount();ix++){
+		catini.WriteInt("CategoryVersion", 2, "General"); // khaos::categorymod+
+		for (int ix=0;ix<catMap.GetCount();ix++){
 			ixStr.Format("Cat#%i",ix);
 			catini.WriteString("Title",catMap.GetAt(ix)->title,ixStr);
 			catini.WriteString("Incoming",catMap.GetAt(ix)->incomingpath,ixStr);
@@ -1802,26 +1800,28 @@ void CPreferences::LoadPreferences(){
 	prefs->m_bFirstStart = false;
 
 	CFileFind findFileName;
+
 	if (strCurrVersion != strPrefsVersion){
 //MORPH START - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
 		if (!StrStrI(strPrefsVersion,"morph"))
 			prefs->m_bFirstStart = true;
 //MORPH END  - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
-		if(findFileName.FindFile(strFileName)){
-			CFile file;
-			CFileFind findNewName;
-			CString strNewName;
-			strNewName.Format("%spreferences.ini.old", configdir);
-	
-			if (findNewName.FindFile(strNewName))
-				file.Remove(strNewName);
-	
-			file.Rename(strFileName, strNewName);
-			strFileName = strNewName;
-			// -khaos--+++> Set this to 2 so that LoadStats will load 'em from ini.old
-			loadstatsFromOld = 2;
-			// <-----khaos-
-		}
+		// don't use this; it'll delete all read-only settings from the current pref.ini
+//		if(findFileName.FindFile(strFileName)){
+//			CFile file;
+//			CFileFind findNewName;
+//			CString strNewName;
+//			strNewName.Format("%spreferences.ini.old", configdir);
+//	
+//			if (findNewName.FindFile(strNewName))
+//				file.Remove(strNewName);
+//	
+//			file.Rename(strFileName, strNewName);
+//			strFileName = strNewName;
+//			// -khaos--+++> Set this to 2 so that LoadStats will load 'em from ini.old
+//			loadstatsFromOld = 2;
+//			// <-----khaos-
+//		}
 	}
 	CIni ini(strFileName, "eMule");
 	//--- end Ozon :)
@@ -1979,11 +1979,11 @@ void CPreferences::LoadPreferences(){
 		else 
 			prefs->depth3D = 5;
 
-	prefs->useDownloadNotifier=ini.GetBool("NotifyOnDownload",false);	// Added by enkeyDEV
+    prefs->useDownloadNotifier=ini.GetBool("NotifyOnDownload",false);	// Added by enkeyDEV
 	prefs->useNewDownloadNotifier=ini.GetBool("NotifyOnNewDownload",false);
-	prefs->useChatNotifier=ini.GetBool("NotifyOnChat",false);
-	prefs->useLogNotifier=ini.GetBool("NotifyOnLog",false);
-	prefs->useSoundInNotifier=ini.GetBool("NotifierUseSound",false);
+    prefs->useChatNotifier=ini.GetBool("NotifyOnChat",false);
+    prefs->useLogNotifier=ini.GetBool("NotifyOnLog",false);
+    prefs->useSoundInNotifier=ini.GetBool("NotifierUseSound",false);
 	prefs->notifierPopsEveryChatMsg=ini.GetBool("NotifierPopEveryChatMessage",false);
 	prefs->notifierNewVersion=ini.GetBool("NotifierPopNewVersion",false);
 	prefs->notifierImportantError=ini.GetBool("NotifyOnImportantError",false);
@@ -2117,7 +2117,7 @@ void CPreferences::LoadPreferences(){
 	//if (prefs->maxGraphDownloadRate<prefs->maxdownload) prefs->maxdownload=UNLIMITED;
 	//if (prefs->maxGraphUploadRate<prefs->maxupload) prefs->maxupload=UNLIMITED;
 
-ini.SerGet(true, prefs->downloadColumnWidths,
+	ini.SerGet(true, prefs->downloadColumnWidths,
 		ARRSIZE(prefs->downloadColumnWidths), "DownloadColumnWidths");
 	ini.SerGet(true, prefs->downloadColumnHidden,
 		ARRSIZE(prefs->downloadColumnHidden), "DownloadColumnHidden");
@@ -2285,7 +2285,7 @@ ini.SerGet(true, prefs->downloadColumnWidths,
 	prefs->m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
 
-	LoadCats();
+    LoadCats();
 	//MORPH - Khaos Obsolete //if (GetCatCount()==1) SetAllcatType(0);
 
 	SetLanguage();
@@ -2749,6 +2749,7 @@ void CPreferences::SetMMPass(CString strNewPass)
 {
 	sprintf(prefs->m_sMMPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
 }
+
 void CPreferences::SetMaxUpload(uint16 in)
 {
 	prefs->maxupload = (in) ? in : UNLIMITED;

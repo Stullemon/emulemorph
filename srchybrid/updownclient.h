@@ -106,6 +106,7 @@ enum ESecureIdentState{
 	IS_SIGNATURENEEDED	= 1,
 	IS_KEYANDSIGNEEDED	= 2,
 };
+
 enum EInfoPacketState{
 	IP_NONE				= 0,
 	IP_EDONKEYPROTPACK  = 1,
@@ -118,7 +119,7 @@ enum ESourceFrom{
 	SF_KADEMLIA			= 1,
 	SF_SOURCE_EXCHANGE	= 2,
 	SF_PASSIVE			= 3,
-	SF_SLS			= 4 //MORPH - Added by SiRoB, Save Load Sources (SLS)
+	SF_SLS				= 4 //MORPH - Added by SiRoB, Save Load Sources (SLS)
 };
 
 struct PartFileStamp {
@@ -126,13 +127,13 @@ struct PartFileStamp {
 	DWORD		timestamp;
 };
 
+//#pragma pack(2)
 class CUpDownClient: public CLoggable
 #ifdef _DEBUG
 					,public CObject
 #endif
 {
 	friend class CUploadQueue;
-
 public:
 	//base
 	CUpDownClient(CClientReqSocket* sender = 0);
@@ -141,8 +142,8 @@ public:
 
 	bool			Disconnected(bool bFromSocket = false);
 	bool			TryToConnect(bool bIgnoreMaxCon = false);
-	// khaos::concrash-
 	void			ConnectionEstablished();
+
 	uint32			GetUserIDHybrid()			{return m_nUserIDHybrid;}
 	void			SetUserIDHybrid(uint32 val)	{m_nUserIDHybrid = val;}
 	char*			GetUserName()				{return m_pszUsername;}
@@ -387,10 +388,10 @@ public:
     void			SetFileRate(int8 iNewRate)	{m_iRate=iNewRate;}
 
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
-	int unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
+	int				unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
 	// Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
-	void ShowDownloadingParts(CString *partsYN);
-	void UpdateDisplayedInfo(boolean force=false);
+	void			ShowDownloadingParts(CString *partsYN);
+	void			UpdateDisplayedInfo(boolean force=false);
     int             GetFileListRequested() { return m_iFileListRequested; }
     void            SetFileListRequested(int iFileListRequested) { m_iFileListRequested = iFileListRequested; }
 
@@ -449,6 +450,7 @@ private:
 	void	Init();
 	bool	ProcessHelloTypePacket(CSafeMemFile* data);
 	void	SendHelloTypePacket(CMemFile* data);
+
 	uint32	m_dwUserIP;
 	uint32	m_dwServerIP;
 	uint32	m_nUserIDHybrid;
@@ -490,8 +492,8 @@ private:
 	bool	m_bPreviewReqPending;
 	bool	m_bPreviewAnsPending;
 
-	CTypedPtrList<CPtrList, Packet*>				 m_WaitingPackets_list;
-	CList<PartFileStamp, PartFileStamp>				 m_DontSwap_list;
+	CTypedPtrList<CPtrList, Packet*> m_WaitingPackets_list;
+	CList<PartFileStamp, PartFileStamp> m_DontSwap_list;
 	DWORD	m_lastRefreshedDLDisplay;
     
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
@@ -500,12 +502,10 @@ private:
 
 	uint32	m_L2HAC_time;			//<<-- enkeyDEV(th1) -L2HAC-
 
-
-	ESecureIdentState	m_SecureIdentState;
+	ESecureIdentState m_SecureIdentState;
 	uint32	m_dwLastSignatureIP;
 	uint8	m_byInfopacketsReceived;			// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
 	uint8	m_bySupportSecIdent;
-
 
 	//upload
 	// -khaos--+++> Added parameters: bool bFromPF = true
@@ -533,14 +533,14 @@ private:
 	uint32      m_curSessionAmountNumber;
 	uint16		m_nUpPartCount;
 	uint16		m_nUpCompleteSourcesCount;
-	static		CBarShader s_UpStatusBar;
+	static CBarShader s_UpStatusBar;
 	uchar		requpfileid[16];
-	DWORD       m_lastRefreshedULDisplay;
+    DWORD       m_lastRefreshedULDisplay;
+
 	typedef struct TransferredData {
 		uint32	datalen;
 		DWORD	timestamp;
 	};
-	
 	CList<TransferredData,TransferredData>			 m_AvarageUDR_list; // By BadWolf
 	CTypedPtrList<CPtrList, Packet*>				 m_BlockSend_queue;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_BlockRequests_queue;
@@ -555,8 +555,6 @@ private:
 	bool		m_bFullChunkTransferTag;//Morph - added by AndCycle, keep full chunk transfer
 
 	//download
-    
-
 	EDownloadState m_nDownloadState;
 	uint32		m_cDownAsked;
 	uint8*		m_abyPartStatus;
@@ -573,7 +571,7 @@ private:
 	uint32		m_nSumForAvgDownDataRate;
 	uint16		m_cShowDR;
 	uint16		m_nRemoteQueueRank;
-	int		m_iDifferenceQueueRank;	//Morph - added by AndCycle, DiffQR
+	int			m_iDifferenceQueueRank;	//Morph - added by AndCycle, DiffQR
 	uint32		m_dwLastBlockReceived;
 	ESourceFrom	m_nSourceFrom;
 	uint16		m_nPartCount;

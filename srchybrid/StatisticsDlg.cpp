@@ -14,9 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// StatisticsDlg.cpp : implementation file
-//
 #include "stdafx.h"
 #include "emule.h"
 #include "StatisticsDlg.h"
@@ -152,7 +149,7 @@ void CStatisticsDlg::SetAllIcons()
 BOOL CStatisticsDlg::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
-	EnableWindow( FALSE );
+	EnableWindow(FALSE);
 	SetAllIcons();
 	Localize();
 
@@ -404,6 +401,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 	//if (resize) m_Statistics.SetRanges(0, theApp.glob_prefs->GetStatsMax()+15) ;
 	m_Statistics.AppendPoints(m_dPlotDataMore);
 }
+
 
 // -khaos--+++> Completely rewritten ShowStatistics
 void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
@@ -1775,7 +1773,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			} // End Clients -> Client Software -> eD Hybrid Section
 
 			// CLIENTS -> CLIENT SOFTWARE -> EMULE SECTION
-			if (forceUpdate || stattree.IsExpanded(clisoft[0]) || cli_lastCount[0] == 0) {				
+			if (forceUpdate || stattree.IsExpanded(clisoft[0]) || cli_lastCount[0] == 0) {
 				uint32 verCount = 0;
 				
 				//--- find top 4 eMule client versions ---
@@ -1813,7 +1811,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					}
 					else 
 						continue;
-
+					
 					if (i > 3) totalOther += topcnt;
 					
 					if (i >= cli_lastCount[0]) {
@@ -2112,7 +2110,6 @@ void CStatisticsDlg::UpdateConnectionsGraph()
 	//MORPH END   - Removed by SiRoB, New Graph
 } // UpdateConnectionsGraph()
 
-
 void CStatisticsDlg::OnShowWindow(BOOL bShow,UINT nStatus){
 
 }
@@ -2356,9 +2353,9 @@ void CStatisticsDlg::CreateMyTree() {
 			clientSoft[CS_UNKNOWN].Add(stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclisoft));
 		hcliport = stattree.InsertItem(GetResString(IDS_PORT),h_clients);						// Client Port Section
 			for(int i = 0; i<2; i++) cliport[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hcliport);
+		
 		cligen[4] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 		cligen[3] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
-		
 		for(int i = 0; i<3; i++) cligen[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 	cligen[6] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients); //MORPH - Added by SiRoB, Leecher counter
 	h_servers = stattree.InsertItem(GetResString(IDS_FSTAT_SERVERS),4,4);					// Servers section

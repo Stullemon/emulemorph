@@ -1,5 +1,19 @@
-// OScopeCtrl.cpp : implementation file//
-
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <math.h>
 #include "emule.h"
@@ -21,26 +35,26 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	COLORREF PresetColor[16] = 
 	{
 		RGB(0xFF, 0x00, 0x00),
-			RGB(0xFF, 0xC0, 0xC0),
-			
-			RGB(0xFF, 0xFF, 0x00),
-			RGB(0xFF, 0xA0, 0x00),
-			RGB(0xA0, 0x60, 0x00),
-			
-			RGB(0x00, 0xFF, 0x00),
-			RGB(0x00, 0xA0, 0x00),
-			
-			RGB(0x00, 0x00, 0xFF),
-			RGB(0x00, 0xA0, 0xFF),
-			RGB(0x00, 0xFF, 0xFF),
-			RGB(0x00, 0xA0, 0xA0),
-			
-			RGB(0xC0, 0xC0, 0xFF),
-			RGB(0xFF, 0x00, 0xFF),
-			RGB(0xA0, 0x00, 0xA0),
-			
-			RGB(0xFF, 0xFF, 0xFF),
-			RGB(0x80, 0x80, 0x80)
+		RGB(0xFF, 0xC0, 0xC0),
+		
+		RGB(0xFF, 0xFF, 0x00),
+		RGB(0xFF, 0xA0, 0x00),
+		RGB(0xA0, 0x60, 0x00),
+		
+		RGB(0x00, 0xFF, 0x00),
+		RGB(0x00, 0xA0, 0x00),
+		
+		RGB(0x00, 0x00, 0xFF),
+		RGB(0x00, 0xA0, 0xFF),
+		RGB(0x00, 0xFF, 0xFF),
+		RGB(0x00, 0xA0, 0xA0),
+		
+		RGB(0xC0, 0xC0, 0xFF),
+		RGB(0xFF, 0x00, 0xFF),
+		RGB(0xA0, 0x00, 0xA0),
+		
+		RGB(0xFF, 0xFF, 0xFF),
+		RGB(0x80, 0x80, 0x80)
 	};
 	// since plotting is based on a LineTo for each new point
 	// we need a starting point (i.e. a "previous" point)
@@ -52,7 +66,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	// be drawn with white, unless you call SetPlotColor
 	m_PlotData = new PlotData_t[NTrends];
 	m_NTrends = NTrends;
-
+	
 	for(i = 0; i < m_NTrends; i++)
 	{
 		if(i < 15)
@@ -65,7 +79,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 		m_PlotData[i].dLowerLimit = -10.0;
 		m_PlotData[i].dUpperLimit =  10.0;
 		m_PlotData[i].dRange      =   m_PlotData[i].dUpperLimit - 
-			m_PlotData[i].dLowerLimit;   // protected member variable
+		m_PlotData[i].dLowerLimit;   // protected member variable
 		m_PlotData[i].lstPoints.AddTail(0.0);
 		// -khaos--+++> Initialize our new trend ratio variable to 1
 		m_PlotData[i].iTrendRatio = 1;
@@ -246,6 +260,7 @@ void COScopeCtrl::SetRanges(double dLower, double dUpper)
 	// clear out the existing garbage, re-start with a clean plot
 	InvalidateCtrl();
 }  // SetRanges
+
 /////////////////////////////////////////////////////////////////////////////
 // G.Hayduk: Apart from setting title of axis, now you can optionally set 
 // the limits strings
@@ -533,7 +548,8 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	if(m_nMaxPointCnt < iNewSize)
 		m_nMaxPointCnt = iNewSize;									// keep the bigest value
 	m_bDoUpdate = false;
-		if (theApp.emuledlg->IsRunning()) 
+
+	if (theApp.emuledlg->IsRunning()) 
 	{
 		if (!theApp.glob_prefs->IsGraphRecreateDisabled()) {
 			if(m_nRedrawTimer)

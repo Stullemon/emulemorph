@@ -30,7 +30,6 @@
 // Please use and enjoy. Please let me know of any bugs/mods/improvements 
 // that you have found/implemented and I will fix/incorporate them into this
 // file. 
-
 #include "stdafx.h"
 #include <math.h>
 #include "ColourPopup.h"

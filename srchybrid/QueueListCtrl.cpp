@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// QueueListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "QueueListCtrl.h"
@@ -116,6 +112,7 @@ void CQueueListCtrl::OnSysColorChange()
 	CMuleListCtrl::OnSysColorChange();
 	SetAllIcons();
 }
+
 void CQueueListCtrl::SetAllIcons()
 {
 	imagelist.DeleteImageList();
@@ -221,15 +218,6 @@ void CQueueListCtrl::AddClient(CUpDownClient* client, bool resetclient){
 		// get to keep its waiting time since before they started upload), are
 		// recognized by having an ask count of 0.
 		client->SetAskedCount(0);
-
-		//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
-		//require for equal chance for each file, accepted base
-		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
-		if (reqfile){
-			reqfile->statistic.DelAccepted();
-		}
-		//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
-
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	}
 	if(theApp.glob_prefs->IsQueueListDisabled())
@@ -609,7 +597,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				break;
 			}
 			case MPG_ALTENTER:
-			case MP_DETAIL:{
+			case MP_DETAIL: {
 				CClientDetailDialog dialog(client);
 				dialog.DoModal();
 				break;

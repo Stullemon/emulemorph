@@ -1,5 +1,4 @@
 #pragma once
-
 #include "PPgGeneral.h"
 #include "PPgConnection.h"
 #include "PPgServer.h"

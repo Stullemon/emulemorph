@@ -57,7 +57,6 @@ public:
 #define OP_ED2KLINK				12000
 #define OP_CLCOMMAND			12001
 
-// CemuleDlg Dialogfeld
 class CemuleDlg : public CTrayDialog
 {
 // Konstruktion
@@ -186,8 +185,8 @@ protected:
 	afx_msg LRESULT OnKademliaOverheadSend	(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnKademliaOverheadRecv	(WPARAM wParam, LPARAM lParam);
 
-	void		 OnOK()			{}
-	void		 OnClose();
+	void OnOK() {}
+	void OnClose();
 	bool CanClose();
 
 private:
@@ -198,8 +197,7 @@ private:
 	HICON			imicons[3];
 	HICON			mytrayIcon;
 	HICON			usericon;
-
-	CMeterIcon trayIcon;
+	CMeterIcon		trayIcon;
 	HICON			sourceTrayIcon;		// do not use those icons for anything else than the traybar!!!
 	HICON			sourceTrayIconGrey;	// do not use those icons for anything else than the traybar!!!
 	HICON			sourceTrayIconLow;	// do not use those icons for anything else than the traybar!!!

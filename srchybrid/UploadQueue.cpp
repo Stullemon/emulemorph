@@ -591,8 +591,6 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		uploadinglist.AddTail(newclient);
 		newclient->SetSlotNumber(uploadinglist.GetCount());
 	}
-
-	newclient->setFullChunkTransferTag(true);//Morph - added by AndCycle, keep full chunk transfer
 }
 
 
@@ -658,11 +656,12 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	}
 
 	bool connectSuccess = true;
+
 	// tell the client that we are now ready to upload
 	if (!newclient->socket || !newclient->socket->IsConnected()){
 		newclient->SetUploadState(US_CONNECTING);
-		newclient->TryToConnect(true);
-		connectSuccess = false;
+		if (!newclient->TryToConnect(true))
+			connectSuccess = false;
 	}
 	else{
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
@@ -688,11 +687,14 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			successfullupcount--;
 		}
 
-		// statistic
-		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
-		if (reqfile)
-			reqfile->statistic.AddAccepted();
-		//	}
+		if(newclient->chkFullChunkTransferTag() == false){
+			// statistic
+			CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
+			if (reqfile){
+				reqfile->statistic.AddAccepted();
+			}
+			newclient->setFullChunkTransferTag(true);//Morph - added by AndCycle, keep full chunk transfer
+		}
 		
 		theApp.emuledlg->transferwnd->uploadlistctrl.AddClient(newclient);
 

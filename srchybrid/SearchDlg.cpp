@@ -14,11 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// SearchDlg.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
@@ -114,7 +109,6 @@ BOOL CSearchDlg::OnInitDialog()
 	AddAnchor(IDC_SDOWNLOAD,BOTTOM_LEFT);
 	AddAnchor(IDC_SEARCHLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_PROGRESS1,BOTTOM_LEFT,BOTTOM_RIGHT);
-
 	AddAnchor(IDC_DDOWN_FRM, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_ELINK, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_STARTS, TOP_RIGHT);
@@ -254,28 +248,28 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 	}
 	else if (nIDEvent == global_search_timer)
 	{
-	if (theApp.serverconnect->IsConnected()){
-		CServer* toask = theApp.serverlist->GetNextSearchServer();
-		if (toask == theApp.serverlist->GetServerByAddress(theApp.serverconnect->GetCurrentServer()->GetAddress(),theApp.serverconnect->GetCurrentServer()->GetPort()))
-			toask = theApp.serverlist->GetNextSearchServer();
-
-		if (toask && theApp.serverlist->GetServerCount()-1 != servercount){
-			servercount++;
+	    if (theApp.serverconnect->IsConnected()){
+		    CServer* toask = theApp.serverlist->GetNextSearchServer();
+		    if (toask == theApp.serverlist->GetServerByAddress(theApp.serverconnect->GetCurrentServer()->GetAddress(),theApp.serverconnect->GetCurrentServer()->GetPort()))
+			    toask = theApp.serverlist->GetNextSearchServer();
+    
+		    if (toask && theApp.serverlist->GetServerCount()-1 != servercount){
+			    servercount++;
 				if (toask->GetUDPFlags() & SRV_UDPFLG_EXT_GETFILES)
 					searchpacket->opcode = OP_GLOBSEARCHREQ2;
 				else
 					searchpacket->opcode = OP_GLOBSEARCHREQ;
 				if (theApp.glob_prefs->GetDebugServerUDP())
 					Debug(">>> Sending %s  to server %s:%u (%u of %u)\n", (searchpacket->opcode == OP_GLOBSEARCHREQ2) ? "OP__GlobSearchReq2" : "OP__GlobSearchReq", toask->GetAddress(), toask->GetPort(), servercount, theApp.serverlist->GetServerCount());
-			theApp.serverconnect->SendUDPPacket(searchpacket,toask,false);
-			searchprogress.StepIt();
-		}
-		else
-			OnBnClickedCancels();
-	}
-	else
-		OnBnClickedCancels();
-   }
+			    theApp.serverconnect->SendUDPPacket(searchpacket,toask,false);
+			    searchprogress.StepIt();
+		    }
+		    else
+			    OnBnClickedCancels();
+	    }
+	    else
+		    OnBnClickedCancels();
+    }
 	else
 		ASSERT( 0 );
 }
@@ -283,6 +277,8 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 void CSearchDlg::OnBnClickedCancels()
 {
 	canceld = true;
+
+	// delete any global search timer
 	if (globsearch){
 		delete searchpacket;
 		searchpacket = NULL;
@@ -318,7 +314,7 @@ void CSearchDlg::LocalSearchEnd(uint16 count, bool bMoreResultsAvailable)
 
 	if (!canceld && count > MAX_RESULTS)
 		OnBnClickedCancels();
-	if (!canceld){	
+	if (!canceld){
 		if (!globsearch){
 			GetDlgItem(IDC_STARTS)->EnableWindow(true);
 			CWnd* pWndFocus = GetFocus();
@@ -332,6 +328,7 @@ void CSearchDlg::LocalSearchEnd(uint16 count, bool bMoreResultsAvailable)
 	}
 	m_ctlMore.EnableWindow(bMoreResultsAvailable && m_iSentMoreReq < MAX_MORE_SEARCH_REQ);
 }
+
 void CSearchDlg::AddUDPResult(uint16 count){
 	if (!canceld && count > MAX_RESULTS)
 		OnBnClickedCancels();
@@ -511,7 +508,7 @@ void CSearchDlg::DownloadSelected() {
 void CSearchDlg::DownloadSelected(bool paused)
 {
 	CWaitCursor curWait;
-	POSITION pos = searchlistctrl.GetFirstSelectedItemPosition();
+	POSITION pos = searchlistctrl.GetFirstSelectedItemPosition(); 
 	
 	// khaos::categorymod+ Category selection stuff...
 	if (!pos) return; // No point in asking for a category if there are no selected files to download.
@@ -536,7 +533,7 @@ void CSearchDlg::DownloadSelected(bool paused)
 	int useOrder = theApp.downloadqueue->GetMaxCatResumeOrder(useCat);
 	// khaos::categorymod-
 
-	while(pos != NULL) 
+	while (pos != NULL) 
 	{ 
 		int index = searchlistctrl.GetNextSelectedItem(pos); 
 		if (index > -1) {
@@ -561,7 +558,7 @@ void CSearchDlg::DownloadSelected(bool paused)
 				cur_file=cur_file->GetListParent();
 			searchlistctrl.UpdateSources(cur_file);
 		}
-	} 
+	}
 }
 
 void CSearchDlg::OnSysColorChange()
@@ -734,6 +731,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 	if (theApp.glob_prefs->GetDebugServerSearches())
 		Debug("Search Expr: %s\n", strDbg);
 
+	// this limit (+ the additonal operators which will be added later) has to match the limit in 'CreateSearchExpressionTree'
 	if (iOpAnd + iOpOr + iOpNot > 10)
 		yyerror(GetResString(IDS_SEARCH_TOOCOMPLEX));
 
@@ -757,7 +755,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 #ifdef _DEBUG
 	if (theApp.glob_prefs->GetDebugServerSearches()){
 		_strSearchTree.Empty();
-	DumpSearchTree(_SearchExpr);
+		DumpSearchTree(_SearchExpr);
 		Debug("Search Tree: %s\n", _strSearchTree);
 	}
 #endif
@@ -767,7 +765,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 					 const CString& strSearchString, const CString& strLocalizedType,
 					 ULONG ulMinSize, ULONG ulMaxSize, int iAvailability, 
 					 const CString& strExtension, bool bAllowEmptySearchString)
-		{
+{
 	static const uchar _aucSearchType[3]         = {       0x01, 0x00, FT_FILETYPE	 };
 	static const uchar _aucSearchExtension[3]    = {       0x01, 0x00, FT_FILEFORMAT };
 	static const uchar _aucSearchAvailability[4] = { 0x01, 0x01, 0x00, FT_SOURCES    };
@@ -828,7 +826,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 		    AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_GENERALERROR), MB_ICONWARNING);
 		    return false;
 	    }
-		}
+	}
 
 	// get total nr. of search terms
 	int iTotalTerms = 0;
@@ -850,7 +848,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 	CString strDbg;
 	int iParameterCount = 0;
 	if (_SearchExpr.m_aExpr.GetCount() <= 1)
-		{
+	{
 		// If we don't have a NOT or OR operator we use a series of AND terms which can be processed by
 		// the servers with less load (request lugdunummaster)
 		//
@@ -882,7 +880,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			data.Write(_aucSearchType, sizeof _aucSearchType);
 			strDbg.AppendFormat("type=\"%s\" ", strType);
 		}
-	  
+		
 		if (ulMinSize > 0){
 			if (++iParameterCount < iTotalTerms){
 				data.Write(&andParameter, 2);
@@ -929,11 +927,11 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			data.Write(_aucSearchExtension, sizeof _aucSearchExtension);
 			strDbg.AppendFormat("ext=\"%s\" ", strData);
 		}
-        
+
 		ASSERT( iParameterCount == iTotalTerms );
 	}
 	else
-		{
+	{
 		if (!strExtension.IsEmpty()){
 			if (++iParameterCount < iTotalTerms){
 				data.Write(&andParameter, 2);
@@ -964,7 +962,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
         
 		if (!strType.IsEmpty()){
 			if (++iParameterCount < iTotalTerms){
-			  data.Write(&andParameter,2);
+				data.Write(&andParameter,2);
 				strDbg.AppendFormat("AND ");
 			}
 		}
@@ -972,7 +970,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 		for (int j = 0; j < _SearchExpr.m_aExpr.GetCount(); j++){
 			CString str(_SearchExpr.m_aExpr[j]);
 			if (str == SEARCHOPTOK_AND){
-		      data.Write(&andParameter,2);
+				data.Write(&andParameter,2);
 				strDbg.AppendFormat("AND ");
 			}
 			else if (str == SEARCHOPTOK_OR){
@@ -1031,13 +1029,13 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			data.Write(_aucSearchExtension, sizeof _aucSearchExtension);
 			strDbg.AppendFormat("ext=\"%s\" ", strData);
 		}
-		}
+	}
 
 	if (theApp.glob_prefs->GetDebugServerSearches())
 		Debug("Search Data: %s\n", strDbg);
 	_SearchExpr.m_aExpr.RemoveAll();
 	return true;
-		}
+}
 
 bool CSearchDlg::DoNewSearch(SSearchParams* pParams)
 {
@@ -1070,36 +1068,36 @@ bool CSearchDlg::DoNewSearch(SSearchParams* pParams)
 		GetDlgItem(IDC_CANCELS)->SetFocus();
 	m_iSentMoreReq = 0;
 
-		Packet* packet = new Packet(&data);
-		packet->opcode = OP_SEARCHREQUEST;
+	Packet* packet = new Packet(&data);
+	packet->opcode = OP_SEARCHREQUEST;
 	if (theApp.glob_prefs->GetDebugServerTCP())
 		Debug(">>> Sending OP__SearchRequest\n");
-		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
-		theApp.serverconnect->SendPacket(packet,false);
+	theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
+	theApp.serverconnect->SendPacket(packet,false);
 
 	if (pParams->eType == SearchTypeGlobal && theApp.serverconnect->IsUDPSocketAvailable())
 	{
 		// set timeout timer for local server
 		m_uTimerLocalServer = SetTimer(TimerServerTimeout, 50000, NULL);
 
-			if( theApp.glob_prefs->Score() ){
-				theApp.serverlist->ResetSearchServerPos();
-			}
+		if( theApp.glob_prefs->Score() ){
+			theApp.serverlist->ResetSearchServerPos();
+		}
 
-			if (globsearch){
-				delete searchpacket;
-				searchpacket = NULL;
-			}
-			searchpacket = packet;
+		if (globsearch){
+			delete searchpacket;
+			searchpacket = NULL;
+		}
+		searchpacket = packet;
 		searchpacket->opcode = OP_GLOBSEARCHREQ; // will be changed later when actually sending the packet!!
-			servercount = 0;
-			searchprogress.SetRange32(0,theApp.serverlist->GetServerCount()-1);
-			globsearch = true;
-		}
-		else{
-			globsearch = false;
-			delete packet;
-		}
+		servercount = 0;
+		searchprogress.SetRange32(0,theApp.serverlist->GetServerCount()-1);
+		globsearch = true;
+	}
+	else{
+		globsearch = false;
+		delete packet;
+	}
 	CreateNewTab(pParams);
 	return true;
 }
@@ -1119,7 +1117,7 @@ void CSearchDlg::OnBnClickedMore()
 	if (pWndFocus == GetDlgItem(IDC_STARTS))
 		m_ctlName.SetFocus();
 	GetDlgItem(IDC_CANCELS)->EnableWindow(true);
-	
+
 	Packet* packet = new Packet();
 	packet->opcode = OP_QUERY_MORE_RESULT;
 	if (theApp.glob_prefs->GetDebugServerTCP())
@@ -1343,7 +1341,7 @@ void CSearchDlg::DeleteSearch(uint32 nSearchID)
 		if (iCurSel == CB_ERR)					// if still error
 			iCurSel = searchselect.SetCurSel(0);
 		if (iCurSel != CB_ERR){
-		item.mask = TCIF_PARAM;
+			item.mask = TCIF_PARAM;
 			item.lParam = NULL;
 			if (searchselect.GetItem(iCurSel, &item) && item.lParam != NULL)
 				ShowResults((const SSearchParams*)item.lParam);
@@ -1412,7 +1410,7 @@ LRESULT CSearchDlg::OnCloseTab(WPARAM wparam, LPARAM lparam)
 		int nSearchID = ((const SSearchParams*)item.lParam)->dwSearchID;
 		if (!canceld && nSearchID == m_nSearchID)
 			OnBnClickedCancels();
-	DeleteSearch(nSearchID);
+		DeleteSearch(nSearchID);
 	}
 	return TRUE;
 }
@@ -1663,4 +1661,3 @@ void KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, LP
 	
 	delete temp;
 }
-

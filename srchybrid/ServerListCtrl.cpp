@@ -14,11 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// ServerListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ServerListCtrl.h"
@@ -53,19 +48,19 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	ModifyStyle(0,LVS_SINGLESEL|LVS_REPORT);
 	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT); //here the CListCtrl is set to report-style
 
-	InsertColumn(0,GetResString(IDS_SL_SERVERNAME),LVCFMT_LEFT, 150);
-	InsertColumn(1,GetResString(IDS_IP),LVCFMT_LEFT, 140);
-	InsertColumn(2,GetResString(IDS_DESCRIPTION) ,LVCFMT_LEFT, 150);
+	InsertColumn(0, GetResString(IDS_SL_SERVERNAME),LVCFMT_LEFT, 150);
+	InsertColumn(1, GetResString(IDS_IP),			LVCFMT_LEFT, 140);
+	InsertColumn(2, GetResString(IDS_DESCRIPTION),	LVCFMT_LEFT, 150);
 	InsertColumn(3, GetResString(IDS_PING),			LVCFMT_RIGHT, 50);
 	InsertColumn(4, GetResString(IDS_UUSERS),		LVCFMT_RIGHT, 50);
 	InsertColumn(5, GetResString(IDS_MAXCLIENT),	LVCFMT_RIGHT, 50);
 	InsertColumn(6, GetResString(IDS_PW_FILES) ,	LVCFMT_RIGHT, 50);
-	InsertColumn(7,GetResString(IDS_PREFERENCE),LVCFMT_LEFT, 60);
+	InsertColumn(7, GetResString(IDS_PREFERENCE),	LVCFMT_LEFT,  60);
 	InsertColumn(8, GetResString(IDS_UFAILED),		LVCFMT_RIGHT, 50);
-	InsertColumn(9,GetResString(IDS_STATICSERVER),LVCFMT_LEFT, 50);
+	InsertColumn(9, GetResString(IDS_STATICSERVER),	LVCFMT_LEFT,  50);
 	InsertColumn(10,GetResString(IDS_SOFTFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(11,GetResString(IDS_HARDFILES),	LVCFMT_RIGHT, 50);
-	InsertColumn(12,GetResString(IDS_VERSION),LVCFMT_LEFT, 50);
+	InsertColumn(12,GetResString(IDS_VERSION),		LVCFMT_LEFT,  50);
 
 	SetAllIcons();
 	Localize();
@@ -367,59 +362,59 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 //   POINT point; 
 //   ::GetCursorPos(&point); 
 
-   // tecxx 0609 2002 
-   // fix - on right click, we also want to change the current selection like the left click does 
-   CPoint p = point; 
-   ScreenToClient(&p); 
-   int it = HitTest(p); 
-   if (it != -1) 
-      SetSelectionMark(it);   // display selection mark correctly! 
-   // fix end 
+	// tecxx 0609 2002 
+	// fix - on right click, we also want to change the current selection like the left click does 
+	CPoint p = point; 
+	ScreenToClient(&p); 
+	int it = HitTest(p); 
+	if (it != -1) 
+		SetSelectionMark(it);   // display selection mark correctly! 
+	// fix end 
 
-   // Create up-to-date popupmenu
-   UINT flags,flagSSL1,flagSSL2;
-   CTitleMenu m_ServerMenu;
-   CMenu m_ServerPrioMenu;
+	// Create up-to-date popupmenu
+	UINT flags,flagSSL1,flagSSL2;
+	CTitleMenu m_ServerMenu;
+	CMenu m_ServerPrioMenu;
 
-   CServer* test=NULL;
-   if (this->GetSelectionMark() != -1) test=(CServer*)GetItemData(GetSelectionMark());
+	CServer* test=NULL;
+	if (this->GetSelectionMark() != -1) test=(CServer*)GetItemData(GetSelectionMark());
 
-   // set state of selection-dependent menuitems
-   flags=MF_STRING || MF_DISABLED;
-   if (this->GetSelectionMark() != -1) if (test != NULL) flags=MF_STRING;
-   flagSSL1=MF_STRING || MF_DISABLED;
-   flagSSL2=MF_STRING || MF_DISABLED;
+	// set state of selection-dependent menuitems
+	flags=MF_STRING || MF_DISABLED;
+	if (this->GetSelectionMark() != -1) if (test != NULL) flags=MF_STRING;
+	flagSSL1=MF_STRING || MF_DISABLED;
+	flagSSL2=MF_STRING || MF_DISABLED;
 
-   if (test != NULL) 
-	   if (test->IsStaticMember()) flagSSL2=MF_STRING; else flagSSL1=MF_STRING;
+	if (test != NULL) 
+		if (test->IsStaticMember()) flagSSL2=MF_STRING; else flagSSL1=MF_STRING;
 
-   // add priority switcher
-   m_ServerPrioMenu.CreateMenu();
-   m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIOLOW,GetResString(IDS_PRIOLOW));
-   m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIONORMAL,GetResString(IDS_PRIONORMAL));
-   m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH,GetResString(IDS_PRIOHIGH));
+	// add priority switcher
+	m_ServerPrioMenu.CreateMenu();
+	m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIOLOW,GetResString(IDS_PRIOLOW));
+	m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIONORMAL,GetResString(IDS_PRIONORMAL));
+	m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH,GetResString(IDS_PRIOHIGH));
 
-   m_ServerMenu.CreatePopupMenu(); 
-   m_ServerMenu.AddMenuTitle(GetResString(IDS_EM_SERVER));
-   m_ServerMenu.AppendMenu(flags,MP_CONNECTTO, GetResString(IDS_CONNECTTHIS)); 
-   m_ServerMenu.AppendMenu(flags|MF_POPUP,(UINT_PTR)m_ServerPrioMenu.m_hMenu, GetResString(IDS_PRIORITY));
+	m_ServerMenu.CreatePopupMenu(); 
+	m_ServerMenu.AddMenuTitle(GetResString(IDS_EM_SERVER));
+	m_ServerMenu.AppendMenu(flags,MP_CONNECTTO, GetResString(IDS_CONNECTTHIS)); 
+	m_ServerMenu.AppendMenu(flags|MF_POPUP,(UINT_PTR)m_ServerPrioMenu.m_hMenu, GetResString(IDS_PRIORITY));
 
-   m_ServerMenu.AppendMenu( flagSSL1,MP_ADDTOSTATIC, GetResString(IDS_ADDTOSTATIC));
-   m_ServerMenu.AppendMenu( flagSSL2,MP_REMOVEFROMSTATIC, GetResString(IDS_REMOVEFROMSTATIC));
+	m_ServerMenu.AppendMenu( flagSSL1,MP_ADDTOSTATIC, GetResString(IDS_ADDTOSTATIC));
+	m_ServerMenu.AppendMenu( flagSSL2,MP_REMOVEFROMSTATIC, GetResString(IDS_REMOVEFROMSTATIC));
 
-   m_ServerMenu.AppendMenu(MF_STRING|MF_SEPARATOR);	
-   m_ServerMenu.AppendMenu(flags,MP_REMOVE,   GetResString(IDS_REMOVETHIS)); 
-   m_ServerMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALL));
-   m_ServerMenu.AppendMenu(MF_SEPARATOR); 
-   m_ServerMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1) );
+	m_ServerMenu.AppendMenu(MF_STRING|MF_SEPARATOR);	
+	m_ServerMenu.AppendMenu(flags,MP_REMOVE,   GetResString(IDS_REMOVETHIS)); 
+	m_ServerMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALL));
+	m_ServerMenu.AppendMenu(MF_SEPARATOR); 
+	m_ServerMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1) );
 //   m_ServerMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC)); 
 
-   m_ServerMenu.SetDefaultItem(MP_CONNECTTO);
+	m_ServerMenu.SetDefaultItem(MP_CONNECTTO);
 	GetPopupMenuPos(*this, point);
-   m_ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this); 
+	m_ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this); 
 
-   VERIFY( m_ServerPrioMenu.DestroyMenu() );
-   VERIFY( m_ServerMenu.DestroyMenu() );
+	VERIFY( m_ServerPrioMenu.DestroyMenu() );
+	VERIFY( m_ServerMenu.DestroyMenu() );
 }
 
 BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){ 

@@ -13,9 +13,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
-
-// finestra di dialogo CPPgNotify
-
 class CPPgNotify : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgNotify)
@@ -23,6 +20,7 @@ class CPPgNotify : public CPropertyPage
 public:
 	CPPgNotify();
 	virtual ~CPPgNotify();	
+
 	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
 	void Localize(void);
 
@@ -37,7 +35,7 @@ protected:
 	void LoadSettings(void);
 
 	virtual void DoDataExchange(CDataExchange* pDX);
-	
+
 	afx_msg void OnSettingsChange() { SetModified(); }
 	afx_msg void OnBnClickedCbTbnOnchat();
 	afx_msg void OnBnClickedBtnBrowseWav();

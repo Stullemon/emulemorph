@@ -18,6 +18,7 @@ public:
 
 // Dialog Data 
 	enum { IDD = IDD_COMMENTLST }; 
+
 protected: 
 	CString m_strCaption;
 	CListCtrl pmyListCtrl;

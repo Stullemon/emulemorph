@@ -14,9 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-// ListenSocket.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "DebugHelpers.h"
 #include "emule.h"
@@ -61,7 +58,6 @@ CClientReqSocket::CClientReqSocket(CPreferences* in_prefs,CUpDownClient* in_clie
 	deltimer = 0;
 }
 
-
 CClientReqSocket::~CClientReqSocket(){
 	if (client)
 		client->socket = 0;
@@ -95,7 +91,7 @@ void CClientReqSocket::OnClose(int nErrorCode){
 }
 
 void CClientReqSocket::Disconnect(){
-    AsyncSelect(0);
+	AsyncSelect(0);
 	byConnected = ES_DISCONNECTED;
 	if (!client)
 		Safe_Delete();
@@ -148,7 +144,8 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
 					client->ProcessHelloAnswer(packet,size);
-// start secure identification, if
+
+					// start secure identification, if
 					//  - we have received OP_EMULEINFO and OP_HELLOANSWER (old eMule)
 					//	- we have received eMule-OP_HELLOANSWER (new eMule)
 					if (client->GetInfoPacketsReceived() == IP_BOTH)
@@ -206,13 +203,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						theApp.clientlist->AddClient(client);
 						client->SetCommentDirty();
 					}
-					
+
 					theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
 
 					// send a response packet with standart informations
 					if (client->GetHashType() == SO_EMULE && !bIsMuleHello)
 						client->SendMuleInfoPacket(false);
-					
+
 					client->SendHelloAnswer();
 					if (client)
 						client->ConnectionEstablished();
@@ -308,13 +305,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (client){
 							switch (client->GetDownloadState()) {
 								case DS_CONNECTED:
-							case DS_ONQUEUE:
-							case DS_NONEEDEDPARTS:
+								case DS_ONQUEUE:
+								case DS_NONEEDEDPARTS:
 								if (!client->SwapToAnotherFile(true, true, true, NULL)) {
 									theApp.downloadqueue->RemoveSource(client, true);
+								}
+								break;
 							}
-							break;
-						}
 						}
 						break;
 					}
@@ -1097,7 +1094,6 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 						CKnownFile* file = theApp.sharedfiles->GetFileByID((uchar*)packet);
 						if(!file)
 							file = theApp.downloadqueue->GetFileByID((uchar*)packet);
-		
 						if(file) {
 							DWORD dwTimePassed = ::GetTickCount() - client->GetLastSrcReqTime() + CONNECTION_LATENCY;
 							bool bNeverAskedBefore = client->GetLastSrcReqTime() == 0;
@@ -1111,7 +1107,6 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 								//OR if file is not rare or if file is complete, allow every 90 minutes
 								( (bNeverAskedBefore || dwTimePassed > SOURCECLIENTREASK * MINCOMMONPENALTY) )
 							) {
-		
 								client->SetLastSrcReqTime();
 								Packet* tosend = file->CreateSrcInfoPacket(client);
 								if(tosend){
@@ -1429,7 +1424,7 @@ void CListenSocket::Process(){
 			cur_sock->CheckTimeOut();		// may call 'shutdown'
 		}
 	}
-   if ( (GetOpenSockets()+5 < app_prefs->GetMaxConnections() || theApp.serverconnect->IsConnecting()) && !bListening)
+	if ( (GetOpenSockets()+5 < app_prefs->GetMaxConnections() || theApp.serverconnect->IsConnecting()) && !bListening)
 	   ReStartListening();
 }
 

@@ -14,10 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// ChatSelector.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "ChatSelector.h"
@@ -51,7 +47,7 @@ CChatItem::CChatItem()
 	log = NULL;
 	messagepending = NULL;
 	notify = false;
-	history_pos=0;
+	history_pos = 0;
 }
 
 CChatItem::~CChatItem()
@@ -147,7 +143,7 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 
 	CTime theTime = CTime::GetCurrentTime();
 	CString sessions = GetResString(IDS_CHAT_START) + client->GetUserName() + CString(_T(" - ")) + theTime.Format(_T("%c"))+ _T("\n");
-	chatitem->log->AppendKeyWord(sessions,RGB(255,0,0));
+	chatitem->log->AppendKeyWord(sessions, RGB(255,0,0));
 	client->SetChatState(MS_CHATTING);
 
 	CString name;
@@ -160,7 +156,7 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 	// CCloseableTabCtrl doesn't draw the text really nice.. add some "margins"
 	CString strLabel = _T("  ") + name + _T("  ");
 	TCITEM newitem;
-	newitem.mask = TCIF_PARAM|TCIF_TEXT|TCIF_IMAGE;
+	newitem.mask = TCIF_PARAM | TCIF_TEXT | TCIF_IMAGE;
 	newitem.lParam = (LPARAM)chatitem;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)strLabel);
 	newitem.iImage = 0;
@@ -174,7 +170,7 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 
 uint16 CChatSelector::GetTabByClient(CUpDownClient* client)
 {
-	for (int i = 0; i < GetItemCount();i++){
+	for (int i = 0; i < GetItemCount(); i++){
 		TCITEM cur_item;
 		cur_item.mask = TCIF_PARAM;
 		if (GetItem(i, &cur_item) && ((CChatItem*)cur_item.lParam)->client == client)
@@ -185,7 +181,7 @@ uint16 CChatSelector::GetTabByClient(CUpDownClient* client)
 
 CChatItem* CChatSelector::GetItemByClient(CUpDownClient* client)
 {
-	for (int i = 0; i < GetItemCount();i++){
+	for (int i = 0; i < GetItemCount(); i++){
 		TCITEM cur_item;
 		cur_item.mask = TCIF_PARAM;
 		if (GetItem(i, &cur_item) && ((CChatItem*)cur_item.lParam)->client == client)
@@ -200,7 +196,7 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, char* message)
 
 	CString strMessage = CString(message).MakeLower();
 	CString resToken;
-	int curPos=0;
+	int curPos = 0;
 	resToken = theApp.glob_prefs->GetMessageFilter().Tokenize(_T("|"), curPos);
 	while (resToken != _T(""))
 	{
@@ -227,7 +223,7 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, char* message)
 	{
 		if (GetItemCount() >= theApp.glob_prefs->GetMsgSessionsMax())
 			return;
-		ci = StartSession(sender,false);
+		ci = StartSession(sender, false);
 		isNewChatWindow = true; 
 	}
 	if (theApp.glob_prefs->GetIRCAddTimestamp())
@@ -238,12 +234,11 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, char* message)
 	if (GetCurSel() == GetTabByClient(sender) && GetParent()->IsWindowVisible()){
 		; // chat window is already visible
 	}
-	else { 
+	else{
 		ci->notify = true;
         if (isNewChatWindow || theApp.glob_prefs->GetNotifierPopsEveryChatMsg())
 			theApp.emuledlg->ShowNotifier(GetResString(IDS_TBN_NEWCHATMSG) + _T(" ") + CString(sender->GetUserName()) + _T(":'") + CString(message) + _T("'\n"), TBN_CHAT);
 		isNewChatWindow = false;
-		//END - enkeyDEV(kei-kun) -TaskbarNotifier-
 	}
 }
 
@@ -256,7 +251,7 @@ bool CChatSelector::SendMessage(LPCTSTR message)
 	if (ci->history.GetCount() == theApp.glob_prefs->GetMaxChatHistoryLines())
 		ci->history.RemoveAt(0);
 	ci->history.Add(CString(message));
-	ci->history_pos=ci->history.GetCount();
+	ci->history_pos = ci->history.GetCount();
 
 	// advance spamfilter stuff
 	ci->client->m_cMessagesSend++;
@@ -269,11 +264,11 @@ bool CChatSelector::SendMessage(LPCTSTR message)
 	if (ci->client->socket && ci->client->socket->IsConnected())
 	{
 		uint16 mlen = (uint16)strlen(message);
-		Packet* packet = new Packet(OP_MESSAGE,mlen+2);
+		Packet* packet = new Packet(OP_MESSAGE, mlen+2);
 		memcpy(packet->pBuffer, &mlen, 2);
 		memcpy(packet->pBuffer + 2, message, mlen);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-		ci->client->socket->SendPacket(packet,true,true);
+		ci->client->socket->SendPacket(packet, true, true);
 
 		ci->log->AppendKeyWord(theApp.glob_prefs->GetUserNick(), RGB(1,180,20));
 		ci->log->AppendText(_T(": "));
@@ -294,6 +289,7 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 	CChatItem* ci = GetItemByClient(sender);
 	if (!ci)
 		return;
+
 	ci->client->SetChatState(MS_CHATTING);
 	if (!success){
 		if (ci->messagepending){
@@ -311,11 +307,12 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 		ci->log->AppendKeyWord(_T(" ok\n"), RGB(255,0,0));
 		
 		uint16 mlen = (uint16)strlen(ci->messagepending);
-		Packet* packet = new Packet(OP_MESSAGE,mlen+2);
+		Packet* packet = new Packet(OP_MESSAGE, mlen+2);
 		memcpy(packet->pBuffer, &mlen, 2);
 		memcpy(packet->pBuffer + 2, ci->messagepending, mlen);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-		ci->client->socket->SendPacket(packet,true,true);
+		ci->client->socket->SendPacket(packet, true, true);
+
 		if (theApp.glob_prefs->GetIRCAddTimestamp())
 			AddTimeStamp(ci);
 		ci->log->AppendKeyWord(theApp.glob_prefs->GetUserNick(), RGB(1,180,20));
@@ -334,11 +331,11 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 
 void CChatSelector::DeleteAllItems()
 {
-	for (int i = 0; i < GetItemCount();i++){
+	for (int i = 0; i < GetItemCount(); i++){
 		TCITEM cur_item;
 		cur_item.mask = TCIF_PARAM;
 		if (GetItem(i, &cur_item))
-		delete (CChatItem*)cur_item.lParam;
+			delete (CChatItem*)cur_item.lParam;
 	}
 }
 
@@ -356,14 +353,15 @@ void CChatSelector::OnTimer(UINT_PTR nIDEvent)
 		cur_item.mask = TCIF_IMAGE;
 		if (((CChatItem*)cur_item.lParam)->notify){
 			cur_item.iImage = (m_blinkstate) ? 1 : 2;
-			SetItem(i,&cur_item);
+			SetItem(i, &cur_item);
 			globalnotify = true;
 		}
 		else if (cur_item.iImage != 0){
 			cur_item.iImage = 0;
-			SetItem(i,&cur_item);
+			SetItem(i, &cur_item);
 		}
 	}
+
 	if (globalnotify) {
 		theApp.emuledlg->ShowMessageState(m_blinkstate ? 1 : 2);
 		m_lastemptyicon = false;
@@ -379,6 +377,7 @@ CChatItem* CChatSelector::GetCurrentChatItem()
 	int iCurSel = GetCurSel();
 	if (iCurSel == -1)
 		return NULL;
+
 	TCITEM cur_item;
 	cur_item.mask = TCIF_PARAM;
 	if (!GetItem(iCurSel, &cur_item))
@@ -439,13 +438,14 @@ void CChatSelector::EndSession(CUpDownClient* client)
 		iCurSel = GetCurSel();
 	if (iCurSel == -1)
 		return;
+	
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 	if (!GetItem(iCurSel, &item) || item.lParam == 0)
 		return;
 	CChatItem* ci = (CChatItem*)item.lParam;
 	ci->client->SetChatState(MS_NONE);
-	
+
 	DeleteItem(iCurSel);
 	delete ci;
 
@@ -461,7 +461,7 @@ void CChatSelector::EndSession(CUpDownClient* client)
 		if (iCurSel == CB_ERR)					// if still error
 			iCurSel = SetCurSel(0);
 		ShowChat();
-}
+	}
 }
 
 void CChatSelector::GetChatSize(CRect& rcChat)
@@ -486,20 +486,21 @@ void CChatSelector::GetChatSize(CRect& rcChat)
 
 void CChatSelector::OnSize(UINT nType, int cx, int cy)
 {
-	CClosableTabCtrl::OnSize(nType, cx, cy);	
+	CClosableTabCtrl::OnSize(nType, cx, cy);
 
 	CRect rect;
 	GetClientRect(&rect);
 	AdjustRect(FALSE, rect);
-		
+
 	CRect rClose;
 	m_pCloseBtn->GetWindowRect(&rClose);
 	m_pCloseBtn->SetWindowPos(NULL, rect.right-7-rClose.Width(), rect.bottom-7-rClose.Height(),
-								rClose.Width(), rClose.Height(), SWP_NOZORDER);
+							  rClose.Width(), rClose.Height(), SWP_NOZORDER);
+	
 	CRect rSend;
 	m_pSendBtn->GetWindowRect(&rSend);
 	m_pSendBtn->SetWindowPos(NULL, rect.right-7-rClose.Width()-7-rSend.Width(), rect.bottom-7-rSend.Height(),
-								rSend.Width(), rSend.Height(), SWP_NOZORDER);
+							 rSend.Width(), rSend.Height(), SWP_NOZORDER);
 	
 	CRect rMessage;
 	m_pMessageBox->GetWindowRect(&rMessage);
@@ -508,7 +509,7 @@ void CChatSelector::OnSize(UINT nType, int cx, int cy)
 
 	CRect rcChat;
 	GetChatSize(rcChat);
-	
+
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 	int i = 0;
@@ -542,9 +543,9 @@ BOOL CChatSelector::PreTranslateMessage(MSG* pMsg)
 	if (pMsg->message == WM_KEYDOWN)
 	{
 		if (pMsg->wParam == VK_RETURN){
-		if (pMsg->hwnd == m_pMessageBox->m_hWnd)
-			OnBnClickedCsend();
-	}
+			if (pMsg->hwnd == m_pMessageBox->m_hWnd)
+				OnBnClickedCsend();
+		}
 
 		if (pMsg->hwnd == m_pMessageBox->m_hWnd && (pMsg->wParam == VK_UP || pMsg->wParam == VK_DOWN)){
 			theApp.emuledlg->chatwnd->ScrollHistory(pMsg->wParam == VK_DOWN);
@@ -556,20 +557,22 @@ BOOL CChatSelector::PreTranslateMessage(MSG* pMsg)
 
 void CChatSelector::Localize(void)
 {
-	if(m_hWnd)
+	if (m_hWnd)
 	{
-		if(m_pSendBtn)
+		if (m_pSendBtn)
 			m_pSendBtn->SetWindowText(GetResString(IDS_CW_SEND));
 		else
 			GetParent()->GetDlgItem(IDC_CSEND)->SetWindowText(GetResString(IDS_CW_SEND));
-		if(m_pCloseBtn)
+
+		if (m_pCloseBtn)
 			m_pCloseBtn->SetWindowText(GetResString(IDS_CW_CLOSE));
 		else
 			GetParent()->GetDlgItem(IDC_CCLOSE)->SetWindowText(GetResString(IDS_CW_CLOSE));
 	}
 }
 
-bool CChatSelector::IsSpam(CString strMessage, CUpDownClient* client){
+bool CChatSelector::IsSpam(CString strMessage, CUpDownClient* client)
+{
 	// first step, spam dectection will be further improved in future versions
 	if ( !theApp.glob_prefs->IsAdvSpamfilterEnabled() || client->IsFriend() ) // friends are never spammer... (but what if two spammers are friends :P )
 		return false;
@@ -600,6 +603,7 @@ bool CChatSelector::IsSpam(CString strMessage, CUpDownClient* client){
 	// to be continued
 	return false;
 }
+
 void CChatSelector::AddTimeStamp(CChatItem* ci)
 {
 	ci->log->AppendText(CTime::GetCurrentTime().Format(_T("[%X] ")));
