@@ -78,7 +78,7 @@ public:
     virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, true); };
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize) { return Send(maxNumberOfBytesToSend, minFragSize, false); };
 
-    uint32	GetNeededBytes();
+    uint32	GetNeededBytes(bool lowspeed = false);
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;

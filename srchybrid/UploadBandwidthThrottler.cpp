@@ -523,7 +523,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
      			if(socket != NULL) {
 				    if(thisLoopTick-socket->GetLastCalledSend() > SEC2MS(1)) {
       	              // trickle
-      	              uint32 neededBytes = socket->GetNeededBytes();
+      	              uint32 neededBytes = socket->GetNeededBytes(minFragSize<1000);
 
       	              if(neededBytes > 0) {
 						    SocketSentBytes socketSentBytes = socket->SendFileAndControlData(neededBytes, minFragSize);
@@ -531,8 +531,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
                     	    spentBytesClass[classID] += lastSpentBytes;
 							if (classID < LAST_CLASS) spentBytesClass[LAST_CLASS] += lastSpentBytes;
 							spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
-							if(lastSpentBytes > 0 && slotCounter < m_highestNumberOfFullyActivatedSlots) {
-                                m_highestNumberOfFullyActivatedSlots = slotCounter;
+							if(lastSpentBytes > 0 && slotCounter < m_highestNumberOfFullyActivatedSlots && m_highestNumberOfFullyActivatedSlots>0) {
+                                --m_highestNumberOfFullyActivatedSlots;
                     	   	}
 						}
                		}
@@ -546,7 +546,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			memcpy(maxSlot,slotCounterClass,sizeof(slotCounterClass));
 
 			uint32 lastpos = 0;
-            for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
+            for(uint32 classID=0;classID<NB_SPLITTING_CLASS && slotCounterClass[classID];classID++)
 			{
 				bool isFocused = ClientDataRate[classID] == 0;
 				if (!isFocused) {
@@ -615,8 +615,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						spentBytesClass[classID] += lastSpentBytes;
 						if (classID < LAST_CLASS) spentBytesClass[LAST_CLASS] += lastSpentBytes;
 						spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
-						if(slotCounter+2 > m_highestNumberOfFullyActivatedSlots && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/)) {
-							m_highestNumberOfFullyActivatedSlots = slotCounter+2;
+						if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/)) {
+							m_highestNumberOfFullyActivatedSlots = slotCounter+1;
 						}
 					} else {
 						theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i"), slotCounter, m_StandardOrder_list.GetSize());
@@ -630,19 +630,19 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			DWORD templastTickReachedBandwidth = lastTickReachedBandwidth;
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{
-				if (allowedDataRateClass[classID])
+				if (allowedDataRateClass[classID] && (slotCounterClass[classID]>0 || classID==LAST_CLASS))
 				{
 					if(realBytesToSpendClass[classID] < -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000) {
 	           			sint64 newRealBytesToSpend = -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000;
 	           			realBytesToSpendClass[classID] = newRealBytesToSpend;
-	           		    templastTickReachedBandwidth = thisLoopTick;
+	           		    if (classID==LAST_CLASS) templastTickReachedBandwidth = thisLoopTick;
 	       			} else {
 	           		    uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*512*1000;
 	           		    if(realBytesToSpendClass[classID] > 0 && (uint64)realBytesToSpendClass[classID] > 999+bandwidthSavedTolerance) {
 					        sint64 newRealBytesToSpend = 999+bandwidthSavedTolerance;
 					        //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i"), realBytesToSpend, newRealBytesToSpend);
 	           				realBytesToSpendClass[classID] = newRealBytesToSpend;
-							if(thisLoopTick-lastTickReachedBandwidth > max(1000, timeSinceLastLoop*2)) {
+							if(thisLoopTick-lastTickReachedBandwidth > max(100, timeSinceLastLoop*2)) {
 	           		            if (classID==LAST_CLASS)
 								{
 									m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;
