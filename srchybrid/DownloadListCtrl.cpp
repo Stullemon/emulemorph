@@ -2621,8 +2621,13 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 	{
 		//Make ascending sort so we can have the smaller remaining time on the top 
 		//instead of unknowns so we can see which files are about to finish better..
+		//MORPH - Changed by SiRoB, Sort by AverageRemainingTime
+		/*
 		sint32 f1 = file1->getTimeRemaining();
 		sint32 f2 = file2->getTimeRemaining();
+		*/
+		sint32 f1 = (thePrefs.GetTimeRemainingMode()!=2)?file1->getTimeRemaining():file1->GetTimeRemainingAvg();
+		sint32 f2 = (thePrefs.GetTimeRemainingMode()!=2)?file2->getTimeRemaining():file2->GetTimeRemainingAvg();
 		//Same, do nothing.
 		if( f1 == f2 )
 			return 0;

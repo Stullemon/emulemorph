@@ -339,7 +339,7 @@ public:
 	// khaos::accuratetimerem+
 	void	SetActivatedTick()				{ m_dwActivatedTick = GetTickCount(); }
 	DWORD	GetActivatedTick()				{ return m_dwActivatedTick; }
-	sint32	GetTimeRemainingAvg();
+	sint32	GetTimeRemainingAvg() const;
 	// khaos::accuratetimerem-
 	// khaos::kmod+ Advanced A4AF: Brute Force Features
 	bool	ForceAllA4AF()	const			{ return m_bForceAllA4AF; }

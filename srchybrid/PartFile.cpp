@@ -3598,7 +3598,7 @@ sint32 CPartFile::getTimeRemaining() const
 }
 
 // khaos::accuratetimerem+
-sint32 CPartFile::GetTimeRemainingAvg()
+sint32 CPartFile::GetTimeRemainingAvg() const
 {
 	uint32 nCompletedSince = GetCompletedSize() - m_nInitialBytes;
 	uint32 nSecondsActive = m_nSecondsActive;
