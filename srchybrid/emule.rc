@@ -1521,8 +1521,8 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Morph"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,7,46,216,204
+    CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,204
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
@@ -2843,7 +2843,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_FAILEDDOWNLOADMET "Failed to download the serverlist from %s"
-    IDS_PERMISSION          "Permission..."
+    IDS_PERMISSION          "Permission"
     IDS_SHAREDFILES         "Shared Files"
     IDS_PRIOVERYLOW         "Very Low"
     IDS_PRIORELEASE         "Release"
@@ -2953,7 +2953,7 @@ BEGIN
     IDS_TITLE               "Title"
     IDS_COLOR               "Color"
     IDS_DEFAULT             "Default"
-    IDS_PW_DISPLAY          "Display..."
+    IDS_PW_DISPLAY          "Display"
     IDS_CAT_INVADD          "Show all unassigned"
     IDS_CAT_REINVADD        "Show all"
     IDS_INDICATERATINGS     "Indicate downloads with comments/rating by icon"
@@ -3411,38 +3411,16 @@ BEGIN
     IDS_IRC_PRIVATECHANSTART "* Private chat session started"
     IDS_IRC_SLAPMSG         "* %s slaps %s around with a large Babelfish!"
     IDS_IRC_PRIVMESSAGE     "Private Message"
+    IDS_SOURCESWAPBLOCKED   "Swap blocked"
+    IDS_A4AF_CHECK_THIS_NOW "Check this source now (debug)"
     IDS_SOURCEEXCHANGESWAP  "Temporary Source Exchange Swap"
+    IDS_PR_SHORT_HIGH       "[Hi]"
     IDS_PR_SHORT_LOW        "[Lo]"
     IDS_IRC_KICK            "Kick"
     IDS_IRC_SLAP            "Slap"
     IDS_IRC_JOIN            "Join"
     IDS_IRC_CHANNELLIST     "Channel list"
     IDS_IRC_CONNECT         "Connect"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_COUNTRY             "Country"
-    IDS_MISSING_STARTUPSOUND 
-                            "Missing startupsound.wav! Note: The file 'startupsound.wav' has to be placed in your config dir"
-    IDS_PW_STARTUPSOUND     "Play startupsound"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_FO_PREF_EXISTED     "eMule detected existing rules for the selected ports, which were not overwritten or replaced. Missing rules have been added successfully.\nPlease note that third-party desktopfirewalls and routers are not affected by this!"
-    IDS_FO_PREF_FAILED      "Failed to configure the internal WinXP firewall for the selected ports!"
-    IDS_FO_PREF_STARTUP     "Open/close ports on WinXP firewall when starting/exiting eMule"
-    IDS_LOG_LEVEL           "Log level"
-    IDS_DISABLEPEERACHE     "Disable downloading from PeerCache"
-    IDS_NEWMSG              "New Message from '%s' (IP:%s)"
-    IDS_PREF_STARTNEXTFILECATONLY "only in same category"
-    IDS_LOG_ULDL_EVENTS     "Log upload/download events"
-    IDS_PEERCACHE_ENABLED   "Your ISP supports the PeerCache technology, enabling cache downloads!"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Allow user to add you as a friend."
-    IDS_SOURCESWAPBLOCKED   "Swap blocked"
-    IDS_A4AF_CHECK_THIS_NOW "Check this source now (debug)"
-    IDS_PR_SHORT_HIGH       "[Hi]"
 END
 
 STRINGTABLE 
@@ -3693,7 +3671,7 @@ BEGIN
     IDS_ADDDOWNLOADSFROMCB  "Add these eD2K-file-links to download?\n"
     IDS_ADDDOWNLOADSFROMCBTITLE "eD2K-file-link on clipboard"
     IDS_PF_WATCHCB          "Watch clipboard for eD2K file links"
-    IDS_SECURITY            "Security..."
+    IDS_SECURITY            "Security"
     IDS_IPFILTERLOADED      "%i IP filters loaded"
     IDS_IPFILTER            "IP Filter"
     IDS_EDIT                "Edit..."
@@ -4250,6 +4228,20 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_FO_PREF_EXISTED     "eMule detected existing rules for the selected ports, which were not overwritten or replaced. Missing rules have been added successfully.\nPlease note that third-party desktopfirewalls and routers are not affected by this!"
+    IDS_FO_PREF_FAILED      "Failed to configure the internal WinXP firewall for the selected ports!"
+    IDS_FO_PREF_STARTUP     "Open/close ports on WinXP firewall when starting/exiting eMule"
+    IDS_LOG_LEVEL           "Log level"
+    IDS_DISABLEPEERACHE     "Disable downloading from PeerCache"
+    IDS_NEWMSG              "New Message from '%s' (IP:%s)"
+    IDS_PREF_STARTNEXTFILECATONLY "only in same category"
+    IDS_LOG_ULDL_EVENTS     "Log upload/download events"
+    IDS_PEERCACHE_ENABLED   "Your ISP supports the PeerCache technology, enabling cache downloads!"
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Allow user to add you as a friend."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "check file availability before starting download"
     IDS_DL_FORCE            "Force Download"
@@ -4268,9 +4260,9 @@ BEGIN
     IDS_UPSLOTNUMBER        "Slot #"
     IDS_STATS_LEECHERCLIENTS "Leechers: %u"
     IDS_WARNINGMORPH        "Warning:  Do not change these settings unless you know what you are doing.  You can easily make things worse for yourself.\neMule will run fine without adjusting any of these settings."
-    IDS_DM                  "Download Management..."
-    IDS_SCC                 "Smart Category Control (SCC)..."
-    IDS_SAC                 "Smart A4AF Control (SAC)..."
+    IDS_DM                  "Download Management"
+    IDS_SCC                 "Smart Category Control (SCC)"
+    IDS_SAC                 "Smart A4AF Control (SAC)"
 END
 
 STRINGTABLE 
@@ -4281,7 +4273,7 @@ BEGIN
     IDS_POWERSHARE_OFF_LABEL "Off"
     IDS_POWERSHARE_COLUMN_LABEL "Powershare"
     IDS_POWERSHARE_PREFIX   "PS"
-    IDS_POWERSHARE          "Powershare..."
+    IDS_POWERSHARE          "Powershare"
     IDS_SF_UPLOADED_PARTS   "Spread bar (UL part history)"
 END
 
@@ -4290,7 +4282,7 @@ BEGIN
     IDS_SF_TURN_PART        "File UL (part)"
     IDS_SF_TURN_SIMPLE      "File UL (simple)"
     IDS_SF_FULLUPLOAD       "File UL (full)"
-    IDS_UM                  "Upload Management..."
+    IDS_UM                  "Upload Management"
     IDS_ANTI_LEECHER        "Enable anti-leechers control"
     IDS_PROGRESS_PERCENT    "Show percentage in progress bar"
     IDS_DOWNLOAD_IN_BOLD    "Show downloading files in bold"
@@ -4321,8 +4313,8 @@ BEGIN
     IDS_POWERSHARE_DISABLED_LABEL "Disabled"
     IDS_POWERSHARE_AUTO_LABEL "Auto"
     IDS_POWERSHARE_AUTO     "Auto"
-    IDS_DYNUPLOAD           "Dynamic Upload..."
-    IDS_HIDEOVERSHARES      "Overshares before hiding chunks (0 = Disabled)..."
+    IDS_DYNUPLOAD           "Dynamic Upload"
+    IDS_HIDEOVERSHARES      "Overshares before hiding chunks (0 = Disabled)"
 END
 
 STRINGTABLE 
@@ -4373,7 +4365,7 @@ STRINGTABLE
 BEGIN
     IDS_ABORT               "Abort?"
     IDS_MINUPLOAD_SHORT     "Min. Up"
-    IDS_SUC                 "Smart Upload Control (SUC)..."
+    IDS_SUC                 "Smart Upload Control (SUC)"
     IDS_SUC_ENABLED         "Enable"
     IDS_MINUPLOAD           "Minimum upload limit"
     IDS_SUC_HIGH            "High pass (default %i)"
@@ -4401,7 +4393,7 @@ BEGIN
     IDS_A4AF_BALANCE        "Balance sources"
     IDS_A4AF_STACK          "Stack sources"
     IDS_A4AF_DISABLED       "Disabled"
-    IDS_A4AF_ADVMODE        "Advanced A4AF handling..."
+    IDS_A4AF_ADVMODE        "Advanced A4AF handling"
     IDS_CAT_STARTFILESONADD "Start # files when added to a new category"
 END
 
@@ -4434,7 +4426,7 @@ BEGIN
     IDS_UPDATEIPFILTERERROR "Error updating IPFilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Updating IPFilter.dat"
     IDS_IPFILTER_PERCENTAGE "Updating IPFilter.dat: %s%% of %s completed"
-    IDS_REMTIMEAVRREAL      "Remaining time display..."
+    IDS_REMTIMEAVRREAL      "Remaining time display"
 END
 
 STRINGTABLE 
@@ -4491,7 +4483,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_USS                 "Upload Speed Sense (USS)..."
+    IDS_USS                 "Upload Speed Sense (USS)"
     IDS_USS_ENABLED         "Enable"
     IDS_USS_LOG             "Show activities in debug log"
     IDS_USS_PINGTOLERANCE   "Ping tolerance (in %%) (Default %i)"
@@ -4572,7 +4564,7 @@ STRINGTABLE
 BEGIN
     IDS_SWITCHSUC           "Switching Dynamic Upload System to SmartUploadControl"
     IDS_SWITCHDYNUP         "Switching Dynamic Upload System to UploadSpeedSense"
-    IDS_AUTODYNUPSWITCHING  "Automatic dynamic upload system switching..."
+    IDS_AUTODYNUPSWITCHING  "Automatic dynamic upload system switching"
     IDS_MAXCONNECTIONSSWITCHBORDER "Border for switching"
 END
 
@@ -4603,7 +4595,7 @@ STRINGTABLE
 BEGIN
     IDS_HIDEOS              "Hide Over Share"
     IDS_SHAREONLYTHENEED    "Share Only The Need"
-    IDS_SFM                 "Shared File Management..."
+    IDS_SFM                 "Shared File Management"
     IDS_IP2COUNTRY          "IP2Country"
 END
 
@@ -4676,6 +4668,10 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CHAT_NAME           "Name:"
+    IDS_COUNTRY             "Country"
+    IDS_MISSING_STARTUPSOUND 
+                            "Missing startupsound.wav! Note: The file 'startupsound.wav' has to be placed in your config dir"
+    IDS_PW_STARTUPSOUND     "Play startupsound"
     IDS_CLIENTPERCENTAGE    "Show Client Percentage"
 END
 
