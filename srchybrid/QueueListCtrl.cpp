@@ -36,9 +36,6 @@
 #include "Kademlia/Kademlia/Prefs.h"
 #include "kademlia/net/KademliaUDPListener.h"
 
-#include "DownloadQueue.h" //MORPH - Added by SiRoB
-#include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -325,9 +322,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	RECT clientRect;
 	GetClientRect(&clientRect);
 	RECT cur_rec = lpDrawItemStruct->rcItem;
-	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
-		&&
-		(cur_rec.bottom > clientRect.top || cur_rec.bottom < clientRect.bottom))
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	
@@ -370,9 +365,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		if( !IsColumnHidden(iColumn) ){
 			cur_rec.right += GetColumnWidth(iColumn);
 			//MORPH START - Added by SiRoB, Don't draw hidden columns
-			if (cur_rec.left > clientRect.left && cur_rec.left < clientRect.right
-				||
-				cur_rec.right > clientRect.left && cur_rec.right < clientRect.right)
+			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				switch(iColumn){
@@ -752,34 +745,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 			case MP_LIST_REQUESTED_FILES: { // added by sivka
 				if (client != NULL)
 				{
-					CString fileList;
-					fileList += GetResString(IDS_LISTREQDL);
-					fileList += "\n--------------------------\n" ; 
-					if (theApp.downloadqueue->IsPartFile(client->GetRequestFile()))
-					{
-						fileList += client->GetRequestFile()->GetFileName(); 
-						for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
-						{
-							fileList += "\n" ; 
-							fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
-						}
-						for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
-						{
-							fileList += "\n" ;
-							fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
-						}
-					}
-					else
-						fileList += GetResString(IDS_LISTREQNODL);
-					fileList += "\n\n\n";
-					fileList += GetResString(IDS_LISTREQUL);
-					fileList += "\n------------------------\n" ; 
-					CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-					if(uploadfile)
-						fileList += uploadfile->GetFileName();
-					else
-						fileList += GetResString(IDS_LISTREQNOUL);
-					AfxMessageBox(fileList,MB_OK);
+					client->ShowRequestedFiles(); //Changed by SiRoB
 				}
 				break;
 			}
