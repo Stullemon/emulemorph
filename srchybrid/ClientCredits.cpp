@@ -43,11 +43,12 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_dwSecureWaitTime = 0;
 	m_dwWaitTimeIP = 0;
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
-	m_fLastScoreRatio = 1;
+	m_fLastScoreRatio = 0;
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
-	//Morph End - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
+	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -60,11 +61,12 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_dwSecureWaitTime = ::GetTickCount();
 	m_dwWaitTimeIP = 0;
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
-	m_fLastScoreRatio = 1;
+	m_fLastScoreRatio = 0;
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
+	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 }
 
 CClientCredits::~CClientCredits()
@@ -84,7 +86,10 @@ void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
 	m_pCredits->nDownloadedLo=(uint32)current;
 	m_pCredits->nDownloadedHi=(uint32)(current>>32);
 
-	m_bCheckScoreRatio = true;
+	//is it good to refresh PayBackFirst status here?
+	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+
+	m_bCheckScoreRatio = true;//Morph - Added by AndCycle, reduce a little CPU usage for ratio count
 }
 
 void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
@@ -99,7 +104,10 @@ void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
 	m_pCredits->nUploadedLo=(uint32)current;
 	m_pCredits->nUploadedHi=(uint32)(current>>32);
 
-	m_bCheckScoreRatio = true;
+	//is it good to refresh PayBackFirst status here?
+	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+
+	m_bCheckScoreRatio = true;//Morph - Added by AndCycle, reduce a little CPU usage for ratio count
 }
 
 uint64	CClientCredits::GetUploadedTotal(){
@@ -112,81 +120,42 @@ uint64	CClientCredits::GetDownloadedTotal(){
 
 float CClientCredits::GetScoreRatio(uint32 dwForIP)
 {
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	if(m_cssCurrentCreditSystem != theApp.glob_prefs->GetCreditSystem()){
 		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
-	}else if(m_bCheckScoreRatio == false){
+	}else if(m_bCheckScoreRatio == false){//only refresh ScoreRatio when really need
 		return m_fLastScoreRatio;
-	}else if(m_bCheckScoreRatio == true){
-		m_bCheckScoreRatio = false;
 	}
-	//Morph End - Added by AndCycle, reduce a litte CPU usage for ratio count
+	m_bCheckScoreRatio = false;
+	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
-	//Morph Start - Modified by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Modified by AndCycle, reduce a little CPU usage for ratio count
 
 	float result = 0;//everybody share one result.
     //EastShare START - Added by linekin, CreditSystem 
 	switch (m_cssCurrentCreditSystem)	{
 
 		// EastShare - Added by linekin, lovelace Credit
-		case CS_LOVELACE: 
-			{
-				// new creditsystem by [lovelace]
-				double cl_up,cl_down; 
-				if (this->m_pCredits){
-						cl_up = GetUploadedTotal()/(double)1048576;
-						cl_down = GetDownloadedTotal()/(double)1048576;
-						result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
-						if (fabs(result)>20000.0f) 
-							result*=20000.0f/fabs(result);
-						result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001))),6.6667f);
-						if (result<0.1f) 
-							result=0.1f;
-						if (result>100.f)
-							result=100.f;
-				}else{
-					result = 0.1f;
-				}
-				// end new creditsystem by [lovelace]
-			}break;
-/*
-		//Ratio mod Credit
-		case CS_RATIO: 
-		{
-			float UploadedTotalMB = (float)GetUploadedTotal()/1048576.0;
-			float DownloadedTotalMB = (float)GetDownloadedTotal()/1048576.0;
-			if (DownloadedTotalMB < 1){
-				if (UploadedTotalMB >= 18)
-					return 0.1f;
-				else
-					return 1-(UploadedTotalMB/20);
-			}
-
-			float result = 10000;
-			if (UploadedTotalMB > 1){
-				result = (DownloadedTotalMB * 2)/UploadedTotalMB;
-				if (result < 2){
-					float BonusMB = (float)sqrt((double)DownloadedTotalMB) * 5;
-					result = (DownloadedTotalMB + BonusMB)/UploadedTotalMB;
-					if (result < 0.5){
-						result = 0.5f;
-					}
-				}
-			}
-
-			float result2 = DownloadedTotalMB;
-			result2 += 2;
-			result2 = (float)sqrt((double)result2);
-
-			if (result > result2)
-				result = result2;
-
-			if (result < 1.01){
-				if (DownloadedTotalMB > 9)
-					result = 1.01f;
-			}
+		case CS_LOVELACE:{
+			// new creditsystem by [lovelace]
+			double cl_up,cl_down; 
+//			if (this->m_pCredits){
+					cl_up = GetUploadedTotal()/(double)1048576;
+					cl_down = GetDownloadedTotal()/(double)1048576;
+					result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
+					if (fabs(result)>20000.0f) 
+						result*=20000.0f/fabs(result);
+					result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001))),6.6667f);
+					if (result<0.1f) 
+						result=0.1f;
+					if (result>10.0f && IdentState == IS_NOTAVAILABLE)
+						result=10.0f;
+//			}else{
+//				result = 0.1f;
+//			}
+			// end new creditsystem by [lovelace]
 		}break;
-*/
+
 		//EastShare Start - added by AndCycle, Pawcio credit
 		case CS_PAWCIO:{	
 			//Pawcio: Credits
@@ -319,7 +288,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 	return m_fLastScoreRatio = result;
 	//EastShare END - Added by linekin, CreditSystem 
 
-	//Morph End - Modified by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph End - Modified by AndCycle, reduce a little CPU usage for ratio count
 }
 
 //MORPH START - Added by IceCream, VQB: ownCredits
@@ -895,3 +864,13 @@ void CClientCredits::ClearWaitStartTime(){
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 }
+
+//EastShare Start - added by AndCycle, Pay Back First
+void CClientCredits::TestPayBackFirstStatus(){
+
+	if(GetDownloadedTotal() < 1000000)
+		m_bPayBackFirst = false;
+	else
+		m_bPayBackFirst = GetDownloadedTotal() > GetUploadedTotal();
+}
+//EastShare End - added by AndCycle, Pay Back First

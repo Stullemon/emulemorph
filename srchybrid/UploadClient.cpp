@@ -169,6 +169,9 @@ int CUpDownClient::GetFilePrioAsNumber() {
  * time, priority of requested file, and the client's credits.
  */
 uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasevalue){
+
+	DWORD curTick = ::GetTickCount();
+
 	//TODO: complete this (friends, uploadspeed, emuleuser etc etc)
 	if (!m_pszUsername)
 		return 0;
@@ -202,6 +205,19 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		return 0;
 	}
 
+
+	//Morph Start - added by AndCycle, reduce a little CPU usage for score count
+	//well...I dont know how many CPU usage can this reduce...maybe even doesnt work....
+	bool onlycurrentwaitingscore = !sysvalue && !isdownloading && !onlybasevalue;
+	if(onlycurrentwaitingscore){
+
+		if(curTick - m_dwLastGetScore < 100)
+			return m_dwLastBaseValue;
+		else
+			m_dwLastGetScore = curTick;
+	}
+	//Morph End - added by AndCycle, reduce a little CPU usage for score count
+
 	int filepriority = GetFilePrioAsNumber();
 	//MORPH - Added by Yun.SF3, ZZ Upload System
 
@@ -210,20 +226,37 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (onlybasevalue)
 		fBaseValue = 100;
 	else if (!isdownloading)
-		fBaseValue = (float)(::GetTickCount()-GetWaitStartTime())/1000;
+		fBaseValue = (float)(curTick-GetWaitStartTime())/1000;
 	else{
 		// we dont want one client to download forever
 		// the first 15 min downloadtime counts as 15 min waitingtime and you get a 15 min bonus while you are in the first 15 min :)
 		// (to avoid 20 sec downloads) after this the score won't raise anymore 
 		fBaseValue = (float)(m_dwUploadTime-GetWaitStartTime());
 		ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"
-		fBaseValue += (float)(::GetTickCount() - m_dwUploadTime > 900000)? 900000:1800000;
+		fBaseValue += (float)(curTick - m_dwUploadTime > 900000)? 900000:1800000;
 		fBaseValue /= 1000;
 	}
+	if(theApp.glob_prefs->UseCreditSystem())
+	{
 		float modif = credits->GetScoreRatio(GetIP());
 		fBaseValue *= modif;
-		if(!m_bySupportSecIdent)
-			fBaseValue *= 0.85f;
+		if(!m_bySupportSecIdent){
+			switch(theApp.glob_prefs->GetCreditSystem()){
+				case CS_OFFICIAL:
+				//for those unsecure client have no credit, official gives lower Score
+				case CS_PAWCIO:
+					if(modif == 1)
+						fBaseValue *= 0.85f;
+					break;
+				case CS_LOVELACE:
+					//I think lovelace give enough punishment
+				case CS_EASTSHARE:
+					//this also punish those no credit client, so no need for more punishment
+				default:
+					break;
+			}
+		}
+	}
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
 	//MORPH START - Added by Yun.SF3, boost the less uploaded files
@@ -245,6 +278,12 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	}
 	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
 		fBaseValue *= 0.5f;
+
+	//Morph Start - added by AndCycle, reduce a little CPU usage for score count
+	if(onlycurrentwaitingscore)
+		m_dwLastBaseValue = (uint32)fBaseValue;
+	//Morph End - added by AndCycle, reduce a little CPU usage for score count
+
 	return (uint32)fBaseValue;
 }
 
@@ -252,9 +291,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 bool CUpDownClient::MoreUpThanDown(){
 
 	if(!theApp.glob_prefs->IsPayBackFirst()){
-		return false;
-
-	}else if(credits->GetDownloadedTotal() < 1000000){
 		return false;
 
 	//keep PayBackFirst client for full chunk transfer
@@ -267,7 +303,7 @@ bool CUpDownClient::MoreUpThanDown(){
 			return chkPayBackFirstTag();
 		}
 	}else{
-		setPayBackFirstTag(credits->GetDownloadedTotal() > credits->GetUploadedTotal());
+		setPayBackFirstTag(credits->GetPayBackFirstStatus());
 	}
 
 	return chkPayBackFirstTag();
@@ -282,8 +318,7 @@ bool CUpDownClient::MoreUpThanDown(){
  */
 bool CUpDownClient::GetPowerShared() {
 
-	if(GetUploadFileID() != NULL &&
-       theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
+	if(GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		return theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
 	} else {
 		return false;

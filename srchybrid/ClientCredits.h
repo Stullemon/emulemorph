@@ -86,6 +86,7 @@ public:
 	EIdentState	GetCurrentIdentState(uint32 dwForIP); // can be != IdentState
 	uint32	GetSecureWaitStartTime(uint32 dwForIP);
 	void	SetSecWaitStartTime(uint32 dwForIP);
+	bool	GetPayBackFirstStatus()				{return m_bPayBackFirst;}//EastShare - added by AndCycle, Pay Back First
 protected:
 	void	Verified(uint32 dwForIP);
 	EIdentState IdentState;
@@ -100,11 +101,14 @@ private:
 	uint32			m_dwUnSecureWaitTime;
 	uint32			m_dwWaitTimeIP;			   // client IP assigned to the waittime
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	bool			m_bCheckScoreRatio;
 	float			m_fLastScoreRatio;
 	CreditSystemSelection	m_cssCurrentCreditSystem;
-	//Morph End - Added by AndCycle, reduce a litte CPU usage for ratio count
+	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
+
+	bool			m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	void			TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 };
 
 class CClientCreditsList: public CLoggable

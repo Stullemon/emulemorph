@@ -43,6 +43,8 @@ CUpDownClient::CUpDownClient(CClientReqSocket* sender){
 	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 	theApp.clientlist->AddClientType(GetClientSoft(), GetClientVerString());
 	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+
+	m_dwLastGetScore = 0;//Morph - added by AndCycle, reduce a little CPU usage for score count
 }
 
 CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid,uint32 in_serverip, uint16 in_serverport, bool ed2kID){
@@ -70,6 +72,8 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 	m_nServerPort = in_serverport;
 	reqfile = in_reqfile;
 	ReGetClientSoft();
+
+	this->m_dwLastGetScore = 0;//Morph - added by AndCycle, reduce a little CPU usage for score count
 }
 
 void CUpDownClient::Init(){
