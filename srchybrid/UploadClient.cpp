@@ -85,7 +85,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
 	s_UpStatusBar.SetWidth(rect->right - rect->left); 
 	s_UpStatusBar.Fill(crNeither); 
-	if (!onlygreyrect && m_abyUpPartStatus) { 
+	if (!onlygreyrect && m_abyUpPartStatus && currequpfile) { 
 		bool isHiddenPart = !currequpfile->IsPartFile() && ((currequpfile->GetShareOnlyTheNeed()>=0)?currequpfile->GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())>0;
 		if (isHiddenPart) {
 			bool partsneeded = false;
