@@ -94,8 +94,12 @@ void CWebCacheSocket::DetachFromClient()
 		}
 		if (GetClient()->m_pWCUpSocket == this){
 			ASSERT(0);
+			GetClient()->SetWebCacheUpState( WCUS_NONE ); //MOPRH - Moved by SiRoB, WebCache -Fix-
 			GetClient()->m_pWCUpSocket = NULL;
+			//MORPH - Removed by SiRoB, WebCache -Fix-
+			/*
 			GetClient()->SetWebCacheUpState( WCUS_NONE );
+			*/
 		}
 	}
 }
@@ -312,10 +316,7 @@ void CWebCacheUpSocket::DetachFromClient()
 	{
 		if (GetClient()->m_pWCUpSocket == this) {
 			GetClient()->m_pWCUpSocket = NULL;
-			//MORPH - Removed by SiRoB, WebCache Fix
-			/*
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); // Superlexx - from 0.44a PC code
-			*/
 			GetClient()->SetWebCacheUpState( WCUS_NONE );
 		}
 	}
