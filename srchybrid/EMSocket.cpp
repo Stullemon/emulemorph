@@ -398,6 +398,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 				case OP_EMULEPROT:
 // MORPH START - Added by SiRoB, WebCache 1.2f
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
+				case OP_WEBCACHEPACKEDPROT:
 				case OP_WEBCACHEPROT: // yonatan - webcache protocol packets
 // MORPH END   - Added by SiRoB, WebCache 1.2f
 					break;
@@ -462,8 +463,20 @@ void CEMSocket::OnReceive(int nErrorCode){
 }
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
-	downloadLimit = limit;
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+	// JP added netfinity download throttler
+	// MOD BEGIN netfinity: Accumulate download limits
+	downloadLimit += limit; 
 	downloadLimitEnable = true;	
+	if(downloadLimit > 20 * limit && downloadLimit > 4500) // Allow a maximum of 2.0 sec to accumulate or 3 * MTU
+		downloadLimit = max(20 * limit, 4500); 
+	// MOD END netfinity
+
+/*(original code)
+//	downloadLimit = limit;
+//	downloadLimitEnable = true;	
+*/
+	
 	
 	// CPU load improvement
 	if(limit > 0 && pendingOnReceive == true){

@@ -512,6 +512,12 @@
 				RelativePath="WebCache\WebCachedBlockList.cpp">
 			</File>
 			<File
+				RelativePath=".\WebCache\WebCacheMFRList.cpp">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCacheOHCBManager.cpp">
+			</File>
+			<File
 				RelativePath="WebCache\WebCacheProxyClient.cpp">
 			</File>
 			<File
@@ -852,6 +858,12 @@
 			</File>
 			<File
 				RelativePath=".\WebCache\WebCachedBlockList.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCacheMFRList.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCacheOHCBManager.h">
 			</File>
 			<File
 				RelativePath=".\WebCache\WebCacheProxyClient.h">

@@ -1408,7 +1408,7 @@ BEGIN
     GROUPBOX        "Dates",IDC_FD_X8,7,183,320,57,BS_FLAT
     CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,273,152,50,8
-    CONTROL         "not working yet",IDC_WCDOWNL,"Static",SS_LEFTNOWORDWRAP | 
+    CONTROL         "Static",IDC_WCDOWNL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,273,162,50,8
     CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
                     SS_LEFTNOWORDWRAP | WS_GROUP,201,152,64,8
@@ -1883,7 +1883,7 @@ BEGIN
                     WS_TABSTOP,14,17,118,12
     CTEXT           "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!",
                     IDC_WrongPortWarning,21,203,194,34,NOT WS_VISIBLE
-    PUSHBUTTON      "Autodetect Webcache",IDC_DETECTWEBCACHE,14,163,201,12,
+    PUSHBUTTON      "Autodetect Webcache",IDC_DETECTWEBCACHE,14,175,201,12,
                     BS_FLAT
     LTEXT           "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)",
                     IDC_STATIC_NRBLOCKS,14,97,124,28
@@ -1895,8 +1895,6 @@ BEGIN
     CONTROL         "This webcache does NOT cache traffic within the same ISP",
                     IDC_LOCALTRAFFIC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     14,136,201,14
-    CONTROL         "",IDC_WEBCACHELINK,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,14,178,201,10
     CONTROL         "",IDC_WEBCACHELINK2,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE,14,190,201,10
     CONTROL         "Persistent connections for proxy downloads",
@@ -1906,6 +1904,9 @@ BEGIN
                     17
     PUSHBUTTON      "Test webcache configuration. Might take up to 30 Seconds",
                     IDC_TestProxy,14,82,201,15
+    CONTROL         "Update webcachesettings automatically",
+                    IDC_UPDATE_WCSETTINGS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,161,201,14
 END
 
 

@@ -47,6 +47,8 @@
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Log.h"
+// WebCache ///////////////////////////////////////////////////////////////////////////////////
+#include "PartFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1015,7 +1017,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
         activeSlots = m_MaxActiveClientsShortTime;
     }
 
-    if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
+    if(m_abOnClientOverHideClientDatarate[LAST_CLASS] || curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
 		curUploadSlots/*+1*/ < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
     }
@@ -1086,6 +1088,14 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	    if (client->IsBanned())
 		return;
     }
+
+// WebCache ////////////////////////////////////////////////////////////////////////////////////////
+// this file is shared but not a single chunk is complete, so don't enqueue the clients asking for it
+	CKnownFile* uploadReqfile = theApp.sharedfiles->GetFileByID(client->requpfileid);
+	if (uploadReqfile && uploadReqfile->IsPartFile() && ((CPartFile*)uploadReqfile)->GetAvailablePartCount() == 0)
+		return;
+// WebCache end/////////////////////////////////////////////////////////////////////////////////////
+
 	uint16 cSameIP = 0;
 	// check for double
 	POSITION pos1, pos2;

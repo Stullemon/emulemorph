@@ -209,10 +209,19 @@ void Packet::PackPacket(){
 		delete[] output;
 		return;
 	}
-	if( prot == OP_KADEMLIAHEADER )
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+	switch (prot)
+	{
+		case OP_KADEMLIAHEADER:
 		prot = OP_KADEMLIAPACKEDPROT;
-	else
+			break;
+		case OP_WEBCACHEPROT:
+			prot = OP_WEBCACHEPACKEDPROT;
+			break;
+		default:
 		prot = OP_PACKEDPROT;
+	}
+// WebCache End ////////////////////////////////////////////////////////////////////////////////
 	memcpy(pBuffer,output,newsize);
 	size = newsize;
 	delete[] output;
@@ -220,7 +229,11 @@ void Packet::PackPacket(){
 }
 
 bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
-	ASSERT ( prot == OP_PACKEDPROT || prot == OP_KADEMLIAPACKEDPROT); 
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+	ASSERT ( prot == OP_PACKEDPROT
+		|| prot == OP_KADEMLIAPACKEDPROT
+		|| prot == OP_WEBCACHEPACKEDPROT); 
+// WebCache End ////////////////////////////////////////////////////////////////////////////////
 	uint32 nNewSize = size*10+300;
 	if (nNewSize > uMaxDecompressedSize){
 		//ASSERT(0);
@@ -235,10 +248,19 @@ bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
 		size = unpackedsize;
 		delete[] pBuffer;
 		pBuffer = (char*)unpack;
-		if( prot == OP_KADEMLIAPACKEDPROT )
-			prot = OP_KADEMLIAHEADER;
-		else
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+		switch (prot)
+		{
+			case OP_KADEMLIAPACKEDPROT:
+				prot = OP_KADEMLIAHEADER;
+				break;
+			case OP_WEBCACHEPACKEDPROT:
+				prot = OP_WEBCACHEPROT;
+				break;
+			default:
 			prot =  OP_EMULEPROT;
+		}
+// WebCache End ////////////////////////////////////////////////////////////////////////////////
 		return true;
 	}
 	delete[] unpack;

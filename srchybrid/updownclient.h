@@ -22,7 +22,7 @@
 #include "Preferences.h"
 #include "WebCache/WebCache.h"
 #include "WebCache/WebCacheCryptography.h"
-//#include <crypto51/arc4.h>
+#include "WebCache/WebCacheMFRList.h"
 
 // USING_NAMESPACE(CryptoPP)
 
@@ -30,7 +30,8 @@ enum EWebCacheDownState{
 	WCDS_NONE = 0,
 	WCDS_WAIT_CLIENT_REPLY,
 	WCDS_WAIT_CACHE_REPLY,
-	WCDS_DOWNLOADING
+	WCDS_DOWNLOADINGVIA,
+	WCDS_DOWNLOADINGFROM
 };
 
 enum EWebCacheUpState{
@@ -259,6 +260,7 @@ public:
 	EClientSoftware	GetClientSoft() const							{ return (EClientSoftware)m_clientSoft; }
 	const CString&	GetClientSoftVer() const						{ return m_strClientSoftware; }
 	const CString&	GetClientModVer() const							{ return m_strModVersion; }
+	const CString&	GetClientModTag() const							{ return m_strNotOfficial; }
 	void			ReGetClientSoft();
 	uint32			GetVersion() const								{ return m_nClientVersion; }
 	uint8			GetMuleVersion() const							{ return m_byEmuleVersion; }
@@ -704,6 +706,11 @@ public:
 	void SendResumeOHCBSendingUDP();
 //JP stop sendig OHCBs END
 	CWebCacheCryptography Crypt; // Superlexx - encryption
+	uint32 lastMultiOHCBPacketSent;
+	void SendOHCBsNow();
+	bool a(uint32 a) {return a <= WC_MAX_OHCBS_IN_UDP_PACKET;}
+	bool b(uint32 a, uint32 b) { return a * 100.0 / (b + 1) < 0,2; }
+	bool c(uint32 a, uint32 b) { return a > 4 && (b * 100) / a < 20; }
 // MORPH END - Added by Commander, WebCache 1.2f
 
 	///////////////////////////////////////////////////////////////////////////
@@ -793,6 +800,7 @@ public:
 													|| (GetUserPort()==210)
 													|| ((GetUserPort()>=1025) && (GetUserPort()<=65535)));}
 	bool			SupportsWebCache() const { return m_bWebCacheSupport; }
+	bool			SupportsMultiOHCBs() const {return m_bWebCacheSupportsMultiOHCBs;}
 	bool			IsBehindOurWebCache() const
 					{
 						// WC-TODO: make this more efficient
@@ -807,6 +815,7 @@ public:
 							return _T("");
 					}
 	bool			m_bWebCacheSupport;
+	bool			m_bWebCacheSupportsMultiOHCBs;
 	// Superlexx - webcache
 	int		m_WA_webCacheIndex;	// index of the webcache name
 	uint16	m_WA_HTTPPort;		// remote webserver port
@@ -815,7 +824,11 @@ public:
 									// if the header contains this ID and there is a known client with same ID in downloading state.
 									// used for client authorization, should be substituted by a HttpIdList? later
 									// for efficiency reasons.
-	// Superlexx end
+// Superlexx - MFR
+	CWebCacheMFRList	requestedFiles; // the files this client requested from us
+	Packet*	CreateMFRPacket();		// builds a separate MFR-packet
+	uint8	AttachMultiOHCBsRequest(CSafeMemFile &data); // Superlexx - attaches a multiple files request
+	uint8	IsPartAvailable(uint16 iPart, const byte* fileHash) {return requestedFiles.IsPartAvailable(iPart, fileHash);}
     // MORPH END - Added by Commander, WebCache 1.2e
 protected:
 	int m_iHttpSendState;
@@ -1112,6 +1125,7 @@ static LPCTSTR apszSnafuTag[] =
 	_T("[Hunter]"),											//12
 	_T("[Bionic 0.20 Beta]"),								//13
 	_T("[Rumata (rus)(Plus v1f)]")							//14
+	_T("[Fusspi]")											//15
 	};
 
 //<<< new tags from eMule 0.04x
@@ -1122,17 +1136,21 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNx15			0x15 // http://www.haspepapa-welt.de (DodgeBoards) & DarkMule |eVorte|X|
 #define CT_UNKNOWNx16			0x16 // http://www.haspepapa-welt.de (DodgeBoards)
 #define CT_UNKNOWNx17			0x17 // http://www.haspepapa-welt.de (DodgeBoards)
+#define CT_UNKNOWNxE6			0xE6 // http://www.haspepapa-welt.de
 #define CT_UNKNOWNx22			0x22 // DarkMule |eVorte|X|
 #define CT_UNKNOWNx63			0x63 // ?
 #define CT_UNKNOWNx64			0x64 // ?
 #define CT_UNKNOWNx69			0x69 // eMuleReactor
 #define CT_UNKNOWNx79			0x79 // Bionic
+#define CT_UNKNOWNx7A			0x7A // NewDarkMule
+#define CT_UNKNOWNx83			0x83 // Fusspi
 #define CT_UNKNOWNx88			0x88 // DarkMule v6 |eVorte|X|
 #define CT_UNKNOWNx8c			0x8c // eMule v0.27c [LSD7c] 
 #define CT_UNKNOWNx8d			0x8d // unknown Leecher - (client version:60)
 #define CT_UNKNOWNx99			0x99 // eMule v0.26d [RAMMSTEIN 8b]
 #define CT_UNKNOWNxbb			0xbb // emule.de (client version:60)
 #define CT_UNKNOWNxc4			0xc4 //MD5 Community from new bionic - hello
+#define CT_UNKNOWNxCA			0xCA // NewDarkMule
 #define CT_FRIENDSHARING		0x66 //eWombat  [SNAFU]
 #define CT_DARK					0x54 //eWombat [SNAFU]
 #define FRIENDSHARING_ID 0x5F73F1A0 // Magic Key, DO NOT CHANGE!

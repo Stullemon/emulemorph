@@ -16,6 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "DeadSourceList.h"
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
+#include "UpDownClient.h"
 
 class CClientReqSocket;
 class CUpDownClient;
@@ -120,6 +122,12 @@ public:
 // MORPH START - Added by Commander, WebCache 1.2e
 // yonatan - not 2 be confused with the one in CUploadQueue!
 	CUpDownClient*	FindClientByWebCacheUploadId(const uint32 id);
+// Superlexx - OHCB manager
+	CUpDownClientPtrList* XpressOHCBRecipients(uint16 maxNrOfClients, const Requested_Block_Struct* block);
+	void SendOHCBs(); // sends OHCBs to every client every x minutes
+	uint32 m_dwLastSendOHCBs;
+// Superlexx - COtN - moved here from the CUpDownClient
+	uint16 GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, uint16 maxNrOfClients);
 // MORPH END - Added by Commander, WebCache 1.2e
 
 protected:

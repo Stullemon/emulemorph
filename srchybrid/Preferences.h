@@ -314,6 +314,8 @@ public:
 	static	uint64	sesDownData_WEBCACHE; //jp webcache statistics
 	static  uint32	ses_WEBCACHEREQUESTS; //jp webcache statistics
 	static	uint32	ses_successfull_WCDOWNLOADS;  //jp webcache statistics
+	static  uint32	ses_PROXYREQUESTS; //jp webcache statistics
+    static  uint32	ses_successfullPROXYREQUESTS;//jp webcache statistics
 	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Cumulative port breakdown stats for received bytes...
@@ -873,6 +875,7 @@ public:
 	static	uint16	GetWebCacheBlockLimit() {return webcacheBlockLimit;}
 	static	bool	webcacheExtraTimeout;
 	static	bool	PersistentConnectionsForProxyDownloads;
+	static	bool	WCAutoupdate;
 	static	void	SetWebCacheExtraTimeout(bool value) {webcacheExtraTimeout = value;}
 	static	bool	GetWebCacheExtraTimeout() {return webcacheExtraTimeout;}
 	static	bool	webcacheCachesLocalTraffic;
@@ -881,7 +884,7 @@ public:
 	static	bool	webcacheEnabled;
 	static	bool	IsWebCacheDownloadEnabled() {return webcacheEnabled && !WebCacheDisabledThisSession;} //jp
 	static	bool	UsesCachedTCPPort();	//jp
-	static	bool	detectWebcacheOnStartup; // jp detect webcache on startup
+	static	bool	detectWebcacheOnStart; // jp detect webcache on startup
 	static	uint32	webcacheLastSearch;
 	static	void	SetWebCacheLastSearch(uint32 time) {webcacheLastSearch = time;}
 	static	uint32	GetWebCacheLastSearch() {return webcacheLastSearch;}
@@ -891,19 +894,21 @@ public:
 	static	CString	webcacheLastResolvedName;
 	static	void	SetLastResolvedName(CString name) {webcacheLastResolvedName = name;}
 	static	CString	GetLastResolvedName()	{return webcacheLastResolvedName;}
+	// Superlexx end
+	static	uint8	webcacheTrustLevel;
 	// MORPH END - Added by Commander, WebCache 1.2f
 
 	enum Table
 	{
 		tableDownload, 
-		tabledownloadClients,  //SLAHAM: ADDED DownloadClientsCtrl
 		tableUpload, 
 		tableQueue, 
 		tableSearch,
 		tableShared, 
 		tableServer, 
 		tableClientList,
-		tableFilenames
+		tableFilenames,
+		tabledownloadClients  //SLAHAM: ADDED DownloadClientsCtrl
 	};
 
 	friend class CPreferencesWnd;

@@ -373,6 +373,7 @@ void CFileDetailDialogInfo::RefreshData()
 	//MORPH START - Changed by SiRoB, WebCache 1.2f
 	uint32	uWebcacherequests = 0; //JP webcache
 	uint32	uSuccessfulWebcacherequests = 0;//jp webcache
+	uint32  uWebcachedownloaded = 0;//jp webcache
 	//MORPH END   - Changed by SiRoB, WebCache 1.2f
 
 	for (int i = 0; i < m_paFiles->GetSize(); i++)
@@ -392,6 +393,7 @@ void CFileDetailDialogInfo::RefreshData()
 		//MORPH START - Changed by SiRoB, WebCache 1.2f
 		uWebcacherequests += file->Webcacherequests;//jp webcache
 		uSuccessfulWebcacherequests += file->SuccessfulWebcacherequests;//jp webcache
+		uWebcachedownloaded += file->WebCacheDownDataThisFile;//jp webcache
 		//MORPH END   - Changed by SiRoB, WebCache 1.2f
 
 		if (file->IsPartFile())
@@ -440,6 +442,7 @@ void CFileDetailDialogInfo::RefreshData()
 		percentSessions = (double) 100 * uSuccessfulWebcacherequests / uWebcacherequests;
 	str.Format( _T("%u/%u (%1.1f%%)"), uSuccessfulWebcacherequests, uWebcacherequests, percentSessions );
 	SetDlgItemText(IDC_WCReq, str);
+	SetDlgItemText(IDC_WCDOWNL, CastItoXBytes(uWebcachedownloaded, false, false));
 	//MORPH END   - Changed by SiRoB, WebCache 1.2f
 }
 

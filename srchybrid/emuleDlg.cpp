@@ -110,8 +110,6 @@
 #include "Friend.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
-#include "FadeWnd.h"
-
 #ifndef RBBS_USECHEVRON
 #define RBBS_USECHEVRON     0x00000200  // display drop-down button for this band if it's sized smaller than ideal width
 #endif
@@ -623,9 +621,9 @@ BOOL CemuleDlg::OnInitDialog()
 		// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
 		m_bStartMinimized = false;
 
-		//MORPH START - Added by SiROB, WebCache 1.2f
-		thePrefs.detectWebcacheOnStartup = true; //jp detect webcache on startup
-		//MORPH END   - Added by SiROB, WebCache 1.2f
+		//MORPH START - Added by SiRoB, WebCache 1.2f
+		thePrefs.detectWebcacheOnStart = true; //jp detect webcache on startup
+		//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 		DestroySplash();
 

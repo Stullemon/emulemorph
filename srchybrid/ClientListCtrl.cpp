@@ -430,7 +430,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					}
 					case 5:{
-						Sbuffer = client->GetClientSoftVer();
+						Sbuffer = client->GetClientSoftVer() + client->GetClientModTag();
 						if (Sbuffer.IsEmpty())
 							Sbuffer = GetResString(IDS_UNKNOWN);
 						break;

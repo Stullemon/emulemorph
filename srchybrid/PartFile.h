@@ -495,9 +495,10 @@ private:
 	//JP webcache column END
 
 	//JP webcache file detail dialogue START
+	uint32  WebCacheDownDataThisFile;
 	uint32	Webcacherequests;
 	uint32	SuccessfulWebcacherequests;
-	void	AddWebCachedBlockToStats( bool IsGood );
+	void	AddWebCachedBlockToStats( bool IsGood, uint32 bytes );
 	//JP webcache file detail dialogue END
 
 	//JP Throttle OHCB-production START

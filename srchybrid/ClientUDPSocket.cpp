@@ -41,6 +41,7 @@
 // MORPH START - Added by Commander, WebCache 1.2e
 #include "WebCache/WebCachedBlock.h" // yonatan http
 #include "SafeFile.h" // yonatan http (for udp ohcbs)
+#include "WebCache/WebCachedBlockList.h" // Superlexx - managed OHCB list
 // MORPH END - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -142,6 +143,31 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 				}
 //MORPH START - Added by SiRoB, WebCache 1.2f
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
+				case OP_WEBCACHEPACKEDPROT:	// Superlexx - packed WC protocol
+				{ // taken from above, update this code once the source is beautified
+					if (length >= 2)
+					{
+						uint32 nNewSize = length*10+300;
+						byte* unpack = new byte[nNewSize];
+						uLongf unpackedsize = nNewSize-2;
+						uint16 result = uncompress(unpack+2, &unpackedsize, buffer+2, length-2);
+						if (result == Z_OK)
+						{
+							unpack[0] = OP_WEBCACHEPROT;
+							unpack[1] = buffer[1];
+							ProcessWebCachePacket(unpack+2, unpackedsize, unpack[1], sockAddr.sin_addr.S_un.S_addr, ntohs(sockAddr.sin_port));
+						}
+						else
+						{
+							delete[] unpack;
+							throw CString(_T("Failed to uncompress WebCache packet"));
+						}
+						delete[] unpack;
+					}
+					else
+						throw CString(_T("Packet too short"));
+					break;
+				}
 				//JP WEBCACHE START
 				case OP_WEBCACHEPROT:
 				{
@@ -504,6 +530,98 @@ bool CClientUDPSocket::ProcessWebCachePacket(BYTE* packet, uint16 size, uint8 op
 				AddDebugLogLine( false, _T("Received OP_RESUME_SEND_OHCBS from unknown client") );
 			break;
 		}
+		case OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS:
+		case OP_MULTI_HTTP_CACHED_BLOCKS:
+			{
+				CSafeMemFile data((BYTE*)packet,size);
+				CUpDownClient* sender = theApp.clientlist->FindClientByWebCacheUploadId( data.ReadUInt32() ); // data.ReadUInt32() is the uploadID
+				if (!sender) 
+					return false;
+				DebugRecv("OP__Multi_Http_Cached_Blocks", sender);
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					theStats.AddDownDataOverheadOther(size);
+				if( thePrefs.IsWebCacheDownloadEnabled() && sender->SupportsWebCache() ) 
+				{
+					// CHECK HANDSHAKE?
+					if (thePrefs.GetLogWebCacheEvents())
+						AddDebugLogLine( false, _T("Received MultiWCBlocks - UDP") );
+					return WebCachedBlockList.ProcessWCBlocks((char*)packet, size, opcode, sender);
+				}
+				break;
+			}
+		case OP_MULTI_FILE_REASK:
+			{
+				theStats.AddDownDataOverheadFileRequest(size);
+				CSafeMemFile data_in(packet, size);
+				uchar reqfilehash[16];
+				data_in.ReadHash16(reqfilehash);
+				CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(reqfilehash);
+				if (!reqfile)
+				{
+					if (thePrefs.GetDebugClientUDPLevel() > 0)
+					{
+						DebugRecv("OP_MultiFileReask", NULL, (char*)reqfilehash, ip);
+						DebugSend("OP__FileNotFound", NULL);
+					}
+
+					Packet* response = new Packet(OP_FILENOTFOUND,0,OP_EMULEPROT);
+					theStats.AddUpDataOverheadFileRequest(response->size);
+					SendPacket(response, ip, port);
+					break;
+				}
+				CUpDownClient* sender = theApp.uploadqueue->GetWaitingClientByIP_UDP(ip, port);
+				if (sender)
+				{
+					if (thePrefs.GetDebugClientUDPLevel() > 0)
+						DebugRecv("OP_MultiFileReask", sender, (char*)reqfilehash, ip);
+
+					//Make sure we are still thinking about the same file
+					if (md4cmp(reqfilehash, sender->GetUploadFileID()) == 0)
+					{
+						sender->AddAskedCount();
+						sender->SetLastUpRequest();
+						sender->ProcessExtendedInfo(&data_in, reqfile);
+
+						sender->requestedFiles.AddFiles(&data_in, sender);
+
+						CSafeMemFile data_out(128);
+
+						if (reqfile->IsPartFile())
+							((CPartFile*)reqfile)->WritePartStatus(&data_out);
+						else
+							data_out.WriteUInt16(0);
+
+						data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
+						if (thePrefs.GetDebugClientUDPLevel() > 0)
+							DebugSend("OP__ReaskAck", sender);
+						Packet* response = new Packet(&data_out, OP_EMULEPROT);
+						response->opcode = OP_REASKACK;
+						theStats.AddUpDataOverheadFileRequest(response->size);
+						theApp.clientudp->SendPacket(response, ip, port);
+					}
+					else
+					{
+						AddDebugLogLine(false, _T("Client UDP socket; MultiFileReask; reqfile does not match"));
+						TRACE(_T("reqfile:         %s\n"), DbgGetFileInfo(reqfile->GetFileHash()));
+						TRACE(_T("sender->GetRequestFile(): %s\n"), sender->GetRequestFile() ? DbgGetFileInfo(sender->GetRequestFile()->GetFileHash()) : _T("(null)"));
+					}
+				}
+				else
+				{
+					if (thePrefs.GetDebugClientUDPLevel() > 0)
+						DebugRecv("OP_MultiFileReask", NULL, (char*)reqfilehash, ip);
+
+					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > thePrefs.GetQueueSize())
+					{
+						if (thePrefs.GetDebugClientUDPLevel() > 0)
+							DebugSend("OP__QueueFull", NULL);
+						Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
+						theStats.AddUpDataOverheadFileRequest(response->size);
+						SendPacket(response, ip, port);
+					}
+				}
+				break;
+			}
 		default:
 			theStats.AddDownDataOverheadOther(size);
 			if (thePrefs.GetDebugClientUDPLevel() > 0)

@@ -19,7 +19,7 @@
 
 //MORPH START - Added by SiRoB, [itsonlyme: -modname-]
 #define MOD_VERSION_MJR		6
-#define MOD_VERSION_MIN		2
+#define MOD_VERSION_MIN		3
 #define MOD_VERSION_BUILD   1
 
 // this one is sent as the mod ID

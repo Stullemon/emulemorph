@@ -39,6 +39,12 @@
 #include "Log.h"
 #include "packets.h"
 
+//WebCache ////////////////////////////////////////////////////////////////////////////
+#include "PartFile.h"
+#include "SharedFileList.h"
+#include "WebCache/WebCache.h"
+//WebCache end/////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -55,6 +61,9 @@ CClientList::CClientList(){
 	m_trackedClientsList.InitHashTable(2011);
 	m_globDeadSourceList.Init(true);
 	m_pBuddy = NULL;
+
+// WebCache ///////////////////////////////////////////////////////////////////////////
+	m_dwLastSendOHCBs = 0;
 }
 
 CClientList::~CClientList(){
@@ -720,6 +729,7 @@ void CClientList::Process(){
 	}
 
 	CleanUpClientList();
+	SendOHCBs();
 }
 
 #ifdef _DEBUG
@@ -926,3 +936,76 @@ CUpDownClient*	CClientList::FindClientByWebCacheUploadId(const uint32 id)
 	return 0;
 }
 // MORPH END - Added by Commander, WebCache 1.2e
+
+// Superlexx - OHCB manager
+// returns a list of multi-OHCB-supporting clients ( = v1.9a or newer ) that should receive this OHCB immediately
+CUpDownClientPtrList* CClientList::XpressOHCBRecipients(uint16 maxNrOfClients, const Requested_Block_Struct* block)
+{
+	uint16 part = block->StartOffset / PARTSIZE;
+ 	CUpDownClientPtrList* newClients = new CUpDownClientPtrList;	// supporting multi-OHCB
+
+	for (POSITION pos = list.GetHeadPosition(); pos;)
+	{
+		CUpDownClient* cur_client = list.GetNext(pos);
+		if ( !(cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected()))
+			&& cur_client->SupportsMultiOHCBs()
+			&& !cur_client->IsProxy()	// client isn't a proxy
+			&& cur_client->m_bIsAcceptingOurOhcbs
+			//&& theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID())	// client has requested a file - obsolete with MFR
+			//&& !md4cmp(cur_client->GetUploadFileID(), block->FileID ) // file hashes do match - obsolete with MFR
+			&& !cur_client->IsPartAvailable(part, block->FileID) // the MFR version
+			&& cur_client->IsBehindOurWebCache())	// inefficient
+			if (cur_client->socket && cur_client->socket->IsConnected())
+				newClients->AddHead(cur_client); // add connected clients to head
+			else
+				newClients->AddTail(cur_client);
+	}
+
+	CUpDownClientPtrList* toReturn = new CUpDownClientPtrList;
+
+	// TODO: optimize this, dependent on further protocol development
+	POSITION pos1 = newClients->GetHeadPosition();
+	while (pos1 != NULL
+		&& toReturn->GetCount() <= maxNrOfClients)
+		toReturn->AddTail(newClients->GetNext(pos1));
+
+	delete newClients;
+	return toReturn;
+}
+
+uint16 CClientList::GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, uint16 maxNrOfClients) // Superlexx - COtN
+{
+	uint16 toReturn = 0;
+	uint16 part = pending->block->StartOffset / PARTSIZE;
+
+	for (POSITION pos = list.GetHeadPosition(); pos && toReturn <= maxNrOfClients; list.GetNext(pos))
+	{
+		CUpDownClient* cur_client = list.GetAt( pos );
+		if( cur_client->m_bIsAcceptingOurOhcbs
+			&& !cur_client->IsProxy()
+//			&& cur_client != this // 'this' is the client we want to download data from - covered by IsPartAvaiable
+			&& cur_client->IsBehindOurWebCache()
+			&& !cur_client->IsPartAvailable(part, pending->block->FileID))
+			toReturn++;
+	}
+	return toReturn;
+}
+
+void CClientList::SendOHCBs()
+{
+	const uint32 now = ::GetTickCount();
+	if (now - m_dwLastSendOHCBs > WC_SENDOHCBS_INTERVAL)
+	{
+		m_dwLastSendOHCBs = now;
+		CUpDownClient* cur_client = NULL;
+		for (POSITION pos = list.GetHeadPosition(); pos;)
+		{
+			cur_client = list.GetNext(pos);
+			if (cur_client->SupportsWebCache()
+				&& cur_client->SupportsMultiOHCBs()
+				&& now - cur_client->lastMultiOHCBPacketSent > WC_MULTI_OHCB_SEND_TIME
+				&& cur_client->IsBehindOurWebCache())
+				cur_client->SendOHCBsNow();
+		}
+	}
+}

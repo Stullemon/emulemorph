@@ -54,6 +54,7 @@
 #include "WebCache/WebCachedBlock.h"
 #include "WebCache/WebCacheProxyClient.h"
 #include "WebCache/WebCachedBlockList.h"
+#include "WebCache/WebCacheOHCBManager.h"
 // MORPH END - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -1503,6 +1504,24 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								}
 								break;
 							}
+/*							case WC_TAG_REQ_OHCBS:
+								{
+									if (!client->SupportsMultiOHCBs() || !client->SupportsWebCache())
+										break;
+									client->requestedFiles.RemoveAll();
+									client->requestedFiles.AddFiles(&data_in);
+									
+									Packet* tosend = WC_OHCBManager.GetWCBlocksForClient(client);
+									if(tosend)
+									{
+										if (thePrefs.GetDebugClientTCPLevel() > 0)
+											DebugSend("OP__multiOHCB", client, (char*)reqfile->GetFileHash());
+										theStats.AddUpDataOverheadOther(tosend->size);
+										SendPacket(tosend, true);
+									}
+								}
+								break;*/
+							// Superlexx - webcache - end
 							// MORPH END - Added by Commander, WebCache 1.2e
 							default:
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -1648,6 +1667,25 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								}
 								break;
 							}
+/*							case WC_TAG_REQ_OHCBS:
+							{
+								if (!client->SupportsMultiOHCBs() || !client->SupportsWebCache())
+									break;
+								client->requestedFiles.RemoveAll();
+								//CWebCacheMFRList*
+								client->requestedFiles.AddFiles(&data_in);
+								//client->requestedFiles = requestedFiles;
+
+								Packet* tosend = WC_OHCBManager.GetWCBlocksForClient(client);
+								if(tosend)
+								{
+									if (thePrefs.GetDebugClientTCPLevel() > 0)
+										DebugSend("OP__multiOHCB", client, (char*)reqfile->GetFileHash());
+									theStats.AddUpDataOverheadOther(tosend->size);
+									SendPacket(tosend, true);
+								}
+								break;
+							}*/
 							// Superlexx - webcache - end
 							// MORPH END - Added by Commander, WebCache 1.2e
 							default:
@@ -1655,6 +1693,22 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 									Debug(_T("***NOTE: Invalid sub opcode 0x%02x with OP_MultiPacketAns received; %s"), opcode_in, client->DbgGetClientInfo());
 						}
 					}
+
+					//MORPH START - Added by Commander, WebCache 1.9a
+					if (client->SupportsWebCache()
+						&& client->SupportsMultiOHCBs()
+						&& client->IsTrustedOHCBSender())
+					{
+						Packet* tosend = client->CreateMFRPacket();
+						if (tosend)
+						{
+							if (thePrefs.GetDebugClientTCPLevel() > 0)
+								DebugSend("OP__multiFileRequest", client, (char*)reqfile->GetFileHash());
+							theStats.AddUpDataOverheadOther(tosend->size);
+							SendPacket(tosend, true);
+						}
+					}
+					//MORPH END   - Added by Commander, WebCache 1.9a
 					break;
 				}
 				case OP_EMULEINFO:
@@ -2334,6 +2388,14 @@ bool CClientReqSocket::PacketReceivedCppEH(Packet* packet)
 // MORPH START - Added by Commander, WebCache 1.2f
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		// yonatan - webcache protocol packets
+		case OP_WEBCACHEPACKEDPROT:	// Superlexx - packed WC protocol
+			if (!packet->UnPackPacket())
+			{
+				if (thePrefs.GetVerbose())
+					AddDebugLogLine(false, _T("Failed to decompress client WC TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
+				bResult = false;
+				break;
+			}
 		case OP_WEBCACHEPROT:
 			bResult = ProcessWebCachePacket(packet->pBuffer, packet->size, packet->opcode, uRawSize);
 			break;
@@ -2947,12 +3009,12 @@ bool CClientReqSocket::ProcessWebCachePacket(char* packet, uint32 size, UINT opc
 			if( client->SupportsWebCache() && client->SupportsOhcbSuppression() )
 				client->m_bIsAcceptingOurOhcbs = false;
 			return true;
-		//JP for a future version
-		case OP_RESUME_SEND_OHCBS:
+		//JP TEST THIS!!! (WE ARE NOT USING IT YET)
+		case OP_RESUME_SEND_OHCBS: //we are not using it yet, but might in the future
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
 				DebugRecv("OP_RESUME_SEND_OHCBS received from", client);
 			if (thePrefs.GetLogWebCacheEvents())
-				AddDebugLogLine( false, _T("Received OP_RESUME_SEND_OHCBS from %s "), client->DbgGetClientInfo() );
+				AddDebugLogLine( false, _T("OP_RESUME_SEND_OHCBS RECEIVED")); // yonatan tmp
 			theStats.AddDownDataOverheadOther(size);
 			if( client->SupportsWebCache() && client->SupportsOhcbSuppression() )
 				client->m_bIsAcceptingOurOhcbs = true;
@@ -2969,11 +3031,51 @@ bool CClientReqSocket::ProcessWebCachePacket(char* packet, uint32 size, UINT opc
 				CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, client ); // Starts DL or places block on queue
 			}
 			return true;
+		case OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS:
+		case OP_MULTI_HTTP_CACHED_BLOCKS:
+            if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugRecv("OP__Multi_Http_Cached_Blocks", client);
+			theStats.AddDownDataOverheadOther(size);
+			if( thePrefs.IsWebCacheDownloadEnabled() && client->SupportsWebCache() ) 
+			{
+				// CHECK HANDSHAKE?
+				if (thePrefs.GetLogWebCacheEvents())
+					AddDebugLogLine( false, _T("Received MultiWCBlocks - TCP") );
+				//CWebCachedBlock* newblock = new CWebCachedBlock( (char*)packet, size, client ); // Starts DL or places block on queue
+				CSafeMemFile data((BYTE*)packet,size);
+				uint32 uploadID;
+				uploadID = data.ReadUInt32();
+				if (client->m_uWebCacheUploadId != uploadID)
+					return false;
+
+				return WebCachedBlockList.ProcessWCBlocks(packet, size, opcode, client);
+			}
+			return false;
+		case OP_MULTI_FILE_REQ:
+			{
+				if (!client->SupportsMultiOHCBs() || !client->SupportsWebCache())
+					break;
+//				client->requestedFiles.RemoveAll();
+//				client->requestedFiles.AddFiles(&CSafeMemFile(BYTE(packet)));
+				CSafeMemFile data_in((BYTE*)packet,size);
+				client->requestedFiles.AddFiles(&data_in, client);
+
+				Packet* toSend = WC_OHCBManager.GetWCBlocksForClient(client);
+				if(toSend)
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugSend("OP__multiOHCB", client);
+					theStats.AddUpDataOverheadOther(toSend->size);
+					SendPacket(toSend, true);
+				}
+				return true;
+			}
+			return false;
 		default:
 			theStats.AddDownDataOverheadOther(uRawSize);
 			PacketToDebugLogLine(_T("WebCache"), packet, size, opcode, DLP_DEFAULT);
-			return false;
 	}
+	return false;
 }
 // yonatan - webcache protocol packets end
 // MORPH END   - Added by SiRoB, WebCache 1.2f

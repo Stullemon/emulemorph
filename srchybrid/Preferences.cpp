@@ -310,6 +310,8 @@ uint64	CPreferences::sesDownData_URL;
 // MORPH START - Added by Commander, WebCache 1.2e
 uint64	CPreferences::sesDownData_WEBCACHE; //jp webcache statistics
 uint32	CPreferences::ses_WEBCACHEREQUESTS; //jp webcache statistics needs to be uint32 or the statistics won't work
+uint32	CPreferences::ses_PROXYREQUESTS; //jp webcache statistics
+uint32	CPreferences::ses_successfullPROXYREQUESTS; //jp webcache statistics
 uint32	CPreferences::ses_successfull_WCDOWNLOADS; //jp webcache statistics needs to be uint32 or the statistics won't work
 // MORPH END - Added by Commander, WebCache 1.2e
 uint64	CPreferences::cumDownDataPort_4662;
@@ -816,10 +818,11 @@ uint16	CPreferences::webcachePort;
 bool	CPreferences::webcacheReleaseAllowed; //jp webcache release
 uint16	CPreferences::webcacheBlockLimit;
 bool	CPreferences::PersistentConnectionsForProxyDownloads; //jp persistent proxy connections
+bool	CPreferences::WCAutoupdate; //jp WCAutoupdate
 bool	CPreferences::webcacheExtraTimeout;
 bool	CPreferences::webcacheCachesLocalTraffic;
 bool	CPreferences::webcacheEnabled;
-bool	CPreferences::detectWebcacheOnStartup; //jp detect webcache on startup
+bool	CPreferences::detectWebcacheOnStart; //jp detect webcache on startup
 uint32	CPreferences::webcacheLastSearch;
 CString	CPreferences::webcacheLastResolvedName;
 uint32	CPreferences::webcacheLastGlobalIP;
@@ -839,10 +842,12 @@ bool	CPreferences::IsWebCacheTestPossible()//jp check proxy config
 	return (theApp.GetPublicIP() != 0 //we have a public IP
 		&& theApp.serverconnect->IsConnected() //connected to a server
 		&& !theApp.serverconnect->IsLowID()//don't have LowID
-		&& m_bHighIdPossible);// no fake high ID
+		&& m_bHighIdPossible
+		&& !theApp.listensocket->TooManySockets());// no fake high ID
 }
 //JP proxy configuration test end
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
+uint8	CPreferences::webcacheTrustLevel;
 //JP webcache release START
 bool	CPreferences::UpdateWebcacheReleaseAllowed()
 {
@@ -1972,8 +1977,10 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesDownData_URL				= 0;
 		// MORPH START - Added by Commander, WebCache 1.2e
 		sesDownData_WEBCACHE		= 0; // Superlexx - webcache - statistics
-		ses_WEBCACHEREQUESTS		= 0; //jp webcache statistics
-		ses_successfull_WCDOWNLOADS	= 0; //jp webcache statistics
+		ses_WEBCACHEREQUESTS		= 0; //jp webcache statistics (from proxy)
+		ses_successfull_WCDOWNLOADS	= 0; //jp webcache statistics (from proxy)
+		ses_PROXYREQUESTS           = 0; //jp webcache statistics (via proxy)
+		ses_successfullPROXYREQUESTS= 0; //jp webcache statistics (via proxy)
 		// MORPH END - Added by Commander, WebCache 1.2e
 
 		sesDownDataPort_4662		= 0;
@@ -2350,13 +2357,16 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("webcachePort"), webcachePort);
 	ini.WriteInt(_T("WebCacheBlockLimit"), webcacheBlockLimit);
 	ini.WriteBool(_T("PersistentConnectionsForProxyDownloads"), PersistentConnectionsForProxyDownloads); //JP persistent proxy connections
+	ini.WriteBool(_T("WCAutoupdate"), WCAutoupdate); //JP WCAutoupdate
 	ini.WriteBool(_T("WebCacheExtraTimeout"), webcacheExtraTimeout);
 	ini.WriteBool(_T("WebCacheCachesLocalTraffic"), webcacheCachesLocalTraffic);
 	ini.WriteBool(_T("WebCacheEnabled"), webcacheEnabled);
-	ini.WriteBool(_T("detectWebcacheOnStartup"), detectWebcacheOnStartup); // jp detect webcache on startup
+	ini.WriteBool(_T("detectWebcacheOnStart"), detectWebcacheOnStart); // jp detect webcache on startup
 	ini.WriteUInt64(_T("WebCacheLastSearch"), (uint64)webcacheLastSearch);
 	ini.WriteUInt64(_T("WebCacheLastGlobalIP"), (uint64)webcacheLastGlobalIP);
 	ini.WriteString(_T("WebCacheLastResolvedName"), webcacheLastResolvedName);
+	ini.WriteUInt64(_T("webcacheTrustLevel"), (uint64)webcacheTrustLevel);
+// yonatan http end ////////////////////////////////////////////////////////////////////////////
 	// MORPH END - Added by Commander, WebCache 1.2e
 	ini.WriteInt(_T("MaxSourcesPerFile"),maxsourceperfile );
 	ini.WriteWORD(_T("Language"),m_wLanguageID);
@@ -3090,18 +3100,18 @@ void CPreferences::LoadPreferences()
 	sprintf(tmpWebcacheName,"%s",ini.GetString(_T("webcacheName"),_T("")));
 	webcacheName = tmpWebcacheName; // TODO: something more elegant*/
 	webcacheName = ini.GetString(_T("webcacheName"), _T(""));
-	if (!StrStrI(strPrefsVersion,_T("proxy.free.fr")))
-		webcacheName=_T("");
 	webcachePort=ini.GetInt(_T("webcachePort"),0);
 	webcacheBlockLimit=ini.GetInt(_T("webcacheBlockLimit"));
 	webcacheExtraTimeout=ini.GetBool(_T("webcacheExtraTimeout"));
 	PersistentConnectionsForProxyDownloads=ini.GetBool(_T("PersistentConnectionsForProxyDownloads"), false);
+	WCAutoupdate=ini.GetBool(_T("WCAutoupdate"), true);
 	webcacheCachesLocalTraffic=ini.GetBool(_T("webcacheCachesLocalTraffic"), true);
 	webcacheEnabled=ini.GetBool(_T("webcacheEnabled"),false); //webcache disabled on first start so webcache detection on start gets called.
-	detectWebcacheOnStartup=ini.GetBool(_T("detectWebcacheOnStartup"), true); // jp detect webcache on startup
+	detectWebcacheOnStart=ini.GetBool(_T("detectWebcacheOnStart"), true); // jp detect webcache on startup
 	webcacheLastSearch=(uint32)ini.GetUInt64(_T("webcacheLastSearch"));
 	webcacheLastGlobalIP=(uint32)ini.GetUInt64(_T("webcacheLastGlobalIP"));
 	webcacheLastResolvedName=ini.GetString(_T("webcacheLastResolvedName"),0);
+	webcacheTrustLevel=(uint8)ini.GetUInt64(_T("webcacheTrustLevel"),30);
 	// webcache end
         // MORPH END - Added by Commander, WebCache 1.2e
 	maxsourceperfile=ini.GetInt(_T("MaxSourcesPerFile"),400 );

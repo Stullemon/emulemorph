@@ -230,6 +230,7 @@ void CPartFile::Init(){
 	WebcacheSourcesNotOurProxy = 0;//JP added from Gnaddelwarz
 	Webcacherequests = 0; //JP WC-Filedetails
 	SuccessfulWebcacherequests = 0; //JP WC-Filedetails
+	WebCacheDownDataThisFile = 0; //JP WC-Filedetails
 	// MORPH END - Added by Commander, WebCache 1.2f
 	newdate = true;
 	m_LastSearchTime = 0;
@@ -6565,10 +6566,12 @@ uint16 CPartFile::GetNumberOfCurrentWebcacheConnectionsForThisFile()
 
 //JP Throttle OHCB-production END
 
-void CPartFile::AddWebCachedBlockToStats( bool IsGood )
+void CPartFile::AddWebCachedBlockToStats( bool IsGood, uint32 bytes )
 {
 	Webcacherequests++;
-	if (IsGood)
+	if (IsGood){
+		WebCacheDownDataThisFile += bytes;
 		SuccessfulWebcacherequests++;
+	}
 }
 // MORPH END  - Added by SiRoB, WebCache

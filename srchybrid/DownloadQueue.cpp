@@ -1152,15 +1152,21 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 	return true;
 }
 
-bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList){
+bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList, bool doThrow){
 	if (sender->IsStopped())
+	{
+		if (doThrow)
+			throw CString(_T("file stopped"));
 		return false;
+	}
 
 	// filter sources which are known to be dead/useless
 	if ( (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) && !bIgnoreGlobDeadList) || sender->m_DeadSourceList.IsDeadSource(source)){
 		if (thePrefs.GetLogFilteredIPs())
 			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
 			,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
+		if (doThrow)
+			throw CString(_T("found on the dead source list"));
 		return false;
 	}
 
@@ -1175,6 +1181,8 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 		if (!IsGoodIP(nClientIP)){ // check for 0-IP, localhost and LAN addresses
 			if (thePrefs.GetLogFilteredIPs())
 				AddDebugLogLine(false, _T("Ignored already known source with IP=%s"), ipstr(nClientIP));
+			if (doThrow)
+				throw CString(_T("source already known (IsGoodIP(nClientIP) is false)"));
 			return false;
 		}
 	}
@@ -1184,12 +1192,19 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->srclist.Find(source)){
 			if (cur_file == sender)
+			{
+				if (doThrow)
+					throw CString(_T("source already known (already in the srclist)"));
 				return false;
-			if (source->AddRequestForAnotherFile(sender))
+			}
+			bool addedA4AF = source->AddRequestForAnotherFile(sender);
+			if (addedA4AF)
 				theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(sender,source,true);
-                if(source->GetDownloadState() != DS_CONNECTED) {
+             if(source->GetDownloadState() != DS_CONNECTED) {
                     source->SwapToAnotherFile(_T("New A4AF source found. CDownloadQueue::CheckAndAddKnownSource()"), false, false, false, NULL, true, false); // ZZ:DownloadManager
                 }
+			if (doThrow && addedA4AF)
+				return true;
 			return false;
 		}
 	}

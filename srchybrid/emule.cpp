@@ -63,6 +63,7 @@
 #include "SafeFile.h"
 #include "PeerCacheFinder.h"
 #include "WebCache/WebCache.h" // jp detect webcache on startup // MORPH - Added by Commander, WebCache 1.2e
+#include "WebCache/WebCacheMFRList.h"	// Superlexx - MFR
 #include "emuleDlg.h"
 #include "SearchDlg.h"
 #include "enbitmap.h"
@@ -1161,17 +1162,15 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 	
 	m_dwPublicIP = dwIP;
 
-        // MORPH START - Added by Commander, WebCache 1.2e
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
 	// jp detect Webcache on Startup START
-	if (thePrefs.detectWebcacheOnStartup
-		&& m_dwPublicIP != 0
-		&& !thePrefs.webcacheEnabled) //Note: don't use IsWebCacheDownloadEnabled() here
+	if (thePrefs.WCAutoupdate
+		&& m_dwPublicIP != 0 )
 	{
-		thePrefs.detectWebcacheOnStartup = false;
-		detectWebcacheOnStart();
+		thePrefs.detectWebcacheOnStart = false;
+		AutodetectWebcache();
 	}
-	// MORPH END - Added by Commander, WebCache 1.2e
-
+	// jp detect Webcache on Startup END
 }
 
 

@@ -747,12 +747,12 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			{
 				CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
 				CStringA str;
-				str.AppendFormat("HTTP/1.1 200\r\n");
+//				str.AppendFormat("HTTP/1.1 200 OK\r\n"); // DFA
+				str.AppendFormat("HTTP/1.0 200 OK\r\n");
 				str.AppendFormat("Content-Length: %u\r\n", currentblock->EndOffset - currentblock->StartOffset);
-				str.AppendFormat("Cache-Control: public\r\n");
-//				str.AppendFormat("Cache-Control: max-age=864000\r\n"); // overrides expires header in HTTP/1.1
-				str.AppendFormat("Cache-Control: no-transform\r\n");
 				str.AppendFormat("Expires: Mon, 03 Sep 2007 01:23:45 GMT\r\n" ); // rolled-back to 1.1b code (possible bug w/soothsayers' proxy)
+				str.AppendFormat("Cache-Control: public\r\n");
+				str.AppendFormat("Cache-Control: no-transform\r\n");
 				str.AppendFormat("Connection: keep-alive\r\nProxy-Connection: keep-alive\r\n");
 				//MORPH START - Changed by SiRoB, ModID
 				/*

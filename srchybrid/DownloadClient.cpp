@@ -1052,14 +1052,17 @@ void CUpDownClient::SendBlockRequests(){
 		{
 			Pending_Block_Struct* pending = m_PendingBlocks_list.GetHead();
 #ifndef _DEBUG
-			if (GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(pending) > 0)
+			//JP take successrate into account when deciding to do webcache download (rounded down)
+			// Superlexx: modified this to actually work ;)
+			uint32 minOHCBRecipients = (thePrefs.ses_WEBCACHEREQUESTS > 50 && thePrefs.ses_successfull_WCDOWNLOADS > 0) ? thePrefs.ses_WEBCACHEREQUESTS / thePrefs.ses_successfull_WCDOWNLOADS : 1;
+			if (theApp.clientlist->GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(pending, minOHCBRecipients) >= minOHCBRecipients)
 #endif _DEBUG
 				doCache = true;
 		}
 	
 		if( doCache ) {
 			ASSERT( GetDownloadState() == DS_DOWNLOADING );
-			Crypt.useNewKey = true;
+//		Crypt.useNewKey = true;	// Superlexx - moved this to SendWebCacheBlockRequests()
 			SendWebCacheBlockRequests();
 			return;
 		}
@@ -1659,6 +1662,18 @@ void CUpDownClient::UDPReaskForDownload()
 			}
 			if (GetUDPVersion() > 2)
 				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
+// WebCache //////////////////////////////////////////////////////////////////////////////
+		if (SupportsMultiOHCBs() &&	AttachMultiOHCBsRequest(data))
+		{
+			DebugSend("OP__MultiFileReask", this, (char*)reqfile->GetFileHash());
+			Packet* response = new Packet(&data, OP_WEBCACHEPROT);
+			response->opcode = OP_MULTI_FILE_REASK;
+			theStats.AddUpDataOverheadFileRequest(response->size);
+			theApp.downloadqueue->AddUDPFileReasks();
+			theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
+		}
+		else
+		{
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
 				DebugSend("OP__ReaskFilePing", this, (char*)reqfile->GetFileHash());
 			Packet* response = new Packet(&data, OP_EMULEPROT);
@@ -1666,6 +1681,7 @@ void CUpDownClient::UDPReaskForDownload()
 			theStats.AddUpDataOverheadFileRequest(response->size);
 			theApp.downloadqueue->AddUDPFileReasks();
 			theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
+		}
 			m_nTotalUDPPackets++;
 		}
 		else if (HasLowID() && GetBuddyIP() && GetBuddyPort() && HasValidBuddyID())

@@ -860,7 +860,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 				wcsc_not_our = lpPartFile->GetWebcacheSourceNotOurProxyCount();
 				}
 
-				uint16 sc = lpPartFile->GetSourceCount();
+				uint16 sc = lpPartFile->GetSourceCount() + lpPartFile->GetSrcA4AFCount();
 				double PercentWCClients;
 				if (sc !=0)
 					PercentWCClients = (double) 100 * wcsc / sc;

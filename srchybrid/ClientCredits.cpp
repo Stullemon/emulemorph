@@ -622,7 +622,9 @@ void CClientCreditsList::SaveList()
 	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
 	uint32 count = m_mapClients.GetCount();
-	BYTE* pBuffer = new BYTE[count*sizeof(CreditStruct)];
+	BYTE* pBuffer = NULL;
+	if (m_bSaveUploadQueueWaitTime)
+		pBuffer = new BYTE[count*sizeof(CreditStruct)];
 	CClientCredits* cur_credit;
 	CCKey tempkey(0);
 	POSITION pos = m_mapClients.GetStartPosition();
@@ -642,7 +644,7 @@ void CClientCreditsList::SaveList()
 			count++; 
 		}
 		*/
-		if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+		if(m_bSaveUploadQueueWaitTime){
 			if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 			{
 				cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
@@ -655,7 +657,7 @@ void CClientCreditsList::SaveList()
 			if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
 			{
 				cur_credit->ClearUploadQueueWaitTime();//fair to all client
-				memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+				//memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
 				memcpy(pBuffer30c+(count*sizeof(CreditStruct_30c)), (uint8 *)cur_credit->GetDataStruct() + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
 				count++; 
 			}
@@ -673,16 +675,18 @@ void CClientCreditsList::SaveList()
 		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
 			fileBack.Flush();
 		fileBack.Close();
-		delete[] pBuffer30c;
 		//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
-		uint8 version = CREDITFILE_VERSION;
-		file.Write(&version, 1);
-		file.Write(&count, 4);
-		file.Write(pBuffer, count*sizeof(CreditStruct));
-		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
-			file.Flush();
-		file.Close();
+		if (m_bSaveUploadQueueWaitTime)
+		{
+			uint8 version = CREDITFILE_VERSION;
+			file.Write(&version, 1);
+			file.Write(&count, 4);
+			file.Write(pBuffer, count*sizeof(CreditStruct));
+			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning()))
+				file.Flush();
+			file.Close();
+		}
 	}
 	catch(CFileException* error){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
@@ -694,8 +698,9 @@ void CClientCreditsList::SaveList()
 		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		error->Delete();
 	}
-
-	delete[] pBuffer;
+	delete[] pBuffer30c;
+	if(m_bSaveUploadQueueWaitTime)
+		delete[] pBuffer;
 }
 
 CClientCredits* CClientCreditsList::GetCredit(const uchar* key)

@@ -444,6 +444,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 					//JP moved to CUpDownClient::SendWebCacheBlockRequests() and CWebCacheProxyClient::UpdateClient
 					if( !IsProxy() )
 					{
+						thePrefs.ses_successfullPROXYREQUESTS++;
 						PublishWebCachedBlock( cur_block->block );
 					} 
 					else 
