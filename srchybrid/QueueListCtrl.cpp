@@ -474,7 +474,8 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 								Sbuffer.Format("%i",client->GetScore(false));
 
 							if(client->needFullChunkTransfer()){
-								Sbuffer.Append(" F");
+								//show out how much have uploaded to this client
+								Sbuffer.Format("%s F(%s)", Sbuffer, CastItoXBytes(client->GetQueueSessionUp()));
 							}
 						}
 						break;
@@ -722,7 +723,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if (item1->GetPowerShared()) result ++;
  				if (item2->GetPowerShared()) result --;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(result == 0 && theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE)
+				if(result == 0 && (theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE || (item1->GetPowerShared() == true && item2->GetPowerShared() == true)))
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				if (result == 0 && file1 != file2 && theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 					result =
@@ -789,12 +790,21 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 						0;
 				}
 
+				//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
+				if(result == 0){
+					result =
+						item1->GetQueueSessionUp() > item2->GetQueueSessionUp() ? 1 :
+						item1->GetQueueSessionUp() < item2->GetQueueSessionUp() ? -1 :
+						0;
+				}
+
 				if(result == 0 && file1 != file2){
 					result =
 						item1->GetEqualChanceValue() < item2->GetEqualChanceValue() ? 1 :
 						item1->GetEqualChanceValue() > item2->GetEqualChanceValue() ? -1 :
 						0;
 				}
+
 				if(result == 0){
 					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 				}

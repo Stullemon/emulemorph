@@ -253,11 +253,15 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 							(//Morph - added by AndCycle, keep full chunk transfer
 								leftClient->needFullChunkTransfer() == false && rightClient->needFullChunkTransfer() == true ||	// rightClient hasn't finish a full chunk, let him get this first
 								leftClient->needFullChunkTransfer() == rightClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
-								(//Morph - added by AndCycle, Equal Chance For Each File
-									leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
-									leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
-									(
-										leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
+								(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
+									leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
+									leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
+									(//Morph - added by AndCycle, Equal Chance For Each File
+										leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+										leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
+										(
+											leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
+										)
 									)
 								)
 							)
@@ -266,11 +270,15 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 						(//Morph - added by AndCycle, keep full chunk transfer
 							leftClient->needFullChunkTransfer() == false && rightClient->needFullChunkTransfer() == true ||	// rightClient hasn't finish a full chunk, let him get this first
 							leftClient->needFullChunkTransfer() == rightClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
-							(//Morph - added by AndCycle, Equal Chance For Each File
-								leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
-								leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
-								(
-									leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
+							(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
+								leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
+								leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
+								(//Morph - added by AndCycle, Equal Chance For Each File
+									leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+									leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
+									(
+										leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
+									)
 								)
 							)
 						)
@@ -457,6 +465,12 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 					(
 						uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() ||
 						uploadingClient->GetPowerShared() == false && newclient->GetPowerShared() == false
+						/* should this apply in uploading list?
+						uploadingClient->GetPowerShared() == true && newclient->GetPowerShared() == true && uploadingClient->GetFilePrioAsNumber() == newclient->GetFilePrioAsNumber() &&
+						uploadingClient->GetQueueSessionUp() >= newclient->GetQueueSessionUp() || //Morph - added by AndCycle, try to finish faster for the one have finished more than others
+						uploadingClient->GetPowerShared() == false && newclient->GetPowerShared() == false &&
+						uploadingClient->GetQueueSessionUp() >= newclient->GetQueueSessionUp() //Morph - added by AndCycle, try to finish faster for the one have finished more than others
+						*/
 					)
 				)&&
 				(
@@ -708,11 +722,11 @@ void CUploadQueue::Process() {
 
 			// add to queue again.
 			// the client is allowed to keep its waiting position in the queue, since it was pre-empted
-			AddClientToQueue(lastClient,true, true);
+			AddClientToQueue(lastClient, true, true);
 		}
 	} else if(theApp.lastCommonRouteFinder->AcceptNewClient() &&
 			(
-			highestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetCount()
+				highestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetCount()
 			)
 			) {
 		// we have given all slots bandwidth this round, and couldn't have given them more.
@@ -722,8 +736,8 @@ void CUploadQueue::Process() {
 
 		// open an extra slot so that we always have enough trickle slots
 		if(m_FirstRanOutOfSlotsTick != 0 && curTick-m_FirstRanOutOfSlotsTick > 500 &&
-		AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0 /*&&
-		(curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)*/
+		AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0 &&
+		(curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)
 		) {
 			// There's not enough open uploads. Open another one.
 			AddUpNextClient();
@@ -771,11 +785,9 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 		return false;
 
 	//now the final check
-    	//now the final check
 	if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
 		GetDatarate() < 2400*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
 			return true;
-//	}
 	//nope
 	return false;
 }
