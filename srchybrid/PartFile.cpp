@@ -1661,10 +1661,10 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								break; 
 						}
 						case DS_ONQUEUE:{
-							//EastShare Start - Only download complete files v2.1 by AndCycle
+							//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && (lastseencomplete==NULL))
 								break;//shadow#(onlydownloadcompletefiles)
-							//EastShare End - Only download complete files v2.1 by AndCycle
+							//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 							if( cur_src->IsRemoteQueueFull() ) {
 								if( ((dwCurTick - lastpurgetime) > 60000) && (this->GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )) ){
 									theApp.downloadqueue->RemoveSource( cur_src );
@@ -2612,9 +2612,9 @@ void CPartFile::StopFile(bool setVars){
 	// khaos::kmod-
 	datarate = 0;
 	memset(m_anStates,0,sizeof(m_anStates));
-	//EastShare Start - Only download complete files v2.1 by AndCycle
+	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 	if ((status!=PS_COMPLETE)&&(status!=PS_COMPLETING)) lastseencomplete = NULL;//shadow#(onlydownloadcompletefiles)
-	//EastShare End - Only download complete files v2.1 by AndCycle
+	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	FlushBuffer();
 	theApp.downloadqueue->SortByPriority();
 	theApp.downloadqueue->CheckDiskspace();	// SLUGFILLER: checkDiskspace
@@ -3760,7 +3760,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	//      completed before starting to download other one.
 	//  
 	// The frequency criterion defines three zones: very rare (<10%), rare (<50%)
-	// and common (>30%). Inside each zone, the criteria have a specific ‘weight’, used 
+	// and common (>30%). Inside each zone, the criteria have a specific ‘weight? used 
 	// to calculate the priority of chunks. The chunk(s) with the highest 
 	// priority (highest=0, lowest=0xffff) is/are selected first.
 	//  
@@ -3981,7 +3981,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 						if(randomness == 0){
 							// Selection process is over 
 							sender->m_lastPartAsked = cur_chunk.part;
-							// Remark: this list might be reused up to ‘*count’ times
+							// Remark: this list might be reused up to ?count?times
 							chunksList.RemoveAt(cur_pos);
 							break; // exit loop for()
 						}  
@@ -4208,7 +4208,7 @@ int CPartFile::GetRating(){
           if (fRate>0)  
           {  
               num++;
-      //Cax2 - bugfix: for some £$%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
+      //Cax2 - bugfix: for some ?%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
       if (fRate==3 || fRate==4) fRate=(fRate==3)?4:3;
               tot+=fRate;  
           }  
@@ -4216,7 +4216,7 @@ int CPartFile::GetRating(){
   if (num>0)
   {
   num=(float)tot/num+.5; //Cax2 - get the average of all the ratings
-  //Cax2 - bugfix: for some £$%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
+  //Cax2 - bugfix: for some ?%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
   if (num==3 || num==4) num=(num==3)?4:3;
   }
     return num; //Cax2 - if no ratings found, will return 0!

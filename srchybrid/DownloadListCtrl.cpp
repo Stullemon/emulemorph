@@ -1337,9 +1337,9 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_PAUSE,((file->GetStatus() != PS_PAUSED && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));
 			m_FileMenu.EnableMenuItem(MP_STOP,((!file->IsStopped() && file->GetStatus() != PS_ERROR && !filedone ) ? MF_ENABLED:MF_GRAYED));
 			m_FileMenu.EnableMenuItem(MP_RESUME,((file->GetStatus() == PS_PAUSED) ? MF_ENABLED:MF_GRAYED));
-			//EastShare Start - Only download complete files v2.1 by AndCycle
+			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 			m_FileMenu.EnableMenuItem(MP_FORCE,((file->lastseencomplete == NULL && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));//shadow#(onlydownloadcompletefiles)
-			//EastShare End - Only download complete files v2.1 by AndCycle
+			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	        m_FileMenu.EnableMenuItem(MP_OPEN,((file->GetStatus() == PS_COMPLETE) ? MF_ENABLED:MF_GRAYED)); //<<--9/21/02
 			m_FileMenu.EnableMenuItem(MP_PREVIEW,((file->PreviewAvailable()) ? MF_ENABLED:MF_GRAYED));
 
@@ -1438,9 +1438,9 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_PAUSE,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_STOP,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_RESUME,MF_GRAYED);
-		//EastShare Start - Only download complete files v2.1 by AndCycle
+		//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_FileMenu.EnableMenuItem(MP_FORCE,MF_GRAYED);//shadow#(onlydownloadcompletefiles)
-		//EastShare End - Only download complete files v2.1 by AndCycle
+		//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_FileMenu.EnableMenuItem(MP_PREVIEW,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_OPEN,MF_GRAYED); //<<--9/21/02
 		m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -1623,7 +1623,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					} 
 					file->ResumeFile();
 					break;
-				//EastShare Start - Only download complete files v2.1 by AndCycle
+				//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 				case MP_FORCE://shadow#(onlydownloadcompletefiles)-start
 					if(selectedCount > 1)
 					{
@@ -1639,7 +1639,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					file->lastseencomplete = 1025992800;
 					file->SavePartFile();
 					break;//shadow#(onlydownloadcompletefiles)-end
-				//EastShare End - Only download complete files v2.1 by AndCycle
+				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 				case MP_STOP:
 					if(selectedCount > 1)
 					{
@@ -2500,9 +2500,9 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_STRING,MP_STOP, GetResString(IDS_DL_STOP));
 	m_FileMenu.AppendMenu(MF_STRING,MP_PAUSE, GetResString(IDS_DL_PAUSE));
 	m_FileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DL_RESUME));
-	//EastShare Start - Only download complete files v2.1 by AndCycle
+	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_FileMenu.AppendMenu(MF_STRING,MP_FORCE, "Force Download");//shadow#(onlydownloadcompletefiles)
-	//EastShare End - Only download complete files v2.1 by AndCycle
+	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_DL_OPEN) );//<--9/21/02
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW) );
