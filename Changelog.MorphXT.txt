@@ -1,9 +1,10 @@
 --------------------------------------
-Changelog for eMule 0.42g MorphXT v3.x
+Changelog for eMule 0.42g MorphXT v3.2
 --------------------------------------
-FIXED  : PowerShare Limit per file [SiRoB]
+FIXED  : Powershare Limit per file [SiRoB]
 
 CHANGED: FakeCheck & IPFilter updated to prevent people use direct link to data file and bypass the version test [SiRoB]
+CHANGED: Updated from the zz upload system 20040531-1749 [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.1
