@@ -61,14 +61,15 @@ protected:
   void OnStatusCallBack(HINTERNET hInternet, DWORD dwInternetStatus, 
                         LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
   static UINT _DownloadThread(LPVOID pParam);
-  void HandleThreadErrorWithLastError(CString nIDError, DWORD dwLastError=0);
-  void HandleThreadError(CString nIDError);
+  void HandleThreadErrorWithLastError(UINT nIDError, DWORD dwLastError=0);
+  void HandleThreadError(UINT nIDError);
   void DownloadThread();
   void SetPercentage(int nPercentage);
   void SetTimeLeft(DWORD dwSecondsLeft, DWORD dwBytesRead, DWORD dwFileSize);
   void SetProgressRange(DWORD dwFileSize);
   void SetStatus(const CString& sCaption);
-  void SetStatus(CString nID, const CString& lpsz1);
+  void SetStatus(UINT nID);
+  void SetStatus(UINT nID, const CString& lpsz1);
   void SetTransferRate(double KbPerSecond);
   void PlayAnimation();
   void SetProgress(DWORD dwBytesRead);
