@@ -13,13 +13,14 @@ ADDED  : Optionnal funnyNick Display [SiRoB]
 ADDED  : fake emuleVersion detection [SiRoB]
 ADDED  : fake MODSTRING detection [SiRoB]
 
-UPDATED: -UPnPNAT Support- by MoNKi from emulEspania [SiRoB]
-UPDATED: -Improved ICS-Firewall support- by MoNKi from emulEspania [SiRoB]
-UPDATED: -Random Ports- by MoNKi from emulEspania [SiRoB]
-
 CHANGED: SLS: LowID are now recorded [SiRoB]
 CHANGED: SpreadBar is now disabled by default in share preferency [SiRoB]
 CHANGED: USC: Reworked to work properly with the new scheduled remove slot [SiRoB]
+CHANGED: updated -UPnPNAT Support- by MoNKi from emulEspania [SiRoB]
+CHANGED: updated -Improved ICS-Firewall support- by MoNKi from emulEspania [SiRoB]
+CHANGED: updated -Random Ports- by MoNKi from emulEspania [SiRoB]
+
+REMOVED: CPU live optimization [SiRoB]
 
 TWEAKED: USC: Ensure proper new open slot in all case [SiRoB]
 
