@@ -104,7 +104,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 //MORPH START - Added by Yun.SF3, Boost the less uploaded files
 	if (theApp.glob_prefs->IsBoostLess())
 	{
-		if (GetDownloadedTotal() < 1000000)
+		if (!GetDownloadedTotal())
 			return 1;
 		float result = 0;
 		if (!GetUploadedTotal())
@@ -112,10 +112,9 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		else
 			result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
 		float result2 = 0;
-		result2 = (float)GetDownloadedTotal()/1048576.0;
+		result2 = (float)GetDownloadedTotal()/1024.0;
 		result2 += 2;
 		result2 = (double)sqrt((double)result2);
-		result2 *= 100;
 		if (result > result2)
 			result = result2;
 
