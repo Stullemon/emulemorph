@@ -38,6 +38,12 @@ CClientUDPSocket::CClientUDPSocket()
 
 CClientUDPSocket::~CClientUDPSocket()
 {
+	POSITION pos = controlpacket_queue.GetHeadPosition();
+	while (pos){
+		UDPPack* p = controlpacket_queue.GetNext(pos);
+		delete p->packet;
+		delete p;
+	}
 }
 
 void CClientUDPSocket::OnReceive(int nErrorCode){
