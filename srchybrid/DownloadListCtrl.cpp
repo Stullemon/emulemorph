@@ -977,6 +977,15 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				}
 		case 9:		// remaining time & size
 			break;
+		//MORPH START - Added by SiRoB, To see the complet source number given by the client
+		case 10:		// Last Seen Complet
+			if (lpCtrlItem->type == AVAILABLE_SOURCE)
+				buffer.Format("Say %i Complete Source", lpUpDownClient->GetUpCompleteSourcesCount());
+			else
+				buffer = "Don't know because A4AF Source";
+			dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
+			break;
+		//MORPH END - Added by SiRoB, To see the complet source number given by the client
 		}
 	}
 }
