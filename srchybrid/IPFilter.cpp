@@ -466,7 +466,7 @@ void CIPFilter::UpdateIPFilterURL()
 		{
 			bIsZipFile = true;
 
-			CZIPFile::File* zfile = zip.GetFile(DFLT_IPFILTER_FILENAME);
+			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
 			if (zfile)
 			{
 				TCHAR szTempUnzipFilePath[MAX_PATH];
