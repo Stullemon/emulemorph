@@ -56,7 +56,7 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
-	m_wndMorph3.m_psp.dwFlags &= ~PSH_HASHELP; //Commander - Added: Morph III
+//	m_wndMorph3.m_psp.dwFlags &= ~PSH_HASHELP; //Commander - Added: Morph III
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
@@ -272,7 +272,7 @@ void CPreferencesDlg::Localize()
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
 	m_wndMorphShare.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
-	m_wndMorph3.Localize(); //Commander - Added: Morph III
+//	m_wndMorph3.Localize(); //Commander - Added: Morph III
 	m_wndEastShare.Localize();
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
 	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f

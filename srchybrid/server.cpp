@@ -20,8 +20,7 @@
 #include "Opcodes.h"
 #include "OtherFunctions.h"
 #include "Packets.h"
-#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
-#include "preferences.h" //EastShare - added by AndCycle, IP to Country
+#include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -275,22 +274,7 @@ void CServer::SetLastDescPingedCount(bool bReset)
 
 //EastShare Start - added by AndCycle, IP to Country
 CString CServer::GetCountryName() const{
-	CString tempStr;
-
-	if(theApp.ip2country->IsIP2Country() == false) return _T("");
-
-	switch(thePrefs.GetIP2CountryNameMode()){
-		case IP2CountryName_SHORT:
-			tempStr.Format(_T("%s"),m_structServerCountry->ShortCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
-			return tempStr;
-		case IP2CountryName_MID:
-			tempStr.Format(_T("%s"),m_structServerCountry->MidCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
-			return tempStr;
-		case IP2CountryName_LONG:
-			tempStr.Format(_T("%s"),m_structServerCountry->LongCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
-			return tempStr;
-	}
-	return _T("");
+	return theApp.ip2country->GetCountryNameFromRef(m_structServerCountry);
 }
 
 int CServer::GetCountryFlagIndex() const{

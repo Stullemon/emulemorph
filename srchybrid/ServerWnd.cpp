@@ -44,7 +44,6 @@
 #define PUGAPI_VERSION_MAJOR 1
 #define PUGAPI_VERSION_MINOR 2
 #include "pugxml.h"
-#include ".\serverwnd.h"
 //MORPH END   - Added by SiRoB, XML News [O²]
 
 #ifdef _DEBUG
@@ -1130,7 +1129,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 	}
 }
 
-void CServerWnd::ParseNewsFile(CString strTempFilename)
+void CServerWnd::ParseNewsFile(LPCTSTR strTempFilename)
 {
 	CString sbuffer;
 	newsmsgbox->Reset();

@@ -17,6 +17,8 @@
 #pragma once
 #include "loggable.h"
 #include "BarShader.h"
+#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+
 // MORPH START - Added by Commander, WebCache 1.2e
 #include "Preferences.h"
 #include "WebCache/WebCache.h"
@@ -59,8 +61,6 @@ class CSafeMemFile;
 class CEMSocket;
 class CAICHHash;
 enum EUtf8Str;
-
-struct IPRange_Struct2; //EastShare - added by AndCycle, IP to Country
 
 struct Pending_Block_Struct{
 	Pending_Block_Struct()
@@ -723,7 +723,9 @@ public:
 	bool			GetPowerShared() const;
 	double			GetCombinedFilePrioAndCredit();
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
-	
+	//MORPH START - Added by SiRoB, Show client Requested file
+	void			ShowRequestedFiles();
+	//MORPH END   - Added by SiRoB, Show client Requested file
 	//download
 	uint32			GetAskedCountDown() const
 					{

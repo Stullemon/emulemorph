@@ -399,14 +399,7 @@ void CServerListCtrl::RefreshServer(const CServer* server)
    
 	// Commander - Added: IP2Country column - Start
 	//Countryname
-	if(server->GetCountryName()){
-	   CString tempCountryName;
-	   tempCountryName = server->GetCountryName();
-	   SetItemText(itemnr,15,tempCountryName);
-	}
-	else{
-       SetItemText(itemnr,15,_T(""));
-	}
+	SetItemText(itemnr,15,server->GetCountryName());
 	// Commander - Added: IP2Country column - End
 }
 

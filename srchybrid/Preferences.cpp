@@ -37,7 +37,6 @@
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
-#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "friendlist.h" //MORPH - Added by SiRoB, There is one slot friend or more
 
 #ifdef _DEBUG
@@ -548,7 +547,7 @@ bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process p
 bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
-CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
+uint8	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 bool	CPreferences::m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 uint8	CPreferences::m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -615,7 +614,7 @@ uint32	CPreferences::m_IP2CountryVersion;
 //Commander - Added: IP2Country Auto-updating - End
 
 //EastShare - added by AndCycle, IP to Country
-IP2CountryNameSelection	CPreferences::m_iIP2CountryNameMode;
+uint8	CPreferences::m_iIP2CountryNameMode;
 bool	CPreferences::m_bIP2CountryShowFlag;
 //EastShare - added by AndCycle, IP to Country
 
@@ -3231,7 +3230,7 @@ void CPreferences::LoadPreferences()
 	enableAntiLeecher = ini.GetBool(_T("EnableAntiLeecher"), true); //MORPH - Added by IceCream, enable AntiLeecher
 	enableAntiCreditHack = ini.GetBool(_T("EnableAntiCreditHack"), true); //MORPH - Added by IceCream, enable AntiCreditHack
 	enableHighProcess = ini.GetBool(_T("EnableHighProcess"), false); //MORPH - Added by IceCream, high process priority
-	creditSystemMode = (CreditSystemSelection)ini.GetInt(_T("CreditSystemMode"), CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
+	creditSystemMode = ini.GetInt(_T("CreditSystemMode"), 0/*Officiel*/); // EastShare - Added by linekin, ES CreditSystem
 	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
@@ -3245,7 +3244,7 @@ void CPreferences::LoadPreferences()
     //Commander - Added: IP2Country Auto-updating - End
 
 	//EastShare - added by AndCycle, IP to Country
-	m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt(_T("IP2Country"), IP2CountryName_DISABLE); 
+	m_iIP2CountryNameMode = ini.GetInt(_T("IP2Country"), IP2CountryName_DISABLE); 
 	m_bIP2CountryShowFlag = ini.GetBool(_T("IP2CountryShowFlag"), false);
 	//EastShare - added by AndCycle, IP to Country
 	
@@ -3324,7 +3323,7 @@ void CPreferences::LoadPreferences()
 	m_bPayBackFirst=ini.GetBool(_T("IsPayBackFirst"),false);//EastShare - added by AndCycle, Pay Back First
 	m_iPayBackFirstLimit=ini.GetInt(_T("PayBackFirstLimit"),10);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), false/*true cahnged by sirob*/);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), false/*true changed by sirob*/);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), true);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.dat")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip")));//MORPH START added by Yun.SF3: Ipfilter.dat update

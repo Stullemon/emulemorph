@@ -128,27 +128,6 @@ struct DynDNS_Struct{
 #pragma pack()
 //MORPH END - Added by SiRoB, DynDNS
 
-//EastShare Start - added by AndCycle, IP to Country
-enum IP2CountryNameSelection{
-
-	IP2CountryName_DISABLE = 0,
-	IP2CountryName_SHORT,
-	IP2CountryName_MID,
-	IP2CountryName_LONG
-};
-//EastShare End - added by AndCycle, IP to Country
-
-//EastShare Start - added by AndCycle, creditsystem integration
-enum CreditSystemSelection {
-	//becareful the sort order for the damn radio button in PPgEastShare.cpp
-	CS_OFFICIAL = 0,	
-	CS_LOVELACE,
-//	CS_RATIO,
-	CS_PAWCIO,
-	CS_EASTSHARE
-};
-//EastShare End - added by AndCycle, creditsystem integration
-
 class CPreferences: public CLoggable
 {
 public:
@@ -604,7 +583,7 @@ public:
 	static bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
-	static CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
+	static uint8	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	static bool	m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static uint8	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -689,7 +668,7 @@ public:
         //Commander - Added: IP2Country Auto-updating - End
 
 	//EastShare - added by AndCycle, IP to Country
-	static IP2CountryNameSelection	m_iIP2CountryNameMode;
+	static uint8	m_iIP2CountryNameMode;
 	static bool		m_bIP2CountryShowFlag;
 	//EastShare - added by AndCycle, IP to Country
 
@@ -896,7 +875,7 @@ public:
 	friend class CPPgDebug;
 	friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
 	friend class CPPgMorph2; //MORPH - Added by SiRoB, Morph Prefs
-	friend class CPPgMorph3; //Commander - Added: Morph III
+	//friend class CPPgMorph3; //Commander - Added: Morph III
 	friend class CPPgEastShare; //EastShare - Added by Pretender, ES Prefs
 	
 	CPreferences();
@@ -1631,7 +1610,7 @@ public:
 	static	bool GetEnableDownloadInRed()	{ return enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
 	static	bool GetEnableAntiLeecher()		{ return enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	
-	static	CreditSystemSelection	GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
+	static	uint8	GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
 	static	bool	IsEqualChanceEnable()	{ return m_bEnableEqualChanceForEachFile;}	//Morph - added by AndCycle, Equal Chance For Each File
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
@@ -1683,7 +1662,7 @@ public:
 	static uint32   GetIP2CountryVersion()				{return m_IP2CountryVersion;}//Commander - Added: IP2Country auto-updating
 	static void		SetIP2CountryVersion(uint32 version){m_IP2CountryVersion = version;}//Commander - Added: IP2Country auto-updating
 	//EastShare - added by AndCycle, IP to Country
-	IP2CountryNameSelection	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
+	uint8	GetIP2CountryNameMode()	{return m_iIP2CountryNameMode;}
 	static bool	IsIP2CountryShowFlag()				{return m_bIP2CountryShowFlag;}
 	//EastShare - added by AndCycle, IP to Country
 	static	void	SetMinUpload(uint16 in); //MORPH - Added by SiRoB, (SUC) & (USS)

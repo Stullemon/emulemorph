@@ -37,6 +37,7 @@
 #include "TransferWnd.h"
 #include "ClientList.h"
 #include "ED2kLinkDlg.h"
+#include "uploadqueue.h" //MORPH - Added by SiRoB, 
 
 // Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
@@ -383,9 +384,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	RECT clientRect;
 	GetClientRect(&clientRect);
 	RECT cur_rec = lpDrawItemStruct->rcItem;
-	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
-		&&
-		(cur_rec.bottom < clientRect.top || cur_rec.bottom > clientRect.bottom))
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
@@ -430,9 +429,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			UINT uDTFlags = DLC_DT_TEXT;
 			cur_rec.right += GetColumnWidth(iColumn);
 			//MORPH START - Added by SiRoB, Don't draw hidden columns
-			if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
-				||
-				cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+			if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 			{
 			//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				//MORPH - Moved by SiRoB, due to the draw system change on hidden rect
@@ -1446,6 +1443,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					}
 					UpdateFile(file);
 				}
+				theApp.uploadqueue->ReSortUploadSlots(true);
 				break;
 			}
 			//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing

@@ -181,6 +181,7 @@ void CPPgMorph2::Localize(void)
 void CPPgMorph2::OnBnClickedUpdatefakes()
 {
 	theApp.FakeCheck->DownloadFakeList();
+	CString strBuffer;
 	strBuffer.Format(_T("v.%u"), thePrefs.GetFakesDatVersion());
 	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
 }
@@ -189,6 +190,7 @@ void CPPgMorph2::OnBnClickedUpdatefakes()
 void CPPgMorph2::OnBnClickedUpdateipfurl()
 {
 	theApp.ipfilter->UpdateIPFilterURL();
+	CString strBuffer;
 	strBuffer.Format(_T("v.%u"), thePrefs.GetIPfilterVersion());
 	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
 }
@@ -198,6 +200,7 @@ void CPPgMorph2::OnBnClickedUpdateipfurl()
 void CPPgMorph2::OnBnClickedUpdateipcurl()
 {
 	theApp.ip2country->UpdateIP2CountryURL();
+	CString strBuffer;
 	strBuffer.Format(_T("v.%u"), thePrefs.GetIP2CountryVersion());
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
 }

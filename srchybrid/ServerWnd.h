@@ -63,7 +63,7 @@ public:
 	void DownloadFeed();
 	void DownloadAllFeeds(); //Commander - Added: Update All Feeds at once
 	void ParseNewsNode(pug::xml_node _node, CString _xmlbuffer);
-	void ParseNewsFile(CString strTempFilename);
+	void ParseNewsFile(LPCTSTR strTempFilename);
 	void OnFeedListSelChange();
 	CArray<CString> aFeedUrls;
 	CArray<CString> aXMLUrls;
