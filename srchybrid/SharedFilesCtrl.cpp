@@ -221,8 +221,8 @@ void CSharedFilesCtrl::Init(){
 	//MORPH END   - Added & Moddified by IceCream, SLUGFILLER: showComments
 
 	// Mighty Knife: CRC32-Tag
-	InsertColumn(20,_T("calculated CRC32"),LVCFMT_LEFT,120,20);
-	InsertColumn(21,_T("CRC32-check ok"),LVCFMT_LEFT,100,21);
+	InsertColumn(20,GetResString(IDS_CRC_CALCULATED),LVCFMT_LEFT,120,20);
+	InsertColumn(21,GetResString(IDS_CRC_CHECKOK),LVCFMT_LEFT,100,21);
 	// [end] Mighty Knife
 
 	CreateMenues();

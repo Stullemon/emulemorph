@@ -170,7 +170,10 @@ void CPPgMorph2::Localize(void)
 		//MORPH START - Added by Yun.SF3: Ipfilter.dat update
 		GetDlgItem(IDC_MORPH2_SECURITY)->SetWindowText(GetResString(IDS_SECURITY));
 		GetDlgItem(IDC_AUTOUPIPFILTER)->SetWindowText(GetResString(IDS_UPDATEIPFILTERONSTART));
+		GetDlgItem(IDC_URL_FOR_UPDATING2)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
 		GetDlgItem(IDC_UPDATEIPCURL)->SetWindowText(GetResString(IDS_UPDATEIPFILTER));
+		GetDlgItem(IDC_UPDATEIPFURL)->SetWindowText(GetResString(IDS_UPDATEIPFILTER));
+		GetDlgItem(IDC_UPDATEFAKES)->SetWindowText(GetResString(IDS_UPDATEIPFILTER));
 		GetDlgItem(IDC_URL_FOR_UPDATING)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
 		GetDlgItem(IDC_RESETIPFURL)->SetWindowText(GetResString(IDS_RESET));
 		//MORPH END   - Added by Yun.SF3: Ipfilter.dat update

@@ -199,6 +199,8 @@ void CPPgStats::Localize(void)
 		GetDlgItem(IDC_PREFCOLORS)->SetWindowText(GetResString(IDS_COLORS));
 	
 		GetDlgItem(IDC_SOLIDGRAPH)->SetWindowText(GetResString(IDS_SOLIDGRAPH)); //MORPH - Added by SiRoB, New Graph
+        GetDlgItem(IDC_GRAPHOPTIONS)->SetWindowText(GetResString(IDS_GRAPHOPTIONS));
+
 		m_colors.ResetContent();
 		m_colors.AddString(GetResString(IDS_SP_BACKGROUND));
 		m_colors.AddString(GetResString(IDS_SP_GRID));

@@ -2743,6 +2743,15 @@
 #define IDS_DOWNLOADEMFRIENDSMET        6160
 #define IDS_EMFRIENDSMETURL             6161
 #define IDC_COUNTRYFLAG                 6200
+#define IDC_GRAPHOPTIONS                6201
+#define IDS_GRAPHOPTIONS                6201
+#define IDS_CRC_CALCULATED              6202
+#define IDS_CRC_CHECKOK                 6203
+#define IDS_CRC_FORCEADDING             6204
+#define IDS_CRC_FORCEUPPERCASE          6205
+#define IDS_CRC_DONTADDCRC              6206
+#define IDS_CRC_PREFIX                  6207
+#define IDS_CRC_SUFFIX                  6208
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053
@@ -2837,9 +2846,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6205
+#define _APS_NEXT_RESOURCE_VALUE        6208
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         6200
+#define _APS_NEXT_CONTROL_VALUE         6201
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

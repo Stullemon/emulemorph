@@ -87,7 +87,13 @@ BOOL AddCRC32InputBox::OnInitDialog(){
 	CheckDlgButton(IDC_CRCFORCEADDING,thePrefs.GetCRC32ForceAdding() ? BST_CHECKED : BST_UNCHECKED);
 	GetDlgItem(IDC_CRC32PREFIX)->SetWindowText (thePrefs.GetCRC32Prefix ());
 	GetDlgItem(IDC_CRC32SUFFIX)->SetWindowText (thePrefs.GetCRC32Suffix ());
-
+     
+	GetDlgItem(IDC_IBLABEL)->SetWindowText(GetResString(IDS_CRC_PREFIX));
+    GetDlgItem(IDC_STATIC)->SetWindowText(GetResString(IDS_CRC_SUFFIX));
+	GetDlgItem(IDC_CRCFORCEADDING)->SetWindowText(GetResString(IDS_CRC_FORCEADDING));
+	GetDlgItem(IDC_CRCFORCEUPPERCASE)->SetWindowText(GetResString(IDS_CRC_FORCEUPPERCASE));
+	GetDlgItem(IDC_DONTADDCRC)->SetWindowText(GetResString(IDS_CRC_DONTADDCRC));
+    
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 
 	return TRUE;

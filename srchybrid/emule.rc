@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -286,7 +286,7 @@ BEGIN
                     WS_TABSTOP,13,185,201,12,WS_EX_STATICEDGE
     CONTROL         "Draw solid graphs",IDC_SOLIDGRAPH,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,227,202,10
-    GROUPBOX        "Graph options",IDC_STATIC,4,214,220,31
+    GROUPBOX        "Graph options",IDC_GRAPHOPTIONS,4,214,220,31
 END
 
 IDD_SPLASH DIALOGEX 0, 0, 234, 185
@@ -2909,12 +2909,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5386,7 +5386,23 @@ BEGIN
     IDS_INITIATEREHASH      "Initiate rehash"
 END
 
-#endif    // Anglais (États-Unis) resources
+STRINGTABLE 
+BEGIN
+    IDS_GRAPHOPTIONS        "Graph options"
+    IDS_CRC_CALCULATED      "calculated CRC32"
+    IDS_CRC_CHECKOK         "CRC32-check ok"
+    IDS_CRC_FORCEADDING     "Add CRC32/Tag to filename even if the filename already contains a valid CRC32"
+    IDS_CRC_FORCEUPPERCASE  "If filename already contains a valid CRC32, convert it to uppercase."
+    IDS_CRC_DONTADDCRC      "Don't add CRC32/Suffix to filename, only add prefix as static text."
+    IDS_CRC_PREFIX          "Prefix to add at the end of the filename before the CRC32:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CRC_SUFFIX          "Suffix to add at the end of the filename after the CRC32:"
+END
+
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
