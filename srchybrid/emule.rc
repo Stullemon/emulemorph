@@ -2516,6 +2516,7 @@ IDR_HTTPDOWNLOAD_ANIMATION AVI                     "res\\inetdownload.avi"
 SPLASH                  JPG                     "res\\About.jpg"
 ABOUT                   JPG                     "res\\logo.jpg"
 BANNER                  JPG                     "res\\Banner_Morph.jpg"
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // GIF
@@ -2578,19 +2579,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Neutre resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Allemand (Allemagne) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-#ifdef _WIN32
-LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
-#pragma code_page(1252)
-#endif //_WIN32
-
-#endif    // Allemand (Allemagne) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -3423,9 +3411,6 @@ BEGIN
     IDS_IRC_PRIVATECHANSTART "* Private chat session started"
     IDS_IRC_SLAPMSG         "* %s slaps %s around with a large Babelfish!"
     IDS_IRC_PRIVMESSAGE     "Private Message"
-    IDS_COUNTRY             "Country"
-    IDS_MISSING_STARTUPSOUND 
-                            "Missing startupsound.wav! Note: The file 'startupsound.wav' has to be placed in your config dir"
     IDS_SOURCEEXCHANGESWAP  "Temporary Source Exchange Swap"
     IDS_PR_SHORT_LOW        "[Lo]"
     IDS_IRC_KICK            "Kick"
@@ -3433,6 +3418,14 @@ BEGIN
     IDS_IRC_JOIN            "Join"
     IDS_IRC_CHANNELLIST     "Channel list"
     IDS_IRC_CONNECT         "Connect"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COUNTRY             "Country"
+    IDS_MISSING_STARTUPSOUND 
+                            "Missing startupsound.wav! Note: The file 'startupsound.wav' has to be placed in your config dir"
+    IDS_PW_STARTUPSOUND     "Play startupsound"
 END
 
 STRINGTABLE 
@@ -4684,7 +4677,6 @@ STRINGTABLE
 BEGIN
     IDS_CHAT_NAME           "Name:"
     IDS_CLIENTPERCENTAGE    "Show Client Percentage"
-    IDS_PW_STARTUPSOUND     "Play startupsound"
 END
 
 STRINGTABLE 
