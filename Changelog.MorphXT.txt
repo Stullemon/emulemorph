@@ -18,6 +18,11 @@ ADDED  : Enable/Disable startupsound (Preferences -> General ->Play startupsound
 FIXED  : Code alignment [Commander]
 ADDED  : Save known.met when clicking 'reload' [MightyKnife]
 TODO   : Rechecking SUQWT [Commander]
+FIXED  : SUQWT [Commander]
+ADDED  : CountryFlag to serverlist [Commander/Iberica]
+CHANGED: Client Percentage-> SRCPAINT instead of SRCINVERT->better readable now [Commander]
+FIXED  : Ip2Country column settings saved
+TWEAKED: Mass-Rename SimpleCleanup tweaked [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
