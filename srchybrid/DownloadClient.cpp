@@ -1491,16 +1491,15 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
 								cur_file->IsA4AFAuto() ||
 								//MORPH START - Added by SiRoB, Stacking A4AF
 								(
-									(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) == 2 &&
+									SwapTo_iA4AFMode == 2 &&
 									cur_file->GetCatResumeOrder() < SwapTo->GetCatResumeOrder() ||
 									(
 										cur_file->GetCatResumeOrder() == SwapTo->GetCatResumeOrder() &&
 										SwapTo_iA4AFMode == 2 &&
 										SwapTo_iA4AFMode == cur_file_iA4AFMode
 										||
-										(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) != 2 &&
-										(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) ==
-										(thePrefs.GetCategory(cur_file->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(cur_file->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode())
+										SwapTo_iA4AFMode != 2 &&
+										SwapTo_iA4AFMode == cur_file_iA4AFMode
 									) &&
 								//MORPH END   - Added by SiRoB, Stacking A4AF		
 									(
@@ -1516,7 +1515,7 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
 												cur_file->GetFileName().CompareNoCase(SwapTo->GetFileName()) < 0
 												//MORPH START - Added by SiRoB, Balancing A4AF
 												||
-												(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) != 0 &&
+												SwapTo_iA4AFMode != 0 &&
 												cur_file->GetAvailableSrcCount() < SwapTo->GetAvailableSrcCount()
 												//MORPH END   - Added by SiRoB, Balancing A4AF
 											)
