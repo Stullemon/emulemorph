@@ -2734,6 +2734,7 @@ BEGIN
     IDS_ERR_PARTCORRUPT     "Downloaded part %i is corrupt :(  (%s)"
     IDS_ICHWORKED           "ICH: Recovered corrupted part %i  (%s)"
     IDS_ERR_OUTOFSPACE      "You have insufficient diskspace to download %s!"
+    IDS_COUNTRYNAME_SHOWFLAG "ShowFlag"
 END
 
 STRINGTABLE 

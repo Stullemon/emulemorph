@@ -39,6 +39,8 @@ protected:
 	HTREEITEM m_htiIP2CountryName_SHORT;
 	HTREEITEM m_htiIP2CountryName_MID;
 	HTREEITEM m_htiIP2CountryName_LONG;
+	int m_bIP2CountryShowFlag;
+	HTREEITEM m_htiIP2CountryShowFlag;
 	//EastShare - added by AndCycle, IP to Country
 
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]

@@ -87,6 +87,7 @@
 #define IDS_ICHWORKED                   173
 #define IDS_ERR_OUTOFSPACE              174
 #define IDD_SOURCEDETAILWND             175
+#define IDS_COUNTRYNAME_SHOWFLAG        175
 #define IDS_ERR_WRITEERROR              176
 #define IDS_ERR_COMPLETIONFAILED        177
 #define IDS_ERR_DELETEFAILED            178

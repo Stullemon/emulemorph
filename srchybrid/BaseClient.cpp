@@ -2047,16 +2047,27 @@ uint32	CUpDownClient::GetL2HACTime()
 // Superlexx - client's location
 CString	CUpDownClient::GetCountryName(bool longName) const {
 
-	if(longName) return m_structUserCountry->LongCountryName;
+	if(longName){
+		return m_structUserCountry->LongCountryName;
+	}
+
+	CString tempStr;
 
 	switch(theApp.glob_prefs->GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
-			return m_structUserCountry->ShortCountryName;
+			tempStr.Format("<%s>",m_structUserCountry->ShortCountryName);
+			return tempStr;
 		case IP2CountryName_MID:
-			return m_structUserCountry->MidCountryName;
+			tempStr.Format("<%s>",m_structUserCountry->MidCountryName);
+			return tempStr;
 		case IP2CountryName_LONG:
-			return m_structUserCountry->LongCountryName;
+			tempStr.Format("<%s>",m_structUserCountry->LongCountryName);
+			return tempStr;
 	}
 	return "";
+}
+
+int CUpDownClient::GetCountryFlagIndex() const {
+	return m_structUserCountry->FlagIndex;
 }
 //EastShare End - added by AndCycle, IP to Country

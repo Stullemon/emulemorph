@@ -5,6 +5,7 @@
 #include "emule.h"
 #include "PPgEastShare.h"
 #include "OtherFunctions.h"
+#include "ip2country.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -39,6 +40,7 @@ CPPgEastShare::CPPgEastShare()
 	m_htiIP2CountryName_SHORT = NULL;
 	m_htiIP2CountryName_MID = NULL;
 	m_htiIP2CountryName_LONG = NULL;
+	m_htiIP2CountryShowFlag = NULL;
 	//EastShare End - added by AndCycle, IP to Country
 
 	//EastShare START - Added by Pretender
@@ -97,6 +99,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiIP2CountryName_SHORT = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COUNTRYNAME_SHORT), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_SHORT);
 		m_htiIP2CountryName_MID = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COUNTRYNAME_MID), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_MID);
 		m_htiIP2CountryName_LONG = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COUNTRYNAME_LONG), m_htiIP2CountryName, m_iIP2CountryName == IP2CountryName_LONG);
+		m_htiIP2CountryShowFlag = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTRYNAME_SHOWFLAG), m_htiIP2CountryName, m_bIP2CountryShowFlag);
 		//EastShare End - added by AndCycle, IP to Country
 
 		// EastShare START - Added by linekin, new creditsystem by [lovelace]  // Modified by Pretender
@@ -139,7 +142,11 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 
 	//this is bad using enum for radio button...need (int &) ^*&^#*^$(, by AndCycle
 
-	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryName, (int &)m_iIP2CountryName);//EastShare - added by AndCycle, IP to Country
+	//EastShare - added by AndCycle, IP to Country
+	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryName, (int &)m_iIP2CountryName);
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIP2CountryShowFlag, m_bIP2CountryShowFlag);
+	//EastShare - added by AndCycle, IP to Country
+
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem, (int &)m_iCreditSystem); //EastShare - added by linekin , CreditSystem
 
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiECFEF, (int &)m_iEqualChanceForEachFile);//Morph - added by AndCycle, Equal Chance For Each File
@@ -164,7 +171,11 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bOnlyDownloadCompleteFiles = app_prefs->prefs->m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = app_prefs->prefs->m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
-	m_iIP2CountryName = app_prefs->GetIP2CountryNameMode(); //EastShare - added by AndCycle, IP to Country
+	//EastShare - added by AndCycle, IP to Country
+	m_iIP2CountryName = app_prefs->GetIP2CountryNameMode(); 
+	m_bIP2CountryShowFlag = app_prefs->IsIP2CountryShowFlag();
+	//EastShare - added by AndCycle, IP to Country
+
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
 	m_iEqualChanceForEachFile = app_prefs->GetEqualChanceForEachFileMode();//Morph - added by AndCycle, Equal Chance For Each File
 	m_bECFEFallTime = app_prefs->IsECFEFallTime();//Morph - added by AndCycle, Equal Chance For Each File
@@ -202,11 +213,12 @@ BOOL CPPgEastShare::OnApply()
 	app_prefs->prefs->m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 	//EastShare Start - added by AndCycle, IP to Country
-	if(m_iIP2CountryName != app_prefs->prefs->m_iIP2CountryNameMode && 
-		(app_prefs->prefs->m_iIP2CountryNameMode == IP2CountryName_DISABLE || m_iIP2CountryName == IP2CountryName_DISABLE)){
+	if(	(app_prefs->prefs->m_iIP2CountryNameMode != IP2CountryName_DISABLE || app_prefs->prefs->m_bIP2CountryShowFlag) !=
+		((IP2CountryNameSelection)m_iIP2CountryName != IP2CountryName_DISABLE || m_bIP2CountryShowFlag)	){
 		bRestartApp = true;
 	}
 	app_prefs->prefs->m_iIP2CountryNameMode = m_iIP2CountryName;
+	app_prefs->prefs->m_bIP2CountryShowFlag = m_bIP2CountryShowFlag;
 	//EastShare End - added by AndCycle, IP to Country
 
 	//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
@@ -279,6 +291,7 @@ void CPPgEastShare::OnDestroy()
 	m_htiIP2CountryName_SHORT = NULL;
 	m_htiIP2CountryName_MID = NULL;
 	m_htiIP2CountryName_LONG = NULL;
+	m_htiIP2CountryShowFlag = NULL;
 	//EastShare End - added by AndCycle, IP to Country
 
 	//EastShare START - Added by Pretender

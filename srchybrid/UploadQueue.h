@@ -148,7 +148,7 @@ private:
 	CCriticalSection	UploadingSlot;
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
-		void CUploadQueue::ReSortUploadSlots(bool force = false);
+	void	ReSortUploadSlots(bool force = false);
 
 	CList<uint64,uint64> avarage_dr_list;
 	CList<uint64,uint64> avarage_friend_dr_list;

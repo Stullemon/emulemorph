@@ -162,6 +162,7 @@ public:
 
 	//EastShare Start - added by AndCycle, IP to Country
 	CString			GetCountryName(bool longName = false) const;
+	int				GetCountryFlagIndex() const;
 	//EastShare End - added by AndCycle, IP to Country
 
 	uint16			GetUserPort() const			{return m_nUserPort;}

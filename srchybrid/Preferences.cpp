@@ -1383,7 +1383,11 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("IPfilterVersion",prefs->m_IPfilterVersion); //added by milobac: Ipfilter.dat update
 	ini.WriteBool("AutoUPdateIPFilter",prefs->AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
 //MORPH END added by Yun.SF3: Ipfilter.dat update
-	ini.WriteInt("IP2Country", prefs->m_iIP2CountryNameMode); //EastShare - added by AndCycle, IP to Country
+
+	//EastShare - added by AndCycle, IP to Country
+	ini.WriteInt("IP2Country", prefs->m_iIP2CountryNameMode); 
+	ini.WriteBool("IP2CountryShowFlag", prefs->m_bIP2CountryShowFlag);
+	//EastShare - added by AndCycle, IP to Country
 
 	buffer.Format("%s",prefs->nick);
 	ini.WriteString("Nick",buffer);
@@ -1967,7 +1971,11 @@ void CPreferences::LoadPreferences(){
 	prefs->m_IPfilterVersion=ini.GetInt("IPfilterVersion",0); //added by milobac: Ipfilter.dat update
 	prefs->AutoUpdateIPFilter=ini.GetBool("AutoUPdateIPFilter",false); //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
-	prefs->m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt("IP2Country", IP2CountryName_DISABLE); //EastShare - added by AndCycle, IP to Country
+
+	//EastShare - added by AndCycle, IP to Country
+	prefs->m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt("IP2Country", IP2CountryName_DISABLE); 
+	prefs->m_bIP2CountryShowFlag = ini.GetBool("IP2CountryShowFlag", false);
+	//EastShare - added by AndCycle, IP to Country
 
 	prefs->deadserverretries=ini.GetInt("DeadServerRetry",1);
 	prefs->m_dwServerKeepAliveTimeout=ini.GetInt("ServerKeepAliveTimeout",0);

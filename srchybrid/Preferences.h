@@ -612,7 +612,11 @@ struct Preferences_Struct{
 	bool		AutoUpdateIPFilter; //added by milobac: Ipfilter.dat update
 	uint32		m_IPfilterVersion; //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
-	IP2CountryNameSelection	m_iIP2CountryNameMode;//EastShare - added by AndCycle, IP to Country
+
+	//EastShare - added by AndCycle, IP to Country
+	IP2CountryNameSelection	m_iIP2CountryNameMode;
+	bool		m_bIP2CountryShowFlag;
+	//EastShare - added by AndCycle, IP to Country
 
 	// khaos::categorymod+
 	bool		m_bValidSrcsOnly;
@@ -1241,7 +1245,11 @@ public:
 	uint32	GetIPfilterVersion()				{return prefs->m_IPfilterVersion;}
 	void	SetIpfilterVersion(uint32 version)	{prefs->m_IPfilterVersion = version;}
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
-	IP2CountryNameSelection	GetIP2CountryNameMode()	{return prefs->m_iIP2CountryNameMode;}//EastShare - added by AndCycle, IP to Country
+
+	//EastShare - added by AndCycle, IP to Country
+	IP2CountryNameSelection	GetIP2CountryNameMode()	{return prefs->m_iIP2CountryNameMode;}
+	bool	IsIP2CountryShowFlag()				{return prefs->m_bIP2CountryShowFlag;}
+	//EastShare - added by AndCycle, IP to Country
 
 	// Barry
 	uint16	Get3DDepth() { return prefs->depth3D;}

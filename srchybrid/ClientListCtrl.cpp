@@ -119,6 +119,11 @@ void CClientListCtrl::SetAllIcons()
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 
+	//Morph Start - added by AndCycle, IP to Country
+	for(int count = 0; count < theApp.ip2country->GetCountryFlagAmount(); count++){
+		imagelist.Add(theApp.ip2country->GetCountryFlagByIndex(count));
+	}
+	//Morph End- added by AndCycle, IP to Country
 }
 
 void CClientListCtrl::Localize()
@@ -305,16 +310,30 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer.Format("(%s)", GetResString(IDS_UNKNOWN));
 					else
 						Sbuffer = client->GetUserName();
+
 					//EastShare Start - added by AndCycle, IP to Country
 					if(theApp.ip2country->IsIP2Country()){
 						CString tempStr;
-						tempStr.Format("%s : %s", client->GetCountryName(), Sbuffer);
+						tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
 						Sbuffer = tempStr;
+						if(theApp.glob_prefs->IsIP2CountryShowFlag()){
+							cur_rec.left+=20;
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							imagelist.Draw(dc, client->GetCountryFlagIndex() + 11, point2, ILD_NORMAL);
+						}
 					}
 					//EastShare End - added by AndCycle, IP to Country
+
 					cur_rec.left +=20;
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 					cur_rec.left -=20;
+
+					//EastShare Start - added by AndCycle, IP to Country
+					if(theApp.ip2country->IsIP2Country() && theApp.glob_prefs->IsIP2CountryShowFlag()){
+						cur_rec.left-=20;
+					}
+					//EastShare End - added by AndCycle, IP to Country
+
 					break;
 				}
 				case 1:{
