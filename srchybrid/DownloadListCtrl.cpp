@@ -36,8 +36,10 @@
 #include "ChatWnd.h"
 #include "TransferWnd.h"
 #include "SharedFileList.h" //MORPH - Added by SiRoB
-
 #include "version.h" //MORPH - Added by SiRoB
+//EastShare Start - added by AndCycle, IP to Country
+#include "IP2Country.h"
+//EastShare End - added by AndCycle, IP to Country
 
 #ifdef _DEBUG
 #undef THIS_FILE
