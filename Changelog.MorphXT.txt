@@ -1,7 +1,15 @@
 --------------------------------------
-Changelog for eMule 0.42e MorphXT v2.7
+Changelog for eMule 0.42e MorphXT v2.8
 --------------------------------------
 FIXED  : Killing this ******* Invalide Parameter [SiRoB]
+FIXED  : Some translation arround some button [SiRoB]
+FIXED  : The freeze trouble should be away [SiRoB]
+
+CHANGED: Updated UploadBandwithThrottler from the latest zz version [SiRoB]
+CHANGED: zz ratio is presente when friend slot is activated on one of the friend [SiRoB]
+CHANGED: systray & application icon without white glitch on dark desktop by FrankyFive [SiRoB]
+
+TWEAKED: Improved Anti-Leecher feature avoid some case where leecher can enter in queue [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42e MorphXT v2.7
