@@ -40,7 +40,7 @@ ADDED  : Save known.met when clicking 'reload' [MightyKnife]
 ADDED  : Optimizer [ePlus] + emulespania methode [Commander/SiRoB]
 ADDED  : CPU Optimization Mode display on Splashscreen [Commander]
 
-ADDED  : Preferences Side Banner from TPT / Enable-Disable on the Fly [Commander/SiRoB]
+ADDED  : Preferences Side Banner from TPT / Enable-Disable on the Fly / Banner Picture [Commander/SiRoB/iCeCream]
 ADDED  : Show version-numbers of Fakes- and IPfilter.dat and ip-to-country.csv in MorphII settings [Commander]
 
 ADDED  : Dynamic Invisible Mode from TPT [Commander]
