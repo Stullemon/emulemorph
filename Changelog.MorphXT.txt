@@ -3,8 +3,13 @@ Changelog for eMule 0.42g MorphXT v2.9
 --------------------------------------
 MERGED : Code merged to 0.42g [SiRoB]
 FIXED  : Columns Preferency Saving (Sort, Size, Visibility) [SiRoB]
+ADED   : Solid Graph Option in Statistic preferency [SiRoB]
 CHANGED: Now Canceling Selection category mean aborting [SiRoB]
 CHANGED: Review the Selection category support (if not used take the official way) [SiRoB]
+CHANGED: ZZ ratio is applicable when:
+		-incomplet file is forced to powershare
+		-friend slot is activated on one friend or more
+		-average upload under 10kB/s
 REMOVED: Group notion for downloading files have been removed (never implemented) [SiRoB]
 
 --------------------------------------
