@@ -807,11 +807,14 @@ uint32 CUpDownClient::SendBlockData(){
 	    theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
 	    m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
 //Give more credits to rare files uploaders [Yun.SF3]
-		CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);//check this if download completion problems occurs [Yun.SF3]
-		if (currequpfile->m_nVirtualCompleteSourcesCountMin && theApp.glob_prefs->IsBoostLess())
-        credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/currequpfile->m_nVirtualCompleteSourcesCountMin, GetIP());
-		else
-        credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP());
+		if (theApp.glob_prefs->IsBoostLess()){
+			CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);//check this if download completion problems occurs [Yun.SF3]
+			if(!currequpfile->IsPartFile())
+				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,currequpfile->m_nVirtualCompleteSourcesCountMin), GetIP());
+			else
+				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,((CPartFile*)currequpfile)->m_nVirtualCompleteSourcesCountMin), GetIP());
+		}else
+			credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
 //Give more credits to rare files uploaders [Yun.SF3]
 
         sentBytesPayload = socket->GetSentPayloadSinceLastCallAndReset();
