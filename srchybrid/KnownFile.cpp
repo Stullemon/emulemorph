@@ -2859,8 +2859,7 @@ CString CKnownFile::GetFeedback(bool isUS)
 		feed.AppendFormat(_T("File name: %s\r\n"),GetFileName());
 		feed.AppendFormat(_T("File type: %s\r\n"),GetFileType());
 		feed.AppendFormat(_T("Size: %s\r\n"), CastItoXBytes(GetFileSize(),false,false,3,true));
-		if(IsPartFile())
-			feed.AppendFormat(_T("Downloaded: %s\r\n"), CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3));
+		feed.AppendFormat(_T("Downloaded: %s\r\n"), (IsPartFile()==false)?GetResString(IDS_COMPLETE):CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3));
 		feed.AppendFormat(_T("Transfered: %s (%s)\r\n"), CastItoXBytes(statistic.GetTransferred(),false,false,3,true), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3,true)); 
 		feed.AppendFormat(_T("Requested: %i (%i)\r\n"), statistic.GetRequests(), statistic.GetAllTimeRequests()); 
 		feed.AppendFormat(_T("Accepted Requests: %i (%i)\r\n"), statistic.GetAccepts(),statistic.GetAllTimeAccepts()); 
@@ -2873,20 +2872,30 @@ CString CKnownFile::GetFeedback(bool isUS)
 	}
 	else
 	{
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILENAME), GetFileName()); feed.Append(_T(" \r\n"));
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILETYPE), GetFileType()); feed.Append(_T(" \r\n"));
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILESIZE), CastItoXBytes(GetFileSize(),false,false,3)); feed.Append(_T(" \r\n"));
-		if(IsPartFile())
-			feed.AppendFormat(GetResString(IDS_FEEDBACK_DOWNLOADED), CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3)); feed.Append(_T(" \r\n"));
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_TRANSFERED), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3),CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3)); feed.Append(_T(" \r\n"));
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_REQUESTED), statistic.GetRequests(), statistic.GetAllTimeRequests()); feed.Append(_T(" \r\n"));
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_ACCEPTED), statistic.GetAccepts() , statistic.GetAllTimeAccepts()); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILENAME), GetFileName());
+		feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILETYPE), GetFileType());
+		feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_FILESIZE), CastItoXBytes(GetFileSize(),false,false,3));
+		feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_DOWNLOADED), (IsPartFile()==false)?GetResString(IDS_COMPLETE):CastItoXBytes(((CPartFile*)this)->GetCompletedSize(),false,false,3));
+		feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_TRANSFERED), CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3),CastItoXBytes(statistic.GetAllTimeTransferred(),false,false,3));
+		feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_REQUESTED), statistic.GetRequests(), statistic.GetAllTimeRequests());
+		feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_ACCEPTED), statistic.GetAccepts() , statistic.GetAllTimeAccepts());
+		feed.Append(_T(" \r\n"));
 		if(IsPartFile()){
-			feed.AppendFormat(GetResString(IDS_FEEDBACK_TOTAL), ((CPartFile*)this)->GetSourceCount()); feed.Append(_T(" \r\n"));
-			feed.AppendFormat(GetResString(IDS_FEEDBACK_AVAILABLE), ((CPartFile*)this)->GetAvailableSrcCount()); feed.Append(_T(" \r\n"));
-			feed.AppendFormat(GetResString(IDS_FEEDBACK_NONEEDPART), ((CPartFile*)this)->GetSrcStatisticsValue(DS_NONEEDEDPARTS)); feed.Append(_T(" \r\n"));
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_TOTAL), ((CPartFile*)this)->GetSourceCount());
+			feed.Append(_T(" \r\n"));
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_AVAILABLE), ((CPartFile*)this)->GetAvailableSrcCount());
+			feed.Append(_T(" \r\n"));
+			feed.AppendFormat(GetResString(IDS_FEEDBACK_NONEEDPART), ((CPartFile*)this)->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
+			feed.Append(_T(" \r\n"));
 		}
-		feed.AppendFormat(GetResString(IDS_FEEDBACK_COMPLETE), m_nCompleteSourcesCount, m_nVirtualCompleteSourcesCount); feed.Append(_T(" \r\n"));
+		feed.AppendFormat(GetResString(IDS_FEEDBACK_COMPLETE), m_nCompleteSourcesCount, m_nVirtualCompleteSourcesCount);
+		feed.Append(_T(" \r\n"));
 	}
 	return feed;
 }
