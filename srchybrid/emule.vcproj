@@ -1399,6 +1399,9 @@
 				RelativePath="EnBitmap.cpp">
 			</File>
 			<File
+				RelativePath=".\FadeWnd.cpp">
+			</File>
+			<File
 				RelativePath="FileDetailDialog.cpp">
 			</File>
 			<File
@@ -1791,6 +1794,9 @@
 			</File>
 			<File
 				RelativePath="EnBitmap.h">
+			</File>
+			<File
+				RelativePath=".\FadeWnd.h">
 			</File>
 			<File
 				RelativePath="FileDetailDialog.h">
