@@ -53,6 +53,21 @@ CPPgConnection::~CPPgConnection()
 void CPPgConnection::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	CString text;
+
+	DDX_Control(pDX, IDC_MINPORT, m_minRndPort);
+	m_minRndPort.GetWindowText(text);
+	DDV_MinMaxInt(pDX,_ttoi(text),1,0xFFFF);
+
+	DDX_Control(pDX, IDC_MAXPORT, m_maxRndPort);
+	m_maxRndPort.GetWindowText(text);
+	DDV_MinMaxInt(pDX,_ttoi(text),1,0xFFFF);
+
+	DDX_Control(pDX, IDC_SPIN_MIN, m_minRndPortSpin);
+	DDX_Control(pDX, IDC_SPIN_MAX, m_maxRndPortSpin);
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 }
 
 BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
@@ -75,6 +90,9 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	ON_BN_CLICKED(IDC_NETWORK_KADEMLIA, OnSettingsChange)
 	ON_WM_HELPINFO()
 	ON_BN_CLICKED(IDC_OPENPORTS, OnBnClickedOpenports)
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	ON_BN_CLICKED(IDC_RANDOMPORTS, OnRandomPortsChange)
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 END_MESSAGE_MAP()
 
 
@@ -119,7 +137,12 @@ void CPPgConnection::OnEnChangeUDPDisable(){
 		guardian=true;
 		SetModified();
 
+		//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+		/*
 		GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE));
+		*/
+		GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE) && !IsDlgButtonChecked(IDC_RANDOMPORTS));
+		//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 		if(GetDlgItem(IDC_UDPPORT)->GetWindowTextLength())
 		{
@@ -144,6 +167,13 @@ BOOL CPPgConnection::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	m_minRndPortSpin.SetBuddy(&m_minRndPort);
+	m_minRndPortSpin.SetRange32(1,0xffff);
+	m_maxRndPortSpin.SetBuddy(&m_maxRndPort);
+	m_maxRndPortSpin.SetRange32(1,0xffff);
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
 	LoadSettings();
 	Localize();
 
@@ -166,7 +196,11 @@ void CPPgConnection::LoadSettings(void)
 		GetDlgItem(IDC_UDPPORT)->SetWindowText(strBuffer);
 		CheckDlgButton(IDC_UDPDISABLE,(thePrefs.udpport==0));
 
+		//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+		/*		
 		GetDlgItem(IDC_UDPPORT)->EnableWindow(thePrefs.udpport>0);
+		*/
+		//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 	
 		strBuffer.Format(_T("%d"), thePrefs.maxGraphDownloadRate);
 		GetDlgItem(IDC_DOWNLOAD_CAP)->SetWindowText(strBuffer);
@@ -234,6 +268,24 @@ void CPPgConnection::LoadSettings(void)
 		else
 			GetDlgItem(IDC_OPENPORTS)->EnableWindow(false);
 
+		//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+		CString rndText;
+
+		CheckDlgButton(IDC_RANDOMPORTS,thePrefs.GetUseRandomPorts());
+		rndText.Format(_T("%u"), thePrefs.GetMinRandomPort());
+		m_minRndPort.SetWindowText(rndText);
+		rndText.Format(_T("%u"), thePrefs.GetMaxRandomPort());
+		m_maxRndPort.SetWindowText(rndText);
+
+		GetDlgItem(IDC_PORT)->EnableWindow(!thePrefs.GetUseRandomPorts());
+		GetDlgItem(IDC_UDPPORT)->EnableWindow(!thePrefs.GetUseRandomPorts() && thePrefs.udpport>0);
+		
+		m_minRndPort.EnableWindow(thePrefs.GetUseRandomPorts());
+		m_maxRndPort.EnableWindow(thePrefs.GetUseRandomPorts());
+		m_minRndPortSpin.EnableWindow(thePrefs.GetUseRandomPorts());
+		m_maxRndPortSpin.EnableWindow(thePrefs.GetUseRandomPorts());
+		//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
 		ShowLimitValues();
 		OnLimiterChange();
 	}
@@ -294,6 +346,9 @@ BOOL CPPgConnection::OnApply()
 				theApp.listensocket->Rebind();
 			else
 				bRestartApp = true;
+			//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+			theApp.m_pFirewallOpener->ClearMappingsAtEnd();
+			//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 		}
 	}
 	
@@ -313,6 +368,9 @@ BOOL CPPgConnection::OnApply()
 				theApp.clientudp->Rebind();
 			else 
 				bRestartApp = true;
+			//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+			theApp.m_pFirewallOpener->ClearMappingsAtEnd();
+			//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 		}
 	}
 
@@ -380,6 +438,40 @@ BOOL CPPgConnection::OnApply()
 	//if (thePrefs.maxGraphDownloadRate<thePrefs.maxdownload) thePrefs.maxdownload=UNLIMITED;
 	//if (thePrefs.maxGraphUploadRate<thePrefs.maxupload) thePrefs.maxupload=UNLIMITED;
 
+	//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
+	if((bool)IsDlgButtonChecked(IDC_RANDOMPORTS) != thePrefs.GetUseRandomPorts()){
+		bRestartApp = true;
+		//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+		theApp.m_pFirewallOpener->ClearMappingsAtEnd();
+		//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	}
+
+	thePrefs.SetUseRandomPorts((BOOL)IsDlgButtonChecked(IDC_RANDOMPORTS));
+
+	unsigned long rndValue1, rndValue2;
+	CString rndText;
+	m_minRndPort.GetWindowText(rndText);
+	rndValue1 = _ttoi(rndText);
+	m_maxRndPort.GetWindowText(rndText);
+	rndValue2 = _ttoi(rndText);
+
+	if (rndValue1 > 0xFFFF) rndValue1 = 0xFFFF;
+	if (rndValue1 < 1) rndValue1 = 1;
+	if (rndValue2 > 0xFFFF) rndValue2 = 0xFFFF;
+	if (rndValue2 < 1) rndValue2 = 1;
+	if (rndValue1 > rndValue2){
+		int tmp = rndValue2;
+		rndValue2 = rndValue1;
+		rndValue1 = tmp;
+	}
+
+	if(rndValue1 != thePrefs.GetMinRandomPort() || rndValue2 != thePrefs.GetMaxRandomPort()){
+		bRestartApp = true;
+		thePrefs.SetMinRandomPort(rndValue1);
+		thePrefs.SetMaxRandomPort(rndValue2);
+	}
+	//MORPH END   - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
+
 	SetModified(FALSE);
 	LoadSettings();
 
@@ -436,6 +528,12 @@ void CPPgConnection::Localize(void)
 
 		GetDlgItem(IDC_OPENPORTS)->SetWindowText(GetResString(IDS_FO_PREFBUTTON));
 		SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
+
+		//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
+		GetDlgItem(IDC_RANDOMPORTS)->SetWindowText(GetResString(IDS_RANDOMPORTS));
+		GetDlgItem(IDC_LBL_MIN)->SetWindowText(GetResString(IDS_MINPORT));
+		GetDlgItem(IDC_LBL_MAX)->SetWindowText(GetResString(IDS_MAXPORT));
+		//MORPH END   - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
 	}
 }
 
@@ -530,6 +628,11 @@ BOOL CPPgConnection::OnHelpInfo(HELPINFO* pHelpInfo)
 
 void CPPgConnection::OnBnClickedOpenports()
 {
+	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	thePrefs.SetICFSupport(true);
+	thePrefs.m_bICFSupportStatusChanged = true;
+	//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
 	OnApply();
 	theApp.m_pFirewallOpener->RemoveRule(EMULE_DEFAULTRULENAME_UDP);
 	theApp.m_pFirewallOpener->RemoveRule(EMULE_DEFAULTRULENAME_TCP);
@@ -563,3 +666,22 @@ void CPPgConnection::OnStartPortTest() {
 
 	TriggerPortTest(tcp,udp);
 }
+
+//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+void CPPgConnection::OnRandomPortsChange() {
+	CString udpStr;
+	unsigned int udp;
+
+	GetDlgItem(IDC_UDPPORT)->GetWindowText(udpStr);
+	udp = _ttoi(udpStr);
+
+	GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_RANDOMPORTS) && udp>0);
+	GetDlgItem(IDC_PORT)->EnableWindow(!IsDlgButtonChecked(IDC_RANDOMPORTS));
+	m_minRndPort.EnableWindow(IsDlgButtonChecked(IDC_RANDOMPORTS));
+	m_maxRndPort.EnableWindow(IsDlgButtonChecked(IDC_RANDOMPORTS));
+	m_minRndPortSpin.EnableWindow(IsDlgButtonChecked(IDC_RANDOMPORTS));
+	m_maxRndPortSpin.EnableWindow(IsDlgButtonChecked(IDC_RANDOMPORTS));
+
+	SetModified(TRUE);	
+}
+//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]

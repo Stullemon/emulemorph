@@ -46,6 +46,8 @@
 #include "ClientUDPSocket.h"
 #include "SHAHashSet.h"
 
+#include "FirewallOpener.h" //MORPH - Added by SiRoB, [MoNKi: -Random Ports-]
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -2306,12 +2308,72 @@ bool CListenSocket::StartListening(){
 	// socket is already used by some other application (e.g. a 2nd emule), we though bind
 	// to that socket leading to the situation that 2 applications are listening at the same
 	// port!
+	//
+	//MORPH START - Modified by SiRoB, [MoNKi: -UPnPNAT Support-]
+	//MORPH START - Modified by SiRoB, [MoNKi: -Random Ports-]
+	
+	//bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/) && Listen());
+	//if (ret)
+	//	m_port=thePrefs.GetPort();
+	//return ret;
 
-	bool ret=(Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/) && Listen());
+	bool ret;
+	WORD rndPort;
+	int retries=0;
+	int maxRetries = 50;
+
+	if(thePrefs.GetUseRandomPorts()){
+		do{
+			retries++;
+			rndPort = thePrefs.GetPort(true);
+
+			if((retries < (maxRetries / 2)) && ((thePrefs.GetICFSupport() && !theApp.m_pFirewallOpener->DoesRuleExist(rndPort, NAT_PROTOCOL_TCP))
+				|| !thePrefs.GetICFSupport()))
+			{
+				ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/);
+			}
+			else if (retries >= (maxRetries / 2))
+				ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/);
+		}while(!ret && retries<maxRetries);
+	}
+	else
+		ret = Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/);
+
+	//MORPH START - Added by SiRoB, Merged to 0.44b
 	if (ret)
-		m_port=thePrefs.GetPort();
+		m_port=thePrefs.GetPort(); //GetPort return the rndport one too
+	//MORPH END   - Added by SiRoB, Merged to 0.44b
 
-	return ret;
+	if(ret && Listen()){
+		if(thePrefs.GetICFSupport()){
+			if (theApp.m_pFirewallOpener->OpenPort(thePrefs.GetPort(), NAT_PROTOCOL_TCP, EMULE_DEFAULTRULENAME_TCP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetUseRandomPorts()))
+				theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_S), thePrefs.GetPort());
+			else
+				theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_F), thePrefs.GetPort());
+		}
+
+		if(thePrefs.GetUPnPNat()){
+			CUPnPNat::UPNPNAT_MAPPING mapping;
+			
+			mapping.internalPort = mapping.externalPort = thePrefs.GetPort();
+			mapping.protocol = CUPnPNat::UNAT_TCP;
+			mapping.description = "TCP Port";
+
+			theApp.AddUPnPNatPort(&mapping, thePrefs.GetUPnPNatTryRandom());
+
+			thePrefs.SetUPnPTCPExternal(mapping.externalPort);
+			thePrefs.SetUPnPTCPInternal(mapping.internalPort);
+		}
+		else{
+			thePrefs.SetUPnPTCPExternal(thePrefs.GetPort());
+			thePrefs.SetUPnPTCPInternal(thePrefs.GetPort());
+		}
+		return true;
+	}
+	else
+		return false;
+	//MORPH END   - Modified by SiRoB, [MoNKi: -Random Ports-]
+	//MORPH END   - Modified by SiRoB, [MoNKi: -UPnPNAT Support-]
 }
 
 void CListenSocket::ReStartListening(){

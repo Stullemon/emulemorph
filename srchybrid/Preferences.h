@@ -753,7 +753,30 @@ public:
 
         static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
         
-        //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
+	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	static bool		m_bUPnPNat;
+	static bool		m_bUPnPNatWeb;
+	static uint16	m_iUPnPTCPExternal;
+	static uint16	m_iUPnPUDPExternal;
+	static uint16	m_iUPnPTCPInternal;
+	static uint16	m_iUPnPUDPInternal;
+	static bool		m_bUPnPTryRandom;
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	static bool		m_bRndPorts;
+	static uint16	m_iMinRndPort;
+	static uint16	m_iMaxRndPort;
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	static bool		m_bICFSupport;
+	static bool		m_bICFSupportFirstTime;
+	static bool		m_bICFSupportStatusChanged;
+	static bool		m_bICFSupportServerUDP;
+	//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
+    //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	static TCHAR	m_sWapTemplateFile[MAX_PATH];
 	static bool		m_bWapEnabled;
 	static uint16	m_nWapPort;
@@ -857,8 +880,21 @@ public:
 	static	void	SetUserNick(LPCTSTR pszNick);
 	static	int		GetMaxUserNickLength()			{return 50;}
 
+	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
+	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	/*
 	static	uint16	GetPort()		{return port;}
 	static	uint16	GetUDPPort()	{return udpport;}
+	*/
+		// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+		/*
+		static	uint16	GetPort();
+		static	uint16	GetUDPPort();
+		*/
+		static	uint16	GetPort(bool newPort = false);
+		static	uint16	GetUDPPort(bool newPort = false);
+	//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
+
 	static	uint16	GetServerUDPPort(){return nServerUDPPort;}
 	static	uchar*	GetUserHash()	{return userhash;}
 	// ZZ:UploadSpeedSense -->
@@ -1399,7 +1435,14 @@ public:
 	// deadlake PROXYSUPPORT
 	static	const ProxySettings& GetProxy()					{ return proxy; }
 	static	void	SetProxySettings(const ProxySettings& proxysettings) { proxy = proxysettings; }
+
+	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
+	/*
 	static	uint16	GetListenPort()							{ if (m_UseProxyListenPort) return ListenPort; else return port; }
+	*/
+	static	uint16	GetListenPort()							{ if (m_UseProxyListenPort) return ListenPort; else return GetPort(); }
+	//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
+
 	static	void	SetListenPort(uint16 uPort)				{ ListenPort = uPort; m_UseProxyListenPort = true; }
 	static	void	ResetListenPort()						{ ListenPort = 0; m_UseProxyListenPort = false; }
 	static	void	SetUseProxy(bool in)					{ proxy.UseProxy=in;}
@@ -1705,8 +1748,42 @@ protected:
 	static void LoadPreferences();
 	static void SavePreferences();
 	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
-	// added by MoNKi [ MoNKi: -Wap Server- ]
+
 public:
+	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
+	static	bool	GetUPnPNat()						{ return m_bUPnPNat; }
+	static	void	SetUPnPNat(bool on)					{ m_bUPnPNat = on; }
+	static	bool	GetUPnPNatWeb()						{ return m_bUPnPNatWeb; }
+	static	void	SetUPnPNatWeb(bool on)				{ m_bUPnPNatWeb = on; }
+	static	void	SetUPnPTCPExternal(uint16 port)		{ m_iUPnPTCPExternal = port; }
+	static	void	SetUPnPUDPExternal(uint16 port)		{ m_iUPnPUDPExternal = port; }
+	static	bool	GetUPnPNatTryRandom()				{ return m_bUPnPTryRandom; }
+	static	void	SetUPnPNatTryRandom(bool on)		{ m_bUPnPTryRandom = on; }
+	static	void	SetUPnPTCPInternal(uint16 port)		{ m_iUPnPTCPInternal = port; }
+	static	uint16	GetUPnPTCPInternal()				{ return m_iUPnPTCPInternal; }
+	static	void	SetUPnPUDPInternal(uint16 port)		{ m_iUPnPUDPInternal = port; }
+	static	uint16	GetUPnPUDPInternal()				{ return m_iUPnPUDPInternal; }
+	//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
+
+	//MORPH START - Added by SiRoB [MoNKi: -Random Ports-]
+	static	bool	GetUseRandomPorts()				{ return m_bRndPorts; }
+	static	void	SetUseRandomPorts(bool on)		{ m_bRndPorts = on; }
+	static	uint16	GetMinRandomPort()				{ return m_iMinRndPort; }
+	static	void	SetMinRandomPort(uint16 min)	{ m_iMinRndPort = min; }
+	static	uint16	GetMaxRandomPort()				{ return m_iMaxRndPort; }
+	static	void	SetMaxRandomPort(uint16 max)	{ m_iMaxRndPort = max; }
+	//MORPH END   - Added by SiRoB [MoNKi: -Random Ports-]
+
+	//MORPH START - Added by SiRoB [MoNKi: -Improved ICS-Firewall support-]
+	static	bool	GetICFSupport() { return m_bICFSupport; }
+	static	void	SetICFSupport(bool on) { m_bICFSupport = on; }
+	static	bool	GetICFSupportFirstTime() { return m_bICFSupportFirstTime; }
+	static	void	SetICFSupportFirstTime(bool on) { m_bICFSupportFirstTime = on; }
+	static	bool	GetICFSupportServerUDP() { return m_bICFSupportServerUDP; }
+	static	void	SetICFSupportServerUDP(bool on) { m_bICFSupportServerUDP = on; }
+	//MORPH END   - Added by SiRoB [MoNKi: -Improved ICS-Firewall support-]
+
+	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	static CString	GetWapTemplate()				{ return CString(m_sWapTemplateFile);}
 	static void		SetWapTemplate(CString in)		{ _stprintf(m_sWapTemplateFile,_T("%s"),in);}
 	static bool		GetWapServerEnabled()			{ return m_bWapEnabled; }

@@ -419,6 +419,17 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 				{
 					if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
 					{
+						//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+						CUPnPNat::UPNPNAT_MAPPING mapping;
+						BOOL UPnP = false;
+
+						mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
+						mapping.protocol = CUPnPNat::UNAT_TCP;
+						mapping.description = "Web Interface";
+						if(thePrefs.GetUPnPNatWeb())
+							UPnP = theApp.AddUPnPNatPort(&mapping);
+						//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
 						HANDLE pWait[] = { hEvent, s_hTerminate };
 						while (WAIT_OBJECT_0 == WaitForMultipleObjects(2, pWait, FALSE, INFINITE))
 						{
@@ -451,6 +462,10 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 									VERIFY( !closesocket(hSocket) );
 							}
 						}
+
+						//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+						if(UPnP) theApp.RemoveUPnPNatPort(&mapping);
+						//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 					}
 					VERIFY( CloseHandle(hEvent) );
 				}

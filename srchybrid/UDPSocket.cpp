@@ -32,6 +32,7 @@
 #include "emuledlg.h"
 #include "ServerWnd.h"
 #include "SearchDlg.h"
+#include "FirewallOpener.h" //MORPH - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -90,11 +91,43 @@ bool CUDPSocket::Create(){
 	    VERIFY( m_udpwnd.CreateEx(0, AfxRegisterWndClass(0),_T("Emule Socket Wnd"),WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
 	    m_hWndResolveMessage = m_udpwnd.m_hWnd;
 	    m_udpwnd.m_pOwner = this;
+
+		//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
+		/*
 		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
 			AddLogLine(true, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
 			return false;
 		}
 		return true;
+		*/
+		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
+			AddLogLine(true, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
+			return false;
+		}
+		else {
+			CString client;
+			UINT port;
+			GetSockName(client, port);
+			
+			//MORPH START -, Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+			if(thePrefs.GetICFSupport() && thePrefs.GetICFSupportServerUDP()){
+				if (theApp.m_pFirewallOpener->OpenPort(port, NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_SERVERUDP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetServerUDPPort()==0xFFFF))
+					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_S), port);
+				else
+					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), port);
+			}
+			//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
+			if(thePrefs.GetUPnPNat()){
+				CUPnPNat::UPNPNAT_MAPPING mapping;
+				mapping.internalPort = mapping.externalPort = port;
+				mapping.protocol = CUPnPNat::UNAT_UDP;
+				mapping.description = "Server UDP Port";
+				theApp.AddUPnPNatPort(&mapping, thePrefs.GetUPnPNatTryRandom());
+			}
+			return true;
+		}
+		//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
 	}
 	return false;
 }

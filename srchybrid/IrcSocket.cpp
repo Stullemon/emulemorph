@@ -39,6 +39,18 @@ CIrcSocket::CIrcSocket(CIrcMain* pIrcMain) : CAsyncSocketEx()
 CIrcSocket::~CIrcSocket()
 {
 	RemoveAllLayers();
+
+	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	CString client;
+	UINT port;
+	CUPnPNat::UPNPNAT_MAPPING mapping;
+
+	GetSockName(client, port);
+	mapping.internalPort = mapping.externalPort = port;
+	mapping.protocol = CUPnPNat::UNAT_TCP;
+	mapping.description = "IRC";
+	theApp.RemoveUPnPNatPort(&mapping);
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 }
 
 BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR lpszSocketAddress)
@@ -73,7 +85,27 @@ BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR 
 		AddLayer(m_pProxyLayer);
 	}
 
+	//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
+	/*
 	return CAsyncSocketEx::Create(nSocketPort, nSocketType, lEvent, lpszSocketAddress);
+	*/
+	if(CAsyncSocketEx::Create(nSocketPort, nSocketType, lEvent, lpszSocketAddress)){
+		if(thePrefs.GetUPnPNat()){
+			CString client;
+			UINT port;
+			CUPnPNat::UPNPNAT_MAPPING mapping;
+
+			GetSockName(client, port);
+			mapping.internalPort = mapping.externalPort = port;
+			mapping.protocol = CUPnPNat::UNAT_TCP;
+			mapping.description = "IRC";
+			theApp.AddUPnPNatPort(&mapping);
+		}
+		return true;
+	}
+	else
+		return false;
+	//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
 }
 
 void CIrcSocket::Connect()

@@ -721,6 +721,30 @@ CString	CPreferences::m_strFeedsDir;
 bool	CPreferences::enableNEWS;
 //MORPH END   - Added by SiRoB, XML News [O²]
 
+//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	bool	CPreferences::m_bUPnPNat;
+	bool	CPreferences::m_bUPnPNatWeb;
+	uint16	CPreferences::m_iUPnPTCPExternal;
+	uint16	CPreferences::m_iUPnPUDPExternal;
+	uint16	CPreferences::m_iUPnPTCPInternal;
+	uint16	CPreferences::m_iUPnPUDPInternal;
+	bool	CPreferences::m_bUPnPTryRandom;
+	// End MoNKi
+//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
+//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	bool	CPreferences::m_bRndPorts;
+	uint16	CPreferences::m_iMinRndPort;
+	uint16	CPreferences::m_iMaxRndPort;
+//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
+//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	bool	CPreferences::m_bICFSupport;
+	bool	CPreferences::m_bICFSupportFirstTime;
+	bool	CPreferences::m_bICFSupportStatusChanged;
+	bool	CPreferences::m_bICFSupportServerUDP;
+//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	TCHAR	CPreferences::m_sWapTemplateFile[MAX_PATH];
 	bool	CPreferences::m_bWapEnabled;
@@ -761,6 +785,13 @@ void CPreferences::Init()
 
 	prefsExt=new Preferences_Ext_Struct;
 	memset(prefsExt, 0, sizeof *prefsExt);
+
+	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	m_iUPnPUDPExternal = 0;
+	m_iUPnPTCPExternal = 0;
+	m_iUPnPUDPInternal = 0;
+	m_iUPnPTCPInternal = 0;
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//get application start directory
 	TCHAR buffer[490];
@@ -2431,6 +2462,24 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("Enabled"), m_bPeerCacheEnabled);
 	ini.WriteInt(_T("PCPort"), m_nPeerCachePort);
         
+	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
+	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb, _T("eMule"));
+	ini.WriteBool(_T("UPnPNAT_TryRandom"), m_bUPnPTryRandom, _T("eMule"));
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	ini.WriteBool(_T("RandomPorts"), m_bRndPorts, _T("eMule"));
+	ini.WriteBool(_T("MinRandomPort"), m_iMinRndPort, _T("eMule"));
+	ini.WriteBool(_T("MaxRandomPort"), m_iMaxRndPort, _T("eMule"));
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	ini.WriteBool(_T("ICFSupportFirstTime"), m_bICFSupportFirstTime, _T("eMule"));
+	ini.WriteBool(_T("ICFSupport"), m_bICFSupport, _T("eMule"));
+	ini.WriteBool(_T("ICFSupportServerUDP"), m_bICFSupportServerUDP , _T("eMule"));
+	//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	ini.WriteBool(_T("WapEnabled"), m_bWapEnabled, _T("WapServer"));
 	ini.WriteString(_T("WapTemplateFile"),m_sWapTemplateFile, _T("WapServer"));
@@ -3445,7 +3494,26 @@ void CPreferences::LoadPreferences()
 	m_bPeerCacheEnabled = ini.GetBool(_T("Enabled"), true);
 	m_nPeerCachePort = ini.GetInt(_T("PCPort"), 0);
         
-    ///////////////////////////////////////////////////////////////////////////
+    //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));
+	m_bUPnPNatWeb = ini.GetBool(_T("UPnPNAT_Web"), false, _T("eMule"));
+	m_bUPnPTryRandom = ini.GetBool(_T("UPnPNAT_TryRandom"), true, _T("eMule"));
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	m_bRndPorts = ini.GetBool(_T("RandomPorts"), false, _T("eMule"));
+	m_iMinRndPort = ini.GetInt(_T("MinRandomPort"), 3000, _T("eMule"));
+	m_iMaxRndPort = ini.GetInt(_T("MaxRandomPort"), 0xFFFF, _T("eMule"));
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
+	//MORPH START - Added by by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	m_bICFSupportStatusChanged = false;
+	m_bICFSupport = ini.GetBool(_T("ICFSupport"), false, _T("eMule"));
+	m_bICFSupportFirstTime = ini.GetBool(_T("ICFSupportFirstTime"), true, _T("eMule"));
+	m_bICFSupportServerUDP = ini.GetBool(_T("ICFSupportServerUDP"), false, _T("eMule"));
+	//MORPH END   - Added by by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
+	///////////////////////////////////////////////////////////////////////////
 	// Section: "WapServer"
 	//
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
@@ -4178,6 +4246,60 @@ void CPreferences::SetInvisibleMode(bool on, UINT keymodifier, char key)
 	}
 }
 //Commander - Added: Invisible Mode [TPT] - End
+
+//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+/*
+uint16	CPreferences::GetPort(){
+*/
+uint16	CPreferences::GetPort(bool newPort){
+// End -Random Ports-
+
+	if(m_iUPnPTCPExternal != 0)
+		return m_iUPnPTCPExternal;
+
+	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
+	static portNumber = 0;
+	if (portNumber == 0 || newPort){
+		if(GetUseRandomPorts())
+			do{
+				portNumber = GetMinRandomPort() + (((float)rand() / RAND_MAX) * (GetMaxRandomPort() - GetMinRandomPort()));
+			}while(portNumber==GetUDPPort() && ((GetMaxRandomPort() - GetMinRandomPort())>0));
+		else
+			portNumber = port;
+	}
+	return portNumber;
+	// End -Random Ports-
+}
+
+// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+/*
+uint16	CPreferences::GetUDPPort(){
+*/
+uint16	CPreferences::GetUDPPort(bool newPort){
+// End -Random Ports-
+
+	if(udpport == 0)
+		return 0;
+	
+	if(m_iUPnPUDPExternal != 0)
+		return m_iUPnPUDPExternal;
+
+	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
+	static portNumber = 0;
+	if (portNumber == 0 || newPort){
+		if(GetUseRandomPorts())
+			do{
+				portNumber = GetMinRandomPort() + (((float)rand() / RAND_MAX) * (GetMaxRandomPort() - GetMinRandomPort()));
+			}while(portNumber==GetPort() && ((GetMaxRandomPort() - GetMinRandomPort())>0));
+		else
+			portNumber = udpport;
+	}
+	return portNumber;
+	// End -Random Ports-
+}
+//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 void CPreferences::SetWapPass(CString strNewPass)
 {

@@ -34,6 +34,7 @@
 #include "kademlia/net/KademliaUDPListener.h"
 #include "kademlia/io/IOException.h"
 #include "IPFilter.h"
+#include "FirewallOpener.h" // emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -498,7 +499,9 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 
 bool CClientUDPSocket::Create(){
 	bool ret=true;
-
+	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+	/*
 	if (thePrefs.GetUDPPort()) {
 		ret=CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
 		if (ret)
@@ -508,6 +511,63 @@ bool CClientUDPSocket::Create(){
 	if (ret)
 		m_port=thePrefs.GetUDPPort();
 
+	return ret;
+	*/
+	WORD rndPort;
+	int retries=0;
+	int maxRetries = 50;
+
+	if (thePrefs.GetUDPPort()){
+		if(thePrefs.GetUseRandomPorts()){
+			do{
+				retries++;
+				rndPort = thePrefs.GetUDPPort(true);
+				if((retries < (maxRetries / 2)) && ((thePrefs.GetICFSupport() && !theApp.m_pFirewallOpener->DoesRuleExist(rndPort, NAT_PROTOCOL_UDP))
+					|| !thePrefs.GetICFSupport()))
+				{
+					ret = CAsyncSocket::Create(rndPort,SOCK_DGRAM,FD_READ|FD_WRITE);
+				}
+				else if (retries >= (maxRetries / 2))
+					ret = CAsyncSocket::Create(rndPort,SOCK_DGRAM,FD_READ|FD_WRITE);
+			}while(!ret && retries<maxRetries);
+		}
+		else
+			ret = CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
+
+		//MORPH START - Added by SiRoB, Merged to 44b
+		if (ret)
+			m_port=thePrefs.GetUDPPort(); //checked that the port was the rnd one if we use rndport
+		//MORPH END   - Added by SiRoB, Merged to 44b
+		
+		if(ret){
+			if(thePrefs.GetICFSupport()){
+				if (theApp.m_pFirewallOpener->OpenPort(thePrefs.GetUDPPort(), NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_UDP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetUseRandomPorts()))
+					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_S), thePrefs.GetUDPPort());
+				else
+					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), thePrefs.GetUDPPort());
+			}
+
+			if(thePrefs.GetUPnPNat()){
+				CUPnPNat::UPNPNAT_MAPPING mapping;
+
+				mapping.internalPort = mapping.externalPort = thePrefs.GetUDPPort();
+				mapping.protocol = CUPnPNat::UNAT_UDP;
+				mapping.description = "UDP Port";
+				
+				theApp.AddUPnPNatPort(&mapping, thePrefs.GetUPnPNatTryRandom());
+				
+				thePrefs.SetUPnPUDPExternal(mapping.externalPort);
+				thePrefs.SetUPnPUDPInternal(mapping.internalPort);
+			}
+			else{
+				thePrefs.SetUPnPUDPExternal(thePrefs.GetUDPPort());
+				thePrefs.SetUPnPUDPInternal(thePrefs.GetUDPPort());
+			}
+		}
+	}
+	// End emulEspaña
+	if (ret)
+		m_port=thePrefs.GetUDPPort();
 	return ret;
 }
 

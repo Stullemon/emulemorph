@@ -91,6 +91,39 @@ BOOL CNetworkInfoDlg::OnInitDialog()
 void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rcfBold, bool bFullInfo)
 {
 	CString buffer;
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	///////////////////////////////////////////////////////////////////////////
+	// Ports Info
+	///////////////////////////////////////////////////////////////////////////
+	rCtrl.SetSelectionCharFormat(rcfBold);
+	rCtrl << GetResString(IDS_PW_CLIENTPORT) << _T("\r\n");
+	rCtrl.SetSelectionCharFormat(rcfDef);
+
+	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	/*
+	buffer.Format(_T("TCP:\t%i"), thePrefs.thePrefs.GetPort());
+	*/
+	buffer.Format(_T("TCP:\t%i"), thePrefs.GetUPnPTCPInternal());
+	rCtrl << buffer << _T("\r\n");
+	if(thePrefs.GetUPnPTCPInternal() != 0 && (thePrefs.GetUPnPTCPInternal() != thePrefs.GetPort())){
+		buffer.Format(_T("TCP (External):\t%i"), thePrefs.GetPort());
+		rCtrl << buffer << _T("\r\n");
+	}
+	// End -UPnPNAT Support-
+
+	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	/*
+	buffer.Format(_T("UDP:\t%i"), thePrefs.GetUDPPort());
+	*/
+	buffer.Format(_T("UDP:\t%i"), thePrefs.GetUPnPUDPInternal());
+	rCtrl << buffer << _T("\r\n");
+	if(thePrefs.GetUPnPUDPInternal() != 0 && (thePrefs.GetUPnPUDPInternal() != thePrefs.GetUDPPort())){
+		buffer.Format(_T("UDP (External):\t%i"), thePrefs.GetUDPPort());
+		rCtrl << buffer << _T("\r\n");
+	}
+	rCtrl << _T("\r\n");
+	// End -UPnPNAT Support-
+	//MORPH END - Added by SiRoB, [MoNKi: -Random Ports-]
 
 	///////////////////////////////////////////////////////////////////////////
 	// ED2K

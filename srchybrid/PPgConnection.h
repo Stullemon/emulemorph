@@ -38,4 +38,12 @@ protected:
 	afx_msg void OnEnChangeTCP();
 	afx_msg void OnEnChangeUDP();
 	afx_msg void OnEnChangePorts(uint8 istcpport);
+
+//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	afx_msg void OnRandomPortsChange();
+	CEdit m_minRndPort;
+	CEdit m_maxRndPort;
+	CSpinButtonCtrl m_minRndPortSpin;
+	CSpinButtonCtrl m_maxRndPortSpin;
+//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 };
