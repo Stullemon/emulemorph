@@ -2237,7 +2237,6 @@
 #define IDS_EASTSHARE_CREDIT            4009
 #define IDS_PREFER_SHARE_ALL            4010
 #define IDS_MET_FILE_CONTROL            4011
-#define IDS_EXPIRED_CLIENTS             4012
 #define IDS_EXPIRED_KNOWN               4013
 #define IDS_DELETEFILE                  4014
 #define IDS_PAWCIO_CREDIT               4015
