@@ -1,11 +1,17 @@
+--------------------------------------
+Changelog for eMule 0.45a MorphXT v6.0
+--------------------------------------
 MERGED : Ported to 0.45a Official version [SiRoB]
 
 FIXED  : Download part file progress bar is now drawn correctly [SiRoB]
 FIXED  : Intercept wrong friend link to avoid crash when pasted in friendlist [SiRoB]
 FIXED  : ICS: Don't send for complete file by netfinity [SiRoB]
 FIXED  : USC: Minor fix arround Friend Class Limit consign [SiRoB]
+FIXED  : KAD: Official Busy loop fix by gcostanza (i.e.: abnormal cpu usage) [SiRoB]
 
 CHANGED: Download Client part file progress bar has a lighter color now for confirmed download chunk when in flat mode [SiRoB]
+
+TWEAKED: Various code optimization [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.18
