@@ -778,7 +778,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						if (!client->GetMessageFiltered()){
 							if (thePrefs.GetVerbose())
 							//MORPH START - Changed by SiRoB, Just Add client soft version
-								AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s) (%s)"), client->GetUserName(), ipstr(client->GetConnectIP()), client->DbgGetFullClientSoftVer());
+								AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s) (%s)"), client->GetUserName(), ipstr(client->GetConnectIP()), client->GetClientSoftVer());
 							//MORPH END   - Changed by SiRoB, Just Add client soft version
 						}
 						client->SetMessageFiltered(true);
