@@ -1135,7 +1135,7 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
     bool result = false;
 	uint32 slotCounter = 1;
-	//MORPH END - Changed by SiRoB, ResortUploadSlot Fix
+	//MORPH START - Changed by SiRoB, ResortUploadSlot Fix
 	/*
 	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;){
         POSITION curPos = pos;
@@ -1146,11 +1146,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 	POSITION pos = uploadinglist.Find(client);
 	POSITION pos2 = tempUploadinglist.Find(client);
 	if (pos2){
-		slotCounter = uploadinglist.GetCount();
+		slotCounter = uploadinglist.GetCount()+1;
 		tmpuploadinglist = &tempUploadinglist;
-		pos = pos2;
 	}
-
+	pos = tmpuploadinglist->GetHeadPosition();
 	while (pos != 0)
 	{
 	    POSITION curPos = pos;
@@ -1163,7 +1162,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
             client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
-            uploadinglist.RemoveAt(curPos);
+            tmpuploadinglist->RemoveAt(curPos);
 			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
             bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 			//MORPH START - Added by SiRoB, due to zz upload system WebCache
