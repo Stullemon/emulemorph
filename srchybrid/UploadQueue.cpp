@@ -120,6 +120,11 @@ CUploadQueue::CUploadQueue(CPreferences* in_prefs){
 	m_FirstRanOutOfSlotsTick = 0;
 	m_averageActiveClients = 0;
 //MORPH END - Added by SiRoB, ZZ Upload System 20040213-1623
+
+	//Morph Start - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
+	m_LastCheckedRemainBytes = ::GetTickCount();
+	m_RemainBytes = 0;
+	//Morph End - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
 }
 
 /**
@@ -673,6 +678,13 @@ void CUploadQueue::Process() {
 		}
 	}
 
+	//Morph Start - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
+	if(curTick - m_LastCheckedRemainBytes >= 500){
+		m_RemainBytes = theApp.uploadBandwidthThrottler->GetRemainBytes()*1000/(curTick - m_LastCheckedRemainBytes);
+		m_LastCheckedRemainBytes = curTick;
+	}
+	//Morph End - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
+
 	POSITION lastpos = uploadinglist.GetTailPosition();
 
 	CUpDownClient* lastClient = NULL;
@@ -767,6 +779,13 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 		return true;
 	else if (numberOfUploads >= MAX_UP_CLIENTS_ALLOWED)
 		return false;
+
+	//Morph Start - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
+	//if there are still bandwidth remain, allow accept new client
+	if(m_RemainBytes > 100){
+		return true;
+	}
+	//Morph End - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
 
 	//now the final check
 	if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
@@ -924,30 +943,33 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			reqfile->statistic.AddRequest();
 // <<---- start of change ---->
 
-		// better ways to cap the list
-		uint32 softQueueLimit;
-		uint32 hardQueueLimit;
+		if(!theApp.glob_prefs->IsInfiniteQueueEnabled()){ //Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+			// better ways to cap the list
+			uint32 softQueueLimit;
+			uint32 hardQueueLimit;
 
-		// these proportions could be tweaked. take 20 precent of queue size to buffer new client
-		softQueueLimit = theApp.glob_prefs->GetQueueSize() - theApp.glob_prefs->GetQueueSize()/5;
-		hardQueueLimit = theApp.glob_prefs->GetQueueSize();
+			// these proportions could be tweaked. take 20 precent of queue size to buffer new client
+			softQueueLimit = theApp.glob_prefs->GetQueueSize() - theApp.glob_prefs->GetQueueSize()/5;
+			hardQueueLimit = theApp.glob_prefs->GetQueueSize();
 
-		if ((uint32)waitinglist.GetCount() > hardQueueLimit){
-			return;
-		}
-		if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
-
-			if (client->GetFriendSlot() == false && // client is not a friend with friend slot
-				client->IsPBForPS() == false && // client don't want powershared file
-					(
-						client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE ||
-						client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE//Morph - added by AndCycle, Equal Chance For Each File
-					)// and client has lower credits/wants lower prio file than average client in queue
-				) {
-				// then block client from getting on queue
+			if ((uint32)waitinglist.GetCount() > hardQueueLimit){
 				return;
 			}
+			if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
+
+				if (client->GetFriendSlot() == false && // client is not a friend with friend slot
+					client->IsPBForPS() == false && // client don't want powershared file
+						(
+							client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE ||
+							client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE//Morph - added by AndCycle, Equal Chance For Each File
+						)// and client has lower credits/wants lower prio file than average client in queue
+					) {
+					// then block client from getting on queue
+					return;
+				}
+			}
 		}
+
 // <<---- end of change ---->
 
 		if (client->IsDownloading()){
@@ -978,6 +1000,7 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 		POSITION pos1, pos2;
 
 		// TODO: is there a risk of overflow? I don't think so...
+		//Morph - partial changed by AndCycle, Equal Chance For Each File - the equal chance have a risk of overflow ... so I use double
 		double sum = 0;
 
 		for (pos1 = waitinglist.GetHeadPosition();( pos2 = pos1 ) != NULL;){

@@ -39,6 +39,7 @@ UploadBandwidthThrottler::UploadBandwidthThrottler(void) {
 	m_SentBytesSinceLastCall = 0;
 	m_SentBytesSinceLastCallExcludingOverhead = 0;
 	m_highestNumberOfFullyActivatedSlots = 0;
+	m_RemainBytes = 0;//Morph - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
 
 	threadEndedEvent = new CEvent(0, 1);
 	doRun = true;
@@ -412,6 +413,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		}
 
 		bytesToSpend -= spentBytes;
+		m_RemainBytes = bytesToSpend;//Morph - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
 
         if(bytesToSpend < -((sint64)m_StandardOrder_list.GetSize()*minFragSize)) {
             sint64 newBytesToSpend = -((sint64)m_StandardOrder_list.GetSize()*minFragSize);
