@@ -448,20 +448,6 @@ BOOL CemuleApp::InitInstance()
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
 
-	uint32 startMesure = GetTickCount();
-	char hash1[512],hash2[512];
-	uint64 loop = 10000000;
-	startMesure = GetTickCount();
-	for(uint64 cur = 0; cur<loop; cur++){
-		md4cpy(hash1,hash2);
-	}
-	AddLogLine(false,_T("echo emulecpy %i"), GetTickCount() - startMesure);
-	startMesure = GetTickCount();
-	for(uint64 cur = 0; cur<loop; cur++){
-		memcpy(hash1,hash2,512);
-	}
-	AddLogLine(false,_T("echo memcpy %i"), GetTickCount() - startMesure);
-
 	//MORPH START - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 	if(thePrefs.ShowFolderIcons()){
 		theApp.AddIncomingFolderIcon();
