@@ -35,6 +35,7 @@ protected:
 	int m_iMinUpload;
 	int m_bEnableZeroFilledTest;
 	int m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	int m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	int m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	int m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	int m_bIsBoostLess;//Added by Yun.SF3, boost the less uploaded files
@@ -87,6 +88,7 @@ protected:
 	HTREEITEM m_htiMinUpload;
 	HTREEITEM m_htiEnableZeroFilledTest;
 	HTREEITEM m_htiEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	HTREEITEM m_htiEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	HTREEITEM m_htiEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiIsBoostLess;//Added by Yun.SF3, boost the less uploaded files

@@ -54,6 +54,7 @@ CPPgMorph::CPPgMorph()
 	m_htiMinUpload = NULL;
 	m_htiEnableZeroFilledTest = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
+	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, activate Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, activate Anti-CreditHack
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
@@ -155,7 +156,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//m_ctrlTreeOptions.Expand(m_htiTimeRemainingMode, TVE_EXPAND); // khaos::accuratetimerem+
 		// khaos::accuratetimerem-
 		m_htiEnableZeroFilledTest = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ZERO_FILLED_TEST), m_htiDM, m_bEnableZeroFilledTest);
-		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDM, m_bEnableDownloadInRed); //MORPH - Added by IceCream, show download in red
+		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDM, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
+		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDM, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 				
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_iUseSLS);
@@ -264,6 +266,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableZeroFilledTest, m_bEnableZeroFilledTest);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInRed, m_bEnableDownloadInRed); //MORPH - Added by IceCream, show download in red
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInBold, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiLeecher, m_bEnableAntiLeecher); //MORPH - Added by IceCream, enable Anti-leecher
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	//MORPH - Removed be SiRoB, Due to zz change
@@ -323,6 +326,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iMinUpload = app_prefs->prefs->minupload;
 	m_bEnableZeroFilledTest = app_prefs->prefs->enableZeroFilledTest;
 	m_bEnableDownloadInRed = app_prefs->prefs->enableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	m_bEnableDownloadInBold = app_prefs->prefs->enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bEnableAntiLeecher = app_prefs->prefs->enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = app_prefs->prefs->enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_bIsBoostLess = app_prefs->prefs->isboostless;//Added by Yun.SF3, boost the less uploaded files
@@ -396,6 +400,7 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->SetMinUpload(m_iMinUpload);
 	app_prefs->prefs->enableZeroFilledTest = m_bEnableZeroFilledTest;
 	app_prefs->prefs->enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	app_prefs->prefs->enableDownloadInBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	app_prefs->prefs->enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	app_prefs->prefs->enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	app_prefs->prefs->isboostless = m_bIsBoostLess;//Added by Yun.SF3, boost the less uploaded files
@@ -493,6 +498,7 @@ void CPPgMorph::Localize(void)
 		if (m_htiMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiMinUpload, GetResString(IDS_MINUPLOAD));		
 		if (m_htiEnableZeroFilledTest) m_ctrlTreeOptions.SetItemText(m_htiEnableZeroFilledTest, GetResString(IDS_ZERO_FILLED_TEST));
 		if (m_htiEnableDownloadInRed) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInRed, GetResString(IDS_DOWNLOAD_IN_RED)); //MORPH - Added by IceCream, show download in red
+		if (m_htiEnableDownloadInBold) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInBold, GetResString(IDS_DOWNLOAD_IN_BOLD)); //MORPH - Added by SiRoB, show download in Bold
 		if (m_htiEnableAntiLeecher) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiLeecher, GetResString(IDS_ANTI_LEECHER)); //MORPH - Added by IceCream, enable Anti-leecher
 		if (m_htiEnableAntiCreditHack) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiCreditHack, GetResString(IDS_ANTI_CREDITHACK)); //MORPH - Added by IceCream, enable Anti-CreditHack
 		//MORPH - Removed by SiRoB, Due to zz change
@@ -559,6 +565,7 @@ void CPPgMorph::OnDestroy()
 	m_htiMinUpload = NULL;
 	m_htiEnableZeroFilledTest = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
+	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack
 	m_htiSCC = NULL;

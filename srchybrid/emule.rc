@@ -3848,6 +3848,7 @@ BEGIN
     IDS_BOOST_LESS          "Boost the less uploaded files (session)"
     IDS_BOOST_FRIENDS       "Boost friends (x1.5)"
     IDS_PROGRESS_PERCENT    "Show percentage in progress bar"
+    IDS_DOWNLOAD_IN_BOLD    "Show downloading files in bold"
 END
 
 STRINGTABLE 

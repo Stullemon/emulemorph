@@ -1353,6 +1353,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("EnableHighProcess", enableHighProcess); //MORPH - Added by IceCream, high process priority
 
 	ini.WriteBool("EnableDownloadInRed", prefs->enableDownloadInRed); //MORPH - Added by IceCream, show download in red
+	ini.WriteBool("EnableDownloadInBold", prefs->enableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 	ini.WriteBool("EnableChunkAvaibility", prefs->enableChunkAvaibility); //MORPH - Added by IceCream, enable ChunkAvaibility
 	ini.WriteBool("EnableAntiLeecher", prefs->enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
 	ini.WriteBool("EnableAntiCreditHack", prefs->enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
@@ -1847,6 +1848,7 @@ void CPreferences::LoadPreferences(){
 	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
 	prefs->enableDownloadInRed = ini.GetBool("EnableDownloadInRed", true); //MORPH - Added by IceCream, show download in red
+	prefs->enableDownloadInBold = ini.GetBool("EnableDownloadInBold", true); //MORPH - Added by SiRoB, show download in Bold
 	prefs->enableChunkAvaibility = ini.GetBool("EnableChunkAvaibility", true); //MORPH - Added by IceCream, enable ChunkAvaibility
 	prefs->enableAntiLeecher = ini.GetBool("EnableAntiLeecher", true); //MORPH - Added by IceCream, enable AntiLeecher
 	prefs->enableAntiCreditHack = ini.GetBool("EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack

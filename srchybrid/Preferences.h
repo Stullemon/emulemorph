@@ -137,6 +137,7 @@ struct Preferences_Struct{
 	bool	enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
+	bool	enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	bool	enableChunkAvaibility; //MORPH - Added by IceCream, ChunkAvaibility
 	bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
@@ -757,6 +758,7 @@ public:
 	bool	GetChunkAvaibility()						{ return prefs->enableChunkAvaibility; }//MORPH - Added by IceCream, enable ChunkAvaibility
 
 	bool GetEnableDownloadInRed () const { return prefs->enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
+	bool GetEnableDownloadInBold () const { return prefs->enableDownloadInBold; } //MORPH - Added by SiRoB, show download in Bold
 	bool GetEnableAntiLeecher () const { return prefs->enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	bool IsBoostLess() const {return prefs->isboostless;}//Added by Yun.SF3, boost the less uploaded files
 

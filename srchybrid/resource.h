@@ -1311,6 +1311,7 @@
 #define IDI_RATING_POOR                 1593
 #define IDI_RATING_FAKE                 1594
 #define IDS_PROGRESS_PERCENT            1595
+#define IDS_DOWNLOAD_IN_BOLD            1596
 #define IDS_CAT_MINIMUM                 1632
 #define IDS_CAT_MAXIMUM                 1633
 #define IDS_CAT_DLGHELP                 1634

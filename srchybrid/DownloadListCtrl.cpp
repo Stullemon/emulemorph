@@ -456,19 +456,33 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 		CString buffer;
 		CPartFile *lpPartFile = (CPartFile*)lpCtrlItem->value;
 
+		//MORPH START - Added by SiRoB, Due to Don't draw hidden Rect
+		if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
+			dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
+		//MORPH END   - Added by SiRoB, Due to Don't draw hidden Rect
 		//MORPH START - Added by IceCream, show download in red
-		if(theApp.glob_prefs->GetEnableDownloadInRed())
-			if((lpPartFile->GetTransferingSrcCount()) && (nColumn))
-				dc->SetTextColor(RGB(192,0,0));
+		if(theApp.glob_prefs->GetEnableDownloadInRed() && lpPartFile->GetTransferingSrcCount())
+			dc->SetTextColor(RGB(192,0,0));
 		//MORPH END   - Added by IceCream, show download in red
-		//MORPH START - Moved by SiRoB, Due to Don't draw hidden Rect
-			else if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
-				dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
-		//MORPH END   - Moved by SiRoB, Due to Don't draw hidden Rect
+		//MORPH START - Added by SiRoB, show download in Bold
+		CFont newInBoldFont;
+		CFont *pOldInBoldFont;
+		if(theApp.glob_prefs->GetEnableDownloadInBold() && lpPartFile->GetTransferingSrcCount()){
+			LOGFONT logInBoldFont;
+			CFont *pInBoldFont = GetFont();
+			pInBoldFont->GetLogFont(&logInBoldFont);
+			logInBoldFont.lfWeight = FW_BOLD;
+			newInBoldFont.CreateFontIndirect(&logInBoldFont);
+			pOldInBoldFont = dc->SelectObject(&newInBoldFont);
+		}
+		//MORPH END  - Added by SiRoB, show download in Bold
+
 		switch(nColumn)
 		{
 		case 0:{		// file name
-			
+			if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
+				dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
+		
 			//MORPH START - Added by IceCream, eMule Plus rating icons
 			int iImage = theApp.GetFileTypeSystemImageIdx(lpPartFile->GetFileName());
 			if (theApp.GetSystemImageList() != NULL)
@@ -766,6 +780,12 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 			break;
 		// khaos::accuratetimerem-
 		}
+		//MORPH START - Added by SiRoB, show download in Bold
+		if(theApp.glob_prefs->GetEnableDownloadInBold() && lpPartFile->GetTransferingSrcCount()){
+			dc->SelectObject (pOldInBoldFont);
+			newInBoldFont.DeleteObject ();
+		}
+		//MORPH END   - Added by SiRoB, show download in Bold
 	}
 }
 
