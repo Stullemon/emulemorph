@@ -934,7 +934,8 @@ CString CleanupFilename(CString filename) {
 				if (numcount>tempStr.GetLength()/2) continue;
 			}
 			filename=filename.Left(pos1)+filename.Right(filename.GetLength()-pos2-1);
-			pos1-=(pos2-pos1);
+			//pos1-=(pos2-pos1);//original
+			pos1--; // KuSh: -fix: cleaning brackets in CleanupFilename-
 		} else break;
 	}
 
