@@ -4,6 +4,7 @@ Changelog for eMule 0.41a10 MorphKad 0.9
 MERGED: code merged to 0.41a10 [SiRoB]
 
 REMOVED: FPU/MMX/AMD/SSE memset FPU/MMX/SSE memcpy optimized (eMulePlus) [SiRoB]
+CHANGED: Return of the 1/3 ZZ ratio and allways forced (don't ask why, it's too logical) [SiRoB]
 FIXED: showSharePermissions coloring when the first column is hidden (xMule_MOD) [SiRoB]
 FIXED: prefere resume same category [SiRoB]
 FIXED: auto category selection for new download file (Advanced Filter is working now) [SiRoB]
