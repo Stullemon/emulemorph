@@ -1007,8 +1007,10 @@ void CUpDownClient::SendBlockRequests(){
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__RequestParts", this, reqfile!=NULL ? (char*)reqfile->GetFileHash() : NULL);
 	//m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Moved by SiRoB
-	if (!reqfile)
+	if (!reqfile){
+		m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Added by SiRoB
 		return;
+	}
 	// MORPH START - Added by Commander, WebCache 1.2e
 	if( thePrefs.IsWebCacheDownloadEnabled()
 		&& UsesCachedTCPPort() // uses a port that is usually cached
@@ -2115,10 +2117,18 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
     } else {
         m_fileReaskTimes.RemoveKey(reqfile); // ZZ:DownloadManager (one resk timestamp for each file)
 		//MORPH START - Changed by SiRoB, Keep A4AF infos
-		m_PartStatus_list.RemoveKey(reqfile);
-		m_IncPartStatus_list.RemoveKey(reqfile); //ICS, Keep A4AF infos
+		uint8* PartStatus;
+		if(m_PartStatus_list.Lookup(reqfile,PartStatus) && PartStatus){
+			delete[] PartStatus;
+			m_PartStatus_list.RemoveKey(reqfile);
+		}
+		if(m_IncPartStatus_list.Lookup(reqfile,PartStatus) && PartStatus){
+			delete[] PartStatus;
+			m_IncPartStatus_list.RemoveKey(reqfile); //ICS, Keep A4AF infos
+		}
+		m_IncPartStatus_list.RemoveKey(reqfile);
 		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
-		//MORPH START - Changed by SiRoB, Keep A4AF infos
+		//MORPH END   - Changed by SiRoB, Keep A4AF infos
 	}
 
 	SetDownloadState(DS_NONE);
