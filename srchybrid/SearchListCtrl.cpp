@@ -547,12 +547,16 @@ int CSearchListCtrl::Compare(CSearchFile* item1, CSearchFile* item2, LPARAM lPar
 			return CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
 		case 110:
 			return -CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
-
-		case 11: //path asc
+		//Morph Start - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
+		case 10:
+			return CompareOptStringNoCase(theApp.FakeCheck->IsFake(EncodeBase16(item1->GetFileHash(), 16),item1->GetFileSize()), theApp.FakeCheck->IsFake(EncodeBase16(item2->GetFileHash(), 16),item2->GetFileSize()));
+		case 110:
+			return -CompareOptStringNoCase(theApp.FakeCheck->IsFake(EncodeBase16(item1->GetFileHash(), 16),item1->GetFileSize()), theApp.FakeCheck->IsFake(EncodeBase16(item2->GetFileHash(), 16),item2->GetFileSize()));
+		case 12: //path asc
 			return CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
-		case 111: //path desc
+		case 112: //path desc
 			return -CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
-
+		//Morph End - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
 		default:
 			return 0;
 	}
