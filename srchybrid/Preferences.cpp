@@ -1439,6 +1439,9 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("HideOvershares",prefs->hideOS);
 	ini.WriteBool("SelectiveShare",prefs->selectiveShare);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+	ini.WriteBool("ShareOnlyTheNeed",prefs->ShareOnlyTheNeed);
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	ini.WriteBool("Reconnect",prefs->reconnect);
 	ini.WriteBool("Scoresystem",prefs->scorsystem);
 	ini.WriteBool("ICH",prefs->ICH);
@@ -1967,7 +1970,10 @@ void CPreferences::LoadPreferences(){
 	prefs->hideOS=ini.GetInt("HideOvershares",0/*5*/);
 	prefs->selectiveShare=ini.GetBool("SelectiveShare",false);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
-
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+	prefs->ShareOnlyTheNeed=ini.GetInt("ShareOnlyTheNeed",0);
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	
 	//EastShare - Added by Pretender, TBH-AutoBackup
 	prefs->autobackup = ini.GetBool("AutoBackup",true);
 	prefs->autobackup2 = ini.GetBool("AutoBackup2",true);
