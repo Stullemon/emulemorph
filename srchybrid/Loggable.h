@@ -48,5 +48,6 @@ protected:
 //Morph START - added by AndCycle, Date File Name Log
 private:
 	CString m_strOriginFileName;
+	DWORD	m_dwNextRenameTick;
 //Morph END - added by AndCycle, Date File Name Log
 };

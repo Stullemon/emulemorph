@@ -155,6 +155,16 @@ bool CLog::SetFilePath(LPCTSTR pszFilePath)
 	TCHAR szExt[_MAX_EXT];
 	_tsplitpath(m_strFilePath, szDrv, szDir, szNam, szExt);
 	m_strOriginFileName = szNam;
+
+	//to calibrate milliseconds, would wate out one second
+	for(int start = time(NULL); theApp.glob_prefs->DateFileNameLog();){
+		//the step to next second
+		if(time(NULL) > start){
+			//now the tick shoud really close to the second start
+			m_dwNextRenameTick = ::GetTickCount();
+			break;
+		}
+	}
 	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
 
 	return true;
@@ -213,11 +223,19 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 		return false;
 
 	//Morph START - Added by SiRoB, AndCycle, Date File Name Log
-	if (theApp.glob_prefs->DateFileNameLog()){
+	//it DateNameLog enable, and it's time to change filename
+	if (theApp.glob_prefs->DateFileNameLog() && ::GetTickCount() >= m_dwNextRenameTick){
+
 		time_t tCurrent;
 		time(&tCurrent);
+		struct tm *currentDate = localtime(&tCurrent);
+
+		//set next rename tick, rename at next day reach
+		m_dwNextRenameTick += (86400 - (currentDate->tm_hour*3600 + currentDate->tm_min*60 + currentDate->tm_sec))*1000;
+
+		//go on rename
 		TCHAR szDateLogCurrent[40];
-		_tcsftime(szDateLogCurrent, ARRSIZE(szDateLogCurrent), _T("%Y.%m.%d"), localtime(&tCurrent));
+		_tcsftime(szDateLogCurrent, ARRSIZE(szDateLogCurrent), _T("%Y.%m.%d"), currentDate);
 
 		TCHAR szDrv[_MAX_DRIVE];
 		TCHAR szDir[_MAX_DIR];
@@ -230,15 +248,14 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 		strNewNam += _T(" - ");
 		strNewNam += szDateLogCurrent;
 
-		//check is current file name in current date, if not make it to current
-		if (strNewNam.Compare(szNam) != 0){
-			Close();
-			//remake path
-			TCHAR szNewFilePath[MAX_PATH];
-			_tmakepath(szNewFilePath, szDrv, szDir, strNewNam, szExt);
-			m_strFilePath = szNewFilePath;
-			Open();
-		}
+		//remake path
+		TCHAR szNewFilePath[MAX_PATH];
+		_tmakepath(szNewFilePath, szDrv, szDir, strNewNam, szExt);
+		m_strFilePath = szNewFilePath;
+
+		//close then open new file name
+		Close();
+		Open();
 	}
 	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
 
