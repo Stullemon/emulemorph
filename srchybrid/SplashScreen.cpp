@@ -101,39 +101,45 @@ void CSplashScreen::OnPaint()
 			BITMAP BM;
 			m_imgSplash.GetBitmap(&BM);
 			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, SRCCOPY);
-			//MORPH - Removed by SiRoB
-			/*
+			
 			if (pOldBM)
 				dcMem.SelectObject(pOldBM);
-			CRect rc(0, BM.bmHeight * 0.65, BM.bmWidth, BM.bmHeight);
-			dc.FillSolidRect(rc.left+1, rc.top+1, rc.Width()-2, rc.Height()-2, RGB(255,255,255));
+			CRect rc(0, BM.bmHeight * 0.95, BM.bmWidth, BM.bmHeight);//Commander - Changed
+			//Commander - Removed
+			//dc.FillSolidRect(rc.left+1, rc.top+1, rc.Width()-2, rc.Height()-2, RGB(255,255,255));
 
 			LOGFONT lf = {0};
-			lf.lfHeight = 30;
+			lf.lfHeight = 14;
 			lf.lfWeight = FW_BOLD;
-			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+			lf.lfQuality = NONANTIALIASED_QUALITY;
 			_tcscpy(lf.lfFaceName, _T("Arial"));
+			COLORREF oldclr = dc.SetTextColor(RGB(255,255,255));//Commander: Set white text color
+			int iOMode = dc.SetBkMode(TRANSPARENT);//Commander: Make bg transparent
 			CFont font;
 			font.CreateFontIndirect(&lf);
 			CFont* pOldFont = dc.SelectObject(&font);
-			rc.top += dc.DrawText(_T("eMule ") + theApp.m_strCurVersionLong, &rc, DT_CENTER | DT_NOPREFIX);
+			//Commander - Added: OptimizeMode - Start
+			CString mode;
+			switch (get_cpu_type())
+			{
+			case 2:
+				mode += GetResString(IDS_MMX_ACTIVE);
+				break;
+			case 3:
+				mode += GetResString(IDS_AMD_ACTIVE);
+				break;
+			case 4:
+			case 5:
+				mode += GetResString(IDS_SSE_ACTIVE);
+				break;
+			}
+			rc.top += dc.DrawText( mode, &rc, DT_RIGHT | DT_NOPREFIX);
 			if (pOldFont)
+				dc.SetBkMode(iOMode);
+			    dc.SetTextColor(oldclr);
 				dc.SelectObject(pOldFont);
-			font.DeleteObject();
-
-			rc.top += 8;
-
-			lf.lfHeight = 14;
-			lf.lfWeight = FW_NORMAL;
-			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
-			_tcscpy(lf.lfFaceName, _T("Arial"));
-			font.CreateFontIndirect(&lf);
-			pOldFont = dc.SelectObject(&font);
-			dc.DrawText(_T("Copyright (C) 2002-2004 Merkur"), &rc, DT_CENTER | DT_NOPREFIX);
-			if (pOldFont)
-				dc.SelectObject(pOldFont);
-			font.DeleteObject();
-			*/
+			    font.DeleteObject();
+		   //Commander - Added: OptimizeMode - Start
 		}
 	}
 }
