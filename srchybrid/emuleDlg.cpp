@@ -562,15 +562,6 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 }
 //MORPH START - Added by SiRoB, New Version check
 void CemuleDlg::DoMVersioncheck(bool manual) {
-
-	if (!manual && thePrefs.GetLastVC()!=0) {
-		CTime last(thePrefs.GetLastVC());
-		time_t tLast=safe_mktime(last.GetLocalTm());
-		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
-
-		if ( (difftime(tNow,tLast) / 86400)<thePrefs.GetUpdateDays() )
-			return;
-	}
 	if (WSAAsyncGetHostByName(m_hWnd, WM_MVERSIONCHECK_RESPONSE, "morphvercheck.dyndns.info", m_acMVCDNSBuffer, sizeof(m_acMVCDNSBuffer)) == 0){
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
@@ -2604,7 +2595,6 @@ LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 					}
 				}
 				else{
-					thePrefs.UpdateLastVC();
 					AddLogLine(true,GetResString(IDS_NONEWMVERVERSION));
 				}
 				return 0;
