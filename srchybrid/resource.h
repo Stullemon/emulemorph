@@ -1429,7 +1429,6 @@
 #define IDS_FEATURES                    1469
 #define IDS_IRC_NEWNICK                 1470
 #define IDS_IRC_NEWNICKDESC             1471
-#define IDS_DONTREMOVESPARETRICKLESLOT  1472
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -2128,7 +2127,6 @@
 #define IDC_BUTTON1                     2899
 #define IDC_LD_LINKGROUP                2900
 #define IDC_BUTTON2                     2900
-#define IDC_BUTTON_DYNDNS_NEXT          2900
 #define IDC_LD_BASICGROUP               2901
 #define IDC_LD_ADVANCEDGROUP            2902
 #define IDC_LD_CLIPBOARDBUT             2903
@@ -2347,9 +2345,7 @@
 #define IDC_MANUAL_CHECKDISKSPACE       3714
 #define IDS_MANUAL_CHECKDISKSPACE       3715
 #define IDC_CUSTOM1                     3715
-#define IDC_LOWIDRETRY                  3750
-#define IDC_LOWIDRETRYLABEL             3751
-#define IDS_LOWIDRETRYLABEL             3751
+#define IDS_RECONNECTONLOWID            3751
 #define IDS_ACTIVATIONLIMIT_SLS         3752
 #define IDS_SOURCESTOSAVE_SLS           3753
 #define IDS_SLS                         3754
@@ -2519,11 +2515,8 @@
 #define IDC_DLOC                        4877
 #define IDC_DLOC2                       4878
 #define IDC_CRC32PREFIX                 4878
-#define IDS_URL_FOR_UPDATING_IP2COUNTRY 4878
-#define IDC_URL_FOR_UPDATING_IP2COUNTRY 4878
 #define IDS_IP2COUNTRY                  4879
 #define IDC_CRC32SUFFIX                 4879
-#define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 4879
 #define IDS_COUNTRYNAME_SHORT           4880
 #define IDC_DONTADDCRC                  4880
 #define IDS_COUNTRYNAME_MID             4881
@@ -2558,7 +2551,6 @@
 #define IDC_CHARSOURCE                  5016
 #define IDC_CHARDEST                    5017
 #define IDC_CHECKDOTTOSPACE             5018
-#define IDD_DYNDNS_HELP                 5018
 #define IDC_CHECKUNDERLINETOSPACE       5019
 #define IDC_CHECKCONVERTAPOSTROPHES     5020
 #define IDC_CHECKSEARCHANDREPLACE       5021
@@ -2596,14 +2588,6 @@
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
-#define IDC_BUTTON_DYNDNS_HELP          5048
-#define IDC_BUTTON_DYNDNS_PREVIOUS      5051
-#define IDC_STATIC_DYNDNS_CURRENTIP     5052
-#define IDC_STATIC_DYNDNS_CURRENTIP2    5053
-#define IDC_STATIC_DYNDNS_LASTUPDATE2   5054
-#define IDC_STATIC_DYNDNS_LASTUPDATE_ARROW 5055
-#define IDC_STATIC_DYNDNS_CURRENTIP_ARROW 5056
-#define IDC_RE_DYNDNS_HELP              5057
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
 #define IDS_CHAT_COUNTRY                5115
 #define IDC_SHOWCLIENTPERCENTAGE        5116
@@ -2670,8 +2654,19 @@
 #define IDC_SHOWQUEUEBAR                5505
 #define IDC_QUEUE                       5506
 #define IDC_QUEUEBORDER                 5507
+#define IDS_DONTREMOVESPARETRICKLESLOT  5508
 #define IDS_ADVANCED                    5600
-#define IDC_MORPH3_OPTS                 6000
+#define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 5601
+#define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 5601
+#define IDC_URL_FOR_UPDATING_IP2COUNTRY 5602
+#define IDS_URL_FOR_UPDATING_IP2COUNTRY 5602
+
+#define IDC_MORPH3_OPTS                 5700
+
+#define IDS_AUTOUPIP2COUNTRY            6032
+#define IDS_UPDATEIPCURL                6033
+
+#define IDD_PPG_EMULESPANA1				6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
 #define IDS_WAP_ADMINLOGIN              6003
@@ -2697,11 +2692,10 @@
 #define IDS_WAP_BASICDATA               6023
 #define IDS_WAP_REFRESH                 6024
 #define IDS_WAP_SORTBY                  6025
-#define IDS_AUTOUPIP2COUNTRY            6032
-#define IDS_UPDATEIPCURL                6033
-#define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 6034
+
 #define IDS_CHECK_DYNDNS_ENABLED        6100
 #define IDC_CHECK_DYNDNS_ENABLED        6100
+
 #define IDS_STATIC_DYNDNS_USERNAME      6101
 #define IDC_STATIC_DYNDNS_USERNAME      6101
 #define IDC_EDIT_DYNDNS_USERNAME        6102
@@ -2716,8 +2710,37 @@
 #define IDS_BUTTON_DYNDNS_RESET         6108
 #define IDC_BUTTON_DYNDNS_RESET         6108
 #define IDC_STATIC_DYNDNS_LASTUPDATE    6109
-#define IDC_AUTOBACKUP                  13324
-#define IDC_AUTOBACKUP2                 13325
+#define IDC_BUTTON_DYNDNS_NEXT          6110
+#define IDD_DYNDNS_HELP                 6111
+#define IDC_BUTTON_DYNDNS_HELP          6112
+#define IDC_BUTTON_DYNDNS_PREVIOUS      6113
+#define IDC_STATIC_DYNDNS_CURRENTIP     6114
+#define IDC_STATIC_DYNDNS_CURRENTIP2    6115
+#define IDC_STATIC_DYNDNS_LASTUPDATE2   6116
+#define IDC_STATIC_DYNDNS_LASTUPDATE_ARROW 6117
+#define IDC_STATIC_DYNDNS_CURRENTIP_ARROW 6118
+#define IDC_RE_DYNDNS_HELP              6119
+
+#define IDC_RANDOMPORTS                 20102
+#define IDC_LBL_MIN                     20103
+#define IDC_LBL_MAX                     20104
+#define IDC_MINPORT                     20105
+#define IDC_MAXPORT                     20106
+#define IDC_SPIN_MAX                    20107
+#define IDC_SPIN_MIN                    20108
+
+#define IDS_UPNPNAT						21009
+#define IDS_UPNPNATEMULE				21010
+#define IDS_UPNPNATTRYRANDOM			21011
+#define IDS_RANDOMPORTS                 21012
+#define IDS_MINPORT                     21013
+#define IDS_MAXPORT                     21014
+
+#define IDS_ICFSUPPORT					21027
+#define IDS_ICFSUPPORTFIRST				21028
+#define IDS_ICF							21029
+#define IDS_ICF_SERVERUDP				21030
+
 #define IDC_BTN_MENU                    20120
 #define IDS_USER_ALREADY_FRIEND         21062
 #define IDS_GETFRIENDED2KLINK           21063
@@ -2755,9 +2778,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5019
+#define _APS_NEXT_RESOURCE_VALUE        6200
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5058
+#define _APS_NEXT_CONTROL_VALUE         6200
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

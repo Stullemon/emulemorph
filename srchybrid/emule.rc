@@ -339,9 +339,6 @@ BEGIN
                     IDC_MANUALSERVERHIGHPRIO,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,121,216,10
     LTEXT           "Remove dead servers after",IDC_REMOVEDEAD,7,8,106,8
-    EDITTEXT        IDC_LOWIDRETRY,115,158,22,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,7,160,85,8
 END
 
 IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 257
@@ -490,7 +487,7 @@ BEGIN
     EDITTEXT        IDC_UDPPORT,41,106,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "disable",IDC_UDPDISABLE,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,83,108,51,9
-    EDITTEXT        IDC_MAXSOURCEPERFILE,14,160,38,12,ES_AUTOHSCROLL | 
+	EDITTEXT        IDC_MAXSOURCEPERFILE,14,160,38,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
     EDITTEXT        IDC_MAXCON,120,160,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Autoconnect on startup",IDC_AUTOCONNECT,"Button",
@@ -528,6 +525,18 @@ BEGIN
     PUSHBUTTON      "Open these ports on internal WinXP firewall",
                     IDC_OPENPORTS,14,121,202,12,BS_FLAT | WS_DISABLED
     PUSHBUTTON      "Test ports",IDC_STARTTEST,145,104,71,14,BS_FLAT
+    CONTROL         "IDS_RANDOMPORTS",IDC_RANDOMPORTS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,106,93,10
+    EDITTEXT        IDC_MINPORT,114,106,40,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_MAXPORT,167,106,40,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "IDS_MINPORT",IDC_LBL_MIN,114,96,47,8
+    LTEXT           "IDS_MAXPORT",IDC_LBL_MAX,168,96,48,8
+    CONTROL         "",IDC_SPIN_MIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_ARROWKEYS | UDS_NOTHOUSANDS,153,106,
+                    11,12
+    CONTROL         "",IDC_SPIN_MAX,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_ARROWKEYS | UDS_NOTHOUSANDS,205,106,
+                    11,12
 END
 
 IDD_IRC DIALOGEX 0, 35, 511, 289
@@ -1840,6 +1849,28 @@ BEGIN
                     WS_BORDER | WS_TABSTOP,7,7,201,221
 END
 
+IDD_PPG_EMULESPANA1 DIALOGEX 0, 0, 230, 246
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "emulEspaña Settings"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
+                    WS_BORDER | WS_TABSTOP,12,60,208,176
+/*
+    LTEXT           "Estático",IDC_SKINS_LBL,12,214,208,10
+    EDITTEXT        IDC_EDIT_SKINS_DIR,12,224,146,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BTN_SKINS_DIR,160,224,12,12
+    PUSHBUTTON      "Reload",IDC_BTN_SKINS_RELOAD,174,224,46,12
+    CONTROL         "",IDC_LIST_TB_SKINS,"SysListView32",LVS_REPORT | 
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,12,60,208,150
+    CONTROL         "",IDC_LIST_SKINS,"SysListView32",LVS_REPORT | 
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,12,60,208,150
+    CONTROL         "",IDC_TAB_EMULESPANA_PREFS,"SysTabControl32",0x0,7,43,
+                    219,199
+*/
+END
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2673,11 +2704,11 @@ FRIENDNOCLIENTSLOT      ICON                    "res\\friends1slot.ico"
 FRIENDWITHCLIENTSLOT    ICON                    "res\\friends2slot.ico"
 FRIENDCONNECTEDSLOT     ICON                    "res\\friends3slot.ICO"
 AABINCOMINGFOLDER       ICON                    "res\\incomingfolder.ico"
+MOBILE                  ICON                    "res\\mobile.ico"
+PREF_EMULESPANA		ICON			"res\\emulespana.ico"
 TRAY_MESSAGE            ICON                    "res\\mule_tray_message.ico"
 TRAY_MESSAGE_GREY       ICON                    "res\\mule_tray_message_grey.ico"
 TRAY_MESSAGE_LOW        ICON                    "res\\mule_tray_message_low.ico"
-MOBILE                  ICON                    "res\\mobile.ico"
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
@@ -4724,7 +4755,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOWIDRETRYLABEL     "Low ID retry"
+    IDS_RECONNECTONLOWID   "Reconnect on LowID retries"
 END
 
 STRINGTABLE 
@@ -5064,7 +5095,17 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WAPSRV              "Wap Interface"
+	IDS_UPNPNAT             "Enable UPnP on %s"
+    IDS_UPNPNATEMULE        "eMule ports"
+    IDS_UPNPNATTRYRANDOM    "Try with external random ports if are in use"
+    IDS_RANDOMPORTS         "Random Ports"
+    IDS_MINPORT             "Min Port"
+    IDS_MAXPORT             "Max Port"
+    IDS_ICFSUPPORT          "Enable Windows Internet Connection Firewall (ICF) support"
+    IDS_ICFSUPPORTFIRST     "eMule has detected Windows Internet Connection Firewall (ICF) running on your machine,\n\rDo you want eMule to automatically configure it? (Recomended)"
+    IDS_ICF                 "Windows Internet Connection Firewall (ICF)"
+	IDS_ICF_SERVERUDP		"Add rule for the ""Server UDP"" port"
+	IDS_WAPSRV              "Wap Interface"
     IDS_PW_WAP              "Wap Interface"
     IDS_WAP_ADMINLOGIN      "Wap Interface: Admin-Login"
     IDS_WAP_GUESTLOGIN      "Wap Interface: Guest-Login"
