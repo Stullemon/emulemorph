@@ -89,6 +89,7 @@ void CCorruptionBlackBox::TransferredData(uint32 nStartPos, uint32 nEndPos, cons
 		ASSERT( false );
 		return;
 	}
+	if(!pSender) return; //MORPH - Added by SiRoB, Import Parts [SR13]
 	uint32 dwSenderIP = pSender->GetIP();
 	// we store records seperated for each part, so we don't have to search all entries everytime
 	

@@ -777,6 +777,9 @@
 				RelativePath="SourceSaver.cpp">
 			</File>
 			<File
+				RelativePath=".\SR13-ImportParts.cpp">
+			</File>
+			<File
 				RelativePath="Statistics.cpp">
 			</File>
 			<File
@@ -1154,6 +1157,9 @@
 			</File>
 			<File
 				RelativePath="SourceSaver.h">
+			</File>
+			<File
+				RelativePath=".\SR13-ImportParts.h">
 			</File>
 			<File
 				RelativePath="Statistics.h">

@@ -44,6 +44,7 @@
 #include "SharedFileList.h" //MORPH - Added by SiRoB
 #include "MassRename.h" //SLAHAM: ADDED MassRename DownloadList
 #include "log.h" //MassRename DownloadList
+#include "SR13-ImportParts.h"//MORPH - Added by SiRoB, Import Parts [SR13]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1713,6 +1714,11 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				m_FileMenu.SetDefaultItem((UINT)-1);
 			m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
 			
+			//MORPH START - Added by SiRoB, Import Parts [SR13]
+			m_FileMenu.EnableMenuItem(MP_SR13_ImportParts, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+			m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+			//MORPH END   - Added by SiRoB, Import Parts [SR13]
+
 			int total;
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
@@ -1884,6 +1890,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		//MORPH END   - Added by SiRoB, copy feedback feature
 		m_FileMenu.EnableMenuItem(MP_MASSRENAME,MF_GRAYED);//Commander - Added: MassRename
 		m_FileMenu.EnableMenuItem(MP_PREVIEW,MF_GRAYED);
+		//MORPH START - Added by SiRoB, Import Parts [SR13]
+		m_FileMenu.EnableMenuItem(MP_SR13_ImportParts,MF_GRAYED);
+		m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash,MF_GRAYED);
+		//MORPH END   - Added by SiRoB, Import Parts [SR13]
 		m_FileMenu.EnableMenuItem(MP_METINFO, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab,total) > 0 ? MF_ENABLED : MF_GRAYED);
@@ -2207,6 +2217,14 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				case MP_VIEWFILECOMMENTS:
 					ShowFileDialog(NULL, INP_COMMENTPAGE);
 					break;
+				//MORPH START - Added by SiRoB, Import Parts [SR13]
+				case MP_SR13_ImportParts:
+					file->SR13_ImportParts();
+					break;
+				case MP_SR13_InitiateRehash:
+					SR13_InitiateRehash(file);
+					break;
+				//MORPH END   - Added by SiRoB, Import Parts [SR13]
 				case MP_SHOWED2KLINK:
 					ShowFileDialog(NULL, INP_LINKPAGE);
 					break;
@@ -3036,6 +3054,8 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
 	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO") );//<--9/21/02
 	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS") );
+ 	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_ImportParts, _T("Import parts to file..."), _T("SR13IMPORTPARTS"));
+ 	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_InitiateRehash, _T("Initiate rehash"), _T("SR13INITIATEREHASH"));
 	if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR), _T("CLEARCOMPLETE"));

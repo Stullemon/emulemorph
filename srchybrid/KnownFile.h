@@ -215,6 +215,9 @@ public:
 	virtual bool IsPartFile() const { return false; }
 	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFileDataIO* file);
+	//MORPH START - Added by SiRoB, Import Parts [SR13]
+	bool	SR13_ImportParts();
+	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	bool	CreateAICHHashSetOnly();
 
 	// last file modification time in (DST corrected, if NTFS) real UTC format
