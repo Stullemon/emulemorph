@@ -501,7 +501,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 
 	if(insertPosition != NULL) {
 		POSITION renumberPosition = insertPosition;
-		uint32 renumberSlotNumber = posCounter;
+		uint32 renumberSlotNumber = posCounter+1;
 	    
 		while(renumberPosition != NULL) {
 			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
@@ -569,13 +569,8 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
                 }
             }
 
-            if(!IsDownloading(newclient)) {
-				RemoveFromWaitingQueue(newclient, true);
-				theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
-            //} else {
-            //    newclient->UnscheduleForRemoval();
-            //    MoveDownInUploadQueue(newclient);
-			}
+            RemoveFromWaitingQueue(newclient, true);
+			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 		}
 	}
 	else
