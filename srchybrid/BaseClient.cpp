@@ -450,23 +450,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					}
 					m_strHelloInfo.AppendFormat("  NAME='%s'", m_pszUsername);
 				}
-				//MORPH START - Added by IceCream, xrmb Funnynick START
-				if (!m_pszUsername)
-					m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-				else if((strncmp(m_pszUsername, "http://emule",12)==0)
-					||(strncmp(m_pszUsername, "http://www.emule",16)==0)
-					||(strncmp(m_pszUsername, "www.emule",9)==0)
-					||(strncmp(m_pszUsername, "www.shareaza",12)==0)
-					||(strncmp(m_pszUsername, "eMule v",7)==0)
-					||(strncmp(m_pszUsername, "eMule Plus",10)==0)
-					||(strncmp(m_pszUsername, "eMule OX",8)==0)
-					||(strncmp(m_pszUsername, "eMule Plus",10)==0)
-					||(strncmp(m_pszUsername, "eMule0",6)==0)
-					||(strcmp(m_pszUsername, "")==0)) {
-						delete m_pszUsername;
-						m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-				}
-				//MORPH END   - Added by IceCream, xrmb Funnynick END
 				break;
 			case CT_VERSION:
 				if (bDbgInfo)
@@ -669,6 +652,27 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			m_bLeecher = false;
 		//MORPH END   - Added by SiRoB, Anti-leecher feature
 	}
+	
+	
+	//MORPH START - Moved by SiRoB, xrmb Funnynick START
+	if (!IsLeecher()){ //MORPH - Added by SiRoB, Keep Leecher name
+		if (!m_pszUsername)
+			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
+		else if((strncmp(m_pszUsername, "http://emule",12)==0)
+			||(strncmp(m_pszUsername, "http://www.emule",16)==0)
+			||(strncmp(m_pszUsername, "www.emule",9)==0)
+			||(strncmp(m_pszUsername, "www.shareaza",12)==0)
+			||(strncmp(m_pszUsername, "eMule v",7)==0)
+			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
+			||(strncmp(m_pszUsername, "eMule OX",8)==0)
+			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
+			||(strncmp(m_pszUsername, "eMule0",6)==0)
+			||(strcmp(m_pszUsername, "")==0)) {
+				delete m_pszUsername;
+			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
+		}
+	}
+	//MORPH END   - Moved by IceCream, xrmb Funnynick END
 
 	if (thePrefs.GetVerbose() && GetServerIP() == INADDR_NONE)
 		AddDebugLogLine(false, _T("Received invalid server IP %s from %s"), ipstr(GetServerIP()), DbgGetClientInfo());
@@ -1568,6 +1572,30 @@ void CUpDownClient::SetUserName(LPCSTR pszNewName)
 	}
 	if( pszNewName )
 		m_pszUsername = nstrdup(pszNewName);
+	//MORPH START - Added by SiRoB, Anti-leecher feature
+	if(thePrefs.GetEnableAntiLeecher())
+		if(TestLeecher())
+			BanLeecher(!IsBanned());
+	//MORPH END   - Added by SiRoB, Anti-leecher feature
+	//MORPH START - Added by IceCream, xrmb Funnynick START
+	if (!IsLeecher()) {//MORPH - Added by SiRoB, Keep Leecher name
+		if (!m_pszUsername)
+			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
+		else if((strncmp(m_pszUsername, "http://emule",12)==0)
+			||(strncmp(m_pszUsername, "http://www.emule",16)==0)
+			||(strncmp(m_pszUsername, "www.emule",9)==0)
+			||(strncmp(m_pszUsername, "www.shareaza",12)==0)
+			||(strncmp(m_pszUsername, "eMule v",7)==0)
+			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
+			||(strncmp(m_pszUsername, "eMule OX",8)==0)
+			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
+			||(strncmp(m_pszUsername, "eMule0",6)==0)
+			||(strcmp(m_pszUsername, "")==0)) {
+				delete m_pszUsername;
+				m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
+		}
+	}
+	//MORPH END   - Added by IceCream, xrmb Funnynick END
 }
 
 void CUpDownClient::RequestSharedFileList()
