@@ -420,6 +420,7 @@ CKnownFile::CKnownFile()
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_iHideOS = -1;
 	m_iSelectiveChunk = -1;
+	m_bHideOSAuthorized = true; //MORPH - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	m_iShareOnlyTheNeed = -1;
@@ -683,6 +684,9 @@ void CKnownFile::UpdatePartsInfo()
 	}
 	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
+	UpdateHideOSLimit(m_nVirtualCompleteSourcesCount==1);
+	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB, Reduce ShareStatusBar CPU consumption
@@ -2607,7 +2611,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	if ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled())
 		return parts;
 
-	uint8 hideOS = (GetHideOS()>=0)?GetHideOS():thePrefs.GetHideOvershares();
+	uint8 hideOS = HideOSInWork();
 	ASSERT(hideOS != 0);
 
 	bool resetSentCount = false;
@@ -2668,7 +2672,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 };
 
 bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
-	uint8 hideOS = (GetHideOS()>=0)?GetHideOS():thePrefs.GetHideOvershares();
+	uint8 hideOS = HideOSInWork();
 	
 	if (!hideOS)
 		return FALSE;
@@ -2768,4 +2772,12 @@ bool CKnownFile::GetPowerShared() const
 	return ((temppowershared&1) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
 }
 //MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
-	
+//MORPH START - Added by SiRoB, Avoid misusing of HideOS
+uint8	CKnownFile::HideOSInWork() const
+{
+	if (m_bHideOSAuthorized)
+		return  (m_iHideOS>=0)?m_iHideOS:thePrefs.GetHideOvershares();
+	else
+		return 0;
+}
+//MORPH END   - Added by SiRoB, Avoid misusing of HideOS

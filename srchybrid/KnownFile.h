@@ -330,6 +330,11 @@ public:
 	void	SetSelectiveChunk(int newValue) {m_iSelectiveChunk = newValue;};
 	int		GetSelectiveChunk() const {return m_iSelectiveChunk;}
 	//MORPH END   - Added by SiRoB, HIDEOS
+	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
+	uint8	HideOSInWork() const;
+	bool	GetHideOSAuthorized() const {return m_bHideOSAuthorized;}
+	void	UpdateHideOSLimit(bool authorizehideos) {m_bHideOSAuthorized = authorizehideos;}
+	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	void	SetShareOnlyTheNeed(int newValue) {m_iShareOnlyTheNeed = newValue;};
 	int		GetShareOnlyTheNeed() const {return m_iShareOnlyTheNeed;}
@@ -345,6 +350,7 @@ public:
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare, bool limitedpowershare) {m_bPowerShareAuthorized = authorizepowershare;m_bPowerShareAuto = autopowershare;m_bPowerShareLimited = limitedpowershare;}
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+
 	// Mighty Knife: CRC32-Tag
 	bool    IsCRC32Calculated () const			{return m_sCRC32[0]!='\0';}
 	CString GetLastCalculatedCRC32 () const		{return m_sCRC32;}
@@ -403,7 +409,10 @@ private:
 	int		m_iHideOS;
 	int		m_iSelectiveChunk;
 	//MORPH END   - Added by SiRoB, HIDEOS
-
+	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
+	bool	m_bHideOSAuthorized;
+	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
+	
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	int		m_iShareOnlyTheNeed;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
@@ -413,7 +422,6 @@ private:
 	bool	m_bPowerShareAuthorized;
 	bool	m_bPowerShareAuto;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
 	int		m_iPowerShareLimit;
 	bool	m_bPowerShareLimited;

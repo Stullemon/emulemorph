@@ -661,17 +661,28 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// SLUGFILLER: Spreadbars
 					//MORPH START - Added by SiRoB, HIDEOS
 					case 18:
-						if(file->GetHideOS()>=0)
-							if (file->GetHideOS()){
-								buffer.Format(_T("%i"), file->GetHideOS());
-								if (file->GetSelectiveChunk()>=0)
-									if (file->GetSelectiveChunk())
-										buffer.AppendFormat(_T(" + %s") ,GetResString(IDS_SELECTIVESHARE));
-							}else
-								buffer = GetResString(IDS_DISABLED);
-						else
-							buffer = GetResString(IDS_DEFAULT);
+					//MORPH START - Changed by SiRoB, Avoid misusing of HideOS
+					{
+						uint8 hideOSInWork = file->HideOSInWork();
+						buffer = _T("[") + GetResString((hideOSInWork)?IDS_POWERSHARE_ON_LABEL:IDS_POWERSHARE_OFF_LABEL) + _T("] ");
+						if(file->GetHideOS()<0)
+							buffer.Append(_T(" ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". "));
+						if (hideOSInWork){
+							buffer.AppendFormat(_T("%i"), hideOSInWork);
+							if (file->GetSelectiveChunk()>=0)
+								if (file->GetSelectiveChunk())
+									buffer.AppendFormat(_T(" + %s") ,GetResString(IDS_SELECTIVESHARE));
+							buffer.Append(_T(" ("));
+							if (file->GetPowerShareAuthorized())
+								buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
+							else
+								buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
+							buffer.Append(_T(")"));
+						}else
+							buffer = GetResString(IDS_DISABLED);
 						break;
+						//MORPH START - Changed by SiRoB, Avoid misusing of HideOS
+					}
 					//MORPH END   - Added by SiRoB, HIDEOS
 					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 					case 19:
@@ -1063,6 +1074,13 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_PowerShareLimitMenu.CheckMenuRadioItem(MP_POWERSHARE_LIMIT, MP_POWERSHARE_LIMIT_SET, uPowerShareLimitMenuItem, 0);
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	
+	//MORPH START - Added by SiRoB, Mighty Knife: CRC32-Tag
+	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_CRC32Menu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	//MORPH END   - Added by SiRoB, [end] Mighty Knife
+	//MORPH START - Added by SiRoB, Mighty Knife: Mass Rename
+	m_SharedFilesMenu.EnableMenuItem(MP_MASSRENAME, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	//MORPH END   - Added by SiRoB, [end] Mighty Knife
+
 	#if defined(_DEBUG)
 	//JOHNTODO: Not for release as we need kad lowID users in the network to see how well this work work. Also, we do not support these links yet.
 	if (iSelectedItems > 0 && theApp.IsConnected() && theApp.IsFirewalled() && theApp.clientlist->GetBuddy())
