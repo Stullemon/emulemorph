@@ -2721,6 +2721,9 @@
 #define IDC_STATIC_DYNDNS_CURRENTIP_ARROW 6118
 #define IDC_RE_DYNDNS_HELP              6119
 
+#define	IDC_AUTOBACKUP					13000
+#define	IDC_AUTOBACKUP2					13001
+
 #define IDC_RANDOMPORTS                 20102
 #define IDC_LBL_MIN                     20103
 #define IDC_LBL_MAX                     20104
