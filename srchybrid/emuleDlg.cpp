@@ -860,12 +860,15 @@ void CemuleDlg::ShowPing() {
 
         if(theApp.glob_prefs->IsDynUpEnabled()) {
             if(lastPing.latency > 0) {
-                if(lastPing.lowest > 0) {
-					sprintf(buffer,"USS %i ms %i%%",lastPing.latency, lastPing.latency*100/lastPing.lowest);
-                } else {
-					sprintf(buffer,"USS %i ms",lastPing.latency);
-                }
-            } else {
+				if (!theApp.glob_prefs->IsUSSLimit()){
+					if(lastPing.lowest > 0) {
+						sprintf(buffer,"USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+					} else {
+						sprintf(buffer,"USS %i ms %.1f%s/s",lastPing.latency, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+					}
+				} else
+					sprintf(buffer,"USS %i ms %i ms %.1f%s/s",lastPing.latency, theApp.glob_prefs->GetDynUpPingLimit(), (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+			} else {
                 sprintf(buffer,"Preparing...",lastPing);
             }
 		//MORPH START - Added by SiRoB, Related to SUC
