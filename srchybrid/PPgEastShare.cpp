@@ -10,6 +10,10 @@
 #include "ip2country.h"
 //EastShare End - added by AndCycle, IP to Country
 
+//MORPH START - Added by SiRoB, reduce a little CPU usage for ratio count
+#include "ClientCredits.h"	
+//MORPH END   - Added by SiRoB, reduce a little CPU usage for ratio count
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -237,8 +241,13 @@ BOOL CPPgEastShare::OnApply()
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection(); */
 
 
-	thePrefs.creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
-
+	//MORPH START - Changed by SiRoB, reduce a little CPU usage for ratio count
+	if(thePrefs.creditSystemMode != m_iCreditSystem){
+		thePrefs.creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
+		theApp.clientcredits->ResetCheckScoreRatio();
+	}
+	//MORPH END - Changed by SiRoB, reduce a little CPU usage for ratio count
+	
 	//Morph - added by AndCycle, Equal Chance For Each File
 	thePrefs.m_bEnableEqualChanceForEachFile = m_iEnableEqualChanceForEachFile;
 	//Morph - added by AndCycle, Equal Chance For Each File

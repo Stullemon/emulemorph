@@ -52,7 +52,6 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	//Removed by SiRoB , for speedup creditfile load
 	/*
 	m_fLastScoreRatio = 0;
-	m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
 	*/
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
@@ -80,7 +79,6 @@ CClientCredits::CClientCredits(const uchar* key)
 	//Removed by SiRoB , for speedup creditfile load
 	/*
 	m_fLastScoreRatio = 0;
-	m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
 	*/
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
@@ -139,15 +137,18 @@ uint64	CClientCredits::GetDownloadedTotal() const{
 float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 {
 	// check the client ident status
+	//MORPH START - Changed by SIRoB, Optimization 
+	/*
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+	*/
+	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
+	//MORPH END   - Changed by SIRoB, Optimization 
 		// bad guy - no credits for you
 		return 1;
 	}
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
-	if(m_cssCurrentCreditSystem != thePrefs.GetCreditSystem()){
-		m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
-	}else if(m_bCheckScoreRatio == false){//only refresh ScoreRatio when really need
+	if(m_bCheckScoreRatio == false){//only refresh ScoreRatio when really need
 		return m_fLastScoreRatio;
 	}
 	m_bCheckScoreRatio = false;
@@ -157,7 +158,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 
 	float result = 0;//everybody share one result.
     //EastShare START - Added by linekin, CreditSystem 
-	switch (m_cssCurrentCreditSystem)	{
+	switch (thePrefs.GetCreditSystem())	{
 
 		// EastShare - Added by linekin, lovelace Credit
 		case CS_LOVELACE:{
@@ -366,8 +367,8 @@ void CClientCreditsList::LoadList()
 		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
 			prioOrderfile[index++]=curFile;
+			loadFile.Close();
 		}
-		loadFile.Close();
 	}
 	uint8 tmpprioOrderfile;
 	uint8 maxavailablefile = index;
@@ -1113,3 +1114,16 @@ void CClientCredits::TestPayBackFirstStatus(){
 	}
 }
 //EastShare End - added by AndCycle, Pay Back First Tweak
+
+//MORPH START - Changed by SiRoB, reduce a little CPU usage for ratio count
+void CClientCreditsList::ResetCheckScoreRatio(){
+	CClientCredits* cur_credit;
+	CCKey tempkey(0);
+	POSITION pos = m_mapClients.GetStartPosition();
+	while (pos)
+	{
+		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
+		cur_credit->m_bCheckScoreRatio = true;
+	}
+}
+//MORPH END   - Changed by SiRoB, reduce a little CPU usage for ratio count
