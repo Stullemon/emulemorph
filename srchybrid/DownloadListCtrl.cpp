@@ -889,9 +889,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 					buffer = tempStr;
 					//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 					//EastShare Start - added by AndCycle, IP to Country
-					CString tempStr2;
-					tempStr2.Format("%s : %s", lpUpDownClient->GetCountryName(), buffer);
-					buffer = tempStr2;
+					if(theApp.ip2country->IsIP2Country()){
+						CString tempStr2;
+						tempStr2.Format("%s : %s", lpUpDownClient->GetCountryName(), buffer);
+						buffer = tempStr2;
+					}
 					//EastShare End - added by AndCycle, IP to Country
 				}
 				dc->DrawText(buffer,buffer.GetLength(),&cur_rec, DLC_DT_TEXT);
