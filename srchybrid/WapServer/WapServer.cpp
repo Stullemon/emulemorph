@@ -40,7 +40,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-#define WMLInit "Server: eMule\r\nConnection: close\r\nContent-Type: text/vnd.wap.wml\r\n"
+#define WMLInit _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/vnd.wap.wml\r\n")
 
 #define WAP_SERVER_TEMPLATES_VERSION	2
 
@@ -301,6 +301,7 @@ void CWapServer::ProcessURL(WapThreadData Data)
 	CoInitialize(NULL);
 
 	try{
+		USES_CONVERSION;
 		CString Out = _T("");
 		CString OutE = _T("");	// List Entry Templates
 		CString OutE2 = _T("");
@@ -313,7 +314,7 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		long lSession = 0;
 
 		if(_ParseURL(Data.sURL, _T("ses")) != _T(""))
-			lSession = _ttol(_ParseURL(Data.sURL, _T("ses")));
+			lSession = _tstol(_ParseURL(Data.sURL, _T("ses")));
 
 		if (_ParseURL(Data.sURL, _T("w")) == _T("password"))
 		{
@@ -344,14 +345,12 @@ void CWapServer::ProcessURL(WapThreadData Data)
 				login=true;
 			} else {
 				AddLogLine(true,GetResString(IDS_WAP_BADLOGINATTEMPT)+_T(" (%s)"),ip);
-				USES_CONVERSION;
 				BadLogin newban={inet_addr(T2CA(ip)), ::GetTickCount()};	// save failed attempt (ip,time)
 				pThis->m_Params.badlogins.Add(newban);
 				login=false;
 			}
 
 			if (login) {
-				USES_CONVERSION;
 				uint32 ipn=inet_addr(T2CA(ip)) ;
 				for(int i = 0; i < pThis->m_Params.badlogins.GetSize();)
 				{
@@ -466,7 +465,6 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		}
 		else 
 		{
-			USES_CONVERSION;
 			uint32 ip= inet_addr(T2CA(ipstr( Data.inadr )));
 			uint32 faults=0;
 
@@ -493,7 +491,7 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		
 		Out.Replace(_T("[CharSet]"), _GetWebCharSet());
 		// send answer ...
-		Data.pSocket->SendContent(WMLInit, Out, Out.GetLength());
+		Data.pSocket->SendContent(T2CA(WMLInit), Out);
 	}
 	catch(...){
 		TRACE(_T("*** Unknown exception in CWapServer::ProcessURL\n"));
@@ -561,6 +559,15 @@ CString CWapServer::_ParseURL(CString URL, CString fieldname)
 			}
 		}
 	}
+
+#ifdef _UNICODE
+	CStringA strValueA;
+	LPSTR pszA = strValueA.GetBuffer(value.GetLength());
+	for (int i = 0; i < value.GetLength(); i++)
+		*pszA++ = (CHAR)value[i];
+	strValueA.ReleaseBuffer(value.GetLength());
+	value = strValueA;
+#endif
 
 	return value;
 }
@@ -3889,7 +3896,8 @@ void CWapServer::SendScriptFile(WapThreadData Data){
 		Out +=_T("<wml><card><p>");
 		Out +=_T("Error: This browser do not support WMLScript");
 		Out +=_T("</p></card></wml>");
-		Data.pSocket->SendContent(WMLInit, Out, Out.GetLength());
+		USES_CONVERSION;
+		Data.pSocket->SendContent(T2CA(WMLInit), Out);
 		return;
 	}
 

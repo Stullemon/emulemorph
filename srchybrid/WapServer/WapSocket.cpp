@@ -4,7 +4,6 @@
 
 #include <stdafx.h> 
 #pragma comment(lib, "ws2_32.lib") 
-
 #include <stdlib.h> // for atol function
 
 #include "emule.h"
@@ -12,6 +11,7 @@
 #include "WapSocket.h"
 #include "WapServer.h"
 #include "Preferences.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -155,11 +155,6 @@ void CWapSocket::OnReceived(void* pData, DWORD dwSize, in_addr inad)
 		if (m_bCanRecv && (m_dwRecv > m_dwHttpHeaderLen + m_dwHttpContentLen))
 		{
 			// move our data
-			//emulEspaña - Modified [MoNKi: -Fixed exploit in WapSocket-]
-			/*
-			MoveMemory(m_pBuf, m_pBuf + m_dwHttpHeaderLen + m_dwHttpContentLen, m_dwRecv - m_dwHttpHeaderLen + m_dwHttpContentLen);
-			m_dwRecv -= m_dwHttpHeaderLen + m_dwHttpContentLen;
-			*/
 			m_dwRecv -= m_dwHttpHeaderLen + m_dwHttpContentLen;
 			MoveMemory(m_pBuf, m_pBuf + m_dwHttpHeaderLen + m_dwHttpContentLen, m_dwRecv);
 		} else
@@ -240,10 +235,20 @@ void CWapSocket::SendContent(LPCSTR szStdResponse, const void* pContent, DWORD d
 	SendData(pContent, dwContentSize);
 }
 
+void CWapSocket::SendContent(LPCSTR szStdResponse, const CString& rstr)
+{
+#ifdef _UNICODE
+	CStringA strA(wc2utf8(rstr));
+	SendContent(szStdResponse, strA, strA.GetLength());
+#else
+	SendContent(szStdResponse, rstr, rstr.GetLength());
+#endif
+}
+
 void CWapSocket::SendError404(bool sendInfo)
 {
 	char szBuf[0x1000];
-	CString Out;
+	CStringA Out;
 	if (sendInfo){
 		Out="<?xml version=\"1.0\"?>"
 			"<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">"
