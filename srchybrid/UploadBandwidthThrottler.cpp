@@ -410,10 +410,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
                 // no time has passed, so don't add any bytes. Shouldn't happen.
                 bytesToSpend = 0; //realBytesToSpend/1000;
             } else if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpend) {
-                if(timeSinceLastLoop > sleepTime + 150) {
-			        theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims", timeSinceLastLoop, sleepTime, sleepTime + 150);
+                if(timeSinceLastLoop > sleepTime + 2000) {
+			        theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims", timeSinceLastLoop, sleepTime, sleepTime + 2000);
         
-                    timeSinceLastLoop = sleepTime + 150;
+                    timeSinceLastLoop = sleepTime + 2000;
                     lastLoopTick = thisLoopTick - timeSinceLastLoop;
                 }
 

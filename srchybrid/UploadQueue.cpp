@@ -838,62 +838,17 @@ void CUploadQueue::Process() {
 
 bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 	// check if we can allow a new client to start downloading form us
-	uint16 MaxSpeed = thePrefs.GetMaxUpload();
-	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
 	uint32 curUploadSlots = numberOfUploads;
     uint32 datarate = GetDatarate();
 
 	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
 
-	if( MaxSpeed > 20 || MaxSpeed == UNLIMITED)
-		upPerClient += datarate/43;
-
-	if( upPerClient > 7680 )
-		upPerClient = 7680;
-
 	//now the final check
-
-	if ( MaxSpeed == UNLIMITED )
-	{
-		if (curUploadSlots < (datarate/upPerClient) || curUploadSlots < 6)
+    if (curUploadSlots < (datarate/UPLOAD_CLIENT_DATARATE)+3 ||
+        datarate < 2400*3 && curUploadSlots < datarate/UPLOAD_CLIENT_DATARATE)
 			return true;
-	}
-	else{
-		uint16 nMaxSlots;
-		if (MaxSpeed > 12)
-			nMaxSlots = (uint16)(((float)(MaxSpeed*1024)) / upPerClient);
-		else if (MaxSpeed > 7)
-			nMaxSlots = 4;
-		else if (MaxSpeed > 3)
-			nMaxSlots = 3;
-		else
-			nMaxSlots = 2;
-//		AddLogLine(true,"maxslots=%u, upPerClient=%u, datarateslot=%u|%u|%u",nMaxSlots,upPerClient,datarate/UPLOAD_CHECK_CLIENT_DR, datarate, UPLOAD_CHECK_CLIENT_DR);
-
-		if (MaxSpeed < 13)
-		{
-			if ( curUploadSlots < nMaxSlots )
-			{
-				return true;
-			}
-		}
-		else if( curUploadSlots < (datarate/UPLOAD_CHECK_CLIENT_DR) && curUploadSlots < nMaxSlots )
-		{
-			return true;
-		}
-	}
-
-
-    if(curUploadSlots < 6 && MaxSpeed != UNLIMITED && datarate < (uint32)max(MaxSpeed*1024, 1024)-512) {
-      return true;
-    }
-
-//    if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
-//        GetDatarate() < UPLOAD_CHECK_CLIENT_DR*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
-//			return true;
-	
-    //nope
+	//nope
 	return false;
 }
 
