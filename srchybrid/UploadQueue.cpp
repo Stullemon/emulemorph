@@ -219,30 +219,26 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			(
 				(iSuperior = RightClientIsSuperior(leftClient, rightClient)) > 0 ||
 				iSuperior == 0 &&
-				(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
-					leftClient->GetQueueSessionPayloadUp() < rightClient->GetQueueSessionPayloadUp() ||
-					leftClient->GetQueueSessionPayloadUp() == rightClient->GetQueueSessionPayloadUp() &&
-					(//Morph - added by AndCycle, Equal Chance For Each File
-						leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
-						leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
+				(//Morph - added by AndCycle, Equal Chance For Each File
+					leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+					leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
+					(
+						leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() || // same prio file
+						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false //neither want powershare file
+				    ) && // they are equal in powersharing
+				    (
+						!leftLowIdMissed && rightLowIdMissed || // rightClient is lowId and has missed a slot and is currently connected
+			
+						leftLowIdMissed && rightLowIdMissed && // both have missed a slot and both are currently connected
+						leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick > rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick || // but right client missed earlier
+			
 						(
-							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() || // same prio file
-							leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false //neither want powershare file
-				        ) && // they are equal in powersharing
-				        (
-							!leftLowIdMissed && rightLowIdMissed || // rightClient is lowId and has missed a slot and is currently connected
-				
-							leftLowIdMissed && rightLowIdMissed && // both have missed a slot and both are currently connected
-							leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick > rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick || // but right client missed earlier
-				
-							(
-								!leftLowIdMissed && !rightLowIdMissed || // none have both missed and is currently connected
-				
-								leftLowIdMissed && rightLowIdMissed && // both have missed a slot
-								leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick == rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick // and at same time (should hardly ever happen)
-				            ) &&
-							rightScore > leftScore // but rightClient has better score, so rightClient is better
-						)
+							!leftLowIdMissed && !rightLowIdMissed || // none have both missed and is currently connected
+			
+							leftLowIdMissed && rightLowIdMissed && // both have missed a slot
+							leftClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick == rightClient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick // and at same time (should hardly ever happen)
+				        ) &&
+						rightScore > leftScore // but rightClient has better score, so rightClient is better
 					)
 				)
 			) ||
