@@ -146,7 +146,10 @@ void CDownloadListCtrl::Init()
 		lfFont.lfWeight = FW_BOLD;
 		m_fontBold.CreateFontIndirect(&lfFont);
 	//} //MORPH - Removed by SiRoB, Allways creat the font
-
+	//MORPH START - Added by SiRoB, Draw Client Percentage
+	lfFont.lfHeight = 10;
+	m_fontBoldSmaller.CreateFontIndirect(&lfFont);
+	//MORPH END   - Added by SiRoB, Draw Client Percentage
 
 	// Barry - Use preferred sort order from preferences
 	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
@@ -1007,7 +1010,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 							COLORREF oldclr = cdcStatus.SetTextColor(RGB(0,0,0));
 							int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
 							buffer.Format(_T("%.1f%%"), percent);
-							CFont *pOldFont = cdcStatus.SelectObject(&m_fontBold);
+							CFont *pOldFont = cdcStatus.SelectObject(&m_fontBoldSmaller);
 							rec_status.left--;rec_status.top--;rec_status.right--;rec_status.top--;
 							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
 							rec_status.left+=2;rec_status.right+=2;
