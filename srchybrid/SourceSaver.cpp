@@ -169,8 +169,8 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 	POSITION pos2;
 	CUpDownClient* cur_src;
 	// Choose best sources for the file
-	for(POSITION pos = file->m_downloadingSourceList.GetHeadPosition();pos!=0;){
-		cur_src = file->m_downloadingSourceList.GetNext(pos);
+	for(POSITION pos = file->srclist.GetHeadPosition();pos!=0;){
+		cur_src = file->srclist.GetNext(pos);
 		if (cur_src->HasLowID())
 			continue;
 		if (srcstosave.IsEmpty()) {

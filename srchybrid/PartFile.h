@@ -91,7 +91,6 @@ typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 class CPartFile : public CKnownFile
 {
 	friend class CPartFileConvert;
-	friend class CSourceSaver;
 public:
 	friend class CPartFileConvert;
 	friend class CPartHashThread;	// SLUGFILLER: SafeHash
@@ -293,7 +292,6 @@ protected:
 	// khaos::kmod+ Save/Load Sources
 	CSourceSaver m_sourcesaver; //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
-	CUpDownClientPtrList m_downloadingSourceList;
 private:
 	uint32	m_iLastPausePurge;
 	uint16	count;
@@ -344,7 +342,8 @@ private:
 	DWORD	m_lastRefreshedDLDisplay;
 	DWORD   m_lastdatetimecheck;
 	CTime	m_lastdatecheckvalue;
-	
+	CUpDownClientPtrList m_downloadingSourceList;
+
 	// Barry - Buffered data to be written
 	CTypedPtrList<CPtrList, PartFileBufferedData*> m_BufferedData_list;
 	uint32 m_nTotalBufferData;

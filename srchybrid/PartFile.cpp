@@ -4492,25 +4492,25 @@ int CPartHashThread::Run(){
 //MORPH START - Added by IceCream, eMule Plus rating icons
 int CPartFile::GetRating(){  
 	if (!hasRating) return 0;
-	int number, total, fRate;
-	number = total = 0;
-
-	for(POSITION pos = srclist.GetHeadPosition(); pos != 0; srclist.GetNext(pos)){
-		CUpDownClient* cur_client = m_downloadingSourceList.GetAt(pos);
-		fRate = cur_client->GetFileRate();
+    int num,tot,fRate;  
+    num=tot=0;  
+    for(POSITION pos = srclist.GetHeadPosition();pos!=0;){
+		fRate =((CUpDownClient*) srclist.GetNext(pos))->GetFileRate();  
 		if (fRate > 0)  
 		{
-			number++;
-			total += fRate;
+			num++;
+			//Cax2 - bugfix: for some ?%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
+			if (fRate==3 || fRate==4) fRate=(fRate==3)?4:3;
+			tot+=fRate;  
 		}
 	}
-	if (number > 0)
+	if (num>0)
 	{
-		int	result = (float)total/number + 0.5;
-		return result; //Cax2 - get the average of all the ratings
+		num=(float)tot/num+.5; //Cax2 - get the average of all the ratings
+		//Cax2 - bugfix: for some ?%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
+		if (num==3 || num==4) num=(num==3)?4:3;
 	}
-
-	return 0; //Cax2 - if no ratings found, will return 0!
+    return num; //Cax2 - if no ratings found, will return 0!
 }
 //MORPH END   - Added by IceCream, eMule Plus rating icons
 
