@@ -66,7 +66,7 @@ int CAICHSyncThread::Run()
 	uint32 nLastVerifiedPos = 0;
 	if (!file.Open(fullpath,CFile::modeCreate|CFile::modeReadWrite|CFile::modeNoTruncate|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyNone, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError(_T("Failed to load ") KNOWN2_MET_FILENAME _T(" file"));
+			CString strError(GetResString(IDS_FAILEDTOLOAD)+_T(" ") KNOWN2_MET_FILENAME _T(" ")+GetResString(IDS_FILE)); // Localized by FrankyFive
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 				strError += _T(" - ");

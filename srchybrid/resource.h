@@ -2801,6 +2801,9 @@
 #define IDS_SHORTTAGS                   6278
 #define IDS_NEWFRIEND                   6279
 #define IDS_REMOVEDFRIEND               6280
+#define IDS_FRIENDNAME_CHANGED1         6281
+#define IDS_FRIENDNAME_CHANGED2         6282
+#define IDS_FAILEDTOLOAD                6283
 //MORPH END - Added by FrankyFive
 
 #define IDS_TW_TRANSFERS                7051

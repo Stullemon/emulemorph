@@ -130,13 +130,13 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 	CString OldName = GetItemText (iItem,0);
 	if ((OldName != pFriend->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
  		#ifdef MIGHTY_TWEAKS
-		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"),
+		AddLogLine(false, GetResString(IDS_FRIENDNAME_CHANGED1),
 									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, (uint8)pFriend->m_dwLastUsedIP, 
 									(uint8)(pFriend->m_dwLastUsedIP>>8), 
 									(uint8)(pFriend->m_dwLastUsedIP>>16),(uint8)(pFriend->m_dwLastUsedIP>>24), 
 									pFriend->m_nLastUsedPort, md4str(pFriend->m_abyUserhash));
 		#else
-		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', hash %s"),
+		AddLogLine(false, GetResString(IDS_FRIENDNAME_CHANGED2),
 									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, md4str(pFriend->m_abyUserhash));
 		#endif
 	}

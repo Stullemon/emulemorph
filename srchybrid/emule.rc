@@ -5456,8 +5456,8 @@ BEGIN
     IDS_LOG_CRC32_CALC      "Calculating CRC32 of file '%s'..."
     IDS_LOG_CRC32_ADORT     "CRC32 calculation aborted."
     IDS_LOG_CRC32_COMPLETED "Calculation of CRC32 for file '%s' completed. File CRC: %s"
-    IDS_IP2COUNTRY_MSG1     "IP2Country uses the IP-to-Country Database provided by WebHosting."
-    IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info."
+    IDS_IP2COUNTRY_MSG1     "IP2Country uses the IP-to-Country Database provided by WebHosting.Info"
+    IDS_IP2COUNTRY_MSG2     "(http://www.webhosting.info), available from http://ip-to-country.webhosting.info"
     IDS_IP2COUNTRY_LOADED   "IP2Country loaded"
     IDS_IP2COUNTRY_UNLOADED "IP2Country unloaded"
     IDS_IP2COUNTRY_ERROR1   "error line number : %i"
@@ -5511,6 +5511,13 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Scheduled FAKES.DAT-update initiated."
     IDS_SCHED_UPDATE_WARNING 
                             "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FRIENDNAME_CHANGED1 "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
+    IDS_FRIENDNAME_CHANGED2 "Friend changed his name: '%s'->'%s', hash %s"
+    IDS_FAILEDTOLOAD        "Failed to load"
 END
 
 #endif    // Anglais (États-Unis) resources
