@@ -583,20 +583,7 @@ void CKnownFile::NewAvailPartsInfo(){
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	bool AutoPowerShareOn=false;
-	bool AuthorizePowerShare=false;
-	for (uint16 i = 0; i < partcount; i++)
-		if(m_AvailPartFrequency[i]==0){
-			AutoPowerShareOn=true;
-			break;
-		}
-	for (uint16 i = 0; i < partcount; i++)
-		if(m_AvailPartFrequency[i]<10){
-			AuthorizePowerShare=true;
-			break;
-		}
-	UpdatePowerShareLimit(AuthorizePowerShare && m_nCompleteSourcesCountHi<21,AutoPowerShareOn && m_nCompleteSourcesCountHi==1 && m_iPartCount>3);
-	
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<51,m_nCompleteSourcesCountHi==1 && m_iPartCount>3);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
