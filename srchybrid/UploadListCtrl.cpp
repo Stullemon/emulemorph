@@ -495,8 +495,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						{//Morph - modified by AndCycle, upRemain
 							sint32 timeleft;
 							uint32 UpDatarate = client->GetDatarate();
-							if(UpDatarate == 0)	timeleft = -1;
-							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/UpDatarate;
+							// Mighty Knife: Check for credits!=NULL
+							if ((UpDatarate == 0) || (client->Credits()==NULL)) timeleft = -1;
+							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->Credits()->GetDownloadedTotal() - client->Credits()->GetUploadedTotal())/UpDatarate;
+							// [end] Mighty Knife
 							else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
 							else if(file)
 								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate;

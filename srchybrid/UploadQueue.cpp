@@ -1155,7 +1155,10 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
     
         client->ResetQueueSessionUp();
 		// EastShare - Added by TAHO, modified SUQWT
-		client->Credits()->SetSecWaitStartTime();
+		// Mighty Knife: Check for credits!=NULL
+		if (client->Credits() != NULL)
+			client->Credits()->SetSecWaitStartTime();
+		// [end] Mighty Knife
 		// EastShare - Added by TAHO, modified SUQWT
 	}
 
@@ -1221,7 +1224,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			//EastShare Start - added by AndCycle, Pay Back First
 			//client normal leave the upload queue, check does client still satisfy requirement
 			if(earlyabort == false){
-				client->credits->InitPayBackFirstStatus();
+				// Mighty Knife: Check for credits!=NULL
+				if (client->Credits() != NULL)
+					client->Credits()->InitPayBackFirstStatus();
+				// [end] Mighty Knife
 			}
 			//EastShare End - added by AndCycle, Pay Back First
 	
@@ -1256,22 +1262,27 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 
 			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			// EastShare START - Marked by TAHO, modified SUQWT
-			if(earlyabort == true)
-			{
-				//client->Credits()->SaveUploadQueueWaitTime();
+
+			// Mighty Knife: Check for credits!=NULL
+			if (client->Credits()!=NULL) {
+				if(earlyabort == true)
+				{
+					//client->Credits()->SaveUploadQueueWaitTime();
+				}
+				else if(client->GetQueueSessionUp() < SESSIONMAXTRANS)
+				{
+					int keeppct = (100 - (100 * client->GetQueueSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
+					if (keeppct < 0)    keeppct = 0;
+					client->Credits()->SaveUploadQueueWaitTime(keeppct);
+					client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
+				}
+				else
+				{
+					client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+					client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
+				}
 			}
-			else if(client->GetQueueSessionUp() < SESSIONMAXTRANS)
-			{
-				int keeppct = (100 - (100 * client->GetQueueSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
-				if (keeppct < 0)    keeppct = 0;
-				client->Credits()->SaveUploadQueueWaitTime(keeppct);
-				client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
-			}
-			else
-			{
-				client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
-				client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
-			}
+			// [end] Mighty Knife
 			// EastShare END - Marked by TAHO, modified SUQWT
 			//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			result = true;
