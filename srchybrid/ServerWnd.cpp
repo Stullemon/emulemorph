@@ -1081,7 +1081,9 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 	for(xml_node::child_iterator i = _node.children_begin(); i < _node.children_end(); ++i) {
 		CString c = CString(i->name());
 		if (CString(i->name()) == _T("item")) {
-			aXMLUrls.Add(i->first_element_by_path(_T("./link")).child(0).value());
+			sbuffer = i->first_element_by_path(_T("./link")).child(0).value();
+			HTMLParse(sbuffer);
+			aXMLUrls.Add(sbuffer);
 			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
 			newsmsgbox->AppendText(_T("\n\x2022"));
@@ -1163,7 +1165,8 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 	if(!itelem.empty()) {
 		// Add the data in this section to the News box. 
 		// It represents the title of the news channel and so on...
-		aXMLUrls.Add(itelem.first_element_by_path(_T("./link")).child(0).value());
+		sbuffer = itelem.first_element_by_path(_T("./link")).child(0).value();
+		aXMLUrls.Add(sbuffer);
 		sbuffer = itelem.first_element_by_path(_T("./title")).child(0).value();
 		HTMLParse(sbuffer);
 		sbuffer.Replace(_T("'"),_T("`"));
