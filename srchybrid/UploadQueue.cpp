@@ -884,14 +884,16 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		// these proportions could be tweaked. take 20 precent of queue size to buffer new client
 		softQueueLimit = theApp.glob_prefs->GetQueueSize() - theApp.glob_prefs->GetQueueSize()/5;
 		hardQueueLimit = theApp.glob_prefs->GetQueueSize();
-		if ((uint32)waitinglist.GetCount() > hardQueueLimit)
+
+		if ((uint32)waitinglist.GetCount() > hardQueueLimit){
 			return;
-		if (client->GetFriendSlot() == false && // client is not a friend with friend slot
-			client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
-			client->GetPowerShared() == false) // client don't want powershared file //Morph - Added by AndCycle
-		{
-			if ((uint32)waitinglist.GetCount() > softQueueLimit && // soft queue limit is reached
-			client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
+		}
+		else if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
+
+			if (client->GetFriendSlot() == false && // client is not a friend with friend slot
+				client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
+				client->GetPowerShared() == false) && // client don't want powershared file //Morph - Added by AndCycle
+				client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
 				// then block client from getting on queue
 				return;
 			}
