@@ -361,23 +361,24 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_NICK,14,18,136,12,ES_AUTOHSCROLL
-    COMBOBOX        IDC_LANGS,14,49,136,310,CBS_DROPDOWNLIST | CBS_SORT | 
+    EDITTEXT        IDC_NICK,10,21,97,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_LANGS,121,21,95,75,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Beep on errors",IDC_BEEPER,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,14,83,202,10
+                    BS_FLAT | WS_TABSTOP,14,61,202,10
     CONTROL         "Bring to front on link click",IDC_BRINGTOFOREGROUND,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,95,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,73,
                     202,10
     CONTROL         "Onlinesig",IDC_ONLINESIG,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,14,107,202,10
+                    BS_FLAT | WS_TABSTOP,14,85,202,10
     CONTROL         "Prompt on exit",IDC_EXIT,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,14,120,202,10
+                    BS_FLAT | WS_TABSTOP,14,98,202,10
     CONTROL         "Check for new version on startup",IDC_CHECK4UPDATE,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,120,
                     135,10
     CONTROL         "",IDC_CHECKDAYS,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    WS_TABSTOP,159,126,53,10,WS_EX_STATICEDGE
+                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,159,
+                    126,53,10,WS_EX_STATICEDGE
     CONTROL         "Show splashscreen",IDC_SPLASHON,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,132,138,10
     CONTROL         "Startup Minimized",IDC_STARTMIN,"Button",
