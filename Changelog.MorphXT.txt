@@ -4,9 +4,13 @@ Changelog for eMule 0.43b MorphXT v4.x
 FIXED  : Resource ID [SiRoB]
 FIXED  : minor gui display bug arround the category priority [SiRoB]
 FIXED  : Definitly fixed the Resume Next in the category context menu, this is not anymore a globaly Resume Next but a per-category resume [SiRoB]
+FIXED  : Anti-Leecher [SiRoB]
 
 CHANGED: Removed the "..." and change the tree in Morph preferency [SiRoB]
 
+ADDED  : Winsock2 from eWombat [SiRoB]
+ADDED  : Partial patch from netfinity that fix 0.0kB/s [SiRoB]
+ADDED  : Patch from cmgrr to stopping download [SiRoB]
 ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 
 --------------------------------------
