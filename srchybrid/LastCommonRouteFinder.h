@@ -49,9 +49,10 @@ public:
 	/*
 	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed);
 	*/
-	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog);
+	void SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pMinUpload, uint32 pMaxUpload, bool pUseMillisecondPingTolerance, double pPingTolerance, uint32 pPingToleranceMilliseconds, uint32 pGoingUpDivider, uint32 pGoingDownDivider, uint32 pNumberOfPingsForAverage, uint64 pLowestInitialPingAllowed, bool isUSSLog, uint32 FriendByteToSend);
 
     uint32 GetUpload();
+	uint32 GetFriendByteToSend();
 private:
     static UINT RunProc(LPVOID pParam);
     UINT RunInternal();
@@ -96,5 +97,9 @@ private:
 	CString m_state;
 	//MORPH START - Added by SiRoB, Log Flag to trace or not the USS activities
 	bool m_bIsUSSLog;
-	//MORPH START - Added by SiRoB, Log Flag to trace or not the USS activities
+	//MORPH END   - Added by SiRoB, Log Flag to trace or not the USS activities
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	CCriticalSection FriendUploadLocker;
+	uint32 m_iMaxFriendByteToSend;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 };

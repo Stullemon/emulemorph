@@ -150,4 +150,7 @@ private:
 	uint32	AvgRespondTime[2];
 	uint32	MaxVUR;
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	uint32	FSinUpload;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 };

@@ -28,35 +28,51 @@ public:
     uint64 GetNumberOfSentBytesSinceLastCallAndReset();
     uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
     uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
-
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+	/*
     uint32 GetStandardListSize() { return m_StandardOrder_list.GetSize(); };
+	*/
+	uint32 GetStandardListSize() { return m_StandardOrder_list.GetSize() + m_PowerShareOrder_list.GetSize() + m_FriendOrder_list.GetSize(); };
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
-    void AddToStandardList(uint32 index, ThrottledFileSocket* socket);
-    bool RemoveFromStandardList(ThrottledFileSocket* socket);
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+    /*
+	void AddToStandardList(uint32 index, ThrottledFileSocket* socket);
+	bool RemoveFromStandardList(ThrottledFileSocket* socket);
+	*/
+	void AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID);
+	int RemoveFromStandardList(ThrottledFileSocket* socket);
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
     void QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent = false); // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledControlSocket* socket) { RemoveFromAllQueues(socket, true); }; // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledFileSocket* socket);
 
     void EndThread();
-
     void SetAllowedDataRate(uint32 newValue);
-
     void Pause(bool paused);
 private:
     static UINT RunProc(LPVOID pParam);
     UINT RunInternal();
 
     void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
-    bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
-
-    CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+	/*
+	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
+	*/
+	int RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
+    
+	CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueueFirst_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_TempControlQueue_list; // sockets that wants to enter m_ControlQueue_list // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_TempControlQueueFirst_list; // sockets that wants to enter m_ControlQueue_list and has been able to send before // ZZ:UploadBandWithThrottler (UDP)
 
     CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_StandardOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
-
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_PowerShareOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
+	CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_FriendOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
     CCriticalSection sendLocker;
     CCriticalSection tempQueueLocker;
 
@@ -66,7 +82,10 @@ private:
     uint64 m_SentBytesSinceLastCall;
     uint64 m_SentBytesSinceLastCallOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots;
-
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	uint32 m_highestNumberOfFullyActivatedSlotsPowerShare;
+	uint32 m_highestNumberOfFullyActivatedSlotsFriend;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
     uint32 m_allowedDataRate;
 
     bool doRun;

@@ -176,35 +176,26 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 	if(leftClient == NULL){
 		return 1;
 	}
-	else if(rightClient == NULL){
+	if(rightClient == NULL){
 		return -1;
 	}
-	else if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == false && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == true){
-		return 1;
-	}
-	else if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == true && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == false){
-		return -1;
-	}
-	else if(leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == true){
-		return 1;
-	}
-	else if(leftClient->IsPBForPS() == true && rightClient->IsPBForPS() == false){
-		return -1;
-	}
-	else if(leftClient->IsPBForPS() == true && rightClient->IsPBForPS() == true){
-		if(leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber()){
+	if (3*FSinUpload < (uint32)uploadinglist.GetCount())
+	{
+		if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == false && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == true){
 			return 1;
 		}
-		else if(leftClient->GetFilePrioAsNumber() > rightClient->GetFilePrioAsNumber()){
+		else if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == true && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == false){
 			return -1;
 		}
-		else{
-			return 0;
-		}
 	}
-	else{
+	if(leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == true){
+		return 1;
+	}
+	if(leftClient->IsPBForPS() == true && rightClient->IsPBForPS() == false){
+		return -1;
+	}
+	else
 		return 0;
-	}
 }
 //Morph End - added by AndCycle, separate special prio compare
 
@@ -309,10 +300,74 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 }
 
 void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
-    // Add it last
-    theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
-	uploadinglist.AddTail(newclient);
-	newclient->SetSlotNumber(uploadinglist.GetCount());
+	POSITION insertPosition = NULL;
+	uint32 posCounter = uploadinglist.GetCount();
+
+	uint32 newclientScore = newclient->GetScore(false);
+
+	bool foundposition = false;
+	POSITION pos = uploadinglist.GetTailPosition();
+	while(pos != NULL && foundposition == false) {
+		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
+		if((newclient->IsFriend() && newclient->GetFriendSlot()) == false
+		   &&
+		   (uploadingClient->IsFriend() && uploadingClient->GetFriendSlot()) == true
+		   ||
+		   (newclient->IsFriend() && newclient->GetFriendSlot()) ==
+		   (uploadingClient->IsFriend() && uploadingClient->GetFriendSlot())
+		   &&
+			(
+				!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
+				newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
+				// Compare scores is more right than comparing waittime.
+			)
+			)
+		{
+			foundposition = true;
+		} else {
+			insertPosition = pos;
+			uploadinglist.GetPrev(pos);
+			posCounter--;
+		}
+	}
+
+	if(insertPosition != NULL) {
+		POSITION renumberPosition = insertPosition;
+		uint32 renumberSlotNumber = posCounter;
+	    
+		uploadinglist.GetNext(renumberPosition);
+		while(renumberPosition != NULL) {
+			renumberSlotNumber++;
+
+			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
+
+			renumberClient->SetSlotNumber(renumberSlotNumber+1);
+
+			uploadinglist.GetNext(renumberPosition);
+		}
+
+		// add it at found pos
+		newclient->SetSlotNumber(posCounter+1);
+		uploadinglist.InsertBefore(insertPosition, newclient);
+		if (newclient->GetFriendSlot())
+		{
+			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
+			++FSinUpload;
+		}
+		else
+			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket,2);
+	}	else{
+		// Add it last
+		if (newclient->GetFriendSlot())
+		{
+			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
+			++FSinUpload;
+		}
+		else
+			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),2);
+		uploadinglist.AddTail(newclient);
+		newclient->SetSlotNumber(uploadinglist.GetCount());
+	}
 }
 
 
@@ -871,7 +926,11 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
             client->m_bAddNextConnect = false;
             uploadinglist.RemoveAt(curPos);
-			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+			int removedclass = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+			if (removedclass==0){
+				--FSinUpload;
+			}
+			bool removed = removedclass>=0?true:false;
             bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 
             //if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved)) {
@@ -1075,7 +1134,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// ZZ:UploadSpeedSense -->
 		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog(),theStats.GetMaxFriendByteToSend());
 		//MOPRH END   - Modified by SiRoB
 
 		theApp.uploadqueue->Process();
@@ -1341,7 +1400,8 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
     	    tempUploadinglist.AddTail(cur_client);
     	}
 
-    	// Remove one at a time from temp list and reinsert in correct position in uploading list
+    	FSinUpload = 0; //MORPH - Adde by SiRoB, Upload Splitting Class
+		// Remove one at a time from temp list and reinsert in correct position in uploading list
     	POSITION tempPos = tempUploadinglist.GetHeadPosition();
     	while(tempPos != NULL) {
     	    POSITION curpos = tempPos;

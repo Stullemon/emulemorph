@@ -401,3 +401,17 @@ void CStatistics::ResetUpDatarateOverhead()
 	m_AvarageUDRO_list.RemoveAll();
 	m_nUpDatarateOverhead = 0;
 }
+//MORPH START - Added by SiRoB, Upload Splitting Class
+uint32	CStatistics::GetMaxFriendByteToSend()
+{
+	if (theStats.sessionReceivedBytes > 0)
+	{
+		if (3*theStats.sessionSentBytes > theStats.sessionReceivedBytes+3*theStats.sessionSentBytesToFriend)
+			return 3*theStats.sessionSentBytes-theStats.sessionReceivedBytes-3*theStats.sessionSentBytesToFriend;
+		else
+			return 0;
+	}
+	else
+		return _UI32_MAX;
+}
+//MORPH END   - Added by SiRoB, Upload Splitting Class
