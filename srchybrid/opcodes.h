@@ -41,7 +41,8 @@
 #define MAX_RESULTS				100		// max global search results
 #define	MAX_MORE_SEARCH_REQ		5		// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
 #define MAX_CLIENTCONNECTIONTRY	2
-#define CONNECTION_TIMEOUT		40000	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
+//#define CONNECTION_TIMEOUT		40000	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
+#define CONNECTION_TIMEOUT		60000	// <<-- enkeyDEV(th1) -L2HAC-
 #define	FILEREASKTIME			1500000	//25 mins
 #define SERVERREASKTIME			900000  //15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
 #define UDPSERVERREASKTIME		1800000	//30 mins
@@ -101,6 +102,21 @@
 //MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
 #define SESSIONAMOUNT (10*1024*1024) // PENDING: Change to 10 MBytes when done testing!
 //MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
+
+// START enkeyDEV(th1)
+#define L2HAC_DEFAULT_EMULE		(FILEREASKTIME)
+#define L2HAC_MIN_TIME			900000
+#define L2HAC_MAX_TIME			3600000
+#define L2HAC_CALLBACK_PRECEDE	(CONNECTION_TIMEOUT >> 1)
+#define L2HAC_PREPARE_PRECEDE	(CONNECTION_TIMEOUT)
+#define EDT_PERIOD_CACHE		50				//<<-- enkeyDEV(th1) -EDT-
+#define EDT_MIN_PERIOD_CACHE	30				//<<-- enkeyDEV(th1) -EDT-
+#define EDT_UNDEFINED			((uint32)(-1))	//<<-- enkeyDEV(th1) -EDT-
+#define EDT_INFINITE_TIME		0xFFFFFFFF		//<<-- enkeyDEV(th1) -EDT-
+#define EDT_INFINITE_ERR		0xFFFFFFFE		//<<-- enkeyDEV(th1) -EDT-
+#define EDT_IMMINENT			300				//<<-- enkeyDEV(th1) -EDT-
+#define EDT_EDW_THRESHOLD		28800			//<<-- enkeyDEV(th1) -EDT-
+// END enkeyDEV(th1)
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 //MOPRH START - Added by SiRoB, ZZ Upload System 20030824-2238
@@ -564,6 +580,8 @@
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 #define ET_MOD_VERSION 			0x55 // Maella -Support for tag ET_MOD_VERSION 0x55-
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+#define ET_DOWNLOADTIME			0x3C //<<-- enkeyDev(th1) -EDT-
+#define ET_L2HAC				0x3E //<<-- enkeyDEV(th1) -L2HAC-
 
 // emuleapp <-> emuleapp
 #define OP_ED2KLINK				12000

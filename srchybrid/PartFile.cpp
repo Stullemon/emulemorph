@@ -1701,7 +1701,18 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							//MORPH END - Added by SiRoB, Due to Khaos A4AF
 							if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME-20000))
 								cur_src->UDPReaskForDownload();
-
+						    // START enkeyDEV(th1) -L2HAC- highid side, "prepare" phase
+						    // (emulates a "Connecting via server..." without socket timeout)
+						    if (theApp.serverconnect->IsConnected()
+							    && (cur_src->GetLastAskedTime())
+							    && ((dwCurTick - cur_src->GetLastAskedTime()) > (FILEREASKTIME - L2HAC_PREPARE_PRECEDE))
+							    && cur_src->HasLowID()
+							    && cur_src->GetL2HACTime()
+							    && !theApp.serverconnect->IsLowID())
+						    {
+							    cur_src->SetDownloadState(DS_WAITCALLBACK);
+						    }
+						    // END enkeyDEV(th1) -L2HAC-
 						}
 						case DS_CONNECTING:
 						case DS_TOOMANYCONNS:
@@ -2440,6 +2451,12 @@ BOOL CPartFile::PerformFileComplete()
 	// <-----khaos- End Statistics Modifications
 
 	GetMetaDataTags();
+
+	//EastShare Start - added by AndCycle - AutoClearComplete (NoamSon)
+	if (theApp.glob_prefs->IsAutoClearComplete() == true) {
+		theApp.emuledlg->transferwnd.downloadlistctrl.ClearCompleted();
+	}
+	//EastShare End - added by AndCycle - AutoClearComplete (NoamSon)
 
 	return TRUE;
 }
@@ -3187,11 +3204,12 @@ uint32 CPartFile::WriteToBuffer(uint32 transize, BYTE *data, uint32 start, uint3
 	POSITION pos = m_BufferedData_list.GetTailPosition();
 	while (pos != NULL)
 	{	
+		POSITION posLast = pos;//EastShare - added by AndCycle, reduce HD head moving (bluecow)
 		queueItem = m_BufferedData_list.GetPrev(pos);
 		if (item->end > queueItem->end)
 		{
 			added = true;
-			m_BufferedData_list.InsertAfter(pos, item);
+			m_BufferedData_list.InsertAfter(posLast, item);//EastShare - modified by AndCycle, reduce HD head moving (bluecow)
 			break;
 		}
 	}

@@ -22,8 +22,11 @@
 #include "preferences.h"
 #include "loggable.h"
 
+class CEdt; //<<--enkeyDev(th1) -EDT-
+
 class CUploadQueue: public CLoggable
 {
+	friend class CEdt; //<<--enkeyDev(th1) -EDT-
 public:
 	CUploadQueue(CPreferences* in_prefs);
 	~CUploadQueue();

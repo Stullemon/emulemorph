@@ -98,9 +98,12 @@ struct PartFileStamp {
 class CClientReqSocket;
 class CFriend;
 
+class CEdt; //<<--enkeyDev(th1) -EDT-
+
 class CUpDownClient: public CLoggable
 {
 	friend class CUploadQueue;
+	friend class CEdt; //<<--enkeyDev(th1) -EDT-
 public:
 	//base
 	CUpDownClient(CClientReqSocket* sender = 0);
@@ -147,6 +150,8 @@ public:
 	void			SetKadPort(uint16 nPort)	{ m_nKadPort = nPort; }
 	uint8			GetUDPVersion()				{return m_byUDPVer;}
 	uint8			GetExtendedRequestsVersion(){return m_byExtendedRequestsVer;}
+	uint32			GetL2HACTime()				{return m_L2HAC_time ? (m_L2HAC_time - L2HAC_CALLBACK_PRECEDE) : 0;} //<<-- enkeyDEV(th1) -L2HAC-
+
 	bool			IsFriend()					{return m_Friend != NULL;}
 	float			GetCompression()	{return (float)compressiongain/notcompressed*100.0f;} // Add rod show compression
 	void			ResetCompressionGain() {compressiongain = 0; notcompressed=1;} // Add show compression
@@ -181,6 +186,14 @@ public:
 	uint8			GetSourceExchangeVersion()	{return m_bySourceExchangeVer;}
 	
 	uint32			GetAskTime()	{return AskTime;} //MORPH - Added by SiRoB - Smart Upload Control v2 (SUC) [lovelace]
+	
+	// START enkeyDev(th1) -EDT-
+	bool			GetDownloadTimeVersion()	{return m_DownloadTimeVer;}
+	const CTime &	GetDownloadTime()			{return m_DownloadTime;}
+	uint32			GetDownloadTimeVal()		{return m_DownloadTimeVal;}
+	uint32			GetDownloadTimeErr()		{return m_DownloadTimeErr;}
+	void			EstimateDownloadTime(uint32 &avg_time, uint32 &err_time);
+	// END enkeyDev(th1) -EDT-
 	
 	void			SendPublicKeyPacket();
 	void			SendSignaturePacket();
@@ -248,6 +261,10 @@ public:
 	void			FlushSendBlocks();			// call this when you stop upload, or the socket might be not able to send
 	void			SetLastUpRequest()			{m_dwLastUpRequest = ::GetTickCount();}
 	uint32			GetLastUpRequest()			{return m_dwLastUpRequest;}
+	// START enkeyDEV(th1) -L2HAC-
+	void			SetLastL2HACExecution(uint32 m_set_to = 0)		{m_last_l2hac_exec = m_set_to ? m_set_to : ::GetTickCount();}
+	uint32			GetLastL2HACExecution()		{return m_last_l2hac_exec;}
+	// END enkeyDEV(th1) -L2HAC-
 	void			UDPFileReasked();
 	uint32			GetSessionUp()			{return m_nTransferedUp - m_nCurSessionUp;}
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
@@ -285,7 +302,11 @@ public:
 	void			SetRemoteQueueFull( bool flag )	{m_bRemoteQueueFull = flag;}
 	bool			IsRemoteQueueFull()			{return m_bRemoteQueueFull;}
 	void			SetRemoteQueueRank(uint16 nr);
+	void			SetRemoteEDT(uint32 avg, uint32 err); //<<-- enkeyDEV(th1) -EDT-
 	void			DrawStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
+	void			EnableL2HAC()				{m_l2hac_enabled = true;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
+	void			DisableL2HAC()				{m_l2hac_enabled = false;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
+	bool			IsL2HACEnabled()			{return m_l2hac_enabled;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
 	void			AskForDownload();
 	void			SendFileRequest();
 	void			SendStartupLoadReq();
@@ -433,6 +454,14 @@ private:
     
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
+	bool	m_bIsEastShare; // EastShare - Added by Pretender, Is EastShare Cilent?
+
+	uint32	m_L2HAC_time;			//<<-- enkeyDEV(th1) -L2HAC-
+
+	uint32	m_DownloadTimeVer;		//<<-- enkeyDev(th1) -EDT-
+	CTime	m_DownloadTime;			//<<-- enkeyDev(th1) -EDT-
+	uint32	m_DownloadTimeVal;		//<<-- enkeyDev(th1) -EDT-
+	uint32	m_DownloadTimeErr;		//<<-- enkeyDev(th1) -EDT-
 
 	ESecureIdentState	m_SecureIdentState;
 	uint8	m_byInfopacketsReceived;			// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
@@ -461,6 +490,7 @@ private:
 	uint32		m_nAvUpDatarate;
 	uint32		m_cAsked;
 	uint32		m_dwLastUpRequest;
+	uint32		m_last_l2hac_exec; //<<-- enkeyDEV(th1) -L2HAC-
 	bool		m_bUsedComprUp;	//only used for interface output
 	uint32		m_nCurSessionUp;
 	uint32      m_nCurQueueSessionUp;
@@ -495,6 +525,7 @@ private:
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_BlockRequests_queue;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DoneBlocks_list;
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
+	bool		m_l2hac_enabled; //<<-- enkeyDEV(th1) -L2HAC- lowid side
 	//download
     
 

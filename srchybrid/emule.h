@@ -45,6 +45,7 @@
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB, ZZ Upload system (USS)
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
+#include "edt.h"		//<<-- enkeyDev(th1) -EDT-
 
 #define MAX_NICK_LENGTH 49 // max. length of nick without trailing NUL char
 
@@ -110,6 +111,7 @@ public:
 	CString				m_strCurVersionLong;
 	UINT				m_uCurVersionShort;
 	UINT				m_uCurVersionCheck;
+	CEdt				m_edt;	//<<-- enkeyDev(th1) -EDT-
 
 	CArray<CString,CString> webservices;
 	AppState	m_app_state; // defines application state for shutdown 

@@ -936,6 +936,15 @@ void CUpDownClient::SendRankingInfo(){
 	Packet* packet = new Packet(OP_QUEUERANKING,12,OP_EMULEPROT);
 	memset(packet->pBuffer,0,12);
 	memcpy(packet->pBuffer+0,&nRank,2);
+	// START enkeyDev(th1) -EDT-
+	if (GetDownloadTimeVersion()) {
+		uint32 avg_value;
+		uint32 err_value;
+		EstimateDownloadTime(avg_value, err_value);
+		memcpy(packet->pBuffer+4,&avg_value,4);
+		memcpy(packet->pBuffer+8,&err_value,4);
+	}
+	// END enkeyDev(th1) -EDT-
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 	socket->SendPacket(packet,true,true);
 }
@@ -1040,9 +1049,28 @@ void CUpDownClient::BanLeecher(int log_message){
 void CUpDownClient::UDPFileReasked(){
 	AddAskedCount();
 	SetLastUpRequest();
+	SetLastL2HACExecution(); //<<-- enkeyDEV(th1) -L2HAC-
 	uint16 nRank = theApp.uploadqueue->GetWaitingPosition(this);
-	Packet* response = new Packet(OP_REASKACK,2,OP_EMULEPROT);
+//	Packet* response = new Packet(OP_REASKACK,2,OP_EMULEPROT); // enkeyDev(th1) original, commented
+//	memcpy(response->pBuffer,&nRank,2); // enkeyDev(th1) original, commented
+	// START enkeyDev(th1) -EDT-
+	Packet* response;
+	if (GetDownloadTimeVersion()) {
+		response = new Packet(OP_REASKACK,12,OP_EMULEPROT);
+		memset(response->pBuffer,0,12);
+		memcpy(response->pBuffer,&nRank,2);
+		uint32 avg_value;
+		uint32 err_value;
+		EstimateDownloadTime(avg_value, err_value);
+		memcpy(response->pBuffer+4,&avg_value,4);
+		memcpy(response->pBuffer+8,&err_value,4);
+	}
+	else
+	{
+		response = new Packet(OP_REASKACK,2,OP_EMULEPROT);
 	memcpy(response->pBuffer,&nRank,2);
+	}
+	// END enkeyDev(th1) -EDT-
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 	theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
 }
@@ -1086,3 +1114,12 @@ bool CUpDownClient::GetFriendSlot(){
 	}
 	return m_bFriendSlot;
 }
+// START enkeyDev(th1) -EDT-
+void CUpDownClient::EstimateDownloadTime(uint32 &avg_time, uint32 &err_time)
+{
+	avg_time = 0;
+	err_time = EDT_UNDEFINED;
+	if (!IsDownloading())
+		theApp.m_edt.EstimateTime(this, avg_time, err_time);
+}
+// END enkeyDev(th1) -EDT-

@@ -235,6 +235,7 @@ void CUpDownClient::SendFileRequest(){
 	if( IsEmuleClient() ){
 		SetRemoteQueueFull( true );
 		SetRemoteQueueRank(0);
+		SetRemoteEDT(0, EDT_UNDEFINED); //<<-- enkeyDev(th1) -EDT-
 	}	
 	if(IsSourceRequestAllowed()) {
 		reqfile->SetLastAnsweredTimeTimeout();
@@ -270,6 +271,7 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 	data.Read(&namelength,2);
 	data.Read(m_strClientFilename.GetBuffer(namelength),namelength);
 	m_strClientFilename.ReleaseBuffer(namelength);
+	m_dwLastAskedTime = ::GetTickCount(); //<<-- enkeyDEV(th1) -L2HAC- highid side
 
 	if (reqfile==NULL)
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileInfo; reqfile==NULL)");
@@ -383,6 +385,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	}
 	else{
 		SendStartupLoadReq();
+		m_dwLastAskedTime = ::GetTickCount(); //<<-- enkeyDEV(th1) -L2HAC- highid side
 	}
 	reqfile->NewSrcPartsInfo();
 }
@@ -471,6 +474,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 				SetRemoteQueueFull(false);
 			SetRemoteQueueRank(0);
 			SetAskedCountDown(0);
+			SetRemoteEDT(0, EDT_UNDEFINED); //<<-- enkeyDev(th1) -EDT-
 		}
 		UpdateDisplayedInfo(true);
 	}
@@ -490,6 +494,7 @@ void CUpDownClient::ProcessHashSet(char* packet,uint32 size){
 		throw GetResString(IDS_ERR_BADHASHSET);
 	}
 	SendStartupLoadReq();
+	m_dwLastAskedTime = ::GetTickCount(); //<<-- enkeyDEV(th1) -L2HAC- highid side
 }
 
 void CUpDownClient::SendBlockRequests(){
@@ -935,6 +940,15 @@ void CUpDownClient::SetRemoteQueueRank(uint16 nr){
 	m_nRemoteQueueRank = nr;
 	UpdateDisplayedInfo();
 }
+
+// START enkeyDev(th1) -EDT-
+void CUpDownClient::SetRemoteEDT(uint32 avg, uint32 err){
+ 	m_DownloadTime = CTime::GetCurrentTime() + CTimeSpan(avg);
+	m_DownloadTimeErr = err;
+	m_DownloadTimeVal = avg;
+	UpdateDisplayedInfo();
+}
+// END enkeyDev(th1) -EDT-
 
 void CUpDownClient::UDPReaskACK(uint16 nNewQR){
 	m_bUDPPending = false;

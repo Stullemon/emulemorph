@@ -702,7 +702,7 @@ void CUploadQueue::Process() {
         activeClients_tick_list.RemoveHead();
 	    activeClients_list.RemoveHead();
 	}
-};
+}
 
 bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 	// check if we can allow a new client to start downloading form us

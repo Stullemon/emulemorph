@@ -1240,6 +1240,7 @@ BEGIN
     DEFPUSHBUTTON   "&Close",IDOK,268,207,47,14,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC48,19,108,86,8
     LTEXT           "Static",IDC_UPLOADING,110,108,202,8
+    LTEXT           "Static",IDC_EDTINFO,163,175,144,8
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130

@@ -1,0 +1,15 @@
+Note:
+
+:>
+need to make some standard format for the code Tag
+
+
+:>
+this doesnt work?
+Did I do anything wrong??
+//code
+bool CUpDownClient::MoreUpThanDown()
+	(~~)
+}else if(credits->GetDownloadedTotal() < 1048576){
+	return false;
+//code

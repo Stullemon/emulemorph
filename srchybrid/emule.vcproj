@@ -259,6 +259,9 @@
 				RelativePath="ED2KLink.cpp">
 			</File>
 			<File
+				RelativePath="edt.cpp">
+			</File>
+			<File
 				RelativePath="EMSocket.cpp">
 			</File>
 			<File
@@ -577,6 +580,9 @@
 			</File>
 			<File
 				RelativePath="ED2KLink.h">
+			</File>
+			<File
+				RelativePath="edt.h">
 			</File>
 			<File
 				RelativePath="EMSocket.h">

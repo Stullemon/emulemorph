@@ -2372,6 +2372,7 @@
 #define IDC_URL_FOR_UPDATING2           4867
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
+#define IDC_EDTINFO                     40125
 
 // Next default values for new objects
 // 

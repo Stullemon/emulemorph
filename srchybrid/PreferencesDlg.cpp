@@ -181,7 +181,7 @@ void CPreferencesDlg::Localize()
 	buffer.Add(GetResString(IDS_BACKUP)); //EastShare - Added by Pretender, TBH-AutoBackup
 	buffer.Add("Morph"); //MORPH - Added by IceCream, Morph Prefs
 	buffer.Add("Morph II"); //MORPH - Added by SiRoB, Morph Prefs
-	buffer.Add("Morph III"); //EastShare - Added by Pretender, ES Prefs
+	buffer.Add("EastShare"); //EastShare - Added by Pretender, ES Prefs
 	for (int i = 0; i < buffer.GetCount(); i++)
 		buffer[i].Remove(_T('&'));
 
