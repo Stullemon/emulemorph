@@ -217,7 +217,9 @@ BOOL CTransferWnd::OnInitDialog()
 	m_tooltipCats.Activate(TRUE);
 
 	UpdateListCount(m_uWnd2);
-	VerifyCatTabSize();
+	// Mighty Knife: Force category tab verification even if window is not visible
+	VerifyCatTabSize(true);
+	// [end] Mighty Knife
 	//Commander - Added: ClientQueueProgressBar - Start
 	bold.CreateFont(10,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("Small Fonts"));
 
@@ -229,6 +231,7 @@ BOOL CTransferWnd::OnInitDialog()
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
 	}
 	//Commander - Added: ClientQueueProgressBar - End
+
 	return true;
 }
 
@@ -2053,10 +2056,30 @@ void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
 	downloadlistctrl.ChangeCategory(to);
 }
 
-void CTransferWnd::VerifyCatTabSize() {
+// VerifyCatTabSize 
+//
+// [Comment by Mighty Knife:]
+//
+// Verify the proper positioning of the download tab's. If the
+// positioning is wrong, the tab's are repositioned.
+//
+// If the download-list is not visible, no repositioning of
+// the tab's is performed. That's the case if the download list
+// is hidden by the category buttons next to the download tab's.
+// If repositioning took place, the download tab's would be made
+// visible, what's undesired if the download list is not visible!
+//
+// Unfortunately if the dialog is build up in the InitDialog
+// routine, the download window is not visible, but the resizing must
+// be done. In such a case if _forceverify==true, the resizing is
+// forced, even if the download window is not visible!
+
+void CTransferWnd::VerifyCatTabSize(bool _forceverify) {
 	//MORPH - Added by SiRoB, Show/Hide dlTab
-	if (downloadlistctrl.IsWindowVisible() == false)
+	// MightyKnife: Forcing of the verification added
+	if ((downloadlistctrl.IsWindowVisible() == false) && (!_forceverify))
 		return;
+	// [end] Mighty Knife
 	//MORPH - Added by SiRoB, Show/Hide dlTab
 			
 	CRect rect;

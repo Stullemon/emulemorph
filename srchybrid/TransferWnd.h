@@ -46,7 +46,7 @@ public:
 	void	UpdateDownloadClientsCount(int count); //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
 	bool 	isUploadQueueVisible() { return (m_uWnd2 == 0); } //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
 	bool	isDownloadListVisible() { return ((showlist == IDC_DOWNLOADLIST) || (showlist == IDC_DOWNLOADLIST+IDC_UPLOADLIST)); } //SLAHAM: ADDED [TPT] - TBH Transfer Window Buttons =>
-	void	VerifyCatTabSize();
+	void	VerifyCatTabSize(bool _forceverify=false);
 	void SwitchUploadList();
 
 	// khaos::categorymod+

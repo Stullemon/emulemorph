@@ -1,10 +1,12 @@
+FIXED  : Possible crash in mass-rename if filename contains "%"-characters [MightyKnife]
+FIXED  : Display bug: Category tab's weren't aligned properly on program start [MightyKnife]
+
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.13
 --------------------------------------
 FIXED  : crash (introduced in previous version) when start resume next occur and 'prefer same category' or 'only in same categry' prefrency is not checked [SiRoB]
 FIXED  : Wrong display spreadbar disable in the hideos column [SiRoB]
 FIXED  : 2GB load bug in ImportParts code (Death Knight) [Commander]
-FIXED  : Possible crash in mass-rename if filename contains "%"-characters [MightyKnife]
 
 CHANGED: Revert back red and green color for QRdiff [SiRoB]
 CHANGED: Flag display in serverlist (moved to country column) [Commander]
