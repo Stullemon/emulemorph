@@ -996,20 +996,14 @@ void CServerWnd::DownloadFeed()
 #ifdef _UNICODE
 	FILE *tempFP = _tfopen(szTempFilePath, _T("r"));
 	FILE *targetFP = _tfopen(szFilePath, _T("wb"));
-
 	fputwc(0xFEFF, targetFP);
-
 	while(!feof(tempFP)){
 		TCHAR temp[1024];
 		_fgetts(temp, 1023, tempFP);
-
-		//_fputts(tempA2T, targetFP);
 		fwrite(temp, 1, _tcslen(temp)*sizeof(TCHAR), targetFP);
 	}
-
 	fclose(tempFP);
 	fclose(targetFP);
-
 	_tremove(szTempFilePath);
 #elif
 	_trename(szTempFilePath, szFilePath);
@@ -1050,20 +1044,14 @@ void CServerWnd::DownloadAllFeeds()
 #ifdef _UNICODE
 	FILE *tempFP = _tfopen(szTempFilePath, _T("r"));
 	FILE *targetFP = _tfopen(szFilePath, _T("wb"));
-
 	fputwc(0xFEFF, targetFP);
-
 	while(!feof(tempFP)){
 		TCHAR temp[1024];
 		_fgetts(temp, 1023, tempFP);
-
-		//_fputts(tempA2T, targetFP);
 		fwrite(temp, 1, _tcslen(temp)*sizeof(TCHAR), targetFP);
 	}
-
 	fclose(tempFP);
 	fclose(targetFP);
-
 	_tremove(szTempFilePath);
 #elif
 	_trename(szTempFilePath, szFilePath);
