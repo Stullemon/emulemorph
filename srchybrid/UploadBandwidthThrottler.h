@@ -75,9 +75,10 @@ private:
 
     CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_StandardOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
 	//MORPH START - Added by SiRoB & AndCycle, Upload Splitting Class
-	CArray<Socket_stat*, Socket_stat*> m_StandardOrder_list_stat;
 	//MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
-    CCriticalSection sendLocker;
+    CMap<ThrottledFileSocket*, ThrottledFileSocket*, Socket_stat*, Socket_stat*> m_stat_list;
+	
+	CCriticalSection sendLocker;
     CCriticalSection tempQueueLocker;
 
     CEvent* threadEndedEvent;
@@ -86,6 +87,6 @@ private:
     uint64 m_SentBytesSinceLastCall;
     uint64 m_SentBytesSinceLastCallOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots[NB_SPLITTING_CLASS];
-	uint32 slotCounterClass[NB_SPLITTING_CLASS]; //MORPH - Added by SiRoB, Upload Splitting Class
-    bool doRun;
+	uint32 slotCounterClass[NB_SPLITTING_CLASS];
+	bool doRun;
 };
