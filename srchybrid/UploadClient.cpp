@@ -1051,20 +1051,12 @@ uint32 CUpDownClient::GetWaitStartTime() const
 		return 0;
 	}
 	uint32 dwResult = credits->GetSecureWaitStartTime(GetIP());
-//MORPH START - Changed by SiRoB
-/*
-	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	uint32 dwTicks = ::GetTickCount();
-	// Moonlight: SUQWT - To avoid erroneous check due to overflow, convert time index to plain time.
-	if ((dwTicks - dwResult) < (dwTicks - m_dwUploadTime) && IsDownloading()){	
-	//if (dwResult > m_dwUploadTime && IsDownloading()){//original commented out
-//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-*/
+//MORPH START - Changed by SiRoB, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	uint32 dwTicks = ::GetTickCount();
 	if ((!theApp.clientcredits->IsSaveUploadQueueWaitTime() && (dwResult > m_dwUploadTime) ||
-		theApp.clientcredits->IsSaveUploadQueueWaitTime() && ((dwTicks - dwResult) < (dwTicks - m_dwUploadTime)))
+		theApp.clientcredits->IsSaveUploadQueueWaitTime() && ((int)(m_dwUploadTime - dwResult) < 0))
 		&& IsDownloading()){
-//MORPH END - Changed by SiRoB
+//MORPH END - Changed by SiRoB, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	//this happens only if two clients with invalid securehash are in the queue - if at all
 			dwResult = m_dwUploadTime-1;
 
