@@ -51,7 +51,7 @@ public:
 	*/
 	void AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID = LAST_CLASS);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
-	bool RemoveFromStandardList(ThrottledFileSocket* socket);
+	bool RemoveFromStandardList(ThrottledFileSocket* socket, bool resort = false); //MORPH - Changed by SiRoB & AndCycle, Upload Splitting Class
 
     void QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent = false); // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledControlSocket* socket) { RemoveFromAllQueues(socket, true); }; // ZZ:UploadBandWithThrottler (UDP)
@@ -65,7 +65,7 @@ private:
     UINT RunInternal();
 
     void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
-	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
+	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket, bool resort = false); //MORPH - Changed by SiRoB & AndCycle, Upload Splitting Class
     
 	CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueueFirst_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)

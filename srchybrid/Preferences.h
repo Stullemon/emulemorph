@@ -542,6 +542,10 @@ public:
 	static	COLORREF m_crLogError;
 	static	COLORREF m_crLogWarning;
 	static	COLORREF m_crLogSuccess;
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	static	COLORREF m_crLogUSC;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
 	static	int		m_iExtractMetaData;
 	static	bool	m_bAdjustNTFSDaylightFileTime;
 
@@ -1382,6 +1386,9 @@ public:
 	static	COLORREF GetLogErrorColor()					{return m_crLogError;}
 	static	COLORREF GetLogWarningColor()				{return m_crLogWarning;}
 	static	COLORREF GetLogSuccessColor()				{return m_crLogSuccess;}
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	static	COLORREF GetLogUSCColor()					{return m_crLogUSC;}
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	static	uint16	GetMaxConperFive()					{return MaxConperFive;}
 	static	uint16	GetDefaultMaxConperFive();

@@ -118,6 +118,10 @@ COLORREF GetLogLineColor(UINT eMsgType)
 		return thePrefs.m_crLogWarning;
 	if (eMsgType == LOG_SUCCESS)
 		return thePrefs.m_crLogSuccess;
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	if (eMsgType == LOG_USC)
+		return thePrefs.m_crLogUSC;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	ASSERT( eMsgType == LOG_INFO );
 	return CLR_DEFAULT;
 }

@@ -506,6 +506,10 @@ LOGFONT CPreferences::m_lfLogText;
 COLORREF CPreferences::m_crLogError = RGB(255, 0, 0);
 COLORREF CPreferences::m_crLogWarning = RGB(128, 0, 128);
 COLORREF CPreferences::m_crLogSuccess = RGB(0, 0, 255);
+//MORPH START - Added by SiRoB, Upload Splitting Class
+COLORREF CPreferences::m_crLogUSC = RGB(0, 255, 0);
+//MORPH END   - Added by SiRoB, Upload Splitting Class
+	
 int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 TCHAR	CPreferences::m_sWebPassword[256];
@@ -3629,6 +3633,9 @@ void CPreferences::LoadPreferences()
 	m_crLogError = ini.GetColRef(_T("LogErrorColor"), m_crLogError);
 	m_crLogWarning = ini.GetColRef(_T("LogWarningColor"), m_crLogWarning);
 	m_crLogSuccess = ini.GetColRef(_T("LogSuccessColor"), m_crLogSuccess);
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	m_crLogUSC = ini.GetColRef(_T("LogUploadSplittingClassColor"), m_crLogUSC);
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	if (statsAverageMinutes < 1)
 		statsAverageMinutes = 5;

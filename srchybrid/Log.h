@@ -13,7 +13,8 @@ enum EDebugLogPriority{
 #define	LOG_WARNING		1
 #define	LOG_ERROR		2
 #define	LOG_SUCCESS		3
-#define	LOGMSGTYPEMASK	0x03
+#define LOG_USC			4 //MORPH - Added by SiRoB, Upload Splitting Class
+#define	LOGMSGTYPEMASK	0x07/*3*/ //MORPH - Changed by SiRoB, Upload Splitting Class
 
 // Log message targets flags
 #define	LOG_DEFAULT		0x00

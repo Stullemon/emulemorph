@@ -170,7 +170,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
  * @param socket the address of the socket that should be removed from the list. If this socket
  *               does not exist in the list, this method will do nothing.
  */
-bool UploadBandwidthThrottler::RemoveFromStandardList(ThrottledFileSocket* socket) {
+bool UploadBandwidthThrottler::RemoveFromStandardList(ThrottledFileSocket* socket, bool resort) {
 	bool returnValue;
     sendLocker.Lock();
 
@@ -190,29 +190,33 @@ bool UploadBandwidthThrottler::RemoveFromStandardList(ThrottledFileSocket* socke
  * @param socket address of the socket that should be removed from the list. If this socket
  *               does not exist in the list, this method will do nothing.
  */
-bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* socket) {
+bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* socket, bool resort) {
 	// Find the slot
     int slotCounter = 0;
     bool foundSocket = false;
+	uint32 classID = NULL;
     while(slotCounter < m_StandardOrder_list.GetSize() && foundSocket == false) {
         if(m_StandardOrder_list.GetAt(slotCounter) == socket) {
 			// Remove the slot
             m_StandardOrder_list.RemoveAt(slotCounter);
 			// Remove the slot
-			delete m_StandardOrder_list_stat.GetAt(slotCounter);
+			Socket_stat* stat = m_StandardOrder_list_stat.GetAt(slotCounter);
+			classID = stat->classID;
+			delete stat;
 			m_StandardOrder_list_stat.RemoveAt(slotCounter);
-			// Remove the slot
-            foundSocket = true;
+			foundSocket = true;
         } else {
             slotCounter++;
         }
     }
 
-    /*
-	if(foundSocket && (INT_PTR)m_highestNumberOfFullyActivatedSlots >= m_StandardOrder_list.GetSize() && m_highestNumberOfFullyActivatedSlots > 0) {
-        --m_highestNumberOfFullyActivatedSlots;
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	if(resort == false && foundSocket) {
+        if (m_highestNumberOfFullyActivatedSlots[classID] > 0) --m_highestNumberOfFullyActivatedSlots[classID];
+		if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] > 0) --m_highestNumberOfFullyActivatedSlots[LAST_CLASS];
     }
-	*/
+	//MORPH END  - Added by SiRoB, Upload Splitting Class
+
 	return foundSocket;
 }
 
@@ -684,8 +688,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								lastTickReachedBandwidth[classID] = thisLoopTick;
 	           		            //theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
 	       					}
-	           		    //} else {
-	           		    //    lastTickReachedBandwidth = thisLoopTick;
+	           		    } else {
+	           		        lastTickReachedBandwidth[classID] = thisLoopTick;
 	           			}
 	       			}
 					realBytesToSpendClass[classID] = realBytesToSpend;

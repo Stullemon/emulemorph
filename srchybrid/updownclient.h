@@ -737,7 +737,7 @@ public:
 	//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 	void GetUploadingAndUploadedPart(uint8* abyUpPartUploadingAndUploaded, uint16 partcount);
 	//MORPH END   - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
-
+	void SetPendingUploadingConnection(bool newvalue) {m_bPendingUploadingConnection = newvalue;} //MORPH - Added by SiRoB,
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}
 	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}
@@ -903,7 +903,7 @@ protected:
 	uint16		m_nUpCompleteSourcesCount;
 	uchar		requpfileid[16];
     uint32      m_slotNumber;
-
+	bool		m_bPendingUploadingConnection; //MORPH - Added by SiRoB,
     DWORD       m_dwLastCheckedForEvictTick;
 
 	typedef struct TransferredData {

@@ -202,7 +202,7 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
         minUpload = pMinUpload;
     }
 
-    if(pMaxUpload != 0) {
+    if(pMaxUpload != 0 && pMaxUpload != UNLIMITED*1024) {//MORPH - Changed by SiRoB, Fix
         maxUpload = pMaxUpload;
         if(maxUpload < minUpload) {
             minUpload = maxUpload;
