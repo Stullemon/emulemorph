@@ -2049,6 +2049,11 @@ void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
 }
 
 void CTransferWnd::VerifyCatTabSize() {
+	//MORPH - Added by SiRoB, Show/Hide dlTab
+	if (downloadlistctrl.IsWindowVisible() == false)
+		return;
+	//MORPH - Added by SiRoB, Show/Hide dlTab
+			
 	CRect rect;
 	int size=0;
 	int right;
