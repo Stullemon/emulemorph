@@ -524,9 +524,9 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 4:{
 							if (client->HasLowID()){
 						if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
-							Sbuffer.Format(_T("%i **** Awaited reconnect %s"),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+							Sbuffer.Format(GetResString(IDS_UP_LOWID_AWAITED),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 								else
-									Sbuffer.Format(_T("%i LowID"),client->GetScore(false));
+									Sbuffer.Format(GetResString(IDS_UP_LOWID2),client->GetScore(false));
 							}
 							else
 								Sbuffer.Format(_T("%i"),client->GetScore(false));

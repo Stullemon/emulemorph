@@ -2818,6 +2818,8 @@
 #define IDS_UP_LOWID                    6270
 #define IDS_UP_LOWID_DELAYED            6271
 #define IDS_UPNP                        6272
+#define IDS_UP_LOWID2                   6273
+#define IDS_UP_LOWID_AWAITED            6274
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053

@@ -5488,6 +5488,8 @@ BEGIN
     IDS_CAT_TOTAL           "Total"
     IDS_UP_LOWID            "%s LowID"
     IDS_UP_LOWID_DELAYED    "%s LowID delayed %s"
+    IDS_UP_LOWID2           "%i LowID"
+    IDS_UP_LOWID_AWAITED    "%i **** Awaited reconnect %s"
     IDS_UPNP                "Universal Plug & Play (UPnP)"
 END
 //MORPH END - Added by FrankyFive
