@@ -1,8 +1,18 @@
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.x
 --------------------------------------
-FIXED: Download file in search window will now work properly in case you don't use selectcategory or  you select a category tab item [SiRoB]
-TWEAKED: Equal Chance Value now involed a time quantum base on file shared time
+FIXED  : Download file in search window will now work properly in case you don't use selectcategory or you didn't select the category tab item [SiRoB]
+FIXED  : Statistic SlideBar [SiRoB]
+
+ADDED  : Now we can see parts hidden by the Share Only The Need feature [SiRoB]
+ADDED  : A new Select view filter option to hide seen complet file [SiRoB]
+ADDED  : Download/Upload in the transfert window [SiRoB]
+
+CHANGED: SUWQT merged from EastShare [SiRoB]
+
+TWEAKED: Equal Chance Value now involed a time quantum base on file shared time [AndCycle]
+TWEAKED: Share Only The Need [SiRoB]
+TWEAKED: Auto Power Share by checking the last seen information (partfile side) [SiRoB]
 
 NOTE: for the RSS news you can edit entry in XMLNews.dat
 
