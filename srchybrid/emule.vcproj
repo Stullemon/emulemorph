@@ -80,7 +80,7 @@
 			UseOfMFC="1"
 			CharacterSet="2"
 			DeleteExtensionsOnClean="*.obj;*.ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.bat;*.asm;$(TargetPath)"
-			WholeProgramOptimization="FALSE">
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
@@ -314,6 +314,7 @@
 				AdditionalOptions="/LTCG:STATUS"
 				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib"
 				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="FALSE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
@@ -696,6 +697,9 @@
 				RelativePath="StringConversion.cpp">
 			</File>
 			<File
+				RelativePath=".\WebCache\ThrottledChunkList.cpp">
+			</File>
+			<File
 				RelativePath="TimeTick.cpp">
 			</File>
 			<File
@@ -717,7 +721,22 @@
 				RelativePath="URLClient.cpp">
 			</File>
 			<File
-				RelativePath="URLClient.cpp">
+				RelativePath="WebCache\WebCache.cpp">
+			</File>
+			<File
+				RelativePath="WebCache\WebCacheClient.cpp">
+			</File>
+			<File
+				RelativePath="WebCache\WebCacheCryptography.cpp">
+			</File>
+			<File
+				RelativePath="WebCache\WebCachedBlock.cpp">
+			</File>
+			<File
+				RelativePath="WebCache\WebCachedBlockList.cpp">
+			</File>
+			<File
+				RelativePath="WebCache\WebCacheProxyClient.cpp">
 			</File>
 			<File
 				RelativePath=".\WebSocket.cpp">
@@ -1035,7 +1054,10 @@
 				RelativePath="StringConversion.h">
 			</File>
 			<File
-				RelativePath="ThrottledSocket.h">
+				RelativePath=".\WebCache\ThrottledChunkList.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\ThrottledSocket.h">
 			</File>
 			<File
 				RelativePath="TimeTick.h">
@@ -1062,10 +1084,25 @@
 				RelativePath="URLClient.h">
 			</File>
 			<File
-				RelativePath="URLClient.h">
+				RelativePath="Version.h">
 			</File>
 			<File
-				RelativePath="Version.h">
+				RelativePath=".\WebCache\WebCache.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCacheCryptography.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCachedBlock.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCachedBlockList.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCacheProxyClient.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\WebCacheSocket.h">
 			</File>
 			<File
 				RelativePath="WebServices.h">
@@ -1387,6 +1424,9 @@
 			</File>
 			<File
 				RelativePath="PPgTweaks.cpp">
+			</File>
+			<File
+				RelativePath=".\WebCache\PPgWebcachesettings.cpp">
 			</File>
 			<File
 				RelativePath="PPgWebServer.cpp">
@@ -1778,6 +1818,9 @@
 			</File>
 			<File
 				RelativePath="PPgTweaks.h">
+			</File>
+			<File
+				RelativePath=".\WebCache\PPgWebcachesettings.h">
 			</File>
 			<File
 				RelativePath="PPgWebServer.h">
@@ -2364,6 +2407,9 @@
 			</File>
 			<File
 				RelativePath="res\Prefs_tweak.ico">
+			</File>
+			<File
+				RelativePath=".\res\Prefs_Webcache.ico">
 			</File>
 			<File
 				RelativePath="res\PROVIDER.ICO">
