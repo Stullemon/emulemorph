@@ -1796,7 +1796,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				m_FileMenu.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)mnuOrder.m_hMenu, GetResString(IDS_CAT_SETORDER));
 			}
 			else {
-				m_FileMenu.AppendMenu(MF_STRING, MP_CAT_SETRESUMEORDER, GetResString(IDS_CAT_SETORDER));
+				m_FileMenu.AppendMenu(MF_STRING, MP_CAT_SETRESUMEORDER, GetResString(IDS_CAT_SETORDER), _T("FILELINEARPRIO"));
 			}
 			// khaos::categorymod-
 
@@ -3032,7 +3032,7 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_DL_OPEN), _T("OPENFILE") );//<--9/21/02
 	if (thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio())
-    	m_FileMenu.AppendMenu(MF_STRING,MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS));
+    	m_FileMenu.AppendMenu(MF_STRING,MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS), _T("FILEDOWNLOADPREVIEWFIRST"));
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
 	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO") );//<--9/21/02
 	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS") );
