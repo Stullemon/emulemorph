@@ -150,7 +150,7 @@ BOOL CTransferWnd::OnInitDialog()
 	UpdateListCount(m_uWnd2);
 	VerifyCatTabSize();
 	//Commander - Added: ClientQueueProgressBar - Start
-	bold.CreateFont(7,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Sherif"));
+	bold.CreateFont(7,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Serif"));
 	queueBar.SetFont(&bold);
 	queueBar.SetBkColor(RGB(255,255,255));
 	queueBar.SetShowPercent();
