@@ -1,6 +1,5 @@
---------------------------------------
-Changelog for eMule 0.44d MorphXT v5.x
---------------------------------------
+MERGED : Ported to 0.45a Official version [SiRoB]
+
 FIXED  : Download part file progress bar is now drawn correctly [SiRoB]
 FIXED  : Intercept wrong friend link to avoid crash when pasted in friendlist [SiRoB]
 FIXED  : ICS: Don't send for complete file by netfinity [SiRoB]
