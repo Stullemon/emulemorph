@@ -1034,6 +1034,7 @@ bool CKnownFile::LoadFromFile(CFile* file){
 	bool ret1 = LoadDateFromFile(file);
 	bool ret2 = LoadHashsetFromFile(file,false);
 	bool ret3 = LoadTagsFromFile(file);
+	NewAvailPartsInfo(); //Added by SiRoB, maybe not use full but lot of repport 
 	if (GetED2KPartCount() <= 1) {	// ignore loaded hash for 1-chunk files
 		for (int i = 0; i < hashlist.GetSize(); i++)
 			delete[] hashlist[i];
