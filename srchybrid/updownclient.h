@@ -395,6 +395,12 @@ public:
 	void	setPayBackFirstTag(bool tag) {m_bPayBackFirstTag=tag;}	//EastShare - Added by AndCycle, PayBackFirst
 	bool	chkPayBackFirstTag() {return m_bPayBackFirstTag;} //EastShare - Added by AndCycle, PayBackFirst
 
+	//Morph - added by AndCycle, keep full chunk transfer
+	bool	needFullChunkTransfer();
+	void	setFullChunkTransferTag(bool tag)	{m_bFullChunkTransferTag = tag;}
+	bool	chkFullChunkTransferTag()	{return m_bFullChunkTransferTag;}
+	//Morph - added by AndCycle, keep full chunk transfer
+
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}//wistily
 	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}//wistily
@@ -507,6 +513,7 @@ private:
 	DWORD       m_dwLastCheckedForEvictTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
 	bool		m_bPayBackFirstTag; //EastShare - added by AndCycle, Pay Back First
+	bool		m_bFullChunkTransferTag;//Morph - added by AndCycle, keep full chunk transfer
 public:
 	uint16		m_lastPartAsked;
 	uint8*		m_abyUpPartStatus;

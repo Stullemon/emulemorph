@@ -188,12 +188,22 @@ void CQueueListCtrl::AddClient(CUpDownClient* client, bool resetclient){
 	if( resetclient && client){
 			client->SetWaitStartTime();
 			client->SetAskedCount(1);
+			client->setFullChunkTransferTag(false);//Morph - added by AndCycle, keep full chunk transfer
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	} else if( client ) {
 		// Clients that have been put back "first" on queue (that is, they
 		// get to keep its waiting time since before they started upload), are
 		// recognized by having an ask count of 0.
 		client->SetAskedCount(0);
+
+		//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
+		//require for equal chance for each file, accepted base
+		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
+		if (reqfile){
+			reqfile->statistic.DelAccepted();
+		}
+		//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
+
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	}
 	if(theApp.glob_prefs->IsQueueListDisabled())
@@ -432,15 +442,20 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					case 3:
 						Sbuffer.Format("%i",client->GetScore(false,false,true));
 						break;
-					case 4:
-						if (client->HasLowID()){
-							if (client->m_bAddNextConnect)
-								Sbuffer.Format("%i ****",client->GetScore(false));
+					case 4:{
+							if (client->HasLowID()){
+								if (client->m_bAddNextConnect)
+									Sbuffer.Format("%i ****",client->GetScore(false));
+								else
+									Sbuffer.Format("%i LowID",client->GetScore(false));
+							}
 							else
-								Sbuffer.Format("%i LowID",client->GetScore(false));
+								Sbuffer.Format("%i",client->GetScore(false));
+
+							if(client->needFullChunkTransfer()){
+								Sbuffer.Append(" F");
+							}
 						}
-						else
-							Sbuffer.Format("%i",client->GetScore(false));
 						break;
 					case 5:
 						Sbuffer.Format("%i",client->GetAskedCount());
@@ -765,6 +780,9 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if(item1->GetPowerShared() && item2->GetPowerShared()){//Equal chance keep the file prio under PowerShare
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				}
+				if(item1->needFullChunkTransfer()) result ++;
+				if(item2->needFullChunkTransfer()) result --;
+
 				if(result == 0 && file1 != file2){
 					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 						case ECFEF_ACCEPTED:

@@ -312,23 +312,23 @@ bool CUpDownClient::MoreUpThanDown(){
 
 	if(!theApp.glob_prefs->IsPayBackFirst()){
 		return false;
-
-	//keep PayBackFirst client for full chunk transfer
-	}else if(GetQueueSessionPayloadUp() > 0 && theApp.glob_prefs->TransferFullChunks()){
-
-		//kick PayBackFirst client after full chunk transfer
-		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){
-			return false;
-		}else{
-			return chkPayBackFirstTag();
-		}
-	}else{
-		setPayBackFirstTag(credits->GetPayBackFirstStatus());
 	}
 
-	return chkPayBackFirstTag();
+	return credits->GetPayBackFirstStatus();
+
 }
 //EastShare End - added by AndCycle, Pay Back First
+
+//Morph - added by AndCycle, keep full chunk transfer
+bool	CUpDownClient::needFullChunkTransfer(){
+
+	if(!theApp.glob_prefs->TransferFullChunks()){
+		return false;
+	}
+
+	return chkFullChunkTransferTag();
+}
+//Morph - added by AndCycle, keep full chunk transfer
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**

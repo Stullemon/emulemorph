@@ -118,15 +118,16 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 		(
 			(client->IsFriend() && client->GetFriendSlot()) == false &&	// if it is not in a class that gives it a right
 			client->GetPowerShared() == false &&						// to have a check performed to see if it can stay, we remove at once
-			client->MoreUpThanDown() == false ||							//EastShare - added by AndCycle, PayBackFirst
+			client->MoreUpThanDown() == false ||						//EastShare - added by AndCycle, PayBackFirst
 			//client->m_BlockRequests_queue.IsEmpty() ||         // or if it doesn't want any more blocks
 			(
 				(
-					(newclient->MoreUpThanDown() == true && client->MoreUpThanDown() == false || //EastShare - added by AndCycle, PayBackFirst
-					newclient->MoreUpThanDown() == client->MoreUpThanDown() && //EastShare - added by AndCycle, PayBackFirst
-						(newclient->MoreUpThanDown() == true && client->MoreUpThanDown() == true || //EastShare - added by AndCycle, PayBackFirst
-						newclient->GetPowerShared() == true && client->GetPowerShared() == false || // new client wants powershare file, but old client don't
-						newclient->GetPowerShared() == true && client->GetPowerShared() == true && newclient->GetFilePrioAsNumber() >= client->GetFilePrioAsNumber() // both want powersharedfile, and newer wants higher/same prio file
+					(
+						newclient->MoreUpThanDown() == true && client->MoreUpThanDown() == false || //EastShare - added by AndCycle, PayBackFirst
+						newclient->MoreUpThanDown() == client->MoreUpThanDown() && //EastShare - added by AndCycle, PayBackFirst
+						(
+							newclient->GetPowerShared() == true && client->GetPowerShared() == false || // new client wants powershare file, but old client don't
+							newclient->GetPowerShared() == true && client->GetPowerShared() == true && newclient->GetFilePrioAsNumber() >= client->GetFilePrioAsNumber() // both want powersharedfile, and newer wants higher/same prio file
 						)//EastShare - added by AndCycle, PayBackFirst
 					) &&
 					(client->IsFriend() && client->GetFriendSlot()) == false
@@ -139,7 +140,6 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
         // Remove client from ul list to make room for higher/same prio client
         theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(SESSIONAMOUNT*max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)), (sint32)client->GetQueueSessionPayloadUp()-SESSIONAMOUNT*(max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)));
 
-        client->SetWaitStartTime();
 	    theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULSUCCESS));
 	    theApp.uploadqueue->AddClientToQueue(client,true);
 
@@ -325,19 +325,27 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 							leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
 							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
 							(
-								rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
-								bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
+								rightClient->needFullChunkTransfer() == true && leftClient->needFullChunkTransfer() == false ||	//Morph - added by AndCycle, keep full chunk transfer
+								rightClient->needFullChunkTransfer() == leftClient->needFullChunkTransfer() &&					//Morph - added by AndCycle, keep full chunk transfer
 								(
-									rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
+									rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
+									bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
+									(
+										rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
+									)
 								)
 							)
 						) ||  
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
 						(
-							rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
-							bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
+							rightClient->needFullChunkTransfer() == true && leftClient->needFullChunkTransfer() == false ||	//Morph - added by AndCycle, keep full chunk transfer
+							rightClient->needFullChunkTransfer() == leftClient->needFullChunkTransfer() &&					//Morph - added by AndCycle, keep full chunk transfer
 							(
-								rightScore > leftScore  // but rightClient has better score, so rightClient is better
+								rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
+								bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
+								(
+									rightScore > leftScore  // but rightClient has better score, so rightClient is better
+								)
 							)
 						)
 					)//EastShare - added by AndCycle, PayBackFirst
@@ -564,6 +572,8 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		uploadinglist.AddTail(newclient);
         newclient->SetSlotNumber(uploadinglist.GetCount());
     }
+
+	newclient->setFullChunkTransferTag(true);//Morph - added by AndCycle, keep full chunk transfer
 }
 
 
@@ -763,14 +773,6 @@ void CUploadQueue::Process() {
             // Remove from upload list.
 
             RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
-
-			//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
-			//require for equal chance for each file, accepted base
-			CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)lastClient->GetUploadFileID());
-			if (reqfile){
-				reqfile->statistic.DelAccepted();
-			}
-			//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
 
 		    // add to queue again.
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
