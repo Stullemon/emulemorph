@@ -1,4 +1,4 @@
-// eMule 0.45b MorphXT 6.1 PL by [OSIOL.NET]_lcf_[PL]
+// eMule 0.45b MorphXT 6.6 PL by [OSIOL.NET]_lcf_[PL]
 // Microsoft Visual C++ generated resource script.
 //
 #include "pl_PL.h"
@@ -326,7 +326,7 @@ BEGIN
     IDS_FSTAT_WAITING       "Czekam..."
     IDS_TIME                "Czas"
     IDS_STATS_DDATA         "Pobrano danych: %s"
-    IDS_STATS_UDATA         "Wys≥ano danych (Sesja): %s"
+    IDS_STATS_UDATA         "Wys≥ano danych: %s"
     IDS_STATS_AVGDL         "årednia prÍdkoúÊ pobierania dla sesji: %s"
     IDS_STATS_AVGUL         "årednia prÍdkoúÊ wysy≥ania dla sesji: %s"
     IDS_STATS_FOUNDSRC      "Znaleziono ürÛde≥: %i"
@@ -806,7 +806,7 @@ BEGIN
     IDS_HARDLIMIT           "Ostateczny limit"
     IDS_COL_MORECOLORS      "WiÍcej..."
     IDS_KBYTESEC            "kB/s"
-    IDS_TOOMANYCONNS        "Zbyt wiele po≥πczeÒ"
+    IDS_TOOMANYCONNS        "Za duøo po≥πczeÒ"
     IDS_DOWNLOADRENAMED     "Plik o takiej nazwie juø istnieje, plik zosta≥ zapisany jako %s"
     IDS_TBN_DOWNLOADDONE    "Pobrano:"
     IDS_TBN_DOWNLOADADDED   "Umieszczono na liúcie do pobrania:"
@@ -843,38 +843,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
-                            "Import anulowany: Nie moøna importowaÊ do kompletnego pliku."
-    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
-                            "Import anulowany: niekompletny hashset dla %s (%i hashÛw z %i czÍúci)."
-    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import anulowany: Nie moøna otworzyÊ %s."
-    IDS_SR13_IMPORTPARTS_IMPORTSTART 
-                            "Importowanie %i czÍúci (od 0 do %i) do %s."
-    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
-                            "CzÍúÊ %i: pominiÍto, juø kompletna."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "CzÍúÊ %i: zaimportowano."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "CzÍúÊ %i: zaimportowano (ICH)."
-    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
-                            "CzÍúÊ %i: pominiÍto, nie pasuje do czÍúciowo zakoÒczonego bloku."
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
-                            "%i z≥ych czÍúci zosta≥o zaimportowanych do A/ICH. Rozpoczynanie rehashowania."
-    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
-                            "Inny import w trakcie. ProszÍ zaczekaÊ aø siÍ zakoÒczy."
-    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
-                            "Import zakoÒczony. %i czÍúci zosta≥o zaimportowanych do %s"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_FO_PREF_EXISTED     "eMule wykry≥ istniejπce zasady dla wybranych portÛw, ktÛre nie zosta≥y nadpisane ani zastπpione. Brakujπce zasady zosta≥y dodane.\nUwaga: dotyczy tylko firewalla w WindowsXP!"
     IDS_FO_PREF_FAILED      "Nie uda≥o siÍ skonfigurowaÊ firewalla WindowsXP dla wybranych portÛw!"
     IDS_FO_PREF_STARTUP     "Otwieraj/zamykaj porty firewalla WindowsXP przy uruchamianiu/zamykaniu eMule"
@@ -891,12 +859,6 @@ BEGIN
     IDS_PR_SHORT_HIGH       "[Hi]"
     IDS_STATS_FRATIO        "Ratio UL:DL sesji (bez slotÛw dla znajomych):"
     IDS_STATS_UDATA_FRIENDS "Dane wys≥ane przez sloty dla znajomych (w sesji): %s"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "Pobieranie przez WebCache wy≥πczone: Tylko transfery na portach 21, 70, 80, 210, 443, 563 oraz w zakresie od 1025 do 65535 sπ cache'owane. Aby korzystaÊ z WebCache, naleøy uøywaÊ jednego z tych portÛw"
 END
 
 STRINGTABLE 
@@ -1154,7 +1116,7 @@ BEGIN
     IDS_DL_TRANSFCOMPL      "ZakoÒczone"
     IDS_STATS_FILTEREDCLIENTS "Odfiltrowanych: %i"
     IDS_FILTERLABEL         "Filtruj wiadomoúci zawierajπce: (Separator | )"
-    IDS_ERR_LARGEREQBLOCK   "Klient zaøπda≥ zbyt duøego bloku danych."
+    IDS_ERR_LARGEREQBLOCK   "Klient zaøπda≥ za duøego bloku danych."
     IDS_SHOWRATEONTITLE     "Pokazuj prÍdkoúÊ transferu w tytule"
     IDS_TBN_NOMESSAGEHISTORY "Brak wiadomoúci archiwalnych!"
     IDS_PW_DAP              "Dodawaj pliki do pobrania z auto priorytetem"
@@ -1877,11 +1839,50 @@ BEGIN
     IDS_STORENOTES          "Zachowaj komentarz"
     IDS_NOTES               "Komentarz"
     IDS_KADSEARCHALREADY    "Jedno szukanie jest juø w trakcie. ProszÍ sprÛbowaÊ pÛüniej!"
+    IDS_CRASHRPT_DONE       "Utworzono raport o b≥Ídzie."
+    IDS_CRASHRPT_AV         "Raportowanie b≥ÍdÛw w≥πczone."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_RESET               "Reset"
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
+                            "Import anulowany: Nie moøna importowaÊ do kompletnego pliku."
+    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
+                            "Import anulowany: niekompletny hashset dla %s (%i hashÛw z %i czÍúci)."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import anulowany: Nie moøna otworzyÊ %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART 
+                            "Importowanie %i czÍúci (od 0 do %i) do %s."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
+                            "CzÍúÊ %i: pominiÍto, juø kompletna."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "CzÍúÊ %i: zaimportowano."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "CzÍúÊ %i: zaimportowano (ICH)."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
+                            "CzÍúÊ %i: pominiÍto, nie pasuje do czÍúciowo zakoÒczonego bloku."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
+                            "%i z≥ych czÍúci zosta≥o zaimportowanych do A/ICH. Rozpoczynanie rehashowania."
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
+                            "Inny import w trakcie. ProszÍ zaczekaÊ aø siÍ zakoÒczy."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
+                            "Import zakoÒczony. %i czÍúci zosta≥o zaimportowanych do %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_WEBCACHE         "WebCache"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WrongPortforWebcache 
+                            "Pobieranie przez WebCache wy≥πczone: Tylko transfery na portach 21, 70, 80, 210, 443, 563 oraz w zakresie od 1025 do 65535 sπ cache'owane. Aby korzystaÊ z WebCache, naleøy uøywaÊ jednego z tych portÛw"
+END
+
+STRINGTABLE 
+BEGIN    IDS_RESET               "Reset"
     IDS_SPREADBAR           "Pasek rozproszenia"
     IDS_SPREADBAR_DEFAULT_CHECKBOX "Domyúlnie w≥πczaj pasek rozproszenia"
 END
@@ -1920,6 +1921,14 @@ BEGIN
     IDS_POWERSHARE_PREFIX   "PS"
     IDS_POWERSHARE          "Powershare"
     IDS_SF_UPLOADED_PARTS   "Pasek rozproszenia (historia czÍúci UL)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CRASHRPT_NOTAV      "Nie znaleziono programu do raportowania b≥ÍdÛw. Jeúli chcesz pomÛc nam szukaÊ b≥ÍdÛw, pobierz CrashRpt.dll"
+    IDS_UPLOAD_COMPLETED    "ZakoÒczono"
+    IDS_UPLOAD_PREEMPTED    "Wysy≥anie zakoÒczone - klient o wyøszym priorytecie."
+    IDS_UPLOAD_TOO_MANY_SLOTS "Za duøo slotÛw UL"
 END
 
 STRINGTABLE 
@@ -2092,7 +2101,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_Transferred "Przes≥anych: %s (%s)"
+    IDS_FEEDBACK_TRANSFERRED "Przes≥anych: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Øπdanych: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Zaakceptowanych øπdaÒ: %i (%i)"
     IDS_FEEDBACK_FROM       "Odpowiedü od %s na [%s]"
@@ -2290,6 +2299,7 @@ BEGIN
     IDS_MORPH_RFHA          "Pokazuj komunikaty hashowania plikÛw"
     IDS_MORPH_RAIF          "Pokazuj komunikaty dot. znajomych"
     IDS_MORPH_KSSERV        "Nie usuwaj z listy serwerÛw statycznych podczas dzia≥ania"
+    IDS_MORPH_LOG           "Log Morpha"
 END
 
 STRINGTABLE 
@@ -2418,6 +2428,7 @@ BEGIN
     IDS_MAXCLIENTDATARATEFRIEND "Maks. prÍdkoúÊ klienta (0kB/s=bez ograniczeÒ)"
     IDS_MAXCLIENTDATARATEPOWERSHARE "Maks. prÍdkoúÊ klienta (0kB/s=bez ograniczeÒ)"
     IDS_MAXCLIENTDATARATE   "Maks. prÍdkoúÊ klienta (0kB/s=bez ograniczeÒ)"
+    IDS_DISPLAYFUNNYNICK    "W≥πcz FunnyNick"
 END
 
 STRINGTABLE 
@@ -2428,6 +2439,7 @@ BEGIN
     IDS_RANDOMPORTS         "Porty losowe"
     IDS_MINPORT             "Najmniejszy"
     IDS_MAXPORT             "NajwiÍkszy"
+    IDS_RANDOMPORTSRESETTIME "Bezpieczny czas na restart portÛw losowych (w sekundach)"
 END
 
 STRINGTABLE 
@@ -2534,7 +2546,7 @@ BEGIN
     IDS_WC_PORT             "Port"
     IDS_WC_ADDRESS          "Adres"
     IDS_WC_CONTROLS         "Ustawienia WebCache"
-    IDS_WC_ENABLE           "W≥πcz pobieranie przez WebCache"
+    IDS_WC_ENABLE           "Pobieranie przez WebCache"
 END
 
 STRINGTABLE 
@@ -2548,11 +2560,12 @@ BEGIN
     IDS_WC_SUBMIT_EMAIL     "Wyúlij te ustawienia emailem"
     IDS_WC_LINK             "Link: "
     IDS_WC_PERSISTENT       "Trwa≥e po≥πczenia dla pobieraÒ przez proxy"
-    IDS_WC_ADVANCED         "Pokaø ustawienia zaawansowane "
+    IDS_WC_ADVANCED         "Opcje zaawansowane"
     IDS_WC_TEST             "Testuj ustawienia WebCache. Moøe zajπÊ do 30 sekund"
     IDS_WC_HIDE_ADV         "Ukryj ustawienia zaawansowane "
     IDS_WC_SUBMIT_WEB       "Wyúlij informacje WebCache przez formularz www"
-    IDS_WC_SOURCES          "èrÛd≥a WebCache"
+    IDS_WC_SOURCES          "Obs≥uga WebCache"
+    IDS_WC_UPDATESETTING    "Automatyczna aktualizacja ustawieÒ WebCache"
 END
 
 STRINGTABLE 
@@ -2572,7 +2585,7 @@ BEGIN
     IDS_GRAPHOPTIONS        "Opcje wykresÛw"
     IDS_CRC_CALCULATED      "CRC32 obliczone"
     IDS_CRC_CHECKOK         "CRC32 poprawne"
-    IDS_CRC_FORCEADDING     "Dodaj tag CRC32 do nazwy pliku nawet jeúli juø zawiera poprawny CRC2"
+    IDS_CRC_FORCEADDING     "Dodaj tag CRC32 do nazwy pliku nawet jeúli juø zawiera poprawny CRC32"
     IDS_CRC_FORCEUPPERCASE  "Jeúli nazwa pliku zawiera juø poprawny CRC32, zamieÒ jπ na ma≥e litery."
     IDS_CRC_DONTADDCRC      "Dodawaj przyrostek statyczny, a nie CRC32."
     IDS_CRC_PREFIX          "Przyrostek do dodania na koÒcu nazwy pliku przed CRC32:"
@@ -2624,7 +2637,6 @@ BEGIN
     IDS_IP2COUNTRY_LOADED   "Za≥adowano IP2Country"
     IDS_IP2COUNTRY_UNLOADED "UsuniÍto IP2Country z pamiÍci"
     IDS_IP2COUNTRY_ERROR1   "numer b≥Ídnej linii: %i"
-    IDS_IP2COUNTRY_ERROR2   "moøliwa b≥Ídna linia w"
     IDS_IP2COUNTRY_ERROR3   "Nieudane ≥adowanie w"
     IDS_IP2COUNTRY_ERROR4   "CountryFlag wy≥πczone, nieudane ≥adowanie"
     IDS_IP2COUNTRY_ERROR5   "Nieprawid≥owe resID, byc moøe powinieneú aktualizowaÊ bibliotekÍ z flagami,"
@@ -2675,7 +2687,19 @@ BEGIN
     IDS_SCHED_UPDATE_IPCONFIG_LOG "RozpoczÍto zaplanowanπ aktualizacjÍ IPFILTER.DAT."
     IDS_SCHED_UPDATE_FAKES_LOG "RozpoczÍto zaplanowanπ aktualizacjÍ FAKES.DAT."
     IDS_SCHED_UPDATE_WARNING 
-                            "Nie ustawiaj zbyt czÍstych aktualizacji automatycznych, gdyø tworzπ zbÍdny ruchu w sieci!\r\nAktualizacje raz na tydzieÒ powinny wystarczyÊ!"
+                            "Nie ustawiaj za czÍstych aktualizacji automatycznych, gdyø tworzπ zbÍdny ruchu w sieci!\r\nAktualizacje raz na tydzieÒ powinny wystarczyÊ!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ZZRATIO             "zzRatio"
+    IDS_ZZRATIO_ENABLED     "w≥πczone"
+    IDS_ZZRATIO_DISABLED    "wy≥πczone"
+    IDS_ZZRATIO_CHECK1      "Maks. ratio sesji"
+    IDS_ZZRATIO_CHECK2      "PowerSharing niekompletnego pliku"
+    IDS_ZZRATIO_CHECK3      "Slot dla znajomych powyøej 3kB/s"
+    IDS_ZZRATIO_CHECK4      "Limit wysy≥ania poniøej 10kB/s"
+    IDS_ZZRATIO_CHECK5      "årenie wysy≥anie poniøej 10kB/s"
 END
 
 #endif    // Polish resources
@@ -2693,4 +2717,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-// eMule 0.45b MorphXT 6.1 PL by [OSIOL.NET]_lcf_[PL]
+// eMule 0.45b MorphXT 6.6 PL by [OSIOL.NET]_lcf_[PL]

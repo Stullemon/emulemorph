@@ -650,7 +650,7 @@ BEGIN
     IDS_SCORE               "Puntuación"
     IDS_ASKED               "Pedido"
     IDS_LASTSEEN            "Última comprobación"
-    IDS_BANNED              "bloqueado(s)"
+    IDS_BANNED              "bloqueados"
     IDS_PRIOVERYHIGH        "Muy alta"
     IDS_UUSERS              "Usuarios"
     IDS_UFAILED             "Error"
@@ -1851,6 +1851,12 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_CRASHRPT_DONE       "El informe de errores ha sido generado."
+    IDS_CRASHRPT_AV         "El RecopiladorDeErrores está disponible y activo."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
                             "Importación cancelada: No se puede importar a un archivo completado."
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
@@ -1884,7 +1890,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_WrongPortforWebcache 
-                            "Descarga del WebCaché desactivado: Solo transmite en puertos 21, 70,  80, 210, 443, 563 y esta cacheado en el rango 1025 a 65535. Por favor utilicen uno de estos puertos si queréis activar el WebCaché"
+                            "Descarga del WebCaché desactivado: Sólo transmite en puertos 21, 70,  80, 210, 443, 563 y esta cacheado en el rango 1025 a 65535. Por favor utilicen uno de estos puertos si queréis activar el WebCaché"
 END
 
 STRINGTABLE 
@@ -1928,6 +1934,14 @@ BEGIN
     IDS_POWERSHARE_PREFIX   "PS"
     IDS_POWERSHARE          "Powershare"
     IDS_SF_UPLOADED_PARTS   "Spread bar (Historial de partes subidas)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CRASHRPT_NOTAV      "El RecopiladorDeErrores no ha sido encontrado en el directorio del emule. Si quiere ayudarnos a depurar nuestro mod, por favor descárguese el archivo CrashRpt.dll"
+    IDS_UPLOAD_COMPLETED    "Completando"
+    IDS_UPLOAD_PREEMPTED    "A este chico lo colamos en la lista porque comparte mucho y bien."
+    IDS_UPLOAD_TOO_MANY_SLOTS "Demasiados slots"
 END
 
 STRINGTABLE 
@@ -2004,7 +2018,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ABORT               "¿Cancelar?"
-    IDS_MINUPLOAD_SHORT     "Min. Subida"
+    IDS_MINUPLOAD_SHORT     "Mín. Subida"
     IDS_SUC                 "Control Inteligente de Subida (SUC)"
     IDS_SUC_ENABLED         "Activar"
     IDS_MINUPLOAD           "Límite Mínimo de Subida"
@@ -2100,7 +2114,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_Transferred "Transferido: %s (%s)"
+    IDS_FEEDBACK_TRANSFERRED "Transferido: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Solicitado: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Solicitudes Aceptadas: %i (%i)"
     IDS_FEEDBACK_FROM       "Información de %s sobre [%s]"
@@ -2164,7 +2178,7 @@ BEGIN
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() fallido para al menos una funcion."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() fallido, err: "
     IDS_USSPINGERICMPENDERR "Error cerrando el manejo de ICMP, err: "
-    IDS_REMULREASON         "%s: Eliminando usuario de la lista de subida. Razon: %s"
+    IDS_REMULREASON         "%s: Eliminando usuario de la lista de subida. Razón: %s"
 END
 
 STRINGTABLE 
@@ -2173,8 +2187,8 @@ BEGIN
     IDS_REMULHIGHERPRIO     "Subida terminada para hacer sitio para usuario mejor con más prioridad."
     IDS_REMULMANYSLOTS      "Demasiados slots de subida abiertos."
     IDS_ULSUCCESSFUL        "%s: Subida completada. Cantidad transferida: %s. Dif de %s: %i bytes"
-    IDS_SKTDISREASON        "Desconexion del Socket: "
-    IDS_SKTDISUNKREASON     "Desconexion del Socket. Razón desconocida."
+    IDS_SKTDISREASON        "Desconexión del Socket: "
+    IDS_SKTDISUNKREASON     "Desconexión del Socket. Razón desconocida."
     IDS_IPISFILTERED        "IP filtrada."
     IDS_CNXTIMEOUT          "Tiempo de espera de la conexión concluido."
     IDS_UPSTOPPEDLEECHER    "Sesión de subida no ha podido iniciarse. El usuario tiene pinta de ser un leecher."
@@ -2190,10 +2204,10 @@ STRINGTABLE
 BEGIN
     IDS_REMULUSERCANCEL     "Usuario remoto cancelo transferencia."
     IDS_REMULUSEREND        "Usuario remoto termino transferencia."
-    IDS_DWLSESSIONENDED     "Sesión de descarga terminada. Usuario: %s Razon: %s"
-    IDS_BANHASHCHANGED      "Usuario: %s (%s), Razon del baneo: hash de usuario ha cambiado"
-    IDS_BANHASHCHANGEDT     "Usuario: %s (%s), Razon del baneo: hash de usuario ha cambiado (Encontrado en la lista de clientes rastreados)"
-    IDS_BANHASHINVALID      "usuario: %s (%s), Razon del baneo: hash de usuario no valido"
+    IDS_DWLSESSIONENDED     "Sesión de descarga terminada. Usuario: %s Razón: %s"
+    IDS_BANHASHCHANGED      "Usuario: %s (%s), Razón del baneo: hash de usuario ha cambiado"
+    IDS_BANHASHCHANGEDT     "Usuario: %s (%s), Razón del baneo: hash de usuario ha cambiado (Encontrado en la lista de clientes rastreados)"
+    IDS_BANHASHINVALID      "usuario: %s (%s), Razón del baneo: hash de usuario no valido"
     IDS_LOWIDRETRYING       "LowID -- Vuelvelo a intentar (%i veces)"
     IDS_IPFILTEREDSRV       "Fuente con IPfiltrada IP=%s (%s) recibida de servidor"
     IDS_IPIGNOREDSRV        "Fuente ignorada (IP=%s) recibida de servidor"
@@ -2298,6 +2312,7 @@ BEGIN
     IDS_MORPH_RFHA          "Informar de Actividades de Hashing"
     IDS_MORPH_RAIF          "Informar de Actividades en la lista de amigos"
     IDS_MORPH_KSSERV        "No eliminar servidores estáticos de la lista de servidores durante la ejecución"
+    IDS_MORPH_LOG           "Log del MorphXT"
 END
 
 STRINGTABLE 
@@ -2421,11 +2436,12 @@ STRINGTABLE
 BEGIN
     IDS_CRC32_ABORT         "Cancelar cálculo"
     IDS_DONTREMOVESPARETRICKLESLOT "No eliminar slot de reserva"
-    IDS_MINDATARATEFRIEND   "Flujo de datos Global (Por Defecto 0kB/s=ilimitado)"
-    IDS_MINDATARATEPOWERSHARE "Flujo de datos Global (Por Defecto 0kB/s=ilimitado)"
-    IDS_MAXCLIENTDATARATEFRIEND "Máximo flujo de datos por Usuario (Por Defecto 0kB/s=centrado)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Máximo flujo de datos por Usuario (Por Defecto 0kB/s=centrado)"
-    IDS_MAXCLIENTDATARATE   "Máximo flujo de datos por Usuario (Por Defecto 0kB/s=centrado)"
+    IDS_MINDATARATEFRIEND   "Flujo de datos Global (0kB/s = ilimitado, 1...3kB/s = sin zzRatio)"
+    IDS_MINDATARATEPOWERSHARE "Flujo de datos Global (0kB/s = ilimitado)"
+    IDS_MAXCLIENTDATARATEFRIEND "Máximo flujo de datos por Usuario (0kB/s = ilimitado)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Máximo flujo de datos por Usuario (0kB/s = ilimitado)"
+    IDS_MAXCLIENTDATARATE   "Máximo flujo de datos por Usuario (0kB/s = ilimitado)"
+    IDS_DISPLAYFUNNYNICK    "Habilitar mostrar FunnyNick"
 END
 
 STRINGTABLE 
@@ -2436,6 +2452,7 @@ BEGIN
     IDS_RANDOMPORTS         "Puertos Aleatorios"
     IDS_MINPORT             "Puerto Mínimo"
     IDS_MAXPORT             "Puerto Máximo"
+    IDS_RANDOMPORTSRESETTIME "Puertos Aleatorios tiempo de reseteo seguro (en segundos)"
 END
 
 STRINGTABLE 
@@ -2494,7 +2511,7 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Actualizar Ip-to-country.csv al inicio"
     IDS_UPDATEIPCURL        "Actualizar"
     IDS_CLIENTQUEUEPROGRESSBAR "Ver progreso de la lista de espera del usuario"
-    IDS_WEBCACHE_NOSUPPORT  "no suportado"
+    IDS_WEBCACHE_NOSUPPORT  "sin soporte"
     IDS_STATS_SUCCESSFULLWC "Descargas-WebCaché/Peticiones-WebCaché con éxito:"
     IDS_STATS_FAILEDWC      "Descargas-WebCaché/Peticiones-WebCaché fallados:"
 END
@@ -2561,6 +2578,7 @@ BEGIN
     IDS_WC_HIDE_ADV         "Esconder Avanzados"
     IDS_WC_SUBMIT_WEB       "Enviar información sobre el WebCachá via formulario-web"
     IDS_WC_SOURCES          "Fuentes WebCaché"
+    IDS_WC_UPDATESETTING    "Actualizar Configuración WebCaché Automáticamente"
 END
 
 STRINGTABLE 
@@ -2632,7 +2650,6 @@ BEGIN
     IDS_IP2COUNTRY_LOADED   "IP2Country cargado"
     IDS_IP2COUNTRY_UNLOADED "IP2Country descargado"
     IDS_IP2COUNTRY_ERROR1   "línea de error número : %i"
-    IDS_IP2COUNTRY_ERROR2   "posible línea de error"
     IDS_IP2COUNTRY_ERROR3   "No pudo cargar"
     IDS_IP2COUNTRY_ERROR4   "Bandera Desactivada, no se pudo cargar"
     IDS_IP2COUNTRY_ERROR5   "resID no válido, puede que necesites actualizar la bandera del icono del Dll,"
@@ -2684,6 +2701,18 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Actualización del FAKES.DAT programada iniciada."
     IDS_SCHED_UPDATE_WARNING 
                             "No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana es más que suficiente."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ZZRATIO             "zzRatio"
+    IDS_ZZRATIO_ENABLED     "está activado"
+    IDS_ZZRATIO_DISABLED    "no está activado"
+    IDS_ZZRATIO_CHECK1      "Se ha llegado al Ratio 1:3"
+    IDS_ZZRATIO_CHECK2      "PowerSharing archivo incompleto"
+    IDS_ZZRATIO_CHECK3      "Usando el slot de amigo y velocidad de transmisión global>3KB/s"
+    IDS_ZZRATIO_CHECK4      "Límite de Subida por debajo de 10KB/s"
+    IDS_ZZRATIO_CHECK5      "Subida Media por debajo de 10KB/s"
 END
 
 #endif    // Spanish (Castilian) resources

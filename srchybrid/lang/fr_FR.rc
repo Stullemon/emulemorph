@@ -1842,6 +1842,12 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_CRASHRPT_DONE       "Un rapport de crash a été généré."
+    IDS_CRASHRPT_AV         "Le rapporteur de Crash est fonctionnel."
+END
+
+STRINGTABLE
+BEGIN
     IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
                             "Importation abandonnée: Impossible d'importer vers un fichier complet."
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
@@ -1878,38 +1884,38 @@ BEGIN
                             "Download WebCache désactivé: Seuls les transferts depuis les ports 21, 70, 80, 210, 443, 563 et dans l'intervalle de 1025 à 65535 emploient le cache. Utiliser un de ces ports pour activer le WebCache"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RESET               "Mise à 0"
     IDS_SPREADBAR           "Barre de Diffusion"
     IDS_SPREADBAR_DEFAULT_CHECKBOX "Activer la Barre de Diffusion par défaut"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
-    IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
+    IDS_ONLY_DOWNLOAD_COMPLETE_FILES
                             "Vérifier si le fichier est complet avant de lancer le téléchargement"
     IDS_DL_FORCE            "Forcer le téléchargement"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Sauvegarder le temps d'attente des clients dans la file"
     IDS_DATEFILENAMELOG     "Sauver les logs par date"
-    IDS_ECFEF               "Chance égale pour chaque fichiers"
+    IDS_ECFEF               "Sauver les logs par date"
     IDS_ALL_TIME            "Dans tous les cas"
     IDS_COPYFEEDBACK        "Copier un feedback dans le presse-papiers"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Le client %s a été temporairement banni car il a commis une action suspicieuse"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_DOWNLOAD_IN_RED     "Montrer les fichiers en cours de téléchargement en rouge"
     IDS_UPSLOTNUMBER        "Slot #"
-    IDS_STATS_LEECHERCLIENTS "Leecher(s): %u"
+    IDS_STATS_LEECHERCLIENTS "Leechers: %u"
     IDS_WARNINGMORPH        "Attention: Ne changez pas ces paramètres sauf si vous savez ce que vous faites. Vous pouvez facilement rendre les choses pire pour vous-mêmes.\neMule fonctionnera bien sans avoir à ajuster ces paramètres."
     IDS_DM                  "Gestion du Download"
     IDS_SCC                 "Gestion des catégories (SCC)"
     IDS_SAC                 "Gestion du contrôle des A4AF (SAC)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_POWERSHARE_ACTIVATED "Activé"
     IDS_POWERSHARE_DISABLED "Désactivé"
@@ -1921,7 +1927,15 @@ BEGIN
     IDS_SF_UPLOADED_PARTS   "Barre de diffusion (Historique des parties envoyées)"
 END
 
-STRINGTABLE 
+STRINGTABLE
+BEGIN
+    IDS_CRASHRPT_NOTAV      "Le rapporteur de Crash n'est pas présent dans le répertoire emule. Si vous voulez nous aider à debugger notre mod, veuillez downloader CrashRpt.dll"
+    IDS_UPLOAD_COMPLETED    "S'accompli"
+    IDS_UPLOAD_PREEMPTED    "Un client avec priorité importante accède à la file d'attente"
+    IDS_UPLOAD_TOO_MANY_SLOTS "Trop de slots"
+END
+
+STRINGTABLE
 BEGIN
     IDS_SF_TURN_PART        "File UL (Partiel)"
     IDS_SF_TURN_SIMPLE      "File UL (Simple)"
@@ -2091,7 +2105,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_Transferred "Transférés: %s (%s)"
+    IDS_FEEDBACK_TRANSFERRED "Transférés: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Demandes: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Demandes Acceptées: %i (%i)"
     IDS_FEEDBACK_FROM       "Statistiques de %s utilisant [%s]"
@@ -2101,7 +2115,7 @@ BEGIN
     IDS_FEEDBACK_DOWNLOADED "Téléchargé: %s"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_FEEDBACK_TOTAL      "Nombre total de sources: %i"
     IDS_FEEDBACK_AVAILABLE  "Nombre de sources disponibles: %i"
@@ -2214,7 +2228,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_BACKUP              "Copie de secours"
-    IDS_USS_MAXPING         "Tolérance du ping (ms) (Défaut %i)"
+    IDS_USS_MAXPING         "Valeur maxi du ping (ms) (Défaut %i)"
     IDS_PAYBACKFIRST        "Rendre les crédits dûs en premier (PBF)"
     IDS_USS_USEMAXPING      "Utiliser la valeur maxi pour le ping"
     IDS_CREDIT_SYSTEM       "Système de crédit"
@@ -2237,7 +2251,7 @@ BEGIN
     IDS_IP2COUNTRY          "IP -> Nationalité"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ADVANCED            "Avancé"
     IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE "URL pour la mise à jour de la version"
@@ -2289,6 +2303,7 @@ BEGIN
     IDS_MORPH_RFHA          "Enregistrer les activités de hachage de fichiers"
     IDS_MORPH_RAIF          "Enregistrer les activités de la liste d'amis"
     IDS_MORPH_KSSERV        "Ne pas enlever les serveurs statiques de la liste des serveurs pendant leurs utilisations"
+    IDS_MORPH_LOG           "Log Morph"
 END
 
 STRINGTABLE 
@@ -2417,6 +2432,7 @@ BEGIN
     IDS_MAXCLIENTDATARATEFRIEND "Débit par client (défaut 0 kb/s = illimité)"
     IDS_MAXCLIENTDATARATEPOWERSHARE "Débit par client (défaut 0 kb/s = illimité)"
     IDS_MAXCLIENTDATARATE   "Débit par client (défaut 0 kb/s = illimité)"
+    IDS_DISPLAYFUNNYNICK    "Autorise l'affichage FunnyNick"
 END
 
 STRINGTABLE 
@@ -2427,6 +2443,7 @@ BEGIN
     IDS_RANDOMPORTS         "Ports aléatoires"
     IDS_MINPORT             "Port mini"
     IDS_MAXPORT             "Port maxi"
+    IDS_RANDOMPORTSRESETTIME "Temps de libération des ports aléatoires (en secondes)"
 END
 
 STRINGTABLE 
@@ -2551,7 +2568,8 @@ BEGIN
     IDS_WC_TEST             "Tester la configuration du WebCache (...30 sec)"
     IDS_WC_HIDE_ADV         "Contrôles Avancés"
     IDS_WC_SUBMIT_WEB       "Soumettre les infos WebCache par formulaire web"
-    IDS_WC_SOURCES          "Sources WebCache"
+    IDS_WC_SOURCES          "Webcache Actif"
+    IDS_WC_UPDATESETTING    "Mettre à jour automatiquement les paramètres Webcache"
 END
 
 STRINGTABLE 
@@ -2623,7 +2641,6 @@ BEGIN
     IDS_IP2COUNTRY_LOADED   "IP2Country chargés"
     IDS_IP2COUNTRY_UNLOADED "IP2Country déchargés"
     IDS_IP2COUNTRY_ERROR1   "Nombre de ligne erroné: %i"
-    IDS_IP2COUNTRY_ERROR2   "Erreur possible dans la ligne"
     IDS_IP2COUNTRY_ERROR3   "Impossible de chargé dans"
     IDS_IP2COUNTRY_ERROR4   "Drapeaux des pays désactivé, impossible à charger"
     IDS_IP2COUNTRY_ERROR5   "ID non valide, essayez de mettre à jour votre fichier DLL d'icones des drapeaux,"
@@ -2643,6 +2660,9 @@ BEGIN
     IDS_SOURCE_LOADER_SAVER "Source Sauvée"
     IDS_NEWFRIEND           "Nouvel ami:"
     IDS_REMOVEDFRIEND       "Ami retiré:"
+    IDS_FRIENDNAME_CHANGED1 "L'ami a changé son nom: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
+    IDS_FRIENDNAME_CHANGED2 "L'ami a changé son nom: '%s'->'%s', hash %s"
+    IDS_FAILEDTOLOAD        "N'a pas chargé"
 END
 
 STRINGTABLE 
@@ -2670,14 +2690,20 @@ BEGIN
     IDS_SCHED_BACKUP_LOG    "Sauvegarde de la copie de secours planifiée."
     IDS_SCHED_UPDATE_IPCONFIG_LOG "Mise à jour planifiée de ipfilter.dat"
     IDS_SCHED_UPDATE_FAKES_LOG "Mise à jour planifiée de fakes.dat"
-    IDS_SCHED_UPDATE_WARNING "Evitez de planifier les mises à jour trop fréquemment pour limiter le traffic réseau.\nUne mise à jour hebdomadaire devrait suffire"
+    IDS_SCHED_UPDATE_WARNING
+                             "Evitez de planifier les mises à jour trop fréquemment pour limiter le traffic réseau.\nUne mise à jour hebdomadaire devrait suffire"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
-    IDS_FRIENDNAME_CHANGED1 "L'ami a changé son nom: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
-    IDS_FRIENDNAME_CHANGED2 "L'ami a changé son nom: '%s'->'%s', hash %s"
-    IDS_FAILEDTOLOAD        "N'a pas chargé"
+    IDS_ZZRATIO             "zzRatio"
+    IDS_ZZRATIO_ENABLED     "est activé"
+    IDS_ZZRATIO_DISABLED    "n'est pas activé"
+    IDS_ZZRATIO_CHECK1      "Ratio 1/3 est atteint"
+    IDS_ZZRATIO_CHECK2      "PowerSharing sur les fichiers incomplets"
+    IDS_ZZRATIO_CHECK3      "Utiliser slot ami et vitesse globale des données>3Ko/s"
+    IDS_ZZRATIO_CHECK4      "Limite d'upload inférieure à 10Ko/s"
+    IDS_ZZRATIO_CHECK5      "Moyenne d'upload inférieure à 10Ko/s"
 END
 
 #endif    // French (France) resources
