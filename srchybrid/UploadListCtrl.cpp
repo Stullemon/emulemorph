@@ -534,10 +534,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if (client->IsMoreUpThanDown())
 						{
 							Sbuffer.Append(_T(" PBF"));
-							if (client->Credits())
-								Sbuffer.AppendFormat( _T("(%i)"),
-								CastItoXBytes((float)client->Credits()->GetUploadedTotal()-
-								(float)client->Credits()->GetDownloadedTotal()));
+							if (client->Credits() && client->Credits()->GetDownloadedTotal() > client->Credits()->GetUploadedTotal())
+								Sbuffer.AppendFormat( _T("(%s)"),
+								CastItoXBytes((float)client->Credits()->GetDownloadedTotal()-
+											  (float)client->Credits()->GetUploadedTotal()));
 						}
 						if (client->GetPowerShared())
 							Sbuffer.Append(_T(" PS"));
