@@ -264,6 +264,9 @@
 				RelativePath="fakecheck.cpp">
 			</File>
 			<File
+				RelativePath=".\FileProcessing.cpp">
+			</File>
+			<File
 				RelativePath="FrameGrabThread.cpp">
 			</File>
 			<File
@@ -590,6 +593,9 @@
 				RelativePath="fakecheck.h">
 			</File>
 			<File
+				RelativePath=".\FileProcessing.h">
+			</File>
+			<File
 				RelativePath="FrameGrabThread.h">
 			</File>
 			<File
@@ -845,6 +851,9 @@
 		<Filter
 			Name="Interface Source"
 			Filter="">
+			<File
+				RelativePath=".\AddCRC32TagDialog.cpp">
+			</File>
 			<File
 				RelativePath="AddFriend.cpp">
 			</File>
@@ -1230,6 +1239,9 @@
 			Name="Interface Header"
 			Filter="">
 			<File
+				RelativePath=".\AddCRC32TagDialog.h">
+			</File>
+			<File
 				RelativePath="AfxBeginMsgMapTemplate.h">
 			</File>
 			<File
@@ -1596,6 +1608,9 @@
 			</File>
 			<File
 				RelativePath="res\close.ico">
+			</File>
+			<File
+				RelativePath=".\res\community.ico">
 			</File>
 			<File
 				RelativePath="res\compatible.ICO">
