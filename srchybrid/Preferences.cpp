@@ -1414,7 +1414,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("ShareAll",prefs->shareall);	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-//	ini.WriteInt("ClientsMetDays", prefs->m_iClientsMetDays);//EastShare - AndCycle, this official setting shoudlnt be change by user
 	ini.WriteInt("KnownMetDays", prefs->m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met file control
 
@@ -1943,7 +1942,6 @@ void CPreferences::LoadPreferences(){
 	prefs->shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-//	prefs->m_iClientsMetDays = ini.GetInt("ClientsMetDays", 150);//EastShare - AndCycle, this official setting shoudlnt be change by user
 	prefs->m_iKnownMetDays = ini.GetInt("KnownMetDays", 0);
 	// EastShare END - Added by TAHO, .met file control
 

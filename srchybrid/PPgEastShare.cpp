@@ -42,7 +42,6 @@ CPPgEastShare::CPPgEastShare()
 	//EastShare END - Added by Pretender
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;
-//	m_htiClientsMet = NULL;//EastShare - AndCycle, this official setting shoudlnt be change by user
 	m_htiKnownMet = NULL;
 	//EastShare END - Added by TAHO, .met control
 }
@@ -82,14 +81,11 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 
 		// EastShare START - Added by TAHO, .met control // Modified by Pretender
 		m_htiMetControl = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_MET_FILE_CONTROL), iImgMETC, TVI_ROOT);
-//		m_htiClientsMet = m_ctrlTreeOptions.InsertItem(GetResString(IDS_EXPIRED_CLIENTS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiMetControl);//EastShare - AndCycle, this official setting shoudlnt be change by user
-//		m_ctrlTreeOptions.AddEditBox(m_htiClientsMet, RUNTIME_CLASS(CNumTreeOptionsEdit));//EastShare - AndCycle, this official setting shoudlnt be change by user
 		m_htiKnownMet = m_ctrlTreeOptions.InsertItem(GetResString(IDS_EXPIRED_KNOWN), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiMetControl);
 		m_ctrlTreeOptions.AddEditBox(m_htiKnownMet, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		// EastShare END - Added by TAHO, .met control
 
 		// EastShare START - Added by Pretender
-		m_ctrlTreeOptions.Expand(m_htiCreditSystem, TVE_EXPAND);//EastShare - AndCycle, this official setting shoudlnt be change by user
 		m_ctrlTreeOptions.Expand(m_htiMetControl, TVE_EXPAND);
 		// EastShare END - Added by Pretender
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
@@ -100,7 +96,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiCreditSystem, (int &)m_iCreditSystem); //EastShare - added by linekin , CreditSystem
 	
 	// EastShare START - Added by TAHO, .met flies Control
-//	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiClientsMet, m_iClientsMetDays);//EastShare - AndCycle, this official setting shoudlnt be change by user
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiKnownMet, m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met flies Control
 	
@@ -117,7 +112,6 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bAutoClearComplete = app_prefs->prefs->m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_bIsPayBackFirst = app_prefs->prefs->m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
-//	m_iClientsMetDays = app_prefs->GetClientsMetDays(); //EastShare - Added by TAHO , .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
 	m_iKnownMetDays = app_prefs->GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
 	
 	CPropertyPage::OnInitDialog();
@@ -152,7 +146,6 @@ BOOL CPPgEastShare::OnApply()
 
 
 	app_prefs->prefs->creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 
-//	app_prefs->SetClientsMetDays( m_iClientsMetDays); //EastShare - Added by TAHO , .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
 	app_prefs->SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
 
 	SetModified(FALSE);
@@ -177,7 +170,6 @@ void CPPgEastShare::Localize(void)
 		if (m_htiIsPayBackFirst) m_ctrlTreeOptions.SetItemText(m_htiIsPayBackFirst, GetResString(IDS_PAYBACKFIRST));//EastShare - added by AndCycle, Pay Back First
 
 		//EastShare START - Added By TAHO, .met file control // Modified by Pretender
-//		if (m_htiClientsMet) m_ctrlTreeOptions.SetEditLabel(m_htiClientsMet, (GetResString(IDS_EXPIRED_CLIENTS)));//EastShare - AndCycle, this official setting shoudlnt be change by user
 		if (m_htiKnownMet) m_ctrlTreeOptions.SetEditLabel(m_htiKnownMet, (GetResString(IDS_EXPIRED_KNOWN)));
 		//EastShare END - Added By TAHO, .met file control
 
@@ -206,7 +198,6 @@ void CPPgEastShare::OnDestroy()
 
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;
-//	m_htiClientsMet = NULL;//EastShare - AndCycle, this official setting shoudlnt be change by user
 	m_htiKnownMet = NULL;
 	//EastShare END - Added by TAHO, .met control
 	

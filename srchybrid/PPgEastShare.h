@@ -36,12 +36,10 @@ protected:
 	HTREEITEM m_htiLovelaceCredit;
 	HTREEITEM m_htiRatioCredit;
 	HTREEITEM m_htiPawcioCredit;
-//	HTREEITEM m_htiBoostLess;
 	HTREEITEM m_htiESCredit;
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 	// EastShare START - Added by TAHO, .met control
 	HTREEITEM m_htiMetControl;
-//	int m_iClientsMetDays;//EastShare - AndCycle, this official setting shoudlnt be change by user
 	HTREEITEM m_htiClientsMet;
 	int m_iKnownMetDays;
 	HTREEITEM m_htiKnownMet;

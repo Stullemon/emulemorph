@@ -468,7 +468,6 @@ void CClientCreditsList::LoadList()
 
 		//EastShare START - modified by TAHO, .met control
 		const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
-		//const uint32 dwExpired = time(NULL) - m_pAppPrefs->GetClientsMetDays()*86400; //EastShare - AndCycle, this official setting shoudlnt be change by user
 		//EastShare END - modified by TAHO, .met control
 		uint32 cDeleted = 0;
 		for (uint32 i = 0; i < count; i++){
@@ -479,10 +478,6 @@ void CClientCreditsList::LoadList()
 			else
 				file.Read(newcstruct, sizeof(CreditStruct));
 			
-			//EastShare START - modified by TAHO, .met control
-			//if (newcstruct->nLastSeen < dwExpired){
-			//if ( m_pAppPrefs->GetClientsMetDays() != 0 && newcstruct->nLastSeen < dwExpired){//EastShare - AndCycle, this official setting shoudlnt be change by user
-			//EastShare END - modified by TAHO, .met control
 			if (newcstruct->nLastSeen < dwExpired){
 				cDeleted++;
 				delete newcstruct;

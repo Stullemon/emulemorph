@@ -482,7 +482,6 @@ struct Preferences_Struct{
 	bool	m_bFirstStart;
 	bool	m_bCreditSystem;
 	bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
-//	int		m_iClientsMetDays; // EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
 	int		m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
 
 	bool	log2disk;
@@ -749,7 +748,6 @@ public:
 	bool IsBoostLess() const {return prefs->isboostless;}//Added by Yun.SF3, boost the less uploaded files
 
 	CreditSystemSelection  GetCreditSystem() const {return prefs->creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
-//	int  GetClientsMetDays() const {return prefs->m_iClientsMetDays;} // EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
 	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	bool IsBoostFriends() const {return prefs->isboostfriends;}//Added by Yun.SF3, boost friends
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
@@ -1151,7 +1149,6 @@ public:
 	bool	IsFirstStart()						{return prefs->m_bFirstStart;}
 	bool	UseCreditSystem()					{return true;} // EastShare - Fixed by linekin
 	void	SetCreditSystem(bool m_bInCreditSystem)	{prefs->m_bCreditSystem = m_bInCreditSystem;}	//EastShare - Credit System select
-//	void	SetClientsMetDays(int m_iInClientsMetDays)	{prefs->m_iClientsMetDays = m_iInClientsMetDays;}	//EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
 	void	SetKnownMetDays(int m_iInKnownMetDays)	{prefs->m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
 	bool	IsPayBackFirst()					{return prefs->m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
 	bool	IsAutoClearComplete()				{return prefs->m_bAutoClearComplete; }	//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
