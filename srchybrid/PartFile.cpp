@@ -4843,7 +4843,7 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 		return false;
 	if (!curCat->viewfilters.bPaused && GetStatus()==PS_PAUSED)
 		return false;
-	if (!curCat->viewfilters.bStopped && IsStopped())
+	if (!curCat->viewfilters.bStopped && IsStopped() && IsPartFile())
 		return false;
 	if (!curCat->viewfilters.bErrorUnknown && (GetStatus() == PS_ERROR || GetStatus() == PS_UNKNOWN))
 		return false;
