@@ -43,7 +43,6 @@
 #include "Kademlia/Kademlia/SearchManager.h"
 #include "SafeFile.h"
 #include "shahashset.h"
-#include "UploadQueue.h"
 
 // id3lib
 #include <id3/tag.h>
@@ -199,7 +198,7 @@ void CFileStatistic::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 		InChangedSpreadBar = true;
 		lastSize=iWidth;
 		lastbFlat=bFlat;
-			m_bitmapSpreadBar.DeleteObject();
+		m_bitmapSpreadBar.DeleteObject();
 		m_bitmapSpreadBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
 		m_bitmapSpreadBar.SetBitmapDimension(iWidth,  iHeight); 
 		hOldBitmap = cdcStatus.SelectObject(m_bitmapSpreadBar);
@@ -230,6 +229,7 @@ void CFileStatistic::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 	cdcStatus.SelectObject(hOldBitmap);
 }
 //MORPH END  - Changed by SiRoB, Reduce SpreadBar CPU consumption
+
 float CFileStatistic::GetSpreadSortValue() /*const*/
 {
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
@@ -437,7 +437,6 @@ CKnownFile::CKnownFile()
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 	InChangedSharedStatusBar = false;
-	m_pbitmapOldSharedStatusBar = NULL;
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 
 	// Mighty Knife: CRC32-Tag
@@ -453,7 +452,7 @@ CKnownFile::~CKnownFile()
 		delete taglist[i];
 	delete m_pAICHHashSet; 
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBar CPU consumption
-	if(m_pbitmapOldSharedStatusBar != NULL) m_dcSharedStatusBar.SelectObject(m_pbitmapOldSharedStatusBar);
+	m_bitmapSharedStatusBar.DeleteObject();
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBar CPU consumption
 }
 
@@ -539,11 +538,12 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 				crHave = RGB(104, 104, 104);
 				crPending = RGB(255, 208, 0);
 			} 
-			for (int i = 0; i < GetPartCount(); i++)
+			for (int i = 0; i < GetPartCount(); i++){
 				if(m_AvailPartFrequency[i] > 0 ){
 					COLORREF color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
 						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
 				}
+			}
 		}
 		s_ShareStatusBar.Draw(&cdcStatus, 0, 0, bFlat); 
 	}
@@ -2497,13 +2497,6 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 	}
 	delete[] imgResults;
 
-}
-
-void CKnownFile::SetPowerShared(int newValue) {
-    int oldValue = m_powershared;
-    m_powershared = newValue;
-    if(theApp.uploadqueue && oldValue != newValue)
-        theApp.uploadqueue->ReSortUploadSlots(true);
 }
 
 /*// #zegzav:updcliuplst
