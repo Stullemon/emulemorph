@@ -2804,7 +2804,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 uint8	CKnownFile::HideOSInWork() const
 {
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	if(GetSpreadbarSetStatus() == 0 || (GetSpreadbarSetStatus() == -1 && thePrefs.GetSparsePartFiles() == 0))
+	if(GetSpreadbarSetStatus() == 0 || (GetSpreadbarSetStatus() == -1 && thePrefs.GetSpreadbarSetStatus() == 0))
 		return 0;
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	if (m_bHideOSAuthorized==true)
