@@ -890,11 +890,11 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
 			client->GetPowerShared() == false) // client don't want powershared file //Morph - Added by AndCycle
 		{
-			if ((uint32)waitinglist.GetCount() > softQueueLimit || // soft queue limit is reached
-				client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
-					// then block client from getting on queue
-					return;
-				}
+			if ((uint32)waitinglist.GetCount() > softQueueLimit && // soft queue limit is reached
+			client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit()) {// and client has lower credits/wants lower prio file than average client in queue
+				// then block client from getting on queue
+				return;
+			}
 		}
 // <<---- end of change ---->
 
