@@ -49,8 +49,9 @@ class CMuleSystrayDlg;
 #define OP_ED2KLINK				12000
 #define OP_CLCOMMAND			12001
 
-class CemuleDlg : public CTrayDialog
+class CemuleDlg : public CTrayDialog, public CLoggable
 {
+	friend class CMuleToolbarCtrl;
 // Konstruktion
 public:
 	CemuleDlg(CWnd* pParent = NULL);	// Standardkonstruktor
@@ -95,6 +96,7 @@ public:
 	void			ApplyHyperTextFont(LPLOGFONT pFont);
 	void			SetKadButtonState();
 	void			ProcessED2KLink(LPCTSTR pszData);
+	void			SetStatusBarPartsSize();
 
 	CTransferWnd*	transferwnd;
 	CServerWnd*		serverwnd;
@@ -218,7 +220,6 @@ private:
 	void LoadNotifier(CString configuration); //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
 	bool notifierenabled;					  //<<-- enkeyDEV(kei-kun) -Quick disable/enable notifier-
 	void ShowToolPopup(bool toolsonly=false);
-	void SetStatusBarPartsSize();
 	void SetAllIcons();
 
 	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];

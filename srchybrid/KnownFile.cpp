@@ -777,36 +777,12 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	}
 
 	// set lastwrite date
-	struct _stat fileinfo;
-
+	struct _stat fileinfo = {0};
 	_fstat(file->_file, &fileinfo);
 	date = fileinfo.st_mtime;
+	AdjustNTFSDaylightFileTime(date, strFilePath);
 	
 	fclose(file);
-
-	// Mighty Knife: try to correct the daylight saving bug.
-	// Very special. Never activate this in a release version !!!
-//	#ifdef MIGHTY_SUMMERTIME
-	if (thePrefs.GetDaylightSavingPatch ()) {
-		CFileFind ff;
-		if (ff.FindFile(CString (in_directory)+"\\"+CString (in_filename),0)) {
-			ff.FindNextFile ();
-			CTime lwtime;
-			if (!ff.GetLastWriteTime(lwtime))
-				theApp.emuledlg->AddDebugLogLine(false, "Failed to get file date of %s - %s", ff.GetFileName(), GetErrorMessage(GetLastError()));
-			time_t fdate = mktime(lwtime.GetLocalTm());
-			if (fdate == -1)
-				theApp.emuledlg->AddDebugLogLine(false, "Failed to convert file date of %s", ff.GetFileName());
-			if (fdate != -1) {
-				CorrectLocalFileTime (CString (in_directory)+"\\"+CString (in_filename),fdate);
-				date = fdate;
-			}
-		}
-		ff.Close ();
-	}
-//	#endif
-	// [end] Mighty Knife
-
 	file = NULL;
 
 	// Add filetags
@@ -822,7 +798,6 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 		theApp.emuledlg->AddLogLine(false, "Hashing of file '%s' completed.", (const char*) hashfilename);
 	}
 	// [end] Mighty Knife
-
 	return true;	
 }
 

@@ -15,6 +15,8 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#pragma comment(lib, "winmm.lib")
+#include <Mmsystem.h>
 #include "emule.h"
 #include "IRCMain.h"
 #include "OtherFunctions.h"
@@ -219,6 +221,27 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						m_pwndIRC->AddInfoMessage( target, "* %s%s", source, message.Mid(6) );
 						return;
 					}
+					if( message.Left(5) == "SOUND")
+					{
+						message = message.Mid(6);
+						int soundlen = message.Find( " " );
+						CString sound;
+						if( soundlen != -1 )
+						{
+							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message.Left(soundlen));
+							message = message.Mid(soundlen);
+						}
+						else
+						{
+							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message);
+							message = " [sound]";
+						}
+						if(thePrefs.GetIrcSoundEvents())
+						{
+							PlaySound(sound, NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
+						}
+						m_pwndIRC->AddInfoMessage( target, "* %s%s", source, message );
+					}
 					if( message.Left(7) == "VERSION")
 					{
 						version = "eMule" + theApp.m_strCurVersionLong + (CString)Irc_Version;
@@ -243,6 +266,27 @@ void CIrcMain::ParseMessage( CString rawMessage )
 					{
 						m_pwndIRC->AddInfoMessage( source, "* %s%s", source, message.Mid(6) );
 						return;
+					}
+					if( message.Left(5) == "SOUND")
+					{
+						message = message.Mid(6);
+						int soundlen = message.Find( " " );
+						CString sound;
+						if( soundlen != -1 )
+						{
+							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message.Left(soundlen));
+							message = message.Mid(soundlen);
+						}
+						else
+						{
+							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message);
+							message = " [sound]";
+						}
+						if(thePrefs.GetIrcSoundEvents())
+						{
+							PlaySound(sound, NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
+						}
+						m_pwndIRC->AddInfoMessage( source, "* %s%s", source, message );
 					}
 					if( message.Left(7) == "VERSION")
 					{
@@ -283,7 +327,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 					{
 						if ( !thePrefs.GetIrcAcceptLinks() )
 						{
-							if( !thePrefs.GetIrcIgnoreInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
 							{
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file. If you wanted to accept the files from this person, enable Recieve files in the IRC Preferences.");
 							}
@@ -303,17 +347,20 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						CString RecieveString, build;
 						if(!theApp.friendlist->SearchFriend(userid, 0, 0))
 						{
-							if( !thePrefs.GetIrcIgnoreInfoMessage() )
+							if( thePrefs.GetIrcAcceptLinksFriends() )
 							{
-								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file but wasn't a friend. If you wanted to accept files from this person, add person as a friend or disable from friends only in the IRC preferences.");
+								if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
+								{
+									m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file but wasn't a friend. If you wanted to accept files from this person, add person as a friend or disable from friends only in the IRC preferences.");
+								}
+								return;
 							}
-							return;
 						}
 						RecieveString = message.Mid( index2+1 );
 						if( !RecieveString.IsEmpty() )
 						{
 							build.Format( GetResString(IDS_IRC_RECIEVEDLINK), source, RecieveString );
-							if( !thePrefs.GetIrcIgnoreInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", build );
 							ProcessLink( RecieveString );
 						}
@@ -372,7 +419,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASJOINED), source, target );
 			return;
 			}
-			if( !thePrefs.GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreJoinMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASJOINED), source, target );
 			m_pwndIRC->NewNick( target, source );
 			return;
@@ -387,7 +434,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 				return;
 			}
 			m_pwndIRC->RemoveNick( target, source );
-			if( !thePrefs.GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnorePartMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASPARTED), source, target, message );
 			return;
 		}
@@ -429,7 +476,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 				return;
 			}
 			m_pwndIRC->RemoveNick( target, target2 );
-			if( !thePrefs.GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreMiscMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_WASKICKEDBY), target2, source, message );
 			return;
 		}
@@ -644,6 +691,15 @@ void CIrcMain::Connect()
 		nick.Replace(":", "");
 		nick.Replace("/", "");
 		nick.Replace("@", "");
+		if( nick.MakeLower() == "emule" )
+		{
+			uint16 ident_int = 0;
+			for( int i = 0; i < 16; i++)
+			{
+				ident_int += thePrefs.GetUserHash()[i] * thePrefs.GetUserHash()[15-i];
+			}
+			nick.Format("eMuleIRC%u", ident_int);
+		}
 		nick = nick.Left(20);
 		version = "eMule" + theApp.m_strCurVersionLong + (CString)Irc_Version;
 		user = "USER " + ident + " 8 * :" + version;

@@ -30,9 +30,47 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgIRC, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(CPPgIRC, CPropertyPage)
+	ON_BN_CLICKED(IDC_IRC_USECHANFILTER, OnBtnClickPerform)
+	ON_BN_CLICKED(IDC_IRC_USEPERFORM, OnBtnClickPerform)
+	ON_EN_CHANGE(IDC_IRC_NICK_BOX, OnEnChangeNick)
+	ON_EN_CHANGE(IDC_IRC_PERFORM_BOX, OnSettingsChange)
+	ON_EN_CHANGE(IDC_IRC_SERVER_BOX, OnSettingsChange)
+	ON_EN_CHANGE(IDC_IRC_NAME_BOX, OnSettingsChange)
+	ON_EN_CHANGE(IDC_IRC_MINUSER_BOX, OnSettingsChange)
+	ON_BN_CLICKED(IDC_IRC_LISTONCONNECT, OnSettingsChange)
+	ON_WM_DESTROY()
+	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+END_MESSAGE_MAP()
+
 CPPgIRC::CPPgIRC()
 	: CPropertyPage(CPPgIRC::IDD)
+	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
+	m_iTimeStamp = 0;
+	m_iSoundEvents = 0;
+	m_iInfoMessage = 0;
+	m_iMiscMessage = 0;
+	m_iJoinMessage = 0;
+	m_iPartMessage = 0;
+	m_iQuitMessage = 0;
+	m_iEmuleProto = 0;
+	m_iAcceptLinks = 0;
+	m_iAcceptLinksFriends = 0;
+	m_iHelpChannel = 0;
+	m_bInitializedTreeOpts = false;
+	m_htiTimeStamp = NULL;
+	m_htiSoundEvents = NULL;
+	m_htiInfoMessage = NULL;
+	m_htiMiscMessage = NULL;
+	m_htiJoinMessage = NULL;
+	m_htiPartMessage = NULL;
+	m_htiQuitMessage = NULL;
+	m_htiEmuleProto = NULL;
+	m_htiAcceptLinks = NULL;
+	m_htiAcceptLinksFriends = NULL;
+	m_htiHelpChannel = NULL;
 }
 
 CPPgIRC::~CPPgIRC()
@@ -42,29 +80,56 @@ CPPgIRC::~CPPgIRC()
 void CPPgIRC::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_MISC_IRC, m_ctrlTreeOptions);
+	if (!m_bInitializedTreeOpts)
+	{
+		m_htiSoundEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_SOUNDEVENTS), TVI_ROOT, m_iSoundEvents);
+		m_htiHelpChannel = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_HELPCHANNEL), TVI_ROOT, m_iHelpChannel);
+		m_htiTimeStamp = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ADDTIMESTAMP), TVI_ROOT, m_iTimeStamp);
+		m_htiInfoMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_IGNOREINFOMESSAGE), TVI_ROOT, FALSE);
+		m_htiMiscMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_IGNOREMISCMESSAGE), m_htiInfoMessage, m_iMiscMessage);
+		m_htiJoinMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_IGNOREJOINMESSAGE), m_htiInfoMessage, m_iJoinMessage);
+		m_htiPartMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_IGNOREPARTMESSAGE), m_htiInfoMessage, m_iPartMessage);
+		m_htiQuitMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_IGNOREQUITMESSAGE), m_htiInfoMessage, m_iQuitMessage);
+		m_htiEmuleProto = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE), TVI_ROOT, m_iEmuleProto);
+		m_htiAcceptLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ACCEPTLINKS), TVI_ROOT, m_iAcceptLinks);
+		m_htiAcceptLinksFriends = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ACCEPTLINKSFRIENDS), TVI_ROOT, m_iAcceptLinksFriends);
+
+		m_ctrlTreeOptions.Expand(m_htiInfoMessage, TVE_EXPAND);
+
+		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
+
+        m_bInitializedTreeOpts = true;
+	}
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiTimeStamp, m_iTimeStamp);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiSoundEvents, m_iSoundEvents);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiMiscMessage, m_iMiscMessage);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiJoinMessage, m_iJoinMessage);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiPartMessage, m_iPartMessage);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiQuitMessage, m_iQuitMessage);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiEmuleProto, m_iEmuleProto);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiAcceptLinks, m_iAcceptLinks);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiAcceptLinksFriends, m_iAcceptLinksFriends);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiHelpChannel, m_iHelpChannel);
+
+	m_ctrlTreeOptions.UpdateCheckBoxGroup(m_htiInfoMessage);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAcceptLinksFriends, m_iAcceptLinks);
 }
-
-
-BEGIN_MESSAGE_MAP(CPPgIRC, CPropertyPage)
-	ON_BN_CLICKED(IDC_IRC_TIMESTAMP, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_USECHANFILTER, OnBtnClickPerform)
-	ON_BN_CLICKED(IDC_IRC_USEPERFORM, OnBtnClickPerform)
-	ON_BN_CLICKED(IDC_IRC_ACCEPTLINKS, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_ACCEPTLINKSFRIENDS, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_INFOMESSAGE, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_EMULEPROTO_INFOMESSAGE, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_HELPCHANNEL, OnSettingsChange)
-	ON_EN_CHANGE(IDC_IRC_NICK_BOX, OnEnChangeNick)
-	ON_EN_CHANGE(IDC_IRC_PERFORM_BOX, OnSettingsChange)
-	ON_EN_CHANGE(IDC_IRC_SERVER_BOX, OnSettingsChange)
-	ON_EN_CHANGE(IDC_IRC_NAME_BOX, OnSettingsChange)
-	ON_EN_CHANGE(IDC_IRC_MINUSER_BOX, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_LISTONCONNECT, OnSettingsChange)
-END_MESSAGE_MAP()
-
 
 BOOL CPPgIRC::OnInitDialog()
 {
+	m_iTimeStamp = thePrefs.GetIRCAddTimestamp();
+	m_iInfoMessage = 0;
+	m_iSoundEvents = thePrefs.GetIrcSoundEvents();
+	m_iMiscMessage = thePrefs.GetIrcIgnoreMiscMessage();
+	m_iJoinMessage = thePrefs.GetIrcIgnoreJoinMessage();
+	m_iPartMessage = thePrefs.GetIrcIgnorePartMessage();
+	m_iQuitMessage = thePrefs.GetIrcIgnoreQuitMessage();
+	m_iEmuleProto = thePrefs.GetIrcIgnoreEmuleProtoInfoMessage();
+	m_iAcceptLinks = thePrefs.GetIrcAcceptLinks();
+	m_iAcceptLinksFriends = thePrefs.GetIrcAcceptLinksFriends();
+	m_iHelpChannel = thePrefs.GetIrcHelpChannel();
+
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 	((CEdit*)GetDlgItem(IDC_IRC_NICK_BOX))->SetLimitText(20);
@@ -76,52 +141,37 @@ BOOL CPPgIRC::OnInitDialog()
 	Localize();
 	m_bnickModified = false;
 
-	GetDlgItem(IDC_IRC_PERFORM_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USEPERFORM) );
-	GetDlgItem(IDC_IRC_NAME_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
-	GetDlgItem(IDC_IRC_MINUSER_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
+	UpdateControls();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+BOOL CPPgIRC::OnKillActive()
+{
+	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// data from an open edit control
+	m_ctrlTreeOptions.HandleChildControlLosingFocus();
+	return CPropertyPage::OnKillActive();
 }
 
 void CPPgIRC::LoadSettings(void)
-{	//What am I doing wrong? why can't I use the thePrefs.prefs like the other tabs?
-	if(thePrefs.m_bircaddtimestamp)
-		this->CheckDlgButton(IDC_IRC_TIMESTAMP,1);
-	else
-		this->CheckDlgButton(IDC_IRC_TIMESTAMP,0);
-	if(thePrefs.m_bircignoreinfomessage)
-		this->CheckDlgButton(IDC_IRC_INFOMESSAGE,1);
-	else
-		this->CheckDlgButton(IDC_IRC_INFOMESSAGE,0);
-	if(thePrefs.m_bircignoreemuleprotoinfomessage)
-		this->CheckDlgButton(IDC_IRC_EMULEPROTO_INFOMESSAGE,1);
-	else
-		this->CheckDlgButton(IDC_IRC_EMULEPROTO_INFOMESSAGE,0);
-	if(thePrefs.m_bircacceptlinks)
-		this->CheckDlgButton(IDC_IRC_ACCEPTLINKS,1);
-	else
-		this->CheckDlgButton(IDC_IRC_ACCEPTLINKS,0);
-	if(thePrefs.m_bircacceptlinksfriends)
-		this->CheckDlgButton(IDC_IRC_ACCEPTLINKSFRIENDS,1);
-	else
-		this->CheckDlgButton(IDC_IRC_ACCEPTLINKSFRIENDS,0);
+{	
 	if(thePrefs.m_bircusechanfilter)
-		this->CheckDlgButton(IDC_IRC_USECHANFILTER,1);
+		CheckDlgButton(IDC_IRC_USECHANFILTER,1);
 	else
-		this->CheckDlgButton(IDC_IRC_USECHANFILTER,0);
+		CheckDlgButton(IDC_IRC_USECHANFILTER,0);
+	
 	if(thePrefs.m_bircuseperform)
-		this->CheckDlgButton(IDC_IRC_USEPERFORM,1);
+		CheckDlgButton(IDC_IRC_USEPERFORM,1);
 	else
-		this->CheckDlgButton(IDC_IRC_USEPERFORM,0);
+		CheckDlgButton(IDC_IRC_USEPERFORM,0);
+	
 	if(thePrefs.m_birclistonconnect)
-		this->CheckDlgButton(IDC_IRC_LISTONCONNECT,1);
+		CheckDlgButton(IDC_IRC_LISTONCONNECT,1);
 	else
-		this->CheckDlgButton(IDC_IRC_LISTONCONNECT,0);
-	if(thePrefs.m_birchelpchannel)
-		this->CheckDlgButton(IDC_IRC_HELPCHANNEL,1);
-	else
-		this->CheckDlgButton(IDC_IRC_HELPCHANNEL,0);
+		CheckDlgButton(IDC_IRC_LISTONCONNECT,0);
+	
 	GetDlgItem(IDC_IRC_SERVER_BOX)->SetWindowText(thePrefs.m_sircserver);
 	GetDlgItem(IDC_IRC_NICK_BOX)->SetWindowText(thePrefs.m_sircnick);
 	GetDlgItem(IDC_IRC_NAME_BOX)->SetWindowText(thePrefs.m_sircchannamefilter);
@@ -131,45 +181,41 @@ void CPPgIRC::LoadSettings(void)
 	GetDlgItem(IDC_IRC_MINUSER_BOX)->SetWindowText(strBuffer);
 }
 
-
 BOOL CPPgIRC::OnApply()
-{   //What am I doing wrong? why can't I use the thePrefs.prefs like the other tabs?
-	if(IsDlgButtonChecked(IDC_IRC_TIMESTAMP))
-		thePrefs.m_bircaddtimestamp = true;
-	else
-		thePrefs.m_bircaddtimestamp = false;
-	if(IsDlgButtonChecked(IDC_IRC_INFOMESSAGE))
-		thePrefs.m_bircignoreinfomessage = true;
-	else
-		thePrefs.m_bircignoreinfomessage = false;
-	if(IsDlgButtonChecked(IDC_IRC_EMULEPROTO_INFOMESSAGE))
-		thePrefs.m_bircignoreemuleprotoinfomessage = true;
-	else
-		thePrefs.m_bircignoreemuleprotoinfomessage = false;
-	if(IsDlgButtonChecked(IDC_IRC_ACCEPTLINKS))
-		thePrefs.m_bircacceptlinks = true;
-	else
-		thePrefs.m_bircacceptlinks = false;
-	if(IsDlgButtonChecked(IDC_IRC_ACCEPTLINKSFRIENDS))
-		thePrefs.m_bircacceptlinksfriends = true;
-	else
-		thePrefs.m_bircacceptlinksfriends = false;
+{
+	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// data from an open edit control
+	m_ctrlTreeOptions.HandleChildControlLosingFocus();
+
+	if (!UpdateData())
+		return FALSE;
+
+	thePrefs.m_bircaddtimestamp = m_iTimeStamp;
+	thePrefs.m_bircsoundevents = m_iSoundEvents;
+	thePrefs.m_bircignoremiscmessage = m_iMiscMessage;
+	thePrefs.m_bircignorejoinmessage = m_iJoinMessage;
+	thePrefs.m_bircignorepartmessage = m_iPartMessage;
+	thePrefs.m_bircignorequitmessage = m_iQuitMessage;
+	thePrefs.m_bircignoreemuleprotoinfomessage = m_iEmuleProto;
+	thePrefs.m_bircacceptlinks = m_iAcceptLinks;
+	thePrefs.m_bircacceptlinksfriends = m_iAcceptLinksFriends;
+	thePrefs.m_birchelpchannel = m_iHelpChannel;
+
 	if(IsDlgButtonChecked(IDC_IRC_LISTONCONNECT))
 		thePrefs.m_birclistonconnect = true;
 	else
 		thePrefs.m_birclistonconnect = false;
+
 	if(IsDlgButtonChecked(IDC_IRC_USECHANFILTER))
 		thePrefs.m_bircusechanfilter = true;
 	else
 		thePrefs.m_bircusechanfilter = false;
+
 	if(IsDlgButtonChecked(IDC_IRC_USEPERFORM))
 		thePrefs.m_bircuseperform = true;
 	else
 		thePrefs.m_bircuseperform = false;
-	if(IsDlgButtonChecked(IDC_IRC_HELPCHANNEL))
-		thePrefs.m_birchelpchannel = true;
-	else
-		thePrefs.m_birchelpchannel = false;
+
 	char buffer[510];
 	if(GetDlgItem(IDC_IRC_NICK_BOX)->GetWindowTextLength())
 	{
@@ -212,18 +258,18 @@ BOOL CPPgIRC::OnApply()
 	else{
 		thePrefs.m_iircchanneluserfilter = 0;
 	}
-//	thePrefs.Save();
+
 	LoadSettings();
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();
 }
+
 void CPPgIRC::Localize(void)
 {
 	if(m_hWnd)
 	{
 		GetDlgItem(IDC_IRC_SERVER_FRM)->SetWindowText(GetResString(IDS_PW_SERVER));
 		GetDlgItem(IDC_IRC_MISC_FRM)->SetWindowText(GetResString(IDS_PW_MISC));
-		GetDlgItem(IDC_IRC_TIMESTAMP)->SetWindowText(GetResString(IDS_IRC_ADDTIMESTAMP));
 		GetDlgItem(IDC_IRC_NICK_FRM)->SetWindowText(GetResString(IDS_PW_NICK));
 		GetDlgItem(IDC_IRC_NAME_TEXT)->SetWindowText(GetResString(IDS_IRC_NAME));
 		GetDlgItem(IDC_IRC_MINUSER_TEXT)->SetWindowText(GetResString(IDS_UUSERS));
@@ -231,19 +277,63 @@ void CPPgIRC::Localize(void)
 		GetDlgItem(IDC_IRC_USECHANFILTER)->SetWindowText(GetResString(IDS_IRC_USEFILTER));
 		GetDlgItem(IDC_IRC_PERFORM_FRM)->SetWindowText(GetResString(IDS_IRC_PERFORM));
 		GetDlgItem(IDC_IRC_USEPERFORM)->SetWindowText(GetResString(IDS_IRC_USEPERFORM));
-		GetDlgItem(IDC_IRC_LISTONCONNECT)->SetWindowText(GetResString(IDS_IRC_LOADCHANNELLISTONCON));
-		GetDlgItem(IDC_IRC_ACCEPTLINKS)->SetWindowText(GetResString(IDS_IRC_ACCEPTLINKS));
-		GetDlgItem(IDC_IRC_ACCEPTLINKSFRIENDS)->SetWindowText(GetResString(IDS_IRC_ACCEPTLINKSFRIENDS));
-		GetDlgItem(IDC_IRC_INFOMESSAGE)->SetWindowText(GetResString(IDS_IRC_IGNOREINFOMESSAGE));
-		GetDlgItem(IDC_IRC_EMULEPROTO_INFOMESSAGE)->SetWindowText(GetResString(IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE));
-		GetDlgItem(IDC_IRC_HELPCHANNEL)->SetWindowText(GetResString(IDS_IRC_HELPCHANNEL));
+
+		if (m_htiSoundEvents) m_ctrlTreeOptions.SetItemText(m_htiSoundEvents, GetResString(IDS_IRC_SOUNDEVENTS));
+		if (m_htiTimeStamp) m_ctrlTreeOptions.SetItemText(m_htiTimeStamp, GetResString(IDS_IRC_ADDTIMESTAMP));
+		if (m_htiInfoMessage) m_ctrlTreeOptions.SetItemText(m_htiInfoMessage, GetResString(IDS_IRC_IGNOREINFOMESSAGE));
+		if (m_htiMiscMessage) m_ctrlTreeOptions.SetItemText(m_htiMiscMessage, GetResString(IDS_IRC_IGNOREMISCMESSAGE));
+		if (m_htiJoinMessage) m_ctrlTreeOptions.SetItemText(m_htiJoinMessage, GetResString(IDS_IRC_IGNOREJOINMESSAGE));
+		if (m_htiPartMessage) m_ctrlTreeOptions.SetItemText(m_htiPartMessage, GetResString(IDS_IRC_IGNOREPARTMESSAGE));
+		if (m_htiQuitMessage) m_ctrlTreeOptions.SetItemText(m_htiQuitMessage, GetResString(IDS_IRC_IGNOREQUITMESSAGE));
+		if (m_htiEmuleProto) m_ctrlTreeOptions.SetItemText(m_htiEmuleProto, GetResString(IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE));
+		if (m_htiAcceptLinks) m_ctrlTreeOptions.SetItemText(m_htiAcceptLinks, GetResString(IDS_IRC_ACCEPTLINKS));
+		if (m_htiAcceptLinksFriends) m_ctrlTreeOptions.SetItemText(m_htiAcceptLinksFriends, GetResString(IDS_IRC_ACCEPTLINKSFRIENDS));
+		if (m_htiHelpChannel) m_ctrlTreeOptions.SetItemText(m_htiHelpChannel, GetResString(IDS_IRC_HELPCHANNEL));
 	}
 }
 
-void CPPgIRC::OnBtnClickPerform() {
+void CPPgIRC::OnBtnClickPerform()
+{
 	SetModified();
-	GetDlgItem(IDC_IRC_PERFORM_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USEPERFORM) );
+	UpdateControls();
+}
 
+void CPPgIRC::UpdateControls()
+{
+	GetDlgItem(IDC_IRC_PERFORM_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USEPERFORM) );
 	GetDlgItem(IDC_IRC_NAME_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
 	GetDlgItem(IDC_IRC_MINUSER_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
+}
+
+void CPPgIRC::OnDestroy()
+{
+	m_ctrlTreeOptions.DeleteAllItems();
+	m_ctrlTreeOptions.DestroyWindow();
+	m_bInitializedTreeOpts = false;
+	m_htiAcceptLinks = NULL;
+	m_htiAcceptLinksFriends = NULL;
+	m_htiEmuleProto = NULL;
+	m_htiHelpChannel = NULL;
+	m_htiSoundEvents = NULL;
+	m_htiInfoMessage = NULL;
+	m_htiMiscMessage = NULL;
+	m_htiJoinMessage = NULL;
+	m_htiPartMessage = NULL;
+	m_htiQuitMessage = NULL;
+	m_htiTimeStamp = NULL;
+    CPropertyPage::OnDestroy();
+}
+
+LRESULT CPPgIRC::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == IDC_MISC_IRC){
+		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
+		if (pton->hItem == m_htiAcceptLinks){
+			BOOL bCheck;
+			if (m_ctrlTreeOptions.GetCheckBox(m_htiAcceptLinks, bCheck))
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAcceptLinksFriends, bCheck);
+		}
+		SetModified();
+	}
+	return 0;
 }

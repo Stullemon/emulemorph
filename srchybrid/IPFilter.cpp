@@ -158,7 +158,8 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			while (i < m_iplist.GetCount())
 			{
 				SIPFilter* pCur = m_iplist[i];
-				if ((pCur->start >= pPrv->start && pCur->start <= pPrv->end || pCur->start == pPrv->end+1))
+				if (   pCur->start >= pPrv->start && pCur->start <= pPrv->end	 // overlapping
+					|| pCur->start == pPrv->end+1 && pCur->level == pPrv->level) // adjacent
 				{
 					if (pCur->start != pPrv->start || pCur->end != pPrv->end) // don't merge identical entries
 					{

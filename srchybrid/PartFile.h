@@ -264,7 +264,7 @@ public:
 	void	UpdateDisplayedInfo(boolean force=false);
 
 	uint8	GetCategory() const;
-	void	SetCategory(uint8 cat);
+	void	SetCategory(uint8 cat,bool setprio=true);
 	bool	CheckShowItemInGivenCat(int inCategory);
 
 	uint8*	MMCreatePartStatus();

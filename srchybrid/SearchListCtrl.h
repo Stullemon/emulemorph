@@ -48,8 +48,8 @@ public:
 protected:
 	uint32	m_nResultsID;
 
-	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src);
-	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src);
+	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
+	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 
 	static int Compare(const CSearchFile* item1, const CSearchFile* item2, LPARAM lParamSort);
 	static int CompareChild(const CSearchFile* file1, const CSearchFile* file2, LPARAM lParamSort);

@@ -12,23 +12,24 @@ public:
 // Dialog Data
 	enum { IDD = IDD_PPG_DIRECTORIES };
 
+	void Localize(void);
+
 protected:
+	CDirectoryTreeCtrl m_ShareSelector;
+	CListCtrl m_ctlUncPaths;
+
+	void LoadSettings(void);
+	void FillUncList(void);
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	DECLARE_MESSAGE_MAP()
 	virtual BOOL OnInitDialog();
-public:
 	virtual BOOL OnApply();
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnBnClickedSelincdir();
 	afx_msg void OnBnClickedSeltempdir();
 	afx_msg void OnBnClickedAddUNC();
 	afx_msg void OnBnClickedRemUNC();
-	void Localize(void);
-	CDirectoryTreeCtrl m_ShareSelector;
-
-private:
-	void LoadSettings(void);
-	CListCtrl* m_uncfolders;
-	void FillUncList(void);
 };

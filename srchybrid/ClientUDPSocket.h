@@ -25,6 +25,8 @@ struct UDPPack
 	Packet* packet;
 	uint32 dwIP;
 	uint16 nPort;
+	uint32 dwTime;
+	//uint16 nPriority; We could add a priority system here to force some packets.
 };
 #pragma pack()
 

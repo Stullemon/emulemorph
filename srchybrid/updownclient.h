@@ -585,7 +585,7 @@ public:
 	void			SendFileRequest();
 	void			SendStartupLoadReq();
 	void			ProcessFileInfo(CSafeMemFile* data, CPartFile* file);
-	void			ProcessFileStatus(CSafeMemFile* data, CPartFile* file);
+	void			ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPartFile* file);
 	void			ProcessHashSet(char* data, uint32 size);
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	void			SendBlockRequests();

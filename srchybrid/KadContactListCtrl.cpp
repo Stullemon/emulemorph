@@ -61,7 +61,7 @@ void CKadContactListCtrl::Init()
 {
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
-	InsertColumn(colID,"ID",LVCFMT_LEFT,100);
+	InsertColumn(colID,GetResString(IDS_ID),LVCFMT_LEFT,100);
 	InsertColumn(colType,GetResString(IDS_TYPE) ,LVCFMT_LEFT,50);
 	InsertColumn(colContact, GetResString(IDS_KADCONTACTLAB) ,LVCFMT_LEFT,50);
 	InsertColumn(colDistance,GetResString(IDS_KADDISTANCE),LVCFMT_LEFT,50);
@@ -110,8 +110,25 @@ void CKadContactListCtrl::SetAllIcons()
 
 void CKadContactListCtrl::Localize()
 {
-}
+	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
+	HDITEM hdi;
+	hdi.mask = HDI_TEXT;
+	CString strRes;
 
+	for (int icol=0;icol< pHeaderCtrl->GetItemCount() ;icol++) {
+		switch (icol) {
+			case 0: strRes = GetResString(IDS_ID); break;
+			case 1: strRes = GetResString(IDS_TYPE); break;
+			case 2: strRes = GetResString(IDS_KADCONTACTLAB); break;
+			case 3: strRes = GetResString(IDS_KADDISTANCE); break;
+		}
+	
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(icol, &hdi);
+		strRes.ReleaseBuffer();
+	}
+}
+	
 void CKadContactListCtrl::UpdateContact(int iItem, Kademlia::CContact* contact)
 {
 	CString id;

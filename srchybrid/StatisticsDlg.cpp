@@ -346,15 +346,14 @@ void CStatisticsDlg::RepaintMeters() {
 }
 
  //MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float uploadtonetworkrate, float uploadrateControlPackets) {
+void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float uploadtonetworkrate, float uploadrateControlPackets)
+{
 	double m_dPlotDataUp[ 5 ];
  //MORPH END   - Added by Yun.SF3, ZZ Upload System 20030818-1923
 	double m_dPlotDataDown[ 3 ];
-	// -khaos--+++> Must accomodate changed GetDownloadStats...
-	int myStats[20];
-	// <-----khaos-
 
-	if (!theApp.emuledlg->IsRunning()) return;
+	if (!theApp.emuledlg->IsRunning())
+		return;
 
 	// current rate
 	m_dPlotDataDown[2]=downloadrate;
@@ -392,6 +391,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 
 
 	// get Partialfiles summary
+	CDownloadQueue::SDownloadStats myStats;
 	theApp.downloadqueue->GetDownloadStats(myStats);
 	// -khaos--+++> Ratio is now handled in the scope itself
 	m_dPlotDataMore[0]=theApp.listensocket->GetActiveConnections();
@@ -400,10 +400,8 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 	m_dPlotDataMore[1]=theApp.uploadqueue->GetActiveUploadsCount();
 	m_dPlotDataMore[2]=theApp.uploadqueue->GetUploadQueueLength();
 	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
-	m_dPlotDataMore[3]=myStats[1];
+	m_dPlotDataMore[3]=myStats.a[1];
 
-	//for (int i=0;i<4;i++) if (m_dPlotDataMore[i]>thePrefs.GetStatsMax()) {resize=true;thePrefs.GetStatsMax()=(int)m_dPlotDataMore[i];}
-	//if (resize) m_Statistics.SetRanges(0, thePrefs.GetStatsMax()+15) ;
 	m_Statistics.AppendPoints(m_dPlotDataMore);
 }
 
@@ -469,8 +467,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 		if (forceUpdate || stattree.IsExpanded(h_download)) {
 			uint64	DownOHTotal = 0;
 			uint64	DownOHTotalPackets = 0;
-			//uint64	lostgainedStats[2]; khaos::compcorruptfix+
-			int		myStats[19];
+			CDownloadQueue::SDownloadStats myStats;
 			theApp.downloadqueue->GetDownloadStats(myStats);
 			// TRANSFER -> DOWNLOADS -> SESSION SECTION
 			if (forceUpdate || stattree.IsExpanded(h_down_session)) {
@@ -563,54 +560,54 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				cbuffer.Format( "%s: %u" , GetResString( IDS_STATS_COMPDL ) , thePrefs.GetDownSessionCompletedFiles() );
 				stattree.SetItemText( down_S[1] , cbuffer );
 				// Active Downloads
-				cbuffer.Format( GetResString( IDS_STATS_ACTDL ) , myStats[1] );
+				cbuffer.Format( GetResString( IDS_STATS_ACTDL ) , myStats.a[1] );
 				stattree.SetItemText( down_S[2] , cbuffer );
 				// Found Sources
-				cbuffer.Format( GetResString( IDS_STATS_FOUNDSRC ) , myStats[0] );
+				cbuffer.Format( GetResString( IDS_STATS_FOUNDSRC ) , myStats.a[0] );
 				stattree.SetItemText( down_S[3] , cbuffer );
 				if (forceUpdate || stattree.IsExpanded(down_S[3])) { 
 					int i = 0;
 					// Sources By Status
-					cbuffer.Format( "%s: %u" , GetResString( IDS_ONQUEUE ) , myStats[2] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_ONQUEUE ) , myStats.a[2] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_QUEUEFULL ) , myStats[3] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_QUEUEFULL ) , myStats.a[3] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_NONEEDEDPARTS ) , myStats[4] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_NONEEDEDPARTS ) , myStats.a[4] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_ASKING ) , myStats[5] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_ASKING ) , myStats.a[5] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_RECHASHSET ) , myStats[6] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_RECHASHSET ) , myStats.a[6] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_CONNECTING ) , myStats[7] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_CONNECTING ) , myStats.a[7] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_CONNVIASERVER) , myStats[8] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_CONNVIASERVER) , myStats.a[8] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_TOOMANYCONNS) , myStats[9] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_TOOMANYCONNS) , myStats.a[9] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_NOCONNECTLOW2LOW) , myStats[10] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_NOCONNECTLOW2LOW) , myStats.a[10] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_STATS_PROBLEMATIC) , myStats[12] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_STATS_PROBLEMATIC) , myStats.a[12] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_BANNED) , myStats[13] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_BANNED) , myStats.a[13] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_ASKED4ANOTHERFILE) , myStats[15] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_ASKED4ANOTHERFILE) , myStats.a[15] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString(IDS_UNKNOWN) , myStats[11] );
+					cbuffer.Format( "%s: %u" , GetResString(IDS_UNKNOWN) , myStats.a[11] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
 
 					// where from? (3)
-					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAED2KSQ ) , myStats[16] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAED2KSQ ) , myStats.a[16] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAKAD ) , myStats[17] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAKAD ) , myStats.a[17] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_VIASE ) , myStats[18] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_VIASE ) , myStats.a[18] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
-					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAPASSIVE ) , myStats[19] );
+					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAPASSIVE ) , myStats.a[14] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
 
 				}
 				// Set Download Sessions
-				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats[1]; // Add Active Downloads
+				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
 				statBadSessions =	thePrefs.GetDownS_FailedSessions();
 				cbuffer.Format( "%s: %u" , GetResString(IDS_STATS_DLSES) , statGoodSessions + statBadSessions );
 				stattree.SetItemText( down_S[4] , cbuffer );
@@ -774,7 +771,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				cbuffer.Format("%s: %u", GetResString(IDS_STATS_COMPDL), thePrefs.GetDownCompletedFiles() );
 				stattree.SetItemText(down_T[1], cbuffer);
 				// Set Cum Download Sessions
-				statGoodSessions = thePrefs.GetDownC_SuccessfulSessions() + myStats[1]; // Need to reset these from the session section.  Declared up there.
+				statGoodSessions = thePrefs.GetDownC_SuccessfulSessions() + myStats.a[1]; // Need to reset these from the session section.  Declared up there.
 				statBadSessions = thePrefs.GetDownC_FailedSessions(); // ^^^^^^^^^^^^^^
 				cbuffer.Format("%s: %u", GetResString(IDS_STATS_DLSES), statGoodSessions+statBadSessions );
 				stattree.SetItemText(down_T[2], cbuffer);
@@ -1604,7 +1601,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					} // - End Time Statistics -> Projected Averages -> Time Period -> Uploads Section
 					// TIME STATISTICS -> PROJECTED AVERAGES -> TIME PERIOD -> DOWNLOADS SECTION
 					if (forceUpdate || stattree.IsExpanded(time_aap_hdown[mx])) {
-						int		myStats[19];
+						CDownloadQueue::SDownloadStats myStats;
 						theApp.downloadqueue->GetDownloadStats(myStats);
 						// Downloaded Data
 						cbuffer.Format(GetResString(IDS_STATS_DDATA),CastItoXBytes( (uint64) (theApp.stat_sessionReceivedBytes+thePrefs.GetTotalDownloaded()) * avgModifier[mx] ));
@@ -1694,7 +1691,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format("%s: %I64u", GetResString(IDS_STATS_COMPDL), (uint64) (thePrefs.GetDownCompletedFiles() * avgModifier[mx]) );
 						stattree.SetItemText(time_aap_down[mx][1], cbuffer);
 						// Set Cum Download Sessions
-						uint32	statGoodSessions = (uint32) (thePrefs.GetDownC_SuccessfulSessions() + myStats[1]) * avgModifier[mx];
+						uint32	statGoodSessions = (uint32) (thePrefs.GetDownC_SuccessfulSessions() + myStats.a[1]) * avgModifier[mx];
 						uint32	statBadSessions = (uint32) thePrefs.GetDownC_FailedSessions() * avgModifier[mx];
 						double	percentSessions;
 						cbuffer.Format("%s: %u", GetResString(IDS_STATS_DLSES), statGoodSessions+statBadSessions );
@@ -1900,7 +1897,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				uint32	currtop = 0;
 				uint32	lasttop = 0xFFFFFFFF;
 				uint32	totalOther = 0;
-				for(uint32 i=0; i<8; i++)
+				for(uint32 i=0; i<12; i++)
 				{
 					POSITION pos=clientVersionEMule.GetStartPosition();
 					uint32 topver=0;
@@ -1932,24 +1929,24 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					else 
 						continue;
 					
-					if (i > 3) totalOther += topcnt;
+					if (i > 5) totalOther += topcnt;
 					
 					if (i >= cli_lastCount[0]) {
-						if (i == 4) cli_other[0] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), clisoft[0]);
-						if (i > 3) cli_versions[i] = stattree.InsertItem(cbuffer, cli_other[0]);
+						if (i == 6) cli_other[0] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), clisoft[0]);
+						if (i > 5) cli_versions[i] = stattree.InsertItem(cbuffer, cli_other[0]);
 						else cli_versions[i] = stattree.InsertItem(cbuffer, clisoft[0]);
 					}
 					else stattree.SetItemText(cli_versions[i], cbuffer);
 
 					verCount++;
 				}
-				if (verCount > 4) {
+				if (verCount > 6) {
 					cbuffer.Format("%s: %i (%1.1f%%)", GetResString(IDS_STATS_OLDCLIENTS), totalOther, (double) 100 * totalOther / myStats[2]);
 					stattree.SetItemText(cli_other[0], cbuffer);
 				}
 				if (verCount < cli_lastCount[0]) for (uint32 i=0; i<(cli_lastCount[0]-verCount); i++) {
 					stattree.DeleteItem(cli_versions[cli_lastCount[0]-1-i]);
-					if ((cli_lastCount[0]-1-i) == 4) stattree.DeleteItem(cli_other[0]);
+					if ((cli_lastCount[0]-1-i) == 6) stattree.DeleteItem(cli_other[0]);
 				}
 				cli_lastCount[0] = verCount;
 

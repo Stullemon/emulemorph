@@ -2663,7 +2663,7 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			return -1;
 		return _tcsicmp(client1->GetUserName(),client2->GetUserName());
 	case 1: //size but we use status asc
-		return CompareUnsigned(client2->GetDownloadState(), client1->GetDownloadState());	// SLUGFILLER: DLsortFix - better status(downloading, on queue)<->bigger file
+		return client1->GetSourceFrom() - client2->GetSourceFrom();
 	case 2://transfered asc
 	case 3://completed asc
 		return CompareUnsigned(client1->GetTransferedDown(), client2->GetTransferedDown());

@@ -106,7 +106,6 @@ public:
 		Unknown
 	};
 
-	EKnownType InitKnownType();
 	EKnownType GetKnownType() const { return m_eKnown; }
 	void SetKnownType(EKnownType eType) { m_eKnown = eType; }
 

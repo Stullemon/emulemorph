@@ -849,22 +849,13 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			// check date of .part file - if its wrong, rehash file
 			CFileStatus filestatus;
 			m_hpartfile.GetStatus(filestatus); // this; "...returns m_attribute without high-order flags" indicates a known MFC bug, wonder how many unknown there are... :)
-			time_t fdate = safe_mktime(filestatus.m_mtime.GetLocalTm());
+			uint32 fdate = filestatus.m_mtime.GetTime();
 			if (fdate == -1){
 				if (thePrefs.GetVerbose())
 				AddDebugLogLine(false, "Failed to convert file date of %s (%s)", filestatus.m_szFullName, GetFileName());
 			}
-// #ifdef MIGHTY_SUMMERTIME
-			// Mighty Knife: try to correct the daylight saving bug.
-			// Very special. Never activate this in a release version !!!
-			if (thePrefs.GetDaylightSavingPatch ()) {
-				if (fdate != -1) {
-					CorrectLocalFileTime (m_hpartfile.GetFilePath(),fdate);
-				}
-			}
-			// [end] Mighty Knife
-// #endif
-
+			else
+				AdjustNTFSDaylightFileTime(fdate, filestatus.m_szFullName);
 			if (date != fdate){
 				CString strFileInfo;
 				strFileInfo.Format(_T("%s (%s)"), GetFilePath(), GetFileName());
@@ -926,61 +917,29 @@ bool CPartFile::SavePartFile(){
 	if (!end)
 		ff.FindNextFile();
 	if (end || ff.IsDirectory()){
-		AddLogLine(false, GetResString(IDS_ERR_SAVEMET), GetResString(IDS_ERR_PART_FNF), m_partmetfilename, GetFileName());
+		AddLogLine(false, GetResString(IDS_ERR_SAVEMET) + _T(" - %s"), m_partmetfilename, GetFileName(), GetResString(IDS_ERR_PART_FNF));
 		return false;
 	}
 
 	if (!m_PartsHashing){	// SLUGFILLER: SafeHash - don't update the file date unless all parts are hashed
 		//get filedate
 		CTime lwtime;
-	if (!ff.GetLastWriteTime(lwtime)){
-		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, "Failed to get file date of %s (%s) - %s", m_partmetfilename, GetFileName(), GetErrorMessage(GetLastError()));
-	}
-		date = safe_mktime(lwtime.GetLocalTm());
-	if (date == -1){
-		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, "Failed to convert file date of %s (%s)", m_partmetfilename, GetFileName());
+		if (!ff.GetLastWriteTime(lwtime)){
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, "Failed to get file date of %s (%s) - %s", m_partmetfilename, GetFileName(), GetErrorMessage(GetLastError()));
 		}
-		// Mighty Knife: try to correct the daylight saving bug.
-		// Very special. Never activate this in a release version !!!
-//		#ifdef MIGHTY_SUMMERTIME
-
-		// HINT TO THE MAIN DEVELOPER FOR CLEANUP
-		// --------------------------------------
-		// Please change the data type of CKnownFile::date from "uint32" to "time_t"
-		// (and with that also the return value of "CKnownFile::GetFileDate").
-		// Otherwise such if-clauses like the above "if (date == -1)" would make no sense !
-		// Since the data types are almost identical (apart from the sign) this should
-		// make neighter a big deal, nor a any difference.
-
-		if (thePrefs.GetDaylightSavingPatch ()) {
-			if (date != -1) {
-				time_t fdate = date;
-				CorrectLocalFileTime (ff.GetFilePath(),fdate);
-				date = fdate;
-			}
+		date = lwtime.GetTime();
+		if (date == -1){
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, "Failed to convert file date of %s (%s)", m_partmetfilename, GetFileName());
 		}
-//		#endif
-		// [end] Mighty Knife
-
+		else
+			AdjustNTFSDaylightFileTime(date, ff.GetFilePath());
 	}	// SLUGFILLER: SafeHash
 	ff.Close();
-	uint32 lsc = safe_mktime(lastseencomplete.GetLocalTm());
 
 	CString strTmpFile(m_fullname);
 	strTmpFile += PARTMET_TMP_EXT;
-
-	// Mighty Knife: try to correct the daylight saving bug.
-	// Very special. Never activate this in a release version !!!
-//	#ifdef MIGHTY_SUMMERTIME
-	if (thePrefs.GetDaylightSavingPatch ()) {
-		time_t lsctmp = lsc;
-		CorrectLocalFileTime (strTmpFile,lsctmp);
-		lsc = lsctmp;
-	}
-//	#endif
-	// [end] Mighty Knife
 
 	// save file data to part.met file
 	CSafeBufferedFile file;
@@ -1053,7 +1012,7 @@ bool CPartFile::SavePartFile(){
 		CTag prioritytag(FT_DLPRIORITY, IsAutoDownPriority() ? PR_AUTO : m_iDownPriority);
 		prioritytag.WriteTagToFile(&file);
 
-		CTag lsctag(FT_LASTSEENCOMPLETE,lsc);
+		CTag lsctag(FT_LASTSEENCOMPLETE,lastseencomplete.GetTime());
 		lsctag.WriteTagToFile(&file);
 
 		CTag ulprioritytag(FT_ULPRIORITY, IsAutoUpPriority() ? PR_AUTO : GetUpPriority());
@@ -1877,7 +1836,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			}
 			if (cur_src->IsBanned())
 				nCountForState = DS_BANNED;
-			if (cur_src->GetSourceFrom() >= SF_SERVER && cur_src->GetSourceFrom() <= SF_SOURCE_EXCHANGE)
+			if (cur_src->GetSourceFrom() >= SF_SERVER && cur_src->GetSourceFrom() <= SF_PASSIVE)
 				++src_stats[cur_src->GetSourceFrom()];
 
 			ASSERT( nCountForState < sizeof(m_anStates)/sizeof(m_anStates[0]) );
@@ -2618,32 +2577,11 @@ BOOL CPartFile::PerformFileComplete()
 	// because of different file date!
 	ASSERT( m_hpartfile.m_hFile == INVALID_HANDLE_VALUE ); // the file must be closed/commited!
 	struct _stat st;
-
-	// Mighty Knife: slightly different code to allow the below define to become active
-	if (_stat(strNewname, &st) == 0) {
+	if (_stat(strNewname, &st) == 0)
+	{
 		date = st.st_mtime;
-// #ifdef MIGHTY_SUMMERTIME
-		// Mighty Knife: try to correct the daylight saving bug.
-		// Very special. Never activate this in a release version !!!
-
-		// HINT TO THE MAIN DEVELOPERS FOR CLEANUP
-		// ---------------------------------------
-		// Please change the data type of CKnownFile::date from "uint32" to "time_t"
-		// (and with that also the return value of "CKnownFile::GetFileDate").
-		// Since the data types are almost identical (apart from the sign) this should
-		// make neighter a big deal, nor a any difference.
-		//
-		// Normalize time stamp
-		if (thePrefs.GetDaylightSavingPatch ()) {
-			time_t fdate2 = date;
-			CorrectLocalFileTime (strNewname,fdate2);
-			date = fdate2;
-		}
-		// [end] Mighty Knife summertime
-// #endif
-
+		AdjustNTFSDaylightFileTime(date, strNewname);
 	}
-	// [end] Migthy Knife
 
 	// remove part.met file
 	if (remove(m_fullname))
@@ -2669,6 +2607,7 @@ BOOL CPartFile::PerformFileComplete()
 	SetPath(indir);
 	SetFilePath(m_fullname);
 	SetStatus(PS_COMPLETE);
+	paused = false;
 	// paused = false; // khaos::kmod+ No longer necessary.
 // explicitly unlock the file before posting something to the main thread.
 	sLock.Unlock();
@@ -2706,10 +2645,6 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 		else
 			UpdateDisplayedInfo(true);
 		theApp.emuledlg->transferwnd->downloadlistctrl.ShowFilesCount();
-		//SHAddToRecentDocs(SHARD_PATH, fullname); // This is a real nasty call that takes ~110 ms on my 1.4 GHz Athlon and isn't really needed afai see...[ozon]
-
-		if (thePrefs.StartNextFile())
-			theApp.downloadqueue->StartNextFile(GetCategory());
 
 		// -khaos--+++> Extended Statistics Added 2-10-03
 		thePrefs.Add2DownCompletedFiles();		// Increments cumDownCompletedFiles in prefs struct
@@ -2816,6 +2751,44 @@ void CPartFile::DeleteFile(){
 }
 
 // SLUGFILLER: SafeHash remove - removed HashSinglePart completely.
+/*
+bool CPartFile::HashSinglePart(uint16 partnumber)
+{
+	if ((GetHashCount() <= partnumber) && (GetPartCount() > 1)){
+		AddLogLine(true,GetResString(IDS_ERR_HASHERRORWARNING),GetFileName());
+		hashsetneeded = true;
+		return true;
+	}
+	else if (!GetPartHash(partnumber) && GetPartCount() != 1){
+		AddLogLine(true,GetResString(IDS_ERR_INCOMPLETEHASH),GetFileName());
+		hashsetneeded = true;
+		return true;		
+	}
+	else{
+		uchar hashresult[16];
+		m_hpartfile.Seek((LONGLONG)PARTSIZE*partnumber,0);
+		uint32 length = PARTSIZE;
+		if ((ULONGLONG)PARTSIZE*(partnumber+1) > m_hpartfile.GetLength()){
+			length = (m_hpartfile.GetLength() - ((ULONGLONG)PARTSIZE*partnumber));
+			ASSERT( length <= PARTSIZE );
+		}
+		CreateHashFromFile(&m_hpartfile,length,hashresult);
+
+		if (GetPartCount()>1 || GetFileSize()==PARTSIZE){
+			if (md4cmp(hashresult,GetPartHash(partnumber)))
+				return false;
+			else
+				return true;
+		}
+		else{
+			if (md4cmp(hashresult,m_abyFileHash))
+				return false;
+			else
+				return true;
+		}
+	}
+}
+*/
 
 bool CPartFile::IsCorruptedPart(uint16 partnumber) const
 {
@@ -4139,12 +4112,12 @@ void CPartFile::CharFillRange(CString* buffer,uint32 start, uint32 end, char col
 		buffer->SetAt(i,color);
 }
 
-void CPartFile::SetCategory(uint8 cat)
+void CPartFile::SetCategory(uint8 cat, bool setprio)
 {
 	m_category=cat;
 	
 	// set new prio
-	if (IsPartFile()){
+	if (setprio && IsPartFile()){
 		switch (thePrefs.GetCategory(GetCategory())->prio) {
 		case 0:
 			break;

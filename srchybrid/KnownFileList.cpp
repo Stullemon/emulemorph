@@ -261,22 +261,8 @@ CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename, uint32 date, uint32 
 		CKnownFile* cur_file;
 		CCKey key;
 		m_Files_map.GetNextAssoc(pos, key, cur_file);
-		
-//#ifdef MIGHTY_SUMMERTIME
-		// Mighty Knife: try to correct the daylight saving bug.
-		// Very special. Never activate this in a release version !!!
-
-		// If theApp.importknowndates has set bit 1, found files are reported even if the
-		// date does not match. The caller can then retrieve the correct date
-		// from the file directly and save it to known.met.
-		if (cur_file->GetFileSize() == size && (!strcmp(filename,cur_file->GetFileName())))
-			if ((cur_file->GetFileDate() == date)) // importing disabled at the moment
+		if (cur_file->GetFileDate() == date && cur_file->GetFileSize() == size && !_tcscmp(filename, cur_file->GetFileName()))
 				return cur_file;
-//#else
-//		if (cur_file->GetFileDate() == in_date && cur_file->GetFileSize() == in_size && (!_tcscmp(filename,cur_file->GetFileName())))
-//			return cur_file;
-//#endif
-		// [end] Mighty Knife
 	}
 	return NULL;
 }

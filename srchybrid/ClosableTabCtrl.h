@@ -1,6 +1,7 @@
 #pragma once
 
 #define WM_CLOSETAB		(WM_USER + 0x101)
+#define	WM_QUERYTAB		(WM_USER + 0x102)
 
 class CClosableTabCtrl : public CTabCtrl
 {

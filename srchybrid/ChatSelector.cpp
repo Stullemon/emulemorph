@@ -380,11 +380,13 @@ void CChatSelector::OnTimer(UINT_PTR nIDEvent)
 		if (((CChatItem*)cur_item.lParam)->notify){
 			cur_item.iImage = (m_blinkstate) ? 1 : 2;
 			SetItem(i, &cur_item);
+			HighlightItem(i, TRUE);
 			globalnotify = true;
 		}
 		else if (cur_item.iImage != 0){
 			cur_item.iImage = 0;
 			SetItem(i, &cur_item);
+			HighlightItem(i, FALSE);
 		}
 	}
 
@@ -426,6 +428,7 @@ void CChatSelector::ShowChat()
 	item.mask = TCIF_IMAGE;
 	item.iImage = 0;
 	SetItem(GetCurSel(), &item);
+	HighlightItem(GetCurSel(), FALSE);
 
 	// hide all other chat windows
 	item.mask = TCIF_PARAM;

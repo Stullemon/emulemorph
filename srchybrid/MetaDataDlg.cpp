@@ -43,9 +43,9 @@ enum EMetaDataCols
 
 static LCX_COLUMN_INIT _aColumns[] =
 {
-	{ META_DATA_COL_NAME,		"Name",		LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("Temporary file MMMMM") },
-	{ META_DATA_COL_TYPE,		"Type",		LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("Integer") },
-	{ META_DATA_COL_VALUE,		"Value",	LVCFMT_LEFT,	-1, 2, ASCENDING,  NONE, _T("long long long long long long long long file name.avi") }
+	{ META_DATA_COL_NAME,	_T("Name"),		IDS_SW_NAME,	LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("Temporary file MMMMM") },
+	{ META_DATA_COL_TYPE,	_T("Type"),		IDS_TYPE,		LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("Integer") },
+	{ META_DATA_COL_VALUE,	_T("Value"),	IDS_VALUE,		LVCFMT_LEFT,	-1, 2, ASCENDING,  NONE, _T("long long long long long long long long file name.avi") }
 };
 
 #define	PREF_INI_SECTION	_T("MetaDataDlg")

@@ -43,11 +43,11 @@ enum EIPFilterCols
 
 static LCX_COLUMN_INIT _aColumns[] =
 {
-	{ IPFILTER_COL_START,		_T("Start"),		LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("255.255.255.255") },
-	{ IPFILTER_COL_END,			_T("End"),			LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("255.255.255.255")},
-	{ IPFILTER_COL_LEVEL,		_T("Level"),		LVCFMT_RIGHT,	-1, 2, ASCENDING,  NONE, _T("999") },
-	{ IPFILTER_COL_HITS,		_T("Hits"),			LVCFMT_RIGHT,	-1, 3, DESCENDING, NONE, _T("99999") },
-	{ IPFILTER_COL_DESC,		_T("Description"),	LVCFMT_LEFT,	-1, 4, ASCENDING,  NONE, _T("long long long long long long long long file name") },
+	{ IPFILTER_COL_START,	_T("Start"),		IDS_IP_START,	LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("255.255.255.255") },
+	{ IPFILTER_COL_END,		_T("End"),			IDS_IP_END,		LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("255.255.255.255")},
+	{ IPFILTER_COL_LEVEL,	_T("Level"),		IDS_IP_LEVEL,	LVCFMT_RIGHT,	-1, 2, ASCENDING,  NONE, _T("999") },
+	{ IPFILTER_COL_HITS,	_T("Hits"),			IDS_IP_HITS,	LVCFMT_RIGHT,	-1, 3, DESCENDING, NONE, _T("99999") },
+	{ IPFILTER_COL_DESC,	_T("Description"),	IDS_IP_DESC,	LVCFMT_LEFT,	-1, 4, ASCENDING,  NONE, _T("long long long long long long long long file name") },
 };
 
 #define	PREF_INI_SECTION	_T("IPFilterDlg")
@@ -201,10 +201,6 @@ BOOL CIPFilterDlg::OnInitDialog()
 	m_ipfilter.m_pParent = this;
 
 	
-	CHeaderCtrl* pHeaderCtrl = m_ipfilter.GetHeaderCtrl();
-	HDITEM hdi;
-	hdi.mask = HDI_TEXT;
-
 	// localize
 	SetWindowText(GetResString(IDS_IPFILTER));
 	SetDlgItemText(IDC_STATICIPLABEL,GetResString(IDS_IP_RULES));
@@ -215,20 +211,6 @@ BOOL CIPFilterDlg::OnInitDialog()
 	SetDlgItemText(IDC_APPEND,GetResString(IDS_APPEND));
 	SetDlgItemText(IDC_SAVE,GetResString(IDS_SAVE));
 	SetDlgItemText(IDOK,GetResString(IDS_FD_CLOSE));
-
-	CString strRes;
-	for (int icol=0;icol<5;icol++) {
-		switch(icol) {
-			case 0: strRes= GetResString(IDS_IP_START); break;
-			case 1: strRes=GetResString(IDS_IP_END); break;
-			case 2: strRes=GetResString(IDS_IP_LEVEL); break;
-			case 3: strRes=GetResString(IDS_IP_HITS); break;
-			case 4: strRes=GetResString(IDS_IP_DESC); break;
-		}
-		hdi.pszText = strRes.GetBuffer();
-		pHeaderCtrl->SetItem(icol, &hdi);
-		strRes.ReleaseBuffer();			
-	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -334,10 +316,8 @@ void CIPFilterDlg::OnSelectAllIPFilter()
 
 void CIPFilterDlg::OnBnClickedAppend()
 {
-	CString strFilePath,formats;
-	formats=GetResString(IDS_IPFILTERFILES);
-
-	if (DialogBrowseFile(strFilePath, _T(GetResString(IDS_IPFILTERFILES))))
+	CString strFilePath;
+	if (DialogBrowseFile(strFilePath, GetResString(IDS_IPFILTERFILES)))
 	{
 		CWaitCursor curWait;
 		if (theApp.ipfilter->AddFromFile(strFilePath, true))

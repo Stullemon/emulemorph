@@ -270,11 +270,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
 
-		// #ifdef MIGHTY_SUMMERTIME
-		// Mighty Knife: daylight saving patch
-		m_htiDaylightSavingPatch = m_ctrlTreeOptions.InsertCheckBox("Enable daylight saving patch (Warning: will eventually rehash your files! Please restart EMule!)", TVI_ROOT, m_iDaylightSavingPatch);
-		// #endif
-
 		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 		m_htiCommunityName = m_ctrlTreeOptions.InsertItem("Community Tags (separated by '|')", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
 		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
@@ -356,10 +351,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_iHighProcess); //MORPH - Added by IceCream, high process priority 
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDaylightSavingPatch, m_iDaylightSavingPatch); 
-	// #endif
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiReportHashingFiles, m_bReportHashingFiles); 
@@ -430,11 +421,6 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iHighProcess = thePrefs.GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
 	
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	m_iDaylightSavingPatch = thePrefs.GetDaylightSavingPatch();
-	// #endif
-
 	// Mighty Knife: Report hashing files, Log friendlist activities
 	m_bReportHashingFiles = thePrefs.GetReportHashingFiles ();
 	m_bLogFriendlistActivities = thePrefs.GetLogFriendlistActivities ();
@@ -522,11 +508,6 @@ BOOL CPPgMorph::OnApply()
 	//MORPH START - Added by IceCream, high process priority
 	thePrefs.SetEnableHighProcess(m_iHighProcess);
 	//MORPH END   - Added by IceCream, high process priority
-
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	thePrefs.SetDaylightSavingPatch(m_iDaylightSavingPatch);
-	// #endif
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
 	thePrefs.SetReportHashingFiles (m_bReportHashingFiles);

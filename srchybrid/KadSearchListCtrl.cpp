@@ -68,7 +68,7 @@ void CKadSearchListCtrl::Init()
 	InsertColumn(colKey, GetResString(IDS_KEY) ,LVCFMT_LEFT,50);
 	InsertColumn(colType, GetResString(IDS_TYPE) ,LVCFMT_LEFT,100);
 	InsertColumn(colName, GetResString(IDS_SW_NAME) ,LVCFMT_LEFT,100);
-	InsertColumn(colStop, "Status" ,LVCFMT_LEFT,100);
+	InsertColumn(colStop, GetResString(IDS_STATUS),LVCFMT_LEFT,100);
 	SetAllIcons();
 	Localize();
 
@@ -80,8 +80,6 @@ void CKadSearchListCtrl::Init()
 	bool bSortAscending = ini.GetInt(m_strLVName + "SortAscending");
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
-
-	UpdateKadSearchCount();
 }
 
 void CKadSearchListCtrl::UpdateKadSearchCount() {
@@ -121,6 +119,28 @@ void CKadSearchListCtrl::SetAllIcons()
 
 void CKadSearchListCtrl::Localize()
 {
+	// who let this empty?
+	// masta notices those things
+	// and ornis have to do the slavework :)
+
+	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
+	HDITEM hdi;
+	hdi.mask = HDI_TEXT;
+	CString strRes;
+
+	for (int icol=0;icol<pHeaderCtrl->GetItemCount();icol++) {
+		switch (icol) {
+			case 0: strRes = GetResString(IDS_NUMBER); break;
+			case 1: strRes = GetResString(IDS_KEY); break;
+			case 2: strRes = GetResString(IDS_TYPE); break;
+			case 3: strRes = GetResString(IDS_SW_NAME); break;
+			case 4: strRes = GetResString(IDS_STATUS); break;
+		}
+	
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(icol, &hdi);
+		strRes.ReleaseBuffer();
+	}
 }
 
 void CKadSearchListCtrl::SearchAdd(Kademlia::CSearch* search)

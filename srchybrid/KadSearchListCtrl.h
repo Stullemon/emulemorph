@@ -37,12 +37,12 @@ public:
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	SaveAllSettings(CIni* ini);
+	void UpdateKadSearchCount();
 
 protected:
 	CString m_strLVName;
 	
 	void SetAllIcons();
-	void UpdateKadSearchCount();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

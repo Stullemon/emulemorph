@@ -25,7 +25,7 @@
 class CHTRichEditCtrl;
 class CCustomAutoComplete;
 
-class CServerWnd : public CResizableDialog
+class CServerWnd : public CResizableDialog, public CLoggable
 {
 	DECLARE_DYNAMIC(CServerWnd)
 

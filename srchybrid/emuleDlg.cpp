@@ -725,7 +725,7 @@ void CemuleDlg::AddLogText(bool addtostatusbar, const CString& txt, bool bDebug)
 				theLog.Log(temp, iLen);
 		}
 
-		if (thePrefs.GetVerbose() && bDebug)
+		if (thePrefs.GetVerbose())
 		{
 				serverwnd->debuglog.Add(temp, iLen);
 			if (IsWindow(serverwnd->StatusSelector) && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneVerboseLog)
@@ -1159,10 +1159,14 @@ void CemuleDlg::SetStatusBarPartsSize()
 {
 	CRect rect;
 	statusbar->GetClientRect(&rect);
+	int ussShift = 0;
 	//MORPH START - Added by SiRoB, Related to SUC
-	//int aiWidths[5] = { rect.right-650, rect.right-440, rect.right-250, rect.right-25, -1 };
-	int aiWidths[5] = { rect.right-675, rect.right-465, rect.right-275, rect.right-175, -1 };
+	if(thePrefs.IsDynUpEnabled() || thePrefs.IsSUCEnabled())
+	{
+		ussShift = 150;
+	}
 	//MORPH END   - Added by SiRoB, Related to SUC
+	int aiWidths[5] = { rect.right-525-ussShift, rect.right-315-ussShift, rect.right-125-ussShift, rect.right-25-ussShift, -1 };
 	statusbar->SetParts(5, aiWidths);
 }
 

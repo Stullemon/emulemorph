@@ -265,25 +265,6 @@ uint32 CSearchFile::GetSourceCount() const
 	return GetIntTagValue(FT_SOURCES);
 }
 
-CSearchFile::EKnownType CSearchFile::InitKnownType()
-{
-	const CKnownFile* pFile = theApp.downloadqueue->GetFileByID(GetFileHash());
-	if (pFile)
-	{
-		if (pFile->IsPartFile())
-			m_eKnown = Downloading;
-		else
-			m_eKnown = Shared;
-	}
-	else if (theApp.sharedfiles->GetFileByID(GetFileHash()))
-		m_eKnown = Shared;
-	else if (theApp.knownfiles->FindKnownFileByID(GetFileHash()))
-		m_eKnown = Downloaded;
-	else
-		m_eKnown = Unknown;
-	return m_eKnown;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchList
 
@@ -652,7 +633,6 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 		delete toadd;
 		return false;
 	}
-	toadd->InitKnownType();
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
 	{
 		CSearchFile* cur_file = list.GetNext(pos);
@@ -665,8 +645,6 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 			
 			// already a result in list (parent exists)
 			cur_file->AddSources(uAvail);
-			// do not count already available or downloading files for the search result limit
-			if (toadd->GetKnownType() != CSearchFile::Shared && toadd->GetKnownType() != CSearchFile::Downloading)
 			AddResultCount(cur_file->GetSearchID(), toadd->GetFileHash(), uAvail);
 
 			// check if child with same filename exists
@@ -773,8 +751,6 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 
 		// new search result entry (no parent); add to result count for search result limit
 		UINT uAvail = toadd->GetIntTagValue(FT_SOURCES);
-		// do not count already available or downloading files for the search result limit
-		if (toadd->GetKnownType() != CSearchFile::Shared && toadd->GetKnownType() != CSearchFile::Downloading)
 		AddResultCount(toadd->GetSearchID(), toadd->GetFileHash(), uAvail);
 
 		CSearchFile* neu = new CSearchFile(toadd);
@@ -801,6 +777,10 @@ CSearchFile* CSearchList::GetSearchFileByHash(const uchar* hash) const
 
 void CSearchList::AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCount)
 {
+	// do not count already available or downloading files for the search result limit
+	if (theApp.sharedfiles->GetFileByID(hash) || theApp.downloadqueue->GetFileByID(hash))
+		return;
+
 	uint16 tempValue = 0;
 	VERIFY( m_foundSourcesCount.Lookup(nSearchID, tempValue) );
 	m_foundSourcesCount.SetAt(nSearchID, tempValue + nCount);

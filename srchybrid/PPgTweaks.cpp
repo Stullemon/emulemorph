@@ -211,6 +211,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		*/
 
 		//m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
 		/*

@@ -401,7 +401,11 @@ public:
 	static	bool	m_birclistonconnect;
 	static	bool	m_bircacceptlinks;
 	static	bool	m_bircacceptlinksfriends;
-	static	bool	m_bircignoreinfomessage;
+	static	bool	m_bircsoundevents;
+	static	bool	m_bircignoremiscmessage;
+	static	bool	m_bircignorejoinmessage;
+	static	bool	m_bircignorepartmessage;
+	static	bool	m_bircignorequitmessage;
 	static	bool	m_bircignoreemuleprotoinfomessage;
 	static	bool	m_birchelpchannel;
 
@@ -507,6 +511,7 @@ public:
 	static	char	datetimeformat4log[64];
 	static	LOGFONT m_lfHyperText;
 	static	int		m_iExtractMetaData;
+	static	bool	m_bAdjustNTFSDaylightFileTime;
 
 	// Web Server [kuchin]
 	static	char	m_sWebPassword[256];
@@ -552,10 +557,7 @@ public:
 
 	//preview
 	static	bool	m_bPreviewEnabled;
-// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	static bool    m_iDaylightSavingPatch;
-	// #endif
+
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	static bool	enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
@@ -1053,7 +1055,11 @@ public:
 	static	bool	GetIRCListOnConnect()				{return m_birclistonconnect;}
 	static	bool	GetIrcAcceptLinks()					{return m_bircacceptlinks;}
 	static	bool	GetIrcAcceptLinksFriends()			{return m_bircacceptlinksfriends;}
-	static	bool	GetIrcIgnoreInfoMessage()			{return m_bircignoreinfomessage;}
+	static	bool	GetIrcSoundEvents()					{return m_bircsoundevents;}
+	static	bool	GetIrcIgnoreMiscMessage()			{return m_bircignoremiscmessage;}
+	static	bool	GetIrcIgnoreJoinMessage()			{return m_bircignorejoinmessage;}
+	static	bool	GetIrcIgnorePartMessage()			{return m_bircignorepartmessage;}
+	static	bool	GetIrcIgnoreQuitMessage()			{return m_bircignorequitmessage;}
 	static	bool	GetIrcIgnoreEmuleProtoInfoMessage()	{return m_bircignoreemuleprotoinfomessage;}
 	static	bool	GetIrcHelpChannel()					{return m_birchelpchannel;}
 	static	WORD	GetWindowsVersion();
@@ -1134,6 +1140,7 @@ public:
 	static	bool	IsMoviePreviewBackup()				{return moviePreviewBackup;}
 	static	int		GetPreviewSmallBlocks()				{return m_iPreviewSmallBlocks;}
 	static	int		GetExtractMetaData()				{return m_iExtractMetaData;}
+	static	bool	GetAdjustNTFSDaylightFileTime()		{return m_bAdjustNTFSDaylightFileTime;}
 
 	// itsonlyme: hostnameSource
 	static	char*	GetYourHostname()					{return yourHostname;}
@@ -1300,12 +1307,6 @@ public:
 	static	int		GetEnableHighProcess()					{ return enableHighProcess; }
 	static	void	SetEnableHighProcess(bool enablehigh);
 	//MORPH END   - Added by IceCream, high process priority
-
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	static	int	GetDaylightSavingPatch()	{ return m_iDaylightSavingPatch; }
-	static	void	SetDaylightSavingPatch(int settings) { m_iDaylightSavingPatch= settings; }
-	// #endif
 
 	static	bool	GetEnableAntiCreditHack()					{ return enableAntiCreditHack; }//MORPH - Added by IceCream, enable AntiCreditHack
 

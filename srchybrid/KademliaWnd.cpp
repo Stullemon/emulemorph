@@ -97,6 +97,9 @@ BOOL CKademliaWnd::OnInitDialog()
 	SetAllIcons();
 	Localize();
 
+	searchList->UpdateKadSearchCount();
+	contactList->UpdateKadContactCount();
+
 	if (thePrefs.GetUseAutocompletion()){
 		m_pacONBSIPs = new CCustomAutoComplete();
 		m_pacONBSIPs->AddRef();
@@ -124,47 +127,54 @@ BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_FIREWALLCHECKBUTTON, OnBnClickedFirewallcheckbutton)
 	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
+	ON_EN_SETFOCUS(IDC_BOOTSTRAPIP, OnEnSetfocusBootstrapip)
 END_MESSAGE_MAP()
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 
+void CKademliaWnd::OnEnSetfocusBootstrapip()
+{
+	CheckRadioButton(IDC_RADIP, IDC_RADCLIENTS, IDC_RADIP);
+}
+
 void CKademliaWnd::OnBnClickedBootstrapbutton()
 {
-	Kademlia::CKademlia::start();
+	CString strIP;
+	uint16 nPort = 0;
 
-	uint16 tempVal=0;
-	CString strBuffer;
-	GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowText(strBuffer);
-
-	// auto-handle ip:port
-	if (strBuffer.Find(':')!=-1) {
-		int pos=strBuffer.Find(':');
-		GetDlgItem(IDC_BOOTSTRAPPORT)->SetWindowText( strBuffer.Right( strBuffer.GetLength()-pos-1));
-		GetDlgItem(IDC_BOOTSTRAPIP)->SetWindowText( strBuffer.Left(pos));
-		strBuffer=strBuffer.Right( strBuffer.GetLength()-pos-1);
-	}
-
-	char buffer[7];
-	GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowText(buffer,6);
-	tempVal= atoi(buffer);
-
-	// boot by kad-client
-	if ( IsDlgButtonChecked(IDC_RADCLIENTS) )
+	if (!IsDlgButtonChecked(IDC_RADCLIENTS))
 	{
-		Kademlia::CKademlia::bootstrap(strBuffer,tempVal);
-		return;
+		GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowText(strIP);
+		strIP.Trim();
+
+		// auto-handle ip:port
+		int iPos;
+		if ((iPos = strIP.Find(_T(':'))) != -1)
+		{
+			GetDlgItem(IDC_BOOTSTRAPPORT)->SetWindowText(strIP.Mid(iPos+1));
+			strIP = strIP.Left(iPos);
+			GetDlgItem(IDC_BOOTSTRAPIP)->SetWindowText(strIP);
+		}
+
+		CString strPort;
+		GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowText(strPort);
+		strPort.Trim();
+		nPort = _ttoi(strPort);
+
+		// invalid IP/Port
+		if (strIP.GetLength()<7 || nPort==0)
+			return;
+
+		if (m_pacONBSIPs && m_pacONBSIPs->IsBound())
+			m_pacONBSIPs->AddItem(strIP + _T(":") + strPort, 0);
 	}
 
-	// invalid IP/Port
-	if (strBuffer.GetLength()<7 || tempVal<1)
-		return;
-
-	if (m_pacONBSIPs && m_pacONBSIPs->IsBound())
-		m_pacONBSIPs->AddItem(strBuffer +":"+CString(buffer) ,0);
-
-	Kademlia::CKademlia::bootstrap(strBuffer,tempVal);
+	Kademlia::CKademlia::start();
+	theApp.emuledlg->ShowConnectionState();
+	if (!strIP.IsEmpty() && nPort)
+		Kademlia::CKademlia::bootstrap(strIP, nPort);
 }
 
 void CKademliaWnd::OnBnClickedFirewallcheckbutton()

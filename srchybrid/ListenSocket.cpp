@@ -397,7 +397,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					uchar cfilehash[16];
 					data.ReadHash16(cfilehash);
 					CPartFile* file = theApp.downloadqueue->GetFileByID(cfilehash);
-					client->ProcessFileStatus(&data, file);
+					client->ProcessFileStatus(false, &data, file);
 					break;
 				}
 				case OP_STARTUPLOADREQ:
@@ -1166,6 +1166,10 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 			{
 				case OP_MULTIPACKET:
 				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_MultiPacket", client);
+					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+
 					if (client->IsBanned())
 						break;
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
@@ -1179,8 +1183,10 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								&& reqfile->GetFileSize() > PARTSIZE ) )
 						{
 							// send file request no such file packet (0x48)
+							if (thePrefs.GetDebugClientTCPLevel() > 0)
+								DebugSend("OP__FileReqAnsNoFil", client, packet);
 							Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-							md4cpy(replypacket->pBuffer, packet); //Is this ok with packet being larger then 16?
+							md4cpy(replypacket->pBuffer, packet);
 							theApp.uploadqueue->AddUpDataOverheadFileRequest(replypacket->size);
 							SendPacket(replypacket, true);
 							break;
@@ -1248,6 +1254,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 										Packet* tosend = reqfile->CreateSrcInfoPacket(client);
 										if(tosend)
 										{
+											if (thePrefs.GetDebugClientTCPLevel() > 0)
+												DebugSend("OP__AnswerSources", client, (char*)reqfile->GetFileHash());
 											if (thePrefs.GetDebugSourceExchange())
 												AddDebugLogLine( false, "RCV:Source Request User(%s) File(%s)", client->GetUserName(), reqfile->GetFileName() );
 											theApp.uploadqueue->AddUpDataOverheadSourceExchange(tosend->size);
@@ -1266,14 +1274,21 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 					}
 					if( data_out.GetLength() > 16 )
 					{
+						if (thePrefs.GetDebugClientTCPLevel() > 0)
+							DebugSend("OP__MulitPacketAns", client, (char*)reqfile->GetFileHash());
 						Packet* reply = new Packet(&data_out, OP_EMULEPROT);
 						reply->opcode = OP_MULTIPACKETANSWER;
+						theApp.uploadqueue->AddUpDataOverheadFileRequest(reply->size);
 						SendPacket(reply, true);
 					}
 					break;
 				}
 				case OP_MULTIPACKETANSWER:
 				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_MultiPacketAns", client);
+					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+
 					if (client->IsBanned())
 						break;
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
@@ -1301,7 +1316,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 							}
 							case OP_FILESTATUS:
 							{
-								client->ProcessFileStatus(&data_in, reqfile);
+								client->ProcessFileStatus(false, &data_in, reqfile);
 								break;
 							}
 						}
@@ -1620,15 +1635,6 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 		if (thePrefs.GetVerbose())
 		{
 		    strTCPError = GetErrorMessage(nErrorCode, 1);
-
-		    // WSAECONNREFUSED (10061) Connection refused.
-		    // No connection could be made because the target machine actively refused it.
-		    // This usually results from trying to connect to a service that is inactive on the foreign host
-		    // that is, one with no server application running.
-		    //
-		    // WSAETIMEDOUT (10060) Connection timed out.
-		    // A connection attempt failed because the connected party did not properly respond after a
-		    // period of time, or the established connection failed because the connected host has failed to respond.
 		    if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
 			    AddDebugLogLine(false, _T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}

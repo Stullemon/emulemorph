@@ -1059,7 +1059,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						newpath.ReleaseBuffer();
 						if (_trename(file->GetFilePath(), newpath) != 0){
 							CString strError;
-							strError.Format(_T(GetResString(IDS_ERR_RENAMESF)), file->GetFilePath(), newpath, strerror(errno));
+							strError.Format(GetResString(IDS_ERR_RENAMESF), file->GetFilePath(), newpath, strerror(errno));
 							AfxMessageBox(strError);
 							break;
 						}

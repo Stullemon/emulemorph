@@ -37,6 +37,7 @@ public:
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	SaveAllSettings(CIni* ini);
+	void UpdateKadContactCount();
 
 protected:
 	CString m_strLVName;
@@ -44,7 +45,6 @@ protected:
 	void UpdateContact(int iItem, Kademlia::CContact* contact);
 	void SetAllIcons();
 	void ContactAdd();
-	void UpdateKadContactCount();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

@@ -30,8 +30,8 @@
 //
 #define VERSION_MJR		0
 #define VERSION_MIN		42
-#define VERSION_UPDATE	1
-#define VERSION_BUILD	14
+#define VERSION_UPDATE	2
+#define VERSION_BUILD	21
 #ifdef _DEBUG
   #ifdef _UNICODE
     #define VERSION_SPECIAL_BUILD	_T(" - Unicode Debug")

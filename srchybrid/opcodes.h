@@ -75,6 +75,7 @@
 #define UDPSERVERSTATTIME		SEC2MS(5)	//5 secs
 #define UDPSERVSTATREASKTIME	HR2S(4)		//4 hours
 #define	UDPSERVERPORT			4665	//default udp port
+#define UDPMAXQUEUETIME			SEC2MS(30)	//30 Seconds
 #define RSAKEYSIZE				384		//384 bits
 #define	MAX_SOURCES_FILE_SOFT	500
 #define	MAX_SOURCES_FILE_UDP	50
@@ -402,85 +403,6 @@
 #define ET_MOD_VERSION 			0x55
 
 // GUI-Protocol TCP (ed2k_gui + java_gui)
-#define CO_SERVER_LIST			0xAA	// C-G 170 //      filelist: server list
-#define CO_FRIEND_LIST			0xAB	// C-G 171 //      filelist: friend list
-#define CO_SHARED_DIRS			0xAC	// C-G 172 //      w16: num directories	//      string[]: directory name
-#define CO_SHARED_FILES			0xAD	// C-G 173 //	   filelist: shared files
-#define CO_GAP_DETAILS			0xAE	// C-G 174 <HASH 16><count 2>(<GAP_START 4><GAP_END 4><GAP_STAT 2>)[count]
-#define CO_CLIENT_STATS			0xAF	// C-G 175
-// float: free space on temp drive in MB
-// float: free space in incoming in MB
-// float: space needed by downloads in MB
-// w32:   client ID
-// w16:   no. of connections used currently
-// w16:   no. of people on queue
-#define CO_STATUS_MSG			0xB4	// C-G 180	//      string: message
-#define CO_ERROR_MSG			0xB5	// C-G 181	//      string: error message
-#define CO_CONNECTED_TO			0xB6	// C-G 182	//      string: server name
-#define CO_DISCONNECTED			0xB7	// C-G 183
-#define CO_SET_SERVER_STATS		0xB8	// C-G 184	//      w32: files w32: users
-#define CO_EXTENDING_SEARCH		0xB9	// C-G 185	//      string: server name
-#define CO_SEARCH_RESULT		0xBA	// C-G 186	//      meta: result meta
-#define CO_NEW_SEARCH_RESULTS	0xBB	// C-G 187	//      filelist: result list	//      w8: more or not (0 or 1)
-#define CO_NEW_DOWNLOAD			0xBC	// C-G 188	// meta: download file w8: initial preference (???) i4string: temp file name
-#define CO_REMOVE_DOWNLOAD		0xBD	// C-G 189	//      hash: fileID
-#define CO_NEW_UPLOAD			0xBE    // C-G 190	// string: file name	meta: upload user
-#define CO_REMOVE_UPLOAD		0xBF    // C-G 191	//      hash: uploader/user ID
-#define CO_NEW_UPLOAD_SLOT		0xC0    // C-G 192	// w32: slot ID string: uploader name
-#define CO_REMOVE_UPLOAD_SLOT	0xC1    // C-G 193	//      w32: slot ID
-#define CO_USER_FILES			0xC2    // C-G 194	//      filelist: users filelist
-#define CO_HASHING				0xC3    // C-G 195	//      string: filename
-#define CO_FRIEND_LIST_UPDATE	0xC4    // C-G 196     	// the friend list needs to be updated
-#define CO_DOWNLOAD_STATUS		0xC5	// C-G 197	<cnt 2>(<ID 2><STAT 1><SPEED kb/sec float 4><TRANSFERED 4><AVAIL% 1><SOUCES 1>)[cnt]
-#define CO_UPLOAD_STATUS		0xC6	// C-G 198	<cnt 2>(<ID 2><SPEED kb/sec float 4>)[cnt]
-#define CO_OPTIONS				0xC7	// C-G 199     	// options follow
-/* w16     clientversion
-float   max down
-float   max up
-w16     doorport
-w16     max connections
-string  client name
-string  temp dir
-string  incoming dir
-w8      autoConnect
-w8      autoServRemove
-w8      primsgallow
-w8      savecorrupt
-w8      verifyCancel
-w16     adminDoorPort
-w32     core build date
-float   line down speed */
-#define CO_CONNECT              0xC8	// G-C
-#define CO_DISCONNECT           0xC9	// G-C
-#define CO_SEARCH               0xCA	// G-C
-#define CO_EXSEARCH             0xCB	// G-C
-#define CO_MORESEARCH           0xCC	// G-C
-#define CO_SEARCH_USER          0xCD	// G-C
-#define CO_EXSEARCH_USER        0xCE	// G-C
-#define CO_DOWNLOAD             0xCF	// G-C
-#define CO_PAUSE_DOWNLOAD       0xD0	// G-C		<HASH 16>
-#define CO_RESUME_DOWNLOAD      0xD1	// G-C		<HASH 16>
-#define CO_CANCEL_DOWNLOAD      0xD2	// G-C		<HASH 16>
-#define CO_SETPRI_DOWNLOAD      0xD3	// G-C		<HASH 16><PRI 1>
-#define CO_VIEW_FRIEND_FILES    0xD4	// G-C
-#define CO_GET_SERVERLIST       0xD5	// G-C		(null)
-#define CO_GET_FRIENDLIST       0xD6	// G-C		(null)
-#define CO_GET_SHARE_DIRS       0xD7	// G-C		(null)
-#define CO_SET_SHARE_DIRS       0xD8	// G-C		(null)
-#define CO_START_DL_STATUS      0xD9	// G-C		(null)
-#define CO_STOP_DL_STATUS       0xDA	// G-C		(null)
-#define CO_START_UL_STATUS      0xDB	// G-C		(null)
-#define CO_STOP_UL_STATUS       0xDC	// G-C		(null)
-#define CO_DELETE_SERVER        0xDD	// G-C		<IP 4><PORT 2>
-#define CO_ADD_SERVER           0xDE	// G-C		<IP 4><PORT 2>
-#define CO_SETPRI_SERVER        0xDF	// G-C		<IP 4><PORT 2><PRI 1>
-#define CO_GET_SHARE_FILES      0xE0	// G-C
-#define CO_GET_OPTIONS          0xE1	// G-C
-#define CO_REQ_NEW_DOWNLOAD     0xE2	// G-C	226	<HASH 16><IP 4><PORT 4><Tag_set {min size+name}>
-#define CO_GET_GAP_DETAILS		0xE3	// G-C	227	<HASH 16><count 2>
-#define CO_GET_CLIENT_STATS		0xE4	// G-C 	228	<FREE_TMP_MB float 4><FREE_IN_MB float 4><NEED MB float 4><ID 4><conn 2><queue 2>
-
-// KADEMLIA (opcodes) (udp)
 #define KADEMLIA_BOOTSTRAP_REQ	0x00	// <PEER (sender) [25]>
 #define KADEMLIA_BOOTSTRAP_RES	0x08	// <CNT [2]> <PEER [25]>*(CNT)
 #define KADEMLIA_HELLO_REQ	 	0x10	// <PEER (sender) [25]>

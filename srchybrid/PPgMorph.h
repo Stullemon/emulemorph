@@ -131,12 +131,6 @@ protected:
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
 
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	HTREEITEM m_htiDaylightSavingPatch;
-	int m_iDaylightSavingPatch;
-	// #endif
-
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	CString   m_sCommunityName;
 	HTREEITEM m_htiCommunityName;

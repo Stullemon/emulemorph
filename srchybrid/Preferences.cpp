@@ -32,7 +32,6 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 #include "SafeFile.h"
-#include "MuleToolbarCtrl.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
@@ -352,7 +351,11 @@ bool	CPreferences::m_bircuseperform;
 bool	CPreferences::m_birclistonconnect;
 bool	CPreferences::m_bircacceptlinks;
 bool	CPreferences::m_bircacceptlinksfriends;
-bool	CPreferences::m_bircignoreinfomessage;
+bool	CPreferences::m_bircsoundevents;
+bool	CPreferences::m_bircignoremiscmessage;
+bool	CPreferences::m_bircignorejoinmessage;
+bool	CPreferences::m_bircignorepartmessage;
+bool	CPreferences::m_bircignorequitmessage;
 bool	CPreferences::m_bircignoreemuleprotoinfomessage;
 bool	CPreferences::m_birchelpchannel;
 bool	CPreferences::m_bRemove2bin;
@@ -448,6 +451,7 @@ char	CPreferences::datetimeformat[64];
 char	CPreferences::datetimeformat4log[64];
 LOGFONT CPreferences::m_lfHyperText;
 int		CPreferences::m_iExtractMetaData;
+bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 char	CPreferences::m_sWebPassword[256];
 char	CPreferences::m_sWebLowPassword[256];
 uint16	CPreferences::m_nWebPort;
@@ -482,10 +486,6 @@ char	CPreferences::m_sToolbarBitmap[256];
 char	CPreferences::m_sToolbarBitmapFolder[256];
 char	CPreferences::m_sToolbarSettings[256];
 bool	CPreferences::m_bPreviewEnabled;
-// #ifdef MIGHTY_SUMMERTIME
-// Mighty Knife: daylight saving patch
-bool    CPreferences::m_iDaylightSavingPatch;
-// #endif
 bool	CPreferences::enableHighProcess;//MORPH - Added by IceCream, high process priority
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
  bool	CPreferences::enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
@@ -928,10 +928,10 @@ bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rst
 //MORPH - Added by SiRoB, ZZ Ratio
 bool CPreferences::IsZZRatioDoesWork(){
 	
+	if (theApp.downloadqueue->IsFilesPowershared())
+		return true;
 	/*
 	if (theApp.stat_sessionSentBytesToFriend)
-		return true;
-	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
 	if (thePrefs.IsSUCEnabled() ||)
 		return theApp.uploadqueue->GetMaxVUR()<10240;
@@ -2090,7 +2090,11 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("IRCListOnConnect", m_birclistonconnect);
 	ini.WriteBool("IRCAcceptLink", m_bircacceptlinks);
 	ini.WriteBool("IRCAcceptLinkFriends", m_bircacceptlinksfriends);
-	ini.WriteBool("IRCIgnoreInfoMessage", m_bircignoreinfomessage);
+	ini.WriteBool("IRCSoundEvents", m_bircsoundevents);
+	ini.WriteBool("IRCIgnoreMiscMessages", m_bircignoremiscmessage);
+	ini.WriteBool("IRCIgnoreJoinMessages", m_bircignorejoinmessage);
+	ini.WriteBool("IRCIgnorePartMessages", m_bircignorepartmessage);
+	ini.WriteBool("IRCIgnoreQuitMessages", m_bircignorequitmessage);
 	ini.WriteBool("IRCIgnoreEmuleProtoInfoMessage", m_bircignoreemuleprotoinfomessage);
 	ini.WriteBool("IRCHelpChannel", m_birchelpchannel);
 	ini.WriteBool("SmartIdCheck", smartidcheck);
@@ -2392,11 +2396,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime,"eMule");//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	ini.WriteBool("DateFileNameLog", m_bDateFileNameLog,"eMule");//Morph - added by AndCycle, Date File Name Log
 
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	ini.WriteBool("DaylightSavingPatchEnabled",m_iDaylightSavingPatch,"eMule");
-	// #endif
-
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
 	ini.WriteBool("AutoBackup",autobackup,"eMule");
 	ini.WriteBool("AutoBackup2",autobackup2,"eMule");
@@ -2679,7 +2678,11 @@ void CPreferences::LoadPreferences(){
 	m_birclistonconnect=ini.GetBool("IRCListOnConnect", true);
 	m_bircacceptlinks=ini.GetBool("IRCAcceptLink", true);
 	m_bircacceptlinksfriends=ini.GetBool("IRCAcceptLinkFriends", true);
-	m_bircignoreinfomessage=ini.GetBool("IRCIgnoreInfoMessage", false);
+	m_bircsoundevents=ini.GetBool("IRCSoundEvents", false);
+	m_bircignoremiscmessage=ini.GetBool("IRCIgnoreMiscMessages", false);
+	m_bircignorejoinmessage=ini.GetBool("IRCIgnoreJoinMessages", true);
+	m_bircignorepartmessage=ini.GetBool("IRCIgnorePartMessages", true);
+	m_bircignorequitmessage=ini.GetBool("IRCIgnoreQuitMessages", true);
 	m_bircignoreemuleprotoinfomessage=ini.GetBool("IRCIgnoreEmuleProtoInfoMessage", true);
 	m_birchelpchannel=ini.GetBool("IRCHelpChannel",true);
 	smartidcheck=ini.GetBool("SmartIdCheck",true);
@@ -2781,6 +2784,7 @@ void CPreferences::LoadPreferences(){
 	sprintf(commentFilter,"%s",ini.GetString("CommentFilter","http://|www."));
 	sprintf(filenameCleanups,"%s",ini.GetString("FilenameCleanups","http|www.|.com|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt"));
 	m_iExtractMetaData=ini.GetInt("ExtractMetaData",2); // 0=disable, 1=mp3+avi, 2=MediaDet
+	m_bAdjustNTFSDaylightFileTime=ini.GetBool("AdjustNTFSDaylightFileTime", true);
 		
 	m_bUseSecureIdent=ini.GetBool("SecureIdent",true);
 	m_bAdvancedSpamfilter=ini.GetBool("AdvancedSpamFilter",true);
@@ -2860,11 +2864,6 @@ void CPreferences::LoadPreferences(){
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	maxconnectionsswitchborder = ini.GetInt("MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	maxconnectionsswitchborder = min(max(maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
-
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	m_iDaylightSavingPatch = ini.GetBool("DaylightSavingPatchEnabled",false);
-	// #endif
 
 	//EastShare Start - PreferShareAll by AndCycle
 	shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll

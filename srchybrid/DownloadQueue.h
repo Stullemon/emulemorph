@@ -91,8 +91,10 @@ public:
 	void	CheckDiskspace(bool bNotEnoughSpaceLeft = false); // SLUGFILLER: checkDiskspace
 	void	CheckDiskspaceTimed();
 	void	StopUDPRequests();
-	CServer*	cur_udpserver;
-	void	GetDownloadStats(int results[]);
+	typedef struct{
+		int	a[19];
+	} SDownloadStats;
+	void	GetDownloadStats(SDownloadStats& results);
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
 	void	AddPartFilesToShare();
 
@@ -104,7 +106,6 @@ public:
 	void	AddDownload(CPartFile* newfile, bool paused);
 	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
 	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
-	//void	UpdateDisplayedInfo(boolean force=false);
 	
 	// khaos::categorymod+
 	//void	StartNextFile()									{ StartNextFile(-1); }
@@ -158,7 +159,9 @@ public:
 	uint16	GetPausedFileCount();
 	void	DisableAllA4AFAuto(void);
 	//MORPH START - Removed by SiRoB, Due to Khaos Categorie
-	//void	SetAutoCat(CPartFile* newfile);
+	/*
+	void	SetAutoCat(CPartFile* newfile);
+	*/
 	//MORPH END   - Removed by SiRoB, Due to Khaos Categorie
 	void	SendLocalSrcRequest(CPartFile* sender);
 	void	RemoveLocalServerRequest(CPartFile* pFile);
@@ -169,6 +172,7 @@ public:
 	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
 	void	ExportPartMetFilesOverview() const;
 
+	CServer* cur_udpserver;
 	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio
 	// khaos::kmod+ Advanced A4AF: Brute Force
 	CPartFile* forcea4af_file;

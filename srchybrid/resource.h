@@ -239,6 +239,7 @@
 #define IDS_PRIOHIGHEST                 316
 #define IDD_PPG_SERVER                  317
 #define IDS_STRING317                   317
+#define IDS_AVAILABLE                   317
 #define IDS_ERR_NOPRIMCHANGE            318
 #define IDS_HIDDEN                      319
 #define IDS_FSTAT_TRANSFER              320
@@ -523,8 +524,11 @@
 #define IDS_RECONNECT                   599
 #define IDS_SERVERADDED                 600
 #define IDB_UP2X                        601
+#define IDS_STRING6IDS_IRC_IGNOREJOINMESSAGE 601
+#define IDS_IRC_IGNOREJOINMESSAGE       601
 #define IDS_STATS_SUCCUPCOUNT           602
 #define IDB_DOWN2X                      603
+#define IDS_IRC_IGNOREPARTMESSAGE       603
 #define IDS_STATS_FAILUPCOUNT           604
 #define IDS_STATS_AVEUPTIME             605
 #define IDS_SEARCHMINSIZE               606
@@ -542,8 +546,10 @@
 #define IDS_STATS_AVGLABEL              618
 #define IDS_GRAPHS                      619
 #define IDS_STREE                       620
+#define IDS_IRC_IGNOREQUITMESSAGE       621
 #define IDS_STATSSETUPINFO              622
 #define IDD_PPG_STATS                   623
+#define IDS_IRC_SOUNDEVENTS             623
 #define IDS_HARDLIMIT                   624
 #define IDS_COL_MORECOLORS              625
 #define IDS_KBYTESEC                    626
@@ -606,7 +612,9 @@
 #define IDS_IRC_SENDLINK                683
 #define IDS_IRC_RECIEVEDLINK            684
 #define IDS_IRC_ACCEPTLINKS             685
+#define IDS_SHARED                      686
 #define IDR_ABOUT                       687
+#define IDS_DOWNLOADED                  687
 #define IDS_SOURCENAMES                 688
 #define IDS_PREF_STARTMIN               689
 #define IDS_PS_TBN_IMPORTANT            690
@@ -633,6 +641,8 @@
 #define IDS_WIZ_OS_FRAME                711
 #define IDS_WIZ_CONCURENTDOWN_FRAME     712
 #define IDD_FILEINFO                    713
+#define IDS_STRING713                   713
+#define IDS_HASHINGFILE                 713
 #define IDS_WIZ_CUSTOM_FRAME            714
 #define IDS_WIZ_HOTBUTTON_FRAME         715
 #define IDS_WIZ_TRUEUPLOAD_TEXT         716
@@ -671,6 +681,7 @@
 #define IDS_WIZARD_ENTERBELOW           749
 #define IDS_STATS_MAXAVGDL              750
 #define IDD_COMMENT                     751
+#define IDS_USS_MIN                     751
 #define IDS_STATS_MAXDL                 752
 #define IDD_COMMENTLST                  753
 #define IDS_PW_FASTSRVCON               754
@@ -1270,6 +1281,12 @@
 #define IDS_IP_DESC                     1341
 #define IDS_IP_HITS                     1342
 #define IDS_IP_RULES                    1343
+#define IDS_ERR_NOTCONNECTEDKAD         1344
+#define IDS_STRING601                   1345
+#define IDS_IRC_NOSFS                   1345
+#define IDS_STRING6IDS_IRC_IGNOREPARTMESSAGE 1346
+#define IDS_IRC_IGNOREMISCMESSAGE       1347
+#define IDS_KNOWN                       1348
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -1910,6 +1927,7 @@
 #define IDC_FORMAT                      2816
 #define IDC_KADALPHA                    2817
 #define IDC_STATICIPLABEL               2818
+#define IDC_MISC_IRC                    2819
 #define IDC_PARTMET                     3345
 #define IDD_PPG_BACKUP                  3378
 #define IDS_SWITCHSUC                   3468

@@ -1598,40 +1598,34 @@ void CDownloadQueue::CheckDiskspace(bool bNotEnoughSpaceLeft)
 }
 // SLUGFILLER: checkDiskspace
 
-// -khaos--+++> Rewritten GetDownloadStats
-void CDownloadQueue::GetDownloadStats(int results[])
+void CDownloadQueue::GetDownloadStats(SDownloadStats& results)
 {
-	memset(results, 0, sizeof(results[0])*20);
+	memset(&results, 0, sizeof results);
 	for (POSITION pos = theApp.downloadqueue->filelist.GetHeadPosition(); pos != 0; )
 	{
 		const CPartFile* cur_file = theApp.downloadqueue->filelist.GetNext(pos);
 
-		results[0]+=cur_file->GetSourceCount();
-		results[1]+=cur_file->GetTransferingSrcCount();
-		// -khaos-/
-		results[2]+=cur_file->GetSrcStatisticsValue(DS_ONQUEUE);
-		results[3]+=cur_file->GetSrcStatisticsValue(DS_REMOTEQUEUEFULL);
-		results[4]+=cur_file->GetSrcStatisticsValue(DS_NONEEDEDPARTS);
-		results[5]+=cur_file->GetSrcStatisticsValue(DS_CONNECTED);
-		results[6]+=cur_file->GetSrcStatisticsValue(DS_REQHASHSET);
-		results[7]+=cur_file->GetSrcStatisticsValue(DS_CONNECTING);
-		results[8]+=cur_file->GetSrcStatisticsValue(DS_WAITCALLBACK);
-		results[9]+=cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS);
-		results[10]+=cur_file->GetSrcStatisticsValue(DS_LOWTOLOWIP);
-		results[11]+=cur_file->GetSrcStatisticsValue(DS_NONE);
-		results[12]+=cur_file->GetSrcStatisticsValue(DS_ERROR);
-		results[13]+=cur_file->GetSrcStatisticsValue(DS_BANNED);
-		results[14]+=cur_file->TotalPacketsSavedDueToICH();
-		results[15]+=cur_file->GetSrcA4AFCount();
-		// /-khaos-
-
-		results[16]+=cur_file->src_stats[0];
-		results[17]+=cur_file->src_stats[1];
-		results[18]+=cur_file->src_stats[2];
-		results[19] += cur_file->src_stats[3];
+		results.a[0]  += cur_file->GetSourceCount();
+		results.a[1]  += cur_file->GetTransferingSrcCount();
+		results.a[2]  += cur_file->GetSrcStatisticsValue(DS_ONQUEUE);
+		results.a[3]  += cur_file->GetSrcStatisticsValue(DS_REMOTEQUEUEFULL);
+		results.a[4]  += cur_file->GetSrcStatisticsValue(DS_NONEEDEDPARTS);
+		results.a[5]  += cur_file->GetSrcStatisticsValue(DS_CONNECTED);
+		results.a[6]  += cur_file->GetSrcStatisticsValue(DS_REQHASHSET);
+		results.a[7]  += cur_file->GetSrcStatisticsValue(DS_CONNECTING);
+		results.a[8]  += cur_file->GetSrcStatisticsValue(DS_WAITCALLBACK);
+		results.a[9]  += cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS);
+		results.a[10] += cur_file->GetSrcStatisticsValue(DS_LOWTOLOWIP);
+		results.a[11] += cur_file->GetSrcStatisticsValue(DS_NONE);
+		results.a[12] += cur_file->GetSrcStatisticsValue(DS_ERROR);
+		results.a[13] += cur_file->GetSrcStatisticsValue(DS_BANNED);
+		results.a[14] += cur_file->src_stats[3];
+		results.a[15] += cur_file->GetSrcA4AFCount();
+		results.a[16] += cur_file->src_stats[0];
+		results.a[17] += cur_file->src_stats[1];
+		results.a[18] += cur_file->src_stats[2];
 	}
-} // GetDownloadStats
-// <-----khaos-
+}
 
 CUpDownClient* CDownloadQueue::GetDownloadClientByIP(uint32 dwIP){
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
@@ -1676,9 +1670,10 @@ bool CDownloadQueue::IsInList(const CUpDownClient* client) const
 void CDownloadQueue::ResetCatParts(int cat, uint8 useCat)
 {
 	int useOrder = GetMaxCatResumeOrder(useCat);
-	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )
-	{
-		CPartFile* cur_file = filelist.GetNext(pos);
+	CPartFile* cur_file;
+	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; ){
+		cur_file = filelist.GetNext(pos);
+
 		if (cur_file->GetCategory() == cat)
 		{
 			useOrder++;
@@ -1686,7 +1681,7 @@ void CDownloadQueue::ResetCatParts(int cat, uint8 useCat)
 			cur_file->SetCatResumeOrder(useOrder);
 		}
 		else if (cur_file->GetCategory() > cat)
-			cur_file->SetCategory(cur_file->GetCategory() - 1);
+			cur_file->SetCategory(cur_file->GetCategory() - 1, false);
 	}
 }
 // khaos::categorymod-
@@ -2128,14 +2123,9 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			ctemp->SetKadPort(udp);
 			break;
 		}
-		case 2:
+/*		case 2:
 		{
-			//This is a firewalled client connected to a server.
-			ctemp = new CUpDownClient(temp,0,clientid,serverip,serverport,false);
-			ctemp->SetSourceFrom(SF_KADEMLIA);
-			ctemp->SetServerIP(serverip);
-			ctemp->SetServerPort(serverport);
-			ctemp->SetKadPort(udp);
+			//Don't use this type... Some clients will process it wrong..
 			break;
 		}
 		case 3:
@@ -2143,7 +2133,7 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			//This will be a firewaled client connected to Kad only.
 			break;
 		}
-	}
+*/	}
 
 	if (ctemp)
 		CheckAndAddSource(temp, ctemp);

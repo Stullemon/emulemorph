@@ -33,6 +33,7 @@ typedef struct
 {
 	int				iColID;
 	LPCTSTR			pszHeading;
+	UINT			uHeadResID;		// optional, set to 0, if not needed
 	UINT			uFormat;
 	int				iWidth;
 	int				iOrder;

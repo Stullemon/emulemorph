@@ -215,7 +215,7 @@
 // reserve max 50
 
 
-#define Irc_Version				"(SMIRCv00.66)"
+#define Irc_Version				"(SMIRCv00.67)"
 #define Irc_Op					10240
 #define Irc_DeOp				10241
 #define Irc_Voice				10242

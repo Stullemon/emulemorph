@@ -219,7 +219,7 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 					DebugRecv("OP_ReaskFilePing", sender, (char*)reqfilehash, ip);
 
 				//Make sure we are still thinking about the same file.
-				if( sender->reqfile == reqfile )
+				if (md4cmp(reqfilehash, sender->GetUploadFileID()) == 0)
 				{
 					sender->AddAskedCount();
 					sender->SetLastUpRequest();
@@ -254,14 +254,18 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 					}
 					data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
 					if (thePrefs.GetDebugClientUDPLevel() > 0)
-						DebugSend("OP__ReaskAck", NULL);
+						DebugSend("OP__ReaskAck", sender);
 					Packet* response = new Packet(&data_out, OP_EMULEPROT);
 					response->opcode = OP_REASKACK;
 					theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 					theApp.clientudp->SendPacket(response, ip, port);
-					break;
 				}
-				break;
+				else
+				{
+					AddDebugLogLine(false, "Client UDP socket; ReaskFilePing; reqfile does not match");
+					TRACE("reqfile:         %s\n", DbgGetFileInfo(reqfile->GetFileHash()));
+					TRACE("sender->reqfile: %s\n", sender->reqfile ? DbgGetFileInfo(sender->reqfile->GetFileHash()) : "(null)");
+				}
 			}
 			else
 			{
@@ -280,7 +284,6 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 					theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 					SendPacket(response, ip, port);
 				}
-				break;
 			}
 			break;
 		}
@@ -306,7 +309,7 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 				CSafeMemFile data_in((BYTE*)packet,size);
 				if ( sender->GetUDPVersion() > 3 )
 				{
-					sender->ProcessFileStatus(&data_in, sender->reqfile);
+					sender->ProcessFileStatus(true, &data_in, sender->reqfile);
 				}
 				uint16 nRank = data_in.ReadUInt16();
 				sender->SetRemoteQueueFull(false);
@@ -348,15 +351,23 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 	m_bWouldBlock = false;
 	while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy()){
 		UDPPack* cur_packet = controlpacket_queue.GetHead();
-		char* sendbuffer = new char[cur_packet->packet->size+2];
-		memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
-		memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
-		if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
+		if( GetTickCount() - cur_packet->dwTime < UDPMAXQUEUETIME )
+		{
+			char* sendbuffer = new char[cur_packet->packet->size+2];
+			memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
+			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
+			if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
+				delete cur_packet->packet;
+				delete cur_packet;
+			}
+			delete[] sendbuffer;
+		}
+		else
+		{
 			controlpacket_queue.RemoveHead();
 			delete cur_packet->packet;
 			delete cur_packet;
 		}
-		delete[] sendbuffer;
 	}
 }
 
@@ -381,6 +392,7 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 	newpending->dwIP = dwIP;
 	newpending->nPort = nPort;
 	newpending->packet = packet;
+	newpending->dwTime = GetTickCount();
 	if (IsBusy()){
 		controlpacket_queue.AddTail(newpending);
 		return true;

@@ -272,8 +272,6 @@ void CUpDownClient::SendFileRequest()
 		return;
 	AddAskedCountDown();
 
-	if (thePrefs.GetDebugClientTCPLevel() > 0)
-		DebugSend("OP__FileRequest", this, (char*)reqfile->GetFileHash());
 	CSafeMemFile dataFileReq(16+16);
 	dataFileReq.WriteHash16(reqfile->GetFileHash());
 
@@ -300,8 +298,11 @@ void CUpDownClient::SendFileRequest()
 			if (thePrefs.GetDebugSourceExchange())
 				AddDebugLogLine( false, "Send:Source Request User(%s) File(%s)", GetUserName(), reqfile->GetFileName() );
 		}
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__MultiPacket", this, (char*)reqfile->GetFileHash());
 		Packet* packet = new Packet(&dataFileReq, OP_EMULEPROT);
 		packet->opcode = OP_MULTIPACKET;
+		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 		socket->SendPacket(packet, true);
 	}
 	else
@@ -313,6 +314,8 @@ void CUpDownClient::SendFileRequest()
 	if( GetExtendedRequestsVersion() > 1 ){
 			reqfile->WriteCompleteSourcesCount(&dataFileReq);
 	}
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__FileRequest", this, (char*)reqfile->GetFileHash());
 	Packet* packet = new Packet(&dataFileReq);
 		packet->opcode=OP_REQUESTFILENAME;
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
@@ -362,7 +365,7 @@ void CUpDownClient::SendStartupLoadReq()
 {
 	if (socket==NULL || reqfile==NULL)
 	{
-		//ASSERT(0); //MORPH - Removed by SiRoB
+		ASSERT(0);
 		return;
 	}
 	SetDownloadState(DS_ONQUEUE);
@@ -428,13 +431,18 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		// even if the file is <= PARTSIZE, we _may_ need the hashset for that file (if the file size == PARTSIZE)
 		if (reqfile->hashsetneeded)
 		{
-			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-			md4cpy(packet->pBuffer,reqfile->GetFileHash());
-			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-			socket->SendPacket(packet,true,true);
-			SetDownloadState(DS_REQHASHSET);
-			m_fHashsetRequesting = 1;
-			reqfile->hashsetneeded = false;
+			if (socket)
+			{
+				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+				md4cpy(packet->pBuffer,reqfile->GetFileHash());
+				theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+				socket->SendPacket(packet,true,true);
+				SetDownloadState(DS_REQHASHSET);
+				m_fHashsetRequesting = 1;
+				reqfile->hashsetneeded = false;
+			}
+			else
+				ASSERT(0);
 		}
 		else
 		{
@@ -444,7 +452,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 	}
 }
 
-void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
+void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPartFile* file)
 {
 	if ( !reqfile || file != reqfile )
 	{
@@ -472,7 +480,7 @@ void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
 		memset(m_abyPartStatus,1,m_nPartCount);
 		bPartsNeeded = true;
 		m_bCompleteSource = true;
-		if (thePrefs.GetDebugClientTCPLevel() > 0)
+		if (bUdpPacket ? (thePrefs.GetDebugClientUDPLevel() > 0) : (thePrefs.GetDebugClientTCPLevel() > 0))
 		{
 			for (int i = 0; i < m_nPartCount; i++)
 			{
@@ -515,7 +523,7 @@ void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
 		}
 	}
 
-	if (thePrefs.GetDebugClientTCPLevel() > 0)
+	if (bUdpPacket ? (thePrefs.GetDebugClientUDPLevel() > 0) : (thePrefs.GetDebugClientTCPLevel() > 0))
 	{
 		char* psz = new char[m_nPartCount + 1];
 		for (int i = 0; i < m_nPartCount; i++)
@@ -536,24 +544,40 @@ void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
 	UpdateDisplayedInfo();
 	reqfile->UpdateAvailablePartsCount();
     
-	if (!bPartsNeeded)
-		SetDownloadState(DS_NONEEDEDPARTS);
-	//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
-	else if (reqfile->hashsetneeded)
+	// NOTE: This function is invoked from TCP and UDP socket!
+	if (!bUdpPacket)
 	{
-		if (thePrefs.GetDebugClientTCPLevel() > 0)
-			DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
-		Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-		md4cpy(packet->pBuffer,reqfile->GetFileHash());
-		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-		socket->SendPacket(packet, true, true);
-		SetDownloadState(DS_REQHASHSET);
-		m_fHashsetRequesting = 1;
-		reqfile->hashsetneeded = false;
+		if (!bPartsNeeded)
+			SetDownloadState(DS_NONEEDEDPARTS);
+		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
+		else if (reqfile->hashsetneeded)
+		{
+			if (socket)
+			{
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
+			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+			md4cpy(packet->pBuffer,reqfile->GetFileHash());
+			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+			socket->SendPacket(packet, true, true);
+			SetDownloadState(DS_REQHASHSET);
+			m_fHashsetRequesting = 1;
+			reqfile->hashsetneeded = false;
+			}
+			else
+				ASSERT(0);
+		}
+		else
+		{
+			SendStartupLoadReq();
+		}
 	}
 	else
 	{
-		SendStartupLoadReq();
+		if (!bPartsNeeded)
+			SetDownloadState(DS_NONEEDEDPARTS);
+		else
+			SetDownloadState(DS_ONQUEUE);
 	}
 	reqfile->UpdatePartsInfo();
 }
@@ -786,9 +810,6 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 			Debug("  Start=%u  End=%u  Size=%u  %s\n", nDbgStartPos, *((uint32*)(packet + 16+4)), *((uint32*)(packet + 16+4)) - nDbgStartPos, DbgGetFileInfo((uchar*)packet));
 	}
 
-#ifndef _DEBUG
-  	try{
-#endif
 	// Ignore if no data required
 	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS))
 		return;
@@ -798,11 +819,10 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	// Update stats
 	m_dwLastBlockReceived = ::GetTickCount();
 
-
 	// Read data from packet
 	CSafeMemFile data((BYTE*)packet, size);
 	uchar fileID[16];
-		data.ReadHash16(fileID);
+	data.ReadHash16(fileID);
 
 	// Check that this data is for the correct file
 	if ( (!reqfile) || md4cmp(packet, reqfile->GetFileHash()))
@@ -935,9 +955,10 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						nEndPos = cur_block->block->StartOffset + cur_block->totalUnzipped - 1;
 
 					    if (nStartPos > cur_block->block->EndOffset || nEndPos > cur_block->block->EndOffset){
-								if (thePrefs.GetVerbose())
-						AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
-						reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+							if (thePrefs.GetVerbose())
+								AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
+							reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+							// There is no chance to recover from this error
 						}
 						else{
 							// Write uncompressed data to file
@@ -1025,14 +1046,6 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 			return;
 			}
 		}
-#ifndef _DEBUG
-  	}
-	catch (...){
-		if (thePrefs.GetVerbose())
-		AddDebugLogLine(false, _T("Unknown exception in %s: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
-		ASSERT(0);
-	}
-#endif
 }
 
 int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion)
@@ -1041,10 +1054,8 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 
 	TRACE_UNZIP("unzip: Zipd=%6u Unzd=%6u Rcrs=%d", lenZipped, *lenUnzipped, iRecursion);
   	int err = Z_DATA_ERROR;
-#ifndef _DEBUG
   	try
 	{
-#endif
 	    // Save some typing
 	    z_stream *zS = block->zStream;
     
@@ -1152,7 +1163,6 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
     
 	    if (err != Z_OK)
 		    (*lenUnzipped) = 0;
-#ifndef _DEBUG
   	}
   	catch (...){
 		if (thePrefs.GetVerbose())
@@ -1160,7 +1170,6 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 		err = Z_DATA_ERROR;
 		ASSERT(0);
 	}
-#endif
   	return err;
 }
 

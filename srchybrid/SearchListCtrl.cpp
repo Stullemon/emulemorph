@@ -163,7 +163,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	InsertColumn(9,GetResString(IDS_BITRATE),LVCFMT_LEFT,50);
 	InsertColumn(10,GetResString(IDS_CODEC),LVCFMT_LEFT,50);
 	InsertColumn(11,GetResString(IDS_FOLDER),LVCFMT_LEFT,220);
-	InsertColumn(12,_T("Known"),LVCFMT_LEFT,50);
+	InsertColumn(12,GetResString(IDS_KNOWN),LVCFMT_LEFT,50);
 	InsertColumn(13,GetResString(IDS_CHECKFAKE),LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 	CreateMenues();
@@ -196,72 +196,29 @@ void CSearchListCtrl::Localize()
 	hdi.mask = HDI_TEXT;
 	CString strRes;
 
-	strRes = GetResString(IDS_DL_FILENAME);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(0, &hdi);
-	strRes.ReleaseBuffer();
+	for (int icol=0;icol<pHeaderCtrl->GetItemCount();icol++) {
+		switch (icol) {
+			case 0: strRes = GetResString(IDS_DL_FILENAME); break;
+			case 1: strRes = GetResString(IDS_DL_SIZE); break;
+			case 2: strRes = GetResString(IDS_SEARCHAVAIL) + _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')'); break;
+			case 3: strRes = GetResString(IDS_TYPE); break;
+			case 4: strRes = GetResString(IDS_FILEID); break;
+			case 5: strRes = GetResString(IDS_ARTIST); break;
+			case 6: strRes = GetResString(IDS_ALBUM); break;
+			case 7: strRes = GetResString(IDS_TITLE); break;
+			case 8: strRes = GetResString(IDS_LENGTH); break;
+			case 9: strRes = GetResString(IDS_BITRATE); break;
+			case 10: strRes = GetResString(IDS_CODEC); break;
+			case 11: strRes = GetResString(IDS_FOLDER); break;
+			case 12: strRes = GetResString(IDS_KNOWN); break;
+			case 13: strRes = GetResString(IDS_CHECKFAKE); break; //MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
-	strRes = GetResString(IDS_DL_SIZE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(1, &hdi);
-	strRes.ReleaseBuffer();
+		}
 
-	strRes = GetResString(IDS_SEARCHAVAIL) + _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')');
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(2, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_TYPE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(3, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_FILEID);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(4, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_ARTIST);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(5, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_ALBUM);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(6, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_TITLE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(7, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_LENGTH);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(8, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_BITRATE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(9, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_CODEC);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(10, &hdi);
-	strRes.ReleaseBuffer();
-
-	strRes = GetResString(IDS_FOLDER);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(11, &hdi);
-	strRes.ReleaseBuffer();
-
-	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	strRes = GetResString(IDS_CHECKFAKE);
-	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(13, &hdi);
-	strRes.ReleaseBuffer();
-	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+		hdi.pszText = strRes.GetBuffer();
+		pHeaderCtrl->SetItem(icol, &hdi);
+		strRes.ReleaseBuffer();
+	}
 
 	CreateMenues();
 }
@@ -322,6 +279,10 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 	if (toshow->GetSearchID() != m_nResultsID)
 		return;
 
+	//TODO: Here we have a problem. Since this listview control is owner drawn the listview items may no longer
+	//contain the actual information which is displayed. The usage of the 'Find' command may therefore deal with
+	//wrong item contents (which are stored in the listview items right here in this function).
+
 	int itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),toshow->GetFileName(),0,0,0,(LPARAM)toshow);
 	TCHAR cbuffer[50];
 	SetItemText(itemnr,1,CastItoXBytes(toshow->GetFileSize()));
@@ -354,11 +315,12 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 	if (toshow->GetDirectory())
 		SetItemText(itemnr,11,toshow->GetDirectory());
 	if (toshow->m_eKnown == CSearchFile::Shared)
-		SetItemText(itemnr,12,_T("Shared"));
+		SetItemText(itemnr,12,GetResString(IDS_SHARED));
 	else if (toshow->m_eKnown == CSearchFile::Downloading)
-		SetItemText(itemnr,12,_T("Downloading"));
+		SetItemText(itemnr,12,GetResString(IDS_DOWNLOADING));
 	else if (toshow->m_eKnown == CSearchFile::Downloaded)
-		SetItemText(itemnr,12,_T("Downloaded"));
+		SetItemText(itemnr,12,GetResString(IDS_DOWNLOADED));
+
 	SetItemText(itemnr,13,toshow->GetFakeComment()); //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 }
 
@@ -1053,7 +1015,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
-	const CSearchFile* content = (CSearchFile*)lpDrawItemStruct->itemData;
+	CSearchFile* content = (CSearchFile*)lpDrawItemStruct->itemData;
 	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
@@ -1114,11 +1076,13 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				if (iColumn == 0)
 				{
 					int iNextLeft = cur_rec.left + cx;
+
 					//set up tree vars
 					cur_rec.left = cur_rec.right + iOffset;
 					cur_rec.right = cur_rec.left + min(8, cx);
 					tree_start = cur_rec.left + 1;
 					tree_end = cur_rec.right;
+
 					//normal column stuff
 					cur_rec.left = cur_rec.right + 1;
 					cur_rec.right = tree_start + cx - iOffset;
@@ -1152,6 +1116,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					cur_rec.right = cur_rec.left + min(8, cx);
 					tree_start = cur_rec.left + 1;
 					tree_end = cur_rec.right;
+
 					//normal column stuff
 					cur_rec.left = cur_rec.right + 1;
 					cur_rec.right = tree_start + cx - iOffset;
@@ -1167,6 +1132,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			}
 		}
 	}
+
 	//draw rectangle around selected item(s)
 	if (content->GetListParent()==NULL && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
@@ -1297,19 +1263,30 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	dc->SetTextColor(crOldTextColor);
 }
 
-static COLORREF GetSearchItemColor(const CSearchFile* src)
+static COLORREF GetSearchItemColor(/*const*/ CSearchFile* src)
 {
 	// default to black color (may be "corrected" below)
 	uint32 red = 0;
 	uint32 green = 0;
 	uint32 blue = 0;
 
-	if (src->GetKnownType() == CSearchFile::Downloading || src->GetKnownType() == CSearchFile::Shared)
+	const CKnownFile* pFile = theApp.downloadqueue->GetFileByID(src->GetFileHash());
+	if (pFile)
 	{
+		if (pFile->IsPartFile())
+			src->SetKnownType(CSearchFile::Downloading);
+		else
+			src->SetKnownType(CSearchFile::Shared);
 		red = 255;
 	}
-	else if (src->GetKnownType() == CSearchFile::Downloaded)
+	else if (theApp.sharedfiles->GetFileByID(src->GetFileHash()))
 	{
+		src->SetKnownType(CSearchFile::Shared);
+		red = 255;
+	}
+	else if (theApp.knownfiles->FindKnownFileByID(src->GetFileHash()))
+	{
+		src->SetKnownType(CSearchFile::Downloaded);
 		green = 128;
 	}
 	else
@@ -1333,14 +1310,14 @@ static COLORREF GetSearchItemColor(const CSearchFile* src)
 	return RGB(red, green, blue);
 }
 
-void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src)
+void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src)
 {
 	if (!src)
 		return;
 	if (lpRect->left < lpRect->right)
 	{
 		CString buffer;
-		dc->SetTextColor(GetSearchItemColor(src));
+		COLORREF crOldTextColor = dc->SetTextColor(GetSearchItemColor(src));
 		switch (nColumn)
 		{
 			case 0:			// file name
@@ -1398,11 +1375,11 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const
 				break;
 			case 12:
 				if (src->m_eKnown == CSearchFile::Shared)
-					buffer = _T("Shared");
+					buffer = GetResString(IDS_SHARED);
 				else if (src->m_eKnown == CSearchFile::Downloading)
-					buffer = _T("Downloading");
+					buffer = GetResString(IDS_DOWNLOADING);
 				else if (src->m_eKnown == CSearchFile::Downloaded)
-					buffer = _T("Downloaded");
+					buffer = GetResString(IDS_DOWNLOADED);
 				else
 					buffer.Empty();
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
@@ -1416,10 +1393,11 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const
 				break;
 			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
 		}
+		dc->SetTextColor(crOldTextColor);
 	}
 }
 
-void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src)
+void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src)
 {
 	if (!src)
 		return;
@@ -1427,7 +1405,7 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, cons
 	if (lpRect->left < lpRect->right)
 	{
 		CString buffer;
-		dc->SetTextColor(GetSearchItemColor(src));
+		COLORREF crOldTextColor = dc->SetTextColor(GetSearchItemColor(src));
 		switch (nColumn)
 		{
 			case 0:			// file name
@@ -1493,14 +1471,15 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, cons
 				break;
 			case 12:
 				if (src->m_eKnown == CSearchFile::Shared)
-					buffer = _T("Shared");
+					buffer = GetResString(IDS_SHARED);
 				else if (src->m_eKnown == CSearchFile::Downloading)
-					buffer = _T("Downloading");
+					buffer = GetResString(IDS_DOWNLOADING);
 				else if (src->m_eKnown == CSearchFile::Downloaded)
-					buffer = _T("Downloaded");
+					buffer = GetResString(IDS_DOWNLOADED);
 				else
 					buffer.Empty();
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
+				break;
 			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating
 			case 13:		// fake check
 				if (src->GetFakeComment()){
@@ -1510,5 +1489,6 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, cons
 				break;
 			//MORPH    END - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating
 		}
+		dc->SetTextColor(crOldTextColor);
 	}
 }

@@ -165,6 +165,12 @@ void CListCtrlX::CreateColumns(int iColumns, LCX_COLUMN_INIT* pColumns)
 	InsertColumn(0, _T("Dummy"), LVCFMT_LEFT, 0);
 	for (int iCol = 0; iCol < iColumns; iCol++)
 	{
+		CString strHeading;
+		if (pColumns[iCol].uHeadResID)
+			strHeading = GetResString(pColumns[iCol].uHeadResID);
+		if (strHeading.IsEmpty())
+			strHeading = pColumns[iCol].pszHeading;
+
 		int iColWidth;
 		if (pColumns[iCol].iWidth >= 0)
 		{
@@ -176,7 +182,7 @@ void CListCtrlX::CreateColumns(int iColumns, LCX_COLUMN_INIT* pColumns)
 			if (pColumns[iCol].pszSample)
 			{
 				int iWidthSample = GetStringWidth(pColumns[iCol].pszSample);
-				int iWidthHeader = GetStringWidth(pColumns[iCol].pszHeading);
+				int iWidthHeader = GetStringWidth(strHeading);
 				iWidthHeader += 30; // if using the COMCTL 6.0 header bitmaps (up/down arrows), we need more space
 
 				iColWidth = 6 + __max(iWidthSample, iWidthHeader) + 6;	// left+right margin
@@ -189,7 +195,7 @@ void CListCtrlX::CreateColumns(int iColumns, LCX_COLUMN_INIT* pColumns)
 
 		LVCOLUMN lvc;
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT | LVCF_SUBITEM;
-		lvc.pszText = const_cast<LPTSTR>(pColumns[iCol].pszHeading);
+		lvc.pszText = const_cast<LPTSTR>((LPCTSTR)strHeading);
 		lvc.cx = iColWidth;
 		lvc.fmt = pColumns[iCol].uFormat;
 		lvc.iSubItem = pColumns[iCol].iColID;

@@ -96,35 +96,31 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
 		}
 	}
-	// PENDING: this is currently commented so that a yellow block is only shown for the next
-	//          requested package. I would like for this to be commented the next test release.
-	//          When we have confirmed that sockets no longer just stop requesting blocks,
-	//          the code can be restored. /zz
-	//if (!m_DoneBlocks_list.IsEmpty()){
-	//	block = m_DoneBlocks_list.GetTail();
-	//	if(block){
-	//		uint32 start = block->StartOffset/PARTSIZE;
-	//		s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
-	//	}
-	//}
 	if (!m_DoneBlocks_list.IsEmpty()){
+		block = m_DoneBlocks_list.GetTail();
+		if(block){
+			uint32 start = block->StartOffset/PARTSIZE;
+			s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
+		}
+	}
+	if (!m_DoneBlocks_list.IsEmpty()){
+		for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
+			Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
+			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+		}
 		//for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
-		//	Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
-		//	s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
-		//}
-
-		// Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
-		uint32 total = 0;
+        // Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
+        /*uint32 total = 0;
 		for(POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos!=0; ){
 			const Requested_Block_Struct* block = m_DoneBlocks_list.GetNext(pos);
 
 			if(total + (block->EndOffset-block->StartOffset) < GetQueueSessionPayloadUp()) {
-				// block is sent
+                // block is sent
 				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
 				total += block->EndOffset-block->StartOffset;
 			}
 			else if (total < GetQueueSessionPayloadUp()){
-				// block partly sent, partly in buffer
+                // block partly sent, partly in buffer
 				total += block->EndOffset-block->StartOffset;
 				uint32 rest = total - GetQueueSessionPayloadUp();
 				uint32 newEnd = block->EndOffset-rest;
@@ -133,11 +129,11 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
     			s_UpStatusBar.FillRange(newEnd, block->EndOffset, crBuffer);
 			}
 			else {
-				// entire block is still in buffer
+                // entire block is still in buffer
 				total += block->EndOffset-block->StartOffset;
     			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
 			}
-		}
+		}*/
 	}
    	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 

@@ -18,12 +18,14 @@ class CIrcNickListCtrl : public CMuleListCtrl
 
 public:
 	CIrcNickListCtrl();
+	void Init();
 
 protected:
 	friend class CIrcWnd;
 
 	CIrcWnd* m_pParent;
 	bool m_asc_sort[2];
+	uint8 m_iSortIndex;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
@@ -96,13 +98,14 @@ protected:
 	afx_msg void	OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void	OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnQueryTab(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 private:
 	int				GetTabUnderMouse(CPoint point);
 	CImageList		m_imagelist;
 	CIrcMain*		m_pIrcMain;
-	CClosableTabCtrl		channelselect;
+	CClosableTabCtrl channelselect;
 	CString			m_sSendString;
 	bool			m_bConnected;
 	bool			m_bLoggedIn;

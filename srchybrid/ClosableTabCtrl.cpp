@@ -116,8 +116,12 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			rect.left += 4;
 	}
 
+	bool bCloseable = m_bCloseable;
+	if (bCloseable && GetParent()->SendMessage(WM_QUERYTAB, nTabIndex))
+		bCloseable = false;
 	// Draw 'Close button' at right side
-	if (m_bCloseable && m_ImgLstCloseButton.m_hImageList)
+	// Draw 'Close button' at right side
+	if (bCloseable && m_ImgLstCloseButton.m_hImageList)
 	{
 		CRect rcCloseButton;
 		GetCloseButtonRect(rect, rcCloseButton);

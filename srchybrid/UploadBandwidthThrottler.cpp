@@ -382,7 +382,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			if(socket != NULL) {
 				SocketSentBytes socketSentBytes = socket->Send(bytesToSpend-spentBytes, true);
 				spentBytes += socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
-				spentOverhead += socketSentBytes.sentBytesControlPackets;
+				spentOverhead += socketSentBytes.sentBytesControlPackets+40;
 			}
 		}
 
@@ -469,7 +469,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         if(bytesToSpend < -((sint64)m_StandardOrder_list.GetSize()*minFragSize)) {
         	sint64 newBytesToSpend = -((sint64)m_StandardOrder_list.GetSize()*minFragSize);
 
-            theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler: Overcharged bytesToSpend. Limiting negative value. Old value: %I64i New value: %i", bytesToSpend, newBytesToSpend);
+            TRACE("UploadBandwidthThrottler: Overcharged bytesToSpend. Limiting negative value. Old value: %I64i New value: %i\n", bytesToSpend, newBytesToSpend);
 
 		bytesToSpend = newBytesToSpend;
         } else if(bytesToSpend > minFragSize) {

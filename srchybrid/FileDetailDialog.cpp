@@ -104,7 +104,7 @@ BOOL CFileDetailDialog::OnInitDialog()
 
 	LPCTSTR pPshStartPage = m_pPshStartPage;
 	if (m_bInvokeCommentsPage)
-		m_pPshStartPage = MAKEINTRESOURCE(IDD_COMMENTLST);
+		pPshStartPage = MAKEINTRESOURCE(IDD_COMMENTLST);
 
 	for (int i = 0; i < m_pages.GetSize(); i++)
 	{
@@ -225,7 +225,7 @@ void CFileDetailDialogInfo::RefreshData()
 			str = (*m_paFiles)[0]->getPartfileStatus();
 		SetDlgItemText(IDC_PFSTATUS, str);
 
-		str.Format(_T("%u;  Available: %u (%.1f%%)"), (*m_paFiles)[0]->GetPartCount(), (*m_paFiles)[0]->GetAvailablePartCount(), (float)(((*m_paFiles)[0]->GetAvailablePartCount()*100)/(*m_paFiles)[0]->GetPartCount()));
+		str.Format(_T("%u;  %s: %u (%.1f%%)"), (*m_paFiles)[0]->GetPartCount(), GetResString(IDS_AVAILABLE) , (*m_paFiles)[0]->GetAvailablePartCount(), (float)(((*m_paFiles)[0]->GetAvailablePartCount()*100)/(*m_paFiles)[0]->GetPartCount()));
 		SetDlgItemText(IDC_PARTCOUNT, str);
 
 		// date created
@@ -293,7 +293,7 @@ void CFileDetailDialogInfo::RefreshData()
 		uCompression += (*m_paFiles)[i]->GetGainDueToCompression();
 		uDataRate += (*m_paFiles)[i]->GetDatarate();
 		uCompleted += (*m_paFiles)[i]->GetCompletedSize();
-		iHashsetAvailable += ((*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartCount()) ? 1 : 0; //MORPH - Changed by SiRoB, Safe Hash
+		iHashsetAvailable += ((*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartCount()) ? 1 : 0;
 
 		if ((*m_paFiles)[i]->IsPartFile())
 		{

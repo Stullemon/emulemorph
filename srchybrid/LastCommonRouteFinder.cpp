@@ -212,7 +212,13 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
 
     if(pEnabled && m_enabled == false) {
         sendEvent = true;
+        // this will show the area for ping info in status bar.
+		theApp.emuledlg->SetStatusBarPartsSize();
     } else if(pEnabled == false) {
+        if(m_enabled) {
+            // this will remove the area for ping info in status bar.
+			theApp.emuledlg->SetStatusBarPartsSize();
+        }
         prefsEvent->ResetEvent();
     }
     m_enabled = pEnabled;
@@ -317,6 +323,9 @@ UINT LastCommonRouteFinder::RunInternal() {
             m_lowestPing = 0;
             pingLocker.Unlock();
 
+            // Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
+            int startUpload = (maxUpload != _UI32_MAX)?maxUpload:10*1024;
+
             bool atLeastOnePingSucceded = false;
             while(doRun && enabled && foundLastCommonHost == false) {
                 int traceRouteTries = 0;
@@ -324,8 +333,9 @@ UINT LastCommonRouteFinder::RunInternal() {
                     traceRouteTries++;
 
                     lastCommonHost = 0;
-					//MORPH - Modified by SiRoB, USS log debug
-                	if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSCOLLECTINGHOSTS), traceRouteTries);
+
+                    if(thePrefs.IsUSSLog()) //MORPH - Modified by SiRoB, USS log debug
+			theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSCOLLECTINGHOSTS), traceRouteTries);
 
                     addHostLocker.Lock();
                     needMoreHosts = true;
@@ -355,6 +365,8 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 					//MORPH - Modified by SiRoB, USS log debug
 					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSFINDLASTCOMMON));
+                    // for the tracerouting phase (preparing...) we need to disable uploads so we get a faster traceroute and better ping values.
+                    SetUpload(512);
 
                     if(m_enabled == false) {
                         enabled = false;
@@ -526,8 +538,9 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             uint32 initial_ping = _I32_MAX;
 
-            // lock to prevent GetUpload(), and thereby preventing UploadBandwidthThrottler to loop and send() during this part.
-            uploadLocker.Lock();
+            //// lock to prevent GetUpload(), and thereby preventing UploadBandwidthThrottler to loop and send() during this part.
+            //uploadLocker.Lock();
+
             // finding lowest ping
             for(int initialPingCounter = 0; doRun && enabled && initialPingCounter < 10; initialPingCounter++) {
                 Sleep(200);
@@ -548,7 +561,10 @@ UINT LastCommonRouteFinder::RunInternal() {
                     enabled = false;
                 }
             }
-            uploadLocker.Unlock();
+
+            // Set the upload to a good starting point
+            SetUpload(startUpload);
+            //uploadLocker.Unlock();
 
             // if all pings returned 0, initial_ping will not have been changed from default value.
             // then set initial_ping to lowestInitialPingAllowed

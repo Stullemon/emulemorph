@@ -32,6 +32,16 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgDirectories, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
+	ON_BN_CLICKED(IDC_SELTEMPDIR, OnBnClickedSeltempdir)
+	ON_BN_CLICKED(IDC_SELINCDIR,OnBnClickedSelincdir)
+	ON_EN_CHANGE(IDC_INCFILES,	OnSettingsChange)
+	ON_EN_CHANGE(IDC_TEMPFILES, OnSettingsChange)
+	ON_BN_CLICKED(IDC_UNCADD,	OnBnClickedAddUNC)
+	ON_BN_CLICKED(IDC_UNCREM,	OnBnClickedRemUNC)
+END_MESSAGE_MAP()
+
 CPPgDirectories::CPPgDirectories()
 	: CPropertyPage(CPPgDirectories::IDD)
 {
@@ -46,20 +56,8 @@ void CPPgDirectories::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_SHARESELECTOR, m_ShareSelector);
+	DDX_Control(pDX, IDC_UNCLIST, m_ctlUncPaths);
 }
-
-
-BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
-	ON_BN_CLICKED(IDC_SELTEMPDIR, OnBnClickedSeltempdir)
-	ON_BN_CLICKED(IDC_SELINCDIR,OnBnClickedSelincdir)
-	ON_EN_CHANGE(IDC_INCFILES,	OnSettingsChange)
-	ON_EN_CHANGE(IDC_TEMPFILES, OnSettingsChange)
-	ON_BN_CLICKED(IDC_UNCADD,	OnBnClickedAddUNC)
-	ON_BN_CLICKED(IDC_UNCREM,	OnBnClickedRemUNC)
-END_MESSAGE_MAP()
-
-
-// CPPgDirectories message handlers
 
 BOOL CPPgDirectories::OnInitDialog()
 {
@@ -70,8 +68,8 @@ BOOL CPPgDirectories::OnInitDialog()
 
 	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(509);
 	((CEdit*)GetDlgItem(IDC_TEMPFILES))->SetLimitText(509);
-	m_uncfolders=(CListCtrl*)GetDlgItem(IDC_UNCLIST);
-	m_uncfolders->InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280, -1); 
+	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280, -1); 
+	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 
 	LoadSettings();
 	Localize();
@@ -128,11 +126,8 @@ BOOL CPPgDirectories::OnApply()
 	thePrefs.shareddir_list.RemoveAll();
 
 	m_ShareSelector.GetSharedDirectories(&thePrefs.shareddir_list);
-	for (int i=0;i<m_uncfolders->GetItemCount();++i){
-		CString unc;
-		unc=m_uncfolders->GetItemText(i,0);
-		thePrefs.shareddir_list.AddTail(unc);
-	}
+	for (int i = 0; i < m_ctlUncPaths.GetItemCount(); i++)
+		thePrefs.shareddir_list.AddTail(m_ctlUncPaths.GetItemText(i, 0));
 
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
@@ -147,8 +142,8 @@ BOOL CPPgDirectories::OnApply()
 
 BOOL CPPgDirectories::OnCommand(WPARAM wParam, LPARAM lParam)
 {
-//	if(wParam == USRMSG_ITEMSTATECHANGED)
-//		SetModified();	
+	if (wParam == USRMSG_ITEMSTATECHANGED)
+		SetModified();	
 	return CPropertyPage::OnCommand(wParam, lParam);
 }
 
@@ -166,50 +161,53 @@ void CPPgDirectories::Localize(void)
 	}
 }
 
-void CPPgDirectories::FillUncList(void) {
-	m_uncfolders->DeleteAllItems();
+void CPPgDirectories::FillUncList(void)
+{
+	m_ctlUncPaths.DeleteAllItems();
 
-	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;){
+	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition(); pos != 0; )
+	{
 		CString folder = thePrefs.shareddir_list.GetNext(pos);
-		if (folder.Left(2)=="\\\\") {
-			m_uncfolders->InsertItem(0,folder);
-		}
+		if (PathIsUNC(folder))
+			m_ctlUncPaths.InsertItem(0, folder);
 	}
 }
 
 void CPPgDirectories::OnBnClickedAddUNC()
 {
 	InputBox inputbox;
-	
-	inputbox.SetLabels(GetResString(IDS_UNCFOLDERS),GetResString(IDS_UNCFOLDERS),"\\\\HOST\\path");
+	inputbox.SetLabels(GetResString(IDS_UNCFOLDERS), GetResString(IDS_UNCFOLDERS), _T("\\\\Server\\Share"));
 	if (inputbox.DoModal() != IDOK)
 		return;
 	CString unc=inputbox.GetInput();
 
 	// basic unc-check 
-	if ( unc.GetLength()<5 || unc.Left(2)!="\\\\") {
+	if (!PathIsUNC(unc)){
 		AfxMessageBox(GetResString(IDS_ERR_BADUNC), MB_ICONERROR);
 		return;
 	}
 
-	if (unc.Right(1)=="\\") unc.Delete(unc.GetLength()-1,1);
+	if (unc.Right(1) == _T("\\"))
+		unc.Delete(unc.GetLength()-1, 1);
 
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;){
 		if (unc.CompareNoCase(thePrefs.shareddir_list.GetNext(pos))==0)
 			return;
 	}
-	for (int posi = 0; posi<m_uncfolders->GetItemCount();++posi){
-		if (unc.CompareNoCase(m_uncfolders->GetItemText(posi,0))==0)
+	for (int posi = 0; posi < m_ctlUncPaths.GetItemCount(); posi++){
+		if (unc.CompareNoCase(m_ctlUncPaths.GetItemText(posi, 0)) == 0)
 			return;
 	}
 
-	m_uncfolders->InsertItem(m_uncfolders->GetItemCount(),unc);
+	m_ctlUncPaths.InsertItem(m_ctlUncPaths.GetItemCount(), unc);
+	SetModified();
 }
 
 void CPPgDirectories::OnBnClickedRemUNC()
 {
-	int index=m_uncfolders->GetSelectionMark();
-	if (index==-1 || m_uncfolders->GetSelectedCount()==0 ) return;
-
-	m_uncfolders->DeleteItem(index);
+	int index = m_ctlUncPaths.GetSelectionMark();
+	if (index == -1 || m_ctlUncPaths.GetSelectedCount() == 0)
+		return;
+	m_ctlUncPaths.DeleteItem(index);
+	SetModified();
 }

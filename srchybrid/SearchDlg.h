@@ -74,7 +74,7 @@ struct SSearchParams
 
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchDlg dialog
-class CSearchDlg : public CResizableDialog
+class CSearchDlg : public CResizableDialog, public CLoggable
 {
 	DECLARE_DYNAMIC(CSearchDlg)
 
@@ -108,6 +108,9 @@ public:
 	// khaos::categorymod+ Changed Param: uint8 cat
 	void	AddEd2kLinksToDownload(CString strlink, int theCat = -1);
 	// Removed overloaded function
+	/*
+	void	AddEd2kLinksToDownload(CString strlink)	{AddEd2kLinksToDownload(strlink,m_cattabs.GetCurSel());}
+	*/
 	// khaos::categorymod-
 	void	IgnoreClipBoardLinks(CString strlink)		{m_lastclpbrd = strlink; }
 	bool	CreateNewTab(SSearchParams* pParams);

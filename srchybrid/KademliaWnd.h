@@ -38,4 +38,5 @@ protected:
 	afx_msg void OnBnConnect();
 	afx_msg void OnBnClickedFirewallcheckbutton();
 	afx_msg void OnSysColorChange();
+	afx_msg void OnEnSetfocusBootstrapip();
 };

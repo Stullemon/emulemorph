@@ -268,13 +268,4 @@ CString ipstr(uint32 nIP);
 // Date/Time
 //
 time_t safe_mktime(struct tm* ptm);
-
-// #ifdef MIGHTY_SUMMERTIME
-// Mighty Knife: try to correct the summertime bug.
-// Very special. Never activate this in a release version until totally tested !
-CString ExtractFileVolume (CString _FilePath);
-CString GetFileVolumeString (CString _FilePath);
-bool    IsDaylightActive (int& _DaylightBias);
-bool	CorrectLocalFileTime (CString _Filename, time_t& _fdate);
-// [end] Mighty Knife
-// #endif
+bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);

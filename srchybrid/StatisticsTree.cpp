@@ -404,7 +404,7 @@ CString CStatisticsTree::GetText(bool onlyVisible, HTREEITEM theItem, int theIte
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
-	if (firstItem) strBuffer.Format("eMule v%s Statistics [%s]\r\n\r\n", theApp.m_strCurVersionLong, thePrefs.GetUserNick());
+	if (firstItem) strBuffer.Format("eMule v%s %s [%s]\r\n\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
 
 	if (theItem == NULL) hCurrent = GetRootItem(); // Copy All Vis or Copy All
 	else if (firstItem) {

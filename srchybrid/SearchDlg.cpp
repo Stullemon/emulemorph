@@ -577,7 +577,6 @@ void CSearchDlg::DownloadSelected(bool paused)
 			// khaos::categorymod-
 			if (cur_file->GetListParent()!=NULL)
 				cur_file=cur_file->GetListParent();
-			cur_file->InitKnownType();
 			searchlistctrl.UpdateSources(cur_file);
 		}
 	}
@@ -1160,7 +1159,12 @@ void CSearchDlg::StartNewSearch(bool bKademlia)
 {
 	ESearchType eSearchType = (ESearchType)methodBox.GetCurSel();
 	if (bKademlia ? !Kademlia::CKademlia::isConnected() : ((eSearchType == SearchTypeServer || eSearchType == SearchTypeGlobal) && !theApp.serverconnect->IsConnected()))
+	{
+		if (!bKademlia)
 		AfxMessageBox(GetResString(IDS_ERR_NOTCONNECTED),MB_ICONASTERISK);
+		else
+			AfxMessageBox(GetResString(IDS_ERR_NOTCONNECTEDKAD), MB_ICONASTERISK);
+	}
 	else{
 		CString strSearchString;
 		m_ctlName.GetWindowText(strSearchString);
@@ -1216,7 +1220,7 @@ void CSearchDlg::StartNewSearch(bool bKademlia)
 		pParams->ulMinSize = ulMinSize;
 		pParams->strMaxSize = strMaxSize;
 		pParams->ulMaxSize = ulMaxSize;
-		pParams->iAvailability = iAvailability;
+		pParams->iAvailability = iAvailability == -1 ? -1 : (iAvailability + 1);
 		pParams->strExtension = strExtension;
 		pParams->bMatchKeywords = IsDlgButtonChecked(IDC_MATCH_KEYWORDS);
 
@@ -1311,6 +1315,7 @@ bool CSearchDlg::CreateNewTab(SSearchParams* pParams)
 		if (searchselect.GetItem(i, &tci) && tci.lParam != NULL && ((const SSearchParams*)tci.lParam)->dwSearchID == pParams->dwSearchID)
 			return false;
     }
+	// add new tab
 	// add new tab
 	TCITEM newitem;
 	if (pParams->strExpression.IsEmpty())
