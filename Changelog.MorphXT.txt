@@ -1,11 +1,15 @@
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.1
 ---------------------------------------- 
+NEW    : You can now find the Morph-News with our RSS Feed at this url "http://emulemorph.sourceforge.net/backend.php" [IceCream] 
+NEW    : German dll language from cyrex2001 added to our official Website, more to come [IceCream]
+
 FIXED  : The Multiple affectation to HideOS, SelectiveChunk, and ShareOnlyTheNeed causing crash [SiRoB]
 FIXED  : TagCount Trouble causing .part corruption [SiRoB]
 FIXED  : Popup menu permission state in the Download Windows  [SiRoB]
 FIXED  : The Known.met trouble and certainly many other, Great thanks to Tharghan for his support [SiRoB]
 ADDED  : 2 Columns in SharedFIle to see the HideOS & ShareOnlyTheNeed State [SiRoB]
+CHANGED: Network status state in the statusBar [SiRoB]
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.0 
