@@ -13,7 +13,7 @@ ADDED  : Show Client Percentage in the downloadlist [Commander]
 CHANGED: Invisible Mode [Commander]
 ADDED  : Dynamic Invisible Mode [Commander]
 TODO   : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander]
-FIXED  : duplicated part file statistics no longer save in known.met [AndCycle]
+FIXED  : duplicated part file statistics no longer save in known.met [AndCycle] - Removed
 ADDED  : Enable/Disable startupsound (Preferences -> General ->Play startupsound) [Commander]
 FIXED  : Code alignment [Commander]
 ADDED  : Save known.met when clicking 'reload' [MightyKnife]
@@ -28,19 +28,20 @@ ADDED  : Optimizer [ePlus] [Commander]
 ADDED  : Displaying the friend's country in the chatwnd info groupbox [Commander]
 FIXED  : Serverlist->LowId column display and sort [Commander]
 FIXED  : cat->rightclick->Resume Next works now [Commander]
+TODO   : Make RSS-Feed fully RDF compatible [?]
+FIXED  : SharedFileList -> Transfered data now saved correctly [AndCycle/Commander]
+TODO   : Recheck file completing (user report->possible bug?)
+ADDED  : CPU Optimization Mode display on Splashscreen [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
 --------------------------------------
 MERGED : Code merged to 0.43b [SiRoB]
-
 FIXED  : Various fix & optimization [SiRoB]
-
 CHANGED: Simplify Equal Chance for Each File to a checkbox [AndCycle]
 CHANGED: Adapt to SLUGFILLER's expired time known.met control [AndCycle]
 CHANGED: r in StatusBar to said that we will be limited when 1:3 session ratio is reach [SiRoB]
 CHANGED: R in StatusBar to said that we are actualy limited in download [SiRoB]
-
 ADDED  : Now we can visualise parts that we hide when we use the HideOS feature (cyan color) [SiRoB]
 ADDED  : PBF Progression to avoid some brain-storming [SiRoB]
 ADDED  : Splash Song by Commander [SiRoB]
