@@ -3054,8 +3054,10 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
 	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO") );//<--9/21/02
 	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS") );
- 	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_ImportParts, _T("Import parts to file..."), _T("SR13IMPORTPARTS"));
- 	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_InitiateRehash, _T("Initiate rehash"), _T("SR13INITIATEREHASH"));
+	//MORPH START - Added by SiRoB, Import Parts [SR13]
+	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_ImportParts, _T("Import parts to file..."), _T("FILEIMPORTPARTS"));
+ 	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_InitiateRehash, _T("Initiate rehash"), _T("FILEINITIATEREHASH"));
+	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR), _T("CLEARCOMPLETE"));
