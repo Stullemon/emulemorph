@@ -873,12 +873,11 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			}
 			else if(m_nDownloadState == DS_DOWNLOADING){
 				reqfile->RemoveDownloadingSource(this);
-                                theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this); // MORPH - Moved by Commander, Crash fix
 			}
 		}
 
 		if (m_nDownloadState == DS_DOWNLOADING ){
-			//theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this);  //SLAHAM: ADDED DownloadClientsCtrl // Commander: Moved above
+			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
 				thePrefs.Add2DownSuccessfulSessions(); // Increment our counters for successful sessions (Cumulative AND Session)
