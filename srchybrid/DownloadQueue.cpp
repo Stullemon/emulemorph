@@ -962,10 +962,10 @@ void CDownloadQueue::Process(){
 	CheckDiskspaceTimed();
 
 // ZZ:DownloadManager -->
-    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
-        theApp.clientlist->ProcessA4AFClients();
-        m_dwLastA4AFtime = ::GetTickCount();
-    }
+//    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
+//        theApp.clientlist->ProcessA4AFClients();
+//        m_dwLastA4AFtime = ::GetTickCount();
+//    }
 // <-- ZZ:DownloadManager
 }
 
@@ -1041,7 +1041,7 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 			return false;
 		}
 	}
-
+	// filter sources which are known to be dead/useless
 	if (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) || sender->m_DeadSourceList.IsDeadSource(source)){
 		if (thePrefs.GetLogFilteredIPs())
 			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
