@@ -2045,6 +2045,7 @@
 #define IDS_CAT_GROUP                   3621
 #define IDS_CAT_SETFILEGROUPMSG         3622
 #define IDC_AUTOCAT                     3622
+#define IDS_CAT_RESUMEFILEONLYINSAMECAT 3622
 #define IDS_A4AF_FORCEALL               3623
 #define IDS_A4AF_FLAGS                  3624
 #define IDS_A4AF_ONFLAG                 3625
@@ -2365,10 +2366,10 @@
 #define IDC_SPLITTER_IRC                5013
 #define IDC_FRIENDS_USERHASH            5102
 #define IDC_FRIENDS_NAME                5103
-#define IDC_FRIENDS_CLIENT				5104
+#define IDC_FRIENDS_CLIENT              5104
 #define IDC_FRIENDS_UPLOADED            5105
 #define IDC_FRIENDS_DOWNLOADED          5106
-#define IDC_FRIENDS_IDENT				5107
+#define IDC_FRIENDS_IDENT               5107
 #define IDC_FRIENDS_NAME_EDIT           5108
 #define IDC_FRIENDS_USERHASH_EDIT       5109
 #define IDC_FRIENDS_CLIENTE_EDIT        5110
@@ -2377,7 +2378,6 @@
 #define IDC_FRIENDS_DESCARGADO_EDIT     5113
 #define IDC_FRIENDS_MSG                 5114
 #define IDC_WINDOW1_STATIC              5115
-#define IDC_FRIENDS_MSG                 5114
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125

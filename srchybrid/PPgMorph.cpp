@@ -94,6 +94,7 @@ CPPgMorph::CPPgMorph()
 	m_htiSmallFileDLPush = NULL;
 	m_htiResumeFileInNewCat = NULL;
 	m_htiUseAutoCat = NULL;
+	m_htiResumeFileOnlyInSameCat = NULL; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	m_htiUseSLS = NULL;
 	// khaos::accuratetimerem+
 	m_htiTimeRemainingMode = NULL;
@@ -160,12 +161,13 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiUseAutoCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_USEAUTOCAT), m_htiSCC, m_iUseAutoCat);
 		m_htiUseActiveCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_USEACTIVE), m_htiSCC, m_iUseActiveCat);
 		m_htiAutoSetResOrder = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_AUTORESUMEORD), m_htiSCC, m_iAutoSetResOrder);
-		
+		m_htiSmallFileDLPush = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SMALLFILEDLPUSH), m_htiSCC, m_iSmallFileDLPush);
+		m_htiResumeFileInNewCat = m_ctrlTreeOptions.InsertItem(GetResString(IDS_CAT_STARTFILESONADD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSCC);
+		m_ctrlTreeOptions.AddEditBox(m_htiResumeFileInNewCat, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiResumeFileOnlyInSameCat = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_RESUMEFILEONLYINSAMECAT), m_htiSCC, m_iResumeFileOnlyInSameCat); //MORPH - Added by SiRoB, Resume File Only in the same cat
+
 		m_htiSAC = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SAC), iImgSAC, m_htiDM);
 		m_htiShowA4AFDebugOutput  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SHOWDEBUG), m_htiSAC, m_iShowA4AFDebugOutput);
-		m_htiSmallFileDLPush = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SMALLFILEDLPUSH), m_htiSAC, m_iSmallFileDLPush);
-		m_htiResumeFileInNewCat = m_ctrlTreeOptions.InsertItem(GetResString(IDS_CAT_STARTFILESONADD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSAC);
-		m_ctrlTreeOptions.AddEditBox(m_htiResumeFileInNewCat, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiSmartA4AFSwapping = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SMARTSWAP), m_htiSAC, m_iSmartA4AFSwapping);
 		m_htiAdvA4AFMode = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DEFAULT) + " " + GetResString(IDS_A4AF_ADVMODE), iImgA4AF, m_htiSAC);
 		m_htiDisableAdvA4AF = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_A4AF_DISABLED), m_htiAdvA4AFMode, m_iAdvA4AFMode == 0);
@@ -368,6 +370,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSmartA4AFSwapping, m_iSmartA4AFSwapping);
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiAdvA4AFMode, m_iAdvA4AFMode);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseAutoCat, m_iUseAutoCat);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiResumeFileOnlyInSameCat, m_iResumeFileOnlyInSameCat); //MORPH - Added by SiRoB, Resume File Only in the same cat
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseSLS, m_iUseSLS);
 	// khaos::accuratetimerem+
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiTimeRemainingMode, m_iTimeRemainingMode);
@@ -435,6 +438,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iSmallFileDLPush = thePrefs.SmallFileDLPush();
 	m_iResumeFileInNewCat = thePrefs.StartDLInEmptyCats();
 	m_iUseAutoCat = thePrefs.UseAutoCat();
+	m_iResumeFileOnlyInSameCat = thePrefs.ResumeFileOnlyInSameCat(); //MORPH - Added by SiRoB, Resume File Only in the same cat
 	m_iUseSLS = thePrefs.UseSaveLoadSources();
 	// khaos::accuratetimerem+
 	m_iTimeRemainingMode = thePrefs.GetTimeRemainingMode();
@@ -526,6 +530,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bSmallFileDLPush = m_iSmallFileDLPush;
 	thePrefs.m_iStartDLInEmptyCats = m_iResumeFileInNewCat;
 	thePrefs.m_bUseAutoCat = m_iUseAutoCat;
+	thePrefs.m_bResumeFileOnlyInSameCat = m_iResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	thePrefs.m_bUseSaveLoadSources = m_iUseSLS;
 	// khaos::accuratetimerem+
 	thePrefs.m_iTimeRemainingMode = m_iTimeRemainingMode;
@@ -638,13 +643,14 @@ void CPPgMorph::Localize(void)
 		if (m_htiUseActiveCat) m_ctrlTreeOptions.SetItemText(m_htiUseActiveCat, GetResString(IDS_CAT_USEACTIVE));
 		if (m_htiAutoSetResOrder) m_ctrlTreeOptions.SetItemText(m_htiAutoSetResOrder, GetResString(IDS_CAT_AUTORESUMEORD));
 		if (m_htiSmallFileDLPush) m_ctrlTreeOptions.SetItemText(m_htiSmallFileDLPush, GetResString(IDS_CAT_SMALLFILEDLPUSH));
-		if (m_htiResumeFileInNewCat) m_ctrlTreeOptions.SetEditLabel(m_htiResumeFileInNewCat, GetResString(IDS_CAT_RESUMENEXT));
+		if (m_htiResumeFileInNewCat) m_ctrlTreeOptions.SetEditLabel(m_htiResumeFileInNewCat, GetResString(IDS_CAT_STARTFILESONADD));
 		if (m_htiSmartA4AFSwapping) m_ctrlTreeOptions.SetItemText(m_htiSmartA4AFSwapping, GetResString(IDS_A4AF_SMARTSWAP));
 		if (m_htiShowA4AFDebugOutput) m_ctrlTreeOptions.SetItemText(m_htiShowA4AFDebugOutput, GetResString(IDS_A4AF_SHOWDEBUG));
 		if (m_htiAdvA4AFMode) m_ctrlTreeOptions.SetItemText(m_htiAdvA4AFMode, /*GetResString(IDS_DEFAULT) + " " +*/ GetResString(IDS_A4AF_ADVMODE));
 		if (m_htiDisableAdvA4AF) m_ctrlTreeOptions.SetItemText(m_htiDisableAdvA4AF, GetResString(IDS_A4AF_DISABLED));
 		if (m_htiBalanceSources) m_ctrlTreeOptions.SetItemText(m_htiBalanceSources, GetResString(IDS_A4AF_BALANCE));
 		if (m_htiStackSources) m_ctrlTreeOptions.SetItemText(m_htiStackSources, GetResString(IDS_A4AF_STACK));
+		if (m_htiResumeFileOnlyInSameCat) m_ctrlTreeOptions.SetItemText(m_htiResumeFileOnlyInSameCat, GetResString(IDS_CAT_RESUMEFILEONLYINSAMECAT)); //MORPH - Added by SiRoB, Resume File Only in the same cat
 		if (m_htiUseSLS) m_ctrlTreeOptions.SetItemText(m_htiUseSLS, GetResString(IDS_SLS_USESLS));
 		// khaos::accuratetimerem+
 		if (m_htiTimeRemainingMode) m_ctrlTreeOptions.SetItemText(m_htiTimeRemainingMode, GetResString(IDS_REMTIMEAVRREAL));
@@ -710,6 +716,7 @@ void CPPgMorph::OnDestroy()
 	m_htiSmallFileDLPush = NULL;
 	m_htiResumeFileInNewCat = NULL;
 	m_htiUseAutoCat = NULL;
+	m_htiResumeFileOnlyInSameCat = NULL; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	m_htiUseSLS = NULL;
 	// khaos::accuratetimerem+
 	m_htiTimeRemainingMode = NULL;

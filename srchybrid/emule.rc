@@ -80,7 +80,7 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    ICON            "",IDC_DOWNLOAD_ICO,5,5,20,20
+    ICON            "",IDC_DOWNLOAD_ICO,5,5,21,20
     CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,21,6,140,8
     CONTROL         "",IDC_DOWNLOADLIST,"SysListView32",LVS_REPORT | 
@@ -206,30 +206,27 @@ BEGIN
     LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,63,270,71,8
 END
 
-IDD_STATISTICS DIALOGEX 0, 35, 511, 289
+IDD_STATISTICS DIALOGEX 0, 35, 511, 290
 STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_SCOPE_U,"Static",SS_ETCHEDFRAME | SS_RIGHTJUST | 
-                    SS_REALSIZEIMAGE | SS_SUNKEN | NOT WS_VISIBLE,221,112,
-                    284,106
+                    SS_REALSIZEIMAGE | SS_SUNKEN | NOT WS_VISIBLE,221,97,284,
+                    93
     CONTROL         "",IDC_STATSSCOPE,"Static",SS_ETCHEDFRAME | SS_SUNKEN | 
-                    NOT WS_VISIBLE,221,221,284,65
+                    NOT WS_VISIBLE,221,194,284,93
     CONTROL         "",IDC_SCOPE_D,"Static",SS_ETCHEDFRAME | SS_SUNKEN | NOT 
-                    WS_VISIBLE,221,4,284,106
+                    WS_VISIBLE,221,0,284,93
     CONTROL         "",IDC_STATTREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP | 0x800,3,26,211,260
-    PUSHBUTTON      "V",IDC_BNMENU,7,8,16,14,BS_FLAT
-    LTEXT           "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,26,
-                    11,192,11
+                    WS_BORDER | WS_TABSTOP | 0x800,5,0,211,287
     CONTROL         "",IDC_SPLITTER_STAT,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,216,5,3,281
+                    WS_VISIBLE,217,6,5,281
     CONTROL         "",IDC_SPLITTER_STAT_HL,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,221,218,284,3
+                    WS_VISIBLE,221,190,284,5
     CONTROL         "",IDC_SPLITTER_STAT_HR,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,221,110,284,3
+                    WS_VISIBLE,221,92,284,5
 END
 
 IDD_PPG_STATS DIALOGEX 0, 0, 229, 229
@@ -1704,11 +1701,8 @@ BEGIN
 
     IDD_STATISTICS, DIALOG
     BEGIN
-        LEFTMARGIN, 3
         RIGHTMARGIN, 505
-        VERTGUIDE, 373
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 286
+        BOTTOMMARGIN, 287
     END
 
     IDD_PPG_STATS, DIALOG
@@ -4258,6 +4252,8 @@ BEGIN
     IDS_SLS_USESLS          "Enable saving and loading of sources"
     IDS_CAT_MERGE           "Merge category"
     IDS_CAT_GROUP           "Group"
+    IDS_CAT_RESUMEFILEONLYINSAMECAT 
+                            "Start next paused file only in the same category"
     IDS_A4AF_FORCEALL       "Get all A4AF"
     IDS_A4AF_FLAGS          "Advanced A4AF flags"
     IDS_A4AF_ONFLAG         "Force A4AF On"

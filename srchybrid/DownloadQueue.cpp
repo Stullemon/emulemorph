@@ -299,7 +299,8 @@ bool CDownloadQueue::StartNextFile(int cat){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_PAUSED) {
 			if (!pfile)
-				pfile = cur_file;
+				if (thePrefs.ResumeFileOnlyInSameCat() && cur_file->GetCategory()==cat) //MORPH - Added by SiRoB, Resume File Only in the same category
+					pfile = cur_file;
 			else {
 				if (pfile->GetCategory()==cat && thePrefs.GetResumeSameCat() && cur_file->GetCategory()!=cat  && cat!=-1)
 					continue;
@@ -2235,10 +2236,12 @@ void CDownloadQueue::OnConnectionState(bool bConnected)
 //MORPH START - Added by SiRoB, ZZ Ratio
 bool CDownloadQueue::IsFilesPowershared()
 {
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
-		CPartFile* cur_file =  filelist.GetNext(pos);
-		if (cur_file->IsPartFile() && ((cur_file->GetPowerSharedMode()>=0)?cur_file->GetPowerSharedMode():thePrefs.GetPowerShareMode())&1)
-			return true;
+	if (filelist.IsEmpty()) {
+		for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+			CPartFile* cur_file =  filelist.GetNext(pos);
+			if (cur_file->IsPartFile() && ((cur_file->GetPowerSharedMode()>=0)?cur_file->GetPowerSharedMode():thePrefs.GetPowerShareMode())&1)
+				return true;
+		}
 	}
 	return false;
 }

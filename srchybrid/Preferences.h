@@ -67,6 +67,7 @@ struct CategoryViewFilter_Struct{
 	bool	bHashing;
 	bool	bErrorUnknown;
 	bool	bCompleting;
+	bool	bSeenComplet; //MORPH - Added by SiRoB, Seen Complet filter
 	//		File Size View Filters
 	uint32	nFSizeMin;
 	uint32	nFSizeMax;
@@ -660,6 +661,7 @@ public:
 	static uint8		m_iStartDLInEmptyCats;
 	static bool		m_bRespectMaxSources;
 	static bool		m_bUseAutoCat;
+	static bool		m_bResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	static bool		m_bShowA4AFDebugOutput;
@@ -1497,6 +1499,7 @@ public:
 	static	bool	SmallFileDLPush()		{ return m_bSmallFileDLPush; }
 	static	uint8	StartDLInEmptyCats()	{ return m_iStartDLInEmptyCats; } // 0 = disabled, otherwise num to resume
 	static	bool	UseAutoCat()			{ return m_bUseAutoCat; }
+	static	bool	ResumeFileOnlyInSameCat(){ return m_bResumeFileOnlyInSameCat; } //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	static	bool	UseSmartA4AFSwapping()	{ return m_bSmartA4AFSwapping; } // only for NNP swaps and file completes, stops, cancels, etc.

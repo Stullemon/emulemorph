@@ -52,6 +52,7 @@ protected:
 	int m_iSmallFileDLPush;
 	int m_iResumeFileInNewCat;
 	int m_iUseAutoCat;
+	int m_iResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	int m_iUseSLS;
 	// khaos::accuratetimerem+
 	int m_iTimeRemainingMode;
@@ -127,6 +128,7 @@ protected:
 	HTREEITEM m_htiSmallFileDLPush;
 	HTREEITEM m_htiResumeFileInNewCat;
 	HTREEITEM m_htiUseAutoCat;
+	HTREEITEM m_htiResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 	HTREEITEM m_htiUseSLS;
 	// khaos::accuratetimerem+
 	HTREEITEM m_htiTimeRemainingMode;

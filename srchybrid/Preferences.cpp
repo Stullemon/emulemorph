@@ -578,6 +578,7 @@ bool	CPreferences::m_bSmallFileDLPush;
 uint8	CPreferences::m_iStartDLInEmptyCats;
 bool	CPreferences::m_bRespectMaxSources;
 bool	CPreferences::m_bUseAutoCat;
+bool	CPreferences::m_bResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume File Only in the same cat
 // khaos::categorymod-
 // khaos::kmod+
 bool	CPreferences::m_bShowA4AFDebugOutput;
@@ -2391,6 +2392,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("SmallFileDLPush", m_bSmallFileDLPush,"eMule");
 	ini.WriteInt("StartDLInEmptyCats", m_iStartDLInEmptyCats,"eMule");
 	ini.WriteBool("UseAutoCat", m_bUseAutoCat,"eMule");
+	ini.WriteBool("ResumeFileOnlyInSameCat", m_bResumeFileOnlyInSameCat,"eMule"); //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	ini.WriteBool("SmartA4AFSwapping", m_bSmartA4AFSwapping,"eMule");
@@ -2446,9 +2448,9 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit,"eMule"); // EastShare - Added by TAHO, does USS limit
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 	//MORPH START - Added by SiRoB, Splitting Bar [O²]
-	ini.WriteInt("SplitterbarPositionStat",splitterbarPositionStat+2,"eMule");
-	ini.WriteInt("SplitterbarPositionStat_HL",splitterbarPositionStat_HL+2,"eMule");
-	ini.WriteInt("SplitterbarPositionStat_HR",splitterbarPositionStat_HR+2,"eMule");
+	ini.WriteInt("SplitterbarPositionStat",splitterbarPositionStat,"eMule");
+	ini.WriteInt("SplitterbarPositionStat_HL",splitterbarPositionStat_HL,"eMule");
+	ini.WriteInt("SplitterbarPositionStat_HR",splitterbarPositionStat_HR,"eMule");
 	ini.WriteInt("SplitterbarPositionFriend",splitterbarPositionFriend+2,"eMule");
 	ini.WriteInt("SplitterbarPositionIRC",splitterbarPositionIRC+2,"eMule");
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
@@ -2500,6 +2502,7 @@ void CPreferences::SaveCats(){
 		catini.WriteBool("vfHashing", catMap.GetAt(ix)->viewfilters.bHashing, ixStr);
 		catini.WriteBool("vfErrorUnknown", catMap.GetAt(ix)->viewfilters.bErrorUnknown, ixStr);
 		catini.WriteBool("vfCompleting", catMap.GetAt(ix)->viewfilters.bCompleting, ixStr);
+		catini.WriteBool("vfSeenComplet", catMap.GetAt(ix)->viewfilters.bSeenComplet, ixStr); //MORPH - Added by SiRoB, Seen Complet filter
 		catini.WriteInt("vfFSizeMin", catMap.GetAt(ix)->viewfilters.nFSizeMin, ixStr);
 		catini.WriteInt("vfFSizeMax", catMap.GetAt(ix)->viewfilters.nFSizeMax, ixStr);
 		catini.WriteInt("vfRSizeMin", catMap.GetAt(ix)->viewfilters.nRSizeMin, ixStr);
@@ -2956,6 +2959,7 @@ void CPreferences::LoadPreferences(){
 	m_bSmallFileDLPush=ini.GetBool("SmallFileDLPush", true);
 	m_iStartDLInEmptyCats=ini.GetInt("StartDLInEmptyCats", 0);
 	m_bUseAutoCat=ini.GetBool("UseAutoCat", true);
+	m_bResumeFileOnlyInSameCat=ini.GetBool("ResumeFileONlyInSameCat", true); //MORPH - Added by SiRoB, Resume File Only in the same cat
 	// khaos::categorymod-
 	// khaos::kmod+
 	m_bUseSaveLoadSources=ini.GetBool("UseSaveLoadSources", true);
@@ -2968,8 +2972,12 @@ void CPreferences::LoadPreferences(){
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, Splitting Bar [O²]
 	splitterbarPositionStat=ini.GetInt("SplitterbarPositionStat",30);
-	splitterbarPositionStat_HL=ini.GetInt("SplitterbarPositionStat_HL",68);
+	splitterbarPositionStat_HL=ini.GetInt("SplitterbarPositionStat_HL",66);
 	splitterbarPositionStat_HR=ini.GetInt("SplitterbarPositionStat_HR",33);
+	if (splitterbarPositionStat_HR+1>=splitterbarPositionStat_HL){
+		splitterbarPositionStat_HL = 66;
+		splitterbarPositionStat_HR = 33;
+	}
 	splitterbarPositionFriend=ini.GetInt("SplitterbarPositionFriend",300);
 	splitterbarPositionIRC=ini.GetInt("SplitterbarPositionIRC",200);
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
@@ -3239,6 +3247,7 @@ void CPreferences::LoadCats() {
 		defcat->viewfilters.bAudio = true;
 		defcat->viewfilters.bComplete = true;
 		defcat->viewfilters.bCompleting = true;
+		defcat->viewfilters.bSeenComplet = true; //MORPH - Added by SiRoB, Seen Complet filter
 		defcat->viewfilters.bErrorUnknown = true;
 		defcat->viewfilters.bHashing = true;
 		defcat->viewfilters.bImages = true;
@@ -3305,6 +3314,7 @@ void CPreferences::LoadCats() {
 		newcat->viewfilters.bHashing = catini.GetBool("vfHashing", true);
 		newcat->viewfilters.bErrorUnknown = catini.GetBool("vfErrorUnknown", true);
 		newcat->viewfilters.bCompleting = catini.GetBool("vfCompleting", true);
+		newcat->viewfilters.bSeenComplet = catini.GetBool("vfSeenComplet", true); //MORPH - Added by SiRoB, Seen Complet filter
 		newcat->viewfilters.nFSizeMin = catini.GetInt("vfFSizeMin", 0);
 		newcat->viewfilters.nFSizeMax = catini.GetInt("vfFSizeMax", 0);
 		newcat->viewfilters.nRSizeMin = catini.GetInt("vfRSizeMin", 0);
