@@ -2344,6 +2344,17 @@
 #define IDS_DYNUPLOAD                   3822
 #define IDS_HIDEOVERSHARES              3823
 #define IDS_SELECTIVESHARE              3824
+
+// Mighty Knife: More scheduling events
+#define IDS_SCHED_BACKUP                3830
+#define IDS_SCHED_UPDATE_IPCONFIG       3831
+#define IDS_SCHED_UPDATE_FAKES          3832
+#define IDS_SCHED_BACKUP_LOG            3840
+#define IDS_SCHED_UPDATE_IPCONFIG_LOG   3841
+#define IDS_SCHED_UPDATE_FAKES_LOG      3842
+#define IDS_SCHED_UPDATE_WARNING		3850
+// [end] Mighty Knife
+
 #define IDS_BACKUP                      4001
 #define IDS_USS_MAXPING                 4002
 #define IDS_PAYBACKFIRST                4003

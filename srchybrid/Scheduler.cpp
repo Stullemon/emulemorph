@@ -24,6 +24,13 @@
 #include "emuledlg.h"
 #include "MenuCmds.h"
 
+// Mighty Knife: additional scheduling events
+#include "PPgBackup.h"
+#include "ipfilter.h"
+#include "fakecheck.h"
+#include "log.h"
+// [end] Mighty Knife
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -38,7 +45,10 @@ CScheduler::CScheduler(){
 }
 
 CScheduler::~CScheduler(){
-	SaveToFile();
+	// Mighty Knife: Saving of scheduler events is now done by SaveSettings!
+	// -> much cleaner. This should be changed for the constructor, too...
+	// SaveToFile();
+	// [end] Mighty Knife
 	RemoveAll();
 }
 
@@ -177,6 +187,15 @@ int CScheduler::Check(bool forcecheck){
 		int it1,it2, itn;
 		it1=h1*60 + m1;
 		it2=h2*60 + m2;
+
+		// Mighty Knife: handling of one-time-events.
+		// if start-time=end-time, this is an event that should
+		// occur once in that minute. In that case we add 1 to it2 to make sure
+		// it happens (because of the timespan-comparison below, which happens
+		// once per minute, too...)
+		if (it2==it1) it2++;
+		// [end] Mighty Knife
+
 		itn=tNow.GetHour()*60 + tNow.GetMinute();
 		if (it1<=it2) { // normal timespan
 			if ( !(itn>=it1 && itn<it2) ) continue;
@@ -262,6 +281,29 @@ void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
 				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
 				break;
 			//EastShare END - Added by Pretender, add USS settings in scheduler tab
+
+			// Mighty Knife: additional scheduling events
+			case ACTION_BACKUP : {
+					// Save everything before backup
+					AddLogLine (false,GetResString (IDS_SCHED_BACKUP_LOG));
+					theApp.emuledlg->SaveSettings (false);
+
+					// backup everything
+					theApp.ppgbackup->Backup(_T("*.ini"), false);
+					theApp.ppgbackup->Backup(_T("*.dat"), false);
+					theApp.ppgbackup->Backup(_T("*.met"), false);
+				} break;
+			case ACTION_UPDIPCONF : {
+					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_IPCONFIG_LOG));
+					theApp.ipfilter->UpdateIPFilterURL();
+				} break;
+			case ACTION_UPDFAKES : {
+					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_FAKES_LOG));
+					theApp.FakeCheck->DownloadFakeList();
+				} break;
+
+			// [end] Mighty Knife
+
 		}
 	}
 }

@@ -24,6 +24,10 @@
 #include "MenuCmds.h"
 #include "HelpIDs.h"
 
+// Mighty Knife: additional scheduling events
+#include "XMessageBox.h"
+// [end] Mighty Knife
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -262,6 +266,12 @@ CString CPPgScheduler::GetActionLabel(uint8 index) {
 		case ACTION_USSGODOWN	: return GetResString(IDS_USS_GOINGDOWNDIVIDER);
 		case ACTION_USSMINUP	: return GetResString(IDS_MINUPLOAD);
 		//EastShare END - Added by Pretender, add USS settings in scheduler tab
+
+		// Mighty Knife: additional scheduling events
+		case ACTION_BACKUP  	: return GetResString(IDS_SCHED_BACKUP);
+		case ACTION_UPDIPCONF	: return GetResString(IDS_SCHED_UPDATE_IPCONFIG);
+		case ACTION_UPDFAKES	: return GetResString(IDS_SCHED_UPDATE_FAKES);
+		// [end] MIghty Knife
 	}
 	return _T(""); //MORPH - Modified by IceCream, return a CString
 }
@@ -288,7 +298,11 @@ void CPPgScheduler::OnNMDblclkActionlist(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	if (m_actions.GetSelectionMark()!=-1) {
 		int ac=m_actions.GetItemData(m_actions.GetSelectionMark());
-		if (ac!=6 && ac!=7) OnCommand(MP_CAT_EDIT,0);
+		// Mighty Knife: actions without parameters
+		if (ac < ACTION_BACKUP || ac > ACTION_UPDFAKES) {
+			if (ac!=6 && ac!=7) OnCommand(MP_CAT_EDIT,0);
+		} 
+		// [end] Mighty Knife
 	}
 
 	*pResult = 0;
@@ -308,6 +322,14 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult)
 		int ac=m_actions.GetItemData(m_actions.GetSelectionMark());
 		if (ac==6 || ac==7) isCatAction=true;
 	}
+
+	// Mighty Knife: actions without parameters
+	bool isParameterless = false;
+	if (m_actions.GetSelectionMark()!=-1) {
+		int ac=m_actions.GetItemData(m_actions.GetSelectionMark());
+		if (ac>=ACTION_BACKUP && ac<=ACTION_UPDFAKES) isParameterless=true;
+	}
+	// [end] Mighty Knife
 
 	m_ActionMenu.CreatePopupMenu();
 	m_ActionSel.CreatePopupMenu();
@@ -334,18 +356,27 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult)
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_USSMINUP,GetResString(IDS_MINUPLOAD));
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 
+	// Mighty Knife: additional scheduling events
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_BACKUP,GetResString(IDS_SCHED_BACKUP));
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDFAKES,GetResString(IDS_SCHED_UPDATE_FAKES));
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDIPCONF,GetResString(IDS_SCHED_UPDATE_IPCONFIG));
+	// [end] MIghty Knife
+
 	m_ActionMenu.AddMenuTitle(GetResString(IDS_ACTION));
 	m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_ActionSel.m_hMenu,	GetResString(IDS_ADD));
 
-	if (isCatAction) {
-		if (thePrefs.GetCatCount()>1) m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+20,GetResString(IDS_ALLUNASSIGNED));
-		m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+21,GetResString(IDS_ALL));
-		for (int i=1;i<thePrefs.GetCatCount();i++)
-			m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+22+i,thePrefs.GetCategory(i)->title );
-		m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_CatActionSel.m_hMenu,	GetResString(IDS_SELECTCAT));
-	} else
-		m_ActionMenu.AppendMenu(nFlag,MP_CAT_EDIT,	GetResString(IDS_EDIT));
-
+	// Mighty Knife: actions without parameters
+	if (!isParameterless) {
+		if (isCatAction) {
+			if (thePrefs.GetCatCount()>1) m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+20,GetResString(IDS_ALLUNASSIGNED));
+			m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+21,GetResString(IDS_ALL));
+			for (int i=1;i<thePrefs.GetCatCount();i++)
+				m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+22+i,thePrefs.GetCategory(i)->title );
+			m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_CatActionSel.m_hMenu,	GetResString(IDS_SELECTCAT));
+		} else
+			m_ActionMenu.AppendMenu(nFlag,MP_CAT_EDIT,	GetResString(IDS_EDIT));
+	}
+	// [end] Mighty Knife
 
 	m_ActionMenu.AppendMenu(nFlag,MP_CAT_REMOVE,GetResString(IDS_REMOVE));
 
@@ -370,6 +401,16 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 		m_actions.SetSelectionMark(i);
 		if (action<6)
 			OnCommand(MP_CAT_EDIT,0);
+		// Mighty Knife: parameterless schedule events
+		if (action>=ACTION_BACKUP && action<=ACTION_UPDFAKES) {
+			m_actions.SetItemText(i,1,_T("-"));
+			// Small warning message
+			if (action == ACTION_UPDIPCONF || action == ACTION_UPDFAKES) {
+				XMessageBox (NULL,GetResString (IDS_SCHED_UPDATE_WARNING),
+							 GetResString (IDS_WARNING),MB_OK | MB_ICONINFORMATION,NULL);
+			}
+		}
+		// [end] Mighty Knife
 	}
 	else if (wParam>=MP_SCHACTIONS+20 && wParam<=MP_SCHACTIONS+80)
 	{

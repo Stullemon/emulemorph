@@ -30,6 +30,11 @@
 #define ACTION_USSMINUP		11
 //EastShare END - Added by Pretender, add USS settings in scheduler tab
 
+// Mighty Knife: additional scheduling events
+#define ACTION_BACKUP  	    12
+#define ACTION_UPDIPCONF    13
+#define ACTION_UPDFAKES	    14
+// [end] Mighty Knife
 
 #define DAY_DAYLY		0
 #define DAY_MO			1
