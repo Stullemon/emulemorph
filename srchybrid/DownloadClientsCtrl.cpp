@@ -438,13 +438,20 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}	
 			case 5:
-				Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
+				if(client->Credits())
+					Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedDown()), CastItoXBytes(client->credits->GetDownloadedTotal()));
+				else
+				    Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedDown()));
 				break;
 			case 6:
-				Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
+				if(client->Credits())
+					Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetTransferedUp()), CastItoXBytes(client->credits->GetUploadedTotal()));
+				else
+                    Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetTransferedUp()));
 				break;
 			case 7:
-				Sbuffer.Format(_T("%.1f/%.1f"),client->credits->GetScoreRatio(client->GetIP()), client->credits->GetMyScoreRatio(client->GetIP()));
+				if(client->Credits())
+				    Sbuffer.Format(_T("%.1f/%.1f"),client->credits->GetScoreRatio(client->GetIP()), client->credits->GetMyScoreRatio(client->GetIP()));
 				break;
 				//SLAHAM: ADDED Last Asked Counter =>
 			case 8:
@@ -699,16 +706,26 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 	case 106:
 		return CompareUnsigned(item1->GetDatarate(), item2->GetDatarate());
 	case 7:
-		{
-			float r1=item2->credits->GetScoreRatio(item2->GetIP());
-			float r2=item1->credits->GetScoreRatio(item1->GetIP());
-			return r1==r2? 0 : r1<r2? -1 : 1;
+		{   
+			if (!item1->Credits()) 
+				return 1; 
+			else if (!item2->Credits())   
+				return -1; 
+
+			float r1=item1->credits->GetScoreRatio(item1->GetIP());   
+			float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
+			return r2 > r1 ? 1 : r2==r1?0:-1; 
 		}
 	case 107:
-		{
-			float r1=item1->credits->GetScoreRatio(item1->GetIP());
-			float r2=item2->credits->GetScoreRatio(item2->GetIP());
-			return r1==r2? 0 : r1<r2? -1 : 1;
+		{   
+			if (!item2->Credits()) 
+				return 1; 
+			else if (!item1->Credits())   
+				return -1;  
+
+			float r1=item1->credits->GetScoreRatio(item1->GetIP());   
+			float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
+			return r1 > r2 ? 1 : r2==r1?0:-1;
 		}
 		//SLAHAM: ADDED Last Asked =>
 	case 8: 
