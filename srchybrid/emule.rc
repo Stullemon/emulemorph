@@ -5022,7 +5022,7 @@ STRINGTABLE
 BEGIN
     IDS_INVMODE_GROUP       "Invisible Mode"
     IDS_INVMODE             "Activate Invisible Mode"
-    IDS_INVMODE_HOTKEY      "Select the hotkey to restore the window"
+    IDS_INVMODE_HOTKEY      "Select the hotkey to show / hide the window"
     IDS_INVMODE_MODKEY      "Modifier Keys:"
     IDS_INVMODE_VKEY        "Key:"
     IDS_FPU_ACTIVE          "FPU optimizations active"

@@ -516,10 +516,9 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 			inp.SetLabels (GetResString (IDS_DOWNLOADEMFRIENDSMET),	GetResString (IDS_EMFRIENDSMETURL),_T(""));
 			inp.DoModal ();
 			CString url = inp.GetInput ();
-				if ( !url.IsEmpty() )
-					UpdateEmfriendsMetFromURL(url);
 
-			return true;
+			if (!url.IsEmpty() && !inp.WasCancelled())
+					UpdateEmfriendsMetFromURL(url);
 		} break;
         //MORPH END - Added by Commander, Manual eMfriend.met download
 
@@ -595,7 +594,7 @@ void CChatWnd::OnBnClickedBnmenu()
 	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETFRIENDED2KLINK, GetResString(IDS_GETMYFRIENDED2KLINK)) );
 	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETMYHTMLFRIENDED2KLINK)) );
 	VERIFY ( tmColumnMenu.AppendMenu(MF_SEPARATOR) ); 
-    VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETEMFRIENDMETFROMURL, GetResString(IDS_DOWNLOADEMFRIENDSMET)) );
+    VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETEMFRIENDMETFROMURL, GetResString(IDS_DOWNLOADEMFRIENDSMET)) ); //MORPH - Added by Commander, Manual Download and load of emfriends.met
 
 	RECT rectBtn;
 	GetDlgItem(IDC_BTN_MENU)->GetWindowRect(&rectBtn);

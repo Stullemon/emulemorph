@@ -165,8 +165,16 @@ BOOL CTransferWnd::OnInitDialog()
 
 void CTransferWnd::ShowQueueCount(uint32 number){
 	TCHAR buffer[100];
-	_stprintf(buffer,_T("%u / %u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"),number,(thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200)),theApp.clientlist->GetBannedCount()); //Commander - Modified: ClientQueueProgressBar
+
+	if(thePrefs.IsInfiniteQueueEnabled()){
+		_stprintf(buffer,_T("%u / %s (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"),number,_T("IFQ"),theApp.clientlist->GetBannedCount()); // Commander - In case that InfiniteQueue is enabled show number / IFQ
+	}
+	else {
+		_stprintf(buffer,_T("%u / %u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"),number,(thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200)),theApp.clientlist->GetBannedCount()); //Commander - Modified: ClientQueueProgressBar
+	}
+	
 	GetDlgItem(IDC_QUEUECOUNT)->SetWindowText(buffer);
+
     //Commander - Added: ClientQueueProgressBar - Start
 	if(thePrefs.IsInfiniteQueueEnabled() || !thePrefs.ShowClientQueueProgressBar()){
 		GetDlgItem(IDC_QUEUE)->ShowWindow(SW_HIDE);
