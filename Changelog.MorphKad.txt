@@ -1,12 +1,7 @@
 ----------------------------------------
-Changelog for eMule 0.40f26 MorphKad 0.6
+Changelog for eMule 0.40f26 MorphKad 0.?
 ----------------------------------------
-ADDED: Give more credits to rare files uploaders when boost the less uploaded files selected[Yun.SF3]
-FIXED: Bug making interraction between A4AF & Category [SiRoB]
-FIXED: Complet Source Number Should be ok [SiRoB]
-FIXED: Actualisation of Progress & Obtained Part Bar shader when there is swapping of source [SiRoB]
-CHANGED: ZZ Patch Return of prio on uploading list [SiRoB]
-TWEAKED: PowerShare Limit don't depend only on the complet source (to avoid some possible wrong complet source report by other client or ours) [SiRoB]
+CHANGED: Put the Official Percentage Display on the download progress bare [SiRoB]
 ADDED: Only download complete files v2.1 (shadow)[AndCycle]
 ADDED: PreferShareAll option (SlugFiller) [AndCycle]
 ADDED: OnConnect notification for sockets (Pawcio) [AndCycle]
@@ -19,6 +14,16 @@ ADDED: "Yes To All" selection for the popup confirmation message in the BackUp U
 ADDED: Add USS settings in scheduler tab [Pretender]
 ADDED: Pay Back First [AndCycle]
 ADDED: Delete Shared File (TheBlackHand) [linekin]
+
+----------------------------------------
+Changelog for eMule 0.40f26 MorphKad 0.6
+----------------------------------------
+ADDED: Give more credits to rare files uploaders when boost the less uploaded files selected[Yun.SF3]
+FIXED: Bug making interraction between A4AF & Category [SiRoB]
+FIXED: Complet Source Number Should be ok [SiRoB]
+FIXED: Actualisation of Progress & Obtained Part Bar shader when there is swapping of source [SiRoB]
+CHANGED: ZZ Patch Return of prio on uploading list [SiRoB]
+TWEAKED: PowerShare Limit don't depend only on the complet source (to avoid some possible wrong complet source report by other client or ours) [SiRoB]
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.5
