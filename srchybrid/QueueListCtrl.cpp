@@ -687,10 +687,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL)){
- 				//MORPH START - Added by SiRoB, Pay Back First
-				if (item1->MoreUpThanDown()) result += 2;
-				if (item2->MoreUpThanDown()) result -= 2;
-				//MORPH END   - Added by SiRoB, Pay Back First
+				//only file priority
 				if (item1->GetPowerShared()) result ++;
  				if (item2->GetPowerShared()) result --;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
@@ -780,9 +777,10 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if(item1->GetPowerShared() && item2->GetPowerShared()){//Equal chance keep the file prio under PowerShare
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				}
-				if(item1->needFullChunkTransfer()) result ++;
-				if(item2->needFullChunkTransfer()) result --;
-
+				if(result == 0){//keep full chunk transfer
+					if(item1->needFullChunkTransfer()) result ++;
+					if(item2->needFullChunkTransfer()) result --;
+				}
 				if(result == 0 && file1 != file2){
 					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 						case ECFEF_ACCEPTED:
