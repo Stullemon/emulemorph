@@ -1471,8 +1471,8 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 	// test if the file name already contained the CRC tag
 	CString fnup = fn;
 	fnup.MakeUpper();
-	if(fnup.Find(f->GetLastCalculatedCRC32()) != -1){
-		theApp.AddLogLine (false, "File '%s' already contained the correct CRC tag, won't rename", fn);
+	if(f->IsCRC32Calculated() && (fnup.Find(f->GetLastCalculatedCRC32()) != -1)){
+		theApp.AddLogLine (false, "File '%s' already containes the correct CRC32 tag, won't be renamed.", fn);
 		return 0;
 	}
 	CString p3,p4;
