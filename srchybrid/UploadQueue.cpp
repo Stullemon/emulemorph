@@ -1098,6 +1098,10 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			client->AddRequestCount(client->GetUploadFileID());
 	    if (client->IsBanned())
 		return;
+		//MORPH - Added by SiRoB, Pay Back First, for speedup creditfile load
+		if (client->Credits() != NULL)
+			client->Credits()->InitPayBackFirstStatus();
+		//MORPH - Added by SiRoB, Pay Back First, for speedup creditfile load
     }
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////////

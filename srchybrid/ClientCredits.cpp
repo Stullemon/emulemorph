@@ -54,8 +54,8 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_fLastScoreRatio = 0;
 	*/
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
-
-	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+	//Moved by SiRoB , for speedup creditfile load, now in AddClientToQueue
+	//InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -82,7 +82,8 @@ CClientCredits::CClientCredits(const uchar* key)
 	*/
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
-	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+	//Moved by SiRoB , for speedup creditfile load, now in AddClientToQueue
+	//InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 }
 
 CClientCredits::~CClientCredits()
