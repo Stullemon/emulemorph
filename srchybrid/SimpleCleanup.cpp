@@ -240,8 +240,8 @@ CString SimpleCleanupFilename (CString _filename, int _options,
 		for (POSITION pos=searchforchars.GetHeadPosition(); pos != NULL;) {
 		CString src=searchforchars.GetNext(pos);
 		CString dst=replacebychars.GetNext(dpos);
-		ReplaceChars (name,src,dst,false);
-		ReplaceChars (ext,src,dst,false);
+		ReplaceChars (name,src,dst,true);
+		ReplaceChars (ext,src,dst,true);
 		}
 	  }
   }
