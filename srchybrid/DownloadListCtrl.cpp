@@ -1396,8 +1396,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
 				m_ClientMenu.AppendMenu(MF_STRING,MP_BOOT, "BootStrap");
 
-
-			CMenu mc_A4AFMenu;
+			//MORPH - Removed by SiRoB, Due to Khaos A4AF
+			/*CMenu mc_A4AFMenu;
 			mc_A4AFMenu.CreateMenu();
 			if (theApp.glob_prefs->IsExtControlsEnabled()) {
 				if (content->type == UNAVAILABLE_SOURCE)
@@ -1407,7 +1407,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 				if (mc_A4AFMenu.GetMenuItemCount()>0) 
 					m_ClientMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)mc_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));				
-			}
+			}*/
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			m_ClientMenu.AppendMenu(MF_SEPARATOR);
 			m_ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
