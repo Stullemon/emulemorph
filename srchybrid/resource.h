@@ -51,6 +51,7 @@
 #define IDD_SEARCH                      142
 #define IDS_STRING142                   142
 #define IDS_WIZARD_ED2K                 142
+#define IDS_MULTIPLEINSTANCE            143
 #define IDS_MAIN_SOCKETERROR            144
 #define IDS_MAIN_BTN_DISCONNECT         145
 #define IDS_MAIN_BTN_DISCONNECT_TOOLTIP 146
@@ -71,6 +72,7 @@
 #define IDS_ERR_FILEERROR               161
 #define IDS_ERR_FILEOPEN                162
 #define IDD_HTTPDOWNLOAD                163
+#define IDS_INFINITEQUEUE               163
 #define IDS_ERR_REHASH                  164
 #define IDD_CHAT                        165
 #define IDS_ERR_PART_FNF                166
@@ -2089,7 +2091,7 @@
 #define IDS_DYNUPLOAD                   3822
 #define IDS_HIDEOVERSHARES              3823
 #define IDS_SELECTIVESHARE              3824
-#define IDS_REMOVEALLFRIENDSLOT		3825
+#define IDS_REMOVEALLFRIENDSLOT         3825
 #define IDS_BACKUP                      4001
 #define IDS_USS_MAXPING                 4002
 #define IDS_PAYBACKFIRST                4003

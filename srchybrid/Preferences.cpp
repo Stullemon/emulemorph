@@ -1486,6 +1486,8 @@ void CPreferences::SavePreferences(){
 	buffer.Format("%s",prefs->yourHostname);
 	ini.WriteString("YourHostname",buffer);
 	// itsonlyme: hostnameSource
+	ini.WriteBool("InfiniteQueue",prefs->infiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	ini.WriteBool("MultipleInstance",prefs->multipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
 
 	ini.WriteBool("AutoDynUpSwitching",prefs->isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -2056,7 +2058,8 @@ void CPreferences::LoadPreferences(){
 	prefs->checkDiskspace=ini.GetBool("CheckDiskspace",false);	// SLUGFILLER: checkDiskspace
 	prefs->m_uMinFreeDiskSpace=ini.GetInt("MinFreeDiskSpace",20*1024*1024);
 	sprintf(prefs->yourHostname,"%s",ini.GetString("YourHostname",""));	// itsonlyme: hostnameSource
-
+	prefs->infiniteQueue=ini.GetBool("InfiniteQueue",false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	prefs->multipleInstance=ini.GetBool("MultipleInstance",false);	//Morph - added by AndCycle, VQB: multipleInstance
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	prefs->m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing

@@ -451,6 +451,9 @@ struct Preferences_Struct{
 	uint8	selectiveShare;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 
+	bool	infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	bool	multipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
+
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	uint8	ShareOnlyTheNeed;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
@@ -1308,6 +1311,8 @@ public:
 	uint8	GetHideOvershares()		{return prefs->hideOS;}
 	uint8	IsSelectiveShareEnabled()	{return prefs->selectiveShare;}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+	bool	IsInfiniteQueueEnabled()		{return prefs->infiniteQueue;}	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	bool	IsMultipleInstanceEnabled()		{return prefs->multipleInstance;}	//Morph - added by AndCycle, VQB: multipleInstance
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	uint8	GetShareOnlyTheNeed()	{return prefs->ShareOnlyTheNeed;}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea

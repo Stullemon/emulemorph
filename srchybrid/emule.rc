@@ -13,12 +13,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// 中性 resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(950)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2297,8 +2297,8 @@ SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
 PREF_BACKUP             ICON                    "res\\backup.ico"
 EQFILE                  ICON                    "res\\EQfile.ico"
 COMMUNITY               ICON                    "res\\community.ico"
-CLIENTFRIENDOVL		ICON			"res\\friendovl.ico"
-CLIENTFRIENDSLOTOVL	ICON			"res\\friendslotovl.ico"
+CLIENTFRIENDOVL         ICON                    "res\\friendovl.ico"
+CLIENTFRIENDSLOTOVL     ICON                    "res\\friendslotovl.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2397,12 +2397,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // 中性 resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// 英文 (美國) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -2471,6 +2471,7 @@ BEGIN
     IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
     IDS_MAIN_READY          "eMule Version %s ready"
     IDS_WIZARD_ED2K         "ED2k Settings"
+    IDS_MULTIPLEINSTANCE    "Multiple Instances (requires restart)"
 END
 
 STRINGTABLE 
@@ -2796,6 +2797,7 @@ BEGIN
     IDS_ERR_METCORRUPT      "Error: %s (%s) is corrupt, unable to load file"
     IDS_ERR_FILEERROR       "Unexpected file error while reading %s (%s): %s"
     IDS_ERR_FILEOPEN        "Failed to open %s (%s)"
+    IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_ERR_REHASH          "Warning: %s might be corrupted, performing rehash of completed parts"
     IDS_ERR_PART_FNF        ".part file not found"
     IDS_ERR_OPENMETFILE     "Failed to open part.met file"
@@ -4271,6 +4273,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SELECTIVESHARE      "Selective chunk sharing"
+    IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
 END
 
 STRINGTABLE 
@@ -4309,11 +4312,7 @@ BEGIN
     IDS_COUNTRYNAME_SHOWFLAG "ShowFlag"
 END
 
-STRINGTABLE
-BEGIN
-    IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
-END
-#endif    // Englisch (USA) resources
+#endif    // 英文 (美國) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

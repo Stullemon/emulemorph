@@ -1,4 +1,10 @@
 ---------------------------------------- 
+Changelog for eMule 0.41b29 MorphXT v1.x
+---------------------------------------- 
+ADDED  : Multiple Instances option from SlugFiller-itsonlyme by VQB
+ADDED  : Infinite Queue option from SlugFiller-itsonlyme
+
+---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.5
 ---------------------------------------- 
 FIXED  : Several bugfix and update (A4AF and others) [SiRoB/AndClyve]
@@ -21,7 +27,7 @@ ADDED  : Limited community support with community tags: Community icon, Columns 
 ADDED  : Report hashing files activities [MightyKnife]
 ADDED  : Report activities in friendlist [MightyKnife]
 ADDED  : CRC32 calculation/testing for files. Right click on a file in the shared files list lets you calculate the CRC32 for the file. Furthermore a releaser tag can be added (together with the CRC) to the filename (of course for multiple files at once, too). The calculated CRC is shown in a column on the right - together with an info whether the calculated CRC was found in the filename. (Hint: The calculated CRC32 will not be stored in known.met) [MightyKnife]
-ADDED  : searchCatch and cacheUDPsearchResults from [SlugFiller-itsonlyme]
+ADDED  : searchCatch and cacheUDPsearchResults from SlugFiller-itsonlyme
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.3
