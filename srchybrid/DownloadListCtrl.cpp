@@ -147,8 +147,7 @@ void CDownloadListCtrl::Init()
 		m_fontBold.CreateFontIndirect(&lfFont);
 	//} //MORPH - Removed by SiRoB, Allways creat the font
 	//MORPH START - Added by SiRoB, Draw Client Percentage
-	lfFont.lfHeight = 10;
-	m_fontBoldSmaller.CreateFontIndirect(&lfFont);
+	m_fontBoldSmaller.CreateFont(12,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Serif"));
 	//MORPH END   - Added by SiRoB, Draw Client Percentage
 
 	// Barry - Use preferred sort order from preferences
