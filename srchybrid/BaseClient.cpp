@@ -466,6 +466,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			StrStrI(m_strModVersion,_T("ACAT")) ||
 			StrStrI(m_strModVersion,_T("!FREEANGEL!")) ||
+			StrStrI(m_strModVersion,_T("          ")) ||
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
 			)
@@ -1034,7 +1035,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	data.WriteUInt8(theApp.m_uCurVersionShort);
 	data.WriteUInt8(EMULE_PROTOCOL);
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = m_strModVersion.GetLength() && IsSecure() && !IsLeecher();
+	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion)
 		data.WriteUInt32(7/*7 OFFICIAL*/+1/*ET_MOD_VERSION*/+1/*enkeyDev: ICS*/); // nr. of tags
 	else
@@ -1358,7 +1359,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		tagcount += 2;
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = m_strModVersion.GetLength() && IsSecure() && !IsLeecher();
+	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	if (bSendModVersion || m_clientSoft == SO_LPHANT) tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
