@@ -490,20 +490,9 @@ void CPartFile::CreatePartFile()
 	if (m_dwFileAttributes == INVALID_FILE_ATTRIBUTES)
 		m_dwFileAttributes = 0;
 
-	//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash - setting at the hotspot
-	/*
 	if (GetED2KPartHashCount() == 0)
 		hashsetneeded = false;
-	*/
-	if (GetED2KPartCount() > 1)
-		hashsetneeded = true;
-	else {
-		hashsetneeded = false;
-		uchar* cur_hash = new uchar[16];
-		md4cpy(cur_hash, m_abyFileHash);
-		hashlist.Add(cur_hash);
-	}
-
+	//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash - setting at the hotspot
 	// the important part
 	m_PartsShareable.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
@@ -1055,21 +1044,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		}
 		// SLUGFILLER: SafeHash
 
-		//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash - ignore loaded hash for 1-chunk files
-		if (GetED2KPartCount() <= 1) {
-			for (int i = 0; i < hashlist.GetSize(); i++)
-				delete[] hashlist[i];
-			hashlist.RemoveAll();
-			uchar* cur_hash = new uchar[16];
-			md4cpy(cur_hash, m_abyFileHash);
-			hashlist.Add(cur_hash);
-		}
-
+		//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash
 		// the important part
 		m_PartsShareable.SetSize(GetPartCount());
 		for (uint32 i = 0; i < GetPartCount();i++)
 			m_PartsShareable[i] = false;
-		//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash - ignore loaded hash for 1-chunk files
+		//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 
 		m_SrcpartFrequency.SetSize(GetPartCount());
 		for (uint32 i = 0; i != GetPartCount();i++)
