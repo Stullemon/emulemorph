@@ -2101,13 +2101,10 @@
 #define IDC_CLIENTDETAIL_KAD            2876
 #define IDC_EDIT1                       2877
 #define IDC_LD_LINKEDI                  2877
-#define IDC_EDIT_DYNDNS_HOSTNAME        2877
 #define IDC_CLIENTDETAIL_KADCON         2878
 #define IDC_EDIT11                      2878
-#define IDC_EDIT_DYNDNS_PASSWORD        2878
 #define IDC_SEARCH_UNICODE              2879
 #define IDC_EDIT12                      2879
-#define IDC_EDIT_DYNDNS_USERNAME        2879
 #define IDC_AUTOSTART                   2880
 #define IDC_STARTWIN                    2882
 #define IDC_RADIO1                      2883
@@ -2130,7 +2127,6 @@
 #define IDC_BUTTON1                     2899
 #define IDC_LD_LINKGROUP                2900
 #define IDC_BUTTON2                     2900
-#define IDC_BUTTON_DYNDNS_RESET         2900
 #define IDC_LD_BASICGROUP               2901
 #define IDC_LD_ADVANCEDGROUP            2902
 #define IDC_LD_CLIPBOARDBUT             2903
@@ -2521,13 +2517,8 @@
 #define IDC_DLOC                        4877
 #define IDC_DLOC2                       4878
 #define IDC_CRC32PREFIX                 4878
-#define IDC_URL_FOR_UPDATING3           4878
-#define IDC_URL_FOR_UPDATING_IP2COUNTRY 4878
-#define IDS_URL_FOR_UPDATING_IP2COUNTRY 4878
 #define IDS_IP2COUNTRY                  4879
 #define IDC_CRC32SUFFIX                 4879
-#define IDC_URL_FOR_UPDATING4           4879
-#define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 4879
 #define IDS_COUNTRYNAME_SHORT           4880
 #define IDC_DONTADDCRC                  4880
 #define IDS_COUNTRYNAME_MID             4881
@@ -2586,8 +2577,6 @@
 #define IDC_GROUP_DYNIP                 5035
 #define IDC_NEWCHARACTER                5036
 #define IDC_CHECK1                      5036
-#define IDC_CHECK_DYNDNS_ENABLE         5036
-#define IDC_CHECK_DYNDNS_ENABLED        5036
 #define IDC_FEEDCHANGE                  5037
 #define IDD_SIMPLECLEANUP               5038
 #define IDC_INSERTTEXTCOLUMN            5039
@@ -2601,11 +2590,6 @@
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
-#define IDC_STATIC_DYNDNS_HOSTNAME      5047
-#define IDC_STATIC_DYNDNS_USERNAME      5048
-#define IDC_STATIC_DYNDNS_PASSWORD      5049
-#define IDC_STATIC_DYNDNS_LASTUPDATE    5050
-#define IDC_BUTTON_DYNDNS_UPDATE        5051
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
 #define IDS_CHAT_COUNTRY                5115
 #define IDC_SHOWCLIENTPERCENTAGE        5116
@@ -2673,6 +2657,14 @@
 #define IDC_QUEUE                       5506
 #define IDC_QUEUEBORDER                 5507
 #define IDS_ADVANCED                    5600
+#define IDS_URL_FOR_UPDATING_IP2COUNTRY 4878
+#define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 6034
+#define IDC_URL_FOR_UPDATING_IP2COUNTRY 4878
+
+#define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 4879
+#define IDS_AUTOUPIP2COUNTRY            6032
+#define IDS_UPDATEIPCURL                6033
+
 #define IDC_MORPH3_OPTS                 6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
@@ -2699,15 +2691,26 @@
 #define IDS_WAP_BASICDATA               6023
 #define IDS_WAP_REFRESH                 6024
 #define IDS_WAP_SORTBY                  6025
-#define IDS_CHECK_DYNDNS_ENABLED        6026
-#define IDS_STATIC_DYNDNS_USERNAME      6027
-#define IDS_STATIC_DYNDNS_PASSWORD      6028
-#define IDS_STATIC_DYNDNS_HOSTNAME      6029
-#define IDS_BUTTON_DYNDNS_UPDATE        6030
-#define IDS_BUTTON_DYNDNS_RESET         6031
-#define IDS_AUTOUPIP2COUNTRY            6032
-#define IDS_UPDATEIPCURL                6033
-#define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 6034
+
+#define IDS_CHECK_DYNDNS_ENABLED        6100
+#define IDC_CHECK_DYNDNS_ENABLED        6100
+
+#define IDS_STATIC_DYNDNS_USERNAME      6101
+#define IDC_STATIC_DYNDNS_USERNAME      6101
+#define IDC_EDIT_DYNDNS_USERNAME        6102
+#define IDS_STATIC_DYNDNS_PASSWORD      6103
+#define IDC_STATIC_DYNDNS_PASSWORD      6103
+#define IDC_EDIT_DYNDNS_PASSWORD        6104
+#define IDS_STATIC_DYNDNS_HOSTNAME      6105
+#define IDC_STATIC_DYNDNS_HOSTNAME      6105
+#define IDC_EDIT_DYNDNS_HOSTNAME        6106
+#define IDC_BUTTON_DYNDNS_UPDATE        6107
+#define IDS_BUTTON_DYNDNS_UPDATE        6107
+#define IDS_BUTTON_DYNDNS_RESET         6108
+#define IDC_BUTTON_DYNDNS_RESET         6108
+#define IDC_STATIC_DYNDNS_LASTUPDATE    6109
+
+
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
