@@ -864,7 +864,7 @@ uint32 CUpDownClient::SendBlockData(){
 	}
 			
 	while (m_AvarageUDR_list.GetCount() > 0)
-		if (100 * m_AvarageUDR_list.GetHead().datalen < sumavgUDR || (curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
+		if ((curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
 			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else
 			break;

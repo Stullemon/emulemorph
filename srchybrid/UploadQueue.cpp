@@ -796,7 +796,7 @@ void CUploadQueue::Process() {
 	}
 	
 	while(avarage_tick_list.GetCount() > 0)
-		if (100 * avarage_dr_list.GetHead() < m_avarage_dr_sum || (curTick - avarage_tick_list.GetHead()) > 30000) {
+		if ((curTick - avarage_tick_list.GetHead()) > 30000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 			sumavgUDRO -= m_AvarageUDRO_list.RemoveHead();
 			avarage_friend_dr_list.RemoveHead();

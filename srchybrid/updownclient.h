@@ -716,7 +716,12 @@ public:
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
 	int				unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
 	// Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
+	//MORPH START - Changed by SiRoB, See A4AF PartStatus
+	/*
 	void			ShowDownloadingParts(CString* partsYN) const;
+	*/
+	void			ShowDownloadingParts(CString* partsYN,uint16 m_nPartCount) const;
+	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
 	void			UpdateDisplayedInfo(bool force = false);
 	int             GetFileListRequested() const
 					{

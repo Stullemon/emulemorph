@@ -58,7 +58,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 	COLORREF crMeOnly; 
 	//--- :xrmb ---
-	
+	COLORREF crA4AF; 
 	if(bFlat) { 
 		crBoth = RGB(0, 0, 0);
 		crNeither = RGB(224, 224, 224);
@@ -68,6 +68,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 		//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 		crMeOnly = RGB(112,112,112);
 		//--- :xrmb ---
+		crA4AF = RGB(192, 100, 255);
 	} else { 
 		crBoth = RGB(104, 104, 104);
 		crNeither = RGB(240, 240, 240);
@@ -77,6 +78,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 		//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 		crMeOnly = RGB(172,172,172);
 		//--- :xrmb ---
+		crA4AF = RGB(192, 100, 255);
 	} 
 
 	
@@ -98,10 +100,8 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	uint8* thisStatus;
 	if(m_PartStatus_list.Lookup(file,thisStatus) && thisStatus){
 		CString gettingParts;
-		if (file != reqfile)
-			crClientOnly = RGB(192, 100, 255);
-		else
-			ShowDownloadingParts(&gettingParts);
+		if (file == reqfile)
+			ShowDownloadingParts(&gettingParts,file->GetPartCount());
 		for (uint32 i = 0;i < file->GetPartCount();i++){
 			if (thisStatus[i]){ 
 				uEnd = PARTSIZE*(i+1);
@@ -1186,8 +1186,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if(100*m_AvarageDDR_list.GetHead().datalen < m_nSumForAvgDownDataRate ||
-			(cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000) {
+		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000) {
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		}else
 			break;
@@ -1321,7 +1320,11 @@ void CUpDownClient::RequestHashset(){
 // SLUGFILLER: SafeHash
 
 // Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
+//MORPH START - Changed by SiRoB, See A4AF PartStatus
+/*
 void CUpDownClient::ShowDownloadingParts(CString *partsYN) const
+*/
+void CUpDownClient::ShowDownloadingParts(CString *partsYN, uint16 m_nPartCount) const
 {
 	// Initialise to all N's
 	char *n = new char[m_nPartCount+1];
