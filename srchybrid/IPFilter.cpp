@@ -90,6 +90,7 @@ int CIPFilter::LoadFromDefaultFile(bool bShowResponse)
 
 int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 {
+	DWORD startMesure = GetTickCount();
 	FILE* readFile = _tfsopen(pszFilePath, _T("r"), _SH_DENYWR);
 	if (readFile != NULL)
 	{
@@ -210,7 +211,7 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 		theApp.emuledlg->AddLogLine(bShowResponse, GetResString(IDS_IPFILTERLOADED), m_iplist.GetCount());
 		if (thePrefs.GetVerbose())
 		{
-			theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP filters from \"%s\""), pszFilePath);
+			theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP filters from \"%s\" in %ums"), pszFilePath, GetTickCount()-startMesure);
 			theApp.emuledlg->AddDebugLogLine(false, _T("Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"), iLine, iFoundRanges, iDuplicate, iMerged);
 		}
 	}

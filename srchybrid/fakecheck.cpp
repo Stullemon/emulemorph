@@ -59,13 +59,15 @@ static int __cdecl CmpFakeByHash_Lenght(const void* p1, const void* p2)
 }
 
 int CFakecheck::LoadFromFile(){
-	FILE* readFile = _tfsopen(thePrefs.GetConfigDir()+DFLT_FAKECHECK_FILENAME, _T("r"), _SH_DENYWR);
+	DWORD startMesure = GetTickCount();
+	CString strfakecheckfile = GetDefaultFilePath();
+	FILE* readFile = _tfsopen(strfakecheckfile, _T("r"), _SH_DENYWR);
 	if (readFile!=NULL) {
 		CString sbuffer, sbuffer2;
 		int pos;
 		uint32 Lenght;
 		CString Title;
-		char buffer[1024];
+		char buffer[512];
 		int fakecounter = 0;
 		int iDuplicate = 0;
 		int iMerged = 0;
@@ -123,6 +125,7 @@ int CFakecheck::LoadFromFile(){
 		AddLogLine(false, _T("%i Fake Check reference loaded"), m_fakelist.GetCount());
 		if (thePrefs.GetVerbose())
 		{
+			AddDebugLogLine(false, _T("Loaded Fake Check from \"%s\" in %ums"), strfakecheckfile, GetTickCount()-startMesure);
 			AddDebugLogLine(false, _T("Found Fake Reference:%u  Duplicate:%u  Merged:%u"), fakecounter, iDuplicate, iMerged);
 		}
 	}
