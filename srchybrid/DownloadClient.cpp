@@ -1036,7 +1036,11 @@ void CUpDownClient::SendBlockRequests(){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	//CreateBlockRequests(3);
 	CreateBlockRequests(2); // Superlexx - COtN - one block request already created, 2 left
-
+	if (m_PendingBlocks_list.IsEmpty()){
+		SendCancelTransfer();
+		SetDownloadState(DS_NONEEDEDPARTS);
+		return;
+	}
 	const int iPacketSize = 16+(3*4)+(3*4); // 40
 	Packet* packet = new Packet(OP_REQUESTPARTS,iPacketSize);
 	CSafeMemFile data((BYTE*)packet->pBuffer,iPacketSize);
