@@ -657,7 +657,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{
 				sumofclientinclass += slotCounterClass[classID];
-				if ((allowedDataRateClass[classID] == 0 || allowedDataRateClass[classID] > allowedDataRateClass[LAST_CLASS]) && realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
+				if ((allowedDataRateClass[classID] == 0 && sumofclientinclass==m_StandardOrder_list.GetSize() || allowedDataRateClass[classID] > allowedDataRateClass[LAST_CLASS]) && realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 					realBytesToSpend = realBytesToSpendClass[LAST_CLASS];
 				else
 					realBytesToSpend = realBytesToSpendClass[classID];
