@@ -373,7 +373,7 @@ public:
     void			SetFileRate(int8 iNewRate)	{m_iRate=iNewRate;}
 
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
-	int unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, bool recursive = false);
+	int unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
 	// Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
 	void ShowDownloadingParts(CString *partsYN);
 	void UpdateDisplayedInfo(boolean force=false);
@@ -442,6 +442,7 @@ private:
 	bool	m_bCommentDirty;
 	bool	m_bIsHybrid;
 	bool	m_bIsML;
+	bool	m_bGPLEvildoer;
 	// preview
 	bool	m_bSupportsPreview;
 	bool	m_bPreviewReqPending;

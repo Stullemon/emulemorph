@@ -17,6 +17,9 @@
 
 #include "StdAfx.h"
 #include <zlib/zlib.h>
+extern "C" {
+#include <zlib/zutil.h>
+}
 #include "updownclient.h"
 #include "partfile.h"
 #include "opcodes.h"
@@ -561,6 +564,7 @@ void CUpDownClient::SendBlockRequests(){
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
 		pblock->zStream = NULL;
 		pblock->totalUnzipped = 0;
+		pblock->bZStreamError = false;
 		m_PendingBlocks_list.AddTail(pblock);
 	}
 	if (m_PendingBlocks_list.IsEmpty()){
@@ -688,6 +692,12 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 		{
 			// Found reserved block
 
+		    if (cur_block->bZStreamError){
+			    AddDebugLogLine(false, _T("Ignoring %u bytes of block %u-%u because of errornous zstream state for file \"%s\""), size - HEADER_SIZE, nStartPos, nEndPos, reqfile->GetFileName());
+			    reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+			    return;
+		    }
+        
 			// Remember this start pos, used to draw part downloading in list
 			m_nLastBlockOffset = nStartPos;  
 
@@ -757,9 +767,9 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						nStartPos = cur_block->block->StartOffset + cur_block->totalUnzipped - lenUnzipped;
 						nEndPos = cur_block->block->StartOffset + cur_block->totalUnzipped - 1;
 
-						if( nEndPos > cur_block->block->EndOffset){
-							AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
-							reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+					    if (nStartPos > cur_block->block->EndOffset || nEndPos > cur_block->block->EndOffset){
+						AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
+						reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 						}
 						else{
 							// Write uncompressed data to file
@@ -773,8 +783,26 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 				}
 				else
 				{
-					AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG), reqfile->GetFileName(), result);
+				    CString strZipError;
+				    if (cur_block->zStream && cur_block->zStream->msg)
+					    strZipError.Format(_T(" - %s"), cur_block->zStream->msg);
+				    else
+					    strZipError.Format(_T(" - %s"), ERR_MSG(result));
+				    AddDebugLogLine(false, GetResString(IDS_ERR_CORRUPTCOMPRPKG) + strZipError, reqfile->GetFileName(), result);
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
+
+				    // If we had an zstream error, there is no chance that we could recover from it nor that we
+				    // could use the current zstream (which is in error state) any longer.
+				    if (cur_block->zStream){
+					    inflateEnd(cur_block->zStream);
+					    delete cur_block->zStream;
+					    cur_block->zStream = NULL;
+				    }
+    
+				    // Although we can't further use the current zstream, there is no need to disconnect the sending 
+				    // client because the next zstream (a series of 10K-blocks which build a 180K-block) could be
+				    // valid again. Just ignore all further blocks for the current zstream.
+				    cur_block->bZStreamError = true;					
 					//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 					if(theApp.glob_prefs->GetEnableZeroFilledTest() == true) {
 						CString userHash;
@@ -820,13 +848,19 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 			// Stop looping and exit method
 			return;
+			}
 		}
+  	}
+	catch (...){
+		AddDebugLogLine(false, _T("Unknown exception in %s: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
 	}
-  } catch (...) {}
 }
 
-int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, bool recursive)
+int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion)
 {
+#define TRACE_UNZIP	/*TRACE*/
+
+	TRACE_UNZIP("unzip: Zipd=%6u Unzd=%6u Rcrs=%d", lenZipped, *lenUnzipped, iRecursion);
   	int err = Z_DATA_ERROR;
   	try
   	{
@@ -851,16 +885,18 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
     
 		    // Initialise the z_stream
 		    err = inflateInit(zS);
-		    if (err != Z_OK)
+			if (err != Z_OK){
+				TRACE_UNZIP("; Error: new stream failed: %d\n", err);
 			    return err;
-	    }
+			}
+		}
     
 	    // Use whatever input is provided
 	    zS->next_in  = zipped;
 	    zS->avail_in = lenZipped;
     
 	    // Only set the output if not being called recursively
-	    if (!recursive)
+	    if (iRecursion == 0)
 	    {
 		    zS->next_out = (*unzipped);
 		    zS->avail_out = (*lenUnzipped);
@@ -874,16 +910,20 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 	    {
 		    // Finish up
 		    err = inflateEnd(zS);
-		    if (err != Z_OK)
+			if (err != Z_OK){
+				TRACE_UNZIP("; Error: end stream failed: %d\n", err);
 			    return err;
+			}
+			TRACE_UNZIP("; Z_STREAM_END\n");
     
 		    // Got a good result, set the size to the amount unzipped in this call (including all recursive calls)
 		    (*lenUnzipped) = (zS->total_out - block->totalUnzipped);
 		    block->totalUnzipped = zS->total_out;
 	    }
-	    else if ((err == Z_OK) && (zS->avail_out == 0))
+	    else if ((err == Z_OK) && (zS->avail_out == 0) && (zS->avail_in != 0))
 	    {
 		    // Output array was not big enough, call recursively until there is enough space
+			TRACE_UNZIP("; output array not big enough (ain=%u)\n", zS->avail_in);
     
 		    // What size should we try next
 		    uint32 newLength = (*lenUnzipped) *= 2;
@@ -892,6 +932,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
     
 		    // Copy any data that was successfully unzipped to new array
 		    BYTE *temp = new BYTE[newLength];
+		    ASSERT( zS->total_out - block->totalUnzipped <= newLength );
 		    MEMCOPY(temp, (*unzipped), (zS->total_out - block->totalUnzipped));
 			delete [] (*unzipped);
 		    (*unzipped) = temp;
@@ -902,10 +943,11 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 		    zS->avail_out = (*lenUnzipped) - (zS->total_out - block->totalUnzipped);
     
 		    // Try again
-		    err = unzip(block, zS->next_in, zS->avail_in, unzipped, lenUnzipped, true);
+		    err = unzip(block, zS->next_in, zS->avail_in, unzipped, lenUnzipped, iRecursion + 1);
 	    }
 	    else if ((err == Z_OK) && (zS->avail_in == 0))
 	    {
+			TRACE_UNZIP("; all input processed\n");
 		    // All available input has been processed, everything ok.
 		    // Set the size to the amount unzipped in this call (including all recursive calls)
 		    (*lenUnzipped) = (zS->total_out - block->totalUnzipped);
@@ -914,13 +956,20 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 	    else
 	    {
 		    // Should not get here unless input data is corrupt
-			AddDebugLogLine(false,"Unexpected zip error in file \"%s\"", reqfile ? reqfile->GetFileName() : NULL);
+			CString strZipError;
+			if (zS->msg)
+				strZipError.Format(_T(" '%s'"), zS->msg);
+			else if (err != Z_OK)
+				strZipError.Format(_T(" %d: '%s'"), err, ERR_MSG(err));
+			TRACE_UNZIP("; Error: %s\n", strZipError);
+			AddDebugLogLine(false,"Unexpected zip error%s in file \"%s\"", strZipError, reqfile ? reqfile->GetFileName() : NULL);
 	    }
     
 	    if (err != Z_OK)
 		    (*lenUnzipped) = 0;
   	}
   	catch (...){
+		AddDebugLogLine(false, _T("Unknown exception in %s: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
 		err = Z_DATA_ERROR;
 	}
   	return err;

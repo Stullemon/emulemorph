@@ -186,7 +186,7 @@ void CUpDownClient::Init(){
 	m_bSupportsPreview = false;
 	m_bPreviewReqPending = false;
 	m_bPreviewAnsPending = false;
-
+	m_bGPLEvildoer = false;
 	m_last_l2hac_exec = 0;				//<<--enkeyDEV(th1) -L2HAC-
 	m_L2HAC_time = 0;					//<<--enkeyDEV(th1) -L2HAC-
 	m_l2hac_enabled = false;			//<<--enkeyDEV(th1) -L2HAC- lowid side
@@ -553,6 +553,17 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 		// avoid that an unwanted client instance keeps a friend slot
 		SetFriendSlot(false);
 	}
+
+	// We want to educate Users of major comercial GPL breaking mods by telling them about the effects
+	// check for known advertising in usernames
+	// the primary aim is not to technical block those but to make users use a GPL-conform version
+	CString strBuffer = m_pszUsername;
+	strBuffer.MakeUpper();
+	strBuffer.Remove(' ');
+	if (strBuffer.Find("EMULE-CLIENT") != -1 || strBuffer.Find("POWERMULE") != -1){
+		m_bGPLEvildoer = true;  
+	}
+
 	ReGetClientSoft();
 	m_byInfopacketsReceived |= IP_EDONKEYPROTPACK;
 	// check if at least CT_EMULEVERSION was received, all other tags are optional
@@ -817,20 +828,22 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 
 	uint32 tagcount = 6/*5*/;//MORPH - Changed by SiRoB, MOD_VERSION tag
 	data->Write(&tagcount,4);
+	char* strUsedName;
+	if (m_bGPLEvildoer) // try to make the user of GPL-breaking clients read our info-site without spamming them in any way
+		strUsedName = "Lies Mich! http://ReadMe.emule-project.net <- Please use a GPL-conform version";	
 	// eD2K Name
 	//MORPH START - Added by IceCream, Anti-leecher feature
-	if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
+	else if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
 	{
-		CTag tagName(CT_NAME, m_pszUsername);
-		tagName.WriteTagToFile(data);
+		strUsedName = m_pszUsername;
 	}
 	else
 	{
-		CTag tagName(CT_NAME,theApp.glob_prefs->GetUserNick());
-		tagName.WriteTagToFile(data);
+		strUsedName = theApp.glob_prefs->GetUserNick();
 	}
 	//MORPH END   - Added by IceCream, Anti-leecher feature
-
+	CTag tagName(CT_NAME,strUsedName);
+	tagName.WriteTagToFile(data);
 	// eD2K Version
 	CTag tagVersion(CT_VERSION,EDONKEYVERSION);
 	tagVersion.WriteTagToFile(data);
