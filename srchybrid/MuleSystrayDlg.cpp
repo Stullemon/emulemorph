@@ -4,11 +4,11 @@
 #include "stdafx.h"
 #include "MuleSystrayDlg.h"
 #include "emule.h"
+#include "preferences.h"
 #include "opcodes.h"
+#include "otherfunctions.h"
 #include "Sockets.h"
 #include "kademlia/kademlia/Kademlia.h"
-#include "preferences.h"
-#include "OtherFunctions.h"
 #include "Scheduler.h" //MORPH - Added by SiRoB, Fix for Param used in scheduler
 
 #ifdef _DEBUG

@@ -1240,7 +1240,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM wParam,LPARAM lParam)
 			return true;
 		}
 
-		if (clcommand=="help" || clcommand=="/?") {
+		if (clcommand==_T("help") || clcommand==_T("/?")) {
 			// show usage
 			return true;
 		}
@@ -1274,7 +1274,8 @@ LRESULT CemuleDlg::OnWMData(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnFileHashed(WPARAM wParam, LPARAM lParam)
 {
 	if (theApp.m_app_state	== APP_STATE_SHUTINGDOWN)
-		return false;
+		return FALSE;
+
 	CKnownFile* result = (CKnownFile*)lParam;
 	ASSERT( result->IsKindOf(RUNTIME_CLASS(CKnownFile)) );
 
@@ -1303,7 +1304,7 @@ LRESULT CemuleDlg::OnFileHashed(WPARAM wParam, LPARAM lParam)
 		//	- reading shared directories during runtime (user hit Reload button, added a shared directory, ...)
 		theApp.sharedfiles->FileHashingFinished(result);
 	}
-	return true;
+	return TRUE;
 }
 
 LRESULT CemuleDlg::OnFileOpProgress(WPARAM wParam, LPARAM lParam)
@@ -1546,7 +1547,7 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 		case IDC_DISCONNECT:
 			CloseConnection();
 			break;
-		case IDC_TRAY_EXIT:
+		case IDC_EXIT:
 			OnClose();
 			break;
 		case IDC_TRAYRELOADSHARE:
