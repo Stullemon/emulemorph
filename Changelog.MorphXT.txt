@@ -14,6 +14,10 @@ CHANGED: Invisible Mode [Commander]
 ADDED  : Dynamic Invisible Mode [Commander]
 TODO   : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander]
 FIXED  : duplicated part file statistics no longer save in known.met [AndCycle]
+ADDED  : Enable/Disable startupsound (Preferences -> General ->Play startupsound) [Commander]
+FIXED  : Code alignment [Commander]
+ADDED  : Save known.met when clicking 'reload' [MightyKnife]
+TODO   : Rechecking SUQWT [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
