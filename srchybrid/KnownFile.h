@@ -332,7 +332,7 @@ public:
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
 	uint8	HideOSInWork() const;
-	bool	GetHideOSAuthorized() const {return m_bHideOSAuthorized;}
+	bool	GetHideOSAuthorized() const {return m_bHideOSAuthorized && !IsPartFile();}
 	void	UpdateHideOSLimit(bool authorizehideos) {m_bHideOSAuthorized = authorizehideos;}
 	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
