@@ -3319,7 +3319,7 @@ void CDownloadListCtrl::ShowFilesCount() {
 	}
 
 	if (thePrefs.GetCategory(curTab))
-		counter.Format(_T("%s: %u (%u Total | %s)"), GetResString(IDS_TW_DOWNLOADS),count,totcnt,thePrefs.GetCategory(curTab)->viewfilters.bSuspendFilters ? GetResString(IDS_CAT_FILTERSSUSP) : GetResString(IDS_CAT_FILTERSACTIVE));
+		counter.Format(_T("%s: %u (%u ")+GetResString(IDS_CAT_TOTAL)+_T(" | %s)"), GetResString(IDS_TW_DOWNLOADS),count,totcnt,thePrefs.GetCategory(curTab)->viewfilters.bSuspendFilters ? GetResString(IDS_CAT_FILTERSSUSP) : GetResString(IDS_CAT_FILTERSACTIVE));
 	theApp.emuledlg->transferwnd->GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(counter);
 }
 // khaos::categorymod-

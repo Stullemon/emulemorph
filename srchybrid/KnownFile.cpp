@@ -924,7 +924,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 		CString hashfilename;
 		hashfilename.Format (_T("%s\\%s"),in_directory, in_filename);
 		if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),in_directory, in_filename);
-		AddLogLine(false, _T("Completed hashing of file '%s'."), hashfilename);
+		AddLogLine(false, GetResString(IDS_HASHING_COMPLETED), hashfilename);
 	}
 	// [end] Mighty Knife
 	return true;	

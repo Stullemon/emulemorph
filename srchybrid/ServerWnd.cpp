@@ -55,7 +55,7 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 #define	SERVERMET_STRINGS_PROFILE	_T("AC_ServerMetURLs.dat")
-#define SZ_DEBUG_LOG_TITLE			_T("Verbose")
+#define SZ_DEBUG_LOG_TITLE			GetResString(IDS_VERBOSE_TITLE)
 
 // CServerWnd dialog
 

@@ -420,7 +420,7 @@ void CSharedFileList::FindSharedFiles()
 				CString hashfilename;
 				hashfilename.Format (_T("%s\\%s"),f->strDirectory, f->strName);
 				if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),f->strDirectory, f->strName);
-				Log(_T("New file: '%s'"), hashfilename);
+				Log(GetResString(IDS_HASHING_NEWFILE), hashfilename);
 				waitingforhash_list.GetNext (p);
 			}
 		}
@@ -1012,7 +1012,7 @@ void CSharedFileList::HashNextFile(){
 	// Mighty Knife: Report hashing files
 	if (waitingforhash_list.IsEmpty()) {
 		if (thePrefs.GetReportHashingFiles ()) {
-			AddLogLine(false, _T("Hashing of new files completed."));
+			AddLogLine(false, GetResString(IDS_HASHING_COMPLETED2));
 		}
 	}
 	// [end] Mighty Knife

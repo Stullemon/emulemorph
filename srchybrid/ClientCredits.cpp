@@ -387,7 +387,7 @@ void CClientCreditsList::LoadList()
 	for (uint8 i=0;i<maxavailablefile;i++)
 	{
 		strFileName = loadFileName[prioOrderfile[i]];
-		AddLogLine(false, _T("Load %s"), strFileName);
+		AddLogLine(false, GetResString(IDS_SUQWT_LOAD), strFileName);
 	//Morph End - added by AndCycle, choose .met to load
 	//MORPH END  - Changed by SiRoB, Allternative choose .met to load
 

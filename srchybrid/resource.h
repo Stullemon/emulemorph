@@ -2814,6 +2814,12 @@
 #define IDS_IP2COUNTRY_DWNFILE          6261
 #define IDS_IP2COUNTRY_UPUNLOAD         6262
 #define IDS_IP2COUNTRY_UPLOAD           6263
+#define IDS_HASHING_COMPLETED           6264
+#define IDS_HASHING_COMPLETED2          6265
+#define IDS_HASHING_NEWFILE             6266
+#define IDS_SUQWT_LOAD                  6267
+#define IDS_VERBOSE_TITLE               6268
+#define IDS_CAT_TOTAL                   6269
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053

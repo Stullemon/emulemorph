@@ -5112,7 +5112,7 @@ STRINGTABLE
 BEGIN
     IDS_MORPH_RFHA          "Report file hashing activities"
     IDS_MORPH_RAIF          "Report activities in friendlist"
-	IDS_MORPH_KSSERV		"Don't remove static servers from serverlist in runtime"
+    IDS_MORPH_KSSERV        "Don't remove static servers from serverlist in runtime"
 END
 
 STRINGTABLE 
@@ -5416,7 +5416,12 @@ BEGIN
     IDS_WCDownl             "not working yet"
     IDS_WC_REQ_SUCC         "WC Succ/Req:"
     IDS_WC_DOWNLOADED       "WC-Download:"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CRC32_TITLE         "CRC32 to filename"
+    IDS_MASSRENAME_TITLE    "Mass-Rename"
     IDS_LOG_IPFILTER_LOADED "Loaded IP filters from \""%s\"" in %ums"
     IDS_LOG_IPFILTER_INFO   "Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"
     IDS_IPFILTER_SAVERR     "Failed to save IP filter to file \""%s\"" - %hs"
@@ -5427,6 +5432,10 @@ BEGIN
     IDS_LOG_IPFILTER_DLFAIL "IP Filter download failed"
     IDS_LOG_IPFILTER_ERR1   "Failed to extract IP filter file from downloaded IP filter ZIP file \""%s\""."
     IDS_LOG_IPFILTER_ERR2   "Downloaded IP filter file \""%s\"" is a ZIP file with unexpected content."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_DOWNFAKECHECKVER    "Downloading Fake Check version file"
     IDS_DOWNFAKECHECKFILE   "Downloading Fake Check file"
     IDS_FC_LOADED           "%i Fake Check reference loaded"
@@ -5434,7 +5443,10 @@ BEGIN
     IDS_LOG_FC_INFO         "Found Fake Reference:%u  Duplicate:%u  Merged:%u"
     IDS_LOG_FC_ERR1         "Failed to extract fake check file from downloaded fake check ZIP file \""%s\""."
     IDS_LOG_FC_ERR2         "Downloaded fake check file \""%s\"" is a ZIP file with unexpected content."
-    IDS_MASSRENAME_TITLE    "Mass-Rename"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_LOG_CRC32_WRN1      "Warning: A file for which the CRC32 should be calculated is not shared anymore. Calculation skipped."
     IDS_LOG_CRC32_WRN2      "Warning: File '%s' is not shared anymore. CRC32 calculation skipped."
     IDS_LOG_CRC32_WRN3      "Warning: Can't open file '%s' for CRC32 calculation. File skipped."
@@ -5443,6 +5455,10 @@ BEGIN
     IDS_LOG_CRC32_CALC      "Calculating CRC32 of file '%s'..."
     IDS_LOG_CRC32_ADORT     "CRC32 calculation aborted."
     IDS_LOG_CRC32_COMPLETED "Calculation of CRC32 for file '%s' completed. File CRC: %s"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IP2COUNTRY_MSG1     "IP2Country uses the IP-to-Country Database provided by WebHosting."
     IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info."
     IDS_IP2COUNTRY_LOADED   "IP2Country loaded"
@@ -5464,6 +5480,16 @@ BEGIN
     IDS_IP2COUNTRY_DWNFILE  "Downloading IP2Country file"
     IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv unloaded due to update in progress"
     IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv loaded after successful update"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_HASHING_COMPLETED   "Completed hashing of file '%s'."
+    IDS_HASHING_COMPLETED2  "Hashing of new files completed."
+    IDS_HASHING_NEWFILE     "New file: '%s'"
+    IDS_SUQWT_LOAD          "Load %s"
+    IDS_VERBOSE_TITLE       "Verbose"
+    IDS_CAT_TOTAL           "Total"
 END
 //MORPH END - Added by FrankyFive
 
