@@ -1,4 +1,18 @@
 --------------------------------------
+Changelog for eMule 0.44b MorphXT v5.4
+--------------------------------------
+FIXED  : Fixed Upload Splitting Class [SiRoB]
+
+NOTE: About WebCache from the official thread
+Quick Start:
+
+You need to configure eMule so it uses your ISPs' proxy server, go to Preferences->Webcache and hit the autodetect button (you will need to connect to a server first). If autodetection fails, you will need to enter your proxys' address and port manually. If you don't know your proxys' address, you can try typing your ISPs' name and the word 'proxy' in google and see if that gets you anything. If this too doesn't work, you'll have to call your ISPs' customer support and ask them.
+
+For cached download to occur you must have another client using your proxy and downloading the same file as you are. There's usualy a test file for new webcache releases, the current one is ed2k://|file|webcachemule.1.1.beta.testfile|1078989657|E9057ADC38054AFA24816E86BB08D270|/ but this post may become outdated, so look through the posts refering to the latest version.
+
+When downloading through a proxy you should see a 'Transferring Via Proxy' in your status column, this means that you are downloading from another client via your proxy server. If you see a client called 'HTTP Proxy @ xxx.xxx.xxx.xxx' with a strange icon on your download list, that means you are downloading a cached block from your proxy server.
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.3
 --------------------------------------
 FIXED  : Fixed Upload Splitting Class [SiRoB]
