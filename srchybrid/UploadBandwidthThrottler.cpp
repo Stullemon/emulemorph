@@ -531,8 +531,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
                     	    spentBytesClass[classID] += lastSpentBytes;
 							if (classID < LAST_CLASS) spentBytesClass[LAST_CLASS] += lastSpentBytes;
 							spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
-							if(lastSpentBytes > 0 && slotCounter+1 < m_highestNumberOfFullyActivatedSlots) {
-                                m_highestNumberOfFullyActivatedSlots = slotCounter+1;
+							if(lastSpentBytes > 0 && slotCounter < m_highestNumberOfFullyActivatedSlots) {
+                                m_highestNumberOfFullyActivatedSlots = slotCounter;
                     	   	}
 						}
                		}
