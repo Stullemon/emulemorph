@@ -2508,7 +2508,7 @@ void CPartFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, count.GetSize() && (m_nCompleteSourcesCountHi==1 || m_nVirtualCompleteSourcesCount==1) || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200,  (m_nCompleteSourcesCountHi==1 || m_nVirtualCompleteSourcesCount==1) || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo(true);

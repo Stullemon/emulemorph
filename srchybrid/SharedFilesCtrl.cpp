@@ -600,12 +600,12 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer.Append(" (");
 						if (file->GetPowerShareAuto())
 							buffer.Append(GetResString(IDS_POWERSHARE_ADVISED_LABEL));
-						else if (file->GetPowerShareAuthorized())
-							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
 						//MORPH START - Added by SiRoB, POWERSHARE Limit
 						else if (file->GetPowerShareLimited() && (powersharemode == 3))
 							buffer.Append(GetResString(IDS_POWERSHARE_LIMITED));
 						//MORPH END   - Added by SiRoB, POWERSHARE Limit
+						else if (file->GetPowerShareAuthorized())
+							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
 						else
 							buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
 						buffer.Append(")");
