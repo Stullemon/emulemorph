@@ -2318,9 +2318,7 @@
 #define IDC_NEWFILENAMESEDITLEFT        4883
 #define IDS_REMOVEALLFRIENDSLOT         4884
 #define IDS_MULTIPLEINSTANCE            4885
-#define ID_MASSRENAMEOK                 4885
 #define IDS_INFINITEQUEUE               4886
-#define ID_MASSRENAMECANCEL             4886
 #define IDS_PAYBACKFIRSTLIMIT           4887
 #define IDC_FILENAMELEFT                4888
 
@@ -2329,8 +2327,8 @@
 #define IDC_NEWFILENAMESEDITRIGHT       4890
 #define IDS_COMMUNITYTAG                4890
 #define IDC_RESETBUTTON                 4891
-
 #define IDC_RICHEDIT21                  4897
+
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
