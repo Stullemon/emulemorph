@@ -1,4 +1,20 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.18
+--------------------------------------
+FIXED  : Kad: Buddy patch to avoid crash by tHeWiZaRdOfDoS [SiRoB]
+FIXED  : PC: timeout fix focused by tHeWiZaRdOfDoS [SiRoB]
+FIXED  : WC: timeout fix focused by tHeWiZaRdOfDoS [SiRoB]
+
+ADDED  : Patch to Attempt to avoid the tomanyconnection freeze state [SiRoB]
+ADDED  : Some string localization [FrankyFive]
+
+CHANGED: USC: Minor change to lower even more the number of uploading slot [SiRoB]
+
+REMOVED: Don't add client in uploadinglist not accepted by trytoconnect to avoid failed upload (banned,filtered,etc) [SiRoB]
+
+TWEAKED: USC: Optimized [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.17
 --------------------------------------
 FIXED  : HOS: Properly desactivated when not welcome [SiRoB]
