@@ -137,7 +137,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 				else
 					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
 				*/
-				else if (file == reqfile)
+				else if (file == reqfile){
 					if (m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset < uEnd &&
 							m_nLastBlockOffset >= PARTSIZE*i)
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crPending);
@@ -145,6 +145,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crNextPending);
 					else
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
+				}
 				else
 					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
 				//MORPH END  - Changed by SiRoB, Advanced A4AF derivated from Khaos	
