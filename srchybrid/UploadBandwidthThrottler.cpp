@@ -110,7 +110,7 @@ uint32 UploadBandwidthThrottler::GetHighestNumberOfFullyActivatedSlotsSinceLastC
     sendLocker.Lock();
     
     uint64 highestNumberOfFullyActivatedSlots = m_highestNumberOfFullyActivatedSlots;
-    m_highestNumberOfFullyActivatedSlots = 1;
+    m_highestNumberOfFullyActivatedSlots = 0;
 
     sendLocker.Unlock();
 
@@ -133,7 +133,7 @@ uint32 UploadBandwidthThrottler::GetHighestNumberOfFullyActivatedSlotsSinceLastC
  * @param socket the address to the socket that should be added to the list. If the address is NULL,
  *               this method will do nothing.
  */
-void UploadBandwidthThrottler::AddToStandardList(uint32 index, CEMSocket* socket) {
+void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSocket* socket) {
     if(socket != NULL) {
         sendLocker.Lock();
 
@@ -160,7 +160,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, CEMSocket* socket
  * @param socket the address of the socket that should be removed from the list. If this socket
  *               does not exist in the list, this method will do nothing.
  */
-void UploadBandwidthThrottler::RemoveFromStandardList(CEMSocket* socket) {
+void UploadBandwidthThrottler::RemoveFromStandardList(ThrottledFileSocket* socket) {
     sendLocker.Lock();
 
     RemoveFromStandardListNoLock(socket);
@@ -177,7 +177,7 @@ void UploadBandwidthThrottler::RemoveFromStandardList(CEMSocket* socket) {
  * @param socket address of the socket that should be removed from the list. If this socket
  *               does not exist in the list, this method will do nothing.
  */
-void UploadBandwidthThrottler::RemoveFromStandardListNoLock(CEMSocket* socket) {
+void UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* socket) {
     // Find the slot
     int slotCounter = 0;
     bool foundSocket = false;
@@ -204,13 +204,17 @@ void UploadBandwidthThrottler::RemoveFromStandardListNoLock(CEMSocket* socket) {
 * @param socket address to the socket that requests to have controlpacket send
 *               to be called on it
 */
-void UploadBandwidthThrottler::QueueForSendingControlPacket(ThrottledSocket* socket) {
+void UploadBandwidthThrottler::QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent) {
     // Get critical section
     tempQueueLocker.Lock();
 
 
     if(doRun) {
-        m_TempControlQueue_list.AddTail(socket);
+        if(hasSent) {
+            m_TempControlQueueFirst_list.AddTail(socket);
+        } else {
+        	m_TempControlQueue_list.AddTail(socket);
+    	}
     }
 
     // End critical section
@@ -224,7 +228,7 @@ void UploadBandwidthThrottler::QueueForSendingControlPacket(ThrottledSocket* soc
  *
  * @param socket address to the socket that should be removed
  */
-void UploadBandwidthThrottler::RemoveFromAllQueues(ThrottledSocket* socket, bool lock) {
+void UploadBandwidthThrottler::RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock) {
     if(lock) {
     	// Get critical section
    		sendLocker.Lock();
@@ -236,7 +240,7 @@ void UploadBandwidthThrottler::RemoveFromAllQueues(ThrottledSocket* socket, bool
             POSITION pos1, pos2;
 	        for (pos1 = m_ControlQueue_list.GetHeadPosition();( pos2 = pos1 ) != NULL;) {
 		        m_ControlQueue_list.GetNext(pos1);
-		        ThrottledSocket* socketinQueue = m_ControlQueue_list.GetAt(pos2);
+		        ThrottledControlSocket* socketinQueue = m_ControlQueue_list.GetAt(pos2);
 
                 if(socketinQueue == socket) {
                     m_ControlQueue_list.RemoveAt(pos2);
@@ -244,15 +248,39 @@ void UploadBandwidthThrottler::RemoveFromAllQueues(ThrottledSocket* socket, bool
             }
         }
         
+        {
+            POSITION pos1, pos2;
+	        for (pos1 = m_ControlQueueFirst_list.GetHeadPosition();( pos2 = pos1 ) != NULL;) {
+		        m_ControlQueueFirst_list.GetNext(pos1);
+		        ThrottledControlSocket* socketinQueue = m_ControlQueueFirst_list.GetAt(pos2);
+
+                if(socketinQueue == socket) {
+                    m_ControlQueueFirst_list.RemoveAt(pos2);
+                }
+            }
+        }
+
         tempQueueLocker.Lock();
         {
             POSITION pos1, pos2;
 	        for (pos1 = m_TempControlQueue_list.GetHeadPosition();( pos2 = pos1 ) != NULL;) {
 		        m_TempControlQueue_list.GetNext(pos1);
-		        ThrottledSocket* socketinQueue = m_TempControlQueue_list.GetAt(pos2);
+		        ThrottledControlSocket* socketinQueue = m_TempControlQueue_list.GetAt(pos2);
 
                 if(socketinQueue == socket) {
                     m_TempControlQueue_list.RemoveAt(pos2);
+                }
+            }
+        }
+
+        {
+            POSITION pos1, pos2;
+	        for (pos1 = m_TempControlQueueFirst_list.GetHeadPosition();( pos2 = pos1 ) != NULL;) {
+		        m_TempControlQueueFirst_list.GetNext(pos1);
+		        ThrottledControlSocket* socketinQueue = m_TempControlQueueFirst_list.GetAt(pos2);
+
+                if(socketinQueue == socket) {
+                    m_TempControlQueueFirst_list.RemoveAt(pos2);
                 }
             }
         }
@@ -265,7 +293,7 @@ void UploadBandwidthThrottler::RemoveFromAllQueues(ThrottledSocket* socket, bool
     }
 }
 
-void UploadBandwidthThrottler::RemoveFromAllQueues(CEMSocket* socket) {
+void UploadBandwidthThrottler::RemoveFromAllQueues(ThrottledFileSocket* socket) {
     // Get critical section
     sendLocker.Lock();
 
@@ -341,6 +369,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
     uint32 highestNumberOfFullyActivatedSlots = 0;
 
+    DWORD lastSendTick = 0;
+
     while(doRun) {
         pauseEvent->Lock();
 
@@ -349,64 +379,88 @@ UINT UploadBandwidthThrottler::RunInternal() {
         // Get current speed from UploadSpeedSense
         allowedDataRate = theApp.lastCommonRouteFinder->GetUpload();
 
+        uint32 minFragSize = 1300;
+        if(allowedDataRate < 6*1024) {
+            minFragSize = 536;
+        }
+
 #define TIME_BETWEEN_UPLOAD_LOOPS 1
-        if(timeSinceLastLoop < TIME_BETWEEN_UPLOAD_LOOPS) {
-            if(allowedDataRate == 0 || realBytesToSpend >= 1000) {
+        uint32 sleepTime;
+        if(allowedDataRate == 0 || allowedDataRate == _UI32_MAX || realBytesToSpend >= 1000) {
                 // we could send at once, but sleep a while to not suck up all cpu
-            	Sleep(TIME_BETWEEN_UPLOAD_LOOPS-timeSinceLastLoop);
+            sleepTime = TIME_BETWEEN_UPLOAD_LOOPS;
             } else {
                 // sleep for just as long as we need to get back to having one byte to send
-                uint32 sleepTime = max(((uint32)(-realBytesToSpend + 1000))/allowedDataRate, TIME_BETWEEN_UPLOAD_LOOPS);
-                if(timeSinceLastLoop < sleepTime) {
-                    Sleep(sleepTime-timeSinceLastLoop);
-                }
-        	}
+            sleepTime = max((uint32)ceil((double)(-realBytesToSpend + 1000)/allowedDataRate), TIME_BETWEEN_UPLOAD_LOOPS);
         }
 
+        if(timeSinceLastLoop < sleepTime) {
+            Sleep(sleepTime-timeSinceLastLoop);
+        }
+        
         const DWORD thisLoopTick = ::GetTickCount();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
-        if(timeSinceLastLoop > 1*1000) {
-			theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long (%i).", timeSinceLastLoop);
 
-            timeSinceLastLoop = 1*1000;
-            lastLoopTick = thisLoopTick - timeSinceLastLoop;
-        }
+         // Calculate how many bytes we can spend
+        sint64 bytesToSpend = 0;
 
-        // Calculate how many bytes we can spend
-        if(allowedDataRate != 0) {
-            realBytesToSpend += allowedDataRate*(thisLoopTick-lastLoopTick);
+        if(allowedDataRate != 0 && allowedDataRate != _UI32_MAX) {
+            // prevent overflow
+            if(timeSinceLastLoop == 0) {
+                // no time has passed, so don't add any bytes. Shouldn't happen.
+                bytesToSpend = 0; //realBytesToSpend/1000;
+            } else if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpend) {
+                if(timeSinceLastLoop > sleepTime + 150) {
+			        theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long. time: %ims wanted: %ims Max: %ims", timeSinceLastLoop, sleepTime, sleepTime + 150);
+        
+                    timeSinceLastLoop = sleepTime + 150;
+                    lastLoopTick = thisLoopTick - timeSinceLastLoop;
+                }
+
+                realBytesToSpend += allowedDataRate*timeSinceLastLoop;
+
+                bytesToSpend = realBytesToSpend/1000;
         } else {
             realBytesToSpend = _I64_MAX;
+                bytesToSpend = _I32_MAX;
+            }
+        } else {
+            realBytesToSpend = 0; //_I64_MAX;
+            bytesToSpend = _I32_MAX;
         }
         lastLoopTick = thisLoopTick;
 
-        if(realBytesToSpend >= 1000) {
-        	sint64 bytesToSpend = realBytesToSpend/1000;
+        if(bytesToSpend >= 1) {
+            //sint64 bytesToSpend = realBytesToSpend/1000;
 
         	uint64 spentBytes = 0;
         	uint64 spentOverhead = 0;
 
         	tempQueueLocker.Lock();
 	        // are there any sockets in m_TempControlQueue_list? Move them to normal m_ControlQueue_list;
+            while(!m_TempControlQueueFirst_list.IsEmpty()) {
+                ThrottledControlSocket* moveSocket = m_TempControlQueueFirst_list.RemoveHead();
+                m_ControlQueueFirst_list.AddTail(moveSocket);
+            }
         	while(!m_TempControlQueue_list.IsEmpty()) {
-        	    ThrottledSocket* moveSocket = m_TempControlQueue_list.RemoveHead();
+                ThrottledControlSocket* moveSocket = m_TempControlQueue_list.RemoveHead();
         	    m_ControlQueue_list.AddTail(moveSocket);
         	}
        		tempQueueLocker.Unlock();
         
-            uint32 minFragSize = 1300;
-            if(allowedDataRate < 6*1024) {
-                minFragSize = 536;
-            }
-
             //uint32 lastSpentBytes = minFragSize;
 
             sendLocker.Lock();
 
         	// Send any queued up control packets first
         	//while(bytesToSpend > 0 && (spentBytes+minFragSize <= (uint64)bytesToSpend || lastSpentBytes > 0 && spentBytes <= (uint64)bytesToSpend) && !m_ControlQueue_list.IsEmpty()) {
-        	while(bytesToSpend > 0 && spentBytes/*+minFragSize*/ < /*=*/ (uint64)bytesToSpend && !m_ControlQueue_list.IsEmpty()) {
-        	    ThrottledSocket* socket = m_ControlQueue_list.RemoveHead();
+            while(bytesToSpend > 0 && spentBytes/*+minFragSize*/ < /*=*/ (uint64)bytesToSpend && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
+                ThrottledControlSocket* socket = NULL;
+                if(!m_ControlQueueFirst_list.IsEmpty()) {
+                    socket = m_ControlQueueFirst_list.RemoveHead();
+                } else if(!m_ControlQueue_list.IsEmpty()) {
+                    socket = m_ControlQueue_list.RemoveHead();
+                }
 
        	     if(socket != NULL) {
         	        SocketSentBytes socketSentBytes = socket->Send(bytesToSpend-spentBytes, minFragSize, true);
@@ -418,7 +472,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
      	   // Check if any sockets haven't gotten data for a long time. Then trickle them a package.
      	   for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize(); slotCounter++) {
-    	        CEMSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
+                ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 
      	       if(socket != NULL) {
      	           if((thisLoopTick-socket->GetLastCalledSend())*1000 > SEC2MS(1)) {
@@ -431,8 +485,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
                     	    spentBytes += lastSpentBytes;
                         	spentOverhead += socketSentBytes.sentBytesControlPackets;
 
-                        	if(lastSpentBytes > 0 && slotCounter+1 < highestNumberOfFullyActivatedSlots) {
-                        	    highestNumberOfFullyActivatedSlots = slotCounter+1;
+                            if(lastSpentBytes > 0 && slotCounter < highestNumberOfFullyActivatedSlots) {
+                                highestNumberOfFullyActivatedSlots = slotCounter;
                     	   	}
 						}
                		}
@@ -447,8 +501,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
             //if(m_ControlQueue_list.IsEmpty())
             {
             	uint32 slotCounter = 0;
-            	for(slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize() && bytesToSpend > 0 && spentBytes < (uint64)bytesToSpend && (slotCounter+1 < highestNumberOfFullyActivatedSlots || spentBytes + minFragSize < (uint64)bytesToSpend); slotCounter++) {
-             	   CEMSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
+                for(slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize() && bytesToSpend > 0 && spentBytes < (uint64)bytesToSpend && (slotCounter <= highestNumberOfFullyActivatedSlots || spentBytes + minFragSize <= (uint64)bytesToSpend); slotCounter++) {
+                    ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 
                 	if(socket != NULL) {
                    		SocketSentBytes socketSentBytes = socket->Send(bytesToSpend-spentBytes, minFragSize, false);
@@ -464,9 +518,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
                     	theApp.QueueDebugLogLine(false,"There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i", slotCounter, m_StandardOrder_list.GetSize());
                 	}
             	}
-            	if(slotCounter+1 < highestNumberOfFullyActivatedSlots) {
-                	highestNumberOfFullyActivatedSlots = slotCounter+1;
-            	}
+                //if(slotCounter+1 < highestNumberOfFullyActivatedSlots) {
+                //    highestNumberOfFullyActivatedSlots = slotCounter+1;
+                //}
         	}
 
         	realBytesToSpend -= spentBytes*1000;
@@ -481,8 +535,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
             	//theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Overcharged bytesToSpend. Limiting negative value. Old value: %I64i New value: %I64i", realBytesToSpend, newRealBytesToSpend);
 
             	realBytesToSpend = newRealBytesToSpend;
-        	//} else if(realBytesToSpend <= minFragSize*1000) {
-        	//    // do nothing
         	} else if(realBytesToSpend > minFragSize*1000+999) {
             	sint64 newRealBytesToSpend = minFragSize*1000+999;
 

@@ -126,6 +126,8 @@ CEMSocket::CEMSocket(void){
     m_actualPayloadSize = 0;
     m_actualPayloadSizeSent = 0;
 
+    m_bBusy = false;
+    m_hasSent = false;
 	//MORPH START - Added by SiRoB, ZZ Upload
     m_bBusy = false;
     int val = 0;
@@ -495,7 +497,7 @@ void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 	        controlpacket_queue.AddTail(packet);
 
             // queue up for controlpacket
-            theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+            theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
 	    } else {
             bool first = !((sendbuffer && !m_currentPacket_is_controlpacket) || !standartpacket_queue.IsEmpty()); //MORPH - Added by SiRoB, ZZ Upload
             StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
@@ -582,7 +584,7 @@ void CEMSocket::OnSend(int nErrorCode){
 
     if(m_currentPacket_is_controlpacket) {
         // queue up for control packet
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
     }
 
     sendLocker.Unlock();
@@ -763,7 +765,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
                     //    // we might enter control packet queue several times for the same package,
                     //    // but that costs very little overhead. Less overhead than trying to make sure
                     //    // that we only enter the queue once.
-                    //    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+                    //    theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
                     //}
 
                     //m_wasBlocked = true;
@@ -779,6 +781,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
             } else {
                 // we managed to send some bytes. Perform bookkeeping.
                 m_bBusy = false;
+                m_hasSent = true;
 
                 //lastCalledSend = ::GetTickCount();
                 sent += result;
@@ -826,7 +829,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
         // we might enter control packet queue several times for the same package,
         // but that costs very little overhead. Less overhead than trying to make sure
         // that we only enter the queue once.
-        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this, HasSent());
     }
 
     //CleanSendLatencyList();

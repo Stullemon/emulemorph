@@ -18,8 +18,6 @@
 
 #include "ThrottledSocket.h" // ZZ:UploadBandWithThrottler (UDP)
 
-class CEMSocket;
-
 class UploadBandwidthThrottler :
     public CWinThread 
 {
@@ -31,12 +29,12 @@ public:
     uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
     uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
-    void AddToStandardList(uint32 index, CEMSocket* socket);
-    void RemoveFromStandardList(CEMSocket* socket);
+    void AddToStandardList(uint32 index, ThrottledFileSocket* socket);
+    void RemoveFromStandardList(ThrottledFileSocket* socket);
 
-    void QueueForSendingControlPacket(ThrottledSocket* socket); // ZZ:UploadBandWithThrottler (UDP)
-    void RemoveFromAllQueues(ThrottledSocket* socket, bool lock = true); // ZZ:UploadBandWithThrottler (UDP)
-    void RemoveFromAllQueues(CEMSocket* socket);
+    void QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent = false); // ZZ:UploadBandWithThrottler (UDP)
+    void RemoveFromAllQueues(ThrottledControlSocket* socket) { RemoveFromAllQueues(socket, true); }; // ZZ:UploadBandWithThrottler (UDP)
+    void RemoveFromAllQueues(ThrottledFileSocket* socket);
 
     void EndThread();
 
@@ -47,12 +45,15 @@ private:
     static UINT RunProc(LPVOID pParam);
     UINT RunInternal();
 
-    void RemoveFromStandardListNoLock(CEMSocket* socket);
+    void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
+    void RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
 
-    CTypedPtrList<CPtrList, ThrottledSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
-    CTypedPtrList<CPtrList, ThrottledSocket*> m_TempControlQueue_list; // sockets that wants to enter m_ControlQueue_list // ZZ:UploadBandWithThrottler (UDP)
+    CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
+    CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueueFirst_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
+    CTypedPtrList<CPtrList, ThrottledControlSocket*> m_TempControlQueue_list; // sockets that wants to enter m_ControlQueue_list // ZZ:UploadBandWithThrottler (UDP)
+    CTypedPtrList<CPtrList, ThrottledControlSocket*> m_TempControlQueueFirst_list; // sockets that wants to enter m_ControlQueue_list and has been able to send before // ZZ:UploadBandWithThrottler (UDP)
 
-    CArray<CEMSocket*, CEMSocket*> m_StandardOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
+    CArray<ThrottledFileSocket*, ThrottledFileSocket*> m_StandardOrder_list; // sockets that have upload slots. Ordered so the most prioritized socket is first
 
     CCriticalSection sendLocker;
     CCriticalSection tempQueueLocker;

@@ -40,7 +40,7 @@ struct StandardPacketQueueEntry {
 /*
 class CEMSocket : public CAsyncSocketEx
 */
-class CEMSocket : public CAsyncSocketEx, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
+class CEMSocket : public CAsyncSocketEx, public ThrottledFileSocket // ZZ:UploadBandWithThrottler (UDP)
 //MOPRH END   - Changed by SiRoB, zz Upload System
 {
 //MOPRH START - Removed by SiRoB, zz Upload System
@@ -114,6 +114,7 @@ private:
 
     //MOPRH START - Added by SiRoB, zz Upload System
 	uint32 GetNextFragSize(uint32 current, uint32 minFragSize);
+	bool    HasSent() { return m_hasSent; }
 	//MOPRH END   - Added by SiRoB, zz Upload System
 
 	// Download (pseudo) rate control	
@@ -164,4 +165,5 @@ private:
     uint32 m_actualPayloadSizeSent;
 
     boolean m_bBusy; //MOPRH - Added by SiRoB, zz Upload System
+	boolean m_hasSent; //MOPRH - Added by SiRoB, zz Upload System
 };

@@ -556,37 +556,41 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 		if(newclient != NULL) {
 			if(highPrioCheck == true) {
-				POSITION lastpos = uploadinglist.GetTailPosition();
+                if((newclient->IsFriend() && newclient->GetFriendSlot()) || newclient->IsPBForPS()) {
+					POSITION lastpos = uploadinglist.GetTailPosition();
 
-				CUpDownClient* lastClient = NULL;
-				if(lastpos != NULL) {
-					lastClient = uploadinglist.GetAt(lastpos);
-				}
-				if(lastClient != NULL) {
-
-					if (
-						RightClientIsSuperior(lastClient, newclient) > 0
-						/*
-						(newclient->IsFriend() && newclient->GetFriendSlot()) == true && (lastClient->IsFriend() && lastClient->GetFriendSlot()) == false ||
-						(newclient->IsFriend() && newclient->GetFriendSlot()) == (lastClient->IsFriend() && lastClient->GetFriendSlot()) &&
-							(
-								newclient->IsPBForPS() == true && lastClient->IsPBForPS() == false ||
-								newclient->IsPBForPS() == true && lastClient->IsPBForPS() == true && newclient->GetFilePrioAsNumber() > lastClient->GetFilePrioAsNumber()
-							)
-						*/
-						) {
-
-						//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
-						// Remove last client from ul list to make room for higher prio client
-						theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
-
-						// add to queue again.
-						// the client is allowed to keep its waiting position in the queue, since it was pre-empted
-						AddClientToQueue(lastClient,true, true);
-					} else {
-						return false;
+					CUpDownClient* lastClient = NULL;
+					if(lastpos != NULL) {
+						lastClient = uploadinglist.GetAt(lastpos);
 					}
-				}
+					if(lastClient != NULL) {
+
+						if (
+							RightClientIsSuperior(lastClient, newclient) > 0
+							/*
+							(newclient->IsFriend() && newclient->GetFriendSlot()) == true && (lastClient->IsFriend() && lastClient->GetFriendSlot()) == false ||
+							(newclient->IsFriend() && newclient->GetFriendSlot()) == (lastClient->IsFriend() && lastClient->GetFriendSlot()) &&
+								(
+									newclient->IsPBForPS() == true && lastClient->IsPBForPS() == false ||
+									newclient->IsPBForPS() == true && lastClient->IsPBForPS() == true && newclient->GetFilePrioAsNumber() > lastClient->GetFilePrioAsNumber()
+								)
+							*/
+							) {
+
+							//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
+							// Remove last client from ul list to make room for higher prio client
+							theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
+
+							// add to queue again.
+							// the client is allowed to keep its waiting position in the queue, since it was pre-empted
+							AddClientToQueue(lastClient,true, true);
+						} else {
+							return false;
+						}
+					}
+                } else {
+                    return false;
+                }
 			}
 
 			//RemoveFromWaitingQueue(toadd, true);
@@ -663,71 +667,83 @@ void CUploadQueue::Process() {
 
 	ReSortUploadSlots();
 
-	uint32 tempMaxActiveClients = 0;
-	uint32 tempMaxActiveClientsShortTime = 0;
-    uint32 tempSumActiveClients = 0;
-    uint32 tempCountActiveClients = 0;
-	POSITION activeClientsTickPos = activeClients_tick_list.GetHeadPosition();
-	POSITION activeClientsListPos = activeClients_list.GetHeadPosition();
-	while(activeClientsListPos != NULL) {
-		DWORD activeClientsTickSnapshot = activeClients_tick_list.GetAt(activeClientsTickPos);
-		uint32 activeClientsSnapshot = activeClients_list.GetAt(activeClientsListPos);
+    if(!activeClients_tick_list.IsEmpty()) {
+        // save 15 minutes of data about number of fully active clients
+        uint32 tempMaxRemoved = 0;
+        while(curTick-activeClients_tick_list.GetHead() > 15*60*1000) {
+            activeClients_tick_list.RemoveHead();
+	        uint32 removed = activeClients_list.RemoveHead();
 
-		if(activeClientsSnapshot > tempMaxActiveClients) {
-			tempMaxActiveClients = activeClientsSnapshot;
-		}
-
-        if(curTick - activeClientsTickSnapshot < 3 * 1000) {
-            tempCountActiveClients++;
-            tempSumActiveClients += activeClientsSnapshot;
+            if(removed > tempMaxRemoved) {
+                tempMaxRemoved = removed;
+            }
         }
 
-		if(activeClientsSnapshot > tempMaxActiveClientsShortTime && curTick - activeClientsTickSnapshot < 10 * 1000) {
-			tempMaxActiveClientsShortTime = activeClientsSnapshot;
+		uint32 tempMaxActiveClients = 0;
+		uint32 tempMaxActiveClientsShortTime = 0;
+    	uint32 tempSumActiveClients = 0;
+    	uint32 tempCountActiveClients = 0;
+        POSITION activeClientsTickPos = activeClients_tick_list.GetTailPosition();
+        POSITION activeClientsListPos = activeClients_list.GetTailPosition();
+        while(activeClientsListPos != NULL && (tempMaxRemoved >= m_MaxActiveClients || curTick - activeClients_tick_list.GetAt(activeClientsTickPos) < 10 * 1000)) {
+			DWORD activeClientsTickSnapshot = activeClients_tick_list.GetAt(activeClientsTickPos);
+			uint32 activeClientsSnapshot = activeClients_list.GetAt(activeClientsListPos);
+
+			if(activeClientsSnapshot > tempMaxActiveClients) {
+				tempMaxActiveClients = activeClientsSnapshot;
+			}
+
+    	    if(curTick - activeClientsTickSnapshot < 3 * 1000) {
+    	        tempCountActiveClients++;
+    	        tempSumActiveClients += activeClientsSnapshot;
+    	    }
+
+			if(activeClientsSnapshot > tempMaxActiveClientsShortTime && curTick - activeClientsTickSnapshot < 10 * 1000) {
+				tempMaxActiveClientsShortTime = activeClientsSnapshot;
+			}
+
+            activeClients_tick_list.GetPrev(activeClientsTickPos);
+            activeClients_list.GetPrev(activeClientsListPos);
 		}
 
-		activeClients_tick_list.GetNext(activeClientsTickPos);
-		activeClients_list.GetNext(activeClientsListPos);
-	}
-	m_MaxActiveClients = tempMaxActiveClients;
-	m_MaxActiveClientsShortTime = tempMaxActiveClientsShortTime;
+        if(tempMaxRemoved > m_MaxActiveClients) {
+			m_MaxActiveClients = tempMaxActiveClients;
+        }
 
-    m_averageActiveClients = (tempCountActiveClients>0?tempSumActiveClients/tempCountActiveClients:0);
+		m_MaxActiveClientsShortTime = tempMaxActiveClientsShortTime;
+
+    	m_averageActiveClients = (tempCountActiveClients>0?tempSumActiveClients/tempCountActiveClients:0);
+    } else {
+        m_MaxActiveClients = 0;
+        m_MaxActiveClientsShortTime = 0;
+        m_averageActiveClients = 0;
+    }
 
 	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
 
-	// How many slots should be open? Trickle slots included (at least 2 trickles, 30% of total, and the slots are expected to use UPLOAD_CLIENT_REALISTIC_AVERAGE_DATARATE in average, whichever number is largest)
-	//sint32 wantedNumberOfTotalUploads = max((uint32)(estadatarate/UPLOAD_CLIENT_DATARATE), m_MaxActiveClientsShortTime + MINNUMBEROFTRICKLEUPLOADS);
-	//wantedNumberOfTotalUploads = max(wantedNumberOfTotalUploads, m_MaxActiveClientsShortTime*1.3);
-	sint32 wantedNumberOfTotalUploads = m_MaxActiveClientsShortTime;
+    // How many slots should be open? Trickle slots included (at least 2 trickles, 30% of total, and the slots are expected to use UPLOAD_CLIENT_REALISTIC_AVERAGE_DATARATE in average, whichever number is largest)
+    //sint32 wantedNumberOfTotalUploads = max((uint32)(estadatarate/UPLOAD_CLIENT_DATARATE), m_MaxActiveClientsShortTime + MINNUMBEROFTRICKLEUPLOADS);
+    //wantedNumberOfTotalUploads = max(wantedNumberOfTotalUploads, m_MaxActiveClientsShortTime*1.3);
+    //sint32 wantedNumberOfTotalUploads = m_MaxActiveClientsShortTime;
 
-	// PENDING: Each 3 seconds
+    // PENDING: Each 3 seconds
 	if(curTick - m_dwLastCheckedForHighPrioClient >= 3*1000) {
 		bool added = AddUpNextClient(NULL, true);
 		if(added == false) {
-			// set timer so we can wait a while
+            // set timer so we can wait a while
 			m_dwLastCheckedForHighPrioClient = curTick;
 		}else{
-			// there might be another highprio client
-			// don't set timer, so that we check next call as well
+            // there might be another highprio client
+            // don't set timer, so that we check next call as well
 		}
 	}
 
-	POSITION pos = uploadinglist.GetHeadPosition();
-	while(pos != 0){
-		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
-		if (thePrefs.m_iDbgHeap >= 2)
-			ASSERT_VALID(cur_client);
-		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
-		if (!cur_client->socket)
-		{
-			RemoveFromUploadQueue(cur_client);
-			if(cur_client->Disconnected("CUploadQueue::Process")){
-				delete cur_client;
-			}
-		} else {
-			cur_client->SendBlockData();
-		}
+    POSITION ulpos = uploadinglist.GetHeadPosition();
+    // The loop that feeds the upload slots with data.
+    while (ulpos != NULL) {
+        // Get the client. Note! Also updates ulpos as a side effect.
+		CUpDownClient* cur_client = uploadinglist.GetNext(ulpos);
+		cur_client->SendBlockData();
 	}
 
 	POSITION lastpos = uploadinglist.GetTailPosition();
@@ -737,44 +753,41 @@ void CUploadQueue::Process() {
 		lastClient = uploadinglist.GetAt(lastpos);
 	}
 
-	// Save number of active clients for statistics
+    // Save number of active clients for statistics
 	uint32 highestNumberOfFullyActivatedSlotsSinceLastCall = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
+    m_MaxActiveClients = max(m_MaxActiveClients, highestNumberOfFullyActivatedSlotsSinceLastCall);
 	activeClients_list.AddTail(highestNumberOfFullyActivatedSlotsSinceLastCall);
 	activeClients_tick_list.AddTail(curTick);
 
 	if(uploadinglist.GetCount() > MIN_UP_CLIENTS_ALLOWED &&
 		((uint32)uploadinglist.GetCount() > m_MaxActiveClients+wantedNumberOfTrickles ||
 		(uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+wantedNumberOfTrickles && AcceptNewClient(uploadinglist.GetCount()) == false)) {
-		// we need to close a trickle slot and put it back first on the queue
+        // we need to close a trickle slot and put it back first on the queue
 		if(lastClient != NULL && lastClient->GetUpStartTimeDelay() > 3*1000) {
 
-			// There's to many open uploads (propably due to the user changing
-			// the upload limit to a lower value). Remove the last opened upload and put
-			// it back on the waitinglist. When it is put back, it get
-			// to keep its waiting time. This means it is likely to soon be
-			// choosen for upload again.
+            // There's to many open uploads (propably due to the user changing
+            // the upload limit to a lower value). Remove the last opened upload and put
+            // it back on the waitinglist. When it is put back, it get
+            // to keep its waiting time. This means it is likely to soon be
+            // choosen for upload again.
 
 			m_FirstRanOutOfSlotsTick = 0;
 
 			//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload since there are too many upload slots opened.", lastClient->GetUserName());
-			// Remove from upload list.
-
-			RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
-
-			// add to queue again.
-			// the client is allowed to keep its waiting position in the queue, since it was pre-empted
+		    // add to queue again.
+            // the client is allowed to keep its waiting position in the queue, since it was pre-empted
 			AddClientToQueue(lastClient, true, true);
 		}
 	} else if(theApp.lastCommonRouteFinder->AcceptNewClient()) {
 		if(highestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetCount()) {
-			// we have given all slots bandwidth this round, and couldn't have given them more.
+            // we have given all slots bandwidth this round, and couldn't have given them more.
 			if(m_FirstRanOutOfSlotsTick == 0) {
 				m_FirstRanOutOfSlotsTick = curTick;
 			} else if(curTick-m_FirstRanOutOfSlotsTick > 500 && AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0
                 && (curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)
             ) {
-				// open an extra slot so that we always have enough trickle slots
-				// There's not enough open uploads. Open another one.
+                // open an extra slot so that we always have enough trickle slots
+                // There's not enough open uploads. Open another one.
 				AddUpNextClient();
 
 				m_FirstRanOutOfSlotsTick = 0;
@@ -809,28 +822,66 @@ void CUploadQueue::Process() {
 			break;
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 	// Don't save more than three minutes of data about number of fully active clients
-	while(curTick-activeClients_tick_list.GetHead() > 3*60*1000) {
-		activeClients_tick_list.RemoveHead();
-		activeClients_list.RemoveHead();
-	}
 }
 
 bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 	// check if we can allow a new client to start downloading form us
-	if (numberOfUploads < MIN_UP_CLIENTS_ALLOWED)
+	uint16 MaxSpeed = thePrefs.GetMaxUpload();
+	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
+	uint32 curUploadSlots = numberOfUploads;
+    uint32 datarate = GetDatarate();
+
+	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
-	//else if (numberOfUploads >= MAX_UP_CLIENTS_ALLOWED)
-	//	return false;
 
-    //if(numberOfUploads > 3) return false;
+	if( MaxSpeed > 20 || MaxSpeed == UNLIMITED)
+		upPerClient += datarate/43;
 
-    //if(thePrefs.GetMaxUpload() != UNLIMITED && GetDatarate() < (uint32)max(thePrefs.GetMaxUpload()*1024, 1024)-512) return true;
+	if( upPerClient > 7680 )
+		upPerClient = 7680;
 
 	//now the final check
-	if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
-        GetDatarate() < UPLOAD_CHECK_CLIENT_DR*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
+
+	if ( MaxSpeed == UNLIMITED )
+	{
+		if (curUploadSlots < (datarate/upPerClient) || curUploadSlots < 6)
 			return true;
-	//nope
+	}
+	else{
+		uint16 nMaxSlots;
+		if (MaxSpeed > 12)
+			nMaxSlots = (uint16)(((float)(MaxSpeed*1024)) / upPerClient);
+		else if (MaxSpeed > 7)
+			nMaxSlots = 4;
+		else if (MaxSpeed > 3)
+			nMaxSlots = 3;
+		else
+			nMaxSlots = 2;
+//		AddLogLine(true,"maxslots=%u, upPerClient=%u, datarateslot=%u|%u|%u",nMaxSlots,upPerClient,datarate/UPLOAD_CHECK_CLIENT_DR, datarate, UPLOAD_CHECK_CLIENT_DR);
+
+		if (MaxSpeed < 13)
+		{
+			if ( curUploadSlots < nMaxSlots )
+			{
+				return true;
+			}
+		}
+		else if( curUploadSlots < (datarate/UPLOAD_CHECK_CLIENT_DR) && curUploadSlots < nMaxSlots )
+		{
+			return true;
+		}
+	}
+
+
+    if(curUploadSlots < 6 && MaxSpeed != UNLIMITED && datarate < (uint32)max(MaxSpeed*1024, 1024)-512) {
+      return true;
+    }
+
+//    if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
+//        GetDatarate() < UPLOAD_CHECK_CLIENT_DR*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
+//			return true;
+	
+    //nope
 	return false;
 }
 
@@ -1474,10 +1525,10 @@ void CUploadQueue::UpdateDatarates() {
 			datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
 			m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
 			friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
-		} else {
-			datarate = 0;
-			m_nUpDatarateOverhead = 0;
-			friendDatarate = 0;
+		//} else {
+		//	datarate = 0;
+		//	m_nUpDatarateOverhead = 0;
+		//	friendDatarate = 0;
 		}
 		*/
 		if (avarage_tick_list.GetCount() > 0){
@@ -1526,10 +1577,10 @@ uint32 CUploadQueue::GetToNetworkDatarate() {
 uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
 	uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
 
-	//if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
-	//	minNumber = 2;
-	//} else
-	if(minNumber < 1 && thePrefs.GetMaxUpload() >= 2) {
+    //if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
+    //    minNumber = 2;
+    //} else
+    if(minNumber < 1 && GetDatarate() >= 2*1024 /*thePrefs.GetMaxUpload() >= 2*/) {
 		minNumber = 1;
 	}
 

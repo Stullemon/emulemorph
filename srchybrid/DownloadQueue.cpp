@@ -136,7 +136,7 @@ void CDownloadQueue::CompDownDatarateOverhead(){
 	if(m_AvarageDDRO_list.GetCount() > 10){
 		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp;
 		if (dwDuration)
-			m_nDownDatarateOverhead = 1000 * sumavgDDRO / dwDuration;
+			m_nDownDatarateOverhead = 1000 * (sumavgDDRO-m_AvarageDDRO_list.GetHead().datalen) / dwDuration;
 	}
 	else
 		m_nDownDatarateOverhead = 0;

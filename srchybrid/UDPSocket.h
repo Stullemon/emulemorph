@@ -46,7 +46,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // CUDPSocket
 
-class CUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
+class CUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	friend class CServerConnect;
 

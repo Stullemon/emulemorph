@@ -449,7 +449,7 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
 
         returnValue.success = true;
         returnValue.status = *(DWORD *) &(achRepData[4]);
-		returnValue.delay = (m_time.isPerformanceCounter() && (pingTime <= 20 || pingTime%10 == 0) ? usResTime : pingTime);
+		returnValue.delay = (m_time.isPerformanceCounter() && (pingTime <= 20 || pingTime%10 == 0) && (pingTime+10 > usResTime && usResTime+10 > pingTime )? usResTime : pingTime);
         returnValue.destinationAddress = stDestAddr.s_addr;
         returnValue.ttl = (returnValue.status != IP_SUCCESS)?ttl:(*(char *)&(achRepData[20]))&0x00FF;
 

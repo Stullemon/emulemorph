@@ -31,7 +31,7 @@ struct UDPPack
 };
 #pragma pack()
 
-class CClientUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
+class CClientUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 public:
 	CClientUDPSocket();
@@ -40,7 +40,6 @@ public:
 	bool	Create();
 	bool	SendPacket(Packet* packet, uint32 dwIP, uint16 nPort);
     SocketSentBytes  Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket); // ZZ:UploadBandWithThrottler (UDP)
-	bool	IsBusy() const { return m_bWouldBlock; }
 
 protected:
 	bool	ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, uint32 ip, uint16 port);
@@ -50,6 +49,7 @@ protected:
 
 private:
 	int		SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort);
+    bool	IsBusy() const { return m_bWouldBlock; }
 	bool	m_bWouldBlock;
 
 	CTypedPtrList<CPtrList, UDPPack*> controlpacket_queue;
