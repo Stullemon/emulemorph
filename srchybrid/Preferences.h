@@ -605,6 +605,7 @@ public:
 	static char	UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 	static bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	static uint8	m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
 	static bool	m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	static bool	m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	static int		m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
@@ -1345,6 +1346,7 @@ public:
 	//MORPH END - Added by SiRoB, ZZ Ratio
 	static	void	SetKnownMetDays(int m_iInKnownMetDays)	{m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
 	static	bool	IsPayBackFirst()					{return m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
+	static	uint8	GetPayBackFirstLimit()				{return m_iPayBackFirstLimit;}	//MOPRH - Added by SiRoB, Pay Back First Tweak
 	static	bool	OnlyDownloadCompleteFiles()			{return m_bOnlyDownloadCompleteFiles;} //EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	static	bool	SaveUploadQueueWaitTime()			{return m_bSaveUploadQueueWaitTime;}//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	static	CString	GetUpdateURLFakeList()				{return CString(UpdateURLFakeList);}		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating

@@ -393,7 +393,6 @@ bool CUpDownClient::GetPowerShared() const {
 	if (credits)
 		if (credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED)
 			return false;
-
 	bool bPowerShared;
 	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		bPowerShared = theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();

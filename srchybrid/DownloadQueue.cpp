@@ -874,7 +874,7 @@ void CDownloadQueue::Process(){
 
     uint32 friendDownspeed = downspeed;
 
-    if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {//MORPH - Changed by SiRoB, :( Added By Yun.SF3, Option for Ratio Systems
+    if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {
         // has this client downloaded more than it has uploaded this session? (friends excluded)
         // then limit its download speed from all clients but friends
         // limit will be removed as soon as upload has catched up to download
@@ -898,7 +898,7 @@ void CDownloadQueue::Process(){
         // has this client downloaded more than it has uploaded this session? (friends included)
         // then limit its download speed from all friends
         // limit will be removed as soon as upload has catched up to download
-        if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes) &&
+        if(theApp.stat_sessionReceivedBytes/3 > theApp.stat_sessionSentBytes &&
            datarate > 1500) {
 
             float secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-theApp.stat_sessionSentBytes)/(theApp.uploadqueue->GetDatarate()+1);

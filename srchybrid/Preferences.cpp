@@ -534,6 +534,7 @@ char	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Y
 char	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 bool	CPreferences::m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+uint8	CPreferences::m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
 bool	CPreferences::m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 bool	CPreferences::m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 int	CPreferences::m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
@@ -930,18 +931,9 @@ bool CPreferences::IsZZRatioDoesWork(){
 	
 	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
-	/*
-	if (theApp.stat_sessionSentBytesToFriend)
+	if (thePrefs.GetPayBackFirstLimit() < 10)
 		return true;
-	if (thePrefs.IsSUCEnabled() ||)
-		return theApp.uploadqueue->GetMaxVUR()<10240;
-	else if (thePrefs.IsDynUpEnabled())
-		return theApp.lastCommonRouteFinder->GetUpload()<10240;
-	*/
-	if (thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled())
-		return theApp.uploadqueue->GetDatarate()<10240;
-	else
-		return thePrefs.GetMaxUpload()<10;
+	return theApp.uploadqueue->GetDatarate()<10240;
 }
 //MORPH - Added by SiRoB, ZZ ratio
 
@@ -2392,6 +2384,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("MaxConnectionsSwitchBorder",maxconnectionsswitchborder,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
 
 	ini.WriteBool("IsPayBackFirst",m_bPayBackFirst,"eMule");//EastShare - added by AndCycle, Pay Back First
+	ini.WriteInt("PayBackFirstLimit",m_iPayBackFirstLimit,"eMule");//MORPH - Added by SiRoB, Pay Back First Tweak
 	ini.WriteBool("OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles,"eMule");//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime,"eMule");//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	ini.WriteBool("DateFileNameLog", m_bDateFileNameLog,"eMule");//Morph - added by AndCycle, Date File Name Log
@@ -2874,11 +2867,18 @@ void CPreferences::LoadPreferences(){
 	isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
 	m_bDateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
 	m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
+	m_iPayBackFirstLimit=ini.GetInt("PayBackFirstLimit",10);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool("OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = ini.GetBool("SaveUploadQueueWaitTime", true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	sprintf(UpdateURLFakeList,"%s",ini.GetString("UpdateURLFakeList","http://www.emuleitor.com/downloads/Morph/fakes.txt"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	sprintf(UpdateURLIPFilter,"%s",ini.GetString("UpdateURLIPFilter","http://www.emuleitor.com/downloads/Morph/ipfilter.txt"));//MORPH START added by Yun.SF3: Ipfilter.dat update
-
+	sprintf(UpdateURLFakeList,"%s",ini.GetString("UpdateURLFakeList",""));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	sprintf(UpdateURLIPFilter,"%s",ini.GetString("UpdateURLIPFilter",""));//MORPH START added by Yun.SF3: Ipfilter.dat update
+	if (StrStrI(UpdateURLFakeList,"http://www.emuleitor.com/downloads/Morph/fakes.txt") ||
+		StrStrI(UpdateURLFakeList,"http://membres.lycos.fr/ipfilter/fakes.txt"))
+		sprintf(UpdateURLFakeList,"%s","");
+	if (StrStrI(UpdateURLIPFilter,"http://www.emuleitor.com/downloads/Morph/ipfilter.txt") ||
+		StrStrI(UpdateURLIPFilter,"http://membres.lycos.fr/ipfilter/ipfilter.txt"))
+		sprintf(UpdateURLIPFilter,"%s","");
+	
 	// khaos::categorymod+ Load Preferences
 	m_bShowCatNames=ini.GetBool("ShowCatName",true);
 	m_bValidSrcsOnly=ini.GetBool("ValidSrcsOnly", false);

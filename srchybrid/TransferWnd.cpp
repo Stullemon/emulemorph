@@ -539,8 +539,8 @@ void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
 	Category_Struct* curCat = thePrefs.GetCategory(rightclickindex);
 	if (curCat) { //MORPH - HOTFIX by SiRoB, Possible crash when NULL is returned by GetCategory()
 		//MORPH START - Added by SiRoB, Fix to show the category prio 
-		UINT uCurPrioMenuItem = 0;
-		if (curCat->prio)
+		UINT uCurPrioMenuItem = -1;
+		if (curCat->prio == PR_AUTO)
 			uCurPrioMenuItem = MP_PRIOAUTO;
 		else if (curCat->prio == PR_HIGH)
 			uCurPrioMenuItem = MP_PRIOHIGH;
@@ -576,7 +576,7 @@ void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
 		//MORPH START - Changed by SiRoB, Use Radio button
 		//for (int i = 0; i < 3; i++)
 		//	m_mnuCatA4AF.CheckMenuItem(MP_CAT_A4AF + i, (curCat->iAdvA4AFMode == i) ? MF_CHECKED : MF_UNCHECKED);
-		m_mnuCatA4AF.CheckMenuRadioItem(MP_CAT_A4AF, MP_CAT_A4AF+2, curCat->iAdvA4AFMode,0);
+		m_mnuCatA4AF.CheckMenuRadioItem(MP_CAT_A4AF, MP_CAT_A4AF+2, MP_CAT_A4AF+curCat->iAdvA4AFMode,0);
 		//MORPH START - Changed by SiRoB, Use Radio button
 		m_mnuCategory.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 	}

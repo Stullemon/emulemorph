@@ -34,6 +34,7 @@ CPPgEastShare::CPPgEastShare()
 	m_bInitializedTreeOpts = false;
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
+	m_htiPayBackFirstLimit = NULL; //MORPH - Added by SiRoB, Pay Back First Tweak
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -116,7 +117,12 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		//EastShare End - CreditSystemSelection
 		m_htiIsPayBackFirst = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PAYBACKFIRST), m_htiCreditSystem, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
 		// EastShare END - Added by linekin, new creditsystem by [lovelace]
-
+		//MORPH START - Added by SiRoB, Pay Back First Tweak
+		m_htiPayBackFirstLimit = m_ctrlTreeOptions.InsertItem(GetResString(IDS_PAYBACKFIRSTLIMIT),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_htiIsPayBackFirst);
+		m_ctrlTreeOptions.AddEditBox(m_htiPayBackFirstLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_ctrlTreeOptions.Expand(m_htiIsPayBackFirst, TVE_EXPAND);
+		//MORPH END   - Added by SiRoB, Pay Back First Tweak
+		
 		//Morph - added by AndCycle, Equal Chance For Each File
 		m_htiECFEF = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_ECFEF), iImgECFEF, TVI_ROOT);
 		m_htiECFEF_DISABLE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DISABLED), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_DISABLE);
@@ -161,6 +167,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnablePreferShareAll, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIsPayBackFirst, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
+	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiPayBackFirstLimit, m_iPayBackFirstLimit); //MORPH - Added by SiRoB, Pay Back First Tweak
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiOnlyDownloadCompleteFiles, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiSaveUploadQueueWaitTime, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 }
@@ -171,6 +178,7 @@ BOOL CPPgEastShare::OnInitDialog()
 
 	m_bEnablePreferShareAll = thePrefs.shareall;//EastShare - PreferShareAll by AndCycle
 	m_bIsPayBackFirst = thePrefs.m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	m_iPayBackFirstLimit = thePrefs.m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = thePrefs.m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = thePrefs.m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -213,6 +221,7 @@ BOOL CPPgEastShare::OnApply()
 
 	thePrefs.shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
 	thePrefs.m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	thePrefs.m_iPayBackFirstLimit = m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
 	thePrefs.m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 	//EastShare Start - added by AndCycle, IP to Country
@@ -273,6 +282,7 @@ void CPPgEastShare::Localize(void)
 
 		if (m_htiEnablePreferShareAll) m_ctrlTreeOptions.SetItemText(m_htiEnablePreferShareAll, GetResString(IDS_PREFER_SHARE_ALL));//EastShare - PreferShareAll by AndCycle
 		if (m_htiIsPayBackFirst) m_ctrlTreeOptions.SetItemText(m_htiIsPayBackFirst, GetResString(IDS_PAYBACKFIRST));//EastShare - added by AndCycle, Pay Back First
+		if (m_htiPayBackFirstLimit) m_ctrlTreeOptions.SetEditLabel(m_htiPayBackFirstLimit, GetResString(IDS_PAYBACKFIRSTLIMIT));//MORPH - Added by SiRoB, Pay Back First Tweak
 		if (m_htiOnlyDownloadCompleteFiles) m_ctrlTreeOptions.SetItemText(m_htiOnlyDownloadCompleteFiles,GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES));//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 		if (m_htiSaveUploadQueueWaitTime) m_ctrlTreeOptions.SetItemText(m_htiSaveUploadQueueWaitTime,GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME));//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -292,6 +302,7 @@ void CPPgEastShare::OnDestroy()
 
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
+	m_htiPayBackFirstLimit = NULL; //MORPH - Added by SiRoB, Pay Back First Tweak
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 

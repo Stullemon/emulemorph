@@ -20,6 +20,9 @@ protected:
 
 	int m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	HTREEITEM m_htiIsPayBackFirst; //EastShare - added by AndCycle, Pay Back First
+	
+	int m_iPayBackFirstLimit; //MORPH - Added by SiRoB, Pay Back First Tweak
+	HTREEITEM m_htiPayBackFirstLimit; //MORPH - Added by SiRoB, Pay Back First Tweak
 
 	int m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	HTREEITEM m_htiOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)

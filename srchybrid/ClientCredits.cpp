@@ -1033,19 +1033,28 @@ void CClientCredits::ClearWaitStartTime(){
 //1. client credit create, 
 //2. when reach 10MB transfered, between first time remove check and second time remove check
 void CClientCredits::InitPayBackFirstStatus(){
-
+	//MORPH START - Changed by SiRoB, Pay Back First Tweak
+	/*
 	m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS;
-
+	*/
+	m_bPayBackFirst = false;
+	TestPayBackFirstStatus();
+	//MORPH END   - Changed by SiRoB, Pay Back First Tweak
 }
 
 //test will be triggered at client have up/down transfered
 void CClientCredits::TestPayBackFirstStatus(){
-
+	if(GetDownloadedTotal() < SESSIONMAXTRANS) return; //MORPH - Added by SiRoB, Pay Back First Tweak
+	//MORPH START - Changed by SiRoB, Pay Back First Tweak
+	/*
 	if(GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS){
+	*/
+	if(GetDownloadedTotal() >= GetUploadedTotal()+1024*1024*(uint64)thePrefs.GetPayBackFirstLimit()){
+	//MORPH END   - Changed by SiRoB, Pay Back First Tweak
 		m_bPayBackFirst = true;
 	}
 	else if(GetDownloadedTotal() < GetUploadedTotal()){
 		m_bPayBackFirst = false;
 	}
 }
-//EastShare End - added by AndCycle, Pay Back First
+//EastShare End - added by AndCycle, Pay Back First Tweak

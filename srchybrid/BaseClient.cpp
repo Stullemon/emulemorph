@@ -59,7 +59,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
 //	members of CUpDownClient
 //	which are used by down and uploading functions 
 

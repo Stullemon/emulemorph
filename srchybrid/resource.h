@@ -2320,6 +2320,7 @@
 #define ID_MASSRENAMEOK                 4885
 #define IDS_INFINITEQUEUE               4886
 #define ID_MASSRENAMECANCEL             4886
+#define IDS_PAYBACKFIRSTLIMIT           4887
 #define IDC_FILENAMELEFT                4888
 #define IDC_FILENAMERIGHT               4889
 #define IDC_NEWFILENAMESEDITRIGHT       4890
