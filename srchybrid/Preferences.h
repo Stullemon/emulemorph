@@ -944,8 +944,8 @@ public:
 		static	uint16	GetPort();
 		static	uint16	GetUDPPort();
 		*/
-		static	uint16	GetPort(bool newPort = false);
-		static	uint16	GetUDPPort(bool newPort = false);
+		static	uint16	GetPort(bool newPort = false, bool original = false, bool reset = false);
+		static	uint16	GetUDPPort(bool newPort = false, bool original = false, bool reset = false);
 	//MORPH END   - Changed by SiRoB, [MoNKi: -UPnPNAT Support-] [MoNKi: -Random Ports-]
 
 	static	uint16	GetServerUDPPort(){return nServerUDPPort;}

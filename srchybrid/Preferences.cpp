@@ -4535,14 +4535,25 @@ void CPreferences::SetInvisibleMode(bool on, UINT keymodifier, char key)
 /*
 uint16	CPreferences::GetPort(){
 */
-uint16	CPreferences::GetPort(bool newPort){
+uint16	CPreferences::GetPort(bool newPort, bool original, bool reset){
+// End -Random Ports-
+
+	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
+	static portNumber = 0;
+	
+	if(original)
+		return port;
+
+	if(reset){
+		portNumber = 0;
+		m_iUPnPTCPExternal = 0; //Only for UPnP
+	}
 // End -Random Ports-
 
 	if(m_iUPnPTCPExternal != 0)
 		return m_iUPnPTCPExternal;
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
-	static portNumber = 0;
 	if (portNumber == 0 || newPort){
 		if(GetUseRandomPorts())
 			do{
@@ -4559,7 +4570,19 @@ uint16	CPreferences::GetPort(bool newPort){
 /*
 uint16	CPreferences::GetUDPPort(){
 */
-uint16	CPreferences::GetUDPPort(bool newPort){
+uint16	CPreferences::GetUDPPort(bool newPort, bool original, bool reset){
+// End -Random Ports-
+
+	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
+	static portNumber = 0;
+	
+	if(original)
+		return udpport;
+
+	if(reset){
+		portNumber = 0;
+		m_iUPnPUDPExternal = 0; //Only for UPnP
+	}
 // End -Random Ports-
 
 	if(udpport == 0)
@@ -4569,7 +4592,6 @@ uint16	CPreferences::GetUDPPort(bool newPort){
 		return m_iUPnPUDPExternal;
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
-	static portNumber = 0;
 	if (portNumber == 0 || newPort){
 		if(GetUseRandomPorts())
 			do{
