@@ -1,4 +1,4 @@
-// eMule 0.44d MorphXT 5.11 PL by [OSIOL.NET]_lcf_[PL]
+// eMule 0.44d MorphXT 5.12 PL by [OSIOL.NET]_lcf_[PL]
 // Microsoft Visual C++ generated resource script.
 //
 #include "pl_PL.h"
@@ -2500,6 +2500,7 @@ BEGIN
     IDS_WC_TEST             "Testuj ustawienia webcache. Moøe zajπÊ do 30 sekund"
     IDS_WC_HIDE_ADV         "Ukryj ustawienia zaawansowane "
     IDS_WC_SUBMIT_WEB       "Wyúlij informacje webcache przez formularz www"
+    IDS_WC_SOURCES          "èrÛd≥a webcache"
 END
 
 STRINGTABLE 
@@ -2512,6 +2513,22 @@ STRINGTABLE
 BEGIN
     IDS_IMPORTPARTS         "Importuj czÍúci do pliku..."
     IDS_INITIATEREHASH      "Zacznij rehash"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_GRAPHOPTIONS        "Opcje wykresÛw"
+    IDS_CRC_CALCULATED      "obliczono CRC32"
+    IDS_CRC_CHECKOK         "CRC32 poprawne"
+    IDS_CRC_FORCEADDING     "Dodaj tag CRC32 do nazwy pliku nawet jeúli juø zawiera poprawny CRC2"
+    IDS_CRC_FORCEUPPERCASE  "Jeúli nazwa pliku zawiera juø poprawny CRC32, zamieÒ jπ na ma≥e litery."
+    IDS_CRC_DONTADDCRC      "Dodawaj przyrostek statyczny, a nie CRC32."
+    IDS_CRC_PREFIX          "Przyrostek do dodania na koÒcu nazwy pliku przed CRC32:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CRC_SUFFIX          "Przyrostek do dodania na koÒcy nazwy pliku po CRC32:"
 END
 
 
@@ -2530,4 +2547,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-// eMule 0.44d MorphXT 5.11 PL by [OSIOL.NET]_lcf_[PL]
+// eMule 0.44d MorphXT 5.12 PL by [OSIOL.NET]_lcf_[PL]
