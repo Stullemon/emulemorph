@@ -422,7 +422,9 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 							//EastShare START - Added by TAHO, Pay Back First
 							if(client->IsMoreUpThanDown()) {
-								Sbuffer.Format("%s %s", "PBF", Sbuffer);
+								CString tempStr;
+								tempStr.Format("%s %s", "PBF", Sbuffer);
+								Sbuffer = tempStr;
 							}
 							//EastShare END - Added by TAHO, Pay Back First
 
