@@ -421,11 +421,13 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 						(
 							leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
 							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
-							rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
-							bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
 							(
-								rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
-							)
+								rightGetQueueFile == true ||	//Morph - added by AndCycle, Equal Chance For Each File
+								bothGetQueueFile == true &&		//Morph - added by AndCycle, Equal Chance For Each File
+								(
+									rightScore > leftScore  // same prio file, but rightClient has better score, so rightClient is better
+								)
+							}
 						) ||  
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
 						(
