@@ -2113,7 +2113,7 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	// SLUGFILLER: hideOS
 	CArray<uint32, uint32> partspread;
 	UINT parts;
-	uint8 hideOS = 0;//HideOSInWork();
+	uint8 hideOS = HideOSInWork();
 	if (hideOS && client) {
 		parts = CalcPartSpread(partspread, client);
 	} else {	// simpler to set as 0 than to create another loop...
@@ -2185,7 +2185,7 @@ void CPartFile::WriteCompleteSourcesCount(CSafeMemFile* file) const
 	file->WriteUInt16(m_nCompleteSourcesCount);
 }
 
-//MORPH START - Changed by SiRoB, Source Counts Are Cached [Khaos]
+//MORPH START - Changed by SiRoB, Source Counts Are Cached derivated from Khaos
 /*
 int CPartFile::GetValidSourcesCount() const
 {
@@ -2221,7 +2221,7 @@ uint16 CPartFile::GetAvailableSrcCount() const
 {
 	return m_anStates[DS_ONQUEUE]+m_anStates[DS_DOWNLOADING];
 }
-//MORPH END - Changed by SiRoB, Source Counts Are Cached [Khaos]
+//MORPH END - Changed by SiRoB, Source Counts Are Cached derivated from Khaos
 
 // SLUGFILLER: checkDiskspace
 uint32 CPartFile::GetNeededSpace() const
@@ -2318,7 +2318,13 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	else
 	{
 		// -khaos--+++> Moved this here, otherwise we were setting our permanent variables to 0 every tenth of a second...
+		
+		//MORPH START - Changed by SiRoB, Source Counts Are Cached derivated from Khaos
+		/*
 		memset(m_anStates,0,sizeof(m_anStates));
+		*/
+		memset(m_anStatesTemp,0,sizeof(m_anStatesTemp));
+		//MORPH END   - Added by SiRoB, Source Counts Are Cached derivated from Khaos
 		memset(src_stats,0,sizeof(src_stats));
 		memset(net_stats,0,sizeof(net_stats));
 		uint16 nCountForState;
@@ -2351,8 +2357,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			if (cur_src->GetKadPort())
 				net_stats[1]++;
 
-			ASSERT( nCountForState < sizeof(m_anStates)/sizeof(m_anStates[0]) );
-			m_anStates[nCountForState]++;
+			ASSERT( nCountForState < sizeof(m_anStatesTemp)/sizeof(m_anStatesTemp[0]) );
+			m_anStatesTemp[nCountForState]++;
 			
 			switch (cur_src->GetDownloadState())
 			{
@@ -2484,6 +2490,9 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				}
 			}
 		}
+		//MORPH START - Changed by SiRoB, Cached stat
+		memcpy(m_anStates,m_anStatesTemp,sizeof(m_anStates));
+		//MORPH END   - Changed by SiRoB, Cached stat
 
 		if( thePrefs.GetMaxSourcePerFileUDP() > GetSourceCount()){
 			if (theApp.downloadqueue->DoKademliaFileRequest() && (Kademlia::CKademlia::getTotalFile() < KADEMLIATOTALFILE) && (!lastsearchtimeKad || (dwCurTick - lastsearchtimeKad) > KADEMLIAREASKTIME) &&  Kademlia::CKademlia::isConnected() && theApp.IsConnected() && !stopped){ //Once we can handle lowID users in Kad, we remove the second IsConnected
@@ -2782,7 +2791,7 @@ void CPartFile::UpdatePartsInfo()
 	if (flag)
 		count.SetSize(0, srclist.GetSize());
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	bool bCompleteSourcesCountInfoReceived=false;
+	uint16 iCompleteSourcesCountInfoReceived = 0;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	for (POSITION pos = srclist.GetHeadPosition(); pos != 0; )
 	{
@@ -2799,8 +2808,8 @@ void CPartFile::UpdatePartsInfo()
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			}
 			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-			if (cur_src->GetUpCompleteSourcesCount()>0 && 10*m_anStates[DS_TOOMANYCONNS]<GetValidSourcesCount())
-				bCompleteSourcesCountInfoReceived = true;
+			if (cur_src->GetUpCompleteSourcesCount()>0)
+				++iCompleteSourcesCountInfoReceived;
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
 	}
@@ -2890,7 +2899,9 @@ void CPartFile::UpdatePartsInfo()
 		if(m_nVirtualCompleteSourcesCount > m_SrcpartFrequency[i])
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, bCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0)),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	if(iCompleteSourcesCountInfoReceived)
+		iCompleteSourcesCountInfoReceived /= 2+GetNotCurrentSourcesCount();
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0)),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	UpdateDisplayedInfo();
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
@@ -3715,6 +3726,10 @@ void CPartFile::StopFile(bool bCancel, bool resort)
 	insufficient = false;
 	datarate = 0;
 	memset(m_anStates,0,sizeof(m_anStates));
+	//MORPH START - Added by SiRoB, -Fix-
+	memset(net_stats,0,sizeof(net_stats));
+	memset(net_stats,0,sizeof(net_stats));
+	//MORPH END   - Added by SiRoB, -Fix-
 	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 	if ((status!=PS_COMPLETE)&&(status!=PS_COMPLETING)) lastseencomplete = NULL;//shadow#(onlydownloadcompletefiles)
 	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)

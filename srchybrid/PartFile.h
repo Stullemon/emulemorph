@@ -201,9 +201,9 @@ public:
 	float	GetPercentCompleted() const { return percentcompleted; }
 	uint16  GetNotCurrentSourcesCount() const;
 	int		GetValidSourcesCount() const;
-	//MORPH START - Added by SiRoB, Source Counts Are Cached [Khaos]
+	//MORPH START - Added by SiRoB, Source Counts Are Cached derivated from Khaos
 	uint16	GetAvailableSrcCount() const;
-	//MORPH END   - Added by SiRoB, Source Counts Are Cached [Khaos]
+	//MORPH END   - Added by SiRoB, Source Counts Are Cached derivated from Khaos
 	bool	IsArchive(bool onlyPreviewable = false) const; // Barry - Also want to preview archives
     bool    IsPreviewableFileType() const;
 	sint32	getTimeRemaining() const;
@@ -392,6 +392,9 @@ private:
 	uint32	m_iLastPausePurge;
 	uint16	count;
 	uint16	m_anStates[STATES_COUNT];
+	//MORPH START - Added by SiRoB, Cached stat
+	uint16	m_anStatesTemp[STATES_COUNT];
+	//MORPH END   - Added by SiRoB, Cached stat
 	uint32  completedsize;
 	uint64	m_iLostDueToCorruption;
 	uint64	m_iGainDueToCompression;
