@@ -1429,6 +1429,7 @@
 #define IDS_FEATURES                    1469
 #define IDS_IRC_NEWNICK                 1470
 #define IDS_IRC_NEWNICKDESC             1471
+#define IDS_LD_ADDPHPBB                 1472
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -2576,6 +2577,7 @@
 #define IDC_GROUP_DYNIP                 5035
 #define IDC_NEWCHARACTER                5036
 #define IDC_CHECK1                      5036
+#define IDC_LD_PHPBBCHE                 5036
 #define IDC_FEEDCHANGE                  5037
 #define IDD_SIMPLECLEANUP               5038
 #define IDC_INSERTTEXTCOLUMN            5039

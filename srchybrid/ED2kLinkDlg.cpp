@@ -40,6 +40,9 @@ BEGIN_MESSAGE_MAP(CED2kLinkDlg, CResizablePage)
 	ON_BN_CLICKED(IDC_LD_HTMLCHE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LD_HOSTNAMECHE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LD_HASHSETCHE, OnSettingsChange)
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	ON_BN_CLICKED(IDC_LD_PHPBBCHE, OnSettingsChange)
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 END_MESSAGE_MAP() 
 
 CED2kLinkDlg::CED2kLinkDlg() 
@@ -78,6 +81,9 @@ BOOL CED2kLinkDlg::OnInitDialog()
 	AddAnchor(IDC_LD_HASHSETCHE,BOTTOM_LEFT,BOTTOM_LEFT);
 	//AddAnchor(IDC_LD_KADLOWIDCHE,BOTTOM_LEFT,BOTTOM_LEFT);
 	AddAnchor(IDC_LD_HOSTNAMECHE,BOTTOM_LEFT,BOTTOM_LEFT);
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	AddAnchor(IDC_LD_PHPBBCHE,BOTTOM_LEFT,BOTTOM_LEFT);
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 
 	// enabled/disable checkbox depending on situation
 	if (theApp.IsConnected() && !theApp.IsFirewalled())
@@ -139,6 +145,9 @@ void CED2kLinkDlg::Localize(void)
 	GetDlgItem(IDC_LD_LINKGROUP)->SetWindowText(GetResString(IDS_LD_ED2KLINK)); 
 	GetDlgItem(IDC_LD_CLIPBOARDBUT)->SetWindowText(GetResString(IDS_LD_COPYCLIPBOARD));
 	GetDlgItem(IDC_LD_HOSTNAMECHE)->SetWindowText(GetResString(IDS_LD_HOSTNAME)); 
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	GetDlgItem(IDC_LD_PHPBBCHE)->SetWindowText(GetResString(IDS_LD_ADDPHPBB));
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 }
 
 void CED2kLinkDlg::UpdateLink(){
@@ -150,6 +159,9 @@ void CED2kLinkDlg::UpdateLink(){
 	const bool bHostname = ((CButton*)GetDlgItem(IDC_LD_HOSTNAMECHE))->GetCheck() == BST_CHECKED && theApp.IsConnected() && !theApp.IsFirewalled()
 		&& !CString(thePrefs.GetYourHostname()).IsEmpty() && CString(thePrefs.GetYourHostname()).Find(_T(".")) != -1;
 	const bool bEMHash = ((CButton*)GetDlgItem(IDC_LD_EMULEHASHCHE))->GetCheck() == BST_CHECKED;
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	const bool bPHPBB = ((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->GetCheck() == BST_CHECKED && !bHTML;
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 
 	for (int i = 0; i != m_paFiles->GetSize(); i++){
 		if (!strLinks.IsEmpty())
@@ -157,7 +169,22 @@ void CED2kLinkDlg::UpdateLink(){
 
 		if (bHTML)
 			strLinks += _T("<a href=\"");
-		
+
+		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+		if (bPHPBB) {
+			strLinks += _T("[url=");
+			CString tempED2kLink = CreateED2kLink((*m_paFiles)[i], false);
+
+			//for compatible with phpBB, phpBB using "[" "]" to identify tag
+			tempED2kLink.Replace(_T("["), _T("("));
+			tempED2kLink.Replace(_T("]"), _T(")"));
+
+			strLinks += tempED2kLink;
+			delete tempED2kLink;
+		}
+		else //  *!!! beware of this ELSE !!!*
+		//EastShare End - added by AndCycle, phpBB URL-Tags style link
+
 		strLinks += CreateED2kLink((*m_paFiles)[i], false);
 		
 		if (bHashset && (*m_paFiles)[i]->GetHashCount() > 0 && (*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartHashCount()){
@@ -191,6 +218,19 @@ void CED2kLinkDlg::UpdateLink(){
 
 		if (bHTML)
 			strLinks += _T("\">") + StripInvalidFilenameChars((*m_paFiles)[i]->GetFileName(), true) + _T("</a>");
+
+		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+		if (bPHPBB) {
+			CString tempFileName = StripInvalidFilenameChars((*m_paFiles)[i]->GetFileName(), true);
+
+			//like before, just show up #for compatible with phpBB, phpBB using "[" "]" to identify tag#
+			tempFileName.Replace(_T("["), _T("("));
+			tempFileName.Replace(_T("]"), _T(")"));
+
+			strLinks += _T("]") + tempFileName + _T("[/url]");
+			delete tempFileName;
+		}
+		//EastShare End - added by AndCycle, phpBB URL-Tags style link
 	}
 	m_ctrlLinkEdit.SetWindowText(strLinks);
 
@@ -204,5 +244,15 @@ void CED2kLinkDlg::OnBnClickedClipboard()
 
 void CED2kLinkDlg::OnSettingsChange()
 {
+
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	//hide up if using html checked
+	if (((CButton*)GetDlgItem(IDC_LD_HTMLCHE))->GetCheck() == BST_CHECKED) {
+		((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->SetCheck(BST_UNCHECKED);
+		GetDlgItem(IDC_LD_PHPBBCHE)->EnableWindow(FALSE);
+	}
+	else 
+		GetDlgItem(IDC_LD_PHPBBCHE)->EnableWindow(TRUE);
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 	UpdateLink();
 }
