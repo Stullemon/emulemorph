@@ -780,6 +780,75 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 					) && theApp.clientcredits->CryptoAvailable()){
 					result ++;
 				}
+
+				if(result == 0){
+					result = 
+						item1->MoreUpThanDown() == true && item2->MoreUpThanDown() == false ? 1 :
+						item1->MoreUpThanDown() == false && item2->MoreUpThanDown() == true ? -1 :
+						item1->GetPowerShared() == true && item2->GetPowerShared() == false ? 1 :
+						item1->GetPowerShared() == false && item2->GetPowerShared() == true ? -1 :
+						item1->GetPowerShared() == true && item2->GetPowerShared() == true ? 
+							((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) :
+						0;
+				}
+
+				if(result == 0){
+					result =
+						item1->needFullChunkTransfer() == true && item2->needFullChunkTransfer() == false ? 1 :
+						item1->needFullChunkTransfer() == false && item2->needFullChunkTransfer() == true ? -1 :
+						0;
+				}
+
+				if(result == 0 && file1 != file2){
+					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+						case ECFEF_ACCEPTED:
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = file2->statistic.GetAllTimeAccepts() - file1->statistic.GetAllTimeAccepts();
+							}
+							else{
+								result = file2->statistic.GetAccepts() - file1->statistic.GetAccepts();
+							}
+							break;
+						case ECFEF_ACCEPTED_COMPLETE:
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = //result is INT
+									(float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() > (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount() ? 1 :
+									(float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() < (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount() ? -1 : 0;
+							}
+							else{
+								result = //result is INT
+									(float)file2->statistic.GetAccepts()/file2->GetPartCount() > (float)file1->statistic.GetAccepts()/file1->GetPartCount() ? 1:
+									(float)file2->statistic.GetAccepts()/file2->GetPartCount() < (float)file1->statistic.GetAccepts()/file1->GetPartCount() ? -1 : 0;
+							}
+							break;
+						case ECFEF_TRANSFERRED:
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = file2->statistic.GetAllTimeTransferred() - file1->statistic.GetAllTimeTransferred();
+							}
+							else{
+								result = file2->statistic.GetTransferred() - file1->statistic.GetTransferred();
+							}
+							break;
+						case ECFEF_TRANSFERRED_COMPLETE:
+							if(theApp.glob_prefs->IsECFEFallTime()){
+								result = //result is INT
+									(double)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() > (double)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize() ? 1 :
+									(double)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() < (double)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize() ? -1 : 0;
+							}
+							else{
+								result = //result is INT
+									(double)file2->statistic.GetTransferred()/file2->GetFileSize() > (double)file1->statistic.GetTransferred()/file1->GetFileSize() ? 1 :
+									(double)file2->statistic.GetTransferred()/file2->GetFileSize() < (double)file1->statistic.GetTransferred()/file1->GetFileSize() ? -1 : 0;
+							}
+							break;
+					}
+				}
+				if(result == 0){
+					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
+				}
+
+
+				/*
 				//MORPH START - Added by SiRoB, Pay Back First
 				if(result == 0){
 					if(item1->MoreUpThanDown())	result ++;
@@ -846,6 +915,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if(result == 0){
 					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 				}
+				*/
 			}
 			else if( file1 == NULL )
 				result = 1;
