@@ -2047,7 +2047,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_TRANSFERED "Передано: %s (%s)"
+    IDS_FEEDBACK_Transferred "Передано: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Запрошено: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Принятых запросов: %i (%i)"
     IDS_FEEDBACK_FROM       "Отчет от %s на [%s]"
@@ -2550,15 +2550,11 @@ BEGIN
     IDS_IPFILTER_SAVERR     "Ошибка при сохранении IP-фильтра в файл ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Недоступно"
     IDS_IPFILTER_DLVERSION  "Принимаю файл версии IP-фильтров"
-    IDS_IPFILTER_DLFILE     "Принимаю IP-фильтры"
     IDS_LOG_ERRDWN          "Ошибка при приеме %s"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_IPFILTER_DLFAIL "Ошибка при приеме IP-фильтров"
-    IDS_LOG_IPFILTER_ERR1   "Не удалось извлечь файл IP-фильтров из принятого архива ""%s""."
-    IDS_LOG_IPFILTER_ERR2   "Принятый архив IP-фильтров ""%s"" имеет неожиданное содержание."
     IDS_DOWNFAKECHECKVER    "Принимаю файл-версию фэйков"
     IDS_DOWNFAKECHECKFILE   "Принимаю список фэйков"
     IDS_FC_LOADED           "%i Фэйки загружены"
