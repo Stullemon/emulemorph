@@ -2775,7 +2775,7 @@ bool CKnownFile::GetPowerShared() const
 //MORPH START - Added by SiRoB, Avoid misusing of HideOS
 uint8	CKnownFile::HideOSInWork() const
 {
-	if (m_bHideOSAuthorized)
+	if (m_bHideOSAuthorized==true)
 		return  (m_iHideOS>=0)?m_iHideOS:thePrefs.GetHideOvershares();
 	else
 		return 0;

@@ -667,14 +667,14 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer = _T("[") + GetResString((hideOSInWork>0)?IDS_POWERSHARE_ON_LABEL:IDS_POWERSHARE_OFF_LABEL) + _T("] ");
 						if(file->GetHideOS()<0)
 							buffer.Append(_T(" ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". "));
-						if (hideOSInWork){
+						if (hideOSInWork>0){
 							buffer.AppendFormat(_T("%i"), hideOSInWork);
 							if (file->GetSelectiveChunk()>=0)
 								if (file->GetSelectiveChunk())
 									buffer.AppendFormat(_T(" + %s") ,GetResString(IDS_SELECTIVESHARE));
-							buffer.Append(_T(" ("));
 						}else
 							buffer.Append(GetResString(IDS_DISABLED));
+						buffer.Append(_T(" ("));
 						if (file->GetPowerShareAuthorized())
 							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
 						else
