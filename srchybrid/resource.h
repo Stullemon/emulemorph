@@ -2113,7 +2113,6 @@
 #define IDS_WC_BLOCK                    3219
 #define IDS_WC_TIMEOUT                  3220
 #define IDS_WC_LOCAL                    3221
-#define IDS_WC_SUBMIT                   3222
 #define IDS_WC_SUBMIT_EMAIL             3222
 #define IDS_WC_LINK                     3223
 #define IDS_WC_PERSISTENT               3224
@@ -2138,7 +2137,6 @@
 #define IDS_SWITCHDYNUP                 3469
 #define IDS_AUTODYNUPSWITCHING          3470
 #define IDS_MAXCONNECTIONSSWITCHBORDER  3471
-#define IDS_AUTO_CLEAR_COMPLETE         3525
 #define IDS_ONLY_DOWNLOAD_COMPLETE_FILES 3526
 #define IDS_DL_FORCE                    3527
 #define IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 3528
@@ -2151,7 +2149,6 @@
 #define IDS_DOWNLOAD_IN_RED             3537
 #define IDS_UPSLOTNUMBER                3538
 #define IDS_STATS_LEECHERCLIENTS        3539
-#define IDS_STATS_SECUREDCLIENTS        3540
 #define IDS_WARNINGMORPH                3542
 #define IDI_EDONKEY                     3543
 #define IDS_DM                          3543
@@ -2189,9 +2186,7 @@
 #define IDS_UM                          3587
 #define IDS_ANTI_LEECHER                3588
 #define IDI_RATING_NO                   3589
-#define IDS_BOOST_LESS                  3590
 #define IDI_RATING_EXCELLENT            3590
-#define IDS_BOOST_FRIENDS               3591
 #define IDI_RATING_FAIR                 3591
 #define IDI_RATING_GOOD                 3592
 #define IDI_RATING_POOR                 3593
@@ -2227,10 +2222,8 @@
 #define IDD_PPG_EASTSHARE               3618
 #define IDS_CAT_MERGE                   3619
 #define IDD_ADDCRC32TAG                 3619
-#define IDS_CAT_SETFILEGROUP            3620
 #define IDD_MASSRENAME                  3620
 #define IDS_CAT_GROUP                   3621
-#define IDS_CAT_SETFILEGROUPMSG         3622
 #define IDC_AUTOCAT                     3622
 #define IDS_CAT_RESUMEFILEONLYINSAMECAT 3622
 #define IDS_A4AF_FORCEALL               3623
@@ -2259,7 +2252,6 @@
 #define IDS_BOTH                        3648
 #define IDS_REALTIME                    3649
 #define IDS_ANTI_CREDITHACK             3650
-#define IDS_CHUNKAVAIBILITY_OPTION      3651
 #define IDC_STATIC_INS                  3663
 #define IDC_STATIC_MAX                  3664
 #define IDC_STATIC_MIN                  3665
@@ -2291,9 +2283,7 @@
 #define IDC_RS_MIN                      3685
 #define IDS_CAT_COLORDER                3686
 #define IDC_RS_MAX                      3686
-#define IDS_CAT_MSGBOXTXT               3687
 #define IDC_STATIC_SCOUNT               3687
-#define IDS_CAT_MSGBOXCAP               3688
 #define IDC_SC_MIN                      3688
 #define IDS_CAT_MNUAUTOINC              3689
 #define IDC_SC_MAX                      3689
@@ -2313,7 +2303,6 @@
 #define IDS_MINUPLOAD_SHORT             3698
 #define IDS_SUC                         3699
 #define IDS_SUC_ENABLED                 3700
-#define IDS_SUC_MINUPLOAD               3701
 #define IDS_MINUPLOAD                   3701
 #define IDS_SUC_HIGH                    3702
 #define IDS_SUC_LOW                     3703
@@ -2324,17 +2313,10 @@
 #define IDS_A4AF_SHOWDEBUG              3709
 #define IDS_HIGHPROCESS                 3712
 #define IDC_TEXTNUM                     3713
-#define IDC_MANUAL_CHECKDISKSPACE       3714
-#define IDS_MANUAL_CHECKDISKSPACE       3715
 #define IDC_CUSTOM1                     3715
 #define IDS_RECONNECTONLOWID            3751
-#define IDS_ACTIVATIONLIMIT_SLS         3752
-#define IDS_SOURCESTOSAVE_SLS           3753
-#define IDS_SLS                         3754
-#define IDS_ENABLESLS                   3755
 #define IDS_POWERSHARE_DENIED_LABEL     3813
 #define IDS_POWERSHARE_ADVISED_LABEL    3814
-#define IDS_POWERSHARE_AUTONEWDOWNLOADFILE 3815
 #define IDS_POWERSHARE_AUTHORIZED_LABEL 3816
 #define IDS_POWERSHARE_ACTIVATED_LABEL  3817
 #define IDS_POWERSHARE_DISABLED_LABEL   3818
@@ -2351,7 +2333,7 @@
 #define IDS_SCHED_BACKUP_LOG            3840
 #define IDS_SCHED_UPDATE_IPCONFIG_LOG   3841
 #define IDS_SCHED_UPDATE_FAKES_LOG      3842
-#define IDS_SCHED_UPDATE_WARNING		3850
+#define IDS_SCHED_UPDATE_WARNING        3850
 // [end] Mighty Knife
 
 #define IDS_BACKUP                      4001
@@ -2375,14 +2357,12 @@
 #define IDS_HTTP_IPFILTERCAPTION        4646
 #define IDS_IPFILTER_PERCENTAGE         4649
 #define IDS_REMTIMEAVRREAL              4650
-#define IDS_ASK_SRV_SRC                 4651
 #define IDS_UPL_DL                      4652
 #define IDS_LISTREQUESTED               4653
 #define IDS_LISTREQDL                   4654
 #define IDS_LISTREQUL                   4655
 #define IDS_LISTREQNODL                 4656
 #define IDS_LISTREQNOUL                 4657
-#define IDS_REMTIMEPREFS                4658
 #define IDS_CORRUPTDATASENT             4659
 #define IDS_ULENDCANTRANS               4660
 #define IDS_ULENDENDTRANS               4661
@@ -2390,26 +2370,11 @@
 #define IDS_LEECHERPUTBACK              4663
 #define IDS_TRIEDDLOTHERFILE            4664
 #define IDS_CLIENTPUTBACK               4665
-#define IDS_ABLSRCREQDELAY              4666
-#define IDS_ABLSRCREQIN                 4667
-#define IDS_ABLLUGCONNECT               4668
-#define IDS_ABLNONLUGCONNECT            4669
-#define IDS_ABLSENDSHAREDFILES          4670
-#define IDS_ABLINFOS                    4671
-#define IDS_ABLCONNECACCEPTED           4672
-#define IDS_ABLCONNECCOST               4673
 #define IDS_SUSPECTUSEOWNHASH           4674
 #define IDS_SUSPECTHAsHCHANGE           4675
 #define IDS_FINPARTNUMOFFILE            4676
 #define IDS_COMPLETESOURCES             4677
-#define IDS_FEEDBACK_UPLOADED_FULL      4772
-#define IDS_FEEDBACK_UPLOADED_SESSION   4773
-#define IDS_FEEDBACK_REQUEST_SESSION    4774
-#define IDS_FEEDBACK_REQUEST_FULL       4775
-#define IDS_FEEDBACK_ACCEPT_SESSION     4776
-#define IDS_FEEDBACK_UPLOADED           4776
 #define IDS_FEEDBACK_TRANSFERED         4776
-#define IDS_FEEDBACK_ACCEPT_FULL        4777
 #define IDS_FEEDBACK_REQUESTED          4777
 #define IDS_FEEDBACK_ACCEPTED           4778
 #define IDS_FEEDBACK_FROM               4779
@@ -2499,7 +2464,6 @@
 #define IDC_UPDATE_URL_FAKELIST         4865
 #define IDS_SHAREONLYTHENEED            4865
 #define IDC_UPDATE_URL_IPFILTER         4866
-#define IDS_SHAREONLYTHENEEDDEFAULT     4866
 #define IDC_UPDATEFAKES                 4867
 #define IDS_SFM                         4867
 #define IDC_UPDATEIPFURL                4868
@@ -2601,7 +2565,6 @@
 #define IDS_NONEWMVERVERSION            5113
 #define IDS_NEWMVERSIONAVL              5114
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
-#define IDS_CHAT_COUNTRY                5115
 #define IDS_NEWMVERSIONAVLPOPUP         5115
 #define IDC_FRIENDS_COUNTRY             5116
 #define IDS_CTRLKEY                     5117
@@ -2666,7 +2629,6 @@
 #define IDC_QUEUE                       5506
 #define IDC_QUEUEBORDER                 5507
 #define IDS_DONTREMOVESPARETRICKLESLOT  5508
-#define IDS_MAXUPLOADFRIEND             5509
 #define IDS_MINDATARATEFRIEND           5509
 #define IDS_MINDATARATEPOWERSHARE       5510
 #define IDS_MAXCLIENTDATARATEFRIEND     5511
@@ -2678,7 +2640,6 @@
 #define IDC_URL_FOR_UPDATING_IP2COUNTRY 5602
 #define IDS_URL_FOR_UPDATING_IP2COUNTRY 5602
 #define IDC_MORPH3_OPTS                 5700
-#define IDS_IMPORT_PARTS                5700
 #define IDS_IMPORTPARTS                 5700
 #define IDS_INITIATEREHASH              5701
 #define IDD_PPG_EMULESPANA1             6000
@@ -2850,7 +2811,6 @@
 #define IDS_LAST_ASKED                  7081
 #define IDS_DOWNL_TIME                  7082
 #define IDS_KNOWN_SINCE                 7083
-#define IDS_PWEBCACHE                   10646
 #define IDS_WrongPortforWebcache        11387
 #define IDD_PPG_WEBCACHESETTINGS        12787
 #define IDC_Webcache                    12847
@@ -2919,7 +2879,6 @@
 #define IDC_BACKUP_AUTO                 50503
 #define IDC_BACKUP_NOTE                 50505
 #define IDC_BACKUP_MESSAGE              50507
-#define IDC_MORPH2_SERVER               50522
 #define IDC_MORPH2_FILE                 50523
 #define IDC_MORPH2_SECURITY             50524
 #define IDC_MORPH2_COUNTRY              50525
@@ -2931,17 +2890,10 @@
 #define IDS_BACKUP_BACKUPNOW            51506
 #define IDS_BACKUP_MESSAGE              51507
 #define IDS_BACKUP_AUTOBACKUP2          51508
-#define IDS_MORPH2_SERVER               51522
-#define IDS_MORPH2_FILE                 51523
-#define IDS_MORPH2_SECURITY             51524
 #define IDS_MORPH_RFHA                  51541
 #define IDS_MORPH_RAIF                  51542
 #define IDS_MORPH_KSSERV                51543
 #define IDS_WEBSERVER_LINK              51561
-#define IDS_CCRC32                      51562
-#define IDS_ARTCTF                      51563
-#define IDS_ARC32C                      51564
-#define IDS_MASSRN                      51565
 
 // Next default values for new objects
 // 

@@ -5120,17 +5120,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MORPH2_FILE         "File"
-    IDS_MORPH2_SECURITY     "Security"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_MORPH2_SERVER       "Server"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_MORPH_RFHA          "Report file hashing activities"
     IDS_MORPH_RAIF          "Report activities in friendlist"
     IDS_MORPH_KSSERV        "Don't remove static servers from serverlist in runtime"
