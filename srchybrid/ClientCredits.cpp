@@ -369,28 +369,52 @@ void CClientCreditsList::LoadList()
 	CString strSUQWTv2FileName;
 	strSUQWTv2FileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
 
-	if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){
+	CFileStatus	strFileStatus, strSUQWTv2FileStatus;
+	CSafeBufferedFile	strFile, strSUQWTv2File;
+	
+	bool	successOpenStrFile, successOpenStrSUQWTv2File;
+
+	successOpenStrFile = strFile.Open(strFileName, iOpenFlags, &fexp);
+	successOpenStrSUQWTv2File = strSUQWTv2File.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
+	strFile.Close();
+	strSUQWTv2File.Close();
+
+	//if credits.met and credits.met.SUQWTv2.met both exist, check which newer
+	if(successOpenStrFile && successOpenStrSUQWTv2File){
+		strFile.GetStatus(strFileStatus);
+		strSUQWTv2File.GetStatus(strSUQWTv2FileStatus);
+		if(strFileStatus.m_mtime > strSUQWTv2FileStatus.m_mtime){
+			//if original credits.met newer, take it
+			file.Open(strFileName, iOpenFlags, &fexp);
+			AddLogLine(false, "Original creditsfile.met newer, take over SUQWTv2.met");
+		}else{
+			//if SUQWTv2 newer, take it
+			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
+			AddLogLine(false, "take SUQWTv2.met for credits");
+		}
+		
+	}else if(!successOpenStrSUQWTv2File){//if credits.met.SUQWTv2.met does not exist
 		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError("Client.met.SUQWTv2.met not exist");
+			CString strError("Client.met.SUQWTv2.met does not exist.");
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
 				strError += _T(" - ");
 				strError += szError;
 			}
-			AddLogLine(true, _T("%s"), strError);
+			AddLogLine(false, _T("%s"), strError);
 		}
 
-		if(file.Open(strFileName, iOpenFlags, &fexp)){
+		if(file.Open(strFileName, iOpenFlags, &fexp)){//but original credits.met exist
 
 			file.Close(); // close the file before copying
 
-			//create client.met.SUQWTv2.met for SUQWTv2
+			//make a copy client.met.SUQWTv2.met for SUQWTv2
 			if (!::CopyFile(strFileName, strSUQWTv2FileName, FALSE))
 				AddLogLine(false, "Failed to create SUQWTv2.met file");
 			else
-				AddLogLine(false, "Create client.met.SUQWTv2.met for SaveUploadQueueWaitTimeV2");
+				AddLogLine(false, "Make a copy to client.met.SUQWTv2.met for SaveUploadQueueWaitTimeV2");
 
-			// reopen file
+			// open new file
 			CFileException fexp;
 			if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){
 				CString strError("Failed to open client.met.SUQWTv2.met");
@@ -402,12 +426,11 @@ void CClientCreditsList::LoadList()
 				AddLogLine(true, _T("%s"), strError);
 				return;
 			}
-			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.Seek(1, CFile::begin); //set filepointer behind file version byte
 
 		}else{
 			if (fexp.m_cause != CFileException::fileNotFound){
-				CString strError("Client.met.SUQWTv2.met not exist");
+				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 				TCHAR szError[MAX_CFEXP_ERRORMSG];
 				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
 					strError += _T(" - ");
@@ -417,9 +440,33 @@ void CClientCreditsList::LoadList()
 			}
 			return;
 		}
-	}	
+	}else if(!successOpenStrFile){//original credits.met not exist
+		
+		if (fexp.m_cause != CFileException::fileNotFound){
+			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			AddLogLine(false, _T("%s"), strError);
+		}
 
-//Morph End - added by AndCycle, SUQWT save in client.met.SUQWTv2.met
+		if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){//try out the SUQWTv2.met instead
+			CString strError("Failed to open client.met.SUQWTv2.met");
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			AddLogLine(false, _T("%s"), strError);
+			return;
+		}
+		
+		AddLogLine(false, "original credits.met not exist, take SUQWTv2.met instead");
+
+	}
+
 //original commented out
 /*
 	if(!file.Open(strFileName, iOpenFlags, &fexp)){
@@ -435,7 +482,9 @@ void CClientCreditsList::LoadList()
 	}
 */
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-	
+
+//Morph End - added by AndCycle, SUQWT save in client.met.SUQWTv2.met
+
 	try{
 		uint8 version;
 		file.Read(&version, 1);
@@ -456,6 +505,8 @@ void CClientCreditsList::LoadList()
 		}
 		*/
 		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		//original commented out
+		/*
 		// everything is ok, lets see if the backup exist...
 		CString strBakFileName;
 		strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());
@@ -501,7 +552,7 @@ void CClientCreditsList::LoadList()
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.Seek(1, CFile::begin); //set filepointer behind file version byte
 		}
-
+		*/
 //Morph Start - added by AndCycle, separate the .bak for SUQWT
 		// everything is ok, lets see if the backup exist...
 		CString strSUQWTv2BakFileName;
