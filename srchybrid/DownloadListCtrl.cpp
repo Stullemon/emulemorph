@@ -1209,13 +1209,13 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 							if ( lpUpDownClient->GetRemoteQueueRank()){
 								int	m_iDifference = lpUpDownClient->GetDiffQR();
 								if(m_iDifference == 0){
-									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,180,50));
-								}
-								else if(m_iDifference > 0){
 									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(60,10,240));
 								}
-								else if(m_iDifference < 0){
+								else if(m_iDifference > 0){
 									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(240,125,10));
+								}
+								else if(m_iDifference < 0){
+									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,180,50));
 								}
 							}
 							else{
