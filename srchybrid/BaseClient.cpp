@@ -1108,7 +1108,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 		socket = new CClientReqSocket(theApp.glob_prefs,this);
 		if (!socket->Create()){
 			socket->Safe_Delete();
-			return false; //Fix
+			return true;
 		}
 	}
 	else if (!socket->IsConnected()){
@@ -1116,7 +1116,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 		socket = new CClientReqSocket(theApp.glob_prefs,this);
 		if (!socket->Create()){
 			socket->Safe_Delete();
-			return false; //Fix
+			return true;
 		}
 	}
 	else{
