@@ -7,6 +7,7 @@
 #include "XMessageBox.h"
 #include "string.h"
 #include "Preferences.h"
+#include "OtherFunctions.h"
 
 // CPPgBackup dialog
 
@@ -30,6 +31,7 @@ void CPPgBackup::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgBackup::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
+	Localize();
 	LoadSettings();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -442,5 +444,20 @@ void CPPgBackup::Backup3()
 	} 
 	if (error)
 		MessageBox("Error encountered during backup","Error",MB_OK);
+}
+
+void CPPgBackup::Localize(void)
+{
+	if(m_hWnd)
+	{
+		GetDlgItem(IDC_BACKUP_FILEFRAME)->SetWindowText( GetResString(IDS_BACKUP_FILEFRAME) );
+		GetDlgItem(IDC_SELECTALL)->SetWindowText( GetResString(IDS_BACKUP_SELECTALL) );
+		GetDlgItem(IDC_BACKUP_AUTO)->SetWindowText( GetResString(IDS_BACKUP_AUTOFRAME) );
+		GetDlgItem(IDC_AUTOBACKUP)->SetWindowText( GetResString(IDS_BACKUP_AUTOBACKUP));
+		GetDlgItem(IDC_BACKUP_NOTE)->SetWindowText( GetResString(IDS_BACKUP_NOTE));
+		GetDlgItem(IDC_BACKUPNOW)->SetWindowText( GetResString(IDS_BACKUP_BACKUPNOW) );
+		GetDlgItem(IDC_BACKUP_MESSAGE)->SetWindowText( GetResString(IDS_BACKUP_MESSAGE) );
+		GetDlgItem(IDC_AUTOBACKUP2)->SetWindowText( GetResString(IDS_BACKUP_AUTOBACKUP2));
+	}
 }
 //eastshare end

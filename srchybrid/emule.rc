@@ -130,7 +130,7 @@ BEGIN
     CONTROL         "",IDC_MYINFOLIST,"RichEdit20A",ES_MULTILINE | 
                     ES_READONLY | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,372,
                     176,130,106,WS_EX_STATICEDGE
-    ICON            "",IDC_SERVLST_ICO,5,5,20,20
+    ICON            "",IDC_SERVLST_ICO,5,5,21,20
     CONTROL         "Servers:",IDC_SERVLIST_TEXT,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,18,6,91,8
     CONTROL         "",IDC_SERVLIST,"SysListView32",LVS_OWNERDRAWFIXED | 
@@ -146,6 +146,10 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT 
                     WS_BORDER | WS_VSCROLL | WS_HSCROLL,WS_EX_STATICEDGE
     LTEXT           ":",IDC_SSTATIC5,458,59,8,8
+    COMBOBOX        IDC_FEEDLIST,154,180,106,83,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Reload",IDC_FEEDUPDATE,265,179,51,15,BS_FLAT | 
+                    WS_DISABLED
 END
 
 IDD_SEARCH DIALOGEX 0, 0, 511, 289
@@ -174,19 +178,32 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_CHATSEL,"SysTabControl32",0x0,124,16,383,270
-    EDITTEXT        IDC_CMESSAGE,127,262,263,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_CHATSEL,"SysTabControl32",0x0,147,16,360,270
+    EDITTEXT        IDC_CMESSAGE,151,262,243,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "Send",IDC_CSEND,397,262,50,14,BS_FLAT
     PUSHBUTTON      "Close",IDC_CCLOSE,449,262,50,14,BS_FLAT
     CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | 
-                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,5,17,116,
-                    267,WS_EX_STATICEDGE
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,5,17,133,
+                    187,WS_EX_STATICEDGE
     CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,137,6,236,8
-    ICON            "",IDC_MESSAGEICON,124,5,20,20
+                    WS_GROUP,160,6,236,8
+    ICON            "",IDC_MESSAGEICON,147,5,21,20
     CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,18,6,93,8
-    ICON            "",IDC_FRIENDSICON,5,5,21,20
+    ICON            "",IDC_FRIENDSICON,5,5,20,20
+    GROUPBOX        "Info",IDC_FRIENDS_MSG,5,206,133,78
+    LTEXT           "Userhash:",IDC_FRIENDS_USERHASH,15,225,34,8
+    LTEXT           "Client:",IDC_FRIENDS_CLIENT,15,237,26,8
+    LTEXT           "Uploaded:",IDC_FRIENDS_UPLOADED,15,260,35,8
+    LTEXT           "Downloaded:",IDC_FRIENDS_DOWNLOADED,15,270,42,8
+    LTEXT           "ID:",IDC_FRIENDS_IDENT,15,249,48,8
+    LTEXT           "Name:",IDC_FRIENDS_NAME,15,215,28,8
+    LTEXT           "-",IDC_FRIENDS_NAME_EDIT,47,214,104,8
+    LTEXT           "-",IDC_FRIENDS_USERHASH_EDIT,51,225,115,8
+    LTEXT           "-",IDC_FRIENDS_CLIENTE_EDIT,44,237,93,8
+    LTEXT           "-",IDC_FRIENDS_IDENTIFICACION_EDIT,63,249,74,8
+    LTEXT           "-",IDC_FRIENDS_SUBIDO_EDIT,63,259,74,8
+    LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,63,270,71,8
 END
 
 IDD_STATISTICS DIALOGEX 0, 35, 511, 289
@@ -196,17 +213,23 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_SCOPE_U,"Static",SS_ETCHEDFRAME | SS_RIGHTJUST | 
                     SS_REALSIZEIMAGE | SS_SUNKEN | NOT WS_VISIBLE,221,112,
-                    284,107
+                    284,106
     CONTROL         "",IDC_STATSSCOPE,"Static",SS_ETCHEDFRAME | SS_SUNKEN | 
-                    NOT WS_VISIBLE,221,220,284,66
+                    NOT WS_VISIBLE,221,221,284,65
     CONTROL         "",IDC_SCOPE_D,"Static",SS_ETCHEDFRAME | SS_SUNKEN | NOT 
-                    WS_VISIBLE,221,4,284,107
+                    WS_VISIBLE,221,4,284,106
     CONTROL         "",IDC_STATTREE,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | 
                     WS_BORDER | WS_TABSTOP | 0x800,3,26,211,260
-    PUSHBUTTON      "V",IDC_BNMENU,198,8,16,14,BS_FLAT
-    LTEXT           "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,3,
+    PUSHBUTTON      "V",IDC_BNMENU,7,8,16,14,BS_FLAT
+    LTEXT           "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,26,
                     11,192,11
+    CONTROL         "",IDC_SPLITTER_STAT,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,216,5,3,281
+    CONTROL         "",IDC_SPLITTER_STAT_HL,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,221,218,284,3
+    CONTROL         "",IDC_SPLITTER_STAT_HR,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,221,110,284,3
 END
 
 IDD_PPG_STATS DIALOGEX 0, 0, 229, 229
@@ -485,17 +508,19 @@ BEGIN
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_TABSTOP,5,5,104,259,WS_EX_STATICEDGE
     PUSHBUTTON      "Connect",IDC_BN_IRCCONNECT,5,268,54,14,BS_FLAT
-    CONTROL         "",IDC_TAB2,"SysTabControl32",0x0,113,5,393,16
-    EDITTEXT        IDC_INPUTWINDOW,113,269,339,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_TITLEWINDOW,113,20,393,12,ES_AUTOHSCROLL | 
+    CONTROL         "",IDC_TAB2,"SysTabControl32",0x0,118,5,393,16
+    EDITTEXT        IDC_INPUTWINDOW,118,269,339,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TITLEWINDOW,118,20,393,12,ES_AUTOHSCROLL | 
                     ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
     DEFPUSHBUTTON   "Send",IDC_CHATSEND,459,268,47,14,BS_FLAT
     CONTROL         "IRCChannelsLv",IDC_SERVERCHANNELLIST,"SysListView32",
                     LVS_REPORT | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
-                    WS_TABSTOP,113,35,393,229,WS_EX_STATICEDGE
+                    WS_TABSTOP,118,35,393,229,WS_EX_STATICEDGE
     CONTROL         "",IDC_STATUSWINDOW,"Static",SS_BLACKFRAME | NOT 
                     WS_VISIBLE | WS_BORDER,113,35,393,229
     PUSHBUTTON      "Close",IDC_CLOSECHAT,59,268,50,14,BS_FLAT
+    CONTROL         "",IDC_SPLITTER_IRC,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,112,5,4,278
 END
 
 IDD_FILES DIALOGEX 0, 35, 511, 289
@@ -1484,22 +1509,22 @@ BEGIN
                     196,8
     PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,135,53,81,14,BS_FLAT
     EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,13,28,203,8,0,
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,203,8,0,
                     WS_EX_TRANSPARENT
     PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,135,125,81,14,
                     BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
                     202,10
-    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,109,202,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,101,202,8,0,
+    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,202,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,202,8,0,
                     WS_EX_TRANSPARENT
     EDITTEXT        IDC_LOWIDRETRY,114,156,22,12,ES_CENTER | ES_AUTOHSCROLL | 
                     ES_NUMBER
     LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,22,159,85,8
-    GROUPBOX        "Server",IDC_STATIC,14,148,125,25,BS_FLAT
-    GROUPBOX        "File",IDC_STATIC,7,6,217,67,BS_FLAT
-    GROUPBOX        "Security",IDC_STATIC,7,76,217,69,BS_FLAT
+    GROUPBOX        "Server",IDC_MORPH2_SERVER,14,148,125,25,BS_FLAT
+    GROUPBOX        "File",IDC_MORPH2_FILE,7,6,217,67,BS_FLAT
+    GROUPBOX        "Security",IDC_MORPH2_SECURITY,7,76,217,69,BS_FLAT
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -1508,13 +1533,13 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION |
 CAPTION "Backup"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    GROUPBOX        "Select File Types to Backup",IDC_STATIC,7,7,213,91,
-                    BS_FLAT
-    GROUPBOX        "Auto Backup",IDC_STATIC,8,103,112,47,BS_FLAT
-    CONTROL         "Note:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    10,160,22,8
+    GROUPBOX        "Select File Types to Backup",IDC_BACKUP_FILEFRAME,7,7,
+                    213,91,BS_FLAT
+    GROUPBOX        "Auto Backup",IDC_BACKUP_AUTO,8,103,112,47,BS_FLAT
+    CONTROL         "Note:",IDC_BACKUP_NOTE,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,10,160,22,8
     LTEXT           "A Directory named ""Backup"" will be created  under your eMule Application directory to store Backups",
-                    IDC_STATIC,10,172,205,21
+                    IDC_BACKUP_MESSAGE,10,172,205,21
     CONTROL         "*.dat",IDC_DAT,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,14,22,33,10
     CONTROL         "*.met",IDC_MET,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
@@ -1594,6 +1619,7 @@ BEGIN
                     ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | 
                     ES_WANTRETURN | WS_BORDER | WS_VSCROLL | WS_HSCROLL | 
                     WS_TABSTOP,196,53,173,177
+    PUSHBUTTON      "&Cleanup",IDC_BUTTONSTRIP,4,237,56,13,BS_FLAT
 END
 
 
@@ -4412,8 +4438,7 @@ BEGIN
     IDS_EASTSHARE_CREDIT    "EastShare Credit"
     IDS_PREFER_SHARE_ALL    "Prefer Share All"
     IDS_MET_FILE_CONTROL    ".met File Control (be ware of changing any value !!)"
-    IDS_EXPIRED_CLIENTS     "Expired time of clients (day) (0 = Disabled)"
-    IDS_EXPIRED_KNOWN       "Expired time of known files (day) (0 = Disabled)"
+    IDS_EXPIRED_KNOWN       "Expired time of known files (day) (0 = Default)"
     IDS_DELETEFILE          "Delete File"
     IDS_PAWCIO_CREDIT       "Pawcio Credit"
 END
@@ -4435,8 +4460,10 @@ BEGIN
     IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
     IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_PAYBACKFIRSTLIMIT   "Amount before triggering (Default 10MB)"
+    IDS_ENABLE_CHUNKDOTS    "Enable ChunkDots in progress bar"
     IDS_COMMUNITY           "Community"
     IDS_COMMUNITYTAG        "Community Tags (separated by '|')"
+    IDS_INVISIBLEMODE       "Invisible Mode (Winkey+S to switch)"
 END
 
 STRINGTABLE 
@@ -4445,6 +4472,54 @@ BEGIN
     IDS_SOLIDGRAPH          "Show solid graph"
     IDS_POWERSHARE_LIMITED  "Limited"
     IDS_POWERSHARE_LIMIT    "Limit of complete source"
+    IDS_CHAT_DOWNLOADED     "Downloaded:"
+    IDS_CHAT_UPLOADED       "Uploaded:"
+    IDS_CHAT_IDENT          "Identification:"
+    IDS_CHAT_CLIENT         "Client:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BACKUP_FILEFRAME    "Select File Types to Backup"
+    IDS_BACKUP_SELECTALL    "Select All"
+    IDS_BACKUP_AUTOFRAME    "Auto Backup"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BACKUP_AUTOBACKUP   "Auto Backup on Exit"
+    IDS_BACKUP_NOTE         "Note:"
+    IDS_BACKUP_BACKUPNOW    "Backup Now"
+    IDS_BACKUP_MESSAGE      "A Directory named ""Backup"" will be created  under your eMule Application directory to store Backups"
+    IDS_BACKUP_AUTOBACKUP2  "Double Backup"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_URL_FOR_UPDATING2   "URL for updating"
+    IDS_MORPH2_FILE         "File"
+    IDS_MORPH2_SECURITY     "Security"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_MORPH2_SERVER       "Server"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MORPH_RFHA          "Report file hashing activities"
+    IDS_MORPH_RAIF          "Report activities in friendlist"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WEBSERVER_LINK      "Link: "
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CHAT_NAME           "Name:"
 END
 
 #endif    // Anglais (États-Unis) resources

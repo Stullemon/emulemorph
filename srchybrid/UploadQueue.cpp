@@ -1026,7 +1026,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
 
 				if (client->GetFriendSlot() == false && // client is not a friend with friend slot
-					client->IsPBForPS() == false && // client don't want powershared file
+            		client->IsPBForPS() == false && // client don't want powershared file
 						(
 							client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && thePrefs.GetEqualChanceForEachFileMode() == ECFEF_DISABLE ||
 							client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE//Morph - added by AndCycle, Equal Chance For Each File

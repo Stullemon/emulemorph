@@ -83,4 +83,5 @@ public:
 	afx_msg void OnBnClickedReset();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnEnChangeFilenamemaskedit();
+	afx_msg void OnBnClickedButtonStrip(); //MORPH - Added by SiRoB, Clean MassRename
 };

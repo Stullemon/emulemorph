@@ -375,6 +375,13 @@ public:
 	static	uint8	bringtoforeground;
 	static	uint8	splitterbarPosition;
 	static	uint8	m_uTransferWnd2;
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	static	uint8	splitterbarPositionStat;
+	static	uint8	splitterbarPositionStat_HL;
+	static	uint8	splitterbarPositionStat_HR;
+	static	uint16	splitterbarPositionFriend;
+	static	uint16	splitterbarPositionIRC;
+	//MORPH END - Added by SiRoB, Splitting Bar [O²]
 	static	uint16	deadserverretries;
 	static	DWORD	m_dwServerKeepAliveTimeout;
 	// -khaos--+++> Changed data type to avoid overflows
@@ -429,6 +436,9 @@ public:
 	static	char	yourHostname[127];	// itsonlyme: hostnameSource
 	static	bool	m_bEnableVerboseOptions;
 	static	bool	m_bVerbose;
+	//MORPH START - Added by SiRoB, XML News [O²]
+	static	bool	enableNEWS;
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	static	bool	m_bFullVerbose;
 	static	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
 	static	bool	m_bLogBannedClients;
@@ -609,6 +619,13 @@ public:
 	static bool	shareall;	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
+	//EastShare - Added by Pretender, Option for ChunkDots
+	static bool	m_bEnableChunkDots;
+	//EastShare - Added by Pretender, Option for ChunkDots
+	//EastShare - Added by Pretender, Invisible Mode
+	static bool	m_bInvisibleMode;
+	//EastShare - Added by Pretender, Invisible Mode
+
 	static char	UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	static char	UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
 
@@ -734,6 +751,10 @@ public:
 	static	LPCTSTR GetTempDir()					{return tempdir;}
 	static	const CString& GetConfigDir()			{return configdir;}
 	static	const CString& GetWebServerDir()		{return m_strWebServerDir;}
+
+	//MORPH START - Added by SiRoB, XML News [O²]
+	static	const CString& GetFeedsDir()			{return m_strFeedsDir;} // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
 	static	bool	IsConfigFile(const CString& rstrDirectory, const CString& rstrName);
@@ -1042,6 +1063,18 @@ public:
 	static	void	SetSplitterbarPosition(uint8 pos)	{splitterbarPosition=pos;}
 	static	uint8	GetTransferWnd2()					{return m_uTransferWnd2;}
 	static	void	SetTransferWnd2(uint8 uWnd2)		{m_uTransferWnd2 = uWnd2;}
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	static	uint8   GetSplitterbarPositionStat()	{return splitterbarPositionStat;}
+	static	void	SetSplitterbarPositionStat(uint8 pos) {splitterbarPositionStat=pos;}
+	static	uint8   GetSplitterbarPositionStat_HL()	{return splitterbarPositionStat_HL;}
+	static	void	SetSplitterbarPositionStat_HL(uint8 pos) {splitterbarPositionStat_HL=pos;}
+	static	uint8   GetSplitterbarPositionStat_HR()	{return splitterbarPositionStat_HR;}
+	static	void	SetSplitterbarPositionStat_HR(uint8 pos) {splitterbarPositionStat_HR=pos;}
+	static	uint16   GetSplitterbarPositionFriend()	{return splitterbarPositionFriend;}
+	static	void	SetSplitterbarPositionFriend(uint16 pos) {splitterbarPositionFriend=pos;}
+	static	uint16  GetSplitterbarPositionIRC()	{return splitterbarPositionIRC;}
+	static	void	SetSplitterbarPositionIRC(uint16 pos) {splitterbarPositionIRC=pos;}
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 	// -khaos--+++> Changed datatype to avoid overflows
 	static	uint16	GetStatsMax()						{return statsMax;}
 	// <-----khaos-
@@ -1102,6 +1135,9 @@ public:
 	static	void	SetSmartIdState(uint8 in_smartidstate) {smartidstate = in_smartidstate;}
 	static	bool	GetEnableVerboseOptions()			{return m_bEnableVerboseOptions;}
 	static	bool	GetVerbose()						{return m_bVerbose;}
+	//MORPH START - Added by SiRoB, XML News [O²]
+	static	bool	GetNews()							{return enableNEWS;}
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	static	bool	GetFullVerbose()					{return m_bVerbose && m_bFullVerbose;}
 	static	bool	GetDebugSourceExchange()			{return m_bVerbose && m_bDebugSourceExchange;}
 	static	bool	GetLogBannedClients()				{return m_bVerbose && m_bLogBannedClients;}
@@ -1421,6 +1457,12 @@ public:
 	//EastShare Start - PreferShareAll by AndCycle
 	static	bool	ShareAll()			{return shareall;}	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
+	//EastShare - Added by Pretender, Option for ChunkDots
+	static	bool	EnableChunkDots()			{return m_bEnableChunkDots;}
+	//EastShare - Added by Pretender, Option for ChunkDots
+	//EastShare - Added by Pretender, Invisible Mode
+	static	bool	InvisibleMode()			{return m_bInvisibleMode;}
+	//EastShare - Added by Pretender, Invisible Mode
 
 	static	bool	DateFileNameLog()	{ return m_bDateFileNameLog;}//Morph - added by AndCycle, Date File Name Log
 
@@ -1471,6 +1513,9 @@ protected:
 	static	CString configdir;
 	static	CString m_strWebServerDir;
 	static	CString m_strLangDir;
+	//MORPH START - Added by SiRoB, XML News [O²]
+	static	CString m_strFeedsDir; // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	static	Preferences_Ext_Struct* prefsExt;
 	static	WORD m_wWinVer;
 	static	bool m_UseProxyListenPort;

@@ -1745,6 +1745,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 	uint32	wp=(uint32)(percentcompleted/100*w+0.5f);
 
 	if(!bFlat) {
+		if(thePrefs.m_bEnableChunkDots){ //EastShare - Added by Pretender, Option for ChunkDots
 		// SLUGFILLER: chunkDots
 		s_LoadBar.SetWidth(1);
 		s_LoadBar.SetFileSize(1);
@@ -1752,6 +1753,8 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 		for(uint32 i=completedsize+PARTSIZE-(completedsize % PARTSIZE); i<m_nFileSize; i+=PARTSIZE)
 			s_LoadBar.Draw(dc, gaprect.left+(uint32)((float)i*w/m_nFileSize), gaprect.top, false);
 		// SLUGFILLER: chunkDots
+		} //EastShare - Added by Pretender, Option for ChunkDots
+
 		s_LoadBar.SetWidth(wp);
 		s_LoadBar.SetFileSize(completedsize);
 		s_LoadBar.Fill(crUnconfirmed);
@@ -1767,6 +1770,8 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 		gaprect.left = gaprect.right;
 		gaprect.right = rect->right;
 		dc->FillRect(&gaprect, &CBrush(RGB(224,224,224)));
+		
+		if (thePrefs.m_bEnableChunkDots){ //EastShare - Added by Pretender, Option for ChunkDots
 		// SLUGFILLER: chunkDots
 		for(uint32 i=completedsize+PARTSIZE-(completedsize % PARTSIZE); i<m_nFileSize; i+=PARTSIZE){
 			gaprect.left = gaprect.right = rect->left+(uint32)((float)i*w/m_nFileSize);
@@ -1774,6 +1779,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 			dc->FillRect(&gaprect, &CBrush(RGB(128,128,128)));
 		}
 		// SLUGFILLER: chunkDots
+		} //EastShare - Added by Pretender, Option for ChunkDots
 	}
 	//MORPH END   - Added by IceCream--- :xrmb ---
 }

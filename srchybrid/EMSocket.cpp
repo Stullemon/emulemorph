@@ -129,8 +129,9 @@ CEMSocket::CEMSocket(void){
 	//MORPH START - Added by SiRoB, ZZ Upload
     m_bBusy = false;
     m_hasSent = false;
-    //int val = 0;
-    //SetSockOpt(SO_SNDBUF, &val, sizeof(int));
+
+    int val = 0;
+    SetSockOpt(SO_SNDBUF, &val, sizeof(int));
 	//MORPH END   - Added by SiRoB, ZZ Upload
 }
 

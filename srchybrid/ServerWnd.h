@@ -21,6 +21,9 @@
 #include "IconStatic.h"
 #include "RichEditCtrlX.h"
 #include "ClosableTabCtrl.h"
+//MORPH START - Added by SiRoB, XML News [O²]
+#include "types.h" // Added by N_OxYdE: XML News
+//MORPH END    - Added by SiRoB, XML News [O²]
 
 class CHTRichEditCtrl;
 class CCustomAutoComplete;
@@ -35,6 +38,9 @@ public:
 	void Localize();
 	bool UpdateServerMetFromURL(CString strURL);
 	void ToggleDebugWindow();
+	//MORPH START - Added by SiRoB, XML News [O²]
+	void RedrawFeedList(); // eMule O² Bzubzu
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	void UpdateMyInfo();
 	void UpdateLogTabSelection();
 	void SaveAllSettings();
@@ -45,6 +51,16 @@ public:
 	void PasteServerFromClipboard();
 	bool AddServer(uint16 uPort, CString strIP, CString strName = _T(""), bool bShowErrorMB = true);
 
+	//MORPH START - Added by SiRoB, XML News [O²]
+	void ListFeeds();
+	void DownloadFeed();
+	void ParseNewsFile(CString strTempFilename);
+	void OnFeedListSelChange();
+	CArray<CString> aFeedUrls;
+	CArray<CString> aXMLUrls;
+	CArray<CString> aXMLNames;
+	//MORPH END   - Added by SiRoB, XML News [O²]
+
 // Dialog Data
 	enum { IDD = IDD_SERVER };
 
@@ -52,7 +68,13 @@ public:
 	{
 		PaneServerInfo	= 0, // those are CTabCtrl item indices
 		PaneLog			= 1,
+		//MORPH START - Changed by SiRoB, XML News [O²]
+		/*
 		PaneVerboseLog	= 2
+		*/
+		PaneNews 		= 2,
+		PaneVerboseLog	= 3
+		//MORPH END   - Changed by SiRoB, XML News [O²]
 	};
 
 	CServerListCtrl serverlistctrl;
@@ -61,12 +83,22 @@ public:
 	CLogEditCtrl debuglog;
 	CClosableTabCtrl StatusSelector;
 
+	//MORPH START - Added by SiRoB, XML News [O²]
+	CHTRichEditCtrl* newsmsgbox;
+	CComboBox m_feedlist;
+	afx_msg void OnEnLinkNewsBox(NMHDR *pNMHDR, LRESULT *pResult);
+	//MORPH END - Added by SiRoB, XML News [O²]
+	
+
 protected:
 	void SetAllIcons();
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	//MORPH START - Added by SiRoB, XML News [O²]	
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedAddserver();
 	afx_msg void OnBnClickedUpdateservermetfromurl();
@@ -87,6 +119,9 @@ private:
 	CImageList m_imlLogPanes;
 	HICON icon_srvlist;
 	bool	debug;
+	//MORPH START - Added by SiRoB, XML News [O²]
+	bool	news;
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	CRichEditCtrlX m_MyInfo;
 	CHARFORMAT m_cfDef;
 	CHARFORMAT m_cfBold;

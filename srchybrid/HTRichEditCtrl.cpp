@@ -644,3 +644,16 @@ CFont* CHTRichEditCtrl::GetFont() const
 	ASSERT(0);
 	return NULL;
 }
+//MORPH START - Added by SiRoB, XML News [O²]
+void CHTRichEditCtrl::ScrollToFirstLine()
+{
+	// WM_VSCROLL does not work correctly under Win98 (or older version of comctl.dll)
+	SendMessage(WM_VSCROLL, SB_TOP);
+	if (afxData.bWin95){
+		// older version of comctl.dll seem to need this to properly update the display
+		int iPos = GetScrollPos(SB_VERT);
+		SendMessage(WM_VSCROLL, MAKELONG(SB_THUMBPOSITION, iPos));
+		SendMessage(WM_VSCROLL, SB_ENDSCROLL);
+	}
+}
+//MORPH END   - Added by SiRoB, XML News [O²]

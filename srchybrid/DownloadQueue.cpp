@@ -2237,7 +2237,7 @@ bool CDownloadQueue::IsFilesPowershared()
 {
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file =  filelist.GetNext(pos);
-		if (cur_file->IsPartFile() && ((cur_file->GetPowerSharedMode()>=0)?cur_file->GetPowerSharedMode():thePrefs.GetPowerShareMode())==1)
+		if (cur_file->IsPartFile() && ((cur_file->GetPowerSharedMode()>=0)?cur_file->GetPowerSharedMode():thePrefs.GetPowerShareMode())&1)
 			return true;
 	}
 	return false;

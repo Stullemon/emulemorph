@@ -142,8 +142,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	m_bDoUpdate = true;
 	m_nRedrawTimer = 0;
 
-	m_oldcx = 0;
-	m_oldcy = 0;
+	// [TPT]
 	ready = false;
 }  // COScopeCtrl
 
@@ -551,19 +550,22 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		m_dcPlot.FillRect(m_rectClient, &m_brushBack);
 	}
 
+	//MORPH START - Changed by SiRoB, Maella -Code Fix- [TPT]
 	int iNewSize = m_rectClient.Width() / m_nShiftPixels + 10;		// +10 just in case :)
 	if(m_nMaxPointCnt < iNewSize)
 		m_nMaxPointCnt = iNewSize;									// keep the bigest value
-	m_bDoUpdate = false;
 
 	if (theApp.emuledlg->IsRunning()) 
 	{
-		if (!thePrefs.IsGraphRecreateDisabled()) {
+			if (thePrefs.IsGraphRecreateDisabled() == false) {
+				// The timer will redraw the previous points in 200ms
+				m_bDoUpdate = false;
 			if(m_nRedrawTimer)
 				KillTimer(m_nRedrawTimer);
-			VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) != NULL ); // reduce flickering
+				VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) ); // reduce flickering
 		}
 	}
+	//MORPH END   - Changed by SiRoB, Maella -Code Fix- [TPT]
 
 	// finally, force the plot area to redraw
 	InvalidateRect(m_rectClient);
@@ -595,6 +597,12 @@ void COScopeCtrl::AppendPoints(double dNewPoint[], bool bInvalidate, bool bAdd2L
 		}
 	}
 	
+	//MORPH START - Changed by SiRoB, Maella -Code Fix- [TPT]
+	// Sometime responsible for 'ghost' point on the left after a resize
+	if(m_bDoUpdate == false)		
+		return;
+	//MORPH END   - Changed by SiRoB, Maella -Code Fix- [TPT]
+
 	if(m_nTrendPoints > 0)
 	{
 		if(CustShift.m_nPointsToDo == 0)
@@ -843,12 +851,12 @@ void COScopeCtrl::DrawPoint()
 /////////////////////////////////////////////////////////////////////////////
 void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 {
-	if ((!cx && !cy) || (cx==m_oldcx && cy==m_oldcy))
+	// [TPT]
+	if (!cx && !cy)
 		return;
 
 	int iTrend;
 	CWnd::OnSize(nType, cx, cy);
-	m_oldcx=cx;m_oldcy=cy;
 	
 	// NOTE: OnSize automatically gets called during the setup of the control
 	
@@ -900,32 +908,56 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 /////////////////////////////////////////////////////////////////////////////
 void COScopeCtrl::Reset()
 {
+	//MORPH START - Added by SiRoB, Maella -Code Fix- [TPT]
+	// simply invalidate the entire control
+	for(int i = 0; i < m_NTrends; i++)
+	{
+		// Clear all points
+		m_PlotData[i].dPreviousPosition = 0.0;
+		m_PlotData[i].nPrevY = -1;
+
+		for(int iTrend = 0; iTrend < m_NTrends; iTrend++){
+			m_PlotData[iTrend].lstPoints.RemoveAll();
+		}
+	}
+	//MORPH END   - Added by SiRoB, Maella -Code Fix- [TPT]
+
 	// to clear the existing data (in the form of a bitmap)
 	// simply invalidate the entire control
 	InvalidateCtrl();
 }
 
+//MORPH START - Changed by SiRoB, Maella -Code Inprovement- [TPT]
 int COScopeCtrl::ReCreateGraph(void)
 {
-	int i;
-	for(i = 0; i < m_NTrends; i++)
+	for(int i = 0; i < m_NTrends; i++)
 	{
 		m_PlotData[i].dPreviousPosition = 0.0;
 		m_PlotData[i].nPrevY = -1;
 	}
 	
 	double *pAddPoints = new double[m_NTrends];
+	POSITION* pPosArray = new POSITION[m_NTrends];
 	
-	int iCnt = m_PlotData[0].lstPoints.GetCount();
-	for(i = 0; i < iCnt; i++)
+	// Try to avoid to call the method AppendPoints() more than necessary
+	// Remark: the default size of the list is 1024
+	int pointToDraw = m_PlotData[0].lstPoints.GetCount();
+	if(pointToDraw > (m_nPlotWidth/m_nShiftPixels)+1)
 	{	
+		pointToDraw = (m_nPlotWidth/m_nShiftPixels)+1;
+	}
+	int startIndex = m_PlotData[0].lstPoints.GetCount() - pointToDraw;
+
+	// Prepare to go through the elements on n lists in parallel
 		for(int iTrend = 0; iTrend < m_NTrends; iTrend++)
 		{
-			POSITION pos = m_PlotData[iTrend].lstPoints.FindIndex(i);
-			if(pos)
-				pAddPoints[iTrend] = m_PlotData[iTrend].lstPoints.GetAt(pos);
-			else
-				pAddPoints[iTrend] = 0;
+		pPosArray[iTrend] = m_PlotData[iTrend].lstPoints.FindIndex(startIndex);
+	}	
+	
+	// We will assume that each trends have the same among of points, so we test only the first iterator
+	while(pPosArray[0] != 0){
+		for(int iTrend = 0; iTrend < m_NTrends; iTrend++){
+			pAddPoints[iTrend] = m_PlotData[iTrend].lstPoints.GetNext(pPosArray[iTrend]);
 		}
 		// -khaos--+++> Pass false for new bUseTrendRatio parameter so that graph is recreated correctly...
 		AppendPoints(pAddPoints, false, false, false);
@@ -933,9 +965,14 @@ int COScopeCtrl::ReCreateGraph(void)
 	}
 	
 	delete[] pAddPoints;
+	delete[] pPosArray;
+
+	// Draw the new graph without waiting on the next AppendPoints()
+	Invalidate();
 
 	return 0;
 }
+//MORPH END   - Changed by SiRoB, Maella -Code Inprovement- [TPT]
 
 void COScopeCtrl::OnTimer(UINT nIDEvent)
 {

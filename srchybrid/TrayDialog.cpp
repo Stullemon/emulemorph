@@ -264,7 +264,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 	}
 	else if ((nID & 0xFFF0) == SC_MINIMIZETRAY)
 	{
-		if (TrayShow())
+			if (TrayShow())
 			ShowWindow(SW_HIDE);
 	}
 	else

@@ -506,14 +506,14 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 		s_ShareStatusBar.SetHeight(iHeight); 
 		s_ShareStatusBar.SetWidth(iWidth); 
 		s_ShareStatusBar.Fill(crMissing); 
-	COLORREF color;
-	if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
-		for (int i = 0;i < GetPartCount();i++)
-			if(m_AvailPartFrequency[i] > 0 ){
-				color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
-					s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
-			}
-	}
+		COLORREF color;
+		if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
+			for (int i = 0;i < GetPartCount();i++)
+				if(m_AvailPartFrequency[i] > 0 ){
+					color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
+						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
+				}
+		}
 		s_ShareStatusBar.Draw(&cdcStatus, 0, 0, bFlat); 
 	}
 	else
@@ -876,8 +876,13 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 	}
 
 	// nr. of data parts
+	//MORPH START - Added by SiRoB, bugfix: Pichuein
+	/*
 	m_iPartCount = (nFileSize + (PARTSIZE - 1)) / PARTSIZE;
-
+	*/
+	m_iPartCount = nFileSize/PARTSIZE;
+	if (nFileSize % PARTSIZE) ++m_iPartCount;
+	//MORPH END   - Added by SiRoB, bugfix: Pichuein
 	// nr. of parts to be used with OP_FILESTATUS
 	m_iED2KPartCount = nFileSize / PARTSIZE + 1;
 
@@ -2104,7 +2109,7 @@ TCHAR szFullPath[MAX_PATH];
 								else if (dwVideoCodec == BI_BITFIELDS)
 									strCodec = "bitfields";
 								else{
-									memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
+								memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
 									strCodec.ReleaseBuffer(4);
 									strCodec.MakeLower();
 								}
@@ -2440,7 +2445,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file)
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= ShareOnlyTheNeed)
+			if (m_AvailPartFrequency[done] <= m_nVirtualCompleteSourcesCount)
 				towrite |= (1<<i);
 			done++;
 			if (done == parts)
@@ -2540,7 +2545,7 @@ CString CKnownFile::GetEqualChanceValueString(bool detail){
 bool CKnownFile::GetPowerShared() const
 {
 	int temppowershared = (m_powershared>=0)?m_powershared:thePrefs.GetPowerShareMode();
-	return ((temppowershared == 1) || (temppowershared == 3) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
+	return ((temppowershared&1) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
 }
 //MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	

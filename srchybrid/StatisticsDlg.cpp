@@ -225,7 +225,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 
 	m_ilastMaxConnReached = 0;
 	//MORPH START - Removed by SiRoB, New Graph
-	/*AddAnchor(IDC_STATTREE,TOP_LEFT, BOTTOM_LEFT );
+	/*
+	AddAnchor(IDC_STATTREE,TOP_LEFT, BOTTOM_LEFT );
 
 	AddAnchor(IDC_STATIC_CONNSTATS,BOTTOM_LEFT);
 	AddAnchor(m_Led3[0],BOTTOM_LEFT);
@@ -247,20 +248,75 @@ BOOL CStatisticsDlg::OnInitDialog()
 	AddAnchor(IDC_STATIC_U,CSize(0,50));
 	AddAnchor(IDC_STATIC_U2,CSize(0,50));
 	AddAnchor(IDC_TIMEAVG2,CSize(0,50));
-	AddAnchor(IDC_STATIC_U3,CSize(0,50));*/
+	AddAnchor(IDC_STATIC_U3,CSize(0,50));
+	*/
 	//MORPH END - Removed by SiRoB, New Graph
-	//MORPH START - Added by SiRoB, New Graph
-	AddAnchor(IDC_STATTREE, TOP_LEFT, BOTTOM_CENTER);
-	AddAnchor(IDC_STATIC_LASTRESET, TOP_LEFT, TOP_CENTER);
-	AddAnchor(IDC_BNMENU, TOP_CENTER);
 
-	AddAnchor(IDC_SCOPE_D, TOP_CENTER, CSize(100,34));
-	AddAnchor(m_DownloadOMeter.m_hWnd, TOP_CENTER, CSize(100,34));
-	AddAnchor(IDC_SCOPE_U, CSize(50,34), CSize(100,68));
-	AddAnchor(m_UploadOMeter.m_hWnd, CSize(50,34), CSize(100,68));
-	AddAnchor(IDC_STATSSCOPE, CSize(50,68), BOTTOM_RIGHT);
-	AddAnchor(m_Statistics.m_hWnd, CSize(50,68), BOTTOM_RIGHT);
+	//MORPH START - Added by SiRoB, New Graph
+	/*
+	AddAnchor(IDC_STATTREE, TOP_LEFT, CSize(thePrefs.GetSplitterbarPositionStat(),100));
+	AddAnchor(IDC_STATIC_LASTRESET, TOP_LEFT, CSize(thePrefs.GetSplitterbarPositionStat(),0));
+	AddAnchor(IDC_BNMENU, CSize(thePrefs.GetSplitterbarPositionStat(),0));
+
+	AddAnchor(m_DownloadOMeter.m_hWnd, CSize(thePrefs.GetSplitterbarPositionStat(),0), CSize(100,thePrefs.GetSplitterbarPositionStat_HR()));
+	AddAnchor(m_UploadOMeter.m_hWnd, CSize(thePrefs.GetSplitterbarPositionStat(),thePrefs.GetSplitterbarPositionStat_HR()), CSize(100,thePrefs.GetSplitterbarPositionStat_HL()));
+	AddAnchor(m_Statistics.m_hWnd, CSize(thePrefs.GetSplitterbarPositionStat(),thePrefs.GetSplitterbarPositionStat_HL()), BOTTOM_RIGHT);
+	*/
 	//MORPH END   - Added by SiRoB, New Graph
+
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	CRect rcW,rcSpl,rc;
+	
+	GetWindowRect(rcW);
+	ScreenToClient(rcW);
+
+	LONG splitposstat=(thePrefs.GetSplitterbarPositionStat()*rcW.Height())/100;;
+	LONG splitposstat_HL=(thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height())/100;;
+	LONG splitposstat_HR=(thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height())/100;;
+	
+	rcSpl=rcW; rcSpl.left=rcW.left+101; rcSpl.right=rcSpl.left+2;
+	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
+	rcSpl=rcW; rcSpl.left=rcW.left+108; rcSpl.right=rcW.right-2; rcSpl.top=rc.top+201;rcSpl.bottom=rcSpl.top+4;
+	m_wndSplitterstat_HL.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HL);
+	rcSpl=rcW; rcSpl.left=rcW.left+108; rcSpl.right=rcW.right-2; rcSpl.top=rc.top+101;rcSpl.bottom=rcSpl.top+4;
+	m_wndSplitterstat_HR.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HR);
+
+	//stattree
+	CWnd* pWnd = GetDlgItem(IDC_STATTREE);
+	pWnd->GetWindowRect(rc);
+	ScreenToClient(rc);
+	rc.right = rcW.left+100;
+	stattree.MoveWindow(rc);
+
+	//m_DownloadOMeter
+	m_DownloadOMeter.GetWindowRect(rc);
+	ScreenToClient(rc);
+	rc.left = rcW.left+106; rc.bottom = rcW.top+100;
+	m_DownloadOMeter.MoveWindow(rc);
+
+	//m_UploadOMeter
+	m_UploadOMeter.GetWindowRect(rc);
+	ScreenToClient(rc);
+	rc.left = rcW.left+106; rc.top = rcW.top+106; rc.bottom = rcW.top+200;
+	m_UploadOMeter.MoveWindow(rc);
+
+	//m_Statistics
+	m_Statistics.GetWindowRect(rc);
+	ScreenToClient(rc);
+	rc.left = rcW.left+106; rc.top = rcW.top+206;
+	m_Statistics.MoveWindow(rc);
+
+	rcSpl=rcW; rcSpl.left=splitposstat; rcSpl.right=rcSpl.left+6;
+	m_wndSplitterstat.MoveWindow(rcSpl,true);
+	rcSpl=rcW; rcSpl.left=splitposstat+7; rcSpl.right=rcW.right-2; rcSpl.top=splitposstat_HL;rcSpl.bottom=rcSpl.top+4;
+	m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
+	rcSpl=rcW; rcSpl.left=splitposstat+7; rcSpl.right=rcW.right-2; rcSpl.top=splitposstat_HR;rcSpl.bottom=rcSpl.top+4;
+	m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
+
+	DoResize_V(0);
+	DoResize_HR(0);
+	DoResize_HL(0);
+	//MORPH END - Added by SiRoB, Splitting Bar [O²]
 
 	RepaintMeters();
 
@@ -272,8 +328,288 @@ BOOL CStatisticsDlg::OnInitDialog()
 	return true;
 }
 
+//MORPH START - Added by SiRoB, Splitting Bar [O²]
+void CStatisticsDlg::initCSize(uint8 x, uint8 y, uint8 z)
+{
+	//split
+	RemoveAnchor(m_wndSplitterstat);
+	AddAnchor(m_wndSplitterstat,CSize(x,0));
+
+	RemoveAnchor(m_wndSplitterstat_HL);
+	AddAnchor(m_wndSplitterstat_HL,CSize(x,y),CSize(100,y));
+
+	RemoveAnchor(m_wndSplitterstat_HR);
+	AddAnchor(m_wndSplitterstat_HR,CSize(x,z),CSize(100,z));
+
+	//stattree
+	RemoveAnchor(stattree);
+	AddAnchor(stattree,CSize(0,0),CSize(x,100));
+
+	//graph
+	RemoveAnchor(m_DownloadOMeter);
+	AddAnchor(m_DownloadOMeter,CSize(x,0),CSize(100,z));
+
+	RemoveAnchor(m_UploadOMeter);
+	AddAnchor(m_UploadOMeter,CSize(x,z),CSize(100,y));
+
+	RemoveAnchor(m_Statistics);
+	AddAnchor(m_Statistics,CSize(x,y),CSize(100,100));
+	
+	//set range
+	CRect rc;
+	GetWindowRect(rc);
+	ScreenToClient(rc);
+
+	m_wndSplitterstat.SetRange(rc.left+8, rc.right-8);
+	CRect rcd,rcu,rcs;
+	m_DownloadOMeter.GetWindowRect(rcd);
+	m_UploadOMeter.GetWindowRect(rcu);
+	m_Statistics.GetWindowRect(rcs);
+	ScreenToClient(rcd);
+	ScreenToClient(rcu);
+	ScreenToClient(rcs);
+	m_wndSplitterstat_HL.SetRange(rcu.top+3, rcs.bottom-3);
+	m_wndSplitterstat_HR.SetRange(rcd.top+3, rcu.bottom-3);
+}
+
+
+void CStatisticsDlg::DoResize_HL(int delta)
+{
+	CSplitterControl::ChangeHeight(&m_UploadOMeter, delta , CW_TOPALIGN);
+	CSplitterControl::ChangeHeight(&m_Statistics, -delta, CW_BOTTOMALIGN);
+
+	CRect rcW;
+ 
+	GetWindowRect(rcW);
+	ScreenToClient(rcW);
+
+	CRect rcspl;
+
+	GetDlgItem(IDC_STATTREE)->GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat(((rcspl.right)*100)/rcW.Width());
+
+	m_UploadOMeter.GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat_HL(((rcspl.bottom)*100)/rcW.Height());
+
+	m_DownloadOMeter.GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat_HR(((rcspl.bottom)*100)/rcW.Height());
+
+	initCSize(thePrefs.GetSplitterbarPositionStat(),thePrefs.GetSplitterbarPositionStat_HL(),thePrefs.GetSplitterbarPositionStat_HR());
+
+	ShowInterval();
+	Invalidate();
+	UpdateWindow();
+}
+
+void CStatisticsDlg::DoResize_HR(int delta)
+{
+
+	CSplitterControl::ChangeHeight(&m_DownloadOMeter, delta , CW_TOPALIGN);
+	CSplitterControl::ChangeHeight(&m_UploadOMeter, -delta, CW_BOTTOMALIGN);
+
+	CRect rcW;
+ 
+	GetWindowRect(rcW);
+	ScreenToClient(rcW);
+
+	CRect rcspl;
+
+	GetDlgItem(IDC_STATTREE)->GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat(((rcspl.right)*100)/rcW.Width());
+
+	m_UploadOMeter.GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat_HL(((rcspl.bottom)*100)/rcW.Height());
+
+	m_DownloadOMeter.GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat_HR(((rcspl.bottom)*100)/rcW.Height());
+
+	initCSize(thePrefs.GetSplitterbarPositionStat(),thePrefs.GetSplitterbarPositionStat_HL(),thePrefs.GetSplitterbarPositionStat_HR());
+
+	ShowInterval();
+	Invalidate();
+	UpdateWindow();
+}
+
+void CStatisticsDlg::DoResize_V(int delta)
+{
+	CSplitterControl::ChangeWidth(&stattree, delta);
+	CSplitterControl::ChangeWidth(&m_wndSplitterstat_HL, -delta);
+	CSplitterControl::ChangeWidth(&m_wndSplitterstat_HR, -delta);
+	CSplitterControl::ChangeWidth(&m_DownloadOMeter, -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(&m_UploadOMeter, -delta, CW_RIGHTALIGN);
+	CSplitterControl::ChangeWidth(&m_Statistics, -delta, CW_RIGHTALIGN);
+
+	CRect rcW;
+ 
+	GetWindowRect(rcW);
+	ScreenToClient(rcW);
+
+	CRect rcspl;
+
+	GetDlgItem(IDC_STATTREE)->GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat(((rcspl.right)*100)/rcW.Width());
+
+	m_UploadOMeter.GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat_HL(((rcspl.bottom)*100)/rcW.Height());
+
+	m_DownloadOMeter.GetWindowRect(rcspl);
+	ScreenToClient(rcspl);
+	thePrefs.SetSplitterbarPositionStat_HR(((rcspl.bottom)*100)/rcW.Height());
+
+	initCSize(thePrefs.GetSplitterbarPositionStat(),thePrefs.GetSplitterbarPositionStat_HL(),thePrefs.GetSplitterbarPositionStat_HR());
+
+	ShowInterval();
+	Invalidate();
+	UpdateWindow();
+}
+
+LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+switch (message) {
+	case WM_PAINT:
+		if (m_wndSplitterstat) 
+		{
+			CRect rctree,rcSpl,rcW;
+			CWnd* pWnd;
+
+			GetWindowRect(rcW);
+			ScreenToClient(rcW);
+
+			pWnd = GetDlgItem(IDC_STATTREE);
+			pWnd->GetWindowRect(rctree);
+
+			ScreenToClient(rctree);
+  
+
+			if (rcW.Width()>0) 
+			{
+				rcSpl.left=rctree.right+1;
+				rcSpl.right=rcSpl.left+4;
+				rcSpl.top=rcW.top+9;
+				rcSpl.bottom=rcW.bottom-6;
+    
+				m_wndSplitterstat.MoveWindow(rcSpl,true);
+			}
+		}
+		if (m_wndSplitterstat_HL) {
+			CRect rctree,rcSpl,rcW;
+			CWnd* pWnd;
+
+			GetWindowRect(rcW);
+			ScreenToClient(rcW);
+
+			pWnd = &m_UploadOMeter;
+			pWnd->GetWindowRect(rctree);
+
+			ScreenToClient(rctree);
+  
+			if (rcW.Height()>0) 
+			{
+				rcSpl.left=rctree.left+2;
+				rcSpl.right=rctree.right-2;
+				rcSpl.top=rctree.bottom+1;
+				rcSpl.bottom=rctree.bottom+5;
+    
+				m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
+			}
+		}
+		if (m_wndSplitterstat_HR) {
+			CRect rctree,rcSpl,rcW;
+			CWnd* pWnd;
+
+			GetWindowRect(rcW);
+			ScreenToClient(rcW);
+
+			pWnd = &m_DownloadOMeter;
+			pWnd->GetWindowRect(rctree);
+
+			ScreenToClient(rctree);
+  
+			if (rcW.Height()>0) 
+			{
+				rcSpl.left=rctree.left+2;
+				rcSpl.right=rctree.right-2;
+				rcSpl.top=rctree.bottom+1;
+				rcSpl.bottom=rctree.bottom+5;
+    
+				m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
+			}
+		}
+	break;
+	case WM_NOTIFY:
+		if (wParam == IDC_SPLITTER_STAT)
+		{ 
+			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+			DoResize_V(pHdr->delta);
+		}
+		else if (wParam == IDC_SPLITTER_STAT_HL)
+		{ 
+			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+			DoResize_HL(pHdr->delta);
+		}
+		else if (wParam == IDC_SPLITTER_STAT_HR)
+		{ 
+			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+			DoResize_HR(pHdr->delta);
+		}
+		break;
+	case WM_WINDOWPOSCHANGED : 
+		{
+			CRect rcW;
+			GetWindowRect(rcW);
+			ScreenToClient(rcW);
+
+			if (m_wndSplitterstat && rcW.Width()>0) Invalidate();
+			if (m_wndSplitterstat_HL && rcW.Height()>0) Invalidate();
+			if (m_wndSplitterstat_HR && rcW.Height()>0) Invalidate();
+			break;
+		}
+	case WM_SIZE:
+		{
+      //set range
+			if (m_wndSplitterstat)
+			{
+				CRect rc;
+				GetWindowRect(rc);
+				ScreenToClient(rc);
+				m_wndSplitterstat.SetRange(rc.left+8 , rc.right-8);
+				ShowInterval();
+			}
+			if (m_wndSplitterstat_HL)
+			{
+				CRect rcs; m_Statistics.GetWindowRect(rcs); ScreenToClient(rcs);
+				CRect rcu; m_UploadOMeter.GetWindowRect(rcu); ScreenToClient(rcu);
+				m_wndSplitterstat_HL.SetRange(rcu.top+3, rcs.bottom-3);
+				ShowInterval();
+			}
+			if (m_wndSplitterstat_HR)
+			{
+				CRect rcd; m_DownloadOMeter.GetWindowRect(rcd); ScreenToClient(rcd);
+				CRect rcu; m_UploadOMeter.GetWindowRect(rcu); ScreenToClient(rcu);
+				m_wndSplitterstat_HR.SetRange(rcd.top+3, rcu.bottom-3);
+				ShowInterval();
+			}
+		break;
+		}
+
+}
+
+return CResizableDialog::DefWindowProc(message, wParam, lParam);
+
+}
+//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+
 //MORPH START - Removed by SiRoB, New Graph
-/*void CStatisticsDlg::SetupLegend( int ResIdx, int ElmtIdx, int legendNr){
+/*
+void CStatisticsDlg::SetupLegend( int ResIdx, int ElmtIdx, int legendNr){
 	CRect Rect;
 
 	GetDlgItem( ResIdx )->GetWindowRect( Rect );
@@ -292,7 +628,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 		m_Led3[ ElmtIdx ].SetBackgroundColor( m_Statistics.GetPlotColor( ElmtIdx ) );
 		m_Led3[ ElmtIdx ].SetFrameColor( RGB( 0x00, 0x00, 0x00 ) );
 	}
-}*/
+}
+*/
 //MORPH END  - Removed by SiRoB, New Graph
 
 void CStatisticsDlg::RepaintMeters() {
@@ -2395,15 +2732,15 @@ void CStatisticsDlg::ShowInterval()
 //MORPH START - Changed by SiRoB, New Graph
 void CStatisticsDlg::SetARange(bool SetDownload,int maxValue){
 	if (SetDownload) {
-		m_DownloadOMeter.SetRange(0, maxValue/*maxValue+4*/, 0);
-		m_DownloadOMeter.SetRange(0, maxValue/*maxValue+4*/, 1);
-		m_DownloadOMeter.SetRange(0, maxValue/*maxValue+4*/, 2);
+		m_DownloadOMeter.SetRange(0, maxValue, 0);
+		m_DownloadOMeter.SetRange(0, maxValue, 1);
+		m_DownloadOMeter.SetRange(0, maxValue, 2);
 	}else{
-		m_UploadOMeter.SetRange(0, maxValue/*maxValue+4*/, 0) ;
-		m_UploadOMeter.SetRange(0, maxValue/*maxValue+4*/, 1);
-		m_UploadOMeter.SetRange(0, maxValue/*maxValue+4*/, 2);
-		m_UploadOMeter.SetRange(0, maxValue/*maxValue+4*/, 3);
-		m_UploadOMeter.SetRange(0, maxValue/*maxValue+4*/, 4);
+		m_UploadOMeter.SetRange(0, maxValue, 0) ;
+		m_UploadOMeter.SetRange(0, maxValue, 1);
+		m_UploadOMeter.SetRange(0, maxValue, 2);
+		m_UploadOMeter.SetRange(0, maxValue, 3);
+		m_UploadOMeter.SetRange(0, maxValue, 4);
 	}
 }
 //MORPH END   - Changed by SiRoB, New Graph

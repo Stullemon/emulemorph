@@ -538,6 +538,12 @@ uint8	CPreferences::permissions;
 bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
 //EastShare End - PreferShareAll by AndCycle
 
+bool	CPreferences::m_bEnableChunkDots;
+//EastShare - Added by Pretender, Option for ChunkDots
+//EastShare - Added by Pretender, Invisible Mode
+bool	CPreferences::m_bInvisibleMode;
+//EastShare - Added by Pretender, Invisible Mode
+
 char	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 char	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
 
@@ -628,7 +634,17 @@ CArray<Category_Struct*,Category_Struct*> CPreferences::catMap;
 uint8	CPreferences::m_nWebMirrorAlertLevel;
 bool	CPreferences::m_bRunAsUser;
 
-
+//MORPH START - Added by SiRoB, Splitting Bar [O²]
+uint8	CPreferences::splitterbarPositionStat;
+uint8	CPreferences::splitterbarPositionStat_HL;
+uint8	CPreferences::splitterbarPositionStat_HR;
+uint16	CPreferences::splitterbarPositionFriend;
+uint16	CPreferences::splitterbarPositionIRC;
+//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+//MORPH START - Added by SiRoB, XML News [O²]
+CString	CPreferences::m_strFeedsDir;
+bool	CPreferences::enableNEWS;
+//MORPH END   - Added by SiRoB, XML News [O²]
 
 CPreferences::CPreferences()
 {
@@ -662,8 +678,14 @@ void CPreferences::Init()
 	configdir = appdir + CONFIGFOLDER;
 	m_strWebServerDir = appdir + _T("webserver\\");
 	m_strLangDir = appdir + _T("lang\\");
+	//MORPH START - Added by SiRoB, XML News [O²]
+	m_strFeedsDir = appdir + _T("feeds\\"); // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	::CreateDirectory(GetConfigDir(),0);
+	//MORPH START - Added by SiRoB, XML News [O²]
+	::CreateDirectory(GetFeedsDir(),0); // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	// lets move config-files in the appdir to the configdir (for upgraders <0.29a to >=0.29a )
 	if ( PathFileExists(appdir+"preferences.ini")) MoveFile(appdir+"preferences.ini",configdir+"preferences.ini");
@@ -679,6 +701,9 @@ void CPreferences::Init()
 	if ( PathFileExists(appdir+"shareddir.dat")) MoveFile(appdir+"shareddir.dat",configdir+"shareddir.dat");
 	if ( PathFileExists(appdir+"staticservers.dat")) MoveFile(appdir+"staticservers.dat",configdir+"staticservers.dat");
 	if ( PathFileExists(appdir+"webservices.dat")) MoveFile(appdir+"webservices.dat",configdir+"webservices.dat");
+	//MORPH START - Added by SiRoB, XML News [O²]
+	if ( PathFileExists(appdir+"xmlnews.dat")) MoveFile(appdir+"xmlnews.dat",configdir+"xmlnews.dat"); // Added by N_OxYdE:XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	CreateUserHash();
 
@@ -2345,6 +2370,12 @@ void CPreferences::SavePreferences(){
 	// EastShare START - Added by TAHO, .met file control
 	ini.WriteInt("KnownMetDays", m_iKnownMetDays,"eMule");
 	// EastShare END - Added by TAHO, .met file control
+	//EastShare - Added by Pretender, Option for ChunkDots
+	ini.WriteInt("EnableChunkDots", m_bEnableChunkDots,"eMule");
+	//EastShare - Added by Pretender, Option for ChunkDots
+	//EastShare - Added by Pretender, Invisible Mode
+	ini.WriteInt("InvisibleMode", m_bInvisibleMode,"eMule");
+	//EastShare - Added by Pretender, Invisible Mode
 
 	//EastShare - added by AndCycle, IP to Country
 	ini.WriteInt("IP2Country", m_iIP2CountryNameMode,"eMule"); 
@@ -2414,6 +2445,14 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("USSPingLimit", m_iDynUpPingLimit,"eMule"); // EastShare - Add by TAHO, USS limit
 	ini.WriteBool("IsUSSLimit", m_bIsUSSLimit,"eMule"); // EastShare - Added by TAHO, does USS limit
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	ini.WriteInt("SplitterbarPositionStat",splitterbarPositionStat+2,"eMule");
+	ini.WriteInt("SplitterbarPositionStat_HL",splitterbarPositionStat_HL+2,"eMule");
+	ini.WriteInt("SplitterbarPositionStat_HR",splitterbarPositionStat_HR+2,"eMule");
+	ini.WriteInt("SplitterbarPositionFriend",splitterbarPositionFriend+2,"eMule");
+	ini.WriteInt("SplitterbarPositionIRC",splitterbarPositionIRC+2,"eMule");
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+	
 	// ZZ:UploadSpeedSense -->
 	ini.WriteBool("USSEnabled", m_bDynUpEnabled, "eMule");
 	ini.WriteInt("USSPingTolerance", m_iDynUpPingTolerance, "eMule");
@@ -2422,7 +2461,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("USSNumberOfPings", m_iDynUpNumberOfPings, "eMule");
 	// ZZ:UploadSpeedSense <--
 	ini.WriteInt("WebMirrorAlertLevel", m_nWebMirrorAlertLevel, "eMule");
-ini.WriteBool("RunAsUnprivilegedUser", m_bRunAsUser, "eMule");
+	ini.WriteBool("RunAsUnprivilegedUser", m_bRunAsUser, "eMule");
 }
 
 void CPreferences::SaveCats(){
@@ -2883,9 +2922,16 @@ void CPreferences::LoadPreferences(){
 	shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	m_iKnownMetDays = ini.GetInt("KnownMetDays", 150);
+	m_iKnownMetDays = ini.GetInt("KnownMetDays", 90);
 	if (m_iKnownMetDays == 0) m_iKnownMetDays = 150;
 	// EastShare END - Added by TAHO, .met file control
+	//EastShare - Added by Pretender, Option for ChunkDots
+	m_bEnableChunkDots=ini.GetBool("EnableChunkDots",true);
+	//EastShare - Added by Pretender, Option for ChunkDots
+	//EastShare - Added by Pretender, Invisible Mode
+	m_bInvisibleMode=ini.GetBool("InvisibleMode",false);
+	//EastShare - Added by Pretender, Invisible Mode
+
 	isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
 	m_bDateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
 	m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
@@ -2920,7 +2966,16 @@ void CPreferences::LoadPreferences(){
 	// khaos::accuratetimerem+
 	m_iTimeRemainingMode=ini.GetInt("TimeRemainingMode", 0);
 	// khaos::accuratetimerem-
-
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	splitterbarPositionStat=ini.GetInt("SplitterbarPositionStat",30);
+	splitterbarPositionStat_HL=ini.GetInt("SplitterbarPositionStat_HL",68);
+	splitterbarPositionStat_HR=ini.GetInt("SplitterbarPositionStat_HR",33);
+	splitterbarPositionFriend=ini.GetInt("SplitterbarPositionFriend",300);
+	splitterbarPositionIRC=ini.GetInt("SplitterbarPositionIRC",200);
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+	//MORPH START - Added by SiRoB, XML News [O²]
+	enableNEWS=ini.GetBool("ShowNews", 1);
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	//if (maxGraphDownloadRate<maxdownload) maxdownload=UNLIMITED;
 	//if (maxGraphUploadRate<maxupload) maxupload=UNLIMITED;
 
@@ -3114,7 +3169,7 @@ void CPreferences::LoadPreferences(){
 	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1, "eMule");
 	m_bDynUpLog = ini.GetBool("USSLog", false, "eMule");
 	m_iDynUpPingLimit = ini.GetInt("USSPingLimit", 200, "eMule"); // EastShare - Added by TAHO, USS limit
-	m_bIsUSSLimit = ini.GetBool("IsUSSLimit", false, "eMule"); // EastShare - Added by TAHO, does USS limit
+	m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true, "eMule"); // EastShare - Added by TAHO, does USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
 
 	// ZZ:UploadSpeedSense -->

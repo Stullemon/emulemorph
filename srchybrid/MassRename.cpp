@@ -105,6 +105,7 @@ BEGIN_MESSAGE_MAP(CMassRenameDialog, CDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_CHAR()
 	ON_EN_CHANGE(IDC_FILENAMEMASKEDIT, OnEnChangeFilenamemaskedit)
+	ON_BN_CLICKED(IDC_BUTTONSTRIP, OnBnClickedButtonStrip) //MORPH - Added by SiRoB, Clean MassRename
 END_MESSAGE_MAP()
 
 void CMassRenameDialog::OnOK() {
@@ -450,3 +451,12 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 		}
 	}
 }
+//MORPH START - Added by SiRoB, Clean MassRename
+void CMassRenameDialog::OnBnClickedButtonStrip()
+{
+	CString filename;
+
+	NFNLeft->GetWindowText(filename);
+	NFNLeft->SetWindowText( CleanupFilename(filename) );
+}
+//MORPH END   - Added by SiRoB, Clean MassRename

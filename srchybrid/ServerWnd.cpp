@@ -32,6 +32,12 @@
 #include "Sockets.h"
 #include "MuleStatusBarCtrl.h"
 #include "HelpIDs.h"
+//MORPH START - Added by SiRoB, XML News [O²]
+#define PUGAPI_VARIANT 0x58475550
+#define PUGAPI_VERSION_MAJOR 1
+#define PUGAPI_VERSION_MINOR 2
+#include "pugxml.h"
+//MORPH END   - Added by SiRoB, XML News [O²]
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -49,6 +55,9 @@ CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CServerWnd::IDD, pParent)
 {
 	servermsgbox = new CHTRichEditCtrl;
+	//MORPH START - Added by SiRoB, XML News [O²]
+	newsmsgbox = new CHTRichEditCtrl; // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	m_pacServerMetURL=NULL;
 	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
 	icon_srvlist = NULL;
@@ -66,6 +75,9 @@ CServerWnd::~CServerWnd()
 		m_pacServerMetURL->Release();
 	}
 	delete servermsgbox;
+	//MORPH START - Added by SiRoB, XML News [O²]
+	delete newsmsgbox; // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 }
 
 BOOL CServerWnd::OnInitDialog()
@@ -111,6 +123,15 @@ BOOL CServerWnd::OnInitDialog()
 		// MOD Note: end
 		servermsgbox->AppendText(CString("\n\n"));
 	}
+	//MORPH START - Added by SiRoB, XML News [O²]
+	if (newsmsgbox->Create(WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rect, this, 124)){
+		newsmsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		newsmsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		newsmsgbox->SetEventMask(newsmsgbox->GetEventMask() | ENM_LINK);
+		newsmsgbox->SetFont(&theApp.emuledlg->m_fontHyperText);
+		newsmsgbox->SetTitle("News");
+	}
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	TCITEM newitem;
 	CString name;
 	name = GetResString(IDS_SV_SERVERINFO);
@@ -124,6 +145,14 @@ BOOL CServerWnd::OnInitDialog()
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneLog );
+
+	//MORPH START - Added by SiRoB, XML News [O²]
+	name = "News";
+	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+	newitem.iImage = 0;
+	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneNews );
+	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	name=SZ_DEBUG_LOG_TITLE;
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
@@ -153,13 +182,26 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
 	AddAnchor(IDC_DD,TOP_RIGHT);
 
+	//MORPH START - Added by SiRoB, XML News [O²]
+	AddAnchor(IDC_FEEDUPDATE, MIDDLE_RIGHT);
+	AddAnchor(IDC_FEEDLIST, MIDDLE_LEFT, MIDDLE_RIGHT);
+	//MORPH END   - Added by SiRoB, XML News [O²]
+
 	if (servermsgbox->m_hWnd)
 		AddAnchor(*servermsgbox, CSize(0,50), BOTTOM_RIGHT);
 	debug = true;
+	//MORPH START - Added by SiRoB, XML News [O²]
+	if (newsmsgbox->m_hWnd)
+		AddAnchor(*newsmsgbox, CSize(0,50), BOTTOM_RIGHT);
+	news = true;
+	//MORPH END   - Added by SiRoB, XML News [O²]	
 	ToggleDebugWindow();
 
 	debuglog.ShowWindow(SW_HIDE);
 	logbox.ShowWindow(SW_HIDE);
+	//MORPH START - Added by SiRoB, XML News [O²]
+	newsmsgbox->ShowWindow(SW_HIDE); // Added by N_OxYdE: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	if (servermsgbox->m_hWnd)
 		servermsgbox->ShowWindow(SW_SHOW);
 
@@ -215,6 +257,10 @@ BOOL CServerWnd::OnInitDialog()
 
 	InitWindowStyles(this);
 
+	//MORPH START - Added by SiRoB, XML News [O²]
+	ListFeeds(); // Added by O²: XML News
+	GetDlgItem(IDC_FEEDLIST)->RedrawWindow(); //Added by SiRoB
+	//MORPH END   - Added by SiRoB, XML News [O²]
 	return true;
 }
 
@@ -229,6 +275,9 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MYINFO, m_ctrlMyInfo);
 	DDX_Control(pDX, IDC_TAB3, StatusSelector);
 	DDX_Control(pDX, IDC_MYINFOLIST, m_MyInfo);
+	//MORPH START - Added by SiRoB, XML News [O²]
+	DDX_Control(pDX, IDC_FEEDLIST, m_feedlist); // Added by O²: XML News
+	//MORPH END   - Added by SiRoB, XML News [O²]
 }
 
 bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
@@ -307,6 +356,9 @@ void CServerWnd::Localize()
 	    GetDlgItem(IDC_LOGRESET)->SetWindowText(GetResString(IDS_PW_RESET));
 	    GetDlgItem(IDC_MYINFO)->SetWindowText(GetResString(IDS_MYINFO));
 	    m_ctrlMyInfo.SetText(GetResString(IDS_MYINFO));
+    	//MORPH START - Added by SiRoB, XML News [O²]
+		GetDlgItem(IDC_FEEDUPDATE)->SetWindowText(GetResString(IDS_SF_RELOAD)); // Added by O²: XML News
+		//MORPH END   - Added by SiRoB, XML News [O²]
     
 	    TCITEM item;
 	    CString name;
@@ -319,6 +371,13 @@ void CServerWnd::Localize()
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneLog, &item);
+
+	    //MORPH START - Added by SiRoB, XML News [O²]
+		name = "News";
+	    item.mask = TCIF_TEXT;
+		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		StatusSelector.SetItem(PaneNews, &item);
+		//MORPH END   - Added by SiRoB, XML News [O²]
 
 	    name = SZ_DEBUG_LOG_TITLE;
 	    item.mask = TCIF_TEXT;
@@ -345,6 +404,11 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_EN_CHANGE(IDC_SPORT, OnSvrTextChange)
 	ON_EN_CHANGE(IDC_SNAME, OnSvrTextChange)
 	ON_EN_CHANGE(IDC_SERVERMETURL, OnSvrTextChange)
+	//MORPH START - Added by SiRoB, XML News [O²]
+	ON_NOTIFY(EN_LINK, 124, OnEnLinkNewsBox)
+	ON_BN_CLICKED(IDC_FEEDUPDATE, DownloadFeed)
+	ON_LBN_SELCHANGE(IDC_FEEDLIST, OnFeedListSelChange)
+	//MORPH END   - Added by SiRoB, XML News [O²]
 END_MESSAGE_MAP()
 
 
@@ -507,7 +571,12 @@ void CServerWnd::OnBnClickedResetLog()
 	int cur_sel = StatusSelector.GetCurSel();
 	if (cur_sel == -1)
 		return;
+	//MORPH START - Changed by SiRoB, XML News [O²]
+	/*
 	if (cur_sel == PaneVerboseLog)
+	*/
+	if( (cur_sel == 3 && news) || (cur_sel == 2 && !news) )
+	//MORPH END   - Changed by SiRoB, XML News [O²]
 	{
 		theApp.emuledlg->ResetDebugLog();
 		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
@@ -522,6 +591,15 @@ void CServerWnd::OnBnClickedResetLog()
 		servermsgbox->Reset();
 		// the statusbar does not contain any server log related messages, so it's not cleared.
 	}
+
+	//MORPH START - Changed by SiRoB, XML News [O²]
+	if( cur_sel == 2  && news )
+	//if (cur_sel == PaneNews)
+	{
+		newsmsgbox->Reset();
+		// the statusbar does not contain any server log related messages, so it's not cleared.
+	}
+	//MORPH END   - Changed by SiRoB, XML News [O²]
 }
 
 void CServerWnd::OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult)
@@ -535,10 +613,18 @@ void CServerWnd::UpdateLogTabSelection()
 	int cur_sel = StatusSelector.GetCurSel();
 	if (cur_sel == -1)
 		return;
+	//MORPH START - Changed by SiRoB, XML News [O²]
+	/*
 	if (cur_sel == PaneVerboseLog)
+	*/
+	if( (cur_sel == 3 && news) || (cur_sel == 2 && !news) )
+	//MORPH END   - Changed by SiRoB, XML News [O²]
 	{
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
+		//MORPH START - Added by SiRoB, XML News [O²]
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O²: XML News
+		//MORPH END   - Added by SiRoB, XML News [O²]
 		debuglog.ShowWindow(SW_SHOW);
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -546,6 +632,9 @@ void CServerWnd::UpdateLogTabSelection()
 	{
 		debuglog.ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
+		//MORPH START - Added by SiRoB, XML News [O²]
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O²: XML News
+		//MORPH END   - Added by SiRoB, XML News [O²]
 		logbox.ShowWindow(SW_SHOW);
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -553,16 +642,35 @@ void CServerWnd::UpdateLogTabSelection()
 	{
 		debuglog.ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
+		//MORPH START - Added by SiRoB, XML News [O²]
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O²: XML News
+		//MORPH END   - Added by SiRoB, XML News [O²]
 		servermsgbox->ShowWindow(SW_SHOW);
 		servermsgbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
+	
+	//MORPH START - Added by SiRoB, XML News [O²]	
+	if( cur_sel == 2  && news )
+	//if (cur_sel == PaneNews)
+	{
+		debuglog.ShowWindow(SW_HIDE);
+		logbox.ShowWindow(SW_HIDE);
+		// eMule O²
+		newsmsgbox->ShowWindow(SW_SHOW); // added by O²: XML News
+		// END eMule O²
+		servermsgbox->ShowWindow(SW_HIDE);
+		StatusSelector.HighlightItem(cur_sel, FALSE);
+	}
+	//MORPH END   - Added by SiRoB, XML News [O²]
 }
 
 void CServerWnd::ToggleDebugWindow()
 {
 	int cur_sel = StatusSelector.GetCurSel();
-	if (thePrefs.GetVerbose() && !debug)
+	//MORPH START - Changed by SiRoB, XML News [O²]
+	/*
+	if (thePrefs.GetVerbose() && !debug)	
 	{
 		TCITEM newitem;
 		CString name;
@@ -586,7 +694,82 @@ void CServerWnd::ToggleDebugWindow()
 		StatusSelector.DeleteItem(PaneVerboseLog);
 		debug = false;
 	}
+	*/
+	if( (cur_sel == 2) || (cur_sel == 3) ){
+		// StatusSelector.SetCurSel(2);
+		StatusSelector.SetCurSel(1);
+		// END Added by O²: XML News
+		// END eMule O²
+		StatusSelector.SetFocus();
+	}
+	servermsgbox->ShowWindow(SW_HIDE);
+	logbox.ShowWindow(SW_SHOW);
+	newsmsgbox->ShowWindow(SW_HIDE);
+	debuglog.ShowWindow(SW_HIDE);
+
+	StatusSelector.DeleteItem(3);
+	StatusSelector.DeleteItem(2);
+
+	debug = false;
+	news = false;
+
+	GetDlgItem(IDC_FEEDUPDATE)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_FEEDLIST)->ShowWindow(SW_HIDE);
+	if (thePrefs.GetNews()) {
+		TCITEM newitem;
+		CString name;
+		name = "News";
+		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
+		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		newitem.iImage = 0;
+		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
+		news = true; 
+
+		GetDlgItem(IDC_FEEDUPDATE)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_FEEDLIST)->ShowWindow(SW_SHOW);
+	}
+
+	if (thePrefs.GetVerbose()) {
+		TCITEM newitem;
+		CString name;
+		name = SZ_DEBUG_LOG_TITLE;
+		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
+		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		newitem.iImage = 0;
+		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
+		debug = true;
+	}
+	RedrawFeedList();
+	//MORPH END   - Changed by SiRoB, XML News [O²]
 }
+
+//MORPH START - Added by SiRoB, XML News [O²]
+void CServerWnd::RedrawFeedList(){
+	if (news) {
+		uint8 verbose;
+		if (debug)
+			verbose = 3;
+		else
+			verbose = 2;
+		CRect rectab, rectlist, rectgo;
+		StatusSelector.GetItemRect(verbose,rectab);
+		GetDlgItem(IDC_FEEDLIST)->GetWindowRect(rectlist);
+		ScreenToClient(rectlist);
+		GetDlgItem(IDC_FEEDUPDATE)->GetWindowRect(rectgo);
+		ScreenToClient(rectgo);
+		rectlist.left = rectab.right + 20;
+		rectlist.right = rectgo.left - 10 ;
+		GetDlgItem(IDC_FEEDLIST)->MoveWindow(rectlist, true);
+	}
+}
+
+LRESULT CServerWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+	if ((message == WM_PAINT) && (m_feedlist))
+		RedrawFeedList();
+	return CResizableDialog::DefWindowProc(message, wParam, lParam);
+}
+//MORPH START - Added by SiRoB, XML News [O²]
 
 void CServerWnd::UpdateMyInfo() {
 	CString buffer;
@@ -899,3 +1082,221 @@ void CServerWnd::OnSvrTextChange()
 	GetDlgItem(IDC_ADDSERVER)->EnableWindow(GetDlgItem(IDC_IPADDRESS)->GetWindowTextLength());
 	GetDlgItem(IDC_UPDATESERVERMETFROMURL)->EnableWindow( GetDlgItem(IDC_SERVERMETURL)->GetWindowTextLength()>0 );
 }
+
+//MORPH START - Added by SiRoB, XML News [O²]
+void CServerWnd::ListFeeds()
+{
+	while (m_feedlist.GetCount()>0)
+		m_feedlist.DeleteString(0);
+	int counter=0;
+	CString sbuffer;
+	char buffer[1024];
+	int lenBuf = 1024;
+
+	FILE* readFile= fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "r");
+	if (readFile!=NULL)
+	{
+		GetDlgItem(IDC_FEEDLIST)->EnableWindow();
+		while (!feof(readFile))
+		{
+			if (fgets(buffer,lenBuf,readFile)==0)
+				break;
+			sbuffer=buffer;
+			
+			// ignore comments & too short lines
+			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength()<5)
+				continue;
+			
+			int pos=sbuffer.Find(',');
+			if (pos>0 && pos<sbuffer.GetLength())
+			{
+				counter++;
+				m_feedlist.AddString(sbuffer.Left(pos).Trim());
+				aFeedUrls.Add(sbuffer.Right(sbuffer.GetLength()-pos-1).Trim());
+			}
+		}
+		fclose(readFile);
+	}
+	else
+	{
+		GetDlgItem(IDC_FEEDUPDATE)->EnableWindow(false);
+		GetDlgItem(IDC_FEEDLIST)->EnableWindow(false);
+	}
+}
+
+void CServerWnd::DownloadFeed()
+{
+	CString sbuffer;
+	int numero = m_feedlist.GetCurSel();
+	CString strURL = aFeedUrls.GetAt(numero);
+	CString strTempFilename; 
+	CString strTempFilenameToNormalize; // Format XML by bzubzu
+	strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),numero);
+	strTempFilenameToNormalize.Format("%s%d.xmltmp",thePrefs.GetFeedsDir(),numero); // Format XML by bzubzu
+	FILE* readFileToNormalize = fopen(strTempFilenameToNormalize, "r");
+	if (readFileToNormalize!=NULL)
+	{
+		fclose(readFileToNormalize);
+		remove(strTempFilenameToNormalize);
+	}
+	readFileToNormalize = fopen(strTempFilenameToNormalize, "r");
+	CHttpDownloadDlg dlgDownload;
+	dlgDownload.m_sURLToDownload = strURL;
+	dlgDownload.m_sFileToDownloadInto = strTempFilenameToNormalize;
+	if (dlgDownload.DoModal() != IDOK)
+	{
+		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
+		return;
+	}
+	// Format XML by bzubzu
+	FILE* writeFile = fopen(strTempFilename, "w");
+	readFileToNormalize = fopen(strTempFilenameToNormalize, "r");
+	if (writeFile!=NULL)
+	{
+		fclose(writeFile);
+		remove(strTempFilename);
+	}
+	writeFile = fopen(strTempFilename, "w");
+	int ch;
+	while (!feof(readFileToNormalize)){
+		ch = fgetc( readFileToNormalize );
+		switch ((char)ch){
+			case 'é': //&eacute;
+				fputs( "&eacute;", writeFile );
+				break;
+			case 'è': //&egrave;
+				fputs( "&egrave;", writeFile );
+				break;
+			case 'ç': //&ccedil;
+				fputs( "&ccedil;", writeFile );
+				break;
+			case 'à': //&agrave;
+				fputs( "&agrave;", writeFile );
+				break;
+			default:
+				putc(ch, writeFile);
+				break;
+		}
+	}
+	fclose(writeFile);
+	fclose(readFileToNormalize);
+	remove(strTempFilenameToNormalize);
+	// END Format XML by bzubzu
+	ParseNewsFile(strTempFilename);
+}
+
+void CServerWnd::ParseNewsFile(CString strTempFilename)
+{
+	CString sbuffer;
+	newsmsgbox->Reset();
+	aXMLUrls.RemoveAll();
+	aXMLNames.RemoveAll();
+
+	if (!PathFileExists(strTempFilename)){
+		StatusSelector.SetCurSel(2);
+		UpdateLogTabSelection();
+		return;
+	}
+
+	using namespace pug;
+	xml_parser* xml = new xml_parser();
+	xml->parse_file(strTempFilename);
+	xml_node itelem;
+	if (!xml->document().first_element_by_path("./rss").empty())
+		itelem = xml->document().first_element_by_path("./rss/channel");
+	else if (!xml->document().first_element_by_path("./rdf:RDF").empty())
+		itelem = xml->document().first_element_by_path("./rdf:RDF/channel");
+	else
+	{
+		delete xml;
+		return;
+	}
+	if(!itelem.empty())
+	{
+		aXMLUrls.Add(itelem.first_element_by_path("./link").child(0).value());
+		sbuffer = itelem.first_element_by_path("./title").child(0).value();
+		HTMLParse(sbuffer);
+		sbuffer.Replace("'","`");
+		newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+		aXMLNames.Add(sbuffer);
+		CString xmlbuffer = itelem.first_element_by_path("./description").child(0).value();
+		HTMLParse(xmlbuffer);
+		newsmsgbox->AddEntry(CString("\n	")+xmlbuffer);
+		CString sxmlbuffer;
+		xml_node_list item;
+		for(xml_node::child_iterator i = itelem.children_begin(); i < itelem.children_end(); ++i)
+			if (CString(i->name()) == CString("item"))
+			{
+				aXMLUrls.Add(i->first_element_by_path("./link").child(0).value());
+				sbuffer = i->first_element_by_path("./title").child(0).value();
+				HTMLParse(sbuffer);
+				newsmsgbox->AppendText("\n• ");
+				newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+				aXMLNames.Add(sbuffer);
+				if (!i->first_element_by_path("./author").child(0).empty())
+				{
+					sxmlbuffer = i->first_element_by_path("./author").child(0).value();
+					newsmsgbox->AppendText(CString(" - Par: ")+sxmlbuffer);
+				}
+				CString buffer = i->first_element_by_path("./description").child(0).value();
+				HTMLParse(buffer);
+				if (buffer != xmlbuffer && !buffer.IsEmpty())
+				{
+					if (sxmlbuffer.IsEmpty())
+						newsmsgbox->AppendText("\n");
+					int index = 0;
+					while (buffer.Find("<a href=\"") != -1)
+					{
+						index = buffer.Find("<a href=\"");
+						newsmsgbox->AppendText(buffer.Left(index));
+						buffer = buffer.Mid(index+9);
+						index = buffer.Find("\"");
+						sbuffer = buffer.Left(index);
+						aXMLUrls.Add(sbuffer);
+						buffer = buffer.Mid(index+1);
+						index = buffer.Find(">");
+						buffer = buffer.Mid(index+1);
+						index = buffer.Find("</a>");
+						sbuffer = buffer.Left(index);
+						aXMLNames.Add(sbuffer);
+						newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+						buffer = buffer.Mid(index+4);
+					}
+					newsmsgbox->AppendText(buffer+"\n");
+				}
+			}
+	newsmsgbox->AppendText("\n");
+	}
+	delete xml;
+	newsmsgbox->ScrollToFirstLine();
+	StatusSelector.SetCurSel(2);
+	UpdateLogTabSelection();
+}
+
+void CServerWnd::OnEnLinkNewsBox(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	*pResult = 0;
+	ENLINK* pEnLink = reinterpret_cast<ENLINK *>(pNMHDR);
+	if (pEnLink && pEnLink->msg == WM_LBUTTONDOWN)
+	{
+		CString strUrl;
+		newsmsgbox->GetTextRange(pEnLink->chrg.cpMin, pEnLink->chrg.cpMax, strUrl);
+		for (int i=0;i<aXMLNames.GetCount();i++)
+			if (aXMLNames[i] == strUrl)
+			{
+				strUrl = aXMLUrls[i];
+				break;
+			}
+		ShellExecute(NULL, NULL, strUrl, NULL, NULL, SW_SHOWDEFAULT);
+		*pResult = 1;
+	}
+}
+
+void CServerWnd::OnFeedListSelChange()
+{
+	GetDlgItem(IDC_FEEDUPDATE)->EnableWindow();
+	CString strTempFilename;
+	strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),m_feedlist.GetCurSel());
+	ParseNewsFile(strTempFilename);
+}
+//MORPH END - Added by SiRoB, XML News [O²]

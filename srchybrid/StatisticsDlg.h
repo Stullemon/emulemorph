@@ -17,6 +17,9 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "StatisticsTree.h"
+//MORPH START - Added by SiRoB, Splitting Bar [O²]
+#include "SplitterControl.h"
+//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 #include "OScopeCtrl.h"
 #include "ColorFrameCtrl.h"
 
@@ -123,4 +126,14 @@ protected:
 	// -khaos--+++> Buttons, stuff.
 	afx_msg void OnMenuButtonClicked();
 	// <-----khaos-
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	CSplitterControl m_wndSplitterstat; //bzubzusplitstat
+	CSplitterControl m_wndSplitterstat_HL; //bzubzusplitstat
+	CSplitterControl m_wndSplitterstat_HR; //bzubzusplitstat
+	void DoResize_V(int delta);
+	void DoResize_HL(int delta);
+	void DoResize_HR(int delta);
+	void initCSize(uint8 x, uint8 y, uint8 z);
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 };

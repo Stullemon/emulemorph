@@ -2,6 +2,9 @@
 #include "ResizableLib\ResizableDialog.h"
 #include "MuleListCtrl.h"
 #include "ClosableTabCtrl.h"
+//MORPH START - Added by SiRoB, Splitting Bar [O²]
+#include "SplitterControl.h"
+//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 
 class CIrcMain;
 struct ChannelList;
@@ -101,6 +104,12 @@ protected:
 	afx_msg LRESULT OnQueryTab(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL	OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void	OnBnClickedChatsend();
+
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	CSplitterControl m_wndSplitterIRC; //bzubzusplitchat
+	void DoResize(int delta);
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 	DECLARE_MESSAGE_MAP()
 
 private:

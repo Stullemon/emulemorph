@@ -26,7 +26,7 @@ public:
 	virtual BOOL OnApply();
 	void Backup(LPCSTR extensionToBack, BOOL conFirm);
 	void Backup3(); //eastshare added by linekin, backup backup
-
+	void Localize(void);
 
 private:
 	//void Backup(LPCSTR extensionToBack);

@@ -31,6 +31,10 @@ public:
 	void SetFont(CFont* pFont, BOOL bRedraw = TRUE);
 	CFont* GetFont() const;
 
+	//MORPH START - Added by SiRoB, XML News [O²]
+	void CHTRichEditCtrl::ScrollToFirstLine(); // Added by N_OxYdE
+	//MORPH END   - Added by SiRoB, XML News [O²]
+
 protected:
 	bool m_bRichEdit;
 	CTitleMenu m_LogMenu;

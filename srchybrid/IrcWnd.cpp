@@ -266,6 +266,20 @@ BOOL CIrcWnd::OnInitDialog()
 	OnTcnSelchangeTab2( NULL, NULL );
 	((CEdit*)GetDlgItem(IDC_INPUTWINDOW))->SetLimitText(MAX_IRC_MSG_LEN);
 
+	//MORPH START -Added by SiRoB, Splitting Bar [O²]
+	CRect rc,rcSpl;
+
+	CWnd* pWnd = GetDlgItem(IDC_NICKLIST);
+	pWnd->GetWindowRect(rcSpl);
+	ScreenToClient(rcSpl);
+	
+	GetWindowRect(rc);
+	ScreenToClient(rc);
+
+	rcSpl.bottom=rc.bottom-10; rcSpl.left=rcSpl.right +3; rcSpl.right=rcSpl.left+4;
+	m_wndSplitterIRC.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_IRC);
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+
 	AddAnchor(IDC_BN_IRCCONNECT,BOTTOM_LEFT);
 	AddAnchor(IDC_CLOSECHAT,BOTTOM_LEFT);
 	AddAnchor(IDC_CHATSEND,BOTTOM_RIGHT);
@@ -274,6 +288,21 @@ BOOL CIrcWnd::OnInitDialog()
 	AddAnchor(IDC_TITLEWINDOW,TOP_LEFT,TOP_RIGHT);
 	AddAnchor(IDC_SERVERCHANNELLIST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_TAB2,TOP_LEFT, TOP_RIGHT);
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
+	AddAnchor(m_wndSplitterIRC,TOP_LEFT, BOTTOM_LEFT);
+	
+	int PosStatinit = rcSpl.left;
+	int PosStatnew = thePrefs.GetSplitterbarPositionIRC();
+	int max = 700;
+	int min = 200;
+	if (thePrefs.GetSplitterbarPositionIRC() > 700) PosStatnew = 700;
+	else if (thePrefs.GetSplitterbarPositionIRC() < 200) PosStatnew = 200;
+	rcSpl.left = PosStatnew;
+	rcSpl.right = PosStatnew+5;
+
+	m_wndSplitterIRC.MoveWindow(rcSpl);
+	DoResize(PosStatnew-PosStatinit);
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 
 	serverChannelList.SortItems(serverChannelList.SortProc, 11);
 	serverChannelList.SetSortArrow(1, false);
@@ -282,6 +311,132 @@ BOOL CIrcWnd::OnInitDialog()
 
 	return true;
 }
+
+//MORPH START - Added by SiRoB, Splitting Bar [O²]
+void CIrcWnd::DoResize(int delta)
+{
+
+CSplitterControl::ChangeWidth(GetDlgItem(IDC_NICKLIST), delta);
+CSplitterControl::ChangeWidth(GetDlgItem(IDC_INPUTWINDOW), -delta, CW_RIGHTALIGN);
+CSplitterControl::ChangeWidth(GetDlgItem(IDC_TITLEWINDOW), -delta, CW_RIGHTALIGN);
+CSplitterControl::ChangeWidth(GetDlgItem(IDC_SERVERCHANNELLIST), -delta, CW_RIGHTALIGN);
+CSplitterControl::ChangeWidth(GetDlgItem(IDC_STATUSWINDOW), -delta, CW_RIGHTALIGN);
+CSplitterControl::ChangeWidth(GetDlgItem(IDC_TAB2), -delta, CW_RIGHTALIGN);
+
+CRect rcChannel;
+serverChannelList.GetWindowRect(&rcChannel);
+ScreenToClient(&rcChannel);
+m_pCurrentChannel->log.SetWindowPos(NULL, rcChannel.left, rcChannel.top, rcChannel.Width(), rcChannel.Height(), SWP_NOZORDER);
+
+CRect rcW;
+
+GetWindowRect(rcW);
+ScreenToClient(rcW);
+
+CRect rcspl;
+GetDlgItem(IDC_NICKLIST)->GetClientRect(rcspl);
+
+thePrefs.SetSplitterbarPositionIRC(rcspl.right);
+
+RemoveAnchor(IDC_BN_IRCCONNECT);
+AddAnchor(IDC_BN_IRCCONNECT,BOTTOM_LEFT);
+RemoveAnchor(IDC_CLOSECHAT);
+AddAnchor(IDC_CLOSECHAT,BOTTOM_LEFT);
+RemoveAnchor(IDC_INPUTWINDOW);
+AddAnchor(IDC_INPUTWINDOW,BOTTOM_LEFT,BOTTOM_RIGHT);
+RemoveAnchor(IDC_NICKLIST);
+AddAnchor(IDC_NICKLIST,TOP_LEFT,BOTTOM_LEFT);
+RemoveAnchor(IDC_TITLEWINDOW);
+AddAnchor(IDC_TITLEWINDOW,TOP_LEFT,TOP_RIGHT);
+RemoveAnchor(IDC_SERVERCHANNELLIST);
+AddAnchor(IDC_SERVERCHANNELLIST,TOP_LEFT,BOTTOM_RIGHT);
+RemoveAnchor(IDC_TAB2);
+AddAnchor(IDC_TAB2,TOP_LEFT, TOP_RIGHT);
+RemoveAnchor(m_wndSplitterIRC);
+AddAnchor(m_wndSplitterIRC,TOP_LEFT, BOTTOM_LEFT);
+
+m_wndSplitterIRC.SetRange(rcW.left+190, rcW.left+700);
+//initCSize(thePrefs.GetSplitterbarPositionIRC());
+
+nickList.SetColumnWidth(0,rcspl.Width()-75);
+nickList.SetColumnWidth(1,70);
+
+Invalidate();
+UpdateWindow();
+}
+
+LRESULT CIrcWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
+{
+switch (message) {
+ case WM_PAINT:
+  if (m_wndSplitterIRC) {
+  
+   CRect rctree,rcSpl,rcW;
+   CWnd* pWnd;
+
+   GetWindowRect(rcW);
+   ScreenToClient(rcW);
+
+   pWnd = GetDlgItem(IDC_NICKLIST);
+   pWnd->GetWindowRect(rctree);
+
+   ScreenToClient(rctree);
+  
+
+   if (rcW.Width()>0) {
+
+	rcSpl.left=rctree.right+5;
+    rcSpl.right=rcSpl.left+5;
+    rcSpl.top=rctree.top;
+    rcSpl.bottom=rcW.bottom-5;
+    
+    m_wndSplitterIRC.MoveWindow(rcSpl,true);
+
+	nickList.SetColumnWidth(0,rctree.Width()-75);
+	nickList.SetColumnWidth(1,70);
+
+
+   }
+
+  }
+  break;
+ case WM_NOTIFY:
+  if (wParam == IDC_SPLITTER_IRC)
+  { 
+   SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+   DoResize(pHdr->delta);
+  }
+  break;
+ case WM_WINDOWPOSCHANGED : 
+  {
+   CRect rcW;
+   GetWindowRect(rcW);
+   ScreenToClient(rcW);
+
+   if (m_wndSplitterIRC && rcW.Width()>0) Invalidate();
+   break;
+  }
+ case WM_SIZE:
+  {
+      //set range
+   if (m_wndSplitterIRC)
+   {
+    CRect rc;
+    GetWindowRect(rc);
+    ScreenToClient(rc);
+    m_wndSplitterIRC.SetRange(rc.left+190 , rc.left+700);
+   }
+   break;
+  }
+
+}
+
+return CResizableDialog::DefWindowProc(message, wParam, lParam);
+
+}
+
+//MORPH END - Added by SiRoB, Splitting Bar [O²]
+
 
 void CIrcWnd::UpdateFonts(CFont* pFont)
 {

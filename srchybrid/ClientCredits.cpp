@@ -47,6 +47,7 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 	m_dwWaitTimeIP = 0;
+	m_isStartTimeResetable = true;   // EastShare - added by TAHO, modified SUQWT
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
@@ -66,6 +67,7 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_dwUnSecureWaitTime = ::GetTickCount();
 	m_dwSecureWaitTime = ::GetTickCount();
 	m_dwWaitTimeIP = 0;
+	m_isStartTimeResetable = true;   // EastShare - added by TAHO, modified SUQWT
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
@@ -957,16 +959,42 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 #endif
 
 uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
-	if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0)
+	// EASTSHART START - Modified by TAHO, modified SUQWT
+	// if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0)
+		//SetSecWaitStartTime(dwForIP);
+
+	uint32 secureTime;
+	uint32 unSecureTime;
+	if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0) {
+		if (!theApp.clientcredits->IsSaveUploadQueueWaitTime() || m_isStartTimeResetable){
 		SetSecWaitStartTime(dwForIP);
+			secureTime = m_dwSecureWaitTime;
+			unSecureTime = m_dwUnSecureWaitTime;
+		}
+		else{
+			secureTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime;
+			unSecureTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;
+		}
+	}
+	else{
+		secureTime = m_dwSecureWaitTime;
+		unSecureTime = m_dwUnSecureWaitTime;
+	}
+	// EASTSHART END - Modified by TAHO, modified SUQWT
 
 	if (m_pCredits->nKeySize != 0){	// this client is a SecureHash Client
 		if (GetCurrentIdentState(dwForIP) == IS_IDENTIFIED){ // good boy
-			return m_dwSecureWaitTime;
+			// EASTSHART START - Modified by TAHO, modified SUQWT
+			//return m_dwSecureWaitTime;
+			return secureTime;
+			// EASTSHART END - Modified by TAHO, modified SUQWT
 		}
 		else{	// not so good boy
 			if (dwForIP == m_dwWaitTimeIP){
-				return m_dwUnSecureWaitTime;
+				// EASTSHART START - Modified by TAHO, modified SUQWT
+				//return m_dwUnSecureWaitTime;
+				return unSecureTime;
+				// EASTSHART END - Modified by TAHO, modified SUQWT
 			}
 			else{	// bad boy
 				// this can also happen if the client has not identified himself yet, but will do later - so maybe he is not a bad boy :) .
@@ -978,18 +1006,25 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 				if (thePrefs.GetLogSecureIdent())
 					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
 				if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-					m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+					if (m_isStartTimeResetable) // EASTSHART - Added by TAHO, modified SUQWT
+						m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 				}
 				else{
 					m_dwUnSecureWaitTime = ::GetTickCount();//original
 				}
 				m_dwWaitTimeIP = dwForIP;
-				return m_dwUnSecureWaitTime;
+				// EASTSHART START - Modified by TAHO, modified SUQWT
+				//return m_dwUnSecureWaitTime;
+				return unSecureTime;
+				// EASTSHART END - Modified by TAHO, modified SUQWT
 			}	
 		}
 	}
 	else{	// not a SecureHash Client - handle it like before for now (no security checks)
-		return m_dwUnSecureWaitTime;
+		// EASTSHART START - Modified by TAHO, modified SUQWT
+		//return m_dwUnSecureWaitTime;
+		return unSecureTime;
+		// EASTSHART END - Modified by TAHO, modified SUQWT
 	}
 }
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1026,6 +1061,12 @@ void CClientCredits::ClearWaitStartTime(){
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 }
+
+//EastShare Start - added by AndCycle, Pay Back First
+void CClientCredits::SetStartTimeResetable(bool isResetable){
+	m_isStartTimeResetable = isResetable;
+}
+//EastShare END - Added by TAHO, modified SUQWT
 
 //EastShare Start - added by AndCycle, Pay Back First
 

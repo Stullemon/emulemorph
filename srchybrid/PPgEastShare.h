@@ -30,6 +30,15 @@ protected:
 	int m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	HTREEITEM m_htiSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
+	//EastShare - Added by Pretender, Option for ChunkDots
+	int m_bEnableChunkDots;
+	HTREEITEM m_htiEnableChunkDots;
+	//EastShare - Added by Pretender, Option for ChunkDots
+	//EastShare - Added by Pretender, Invisible Mode
+	int m_bInvisibleMode;
+	HTREEITEM m_htiInvisibleMode;
+	//EastShare - Added by Pretender, Invisible Mode
+
 	//EastShare - added by AndCycle, IP to Country
 	IP2CountryNameSelection	m_iIP2CountryName;
 	HTREEITEM m_htiIP2CountryName;
