@@ -690,10 +690,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
            			realBytesToSpend = newRealBytesToSpend;
            		    lastTickReachedBandwidth[classID] = thisLoopTick;
        			} else {*/
-           		    if(realBytesToSpend > 0) {
-						uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*512*1000;
-           		        if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance)
-							realBytesToSpend = 999+bandwidthSavedTolerance;
+           		    uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*512*1000;
+					if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
+						realBytesToSpend = 999+bandwidthSavedTolerance;
 						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
 							m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
 						if(classID<LAST_CLASS){
