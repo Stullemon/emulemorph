@@ -9,6 +9,10 @@
 #include "Preferences.h"
 #include "OtherFunctions.h"
 
+// Mighty Knife: Save current settings before backup
+#include "emuledlg.h"
+// [end] Mighty Knife
+
 // CPPgBackup dialog
 
 IMPLEMENT_DYNAMIC(CPPgBackup, CPropertyPage)
@@ -126,6 +130,9 @@ void CPPgBackup::OnBnClickedBackupnow()
 
 	if ((bool)IsDlgButtonChecked(IDC_INI))
 	{
+		// Mighty Knife: Save current settings before backup
+		theApp.emuledlg->SaveSettings (false);
+		// [end] Mighty Knife
 		Backup(_T("*.ini"), true);
 		CheckDlgButton(IDC_INI,BST_UNCHECKED);
 	}
