@@ -1725,6 +1725,11 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			break;
 		}
 		//MORPH END   - Added by SiRoB, Seen Complet filter
+	    //MORPH START - Added by Commander, Open Incoming Folder Fix
+		case MP_HM_OPENINC:
+			ShellExecute(NULL, _T("open"), curCat->incomingpath,NULL, NULL, SW_SHOW);
+			break;
+		//MORPH END - Added by Commander, Open Incoming Folder Fix
 	}
 
 	//MORPH - Changed by SiRoB, Seen Complet filter

@@ -97,6 +97,8 @@
 #include "Friend.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
+#include "FadeWnd.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -1436,7 +1438,8 @@ LRESULT CemuleDlg::OnFileCompleted(WPARAM wParam, LPARAM lParam)
 bool CemuleDlg::CanClose()
 {
 	if (theApp.m_app_state == APP_STATE_RUNNING && thePrefs.IsConfirmExitEnabled())
-	{
+	{   
+		CFadeWnd wndFade(this);
 		if (AfxMessageBox(GetResString(IDS_MAIN_EXIT), MB_YESNO | MB_DEFBUTTON2) == IDNO)
 			return false;
 	}
@@ -1524,11 +1527,12 @@ void CemuleDlg::OnClose()
 	// explicitly delete all listview items which may hold ptrs to objects which will get deleted
 	// by the dtors (some lines below) to avoid potential problems during application shutdown.
 	transferwnd->downloadlistctrl.DeleteAllItems();
+	transferwnd->downloadclientsctrl.DeleteAllItems(); // MORPH - Added by Commander, Crash fix
 	chatwnd->chatselector.DeleteAllItems();
 	theApp.clientlist->DeleteAll();
 	searchwnd->DeleteAllSearchListCtrlItems();
 	sharedfileswnd->sharedfilesctrl.DeleteAllItems();
-    transferwnd->queuelistctrl.DeleteAllItems();
+        transferwnd->queuelistctrl.DeleteAllItems();
 	transferwnd->clientlistctrl.DeleteAllItems();
 	transferwnd->uploadlistctrl.DeleteAllItems();
 	

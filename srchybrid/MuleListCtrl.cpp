@@ -345,6 +345,10 @@ void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
 			strKey = _T("SearchResultsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CDownloadListCtrl)))
 			strKey = _T("DownloadsLv");
+		// MORPH START - Added by Commander, Crash fix
+		else if (IsKindOf(RUNTIME_CLASS(CDownloadClientsCtrl)))	
+			strKey = _T("DownloadsClientsLv");
+		// MORPH END - Added by Commander, Crash fix
 		else if (IsKindOf(RUNTIME_CLASS(CUploadListCtrl)))
 			strKey = _T("UploadsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CQueueListCtrl)))
