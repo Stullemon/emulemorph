@@ -233,7 +233,6 @@ bool CIP2Country::LoadCountryFlagLib(){
 			iconHandle = LoadIcon(_hCountryFlagDll, MAKEINTRESOURCE(resID[cur_pos]));
 			if(iconHandle == NULL) throw CString(_T("Invalid resID"));
 			CountryFlagIcon[cur_pos] = iconHandle;
-			//CountryFlagIcon.AddTail(iconHandle);
 		}
 
 	}
