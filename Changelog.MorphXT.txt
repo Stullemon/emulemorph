@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.42d MorphXT v2.3
+--------------------------------------
+FIXED  : All the schedulable parameter accessible in Morph Preferency are now correctly saved at shutdown [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.42d MorphXT v2.2
 --------------------------------------
 CHANGED: MultipleInstance from SF-IOM mod
