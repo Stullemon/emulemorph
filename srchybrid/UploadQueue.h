@@ -27,7 +27,7 @@ public:
 	~CUploadQueue();
 
 	void	Process();
-	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false);
+	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
 	bool	RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason = NULL, bool updatewindow = true, bool earlyabort = false);
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
@@ -46,7 +46,6 @@ public:
 	void	SetMaxVUR(uint32 in_MaxVUR){MaxVUR=in_MaxVUR;}
 	//MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
-	bool	CheckForTimeOver(CUpDownClient* client);
 	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
 	uint32	GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
@@ -75,11 +74,11 @@ public:
 	uint32	GetFailedUpCount()						{return failedupcount;}
 	uint32	GetAverageUpTime();
 //	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
+
+	bool    RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove = false);
 	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL);
-	void	ReSortUploadSlots(bool force = false);
-	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
 	bool RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore);
-	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
+	void	ReSortUploadSlots(bool force = false);
 
 	//Morph - added by AndCycle, separate special prio compare
 	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient);
@@ -93,7 +92,7 @@ protected:
 	bool		AcceptNewClient(uint32 curUploadSlots);
 	bool		ForceNewClient(bool allowEmptyWaitingQueue = false);
 
-	bool		AddUpNextClient(CUpDownClient* directadd = 0);
+	bool		AddUpNextClient(CUpDownClient* directadd = 0, bool highPrioCheck = false);
 	
 	static VOID CALLBACK UploadTimer(HWND hWnd, UINT nMsg, UINT nId, DWORD dwTime);
 
@@ -104,6 +103,8 @@ private:
 
     void InsertInUploadingList(CUpDownClient* newclient);
     double GetAverageCombinedFilePrioAndCredit();
+	uint32 GetWantedNumberOfTrickleUploads();
+    void CheckForHighPrioClient();
 
 	CUpDownClientPtrList	waitinglist;
 	CUpDownClientPtrList	uploadinglist;
@@ -144,13 +145,10 @@ private:
 
     DWORD   m_dwLastResortedUploadSlots;
 
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030824-2238
+	DWORD   m_dwLastCheckedForHighPrioClient;
 
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	uint32	AvgRespondTime[2];
 	uint32	MaxVUR;
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	//MORPH START - Added by SiRoB, Upload Splitting Class
-	uint32	FSinUpload;
-	//MORPH END   - Added by SiRoB, Upload Splitting Class
 };

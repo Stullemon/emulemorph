@@ -811,8 +811,41 @@ void CDownloadQueue::Process(){
 	ProcessLocalRequests(); // send src requests to local server
 
 	uint32 downspeed = 0;
+	// ZZ:UploadSpeedSense -->
+    // Enforce a session ul:dl ratio of 1:3 no matter what upload speed.
+    // The old ratio code is only used if the upload-queue is empty.
+    // If the queue is empty, the client may not have gotten enough
+    // requests, to be able to upload full configured speed. So we fallback
+    // to old ratio-variant.
+    // This new ratio check really needs to be here with the new more
+    // powerful friends slot, to prevent the user from giving all his
+    // bandwidth to just friends, and at the same time leaching from
+    // all other clients.
     uint64 maxDownload = thePrefs.GetMaxDownloadInBytesPerSec(true);
-	if (maxDownload != UNLIMITED && datarate > 1500){
+
+    if(theApp.uploadqueue->GetUploadQueueLength() <= 0) {
+        uint64 maxup;
+        if(thePrefs.IsDynUpEnabled() && theApp.uploadqueue->GetWaitingUserCount() != 0 && theApp.uploadqueue->GetDatarate() != 0) {
+            maxup = theApp.uploadqueue->GetDatarate();
+        } else {
+            maxup = thePrefs.GetMaxUpload()*1024;
+        }
+
+        if(maxup != 0){
+            uint32 ratio = 0;
+			if(maxup < 4*1024) {
+			    ratio = 3;
+            } else if(maxup < 10*1024) {
+                ratio = 4;
+            }
+
+            if(ratio != 0 && maxup*ratio < thePrefs.GetMaxDownloadInBytesPerSec()) {
+              maxDownload = maxup*ratio;
+            }
+		}
+    }
+
+	if (maxDownload != UNLIMITED && datarate > 300 || thePrefs.IsZZRatioDoesWork()){
 		downspeed = (maxDownload*100)/(datarate+1);
 		if (downspeed < 50)
 			downspeed = 50;
@@ -820,6 +853,47 @@ void CDownloadQueue::Process(){
 			downspeed = 200;
 	}
 	// ZZ:UploadSpeedSense <--
+
+    uint32 friendDownspeed = downspeed;
+	bool tempIsZZRatioInWork = false; //MORPH - Added by SiRoB, ZZ Ratio in work
+
+	if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {
+        // has this client downloaded more than it has uploaded this session? (friends excluded)
+        // then limit its download speed from all clients but friends
+        // limit will be removed as soon as upload has catched up to download
+        if(theStats.sessionReceivedBytes/3 > (theStats.sessionSentBytes-theStats.sessionSentBytesToFriend) &&
+           datarate > 1500) {
+            
+            // calc allowed dl speed for rest of network (those clients that don't have
+            // friend slots. Since you don't upload as much to them, you won't be able to download
+            // as much from them. This will only be lower than friends speed if you are currently
+            // uploading to a friend slot, otherwise they are the same.
+
+            uint32 secondsNeededToEvenOut = (theStats.sessionReceivedBytes/3-(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend))/(theApp.uploadqueue->GetToNetworkDatarate()+1);
+            uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
+
+            if(downspeed == 0 || tempDownspeed < downspeed) {
+                downspeed = tempDownspeed;
+                //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
+				tempIsZZRatioInWork = true; //MORPH - Added by SiRoB, ZZ Ratio in work
+            }
+        }
+
+        // has this client downloaded more than it has uploaded this session? (friends included)
+        // then limit its download speed from all friends
+        // limit will be removed as soon as upload has catched up to download
+        if(theStats.sessionReceivedBytes/3 > (theStats.sessionSentBytes) &&
+           datarate > 1500) {
+
+            float secondsNeededToEvenOut = (theStats.sessionReceivedBytes/3-theStats.sessionSentBytes)/(theApp.uploadqueue->GetDatarate()+1);
+            uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
+
+            if(friendDownspeed == 0 || tempDownspeed < friendDownspeed) {
+                friendDownspeed = tempDownspeed;
+				tempIsZZRatioInWork = true; //MORPH - Added by SiRoB, ZZ Ratio in work
+            }
+        }
+	}
 
 	//MORPH START - Removed by SiRoB, sum datarate calculated for each file
 	/*
@@ -841,7 +915,7 @@ void CDownloadQueue::Process(){
 	for (POSITION pos =filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY){
-			datarateX += cur_file->Process(downspeed,udcounter);
+			datarateX += cur_file->Process(downspeed,udcounter, friendDownspeed);
 		}
 		else{
 			//This will make sure we don't keep old sources to paused and stoped files..
@@ -888,10 +962,10 @@ void CDownloadQueue::Process(){
 	CheckDiskspaceTimed();
 
 // ZZ:DownloadManager -->
-    //if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
-    //    theApp.clientlist->ProcessA4AFClients();
-    //    m_dwLastA4AFtime = ::GetTickCount();
-    //}
+    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
+        theApp.clientlist->ProcessA4AFClients();
+        m_dwLastA4AFtime = ::GetTickCount();
+    }
 // <-- ZZ:DownloadManager
 }
 
@@ -2222,3 +2296,17 @@ void CDownloadQueue::OnConnectionState(bool bConnected)
 			pPartFile->SetActive(bConnected);
 	}
 }
+
+//MORPH START - Added by SiRoB, ZZ Ratio
+bool CDownloadQueue::IsFilesPowershared()
+{
+	if (!filelist.IsEmpty()) {
+		for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+			CPartFile* cur_file =  filelist.GetNext(pos);
+			if (cur_file->IsPartFile() && ((cur_file->GetPowerSharedMode()>=0)?cur_file->GetPowerSharedMode():thePrefs.GetPowerShareMode())&1)
+				return true;
+		}
+	}
+	return false;
+}
+//MORPH END   - Added by SiRoB, ZZ Ratio

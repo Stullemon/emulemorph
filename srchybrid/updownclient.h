@@ -17,6 +17,7 @@
 #pragma once
 #include "loggable.h"
 #include "BarShader.h"
+#include "Opcodes.h"
 
 class CClientReqSocket;
 class CPeerCacheDownSocket;
@@ -445,10 +446,7 @@ public:
 						m_dwLastAskedForSources = ::GetTickCount();
 					}
 	bool			GetFriendSlot() const;
-	void			SetFriendSlot(bool bNV)		
-					{
-						m_bFriendSlot = bNV;
-					}
+	void			SetFriendSlot(bool bNV);
 	bool			IsFriend() const
 					{
 						return m_Friend != NULL;
@@ -593,13 +591,36 @@ public:
 	void			ResetSessionUp()
 					{
 						m_nCurSessionUp = m_nTransferedUp;
-						m_addedPayloadQueueSession = 0;
-						m_nCurQueueSessionPayloadUp = 0;
+						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
+						//m_nCurQueueSessionPayloadUp = 0;
 					}
-	uint32			GetQueueSessionPayloadUp() const
+	uint32			GetQueueSessionUp() const
+                    {
+                        return m_nTransferedUp - m_nCurQueueSessionUp;
+                    }
+
+	void			ResetQueueSessionUp()
+                    {
+                        m_nCurQueueSessionUp = m_nTransferedUp;
+						m_nCurQueueSessionPayloadUp = 0;
+                        m_curSessionAmountNumber = 0;
+					} 
+
+	uint32			GetQueueSessionPayloadUp()
+                    {
+                        return m_nCurQueueSessionPayloadUp;
+					}
+
+
+	uint32			GetQueueSessionPayloadUp() const 
 					{
 						return m_nCurQueueSessionPayloadUp;
 					}
+    uint64          GetCurrentSessionLimit() const
+                    {
+                        return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1)+20*1024;
+                    }
+
 	void			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
 	uint16			GetUpPartCount() const
 					{
@@ -608,7 +629,7 @@ public:
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const;
 	uint32			GetPayloadInBuffer() const
 					{
-						return m_addedPayloadQueueSession-GetQueueSessionPayloadUp();
+						return m_addedPayloadQueueSession - GetQueueSessionPayloadUp();
 					}
 	bool			IsUpPartAvailable(uint16 iPart) const
 					{
@@ -897,7 +918,7 @@ public:
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherRequests_list;
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherNoNeeded_list;
 	uint16			m_lastPartAsked;
-	bool			m_bAddNextConnect;  // VQB Fix for LowID slots only on connection
+	DWORD			m_dwWouldHaveGottenUploadSlotIfNotLowIdTick;  // VQB Fix for LowID slots only on connection
 
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() const { return m_slotNumber; }
@@ -1038,13 +1059,17 @@ protected:
 	uint32		m_cAsked;
 	uint32		m_dwLastUpRequest;
 	uint32		m_nCurSessionUp;
+    uint32      m_nCurQueueSessionUp;
 	uint32      m_nCurQueueSessionPayloadUp;
 	uint32      m_addedPayloadQueueSession;
+    uint32      m_curSessionAmountNumber;
 	uint16		m_nUpPartCount;
 	uint16		m_nUpCompleteSourcesCount;
 	static CBarShader s_UpStatusBar;
 	uchar		requpfileid[16];
     uint32      m_slotNumber;
+
+    DWORD       m_dwLastCheckedForEvictTick;
 
 	typedef struct TransferredData {
 		uint32	datalen;

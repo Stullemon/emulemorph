@@ -1427,7 +1427,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				stattree.SetItemText(up_S[4], cbuffer);
 
 				// Set Upload Sessions
-				statGoodSessions = theApp.uploadqueue->GetSuccessfullUpCount() + theApp.uploadqueue->GetUploadQueueLength();
+				statGoodSessions = theApp.uploadqueue->GetSuccessfullUpCount(); // + theApp.uploadqueue->GetUploadQueueLength();
 				statBadSessions = theApp.uploadqueue->GetFailedUpCount();
 				cbuffer.Format(_T("%s: %u"), GetResString(IDS_STATS_ULSES), statGoodSessions + statBadSessions);
 				stattree.SetItemText(up_S[5], cbuffer);
@@ -1437,7 +1437,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					if (statGoodSessions>0)
 					{ // Blackholes are when God divided by 0
 						percentSessions = (double) 100*statGoodSessions/(statGoodSessions+statBadSessions);
-						cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( theStats.sessionSentBytes / statGoodSessions, false, false) ); 
+						cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( (uint64) theStats.GetTotalCompletedBytes() / statGoodSessions, false, false) ); 
 					}
 					else 
 					{

@@ -107,7 +107,12 @@ void CUpDownClient::Init()
 {
 	credits = 0;
 	sumavgUDR = 0; // by BadWolf - Accurate Speed Measurement
+	//MORPH START - Changed by SiRoB, ZZUL_20040904	
+	/*
 	m_bAddNextConnect = false;  // VQB Fix for LowID slots only on connection
+	*/
+	m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;  // VQB Fix for LowID slots only on connection
+	//MORPH END   - Changed by SiRoB, ZZUL_20040904	
 	m_nAvDownDatarate = 0; //Wistily
 	m_nAvUpDatarate = 0; //Wistily
 	m_nChatstate = MS_NONE;
@@ -174,6 +179,7 @@ void CUpDownClient::Init()
 	m_cMessagesReceived = 0;
 	m_cMessagesSent = 0;
 	m_nCurSessionUp = 0;
+    m_nCurQueueSessionUp = 0;
 	m_nSumForAvgDownDataRate = 0;
 	m_clientSoft=SO_UNKNOWN;
 	m_bRemoteQueueFull = false;
@@ -242,6 +248,11 @@ void CUpDownClient::Init()
 	m_fNeedOurPublicIP = 0;
 
     m_random_update_wait = (uint32)(rand()/(RAND_MAX/1000));
+	
+	//MORPH START - Changed by SiRoB, ZZUL_20040904
+    m_dwLastCheckedForEvictTick = 0;
+    m_addedPayloadQueueSession = 0;
+	//MORPH END   - Changed by SiRoB, ZZUL_20040904	
 
     m_bSourceExchangeSwapped = false; // ZZ:DownloadManager
     m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000; // ZZ:DownloadManager
@@ -2392,7 +2403,6 @@ void CUpDownClient::AssertValid() const
 	m_OtherRequests_list.AssertValid();
 	m_OtherNoNeeded_list.AssertValid();
 	(void)m_lastPartAsked;
-	CHECK_BOOL(m_bAddNextConnect);
 	(void)m_cMessagesReceived;
 	(void)m_cMessagesSent;
 	(void)m_dwUserIP;
@@ -2769,6 +2779,15 @@ EUtf8Str CUpDownClient::GetUnicodeSupport() const
 #endif
 	return utf8strNone;
 }
+//MORPH START - Added by SiRoB, ZZUL_20040904
+void CUpDownClient::SetFriendSlot(bool bNV)		
+{
+    bool oldValue = m_bFriendSlot;
+    m_bFriendSlot = bNV;
+    if(theApp.uploadqueue && oldValue != m_bFriendSlot)
+        theApp.uploadqueue->ReSortUploadSlots(true);
+}
+//MORPH END   - Added by SiRoB, ZZUL_20040904
 
 //EastShare Start - added by AndCycle, IP to Country
 // Superlexx - client's location

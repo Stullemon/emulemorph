@@ -56,6 +56,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crNextSending;
 	COLORREF crBoth;
 	COLORREF crSending;
+	COLORREF crBuffer;
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	COLORREF crHiddenPartBySOTN;
 	COLORREF crHiddenPartByHideOS;
@@ -67,6 +68,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	    crNextSending = RGB(255,208,0);
 	    crBoth = bFlat ? RGB(0, 0, 0) : RGB(104, 104, 104);
 	    crSending = RGB(0, 150, 0);
+		crBuffer = RGB(255, 100, 100);
 		//MORPH START - Added by SiRoB, See chunk that we hide
 		crHiddenPartBySOTN = RGB(192, 96, 255);
 		crHiddenPartByHideOS = RGB(96, 192, 255);
@@ -78,6 +80,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	    crNextSending = RGB(255,244,191);
 	    crBoth = bFlat ? RGB(191, 191, 191) : RGB(191, 191, 191);
 	    crSending = RGB(191, 229, 191);
+		crBuffer = RGB(255, 216, 216);
 		//MORPH START - Added by SiRoB, See chunk that we hide
 		crHiddenPartBySOTN = RGB(224, 128, 255);
 		crHiddenPartByHideOS = RGB(128, 224, 255);
@@ -136,9 +139,37 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 				block = m_DoneBlocks_list.GetNext(pos);
 				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset + 1, crSending);
 			}
-		}
-		s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
-	} 
+
+            // Also show what data is buffered (with color crBuffer)
+            uint32 total = 0;
+    
+		    for(POSITION pos=m_DoneBlocks_list.GetTailPosition();pos!=0; ){
+			    Requested_Block_Struct* block = m_DoneBlocks_list.GetPrev(pos);
+    
+                if(total + (block->EndOffset-block->StartOffset) <= GetQueueSessionPayloadUp()) {
+                    // block is sent
+			        s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+                    total += block->EndOffset-block->StartOffset;
+                }
+                else if (total < GetQueueSessionPayloadUp()){
+                    // block partly sent, partly in buffer
+                    total += block->EndOffset-block->StartOffset;
+                    uint32 rest = total - GetQueueSessionPayloadUp();
+                    uint32 newEnd = block->EndOffset-rest;
+    
+    			    s_UpStatusBar.FillRange(block->StartOffset, newEnd, crSending);
+    			    s_UpStatusBar.FillRange(newEnd, block->EndOffset, crBuffer);
+                }
+                else{
+                    // entire block is still in buffer
+                    total += block->EndOffset-block->StartOffset;
+    			    s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
+                }
+		    }
+	    }
+   	    s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat);
+	}
+	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
 void CUpDownClient::SetUploadState(EUploadState news){
@@ -305,7 +336,12 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	}
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
-
+	if (!isdownloading && !onlybasevalue){
+		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
+			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
+				return 0;
+		}
+	}
 	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
 		fBaseValue *= 0.5f;
 
@@ -352,8 +388,6 @@ bool CUpDownClient::IsSecure() const
 */
 bool CUpDownClient::GetPowerShared() const {
 	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	if(!IsSecure()) return false;
-
 	bool bPowerShared;
 	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		bPowerShared = theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
@@ -809,25 +843,54 @@ uint32 CUpDownClient::SendBlockData(){
 		sentBytesPayload = s->GetSentPayloadSinceLastCallAndReset();
 		m_nCurQueueSessionPayloadUp += sentBytesPayload;
 
-        if(theApp.uploadqueue->CheckForTimeOver(this)) {
-            theApp.uploadqueue->RemoveFromUploadQueue(this, _T("Completed transfer"), true);
-			//OP_OUTOFPARTREQS will tell the downloading client to go back to OnQueue..
+        if(GetUploadState() == US_UPLOADING) {
+            bool wasRemoved = false;
+            if(GetQueueSessionPayloadUp() > SESSIONMAXTRANS+20*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
+                m_dwLastCheckedForEvictTick = curTick;
+                wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+				//reset
+				m_bPowerShared = false;
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+            }
 			//The main reason for this is that if we put the client back on queue and it goes
-			//back to the upload before the socket times out... We get a situation where the
-			//downloader things it already send the requested blocks and the uploader thinks
+            if(wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+                // Should we end this upload?
+				//EastShare Start - added by AndCycle, Pay Back First
+				//check again does client satisfy the conditions
+				credits->InitPayBackFirstStatus();
+				//EastShare End - added by AndCycle, Pay Back First
+
+                // first clear the average speed, to show ?? as speed in upload slot display
+                m_AvarageUDR_list.RemoveAll();
+                sumavgUDR = 0;
+
+	            // Give clients in queue a chance to kick this client out.
+                // It will be kicked out only if queue contains a client
+                // of same/higher class as this client, and that new
+                // client must either be a high ID client, or a low ID
+                // client that is currently connected.
+                wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
 			//the downloader didn't send any reqeust blocks. Then the connection times out..
+                if(!wasRemoved) {
+                    // It wasn't removed, so it is allowed to pass into the next amount.
+                    m_curSessionAmountNumber++;
+                }
+            }
 			//I did some tests with eDonkey also and it seems to work well with them also..
-			if (thePrefs.GetDebugClientTCPLevel() > 0)
-				DebugSend("OP__OutOfPartReqs", this);
-			Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
-			theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
-			socket->SendPacket(pCancelTransferPacket,true,true);
-            theApp.uploadqueue->AddClientToQueue(this,true);
-        } 
-		else {
-            // read blocks from file and put on socket
-            CreateNextBlockPackage();
-        }
+            if(wasRemoved) {
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("OP__OutOfPartReqs", this);
+				Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
+				theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
+				socket->SendPacket(pCancelTransferPacket,true,true);
+            	theApp.uploadqueue->AddClientToQueue(this,true);
+        	} 
+			else {
+    	        // read blocks from file and put on socket
+    	        CreateNextBlockPackage();
+    	    }
+    	}
     }
 
 	//MORPH START - Modified by SiRoB, Better Upload rate calcul
@@ -845,8 +908,7 @@ uint32 CUpDownClient::SendBlockData(){
 			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else
 			break;
-
-    if(m_AvarageUDR_list.GetCount() > 0) {
+    	if(m_AvarageUDR_list.GetCount() > 0) {
 		if(m_AvarageUDR_list.GetCount() == 1)
 			m_nUpDatarate = (sumavgUDR*1000) / 30000;
 		else {
@@ -857,7 +919,7 @@ uint32 CUpDownClient::SendBlockData(){
 			m_nUpDatarate = ((sumavgUDR - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
 		}
 	} else {
-        m_nUpDatarate = 0;
+   	    m_nUpDatarate = 0;
 	}
 	//MORPH END   - Modified by SiRoB, Better Upload rate calcul
     // Check if it's time to update the display.
@@ -867,7 +929,7 @@ uint32 CUpDownClient::SendBlockData(){
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 		m_lastRefreshedULDisplay = curTick;
 	}
-	
+
 	return sentBytesCompleteFile + sentBytesPartFile;
 }
 

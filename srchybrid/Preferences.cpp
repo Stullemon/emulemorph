@@ -1045,12 +1045,29 @@ bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rst
 }
 // SLUGFILLER: SafeHash
 
+//MORPH - Added by SiRoB, ZZ Ratio
+bool CPreferences::IsZZRatioDoesWork(){
+	
+	if (theApp.downloadqueue->IsFilesPowershared())
+		return true;
+	if (theApp.friendlist->IsFriendSlot())
+		return true;
+	if (GetMaxUpload()<10)
+		return true;
+	return theStats.GetAvgUploadRate(0)<10;
+}
+//MORPH - Added by SiRoB, ZZ ratio
+
 uint16 CPreferences::GetMaxDownload(){
     return GetMaxDownloadInBytesPerSec()/1024;
 }
 
 uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 //dont be a Lam3r :)
+	//MORPH START - Added by SiRoB, ZZ Upload system
+	if (IsZZRatioDoesWork())
+		return maxdownload*1024;
+	//MORPH END   - Added by SiRoB, ZZ Upload system
     uint64 maxup;
     if(dynamic && thePrefs.IsDynUpEnabled() && theApp.uploadqueue->GetWaitingUserCount() != 0 && theApp.uploadqueue->GetDatarate() != 0) {
         maxup = theApp.uploadqueue->GetDatarate();
@@ -1066,19 +1083,7 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 //MORPH START - Added by SiRoB, Upload Splitting Class
 uint32	CPreferences::GetMaxFriendByteToSend()
 {
-	if (theStats.sessionSentBytes > theStats.sessionSentBytesToFriend && theStats.sessionReceivedBytes>=theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)
-	{
-		if ((float)theStats.sessionReceivedBytes/(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)>=3)
-		{
-			if (3*theApp.uploadqueue->GetDatarate()>theApp.downloadqueue->GetDatarate())
-				return theApp.uploadqueue->GetDatarate()-theApp.downloadqueue->GetDatarate()/3;
-			else
-				return 0;
-		}else
-			return _UI32_MAX;
-	}
-	else
-		return _UI32_MAX;
+	return _UI32_MAX;
 }
 //MORPH END   - Added by SiRoB, Upload Splitting Class
 // -khaos--+++> A whole bunch of methods!  Keep going until you reach the end tag.

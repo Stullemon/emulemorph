@@ -43,6 +43,7 @@
 #include "Kademlia/Kademlia/SearchManager.h"
 #include "SafeFile.h"
 #include "shahashset.h"
+#include "UploadQueue.h"
 
 // id3lib
 #include <id3/tag.h>
@@ -2480,6 +2481,13 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 	}
 	delete[] imgResults;
 
+}
+
+void CKnownFile::SetPowerShared(int newValue) {
+    int oldValue = m_powershared;
+    m_powershared = newValue;
+    if(theApp.uploadqueue && oldValue != newValue)
+        theApp.uploadqueue->ReSortUploadSlots(true);
 }
 
 /*// #zegzav:updcliuplst

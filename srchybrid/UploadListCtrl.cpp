@@ -441,11 +441,20 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
 					break;
 				case 3:
-					Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false));
+					//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
+					if(client->GetSessionUp() == client->GetQueueSessionUp()) {
+						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false));
+                    } else {
+						Sbuffer.Format(_T("%s=%s+%s (%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
+					}
+					//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 					break;
 				case 4:
 					if (client->HasLowID())
-						Sbuffer.Format(_T("%s LowID"),CastSecondsToHM((client->GetWaitTime())/1000));
+                        if(client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
+                            Sbuffer.Format(_T("%s LowID delayed %s"),CastSecondsToHM((client->GetWaitTime())/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+                        else
+							Sbuffer.Format(_T("%s LowID"),CastSecondsToHM((client->GetWaitTime())/1000));
 					else
 						Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
 					break;
@@ -453,11 +462,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					{//Morph - modified by AndCycle, upRemain
 						sint32 timeleft;
 						if(client->GetDatarate() == 0)	timeleft = -1;
-						else if(client->IsMoreUpThanDown() && client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
-						else if(client->GetPowerShared() && client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+						else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						else if(file)
-							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionPayloadUp())/client->GetDatarate();
-							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionPayloadUp())/client->GetDatarate();
+							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
+							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain
 					break;
@@ -848,10 +857,14 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return CompareUnsigned(item1->GetDatarate(), item2->GetDatarate());
 		case 102:
 			return CompareUnsigned(item2->GetDatarate(), item1->GetDatarate());
+
+		//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 		case 3: 
-			return CompareUnsigned(item1->GetQueueSessionPayloadUp(), item2->GetQueueSessionPayloadUp());
+			return CompareUnsigned(item1->GetQueueSessionUp(), item2->GetQueueSessionUp());
 		case 103: 
-			return CompareUnsigned(item2->GetQueueSessionPayloadUp(), item1->GetQueueSessionPayloadUp());
+			return CompareUnsigned(item2->GetQueueSessionUp(), item1->GetQueueSessionUp());
+		//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
+
 		case 4: 
 			return item1->GetWaitTime() - item2->GetWaitTime();
 		case 104: 

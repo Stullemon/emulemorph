@@ -2206,7 +2206,7 @@ void CPartFile::RemoveDownloadingSource(CUpDownClient* client){
 	}
 }
 
-uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/)
+uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/, uint32 friendReduceddownload)
 {
 	if (thePrefs.m_iDbgHeap >= 2)
 		ASSERT_VALID(this);
@@ -2298,16 +2298,20 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/)
 			switch (cur_src->GetDownloadState())
 			{
 				case DS_DOWNLOADING:{
+                    uint32 curClientReducedDownload = reducedownload;
+                    if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
+                        curClientReducedDownload = friendReduceddownload;
+                    }
 					ASSERT( cur_src->socket );
 					if (cur_src->socket)
 					{
 						cur_src->CheckDownloadTimeout();
 						uint32 cur_datarate = cur_src->CalculateDownloadRate();
 						datarate += cur_datarate;
-						if (reducedownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
+						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
-							uint32 limit = reducedownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
-							if (limit < 1000 && reducedownload == 200)
+							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
+							if (limit < 1000 && curClientReducedDownload == 200)
 								limit += 1000;
 							else if (limit < 1)
 								limit = 1;
