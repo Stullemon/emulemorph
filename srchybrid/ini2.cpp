@@ -754,25 +754,32 @@ int			CIni::Parse(const CString& strIn, int nOffset, CString& strOut) {
 	int nLength = strIn.GetLength();
 
 	if(nOffset < nLength) {
-		if(nOffset != 0 && strIn[nOffset] == _T(','))
-			nOffset++;
 
-		while(nOffset < nLength) {
-			if(!_istspace((_TUCHAR)strIn[nOffset]))
-				break;
+		// Mighty Knife: Parse-routine rewritten because of unproper
+		// behaviour in case of a set of empty parameters (",,,,,,,,")
 
+		// Delete leading whitespaces
+		while((nOffset < nLength) && _istspace((_TUCHAR)strIn[nOffset])) {
 			nOffset++;
 		}
 
-		while(nOffset < nLength) {
-			strOut += strIn[nOffset];
-
-			if(strIn[++nOffset] == _T(','))
-				break;
+		// Copy characters up to next "," or end of line
+		while ((nOffset < nLength) && (strIn[nOffset] != _T(','))) {
+			strOut += strIn[nOffset++];
 		}
 
+		// If we haven't reached the end of the line, we've reached a comma - 
+		// and that we must skip...
+		if (nOffset < nLength) 
+			nOffset++;
+
+		// Trim trailing spaces
 		strOut.Trim();
+
+		// [end] Mighty Knife
 	}
+
+	// Return position of next parameter of position of EOL
 	return nOffset;
 }
 
