@@ -364,7 +364,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                     uint32 curHost = 0;
                     for(uint32 ttl = 1; doRun && enabled && (curHost != 0 && ttl <= 64 || curHost == 0 && ttl < 5) && foundLastCommonHost == false && failed == false; ttl++) {
-                        theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Pinging for TTL %i...", ttl);
+                        if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Pinging for TTL %i...", ttl);
                         curHost = 0;
 						PingStatus pingStatus = {0};
 
@@ -397,7 +397,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                             pingStatus.success = false;
                             for(int counter = 0; doRun && enabled && counter < 3 && pingStatus.success == false; counter++) {
-                                pingStatus = pinger.Ping(curAddress, ttl, true);
+                            pingStatus = pinger.Ping(curAddress, ttl, theApp.glob_prefs->IsUSSLog()); //MORPH - Modified by SiRoB, USS log debug
                                 if(doRun && enabled && pingStatus.success == false && counter < 3-1) {
                                     IN_ADDR stDestAddr;
                                     stDestAddr.s_addr = curAddress;
