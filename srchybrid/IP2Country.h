@@ -14,6 +14,16 @@ struct IPRange_Struct2{
 	WORD			FlagIndex;
 };
 
+//EastShare Start - added by AndCycle, IP to Country
+enum IP2CountryNameSelection{
+
+	IP2CountryName_DISABLE = 0,
+	IP2CountryName_SHORT,
+	IP2CountryName_MID,
+	IP2CountryName_LONG
+};
+//EastShare End - added by AndCycle, IP to Country
+
 #define DFLT_IP2COUNTRY_FILENAME  _T("ip-to-country.csv")//Commander - Added: IP2Country auto-updating
 
 typedef CTypedPtrArray<CPtrArray, IPRange_Struct2*> CIP2CountryArray;
@@ -46,6 +56,7 @@ class CIP2Country: public CLoggable
 		void	AddIPRange(uint32 IPfrom,uint32 IPto, CString& shortCountryName, CString& midCountryName, CString& longCountryName);
 
 		IPRange_Struct2*	GetCountryFromIP(uint32 IP);
+		CString	GetCountryNameFromRef(IPRange_Struct2* m_structServerCountry, bool longname=false);
 		WORD	GetFlagResIDfromCountryCode(CString shortCountryName);
 
 		CImageList* GetFlagImageList() {return &CountryFlagImageList;}

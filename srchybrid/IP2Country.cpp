@@ -128,11 +128,10 @@ static int __cdecl CmpIP2CountryByStartAddr(const void* p1, const void* p2)
 }
 
 bool CIP2Country::LoadFromFile(){
-
+	DWORD startMesure = GetTickCount();
 	TCHAR szBuffer[512];
 	CString ip2countryCSVfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
-
 	try{
 		if (readFile != NULL) {
 
@@ -232,7 +231,7 @@ bool CIP2Country::LoadFromFile(){
 
 			if (thePrefs.GetVerbose())
 			{
-				theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP2Country from \"%s\""), ip2countryCSVfile);
+				theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP2Country from \"%s\" in %ums"), ip2countryCSVfile, GetTickCount()-startMesure);
 				theApp.emuledlg->AddDebugLogLine(false, _T("Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"), iLine, iCount, iDuplicate, iMerged);
 			}
 
@@ -241,12 +240,11 @@ bool CIP2Country::LoadFromFile(){
 			throw CString(_T("Failed to load in"));
 		}
 	}
-	catch(CString error){
-		AddLogLine(false, _T("%s %s"), error, ip2countryCSVfile);
+	catch(CString strerror){
+		AddLogLine(false, _T("%s %s"), strerror, ip2countryCSVfile);
 		RemoveAllIPs();
 		return false;
 	}
-	AddDebugLogLine(false, _T("IP2Countryfile has been loaded"));
 	return true;
 
 }
@@ -480,7 +478,24 @@ struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
 
 	return &defaultIP2Country;
 }
-
+CString CIP2Country::GetCountryNameFromRef(IPRange_Struct2* m_structCountry, bool longName){
+	if(EnableIP2Country)
+	{
+		if(longName)
+			return m_structCountry->LongCountryName;
+		switch(thePrefs.GetIP2CountryNameMode()){
+			case IP2CountryName_SHORT:
+				return m_structCountry->ShortCountryName;
+			case IP2CountryName_MID:
+				return m_structCountry->MidCountryName;
+			case IP2CountryName_LONG:
+				return m_structCountry->LongCountryName;
+		}
+	}
+	else if(longName)
+		return GetResString(IDS_DISABLED);	
+	return _T("");
+}
 bool CIP2Country::ShowCountryFlag(){
 
 	return 
