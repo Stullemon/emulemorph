@@ -58,7 +58,7 @@ END_MESSAGE_MAP()
 
 void InputBox::OnOK()
 {	char buffer[510];
-	//kahos +
+	//khaos +
 	CWnd* textBox;
 	if (!isNumber) textBox = GetDlgItem(IDC_TEXT);
 	else textBox = GetDlgItem(IDC_TEXTNUM);
@@ -78,7 +78,7 @@ void InputBox::OnOK()
 	}
 	CDialog::OnOK();
 	*/
-	//kahos -
+	//khaos -
 }
 
 
