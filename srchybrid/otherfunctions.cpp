@@ -2800,16 +2800,16 @@ long FileSize(LPCTSTR fileName){
 uint32 getPrime(uint32 lower_bound)
 {
 	std::list<uint32> prime_no_list;
-	prime_no_list.push_back(2);
+	prime_no_list.push_back(3);
 
 	bool isPrime;
-	for(uint32 cur_no = 3; !(cur_no > lower_bound && isPrime); cur_no++){
+	for(uint32 cur_no = 5; !(cur_no > lower_bound && isPrime); cur_no = cur_no+2){
 		isPrime = true;
 		for(std::list<uint32>::iterator cur_pos=prime_no_list.begin(); cur_pos!=prime_no_list.end(); cur_pos++){
 			if(cur_no%(*cur_pos) == 0){
 			    isPrime = false;
 			    break;
-			}
+			}	
 		}
 		if(isPrime){
 			prime_no_list.push_back(cur_no);
