@@ -367,7 +367,8 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
  * @param newclient address of the client that should be inserted in the uploading list
  */
 void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
-	POSITION insertPosition = NULL;
+	//MORPH - Removed by SiRoB, No prio on the uploading list
+	/*POSITION insertPosition = NULL;
 	uint32 posCounter = uploadinglist.GetCount();
 
 	uint32 newclientScore = newclient->GetScore(false);
@@ -414,12 +415,12 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
         newclient->SetSlotNumber(posCounter+1);
 		uploadinglist.InsertBefore(insertPosition, newclient);
         theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket);
-    } else {
+    } else {*/
         // Add it last
         theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->socket);
 		uploadinglist.AddTail(newclient);
         newclient->SetSlotNumber(uploadinglist.GetCount());
-    }
+    /*}*/
 }
 
 
