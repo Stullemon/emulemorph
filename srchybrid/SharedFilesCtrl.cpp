@@ -379,6 +379,15 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if( !lpDrawItemStruct->itemData)
 		return;
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	CRect clientRect;
+	GetClientRect(clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
+		&&
+		(cur_rec.bottom < clientRect.top || cur_rec.bottom > clientRect.bottom))
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if( odc && (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
@@ -393,7 +402,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec = lpDrawItemStruct->rcItem;
+	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
@@ -417,12 +429,12 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		if( !IsColumnHidden(iColumn) ){
 			UINT uDTFlags = DLC_DT_TEXT;
 			cur_rec.right += GetColumnWidth(iColumn);
-			//MORPH START - Added by SiRoB, Don't draw hidden colums
-			CRect Rect;
-			this->GetClientRect(Rect);
-			Rect.IntersectRect(Rect, &cur_rec);
-			if (!Rect.IsRectEmpty()){
-			//MORPH END   - Added by SiRoB, Don't draw hidden colums
+			//MORPH START - Added by SiRoB, Don't draw hidden columns
+			if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
+				||
+				cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+			{
+			//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				//MORPH - Moved by SiRoB, due to the draw system change on hidden rect
 				// xMule_MOD: showSharePermissions, modified by itsonlyme
 				// display not finished files in navy, blocked files in red and friend-only files in orange
@@ -726,7 +738,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//MORPH - Changed by SiRoB, for rating icon
 					//cur_rec.left -= iIconDrawWidth;
 					cur_rec.left -= iIconDrawWidth + 11;
-			//MORPH START - Added by SiRoB, Don't draw hidden coloms
+			//MORPH - Added by SiRoB, Don't draw hidden coloms
 			}
 			//MORPH END   - Added by SiRoB, Don't draw hidden coloms
 			cur_rec.left += GetColumnWidth(iColumn);
@@ -2091,6 +2103,10 @@ void CSharedFilesCtrl::UpdateFile(const CKnownFile* pFile)
 {
 	if( !theApp.emuledlg->IsRunning())
 		return;
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->sharedfileswnd)
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)pFile;

@@ -295,8 +295,12 @@ void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
 	// I added this IsRunning() check to this function and the DrawItem method and
 	// this seems to keep it from crashing. This is not the fix but a patch until
 	// someone points out what is going wrong.. Also, it will still assert in debug mode..
-	if( !theApp.emuledlg->IsRunning() )
+	if( !theApp.emuledlg->IsRunning())
 		return;
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
@@ -313,6 +317,15 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	CRect clientRect;
+	GetClientRect(clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
+		&&
+		(cur_rec.bottom < clientRect.top || cur_rec.bottom > clientRect.bottom))
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
@@ -327,7 +340,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont *pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec = lpDrawItemStruct->rcItem;
+	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
     if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
         dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
@@ -352,264 +368,271 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 		if( !IsColumnHidden(iColumn) ){
 			cur_rec.right += GetColumnWidth(iColumn);
-			switch(iColumn){
-				case 0:{
-					//MORPH START - Modified by SiRoB, More client & Credit overlay icon
-					uint8 image;
-					//MORPH - Removed by SiRoB, Friend Addon
-					/*
-					if (client->IsFriend())
-						image = 2;
-					else*/ if (client->GetClientSoft() == SO_MLDONKEY )
-						image = 3;
-					else if (client->GetClientSoft() == SO_EDONKEYHYBRID )
-						image = 4;
-					else if (client->GetClientSoft() == SO_SHAREAZA )
-						image = 5;
-					else if (client->GetClientSoft() == SO_AMULE)
-						image = 6;
-					else if (client->GetClientSoft() == SO_LPHANT)
-						image = 7;
-					else if (client->GetClientSoft() == SO_EDONKEY )
-						image = 8;
-					else if (client->ExtProtocolAvailable())
-						image = (client->IsMorph())?9:1;
-					else
-						image = 0;
+			//MORPH START - Added by SiRoB, Don't draw hidden columns
+			if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
+				||
+				cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+			{
+			//MORPH END   - Added by SiRoB, Don't draw hidden columns
+				switch(iColumn){
+					case 0:{
+						//MORPH START - Modified by SiRoB, More client & Credit overlay icon
+						uint8 image;
+						//MORPH - Removed by SiRoB, Friend Addon
+						/*
+						if (client->IsFriend())
+							image = 2;
+						else*/ if (client->GetClientSoft() == SO_MLDONKEY )
+							image = 3;
+						else if (client->GetClientSoft() == SO_EDONKEYHYBRID )
+							image = 4;
+						else if (client->GetClientSoft() == SO_SHAREAZA )
+							image = 5;
+						else if (client->GetClientSoft() == SO_AMULE)
+							image = 6;
+						else if (client->GetClientSoft() == SO_LPHANT)
+							image = 7;
+						else if (client->GetClientSoft() == SO_EDONKEY )
+							image = 8;
+						else if (client->ExtProtocolAvailable())
+							image = (client->IsMorph())?9:1;
+						else
+							image = 0;
 
-					POINT point = {cur_rec.left, cur_rec.top+1};
-					UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetScoreRatio(client->GetIP()) > 1) ? 2 : 0));
-					if (client->IsLeecher())
-						imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg | ILD_ROP, NOTSRCCOPY);
-					else
-						imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, odc->GetBkColor());
-					//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
+						POINT point = {cur_rec.left, cur_rec.top+1};
+						UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetScoreRatio(client->GetIP()) > 1) ? 2 : 0));
+						if (client->IsLeecher())
+							imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, RGB(255,64,64));
+						else
+							imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | uOvlImg, 0, odc->GetBkColor());
+						//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
 
-					// Mighty Knife: Community visualization
-					if (client->IsCommunity())
-						m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
-					// [end] Mighty Knife
+						// Mighty Knife: Community visualization
+						if (client->IsCommunity())
+							m_overlayimages.Draw(dc,0, point, ILD_TRANSPARENT);
+						// [end] Mighty Knife
 
-					//MORPH START - Added by SiRoB, Friend Addon
-					if (client->IsFriend())
-						m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_TRANSPARENT);
-					//MORPH END   - Added by SiRoB, Friend Addon
+						//MORPH START - Added by SiRoB, Friend Addon
+						if (client->IsFriend())
+							m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_TRANSPARENT);
+						//MORPH END   - Added by SiRoB, Friend Addon
+							
+						Sbuffer = client->GetUserName();
+
+						//EastShare Start - added by AndCycle, IP to Country, modified by Commander
+						//CString tempStr;
+						//tempStr.Format("<%s>%s", client->GetCountryName(), Sbuffer);
+						//Sbuffer = tempStr;
+											//Commander: There is a column now to show the country name
+
+						if(theApp.ip2country->ShowCountryFlag()){
+							cur_rec.left+=20;
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						}
+						//EastShare End - added by AndCycle, IP to Country
+
+						cur_rec.left +=20;
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						cur_rec.left -=20;
+
+						//EastShare Start - added by AndCycle, IP to Country
+						if(theApp.ip2country->ShowCountryFlag()){
+							cur_rec.left-=20;
+						}
+						//EastShare End - added by AndCycle, IP to Country
+
+						break;
+					}
+					case 1:
+						if(file){
+							Sbuffer = file->GetFileName();
+
+							//Morph Start - added by AndCycle, Equal Chance For Each File
+							//Morph - added by AndCycle, more detail...for debug?
+							if(thePrefs.IsEqualChanceEnable()){
+								Sbuffer.Format(_T("%s :%s"), file->statistic.GetEqualChanceValueString(false), Sbuffer);
+							}
+							//Morph - added by AndCycle, more detail...for debug?
+							//Morph End - added by AndCycle, Equal Chance For Each File
+						}
+						else
+							Sbuffer = _T("?");
+						break;
+					case 2:
+						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
+						break;
+					case 3:
+						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
+						if(client->GetSessionUp() == client->GetQueueSessionUp()) {
+							Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false));
+						} else {
+							Sbuffer.Format(_T("%s=%s+%s (%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
+						}
+						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
+						break;
+					case 4:
+						if (client->HasLowID())
+							if(client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
+								Sbuffer.Format(_T("%s LowID delayed %s"),CastSecondsToHM((client->GetWaitTime())/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+							else
+								Sbuffer.Format(_T("%s LowID"),CastSecondsToHM((client->GetWaitTime())/1000));
+						else
+							Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
+						break;
+					case 5:
+						{//Morph - modified by AndCycle, upRemain
+							sint32 timeleft;
+							if(client->GetDatarate() == 0)	timeleft = -1;
+							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+							else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+							else if(file)
+								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
+								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
+						}//Morph - modified by AndCycle, upRemain
+						break;
+					case 6:
+						Sbuffer = client->GetUploadStateDisplayString();
+						break;
+					case 7:
+						//if( client->GetUpPartCount() )[
+							cur_rec.bottom--;
+							cur_rec.top++;
+							client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
+							cur_rec.bottom++;
+							cur_rec.top--;
+						//}
+						break;
+
+					//MORPH START - Added by SiRoB, Client Software
+					case 8:			
+						Sbuffer = client->GetClientSoftVer();
+						break;
+					//MORPH END - Added by SiRoB, Client Software
+				
+					//MORPH START - Added By Yun.SF3, Upload/Download
+					case 9: //LSD Total UP/DL
+						{
+							if (client->Credits()){
+								Sbuffer.Format( _T("%s/%s"),
+									CastItoXBytes(client->Credits()->GetUploadedTotal(),false,false),
+									CastItoXBytes(client->Credits()->GetDownloadedTotal(),false,false));
+								//(float)client->Credits()->GetScoreRatio() );
+
+							}
+							else{
+								Sbuffer.Format( _T("%s/%s"),// R%s",
+									_T("?"),_T("?"));//,"?" );
+							}
+							break;	
+
+						}
+					//MORPH END - Added By Yun.SF3, Upload/Download
+
+					//MORPH START - Added By Yun.SF3, Remote Status
+					case 10: //Yun.SF3 remote queue status
+						{	
+							int qr = client->GetRemoteQueueRank();
+							if (client->GetDownloadDatarate() > 0){
+								Sbuffer.Format(_T("%s"),CastItoXBytes(client->GetDownloadDatarate(),false,true));
+							}
+							else if (qr)
+									Sbuffer.Format(_T("QR: %u"),qr);
+							
+							else if(client->IsRemoteQueueFull())
+								Sbuffer.Format(_T("%s"),GetResString(IDS_QUEUEFULL));
+							else
+								Sbuffer.Format(_T("%s"),GetResString(IDS_UNKNOWN));
 						
-					Sbuffer = client->GetUserName();
-
-					//EastShare Start - added by AndCycle, IP to Country, modified by Commander
-					//CString tempStr;
-					//tempStr.Format("<%s>%s", client->GetCountryName(), Sbuffer);
-					//Sbuffer = tempStr;
-                                        //Commander: There is a column now to show the country name
-
-					if(theApp.ip2country->ShowCountryFlag()){
-						cur_rec.left+=20;
-						POINT point2= {cur_rec.left,cur_rec.top+1};
-						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
-					}
-					//EastShare End - added by AndCycle, IP to Country
-
-					cur_rec.left +=20;
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-					cur_rec.left -=20;
-
-					//EastShare Start - added by AndCycle, IP to Country
-					if(theApp.ip2country->ShowCountryFlag()){
-						cur_rec.left-=20;
-					}
-					//EastShare End - added by AndCycle, IP to Country
-
-					break;
-				}
-				case 1:
-					if(file){
-						Sbuffer = file->GetFileName();
-
-						//Morph Start - added by AndCycle, Equal Chance For Each File
-						//Morph - added by AndCycle, more detail...for debug?
-						if(thePrefs.IsEqualChanceEnable()){
-							Sbuffer.Format(_T("%s :%s"), file->statistic.GetEqualChanceValueString(false), Sbuffer);
-						}
-						//Morph - added by AndCycle, more detail...for debug?
-						//Morph End - added by AndCycle, Equal Chance For Each File
-					}
-					else
-						Sbuffer = _T("?");
-					break;
-				case 2:
-					Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
-					break;
-				case 3:
-					//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
-					if(client->GetSessionUp() == client->GetQueueSessionUp()) {
-						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false));
-                    } else {
-						Sbuffer.Format(_T("%s=%s+%s (%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
-					}
-					//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
-					break;
-				case 4:
-					if (client->HasLowID())
-                        if(client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
-                            Sbuffer.Format(_T("%s LowID delayed %s"),CastSecondsToHM((client->GetWaitTime())/1000), CastSecondsToHM((::GetTickCount()-client->GetUpStartTimeDelay()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
-                        else
-							Sbuffer.Format(_T("%s LowID"),CastSecondsToHM((client->GetWaitTime())/1000));
-					else
-						Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
-					break;
-				case 5:
-					{//Morph - modified by AndCycle, upRemain
-						sint32 timeleft;
-						if(client->GetDatarate() == 0)	timeleft = -1;
-						else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
-						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
-						else if(file)
-							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
-							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
-						Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
-					}//Morph - modified by AndCycle, upRemain
-					break;
-				case 6:
-					Sbuffer = client->GetUploadStateDisplayString();
-					break;
-				case 7:
-					//if( client->GetUpPartCount() )[
-						cur_rec.bottom--;
-						cur_rec.top++;
-						client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
-						cur_rec.bottom++;
-						cur_rec.top--;
-					//}
-					break;
-
-				//MORPH START - Added by SiRoB, Client Software
-				case 8:			
-					Sbuffer = client->GetClientSoftVer();
-					break;
-				//MORPH END - Added by SiRoB, Client Software
-			
-				//MORPH START - Added By Yun.SF3, Upload/Download
-				case 9: //LSD Total UP/DL
-					{
-						if (client->Credits()){
-							Sbuffer.Format( _T("%s/%s"),
-								CastItoXBytes(client->Credits()->GetUploadedTotal(),false,false),
-								CastItoXBytes(client->Credits()->GetDownloadedTotal(),false,false));
-							//(float)client->Credits()->GetScoreRatio() );
-
-						}
-						else{
-							Sbuffer.Format( _T("%s/%s"),// R%s",
-								_T("?"),_T("?"));//,"?" );
 						}
 						break;	
+						//MORPH END - Added By Yun.SF3, Remote Status
 
-					}
-				//MORPH END - Added By Yun.SF3, Upload/Download
-
-				//MORPH START - Added By Yun.SF3, Remote Status
-				case 10: //Yun.SF3 remote queue status
-					{	
-						int qr = client->GetRemoteQueueRank();
-						if (client->GetDownloadDatarate() > 0){
-							Sbuffer.Format(_T("%s"),CastItoXBytes(client->GetDownloadDatarate(),false,true));
+					case 11:{
+						Sbuffer.Format(_T("%i"), client->GetSlotNumber());
+						//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
+						if (client->GetFriendSlot() && client->IsFriend()){
+							Sbuffer.Append(_T(" FS"));
 						}
-						else if (qr)
-								Sbuffer.Format(_T("QR: %u"),qr);
-						
-						else if(client->IsRemoteQueueFull())
-							Sbuffer.Format(_T("%s"),GetResString(IDS_QUEUEFULL));
-						else
-							Sbuffer.Format(_T("%s"),GetResString(IDS_UNKNOWN));
-					
-					}
-					break;	
-					//MORPH END - Added By Yun.SF3, Remote Status
-
-				case 11:{
-					Sbuffer.Format(_T("%i"), client->GetSlotNumber());
-					//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
-					if (client->GetFriendSlot() && client->IsFriend()){
-						Sbuffer.Append(_T(" FS"));
-					}
-					//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
-					else if (client->IsPBForPS()){
-						if (client->IsMoreUpThanDown())
-						{
-							Sbuffer.Append(_T(" PBF"));
-							if (client->Credits() && client->Credits()->GetDownloadedTotal() > client->Credits()->GetUploadedTotal())
-								Sbuffer.AppendFormat( _T("(%s)"),
-								CastItoXBytes((float)client->Credits()->GetDownloadedTotal()-
-											  (float)client->Credits()->GetUploadedTotal(),false,false));
-						}
-						if (client->GetPowerShared())
-							Sbuffer.Append(_T(" PS"));
-
-						CString tempFilePrio;
-						if (file)
-						{
-							switch (file->GetUpPriority()) {
-								case PR_VERYLOW : {
-									tempFilePrio = GetResString(IDS_PRIOVERYLOW);
-									break; }
-								case PR_LOW : {
-									if( file->IsAutoUpPriority() )
-										tempFilePrio = GetResString(IDS_PRIOAUTOLOW);
-									else
-										tempFilePrio = GetResString(IDS_PRIOLOW);
-									break; }
-								case PR_NORMAL : {
-									if( file->IsAutoUpPriority() )
-										tempFilePrio = GetResString(IDS_PRIOAUTONORMAL);
-									else
-										tempFilePrio = GetResString(IDS_PRIONORMAL);
-									break; }
-								case PR_HIGH : {
-									if( file->IsAutoUpPriority() )
-										tempFilePrio = GetResString(IDS_PRIOAUTOHIGH);
-									else
-										tempFilePrio = GetResString(IDS_PRIOHIGH);
-									break; }
-								case PR_VERYHIGH : {
-									tempFilePrio = GetResString(IDS_PRIORELEASE);
-									break; }
-								default:
-									tempFilePrio.Empty();
+						//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
+						else if (client->IsPBForPS()){
+							if (client->IsMoreUpThanDown())
+							{
+								Sbuffer.Append(_T(" PBF"));
+								if (client->Credits() && client->Credits()->GetDownloadedTotal() > client->Credits()->GetUploadedTotal())
+									Sbuffer.AppendFormat( _T("(%s)"),
+									CastItoXBytes((float)client->Credits()->GetDownloadedTotal()-
+												(float)client->Credits()->GetUploadedTotal(),false,false));
 							}
-						}
-						Sbuffer.Append(_T(" ") + tempFilePrio);
-					}
-					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
-				}break;
-				//MORPH START - Added by SiRoB, Show Compression by Tarod
-				case 12:
-					if (client->GetCompression() < 0.1f)
-						Sbuffer = _T("-");
-					else
-						Sbuffer.Format(_T("%.1f%%"), client->GetCompression());
-					break;
-				//MORPH END - Added by SiRoB, Show Compression by Tarod
+							if (client->GetPowerShared())
+								Sbuffer.Append(_T(" PS"));
 
-				// Mighty Knife: Community affiliation
-				case 13:
-					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
-					break;
-				// [end] Mighty Knife
-				// EastShare - Added by Pretender, Friend Tab
-				case 14:
-					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
-					break;
-				// EastShare - Added by Pretender, Friend Tab
-                // Commander - Added: IP2Country column - Start
-                case 15:
-					Sbuffer.Format(_T("%s"), client->GetCountryName());
-					break;
-                // Commander - Added: IP2Country column - End	
-			}
-	
-			if( iColumn != 7 && iColumn != 0 )
-				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+							CString tempFilePrio;
+							if (file)
+							{
+								switch (file->GetUpPriority()) {
+									case PR_VERYLOW : {
+										tempFilePrio = GetResString(IDS_PRIOVERYLOW);
+										break; }
+									case PR_LOW : {
+										if( file->IsAutoUpPriority() )
+											tempFilePrio = GetResString(IDS_PRIOAUTOLOW);
+										else
+											tempFilePrio = GetResString(IDS_PRIOLOW);
+										break; }
+									case PR_NORMAL : {
+										if( file->IsAutoUpPriority() )
+											tempFilePrio = GetResString(IDS_PRIOAUTONORMAL);
+										else
+											tempFilePrio = GetResString(IDS_PRIONORMAL);
+										break; }
+									case PR_HIGH : {
+										if( file->IsAutoUpPriority() )
+											tempFilePrio = GetResString(IDS_PRIOAUTOHIGH);
+										else
+											tempFilePrio = GetResString(IDS_PRIOHIGH);
+										break; }
+									case PR_VERYHIGH : {
+										tempFilePrio = GetResString(IDS_PRIORELEASE);
+										break; }
+									default:
+										tempFilePrio.Empty();
+								}
+							}
+							Sbuffer.Append(_T(" ") + tempFilePrio);
+						}
+						//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
+					}break;
+					//MORPH START - Added by SiRoB, Show Compression by Tarod
+					case 12:
+						if (client->GetCompression() < 0.1f)
+							Sbuffer = _T("-");
+						else
+							Sbuffer.Format(_T("%.1f%%"), client->GetCompression());
+						break;
+					//MORPH END - Added by SiRoB, Show Compression by Tarod
+
+					// Mighty Knife: Community affiliation
+					case 13:
+						Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
+						break;
+					// [end] Mighty Knife
+					// EastShare - Added by Pretender, Friend Tab
+					case 14:
+						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
+						break;
+					// EastShare - Added by Pretender, Friend Tab
+					// Commander - Added: IP2Country column - Start
+					case 15:
+						Sbuffer.Format(_T("%s"), client->GetCountryName());
+						break;
+					// Commander - Added: IP2Country column - End	
+				}
+		
+				if( iColumn != 7 && iColumn != 0 )
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+			} //MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}

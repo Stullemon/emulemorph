@@ -486,7 +486,11 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 {
 	if (!theApp.emuledlg->IsRunning())
 		return;
-
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+	
 	// Retrieve all entries matching the source
 	std::pair<ListItems::const_iterator, ListItems::const_iterator> rangeIt = m_ListItems.equal_range(toupdate);
 	for(ListItems::const_iterator it = rangeIt.first; it != rangeIt.second; it++){
@@ -506,14 +510,6 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 
 void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem)
 {
-	//MORPH START - Added by SiRoB, Don't draw hidden Rect
-	CRect Rect;
-	this->GetClientRect(Rect);
-	Rect.IntersectRect(Rect,lpRect);
-	if (Rect.IsRectEmpty())
-		return;
-	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
-
 	if(lpRect->left < lpRect->right)
 	{
 		CString buffer;
@@ -805,13 +801,6 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 }
 
 void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem) {
-	//MORPH START - Added by SiRoB, Don't draw hidden colums
-	CRect Rect;
-	this->GetClientRect(Rect);
-	Rect.IntersectRect(Rect,lpRect);
-	if (Rect.IsRectEmpty())
-		return;
-	//MORPH END   - Added by SiRoB, Don't draw hidden colums
 	if(lpRect->left < lpRect->right) { 
 
 		CString buffer;
@@ -1145,7 +1134,15 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
-
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	CRect clientRect;
+	GetClientRect(clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
+		&&
+		(cur_rec.bottom < clientRect.top || cur_rec.bottom > clientRect.bottom))
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	CtrlItem_Struct* content = (CtrlItem_Struct*)lpDrawItemStruct->itemData;
 	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
@@ -1196,7 +1193,10 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	int tree_start=0;
 	int tree_end=0;
 
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec = lpDrawItemStruct->rcItem;
+	*/
 
 	//offset was 4, now it's the standard 2 spaces
 	int iTreeOffset = dc->GetTextExtent(_T(" "), 1 ).cx*2;
@@ -1211,6 +1211,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 			int cx = CListCtrl::GetColumnWidth(iColumn);
+			
 			if(iColumn == 5) {
 				int iNextLeft = cur_rec.left + cx;
 				//set up tree vars
@@ -1221,10 +1222,20 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 				//normal column stuff
 				cur_rec.left = cur_rec.right + 1;
 				cur_rec.right = tree_start + cx - iTreeOffset;
+				//MORPH START - Added by SiRoB, Don't draw hidden columns
+				if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
+					||
+					cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+				//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				DrawFileItem(dc, 5, &cur_rec, content);
 				cur_rec.left = iNextLeft;
 			} else {
 				cur_rec.right += cx;
+				//MORPH START - Added by SiRoB, Don't draw hidden columns
+				if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
+					||
+					cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+				//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				DrawFileItem(dc, iColumn, &cur_rec, content);
 				cur_rec.left += cx;
 			}

@@ -295,8 +295,12 @@ void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
 	// I added this IsRunning() check to this function and the DrawItem method and
 	// this seems to keep it from crashing. This is not the fix but a patch until
 	// someone points out what is going wrong.. Also, it will still assert in debug mode..
-	if( !theApp.emuledlg->IsRunning() )
+	if( !theApp.emuledlg->IsRunning())
 		return;
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
@@ -313,6 +317,16 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	CRect clientRect;
+	GetClientRect(clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
+		&&
+		(cur_rec.bottom > clientRect.top || cur_rec.bottom < clientRect.bottom))
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
+	
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
@@ -326,7 +340,10 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec = lpDrawItemStruct->rcItem;
+	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
@@ -349,13 +366,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 		if( !IsColumnHidden(iColumn) ){
 			cur_rec.right += GetColumnWidth(iColumn);
-			//MORPH START - Added by SiRoB, Don't draw hidden Rect
-			CRect Rect;
-			this->GetClientRect(Rect);
-			Rect.IntersectRect(Rect,&cur_rec);
-			if (!Rect.IsRectEmpty()){
-			//MORPH END   - Added by SiRoB, Don't draw hidden Rect
-	
+			//MORPH START - Added by SiRoB, Don't draw hidden columns
+			if (cur_rec.left > clientRect.left && cur_rec.left < clientRect.right
+				||
+				cur_rec.right > clientRect.left && cur_rec.right < clientRect.right)
+			{
+			//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				switch(iColumn){
 					case 0:{
 						//MORPH START - Modified by SiRoB, More client & Credit overlay icon
@@ -405,7 +421,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//CString tempStr;
 						//tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
 						//Sbuffer = tempStr;
-                                                //Commander: There is a column now to show the country name
+												//Commander: There is a column now to show the country name
 
 						if(theApp.ip2country->ShowCountryFlag()){
 							cur_rec.left+=20;
@@ -494,7 +510,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 4:{
 							if (client->HasLowID()){
 						if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
-                            Sbuffer.Format(_T("%i **** Awaited reconnect %s"),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+							Sbuffer.Format(_T("%i **** Awaited reconnect %s"),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 								else
 									Sbuffer.Format(_T("%i LowID"),client->GetScore(false));
 							}
@@ -550,17 +566,15 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
 						break;
 					// EastShare - Added by Pretender, Friend Tab
-                    // Commander - Added: IP2Country column - Start
-                    case 13:
+					// Commander - Added: IP2Country column - Start
+					case 13:
 						Sbuffer.Format(_T("%s"), client->GetCountryName());
 						break;
-                    // Commander - Added: IP2Country column - End
+					// Commander - Added: IP2Country column - End
 				}
 				if( iColumn != 9 && iColumn != 0)
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-			//MORPH START - Added by SiRoB, Don't draw hidden colums
-			}
-			//MORPH END   - Added by SiRoB, Don't draw hidden colums
+			}//MORPH - Added by SiRoB, Don't draw hidden colums
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
