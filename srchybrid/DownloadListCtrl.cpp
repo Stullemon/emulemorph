@@ -198,8 +198,10 @@ void CDownloadListCtrl::SetAllIcons()
 	//MORPH END   - Added by IceCream, eMule Plus rating icones
 
 	//Morph Start - added by AndCycle, IP to Country
-	for(int count = 0; count< theApp.ip2country->GetCountryFlagAmount(); count++){
-		m_ImageList.Add(theApp.ip2country->GetCountryFlagByIndex(count));
+	if(theApp.ip2country->LoadCountryFlagLib()){
+		for(int count = 0; count< theApp.ip2country->GetCountryFlagAmount(); count++){
+			m_ImageList.Add(theApp.ip2country->GetCountryFlagByIndex(count));
+		}
 	}
 	//Morph End - added by AndCycle, IP to Country
 }
