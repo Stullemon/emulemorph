@@ -586,8 +586,11 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		if (!newclient->socket) // Pawcio: BC
 			return false;
 	}
-	else
+	//MORPH - Removed by SiRoB, -Fix-
+	//Comment: since the client is not in the uploadinglist he never got the OP_ACCEPTUPLOADREQ if we pass in the first condition
+	/*else
 	{
+	*/
 		//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(newclient->GetUploadFileID());
 		if (reqfile){
@@ -619,7 +622,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		theStats.AddUpDataOverheadFileRequest(packet->size);
 		newclient->socket->SendPacket(packet,true);
 		newclient->SetUploadState(US_UPLOADING);
-	}
+	//} Removed by SiRoB, see comment above
 
 	newclient->SetUpStartTime();
 	newclient->ResetSessionUp();
@@ -641,7 +644,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
     }
 
 	// statistic
-	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
+	//CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
 	if (reqfile){
 		reqfile->statistic.AddAccepted();
 	}
