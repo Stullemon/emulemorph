@@ -115,19 +115,16 @@ BOOL CPreferencesDlg::OnInitDialog()
 	m_groupbox.SetWindowText(currenttext);
 	m_iPrevPage = curSel;
     
-	if(thePrefs.UseSideBanner()){
 	//Commander - Added: Preferences Banner [TPT] - Start		
 	CBitmap bmp;
 	bmp.LoadBitmap(IDB_MORPH_BANNER);
 	m_banner.SetTexture((HBITMAP)bmp.Detach());	
 	m_banner.SetFillFlag(KCSB_FILL_TEXTURE);
-	m_banner.SetSize(70);
+	m_banner.SetSize(thePrefs.sidebanner?70:0);
 	m_banner.SetTitle(_T(""));
 	m_banner.SetCaption(_T(""));
 	m_banner.Attach(this, KCSB_ATTACH_RIGHT);
-	//theApp.emuledlg->preferenceswnd->Localize();
 	//Commander - Added: Preferences Banner [TPT] - End
-	}
 
 	return bResult;
 }

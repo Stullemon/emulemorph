@@ -26,6 +26,7 @@
 #include "TransferWnd.h"
 #include "ServerWnd.h"
 #include "HelpIDs.h"
+#include "PreferencesDlg.h" //Commander - Added: Side Banner
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -165,8 +166,13 @@ BOOL CPPgDisplay::OnApply()
 	thePrefs.m_bShowClientPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWCLIENTPERCENTAGE); //Commander - Added: Client Percentage
 	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
-    thePrefs.sidebanner = (uint8)IsDlgButtonChecked(IDC_BANNER);//Commander - Added: Side Banner
-
+	//Commander - Added: Side Banner
+	if (thePrefs.sidebanner != (uint8)IsDlgButtonChecked(IDC_BANNER)){
+		theApp.emuledlg->preferenceswnd->m_banner.SetSize(thePrefs.sidebanner?0:70);
+		theApp.emuledlg->preferenceswnd->m_banner.UpdateSize();
+	}
+	thePrefs.sidebanner = (uint8)IsDlgButtonChecked(IDC_BANNER);
+	//Commander - Added: Side Banner
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		thePrefs.m_bupdatequeuelist = false;
 	else

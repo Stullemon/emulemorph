@@ -74,7 +74,7 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-protected:
+public:
 	CKCSideBannerWnd m_banner;	//Commander - Added: Preferences Banner [TPT]	
 
 
