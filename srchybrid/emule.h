@@ -23,7 +23,9 @@
 #include "loggable.h"
 #include "UPnPNat.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 #include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
-
+//MORPH START - Added by SiRoB [itsonlyme: -modname-]
+#include "ModName.h"
+//MORPH END   - Added by SiRoB [itsonlyme: -modname-]
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
 #define	DEFAULT_TCP_PORT	4662
 #define	DEFAULT_UDP_PORT	(DEFAULT_TCP_PORT+10)

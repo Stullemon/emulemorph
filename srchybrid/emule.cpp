@@ -71,10 +71,6 @@
 #include "FirewallOpener.h"
 #include "StringConversion.h"
 
-//MORPH START - Added by SiRoB [itsonlyme: -modname-]
-#include "ModName.h"
-//MORPH END   - Added by SiRoB [itsonlyme: -modname-]
-
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
