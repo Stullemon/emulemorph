@@ -657,12 +657,7 @@ CString CStatisticsTree::GetWML(bool onlyVisible, bool onlyBold, bool noRecursiv
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
-	// modified by Announ [itsonlyme: -modname-]
-	/*
-	if (firstItem) strBuffer.Format("<b>eMule v%s %s [%s]</b>\r\n<br/><br/>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-	*/
-	if (firstItem) strBuffer.Format("<b>eMule v%s %s %s [%s]</b>\r\n<br/><br/>\r\n", theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-	// End itsonlyme
+	if (firstItem) strBuffer.Format(_T("<b>eMule v%s %s [%s]</b>\r\n<br/><br/>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 
 	if (theItem == NULL) {
 		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
@@ -679,12 +674,12 @@ CString CStatisticsTree::GetWML(bool onlyVisible, bool onlyBold, bool noRecursiv
 		if((IsBold(hCurrent) && onlyBold) || !onlyBold){
 			strItem = GetItemText(hCurrent);
 
-			for (int i = 0; i < theItemLevel; i++) strBuffer += "...";
+			for (int i = 0; i < theItemLevel; i++) strBuffer += _T("...");
 			if (ItemHasChildren(hCurrent)){
-				stheItemPos.Format("%p",hCurrent);
-				strBuffer += "<b><a href=\"./?ses=[Session]&amp;w=stats&amp;show=" + stheItemPos + "\">" + strItem + "</a></b><br/>";
+				stheItemPos.Format(_T("%p"),hCurrent);
+				strBuffer += _T("<b><a href=\"./?ses=[Session]&amp;w=stats&amp;show=") + stheItemPos + _T("\">") + strItem + _T("</a></b><br/>");
 			}else
-				strBuffer += strItem + "<br/>";
+				strBuffer += strItem + _T("<br/>");
 		}
 		if (!noRecursive && ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
 			strBuffer += (CString) GetWML(onlyVisible, onlyBold, false, GetChildItem(hCurrent), theItemLevel+1, false);

@@ -68,16 +68,16 @@ void CPPgMorph3::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgWap = piml->Add(CTempIconLoader(_T("MOBILE")));
 		}
-		m_htiWapRoot = m_ctrlTreeOptions.InsertItem("Wap Interface", iImgWap, iImgWap, TVI_ROOT);
-		m_htiWapEnable  = m_ctrlTreeOptions.InsertCheckBox("Enable Wap Interface", m_htiWapRoot, m_bWapEnable);
-		m_htiWapTemplate = m_ctrlTreeOptions.InsertItem("Template", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
+		m_htiWapRoot = m_ctrlTreeOptions.InsertItem(_T("Wap Interface"), iImgWap, iImgWap, TVI_ROOT);
+		m_htiWapEnable  = m_ctrlTreeOptions.InsertCheckBox(_T("Enable Wap Interface"), m_htiWapRoot, m_bWapEnable);
+		m_htiWapTemplate = m_ctrlTreeOptions.InsertItem(_T("Template"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
 		m_ctrlTreeOptions.AddFileEditBox(m_htiWapTemplate,RUNTIME_CLASS(CTreeOptionsEdit), RUNTIME_CLASS(CTreeOptionsBrowseButton));
-		m_htiWapPort = m_ctrlTreeOptions.InsertItem("Port", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
+		m_htiWapPort = m_ctrlTreeOptions.InsertItem(_T("Port"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
 		m_ctrlTreeOptions.AddEditBox(m_htiWapPort, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		m_htiWapPass = m_ctrlTreeOptions.InsertItem("Pass", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
+		m_htiWapPass = m_ctrlTreeOptions.InsertItem(_T("Pass"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
 		m_ctrlTreeOptions.AddPassEditBox(m_htiWapPass, RUNTIME_CLASS(CPassTreeOptionsEdit));
-		m_htiWapLowEnable  = m_ctrlTreeOptions.InsertCheckBox("Low Enable", m_htiWapRoot, m_bWapLowEnable);
-		m_htiWapLowPass = m_ctrlTreeOptions.InsertItem("Low Pass", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
+		m_htiWapLowEnable  = m_ctrlTreeOptions.InsertCheckBox(_T("Low Enable"), m_htiWapRoot, m_bWapLowEnable);
+		m_htiWapLowPass = m_ctrlTreeOptions.InsertItem(_T("Low Pass"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiWapRoot);
 		m_ctrlTreeOptions.AddPassEditBox(m_htiWapLowPass, RUNTIME_CLASS(CPassTreeOptionsEdit));
 
 		m_ctrlTreeOptions.Expand(m_htiWapRoot, TVE_EXPAND);
@@ -187,7 +187,6 @@ void CPPgMorph3::Localize(void)
 		}
 		// End MoNKi
 	}
-}
 }
 
 LRESULT CPPgMorph3::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)

@@ -1670,7 +1670,8 @@ protected:
 	static void LoadPreferences();
 	static void SavePreferences();
 	static CString GetHomepageBaseURLForLevel(uint8 nLevel);
-        // added by MoNKi [ MoNKi: -Wap Server- ]
+	// added by MoNKi [ MoNKi: -Wap Server- ]
+public:
 	static CString	GetWapTemplate()				{ return CString(m_sWapTemplateFile);}
 	static void		SetWapTemplate(CString in)		{ sprintf(m_sWapTemplateFile,"%s",in);}
 	static bool		GetWapServerEnabled()			{ return m_bWapEnabled; }

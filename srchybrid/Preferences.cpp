@@ -699,7 +699,7 @@ bool	CPreferences::enableNEWS;
 //MORPH END   - Added by SiRoB, XML News [O²]
 
 // Added by MoNKi [MoNKi: -Wap Server-]
-	char	CPreferences::m_sWapTemplateFile[MAX_PATH];
+	TCHAR	CPreferences::m_sWapTemplateFile[MAX_PATH];
 	bool	CPreferences::m_bWapEnabled;
 	uint16	CPreferences::m_nWapPort;
 	uint8	CPreferences::m_iWapGraphWidth;
@@ -3378,8 +3378,8 @@ void CPreferences::LoadPreferences()
 	//
         // added by MoNKi [MoNKi: -Wap Server-]
 	m_bWapEnabled=ini.GetBool(_T("WapEnabled"), false, _T("emulEspaña"));
-	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("emulEspaña"));
-	m_nWapPort=ini.GetInt("WapPort", 80, _T("emulEspaña"));
+	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("emulEspaña")));
+	m_nWapPort=ini.GetInt(_T("WapPort"), 80, _T("emulEspaña"));
 	m_iWapGraphWidth=ini.GetInt(_T("WapGraphWidth"), 60, _T("emulEspaña"));
 	m_iWapGraphHeight=ini.GetInt(_T("WapGraphHeight"), 45, _T("emulEspaña"));
 	m_bWapFilledGraphs=ini.GetBool(_T("WapFilledGraphs"), false, _T("emulEspaña"));

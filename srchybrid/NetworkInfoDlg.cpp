@@ -277,9 +277,9 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	// Wap Interface
 	///////////////////////////////////////////////////////////////////////////
 	rCtrl << _T("\r\n");
-	rCtrl.SetSelectionCharFormat(m_cfBold);
+	rCtrl.SetSelectionCharFormat(rcfBold);
 	rCtrl << GetResString(IDS_WAPSRV) << _T("\r\n");
-	rCtrl.SetSelectionCharFormat(m_cfDef);
+	rCtrl.SetSelectionCharFormat(rcfDef);
 	rCtrl << GetResString(IDS_STATUS) << _T(":\t");
 	rCtrl << (theApp.wapserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << _T("\r\n");
 	if (thePrefs.GetWapServerEnabled()){
