@@ -376,3 +376,9 @@ STRINGTABLE
 BEGIN
     IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
 END
+
+STRINGTABLE
+BEGIN
+    IDS_INFINITEQUEUE       "Infinite Queue"
+    IDS_PAYBACKFIRSTLIMIT   "Amount before triggering (Default 10MB)"
+END
