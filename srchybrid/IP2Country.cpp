@@ -464,7 +464,7 @@ static int __cdecl CmpIP2CountryByAddr(const void* pvKey, const void* pvElement)
 
 struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
 
-	if(EnableIP2Country == false || || ClientIP == 0){
+	if(EnableIP2Country == false || ClientIP == 0){
 		return &defaultIP2Country;
 	}
 	if(m_iplist.GetCount() == 0){
