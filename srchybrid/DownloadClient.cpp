@@ -2384,8 +2384,11 @@ void CUpDownClient::ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file){
 //MORPH START - Added by SIRoB, GetAverage Donwload from client Wistily idea
 uint32 CUpDownClient::GetAvDownDatarate() const
 {
-	if (GetDownTotalTime() > 999)
-		return	GetTransferedDown()/(GetDownTotalTime()/1000);
+	uint32 tempDownCurrentTotalTime = GetDownTotalTime();
+	if (GetDownloadState() == DS_DOWNLOADING)
+		tempDownCurrentTotalTime += GetTickCount() - m_dwDownStartTime;
+	if (tempDownCurrentTotalTime & ~1023)
+		return	GetTransferedDown()/(tempDownCurrentTotalTime/1000);
 	else
 		return 0;
 }

@@ -1217,8 +1217,11 @@ bool CUpDownClient::IsCommunity() const {
 //MORPH START - Added by SIRoB, GetAverage Upload to client Wistily idea
 uint32 CUpDownClient::GetAvUpDatarate() const
 {
-	if (GetUpTotalTime() > 999)
-		return	GetTransferedUp()/(GetUpTotalTime()/1000);
+	uint32 tempUpCurrentTotalTime = GetUpTotalTime();
+	if (GetUploadState() == US_UPLOADING)
+		tempUpCurrentTotalTime += GetTickCount() - m_dwUploadTime;
+	if (tempUpCurrentTotalTime & ~1023)
+		return	GetTransferedUp()/(tempUpCurrentTotalTime/1000);
 	else
 		return 0;
 }

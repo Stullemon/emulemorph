@@ -954,11 +954,11 @@ public:
 	//Morph End - added by AndCycle, ICS
 
 	//wistily start
-	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}//wistily
-	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}//wistily
-	uint32  GetDownTotalTime() const  {return m_nDownTotalTime;}//wistily
+	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}
+	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}
+	uint32  GetDownTotalTime() const  {return m_nDownTotalTime;}
 	uint32  GetAvDownDatarate() const;
-	uint32  GetUpTotalTime() const  {return m_nUpTotalTime;}//wistily
+	uint32  GetUpTotalTime() const  {return m_nUpTotalTime;}
 	uint32  GetAvUpDatarate()const;
 	//wistily stop
 protected:
