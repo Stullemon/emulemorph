@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.13
+--------------------------------------
+FIXED  : crash (introduced in previous version) when strat resume next occur and 'prefer same category' or 'only in same categry' prefrency is not checked [SiRoB]
+
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.12
 --------------------------------------
 MERGED : Some merge from emulEspana arround randomport and folder icone [SiRoB]
