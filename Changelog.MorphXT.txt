@@ -17,6 +17,8 @@ ADDED  : Don't add client in uploadinglist not accepted by trytoconnect to avoid
 ADDED  : Intermediate temp var for file datarate to avoid 0kb/s display when GUI refresh the file item [SiRoB]
 ADDED  : Country column in download window [SiRoB]
 
+TEAWED: Better datarate mesurement for low and high speed [SiRoB]
+
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.11
 --------------------------------------

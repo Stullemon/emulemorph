@@ -641,11 +641,11 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     // Save number of active clients for statistics
     uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
-	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
+	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > uploadinglist.GetSize()) {
         // debug info, will remove this when I'm done.
-        //AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
+        DebugLogError(_T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
 
-		if(tempHighest > (uint32)uploadinglist.GetSize()) {
+		if(tempHighest > uploadinglist.GetSize()) {
         	tempHighest = uploadinglist.GetSize();
 		}
     }
@@ -724,7 +724,7 @@ void CUploadQueue::Process() {
 	/*
 	if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	*/
-	uint32 iCount = (uint32)uploadinglist.GetCount();
+	uint32 iCount = uploadinglist.GetCount();
 	if(thePrefs.DoRemoveSpareTrickleSlot() && iCount > 0 && iCount > m_MaxActiveClientsShortTime+1 && AcceptNewClient(iCount-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
 	//MORPH END   - Changed by SiRoB, 
@@ -817,7 +817,7 @@ void CUploadQueue::Process() {
 	}
 
 	// don't save more than 5 secs of data
-	while(avarage_tick_list.GetCount() > 0)
+	while(avarage_tick_list.GetCount() > 2)
 		if ((curTick - avarage_tick_list.GetHead()) > 10000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 			avarage_friend_dr_list.RemoveHead();

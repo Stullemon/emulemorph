@@ -1011,14 +1011,14 @@ bool CUpDownClient::SendBlockData(){
 		m_nSumForAvgUpDataRate += sentBytesCompleteFile + sentBytesPartFile;
 	}
 			
-	while (m_AvarageUDR_list.GetCount() > 0)
+	while (m_AvarageUDR_list.GetCount() > 2)
 		if ((curTick - m_AvarageUDR_list.GetHead().timestamp) > 10000) {
 			m_nSumForAvgUpDataRate -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else
 			break;
     if(m_AvarageUDR_list.GetCount() > 0) {
 		if(m_AvarageUDR_list.GetCount() == 1)
-			m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / 10000;
+			m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / GetUpStartTimeDelay();
 		else {
 			DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
 			if ((m_AvarageUDR_list.GetCount() - 1)*(curTick - m_AvarageUDR_list.GetTail().timestamp) >= dwDuration)
