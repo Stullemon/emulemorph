@@ -596,6 +596,9 @@
 				RelativePath=".\res\no.ico">
 			</File>
 			<File
+				RelativePath="res\not.ico">
+			</File>
+			<File
 				RelativePath=".\res\np.ico">
 			</File>
 			<File

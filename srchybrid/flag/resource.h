@@ -242,12 +242,13 @@
 #define IDI_COUNTRY_FLAG_ZW             338
 #define IDI_COUNTRY_FLAG_UK             340
 #define IDI_COUNTRY_FLAG_CS             341
+#define IDI_COUNTRY_FLAG_NOFLAG         342
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        342
+#define _APS_NEXT_RESOURCE_VALUE        343
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101
