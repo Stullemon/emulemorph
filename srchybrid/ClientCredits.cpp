@@ -368,112 +368,70 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile file;
 	CFileException fexp;
 
-//Morph Start - added by AndCycle, SUQWT save in client.met.SUQWTv2.met
+//Morph Start - added by AndCycle, choose .met to load
 
-	CString strSUQWTv2FileName;
-	strSUQWTv2FileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
+	CSafeBufferedFile	loadFile;
+	bool		haveTrouble = false;
 
-	CFileStatus	strFileStatus, strSUQWTv2FileStatus;
-	CSafeBufferedFile	strFile, strSUQWTv2File;
-	
-	bool	successOpenStrFile, successOpenStrSUQWTv2File;
-	bool	useStrFile = false, useStrSUQWTv2File = false;
-	bool	haveTrouble = false;
+	const int	totalLoadFile = 12;
 
-	//check credits.met.SUQWTv2.met status
-	successOpenStrSUQWTv2File = strSUQWTv2File.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
-	if (!successOpenStrSUQWTv2File){
-		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-				strError += _T(" - ");
-				strError += szError;
+	CString		loadFileName[totalLoadFile];
+	CFileStatus	loadFileStatus[totalLoadFile];
+	bool		successLoadFile[totalLoadFile];
+
+	//SUQWTv2.met must have bigger number than original credits.met to have higher prio
+	loadFileName[0].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir());
+	loadFileName[1].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir());
+	loadFileName[2].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
+	loadFileName[3].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir());
+	loadFileName[4].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[5].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[6].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[7].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
+	loadFileName[8].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[9].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[10].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+	loadFileName[11].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
+
+
+	int	lastFile = -1;
+	for(int curFile = 0; curFile < totalLoadFile; curFile++){
+		//check credits.met status
+		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp);
+		if (!successLoadFile[curFile]){
+			if (fexp.m_cause != CFileException::fileNotFound){
+				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+				TCHAR szError[MAX_CFEXP_ERRORMSG];
+				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+					strError += _T(" - ");
+					strError += szError;
+				}
+				AddLogLine(true, _T("%s"), strError);
+				haveTrouble = true;
+			}else{
+				//AddLogLine(false, "%s does not exist,", loadFileName[curFile]);
 			}
-			AddLogLine(true, _T("%s"), strError);
-			haveTrouble = true;
 		}else{
-			AddLogLine(false, "credits.met.SUQWTv2.met does not exist,");
-		}
-	}
+			loadFile.GetStatus(loadFileStatus[curFile]);
+			loadFile.Close();
 
-	//check credits.met status
-	successOpenStrFile = strFile.Open(strFileName, iOpenFlags, &fexp);
-	if (!successOpenStrFile){
-		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-				strError += _T(" - ");
-				strError += szError;
+			if(lastFile == -1){
+				lastFile = curFile;
 			}
-			AddLogLine(true, _T("%s"), strError);
-			haveTrouble = true;
-		}else{
-			AddLogLine(false, "credits.met does not exist,");
+
+			//SUQWTv2.met have bigger number than credits.met, so it will replace the credits.met that have the same m_mtime
+			if(loadFileStatus[curFile].m_mtime >= loadFileStatus[lastFile].m_mtime){
+				lastFile = curFile;
+			}
 		}
 	}
 
-	//if credits.met and credits.met.SUQWTv2.met both exist, check which newer
-	if(successOpenStrFile && successOpenStrSUQWTv2File){
+	if(lastFile == -1)	return;
+	strFileName = loadFileName[lastFile];
+	AddLogLine(false, "Load %s", strFileName);
 
-		strFile.GetStatus(strFileStatus);
-		strSUQWTv2File.GetStatus(strSUQWTv2FileStatus);
+//Morph End - added by AndCycle, choose .met to load
 
-		//close before handle over by CSafeBufferedFile file
-		strFile.Close();
-		strSUQWTv2File.Close();
-
-		if(strFileStatus.m_mtime > strSUQWTv2FileStatus.m_mtime){
-			//if original credits.met newer, take it
-			file.Open(strFileName, iOpenFlags, &fexp);
-			useStrFile = true;
-			AddLogLine(false, "Original %s newer, load it instead of %s." , strFileName, strSUQWTv2FileName);
-		}else{
-			//if SUQWTv2 newer, take it
-			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
-			useStrSUQWTv2File = true;
-			AddLogLine(false, "Load %s", strSUQWTv2FileName);
-		}
-	}
-
-	//if both doesn't exist or have trouble, stop load file
-	else if(!successOpenStrFile && !successOpenStrSUQWTv2File){
-
-		strFile.Close();
-		strSUQWTv2File.Close();
-		return;
-	}
-
-	//one of the credit.met have trouble or doesn't exist
-	else{
-
-		//close before handle over by CSafeBufferedFile file
-		strFile.Close();
-		strSUQWTv2File.Close();
-
-		if(haveTrouble)	return;//if there're trouble, don't load credits??
-
-		if(successOpenStrSUQWTv2File){
-			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
-			useStrSUQWTv2File = true;
-			AddLogLine(false, "Load %s", strSUQWTv2FileName);
-		}
-		else if(successOpenStrFile){
-			file.Open(strFileName, iOpenFlags, &fexp);
-			useStrFile = true;
-			AddLogLine(false, "Load %s", strFileName);
-		}
-		
-	}
-
-	strFile.Close();
-	strSUQWTv2File.Close();
-
-
-
-//original commented out
-/*
 	if (!file.Open(strFileName, iOpenFlags, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
@@ -486,10 +444,7 @@ void CClientCreditsList::LoadList()
 		}
 		return;
 	}
-*/
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-
-//Morph End - added by AndCycle, SUQWT save in client.met.SUQWTv2.met
 
 	try{
 		uint8 version;
@@ -511,12 +466,12 @@ void CClientCreditsList::LoadList()
 		}
 		*/
 		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-//Morph - commented out by AndCycle, the official backup cause problem here...
-/*
+
 		// everything is ok, lets see if the backup exist...
 		CString strBakFileName;
-		strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());
-			
+		//strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());//original commented out
+		strBakFileName.Format(_T("%s") _T(".BAK"), strFileName);//Morph - modify by AndCycle, backup loaded file
+
 		DWORD dwBakFileSize = 0;
 		BOOL bCreateBackup = TRUE;
 
@@ -559,7 +514,7 @@ void CClientCreditsList::LoadList()
 			file.Seek(1, CFile::begin); //set filepointer behind file version byte
 
 		}
-*/
+
 		uint32 count;
 		file.Read(&count, 4);
 		m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
