@@ -661,7 +661,8 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	// tell the client that we are now ready to upload
 	if (!newclient->socket || !newclient->socket->IsConnected()){
 		newclient->SetUploadState(US_CONNECTING);
-		if (!newclient->TryToConnect(true))	connectSuccess = false;
+		newclient->TryToConnect(true);
+		connectSuccess = false;
 	}
 	else{
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
