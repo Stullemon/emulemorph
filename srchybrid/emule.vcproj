@@ -2106,6 +2106,9 @@
 				RelativePath="res\emule.rc2">
 			</File>
 			<File
+				RelativePath=".\res\emulespana.ico">
+			</File>
+			<File
 				RelativePath=".\res\EQfile.ico">
 			</File>
 			<File
