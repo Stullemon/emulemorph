@@ -3057,7 +3057,7 @@ void CPreferences::LoadPreferences(){
 	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
 	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
 	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
-	m_bDynUpLog = ini.GetBool("DynUpLog", false);
+	m_bDynUpLog = ini.GetBool("USSLog", false);
 	m_iDynUpPingLimit = ini.GetInt("USSPingLimit", 200); // EastShare - Added by TAHO, USS limit
 	m_bIsUSSLimit = ini.GetBool("IsUSSLimit",false); // EastShare - Added by TAHO, does USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
