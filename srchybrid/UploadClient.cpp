@@ -258,10 +258,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	}
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
-	//MORPH START - Added by Yun.SF3, boost friend
-	if ((IsFriend()) && (thePrefs.IsBoostFriends()) && (thePrefs.UseCreditSystem()) && ((credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED) || thePrefs.GetEnableAntiCreditHack() || ((!IsEmuleClient()) && (GetSourceExchangeVersion()==0)))) //MORPH - Added by IceCream, only boost for secured friend
-		fBaseValue *=1.5f;
-	//MORPH END - Added by Yun.SF3, boost friend
 
 	if (!isdownloading && !onlybasevalue){
 		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){

@@ -574,7 +574,6 @@ public:
 	static CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	static EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
-	static bool	isboostfriends;//Added by Yun.SF3, boost friends
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	static uint16	maxconnectionsswitchborder;
@@ -1348,7 +1347,6 @@ public:
 	static	EqualChanceForEachFileSelection	GetEqualChanceForEachFileMode()	{return equalChanceForEachFileMode;}	//Morph - added by AndCycle, Equal Chance For Each File
 	static	bool	IsECFEFallTime()	{return m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
-	static	bool IsBoostFriends()	{return isboostfriends;}//Added by Yun.SF3, boost friends
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static	bool IsAutoPowershareNewDownloadFile()	{return m_bisautopowersharenewdownloadfile;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	//EastShare START - Pretender, TBH-AutoBackup

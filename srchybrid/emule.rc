@@ -4110,8 +4110,6 @@ BEGIN
     IDS_SF_FULLUPLOAD       "File UL (full)"
     IDS_UM                  "Upload Management"
     IDS_ANTI_LEECHER        "Enable anti-leechers control"
-    IDS_BOOST_LESS          "Boost the less uploaded files (session)"
-    IDS_BOOST_FRIENDS       "Boost friends (x1.5)"
     IDS_PROGRESS_PERCENT    "Show percentage in progress bar"
     IDS_DOWNLOAD_IN_BOLD    "Show downloading files in bold"
     IDS_CAT_RESUMENEXT      "Resume next"
