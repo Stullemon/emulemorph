@@ -178,6 +178,17 @@ void UploadBandwidthThrottler::RemoveFromStandardList(CEMSocket* socket) {
  *               does not exist in the list, this method will do nothing.
  */
 void UploadBandwidthThrottler::RemoveFromStandardListNoLock(CEMSocket* socket) {
+//MORPH START - Changed by SiRoB, Maybe the freeze fix
+    // Find the slot
+    INT_PTR slotCounter = m_StandardOrder_list.GetSize();
+    while(slotCounter--) {
+        if(m_StandardOrder_list.GetAt(slotCounter) == socket) {
+            // Remove the slot
+            m_StandardOrder_list.RemoveAt(slotCounter);
+            break;
+		}
+    }
+/*
     // Find the slot
     int slotCounter = 0;
     bool foundSocket = false;
@@ -190,6 +201,8 @@ void UploadBandwidthThrottler::RemoveFromStandardListNoLock(CEMSocket* socket) {
             slotCounter++;
         }
     }
+*/
+//MORPH END   - Changed by SiRoB, Maybe the freeze fix
 }
 
 /**
