@@ -78,7 +78,11 @@ CPPgTweaks::CPPgTweaks()
 	m_iCheckDiskspace = 0;
 	m_fMinFreeDiskSpaceMB = 0.0F;
 	(void)m_sYourHostname;
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	m_iFirewallStartup = 0;
+	*/
+	// End emulEspaña
 	m_iLogLevel = 0;
 	m_iDisablePeerCache = 0;
 
@@ -120,7 +124,11 @@ CPPgTweaks::CPPgTweaks()
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	m_htiFirewallStartup = NULL;
+	*/
+	// End emulEspaña
 	m_htiLogLevel = NULL;
 	m_htiDisablePeerCache = NULL;
 
@@ -176,7 +184,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiMaxHalfOpen = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXHALFOPENCONS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxHalfOpen, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiAutoTakeEd2kLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTOTAKEED2KLINKS), TVI_ROOT, m_iAutoTakeEd2kLinks);
+		// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+		/* Moved to PPgEmulespana
 		m_htiFirewallStartup = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FO_PREF_STARTUP), TVI_ROOT, m_iFirewallStartup);
+		*/
+		// End emulEspaña
 
 		m_htiCreditSystem = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECREDITSYSTEM), TVI_ROOT, m_iCreditSystem);
 		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiCreditSystem,false); //MORPH - Added by SiRoB, Credit System Allways Used
@@ -291,7 +303,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);	// itsonlyme: hostnameSource
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFirewallStartup, m_iFirewallStartup);
+	*/
+	// End emulEspaña
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_iDisablePeerCache);
 
 	if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_iVerbose);
@@ -308,7 +324,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		DDV_MinMaxInt(pDX, m_iLogLevel, 1, 5);
 	}	
 	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAutoTakeEd2kLinks, HaveEd2kRegAccess());
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiFirewallStartup, thePrefs.GetWindowsVersion() == _WINVER_XP_);
+	*/
+	// End emulEspaña
 
 
 	// ZZ:UploadSpeedSense -->
@@ -367,7 +387,11 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iCheckDiskspace = thePrefs.checkDiskspace;	// SLUGFILLER: checkDiskspace
 	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
 	m_sYourHostname = thePrefs.GetYourHostname();	// itsonlyme: hostnameSource
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	m_iFirewallStartup = ((thePrefs.GetWindowsVersion() == _WINVER_XP_) ? thePrefs.m_bOpenPortsOnStartUp : 0); 
+	*/
+	// End emulEspaña
 	m_iDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
 
 	// ZZ:UploadSpeedSense -->
@@ -496,7 +520,11 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	thePrefs.SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	thePrefs.m_bOpenPortsOnStartUp = m_iFirewallStartup; 
+	*/
+	// End emulEspaña
 	thePrefs.m_bPeerCacheEnabled = !m_iDisablePeerCache;
 
 	// ZZ:UploadSpeedSense -->
@@ -579,7 +607,11 @@ void CPPgTweaks::Localize(void)
 		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));	// SLUGFILLER: checkDiskspace
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
+		// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+		/* Moved to PPgEmulespana
 		if (m_htiFirewallStartup) m_ctrlTreeOptions.SetItemText(m_htiFirewallStartup, GetResString(IDS_FO_PREF_STARTUP));
+		*/
+		// End emulEspaña
 		if (m_htiDisablePeerCache) m_ctrlTreeOptions.SetItemText(m_htiDisablePeerCache, GetResString(IDS_DISABLEPEERACHE));
 
 		// ZZ:UploadSpeedSense -->
@@ -636,7 +668,11 @@ void CPPgTweaks::OnDestroy()
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	m_htiFirewallStartup = NULL;
+	*/
+	// End emulEspaña
 	m_htiDisablePeerCache = NULL;
 	
 	// ZZ:UploadSpeedSense -->

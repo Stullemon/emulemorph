@@ -86,7 +86,11 @@ protected:
 	HTREEITEM m_htiCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	HTREEITEM m_htiMinFreeDiskSpace;
 	HTREEITEM m_htiYourHostname;	// itsonlyme: hostnameSource
+	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
+	/* Moved to PPgEmulespana
 	HTREEITEM m_htiFirewallStartup;
+	*/
+	// End emulEspaña
 	HTREEITEM m_htiLogLevel;
 	HTREEITEM m_htiDisablePeerCache;
 
