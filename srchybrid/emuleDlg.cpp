@@ -1148,7 +1148,7 @@ void CemuleDlg::SetStatusBarPartsSize()
 	{
 		ussShift = 150;
 	}
-	int aiWidths[5] = { rect.right-525-ussShift, rect.right-315-ussShift, rect.right-125-ussShift, rect.right-25-ussShift, -1 };
+	int aiWidths[5] = { rect.right-525-ussShift, rect.right-315-ussShift, rect.right-115-ussShift, rect.right-25-ussShift, -1 };
 	//MORPH END   - Added by SiRoB, Related to SUC
 	statusbar->SetParts(5, aiWidths);
 }
