@@ -1177,7 +1177,10 @@ void CTransferWnd::VerifyCatTabSize() {
 	if (wpTabWinPos.rcNormalPosition.right<0) return;
 
 	int left=wpTabWinPos.rcNormalPosition.right-size;
-	if (left<200) left=200;
+	//MORPH START - Changed by SiRoB, Due to Khaos Categorie
+	//if (left<200) left=200;
+	if (left<260) left=260;
+	//MORPH END   - Changed by SiRoB, Due to Khaos Categorie
 	wpTabWinPos.rcNormalPosition.left=left;
 
 			RemoveAnchor(m_dlTab);
