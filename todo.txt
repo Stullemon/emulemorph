@@ -9,3 +9,7 @@ SharedFile:
  -Add user item on each file to show uploaded stat on client
  -ShareDirectory
 
+resync with SF mod 041
+SafeHash
+MergeKnown
+MultipleInstance
