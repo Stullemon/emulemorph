@@ -170,7 +170,6 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	    }
    	    s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat);
 	}
-	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
 void CUpDownClient::SetUploadState(EUploadState news){
