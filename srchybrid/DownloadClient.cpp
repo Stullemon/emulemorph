@@ -95,9 +95,10 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 
 	// Barry - was only showing one part from client, even when reserved bits from 2 parts
 	CString gettingParts;
-	ShowDownloadingParts(&gettingParts);
-
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+	//ShowDownloadingParts(&gettingParts);
+	ShowDownloadingParts(&gettingParts,file->GetPartCount());
+	
 	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
 	uint8* thisStatus;
 	if(m_PartStatus_list.Lookup(file,thisStatus)){
@@ -1129,7 +1130,10 @@ void CUpDownClient::UDPReaskForDownload(){
 }
 
 // Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
-void CUpDownClient::ShowDownloadingParts(CString *partsYN) const
+//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+//void CUpDownClient::ShowDownloadingParts(CString *partsYN) const
+void CUpDownClient::ShowDownloadingParts(CString *partsYN, uint16 m_nPartCount) const
+//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 {
 	// Initialise to all N's
 	char *n = new char[m_nPartCount+1];

@@ -1,4 +1,9 @@
 ---------------------------------------- 
+Changelog for eMule 0.41b29 MorphXT
+---------------------------------------- 
+FIXED: the wrong construction of the A4AF available part causing messageBox (invalide parameter) [SiRoB]
+
+---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.1
 ---------------------------------------- 
 NEW    : You can now find the Morph-News with our RSS Feed at this url "http://emulemorph.sourceforge.net/backend.php" [IceCream] 
