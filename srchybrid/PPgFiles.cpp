@@ -48,6 +48,11 @@ BEGIN_MESSAGE_MAP(CPPgFiles, CPropertyPage)
 	ON_EN_CHANGE(IDC_VIDEOPLAYER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_VIDEOBACKUP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_BROWSEV, BrowseVideoplayer)
+	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	ON_BN_CLICKED(IDC_UPDATEFAKELISTSTART, OnSettingsChange)
+	ON_BN_CLICKED(IDC_UPDATEFAKES, OnBnClickedUpdatefakes)
+	ON_EN_CHANGE(IDC_UPDATE_URL_FAKELIST, OnSettingsChange)
+	//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 END_MESSAGE_MAP()
 
 BOOL CPPgFiles::OnInitDialog()
@@ -114,6 +119,13 @@ void CPPgFiles::LoadSettings(void)
 		CheckDlgButton(IDC_WATCHCB,1);
 	else
 		CheckDlgButton(IDC_WATCHCB,0);
+//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(app_prefs->prefs->UpdateURLFakeList);
+	if(app_prefs->prefs->UpdateFakeStartup)
+		CheckDlgButton(IDC_UPDATEFAKELISTSTART,1);
+	else
+		CheckDlgButton(IDC_UPDATEFAKELISTSTART,0);
+//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_STARTNEXTFILECAT)->EnableWindow(IsDlgButtonChecked(IDC_STARTNEXTFILE));
 }
 
@@ -161,6 +173,14 @@ BOOL CPPgFiles::OnApply()
 		app_prefs->prefs->watchclipboard = true;
 	else
 		app_prefs->prefs->watchclipboard = false;
+//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->GetWindowText(buffer);
+	strcpy(app_prefs->prefs->UpdateURLFakeList, buffer);
+	if(IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART))
+		app_prefs->prefs->UpdateFakeStartup = true;
+	else
+		app_prefs->prefs->UpdateFakeStartup = false;
+//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	app_prefs->prefs->addnewfilespaused = (int8)IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED);
 	app_prefs->prefs->autofilenamecleanup=(int8)IsDlgButtonChecked(IDC_FNCLEANUP);
 
@@ -204,6 +224,11 @@ void CPPgFiles::Localize(void)
 		GetDlgItem(IDC_VIDEOBACKUP)->SetWindowText(GetResString(IDS_VIDEOBACKUP));		
 		GetDlgItem(IDC_STATIC_EMPTY)->SetWindowText(GetResString(IDS_STATIC_EMPTY));
 		GetDlgItem(IDC_BROWSEV)->SetWindowText(GetResString(IDS_PW_BROWSE));
+		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+		GetDlgItem(IDC_UPDATEFAKES)->SetWindowText(GetResString(IDS_UPDATEFAKES));
+		GetDlgItem(IDC_UPDATEFAKELISTSTART)->SetWindowText(GetResString(IDS_UPDATEFAKECHECKONSTART));
+		GetDlgItem(IDC_URL_FOR_UPDATING)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
+		//MORPH END - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	}
 }
 
@@ -226,4 +251,9 @@ void CPPgFiles::BrowseVideoplayer()
 		GetDlgItem(IDC_VIDEOPLAYER)->SetWindowText(dlgFile.GetPathName());
 		SetModified();
 	}
+}
+void CPPgFiles::OnBnClickedUpdatefakes()
+{
+	if(!theApp.FakeCheck->DownloadFakeList())
+		theApp.emuledlg->AddLogLine(true, GetResString(IDS_FAKECHECKUPERROR));
 }
