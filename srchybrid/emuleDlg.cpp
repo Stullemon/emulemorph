@@ -914,6 +914,9 @@ void CemuleDlg::ShowConnectionState()
 	
 	CString status;
 
+	//MORPH START - Changed by SiRoB, Don't know why but arceling reporting
+	//Please keep this modif or we will get again an arceling reporting :p
+	/*
 	if(theApp.serverconnect->IsConnected())
 		status = "eD2K:"+GetResString(IDS_CONNECTED);
 	else if (theApp.serverconnect->IsConnecting())
@@ -928,6 +931,19 @@ void CemuleDlg::ShowConnectionState()
 		status += "|Kad:"+GetResString(IDS_CONNECTING);
 	else
 		status += "|Kad:"+GetResString(IDS_NOTCONNECTED);
+	*/
+	if(theApp.serverconnect->IsConnected())
+		status = "ED2K";
+	else if (theApp.serverconnect->IsConnecting())
+		status = "ed2k";
+	else
+		status = "";
+
+	if(Kademlia::CKademlia::isConnected())
+		status += status.IsEmpty()?"KAD":" | KAD";
+	else if (Kademlia::CKademlia::isRunning())
+		status += status.IsEmpty()?"kad":" | kad";
+	//MORPH END   - Changed by SiRoB, Don't know why but arceling reporting
 
 	statusbar->SetTipText(3,status);
 	statusbar->SetText(status,3,0);
