@@ -665,7 +665,13 @@ void CClientList::Process(){
 				//Two Open clients ended up buddies
 				//Someone must have fixed their firewall or stopped saturating their line.. 
 				ASSERT(m_pBuddy);
+				
+				//MORPH - Changed by SiRoB, Kad patch to avoid crash by tHeWiZaRdOfDoS
+				/*
 				if( !m_pBuddy->HasLowID() )
+				*/
+				if( m_pBuddy && !m_pBuddy->HasLowID() )
+				//MORPH - Changed by SiRoB, Kad patch to avoid crash by tHeWiZaRdOfDoS
 					m_pBuddy->SetKadState(KS_NONE);
 			}
 		}
@@ -780,6 +786,7 @@ void CClientList::RemoveFromKadList(CUpDownClient* torem){
 	{
 		if(torem == m_pBuddy)
 		{
+			m_bHaveBuddy = false; //MORPH - Added by SiRoB, Kad patch to avoid crash by tHeWiZaRdOfDoS
 			m_pBuddy = NULL;
 			theApp.emuledlg->serverwnd->UpdateMyInfo();
 		}
