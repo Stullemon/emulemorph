@@ -192,9 +192,12 @@ double CUpDownClient::GetCombinedFilePrioAndCredit() {
 	}
 
 	//Morph Start - added by AndCycle, Equal Chance For Each File
-	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
-	if(currequpfile && thePrefs.IsEqualChanceEnable())
-		return currequpfile->statistic.GetEqualChanceValue();
+	if (thePrefs.IsEqualChanceEnable())
+	{
+		CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+		if(currequpfile)
+			return currequpfile->statistic.GetEqualChanceValue();
+	}
 	//Morph End - added by AndCycle, Equal Chance For Each File
 
     return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
@@ -366,18 +369,14 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 	if(!IsSecure()) return false;
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 	if (currentReqFile == NULL) return false;
-	return (thePrefs.IsPayBackFirst() && currentReqFile->IsPartFile()==false) ? credits->GetPayBackFirstStatus() : false ;
+	return currentReqFile->IsPartFile()==false && thePrefs.IsPayBackFirst() && credits->GetPayBackFirstStatus();
 }
 //Morph End - added by AndCycle, Pay Back First
 
 //Morph Start - added by AndCycle, separate secure check
 bool CUpDownClient::IsSecure() const
 {
-	if(	!credits || !theApp.clientcredits->CryptoAvailable() || 
-		credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED	) {
-		return false;
-	}
-	return true;
+	return credits && theApp.clientcredits->CryptoAvailable() && credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED;
 }
 //Morph End - added by AndCycle, separate secure check
 
@@ -393,8 +392,8 @@ bool CUpDownClient::IsPBForPS() const
 	//-->Commun to both call
 	if (currentReqFile->GetPowerShared())
 		return true;
-	if(thePrefs.IsPayBackFirst() && currentReqFile->IsPartFile()==false)
-		return credits->GetPayBackFirstStatus();
+	if(currentReqFile->IsPartFile()==false && thePrefs.IsPayBackFirst() && credits->GetPayBackFirstStatus())
+		return true;
 	return (m_bPowerShared && GetUploadState()==US_UPLOADING);
 }
 //MORPH END   - Added by SiRoB, Code Optimization PBForPS()
