@@ -2549,11 +2549,11 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (partspread[i] < hideOS)
+			if (partspread[done] < hideOS)
 				towrite |= (1<<i);
 			//MORPH START - Added by SiRoB, See chunk that we hide
 			else
-				client->m_abyUpPartStatusHidden[i] = 1;
+				client->m_abyUpPartStatusHidden[done] = 1;
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			done++;
 			if (done == parts)
