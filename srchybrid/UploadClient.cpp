@@ -57,6 +57,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crSending;
 	COLORREF crNextSending;
 	COLORREF crBuffer;
+	COLORREF crHiddenPart; //MORPH - Added by SiRoB, Show Hidden part
 
 	if(bFlat) { 
 		crBoth = RGB(0, 0, 0);
@@ -69,6 +70,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	crSending = RGB(0, 150, 0);
 	crNextSending = RGB(255,208,0);
 	crBuffer = RGB(255, 100, 100);
+	crHiddenPart = RGB(192, 100, 255); //MORPH - Added by SiRoB, Show Hidden part
 
 	// wistily: UpStatusFix
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
@@ -84,10 +86,32 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	s_UpStatusBar.SetWidth(rect->right - rect->left); 
 	s_UpStatusBar.Fill(crNeither); 
 	if (!onlygreyrect && m_abyUpPartStatus) { 
-		for (uint32 i = 0;i < m_nUpPartCount;i++)
+		bool isHiddenPart = !currequpfile->IsPartFile() && ((currequpfile->GetShareOnlyTheNeed()>=0)?currequpfile->GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())>0;
+		if (isHiddenPart) {
+			bool partsneeded = false;
+			UINT i;
+			for (i = 0; i < m_nUpPartCount; i++)
+				if (currequpfile->m_AvailPartFrequency[i] <= 2 && !m_abyUpPartStatus[i])
+					partsneeded = true;
+			for (i; i < currequpfile->GetED2KPartCount(); i++)
+				if (currequpfile->m_AvailPartFrequency[i] <= 2 && !m_abyUpPartStatus[i])
+					partsneeded = true;
+			isHiddenPart &= partsneeded;
+		}
+		uint32 i;
+		for (i = 0;i < m_nUpPartCount;i++)
 			if(m_abyUpPartStatus[i])
 				s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crBoth);
+		//MORPH START - Added by SiRoB, Show Hidden part
+			else if (isHiddenPart && currequpfile->m_AvailPartFrequency[i]>2)
+				s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crHiddenPart);
+		if (isHiddenPart)
+			for (i;i < currequpfile->GetED2KPartCount();i++)
+				if (currequpfile->m_AvailPartFrequency[i]>2)
+					s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crHiddenPart);
+		//MORPH END   - Added by SiRoB, Show Hidden part	
 	}
+	
 	Requested_Block_Struct* block;
 	if (!m_BlockRequests_queue.IsEmpty()){
 		block = m_BlockRequests_queue.GetHead();
@@ -135,7 +159,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			}
 		}*/
 	}
-   	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
+	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
 void CUpDownClient::SetUploadState(EUploadState news){
@@ -1018,7 +1042,15 @@ void  CUpDownClient::UnBan(){
 // Moonlight: SUQWT - Reset the wait time on ban, do not give time credit for banned clients queue time!//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CUpDownClient::Ban(){
 	theApp.clientlist->AddTrackClient(this);
-	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	// EastShare START - Modified by TAHO, modified SUQWT
+	//if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) {
+		ClearWaitStartTime();
+		if (credits != NULL){
+			credits->ClearUploadQueueWaitTime();
+		}
+	}
+	// EastShare END - Modified by TAHO, modified SUQWT
 	if ( !IsBanned() ){
 		if (thePrefs.GetLogBannedClients())
 			AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
