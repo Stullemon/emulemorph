@@ -1183,6 +1183,8 @@
 #define IDS_DL_FORCE                    1227
 #define IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 1228
 #define IDS_DATEFILENAMELOG             1229
+#define IDS_ECFEF                       1230
+#define IDS_ALL_TIME                    1231
 #define IDS_BOOTSTRAP                   1300
 #define IDS_VIAED2KSQ                   1301
 #define IDS_EM_KADEMLIA                 1302
@@ -2251,7 +2253,6 @@
 #define IDS_MET_FILE_CONTROL            4011
 #define IDS_EXPIRED_CLIENTS             4012
 #define IDS_EXPIRED_KNOWN               4013
-
 #define IDS_DELETEFILE                  4014
 #define IDS_UPDATEIPFILTER              4742
 #define IDS_UPDATEIPFILTERONSTART       4743

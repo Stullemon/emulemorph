@@ -228,7 +228,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID());
 		leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID());
 	}
-	if(rightReqFile != NULL && leftReqFile != NULL ){
+	if(rightReqFile != NULL && leftReqFile != NULL && rightReqFile != leftReqFile){
 
 		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 
@@ -291,19 +291,19 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			case ECFEF_TRANSFERRED_COMPLETE:{
 				if(theApp.glob_prefs->IsECFEFallTime()){
 					rightGetQueueFile =
-						(float)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() < 
-						(float)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
+						(double)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() < 
+						(double)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
 					bothGetQueueFile =
-						(float)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() == 
-						(float)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
+						(double)rightReqFile->statistic.GetAllTimeTransferred()/rightReqFile->GetFileSize() == 
+						(double)leftReqFile->statistic.GetAllTimeTransferred()/leftReqFile->GetFileSize();
 				}
 				else{
 					rightGetQueueFile =
-						(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
-						(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+						(double)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
+						(double)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
 					bothGetQueueFile =
-						(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() == 
-						(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+						(double)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() == 
+						(double)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
 				}
 			}break;
 		}

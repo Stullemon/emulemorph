@@ -3752,6 +3752,8 @@ BEGIN
     IDS_DL_FORCE            "Force Download"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Save Upload Queue Wait Time"
     IDS_DATEFILENAMELOG     "Log File Name in date "
+    IDS_ECFEF               "Equal Chance For Each File"
+    IDS_ALL_TIME            "All Time"
 END
 
 STRINGTABLE 

@@ -462,10 +462,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 							case ECFEF_ACCEPTED_COMPLETE:{
 								if(theApp.glob_prefs->IsECFEFallTime()){
-									ecfef.Format("%.2f: %u/%u", (float)clientReqFile->statistic.GetAllTimeAccepts()/clientReqFile->GetPartCount(), clientReqFile->statistic.GetAllTimeAccepts(), clientReqFile->GetPartCount());
+									ecfef.Format("%.2f = %u/%u", (float)clientReqFile->statistic.GetAllTimeAccepts()/clientReqFile->GetPartCount(), clientReqFile->statistic.GetAllTimeAccepts(), clientReqFile->GetPartCount());
 								}
 								else{
-									ecfef.Format("%.2f: %u/%u", (float)clientReqFile->statistic.GetAccepts()/clientReqFile->GetPartCount(), clientReqFile->statistic.GetAccepts(), clientReqFile->GetPartCount());
+									ecfef.Format("%.2f = %u/%u", (float)clientReqFile->statistic.GetAccepts()/clientReqFile->GetPartCount(), clientReqFile->statistic.GetAccepts(), clientReqFile->GetPartCount());
 								}
 							}break;
 
@@ -480,10 +480,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 							case ECFEF_TRANSFERRED_COMPLETE:{
 								if(theApp.glob_prefs->IsECFEFallTime()){
-									ecfef.Format("%.2f: %s/%s", (float)clientReqFile->statistic.GetAllTimeTransferred()/clientReqFile->GetFileSize(), CastItoXBytes(clientReqFile->statistic.GetAllTimeTransferred()), CastItoXBytes(clientReqFile->GetFileSize()));
+									ecfef.Format("%.2f = %s/%s", (double)clientReqFile->statistic.GetAllTimeTransferred()/clientReqFile->GetFileSize(), CastItoXBytes(clientReqFile->statistic.GetAllTimeTransferred()), CastItoXBytes(clientReqFile->GetFileSize()));
 								}
 								else{
-									ecfef.Format("%.2f: %s/%s", (float)clientReqFile->statistic.GetTransferred()/clientReqFile->GetFileSize(), CastItoXBytes(clientReqFile->statistic.GetTransferred()), CastItoXBytes(clientReqFile->GetFileSize()));
+									ecfef.Format("%.2f = %s/%s", (double)clientReqFile->statistic.GetTransferred()/clientReqFile->GetFileSize(), CastItoXBytes(clientReqFile->statistic.GetTransferred()), CastItoXBytes(clientReqFile->GetFileSize()));
 								}
 							}break;
 
@@ -491,7 +491,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 								ecfef.Empty();
 							}break;
 						}
-						Sbuffer.Append(":");
+						Sbuffer.Append(" :");
 						Sbuffer.Append(ecfef);
 					}
 					//Morph - added by AndCycle, more detail...for debug?

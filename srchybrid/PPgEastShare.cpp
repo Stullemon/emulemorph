@@ -95,13 +95,13 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		// EastShare END - Added by linekin, new creditsystem by [lovelace]
 
 		//Morph - added by AndCycle, Equal Chance For Each File
-		m_htiECFEF = m_ctrlTreeOptions.InsertGroup("Equal Chance For Each File", iImgECFEF, TVI_ROOT);
+		m_htiECFEF = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_ECFEF), iImgECFEF, TVI_ROOT);
 		m_htiECFEF_DISABLE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DISABLED), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_DISABLE);
 		m_htiECFEF_ACCEPTED = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_ACCEPTS), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_ACCEPTED);
-		m_htiECFEF_ACCEPTED_COMPLETE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_ACCEPTS) + " " + GetResString(IDS_COMPLETE), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_ACCEPTED_COMPLETE);
+		m_htiECFEF_ACCEPTED_COMPLETE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_ACCEPTS) + "/" + GetResString(IDS_COMPLETE), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_ACCEPTED_COMPLETE);
 		m_htiECFEF_TRANSFERRED = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_TRANSFERRED), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_TRANSFERRED);
-		m_htiECFEF_TRANSFERRED_COMPLETE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_TRANSFERRED) + " " + GetResString(IDS_COMPLETE), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_TRANSFERRED_COMPLETE);
-		m_htiECFEF_ALLTIME = m_ctrlTreeOptions.InsertCheckBox("All Time", m_htiECFEF, m_bECFEFallTime);
+		m_htiECFEF_TRANSFERRED_COMPLETE = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SF_TRANSFERRED) + "/" + GetResString(IDS_COMPLETE), m_htiECFEF, m_iEqualChanceForEachFile == ECFEF_TRANSFERRED_COMPLETE);
+		m_htiECFEF_ALLTIME = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ALL_TIME), m_htiECFEF, m_bECFEFallTime);
 		//Morph - added by AndCycle, Equal Chance For Each File
 
 		// EastShare START - Added by TAHO, .met control // Modified by Pretender
