@@ -117,12 +117,12 @@ CString CMuleStatusBarCtrl::GetPaneToolTipText(EStatusBarPane iPane) const
 	case SBarUpDown:
 		{
 			uint8 ActivatedRatioReason = thePrefs.IsZZRatioDoesWork();
-			strText.Format(_T("zzRatio %s:"),(ActivatedRatioReason)?_T("is activated"):_T("isn't activated"));
-			strText.AppendFormat(_T("\n\r\x2022 1/3 Ratio reached: %s"),(theApp.downloadqueue->IsZZRatioInWork())?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\n\r\x2022 PowerSharing incomplet file: %s"),(ActivatedRatioReason & 1)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\n\r\x2022 Using friend slot and globaldatarate>3KB/s: %s"),(ActivatedRatioReason & 2)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\n\r\x2022 Upload limit under 10KB/s: %s"),(ActivatedRatioReason & 4)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\n\r\x2022 Average upload under 10KB/s: %s"),(ActivatedRatioReason & 8)?_T("Yes"):_T("No"));
+			strText.Format(GetResString(IDS_ZZRATIO)+_T(" %s:"),(ActivatedRatioReason)?GetResString(IDS_ZZRATIO_ENABLED):GetResString(IDS_ZZRATIO_DISABLED));
+			strText.AppendFormat(_T("\n\r\x2022 ")+GetResString(IDS_ZZRATIO_CHECK1)+_T(": %s"),(theApp.downloadqueue->IsZZRatioInWork())?GetResString(IDS_YES):GetResString(IDS_NO));
+			strText.AppendFormat(_T("\n\r\x2022 ")+GetResString(IDS_ZZRATIO_CHECK2)+_T(": %s"),(ActivatedRatioReason & 1)?GetResString(IDS_YES):GetResString(IDS_NO));
+			strText.AppendFormat(_T("\n\r\x2022 ")+GetResString(IDS_ZZRATIO_CHECK3)+_T(": %s"),(ActivatedRatioReason & 2)?GetResString(IDS_YES):GetResString(IDS_NO));
+			strText.AppendFormat(_T("\n\r\x2022 ")+GetResString(IDS_ZZRATIO_CHECK4)+_T(": %s"),(ActivatedRatioReason & 4)?GetResString(IDS_YES):GetResString(IDS_NO));
+			strText.AppendFormat(_T("\n\r\x2022 ")+GetResString(IDS_ZZRATIO_CHECK5)+_T(": %s"),(ActivatedRatioReason & 8)?GetResString(IDS_YES):GetResString(IDS_NO));
 			break;
 		}
 	//MORPH END   - Added by SiRoB, Show zz ratio activation reason

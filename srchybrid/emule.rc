@@ -3787,38 +3787,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
-                            "Import aborted: Can't import to a complete file."
-    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
-                            "Import aborted: hashset incomplete for %s (%i hashes for %i parts)."
-    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import aborted: Couldn't open %s."
-    IDS_SR13_IMPORTPARTS_IMPORTSTART 
-                            "Importing %i parts (from 0 to %i) to %s."
-    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
-                            "Part %i: skipped, already complete."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Part %i: imported."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Part %i: imported for ICH handling."
-    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
-                            "Part %i: skipped, doesn't match partially completed block."
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
-                            "%i bad parts were imported for A/ICH. Initiating rehash."
-    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
-                            "Another import is already in progress. Please wait until it is finished."
-    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
-                            "Import finished. %i parts were imported to %s."
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_FO_PREF_EXISTED     "eMule detected existing rules for the selected ports, which were not overwritten or replaced. Missing rules have been added successfully.\nPlease note that third-party desktopfirewalls and routers are not affected by this!"
     IDS_FO_PREF_FAILED      "Failed to configure the internal WinXP firewall for the selected ports!"
     IDS_FO_PREF_STARTUP     "Open/close ports on WinXP firewall when starting/exiting eMule"
@@ -3835,12 +3803,6 @@ BEGIN
     IDS_PR_SHORT_HIGH       "[Hi]"
     IDS_STATS_FRATIO        "Session UL:DL Ratio (Friends UL excluded):"
     IDS_STATS_UDATA_FRIENDS "Uploaded Data to Friend Slots (Session): %s"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "Webcache Download disabled: Only transfers on Port   21, 70,  80, 210, 443, 563 and in the range from 1025 to 65535 are cached. Please use one of these Ports if you want to enable the Webcache Feature"
 END
 
 STRINGTABLE 
@@ -4780,6 +4742,48 @@ BEGIN
     IDS_STORENOTES          "Store Notes"
     IDS_NOTES               "Notes"
     IDS_KADSEARCHALREADY    "Another search is already in progress. Please try again later!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
+                            "Import aborted: Can't import to a complete file."
+    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
+                            "Import aborted: hashset incomplete for %s (%i hashes for %i parts)."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import aborted: Couldn't open %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART 
+                            "Importing %i parts (from 0 to %i) to %s."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
+                            "Part %i: skipped, already complete."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Part %i: imported."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Part %i: imported for ICH handling."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
+                            "Part %i: skipped, doesn't match partially completed block."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
+                            "%i bad parts were imported for A/ICH. Initiating rehash."
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
+                            "Another import is already in progress. Please wait until it is finished."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
+                            "Import finished. %i parts were imported to %s."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_WEBCACHE         "WebCache"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WrongPortforWebcache 
+                            "Webcache Download disabled: Only transfers on Port   21, 70,  80, 210, 443, 563 and in the range from 1025 to 65535 are cached. Please use one of these Ports if you want to enable the Webcache Feature"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CRASHRPT_DONE       "Crash report has been generated."
     IDS_CRASHRPT_AV         "CrashReporter is available and running."
 END
@@ -5593,6 +5597,18 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Scheduled FAKES.DAT-update initiated."
     IDS_SCHED_UPDATE_WARNING 
                             "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ZZRATIO             "zzRatio"
+    IDS_ZZRATIO_ENABLED     "is activated"
+    IDS_ZZRATIO_DISABLED    "isn't activated"
+    IDS_ZZRATIO_CHECK1      "1/3 Ratio reached"
+    IDS_ZZRATIO_CHECK2      "PowerSharing incomplet file"
+    IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
+    IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
+    IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
 END
 
 #endif    // Anglais (États-Unis) resources

@@ -1451,7 +1451,6 @@
 #define IDS_STORENOTES                  1499
 #define IDS_NOTES                       1500
 #define IDS_KADSEARCHALREADY            1501
-#define IDS_ALPHABETIC2NDSORT           1502
 #define IDS_CRASHRPT_DONE               1502
 #define IDS_CRASHRPT_AV                 1503
 #define IDS_CRASHRPT_NOTAV              1504
@@ -1566,7 +1565,6 @@
 #define IDC_PROGRESS1                   2180
 #define IDC_MINTRAY                     2181
 #define IDC_VCODEC                      2182
-#define IDC_ALPH2ND                     2182
 #define IDC_SEARCHNAME                  2183
 #define IDC_AUTOCONNECT                 2185
 #define IDC_VBITRATE                    2186
@@ -2679,6 +2677,14 @@
 #define IDC_MORPH3_OPTS                 5700
 #define IDS_IMPORTPARTS                 5700
 #define IDS_INITIATEREHASH              5701
+#define IDS_ZZRATIO                     5750
+#define IDS_ZZRATIO_ENABLED             5751
+#define IDS_ZZRATIO_DISABLED            5752
+#define IDS_ZZRATIO_CHECK1              5753
+#define IDS_ZZRATIO_CHECK2              5754
+#define IDS_ZZRATIO_CHECK3              5755
+#define IDS_ZZRATIO_CHECK4              5756
+#define IDS_ZZRATIO_CHECK5              5757
 #define IDD_PPG_EMULESPANA1             6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
