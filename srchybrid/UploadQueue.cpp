@@ -159,21 +159,14 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 
 		return true;
 	} else if(onlyCheckForRemove == false) {
+
+		//Morph - added by AndCycle, lock up slot to prevent interleaving
+		UploadingSlot.Lock();
+
 		// Move down
 		// first find the client in the uploadinglist
-		uint32 posCounter = 0;
-		POSITION foundPos = NULL;
-		POSITION pos = uploadinglist.GetHeadPosition();
-		while(pos != NULL && foundPos == NULL) {
-			if (uploadinglist.GetAt(pos) == client){
-				foundPos = pos;
-			} else {
-				uploadinglist.GetNext(pos);
-				posCounter++;
-			}
-		}
-
-		if(foundPos != NULL) {
+		POSITION foundPos = uploadinglist.Find(client);
+		if(foundPos != NULL){
 			// Remove the found Client
 			uploadinglist.RemoveAt(foundPos);
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
@@ -181,6 +174,9 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 			// then add it last in it's class
 			InsertInUploadingList(client);
 		}
+
+		//Morph - added by AndCycle, lock up slot to prevent interleaving
+		UploadingSlot.Unlock();
 
 		return false;
 	} else {
@@ -423,6 +419,10 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 * @param newclient address of the client that should be inserted in the uploading list
 */
 void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
+
+//Morph - added by AndCycle, lock up slot to prevent interleaving
+//lock from outside before entering here
+
 	POSITION insertPosition = NULL;
 	uint32 posCounter = uploadinglist.GetCount();
 
@@ -483,6 +483,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		uploadinglist.AddTail(newclient);
 		newclient->SetSlotNumber(uploadinglist.GetCount());
 	}
+
 }
 
 
@@ -565,8 +566,14 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		newclient->ResetCompressionGain();
 		// khaos::kmod-
 
+		//Morph - added by AndCycle, lock up slot to prevent interleaving
+		UploadingSlot.Lock();
+	
 		InsertInUploadingList(newclient);
 	
+		//Morph - added by AndCycle, lock up slot to prevent interleaving
+		UploadingSlot.Unlock();
+
 		if(newclient->GetQueueSessionUp() > 0) {
 			// this client has already gotten a successfullupcount++ when it was early removed
 			// negate that successfullupcount++ so we can give it a new one when this session ends
@@ -644,12 +651,27 @@ void CUploadQueue::Process() {
 		}
 	}
 
+	//Morph - added by AndCycle, lock up slot to prevent interleaving
+	UploadingSlot.Lock();
+
+	//Morph - added by AndCycle, remove list
+	CTypedPtrList<CPtrList, CUpDownClient*> removeUploadinglist;
+
 	POSITION ulpos = uploadinglist.GetHeadPosition();
 	// The loop that feeds the upload slots with data.
 	while (ulpos != NULL) {
 		// Get the client. Note! Also updates ulpos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(ulpos);
-		cur_client->SendBlockData();
+		if (_iDbgHeap >= 2)
+			ASSERT_VALID(cur_client);
+		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
+		//Morph - modified by AndCycle, official code 41b29
+		if (!cur_client->socket){
+			removeUploadinglist.AddTail(cur_client);
+		} else {
+            cur_client->SendBlockData();
+        }
+		//Morph - modified by AndCycle, official code 41b29
 	}
 
 	POSITION lastpos = uploadinglist.GetTailPosition();
@@ -658,6 +680,23 @@ void CUploadQueue::Process() {
 	if(lastpos != NULL) {
 		lastClient = uploadinglist.GetAt(lastpos);
 	}
+
+	//Morph - added by AndCycle, lock up slot to prevent interleaving
+	UploadingSlot.Unlock();
+
+	//Morph - added by AndCycle, remove list
+	POSITION rmpos = removeUploadinglist.GetHeadPosition();
+	while( rmpos != NULL){
+		CUpDownClient* cur_client = removeUploadinglist.GetNext(rmpos);
+		//Morph - added by AndCycle, official code 41b29
+		RemoveFromUploadQueue(cur_client);
+		if(cur_client->Disconnected()){
+			delete cur_client;
+		}
+		//Morph - added by AndCycle, official code 41b29
+	}
+	removeUploadinglist.RemoveAll();
+	//Morph - added by AndCycle, remove list
 
 	// Save number of active clients for statistics
 	uint32 highestNumberOfFullyActivatedSlotsSinceLastCall = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
@@ -973,55 +1012,73 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 }
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, bool updatewindow, bool earlyabort){
+
+	//Morph - added by AndCycle, lock up slot to prevent interleaving
+	//lock up uploading list
+	UploadingSlot.Lock();
+
 	theApp.clientlist->AddTrackClient(client); // Keep track of this client
-	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;uploadinglist.GetNext(pos)){
-		if (client == uploadinglist.GetAt(pos)){
-			if (updatewindow)
-				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
-	        
-			//EastShare Start - added by AndCycle, Pay Back First
-			//client normal leave the upload queue, check does client still satisfy requirement
-			if(earlyabort == false){
-				client->credits->InitPayBackFirstStatus();
-			}
-			//EastShare End - added by AndCycle, Pay Back First
 
-			if(!reason.IsEmpty())
-				AddDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
-			uploadinglist.RemoveAt(pos);
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-			if(client->GetQueueSessionUp()){
-				successfullupcount++;
+	//try to find client in uploadinglist
+	POSITION pos = uploadinglist.Find(client);
+	
+	if (pos == NULL){
 
-				if(client->GetSessionUp()) {
-					//wistily
-					uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
-					client->Add2UpTotalTime(tempUpStartTimeDelay);
-					client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
-					/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
-					totaluploadtime += tempUpStartTimeDelay/1000;
-					//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-					if (theApp.clientcredits->IsSaveUploadQueueWaitTime())
-						client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
-					//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-					//wistily stop
-					totalCompletedBytes += client->GetSessionUp();
-				}
-				//} else if(client->HasBlocks() || client->GetUploadState() != US_UPLOADING) {
-			} else if(earlyabort == false){
-				failedupcount++;
-				//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				if (theApp.clientcredits->IsSaveUploadQueueWaitTime())
-					client->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			}
-			
-			client->SetUploadState(US_NONE);
-			client->ClearUploadBlockRequests(/*!earlyabort*/);
-			return true;
-		}
+		//Morph - added by AndCycle, lock up slot to prevent interleaving
+		//not in list, unlock and exit
+		UploadingSlot.Unlock();
+
+		return false;	
 	}
-	return false;
+
+	if (updatewindow)
+		theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
+	
+	//EastShare Start - added by AndCycle, Pay Back First
+	//client normal leave the upload queue, check does client still satisfy requirement
+	if(earlyabort == false){
+		client->credits->InitPayBackFirstStatus();
+	}
+	//EastShare End - added by AndCycle, Pay Back First
+
+	if(!reason.IsEmpty())
+		AddDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
+	uploadinglist.RemoveAt(pos);
+	theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+
+	//Morph - added by AndCycle, lock up slot to prevent interleaving
+	//remove done, unlock list
+	UploadingSlot.Unlock();
+
+	if(client->GetQueueSessionUp()){
+		successfullupcount++;
+
+		if(client->GetSessionUp()) {
+			//wistily
+			uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
+			client->Add2UpTotalTime(tempUpStartTimeDelay);
+			client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
+			/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
+			totaluploadtime += tempUpStartTimeDelay/1000;
+			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			if (theApp.clientcredits->IsSaveUploadQueueWaitTime())
+				client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+			//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			//wistily stop
+			totalCompletedBytes += client->GetSessionUp();
+		}
+		//} else if(client->HasBlocks() || client->GetUploadState() != US_UPLOADING) {
+	} else if(earlyabort == false){
+		failedupcount++;
+		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		if (theApp.clientcredits->IsSaveUploadQueueWaitTime())
+			client->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	}
+
+	client->SetUploadState(US_NONE);
+	client->ClearUploadBlockRequests(/*!earlyabort*/);
+	return true;
 }
 
 uint32 CUploadQueue::GetAverageUpTime(){
@@ -1381,43 +1438,52 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
 * are changed by the user, friend slot is turned on/off, etc
 */
 void CUploadQueue::ReSortUploadSlots(bool force) {
-	DWORD curtick = ::GetTickCount();
-	if(force ||  curtick - m_dwLastResortedUploadSlots >= 3*1000) {
-		m_dwLastResortedUploadSlots = curtick;
-
-    	CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
-
-		// Remove all clients from uploading list and store in tempList
-		POSITION ulpos = uploadinglist.GetHeadPosition();
-		while (ulpos != NULL) {
-			POSITION curpos = ulpos;
-			uploadinglist.GetNext(ulpos);
-
-			// Get and remove the client from upload list.
-			CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
-
-			uploadinglist.RemoveAt(curpos);
-
-			// Remove the found Client from UploadBandwidthThrottler
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
-
-			tempUploadinglist.AddTail(cur_client);
-		}
-
-		// Remove one at a time from temp list and reinsert in correct position in uploading list
-		POSITION tempPos = tempUploadinglist.GetHeadPosition();
-		while(tempPos != NULL) {
-			POSITION curpos = tempPos;
-			tempUploadinglist.GetNext(tempPos);
-
-			// Get and remove the client from upload list.
-			CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
-
-			tempUploadinglist.RemoveAt(curpos);
-
-			// This will insert in correct place
-			InsertInUploadingList(cur_client);
-		}
+    DWORD curtick = ::GetTickCount();
+    if(!force &&  curtick - m_dwLastResortedUploadSlots < 3*1000) {
+		return;
 	}
+
+	//Morph - added by AndCycle, lock up slot to prevent interleaving
+	UploadingSlot.Lock();
+
+    m_dwLastResortedUploadSlots = curtick;
+
+    CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
+
+    // Remove all clients from uploading list and store in tempList
+    POSITION ulpos = uploadinglist.GetHeadPosition();
+    while (ulpos != NULL) {
+        POSITION curpos = ulpos;
+        uploadinglist.GetNext(ulpos);
+
+        // Get and remove the client from upload list.
+		CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
+
+        uploadinglist.RemoveAt(curpos);
+
+        // Remove the found Client from UploadBandwidthThrottler
+        theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+
+        tempUploadinglist.AddTail(cur_client);
+    }
+
+    // Remove one at a time from temp list and reinsert in correct position in uploading list
+    POSITION tempPos = tempUploadinglist.GetHeadPosition();
+    while(tempPos != NULL) {
+        POSITION curpos = tempPos;
+        tempUploadinglist.GetNext(tempPos);
+
+        // Get and remove the client from upload list.
+		CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
+
+        tempUploadinglist.RemoveAt(curpos);
+
+        // This will insert in correct place
+        InsertInUploadingList(cur_client);
+	}
+
+	//Morph - added by AndCycle, lock up slot to prevent interleaving
+	UploadingSlot.Unlock();
+
 }
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
