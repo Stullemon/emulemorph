@@ -1035,6 +1035,9 @@ bool CUpDownClient::Disconnected( bool bFromSocket){
 		if(GetDownloadState() == DS_CONNECTED){
 			// client didn't responsed to our request for some reasons (remotely banned?)
 			// or it just doesn't has this file, so try to swap first
+			//Morph Start - added by AndCycle, for debug
+			if (theApp.glob_prefs->ShowA4AFDebugOutput()) theApp.emuledlg->AddDebugLogLine(false, "In %s, gonna entering SwapToAnotherFile.", __FUNCTION__);
+			//Morph End - added by AndCycle, for debug
 			if (!SwapToAnotherFile(true, true, true, NULL)){
 				theApp.downloadqueue->RemoveSource(this);
 				//DEBUG_ONLY(AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));

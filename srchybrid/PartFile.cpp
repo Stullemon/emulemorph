@@ -1895,6 +1895,9 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				case DS_NONEEDEDPARTS:{ 
 					// we try to purge noneeded source, even without reaching the limit
 					if( cur_src->GetDownloadState() == DS_NONEEDEDPARTS && (dwCurTick - lastpurgetime) > 40000 ){
+						//Morph Start - added by AndCycle, for debug
+						if (theApp.glob_prefs->ShowA4AFDebugOutput()) theApp.emuledlg->AddDebugLogLine(false, "In %s, gonna entering SwapToAnotherFile.", __FUNCTION__);
+						//Morph End - added by AndCycle, for debug
 						if( !cur_src->SwapToAnotherFile( false , false, false , NULL ) ){
 							//however we only delete them if reaching the limit
 							if (GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )){
@@ -2598,6 +2601,9 @@ BOOL CPartFile::PerformFileComplete()
 
 void  CPartFile::RemoveAllSources(bool bTryToSwap){
 	POSITION pos1,pos2;
+	//Morph Start - added by AndCycle, for debug
+	if (theApp.glob_prefs->ShowA4AFDebugOutput()) theApp.emuledlg->AddDebugLogLine(false, "In %s, gonna entering SwapToAnotherFile.", __FUNCTION__);
+	//Morph End - added by AndCycle, for debug
 	for( pos1 = srclist.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 		srclist.GetNext(pos1);
 		if (bTryToSwap){

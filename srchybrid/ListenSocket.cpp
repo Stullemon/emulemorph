@@ -311,6 +311,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 								case DS_CONNECTED:
 								case DS_ONQUEUE:
 								case DS_NONEEDEDPARTS:
+								//Morph Start - added by AndCycle, for debug
+								if (theApp.glob_prefs->ShowA4AFDebugOutput()) theApp.emuledlg->AddDebugLogLine(false, "In %s, gonna entering SwapToAnotherFile.", __FUNCTION__);
+								//Morph End - added by AndCycle, for debug
 								if (!client->SwapToAnotherFile(true, true, true, NULL)) {
 									theApp.downloadqueue->RemoveSource(client, true);
 								}
