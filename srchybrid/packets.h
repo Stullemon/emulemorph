@@ -26,12 +26,7 @@ public:
 	Packet(CMemFile* datafile,uint8 protocol = OP_EDONKEYPROT);
 	// -khaos--+++> For use in upload statistics... Optional var, shouldn't affect anything.
 	Packet(int8 in_opcode,int32 in_size,uint8 protocol = OP_EDONKEYPROT,bool bFromPF = true);
-	//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
-	Packet(char* pPacketPart, uint32 nSize, bool bFromPF);
-	/*
 	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPF = true); // only used for splitted packets!
-	*/
-	//Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
 	// <-----khaos-
 	~Packet();
 	char*	GetHeader();
