@@ -76,13 +76,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
+				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
 				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="FALSE"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories=".\,..\,..\include,..\include\id3,..\zlib\include"
 				PreprocessorDefinitions="NDEBUG,WIN32,_LIB,_WINDOWS,HAVE_CONFIG_H,ID3LIB_LINKOPTION=1"
 				StringPooling="TRUE"
@@ -101,8 +101,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalOptions="/LTCG"
 				OutputFile=".\id3lib.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="FALSE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
