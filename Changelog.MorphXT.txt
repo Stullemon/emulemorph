@@ -3,6 +3,7 @@ Changelog for eMule 0.45b MorphXT v6.x
 --------------------------------------
 FIXED  : Identified a very old bug that make crash morph in particular waiting-queue configuration [SiRoB]
 FIXED  : Friend eLink minor fix from emulEspaña [SiRoB]
+FIXED  : DoubleClick on the chat window friend icon open the file preferency [SiRoB]
 
 ADDED  : CrashReporter from SF-IOM, gnaddelwarz: crashRpt[AndCycle]
 ADDED  : Scheduled remove slot from zz mod [AndCycle/SiRoB]
