@@ -130,7 +130,7 @@ static int __cdecl CmpIP2CountryByStartAddr(const void* p1, const void* p2)
 
 bool CIP2Country::LoadFromFile(){
 	DWORD startMesure = GetTickCount();
-	TCHAR szBuffer[512];
+	TCHAR szBuffer[1024];
 	CString ip2countryCSVfile = GetDefaultFilePath();
 	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 	try{
@@ -140,56 +140,50 @@ bool CIP2Country::LoadFromFile(){
 			int iLine = 0;
 			int iDuplicate = 0;
 			int iMerged = 0;
-			bool error = false;
 			CString tempStr[5];
 			CString	sbuffer;
-			while (!feof(readFile)) {
-				error = false;
-				if (_fgetts(szBuffer, ARRSIZE(szBuffer),readFile)==0) break;
-					sbuffer = szBuffer;
-					++iLine;
-					/*
-					http://ip-to-country.webhosting.info/node/view/54
+			while (_fgetts(szBuffer, ARRSIZE(szBuffer),readFile)!=NULL)
+			{
+				sbuffer = szBuffer;
+				++iLine;
+				/*
+				http://ip-to-country.webhosting.info/node/view/54
 
-					This is a sample of how the CSV file is structured:
+				This is a sample of how the CSV file is structured:
 
-					"0033996344","0033996351","GB","GBR","UNITED KINGDOM"
-					"0050331648","0083886079","US","USA","UNITED STATES"
-					"0094585424","0094585439","SE","SWE","SWEDEN"
+				"0033996344","0033996351","GB","GBR","UNITED KINGDOM"
+				"0050331648","0083886079","US","USA","UNITED STATES"
+				"0094585424","0094585439","SE","SWE","SWEDEN"
 
-					FIELD  			DATA TYPE		  	FIELD DESCRIPTION
-					IP_FROM 		NUMERICAL (DOUBLE) 	Beginning of IP address range.
-					IP_TO			NUMERICAL (DOUBLE) 	Ending of IP address range.
-					COUNTRY_CODE2 	CHAR(2)				Two-character country code based on ISO 3166.
-					COUNTRY_CODE3 	CHAR(3)				Three-character country code based on ISO 3166.
-					COUNTRY_NAME 	VARCHAR(50) 		Country name based on ISO 3166
+				FIELD  			DATA TYPE		  	FIELD DESCRIPTION
+				IP_FROM 		NUMERICAL (DOUBLE) 	Beginning of IP address range.
+				IP_TO			NUMERICAL (DOUBLE) 	Ending of IP address range.
+				COUNTRY_CODE2 	CHAR(2)				Two-character country code based on ISO 3166.
+				COUNTRY_CODE3 	CHAR(3)				Three-character country code based on ISO 3166.
+				COUNTRY_NAME 	VARCHAR(50) 		Country name based on ISO 3166
 				*/
 				// we assume that the ip-to-country.csv is valid and doesn't cause any troubles
 				// get & process IP range
-				sbuffer.TrimRight(_T('\n'));
-				sbuffer.Remove('"'); // get rid of the " signs
 
-				int curPos = 0;
-
-				for(int forCount = 0; forCount !=  5; forCount++){
-					tempStr[forCount] = sbuffer.Tokenize(_T(","), curPos);
-					if(tempStr[forCount].IsEmpty()) {
-						if(forCount == 0 || forCount == 1) error = true; //no empty ip field
-						//no need to throw an exception, keep reading in next line
-						//throw CString(_T("error line in"));
-					}
-				}
-				
-				if(error){
-					AddLogLine(false, GetResString(IDS_IP2COUNTRY_ERROR1), iCount+1);
-					AddLogLine(false, _T("%s %s"), GetResString(IDS_IP2COUNTRY_ERROR2), ip2countryCSVfile);
+				// ignore comments & too short lines
+				if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5) {
+					sbuffer.Trim(_T(" \t\r\n"));
+					DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IPToCountry: ignored line %u\n", iLine) : 0 );
 					continue;
 				}
-				//tempStr[4] is full country name, capitalize country name from rayita
-				FirstCharCap(&tempStr[4]);
+				TCHAR sz2L[2],sz3L[3],szDesc[256];
+				memset(szDesc, 0, sizeof szDesc);
+				UINT ip1, ip2;
+				CString str2L,str3L,strCountry;
+				int iItems = _stscanf(sbuffer, _T("\"%u\",\"%u\",\"%2c\",\"%3c\",\"%255c"), &ip1, &ip2, sz2L, sz3L, szDesc);
+				if (iItems < 5)
+					continue;
+
+				//strCountry is full country name, capitalize country name from rayita
+				FirstCharCap(&strCountry);
 
 				++iCount;
-				AddIPRange(_tstoi(tempStr[0]),_tstoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
+				AddIPRange(ip1, ip2, str2L, str3L, strCountry);
 			}
 			fclose(readFile);
 

@@ -4742,6 +4742,8 @@ BEGIN
     IDS_STORENOTES          "Store Notes"
     IDS_NOTES               "Notes"
     IDS_KADSEARCHALREADY    "Another search is already in progress. Please try again later!"
+    IDS_CRASHRPT_DONE       "Crash report has been generated."
+    IDS_CRASHRPT_AV         "CrashReporter is available and running."
 END
 
 STRINGTABLE 
@@ -4780,12 +4782,6 @@ STRINGTABLE
 BEGIN
     IDS_WrongPortforWebcache 
                             "Webcache Download disabled: Only transfers on Port   21, 70,  80, 210, 443, 563 and in the range from 1025 to 65535 are cached. Please use one of these Ports if you want to enable the Webcache Feature"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_CRASHRPT_DONE       "Crash report has been generated."
-    IDS_CRASHRPT_AV         "CrashReporter is available and running."
 END
 
 STRINGTABLE 
@@ -5473,7 +5469,7 @@ BEGIN
     IDS_WC_HIDE_ADV         "Hide advanced controls"
     IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
     IDS_WC_SOURCES          "Webcache Capable"
-	IDS_WC_UPDATESETTING   	"Update webcachesettings automatically"
+    IDS_WC_UPDATESETTING    "Update webcachesettings automatically"
 END
 
 STRINGTABLE 
@@ -5545,7 +5541,6 @@ BEGIN
     IDS_IP2COUNTRY_LOADED   "IP2Country loaded"
     IDS_IP2COUNTRY_UNLOADED "IP2Country unloaded"
     IDS_IP2COUNTRY_ERROR1   "error line number : %i"
-    IDS_IP2COUNTRY_ERROR2   "possible error line in"
     IDS_IP2COUNTRY_ERROR3   "Failed to load in"
     IDS_IP2COUNTRY_ERROR4   "CountryFlag Disabled, failed to load"
     IDS_IP2COUNTRY_ERROR5   "Invalid resID, maybe you need to upgrade your flag icon Dll,"

@@ -538,13 +538,13 @@ BOOL CemuleApp::InitInstance()
 	downloadqueue = new CDownloadQueue();	// bugfix - do this before creating the uploadqueue
 	uploadqueue = new CUploadQueue();
 	ipfilter 	= new CIPFilter();
+	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 	webserver = new CWebServer(); // Webserver [kuchin]
 	wapserver = new CWapServer(); //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
 	m_pPeerCache = new CPeerCacheFinder();
-	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 
 	/*
 	//Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
