@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.x
+--------------------------------------
+FIXED  : Download part file progress bar is now drawn correctly [SiRoB]
+
+CHANGED: Download Client part file progress bar has a lighter color now for confirmed download chunk when in flat mode [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.18
 --------------------------------------
 FIXED  : Kad: Buddy patch to avoid crash by tHeWiZaRdOfDoS [SiRoB]
