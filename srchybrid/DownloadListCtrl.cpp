@@ -1978,7 +1978,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						// in the CKnownFile object.
 						if ((!file->IsPartFile()) && (_trename(file->GetFilePath(), newpath) != 0)){
 							CString strError;
-							strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, strerror(errno));
+							strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, _tcserror(errno));
 							AddLogLine(false,strError);
 						} else {
 							CString strres;

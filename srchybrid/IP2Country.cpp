@@ -515,11 +515,11 @@ void CIP2Country::UpdateIP2CountryURL()
 					zfile = NULL;
 
 					if (_tremove(GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default IP to Country file \"%s\" - %s\n", GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to remove default IP to Country file \"%s\" - %s\n", GetDefaultFilePath(), _tcserror(errno));
 					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
 					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary IP to Country file \"%s\" - %s\n", szTempFilePath, strerror(errno));
+						TRACE("*** Error: Failed to remove temporary IP to Country file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
 					bUnzipped = true;
 				}
 				else

@@ -1177,7 +1177,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						newpath.ReleaseBuffer();
 						if (_trename(file->GetFilePath(), newpath) != 0){
 							CString strError;
-							strError.Format(GetResString(IDS_ERR_RENAMESF), file->GetFilePath(), newpath, strerror(errno));
+							strError.Format(GetResString(IDS_ERR_RENAMESF), file->GetFilePath(), newpath, _tcserror(errno));
 							AfxMessageBox(strError);
 							break;
 						}
@@ -1595,7 +1595,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							// in the CKnownFile object.
 							if ((!file->IsPartFile()) && (_trename(file->GetFilePath(), newpath) != 0)){
 								CString strError;
-								strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, strerror(errno));
+								strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, _tcserror(errno));
 								AddLogLine(false,strError);
 							} else {
 								CString strres;
@@ -1746,7 +1746,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 
 	// Try to rename
 	if ((!f->IsPartFile()) && (_trename(f->GetFilePath (), NewPath) != 0)) {
-		theApp.AddLogLine (false,_T("Can't rename file '%s' ! Error: %hs"),fn,strerror(errno));
+		theApp.AddLogLine (false,_T("Can't rename file '%s' ! Error: %hs"),fn,_tcserror(errno));
 	} else {
 		CString strres;
 		if (!f->IsPartFile()) {

@@ -91,7 +91,7 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 
 	FILE* fp = _tfsopen(m_strFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
 	if (fp == NULL){
-		theApp.emuledlg->AddLogLine(false, _T("Failed to open performance log file \"%s\" - %hs"), m_strFilePath, strerror(errno));
+		theApp.emuledlg->AddLogLine(false, _T("Failed to open performance log file \"%s\" - %hs"), m_strFilePath, _tcserror(errno));
 		return;
 	}
 	setvbuf(fp, NULL, _IOFBF, 16384); // ensure that all lines are written to file with one call

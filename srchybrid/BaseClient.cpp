@@ -113,8 +113,6 @@ void CUpDownClient::Init()
 	*/
 	m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;  // VQB Fix for LowID slots only on connection
 	//MORPH END   - Changed by SiRoB, ZZUL_20040904	
-	m_nAvDownDatarate = 0; //Wistily
-	m_nAvUpDatarate = 0; //Wistily
 	m_nChatstate = MS_NONE;
 	m_nKadState = KS_NONE;
 	m_cShowDR = 0;

@@ -440,7 +440,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 			fwrite(strText, sizeof(TCHAR), strText.GetLength(), fp);
 			if (ferror(fp)){
 				CString strError;
-				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
 				AfxMessageBox(strError, MB_ICONERROR);
 			}
 			else
@@ -449,7 +449,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 		}
 		else{
 			CString strError;
-			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
 			AfxMessageBox(strError, MB_ICONERROR);
 		}
 	}

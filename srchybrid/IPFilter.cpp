@@ -235,7 +235,7 @@ void CIPFilter::SaveToDefaultFile()
 			if (_ftprintf(fp, _T("%-15s - %-15s , %3u , %s\n"), szStart, szEnd, flt->level, flt->desc) == 0 || ferror(fp))
 			{
 				CString strError;
-				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
+				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
 				throw strError;
 			}
 		}
@@ -244,7 +244,7 @@ void CIPFilter::SaveToDefaultFile()
 	else
 	{
 		CString strError;
-		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
+		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
 		throw strError;
 	}
 }
@@ -476,11 +476,11 @@ void CIPFilter::UpdateIPFilterURL()
 					zfile = NULL;
 
 					if (_tremove(GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
 					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, strerror(errno));
+						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
 					bUnzipped = true;
 				}
 				else

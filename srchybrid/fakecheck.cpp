@@ -223,11 +223,11 @@ void CFakecheck::DownloadFakeList()
 					zfile = NULL;
 
 					if (_tremove(GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default fake check file \"%s\" - %s\n", GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to remove default fake check file \"%s\" - %s\n", GetDefaultFilePath(), _tcserror(errno));
 					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed fake check file \"%s\" to default fake check file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to rename uncompressed fake check file \"%s\" to default fake check file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), _tcserror(errno));
 					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary fake check file \"%s\" - %s\n", szTempFilePath, strerror(errno));
+						TRACE("*** Error: Failed to remove temporary fake check file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
 					bUnzipped = true;
 				}
 				else

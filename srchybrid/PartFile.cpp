@@ -452,7 +452,7 @@ void CPartFile::CreatePartFile()
 			m_tCreated = fileinfo.st_ctime;
 		}
 		else
-			AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), partfull, strerror(errno));
+			AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), partfull, _tcserror(errno));
 	}
 	m_dwFileAttributes = GetFileAttributes(partfull);
 	if (m_dwFileAttributes == INVALID_FILE_ATTRIBUTES)
@@ -987,7 +987,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		m_tCreated = fileinfo.st_ctime;
 	}
 	else
-		AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), searchpath, strerror(errno));
+		AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), searchpath, _tcserror(errno));
 
 	try{
 		SetFilePath(searchpath);
@@ -1420,18 +1420,18 @@ bool CPartFile::SavePartFile()
 	// after successfully writing the temporary part.met file...
 	if (_tremove(m_fullname) != 0 && errno != ENOENT){
 		if (thePrefs.GetVerbose())
-		AddDebugLogLine(false, _T("Failed to remove \"%s\" - %s"), m_fullname, strerror(errno));
+		AddDebugLogLine(false, _T("Failed to remove \"%s\" - %s"), m_fullname, _tcserror(errno));
 	}
 
 	if (_trename(strTmpFile, m_fullname) != 0){
 		int iErrno = errno;
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, strerror(iErrno));
+			AddDebugLogLine(false, _T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, _tcserror(iErrno));
 
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_SAVEMET), m_partmetfilename, GetFileName());
 		strError += _T(" - ");
-		strError += strerror(iErrno);
+		strError += _tcserror(iErrno);
 		AddLogLine(false, _T("%s"), strError);
 		return false;
 	}
@@ -3333,7 +3333,7 @@ BOOL CPartFile::PerformFileComplete()
 
 	// remove part.met file
 	if (_tremove(m_fullname))
-		theApp.QueueLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(strerror(errno)),m_fullname);
+		theApp.QueueLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(_tcserror(errno)),m_fullname);
 	// khaos::kmod+ Save/Load Sources
 	else
 		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
@@ -3474,14 +3474,14 @@ void CPartFile::DeleteFile(){
 		m_hpartfile.Close();
 
 	if (_tremove(m_fullname))
-		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(strerror(errno)),m_fullname);	
+		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),m_fullname);	
 	// khaos::kmod+ Save/Load Sources
 	else
 		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
 	CString partfilename(RemoveFileExtension(m_fullname));
 	if (_tremove(partfilename))
-		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(strerror(errno)),partfilename);
+		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),partfilename);
 
 	CString BAKName(m_fullname);
 	BAKName.Append(PARTMET_BAK_EXT);
