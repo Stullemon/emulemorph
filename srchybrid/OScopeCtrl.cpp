@@ -501,7 +501,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	//		but does not work for Korean fonts.
 	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
 	//		does work for all languages which are currently supported by eMule.
-	LegendFont.CreatePointFont(7*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
+	LegendFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	oldFont = m_dcGrid.SelectObject(&LegendFont);
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
 	
