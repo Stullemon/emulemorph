@@ -62,14 +62,20 @@ BOOL CClientDetailDialog::OnInitDialog(){
 		GetDlgItem(IDC_DNAME)->SetWindowText(_T("?"));
 	
 	//EastShare Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->IsIP2Country()){
+	if(theApp.ip2country->IsIP2Country() && thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE){
 		// Superlexx
 		bool longCountryName = true;
 		GetDlgItem(IDC_DLOC)->SetWindowText(m_client->GetCountryName(longCountryName));
+		//MORPH START - Added by Commander, CountryFlag
+		countryflag = theApp.ip2country->GetFlagImageList()->ExtractIcon(m_client->GetCountryFlagIndex());
+		((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
 	}
 	else{
 		GetDlgItem(IDC_DLOC)->SetWindowText(GetResString(IDS_DISABLED));
+		countryflag = theApp.LoadIcon(_T("FLAG_NA"), 18, 16);
+		((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
 	}
+	//MORPH END - Added by Commander, CountryFlag
 	//EastShare End - added by AndCycle, IP to Country
 
 	if (m_client->HasValidHash()){
@@ -199,7 +205,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	#ifdef MIGHTY_TWEAKS
 	CString AddInfo;
 	uint32 ClientIP = m_client->GetIP ();
-	AddInfo.Format ("User-ID: %u   IP: %d.%d.%d.%d:%d",
+	AddInfo.Format (_T("User-ID: %u   IP: %d.%d.%d.%d:%d"),
 					m_client->GetUserIDHybrid (),
 					(ClientIP >> 24) & 0xFF, (ClientIP >> 16) & 0xFF,
 					(ClientIP >> 8) & 0xFF, ClientIP & 0xFF, 
@@ -220,12 +226,21 @@ BOOL CClientDetailDialog::OnInitDialog(){
 					CLIP_DEFAULT_PRECIS,       // nClipPrecision
 					DEFAULT_QUALITY,           // nQuality
 					DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-					"MS Shell Dlg"));                 // lpszFacename
+					_T("MS Shell Dlg")));      // lpszFacename
 	m_sAdditionalInfo.SetFont (&m_fStdFont);
 	#endif
 	// [MightyKnife] end: Private Modifications
 	//MORPH START - Added by SiRoB, Webcache 1.2f
+
+	//MORPH START - Modified by Commander, WebCacheName
+	if(m_client->SupportsWebCache() && m_client->GetWebCacheName() == "")
+		GetDlgItem(IDC_Webcache)->SetWindowText(_T("no proxy set"));
+	if(m_client->SupportsWebCache() && m_client->GetWebCacheName() != "")
 	GetDlgItem(IDC_Webcache)->SetWindowText(m_client->GetWebCacheName()); // Superlexx - webcache //JP changed to new GetWebcacheName-function
+    if(!m_client->SupportsWebCache())
+		GetDlgItem(IDC_Webcache)->SetWindowText(GetResString(IDS_WEBCACHE_NOSUPPORT));
+    //MORPH END - Modified by Commander, WebCacheName
+
 	double percentSessions = 0;
 	if (m_client->WebCachedBlockRequests != 0)
 		percentSessions = (double) 100 * m_client->SuccessfulWebCachedBlockDownloads / m_client->WebCachedBlockRequests;

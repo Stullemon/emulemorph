@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1286,7 +1286,7 @@ BEGIN
     LTEXT           "Static",IDC_WCSTATISTICS,110,242,197,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
-    LTEXT           "Static",IDC_DLOC,84,69,92,8
+    LTEXT           "Static",IDC_DLOC,98,69,92,8
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
     LTEXT           "WebCache:",IDC_STATIC,19,229,64,10
     LTEXT           "Static",IDC_Webcache,110,229,197,10
@@ -1294,6 +1294,7 @@ BEGIN
     LTEXT           "Successfull/Requested:",IDC_STATIC,19,242,84,10
     LTEXT           "Is trusted OHCB sender:",IDC_STATIC,19,255,83,10
     LTEXT           "Static",IDC_TRUSTEDOHCBSENDER,110,255,197,8
+    ICON            "",IDC_COUNTRYFLAG,84,68,21,20
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -2756,15 +2757,15 @@ FILECRC32               ICON                    "res\\MOD\\fileCRC32.ico"
 FILEPOWERSHARE          ICON                    "res\\MOD\\filepowershare.ico"
 FILEHIDEOS              ICON                    "res\\MOD\\filehideos.ico"
 FILESHAREONLYTHENEED    ICON                    "res\\MOD\\fileshareonlytheneed.ico"
-FILEREQUESTED          ICON                    "res\\MOD\\filerequested.ico"
+FILEREQUESTED           ICON                    "res\\MOD\\filerequested.ico"
 ADVA4AF                 ICON                    "res\\MOD\\catAdvA4AF.ico"
 CATSTOPLAST             ICON                    "res\\MOD\\catStopLast.ico"
 CATPAUSELAST            ICON                    "res\\MOD\\catPauseLast.ico"
 CATRESUMENEXT           ICON                    "res\\MOD\\catResumeNext.ico"
-CATADD		            ICON                    "res\\MOD\\catadd.ico"
-CATEDIT		            ICON                    "res\\MOD\\catedit.ico"
-CATREMOVE	            ICON                    "res\\MOD\\catremove.ico"
-CATMERGE	           	ICON                    "res\\MOD\\catmerge.ico"
+CATADD                  ICON                    "res\\MOD\\catadd.ico"
+CATEDIT                 ICON                    "res\\MOD\\catedit.ico"
+CATREMOVE               ICON                    "res\\MOD\\catremove.ico"
+CATMERGE                ICON                    "res\\MOD\\catmerge.ico"
 FRIENDSLOTREMOVE        ICON                    "res\\MOD\\FriendslotRemove.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2871,12 +2872,33 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Deutsch (Deutschland) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+FLAG_NA                 ICON                    "res\\MOD\\not.ico"
+#endif    // Deutsch (Deutschland) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5252,6 +5274,7 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv on startup"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Show progress of client queue"
+    IDS_WEBCACHE_NOSUPPORT  "not supported"
 END
 
 STRINGTABLE 
@@ -5283,7 +5306,7 @@ BEGIN
     IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -76,7 +76,7 @@
 #define IDS_SKIN_PROF                   165
 #define IDS_ERR_PART_FNF                166
 #define IDS_ERR_OPENMETFILE             167
-#define IDR_HTTPDOWNLOAD_ANI			168
+#define IDR_HTTPDOWNLOAD_ANI            168
 #define IDS_KADOPEN                     168
 #define IDS_ERR_SAVEMET                 169
 #define IDS_ERR_FOUNDCORRUPTION         170
@@ -2507,7 +2507,6 @@
 #define IDC_NEWSMSG                     5010
 #define IDC_BUTTONEDIT                  5014
 #define IDC_BUTTONCHANGE                5015
-#define IDI_ICON2                       5015
 #define IDC_CHARSOURCE                  5016
 #define IDC_CHARDEST                    5017
 #define IDC_CHECKDOTTOSPACE             5018
@@ -2659,6 +2658,7 @@
 #define IDS_AUTOUPIP2COUNTRY            6032
 #define IDS_UPDATEIPCURL                6033
 #define IDS_CLIENTQUEUEPROGRESSBAR      6040
+#define IDS_WEBCACHE_NOSUPPORT          6041
 #define IDS_CHECK_DYNDNS_ENABLED        6100
 #define IDC_CHECK_DYNDNS_ENABLED        6100
 #define IDS_STATIC_DYNDNS_USERNAME      6101
@@ -2688,6 +2688,7 @@
 #define IDS_FOLDERICONS                 6150
 #define IDS_DOWNLOADEMFRIENDSMET        6160
 #define IDS_EMFRIENDSMETURL             6161
+#define IDC_COUNTRYFLAG                 6200
 #define IDS_PWEBCACHE                   10646
 #define IDS_WrongPortforWebcache        11387
 #define IDD_PPG_WEBCACHESETTINGS        12787
@@ -2767,7 +2768,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6202
+#define _APS_NEXT_RESOURCE_VALUE        6204
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         6200
 #define _APS_NEXT_SYMED_VALUE           106

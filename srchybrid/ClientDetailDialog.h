@@ -46,4 +46,6 @@ protected:
 	// [MightyKnife] end: Private Modifications
 
 	DECLARE_MESSAGE_MAP()
+private:
+	HICON countryflag; // MORPH - Added by Commander, CountryFlag
 };
