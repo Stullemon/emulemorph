@@ -43,7 +43,6 @@ static char THIS_FILE[]=__FILE__;
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 #define DLC_BARUPDATE 512
 
-
 IMPLEMENT_DYNAMIC(CDownloadListCtrl, CListBox)
 CDownloadListCtrl::CDownloadListCtrl() {
 }
@@ -888,7 +887,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				cdcStatus.CreateCompatibleDC(dc);
 				int cx = lpCtrlItem->status.GetBitmapDimension().cx;
 				DWORD dwTicks = GetTickCount();
-				if((lpCtrlItem->dwUpdated + 2*lpCtrlItem->owner->GetSourceCount()+DLC_BARUPDATE) < dwTicks || cx !=  iWidth  || !lpCtrlItem->dwUpdated) { //MORPH - Changed by SiRoB, Reduce PartStatus CPU consomption
+				if((lpCtrlItem->dwUpdated + (3000-DLC_BARUPDATE)/3*lpCtrlItem->owner->GetSourceCount()+DLC_BARUPDATE) < dwTicks || cx !=  iWidth  || !lpCtrlItem->dwUpdated) { //MORPH - Changed by SiRoB, Reduce PartStatus CPU consomption
 					lpCtrlItem->status.DeleteObject(); 
 					lpCtrlItem->status.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
 					lpCtrlItem->status.SetBitmapDimension(iWidth,  iHeight); 
