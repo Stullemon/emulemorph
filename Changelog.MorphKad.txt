@@ -1,4 +1,10 @@
 ----------------------------------------
+Changelog for eMule 0.40e21 MorphKad 0.3
+----------------------------------------
+FIXED: HTTPDownload corrected to see download info [Yun.SF3]
+FIXED: Hello Answer fix [SiRoB]
+
+----------------------------------------
 Changelog for eMule 0.40e21 MorphKad 0.2
 ----------------------------------------
 CHANGED: ZZ Patch No prio on the uploading list (order by inserted time)[SiRoB]
