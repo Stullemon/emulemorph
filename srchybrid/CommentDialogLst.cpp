@@ -82,6 +82,8 @@ BOOL CCommentDialogLst::OnInitDialog()
 	pmyListCtrl.InsertColumn(1, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 130, -1); 
 	pmyListCtrl.InsertColumn(2, GetResString(IDS_QL_RATING), LVCFMT_LEFT, 80, 1); 
 	pmyListCtrl.InsertColumn(3, GetResString(IDS_COMMENT), LVCFMT_LEFT, 340, 1); 
+	pmyListCtrl.InsertColumn(4, GetResString(IDS_CLIENTSOFTWARE), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientSoftware Column
+        pmyListCtrl.InsertColumn(5, GetResString(IDS_COUNTRY), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientCountry Column
 
 	pmyListCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT); //NoamSon: CopyComments
 
@@ -110,6 +112,8 @@ void CCommentDialogLst::CompleteList ()
 			pmyListCtrl.SetItemText(count, 1, cur_src->GetClientFilename()); 
 			pmyListCtrl.SetItemText(count, 2, GetRateString(cur_src->GetFileRate())); 
 			pmyListCtrl.SetItemText(count, 3, cur_src->GetFileComment());
+			pmyListCtrl.SetItemText(count, 4, cur_src->DbgGetFullClientSoftVer()); //Commander - Added: ClientSoftware Column
+                        pmyListCtrl.SetItemText(count, 5, cur_src->GetCountryName()); //Commander - Added: ClientCountry Column
 			count++;
 		} 
 	} 
