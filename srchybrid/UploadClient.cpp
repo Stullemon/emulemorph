@@ -342,6 +342,12 @@ double CUpDownClient::GetEqualChanceValue() const
 }
 //Morph End - added by AndCycle, Equal Chance For Each File
 
+//Morph Start - added by AndCycle, Pay Back First
+bool CUpDownClient::IsMoreUpThanDown() const{
+	return theApp.glob_prefs->IsPayBackFirst() ? credits->GetPayBackFirstStatus() : false ;
+}
+//Morph End - added by AndCycle, Pay Back First
+
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
 * Checks if the file this client has requested has release priority.
@@ -696,48 +702,6 @@ void CUpDownClient::SetUploadFileID(const uchar* tempreqfileid)
 
 void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock){
 
-// SLUGFILLER: reqBlocksClipping
-	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(reqblock->FileID);
-	if (!currequpfile) {
-		delete reqblock;
-		return;
-	}
-	uint32 filesize = currequpfile->GetFileSize();
-	// Handle file wrap-around
-	reqblock->StartOffset %= filesize;
-	reqblock->EndOffset %= filesize;
-	if (!reqblock->EndOffset)
-		reqblock->EndOffset = filesize;
-	if (reqblock->StartOffset == reqblock->EndOffset) {
-		delete reqblock;
-		return;
-	}
-	if (reqblock->EndOffset < reqblock->StartOffset) {
-		Requested_Block_Struct* block = new Requested_Block_Struct;
-		block->StartOffset = reqblock->StartOffset;
-		block->EndOffset = filesize;
-		md4cpy(block->FileID, reqblock->FileID);
-		AddReqBlock(block);
-		reqblock->StartOffset = 0;
-	}
-	// Handle part overflows and block-size overflows
-	while(true) {
-		uint32 next = (reqblock->StartOffset/PARTSIZE+1)*PARTSIZE;
-		if (next > reqblock->StartOffset+184320)
-			next = reqblock->StartOffset+184320;
-		if (next < reqblock->EndOffset) {
-			Requested_Block_Struct* block = new Requested_Block_Struct;
-			block->StartOffset = reqblock->StartOffset;
-			block->EndOffset = next;
-			md4cpy(block->FileID, reqblock->FileID);
-			AddReqBlock(block);
-			reqblock->StartOffset = next;
-			continue;
-		}
-		break;
-	}
-// SLUGFILLER: reqBlocksClipping
-
 	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;m_DoneBlocks_list.GetNext(pos)){
 		if (reqblock->StartOffset == m_DoneBlocks_list.GetAt(pos)->StartOffset && reqblock->EndOffset == m_DoneBlocks_list.GetAt(pos)->EndOffset){
 			delete reqblock;
@@ -777,9 +741,6 @@ uint32 CUpDownClient::SendBlockData(){
 		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
 		m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
 		credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
-		//EastShare Start - added by AndCycle, Pay Back First
-		TestMoreUpThanDown();
-		//EastShare End - added by AndCycle, Pay Back First
 
 		sentBytesPayload = socket->GetSentPayloadSinceLastCallAndReset();
 		m_nCurQueueSessionPayloadUp += sentBytesPayload;
@@ -798,7 +759,7 @@ uint32 CUpDownClient::SendBlockData(){
 
 				//EastShare Start - added by AndCycle, Pay Back First
 				//check again does client satisfy the conditions
-				InitMoreUpThanDown();
+				credits->InitPayBackFirstStatus();
 				//EastShare End - added by AndCycle, Pay Back First
 
 				// first clear the average speed, to show ?? as speed in upload slot display

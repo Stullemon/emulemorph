@@ -151,7 +151,12 @@ public:
 	EIdentState	GetCurrentIdentState(uint32 dwForIP); // can be != IdentState
 	uint32	GetSecureWaitStartTime(uint32 dwForIP);
 	void	SetSecWaitStartTime(uint32 dwForIP);
-	bool	GetPayBackFirstStatus()				{return m_bPayBackFirst;}//EastShare - added by AndCycle, Pay Back First
+
+	//EastShare Start - added by AndCycle, Pay Back First
+	bool	GetPayBackFirstStatus()			{return m_bPayBackFirst;}
+	void	InitPayBackFirstStatus();
+	//EastShare End - added by AndCycle, Pay Back First
+
 protected:
 	void	Verified(uint32 dwForIP);
 	EIdentState IdentState;
@@ -172,8 +177,10 @@ private:
 	CreditSystemSelection	m_cssCurrentCreditSystem;
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
-	bool			m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
-	void			TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+	//EastShare Start - added by AndCycle, Pay Back First
+	bool			m_bPayBackFirst;
+	void			TestPayBackFirstStatus();
+	//EastShare End - added by AndCycle, Pay Back First
 
 };
 

@@ -370,35 +370,6 @@ bool CUpDownClient::TestLeecher(){
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
 
-//EastShare Start - added by AndCycle, Pay Back First
-
-//check at entry point
-void CUpDownClient::InitMoreUpThanDown(){
-	m_bPayBackFirstTag = credits->GetPayBackFirstStatus() && NeedMoreUpThanDown();
-}
-
-//does client satisfy the need?
-bool CUpDownClient::NeedMoreUpThanDown(){
-	return	credits->GetDownloadedTotal() > credits->GetUploadedTotal()+SESSIONAMOUNT;
-}
-
-//check status during up&down
-void CUpDownClient::TestMoreUpThanDown(){
-	if(credits->GetPayBackFirstStatus()){
-		if(NeedMoreUpThanDown()){
-			m_bPayBackFirstTag = true;
-		}
-	}
-	else{
-		m_bPayBackFirstTag = false;
-	}
-}
-
-bool CUpDownClient::IsMoreUpThanDown() const{
-	return theApp.glob_prefs->IsPayBackFirst() ? m_bPayBackFirstTag : false ;
-}
-//EastShare End - added by AndCycle, Pay Back First
-
 void CUpDownClient::ClearHelloProperties()
 {
 	m_nUDPPort = 0;
@@ -586,10 +557,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				AddDebugLogLine(false, "Clients: %s (%s), Banreason: Userhash changed (Found in TrackedClientsList)", GetUserName(), GetFullIP()); 
 			Ban();
 		}
-		//EastShare Start - added by AndCycle, Pay Back First
-		//here the credits has been init, so we can set default tag now
-		InitMoreUpThanDown();
-		//EastShare End - added by AndCycle, Pay Back First
 	}
 	else if (credits != pFoundCredits){
 		// userhash change ok, however two hours "waittime" before it can be used
@@ -597,10 +564,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 		if (theApp.glob_prefs->GetLogBannedClients())
 			AddDebugLogLine(false, "Clients: %s (%s), Banreason: Userhash changed", GetUserName(),GetFullIP()); 
 		Ban();
-		//EastShare Start - added by AndCycle, Pay Back First
-		//here the credits has been init, so we can set default tag now
-		InitMoreUpThanDown();
-		//EastShare End - added by AndCycle, Pay Back First
 	}
 
 	if ((m_Friend = theApp.friendlist->SearchFriend((uchar*)m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){

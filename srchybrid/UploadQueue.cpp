@@ -982,7 +982,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			//EastShare Start - added by AndCycle, Pay Back First
 			//client normal leave the upload queue, check does client still satisfy requirement
 			if(earlyabort == false){
-				client->InitMoreUpThanDown();
+				client->credits->InitPayBackFirstStatus();
 			}
 			//EastShare End - added by AndCycle, Pay Back First
 

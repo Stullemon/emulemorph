@@ -608,13 +608,6 @@ private:
 	DWORD       m_dwLastCheckedForEvictTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
 
-	//EastShare Start - Added by AndCycle, PayBackFirst
-	bool		m_bPayBackFirstTag;
-	void		InitMoreUpThanDown();
-	bool		NeedMoreUpThanDown();
-	void		TestMoreUpThanDown();
-	//EastShare End - Added by AndCycle, PayBackFirst
-
 	//download
 	EDownloadState m_nDownloadState;
 	uint32		m_cDownAsked;

@@ -704,9 +704,6 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 	m_nDownDataRateMS += size - HEADER_SIZE;
 	credits->AddDownloaded(size - HEADER_SIZE, GetIP());
-	//EastShare Start - added by AndCycle, Pay Back First
-	TestMoreUpThanDown();
-	//EastShare End - added by AndCycle, Pay Back First
 
 	// Move end back one, should be inclusive
 	nEndPos--;

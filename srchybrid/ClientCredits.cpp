@@ -53,7 +53,7 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_fLastScoreRatio = 0;
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
-	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
 }
 
@@ -72,7 +72,7 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_fLastScoreRatio = 0;
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
-	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
 }
 
@@ -985,9 +985,19 @@ void CClientCredits::ClearWaitStartTime(){
 }
 
 //EastShare Start - added by AndCycle, Pay Back First
+void CClientCredits::InitPayBackFirstStatus(){
+
+	m_bPayBackFirst = GetDownloadedTotal() > GetUploadedTotal()+SESSIONAMOUNT;
+
+}
 void CClientCredits::TestPayBackFirstStatus(){
 
-	m_bPayBackFirst = GetDownloadedTotal() > GetUploadedTotal();
+	if(GetDownloadedTotal() > GetUploadedTotal()+SESSIONAMOUNT){
+		m_bPayBackFirst = true;
+	}
+	else if(GetDownloadedTotal() <= GetUploadedTotal()){
+		m_bPayBackFirst = false;
+	}
 
 }
 //EastShare End - added by AndCycle, Pay Back First
