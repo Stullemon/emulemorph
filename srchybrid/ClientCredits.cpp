@@ -998,16 +998,16 @@ void CClientCredits::ClearWaitStartTime(){
 
 //EastShare Start - added by AndCycle, Pay Back First
 void CClientCredits::InitPayBackFirstStatus(){
-
-	m_bPayBackFirst = GetDownloadedTotal() > GetUploadedTotal()+SESSIONAMOUNT;
+	if (GetDownloadedTotal() >= SESSIONAMOUNT)
+		m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal();
 
 }
 void CClientCredits::TestPayBackFirstStatus(){
 
-	if(GetDownloadedTotal() > GetUploadedTotal()+SESSIONAMOUNT){
+	if(GetDownloadedTotal() >= GetUploadedTotal()){
 		m_bPayBackFirst = true;
 	}
-	else if(GetDownloadedTotal() <= GetUploadedTotal()){
+	else if(GetDownloadedTotal() < GetUploadedTotal()){
 		m_bPayBackFirst = false;
 	}
 
