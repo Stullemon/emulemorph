@@ -85,11 +85,10 @@ BOOL CPPgSecurity::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 	//MORPH START - Added by SiRoB, Allways use securedid
-	GetDlgItem(IDC_USESECIDENT)->EnableWindow(1);
+	GetDlgItem(IDC_USESECIDENT)->EnableWindow(0);
 	//MORPH END   - Added by SiRoB, Allways use securedid
 	LoadSettings();
 	Localize();
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
