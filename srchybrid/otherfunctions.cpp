@@ -1459,6 +1459,25 @@ bool IsGoodIP(uint32 nIP, bool forceCheck) //MORPH - Modified by SiRoB, ZZ Uploa
 	if (nFirst==0 || nFirst==10)
 		return false;
 
+	// itsonlyme: ipFiltering
+	// see http://www.faqs.org/rfcs/rfc3330.html
+	// filter other non-public IPs
+	// 169.254.0.0/16 - Link Local
+	// 192.0.2.0/24 - Test-Net
+	// 192.88.99.0/24 - 6to4 Relay Anycast
+	// 224.0.0.0/4 - Multicast
+	// 240.0.0.0/4 - Reserved for Future Use
+	uint8 nThird = (uint8)(nIP >> 16);
+	if (nFirst==169 && nSecond==254)
+	return false;
+	if (nFirst==192 && nSecond==0 && nThird==2)
+	return false;
+	if (nFirst==192 && nSecond==88 && nThird==99)
+	return false;
+	if (nFirst>=224)
+	return false;
+	// itsonlyme: ipFiltering
+
 	return true; 
 }
 
