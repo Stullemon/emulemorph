@@ -224,6 +224,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlConnect.m_nBtnID = IDC_CONNECT;
 		//p->GetWindowText(m_ctrlConnect.m_strText);
 		m_ctrlConnect.m_strText = GetResString(IDS_MAIN_BTN_CONNECT);
+		m_ctrlConnect.m_strText.Remove('&');
 
 		m_ctrlConnect.m_bUseIcon = true;
 		m_ctrlConnect.m_sIcon.cx = 16;
