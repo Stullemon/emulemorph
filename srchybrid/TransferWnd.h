@@ -44,7 +44,6 @@ public:
 	void SwitchUploadList();
 
 	// khaos::categorymod+
-	int		GetCategoryTab()			{ return m_dlTab.GetCurSel(); }
 	int		GetActiveCategory()			{ return m_dlTab.GetCurSel(); }
 	// khaos::categorymod-
 

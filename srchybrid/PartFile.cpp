@@ -2193,7 +2193,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	if ( GetSrcStatisticsValue(DS_DOWNLOADING) != nOldTransSourceCount ){
 		// khaos::categorymod+
 		//if (theApp.emuledlg->transferwnd->downloadlistctrl.curTab == 0)
-		theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->GetCategoryTab());
+		theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->GetActiveCategory());
 		//else
 		//	UpdateDisplayedInfo(true);
 		// khaos::categorymod-

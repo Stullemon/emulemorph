@@ -32,7 +32,7 @@ public:
 	void Check4StatUpdate(const CKnownFile* file);
 	void Reload();
 
-// Dialog Data
+	//MORPH START - Added by SiRoB, Share Category
 	enum { IDD = IDD_FILES };
 
 	CSharedFilesCtrl sharedfilesctrl;

@@ -38,6 +38,7 @@
 #endif
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+#include "friendlist.h" //MORPH - Added by SiRoB, There is one slot friend or more
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -911,10 +912,12 @@ bool CPreferences::IsZZRatioDoesWork(){
 	
 	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
-	if (theApp.stat_sessionSentBytesToFriend > 0)
+	if (theApp.friendlist->IsFriendSlot())
 		return true;
 	if (theApp.statistics)
 		return theApp.statistics->GetAvgUploadRate(0)<16*(1+(uint32)theApp.statistics->maxDown/64)-6;
+	if (GetMaxUpload()<10)
+		return true;
 	return false;
 }
 //MORPH - Added by SiRoB, ZZ ratio

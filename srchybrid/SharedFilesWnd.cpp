@@ -103,7 +103,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	AddAnchor(IDC_POPBAR3,BOTTOM_LEFT);
 	AddAnchor(IDC_FSTATIC9,BOTTOM_LEFT);
 	AddAnchor(IDC_STRANSFERED2,BOTTOM_LEFT);
-	
+	//MORPH START - Added by SiRoB, Share Category
 	return TRUE;
 }
 

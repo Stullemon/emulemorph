@@ -894,6 +894,7 @@ void CDownloadQueue::Process(){
                 //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
 		   }
 		}
+
         // has this client downloaded more than it has uploaded this session? (friends included)
         // then limit its download speed from all friends
         // limit will be removed as soon as upload has catched up to download
