@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -333,6 +333,9 @@ BEGIN
                     IDC_MANUALSERVERHIGHPRIO,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,121,216,10
     LTEXT           "Remove dead servers after",IDC_REMOVEDEAD,7,8,106,8
+    EDITTEXT        IDC_LOWIDRETRY,115,158,22,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,7,160,85,8
 END
 
 IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 257
@@ -621,7 +624,7 @@ BEGIN
                     BS_MULTILINE | BS_FLAT | WS_TABSTOP,22,138,191,22
 END
 
-IDD_PPG_IRC DIALOGEX 0, 0, 229, 289
+IDD_PPG_IRC DIALOGEX 0, 0, 229, 239
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "IRC"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
@@ -643,9 +646,9 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,118,
                     202,10
     EDITTEXT        IDC_IRC_PERFORM_BOX,14,128,202,12,ES_AUTOHSCROLL
-    GROUPBOX        "Miscellaneous",IDC_IRC_MISC_FRM,7,148,215,134,BS_FLAT
+    GROUPBOX        "Miscellaneous",IDC_IRC_MISC_FRM,7,148,215,84,BS_FLAT
     CONTROL         "",IDC_MISC_IRC,"SysTreeView32",TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,14,157,202,118
+                    WS_BORDER | WS_TABSTOP,14,158,202,69
 END
 
 IDD_WIZARD DIALOGEX 0, 0, 263, 262
@@ -742,20 +745,21 @@ BEGIN
                     WS_HSCROLL | WS_TABSTOP,7,106,394,143
 END
 
-IDD_PPG_TWEAKS DIALOGEX 0, 0, 227, 289
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_PPG_TWEAKS DIALOGEX 0, 0, 227, 246
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 CAPTION "Tweaks"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     LTEXT           "Static",IDC_WARNING,7,7,213,39
     CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,7,46,213,186
-    LTEXT           "File buffer size",IDC_FILEBUFFERSIZE_STATIC,7,236,213,8
+                    WS_BORDER | WS_TABSTOP,7,46,213,145
+    LTEXT           "File buffer size",IDC_FILEBUFFERSIZE_STATIC,7,195,213,8
     CONTROL         "",IDC_FILEBUFFERSIZE,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,14,246,206,11,WS_EX_STATICEDGE
-    LTEXT           "Queue size",IDC_QUEUESIZE_STATIC,7,261,213,8
+                    TBS_NOTICKS | WS_TABSTOP,14,205,206,11,WS_EX_STATICEDGE
+    LTEXT           "Queue size",IDC_QUEUESIZE_STATIC,7,220,213,8
     CONTROL         "",IDC_QUEUESIZE,"msctls_trackbar32",TBS_BOTH | 
-                    TBS_NOTICKS | WS_TABSTOP,14,271,206,11,WS_EX_STATICEDGE
+                    TBS_NOTICKS | WS_TABSTOP,14,230,206,11,WS_EX_STATICEDGE
 END
 
 IDD_ADDFRIEND DIALOGEX 0, 0, 269, 172
@@ -1229,8 +1233,8 @@ BEGIN
     LTEXT           "Static",IDC_DSOFT,84,36,227,8
     LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8
     LTEXT           "Static",IDC_DSIP,84,47,61,8
-    LTEXT           "Servername:",IDC_STATIC38,147,47,69,8
-    LTEXT           "Static",IDC_DSNAME,219,47,92,8
+    LTEXT           "Servername:",IDC_STATIC38,163,47,52,8
+    LTEXT           "Static",IDC_DSNAME,215,47,93,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
     LTEXT           "Static",IDC_CDIDENT,84,58,172,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,81,308,71,BS_FLAT
@@ -1259,7 +1263,7 @@ BEGIN
     LTEXT           "Currently downloading:",IDC_STATIC48,19,102,86,8
     LTEXT           "Static",IDC_UPLOADING,110,102,202,8
     LTEXT           "Static",IDC_DLOC,215,58,92,8
-    LTEXT           "Location:",IDC_DLOC2,163,58,49,8
+    LTEXT           "Country:",IDC_DLOC2,163,58,49,8
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -1510,17 +1514,17 @@ BEGIN
     PUSHBUTTON      "Cance&l",IDC_CANCELS,198,36,58,14,BS_FLAT | WS_DISABLED
 END
 
-IDD_PPG_MORPH DIALOGEX 0, 0, 230, 289
+IDD_PPG_MORPH DIALOGEX 0, 0, 230, 257
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Morph"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,7,46,216,236
+                    WS_BORDER | WS_TABSTOP,7,46,216,204
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
-IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 289
+IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 252
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Morph2"
@@ -1541,10 +1545,6 @@ BEGIN
     EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,202,8,0,
                     WS_EX_TRANSPARENT
-    EDITTEXT        IDC_LOWIDRETRY,194,259,22,12,ES_CENTER | ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,15,262,85,8
-    GROUPBOX        "Server",IDC_MORPH2_SERVER,7,249,217,34,BS_FLAT
     GROUPBOX        "File",IDC_MORPH2_FILE,7,6,217,67,BS_FLAT
     GROUPBOX        "Security",IDC_MORPH2_SECURITY,7,76,217,69,BS_FLAT
     PUSHBUTTON      "Update IP2Country",IDC_UPDATEIPCURL,135,226,81,14,
@@ -1597,14 +1597,14 @@ BEGIN
                     BS_FLAT | WS_TABSTOP,25,133,63,10
 END
 
-IDD_PPG_EASTSHARE DIALOGEX 0, 0, 230, 289
+IDD_PPG_EASTSHARE DIALOGEX 0, 0, 230, 257
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "EastShare"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_EASTSHARE_OPTS,"SysTreeView32",
                     TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,
-                    236
+                    204
     LTEXT           "Static",IDC_WARNINGEASTSHARE,7,7,213,39
 END
 
@@ -2576,12 +2576,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4747,7 +4747,7 @@ BEGIN
     IDS_SC_HEADLINE         "Simple cleanup"
 END
 
-#endif    // Englisch (USA) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

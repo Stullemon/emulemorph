@@ -34,9 +34,6 @@ void CPPgMorph2::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	ON_EN_CHANGE(IDC_LOWIDRETRY, OnSettingsChange)
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	ON_BN_CLICKED(IDC_UPDATEFAKELISTSTART, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATEFAKES, OnBnClickedUpdatefakes)
@@ -73,11 +70,6 @@ BOOL CPPgMorph2::OnInitDialog()
 void CPPgMorph2::LoadSettings(void)
 {
 	CString strBuffer;
-
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	strBuffer.Format("%d", thePrefs.GetLowIdRetries());
-	GetDlgItem(IDC_LOWIDRETRY)->SetWindowText(strBuffer);
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(thePrefs.UpdateURLFakeList);
@@ -132,14 +124,6 @@ BOOL CPPgMorph2::OnApply()
 
 	CString buffer;
 	
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	if(GetDlgItem(IDC_LOWIDRETRY)->GetWindowTextLength())
-	{
-		GetDlgItem(IDC_LOWIDRETRY)->GetWindowText(buffer);
-		thePrefs.SetLowIdRetries(atoi(buffer));
-	}
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
-
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->GetWindowText(buffer);
 	strcpy(thePrefs.UpdateURLFakeList, buffer);
@@ -174,10 +158,6 @@ void CPPgMorph2::Localize(void)
 	if(m_hWnd)
 	{
 		//SetWindowText(GetResString(IDS_MORPH2));
-		
-		//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-		GetDlgItem(IDC_LOWIDRETRYLABEL)->SetWindowText(GetResString(IDS_LOWIDRETRYLABEL));
-		//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
 		
 		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 		GetDlgItem(IDC_UPDATEFAKES)->SetWindowText(GetResString(IDS_UPDATEFAKES));
