@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -86,7 +86,7 @@ BEGIN
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_TABSTOP,5,234,500,43,WS_EX_STATICEDGE
     CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,21,4,109,8
+                    WS_GROUP,21,4,217,8
     LTEXT           "IDS_TW_QUEUE",IDC_TSTATIC1,6,280,87,8
     LTEXT           "0",IDC_QUEUECOUNT,100,280,78,8
     CONTROL         "",IDC_SPLITTER,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
@@ -94,7 +94,7 @@ BEGIN
     CONTROL         "",IDC_QUEUELIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | NOT 
                     WS_VISIBLE | WS_TABSTOP,5,215,500,63,WS_EX_STATICEDGE
-    ICON            "",IDC_DOWNLOAD_ICO,5,3,21,20
+    ICON            "",IDC_DOWNLOAD_ICO,5,3,20,20
     PUSHBUTTON      "Text",IDC_UPLOAD_ICO,1,99,34,15,BS_ICON | BS_FLAT
     PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,437,278,68,11,BS_FLAT | 
                     NOT WS_VISIBLE
@@ -2289,7 +2289,7 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
