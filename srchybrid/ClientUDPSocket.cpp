@@ -632,11 +632,13 @@ bool CClientUDPSocket::Create(){
 	int retries=0;
 	int maxRetries = 50;
 
-	if (thePrefs.GetUDPPort(false, false, true)){
+	static bool bNotFirstRun = false;
+
+	if (thePrefs.GetUDPPort(false, false, bNotFirstRun)){
 		if(thePrefs.GetUseRandomPorts()){
 			do{
 				retries++;
-				rndPort = thePrefs.GetUDPPort(true);
+				rndPort = thePrefs.GetUDPPort(bNotFirstRun);
 				if((retries < (maxRetries / 2)) && ((thePrefs.GetICFSupport() && !theApp.m_pFirewallOpener->DoesRuleExist(rndPort, NAT_PROTOCOL_UDP))
 					|| !thePrefs.GetICFSupport()))
 				{
@@ -660,13 +662,13 @@ bool CClientUDPSocket::Create(){
 			}
 
 			if(thePrefs.GetUPnPNat()){
-				CUPnPNat::UPNPNAT_MAPPING mapping;
+				CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
 				mapping.internalPort = mapping.externalPort = thePrefs.GetUDPPort();
-				mapping.protocol = CUPnPNat::UNAT_UDP;
-				mapping.description = "UDP Port";
+				mapping.protocol = CUPnP_IGDControlPoint::UNAT_UDP;
+				mapping.description = _T("UDP Port");
 				
-				theApp.AddUPnPNatPort(&mapping, thePrefs.GetUPnPNatTryRandom());
+				theApp.AddUPnPNatPort(&mapping);
 				
 				thePrefs.SetUPnPUDPExternal(mapping.externalPort);
 				thePrefs.SetUPnPUDPInternal(mapping.internalPort);
@@ -677,6 +679,9 @@ bool CClientUDPSocket::Create(){
 			}
 		}
 	}
+
+	bNotFirstRun = true;
+	
 	if (ret)
 		m_port=thePrefs.GetUDPPort();
 
@@ -693,6 +698,17 @@ bool CClientUDPSocket::Rebind(){
 	*/
 	if (!thePrefs.GetUseRandomPorts() && thePrefs.GetUDPPort(false, true)==m_port)
 		return false;
+
+	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	if(thePrefs.GetUPnPNat()){
+		CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
+		mapping.internalPort = thePrefs.GetUPnPUDPInternal();
+		mapping.externalPort = thePrefs.GetUPnPUDPExternal();
+		mapping.protocol = CUPnP_IGDControlPoint::UNAT_UDP;
+		mapping.description = _T("UDP Port");
+		theApp.RemoveUPnPNatPort(&mapping);
+	}
+	// End -UPnPNAT Support-
 	// End emulEspaña
 
 	Close();

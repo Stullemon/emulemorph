@@ -2783,6 +2783,7 @@ MOBILE                  ICON                    "res\\MOD\\mobile.ico"
 MORPH                   ICON                    "res\\MOD\\Morph.ico"
 EASTSHARE               ICON                    "res\\MOD\\EastShare.ico"
 EMULESPANA              ICON                    "res\\MOD\\emulespana.ico"
+UPNP                    ICON                    "res\\MOD\\UPnP.ico"
 WEBCACHE                ICON                    "res\\MOD\\Webcache.ico"
 FILEPERMISSION          ICON                    "res\\MOD\\filepermission.ico"
 FILEMASSRENAME          ICON                    "res\\MOD\\fileMassRename.ico"
@@ -5337,6 +5338,7 @@ BEGIN
     IDS_RANDOMPORTS         "Random Ports"
     IDS_MINPORT             "Min Port"
     IDS_MAXPORT             "Max Port"
+	IDS_RANDOMPORTSRESETTIME "Random ports safe restart time (in seconds)"
 END
 
 STRINGTABLE 

@@ -20,7 +20,7 @@
 #endif
 #include ".\Optimizer\cpu_info.h" //Commander - Added: Optimizer [ePlus]
 #include "resource.h"
-#include "UPnPNat.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+#include "UPnP_IGDControlPoint.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 #include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
@@ -226,9 +226,9 @@ public:
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 public:
-	CUPnPNat	m_UPnPNat;
-	BOOL		AddUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping, bool tryRandom = false);
-	BOOL		RemoveUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping);
+	CUPnP_IGDControlPoint *m_UPnPNat;
+	BOOL		AddUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping);
+	BOOL		RemoveUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping);
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]

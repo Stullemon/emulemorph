@@ -74,10 +74,10 @@ CPPgEmulespana::CPPgEmulespana()
 	m_htiUPnPRoot = NULL;
 	m_htiUPnP = NULL;
 	m_htiUPnPWeb = NULL;
-	m_htiUPnPTryRandom = NULL;
+	//m_htiUPnPTryRandom = NULL;
 	m_bUPnP = false;
 	m_bUPnPWeb = false;
-	m_bUPnPTryRandom = false;
+	//m_bUPnPTryRandom = false;
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -124,6 +124,17 @@ CPPgEmulespana::CPPgEmulespana()
 	m_iUSSTTL = 0;
 	// End MoNKi
 */
+	// Added by MoNKi [MoNKi: -Random Ports-]
+	m_htiRandomPortsResetTime = NULL;
+	m_iRandomPortsResetTime = 0;
+	// End MoNKi
+
+/*Commented by SiRoB
+	// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+	m_htiCustomIncomingIcon = NULL;
+	m_bCustomIncomingIcon = false;
+	// End MoNKi
+*/
 }
 
 CPPgEmulespana::~CPPgEmulespana()
@@ -144,16 +155,27 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		// End SlugFiller
 
 /*Commented by SiRoB
+		// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+		m_htiCustomIncomingIcon  = m_ctrlTreeOptions.InsertCheckBox(_T("Custom incoming folder icon"), TVI_ROOT, m_bCustomIncomingIcon);
+		// End MoNKi
+*/
+
+		// Added by MoNKi [MoNKi: -Random Ports-]
+		m_htiRandomPortsResetTime = m_ctrlTreeOptions.InsertItem(_T("Random ports safe restart time"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
+		m_ctrlTreeOptions.AddEditBox(m_htiRandomPortsResetTime, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		// End MoNKi
+
+/*Commented by SiRoB
 		// Added by MoNKi [MoNKi: -invisible mode-]
 		int iImgInvisibleMode = 8; // default icon
 		if (piml){
 			iImgInvisibleMode = piml->Add(CTempIconLoader(_T("TrayLowID")));
 		}
-		m_htiInvisibleModeRoot = m_ctrlTreeOptions.InsertItem("Invisible Mode", iImgInvisibleMode, iImgInvisibleMode, TVI_ROOT);
-		m_htiInvisibleMode = m_ctrlTreeOptions.InsertCheckBox("Enable Invisible Mode", m_htiInvisibleModeRoot, m_bInvisibleMode);
-		m_htiInvisibleModeMod = m_ctrlTreeOptions.InsertItem("Key Modifier", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiInvisibleModeRoot);
+		m_htiInvisibleModeRoot = m_ctrlTreeOptions.InsertItem(_T("Invisible Mode"), iImgInvisibleMode, iImgInvisibleMode, TVI_ROOT);
+		m_htiInvisibleMode = m_ctrlTreeOptions.InsertCheckBox(_T("Enable Invisible Mode"), m_htiInvisibleModeRoot, m_bInvisibleMode);
+		m_htiInvisibleModeMod = m_ctrlTreeOptions.InsertItem(_T("Key Modifier"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiInvisibleModeRoot);
 		m_ctrlTreeOptions.AddComboBox(m_htiInvisibleModeMod, RUNTIME_CLASS(CTreeOptionsInvisibleModCombo));
-		m_htiInvisibleModeKey = m_ctrlTreeOptions.InsertItem("Key", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiInvisibleModeRoot);
+		m_htiInvisibleModeKey = m_ctrlTreeOptions.InsertItem(_T("Key"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiInvisibleModeRoot);
 		m_ctrlTreeOptions.AddComboBox(m_htiInvisibleModeKey, RUNTIME_CLASS(CTreeOptionsInvisibleKeyCombo));
 		m_ctrlTreeOptions.Expand(m_htiInvisibleModeRoot, TVE_EXPAND);
 		// End MoNKi
@@ -173,11 +195,11 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 		int iImgUPnP = 8; // default icon
 		if (piml){
-			iImgUPnP = piml->Add(CTempIconLoader(_T("PROXY")));
+			iImgUPnP = piml->Add(CTempIconLoader(_T("UPNP")));
 		}
 		m_htiUPnPRoot = m_ctrlTreeOptions.InsertItem(_T("Universal Plug & Play (UPnP)"), iImgUPnP, iImgUPnP, TVI_ROOT);
 		m_htiUPnP  = m_ctrlTreeOptions.InsertCheckBox(_T("Enable UPnP on emule ports"), m_htiUPnPRoot, m_bUPnP);
-		m_htiUPnPTryRandom = m_ctrlTreeOptions.InsertCheckBox(_T("Try with external random ports if are in use"), m_htiUPnPRoot, m_bUPnPTryRandom);
+		//m_htiUPnPTryRandom = m_ctrlTreeOptions.InsertCheckBox(_T("Try with external random ports if are in use"), m_htiUPnPRoot, m_bUPnPTryRandom);
 		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(_T("Web Interface"), m_htiUPnPRoot, m_bUPnPWeb);
 		m_ctrlTreeOptions.Expand(m_htiUPnPRoot, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
@@ -240,9 +262,9 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnP, m_bUPnP);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPTryRandom, m_bUPnPTryRandom);
+	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPTryRandom, m_bUPnPTryRandom);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiUPnPTryRandom, m_bUPnP);
+	//m_ctrlTreeOptions.SetCheckBoxEnable(m_htiUPnPTryRandom, m_bUPnP);
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -271,6 +293,11 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, m_iLowIdRetry, 0, 255);
 	// End SlugFiller
 
+	// Added by MoNKi [MoNKi: -Random Ports-]
+	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiRandomPortsResetTime, m_iRandomPortsResetTime);
+	DDV_MinMaxInt(pDX, m_iRandomPortsResetTime, 0, 900);
+	// End MoNKi
+
 /*Commented by SiRoB
 	// Added by MoNKi [MoNKi: -USS initial TTL-]
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiUSSTTL, m_iUSSTTL);
@@ -286,6 +313,12 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiWapLowEnable, m_bWapLowEnable);
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiWapLowPass, m_sWapLowPass);
 	// end MoNKi
+
+/*Commented by SiRoB
+	// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCustomIncomingIcon, m_bCustomIncomingIcon);
+	// End MoNKi
+*/
 }
 
 
@@ -319,11 +352,12 @@ void CPPgEmulespana::OnPaint()
 		m_bICFSupport = thePrefs.GetICFSupport();
 		thePrefs.m_bICFSupportStatusChanged = false;
 	}
+
 	CPaintDC dc(this); // device context for painting
 	CxImage cImage;
 	CRect rc;
 
-	cImage.LoadResource(FindResource(NULL,MAKEINTRESOURCE(IDR_EE_PREFS_PNG),"PNG"), CXIMAGE_FORMAT_PNG);
+	cImage.LoadResource(FindResource(NULL,MAKEINTRESOURCE(IDR_EE_PREFS_PNG),_T("PNG")), CXIMAGE_FORMAT_PNG);
 	rc.SetRect(10,10, 10 + cImage.GetWidth(), 10 + cImage.GetHeight());
 	cImage.Draw(dc.m_hDC,rc);
 }
@@ -362,13 +396,19 @@ void CPPgEmulespana::Localize()
 			if(m_ctrlTreeOptions.GetCheckBox(m_htiInvisibleMode, m_bInvisibleMode)){
 				if(m_bInvisibleMode)
 					m_ctrlTreeOptions.SetItemText(m_htiInvisibleModeRoot, GetResString(IDS_INVMODE_GROUP) + 
-						" (" + m_sInvisibleModeMod + " + " + m_sInvisibleModeKey + ")");
+						_T(" (") + m_sInvisibleModeMod + _T(" + ") + m_sInvisibleModeKey + _T(")"));
 				else
 					m_ctrlTreeOptions.SetItemText(m_htiInvisibleModeRoot, GetResString(IDS_INVMODE_GROUP));
 			}
 		}
 		// End MoNKi
 */
+
+		// Added by MoNKi [MoNKi: -Random Ports-]
+		if(m_htiRandomPortsResetTime)
+			m_ctrlTreeOptions.SetEditLabel(m_htiRandomPortsResetTime, GetResString(IDS_RANDOMPORTSRESETTIME));
+		// End MoNKi
+
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 		m_ctrlTreeOptions.SetItemText(m_htiUPnPRoot, GetResString(IDS_UPNP));
 		CString tmpString, tmpString2;
@@ -376,7 +416,7 @@ void CPPgEmulespana::Localize()
 		m_ctrlTreeOptions.SetItemText(m_htiUPnP, tmpString);
 		tmpString.Format(GetResString(IDS_UPNPNAT), GetResString(IDS_PW_WS));
 		m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, tmpString);
-		m_ctrlTreeOptions.SetItemText(m_htiUPnPTryRandom, GetResString(IDS_UPNPNATTRYRANDOM));		
+		//m_ctrlTreeOptions.SetItemText(m_htiUPnPTryRandom, GetResString(IDS_UPNPNATTRYRANDOM));		
 		// End MoNKi
 
 /*Commented by SiRoB
@@ -447,6 +487,10 @@ void CPPgEmulespana::Localize()
 			m_ctrlTreeOptions.SetEditLabel(m_htiUSSTTL, GetResString(IDS_USS_INITIAL_TTL));
 		}
 		// End MoNKi
+
+		// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+		m_ctrlTreeOptions.SetItemText(m_htiCustomIncomingIcon, GetResString(IDS_CUSTOM_INCOMING_ICON));
+		// End MoNKi
 */
 	}
 }
@@ -484,18 +528,18 @@ LRESULT CPPgEmulespana::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		if(m_ctrlTreeOptions.GetCheckBox(m_htiInvisibleMode, m_bInvisibleMode)){
 			if(m_bInvisibleMode)
 				m_ctrlTreeOptions.SetItemText(m_htiInvisibleModeRoot, GetResString(IDS_INVMODE_GROUP) + 
-					" (" + m_sInvisibleModeMod + " + " + m_sInvisibleModeKey + ")");
+					_T(" (") + m_sInvisibleModeMod + _T(" + ") + m_sInvisibleModeKey + _T(")"));
 			else
 				m_ctrlTreeOptions.SetItemText(m_htiInvisibleModeRoot, GetResString(IDS_INVMODE_GROUP));
 		}
 		// End MoNKi
 */
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-		if (pton->hItem == m_htiUPnP){
+		/*if (pton->hItem == m_htiUPnP){
 			if(m_ctrlTreeOptions.GetCheckBox(m_htiUPnP, m_bUPnP)){
 				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiUPnPTryRandom, m_bUPnP);
 			}
-		}
+		}*/
 		// End MoNKi
 
 /*Commented by SiRoB
@@ -530,7 +574,7 @@ void CPPgEmulespana::OnDestroy()
 	m_htiUPnPRoot = NULL;
 	m_htiUPnP = NULL;
 	m_htiUPnPWeb = NULL;
-	m_htiUPnPTryRandom = NULL;
+	//m_htiUPnPTryRandom = NULL;
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -564,7 +608,12 @@ void CPPgEmulespana::OnDestroy()
 	m_htiUSSRoot = NULL;
 	m_htiUSSTTL = NULL;
 	// End MoNKi
+
+	// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+	m_htiCustomIncomingIcon = NULL;
+	// End MoNKi
 */
+
 	CPropertyPage::OnDestroy();
 }
 
@@ -586,13 +635,13 @@ BOOL CPPgEmulespana::OnApply()
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	if((BOOL)thePrefs.GetUPnPNat() != m_bUPnP ||
-		(BOOL)thePrefs.GetUPnPNatTryRandom() != m_bUPnPTryRandom ||
+		/*(BOOL)thePrefs.GetUPnPNatTryRandom() != m_bUPnPTryRandom ||*/
 		(BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
 	{
 		bRestartApp = true;
 	}
 	thePrefs.SetUPnPNat(m_bUPnP);
-	thePrefs.SetUPnPNatTryRandom(m_bUPnPTryRandom);
+	//thePrefs.SetUPnPNatTryRandom(m_bUPnPTryRandom);
 	thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 	// End MoNKi
 
@@ -631,13 +680,16 @@ BOOL CPPgEmulespana::OnApply()
 	sToolbarSkin = m_listTBSkins.GetSelectedSkin();
 	sIniSkin = m_listSkins.GetSelectedSkin();
 
-	if(sToolbarSkin.MakeLower() != thePrefs.GetToolbarBitmapSettings().MakeLower()){
+	if(sToolbarSkin.MakeLower() != CString(thePrefs.GetToolbarBitmapSettings()).MakeLower()){
 		m_listTBSkins.SelectCurrentSkin();
 	}
 	
 	if(sIniSkin.MakeLower() != CString(thePrefs.GetSkinProfile()).MakeLower()){
 		m_listSkins.SelectCurrentSkin();
 	}
+
+	thePrefs.SetColumnSortAscending(CPreferences::tableToolbarSkins, m_listTBSkins.GetSortAscending()); 
+	thePrefs.SetColumnSortAscending(CPreferences::tableSkins, m_listSkins.GetSortAscending()); 
 	// End MoNKi
 */
 	// Added by MoNKi [ SlugFiller: -lowIdRetry- ]
@@ -645,7 +697,7 @@ BOOL CPPgEmulespana::OnApply()
 		m_iLowIdRetry = 0;
 	if(m_iLowIdRetry>255)
 		m_iLowIdRetry = 255;
-	thePrefs.LowIdRetries = m_iLowIdRetry;	
+	thePrefs.LowIdRetries = m_iLowIdRetry;
 	// End SlugFiller
 
 	// Added by by MoNKi [MoNKi: -Wap Server-]
@@ -671,6 +723,14 @@ BOOL CPPgEmulespana::OnApply()
 	// Added by MoNKi [MoNKi: -USS initial TTL-]
 	thePrefs.SetUSSInitialTTL(m_iUSSTTL);
 	// End MoNKi
+	// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+	bool oldIncomingIcon = thePrefs.GetCustomIncomingIcon();
+	thePrefs.SetCustomIncomingIcon(m_bCustomIncomingIcon);
+	if(m_bCustomIncomingIcon)
+		theApp.AddIncomingFolderIcon();
+	else if(oldIncomingIcon)
+		theApp.RemoveIncomingFolderIcon();
+	// End MoNKi
 */	
 	if (bRestartApp)
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
@@ -681,6 +741,9 @@ BOOL CPPgEmulespana::OnApply()
 
 BOOL CPPgEmulespana::OnInitDialog()
 {
+	// Added by MoNKi [MoNKi: -Random Ports-]
+	m_iRandomPortsResetTime = thePrefs.GetRandomPortsSafeResetOnRestartTime();
+	// End MoNKi
 /*Commented by SiRoB
 	// Added by MoNKi [MoNKi: -invisible mode-]
 	m_bInvisibleMode = thePrefs.GetInvisibleMode();
@@ -702,7 +765,7 @@ BOOL CPPgEmulespana::OnInitDialog()
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_bUPnP = thePrefs.GetUPnPNat();
-	m_bUPnPTryRandom = thePrefs.GetUPnPNatTryRandom();
+	//m_bUPnPTryRandom = thePrefs.GetUPnPNatTryRandom();
 	m_bUPnPWeb = thePrefs.GetUPnPNatWeb();
 	// End MoNKi
 
@@ -735,6 +798,10 @@ BOOL CPPgEmulespana::OnInitDialog()
 	// Added by MoNKi [MoNKi: -USS initial TTL-]
 	m_iUSSTTL = thePrefs.GetUSSInitialTTL();
 	// End MoNKi
+
+	// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+	m_bCustomIncomingIcon = thePrefs.GetCustomIncomingIcon();
+	// End MoNKi
 */
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
@@ -746,10 +813,14 @@ BOOL CPPgEmulespana::OnInitDialog()
 	m_tabPrefs.InsertItem(0,tmpString);
 	m_tabPrefs.InsertItem(1,GetResString(IDS_TOOLBARSKINS));
 	m_tabPrefs.InsertItem(2,GetResString(IDS_SKIN_PROF));
+
 	m_sTBSkinsDir = thePrefs.GetToolbarBitmapFolderSettings();
+	m_listTBSkins.SetSortAscending(thePrefs.GetColumnSortAscending(CPreferences::tableToolbarSkins)); 
 	m_listTBSkins.Init();
 	m_listTBSkins.LoadToolBars(m_sTBSkinsDir);
+
 	m_sSkinsDir = thePrefs.GetSkinProfileDir();
+	m_listSkins.SetSortAscending(thePrefs.GetColumnSortAscending(CPreferences::tableSkins)); 
 	m_listSkins.Init();
 	m_listSkins.LoadSkins(m_sSkinsDir);
 	ChangeTab(0);

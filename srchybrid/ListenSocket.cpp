@@ -2275,7 +2275,7 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 
 		if (thePrefs.GetVerbose())
 		{
-		    if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
+			if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
 			    DebugLogError(_T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
 		//MORPH START - Added by SiRoB, ZZUPLOAD
@@ -2518,6 +2518,17 @@ bool CListenSocket::Rebind(){
 	*/
 	if (!thePrefs.GetUseRandomPorts() && thePrefs.GetPort(false, true)==m_port)
 		return false;
+
+	// Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	if(thePrefs.GetUPnPNat()){
+		CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
+		mapping.internalPort = thePrefs.GetUPnPTCPInternal();
+		mapping.externalPort = thePrefs.GetUPnPTCPExternal();
+		mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
+		mapping.description = _T("TCP Port");
+		theApp.RemoveUPnPNatPort(&mapping);
+	}
+	// End -UPnPNAT Support-
 	// End emulEspaña
 
 	Close();
@@ -2548,12 +2559,14 @@ bool CListenSocket::StartListening(){
 	int retries=0;
 	int maxRetries = 50;
 
-	thePrefs.GetPort(false, false, true); //Resets port data
+	static bool bFirstRun = true;
+	if(!bFirstRun)
+		thePrefs.GetPort(false, false, true); //Resets port data
 
 	if(thePrefs.GetUseRandomPorts()){
 		do{
 			retries++;
-			rndPort = thePrefs.GetPort(true);
+			rndPort = thePrefs.GetPort(!bFirstRun);
 
 			if((retries < (maxRetries / 2)) && ((thePrefs.GetICFSupport() && !theApp.m_pFirewallOpener->DoesRuleExist(rndPort, NAT_PROTOCOL_TCP))
 				|| !thePrefs.GetICFSupport()))
@@ -2567,6 +2580,8 @@ bool CListenSocket::StartListening(){
 	else
 		ret = Create(thePrefs.GetPort(false, true), SOCK_STREAM, FD_ACCEPT, NULL, FALSE/*TRUE*/);
 
+	bFirstRun = false;
+
 	if(ret && Listen()){
 		m_port=thePrefs.GetPort();		
 	
@@ -2578,13 +2593,13 @@ bool CListenSocket::StartListening(){
 		}
 
 		if(thePrefs.GetUPnPNat()){
-			CUPnPNat::UPNPNAT_MAPPING mapping;
+			CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 			
 			mapping.internalPort = mapping.externalPort = thePrefs.GetPort();
-			mapping.protocol = CUPnPNat::UNAT_TCP;
+			mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 			mapping.description = "TCP Port";
 
-			theApp.AddUPnPNatPort(&mapping, thePrefs.GetUPnPNatTryRandom());
+			theApp.AddUPnPNatPort(&mapping);
 
 			thePrefs.SetUPnPTCPExternal(mapping.externalPort);
 			thePrefs.SetUPnPTCPInternal(mapping.internalPort);

@@ -769,7 +769,7 @@ bool	CPreferences::enableNEWS;
 	uint16	CPreferences::m_iUPnPUDPExternal;
 	uint16	CPreferences::m_iUPnPTCPInternal;
 	uint16	CPreferences::m_iUPnPUDPInternal;
-	bool	CPreferences::m_bUPnPTryRandom;
+	//bool	CPreferences::m_bUPnPTryRandom;
 	// End MoNKi
 //MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
@@ -777,6 +777,10 @@ bool	CPreferences::enableNEWS;
 	bool	CPreferences::m_bRndPorts;
 	uint16	CPreferences::m_iMinRndPort;
 	uint16	CPreferences::m_iMaxRndPort;
+	bool	CPreferences::m_bRndPortsResetOnRestart;
+	uint16	CPreferences::m_iRndPortsSafeResetOnRestartTime;
+	uint16	CPreferences::m_iCurrentTCPRndPort;
+	uint16	CPreferences::m_iCurrentUDPRndPort;
 //MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 //MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
@@ -2718,13 +2722,19 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
 	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb, _T("eMule"));
-	ini.WriteBool(_T("UPnPNAT_TryRandom"), m_bUPnPTryRandom, _T("eMule"));
+	//ini.WriteBool(_T("UPnPNAT_TryRandom"), m_bUPnPTryRandom, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	ini.WriteBool(_T("RandomPorts"), m_bRndPorts, _T("eMule"));
 	ini.WriteBool(_T("MinRandomPort"), m_iMinRndPort, _T("eMule"));
 	ini.WriteBool(_T("MaxRandomPort"), m_iMaxRndPort, _T("eMule"));
+	ini.WriteBool(_T("RandomPortsReset"), m_bRndPortsResetOnRestart, _T("eMule"));
+	ini.WriteInt(_T("RandomPortsSafeResetOnRestartTime"), m_iRndPortsSafeResetOnRestartTime, _T("eMule"));
+	
+	ini.WriteInt(_T("OldTCPRandomPort"), m_iCurrentTCPRndPort, _T("eMule"));
+	ini.WriteInt(_T("OldUDPRandomPort"), m_iCurrentUDPRndPort, _T("eMule"));
+	ini.WriteInt(_T("RandomPortsLastRun"), CTime::GetCurrentTime().GetTime() , _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
@@ -3797,13 +3807,35 @@ void CPreferences::LoadPreferences()
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));
 	m_bUPnPNatWeb = ini.GetBool(_T("UPnPNAT_Web"), false, _T("eMule"));
-	m_bUPnPTryRandom = ini.GetBool(_T("UPnPNAT_TryRandom"), true, _T("eMule"));
+	//m_bUPnPTryRandom = ini.GetBool(_T("UPnPNAT_TryRandom"), true, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	m_bRndPorts = ini.GetBool(_T("RandomPorts"), false, _T("eMule"));
 	m_iMinRndPort = ini.GetInt(_T("MinRandomPort"), 3000, _T("eMule"));
 	m_iMaxRndPort = ini.GetInt(_T("MaxRandomPort"), 0xFFFF, _T("eMule"));
+	m_bRndPortsResetOnRestart = ini.GetBool(_T("RandomPortsReset"), false, _T("eMule"));
+	m_iRndPortsSafeResetOnRestartTime = ini.GetInt(_T("RandomPortsSafeResetOnRestartTime"), 0, _T("eMule"));
+	
+	int iOldRndTCPPort = ini.GetInt(_T("OldTCPRandomPort"), 0, _T("eMule"));
+	int iOldRndUDPPort = ini.GetInt(_T("OldUDPRandomPort"), 0, _T("eMule"));
+	__time64_t iRndPortsLastRun = ini.GetInt(_T("RandomPortsLastRun"), 0, _T("eMule"));
+	
+	m_iCurrentTCPRndPort = 0;
+	m_iCurrentUDPRndPort = 0;
+
+	if(m_bRndPorts && !m_bRndPortsResetOnRestart &&
+		m_iRndPortsSafeResetOnRestartTime != 0)
+	{
+		CTime tNow = CTime::GetCurrentTime();
+		CTime tOld = CTime(iRndPortsLastRun);
+		CTimeSpan ts = tNow - tOld;
+		if(ts.GetTimeSpan() <= m_iRndPortsSafeResetOnRestartTime){
+			m_iCurrentTCPRndPort = iOldRndTCPPort;
+			m_iCurrentUDPRndPort = iOldRndUDPPort;
+		}
+	}
+	m_bRndPortsResetOnRestart = false;
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 	//MORPH START - Added by by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
@@ -4637,13 +4669,11 @@ uint16	CPreferences::GetPort(bool newPort, bool original, bool reset){
 // End -Random Ports-
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
-	static portNumber = 0;
-	
 	if(original)
 		return port;
 
 	if(reset){
-		portNumber = 0;
+		m_iCurrentTCPRndPort = 0;
 		m_iUPnPTCPExternal = 0; //Only for UPnP
 	}
 // End -Random Ports-
@@ -4652,15 +4682,15 @@ uint16	CPreferences::GetPort(bool newPort, bool original, bool reset){
 		return m_iUPnPTCPExternal;
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
-	if (portNumber == 0 || newPort){
+	if (m_iCurrentTCPRndPort == 0 || newPort){
 		if(GetUseRandomPorts())
 			do{
-				portNumber = GetMinRandomPort() + (((float)rand() / RAND_MAX) * (GetMaxRandomPort() - GetMinRandomPort()));
-			}while(portNumber==GetUDPPort() && ((GetMaxRandomPort() - GetMinRandomPort())>0));
+				m_iCurrentTCPRndPort = GetMinRandomPort() + (((float)rand() / RAND_MAX) * (GetMaxRandomPort() - GetMinRandomPort()));
+			}while(m_iCurrentTCPRndPort==GetUDPPort() && ((GetMaxRandomPort() - GetMinRandomPort())>0));
 		else
-			portNumber = port;
+			m_iCurrentTCPRndPort = port;
 	}
-	return portNumber;
+	return m_iCurrentTCPRndPort;
 	// End -Random Ports-
 }
 
@@ -4672,13 +4702,11 @@ uint16	CPreferences::GetUDPPort(bool newPort, bool original, bool reset){
 // End -Random Ports-
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
-	static portNumber = 0;
-	
 	if(original)
 		return udpport;
 
 	if(reset){
-		portNumber = 0;
+		m_iCurrentUDPRndPort = 0;
 		m_iUPnPUDPExternal = 0; //Only for UPnP
 	}
 // End -Random Ports-
@@ -4690,15 +4718,15 @@ uint16	CPreferences::GetUDPPort(bool newPort, bool original, bool reset){
 		return m_iUPnPUDPExternal;
 
 	// emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
-	if (portNumber == 0 || newPort){
+	if (m_iCurrentUDPRndPort == 0 || newPort){
 		if(GetUseRandomPorts())
 			do{
-				portNumber = GetMinRandomPort() + (((float)rand() / RAND_MAX) * (GetMaxRandomPort() - GetMinRandomPort()));
-			}while(portNumber==GetPort() && ((GetMaxRandomPort() - GetMinRandomPort())>0));
+				m_iCurrentUDPRndPort = GetMinRandomPort() + (((float)rand() / RAND_MAX) * (GetMaxRandomPort() - GetMinRandomPort()));
+			}while(m_iCurrentUDPRndPort==GetPort() && ((GetMaxRandomPort() - GetMinRandomPort())>0));
 		else
-			portNumber = udpport;
+			m_iCurrentUDPRndPort = udpport;
 	}
-	return portNumber;
+	return m_iCurrentUDPRndPort;
 	// End -Random Ports-
 }
 //MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]

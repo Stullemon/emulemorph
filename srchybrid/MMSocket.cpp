@@ -339,10 +339,10 @@ CListenMMSocket::~CListenMMSocket(void)
 		delete m_socket_list.RemoveHead();
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-	CUPnPNat::UPNPNAT_MAPPING mapping;
+	CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
 	mapping.internalPort = mapping.externalPort = thePrefs.GetMMPort();
-	mapping.protocol = CUPnPNat::UNAT_TCP;
+	mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 	mapping.description = "MobileMule";
 	theApp.RemoveUPnPNatPort(&mapping);
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
@@ -355,10 +355,10 @@ bool  CListenMMSocket::Create(){
 	*/
 	if(CAsyncSocket::Create(thePrefs.GetMMPort(),SOCK_STREAM,FD_ACCEPT) && Listen()){
 		if(thePrefs.GetUPnPNat()){
-			CUPnPNat::UPNPNAT_MAPPING mapping;
+			CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
 			mapping.internalPort = mapping.externalPort = thePrefs.GetMMPort();
-			mapping.protocol = CUPnPNat::UNAT_TCP;
+			mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 			mapping.description = "MobileMule";
 			theApp.AddUPnPNatPort(&mapping);
 		}

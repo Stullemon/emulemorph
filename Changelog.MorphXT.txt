@@ -9,11 +9,17 @@ FIXED  : AddSource memory exception Official Bugfix by WiZaRd [SiRoB]
 ADDED  : CrashReporter from SF-IOM, gnaddelwarz: crashRpt[AndCycle]
 ADDED  : Scheduled remove slot from zz mod [AndCycle/SiRoB]
 
+UPDATED: -UPnPNAT Support- by MoNKi from emulEspania [SiRoB]
+UPDATED: -Improved ICS-Firewall support- by MoNKi from emulEspania [SiRoB]
+UPDATED: -Random Ports- by MoNKi from emulEspania [SiRoB]
+
 CHANGED: SLS: LowID are now recorded [SiRoB]
 CHANGED: SpreadBar is now disabled by default in share preferency [SiRoB]
 CHANGED: USC: Reworked to work properly with the new scheduled remove slot [SiRoB]
 
 TWEAKED: USC: Ensure proper new open slot in all case [SiRoB]
+
+NOTE: About upnp support now you can disable the XP service :), big thanks to NoNKi.
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.1

@@ -47,6 +47,10 @@ enum EFOCAction{
 #define EMULE_DEFAULTRULENAME_TCP			_T("TCP Port")
 #define EMULE_DEFAULTRULENAME_SERVERUDP		_T("Server UDP Port")
 #define EMULE_DEFAULTRULEDESCRIPTIONFORMAT 	_T("eMule (%s) [%s: %u]")
+// Added by MoNKi [MoNKi: -UPnPNAT Support-]
+#define EMULE_DEFAULTRULENAME_UPNP_TCP		_T("UPnP TCP Port")
+#define EMULE_DEFAULTRULENAME_UPNP_UDP		_T("UPnP UDP Port")
+// End -UPnPNAT Support-
 //MORPH END   - Changed by SiRoB [MoNKi: -Improved ICS-Firewall support-]
 
 #define NAT_PROTOCOL_TCP 6

@@ -39,10 +39,10 @@ protected:
 	HTREEITEM	m_htiUPnPRoot;
 	HTREEITEM	m_htiUPnP;
 	HTREEITEM	m_htiUPnPWeb;
-	HTREEITEM	m_htiUPnPTryRandom;
+	//HTREEITEM	m_htiUPnPTryRandom;
 	BOOL		m_bUPnP;
 	BOOL		m_bUPnPWeb;
-	BOOL		m_bUPnPTryRandom;
+	//BOOL		m_bUPnPTryRandom;
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -101,7 +101,16 @@ protected:
 	HTREEITEM	m_htiUSSTTL;
 	int			m_iUSSTTL;
 	// End MoNKi
+
+	// Added by MoNKi [MoNKi: -Custom incoming folder icon-]
+	HTREEITEM	m_htiCustomIncomingIcon;
+	BOOL		m_bCustomIncomingIcon;
+	// End MoNKi
 */
+	// Added by MoNKi [MoNKi: -Random Ports-]
+	HTREEITEM	m_htiRandomPortsResetTime;
+	int			m_iRandomPortsResetTime;
+	// End MoNKi
 
 	void ChangeTab(int nitem);
 

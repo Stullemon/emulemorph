@@ -322,8 +322,12 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		CString count;
 		count.Format(_T("%i %s"),theApp.wapserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
 		rCtrl << _T("\t") << count << _T("\r\n");
-		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
-		rCtrl << _T("URL:\t") << _T("http://") << ipstr(nLocalIP) << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
+		CString strHostname;
+		if (!thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
+			strHostname = thePrefs.GetYourHostname();
+		else
+			strHostname = ipstr(theApp.serverconnect->GetLocalIP());
+		rCtrl << _T("URL:\t") << _T("http://") << strHostname << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
 	}
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 

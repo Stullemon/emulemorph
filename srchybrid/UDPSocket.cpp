@@ -121,11 +121,11 @@ bool CUDPSocket::Create(){
 			//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
 			if(thePrefs.GetUPnPNat()){
-				CUPnPNat::UPNPNAT_MAPPING mapping;
+				CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 				mapping.internalPort = mapping.externalPort = port;
-				mapping.protocol = CUPnPNat::UNAT_UDP;
+				mapping.protocol = CUPnP_IGDControlPoint::UNAT_UDP;
 				mapping.description = "Server UDP Port";
-				theApp.AddUPnPNatPort(&mapping, thePrefs.GetUPnPNatTryRandom());
+				theApp.AddUPnPNatPort(&mapping);
 			}
 			return true;
 		}

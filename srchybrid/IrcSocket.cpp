@@ -44,11 +44,11 @@ CIrcSocket::~CIrcSocket()
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	CString client;
 	UINT port;
-	CUPnPNat::UPNPNAT_MAPPING mapping;
+	CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
 	GetSockName(client, port);
 	mapping.internalPort = mapping.externalPort = port;
-	mapping.protocol = CUPnPNat::UNAT_TCP;
+	mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 	mapping.description = "IRC";
 	theApp.RemoveUPnPNatPort(&mapping);
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
@@ -94,11 +94,11 @@ BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR 
 		if(thePrefs.GetUPnPNat()){
 			CString client;
 			UINT port;
-			CUPnPNat::UPNPNAT_MAPPING mapping;
+			CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 
 			GetSockName(client, port);
 			mapping.internalPort = mapping.externalPort = port;
-			mapping.protocol = CUPnPNat::UNAT_TCP;
+			mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 			mapping.description = "IRC";
 			theApp.AddUPnPNatPort(&mapping);
 		}

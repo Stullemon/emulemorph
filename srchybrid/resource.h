@@ -2883,6 +2883,7 @@
 #define IDS_RANDOMPORTS                 21012
 #define IDS_MINPORT                     21013
 #define IDS_MAXPORT                     21014
+#define IDS_RANDOMPORTSRESETTIME        21015
 #define IDS_ICFSUPPORT                  21027
 #define IDS_ICFSUPPORTFIRST             21028
 #define IDS_ICF                         21029

@@ -793,13 +793,17 @@ public:
 	static uint16	m_iUPnPUDPExternal;
 	static uint16	m_iUPnPTCPInternal;
 	static uint16	m_iUPnPUDPInternal;
-	static bool		m_bUPnPTryRandom;
+	//static bool		m_bUPnPTryRandom;
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	static bool		m_bRndPorts;
 	static uint16	m_iMinRndPort;
 	static uint16	m_iMaxRndPort;
+	static bool		m_bRndPortsResetOnRestart;
+	static uint16	m_iRndPortsSafeResetOnRestartTime;
+	static uint16	m_iCurrentTCPRndPort;
+	static uint16	m_iCurrentUDPRndPort;
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
@@ -1903,9 +1907,11 @@ public:
 	static	bool	GetUPnPNatWeb()						{ return m_bUPnPNatWeb; }
 	static	void	SetUPnPNatWeb(bool on)				{ m_bUPnPNatWeb = on; }
 	static	void	SetUPnPTCPExternal(uint16 port)		{ m_iUPnPTCPExternal = port; }
+	static	uint16	GetUPnPTCPExternal()				{ return m_iUPnPTCPExternal; }
 	static	void	SetUPnPUDPExternal(uint16 port)		{ m_iUPnPUDPExternal = port; }
-	static	bool	GetUPnPNatTryRandom()				{ return m_bUPnPTryRandom; }
-	static	void	SetUPnPNatTryRandom(bool on)		{ m_bUPnPTryRandom = on; }
+	static	uint16	GetUPnPUDPExternal()				{ return m_iUPnPUDPExternal; }
+	//static	bool	GetUPnPNatTryRandom()				{ return m_bUPnPTryRandom; }
+	//static	void	SetUPnPNatTryRandom(bool on)		{ m_bUPnPTryRandom = on; }
 	static	void	SetUPnPTCPInternal(uint16 port)		{ m_iUPnPTCPInternal = port; }
 	static	uint16	GetUPnPTCPInternal()				{ return m_iUPnPTCPInternal; }
 	static	void	SetUPnPUDPInternal(uint16 port)		{ m_iUPnPUDPInternal = port; }
@@ -1919,6 +1925,10 @@ public:
 	static	void	SetMinRandomPort(uint16 min)	{ m_iMinRndPort = min; }
 	static	uint16	GetMaxRandomPort()				{ return m_iMaxRndPort; }
 	static	void	SetMaxRandomPort(uint16 max)	{ m_iMaxRndPort = max; }
+	static	bool	GetRandomPortsResetOnRestart()	{ return m_bRndPortsResetOnRestart; }
+	static	void	SetRandomPortsResetOnRestart(bool on)	{ m_bRndPortsResetOnRestart = on; }
+	static	uint16	GetRandomPortsSafeResetOnRestartTime(){ return m_iRndPortsSafeResetOnRestartTime; }
+	static	void	SetRandomPortsSafeResetOnRestartTime(uint16 time){ m_iRndPortsSafeResetOnRestartTime = time; }
 	//MORPH END   - Added by SiRoB [MoNKi: -Random Ports-]
 
 	//MORPH START - Added by SiRoB [MoNKi: -Improved ICS-Firewall support-]

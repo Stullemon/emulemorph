@@ -416,11 +416,11 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 					if (!WSAEventSelect(hSocket, hEvent, FD_ACCEPT))
 					{
 						//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-						CUPnPNat::UPNPNAT_MAPPING mapping;
+						CUPnP_IGDControlPoint::UPNPNAT_MAPPING mapping;
 						BOOL UPnP = false;
 
 						mapping.internalPort = mapping.externalPort = ntohs(stAddr.sin_port);
-						mapping.protocol = CUPnPNat::UNAT_TCP;
+						mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 						mapping.description = "Web Interface";
 						if(thePrefs.GetUPnPNatWeb())
 							UPnP = theApp.AddUPnPNatPort(&mapping);

@@ -490,8 +490,10 @@ BOOL CPPgConnection::OnApply()
 			theApp.listensocket->Rebind();
 			theApp.clientudp->Rebind();
 		}
-		else 
+		else{
 			bRestartApp = true;
+			thePrefs.SetRandomPortsResetOnRestart(true);
+		}
 		// Added by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 		theApp.m_pFirewallOpener->ClearMappingsAtEnd();
 		// End -Improved ICS-Firewall support-
@@ -502,8 +504,10 @@ BOOL CPPgConnection::OnApply()
 				theApp.listensocket->Rebind();
 				theApp.clientudp->Rebind();
 			}
-			else 
+			else {
 				bRestartApp = true;
+				thePrefs.SetRandomPortsResetOnRestart(true);
+			}
 
 			// Added by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 			theApp.m_pFirewallOpener->ClearMappingsAtEnd();
