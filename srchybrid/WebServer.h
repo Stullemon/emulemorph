@@ -38,10 +38,10 @@ typedef struct
 {
 	CString	sFileName;
 	uint64	lFileSize;
-	uint32	nFileTransferred;
+	uint64	nFileTransferred;//Morph - modify by AndCycle, [fix] webserver uint sizes(itsonlyme)
     uint64	nFileAllTimeTransferred;
 	uint16	nFileRequests;
-	uint32	nFileAllTimeRequests;
+	uint16	nFileAllTimeRequests;//Morph - modify by AndCycle, [fix] webserver uint sizes(itsonlyme)
 	uint16	nFileAccepts;
 	uint32	nFileAllTimeAccepts;
 	uint8	nFilePriority;
