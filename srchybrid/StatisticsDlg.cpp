@@ -1073,7 +1073,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						else
 							percentWCSessions = (double) 0;
 
-						cbuffer.Format( _T("%s: %u (%1.1f%%) (WC: %u ((%1.1f%%))") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions, failedWCSessions, percentWCSessions );
+						cbuffer.Format( _T("%s: %u (%1.1f%%) (WC: %u (%1.1f%%))") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions, failedWCSessions, percentWCSessions );
 						}
 					else
 						{
