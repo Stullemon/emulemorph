@@ -3071,7 +3071,7 @@ void CPreferences::LoadPreferences()
     //Commander - Added: Invisible Mode [TPT] - End
 
     //MORPH START - Added by Commander, ClientQueueProgressBar
-	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),true);
+	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),false);
     //MORPH END - Added by Commander, ClientQueueProgressBar
 
 	//MORPH START - Added by Commander, FolderIcons
