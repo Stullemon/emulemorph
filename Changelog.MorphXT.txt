@@ -35,6 +35,7 @@ TODO   : Several Preferences Options (after new Preferences-Cats System arrived)
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
 TODO   : Fixing RSS News Feed Display ... [Commander]
+TODO   : Adding UPNP,RandomPort,Inproved ICF from emulespania [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
