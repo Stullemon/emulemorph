@@ -862,7 +862,7 @@ void CUploadQueue::Process() {
 	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-		if (isUnlimitedClass(classID) || m_abOnClientOverHideClientDatarate[classID])
+		if (isUnlimitedClass(classID) || m_abOnClientOverHideClientDatarate[classID] || (uploadinglist.GetCount() == 0))
 			m_abAddClientOfThisClass[classID] = true;
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -933,77 +933,27 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 
 	uint32 curUploadSlots = (uint32)uploadinglist.GetCount();
 
-	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
-		return true;
-
     if(!AcceptNewClient(curUploadSlots) || !theApp.lastCommonRouteFinder->AcceptNewClient()) { // UploadSpeedSense can veto a new slot if USS enabled
 		return false;
     }
 
-	uint16 MaxSpeed;
-
-    if (thePrefs.IsDynUpEnabled())
-        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
-    else
-		MaxSpeed = thePrefs.GetMaxUpload();
-
-
-	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
-	//MOPRH START - Changed by SiRoB, Upload Splitting Class
+    //MORPH START - Added by SiRoB, Upload Splitting Class
 	/*
-	// if throttler doesn't require another slot, go with a slightly more restrictive method
-	if( MaxSpeed > 20 || MaxSpeed == UNLIMITED)
-		upPerClient += datarate/43;
-
-	if( upPerClient > 7680 )
-		upPerClient = 7680;
-	*/
-	if(thePrefs.GetMaxClientDataRate())
-		upPerClient = thePrefs.GetMaxClientDataRate();
-	else
-		upPerClient = _I32_MAX;
-	//MOPRH END   - Changed by SiRoB, Upload Splitting Class
-
-    //now the final check
-
-	if ( MaxSpeed == UNLIMITED )
-	{
-		if (curUploadSlots < (datarate/upPerClient))
-		return true;
-	}
-	else{
-		uint16 nMaxSlots;
-		if (MaxSpeed > 12)
-			nMaxSlots = (uint16)(((float)(MaxSpeed*1024)) / upPerClient);
-		else if (MaxSpeed > 7)
-			nMaxSlots = MIN_UP_CLIENTS_ALLOWED + 2;
-		else if (MaxSpeed > 3)
-			nMaxSlots = MIN_UP_CLIENTS_ALLOWED + 1;
-		else
-			nMaxSlots = MIN_UP_CLIENTS_ALLOWED;
-
-	//now the final check
-		if ( curUploadSlots < nMaxSlots )
-		{
-			return true;
-		}
-	}
-
-    uint32 iCount = (uint32)uploadinglist.GetSize();
+	uint32 iCount = (uint32)uploadinglist.GetSize();
 	if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall > iCount) {
         // uploadThrottler requests another slot. If throttler says it needs another slot, we will allow more slots
         // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
         if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
             AddDebugLogLine(false, _T("UploadQueue: Added new slot since throttler needs it. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i uploadinglist.GetSize(): %i tick: %i"), m_iHighestNumberOfFullyActivatedSlotsSinceLastCall, iCount, ::GetTickCount());
-		m_abAddClientOfThisClass[LAST_CLASS] = true;
 		return true;
     }
-	//MORPH START - Added by SiRoB, Upload Splitting Class
+	*/
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 	{
 		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
-			m_abAddClientOfThisClass[classID] = true;
-			return true;
+			if(classID==LAST_CASS && thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+				DebugLog(LOG_USC, _T("USC: Added new slot since throttler needs it for class %i. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i m_aiSlotCounter[classID]: %i tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
+			return m_abAddClientOfThisClass[classID] = true;
 		}
 		else if (m_abOnClientOverHideClientDatarate[classID] == true){
 			return true;
