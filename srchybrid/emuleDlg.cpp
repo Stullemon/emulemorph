@@ -2440,7 +2440,7 @@ BOOL CemuleDlg::PreTranslateMessage(MSG* pMsg)
    Author:	 MightyKnife
 */
 void CemuleDlg::AddExtDebugMessage (CString _line,...) {
-	ASSERT( theApp.glob_prefs!=NULL );
+
 
 	char temp[1060]; 
 	char bufferline[1000];
@@ -2471,7 +2471,7 @@ void CemuleDlg::AddExtDebugMessage (CString _line,...) {
    Author:   Mighty Knife
 */
 void CemuleDlg::AddExtDebugDump (CString _headline, const char* _data, int _size, CString _subscript) {
-	ASSERT( theApp.glob_prefs!=NULL );
+
 
 	// Add timestamp to the headline
 	if (_headline != "") AddExtDebugMessage ("%s",(const char*) _headline);
@@ -2514,7 +2514,6 @@ void CemuleDlg::AddExtDebugDump (CString _headline, const char* _data, int _size
    Author:   Mighty Knife
 */
 void CemuleDlg::OutputExtDebugMessages () {
-	ASSERT( theApp.glob_prefs!=NULL );
 
 	while (!m_ExtDebugMessages.IsEmpty ()) {
 		CString temp = m_ExtDebugMessages.RemoveHead ();

@@ -394,8 +394,9 @@ bool CUpDownClient::IsMoreUpThanDown() const{
 */
 bool CUpDownClient::GetPowerShared() const {
 	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	if (credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED)
-		return false;
+	if (credits)
+		if (credits->GetCurrentIdentState(GetIP()) != IS_IDENTIFIED)
+			return false;
 
 	bool bPowerShared;
 	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
