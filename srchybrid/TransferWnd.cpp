@@ -750,7 +750,7 @@ void CTransferWnd::CreateCategoryMenus()
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
 	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_STOPLAST, GetResString(IDS_CAT_STOPLAST));	
 	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_PAUSELAST, GetResString(IDS_CAT_PAUSELAST));	
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_RESUMENEXT, GetResString(IDS_CAT_RESUMENEXT));    	
+	m_mnuCategory.AppendMenu(MF_STRING, MP_RESUMENEXT, GetResString(IDS_CAT_RESUMENEXT));    	
 
 }
 
@@ -991,14 +991,8 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
 		}
-		//MORPH START - Changed by SiRoB, Khaos Category
-		/*
 		case MP_RESUMENEXT: {
 			theApp.downloadqueue->StartNextFile(rightclickindex,false);
-		*/
-		case MP_CAT_RESUMENEXT: {
-			theApp.downloadqueue->StartNextFile(rightclickindex,false);
-		//MORPH END   - Changed by SiRoB, Khaos Category
 			break;
 		}
 
