@@ -833,7 +833,7 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags)
 			bIsLastMenuSeparator = true; //MORPH START - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
 		}
 	}
-	if (bIsLastMenuSeparator == true)
+//	if (bIsLastMenuSeparator == true)
 //		rMenu.
 	return iMenuEntries;
 }
@@ -2594,9 +2594,9 @@ void InitRandGen()
 // khaos::categorymod+
 // Compares strings using wildcards * and ?.
 // Credited To: Jack Handy
-int wildcmp(char *wild, char *string)
+int wildcmp(TCHAR *wild, TCHAR *string)
 {
-	char *cp, *mp;
+	TCHAR *cp, *mp;
 
 	while ((*string) && (*wild != '*'))
 	{
@@ -2645,13 +2645,13 @@ ULONG CastXBytesToI(const CString& strExpr)
 		if (!strUnits.IsEmpty()){
 			//MORPH START - Fixed by SiRoB, Now Right For multilanguage
 			CString strBytes = GetResString(IDS_BYTES);
-			if (strUnits.CompareNoCase(_T(strBytes.Left(1))) == 0 || strUnits.CompareNoCase(_T(strBytes)) == 0)
+			if (strUnits.CompareNoCase(strBytes.Left(1)) == 0 || strUnits.CompareNoCase(strBytes) == 0)
 				return ulNum * 1U; // Bytes
-			else if (strUnits.CompareNoCase(_T("k")) == 0 || strUnits.CompareNoCase(_T(GetResString(IDS_KBYTES))) == 0 || strUnits.CompareNoCase(_T("k"+strBytes)) == 0)
+			else if (strUnits.CompareNoCase(_T("k")) == 0 || strUnits.CompareNoCase(GetResString(IDS_KBYTES)) == 0 || strUnits.CompareNoCase(_T("k")+strBytes) == 0)
 				return ulNum * 1024U; // KBytes
-			else if (strUnits.CompareNoCase(_T("m")) == 0 || strUnits.CompareNoCase(_T(GetResString(IDS_MBYTES))) == 0 || strUnits.CompareNoCase(_T("m"+strBytes)) == 0)
+			else if (strUnits.CompareNoCase(_T("m")) == 0 || strUnits.CompareNoCase(GetResString(IDS_MBYTES)) == 0 || strUnits.CompareNoCase(_T("m")+strBytes) == 0)
 				return ulNum * 1024U*1024; // MBytes
-			else if (strUnits.CompareNoCase(_T("g")) == 0 || strUnits.CompareNoCase(_T(GetResString(IDS_GBYTES))) == 0 || strUnits.CompareNoCase(_T("g"+strBytes)) == 0)
+			else if (strUnits.CompareNoCase(_T("g")) == 0 || strUnits.CompareNoCase(GetResString(IDS_GBYTES)) == 0 || strUnits.CompareNoCase(_T("g")+strBytes) == 0)
 				return ulNum * 1024U*1024U*1024U; // GBytes
 			else{
 				AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDMINMAX));
@@ -2668,13 +2668,13 @@ CString CastItoUIXBytes(uint32 count)
 {
 	CString buffer;
 	if (count < 1024)
-		buffer.Format("%u%s", count, GetResString(IDS_BYTES));
+		buffer.Format(_T("%u%s"), count, GetResString(IDS_BYTES));
 	else if (count < 1048576)
-		buffer.Format("%u%s", (uint32)(count/1024), GetResString(IDS_KBYTES));
+		buffer.Format(_T("%u%s"), (uint32)(count/1024), GetResString(IDS_KBYTES));
 	else if (count < 1073741824)
-		buffer.Format("%u%s", (uint32)(count/1048576), GetResString(IDS_MBYTES));
+		buffer.Format(_T("%u%s"), (uint32)(count/1048576), GetResString(IDS_MBYTES));
 	else
-		buffer.Format("%u%s", (uint32)(count/1073741824), GetResString(IDS_GBYTES));
+		buffer.Format(_T("%u%s"), (uint32)(count/1073741824), GetResString(IDS_GBYTES));
 	return buffer;
 }
 // khaos::categorymod-
@@ -2683,23 +2683,23 @@ CString CastItoUIXBytes(uint32 count)
 //MORPH START - Added by SiRoB, XML News [O²]
 void HTMLParse(CString &buffer)
 {
-	buffer.Replace("&amp;","&");
-	buffer.Replace("&#34;","\"");
-	buffer.Replace("&quot;","\"");
-	buffer.Replace("&#38;","?");
-	buffer.Replace("&#039;","'");
-	buffer.Replace("&#60;","<");
-	buffer.Replace("&#lt;","<");
-	buffer.Replace("&#62;",">");
-	buffer.Replace("&#gt;",">");
-	buffer.Replace("&ccedil;","ç");
-	buffer.Replace("&eacute;","é");
-	buffer.Replace("&egrave;","è");
-	buffer.Replace("&agrave;","à");
+	buffer.Replace(_T("&amp;"),_T("&"));
+	buffer.Replace(_T("&#34;"),_T("\""));
+	buffer.Replace(_T("&quot;"),_T("\""));
+	buffer.Replace(_T("&#38;"),_T("?"));
+	buffer.Replace(_T("&#039;"),_T("'"));
+	buffer.Replace(_T("&#60;"),_T("<"));
+	buffer.Replace(_T("&#lt;"),_T("<"));
+	buffer.Replace(_T("&#62;"),_T(">"));
+	buffer.Replace(_T("&#gt;"),_T(">"));
+	buffer.Replace(_T("&ccedil;"),_T("ç"));
+	buffer.Replace(_T("&eacute;"),_T("é"));
+	buffer.Replace(_T("&egrave;"),_T("è"));
+	buffer.Replace(_T("&agrave;"),_T("à"));
 	if (buffer.Left(4) == "<br>")
 		buffer.Right(buffer.GetLength()-4);
 	if (buffer.Right(4) == "<br>")
 		buffer.Left(buffer.GetLength()-4);
-	buffer.Replace("<br>","\n");
+	buffer.Replace(_T("<br>"),_T("\n"));
 }
 //MORPH END  - Added by SiRoB, XML News [O²]

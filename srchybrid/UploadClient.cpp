@@ -1150,7 +1150,7 @@ bool CUpDownClient::IsCommunity() const {
 // before testing if it's contained in the username.
 	int p=0;
 	do {
-		CString tag = ctemp.Tokenize ("|",p).Trim ();
+		CString tag = ctemp.Tokenize (_T("|"),p).Trim ();
 		if (tag != "") isCom = ntemp.Find (tag) >= 0;
 	} while ((!isCom) && (p >= 0));
 	return isCom;

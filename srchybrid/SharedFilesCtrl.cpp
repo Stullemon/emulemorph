@@ -202,17 +202,17 @@ void CSharedFilesCtrl::Init(){
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,2);
 	m_ImageList.SetBkColor(CLR_NONE);
-	m_ImageList.Add(theApp.LoadIcon("RATING_NO"));  // 0
-	m_ImageList.Add(theApp.LoadIcon("RATING_FAKE"));  // 1
-	m_ImageList.Add(theApp.LoadIcon("RATING_POOR"));  // 2
-	m_ImageList.Add(theApp.LoadIcon("RATING_GOOD"));  // 3
-	m_ImageList.Add(theApp.LoadIcon("RATING_FAIR"));  // 4
-	m_ImageList.Add(theApp.LoadIcon("RATING_EXCELLENT"));  // 5
+	m_ImageList.Add(theApp.LoadIcon(_T("RATING_NO")));  // 0
+	m_ImageList.Add(theApp.LoadIcon(_T("RATING_FAKE")));  // 1
+	m_ImageList.Add(theApp.LoadIcon(_T("RATING_POOR")));  // 2
+	m_ImageList.Add(theApp.LoadIcon(_T("RATING_GOOD")));  // 3
+	m_ImageList.Add(theApp.LoadIcon(_T("RATING_FAIR")));  // 4
+	m_ImageList.Add(theApp.LoadIcon(_T("RATING_EXCELLENT")));  // 5
 	//MORPH END   - Added & Moddified by IceCream, SLUGFILLER: showComments
 
 	// Mighty Knife: CRC32-Tag
-	InsertColumn(20,"calculated CRC32",LVCFMT_LEFT,120,20);
-	InsertColumn(21,"CRC32-check ok",LVCFMT_LEFT,100,21);
+	InsertColumn(20,_T("calculated CRC32"),LVCFMT_LEFT,120,20);
+	InsertColumn(21,_T("CRC32-check ok"),LVCFMT_LEFT,100,21);
 	// [end] Mighty Knife
 
 	CreateMenues();
@@ -1471,13 +1471,13 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		    // Mighty Knife: CRC32-Tag
-			case MP_RECALCCRC32: 
+			case MP_CRC32_RECALCULATE: 
 				// Remove existing CRC32 tags from the selected files
 				if (!selectedList.IsEmpty()){
 					POSITION pos = selectedList.GetHeadPosition();
 					while (pos != NULL) {
 						CKnownFile* file = selectedList.GetAt (pos);
-						file->SetLastCalculatedCRC32 ("");
+						file->SetLastCalculatedCRC32 (_T(""));
 						//UpdateFile(file);
 						selectedList.GetNext (pos);
 					}
@@ -1485,10 +1485,10 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				// Repaint the list 
 				Invalidate();
 				// !!! NO "break;" HERE !!!
-				// This case branch must lead into the MP_CALCCRC32 branch - 
+				// This case branch must lead into the MP_CRC32_CALCULATE branch - 
 				// so after removing the CRC's from the selected files they
 				// are immediately recalculated!
-			case MP_CALCCRC32: 
+			case MP_CRC32_CALCULATE: 
 				if (!selectedList.IsEmpty()){
 					// For every chosen file create a worker thread and add it
 					// to the file processing thread
@@ -1513,12 +1513,12 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					}
 				}
 				break;
-			case MP_ABORTCRC32CALC:
+			case MP_CRC32_ABORT:
 				// Message the File processing thread to stop any pending calculations
 				if (m_FileProcessingThread.IsRunning ())
 					m_FileProcessingThread.Terminate ();
 				break;
-			case MP_ADDCRC32TOFILENAME:
+			case MP_CRC32_TAG:
 				if (!selectedList.IsEmpty()){
 					AddCRC32InputBox AddCRCDialog;
 					int result = AddCRCDialog.DoModal ();
@@ -1724,7 +1724,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		}
 	} else {
 		// We have to add the CRC32/Releaser tag to the filename.
-		_splitpath (fn,NULL,NULL,p3.GetBuffer (MAX_PATH),p4.GetBuffer (MAX_PATH));
+		_tsplitpath (fn,NULL,NULL,p3.GetBuffer (MAX_PATH),p4.GetBuffer (MAX_PATH));
 		p3.ReleaseBuffer();
 		p4.ReleaseBuffer();
 
@@ -2143,7 +2143,10 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	if (m_ShareOnlyTheNeedMenu) VERIFY( m_ShareOnlyTheNeedMenu.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
-
+	//MORPH START - Added by SiRoB, CRC32-Tag
+	if (m_CRC32Menu) VERIFY( m_CRC32Menu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, CRC32-Tag
+	
 	if (m_SharedFilesMenu) VERIFY( m_SharedFilesMenu.DestroyMenu() );
 
 	// add priority switcher
@@ -2199,6 +2202,14 @@ void CSharedFilesCtrl::CreateMenues()
 	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_1,	GetResString(IDS_ENABLED));
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
+	//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
+	m_CRC32Menu.CreateMenu();
+	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_CALCULATE,GetResString(IDS_CRC32_CALCULATE));
+	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_RECALCULATE,GetResString(IDS_CRC32_RECALCULATE));
+	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_TAG,GetResString(IDS_CRC32_TAG));
+	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_ABORT,GetResString(IDS_CRC32_ABORT));
+	//MORPH END   - Changed by SiRoB, [end] Mighty Knife
+
 	m_SharedFilesMenu.CreatePopupMenu();
 	m_SharedFilesMenu.AddMenuTitle(GetResString(IDS_SHAREDFILES));
 
@@ -2236,15 +2247,12 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD)); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	
-	// Mighty Knife: CRC32-Tag
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CALCCRC32,"Calculate CRC32");
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RECALCCRC32,"Recalculate CRC32");
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ADDCRC32TOFILENAME,"Add Release-Tag/CRC32 to filename...");
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ABORTCRC32CALC,"Abort CRC32 calculation");
-	// [end] Mighty Knife
+	//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_CRC32Menu.m_hMenu, GetResString(IDS_CRC32));
+	//MORPH START - Changed by SiRoB, [end] Mighty Knife
 
 	// Mighty Knife: Mass Rename
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,"Mass rename...");
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,GetResString(IDS_MR));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	// [end] Mighty Knife
 

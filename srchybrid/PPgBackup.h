@@ -24,13 +24,12 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
-	void Backup(LPCSTR extensionToBack, BOOL conFirm);
+	void Backup(LPCTSTR extensionToBack, BOOL conFirm);
 	void Backup3(); //eastshare added by linekin, backup backup
 	void Localize(void);
 
 private:
-	//void Backup(LPCSTR extensionToBack);
-	void Backup2(LPCSTR extensionToBack);
+	void Backup2(LPCTSTR extensionToBack);
 	void LoadSettings(void);
 	BOOL y2All;
 public:

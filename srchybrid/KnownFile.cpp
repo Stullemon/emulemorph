@@ -344,8 +344,8 @@ CString CFileStatistic::GetEqualChanceValueString(bool detail){
 
 	if(thePrefs.IsEqualChanceEnable())	{
 		detail ?
-			tempString.Format("%s : %.2f = %s/%s", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
-			tempString.Format("%s : %.2f", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue) ;
+			tempString.Format(_T("%s : %.2f = %s/%s"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
+			tempString.Format(_T("%s : %.2f"), CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue) ;
 	}
 	else{
 		tempString.Empty();
@@ -858,9 +858,9 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	// Mighty Knife: Report hashing files
 	if (thePrefs.GetReportHashingFiles ()) {
 		CString hashfilename;
-		hashfilename.Format ("%s\\%s",in_directory, in_filename);
-		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
-		AddLogLine(false, "Completed hashing of file '%s'.", (const char*) hashfilename);
+		hashfilename.Format (_T("%s\\%s"),in_directory, in_filename);
+		if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),in_directory, in_filename);
+		AddLogLine(false, _T("Completed hashing of file '%s'."), hashfilename);
 	}
 	// [end] Mighty Knife
 	return true;	

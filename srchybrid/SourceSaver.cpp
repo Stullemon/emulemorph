@@ -18,7 +18,7 @@ m_dwLastTimeSaved = ::GetTickCount() + (rand() * 30000 / RAND_MAX) - 15000 - RES
 
 }
 
-CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const char* exp) 
+CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const TCHAR* exp) 
 {
 	// khaos::kmod+ Modified to Save Source Exchange Version
 	nSrcExchangeVer = client->GetSourceExchangeVersion();
@@ -45,21 +45,21 @@ CSourceSaver::~CSourceSaver(void)
 bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return false if sources not saved
 {
 	if ((int)(::GetTickCount() - m_dwLastTimeSaved) > RESAVETIME) {
-		CString slsfilepath;
-		slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
+		TCHAR szslsfilepath[_MAX_PATH];
+		_tmakepath(szslsfilepath,NULL,thePrefs.GetTempDir(), _T("Source Lists"), file->GetPartMetFileName()+_T(".txtsrc"));
 	
 		//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
 		if (file->GetAvailableSrcCount() > 25)
 		{
-			if (PathFileExists(slsfilepath))
-				remove(slsfilepath);
+			if (PathFileExists(szslsfilepath))
+				_tremove(szslsfilepath);
 			return false;
 		}
 		m_dwLastTimeSaved = ::GetTickCount() + (rand() * 30000 / RAND_MAX) - 15000;
 		SourceList srcs;
-		LoadSourcesFromFile(file, &srcs, slsfilepath);
-		SaveSources(file, &srcs, slsfilepath, maxSourcesToSave);
+		LoadSourcesFromFile(file, &srcs, szslsfilepath);
+		SaveSources(file, &srcs, szslsfilepath, maxSourcesToSave);
 		
 		if ((int)(::GetTickCount() - m_dwLastTimeLoaded) > RELOADTIME) {
 			m_dwLastTimeLoaded = ::GetTickCount() + (rand() * 30000 / RAND_MAX) - 15000;
@@ -76,15 +76,16 @@ bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return fals
 
 void CSourceSaver::DeleteFile(CPartFile* file)
 {
-	CString slsfilepath;
+	TCHAR szslsfilepath[_MAX_PATH];
 	// khaos::kmod+ Source Lists directory
-	slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
-	if (remove(slsfilepath)) if (errno != ENOENT)
-		AddLogLine(true, "Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand.", file->GetPartMetFileName());    
+	_tmakepath(szslsfilepath,NULL,thePrefs.GetTempDir(), _T("Source Lists"), file->GetPartMetFileName()+_T(".txtsrc"));
+	if (_tremove(szslsfilepath)) if (errno != ENOENT)
+		AddLogLine(true, _T("Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand."), file->GetPartMetFileName());    
 }
 
-void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, CString& slsfile)
+void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPCTSTR slsfile)
 {
+	USES_CONVERSION;
 	CString strLine;
 	CStdioFile f;
 	if (!f.Open(slsfile, CFile::modeRead | CFile::typeText))
@@ -97,7 +98,8 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, CSt
 			continue;
 		CString strIP = strLine.Left(pos);
 		strLine = strLine.Mid(pos+1);
-		uint32 dwID = inet_addr(strIP);
+		USES_CONVERSION;
+		uint32 dwID = inet_addr(T2CA(strIP));
 		if (dwID == INADDR_NONE) 
 			continue;
 		pos = strLine.Find(',');
@@ -105,7 +107,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, CSt
 			continue;
 		CString strPort = strLine.Left(pos);
 		strLine = strLine.Mid(pos+1);
-		uint16 wPort = atoi(strPort);
+		uint16 wPort = _tstoi(strPort);
 		if (!wPort)
 			continue;
 		// khaos::kmod+ Src Ex Ver
@@ -119,7 +121,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, CSt
 		pos = strLine.Find(';');
 		if (pos == -1 || strLine.GetLength() < 2)
 			continue;
-		uint8 nSrcExchangeVer = atoi(strLine.Left(pos));
+		uint8 nSrcExchangeVer = _tstoi(strLine.Left(pos));
 
 		CSourceData* newsource = new CSourceData(dwID, wPort, strExpiration, nSrcExchangeVer);
 		// khaos::kmod-
@@ -158,7 +160,7 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 //#define EXPIREIN		3 //Day
 #define EXPIREIN		30 //Minute
 
-void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString& slsfile, int maxSourcesToSave)
+void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR slsfile, int maxSourcesToSave)
 {
 	SourceList srcstosave;
 	CSourceData* sourcedata;
@@ -242,13 +244,13 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 	CStdioFile f;
 	if (!f.Open(slsfile, CFile::modeCreate | CFile::modeWrite | CFile::typeText))
 		return;
-	f.WriteString("#format: a.b.c.d:port,expirationdate(yymmddhhmm);\r\n");
-	f.WriteString("#" + CreateED2kLink(file) + "\r\n"); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
+	f.WriteString(_T("#format: a.b.c.d:port,expirationdate(yymmddhhmm);\r\n"));
+	f.WriteString(_T("#") + CreateED2kLink(file) + _T("\r\n")); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
 	while (!srcstosave.IsEmpty()) {
 		CSourceData* cur_src = srcstosave.RemoveHead();
 		uint32 dwID = cur_src->sourceID;
 		uint16 wPort = cur_src->sourcePort;
-		strLine.Format("%i.%i.%i.%i:%i,%s,%i;\r\n", (uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), wPort, cur_src->expiration, cur_src->nSrcExchangeVer);
+		strLine.Format(_T("%i.%i.%i.%i:%i,%s,%i;\r\n"), (uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), wPort, cur_src->expiration, cur_src->nSrcExchangeVer);
 		delete cur_src;
 		f.WriteString(strLine);
 	}
@@ -268,19 +270,19 @@ CString CSourceSaver::CalcExpiration(int Minutes)
 	CString strExpiration;
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//strExpiration.Format("%02i%02i%02i", (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay());
-	strExpiration.Format("%02i%02i%02i%02i%02i", (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay(), expiration.GetHour(),expiration.GetMinute());
+	strExpiration.Format(_T("%02i%02i%02i%02i%02i"), (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay(), expiration.GetHour(),expiration.GetMinute());
 
 	return strExpiration;
 }
 
 bool CSourceSaver::IsExpired(CString expirationdate)
 {
-	int year = atoi(expirationdate.Mid(0, 2)) + 2000;
-	int month = atoi(expirationdate.Mid(2, 2));
-	int day = atoi(expirationdate.Mid(4, 2));
+	int year = _tstoi(expirationdate.Mid(0, 2)) + 2000;
+	int month = _tstoi(expirationdate.Mid(2, 2));
+	int day = _tstoi(expirationdate.Mid(4, 2));
 	//MORPH - Added by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
-	int hour = atoi(expirationdate.Mid(6, 2));
-	int minute = atoi(expirationdate.Mid(8, 2));
+	int hour = _tstoi(expirationdate.Mid(6, 2));
+	int minute = _tstoi(expirationdate.Mid(8, 2));
 	
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//CTime expiration(year, month, day, 0, 0, 0);

@@ -39,9 +39,6 @@ CPPgEastShare::CPPgEastShare()
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_htiEnableChunkDots = NULL; //EastShare - Added by Pretender, Option for ChunkDots
 
-	//Commander - Removed Invisible Mode
-	//m_htiInvisibleMode = NULL;	//EastShare - Added by Pretender, Invisible Mode
-
 	//EastShare Start - added by AndCycle, IP to Country
 	m_htiIP2CountryName = NULL;
 	m_htiIP2CountryName_DISABLE = NULL;
@@ -85,17 +82,15 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		int iImgMETC = 8; //EastShare Added by TAHO, .met Control
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
-			iImgIP2Country = piml->Add(CTempIconLoader("SEARCHMETHOD_GLOBAL")); //EastShare - added by AndCycle, IP to Country
-			iImgCS = piml->Add(CTempIconLoader("STATSCLIENTS")); // EastShare START - Added by Pretender, CS icon
-			iImgMETC = piml->Add(CTempIconLoader("HARDDISK")); // EastShare START - Added by TAHO, .met control
+			iImgIP2Country = piml->Add(CTempIconLoader(_T("SEARCHMETHOD_GLOBAL"))); //EastShare - added by AndCycle, IP to Country
+			iImgCS = piml->Add(CTempIconLoader(_T("STATSCLIENTS"))); // EastShare START - Added by Pretender, CS icon
+			iImgMETC = piml->Add(CTempIconLoader(_T("HARDDISK"))); // EastShare START - Added by TAHO, .met control
 		}
 		m_htiEnablePreferShareAll = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFER_SHARE_ALL), TVI_ROOT, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 		m_htiOnlyDownloadCompleteFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES), TVI_ROOT, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_htiSaveUploadQueueWaitTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME), TVI_ROOT, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 		m_htiEnableChunkDots = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLE_CHUNKDOTS), TVI_ROOT, m_bEnableChunkDots);//EastShare - Added by Pretender, Option for ChunkDots
 
-		//Commander - Removed Invisible Mode
-		//m_htiInvisibleMode = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INVISIBLEMODE), TVI_ROOT, m_bInvisibleMode);//EastShare - Added by Pretender, Invisible Mode
 		//Morph - added by AndCycle, Equal Chance For Each File
 		m_htiEnableEqualChanceForEachFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ECFEF), TVI_ROOT, m_iEnableEqualChanceForEachFile);
 		//Morph - added by AndCycle, Equal Chance For Each File
@@ -162,8 +157,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiOnlyDownloadCompleteFiles, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiSaveUploadQueueWaitTime, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnableChunkDots, m_bEnableChunkDots);//EastShare - Added by Pretender, Option for ChunkDots
-	//Commander - Removed Invisible Mode
-	//DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiInvisibleMode, m_bInvisibleMode);//EastShare - Added by Pretender, Invisible Mode
 }
 
 
@@ -176,8 +169,6 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bOnlyDownloadCompleteFiles = thePrefs.m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = thePrefs.m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_bEnableChunkDots = thePrefs.m_bEnableChunkDots;//EastShare - Added by Pretender, Option for ChunkDots
-	//Commander - Removed Invisible Mode
-	//m_bInvisibleMode = thePrefs.m_bInvisibleMode;//EastShare - Added by Pretender, Invisible Mode
 
 	//EastShare Start - added by AndCycle, IP to Country
 	m_iIP2CountryName = thePrefs.GetIP2CountryNameMode(); 
@@ -220,8 +211,6 @@ BOOL CPPgEastShare::OnApply()
 	thePrefs.m_iPayBackFirstLimit = m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
 	thePrefs.m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	thePrefs.m_bEnableChunkDots = m_bEnableChunkDots;//EastShare - Added by Pretender, Option for ChunkDots
-	//Commander - Removed Invisible Mode
-	//thePrefs.m_bInvisibleMode = m_bInvisibleMode;//EastShare - Added by Pretender, Invisible Mode
 
 	//EastShare Start - added by AndCycle, IP to Country
 	if(	(thePrefs.m_iIP2CountryNameMode != IP2CountryName_DISABLE || thePrefs.m_bIP2CountryShowFlag) !=
@@ -284,8 +273,6 @@ void CPPgEastShare::Localize(void)
 		if (m_htiOnlyDownloadCompleteFiles) m_ctrlTreeOptions.SetItemText(m_htiOnlyDownloadCompleteFiles,GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES));//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 		if (m_htiSaveUploadQueueWaitTime) m_ctrlTreeOptions.SetItemText(m_htiSaveUploadQueueWaitTime,GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME));//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 		if (m_htiEnableChunkDots) m_ctrlTreeOptions.SetItemText(m_htiEnableChunkDots, GetResString(IDS_ENABLE_CHUNKDOTS));//EastShare - Added by Pretender, Option for ChunkDots
-		//Commander - Removed Invisible Mode
-		//if (m_htiInvisibleMode) m_ctrlTreeOptions.SetItemText(m_htiInvisibleMode, GetResString(IDS_INVISIBLEMODE));//EastShare - Added by Pretender, Invisible Mode
 
 		//EastShare START - Added By TAHO, .met file control // Modified by Pretender
 		if (m_htiKnownMet) m_ctrlTreeOptions.SetEditLabel(m_htiKnownMet, (GetResString(IDS_EXPIRED_KNOWN)));
@@ -307,8 +294,6 @@ void CPPgEastShare::OnDestroy()
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	m_htiEnableChunkDots = NULL; //EastShare - Added by Pretender, Option for ChunkDots
-	//Commander - Removed Invisible Mode
-	//m_htiInvisibleMode = NULL; //EastShare - Added by Pretender, Invisible Mode
 
 	//EastShare Start - added by AndCycle, IP to Country
 	m_htiIP2CountryName = NULL;

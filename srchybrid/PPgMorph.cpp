@@ -134,22 +134,22 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
  		int iImgDisp = 8;
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
-			iImgUM = piml->Add(CTempIconLoader("UPLOAD"));
-			iImgDYNUP = piml->Add(CTempIconLoader("SUC"));
-			iImgDM = piml->Add(CTempIconLoader("DOWNLOAD"));
-			iImgSFM = piml->Add(CTempIconLoader("SHAREDFILES"));
+			iImgUM = piml->Add(CTempIconLoader(_T("UPLOAD")));
+			iImgDYNUP = piml->Add(CTempIconLoader(_T("SUC")));
+			iImgDM = piml->Add(CTempIconLoader(_T("DOWNLOAD")));
+			iImgSFM = piml->Add(CTempIconLoader(_T("SHAREDFILES")));
 			//MORPH START - Added by SiRoB, khaos::categorymod+
-			iImgSCC = piml->Add(CTempIconLoader("PREF_FOLDERS"));
-			iImgSAC = piml->Add(CTempIconLoader("ClientCompatible"));
-			iImgA4AF = piml->Add(CTempIconLoader("SERVERLIST"));
-			iImgPerm = piml->Add(CTempIconLoader("ClientCompatible")); //MORPH - Added by SiRoB, Show Permissions
-			iImgPS = piml->Add(CTempIconLoader("PREF_FILES")); //MORPH - Added by SiRoB, POWERSHARE Limit
+			iImgSCC = piml->Add(CTempIconLoader(_T("PREF_FOLDERS")));
+			iImgSAC = piml->Add(CTempIconLoader(_T("ClientCompatible")));
+			iImgA4AF = piml->Add(CTempIconLoader(_T("SERVERLIST")));
+			iImgPerm = piml->Add(CTempIconLoader(_T("ClientCompatible"))); //MORPH - Added by SiRoB, Show Permissions
+			iImgPS = piml->Add(CTempIconLoader(_T("PREF_FILES"))); //MORPH - Added by SiRoB, POWERSHARE Limit
 			// khaos::accuratetimerem+
-			iImgTimeRem = piml->Add(CTempIconLoader("PREF_SCHEDULER"));
+			iImgTimeRem = piml->Add(CTempIconLoader(_T("PREF_SCHEDULER")));
 			// khaos::accuratetimerem-
 			//MORPH END - Added by SiRoB, khaos::categorymod+
-			iImgSecu = piml->Add(CTempIconLoader("PREF_SECURITY"));
-			iImgDisp = piml->Add(CTempIconLoader("PREF_DISPLAY"));
+			iImgSecu = piml->Add(CTempIconLoader(_T("PREF_SECURITY")));
+			iImgDisp = piml->Add(CTempIconLoader(_T("PREF_DISPLAY")));
 		}
 		
 		m_htiDM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DM), iImgDM, TVI_ROOT);
@@ -167,7 +167,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiSAC = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SAC), iImgSAC, m_htiDM);
 		m_htiShowA4AFDebugOutput  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SHOWDEBUG), m_htiSAC, m_iShowA4AFDebugOutput);
 		m_htiSmartA4AFSwapping = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SMARTSWAP), m_htiSAC, m_iSmartA4AFSwapping);
-		m_htiAdvA4AFMode = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DEFAULT) + " " + GetResString(IDS_A4AF_ADVMODE), iImgA4AF, m_htiSAC);
+		m_htiAdvA4AFMode = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DEFAULT) + _T(" ") + GetResString(IDS_A4AF_ADVMODE), iImgA4AF, m_htiSAC);
 		m_htiDisableAdvA4AF = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_A4AF_DISABLED), m_htiAdvA4AFMode, m_iAdvA4AFMode == 0);
 		m_htiBalanceSources = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_A4AF_BALANCE), m_htiAdvA4AFMode, m_iAdvA4AFMode == 1);
 		m_htiStackSources = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_A4AF_STACK), m_htiAdvA4AFMode, m_iAdvA4AFMode == 2);
@@ -292,8 +292,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 		m_htiCommunityName = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMMUNITYTAG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
 		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
-		m_htiReportHashingFiles = m_ctrlTreeOptions.InsertCheckBox("Report file hashing activities", TVI_ROOT, m_bReportHashingFiles);
-		m_htiLogFriendlistActivities = m_ctrlTreeOptions.InsertCheckBox("Report activities in friendlist", TVI_ROOT, m_bLogFriendlistActivities);
+		m_htiReportHashingFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPH_RFHA), TVI_ROOT, m_bReportHashingFiles);
+		m_htiLogFriendlistActivities = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPH_RAIF), TVI_ROOT, m_bLogFriendlistActivities);
 		// [end] Mighty Knife
 
 		m_ctrlTreeOptions.Expand(m_htiDM, TVE_EXPAND);
@@ -512,7 +512,7 @@ BOOL CPPgMorph::OnApply()
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 
 	// Mighty Knife: Community visualization
-	sprintf (thePrefs.m_sCommunityName,"%s", m_sCommunityName);
+	_stprintf (thePrefs.m_sCommunityName,_T("%s"), m_sCommunityName);
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+

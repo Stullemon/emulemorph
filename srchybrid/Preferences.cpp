@@ -563,15 +563,10 @@ bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
 bool	CPreferences::m_bEnableChunkDots;
 //EastShare - Added by Pretender, Option for ChunkDots
 
-//Commander - Removed Invisible Mode
-//EastShare - Added by Pretender, Invisible Mode
-//bool	CPreferences::m_bInvisibleMode;
-//EastShare - Added by Pretender, Invisible Mode
-
-char	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-char	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
-char	CPreferences::UpdateURLIP2Country[256];//Commander - Added: IP2Country auto-updating
-char	CPreferences::UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
+TCHAR	CPreferences::UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+TCHAR	CPreferences::UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
+TCHAR	CPreferences::UpdateURLIP2Country[256];//Commander - Added: IP2Country auto-updating
+TCHAR	CPreferences::UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
 
 bool	CPreferences::m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 uint8	CPreferences::m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
@@ -621,7 +616,7 @@ uint8	CPreferences::m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = averag
 // khaos::accuratetimerem-
 
 // Mighty Knife: Community Visualization, Report hashing files, Log friendlist activities
-char	CPreferences::m_sCommunityName [256];
+TCHAR	CPreferences::m_sCommunityName [256];
 bool	CPreferences::m_bReportHashingFiles;
 bool	CPreferences::m_bLogFriendlistActivities;
 // [end] Mighty Knife
@@ -630,8 +625,8 @@ bool	CPreferences::m_bLogFriendlistActivities;
 bool	CPreferences::m_bDontAddCRCToFilename;
 bool	CPreferences::m_bCRC32ForceUppercase;
 bool	CPreferences::m_bCRC32ForceAdding;
-char	CPreferences::m_sCRC32Prefix [256];
-char	CPreferences::m_sCRC32Suffix [256];
+TCHAR	CPreferences::m_sCRC32Prefix [256];
+TCHAR	CPreferences::m_sCRC32Suffix [256];
 // [end] Mighty Knife
 
 // Mighty Knife: Simple cleanup options
@@ -759,7 +754,7 @@ void CPreferences::Init()
 	if ( PathFileExists(appdir+_T("staticservers.dat"))) MoveFile(appdir+_T("staticservers.dat"),configdir+_T("staticservers.dat"));
 	if ( PathFileExists(appdir+_T("webservices.dat"))) MoveFile(appdir+_T("webservices.dat"),configdir+_T("webservices.dat"));
 	//MORPH START - Added by SiRoB, XML News [O²]
-	if ( PathFileExists(appdir+_T("xmlnews.dat"))) MoveFile(appdir+"xmlnews.dat",configdir+"xmlnews.dat"); // Added by N_OxYdE:XML News
+	if ( PathFileExists(appdir+_T("xmlnews.dat"))) MoveFile(appdir+_T("xmlnews.dat"),configdir+_T("xmlnews.dat")); // Added by N_OxYdE:XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	CreateUserHash();
@@ -908,7 +903,7 @@ void CPreferences::Init()
 		}
 	}
 	// khaos::kmod+ Source Lists directory
-	CString sSourceListsPath = CString(GetTempDir()) + "\\Source Lists";
+	CString sSourceListsPath = CString(GetTempDir()) + _T("\\Source Lists");
 	if (UseSaveLoadSources() && !PathFileExists(sSourceListsPath.GetBuffer()) && !::CreateDirectory(sSourceListsPath.GetBuffer(), 0)) {
 		CString strError;
 		strError.Format(_T("Failed to create source lists directory \"%s\" - %s"), sSourceListsPath, GetErrorMessage(GetLastError()));
@@ -2339,164 +2334,159 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("Enabled"), m_bPeerCacheEnabled);
 	ini.WriteInt(_T("PCPort"), m_nPeerCachePort);
 
-	ini.WriteBool("InfiniteQueue",infiniteQueue,"eMule");	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	ini.WriteBool(_T("InfiniteQueue"),infiniteQueue,_T("eMule"));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
-	ini.WriteBool("AutoDynUpSwitching",isautodynupswitching,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteInt("PowershareMode",m_iPowershareMode,"eMule"); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool(_T("AutoDynUpSwitching"),isautodynupswitching,_T("eMule"));//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteInt(_T("PowershareMode"),m_iPowershareMode,_T("eMule")); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	ini.WriteBool("EnableZeroFilledTest", enableZeroFilledTest,"eMule");
+	ini.WriteBool(_T("EnableZeroFilledTest"), enableZeroFilledTest,_T("eMule"));
 	// Maella end
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
-	ini.WriteBool("EnableHighProcess", enableHighProcess,"eMule"); //MORPH - Added by IceCream, high process priority
+	ini.WriteBool(_T("EnableHighProcess"), enableHighProcess,_T("eMule")); //MORPH - Added by IceCream, high process priority
 
-	ini.WriteBool("EnableDownloadInRed", enableDownloadInRed,"eMule"); //MORPH - Added by IceCream, show download in red
-	ini.WriteBool("EnableDownloadInBold", enableDownloadInBold,"eMule"); //MORPH - Added by SiRoB, show download in Bold
-	ini.WriteBool("EnableAntiLeecher", enableAntiLeecher,"eMule"); //MORPH - Added by IceCream, enable AntiLeecher
-	ini.WriteBool("EnableAntiCreditHack", enableAntiCreditHack,"eMule"); //MORPH - Added by IceCream, enable AntiCreditHack
-	ini.WriteInt("CreditSystemMode", creditSystemMode,"eMule");// EastShare - Added by linekin, ES CreditSystem
-	ini.WriteBool("EqualChanceForEachFile", m_bEnableEqualChanceForEachFile, "eMule");	//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool(_T("EnableDownloadInRed"), enableDownloadInRed,_T("eMule")); //MORPH - Added by IceCream, show download in red
+	ini.WriteBool(_T("EnableDownloadInBold"), enableDownloadInBold,_T("eMule")); //MORPH - Added by SiRoB, show download in Bold
+	ini.WriteBool(_T("EnableAntiLeecher"), enableAntiLeecher,_T("eMule")); //MORPH - Added by IceCream, enable AntiLeecher
+	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
+	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	ini.WriteInt("ReconnectOnLowIdRetries",LowIdRetries,"eMule");	// SLUGFILLER: lowIdRetry
+	ini.WriteInt(_T("ReconnectOnLowIdRetries"),LowIdRetries,_T("eMule"));	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	ini.WriteInt("HideOvershares",hideOS,"eMule");
-	ini.WriteBool("SelectiveShare",selectiveShare,"eMule");
+	ini.WriteInt(_T("HideOvershares"),hideOS,_T("eMule"));
+	ini.WriteBool(_T("SelectiveShare"),selectiveShare,_T("eMule"));
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	ini.WriteBool("ShareOnlyTheNeed",ShareOnlyTheNeed,"eMule");
+	ini.WriteBool(_T("ShareOnlyTheNeed"),ShareOnlyTheNeed,_T("eMule"));
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	ini.WriteInt("PowerShareLimit",PowerShareLimit,"eMule");
+	ini.WriteInt(_T("PowerShareLimit"),PowerShareLimit,_T("eMule"));
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
-	ini.WriteInt("ShowSharePermissions",permissions,"eMule");
+	ini.WriteInt(_T("ShowSharePermissions"),permissions,_T("eMule"));
 	//MORPH END   - Added by SiRoB, Show Permissions
 
     //MORPH START added by Yun.SF3: Ipfilter.dat update
-	ini.WriteInt("IPfilterVersion",m_IPfilterVersion,"eMule"); //added by milobac: Ipfilter.dat update
-	ini.WriteBool("AutoUPdateIPFilter",AutoUpdateIPFilter,"eMule"); //added by milobac: Ipfilter.dat update
+	ini.WriteInt(_T("IPfilterVersion"),m_IPfilterVersion,_T("eMule")); //added by milobac: Ipfilter.dat update
+	ini.WriteBool(_T("AutoUPdateIPFilter"),AutoUpdateIPFilter,_T("eMule")); //added by milobac: Ipfilter.dat update
     //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	ini.WriteInt("IP2CountryVersion",m_IP2CountryVersion,"eMule"); 
-	ini.WriteBool("AutoUPdateIP2Country",AutoUpdateIP2Country,"eMule");
+	ini.WriteInt(_T("IP2CountryVersion"),m_IP2CountryVersion,_T("eMule")); 
+	ini.WriteBool(_T("AutoUPdateIP2Country"),AutoUpdateIP2Country,_T("eMule"));
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ini.WriteInt("FakesDatVersion",m_FakesDatVersion,"eMule");
-	ini.WriteBool("UpdateFakeStartup",UpdateFakeStartup,"eMule");
+	ini.WriteInt(_T("FakesDatVersion"),m_FakesDatVersion,_T("eMule"));
+	ini.WriteBool(_T("UpdateFakeStartup"),UpdateFakeStartup,_T("eMule"));
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
-	ini.WriteString("UpdateURLFakeList",UpdateURLFakeList,"eMule");		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	ini.WriteString("UpdateURLIPFilter",UpdateURLIPFilter,"eMule");//MORPH START added by Yun.SF3: Ipfilter.dat update
-    ini.WriteString("UpdateURLIP2Country",UpdateURLIP2Country,"eMule");//Commander - Added: IP2Country auto-updating
-	ini.WriteString("UpdateVerURLIP2Country",UpdateVerURLIP2Country,"eMule");//Commander - Added: IP2Country auto-updating
+	ini.WriteString(_T("UpdateURLFakeList"),UpdateURLFakeList,_T("eMule"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	ini.WriteString(_T("UpdateURLIPFilter"),UpdateURLIPFilter,_T("eMule"));//MORPH START added by Yun.SF3: Ipfilter.dat update
+    ini.WriteString(_T("UpdateURLIP2Country"),UpdateURLIP2Country,_T("eMule"));//Commander - Added: IP2Country auto-updating
+	ini.WriteString(_T("UpdateVerURLIP2Country"),UpdateVerURLIP2Country,_T("eMule"));//Commander - Added: IP2Country auto-updating
 
 	//EastShare Start - PreferShareAll by AndCycle
-	ini.WriteBool("ShareAll",shareall,"eMule");	// SLUGFILLER: preferShareAll
+	ini.WriteBool(_T("ShareAll"),shareall,_T("eMule"));	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	ini.WriteInt("KnownMetDays", m_iKnownMetDays,"eMule");
+	ini.WriteInt(_T("KnownMetDays"), m_iKnownMetDays,_T("eMule"));
 	// EastShare END - Added by TAHO, .met file control
 	//EastShare - Added by Pretender, Option for ChunkDots
-	ini.WriteInt("EnableChunkDots", m_bEnableChunkDots,"eMule");
+	ini.WriteInt(_T("EnableChunkDots"), m_bEnableChunkDots,_T("eMule"));
 	//EastShare - Added by Pretender, Option for ChunkDots
 
-	//Commander - Removed Invisible Mode
-	//EastShare - Added by Pretender, Invisible Mode
-	//ini.WriteInt("InvisibleMode", m_bInvisibleMode,"eMule");
-	//EastShare - Added by Pretender, Invisible Mode
-
 	//EastShare - added by AndCycle, IP to Country
-	ini.WriteInt("IP2Country", m_iIP2CountryNameMode,"eMule"); 
-	ini.WriteBool("IP2CountryShowFlag", m_bIP2CountryShowFlag,"eMule");
+	ini.WriteInt(_T("IP2Country"), m_iIP2CountryNameMode,_T("eMule")); 
+	ini.WriteBool(_T("IP2CountryShowFlag"), m_bIP2CountryShowFlag,_T("eMule"));
 	//EastShare - added by AndCycle, IP to Country
 
 	// khaos::categorymod+ Save Preferences
-	ini.WriteBool("ValidSrcsOnly", m_bValidSrcsOnly,"eMule");
-	ini.WriteBool("ShowCatName", m_bShowCatNames,"eMule");
-	ini.WriteBool("ActiveCatDefault", m_bActiveCatDefault,"eMule");
-	ini.WriteBool("SelCatOnAdd", m_bSelCatOnAdd,"eMule");
-	ini.WriteBool("AutoSetResumeOrder", m_bAutoSetResumeOrder,"eMule");
-	ini.WriteBool("SmallFileDLPush", m_bSmallFileDLPush,"eMule");
-	ini.WriteInt("StartDLInEmptyCats", m_iStartDLInEmptyCats,"eMule");
-	ini.WriteBool("UseAutoCat", m_bUseAutoCat,"eMule");
+	ini.WriteBool(_T("ValidSrcsOnly"), m_bValidSrcsOnly,_T("eMule"));
+	ini.WriteBool(_T("ShowCatName"), m_bShowCatNames,_T("eMule"));
+	ini.WriteBool(_T("ActiveCatDefault"), m_bActiveCatDefault,_T("eMule"));
+	ini.WriteBool(_T("SelCatOnAdd"), m_bSelCatOnAdd,_T("eMule"));
+	ini.WriteBool(_T("AutoSetResumeOrder"), m_bAutoSetResumeOrder,_T("eMule"));
+	ini.WriteBool(_T("SmallFileDLPush"), m_bSmallFileDLPush,_T("eMule"));
+	ini.WriteInt(_T("StartDLInEmptyCats"), m_iStartDLInEmptyCats,_T("eMule"));
+	ini.WriteBool(_T("UseAutoCat"), m_bUseAutoCat,_T("eMule"));
 	// khaos::categorymod-
 	// khaos::kmod+
-	ini.WriteBool("SmartA4AFSwapping", m_bSmartA4AFSwapping,"eMule");
-	ini.WriteInt("AdvancedA4AFMode", m_iAdvancedA4AFMode,"eMule");
-	ini.WriteBool("ShowA4AFDebugOutput", m_bShowA4AFDebugOutput,"eMule");
-	ini.WriteBool("RespectMaxSources", m_bRespectMaxSources,"eMule");
-	ini.WriteBool("UseSaveLoadSources", m_bUseSaveLoadSources,"eMule");
+	ini.WriteBool(_T("SmartA4AFSwapping"), m_bSmartA4AFSwapping,_T("eMule"));
+	ini.WriteInt(_T("AdvancedA4AFMode"), m_iAdvancedA4AFMode,_T("eMule"));
+	ini.WriteBool(_T("ShowA4AFDebugOutput"), m_bShowA4AFDebugOutput,_T("eMule"));
+	ini.WriteBool(_T("RespectMaxSources"), m_bRespectMaxSources,_T("eMule"));
+	ini.WriteBool(_T("UseSaveLoadSources"), m_bUseSaveLoadSources,_T("eMule"));
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
-	ini.WriteInt("TimeRemainingMode", m_iTimeRemainingMode,"eMule");
+	ini.WriteInt(_T("TimeRemainingMode"), m_iTimeRemainingMode,_T("eMule"));
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteBool("SUCEnabled",m_bSUCEnabled,"eMule");
-	ini.WriteInt("SUCLog",m_bSUCLog,"eMule");
-	ini.WriteInt("SUCHigh",m_iSUCHigh,"eMule");
-	ini.WriteInt("SUCLow",m_iSUCLow,"eMule");
-	ini.WriteInt("SUCDrift",m_iSUCDrift,"eMule");
-	ini.WriteInt("SUCPitch",m_iSUCPitch,"eMule");
+	ini.WriteBool(_T("SUCEnabled"),m_bSUCEnabled,_T("eMule"));
+	ini.WriteInt(_T("SUCLog"),m_bSUCLog,_T("eMule"));
+	ini.WriteInt(_T("SUCHigh"),m_iSUCHigh,_T("eMule"));
+	ini.WriteInt(_T("SUCLow"),m_iSUCLow,_T("eMule"));
+	ini.WriteInt(_T("SUCDrift"),m_iSUCDrift,_T("eMule"));
+	ini.WriteInt(_T("SUCPitch"),m_iSUCPitch,_T("eMule"));
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteInt("MaxConnectionsSwitchBorder",maxconnectionsswitchborder,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteInt(_T("MaxConnectionsSwitchBorder"),maxconnectionsswitchborder,_T("eMule"));//MORPH - Added by Yun.SF3, Auto DynUp changing
 
-	ini.WriteBool("IsPayBackFirst",m_bPayBackFirst,"eMule");//EastShare - added by AndCycle, Pay Back First
-	ini.WriteInt("PayBackFirstLimit",m_iPayBackFirstLimit,"eMule");//MORPH - Added by SiRoB, Pay Back First Tweak
-	ini.WriteBool("OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles,"eMule");//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime,"eMule");//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	ini.WriteBool("DateFileNameLog", m_bDateFileNameLog,"eMule");//Morph - added by AndCycle, Date File Name Log
+	ini.WriteBool(_T("IsPayBackFirst"),m_bPayBackFirst,_T("eMule"));//EastShare - added by AndCycle, Pay Back First
+	ini.WriteInt(_T("PayBackFirstLimit"),m_iPayBackFirstLimit,_T("eMule"));//MORPH - Added by SiRoB, Pay Back First Tweak
+	ini.WriteBool(_T("OnlyDownloadCompleteFiles"), m_bOnlyDownloadCompleteFiles,_T("eMule"));//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	ini.WriteBool(_T("SaveUploadQueueWaitTime"), m_bSaveUploadQueueWaitTime,_T("eMule"));//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	ini.WriteBool(_T("DateFileNameLog"), m_bDateFileNameLog,_T("eMule"));//Morph - added by AndCycle, Date File Name Log
 
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
-	ini.WriteBool("AutoBackup",autobackup,"eMule");
-	ini.WriteBool("AutoBackup2",autobackup2,"eMule");
+	ini.WriteBool(_T("AutoBackup"),autobackup,_T("eMule"));
+	ini.WriteBool(_T("AutoBackup2"),autobackup2,_T("eMule"));
 	//EastShare End - Added by Pretender, TBH-AutoBackup
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	ini.WriteString("CommunityName", m_sCommunityName,"eMule");
-	ini.WriteBool ("ReportHashingFiles",m_bReportHashingFiles,"eMule");
-	ini.WriteBool ("LogFriendlistActivities",m_bLogFriendlistActivities,"eMule");
+	ini.WriteString(_T("CommunityName"), m_sCommunityName,_T("eMule"));
+	ini.WriteBool (_T("ReportHashingFiles"),m_bReportHashingFiles,_T("eMule"));
+	ini.WriteBool (_T("LogFriendlistActivities"),m_bLogFriendlistActivities,_T("eMule"));
 	// [end] Mighty Knife
 
 	// Mighty Knife: CRC32-Tag
-	ini.WriteBool ("DontAddCRC32ToFilename",m_bDontAddCRCToFilename,"eMule");
-	ini.WriteBool ("ForceCRC32Uppercase",m_bCRC32ForceUppercase,"eMule");
-	ini.WriteBool ("ForceCRC32Adding",m_bCRC32ForceAdding,"eMule");
+	ini.WriteBool (_T("DontAddCRC32ToFilename"),m_bDontAddCRCToFilename,_T("eMule"));
+	ini.WriteBool (_T("ForceCRC32Uppercase"),m_bCRC32ForceUppercase,_T("eMule"));
+	ini.WriteBool (_T("ForceCRC32Adding"),m_bCRC32ForceAdding,_T("eMule"));
 	CString temp;
 	// Encapsule these strings by "" because space characters are allowed at the
 	// beginning/end of the prefix/suffix !
-	temp.Format ("\"%s\"",m_sCRC32Prefix);
-	ini.WriteString("LastCRC32Prefix",temp,"eMule");
-	temp.Format ("\"%s\"",m_sCRC32Suffix);
-	ini.WriteString("LastCRC32Suffix",temp,"eMule");
+	temp.Format (_T("\"%s\""),m_sCRC32Prefix);
+	ini.WriteString(_T("LastCRC32Prefix"),temp,_T("eMule"));
+	temp.Format (_T("\"%s\""),m_sCRC32Suffix);
+	ini.WriteString(_T("LastCRC32Suffix"),temp,_T("eMule"));
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options
-	ini.WriteInt ("SimpleCleanupOptions",m_SimpleCleanupOptions);
+	ini.WriteInt (_T("SimpleCleanupOptions"),m_SimpleCleanupOptions);
 	// Enclose the strings with '"' before writing them to the file.
 	// These will be filtered if the string is read again
-	ini.WriteString ("SimpleCleanupSearch",CString ('\"')+m_SimpleCleanupSearch+'\"');
-	ini.WriteString ("SimpleCleanupReplace",CString ('\"')+m_SimpleCleanupReplace+'\"');
-	ini.WriteString ("SimpleCleanupSearchChars",CString ('\"')+m_SimpleCleanupSearchChars+'\"');
-	ini.WriteString ("SimpleCleanupReplaceChars",CString ('\"')+m_SimpleCleanupReplaceChars+'\"');
+	ini.WriteString (_T("SimpleCleanupSearch"),CString ('\"')+m_SimpleCleanupSearch+'\"');
+	ini.WriteString (_T("SimpleCleanupReplace"),CString ('\"')+m_SimpleCleanupReplace+'\"');
+	ini.WriteString (_T("SimpleCleanupSearchChars"),CString ('\"')+m_SimpleCleanupSearchChars+'\"');
+	ini.WriteString (_T("SimpleCleanupReplaceChars"),CString ('\"')+m_SimpleCleanupReplaceChars+'\"');
 	// [end] Mighty Knife
 
-	ini.WriteBool("SolidGraph", m_bSolidGraph,"eMule"); //MORPH - Added by SiRoB, New Graph
+	ini.WriteBool(_T("SolidGraph"), m_bSolidGraph,_T("eMule")); //MORPH - Added by SiRoB, New Graph
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	ini.WriteBool("USSLog", m_bDynUpLog,"eMule");
+	ini.WriteBool(_T("USSLog"), m_bDynUpLog,_T("eMule"));
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 
     ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
     //Commander - Added: Invisible Mode [TPT] - Start
-    ini.WriteBool("InvisibleMode", m_bInvisibleMode);
-	ini.WriteInt("InvisibleModeHKKey", (int)m_cInvisibleModeHotKey);
-	ini.WriteInt("InvisibleModeHKKeyModifier", m_iInvisibleModeHotKeyModifier);
+    ini.WriteBool(_T("InvisibleMode"), m_bInvisibleMode);
+	ini.WriteInt(_T("InvisibleModeHKKey"), (int)m_cInvisibleModeHotKey);
+	ini.WriteInt(_T("InvisibleModeHKKeyModifier"), m_iInvisibleModeHotKeyModifier);
     //Commander - Added: Invisible Mode [TPT] - End        
 }
 
@@ -2525,36 +2515,36 @@ void CPreferences::SaveCats(){
         catini.WriteBool(_T("downloadInAlphabeticalOrder"), catMap.GetAt(ix)->downloadInAlphabeticalOrder, ixStr); // ZZ:DownloadManager
 
 		// khaos::categorymod+ Save View Filters
-		catini.WriteInt("vfFromCats", catMap.GetAt(ix)->viewfilters.nFromCats, ixStr);
-		catini.WriteBool("vfVideo", catMap.GetAt(ix)->viewfilters.bVideo, ixStr);
-		catini.WriteBool("vfAudio", catMap.GetAt(ix)->viewfilters.bAudio, ixStr);
-		catini.WriteBool("vfArchives", catMap.GetAt(ix)->viewfilters.bArchives, ixStr);
-		catini.WriteBool("vfImages", catMap.GetAt(ix)->viewfilters.bImages, ixStr);
-		catini.WriteBool("vfWaiting", catMap.GetAt(ix)->viewfilters.bWaiting, ixStr);
-		catini.WriteBool("vfTransferring", catMap.GetAt(ix)->viewfilters.bTransferring, ixStr);
-		catini.WriteBool("vfPaused", catMap.GetAt(ix)->viewfilters.bPaused, ixStr);
-		catini.WriteBool("vfStopped", catMap.GetAt(ix)->viewfilters.bStopped, ixStr);
-		catini.WriteBool("vfComplete", catMap.GetAt(ix)->viewfilters.bComplete, ixStr);
-		catini.WriteBool("vfHashing", catMap.GetAt(ix)->viewfilters.bHashing, ixStr);
-		catini.WriteBool("vfErrorUnknown", catMap.GetAt(ix)->viewfilters.bErrorUnknown, ixStr);
-		catini.WriteBool("vfCompleting", catMap.GetAt(ix)->viewfilters.bCompleting, ixStr);
-		catini.WriteBool("vfSeenComplet", catMap.GetAt(ix)->viewfilters.bSeenComplet, ixStr); //MORPH - Added by SiRoB, Seen Complet filter
-		catini.WriteInt("vfFSizeMin", catMap.GetAt(ix)->viewfilters.nFSizeMin, ixStr);
-		catini.WriteInt("vfFSizeMax", catMap.GetAt(ix)->viewfilters.nFSizeMax, ixStr);
-		catini.WriteInt("vfRSizeMin", catMap.GetAt(ix)->viewfilters.nRSizeMin, ixStr);
-		catini.WriteInt("vfRSizeMax", catMap.GetAt(ix)->viewfilters.nRSizeMax, ixStr);
-		catini.WriteInt("vfTimeRemainingMin", catMap.GetAt(ix)->viewfilters.nTimeRemainingMin, ixStr);
-		catini.WriteInt("vfTimeRemainingMax", catMap.GetAt(ix)->viewfilters.nTimeRemainingMax, ixStr);
-		catini.WriteInt("vfSourceCountMin", catMap.GetAt(ix)->viewfilters.nSourceCountMin, ixStr);
-		catini.WriteInt("vfSourceCountMax", catMap.GetAt(ix)->viewfilters.nSourceCountMax, ixStr);
-		catini.WriteInt("vfAvailSourceCountMin", catMap.GetAt(ix)->viewfilters.nAvailSourceCountMin, ixStr);
-		catini.WriteInt("vfAvailSourceCountMax", catMap.GetAt(ix)->viewfilters.nAvailSourceCountMax, ixStr);
-		catini.WriteString("vfAdvancedFilterMask", catMap.GetAt(ix)->viewfilters.sAdvancedFilterMask, ixStr);
+		catini.WriteInt(_T("vfFromCats"), catMap.GetAt(ix)->viewfilters.nFromCats, ixStr);
+		catini.WriteBool(_T("vfVideo"), catMap.GetAt(ix)->viewfilters.bVideo, ixStr);
+		catini.WriteBool(_T("vfAudio"), catMap.GetAt(ix)->viewfilters.bAudio, ixStr);
+		catini.WriteBool(_T("vfArchives"), catMap.GetAt(ix)->viewfilters.bArchives, ixStr);
+		catini.WriteBool(_T("vfImages"), catMap.GetAt(ix)->viewfilters.bImages, ixStr);
+		catini.WriteBool(_T("vfWaiting"), catMap.GetAt(ix)->viewfilters.bWaiting, ixStr);
+		catini.WriteBool(_T("vfTransferring"), catMap.GetAt(ix)->viewfilters.bTransferring, ixStr);
+		catini.WriteBool(_T("vfPaused"), catMap.GetAt(ix)->viewfilters.bPaused, ixStr);
+		catini.WriteBool(_T("vfStopped"), catMap.GetAt(ix)->viewfilters.bStopped, ixStr);
+		catini.WriteBool(_T("vfComplete"), catMap.GetAt(ix)->viewfilters.bComplete, ixStr);
+		catini.WriteBool(_T("vfHashing"), catMap.GetAt(ix)->viewfilters.bHashing, ixStr);
+		catini.WriteBool(_T("vfErrorUnknown"), catMap.GetAt(ix)->viewfilters.bErrorUnknown, ixStr);
+		catini.WriteBool(_T("vfCompleting"), catMap.GetAt(ix)->viewfilters.bCompleting, ixStr);
+		catini.WriteBool(_T("vfSeenComplet"), catMap.GetAt(ix)->viewfilters.bSeenComplet, ixStr); //MORPH - Added by SiRoB, Seen Complet filter
+		catini.WriteInt(_T("vfFSizeMin"), catMap.GetAt(ix)->viewfilters.nFSizeMin, ixStr);
+		catini.WriteInt(_T("vfFSizeMax"), catMap.GetAt(ix)->viewfilters.nFSizeMax, ixStr);
+		catini.WriteInt(_T("vfRSizeMin"), catMap.GetAt(ix)->viewfilters.nRSizeMin, ixStr);
+		catini.WriteInt(_T("vfRSizeMax"), catMap.GetAt(ix)->viewfilters.nRSizeMax, ixStr);
+		catini.WriteInt(_T("vfTimeRemainingMin"), catMap.GetAt(ix)->viewfilters.nTimeRemainingMin, ixStr);
+		catini.WriteInt(_T("vfTimeRemainingMax"), catMap.GetAt(ix)->viewfilters.nTimeRemainingMax, ixStr);
+		catini.WriteInt(_T("vfSourceCountMin"), catMap.GetAt(ix)->viewfilters.nSourceCountMin, ixStr);
+		catini.WriteInt(_T("vfSourceCountMax"), catMap.GetAt(ix)->viewfilters.nSourceCountMax, ixStr);
+		catini.WriteInt(_T("vfAvailSourceCountMin"), catMap.GetAt(ix)->viewfilters.nAvailSourceCountMin, ixStr);
+		catini.WriteInt(_T("vfAvailSourceCountMax"), catMap.GetAt(ix)->viewfilters.nAvailSourceCountMax, ixStr);
+		catini.WriteString(_T("vfAdvancedFilterMask"), catMap.GetAt(ix)->viewfilters.sAdvancedFilterMask, ixStr);
 		// Save Selection Criteria
-		catini.WriteBool("scFileSize", catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
-		catini.WriteBool("scAdvancedFilterMask", catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
+		catini.WriteBool(_T("scFileSize"), catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
+		catini.WriteBool(_T("scAdvancedFilterMask"), catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
 		// khaos::categorymod-
-		catini.WriteBool("ResumeFileOnlyInSameCat", catMap.GetAt(ix)->bResumeFileOnlyInSameCat, ixStr); //MORPH - Added by SiRoB, Resume file only in the same category
+		catini.WriteBool(_T("ResumeFileOnlyInSameCat"), catMap.GetAt(ix)->bResumeFileOnlyInSameCat, ixStr); //MORPH - Added by SiRoB, Resume file only in the same category
 	}
 }
 
@@ -2604,7 +2594,7 @@ void CPreferences::LoadPreferences()
 
 	if (strCurrVersion != strPrefsVersion){
 //MORPH START - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
-		if (!StrStrI(strPrefsVersion,"morph"))
+		if (!StrStrI(strPrefsVersion,_T("morph")))
 			m_bFirstStart = true;
 //MORPH END  - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
 		// don't use this; it'll delete all read-only settings from the current pref.ini
@@ -2925,9 +2915,9 @@ void CPreferences::LoadPreferences()
 	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
     //Commander - Added: Invisible Mode [TPT] - Start
-    SetInvisibleMode( ini.GetBool("InvisibleMode", false),
-	ini.GetInt("InvisibleModeHKKeyModifier", MOD_CONTROL | MOD_SHIFT | MOD_ALT),
-    (char)ini.GetInt("InvisibleModeHKKey", (int)'E'));
+    SetInvisibleMode( ini.GetBool(_T("InvisibleMode"), false),
+	ini.GetInt(_T("InvisibleModeHKKeyModifier"), MOD_CONTROL | MOD_SHIFT | MOD_ALT),
+    (char)ini.GetInt(_T("InvisibleModeHKKey"), (int)'E'));
     //Commander - Added: Invisible Mode [TPT] - End
 
     m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
@@ -3015,11 +3005,6 @@ void CPreferences::LoadPreferences()
 	m_bEnableChunkDots=ini.GetBool(_T("EnableChunkDots"),true);
 	//EastShare - Added by Pretender, Option for ChunkDots
 
-	//Commander - Removed Invisible Mode
-	//EastShare - Added by Pretender, Invisible Mode
-	//m_bInvisibleMode=ini.GetBool(_T("InvisibleMode"),false);
-	//EastShare - Added by Pretender, Invisible Mode
-
 	isautodynupswitching=ini.GetBool(_T("AutoDynUpSwitching"),false);
 	m_bDateFileNameLog=ini.GetBool(_T("DateFileNameLog"), true);//Morph - added by AndCycle, Date File Name Log
 	m_bPayBackFirst=ini.GetBool(_T("IsPayBackFirst"),false);//EastShare - added by AndCycle, Pay Back First
@@ -3032,10 +3017,10 @@ void CPreferences::LoadPreferences()
 	_stprintf(UpdateVerURLIP2Country,_T("%s"),ini.GetString(_T("UpdateVerURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/latest")));//Commander - Added: IP2Country auto-updating
 	if (StrStrI(UpdateURLFakeList,_T("http://www.emuleitor.com/downloads/Morph/fakes.txt")) ||
 		StrStrI(UpdateURLFakeList,_T("http://membres.lycos.fr/ipfilter/fakes.txt")))
-		sprintf(UpdateURLFakeList,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.txt"));
+		_stprintf(UpdateURLFakeList,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.txt"));
 	if (StrStrI(UpdateURLIPFilter,_T("http://www.emuleitor.com/downloads/Morph/ipfilter.txt")) ||
 		StrStrI(UpdateURLIPFilter,_T("http://membres.lycos.fr/ipfilter/ipfilter.txt")))
-		sprintf(UpdateURLIPFilter,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.txt"));
+		_stprintf(UpdateURLIPFilter,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.txt"));
 	
 	// khaos::categorymod+ Load Preferences
 	m_bShowCatNames=ini.GetBool(_T("ShowCatName"),true);
@@ -3239,8 +3224,8 @@ void CPreferences::LoadPreferences()
 	SetCRC32ForceUppercase (ini.GetBool (_T("ForceCRC32Uppercase"),false));
 	SetCRC32ForceAdding (ini.GetBool (_T("ForceCRC32Adding"),false));
 	// From the prefix/suffix delete the leading/trailing "".
-	SetCRC32Prefix (ini.GetString(_T("LastCRC32Prefix"),"\" [\"").Trim ("\""));
-	SetCRC32Suffix (ini.GetString(_T("LastCRC32Suffix"),"\"]\"").Trim ("\""));
+	SetCRC32Prefix (ini.GetString(_T("LastCRC32Prefix"),_T("\" [\"")).Trim (_T("\"")));
+	SetCRC32Suffix (ini.GetString(_T("LastCRC32Suffix"),_T("\"]\"")).Trim (_T("\"")));
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options
@@ -3252,9 +3237,9 @@ void CPreferences::LoadPreferences()
 	// Every "str" in SimpleCleanupSearchChars corresponds to a "str"
 	// in SimpleCleanupReplaceChars at the same position.
 	SetSimpleCleanupSearchChars (ini.GetString (_T("SimpleCleanupSearchChars"),
-								 "\"ä\";\"ö\";\"ü\";\"Ä\";\"Ö\";\"Ü\";\"ß\""));
+								 _T("\"ä\";\"ö\";\"ü\";\"Ä\";\"Ö\";\"Ü\";\"ß\"")));
 	SetSimpleCleanupReplaceChars (ini.GetString (_T("SimpleCleanupReplaceChars"),
-								 "\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\""));
+								 _T("\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\"")));
 	// [end] Mighty Knife
 
 	///////////////////////////////////////////////////////////////////////////
@@ -3348,8 +3333,8 @@ void CPreferences::LoadCats() {
 	else
 	{
 		catini.SetFileName(catinif);
-		catini.SetSection("General");
-		if (catini.GetInt("CategoryVersion") == 0)
+		catini.SetSection(_T("General"));
+		if (catini.GetInt(_T("CategoryVersion")) == 0)
 			bCreateDefault = true;
 	}
 
@@ -3357,11 +3342,11 @@ void CPreferences::LoadCats() {
 	{
 		Category_Struct* defcat=new Category_Struct;
 
-		_stprintf(defcat->title,"Default");
+		_stprintf(defcat->title,_T("Default"));
     	defcat->prio=PR_NORMAL; // ZZ:DownloadManager
 		defcat->iAdvA4AFMode = 0;
 		_stprintf(defcat->incomingpath, incomingdir);
-		_stprintf(defcat->comment, "The default category.  It can't be merged or deleted.");
+		_stprintf(defcat->comment, _T("The default category.  It can't be merged or deleted."));
 		defcat->color = 0;
 		defcat->viewfilters.bArchives = true;
 		defcat->viewfilters.bAudio = true;
@@ -3454,7 +3439,7 @@ void CPreferences::LoadCats() {
 		newcat->viewfilters.nSourceCountMax = catini.GetInt(_T("vfSourceCountMax"), 0);
 		newcat->viewfilters.nAvailSourceCountMin = catini.GetInt(_T("vfAvailSourceCountMin"), 0);
 		newcat->viewfilters.nAvailSourceCountMax = catini.GetInt(_T("vfAvailSourceCountMax"), 0);
-		newcat->viewfilters.sAdvancedFilterMask = catini.GetString(_T("vfAdvancedFilterMask"), "");
+		newcat->viewfilters.sAdvancedFilterMask = catini.GetString(_T("vfAdvancedFilterMask"), _T(""));
 		// Load Selection Criteria
 		newcat->selectioncriteria.bFileSize = catini.GetBool(_T("scFileSize"), true);
 		newcat->selectioncriteria.bAdvancedFilterMask = catini.GetBool(_T("scAdvancedFilterMask"), true);

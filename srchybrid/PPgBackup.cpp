@@ -110,55 +110,55 @@ void CPPgBackup::OnBnClickedPartMet()
 
 void CPPgBackup::OnBnClickedBackupnow()
 {
-	char buffer[200];
+	TCHAR buffer[200];
 	y2All = FALSE;
 	if ((bool)IsDlgButtonChecked(IDC_DAT))
 	{
-		Backup("*.dat", true);
+		Backup(_T("*.dat"), true);
 		CheckDlgButton(IDC_DAT,BST_UNCHECKED);
 	}
 
 	if ((bool)IsDlgButtonChecked(IDC_MET))
 	{
-		Backup("*.met", true);
+		Backup(_T("*.met"), true);
 		CheckDlgButton(IDC_MET,BST_UNCHECKED);
 	}
 
 	if ((bool)IsDlgButtonChecked(IDC_INI))
 	{
-		Backup("*.ini", true);
+		Backup(_T("*.ini"), true);
 		CheckDlgButton(IDC_INI,BST_UNCHECKED);
 	}
 
 	if ((bool)IsDlgButtonChecked(IDC_PARTMET))
 	{
-		Backup2("*.part.met");
+		Backup2(_T("*.part.met"));
 		CheckDlgButton(IDC_PARTMET,BST_UNCHECKED);
 	}
 
 	if ((bool)IsDlgButtonChecked(IDC_PART))
 	{
-		sprintf(buffer,"Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?");
-		if(MessageBox(buffer,"Are you sure?",MB_ICONQUESTION|MB_YESNO)== IDYES)
-			Backup2("*.part");
+		_stprintf(buffer,_T("Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"));
+		if(MessageBox(buffer,_T("Are you sure?"),MB_ICONQUESTION|MB_YESNO)== IDYES)
+			Backup2(_T("*.part"));
 		CheckDlgButton(IDC_PART,BST_UNCHECKED);
 
 	}
 
-	MessageBox("File(s) Copied Successfully.", "BackUp complete.", MB_OK);
+	MessageBox(_T("File(s) Copied Successfully."), _T("BackUp complete."), MB_OK);
 	y2All = FALSE;
 }
 
 
 
-void CPPgBackup::Backup(LPCSTR extensionToBack, BOOL conFirm)  
+void CPPgBackup::Backup(LPCTSTR extensionToBack, BOOL conFirm)  
 {
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
-	char buffer[200];
+	TCHAR buffer[200];
 	//CString szDirPath = CString(thePrefs.GetAppDir());
 	CString szDirPath = CString(thePrefs.GetConfigDir());
-	char szNewPath[MAX_PATH]; 
+	TCHAR szNewPath[MAX_PATH]; 
 
 	SetCurrentDirectory(szDirPath);
 	BOOL error = FALSE;
@@ -192,8 +192,8 @@ void CPPgBackup::Backup(LPCSTR extensionToBack, BOOL conFirm)
 			{
 				if (y2All == FALSE)
 				{
-					sprintf(buffer, "File %s Already Exists. OverWrite It?", FileData.cFileName);
-					int rc = ::XMessageBox(m_hWnd,buffer,"OverWrite?",MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
+					_stprintf(buffer, _T("File %s Already Exists. OverWrite It?"), FileData.cFileName);
+					int rc = ::XMessageBox(m_hWnd,buffer,_T("OverWrite?"),MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
 					if (rc == IDYES)
 						OverWrite = TRUE;
 					else if (rc == IDYESTOALL)
@@ -235,22 +235,22 @@ void CPPgBackup::Backup(LPCSTR extensionToBack, BOOL conFirm)
 		error = TRUE;
 	} 
 	if (error)
-		MessageBox("Error encountered during backup","Error",MB_OK);
+		MessageBox(_T("Error encountered during backup"),_T("Error"),MB_OK);
 }
 
 
-void CPPgBackup::Backup2(LPCSTR extensionToBack)  
+void CPPgBackup::Backup2(LPCTSTR extensionToBack)  
 {
 
 	WIN32_FIND_DATA FileData;   
 	HANDLE hSearch;   
-	char buffer[200];  
+	TCHAR buffer[200];  
 
 
 	//CString szDirPath = CString(thePrefs.GetAppDir());  
 	CString szDirPath = CString(thePrefs.GetConfigDir());
 	CString szTempPath = CString(thePrefs.GetTempDir());  
-	char szNewPath[MAX_PATH]; 
+	TCHAR szNewPath[MAX_PATH]; 
 
 	BOOL fFinished = FALSE;     
 	BOOL error = FALSE;  
@@ -287,8 +287,8 @@ void CPPgBackup::Backup2(LPCSTR extensionToBack)
 		{  
 				if (y2All == FALSE)
 				{
-					sprintf(buffer, "File %s Already Exists. OverWrite It?", FileData.cFileName);
-					int rc = ::XMessageBox(m_hWnd,buffer,"OverWrite?",MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
+					_stprintf(buffer, _T("File %s Already Exists. OverWrite It?"), FileData.cFileName);
+					int rc = ::XMessageBox(m_hWnd,buffer,_T("OverWrite?"),MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
 					if (rc == IDYES)
 						OverWrite = TRUE;
 					else if (rc == IDYESTOALL)
@@ -328,7 +328,7 @@ void CPPgBackup::Backup2(LPCSTR extensionToBack)
 	SetCurrentDirectory(CString(thePrefs.GetConfigDir()));  
 
 	if (error)  
-		MessageBox("Error encountered during backup","Error",MB_OK);  
+		MessageBox(_T("Error encountered during backup"),_T("Error"),MB_OK);  
 
 } 
 
@@ -390,13 +390,13 @@ void CPPgBackup::Backup3()
 {
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
-	CString szDirPath = CString(thePrefs.GetConfigDir())+"Backup\\";
+	CString szDirPath = CString(thePrefs.GetConfigDir())+_T("Backup\\");
 	if(!PathFileExists(szDirPath)) return;
-	char szNewPath[MAX_PATH]; 
+	TCHAR szNewPath[MAX_PATH]; 
 
 	SetCurrentDirectory(szDirPath);
 	BOOL error = FALSE;
-	szDirPath = CString(thePrefs.GetConfigDir())+"Backup2\\";
+	szDirPath = CString(thePrefs.GetConfigDir())+_T("Backup2\\");
 
 	BOOL fFinished = FALSE; 
 
@@ -406,7 +406,7 @@ void CPPgBackup::Backup3()
 
 	// Start searching for files in the current directory. 
 
-	hSearch = FindFirstFile("*.*", &FileData); 
+	hSearch = FindFirstFile(_T("*.*"), &FileData); 
 	if (hSearch == INVALID_HANDLE_VALUE) 
 	{ 
 		error = TRUE;
@@ -443,7 +443,7 @@ void CPPgBackup::Backup3()
 		error = TRUE;
 	} 
 	if (error)
-		MessageBox("Error encountered during backup","Error",MB_OK);
+		MessageBox(_T("Error encountered during backup"),_T("Error"),MB_OK);
 }
 
 void CPPgBackup::Localize(void)

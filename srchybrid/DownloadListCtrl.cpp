@@ -533,7 +533,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			int iImage = theApp.GetFileTypeSystemImageIdx(lpPartFile->GetFileName());
 			if (theApp.GetSystemImageList() != NULL)
 				::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), rcDraw.left, rcDraw.top, ILD_NORMAL|ILD_TRANSPARENT);
-			rcDraw.left += theApp.GetSmallSytemIconSize().cx;
+			rcDraw.left += theApp.GetSmallSytemIconSize().cx+3;
 			if ( thePrefs.ShowRatingIndicator() && (lpPartFile->HasComment() || lpPartFile->HasRating())){
  				//MORPH START - Modified by SiRoB, eMule plus rating icon
 				/*
@@ -637,7 +637,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			{
 				uint16 sc = lpPartFile->GetSourceCount();
 				//MORPH START - Modified by IceCream, [sivka: -counter for A4AF in sources column-]
-				buffer.Format("%i/%i/%i (%i)",
+				buffer.Format(_T("%i/%i/%i (%i)"),
 					lpPartFile->GetSrcA4AFCount(), //MORPH - Added by SiRoB, A4AF counter
 					(lpPartFile->GetSrcStatisticsValue(DS_ONQUEUE) + lpPartFile->GetSrcStatisticsValue(DS_DOWNLOADING)), //MORPH - Modified by SiRoB
 					sc, lpPartFile->GetTransferingSrcCount());
@@ -1019,7 +1019,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 							COLORREF oldclr = cdcClientPercent.SetTextColor(RGB(255,255,255));
 							int iOMode = cdcClientPercent.SetBkMode(TRANSPARENT);
 							CString csClientPercent;
-							csClientPercent.Format("%.1f%%", percent);
+							csClientPercent.Format(_T("%.1f%%"), percent);
 
 							cdcClientPercent.BitBlt(0, 0, iWidth, iHeight,  NULL, 0, 0, BLACKNESS);
 							cdcClientPercent.DrawText(csClientPercent, &rec_status, (DLC_DT_TEXT & ~DT_LEFT) | DT_CENTER);
@@ -1572,8 +1572,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.CheckMenuItem(MP_FORCEA4AF,  iFileForceAllA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED);
 			
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenuFlag.m_hMenu, iFilesNotDone > 0 && (thePrefs.AdvancedA4AFMode() || thePrefs.UseSmartA4AFSwapping())? MF_ENABLED : MF_GRAYED);
-			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFONFLAG, (iFileForceA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFONFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + " " : "") + GetResString(IDS_A4AF_ONFLAG));
-			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFOFFFLAG, (iFileForceA4AFOff > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFOFFFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + " " : "") + GetResString(IDS_A4AF_OFFFLAG));
+			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFONFLAG, (iFileForceA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFONFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + _T(" ") : _T("")) + GetResString(IDS_A4AF_ONFLAG));
+			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFOFFFLAG, (iFileForceA4AFOff > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFOFFFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + _T(" ") :  _T("")) + GetResString(IDS_A4AF_OFFFLAG));
 			// khaos::kmod-
 
 			// enable commands if there is at least one item which can be used for the action
@@ -1729,7 +1729,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			ClientMenu.AppendMenu(MF_SEPARATOR);
-			ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+			ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
 			//MORPH END - Added by Yun.SF3, List Requested Files
 
 			GetPopupMenuPos(*this, point);
@@ -2142,21 +2142,21 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					CString feed;
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_FROM), thePrefs.GetUserNick(), MOD_VERSION);
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILENAME), file->GetFileName());
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILETYPE), file->GetFileType());
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_FILESIZE), (file->GetFileSize()/1048576));
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_DOWNLOADED), (file->GetCompletedSize()/1048576));
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_TOTAL), file->GetSourceCount());
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_AVAILABLE),(file->GetAvailableSrcCount()));
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_NONEEDPART), file->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
-					feed.AppendFormat(" \r\n");
+					feed.AppendFormat(_T(" \r\n"));
 					feed.AppendFormat(GetResString(IDS_FEEDBACK_COMPLETE), file->m_nCompleteSourcesCount);
 					//Todo: copy all the comments too
 					theApp.CopyTextToClipboard(feed);
@@ -2165,16 +2165,16 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				case MP_COPYFEEDBACK_US:
 				{
 					CString feed;
-					feed.AppendFormat("Feedback from %s ",thePrefs.GetUserNick());
-					feed.AppendFormat("on [%s] \r\n",MOD_VERSION);
-					feed.AppendFormat("File Name: %s \r\n",file->GetFileName());
-					feed.AppendFormat("File Type: %s \r\n",file->GetFileType());
-					feed.AppendFormat("Size: %i Mo\r\n", (file->GetFileSize()/1048576));
-					feed.AppendFormat("Downloaded: %i Mo\r\n", (file->GetCompletedSize()/1048576));
-					feed.AppendFormat("Total sources: %i \r\n",file->GetSourceCount());
-					feed.AppendFormat("Available sources : %i \r\n",(file->GetAvailableSrcCount()));
-					feed.AppendFormat("No Need Part sources: %i \r\n",file->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
-					feed.AppendFormat("Estimate Complete source: %i \r\n",file->m_nCompleteSourcesCount);
+					feed.AppendFormat(_T("Feedback from %s "),thePrefs.GetUserNick());
+					feed.AppendFormat(_T("on [%s] \r\n"),MOD_VERSION);
+					feed.AppendFormat(_T("File Name: %s \r\n"),file->GetFileName());
+					feed.AppendFormat(_T("File Type: %s \r\n"),file->GetFileType());
+					feed.AppendFormat(_T("Size: %i Mo\r\n"), (file->GetFileSize()/1048576));
+					feed.AppendFormat(_T("Downloaded: %i Mo\r\n"), (file->GetCompletedSize()/1048576));
+					feed.AppendFormat(_T("Total sources: %i \r\n"),file->GetSourceCount());
+					feed.AppendFormat(_T("Available sources : %i \r\n"),(file->GetAvailableSrcCount()));
+					feed.AppendFormat(_T("No Need Part sources: %i \r\n"),file->GetSrcStatisticsValue(DS_NONEEDEDPARTS));
+					feed.AppendFormat(_T("Estimate Complete source: %i \r\n"),file->m_nCompleteSourcesCount);
 					//Todo: copy all the comments too
 					theApp.CopyTextToClipboard(feed);
 					break;
@@ -2186,7 +2186,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					InputBox	inputOrder;
 					CString		currOrder;
 
-					currOrder.Format("%u", file->GetCatResumeOrder());
+					currOrder.Format(_T("%u"), file->GetCatResumeOrder());
 					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_ORDER), currOrder);
 					inputOrder.SetNumber(true);
 					if (inputOrder.DoModal() == IDOK)
@@ -2206,7 +2206,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					InputBox	inputOrder;
 					if (selectedCount <= 1) break;
 						
-					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_EXPAUTOINC), "0");
+					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_EXPAUTOINC), _T("0"));
 					inputOrder.SetNumber(true);
                     if (inputOrder.DoModal() == IDOK)
 					{
@@ -2236,10 +2236,10 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					inputOrder.SetNumber(true);
 
 					while (!selectedList.IsEmpty()) {
-						currOrder.Format("%u", selectedList.GetHead()->GetCatResumeOrder());
+						currOrder.Format(_T("%u"), selectedList.GetHead()->GetCatResumeOrder());
 						currFile = selectedList.GetHead()->GetFileName();
-                        if (currFile.GetLength() > 50) currFile = currFile.Mid(0,47) + "...";
-						currInstructions.Format("%s %s", GetResString(IDS_CAT_EXPSTEPTHRU), currFile);
+                        if (currFile.GetLength() > 50) currFile = currFile.Mid(0,47) + _T("...");
+						currInstructions.Format(_T("%s %s"), GetResString(IDS_CAT_EXPSTEPTHRU), currFile);
 						inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), currInstructions, currOrder);
 
 						if (inputOrder.DoModal() == IDCANCEL) {
@@ -2267,7 +2267,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 
 					if (selectedCount <= 1) break;
 
-					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_EXPALLSAME), "0");
+					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_EXPALLSAME), _T("0"));
 					inputOrder.SetNumber(true);
 					if (inputOrder.DoModal() == IDCANCEL)
 						break;
@@ -2739,7 +2739,7 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		// Maella -Support for tag ET_MOD_VERSION 0x55-
 		if( client1->GetClientSoft() == client2->GetClientSoft() )
 			if(client2->GetVersion() == client1->GetVersion() && client1->GetClientSoft() == SO_EMULE){
-				return strcmpi(client2->GetClientSoftVer(), client1->GetClientSoftVer());
+				return CompareOptLocaleStringNoCase(client2->GetClientSoftVer(), client1->GetClientSoftVer());
 			}
 			else {
 			return client2->GetVersion() - client1->GetVersion();
@@ -2903,7 +2903,7 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW) );
 	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO) );//<--9/21/02
 	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL) );
-    m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, "Mass Rename...");//Commander - Added: MassRename [Dragon]
+    m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR));//Commander - Added: MassRename [Dragon]
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
 	

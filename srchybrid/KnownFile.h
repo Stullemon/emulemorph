@@ -353,7 +353,7 @@ public:
 	bool    IsCRC32Calculated () const			{return m_sCRC32[0]!='\0';}
 	CString GetLastCalculatedCRC32 () const		{return m_sCRC32;}
 	// The CRC32 is not created within this object but written to this object:
-	void    SetLastCalculatedCRC32 (const char* _CRC) {strcpy (m_sCRC32,_CRC);}
+	void    SetLastCalculatedCRC32 (const LPCTSTR _CRC) {_tcscpy (m_sCRC32,_CRC);}
 
 	// [end] Mighty Knife
 
@@ -424,7 +424,7 @@ private:
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 
 	// Mighty Knife: CRC32-Tag
-	char    m_sCRC32 [16];
+	TCHAR    m_sCRC32 [16];
 	// [end] Mighty Knife
 };
 

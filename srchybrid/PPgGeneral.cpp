@@ -180,9 +180,9 @@ BOOL CPPgGeneral::OnInitDialog()
 	//Commander - Added: Invisible Mode [TPT] - Start
 	// Add keys to ComboBox
 	for(int i='A'; i<='Z'; i++)
-		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->AddString(_T(CString((char)(i))));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->AddString(CString((char)(i)));
 	for(int i='0'; i<='9'; i++)
-		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->AddString(_T(CString((char)(i))));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->AddString(CString((char)(i)));
 	//Commander - Added: Invisible Mode [TPT] - End
 
 	LoadSettings();
@@ -306,10 +306,10 @@ void CPPgGeneral::Localize(void)
 		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY));
 		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_ALTKEY));
 		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_SHIFTKEY));
-		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + " + " + GetResString(IDS_ALTKEY));
-		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + " + " + GetResString(IDS_SHIFTKEY));
-		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_ALTKEY) + " + " + GetResString(IDS_SHIFTKEY));
-		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + " + " + GetResString(IDS_ALTKEY) + " + " + GetResString(IDS_SHIFTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + _T(" + ") + GetResString(IDS_ALTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + _T(" + ") + GetResString(IDS_SHIFTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_ALTKEY) + _T(" + ") + GetResString(IDS_SHIFTKEY));
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_KEY_COMBO))->AddString(GetResString(IDS_CTRLKEY) + _T(" + ") + GetResString(IDS_ALTKEY) + _T(" + ") + GetResString(IDS_SHIFTKEY));
 
 		CString key_modifier;
 		if (m_iActualKeyModifier & MOD_CONTROL)

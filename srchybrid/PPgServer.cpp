@@ -123,7 +123,7 @@ void CPPgServer::LoadSettings(void)
 
     CString strBuffer;
     //MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	strBuffer.Format("%d", thePrefs.GetLowIdRetries());
+	strBuffer.Format(_T("%d"), thePrefs.GetLowIdRetries());
 	GetDlgItem(IDC_LOWIDRETRY)->SetWindowText(strBuffer);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 }
@@ -157,11 +157,9 @@ BOOL CPPgServer::OnApply()
     CString buffer;
 	
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	if(GetDlgItem(IDC_LOWIDRETRY)->GetWindowTextLength())
-	{
-		GetDlgItem(IDC_LOWIDRETRY)->GetWindowText(buffer);
-		thePrefs.SetLowIdRetries(atoi(buffer));
-	}
+	thePrefs.LowIdRetries = GetDlgItemInt(IDC_LOWIDRETRY,NULL,FALSE);
+	if (thePrefs.LowIdRetries > 5)
+		thePrefs.LowIdRetries = 5;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	
 	LoadSettings();

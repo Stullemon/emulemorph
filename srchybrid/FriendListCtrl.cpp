@@ -123,7 +123,7 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 	CString OldName = GetItemText (iItem,0);
 	if ((OldName != pFriend->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
  			TCHAR buffer[100]; buffer [0] = 0;
-		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,pFriend->m_abyUserhash[i]);
+		for (uint16 i = 0;i != 16;i++) _stprintf(buffer,_T("%s%02X"),buffer,pFriend->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
 		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"),
 									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, (uint8)pFriend->m_dwLastUsedIP, 

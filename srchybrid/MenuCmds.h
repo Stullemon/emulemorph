@@ -173,10 +173,10 @@
 // khaos::categorymod-
 
 // Mighty Knife: CRC32-Tag
-#define MP_CALCCRC32            10380
-#define MP_ADDCRC32TOFILENAME   10381
-#define MP_ABORTCRC32CALC		10382
-#define MP_RECALCCRC32          10383
+#define MP_CRC32_CALCULATE	 10380
+#define MP_CRC32_TAG         10381
+#define MP_CRC32_ABORT		 10382
+#define MP_CRC32_RECALCULATE 10383
 // [end] Mighty Knife
 
 // Mighty Knife: Mass Rename

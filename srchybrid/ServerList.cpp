@@ -731,8 +731,8 @@ bool CServerList::SaveServermetToFile()
 			}
 			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 			if (nextserver->GetPort() != nextserver->GetConnPort()) {
-				char temp[64] ;
-				sprintf(temp, "%d", nextserver->GetPort()) ;
+				TCHAR temp[64] ;
+				_stprintf(temp, _T("%d"), nextserver->GetPort()) ;
 				CTag auxportslist("auxportslist", temp);
 				auxportslist.WriteTagToFile(&servermet);
 				uTagCount++;

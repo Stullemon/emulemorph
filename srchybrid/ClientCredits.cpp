@@ -345,10 +345,10 @@ void CClientCreditsList::LoadList()
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".MSUQWT"), thePrefs.GetConfigDir());//Pawcio
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir());
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), thePrefs.GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+"Backup\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+"Backup\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+"Backup2\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+"Backup2\\");
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+_T("Backup\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+_T("Backup\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+_T("Backup2\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+_T("Backup2\\"));
 	//totalLoadFile = 9;
 
 	int	lastFile = -1;
@@ -376,7 +376,7 @@ void CClientCreditsList::LoadList()
 	}
 
 	if(lastFile != -1)	strFileName = loadFileName[lastFile];
-	AddLogLine(false, "Load %s", strFileName);
+	AddLogLine(false, _T("Load %s"), strFileName);
 
 //Morph End - added by AndCycle, choose .met to load
 
@@ -553,7 +553,7 @@ void CClientCreditsList::SaveList()
 		return;
 	}
 	*/
-	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+	if (!file.Open(name+_T(".SUQWTv2.met"), CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){

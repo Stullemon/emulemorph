@@ -198,7 +198,7 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 									(uint8)(Record->m_dwLastUsedIP>>16),(uint8)(Record->m_dwLastUsedIP>>24), 
 									Record->m_nLastUsedPort, buffer);
 		#else
-		AddLogLine(false, "New friend: '%s', hash: %s",
+		AddLogLine(false, _T("New friend: '%s', hash: %s"),
 									Record->m_strName, buffer);
 		#endif
 	}
@@ -243,7 +243,7 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 									(uint8)(NewFriend->m_dwLastUsedIP>>16),(uint8)(NewFriend->m_dwLastUsedIP>>24), 
 									NewFriend->m_nLastUsedPort, buffer);
 		#else
-		AddLogLine(false, "New friend: '%s', hash: %s",
+		AddLogLine(false, _T("New friend: '%s', hash: %s"),
 									NewFriend->m_strName, buffer);
 		#endif
 	}
@@ -270,7 +270,7 @@ void CFriendList::RemoveFriend(CFriend* todel){
 									(uint8)(todel->m_dwLastUsedIP>>16),(uint8)(todel->m_dwLastUsedIP>>24), 
 									todel->m_nLastUsedPort, buffer);
 		#else
-		AddLogLine(false, "Removed friend: '%s', hash: %s",
+		AddLogLine(false, _T("Removed friend: '%s', hash: %s"),
 									todel->m_strName, buffer);
 		#endif
 	}

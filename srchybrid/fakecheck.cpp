@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "StdAfx.h"
+#include <share.h>
 #include "fakecheck.h"
 #include "emule.h"
 #include "otherfunctions.h"
@@ -58,7 +59,7 @@ static int __cdecl CmpFakeByHash_Lenght(const void* p1, const void* p2)
 }
 
 int CFakecheck::LoadFromFile(){
-	FILE* readFile = fopen(thePrefs.GetConfigDir()+_T("fakes.dat"), "r");
+	FILE* readFile = _tfsopen(thePrefs.GetConfigDir()+_T("fakes.dat"), _T("r"), _SH_DENYWR);
 	if (readFile!=NULL) {
 		CString sbuffer, sbuffer2;
 		int pos;
@@ -82,7 +83,7 @@ int CFakecheck::LoadFromFile(){
 			DecodeBase16(sbuffer2.GetBuffer(),sbuffer2.GetLength(),Hash,ARRSIZE(Hash));
 			int pos2=sbuffer.Find(_T(","),pos+1);
 			if (pos2==-1) continue;
-			Lenght=atoi(sbuffer.Mid(pos+1,pos2-pos-1).Trim());
+			Lenght=_tstoi(sbuffer.Mid(pos+1,pos2-pos-1).Trim());
 			Title=sbuffer.Mid(pos2+1,sbuffer.GetLength()-pos2-2);
 			AddFake(&Hash[0],Lenght,Title);
 			++fakecounter;
@@ -155,44 +156,42 @@ void CFakecheck::RemoveAllFakes()
 
 void CFakecheck::DownloadFakeList()
 {
-	char buffer[5];
-	int lenBuf = 5;
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLFakeList();
-	strURL.TrimRight(".txt");
-	strURL.TrimRight(".dat");
-	strURL.Append(".txt");
-	CString strTempFilename;
-	strTempFilename.Format(CString(thePrefs.GetAppDir())+"fakes.txt");
-	FILE* readFile= fopen(strTempFilename, "r");
+	strURL.TrimRight(_T(".txt"));
+	strURL.TrimRight(_T(".dat"));
+	strURL.Append(_T(".txt"));
+
+	TCHAR szTempFilePath[_MAX_PATH];
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_FAKECHECK_FILENAME, _T("tmp"));
+	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = _T("Downloading Fake Check version file");
 	dlgDownload.m_sURLToDownload = strURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
+
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		AddLogLine(true, "Error downloading %s", strURL);
+		_tremove(szTempFilePath);
+		AddLogLine(true, _T("Error downloading %s"), strURL);
 		return;
 	}
-	readFile= fopen(strTempFilename, "r");
+	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+
+	char buffer[9];
+	int lenBuf = 9;
 	fgets(buffer,lenBuf,readFile);
-		//return false;
+
 	sbuffer = buffer;
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
-	remove(strTempFilename);
-	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
-	if ((thePrefs.GetFakesDatVersion() < (uint32) atoi(sbuffer))) {
-		thePrefs.SetFakesDatVersion(atoi(sbuffer));
-		thePrefs.Save(); //MORPH - Added by SiRoB, Fix the continuous update while emule have not been shutdown in case used in an autoupdater
-		CString FakeCheckURL = strURL.TrimRight(".txt")+".dat";
-		strTempFilename.Format(CString(thePrefs.GetConfigDir())+"fakes.dat");
-		if (fopen(strTempFilename, "r")) {
-			fclose(readFile);
-			remove(strTempFilename);
-		}
+	_tremove(szTempFilePath);
 
-		TCHAR szTempFilePath[MAX_PATH];
+	if ((thePrefs.GetFakesDatVersion() < (uint32) _tstoi(sbuffer)) || (readFile == NULL)) {
+		
+		CString FakeCheckURL = thePrefs.GetUpdateURLFakeList();
+
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_FAKECHECK_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
@@ -213,7 +212,7 @@ void CFakecheck::DownloadFakeList()
 		{
 			bIsZipFile = true;
 
-			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+			CZIPFile::File* zfile = zip.GetFile(DFLT_FAKECHECK_FILENAME);
 			if (zfile)
 			{
 				TCHAR szTempUnzipFilePath[MAX_PATH];
@@ -224,18 +223,18 @@ void CFakecheck::DownloadFakeList()
 					zfile = NULL;
 
 					if (_tremove(GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to remove default fake check file \"%s\" - %s\n", GetDefaultFilePath(), strerror(errno));
 					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), strerror(errno));
+						TRACE("*** Error: Failed to rename uncompressed fake check file \"%s\" to default fake check file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), strerror(errno));
 					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, strerror(errno));
+						TRACE("*** Error: Failed to remove temporary fake check file \"%s\" - %s\n", szTempFilePath, strerror(errno));
 					bUnzipped = true;
 				}
 				else
-					AddLogLine(true, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+					AddLogLine(true, _T("Failed to extract fake check file from downloaded fake check ZIP file \"%s\"."), szTempFilePath);
 			}
 			else
-				AddLogLine(true, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				AddLogLine(true, _T("Downloaded fake check file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
 
 			zip.Close();
 		}
@@ -246,7 +245,14 @@ void CFakecheck::DownloadFakeList()
 			_trename(szTempFilePath, GetDefaultFilePath());
 		}
 
+		if(bIsZipFile && !bUnzipped){
+			return;
+		}
+
 		LoadFromFile();
+
+		thePrefs.SetFakesDatVersion(_tstoi(sbuffer));
+		thePrefs.Save();
 	}
 }
 CString CFakecheck::GetDefaultFilePath() const

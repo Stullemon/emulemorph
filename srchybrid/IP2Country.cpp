@@ -12,6 +12,7 @@ the IP to country data is provided by http://ip-to-country.webhosting.info/
 // by Superlexx, based on IPFilter by Bouc7
 
 #include "StdAfx.h"
+#include <share.h>
 #include "IP2Country.h"
 #include "emule.h"
 #include "otherfunctions.h"
@@ -41,7 +42,7 @@ static char THIS_FILE[] = __FILE__;
 CString FirstCharCap(CString target){
 
 	target.TrimRight();//clean out the space at the end, prevent exception for index++
-	if(target.IsEmpty()) return "";
+	if(target.IsEmpty()) return _T("");
 	target.MakeLower();
 	target.SetAt(0, target.Left(1).MakeUpper().GetAt(0));
 	for(int index = target.Find(' '); index != -1; index = target.Find(' ', index)){
@@ -72,8 +73,8 @@ CIP2Country::CIP2Country(){
 		Load();
 	}
 
-	AddLogLine(false, "IP2Country uses the IP-to-Country Database provided by WebHosting.");
-	AddLogLine(false, "Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info.");
+	AddLogLine(false, _T("IP2Country uses the IP-to-Country Database provided by WebHosting."));
+	AddLogLine(false, _T("Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info."));
 	m_bRunning = true;
 }
 
@@ -91,7 +92,7 @@ void CIP2Country::Load(){
 
 	if(m_bRunning) Reset();
 
-	AddLogLine(false, "IP2Country loaded");
+	AddLogLine(false, _T("IP2Country loaded"));
 }
 
 void CIP2Country::Unload(){
@@ -104,7 +105,7 @@ void CIP2Country::Unload(){
 	RemoveAllIPs();
 	RemoveAllFlags();
 
-	AddDebugLogLine(false, "IP2Country unloaded");
+	AddDebugLogLine(false, _T("IP2Country unloaded"));
 }
 
 void CIP2Country::Reset(){
@@ -120,10 +121,8 @@ bool CIP2Country::LoadFromFile(){
 
 	char buffer[1024];
 	int	lenBuf = 1024;
-
-	CString ip2countryCSVfile = thePrefs.GetConfigDir()+"ip-to-country.csv";
-
-	FILE* readFile = fopen(ip2countryCSVfile, "r");
+	CString ip2countryCSVfile = GetDefaultFilePath();
+	FILE* readFile = _tfsopen(ip2countryCSVfile, _T("r"), _SH_DENYWR);
 
 	try{
 		if (readFile != NULL) {
@@ -162,7 +161,7 @@ bool CIP2Country::LoadFromFile(){
 				curPos = 0;
 
 				for(int forCount = 0; forCount !=  5; forCount++){
-					tempStr[forCount] = sbuffer.Tokenize(",", curPos);
+					tempStr[forCount] = sbuffer.Tokenize(_T(","), curPos);
 					if(tempStr[forCount].IsEmpty()) {
 						if(forCount == 0 || forCount == 1) error = true; //no empty ip field
 						//no need to throw an exception, keep reading in next line
@@ -171,15 +170,15 @@ bool CIP2Country::LoadFromFile(){
 				}
 				
 				if(error){
-					AddLogLine(false, "error line number : %i", count+1);
-					AddLogLine(false, "%s %s", "possible error line in", ip2countryCSVfile);
+					AddLogLine(false, _T("error line number : %i"), count+1);
+					AddLogLine(false, _T("%s %s"), _T("possible error line in"), ip2countryCSVfile);
 					continue;
 				}
 				//tempStr[4] is full country name, capitalize country name from rayita
 				tempStr[4] = FirstCharCap(tempStr[4]);
 
 				count++;
-				AddIPRange(atoi(tempStr[0]),atoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
+				AddIPRange(_tstoi(tempStr[0]),_tstoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
 			}
 			fclose(readFile);
 		}
@@ -188,11 +187,11 @@ bool CIP2Country::LoadFromFile(){
 		}
 	}
 	catch(CString error){
-		AddLogLine(false, "%s %s", error, ip2countryCSVfile);
+		AddLogLine(false, _T("%s %s"), error, ip2countryCSVfile);
 		RemoveAllIPs();
 		return false;
 	}
-	AddDebugLogLine(false, "IP2Countryfile has been loaded");
+	AddDebugLogLine(false, _T("IP2Countryfile has been loaded"));
 	return true;
 
 }
@@ -206,11 +205,11 @@ bool CIP2Country::LoadCountryFlagLib(){
 		//detect windows version
 		if(thePrefs.GetWindowsVersion() == _WINVER_XP_){
 			//it's XP, we can use beautiful 32bits flags with alpha channel :)
-			ip2countryCountryFlag = thePrefs.GetConfigDir()+"countryflag32.dll";
+			ip2countryCountryFlag = thePrefs.GetConfigDir()+_T("countryflag32.dll");
 		}
 		else{
 			//oh~ it's not XP, but we still can load the 24bits flags
-			ip2countryCountryFlag = thePrefs.GetConfigDir()+"countryflag.dll";
+			ip2countryCountryFlag = thePrefs.GetConfigDir()+_T("countryflag.dll");
 		}
 
 		_hCountryFlagDll = LoadLibrary(ip2countryCountryFlag); 
@@ -290,27 +289,27 @@ bool CIP2Country::LoadCountryFlagLib(){
 		};
 
 		CString countryID[] = {
-			"N/A",//first res in image list should be N/A
+			_T("N/A"),//first res in image list should be N/A
 
-			"AD", "AE", "AF", "AG", "AI", "AL", "AM", "AN", "AO", "AR", "AS", "AT", "AU", "AW", "AZ", 
-			"BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BM", "BN", "BO", "BR", "BS", "BT", 
-			"BW", "BY", "BZ", "CA", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", 
-			"CR", "CU", "CV", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC", "EE", "EG", 
-			"EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB", "GD", "GE", "GG", 
-			"GH", "GI", "GK", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", 
-			"HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR", "IS", "IT", "JE", 
-			"JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", 
-			"LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "MG", "MH", 
-			"MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", 
-			"MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA", 
-			"PC", "PE", "PF", "PG", "PH", "PK", "PL", "PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", 
-			"RO", "RU", "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SK", "SL", "SM", "SN", 
-			"SO", "SR", "ST", "SU", "SV", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", 
-			"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", 
-			"VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YU", "ZA", "ZM", "ZW", 
-			"UK", //by tharghan
-			"CS", //by propaganda
-			"TP" //by commander
+			_T("AD"), _T("AE"), _T("AF"), _T("AG"), _T("AI"), _T("AL"), _T("AM"), _T("AN"), _T("AO"), _T("AR"), _T("AS"), _T("AT"), _T("AU"), _T("AW"), _T("AZ"), 
+			_T("BA"), _T("BB"), _T("BD"), _T("BE"), _T("BF"), _T("BG"), _T("BH"), _T("BI"), _T("BJ"), _T("BM"), _T("BN"), _T("BO"), _T("BR"), _T("BS"), _T("BT"), 
+			_T("BW"), _T("BY"), _T("BZ"), _T("CA"), _T("CC"), _T("CD"), _T("CF"), _T("CG"), _T("CH"), _T("CI"), _T("CK"), _T("CL"), _T("CM"), _T("CN"), _T("CO"), 
+			_T("CR"), _T("CU"), _T("CV"), _T("CX"), _T("CY"), _T("CZ"), _T("DE"), _T("DJ"), _T("DK"), _T("DM"), _T("DO"), _T("DZ"), _T("EC"), _T("EE"), _T("EG"), 
+			_T("EH"), _T("ER"), _T("ES"), _T("ET"), _T("FI"), _T("FJ"), _T("FK"), _T("FM"), _T("FO"), _T("FR"), _T("GA"), _T("GB"), _T("GD"), _T("GE"), _T("GG"), 
+			_T("GH"), _T("GI"), _T("GK"), _T("GL"), _T("GM"), _T("GN"), _T("GP"), _T("GQ"), _T("GR"), _T("GS"), _T("GT"), _T("GU"), _T("GW"), _T("GY"), _T("HK"), 
+			_T("HN"), _T("HR"), _T("HT"), _T("HU"), _T("ID"), _T("IE"), _T("IL"), _T("IM"), _T("IN"), _T("IO"), _T("IQ"), _T("IR"), _T("IS"), _T("IT"), _T("JE"), 
+			_T("JM"), _T("JO"), _T("JP"), _T("KE"), _T("KG"), _T("KH"), _T("KI"), _T("KM"), _T("KN"), _T("KP"), _T("KR"), _T("KW"), _T("KY"), _T("KZ"), _T("LA"), 
+			_T("LB"), _T("LC"), _T("LI"), _T("LK"), _T("LR"), _T("LS"), _T("LT"), _T("LU"), _T("LV"), _T("LY"), _T("MA"), _T("MC"), _T("MD"), _T("MG"), _T("MH"), 
+			_T("MK"), _T("ML"), _T("MM"), _T("MN"), _T("MO"), _T("MP"), _T("MQ"), _T("MR"), _T("MS"), _T("MT"), _T("MU"), _T("MV"), _T("MW"), _T("MX"), _T("MY"), 
+			_T("MZ"), _T("NA"), _T("NC"), _T("NE"), _T("NF"), _T("NG"), _T("NI"), _T("NL"), _T("NO"), _T("NP"), _T("NR"), _T("NU"), _T("NZ"), _T("OM"), _T("PA"), 
+			_T("PC"), _T("PE"), _T("PF"), _T("PG"), _T("PH"), _T("PK"), _T("PL"), _T("PM"), _T("PN"), _T("PR"), _T("PS"), _T("PT"), _T("PW"), _T("PY"), _T("QA"), 
+			_T("RO"), _T("RU"), _T("RW"), _T("SA"), _T("SB"), _T("SC"), _T("SD"), _T("SE"), _T("SG"), _T("SH"), _T("SI"), _T("SK"), _T("SL"), _T("SM"), _T("SN"), 
+			_T("SO"), _T("SR"), _T("ST"), _T("SU"), _T("SV"), _T("SY"), _T("SZ"), _T("TC"), _T("TD"), _T("TF"), _T("TG"), _T("TH"), _T("TJ"), _T("TK"), _T("TL"), 
+			_T("TM"), _T("TN"), _T("TO"), _T("TR"), _T("TT"), _T("TV"), _T("TW"), _T("TZ"), _T("UA"), _T("UG"), _T("UM"), _T("US"), _T("UY"), _T("UZ"), _T("VA"), 
+			_T("VC"), _T("VE"), _T("VG"), _T("VI"), _T("VN"), _T("VU"), _T("WF"), _T("WS"), _T("YE"), _T("YU"), _T("ZA"), _T("ZM"), _T("ZW"), 
+			_T("UK"), //by tharghan
+			_T("CS"), //by propaganda
+			_T("TP") //by commander
 		};
 
 		HICON iconHandle;
@@ -333,7 +332,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 
 	}
 	catch(CString error){
-		AddLogLine(false, "%s in %s", error, ip2countryCountryFlag);
+		AddLogLine(false, _T("%s in %s"), error, ip2countryCountryFlag);
 		RemoveAllFlags();
 		//free lib
 		if(_hCountryFlagDll != NULL) FreeLibrary(_hCountryFlagDll);
@@ -343,7 +342,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 	//free lib
 	if(_hCountryFlagDll != NULL) FreeLibrary(_hCountryFlagDll);
 
-	AddDebugLogLine(false, "Country Flags have been loaded");
+	AddDebugLogLine(false, _T("Country Flags have been loaded"));
 	return true;
 
 }
@@ -361,7 +360,7 @@ void CIP2Country::RemoveAllIPs(){
 	}
 	iplist.RemoveAll();
 
-	AddDebugLogLine(false, "IP2Countryfile has been unloaded");
+	AddDebugLogLine(false, _T("IP2Countryfile has been unloaded"));
 }
 
 void CIP2Country::RemoveAllFlags(){
@@ -372,7 +371,7 @@ void CIP2Country::RemoveAllFlags(){
 	//also clean out the map table
 	CountryIDtoFlagIndex.RemoveAll();
 
-	AddLogLine(false, "Country Flags have been unloaded");
+	AddLogLine(false, _T("Country Flags have been unloaded"));
 }
 
 bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName){
@@ -415,7 +414,7 @@ struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
 		return &defaultIP2Country;
 	}
 	else if(iplist.IsEmpty()){
-		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP iplist doesn't exist");
+		AddDebugLogLine(false, _T("CIP2Country::GetCountryFromIP iplist doesn't exist"));
 		return &defaultIP2Country;
 	}
 
@@ -453,51 +452,38 @@ bool CIP2Country::ShowCountryFlag(){
 //Commander - Added: IP2Country auto-updating - Start
 void CIP2Country::UpdateIP2CountryURL()
 {   
-	char buffer[9]; //Versionformat: Ymmdd -> 20040101
-	int lenBuf = 9;
 	CString sbuffer;
-	CString strVerURL = thePrefs.GetUpdateVerURLIP2Country(); //Version URL to keep it separated
-	CString strURL = thePrefs.GetUpdateURLIP2Country(); // File URL
-	CString strTempFilename;
-	strTempFilename.Format(CString(thePrefs.GetAppDir())+"ip-to-country.txt");
-	FILE* readFile= fopen(strTempFilename, "r");
+	CString strURL = thePrefs.GetUpdateVerURLIP2Country(); //Version URL to keep it separated
+
+	TCHAR szTempFilePath[_MAX_PATH];
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
+	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = _T("Downloading IP2Country version file");
-	dlgDownload.m_sURLToDownload = strVerURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	dlgDownload.m_sURLToDownload = strURL;
+	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		AddLogLine(true, "Error downloading %s", strVerURL);
+		_tremove(szTempFilePath);
+		AddLogLine(true, _T("Error downloading %s"), strURL);
 		return;
 	}
-	readFile= fopen(strTempFilename, "r");
+	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+
+	char buffer[9]; //Versionformat: Ymmdd -> 20040101
+	int lenBuf = 9;
 	fgets(buffer,lenBuf,readFile);
 	sbuffer = buffer;
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
-	remove(strTempFilename);
+	_tremove(szTempFilePath);
 
     // Compare the Version numbers
-	if ((thePrefs.GetIP2CountryVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
+	if ((thePrefs.GetIP2CountryVersion()< (uint32) _tstoi(sbuffer)) || (readFile == NULL)) {
 		
-		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
-			theApp.ip2country->Unload();
-			AddLogLine(false,"IP2Country.csv unloaded due to update in progress");
-		}
-		CString IP2CountryURL = strURL;
-		CString ext;
+		CString IP2CountryURL = thePrefs.GetUpdateURLIP2Country();
 		
-		ext = strURL;
-		ext.TrimRight("."); //Trim the file URL in order to save its extension in ext
-
-		strTempFilename.Format(CString(thePrefs.GetConfigDir())+"ip-to-country."+"ext"); //create a file with the original extension
-
-		if (fopen(strTempFilename, "r")) {
-			fclose(readFile);
-			remove(strTempFilename);
-		}
-
-		TCHAR szTempFilePath[MAX_PATH];
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
@@ -507,11 +493,7 @@ void CIP2Country::UpdateIP2CountryURL()
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			AddLogLine(true, _T("IP2Country file download failed"));
-			if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
-				theApp.ip2country->Load();
-				AddLogLine(false,"IP2Country.csv loaded after unsuccessful update (backup file loaded)");
-			}
+			AddLogLine(true, _T("IP to Country file download failed"));
 			return;
 		}
         
@@ -522,49 +504,57 @@ void CIP2Country::UpdateIP2CountryURL()
 		{
 			bIsZipFile = true;
 
-			CZIPFile::File* zfile = zip.GetFile(_T("ip-to-country.csv")); // It has to be a zip-file which includes a file called: ip-to-country.csv
+			CZIPFile::File* zfile = zip.GetFile(DFLT_IP2COUNTRY_FILENAME); // It has to be a zip-file which includes a file called: ip-to-country.csv
 			if (zfile)
 			{
 				TCHAR szTempUnzipFilePath[MAX_PATH];
 				_tmakepath(szTempUnzipFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
-				TCHAR szTempCurrentFilePath[MAX_PATH];
-				_tmakepath(szTempCurrentFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(""));
-
 				if (zfile->Extract(szTempUnzipFilePath))
 				{
 					zip.Close();
 					zfile = NULL;
-                    //Successfully unziped, rename the unzipped temp file to its destination name and remove the zipped file
+
+					if (_tremove(GetDefaultFilePath()) != 0)
+						TRACE("*** Error: Failed to remove default IP to Country file \"%s\" - %s\n", GetDefaultFilePath(), strerror(errno));
+					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
+						TRACE("*** Error: Failed to rename uncompressed IP to Country file \"%s\" to default IP to Country file \"%s\" - %s\n", szTempUnzipFilePath, GetDefaultFilePath(), strerror(errno));
+					if (_tremove(szTempFilePath) != 0)
+						TRACE("*** Error: Failed to remove temporary IP to Country file \"%s\" - %s\n", szTempFilePath, strerror(errno));
 					bUnzipped = true;
-                    if(PathFileExists(thePrefs.GetConfigDir()+_T("ip-to-country.csv")))
-						_tremove(szTempCurrentFilePath);
-					_trename(szTempUnzipFilePath, thePrefs.GetConfigDir()+_T("ip-to-country.csv"));
-					_tremove(szTempFilePath);
 				}
 				else
-					AddLogLine(true, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+					AddLogLine(true, _T("Failed to extract IP to Country file from downloaded IP to Country ZIP file \"%s\"."), szTempFilePath);
 			}
 			else
-				AddLogLine(true, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath); //File not found inside the zip-file
+				AddLogLine(true, _T("Downloaded IP to Country file \"%s\" is a ZIP file with unexpected content."), szTempFilePath); //File not found inside the zip-file
 
 			zip.Close();
 		}
-		else 
-			_trename(szTempFilePath, thePrefs.GetConfigDir()+_T("ip-to-country.csv")); //If its not a zipfile, rename it to its destination name
-		
         
-		if(bIsZipFile && bUnzipped == false){ //Is Zipfile and failed to unzip
+		if (!bIsZipFile && !bUnzipped)
+		{
+			_tremove(GetDefaultFilePath());
+			_trename(szTempFilePath, GetDefaultFilePath());
+		}
+
+		if(bIsZipFile && !bUnzipped){
 			return;
 		}
 
-        //load the new one
 		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
-		  theApp.ip2country->Load();
-		  AddLogLine(false,"IP2Country.csv loaded after successful update");
+			theApp.ip2country->Unload();
+			AddLogLine(false,_T("IP2Country.csv unloaded due to update in progress"));
+			theApp.ip2country->Load();
+			AddLogLine(false,_T("IP2Country.csv loaded after successful update"));
 		}
 
-		thePrefs.SetIP2CountryVersion(atoi(sbuffer)); //Commander - Added: Update version number
+		thePrefs.SetIP2CountryVersion(_tstoi(sbuffer)); //Commander - Added: Update version number
 		thePrefs.Save();
 	}
 }
 //Commander - Added: IP2Country auto-updating - End
+
+CString CIP2Country::GetDefaultFilePath() const
+{
+	return thePrefs.GetConfigDir() + DFLT_IP2COUNTRY_FILENAME;
+}

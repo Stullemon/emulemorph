@@ -1109,7 +1109,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 							userHash += buffer;
 						}
 						// Ban => serious error (Attack?)
-						AddLogLine(false, _T(GetResString(IDS_CORRUPTDATASENT)), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash, GetClientSoftVer()); //MORPH - Modified by IceCream
+						AddLogLine(false, GetResString(IDS_CORRUPTDATASENT), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash, GetClientSoftVer()); //MORPH - Modified by IceCream
 						theApp.ipfilter->AddIP(GetIP(), 1, _T("Temporary"));
 						SetDownloadState(DS_ERROR);
 					}

@@ -39,7 +39,7 @@ public:
 	uint32	AddCompleteSources(uint32 count);
 	uint32	GetCompleteSourceCount() const;
 	uint32	GetSearchID() const { return m_nSearchID; }
-	LPCSTR	GetFakeComment() const { return m_pszIsFake; } //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+	LPCTSTR	GetFakeComment() const { return m_pszIsFake; } //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	LPCTSTR GetDirectory() const { return m_pszDirectory; }
 	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
 

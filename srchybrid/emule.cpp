@@ -512,11 +512,6 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 }
 #endif
 
-// Elandal: multipleInstance
-typedef UINT WINAPI GetWindowModuleFileName(IN HWND hwnd, OUT LPSTR pszFileName, IN UINT cchFileNameMax);
-static GetWindowModuleFileName* lpfnGetWindowModuleFileName;
-// Elandal: multipleInstance
-
 bool CemuleApp::ProcessCommandline()
 {
 	bool bIgnoreRunningInstances = (GetProfileInt(_T("eMule"), _T("IgnoreInstances"), 0) != 0);
@@ -540,47 +535,20 @@ bool CemuleApp::ProcessCommandline()
 	CCommandLineInfo cmdInfo;
     ParseCommandLine(cmdInfo);
     
-	// Elandal: multipleInstance
-	char buffer[490];
-	memset(buffer, 0, 490);
-	GetModuleFileName(NULL, buffer, 490);
-	LPTSTR pszFileName = _tcsrchr(buffer, '\\') + 1;
-	*pszFileName = '\0';
-
-	while((pszFileName = _tcschr(buffer, '\\')) != NULL)
-		*pszFileName = '/';
-
 	// If we create our TCP listen socket with SO_REUSEADDR, we have to ensure that there are
 	// not 2 emules are running using the same port.
 	// NOTE: This will not prevent from some other application using that port!
 	UINT uTcpPort = GetProfileInt(_T("eMule"), _T("Port"), DEFAULT_TCP_PORT);
 	CString strMutextName;
-	strMutextName.Format(_T("%s:%u/%s"), EMULE_GUID, uTcpPort,buffer);
+	strMutextName.Format(_T("%s:%u"), EMULE_GUID, uTcpPort);
 	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, strMutextName);
 
-	lpfnGetWindowModuleFileName = NULL;
-	HMODULE hUser32_DLL = LoadLibrary("USER32.DLL");
-	if (hUser32_DLL) {
-	#ifdef UNICODE
-		lpfnGetWindowModuleFileName = (GetWindowModuleFileName*)GetProcAddress(hUser32_DLL,"GetWindowModuleFileNameW");
-	#else
-		lpfnGetWindowModuleFileName = (GetWindowModuleFileName*)GetProcAddress(hUser32_DLL,"GetWindowModuleFileNameA");
-	#endif
-	}
-	else
-		theApp.emuledlg->AddDebugLogLine(false,"LoadLibrary() failed: Unable to locate USER32.DLL!");
-	// Elandal: multipleInstance
-
 	HWND maininst = NULL;
-	LPARAM params[2] = {(LPARAM)&maininst, (LPARAM)&buffer};	// Elandal: multipleInstance
 	bool bAlreadyRunning = false;
 	if (!bIgnoreRunningInstances){
 		bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
-		if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&params);	// Elandal: multipleInstance
+    	if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
 	}
-	// Elandal: multipleInstance
-	FreeLibrary(hUser32_DLL);
-	// Elandal: multipleInstance
 
     if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen) {
 		CString command = cmdInfo.m_strFileName;
@@ -608,34 +576,12 @@ bool CemuleApp::ProcessCommandline()
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
-	// Elandal: multipleInstance
-	LPARAM *params = (LPARAM*)lParam;
-	if (lpfnGetWindowModuleFileName) {
-		//get other application's directory
-		char buffer[490];
-		memset(buffer, 0, 490);
-		lpfnGetWindowModuleFileName(hWnd, buffer, 490);
-		LPTSTR pszFileName = _tcsrchr(buffer, '\\');
-		if (pszFileName)
-			pszFileName++;
-		else
-			return TRUE;
-		*pszFileName = '\0';
-
-		while((pszFileName = _tcschr(buffer, '\\')) != NULL)
-			*pszFileName = '/';
-
-		char *dir = (char*)params[1];
-		if (_tcscmp(buffer, dir))	// Limit to eMules from the same directory
-			return TRUE;
-	}
-	// Elandal: multipleInstance
 	DWORD dwMsgResult;
 	LRESULT res = ::SendMessageTimeout(hWnd,UWM_ARE_YOU_EMULE,0, 0,SMTO_BLOCK |SMTO_ABORTIFHUNG,10000,&dwMsgResult);
 	if(res == 0)
 		return TRUE;
 	if(dwMsgResult == UWM_ARE_YOU_EMULE){ 
-		HWND * target = (HWND *)params[0];	// Elandal: multipleInstance
+		HWND * target = (HWND *)lParam;
 		*target = hWnd;
 		return FALSE; 
 	} 

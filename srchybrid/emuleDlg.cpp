@@ -1451,9 +1451,9 @@ void CemuleDlg::OnClose()
 		theApp.ppgbackup->Backup3();
 	if (thePrefs.GetAutoBackup())
 	{
-		theApp.ppgbackup->Backup("*.ini", false);
-		theApp.ppgbackup->Backup("*.dat", false);
-		theApp.ppgbackup->Backup("*.met", false);
+		theApp.ppgbackup->Backup(_T("*.ini"), false);
+		theApp.ppgbackup->Backup(_T("*.dat"), false);
+		theApp.ppgbackup->Backup(_T("*.met"), false);
 	}
 	//EastShare END - Pretender, TBH-AutoBackup
 
@@ -2637,8 +2637,6 @@ LRESULT CemuleDlg::OnPeerCacheResponse(WPARAM wParam, LPARAM lParam)
 	return theApp.m_pPeerCache->OnPeerCacheCheckResponse(wParam,lParam);
 }
 
-//Commander - Removed Invisible Mode
-//EastShare start, Added by linekin, HotKey
 
 //Commander - Added: Invisible Mode [TPT] - Start
 LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)

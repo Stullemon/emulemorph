@@ -422,7 +422,7 @@ void CSharedFileList::FindSharedFiles()
 				CString hashfilename;
 				hashfilename.Format (_T("%s\\%s"),f->strDirectory, f->strName);
 				if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),f->strDirectory, f->strName);
-				AddLogLine(false, _T("New file: '%s'"), (const char*) hashfilename);
+				AddLogLine(false, _T("New file: '%s'"), hashfilename);
 				waitingforhash_list.GetNext (p);
 			}
 		}

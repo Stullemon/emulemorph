@@ -347,36 +347,36 @@ CUpDownClient::~CUpDownClient(){
 LPCTSTR CUpDownClient::TestLeecher(){
 	if (old_m_strClientSoftware != m_strClientSoftware)
 	{
-		if (StrStrI(m_strModVersion,"Freeza")||
-			StrStrI(m_strModVersion,"d-unit")||
-			//StrStrI(m_strModVersion,"NOS")|| //removed for the moment
-			StrStrI(m_strModVersion,"imperator")||
-			StrStrI(m_strModVersion,"SpeedLoad")||
-			StrStrI(m_strModVersion,"gt mod")||
-			StrStrI(m_strModVersion,"egomule")||
+		if (StrStrI(m_strModVersion,_T("Freeza"))||
+			StrStrI(m_strModVersion,_T("d-unit"))||
+			//StrStrI(m_strModVersion,_T("NOS"))|| //removed for the moment
+			StrStrI(m_strModVersion,_T("imperator"))||
+			StrStrI(m_strModVersion,_T("SpeedLoad"))||
+			StrStrI(m_strModVersion,_T("gt mod"))||
+			StrStrI(m_strModVersion,_T("egomule"))||
 			//StrStrI(m_strModVersion,"aldo")|| //removed for the moment
-			StrStrI(m_strModVersion,"darkmule")||
-			StrStrI(m_strModVersion,"LegoLas")||
-			StrStrI(m_strModVersion,"dodgethis")|| //Updated
-			StrStrI(m_strModVersion,"DM-")|| //hotfix
-			StrStrI(m_strModVersion,"|X|")||
-			StrStrI(m_strModVersion,"eVortex")||
-			StrStrI(m_strModVersion,"Mison")||
-			StrStrI(m_strModVersion,"father")||
-			StrStrI(m_strModVersion,"Dragon")||
-			StrStrI(m_strModVersion,"booster")|| //Temporaly added, must check the tag
-			StrStrI(m_strModVersion,"$motty")||
-			StrStrI(m_strModVersion,"Thunder")||
-			StrStrI(m_strModVersion,"BuzzFuzz")||
-			StrStrI(m_strModVersion,"Speed-Unit")|| 
-			StrStrI(m_strModVersion,"Killians")||
-			StrStrI(m_strModVersion,"Element")|| 
-			StrStrI(m_strModVersion,"§¯Å]")|| 
-			StrStrI(m_strModVersion,"EastShare") && StrStrI(m_strClientSoftware,"0.29")||
+			StrStrI(m_strModVersion,_T("darkmule"))||
+			StrStrI(m_strModVersion,_T("LegoLas"))||
+			StrStrI(m_strModVersion,_T("dodgethis"))|| //Updated
+			StrStrI(m_strModVersion,_T("DM-"))|| //hotfix
+			StrStrI(m_strModVersion,_T("|X|"))||
+			StrStrI(m_strModVersion,_T("eVortex"))||
+			StrStrI(m_strModVersion,_T("Mison"))||
+			StrStrI(m_strModVersion,_T("father"))||
+			StrStrI(m_strModVersion,_T("Dragon"))||
+			StrStrI(m_strModVersion,_T("booster"))|| //Temporaly added, must check the tag
+			StrStrI(m_strModVersion,_T("$motty"))||
+			StrStrI(m_strModVersion,_T("Thunder"))||
+			StrStrI(m_strModVersion,_T("BuzzFuzz"))||
+			StrStrI(m_strModVersion,_T("Speed-Unit"))|| 
+			StrStrI(m_strModVersion,_T("Killians"))||
+			StrStrI(m_strModVersion,_T("Element"))|| 
+			StrStrI(m_strModVersion,_T("§¯Å]"))|| 
+			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
-			StrStrI(m_strModVersion,"LSD.7c") && !StrStrI(m_strClientSoftware,"27")||
-			StrStrI(m_strModVersion,"Morph") && StrStrI(m_strModVersion,"Max")||
-			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,"edonkey")||
+			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
+			StrStrI(m_strModVersion,_T("Morph")) && StrStrI(m_strModVersion,_T("Max"))||
+			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
 			)
 		{
@@ -386,32 +386,32 @@ LPCTSTR CUpDownClient::TestLeecher(){
 	}
 	else if (old_m_pszUsername != m_pszUsername)
 	{
-		if (StrStrI(m_pszUsername,"$GAM3R$")||
-			StrStrI(m_pszUsername,"G@m3r")||
-			StrStrI(m_pszUsername,"$WAREZ$")||
-			StrStrI(m_pszUsername,"RAMMSTEIN")||//	
-			//StrStrI(m_pszUsername,"toXic")|| //removed for the moment
-			StrStrI(m_pszUsername,"Leecha")||
-			//StrStrI(m_pszUsername,"eDevil")|| //removed for the moment
-			StrStrI(m_pszUsername,"darkmule")||
-			StrStrI(m_pszUsername,"phArAo")||
-			StrStrI(m_pszUsername,"dodgethis")||
-			StrStrI(m_pszUsername,"Reverse")||
-			StrStrI(m_pszUsername,"eVortex")||
-			StrStrI(m_pszUsername,"|eVorte|X|")||
-			StrStrI(m_pszUsername,"Chief")||
-			//StrStrI(m_pszUsername,"Mison")|| //Temporaly desactivated, ban only on mod tag
-			StrStrI(m_pszUsername,"$motty")||
-			StrStrI(m_pszUsername,"emule-speed")||
-			StrStrI(m_pszUsername,"celinesexy")||
-			StrStrI(m_pszUsername,"Gate-eMule")||
-			StrStrI(m_pszUsername,"energyfaker")||
-			StrStrI(m_pszUsername,"BuzzFuzz")||
-			StrStrI(m_pszUsername,"Speed-Unit")|| 
-			StrStrI(m_pszUsername,"Killians")||
-			StrStrI(m_pszUsername,"pubsman")||
-			StrStrI(m_pszUsername,"emule-element")||
-			StrStrI(m_pszUsername,"emule") && StrStrI(m_pszUsername,"booster")
+		if (StrStrI(m_pszUsername,_T("$GAM3R$"))||
+			StrStrI(m_pszUsername,_T("G@m3r"))||
+			StrStrI(m_pszUsername,_T("$WAREZ$"))||
+			StrStrI(m_pszUsername,_T("RAMMSTEIN"))||//	
+			//StrStrI(m_pszUsername,_T("toXic"))|| //removed for the moment
+			StrStrI(m_pszUsername,_T("Leecha"))||
+			//StrStrI(m_pszUsername,_T("eDevil"))|| //removed for the moment
+			StrStrI(m_pszUsername,_T("darkmule"))||
+			StrStrI(m_pszUsername,_T("phArAo"))||
+			StrStrI(m_pszUsername,_T("dodgethis"))||
+			StrStrI(m_pszUsername,_T("Reverse"))||
+			StrStrI(m_pszUsername,_T("eVortex"))||
+			StrStrI(m_pszUsername,_T("|eVorte|X|"))||
+			StrStrI(m_pszUsername,_T("Chief"))||
+			//StrStrI(m_pszUsername,"Mison"))|| //Temporaly desactivated, ban only on mod tag
+			StrStrI(m_pszUsername,_T("$motty"))||
+			StrStrI(m_pszUsername,_T("emule-speed"))||
+			StrStrI(m_pszUsername,_T("celinesexy"))||
+			StrStrI(m_pszUsername,_T("Gate-eMule"))||
+			StrStrI(m_pszUsername,_T("energyfaker"))||
+			StrStrI(m_pszUsername,_T("BuzzFuzz"))||
+			StrStrI(m_pszUsername,_T("Speed-Unit"))|| 
+			StrStrI(m_pszUsername,_T("Killians"))||
+			StrStrI(m_pszUsername,_T("pubsman"))||
+			StrStrI(m_pszUsername,_T("emule-element"))||
+			StrStrI(m_pszUsername,_T("emule")) && StrStrI(m_pszUsername,_T("booster"))
 			)
 		{
 			old_m_pszUsername = m_pszUsername;
@@ -527,7 +527,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				{
 					m_strModVersion = temptag.GetStr();
 					//MOPRH START - Added by SiRoB, Is Morph Client?
-					m_bIsMorph = StrStrI(m_strModVersion,"Morph");
+					m_bIsMorph = StrStrI(m_strModVersion,_T("Morph"));
 					//MOPRH END   - Added by SiRoB, Is Morph Client?
 				}
 				else if (temptag.IsInt())
@@ -737,16 +737,16 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	if (!IsLeecher()){ //MORPH - Added by SiRoB, Keep Leecher name
 		if (!m_pszUsername)
 			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-		else if((strncmp(m_pszUsername, "http://emule",12)==0)
-			||(strncmp(m_pszUsername, "http://www.emule",16)==0)
-			||(strncmp(m_pszUsername, "www.emule",9)==0)
-			||(strncmp(m_pszUsername, "www.shareaza",12)==0)
-			||(strncmp(m_pszUsername, "eMule v",7)==0)
-			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
-			||(strncmp(m_pszUsername, "eMule OX",8)==0)
-			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
-			||(strncmp(m_pszUsername, "eMule0",6)==0)
-			||(strcmp(m_pszUsername, "")==0)) {
+		else if((_tcsnicmp(m_pszUsername, _T("http://emule"),12)==0)
+			||(_tcsnicmp(m_pszUsername, _T("http://www.emule"),16)==0)
+			||(_tcsnicmp(m_pszUsername, _T("www.emule"),9)==0)
+			||(_tcsnicmp(m_pszUsername, _T("www.shareaza"),12)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule v"),7)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule OX"),8)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule0"),6)==0)
+			||(_tcsicmp(m_pszUsername, _T(""))==0)) {
 			free(m_pszUsername);
 			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
 		}
@@ -822,7 +822,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	tag7.WriteTagToFile(&data);
 	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH START - Added by IceCream, Anti-leecher feature
-		if (StrStrI(m_strModVersion,"Mison")||StrStrI(m_strModVersion,"eVort")||StrStrI(m_strModVersion,"booster")||IsLeecher()){
+		if (StrStrI(m_strModVersion,_T("Mison"))||StrStrI(m_strModVersion,_T("eVort"))||StrStrI(m_strModVersion,_T("booster"))||IsLeecher()){
 			CTag tag8(ET_MOD_VERSION, m_strModVersion);
 			tag8.WriteTagToFile(&data);
 		}
@@ -952,7 +952,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 				{
 					m_strModVersion = temptag.GetStr();
 					//MOPRH START - Added by SiRoB, Is Morph Client?
-					m_bIsMorph = StrStrI(m_strModVersion,"Morph");
+					m_bIsMorph = StrStrI(m_strModVersion,_T("Morph"));
 					//MOPRH END   - Added by SiRoB, Is Morph Client?
 				}
 				else if (temptag.IsInt())
@@ -1107,7 +1107,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	if (bSendModVersion) { //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 		//MORPH START - Added by SiRoB, Anti-leecher feature
-		if (StrStrI(m_strModVersion,"Mison")||StrStrI(m_strModVersion,"eVort")||StrStrI(m_strModVersion,"booster")||IsLeecher()){
+		if (StrStrI(m_strModVersion,_T("Mison"))||StrStrI(m_strModVersion,_T("eVort"))||StrStrI(m_strModVersion,_T("booster"))||IsLeecher()){
 			CTag tagMODVersion(ET_MOD_VERSION, m_strModVersion);
 			tagMODVersion.WriteTagToFile(data);
 		}
@@ -1864,16 +1864,16 @@ void CUpDownClient::SetUserName(LPCTSTR pszNewName)
 	if (!IsLeecher()) {//MORPH - Added by SiRoB, Keep Leecher name
 		if (!m_pszUsername)
 			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
-		else if((strncmp(m_pszUsername, "http://emule",12)==0)
-			||(strncmp(m_pszUsername, "http://www.emule",16)==0)
-			||(strncmp(m_pszUsername, "www.emule",9)==0)
-			||(strncmp(m_pszUsername, "www.shareaza",12)==0)
-			||(strncmp(m_pszUsername, "eMule v",7)==0)
-			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
-			||(strncmp(m_pszUsername, "eMule OX",8)==0)
-			||(strncmp(m_pszUsername, "eMule Plus",10)==0)
-			||(strncmp(m_pszUsername, "eMule0",6)==0)
-			||(strcmp(m_pszUsername, "")==0)) {
+		else if((_tcsnicmp(m_pszUsername, _T("http://emule"),12)==0)
+			||(_tcsnicmp(m_pszUsername, _T("http://www.emule"),16)==0)
+			||(_tcsnicmp(m_pszUsername, _T("www.emule"),9)==0)
+			||(_tcsnicmp(m_pszUsername, _T("www.shareaza"),12)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule v"),7)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule OX"),8)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule Plus"),10)==0)
+			||(_tcsnicmp(m_pszUsername, _T("eMule0"),6)==0)
+			||(_tcsicmp(m_pszUsername, _T(""))==0)) {
 				free(m_pszUsername);
 				m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
 		}
@@ -2711,7 +2711,7 @@ CString	CUpDownClient::GetCountryName(bool longName) const {
 	//display in client detail
 	if(longName && theApp.ip2country->IsIP2Country() == false)	return GetResString(IDS_DISABLED);
 
-	if(theApp.ip2country->IsIP2Country() == false) return "";
+	if(theApp.ip2country->IsIP2Country() == false) return _T("");
 
 	if(longName) return m_structUserCountry->LongCountryName;
 
@@ -2719,16 +2719,16 @@ CString	CUpDownClient::GetCountryName(bool longName) const {
 
 	switch(thePrefs.GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
-			tempStr.Format("%s",m_structUserCountry->ShortCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
+			tempStr.Format(_T("%s"),m_structUserCountry->ShortCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_MID:
-			tempStr.Format("%s",m_structUserCountry->MidCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
+			tempStr.Format(_T("%s"),m_structUserCountry->MidCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_LONG:
-			tempStr.Format("%s",m_structUserCountry->LongCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
+			tempStr.Format(_T("%s"),m_structUserCountry->LongCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 	}
-	return "";
+	return _T("");
 }
 
 int CUpDownClient::GetCountryFlagIndex() const {

@@ -227,9 +227,9 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 				users = tag->GetInt();
 		}
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
-		else if (!CmpED2KTagName(tag->GetName(),_T("auxportslist"))){
+		else if (!CmpED2KTagName(tag->GetName(),"auxportslist")){
 			ASSERT( tag->IsStr() );
-			if (tag->IsStr())	realport = atoi(tag->GetStr());
+			if (tag->IsStr())	realport = _tstoi(tag->GetStr());
 		}
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 	}
@@ -278,20 +278,20 @@ void CServer::SetLastDescPingedCount(bool bReset)
 CString CServer::GetCountryName() const{
 	CString tempStr;
 
-	if(theApp.ip2country->IsIP2Country() == false) return "";
+	if(theApp.ip2country->IsIP2Country() == false) return _T("");
 
 	switch(thePrefs.GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
-			tempStr.Format("%s",m_structServerCountry->ShortCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
+			tempStr.Format(_T("%s"),m_structServerCountry->ShortCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_MID:
-			tempStr.Format("%s",m_structServerCountry->MidCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
+			tempStr.Format(_T("%s"),m_structServerCountry->MidCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_LONG:
-			tempStr.Format("%s",m_structServerCountry->LongCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
+			tempStr.Format(_T("%s"),m_structServerCountry->LongCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 	}
-	return "";
+	return _T("");
 }
 
 int CServer::GetCountryFlagIndex() const{

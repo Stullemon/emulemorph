@@ -53,7 +53,7 @@ BOOL CSelCategoryDlg::OnInitDialog()
 	SetWindowText(GetResString(IDS_CAT_SELDLGCAP));
 
 	// 'All' is always an option.
-	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(GetResString(IDS_ALL) + "/" + GetResString(IDS_CAT_UNASSIGN));
+	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN));
 
 	// If there are more categories, add them to the list.
 	if (thePrefs.GetCatCount() > 1)
@@ -79,11 +79,11 @@ void CSelCategoryDlg::OnOK()
 	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetWindowText(comboText);
 	comboText.Trim();
 
-	if (catTitle->CompareNoCase(comboText) == 0 || (comboIndex == 0 && comboText.Compare(GetResString(IDS_ALL) + "/" + GetResString(IDS_CAT_UNASSIGN)) == 0))
+	if (catTitle->CompareNoCase(comboText) == 0 || (comboIndex == 0 && comboText.Compare(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN)) == 0))
 		m_Return = comboIndex;
 	else {
 		m_bCreatedNew = true;
-		m_Return = theApp.emuledlg->transferwnd->AddCategorie(comboText, thePrefs.GetIncomingDir(), "","");
+		m_Return = theApp.emuledlg->transferwnd->AddCategorie(comboText, thePrefs.GetIncomingDir(), _T(""),_T(""));
 	}
 
 	delete catTitle;

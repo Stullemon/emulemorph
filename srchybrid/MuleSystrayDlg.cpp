@@ -378,7 +378,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	m_ctrlMinUpSpeedSld.SetPos(m_nMinUpSpeedTxt);
 	m_ctrlMinUpSpeedSld.EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	CFont Font;
-	Font.CreateFont(-16,0,900,0,700,0,0,0,0,3,2,1,34,"Arial");
+	Font.CreateFont(-16,0,900,0,700,0,0,0,0,3,2,1,34,_T("Arial"));
 
 	UINT winver = thePrefs.GetWindowsVersion();
 	if(winver == _WINVER_95_ || winver == _WINVER_NT4_)

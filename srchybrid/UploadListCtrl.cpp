@@ -429,7 +429,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//Morph Start - added by AndCycle, Equal Chance For Each File
 						//Morph - added by AndCycle, more detail...for debug?
 						if(thePrefs.IsEqualChanceEnable()){
-							Sbuffer.Format("%s :%s", file->statistic.GetEqualChanceValueString(false), Sbuffer);
+							Sbuffer.Format(_T("%s :%s"), file->statistic.GetEqualChanceValueString(false), Sbuffer);
 						}
 						//Morph - added by AndCycle, more detail...for debug?
 						//Morph End - added by AndCycle, Equal Chance For Each File
@@ -584,17 +584,17 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 				// Mighty Knife: Community affiliation
 				case 13:
-					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
+					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
 					break;
 				// [end] Mighty Knife
 				// EastShare - Added by Pretender, Friend Tab
 				case 14:
-					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : "";
+					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
 					break;
 				// EastShare - Added by Pretender, Friend Tab
                 // Commander - Added: IP2Country column - Start
                 case 15:
-					Sbuffer.Format("%s", client->GetCountryName());
+					Sbuffer.Format(_T("%s"), client->GetCountryName());
 					break;
                 // Commander - Added: IP2Country column - End	
 			}
@@ -675,7 +675,7 @@ void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
-	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);

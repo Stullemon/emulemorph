@@ -375,7 +375,6 @@ int XMessageBox(HWND hwnd,
 	if ((nStyle & MB_NOSOUND) == 0)
 		::MessageBeep(nStyle & MB_ICONMASK);
 
-	int rc = dlg.Display(szTitle);
 
 	if (ghFont)
 		::DeleteObject(ghFont);
@@ -383,7 +382,7 @@ int XMessageBox(HWND hwnd,
 
 	ghIcon = NULL;      // shared icon, do not call DestroyIcon
 
-	return rc;
+	return NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -579,7 +578,7 @@ BOOL CALLBACK MsgBoxDlgProc(HWND hwnd,
 				_TCHAR szBuf[_MAX_PATH*2];
 				szBuf[0] = 0;
 				GetModuleFileName(AfxGetInstanceHandle(), szBuf, sizeof(szBuf) - 1);
-				if (strlen(szBuf) > 0)
+				if (_tcslen(szBuf) > 0)
 				{
 					_TCHAR *cp = _tcsrchr(szBuf, _T('.'));
 					if (cp)
@@ -668,24 +667,24 @@ CDialogTemp::CDialogTemp(LPCTSTR lpszMessage, UINT nStyle)
 	{
 		int cxIcon;
 		int cyIcon;
-		LPSTR lpIcon = NULL;
+		LPTSTR lpIcon = NULL;
 
 		switch (nStyle & MB_ICONMASK)
 		{
 			case MB_ICONEXCLAMATION:
-				lpIcon = (LPSTR)IDI_EXCLAMATION;
+				lpIcon = (LPTSTR)IDI_EXCLAMATION;
 				break;
 
 			case MB_ICONHAND:
-				lpIcon = (LPSTR)IDI_HAND;
+				lpIcon = (LPTSTR)IDI_HAND;
 				break;
 
 			case MB_ICONQUESTION:
-				lpIcon = (LPSTR)IDI_QUESTION;
+				lpIcon = (LPTSTR)IDI_QUESTION;
 				break;
 
 			case MB_ICONASTERISK:
-				lpIcon = (LPSTR)IDI_ASTERISK;
+				lpIcon = (LPTSTR)IDI_ASTERISK;
 				break;
 		}
 
@@ -1015,167 +1014,6 @@ void CDialogTemp::AddItem(CDialogItem::controltype cType, UINT nID, CRect* prect
 	ASSERT(gdlgTempl.cdit < MAXITEMS);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// CDialogTemp::Display
-int CDialogTemp::Display(LPCTSTR lpszCaption)
-{
-	// The first step is to allocate memory to define the dialog.  The information to be
-	// stored in the allocated buffer is the following:
-	//
-	// 1.  DLGTEMPLATE structure
-	//			typedef struct
-	//			{
-	//					DWORD style;
-	//					DWORD dwExtendedStyle;
-	//					WORD  cdit;
-	//					short x;
-	//					short y;
-	//					short cx;
-	//					short cy;
-	//			} DLGTEMPLATE;
-	// 2.    0x0000 (Word) indicating the dialog has no menu
-	// 3.    0x0000 (Word) Let windows assign default class to the dialog
-	// 4.    (Caption)  Null terminated unicode string
-	// 5.	 0x000B  (size of the font to be used)
-	// 6.    "MS Sans Serif"  (name of the typeface to be used)
-	// 7.  DLGITEMTEMPLATE structure for the button	 (HAS TO BE DWORD ALIGNED)
-	//			typedef struct
-	//			{
-	//				DWORD style;
-	//				DWORD dwExtendedStyle;
-	//				short x;
-	//				short y;
-	//				short cx;
-	//				short cy;
-	//				WORD  id;
-	//			} DLGITEMTEMPLATE;
-	// 8.	 0x0080  to indicate the control is a button
-	// 9.    (Title). Unicode null terminated string with the caption
-	// 10.    0x0000   0 extra bytes of data for this control
-	// 11.  DLGITEMTEMPLATE structure for the Static Text  (HAS TO BE DWORD ALIGNED)
-	// 12.    0x0081 to indicate the control is static text
-	// 13.   (Title). Unicode null terminated string with the text
-	// 14     0x0000.  0 extra bytes of data for this control
-
-
-	int rc = IDCANCEL;
-
-	_TCHAR szTitle[1024];
-	_tcsncpy(szTitle, lpszCaption, sizeof(szTitle)-1);
-	szTitle[sizeof(szTitle)-1] = _T('\0');
-	int nTitleLen = _tcslen(szTitle);
-
-	int i;
-
-	TRY  // catch memory exceptions and don't worry about allocation failures
-	{
-		int nBufferSize = sizeof(DLGTEMPLATE) +
-							(2 * sizeof(WORD)) +				// menu and class
-							((nTitleLen + 1) * sizeof(WCHAR));
-
-		// NOTE - font is set in MsgBoxDlgProc
-
-		nBufferSize = (nBufferSize + 3) & ~3;           // adjust size to make
-														// first control DWORD aligned
-
-		// loop to calculate size of buffer we need - 
-		// add size of each control:
-		//    sizeof(DLGITEMTEMPLATE) +
-		//    sizeof(WORD) +				// atom value flag 0xFFFF
-		//    sizeof(WORD) +				// ordinal value of control's class
-		//    sizeof(WORD) +				// no. of bytes in creation data array
-		//    sizeof title in WCHARs
-		for (i = 0; i < gdlgTempl.cdit; i++)
-		{
-			int nItemLength = sizeof(DLGITEMTEMPLATE) + 3 * sizeof(WORD);
-			int nChars = _tcslen(m_pDlgItemArray[i]->m_szCaption) + 1;
-			nItemLength += nChars * sizeof(WCHAR);
-
-			if (i != gdlgTempl.cdit - 1)                // the last control does not need extra bytes
-				nItemLength = (nItemLength + 3) & ~3;   // take into account gap
-														// so next control is DWORD aligned
-
-			nBufferSize += nItemLength;
-		}
-
-		HLOCAL hLocal = LocalAlloc(LHND, nBufferSize);
-		if (hLocal == NULL)
-			AfxThrowMemoryException();
-
-		BYTE* pBuffer = (BYTE*)LocalLock(hLocal);
-		if (pBuffer == NULL)
-		{
-			LocalFree(hLocal);
-			AfxThrowMemoryException();
-		}
-
-		BYTE* pdest = pBuffer;
-
-		// transfer DLGTEMPLATE structure to the buffer
-		memcpy(pdest, &gdlgTempl, sizeof(DLGTEMPLATE));
-		pdest += sizeof(DLGTEMPLATE);
-
-		*(WORD*)pdest = 0;                              // no menu
-
-		*(WORD*)(pdest + 1) = 0;                        // use default window class
-		pdest += 2 * sizeof(WORD);
-
-		// transfer title
-		WCHAR* pchCaption;
-		int nActualChars;
-
-		pchCaption = new WCHAR[nTitleLen + 1];
-		nActualChars = MultiByteToWideChar(CP_ACP, 0, szTitle, -1, pchCaption, nTitleLen + 1);
-		ASSERT(nActualChars > 0);
-		memcpy(pdest, pchCaption, nActualChars * sizeof(WCHAR));
-		pdest += nActualChars * sizeof(WCHAR);
-		delete pchCaption;
-
-		// will now transfer the information for each one of the item templates
-		for (i = 0; i < gdlgTempl.cdit; i++)
-		{
-			pdest = (BYTE*)(((DWORD)pdest + 3) & ~3);  // make the pointer DWORD aligned
-			memcpy(pdest, (void *)&m_pDlgItemArray[i]->m_dlgItemTemplate, sizeof(DLGITEMTEMPLATE));
-			pdest += sizeof(DLGITEMTEMPLATE);
-			*(WORD*)pdest = 0xFFFF;                     // indicating atom value
-			pdest += sizeof(WORD);
-			*(WORD*)pdest = (WORD)m_pDlgItemArray[i]->m_controltype;     // atom value for the control
-			pdest += sizeof(WORD);
-
-			// transfer the caption even when it is an empty string
-			WCHAR*  pchCaption;
-
-			int nChars = _tcslen(m_pDlgItemArray[i]->m_szCaption) + 1;
-			pchCaption = new WCHAR[nChars];
-			int nActualChars = MultiByteToWideChar(CP_ACP, 0,
-											   m_pDlgItemArray[i]->m_szCaption, -1, pchCaption, nChars);
-			ASSERT(nActualChars > 0);
-			memcpy(pdest, pchCaption, nActualChars * sizeof(WCHAR));
-			pdest += nActualChars * sizeof(WCHAR);
-			delete pchCaption;
-
-			*(WORD*)pdest = 0;                          // How many bytes in data for control
-			pdest += sizeof(WORD);
-		}
-		ASSERT(pdest - pBuffer == nBufferSize);         // just make sure we did not overrun the heap
-
-		rc = ::DialogBoxIndirect((HINSTANCE) ghInst, (LPDLGTEMPLATE)pBuffer,
-								 ghWnd, MsgBoxDlgProc);
-
-		LocalUnlock(hLocal);
-		LocalFree(hLocal);
-	}
-	CATCH (CMemoryException, e)
-	{
-		::MessageBox(NULL, _T("Memory allocation for dialog template failed."),
-						   _T("Allocation Failure"), 
-						   MB_ICONEXCLAMATION | MB_OK);
-		rc = IDCANCEL;
-	}
-	END_CATCH
-
-	return rc;
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2499,7 +2499,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								versionMods->GetNextAssoc(mpos, name, count);
 								if (name.IsEmpty())
 									name = "Official eMule";
-								cbuffer.Format("%s: %i (%1.1f%%)", name, count, (double)count/topcnt*100);
+								cbuffer.Format(_T("%s: %i (%1.1f%%)"), name, count, (double)count/topcnt*100);
 								stattree.SetItemText(hChild, cbuffer);
 								hChild = stattree.GetNextSiblingItem( hChild );
 							}
@@ -2515,7 +2515,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 							versionMods->GetNextAssoc(mpos, name, count);
 							if (name.IsEmpty())
 								name = "Official eMule";
-							cbuffer.Format("%s: %i (%1.1f%%)", name, count, (double)count/topcnt*100);
+							cbuffer.Format(_T("%s: %i (%1.1f%%)"), name, count, (double)count/topcnt*100);
 							stattree.InsertItem(cbuffer, cli_versions[i]);
 						}
 					}
@@ -2815,7 +2815,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		cbuffer.Format(_T("%s: %u (%1.1f%%)"), GetResString(IDS_BANNED), myStats[7], (double)100*myStats[7]/totalclient);stattree.SetItemText(cligen[1], cbuffer);
 		cbuffer.Format(GetResString(IDS_STATS_FILTEREDCLIENTS)+_T(" (%1.1f%%)"),theStats.filteredclients, (double)100*theStats.filteredclients/totalclient);stattree.SetItemText(cligen[2], cbuffer);
 		//MORPH START - Added by IceCream, secure/leecher client in stats
-		cbuffer.Format(GetResString(IDS_STATS_LEECHERCLIENTS) +" (%1.1f%%)",theStats.leecherclients, (double)100*theStats.leecherclients/totalclient);stattree.SetItemText(cligen[6], cbuffer);
+		cbuffer.Format(GetResString(IDS_STATS_LEECHERCLIENTS) +_T(" (%1.1f%%)"),theStats.leecherclients, (double)100*theStats.leecherclients/totalclient);stattree.SetItemText(cligen[6], cbuffer);
 		//MORPH END   - Added by IceCream, secure/leecher client in stats
 	} // - END CLIENTS SECTION
 

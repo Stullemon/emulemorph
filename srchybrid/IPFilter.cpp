@@ -62,7 +62,7 @@ static int __cdecl CmpSIPFilterByStartAddr(const void* p1, const void* p2)
 	return CompareUnsigned(rng1->start, rng2->start);
 }
 
-//MORPH - Added by SiRoB
+//MORPH START - Added by SiRoB
 void CIPFilter::AddIP(uint32 IP, UINT level, const CString& desc)
 {
 	uint32 ip1;
@@ -75,7 +75,8 @@ void CIPFilter::AddIP(uint32 IP, UINT level, const CString& desc)
 	qsort(m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpSIPFilterByStartAddr);
 
 }
-//MORPH - Added by SiRoB
+//MORPH END  - Added by SiRoB
+
 CString CIPFilter::GetDefaultFilePath() const
 {
 	return thePrefs.GetConfigDir() + DFLT_IPFILTER_FILENAME;
@@ -408,45 +409,42 @@ bool CIPFilter::RemoveIPFilter(const SIPFilter* pFilter)
 //MORPH START added by Yun.SF3: Ipfilter.dat update
 void CIPFilter::UpdateIPFilterURL()
 {
-	char buffer[5];
-	int lenBuf = 5;
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLIPFilter();
-	strURL.TrimRight(".txt");
-	strURL.TrimRight(".dat");
-	strURL.Append(".txt");
-	CString strTempFilename;
-	strTempFilename.Format(CString(thePrefs.GetAppDir())+"ipfilter.txt");
-	FILE* readFile= fopen(strTempFilename, "r");
+	strURL.TrimRight(_T(".txt"));
+	strURL.TrimRight(_T(".dat"));
+	strURL.Append(_T(".txt"));
+
+	TCHAR szTempFilePath[_MAX_PATH];
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetAppDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
+	FILE* readFile= _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = _T("Downloading IP filter version file");
 	dlgDownload.m_sURLToDownload = strURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
+
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		AddLogLine(true, "Error downloading %s", strURL);
+		_tremove(szTempFilePath);
+		AddLogLine(true, _T("Error downloading %s"), strURL);
 		return;
 	}
-	readFile= fopen(strTempFilename, "r");
+	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
+
+	char buffer[9];
+	int lenBuf = 9;
 	fgets(buffer,lenBuf,readFile);
-		//return false;
+
 	sbuffer = buffer;
 	sbuffer = sbuffer.Trim();
 	fclose(readFile);
-	remove(strTempFilename);
-	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
-	if ((thePrefs.GetIPfilterVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
-	// [end] Mighty Knife
+	_tremove(szTempFilePath);
 
-		CString IPFilterURL = strURL.TrimRight(".txt") + ".dat";
-		strTempFilename.Format(CString(thePrefs.GetConfigDir())+"ipfilter.dat");
+	if ((thePrefs.GetIPfilterVersion()< (uint32) _tstoi(sbuffer)) || (readFile == NULL)) {
 
-		if (fopen(strTempFilename, "r")) {
-			fclose(readFile);
-			remove(strTempFilename);
-		}
+		CString IPFilterURL = thePrefs.GetUpdateURLIPFilter();
 
-		TCHAR szTempFilePath[MAX_PATH];
 		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 		CHttpDownloadDlg dlgDownload;
@@ -467,7 +465,7 @@ void CIPFilter::UpdateIPFilterURL()
 		{
 			bIsZipFile = true;
 
-			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+			CZIPFile::File* zfile = zip.GetFile(DFLT_IPFILTER_FILENAME);
 			if (zfile)
 			{
 				TCHAR szTempUnzipFilePath[MAX_PATH];
@@ -477,9 +475,9 @@ void CIPFilter::UpdateIPFilterURL()
 					zip.Close();
 					zfile = NULL;
 
-					if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
+					if (_tremove(GetDefaultFilePath()) != 0)
 						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
-					if (_trename(szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
+					if (_trename(szTempUnzipFilePath, GetDefaultFilePath()) != 0)
 						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
 					if (_tremove(szTempFilePath) != 0)
 						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, strerror(errno));
@@ -496,18 +494,18 @@ void CIPFilter::UpdateIPFilterURL()
 
 		if (!bIsZipFile && !bUnzipped)
 		{
-			_tremove(theApp.ipfilter->GetDefaultFilePath());
-			_trename(szTempFilePath, theApp.ipfilter->GetDefaultFilePath());
+			_tremove(GetDefaultFilePath());
+			_trename(szTempFilePath, GetDefaultFilePath());
 		}
-        //Commander - Fixed: Versionnumber on failed download - Start
+
 		if(bIsZipFile && !bUnzipped){
 			return;
 		}
-			LoadFromDefaultFile();
+
+		LoadFromDefaultFile();
             
-			thePrefs.SetIpfilterVersion(atoi(sbuffer));
-			thePrefs.Save();
-		//Commander - Fixed: Versionnumber on failed download - End
+		thePrefs.SetIpfilterVersion(_tstoi(sbuffer));
+		thePrefs.Save();
 	}
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update

@@ -132,11 +132,11 @@ CString StringListToString (CStringList& _slist) {
 	POSITION pos = _slist.GetHeadPosition ();
 	// Add the first string of the list. Remove any '"' characters
 	if (!_slist.IsEmpty ()) {
-	  res = res + '\"' + _slist.GetNext (pos).SpanExcluding ("\"") + '\"';
+	  res = res + '\"' + _slist.GetNext (pos).SpanExcluding (_T("\"")) + '\"';
 	}
 	// Now add all the rest
 	while (pos != NULL) {
-	  res = res + ";\"" + _slist.GetNext (pos).SpanExcluding ("\"") + '\"';
+	  res = res + _T(";\"") + _slist.GetNext (pos).SpanExcluding (_T("\"")) + _T('\"');
 	}
     return res;
 }
@@ -145,8 +145,8 @@ CString StringListToString (CStringList& _slist) {
 // by _dest characters/strings. 
 void ReplaceChars (CString& _str, CString _source, CString _dest, bool _casesensitive) {
 	// Duplicate the strings
-	CString src2 = (const char*) _source;
-	CString str2 = (const char*) _str;
+	CString src2 = _source;
+	CString str2 = _str;
 	// Convert to uppercase if we have to work case-insensitive
 	if (!_casesensitive) {
 		str2.MakeUpper ();
@@ -176,7 +176,7 @@ void ReplaceChars (CString& _str, CString _source, CString _dest, bool _casesens
 // The replacement routine for hexadecimal numbers
 void ReconstructCharacters (CString& _str) {
 	int p=0;
-	const CString hex = "0123456789ABCDEF";
+	const CString hex = _T("0123456789ABCDEF");
 	while (p < _str.GetLength ()) {
 		// look for "%xx"-numbers
 		if (_str [p]=='%') {
@@ -206,14 +206,14 @@ void ReconstructCharacters (CString& _str) {
 CString SimpleCleanupFilename (CString _filename, int _options, 
 							   CString _searchfor, CString _replaceby,
 							   CString _searchforchars, CString _replacebychars) {
-  if (_filename=="") return ""; // nothing to do
+  if (_filename==_T("")) return _T(""); // nothing to do
     
   // Separate the filename from its extension to ensure separate treatment!
   int lastdot = _filename.ReverseFind ('.');
   
   CString name, ext;
   if (lastdot==-1) {
-	  name = (const char*) _filename;
+	  name = _filename;
   } else {
 	  name = _filename.Left (lastdot);
 	  ext = _filename.Right (_filename.GetLength ()-lastdot-1);
@@ -221,22 +221,22 @@ CString SimpleCleanupFilename (CString _filename, int _options,
 
   // Remove dots
   if ((_options & SCO_DOTTOSPACE) != 0) {
-	  ReplaceChars (name,"."," ",false);
-	  ReplaceChars (ext,"."," ",false);
+	  ReplaceChars (name,_T("."),_T(" "),false);
+	  ReplaceChars (ext,_T("."),_T(" "),false);
   }
   
   // Remove underlines
   if ((_options & SCO_UNDERLINETOSPACE) != 0) {
-	  ReplaceChars (name,"_"," ",false);
-	  ReplaceChars (ext,"_"," ",false);
+	  ReplaceChars (name,_T("_"),_T(" "),false);
+	  ReplaceChars (ext,_T("_"),_T(" "),false);
   }
 
   // Correct apostrophes
   if ((_options & SCO_REPLACEAPOSTROPHE) != 0) {
-	  ReplaceChars (name,"´","'",false);
-	  ReplaceChars (ext,"´","'",false);
-	  ReplaceChars (name,"`","'",false);
-	  ReplaceChars (ext,"`","'",false);
+	  ReplaceChars (name,_T("´"),_T("'"),false);
+	  ReplaceChars (ext,_T("´"),_T("'"),false);
+	  ReplaceChars (name,_T("`"),_T("'"),false);
+	  ReplaceChars (ext,_T("`"),_T("'"),false);
   }
 
   // Rebuild characters from hexadecimal numbers
@@ -272,7 +272,7 @@ CString SimpleCleanupFilename (CString _filename, int _options,
   if (lastdot==-1) {
 	  return name;
   } else {
-	  return name+"."+ext;
+	  return name+_T(".")+ext;
   }
 }
 
@@ -290,8 +290,8 @@ void CSimpleCleanupDialog::OnBnClickedNewcharacter()
 		i = m_ReplaceListBox->InsertItem (i,c1);
 		m_ReplaceListBox->SetItemText (i,1,c2);
 
-		GetDlgItem (IDC_CHARSOURCE)->SetWindowText ("");
-		GetDlgItem (IDC_CHARDEST)->SetWindowText ("");
+		GetDlgItem (IDC_CHARSOURCE)->SetWindowText (_T(""));
+		GetDlgItem (IDC_CHARDEST)->SetWindowText (_T(""));
 
 		GetDlgItem (IDC_CHARSOURCE)->SetFocus ();
 	}
@@ -352,8 +352,8 @@ void CSimpleCleanupDialog::ReadConfig () {
   CStringList dst;
   for (int i=0; i < m_ReplaceListBox->GetItemCount (); i++) {
 	  // don't allow '"' in the strings!
-	  CString c1 = m_ReplaceListBox->GetItemText (i,0).SpanExcluding ("\"");
-	  CString c2 = m_ReplaceListBox->GetItemText (i,1).SpanExcluding ("\"");
+	  CString c1 = m_ReplaceListBox->GetItemText (i,0).SpanExcluding (_T("\""));
+	  CString c2 = m_ReplaceListBox->GetItemText (i,1).SpanExcluding (_T("\""));
 	  if (c1 != "") {
 		src.AddTail (c1);
 		dst.AddTail (c2);

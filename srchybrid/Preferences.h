@@ -623,15 +623,10 @@ public:
 	static bool	m_bEnableChunkDots;
 	//EastShare - Added by Pretender, Option for ChunkDots
 
-	//Commander - Removed Invisible Mode
-	//EastShare - Added by Pretender, Invisible Mode
-	//static bool	m_bInvisibleMode;
-	//EastShare - Added by Pretender, Invisible Mode
-
-	static char	UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	static char	UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
-	static char UpdateURLIP2Country[256]; //Commander - Added: IP2Country auto-updating
-	static char UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
+	static TCHAR UpdateURLFakeList[256];//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	static TCHAR UpdateURLIPFilter[256];//MORPH START added by Yun.SF3: Ipfilter.dat update
+	static TCHAR UpdateURLIP2Country[256]; //Commander - Added: IP2Country auto-updating
+	static TCHAR UpdateVerURLIP2Country[256];//Commander - Added: IP2Country auto-updating
 
 	static bool	m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	static uint8	m_iPayBackFirstLimit;//MORPH - Added by SiRoB, Pay Back First Tweak
@@ -682,7 +677,7 @@ public:
 	// khaos::accuratetimerem-
 	
 	// Mighty Knife: Community Visualization, Report hashing files, Log friendlist activities
-	static char		m_sCommunityName [256];
+	static TCHAR	m_sCommunityName [256];
 	static bool		m_bReportHashingFiles;
 	static bool	    m_bLogFriendlistActivities;
 	// [end] Mighty Knife
@@ -691,8 +686,8 @@ public:
 	static bool		m_bDontAddCRCToFilename;
 	static bool		m_bCRC32ForceUppercase;
 	static bool		m_bCRC32ForceAdding;
-	static char		m_sCRC32Prefix [256];
-	static char		m_sCRC32Suffix [256];
+	static TCHAR		m_sCRC32Prefix [256];
+	static TCHAR		m_sCRC32Suffix [256];
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options
@@ -1530,7 +1525,6 @@ public:
 	//EastShare - added by AndCycle, IP to Country
 	static	void	SetMinUpload(uint16 in); //MORPH - Added by SiRoB, (SUC) & (USS)
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	static	void	SetLowIdRetries(uint8 in)	{LowIdRetries=in;}
 	static	void	SetLowIdRetried()	{LowIdRetried--;}
 	static	void	ResetLowIdRetried()	{LowIdRetried = LowIdRetries;}
 	static	uint8	GetLowIdRetried()	{return LowIdRetried;}
@@ -1564,7 +1558,7 @@ public:
 
 	// Mighty Knife: Community visualization, report hashing files, Log friendlist activities
 	static	CString GetCommunityName ()						{ return m_sCommunityName; }
-	static	void	SetCommunityName (CString _CommName)	{ sprintf (m_sCommunityName,"%s",_CommName); }
+	static	void	SetCommunityName (CString _CommName)	{ _stprintf(m_sCommunityName,_T("%s"),_CommName); }
 	static	bool	IsCommunityEnabled()					{ return m_sCommunityName [0] != '\0' ? true : false; }
 	static	bool    GetReportHashingFiles ()				{ return m_bReportHashingFiles; }
 	static	void	SetReportHashingFiles (bool _b)			{ m_bReportHashingFiles = _b; }
@@ -1580,9 +1574,9 @@ public:
 	static	bool    GetCRC32ForceAdding ()					{ return m_bCRC32ForceAdding; }
 	static	void	SetCRC32ForceAdding (bool _b)			{ m_bCRC32ForceAdding = _b; }
 	static	CString GetCRC32Prefix ()						{ return m_sCRC32Prefix; }
-	static	void	SetCRC32Prefix (CString _s)				{ sprintf (m_sCRC32Prefix,"%s",_s); }
+	static	void	SetCRC32Prefix (CString _s)				{ _stprintf (m_sCRC32Prefix,_T("%s"),_s); }
 	static	CString GetCRC32Suffix ()						{ return m_sCRC32Suffix; }
-	static	void	SetCRC32Suffix (CString _s)				{ sprintf (m_sCRC32Suffix,"%s",_s); }
+	static	void	SetCRC32Suffix (CString _s)				{ _stprintf (m_sCRC32Suffix,_T("%s"),_s); }
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options

@@ -49,7 +49,7 @@ class CIP2Country: public CLoggable
 
 		CImageList* GetFlagImageList() {return &CountryFlagImageList;}
 		void    UpdateIP2CountryURL();//Commander - Added: IP2Country auto-updating
-
+		CString GetDefaultFilePath() const;
 	private:
 
 		//check is program current running, if it's under init or shutdown, set to false

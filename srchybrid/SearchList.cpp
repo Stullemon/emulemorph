@@ -457,7 +457,7 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 				CPartFile::SServer tmpServer(toadd->GetClientServerIP(), toadd->GetClientServerPort());
 				tmpServer.m_uAvail = toadd->GetIntTagValue(FT_SOURCES);
 				file->AddAvailServer(tmpServer);
-				AddDebugLogLine(false, "Caching server with %i sources for %s", toadd->GetIntTagValue(FT_SOURCES), file->GetFileName());
+				AddDebugLogLine(false, _T("Caching server with %i sources for %s"), toadd->GetIntTagValue(FT_SOURCES), file->GetFileName());
 				// itsonlyme: cacheUDPsearchResults
 			}
 			// SLUGFILLER: searchCatch
@@ -683,7 +683,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 		CPartFile::SServer tmpServer(toadd->GetClientServerIP(), toadd->GetClientServerPort());
 		tmpServer.m_uAvail = toadd->GetIntTagValue(FT_SOURCES);
 		file->AddAvailServer(tmpServer);
-		AddDebugLogLine(false, "Caching server with %i sources for %s", toadd->GetIntTagValue(FT_SOURCES), file->GetFileName());
+		AddDebugLogLine(false, _T("Caching server with %i sources for %s"), toadd->GetIntTagValue(FT_SOURCES), file->GetFileName());
 		// itsonlyme: cacheUDPsearchResults
 	}
 	// SLUGFILLER: searchCatch

@@ -506,7 +506,7 @@ void CClientListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
-	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
 
 	GetPopupMenuPos(*this, point);
@@ -719,7 +719,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 5:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item2->GetClientSoftVer(), item1->GetClientSoftVer());
+					return CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
 				}
 				else {
 					return item2->GetVersion() - item1->GetVersion();
@@ -729,7 +729,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 105:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item1->GetClientSoftVer(), item2->GetClientSoftVer());
+					return CompareOptLocaleStringNoCase(item1->GetClientSoftVer(), item2->GetClientSoftVer());
 				}
 				else {
 					return item1->GetVersion() - item2->GetVersion();

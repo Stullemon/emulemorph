@@ -478,7 +478,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							//MORPH START - Added by SiRoB, ZZ Upload System
 							if(file->GetPowerShared()) {
 								CString tempString = GetResString(IDS_POWERSHARE_PREFIX);
-								tempString.Append(" ");
+								tempString.Append(_T(" "));
 								tempString.Append(Sbuffer);
 								Sbuffer.Empty(); //MORPH - HotFix by SiRoB, ZZ Upload System
 								Sbuffer = tempString;
@@ -552,7 +552,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// EastShare - Added by Pretender, Friend Tab
                     // Commander - Added: IP2Country column - Start
                     case 13:
-						Sbuffer.Format("%s", client->GetCountryName());
+						Sbuffer.Format(_T("%s"), client->GetCountryName());
 						break;
                     // Commander - Added: IP2Country column - End
 				}
@@ -634,7 +634,7 @@ ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABL
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
-	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);

@@ -248,7 +248,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	}
 
 	if (NFNEdit->GetLineCount () < m_FileList.GetCount()) {
-		AfxMessageBox (_T(GetResString (IDS_NOTENOUGHFILENAMES)),
+		AfxMessageBox (GetResString (IDS_NOTENOUGHFILENAMES),
 					   MB_OK|MB_ICONEXCLAMATION);
 		return;
 	}
@@ -265,7 +265,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 		FName.ReleaseBuffer ();
 		FName.Trim ('\r');
 		FName.Trim (' ');
-		if ((FName=="") || (FName==".") || (FName=="..") || (FName.FindOneOf (":\\?*") >= 0)){
+		if ((FName=="") || (FName==".") || (FName=="..") || (FName.FindOneOf (_T(":\\?*")) >= 0)){
 			CString er;
 			er.Format (_T("Invalid filename in line %d. Rename not possible."),i+1);
 			AfxMessageBox (er,MB_OK|MB_ICONEXCLAMATION);
@@ -295,7 +295,7 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 	for (int i=1; i < (int) sList.size(); i++) {
 		if (sList.at (i-1) == sList.at (i)) {
 			CString er;
-			er.Format (_T(GetResString (IDS_IDENTICALFILENAMES)),i+1);
+			er.Format (GetResString (IDS_IDENTICALFILENAMES),i+1);
 			AfxMessageBox (er,MB_OK|MB_ICONEXCLAMATION);
 			return;
 		}
@@ -460,7 +460,7 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 				NFNEdit->SetSel (lstart+llen-StartR2,lstart+llen-StartR2+1);
 				if (llen-StartR2 < 0) nochange = true;
 			}
-			if (!nochange) NFNEdit->ReplaceSel ("");
+			if (!nochange) NFNEdit->ReplaceSel (_T(""));
 		}
 	} else {
 		CString NewChars = AfterEdit.Mid (Start1,End2-Start1);
@@ -547,7 +547,7 @@ CString SimpleCleanupFilename (CString _filename) {
 		}
 	}
 	// Strip "\r" and "\n"
-	return _filename.SpanExcluding ("\r\n");
+	return _filename.SpanExcluding (_T("\r\n"));
 }
 
 
@@ -619,7 +619,7 @@ void CMassRenameDialog::OnBnClickedSimplecleanup()
 			NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
 			filename.ReleaseBuffer();
 			// Clean it up
-			filename = SimpleCleanupFilename (filename.SpanExcluding ("\r\n"),
+			filename = SimpleCleanupFilename (filename.SpanExcluding (_T("\r\n")),
 											  options,source,dest,
 											  sourcechar,destchar);
 			// and add it to the current list of filenames
@@ -725,7 +725,7 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 			filename.ReleaseBuffer();
 
 			// Remove "\r\n" from the current filename if necessary
-			filename = filename.SpanExcluding ("\r\n");
+			filename = filename.SpanExcluding (_T("\r\n"));
 
 			// We only proceed those lines that are larger than our StartLine - all
 			// other filenames have to be copied.
@@ -735,7 +735,7 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 
 				// Delete the marked characters from the filename (if anything is marked) and
 				// insert the next part of the clipboard at the current cursor position
-				clend = ClipboardData.Find ("\n",clstart);
+				clend = ClipboardData.Find (_T("\n"),clstart);
 				if (clend==-1) clend = ClipboardData.GetLength ();
 				// Extract the characters to be inserted. Make sure not to copy the
 				// trailing "\n"!

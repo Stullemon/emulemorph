@@ -79,17 +79,17 @@ void CCatDialog::UpdateData(){
 	GetDlgItem(IDC_FS_MAX)->SetWindowText(CastItoUIXBytes(m_myCat->viewfilters.nFSizeMax));
 	GetDlgItem(IDC_RS_MIN)->SetWindowText(CastItoUIXBytes(m_myCat->viewfilters.nRSizeMin));
 	GetDlgItem(IDC_RS_MAX)->SetWindowText(CastItoUIXBytes(m_myCat->viewfilters.nRSizeMax));
-	buffer.Format("%u", m_myCat->viewfilters.nTimeRemainingMin >= 60 ? (m_myCat->viewfilters.nTimeRemainingMin / 60) : 0);
+	buffer.Format(_T("%u"), m_myCat->viewfilters.nTimeRemainingMin >= 60 ? (m_myCat->viewfilters.nTimeRemainingMin / 60) : 0);
 	GetDlgItem(IDC_RT_MIN)->SetWindowText(buffer);
-	buffer.Format("%u", m_myCat->viewfilters.nTimeRemainingMax >= 60 ? (m_myCat->viewfilters.nTimeRemainingMax / 60) : 0);
+	buffer.Format(_T("%u"), m_myCat->viewfilters.nTimeRemainingMax >= 60 ? (m_myCat->viewfilters.nTimeRemainingMax / 60) : 0);
 	GetDlgItem(IDC_RT_MAX)->SetWindowText(buffer);
-	buffer.Format("%u", m_myCat->viewfilters.nSourceCountMin);
+	buffer.Format(_T("%u"), m_myCat->viewfilters.nSourceCountMin);
 	GetDlgItem(IDC_SC_MIN)->SetWindowText(buffer);
-	buffer.Format("%u", m_myCat->viewfilters.nSourceCountMax);
+	buffer.Format(_T("%u"), m_myCat->viewfilters.nSourceCountMax);
 	GetDlgItem(IDC_SC_MAX)->SetWindowText(buffer);
-	buffer.Format("%u", m_myCat->viewfilters.nAvailSourceCountMin);
+	buffer.Format(_T("%u"), m_myCat->viewfilters.nAvailSourceCountMin);
 	GetDlgItem(IDC_ASC_MIN)->SetWindowText(buffer);
-	buffer.Format("%u", m_myCat->viewfilters.nAvailSourceCountMax);
+	buffer.Format(_T("%u"), m_myCat->viewfilters.nAvailSourceCountMax);
 	GetDlgItem(IDC_ASC_MAX)->SetWindowText(buffer);
 
 	CheckDlgButton(IDC_CHECK_FS, m_myCat->selectioncriteria.bFileSize?1:0);
@@ -253,17 +253,17 @@ void CCatDialog::OnBnClickedOk()
 	GetDlgItem(IDC_RS_MAX)->GetWindowText(sBuffer);
 	m_myCat->viewfilters.nRSizeMax = CastXBytesToI(sBuffer);
 	GetDlgItem(IDC_RT_MIN)->GetWindowText(sBuffer);
-	m_myCat->viewfilters.nTimeRemainingMin = (uint32) (60 * atoi(sBuffer));
+	m_myCat->viewfilters.nTimeRemainingMin = (uint32) (60 * _tstoi(sBuffer));
 	GetDlgItem(IDC_RT_MAX)->GetWindowText(sBuffer);
-	m_myCat->viewfilters.nTimeRemainingMax = (uint32) (60 * atoi(sBuffer));
+	m_myCat->viewfilters.nTimeRemainingMax = (uint32) (60 * _tstoi(sBuffer));
 	GetDlgItem(IDC_SC_MIN)->GetWindowText(sBuffer);
-	m_myCat->viewfilters.nSourceCountMin = atoi(sBuffer);
+	m_myCat->viewfilters.nSourceCountMin = _tstoi(sBuffer);
 	GetDlgItem(IDC_SC_MAX)->GetWindowText(sBuffer);
-	m_myCat->viewfilters.nSourceCountMax = atoi(sBuffer);
+	m_myCat->viewfilters.nSourceCountMax = _tstoi(sBuffer);
 	GetDlgItem(IDC_ASC_MIN)->GetWindowText(sBuffer);
-	m_myCat->viewfilters.nAvailSourceCountMin = atoi(sBuffer);
+	m_myCat->viewfilters.nAvailSourceCountMin = _tstoi(sBuffer);
 	GetDlgItem(IDC_ASC_MAX)->GetWindowText(sBuffer);
-	m_myCat->viewfilters.nAvailSourceCountMax = atoi(sBuffer);
+	m_myCat->viewfilters.nAvailSourceCountMax = _tstoi(sBuffer);
 
 	m_myCat->selectioncriteria.bFileSize = IsDlgButtonChecked(IDC_CHECK_FS)?true:false;
 	m_myCat->selectioncriteria.bAdvancedFilterMask = IsDlgButtonChecked(IDC_CHECK_MASK)?true:false;	

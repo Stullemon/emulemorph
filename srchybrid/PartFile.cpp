@@ -2613,7 +2613,7 @@ CServer *CPartFile::GetNextAvailServer()
 		return NULL;
 
 	CString tracemsg;
-	tracemsg.Format("GetNextAvailServer returned %s:%i server with %i sources for %s", nextServer->GetAddress(), nextServer->GetPort(), aServer.m_uAvail, this->m_strFileName);
+	tracemsg.Format(_T("GetNextAvailServer returned %s:%i server with %i sources for %s"), nextServer->GetAddress(), nextServer->GetPort(), aServer.m_uAvail, this->m_strFileName);
 	TRACE(tracemsg);
 	AddDebugLogLine(false, tracemsg);
 

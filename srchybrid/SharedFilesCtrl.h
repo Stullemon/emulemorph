@@ -56,6 +56,7 @@ protected:
 	CMenu		m_SelectiveChunkMenu; //MORPH - Added by SiRoB, HIDEOS
 	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	CMenu		m_PowerShareLimitMenu; //MORPH - Added by SiRoB, POWERSHARE Limit
+	CMenu		m_CRC32Menu; //MORPH - Added by SiRoB, CRC32-Tag
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void UpdateItem(CKnownFile* file);
 	void		OpenFile(const CKnownFile* file);

@@ -3119,7 +3119,7 @@ public:
 	//</param>
 	//<param name="delimiter">Delimiter string to use in tokenizing path.</param>
 	//<returns>Matching node, or xml_node(NULL) if not found.</returns>
-	xml_node first_element_by_path(const std::string& path,const std::string& delimiter = _T("/")){ return first_element_by_path(path.c_str(),delimiter.c_str()); }
+	xml_node first_element_by_path(const std::string& path,const std::string& delimiter = "/"){ return first_element_by_path(path.c_str(),delimiter.c_str()); }
 
 	//<summary>Search for a node by path.</summary>
 	//<param name="path">

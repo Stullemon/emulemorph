@@ -154,24 +154,24 @@ void CPreferencesDlg::Localize()
 {
 	ImageList.DeleteImageList();
 	ImageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-	ImageList.Add(CTempIconLoader("PREF_GENERAL"));
-	ImageList.Add(CTempIconLoader("PREF_DISPLAY"));
-	ImageList.Add(CTempIconLoader("PREF_CONNECTION"));
-	ImageList.Add(CTempIconLoader("PREF_PROXY"));
-	ImageList.Add(CTempIconLoader("PREF_SERVER"));
-	ImageList.Add(CTempIconLoader("PREF_FOLDERS"));
-	ImageList.Add(CTempIconLoader("PREF_FILES"));
-	ImageList.Add(CTempIconLoader("PREF_NOTIFICATIONS"));
-	ImageList.Add(CTempIconLoader("PREF_STATISTICS"));
-	ImageList.Add(CTempIconLoader("PREF_IRC"));
-	ImageList.Add(CTempIconLoader("PREF_SECURITY"));
-	ImageList.Add(CTempIconLoader("PREF_SCHEDULER"));
-	ImageList.Add(CTempIconLoader("PREF_WEBSERVER"));
-	ImageList.Add(CTempIconLoader("PREF_TWEAK"));
-	ImageList.Add(CTempIconLoader("PREF_BACKUP")); //EastShare - Added by Pretender, TBH-AutoBackup
-	ImageList.Add(CTempIconLoader("CLIENTMORPH"));  //MORPH - Added by IceCream, Morph Prefs
-	ImageList.Add(CTempIconLoader("CLIENTMORPH"));  //MORPH - Added by SiRoB, Morph Prefs
-	ImageList.Add(CTempIconLoader("CLIENTEASTSHARE"));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
+	ImageList.Add(CTempIconLoader(_T("PREF_GENERAL")));
+	ImageList.Add(CTempIconLoader(_T("PREF_DISPLAY")));
+	ImageList.Add(CTempIconLoader(_T("PREF_CONNECTION")));
+	ImageList.Add(CTempIconLoader(_T("PREF_PROXY")));
+	ImageList.Add(CTempIconLoader(_T("PREF_SERVER")));
+	ImageList.Add(CTempIconLoader(_T("PREF_FOLDERS")));
+	ImageList.Add(CTempIconLoader(_T("PREF_FILES")));
+	ImageList.Add(CTempIconLoader(_T("PREF_NOTIFICATIONS")));
+	ImageList.Add(CTempIconLoader(_T("PREF_STATISTICS")));
+	ImageList.Add(CTempIconLoader(_T("PREF_IRC")));
+	ImageList.Add(CTempIconLoader(_T("PREF_SECURITY")));
+	ImageList.Add(CTempIconLoader(_T("PREF_SCHEDULER")));
+	ImageList.Add(CTempIconLoader(_T("PREF_WEBSERVER")));
+	ImageList.Add(CTempIconLoader(_T("PREF_TWEAK")));
+	ImageList.Add(CTempIconLoader(_T("PREF_BACKUP"))); //EastShare - Added by Pretender, TBH-AutoBackup
+	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by IceCream, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("CLIENTEASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	m_listbox.SetImageList(&ImageList);
 
 	CString title = GetResString(IDS_EM_PREFS); 
@@ -217,9 +217,9 @@ void CPreferencesDlg::Localize()
 	buffer.Add(_T("Debug"));
 #endif
 	buffer.Add(GetResString(IDS_BACKUP)); //EastShare - Added by Pretender, TBH-AutoBackup
-	buffer.Add("Morph"); //MORPH - Added by IceCream, Morph Prefs
-	buffer.Add("Morph II"); //MORPH - Added by SiRoB, Morph Prefs
-	buffer.Add("EastShare"); //EastShare - Added by Pretender, ES Prefs
+	buffer.Add(_T("Morph")); //MORPH - Added by IceCream, Morph Prefs
+	buffer.Add(_T("Morph II")); //MORPH - Added by SiRoB, Morph Prefs
+	buffer.Add(_T("EastShare")); //EastShare - Added by Pretender, ES Prefs
 	for (int i = 0; i < buffer.GetCount(); i++)
 		buffer[i].Remove(_T('&'));
 

@@ -68,7 +68,7 @@ void		InitRandGen();
 int			RandNum();
 static int	rgiState[2+55];
 // Wildcard support for Category Selection Mask
-int wildcmp(char *wild, char *string);
+int wildcmp(TCHAR *wild, TCHAR *string);
 // khaos::kmod-
 //MORPH START - Added by SiRoB, XML News [O²]
 void HTMLParse(CString &buffer); // Added by N_OxYdE

@@ -2508,7 +2508,7 @@ void CClientReqSocket::SmartUploadControl()
 	  theApp.uploadqueue->SetMaxVUR(theApp.uploadqueue->GetDatarate()+thePrefs.GetSUCDrift());
 	}
   if (thePrefs.IsSUCLog ()) {
-	AddDebugLogLine(false,"Smart Upload Control: (time:%ims, clip:%ims, ratio:%i) VUR:%iB/s",
+	AddDebugLogLine(false,_T("Smart Upload Control: (time:%ims, clip:%ims, ratio:%i) VUR:%iB/s"),
 		checkrespond,
 		theApp.uploadqueue->GetAvgRespondTime(1),
 		theApp.uploadqueue->GetAvgRespondTime(0),

@@ -1134,11 +1134,11 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				case 13:{
 					if (server->GetLowIDUsers()){
 						CString tempStr2;
-						tempStr2.Format("%s", CastItoIShort(server->GetLowIDUsers()));
+						tempStr2.Format(_T("%s"), CastItoIShort(server->GetLowIDUsers()));
 						Sbuffer = tempStr2;
 					}
 					else{
-						Sbuffer = "";
+						Sbuffer = _T("");
 					}
 					break;
 						}
@@ -1147,7 +1147,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					if(server->GetConnPort() != server->GetPort())
 						Sbuffer.Format(_T("%i"), server->GetConnPort());
 					else
-						Sbuffer = "";
+						Sbuffer = _T("");
 					break;
 						}
 
@@ -1155,11 +1155,11 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				case 15:{
 					if(server->GetCountryName()){
 						CString tempStr3;
-						tempStr3.Format("%s", server->GetCountryName());
+						tempStr3.Format(_T("%s"), server->GetCountryName());
 						Sbuffer = tempStr3;
 					}
 					else{
-                        Sbuffer = "";
+                        Sbuffer = _T("");
 					}
 					break;
 				}

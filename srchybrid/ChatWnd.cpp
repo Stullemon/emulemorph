@@ -185,7 +185,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 		
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_COUNTRY_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_COUNTRY_EDIT)->SetWindowText(_T("?"));
 	//Commander - Added: IP2Country - End
 	}
 }
@@ -424,7 +424,7 @@ void CChatWnd::Localize()
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(GetResString(IDS_CW_FRIENDS));
 	GetDlgItem(IDC_MESSAGES_LBL)->SetWindowText(GetResString(IDS_CW_MESSAGES));
 	//MORPH START - Added by SiRoB, New friend message window
-	GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_CHAT_COUNTRY));
+	GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_COUNTRY));
 	//MORPH END   - Added by SiRoB, New friend message window
 	GetDlgItem(IDC_FRIENDS_DOWNLOADED)->SetWindowText(GetResString(IDS_CHAT_DOWNLOADED));
 	GetDlgItem(IDC_FRIENDS_UPLOADED)->SetWindowText(GetResString(IDS_CHAT_UPLOADED));

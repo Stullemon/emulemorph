@@ -105,17 +105,17 @@ void CPPgMorph2::LoadSettings(void)
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	strBuffer.Format("v.%u", thePrefs.GetIP2CountryVersion());
+	strBuffer.Format(_T("v.%u"), thePrefs.GetIP2CountryVersion());
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	strBuffer.Format("v.%u", thePrefs.GetFakesDatVersion());
+	strBuffer.Format(_T("v.%u"), thePrefs.GetFakesDatVersion());
 	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	strBuffer.Format("v.%u", thePrefs.GetIPfilterVersion());
+	strBuffer.Format(_T("v.%u"), thePrefs.GetIPfilterVersion());
 	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
 	//Commander - Added: IP2Country Auto-updating - End
 }
@@ -127,25 +127,25 @@ BOOL CPPgMorph2::OnApply()
 	
 	//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->GetWindowText(buffer);
-	strcpy(thePrefs.UpdateURLFakeList, buffer);
+	_tcscpy(thePrefs.UpdateURLFakeList, buffer);
 	thePrefs.UpdateFakeStartup = IsDlgButtonChecked(IDC_UPDATEFAKELISTSTART);
 	//MORPH END   - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 
 	//MORPH START - Added by Yun.SF3: Ipfilter.dat update
 	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->GetWindowText(buffer);
-	strcpy(thePrefs.UpdateURLIPFilter, buffer);
+	_tcscpy(thePrefs.UpdateURLIPFilter, buffer);
 	thePrefs.AutoUpdateIPFilter = IsDlgButtonChecked(IDC_AUTOUPIPFILTER);
 	//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
     //Commander - Added: IP2Country Auto-updating - Start
     GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->GetWindowText(buffer);
-	strcpy(thePrefs.UpdateURLIP2Country, buffer);
+	_tcscpy(thePrefs.UpdateURLIP2Country, buffer);
 	thePrefs.AutoUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
 	GetDlgItem(IDC_UPDATE_VER_URL_IP2COUNTRY)->GetWindowText(buffer);
-	strcpy(thePrefs.UpdateVerURLIP2Country, buffer);
+	_tcscpy(thePrefs.UpdateVerURLIP2Country, buffer);
 	//thePrefs.AutoVerUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY);
 	//Commander - Added: IP2Country Auto-updating - End
 

@@ -211,7 +211,7 @@ void CDownloadQueue::AddSearchToDownload(CSearchFile* toadd,uint8 paused,uint8 c
 		CPartFile::SServer tmpServer(aServers[i].m_nIP, aServers[i].m_nPort);
 		tmpServer.m_uAvail = aServers[i].m_uAvail;
 		newfile->AddAvailServer(tmpServer);
-		AddDebugLogLine(false, "Caching server with %i sources for %s", aServers[i].m_uAvail, newfile->GetFileName());
+		AddDebugLogLine(false, _T("Caching server with %i sources for %s"), aServers[i].m_uAvail, newfile->GetFileName());
 	}
 	// itsonlyme: cacheUDPsearchResults
 	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
@@ -666,9 +666,9 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 				int iStart = 0;
 				switch (i)
 				{
-			case 0: iStart = sFilterMask.Find("<all("); break;
-			case 1: iStart = sFilterMask.Find("<any("); break;
-			case 2: iStart = sFilterMask.Find("<none("); break;
+			case 0: iStart = sFilterMask.Find(_T("<all(")); break;
+			case 1: iStart = sFilterMask.Find(_T("<any(")); break;
+			case 2: iStart = sFilterMask.Find(_T("<none(")); break;
 				}
 
 				if (iStart == -1)
@@ -679,13 +679,13 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 
 				i !=2 ? (iStart += 5) : (iStart += 6);
 
-			int iEnd = sFilterMask.Find(")>", iStart);
-			int iLT = sFilterMask.Find("<", iStart);
-			int iGT = sFilterMask.Find(">", iStart);
+			int iEnd = sFilterMask.Find(_T(")>"), iStart);
+			int iLT = sFilterMask.Find(_T("<"), iStart);
+			int iGT = sFilterMask.Find(_T(">"), iStart);
 
 				if (iEnd == -1 || (iLT != -1 && iLT < iEnd) || iGT < iEnd)
 				{
-				AddDebugLogLine(false, "Category '%s' has invalid Category Mask String.", thePrefs.GetCategory(nCat)->title);
+				AddDebugLogLine(false, _T("Category '%s' has invalid Category Mask String."), thePrefs.GetCategory(nCat)->title);
 					break; // Move on to next category.
 				}
 				if (iStart == iEnd)
@@ -697,20 +697,20 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 			CString sSegment = sFilterMask.Mid(iStart, iEnd - iStart);
 
 				int curPosBlock = 0;
-				CString cmpSubBlock = sSegment.Tokenize(":", curPosBlock);
+				CString cmpSubBlock = sSegment.Tokenize(_T(":"), curPosBlock);
 
 				while (cmpSubBlock != "")
 				{
 					bool bPassed = (i == 1) ? false : true;
 
 					int curPosToken = 0;
-					CString cmpSubStr = cmpSubBlock.Tokenize("|", curPosToken);
+					CString cmpSubStr = cmpSubBlock.Tokenize(_T("|"), curPosToken);
 
 				while (cmpSubStr != "")
 				{
 					int cmpResult;
 
-					if (cmpSubStr.Find("*") != -1 || cmpSubStr.Find("?") != -1)
+					if (cmpSubStr.Find(_T("*")) != -1 || cmpSubStr.Find(_T("?")) != -1)
 						cmpResult = (wildcmp(cmpSubStr.GetBuffer(), sFullName.GetBuffer()) == 0) ? -1 : 1;
 					else
 						cmpResult = sFullName.Find(cmpSubStr);
@@ -721,7 +721,7 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 							case 1:	if (cmpResult != -1) bPassed = true; break;
 							case 2:	if (cmpResult != -1) bPassed = false; break;
 						}
-						cmpSubStr = cmpSubBlock.Tokenize("|", curPosToken);
+						cmpSubStr = cmpSubBlock.Tokenize(_T("|"), curPosToken);
 						}
 					switch (i)
 						{
@@ -729,7 +729,7 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 						case 2: if (bPassed) bPassedGlobal[i] = true; break;
 						case 1: if (!bPassed) bPassedGlobal[i] = false; break;
 						}
-					cmpSubBlock = sSegment.Tokenize(":", curPosBlock);
+					cmpSubBlock = sSegment.Tokenize(_T(":"), curPosBlock);
 					}
 				}
 			for (int i = 0; i < 3; i++)
@@ -739,20 +739,20 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, uint8 nCat)
 		else
 		{
 			int curPos = 0;
-		CString cmpSubStr = sFilterMask.Tokenize("|", curPos);
+		CString cmpSubStr = sFilterMask.Tokenize(_T("|"), curPos);
 
 			while (cmpSubStr != "")
 			{
 				int cmpResult;
 
-				if (cmpSubStr.Find("*") != -1 || cmpSubStr.Find("?") != -1)
+				if (cmpSubStr.Find(_T("*")) != -1 || cmpSubStr.Find(_T("?")) != -1)
 					cmpResult = (wildcmp(cmpSubStr.GetBuffer(), sFullName.GetBuffer()) == 0) ? -1 : 1;
 				else
 					cmpResult = sFullName.Find(cmpSubStr);
 
 				if(cmpResult != -1)
 				return true;
-			cmpSubStr = sFilterMask.Tokenize("|", curPos);
+			cmpSubStr = sFilterMask.Tokenize(_T("|"), curPos);
 			}
 		}
 	return false;
@@ -883,7 +883,7 @@ void CDownloadQueue::Process(){
 	else if (m_ED2KLinkQueue.GetCount() && !thePrefs.SelectCatForNewDL()) // This should not happen.
 	{
 		PurgeED2KLinkQueue();
-		AddDebugLogLine(false, "ERROR: Links in ED2K Link Queue while SelectCatForNewDL was disabled!");
+		AddDebugLogLine(false, _T("ERROR: Links in ED2K Link Queue while SelectCatForNewDL was disabled!"));
 	}
 	// khaos::categorymod-
 

@@ -6,7 +6,7 @@ class CFunnyNick
 {
 public:
 	CFunnyNick();
-	char *gimmeFunnyNick(const uchar *id);
+	TCHAR *gimmeFunnyNick(const uchar *id);
 
 private:
 	CStringList p;

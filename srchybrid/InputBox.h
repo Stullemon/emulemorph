@@ -33,7 +33,7 @@ public:
 	void	SetEditFilenameMode(bool isfilenamemode=true) {m_bFilenameMode=isfilenamemode;}
 	// khaos::categorymod+
 	void	SetNumber(bool isNum = false) { isNumber = isNum; }
-	const int	GetInputInt() const { return atoi(m_return); };
+	const int	GetInputInt() const { return _tstoi(m_return); };
 	// khaos::categorymod-
 protected:
 	CString m_label;

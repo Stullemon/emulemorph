@@ -394,7 +394,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                     uint32 curHost = 0;
                     for(uint32 ttl = 1; doRun && enabled && (curHost != 0 && ttl <= 64 || curHost == 0 && ttl < 5) && foundLastCommonHost == false && failed == false; ttl++) {
                         if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-							theApp.QueueDebugLogLine(false,"UploadSpeedSense: Pinging for TTL %i...", ttl);
+							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Pinging for TTL %i..."), ttl);
 						useUdp = false; // PENDING: Get default value from prefs?
 
                         curHost = 0;

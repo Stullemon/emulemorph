@@ -263,7 +263,7 @@ CString CPPgScheduler::GetActionLabel(uint8 index) {
 		case ACTION_USSMINUP	: return GetResString(IDS_MINUPLOAD);
 		//EastShare END - Added by Pretender, add USS settings in scheduler tab
 	}
-	return ""; //MORPH - Modified by IceCream, return a CString
+	return _T(""); //MORPH - Modified by IceCream, return a CString
 }
 
 CString CPPgScheduler::GetDayLabel(uint8 index) {
@@ -280,7 +280,7 @@ CString CPPgScheduler::GetDayLabel(uint8 index) {
 		case DAY_MO_SA	: return GetResString(IDS_DAY_MO_SA);
 		case DAY_SA_SO	: return GetResString(IDS_DAY_SA_SO);
 	}
-	return ""; //MORPH - Modified by IceCream, return a CString
+	return _T(""); //MORPH - Modified by IceCream, return a CString
 }
 
 

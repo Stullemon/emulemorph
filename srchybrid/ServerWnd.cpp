@@ -33,7 +33,7 @@
 #include "MuleStatusBarCtrl.h"
 #include "HelpIDs.h"
 #include "NetworkInfoDlg.h"
-
+#include <share.h>
 // Mighty Knife: Popup-Menu for editing news feeds
 #include "MenuCmds.h"
 #include "InputBox.h"
@@ -145,7 +145,7 @@ BOOL CServerWnd::OnInitDialog()
 		newsmsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 		newsmsgbox->SetEventMask(newsmsgbox->GetEventMask() | ENM_LINK);
 		newsmsgbox->SetFont(&theApp.emuledlg->m_fontHyperText);
-		newsmsgbox->SetTitle("News");
+		newsmsgbox->SetTitle(GetResString(IDS_FEED));
 	}
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	TCITEM newitem;
@@ -406,7 +406,7 @@ void CServerWnd::Localize()
 		StatusSelector.SetItem(PaneLog, &item);
 
 	    //MORPH START - Added by SiRoB, XML News [O²]
-		name = "News";
+		name = GetResString(IDS_FEED);
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneNews, &item);
@@ -932,7 +932,7 @@ void CServerWnd::ListFeeds()
 	char buffer[1024];
 	int lenBuf = 1024;
 
-	FILE* readFile= fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "r");
+	FILE* readFile= _tfsopen(CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"), _T("r"), _SH_DENYWR);
 	if (readFile!=NULL)
 	{
 		GetDlgItem(IDC_FEEDLIST)->EnableWindow();
@@ -969,31 +969,30 @@ void CServerWnd::DownloadFeed()
 	int numero = m_feedlist.GetCurSel();
 	// if no item is selected there's nothing to do...
 	if (numero==CB_ERR) return;
+
 	// Get the URL to download
 	CString strURL = aFeedUrls.GetAt(numero);
-	CString strTempFilename; 
-	// Delete the old temporary copy in the "feeds" subdirectory
-	// of this feed if necessary
-	strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),numero);
-	FILE* readFile = fopen(strTempFilename, "r");
-	if (readFile!=NULL)
-	{
-		fclose(readFile);
-		remove(strTempFilename);
-	}
-	readFile = fopen(strTempFilename, "r");
+	TCHAR szTempFilePath[_MAX_PATH]; 
+	_stprintf(szTempFilePath, _T("%s%d.xml.tmp"),thePrefs.GetFeedsDir(), numero);
+	TCHAR szFilePath[_MAX_PATH]; 
+	_stprintf(szFilePath, _T("%s%d.xml"),thePrefs.GetFeedsDir(), numero);
+	
 	// Start the download dialog and retrieve the file
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = _T("Download RSS feed file");
 	dlgDownload.m_sURLToDownload = strURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
+		_tremove(szTempFilePath);
+		theApp.emuledlg->AddLogLine(true, _T("Error downloading %s"), strURL);
 		return;
 	}
+	_tremove(szFilePath);
+	_trename(szTempFilePath, szFilePath);
+
 	// Parse it
-	ParseNewsFile(strTempFilename);
+	ParseNewsFile(szFilePath);
 }
 
 //Commander - Added: Update All Feeds at once - Start
@@ -1004,27 +1003,27 @@ void CServerWnd::DownloadAllFeeds()
 		CString sbuffer;
 		if (i==CB_ERR) return;
 		CString strURL = aFeedUrls.GetAt(i);
-		CString strTempFilename; 
-		strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),i);
-		FILE* readFile = fopen(strTempFilename, "r");
-		if (readFile!=NULL)
-		{
-			fclose(readFile);
-			remove(strTempFilename);
-		}
-		readFile = fopen(strTempFilename, "r");
+
+		TCHAR szTempFilePath[_MAX_PATH]; 
+		_stprintf(szTempFilePath, _T("%s%d.xml.tmp"),thePrefs.GetFeedsDir(), i);
+		TCHAR szFilePath[_MAX_PATH]; 
+		_stprintf(szFilePath, _T("%s%d.xml"),thePrefs.GetFeedsDir(), i);
+
 		// Start the download dialog and retrieve the file
 		CHttpDownloadDlg dlgDownload;
 		dlgDownload.m_strTitle = _T("Download RSS feed file");
 		dlgDownload.m_sURLToDownload = strURL;
-		dlgDownload.m_sFileToDownloadInto = strTempFilename;
+		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
 		if (dlgDownload.DoModal() != IDOK)
 		{
-			theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
+			_tremove(szTempFilePath);
+			theApp.emuledlg->AddLogLine(true, _T("Error downloading %s"), strURL);
 			return;
 		}
+		_tremove(szFilePath);
+		_trename(szTempFilePath,szFilePath);
 		// Parse it
-		ParseNewsFile(strTempFilename);
+		ParseNewsFile(szFilePath);
 	}
 }
 //Commander - Added: Update All Feeds at once - End
@@ -1044,7 +1043,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			aXMLUrls.Add(i->first_element_by_path("./link").child(0).value());
 			sbuffer = i->first_element_by_path("./title").child(0).value();
 			HTMLParse(sbuffer);
-			newsmsgbox->AppendText("\n• ");
+			newsmsgbox->AppendText(_T("\n• "));
 			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 			aXMLNames.Add(sbuffer);
 			if (!i->first_element_by_path("./author").child(0).empty())
@@ -1057,26 +1056,26 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			if (buffer != _xmlbuffer && !buffer.IsEmpty())
 			{
 				if (sxmlbuffer.IsEmpty())
-					newsmsgbox->AppendText("\n");
+					newsmsgbox->AppendText(_T("\n"));
 				int index = 0;
-				while (buffer.Find("<a href=\"") != -1)
+				while (buffer.Find(_T("<a href=\"")) != -1)
 				{
-					index = buffer.Find("<a href=\"");
+					index = buffer.Find(_T("<a href=\""));
 					newsmsgbox->AppendText(buffer.Left(index));
 					buffer = buffer.Mid(index+9);
-					index = buffer.Find("\"");
+					index = buffer.Find(_T("\""));
 					sbuffer = buffer.Left(index);
 					aXMLUrls.Add(sbuffer);
 					buffer = buffer.Mid(index+1);
-					index = buffer.Find(">");
+					index = buffer.Find(_T(">"));
 					buffer = buffer.Mid(index+1);
-					index = buffer.Find("</a>");
+					index = buffer.Find(_T("</a>"));
 					sbuffer = buffer.Left(index);
 					aXMLNames.Add(sbuffer);
 					newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 					buffer = buffer.Mid(index+4);
 				}
-				newsmsgbox->AppendText(buffer+"\n");
+				newsmsgbox->AppendText(buffer+_T("\n"));
 			}
 		}
 	}
@@ -1126,7 +1125,7 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 		aXMLUrls.Add(itelem.first_element_by_path("./link").child(0).value());
 		sbuffer = itelem.first_element_by_path("./title").child(0).value();
 		HTMLParse(sbuffer);
-		sbuffer.Replace("'","`");
+		sbuffer.Replace(_T("'"),_T("`"));
 		newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 		aXMLNames.Add(sbuffer);
 		// The xmlbuffer stores the description of the newsfile itself.
@@ -1142,7 +1141,7 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 		ParseNewsNode (itelemroot, xmlbuffer);
 		// On which node they can fe found depends on the one who generates 
 		// the XML file.
-		newsmsgbox->AppendText("\n");
+		newsmsgbox->AppendText(_T("\n"));
 	}
 	delete xml;
 	newsmsgbox->ScrollToFirstLine();
@@ -1173,7 +1172,7 @@ void CServerWnd::OnFeedListSelChange()
 {
 	GetDlgItem(IDC_FEEDUPDATE)->EnableWindow();
 	CString strTempFilename;
-	strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),m_feedlist.GetCurSel());
+	strTempFilename.Format(_T("%s%d.xml"),thePrefs.GetFeedsDir(),m_feedlist.GetCurSel());
 	ParseNewsFile(strTempFilename);
 }
 //MORPH END - Added by SiRoB, XML News [O²]
@@ -1198,7 +1197,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 			InputBox inp;
 			inp.SetLabels (GetResString (IDS_ADDNEWSFEED),
 						   GetResString (IDS_FEEDURL),
-						   "");
+						   _T(""));
 			inp.DoModal ();
 			CString url = inp.GetInput ();
 			if ((!inp.WasCancelled()) && (url != "")) {
@@ -1207,7 +1206,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 				InputBox inp2;
 				inp2.SetLabels (GetResString (IDS_ADDNEWSFEED),
 								GetResString (IDS_FEEDNAME),
-							    "");
+							    _T(""));
 				inp2.DoModal ();
 				if (!inp2.WasCancelled()) {
 					CString name = inp2.GetInput ();
@@ -1303,10 +1302,10 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 					// corresponding number of the entrys in the ComboBox.
 					for (int j=sel; j < names.GetSize (); j++) {
 						CString Source, Dest;
-						Source.Format("%s%d.xml",thePrefs.GetFeedsDir(),j+1);
-						Dest.Format("%s%d.xml",thePrefs.GetFeedsDir(),j);
-						DeleteFile ((const char*) Dest);
-						rename ((const char*) Source,(const char*) Dest);
+						Source.Format(_T("%s%d.xml"),thePrefs.GetFeedsDir(),j+1);
+						Dest.Format(_T("%s%d.xml"),thePrefs.GetFeedsDir(),j);
+						DeleteFile (Dest);
+						_trename(Source, Dest);
 					}
 
 				}
@@ -1321,7 +1320,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 		} break;
 		case MP_DELETEALLFEEDS: {
 			// Delete the file and reload the feeds for the ComboBox
-			DeleteFile (CString(thePrefs.GetConfigDir())+"XMLNews.dat");
+			DeleteFile (CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"));
 			ListFeeds ();
 			return true;
 		} break;
@@ -1344,16 +1343,17 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 // ...
 // There's no "," sign allowed in the name!
 void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
-	FILE* readfile = fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "r");
+	FILE* readfile = _tfsopen(CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"), _T("r"), _SH_DENYWR);
 	if (readfile == NULL) return; 
 	while (!feof (readfile)) {
 		// Read the current line
 		CString url;
-		char* pbuf = url.GetBuffer (1024);
-		fgets (pbuf,1024,readfile);
-		url.ReleaseBuffer ();
+		TCHAR buffer[1024];
+		if(_fgetts(buffer, ARRSIZE(buffer),readfile)==NULL)
+			break;
+		url = buffer;
 		// Remove all LF characters
-		url = url.SpanExcluding ("\n");
+		url = url.SpanExcluding (_T("\n"));
 		// Split the string on the place of the ","
 		int i=url.Find (',');
 		if (i != -1) {
@@ -1372,7 +1372,7 @@ void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
 // Rewrite the XMLNews.dat file.
 // Filter all "," characters if some exist
 void CServerWnd::WriteXMLList (CStringList& _names, CStringList& _urls) {
-	FILE* writefile = fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "w");
+	FILE* writefile = _tfsopen(CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"), _T("w"), _SH_DENYWR);
 	if (writefile == NULL) return; 
 	POSITION posnames = _names.GetHeadPosition ();
 	POSITION posurls = _urls.GetHeadPosition ();
@@ -1385,7 +1385,7 @@ void CServerWnd::WriteXMLList (CStringList& _names, CStringList& _urls) {
 		// Replace all "," by " "
 		name.Replace (',',' ');
 		// Write the info; append CR/LF characters to the end of the line
-		fprintf (writefile,"%s,%s\n",(const char*) name,(const char*) url);
+		_ftprintf (writefile,_T("%s,%s\n"), name, url);
 	}
 	fclose (writefile);
 }
