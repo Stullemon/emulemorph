@@ -1046,6 +1046,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 			} else {
 				dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
 			}
+
 			break;
 
 		case 8:	{	// status
@@ -1598,7 +1599,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 					break;
 				// Mighty Knife: Community visible filelist
 				case PERM_COMMUNITY:
-					buffer.Format(" (%s)","Community");
+					buffer.Format(" (%s)",GetResString(IDS_COMMUNITY));
 					break;
 				// [end] Mighty Knife
 				default:
@@ -2805,7 +2806,7 @@ void CDownloadListCtrl::CreateMenues() {
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
 	// Mighty Knife: Community visible filelist
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,"Community");
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
 	// [end] Mighty Knife
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
 	// xMule_MOD: showSharePermissions

@@ -558,7 +558,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								break;
 							// Mighty Knife: Community visible filelist
 							case PERM_COMMUNITY: 
-								buffer = "Community"; 
+								buffer = GetResString(IDS_COMMUNITY); 
 								break;
 							// [end] Mighty Knife
 							default: 
@@ -909,7 +909,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			break;
 		// Mighty Knife: Community visible filelist
 		case PERM_COMMUNITY:
-			buffer.Format(" (%s)","Community");
+			buffer.Format(" (%s)",GetResString(IDS_COMMUNITY));
 			break;
 		// [end] Mighty Knife
 		default:
@@ -1915,7 +1915,7 @@ void CSharedFilesCtrl::CreateMenues()
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
 	// Mighty Knife: Community visible filelist
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,"Community");
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
 	// [end] Mighty Knife
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
 	//MORPH END   - Added by SiRoB, Show Permissions

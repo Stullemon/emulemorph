@@ -262,7 +262,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
 
 		// Mighty Knife: Community visible filelist
-		m_htiPermCommunity = m_ctrlTreeOptions.InsertRadioButton("Community", m_htiPermissions, m_iPermissions == 3);
+		m_htiPermCommunity = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_COMMUNITY), m_htiPermissions, m_iPermissions == 3);
 		// [end] Mighty Knife
 
 		//MORPH END   - Added by SiRoB, Show Permission
@@ -272,7 +272,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH END   - Added by IceCream, high process priority
 
 		// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-		m_htiCommunityName = m_ctrlTreeOptions.InsertItem("Community Tags (separated by '|')", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
+		m_htiCommunityName = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMMUNITYTAG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT);
 		m_ctrlTreeOptions.AddEditBox(m_htiCommunityName, RUNTIME_CLASS(CTreeOptionsEdit));
 		m_htiReportHashingFiles = m_ctrlTreeOptions.InsertCheckBox("Report file hashing activities", TVI_ROOT, m_bReportHashingFiles);
 		m_htiLogFriendlistActivities = m_ctrlTreeOptions.InsertCheckBox("Report activities in friendlist", TVI_ROOT, m_bLogFriendlistActivities);

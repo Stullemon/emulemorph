@@ -81,8 +81,12 @@ void CQueueListCtrl::Init()
 	//MORPH END - Added by SiRoB, Client Software
 
 	// Mighty Knife: Community affiliation
-	InsertColumn(11,"Community",LVCFMT_LEFT,100,11);
+	InsertColumn(11,GetResString(IDS_COMMUNITY),LVCFMT_LEFT,100,11);
 	// [end] Mighty Knife
+
+	// EastShare - Added by Pretender, Friend Tab
+	InsertColumn(12,GetResString(IDS_FRIENDLIST),LVCFMT_LEFT,75,12);
+	// EastShare - Added by Pretender, Friend Tab
 
 	SetAllIcons();
 	Localize();
@@ -528,6 +532,11 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
 						break;
 					// [end] Mighty Knife
+					// EastShare - Added by Pretender, Friend Tab
+					case 12:
+						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : "";
+						break;
+					// EastShare - Added by Pretender, Friend Tab
 				}
 				if( iColumn != 9 && iColumn != 0)
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
@@ -943,7 +952,12 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 111:
 			return (item1->IsCommunity() && !item2->IsCommunity()) ? 1 : -1;
 		// [end] Mighty Knife
-
+		// EastShare - Added by Pretender, Friend Tab
+		case 12:
+			return (item1->IsFriend() && !item2->IsFriend()) ? -1 : 1;
+		case 112:
+			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
+		// EastShare - Added by Pretender, Friend Tab
 		default:
 			return 0;
 	}

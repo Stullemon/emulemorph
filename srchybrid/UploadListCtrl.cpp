@@ -91,8 +91,12 @@ void CUploadListCtrl::Init()
 	//MORPH END - Added by SiRoB, Show Compression by Tarod
 
 	// Mighty Knife: Community affiliation
-	InsertColumn(13,"Community",LVCFMT_LEFT,100,13);
+	InsertColumn(13,GetResString(IDS_COMMUNITY),LVCFMT_LEFT,100,13);
 	// [end] Mighty Knife
+
+	// EastShare - Added by Pretender, Friend Tab
+	InsertColumn(14,GetResString(IDS_FRIENDLIST),LVCFMT_LEFT,75,14);
+	// EastShare - Added by Pretender, Friend Tab
 
 	SetAllIcons();
 	Localize();
@@ -595,6 +599,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
 					break;
 				// [end] Mighty Knife
+				// EastShare - Added by Pretender, Friend Tab
+				case 14:
+					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : "";
+					break;
+				// EastShare - Added by Pretender, Friend Tab
 			}
 	
 			if( iColumn != 7 && iColumn != 0 )
@@ -900,6 +909,12 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 113:
 			return (item1->IsCommunity() && !item2->IsCommunity()) ? 1 : -1;
 		// [end] Mighty Knife
+		// EastShare - Added by Pretender, Friend Tab
+		case 14:
+			return (item1->IsFriend() && !item2->IsFriend()) ? -1 : 1;
+		case 114:
+			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
+		// EastShare - Added by Pretender, Friend Tab
 
 		default:
 			return 0;

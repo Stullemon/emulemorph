@@ -2327,7 +2327,7 @@
 #define IDC_FILENAMERIGHT               4889
 #define IDS_COMMUNITY                   4889
 #define IDC_NEWFILENAMESEDITRIGHT       4890
-
+#define IDS_COMMUNITYTAG                4890
 #define IDC_RESETBUTTON                 4891
 
 #define IDC_RICHEDIT21                  4897

@@ -4429,6 +4429,8 @@ BEGIN
     IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
     IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_PAYBACKFIRSTLIMIT   "Amount before triggering (Default 10MB)"
+    IDS_COMMUNITY           "Community"
+    IDS_COMMUNITYTAG        "Community Tags (separated by '|')"
 END
 
 #endif    // Anglais (États-Unis) resources
