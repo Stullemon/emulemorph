@@ -1541,7 +1541,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			//MORPH START - Added by SiRoB, xMule_MOD: showSharePermissions
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-			m_PermMenu.CheckMenuRadioItem(MP_PERMNONE, MP_PERMALL, uPermMenuItem, 0);
+			m_PermMenu.CheckMenuRadioItem(MP_PERMALL, MP_PERMNONE, uPermMenuItem, 0);
 			//MORPH END   - Added by SiRoB, xMule_MOD: showSharePermissions
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
