@@ -126,8 +126,10 @@ bool CIP2Country::LoadFromFile(){
 		if (readFile != NULL) {
 
 			int count = 0;
+			bool error = false;
 
 			while (!feof(readFile)) {
+				error = false;
 				if (fgets(buffer,lenBuf,readFile)==0) break;
 				CString	sbuffer;
 				sbuffer = buffer;
@@ -159,10 +161,15 @@ bool CIP2Country::LoadFromFile(){
 				for(int forCount = 0; forCount !=  5; forCount++){
 					tempStr[forCount] = sbuffer.Tokenize(",", curPos);
 					if(tempStr[forCount].IsEmpty()) {
-						throw CString(_T("error line in"));
+						AddLogLine(false, "error line number : %i", count+1);
+						AddLogLine(false, "%s %s", "error line in", ip2countryCSVfile);
+						error = true;
+						//no need to throw an exception, keep reading in next line
+						//throw CString(_T("error line in"));
 					}
 				}
 				
+				if(error) continue;
 				//tempStr[4] is full country name, capitalize country name from rayita
 				tempStr[4] = FirstCharCap(tempStr[4]);
 
