@@ -51,15 +51,18 @@ static char THIS_FILE[]=__FILE__;
 
 UINT GetWebCacheSocketUploadTimeout()
 {
-	return SEC2MS(DOWNLOADTIMEOUT + 20 + 30);
+	if (thePrefs.GetWebCacheExtraTimeout())
+		return SEC2MS(DOWNLOADTIMEOUT + 100 + WC_SOCKETEXTRATIMEOUT);	// must be lower than Upload timeout?
+	else
+		return SEC2MS(DOWNLOADTIMEOUT + 100 + 30);
 }
 
 UINT GetWebCacheSocketDownloadTimeout()
 {
 	if (thePrefs.GetWebCacheExtraTimeout())
-		return SEC2MS(DOWNLOADTIMEOUT + 20 + WC_SOCKETEXTRATIMEOUT);	// must be lower than Upload timeout?
+		return SEC2MS(DOWNLOADTIMEOUT + 100 + WC_SOCKETEXTRATIMEOUT);	// must be lower than Upload timeout?
 	else
-		return SEC2MS(DOWNLOADTIMEOUT + 20);	// must be lower than Upload timeout?
+		return SEC2MS(DOWNLOADTIMEOUT + 100);	// must be lower than Upload timeout?
 }
 
 
