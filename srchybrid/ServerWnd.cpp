@@ -789,29 +789,9 @@ void CServerWnd::ToggleDebugWindow()
 
 void CServerWnd::UpdateMyInfo()
 {       
-        CString buffer;
 	m_MyInfo.SetRedraw(FALSE);
 	m_MyInfo.SetWindowText(_T(""));
 	CreateNetworkInfo(m_MyInfo, m_cfDef, m_cfBold);
-        // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
-	///////////////////////////////////////////////////////////////////////////
-	// Wap Interface
-	///////////////////////////////////////////////////////////////////////////
-	m_MyInfo << "\r\n";
-	m_MyInfo.SetSelectionCharFormat(m_cfBold);
-	m_MyInfo << GetResString(IDS_WAPSRV) << "\r\n";
-	m_MyInfo.SetSelectionCharFormat(m_cfDef);
-	m_MyInfo << GetResString(IDS_STATUS) << ":\t";
-	m_MyInfo << (theApp.wapserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << "\r\n";
-	if (thePrefs.GetWapServerEnabled()){
-		CString count;
-		count.Format("%i %s",theApp.wapserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
-		m_MyInfo << "\t" << count << "\r\n";
-		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
-		m_MyInfo << "URL:\t" << "http://" << inet_ntoa(*(in_addr*)&nLocalIP) << ":" << thePrefs.GetWapPort() << "/\r\n";
-	}
-	// End emulEspaña
-
 	m_MyInfo.SetRedraw(TRUE);
 	m_MyInfo.Invalidate();
 }

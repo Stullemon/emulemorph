@@ -272,5 +272,22 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << buffer.Left (16) << _T("-");
 	rCtrl << _T("\r\n\t") << buffer.Mid (16,255);
 	//MORPH END   - Added by SiRoB, [end] Mighty Knife
-
+    // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	///////////////////////////////////////////////////////////////////////////
+	// Wap Interface
+	///////////////////////////////////////////////////////////////////////////
+	rCtrl << _T("\r\n");
+	rCtrl.SetSelectionCharFormat(m_cfBold);
+	rCtrl << GetResString(IDS_WAPSRV) << _T("\r\n");
+	rCtrl.SetSelectionCharFormat(m_cfDef);
+	rCtrl << GetResString(IDS_STATUS) << _T(":\t");
+	rCtrl << (theApp.wapserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << _T("\r\n");
+	if (thePrefs.GetWapServerEnabled()){
+		CString count;
+		count.Format(_T("%i %s"),theApp.wapserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
+		rCtrl << _T("\t") << count << _T("\r\n");
+		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
+		rCtrl << _T("URL:\t") << _T("http://") << inet_ntoa(*(in_addr*)&nLocalIP) << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
+	}
+	// End emulEspaña
 }
