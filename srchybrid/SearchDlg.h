@@ -52,6 +52,7 @@ struct SSearchParams
 	{
 		dwSearchID = (DWORD)-1;
 		eType = SearchTypeServer;
+		bClientSharedFiles = false;
 		ulMinSize = 0;
 		ulMaxSize = 0;
 		iAvailability = -1;
@@ -67,6 +68,7 @@ struct SSearchParams
 	int iAvailability;
 	CString strExtension;
 	bool bMatchKeywords;
+	bool bClientSharedFiles;
 };
 
 
@@ -112,7 +114,10 @@ public:
 	void	ShowSearchSelector(bool visible);
 	
 	//MORPH - Removed by SiRoB, Khaos Category
-	/*uint8	GetSelectedCat()	{ return m_cattabs.GetCurSel();}*/
+	/*
+	uint8	GetSelectedCat()							{return m_cattabs.GetCurSel();}
+	void	UpdateCatTabs();	
+	*/
 	void	SaveAllSettings();
 	BOOL	SaveSearchStrings();
 	LRESULT ProcessJigleSearchResponse(WPARAM wParam, LPARAM lParam);
@@ -146,6 +151,7 @@ protected:
 	afx_msg void OnBnClickedSearchReset();
 	afx_msg void OnEnKillfocusElink();
 	afx_msg void OnSearchKeyDown();
+	afx_msg void OnDDClicked();
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 
 private:
@@ -160,7 +166,7 @@ private:
 	CEditX		m_ctlName;
 	CComboBoxEx2 methodBox;
 	CComboBox	Stypebox;
-	CImageList	m_ImageList;
+	CImageList	m_imlSearchResults;
 	CTabCtrl	m_cattabs;
 	CString		m_lastclpbrd;
 	bool		m_guardCBPrompt;

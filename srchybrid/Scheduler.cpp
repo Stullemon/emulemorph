@@ -49,7 +49,7 @@ int CScheduler::LoadFromFile(){
 	CString strName;
 	CString temp;
 
-	strName.Format("%spreferences.ini",theApp.glob_prefs->GetConfigDir());
+	strName.Format("%spreferences.ini",thePrefs.GetConfigDir());
 	CIni ini(strName, "Scheduler");
 	
 	uint8 max=ini.GetInt("Count",0);
@@ -84,7 +84,7 @@ void CScheduler::SaveToFile(){
 	CString temp;
 	Schedule_Struct* schedule;
 
-	strName.Format("%spreferences.ini",theApp.glob_prefs->GetConfigDir());
+	strName.Format("%spreferences.ini",thePrefs.GetConfigDir());
 
 	CIni ini(strName, "Scheduler");
 
@@ -128,7 +128,7 @@ uint8 CScheduler::AddSchedule(Schedule_Struct* schedule) {
 }
 
 int CScheduler::Check(bool forcecheck){
-	if (!theApp.glob_prefs->IsSchedulerEnabled()
+	if (!thePrefs.IsSchedulerEnabled()
 		|| theApp.scheduler->GetCount()==0
 		|| !theApp.emuledlg->IsRunning()) return -1;
 
@@ -194,32 +194,32 @@ int CScheduler::Check(bool forcecheck){
 }
 
 void CScheduler::SaveOriginals() {
-	original_upload=theApp.glob_prefs->GetMaxUpload();
-	original_download=theApp.glob_prefs->GetMaxDownload();
-	original_connections=theApp.glob_prefs->GetMaxConnections();
-	original_cons5s=theApp.glob_prefs->GetMaxConperFive();
-	original_sources=theApp.glob_prefs->GetMaxSourcePerFile();
+	original_upload=thePrefs.GetMaxUpload();
+	original_download=thePrefs.GetMaxDownload();
+	original_connections=thePrefs.GetMaxConnections();
+	original_cons5s=thePrefs.GetMaxConperFive();
+	original_sources=thePrefs.GetMaxSourcePerFile();
 	
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
-	original_ussmaxping=theApp.glob_prefs->GetDynUpPingLimit();
-	original_ussgoup=theApp.glob_prefs->GetDynUpGoingUpDivider();
-	original_ussgodown=theApp.glob_prefs->GetDynUpGoingDownDivider();
-	original_ussminup=theApp.glob_prefs->GetMinUpload();
+	original_ussmaxping=thePrefs.GetDynUpPingLimit();
+	original_ussgoup=thePrefs.GetDynUpGoingUpDivider();
+	original_ussgodown=thePrefs.GetDynUpGoingDownDivider();
+	original_ussminup=thePrefs.GetMinUpload();
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 }
 
 void CScheduler::RestoreOriginals() {
-	theApp.glob_prefs->SetMaxUpload(original_upload);
-	theApp.glob_prefs->SetMaxDownload(original_download);
-	theApp.glob_prefs->SetMaxConnections(original_connections);
-	theApp.glob_prefs->SetMaxConsPerFive(original_cons5s);
-	theApp.glob_prefs->SetMaxSourcesPerFile(original_sources);
+	thePrefs.SetMaxUpload(original_upload);
+	thePrefs.SetMaxDownload(original_download);
+	thePrefs.SetMaxConnections(original_connections);
+	thePrefs.SetMaxConsPerFive(original_cons5s);
+	thePrefs.SetMaxSourcesPerFile(original_sources);
 
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
-	theApp.glob_prefs->SetDynUpPingLimit(original_ussmaxping);
-	theApp.glob_prefs->SetDynUpGoingUpDivider(original_ussgoup);
-	theApp.glob_prefs->SetDynUpGoingDownDivider(original_ussgodown);
-	theApp.glob_prefs->SetMinUpload(original_ussminup);
+	thePrefs.SetDynUpPingLimit(original_ussmaxping);
+	thePrefs.SetDynUpGoingUpDivider(original_ussgoup);
+	thePrefs.SetDynUpGoingDownDivider(original_ussgodown);
+	thePrefs.SetMinUpload(original_ussminup);
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
 }
 
@@ -231,19 +231,19 @@ void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
 		if (schedule->values[ai]=="" /* maybe ignore in some future cases...*/ ) continue;
 
 		switch (schedule->actions[ai]) {
-			case 1 : theApp.glob_prefs->SetMaxUpload(atoi(schedule->values[ai]));
+			case 1 : thePrefs.SetMaxUpload(atoi(schedule->values[ai]));
 				if (makedefault) original_upload=atoi(schedule->values[ai]); 
 				break;
-			case 2 : theApp.glob_prefs->SetMaxDownload(atoi(schedule->values[ai]));
+			case 2 : thePrefs.SetMaxDownload(atoi(schedule->values[ai]));
 				if (makedefault) original_download=atoi(schedule->values[ai]);
 				break;
-			case 3 : theApp.glob_prefs->SetMaxSourcesPerFile(atoi(schedule->values[ai]));
+			case 3 : thePrefs.SetMaxSourcesPerFile(atoi(schedule->values[ai]));
 				if (makedefault) original_sources=atoi(schedule->values[ai]);
 				break;
-			case 4 : theApp.glob_prefs->SetMaxConsPerFive(atoi(schedule->values[ai]));
+			case 4 : thePrefs.SetMaxConsPerFive(atoi(schedule->values[ai]));
 				if (makedefault) original_cons5s=atoi(schedule->values[ai]);
 				break;
-			case 5 : theApp.glob_prefs->SetMaxConnections(atoi(schedule->values[ai]));
+			case 5 : thePrefs.SetMaxConnections(atoi(schedule->values[ai]));
 				if (makedefault) original_connections=atoi(schedule->values[ai]);
 				break;
 			
@@ -251,16 +251,16 @@ void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
 			case 7 : theApp.downloadqueue->SetCatStatus(atoi(schedule->values[ai]),MP_RESUME);break;
 
 			//EastShare START - Added by Pretender, add USS settings in scheduler tab
-			case 8 : theApp.glob_prefs->SetDynUpPingLimit(atoi(schedule->values[ai]));
+			case 8 : thePrefs.SetDynUpPingLimit(atoi(schedule->values[ai]));
 				if (makedefault) original_sources=atoi(schedule->values[ai]);
 				break;
-			case 9 : theApp.glob_prefs->SetDynUpGoingUpDivider(atoi(schedule->values[ai]));
+			case 9 : thePrefs.SetDynUpGoingUpDivider(atoi(schedule->values[ai]));
 				if (makedefault) original_sources=atoi(schedule->values[ai]);
 				break;
-			case 10 : theApp.glob_prefs->SetDynUpGoingDownDivider(atoi(schedule->values[ai]));
+			case 10 : thePrefs.SetDynUpGoingDownDivider(atoi(schedule->values[ai]));
 				if (makedefault) original_sources=atoi(schedule->values[ai]);
 				break;
-			case 11 : theApp.glob_prefs->SetMinUpload(atoi(schedule->values[ai]));
+			case 11 : thePrefs.SetMinUpload(atoi(schedule->values[ai]));
 				if (makedefault) original_sources=atoi(schedule->values[ai]);
 				break;
 			//EastShare END - Added by Pretender, add USS settings in scheduler tab

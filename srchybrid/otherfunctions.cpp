@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <sys/stat.h>
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "DownloadQueue.h"
@@ -23,6 +24,7 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 #include "Opcodes.h"
+#include "WebServices.h"
 #ifndef _CONSOLE
 #include <shlobj.h>
 #include "emuledlg.h"
@@ -35,6 +37,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
+CWebServices theWebServices;
 
 // Base chars for encode an decode functions
 static byte base16Chars[17] = "0123456789ABCDEF";
@@ -627,64 +631,110 @@ int	DecodeLengthBase16(int base16Length)
 	return base16Length / 2;
 }
 
+CWebServices::CWebServices()
+{
+	m_tDefServicesFileLastModified = 0;
+}
 
-void UpdateURLMenu(CMenu &menu,int &counter){
-	counter=0;
-	theApp.webservices.RemoveAll();
-	CString name,url,sbuffer;
-	char buffer[1024];
-	int lenBuf = 1024;
+CString CWebServices::GetDefaultServicesFile() const
+{
+	return thePrefs.GetConfigDir() + _T("webservices.dat");
+}
 
-	FILE* readFile= fopen(CString(theApp.glob_prefs->GetConfigDir())+"webservices.dat", "r");
-	if (readFile!=NULL) {
-		while (!feof(readFile)) {
-			if (fgets(buffer,lenBuf,readFile)==0) break;
+void CWebServices::RemoveAllServices()
+{
+	m_aServices.RemoveAll();
+	m_tDefServicesFileLastModified = 0;
+}
+
+int CWebServices::ReadAllServices()
+{
+	RemoveAllServices();
+
+	CString strFilePath = GetDefaultServicesFile();
+	FILE* readFile = fopen(strFilePath, "r");
+	if (readFile != NULL)
+	{
+		CString name, url, sbuffer;
+		while (!feof(readFile))
+		{
+			char buffer[1024];
+			if (fgets(buffer, ARRSIZE(buffer), readFile) == NULL)
+				break;
 			sbuffer=buffer;
 			
 			// ignore comments & too short lines
-			//MORPH START - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
+			//MORPH - Changed by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
 			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength()<3)
 				continue;
 				
-			int i;
-			for(i=1;sbuffer.GetAt(0)==sbuffer.GetAt(i)&&i<4;i++) continue;
-			
-			if ( i>2 || sbuffer.GetAt(0)=='-')
+			int iPos = sbuffer.Find(_T(','));
+			if (iPos > 0)
 			{
-				counter++;
-				menu.AppendMenu(MF_SEPARATOR);
-				theApp.webservices.Add("-");
-				continue;
-			}
-			//MORPH START - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
-
-			int pos=sbuffer.Find(',');
-			if (pos>0) {
-				counter++;
-				menu.AppendMenu(MF_STRING,MP_WEBURL+(counter-1), sbuffer.Left(pos).Trim() );
-				theApp.webservices.Add(sbuffer.Right(sbuffer.GetLength()-pos-1).Trim() );
+				SEd2kLinkService svc;
+				svc.strMenuLabel = sbuffer.Left(iPos).Trim();
+				svc.strUrl = sbuffer.Right(sbuffer.GetLength() - iPos - 1).Trim();
+				m_aServices.Add(svc);
 			}
 		}
 		fclose(readFile);
+
+		struct _stat st;
+		if (_tstat(strFilePath, &st) == 0)
+			m_tDefServicesFileLastModified = st.st_mtime;
 	}
+
+	return m_aServices.GetCount();
 }
 
-void RunURL(const CAbstractFile* file, CString urlpattern)
+int CWebServices::GetAllMenuEntries(CMenu& rMenu)
 {
-	if (file!=NULL) {
+	if (m_aServices.GetCount() == 0)
+	{
+		ReadAllServices();
+	}
+	else
+	{
+		struct _stat st;
+		if (_tstat(GetDefaultServicesFile(), &st) == 0 && st.st_mtime > m_tDefServicesFileLastModified)
+			ReadAllServices();
+	}
+	for (int i = 0; i < m_aServices.GetCount(); i++)
+	{
+		const SEd2kLinkService& rSvc = m_aServices.GetAt(i);
+		//MORPH START - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
+		int pos;
+		for(pos=1;rSvc.strMenuLabel.GetAt(0)==rSvc.strMenuLabel.GetAt(pos)&&pos<4;pos++) continue;
+
+		if ( pos>2 || rSvc.strMenuLabel.GetAt(0)=='-')
+		{
+			rMenu.AppendMenu(MF_SEPARATOR);
+			continue;
+		}
+		//MORPH END   - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
+		rMenu.AppendMenu(MF_STRING, MP_WEBURL + i, rSvc.strMenuLabel);
+	}
+	return m_aServices.GetCount();
+}
+
+bool CWebServices::RunURL(const CAbstractFile* file, UINT uMenuID)
+{
+	CString strUrlTemplate = m_aServices.GetAt(uMenuID - MP_WEBURL).strUrl;
+	if (file != NULL)
+	{
 		// Convert hash to hexadecimal text and add it to the URL
-		urlpattern.Replace("#hashid", EncodeBase16(file->GetFileHash(), 16));
+		strUrlTemplate.Replace(_T("#hashid"), md4str(file->GetFileHash()));
 
 		// Add file size to the URL
 		CString temp;
-		temp.Format("%u",file->GetFileSize());
-		urlpattern.Replace("#filesize", temp);
+		temp.Format(_T("%u"), file->GetFileSize());
+		strUrlTemplate.Replace(_T("#filesize"), temp);
 
 		// add filename to the url
-		urlpattern.Replace("#filename",URLEncode(file->GetFileName()));
+		strUrlTemplate.Replace(_T("#filename"), URLEncode(file->GetFileName()));
 	}
 	// Open URL
-	ShellExecute(NULL, NULL, urlpattern, NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
+	return (int)ShellExecute(NULL, NULL, strUrlTemplate, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT) > 32;
 }
 
 typedef struct
@@ -784,6 +834,44 @@ CString md4str(const uchar* hash)
 	return szHash;
 }
 
+bool strmd4(const char* pszHash, uchar* hash)
+{
+	memset(hash, 0, 16);
+	for (int i = 0; i < 16; i++)
+	{
+		char byte[3];
+		byte[0] = pszHash[i*2+0];
+		byte[1] = pszHash[i*2+1];
+		byte[2] = '\0';
+
+		UINT b;
+		if (sscanf(byte, "%x", &b) != 1)
+			return false;
+		hash[i] = b;
+	}
+	return true;
+}
+
+bool strmd4(const CString& rstr, uchar* hash)
+{
+	memset(hash, 0, 16);
+	if (rstr.GetLength() != 16*2)
+		return false;
+	for (int i = 0; i < 16; i++)
+	{
+		char byte[3];
+		byte[0] = rstr[i*2+0];
+		byte[1] = rstr[i*2+1];
+		byte[2] = '\0';
+
+		UINT b;
+		if (sscanf(byte, "%x", &b) != 1)
+			return false;
+		hash[i] = b;
+	}
+	return true;
+}
+
 CString CleanupFilename(CString filename) {
 	
 	CString tempStr;
@@ -792,7 +880,7 @@ CString CleanupFilename(CString filename) {
 
 	//remove substrings, defined in the preferences (.ini)
 	CString resToken;
-	CString strlink=theApp.glob_prefs->GetFilenameCleanups().MakeLower();
+	CString strlink=thePrefs.GetFilenameCleanups().MakeLower();
 	int curPos=0;
 	resToken= strlink.Tokenize("|",curPos);
 	while (resToken != "") {
@@ -957,10 +1045,11 @@ struct SED2KFileType
 	{ _T(".ram"),	ED2KFT_VIDEO },
 	{ _T(".rm"),	ED2KFT_VIDEO },
 	{ _T(".rv"),	ED2KFT_VIDEO },
+	{ _T(".rv9"),	ED2KFT_VIDEO },
+	{ _T(".ts"),	ED2KFT_VIDEO },
 	{ _T(".vivo"),	ED2KFT_VIDEO },
 	{ _T(".vob"),	ED2KFT_VIDEO },
 	{ _T(".wmv"),	ED2KFT_VIDEO },
-	{ _T(".rv9"),	ED2KFT_VIDEO },
 
 	{ _T(".bmp"),	ED2KFT_IMAGE },
 	{ _T(".dcx"),	ED2KFT_IMAGE },
@@ -1350,13 +1439,13 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 
 	if (nIP==0 || (uint8)nIP==127 || (uint8)nIP>=224){
 #ifdef _DEBUG
-		if (nIP==0x0100007F && theApp.glob_prefs->GetAllowLocalHostIP())
+		if (nIP==0x0100007F && thePrefs.GetAllowLocalHostIP())
 			return true;
 #endif
 		return false;
 	}
 
-	if (!theApp.glob_prefs->FilterLANIPs() && !forceCheck/*ZZ:UploadSpeedSense*/)
+	if (!thePrefs.FilterLANIPs() && !forceCheck/*ZZ:UploadSpeedSense*/)
 		return true;
 	// ZZ:UploadSpeedSense <--
 
@@ -1507,44 +1596,6 @@ void DebugHexDump(CFile& file)
 	}
 }
 
-bool strmd4(const char* pszHash, uchar* hash)
-{
-	memset(hash, 0, 16);
-	for (int i = 0; i < 16; i++)
-	{
-		char byte[3];
-		byte[0] = pszHash[i*2+0];
-		byte[1] = pszHash[i*2+1];
-		byte[2] = '\0';
-
-		UINT b;
-		if (sscanf(byte, "%x", &b) != 1)
-			return false;
-		hash[i] = b;
-	}
-	return true;
-}
-
-bool strmd4(const CString& rstr, uchar* hash)
-{
-	memset(hash, 0, 16);
-	if (rstr.GetLength() != 16*2)
-		return false;
-	for (int i = 0; i < 16; i++)
-	{
-		char byte[3];
-		byte[0] = rstr[i*2+0];
-		byte[1] = rstr[i*2+1];
-		byte[2] = '\0';
-
-		UINT b;
-		if (sscanf(byte, "%x", &b) != 1)
-			return false;
-		hash[i] = b;
-	}
-	return true;
-}
-
 LPCSTR DbgGetFileNameFromID(const uchar* hash)
 {
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)hash);
@@ -1569,6 +1620,22 @@ CString DbgGetFileInfo(const uchar* hash)
 		strInfo += pszName;
 	else
 		strInfo += md4str(hash);
+	return strInfo;
+}
+
+CString DbgGetBlockInfo(const Requested_Block_Struct* block)
+{
+	CString strInfo;
+	strInfo.Format(_T("%u-%u (%u bytes)"), block->StartOffset, block->EndOffset, block->EndOffset - block->StartOffset + 1);
+
+	strInfo.AppendFormat(_T("; part %u"), block->StartOffset/PARTSIZE);
+	if (block->StartOffset/PARTSIZE != block->EndOffset/PARTSIZE)
+		strInfo.AppendFormat(_T("-%u(!!!)"), block->EndOffset/PARTSIZE);
+
+	strInfo.AppendFormat(_T("; block %u"), block->StartOffset/EMBLOCKSIZE);
+	if (block->StartOffset/EMBLOCKSIZE != block->EndOffset/EMBLOCKSIZE)
+		strInfo.AppendFormat(_T("-%u(!!!)"), block->EndOffset/EMBLOCKSIZE);
+
 	return strInfo;
 }
 
@@ -1600,7 +1667,7 @@ LPCTSTR DbgGetHashTypeString(const uchar* hash)
 CString DbgGetClientID(uint32 nClientID)
 {
 	CString strClientID;
-	if (nClientID < 16777216)
+	if (IsLowIDHybrid(nClientID))
 		strClientID.Format(_T("LowID=%u"), nClientID);
 	else
 		strClientID = inet_ntoa(*(in_addr*)&nClientID);
@@ -1635,8 +1702,8 @@ CString DbgGetDonkeyClientTCPOpcode(UINT opcode)
 		_STRVAL(OP_ACCEPTUPLOADREQ),
 		_STRVAL(OP_CANCELTRANSFER),
 		_STRVAL(OP_OUTOFPARTREQS),
-		_STRVAL(OP_FILEREQUEST),
-		_STRVAL(OP_FILEREQANSWER),
+		_STRVAL(OP_REQUESTFILENAME),
+		_STRVAL(OP_REQFILENAMEANSWER),
 		_STRVAL(OP_CHANGE_SLOT),
 		_STRVAL(OP_QUEUERANK),
 		_STRVAL(OP_ASKSHAREDDIRS),
@@ -1716,6 +1783,43 @@ CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode)
 	else
 		str.Format(_T("protocol=0x%02x  opcode=0x%02x"), protocol, opcode);
 	return str;
+}
+
+void DebugRecv(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet, uint32 nIP)
+{
+	// 111.222.333.444 = 15 chars
+	if (client){
+		if (client != NULL && packet != NULL)
+			Debug(_T("%-24s from %s; %s\n"), pszMsg, client->DbgGetClientInfo(true), DbgGetFileInfo((uchar*)packet));
+		else if (client != NULL && packet == NULL)
+			Debug(_T("%-24s from %s\n"), pszMsg, client->DbgGetClientInfo(true));
+		else if (client == NULL && packet != NULL)
+			Debug(_T("%-24s; %s\n"), pszMsg, DbgGetFileInfo((uchar*)packet));
+		else
+			Debug(_T("%-24s\n"), pszMsg);
+	}
+	else{
+		if (nIP != 0 && packet != NULL)
+			Debug(_T("%-24s from %-15s; %s\n"), pszMsg, inet_ntoa(*(in_addr*)&nIP), DbgGetFileInfo((uchar*)packet));
+		else if (nIP != 0 && packet == NULL)
+			Debug(_T("%-24s from %-15s\n"), pszMsg, inet_ntoa(*(in_addr*)&nIP));
+		else if (nIP == 0 && packet != NULL)
+			Debug(_T("%-24s; %s\n"), pszMsg, DbgGetFileInfo((uchar*)packet));
+		else
+			Debug(_T("%-24s\n"), pszMsg);
+	}
+}
+
+void DebugSend(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet)
+{
+	if (client != NULL && packet != NULL)
+		Debug(_T(">>> %-20s to   %s; %s\n"), pszMsg, client->DbgGetClientInfo(true), DbgGetFileInfo((uchar*)packet));
+	else if (client != NULL && packet == NULL)
+		Debug(_T(">>> %-20s to   %s\n"), pszMsg, client->DbgGetClientInfo(true));
+	else if (client == NULL && packet != NULL)
+		Debug(_T(">>> %-20s; %s\n"), pszMsg, DbgGetFileInfo((uchar*)packet));
+	else
+		Debug(_T(">>> %-20s\n"), pszMsg);
 }
 
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)

@@ -17,6 +17,7 @@
 #pragma once
 
 class CUpDownClient;
+class CFileDataIO;
 
 #define	FF_NAME		0x01
 //MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
@@ -42,8 +43,8 @@ public:
 	CUpDownClient* GetLinkedClient() const { return m_LinkedClient; };
 	void SetLinkedClient(CUpDownClient* linkedClient);
 //MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-	void	LoadFromFile(CFile* file);
-	void	WriteToFile(CFile* file);
+	void	LoadFromFile(CFileDataIO* file);
+	void	WriteToFile(CFileDataIO* file);
 
 	static const char sm_abyNullHash[16];
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System

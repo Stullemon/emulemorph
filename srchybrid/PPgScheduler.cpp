@@ -81,7 +81,7 @@ BOOL CPPgScheduler::OnInitDialog()
 	m_actions.InsertColumn(1,GetResString(IDS_VALUE),LVCFMT_LEFT,80,1);
 
 	Localize();
-	CheckDlgButton(IDC_ENABLE,app_prefs->IsSchedulerEnabled());
+	CheckDlgButton(IDC_ENABLE,thePrefs.IsSchedulerEnabled());
 	FillScheduleList();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -211,7 +211,7 @@ void CPPgScheduler::OnBnClickedApply()
 
 		//time kindof (days)
 		schedule->day=m_timesel.GetCurSel();
-		schedule->enabled=(int8)IsDlgButtonChecked(IDC_S_ENABLE);
+		schedule->enabled=(uint8)IsDlgButtonChecked(IDC_S_ENABLE);
 
 		schedule->ResetActions();
 		for (uint8 i=0;i<m_actions.GetItemCount();i++) {
@@ -336,10 +336,10 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult)
 	m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_ActionSel.m_hMenu,	GetResString(IDS_ADD));
 
 	if (isCatAction) {
-		if (theApp.glob_prefs->GetCatCount()>1) m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+20,GetResString(IDS_ALLUNASSIGNED));
+		if (thePrefs.GetCatCount()>1) m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+20,GetResString(IDS_ALLUNASSIGNED));
 		m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+21,GetResString(IDS_ALL));
-		for (int i=1;i<theApp.glob_prefs->GetCatCount();i++)
-			m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+22+i,theApp.glob_prefs->GetCategory(i)->title );
+		for (int i=1;i<thePrefs.GetCatCount();i++)
+			m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+22+i,thePrefs.GetCategory(i)->title );
 		m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_CatActionSel.m_hMenu,	GetResString(IDS_SELECTCAT));
 	} else
 		m_ActionMenu.AppendMenu(nFlag,MP_CAT_EDIT,	GetResString(IDS_EDIT));
@@ -413,8 +413,8 @@ void CPPgScheduler::RecheckSchedules() {
 }
 
 void CPPgScheduler::OnEnableChange() {
-	app_prefs->prefs->scheduler=IsDlgButtonChecked(IDC_ENABLE);
-	if (!app_prefs->prefs->scheduler) theApp.scheduler->RestoreOriginals();
+	thePrefs.scheduler=IsDlgButtonChecked(IDC_ENABLE);
+	if (!thePrefs.scheduler) theApp.scheduler->RestoreOriginals();
 	
 	RecheckSchedules();
 	theApp.emuledlg->preferenceswnd->m_wndConnection.LoadSettings();	

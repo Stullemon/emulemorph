@@ -24,7 +24,6 @@
 
 class CSharedFileList;
 class CKnownFile;
-class CPartFile; //MORPH - Added by SiRoB, delete shared file
 
 class CSharedFilesCtrl : public CMuleListCtrl
 {

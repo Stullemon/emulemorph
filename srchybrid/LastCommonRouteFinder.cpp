@@ -325,7 +325,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                     lastCommonHost = 0;
 					//MORPH - Modified by SiRoB, USS log debug
-                	if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSCOLLECTINGHOSTS), traceRouteTries);
+                	if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSCOLLECTINGHOSTS), traceRouteTries);
 
                     addHostLocker.Lock();
                     needMoreHosts = true;
@@ -335,7 +335,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                     newTraceRouteHostEvent->Lock();
 
 					//MORPH - Modified by SiRoB, USS log debug
-					if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSENOUGHHOSTS));
+					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSENOUGHHOSTS));
 
                     {
                         POSITION pos = hostsToTraceRoute.GetHeadPosition();
@@ -347,14 +347,14 @@ UINT LastCommonRouteFinder::RunInternal() {
                             stDestAddr.s_addr = hostToTraceRoute;
 
 							//MORPH - Modified by SiRoB, USS log debug
-							if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTLISTING), counter, inet_ntoa(stDestAddr));
+							if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTLISTING), counter, inet_ntoa(stDestAddr));
                         }
                     }
 
                     // find the last common host, using traceroute
 
 					//MORPH - Modified by SiRoB, USS log debug
-					if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSFINDLASTCOMMON));
+					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSFINDLASTCOMMON));
 
                     if(m_enabled == false) {
                         enabled = false;
@@ -364,7 +364,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                     uint32 curHost = 0;
                     for(uint32 ttl = 1; doRun && enabled && (curHost != 0 && ttl <= 64 || curHost == 0 && ttl < 5) && foundLastCommonHost == false && failed == false; ttl++) {
-                        if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Pinging for TTL %i...", ttl);
+                        if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Pinging for TTL %i...", ttl);
                         curHost = 0;
 						PingStatus pingStatus = {0};
 
@@ -397,12 +397,12 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                             pingStatus.success = false;
                             for(int counter = 0; doRun && enabled && counter < 3 && pingStatus.success == false; counter++) {
-                            pingStatus = pinger.Ping(curAddress, ttl, theApp.glob_prefs->IsUSSLog()); //MORPH - Modified by SiRoB, USS log debug
+                            pingStatus = pinger.Ping(curAddress, ttl, thePrefs.IsUSSLog()); //MORPH - Modified by SiRoB, USS log debug
                                 if(doRun && enabled && pingStatus.success == false && counter < 3-1) {
                                     IN_ADDR stDestAddr;
                                     stDestAddr.s_addr = curAddress;
 									//MORPH - Modified by SiRoB, USS log debug
-									if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSCANTPING), counter+1, ttl, inet_ntoa(stDestAddr), pingStatus.error);
+									if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSCANTPING), counter+1, ttl, inet_ntoa(stDestAddr), pingStatus.error);
                                     pinger.PIcmpErr(pingStatus.error);
 
                                     Sleep(1000);
@@ -427,20 +427,20 @@ UINT LastCommonRouteFinder::RunInternal() {
                                 stDestAddr.s_addr = curAddress;
                                 if(pingStatus.success == true) {
 									//MORPH - Modified by SiRoB, USS log debug
-									if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, inet_ntoa(stDestAddr), pingStatus.status);
+									if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, inet_ntoa(stDestAddr), pingStatus.status);
                                     hostsToTraceRoute.RemoveAt(lastPos);
                                     failed = true;
                                 } else {
                                     if(pingStatus.error != IP_REQ_TIMED_OUT) {
 										//MORPH - Modified by SiRoB, USS log debug
-										if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, inet_ntoa(stDestAddr), pingStatus.error);
+										if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, inet_ntoa(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
 
                                         hostsToTraceRoute.RemoveAt(lastPos);
                                         failed = true;
                                     } else {
 										//MORPH - Modified by SiRoB, USS log debug
-										if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Timeout when pinging a host! (TTL: %i IP: %s Error: %i). Keeping host. Error info follows.", ttl, inet_ntoa(stDestAddr), pingStatus.error);
+										if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Timeout when pinging a host! (TTL: %i IP: %s Error: %i). Keeping host. Error info follows.", ttl, inet_ntoa(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
                                     }
                                 }
@@ -453,7 +453,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                     IN_ADDR stDestAddr;
                                     stDestAddr.s_addr = curHost;
 									//MORPH - Modified by SiRoB, USS log debug
-									if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTTTL), ttl, inet_ntoa(stDestAddr));
+									if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSHOSTTTL), ttl, inet_ntoa(stDestAddr));
 
                                     lastCommonHost = curHost;
                                     lastCommonTTL = ttl;
@@ -464,7 +464,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                     IN_ADDR stDestAddr;
                                     stDestAddr.s_addr = hostToPing;
                                     //MORPH - Modified by SiRoB, USS log debug
-									if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Found differing host at TTL %i: %s. This will be the host to ping.", ttl, inet_ntoa(stDestAddr));
+									if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Found differing host at TTL %i: %s. This will be the host to ping.", ttl, inet_ntoa(stDestAddr));
                                 } else {
                                     enabled = false;
                                     foundLastCommonHost = false;
@@ -472,10 +472,10 @@ UINT LastCommonRouteFinder::RunInternal() {
                             } else {
                                 if(ttl < 4) {
 									//MORPH - Modified by SiRoB, USS log debug
-									if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Could perform no ping at all at TTL %i. Trying next ttl.", ttl);
+									if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Could perform no ping at all at TTL %i. Trying next ttl.", ttl);
                                 } else {
 									//MORPH - Modified by SiRoB, USS log debug
-									if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Could perform no ping at all at TTL %i. Giving up.", ttl);
+									if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Could perform no ping at all at TTL %i. Giving up.", ttl);
                                 }
                                 lastCommonHost = 0;
                             }
@@ -484,7 +484,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                 }
 
 				//MORPH - Modified by SiRoB, USS log debug
-                if(theApp.glob_prefs->IsUSSLog())	theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Done tracerouting. Evaluating results.");
+                if(thePrefs.IsUSSLog())	theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Done tracerouting. Evaluating results.");
 
                 if(foundLastCommonHost == true) {
                     IN_ADDR stLastCommonHostAddr;
@@ -492,20 +492,20 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                     // log result
                     //MORPH - Modified by SiRoB, USS log debug
-                    if(theApp.glob_prefs->IsUSSLog())	theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Found last common host. LastCommonHost: %s @ TTL: %i", inet_ntoa(stLastCommonHostAddr), lastCommonTTL);
+                    if(thePrefs.IsUSSLog())	theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Found last common host. LastCommonHost: %s @ TTL: %i", inet_ntoa(stLastCommonHostAddr), lastCommonTTL);
 
                     IN_ADDR stHostToPingAddr;
                     stHostToPingAddr.s_addr = hostToPing;
 
 					//MORPH - Modified by SiRoB, USS log debug
-					if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSFOUNDLASTCOMMON), inet_ntoa(stLastCommonHostAddr), lastCommonTTL, inet_ntoa(stHostToPingAddr));
+					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSFOUNDLASTCOMMON), inet_ntoa(stLastCommonHostAddr), lastCommonTTL, inet_ntoa(stHostToPingAddr));
                 } else {
 					//MORPH - Modified by SiRoB, USS log debug
-					if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSTRACEFAILDIS));
+					if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSTRACEFAILDIS));
                     enabled = false;
 
                     // PENDING: this may not be thread safe
-                    theApp.glob_prefs->SetDynUpEnabled(false);
+                    thePrefs.SetDynUpEnabled(false);
                 }
             }
 
@@ -516,7 +516,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             if(doRun && enabled) {
 				//MORPH - Modified by SiRoB, USS log debug
-				if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSSTARTLOWPING));
+				if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSSTARTLOWPING));
             }
 
             // PENDING:
@@ -532,7 +532,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             for(int initialPingCounter = 0; doRun && enabled && initialPingCounter < 10; initialPingCounter++) {
                 Sleep(200);
 
-                PingStatus pingStatus = pinger.Ping(hostToPing, lastCommonTTL, theApp.glob_prefs->IsUSSLog()); //MORPH - Modified by SiRoB, USS log debug
+                PingStatus pingStatus = pinger.Ping(hostToPing, lastCommonTTL, thePrefs.IsUSSLog()); //MORPH - Modified by SiRoB, USS log debug
 
                 if (pingStatus.success) {
                     if(pingStatus.delay > 0 && pingStatus.delay < initial_ping) {
@@ -540,7 +540,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                     }
                 } else {
                     //MORPH - Modified by SiRoB, USS log debug
-                    if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGFAILED), initialPingCounter);
+                    if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGFAILED), initialPingCounter);
                     pinger.PIcmpErr(pingStatus.error);
                 }
 
@@ -560,7 +560,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             if(doRun && enabled) {
 				//MORPH - Modified by SiRoB, USS log debug
-				if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSLOWESTPING), initial_ping);
+				if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSLOWESTPING), initial_ping);
 
             
 
@@ -582,7 +582,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             if(doRun && enabled) {
                 //MORPH - Modified by SiRoB, USS log debug
-                if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSREADY));
+                if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSREADY));
             }
 
             // There may be several reasons to start over with tracerouting again.
@@ -628,8 +628,8 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                 uint32 soll_ping = initial_ping*pingTolerance;
                 // EastShare START - Add by TAHO, USS limit
-				if ( theApp.glob_prefs->IsUSSLimit() ) {
-					soll_ping = theApp.glob_prefs->GetDynUpPingLimit(); 
+				if ( thePrefs.IsUSSLimit() ) {
+					soll_ping = thePrefs.GetDynUpPingLimit(); 
 				}else{
 					soll_ping = initial_ping*pingTolerance; // ZZ, USS
 				}
@@ -653,7 +653,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                             stDestinationAddr.s_addr = pingStatus.destinationAddress;
 
                             //MORPH - Modified by SiRoB, USS log debug
-							if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSNEWTRACEROUTE), lastCommonTTL, inet_ntoa(stLastCommonHostAddr), inet_ntoa(stDestinationAddr));
+							if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSNEWTRACEROUTE), lastCommonTTL, inet_ntoa(stLastCommonHostAddr), inet_ntoa(stDestinationAddr));
                             restart = true;
                         }
 
@@ -664,7 +664,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                             pingFailure = false;
 
                             //MORPH - Modified by SiRoB, USS log debug
-			//				if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGNUMCONTINUE), pingTries);
+			//				if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGNUMCONTINUE), pingTries);
                         } else {
                             // if we have successful pings, then something must be right. So we reset the main tries count.
                             // this way we will not abort unnessesary after a few days, just because there has been transient errors several times.
@@ -676,7 +676,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                         pingFailure = true;
 
                         //MORPH - Modified by SiRoB, USS log debug
-			//			if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGFAILED), pingTries);
+			//			if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGFAILED), pingTries);
                         //pinger.PIcmpErr(pingStatus.error);
                     }
                 }
@@ -684,7 +684,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                 if(restart == false) {
 		            if(raw_ping > 0 && raw_ping < initial_ping && initial_ping > lowestInitialPingAllowed) {
                         //MORPH - Modified by SiRoB, USS log debug
-						if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSNEWLOWEST), raw_ping, initial_ping);
+						if(thePrefs.IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSNEWLOWEST), raw_ping, initial_ping);
 			            initial_ping = max(raw_ping, lowestInitialPingAllowed);
 		            }
 

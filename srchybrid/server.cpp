@@ -150,7 +150,7 @@ CServer::~CServer()
 	delete taglist;
 }
 
-bool CServer::AddTagFromFile(CFile* servermet)
+bool CServer::AddTagFromFile(CFileDataIO* servermet)
 {
 	if (servermet == NULL)
 		return false;
@@ -295,7 +295,7 @@ CString CServer::GetCountryName() const{
 
 	if(theApp.ip2country->IsIP2Country() == false) return "";
 
-	switch(theApp.glob_prefs->GetIP2CountryNameMode()){
+	switch(thePrefs.GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
 			tempStr.Format("<%s>",m_structServerCountry->ShortCountryName);
 			return tempStr;

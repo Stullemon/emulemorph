@@ -30,7 +30,7 @@ CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxD
 	//{{AFX_DATA_INIT(CMuleSystrayDlg)
 	m_nDownSpeedTxt = iMaxDown < iCurDown ? iMaxDown : iCurDown;
 	m_nUpSpeedTxt = iMaxUp < iCurUp ? iMaxUp : iCurUp;
-	m_nMinUpSpeedTxt = theApp.glob_prefs->GetMinUpload();
+	m_nMinUpSpeedTxt = thePrefs.GetMinUpload();
 	//}}AFX_DATA_INIT
 
 	m_iMaxUp = iMaxUp;
@@ -150,13 +150,14 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		else if (theApp.serverconnect->IsConnecting())
 			buffer = "ed2k";
 		else
-			buffer = "";
+			buffer = "---";
 
 		if(theApp.kademlia->isConnected())
 			buffer += "|KAD";
 		else if (theApp.kademlia->GetThreadID())
 			buffer += "|kad";
-
+		else
+			buffer = "|---";
 		m_ctrlSpeed.m_strText = buffer;
 
 		m_ctrlSpeed.m_bUseIcon = true;
@@ -323,7 +324,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		p->SetWindowText(GetResString(IDS_PW_CON_UPLBL));
 	if((p = GetDlgItem(IDC_MINUPLBL)) != NULL){
 		p->SetWindowText(GetResString(IDS_MINUPLOAD_SHORT));
-		p->EnableWindow(theApp.glob_prefs->IsSUCEnabled() || theApp.glob_prefs->IsDynUpEnabled());
+		p->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	}
 	if((p = GetDlgItem(IDC_DOWNKB)) != NULL)
 		p->SetWindowText(GetResString(IDS_KBYTESEC));
@@ -331,9 +332,9 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		p->SetWindowText(GetResString(IDS_KBYTESEC));
 	if((p = GetDlgItem(IDC_MINUPKB)) != NULL){
 		p->SetWindowText(GetResString(IDS_KBYTESEC));
-		p->EnableWindow(theApp.glob_prefs->IsSUCEnabled() || theApp.glob_prefs->IsDynUpEnabled());
+		p->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	}
-	GetDlgItem(IDC_MINUPTXT)->EnableWindow(theApp.glob_prefs->IsSUCEnabled() || theApp.glob_prefs->IsDynUpEnabled());
+	GetDlgItem(IDC_MINUPTXT)->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	m_ctrlDownSpeedSld.SetRange(0,m_iMaxDown);
 	m_ctrlDownSpeedSld.SetPos(m_nDownSpeedTxt);
 
@@ -342,11 +343,11 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 
 	m_ctrlMinUpSpeedSld.SetRange(1,m_iMaxUp);
 	m_ctrlMinUpSpeedSld.SetPos(m_nMinUpSpeedTxt);
-	m_ctrlMinUpSpeedSld.EnableWindow(theApp.glob_prefs->IsSUCEnabled() || theApp.glob_prefs->IsDynUpEnabled());
+	m_ctrlMinUpSpeedSld.EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	CFont Font;
 	Font.CreateFont(-16,0,900,0,700,0,0,0,0,3,2,1,34,"Arial");
 
-	UINT winver = theApp.glob_prefs->GetWindowsVersion();
+	UINT winver = thePrefs.GetWindowsVersion();
 	if(winver == _WINVER_95_ || winver == _WINVER_NT4_)
 	{
 		m_ctrlSidebar.SetColors(GetSysColor(COLOR_CAPTIONTEXT), 
@@ -396,7 +397,7 @@ void CMuleSystrayDlg::OnChangeDowntxt()
 		m_nDownSpeedTxt = min(max(m_nDownSpeedTxt,0),m_iMaxDown);
 		
 		m_ctrlDownSpeedSld.SetPos(m_nDownSpeedTxt);
-		theApp.glob_prefs->SetMaxDownload(m_nDownSpeedTxt);
+		thePrefs.SetMaxDownload(m_nDownSpeedTxt);
 		
 		UpdateData(FALSE);
 	}
@@ -410,7 +411,7 @@ void CMuleSystrayDlg::OnChangeUptxt()
 		m_nUpSpeedTxt = min(max(m_nUpSpeedTxt,0),m_iMaxUp);
 		
 		m_ctrlUpSpeedSld.SetPos(m_nUpSpeedTxt);
-		theApp.glob_prefs->SetMaxUpload(m_nUpSpeedTxt);
+		thePrefs.SetMaxUpload(m_nUpSpeedTxt);
 		UpdateData(FALSE);
 	}
 }
@@ -423,7 +424,7 @@ void CMuleSystrayDlg::OnChangeMinUptxt()
 		m_nMinUpSpeedTxt = min(max(m_nMinUpSpeedTxt,1),m_iMaxUp);
 		
 		m_ctrlMinUpSpeedSld.SetPos(m_nMinUpSpeedTxt);
-		theApp.glob_prefs->SetMinUpload(m_nMinUpSpeedTxt);
+		thePrefs.SetMinUpload(m_nMinUpSpeedTxt);
 		UpdateData(FALSE);
 	}
 }
@@ -434,19 +435,19 @@ void CMuleSystrayDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 		m_nDownSpeedTxt = m_ctrlDownSpeedSld.GetPos();;
 		UpdateData(FALSE);
-		theApp.glob_prefs->SetMaxDownload(m_nDownSpeedTxt);
+		thePrefs.SetMaxDownload(m_nDownSpeedTxt);
 	}
 	else if(pScrollBar == (CScrollBar*)&m_ctrlUpSpeedSld)
 	{
 		m_nUpSpeedTxt = m_ctrlUpSpeedSld.GetPos();
 		UpdateData(FALSE);
-		theApp.glob_prefs->SetMaxUpload(m_nUpSpeedTxt);
+		thePrefs.SetMaxUpload(m_nUpSpeedTxt);
 	}
 	else if(pScrollBar == (CScrollBar*)&m_ctrlMinUpSpeedSld)
 	{
 		m_nMinUpSpeedTxt = m_ctrlMinUpSpeedSld.GetPos();
 		UpdateData(FALSE);
-		theApp.glob_prefs->SetMinUpload(m_nMinUpSpeedTxt);
+		thePrefs.SetMinUpload(m_nMinUpSpeedTxt);
 	}
 
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);

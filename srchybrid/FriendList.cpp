@@ -47,13 +47,12 @@ CFriendList::CFriendList()
 CFriendList::~CFriendList()
 {
 	SaveList();
-	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;m_listFriends.GetNext(pos))
-		delete m_listFriends.GetAt(pos);
-	m_listFriends.RemoveAll();
+	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;)
+		delete m_listFriends.GetNext(pos);
 }
 
 bool CFriendList::LoadList(){
-	CString strFileName = CString(theApp.glob_prefs->GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
+	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(strFileName.GetBuffer(),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary, &fexp)){
@@ -70,15 +69,13 @@ bool CFriendList::LoadList(){
 	}
 
 	try {
-		uint8 header;
-		file.Read(&header,1);
+		uint8 header = file.ReadUInt8();
 		if (header != MET_HEADER){
 			file.Close();
 			return false;
 		}
-		uint32 nRecordsNumber;
-		file.Read(&nRecordsNumber,4);
-		for (uint32 i = 0; i < nRecordsNumber; i++) {
+		UINT nRecordsNumber = file.ReadUInt32();
+		for (UINT i = 0; i < nRecordsNumber; i++) {
 			CFriend* Record =  new CFriend();
 			Record->LoadFromFile(&file);
 			m_listFriends.AddTail(Record);
@@ -101,11 +98,11 @@ bool CFriendList::LoadList(){
 }
 
 void CFriendList::SaveList(){
-	if (theApp.glob_prefs->GetLogFileSaving())
-		DEBUG_ONLY(AddDebugLogLine(false, "Saved Friend list"));
+	if (thePrefs.GetLogFileSaving())
+		AddDebugLogLine(false, "Saving friends list file \"%s\"", EMFRIENDS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
-	CString strFileName = CString(theApp.glob_prefs->GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
+	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(strFileName.GetBuffer(),CFile::modeCreate|CFile::modeWrite|CFile::typeBinary, &fexp)){
@@ -121,14 +118,11 @@ void CFriendList::SaveList(){
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 	
 	try{
-		uint8 header = MET_HEADER;
-		file.Write(&header,1);
-		uint32 nRecordsNumber = m_listFriends.GetCount();
-		file.Write(&nRecordsNumber,4);
-		for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;m_listFriends.GetNext(pos)){
-			m_listFriends.GetAt(pos)->WriteToFile(&file);
-		}
-		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+		file.WriteUInt8(MET_HEADER);
+		file.WriteUInt32(m_listFriends.GetCount());
+		for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;)
+			m_listFriends.GetNext(pos)->WriteToFile(&file);
+		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			file.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk
 				AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
@@ -177,10 +171,8 @@ void CFriendList::ShowFriends() const {
 		return;
 	}
 	m_wndOutput->DeleteAllItems();
-	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;m_listFriends.GetNext(pos)){
-		CFriend* cur_friend = m_listFriends.GetAt(pos);
-		m_wndOutput->AddFriend(cur_friend);	
-	}
+	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;)
+		m_wndOutput->AddFriend(m_listFriends.GetNext(pos));
 	m_wndOutput->UpdateList();
 }
 
@@ -198,7 +190,7 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 	SaveList();
 
 	// Mighty Knife: log friend activities
-	if (theApp.glob_prefs->GetLogFriendlistActivities ()) {
+	if (thePrefs.GetLogFriendlistActivities ()) {
 		char buffer[100]; buffer [0] = 0;
 		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,Record->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
@@ -217,12 +209,12 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 }
 
 // Added for the friends function in the IRC..
-bool CFriendList::IsAlreadyFriend( uint32 dwLastUsedIP, uint32 nLastUsedPort ) const {
-	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;m_listFriends.GetNext(pos)){
-		CFriend* cur_friend = m_listFriends.GetAt(pos);
-		if ( cur_friend->m_dwLastUsedIP == dwLastUsedIP && cur_friend->m_nLastUsedPort == nLastUsedPort ){
+bool CFriendList::IsAlreadyFriend(uint32 dwLastUsedIP, uint32 nLastUsedPort) const
+{
+	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;){
+		const CFriend* cur_friend = m_listFriends.GetNext(pos);
+		if (cur_friend->m_dwLastUsedIP == dwLastUsedIP && cur_friend->m_nLastUsedPort == nLastUsedPort)
 			return true;
-		}
 	}
 	return false;
 }
@@ -242,7 +234,7 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 	}
 	SaveList();
 	// Mighty Knife: log friend activities
-	if (theApp.glob_prefs->GetLogFriendlistActivities ()) {
+	if (thePrefs.GetLogFriendlistActivities ()) {
 		char buffer[100]; buffer [0] = 0;
 		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,NewFriend->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
@@ -269,7 +261,7 @@ void CFriendList::RemoveFriend(CFriend* todel){
 	}
 
 	// Mighty Knife: log friend activities
-	if (theApp.glob_prefs->GetLogFriendlistActivities ()) {
+	if (thePrefs.GetLogFriendlistActivities ()) {
 		char buffer[100]; buffer [0] = 0;
 		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,todel->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
@@ -294,11 +286,13 @@ void CFriendList::RemoveFriend(CFriend* todel){
 	m_listFriends.RemoveAt(pos);
 	delete todel;
 	SaveList();
+	if (m_wndOutput)
+		m_wndOutput->UpdateList();
 }
 
 void CFriendList::RemoveAllFriendSlots(){
-	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;m_listFriends.GetNext(pos)){
-		CFriend* cur_friend = m_listFriends.GetAt(pos);
+	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0; ){
+		CFriend* cur_friend = m_listFriends.GetNext(pos);
 		//MORPH START - Added by Yun.SF3, ZZ Upload System
 		cur_friend->SetFriendSlot(false);
 		//MORPH END - Added by Yun.SF3, ZZ Upload System
@@ -311,5 +305,5 @@ void CFriendList::RemoveAllFriendSlots(){
 void CFriendList::Process()
 {
 	if (::GetTickCount() - m_nLastSaved > MIN2MS(19))
-		this->SaveList();
+		SaveList();
 }

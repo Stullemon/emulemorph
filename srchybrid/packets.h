@@ -17,6 +17,8 @@
 #pragma once
 #include "opcodes.h"
 
+class CFileDataIO;
+
 class Packet
 {
 public:
@@ -25,7 +27,7 @@ public:
 	//khaos Packet(char* pPacketPart,uint32 nSize,bool bLast); // only used for splitted packets!
 	Packet(CMemFile* datafile,uint8 protocol = OP_EDONKEYPROT);
 	// -khaos--+++> For use in upload statistics... Optional var, shouldn't affect anything.
-	Packet(int8 in_opcode,int32 in_size,uint8 protocol = OP_EDONKEYPROT,bool bFromPF = true);
+	Packet(uint8 in_opcode, uint32 in_size, uint8 protocol = OP_EDONKEYPROT, bool bFromPF = true);
 	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPF = true); // only used for splitted packets!
 	// <-----khaos-
 	~Packet();
@@ -66,29 +68,29 @@ struct STag{
 	STag(const STag& in);
 	~STag();
 
-	int8	type;
+	uint8	type;
+	uint8	specialtag;
 	LPSTR	tagname;
 	union{
 	  LPSTR	stringvalue;
-	  int32	intvalue;
+	  uint32 intvalue;
 	  float floatvalue;
 	};
-	int8	specialtag;
 };
 
 class CTag {
 public:
 	CTag(LPCSTR name, uint32 intvalue);
-	CTag(int8 special, uint32 intvalue);
+	CTag(uint8 special, uint32 intvalue);
 	CTag(LPCSTR name, LPCSTR strvalue);
-	CTag(int8 special, LPCSTR strvalue);
+	CTag(uint8 special, LPCSTR strvalue);
 	CTag(const STag& in_tag);
-	CTag(CFile* in_data);
+	CTag(CFileDataIO* in_data);
 	~CTag();
 	
 	CTag* CloneTag() { return new CTag(tag); }
 	
-	bool WriteTagToFile(CFile* file); //used for CMemfiles
+	bool WriteTagToFile(CFileDataIO* file);
 	
 	STag tag;
 	CString GetFullInfo() const;

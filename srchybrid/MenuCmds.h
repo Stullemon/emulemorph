@@ -90,6 +90,7 @@
 #define MP_HM_HELP				10242
 #define MP_HM_1STSWIZARD		10243
 #define MP_OPENFOLDER			10244
+#define	MP_HM_IPFILTER			10245
 
 #define MP_HM_LINK1				10230
 #define MP_HM_LINK2				10231
@@ -136,6 +137,7 @@
 #define MPG_ALTENTER			10330
 #define MPG_F2					10331
 #define	MP_RENAME				10332
+#define	MP_FIND					10333
 
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10335

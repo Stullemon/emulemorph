@@ -118,6 +118,7 @@ void CFriendListCtrl::AddFriend(const CFriend* toadd)
 	int itemnr = GetItemCount();
 	InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE,itemnr,(LPCTSTR)toadd->m_strName,0,0,1,(LPARAM)toadd);
 	RefreshFriend(toadd);
+	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
 }
 
 void CFriendListCtrl::RemoveFriend(const CFriend* toremove)
@@ -128,6 +129,7 @@ void CFriendListCtrl::RemoveFriend(const CFriend* toremove)
 	int result = FindItem(&find);
 	if (result != -1)
 		DeleteItem(result);
+	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
 }
 
 void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
@@ -142,7 +144,7 @@ void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
 		//CString temp;
 		//temp.Format( "%s", toupdate->m_strName );
 		CString OldName = GetItemText (itemnr,0);
-		if ((OldName != toupdate->m_strName) && (theApp.glob_prefs->GetLogFriendlistActivities ())) {
+		if ((OldName != toupdate->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
   			char buffer[100]; buffer [0] = 0;
 			for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,toupdate->m_abyUserhash[i]);
 			#ifdef MIGHTY_TWEAKS
@@ -181,12 +183,11 @@ void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
 
 void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
-	CFriend* cur_friend=NULL;
-
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_FRIENDLIST));
 
+	const CFriend* cur_friend = NULL;
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		cur_friend = (CFriend*)GetItemData(iSel);
@@ -195,29 +196,33 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	}
 
 	ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
+	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->m_LinkedClient && !cur_friend->m_LinkedClient->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	//MORPH START - Modified by SiRoB, ZZ Upload System
+	/*
+	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	if (cur_friend && cur_friend->m_LinkedClient && !cur_friend->m_LinkedClient->HasLowID()){
+		ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_ENABLED);
+		ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend->m_LinkedClient->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
+	}
+	else
+		ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
+	*/
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend && cur_friend->m_LinkedClient && !cur_friend->m_LinkedClient->HasLowID())? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
 	//MORPH END   - Added by SiRoB, Friend Addon
 	
-	if (iSel != -1){
-		ClientMenu.AppendMenu(MF_STRING,MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-		ClientMenu.AppendMenu(MF_STRING,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-		ClientMenu.AppendMenu(MF_STRING,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-		ClientMenu.AppendMenu(MF_STRING,MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
-		//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-		//if (cur_friend && cur_friend->GetLinkedClient() && !cur_friend->GetLinkedClient()->HasLowID()){
-		ClientMenu.EnableMenuItem(MP_FRIENDSLOT,MF_ENABLED);
-		ClientMenu.CheckMenuItem(MP_FRIENDSLOT, ((cur_friend->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) );  
-		//MORPH START - Added by IceCream, List Requested Files
-		ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
-		ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
-		//MORPH END - Added by IceCream, List Requested Files	
-		//}
-		//else
-		//	ClientMenu.EnableMenuItem(MP_FRIENDSLOT,MF_GRAYED);
-		//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	//}
+	//else
+	//	ClientMenu.EnableMenuItem(MP_FRIENDSLOT,MF_GRAYED);
+	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+	//MORPH START - Added by IceCream, List Requested Files
+	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
+	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
+	//MORPH END - Added by IceCream, List Requested Files	
 
-	}
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
@@ -347,7 +352,8 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	return true;
 }
 
-void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
+void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) 
 		ShowFriendDetails((CFriend*)GetItemData(iSel));
@@ -427,5 +433,6 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 void CFriendListCtrl::UpdateList()
 {
+	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
 	SortItems(SortProc, MAKELONG(GetSortItem(), (GetSortAscending() ? 0 : 0x0001)));
 }

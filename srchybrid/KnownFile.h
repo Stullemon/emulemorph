@@ -27,13 +27,14 @@ typedef std::list<CString> WordList;
 };
 class CUpDownClient;
 class Packet;
+class CFileDataIO;
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CFileStatistic{
 	friend class CKnownFile;
 public:
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	//CFileStatistic()					{requested = transferred = accepted = alltimerequested= alltimetransferred = alltimeaccepted = 0;}
+	//	CFileStatistic()					{requested = transferred = accepted = alltimerequested= alltimetransferred = alltimeaccepted = 0;}
 	CFileStatistic(){
 		requested = transferred = accepted = alltimerequested= alltimetransferred = alltimeaccepted = 0;
 		InChangedSpreadSortValue = false;
@@ -44,6 +45,8 @@ public:
 		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
+	void	MergeFileStats( CFileStatistic* toMerge );
+
 	void	AddRequest();
 	void	AddAccepted();
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
@@ -53,7 +56,6 @@ public:
 	float	GetSpreadSortValue() /*const*/;
 	float	GetFullSpreadCount() /*const*/;
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
-	void	Merge(CFileStatistic *other);	// SLUGFILLER: mergeKnown
 	uint16	GetRequests() const				{return requested;}
 	uint16	GetAccepts() const				{return accepted;}
 	uint64	GetTransferred() const			{return transferred;}
@@ -97,11 +99,10 @@ CAbstractFile
 		\ 
 		  CSearchFile
 */
-class CAbstractFile: public CLoggable
-#ifdef _DEBUG
-					,public CObject
-#endif
+class CAbstractFile: public CObject, public CLoggable
 {
+	DECLARE_DYNAMIC(CAbstractFile)
+
 public:
 	CAbstractFile();
 	virtual ~CAbstractFile() { }
@@ -139,13 +140,15 @@ protected:
 	uchar	m_abyFileHash[16];
 	uint32	m_nFileSize;
 	CString m_strComment;
-	int8	m_iRate;
+	uint8	m_iRate;
 	CString m_strFileType;	// this holds the localized(!) file type, TODO: change to ed2k file type
 	CArray<CTag*,CTag*> taglist;
 };
 
 class CKnownFile : public CAbstractFile
 {
+	DECLARE_DYNAMIC(CKnownFile)
+
 public:
 	CKnownFile();
 	~CKnownFile();
@@ -160,9 +163,8 @@ public:
 
 	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
 	virtual bool IsPartFile() const { return false; }
-	virtual bool	LoadFromFile(CFile* file);	//load date, hashset and tags from a .met file
-
-	bool	WriteToFile(CFile* file);	
+	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
+	bool	WriteToFile(CFileDataIO* file);
 	CTime	GetCFileDate() const { return CTime(date); }
 	uint32	GetFileDate() const { return date; }
 	CTime	GetCrCFileDate() const { return CTime(dateC); }
@@ -188,25 +190,27 @@ public:
 	bool	IsAutoUpPriority(void) const { return m_bAutoUpPriority; }
 	void	SetAutoUpPriority(bool NewAutoUpPriority) { m_bAutoUpPriority = NewAutoUpPriority; }
 	void	UpdateAutoUpPriority();
-	void	AddQueuedCount()			{m_iQueuedCount++; UpdateAutoUpPriority();}
-	void	SubQueuedCount()			{if( m_iQueuedCount != 0 ) m_iQueuedCount--; UpdateAutoUpPriority();}
-	uint32	GetQueuedCount()			{return m_iQueuedCount; /*call func after 'return'!? what's the ident here?*/ /*UpdateAutoUpPriority();*/}
 	
-	bool	LoadHashsetFromFile(CFile* file, bool checkhash);
+	// This has lost it's meaning here.. This is the total clients we know that want this file..
+	// Right now this number is used for auto priorities..
+	// This may be replaced with total complete source known in the network..
+	uint32	GetQueuedCount() { return m_ClientUploadList.GetCount();}
+
+	bool	LoadHashsetFromFile(CFileDataIO* file, bool checkhash);
 
 	bool	HideOvershares(CFile* file, CUpDownClient* client);	// SLUGFILLER: hideOS
 
 	void	AddUploadingClient(CUpDownClient* client);
 	void	RemoveUploadingClient(CUpDownClient* client);
-	void	NewAvailPartsInfo();
-	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool bFlat) /*const*/;
+	virtual void	UpdatePartsInfo();
+	virtual void	DrawShareStatusBar(CDC* dc, LPRECT rect, bool onlygreyrect, bool bFlat) /*const*/;
 
 	// comment 
 	CString GetFileComment() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_strComment; }
 	void	SetFileComment(CString strNewComment);
 
-	int8	GetFileRate() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_iRate; }
-	void	SetFileRate(int8 iNewRate); 
+	uint8	GetFileRate() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_iRate; }
+	void	SetFileRate(uint8 iNewRate);
 
 	bool	GetPublishedED2K() const { return m_PublishedED2K; }
 	void	SetPublishedED2K( bool val );
@@ -225,12 +229,10 @@ public:
 	bool	PublishSrc( Kademlia::CUInt128* nextID);
 
 	// file sharing
-	virtual	Packet*	CreateSrcInfoPacket(CUpDownClient* forClient);
+	virtual	Packet*	CreateSrcInfoPacket(CUpDownClient* forClient) const;
 	UINT	GetMetaDataVer() const { return m_uMetaDataVer; }
 	void	UpdateMetaDataTags();
 	void	RemoveMetaDataTags();
-
-	void	UpdateClientUploadList();	// #zegzav:updcliuplst
 
 	// preview
 	bool	IsMovie() const;
@@ -300,9 +302,8 @@ public:
 protected:
 	//preview
 	bool	GrabImage(CString strFileName,uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
-
-	bool	LoadTagsFromFile(CFile* file);
-	bool	LoadDateFromFile(CFile* file);
+	bool	LoadTagsFromFile(CFileDataIO* file);
+	bool	LoadDateFromFile(CFileDataIO* file);
 	void	CreateHashFromFile(FILE* file, int Length, uchar* Output) const { CreateHashFromInput(file, NULL, Length, Output, NULL); }
 	void	CreateHashFromFile(CFile* file, int Length, uchar* Output) const { CreateHashFromInput(NULL, file, Length, Output, NULL); }
 	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output) const { CreateHashFromInput(NULL, NULL, Length, Output, in_string); }
@@ -323,7 +324,6 @@ private:
 	bool	m_bAutoUpPriority;
 	bool	m_bCommentLoaded;
 	bool	m_PublishedED2K;
-	uint32	m_iQueuedCount;
 	uint32	kadFileSearchID;
 	uint32	m_lastPublishTimeKadSrc;
 	uint32	m_PublishedKadSrc;

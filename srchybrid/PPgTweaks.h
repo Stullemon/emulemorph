@@ -9,18 +9,20 @@ public:
 	CPPgTweaks();
 	virtual ~CPPgTweaks();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs;}
-
 // Dialog Data
 	enum { IDD = IDD_PPG_TWEAKS };
 protected:
-	CPreferences *app_prefs;
-	uint8 m_iFileBufferSize;
-	uint8 m_iQueueSize;
+	UINT m_iFileBufferSize;
+	UINT m_iQueueSize;
 	int m_iMaxConnPerFive;
 	int m_iAutoTakeEd2kLinks;
 	int m_iVerbose;
 	int m_iDebugSourceExchange;
+	int m_iLogBannedClients;
+	int m_iLogRatingDescReceived;
+	int m_iLogSecureIdent;
+	int m_iLogFilteredIPs;
+	int m_iLogFileSaving;
 	int m_iCreditSystem;
 	int m_iLog2Disk;
 	int m_iDebug2Disk;
@@ -32,7 +34,6 @@ protected:
 	int m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	float m_fMinFreeDiskSpaceMB;
 	CString m_sYourHostname;	// itsonlyme: hostnameSource
-	int m_iMultipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	// ZZ:UploadSpeedSense -->
     int m_iDynUpEnabled;
@@ -47,10 +48,15 @@ protected:
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiMaxCon5Sec;
 	HTREEITEM m_htiAutoTakeEd2kLinks;
+	HTREEITEM m_htiVerboseGroup;
 	HTREEITEM m_htiVerbose;
 	HTREEITEM m_htiDebugSourceExchange;
+	HTREEITEM m_htiLogBannedClients;
+	HTREEITEM m_htiLogRatingDescReceived;
+	HTREEITEM m_htiLogSecureIdent;
+	HTREEITEM m_htiLogFilteredIPs;
+	HTREEITEM m_htiLogFileSaving;
 	HTREEITEM m_htiCreditSystem;
-	HTREEITEM m_htiSaveLogs;
 	HTREEITEM m_htiLog2Disk;
 	HTREEITEM m_htiDebug2Disk;
 	HTREEITEM m_htiDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
@@ -64,7 +70,6 @@ protected:
 	HTREEITEM m_htiCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	HTREEITEM m_htiMinFreeDiskSpace;
 	HTREEITEM m_htiYourHostname;	// itsonlyme: hostnameSource
-	HTREEITEM m_htiMultipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
 
 	// ZZ:UploadSpeedSense -->
     HTREEITEM m_htiDynUp;
@@ -76,16 +81,13 @@ protected:
     HTREEITEM m_htiDynUpNumberOfPings;
 	// ZZ:UploadSpeedSense <--
 
-    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnDestroy();
-	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
-
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
-public:
-	void Localize(void);
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	virtual BOOL OnKillActive();
+
+	DECLARE_MESSAGE_MAP()
+    afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnDestroy();
+	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 };

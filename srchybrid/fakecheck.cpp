@@ -60,7 +60,7 @@ int CFakecheck::LoadFromFile(){
 	int lenBuf = 1024;
 	fakecounter=0;
 	RemoveAllFakes();
-	FILE* readFile= fopen(CString(theApp.glob_prefs->GetConfigDir())+"fakes.dat", "r");
+	FILE* readFile= fopen(CString(thePrefs.GetConfigDir())+"fakes.dat", "r");
 	if (readFile!=NULL) {
 		while (!feof(readFile)) {
 			if (fgets(buffer,lenBuf,readFile)==0) break;
@@ -120,9 +120,9 @@ bool CFakecheck::DownloadFakeList(){
 	char buffer[5];
 	int lenBuf = 5;
 	CString sbuffer;
-	CString strURL = theApp.glob_prefs->GetUpdateURLFakeList();
+	CString strURL = thePrefs.GetUpdateURLFakeList();
 	CString strTempFilename;
-	strTempFilename.Format(CString(theApp.glob_prefs->GetAppDir())+"fakes.txt");
+	strTempFilename.Format(CString(thePrefs.GetAppDir())+"fakes.txt");
 	FILE* readFile= fopen(strTempFilename, "r");
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_sURLToDownload = strURL;
@@ -141,12 +141,12 @@ bool CFakecheck::DownloadFakeList(){
 	remove(strTempFilename);
 	CString FakeCheckURL;
 	//FakeCheckURL = "http://www.emuleitor.com/downloads/Morph/fakes.dat";
-	FakeCheckURL = theApp.glob_prefs->GetUpdateURLFakeList().TrimRight(".txt")+".dat";
-	strTempFilename.Format(CString(theApp.glob_prefs->GetConfigDir())+"fakes.dat");
+	FakeCheckURL = thePrefs.GetUpdateURLFakeList().TrimRight(".txt")+".dat";
+	strTempFilename.Format(CString(thePrefs.GetConfigDir())+"fakes.dat");
 	readFile= fopen(strTempFilename, "r");
 	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
-	if ((theApp.glob_prefs->GetFakesDatVersion() < (uint32) atoi(sbuffer))) {
-		theApp.glob_prefs->SetFakesDatVersion(atoi(sbuffer));
+	if ((thePrefs.GetFakesDatVersion() < (uint32) atoi(sbuffer))) {
+		thePrefs.SetFakesDatVersion(atoi(sbuffer));
 	if (readFile!=NULL) {
 		fclose(readFile);
 		remove(strTempFilename);

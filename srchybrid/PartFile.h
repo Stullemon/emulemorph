@@ -59,11 +59,15 @@ class CServer; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 #define PMT_SPLITTED		2
 #define PMT_NEWOLD			3
 
+#define	FILE_COMPLETION_THREAD_FAILED	0x0000
+#define	FILE_COMPLETION_THREAD_SUCCESS	0x0001
+#define	FILE_COMPLETION_THREAD_RENAMED	0x0002
 
 class CSearchFile;
 class CUpDownClient;
 enum EDownloadState;
 class CxImage;
+class CSafeMemFile;
 
 #pragma pack(1)
 struct Requested_Block_Struct
@@ -93,6 +97,8 @@ typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CPartFile : public CKnownFile
 {
+	DECLARE_DYNAMIC(CPartFile)
+
 	friend class CPartFileConvert;
 public:
 	friend class CPartHashThread;	// SLUGFILLER: SafeHash
@@ -126,7 +132,7 @@ public:
 	bool	LoadFromFile(FILE* file)						{return false;}
 	// SLUGFILLER: mergeKnown - allow WriteToFile to be called	
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	uint32	Process(uint32 reducedownload,uint8 m_icounter, uint32 friendReduceddownload);
+	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload);
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
 	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
 	bool	SavePartFile();
@@ -139,19 +145,20 @@ public:
 	
 	void	AddGap(uint32 start, uint32 end);
 	void	FillGap(uint32 start, uint32 end);
-	void	DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/;
-	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool	 bFlat) /*const*/;
+	void	DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/;
+	virtual void	DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool	 bFlat) /*const*/;
 	bool	IsComplete(uint32 start, uint32 end) const;
 	bool	IsPureGap(uint32 start, uint32 end) const;
+	bool	IsAlreadyRequested(uint32 start, uint32 end) const;
 	bool	IsCorruptedPart(uint16 partnumber) const;
 	void	UpdateCompletedInfos();
-	void	NewSrcPartsInfo();
+	virtual void	UpdatePartsInfo();
 
 	bool	GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count) /*const*/;
-	void	WritePartStatus(CFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
-	void	WriteCompleteSourcesCount(CFile* file) const;
-	void	AddSources(CMemFile* sources,uint32 serverip, uint16 serverport);
-	static bool	CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, uint8* pdebug_lowiddropped = NULL);
+	void	WritePartStatus(CSafeMemFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
+	void	WriteCompleteSourcesCount(CSafeMemFile* file) const;
+	void	AddSources(CSafeMemFile* sources,uint32 serverip, uint16 serverport);
+	static bool CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped = NULL);
 	
 	uint8	GetStatus(bool ignorepause = false) const;
 	void	SetStatus(uint8 in);
@@ -199,6 +206,7 @@ public:
 	// Barry - Added to prevent list containing deleted blocks on shutdown
 	void	RemoveAllRequestedBlocks(void);
 	bool	RemoveBlockFromList(uint32 start, uint32 end);
+	bool	IsInRequestedBlockList(const Requested_Block_Struct* block) const;
 	void	RemoveAllSources(bool bTryToSwap);
 
 	bool	CanOpenFile() const;
@@ -219,7 +227,7 @@ public:
 	void	ResumeFileInsufficient();
 
 	virtual Packet* CreateSrcInfoPacket(CUpDownClient* forClient) const;
-	void	AddClientSources(CMemFile* sources, uint8 sourceexchangeversion);
+	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion);
 
 	uint16	GetAvailablePartCount() const { return availablePartsCount; }
 	void	UpdateAvailablePartsCount();
@@ -252,7 +260,7 @@ public:
 	CString GetProgressString(uint16 size) const;
 	CString GetInfoSummary(CPartFile* partfile) const;
 
-	int		GetCommonFilePenalty() const;
+//	int		GetCommonFilePenalty() const;
 	void	UpdateDisplayedInfo(boolean force=false);
 
 	uint8	GetCategory() const;
@@ -291,6 +299,8 @@ public:
 	void	FlushBuffersExceptionHandler(CFileException* error);
 	void	FlushBuffersExceptionHandler();
 
+	void	PerformFileCompleteEnd(DWORD dwResult);
+
 	uint32	lastsearchtime;
 	uint32	lastsearchtimeKad;
 	uint32	m_iAllocinfo;
@@ -299,7 +309,7 @@ public:
 	CTime	lastseencomplete;
 	CFile	m_hpartfile;				// permanent opened handle to avoid write conflicts
 	CMutex 	m_FileCompleteMutex;		// Lord KiRon - Mutex for file completion
-	uint16	src_stats[3];
+	uint16	src_stats[4];
 	volatile bool m_bPreviewing;
 	volatile bool m_bRecoveringArchive; // Is archive recovery in progress
 	bool	m_bLocalSrcReqQueued;
@@ -332,7 +342,6 @@ public:
 
 protected:
 	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result) const;
-	bool	IsAlreadyRequested(uint32 start, uint32 end) const;
 	void	CompleteFile(bool hashingdone);
 	void	CreatePartFile();
 	void	Init();
@@ -388,7 +397,7 @@ private:
 	CWinThread* m_AllocateThread;
 	DWORD	m_lastRefreshedDLDisplay;
 	CUpDownClientPtrList m_downloadingSourceList;
-
+	bool	m_bDeleteAfterAlloc;
 	// Barry - Buffered data to be written
 	CTypedPtrList<CPtrList, PartFileBufferedData*> m_BufferedData_list;
 	uint32 m_nTotalBufferData;

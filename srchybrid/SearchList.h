@@ -18,12 +18,14 @@
 #include "Loggable.h"
 #include "KnownFile.h"
 
+class CFileDataIO;
+
 class CSearchFile : public CAbstractFile
 {
 	friend class CPartFile;
 	friend class CSearchListCtrl;
 public:
-	CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP=0, uint16 nServerPort=0, LPCTSTR pszDirectory = NULL, bool nKademlia = false);
+	CSearchFile(CFileDataIO* in_data, uint32 nSearchID, uint32 nServerIP=0, uint16 nServerPort=0, LPCTSTR pszDirectory = NULL, bool nKademlia = false);
 	CSearchFile(const CSearchFile* copyfrom);
 	CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability);
 	~CSearchFile();
@@ -95,6 +97,19 @@ public:
 	bool	IsPreviewPossible() const { return m_bPreviewPossible;}
 	void	SetPreviewPossible(bool in)	{ m_bPreviewPossible = in; }
 
+	enum EKnownType
+	{
+		NotDetermined,
+		Shared,
+		Downloading,
+		Downloaded,
+		Unknown
+	};
+
+	EKnownType InitKnownType();
+	EKnownType GetKnownType() const { return m_eKnown; }
+	void SetKnownType(EKnownType eType) { m_eKnown = eType; }
+
 private:
 	bool	m_nKademlia;
 	uint32	m_nClientID;
@@ -112,6 +127,7 @@ private:
 	bool		 m_list_bExpanded;
 	uint16		 m_list_childcount;
 	CSearchFile* m_list_parent;
+	EKnownType	m_eKnown;
 };
 
 __inline bool __stdcall operator==(const CSearchFile::SServer& s1, const CSearchFile::SServer& s2)
@@ -136,19 +152,20 @@ public:
 	void	NewSearch(CSearchListCtrl* in_wnd, CString resTypes, uint32 nSearchID, bool MobilMuleSearch = false);
 	uint16	ProcessSearchanswer(char* packet, uint32 size, CUpDownClient* Sender, bool* pbMoreResultsAvailable, LPCTSTR pszDirectory = NULL);
 	uint16	ProcessSearchanswer(char* packet, uint32 size, uint32 nServerIP, uint16 nServerPort, bool* pbMoreResultsAvailable);
-	uint16	ProcessUDPSearchanswer(CFile& packet, uint32 nServerIP, uint16 nServerPort);
+	uint16	ProcessUDPSearchanswer(CFileDataIO& packet, uint32 nServerIP, uint16 nServerPort);
 	uint16	GetResultCount() const;
 	uint16	GetResultCount(uint32 nSearchID) const;
 	void	AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCount);
 	void	SetOutputWnd(CSearchListCtrl* in_wnd)		{outputwnd = in_wnd;}
 	void	RemoveResults(  uint32 nSearchID );
-	void	RemoveResults( CSearchFile* todel );
+	void	RemoveResult(CSearchFile* todel);
 	void	ShowResults(uint32 nSearchID);
 	CString GetWebList(CString linePattern,int sortby,bool asc) const;
 	void	AddFileToDownloadByHash(const uchar* hash)		{AddFileToDownloadByHash(hash,0);}
 	void	AddFileToDownloadByHash(const uchar* hash, uint8 cat);
 	bool	AddToList(CSearchFile* toadd, bool bClientResponse = false);
-	CSearchFile*	GetSearchFileByHash(const uchar* hash);
+	CSearchFile* GetSearchFileByHash(const uchar* hash) const;
+	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCSTR name, uint32 size, LPCSTR type, uint16 numProperties, ...);
 
 	uint16	GetFoundFiles(uint32 searchID) const {
 		uint16 returnVal=0;

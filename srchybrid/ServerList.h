@@ -25,7 +25,7 @@ class CServerList: public CLoggable
 {
 	friend class CServerListCtrl;
 public:
-	CServerList(CPreferences* in_prefs);
+	CServerList();
 	~CServerList();
 
 	bool		Init();
@@ -78,10 +78,9 @@ private:
 	uint32		serverpos;
 	uint32		searchserverpos;
 	uint32		statserverpos;
-	int8		version;
+	uint8		version;
 	uint32		servercount;
 	CTypedPtrList<CPtrList, CServer*>	list;
-	CPreferences*	app_prefs;
 	uint32		delservercount;
 	uint32		m_nLastSaved;
 

@@ -72,49 +72,49 @@ END_MESSAGE_MAP()
 
 void CPPgGeneral::LoadSettings(void)
 {
-	GetDlgItem(IDC_NICK)->SetWindowText(app_prefs->prefs->nick);
+	GetDlgItem(IDC_NICK)->SetWindowText(thePrefs.nick);
 
 	for(int i = 0; i < m_language.GetCount(); i++)
-		if(m_language.GetItemData(i) == app_prefs->GetLanguageID())
+		if(m_language.GetItemData(i) == thePrefs.GetLanguageID())
 			m_language.SetCurSel(i);
 	
-	if(app_prefs->prefs->startMinimized)
+	if(thePrefs.startMinimized)
 		CheckDlgButton(IDC_STARTMIN,1);
 	else
 		CheckDlgButton(IDC_STARTMIN,0);
 
-	if (app_prefs->prefs->onlineSig)
+	if (thePrefs.onlineSig)
 		CheckDlgButton(IDC_ONLINESIG,1);
 	else
 		CheckDlgButton(IDC_ONLINESIG,0);
 	
-	if(app_prefs->prefs->beepOnError)
+	if(thePrefs.beepOnError)
 		CheckDlgButton(IDC_BEEPER,1);
 	else
 		CheckDlgButton(IDC_BEEPER,0);
 
-	if(app_prefs->prefs->confirmExit)
+	if(thePrefs.confirmExit)
 		CheckDlgButton(IDC_EXIT,1);
 	else
 		CheckDlgButton(IDC_EXIT,0);
 
-	if(app_prefs->prefs->splashscreen)
+	if(thePrefs.splashscreen)
 		CheckDlgButton(IDC_SPLASHON,1);
 	else
 		CheckDlgButton(IDC_SPLASHON,0);
 
-	if(app_prefs->prefs->bringtoforeground)
+	if(thePrefs.bringtoforeground)
 		CheckDlgButton(IDC_BRINGTOFOREGROUND,1);
 	else
 		CheckDlgButton(IDC_BRINGTOFOREGROUND,0);
 
-	if(app_prefs->prefs->updatenotify)
+	if(thePrefs.updatenotify)
 		CheckDlgButton(IDC_CHECK4UPDATE,1);
 	else
 		CheckDlgButton(IDC_CHECK4UPDATE,0);
 
 	CString strBuffer;
-	strBuffer.Format("%i %s",app_prefs->prefs->versioncheckdays ,GetResString(IDS_DAYS2));
+	strBuffer.Format("%i %s",thePrefs.versioncheckdays,GetResString(IDS_DAYS2));
 	GetDlgItem(IDC_DAYS)->SetWindowText(strBuffer);
 }
 
@@ -123,10 +123,10 @@ BOOL CPPgGeneral::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	((CEdit*)GetDlgItem(IDC_NICK))->SetLimitText(MAX_NICK_LENGTH);
+	((CEdit*)GetDlgItem(IDC_NICK))->SetLimitText(thePrefs.GetMaxUserNickLength());
 
 	CWordArray aLanguageIDs;
-	app_prefs->GetLanguages(aLanguageIDs);
+	thePrefs.GetLanguages(aLanguageIDs);
 	for (int i = 0; i < aLanguageIDs.GetSize(); i++){
 		TCHAR szLang[128];
 		GetLocaleInfo(aLanguageIDs[i], LOCALE_SLANGUAGE, szLang, ARRSIZE(szLang));
@@ -137,12 +137,12 @@ BOOL CPPgGeneral::OnInitDialog()
 
 	CSliderCtrl *sliderUpdate = (CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS);
 	sliderUpdate->SetRange(2, 7, true);
-	sliderUpdate->SetPos(app_prefs->GetUpdateDays());
+	sliderUpdate->SetPos(thePrefs.GetUpdateDays());
 	
 	LoadSettings();
 	Localize();
-	GetDlgItem(IDC_CHECKDAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
-	GetDlgItem(IDC_DAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
+	GetDlgItem(IDC_CHECKDAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE) ? SW_SHOW : SW_HIDE );
+	GetDlgItem(IDC_DAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE) ? SW_SHOW : SW_HIDE );
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -150,16 +150,22 @@ BOOL CPPgGeneral::OnInitDialog()
 
 BOOL CPPgGeneral::OnApply()
 {
-	if(GetDlgItem(IDC_NICK)->GetWindowTextLength())
+	CString strNick;
+	GetDlgItem(IDC_NICK)->GetWindowText(strNick);
+	strNick.Trim();
+	if (strNick.IsEmpty())
 	{
-		GetDlgItem(IDC_NICK)->GetWindowText(app_prefs->prefs->nick,sizeof app_prefs->prefs->nick);
+		strNick = DEFAULT_NICK;
+		GetDlgItem(IDC_NICK)->SetWindowText(strNick);
 	}
+	thePrefs.SetUserNick(strNick);
+
 	if (m_language.GetCurSel() != CB_ERR){
 		WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
-		if (app_prefs->GetLanguageID() != byNewLang){
-			app_prefs->SetLanguageID(byNewLang);
+		if (thePrefs.GetLanguageID() != byNewLang){
+			thePrefs.SetLanguageID(byNewLang);
 		
-			theApp.glob_prefs->SetLanguage();
+			thePrefs.SetLanguage();
 
 			theApp.emuledlg->preferenceswnd->Localize();
 			theApp.emuledlg->statisticswnd->CreateMyTree();
@@ -178,14 +184,14 @@ BOOL CPPgGeneral::OnApply()
 		}
 	}
 
-	app_prefs->prefs->startMinimized= (int8)IsDlgButtonChecked(IDC_STARTMIN);
-	app_prefs->prefs->beepOnError= (int8)IsDlgButtonChecked(IDC_BEEPER);
-	app_prefs->prefs->confirmExit= (int8)IsDlgButtonChecked(IDC_EXIT);
-	app_prefs->prefs->splashscreen = (int8)IsDlgButtonChecked(IDC_SPLASHON);
-	app_prefs->prefs->bringtoforeground = (int8)IsDlgButtonChecked(IDC_BRINGTOFOREGROUND);
-	app_prefs->prefs->updatenotify = (int8)IsDlgButtonChecked(IDC_CHECK4UPDATE);
-	app_prefs->prefs->onlineSig= (int8)IsDlgButtonChecked(IDC_ONLINESIG);
-	app_prefs->prefs->versioncheckdays = ((CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS))->GetPos();
+	thePrefs.startMinimized= (uint8)IsDlgButtonChecked(IDC_STARTMIN);
+	thePrefs.beepOnError= (uint8)IsDlgButtonChecked(IDC_BEEPER);
+	thePrefs.confirmExit= (uint8)IsDlgButtonChecked(IDC_EXIT);
+	thePrefs.splashscreen = (uint8)IsDlgButtonChecked(IDC_SPLASHON);
+	thePrefs.bringtoforeground = (uint8)IsDlgButtonChecked(IDC_BRINGTOFOREGROUND);
+	thePrefs.updatenotify = (uint8)IsDlgButtonChecked(IDC_CHECK4UPDATE);
+	thePrefs.onlineSig= (uint8)IsDlgButtonChecked(IDC_ONLINESIG);
+	thePrefs.versioncheckdays = ((CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS))->GetPos();
 
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 	LoadSettings();
@@ -237,7 +243,7 @@ void CPPgGeneral::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 }
 
 void CPPgGeneral::OnBnClickedEditWebservices(){
-	ShellExecute(NULL, "open", theApp.glob_prefs->GetTxtEditor(), "\""+CString(theApp.glob_prefs->GetConfigDir())+"webservices.dat\"", NULL, SW_SHOW); 
+	ShellExecute(NULL, "open", thePrefs.GetTxtEditor(), "\""+CString(thePrefs.GetConfigDir())+"webservices.dat\"", NULL, SW_SHOW); 
 }
 
 void CPPgGeneral::OnLangChange()
@@ -245,25 +251,25 @@ void CPPgGeneral::OnLangChange()
 #define MIRRORS_URL	"http://langmirror%i.emule-project.org/lang/%i%i%i%i/"
 
 	WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
-	if (app_prefs->GetLanguageID() != byNewLang){
-		if	(!theApp.glob_prefs->IsLanguageSupported(byNewLang, false)){
+	if (thePrefs.GetLanguageID() != byNewLang){
+		if	(!thePrefs.IsLanguageSupported(byNewLang, false)){
 			if (AfxMessageBox(GetResString(IDS_ASKDOWNLOADLANGCAP) + _T("\r\n\r\n") + GetResString(IDS_ASKDOWNLOADLANG), MB_ICONQUESTION | MB_YESNO) == IDYES){
 				// download file
 				// create url, use random mirror for load balancing
 				uint16 nRand = (rand()/(RAND_MAX/3))+1;
 				CString strUrl;
 				strUrl.Format(MIRRORS_URL,nRand, VERSION_MJR, VERSION_MIN, VERSION_UPDATE, VERSION_BUILD);
-				strUrl += theApp.glob_prefs->GetLangDLLNameByID(byNewLang);
+				strUrl += thePrefs.GetLangDLLNameByID(byNewLang);
 				// safeto
-				CString strFilename = theApp.glob_prefs->GetLangDir();
+				CString strFilename = thePrefs.GetLangDir();
 				if (!PathFileExists(strFilename))
 					CreateDirectory(strFilename,0);
-				strFilename.Append(theApp.glob_prefs->GetLangDLLNameByID(byNewLang));
+				strFilename.Append(thePrefs.GetLangDLLNameByID(byNewLang));
 				// start
 				CHttpDownloadDlg dlgDownload;
 				dlgDownload.m_sURLToDownload = strUrl;
 				dlgDownload.m_sFileToDownloadInto = strFilename;
-				if (dlgDownload.DoModal() == IDOK && theApp.glob_prefs->IsLanguageSupported(byNewLang, true))
+				if (dlgDownload.DoModal() == IDOK && thePrefs.IsLanguageSupported(byNewLang, true))
 				{
 					// everything ok, new language downloaded and working
 					OnSettingsChange();
@@ -276,7 +282,7 @@ void CPPgGeneral::OnLangChange()
 			}
 			// undo change selection
 			for(int i = 0; i < m_language.GetCount(); i++)
-				if(m_language.GetItemData(i) == app_prefs->GetLanguageID())
+				if(m_language.GetItemData(i) == thePrefs.GetLanguageID())
 					m_language.SetCurSel(i);
 		}
 		else

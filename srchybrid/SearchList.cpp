@@ -24,9 +24,11 @@
 #include "SafeFile.h"
 #include "MMServer.h"
 #include "SharedFileList.h"
+#include "KnownFileList.h"
 #include "DownloadQueue.h"
 #include "PartFile.h"
 #include "CxImage/xImage.h"
+#include "kademlia/utils/uint128.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "SearchDlg.h"
@@ -147,23 +149,23 @@ CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 	m_list_parent = const_cast<CSearchFile*>(copyfrom);
 	m_list_childcount = 0;
 	m_bPreviewPossible = false;
+	m_eKnown = copyfrom->m_eKnown;
 }
 
-CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uint16 nServerPort, LPCTSTR pszDirectory, bool nKademlia)
+CSearchFile::CSearchFile(CFileDataIO* in_data, uint32 nSearchID, uint32 nServerIP, uint16 nServerPort, LPCTSTR pszDirectory, bool nKademlia)
 {
 	m_nKademlia = nKademlia;
 	m_nSearchID = nSearchID;
-	in_data->Read(&m_abyFileHash,16);
-	in_data->Read(&m_nClientID,4);
-	in_data->Read(&m_nClientPort,2);
+	in_data->ReadHash16(m_abyFileHash);
+	m_nClientID = in_data->ReadUInt32();
+	m_nClientPort = in_data->ReadUInt16();
 	if ((m_nClientID || m_nClientPort) && !IsValidClientIPPort(m_nClientID, m_nClientPort)){
-		if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
+		if (thePrefs.GetDebugServerSearchesLevel() > 1)
 			Debug("Filtered source from search result %s:%u\n", DbgGetClientID(m_nClientID), m_nClientPort);
 		m_nClientID = 0;
 		m_nClientPort = 0;
 	}
-	uint32 tagcount;
-	in_data->Read(&tagcount,4);
+	UINT tagcount = in_data->ReadUInt32();
 	// NSERVER2.EXE (lugdunum v16.38 patched for Win32) returns the ClientIP+Port of the client which offered that
 	// file, even if that client has not filled the according fields in the OP_OFFERFILES packet with its IP+Port.
 	//
@@ -171,12 +173,12 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 	//  *) does not return ClientIP+Port if the OP_OFFERFILES packet does not also contain it.
 	//  *) if the OP_OFFERFILES packet does contain our HighID and Port the server returns that data at least when
 	//     returning search results via TCP.
-	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
+	if (thePrefs.GetDebugServerSearchesLevel() > 1)
 		Debug("Search Result: %s  Client=%u.%u.%u.%u:%u  Tags=%u\n", md4str(m_abyFileHash), (uint8)m_nClientID,(uint8)(m_nClientID>>8),(uint8)(m_nClientID>>16),(uint8)(m_nClientID>>24), m_nClientPort, tagcount);
 
-	for (int i = 0;i != tagcount; i++){
+	for (UINT i = 0; i < tagcount; i++){
 		CTag* toadd = new CTag(in_data);
-		if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
+		if (thePrefs.GetDebugServerSearchesLevel() > 1)
 			Debug("  %s\n", toadd->GetFullInfo());
 		ConvertED2KTag(toadd);
 		if (toadd)
@@ -201,6 +203,7 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 	m_list_parent = NULL;
 	m_list_childcount = 0;
 	m_bPreviewPossible = false;
+	m_eKnown = NotDetermined;
 }
 
 CSearchFile::CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability)
@@ -224,24 +227,28 @@ CSearchFile::CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFil
 	m_list_parent = NULL;
 	m_list_childcount = 0;
 	m_bPreviewPossible = false;
+	m_eKnown = NotDetermined;
 }
 
-CSearchFile::~CSearchFile(){
+CSearchFile::~CSearchFile()
+{
 	for (int i = 0; i < taglist.GetSize();i++)
-		safe_delete(taglist[i]);
-	taglist.RemoveAll();
-	taglist.SetSize(0);
+		delete taglist[i];
 	delete[] m_pszDirectory;
 	delete[] m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
-	for (int i = 0; i != m_listImages.GetSize(); i++)
-		safe_delete(m_listImages[i]);
+	for (int i = 0; i < m_listImages.GetSize(); i++)
+		delete m_listImages[i];
 }
 
-uint32 CSearchFile::AddSources(uint32 count){
-	for (int i = 0; i < taglist.GetSize(); i++){
+uint32 CSearchFile::AddSources(uint32 count)
+{
+	for (int i = 0; i < taglist.GetSize(); i++)
+	{
 		CTag* pTag = taglist[i];
-		if (pTag->tag.specialtag == FT_SOURCES){
-			if(m_nKademlia){
+		if (pTag->tag.specialtag == FT_SOURCES)
+		{
+			if(m_nKademlia)
+			{
 				if( pTag->tag.intvalue < count)
 					pTag->tag.intvalue = count;
 			}
@@ -253,8 +260,28 @@ uint32 CSearchFile::AddSources(uint32 count){
 	return 0;
 }
 
-uint32 CSearchFile::GetSourceCount() const {
+uint32 CSearchFile::GetSourceCount() const
+{
 	return GetIntTagValue(FT_SOURCES);
+}
+
+CSearchFile::EKnownType CSearchFile::InitKnownType()
+{
+	const CKnownFile* pFile = theApp.downloadqueue->GetFileByID(GetFileHash());
+	if (pFile)
+	{
+		if (pFile->IsPartFile())
+			m_eKnown = Downloading;
+		else
+			m_eKnown = Shared;
+	}
+	else if (theApp.sharedfiles->GetFileByID(GetFileHash()))
+		m_eKnown = Shared;
+	else if (theApp.knownfiles->FindKnownFileByID(GetFileHash()))
+		m_eKnown = Downloaded;
+	else
+		m_eKnown = Unknown;
+	return m_eKnown;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -275,35 +302,43 @@ void CSearchList::Clear(){
 	list.RemoveAll();
 }
 
-void CSearchList::RemoveResults( uint32 nSearchID){
+void CSearchList::RemoveResults( uint32 nSearchID)
+{
 	// this will not delete the item from the window, make sure your code does it if you call this
 	ASSERT( outputwnd );
-	for (POSITION pos = list.GetHeadPosition(); pos != NULL;){
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL;)
+	{
 		POSITION posLast = pos;
 		CSearchFile* cur_file =	list.GetNext(pos);
-		if( cur_file->GetSearchID() == nSearchID ){
+		if (cur_file->GetSearchID() == nSearchID)
+		{
 			list.RemoveAt(posLast);
 			delete cur_file;
 		}
 	}
 }
 
-void CSearchList::ShowResults( uint32 nSearchID){
+void CSearchList::ShowResults(uint32 nSearchID)
+{
 	ASSERT( outputwnd );
 	outputwnd->SetRedraw(false);
-	for (POSITION pos = list.GetHeadPosition(); pos != 0;){
-		CSearchFile* cur_file = list.GetNext(pos);
+	for (POSITION pos = list.GetHeadPosition(); pos != 0;)
+	{
+		const CSearchFile* cur_file = list.GetNext(pos);
 		if( cur_file->GetSearchID() == nSearchID && cur_file->GetListParent()==NULL)
 			outputwnd->AddResult(cur_file);
 	}
 	outputwnd->SetRedraw(true);
 }
 
-void CSearchList::RemoveResults( CSearchFile* todel ){
-	for (POSITION pos = list.GetHeadPosition(); pos !=0;){
+void CSearchList::RemoveResult(CSearchFile* todel)
+{
+	for (POSITION pos = list.GetHeadPosition(); pos != 0;)
+	{
 		POSITION posLast = pos;
 		CSearchFile* cur_file = list.GetNext(pos);
-		if( cur_file == todel ){
+		if (cur_file == todel)
+		{
 			theApp.emuledlg->searchwnd->searchlistctrl.RemoveResult( todel );
 			list.RemoveAt(posLast);
 			delete todel;
@@ -312,7 +347,8 @@ void CSearchList::RemoveResults( CSearchFile* todel ){
 	}
 }
 
-void CSearchList::NewSearch(CSearchListCtrl* in_wnd, CString resTypes, uint32 nSearchID, bool MobilMuleSearch){
+void CSearchList::NewSearch(CSearchListCtrl* in_wnd, CString resTypes, uint32 nSearchID, bool MobilMuleSearch)
+{
 	if(in_wnd)
 		outputwnd = in_wnd;
 
@@ -332,6 +368,7 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 	SSearchParams* pParams = new SSearchParams;
 	pParams->strExpression = Sender->GetUserName();
 	pParams->dwSearchID = nSearchID;
+	pParams->bClientSharedFiles = true;
 	if (theApp.emuledlg->searchwnd->CreateNewTab(pParams)){
 		m_foundFilesCount.SetAt(nSearchID,0);
 		m_foundSourcesCount.SetAt(nSearchID,0);
@@ -342,10 +379,8 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 	}
 
 	CSafeMemFile packet((BYTE*)in_packet,size);
-	uint32 results;
-	packet.Read(&results,4);
-
-	for (int i = 0; i != results; i++){
+	UINT results = packet.ReadUInt32();
+	for (UINT i = 0; i < results; i++){
 		CSearchFile* toadd = new CSearchFile(&packet, nSearchID, 0, 0, pszDirectory);
 		if (Sender){
 			toadd->SetClientID(Sender->GetIP());
@@ -357,7 +392,7 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 				server.m_uAvail = 1;
 				toadd->AddServer(server);
 			}			
-			toadd->SetPreviewPossible( Sender->SupportsPreview() && ED2KFT_VIDEO == GetED2KFileTypeID(toadd->GetFileName()) );
+			toadd->SetPreviewPossible( Sender->GetPreviewSupport() && ED2KFT_VIDEO == GetED2KFileTypeID(toadd->GetFileName()) );
 			//Morph Start - added by AndCycle, SLUGFILLER: searchCatch,itsonlyme: cacheUDPsearchResults
 			// SLUGFILLER: searchCatch
 			CPartFile *file = theApp.downloadqueue->GetFileByID(toadd->GetFileHash());
@@ -393,11 +428,22 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 		*pbMoreResultsAvailable = false;
 	int iAddData = (int)(packet.GetLength() - packet.GetPosition());
 	if (iAddData == 1){
-		uint8 ucMore;
-		packet.Read(&ucMore, 1);
+		uint8 ucMore = packet.ReadUInt8();
 		if (ucMore == 0x00 || ucMore == 0x01){
 			if (pbMoreResultsAvailable)
 				*pbMoreResultsAvailable = (bool)ucMore;
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				Debug("  Client search answer(%s): More=%u\n", Sender->GetUserName(), ucMore);
+		}
+		else{
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				Debug("*** NOTE: Client ProcessSearchanswer(%s): ***AddData: 1 byte: 0x%02x\n", Sender->GetUserName(), ucMore);
+		}
+	}
+	else if (iAddData > 0){
+		if (thePrefs.GetDebugClientTCPLevel() > 0){
+			Debug("*** NOTE: Client ProcessSearchanswer(%s): ***AddData: %u bytes\n", Sender->GetUserName(), iAddData);
+			DebugHexDump((uint8*)in_packet + packet.GetPosition(), iAddData);
 		}
 	}
 
@@ -409,10 +455,8 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 										uint32 nServerIP, uint16 nServerPort, bool* pbMoreResultsAvailable)
 {
 	CSafeMemFile packet((BYTE*)in_packet,size);
-	uint32 results;
-	packet.Read(&results,4);
-
-	for (int i = 0; i != results; i++){
+	UINT results = packet.ReadUInt32();
+	for (UINT i = 0; i < results; i++){
 		CSearchFile* toadd = new CSearchFile(&packet, m_nCurrentSearch);
 		toadd->SetClientServerIP(nServerIP);
 		toadd->SetClientServerPort(nServerPort);
@@ -431,21 +475,20 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 		*pbMoreResultsAvailable = false;
 	int iAddData = (int)(packet.GetLength() - packet.GetPosition());
 	if (iAddData == 1){
-		uint8 ucMore;
-		packet.Read(&ucMore, 1);
+		uint8 ucMore = packet.ReadUInt8();
 		if (ucMore == 0x00 || ucMore == 0x01){
 			if (pbMoreResultsAvailable)
 				*pbMoreResultsAvailable = (bool)ucMore;
-			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+			if (thePrefs.GetDebugServerTCPLevel() > 0)
 				Debug("  Search answer(Server %s:%u): More=%u\n", inet_ntoa(*(in_addr*)&nServerIP), nServerPort, ucMore);
 		}
 		else{
-			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+			if (thePrefs.GetDebugServerTCPLevel() > 0)
 				Debug("*** NOTE: ProcessSearchanswer(Server %s:%u): ***AddData: 1 byte: 0x%02x\n", inet_ntoa(*(in_addr*)&nServerIP), nServerPort, ucMore);
 		}
 	}
 	else if (iAddData > 0){
-		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
+		if (thePrefs.GetDebugServerTCPLevel() > 0){
 			Debug("*** NOTE: ProcessSearchanswer(Server %s:%u): ***AddData: %u bytes\n", inet_ntoa(*(in_addr*)&nServerIP), nServerPort, iAddData);
 			DebugHexDump((uint8*)in_packet + packet.GetPosition(), iAddData);
 		}
@@ -455,7 +498,7 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 	return GetResultCount();
 }
 
-uint16 CSearchList::ProcessUDPSearchanswer(CFile& packet, uint32 nServerIP, uint16 nServerPort)
+uint16 CSearchList::ProcessUDPSearchanswer(CFileDataIO& packet, uint32 nServerIP, uint16 nServerPort)
 {
 	CSearchFile* toadd = new CSearchFile(&packet, m_nCurrentSearch, nServerIP, nServerPort);
 	AddToList(toadd);
@@ -535,10 +578,13 @@ CString CSearchList::GetWebList(CString linePattern,int sortby,bool asc) const {
 	return buffer;
 }
 
-void CSearchList::AddFileToDownloadByHash(const uchar* hash,uint8 cat) {
-	for (POSITION pos = list.GetHeadPosition(); pos !=0; ){
-		CSearchFile* sf=list.GetNext(pos);//->GetSearchID() == nSearchID ){
-		if (!md4cmp(hash,sf->GetFileHash())) {
+void CSearchList::AddFileToDownloadByHash(const uchar* hash, uint8 cat)
+{
+	for (POSITION pos = list.GetHeadPosition(); pos != 0; )
+	{
+		CSearchFile* sf = list.GetNext(pos);
+		if (!md4cmp(hash, sf->GetFileHash()))
+		{
 			theApp.downloadqueue->AddSearchToDownload(sf,2,cat);
 			break;
 		}
@@ -571,7 +617,8 @@ CSearchFile* CSearchList::DetachNextFile(uint32 nSearchID) {
 	return result;
 }
 
-bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
+bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
+{
 	//Morph Start - added by AndCycle, SLUGFILLER: searchCatch,itsonlyme: cacheUDPsearchResults
 	// SLUGFILLER: searchCatch
 	CPartFile *file = theApp.downloadqueue->GetFileByID(toadd->GetFileHash());
@@ -605,6 +652,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 		delete toadd;
 		return false;
 	}
+	toadd->InitKnownType();
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
 	{
 		CSearchFile* cur_file = list.GetNext(pos);
@@ -617,10 +665,12 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 			
 			// already a result in list (parent exists)
 			cur_file->AddSources(uAvail);
+			// do not count already available or downloading files for the search result limit
+			if (toadd->GetKnownType() != CSearchFile::Shared && toadd->GetKnownType() != CSearchFile::Downloading)
 			AddResultCount(cur_file->GetSearchID(), toadd->GetFileHash(), uAvail);
-			bool found=false;
 
 			// check if child with same filename exists
+			bool found = false;
 			for (POSITION pos2 = list.GetHeadPosition(); pos2 != NULL && !found ; )
 			{
 				CSearchFile* cur_file2 = list.GetNext(pos2);
@@ -683,7 +733,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 				}
 				else
 				{
-					if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
+					if (thePrefs.GetDebugServerSearchesLevel() > 1)
 					{
 						uint32 nIP = toadd->GetClientID();
 						Debug("Filtered source from search result %s:%u\n", DbgGetClientID(nIP), toadd->GetClientPort());
@@ -715,13 +765,16 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 	
 	// no bounded result found yet -> add as parent to list
 	toadd->SetListParent(NULL);
-	if (list.AddTail(toadd)) {	
+	if (list.AddTail(toadd))
+	{
 		uint16 tempValue = 0;
 		VERIFY( m_foundFilesCount.Lookup(toadd->GetSearchID(),tempValue) );
 		m_foundFilesCount.SetAt(toadd->GetSearchID(),tempValue+1);
 
 		// new search result entry (no parent); add to result count for search result limit
 		UINT uAvail = toadd->GetIntTagValue(FT_SOURCES);
+		// do not count already available or downloading files for the search result limit
+		if (toadd->GetKnownType() != CSearchFile::Shared && toadd->GetKnownType() != CSearchFile::Downloading)
 		AddResultCount(toadd->GetSearchID(), toadd->GetFileHash(), uAvail);
 
 		CSearchFile* neu = new CSearchFile(toadd);
@@ -735,23 +788,104 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 	return true;
 }
 
-CSearchFile* CSearchList::GetSearchFileByHash(const uchar* hash) {
-	for (POSITION pos = list.GetHeadPosition(); pos !=0; ){
-		CSearchFile* sf=list.GetNext(pos);//->GetSearchID() == nSearchID ){
-		if (!md4cmp(hash,sf->GetFileHash())) {
+CSearchFile* CSearchList::GetSearchFileByHash(const uchar* hash) const
+{
+	for (POSITION pos = list.GetHeadPosition(); pos != 0; )
+	{
+		CSearchFile* sf = list.GetNext(pos);
+		if (!md4cmp(hash, sf->GetFileHash()))
 			return sf;
-		}
 	}
 	return NULL;
 }
 
 void CSearchList::AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCount)
 {
-	// do not count already available or downloading files for the search result limit
-	if (theApp.sharedfiles->GetFileByID(hash) || theApp.downloadqueue->GetFileByID(hash))
-		return;
-
 	uint16 tempValue = 0;
 	VERIFY( m_foundSourcesCount.Lookup(nSearchID, tempValue) );
 	m_foundSourcesCount.SetAt(nSearchID, tempValue + nCount);
+}
+
+void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, LPCSTR name, uint32 size, LPCSTR type, uint16 numProperties, ...)
+{
+	va_list args;
+	va_start(args, numProperties);
+
+	CSafeMemFile* temp = new CSafeMemFile(250);
+	uchar fileid[16];
+	fileID->toByteArray(fileid);
+	temp->WriteHash16(fileid);
+	
+	temp->WriteUInt32(0);	// client IP
+	temp->WriteUInt16(0);	// client port
+	
+	// write tag list
+	UINT uFilePosTagCount = temp->GetPosition();
+	uint32 tagcount = 0;
+	temp->WriteUInt32(tagcount); // dummy tag count, will be filled later
+
+	// standard tags
+	CTag tagName(FT_FILENAME, name);
+	tagName.WriteTagToFile(temp);
+	tagcount++;
+
+	CTag tagSize(FT_FILESIZE, size);
+	tagSize.WriteTagToFile(temp);
+	tagcount++;
+
+	if (type != NULL && type[0] != '\0')
+	{
+		CTag tagType(FT_FILETYPE, type);
+		tagType.WriteTagToFile(temp);
+		tagcount++;
+	}
+
+	// additional tags
+	while (numProperties-- > 0)
+	{
+		LPCSTR pszPropType = va_arg(args, LPCSTR);
+		LPCSTR pszPropName = va_arg(args, LPCSTR);
+		LPCSTR pszPropValue = va_arg(args, LPCSTR);
+		if ((int)pszPropType == 2)
+		{
+			if (pszPropValue != NULL && pszPropValue[0] != '\0')
+			{
+				if (strlen(pszPropName) == 1)
+				{
+					CTag tagProp((uint8)*pszPropName, pszPropValue);
+					tagProp.WriteTagToFile(temp);
+				}
+				else
+				{
+					CTag tagProp(pszPropName, pszPropValue);
+					tagProp.WriteTagToFile(temp);
+				}
+				tagcount++;
+			}
+		}
+		else if ((int)pszPropType == 3)
+		{
+			CTag tagProp(pszPropName, (uint32)pszPropValue);
+			tagProp.WriteTagToFile(temp);
+			tagcount++;
+		}
+		else
+		{
+			if (pszPropValue != NULL && pszPropValue[0] != '\0')
+			{
+				CTag tagProp(pszPropName, pszPropValue);
+				tagProp.WriteTagToFile(temp);
+				tagcount++;
+			}
+		}
+	}
+	va_end(args);
+	temp->Seek(uFilePosTagCount, SEEK_SET);
+	temp->WriteUInt32(tagcount);
+	
+	temp->SeekToBegin();
+	CSearchFile* tempFile = new CSearchFile(temp, searchID, 0, 0, 0, true);
+	AddToList(tempFile);
+	
+	delete temp;
 }

@@ -155,8 +155,8 @@ void CPPgBackup::Backup(LPCSTR extensionToBack, BOOL conFirm)
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
 	char buffer[200];
-	//CString szDirPath = CString(theApp.glob_prefs->GetAppDir());
-	CString szDirPath = CString(theApp.glob_prefs->GetConfigDir());
+	//CString szDirPath = CString(thePrefs.GetAppDir());
+	CString szDirPath = CString(thePrefs.GetConfigDir());
 	char szNewPath[MAX_PATH]; 
 
 	SetCurrentDirectory(szDirPath);
@@ -246,9 +246,9 @@ void CPPgBackup::Backup2(LPCSTR extensionToBack)
 	char buffer[200];  
 
 
-	//CString szDirPath = CString(theApp.glob_prefs->GetAppDir());  
-	CString szDirPath = CString(theApp.glob_prefs->GetConfigDir());
-	CString szTempPath = CString(theApp.glob_prefs->GetTempDir());  
+	//CString szDirPath = CString(thePrefs.GetAppDir());  
+	CString szDirPath = CString(thePrefs.GetConfigDir());
+	CString szTempPath = CString(thePrefs.GetTempDir());  
 	char szNewPath[MAX_PATH]; 
 
 	BOOL fFinished = FALSE;     
@@ -324,7 +324,7 @@ void CPPgBackup::Backup2(LPCSTR extensionToBack)
 	{   
 		error = TRUE;  
 	}   
-	SetCurrentDirectory(CString(theApp.glob_prefs->GetConfigDir()));  
+	SetCurrentDirectory(CString(thePrefs.GetConfigDir()));  
 
 	if (error)  
 		MessageBox("Error encountered during backup","Error",MB_OK);  
@@ -357,12 +357,12 @@ void CPPgBackup::LoadSettings(void)
 {
 	if(m_hWnd)
 	{
-		if(theApp.glob_prefs->GetAutoBackup())
+		if(thePrefs.GetAutoBackup())
 			CheckDlgButton(IDC_AUTOBACKUP,1);
 		else
 			CheckDlgButton(IDC_AUTOBACKUP,0);
 		//EastShare Start - Added by Pretender, Double Backup
-		if(theApp.glob_prefs->GetAutoBackup2())
+		if(thePrefs.GetAutoBackup2())
 			CheckDlgButton(IDC_AUTOBACKUP2,1);
 		else
 			CheckDlgButton(IDC_AUTOBACKUP2,0);
@@ -372,10 +372,10 @@ void CPPgBackup::LoadSettings(void)
 
 BOOL CPPgBackup::OnApply()
 {
-	theApp.glob_prefs->SetAutoBackup(IsDlgButtonChecked(IDC_AUTOBACKUP));
+	thePrefs.SetAutoBackup(IsDlgButtonChecked(IDC_AUTOBACKUP));
 	
 	//EastShare Start - Added by Pretender, Double Backup
-	theApp.glob_prefs->SetAutoBackup2(IsDlgButtonChecked(IDC_AUTOBACKUP2)); 
+	thePrefs.SetAutoBackup2(IsDlgButtonChecked(IDC_AUTOBACKUP2)); 
 
 	LoadSettings();
 	SetModified();
@@ -389,13 +389,13 @@ void CPPgBackup::Backup3()
 {
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
-	CString szDirPath = CString(theApp.glob_prefs->GetConfigDir())+"Backup\\";
+	CString szDirPath = CString(thePrefs.GetConfigDir())+"Backup\\";
 	if(!PathFileExists(szDirPath)) return;
 	char szNewPath[MAX_PATH]; 
 
 	SetCurrentDirectory(szDirPath);
 	BOOL error = FALSE;
-	szDirPath = CString(theApp.glob_prefs->GetConfigDir())+"Backup2\\";
+	szDirPath = CString(thePrefs.GetConfigDir())+"Backup2\\";
 
 	BOOL fFinished = FALSE; 
 

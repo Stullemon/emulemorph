@@ -25,7 +25,6 @@
 #include "TitleMenu.h"
 #include "MenuCmds.h"
 #include "PartFile.h"
-#include "DownloadQueue.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -37,7 +36,7 @@ static char THIS_FILE[]=__FILE__;
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialog
 
-int CFileDetailDialog::sm_iLastActivePage;
+LPCTSTR CFileDetailDialog::m_pPshStartPage;
 
 IMPLEMENT_DYNAMIC(CFileDetailDialog, CResizableSheet)
 
@@ -48,6 +47,8 @@ END_MESSAGE_MAP()
 CFileDetailDialog::CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, bool bInvokeCommentsPage)
 {
 	m_file = (*paFiles)[0];
+	for (int i = 0; i < paFiles->GetSize(); i++)
+		m_aKnownFiles.Add((*paFiles)[i]);
 	m_psh.dwFlags &= ~PSH_HASHELP;
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
@@ -64,15 +65,15 @@ CFileDetailDialog::CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, bo
 		m_wndComments.m_psp.dwFlags &= ~PSP_HASHELP;
 		m_wndComments.SetMyfile(m_file);
 		AddPage(&m_wndComments);
+	}
 
-		EED2KFileType eType = GetED2KFileTypeID(m_file->GetFileName());
-		if (eType == ED2KFT_AUDIO || eType == ED2KFT_VIDEO){
-			m_wndVideo.m_psp.dwFlags &= ~PSP_HASHELP;
-			m_wndVideo.SetMyfile(m_file);
-			AddPage(&m_wndVideo);
-		}
+	m_wndVideo.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndVideo.SetMyfile(&m_aKnownFiles);
+	AddPage(&m_wndVideo);
 
-		if (theApp.glob_prefs->IsExtControlsEnabled()){
+	if (paFiles->GetSize() == 1)
+	{
+		if (thePrefs.IsExtControlsEnabled()){
 			m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
 			m_wndMetaData.SetFile(m_file);
 			AddPage(&m_wndMetaData);
@@ -89,7 +90,7 @@ CFileDetailDialog::~CFileDetailDialog()
 void CFileDetailDialog::OnDestroy()
 {
 	if (!m_bInvokeCommentsPage)
-		sm_iLastActivePage = GetActiveIndex();
+		m_pPshStartPage = GetPage(GetActiveIndex())->m_psp.pszTemplate;
 	CResizableSheet::OnDestroy();
 }
 
@@ -101,10 +102,19 @@ BOOL CFileDetailDialog::OnInitDialog()
 	EnableSaveRestore(_T("FileDetailDialog")); // call this after(!) OnInitDialog
 	SetWindowText(GetResString(IDS_FD_TITLE));
 
+	LPCTSTR pPshStartPage = m_pPshStartPage;
 	if (m_bInvokeCommentsPage)
-		SetActivePage(2);
-	else if (sm_iLastActivePage < GetPageCount())
-		SetActivePage(sm_iLastActivePage);
+		m_pPshStartPage = MAKEINTRESOURCE(IDD_COMMENTLST);
+
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		CPropertyPage* pPage = GetPage(i);
+		if (pPage->m_psp.pszTemplate == pPshStartPage)
+		{
+			SetActivePage(i);
+			break;
+		}
+	}
 
 	return bResult;
 }
@@ -173,6 +183,10 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	// properties which won't change during the dialog is open - no need to fresh them and mess with the focus
 	if (m_paFiles->GetSize() == 1)
 	{
+		// if file is completed, we output the 'file path' and not the 'part.met file path'
+		if ((*m_paFiles)[0]->GetStatus(true) == PS_COMPLETE)
+			GetDlgItem(IDC_FD_X2)->SetWindowText(GetResString(IDS_DL_FILENAME));
+
 		SetDlgItemText(IDC_FNAME, (*m_paFiles)[0]->GetFileName());
 		SetDlgItemText(IDC_METFILE, (*m_paFiles)[0]->GetFullName());
 		SetDlgItemText(IDC_FHASH, md4str((*m_paFiles)[0]->GetFileHash()));
@@ -218,7 +232,7 @@ void CFileDetailDialogInfo::RefreshData()
 		if ((*m_paFiles)[0]->GetCrFileDate() != NULL){
 			time_t fromtime = ((*m_paFiles)[0]->GetStatus() != PS_COMPLETE) ? time(NULL) : (*m_paFiles)[0]->GetFileDate();
 			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
-						(*m_paFiles)[0]->GetCrCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
+						(*m_paFiles)[0]->GetCrCFileDate().Format(thePrefs.GetDateTimeFormat()),
 						CastSecondsToLngHM(fromtime - (*m_paFiles)[0]->GetCrFileDate()));
 		}
 		else
@@ -231,7 +245,7 @@ void CFileDetailDialogInfo::RefreshData()
 			str.Format(GetResString(IDS_UNKNOWN));
 		else{
 			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
-						(*m_paFiles)[0]->lastseencomplete.Format(theApp.glob_prefs->GetDateTimeFormat()),
+						(*m_paFiles)[0]->lastseencomplete.Format(thePrefs.GetDateTimeFormat()),
 						CastSecondsToLngHM(time(NULL) - safe_mktime(ptimLastSeenComplete)));
 		}
 		SetDlgItemText(IDC_LASTSEENCOMPL, str);
@@ -239,7 +253,7 @@ void CFileDetailDialogInfo::RefreshData()
 		// last receive
 		if ((*m_paFiles)[0]->GetFileDate() != NULL && (*m_paFiles)[0]->GetRealFileSize() > 0){
 			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
-						(*m_paFiles)[0]->GetCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
+						(*m_paFiles)[0]->GetCFileDate().Format(thePrefs.GetDateTimeFormat()),
 						CastSecondsToLngHM(time(NULL) - (*m_paFiles)[0]->GetFileDate()));
 		}
 		else
@@ -297,19 +311,27 @@ void CFileDetailDialogInfo::RefreshData()
 	else
 		SetDlgItemText(IDC_HASHSET, _T(""));
 
-	str.Format(_T("%s (%.2f%%)"), CastItoXBytes(uCompleted), uFileSize!=0 ? (uCompleted * 100.0 / uFileSize) : 0.0);
+	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompleted), uFileSize!=0 ? (uCompleted * 100.0 / uFileSize) : 0.0);
 	SetDlgItemText(IDC_COMPLSIZE, str);
 
-	str.Format(_T("%.2f %s"), uDataRate/1024.0, GetResString(IDS_KBYTESEC));
+	str.Format(_T("%.1f %s"), uDataRate/1024.0, GetResString(IDS_KBYTESEC));
 	SetDlgItemText(IDC_DATARATE, str);
 
 	str.Format(_T("%s  (%s %s);  %s %s"), CastItoXBytes(uFileSize), GetFormatedUInt64(uFileSize), GetResString(IDS_BYTES), GetResString(IDS_ONDISK), CastItoXBytes(uRealFileSize));
 	SetDlgItemText(IDC_FSIZE, str);
 
 	SetDlgItemText(IDC_TRANSFERED, CastItoXBytes(uTransfered));
-	SetDlgItemText(IDC_CORRUPTED, CastItoXBytes(uCorrupted));
-	SetDlgItemInt(IDC_RECOVERED, uRecovered, FALSE);
-	SetDlgItemText(IDC_COMPRESSION, CastItoXBytes(uCompression));
+
+	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCorrupted), uTransfered!=0 ? (uCorrupted * 100.0 / uTransfered) : 0.0);
+	SetDlgItemText(IDC_CORRUPTED, str);
+
+	str.Format("%i ",uRecovered);
+	str.Append(GetResString(IDS_FD_PARTS));
+	str.Remove(':');	
+	SetDlgItemText(IDC_RECOVERED, str);
+
+	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompression), uTransfered!=0 ? (uCompression * 100.0 / uTransfered) : 0.0);
+	SetDlgItemText(IDC_COMPRESSION, str);
 
 	str.Format(GetResString(IDS_SOURCESINFO), uSources, uValidSources, uNNPSources, uA4AFSources);
 	SetDlgItemText(IDC_SOURCECOUNT, str);
@@ -397,20 +419,19 @@ void CFileDetailDialogName::OnTimer(UINT nIDEvent)
 void CFileDetailDialogName::DoDataExchange(CDataExchange* pDX)
 {
 	CResizablePage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LISTCTRLFILENAMES, pmyListCtrl);
 }
 
 BOOL CFileDetailDialogName::OnInitDialog()
 {
 	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
+	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
 	CIni ini(strIniFile, FILE_DETAIL_PREF_INI_SECTION);
-	m_aiColWidths[0] = ini.GetInt("Col0Width", 340);
-	m_aiColWidths[1] = ini.GetInt("Col1Width", 60);
 
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
-	pmyListCtrl = (CListCtrl*)GetDlgItem(IDC_LISTCTRLFILENAMES);
-	pmyListCtrl->SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	//pmyListCtrl = (CListCtrl*)GetDlgItem(IDC_LISTCTRLFILENAMES);
+//	pmyListCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 
 	AddAnchor(IDC_FD_SN, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_LISTCTRLFILENAMES, TOP_LEFT, BOTTOM_RIGHT);
@@ -418,6 +439,16 @@ BOOL CFileDetailDialogName::OnInitDialog()
 	AddAnchor(IDC_BUTTONSTRIP, BOTTOM_RIGHT);
 	AddAnchor(IDC_RENAME, BOTTOM_RIGHT);
 	AddAnchor(IDC_FILENAME, BOTTOM_LEFT, BOTTOM_RIGHT);
+
+	pmyListCtrl.InsertColumn(0, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 380); 
+	pmyListCtrl.InsertColumn(1, GetResString(IDS_DL_SOURCES), LVCFMT_LEFT, 80); 
+	pmyListCtrl.LoadSettings(CPreferences::tableFilenames);
+
+	m_sortindex = thePrefs.GetColumnSortItem(CPreferences::tableFilenames);
+	m_sortorder = thePrefs.GetColumnSortAscending(CPreferences::tableFilenames);
+
+	pmyListCtrl.SetSortArrow(m_sortindex, m_sortorder);
+	pmyListCtrl.SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
 
 	Localize();
 	RefreshData();
@@ -440,18 +471,13 @@ void CFileDetailDialogName::RefreshData()
 
 void CFileDetailDialogName::OnDestroy()
 {
+	pmyListCtrl.SaveSettings(CPreferences::tableFilenames);
 
-	for (int i=0;i<pmyListCtrl->GetItemCount();++i) {
+	for (int i=0;i<pmyListCtrl.GetItemCount();++i) {
 
-		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(i);
+		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl.GetItemData(i);
 		delete item;
 	}
-
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
-	CIni ini(strIniFile, FILE_DETAIL_PREF_INI_SECTION);
-	ini.WriteInt("Col0Width", pmyListCtrl->GetColumnWidth(0));
-	ini.WriteInt("Col1Width", pmyListCtrl->GetColumnWidth(1));
 
 	if (m_timer){
 		KillTimer(m_timer);
@@ -461,7 +487,7 @@ void CFileDetailDialogName::OnDestroy()
 
 void CFileDetailDialogName::Localize()
 {
-	if (theApp.glob_prefs->GetLanguageID() != MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)){
+	if (thePrefs.GetLanguageID() != MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)){
 	    GetDlgItem(IDC_TAKEOVER)->SetWindowText(GetResString(IDS_TAKEOVER));
 	    GetDlgItem(IDC_BUTTONSTRIP)->SetWindowText(GetResString(IDS_CLEANUP));
 	    GetDlgItem(IDC_RENAME)->SetWindowText(GetResString(IDS_RENAME));
@@ -475,18 +501,11 @@ void CFileDetailDialogName::FillSourcenameList()
 	info.flags = LVFI_STRING; 
 	int itempos; 
 
-	if (pmyListCtrl->GetHeaderCtrl()->GetItemCount() < 2)
-	{
-		pmyListCtrl->DeleteColumn(0); 
-		pmyListCtrl->InsertColumn(0, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, m_aiColWidths[0], -1); 
-		pmyListCtrl->InsertColumn(1, GetResString(IDS_DL_SOURCES), LVCFMT_LEFT, m_aiColWidths[1], 1); 
-	}
-
 	CString strText; 
 
 	// reset
-	for (int i=0;i<pmyListCtrl->GetItemCount();i++){
-		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(i);
+	for (int i=0;i<pmyListCtrl.GetItemCount();i++){
+		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl.GetItemData(i);
 		item->count=0;
 	}
 
@@ -498,47 +517,56 @@ void CFileDetailDialogName::FillSourcenameList()
 			continue;
 
 		info.psz = cur_src->GetClientFilename(); 
-		if ((itempos=pmyListCtrl->FindItem(&info, -1)) == -1)
+		if ((itempos=pmyListCtrl.FindItem(&info, -1)) == -1)
 		{ 
 			FCtrlItem_Struct* newitem= new FCtrlItem_Struct();
 			newitem->count=1;
 			newitem->filename=cur_src->GetClientFilename();
 			
-			pmyListCtrl->InsertItem(LVIF_TEXT|LVIF_PARAM,0,cur_src->GetClientFilename(),0,0,0,(LPARAM)newitem);
-			pmyListCtrl->SetItemText(0, 1, "1"); 
+			pmyListCtrl.InsertItem(LVIF_TEXT|LVIF_PARAM,0,cur_src->GetClientFilename(),0,0,0,(LPARAM)newitem);
+			pmyListCtrl.SetItemText(0, 1, "1"); 
 		}
 		else
 		{
-			FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(itempos);
+			FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl.GetItemData(itempos);
 			item->count+=1;
 			strText.Format("%i",item->count);
-			pmyListCtrl->SetItemText(itempos, 1,strText ); 
+			pmyListCtrl.SetItemText(itempos, 1,strText ); 
 		} 
 	} 
 
 	// remove 0'er
-	for (int i=0;i<pmyListCtrl->GetItemCount();i++)
+	for (int i=0;i<pmyListCtrl.GetItemCount();i++)
 	{
-		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(i);
+		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl.GetItemData(i);
 		if (item && item->count==0)
 		{
 			delete item;
-			pmyListCtrl->DeleteItem(i);
+			pmyListCtrl.DeleteItem(i);
 			i=0;
 		}
 	}
 
-	pmyListCtrl->SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
+	pmyListCtrl.SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
 }
 
 void CFileDetailDialogName::TakeOver()
 {
 	int itemPosition; 
 
-	if (pmyListCtrl->GetSelectedCount() > 0) {
-		POSITION pos = pmyListCtrl->GetFirstSelectedItemPosition(); 
-		itemPosition = pmyListCtrl->GetNextSelectedItem(pos); 
-		GetDlgItem(IDC_FILENAME)->SetWindowText(pmyListCtrl->GetItemText(itemPosition,0));
+	if (pmyListCtrl.GetSelectedCount() > 0) {
+		POSITION pos = pmyListCtrl.GetFirstSelectedItemPosition(); 
+		itemPosition = pmyListCtrl.GetNextSelectedItem(pos); 
+		GetDlgItem(IDC_FILENAME)->SetWindowText(pmyListCtrl.GetItemText(itemPosition,0));
+	} 
+}
+
+void CFileDetailDialogName::Copy()
+{
+	POSITION pos = pmyListCtrl.GetFirstSelectedItemPosition();
+	if (pos){
+		int iItem = pmyListCtrl.GetNextSelectedItem(pos);
+		theApp.CopyTextToClipboard(pmyListCtrl.GetItemText(iItem, 0));
 	} 
 }
 
@@ -557,7 +585,8 @@ void CFileDetailDialogName::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 	if (m_sortindex!=pNMLV->iSubItem) m_sortorder=1; else m_sortorder=!(bool)m_sortorder;
 	m_sortindex=pNMLV->iSubItem;
 
-	pmyListCtrl->SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
+	pmyListCtrl.SetSortArrow(m_sortindex, m_sortorder);
+	pmyListCtrl.SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
 
 	*pResult = 0;
 }
@@ -585,7 +614,7 @@ void CFileDetailDialogName::OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult)
 void CFileDetailDialogName::OnNMRclickList(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	UINT flag = MF_STRING;
-	if (pmyListCtrl->GetSelectionMark() == (-1))
+	if (pmyListCtrl.GetSelectionMark() == (-1))
 		flag = MF_GRAYED;
 
 	POINT point;
@@ -593,6 +622,7 @@ void CFileDetailDialogName::OnNMRclickList(NMHDR *pNMHDR, LRESULT *pResult)
 	CTitleMenu popupMenu;
 	popupMenu.CreatePopupMenu();
 	popupMenu.AppendMenu(flag,MP_MESSAGE, GetResString(IDS_TAKEOVER));
+	popupMenu.AppendMenu(flag,MP_COPYSELECTED, GetResString(IDS_COPY));
 	popupMenu.AppendMenu(MF_STRING,MP_RESTORE, GetResString(IDS_SV_UPDATE));
 	popupMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 	VERIFY( popupMenu.DestroyMenu() );
@@ -602,12 +632,15 @@ void CFileDetailDialogName::OnNMRclickList(NMHDR *pNMHDR, LRESULT *pResult)
 
 BOOL CFileDetailDialogName::OnCommand(WPARAM wParam,LPARAM lParam )
 {
-	if (pmyListCtrl->GetSelectionMark() != (-1))
+	if (pmyListCtrl.GetSelectionMark() != (-1))
 	{
 		switch (wParam)
 		{
 		case MP_MESSAGE:
 			TakeOver();
+			return true;
+		case MP_COPYSELECTED:
+			Copy();
 			return true;
 		case MP_RESTORE:
 			FillSourcenameList();
@@ -625,7 +658,6 @@ void CFileDetailDialogName::OnRename()
 	m_file->SetFileName(NewFileName, true); 
 	m_file->UpdateDisplayedInfo();
 	m_file->SavePartFile(); 
-	theApp.downloadqueue->UpdatePNRFile(m_file); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 } 
 
 BOOL CFileDetailDialogName::PreTranslateMessage(MSG* pMsg) 

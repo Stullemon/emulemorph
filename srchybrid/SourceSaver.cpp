@@ -45,7 +45,7 @@ CSourceSaver::~CSourceSaver(void)
 bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return false if sources not saved
 {
 	CString slsfilepath;
-	slsfilepath.Format("%s\\%s\\%s.txtsrc", theApp.glob_prefs->GetTempDir(), "Source Lists", file->GetPartMetFileName());
+	slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
 
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
@@ -79,7 +79,7 @@ void CSourceSaver::DeleteFile(CPartFile* file)
 {
 	CString slsfilepath;
 	// khaos::kmod+ Source Lists directory
-	slsfilepath.Format("%s\\%s\\%s.txtsrc", theApp.glob_prefs->GetTempDir(), "Source Lists", file->GetPartMetFileName());
+	slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
 	if (remove(slsfilepath)) if (errno != ENOENT)
 		theApp.emuledlg->AddLogLine(true, "Failed to delete 'Temp\\Source Lists\\%s.txtsrc', you will need to do this by hand.", file->GetPartMetFileName());    
 }
@@ -134,7 +134,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, CSt
 void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources) 
 {
 	for (POSITION pos = sources->GetHeadPosition(); pos; sources->GetNext(pos)) {
-		if (theApp.glob_prefs->GetMaxSourcePerFile() <= file->GetSourceCount())
+		if (thePrefs.GetMaxSourcePerFile() <= file->GetSourceCount())
 			return;
     
 		CSourceData* cur_src = sources->GetAt(pos);

@@ -551,7 +551,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 
 	if (theApp.emuledlg->IsRunning()) 
 	{
-		if (!theApp.glob_prefs->IsGraphRecreateDisabled()) {
+		if (!thePrefs.IsGraphRecreateDisabled()) {
 			if(m_nRedrawTimer)
 				KillTimer(m_nRedrawTimer);
 			VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) != NULL ); // reduce flickering

@@ -82,9 +82,9 @@ BOOL CPPgDirectories::OnInitDialog()
 
 void CPPgDirectories::LoadSettings(void)
 {
-	GetDlgItem(IDC_INCFILES)->SetWindowText(app_prefs->prefs->incomingdir);
-	GetDlgItem(IDC_TEMPFILES)->SetWindowText(app_prefs->prefs->tempdir);
-	m_ShareSelector.SetSharedDirectories(&app_prefs->shareddir_list);
+	GetDlgItem(IDC_INCFILES)->SetWindowText(thePrefs.incomingdir);
+	GetDlgItem(IDC_TEMPFILES)->SetWindowText(thePrefs.tempdir);
+	m_ShareSelector.SetSharedDirectories(&thePrefs.shareddir_list);
 	FillUncList();
 }
 
@@ -106,7 +106,7 @@ void CPPgDirectories::OnBnClickedSeltempdir()
 
 BOOL CPPgDirectories::OnApply()
 {
-	CString testdirchanged=app_prefs->GetTempDir();
+	CString testdirchanged=thePrefs.GetTempDir();
 
 	CString strIncomingDir;
 	GetDlgItemText(IDC_INCFILES, strIncomingDir);
@@ -118,27 +118,27 @@ BOOL CPPgDirectories::OnApply()
 
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
-	_sntprintf(app_prefs->prefs->incomingdir, ARRSIZE(app_prefs->prefs->incomingdir), _T("%s"), strIncomingDir);
-	MakeFoldername(app_prefs->prefs->incomingdir);
-	sprintf(app_prefs->GetCategory(0)->incomingpath,"%s",app_prefs->prefs->incomingdir);
+	_sntprintf(thePrefs.incomingdir, ARRSIZE(thePrefs.incomingdir), _T("%s"), strIncomingDir);
+	MakeFoldername(thePrefs.incomingdir);
+	sprintf(thePrefs.GetCategory(0)->incomingpath,"%s",thePrefs.incomingdir);
 
-	_sntprintf(app_prefs->prefs->tempdir, ARRSIZE(app_prefs->prefs->tempdir), _T("%s"), strTempDir);
-	MakeFoldername(app_prefs->prefs->tempdir);
+	_sntprintf(thePrefs.tempdir, ARRSIZE(thePrefs.tempdir), _T("%s"), strTempDir);
+	MakeFoldername(thePrefs.tempdir);
 
-	app_prefs->shareddir_list.RemoveAll();
+	thePrefs.shareddir_list.RemoveAll();
 
-	m_ShareSelector.GetSharedDirectories(&app_prefs->shareddir_list);
+	m_ShareSelector.GetSharedDirectories(&thePrefs.shareddir_list);
 	for (int i=0;i<m_uncfolders->GetItemCount();++i){
 		CString unc;
 		unc=m_uncfolders->GetItemText(i,0);
-		app_prefs->shareddir_list.AddTail(unc);
+		thePrefs.shareddir_list.AddTail(unc);
 	}
 
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 	theApp.emuledlg->sharedfileswnd->Reload();
 
-	if (testdirchanged.CompareNoCase(app_prefs->GetTempDir())!=0)
+	if (testdirchanged.CompareNoCase(thePrefs.GetTempDir())!=0)
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
 	
 	SetModified(0);
@@ -169,8 +169,8 @@ void CPPgDirectories::Localize(void)
 void CPPgDirectories::FillUncList(void) {
 	m_uncfolders->DeleteAllItems();
 
-	for (POSITION pos = app_prefs->shareddir_list.GetHeadPosition();pos != 0;app_prefs->shareddir_list.GetNext(pos)){
-		CString folder=app_prefs->shareddir_list.GetAt(pos);
+	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;){
+		CString folder = thePrefs.shareddir_list.GetNext(pos);
 		if (folder.Left(2)=="\\\\") {
 			m_uncfolders->InsertItem(0,folder);
 		}
@@ -194,14 +194,13 @@ void CPPgDirectories::OnBnClickedAddUNC()
 
 	if (unc.Right(1)=="\\") unc.Delete(unc.GetLength()-1,1);
 
-	CString test;
-	for (POSITION pos = app_prefs->shareddir_list.GetHeadPosition();pos != 0;app_prefs->shareddir_list.GetNext(pos)){
-		test=app_prefs->shareddir_list.GetAt(pos);
-		if (unc.CompareNoCase(test)==0) return;
+	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;){
+		if (unc.CompareNoCase(thePrefs.shareddir_list.GetNext(pos))==0)
+			return;
 	}
 	for (int posi = 0; posi<m_uncfolders->GetItemCount();++posi){
-		test=m_uncfolders->GetItemText(posi,0);
-		if (unc.CompareNoCase(test)==0) return;
+		if (unc.CompareNoCase(m_uncfolders->GetItemText(posi,0))==0)
+			return;
 	}
 
 	m_uncfolders->InsertItem(m_uncfolders->GetItemCount(),unc);

@@ -23,10 +23,8 @@
 #include "kademlia/kademlia/kademlia.h"
 #include "kademlia/kademlia/prefs.h"
 #include "kademlia/utils/MiscUtils.h"
-#include "kademlia/routing/Timer.h"
 #include "OtherFunctions.h"
 #include "emuledlg.h"
-#include "KademliaMain.h"
 #include "WebServer.h"
 #include "CustomAutoComplete.h"
 #include "Server.h"
@@ -55,6 +53,7 @@ CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
 	icon_srvlist = NULL;
 	memset(&m_cfDef, 0, sizeof m_cfDef);
 	memset(&m_cfBold, 0, sizeof m_cfBold);
+	StatusSelector.m_bCloseable = false;
 }
 
 CServerWnd::~CServerWnd()
@@ -100,24 +99,23 @@ BOOL CServerWnd::OnInitDialog()
 	}
 	TCITEM newitem;
 	CString name;
-	name.Format("%s", GetResString(IDS_SV_SERVERINFO) );
+	name = GetResString(IDS_SV_SERVERINFO);
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
-	newitem.pszText = name.GetBuffer();
-	newitem.cchTextMax = (int)name.GetLength()+1;
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 1;
-	StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
-	name.Format("%s", GetResString(IDS_SV_LOG));
+	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneServerInfo );
+
+	name = GetResString(IDS_SV_LOG);
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
-	newitem.pszText = name.GetBuffer();
-	newitem.cchTextMax = (int)name.GetLength()+1;
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
-	StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
+	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneLog );
+
 	name=SZ_DEBUG_LOG_TITLE;
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
-	newitem.pszText = name.GetBuffer();
-	newitem.cchTextMax = (int)name.GetLength()+1;
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
-	StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
+	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneVerboseLog );
 
 	AddAnchor(IDC_SERVLIST,TOP_LEFT, CSize(100,50));
 	AddAnchor(IDC_LOGBOX, CSize(0,50), BOTTOM_RIGHT);
@@ -139,6 +137,8 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_TAB3,CSize(0,50), BOTTOM_RIGHT);
 	AddAnchor(IDC_LOGRESET,CSize(100,50)); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
 	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
+	AddAnchor(IDC_DD,TOP_RIGHT);
+
 	if (servermsgbox->m_hWnd)
 		AddAnchor(*servermsgbox, CSize(0,50), BOTTOM_RIGHT);
 	debug = true;
@@ -150,13 +150,13 @@ BOOL CServerWnd::OnInitDialog()
 		servermsgbox->ShowWindow(SW_SHOW);
 
 	// optional: restore last used log pane
-	if (theApp.glob_prefs->GetRestoreLastLogPane())
+	if (thePrefs.GetRestoreLastLogPane())
 	{
-		if (theApp.glob_prefs->GetLastLogPaneID() >= 0 && theApp.glob_prefs->GetLastLogPaneID() < StatusSelector.GetItemCount())
+		if (thePrefs.GetLastLogPaneID() >= 0 && thePrefs.GetLastLogPaneID() < StatusSelector.GetItemCount())
 		{
 			int iCurSel = StatusSelector.GetCurSel();
-			StatusSelector.SetCurSel(theApp.glob_prefs->GetLastLogPaneID());
-			if (theApp.glob_prefs->GetLastLogPaneID() == StatusSelector.GetCurSel())
+			StatusSelector.SetCurSel(thePrefs.GetLastLogPaneID());
+			if (thePrefs.GetLastLogPaneID() == StatusSelector.GetCurSel())
 				UpdateLogTabSelection();
 			else
 				StatusSelector.SetCurSel(iCurSel);
@@ -186,12 +186,18 @@ BOOL CServerWnd::OnInitDialog()
 		m_cfBold.dwEffects |= CFE_BOLD;
 	}
 
-	if (theApp.glob_prefs->GetUseAutocompletion()){
+	if (thePrefs.GetUseAutocompletion()){
 		m_pacServerMetURL = new CCustomAutoComplete();
 		m_pacServerMetURL->AddRef();
 		if (m_pacServerMetURL->Bind(::GetDlgItem(m_hWnd, IDC_SERVERMETURL), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-			m_pacServerMetURL->LoadList(CString(theApp.glob_prefs->GetConfigDir()) +  _T("\\") SERVERMET_STRINGS_PROFILE);
+			m_pacServerMetURL->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") SERVERMET_STRINGS_PROFILE);
+		if (theApp.emuledlg->m_fontMarlett.m_hObject){
+			GetDlgItem(IDC_DD)->SetFont(&theApp.emuledlg->m_fontMarlett);
+			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
+		}
 	}
+	else
+		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
 
 	InitWindowStyles(this);
 
@@ -219,7 +225,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
 	}
 
 	CString strTempFilename;
-	strTempFilename.Format("%stemp-%d-server.met", theApp.glob_prefs->GetConfigDir(), ::GetTickCount());
+	strTempFilename.Format("%stemp-%d-server.met", thePrefs.GetConfigDir(), ::GetTickCount());
 
 	// step2 - try to download server.met
 	CHttpDownloadDlg dlgDownload;
@@ -258,10 +264,9 @@ void CServerWnd::SetAllIcons()
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.Add(CTempIconLoader("Log"));
 	iml.Add(CTempIconLoader("ServerInfo"));
-	CImageList* piml = StatusSelector.SetImageList(&iml);
-	if (piml)
-		piml->DeleteImageList();
-	iml.Detach();
+	StatusSelector.SetImageList(&iml);
+	m_imlLogPanes.DeleteImageList();
+	m_imlLogPanes.Attach(iml.Detach());
 
 	if (icon_srvlist)
 		VERIFY( DestroyIcon(icon_srvlist) );
@@ -273,8 +278,8 @@ void CServerWnd::Localize()
 {
 	serverlistctrl.Localize();
 
-	if (theApp.glob_prefs->GetLanguageID() != m_uLangID){
-		m_uLangID = theApp.glob_prefs->GetLanguageID();
+	if (thePrefs.GetLanguageID() != m_uLangID){
+		m_uLangID = thePrefs.GetLanguageID();
 	    GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST));
 	    GetDlgItem(IDC_SSTATIC)->SetWindowText(GetResString(IDS_SV_NEWSERVER));
 	    m_ctrlNewServerFrm.SetText(GetResString(IDS_SV_NEWSERVER));
@@ -293,16 +298,18 @@ void CServerWnd::Localize()
 	    CString name;
 	    name = GetResString(IDS_SV_SERVERINFO);
 	    item.mask = TCIF_TEXT;
-	    item.pszText = name.GetBuffer();
-	    StatusSelector.SetItem( 0, &item);
+		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		StatusSelector.SetItem(PaneServerInfo, &item);
+
 	    name = GetResString(IDS_SV_LOG);
 	    item.mask = TCIF_TEXT;
-	    item.pszText = name.GetBuffer();
-	    StatusSelector.SetItem( 1, &item);
+		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		StatusSelector.SetItem(PaneLog, &item);
+
 	    name = SZ_DEBUG_LOG_TITLE;
 	    item.mask = TCIF_TEXT;
-	    item.pszText = name.GetBuffer();
-	    StatusSelector.SetItem( 2, &item);
+		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
+		StatusSelector.SetItem(PaneVerboseLog, &item);
 	}
 
 	UpdateLogTabSelection();
@@ -318,6 +325,7 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_NOTIFY(EN_LINK, 123, OnEnLinkServerBox)
 	ON_BN_CLICKED(IDC_ED2KCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
+	ON_BN_CLICKED(IDC_DD,OnDDClicked)
 END_MESSAGE_MAP()
 
 
@@ -378,11 +386,11 @@ void CServerWnd::OnBnClickedAddserver()
 	CServer* toadd = new CServer(uPort,serveraddr.GetBuffer());
 
 	// Barry - Default all manually added servers to high priority
-	if( theApp.glob_prefs->GetManualHighPrio() )
+	if( thePrefs.GetManualHighPrio() )
 		toadd->SetPreference(SRV_PR_HIGH);
 
-	int32 namelen = GetDlgItem(IDC_SNAME)->GetWindowTextLength();
-	if (namelen){
+	int namelen = GetDlgItem(IDC_SNAME)->GetWindowTextLength();
+	if (namelen > 0){
 		char* servername = new char[namelen+2];
 		GetDlgItem(IDC_SNAME)->GetWindowText(servername,namelen+1);
 		toadd->SetListName(servername);
@@ -412,15 +420,15 @@ void CServerWnd::OnBnClickedUpdateservermetfromurl()
 	GetDlgItem(IDC_SERVERMETURL)->GetWindowText(strURL);
 	
 	if (strURL==""){
-		if (theApp.glob_prefs->adresses_list.IsEmpty()){
+		if (thePrefs.adresses_list.IsEmpty()){
 			AddLogLine(true, GetResString(IDS_SRV_NOURLAV) );
 			return;
 		}
 		else
 		{
-			POSITION Pos = theApp.glob_prefs->adresses_list.GetHeadPosition(); 
+			POSITION Pos = thePrefs.adresses_list.GetHeadPosition(); 
 			while ((!bDownloaded) && (Pos != NULL)){
-				strURL = theApp.glob_prefs->adresses_list.GetNext(Pos).GetBuffer(); 
+				strURL = thePrefs.adresses_list.GetNext(Pos).GetBuffer(); 
 				bDownloaded=UpdateServerMetFromURL(strURL);
 			}
 		}
@@ -429,19 +437,23 @@ void CServerWnd::OnBnClickedUpdateservermetfromurl()
 		UpdateServerMetFromURL(strURL);
 }
 
-void CServerWnd::OnBnClickedResetLog() {
+void CServerWnd::OnBnClickedResetLog()
+{
 	int cur_sel = StatusSelector.GetCurSel();
-	if (cur_sel == (-1))
+	if (cur_sel == -1)
 		return;
-	if( cur_sel == 2 ){
+	if (cur_sel == PaneVerboseLog)
+	{
 		theApp.emuledlg->ResetDebugLog();
 		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
 	}
-	if( cur_sel == 1 ){
+	if (cur_sel == PaneLog)
+	{
 		theApp.emuledlg->ResetLog();
 		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
 	}
-	if( cur_sel == 0 ){
+	if (cur_sel == PaneServerInfo)
+	{
 		servermsgbox->Reset();
 		// the statusbar does not contain any server log related messages, so it's not cleared.
 	}
@@ -453,50 +465,60 @@ void CServerWnd::OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CServerWnd::UpdateLogTabSelection() {
+void CServerWnd::UpdateLogTabSelection()
+{
 	int cur_sel = StatusSelector.GetCurSel();
-	if (cur_sel == (-1))
+	if (cur_sel == -1)
 		return;
-	if( cur_sel == 2 ){
+	if (cur_sel == PaneVerboseLog)
+	{
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
 		debuglog.ShowWindow(SW_SHOW);
+		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
-	if( cur_sel == 1 ){
+	if (cur_sel == PaneLog)
+	{
 		debuglog.ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_SHOW);
+		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
-	if( cur_sel == 0 ){
+	if (cur_sel == PaneServerInfo)
+	{
 		debuglog.ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_SHOW);
 		servermsgbox->Invalidate();
+		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 }
 
-void CServerWnd::ToggleDebugWindow(){
+void CServerWnd::ToggleDebugWindow()
+{
 	int cur_sel = StatusSelector.GetCurSel();
-	if( theApp.glob_prefs->GetVerbose() && debug == false ){
+	if (thePrefs.GetVerbose() && !debug)
+	{
 		TCITEM newitem;
 		CString name;
 		name = SZ_DEBUG_LOG_TITLE;
 		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
-		newitem.pszText = name.GetBuffer();
-		newitem.cchTextMax = (int)name.GetLength()+1;
+		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		newitem.iImage = 0;
 		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
 		debug = true;
 	}
-	else if( !theApp.glob_prefs->GetVerbose() && debug == true ) {
-		if( cur_sel == 2 ){
-			StatusSelector.SetCurSel(1);
+	else if (!thePrefs.GetVerbose() && debug)
+	{
+		if (cur_sel == PaneVerboseLog)
+		{
+			StatusSelector.SetCurSel(PaneLog);
 			StatusSelector.SetFocus();
 		}
 		debuglog.ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_SHOW);
-		StatusSelector.DeleteItem(2);
+		StatusSelector.DeleteItem(PaneVerboseLog);
 		debug = false;
 	}
 }
@@ -528,7 +550,7 @@ void CServerWnd::UpdateMyInfo() {
 		if (theApp.serverconnect->IsLowID())
 			buffer = GetResString(IDS_UNKNOWN);
 		else
-			buffer.Format(_T("%s:%i"), ipstr(theApp.serverconnect->GetClientID()), theApp.glob_prefs->GetPort());
+			buffer.Format(_T("%s:%i"), ipstr(theApp.serverconnect->GetClientID()), thePrefs.GetPort());
 		m_MyInfo << "\t" << buffer << "\r\n";
 
 		m_MyInfo << GetResString(IDS_ID) << "\t";
@@ -557,8 +579,8 @@ void CServerWnd::UpdateMyInfo() {
 			m_MyInfo << GetResString(IDS_DESCRIPTION) << ":\t" << srv->GetDescription() << "\r\n";
 			m_MyInfo << GetResString(IDS_IP) << ":\t" << srv->GetAddress() << ":" << srv->GetPort() << "\r\n";
 			m_MyInfo << GetResString(IDS_VERSION) << ":\t" << srv->GetVersion() << "\r\n";
-			m_MyInfo << GetResString(IDS_UUSERS) << ":\t" << srv->GetUsers() << "\r\n";
-			m_MyInfo << GetResString(IDS_PW_FILES) << ":\t" << srv->GetFiles() << "\r\n";
+			m_MyInfo << GetResString(IDS_UUSERS) << ":\t" << GetFormatedUInt(srv->GetUsers()) << "\r\n";
+			m_MyInfo << GetResString(IDS_PW_FILES) << ":\t" << GetFormatedUInt(srv->GetFiles()) << "\r\n";
 		}
 	}
 	m_MyInfo << "\r\n";
@@ -571,22 +593,22 @@ void CServerWnd::UpdateMyInfo() {
 	m_MyInfo.SetSelectionCharFormat(m_cfDef);
 	
 	m_MyInfo << GetResString(IDS_STATUS) << ":\t";
-	if(theApp.kademlia->isConnected()){
-		if(theApp.kademlia->isFirewalled())
+	if(Kademlia::CKademlia::isConnected()){
+		if(Kademlia::CKademlia::isFirewalled())
 			m_MyInfo << GetResString(IDS_FIREWALLED);
 		else
-			m_MyInfo << "Open";
+			m_MyInfo << GetResString(IDS_KADOPEN);
 		m_MyInfo << "\r\n";
 
 		CString IP;
-		Kademlia::CMiscUtils::ipAddressToString(theApp.kademlia->getIP(),&IP);
-		buffer.Format("%s:%i", IP, theApp.kademlia->getUdpPort());
+		Kademlia::CMiscUtils::ipAddressToString(Kademlia::CKademlia::getPrefs()->getIPAddress(),&IP);
+		buffer.Format("%s:%i", IP, thePrefs.GetUDPPort());
 		m_MyInfo << GetResString(IDS_IP) << ":" << GetResString(IDS_PORT) << "\t" << buffer << "\r\n";
 
-		buffer.Format("%u",theApp.kademlia->getIP());
+		buffer.Format("%u",Kademlia::CKademlia::getPrefs()->getIPAddress());
 		m_MyInfo << GetResString(IDS_ID) << "\t" << buffer << "\r\n";
 	}
-	else if (Kademlia::CTimer::getThreadID())
+	else if (Kademlia::CKademlia::isRunning())
 		m_MyInfo << GetResString(IDS_CONNECTING) << "\r\n";
 	else
 		m_MyInfo << GetResString(IDS_DISCONNECTED) << "\r\n";
@@ -600,16 +622,16 @@ void CServerWnd::UpdateMyInfo() {
 	m_MyInfo.SetSelectionCharFormat(m_cfDef);
 	m_MyInfo << GetResString(IDS_STATUS) << ":\t";
 	m_MyInfo << (theApp.webserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << "\r\n";
-	if (theApp.glob_prefs->GetWSIsEnabled()){
+	if (thePrefs.GetWSIsEnabled()){
 		CString count;
 		count.Format("%i %s",theApp.webserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
 		m_MyInfo << "\t" << count << "\r\n";
 		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
-		m_MyInfo << "URL:\t" << "http://" << inet_ntoa(*(in_addr*)&nLocalIP) << ":" << theApp.glob_prefs->GetWSPort() << "/\r\n";
+		m_MyInfo << "URL:\t" << "http://" << inet_ntoa(*(in_addr*)&nLocalIP) << ":" << thePrefs.GetWSPort() << "/\r\n";
 	}
 	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
 	m_MyInfo << "\r\n";
-	buffer.Format("%s",(LPCTSTR)(md4str((uchar*)theApp.glob_prefs->GetUserHash())));
+	buffer.Format("%s",(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
 	m_MyInfo << GetResString(IDS_CD_UHASH) << "\t" << buffer.Left (16) << "-";
 	m_MyInfo << "\r\n\t" << buffer.Mid (16,255);
 	//MORPH END   - Added by SiRoB, [end] Mighty Knife
@@ -659,7 +681,7 @@ BOOL CServerWnd::SaveServerMetStrings()
 {
 	if (m_pacServerMetURL== NULL)
 		return FALSE;
-	return m_pacServerMetURL->SaveList(CString(theApp.glob_prefs->GetConfigDir()) + _T("\\") SERVERMET_STRINGS_PROFILE);
+	return m_pacServerMetURL->SaveList(CString(thePrefs.GetConfigDir()) + _T("\\") SERVERMET_STRINGS_PROFILE);
 }
 
 HBRUSH CServerWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -693,7 +715,7 @@ void CServerWnd::ShowServerInfo() {
 		buffer2.Format("%s:\n    %s\n\n",GetResString(IDS_VERSION),server->GetVersion() );
 		buffer.Append(buffer2);
 
-		if (theApp.glob_prefs->IsExtControlsEnabled()){
+		if (thePrefs.IsExtControlsEnabled()){
 			buffer2.Format("%s:\n    ", GetResString(IDS_SRV_TCPCOMPR));
 			if (server->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
 				buffer2 += GetResString(IDS_YES);
@@ -701,7 +723,7 @@ void CServerWnd::ShowServerInfo() {
 				buffer2 += GetResString(IDS_NO);
 			buffer.Append(buffer2 + _T("\n\n"));
 		}
-		if (theApp.glob_prefs->IsExtControlsEnabled()){
+		if (thePrefs.IsExtControlsEnabled()){
 			buffer2.Format("%s:\n    ", GetResString(IDS_SRV_UDPSR));
 			if (server->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES)
 				buffer2 += GetResString(IDS_YES);
@@ -746,7 +768,7 @@ void CServerWnd::OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult)
 		servermsgbox->GetTextRange(pEnLink->chrg.cpMin, pEnLink->chrg.cpMax, strUrl);
 		if (strUrl == m_strClickNewVersion){
 			// MOD Note: Do not remove this part - Merkur
-			strUrl.Format(_T("http://emule-project.net"));
+			strUrl.Format("http://vcheck.emule-project.net/en/version_check.php?version=%i&language=%i",theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
 			// MOD Note: end
 		}
 		ShellExecute(NULL, NULL, strUrl, NULL, NULL, SW_SHOWDEFAULT);
@@ -779,7 +801,16 @@ void CServerWnd::OnBnConnect()
 
 void CServerWnd::SaveAllSettings()
 {
-	theApp.glob_prefs->SetLastLogPaneID(StatusSelector.GetCurSel());
+	thePrefs.SetLastLogPaneID(StatusSelector.GetCurSel());
 	serverlistctrl.SaveSettings(CPreferences::tableServer);
 	SaveServerMetStrings();
+}
+
+void CServerWnd::OnDDClicked() {
+	
+	CWnd* box=GetDlgItem(IDC_SERVERMETURL);
+	box->SetFocus();
+	box->SetWindowText("");
+	box->SendMessage(WM_KEYDOWN,VK_DOWN,0x00510001);
+	
 }

@@ -15,34 +15,33 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
+#include "MapKey.h"
 #include "Loggable.h"
 
 class CKnownFile;
-class CPreferences;
 
-class CKnownFileList : public CArray<CKnownFile*,CKnownFile*>, public CLoggable
+class CKnownFileList : public CLoggable
 {
 	friend class CSharedFilesWnd;
 	friend class CFileStatistic;
 public:
 	CKnownFileList();
-	CKnownFileList(CPreferences* in_prefs);//EastShare - Added by TAHO, .met files control
 	~CKnownFileList();
-	void	SafeAddKFile(CKnownFile* toadd);
-	void	RemoveFile(CKnownFile* toremove);	// SLUGFILLER: mergeKnown - for duplicate removal
+	bool	SafeAddKFile(CKnownFile* toadd);
 	bool	Init();
 	void	Save();
 	void	Clear();
 	void	Process();
-	CKnownFile*	FindKnownFile(LPCTSTR filename,uint32 in_date,uint32 in_size);
-	CKnownFile* FindKnownFileByID(const uchar* hash);
-	void	FilterDuplicateKnownFiles(CKnownFile* original);	// SLUGFILLER: mergeKnown - for duplicate removal
-	bool	IsKnownFile(void* pToTest);
-	CMutex	list_mut;
+
+	CKnownFile* FindKnownFile(LPCTSTR filename, uint32 date, uint32 size) const;
+	CKnownFile* FindKnownFileByID(const uchar* hash) const;
+	bool	IsKnownFile(const CKnownFile* file) const;
+	bool	IsFilePtrInList(const CKnownFile* file) const;
+
 private:
 	uint16 requested;
 	uint16 accepted;
 	uint64 transferred;
 	uint32 m_nLastSaved;
-	CPreferences* app_prefs;//EastShare - Added by TAHO, .met files control
+	CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> m_Files_map;
 };

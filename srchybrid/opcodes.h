@@ -52,26 +52,26 @@
 #define MAX_RESULTS				100		// max global search results
 #define	MAX_MORE_SEARCH_REQ		5		// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
 #define MAX_CLIENTCONNECTIONTRY	2
-//#define CONNECTION_TIMEOUT		SEC2MS(40)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
-#define CONNECTION_TIMEOUT		SEC2MS(60)	// <<-- enkeyDEV(th1) -L2HAC-
-#define	FILEREASKTIME			MIN2MS(25)	//25 mins
+#define CONNECTION_TIMEOUT		SEC2MS(40)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
+#define	FILEREASKTIME			MIN2MS(29)	//29 mins
 #define SERVERREASKTIME			MIN2MS(15)	//15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
 #define UDPSERVERREASKTIME		MIN2MS(30)	//30 mins
-#define SOURCECLIENTREASK		MIN2MS(18)	//18 mins
+#define SOURCECLIENTREASKS		MIN2MS(40)	//40 mins
+#define SOURCECLIENTREASKF		MIN2MS(5)	//5 mins
 #define KADEMLIAASKTIME			SEC2MS(1)	//1 second
 #define KADEMLIATOTALFILE		5		//Total files to search sources for.
 #define KADEMLIAREASKTIME		HR2MS(1)	//1 hour
 #define KADEMLIAPUBLISHTIME		SEC2MS(2)	//2 second
 #define KADEMLIATOTALSTORESRC	2		//Total hashes to store.
 #define KADEMLIATOTALSTOREKEY	1		//Total hashes to store.
-#define KADEMLIAREPUBLISHTIME	HR2S(5)		//5 hours
-#define KADEMLIAINDEXCLEAN		HR2S(5)		//5 hours
+#define KADEMLIAREPUBLISHTIMES	HR2S(5)		//5 hours
+#define KADEMLIAREPUBLISHTIMEK	HR2S(10)	//10 hours
 #define KADEMLIADISCONNECTDELAY	MIN2S(20)	//20 mins
-#define	KADEMLIAMAXINDEX		10000		//Total indexed keys (Not used yet?)
+#define	KADEMLIAMAXINDEX		5000		//Total index per key
 #define KADEMLIAMAXSOUCEPERFILE	300			//Max number of sources per file in index.
 
 #define ED2KREPUBLISHTIME		MIN2MS(1)	//1 min
-#define MINCOMMONPENALTY		9
+#define MINCOMMONPENALTY		4
 #define UDPSERVERSTATTIME		SEC2MS(5)	//5 secs
 #define UDPSERVSTATREASKTIME	HR2S(4)		//4 hours
 #define	UDPSERVERPORT			4665	//default udp port
@@ -95,10 +95,10 @@
 #define MINWAITBEFOREOPENANOTHERSLOTMS 3000
 //MORPH END   - Added by Yun.SF3, ZZ Upload System 20030807-1911
 #define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
-#define	MIN_UP_CLIENTS_ALLOWED	1		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
+#define	MIN_UP_CLIENTS_ALLOWED	2		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
-#define RARE_FILE				25
+#define RARE_FILE				50
 #define BADCLIENTBAN			4
 #define	MIN_REQUESTTIME			MIN2MS(10) 
 #define	MAX_PURGEQUEUETIME		HR2MS(1) 
@@ -202,8 +202,8 @@
 #define	OP_ACCEPTUPLOADREQ		0x55	// (null)
 #define	OP_CANCELTRANSFER		0x56	// (null)	
 #define OP_OUTOFPARTREQS		0x57	// (null)
-#define OP_FILEREQUEST			0x58	// <HASH 16>	(more correctly file_name_request)
-#define OP_FILEREQANSWER		0x59	// <HASH 16><len 4><NAME len>
+#define OP_REQUESTFILENAME		0x58	// <HASH 16>	(more correctly file_name_request)
+#define OP_REQFILENAMEANSWER	0x59	// <HASH 16><len 4><NAME len>
 #define OP_CHANGE_SLOT			0x5B	// <HASH 16>
 #define OP_QUEUERANK			0x5C	// <wert  4> (slot index of the request)
 #define OP_ASKSHAREDDIRS        0x5D    // (null)
@@ -212,6 +212,9 @@
 #define OP_ASKSHAREDFILESDIRANS 0x60    // <len 2><Directory len><count 4>(<HASH 16><ID 4><PORT 2><1 Tag_set>)[count]
 #define OP_ASKSHAREDDENIEDANS   0x61    // (null)
 
+// this 'identifier' is used for referencing shared part (incomplete) files with the OP_ASKSHAREDDIRS and related opcodes
+// it was introduced with eDonkeyHybrid and is considered as part of the protocol.
+#define OP_INCOMPLETE_SHARED_FILES "!Incomplete Files"
 
 // extened prot client <-> extened prot client
 #define	OP_EMULEINFO			0x01	//
@@ -226,6 +229,8 @@
 #define OP_SECIDENTSTATE		0x87	// <state 1><rndchallenge 4>
 #define OP_REQUESTPREVIEW		0x90	// <HASH 16>
 #define OP_PREVIEWANSWER		0x91	// <HASH 16><frames 1>{frames * <len 4><frame len>}
+#define OP_MULTIPACKET			0x92
+#define OP_MULTIPACKETANSWER	0x93
 
 // extened prot client <-> extened prot client UDP
 #define OP_REASKFILEPING		0x90	// <HASH 16>
@@ -303,12 +308,13 @@
 #define	 FT_MEDIA_BITRATE		 0xD4	// <uint32>
 #define	TAG_MEDIA_CODEC			"\xD5"	// <string>
 #define	 FT_MEDIA_CODEC			 0xD5	// <string>
-#define TAG_SERVERPORT			"\xFA"
-#define TAG_SERVERIP			"\xFB"
-#define TAG_SOURCEUPORT			"\xFC"
-#define TAG_SOURCEPORT			"\xFD"
-#define TAG_SOURCEIP			"\xFE"
-#define TAG_SOURCETYPE			"\xFF"
+#define TAG_CLIENTLOWID			"\xF9"	// <uint32>
+#define TAG_SERVERPORT			"\xFA"	// <uint16>
+#define TAG_SERVERIP			"\xFB"	// <uint32>
+#define TAG_SOURCEUPORT			"\xFC"	// <uint16>
+#define TAG_SOURCEPORT			"\xFD"	// <uint16>
+#define TAG_SOURCEIP			"\xFE"	// <uint32>
+#define TAG_SOURCETYPE			"\xFF"	// <uint8>
 
 // additional media meta data tags from eDonkeyHybrid (note also the uppercase/lowercase)
 #define	FT_ED2K_MEDIA_ARTIST	"Artist"	// <string>
@@ -394,7 +400,6 @@
 #define ET_COMPATIBLECLIENT		0x26
 #define ET_FEATURES				0x27
 #define ET_MOD_VERSION 			0x55
-#define ET_L2HAC				0x3E //<<-- enkeyDEV(th1) -L2HAC-
 
 // GUI-Protocol TCP (ed2k_gui + java_gui)
 #define CO_SERVER_LIST			0xAA	// C-G 170 //      filelist: server list
@@ -487,6 +492,9 @@ float   line down speed */
 #define KADEMLIA_PUBLISH_REQ	0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 #define KADEMLIA_PUBLISH_RES	0x48	// <HASH (key) [16]>
 #define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
+#define KADEMLIA_BUDDY_REQ		0x51	// <TCPPORT (sender) [2]>
+#define KADEMLIA_BUDDY_CON		0x52	//
+#define KADEMLIA_BUDDY_ACK		0x57	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FIREWALLED_RES	0x58	// <IP (sender) [4]>
 #define KADEMLIA_FIREWALLED_ACK	0x59	// (null)
 
@@ -494,11 +502,3 @@ float   line down speed */
 #define KADEMLIA_FIND_VALUE		0x02
 #define KADEMLIA_STORE			0x04
 #define KADEMLIA_FIND_NODE		0x0B
-
-// START enkeyDEV(th1)
-#define L2HAC_DEFAULT_EMULE		(FILEREASKTIME)
-#define L2HAC_MIN_TIME			900000
-#define L2HAC_MAX_TIME			3600000
-#define L2HAC_CALLBACK_PRECEDE	(CONNECTION_TIMEOUT >> 1)
-#define L2HAC_PREPARE_PRECEDE	(CONNECTION_TIMEOUT)
-// END enkeyDEV(th1)

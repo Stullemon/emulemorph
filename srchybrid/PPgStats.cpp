@@ -42,7 +42,6 @@ END_MESSAGE_MAP()
 CPPgStats::CPPgStats()
 	: CPropertyPage(CPPgStats::IDD)
 {
-	app_prefs = NULL;
 	mystats1 = 0;
 	mystats2 = 0;
 	mystats3 = 0;
@@ -74,19 +73,17 @@ BOOL CPPgStats::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	((CSliderCtrl*)GetDlgItem(IDC_SLIDER))->SetPos(app_prefs->GetTrafficOMeterInterval());
-	// -khaos--+++> Changed this:  Tree update speed ranges 1-100 instead of 5-104.  Power to the people! ;D
-	((CSliderCtrl*)GetDlgItem(IDC_SLIDER2))->SetPos(app_prefs->GetStatsInterval());
-	// <-----khaos-
-	((CSliderCtrl*)GetDlgItem(IDC_SLIDER3))->SetPos(app_prefs->GetStatsAverageMinutes()-1);
-	mystats1=app_prefs->GetTrafficOMeterInterval();
-	mystats2=app_prefs->GetStatsInterval();
-	mystats3=app_prefs->GetStatsAverageMinutes();
+	((CSliderCtrl*)GetDlgItem(IDC_SLIDER))->SetPos(thePrefs.GetTrafficOMeterInterval());
+	((CSliderCtrl*)GetDlgItem(IDC_SLIDER2))->SetPos(thePrefs.GetStatsInterval());
+	((CSliderCtrl*)GetDlgItem(IDC_SLIDER3))->SetPos(thePrefs.GetStatsAverageMinutes() - 1);
+	mystats1 = thePrefs.GetTrafficOMeterInterval();
+	mystats2 = thePrefs.GetStatsInterval();
+	mystats3 = thePrefs.GetStatsAverageMinutes();
 
 	// -khaos--+++> Borrows from eMule Plus
 	// Set the Connections Statistics Y-Axis Scale
 	CString graphScale;
-	graphScale.Format(_T("%u"), app_prefs->GetStatsMax());
+	graphScale.Format(_T("%u"), thePrefs.GetStatsMax());
 	GetDlgItem(IDC_CGRAPHSCALE)->SetWindowText(graphScale);
 
 	// Build our ratio combo and select the item corresponding to the currently set preference
@@ -97,7 +94,7 @@ BOOL CPPgStats::OnInitDialog()
 	m_cratio.AddString(_T("1:5"));
 	m_cratio.AddString(_T("1:10"));
 	m_cratio.AddString(_T("1:20"));
-	int n = app_prefs->GetStatsConnectionsGraphRatio();
+	int n = thePrefs.GetStatsConnectionsGraphRatio();
 	m_cratio.SetCurSel((n==10)?5:((n==20)?6:n-1));
 	// <-----khaos-
 
@@ -114,42 +111,42 @@ BOOL CPPgStats::OnApply()
 	if (m_bModified)
 	{
 		bool bInvalidateGraphs = false;
-		if (app_prefs->GetTrafficOMeterInterval() != mystats1){
-			theApp.glob_prefs->SetTrafficOMeterInterval(mystats1);
+		if (thePrefs.GetTrafficOMeterInterval() != mystats1){
+			thePrefs.SetTrafficOMeterInterval(mystats1);
 			bInvalidateGraphs = true;
 		}
-		if (app_prefs->GetStatsInterval() != mystats2){
-			theApp.glob_prefs->SetStatsInterval(mystats2);
+		if (thePrefs.GetStatsInterval() != mystats2){
+			thePrefs.SetStatsInterval(mystats2);
 			bInvalidateGraphs = true;
 		}
-		if (app_prefs->GetStatsAverageMinutes() != mystats3){
-			theApp.glob_prefs->SetStatsAverageMinutes(mystats3);
+		if (thePrefs.GetStatsAverageMinutes() != mystats3){
+			thePrefs.SetStatsAverageMinutes(mystats3);
 			bInvalidateGraphs = true;
 		}
 
 		TCHAR buffer[20];
 		GetDlgItem(IDC_CGRAPHSCALE)->GetWindowText(buffer, ARRSIZE(buffer));
 		int statsMax = atoi(buffer);
-		if (statsMax > app_prefs->GetMaxConnections() + 5)
+		if (statsMax > thePrefs.GetMaxConnections() + 5)
 		{
-			if (app_prefs->GetStatsMax() != app_prefs->GetMaxConnections() + 5){
-				app_prefs->SetStatsMax(app_prefs->GetMaxConnections() + 5);
+			if (thePrefs.GetStatsMax() != thePrefs.GetMaxConnections() + 5){
+				thePrefs.SetStatsMax(thePrefs.GetMaxConnections() + 5);
 				bInvalidateGraphs = true;
 			}
-			_sntprintf(buffer, ARRSIZE(buffer), _T("%d"), app_prefs->GetStatsMax());
+			_sntprintf(buffer, ARRSIZE(buffer), _T("%d"), thePrefs.GetStatsMax());
 			GetDlgItem(IDC_CGRAPHSCALE)->SetWindowText(buffer);
 		}
 		else {
-			if (app_prefs->GetStatsMax() != statsMax){
-				app_prefs->SetStatsMax(statsMax);
+			if (thePrefs.GetStatsMax() != statsMax){
+				thePrefs.SetStatsMax(statsMax);
 				bInvalidateGraphs = true;
 			}
 		}
 
 		int n = m_cratio.GetCurSel();
 		int iRatio = (n == 5) ? 10 : ((n == 6) ? 20 : n + 1); // Index 5 = 1:10 and 6 = 1:20
-		if (app_prefs->GetStatsConnectionsGraphRatio() != iRatio){
-			app_prefs->SetStatsConnectionsGraphRatio(iRatio); 
+		if (thePrefs.GetStatsConnectionsGraphRatio() != iRatio){
+			thePrefs.SetStatsConnectionsGraphRatio(iRatio); 
 			bInvalidateGraphs = true;
 		}
 
@@ -159,7 +156,7 @@ BOOL CPPgStats::OnApply()
 			theApp.emuledlg->statisticswnd->ShowInterval();
 		}
 		theApp.emuledlg->statisticswnd->RepaintMeters();
-		theApp.emuledlg->statisticswnd->GetDlgItem(IDC_STATTREE)->EnableWindow(theApp.glob_prefs->GetStatsInterval() > 0);
+		theApp.emuledlg->statisticswnd->GetDlgItem(IDC_STATTREE)->EnableWindow(thePrefs.GetStatsInterval() > 0);
 		SetModified(FALSE);
 	}
 	return CPropertyPage::OnApply();
@@ -263,16 +260,16 @@ void CPPgStats::ShowInterval()
 void CPPgStats::OnCbnSelchangeColorselector()
 {
 	int sel = m_colors.GetCurSel();
-	COLORREF selcolor = theApp.glob_prefs->GetStatsColor(sel);
+	COLORREF selcolor = thePrefs.GetStatsColor(sel);
 	m_ctlColor.SetColor(selcolor);
 }
 
 LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
 {
 	COLORREF setcolor = m_ctlColor.GetColor();
-	int iCurColor = theApp.glob_prefs->GetStatsColor(m_colors.GetCurSel());
+	int iCurColor = thePrefs.GetStatsColor(m_colors.GetCurSel());
 	if (iCurColor != setcolor){
-		theApp.glob_prefs->SetStatsColor(m_colors.GetCurSel(), setcolor);
+		thePrefs.SetStatsColor(m_colors.GetCurSel(), setcolor);
 		SetModified(TRUE);
 	}
 	return TRUE;

@@ -20,13 +20,12 @@
 class CUpDownClient;
 class CPacket;
 class CTimerWnd;
-class CPreferences;
 
 class CClientReqSocket : public CEMSocket{
 	friend class CListenSocket;
 public:
-	CClientReqSocket(CPreferences* in_prefs, CUpDownClient* in_client = 0);	
-	void	Disconnect();
+	CClientReqSocket(CUpDownClient* in_client = NULL);	
+	void	Disconnect(CString strReason);
 
 	void	ResetTimeOutTimer();
 	bool	CheckTimeOut();
@@ -50,7 +49,9 @@ protected:
 	void		 OnReceive(int nErrorCode);
 	void		 OnError(int nErrorCode);
 	bool		 PacketReceived(Packet* packet);
-	bool		 PacketReceivedCppEx(Packet* packet);
+	int			 PacketReceivedSEH(Packet* packet);
+	bool		 PacketReceivedCppEH(Packet* packet);
+
 private:
 	void	Delete_Timed();
 	~CClientReqSocket();
@@ -61,7 +62,6 @@ private:
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	void  SmartUploadControl();
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	CPreferences* app_prefs;
 	uint32	timeout_timer;
 	bool	deletethis;
 	uint32	deltimer;
@@ -71,7 +71,7 @@ private:
 class CListenSocket : public CAsyncSocketEx
 {
 public:
-	CListenSocket(CPreferences* in_prefs);
+	CListenSocket();
 	~CListenSocket();
 
 	bool	StartListening();
@@ -99,7 +99,6 @@ public:
 
 private:
 	bool bListening;
-	CPreferences* app_prefs;
 	CTypedPtrList<CPtrList, CClientReqSocket*> socket_list;
 	uint16	opensockets;
 	uint16	m_OpenSocketsInterval;

@@ -52,11 +52,48 @@ CPPgTweaks::CPPgTweaks()
 	: CPropertyPage(CPPgTweaks::IDD)
 	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
+	m_iFileBufferSize = 0;
+	m_iQueueSize = 0;
+	m_iMaxConnPerFive = 0;
+	m_iAutoTakeEd2kLinks = 0;
+	m_iVerbose = 0;
+	m_iDebugSourceExchange = 0;
+	m_iLogBannedClients = 0;
+	m_iLogRatingDescReceived = 0;
+	m_iLogSecureIdent = 0;
+	m_iLogFilteredIPs = 0;
+	m_iLogFileSaving = 0;
+	m_iCreditSystem = 0;
+	m_iLog2Disk = 0;
+	m_iDebug2Disk = 0;
+	m_iCommitFiles = 0;
+	m_iFilterLANIPs = 0;
+	m_iExtControls = 0;
+	m_uServerKeepAliveTimeout = 0;
+	m_iCheckDiskspace = 0;
+	m_fMinFreeDiskSpaceMB = 0.0F;
+	(void)m_sYourHostname;
+/*
+	// ZZ:UploadSpeedSense -->
+    m_iDynUpEnabled = 0;
+    m_iDynUpMinUpload = 0;
+    m_iDynUpPingTolerance = 0;
+    m_iDynUpGoingUpDivider = 0;
+    m_iDynUpGoingDownDivider = 0;
+    m_iDynUpNumberOfPings = 0;
+	// ZZ:UploadSpeedSense <--
+*/
 	m_bInitializedTreeOpts = false;
 	m_htiMaxCon5Sec = NULL;
 	m_htiAutoTakeEd2kLinks = NULL;
+	m_htiVerboseGroup = NULL;
 	m_htiVerbose = NULL;
 	m_htiDebugSourceExchange = NULL;
+	m_htiLogBannedClients = NULL;
+	m_htiLogRatingDescReceived = NULL;
+	m_htiLogSecureIdent = NULL;
+	m_htiLogFilteredIPs = NULL;
+	m_htiLogFileSaving = NULL;
 	m_htiCreditSystem = NULL;
 	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
@@ -73,7 +110,6 @@ CPPgTweaks::CPPgTweaks()
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
 
-	m_htiMultipleInstance = NULL;	//Morph - added by AndCycle, VQB: multipleInstance
 	/* Temp removed until further testing
 	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
@@ -118,26 +154,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxCon5Sec, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiAutoTakeEd2kLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTOTAKEED2KLINKS), TVI_ROOT, m_iAutoTakeEd2kLinks);
-		m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_VERBOSE), TVI_ROOT, m_iVerbose);
-		m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), TVI_ROOT, m_iDebugSourceExchange);
-		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
 		m_htiCreditSystem = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECREDITSYSTEM), TVI_ROOT, m_iCreditSystem);
 		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiCreditSystem,false); //MORPH - Added by SiRoB, Credit System Allways Used
 		
 		m_htiFilterLANIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PW_FILTER), TVI_ROOT, m_iFilterLANIPs);
 		m_htiExtControls = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWEXTSETTINGS), TVI_ROOT, m_iExtControls);
-		m_htiServerKeepAliveTimeout = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERKEEPALIVETIMEOUT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
-		m_ctrlTreeOptions.AddEditBox(m_htiServerKeepAliveTimeout, RUNTIME_CLASS(CNumTreeOptionsEdit));
-
-		m_htiSaveLogs = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_LOG2DISKFRAME), iImgLog, TVI_ROOT);
-		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiSaveLogs, m_iLog2Disk);
-		m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG2DISK), m_htiSaveLogs, m_iDebug2Disk);
-		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiSaveLogs, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
-
-		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);
-		m_htiCommitNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiCommit, m_iCommitFiles == 0);
-		m_htiCommitOnShutdown = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_ONSHUTDOWN), m_htiCommit, m_iCommitFiles == 1);
-		m_htiCommitAlways = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_ALWAYS), m_htiCommit, m_iCommitFiles == 2);
 
 		m_htiCheckDiskspace = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKDISKSPACE), TVI_ROOT, m_iCheckDiskspace);	// SLUGFILLER: checkDiskspace
 		m_htiMinFreeDiskSpace = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINFREEDISKSPACE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiCheckDiskspace);
@@ -147,7 +168,27 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEdit));
 		// itsonlyme: hostnameSource
 
-		m_htiMultipleInstance = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MULTIPLEINSTANCE), TVI_ROOT, m_iMultipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
+
+		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), TVI_ROOT, m_iLog2Disk);
+		m_htiVerboseGroup = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_VERBOSE), iImgLog, TVI_ROOT);
+		m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ENABLED), m_htiVerboseGroup, m_iVerbose);
+		m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiVerboseGroup, m_iDebug2Disk);
+		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiSaveLogs, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
+		m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), m_htiVerboseGroup, m_iDebugSourceExchange);
+		m_htiLogBannedClients = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_BANNED_CLIENTS), m_htiVerboseGroup, m_iLogBannedClients);
+		m_htiLogRatingDescReceived = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_RATING_RECV), m_htiVerboseGroup, m_iLogRatingDescReceived);
+		m_htiLogSecureIdent = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_SECURE_IDENT), m_htiVerboseGroup, m_iLogSecureIdent);
+		m_htiLogFilteredIPs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILTERED_IPS), m_htiVerboseGroup, m_iLogFilteredIPs);
+		m_htiLogFileSaving = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_FILE_SAVING), m_htiVerboseGroup, m_iLogFileSaving);
+
+		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);
+		m_htiCommitNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiCommit, m_iCommitFiles == 0);
+		m_htiCommitOnShutdown = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_ONSHUTDOWN), m_htiCommit, m_iCommitFiles == 1);
+		m_htiCommitAlways = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_ALWAYS), m_htiCommit, m_iCommitFiles == 2);
+
+		m_htiServerKeepAliveTimeout = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERKEEPALIVETIMEOUT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
+		m_ctrlTreeOptions.AddEditBox(m_htiServerKeepAliveTimeout, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
 		/*
 		// ZZ:UploadSpeedSense -->
         m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
@@ -170,7 +211,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		// ZZ:UploadSpeedSense <--
 		*/
 
-        m_ctrlTreeOptions.Expand(m_htiSaveLogs, TVE_EXPAND);
+		//m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
 		/*
@@ -188,6 +229,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_iAutoTakeEd2kLinks);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSourceExchange, m_iDebugSourceExchange);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogBannedClients, m_iLogBannedClients);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogRatingDescReceived, m_iLogRatingDescReceived);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogSecureIdent, m_iLogSecureIdent);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFilteredIPs, m_iLogFilteredIPs);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogFileSaving, m_iLogFileSaving);
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_iLog2Disk);
@@ -201,9 +247,14 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);	// itsonlyme: hostnameSource
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiMultipleInstance, m_iMultipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
 
 	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, m_iVerbose);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, m_iVerbose);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, m_iVerbose);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, m_iVerbose);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_iVerbose);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_iVerbose);
 
 	/*
 	// ZZ:UploadSpeedSense -->
@@ -229,43 +280,48 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPPgTweaks::OnInitDialog()
 {
-	m_iMaxConnPerFive = app_prefs->GetMaxConperFive();
-	m_iAutoTakeEd2kLinks = app_prefs->prefs->autotakeed2klinks;
-	m_iVerbose = app_prefs->prefs->m_bVerbose;
-	m_iDebugSourceExchange = app_prefs->prefs->m_bDebugSourceExchange;
-	m_iLog2Disk = app_prefs->prefs->log2disk;
-	m_iDebug2Disk = app_prefs->prefs->debug2disk;
-	m_iDateFileNameLog = app_prefs->prefs->DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
-	m_iCreditSystem = app_prefs->prefs->m_bCreditSystem;
-	m_iCommitFiles = app_prefs->prefs->m_iCommitFiles;
-	m_iFilterLANIPs = app_prefs->prefs->filterLANIPs;
-	m_iExtControls = app_prefs->prefs->m_bExtControls;
-	m_uServerKeepAliveTimeout = app_prefs->prefs->m_dwServerKeepAliveTimeout / 60000;
-	m_iCheckDiskspace = app_prefs->prefs->checkDiskspace;	// SLUGFILLER: checkDiskspace
-	m_fMinFreeDiskSpaceMB = (float)(app_prefs->prefs->m_uMinFreeDiskSpace / (1024.0 * 1024.0));
-	m_sYourHostname = app_prefs->GetYourHostname();	// itsonlyme: hostnameSource
-	m_iMultipleInstance = app_prefs->prefs->multipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
+	m_iMaxConnPerFive = thePrefs.GetMaxConperFive();
+	m_iAutoTakeEd2kLinks = thePrefs.autotakeed2klinks;
+	m_iVerbose = thePrefs.m_bVerbose;
+	m_iDebugSourceExchange = thePrefs.m_bDebugSourceExchange;		// do *not* use the according 'Get...' function here!
+	m_iLogBannedClients = thePrefs.m_bLogBannedClients;				// do *not* use the according 'Get...' function here!
+	m_iLogRatingDescReceived = thePrefs.m_bLogRatingDescReceived;	// do *not* use the according 'Get...' function here!
+	m_iLogSecureIdent = thePrefs.m_bLogSecureIdent;					// do *not* use the according 'Get...' function here!
+	m_iLogFilteredIPs = thePrefs.m_bLogFilteredIPs;					// do *not* use the according 'Get...' function here!
+	m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
+	m_iLog2Disk = thePrefs.log2disk;
+	m_iDebug2Disk = thePrefs.debug2disk;							// do *not* use the according 'Get...' function here!
+	m_iDateFileNameLog = thePrefs.DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
+	m_iCreditSystem = thePrefs.m_bCreditSystem;
+	m_iCommitFiles = thePrefs.m_iCommitFiles;
+	m_iFilterLANIPs = thePrefs.filterLANIPs;
+	m_iExtControls = thePrefs.m_bExtControls;
+	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
+	m_iCheckDiskspace = thePrefs.checkDiskspace;	// SLUGFILLER: checkDiskspace
+	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
+	m_sYourHostname = thePrefs.GetYourHostname();	// itsonlyme: hostnameSource
+
 	/*
 	// ZZ:UploadSpeedSense -->
-    m_iDynUpEnabled = app_prefs->IsDynUpEnabled();
-    m_iDynUpMinUpload = app_prefs->GetMinUpload();
-    m_iDynUpPingTolerance = app_prefs->GetDynUpPingTolerance();
-    m_iDynUpGoingUpDivider = app_prefs->GetDynUpGoingUpDivider();
-    m_iDynUpGoingDownDivider = app_prefs->GetDynUpGoingDownDivider();
-    m_iDynUpNumberOfPings = app_prefs->GetDynUpNumberOfPings();
+    m_iDynUpEnabled = thePrefs.IsDynUpEnabled();
+    m_iDynUpMinUpload = thePrefs.GetMinUpload();
+    m_iDynUpPingTolerance = thePrefs.GetDynUpPingTolerance();
+    m_iDynUpGoingUpDivider = thePrefs.GetDynUpGoingUpDivider();
+    m_iDynUpGoingDownDivider = thePrefs.GetDynUpGoingDownDivider();
+    m_iDynUpNumberOfPings = thePrefs.GetDynUpNumberOfPings();
 	// ZZ:UploadSpeedSense <--
 	*/
 
     CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(1,100,true);
-	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetPos(app_prefs->prefs->m_iFileBufferSize);
-	m_iFileBufferSize = app_prefs->prefs->m_iFileBufferSize;
+	m_iFileBufferSize = thePrefs.m_iFileBufferSize;
+	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(16, 1024+512, TRUE);
+	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetPos(m_iFileBufferSize/1024);
 
+	m_iQueueSize = thePrefs.m_iQueueSize;
 	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetRange(20,100,true);
-	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetPos(app_prefs->prefs->m_iQueueSize);
-	m_iQueueSize = app_prefs->prefs->m_iQueueSize;
+	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetPos(m_iQueueSize/100);
 
 	Localize();
 
@@ -290,72 +346,77 @@ BOOL CPPgTweaks::OnApply()
 	if (!UpdateData())
 		return FALSE;
 
-	app_prefs->SetMaxConsPerFive(m_iMaxConnPerFive ? m_iMaxConnPerFive : DFLT_MAXCONPERFIVE);
-	theApp.scheduler->original_cons5s = app_prefs->GetMaxConperFive();
+	thePrefs.SetMaxConsPerFive(m_iMaxConnPerFive ? m_iMaxConnPerFive : DFLT_MAXCONPERFIVE);
+	theApp.scheduler->original_cons5s = thePrefs.GetMaxConperFive();
 
-	if (app_prefs->prefs->autotakeed2klinks != m_iAutoTakeEd2kLinks){
-		app_prefs->prefs->autotakeed2klinks = m_iAutoTakeEd2kLinks;
+	if (thePrefs.autotakeed2klinks != m_iAutoTakeEd2kLinks){
+		thePrefs.autotakeed2klinks = m_iAutoTakeEd2kLinks;
 		RevertReg();
 	}
 
-	app_prefs->prefs->m_bVerbose = m_iVerbose;
-	app_prefs->prefs->m_bDebugSourceExchange = m_iDebugSourceExchange;
-	app_prefs->prefs->m_bCreditSystem = m_iCreditSystem;
+	thePrefs.m_bDebugSourceExchange = m_iDebugSourceExchange;
+	thePrefs.m_bLogBannedClients = m_iLogBannedClients;
+	thePrefs.m_bLogRatingDescReceived = m_iLogRatingDescReceived;
+	thePrefs.m_bLogSecureIdent = m_iLogSecureIdent;
+	thePrefs.m_bLogFilteredIPs = m_iLogFilteredIPs;
+	thePrefs.m_bLogFileSaving = m_iLogFileSaving;
+	thePrefs.m_bCreditSystem = m_iCreditSystem;
 
 	//Morph Start - added by AndCycle, Date File Name Log
-	if(app_prefs->prefs->DateFileNameLog != (m_iDateFileNameLog != 0)){
+	if(thePrefs.DateFileNameLog != (m_iDateFileNameLog != 0)){
 
 		//close log first
 		theLog.Close();
 		theVerboseLog.Close();
 
 		//reset path
-		VERIFY( theLog.SetFilePath(app_prefs->GetAppDir() + _T("eMule.log")) );
-		VERIFY( theVerboseLog.SetFilePath(app_prefs->GetAppDir() + _T("eMule_Verbose.log")) );
+		VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule.log")) );
+		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule_Verbose.log")) );
 
 		//open log again
 		theLog.Open();
 		theVerboseLog.Open();
 	}
-	app_prefs->prefs->DateFileNameLog = m_iDateFileNameLog;
+	thePrefs.DateFileNameLog = m_iDateFileNameLog;
 	//Morph End - added by AndCycle, Date File Name Log
 
-	if (!app_prefs->prefs->log2disk && m_iLog2Disk)
+	if (!thePrefs.log2disk && m_iLog2Disk)
 		theLog.Open();
-	else if (app_prefs->prefs->log2disk && !m_iLog2Disk)
+	else if (thePrefs.log2disk && !m_iLog2Disk)
 		theLog.Close();
-	app_prefs->prefs->log2disk = m_iLog2Disk;
+	thePrefs.log2disk = m_iLog2Disk;
 
-	if (!app_prefs->prefs->debug2disk && m_iDebug2Disk)
+	if (!thePrefs.GetDebug2Disk() && m_iVerbose && m_iDebug2Disk)
 		theVerboseLog.Open();
-	else if (app_prefs->prefs->debug2disk && !m_iDebug2Disk)
+	else if (thePrefs.GetDebug2Disk() && (!m_iVerbose || !m_iDebug2Disk))
 		theVerboseLog.Close();
-	app_prefs->prefs->debug2disk = m_iDebug2Disk;
+	thePrefs.debug2disk = m_iDebug2Disk;
 
-	app_prefs->prefs->m_iCommitFiles = m_iCommitFiles;
-	app_prefs->prefs->filterLANIPs = m_iFilterLANIPs;
-	app_prefs->prefs->m_iFileBufferSize = m_iFileBufferSize;
-	app_prefs->prefs->m_iQueueSize = m_iQueueSize;
-	if (app_prefs->prefs->m_bExtControls != (bool)m_iExtControls) {
-		app_prefs->prefs->m_bExtControls = m_iExtControls;
+	thePrefs.m_bVerbose = m_iVerbose; // store after related options were stored!
+
+	thePrefs.m_iCommitFiles = m_iCommitFiles;
+	thePrefs.filterLANIPs = m_iFilterLANIPs;
+	thePrefs.m_iFileBufferSize = m_iFileBufferSize;
+	thePrefs.m_iQueueSize = m_iQueueSize;
+	if (thePrefs.m_bExtControls != (bool)m_iExtControls) {
+		thePrefs.m_bExtControls = m_iExtControls;
 		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
 		theApp.emuledlg->searchwnd->searchlistctrl.CreateMenues();
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 	}
-	app_prefs->prefs->m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
-	app_prefs->prefs->checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
-	app_prefs->prefs->m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
-	app_prefs->SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
-	app_prefs->prefs->multipleInstance = m_iMultipleInstance;	//Morph - added by AndCycle, VQB: multipleInstance
+	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
+	thePrefs.checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
+	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
+	thePrefs.SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
 
 	/*
 	// ZZ:UploadSpeedSense -->
-    app_prefs->prefs->m_bDynUpEnabled = m_iDynUpEnabled;
-    app_prefs->prefs->minupload = m_iDynUpMinUpload;
-    app_prefs->prefs->m_iDynUpPingTolerance = m_iDynUpPingTolerance;
-    app_prefs->prefs->m_iDynUpGoingUpDivider = m_iDynUpGoingUpDivider;
-    app_prefs->prefs->m_iDynUpGoingDownDivider = m_iDynUpGoingDownDivider;
-    app_prefs->prefs->m_iDynUpNumberOfPings = m_iDynUpNumberOfPings;
+    thePrefs.m_bDynUpEnabled = m_iDynUpEnabled;
+    thePrefs.minupload = m_iDynUpMinUpload;
+    thePrefs.m_iDynUpPingTolerance = m_iDynUpPingTolerance;
+    thePrefs.m_iDynUpGoingUpDivider = m_iDynUpGoingUpDivider;
+    thePrefs.m_iDynUpGoingDownDivider = m_iDynUpGoingDownDivider;
+    thePrefs.m_iDynUpNumberOfPings = m_iDynUpNumberOfPings;
 	// ZZ:UploadSpeedSense <--
 	*/
 
@@ -369,19 +430,21 @@ BOOL CPPgTweaks::OnApply()
 
 void CPPgTweaks::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	SetModified(TRUE);
-	
-	CSliderCtrl* slider =(CSliderCtrl*)pScrollBar;
+	if (pScrollBar == GetDlgItem(IDC_FILEBUFFERSIZE))
+	{
+		m_iFileBufferSize = ((CSliderCtrl*)pScrollBar)->GetPos() * 1024;
 	CString temp;
-	if (pScrollBar==GetDlgItem(IDC_FILEBUFFERSIZE)) {
-		m_iFileBufferSize = slider->GetPos();
-		temp.Format( GetResString(IDS_FILEBUFFERSIZE), m_iFileBufferSize*15000 );
+		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize));
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
+		SetModified(TRUE);
 	}
-	else if (pScrollBar==GetDlgItem(IDC_QUEUESIZE)) {
-		m_iQueueSize = slider->GetPos();
-		temp.Format( GetResString(IDS_QUEUESIZE), m_iQueueSize*100 );
+	else if (pScrollBar == GetDlgItem(IDC_QUEUESIZE))
+	{
+		m_iQueueSize = ((CSliderCtrl*)pScrollBar)->GetPos() * 100;
+		CString temp;
+		temp.Format(_T("%s: %s"), GetResString(IDS_QUEUESIZE), GetFormatedUInt(m_iQueueSize));
 		GetDlgItem(IDC_QUEUESIZE_STATIC)->SetWindowText(temp);
+		SetModified(TRUE);
 	}
 }
 
@@ -394,13 +457,18 @@ void CPPgTweaks::Localize(void)
 
 		if (m_htiMaxCon5Sec) m_ctrlTreeOptions.SetEditLabel(m_htiMaxCon5Sec, GetResString(IDS_MAXCON5SECLABEL));
 		if (m_htiAutoTakeEd2kLinks) m_ctrlTreeOptions.SetItemText(m_htiAutoTakeEd2kLinks, GetResString(IDS_AUTOTAKEED2KLINKS));
-		if (m_htiVerbose) m_ctrlTreeOptions.SetItemText(m_htiVerbose, GetResString(IDS_VERBOSE));
+		if (m_htiVerboseGroup) m_ctrlTreeOptions.SetItemText(m_htiVerboseGroup, GetResString(IDS_VERBOSE));
+		if (m_htiVerbose) m_ctrlTreeOptions.SetItemText(m_htiVerbose, GetResString(IDS_ENABLED));
 		if (m_htiDebugSourceExchange) m_ctrlTreeOptions.SetItemText(m_htiDebugSourceExchange, GetResString(IDS_DEBUG_SOURCE_EXCHANGE));
+		if (m_htiLogBannedClients) m_ctrlTreeOptions.SetItemText(m_htiLogBannedClients, GetResString(IDS_LOG_BANNED_CLIENTS));
+		if (m_htiLogRatingDescReceived) m_ctrlTreeOptions.SetItemText(m_htiLogRatingDescReceived, GetResString(IDS_LOG_RATING_RECV));
+		if (m_htiLogSecureIdent) m_ctrlTreeOptions.SetItemText(m_htiLogSecureIdent, GetResString(IDS_LOG_SECURE_IDENT));
+		if (m_htiLogFilteredIPs) m_ctrlTreeOptions.SetItemText(m_htiLogFilteredIPs, GetResString(IDS_LOG_FILTERED_IPS));
+		if (m_htiLogFileSaving) m_ctrlTreeOptions.SetItemText(m_htiLogFileSaving, GetResString(IDS_LOG_FILE_SAVING));
 		if (m_htiCreditSystem) m_ctrlTreeOptions.SetItemText(m_htiCreditSystem, GetResString(IDS_USECREDITSYSTEM));
 
-		if (m_htiSaveLogs) m_ctrlTreeOptions.SetItemText(m_htiSaveLogs, GetResString(IDS_LOG2DISKFRAME));
 		if (m_htiLog2Disk) m_ctrlTreeOptions.SetItemText(m_htiLog2Disk, GetResString(IDS_LOG2DISK));
-		if (m_htiDebug2Disk) m_ctrlTreeOptions.SetItemText(m_htiDebug2Disk, GetResString(IDS_DEBUG2DISK));
+		if (m_htiDebug2Disk) m_ctrlTreeOptions.SetItemText(m_htiDebug2Disk, GetResString(IDS_LOG2DISK));
 
 		if (m_htiCommit) m_ctrlTreeOptions.SetItemText(m_htiCommit, GetResString(IDS_COMMITFILES));
 		if (m_htiCommitNever) m_ctrlTreeOptions.SetItemText(m_htiCommitNever, GetResString(IDS_NEVER));
@@ -412,9 +480,6 @@ void CPPgTweaks::Localize(void)
 		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));	// SLUGFILLER: checkDiskspace
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
-		
-		if (m_htiMultipleInstance) m_ctrlTreeOptions.SetItemText(m_htiMultipleInstance, GetResString(IDS_MULTIPLEINSTANCE));	//Morph - added by AndCycle, VQB: multipleInstance
-
 		/*
 		// ZZ:UploadSpeedSense -->
         if (m_htiDynUp) m_ctrlTreeOptions.SetItemText(m_htiDynUp, GetResString(IDS_DYNUP));
@@ -428,9 +493,9 @@ void CPPgTweaks::Localize(void)
 		*/
 
         CString temp;
-		temp.Format( GetResString(IDS_FILEBUFFERSIZE), m_iFileBufferSize*15000 );
+		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize));
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
-		temp.Format( GetResString(IDS_QUEUESIZE), m_iQueueSize*100 );
+		temp.Format(_T("%s: %s"), GetResString(IDS_QUEUESIZE), GetFormatedUInt(m_iQueueSize));
 		GetDlgItem(IDC_QUEUESIZE_STATIC)->SetWindowText(temp);
 	}
 }
@@ -442,10 +507,15 @@ void CPPgTweaks::OnDestroy()
 	m_bInitializedTreeOpts = false;
 	m_htiMaxCon5Sec = NULL;
 	m_htiAutoTakeEd2kLinks = NULL;
+	m_htiVerboseGroup = NULL;
 	m_htiVerbose = NULL;
 	m_htiDebugSourceExchange = NULL;
+	m_htiLogBannedClients = NULL;
+	m_htiLogRatingDescReceived = NULL;
+	m_htiLogSecureIdent = NULL;
+	m_htiLogFilteredIPs = NULL;
+	m_htiLogFileSaving = NULL;
 	m_htiCreditSystem = NULL;
-	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
 	m_htiDateFileNameLog = NULL;//Morph - added by AndCycle, Date File Name Log
@@ -460,8 +530,6 @@ void CPPgTweaks::OnDestroy()
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
 	
-	m_htiMultipleInstance = NULL;	//Morph - added by AndCycle, VQB: multipleInstance
-
 	/*
 	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
@@ -484,7 +552,15 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		if (pton->hItem == m_htiVerbose){
 			BOOL bCheck;
 			if (m_ctrlTreeOptions.GetCheckBox(m_htiVerbose, bCheck))
+			{
 				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, bCheck);
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, bCheck);
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, bCheck);
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogSecureIdent, bCheck);
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, bCheck);
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
+				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, bCheck);
+			}
 		}
 		SetModified();
 	}

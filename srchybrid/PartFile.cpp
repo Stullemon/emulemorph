@@ -19,7 +19,9 @@
 #include <sys/stat.h>
 #include <io.h>
 #include <winioctl.h>
+#ifdef _DEBUG
 #include "DebugHelpers.h"
+#endif
 #include "emule.h"
 #include "PartFile.h"
 #include "UpDownClient.h"
@@ -27,13 +29,12 @@
 #include "Preview.h"
 #include "ArchiveRecovery.h"
 #include "SearchList.h"
+#include "Kademlia/Kademlia/Kademlia.h"
 #include "kademlia/kademlia/search.h"
 #include "kademlia/kademlia/SearchManager.h"
-#include "kademlia/routing/Timer.h"
 #include "kademlia/utils/MiscUtils.h"
 #include "kademlia/kademlia/prefs.h"
 #include "DownloadQueue.h"
-#include "KademliaMain.h"
 #include "IPFilter.h"
 #include "MMServer.h"
 #include "UploadQueue.h"
@@ -64,6 +65,8 @@ static char THIS_FILE[]=__FILE__;
 
 CBarShader CPartFile::s_LoadBar(PROGRESS_HEIGHT); // Barry - was 5
 CBarShader CPartFile::s_ChunkBar(16); 
+
+IMPLEMENT_DYNAMIC(CPartFile, CKnownFile)
 
 CPartFile::CPartFile()
 {
@@ -193,7 +196,7 @@ void CPartFile::Init(){
 	m_iLastPausePurge = time(NULL);
 	m_AllocateThread=NULL;
 
-	if(theApp.glob_prefs->GetNewAutoDown()){
+	if(thePrefs.GetNewAutoDown()){
 		m_iDownPriority = PR_HIGH;
 		m_bAutoDownPriority = true;
 	}
@@ -235,6 +238,7 @@ void CPartFile::Init(){
 	m_nCompleteSourcesCountLo = 0;
 	m_nCompleteSourcesCountHi = 0;
 	m_dwFileAttributes = 0;
+	m_bDeleteAfterAlloc=false;
 
 	m_PartsHashing = 0;		// SLUGFILLER: SafeHash
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
@@ -291,9 +295,8 @@ CPartFile::~CPartFile()
 		SavePartFile();
 	}
 
-	m_SrcpartFrequency.RemoveAll();
-	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;gaplist.GetNext(pos))
-		delete gaplist.GetAt(pos);
+	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;)
+		delete gaplist.GetNext(pos);
 
 	pos = m_BufferedData_list.GetHeadPosition();
 	while (pos){
@@ -370,20 +373,20 @@ void CPartFile::Dump(CDumpContext& dc) const
 }
 #endif
 
-void CPartFile::CreatePartFile(){
+void CPartFile::CreatePartFile()
+{
 	// use lowest free partfilenumber for free file (InterCeptor)
 	int i = 0; 
 	CString filename; 
-	do 
-	{ 
+	do{ 
 		i++; 
-		filename.Format("%s\\%03i.part", theApp.glob_prefs->GetTempDir(), i); 
-	}while(PathFileExists(filename)); 
+		filename.Format("%s\\%03i.part", thePrefs.GetTempDir(), i); 
+	}
+	while(PathFileExists(filename));
 	m_partmetfilename.Format("%03i.part.met",i); 
+	SetPath(thePrefs.GetTempDir());
+	m_fullname.Format("%s\\%s", thePrefs.GetTempDir(), m_partmetfilename);
 
-	SetPath(theApp.glob_prefs->GetIncomingDir());
-	
-	m_fullname.Format("%s\\%s",theApp.glob_prefs->GetTempDir(),m_partmetfilename);
 	CTag* partnametag = new CTag(FT_PARTFILENAME,RemoveFileExtension(m_partmetfilename));
 	taglist.Add(partnametag);
 	
@@ -424,7 +427,7 @@ void CPartFile::CreatePartFile(){
 		m_SrcpartFrequency[i] = 0;
 	paused = false;
 
-	if (theApp.glob_prefs->AutoFilenameCleanup())
+	if (thePrefs.AutoFilenameCleanup())
 		SetFileName(CleanupFilename(GetFileName()));
 
 	SavePartFile();
@@ -463,7 +466,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	setvbuf(metFile.m_pStream, NULL, _IOFBF, 16384);
 
 	try{
-		metFile.Read(&version,1);
+		version = metFile.ReadUInt8();
 		if (version != PARTFILE_VERSION && version!= PARTFILE_SPLITTEDVERSION ){
 			metFile.Close();
 			AddLogLine(false, GetResString(IDS_ERR_BADMETVERSION), m_partmetfilename, GetFileName());
@@ -507,12 +510,8 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			LoadHashsetFromFile(&metFile, false);
 		}
 
-		uint32 tagcount;
-		metFile.Read(&tagcount, 4);
-
-		bool bInitialBytesSet = false; // khaos::accuratetimerem+ One Line
-
-		for (uint32 j = 0; j != tagcount; j++){
+		UINT tagcount = metFile.ReadUInt32();
+		for (UINT j = 0; j < tagcount; j++){
 			CTag* newtag = new CTag(&metFile);
 			if (!getsizeonly || (getsizeonly && (newtag->tag.specialtag==FT_FILESIZE || newtag->tag.specialtag==FT_FILENAME))){
 				switch(newtag->tag.specialtag){
@@ -694,7 +693,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 
 		// load the hashsets from the hybridstylepartmet
 		if (isnewstyle && !getsizeonly && (metFile.GetPosition()<metFile.GetLength()) ) {
-			int8 temp;
+			uint8 temp;
 			metFile.Read(&temp,1);
 			
 			uint16 parts=GetPartCount();	// assuming we will get all hashsets
@@ -851,13 +850,14 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			CFileStatus filestatus;
 			m_hpartfile.GetStatus(filestatus); // this; "...returns m_attribute without high-order flags" indicates a known MFC bug, wonder how many unknown there are... :)
 			time_t fdate = safe_mktime(filestatus.m_mtime.GetLocalTm());
-			if (fdate == -1)
+			if (fdate == -1){
+				if (thePrefs.GetVerbose())
 				AddDebugLogLine(false, "Failed to convert file date of %s (%s)", filestatus.m_szFullName, GetFileName());
 
 // #ifdef MIGHTY_SUMMERTIME
 			// Mighty Knife: try to correct the daylight saving bug.
 			// Very special. Never activate this in a release version !!!
-			if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+			if (thePrefs.GetDaylightSavingPatch ()) {
 				if (fdate != -1) {
 					CorrectLocalFileTime (m_hpartfile.GetFilePath(),fdate);
 				}
@@ -866,7 +866,9 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 // #endif
 
 			if (date != fdate){
-				AddLogLine(false, GetResString(IDS_ERR_REHASH), m_fullname, GetFileName());
+				CString strFileInfo;
+				strFileInfo.Format(_T("%s (%s)"), GetFilePath(), GetFileName());
+				AddLogLine(false, GetResString(IDS_ERR_REHASH), strFileInfo);
 				// rehash
 				// SLUGFILLER: SafeHash
 				SetStatus(PS_EMPTY);	// no need to wait for hashes with the new system
@@ -931,12 +933,15 @@ bool CPartFile::SavePartFile(){
 	if (!m_PartsHashing){	// SLUGFILLER: SafeHash - don't update the file date unless all parts are hashed
 		//get filedate
 		CTime lwtime;
-		if (!ff.GetLastWriteTime(lwtime))
+	if (!ff.GetLastWriteTime(lwtime)){
+		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false, "Failed to get file date of %s (%s) - %s", m_partmetfilename, GetFileName(), GetErrorMessage(GetLastError()));
+	}
 		date = safe_mktime(lwtime.GetLocalTm());
-		if (date == -1)
+	if (date == -1){
+		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false, "Failed to convert file date of %s (%s)", m_partmetfilename, GetFileName());
-		
+		}
 		// Mighty Knife: try to correct the daylight saving bug.
 		// Very special. Never activate this in a release version !!!
 //		#ifdef MIGHTY_SUMMERTIME
@@ -949,7 +954,7 @@ bool CPartFile::SavePartFile(){
 		// Since the data types are almost identical (apart from the sign) this should
 		// make neighter a big deal, nor a any difference.
 
-		if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+		if (thePrefs.GetDaylightSavingPatch ()) {
 			if (date != -1) {
 				time_t fdate = date;
 				CorrectLocalFileTime (ff.GetFilePath(),fdate);
@@ -969,7 +974,7 @@ bool CPartFile::SavePartFile(){
 	// Mighty Knife: try to correct the daylight saving bug.
 	// Very special. Never activate this in a release version !!!
 //	#ifdef MIGHTY_SUMMERTIME
-	if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+	if (thePrefs.GetDaylightSavingPatch ()) {
 		time_t lsctmp = lsc;
 		CorrectLocalFileTime (strTmpFile,lsctmp);
 		lsc = lsctmp;
@@ -995,16 +1000,15 @@ bool CPartFile::SavePartFile(){
 
 	try{
 		//version
-		uint8 version = PARTFILE_VERSION;
-		file.Write(&version,1);
+		file.WriteUInt8(PARTFILE_VERSION);
 		//date
-		file.Write(&date,4);
+		file.WriteUInt32(date);
 		//hash
-		file.Write(&m_abyFileHash,16);
-		uint16 parts = hashlist.GetCount();
-		file.Write(&parts,2);
-		for (int x = 0; x != parts; x++)
-			file.Write(hashlist[x],16);
+		file.WriteHash16(m_abyFileHash);
+		UINT parts = hashlist.GetCount();
+		file.WriteUInt16(parts);
+		for (UINT x = 0; x < parts; x++)
+			file.WriteHash16(hashlist[x]);
 		//tags
 		uint32 tagcount = 9/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +(gaplist.GetCount()*2);
 		// Float meta tags are currently not written. All older eMule versions < 0.28b have 
@@ -1031,7 +1035,8 @@ bool CPartFile::SavePartFile(){
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 		if (GetShareOnlyTheNeed()>=0) tagcount ++;
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
-		file.Write(&tagcount,4);
+
+		file.WriteUInt32(tagcount);
 
 		CTag nametag(FT_FILENAME, GetFileName());
 		nametag.WriteTagToFile(&file);
@@ -1056,7 +1061,7 @@ bool CPartFile::SavePartFile(){
 
 		//MORPH - Changed by SiRoB
 		//CTag categorytag(FT_CATEGORY, m_category);
-		CTag categorytag(FT_CATEGORY, (m_category > theApp.glob_prefs->GetCatCount() - 1)?0:m_category);
+		CTag categorytag(FT_CATEGORY, (m_category > thePrefs.GetCatCount() - 1)?0:m_category);
 		categorytag.WriteTagToFile(&file);
 
 		CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, GetLastPublishTimeKadSrc());
@@ -1139,7 +1144,7 @@ bool CPartFile::SavePartFile(){
 			i_pos++;
 		}
 
-		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			file.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk
 				AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
@@ -1164,12 +1169,15 @@ bool CPartFile::SavePartFile(){
 	}
 
 	// after successfully writing the temporary part.met file...
-	if (_tremove(m_fullname) != 0 && errno != ENOENT)
+	if (_tremove(m_fullname) != 0 && errno != ENOENT){
+		if (thePrefs.GetVerbose())
 		AddDebugLogLine(false, _T("Failed to remove \"%s\" - %s"), m_fullname, strerror(errno));
+	}
 
 	if (_trename(strTmpFile, m_fullname) != 0){
 		int iErrno = errno;
-		AddDebugLogLine(false, _T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, strerror(iErrno));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, strerror(iErrno));
 
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_SAVEMET), m_partmetfilename, GetFileName());
@@ -1182,8 +1190,10 @@ bool CPartFile::SavePartFile(){
 	// create a backup of the successfully written part.met file
 	CString BAKName(m_fullname);
 	BAKName.Append(PARTMET_BAK_EXT);
-	if (!::CopyFile(m_fullname, BAKName, FALSE))
-		AddDebugLogLine(false, "Failed to create backup of %s (%s) - %s", m_fullname, GetFileName(), GetErrorMessage(GetLastError()));
+	if (!::CopyFile(m_fullname, BAKName, FALSE)){
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Failed to create backup of %s (%s) - %s", m_fullname, GetFileName(), GetErrorMessage(GetLastError()));
+	}
 
 	return true;
 }
@@ -1205,7 +1215,8 @@ void CPartFile::PartFileHashFinished(CKnownFile* result){
 	delete result;
 	if (!errorfound){
 		if (status == PS_COMPLETING){
-			AddDebugLogLine(true,"Completing file-hashing for \"%s\"", GetFileName());
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(true,"Completing file-hashing for \"%s\"", GetFileName());
 			CompleteFile(true);
 			return;
 		}
@@ -1214,11 +1225,13 @@ void CPartFile::PartFileHashFinished(CKnownFile* result){
 	}
 	else{
 		SetStatus(PS_READY);
-		AddDebugLogLine(true,"File-hashing failed for \"%s\"", GetFileName());
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(true,"File-hashing failed for \"%s\"", GetFileName());
 		SavePartFile();
 		return;
 	}
-	AddDebugLogLine(true,"Completing file-hashing of \"%s\"", GetFileName());
+	if (thePrefs.GetVerbose())
+		AddDebugLogLine(true,"Completing file-hashing of \"%s\"", GetFileName());
 	SetStatus(PS_READY);
 	SavePartFile();
 	theApp.sharedfiles->SafeAddKFile(this);
@@ -1433,8 +1446,14 @@ void CPartFile::UpdateCompletedInfos()
 }
 
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
-void CPartFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) /*const*/
+void CPartFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool bFlat) /*const*/
 { 
+	//We need to find where the dangling pointers are before uncommenting this..
+	if( !IsPartFile() )
+	{
+		CKnownFile::DrawShareStatusBar( dc, rect, onlygreyrect, bFlat );
+		return;
+	}
 	int iWidth=rect->right - rect->left;
 	if (iWidth <= 0)	return;
 	int iHeight=rect->bottom - rect->top;
@@ -1488,7 +1507,7 @@ void CPartFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool 
 	cdcStatus.SelectObject(hOldBitmap);
 } 
 
-void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
+void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 {
 	COLORREF crProgress;
 	COLORREF crHave;
@@ -1531,8 +1550,6 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 	s_ChunkBar.SetFileSize(m_nFileSize);
 	s_ChunkBar.Fill(crHave);
 
-	uint32 allgaps = 0;
-
 	if(status == PS_COMPLETE || status == PS_COMPLETING) {
 		s_ChunkBar.FillRange(0, m_nFileSize, crProgress);
 		s_ChunkBar.Draw(dc, rect->left, rect->top, bFlat);
@@ -1542,8 +1559,9 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 	}
 
 	// red gaps
+	uint32 allgaps = 0;
 	for (POSITION pos = gaplist.GetHeadPosition();pos !=  0;){
-		Gap_Struct* cur_gap = gaplist.GetNext(pos);
+		const Gap_Struct* cur_gap = gaplist.GetNext(pos);
 		allgaps += cur_gap->end - cur_gap->start;
 		bool gapdone = false;
 		uint32 gapstart = cur_gap->start;
@@ -1552,9 +1570,9 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 			if (gapstart >= i*PARTSIZE && gapstart <=  (i+1)*PARTSIZE){ // is in this part?
 				if (gapend <= (i+1)*PARTSIZE)
 					gapdone = true;
-				else{
+				else
 					gapend = (i+1)*PARTSIZE; // and next part
-				}
+
 				// paint
 				COLORREF color;
 				if (m_SrcpartFrequency.GetCount() >= (INT_PTR)i && m_SrcpartFrequency[(uint16)i])  // frequency?
@@ -1587,8 +1605,8 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 
 	// yellow pending parts
 	for (POSITION pos = requestedblocks_list.GetHeadPosition();pos !=  0;){
-		Requested_Block_Struct* block =  requestedblocks_list.GetNext(pos);
-		s_ChunkBar.FillRange((block->StartOffset + block->transferred), block->EndOffset,  crPending);
+		const Requested_Block_Struct* block =  requestedblocks_list.GetNext(pos);
+		s_ChunkBar.FillRange(block->StartOffset + block->transferred, block->EndOffset,  crPending);
 	}
 
 	s_ChunkBar.Draw(dc, rect->left, rect->top, bFlat);
@@ -1681,12 +1699,12 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 }
 
 // SLUGFILLER: hideOS
-void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client) /*const*/
+void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*const*/
 {
 	// SLUGFILLER: hideOS
 	CArray<uint32, uint32> partspread;
 	uint16 parts;
-	uint8 hideOS = GetHideOS()>=0?GetHideOS():theApp.glob_prefs->GetHideOvershares();
+	uint8 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
 	if (hideOS && client) {
 		parts = CalcPartSpread(partspread, client);
 	} else {	// simpler to set as 0 than to create another loop...
@@ -1696,13 +1714,12 @@ void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client) /*const*/
 			partspread[i] = 0;
 		hideOS = 1;
 	}
-	file->Write(&parts,2);
-	ASSERT(parts != 0);
+	file->WriteUInt16(parts);
 	// SLUGFILLER: hideOS
-	uint16 done = 0;
+	UINT done = 0;
 	while (done != parts){
 		uint8 towrite = 0;
-		for (uint32 i = 0;i != 8;i++){
+		for (UINT i = 0; i < 8; i++){
 			if (partspread[done] < hideOS)	// SLUGFILLER: hideOS
 				if (IsPartShareable(done))	// SLUGFILLER: SafeHash
 					towrite |= (1<<i);
@@ -1710,14 +1727,13 @@ void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client) /*const*/
 			if (done == parts)
 				break;
 		}
-		file->Write(&towrite,1);
+		file->WriteUInt8(towrite);
 	}
 }
 
-void CPartFile::WriteCompleteSourcesCount(CFile* file) const
+void CPartFile::WriteCompleteSourcesCount(CSafeMemFile* file) const
 {
-	uint16 completecount = m_nCompleteSourcesCount;
-	file->Write(&completecount,2);
+	file->WriteUint16(m_nCompleteSourcesCount);
 }
 
 // -khaos--+++> These values are now cached.
@@ -1782,7 +1798,7 @@ void CPartFile::RemoveDownloadingSource(CUpDownClient* client){
 
 uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/, uint32 friendReduceddownload) //MORPH - Added by Yun.SF3, ZZ Upload System
 {
-	if (_iDbgHeap >= 2)
+	if (thePrefs.m_iDbgHeap >= 2)
 		ASSERT_VALID(this);
 
 	uint16	nOldTransSourceCount  = GetSrcStatisticsValue(DS_DOWNLOADING) ; 
@@ -1790,7 +1806,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	CUpDownClient* cur_src;
 
 	// If buffer size exceeds limit, or if not written within time limit, flush data
-	if ((m_nTotalBufferData > theApp.glob_prefs->GetFileBufferSize()) || (dwCurTick > (m_nLastBufferFlushTime + BUFFER_TIME_LIMIT))){
+	if ((m_nTotalBufferData > thePrefs.GetFileBufferSize()) || (dwCurTick > (m_nLastBufferFlushTime + BUFFER_TIME_LIMIT)))
+	{
 		// Avoid flushing while copying preview file
 		if (!m_bPreviewing)
 			FlushBuffer();
@@ -1799,31 +1816,41 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	datarate = 0;
 
 	// calculate datarate, set limit etc.
-	if(m_icounter < 10){
+	if(m_icounter < 10)
+	{
 		uint32 cur_datarate;
-		for(POSITION pos = m_downloadingSourceList.GetHeadPosition();pos!=0;){
+		for(POSITION pos = m_downloadingSourceList.GetHeadPosition();pos!=0;)
+		{
 			cur_src = m_downloadingSourceList.GetNext(pos);
-			if (_iDbgHeap >= 2)
+			if (thePrefs.m_iDbgHeap >= 2)
 				ASSERT_VALID( cur_src );
-			if(cur_src && cur_src->GetDownloadState() == DS_DOWNLOADING){
+			if(cur_src && cur_src->GetDownloadState() == DS_DOWNLOADING)
+			{
 				ASSERT( cur_src->socket );
-				if (cur_src->socket){
-						cur_datarate = cur_src->CalculateDownloadRate();
-						datarate+=cur_datarate;
-						if(reducedownload){
-							uint32 limit = reducedownload*cur_datarate/1000;
-							if(limit<1000 && reducedownload == 200)
-								limit +=1000;
-							else if(limit<1)
-								limit = 1;
-							cur_src->socket->SetDownloadLimit(limit);
-						}
+				if (cur_src->socket)
+				{
+					cur_datarate = cur_src->CalculateDownloadRate();
+					datarate+=cur_datarate;
+					//MORPH - Added by Yun.SF3, ZZ Upload System
+					uint32 curClientReducedDownload = reducedownload;
+					if(cur_src->IsFriend() && cur_src->GetFriendSlot())
+						curClientReducedDownload = friendReduceddownload;
+					if(curClientReducedDownload)
+					{
+						uint32 limit = curClientReducedDownload*cur_datarate/1000;
+						if(limit<1000 && curClientReducedDownload == 200)
+						//MORPH - Added by Yun.SF3, ZZ Upload System
+							limit +=1000;
+						else if(limit<1)
+							limit = 1;
+						cur_src->socket->SetDownloadLimit(limit);
+					}
 				}
 			}
 		}
 	}
-	else{
-
+	else
+	{
 		// -khaos--+++> Moved this here, otherwise we were setting our permanent variables to 0 every tenth of a second...
 		memset(m_anStates,0,sizeof(m_anStates));
 		memset(src_stats,0,sizeof(src_stats));
@@ -1834,15 +1861,17 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 		uint16 srcPosReask = 0;
 		//MORPH END   - Added by SiRoB, Spread Reask For Better SUC functioning and more
 		
-		for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;){
+		for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
+		{
 			cur_src = srclist.GetNext(pos);
-			if (_iDbgHeap >= 2)
+			if (thePrefs.m_iDbgHeap >= 2)
 				ASSERT_VALID( cur_src );
 
 			// BEGIN -rewritten- refreshing statistics (no need for temp vars since it is not multithreaded)
 			nCountForState = cur_src->GetDownloadState();
 			//special case which is not yet set as downloadstate
-			if (nCountForState == DS_ONQUEUE){
+			if (nCountForState == DS_ONQUEUE)
+			{
 				if( cur_src->IsRemoteQueueFull() )
 					nCountForState = DS_REMOTEQUEUEFULL;
 			}
@@ -1854,20 +1883,22 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			ASSERT( nCountForState < sizeof(m_anStates)/sizeof(m_anStates[0]) );
 			m_anStates[nCountForState]++;
 
-			switch (cur_src->GetDownloadState()){
+			DWORD dwLastCheck = dwCurTick - cur_src->GetLastAskedTime();
+
+			switch (cur_src->GetDownloadState())
+			{
 				case DS_DOWNLOADING:{
-					//MORPH - Added by Yun.SF3, ZZ Upload System
-					uint32 curClientReducedDownload = reducedownload;
-					if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
-						curClientReducedDownload = friendReduceddownload;
-					}
-					//MORPH - Added by Yun.SF3, ZZ Upload System
 					ASSERT( cur_src->socket );
-					if (cur_src->socket){
+					if (cur_src->socket)
+					{
 						uint32 cur_datarate = cur_src->CalculateDownloadRate();
 						datarate += cur_datarate;
 						//MORPH - Added by Yun.SF3, ZZ Upload System
-						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING){
+						uint32 curClientReducedDownload = reducedownload;
+						if(cur_src->IsFriend() && cur_src->GetFriendSlot())
+							curClientReducedDownload = friendReduceddownload;
+						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
+						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;
 							if (limit < 1000 && curClientReducedDownload == 200)
 						//MORPH - Added by Yun.SF3, ZZ Upload System
@@ -1884,38 +1915,60 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				case DS_BANNED:
 				case DS_ERROR:
 					break;	
-				case DS_LOWTOLOWIP:	// if we now have a high ip we can ask
-					if( ((dwCurTick - lastpurgetime) > 30000) && (this->GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )) ){
+				// Check if something has changed with our or their ID state..
+				case DS_LOWTOLOWIP:
+				{
+					//Make sure this source is still a LowID Client..
+					if( cur_src->HasLowID() )
+					{
+						//Make sure we still cannot callback to this Client..
+						if( !theApp.DoCallback( cur_src ) )
+						{
+							//If we are almost maxed on sources, slowly remove these client to see if we can find a better source.
+							if( ((dwCurTick - lastpurgetime) > SEC2MS(30)) && (this->GetSourceCount() >= (thePrefs.GetMaxSourcePerFile()*.8 )) )
+							{
 						theApp.downloadqueue->RemoveSource( cur_src );
 						lastpurgetime = dwCurTick;
+							}
 						break;
 					}
-					if (theApp.IsFirewalled())
+					}
+					// This should no longer be a LOWTOLOWIP..
+					cur_src->SetDownloadState(DS_ONQUEUE);
 						break;
-				case DS_NONEEDEDPARTS:{ 
+				}
+				case DS_NONEEDEDPARTS:
+				{
 					// we try to purge noneeded source, even without reaching the limit
-					if( cur_src->GetDownloadState() == DS_NONEEDEDPARTS && (dwCurTick - lastpurgetime) > 40000 ){
+					if( (dwCurTick - lastpurgetime) > SEC2MS(40) ){
 						if( !cur_src->SwapToAnotherFile( false , false, false , NULL ) ){
 							//however we only delete them if reaching the limit
-							if (GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )){
+							if (GetSourceCount() >= (thePrefs.GetMaxSourcePerFile()*.8 )){
 								theApp.downloadqueue->RemoveSource( cur_src );
 								lastpurgetime = dwCurTick;
 								break; //Johnny-B - nothing more to do here (good eye!)
 							}			
 						}
-						else{
+						else
+						{
 							cur_src->DontSwapTo(this);
 							lastpurgetime = dwCurTick;
 							break;
 						}
 					}
 					// doubled reasktime for no needed parts - save connections and traffic
-					if (!((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME*2))
+					if (!((!cur_src->GetLastAskedTime()) || (dwLastCheck > FILEREASKTIME*2)))
 						break; 
+					// Recheck this client to see if still NNP.. Set to DS_NONE so that we force a TCP reask next time..
+					cur_src->SetDownloadState(DS_NONE);
+					break; 
 				}
-				case DS_ONQUEUE:{
-					if( cur_src->IsRemoteQueueFull() ) {
-						if( ((dwCurTick - lastpurgetime) > 60000) && (this->GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )) ){
+				case DS_ONQUEUE:
+				{
+					if( cur_src->IsRemoteQueueFull() )
+					{
+						if( ((dwCurTick - lastpurgetime) > MIN2MS(1)) && (GetSourceCount() >= (thePrefs.GetMaxSourcePerFile()*.8 )) )
+						{
 							theApp.downloadqueue->RemoveSource( cur_src );
 							lastpurgetime = dwCurTick;
 							break; //Johnny-B - nothing more to do here (good eye!)
@@ -1931,15 +1984,15 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 						// Spread Reask
 						if (!cur_src->GetLastForceA4AFTick() || (dwCurTick - cur_src->GetLastForceA4AFTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
 						{
-							if(theApp.glob_prefs->UseSmartA4AFSwapping())
+							if(thePrefs.UseSmartA4AFSwapping())
 								if (cur_src->SwapToForcedA4AF())
 									break; // This source was transferred, nothing more to do here.
 						}
 						if (!cur_src->GetLastBalanceTick() || (dwCurTick - cur_src->GetLastBalanceTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
 						{
-							uint8 iA4AFMode = theApp.glob_prefs->AdvancedA4AFMode();
-							if (iA4AFMode && theApp.glob_prefs->GetCategory(GetCategory())->iAdvA4AFMode)
-								iA4AFMode = theApp.glob_prefs->GetCategory(GetCategory())->iAdvA4AFMode;
+							uint8 iA4AFMode = thePrefs.AdvancedA4AFMode();
+							if (iA4AFMode && thePrefs.GetCategory(GetCategory())->iAdvA4AFMode)
+								iA4AFMode = thePrefs.GetCategory(GetCategory())->iAdvA4AFMode;
 							if (iA4AFMode == 1 && cur_src->BalanceA4AFSources()) 
 								break; // This source was transferred, nothing more to do here.
 							if (iA4AFMode == 2 && cur_src->StackA4AFSources())
@@ -1948,34 +2001,27 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					}
 					//MORPH END - Added by SiRoB, Due to Khaos A4AF
 					//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-					if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && notSeenCompleteSource())
+					if ((cur_src->GetLastAskedTime()) && (dwLastCheck < FILEREASKTIME*2) && notSeenCompleteSource())
 						break;//shadow#(onlydownloadcompletefiles)
 					//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
-					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME-20000))
+					//Give up to 1 min for UDP to respond.. If we are within on min on TCP, do not try..
+					if (theApp.IsConnected() && ((cur_src->GetLastAskedTime()) && (dwLastCheck > FILEREASKTIME-MIN2MS(2) && dwLastCheck < FILEREASKTIME-SEC2MS(1))))
 						cur_src->UDPReaskForDownload();
-					// START enkeyDEV(th1) -L2HAC- highid side, "prepare" phase
-					// (emulates a "Connecting via server..." without socket timeout)
-					if (theApp.serverconnect->IsConnected()
-						&& (cur_src->GetLastAskedTime())
-						&& ((dwCurTick - cur_src->GetLastAskedTime()) > (FILEREASKTIME - L2HAC_PREPARE_PRECEDE))
-						&& cur_src->HasLowID()
-						&& cur_src->GetL2HACTime()
-						&& !theApp.serverconnect->IsLowID())
-					{
-						cur_src->SetDownloadState(DS_WAITCALLBACK);
-					}
-					// END enkeyDEV(th1) -L2HAC-
 				}
 				case DS_CONNECTING:
 				case DS_TOOMANYCONNS:
 				case DS_NONE:
 				case DS_WAITCALLBACK:
+				{
 					//MORPH START - Changed by SiRoB, Changed Spread Reask For Better SUC result and more
-					//if (theApp.serverconnect->IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME)){
+					/*
+					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME))
+					*/
 					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick > (cur_src->GetLastAskedTime()+FILEREASKTIME)) &&  (dwCurTick % FILEREASKTIME > (UINT32)((FILEREASKTIME / AvailableSrcCount) * (srcPosReask++ % AvailableSrcCount)))))){
 					//MORPH END   - Changed by SiRoB, Spread Reask For Better SUC functioning and more
-						cur_src->AskForDownload(); // NOTE: This may *delete* the client!!
-						cur_src = NULL; // TODO: implement some 'result' from 'AskForDownload' to know whether the client was deleted.
+					{
+						if(!cur_src->AskForDownload()) // NOTE: This may *delete* the client!!
+							break; //I left this break here just as a reminder just in case re rearange things..
 					}
 					break;
 			}
@@ -1983,7 +2029,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 
 		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		//if (IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
-		if (!theApp.glob_prefs->AdvancedA4AFMode() && !theApp.glob_prefs->UseSmartA4AFSwapping() && IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
+		if (!thePrefs.AdvancedA4AFMode() && !thePrefs.UseSmartA4AFSwapping() && IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
 		//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		{
 			m_LastNoNeededCheck = dwCurTick;
@@ -2004,38 +2050,36 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				}
 			}
 		}
-		if( theApp.glob_prefs->GetMaxSourcePerFileUDP() > GetSourceCount()){
-			if (theApp.downloadqueue->DoKademliaFileRequest() && (theApp.kademlia->getStatus()->m_totalFile < KADEMLIATOTALFILE) && (!lastsearchtimeKad || (dwCurTick - lastsearchtimeKad) > KADEMLIAREASKTIME) &&  theApp.kademlia->isConnected() && theApp.IsConnected() && !stopped){ //Once we can handle lowID users in Kad, we remove the second IsConnected
+		if( thePrefs.GetMaxSourcePerFileUDP() > GetSourceCount()){
+			if (theApp.downloadqueue->DoKademliaFileRequest() && (Kademlia::CKademlia::getTotalFile() < KADEMLIATOTALFILE) && (!lastsearchtimeKad || (dwCurTick - lastsearchtimeKad) > KADEMLIAREASKTIME) &&  Kademlia::CKademlia::isConnected() && theApp.IsConnected() && !stopped){ //Once we can handle lowID users in Kad, we remove the second IsConnected
 				//Kademlia
 				theApp.downloadqueue->SetLastKademliaFileRequest();
-				lastsearchtimeKad = dwCurTick;
-				if (Kademlia::CTimer::getThreadID() && !GetKadFileSearchID()){
+				if (Kademlia::CKademlia::isRunning() && !GetKadFileSearchID())
+				{
 					Kademlia::CUInt128 kadFileID;
 					kadFileID.setValue(GetFileHash());
-					Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(KademliaResultFileCallback, kadFileID);
-					pSearch->setSearchTypes(Kademlia::CSearch::FILE);
-					if (pSearch){
-						uint32 nSearchID = pSearch->getSearchID();
-						if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
-							Kademlia::CSearchManager::deleteSearch(pSearch);
-						else
-							SetKadFileSearchID(nSearchID);
+					Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(Kademlia::CSearch::FILE, true, kadFileID);
+					if (pSearch)
+					{
+						lastsearchtimeKad = dwCurTick;
+						SetKadFileSearchID(pSearch->getSearchID());
 					}
+						else
+						SetKadFileSearchID(0);
 				}
 			}
 		}
 		else{
-			if(GetKadFileSearchID()){
-				if (Kademlia::CTimer::getThreadID())
-					VERIFY( PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STOPSEARCH, 0, GetKadFileSearchID()));
-				SetKadFileSearchID(0);
+			if(GetKadFileSearchID())
+			{
+				Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), true);
 			}
 		}
 
 
 		// check if we want new sources from server
 		if ( !m_bLocalSrcReqQueued && ((!lastsearchtime) || (dwCurTick - lastsearchtime) > SERVERREASKTIME) && theApp.serverconnect->IsConnected()
-			&& theApp.glob_prefs->GetMaxSourcePerFileSoft() > GetSourceCount() && !stopped )
+			&& thePrefs.GetMaxSourcePerFileSoft() > GetSourceCount() && !stopped )
 		{
 			m_bLocalSrcReqQueued = true;
 			theApp.downloadqueue->SendLocalSrcRequest(this);
@@ -2045,7 +2089,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 		if (count == 3){
 			count = 0;
 			// khaos::kmod+ Save/Load Sources
-			if (theApp.glob_prefs->UseSaveLoadSources())
+			if (thePrefs.UseSaveLoadSources())
 			m_sourcesaver.Process(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
 			// khaos::kmod-
 			UpdateAutoDownPriority();
@@ -2061,14 +2105,57 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 		//else
 		//	UpdateDisplayedInfo(true);
 		// khaos::categorymod-
-		if (theApp.glob_prefs->ShowCatTabInfos())
+		if (thePrefs.ShowCatTabInfos())
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 	}
 
 	return datarate;
 }
 
-bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, uint8* pdebug_lowiddropped)
+bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped)
+{
+	// MOD Note: Do not change this part - Merkur
+	if (theApp.serverconnect->IsConnected())
+	{
+		if(theApp.serverconnect->IsLowID())
+		{
+			if(theApp.serverconnect->GetClientID() == userid && theApp.serverconnect->GetCurrentServer()->GetIP() == serverip && theApp.serverconnect->GetCurrentServer()->GetPort() == serverport )
+				return false;
+			if(theApp.serverconnect->GetLocalIP() == userid)
+				return false;
+		}
+		else
+		{
+			if(theApp.serverconnect->GetClientID() == userid && thePrefs.GetPort() == port)
+				return false;
+		}
+	}
+	if (Kademlia::CKademlia::isConnected())
+	{
+		if(Kademlia::CKademlia::isFirewalled())
+		{
+			//This will change with LowID support is added..
+			if(ntohl(Kademlia::CKademlia::getPrefs()->getIPAddress()) == userid && thePrefs.GetPort() == port)
+				return false;
+		}
+		else
+		{
+			if(ntohl(Kademlia::CKademlia::getIPAddress()) == userid && thePrefs.GetPort() == port)
+				return false;
+		}
+	}
+
+	if (IsLowIDED2K(userid) && theApp.IsFirewalled())
+	{
+		if (pdebug_lowiddropped)
+			(*pdebug_lowiddropped)++;
+		return false;
+	}
+	// MOD Note - end
+	return true;
+}
+
+/*bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, uint8* pdebug_lowiddropped)
 {
 	// MOD Note: Do not change this part - Merkur
 	// check first if we are this source
@@ -2079,7 +2166,7 @@ bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16
 	else if (theApp.serverconnect->GetClientID() == userid){
 #ifdef _DEBUG
 		// bluecow - please do not remove this in the debug version - i need this for testing.
-		if (theApp.serverconnect->IsLowID() || theApp.glob_prefs->GetPort() == port)
+		if (theApp.serverconnect->IsLowID() || thePrefs.GetPort() == port)
 #endif
 		return false;
 	}
@@ -2092,63 +2179,69 @@ bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16
 	
 	return true;
 }
+*/
 
-void CPartFile::AddSources(CMemFile* sources,uint32 serverip, uint16 serverport)
+
+void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 serverport)
 {
-	uint8 count;
-	sources->Read(&count,1);
+	UINT count = sources->ReadUInt8();
 
-	if (stopped){
+	if (stopped)
+	{
 		// since we may received multiple search source UDP results we have to "consume" all data of that packet
 		sources->Seek(count*(4+2), SEEK_SET);
 		return;
 	}
 
-	uint8 debug_lowiddropped = 0;
-	uint8 debug_possiblesources = 0;
-	for (int i = 0;i != count;i++){
-		uint32 userid;
-		sources->Read(&userid,4);
-		uint16 port;
-		sources->Read(&port,2);
+	UINT debug_lowiddropped = 0;
+	UINT debug_possiblesources = 0;
+	for (UINT i = 0; i < count; i++)
+	{
+		uint32 userid = sources->ReadUInt32();
+		uint16 port = sources->ReadUInt16();
 
-		// "Filter LAN IPs" and "IPfilter" the received sources IP addresses
-		if (userid >= 16777216){
-			if (!IsGoodIP(userid)){ // check for 0-IP, localhost and optionally for LAN addresses
-				if (theApp.glob_prefs->GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored source (IP=%s) received from server"), inet_ntoa(*(in_addr*)&userid));
+		// check the HighID(IP) - "Filter LAN IPs" and "IPfilter" the received sources IP addresses
+		if (!IsLowIDED2K(userid))
+		{
+			if (!IsGoodIP(userid))
+			{ 
+				// check for 0-IP, localhost and optionally for LAN addresses
+				if (thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Ignored source (IP=%s) received from server - bad IP"), inet_ntoa(*(in_addr*)&userid));
 				continue;
 			}
-			if (theApp.ipfilter->IsFiltered(userid)){
-				if (theApp.glob_prefs->GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("IPfiltered source IP=%s (%s) received from server"), inet_ntoa(*(in_addr*)&userid), theApp.ipfilter->GetLastHit());
+			if (theApp.ipfilter->IsFiltered(userid))
+			{
+				if (thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Ignored source (IP=%s) received from server - IP filter (%s)"), inet_ntoa(*(in_addr*)&userid), theApp.ipfilter->GetLastHit());
 				theApp.stat_filteredclients++; //MORPH - Added by SiRoB, To comptabilise ipfiltered
 				continue;
 			}
 		}
 
 		if (!CanAddSource(userid, port, serverip, serverport, &debug_lowiddropped))
+		{
+			if (thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Ignored source (IP=%s) received from server"), inet_ntoa(*(in_addr*)&userid));
 			continue;
+		}
 
-		if( theApp.glob_prefs->GetMaxSourcePerFile() > this->GetSourceCount() ){
+		if( thePrefs.GetMaxSourcePerFile() > this->GetSourceCount() )
+		{
 			debug_possiblesources++;
 			CUpDownClient* newsource = new CUpDownClient(this,port,userid,serverip,serverport,true);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
 		}
-		else{
+		else
+		{
 			// since we may received multiple search source UDP results we have to "consume" all data of that packet
 			sources->Seek((count-i)*(4+2), SEEK_SET);
-
-			//Kademlia::CSearchManager::stopSearch(kadFileSearchID);
-			if(GetKadFileSearchID()){
-				if (Kademlia::CTimer::getThreadID())
-					VERIFY( PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STOPSEARCH, 0, GetKadFileSearchID()) );
-				SetKadFileSearchID(0);
-			}
+			if(GetKadFileSearchID())
+				Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), false);
 			break;
 		}
 	}
-	if ( theApp.glob_prefs->GetDebugSourceExchange() )
+	if ( thePrefs.GetDebugSourceExchange() )
 		AddDebugLogLine(false,"RCV: %i sources from server, %i low id dropped, %i possible sources File(%s)",count,debug_lowiddropped,debug_possiblesources, GetFileName());
 }
 
@@ -2186,8 +2279,8 @@ void CPartFile::AddAvailServer(SServer server)
 //Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 // SLUGFILLER: heapsortCompletesrc
-static void HeapSort(CArray<uint16,uint16> &count, int32 first, int32 last){
-	int32 r;
+static void HeapSort(CArray<uint16,uint16> &count, uint32 first, uint32 last){
+	uint32 r;
 	for ( r = first; !(r & 0x80000000) && (r<<1) < last; ){
 		uint32 r2 = (r<<1)+1;
 		if (r2 != last)
@@ -2205,8 +2298,15 @@ static void HeapSort(CArray<uint16,uint16> &count, int32 first, int32 last){
 }
 // SLUGFILLER: heapsortCompletesrc
 
-void CPartFile::NewSrcPartsInfo()
+void CPartFile::UpdatePartsInfo()
 {
+	//We need to find where the dangling pointers are before uncommenting this..
+	if( !IsPartFile() )
+	{
+		CKnownFile::UpdatePartsInfo();
+		return;
+	}
+
 	// Cache part count
 	uint16 partcount = GetPartCount();
 	bool flag = (time(NULL) - m_nCompleteSourcesTime > 0); 
@@ -2219,7 +2319,7 @@ void CPartFile::NewSrcPartsInfo()
 	
 	CArray<uint16,uint16> count;
 	if (flag)
-		count.SetSize(0, m_ClientUploadList.GetSize());
+		count.SetSize(0, srclist.GetSize());
 	for (POSITION pos = srclist.GetHeadPosition(); pos != 0; )
 	{
 		CUpDownClient* cur_src = srclist.GetNext(pos);
@@ -2249,11 +2349,11 @@ void CPartFile::NewSrcPartsInfo()
 		if (m_nCompleteSourcesCount)
 			count.Add(m_nCompleteSourcesCount);
 	
-		int32 n = count.GetSize();
+		int n = count.GetSize();
 		if (n > 0)
 		{
 			// SLUGFILLER: heapsortCompletesrc
-			int32 r;
+			int r;
 			for (r = n/2; r--; )
 				HeapSort(count, r, n-1);
 			for (r = n; --r; ){
@@ -2265,9 +2365,9 @@ void CPartFile::NewSrcPartsInfo()
 			// SLUGFILLER: heapsortCompletesrc
 
 			// calculate range
-			int32 i= n >> 1;		// (n / 2)
-			int32 j= (n * 3) >> 2;	// (n * 3) / 4
-			int32 k= (n * 7) >> 3;	// (n * 7) / 8
+			int i = n >> 1;			// (n / 2)
+			int j = (n * 3) >> 2;	// (n * 3) / 4
+			int k = (n * 7) >> 3;	// (n * 7) / 8
 			if (n < 5)
 			{
 				m_nCompleteSourcesCount= count.GetAt(i);
@@ -2326,6 +2426,11 @@ bool  CPartFile::RemoveBlockFromList(uint32 start,uint32 end)
 	return bResult;
 }
 
+bool CPartFile::IsInRequestedBlockList(const Requested_Block_Struct* block) const
+{
+	return requestedblocks_list.Find(const_cast<Requested_Block_Struct*>(block)) != NULL;
+}
+
 void CPartFile::RemoveAllRequestedBlocks(void)
 {
 	requestedblocks_list.RemoveAll();
@@ -2334,11 +2439,9 @@ void CPartFile::RemoveAllRequestedBlocks(void)
 void CPartFile::CompleteFile(bool bIsHashingDone)
 {
 	theApp.downloadqueue->RemoveLocalServerRequest(this);
-	if(GetKadFileSearchID()){
-		if (Kademlia::CTimer::getThreadID())
-			VERIFY( PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STOPSEARCH, 0, GetKadFileSearchID()) );
-		SetKadFileSearchID(0);
-	}
+	if(GetKadFileSearchID())
+		Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), false);
+
 	if( this->srcarevisible )
 		theApp.emuledlg->transferwnd->downloadlistctrl.HideSources(this);
 	
@@ -2347,7 +2450,7 @@ void CPartFile::CompleteFile(bool bIsHashingDone)
 		SetStatus(PS_COMPLETING);
 		datarate = 0;
 		CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-		addfilethread->SetValues(0,theApp.glob_prefs->GetTempDir(),RemoveFileExtension(m_partmetfilename),this);
+		addfilethread->SetValues(0,thePrefs.GetTempDir(),RemoveFileExtension(m_partmetfilename),this);
 		addfilethread->ResumeThread();	
 		return;
 	}
@@ -2363,7 +2466,7 @@ void CPartFile::CompleteFile(bool bIsHashingDone)
 			throw GetResString(IDS_ERR_FILECOMPLETIONTHREAD);
 	}
 	theApp.emuledlg->transferwnd->downloadlistctrl.ShowFilesCount();
-	if (theApp.glob_prefs->ShowCatTabInfos() ) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
+	if (thePrefs.ShowCatTabInfos() ) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 	UpdateDisplayedInfo(true);
 }
 
@@ -2395,14 +2498,17 @@ void UncompressFile(LPCTSTR pszFilePath)
 
 	HANDLE hFile = CreateFile(pszFilePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile == INVALID_HANDLE_VALUE){
-		theApp.emuledlg->AddDebugLogLine(true, _T("Failed to open file \"%s\" for decompressing - %s"), pszFilePath, GetErrorMessage(GetLastError(), 1));
+		if (thePrefs.GetVerbose())
+			theApp.emuledlg->QueueDebugLogLine(true, _T("Failed to open file \"%s\" for decompressing - %s"), pszFilePath, GetErrorMessage(GetLastError(), 1));
 		return;
 	}
 	
 	USHORT usInData = COMPRESSION_FORMAT_NONE;
 	DWORD dwReturned = 0;
-	if (!DeviceIoControl(hFile, FSCTL_SET_COMPRESSION, &usInData, sizeof usInData, NULL, 0, &dwReturned, NULL))
-		theApp.emuledlg->AddDebugLogLine(true, _T("Failed to decompress file \"%s\" - %s"), pszFilePath, GetErrorMessage(GetLastError(), 1));
+	if (!DeviceIoControl(hFile, FSCTL_SET_COMPRESSION, &usInData, sizeof usInData, NULL, 0, &dwReturned, NULL)){
+		if (thePrefs.GetVerbose())
+			theApp.emuledlg->QueueDebugLogLine(true, _T("Failed to decompress file \"%s\" - %s"), pszFilePath, GetErrorMessage(GetLastError(), 1));
+	}
 	CloseHandle(hFile);
 }
 
@@ -2418,11 +2524,12 @@ BOOL CPartFile::PerformFileComplete()
 
 	CString strNewname;
 	CString indir;
-	if (PathFileExists( theApp.glob_prefs->GetCategory(GetCategory())->incomingpath)) {
-		indir=theApp.glob_prefs->GetCategory(GetCategory())->incomingpath;
+	if (PathFileExists( thePrefs.GetCategory(GetCategory())->incomingpath)) {
+		indir=thePrefs.GetCategory(GetCategory())->incomingpath;
 		strNewname.Format("%s\\%s",indir,newfilename);
-	} else{
-		indir=theApp.glob_prefs->GetIncomingDir();
+	}
+	else{
+		indir=thePrefs.GetIncomingDir();
 		strNewname.Format("%s\\%s",indir,newfilename);
 	}
 
@@ -2434,7 +2541,7 @@ BOOL CPartFile::PerformFileComplete()
 	catch(CFileException* error){
 		char buffer[MAX_CFEXP_ERRORMSG];
 		error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
-		AddLogLine(true, GetResString(IDS_ERR_FILEERROR), m_partmetfilename, GetFileName(), buffer);
+		theApp.emuledlg->QueueLogLine(true, GetResString(IDS_ERR_FILEERROR), m_partmetfilename, GetFileName(), buffer);
 		error->Delete();
 		//return false;
 	}
@@ -2478,9 +2585,9 @@ BOOL CPartFile::PerformFileComplete()
 		CString strTestName;
 		do {
 			namecount++;
-			strTestName.Format("%s\\%s(%d).%s", indir,
-			newfilename, namecount, min(ext + 1, newfilename + length));
-		} while(PathFileExists(strTestName));
+			strTestName.Format("%s\\%s(%d).%s", indir, newfilename, namecount, min(ext + 1, newfilename + length));
+		}
+		while (PathFileExists(strTestName));
 		strNewname = strTestName;
 	}
 	delete[] newfilename;
@@ -2488,16 +2595,16 @@ BOOL CPartFile::PerformFileComplete()
 	if (rename(strPartfilename,strNewname)){
 		if (this){
 			if (errno == ENOENT && strNewname.GetLength() >= MAX_PATH)
-				AddLogLine(true,GetResString(IDS_ERR_COMPLETIONFAILED) + _T(" - \"%s\": Path too long"),GetFileName(), strNewname);
+				theApp.emuledlg->QueueLogLine(true,GetResString(IDS_ERR_COMPLETIONFAILED) + _T(" - \"%s\": Path too long"),GetFileName(), strNewname);
 			else
-				AddLogLine(true,GetResString(IDS_ERR_COMPLETIONFAILED) + _T(" - \"%s\": ") + CString(strerror(errno)),GetFileName(), strNewname);
+				theApp.emuledlg->QueueLogLine(true,GetResString(IDS_ERR_COMPLETIONFAILED) + _T(" - \"%s\": ") + CString(strerror(errno)),GetFileName(), strNewname);
 		}
 		paused = true;
 		stopped = true;
 		SetStatus(PS_ERROR);
 		m_bCompletionError = true;
-		if (theApp.glob_prefs->StartNextFile())
-			theApp.downloadqueue->StartNextFile(GetCategory());
+		if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+			VERIFY( PostMessage(theApp.emuledlg->m_hWnd, TM_FILECOMPLETED, FILE_COMPLETION_THREAD_FAILED, (LPARAM)this) );
 		return FALSE;
 	}
 
@@ -2525,7 +2632,7 @@ BOOL CPartFile::PerformFileComplete()
 		// make neighter a big deal, nor a any difference.
 		//
 		// Normalize time stamp
-		if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+		if (thePrefs.GetDaylightSavingPatch ()) {
 			time_t fdate2 = date;
 			CorrectLocalFileTime (strNewname,fdate2);
 			date = fdate2;
@@ -2538,7 +2645,7 @@ BOOL CPartFile::PerformFileComplete()
 
 	// remove part.met file
 	if (remove(m_fullname))
-		AddLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(strerror(errno)),m_fullname);
+		theApp.emuledlg->QueueLogLine(true,GetResString(IDS_ERR_DELETEFAILED) + _T(" - ") + CString(strerror(errno)),m_fullname);
 	// khaos::kmod+ Save/Load Sources
 	else
 		m_sourcesaver.DeleteFile(this); //<<-- enkeyDEV(Ottavio84) -New SLS-
@@ -2548,12 +2655,12 @@ BOOL CPartFile::PerformFileComplete()
 	CString BAKName(m_fullname);
 	BAKName.Append(PARTMET_BAK_EXT);
 	if (_taccess(BAKName, 0) == 0 && !::DeleteFile(BAKName))
-		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + GetErrorMessage(GetLastError()), BAKName);
+		theApp.emuledlg->QueueLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + GetErrorMessage(GetLastError()), BAKName);
 
 	BAKName = m_fullname;
 	BAKName.Append(PARTMET_TMP_EXT);
 	if (_taccess(BAKName, 0) == 0 && !::DeleteFile(BAKName))
-		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + GetErrorMessage(GetLastError()), BAKName);
+		theApp.emuledlg->QueueLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + GetErrorMessage(GetLastError()), BAKName);
 
 	// initialize 'this' part file for being a 'complete' file
 	m_fullname = strNewname;
@@ -2561,39 +2668,62 @@ BOOL CPartFile::PerformFileComplete()
 	SetFilePath(m_fullname);
 	SetStatus(PS_COMPLETE);
 	// paused = false; // khaos::kmod+ No longer necessary.
-	// give visual response
-	AddLogLine(true,GetResString(IDS_DOWNLOADDONE),GetFileName());
-	theApp.emuledlg->ShowNotifier(GetResString(IDS_TBN_DOWNLOADDONE)+"\n"+GetFileName(), TBN_DLOAD);
-	if (renamed)
-		AddLogLine(true, GetResString(IDS_DOWNLOADRENAMED), strrchr(strNewname, '\\') + 1);
-	
-	theApp.knownfiles->SafeAddKFile(this);
-	theApp.downloadqueue->RemoveFile(this);
-	// mobilemule
-	theApp.mmserver->AddFinishedFile(this);
-	// end mobilemule
+// explicitly unlock the file before posting something to the main thread.
+	sLock.Unlock();
 
-	if (theApp.glob_prefs->GetRemoveFinishedDownloads())
-		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile(this);
-	else
-		UpdateDisplayedInfo(true);
-	theApp.emuledlg->transferwnd->downloadlistctrl.ShowFilesCount();
-	//SHAddToRecentDocs(SHARD_PATH, fullname); // This is a real nasty call that takes ~110 ms on my 1.4 GHz Athlon and isn't really needed afai see...[ozon]
-
-	if (theApp.glob_prefs->StartNextFile())
-		theApp.downloadqueue->StartNextFile(GetCategory());
-
-	// -khaos--+++> Extended Statistics Added 2-10-03
-	theApp.glob_prefs->Add2DownCompletedFiles();		// Increments cumDownCompletedFiles in prefs struct
-	theApp.glob_prefs->Add2DownSessionCompletedFiles(); // Increments sesDownCompletedFiles in prefs struct
-	theApp.glob_prefs->SaveCompletedDownloadsStat();	// Saves cumDownCompletedFiles to INI
-	// <-----khaos- End Statistics Modifications
-
-	// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
-	// the chance to clean any available meta data tags and provide only tags which were determined by us.
-	UpdateMetaDataTags();
-
+	if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+		VERIFY( PostMessage(theApp.emuledlg->m_hWnd, TM_FILECOMPLETED, FILE_COMPLETION_THREAD_SUCCESS | (renamed ? FILE_COMPLETION_THREAD_RENAMED : 0), (LPARAM)this) );
 	return TRUE;
+}
+
+// 'End' of file completion, to void multi threading synchronization problems, this is to be invoked from within the
+// main thread!
+void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
+{
+	if (dwResult & FILE_COMPLETION_THREAD_SUCCESS)
+	{
+		// give visual response
+		AddLogLine(true,GetResString(IDS_DOWNLOADDONE),GetFileName());
+		theApp.emuledlg->ShowNotifier(GetResString(IDS_TBN_DOWNLOADDONE) + _T('\n') + GetFileName(), TBN_DLOAD);
+		if (dwResult & FILE_COMPLETION_THREAD_RENAMED)
+		{
+			CString strFilePath(GetFullName());
+			PathStripPath(strFilePath.GetBuffer());
+			strFilePath.ReleaseBuffer();
+			AddLogLine(true, GetResString(IDS_DOWNLOADRENAMED), strFilePath);
+		}
+	
+		theApp.knownfiles->SafeAddKFile(this);
+		theApp.downloadqueue->RemoveFile(this);
+		// mobilemule
+		theApp.mmserver->AddFinishedFile(this);
+		// end mobilemule
+
+		if (thePrefs.GetRemoveFinishedDownloads())
+			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile(this);
+		else
+			UpdateDisplayedInfo(true);
+		theApp.emuledlg->transferwnd->downloadlistctrl.ShowFilesCount();
+		//SHAddToRecentDocs(SHARD_PATH, fullname); // This is a real nasty call that takes ~110 ms on my 1.4 GHz Athlon and isn't really needed afai see...[ozon]
+
+		if (thePrefs.StartNextFile())
+			theApp.downloadqueue->StartNextFile(GetCategory());
+
+		// -khaos--+++> Extended Statistics Added 2-10-03
+		thePrefs.Add2DownCompletedFiles();		// Increments cumDownCompletedFiles in prefs struct
+		thePrefs.Add2DownSessionCompletedFiles(); // Increments sesDownCompletedFiles in prefs struct
+		thePrefs.SaveCompletedDownloadsStat();	// Saves cumDownCompletedFiles to INI
+		// <-----khaos- End Statistics Modifications
+
+		// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
+		// the chance to clean any available meta data tags and provide only tags which were determined by us.
+		UpdateMetaDataTags();
+		//This was to update the sharedfile bar as this will now use different data.. But I think there may be a sync issue here.
+		//UpdatePartsInfo();
+	}
+
+	if (thePrefs.StartNextFile())
+		theApp.downloadqueue->StartNextFile(GetCategory());
 }
 
 void  CPartFile::RemoveAllSources(bool bTryToSwap){
@@ -2602,12 +2732,12 @@ void  CPartFile::RemoveAllSources(bool bTryToSwap){
 		srclist.GetNext(pos1);
 		if (bTryToSwap){
 			if (!srclist.GetAt(pos2)->SwapToAnotherFile(true, true, true, NULL) )
-				theApp.downloadqueue->RemoveSource(srclist.GetAt(pos2),true, false);
+				theApp.downloadqueue->RemoveSource(srclist.GetAt(pos2), false);
 		}
 		else
-			theApp.downloadqueue->RemoveSource(srclist.GetAt(pos2),true, false);
+			theApp.downloadqueue->RemoveSource(srclist.GetAt(pos2), false);
 	}
-	NewSrcPartsInfo(); 
+	UpdatePartsInfo();
 	UpdateAvailablePartsCount();
 
 	//[enkeyDEV(Ottavio84) -A4AF-]
@@ -2645,6 +2775,13 @@ void CPartFile::DeleteFile(){
 
 	// Barry - Need to tell any connected clients to stop sending the file
 	StopFile(true);
+
+	// feel free to implement a runtime handling mechanism!
+	if (m_AllocateThread!=NULL) {
+		theApp.AddLogLine(true,GetResString(IDS_DELETEAFTERALLOC),GetFileName());
+		m_bDeleteAfterAlloc=true;
+		return;
+	}
 
 	theApp.sharedfiles->RemoveFile(this);
 	theApp.downloadqueue->RemoveFile(this);
@@ -2747,7 +2884,8 @@ bool CPartFile::CanStopFile() const
 }
 
 // khaos::kmod+ Added param to set the paused and stopped vars...
-void CPartFile::StopFile(bool bCancel,bool setVars){
+void CPartFile::StopFile(bool bCancel,bool setVars)
+{
 	// khaos::kmod-
 	// Barry - Need to tell any connected clients to stop sending the file
 	PauseFile();
@@ -2777,6 +2915,11 @@ void CPartFile::StopPausedFile()
 	if( (uState==PS_PAUSED || uState==PS_INSUFFICIENT || uState==PS_ERROR) && !stopped && time(NULL) - m_iLastPausePurge > (60*60) )
 	{
 		StopFile();
+	} else {
+		if (m_bDeleteAfterAlloc && m_AllocateThread==NULL) {
+			DeleteFile();
+			return;
+		}
 	}
 }
 
@@ -2798,10 +2941,9 @@ void CPartFile::PauseFile(bool bInsufficient)
 		m_iLastPausePurge = time(NULL);
 	theApp.downloadqueue->RemoveLocalServerRequest(this);
 
-	if(GetKadFileSearchID()){
-		if (Kademlia::CTimer::getThreadID())
-			VERIFY( PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STOPSEARCH, 0, GetKadFileSearchID()));
-		SetKadFileSearchID(0);
+	if(GetKadFileSearchID())
+	{
+		Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), true);
 		lastsearchtimeKad = 0; //If we were in the middle of searching, reset timer so they can resume searching.
 	}
 
@@ -2809,11 +2951,16 @@ void CPartFile::PauseFile(bool bInsufficient)
 		return;
 
 	Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-	for( POSITION pos = srclist.GetHeadPosition(); pos != NULL; ){
+	for( POSITION pos = srclist.GetHeadPosition(); pos != NULL; )
+	{
 		CUpDownClient* cur_src = srclist.GetNext(pos);
-		if (cur_src->GetDownloadState() == DS_DOWNLOADING){
-			if (!cur_src->GetSentCancelTransfer()){
+		if (cur_src->GetDownloadState() == DS_DOWNLOADING)
+		{
+			if (!cur_src->GetSentCancelTransfer())
+			{
 				theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("OP__CancelTransfer", cur_src);
 				cur_src->socket->SendPacket(packet,false,true);
 				cur_src->SetSentCancelTransfer(1);
 			}
@@ -2822,18 +2969,21 @@ void CPartFile::PauseFile(bool bInsufficient)
 	}
 	delete packet;
 
-	if (bInsufficient){
+	if (bInsufficient)
+	{
 		AddLogLine(false, _T("Insufficient diskspace - pausing download of \"%s\""), GetFileName());
 		insufficient = true;
 	}
-	else{
+	else
+	{
 		paused = true;
 		insufficient = false;
 	}
 	SetStatus(status); // to update item
 	datarate = 0;
 	m_anStates[DS_DOWNLOADING] = 0; // -khaos--+++> Renamed var.
-	if (!bInsufficient){
+	if (!bInsufficient)
+	{
 		theApp.downloadqueue->SortByPriority();
 		theApp.downloadqueue->CheckDiskspace(); // SLUGFILLER: checkDiskspace
 		SavePartFile();
@@ -2843,7 +2993,6 @@ void CPartFile::PauseFile(bool bInsufficient)
 
 bool CPartFile::CanResumeFile() const
 {
-	bool bFileDone = (GetStatus()==PS_COMPLETE || GetStatus()==PS_COMPLETING);
 	return (GetStatus()==PS_PAUSED || GetStatus()==PS_INSUFFICIENT || (GetStatus()==PS_ERROR && GetCompletionError()));
 }
 
@@ -2980,10 +3129,10 @@ void CPartFile::PreviewFile(){
 	}
 
 
-	if (theApp.glob_prefs->IsMoviePreviewBackup()){
+	if (thePrefs.IsMoviePreviewBackup()){
 		m_bPreviewing = true;
 		CPreviewThread* pThread = (CPreviewThread*) AfxBeginThread(RUNTIME_CLASS(CPreviewThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
-		pThread->SetValues(this,theApp.glob_prefs->GetVideoPlayer());
+		pThread->SetValues(this,thePrefs.GetVideoPlayer());
 		pThread->ResumeThread();
 	}
 	else{
@@ -2997,20 +3146,20 @@ void CPartFile::PreviewFile(){
 		if (strLine.Find(_T(' ')) != -1)
 			strLine = _T('\"') + strLine + _T('\"');
 
-		if (!theApp.glob_prefs->GetVideoPlayer().IsEmpty())
+		if (!thePrefs.GetVideoPlayer().IsEmpty())
 		{
 			// get directory of video player application
-			CString path = theApp.glob_prefs->GetVideoPlayer();
+			CString path = thePrefs.GetVideoPlayer();
 			int pos = path.ReverseFind(_T('\\'));
 			if (pos == -1)
 				path.Empty();
 			else
 				path = path.Left(pos + 1);
 
-			if (theApp.glob_prefs->GetPreviewSmallBlocks())
+			if (thePrefs.GetPreviewSmallBlocks())
 				FlushBuffer(true);
 
-			ShellExecute(NULL, _T("open"), theApp.glob_prefs->GetVideoPlayer(), strLine, path, SW_SHOWNORMAL);
+			ShellExecute(NULL, _T("open"), thePrefs.GetVideoPlayer(), strLine, path, SW_SHOWNORMAL);
 		}
 		else
 			ShellExecute(NULL, _T("open"), strLine, NULL, NULL, SW_SHOWNORMAL);
@@ -3019,7 +3168,7 @@ void CPartFile::PreviewFile(){
 
 bool CPartFile::CanPreviewFile() const
 {
-	uint64 space = GetFreeDiskSpaceX(theApp.glob_prefs->GetTempDir());
+	uint64 space = GetFreeDiskSpaceX(thePrefs.GetTempDir());
 
 	// Barry - Allow preview of archives of any length > 1k
 	if (IsArchive(true)) {
@@ -3034,7 +3183,7 @@ bool CPartFile::CanPreviewFile() const
 			return true;
 	//MORPH END   - Added by SiRoB, preview music file
 	
-	if (theApp.glob_prefs->IsMoviePreviewBackup())
+	if (thePrefs.IsMoviePreviewBackup())
 		//MORPH - Changed by SiRoB, Authorize preview of files with 2 chunk available
 		return !( (GetStatus() != PS_READY && GetStatus() != PS_PAUSED) 
 			|| m_bPreviewing || GetPartCount() < 2 || !IsMovie() || (space + 100000000) < GetFileSize()
@@ -3042,11 +3191,11 @@ bool CPartFile::CanPreviewFile() const
 	else
 	{
 		TCHAR szVideoPlayerFileName[_MAX_FNAME];
-		_tsplitpath(theApp.glob_prefs->GetVideoPlayer(), NULL, NULL, szVideoPlayerFileName, NULL);
+		_tsplitpath(thePrefs.GetVideoPlayer(), NULL, NULL, szVideoPlayerFileName, NULL);
 
 		// enable the preview command if the according option is specified 'PreviewSmallBlocks' 
 		// or if VideoLAN client is specified
-		if (theApp.glob_prefs->GetPreviewSmallBlocks() || !_tcsicmp(szVideoPlayerFileName, _T("vlc"))){
+		if (thePrefs.GetPreviewSmallBlocks() || !_tcsicmp(szVideoPlayerFileName, _T("vlc"))){
 			if (m_bPreviewing)
 				return false;
 
@@ -3057,7 +3206,7 @@ bool CPartFile::CanPreviewFile() const
 			// default: check the ED2K file format to be of type audio, video or CD image. 
 			// but because this could disable the preview command for some file types which eMule does not know,
 			// this test can be avoided by specifying 'PreviewSmallBlocks=2'
-			if (theApp.glob_prefs->GetPreviewSmallBlocks() <= 1)
+			if (thePrefs.GetPreviewSmallBlocks() <= 1)
 			{
 				// check the file extension
 				EED2KFileType eFileType = GetED2KFileTypeID(GetFileName());
@@ -3117,6 +3266,10 @@ void CPartFile::UpdateAvailablePartsCount(){
 
 Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 {
+	//We need to find where the dangling pointers are before uncommenting this..
+	if(!IsPartFile())
+		return CKnownFile::CreateSrcInfoPacket(forClient);
+
 	if (forClient->reqfile != this)
 		return NULL;
 
@@ -3126,16 +3279,16 @@ Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 	if (srclist.IsEmpty())
 		return NULL;
 
-	CMemFile data;
+	CSafeMemFile data(1024);
 	uint16 nCount = 0;
 
-	data.Write(m_abyFileHash,16);
-	data.Write(&nCount,2);
+	data.WriteHash16(m_abyFileHash);
+	data.WriteUInt16(nCount);
 	bool bNeeded;
 	for (POSITION pos = srclist.GetHeadPosition();pos != 0;){
 		bNeeded = false;
 		CUpDownClient* cur_src = srclist.GetNext(pos);
-		if (cur_src->HasLowID() && !cur_src->IsValidSource())
+		if (cur_src->HasLowID() || !cur_src->IsValidSource())
 			continue;
 		uint8* srcstatus = cur_src->GetPartStatus();
 		if (srcstatus){
@@ -3163,7 +3316,8 @@ Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 			}
 			else{
 				// should never happen
-				DEBUG_ONLY(AddDebugLogLine(false,"*** CPartFile::CreateSrcInfoPacket - found source (%u) with wrong partcount (%u) attached to partfile \"%s\" (partcount=%u)", cur_src->GetUserIDHybrid(), cur_src->GetPartCount(), GetFileName(), GetPartCount()));
+				if (thePrefs.GetVerbose())
+					DEBUG_ONLY(AddDebugLogLine(false,"*** %s - found source (%s) with wrong partcount (%u) attached to partfile \"%s\" (partcount=%u)", __FUNCTION__, cur_src->DbgGetClientInfo(), cur_src->GetPartCount(), GetFileName(), GetPartCount()));
 			}
 		}
 		if( bNeeded ){
@@ -3173,145 +3327,146 @@ Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 				dwID = cur_src->GetUserIDHybrid();
 			else
 				dwID = ntohl(cur_src->GetUserIDHybrid());
-			uint16 nPort = cur_src->GetUserPort();
-			uint32 dwServerIP = cur_src->GetServerIP();
-			uint16 nServerPort = cur_src->GetServerPort();
-			data.Write(&dwID, 4);
-			data.Write(&nPort, 2);
-			data.Write(&dwServerIP, 4);
-			data.Write(&nServerPort, 2);
+			data.WriteUInt32(dwID);
+			data.WriteUInt16(cur_src->GetUserPort());
+			data.WriteUInt32(cur_src->GetServerIP());
+			data.WriteUInt16(cur_src->GetServerPort());
 			if (forClient->GetSourceExchangeVersion() > 1)
-				data.Write(cur_src->GetUserHash(),16);
-			if (nCount > 50/*500*/) //MORPH - HotFix by SiRoB about too much source exchanged with compression fix
+				data.WriteHash16(cur_src->GetUserHash());
+			if (nCount > 500)
 				break;
 		}
 	}
 	if (!nCount)
 		return 0;
 	data.Seek(16, 0);
-	data.Write(&nCount, 2);
+	data.WriteUInt16(nCount);
 
 	Packet* result = new Packet(&data, OP_EMULEPROT);
 	result->opcode = OP_ANSWERSOURCES;
 	// 16+2+501*(4+2+4+2+16) = 15048 bytes max.
 	if ( result->size > 354 )
 		result->PackPacket();
-	if ( theApp.glob_prefs->GetDebugSourceExchange() )
+	if ( thePrefs.GetDebugSourceExchange() )
 		AddDebugLogLine( false, "Send:Source User(%s) File(%s) Count(%i)", forClient->GetUserName(), GetFileName(), nCount );
 	return result;
 }
 
-void CPartFile::AddClientSources(CMemFile* sources, uint8 sourceexchangeversion){
-	if (stopped) return;
-	uint16 nCount;
-	sources->Read(&nCount,2);
+void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion)
+{
+	if (stopped)
+		return;
+
+	UINT nCount = sources->ReadUInt16();
 
 	// Check if the data size matches the 'nCount' for v1 or v2 and eventually correct the source
 	// exchange version while reading the packet data. Otherwise we could experience a higher
 	// chance in dealing with wrong source data, userhashs and finally duplicate sources.
 	UINT uDataSize = sources->GetLength() - sources->GetPosition();
 	//Checks if version 1 packet is correct size
-	if ((UINT)nCount*(4+2+4+2) == uDataSize){
+	if (nCount*(4+2+4+2) == uDataSize)
+	{
 		if( sourceexchangeversion != 1 )
 			return;
 	}
 	//Checks if version 2&3 packet is correct size
-	else if ((UINT)nCount*(4+2+4+2+16) == uDataSize){
+	else if (nCount*(4+2+4+2+16) == uDataSize)
+	{
 		if( sourceexchangeversion == 1 )
 			return;
 	}
-	else{
+	else
+	{
 		// If v4 inserts additional data (like v2), the above code will correctly filter those packets.
 		// If v4 appends additional data after <count>(<Sources>)[count], we are in trouble with the 
 		// above code. Though a client which does not understand v4+ should never receive such a packet.
-		AddDebugLogLine(false, "Received invalid source exchange packet (v%u) of data size %u for %s", sourceexchangeversion, uDataSize, GetFileName());
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Received invalid source exchange packet (v%u) of data size %u for %s", sourceexchangeversion, uDataSize, GetFileName());
 		return;
 	}
 
-	if ( theApp.glob_prefs->GetDebugSourceExchange() )
+	if ( thePrefs.GetDebugSourceExchange() )
 		AddDebugLogLine( false, "RCV:Sources File(%s) Count(%i)", GetFileName(), nCount );
 
-	for (int i = 0;i != nCount;i++){
-		uint32 dwID;
-		uint16 nPort;
-		uint32 dwServerIP;
-		uint16 nServerPort;
-		uchar achUserHash[16];
-		sources->Read(&dwID,4);
-		sources->Read(&nPort,2);
-		sources->Read(&dwServerIP,4);
-		sources->Read(&nServerPort,2);
-		if (sourceexchangeversion > 1)
-			sources->Read(achUserHash,16);
+	for (UINT i = 0; i < nCount; i++)
+	{
+		uint32 dwID = sources->ReadUInt32();
+		uint16 nPort = sources->ReadUInt16();
+		uint32 dwServerIP = sources->ReadUInt32();
+		uint16 nServerPort = sources->ReadUInt16();
 
-		if( sourceexchangeversion == 3 ){
-			uint32 dwIDtemp = ntohl(dwID);
-			// "Filter LAN IPs" and "IPfilter" the received sources IP addresses
-			if (!IsLowIDHybrid(dwID)){
-				if (!IsGoodIP(dwIDtemp)){ // check for 0-IP, localhost and optionally for LAN addresses
-					if (theApp.glob_prefs->GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwIDtemp));
+		uchar achUserHash[16];
+		if (sourceexchangeversion > 1)
+			sources->ReadHash16(achUserHash);
+
+		if (sourceexchangeversion == 3)
+		{
+			uint32 dwIDED2K = ntohl(dwID);
+
+			// check the HighID(IP) - "Filter LAN IPs" and "IPfilter" the received sources IP addresses
+			if (!IsLowIDHybrid(dwID))
+			{
+				if (!IsGoodIP(dwIDED2K))
+				{
+					// check for 0-IP, localhost and optionally for LAN addresses
+					if (thePrefs.GetLogFilteredIPs())
+						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - bad IP"), inet_ntoa(*(in_addr*)&dwIDED2K));
 					continue;
 				}
-				if (theApp.ipfilter->IsFiltered(dwIDtemp)){
-					if (theApp.glob_prefs->GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("IPfiltered source IP=%s (%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwIDtemp), theApp.ipfilter->GetLastHit());
+				if (theApp.ipfilter->IsFiltered(dwIDED2K))
+				{
+					if (thePrefs.GetLogFilteredIPs())
+						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - IP filter (%s)"), inet_ntoa(*(in_addr*)&dwIDED2K), theApp.ipfilter->GetLastHit());
 					continue;
 				}
-			}
-			else{
-				continue;
 			}
 	
-			// check if we are this source
-			if (theApp.serverconnect->IsLowID() && theApp.serverconnect->IsConnected()){
-				if ((theApp.serverconnect->GetClientID() == dwIDtemp) && theApp.serverconnect->GetCurrentServer()->GetIP() == dwServerIP)
+			// additionally check for LowID and own IP
+			if (!CanAddSource(dwIDED2K, nPort, dwServerIP, nServerPort, NULL))
+			{
+				if (thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwIDED2K));
 					continue;
-				// although we are currently having a LowID, we could have had a HighID before, which
-				// that client is sending us now! seems unlikely ... it happend!
-				if (dwIDtemp == theApp.serverconnect->GetLocalIP())
-					continue;
-			}
-			else if (theApp.serverconnect->GetClientID() == dwIDtemp){
-				continue;
 			}
 		}
-		else{
-			// "Filter LAN IPs" and "IPfilter" the received sources IP addresses
-			if (!IsLowIDED2K(dwID)){
-				if (!IsGoodIP(dwID)){ // check for 0-IP, localhost and optionally for LAN addresses
-					if (theApp.glob_prefs->GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwID));
+		else
+		{
+			// check the HighID(IP) - "Filter LAN IPs" and "IPfilter" the received sources IP addresses
+			if (!IsLowIDED2K(dwID))
+			{
+				if (!IsGoodIP(dwID))
+				{ 
+					// check for 0-IP, localhost and optionally for LAN addresses
+					if (thePrefs.GetLogFilteredIPs())
+						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - bad IP"), inet_ntoa(*(in_addr*)&dwID));
 					continue;
 				}
-				if (theApp.ipfilter->IsFiltered(dwID)){
-					if (theApp.glob_prefs->GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("IPfiltered source IP=%s (%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwID), theApp.ipfilter->GetLastHit());
+				if (theApp.ipfilter->IsFiltered(dwID))
+				{
+					if (thePrefs.GetLogFilteredIPs())
+						AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - IP filter (%s)"), inet_ntoa(*(in_addr*)&dwID), theApp.ipfilter->GetLastHit());
 					continue;
 				}
-			}
-			else{
-				continue;
 			}
 	
-			// check if we are this source
-			if (theApp.serverconnect->IsLowID() && theApp.serverconnect->IsConnected()){
-			if ((theApp.serverconnect->GetClientID() == dwID) && theApp.serverconnect->GetCurrentServer()->GetIP() == dwServerIP)
-				continue;
-			// although we are currently having a LowID, we could have had a HighID before, which
-			// that client is sending us now! seems unlikely ... it happend!
-			if (dwID == theApp.serverconnect->GetLocalIP())
+			// additionally check for LowID and own IP
+			if (!CanAddSource(dwID, nPort, dwServerIP, nServerPort, NULL))
+			{
+				if (thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwID));
 				continue;
 			}
 			else if (theApp.serverconnect->GetClientID() == dwID){
 #ifdef _DEBUG
 				// bluecow - please do not remove this in the debug version - i need this for testing.
-				if (theApp.serverconnect->IsLowID() || theApp.glob_prefs->GetPort() == nPort)
+				if (theApp.serverconnect->IsLowID() || thePrefs.GetPort() == nPort)
 #endif
 				continue;
 			}
 		}
-		if( theApp.glob_prefs->GetMaxSourcePerFile() > this->GetSourceCount() ){
+
+		if (thePrefs.GetMaxSourcePerFile() > GetSourceCount())
+		{
 			CUpDownClient* newsource;
 			if( sourceexchangeversion == 3 )
 				newsource = new CUpDownClient(this,nPort,dwID,dwServerIP,nServerPort,false);
@@ -3329,12 +3484,12 @@ void CPartFile::AddClientSources(CMemFile* sources, uint8 sourceexchangeversion)
 
 // making this function return a higher when more sources have the extended
 // protocol will force you to ask a larger variety of people for sources
-int CPartFile::GetCommonFilePenalty() const
+/*int CPartFile::GetCommonFilePenalty() const
 {
 	//TODO: implement, but never return less than MINCOMMONPENALTY!
 	return MINCOMMONPENALTY;
 }
-
+*/
 /* Barry - Replaces BlockReceived() 
 
 		Originally this only wrote to disk when a full 180k block 
@@ -3354,23 +3509,27 @@ int CPartFile::GetCommonFilePenalty() const
 */
 uint32 CPartFile::WriteToBuffer(uint32 transize, BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block)
 {
+	ASSERT( (int)transize > 0 );
+
 	// Increment transfered bytes counter for this file
 	transfered += transize;
 
 	// This is needed a few times
 	uint32 lenData = end - start + 1;
+	ASSERT( (int)lenData > 0 );
 
 	// -khaos--+++>
 	if( lenData > transize ) {
 		m_iSesCompressionBytes += lenData-transize;
-		theApp.glob_prefs->Add2SavedFromCompression(lenData-transize);
+		thePrefs.Add2SavedFromCompression(lenData-transize);
 	}
 	// <-----khaos-
 
 	// Occasionally packets are duplicated, no point writing it twice
 	if (IsComplete(start, end))
 	{
-		AddDebugLogLine(false, "File \"%s\" has already been written from %lu to %lu, %u bytes, part %u-%u", GetFileName(), start, end, lenData, start/PARTSIZE, end/PARTSIZE);
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "File \"%s\" has already been written from %lu to %lu, %u bytes, part %u-%u", GetFileName(), start, end, lenData, start/PARTSIZE, end/PARTSIZE);
 		return 0;
 	}
 
@@ -3478,8 +3637,8 @@ void CPartFile::FlushBuffer(bool forcewait)
 		changedPart[partNumber] = false;
 	try
 	{
-		bool bCheckDiskspace = theApp.glob_prefs->IsCheckDiskspaceEnabled() && theApp.glob_prefs->GetMinFreeDiskSpace() > 0;
-		ULONGLONG uFreeDiskSpace = bCheckDiskspace ? GetFreeDiskSpaceX(theApp.glob_prefs->GetTempDir()) : 0;
+		bool bCheckDiskspace = thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0;
+		ULONGLONG uFreeDiskSpace = bCheckDiskspace ? GetFreeDiskSpaceX(thePrefs.GetTempDir()) : 0;
 
 		// Check free diskspace for compressed/sparse files before possibly increasing the file size
 		if (bCheckDiskspace && !IsNormalFile())
@@ -3487,7 +3646,7 @@ void CPartFile::FlushBuffer(bool forcewait)
 			// Compressed/sparse files; regardless whether the file is increased in size, 
 			// check the amount of data which will be written
 			// would need to use disk cluster sizes for more accuracy
-			if (m_nTotalBufferData + theApp.glob_prefs->GetMinFreeDiskSpace() >= uFreeDiskSpace)
+			if (m_nTotalBufferData + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
 				AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 		}
 
@@ -3501,7 +3660,7 @@ void CPartFile::FlushBuffer(bool forcewait)
 				// Normal files; check if increasing the file would reduce the amount of min. free space beyond the limit
 				// would need to use disk cluster sizes for more accuracy
 				ULONGLONG uIncrease = item->end + 1 - m_hpartfile.GetLength();
-				if (uIncrease + theApp.glob_prefs->GetMinFreeDiskSpace() >= uFreeDiskSpace)
+				if (uIncrease + thePrefs.GetMinFreeDiskSpace() >= uFreeDiskSpace)
 					AfxThrowFileException(CFileException::diskFull, 0, m_hpartfile.GetFileName());
 			}
 
@@ -3591,7 +3750,7 @@ void CPartFile::FlushBuffer(bool forcewait)
 					parthashthread->SetSinglePartHash(this, partNumber, false);
 					parthashthread->ResumeThread();
 				}
-				else if ( IsCorruptedPart(partNumber) && theApp.glob_prefs->IsICHEnabled()) {
+				else if ( IsCorruptedPart(partNumber) && thePrefs.IsICHEnabled()) {
 					// Try to recover with minimal loss
 					// But in another thread
 					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
@@ -3634,7 +3793,7 @@ void CPartFile::FlushBuffer(bool forcewait)
 				case PS_COMPLETE:
 					break;
 				default:
-					if (GetFreeDiskSpaceX(theApp.glob_prefs->GetTempDir()) < theApp.glob_prefs->GetMinFreeDiskSpace())
+					if (GetFreeDiskSpaceX(thePrefs.GetTempDir()) < thePrefs.GetMinFreeDiskSpace())
 					{
 						if (IsNormalFile())
 						{
@@ -3666,19 +3825,19 @@ void CPartFile::FlushBuffer(bool forcewait)
 
 void CPartFile::FlushBuffersExceptionHandler(CFileException* error)
 {
-	if (theApp.glob_prefs->IsCheckDiskspaceEnabled() && error->m_cause == CFileException::diskFull)
+	if (thePrefs.IsCheckDiskspaceEnabled() && error->m_cause == CFileException::diskFull)
 	{
 		AddLogLine(true, GetResString(IDS_ERR_OUTOFSPACE), GetFileName());
-		if (theApp.emuledlg->IsRunning() && theApp.glob_prefs->GetNotifierPopOnImportantError()){
+		if (theApp.emuledlg->IsRunning() && thePrefs.GetNotifierPopOnImportantError()){
 			CString msg;
 			msg.Format(GetResString(IDS_ERR_OUTOFSPACE), GetFileName());
-			theApp.emuledlg->ShowNotifier(msg, TBN_IMPORTANTEVENT, false);
+			theApp.emuledlg->ShowNotifier(msg, TBN_IMPORTANTEVENT);
 		}
 
 			// 'CFileException::diskFull' is also used for 'not enough min. free space'
 			if (theApp.emuledlg->IsRunning())
 			{
-				if (theApp.glob_prefs->IsCheckDiskspaceEnabled() && theApp.glob_prefs->GetMinFreeDiskSpace()==0)
+				if (thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace()==0)
 					theApp.downloadqueue->CheckDiskspace(true);
 				else
 					PauseFile(true/*bInsufficient*/);
@@ -3686,17 +3845,17 @@ void CPartFile::FlushBuffersExceptionHandler(CFileException* error)
 		}
 	else
 	{
-		if (theApp.glob_prefs->IsErrorBeepEnabled())
+		if (thePrefs.IsErrorBeepEnabled())
 			Beep(800,200);
 
 		if (error->m_cause == CFileException::diskFull) 
 		{
 			AddLogLine(true, GetResString(IDS_ERR_OUTOFSPACE), GetFileName());
 			// may be called during shutdown!
-			if (theApp.emuledlg->IsRunning() && theApp.glob_prefs->GetNotifierPopOnImportantError()){
+			if (theApp.emuledlg->IsRunning() && thePrefs.GetNotifierPopOnImportantError()){
 				CString msg;
 				msg.Format(GetResString(IDS_ERR_OUTOFSPACE), GetFileName());
-				theApp.emuledlg->ShowNotifier(msg, TBN_IMPORTANTEVENT, false);
+				theApp.emuledlg->ShowNotifier(msg, TBN_IMPORTANTEVENT);
 			}
 		}
 		else
@@ -3896,10 +4055,10 @@ uint8 CPartFile::GetCategory() const
 {
 	//MORPH - Changed by SiRoB
 	/*
-	if (m_category > theApp.glob_prefs->GetCatCount() - 1)
+	if (m_category > thePrefs.GetCatCount() - 1)
 		m_category = 0;
 	*/
-	return m_category > theApp.glob_prefs->GetCatCount() - 1?0:m_category;
+	return m_category > thePrefs.GetCatCount() - 1?0:m_category;
 }
 
 
@@ -3984,7 +4143,7 @@ void CPartFile::SetCategory(uint8 cat)
 	
 	// set new prio
 	if (IsPartFile()){
-		switch (theApp.glob_prefs->GetCategory(GetCategory())->prio) {
+		switch (thePrefs.GetCategory(GetCategory())->prio) {
 		case 0:
 			break;
 		case 1:
@@ -4036,7 +4195,7 @@ void CPartFile::SetStatus(uint8 in)
 
 		theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(curCatIndex);
 
-		if (theApp.glob_prefs->ShowCatTabInfos())
+		if (thePrefs.ShowCatTabInfos())
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 	}
 }
@@ -4214,7 +4373,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 				const uint16 rareBound = 2*limit;
 
     			// Cache Preview state (Criterion 2)
-    			const bool isPreviewEnable = theApp.glob_prefs->GetPreviewPrio() && 
+    			const bool isPreviewEnable = thePrefs.GetPreviewPrio() && 
            									(IsArchive() || IsMovie() || IsMusic()); //MORPH - Added by IceCream, preview also music file
 
 				// Collect and calculate criteria for all chunks
@@ -4379,7 +4538,7 @@ CString CPartFile::GetInfoSummary(CPartFile* partfile) const
 		compl="\n";
 
 	if (partfile->lastseencomplete==NULL) lsc.Format("%s",GetResString(IDS_UNKNOWN).MakeLower() ); else
-		lsc.Format( "%s", partfile->lastseencomplete.Format( theApp.glob_prefs->GetDateTimeFormat()));
+		lsc.Format( "%s", partfile->lastseencomplete.Format( thePrefs.GetDateTimeFormat()));
 
 	float availability = 0;
 	if(partfile->GetPartCount() != 0) {
@@ -4391,7 +4550,7 @@ CString CPartFile::GetInfoSummary(CPartFile* partfile) const
 	CString avail="";
 	if (partfile->IsPartFile()) avail.Format(GetResString(IDS_AVAIL),partfile->GetPartCount(),partfile->GetAvailablePartCount(),availability);
 
-	if (partfile->GetCFileDate()!=NULL) lastdwl.Format( "%s",partfile->GetCFileDate().Format( theApp.glob_prefs->GetDateTimeFormat()));
+	if (partfile->GetCFileDate()!=NULL) lastdwl.Format( "%s",partfile->GetCFileDate().Format( thePrefs.GetDateTimeFormat()));
 		else lastdwl=GetResString(IDS_UNKNOWN);
 	
 	CString sourcesinfo="";
@@ -4427,46 +4586,6 @@ CString CPartFile::GetInfoSummary(CPartFile* partfile) const
 	);
 
 	return info;
-}
-
-void KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport)
-{
-	if(!tcp){
-		CemuleApp::AddDebugLogLine(false, _T("Ignored source (IP=%s) received from Kademlia, no tcp port recieved"), inet_ntoa(*(in_addr*)&ip));
-		return;
-	}
-
-	ip = ntohl(ip);
-	if (!IsGoodIP(ip))
-	{
-		if (theApp.glob_prefs->GetLogFilteredIPs())
-			CemuleApp::AddDebugLogLine(false, _T("Ignored source (IP=%s) received from Kademlia"), inet_ntoa(*(in_addr*)&ip));
-		return;
-	}
-	if (theApp.ipfilter->IsFiltered(ip))
-	{
-		if (theApp.glob_prefs->GetLogFilteredIPs())
-			CemuleApp::AddDebugLogLine(false, _T("IPfiltered source IP=%s (%s) received from Kademlia"), inet_ntoa(*(in_addr*)&ip), theApp.ipfilter->GetLastHit());
-		return;
-	}
-	ip = ntohl(ip);
-	if( (ip == theApp.kademlia->getIP() || ip == theApp.GetID()) && tcp == theApp.glob_prefs->GetPort())
-		return;
-//	CString idStr;
-//	CString ipStr;
-//	pcontactID->toHexString(&idStr);
-//	Kademlia::CMiscUtils::ipAddressToString(ip, &ipStr);
-	CPartFile* temp = theApp.downloadqueue->GetFileByKadFileSearchID(searchID);
-	if( temp ){
-		if(!temp->IsStopped() && theApp.glob_prefs->GetMaxSourcePerFile() > temp->GetSourceCount()){
-			CUpDownClient* ctemp = new CUpDownClient(temp,tcp,ip,0,0);
-			ctemp->SetSourceFrom(SF_KADEMLIA);
-			ctemp->SetServerIP(serverip);
-			ctemp->SetServerPort(serverport);
-			ctemp->SetKadPort(udp);
-			theApp.downloadqueue->CheckAndAddSource(temp, ctemp);
-		}
-	}
 }
 
 bool CPartFile::GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender)
@@ -4517,19 +4636,21 @@ void CPartFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, voi
 	CKnownFile::GrabbingFinished(imgResults, nFramesGrabbed, pSender);
 }
 
-void CPartFile::GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uint32& pui32NeededSpace) const
+void CPartFile::GetSizeToTransferAndNeededSpace(uint32& rui32SizeToTransfer, uint32& rui32NeededSpace) const
 {
-	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;gaplist.GetNext(pos)){
-		Gap_Struct* cur_gap = gaplist.GetAt(pos);
-		pui32SizeToTransfer += cur_gap->end - cur_gap->start;
+	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;)
+	{
+		const Gap_Struct* cur_gap = gaplist.GetNext(pos);
+		uint32 uGapSize = cur_gap->end - cur_gap->start;
+		rui32SizeToTransfer += uGapSize;
 		if(cur_gap->end == GetFileSize()-1)
-			pui32NeededSpace = cur_gap->end - cur_gap->start;
+			rui32NeededSpace = uGapSize;
 	}
 }
 
 void CPartFile::SetLastAnsweredTimeTimeout()
 {
-	m_ClientSrcAnswered = 2 * CONNECTION_LATENCY + ::GetTickCount() - SOURCECLIENTREASK;
+	m_ClientSrcAnswered = 2 * CONNECTION_LATENCY + ::GetTickCount() - SOURCECLIENTREASKS;
 }
 
 /*Checks, if a given item should be shown in a given category
@@ -4552,7 +4673,7 @@ AllcatTypes:
 bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 {
 
-	Category_Struct* curCat = theApp.glob_prefs->GetCategory(inCategory);
+	Category_Struct* curCat = thePrefs.GetCategory(inCategory);
 
 	if (curCat->viewfilters.bSuspendFilters && (GetCategory() == inCategory || curCat->viewfilters.nFromCats == 0))
 		return true;
@@ -4662,7 +4783,7 @@ void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt){
 		corrupted_list.AddTail(partnumber);
 		// Reduce transfered amount by corrupt amount
 		this->m_iLostDueToCorruption += (partRange + 1);
-		theApp.glob_prefs->Add2LostFromCorruption(partRange + 1);
+		thePrefs.Add2LostFromCorruption(partRange + 1);
 		// Update met file - gaps data changed
 		SavePartFile();
 	} else {
@@ -4706,7 +4827,7 @@ void CPartFile::PharseICHResult(){
 		}
 		uint32	partRange = (partnumber < GetPartCount()-1)?PARTSIZE:(m_nFileSize % PARTSIZE);
 		++m_iTotalPacketsSavedDueToICH;
-		theApp.glob_prefs->Add2SessionPartsSavedByICH(1);
+		thePrefs.Add2SessionPartsSavedByICH(1);
 		if (partRange > 0) {
 			partRange--;
 			FillGap((ULONGLONG)PARTSIZE*partnumber,((ULONGLONG)PARTSIZE*partnumber+partRange));
@@ -4730,7 +4851,7 @@ IMPLEMENT_DYNCREATE(CPartHashThread, CWinThread)
 uint16 CPartHashThread::SetFirstHash(CPartFile* pOwner){
 	m_pOwner = pOwner;
 	m_ICHused = false;
-	directory = theApp.glob_prefs->GetTempDir();
+	directory = thePrefs.GetTempDir();
 	filename = RemoveFileExtension(pOwner->GetPartMetFileName());
 	for (int i = 0; i < pOwner->GetPartCount(); i++)
 		if (pOwner->IsComplete(i*PARTSIZE,((i+1)*PARTSIZE)-1)){
@@ -4746,7 +4867,7 @@ uint16 CPartHashThread::SetFirstHash(CPartFile* pOwner){
 void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused){
 	m_pOwner = pOwner;
 	m_ICHused = ICHused;
-	directory = theApp.glob_prefs->GetTempDir();
+	directory = thePrefs.GetTempDir();
 	filename = RemoveFileExtension(pOwner->GetPartMetFileName());
 
 	if (part >= pOwner->GetPartCount()) {	// Out of bounds, no point in even trying
@@ -4829,7 +4950,7 @@ int CPartFile::GetRating(){
 bool	CPartFile::notSeenCompleteSource() const
 {
 	
-	if(!theApp.glob_prefs->OnlyDownloadCompleteFiles()){
+	if(!thePrefs.OnlyDownloadCompleteFiles()){
 		return false;
 	}
 	else if(lastseencomplete == NULL){

@@ -46,14 +46,15 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-CServerList::CServerList(CPreferences* in_prefs)
+#define	SERVER_MET_FILENAME	_T("server.met")
+
+CServerList::CServerList()
 {
 	servercount = 0;
 	version = 0;
 	serverpos = 0;
 	searchserverpos = 0;
 	statserverpos = 0;
-	app_prefs = in_prefs;
 	//udp_timer = 0;
 	delservercount = 0;
 	m_nLastSaved = ::GetTickCount();
@@ -68,7 +69,7 @@ CServerList::~CServerList()
 
 void CServerList::AutoUpdate()
 {
-	if (app_prefs->adresses_list.IsEmpty()){
+	if (thePrefs.adresses_list.IsEmpty()){
 		AfxMessageBox(GetResString(IDS_ERR_EMPTYADRESSESDAT),MB_ICONASTERISK);
 		return;
 	}
@@ -77,17 +78,17 @@ void CServerList::AutoUpdate()
 	CString servermetbackup;
 	CString servermet;
 	CString strURLToDownload; 
-	servermetdownload.Format(_T("%sserver_met.download"), app_prefs->GetConfigDir());
-	servermetbackup.Format(_T("%sserver_met.old"), app_prefs->GetConfigDir());
-	servermet.Format(_T("%sserver.met"), app_prefs->GetConfigDir());
+	servermetdownload.Format(_T("%sserver_met.download"), thePrefs.GetConfigDir());
+	servermetbackup.Format(_T("%sserver_met.old"), thePrefs.GetConfigDir());
+	servermet.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetConfigDir());
 	_tremove(servermetbackup);
 	_tremove(servermetdownload);
 	_trename(servermet,servermetbackup);
 	
-	POSITION Pos = app_prefs->adresses_list.GetHeadPosition(); 
+	POSITION Pos = thePrefs.adresses_list.GetHeadPosition(); 
 	while (!bDownloaded && Pos != NULL){
 		CHttpDownloadDlg dlgDownload;
-		strURLToDownload = app_prefs->adresses_list.GetNext(Pos); 
+		strURLToDownload = thePrefs.adresses_list.GetNext(Pos); 
 		dlgDownload.m_sURLToDownload = strURLToDownload.GetBuffer();
 		dlgDownload.m_sFileToDownloadInto = servermetdownload;
 		if (dlgDownload.DoModal() == IDOK){
@@ -110,20 +111,20 @@ void CServerList::AutoUpdate()
 bool CServerList::Init()
 {
 	// auto update the list by using an url
-	if (app_prefs->AutoServerlist())
+	if (thePrefs.AutoServerlist())
 		AutoUpdate();
 	// Load Metfile
 	CString strPath;
-	strPath.Format(_T("%sserver.met"), app_prefs->GetConfigDir());
+	strPath.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetConfigDir());
 	bool bRes = AddServermetToList(strPath, false);
-	if (app_prefs->AutoServerlist()){
-		strPath.Format(_T("%sserver_met.download"), app_prefs->GetConfigDir());
+	if (thePrefs.AutoServerlist()){
+		strPath.Format(_T("%sserver_met.download"), thePrefs.GetConfigDir());
 		bool bRes2 = AddServermetToList(strPath);
 		if( !bRes && bRes2 )
 			bRes = true;
 	}
 	// insert static servers from textfile
-	strPath.Format(_T("%sstaticservers.dat"), app_prefs->GetConfigDir());
+	strPath.Format(_T("%sstaticservers.dat"), thePrefs.GetConfigDir());
 	AddServersFromTextFile(strPath);
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	if (app_prefs->IsAutoUPdateIPFilterEnabled())
@@ -163,7 +164,7 @@ bool CServerList::AddServermetToList(const CString& strFile, bool merge)
 	}
 	setvbuf(servermet.m_pStream, NULL, _IOFBF, 16384);
 	try{
-		servermet.Read(&version,1);
+		version = servermet.ReadUInt8();
 		if (version != 0xE0 && version != MET_HEADER){
 			servermet.Close();
 			AddLogLine(false,GetResString(IDS_ERR_BADSERVERMETVERSION),version);
@@ -171,18 +172,17 @@ bool CServerList::AddServermetToList(const CString& strFile, bool merge)
 		}
 		theApp.emuledlg->serverwnd->serverlistctrl.Hide();
 		theApp.emuledlg->serverwnd->serverlistctrl.SetRedraw(FALSE);
-		uint32 fservercount;
-		servermet.Read(&fservercount,4);
+		UINT fservercount = servermet.ReadUInt32();
 		
 		ServerMet_Struct sbuffer;
-		uint32 iAddCount = 0;
-		for (uint32 j = 0; j != fservercount; j++)
+		UINT iAddCount = 0;
+		for (UINT j = 0; j < fservercount; j++)
 		{
 			// get server
 			servermet.Read(&sbuffer,sizeof(ServerMet_Struct));
 			CServer* newserver = new CServer(&sbuffer);
 			//add tags
-			for (uint32 i=0;i != sbuffer.tagcount;i++)
+			for (UINT i = 0; i < sbuffer.tagcount; i++)
 				newserver->AddTagFromFile(&servermet);
 			// set listname for server
 			if (!newserver->GetListName()){
@@ -211,12 +211,16 @@ bool CServerList::AddServermetToList(const CString& strFile, bool merge)
 		servermet.Close();
 	}
 	catch(CFileException* error){
-		if (error->m_cause == CFileException::endOfFile)
-			AddDebugLogLine(true,GetResString(IDS_ERR_BADSERVERLIST));
-		else{
-			char buffer[MAX_CFEXP_ERRORMSG];
-			error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
-			AddDebugLogLine(true,GetResString(IDS_ERR_FILEERROR_SERVERMET),buffer);
+		if (thePrefs.GetVerbose())
+		{
+			if (error->m_cause == CFileException::endOfFile){
+				AddDebugLogLine(true,GetResString(IDS_ERR_BADSERVERLIST));
+			}
+			else{
+				char buffer[MAX_CFEXP_ERRORMSG];
+				error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
+				AddDebugLogLine(true,GetResString(IDS_ERR_FILEERROR_SERVERMET),buffer);
+			}
 		}
 		error->Delete();
 	}
@@ -228,17 +232,17 @@ bool CServerList::AddServermetToList(const CString& strFile, bool merge)
 bool CServerList::AddServer(CServer* in_server)
 {
 	if (!IsGoodServerIP(in_server)){ // check for 0-IP, localhost and optionally for LAN addresses
-		if (theApp.glob_prefs->GetLogFilteredIPs())
-			AddDebugLogLine(false, _T("Ignored server with IP=%s"), ipstr(in_server->GetIP()));
+		if (thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored server (IP=%s)"), ipstr(in_server->GetIP()));
 		return false;
 	}
 
-	if (app_prefs->FilterServerByIP()){
+	if (thePrefs.FilterServerByIP()){
 		if (in_server->HasDynIP())
 			return false;
 		if (theApp.ipfilter->IsFiltered(in_server->GetIP())){
-			if (theApp.glob_prefs->GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("IPfiltered server with IP=%s (%s)"), ipstr(in_server->GetIP()), theApp.ipfilter->GetLastHit());
+			if (thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Ignored server (IP=%s) - IP filter (%s)"), ipstr(in_server->GetIP()), theApp.ipfilter->GetLastHit());
 			return false;
 		}
 	}
@@ -279,7 +283,7 @@ void CServerList::ServerStats()
 			if( ping_server == test )
 				return;
 		}
-		if (ping_server->GetFailedCount() >= app_prefs->GetDeadserverRetries() && app_prefs->DeadServer()){
+		if (ping_server->GetFailedCount() >= thePrefs.GetDeadserverRetries() && thePrefs.DeadServer()){
 			theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(ping_server);
 			return;
 		}
@@ -287,19 +291,19 @@ void CServerList::ServerStats()
 		srand(tNow);
 		uint32 time = 0x55AA0000 + (uint16)rand();
 		ping_server->SetChallenge(time);
-		memcpy( packet->pBuffer, &time, 4 );
+		PokeUInt32(packet->pBuffer, time);
 		ping_server->SetLastPinged( ::GetTickCount() );
 		ping_server->SetLastPingedTime(tNow);
 		ping_server->AddFailedCount();
 		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( ping_server );
-		if (app_prefs->GetDebugServerUDPLevel() > 0)
+		if (thePrefs.GetDebugServerUDPLevel() > 0)
 			Debug(">>> Sending OP__GlobServStatReq to %s:%u\n", ping_server->GetAddress(), ping_server->GetPort());
 		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 		theApp.serverconnect->SendUDPPacket( packet, ping_server, true );
 		
 		ping_server->SetLastDescPingedCount(false);
 		if(ping_server->GetLastDescPingedCount() < 2){
-			if (app_prefs->GetDebugServerUDPLevel() > 0)
+			if (thePrefs.GetDebugServerUDPLevel() > 0)
 				Debug(">>> Sending OP__ServDescReq     to %s:%u\n", ping_server->GetAddress(), ping_server->GetPort());
 			packet = new Packet( OP_SERVER_DESC_REQ,0);
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
@@ -589,11 +593,11 @@ CServer* CServerList::GetServerByIP(uint32 nIP, uint16 nPort) const
 
 bool CServerList::SaveServermetToFile()
 {
-	if (theApp.glob_prefs->GetLogFileSaving())
-		DEBUG_ONLY(AddDebugLogLine(false, "Saved Serverlist"));
+	if (thePrefs.GetLogFileSaving())
+		AddDebugLogLine(false, "Saving servers list file \"%s\"", SERVER_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount(); 
-	CString newservermet(app_prefs->GetConfigDir());
-	newservermet += _T("server.met.new");
+	CString newservermet(thePrefs.GetConfigDir());
+	newservermet += SERVER_MET_FILENAME _T(".new");
 	CSafeBufferedFile servermet;
 	CFileException fexp;
 	if (!servermet.Open(newservermet, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
@@ -609,12 +613,12 @@ bool CServerList::SaveServermetToFile()
 	setvbuf(servermet.m_pStream, NULL, _IOFBF, 16384);
 	
 	try{
-		version = 0xE0;
-		servermet.Write(&version, 1);
-		uint32 fservercount = list.GetCount();
-		servermet.Write(&fservercount,4);
+		servermet.WriteUInt8(0xE0);
 		
-		for (uint32 j = 0; j != fservercount; j++)
+		UINT fservercount = list.GetCount();
+		servermet.WriteUInt32(fservercount);
+		
+		for (UINT j = 0; j < fservercount; j++)
 		{
 			ServerMet_Struct sbuffer;
 			const CServer* nextserver = GetServerAt(j);
@@ -667,16 +671,16 @@ bool CServerList::SaveServermetToFile()
 			tagUDPFlags.WriteTagToFile(&servermet);
 		}
 
-		if (app_prefs->GetCommitFiles() >= 2 || (app_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			servermet.Flush(); // flush file stream buffers to disk buffers
 			if (_commit(_fileno(servermet.m_pStream)) != 0) // commit disk buffers to disk
 				AfxThrowFileException(CFileException::hardIO, GetLastError(), servermet.GetFileName());
 		}
 		servermet.Close();
 
-		CString curservermet(app_prefs->GetConfigDir());
-		CString oldservermet(app_prefs->GetConfigDir());
-		curservermet += _T("server.met");
+		CString curservermet(thePrefs.GetConfigDir());
+		CString oldservermet(thePrefs.GetConfigDir());
+		curservermet += SERVER_MET_FILENAME;
 		oldservermet += _T("server_met.old");
 		
 		if (_taccess(oldservermet, 0) == 0)

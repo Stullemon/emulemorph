@@ -48,7 +48,7 @@ static char THIS_FILE[]=__FILE__;
 // CServerConnect
 
 void CServerConnect::TryAnotherConnectionrequest(){
-	if ( connectionattemps.GetCount()<((app_prefs->IsSafeServerConnectEnabled()) ? 1 : 2) ) {
+	if ( connectionattemps.GetCount()<((thePrefs.IsSafeServerConnectEnabled()) ? 1 : 2) ) {
 
 		CServer*  next_server = used_list->GetNextServer();
 
@@ -64,7 +64,7 @@ void CServerConnect::TryAnotherConnectionrequest(){
 					AddLogLine(true,GetResString(IDS_OUTOFSERVERS));
 					AddLogLine(false,GetResString(IDS_RECONNECT), CS_RETRYCONNECTTIME);
 					VERIFY( (m_idRetryTimer = SetTimer(NULL, 0, 1000*CS_RETRYCONNECTTIME, RetryConnectTimer)) != NULL );
-					if (!m_idRetryTimer)
+					if (thePrefs.GetVerbose() && !m_idRetryTimer)
 						AddDebugLogLine(true,_T("Failed to create 'server connect retry' timer - %s"),GetErrorMessage(GetLastError()));
 				}
 			}
@@ -72,7 +72,7 @@ void CServerConnect::TryAnotherConnectionrequest(){
 		}
 
 		// Barry - Only auto-connect to static server option
-		if (theApp.glob_prefs->AutoConnectStaticOnly())
+		if (thePrefs.AutoConnectStaticOnly())
 		{
 			if (next_server->IsStaticMember())
                 ConnectToServer(next_server,true);
@@ -91,7 +91,7 @@ void CServerConnect::ConnectToAnyServer(uint32 startAt,bool prioSort,bool isAuto
 	theApp.emuledlg->ShowConnectionState();
 
 	// Barry - Only auto-connect to static server option
-	if (theApp.glob_prefs->AutoConnectStaticOnly() && isAuto)
+	if (thePrefs.AutoConnectStaticOnly() && isAuto)
 	{
 		bool anystatic = false;
 		CServer *next_server; 
@@ -113,10 +113,10 @@ void CServerConnect::ConnectToAnyServer(uint32 startAt,bool prioSort,bool isAuto
 	}
 
 	used_list->SetServerPosition( startAt );
-	if( theApp.glob_prefs->Score() && prioSort ) used_list->Sort();
+	if( thePrefs.Score() && prioSort ) used_list->Sort();
 
 	//EastShare Start - PreferShareAll by AndCycle
-	if( theApp.glob_prefs->ShareAll() && prioSort ) used_list->PushBackNoShare();	// SLUGFILLER: preferShareAll
+	if( thePrefs.ShareAll() && prioSort ) used_list->PushBackNoShare();	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
 	if (used_list->GetServerCount()==0 ){
@@ -169,14 +169,14 @@ void CServerConnect::StopConnectionTry(){
 			DestroySocket(pSck);
 	}
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	theApp.glob_prefs->ResetLowIdRetried();
+	thePrefs.ResetLowIdRetried();
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 }
 
 void CServerConnect::ConnectionEstablished(CServerSocket* sender){
-	if (theApp.glob_prefs->IsProxyASCWOP())
+	if (thePrefs.IsProxyASCWOP())
 	{
-		theApp.glob_prefs->SetUseProxy(true);
+		thePrefs.SetUseProxy(true);
 		AddLogLine(false,GetResString(IDS_ASCWOP_PROXYSUPPORT)+GetResString(IDS_ENABLED));
 	}
 
@@ -198,24 +198,20 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		}
 
 		CSafeMemFile data(256);
-		data.Write(theApp.glob_prefs->GetUserHash(),16);
-
-		uint32 clientid = GetClientID();
-		data.Write(&clientid,4);
-
-		uint16 port = app_prefs->GetPort();
-		data.Write(&port,2);
+		data.WriteHash16(thePrefs.GetUserHash());
+		data.WriteUInt32(GetClientID());
+		data.WriteUInt16(thePrefs.GetPort());
 
 		uint32 tagcount = 4;
-		data.Write(&tagcount,4);
+		data.WriteUInt32(tagcount);
 
-		CTag tagName(CT_NAME,app_prefs->GetUserNick());
+		CTag tagName(CT_NAME,thePrefs.GetUserNick());
 		tagName.WriteTagToFile(&data);
 
 		CTag tagVersion(CT_VERSION,EDONKEYVERSION);
 		tagVersion.WriteTagToFile(&data);
 
-		CTag tagPort(CT_PORT,app_prefs->GetPort());
+		CTag tagPort(CT_PORT,thePrefs.GetPort());
 		tagPort.WriteTagToFile(&data);
 
 		CTag tagFlags(0x20,0x00000001);
@@ -223,7 +219,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 
 		Packet* packet = new Packet(&data);
 		packet->opcode = OP_LOGINREQUEST;
-		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+		if (thePrefs.GetDebugServerTCPLevel() > 0)
 			Debug(">>> Sending OP__LoginRequest\n");
 		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 		SendPacket(packet,true,sender);
@@ -240,10 +236,10 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		theApp.sharedfiles->SendListToServer();
 		theApp.emuledlg->serverwnd->serverlistctrl.RemoveDeadServer();
 		// tecxx 1609 2002 - serverlist update
-		if (theApp.glob_prefs->AddServersFromServer())
+		if (thePrefs.AddServersFromServer())
 		{
 			Packet* packet = new Packet(OP_GETSERVERLIST,0);
-			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+			if (thePrefs.GetDebugServerTCPLevel() > 0)
 				Debug(">>> Sending OP__GetServerList\n");
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 			SendPacket(packet,true);
@@ -323,10 +319,10 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 		case CS_FATALERROR:{
 			bool autoretry= !singleconnecting;
 			StopConnectionTry();
-			if ((app_prefs->Reconnect()) && (autoretry) && (!m_idRetryTimer)){ 
+			if ((thePrefs.Reconnect()) && (autoretry) && (!m_idRetryTimer)){ 
 				AddLogLine(false,GetResString(IDS_RECONNECT), CS_RETRYCONNECTTIME); 
 				VERIFY( (m_idRetryTimer= SetTimer(NULL, 0, 1000*CS_RETRYCONNECTTIME, RetryConnectTimer)) != NULL );
-				if (!m_idRetryTimer)
+				if (thePrefs.GetVerbose() && !m_idRetryTimer)
 					AddDebugLogLine(true,_T("Failed to create 'server connect retry' timer - %s"),GetErrorMessage(GetLastError()));
 			}
 			break;
@@ -342,11 +338,11 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 			theApp.stat_serverConnectTime = 0;
 			theApp.statistics->Add2TotalServerDuration();
 			// <-----khaos-
-			if (app_prefs->Reconnect() && !connecting){
+			if (thePrefs.Reconnect() && !connecting){
 				ConnectToAnyServer();		
 			}
-			if (theApp.glob_prefs->GetNotifierPopOnImportantError()) {
-				theApp.emuledlg->ShowNotifier(GetResString(IDS_CONNECTIONLOST), TBN_IMPORTANTEVENT, false);
+			if (thePrefs.GetNotifierPopOnImportantError()) {
+				theApp.emuledlg->ShowNotifier(GetResString(IDS_CONNECTIONLOST), TBN_IMPORTANTEVENT);
 			}
 			break;
 		}
@@ -407,6 +403,7 @@ void CServerConnect::CheckForTimeout()
 	while (pos){
 		connectionattemps.GetNextAssoc(pos,tmpkey,tmpsock);
 		if (!tmpsock) {
+			if (thePrefs.GetVerbose())
 			AddDebugLogLine(false,"Error: Socket invalid at timeoutcheck" );
 			connectionattemps.RemoveKey(tmpkey);
 			return;
@@ -448,16 +445,16 @@ bool CServerConnect::Disconnect(){
 		return false;
 }
 
-CServerConnect::CServerConnect(CServerList* in_serverlist, CPreferences* in_prefs){
+CServerConnect::CServerConnect(CServerList* in_serverlist)
+{
 	connectedsocket = NULL;
-	app_prefs = in_prefs;
 	used_list = in_serverlist;
-	max_simcons = (app_prefs->IsSafeServerConnectEnabled()) ? 1 : 2;
+	max_simcons = (thePrefs.IsSafeServerConnectEnabled()) ? 1 : 2;
 	connecting = false;
 	connected = false;
 	clientid = 0;
 	singleconnecting = false;
-	if (in_prefs->GetServerUDPPort() != 0){
+	if (thePrefs.GetServerUDPPort() != 0){
 	    udpsocket = new CUDPSocket(this); // initalize socket for udp packets
 		if (!udpsocket->Create()){
 			delete udpsocket;
@@ -540,26 +537,27 @@ void CServerConnect::InitLocalIP(){
 	}
 	catch(...){
 		// at least two ppl reported crashs when using 'gethostbyname' with third party winsock DLLs
-		AddDebugLogLine(false, _T("Unknown exception in CServerConnect::InitLocalIP"));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Unknown exception in CServerConnect::InitLocalIP"));
 		ASSERT(0);
 	}
 }
 
 void CServerConnect::KeepConnectionAlive()
 {
-	DWORD dwServerKeepAliveTimeout = theApp.glob_prefs->GetServerKeepAliveTimeout();
+	DWORD dwServerKeepAliveTimeout = thePrefs.GetServerKeepAliveTimeout();
 	if (dwServerKeepAliveTimeout && connected && connectedsocket && connectedsocket->connectionstate == CS_CONNECTED &&
 		GetTickCount() - connectedsocket->GetLastTransmission() >= dwServerKeepAliveTimeout)
 	{
 		// "Ping" the server if the TCP connection was not used for the specified interval with 
 		// an empty publish files packet -> recommended by lugdunummaster himself!
 		CSafeMemFile files(4);
-		uint32 nFiles = 0;
-		files.Write(&nFiles,4);
+		files.WriteUInt32(0); // nr. of files
 		Packet* packet = new Packet(&files);
 		packet->opcode = OP_OFFERFILES;
-		AddDebugLogLine(false, _T("Refreshing server connection"));
-		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Refreshing server connection"));
+		if (thePrefs.GetDebugServerTCPLevel() > 0)
 			Debug(">>> Sending OP__OfferFiles(KeepAlive) to server\n");
 		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 		connectedsocket->SendPacket(packet,true);

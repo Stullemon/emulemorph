@@ -19,11 +19,11 @@
 #include "Loggable.h"
 
 class CKnownFileList;
-class CPreferences;
 class CServerConnect;
 class CPartFile;
 class CKnownFile;
 class CPublishKeywordList;
+class CSafeMemFile;
 
 struct UnknownFile_Struct{
 	CString strName;
@@ -36,31 +36,34 @@ class CSharedFileList: public CLoggable
 	friend class CClientReqSocket;
 
 public:
-	CSharedFileList(CPreferences* in_prefs, CServerConnect* in_server);
+	CSharedFileList(CServerConnect* in_server);
 	~CSharedFileList();
 
 	void	SendListToServer();
 	void	Reload();
-	void	SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd = false);
+	bool	SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd = false);
 	void	SetOutputCtrl(CSharedFilesCtrl* in_ctrl);
 	void	RemoveFile(CKnownFile* toremove);
-	CKnownFile*	GetFileByID(const uchar* filehash);
+	CKnownFile* GetFileByID(const uchar* filehash) const;
 	CKnownFile*	GetFileByIndex(int index);
-	void	CreateOfferedFilePacket(CKnownFile* cur_file, CMemFile* files, bool bForServer = true, bool bSendED2KTags = true);
+	bool	IsFilePtrInList(const CKnownFile* file) const;
+	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, bool bForServer = true, bool bSendED2KTags = true);
 	uint64	GetDatasize(uint64 &pbytesLargest);
 	uint16	GetCount()	{return m_Files_map.GetCount(); }
 	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER: SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
 	void	AddFilesFromDirectory(const CString& rstrDirectory);
 	void	HashFailed(UnknownFile_Struct* hashed);		// SLUGFILLER: SafeHash
+	void	FileHashingFinished(CKnownFile* file);
 	void	ClearED2KPublishInfo();
 	void	Process();
 	void	Publish();
 	void	AddKeywords(CKnownFile* pFile);
 	void	RemoveKeywords(CKnownFile* pFile);
+	void	DeletePartFileInstances() const;
 
 private:
-	void	AddFile(CKnownFile* pFile);
+	bool	AddFile(CKnownFile* pFile);
 	void	FindSharedFiles();
 	void	HashNextFile();
 	// SLUGFILLER: SafeHash
@@ -72,7 +75,6 @@ private:
 	CPublishKeywordList* m_keywords;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> waitingforhash_list;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> currentlyhashing_list;	// SLUGFILLER: SafeHash
-	CPreferences*		app_prefs;
 	CServerConnect*		server;
 	CSharedFilesCtrl*	output;
 	uint32 m_lastPublishED2K;
@@ -81,13 +83,6 @@ private:
 	int m_currFileKey;
 	uint32 m_lastPublishKadSrc;
 	uint32 m_lastProcessPublishKadKeywordList;
-	CMutex	list_mut;
-
-// Mighty Knife: CRC32-Tag - Public method to lock the filelist to prevent it 
-// from being deleted; be careful using this not to produce deadlocks !
-public:
-	CMutex FileListLockMutex;
-// [end] Mighty Knife
 };
 
 class CAddFileThread : public CWinThread
@@ -98,10 +93,11 @@ protected:
 public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
-	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* in_partfile_Owner = 0);
+	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile = NULL);
+
 private:
 	CSharedFileList* m_pOwner;
-	CString			 strDirectory;
-	CString			 strFilename;
-	CPartFile*		 partfile_Owner;
+	CString			 m_strDirectory;
+	CString			 m_strFilename;
+	CPartFile*		 m_partfile;
 };

@@ -31,6 +31,7 @@
 #include "ServerListCtrl.h"
 #include "MenuCmds.h"
 #include "OtherFunctions.h"
+#include "ListViewSearchDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -208,12 +209,12 @@ void CMuleListCtrl::SaveSettings(CPreferences::Table tID) {
 	INT *piArray = new INT[m_iColumnsTracked];
 
 	for(int i = 0; i < m_iColumnsTracked; i++) {
-		theApp.glob_prefs->SetColumnWidth(tID, i, GetColumnWidth(i));
-		theApp.glob_prefs->SetColumnHidden(tID, i, IsColumnHidden(i));
+		thePrefs.SetColumnWidth(tID, i, GetColumnWidth(i));
+		thePrefs.SetColumnHidden(tID, i, IsColumnHidden(i));
 		piArray[i] = m_aColumns[i].iLocation;
 	}
 
-	theApp.glob_prefs->SetColumnOrder(tID, piArray);
+	thePrefs.SetColumnOrder(tID, piArray);
 	delete[] piArray;
 }
 
@@ -247,13 +248,13 @@ void CMuleListCtrl::LoadSettings(CPreferences::Table tID) {
 		piArray[i] = i;
 
 	for(int i = 0; i < m_iColumnsTracked; i++) {
-		int iWidth = theApp.glob_prefs->GetColumnWidth(tID, i);
-		if(iWidth != 0)
+		int iWidth = thePrefs.GetColumnWidth(tID, i);
+		if(iWidth >= 2) // don't allow column widths of 0 and 1 -- just because it looks very confusing in GUI
 			SetColumnWidth(i, iWidth);
 		if(i == 0) {
 			piArray[0] = 0;
 		} else {
-			int iOrder = theApp.glob_prefs->GetColumnOrder(tID, i);
+			int iOrder = thePrefs.GetColumnOrder(tID, i);
 			if(iOrder > 0 && iOrder < m_iColumnsTracked && iOrder != i)
 				piArray[iOrder] = i;
 		}
@@ -267,7 +268,7 @@ void CMuleListCtrl::LoadSettings(CPreferences::Table tID) {
 	delete[] piArray;
 
 	for(int i = 1; i < m_iColumnsTracked; i++) {
-		if(theApp.glob_prefs->GetColumnHidden(tID, i))
+		if(thePrefs.GetColumnHidden(tID, i))
 			HideColumn(i);
 	}
 }
@@ -290,7 +291,7 @@ void CMuleListCtrl::LoadSettings(CIni* ini, LPCTSTR pszLVName)
 	for (int i = 0; i < m_iColumnsTracked; i++)
 	{
 		int iWidth = piColWidths[i];
-		if (iWidth != 0)
+		if (iWidth >= 2) // don't allow column widths of 0 and 1 -- just because it looks very confusing in GUI
 			SetColumnWidth(i, iWidth);
 		if (i == 0) {
 			piArray[0] = 0;
@@ -327,7 +328,7 @@ void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
 	COLORREF crHighlight = ::GetSysColor(COLOR_HIGHLIGHT);
 
 	CString strBkImage;
-	LPCTSTR pszSkinProfile = theApp.glob_prefs->GetSkinProfile();
+	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
 	{
 		CString strKey;
@@ -1012,7 +1013,7 @@ BOOL CMuleListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LR
 
 			m_bCustomDraw = CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
 			if(m_bCustomDraw)
-				memcpy(&m_lvcd, (void*)lParam, sizeof(NMLVCUSTOMDRAW));
+				m_lvcd = *((LPNMLVCUSTOMDRAW)lParam);
 
 			return m_bCustomDraw;
 		}
@@ -1306,106 +1307,6 @@ HIMAGELIST CMuleListCtrl::ApplyImageList(HIMAGELIST himl)
 	return himlOld;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-// CDlgListSearchListSearch
-
-class CDlgListSearchListSearch : public CDialog
-{
-	DECLARE_DYNAMIC(CDlgListSearchListSearch)
-
-public:
-	CDlgListSearchListSearch(CWnd* pParent = NULL);   // standard constructor
-
-// Dialog Data
-	enum { IDD = IDD_LISTVIEW_SEARCH };
-
-	CMuleListCtrl* m_pListView;
-	CString m_strFindText;
-	int m_iSearchColumn;
-
-protected:
-	CComboBox m_ctlSearchCol;
-
-	void UpdateControls();
-
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
-
-public:
-	afx_msg void OnEnChangeSearchText();
-	virtual BOOL OnInitDialog();
-};
-
-IMPLEMENT_DYNAMIC(CDlgListSearchListSearch, CDialog)
-
-BEGIN_MESSAGE_MAP(CDlgListSearchListSearch, CDialog)
-	ON_EN_CHANGE(IDC_LISTVIEW_SEARCH_TEXT, OnEnChangeSearchText)
-END_MESSAGE_MAP()
-
-CDlgListSearchListSearch::CDlgListSearchListSearch(CWnd* pParent /*=NULL*/)
-	: CDialog(CDlgListSearchListSearch::IDD, pParent)
-	, m_strFindText(_T(""))
-{
-	m_pListView = NULL;
-	m_iSearchColumn = 0;
-}
-
-void CDlgListSearchListSearch::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LISTVIEW_SEARCH_COLUMN, m_ctlSearchCol);
-	DDX_CBIndex(pDX, IDC_LISTVIEW_SEARCH_COLUMN, m_iSearchColumn);
-	DDX_Text(pDX, IDC_LISTVIEW_SEARCH_TEXT, m_strFindText);
-}
-
-void CDlgListSearchListSearch::OnEnChangeSearchText()
-{
-	UpdateControls();
-}
-
-void CDlgListSearchListSearch::UpdateControls()
-{
-	GetDlgItem(IDOK)->EnableWindow(GetDlgItem(IDC_LISTVIEW_SEARCH_TEXT)->GetWindowTextLength() > 0);
-}
-
-BOOL CDlgListSearchListSearch::OnInitDialog()
-{
-	CDialog::OnInitDialog();
-	InitWindowStyles(this);
-
-	SetWindowText(GetResString(IDS_SW_SEARCHBOX));
-	SetDlgItemText(IDC_LISTVIEW_SEARCH_TEXT_LBL, GetResString(IDS_SEARCH_TEXT) + _T(':'));
-	SetDlgItemText(IDC_LISTVIEW_SEARCH_COLUMN_LBL, GetResString(IDS_SEARCH_COLUMN) + _T(':'));
-	SetDlgItemText(IDCANCEL, GetResString(IDS_CANCEL));	
-
-	if (m_pListView != NULL)
-	{
-		TCHAR szColTitle[256];
-		LVCOLUMN lvc;
-		lvc.mask = LVCF_TEXT;
-		lvc.cchTextMax = sizeof(szColTitle)/sizeof(szColTitle[0]);
-		lvc.pszText = szColTitle;
-		int iCol = 0;
-		while (m_pListView->GetColumn(iCol++, &lvc))
-			m_ctlSearchCol.AddString(lvc.pszText);
-		if ((UINT)m_iSearchColumn >= (UINT)m_ctlSearchCol.GetCount())
-			m_iSearchColumn = 0;
-	}
-	else
-	{
-		m_ctlSearchCol.EnableWindow(FALSE);
-		m_ctlSearchCol.ShowWindow(SW_HIDE);
-
-		m_iSearchColumn = 0;
-	}
-	m_ctlSearchCol.SetCurSel(m_iSearchColumn);
-
-	UpdateControls();
-	return TRUE;
-}
-
 void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError)
 {
 	CWaitCursor curHourglass;
@@ -1454,7 +1355,7 @@ void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BO
 
 void CMuleListCtrl::OnFindStart()
 {
-	CDlgListSearchListSearch dlg;
+	CListViewSearchDlg dlg;
 	dlg.m_pListView = this;
 	dlg.m_strFindText = m_strFindText;
 	//dlg.m_bMatchCase = m_bFindMatchCase;

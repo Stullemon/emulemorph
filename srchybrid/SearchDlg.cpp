@@ -26,12 +26,11 @@
 #include "SafeFile.h"
 #include "DownloadQueue.h"
 #include "UploadQueue.h"
-#include "KademliaMain.h"
 #include "emuledlg.h"
 #include "opcodes.h"
 #include "ED2KLink.h"
+#include "Kademlia/Kademlia/Kademlia.h"
 #include "kademlia/kademlia/SearchManager.h"
-#include "kademlia/routing/Timer.h"
 #include "kademlia/kademlia/search.h"
 #include "CustomAutoComplete.h"
 #include "SearchExpr.h"
@@ -77,6 +76,7 @@ CSearchDlg::CSearchDlg(CWnd* pParent /*=NULL*/)
 	m_uTimerLocalServer = 0;
 	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
 	m_iSentMoreReq = 0;
+	searchselect.m_bCloseable = true;
 }
 
 CSearchDlg::~CSearchDlg()
@@ -122,11 +122,22 @@ BOOL CSearchDlg::OnInitDialog()
 	ShowSearchSelector(false);
 	m_lastclpbrd="";
 
-	if (theApp.glob_prefs->GetUseAutocompletion()){
+	if (thePrefs.GetUseAutocompletion()){
 		m_pacSearchString = new CCustomAutoComplete();
 		m_pacSearchString->AddRef();
 		if (m_pacSearchString->Bind(m_ctlName, ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST))
-			m_pacSearchString->LoadList(CString(theApp.glob_prefs->GetConfigDir()) +  _T("\\") SEARCH_STRINGS_PROFILE);
+			m_pacSearchString->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") SEARCH_STRINGS_PROFILE);
+		if (theApp.emuledlg->m_fontMarlett.m_hObject){
+			GetDlgItem(IDC_DD)->SetFont(&theApp.emuledlg->m_fontMarlett);
+			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
+		}
+	}
+	else
+		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
+
+	if (theApp.emuledlg->m_fontMarlett.m_hObject){
+		GetDlgItem(IDC_STATIC_DLTOof)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_STATIC_DLTOof)->SetWindowText(_T("8")); // show a right-arrow
 	}
 
 	ASSERT( (GetDlgItem(IDC_EDITSEARCHMIN)->GetStyle() & ES_NUMBER) == 0 );
@@ -134,7 +145,7 @@ BOOL CSearchDlg::OnInitDialog()
 	m_ctlName.LimitText(512); // max. length of search expression
 	((CEdit*)GetDlgItem(IDC_EDITSEARCHEXTENSION))->LimitText(8); // max. length of file (type) extension
 
-	if (methodBox.SetCurSel(theApp.glob_prefs->GetSearchMethod()) == CB_ERR)
+	if (methodBox.SetCurSel(thePrefs.GetSearchMethod()) == CB_ERR)
 		methodBox.SetCurSel(SearchTypeServer);
 
 	UpdateControls();
@@ -172,6 +183,7 @@ BEGIN_MESSAGE_MAP(CSearchDlg, CResizableDialog)
 	ON_EN_CHANGE(IDC_SEARCHMINSIZE, OnEnChangeSearchname)
 	ON_EN_CHANGE(IDC_SEARCHMAXSIZE, OnEnChangeSearchname)
 	ON_BN_CLICKED(IDC_SEARCH_RESET, OnBnClickedSearchReset)
+	ON_BN_CLICKED(IDC_DD, OnDDClicked)
 	ON_EN_KILLFOCUS(IDC_ELINK, OnEnKillfocusElink)
 	ON_WM_DESTROY()
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnCbnSelchangeCombo1)
@@ -231,7 +243,7 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 
 	if (m_uTimerLocalServer != 0 && nIDEvent == m_uTimerLocalServer)
 	{
-		if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0)
+		if (thePrefs.GetDebugServerSearchesLevel() > 0)
 			Debug("Timeout waiting on search results of local server\n");
 		// the local server did not answer within the timeout
 		VERIFY( KillTimer(m_uTimerLocalServer) );
@@ -259,7 +271,7 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 					searchpacket->opcode = OP_GLOBSEARCHREQ2;
 				else
 					searchpacket->opcode = OP_GLOBSEARCHREQ;
-				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
+				if (thePrefs.GetDebugServerUDPLevel() > 0)
 					Debug(">>> Sending %s  to server %s:%u (%u of %u)\n", (searchpacket->opcode == OP_GLOBSEARCHREQ2) ? "OP__GlobSearchReq2" : "OP__GlobSearchReq", toask->GetAddress(), toask->GetPort(), servercount, theApp.serverlist->GetServerCount());
 				theApp.uploadqueue->AddUpDataOverheadServer(searchpacket->size);
 			    theApp.serverconnect->SendUDPPacket(searchpacket,toask,false);
@@ -507,8 +519,9 @@ CString	CSearchDlg::CreateWebQuery()
 	return query;
 }
 
-void CSearchDlg::DownloadSelected() {
-	DownloadSelected(theApp.glob_prefs->AddNewFilesPaused());
+void CSearchDlg::DownloadSelected()
+{
+	DownloadSelected(thePrefs.AddNewFilesPaused());
 }
 
 void CSearchDlg::DownloadSelected(bool paused)
@@ -521,7 +534,7 @@ void CSearchDlg::DownloadSelected(bool paused)
 
 	int useCat;
 
-	if(theApp.glob_prefs->SelectCatForNewDL())
+	if(thePrefs.SelectCatForNewDL())
 	{
 		CSelCategoryDlg getCatDlg;
 		getCatDlg.DoModal();
@@ -531,7 +544,7 @@ void CSearchDlg::DownloadSelected(bool paused)
 		// links into a new category.
 		useCat = getCatDlg.GetInput();
 	}
-	else if(theApp.glob_prefs->UseActiveCatForLinks())
+	else if(thePrefs.UseActiveCatForLinks())
 		useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
 	else
 		useCat = 0;
@@ -542,17 +555,18 @@ void CSearchDlg::DownloadSelected(bool paused)
 	while (pos != NULL) 
 	{ 
 		int index = searchlistctrl.GetNextSelectedItem(pos); 
-		if (index > -1) {
+		if (index > -1)
+		{
 			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(index);
 			// khaos::categorymod+ m_cattabs is obsolete.
-			if (!theApp.glob_prefs->SelectCatForNewDL() && theApp.glob_prefs->UseAutoCat())
+			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat())
 			{
 				useCat = theApp.downloadqueue->GetAutoCat(CString(cur_file->GetFileName()), (ULONG)cur_file->GetFileSize());
-				if (!useCat && theApp.glob_prefs->UseActiveCatForLinks())
+				if (!useCat && thePrefs.UseActiveCatForLinks())
 					useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
 			}
 
-			if (theApp.glob_prefs->SmallFileDLPush() && cur_file->GetFileSize() < 154624)
+			if (thePrefs.SmallFileDLPush() && cur_file->GetFileSize() < 154624)
 				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, 0);
 			else
 			{
@@ -562,6 +576,7 @@ void CSearchDlg::DownloadSelected(bool paused)
 			// khaos::categorymod-
 			if (cur_file->GetListParent()!=NULL)
 				cur_file=cur_file->GetListParent();
+			cur_file->InitKnownType();
 			searchlistctrl.UpdateSources(cur_file);
 		}
 	}
@@ -576,7 +591,7 @@ void CSearchDlg::OnSysColorChange()
 void CSearchDlg::SetAllIcons()
 {
 	m_ctrlSearchFrm.Init("SearchParams");
-	m_ctrlDirectDlFrm.Init("SearchDirectDownload");
+	m_ctrlDirectDlFrm.Init("Download");
 
 	if (icon_search)
 		VERIFY( DestroyIcon(icon_search) );
@@ -586,10 +601,15 @@ void CSearchDlg::SetAllIcons()
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader("BN_SEARCH"));
+	iml.Add(CTempIconLoader("SearchMethod_SERVER", 16, 16));
+	iml.Add(CTempIconLoader("SearchMethod_GLOBAL", 16, 16));
+	iml.Add(CTempIconLoader("SearchMethod_JIGLE", 16, 16));
+	iml.Add(CTempIconLoader("SearchMethod_KADEMLIA", 16, 16));
+	iml.Add(CTempIconLoader("StatsClients", 16, 16));
 	searchselect.SetImageList(&iml);
-	m_ImageList.DeleteImageList();
-	m_ImageList.Attach(iml.Detach());
+	m_imlSearchResults.DeleteImageList();
+	m_imlSearchResults.Attach(iml.Detach());
+	searchselect.SetPadding(CSize(10, 3));
 
 	iml.Create(13,13,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
@@ -607,10 +627,12 @@ void CSearchDlg::Localize()
 {
 	searchlistctrl.Localize();
 	//MORPH Removed by SiRoB, Due to Khaos Category
-	/*UpdateCatTabs();*/
+	/*
+	UpdateCatTabs();
+	*/
 
-	if (theApp.glob_prefs->GetLanguageID() != m_uLangID){
-		m_uLangID = theApp.glob_prefs->GetLanguageID();
+	if (thePrefs.GetLanguageID() != m_uLangID){
+		m_uLangID = thePrefs.GetLanguageID();
 		m_ctrlSearchFrm.SetWindowText(GetResString(IDS_SW_SEARCHBOX));
 		m_ctrlSearchFrm.SetText(GetResString(IDS_SW_SEARCHBOX));
 		m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
@@ -734,7 +756,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 			strDbg.AppendFormat("\"%s\" ", str);
 		}
 	}
-	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0)
+	if (thePrefs.GetDebugServerSearchesLevel() > 0)
 		Debug("Search Expr: %s\n", strDbg);
 
 	// this limit (+ the additonal operators which will be added later) has to match the limit in 'CreateSearchExpressionTree'
@@ -759,7 +781,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 		_SearchExpr.m_aExpr.Append(pexpr->m_aExpr);
 
 #ifdef _DEBUG
-	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0){
+	if (thePrefs.GetDebugServerSearchesLevel() > 0){
 		_strSearchTree.Empty();
 		DumpSearchTree(_SearchExpr);
 		Debug("Search Tree: %s\n", _strSearchTree);
@@ -869,7 +891,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			}
 			data.Write(&stringParameter, 1);
 			uint16 nSize = _SearchExpr.m_aExpr[0].GetLength();
-			data.Write(&nSize, 2);
+			data.WriteUInt16(nSize);
 			data.Write((LPCSTR)_SearchExpr.m_aExpr[0], nSize);
 			strDbg.AppendFormat("\"%s\" ", _SearchExpr.m_aExpr[0]);
 		}
@@ -881,7 +903,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			}
 			data.Write(&typeParameter, 1);
 			uint16 nSize = strType.GetLength();
-			data.Write(&nSize, 2);
+			data.WriteUInt16(nSize);
 			data.Write((LPCSTR)strType, nSize);
 			data.Write(_aucSearchType, sizeof _aucSearchType);
 			strDbg.AppendFormat("type=\"%s\" ", strType);
@@ -893,7 +915,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 				strDbg.AppendFormat("AND ");
 			}
 			data.Write(&numericParameter, 1);
-			data.Write(&ulMinSize, 4);
+			data.WriteUInt32(ulMinSize);
 			data.Write(_aucSearchMin, sizeof _aucSearchMin);
 			strDbg.AppendFormat("min=%u ", ulMinSize);
 		}
@@ -904,7 +926,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 				strDbg.AppendFormat("AND ");
 			}
 			data.Write(&numericParameter, 1);
-			data.Write(&ulMaxSize, 4);
+			data.WriteUInt32(ulMaxSize);
 			data.Write(_aucSearchMax, sizeof _aucSearchMax);
 			strDbg.AppendFormat("max=%u ", ulMaxSize);
 		}
@@ -915,7 +937,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 				strDbg.AppendFormat("AND ");
 			}
 			data.Write(&numericParameter, 1);
-			data.Write(&iAvailability, 4);
+			data.WriteUInt32(iAvailability);
 			data.Write(_aucSearchAvailability, sizeof _aucSearchAvailability);
 			strDbg.AppendFormat("avail=%u ", iAvailability);
 		}
@@ -928,7 +950,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			CString strData(strExtension);
 			data.Write(&typeParameter, 1);
 			uint16 nSize = strData.GetLength();
-			data.Write(&nSize, 2);
+			data.WriteUInt16(nSize);
 			data.Write((LPCSTR)strData, nSize);
 			data.Write(_aucSearchExtension, sizeof _aucSearchExtension);
 			strDbg.AppendFormat("ext=\"%s\" ", strData);
@@ -990,7 +1012,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			else{
 				data.Write(&stringParameter, 1);
 				uint16 nSize = str.GetLength();
-				data.Write(&nSize, 2);
+				data.WriteUInt16(nSize);
 				data.Write((LPCSTR)str, nSize);
 				strDbg.AppendFormat("\"%s\" ", str);
 			}
@@ -999,7 +1021,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 		if (!strType.IsEmpty()){
 			data.Write(&typeParameter, 1);
 			uint16 nSize = strType.GetLength();
-			data.Write(&nSize, 2);
+			data.WriteUInt16(nSize);
 			data.Write((LPCSTR)strType, nSize);
 			data.Write(_aucSearchType, sizeof _aucSearchType);
 			strDbg.AppendFormat("type=\"%s\" ", strType);
@@ -1007,21 +1029,21 @@ bool GetSearchPacket(CSafeMemFile* pData,
 
 		if (ulMinSize > 0){
 			data.Write(&numericParameter, 1);
-			data.Write(&ulMinSize, 4);
+			data.WriteUInt32(ulMinSize);
 			data.Write(_aucSearchMin, sizeof _aucSearchMin);
 			strDbg.AppendFormat("min=%u ", ulMinSize);
 		}
 
 		if (ulMaxSize > 0){
 			data.Write(&numericParameter, 1);
-			data.Write(&ulMaxSize, 4);
+			data.WriteUInt32(ulMaxSize);
 			data.Write(_aucSearchMax, sizeof _aucSearchMax);
 			strDbg.AppendFormat("max=%u ", ulMaxSize);
 		}
 
 		if (iAvailability >= 0){
 			data.Write(&numericParameter, 1);
-			data.Write(&iAvailability, 4);
+			data.WriteUInt32(iAvailability);
 			data.Write(_aucSearchAvailability, sizeof _aucSearchAvailability);
 			strDbg.AppendFormat("avail=%u ", iAvailability);
 		}
@@ -1030,14 +1052,14 @@ bool GetSearchPacket(CSafeMemFile* pData,
 			CString strData(strExtension);
 			data.Write(&typeParameter, 1);
 			uint16 nSize = strData.GetLength();
-			data.Write(&nSize, 2);
+			data.WriteUInt16(nSize);
 			data.Write((LPCSTR)strData, nSize);
 			data.Write(_aucSearchExtension, sizeof _aucSearchExtension);
 			strDbg.AppendFormat("ext=\"%s\" ", strData);
 		}
 	}
 
-	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0)
+	if (thePrefs.GetDebugServerSearchesLevel() > 0)
 		Debug("Search Data: %s\n", strDbg);
 	_SearchExpr.m_aExpr.RemoveAll();
 	return true;
@@ -1076,7 +1098,7 @@ bool CSearchDlg::DoNewSearch(SSearchParams* pParams)
 
 	Packet* packet = new Packet(&data);
 	packet->opcode = OP_SEARCHREQUEST;
-	if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+	if (thePrefs.GetDebugServerTCPLevel() > 0)
 		Debug(">>> Sending OP__SearchRequest\n");
 	theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 	theApp.serverconnect->SendPacket(packet,false);
@@ -1086,7 +1108,7 @@ bool CSearchDlg::DoNewSearch(SSearchParams* pParams)
 		// set timeout timer for local server
 		m_uTimerLocalServer = SetTimer(TimerServerTimeout, 50000, NULL);
 
-		if( theApp.glob_prefs->Score() ){
+		if( thePrefs.Score() ){
 			theApp.serverlist->ResetSearchServerPos();
 		}
 
@@ -1126,7 +1148,7 @@ void CSearchDlg::OnBnClickedMore()
 
 	Packet* packet = new Packet();
 	packet->opcode = OP_QUERY_MORE_RESULT;
-	if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
+	if (thePrefs.GetDebugServerTCPLevel() > 0)
 		Debug(">>> Sending OP__QueryMoreResults\n");
 	theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 	theApp.serverconnect->SendPacket(packet);
@@ -1136,7 +1158,7 @@ void CSearchDlg::OnBnClickedMore()
 void CSearchDlg::StartNewSearch(bool bKademlia)
 {
 	ESearchType eSearchType = (ESearchType)methodBox.GetCurSel();
-	if (bKademlia ? !theApp.kademlia->isConnected() : ((eSearchType == SearchTypeServer || eSearchType == SearchTypeGlobal) && !theApp.serverconnect->IsConnected()))
+	if (bKademlia ? !Kademlia::CKademlia::isConnected() : ((eSearchType == SearchTypeServer || eSearchType == SearchTypeGlobal) && !theApp.serverconnect->IsConnected()))
 		AfxMessageBox(GetResString(IDS_ERR_NOTCONNECTED),MB_ICONASTERISK);
 	else{
 		CString strSearchString;
@@ -1236,10 +1258,10 @@ void CSearchDlg::StartNewSearch(bool bKademlia)
 
 bool CSearchDlg::DoNewKadSearch(SSearchParams* pParams)
 {
-	if (!theApp.kademlia->isConnected())
+	if (!Kademlia::CKademlia::isRunning())
 		return false;
 
-	if (Kademlia::CTimer::getThreadID() == 0)
+	if (!Kademlia::CKademlia::isConnected())
 		return false;
 
 	int iPos = 0;
@@ -1259,25 +1281,17 @@ bool CSearchDlg::DoNewKadSearch(SSearchParams* pParams)
 		data.SeekToBegin();
 		data.Read(pSearchTermsData, uSearchTermsSize);
 	}
-	uint32 searchID = 0;
-	Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindKeywords(KademliaResultKeywordCallback, strKeyWord, uSearchTermsSize, pSearchTermsData);
+	Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindKeywords(Kademlia::CSearch::KEYWORD, true, strKeyWord, uSearchTermsSize, pSearchTermsData);
 	delete pSearchTermsData;
-	if (pSearch){
-		uint32 searchid = pSearch->getSearchID();
-		pSearch->setSearchTypes(Kademlia::CSearch::KEYWORD);
-		if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch)){
-			Kademlia::CSearchManager::deleteSearch(pSearch);
-		}
-		else
-			searchID = searchid;
-	}
-	if (searchID == 0)
+	if (!pSearch)
+	{
 		return false;
-	pParams->dwSearchID = searchID;
+	}
+	pParams->dwSearchID = pSearch->getSearchID();
 	CString strResultType = pParams->strFileType;
 	if (strResultType == GetResString(IDS_SEARCH_PRG))
 		strResultType = GetResString(IDS_SEARCH_ANY);
-	theApp.searchlist->NewSearch(&searchlistctrl,strResultType,searchID);
+	theApp.searchlist->NewSearch(&searchlistctrl,strResultType,pParams->dwSearchID);
 	CreateNewTab(pParams);
 	return true;
 }
@@ -1286,9 +1300,11 @@ void CSearchDlg::StartNewSearchKad(){
 	StartNewSearch(true);
 }
 
-bool CSearchDlg::CreateNewTab(SSearchParams* pParams){
+bool CSearchDlg::CreateNewTab(SSearchParams* pParams)
+{
     int iTabItems = searchselect.GetItemCount();
-    for (int i = 0; i < iTabItems; i++){
+    for (int i = 0; i < iTabItems; i++)
+	{
         TCITEM tci;
         tci.mask = TCIF_PARAM;
 		if (searchselect.GetItem(i, &tci) && tci.lParam != NULL && ((const SSearchParams*)tci.lParam)->dwSearchID == pParams->dwSearchID)
@@ -1302,7 +1318,18 @@ bool CSearchDlg::CreateNewTab(SSearchParams* pParams){
 	newitem.lParam = (LPARAM)pParams;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)pParams->strExpression);
 	newitem.cchTextMax = 0;
+	if (pParams->bClientSharedFiles)
+		newitem.iImage = 4;
+	else if (pParams->eType == SearchTypeGlobal)
+		newitem.iImage = 1;
+	else if (pParams->eType == SearchTypeJigleSOAP)
+		newitem.iImage = 2;
+	else if (pParams->eType == SearchTypeKademlia)
+		newitem.iImage = 3;
+	else{
+		ASSERT( pParams->eType == SearchTypeServer );
 	newitem.iImage = 0;
+	}
 	int itemnr = searchselect.InsertItem(INT_MAX, &newitem);
 	if (!searchselect.IsWindowVisible())
 		ShowSearchSelector(true);
@@ -1318,7 +1345,7 @@ bool CSearchDlg::CanDeleteSearch(uint32 nSearchID) const
 
 void CSearchDlg::DeleteSearch(uint32 nSearchID)
 {
-	Kademlia::CSearchManager::stopSearch(nSearchID);
+	Kademlia::CSearchManager::stopSearch(nSearchID, false);
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 	item.lParam = -1;
@@ -1377,7 +1404,7 @@ void CSearchDlg::DeleteAllSearchs()
 		item.mask = TCIF_PARAM;
 		item.lParam = -1;
 		if (searchselect.GetItem(i, &item) && item.lParam != -1 && item.lParam != NULL){
-			Kademlia::CSearchManager::stopSearch(((const SSearchParams*)item.lParam)->dwSearchID);
+			Kademlia::CSearchManager::stopSearch(((const SSearchParams*)item.lParam)->dwSearchID, false);
 			delete (SSearchParams*)item.lParam;
 		}
 	}
@@ -1389,29 +1416,31 @@ void CSearchDlg::DeleteAllSearchs()
 
 void CSearchDlg::ShowResults(const SSearchParams* pParams)
 {
-	m_ctlName.SetWindowText(pParams->strExpression);
-	SetDlgItemText(IDC_EDITSEARCHMIN, pParams->strMinSize);
-	SetDlgItemText(IDC_EDITSEARCHMAX, pParams->strMaxSize);
-	SetDlgItemText(IDC_EDITSEARCHEXTENSION, pParams->strExtension);
+	if (!pParams->bClientSharedFiles)
+	{
+		m_ctlName.SetWindowText(pParams->strExpression);
+		SetDlgItemText(IDC_EDITSEARCHMIN, pParams->strMinSize);
+		SetDlgItemText(IDC_EDITSEARCHMAX, pParams->strMaxSize);
+		SetDlgItemText(IDC_EDITSEARCHEXTENSION, pParams->strExtension);
 
-	CString strBuff;
-	if (pParams->iAvailability > 0)
-		strBuff.Format(_T("%u"), pParams->iAvailability);
-	else
-		strBuff.Empty();
-	SetDlgItemText(IDC_EDITSEARCHAVAIBILITY, strBuff);
-
+		CString strBuff;
+		if (pParams->iAvailability > 0)
+			strBuff.Format(_T("%u"), pParams->iAvailability);
+		else
+			strBuff.Empty();
+		SetDlgItemText(IDC_EDITSEARCHAVAIBILITY, strBuff);
+	}
 	searchlistctrl.ShowResults(pParams->dwSearchID);
 }
 
 void CSearchDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	CWaitCursor curWait; // this may take a while
+	int cur_sel = searchselect.GetCurSel();
+	if (cur_sel == -1)
+		return;
 	TCITEM item;
 	item.mask = TCIF_PARAM;
-	int cur_sel = searchselect.GetCurSel();
-	if (cur_sel == (-1))
-		return;
 	if (searchselect.GetItem(cur_sel, &item) && item.lParam != NULL)
 		ShowResults((const SSearchParams*)item.lParam);
 	*pResult = 0;
@@ -1449,11 +1478,12 @@ void CSearchDlg::OnBnClickedSearchReset()
 }
 
 // khaos::categorymod+ These things are obsolete, replaced by the select cat dialog.
-/*void CSearchDlg::UpdateCatTabs() {
+/*
+void CSearchDlg::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
-	for (int ix=0;ix<theApp.glob_prefs->GetCatCount();ix++)
-		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):theApp.glob_prefs->GetCategory(ix)->title);
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
 		oldsel=0;
 
@@ -1463,7 +1493,8 @@ void CSearchDlg::OnBnClickedSearchReset()
 	
 	this->GetDlgItem(IDC_CATTAB2)->ShowWindow(flag);
 	this->GetDlgItem(IDC_STATIC_DLTOof)->ShowWindow(flag);
-}*/
+}
+*/
 // khaos::categorymod-
 
 void CSearchDlg::SearchClipBoard() {
@@ -1539,7 +1570,8 @@ CString	CSearchDlg::ToQueryString(CString str){
 	return sTmp;
 }
 
-void CSearchDlg::ShowSearchSelector(bool visible){
+void CSearchDlg::ShowSearchSelector(bool visible)
+{
 	WINDOWPLACEMENT wpSearchWinPos;
 	WINDOWPLACEMENT wpSelectWinPos;
 	searchselect.GetWindowPlacement(&wpSelectWinPos);
@@ -1548,18 +1580,18 @@ void CSearchDlg::ShowSearchSelector(bool visible){
 		wpSearchWinPos.rcNormalPosition.top = wpSelectWinPos.rcNormalPosition.bottom;
 	else
 		wpSearchWinPos.rcNormalPosition.top = wpSelectWinPos.rcNormalPosition.top;
-	searchselect.ShowWindow( ((visible)? SW_SHOW : SW_HIDE) );
+	searchselect.ShowWindow(visible ? SW_SHOW : SW_HIDE);
 	RemoveAnchor(searchlistctrl);
 	searchlistctrl.SetWindowPlacement(&wpSearchWinPos);
 	AddAnchor(searchlistctrl,TOP_LEFT,BOTTOM_RIGHT);
-	GetDlgItem(IDC_CLEARALL)->ShowWindow((visible) ? SW_SHOW:SW_HIDE);
+	GetDlgItem(IDC_CLEARALL)->ShowWindow(visible ? SW_SHOW : SW_HIDE);
 }
 
 BOOL CSearchDlg::SaveSearchStrings()
 {
 	if (m_pacSearchString == NULL)
 		return FALSE;
-	return m_pacSearchString->SaveList(CString(theApp.glob_prefs->GetConfigDir()) + _T("\\") SEARCH_STRINGS_PROFILE);
+	return m_pacSearchString->SaveList(CString(thePrefs.GetConfigDir()) + _T("\\") SEARCH_STRINGS_PROFILE);
 }
 
 void CSearchDlg::SaveAllSettings()
@@ -1590,7 +1622,7 @@ void CSearchDlg::UpdateControls()
 {
 	int iMethod = methodBox.GetCurSel();
 	if (iMethod != CB_ERR)
-		theApp.glob_prefs->SetSearchMethod(iMethod);
+		thePrefs.SetSearchMethod(iMethod);
 	GetDlgItem(IDC_MATCH_KEYWORDS)->EnableWindow(iMethod == SearchTypeJigleSOAP || iMethod == SearchTypeJigle);
 	GetDlgItem(IDC_MATCH_KEYWORDS)->ShowWindow((iMethod == SearchTypeJigleSOAP || iMethod == SearchTypeJigle) ? SW_SHOW : SW_HIDE);
 }
@@ -1605,81 +1637,11 @@ void CSearchDlg::OnCbnSelendokCombo1()
 	UpdateControls();
 }
 
-void KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, LPCSTR name, uint32 size, LPCSTR type, uint16 numProperties, va_list args)
-{
-	CString idStr;
-	fileID->toHexString(&idStr);
-	uchar fileid[16];
-	DecodeBase16(idStr.GetBuffer(),idStr.GetLength(),fileid);
+void CSearchDlg::OnDDClicked() {
 	
-	CMemFile* temp = new CMemFile(250);
-	temp->Write(&fileid, 16);
+	CWnd* box=GetDlgItem(IDC_SEARCHNAME);
+	box->SetFocus();
+	box->SetWindowText("");
+	box->SendMessage(WM_KEYDOWN,VK_DOWN,0x00510001);
 	
-	uint32 clientip = 0;
-	temp->Write(&clientip, 4);
-	uint16 clientport = 0;
-	temp->Write(&clientport, 2);
-	
-	// write tag list
-	UINT uFilePosTagCount = temp->GetPosition();
-	uint32 tagcount = 0;
-	temp->Write(&tagcount, 4);
-
-	// standard tags
-	CTag tagName(FT_FILENAME, name);
-	tagName.WriteTagToFile(temp);
-	tagcount++;
-
-	CTag tagSize(FT_FILESIZE, size);
-	tagSize.WriteTagToFile(temp);
-	tagcount++;
-
-	if (type != NULL && type[0] != '\0'){
-		CTag tagType(FT_FILETYPE, type);
-		tagType.WriteTagToFile(temp);
-		tagcount++;
-	}
-
-	// additional tags
-	while (numProperties-- > 0){
-		LPCSTR pszPropType = va_arg(args, LPCSTR);
-		LPCSTR pszPropName = va_arg(args, LPCSTR);
-		LPCSTR pszPropValue = va_arg(args, LPCSTR);
-		if( (int)pszPropType == 2 )
-		{
-			if (pszPropValue != NULL && pszPropValue[0] != '\0'){
-				if (strlen(pszPropName) == 1){
-					CTag tagProp((uint8)*pszPropName, pszPropValue);
-					tagProp.WriteTagToFile(temp);
-				}
-				else{
-					CTag tagProp(pszPropName, pszPropValue);
-					tagProp.WriteTagToFile(temp);
-				}
-				tagcount++;
-			}
-		}
-		else if( (int)pszPropType == 3 )
-		{
-			CTag tagProp(pszPropName, (uint32)pszPropValue);
-			tagProp.WriteTagToFile(temp);
-			tagcount++;
-		}
-		else
-		{
-			if (pszPropValue != NULL && pszPropValue[0] != '\0'){
-				CTag tagProp(pszPropName, pszPropValue);
-				tagProp.WriteTagToFile(temp);
-				tagcount++;
-			}
-		}
-	}
-	temp->Seek(uFilePosTagCount, SEEK_SET);
-	temp->Write(&tagcount, 4);
-	
-	temp->SeekToBegin();
-	CSearchFile* tempFile = new CSearchFile(temp, searchID, 0, 0, 0, true);
-	theApp.searchlist->AddToList(tempFile);
-	
-	delete temp;
 }

@@ -17,6 +17,7 @@
 #pragma once
 
 class CTag;
+class CFileDataIO;
 
 struct IPRange_Struct2; //EastShare - added by AndCycle, IP to Country
 
@@ -52,7 +53,7 @@ public:
 	LPCSTR	GetFullIP() const						{return ipfull;}
 	LPCSTR	GetAddress() const;
 	uint16	GetPort() const							{return port;}
-	bool	AddTagFromFile(CFile* servermet);
+	bool	AddTagFromFile(CFileDataIO* servermet);
 	void	SetListName(LPCSTR newname);
 	void	SetDescription(LPCSTR newdescription);
 	uint32	GetIP() const							{return ip;}

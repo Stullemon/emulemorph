@@ -19,8 +19,9 @@
 #include "IPFilter.h"
 #include "otherfunctions.h"
 #include "Preferences.h"
-#include "HttpDownloadDlg.h"//MORPH START added by Yun.SF3: Ipfilter.dat update
 #include "emuleDlg.h"
+#include "HttpDownloadDlg.h"//MORPH START added by Yun.SF3: Ipfilter.dat update
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -28,164 +29,373 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-CIPFilter::CIPFilter(){
-	lasthit="";
-	LoadFromFile();
+
+#define	DFLT_FILTER_LEVEL	100 // default filter level if non specified
+
+CIPFilter::CIPFilter()
+{
+	m_pLastHit = NULL;
+	LoadFromDefaultFile(false);
 }
 
-CIPFilter::~CIPFilter(){
+CIPFilter::~CIPFilter()
+{
 	RemoveAllIPs();
 }
 
-bool CIPFilter::AddBannedIPRange(uint32 IPfrom,uint32 IPto,uint8 filter, CString desc){
-	IPRange_Struct* newFilter=new IPRange_Struct();
-
-	newFilter->IPstart=IPfrom;
-	newFilter->IPend=IPto;
-	newFilter->filter=filter;
-	newFilter->description=desc;
-
-	// no filters with same startrange allowed for quick key-search (for now)
-	bool discard=(IsFiltered(htonl(IPfrom),-1));
-	if (discard)
-		delete newFilter;
-	else
-		iplist[IPfrom]=newFilter;
-
-	return !discard;
+void CIPFilter::AddIPRange(uint32 start, uint32 end, UINT level, const CString& desc)
+{
+	SIPFilter* newFilter = new SIPFilter;
+	newFilter->start = start;
+	newFilter->end = end;
+	newFilter->level = level;
+	newFilter->desc = desc;
+	newFilter->hits = 0;
+	m_iplist.Add(newFilter);
 }
 
-int CIPFilter::LoadFromFile(){
-	CString sbuffer,sbuffer2,sbuffer3,sbuffer4;
-	int pos,filtercounter;
-	uint32 ip1,ip2;
-	uint8 filter;
-	char buffer[1024];
-	int lenBuf = 1024;
-	filtercounter=0;
+static int __cdecl CmpSIPFilterByStartAddr(const void* p1, const void* p2)
+{
+	const SIPFilter* rng1 = *(SIPFilter**)p1;
+	const SIPFilter* rng2 = *(SIPFilter**)p2;
+	return CompareUnsigned(rng1->start, rng2->start);
+}
 
+int CIPFilter::LoadFromDefaultFile(bool bShowResponse)
+{
 	RemoveAllIPs();
+	return AddFromFile(thePrefs.GetConfigDir() + DFLT_IPFILTER_FILENAME, bShowResponse);
+}
+int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
+{
+	FILE* readFile = fopen(pszFilePath, "r");
+	if (readFile != NULL)
+	{
+		enum EIPFilterFileType
+		{
+			Unknown = 0,
+			FilterDat = 1,		// ipfilter.dat/ip.prefix format
+			PeerGuardian = 2	// PeerGuardian format
+		} eFileType = Unknown;
 
-	FILE* readFile= fopen(CString(theApp.glob_prefs->GetConfigDir())+"ipfilter.dat", "r");
-	if (readFile!=NULL) {
-		while (!feof(readFile)) {
-			if (fgets(buffer,lenBuf,readFile)==0) break;
-			sbuffer=buffer;
+		TCHAR szNam[_MAX_FNAME];
+		TCHAR szExt[_MAX_EXT];
+		_tsplitpath(pszFilePath, NULL, NULL, szNam, szExt);
+		if (_tcsicmp(szExt, _T(".p2p")) == 0 || (_tcsicmp(szNam, _T("guarding.p2p")) == 0 && _tcsicmp(szExt, _T(".txt")) == 0))
+			eFileType = PeerGuardian;
+		else if (_tcsicmp(szExt, _T(".prefix")) == 0)
+			eFileType = FilterDat;
+
+		int iLine = 0;
+		int iFoundRanges = 0;
+		int iDuplicate = 0;
+		int iMerged = 0;
+		CString sbuffer;
+		char szBuffer[1024];
+		while (fgets(szBuffer, ARRSIZE(szBuffer), readFile) != NULL)
+		{
+			iLine++;
+			sbuffer = szBuffer;
 			
 			// ignore comments & too short lines
-			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength()<5)
+			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
 				continue;
-			
-			// get & test & process IP range
-			pos=sbuffer.Find(',');
-			if (pos==-1) continue;
-			sbuffer2=sbuffer.Left(pos).Trim();
-			pos=sbuffer2.Find("-");
-			if (pos==-1) continue;
-			sbuffer3=sbuffer2.Left(pos).Trim();
-			sbuffer4=sbuffer2.Right(sbuffer2.GetLength()-pos-1).Trim();
 
-			ip1=ip2=0;
-			int counter = 0;
-			CString temp;
-			bool skip=false;
+			if (eFileType == Unknown)
+			{
+				// looks like html
+				if (sbuffer.Find(_T('>')) > -1 && sbuffer.Find(_T('<')) > -1)
+					sbuffer.Delete(0, sbuffer.ReverseFind(_T('>')) + 1);
 
-			for( int i = 0; i < 4; i++){
-				sbuffer3.Tokenize(".",counter);
-				if( counter == -1 ){ skip=true;break;}
-			}
-			counter=0;
-			for( int i = 0; i < 4; i++){
-				sbuffer4.Tokenize(".",counter);
-				if( counter == -1 ){ skip=true;break;}
-			}
-			if (skip) continue;
-			
-			// Elandal: Avoids floating point math on 2's power
-			// removes warning regarding implicit cast
-			counter=0;
-			for(int i=0; i<4; i++){ 
-				temp = sbuffer3.Tokenize(".",counter);
-				ip1 += atoi(temp) * (1L << (8*(3-i)));
-			}
-			counter=0;
-			for(int i=0; i<4; i++){ 
-				temp = sbuffer4.Tokenize(".",counter);
-				ip2 += atoi(temp) * (1L << (8*(3-i)));
+				// check for <IP> - <IP> at start of line
+				UINT u1, u2, u3, u4, u5, u6, u7, u8;
+				if (_stscanf(sbuffer, _T("%u.%u.%u.%u - %u.%u.%u.%u"), &u1, &u2, &u3, &u4, &u5, &u6, &u7, &u8) == 8)
+				{
+					eFileType = FilterDat;
+				}
+				else
+				{
+					// check for <description> ':' <IP> '-' <IP>
+					int iColon = sbuffer.Find(_T(':'));
+					if (iColon > -1)
+					{
+						CString strIPRange = sbuffer.Mid(iColon + 1);
+						UINT u1, u2, u3, u4, u5, u6, u7, u8;
+						if (_stscanf(strIPRange, _T("%u.%u.%u.%u - %u.%u.%u.%u"), &u1, &u2, &u3, &u4, &u5, &u6, &u7, &u8) == 8)
+						{
+							eFileType = PeerGuardian;
+						}
+					}
+				}
 			}
 
-			// filter
-			pos=sbuffer.Find(",",pos+1);
-			int pos2=sbuffer.Find(",",pos+1);
-			if (pos2==-1) continue;
-			sbuffer2=sbuffer.Mid(pos+1,pos2-pos-1).Trim();
-			filter=atoi(sbuffer2);
-
-			sbuffer2=sbuffer.Right(sbuffer.GetLength()-pos2-1);
-			if (sbuffer2.GetAt(sbuffer2.GetLength()-1)==10) sbuffer2.Delete(sbuffer2.GetLength()-1);
+			bool bValid = false;
+			uint32 start, end;
+			UINT level;
+			CString desc;
+			if (eFileType == FilterDat)
+				bValid = ParseFilterLine1(sbuffer, start, end, level, desc);
+			else if (eFileType == PeerGuardian)
+				bValid = ParseFilterLine2(sbuffer, start, end, level, desc);
 
 			// add a filter
-			if (AddBannedIPRange(ip1,ip2,filter,sbuffer2 ))
-				filtercounter++;
-
+			if (bValid)
+			{
+				AddIPRange(start, end, level, desc);
+				iFoundRanges++;
+			}
 		}
 		fclose(readFile);
+
+		// sort the IP filter list by IP range start addresses
+		qsort(m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpSIPFilterByStartAddr);
+
+		// merge overlapping and adjacent filter ranges
+		if (m_iplist.GetCount() >= 2)
+		{
+			SIPFilter* pPrv = m_iplist[0];
+			int i = 1;
+			while (i < m_iplist.GetCount())
+			{
+				SIPFilter* pCur = m_iplist[i];
+				if ((pCur->start >= pPrv->start && pCur->start <= pPrv->end || pCur->start == pPrv->end+1))
+				{
+					if (pCur->start != pPrv->start || pCur->end != pPrv->end) // don't merge identical entries
+					{
+						//TODO: not yet handled, overlapping entries with different 'level'
+						if (pCur->end > pPrv->end)
+							pPrv->end = pCur->end;
+						//pPrv->desc += _T("; ") + pCur->desc; // this may create a very very long description string...
+						iMerged++;
+					}
+					else
+					{
+						// if we have identical entries, use the lowest 'level'
+						if (pCur->level < pPrv->level)
+							pPrv->level = pCur->level;
+						iDuplicate++;
+					}
+					delete pCur;
+					m_iplist.RemoveAt(i);
+					continue;
+				}
+				pPrv = pCur;
+				i++;
+			}
+		}
+
+		theApp.emuledlg->AddLogLine(bShowResponse, GetResString(IDS_IPFILTERLOADED), m_iplist.GetCount());
+		if (thePrefs.GetVerbose())
+		{
+			theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP filters from \"%s\""), pszFilePath);
+			theApp.emuledlg->AddDebugLogLine(false, _T("Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"), iLine, iFoundRanges, iDuplicate, iMerged);
+		}
 	}
-	//MORPH START - Added by IceCream, Ipfilter logline at launch is now fixed
-	theApp.emuledlg->AddLogLine(false, GetResString(IDS_IPFILTERLOADED),filtercounter);
-	//MORPH END   - Added by IceCream, Ipfilter logline at launch is now fixed
-	return filtercounter;
+	return m_iplist.GetCount();
 }
 
-void CIPFilter::SaveToFile(){
-	// nope
+void CIPFilter::SaveToDefaultFile()
+{
+	CString strFilePath = thePrefs.GetConfigDir() + DFLT_IPFILTER_FILENAME;
+	FILE* fp = fopen(strFilePath, "wt");
+	if (fp != NULL)
+	{
+		for (int i = 0; i < m_iplist.GetCount(); i++)
+		{
+			const SIPFilter* flt = m_iplist[i];
+
+			char szStart[16];
+			in_addr ip;
+			ip.S_un.S_addr = htonl(flt->start);
+			strcpy(szStart, inet_ntoa(ip));
+
+			char szEnd[16];
+			ip.S_un.S_addr = htonl(flt->end);
+			strcpy(szEnd, inet_ntoa(ip));
+
+			if (fprintf(fp, "%-15s - %-15s , %3u , %s\n", szStart, szEnd, flt->level, flt->desc) == 0 || ferror(fp))
+			{
+				CString strError;
+				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
+				throw strError;
+			}
+		}
+		fclose(fp);
+	}
+	else
+	{
+		CString strError;
+		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
+		throw strError;
+	}
 }
 
-void CIPFilter::RemoveAllIPs(){
-	IPRange_Struct* search;
+bool CIPFilter::ParseFilterLine1(const CString& sbuffer, uint32& ip1, uint32& ip2, UINT& level, CString& desc) const
+{
+	TCHAR szDesc[256];
+	memset(szDesc, 0, sizeof szDesc);
+	UINT u1, u2, u3, u4, u5, u6, u7, u8, uLevel = DFLT_FILTER_LEVEL;
+	int iItems = _stscanf(sbuffer, _T("%u.%u.%u.%u - %u.%u.%u.%u , %u , %255c"), &u1, &u2, &u3, &u4, &u5, &u6, &u7, &u8, &uLevel, szDesc);
+	if (iItems < 8)
+		return false;
+
+	((BYTE*)&ip1)[0] = u4;
+	((BYTE*)&ip1)[1] = u3;
+	((BYTE*)&ip1)[2] = u2;
+	((BYTE*)&ip1)[3] = u1;
+
+	((BYTE*)&ip2)[0] = u8;
+	((BYTE*)&ip2)[1] = u7;
+	((BYTE*)&ip2)[2] = u6;
+	((BYTE*)&ip2)[3] = u5;
+
+	if (iItems == 8)
+	{
+		level = DFLT_FILTER_LEVEL;	// set default level
+		return true;
+	}
+
+	level = uLevel;
+
+	if (iItems == 9)
+		return true;	 // no description available
+
+	ASSERT( iItems == 10 );
+	desc = szDesc;
+	desc.Trim();
+
+	return true;
+}
+
+bool CIPFilter::ParseFilterLine2(const CString& sbuffer, uint32& ip1, uint32& ip2, UINT& level, CString& desc) const
+{
+	int iPos = sbuffer.Find(_T(':'));
+	if (iPos < 1)
+		return false;
+
+	desc = sbuffer.Left(iPos);
+	desc.Replace(_T("PGIPDB"), _T(""));
+	desc.Trim();
+
+	CString strIPRange = sbuffer.Mid(iPos + 1, sbuffer.GetLength() - iPos);
+	UINT u1, u2, u3, u4, u5, u6, u7, u8;
+	if (_stscanf(strIPRange, _T("%u.%u.%u.%u - %u.%u.%u.%u"), &u1, &u2, &u3, &u4, &u5, &u6, &u7, &u8) != 8)
+		return false;
+
+	((BYTE*)&ip1)[0] = u4;
+	((BYTE*)&ip1)[1] = u3;
+	((BYTE*)&ip1)[2] = u2;
+	((BYTE*)&ip1)[3] = u1;
+
+	((BYTE*)&ip2)[0] = u8;
+	((BYTE*)&ip2)[1] = u7;
+	((BYTE*)&ip2)[2] = u6;
+	((BYTE*)&ip2)[3] = u5;
+
+	level = DFLT_FILTER_LEVEL;
+
+	return true;
+}
+
+void CIPFilter::RemoveAllIPs()
+{
+	for (int i = 0; i < m_iplist.GetCount(); i++)
+		delete m_iplist[i];
+	m_iplist.RemoveAll();
+	m_pLastHit = NULL;
+}
+
+bool CIPFilter::IsFiltered(uint32 ip) /*const*/
+{
+	return IsFiltered(ip, thePrefs.GetIPFilterLevel());
+}
+
+static int __cdecl CmpSIPFilterByAddr(const void* pvKey, const void* pvElement)
+{
+	uint32 ip = *(uint32*)pvKey;
+	const SIPFilter* pIPFilter = *(SIPFilter**)pvElement;
+
+	if (ip < pIPFilter->start)
+		return -1;
+	if (ip > pIPFilter->end)
+		return 1;
+	return 0;
+}
+
+bool CIPFilter::IsFiltered(uint32 ip, UINT level) /*const*/
+{
+	if (m_iplist.GetCount() == 0 || ip == 0)
+		return false;
 	
-	std::map<uint32, IPRange_Struct*>::const_iterator it;
-	for ( it = iplist.begin(); it != iplist.end(); ++it ) {
-		search=(*it).second;
-		delete search;
-	}
-
-	iplist.clear();
-}
-
-bool CIPFilter::IsFiltered(uint32 IP2test){
-	return IsFiltered(IP2test,theApp.glob_prefs->GetIPFilterLevel());
-}
-
-bool CIPFilter::IsFiltered(uint32 IP2test,int level){
-	if (iplist.size()==0 || IP2test==0) return false;
-
-	IPRange_Struct* search;
-	IP2test=htonl(IP2test);
-
-	std::map<uint32, IPRange_Struct*>::const_iterator it=iplist.upper_bound(IP2test);
-	it--;
-	do {
-		search=(*it).second;
-		if (search->IPend<IP2test) return false;
-		if (level==-1 && search->IPstart==IP2test ) return true;
-		if (search->IPstart<=IP2test && search->IPend>=IP2test && search->filter<level ) {
-			lasthit=search->description;
+	ip = htonl(ip);
+	/*for (int i = 0; i < m_iplist.GetCount(); i++)
+	{
+		SIPFilter* search = m_iplist[i];
+		if (ip < search->start)
+			return false;
+		if (search->level < level && ip >= search->start && ip <= search->end)
+		{
+			search->hits++;
+			m_pLastHit = search;
 			return true;
 		}
-		it--;
-	} while (it!=iplist.begin());
+	}*/
+
+	// to speed things up we use a binary search
+	//	*)	the IP filter list must be sorted by IP range start addresses
+	//	*)	the IP filter list is not allowed to contain overlapping IP ranges (see also the IP range merging code when
+	//		loading the list)
+	//	*)	the filter 'level' is ignored during the binary search and is evaluated only for the found element
+	//
+	// TODO: this can still be improved even more:
+	//	*)	use a pre assembled list of IP ranges which contains only the IP ranges for the currently used filter level
+	//	*)	use a dumb plain array for storing the IP range structures. this will give more cach hits when processing
+	//		the list. but(!) this would require to also use a dumb SIPFilter structure (don't use data items with ctors).
+	//		otherwise the creation of the array would be rather slow.
+	SIPFilter** ppFound = (SIPFilter**)bsearch(&ip, m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpSIPFilterByAddr);
+	if (ppFound && (*ppFound)->level < level)
+	{
+		(*ppFound)->hits++;
+		m_pLastHit = *ppFound;
+		return true;
+	}
+
 	return false;
 }
+
+LPCTSTR CIPFilter::GetLastHit() const
+{
+	return m_pLastHit ? m_pLastHit->desc : _T("Not available");
+}
+
+const CIPFilterArray& CIPFilter::GetIPFilter() const
+{
+	return m_iplist;
+}
+
+bool CIPFilter::RemoveIPFilter(const SIPFilter* pFilter)
+{
+	for (int i = 0; i < m_iplist.GetCount(); i++)
+	{
+		if (m_iplist[i] == pFilter)
+		{
+			delete m_iplist[i];
+			m_iplist.RemoveAt(i);
+			return true;
+		}
+	}
+	return false;
+}
+
 //MORPH START added by Yun.SF3: Ipfilter.dat update
 void CIPFilter::UpdateIPFilterURL()
 {
 	char buffer[5];
 	int lenBuf = 5;
 	CString sbuffer;
-	CString strURL = theApp.glob_prefs->GetUpdateURLIPFilter();
+	CString strURL = thePrefs.GetUpdateURLIPFilter();
 	CString strTempFilename;
-	strTempFilename.Format(CString(theApp.glob_prefs->GetAppDir())+"ipfilter.txt");
+	strTempFilename.Format(CString(thePrefs.GetAppDir())+"ipfilter.txt");
 	FILE* readFile= fopen(strTempFilename, "r");
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_sURLToDownload = strURL;
@@ -204,12 +414,12 @@ void CIPFilter::UpdateIPFilterURL()
 	remove(strTempFilename);
 	CString IPFilterURL;
 	//IPFilterURL = "http://pages.xtn.net/~charliey/FoX/Morph/ipfilter.dat";
-	IPFilterURL = theApp.glob_prefs->GetUpdateURLIPFilter().TrimRight(".txt") + ".dat";
-	strTempFilename.Format(CString(theApp.glob_prefs->GetConfigDir())+"ipfilter.dat");
+	IPFilterURL = thePrefs.GetUpdateURLIPFilter().TrimRight(".txt") + ".dat";
+	strTempFilename.Format(CString(thePrefs.GetConfigDir())+"ipfilter.dat");
 	readFile= fopen(strTempFilename, "r");
 	// Mighty Knife: cleanup - removed that nasty signed-unsigned-message
-	if ((theApp.glob_prefs->GetIPfilterVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
-		theApp.glob_prefs->SetIpfilterVersion(atoi(sbuffer));
+	if ((thePrefs.GetIPfilterVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
+		thePrefs.SetIpfilterVersion(atoi(sbuffer));
 	// [end] Mighty Knife
 	if (readFile!=NULL) {
 		fclose(readFile);
@@ -224,7 +434,8 @@ void CIPFilter::UpdateIPFilterURL()
 	}
 	else
 	{
-	int count=LoadFromFile();
+	RemoveAllIPs();
+	int count=AddFromFile();
 	}
 	}
 }

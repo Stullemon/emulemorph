@@ -46,6 +46,7 @@ friend class CQueueListCtrl;
 	void		RemoveFriend(CFriend* todel);
 	void		RemoveAllFriendSlots();
 	void		Process();
+	uint16		GetCount()		{ return m_listFriends.GetCount(); }
 
 private:
 	CTypedPtrList<CPtrList, CFriend*>	m_listFriends;

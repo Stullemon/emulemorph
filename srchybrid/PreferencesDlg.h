@@ -55,38 +55,12 @@ public:
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 
-	CPreferences	*app_prefs;
 	CListBoxST		m_listbox;
 	CButton			m_groupbox;
 	CImageList		ImageList;
 	int				m_iPrevPage;
 
 	void Localize();
-	void SetPrefs(CPreferences* in_prefs)
-	{
-		app_prefs = in_prefs;
-		m_wndGeneral.SetPrefs(in_prefs);
-		m_wndDisplay.SetPrefs(in_prefs);
-		m_wndConnection.SetPrefs(in_prefs);
-		m_wndServer.SetPrefs(in_prefs);
-		m_wndDirectories.SetPrefs(in_prefs);
-		m_wndFiles.SetPrefs(in_prefs);
-		m_wndStats.SetPrefs(in_prefs);
-		m_wndNotify.SetPrefs(in_prefs);
-		m_wndIRC.SetPrefs(in_prefs);
-		m_wndTweaks.SetPrefs(in_prefs);
-		m_wndSecurity.SetPrefs(in_prefs);
-		m_wndWebServer.SetPrefs(in_prefs);
-		m_wndScheduler.SetPrefs(in_prefs);
-		m_wndProxy.SetPrefs(in_prefs);
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
-		m_wndDebug.SetPrefs(in_prefs);
-#endif
-		m_wndMorph.SetPrefs(in_prefs); //MORPH - Added by IceCream, Morph Prefs
-		m_wndMorph2.SetPrefs(in_prefs);	//MORPH - Added by SiRoB, Morph Prefs
-		m_wndEastShare.SetPrefs(in_prefs);	//EastShare - Added by Pretender, ES Prefs
-	}
-
 protected:
 	UINT m_nActiveWnd;
 

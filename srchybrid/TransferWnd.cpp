@@ -91,11 +91,11 @@ BOOL CTransferWnd::OnInitDialog()
 	m_uplBtn.SetFlat();
 	m_uplBtn.SetLeftAlign(true); 
 	
-	AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100, theApp.glob_prefs->GetSplitterbarPosition() ));
-	AddAnchor(IDC_UPLOADLIST,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_QUEUELIST,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_CLIENTLIST,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
-	AddAnchor(IDC_UPLOAD_ICO,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100, thePrefs.GetSplitterbarPosition() ));
+	AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+	AddAnchor(IDC_UPLOAD_ICO,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 	AddAnchor(IDC_QUEUECOUNT,BOTTOM_LEFT);
 	AddAnchor(IDC_TSTATIC1,BOTTOM_LEFT);
 	AddAnchor(IDC_QUEUE_REFRESH_BUTTON, BOTTOM_RIGHT);
@@ -122,16 +122,16 @@ BOOL CTransferWnd::OnInitDialog()
 
 // khaos::categorymod+
 	// show & cat-tabs
-	for (int ix=0; ix < theApp.glob_prefs->GetCatCount(); ix++)
+	for (int ix=0; ix < thePrefs.GetCatCount(); ix++)
 	{
-		Category_Struct* curCat = theApp.glob_prefs->GetCategory(ix);
+		Category_Struct* curCat = thePrefs.GetCategory(ix);
 		// MORPH - TO WATCH FOR CATEGORY STATUS
 		/*if (ix == 0 && curCat->viewfilters.nFromCats == 2)
 			curCat->viewfilters.nFromCats = 0;
 		else*/ if (curCat->viewfilters.nFromCats != 2 && ix != 0 && theApp.downloadqueue->GetCategoryFileCount(ix) != 0)
 			curCat->viewfilters.nFromCats = 2;
 
-		m_dlTab.InsertItem(ix,theApp.glob_prefs->GetCategory(ix)->title );
+		m_dlTab.InsertItem(ix,thePrefs.GetCategory(ix)->title );
 	}
 	// khaos::categorymod-
 	m_tooltip.Create(this, TTS_NOPREFIX);
@@ -172,7 +172,7 @@ void CTransferWnd::SetInitLayout() {
 		GetWindowRect(rcW);
 		ScreenToClient(rcW);
 
-		LONG splitpos=(theApp.glob_prefs->GetSplitterbarPosition()*rcW.Height())/100;
+		LONG splitpos=(thePrefs.GetSplitterbarPosition()*rcW.Height())/100;
 
 		pWnd = GetDlgItem(IDC_DOWNLOADLIST);
 		pWnd->GetWindowRect(rcDown);
@@ -250,16 +250,16 @@ void CTransferWnd::UpdateSplitterRange()
 		pWnd->GetWindowRect(rcUp);
 		ScreenToClient(rcUp);
 
-		theApp.glob_prefs->SetSplitterbarPosition((rcDown.bottom*100)/rcW.Height());
+		thePrefs.SetSplitterbarPosition((rcDown.bottom*100)/rcW.Height());
 
 		RemoveAnchor(IDC_DOWNLOADLIST);
 		RemoveAnchor(IDC_UPLOADLIST);
 		RemoveAnchor(IDC_QUEUELIST);
 		RemoveAnchor(IDC_CLIENTLIST);
-		AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100,theApp.glob_prefs->GetSplitterbarPosition() ));
-		AddAnchor(IDC_UPLOADLIST,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
-		AddAnchor(IDC_QUEUELIST,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
-		AddAnchor(IDC_CLIENTLIST,CSize(0,theApp.glob_prefs->GetSplitterbarPosition()),BOTTOM_RIGHT);
+		AddAnchor(IDC_DOWNLOADLIST,TOP_LEFT,CSize(100,thePrefs.GetSplitterbarPosition() ));
+		AddAnchor(IDC_UPLOADLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+		AddAnchor(IDC_QUEUELIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
+		AddAnchor(IDC_CLIENTLIST,CSize(0,thePrefs.GetSplitterbarPosition()),BOTTOM_RIGHT);
 
 		m_wndSplitter.SetRange(rcDown.top+50 , rcUp.bottom-40);
 
@@ -322,7 +322,7 @@ LRESULT CTransferWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 					pWnd->GetWindowRect(rcDown);
 					ScreenToClient(rcDown);
 
-					long splitpos=(theApp.glob_prefs->GetSplitterbarPosition()*rcW.Height())/100;
+					long splitpos=(thePrefs.GetSplitterbarPosition()*rcW.Height())/100;
 
 					rcSpl.right=rcDown.right;rcSpl.top=splitpos+10;rcSpl.bottom=rcSpl.top+7;rcSpl.left=(rcDown.right/2)-50;rcSpl.right=rcSpl.left+100;
 					m_wndSplitter.MoveWindow(rcSpl,true);
@@ -427,7 +427,7 @@ void CTransferWnd::SwitchUploadList()
 {
 	if( windowtransferstate == 1){
 		windowtransferstate = 2;		
-		if( theApp.glob_prefs->IsQueueListDisabled()){
+		if( thePrefs.IsQueueListDisabled()){
 			SwitchUploadList();
 			return;
 		}
@@ -439,7 +439,7 @@ void CTransferWnd::SwitchUploadList()
 	}
 	else if( windowtransferstate == 2){
 		windowtransferstate = 0;
-		if( theApp.glob_prefs->IsKnownClientListDisabled()){
+		if( thePrefs.IsKnownClientListDisabled()){
 			SwitchUploadList();
 			return;
 		}
@@ -534,9 +534,9 @@ void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
 	// Nor can we merge it.
 	m_mnuCategory.EnableMenuItem(MP_CAT_REMOVE, rightclickindex == 0 ? MF_GRAYED : MF_ENABLED);
 	m_mnuCategory.EnableMenuItem(MP_CAT_MERGE, rightclickindex == 0 ? MF_GRAYED : MF_ENABLED);
-	m_mnuCategory.EnableMenuItem(8, (theApp.glob_prefs->AdvancedA4AFMode() ? MF_ENABLED : MF_GRAYED) | MF_BYPOSITION);
+	m_mnuCategory.EnableMenuItem(8, (thePrefs.AdvancedA4AFMode() ? MF_ENABLED : MF_GRAYED) | MF_BYPOSITION);
 
-	Category_Struct* curCat = theApp.glob_prefs->GetCategory(rightclickindex);
+	Category_Struct* curCat = thePrefs.GetCategory(rightclickindex);
 	if (curCat) { //MORPH - HOTFIX by SiRoB, Possible crash when NULL is returned by GetCategory()
 		// Check and enable the appropriate menu items in Select View Filter
 		m_mnuCatViewFilter.CheckMenuItem(MP_CAT_SET0, (curCat->viewfilters.nFromCats == 0) ? MF_CHECKED : MF_UNCHECKED);
@@ -719,7 +719,7 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 
 			m_dlTab.SetCurSel(downloadlistctrl.curTab);
 			//MORPH - Changed by SiRoB, Due to Khaos Category
-			//if (m_dlTab.GetCurSel()>0 || (theApp.glob_prefs->GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
+			//if (m_dlTab.GetCurSel()>0 || (thePrefs.GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
 			if (m_dlTab.GetCurSel()>0)
 				downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
 			UpdateCatTabTitles();
@@ -733,27 +733,27 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 
 	// khaos::categorymod+
 	Category_Struct* curCat;
-	curCat = theApp.glob_prefs->GetCategory(rightclickindex);
+	curCat = thePrefs.GetCategory(rightclickindex);
 	/*if (wParam >= MP_CAT_SET0 && wParam <= MP_CAT_SET0 + 20) {
-		curCat = theApp.glob_prefs->GetCategory(rightclickindex);
-		theApp.glob_prefs->SetAllcatType(wParam-MP_CAT_SET0);
+		curCat = thePrefs.GetCategory(rightclickindex);
+		thePrefs.SetAllcatType(wParam-MP_CAT_SET0);
 		m_nLastCatTT=-1;
 		m_dlTab.SetCurSel(0);
 		downloadlistctrl.ChangeCategory(0);
-		EditCatTabLabel(0,GetCatTitle( theApp.glob_prefs->GetAllcatType()));*/
+		EditCatTabLabel(0,GetCatTitle( thePrefs.GetAllcatType()));*/
 	//}
 	// khaos::categorymod-
 
 	switch (wParam){ 
 		case MP_CAT_ADD: {
 			m_nLastCatTT=-1;
-			int newindex=AddCategorie("?",theApp.glob_prefs->GetIncomingDir(),"","",false);
-			m_dlTab.InsertItem(newindex,theApp.glob_prefs->GetCategory(newindex)->title);
+			int newindex=AddCategorie("?",thePrefs.GetIncomingDir(),"","",false);
+			m_dlTab.InsertItem(newindex,thePrefs.GetCategory(newindex)->title);
 			CCatDialog dialog(newindex);
 			dialog.DoModal();
 			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
-			EditCatTabLabel(newindex,theApp.glob_prefs->GetCategory(newindex)->title);
-			theApp.glob_prefs->SaveCats();
+			EditCatTabLabel(newindex,thePrefs.GetCategory(newindex)->title);
+			thePrefs.SaveCats();
 			break;
 		}
 		// khaos::categorymod+						 
@@ -764,11 +764,11 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			dialog.DoModal();
 
 			CString csName;
-			csName.Format("%s", theApp.glob_prefs->GetCategory(rightclickindex)->title );
+			csName.Format("%s", thePrefs.GetCategory(rightclickindex)->title );
 			EditCatTabLabel(rightclickindex,csName);
 		
 			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
-			theApp.glob_prefs->SaveCats();
+			thePrefs.SaveCats();
 			if (m_dlTab.GetCurSel() == rightclickindex)
 				downloadlistctrl.ChangeCategory(rightclickindex);
 			break;
@@ -792,22 +792,22 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			if (useCat > rightclickindex) useCat--;
 
 			theApp.downloadqueue->ResetCatParts(rightclickindex, useCat);
-			theApp.glob_prefs->RemoveCat(rightclickindex);
+			thePrefs.RemoveCat(rightclickindex);
 			m_dlTab.DeleteItem(rightclickindex);
 			m_dlTab.SetCurSel(useCat);
 			downloadlistctrl.ChangeCategory(useCat);
-			theApp.glob_prefs->SaveCats();
+			thePrefs.SaveCats();
 			break;
 		}
 		// khaos::categorymod-
 		case MP_CAT_REMOVE: {
 			m_nLastCatTT=-1;
 			theApp.downloadqueue->ResetCatParts(rightclickindex);
-			theApp.glob_prefs->RemoveCat(rightclickindex);
+			thePrefs.RemoveCat(rightclickindex);
 			m_dlTab.DeleteItem(rightclickindex);
 			m_dlTab.SetCurSel(0);
 			downloadlistctrl.ChangeCategory(0);
-			theApp.glob_prefs->SaveCats();
+			thePrefs.SaveCats();
 			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
 			break;
 		}
@@ -951,8 +951,8 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 void CTransferWnd::UpdateCatTabTitles() {
 	for (uint8 i=0;i<m_dlTab.GetItemCount();i++)
 		//MORPH START - Changed by SiRoB, Due to Khaos Category
-		//EditCatTabLabel(i,(i==0)? GetCatTitle( theApp.glob_prefs->GetAllcatType() ):theApp.glob_prefs->GetCategory(i)->title);
-		EditCatTabLabel(i, theApp.glob_prefs->GetCategory(i)->title);
+		//EditCatTabLabel(i,(i==0)? GetCatTitle( thePrefs.GetAllcatType() ):thePrefs.GetCategory(i)->title);
+		EditCatTabLabel(i, thePrefs.GetCategory(i)->title);
 		//MORPH END   - Changed by SiRoB, Due to Khaos Category
 }
 
@@ -963,7 +963,7 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 	m_dlTab.GetItem(index,&tabitem);
 	tabitem.mask = TCIF_TEXT;
 
-	if (theApp.glob_prefs->ShowCatTabInfos()) {
+	if (thePrefs.ShowCatTabInfos()) {
 		CPartFile* cur_file;
 		uint16 count,dwl;
 		count=dwl=0;
@@ -1028,7 +1028,7 @@ int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newc
 	newcat->selectioncriteria.bAdvancedFilterMask = true;
 	newcat->selectioncriteria.bFileSize = true;
 	// khaos::categorymod-
-	int index=theApp.glob_prefs->AddCat(newcat);
+	int index=thePrefs.AddCat(newcat);
 	
 	if (addTab) m_dlTab.InsertItem(index,newtitle);
 
@@ -1142,7 +1142,7 @@ void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
 	// do the reorder
 	
 	// rearrange the cat-map
-	if (!theApp.glob_prefs->MoveCat(from,to)) return;
+	if (!thePrefs.MoveCat(from,to)) return;
 
 	// update partfile-stored assignment
 	theApp.downloadqueue->MoveCat((uint8)from,(uint8)to);

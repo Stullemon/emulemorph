@@ -79,53 +79,56 @@ BOOL CPPgFiles::OnInitDialog()
 
 void CPPgFiles::LoadSettings(void)
 {	
-	CheckRadioButton(IDC_SEESHARE1, IDC_SEESHARE3, IDC_SEESHARE1 + app_prefs->prefs->m_iSeeShares);
+	ASSERT( vsfaEverybody == 0 );
+	ASSERT( vsfaFriends == 1 );
+	ASSERT( vsfaNobody == 2 );
+	CheckRadioButton(IDC_SEESHARE1, IDC_SEESHARE3, IDC_SEESHARE1 + thePrefs.m_iSeeShares);
 
-	if(app_prefs->prefs->addnewfilespaused)
+	if(thePrefs.addnewfilespaused)
 		CheckDlgButton(IDC_ADDNEWFILESPAUSED,1);
 	else
 		CheckDlgButton(IDC_ADDNEWFILESPAUSED,0);
 	
-	if(app_prefs->prefs->ICH)
+	if(thePrefs.ICH)
 		CheckDlgButton(IDC_ICH,1);
 	else
 		CheckDlgButton(IDC_ICH,0);
 
-	if(app_prefs->prefs->m_bpreviewprio)
+	if(thePrefs.m_bpreviewprio)
 		CheckDlgButton(IDC_PREVIEWPRIO,1);
 	else
 		CheckDlgButton(IDC_PREVIEWPRIO,0);
 
-	if(app_prefs->prefs->m_bDAP)
+	if(thePrefs.m_bDAP)
 		CheckDlgButton(IDC_DAP,1);
 	else
 		CheckDlgButton(IDC_DAP,0);
 
-	if(app_prefs->prefs->m_bUAP)
+	if(thePrefs.m_bUAP)
 		CheckDlgButton(IDC_UAP,1);
 	else
 		CheckDlgButton(IDC_UAP,0);
 
-	if(app_prefs->prefs->m_btransferfullchunks)
+	if(thePrefs.m_btransferfullchunks)
 		CheckDlgButton(IDC_FULLCHUNKTRANS,1);
 	else
 		CheckDlgButton(IDC_FULLCHUNKTRANS,0);
 
-	if(app_prefs->prefs->m_bstartnextfile)
+	if(thePrefs.m_bstartnextfile)
 		CheckDlgButton(IDC_STARTNEXTFILE,1);
 	else
 		CheckDlgButton(IDC_STARTNEXTFILE,0);
 
-	GetDlgItem(IDC_VIDEOPLAYER)->SetWindowText(app_prefs->prefs->VideoPlayer);
-	if(app_prefs->prefs->moviePreviewBackup)
+	GetDlgItem(IDC_VIDEOPLAYER)->SetWindowText(thePrefs.VideoPlayer);
+	if(thePrefs.moviePreviewBackup)
 		CheckDlgButton(IDC_VIDEOBACKUP,1);
 	else
 		CheckDlgButton(IDC_VIDEOBACKUP,0);
 
-	CheckDlgButton(IDC_STARTNEXTFILECAT, (uint8)app_prefs->GetResumeSameCat() );
-	CheckDlgButton(IDC_FNCLEANUP, (uint8)app_prefs->AutoFilenameCleanup());
+	CheckDlgButton(IDC_STARTNEXTFILECAT, (uint8)thePrefs.GetResumeSameCat() );
+	CheckDlgButton(IDC_FNCLEANUP, (uint8)thePrefs.AutoFilenameCleanup());
 
-	if(app_prefs->prefs->watchclipboard)
+	if(thePrefs.watchclipboard)
 		CheckDlgButton(IDC_WATCHCB,1);
 	else
 		CheckDlgButton(IDC_WATCHCB,0);
@@ -138,55 +141,54 @@ BOOL CPPgFiles::OnApply()
 	CString buffer;
 
 	if(IsDlgButtonChecked(IDC_SEESHARE1))
-		app_prefs->prefs->m_iSeeShares = 0;
+		thePrefs.m_iSeeShares = vsfaEverybody;
 	else if(IsDlgButtonChecked(IDC_SEESHARE2))
-		app_prefs->prefs->m_iSeeShares = 1;
+		thePrefs.m_iSeeShares = vsfaFriends;
 	else
-		app_prefs->prefs->m_iSeeShares = 2;
+		thePrefs.m_iSeeShares = vsfaNobody;
 
 	if(IsDlgButtonChecked(IDC_PREVIEWPRIO))
-		app_prefs->prefs->m_bpreviewprio = true;
+		thePrefs.m_bpreviewprio = true;
 	else
-		app_prefs->prefs->m_bpreviewprio = false;
+		thePrefs.m_bpreviewprio = false;
 
 	if(IsDlgButtonChecked(IDC_DAP))
-		app_prefs->prefs->m_bDAP = true;
+		thePrefs.m_bDAP = true;
 	else
-		app_prefs->prefs->m_bDAP = false;
+		thePrefs.m_bDAP = false;
 
 	if(IsDlgButtonChecked(IDC_UAP))
-		app_prefs->prefs->m_bUAP = true;
+		thePrefs.m_bUAP = true;
 	else
-		app_prefs->prefs->m_bUAP = false;
+		thePrefs.m_bUAP = false;
 
 	if(IsDlgButtonChecked(IDC_STARTNEXTFILE))
-		app_prefs->prefs->m_bstartnextfile = true;
+		thePrefs.m_bstartnextfile = true;
 	else
-		app_prefs->prefs->m_bstartnextfile = false;
+		thePrefs.m_bstartnextfile = false;
 
-	app_prefs->prefs->resumeSameCat= (int8)IsDlgButtonChecked(IDC_STARTNEXTFILECAT);
-
+	thePrefs.resumeSameCat= (uint8)IsDlgButtonChecked(IDC_STARTNEXTFILECAT);
 
 	if(IsDlgButtonChecked(IDC_FULLCHUNKTRANS))
-		app_prefs->prefs->m_btransferfullchunks = true;
+		thePrefs.m_btransferfullchunks = true;
 	else
-		app_prefs->prefs->m_btransferfullchunks = false;
+		thePrefs.m_btransferfullchunks = false;
 
 
 	if(IsDlgButtonChecked(IDC_WATCHCB))
-		app_prefs->prefs->watchclipboard = true;
+		thePrefs.watchclipboard = true;
 	else
-		app_prefs->prefs->watchclipboard = false;
+		thePrefs.watchclipboard = false;
 
-	app_prefs->prefs->addnewfilespaused = (int8)IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED);
-	app_prefs->prefs->autofilenamecleanup=(int8)IsDlgButtonChecked(IDC_FNCLEANUP);
+	thePrefs.addnewfilespaused = (uint8)IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED);
+	thePrefs.autofilenamecleanup=(uint8)IsDlgButtonChecked(IDC_FNCLEANUP);
 
-	app_prefs->prefs->ICH = (int8)IsDlgButtonChecked(IDC_ICH);
+	thePrefs.ICH = (uint8)IsDlgButtonChecked(IDC_ICH);
 
 	GetDlgItem(IDC_VIDEOPLAYER)->GetWindowText(buffer);
-	_snprintf(app_prefs->prefs->VideoPlayer, sizeof app_prefs->prefs->VideoPlayer, "%s", buffer);
+	_snprintf(thePrefs.VideoPlayer, sizeof thePrefs.VideoPlayer, "%s", buffer);
 
-	app_prefs->prefs->moviePreviewBackup = IsDlgButtonChecked(IDC_VIDEOBACKUP);
+	thePrefs.moviePreviewBackup = IsDlgButtonChecked(IDC_VIDEOBACKUP);
 
 	LoadSettings();
 
@@ -228,10 +230,10 @@ void CPPgFiles::OnSetCleanupFilter()
 {
 	CString prompt=GetResString(IDS_FILTERFILENAMEWORD);
 	InputBox inputbox;
-	inputbox.SetLabels(GetResString(IDS_FNFILTERTITLE),prompt,theApp.glob_prefs->GetFilenameCleanups());
+	inputbox.SetLabels(GetResString(IDS_FNFILTERTITLE),prompt,thePrefs.GetFilenameCleanups());
 	inputbox.DoModal();
 	if (!inputbox.WasCancelled())
-		theApp.glob_prefs->SetFilenameCleanups(inputbox.GetInput());
+		thePrefs.SetFilenameCleanups(inputbox.GetInput());
 }
 
 void CPPgFiles::BrowseVideoplayer()

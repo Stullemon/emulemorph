@@ -33,6 +33,7 @@
 #include "SharedFilesWnd.h"
 #include "Opcodes.h"
 #include "InputBox.h"
+#include "WebServices.h"
 
 // Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
@@ -55,11 +56,11 @@ class CSharedFileDetailsSheet : public CResizableSheet
 	DECLARE_DYNAMIC(CSharedFileDetailsSheet)
 
 public:
-	CSharedFileDetailsSheet(const CKnownFile* file);
+	CSharedFileDetailsSheet(const CTypedPtrList<CPtrList, CKnownFile*>& aFiles);
 	virtual ~CSharedFileDetailsSheet();
 
 protected:
-	const CKnownFile* m_file;
+	CSimpleArray<const CKnownFile*> m_aKnownFiles;
 	CFileInfoDialog m_wndMediaInfo;
 	CMetaDataDlg m_wndMetaData;
 
@@ -79,21 +80,23 @@ BEGIN_MESSAGE_MAP(CSharedFileDetailsSheet, CResizableSheet)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
-CSharedFileDetailsSheet::CSharedFileDetailsSheet(const CKnownFile* file)
+CSharedFileDetailsSheet::CSharedFileDetailsSheet(const CTypedPtrList<CPtrList, CKnownFile*>& aFiles)
 {
-	m_file = file;
+	POSITION pos = aFiles.GetHeadPosition();
+	while (pos)
+		m_aKnownFiles.Add(aFiles.GetNext(pos));
 	m_psh.dwFlags &= ~PSH_HASHELP;
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
 	m_wndMediaInfo.m_psp.dwFlags &= ~PSP_HASHELP;
 	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
 
-	m_wndMediaInfo.SetMyfile(file);
-	if (theApp.glob_prefs->IsExtControlsEnabled())
-		m_wndMetaData.SetFile(file);
+	m_wndMediaInfo.SetMyfile(&m_aKnownFiles);
+	if (m_aKnownFiles.GetSize() == 1 && thePrefs.IsExtControlsEnabled())
+		m_wndMetaData.SetFile(m_aKnownFiles[0]);
 
 	AddPage(&m_wndMediaInfo);
-	if (theApp.glob_prefs->IsExtControlsEnabled())
+	if (m_aKnownFiles.GetSize() == 1 && thePrefs.IsExtControlsEnabled())
 		AddPage(&m_wndMetaData);
 }
 
@@ -113,7 +116,10 @@ BOOL CSharedFileDetailsSheet::OnInitDialog()
 	BOOL bResult = CResizableSheet::OnInitDialog();
 	InitWindowStyles(this);
 	EnableSaveRestore(_T("SharedFileDetailsSheet")); // call this after(!) OnInitDialog
-	SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + m_file->GetFileName());
+	if (m_aKnownFiles.GetSize() == 1)
+		SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + m_aKnownFiles[0]->GetFileName());
+	else
+		SetWindowText(GetResString(IDS_DETAILS));
 	if (sm_iLastActivePage < GetPageCount())
 		SetActivePage(sm_iLastActivePage);
 	return bResult;
@@ -191,14 +197,14 @@ void CSharedFilesCtrl::Init(){
 	LoadSettings(CPreferences::tableShared);
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared);
-	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableShared);
+	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableShared);
 	SetSortArrow(sortItem, sortAscending);
 	// SLUGFILLER: multiSort - load multiple params
-	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableShared); i > 0; ) {
+	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableShared); i > 0; ) {
 		i--;
-		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared, i);
-		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared, i);
+		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableShared, i);
+		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableShared, i);
 		// Mighty Knife: CRC32-Tag - Indexes shifted by 10
 		SortItems(SortProc, sortItem + (sortAscending ? 0:30));
 		// [end] Mighty Knife
@@ -393,7 +399,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				//MORPH - Moved by SiRoB, due to the draw system change on hidden rect
 				// xMule_MOD: showSharePermissions, modified by itsonlyme
 				// display not finished files in navy, blocked files in red and friend-only files in orange
-				uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():theApp.glob_prefs->GetPermissions();
+				uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():thePrefs.GetPermissions();
 				if (iColumn==0){
 					if (file->IsPartFile())
 						dc->SetTextColor((COLORREF)RGB(0,0,192));
@@ -417,7 +423,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer = file->GetFileName();
 						//MORPH START - Added by IceCream, SLUGFILLER: showComments
 						CKnownFile* pfile =(CKnownFile*)lpDrawItemStruct->itemData;
-						if ( theApp.glob_prefs->ShowRatingIndicator() && ( !pfile->GetFileComment().IsEmpty() || pfile->GetFileRate() )){ //Modified by IceCream, eMule plus rating icon
+						if ( thePrefs.ShowRatingIndicator() && ( !pfile->GetFileComment().IsEmpty() || pfile->GetFileRate() )){ //Modified by IceCream, eMule plus rating icon
 							POINT point= {cur_rec.left-4,cur_rec.top+2};
 							int the_rating=0;
 							if (pfile->GetFileRate())
@@ -495,9 +501,9 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.bottom--;
 							cur_rec.top++;
 							if(!file->IsPartFile())
-								((CKnownFile*)lpDrawItemStruct->itemData)->DrawShareStatusBar(dc,&cur_rec,false,theApp.glob_prefs->UseFlatBar());
+								((CKnownFile*)lpDrawItemStruct->itemData)->DrawShareStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
 							else
-								((CPartFile*)lpDrawItemStruct->itemData)->DrawShareStatusBar(dc,&cur_rec,false,theApp.glob_prefs->UseFlatBar());
+								((CPartFile*)lpDrawItemStruct->itemData)->DrawShareStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
 							cur_rec.bottom++;
 							cur_rec.top--;
 						}
@@ -532,7 +538,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else
 							buffer = GetResString(IDS_NO);
 						buffer += "|";
-						if( (uint32)time(NULL)-file->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME )
+					if( (uint32)time(NULL)-file->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIMES )
 							buffer += GetResString(IDS_YES);
 						else
 							buffer += GetResString(IDS_NO);
@@ -541,7 +547,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//MORPH START - Added by SiRoB, Keep Permission flag
 					case 12:{
 						// xMule_MOD: showSharePermissions
-						uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():theApp.glob_prefs->GetPermissions();
+						uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():thePrefs.GetPermissions();
 						switch (Perm)
 						{
 							case PERM_ALL:
@@ -594,7 +600,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 14:
 						cur_rec.bottom--;
 						cur_rec.top++;
-						((CKnownFile*)lpDrawItemStruct->itemData)->statistic.DrawSpreadBar(dc,&cur_rec,theApp.glob_prefs->UseFlatBar());
+						((CKnownFile*)lpDrawItemStruct->itemData)->statistic.DrawSpreadBar(dc,&cur_rec,thePrefs.UseFlatBar());
 						cur_rec.bottom++;
 						cur_rec.top--;
 						break;
@@ -855,42 +861,44 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PrioMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_PrioMenu.CheckMenuRadioItem(MP_PRIOVERYLOW, MP_PRIOAUTO, uPrioMenuItem, 0);
 
-	bool bEnableFileOpen = (iSelectedItems == 1 && iCompleteFileSelected == 1);
-	m_SharedFilesMenu.EnableMenuItem(MP_OPEN, bEnableFileOpen ? MF_ENABLED : MF_GRAYED);
-	m_SharedFilesMenu.EnableMenuItem(MP_OPENFOLDER, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
-	m_SharedFilesMenu.EnableMenuItem(MP_RENAME, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
-	m_SharedFilesMenu.EnableMenuItem(MP_REMOVE, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_SharedFilesMenu.SetDefaultItem(bEnableFileOpen ? MP_OPEN : -1);
+	bool bSingleCompleteFileSelected = (iSelectedItems == 1 && iCompleteFileSelected == 1);
+	m_SharedFilesMenu.EnableMenuItem(MP_OPEN, bSingleCompleteFileSelected ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_OPENFOLDER, bSingleCompleteFileSelected ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_RENAME, bSingleCompleteFileSelected ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_REMOVE, iCompleteFileSelected > 0 ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.SetDefaultItem(bSingleCompleteFileSelected ? MP_OPEN : -1);
 	//MORPH START - Changed by SiRoB, BatchComment
-	//m_SharedFilesMenu.EnableMenuItem(MP_CMT, iSelectedItems ==1 0 ? MF_ENABLED : MF_GRAYED);
+	/*
+	m_SharedFilesMenu.EnableMenuItem(MP_CMT, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
+	*/
 	m_SharedFilesMenu.EnableMenuItem(MP_CMT, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	//MORPH END   - Changed by SiRoB, BatchComment
-	m_SharedFilesMenu.EnableMenuItem(MP_DETAIL, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_DETAIL, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, iSelectedItems > 0 && uHideOSMenuItem>=MP_HIDEOS_1 && uHideOSMenuItem<=MP_HIDEOS_5 ? MF_ENABLED : MF_GRAYED);
 	CString buffer;
-	if (theApp.glob_prefs->GetHideOvershares()==0)
+	if (thePrefs.GetHideOvershares()==0)
 		buffer.Format(" (%s)",GetResString(IDS_DISABLED));
 	else
-		buffer.Format(" (%u)",theApp.glob_prefs->GetHideOvershares());
+		buffer.Format(" (%u)",thePrefs.GetHideOvershares());
 	m_HideOSMenu.ModifyMenu(MP_HIDEOS, MF_STRING,MP_HIDEOS, GetResString(IDS_DEFAULT) + buffer);
 	m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS, MP_HIDEOS_5, uHideOSMenuItem, 0);
-	buffer.Format(" (%s)",theApp.glob_prefs->IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+	buffer.Format(" (%s)",thePrefs.IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
 	m_SelectiveChunkMenu.ModifyMenu(MP_SELECTIVE_CHUNK, MF_STRING, MP_SELECTIVE_CHUNK, GetResString(IDS_DEFAULT) + buffer);
 	m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, iSelectedItems > 0 && iCompleteFileSelected ==1 ? MF_ENABLED : MF_GRAYED);
-	buffer.Format(" (%s)",theApp.glob_prefs->GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+	buffer.Format(" (%s)",thePrefs.GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
 	m_ShareOnlyTheNeedMenu.ModifyMenu(MP_SHAREONLYTHENEED, MF_STRING, MP_SHAREONLYTHENEED, GetResString(IDS_DEFAULT) + buffer);
 	m_ShareOnlyTheNeedMenu.CheckMenuRadioItem(MP_SHAREONLYTHENEED, MP_SHAREONLYTHENEED_1, uShareOnlyTheNeedMenuItem, 0);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
 	//MORPH START - Added by SiRoB, Show Share Permissions
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	switch (theApp.glob_prefs->GetPermissions()){
+	switch (thePrefs.GetPermissions()){
 		case PERM_ALL:
 			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
 			break;
@@ -926,8 +934,8 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	// itsonlyme: hostnameSource
 	if (iSelectedItems > 0 && theApp.IsConnected() && !theApp.IsFirewalled() &&
-		!CString(theApp.glob_prefs->GetYourHostname()).IsEmpty() &&
-		CString(theApp.glob_prefs->GetYourHostname()).Find(_T(".")) != -1)
+		!CString(thePrefs.GetYourHostname()).IsEmpty() &&
+		CString(thePrefs.GetYourHostname()).Find(_T(".")) != -1)
 		m_SharedFilesMenu.EnableMenuItem(MP_GETHOSTNAMESOURCEED2KLINK, MF_ENABLED);
 	else
 		m_SharedFilesMenu.EnableMenuItem(MP_GETHOSTNAMESOURCEED2KLINK, MF_GRAYED);
@@ -935,18 +943,17 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, iSelectedItems == 1 && theApp.emuledlg->ircwnd->IsConnected() ? MF_ENABLED : MF_GRAYED);
 
-	CMenu Web;
-	Web.CreateMenu();
-	int iWebMenuEntries;
-	UpdateURLMenu(Web, iWebMenuEntries);
+	CMenu WebMenu;
+	WebMenu.CreateMenu();
+	int iWebMenuEntries = theWebServices.GetAllMenuEntries(WebMenu);
 	UINT flag2 = (iWebMenuEntries == 0 || iSelectedItems != 1) ? MF_GRAYED : MF_STRING;
-	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)Web.m_hMenu, GetResString(IDS_WEBSERVICES));
+	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
 	
 	GetPopupMenuPos(*this, point);
 	m_SharedFilesMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
 
 	m_SharedFilesMenu.RemoveMenu(m_SharedFilesMenu.GetMenuItemCount()-1,MF_BYPOSITION);
-	VERIFY( Web.DestroyMenu() );
+	VERIFY( WebMenu.DestroyMenu() );
 }
 
 BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -1025,7 +1032,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 			case MP_OPEN:
-				if (file)
+				if (file && !file->IsPartFile())
 				OpenFile(file);
 				break; 
 			case MP_OPENFOLDER:
@@ -1037,7 +1044,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break; 
 			case MP_RENAME:
 			case MPG_F2:
-				if (file){
+				if (file && !file->IsPartFile()){
 					InputBox inputbox;
 					CString title = GetResString(IDS_RENAME);
 					title.Remove(_T('&'));
@@ -1052,13 +1059,19 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						newpath.ReleaseBuffer();
 						if (_trename(file->GetFilePath(), newpath) != 0){
 							CString strError;
-							strError.Format(_T("Failed to rename\r\n    \"%s\"\r\nto\r\n    \"%s\"\r\n\r\n%hs"), file->GetFilePath(), newpath, strerror(errno));
+							strError.Format(_T(GetResString(IDS_ERR_RENAMESF)), file->GetFilePath(), newpath, strerror(errno));
 							AfxMessageBox(strError);
 							break;
 						}
+						
+						if (file->IsKindOf(RUNTIME_CLASS(CPartFile)))
+							file->SetFileName(newname);
+						else
+						{
 						theApp.sharedfiles->RemoveKeywords(file);
 						file->SetFileName(newname);
 						theApp.sharedfiles->AddKeywords(file);
+						}
 						file->SetFilePath(newpath);
 						UpdateFile(file);
 					}
@@ -1073,7 +1086,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					CKnownFile* myfile = selectedList.GetHead();
 					selectedList.RemoveHead();
-					if (!myfile)
+					if (!myfile || myfile->IsPartFile())
 						continue;
 					
 					bool delsucc = false;
@@ -1081,7 +1094,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						delsucc = true;
 					else{
 						// Delete
-						if (!theApp.glob_prefs->GetRemoveToBin()){
+						if (!thePrefs.GetRemoveToBin()){
 							delsucc = DeleteFile(myfile->GetFilePath());
 						}
 						else{
@@ -1106,7 +1119,6 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						AfxMessageBox(strError);
 					}
 				}
-				theApp.sharedfiles->Reload();
 				break; 
 			}
 			case MP_CMT:
@@ -1135,12 +1147,11 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 			//MORPH END - Added by SiRoB, derivated from SLUGFILLER: batchComment
 			case MPG_ALTENTER:
-			case MP_DETAIL:
-				if (file){
-					CSharedFileDetailsSheet sheet(file);
+			case MP_DETAIL:{
+				CSharedFileDetailsSheet sheet(selectedList);
 					sheet.DoModal();
-				}
 				break;
+			}
 			case MP_PRIOVERYLOW:
 			case MP_PRIOLOW:
 			case MP_PRIONORMAL:
@@ -1400,7 +1411,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					file = selectedList.GetNext(pos);
 					if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+256){
-						RunURL(file, theApp.webservices.GetAt(wParam - MP_WEBURL));
+						theWebServices.RunURL(file, wParam);
 					}
 					//MORPH START - Added by SiRoB, HIDEOS
 					else if (wParam>=MP_HIDEOS && wParam<=MP_HIDEOS_5){
@@ -1555,16 +1566,16 @@ void CSharedFilesCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared);
-	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared);
+	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableShared);
+	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableShared);
 	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem;
 
 	// Save new preferences
-	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableShared, sortItem);
-	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableShared, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableShared, sortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableShared, sortAscending);
 
 	// Ornis 4-way-sorting
 	int adder=0;
@@ -1840,16 +1851,23 @@ void CSharedFilesCtrl::OpenFile(const CKnownFile* file)
 void CSharedFilesCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	if (iSel != -1) {
+	if (iSel != -1)
+	{
 		const CKnownFile* file = (CKnownFile*)GetItemData(iSel);
-		if (file){
+		if (file)
+		{
 			//MORPH Changed by SiRoB - Double click unfinished files in SharedFile window display FileDetail
-			//if (GetKeyState(VK_MENU) & 0x8000){
-			if (GetKeyState(VK_MENU) & 0x8000 || file->IsPartFile()){
-				CSharedFileDetailsSheet sheet(file);
+			/*
+			if (GetKeyState(VK_MENU) & 0x8000){
+			*/
+			if (GetKeyState(VK_MENU) & 0x8000 || file->IsPartFile())
+			{
+				CTypedPtrList<CPtrList, CKnownFile*> aFiles;
+				aFiles.AddHead(file);
+				CSharedFileDetailsSheet sheet(aFiles);
 				sheet.DoModal();
 			}
-			else
+			else if (!file->IsPartFile())
 				OpenFile(file);
 		}
 	}
@@ -1951,14 +1969,13 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, GetResString(IDS_SHAREONLYTHENEED));
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) );
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) +" ("+GetResString(IDS_PW_CON_UPLBL)+")" );
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD)); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
-	//****end  comments***//
-
+	
 	// Mighty Knife: CRC32-Tag
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CALCCRC32,"Calculate CRC32");
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ADDCRC32TOFILENAME,"Add Release-Tag/CRC32 to filename...");

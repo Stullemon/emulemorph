@@ -19,6 +19,7 @@
 #include "OtherFunctions.h"
 #include "UpDownClient.h"
 #include "Packets.h"
+#include "SafeFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -96,16 +97,17 @@ CFriend::~CFriend(void)
 	//MORPH END - Added by SiRoB, ZZ Upload System
 }
 
-void CFriend::LoadFromFile(CFile* file){
-	file->Read(m_abyUserhash,16);
+void CFriend::LoadFromFile(CFile* file)
+{
+	file->ReadHash16(m_abyUserhash);
 	m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
-	file->Read(&m_dwLastUsedIP,4);
-	file->Read(&m_nLastUsedPort,2);
-	file->Read(&m_dwLastSeen,4);
-	file->Read(&m_dwLastChatted,4);
-	uint32 tagcount;
-	file->Read(&tagcount,4);
-	for (uint32 j = 0; j != tagcount;j++){
+	m_dwLastUsedIP = file->ReadUInt32();
+	m_nLastUsedPort = file->ReadUInt16();
+	m_dwLastSeen = file->ReadUInt32();
+	m_dwLastChatted = file->ReadUInt32();
+
+	UINT tagcount = file->ReadUInt32();
+	for (UINT j = 0; j < tagcount; j++){
 		CTag* newtag = new CTag(file);
 		switch(newtag->tag.specialtag){
 			case FF_NAME:{
@@ -123,16 +125,17 @@ void CFriend::LoadFromFile(CFile* file){
 	}
 }
 
-void CFriend::WriteToFile(CFile* file){
+void CFriend::WriteToFile(CFileDataIO* file)
+{
 	if (!m_dwHasHash)
 		md4cpy(m_abyUserhash, sm_abyNullHash);
-	file->Write(m_abyUserhash,16);
-	file->Write(&m_dwLastUsedIP,4);
-	file->Write(&m_nLastUsedPort,2);
-	file->Write(&m_dwLastSeen,4);
-	file->Write(&m_dwLastChatted,4);
+	file->WriteHash16(m_abyUserhash);
+	file->WriteUInt32(m_dwLastUsedIP);
+	file->WriteUInt16(m_nLastUsedPort);
+	file->WriteUInt32(m_dwLastSeen);
+	file->WriteUInt32(m_dwLastChatted);
 
-	uint32 tagcount = 0;
+	UINT tagcount = 0;
 	if (!m_strName.IsEmpty())
 		tagcount++;
 //MORPH - Added by Yun.SF3, ZZ Upload System
@@ -140,9 +143,9 @@ if(m_LinkedClient !=NULL && m_LinkedClient->GetFriendSlot()  || m_LinkedClient =
 		tagcount++;
     }
 	//MORPH - Added by Yun.SF3, ZZ Upload System
-	file->Write(&tagcount,4);
+	file->WriteUInt32(tagcount);
 	if (!m_strName.IsEmpty()){
-		CTag nametag(FF_NAME,m_strName.GetBuffer());
+		CTag nametag(FF_NAME, m_strName);
 		nametag.WriteTagToFile(file);
 	}
 //MORPH - Added by Yun.SF3, ZZ Upload System

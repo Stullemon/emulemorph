@@ -40,13 +40,13 @@ CPreferencesDlg::CPreferencesDlg(){
 	m_wndWebServer.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndTweaks.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndSecurity.m_psp.dwFlags &= ~PSH_HASHELP;
+	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
+	m_wndProxy.m_psp.dwFlags &= ~PSH_HASHELP; // deadlake PROXYSUPPORT
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
 #endif
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
-	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
-	m_wndProxy.m_psp.dwFlags &= ~PSH_HASHELP; // deadlake PROXYSUPPORT
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 
@@ -88,7 +88,7 @@ END_MESSAGE_MAP()
 void CPreferencesDlg::OnDestroy()
 {
 	CPropertySheet::OnDestroy();
-	app_prefs->Save();
+	thePrefs.Save();
 	m_nActiveWnd = GetActiveIndex();
 }
 

@@ -71,7 +71,7 @@ void CLoggable::AddLogText(bool debug, bool addtostatusbar,LPCTSTR line, va_list
 {
 	ASSERT(line != NULL);
 
-	if (debug && !theApp.glob_prefs->GetVerbose())
+	if (debug && !thePrefs.GetVerbose())
 		return;	
 
 	const size_t bufferSize = 1000;
@@ -157,7 +157,7 @@ bool CLog::SetFilePath(LPCTSTR pszFilePath)
 	m_strOriginFileName = szNam;
 
 	//to calibrate milliseconds, would wate out one second
-	for(int start = time(NULL); theApp.glob_prefs->DateFileNameLog();){
+	for(int start = time(NULL); thePrefs.DateFileNameLog();){
 		//the step to next second
 		if(time(NULL) > start){
 			//now the tick shoud really close to the second start
@@ -224,7 +224,7 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 
 	//Morph START - Added by SiRoB, AndCycle, Date File Name Log
 	//it DateNameLog enable, and it's time to change filename
-	if (theApp.glob_prefs->DateFileNameLog() && ::GetTickCount() >= m_dwNextRenameTick){
+	if (thePrefs.DateFileNameLog() && ::GetTickCount() >= m_dwNextRenameTick){
 
 		time_t tCurrent;
 		time(&tCurrent);
@@ -267,7 +267,7 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 
 	//Morph START - added by AndCycle, Date File Name Log
 	//the start time (m_tStarted) is so strange, so I wanna keep my date log name intact
-	if (m_uBytesWritten >= m_uMaxFileSize && !theApp.glob_prefs->DateFileNameLog())
+	if (m_uBytesWritten >= m_uMaxFileSize && !thePrefs.DateFileNameLog())
 	/*//original
 	if (m_uBytesWritten >= m_uMaxFileSize)
 	*/

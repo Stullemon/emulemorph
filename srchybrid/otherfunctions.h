@@ -17,6 +17,8 @@
 #pragma once
 
 class CAbstractFile;
+struct Requested_Block_Struct;
+class CUpDownClient;
 
 #define ROUND(x) (floor((float)x+0.5f))
 
@@ -99,8 +101,6 @@ bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle = NULL, LPCTSTR pszDl
 BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultFileName = NULL, DWORD dwFlags = 0,bool openfilestyle=true);
 void GetPopupMenuPos(CListCtrl& lv, CPoint& point);
 void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
-void UpdateURLMenu(CMenu &menu, int &counter);
-void RunURL(const CAbstractFile* file,CString urlpattern);
 void InitWindowStyles(CWnd* pWnd);
 CString GetRateString(uint16 rate);
 
@@ -141,6 +141,10 @@ CString DbgGetDonkeyClientTCPOpcode(UINT opcode);
 CString DbgGetMuleClientTCPOpcode(UINT opcode);
 CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode);
 CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size);
+CString DbgGetBlockInfo(const Requested_Block_Struct* block);
+void DebugRecv(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet = NULL, uint32 nIP = 0);
+void DebugSend(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet = NULL);
+
 
 
 ///////////////////////////////////////////////////////////////////////////////

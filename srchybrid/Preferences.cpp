@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <io.h>
-#include "DebugHelpers.h"
 #include "emule.h"
 #include "Preferences.h"
 #include "Opcodes.h"
@@ -33,6 +32,7 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 #include "SafeFile.h"
+#include "MuleToolbarCtrl.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
@@ -46,16 +46,476 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-CPreferences::CPreferences(){
+
+#pragma pack(1)
+struct Preferences_Import19c_Struct{
+	uint8	version;
+	char	nick[50];
+	uint16	maxupload;
+	uint16	maxdownload;
+	uint16	port;
+	uint16	maxconnections;
+	uint8	reconnect;
+	uint8	deadserver;
+	uint8	scorsystem;
+	char	incomingdir[510];
+	char	tempdir[510];
+	uint8	ICH;
+	uint8	autoserverlist;
+	uint8	updatenotify;
+	uint8	mintotray;
+	uchar	userhash[16];
+	uint8	autoconnect;
+	uint8	addserversfromserver;
+	uint8	addserversfromclient;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct Preferences_Import20a_Struct{
+	uint8	version;
+	char	nick[50];
+	uint16	maxupload;
+	uint16	maxdownload;
+	uint16	port;
+	uint16	maxconnections;
+	uint8	reconnect;
+	uint8	deadserver;
+	uint16	deadserverretries;
+	uint8	scorsystem;
+	char	incomingdir[510];
+	char	tempdir[510];
+	uint8	ICH;
+	uint8	autoserverlist;
+	uint8	updatenotify;
+	uint8	mintotray;
+	uchar	userhash[16];
+	uint8	autoconnect;
+	uint8	addserversfromserver;
+	uint8	addserversfromclient;
+	uint16	maxsourceperfile;
+	uint16	trafficOMeterInterval;
+	uint32	totalDownloaded;
+	uint32	totalUploaded;
+	int		maxGraphDownloadRate;
+	int		maxGraphUploadRate;
+	uint8	beepOnError;
+	uint8	confirmExit;
+	WINDOWPLACEMENT EmuleWindowPlacement;
+	int transferColumnWidths[9];
+	int serverColumnWidths[8];
+	uint8	splashscreen;
+	uint8	filterLANIPs;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct Preferences_Import20b_Struct{
+	uint8	version;
+	char	nick[50];
+	uint16	maxupload;
+	uint16	maxdownload;
+	uint16	port;
+	uint16	maxconnections;
+	uint8	reconnect;
+	uint8	deadserver;
+	uint8	scorsystem;
+	char	incomingdir[510];
+	char	tempdir[510];
+	uint8	ICH;
+	uint8	autoserverlist;
+	uint8	updatenotify;
+	uint8	mintotray;
+	uchar	userhash[16];
+	uint8	autoconnect;
+	uint8	addserversfromserver;
+	uint8	addserversfromclient;
+	uint16	maxsourceperfile;
+	uint16	trafficOMeterInterval;
+	uint32	totalDownloaded;	// outdated
+	uint32	totalUploaded;		// outdated
+	int		maxGraphDownloadRate;
+	int		maxGraphUploadRate;
+	uint8	beepOnError;
+	uint8	confirmExit;
+	WINDOWPLACEMENT EmuleWindowPlacement;
+	int transferColumnWidths[9];
+	int serverColumnWidths[8];
+	uint8	splashscreen;
+	uint8	filterLANIPs;
+	uint64	totalDownloadedBytes;
+	uint64	totalUploadedBytes;
+};
+#pragma pack()
+
+CPreferences thePrefs;
+
+int		CPreferences::m_iDbgHeap;
+char	CPreferences::nick[50];
+uint16	CPreferences::minupload;
+uint16	CPreferences::maxupload;
+uint16	CPreferences::maxdownload;
+uint16	CPreferences::port;
+uint16	CPreferences::udpport;
+uint16	CPreferences::nServerUDPPort;
+uint16	CPreferences::maxconnections;
+uint8	CPreferences::reconnect;
+uint8	CPreferences::deadserver;
+uint8	CPreferences::scorsystem;
+char	CPreferences::incomingdir[MAX_PATH];
+char	CPreferences::tempdir[MAX_PATH];
+uint8	CPreferences::ICH;
+uint8	CPreferences::autoserverlist;
+uint8	CPreferences::updatenotify;
+uint8	CPreferences::mintotray;
+uint8	CPreferences::autoconnect;
+uint8	CPreferences::autoconnectstaticonly;
+uint8	CPreferences::autotakeed2klinks;
+uint8	CPreferences::addnewfilespaused;
+uint8	CPreferences::depth3D;
+int		CPreferences::m_iStraightWindowStyles;
+TCHAR	CPreferences::m_szSkinProfile[MAX_PATH];
+TCHAR	CPreferences::m_szSkinProfileDir[MAX_PATH];
+uint8	CPreferences::addserversfromserver;
+uint8	CPreferences::addserversfromclient;
+uint16	CPreferences::maxsourceperfile;
+uint16	CPreferences::trafficOMeterInterval;
+uint16	CPreferences::statsInterval;
+uchar	CPreferences::userhash[16];
+WINDOWPLACEMENT CPreferences::EmuleWindowPlacement;
+int		CPreferences::maxGraphDownloadRate;
+int		CPreferences::maxGraphUploadRate;
+uint8	CPreferences::beepOnError;
+uint8	CPreferences::confirmExit;
+uint16	CPreferences::downloadColumnWidths[13];
+BOOL	CPreferences::downloadColumnHidden[13];
+INT		CPreferences::downloadColumnOrder[13];
+uint16	CPreferences::uploadColumnWidths[8];
+BOOL	CPreferences::uploadColumnHidden[8];
+INT		CPreferences::uploadColumnOrder[8];
+uint16	CPreferences::queueColumnWidths[10];
+BOOL	CPreferences::queueColumnHidden[10];
+INT		CPreferences::queueColumnOrder[10];
+uint16	CPreferences::searchColumnWidths[13];
+BOOL	CPreferences::searchColumnHidden[13];
+INT		CPreferences::searchColumnOrder[13];
+uint16	CPreferences::sharedColumnWidths[12];
+BOOL	CPreferences::sharedColumnHidden[12];
+INT		CPreferences::sharedColumnOrder[12];
+uint16	CPreferences::serverColumnWidths[13];
+BOOL	CPreferences::serverColumnHidden[13];
+INT		CPreferences::serverColumnOrder[13];
+uint16	CPreferences::clientListColumnWidths[8];
+BOOL	CPreferences::clientListColumnHidden[8];
+INT		CPreferences::clientListColumnOrder[8];
+
+uint16	CPreferences::FilenamesListColumnWidths[2];
+BOOL	CPreferences::FilenamesListColumnHidden[2];
+INT		CPreferences::FilenamesListColumnOrder[2];
+
+DWORD	CPreferences::statcolors[15];
+uint8	CPreferences::splashscreen;
+uint8	CPreferences::filterLANIPs;
+bool	CPreferences::m_bAllocLocalHostIP;
+uint8	CPreferences::onlineSig;
+uint64	CPreferences::cumDownOverheadTotal;
+uint64	CPreferences::cumDownOverheadFileReq;
+uint64	CPreferences::cumDownOverheadSrcEx;
+uint64	CPreferences::cumDownOverheadServer;
+uint64	CPreferences::cumDownOverheadKad;
+uint64	CPreferences::cumDownOverheadTotalPackets;
+uint64	CPreferences::cumDownOverheadFileReqPackets;
+uint64	CPreferences::cumDownOverheadSrcExPackets;
+uint64	CPreferences::cumDownOverheadServerPackets;
+uint64	CPreferences::cumDownOverheadKadPackets;
+uint64	CPreferences::cumUpOverheadTotal;
+uint64	CPreferences::cumUpOverheadFileReq;
+uint64	CPreferences::cumUpOverheadSrcEx;
+uint64	CPreferences::cumUpOverheadServer;
+uint64	CPreferences::cumUpOverheadKad;
+uint64	CPreferences::cumUpOverheadTotalPackets;
+uint64	CPreferences::cumUpOverheadFileReqPackets;
+uint64	CPreferences::cumUpOverheadSrcExPackets;
+uint64	CPreferences::cumUpOverheadServerPackets;
+uint64	CPreferences::cumUpOverheadKadPackets;
+uint32	CPreferences::cumUpSuccessfulSessions;
+uint32	CPreferences::cumUpFailedSessions;
+uint32	CPreferences::cumUpAvgTime;
+uint64	CPreferences::cumUpData_EDONKEY;
+uint64	CPreferences::cumUpData_EDONKEYHYBRID;
+uint64	CPreferences::cumUpData_EMULE;
+uint64	CPreferences::cumUpData_MLDONKEY;
+uint64	CPreferences::cumUpData_CDONKEY;
+uint64	CPreferences::cumUpData_XMULE;
+uint64	CPreferences::cumUpData_SHAREAZA;
+uint64	CPreferences::sesUpData_EDONKEY;
+uint64	CPreferences::sesUpData_EDONKEYHYBRID;
+uint64	CPreferences::sesUpData_EMULE;
+uint64	CPreferences::sesUpData_MLDONKEY;
+uint64	CPreferences::sesUpData_CDONKEY;
+uint64	CPreferences::sesUpData_XMULE;
+uint64	CPreferences::sesUpData_SHAREAZA;
+uint64	CPreferences::cumUpDataPort_4662;
+uint64	CPreferences::cumUpDataPort_OTHER;
+uint64	CPreferences::sesUpDataPort_4662;
+uint64	CPreferences::sesUpDataPort_OTHER;
+uint64	CPreferences::cumUpData_File;
+uint64	CPreferences::cumUpData_Partfile;
+uint64	CPreferences::sesUpData_File;
+uint64	CPreferences::sesUpData_Partfile;
+uint32	CPreferences::cumDownCompletedFiles;
+uint16	CPreferences::cumDownSuccessfulSessions;
+uint16	CPreferences::cumDownFailedSessions;
+uint32	CPreferences::cumDownAvgTime;
+uint64	CPreferences::cumLostFromCorruption;
+uint64	CPreferences::cumSavedFromCompression;
+uint32	CPreferences::cumPartsSavedByICH;
+uint16	CPreferences::sesDownSuccessfulSessions;
+uint16	CPreferences::sesDownFailedSessions;
+uint32	CPreferences::sesDownAvgTime;
+uint16	CPreferences::sesDownCompletedFiles;
+uint64	CPreferences::sesLostFromCorruption;
+uint64	CPreferences::sesSavedFromCompression;
+uint16	CPreferences::sesPartsSavedByICH;
+uint64	CPreferences::cumDownData_EDONKEY;
+uint64	CPreferences::cumDownData_EDONKEYHYBRID;
+uint64	CPreferences::cumDownData_EMULE;
+uint64	CPreferences::cumDownData_MLDONKEY;
+uint64	CPreferences::cumDownData_CDONKEY;
+uint64	CPreferences::cumDownData_XMULE;
+uint64	CPreferences::cumDownData_SHAREAZA;
+uint64	CPreferences::sesDownData_EDONKEY;
+uint64	CPreferences::sesDownData_EDONKEYHYBRID;
+uint64	CPreferences::sesDownData_EMULE;
+uint64	CPreferences::sesDownData_MLDONKEY;
+uint64	CPreferences::sesDownData_CDONKEY;
+uint64	CPreferences::sesDownData_XMULE;
+uint64	CPreferences::sesDownData_SHAREAZA;
+uint64	CPreferences::cumDownDataPort_4662;
+uint64	CPreferences::cumDownDataPort_OTHER;
+uint64	CPreferences::sesDownDataPort_4662;
+uint64	CPreferences::sesDownDataPort_OTHER;
+float	CPreferences::cumConnAvgDownRate;
+float	CPreferences::cumConnMaxAvgDownRate;
+float	CPreferences::cumConnMaxDownRate;
+float	CPreferences::cumConnAvgUpRate;
+float	CPreferences::cumConnMaxAvgUpRate;
+float	CPreferences::cumConnMaxUpRate;
+uint64	CPreferences::cumConnRunTime;
+uint16	CPreferences::cumConnNumReconnects;
+uint16	CPreferences::cumConnAvgConnections;
+uint16	CPreferences::cumConnMaxConnLimitReached;
+uint16	CPreferences::cumConnPeakConnections;
+uint32	CPreferences::cumConnTransferTime;
+uint32	CPreferences::cumConnDownloadTime;
+uint32	CPreferences::cumConnUploadTime;
+uint32	CPreferences::cumConnServerDuration;
+uint16	CPreferences::cumSrvrsMostWorkingServers;
+uint32	CPreferences::cumSrvrsMostUsersOnline;
+uint32	CPreferences::cumSrvrsMostFilesAvail;
+uint16	CPreferences::cumSharedMostFilesShared;
+uint64	CPreferences::cumSharedLargestShareSize;
+uint64	CPreferences::cumSharedLargestAvgFileSize;
+uint64	CPreferences::cumSharedLargestFileSize;
+__int64 CPreferences::stat_datetimeLastReset;
+uint8	CPreferences::statsConnectionsGraphRatio;
+char	CPreferences::statsExpandedTreeItems[256];
+uint64	CPreferences::totalDownloadedBytes;
+uint64	CPreferences::totalUploadedBytes;
+WORD	CPreferences::languageID;
+uint8	CPreferences::transferDoubleclick;
+EViewSharedFilesAccess CPreferences::m_iSeeShares;
+uint8	CPreferences::m_iToolDelayTime;
+uint8	CPreferences::bringtoforeground;
+uint8	CPreferences::splitterbarPosition;
+uint16	CPreferences::deadserverretries;
+DWORD	CPreferences::m_dwServerKeepAliveTimeout;
+uint16	CPreferences::statsMax;
+uint8	CPreferences::statsAverageMinutes;
+uint8	CPreferences::useDownloadNotifier;
+uint8	CPreferences::useNewDownloadNotifier;
+uint8	CPreferences::useChatNotifier;
+uint8	CPreferences::useLogNotifier;
+uint8	CPreferences::useSoundInNotifier;
+uint8	CPreferences::notifierPopsEveryChatMsg;
+uint8	CPreferences::notifierImportantError;
+uint8	CPreferences::notifierNewVersion;
+char	CPreferences::notifierSoundFilePath[510];
+char	CPreferences::m_sircserver[50];
+char	CPreferences::m_sircnick[30];
+char	CPreferences::m_sircchannamefilter[50];
+bool	CPreferences::m_bircaddtimestamp;
+bool	CPreferences::m_bircusechanfilter;
+uint16	CPreferences::m_iircchanneluserfilter;
+char	CPreferences::m_sircperformstring[255];
+bool	CPreferences::m_bircuseperform;
+bool	CPreferences::m_birclistonconnect;
+bool	CPreferences::m_bircacceptlinks;
+bool	CPreferences::m_bircacceptlinksfriends;
+bool	CPreferences::m_bircignoreinfomessage;
+bool	CPreferences::m_bircignoreemuleprotoinfomessage;
+bool	CPreferences::m_birchelpchannel;
+bool	CPreferences::m_bRemove2bin;
+bool	CPreferences::m_bpreviewprio;
+bool	CPreferences::smartidcheck;
+uint8	CPreferences::smartidstate;
+bool	CPreferences::safeServerConnect;
+bool	CPreferences::startMinimized;
+bool	CPreferences::m_bRestoreLastMainWndDlg;
+int		CPreferences::m_iLastMainWndDlgID;
+bool	CPreferences::m_bRestoreLastLogPane;
+int		CPreferences::m_iLastLogPaneID;
+uint16	CPreferences::MaxConperFive;
+int		CPreferences::checkDiskspace;
+UINT	CPreferences::m_uMinFreeDiskSpace;
+char	CPreferences::yourHostname[127];
+bool	CPreferences::m_bVerbose;
+bool	CPreferences::m_bDebugSourceExchange;
+bool	CPreferences::m_bLogBannedClients;
+bool	CPreferences::m_bLogRatingDescReceived;
+bool	CPreferences::m_bLogSecureIdent;
+bool	CPreferences::m_bLogFilteredIPs;
+bool	CPreferences::m_bLogFileSaving;
+int		CPreferences::m_iDebugServerTCPLevel;
+int		CPreferences::m_iDebugServerUDPLevel;
+int		CPreferences::m_iDebugServerSourcesLevel;
+int		CPreferences::m_iDebugServerSearchesLevel;
+int		CPreferences::m_iDebugClientTCPLevel;
+int		CPreferences::m_iDebugClientUDPLevel;
+int		CPreferences::m_iDebugClientKadUDPLevel;
+bool	CPreferences::m_bupdatequeuelist;
+bool	CPreferences::m_bmanualhighprio;
+bool	CPreferences::m_btransferfullchunks;
+bool	CPreferences::m_bstartnextfile;
+bool	CPreferences::m_bshowoverhead;
+bool	CPreferences::m_bDAP;
+bool	CPreferences::m_bUAP;
+bool	CPreferences::m_bDisableKnownClientList;
+bool	CPreferences::m_bDisableQueueList;
+bool	CPreferences::m_bExtControls;
+bool	CPreferences::m_bTransflstRemain;
+uint8	CPreferences::versioncheckdays;
+int		CPreferences::tableSortItemDownload;
+int		CPreferences::tableSortItemUpload;
+int		CPreferences::tableSortItemQueue;
+int		CPreferences::tableSortItemSearch;
+int		CPreferences::tableSortItemShared;
+int		CPreferences::tableSortItemServer;
+int		CPreferences::tableSortItemClientList;
+int		CPreferences::tableSortItemFilenames;
+bool	CPreferences::tableSortAscendingDownload;
+bool	CPreferences::tableSortAscendingUpload;
+bool	CPreferences::tableSortAscendingQueue;
+bool	CPreferences::tableSortAscendingSearch;
+bool	CPreferences::tableSortAscendingShared;
+bool	CPreferences::tableSortAscendingServer;
+bool	CPreferences::tableSortAscendingClientList;
+bool	CPreferences::tableSortAscendingFilenames;
+bool	CPreferences::showRatesInTitle;
+char	CPreferences::TxtEditor[256];
+char	CPreferences::VideoPlayer[256];
+bool	CPreferences::moviePreviewBackup;
+int		CPreferences::m_iPreviewSmallBlocks;
+bool	CPreferences::indicateratings;
+bool	CPreferences::watchclipboard;
+bool	CPreferences::filterserverbyip;
+bool	CPreferences::m_bFirstStart;
+bool	CPreferences::m_bCreditSystem;
+bool	CPreferences::log2disk;
+bool	CPreferences::debug2disk;
+int		CPreferences::iMaxLogBuff;
+UINT	CPreferences::uMaxLogFileSize;
+bool	CPreferences::scheduler;
+bool	CPreferences::dontcompressavi;
+bool	CPreferences::msgonlyfriends;
+bool	CPreferences::msgsecure;
+uint8	CPreferences::filterlevel;
+UINT	CPreferences::m_iFileBufferSize;
+UINT	CPreferences::m_iQueueSize;
+int		CPreferences::m_iCommitFiles;
+uint16	CPreferences::maxmsgsessions;
+uint32	CPreferences::versioncheckLastAutomatic;
+char	CPreferences::messageFilter[512];
+char	CPreferences::commentFilter[512];
+char	CPreferences::filenameCleanups[512];
+char	CPreferences::notifierConfiguration[510];
+char	CPreferences::datetimeformat[64];
+char	CPreferences::datetimeformat4log[64];
+LOGFONT CPreferences::m_lfHyperText;
+int		CPreferences::m_iExtractMetaData;
+char	CPreferences::m_sWebPassword[256];
+char	CPreferences::m_sWebLowPassword[256];
+uint16	CPreferences::m_nWebPort;
+bool	CPreferences::m_bWebEnabled;
+bool	CPreferences::m_bWebUseGzip;
+int		CPreferences::m_nWebPageRefresh;
+bool	CPreferences::m_bWebLowEnabled;
+char	CPreferences::m_sWebResDir[MAX_PATH];
+char	CPreferences::m_sTemplateFile[MAX_PATH];
+ProxySettings CPreferences::proxy;
+bool	CPreferences::m_bIsASCWOP;
+bool	CPreferences::m_bShowProxyErrors;
+bool	CPreferences::showCatTabInfos;
+bool	CPreferences::resumeSameCat;
+bool	CPreferences::dontRecreateGraphs;
+bool	CPreferences::autofilenamecleanup;
+int		CPreferences::allcatType;
+bool	CPreferences::m_bUseAutocompl;
+bool	CPreferences::m_bShowDwlPercentage;
+bool	CPreferences::m_bRemoveFinishedDownloads;
+uint16	CPreferences::m_iMaxChatHistory;
+int		CPreferences::m_iSearchMethod;
+bool	CPreferences::m_bAdvancedSpamfilter;
+bool	CPreferences::m_bUseSecureIdent;
+char	CPreferences::m_sMMPassword[256];
+bool	CPreferences::m_bMMEnabled;
+uint16	CPreferences::m_nMMPort;
+bool	CPreferences::networkkademlia;
+bool	CPreferences::networked2k;
+uint8	CPreferences::m_nToolbarLabels;
+char	CPreferences::m_sToolbarBitmap[256];
+char	CPreferences::m_sToolbarBitmapFolder[256];
+char	CPreferences::m_sToolbarSettings[256];
+bool	CPreferences::m_bPreviewEnabled;
+bool	CPreferences::m_bDynUpEnabled;
+int		CPreferences::m_iDynUpPingTolerance;
+int		CPreferences::m_iDynUpGoingUpDivider;
+int		CPreferences::m_iDynUpGoingDownDivider;
+int		CPreferences::m_iDynUpNumberOfPings;
+CStringList CPreferences::shareddir_list;
+CStringList CPreferences::adresses_list;
+CString CPreferences::appdir;
+CString CPreferences::configdir;
+CString CPreferences::m_strWebServerDir;
+CString CPreferences::m_strLangDir;
+Preferences_Ext_Struct* CPreferences::prefsExt;
+WORD	CPreferences::m_wWinVer;
+bool	CPreferences::m_UseProxyListenPort;
+uint16	CPreferences::ListenPort;
+CArray<Category_Struct*,Category_Struct*> CPreferences::catMap;
+
+
+CPreferences::CPreferences()
+{
+#ifdef _DEBUG
+	m_iDbgHeap = 1;
+#endif
+}
+
+CPreferences::~CPreferences()
+{
+	delete prefsExt;
+}
+
+void CPreferences::Init()
+{
 	srand((uint32)time(0)); // we need random numbers sometimes
 	// khaos::kmod+ We need _better_ random numbers...  Sometimes.
 	InitRandGen();
 	// khaos::kmod-
 
-	prefs = new Preferences_Struct;
-	memset(prefs,0,sizeof(Preferences_Struct));
 	prefsExt=new Preferences_Ext_Struct;
-	memset(prefsExt,0,sizeof(Preferences_Ext_Struct));
+	memset(prefsExt, 0, sizeof *prefsExt);
 
 	//get application start directory
 	char buffer[490];
@@ -86,7 +546,6 @@ CPreferences::CPreferences(){
 	if ( PathFileExists(appdir+"webservices.dat")) MoveFile(appdir+"webservices.dat",configdir+"webservices.dat");
 
 	CreateUserHash();
-	md4cpy(&prefs->userhash,&userhash);
 
 	// load preferences.dat or set standart values
 	char* fullpath = new char[strlen(configdir)+16];
@@ -110,54 +569,58 @@ CPreferences::CPreferences(){
 
 
 			if (prefsExt->version>17) {// v0.20b+
+				Preferences_Import20b_Struct* prefsImport20b;
 				prefsImport20b=new Preferences_Import20b_Struct;
 				memset(prefsImport20b,0,sizeof(Preferences_Import20b_Struct));
 				fseek(preffile,0,0);
 				fread(prefsImport20b,sizeof(Preferences_Import20b_Struct),1,preffile);
 
-				md4cpy(&prefs->userhash,&prefsImport20b->userhash);
-				memcpy(&prefs->incomingdir,&prefsImport20b->incomingdir,510);
-				memcpy(&prefs->tempdir,&prefsImport20b->tempdir,510);
-				sprintf(prefs->nick,prefsImport20b->nick);
+				md4cpy(userhash, prefsImport20b->userhash);
+				memcpy(incomingdir, prefsImport20b->incomingdir, 510);
+				memcpy(tempdir, prefsImport20b->tempdir, 510);
+				_snprintf(nick, ARRSIZE(nick), "%s", prefsImport20b->nick);
 
-				prefs->totalDownloadedBytes=prefsImport20b->totalDownloadedBytes;
-				prefs->totalUploadedBytes=prefsImport20b->totalUploadedBytes;
-
+				totalDownloadedBytes=prefsImport20b->totalDownloadedBytes;
+				totalUploadedBytes=prefsImport20b->totalUploadedBytes;
+				delete prefsImport20b;
 			} else if (prefsExt->version>7) { // v0.20a
+				Preferences_Import20a_Struct* prefsImport20a;
 				prefsImport20a=new Preferences_Import20a_Struct;
 				memset(prefsImport20a,0,sizeof(Preferences_Import20a_Struct));
 				fseek(preffile,0,0);
 				fread(prefsImport20a,sizeof(Preferences_Import20a_Struct),1,preffile);
 
-				md4cpy(&prefs->userhash,&prefsImport20a->userhash);
-				memcpy(&prefs->incomingdir,&prefsImport20a->incomingdir,510);
-				memcpy(&prefs->tempdir,&prefsImport20a->tempdir,510);
-				sprintf(prefs->nick,prefsImport20a->nick);
+				md4cpy(userhash, prefsImport20a->userhash);
+				memcpy(incomingdir, prefsImport20a->incomingdir, 510);
+				memcpy(tempdir, prefsImport20a->tempdir, 510);
+				_snprintf(nick, ARRSIZE(nick), "%s", prefsImport20a->nick);
 
-				prefs->totalDownloadedBytes=prefsImport20a->totalDownloaded;
-				prefs->totalUploadedBytes=prefsImport20a->totalUploaded;
-
+				totalDownloadedBytes=prefsImport20a->totalDownloaded;
+				totalUploadedBytes=prefsImport20a->totalUploaded;
+				delete prefsImport20a;
 			} else {	//v0.19c-
+				Preferences_Import19c_Struct* prefsImport19c;
 				prefsImport19c=new Preferences_Import19c_Struct;
 				memset(prefsImport19c,0,sizeof(Preferences_Import19c_Struct));
 
 				fseek(preffile,0,0);
 				fread(prefsImport19c,sizeof(Preferences_Import19c_Struct),1,preffile);
 
-				if (prefsExt->version<3) {
+				if (prefsExt->version < 3)
 					CreateUserHash();
-					md4cpy(&prefs->userhash,&userhash);
-				} else {md4cpy(&prefs->userhash,&prefsImport19c->userhash);}
-				memcpy(&prefs->incomingdir,&prefsImport19c->incomingdir,510);memcpy(&prefs->tempdir,&prefsImport19c->tempdir,510);
-				sprintf(prefs->nick,prefsImport19c->nick);
+				else
+					md4cpy(userhash, prefsImport19c->userhash);
+				memcpy(incomingdir, prefsImport19c->incomingdir, 510);
+				memcpy(tempdir, prefsImport19c->tempdir, 510);
+				_snprintf(nick, ARRSIZE(nick), "%s", prefsImport19c->nick);
+				delete prefsImport19c;
 			}
  		} else {
-			md4cpy(&prefs->userhash,&prefsExt->userhash);
-			prefs->EmuleWindowPlacement=prefsExt->EmuleWindowPlacement;
+			md4cpy(userhash, prefsExt->userhash);
+			EmuleWindowPlacement = prefsExt->EmuleWindowPlacement;
 		}
 		fclose(preffile);
-		md4cpy(&userhash,&prefs->userhash);
-		prefs->smartidstate=0;
+		smartidstate = 0;
 	}
 
 	// shared directories
@@ -212,7 +675,7 @@ CPreferences::CPreferences(){
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_CREATE_DIR), GetResString(IDS_PW_INCOMING), GetIncomingDir(), GetErrorMessage(GetLastError()));
 		AfxMessageBox(strError, MB_ICONERROR);
-		sprintf(prefs->incomingdir,"%sincoming",appdir);
+		sprintf(incomingdir,"%sincoming",appdir);
 		if (!PathFileExists(GetIncomingDir()) && !::CreateDirectory(GetIncomingDir(),0)){
 			strError.Format(GetResString(IDS_ERR_CREATE_DIR), GetResString(IDS_PW_INCOMING), GetIncomingDir(), GetErrorMessage(GetLastError()));
 			AfxMessageBox(strError, MB_ICONERROR);
@@ -222,7 +685,7 @@ CPreferences::CPreferences(){
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_CREATE_DIR), GetResString(IDS_PW_TEMP), GetTempDir(), GetErrorMessage(GetLastError()));
 		AfxMessageBox(strError, MB_ICONERROR);
-		sprintf(prefs->tempdir,"%stemp",appdir);
+		sprintf(tempdir,"%stemp",appdir);
 		if (!PathFileExists(GetTempDir()) && !::CreateDirectory(GetTempDir(),0)){
 			strError.Format(GetResString(IDS_ERR_CREATE_DIR), GetResString(IDS_PW_TEMP), GetTempDir(), GetErrorMessage(GetLastError()));
 			AfxMessageBox(strError, MB_ICONERROR);
@@ -237,26 +700,36 @@ CPreferences::CPreferences(){
 	}
 	// khaos::kmod-
 
-	if (((int*)prefs->userhash[0]) == 0 && ((int*)prefs->userhash[1]) == 0 && ((int*)prefs->userhash[2]) == 0 && ((int*)prefs->userhash[3]) == 0)
+	if (((int*)userhash[0]) == 0 && ((int*)userhash[1]) == 0 && ((int*)userhash[2]) == 0 && ((int*)userhash[3]) == 0)
 		CreateUserHash();
 }
 
-void CPreferences::SetStandartValues(){
+void CPreferences::Uninit()
+{
+	while (!catMap.IsEmpty())
+	{
+		Category_Struct* delcat = catMap.GetAt(0); 
+		catMap.RemoveAt(0); 
+		delete delcat;
+	}
+}
+
+void CPreferences::SetStandartValues()
+{
 	CreateUserHash();
-	md4cpy(&prefs->userhash,&userhash);
 
 	WINDOWPLACEMENT defaultWPM;
 	defaultWPM.length = sizeof(WINDOWPLACEMENT);
 	defaultWPM.rcNormalPosition.left=10;defaultWPM.rcNormalPosition.top=10;
 	defaultWPM.rcNormalPosition.right=700;defaultWPM.rcNormalPosition.bottom=500;
 	defaultWPM.showCmd=0;
-	prefs->EmuleWindowPlacement=defaultWPM;
-	prefs->versioncheckLastAutomatic=0;
+	EmuleWindowPlacement=defaultWPM;
+	versioncheckLastAutomatic=0;
 
 //	Save();
 }
 
-bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrName) const
+bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrName)
 {
 	if (CompareDirectories(rstrDirectory, GetTempDir()))
 		return false;
@@ -283,7 +756,7 @@ bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrN
 }
 
 // SLUGFILLER: SafeHash
-bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rstrName) const
+bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rstrName)
 {
 	if (CompareDirectories(rstrDirectory, configdir))
 		return false;
@@ -332,33 +805,31 @@ bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rst
 //MORPH - Added by SiRoB, ZZ Ratio
 bool CPreferences::IsZZRatioDoesWork(){
 	
+	/*
 	if (theApp.stat_sessionSentBytesToFriend)
 		return true;
 	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
-	if (theApp.glob_prefs->IsSUCEnabled())
+	*/
+	if (thePrefs.IsSUCEnabled())
 		return theApp.uploadqueue->GetMaxVUR()<10240;
-	else if (theApp.glob_prefs->IsDynUpEnabled())
+	else if (thePrefs.IsDynUpEnabled())
 		return theApp.lastCommonRouteFinder->GetUpload()<10240;
 	else
-		return theApp.glob_prefs->GetMaxUpload()<10;
+		return thePrefs.GetMaxUpload()<10;
 }
 //MORPH - Added by SiRoB, ZZ ratio
 
 uint16 CPreferences::GetMaxDownload(){
 	//dont be a Lam3r :)
-	#ifdef MIGHTY_TWEAKS
-	// Mighty Knife: Private modifications
-	return prefs->maxdownload;
-	#endif
 	//MORPH START - Added by SiRoB, ZZ Upload system
 	if (IsZZRatioDoesWork())
 		return prefs->maxdownload;
 	//MORPH END   - Added by SiRoB, ZZ Upload system
 	uint16 maxup=(GetMaxUpload()==UNLIMITED)?GetMaxGraphUploadRate():GetMaxUpload();
 	if( maxup < 4 )
-		return (( (maxup < 10) && (maxup*3 < prefs->maxdownload) )? maxup*3 : prefs->maxdownload);
-	return (( (maxup < 10) && (maxup*4 < prefs->maxdownload) )? maxup*4 : prefs->maxdownload);
+		return (( (maxup < 10) && (maxup*3 < maxdownload) )? maxup*3 : maxdownload);
+	return (( (maxup < 10) && (maxup*4 < maxdownload) )? maxup*4 : maxdownload);
 }
 
 // -khaos--+++> A whole bunch of methods!  Keep going until you reach the end tag.
@@ -387,17 +858,19 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("TotalDownloadedBytes", buffer );
     // Save Complete Downloads - This is saved and incremented in partfile.cpp.
 	// Save Successful Download Sessions
-	ini.WriteInt("DownSuccessfulSessions", prefs->cumDownSuccessfulSessions);
+	ini.WriteInt("DownSuccessfulSessions", cumDownSuccessfulSessions);
 	// Save Failed Download Sessions
-	ini.WriteInt("DownFailedSessions", prefs->cumDownFailedSessions);
+	ini.WriteInt("DownFailedSessions", cumDownFailedSessions);
 	ini.WriteInt("DownAvgTime", (GetDownC_AvgTime() + GetDownS_AvgTime()) / 2 );
 
 	// Cumulative statistics for saved due to compression/lost due to corruption
-	buffer.Format("%I64u",prefs->cumLostFromCorruption+prefs->sesLostFromCorruption);
+	buffer.Format("%I64u", cumLostFromCorruption + sesLostFromCorruption);
 	ini.WriteString("LostFromCorruption", buffer );
-	buffer.Format("%I64u",prefs->sesSavedFromCompression+prefs->cumSavedFromCompression);
+
+	buffer.Format("%I64u", sesSavedFromCompression + cumSavedFromCompression);
 	ini.WriteString("SavedFromCompression", buffer );
-	ini.WriteInt("PartsSavedByICH", prefs->cumPartsSavedByICH+prefs->sesPartsSavedByICH);
+
+	ini.WriteInt("PartsSavedByICH", cumPartsSavedByICH + sesPartsSavedByICH);
 
 	// Save cumulative client breakdown stats for received bytes...
 	buffer.Format("%I64u", GetCumDownData_EDONKEY() );
@@ -554,16 +1027,16 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("ConnNumReconnects", buffer);
 	// Average Connections
 	if (theApp.serverconnect->IsConnected()){
-		buffer.Format("%u",(uint32)(theApp.listensocket->GetAverageConnections()+prefs->cumConnAvgConnections)/2);
+		buffer.Format("%u",(uint32)(theApp.listensocket->GetAverageConnections()+cumConnAvgConnections)/2);
 		ini.WriteString("ConnAvgConnections", buffer);
 	}
 	// Peak Connections
-	if (theApp.listensocket->GetPeakConnections()>prefs->cumConnPeakConnections)
-		prefs->cumConnPeakConnections = theApp.listensocket->GetPeakConnections();
-	ini.WriteInt("ConnPeakConnections", prefs->cumConnPeakConnections);
+	if (theApp.listensocket->GetPeakConnections()>cumConnPeakConnections)
+		cumConnPeakConnections = theApp.listensocket->GetPeakConnections();
+	ini.WriteInt("ConnPeakConnections", cumConnPeakConnections);
 	// Max Connection Limit Reached
-	buffer.Format("%u",theApp.listensocket->GetMaxConnectionReached()+prefs->cumConnMaxConnLimitReached);
-	if (atoi(buffer)>prefs->cumConnMaxConnLimitReached) ini.WriteString("ConnMaxConnLimitReached", buffer);
+	buffer.Format("%u",theApp.listensocket->GetMaxConnectionReached()+cumConnMaxConnLimitReached);
+	if (atoi(buffer)>cumConnMaxConnLimitReached) ini.WriteString("ConnMaxConnLimitReached", buffer);
 	// Time Stuff...
 	ini.WriteInt("ConnTransferTime", GetConnTransferTime() + theApp.statistics->GetTransferTime());
 	ini.WriteInt("ConnUploadTime", GetConnUploadTime() + theApp.statistics->GetUploadTime());
@@ -574,40 +1047,40 @@ void CPreferences::SaveStats(int bBackUp){
 	uint32 servtotal, servfail, servuser, servfile, servtuser, servtfile; float servocc;
 	theApp.serverlist->GetStatus( servtotal, servfail, servuser, servfile, servtuser, servtfile, servocc );
 	
-	if ((servtotal-servfail)>prefs->cumSrvrsMostWorkingServers)	prefs->cumSrvrsMostWorkingServers = servtotal-servfail;
-	ini.WriteInt("SrvrsMostWorkingServers", prefs->cumSrvrsMostWorkingServers);
-	if (servtuser>prefs->cumSrvrsMostUsersOnline) prefs->cumSrvrsMostUsersOnline = servtuser;
-	ini.WriteInt("SrvrsMostUsersOnline", prefs->cumSrvrsMostUsersOnline);
-	if (servtfile>prefs->cumSrvrsMostFilesAvail) prefs->cumSrvrsMostFilesAvail = servtfile;
-	ini.WriteInt("SrvrsMostFilesAvail", prefs->cumSrvrsMostFilesAvail);
+	if ((servtotal-servfail)>cumSrvrsMostWorkingServers)	cumSrvrsMostWorkingServers = servtotal-servfail;
+	ini.WriteInt("SrvrsMostWorkingServers", cumSrvrsMostWorkingServers);
+	if (servtuser>cumSrvrsMostUsersOnline) cumSrvrsMostUsersOnline = servtuser;
+	ini.WriteInt("SrvrsMostUsersOnline", cumSrvrsMostUsersOnline);
+	if (servtfile>cumSrvrsMostFilesAvail) cumSrvrsMostFilesAvail = servtfile;
+	ini.WriteInt("SrvrsMostFilesAvail", cumSrvrsMostFilesAvail);
 
 	// Compare and Save Shared File Records
-	if (theApp.sharedfiles->GetCount()>prefs->cumSharedMostFilesShared)	prefs->cumSharedMostFilesShared = theApp.sharedfiles->GetCount();
-	ini.WriteInt("SharedMostFilesShared", prefs->cumSharedMostFilesShared);
+	if (theApp.sharedfiles->GetCount()>cumSharedMostFilesShared)	cumSharedMostFilesShared = theApp.sharedfiles->GetCount();
+	ini.WriteInt("SharedMostFilesShared", cumSharedMostFilesShared);
 	uint64 bytesLargestFile = 0;
 	uint64 allsize=theApp.sharedfiles->GetDatasize(bytesLargestFile);
-	if (allsize>prefs->cumSharedLargestShareSize) prefs->cumSharedLargestShareSize = allsize;
-	buffer.Format("%I64u", prefs->cumSharedLargestShareSize);
+	if (allsize>cumSharedLargestShareSize) cumSharedLargestShareSize = allsize;
+	buffer.Format("%I64u", cumSharedLargestShareSize);
 	ini.WriteString("SharedLargestShareSize", buffer);
-	if (bytesLargestFile>prefs->cumSharedLargestFileSize) prefs->cumSharedLargestFileSize = bytesLargestFile;
-	buffer.Format("%I64u", prefs->cumSharedLargestFileSize);
+	if (bytesLargestFile>cumSharedLargestFileSize) cumSharedLargestFileSize = bytesLargestFile;
+	buffer.Format("%I64u", cumSharedLargestFileSize);
 	ini.WriteString("SharedLargestFileSize", buffer);
 	if (theApp.sharedfiles->GetCount() != 0) {
 		uint64 tempint = allsize/theApp.sharedfiles->GetCount();
-		if (tempint>prefs->cumSharedLargestAvgFileSize)	prefs->cumSharedLargestAvgFileSize = tempint;
+		if (tempint>cumSharedLargestAvgFileSize)	cumSharedLargestAvgFileSize = tempint;
 	}
-	buffer.Format("%I64u",prefs->cumSharedLargestAvgFileSize);
+	buffer.Format("%I64u",cumSharedLargestAvgFileSize);
 	ini.WriteString("SharedLargestAvgFileSize", buffer);
 
-	buffer.Format("%I64u",prefs->stat_datetimeLastReset);
+	buffer.Format("%I64u",stat_datetimeLastReset);
 	ini.WriteString("statsDateTimeLastReset", buffer);
 
 	// If we are saving a back-up or a temporary back-up, return now.
 	if (bBackUp != 0) return;
 
 	// These aren't really statistics, but they're a part of my add-on, so we'll save them here and load them in LoadStats
-	ini.WriteInt("statsConnectionsGraphRatio", prefs->statsConnectionsGraphRatio, "Statistics");
-	ini.WriteString("statsExpandedTreeItems", prefs->statsExpandedTreeItems, "Statistics");
+	ini.WriteInt("statsConnectionsGraphRatio", statsConnectionsGraphRatio, "Statistics");
+	ini.WriteString("statsExpandedTreeItems", statsExpandedTreeItems, "Statistics");
 
 	// End SaveStats
 }
@@ -628,19 +1101,19 @@ void CPreferences::SetRecordStructMembers() {
 	// Servers
 	uint32 servtotal, servfail, servuser, servfile, servtuser, servtfile; float servocc;
 	theApp.serverlist->GetStatus( servtotal, servfail, servuser, servfile, servtuser, servtfile, servocc );
-	if ((servtotal-servfail)>prefs->cumSrvrsMostWorkingServers) prefs->cumSrvrsMostWorkingServers = (servtotal-servfail);
-	if (servtuser>prefs->cumSrvrsMostUsersOnline) prefs->cumSrvrsMostUsersOnline = servtuser;
-	if (servtfile>prefs->cumSrvrsMostFilesAvail) prefs->cumSrvrsMostFilesAvail = servtfile;
+	if ((servtotal-servfail)>cumSrvrsMostWorkingServers) cumSrvrsMostWorkingServers = (servtotal-servfail);
+	if (servtuser>cumSrvrsMostUsersOnline) cumSrvrsMostUsersOnline = servtuser;
+	if (servtfile>cumSrvrsMostFilesAvail) cumSrvrsMostFilesAvail = servtfile;
 
 	// Shared Files
-	if (theApp.sharedfiles->GetCount()>prefs->cumSharedMostFilesShared) prefs->cumSharedMostFilesShared = theApp.sharedfiles->GetCount();
+	if (theApp.sharedfiles->GetCount()>cumSharedMostFilesShared) cumSharedMostFilesShared = theApp.sharedfiles->GetCount();
 	uint64 bytesLargestFile = 0;
 	uint64 allsize=theApp.sharedfiles->GetDatasize(bytesLargestFile);
-	if (allsize>prefs->cumSharedLargestShareSize) prefs->cumSharedLargestShareSize = allsize;
-	if (bytesLargestFile>prefs->cumSharedLargestFileSize) prefs->cumSharedLargestFileSize = bytesLargestFile;
+	if (allsize>cumSharedLargestShareSize) cumSharedLargestShareSize = allsize;
+	if (bytesLargestFile>cumSharedLargestFileSize) cumSharedLargestFileSize = bytesLargestFile;
 	if (theApp.sharedfiles->GetCount() != 0) {
 		uint64 tempint = allsize/theApp.sharedfiles->GetCount();
-		if (tempint>prefs->cumSharedLargestAvgFileSize) prefs->cumSharedLargestAvgFileSize = tempint;
+		if (tempint>cumSharedLargestAvgFileSize) cumSharedLargestAvgFileSize = tempint;
 	}
 } // SetRecordStructMembers()
 
@@ -679,24 +1152,24 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 			
 			switch (uClientID){
 				// Update session client breakdown stats for sent bytes...
-				case SO_EDONKEY:		prefs->sesUpData_EDONKEY+=bytes;		break;
-				case SO_EDONKEYHYBRID:	prefs->sesUpData_EDONKEYHYBRID+=bytes;	break;
+				case SO_EDONKEY:		sesUpData_EDONKEY+=bytes;		break;
+				case SO_EDONKEYHYBRID:	sesUpData_EDONKEYHYBRID+=bytes;	break;
 				case SO_OLDEMULE:
-				case SO_EMULE:			prefs->sesUpData_EMULE+=bytes;			break;
-				case SO_MLDONKEY:		prefs->sesUpData_MLDONKEY+=bytes;		break;
-				case SO_CDONKEY:		prefs->sesUpData_CDONKEY+=bytes;		break;
-				case SO_XMULE:			prefs->sesUpData_XMULE+=bytes;			break;
-				case SO_SHAREAZA:		prefs->sesUpData_SHAREAZA+=bytes;		break;
+				case SO_EMULE:			sesUpData_EMULE+=bytes;			break;
+				case SO_MLDONKEY:		sesUpData_MLDONKEY+=bytes;		break;
+				case SO_CDONKEY:		sesUpData_CDONKEY+=bytes;		break;
+				case SO_XMULE:			sesUpData_XMULE+=bytes;			break;
+				case SO_SHAREAZA:		sesUpData_SHAREAZA+=bytes;		break;
 			}
 
 			switch (uClientPort){
 				// Update session port breakdown stats for sent bytes...
-				case 4662:				prefs->sesUpDataPort_4662+=bytes;		break;
-				default:				prefs->sesUpDataPort_OTHER+=bytes;		break;
+				case 4662:				sesUpDataPort_4662+=bytes;		break;
+				default:				sesUpDataPort_OTHER+=bytes;		break;
 			}
 
-			if (bFromPF)				prefs->sesUpData_Partfile+=bytes;
-			else						prefs->sesUpData_File+=bytes;
+			if (bFromPF)				sesUpData_Partfile+=bytes;
+			else						sesUpData_File+=bytes;
 
 			//	Add to our total for sent bytes...
 			theApp.UpdateSentBytes(bytes, sentToFriend); //MORPH - Added by Yun.SF3, ZZ Upload System
@@ -709,14 +1182,27 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 
 			switch (uClientID){
                 // Update session client breakdown stats for received bytes...
-				case SO_EDONKEY:		prefs->sesDownData_EDONKEY+=bytes;		break;
-				case SO_EDONKEYHYBRID:	prefs->sesDownData_EDONKEYHYBRID+=bytes;break;
+			if (bFromPF)				sesUpData_Partfile+=bytes;
+			else						sesUpData_File+=bytes;
+
+			//	Add to our total for sent bytes...
+			theApp.UpdateSentBytes(bytes);
+
+			break;
+
+		case false:
+			// Downline Data
+
+			switch (uClientID){
+                // Update session client breakdown stats for received bytes...
+				case SO_EDONKEY:		sesDownData_EDONKEY+=bytes;		break;
+				case SO_EDONKEYHYBRID:	sesDownData_EDONKEYHYBRID+=bytes;break;
 				case SO_OLDEMULE:
-				case SO_EMULE:			prefs->sesDownData_EMULE+=bytes;		break;
-				case SO_MLDONKEY:		prefs->sesDownData_MLDONKEY+=bytes;		break;
-				case SO_CDONKEY:		prefs->sesDownData_CDONKEY+=bytes;		break;
-				case SO_XMULE:			prefs->sesDownData_XMULE+=bytes;		break;
-				case SO_SHAREAZA:		prefs->sesDownData_SHAREAZA+=bytes;		break;
+				case SO_EMULE:			sesDownData_EMULE+=bytes;		break;
+				case SO_MLDONKEY:		sesDownData_MLDONKEY+=bytes;		break;
+				case SO_CDONKEY:		sesDownData_CDONKEY+=bytes;		break;
+				case SO_XMULE:			sesDownData_XMULE+=bytes;		break;
+				case SO_SHAREAZA:		sesDownData_SHAREAZA+=bytes;		break;
 			}
 
 			switch (uClientPort){
@@ -724,8 +1210,8 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 				// For now we are only going to break it down by default and non-default.
 				// A statistical analysis of all data sent from every single port/domain is
 				// beyond the scope of this add-on.
-				case 4662:				prefs->sesDownDataPort_4662+=bytes;		break;
-				default:				prefs->sesDownDataPort_OTHER+=bytes;	break;
+				case 4662:				sesDownDataPort_4662+=bytes;		break;
+				default:				sesDownDataPort_OTHER+=bytes;	break;
 			}
 
 			//	Add to our total for received bytes...
@@ -744,80 +1230,80 @@ void CPreferences::ResetCumulativeStatistics(){
 
 	// SET ALL CUMULATIVE STAT VALUES TO 0  :'-(
 
-	prefs->totalDownloadedBytes=0;
-	prefs->totalUploadedBytes=0;
-	prefs->cumDownOverheadTotal=0;
-	prefs->cumDownOverheadFileReq=0;
-	prefs->cumDownOverheadSrcEx=0;
-	prefs->cumDownOverheadServer=0;
-	prefs->cumDownOverheadKad=0;
-	prefs->cumDownOverheadTotalPackets=0;
-	prefs->cumDownOverheadFileReqPackets=0;
-	prefs->cumDownOverheadSrcExPackets=0;
-	prefs->cumDownOverheadServerPackets=0;
-	prefs->cumDownOverheadKadPackets=0;
-	prefs->cumUpOverheadTotal=0;
-	prefs->cumUpOverheadFileReq=0;
-	prefs->cumUpOverheadSrcEx=0;
-	prefs->cumUpOverheadServer=0;
-	prefs->cumUpOverheadKad=0;
-	prefs->cumUpOverheadTotalPackets=0;
-	prefs->cumUpOverheadFileReqPackets=0;
-	prefs->cumUpOverheadSrcExPackets=0;
-	prefs->cumUpOverheadServerPackets=0;
-	prefs->cumUpOverheadKadPackets=0;
-	prefs->cumUpSuccessfulSessions=0;
-	prefs->cumUpFailedSessions=0;
-	prefs->cumUpAvgTime=0;
-	prefs->cumUpData_EDONKEY=0;
-	prefs->cumUpData_EDONKEYHYBRID=0;
-	prefs->cumUpData_EMULE=0;
-	prefs->cumUpData_MLDONKEY=0;
-	prefs->cumUpData_CDONKEY=0;
-	prefs->cumUpData_XMULE=0;
-	prefs->cumUpData_SHAREAZA=0;
-	prefs->cumUpDataPort_4662=0;
-	prefs->cumUpDataPort_OTHER=0;
-	prefs->cumDownCompletedFiles=0;
-	prefs->cumDownSuccessfulSessions=0;
-	prefs->cumDownFailedSessions=0;
-	prefs->cumDownAvgTime=0;
-	prefs->cumLostFromCorruption=0;
-	prefs->cumSavedFromCompression=0;
-	prefs->cumPartsSavedByICH=0;
-	prefs->cumDownData_EDONKEY=0;
-	prefs->cumDownData_EDONKEYHYBRID=0;
-	prefs->cumDownData_EMULE=0;
-	prefs->cumDownData_MLDONKEY=0;
-	prefs->cumDownData_CDONKEY=0;
-	prefs->cumDownData_XMULE=0;
-	prefs->cumDownData_SHAREAZA=0;
-	prefs->cumDownDataPort_4662=0;
-	prefs->cumDownDataPort_OTHER=0;
-	prefs->cumConnAvgDownRate=0;
-	prefs->cumConnMaxAvgDownRate=0;
-	prefs->cumConnMaxDownRate=0;
-	prefs->cumConnAvgUpRate=0;
-	prefs->cumConnRunTime=0;
-	prefs->cumConnNumReconnects=0;
-	prefs->cumConnAvgConnections=0;
-	prefs->cumConnMaxConnLimitReached=0;
-	prefs->cumConnPeakConnections=0;
-	prefs->cumConnDownloadTime=0;
-	prefs->cumConnUploadTime=0;
-	prefs->cumConnTransferTime=0;
-	prefs->cumConnServerDuration=0;
-	prefs->cumConnMaxAvgUpRate=0;
-	prefs->cumConnMaxUpRate=0;
-	prefs->cumSrvrsMostWorkingServers=0;
-	prefs->cumSrvrsMostUsersOnline=0;
-	prefs->cumSrvrsMostFilesAvail=0;
-    prefs->cumSharedMostFilesShared=0;
-	prefs->cumSharedLargestShareSize=0;
-	prefs->cumSharedLargestAvgFileSize=0;
+	totalDownloadedBytes=0;
+	totalUploadedBytes=0;
+	cumDownOverheadTotal=0;
+	cumDownOverheadFileReq=0;
+	cumDownOverheadSrcEx=0;
+	cumDownOverheadServer=0;
+	cumDownOverheadKad=0;
+	cumDownOverheadTotalPackets=0;
+	cumDownOverheadFileReqPackets=0;
+	cumDownOverheadSrcExPackets=0;
+	cumDownOverheadServerPackets=0;
+	cumDownOverheadKadPackets=0;
+	cumUpOverheadTotal=0;
+	cumUpOverheadFileReq=0;
+	cumUpOverheadSrcEx=0;
+	cumUpOverheadServer=0;
+	cumUpOverheadKad=0;
+	cumUpOverheadTotalPackets=0;
+	cumUpOverheadFileReqPackets=0;
+	cumUpOverheadSrcExPackets=0;
+	cumUpOverheadServerPackets=0;
+	cumUpOverheadKadPackets=0;
+	cumUpSuccessfulSessions=0;
+	cumUpFailedSessions=0;
+	cumUpAvgTime=0;
+	cumUpData_EDONKEY=0;
+	cumUpData_EDONKEYHYBRID=0;
+	cumUpData_EMULE=0;
+	cumUpData_MLDONKEY=0;
+	cumUpData_CDONKEY=0;
+	cumUpData_XMULE=0;
+	cumUpData_SHAREAZA=0;
+	cumUpDataPort_4662=0;
+	cumUpDataPort_OTHER=0;
+	cumDownCompletedFiles=0;
+	cumDownSuccessfulSessions=0;
+	cumDownFailedSessions=0;
+	cumDownAvgTime=0;
+	cumLostFromCorruption=0;
+	cumSavedFromCompression=0;
+	cumPartsSavedByICH=0;
+	cumDownData_EDONKEY=0;
+	cumDownData_EDONKEYHYBRID=0;
+	cumDownData_EMULE=0;
+	cumDownData_MLDONKEY=0;
+	cumDownData_CDONKEY=0;
+	cumDownData_XMULE=0;
+	cumDownData_SHAREAZA=0;
+	cumDownDataPort_4662=0;
+	cumDownDataPort_OTHER=0;
+	cumConnAvgDownRate=0;
+	cumConnMaxAvgDownRate=0;
+	cumConnMaxDownRate=0;
+	cumConnAvgUpRate=0;
+	cumConnRunTime=0;
+	cumConnNumReconnects=0;
+	cumConnAvgConnections=0;
+	cumConnMaxConnLimitReached=0;
+	cumConnPeakConnections=0;
+	cumConnDownloadTime=0;
+	cumConnUploadTime=0;
+	cumConnTransferTime=0;
+	cumConnServerDuration=0;
+	cumConnMaxAvgUpRate=0;
+	cumConnMaxUpRate=0;
+	cumSrvrsMostWorkingServers=0;
+	cumSrvrsMostUsersOnline=0;
+	cumSrvrsMostFilesAvail=0;
+    cumSharedMostFilesShared=0;
+	cumSharedLargestShareSize=0;
+	cumSharedLargestAvgFileSize=0;
 
 	// Set the time of last reset...
-	time_t	timeNow;time(&timeNow);prefs->stat_datetimeLastReset = (__int64) timeNow;
+	time_t	timeNow;time(&timeNow);stat_datetimeLastReset = (__int64) timeNow;
 
 	// Save the reset stats
 	SaveStats();
@@ -862,172 +1348,172 @@ bool CPreferences::LoadStats(int loadBackUp){
 	bool fileex=PathFileExists(sINI);
 	CIni ini(sINI, "Statistics");
 
-	sprintf(buffer , ini.GetString(			"TotalDownloadedBytes"			, 0 ) );
-	prefs->totalDownloadedBytes=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"TotalDownloadedBytes"			, 0 ) );
+	totalDownloadedBytes=			_atoi64( buffer );
 
-	sprintf(buffer , ini.GetString(			"TotalUploadedBytes"			, 0 ) );
-	prefs->totalUploadedBytes=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"TotalUploadedBytes"			, 0 ) );
+	totalUploadedBytes=				_atoi64( buffer );
 
 	// Load stats for cumulative downline overhead
-	sprintf(buffer,ini.GetString(			"DownOverheadTotal"				, 0	) );
-	prefs->cumDownOverheadTotal=			_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadFileReq"			, 0	) );
-	prefs->cumDownOverheadFileReq=			_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadSrcEx"				, 0	) );
-	prefs->cumDownOverheadSrcEx=			_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadServer"			, 0	) );
-	prefs->cumDownOverheadServer=			_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadKad"				, 0	) );
-	prefs->cumDownOverheadKad=				_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadTotalPackets"		, 0 ) );
-	prefs->cumDownOverheadTotalPackets=		_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadFileReqPackets"	, 0 ) );
-	prefs->cumDownOverheadFileReqPackets=	_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadSrcExPackets"		, 0 ) );
-	prefs->cumDownOverheadSrcExPackets=		_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadServerPackets"		, 0 ) );
-	prefs->cumDownOverheadServerPackets=	_atoi64( buffer );
-	sprintf(buffer,ini.GetString(			"DownOverheadKadPackets"		, 0 ) );
-	prefs->cumDownOverheadKadPackets=		_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadTotal"				, 0	) );
+	cumDownOverheadTotal=			_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadFileReq"			, 0	) );
+	cumDownOverheadFileReq=			_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadSrcEx"				, 0	) );
+	cumDownOverheadSrcEx=			_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadServer"			, 0	) );
+	cumDownOverheadServer=			_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadKad"				, 0	) );
+	cumDownOverheadKad=				_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadTotalPackets"		, 0 ) );
+	cumDownOverheadTotalPackets=		_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadFileReqPackets"	, 0 ) );
+	cumDownOverheadFileReqPackets=	_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadSrcExPackets"		, 0 ) );
+	cumDownOverheadSrcExPackets=		_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadServerPackets"		, 0 ) );
+	cumDownOverheadServerPackets=	_atoi64( buffer );
+	sprintf(buffer,"%s", ini.GetString(			"DownOverheadKadPackets"		, 0 ) );
+	cumDownOverheadKadPackets=		_atoi64( buffer );
 
 	// Load stats for cumulative upline overhead
-	sprintf(buffer , ini.GetString(			"UpOverHeadTotal"				, 0 ) );
-	prefs->cumUpOverheadTotal=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadFileReq"				, 0 ) );
-	prefs->cumUpOverheadFileReq=			_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadSrcEx"				, 0 ) );
-	prefs->cumUpOverheadSrcEx=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadServer"				, 0 ) );
-	prefs->cumUpOverheadServer=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadKad"					, 0 ) );
-	prefs->cumUpOverheadKad=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverHeadTotalPackets"		, 0 ) );
-	prefs->cumUpOverheadTotalPackets=		_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadFileReqPackets"		, 0 ) );
-	prefs->cumUpOverheadFileReqPackets=		_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadSrcExPackets"		, 0 ) );
-	prefs->cumUpOverheadSrcExPackets=		_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadServerPackets"		, 0 ) );
-	prefs->cumUpOverheadServerPackets=		_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpOverheadKadPackets"			, 0 ) );
-	prefs->cumUpOverheadKadPackets=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverHeadTotal"				, 0 ) );
+	cumUpOverheadTotal=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadFileReq"				, 0 ) );
+	cumUpOverheadFileReq=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadSrcEx"				, 0 ) );
+	cumUpOverheadSrcEx=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadServer"				, 0 ) );
+	cumUpOverheadServer=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadKad"					, 0 ) );
+	cumUpOverheadKad=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverHeadTotalPackets"		, 0 ) );
+	cumUpOverheadTotalPackets=		_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadFileReqPackets"		, 0 ) );
+	cumUpOverheadFileReqPackets=		_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadSrcExPackets"		, 0 ) );
+	cumUpOverheadSrcExPackets=		_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadServerPackets"		, 0 ) );
+	cumUpOverheadServerPackets=		_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpOverheadKadPackets"			, 0 ) );
+	cumUpOverheadKadPackets=			_atoi64( buffer );
 
 	// Load stats for cumulative upline data
-	prefs->cumUpSuccessfulSessions =	ini.GetInt("UpSuccessfulSessions"	, 0 );
-	prefs->cumUpFailedSessions =		ini.GetInt("UpFailedSessions"		, 0 );
-	prefs->cumUpAvgTime =				ini.GetInt("UpAvgTime"				, 0 );
+	cumUpSuccessfulSessions =	ini.GetInt("UpSuccessfulSessions"	, 0 );
+	cumUpFailedSessions =		ini.GetInt("UpFailedSessions"		, 0 );
+	cumUpAvgTime =				ini.GetInt("UpAvgTime"				, 0 );
 
 	// Load cumulative client breakdown stats for sent bytes
-	sprintf(buffer , ini.GetString(			"UpData_EDONKEY"				, 0 ) );
-	prefs->cumUpData_EDONKEY=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_EDONKEYHYBRID"			, 0 ) );
-	prefs->cumUpData_EDONKEYHYBRID=			_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_EMULE"					, 0 ) );
-	prefs->cumUpData_EMULE=					_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_MLDONKEY"				, 0 ) );
-	prefs->cumUpData_MLDONKEY=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_LMULE"					, 0 ) );
-	prefs->cumUpData_XMULE=					_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_CDONKEY"				, 0 ) );
-	prefs->cumUpData_CDONKEY=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_SHAREAZA"				, 0 ) );
-	prefs->cumUpData_SHAREAZA=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_EDONKEY"				, 0 ) );
+	cumUpData_EDONKEY=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_EDONKEYHYBRID"			, 0 ) );
+	cumUpData_EDONKEYHYBRID=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_EMULE"					, 0 ) );
+	cumUpData_EMULE=					_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_MLDONKEY"				, 0 ) );
+	cumUpData_MLDONKEY=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_LMULE"					, 0 ) );
+	cumUpData_XMULE=					_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_CDONKEY"				, 0 ) );
+	cumUpData_CDONKEY=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_SHAREAZA"				, 0 ) );
+	cumUpData_SHAREAZA=				_atoi64( buffer );
 
 	// Load cumulative port breakdown stats for sent bytes
-	sprintf(buffer , ini.GetString(			"UpDataPort_4662"				, 0 ) );
-	prefs->cumUpDataPort_4662=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpDataPort_OTHER"				, 0 ) );
-	prefs->cumUpDataPort_OTHER=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpDataPort_4662"				, 0 ) );
+	cumUpDataPort_4662=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpDataPort_OTHER"				, 0 ) );
+	cumUpDataPort_OTHER=				_atoi64( buffer );
 
 	// Load cumulative source breakdown stats for sent bytes
-	sprintf(buffer , ini.GetString(			"UpData_File"					, 0 ) );
-	prefs->cumUpData_File=					_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"UpData_Partfile"				, 0 ) );
-	prefs->cumUpData_Partfile=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_File"					, 0 ) );
+	cumUpData_File=					_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_Partfile"				, 0 ) );
+	cumUpData_Partfile=				_atoi64( buffer );
 
 	// Load stats for cumulative downline data
-	prefs->cumDownCompletedFiles =		ini.GetInt("DownCompletedFiles"		, 0 );
-	prefs->cumDownSuccessfulSessions=	ini.GetInt("DownSuccessfulSessions"	, 0 );
-	prefs->cumDownFailedSessions=		ini.GetInt("DownFailedSessions"		, 0 );
-	prefs->cumDownAvgTime=				ini.GetInt("DownAvgTime"			, 0 );
+	cumDownCompletedFiles =		ini.GetInt("DownCompletedFiles"		, 0 );
+	cumDownSuccessfulSessions=	ini.GetInt("DownSuccessfulSessions"	, 0 );
+	cumDownFailedSessions=		ini.GetInt("DownFailedSessions"		, 0 );
+	cumDownAvgTime=				ini.GetInt("DownAvgTime"			, 0 );
 
 	// Cumulative statistics for saved due to compression/lost due to corruption
-	sprintf(buffer , ini.GetString(			"LostFromCorruption"			, 0 ) );
-	prefs->cumLostFromCorruption=			_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"SavedFromCompression"			, 0 ) );
-	prefs->cumSavedFromCompression=			_atoi64( buffer );
-	prefs->cumPartsSavedByICH=				ini.GetInt("PartsSavedByICH"		, 0 );
+	sprintf(buffer , "%s", ini.GetString(			"LostFromCorruption"			, 0 ) );
+	cumLostFromCorruption=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"SavedFromCompression"			, 0 ) );
+	cumSavedFromCompression=			_atoi64( buffer );
+	cumPartsSavedByICH=				ini.GetInt("PartsSavedByICH"		, 0 );
 
 	// Load cumulative client breakdown stats for received bytes
-	sprintf(buffer , ini.GetString(			"DownData_EDONKEY"				, 0 ) );
-	prefs->cumDownData_EDONKEY=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownData_EDONKEYHYBRID"		, 0 ) );
-	prefs->cumDownData_EDONKEYHYBRID=		_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownData_EMULE"				, 0 ) );
-	prefs->cumDownData_EMULE=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownData_MLDONKEY"				, 0 ) );
-	prefs->cumDownData_MLDONKEY=			_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownData_LMULE"				, 0 ) );
-	prefs->cumDownData_XMULE=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownData_CDONKEY"				, 0 ) );
-	prefs->cumDownData_CDONKEY=				_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownData_SHAREAZA"				, 0 ) );
-	prefs->cumDownData_SHAREAZA=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_EDONKEY"				, 0 ) );
+	cumDownData_EDONKEY=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_EDONKEYHYBRID"		, 0 ) );
+	cumDownData_EDONKEYHYBRID=		_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_EMULE"				, 0 ) );
+	cumDownData_EMULE=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_MLDONKEY"				, 0 ) );
+	cumDownData_MLDONKEY=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_LMULE"				, 0 ) );
+	cumDownData_XMULE=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_CDONKEY"				, 0 ) );
+	cumDownData_CDONKEY=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_SHAREAZA"				, 0 ) );
+	cumDownData_SHAREAZA=				_atoi64( buffer );
 
 	// Load cumulative port breakdown stats for received bytes
-	sprintf(buffer , ini.GetString(			"DownDataPort_4662"				, 0 ) );
-	prefs->cumDownDataPort_4662=			_atoi64( buffer );
-	sprintf(buffer , ini.GetString(			"DownDataPort_OTHER"			, 0 ) );
-	prefs->cumDownDataPort_OTHER=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownDataPort_4662"				, 0 ) );
+	cumDownDataPort_4662=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownDataPort_OTHER"			, 0 ) );
+	cumDownDataPort_OTHER=			_atoi64( buffer );
 
 	// Load stats for cumulative connection data
-	prefs->cumConnAvgDownRate =		ini.GetFloat(	"ConnAvgDownRate"		, 0 );
-	prefs->cumConnMaxAvgDownRate =	ini.GetFloat(	"ConnMaxAvgDownRate"	, 0 );
-	prefs->cumConnMaxDownRate =		ini.GetFloat(	"ConnMaxDownRate"		, 0 );
-	prefs->cumConnAvgUpRate =		ini.GetFloat(	"ConnAvgUpRate"			, 0 );
-	prefs->cumConnMaxAvgUpRate =	ini.GetFloat(	"ConnMaxAvgUpRate"		, 0 );
-	prefs->cumConnMaxUpRate =		ini.GetFloat(	"ConnMaxUpRate"			, 0 );
+	cumConnAvgDownRate =		ini.GetFloat(	"ConnAvgDownRate"		, 0 );
+	cumConnMaxAvgDownRate =	ini.GetFloat(	"ConnMaxAvgDownRate"	, 0 );
+	cumConnMaxDownRate =		ini.GetFloat(	"ConnMaxDownRate"		, 0 );
+	cumConnAvgUpRate =		ini.GetFloat(	"ConnAvgUpRate"			, 0 );
+	cumConnMaxAvgUpRate =	ini.GetFloat(	"ConnMaxAvgUpRate"		, 0 );
+	cumConnMaxUpRate =		ini.GetFloat(	"ConnMaxUpRate"			, 0 );
 
-	sprintf(buffer , ini.GetString(			"ConnRunTime"					, 0 ) );
-	prefs->cumConnRunTime=					_atoi64(buffer);
+	sprintf(buffer , "%s", ini.GetString(			"ConnRunTime"					, 0 ) );
+	cumConnRunTime=					_atoi64(buffer);
 
-	prefs->cumConnTransferTime=			ini.GetInt(	"ConnTransferTime"			, 0 );
-	prefs->cumConnDownloadTime=			ini.GetInt(	"ConnDownloadTime"			, 0 );
-	prefs->cumConnUploadTime=			ini.GetInt(	"ConnUploadTime"			, 0 );
-	prefs->cumConnServerDuration=		ini.GetInt( "ConnServerDuration"		, 0 );
-	prefs->cumConnNumReconnects =		ini.GetInt(	"ConnNumReconnects"			, 0 );
-	prefs->cumConnAvgConnections =		ini.GetInt(	"ConnAvgConnections"		, 0 );
-	prefs->cumConnMaxConnLimitReached=	ini.GetInt(	"ConnMaxConnLimitReached"	, 0 );
-	prefs->cumConnPeakConnections =		ini.GetInt(	"ConnPeakConnections"		, 0 );
+	cumConnTransferTime=			ini.GetInt(	"ConnTransferTime"			, 0 );
+	cumConnDownloadTime=			ini.GetInt(	"ConnDownloadTime"			, 0 );
+	cumConnUploadTime=			ini.GetInt(	"ConnUploadTime"			, 0 );
+	cumConnServerDuration=		ini.GetInt( "ConnServerDuration"		, 0 );
+	cumConnNumReconnects =		ini.GetInt(	"ConnNumReconnects"			, 0 );
+	cumConnAvgConnections =		ini.GetInt(	"ConnAvgConnections"		, 0 );
+	cumConnMaxConnLimitReached=	ini.GetInt(	"ConnMaxConnLimitReached"	, 0 );
+	cumConnPeakConnections =		ini.GetInt(	"ConnPeakConnections"		, 0 );
 
 	// Load date/time of last reset
-	sprintf(buffer , ini.GetString(			"statsDateTimeLastReset"		, 0 ) );
-	prefs->stat_datetimeLastReset=			_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"statsDateTimeLastReset"		, 0 ) );
+	stat_datetimeLastReset=			_atoi64( buffer );
 
 	// Smart Load For Restores - Don't overwrite records that are greater than the backed up ones
 	if (loadBackUp == 1) {
 		uint64 temp64;
 		// Load records for servers / network
-		if (ini.GetInt("SrvrsMostWorkingServers", 0) > prefs->cumSrvrsMostWorkingServers)
-			prefs->cumSrvrsMostWorkingServers = ini.GetInt(		"SrvrsMostWorkingServers"	, 0 );
-		if (ini.GetInt("SrvrsMostUsersOnline", 0) > (int)prefs->cumSrvrsMostUsersOnline)
-			prefs->cumSrvrsMostUsersOnline =	ini.GetInt(		"SrvrsMostUsersOnline"		, 0 );
-		if (ini.GetInt("SrvrsMostFilesAvail", 0) > (int)prefs->cumSrvrsMostFilesAvail)
-			prefs->cumSrvrsMostFilesAvail =		ini.GetInt(		"SrvrsMostFilesAvail"		, 0 );
+		if (ini.GetInt("SrvrsMostWorkingServers", 0) > cumSrvrsMostWorkingServers)
+			cumSrvrsMostWorkingServers = ini.GetInt(		"SrvrsMostWorkingServers"	, 0 );
+		if (ini.GetInt("SrvrsMostUsersOnline", 0) > (int)cumSrvrsMostUsersOnline)
+			cumSrvrsMostUsersOnline =	ini.GetInt(		"SrvrsMostUsersOnline"		, 0 );
+		if (ini.GetInt("SrvrsMostFilesAvail", 0) > (int)cumSrvrsMostFilesAvail)
+			cumSrvrsMostFilesAvail =		ini.GetInt(		"SrvrsMostFilesAvail"		, 0 );
 
 		// Load records for shared files
-		if (ini.GetInt("SharedMostFilesShared ", 0, "Statistics") > prefs->cumSharedMostFilesShared)
-			prefs->cumSharedMostFilesShared =	ini.GetInt(		"SharedMostFilesShared"		, 0 );
+		if (ini.GetInt("SharedMostFilesShared ", 0, "Statistics") > cumSharedMostFilesShared)
+			cumSharedMostFilesShared =	ini.GetInt(		"SharedMostFilesShared"		, 0 );
 
-		sprintf(buffer , ini.GetString(	"SharedLargestShareSize" , 0 ) );
+		sprintf(buffer , "%s", ini.GetString(	"SharedLargestShareSize" , 0 ) );
 		temp64 = _atoi64( buffer );
-		if (temp64 > prefs->cumSharedLargestShareSize) prefs->cumSharedLargestShareSize = temp64;
-		sprintf(buffer , ini.GetString( "SharedLargestAvgFileSize" , 0 ) );
+		if (temp64 > cumSharedLargestShareSize) cumSharedLargestShareSize = temp64;
+		sprintf(buffer , "%s", ini.GetString( "SharedLargestAvgFileSize" , 0 ) );
 		temp64 = _atoi64( buffer );
-		if (temp64 > prefs->cumSharedLargestAvgFileSize) prefs->cumSharedLargestAvgFileSize = temp64;
-		sprintf(buffer , ini.GetString( "SharedLargestFileSize" , 0 ) );
+		if (temp64 > cumSharedLargestAvgFileSize) cumSharedLargestAvgFileSize = temp64;
+		sprintf(buffer , "%s", ini.GetString( "SharedLargestFileSize" , 0 ) );
 		temp64 = _atoi64( buffer );
-		if (temp64 > prefs->cumSharedLargestFileSize) prefs->cumSharedLargestFileSize = temp64;
+		if (temp64 > cumSharedLargestFileSize) cumSharedLargestFileSize = temp64;
 
 		// Check to make sure the backup of the values we just overwrote exists.  If so, rename it to the backup file.
 		// This allows us to undo a restore, so to speak, just in case we don't like the restored values...
@@ -1046,47 +1532,47 @@ bool CPreferences::LoadStats(int loadBackUp){
 	// Stupid Load -> Just load the values.
 	else {
 		// Load records for servers / network
-		prefs->cumSrvrsMostWorkingServers = ini.GetInt(		"SrvrsMostWorkingServers"	, 0 );
-		prefs->cumSrvrsMostUsersOnline =	ini.GetInt(		"SrvrsMostUsersOnline"		, 0 );
-		prefs->cumSrvrsMostFilesAvail =		ini.GetInt(		"SrvrsMostFilesAvail"		, 0 );
+		cumSrvrsMostWorkingServers = ini.GetInt(		"SrvrsMostWorkingServers"	, 0 );
+		cumSrvrsMostUsersOnline =	ini.GetInt(		"SrvrsMostUsersOnline"		, 0 );
+		cumSrvrsMostFilesAvail =		ini.GetInt(		"SrvrsMostFilesAvail"		, 0 );
 
 		// Load records for shared files
-		prefs->cumSharedMostFilesShared =	ini.GetInt(		"SharedMostFilesShared"		, 0 );
+		cumSharedMostFilesShared =	ini.GetInt(		"SharedMostFilesShared"		, 0 );
 
-		sprintf(buffer , ini.GetString(		"SharedLargestShareSize"					, 0 ) );
-		prefs->cumSharedLargestShareSize=	_atoi64( buffer );
-		sprintf(buffer , ini.GetString(		"SharedLargestAvgFileSize"					, 0 ) );
-		prefs->cumSharedLargestAvgFileSize=	_atoi64( buffer );
-		sprintf(buffer , ini.GetString(		"SharedLargestFileSize"						, 0 ) );
-		prefs->cumSharedLargestFileSize =	_atoi64( buffer );
+		sprintf(buffer , "%s", ini.GetString(		"SharedLargestShareSize"					, 0 ) );
+		cumSharedLargestShareSize=	_atoi64( buffer );
+		sprintf(buffer , "%s", ini.GetString(		"SharedLargestAvgFileSize"					, 0 ) );
+		cumSharedLargestAvgFileSize=	_atoi64( buffer );
+		sprintf(buffer , "%s", ini.GetString(		"SharedLargestFileSize"						, 0 ) );
+		cumSharedLargestFileSize =	_atoi64( buffer );
 
 		// These are not stats, but they're part of my mod, so we will load them here anyway.
-		prefs->statsConnectionsGraphRatio =		ini.GetInt("statsConnectionsGraphRatio"	, 3	, "Statistics");
-		sprintf(prefs->statsExpandedTreeItems,"%s",ini.GetString("statsExpandedTreeItems","111000000100000110000010000011110000010010","Statistics"));
+		statsConnectionsGraphRatio =		ini.GetInt("statsConnectionsGraphRatio"	, 3	, "Statistics");
+		sprintf(statsExpandedTreeItems,"%s",ini.GetString("statsExpandedTreeItems","111000000100000110000010000011110000010010","Statistics"));
 
 		// Initialize new session statistic variables...
-		prefs->sesDownCompletedFiles =		0;
-		prefs->sesUpData_EDONKEY =			0;
-		prefs->sesUpData_EDONKEYHYBRID =	0;
-		prefs->sesUpData_EMULE =			0;
-		prefs->sesUpData_MLDONKEY =			0;
-		prefs->sesUpData_CDONKEY =			0;
-		prefs->sesUpDataPort_4662 =			0;
-		prefs->sesUpDataPort_OTHER =		0;
-		prefs->sesDownData_EDONKEY =		0;
-		prefs->sesDownData_EDONKEYHYBRID =	0;
-		prefs->sesDownData_EMULE =			0;
-		prefs->sesDownData_MLDONKEY =		0;
-		prefs->sesDownData_CDONKEY =		0;
-		prefs->sesDownData_SHAREAZA =		0;
-		prefs->sesDownDataPort_4662 =		0;
-		prefs->sesDownDataPort_OTHER =		0;
-		prefs->sesDownSuccessfulSessions=	0;
-		prefs->sesDownFailedSessions=		0;
-		prefs->sesPartsSavedByICH=			0;
+		sesDownCompletedFiles =		0;
+		sesUpData_EDONKEY =			0;
+		sesUpData_EDONKEYHYBRID =	0;
+		sesUpData_EMULE =			0;
+		sesUpData_MLDONKEY =			0;
+		sesUpData_CDONKEY =			0;
+		sesUpDataPort_4662 =			0;
+		sesUpDataPort_OTHER =		0;
+		sesDownData_EDONKEY =		0;
+		sesDownData_EDONKEYHYBRID =	0;
+		sesDownData_EMULE =			0;
+		sesDownData_MLDONKEY =		0;
+		sesDownData_CDONKEY =		0;
+		sesDownData_SHAREAZA =		0;
+		sesDownDataPort_4662 =		0;
+		sesDownDataPort_OTHER =		0;
+		sesDownSuccessfulSessions=	0;
+		sesDownFailedSessions=		0;
+		sesPartsSavedByICH=			0;
 	}
 
-	if (!fileex) {time_t	timeNow;time(&timeNow);prefs->stat_datetimeLastReset = (__int64) timeNow;}
+	if (!fileex) {time_t	timeNow;time(&timeNow);stat_datetimeLastReset = (__int64) timeNow;}
 	
 	return true;
 
@@ -1138,11 +1624,11 @@ bool CPreferences::Save(){
 	delete[] fullpath;
 	if (preffile){
 		prefsExt->version=PREFFILE_VERSION;
-		prefsExt->EmuleWindowPlacement=prefs->EmuleWindowPlacement;
-		md4cpy(&prefsExt->userhash,&prefs->userhash);
+		prefsExt->EmuleWindowPlacement=EmuleWindowPlacement;
+		md4cpy(prefsExt->userhash, userhash);
 
 		error = fwrite(prefsExt,sizeof(Preferences_Ext_Struct),1,preffile);
-		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+		if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 			fflush(preffile); // flush file stream buffers to disk buffers
 			(void)_commit(_fileno(preffile)); // commit disk buffers to disk
 		}
@@ -1166,11 +1652,11 @@ bool CPreferences::Save(){
 	if (sdirfile.Open(fullpath,CFile::modeCreate|CFile::modeWrite))
 	{
 		try{
-			for (POSITION pos = shareddir_list.GetHeadPosition();pos != 0;shareddir_list.GetNext(pos)){
-				sdirfile.WriteString(shareddir_list.GetAt(pos).GetBuffer());
+			for (POSITION pos = shareddir_list.GetHeadPosition();pos != 0;){
+				sdirfile.WriteString(shareddir_list.GetNext(pos).GetBuffer());
 				sdirfile.Write("\n",1);
 			}
-			if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 				sdirfile.Flush(); // flush file stream buffers to disk buffers
 				if (_commit(_fileno(sdirfile.m_pStream)) != 0) // commit disk buffers to disk
 					AfxThrowFileException(CFileException::hardIO, GetLastError(), sdirfile.GetFileName());
@@ -1180,7 +1666,8 @@ bool CPreferences::Save(){
 		catch(CFileException* error){
 			TCHAR buffer[MAX_CFEXP_ERRORMSG];
 			error->GetErrorMessage(buffer,ARRSIZE(buffer));
-			AddDebugLogLine(true,_T("Failed to save %s - %s"), fullpath, buffer);
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(true,_T("Failed to save %s - %s"), fullpath, buffer);
 			error->Delete();
 		}
 	}
@@ -1193,32 +1680,38 @@ bool CPreferences::Save(){
 	return error;
 }
 
-void CPreferences::CreateUserHash(){
-	for (int i = 0;i != 8; i++){ 
-		uint16	random = rand();
-		memcpy(&userhash[i*2],&random,2);
+void CPreferences::CreateUserHash()
+{
+	for (int i = 0; i < 8; i++)
+	{
+		uint16 random = rand();
+		memcpy(&userhash[i*2], &random, 2);
 	}
+
 	// mark as emule client. that will be need in later version
 	userhash[5] = 14;
 	userhash[14] = 111;
 }
 
-int CPreferences::GetColumnWidth(Table t, int index) const {
+int CPreferences::GetColumnWidth(Table t, int index)
+{
 	switch(t) {
 	case tableDownload:
-		return prefs->downloadColumnWidths[index];
+		return downloadColumnWidths[index];
 	case tableUpload:
-		return prefs->uploadColumnWidths[index];
+		return uploadColumnWidths[index];
 	case tableQueue:
-		return prefs->queueColumnWidths[index];
+		return queueColumnWidths[index];
 	case tableSearch:
-		return prefs->searchColumnWidths[index];
+		return searchColumnWidths[index];
 	case tableShared:
-		return prefs->sharedColumnWidths[index];
+		return sharedColumnWidths[index];
 	case tableServer:
-		return prefs->serverColumnWidths[index];
+		return serverColumnWidths[index];
 	case tableClientList:
-		return prefs->clientListColumnWidths[index];
+		return clientListColumnWidths[index];
+	case tableFilenames:
+		return FilenamesListColumnWidths[index];
 	}
 	return 0;
 }
@@ -1226,45 +1719,51 @@ int CPreferences::GetColumnWidth(Table t, int index) const {
 void CPreferences::SetColumnWidth(Table t, int index, int width) {
 	switch(t) {
 	case tableDownload:
-		prefs->downloadColumnWidths[index] = width;
+		downloadColumnWidths[index] = width;
 		break;
 	case tableUpload:
-		prefs->uploadColumnWidths[index] = width;
+		uploadColumnWidths[index] = width;
 		break;
 	case tableQueue:
-		prefs->queueColumnWidths[index] = width;
+		queueColumnWidths[index] = width;
 		break;
 	case tableSearch:
-		prefs->searchColumnWidths[index] = width;
+		searchColumnWidths[index] = width;
 		break;
 	case tableShared:
-		prefs->sharedColumnWidths[index] = width;
+		sharedColumnWidths[index] = width;
 		break;
 	case tableServer:
-		prefs->serverColumnWidths[index] = width;
+		serverColumnWidths[index] = width;
 		break;
 	case tableClientList:
-		prefs->clientListColumnWidths[index] = width;
+		clientListColumnWidths[index] = width;
+		break;
+	case tableFilenames:
+		FilenamesListColumnWidths[index] = width;
 		break;
 	}
 }
 
-BOOL CPreferences::GetColumnHidden(Table t, int index) const {
+BOOL CPreferences::GetColumnHidden(Table t, int index)
+{
 	switch(t) {
 	case tableDownload:
-		return prefs->downloadColumnHidden[index];
+		return downloadColumnHidden[index];
 	case tableUpload:
-		return prefs->uploadColumnHidden[index];
+		return uploadColumnHidden[index];
 	case tableQueue:
-		return prefs->queueColumnHidden[index];
+		return queueColumnHidden[index];
 	case tableSearch:
-		return prefs->searchColumnHidden[index];
+		return searchColumnHidden[index];
 	case tableShared:
-		return prefs->sharedColumnHidden[index];
+		return sharedColumnHidden[index];
 	case tableServer:
-		return prefs->serverColumnHidden[index];
+		return serverColumnHidden[index];
 	case tableClientList:
-		return prefs->clientListColumnHidden[index];
+		return clientListColumnHidden[index];
+	case tableFilenames:
+		return FilenamesListColumnHidden[index];
 	}
 	return FALSE;
 }
@@ -1272,45 +1771,51 @@ BOOL CPreferences::GetColumnHidden(Table t, int index) const {
 void CPreferences::SetColumnHidden(Table t, int index, BOOL bHidden) {
 	switch(t) {
 	case tableDownload:
-		prefs->downloadColumnHidden[index] = bHidden;
+		downloadColumnHidden[index] = bHidden;
 		break;
 	case tableUpload:
-		prefs->uploadColumnHidden[index] = bHidden;
+		uploadColumnHidden[index] = bHidden;
 		break;
 	case tableQueue:
-		prefs->queueColumnHidden[index] = bHidden;
+		queueColumnHidden[index] = bHidden;
 		break;
 	case tableSearch:
-		prefs->searchColumnHidden[index] = bHidden;
+		searchColumnHidden[index] = bHidden;
 		break;
 	case tableShared:
-		prefs->sharedColumnHidden[index] = bHidden;
+		sharedColumnHidden[index] = bHidden;
 		break;
 	case tableServer:
-		prefs->serverColumnHidden[index] = bHidden;
+		serverColumnHidden[index] = bHidden;
 		break;
 	case tableClientList:
-		prefs->clientListColumnHidden[index] = bHidden;
+		clientListColumnHidden[index] = bHidden;
+		break;
+	case tableFilenames:
+		FilenamesListColumnHidden[index] = bHidden;
 		break;
 	}
 }
 
-int CPreferences::GetColumnOrder(Table t, int index) const {
+int CPreferences::GetColumnOrder(Table t, int index)
+{
 	switch(t) {
 	case tableDownload:
-		return prefs->downloadColumnOrder[index];
+		return downloadColumnOrder[index];
 	case tableUpload:
-		return prefs->uploadColumnOrder[index];
+		return uploadColumnOrder[index];
 	case tableQueue:
-		return prefs->queueColumnOrder[index];
+		return queueColumnOrder[index];
 	case tableSearch:
-		return prefs->searchColumnOrder[index];
+		return searchColumnOrder[index];
 	case tableShared:
-		return prefs->sharedColumnOrder[index];
+		return sharedColumnOrder[index];
 	case tableServer:
-		return prefs->serverColumnOrder[index];
+		return serverColumnOrder[index];
 	case tableClientList:
-		return prefs->clientListColumnOrder[index];
+		return clientListColumnOrder[index];
+	case tableFilenames:
+		return FilenamesListColumnOrder[index];
 	}
 	return 0;
 }
@@ -1318,42 +1823,30 @@ int CPreferences::GetColumnOrder(Table t, int index) const {
 void CPreferences::SetColumnOrder(Table t, INT *piOrder) {
 	switch(t) {
 	case tableDownload:
-		memcpy(prefs->downloadColumnOrder, piOrder, sizeof(prefs->downloadColumnOrder));
+		memcpy(downloadColumnOrder, piOrder, sizeof(downloadColumnOrder));
 		break;
 	case tableUpload:
-		memcpy(prefs->uploadColumnOrder, piOrder, sizeof(prefs->uploadColumnOrder));
+		memcpy(uploadColumnOrder, piOrder, sizeof(uploadColumnOrder));
 		break;
 	case tableQueue:
-		memcpy(prefs->queueColumnOrder, piOrder, sizeof(prefs->queueColumnOrder));
+		memcpy(queueColumnOrder, piOrder, sizeof(queueColumnOrder));
 		break;
 	case tableSearch:
-		memcpy(prefs->searchColumnOrder, piOrder, sizeof(prefs->searchColumnOrder));
+		memcpy(searchColumnOrder, piOrder, sizeof(searchColumnOrder));
 		break;
 	case tableShared:
-		memcpy(prefs->sharedColumnOrder, piOrder, sizeof(prefs->sharedColumnOrder));
+		memcpy(sharedColumnOrder, piOrder, sizeof(sharedColumnOrder));
 		break;
 	case tableServer:
-		memcpy(prefs->serverColumnOrder, piOrder, sizeof(prefs->serverColumnOrder));
+		memcpy(serverColumnOrder, piOrder, sizeof(serverColumnOrder));
 		break;
 	case tableClientList:
-		memcpy(prefs->clientListColumnOrder, piOrder, sizeof(prefs->clientListColumnOrder));
+		memcpy(clientListColumnOrder, piOrder, sizeof(clientListColumnOrder));
+		break;
+	case tableFilenames:
+		memcpy(FilenamesListColumnOrder, piOrder, sizeof(FilenamesListColumnOrder));
 		break;
 	}
-}
-
-CPreferences::~CPreferences(){
-
-	Category_Struct* delcat;
-	while (!catMap.IsEmpty()) {
-		delcat=catMap.GetAt(0); 
-		catMap.RemoveAt(0); 
-		delete delcat;
-	}
-
-//	delete[] appdir;
-//	delete[] configdir;
-	delete prefs;
-	delete prefsExt;
 }
 
 int CPreferences::GetRecommendedMaxConnections() {
@@ -1381,24 +1874,322 @@ void CPreferences::SavePreferences(){
 	//---
 	ini.WriteString("AppVersion", theApp.m_strCurVersionLong);
 	//---
-//MORPH START added by Yun.SF3: Ipfilter.dat update
-	ini.WriteInt("IPfilterVersion",prefs->m_IPfilterVersion); //added by milobac: Ipfilter.dat update
-	ini.WriteBool("AutoUPdateIPFilter",prefs->AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
-//MORPH END added by Yun.SF3: Ipfilter.dat update
 
-	//EastShare - added by AndCycle, IP to Country
-	ini.WriteInt("IP2Country", prefs->m_iIP2CountryNameMode); 
-	ini.WriteBool("IP2CountryShowFlag", prefs->m_bIP2CountryShowFlag);
-	//EastShare - added by AndCycle, IP to Country
+#ifdef _DEBUG
+	ini.WriteInt("DebugHeap", m_iDbgHeap);
+#endif
 
-	buffer.Format("%s",prefs->nick);
-	ini.WriteString("Nick",buffer);
+	ini.WriteString("Nick", nick);
+	ini.WriteString("IncomingDir", incomingdir);
+	ini.WriteString("TempDir", tempdir);
 
-	buffer.Format("%s",prefs->incomingdir);
-	ini.WriteString("IncomingDir",buffer );
+	// ZZ:UploadSpeedSense -->
+    	ini.WriteInt("MinUpload", minupload);
+	// ZZ:UploadSpeedSense <--
+	ini.WriteInt("MaxUpload",maxupload);
+	ini.WriteInt("MaxDownload",maxdownload);
+	ini.WriteInt("MaxConnections",maxconnections);
+	ini.WriteInt("RemoveDeadServer",deadserver);
+	ini.WriteInt("Port",port);
+	ini.WriteInt("UDPPort",udpport);
+	ini.WriteInt("ServerUDPPort", nServerUDPPort);
+	ini.WriteInt("MaxSourcesPerFile",maxsourceperfile );
+	ini.WriteWORD("Language",languageID);
+	ini.WriteInt("SeeShare",m_iSeeShares);
+	ini.WriteInt("ToolTipDelay",m_iToolDelayTime);
+	ini.WriteInt("StatGraphsInterval",trafficOMeterInterval);
+	ini.WriteInt("StatsInterval",statsInterval);
+	ini.WriteInt("DownloadCapacity",maxGraphDownloadRate);
+	ini.WriteInt("UploadCapacity",maxGraphUploadRate);
+	ini.WriteInt("DeadServerRetry",deadserverretries);
+	ini.WriteInt("ServerKeepAliveTimeout",m_dwServerKeepAliveTimeout);
+	ini.WriteInt("SplitterbarPosition",splitterbarPosition+2);
+	ini.WriteInt("VariousStatisticsMaxValue",statsMax);
+	ini.WriteInt("StatsAverageMinutes",statsAverageMinutes);
+	ini.WriteInt("MaxConnectionsPerFiveSeconds",MaxConperFive);
+	ini.WriteInt("Check4NewVersionDelay",versioncheckdays);
 
-	buffer.Format("%s",prefs->tempdir);
-	ini.WriteString("TempDir",buffer );
+	ini.WriteBool("Reconnect",reconnect);
+	ini.WriteBool("Scoresystem",scorsystem);
+	ini.WriteBool("ICH",ICH);
+	ini.WriteBool("Serverlist",autoserverlist);
+	ini.WriteBool("UpdateNotifyTestClient",updatenotify);
+	ini.WriteBool("MinToTray",mintotray);
+	ini.WriteBool("AddServersFromServer",addserversfromserver);
+	ini.WriteBool("AddServersFromClient",addserversfromclient);
+	ini.WriteBool("Splashscreen",splashscreen);
+	ini.WriteBool("BringToFront",bringtoforeground);
+	ini.WriteBool("TransferDoubleClick",transferDoubleclick);
+	ini.WriteBool("BeepOnError",beepOnError);
+	ini.WriteBool("ConfirmExit",confirmExit);
+	ini.WriteBool("FilterBadIPs",filterLANIPs);
+    ini.WriteBool("Autoconnect",autoconnect);
+	ini.WriteBool("OnlineSignature",onlineSig);
+	ini.WriteBool("StartupMinimized",startMinimized);
+	ini.WriteInt("LastMainWndDlgID",m_iLastMainWndDlgID);
+	ini.WriteInt("LastLogPaneID",m_iLastLogPaneID);
+	ini.WriteBool("SafeServerConnect",safeServerConnect);
+	ini.WriteBool("ShowRatesOnTitle",showRatesInTitle);
+	ini.WriteBool("IndicateRatings",indicateratings);
+	ini.WriteBool("WatchClipboard4ED2kFilelinks",watchclipboard);
+	ini.WriteInt("SearchMethod",m_iSearchMethod);
+	ini.WriteBool("CheckDiskspace",checkDiskspace);	// SLUGFILLER: checkDiskspace
+	ini.WriteInt("MinFreeDiskSpace",m_uMinFreeDiskSpace);
+	// itsonlyme: hostnameSource
+	buffer.Format("%s",yourHostname);
+	ini.WriteString("YourHostname",buffer);
+	// itsonlyme: hostnameSource
+
+	// Barry - New properties...
+    ini.WriteBool("AutoConnectStaticOnly", autoconnectstaticonly);  
+	ini.WriteBool("AutoTakeED2KLinks", autotakeed2klinks);  
+    ini.WriteBool("AddNewFilesPaused", addnewfilespaused);  
+    ini.WriteInt ("3DDepth", depth3D);  
+
+	ini.WriteBool("NotifyOnDownload",useDownloadNotifier); // Added by enkeyDEV
+	ini.WriteBool("NotifyOnNewDownload",useNewDownloadNotifier);
+	ini.WriteBool("NotifyOnChat",useChatNotifier);		  
+	ini.WriteBool("NotifyOnLog",useLogNotifier);
+	ini.WriteBool("NotifierUseSound",useSoundInNotifier);
+	ini.WriteBool("NotifierPopEveryChatMessage",notifierPopsEveryChatMsg);
+	ini.WriteBool("NotifierPopNewVersion",notifierNewVersion);
+	ini.WriteBool("NotifyOnImportantError", notifierImportantError);
+	ini.WriteString("NotifierSoundPath",notifierSoundFilePath);
+	ini.WriteString("NotifierConfiguration",notifierConfiguration);
+
+	ini.WriteString("TxtEditor",TxtEditor);
+	ini.WriteString("VideoPlayer",VideoPlayer);
+	ini.WriteString("MessageFilter",messageFilter);
+	ini.WriteString("CommentFilter",commentFilter);
+	ini.WriteString("DateTimeFormat",GetDateTimeFormat());
+	ini.WriteString("DateTimeFormat4Log",GetDateTimeFormat4Log());
+	ini.WriteString("WebTemplateFile",m_sTemplateFile);
+	ini.WriteString("FilenameCleanups",filenameCleanups);
+	ini.WriteInt("ExtractMetaData",m_iExtractMetaData);
+
+	ini.WriteString("DefaultIRCServer",m_sircserver);
+	ini.WriteString("IRCNick",m_sircnick);
+	ini.WriteBool("IRCAddTimestamp", m_bircaddtimestamp);
+	ini.WriteString("IRCFilterName", m_sircchannamefilter);
+	ini.WriteInt("IRCFilterUser", m_iircchanneluserfilter);
+	ini.WriteBool("IRCUseFilter", m_bircusechanfilter);
+	ini.WriteString("IRCPerformString", m_sircperformstring);
+	ini.WriteBool("IRCUsePerform", m_bircuseperform);
+	ini.WriteBool("IRCListOnConnect", m_birclistonconnect);
+	ini.WriteBool("IRCAcceptLink", m_bircacceptlinks);
+	ini.WriteBool("IRCAcceptLinkFriends", m_bircacceptlinksfriends);
+	ini.WriteBool("IRCIgnoreInfoMessage", m_bircignoreinfomessage);
+	ini.WriteBool("IRCIgnoreEmuleProtoInfoMessage", m_bircignoreemuleprotoinfomessage);
+	ini.WriteBool("IRCHelpChannel", m_birchelpchannel);
+	ini.WriteBool("SmartIdCheck", smartidcheck);
+	ini.WriteBool("Verbose", m_bVerbose);
+	ini.WriteBool("DebugSourceExchange", m_bDebugSourceExchange);	// do *not* use the according 'Get...' function here!
+	ini.WriteBool("LogBannedClients", m_bLogBannedClients);			// do *not* use the according 'Get...' function here!
+	ini.WriteBool("LogRatingDescReceived", m_bLogRatingDescReceived);// do *not* use the according 'Get...' function here!
+	ini.WriteBool("LogSecureIdent", m_bLogSecureIdent);				// do *not* use the according 'Get...' function here!
+	ini.WriteBool("LogFilteredIPs", m_bLogFilteredIPs);				// do *not* use the according 'Get...' function here!
+	ini.WriteBool("LogFileSaving", m_bLogFileSaving);				// do *not* use the according 'Get...' function here!
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	// following options are for debugging or when using an external debug device viewer only.
+	ini.WriteInt("DebugServerTCP",m_iDebugServerTCPLevel);
+	ini.WriteInt("DebugServerUDP",m_iDebugServerUDPLevel);
+	ini.WriteInt("DebugServerSources",m_iDebugServerSourcesLevel);
+	ini.WriteInt("DebugServerSearches",m_iDebugServerSearchesLevel);
+	ini.WriteInt("DebugClientTCP",m_iDebugClientTCPLevel);
+	ini.WriteInt("DebugClientUDP",m_iDebugClientUDPLevel);
+	ini.WriteInt("DebugClientKadUDP",m_iDebugClientKadUDPLevel);
+#endif
+	ini.WriteBool("PreviewPrio", m_bpreviewprio);
+	ini.WriteBool("UpdateQueueListPref", m_bupdatequeuelist);
+	ini.WriteBool("ManualHighPrio", m_bmanualhighprio);
+	ini.WriteBool("FullChunkTransfers", m_btransferfullchunks);
+	ini.WriteBool("StartNextFile", m_bstartnextfile);
+	ini.WriteBool("ShowOverhead", m_bshowoverhead);
+	ini.WriteBool("VideoPreviewBackupped", moviePreviewBackup);
+	ini.WriteInt("PreviewSmallBlocks", m_iPreviewSmallBlocks);
+
+	ini.DeleteKey("FileBufferSizePref"); // delete old 'file buff size' setting
+	ini.WriteInt("FileBufferSize", m_iFileBufferSize);
+
+	ini.DeleteKey("QueueSizePref"); // delete old 'queue size' setting
+	ini.WriteInt("QueueSize", m_iQueueSize);
+
+	ini.WriteInt("CommitFiles", m_iCommitFiles);
+	ini.WriteBool("DAPPref", m_bDAP);
+	ini.WriteBool("UAPPref", m_bUAP);
+	// khaos::kmod+ Obsolete ini.WriteInt("AllcatType", allcatType);
+	ini.WriteBool("FilterServersByIP",filterserverbyip);
+	ini.WriteBool("DisableKnownClientList",m_bDisableKnownClientList);
+	ini.WriteBool("DisableQueueList",m_bDisableQueueList);
+	ini.WriteBool("UseCreditSystem",m_bCreditSystem);
+	ini.WriteBool("SaveLogToDisk",log2disk);
+	ini.WriteBool("SaveDebugToDisk",debug2disk);
+	ini.WriteBool("EnableScheduler",scheduler);
+	ini.WriteBool("MessagesFromFriendsOnly",msgonlyfriends);
+	ini.WriteBool("MessageFromValidSourcesOnly",msgsecure);
+	ini.WriteBool("ShowInfoOnCatTabs",showCatTabInfos);
+	ini.WriteBool("ResumeNextFromSameCat",resumeSameCat);
+	ini.WriteBool("DontRecreateStatGraphsOnResize",dontRecreateGraphs);
+	ini.WriteBool("AutoFilenameCleanup",autofilenamecleanup);
+	ini.WriteBool("ShowExtControls",m_bExtControls);
+	ini.WriteBool("UseAutocompletion",m_bUseAutocompl);
+	ini.WriteBool("NetworkKademlia",networkkademlia);
+	ini.WriteBool("NetworkED2K",networked2k);
+	ini.WriteBool("AutoClearCompleted",m_bRemoveFinishedDownloads);
+	ini.WriteBool("TransflstRemainOrder",m_bTransflstRemain);
+
+	ini.WriteInt("VersionCheckLastAutomatic", versioncheckLastAutomatic);
+	ini.WriteInt("FilterLevel",filterlevel);
+
+	ini.WriteBool("SecureIdent", m_bUseSecureIdent);// change the name in future version to enable it by default
+	ini.WriteBool("AdvancedSpamFilter",m_bAdvancedSpamfilter);
+	ini.WriteBool("ShowDwlPercentage",m_bShowDwlPercentage);		
+	ini.WriteBool("RemoveFilesToBin",m_bRemove2bin);
+
+	// Toolbar
+	ini.WriteString("ToolbarSetting", m_sToolbarSettings);
+	ini.WriteString("ToolbarBitmap", m_sToolbarBitmap );
+	ini.WriteString("ToolbarBitmapFolder", m_sToolbarBitmapFolder);
+	ini.WriteInt("ToolbarLabels", m_nToolbarLabels);
+	ini.WriteString("SkinProfile", m_szSkinProfile);
+	ini.WriteString("SkinProfileDir", m_szSkinProfileDir);
+
+	
+	ini.SerGet(false, downloadColumnWidths,
+		ARRSIZE(downloadColumnWidths), "DownloadColumnWidths");
+	ini.SerGet(false, downloadColumnHidden,
+		ARRSIZE(downloadColumnHidden), "DownloadColumnHidden");
+	ini.SerGet(false, downloadColumnOrder,
+		ARRSIZE(downloadColumnOrder), "DownloadColumnOrder");
+	ini.SerGet(false, uploadColumnWidths,
+		ARRSIZE(uploadColumnWidths), "UploadColumnWidths");
+	ini.SerGet(false, uploadColumnHidden,
+		ARRSIZE(uploadColumnHidden), "UploadColumnHidden");
+	ini.SerGet(false, uploadColumnOrder,
+		ARRSIZE(uploadColumnOrder), "UploadColumnOrder");
+	ini.SerGet(false, queueColumnWidths,
+		ARRSIZE(queueColumnWidths), "QueueColumnWidths");
+	ini.SerGet(false, queueColumnHidden,
+		ARRSIZE(queueColumnHidden), "QueueColumnHidden");
+	ini.SerGet(false, queueColumnOrder,
+		ARRSIZE(queueColumnOrder), "QueueColumnOrder");
+	ini.SerGet(false, searchColumnWidths,
+		ARRSIZE(searchColumnWidths), "SearchColumnWidths");
+	ini.SerGet(false, searchColumnHidden,
+		ARRSIZE(searchColumnHidden), "SearchColumnHidden");
+	ini.SerGet(false, searchColumnOrder,
+		ARRSIZE(searchColumnOrder), "SearchColumnOrder");
+	ini.SerGet(false, sharedColumnWidths,
+		ARRSIZE(sharedColumnWidths), "SharedColumnWidths");
+	ini.SerGet(false, sharedColumnHidden,
+		ARRSIZE(sharedColumnHidden), "SharedColumnHidden");
+	ini.SerGet(false, sharedColumnOrder,
+		ARRSIZE(sharedColumnOrder), "SharedColumnOrder");
+	ini.SerGet(false, serverColumnWidths,
+		ARRSIZE(serverColumnWidths), "ServerColumnWidths");
+	ini.SerGet(false, serverColumnHidden,
+		ARRSIZE(serverColumnHidden), "ServerColumnHidden");
+	ini.SerGet(false, serverColumnOrder,
+		ARRSIZE(serverColumnOrder), "ServerColumnOrder");
+	ini.SerGet(false, clientListColumnWidths,
+		ARRSIZE(clientListColumnWidths), "ClientListColumnWidths");
+	ini.SerGet(false, clientListColumnHidden,
+		ARRSIZE(clientListColumnHidden), "ClientListColumnHidden");
+	ini.SerGet(false, clientListColumnOrder,
+		ARRSIZE(clientListColumnOrder), "ClientListColumnOrder");
+
+	ini.SerGet(false, FilenamesListColumnWidths,
+		ARRSIZE(FilenamesListColumnWidths), "FilenamesListColumnWidths");
+	ini.SerGet(false, FilenamesListColumnHidden,
+		ARRSIZE(FilenamesListColumnHidden), "FilenamesListColumnHidden");
+	ini.SerGet(false, FilenamesListColumnOrder,
+		ARRSIZE(FilenamesListColumnOrder), "FilenamesListColumnOrder");
+
+	// Barry - Provide a mechanism for all tables to store/retrieve sort order
+	// SLUGFILLER: multiSort - save multiple params
+	ini.SerGet(false, tableSortItemDownload,
+		GetColumnSortCount(tableDownload), "TableSortItemDownload");
+	ini.SerGet(false, tableSortItemUpload,
+		GetColumnSortCount(tableUpload), "TableSortItemUpload");
+	ini.SerGet(false, tableSortItemQueue,
+		GetColumnSortCount(tableQueue), "TableSortItemQueue");
+	ini.SerGet(false, tableSortItemSearch,
+		GetColumnSortCount(tableSearch), "TableSortItemSearch");
+	ini.SerGet(false, tableSortItemShared,
+		GetColumnSortCount(tableShared), "TableSortItemShared");
+	ini.SerGet(false, tableSortItemServer,
+		GetColumnSortCount(tableServer), "TableSortItemServer");
+	ini.SerGet(false, tableSortItemClientList,
+		GetColumnSortCount(tableClientList), "TableSortItemClientList");
+	ini.SerGet(false, tableSortItemFilenames,
+		GetColumnSortCount(tableFilenames), "TableSortItemFilenames");
+	ini.SerGet(false, tableSortAscendingDownload,
+		GetColumnSortCount(tableDownload), "TableSortAscendingDownload");
+	ini.SerGet(false, tableSortAscendingUpload,
+		GetColumnSortCount(tableUpload), "TableSortAscendingUpload");
+	ini.SerGet(false, tableSortAscendingQueue,
+		GetColumnSortCount(tableQueue), "TableSortAscendingQueue");
+	ini.SerGet(false, tableSortAscendingSearch,
+		GetColumnSortCount(tableSearch), "TableSortAscendingSearch");
+	ini.SerGet(false, tableSortAscendingShared,
+		GetColumnSortCount(tableShared), "TableSortAscendingShared");
+	ini.SerGet(false, tableSortAscendingServer,
+		GetColumnSortCount(tableServer), "TableSortAscendingServer");
+	ini.SerGet(false, tableSortAscendingClientList,
+		GetColumnSortCount(tableClientList), "TableSortAscendingClientList");
+	ini.SerGet(false, tableSortAscendingFilenames,
+		GetColumnSortCount(tableFilenames), "TableSortAscendingFilenames");
+	// SLUGFILLER: multiSort
+	ini.WriteBinary("HyperTextFont", (LPBYTE)&m_lfHyperText, sizeof m_lfHyperText);
+
+	// deadlake PROXYSUPPORT
+	ini.WriteBool("ProxyEnablePassword",proxy.EnablePassword,"Proxy");
+	ini.WriteBool("ProxyEnableProxy",proxy.UseProxy,"Proxy");
+	ini.WriteString("ProxyName",proxy.name,"Proxy");
+	ini.WriteString("ProxyPassword",proxy.password,"Proxy");
+	ini.WriteString("ProxyUser",proxy.user,"Proxy");
+	ini.WriteInt("ProxyPort",proxy.port,"Proxy");
+	ini.WriteInt("ProxyType",proxy.type,"Proxy");
+	ini.WriteBool("ConnectWithoutProxy",m_bIsASCWOP,"Proxy");
+	ini.WriteBool("ShowErrors",m_bShowProxyErrors,"Proxy");
+
+	CString buffer2;
+	for (int i=0;i<15;i++) {
+		buffer.Format("0x%06x",GetStatsColor(i));
+		buffer2.Format("StatColor%i",i);
+		ini.WriteString(buffer2,buffer,"Statistics");
+	}
+
+	// -khaos--+++>
+	/* Original stat saves from base code now obsolete (KHAOS)
+	buffer.Format("%I64u",totalDownloadedBytes);
+	ini.WriteString("TotalDownloadedBytes",buffer ,"Statistics");
+
+	buffer.Format("%I64u",totalUploadedBytes);
+	ini.WriteString("TotalUploadedBytes",buffer ,"Statistics");
+	// End original stat saves from base code. */
+	// <-----khaos--
+
+	// Web Server
+	ini.WriteString("Password", GetWSPass(), "WebServer");
+	ini.WriteString("PasswordLow", GetWSLowPass());
+	ini.WriteInt("Port", m_nWebPort);
+	ini.WriteBool("Enabled", m_bWebEnabled);
+	ini.WriteBool("UseGzip", m_bWebUseGzip);
+	ini.WriteInt("PageRefreshTime", m_nWebPageRefresh);
+	ini.WriteBool("UseLowRightsUser", m_bWebLowEnabled);
+
+	//mobileMule
+	ini.WriteString("Password", GetMMPass(), "MobileMule");
+	ini.WriteBool("Enabled", m_bMMEnabled);
+	ini.WriteInt("Port", m_nMMPort);
+
+	ini.WriteBool("InfiniteQueue",prefs->infiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	ini.WriteBool("MultipleInstance",prefs->multipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
+
+	ini.WriteBool("AutoDynUpSwitching",prefs->isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
 	ini.WriteBool("EnableZeroFilledTest", prefs->enableZeroFilledTest);
@@ -1417,32 +2208,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
 	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
 
-	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	ini.WriteInt("MinUpload",prefs->minupload);
-	//MORPH END   - Added by SiRoB, (SUC) & (USS)
-	ini.WriteInt("MaxUpload",prefs->maxupload);
-	ini.WriteInt("MaxDownload",prefs->maxdownload);
-	ini.WriteInt("MaxConnections",prefs->maxconnections);
-	ini.WriteInt("RemoveDeadServer",prefs->deadserver);
-	ini.WriteInt("Port",prefs->port);
-	ini.WriteInt("UDPPort",prefs->udpport);
-	ini.WriteInt("ServerUDPPort", prefs->nServerUDPPort);
-	ini.WriteInt("KadUDPPort",prefs->kadudpport);
-	ini.WriteInt("MaxSourcesPerFile",prefs->maxsourceperfile );
-	ini.WriteWORD("Language",prefs->languageID);
-	ini.WriteInt("SeeShare",prefs->m_iSeeShares);
-	ini.WriteInt("ToolTipDelay",prefs->m_iToolDelayTime);
-	ini.WriteInt("StatGraphsInterval",prefs->trafficOMeterInterval);
-	ini.WriteInt("StatsInterval",prefs->statsInterval);
-	ini.WriteInt("DownloadCapacity",prefs->maxGraphDownloadRate);
-	ini.WriteInt("UploadCapacity",prefs->maxGraphUploadRate);
-	ini.WriteInt("DeadServerRetry",prefs->deadserverretries);
-	ini.WriteInt("ServerKeepAliveTimeout",prefs->m_dwServerKeepAliveTimeout);
-	ini.WriteInt("SplitterbarPosition",prefs->splitterbarPosition+2);
-	ini.WriteInt("VariousStatisticsMaxValue",prefs->statsMax);
-	ini.WriteInt("StatsAverageMinutes",prefs->statsAverageMinutes);
-	ini.WriteInt("MaxConnectionsPerFiveSeconds",prefs->MaxConperFive);
-	ini.WriteInt("Check4NewVersionDelay",prefs->versioncheckdays);
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ini.WriteInt("ReconnectOnLowIdRetries",prefs->LowIdRetries);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
@@ -1456,45 +2221,19 @@ void CPreferences::SavePreferences(){
 	//MORPH START - Added by SiRoB, Show Permissions
 	ini.WriteBool("ShowSharePermissions",prefs->permissions);
 	//MORPH END   - Added by SiRoB, Show Permissions
-	ini.WriteBool("Reconnect",prefs->reconnect);
-	ini.WriteBool("Scoresystem",prefs->scorsystem);
-	ini.WriteBool("ICH",prefs->ICH);
-	ini.WriteBool("Serverlist",prefs->autoserverlist);
-	ini.WriteBool("UpdateNotifyTestClient",prefs->updatenotify);
-	ini.WriteBool("MinToTray",prefs->mintotray);
-	ini.WriteBool("AddServersFromServer",prefs->addserversfromserver);
-	ini.WriteBool("AddServersFromClient",prefs->addserversfromclient);
-	ini.WriteBool("Splashscreen",prefs->splashscreen);
-	ini.WriteBool("BringToFront",prefs->bringtoforeground);
-	ini.WriteBool("TransferDoubleClick",prefs->transferDoubleclick);
-	ini.WriteBool("BeepOnError",prefs->beepOnError);
-	ini.WriteBool("ConfirmExit",prefs->confirmExit);
-	ini.WriteBool("FilterBadIPs",prefs->filterLANIPs);
-    ini.WriteBool("Autoconnect",prefs->autoconnect);
-	ini.WriteBool("OnlineSignature",prefs->onlineSig);
-	ini.WriteBool("StartupMinimized",prefs->startMinimized);
-	ini.WriteInt("LastMainWndDlgID",prefs->m_iLastMainWndDlgID);
-	ini.WriteInt("LastLogPaneID",prefs->m_iLastLogPaneID);
-	ini.WriteBool("SafeServerConnect",prefs->safeServerConnect);
-	ini.WriteBool("ShowRatesOnTitle",prefs->showRatesInTitle);
-	ini.WriteBool("IndicateRatings",prefs->indicateratings);
-	ini.WriteBool("WatchClipboard4ED2kFilelinks",prefs->watchclipboard);
-	ini.WriteInt("SearchMethod",prefs->m_iSearchMethod);
-	ini.WriteBool("CheckDiskspace",prefs->checkDiskspace);	// SLUGFILLER: checkDiskspace
-	ini.WriteInt("MinFreeDiskSpace",prefs->m_uMinFreeDiskSpace);
-	// itsonlyme: hostnameSource
-	buffer.Format("%s",prefs->yourHostname);
-	ini.WriteString("YourHostname",buffer);
-	// itsonlyme: hostnameSource
-	ini.WriteBool("InfiniteQueue",prefs->infiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	ini.WriteBool("MultipleInstance",prefs->multipleInstance);	//Morph - added by AndCycle, VQB: multipleInstance
 
-	ini.WriteBool("AutoDynUpSwitching",prefs->isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+//MORPH START added by Yun.SF3: Ipfilter.dat update
+	ini.WriteInt("IPfilterVersion",prefs->m_IPfilterVersion); //added by milobac: Ipfilter.dat update
+	ini.WriteBool("AutoUPdateIPFilter",prefs->AutoUpdateIPFilter); //added by milobac: Ipfilter.dat update
+//MORPH END added by Yun.SF3: Ipfilter.dat update
+
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ini.WriteInt("FakesDatVersion",prefs->m_FakesDatVersion);
 	ini.WriteBool("UpdateFakeStartup",prefs->UpdateFakeStartup);
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+
+	ini.WriteString("UpdateURLFakeList",prefs->UpdateURLFakeList);		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	ini.WriteString("UpdateURLIPFilter",prefs->UpdateURLIPFilter);//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 	//EastShare Start - PreferShareAll by AndCycle
 	ini.WriteBool("ShareAll",prefs->shareall);	// SLUGFILLER: preferShareAll
@@ -1503,277 +2242,55 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("KnownMetDays", prefs->m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met file control
 
-	// Barry - New properties...
-    ini.WriteBool("AutoConnectStaticOnly", prefs->autoconnectstaticonly);  
-	ini.WriteBool("AutoTakeED2KLinks", prefs->autotakeed2klinks);  
-    ini.WriteBool("AddNewFilesPaused", prefs->addnewfilespaused);  
-    ini.WriteInt ("3DDepth", prefs->depth3D);  
-
-	ini.WriteBool("NotifyOnDownload",prefs->useDownloadNotifier); // Added by enkeyDEV
-	ini.WriteBool("NotifyOnNewDownload",prefs->useNewDownloadNotifier);
-	ini.WriteBool("NotifyOnChat",prefs->useChatNotifier);		  
-	ini.WriteBool("NotifyOnLog",prefs->useLogNotifier);
-	ini.WriteBool("NotifierUseSound",prefs->useSoundInNotifier);
-	ini.WriteBool("NotifierPopEveryChatMessage",prefs->notifierPopsEveryChatMsg);
-	ini.WriteBool("NotifierPopNewVersion",prefs->notifierNewVersion);
-	ini.WriteBool("NotifyOnImportantError", prefs->notifierImportantError);
-	ini.WriteString("NotifierSoundPath",prefs->notifierSoundFilePath);
-	ini.WriteString("NotifierConfiguration",prefs->notifierConfiguration);
-
-	ini.WriteString("TxtEditor",prefs->TxtEditor);
-	ini.WriteString("VideoPlayer",prefs->VideoPlayer);
-	ini.WriteString("UpdateURLFakeList",prefs->UpdateURLFakeList);		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	ini.WriteString("UpdateURLIPFilter",prefs->UpdateURLIPFilter);//MORPH START added by Yun.SF3: Ipfilter.dat update
-
-	ini.WriteString("MessageFilter",prefs->messageFilter);
-	ini.WriteString("CommentFilter",prefs->commentFilter);
-	ini.WriteString("DateTimeFormat",GetDateTimeFormat());
-	ini.WriteString("DateTimeFormat4Log",GetDateTimeFormat4Log());
-	ini.WriteString("WebTemplateFile",prefs->m_sTemplateFile);
-	ini.WriteString("FilenameCleanups",prefs->filenameCleanups);
-	ini.WriteInt("ExtractMetaData",prefs->m_iExtractMetaData);
-
-	ini.WriteString("DefaultIRCServer",prefs->m_sircserver);
-	ini.WriteString("IRCNick",prefs->m_sircnick);
-	ini.WriteBool("IRCAddTimestamp", prefs->m_bircaddtimestamp);
-	ini.WriteString("IRCFilterName", prefs->m_sircchannamefilter);
-	ini.WriteInt("IRCFilterUser", prefs->m_iircchanneluserfilter);
-	ini.WriteBool("IRCUseFilter", prefs->m_bircusechanfilter);
-	ini.WriteString("IRCPerformString", prefs->m_sircperformstring);
-	ini.WriteBool("IRCUsePerform", prefs->m_bircuseperform);
-	ini.WriteBool("IRCListOnConnect", prefs->m_birclistonconnect);
-	ini.WriteBool("IRCAcceptLink", prefs->m_bircacceptlinks);
-	ini.WriteBool("IRCAcceptLinkFriends", prefs->m_bircacceptlinksfriends);
-	ini.WriteBool("IRCIgnoreInfoMessage", prefs->m_bircignoreinfomessage);
-	ini.WriteBool("IRCIgnoreEmuleProtoInfoMessage", prefs->m_bircignoreemuleprotoinfomessage);
-	ini.WriteBool("IRCHelpChannel", prefs->m_birchelpchannel);
-	ini.WriteBool("SmartIdCheck", prefs->smartidcheck);
-	ini.WriteBool("Verbose", prefs->m_bVerbose);
-	ini.WriteBool("DebugSourceExchange", prefs->m_bDebugSourceExchange);
-#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
-	// following options are for debugging or when using an external debug device viewer only.
-	ini.WriteInt("DebugServerTCP",prefs->m_iDebugServerTCPLevel);
-	ini.WriteInt("DebugServerUDP",prefs->m_iDebugServerUDPLevel);
-	ini.WriteInt("DebugServerSources",prefs->m_iDebugServerSourcesLevel);
-	ini.WriteInt("DebugServerSearches",prefs->m_iDebugServerSearchesLevel);
-	ini.WriteInt("DebugClientTCP",prefs->m_iDebugClientTCPLevel);
-	ini.WriteInt("DebugClientUDP",prefs->m_iDebugClientUDPLevel);
-#endif
-	//ini.WriteBool("LogBannedClients", prefs->m_bLogBannedClients);
-	ini.WriteBool("PreviewPrio", prefs->m_bpreviewprio);
-	ini.WriteBool("UpdateQueueListPref", prefs->m_bupdatequeuelist);
-	ini.WriteBool("ManualHighPrio", prefs->m_bmanualhighprio);
-	ini.WriteBool("FullChunkTransfers", prefs->m_btransferfullchunks);
-	ini.WriteBool("StartNextFile", prefs->m_bstartnextfile);
-	ini.WriteBool("ShowOverhead", prefs->m_bshowoverhead);
-	ini.WriteBool("VideoPreviewBackupped", prefs->moviePreviewBackup);
-	ini.WriteInt("PreviewSmallBlocks", prefs->m_iPreviewSmallBlocks);
-	ini.WriteInt("FileBufferSizePref", prefs->m_iFileBufferSize);
-	ini.WriteInt("QueueSizePref", prefs->m_iQueueSize);
-	ini.WriteInt("CommitFiles", prefs->m_iCommitFiles);
-	ini.WriteBool("DAPPref", prefs->m_bDAP);
-	ini.WriteBool("UAPPref", prefs->m_bUAP);
-	// khaos::kmod+ Obsolete ini.WriteInt("AllcatType", prefs->allcatType);
-	ini.WriteBool("FilterServersByIP",prefs->filterserverbyip);
-	ini.WriteBool("DisableKnownClientList",prefs->m_bDisableKnownClientList);
-	ini.WriteBool("DisableQueueList",prefs->m_bDisableQueueList);
-	ini.WriteBool("UseCreditSystem",prefs->m_bCreditSystem);
-
-	ini.WriteBool("IsPayBackFirst",prefs->m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
-	ini.WriteBool("OnlyDownloadCompleteFiles", prefs->m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	ini.WriteBool("SaveUploadQueueWaitTime", prefs->m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-
-	ini.WriteBool("SaveLogToDisk",prefs->log2disk);
-	ini.WriteBool("SaveDebugToDisk",prefs->debug2disk);
-	ini.WriteBool("DateFileNameLog", prefs->DateFileNameLog);//Morph - added by AndCycle, Date File Name Log
-	ini.WriteBool("EnableScheduler",prefs->scheduler);
-	ini.WriteBool("MessagesFromFriendsOnly",prefs->msgonlyfriends);
-	ini.WriteBool("MessageFromValidSourcesOnly",prefs->msgsecure);
-	ini.WriteBool("ShowInfoOnCatTabs",prefs->showCatTabInfos);
-	ini.WriteBool("ResumeNextFromSameCat",prefs->resumeSameCat);
-	ini.WriteBool("DontRecreateStatGraphsOnResize",prefs->dontRecreateGraphs);
-	ini.WriteBool("AutoFilenameCleanup",prefs->autofilenamecleanup);
-	ini.WriteBool("ShowExtControls",prefs->m_bExtControls);
-	ini.WriteBool("UseAutocompletion",prefs->m_bUseAutocompl);
-	ini.WriteBool("NetworkKademlia",prefs->networkkademlia);
-	ini.WriteBool("NetworkED2K",prefs->networked2k);
-	ini.WriteBool("AutoClearCompleted",prefs->m_bRemoveFinishedDownloads);
-	ini.WriteBool("TransflstRemainOrder",prefs->m_bTransflstRemain);
-
-	ini.WriteInt("VersionCheckLastAutomatic", prefs->versioncheckLastAutomatic);
-	ini.WriteInt("FilterLevel",prefs->filterlevel);
-
-	ini.WriteBool("SecureIdent", prefs->m_bUseSecureIdent);// change the name in future version to enable it by default
-	ini.WriteBool("AdvancedSpamFilter",prefs->m_bAdvancedSpamfilter);
-	ini.WriteBool("ShowDwlPercentage",prefs->m_bShowDwlPercentage);		
-	ini.WriteBool("RemoveFilesToBin",prefs->m_bRemove2bin);
+	//EastShare - added by AndCycle, IP to Country
+	ini.WriteInt("IP2Country", prefs->m_iIP2CountryNameMode); 
+	ini.WriteBool("IP2CountryShowFlag", prefs->m_bIP2CountryShowFlag);
+	//EastShare - added by AndCycle, IP to Country
 
 	// khaos::categorymod+ Save Preferences
-	ini.WriteBool("ValidSrcsOnly", prefs->m_bValidSrcsOnly);
-	ini.WriteBool("ShowCatName", prefs->m_bShowCatNames);
-	ini.WriteBool("ActiveCatDefault", prefs->m_bActiveCatDefault);
-	ini.WriteBool("SelCatOnAdd", prefs->m_bSelCatOnAdd);
-	ini.WriteBool("AutoSetResumeOrder", prefs->m_bAutoSetResumeOrder);
-	ini.WriteBool("SmallFileDLPush", prefs->m_bSmallFileDLPush);
-	ini.WriteInt("StartDLInEmptyCats", prefs->m_iStartDLInEmptyCats);
-	ini.WriteBool("UseAutoCat", prefs->m_bUseAutoCat);
+	ini.WriteBool("ValidSrcsOnly", m_bValidSrcsOnly);
+	ini.WriteBool("ShowCatName", m_bShowCatNames);
+	ini.WriteBool("ActiveCatDefault", m_bActiveCatDefault);
+	ini.WriteBool("SelCatOnAdd", m_bSelCatOnAdd);
+	ini.WriteBool("AutoSetResumeOrder", m_bAutoSetResumeOrder);
+	ini.WriteBool("SmallFileDLPush", m_bSmallFileDLPush);
+	ini.WriteInt("StartDLInEmptyCats", m_iStartDLInEmptyCats);
+	ini.WriteBool("UseAutoCat", m_bUseAutoCat);
 	// khaos::categorymod-
 	// khaos::kmod+
-	ini.WriteBool("SmartA4AFSwapping", prefs->m_bSmartA4AFSwapping);
-	ini.WriteInt("AdvancedA4AFMode", prefs->m_iAdvancedA4AFMode);
-	ini.WriteBool("ShowA4AFDebugOutput", prefs->m_bShowA4AFDebugOutput);
-	ini.WriteBool("RespectMaxSources", prefs->m_bRespectMaxSources);
-	ini.WriteBool("UseSaveLoadSources", prefs->m_bUseSaveLoadSources);
+	ini.WriteBool("SmartA4AFSwapping", m_bSmartA4AFSwapping);
+	ini.WriteInt("AdvancedA4AFMode", m_iAdvancedA4AFMode);
+	ini.WriteBool("ShowA4AFDebugOutput", m_bShowA4AFDebugOutput);
+	ini.WriteBool("RespectMaxSources", m_bRespectMaxSources);
+	ini.WriteBool("UseSaveLoadSources", m_bUseSaveLoadSources);
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
-	ini.WriteInt("TimeRemainingMode", prefs->m_iTimeRemainingMode);
+	ini.WriteInt("TimeRemainingMode", m_iTimeRemainingMode);
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteBool("SUCEnabled",prefs->m_bSUCEnabled);
-	ini.WriteInt("SUCLog",prefs->m_bSUCLog);
-	ini.WriteInt("SUCHigh",prefs->m_iSUCHigh);
-	ini.WriteInt("SUCLow",prefs->m_iSUCLow);
-	ini.WriteInt("SUCDrift",prefs->m_iSUCDrift);
-	ini.WriteInt("SUCPitch",prefs->m_iSUCPitch);
+	ini.WriteBool("SUCEnabled",m_bSUCEnabled);
+	ini.WriteInt("SUCLog",m_bSUCLog);
+	ini.WriteInt("SUCHigh",m_iSUCHigh);
+	ini.WriteInt("SUCLow",m_iSUCLow);
+	ini.WriteInt("SUCDrift",m_iSUCDrift);
+	ini.WriteInt("SUCPitch",m_iSUCPitch);
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteInt("MaxConnectionsSwitchBorder",prefs->maxconnectionsswitchborder);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteInt("MaxConnectionsSwitchBorder",maxconnectionsswitchborder);//MORPH - Added by Yun.SF3, Auto DynUp changing
+
+	ini.WriteBool("IsPayBackFirst",m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
+	ini.WriteBool("OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	ini.WriteBool("SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	ini.WriteBool("DateFileNameLog", DateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 
 	// #ifdef MIGHTY_SUMMERTIME
 	// Mighty Knife: daylight saving patch
-	ini.WriteBool("DaylightSavingPatchEnabled",prefs->m_iDaylightSavingPatch);
+	ini.WriteBool("DaylightSavingPatchEnabled",m_iDaylightSavingPatch);
 	// #endif
 
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
-	ini.WriteBool("AutoBackup",prefs->autobackup);
-	ini.WriteBool("AutoBackup2",prefs->autobackup2);
+	ini.WriteBool("AutoBackup",autobackup);
+	ini.WriteBool("AutoBackup2",autobackup2);
 	//EastShare End - Added by Pretender, TBH-AutoBackup
-
-	// Toolbar
-	ini.WriteString("ToolbarSetting", prefs->m_sToolbarSettings);
-	ini.WriteString("ToolbarBitmap", prefs->m_sToolbarBitmap );
-	ini.WriteString("ToolbarBitmapFolder", prefs->m_sToolbarBitmapFolder);
-	ini.WriteInt("ToolbarLabels", prefs->m_nToolbarLabels);
-	ini.WriteString("SkinProfile", prefs->m_szSkinProfile);
-	ini.WriteString("SkinProfileDir", prefs->m_szSkinProfileDir);
-
-
-	ini.SerGet(false, prefs->downloadColumnWidths,
-		ARRSIZE(prefs->downloadColumnWidths), "DownloadColumnWidths");
-	ini.SerGet(false, prefs->downloadColumnHidden,
-		ARRSIZE(prefs->downloadColumnHidden), "DownloadColumnHidden");
-	ini.SerGet(false, prefs->downloadColumnOrder,
-		ARRSIZE(prefs->downloadColumnOrder), "DownloadColumnOrder");
-	ini.SerGet(false, prefs->uploadColumnWidths,
-		ARRSIZE(prefs->uploadColumnWidths), "UploadColumnWidths");
-	ini.SerGet(false, prefs->uploadColumnHidden,
-		ARRSIZE(prefs->uploadColumnHidden), "UploadColumnHidden");
-	ini.SerGet(false, prefs->uploadColumnOrder,
-		ARRSIZE(prefs->uploadColumnOrder), "UploadColumnOrder");
-	ini.SerGet(false, prefs->queueColumnWidths,
-		ARRSIZE(prefs->queueColumnWidths), "QueueColumnWidths");
-	ini.SerGet(false, prefs->queueColumnHidden,
-		ARRSIZE(prefs->queueColumnHidden), "QueueColumnHidden");
-	ini.SerGet(false, prefs->queueColumnOrder,
-		ARRSIZE(prefs->queueColumnOrder), "QueueColumnOrder");
-	ini.SerGet(false, prefs->searchColumnWidths,
-		ARRSIZE(prefs->searchColumnWidths), "SearchColumnWidths");
-	ini.SerGet(false, prefs->searchColumnHidden,
-		ARRSIZE(prefs->searchColumnHidden), "SearchColumnHidden");
-	ini.SerGet(false, prefs->searchColumnOrder,
-		ARRSIZE(prefs->searchColumnOrder), "SearchColumnOrder");
-	ini.SerGet(false, prefs->sharedColumnWidths,
-		ARRSIZE(prefs->sharedColumnWidths), "SharedColumnWidths");
-	ini.SerGet(false, prefs->sharedColumnHidden,
-		ARRSIZE(prefs->sharedColumnHidden), "SharedColumnHidden");
-	ini.SerGet(false, prefs->sharedColumnOrder,
-		ARRSIZE(prefs->sharedColumnOrder), "SharedColumnOrder");
-	ini.SerGet(false, prefs->serverColumnWidths,
-		ARRSIZE(prefs->serverColumnWidths), "ServerColumnWidths");
-	ini.SerGet(false, prefs->serverColumnHidden,
-		ARRSIZE(prefs->serverColumnHidden), "ServerColumnHidden");
-	ini.SerGet(false, prefs->serverColumnOrder,
-		ARRSIZE(prefs->serverColumnOrder), "ServerColumnOrder");
-	ini.SerGet(false, prefs->clientListColumnWidths,
-		ARRSIZE(prefs->clientListColumnWidths), "ClientListColumnWidths");
-	ini.SerGet(false, prefs->clientListColumnHidden,
-		ARRSIZE(prefs->clientListColumnHidden), "ClientListColumnHidden");
-	ini.SerGet(false, prefs->clientListColumnOrder,
-		ARRSIZE(prefs->clientListColumnOrder), "ClientListColumnOrder");
-
-	// Barry - Provide a mechanism for all tables to store/retrieve sort order
-	// SLUGFILLER: multiSort - save multiple params
-	ini.SerGet(false, prefs->tableSortItemDownload,
-		GetColumnSortCount(tableDownload), "TableSortItemDownload");
-	ini.SerGet(false, prefs->tableSortItemUpload,
-		GetColumnSortCount(tableUpload), "TableSortItemUpload");
-	ini.SerGet(false, prefs->tableSortItemQueue,
-		GetColumnSortCount(tableQueue), "TableSortItemQueue");
-	ini.SerGet(false, prefs->tableSortItemSearch,
-		GetColumnSortCount(tableSearch), "TableSortItemSearch");
-	ini.SerGet(false, prefs->tableSortItemShared,
-		GetColumnSortCount(tableShared), "TableSortItemShared");
-	ini.SerGet(false, prefs->tableSortItemServer,
-		GetColumnSortCount(tableServer), "TableSortItemServer");
-	ini.SerGet(false, prefs->tableSortItemClientList,
-		GetColumnSortCount(tableClientList), "TableSortItemClientList");
-	ini.SerGet(false, prefs->tableSortAscendingDownload,
-		GetColumnSortCount(tableDownload), "TableSortAscendingDownload");
-	ini.SerGet(false, prefs->tableSortAscendingUpload,
-		GetColumnSortCount(tableUpload), "TableSortAscendingUpload");
-	ini.SerGet(false, prefs->tableSortAscendingQueue,
-		GetColumnSortCount(tableQueue), "TableSortAscendingQueue");
-	ini.SerGet(false, prefs->tableSortAscendingSearch,
-		GetColumnSortCount(tableSearch), "TableSortAscendingSearch");
-	ini.SerGet(false, prefs->tableSortAscendingShared,
-		GetColumnSortCount(tableShared), "TableSortAscendingShared");
-	ini.SerGet(false, prefs->tableSortAscendingServer,
-		GetColumnSortCount(tableServer), "TableSortAscendingServer");
-	ini.SerGet(false, prefs->tableSortAscendingClientList,
-		GetColumnSortCount(tableClientList), "TableSortAscendingClientList");
-	// SLUGFILLER: multiSort
-	ini.WriteBinary("HyperTextFont", (LPBYTE)&prefs->m_lfHyperText, sizeof prefs->m_lfHyperText);
-
-	// deadlake PROXYSUPPORT
-	ini.WriteBool("ProxyEnablePassword",prefs->proxy.EnablePassword,"Proxy");
-	ini.WriteBool("ProxyEnableProxy",prefs->proxy.UseProxy,"Proxy");
-	ini.WriteString("ProxyName",prefs->proxy.name,"Proxy");
-	ini.WriteString("ProxyPassword",prefs->proxy.password,"Proxy");
-	ini.WriteString("ProxyUser",prefs->proxy.user,"Proxy");
-	ini.WriteInt("ProxyPort",prefs->proxy.port,"Proxy");
-	ini.WriteInt("ProxyType",prefs->proxy.type,"Proxy");
-	ini.WriteBool("ConnectWithoutProxy",prefs->m_bIsASCWOP,"Proxy");
-	ini.WriteBool("ShowErrors",prefs->m_bShowProxyErrors,"Proxy");
-
-	CString buffer2;
-	for (int i=0;i<15;i++) {
-		buffer.Format("0x%06x",GetStatsColor(i));
-		buffer2.Format("StatColor%i",i);
-		ini.WriteString(buffer2,buffer,"Statistics");
-	}
-
-	// -khaos--+++>
-	/* Original stat saves from base code now obsolete (KHAOS)
-	buffer.Format("%I64u",prefs->totalDownloadedBytes);
-	ini.WriteString("TotalDownloadedBytes",buffer ,"Statistics");
-
-	buffer.Format("%I64u",prefs->totalUploadedBytes);
-	ini.WriteString("TotalUploadedBytes",buffer ,"Statistics");
-	// End original stat saves from base code. */
-	// <-----khaos--
-
-	// Web Server
-	ini.WriteString("Password", GetWSPass(), "WebServer");
-	ini.WriteString("PasswordLow", GetWSLowPass());
-	ini.WriteInt("Port", prefs->m_nWebPort);
-	ini.WriteBool("Enabled", prefs->m_bWebEnabled);
-	ini.WriteBool("UseGzip", prefs->m_bWebUseGzip);
-	ini.WriteInt("PageRefreshTime", prefs->m_nWebPageRefresh);
-	ini.WriteBool("UseLowRightsUser", prefs->m_bWebLowEnabled);
-
-	//mobileMule
-	ini.WriteString("Password", GetMMPass(), "MobileMule");
-	ini.WriteBool("Enabled", prefs->m_bMMEnabled);
-	ini.WriteInt("Port", prefs->m_nMMPort);
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	ini.WriteString("CommunityName",GetCommunityName());
@@ -1793,14 +2310,21 @@ void CPreferences::SavePreferences(){
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	ini.WriteBool("DynUpEnabled", prefs->m_bDynUpEnabled);
-	ini.WriteInt("DynUpPingTolerance", prefs->m_iDynUpPingTolerance);
-	ini.WriteInt("DynUpGoingUpDivider", prefs->m_iDynUpGoingUpDivider);
-	ini.WriteInt("DynUpGoingDownDivider", prefs->m_iDynUpGoingDownDivider);
-	ini.WriteInt("DynUpNumberOfPings", prefs->m_iDynUpNumberOfPings);
-	ini.WriteBool("DynUpLog", prefs->m_bDynUpLog);
-	ini.WriteInt("DynUpPingLimit", prefs->m_iDynUpPingLimit); // EastShare - Add by TAHO, USS limit
+	ini.WriteBool("DynUpEnabled", m_bDynUpEnabled);
+	ini.WriteInt("DynUpPingTolerance", m_iDynUpPingTolerance);
+	ini.WriteInt("DynUpGoingUpDivider", m_iDynUpGoingUpDivider);
+	ini.WriteInt("DynUpGoingDownDivider", m_iDynUpGoingDownDivider);
+	ini.WriteInt("DynUpNumberOfPings", m_iDynUpNumberOfPings);
+	ini.WriteBool("DynUpLog", m_bDynUpLog);
+	ini.WriteInt("DynUpPingLimit", m_iDynUpPingLimit); // EastShare - Add by TAHO, USS limit
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
+	// ZZ:UploadSpeedSense -->
+	ini.WriteBool("USSEnabled", m_bDynUpEnabled, "eMule");
+	ini.WriteInt("USSPingTolerance", m_iDynUpPingTolerance, "eMule");
+	ini.WriteInt("USSGoingUpDivider", m_iDynUpGoingUpDivider, "eMule");
+	ini.WriteInt("USSGoingDownDivider", m_iDynUpGoingDownDivider, "eMule");
+	ini.WriteInt("USSNumberOfPings", m_iDynUpNumberOfPings, "eMule");
+	// ZZ:UploadSpeedSense <--
 }
 
 void CPreferences::SaveCats(){
@@ -1859,21 +2383,21 @@ void CPreferences::SaveCats(){
 
 void CPreferences::ResetStatsColor(int index){
 	switch(index) {
-		case 0 : prefs->statcolors[0]=RGB(0,0,0);break;  //MORPH - HotFix by SiRoB & IceCream, Default Black color for BackGround
-		case 1 : prefs->statcolors[1]=RGB(192,192,255);break;
-		case 2 : prefs->statcolors[2]=RGB(128, 255, 128);break;
-		case 3 : prefs->statcolors[3]=RGB(0, 210, 0);break;
-		case 4 : prefs->statcolors[4]=RGB(0, 128, 0);break;
-		case 5 : prefs->statcolors[5]=RGB(255, 128, 128);break;
-		case 6 : prefs->statcolors[6]=RGB(200, 0, 0);break;
-		case 7 : prefs->statcolors[7]=RGB(140, 0, 0);break;
-		case 8 : prefs->statcolors[8]=RGB(150, 150, 255);break;
-		case 9 : prefs->statcolors[9]=RGB(255, 255, 128);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 10 : prefs->statcolors[10]=RGB(0, 255, 0);break;
-		case 11 : prefs->statcolors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
-		case 12 : prefs->statcolors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 13 : prefs->statcolors[13]=RGB(0, 0, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
-		case 14 : prefs->statcolors[14]=RGB(200, 200, 0);break;
+		case 0 : statcolors[0]=RGB(0,0,0);break;  //MORPH - HotFix by SiRoB & IceCream, Default Black color for BackGround
+		case 1 : statcolors[1]=RGB(192,192,255);break;
+		case 2 : statcolors[2]=RGB(128, 255, 128);break;
+		case 3 : statcolors[3]=RGB(0, 210, 0);break;
+		case 4 : statcolors[4]=RGB(0, 128, 0);break;
+		case 5 : statcolors[5]=RGB(255, 128, 128);break;
+		case 6 : statcolors[6]=RGB(200, 0, 0);break;
+		case 7 : statcolors[7]=RGB(140, 0, 0);break;
+		case 8 : statcolors[8]=RGB(150, 150, 255);break;
+		case 9 : statcolors[9]=RGB(255, 255, 128);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 10 : statcolors[10]=RGB(0, 255, 0);break;
+		case 11 : statcolors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
+		case 12 : statcolors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 13 : statcolors[13]=RGB(0, 0, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
+		case 14 : statcolors[14]=RGB(200, 200, 0);break;
 
 		default:break;
 	}
@@ -1895,14 +2419,14 @@ void CPreferences::LoadPreferences(){
 	strCurrVersion = theApp.m_strCurVersionLong;
 	strPrefsVersion = pIni->GetString("AppVersion");
 	delete pIni;
-	prefs->m_bFirstStart = false;
+	m_bFirstStart = false;
 
 	CFileFind findFileName;
 
 	if (strCurrVersion != strPrefsVersion){
 //MORPH START - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
 		if (!StrStrI(strPrefsVersion,"morph"))
-			prefs->m_bFirstStart = true;
+			m_bFirstStart = true;
 //MORPH END  - Added by IceCream, No more wizard at launch if you upgrade your Morph version to an other Morph
 		// don't use this; it'll delete all read-only settings from the current pref.ini
 //		if(findFileName.FindFile(strFileName)){
@@ -1924,478 +2448,488 @@ void CPreferences::LoadPreferences(){
 	CIni ini(strFileName, "eMule");
 	//--- end Ozon :)
 
-	_iDbgHeap = ini.GetInt("DebugHeap", 1);
+#ifdef _DEBUG
+	m_iDbgHeap = ini.GetInt("DebugHeap", 1);
+#else
+	m_iDbgHeap = 0;
+#endif
 
-	//MORPH START - Added by IceCream, changed default nickname
-	sprintf(prefs->nick,"%s",ini.GetString("Nick","eMule v"+strCurrVersion));
-	if(((strstr(prefs->nick, "eMule v"))&&(!StrStrI(prefs->nick, "morph"))) || (strstr(prefs->nick,"emule-project"))) 
-		sprintf(prefs->nick,"%s","eMule v"+strCurrVersion);
-	//MORPH END   - Added by IceCream, changed default nickname	
+	_snprintf(nick, ARRSIZE(nick), "%s", ini.GetString("Nick", DEFAULT_NICK));
+	if (nick[0] == '\0' || strcmp(nick, "http://www.emule-project.net") == 0)
+		_snprintf(nick, ARRSIZE(nick), "%s", DEFAULT_NICK);
 
 	sprintf(buffer,"%sIncoming",appdir);
-	sprintf(prefs->incomingdir,"%s",ini.GetString("IncomingDir",buffer ));
-	MakeFoldername(prefs->incomingdir);
+	sprintf(incomingdir,"%s",ini.GetString("IncomingDir",buffer ));
+	MakeFoldername(incomingdir);
 
 	sprintf(buffer,"%sTemp",appdir);
-	sprintf(prefs->tempdir,"%s",ini.GetString("TempDir",buffer));
-	MakeFoldername(prefs->tempdir);
+	sprintf(tempdir,"%s",ini.GetString("TempDir",buffer));
+	MakeFoldername(tempdir);
 
-	//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
-	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	prefs->enableZeroFilledTest = ini.GetBool("EnableZeroFilledTest", false);
-	// Maella end
-	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
-
-	prefs->enableDownloadInRed = ini.GetBool("EnableDownloadInRed", true); //MORPH - Added by IceCream, show download in red
-	prefs->enableDownloadInBold = ini.GetBool("EnableDownloadInBold", true); //MORPH - Added by SiRoB, show download in Bold
-	prefs->enableAntiLeecher = ini.GetBool("EnableAntiLeecher", true); //MORPH - Added by IceCream, enable AntiLeecher
-	prefs->enableAntiCreditHack = ini.GetBool("EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack
-	enableHighProcess = ini.GetBool("EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
-	prefs->creditSystemMode = (CreditSystemSelection)ini.GetInt("CreditSystemMode", CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
-	prefs->equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
-	prefs->m_bECFEFallTime = ini.GetBool("ECFEFallTime", false);//Morph - added by AndCycle, Equal Chance For Each File
-	prefs->m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true); // EastShare - Added by TAHO, does USS limit
-	prefs->isboostfriends = ini.GetBool("IsBoostFriends", false);//Added by Yun.SF3, boost friends
-	prefs->maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);
-	if (prefs->maxGraphDownloadRate==0) prefs->maxGraphDownloadRate=96;
-	prefs->maxGraphUploadRate=ini.GetInt("UploadCapacity",16);
-	if (prefs->maxGraphUploadRate==0) prefs->maxGraphUploadRate=16;
+	maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);
+	if (maxGraphDownloadRate==0) maxGraphDownloadRate=96;
+	maxGraphUploadRate=ini.GetInt("UploadCapacity",16);
+	if (maxGraphUploadRate==0) maxGraphUploadRate=16;
+	// ZZ:UploadSpeedSense -->
+    	minupload=ini.GetInt("MinUpload", 1);
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	prefs->minupload = ini.GetInt("MinUpload",/*10*/5*prefs->maxGraphUploadRate/8);
-	prefs->minupload = min(max(prefs->minupload,1),prefs->maxGraphUploadRate);
+	minupload = min(max(minupload,1),maxGraphUploadRate);
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
-	prefs->maxupload=ini.GetInt("MaxUpload",12);
-	if (prefs->maxupload>prefs->maxGraphUploadRate && prefs->maxupload!=UNLIMITED) prefs->maxupload=prefs->maxGraphUploadRate*.8;
-	prefs->maxdownload=ini.GetInt("MaxDownload",76);
-	if (prefs->maxdownload>prefs->maxGraphDownloadRate && prefs->maxdownload!=UNLIMITED) prefs->maxdownload=prefs->maxGraphDownloadRate*.8;
-	prefs->maxconnections=ini.GetInt("MaxConnections",GetRecommendedMaxConnections());
-	prefs->deadserver=ini.GetInt("RemoveDeadServer",2);
-	prefs->port=ini.GetInt("Port",4662);
-	prefs->udpport=ini.GetInt("UDPPort",prefs->port+10);
-	prefs->nServerUDPPort = ini.GetInt("ServerUDPPort", -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
-	prefs->kadudpport=ini.GetInt("KadUDPPort",prefs->port+11);
-	if(prefs->kadudpport == prefs->udpport )
-	{
-		prefs->kadudpport++;
-		CString msg;
-		msg.Format(GetResString(IDS_KADUDPPORTERR), prefs->kadudpport);
-		AfxMessageBox(msg);
-	}
-	prefs->maxsourceperfile=ini.GetInt("MaxSourcesPerFile",400 );
-	prefs->languageID=ini.GetWORD("Language",0);
-	prefs->m_iSeeShares=ini.GetInt("SeeShare",2);
-	prefs->m_iToolDelayTime=ini.GetInt("ToolTipDelay",1);
-	prefs->trafficOMeterInterval=ini.GetInt("StatGraphsInterval",3);
-	prefs->statsInterval=ini.GetInt("statsInterval",5);
+	// ZZ:UploadSpeedSense <--
+	maxupload=ini.GetInt("MaxUpload",12);
+	if (maxupload>maxGraphUploadRate && maxupload!=UNLIMITED) maxupload=maxGraphUploadRate*.8;
+	maxdownload=ini.GetInt("MaxDownload",76);
+	if (maxdownload>maxGraphDownloadRate && maxdownload!=UNLIMITED) maxdownload=maxGraphDownloadRate*.8;
+	maxconnections=ini.GetInt("MaxConnections",GetRecommendedMaxConnections());
+	deadserver=ini.GetInt("RemoveDeadServer",2);
+	port=ini.GetInt("Port",4662);
+	udpport=ini.GetInt("UDPPort",port+10);
+	nServerUDPPort = ini.GetInt("ServerUDPPort", -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
+	maxsourceperfile=ini.GetInt("MaxSourcesPerFile",400 );
+	languageID=ini.GetWORD("Language",0);
+	m_iSeeShares=(EViewSharedFilesAccess)ini.GetInt("SeeShare",vsfaNobody);
+	m_iToolDelayTime=ini.GetInt("ToolTipDelay",1);
+	trafficOMeterInterval=ini.GetInt("StatGraphsInterval",3);
+	statsInterval=ini.GetInt("statsInterval",5);
+	
+	deadserverretries=ini.GetInt("DeadServerRetry",1);
+	m_dwServerKeepAliveTimeout=ini.GetInt("ServerKeepAliveTimeout",0);
+	splitterbarPosition=ini.GetInt("SplitterbarPosition",75);
+	if (splitterbarPosition>93 || splitterbarPosition<10) splitterbarPosition=75;
 
-	//MORPH START added by Yun.SF3: Ipfilter.dat update
-	prefs->m_IPfilterVersion=ini.GetInt("IPfilterVersion",0); //added by milobac: Ipfilter.dat update
-	prefs->AutoUpdateIPFilter=ini.GetBool("AutoUPdateIPFilter",false); //added by milobac: Ipfilter.dat update
-	//MORPH END added by Yun.SF3: Ipfilter.dat update
+	statsMax=ini.GetInt("VariousStatisticsMaxValue",100);
+	statsAverageMinutes=ini.GetInt("StatsAverageMinutes",5);
+	MaxConperFive=ini.GetInt("MaxConnectionsPerFiveSeconds",GetDefaultMaxConperFive());
 
-	//EastShare - added by AndCycle, IP to Country
-	prefs->m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt("IP2Country", IP2CountryName_DISABLE); 
-	prefs->m_bIP2CountryShowFlag = ini.GetBool("IP2CountryShowFlag", false);
-	//EastShare - added by AndCycle, IP to Country
+	reconnect=ini.GetBool("Reconnect",true);
+	scorsystem=ini.GetBool("Scoresystem",true);
+	ICH=ini.GetBool("ICH",true);
+	autoserverlist=ini.GetBool("Serverlist",false);
+	updatenotify=ini.GetBool("UpdateNotifyTestClient",true);
+	mintotray=ini.GetBool("MinToTray",false);
+	addserversfromserver=ini.GetBool("AddServersFromServer",true);
+	addserversfromclient=ini.GetBool("AddServersFromClient",true);
+	splashscreen=ini.GetBool("Splashscreen",true);
+	bringtoforeground=ini.GetBool("BringToFront",true);
+	transferDoubleclick=ini.GetBool("TransferDoubleClick",true);
+	beepOnError=ini.GetBool("BeepOnError",true);
+	confirmExit=ini.GetBool("ConfirmExit",false);
+	filterLANIPs=ini.GetBool("FilterBadIPs",true);
+	m_bAllocLocalHostIP=ini.GetBool("AllowLocalHostIP",false);
+	autoconnect=ini.GetBool("Autoconnect",false);
+	showRatesInTitle=ini.GetBool("ShowRatesOnTitle",false);
 
-	prefs->deadserverretries=ini.GetInt("DeadServerRetry",1);
-	prefs->m_dwServerKeepAliveTimeout=ini.GetInt("ServerKeepAliveTimeout",0);
-	prefs->splitterbarPosition=ini.GetInt("SplitterbarPosition",75);
-	if (prefs->splitterbarPosition>93 || prefs->splitterbarPosition<10) prefs->splitterbarPosition=75;
+	onlineSig=ini.GetBool("OnlineSignature",false);
+	startMinimized=ini.GetBool("StartupMinimized",false);
+	m_bRestoreLastMainWndDlg=ini.GetBool("RestoreLastMainWndDlg",false);
+	m_iLastMainWndDlgID=ini.GetInt("LastMainWndDlgID",0);
+	m_bRestoreLastLogPane=ini.GetBool("RestoreLastLogPane",false);
+	m_iLastLogPaneID=ini.GetInt("LastLogPaneID",0);
+	safeServerConnect =ini.GetBool("SafeServerConnect",false);
 
-	prefs->statsMax=ini.GetInt("VariousStatisticsMaxValue",100);
-	prefs->statsAverageMinutes=ini.GetInt("StatsAverageMinutes",5);
-	prefs->MaxConperFive=ini.GetInt("MaxConnectionsPerFiveSeconds",GetDefaultMaxConperFive());
-
-	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	prefs->LowIdRetries=ini.GetInt("ReconnectOnLowIdRetries",3);	// SLUGFILLER: lowIdRetry
-	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
-	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	prefs->hideOS=ini.GetInt("HideOvershares",0/*5*/);
-	prefs->selectiveShare=ini.GetBool("SelectiveShare",false);
-	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
-	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	prefs->ShareOnlyTheNeed=ini.GetInt("ShareOnlyTheNeed",0);
-	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
-	//MORPH START - Added by SiRoB, Show Permissions
-	prefs->permissions=ini.GetInt("ShowSharePermissions",0);
-	//MORPH END   - Added by SiRoB, Show Permissions
-	//EastShare - Added by Pretender, TBH-AutoBackup
-	prefs->autobackup = ini.GetBool("AutoBackup",true);
-	prefs->autobackup2 = ini.GetBool("AutoBackup2",true);
-	//EastShare - Added by Pretender, TBH-AutoBackup
-
-	prefs->reconnect=ini.GetBool("Reconnect",true);
-	prefs->scorsystem=ini.GetBool("Scoresystem",true);
-	prefs->ICH=ini.GetBool("ICH",true);
-	prefs->autoserverlist=ini.GetBool("Serverlist",false);
-	prefs->isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
-	prefs->updatenotify=ini.GetBool("UpdateNotifyTestClient",true);
-	prefs->mintotray=ini.GetBool("MinToTray",false);
-	prefs->addserversfromserver=ini.GetBool("AddServersFromServer",true);
-	prefs->addserversfromclient=ini.GetBool("AddServersFromClient",true);
-	prefs->splashscreen=ini.GetBool("Splashscreen",true);
-	prefs->bringtoforeground=ini.GetBool("BringToFront",true);
-	prefs->transferDoubleclick=ini.GetBool("TransferDoubleClick",true);
-	prefs->beepOnError=ini.GetBool("BeepOnError",true);
-	prefs->confirmExit=ini.GetBool("ConfirmExit",false);
-	prefs->filterLANIPs=ini.GetBool("FilterBadIPs",true);
-	prefs->m_bAllocLocalHostIP=ini.GetBool("AllowLocalHostIP",false);
-	prefs->autoconnect=ini.GetBool("Autoconnect",false);
-	prefs->showRatesInTitle=ini.GetBool("ShowRatesOnTitle",false);
-
-	prefs->onlineSig=ini.GetBool("OnlineSignature",false);
-	prefs->startMinimized=ini.GetBool("StartupMinimized",false);
-	prefs->m_bRestoreLastMainWndDlg=ini.GetBool("RestoreLastMainWndDlg",false);
-	prefs->m_iLastMainWndDlgID=ini.GetInt("LastMainWndDlgID",0);
-	prefs->m_bRestoreLastLogPane=ini.GetBool("RestoreLastLogPane",false);
-	prefs->m_iLastLogPaneID=ini.GetInt("LastLogPaneID",0);
-	prefs->safeServerConnect =ini.GetBool("SafeServerConnect",false);
-
-	prefs->m_bTransflstRemain =ini.GetBool("TransflstRemainOrder",false);
-	prefs->filterserverbyip=ini.GetBool("FilterServersByIP",false);
-	prefs->filterlevel=ini.GetInt("FilterLevel",127);
-	prefs->checkDiskspace=ini.GetBool("CheckDiskspace",false);	// SLUGFILLER: checkDiskspace
-	prefs->m_uMinFreeDiskSpace=ini.GetInt("MinFreeDiskSpace",20*1024*1024);
-	sprintf(prefs->yourHostname,"%s",ini.GetString("YourHostname",""));	// itsonlyme: hostnameSource
-	prefs->infiniteQueue=ini.GetBool("InfiniteQueue",false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	prefs->multipleInstance=ini.GetBool("MultipleInstance",false);	//Morph - added by AndCycle, VQB: multipleInstance
-	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	prefs->m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);
-	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	prefs->m_FakesDatVersion=ini.GetInt("FakesDatVersion",0);
-	prefs->UpdateFakeStartup=ini.GetBool("UpdateFakeStartup",false);
-	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	prefs->m_bSUCEnabled = ini.GetBool("SUCEnabled",false);
-	prefs->m_bSUCLog =  ini.GetBool("SUCLog",false);
-	prefs->m_iSUCHigh = ini.GetInt("SUCHigh",900);
-	prefs->m_iSUCHigh = min(max(prefs->m_iSUCHigh,350),1000);
-	prefs->m_iSUCLow = ini.GetInt("SUCLow",600);
-	prefs->m_iSUCLow = min(max(prefs->m_iSUCLow,350),prefs->m_iSUCHigh);
-	prefs->m_iSUCPitch = ini.GetInt("SUCPitch",3000);
-	prefs->m_iSUCPitch = min(max(prefs->m_iSUCPitch,2500),10000);
-	prefs->m_iSUCDrift = ini.GetInt("SUCDrift",50);
-	prefs->m_iSUCDrift = min(max(prefs->m_iSUCDrift,0),100);
-	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	prefs->maxconnectionsswitchborder = ini.GetInt("MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	prefs->maxconnectionsswitchborder = min(max(prefs->maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
-
-	// #ifdef MIGHTY_SUMMERTIME
-	// Mighty Knife: daylight saving patch
-	prefs->m_iDaylightSavingPatch = ini.GetBool("DaylightSavingPatchEnabled",false);
-	// #endif
-
-	//EastShare Start - PreferShareAll by AndCycle
-	prefs->shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll
-	//EastShare END - PreferShareAll by AndCycle
-	// EastShare START - Added by TAHO, .met file control
-	prefs->m_iKnownMetDays = ini.GetInt("KnownMetDays", 0);
-	// EastShare END - Added by TAHO, .met file control
+	m_bTransflstRemain =ini.GetBool("TransflstRemainOrder",false);
+	filterserverbyip=ini.GetBool("FilterServersByIP",false);
+	filterlevel=ini.GetInt("FilterLevel",127);
+	checkDiskspace=ini.GetBool("CheckDiskspace",false);	// SLUGFILLER: checkDiskspace
+	m_uMinFreeDiskSpace=ini.GetInt("MinFreeDiskSpace",20*1024*1024);
+	sprintf(yourHostname,"%s",ini.GetString("YourHostname",""));	// itsonlyme: hostnameSource
 
 	// Barry - New properties...
-	prefs->autoconnectstaticonly = ini.GetBool("AutoConnectStaticOnly",false); 
-	prefs->autotakeed2klinks = ini.GetBool("AutoTakeED2KLinks",true); 
-	prefs->addnewfilespaused = ini.GetBool("AddNewFilesPaused",false); 
-	prefs->depth3D = ini.GetInt("3DDepth", 0);
+	autoconnectstaticonly = ini.GetBool("AutoConnectStaticOnly",false); 
+	autotakeed2klinks = ini.GetBool("AutoTakeED2KLinks",true); 
+	addnewfilespaused = ini.GetBool("AddNewFilesPaused",false); 
+	depth3D = ini.GetInt("3DDepth", 0);
 
 	// as temporarial converter for previous versions
 	if (strPrefsVersion < "0.25a") // before 0.25a
 		if (ini.GetBool("FlatStatusBar",false))
-			prefs->depth3D = 0;
+			depth3D = 0;
 		else 
-			prefs->depth3D = 5;
+			depth3D = 5;
 
-    prefs->useDownloadNotifier=ini.GetBool("NotifyOnDownload",false);	// Added by enkeyDEV
-	prefs->useNewDownloadNotifier=ini.GetBool("NotifyOnNewDownload",false);
-    prefs->useChatNotifier=ini.GetBool("NotifyOnChat",false);
-    prefs->useLogNotifier=ini.GetBool("NotifyOnLog",false);
-    prefs->useSoundInNotifier=ini.GetBool("NotifierUseSound",false);
-	prefs->notifierPopsEveryChatMsg=ini.GetBool("NotifierPopEveryChatMessage",false);
-	prefs->notifierNewVersion=ini.GetBool("NotifierPopNewVersion",false);
-	prefs->notifierImportantError=ini.GetBool("NotifyOnImportantError",false);
-	sprintf(prefs->notifierSoundFilePath,"%s",ini.GetString("NotifierSoundPath",""));
-	sprintf(prefs->notifierConfiguration,"%s",ini.GetString("NotifierConfiguration","")); // Added by enkeyDEV
-	sprintf(prefs->datetimeformat,"%s",ini.GetString("DateTimeFormat","%A, %x, %X"));
-	if (strlen(prefs->datetimeformat)==0) strcpy(prefs->datetimeformat,"%A, %x, %X");
+    useDownloadNotifier=ini.GetBool("NotifyOnDownload",false);	// Added by enkeyDEV
+	useNewDownloadNotifier=ini.GetBool("NotifyOnNewDownload",false);
+    useChatNotifier=ini.GetBool("NotifyOnChat",false);
+    useLogNotifier=ini.GetBool("NotifyOnLog",false);
+    useSoundInNotifier=ini.GetBool("NotifierUseSound",false);
+	notifierPopsEveryChatMsg=ini.GetBool("NotifierPopEveryChatMessage",false);
+	notifierNewVersion=ini.GetBool("NotifierPopNewVersion",false);
+	notifierImportantError=ini.GetBool("NotifyOnImportantError",false);
+	sprintf(notifierSoundFilePath,"%s",ini.GetString("NotifierSoundPath",""));
+	sprintf(notifierConfiguration,"%s",ini.GetString("NotifierConfiguration","")); // Added by enkeyDEV
+	sprintf(datetimeformat,"%s",ini.GetString("DateTimeFormat","%A, %x, %X"));
+	if (strlen(datetimeformat)==0) strcpy(datetimeformat,"%A, %x, %X");
 
-	sprintf(prefs->datetimeformat4log,"%s",ini.GetString("DateTimeFormat4Log","%c"));
-	if (strlen(prefs->datetimeformat4log)==0) strcpy(prefs->datetimeformat4log,"%c");
+	sprintf(datetimeformat4log,"%s",ini.GetString("DateTimeFormat4Log","%c"));
+	if (strlen(datetimeformat4log)==0) strcpy(datetimeformat4log,"%c");
 
-	sprintf(prefs->m_sircserver,"%s",ini.GetString("DefaultIRCServer","irc.emule-project.net"));
-	sprintf(prefs->m_sircnick,"%s",ini.GetString("IRCNick","eMule"));
-	prefs->m_bircaddtimestamp=ini.GetBool("IRCAddTimestamp",true);
-	sprintf(prefs->m_sircchannamefilter,"%s",ini.GetString("IRCFilterName", "" ));
-	prefs->m_bircusechanfilter=ini.GetBool("IRCUseFilter", false);
-	prefs->m_iircchanneluserfilter=ini.GetInt("IRCFilterUser", 0);
-	sprintf(prefs->m_sircperformstring,"%s",ini.GetString("IRCPerformString", "" ));
-	prefs->m_bircuseperform=ini.GetBool("IRCUsePerform", false);
-	prefs->m_birclistonconnect=ini.GetBool("IRCListOnConnect", true);
-	prefs->m_bircacceptlinks=ini.GetBool("IRCAcceptLink", true);
-	prefs->m_bircacceptlinksfriends=ini.GetBool("IRCAcceptLinkFriends", true);
-	prefs->m_bircignoreinfomessage=ini.GetBool("IRCIgnoreInfoMessage", false);
-	prefs->m_bircignoreemuleprotoinfomessage=ini.GetBool("IRCIgnoreEmuleProtoInfoMessage", true);
-	prefs->m_birchelpchannel=ini.GetBool("IRCHelpChannel",true);
-	prefs->smartidcheck=ini.GetBool("SmartIdCheck",true);
-	prefs->m_bVerbose=ini.GetBool("Verbose",false);
-	prefs->m_bDebugSourceExchange=ini.GetBool("DebugSourceExchange",false);
-	prefs->m_bLogBannedClients=ini.GetBool("LogBannedClients", true);
-	prefs->m_bLogRatingReceived=ini.GetBool("LogRatingReceived",true);
-	prefs->m_bLogDescriptionReceived=ini.GetBool("LogDescriptionReceived",true);
-	prefs->m_bLogFilteredIPs=ini.GetBool("LogFilteredIPs",true);
-	prefs->m_bLogFileSaving=ini.GetBool("LogFileSaving",true);
+	sprintf(m_sircserver,"%s",ini.GetString("DefaultIRCServer","irc.emule-project.net"));
+	sprintf(m_sircnick,"%s",ini.GetString("IRCNick","eMule"));
+	m_bircaddtimestamp=ini.GetBool("IRCAddTimestamp",true);
+	sprintf(m_sircchannamefilter,"%s",ini.GetString("IRCFilterName", "" ));
+	m_bircusechanfilter=ini.GetBool("IRCUseFilter", false);
+	m_iircchanneluserfilter=ini.GetInt("IRCFilterUser", 0);
+	sprintf(m_sircperformstring,"%s",ini.GetString("IRCPerformString", "" ));
+	m_bircuseperform=ini.GetBool("IRCUsePerform", false);
+	m_birclistonconnect=ini.GetBool("IRCListOnConnect", true);
+	m_bircacceptlinks=ini.GetBool("IRCAcceptLink", true);
+	m_bircacceptlinksfriends=ini.GetBool("IRCAcceptLinkFriends", true);
+	m_bircignoreinfomessage=ini.GetBool("IRCIgnoreInfoMessage", false);
+	m_bircignoreemuleprotoinfomessage=ini.GetBool("IRCIgnoreEmuleProtoInfoMessage", true);
+	m_birchelpchannel=ini.GetBool("IRCHelpChannel",true);
+	smartidcheck=ini.GetBool("SmartIdCheck",true);
+	m_bVerbose=ini.GetBool("Verbose",false);
+	m_bDebugSourceExchange=ini.GetBool("DebugSourceExchange",false);
+	m_bLogBannedClients=ini.GetBool("LogBannedClients", true);
+	m_bLogRatingDescReceived=ini.GetBool("LogRatingDescReceived",true);
+	m_bLogSecureIdent=ini.GetBool("LogSecureIdent",true);
+	m_bLogFilteredIPs=ini.GetBool("LogFilteredIPs",true);
+	m_bLogFileSaving=ini.GetBool("LogFileSaving",false);
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	// following options are for debugging or when using an external debug device viewer only.
-	prefs->m_iDebugServerTCPLevel=ini.GetInt("DebugServerTCP",0);
-	prefs->m_iDebugServerUDPLevel=ini.GetInt("DebugServerUDP",0);
-	prefs->m_iDebugServerSourcesLevel=ini.GetInt("DebugServerSources",0);
-	prefs->m_iDebugServerSearchesLevel=ini.GetInt("DebugServerSearches",0);
-	prefs->m_iDebugClientTCPLevel=ini.GetInt("DebugClientTCP",0);
-	prefs->m_iDebugClientUDPLevel=ini.GetInt("DebugClientUDP",0);
+	m_iDebugServerTCPLevel=ini.GetInt("DebugServerTCP",0);
+	m_iDebugServerUDPLevel=ini.GetInt("DebugServerUDP",0);
+	m_iDebugServerSourcesLevel=ini.GetInt("DebugServerSources",0);
+	m_iDebugServerSearchesLevel=ini.GetInt("DebugServerSearches",0);
+	m_iDebugClientTCPLevel=ini.GetInt("DebugClientTCP",0);
+	m_iDebugClientUDPLevel=ini.GetInt("DebugClientUDP",0);
+	m_iDebugClientKadUDPLevel=ini.GetInt("DebugClientKadUDP",0);
 #else
 	// for normal release builds ensure that those options are all turned off
-	prefs->m_iDebugServerTCPLevel=0;
-	prefs->m_iDebugServerUDPLevel=0;
-	prefs->m_iDebugServerSourcesLevel=0;
-	prefs->m_iDebugServerSearchesLevel=0;
-	prefs->m_iDebugClientTCPLevel=0;
-	prefs->m_iDebugClientUDPLevel=0;
+	m_iDebugServerTCPLevel=0;
+	m_iDebugServerUDPLevel=0;
+	m_iDebugServerSourcesLevel=0;
+	m_iDebugServerSearchesLevel=0;
+	m_iDebugClientTCPLevel=0;
+	m_iDebugClientUDPLevel=0;
+	m_iDebugClientKadUDPLevel=0;
 #endif
-	prefs->m_bpreviewprio=ini.GetBool("PreviewPrio",false);
-	prefs->m_bupdatequeuelist=ini.GetBool("UpdateQueueListPref",false);
-	prefs->m_bmanualhighprio=ini.GetBool("ManualHighPrio",false);
-	prefs->m_btransferfullchunks=ini.GetBool("FullChunkTransfers",true);
-	prefs->m_bstartnextfile=ini.GetBool("StartNextFile",false);
-	prefs->m_bshowoverhead=ini.GetBool("ShowOverhead",false);
-	prefs->moviePreviewBackup=ini.GetBool("VideoPreviewBackupped",true);
-	prefs->m_iPreviewSmallBlocks=ini.GetInt("PreviewSmallBlocks", 0);
-	prefs->m_iFileBufferSize=ini.GetInt("FileBufferSizePref",16);
-	prefs->m_iQueueSize=ini.GetInt("QueueSizePref",50);
-	if (prefs->m_iQueueSize < 20 || prefs->m_iQueueSize > 100) prefs->m_iQueueSize=50; //<--- 
-	prefs->m_iCommitFiles=ini.GetInt("CommitFiles", 1); // 1 = "commit" on application shut down; 2 = "commit" on each file saveing
-	prefs->versioncheckdays=ini.GetInt("Check4NewVersionDelay",5);
-	prefs->m_bDAP=ini.GetBool("DAPPref",true);
-	prefs->m_bUAP=ini.GetBool("UAPPref",true);
-	prefs->indicateratings=ini.GetBool("IndicateRatings",true);
-	// khaos::kmod+ Obsolete prefs->allcatType=ini.GetInt("AllcatType",0);
-	prefs->watchclipboard=ini.GetBool("WatchClipboard4ED2kFilelinks",false);
-	prefs->m_iSearchMethod=ini.GetInt("SearchMethod",0);
+	m_bpreviewprio=ini.GetBool("PreviewPrio",false);
+	m_bupdatequeuelist=ini.GetBool("UpdateQueueListPref",false);
+	m_bmanualhighprio=ini.GetBool("ManualHighPrio",false);
+	m_btransferfullchunks=ini.GetBool("FullChunkTransfers",true);
+	m_bstartnextfile=ini.GetBool("StartNextFile",false);
+	m_bshowoverhead=ini.GetBool("ShowOverhead",false);
+	moviePreviewBackup=ini.GetBool("VideoPreviewBackupped",true);
+	m_iPreviewSmallBlocks=ini.GetInt("PreviewSmallBlocks", 0);
 
-	prefs->log2disk=ini.GetBool("SaveLogToDisk",false);
-	prefs->debug2disk=ini.GetBool("SaveDebugToDisk",false);
-	prefs->DateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
-	prefs->uMaxLogFileSize = ini.GetInt("MaxLogFileSize", 1024*1024);
-	prefs->iMaxLogBuff = ini.GetInt("MaxLogBuff",64) * 1024;
-	prefs->showCatTabInfos=ini.GetBool("ShowInfoOnCatTabs",false);
-	prefs->resumeSameCat=ini.GetBool("ResumeNextFromSameCat",false);
-	prefs->dontRecreateGraphs =ini.GetBool("DontRecreateStatGraphsOnResize",false);
-	prefs->m_bExtControls =ini.GetBool("ShowExtControls",false);
+	// read file buffer size (with backward compatibility)
+	m_iFileBufferSize=ini.GetInt("FileBufferSizePref",0); // old setting
+	if (m_iFileBufferSize == 0)
+		m_iFileBufferSize = 256*1024;
+	else
+		m_iFileBufferSize = ((m_iFileBufferSize*15000 + 512)/1024)*1024;
+	m_iFileBufferSize=ini.GetInt("FileBufferSize",m_iFileBufferSize);
+
+	// read queue size (with backward compatibility)
+	m_iQueueSize=ini.GetInt("QueueSizePref",0); // old setting
+	if (m_iQueueSize == 0)
+		m_iQueueSize = 50*100;
+	else
+		m_iQueueSize = m_iQueueSize*100;
+	m_iQueueSize=ini.GetInt("QueueSize",m_iQueueSize);
 	
-	prefs->versioncheckLastAutomatic=ini.GetInt("VersionCheckLastAutomatic",0);
-	prefs->m_bDisableKnownClientList=ini.GetInt("DisableKnownClientList",false);
-	prefs->m_bDisableQueueList=ini.GetInt("DisableQueueList",false);
-	prefs->m_bCreditSystem=true; //ini.GetInt("UseCreditSystem",true); //MORPH - Changed by SiRoB, CreditSystem allways used
+	m_iCommitFiles=ini.GetInt("CommitFiles", 1); // 1 = "commit" on application shut down; 2 = "commit" on each file saveing
+	versioncheckdays=ini.GetInt("Check4NewVersionDelay",5);
+	m_bDAP=ini.GetBool("DAPPref",true);
+	m_bUAP=ini.GetBool("UAPPref",true);
+	indicateratings=ini.GetBool("IndicateRatings",true);
+	// khaos::kmod+ Obsolete prefs->allcatType=ini.GetInt("AllcatType",0);
+	watchclipboard=ini.GetBool("WatchClipboard4ED2kFilelinks",false);
+	m_iSearchMethod=ini.GetInt("SearchMethod",0);
+	
+	log2disk=ini.GetBool("SaveLogToDisk",false);
+	debug2disk=ini.GetBool("SaveDebugToDisk",false);
+	uMaxLogFileSize = ini.GetInt("MaxLogFileSize", 1024*1024);
+	iMaxLogBuff = ini.GetInt("MaxLogBuff",64) * 1024;
+	showCatTabInfos=ini.GetBool("ShowInfoOnCatTabs",false);
+	resumeSameCat=ini.GetBool("ResumeNextFromSameCat",false);
+	dontRecreateGraphs =ini.GetBool("DontRecreateStatGraphsOnResize",false);
+	m_bExtControls =ini.GetBool("ShowExtControls",false);
+	
+	versioncheckLastAutomatic=ini.GetInt("VersionCheckLastAutomatic",0);
+	m_bDisableKnownClientList=ini.GetInt("DisableKnownClientList",false);
+	m_bDisableQueueList=ini.GetInt("DisableQueueList",false);
+	m_bCreditSystem=ini.GetInt("UseCreditSystem",true);
+	m_bCreditSystem=true; //MORPH - Changed by SiRoB, CreditSystem allways used
+	scheduler=ini.GetBool("EnableScheduler",false);
+	msgonlyfriends=ini.GetBool("MessagesFromFriendsOnly",false);
+	msgsecure=ini.GetBool("MessageFromValidSourcesOnly",true);
+	autofilenamecleanup=ini.GetBool("AutoFilenameCleanup",false);
+	m_bUseAutocompl=ini.GetBool("UseAutocompletion",true);
+	m_bShowDwlPercentage=ini.GetBool("ShowDwlPercentage",false);
+	networkkademlia=ini.GetBool("NetworkKademlia",false);
+	networked2k=ini.GetBool("NetworkED2K",true);
+	m_bRemove2bin=ini.GetBool("RemoveFilesToBin",true);
 
-	prefs->m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
-	prefs->m_bOnlyDownloadCompleteFiles = ini.GetBool("OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	prefs->m_bSaveUploadQueueWaitTime = ini.GetBool("SaveUploadQueueWaitTime", true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	m_iMaxChatHistory=ini.GetInt("MaxChatHistoryLines",100);
+	if (m_iMaxChatHistory<1) m_iMaxChatHistory=100;
 
-	prefs->scheduler=ini.GetBool("EnableScheduler",false);
-	prefs->msgonlyfriends=ini.GetBool("MessagesFromFriendsOnly",false);
-	prefs->msgsecure=ini.GetBool("MessageFromValidSourcesOnly",true);
-	prefs->autofilenamecleanup=ini.GetBool("AutoFilenameCleanup",false);
-	prefs->m_bUseAutocompl=ini.GetBool("UseAutocompletion",true);
-	prefs->m_bShowDwlPercentage=ini.GetBool("ShowDwlPercentage",false);
-	prefs->networkkademlia=ini.GetBool("NetworkKademlia",true);
-	prefs->networked2k=ini.GetBool("NetworkED2K",true);
-	prefs->m_bRemove2bin=ini.GetBool("RemoveFilesToBin",true);
+	maxmsgsessions=ini.GetInt("MaxMessageSessions",50);
 
-	prefs->m_iMaxChatHistory=ini.GetInt("MaxChatHistoryLines",100);
-	if (prefs->m_iMaxChatHistory<1) prefs->m_iMaxChatHistory=100;
+	sprintf(TxtEditor,"%s",ini.GetString("TxtEditor","notepad.exe"));
+	sprintf(VideoPlayer,"%s",ini.GetString("VideoPlayer",""));
+	
+	sprintf(m_sTemplateFile,"%s",ini.GetString("WebTemplateFile","eMule.tmpl"));
 
-	prefs->maxmsgsessions=ini.GetInt("MaxMessageSessions",50);
-
-	sprintf(prefs->TxtEditor,"%s",ini.GetString("TxtEditor","notepad.exe"));
-	sprintf(prefs->VideoPlayer,"%s",ini.GetString("VideoPlayer",""));
-	sprintf(prefs->UpdateURLFakeList,"%s",ini.GetString("UpdateURLFakeList","http://www.emuleitor.com/downloads/Morph/fakes.txt"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	sprintf(prefs->UpdateURLIPFilter,"%s",ini.GetString("UpdateURLIPFilter","http://www.emuleitor.com/downloads/Morph/ipfilter.txt"));//MORPH START added by Yun.SF3: Ipfilter.dat update
-
-	sprintf(prefs->m_sTemplateFile,"%s",ini.GetString("WebTemplateFile","eMule.tmpl"));
-
-	sprintf(prefs->messageFilter,"%s",ini.GetString("MessageFilter","Your client has an infinite queue"));
-	sprintf(prefs->commentFilter,"%s",ini.GetString("CommentFilter","http://|www."));
-	sprintf(prefs->filenameCleanups,"%s",ini.GetString("FilenameCleanups","http|www.|.com|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt"));
-	prefs->m_iExtractMetaData=ini.GetInt("ExtractMetaData",2); // 0=disable, 1=mp3+avi, 2=MediaDet
+	sprintf(messageFilter,"%s",ini.GetString("MessageFilter","Your client has an infinite queue"));
+	sprintf(commentFilter,"%s",ini.GetString("CommentFilter","http://|www."));
+	sprintf(filenameCleanups,"%s",ini.GetString("FilenameCleanups","http|www.|.com|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt"));
+	m_iExtractMetaData=ini.GetInt("ExtractMetaData",2); // 0=disable, 1=mp3+avi, 2=MediaDet
 		
-	prefs->m_bUseSecureIdent=ini.GetBool("SecureIdent",true);
-	prefs->m_bAdvancedSpamfilter=ini.GetBool("AdvancedSpamFilter",true);
-	prefs->m_bRemoveFinishedDownloads=ini.GetBool("AutoClearCompleted",false);
+	m_bUseSecureIdent=ini.GetBool("SecureIdent",true);
+	m_bAdvancedSpamfilter=ini.GetBool("AdvancedSpamFilter",true);
+	m_bRemoveFinishedDownloads=ini.GetBool("AutoClearCompleted",false);
 
 	// Toolbar
-	sprintf(prefs->m_sToolbarSettings,ini.GetString("ToolbarSetting", strDefaultToolbar));
-	sprintf(prefs->m_sToolbarBitmap,ini.GetString("ToolbarBitmap", ""));
-	sprintf(prefs->m_sToolbarBitmapFolder,ini.GetString("ToolbarBitmapFolder", prefs->incomingdir));
-	prefs->m_nToolbarLabels = ini.GetInt("ToolbarLabels",1);
-	prefs->m_iStraightWindowStyles=ini.GetInt("StraightWindowStyles",0);
-	_sntprintf(prefs->m_szSkinProfile, ARRSIZE(prefs->m_szSkinProfile), "%s", ini.GetString(_T("SkinProfile"), _T("")));
-	_sntprintf(prefs->m_szSkinProfileDir, ARRSIZE(prefs->m_szSkinProfileDir), "%s", ini.GetString(_T("SkinProfileDir"), _T("")));
+	sprintf(m_sToolbarSettings,"%s", ini.GetString("ToolbarSetting", strDefaultToolbar));
+	sprintf(m_sToolbarBitmap,"%s", ini.GetString("ToolbarBitmap", ""));
+	sprintf(m_sToolbarBitmapFolder,"%s", ini.GetString("ToolbarBitmapFolder", incomingdir));
+	m_nToolbarLabels = ini.GetInt("ToolbarLabels",1);
+	m_iStraightWindowStyles=ini.GetInt("StraightWindowStyles",0);
+	_sntprintf(m_szSkinProfile, ARRSIZE(m_szSkinProfile), "%s", ini.GetString(_T("SkinProfile"), _T("")));
+	_sntprintf(m_szSkinProfileDir, ARRSIZE(m_szSkinProfileDir), "%s", ini.GetString(_T("SkinProfileDir"), _T("")));
+
+	//MORPH START added by Yun.SF3: Ipfilter.dat update
+	m_IPfilterVersion=ini.GetInt("IPfilterVersion",0); //added by milobac: Ipfilter.dat update
+	AutoUpdateIPFilter=ini.GetBool("AutoUPdateIPFilter",false); //added by milobac: Ipfilter.dat update
+	//MORPH END added by Yun.SF3: Ipfilter.dat update
+
+	//EastShare - added by AndCycle, IP to Country
+	m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt("IP2Country", IP2CountryName_DISABLE); 
+	m_bIP2CountryShowFlag = ini.GetBool("IP2CountryShowFlag", false);
+	//EastShare - added by AndCycle, IP to Country
+
+	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
+	LowIdRetries=ini.GetInt("ReconnectOnLowIdRetries",3);	// SLUGFILLER: lowIdRetry
+	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
+	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
+	hideOS=ini.GetInt("HideOvershares",0/*5*/);
+	selectiveShare=ini.GetBool("SelectiveShare",false);
+	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+	ShareOnlyTheNeed=ini.GetInt("ShareOnlyTheNeed",0);
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, Show Permissions
+	permissions=ini.GetInt("ShowSharePermissions",0);
+	//MORPH END   - Added by SiRoB, Show Permissions
+	//EastShare - Added by Pretender, TBH-AutoBackup
+	autobackup = ini.GetBool("AutoBackup",true);
+	autobackup2 = ini.GetBool("AutoBackup2",true);
+	//EastShare - Added by Pretender, TBH-AutoBackup
+
+	infiniteQueue=ini.GetBool("InfiniteQueue",false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	m_FakesDatVersion=ini.GetInt("FakesDatVersion",0);
+	UpdateFakeStartup=ini.GetBool("UpdateFakeStartup",false);
+	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+	m_bSUCEnabled = ini.GetBool("SUCEnabled",false);
+	m_bSUCLog =  ini.GetBool("SUCLog",false);
+	m_iSUCHigh = ini.GetInt("SUCHigh",900);
+	m_iSUCHigh = min(max(prefs->m_iSUCHigh,350),1000);
+	m_iSUCLow = ini.GetInt("SUCLow",600);
+	m_iSUCLow = min(max(prefs->m_iSUCLow,350),prefs->m_iSUCHigh);
+	m_iSUCPitch = ini.GetInt("SUCPitch",3000);
+	m_iSUCPitch = min(max(prefs->m_iSUCPitch,2500),10000);
+	m_iSUCDrift = ini.GetInt("SUCDrift",50);
+	m_iSUCDrift = min(max(prefs->m_iSUCDrift,0),100);
+	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+	maxconnectionsswitchborder = ini.GetInt("MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	maxconnectionsswitchborder = min(max(prefs->maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
+
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	m_iDaylightSavingPatch = ini.GetBool("DaylightSavingPatchEnabled",false);
+	// #endif
+
+	//EastShare Start - PreferShareAll by AndCycle
+	shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll
+	//EastShare END - PreferShareAll by AndCycle
+	// EastShare START - Added by TAHO, .met file control
+	m_iKnownMetDays = ini.GetInt("KnownMetDays", 0);
+	// EastShare END - Added by TAHO, .met file control
+	isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
+	DateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
+	m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
+	m_bOnlyDownloadCompleteFiles = ini.GetBool("OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	m_bSaveUploadQueueWaitTime = ini.GetBool("SaveUploadQueueWaitTime", true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	sprintf(UpdateURLFakeList,"%s",ini.GetString("UpdateURLFakeList","http://www.emuleitor.com/downloads/Morph/fakes.txt"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	sprintf(UpdateURLIPFilter,"%s",ini.GetString("UpdateURLIPFilter","http://www.emuleitor.com/downloads/Morph/ipfilter.txt"));//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 	// khaos::categorymod+ Load Preferences
-	prefs->m_bShowCatNames=ini.GetBool("ShowCatName",true);
-	prefs->m_bValidSrcsOnly=ini.GetBool("ValidSrcsOnly", false);
-	prefs->m_bActiveCatDefault=ini.GetBool("ActiveCatDefault", true);
-	prefs->m_bSelCatOnAdd=ini.GetBool("SelCatOnAdd", true);
-	prefs->m_bAutoSetResumeOrder=ini.GetBool("AutoSetResumeOrder", true);
-	prefs->m_bSmallFileDLPush=ini.GetBool("SmallFileDLPush", true);
-	prefs->m_iStartDLInEmptyCats=ini.GetInt("StartDLInEmptyCats", 0);
-	prefs->m_bUseAutoCat=ini.GetBool("UseAutoCat", true);
+	m_bShowCatNames=ini.GetBool("ShowCatName",true);
+	m_bValidSrcsOnly=ini.GetBool("ValidSrcsOnly", false);
+	m_bActiveCatDefault=ini.GetBool("ActiveCatDefault", true);
+	m_bSelCatOnAdd=ini.GetBool("SelCatOnAdd", true);
+	m_bAutoSetResumeOrder=ini.GetBool("AutoSetResumeOrder", true);
+	m_bSmallFileDLPush=ini.GetBool("SmallFileDLPush", true);
+	m_iStartDLInEmptyCats=ini.GetInt("StartDLInEmptyCats", 0);
+	m_bUseAutoCat=ini.GetBool("UseAutoCat", true);
 	// khaos::categorymod-
 	// khaos::kmod+
-	prefs->m_bUseSaveLoadSources=ini.GetBool("UseSaveLoadSources", true);
-	prefs->m_bRespectMaxSources=ini.GetBool("RespectMaxSources", true);
-	prefs->m_bSmartA4AFSwapping=ini.GetBool("SmartA4AFSwapping", true);
-	prefs->m_iAdvancedA4AFMode=ini.GetInt("AdvancedA4AFMode", 1);
-	prefs->m_bShowA4AFDebugOutput=ini.GetBool("ShowA4AFDebugOutput", false);
+	m_bUseSaveLoadSources=ini.GetBool("UseSaveLoadSources", true);
+	m_bRespectMaxSources=ini.GetBool("RespectMaxSources", true);
+	m_bSmartA4AFSwapping=ini.GetBool("SmartA4AFSwapping", true);
+	m_iAdvancedA4AFMode=ini.GetInt("AdvancedA4AFMode", 1);
+	m_bShowA4AFDebugOutput=ini.GetBool("ShowA4AFDebugOutput", false);
 	// khaos::accuratetimerem+
-	prefs->m_iTimeRemainingMode=ini.GetInt("TimeRemainingMode", 0);
+	m_iTimeRemainingMode=ini.GetInt("TimeRemainingMode", 0);
 	// khaos::accuratetimerem-
 
-	//if (prefs->maxGraphDownloadRate<prefs->maxdownload) prefs->maxdownload=UNLIMITED;
-	//if (prefs->maxGraphUploadRate<prefs->maxupload) prefs->maxupload=UNLIMITED;
+	//if (maxGraphDownloadRate<maxdownload) maxdownload=UNLIMITED;
+	//if (maxGraphUploadRate<maxupload) maxupload=UNLIMITED;
 
-	ini.SerGet(true, prefs->downloadColumnWidths,
-		ARRSIZE(prefs->downloadColumnWidths), "DownloadColumnWidths");
-	ini.SerGet(true, prefs->downloadColumnHidden,
-		ARRSIZE(prefs->downloadColumnHidden), "DownloadColumnHidden");
-	ini.SerGet(true, prefs->downloadColumnOrder,
-		ARRSIZE(prefs->downloadColumnOrder), "DownloadColumnOrder");
-	ini.SerGet(true, prefs->uploadColumnWidths,
-		ARRSIZE(prefs->uploadColumnWidths), "UploadColumnWidths");
-	ini.SerGet(true, prefs->uploadColumnHidden,
-		ARRSIZE(prefs->uploadColumnHidden), "UploadColumnHidden");
-	ini.SerGet(true, prefs->uploadColumnOrder,
-		ARRSIZE(prefs->uploadColumnOrder), "UploadColumnOrder");
-	ini.SerGet(true, prefs->queueColumnWidths,
-		ARRSIZE(prefs->queueColumnWidths), "QueueColumnWidths");
-	ini.SerGet(true, prefs->queueColumnHidden,
-		ARRSIZE(prefs->queueColumnHidden), "QueueColumnHidden");
-	ini.SerGet(true, prefs->queueColumnOrder,
-		ARRSIZE(prefs->queueColumnOrder), "QueueColumnOrder");
-	ini.SerGet(true, prefs->searchColumnWidths,
-		ARRSIZE(prefs->searchColumnWidths), "SearchColumnWidths");
-	ini.SerGet(true, prefs->searchColumnHidden,
-		ARRSIZE(prefs->searchColumnHidden), "SearchColumnHidden");
-	ini.SerGet(true, prefs->searchColumnOrder,
-		ARRSIZE(prefs->searchColumnOrder), "SearchColumnOrder");
-	ini.SerGet(true, prefs->sharedColumnWidths,
-		ARRSIZE(prefs->sharedColumnWidths), "SharedColumnWidths");
-	ini.SerGet(true, prefs->sharedColumnHidden,
-		ARRSIZE(prefs->sharedColumnHidden), "SharedColumnHidden");
-	ini.SerGet(true, prefs->sharedColumnOrder,
-		ARRSIZE(prefs->sharedColumnOrder), "SharedColumnOrder");
-	ini.SerGet(true, prefs->serverColumnWidths,
-		ARRSIZE(prefs->serverColumnWidths), "ServerColumnWidths");
-	ini.SerGet(true, prefs->serverColumnHidden,
-		ARRSIZE(prefs->serverColumnHidden), "ServerColumnHidden");
-	ini.SerGet(true, prefs->serverColumnOrder,
-		ARRSIZE(prefs->serverColumnOrder), "ServerColumnOrder");
-	ini.SerGet(true, prefs->clientListColumnWidths,
-		ARRSIZE(prefs->clientListColumnWidths), "ClientListColumnWidths");
-	ini.SerGet(true, prefs->clientListColumnHidden,
-		ARRSIZE(prefs->clientListColumnHidden), "ClientListColumnHidden");
-	ini.SerGet(true, prefs->clientListColumnOrder,
-		ARRSIZE(prefs->clientListColumnOrder), "ClientListColumnOrder");
+	ini.SerGet(true, downloadColumnWidths,
+		ARRSIZE(downloadColumnWidths), "DownloadColumnWidths");
+	ini.SerGet(true, downloadColumnHidden,
+		ARRSIZE(downloadColumnHidden), "DownloadColumnHidden");
+	ini.SerGet(true, downloadColumnOrder,
+		ARRSIZE(downloadColumnOrder), "DownloadColumnOrder");
+	ini.SerGet(true, uploadColumnWidths,
+		ARRSIZE(uploadColumnWidths), "UploadColumnWidths");
+	ini.SerGet(true, uploadColumnHidden,
+		ARRSIZE(uploadColumnHidden), "UploadColumnHidden");
+	ini.SerGet(true, uploadColumnOrder,
+		ARRSIZE(uploadColumnOrder), "UploadColumnOrder");
+	ini.SerGet(true, queueColumnWidths,
+		ARRSIZE(queueColumnWidths), "QueueColumnWidths");
+	ini.SerGet(true, queueColumnHidden,
+		ARRSIZE(queueColumnHidden), "QueueColumnHidden");
+	ini.SerGet(true, queueColumnOrder,
+		ARRSIZE(queueColumnOrder), "QueueColumnOrder");
+	ini.SerGet(true, searchColumnWidths,
+		ARRSIZE(searchColumnWidths), "SearchColumnWidths");
+	ini.SerGet(true, searchColumnHidden,
+		ARRSIZE(searchColumnHidden), "SearchColumnHidden");
+	ini.SerGet(true, searchColumnOrder,
+		ARRSIZE(searchColumnOrder), "SearchColumnOrder");
+	ini.SerGet(true, sharedColumnWidths,
+		ARRSIZE(sharedColumnWidths), "SharedColumnWidths");
+	ini.SerGet(true, sharedColumnHidden,
+		ARRSIZE(sharedColumnHidden), "SharedColumnHidden");
+	ini.SerGet(true, sharedColumnOrder,
+		ARRSIZE(sharedColumnOrder), "SharedColumnOrder");
+	ini.SerGet(true, serverColumnWidths,
+		ARRSIZE(serverColumnWidths), "ServerColumnWidths");
+	ini.SerGet(true, serverColumnHidden,
+		ARRSIZE(serverColumnHidden), "ServerColumnHidden");
+	ini.SerGet(true, serverColumnOrder,
+		ARRSIZE(serverColumnOrder), "ServerColumnOrder");
+	ini.SerGet(true, clientListColumnWidths,
+		ARRSIZE(clientListColumnWidths), "ClientListColumnWidths");
+	ini.SerGet(true, clientListColumnHidden,
+		ARRSIZE(clientListColumnHidden), "ClientListColumnHidden");
+	ini.SerGet(true, clientListColumnOrder,
+		ARRSIZE(clientListColumnOrder), "ClientListColumnOrder");
+
+	ini.SerGet(true, FilenamesListColumnWidths,
+		ARRSIZE(FilenamesListColumnWidths), "FilenamesListColumnWidths");
+	ini.SerGet(true, FilenamesListColumnHidden,
+		ARRSIZE(FilenamesListColumnHidden), "FilenamesListColumnHidden");
+	ini.SerGet(true, FilenamesListColumnOrder,
+		ARRSIZE(FilenamesListColumnOrder), "FilenamesListColumnOrder");
 
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
 	// SLUGFILLER: multiSort - load multiple params
-	ini.SerGet(true, prefs->tableSortItemDownload,
-		ARRSIZE(prefs->tableSortItemDownload), "TableSortItemDownload", NULL, -1);
-	ini.SerGet(true, prefs->tableSortItemUpload,
-		ARRSIZE(prefs->tableSortItemUpload), "TableSortItemUpload", NULL, -1);
-	ini.SerGet(true, prefs->tableSortItemQueue,
-		ARRSIZE(prefs->tableSortItemQueue), "TableSortItemQueue", NULL, -1);
-	ini.SerGet(true, prefs->tableSortItemSearch,
-		ARRSIZE(prefs->tableSortItemSearch), "TableSortItemSearch", NULL, -1);
-	ini.SerGet(true, prefs->tableSortItemShared,
-		ARRSIZE(prefs->tableSortItemShared), "TableSortItemShared", NULL, -1);
-	ini.SerGet(true, prefs->tableSortItemServer,
-		ARRSIZE(prefs->tableSortItemServer), "TableSortItemServer", NULL, -1);
-	ini.SerGet(true, prefs->tableSortItemClientList,
-		ARRSIZE(prefs->tableSortItemClientList), "TableSortItemClientList", NULL, -1);
-	ini.SerGet(true, prefs->tableSortAscendingDownload,
-		ARRSIZE(prefs->tableSortAscendingDownload), "TableSortAscendingDownload");
-	ini.SerGet(true, prefs->tableSortAscendingUpload,
-		ARRSIZE(prefs->tableSortAscendingUpload), "TableSortAscendingUpload");
-	ini.SerGet(true, prefs->tableSortAscendingQueue,
-		ARRSIZE(prefs->tableSortAscendingQueue), "TableSortAscendingQueue");
-	ini.SerGet(true, prefs->tableSortAscendingSearch,
-		ARRSIZE(prefs->tableSortAscendingSearch), "TableSortAscendingSearch");
-	ini.SerGet(true, prefs->tableSortAscendingShared,
-		ARRSIZE(prefs->tableSortAscendingShared), "TableSortAscendingShared");
-	ini.SerGet(true, prefs->tableSortAscendingServer,
-		ARRSIZE(prefs->tableSortAscendingServer), "TableSortAscendingServer");
-	ini.SerGet(true, prefs->tableSortAscendingClientList,
-		ARRSIZE(prefs->tableSortAscendingClientList), "TableSortAscendingClientList");
+	ini.SerGet(true, tableSortItemDownload,
+		ARRSIZE(tableSortItemDownload), "TableSortItemDownload", NULL, -1);
+	ini.SerGet(true, tableSortItemUpload,
+		ARRSIZE(tableSortItemUpload), "TableSortItemUpload", NULL, -1);
+	ini.SerGet(true, tableSortItemQueue,
+		ARRSIZE(tableSortItemQueue), "TableSortItemQueue", NULL, -1);
+	ini.SerGet(true, tableSortItemSearch,
+		ARRSIZE(tableSortItemSearch), "TableSortItemSearch", NULL, -1);
+	ini.SerGet(true, tableSortItemShared,
+		ARRSIZE(tableSortItemShared), "TableSortItemShared", NULL, -1);
+	ini.SerGet(true, tableSortItemServer,
+		ARRSIZE(tableSortItemServer), "TableSortItemServer", NULL, -1);
+	ini.SerGet(true, tableSortItemClientList,
+		ARRSIZE(tableSortItemClientList), "TableSortItemClientList", NULL, -1);
+	ini.SerGet(true, tableSortItemFilenames,
+		ARRSIZE(tableSortItemFilenames), "TableSortItemFilenames", NULL, -1);
+	ini.SerGet(true, tableSortAscendingDownload,
+		ARRSIZE(tableSortAscendingDownload), "TableSortAscendingDownload");
+	ini.SerGet(true, tableSortAscendingUpload,
+		ARRSIZE(tableSortAscendingUpload), "TableSortAscendingUpload");
+	ini.SerGet(true, tableSortAscendingQueue,
+		ARRSIZE(tableSortAscendingQueue), "TableSortAscendingQueue");
+	ini.SerGet(true, tableSortAscendingSearch,
+		ARRSIZE(tableSortAscendingSearch), "TableSortAscendingSearch");
+	ini.SerGet(true, tableSortAscendingShared,
+		ARRSIZE(tableSortAscendingShared), "TableSortAscendingShared");
+	ini.SerGet(true, tableSortAscendingServer,
+		ARRSIZE(tableSortAscendingServer), "TableSortAscendingServer");
+	ini.SerGet(true, tableSortAscendingClientList,
+		ARRSIZE(tableSortAscendingClientList), "TableSortAscendingClientList");
+	ini.SerGet(true, tableSortAscendingFilenames,
+		ARRSIZE(tableSortAscendingFilenames), "TableSortAscendingFilenames");
 	// topmost must be valid
-	if (prefs->tableSortItemDownload[0] == -1) {
-		prefs->tableSortItemDownload[0] = 0;
-		prefs->tableSortAscendingDownload[0] = true;
+	if (tableSortItemDownload[0] == -1) {
+		tableSortItemDownload[0] = 0;
+		tableSortAscendingDownload[0] = true;
 	}
-	if (prefs->tableSortItemUpload[0] == -1) {
-		prefs->tableSortItemUpload[0] = 0;
-		prefs->tableSortAscendingUpload[0] = true;
+	if (tableSortItemUpload[0] == -1) {
+		tableSortItemUpload[0] = 0;
+		tableSortAscendingUpload[0] = true;
 	}
-	if (prefs->tableSortItemQueue[0] == -1) {
-		prefs->tableSortItemQueue[0] = 0;
-		prefs->tableSortAscendingQueue[0] = true;
+	if (tableSortItemQueue[0] == -1) {
+		tableSortItemQueue[0] = 0;
+		tableSortAscendingQueue[0] = true;
 	}
-	if (prefs->tableSortItemSearch[0] == -1) {
-		prefs->tableSortItemSearch[0] = 0;
-		prefs->tableSortAscendingSearch[0] = true;
+	if (tableSortItemSearch[0] == -1) {
+		tableSortItemSearch[0] = 0;
+		tableSortAscendingSearch[0] = true;
 	}
-	if (prefs->tableSortItemShared[0] == -1) {
-		prefs->tableSortItemShared[0] = 0;
-		prefs->tableSortAscendingShared[0] = true;
+	if (tableSortItemShared[0] == -1) {
+		tableSortItemShared[0] = 0;
+		tableSortAscendingShared[0] = true;
 	}
-	if (prefs->tableSortItemServer[0] == -1) {
-		prefs->tableSortItemServer[0] = 0;
-		prefs->tableSortAscendingServer[0] = true;
+	if (tableSortItemServer[0] == -1) {
+		tableSortItemServer[0] = 0;
+		tableSortAscendingServer[0] = true;
 	}
-	if (prefs->tableSortItemClientList[0] == -1) {
-		prefs->tableSortItemClientList[0] = 0;
-		prefs->tableSortAscendingClientList[0] = true;
+	if (tableSortItemClientList[0] == -1) {
+		tableSortItemClientList[0] = 0;
+		tableSortAscendingClientList[0] = true;
+	}
+	if (tableSortItemFilenames[0] == -1) {
+		tableSortItemFilenames[0] = 0;
+		tableSortAscendingFilenames[0] = true;
 	}
 	// SLUGFILLER: multiSort
 
 	LPBYTE pData = NULL;
-	UINT uSize = sizeof prefs->m_lfHyperText;
-	if (ini.GetBinary("HyperTextFont", &pData, &uSize) && uSize == sizeof prefs->m_lfHyperText)
-		memcpy(&prefs->m_lfHyperText, pData, sizeof prefs->m_lfHyperText);
+	UINT uSize = sizeof m_lfHyperText;
+	if (ini.GetBinary("HyperTextFont", &pData, &uSize) && uSize == sizeof m_lfHyperText)
+		memcpy(&m_lfHyperText, pData, sizeof m_lfHyperText);
 	else
-		memset(&prefs->m_lfHyperText, 0, sizeof prefs->m_lfHyperText);
+		memset(&m_lfHyperText, 0, sizeof m_lfHyperText);
 	delete[] pData;
 
-	if (prefs->statsAverageMinutes<1) prefs->statsAverageMinutes=5;
+	if (statsAverageMinutes<1) statsAverageMinutes=5;
 
 	// deadlake PROXYSUPPORT
-	prefs->proxy.EnablePassword = ini.GetBool("ProxyEnablePassword",false,"Proxy");
-	prefs->proxy.UseProxy = ini.GetBool("ProxyEnableProxy",false,"Proxy");
+	proxy.EnablePassword = ini.GetBool("ProxyEnablePassword",false,"Proxy");
+	proxy.UseProxy = ini.GetBool("ProxyEnableProxy",false,"Proxy");
 	sprintf(buffer,"");
-	sprintf(prefs->proxy.name,"%s",ini.GetString("ProxyName",buffer,"Proxy"));
-	sprintf(prefs->proxy.password,"%s",ini.GetString("ProxyPassword",buffer,"Proxy"));
-	sprintf(prefs->proxy.user,"%s",ini.GetString("ProxyUser",buffer,"Proxy"));
-	prefs->proxy.port = ini.GetInt("ProxyPort",1080,"Proxy");
-	prefs->proxy.type = ini.GetInt("ProxyType",PROXYTYPE_NOPROXY,"Proxy");
-	prefs->m_bIsASCWOP = ini.GetBool("ConnectWithoutProxy",false,"Proxy");
-	prefs->m_bShowProxyErrors = ini.GetBool("ShowErrors",false,"Proxy");
+	sprintf(proxy.name,"%s",ini.GetString("ProxyName",buffer,"Proxy"));
+	sprintf(proxy.password,"%s",ini.GetString("ProxyPassword",buffer,"Proxy"));
+	sprintf(proxy.user,"%s",ini.GetString("ProxyUser",buffer,"Proxy"));
+	proxy.port = ini.GetInt("ProxyPort",1080,"Proxy");
+	proxy.type = ini.GetInt("ProxyType",PROXYTYPE_NOPROXY,"Proxy");
+	m_bIsASCWOP = ini.GetBool("ConnectWithoutProxy",false,"Proxy");
+	m_bShowProxyErrors = ini.GetBool("ShowErrors",false,"Proxy");
 
 	CString buffer2;
-	for (int i=0;i<ARRSIZE(prefs->statcolors);i++) {
+	for (int i=0;i<ARRSIZE(statcolors);i++) {
 		buffer2.Format("StatColor%i",i);
-		sprintf(buffer,ini.GetString(buffer2,"0","Statistics"));
-		prefs->statcolors[i] = 0;
-		if (sscanf(buffer, "%i", &prefs->statcolors[i]) != 1 || prefs->statcolors[i] == 0)
+		sprintf(buffer,"%s",ini.GetString(buffer2,"0","Statistics"));
+		statcolors[i] = 0;
+		if (sscanf(buffer, "%i", &statcolors[i]) != 1 || statcolors[i] == 0)
 			ResetStatsColor(i);
 	}
 
@@ -2406,25 +2940,34 @@ void CPreferences::LoadPreferences(){
 	// <-----khaos-
 
 	// Web Server
-	sprintf(prefs->m_sWebPassword,"%s",ini.GetString("Password", "","WebServer"));
-	sprintf(prefs->m_sWebLowPassword,"%s",ini.GetString("PasswordLow", ""));
-	prefs->m_nWebPort=ini.GetInt("Port", 4711);
-	prefs->m_bWebEnabled=ini.GetBool("Enabled", false);
-	prefs->m_bWebUseGzip=ini.GetBool("UseGzip", true);
-	prefs->m_bWebLowEnabled=ini.GetBool("UseLowRightsUser", false);
-	prefs->m_nWebPageRefresh=ini.GetInt("PageRefreshTime", 120);
+	sprintf(m_sWebPassword,"%s",ini.GetString("Password", "","WebServer"));
+	sprintf(m_sWebLowPassword,"%s",ini.GetString("PasswordLow", ""));
+	m_nWebPort=ini.GetInt("Port", 4711);
+	m_bWebEnabled=ini.GetBool("Enabled", false);
+	m_bWebUseGzip=ini.GetBool("UseGzip", true);
+	m_bWebLowEnabled=ini.GetBool("UseLowRightsUser", false);
+	m_nWebPageRefresh=ini.GetInt("PageRefreshTime", 120);
 
-	prefs->dontcompressavi=ini.GetBool("DontCompressAvi",false);
+	dontcompressavi=ini.GetBool("DontCompressAvi",false);
 
 	// mobilemule
-	sprintf(prefs->m_sMMPassword,"%s",ini.GetString("Password", "","MobileMule"));
-	prefs->m_bMMEnabled = ini.GetBool("Enabled", false);
-	prefs->m_nMMPort = ini.GetInt("Port", 80);
+	sprintf(m_sMMPassword,"%s",ini.GetString("Password", "","MobileMule"));
+	m_bMMEnabled = ini.GetBool("Enabled", false);
+	m_nMMPort = ini.GetInt("Port", 80);
 
+/*
+	// ZZ:UploadSpeedSense -->
+    m_bDynUpEnabled = ini.GetBool("USSEnabled", false, "eMule");
+    m_iDynUpPingTolerance = ini.GetInt("USSPingTolerance", 800, "eMule");
+    m_iDynUpGoingUpDivider = ini.GetInt("USSGoingUpDivider", 1000, "eMule");
+    m_iDynUpGoingDownDivider = ini.GetInt("USSGoingDownDivider", 1000, "eMule");
+    m_iDynUpNumberOfPings = ini.GetInt("USSNumberOfPings", 1, "eMule");
+	// ZZ:UploadSpeedSense <--
+*/
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	sprintf (prefs->m_sCommunityName,"%s",ini.GetString ("CommunityName"));
-	prefs->m_bReportHashingFiles = ini.GetBool ("ReportHashingFiles",true);
-	prefs->m_bLogFriendlistActivities = ini.GetBool ("LogFriendlistActivities",true);
+	sprintf (m_sCommunityName,"%s",ini.GetString ("CommunityName"));
+	m_bReportHashingFiles = ini.GetBool ("ReportHashingFiles",true);
+	m_bLogFriendlistActivities = ini.GetBool ("LogFriendlistActivities",true);
 	// [end] Mighty Knife
 
 	// Mighty Knife: CRC32-Tag
@@ -2435,14 +2978,14 @@ void CPreferences::LoadPreferences(){
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	if (!prefs->m_bSUCEnabled) prefs->m_bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
+	if (!m_bSUCEnabled) bDynUpEnabled = ini.GetBool("DynUpEnabled", false);
 
-	prefs->m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
-	prefs->m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
-	prefs->m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
-	prefs->m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
-	prefs->m_bDynUpLog = ini.GetBool("DynUpLog", false);
-	prefs->m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
+	m_iDynUpPingTolerance = ini.GetInt("DynUpPingTolerance", 800);
+	m_iDynUpGoingUpDivider = ini.GetInt("DynUpGoingUpDivider", 1000);
+	m_iDynUpGoingDownDivider = ini.GetInt("DynUpGoingDownDivider", 1000);
+	m_iDynUpNumberOfPings = ini.GetInt("DynUpNumberOfPings", 1);
+	m_bDynUpLog = ini.GetBool("DynUpLog", false);
+	m_iDynUpPingLimit = ini.GetInt("DynUpPingLimit", 200); // EastShare - Added by TAHO, USS limit
 	//MORPH END   - Added by SiRoB,  ZZ dynamic upload (USS)
 
     LoadCats();
@@ -2482,7 +3025,7 @@ void CPreferences::LoadCats() {
 		sprintf(defcat->title,"Default");
 		defcat->prio=0;
 		defcat->iAdvA4AFMode = 0;
-		sprintf(defcat->incomingpath, prefs->incomingdir);
+		sprintf(defcat->incomingpath, incomingdir);
 		sprintf(defcat->comment, "The default category.  It can't be merged or deleted.");
 		defcat->color = 0;
 		defcat->viewfilters.bArchives = true;
@@ -2525,16 +3068,16 @@ void CPreferences::LoadCats() {
 	for (int ix = bCreateDefault ? 1 : 0; ix <= max; ix++)
 	{
 		ixStr.Format("Cat#%i",ix);
-        catini.SetSection(ixStr);
+        	catini.SetSection(ixStr);
 
 		Category_Struct* newcat = new Category_Struct;
 
-		sprintf(newcat->title, catini.GetString("Title", ix == 0 ? "Default" : "?"));
-		sprintf(newcat->incomingpath, catini.GetString("Incoming", ix == 0 ? CString(prefs->incomingdir) : ""));
+		sprintf(newcat->title,"%s",catini.GetString("Title", ix == 0 ? "Default" : "?"));
+		sprintf(newcat->incomingpath, catini.GetString("Incoming", ix == 0 ? CString(incomingdir) : ""));
 		MakeFoldername(newcat->incomingpath);
-		sprintf(newcat->comment, catini.GetString("Comment", "", ixStr));
-		newcat->prio = catini.GetInt("Priority", 0, ixStr);
-		CString sBuff = catini.GetString("Color", "0", ixStr);
+		sprintf(newcat->comment, catini.GetString("Comment", ""));
+		newcat->prio = catini.GetInt("Priority", 0);
+		CString sBuff = catini.GetString("Color", "0");
 		newcat->color = _atoi64(sBuff.GetBuffer());
 		// khaos::kmod+ Category Advanced A4AF Mode
 		newcat->iAdvA4AFMode = catini.GetInt("AdvancedA4AFMode", 0);
@@ -2607,19 +3150,21 @@ int CPreferences::GetColumnSortItem(Table t, int column) const	// SLUGFILLER: mu
 	switch(t) 
 	{
 		case tableDownload:
-			return prefs->tableSortItemDownload[column];	// SLUGFILLER: multiSort
+			return tableSortItemDownload[column];	// SLUGFILLER: multiSort
 		case tableUpload:
-			return prefs->tableSortItemUpload[column];	// SLUGFILLER: multiSort
+			return tableSortItemUpload[column];	// SLUGFILLER: multiSort
 		case tableQueue:
-			return prefs->tableSortItemQueue[column];	// SLUGFILLER: multiSort
+			return tableSortItemQueue[column];	// SLUGFILLER: multiSort
 		case tableSearch:
-			return prefs->tableSortItemSearch[column];	// SLUGFILLER: multiSort
+			return tableSortItemSearch[column];	// SLUGFILLER: multiSort
 		case tableShared:
-			return prefs->tableSortItemShared[column];	// SLUGFILLER: multiSort
+			return tableSortItemShared[column];	// SLUGFILLER: multiSort
 		case tableServer:
-			return prefs->tableSortItemServer[column];	// SLUGFILLER: multiSort
+			return tableSortItemServer[column];	// SLUGFILLER: multiSort
 		case tableClientList:
-			return prefs->tableSortItemClientList[column];	// SLUGFILLER: multiSort
+			return tableSortItemClientList[column];	// SLUGFILLER: multiSort
+		case tableFilenames:
+			return tableSortItemFilenames[column];	// SLUGFILLER: multiSort
 	}
 	return 0;
 }
@@ -2630,19 +3175,21 @@ bool CPreferences::GetColumnSortAscending(Table t, int column) const	// SLUGFILL
 	switch(t) 
 	{
 		case tableDownload:
-			return prefs->tableSortAscendingDownload[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingDownload[column];	// SLUGFILLER: multiSort
 		case tableUpload:
-			return prefs->tableSortAscendingUpload[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingUpload[column];	// SLUGFILLER: multiSort
 		case tableQueue:
-			return prefs->tableSortAscendingQueue[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingQueue[column];	// SLUGFILLER: multiSort
 		case tableSearch:
-			return prefs->tableSortAscendingSearch[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingSearch[column];	// SLUGFILLER: multiSort
 		case tableShared:
-			return prefs->tableSortAscendingShared[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingShared[column];	// SLUGFILLER: multiSort
 		case tableServer:
-			return prefs->tableSortAscendingServer[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingServer[column];	// SLUGFILLER: multiSort
 		case tableClientList:
-			return prefs->tableSortAscendingClientList[column];	// SLUGFILLER: multiSort
+			return tableSortAscendingClientList[column];	// SLUGFILLER: multiSort
+		case tableFilenames:
+			return tableSortAscendingFilenames[column];	// SLUGFILLER: multiSort
 	}
 	return true;
 }
@@ -2654,38 +3201,43 @@ int CPreferences::GetColumnSortCount(Table t) const
 	switch(t)
 	{
 		case tableDownload:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemDownload); i++)
-				if (prefs->tableSortItemDownload[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemDownload); i++)
+				if (tableSortItemDownload[i] == -1)
 					break;
 			return i;
 		case tableUpload:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemUpload); i++)
-				if (prefs->tableSortItemUpload[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemUpload); i++)
+				if (tableSortItemUpload[i] == -1)
 					break;
 			return i;
 		case tableQueue:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemQueue); i++)
-				if (prefs->tableSortItemQueue[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemQueue); i++)
+				if (tableSortItemQueue[i] == -1)
 					break;
 			return i;
 		case tableSearch:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemSearch); i++)
-				if (prefs->tableSortItemSearch[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemSearch); i++)
+				if (tableSortItemSearch[i] == -1)
 					break;
 			return i;
 		case tableShared:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemShared); i++)
-				if (prefs->tableSortItemShared[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemShared); i++)
+				if (tableSortItemShared[i] == -1)
 					break;
 			return i;
 		case tableServer:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemServer); i++)
-				if (prefs->tableSortItemServer[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemServer); i++)
+				if (tableSortItemServer[i] == -1)
 					break;
 			return i;
 		case tableClientList:
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemClientList); i++)
-				if (prefs->tableSortItemClientList[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemClientList); i++)
+				if (tableSortItemClientList[i] == -1)
+					break;
+			return i;
+		case tableFilenames:
+			for (i = 0; i < ARRSIZE(tableSortItemFilenames); i++)
+				if (tableSortItemFilenames[i] == -1)
 					break;
 			return i;
 	}
@@ -2701,93 +3253,106 @@ void CPreferences::SetColumnSortItem(Table t, int sortItem)
 	{
 		case tableDownload:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemDownload)-1; i++)
-				if (prefs->tableSortItemDownload[i] == sortItem ||
-					prefs->tableSortItemDownload[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemDownload)-1; i++)
+				if (tableSortItemDownload[i] == sortItem ||
+					tableSortItemDownload[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemDownload[i] = prefs->tableSortItemDownload[i-1];
-				prefs->tableSortAscendingDownload[i] = prefs->tableSortAscendingDownload[i-1];
+				tableSortItemDownload[i] = tableSortItemDownload[i-1];
+				tableSortAscendingDownload[i] = tableSortAscendingDownload[i-1];
 			}
-			prefs->tableSortItemDownload[0] = sortItem;
+			tableSortItemDownload[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 		case tableUpload:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemUpload)-1; i++)
-				if (prefs->tableSortItemUpload[i] == sortItem ||
-					prefs->tableSortItemUpload[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemUpload)-1; i++)
+				if (tableSortItemUpload[i] == sortItem ||
+					tableSortItemUpload[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemUpload[i] = prefs->tableSortItemUpload[i-1];
-				prefs->tableSortAscendingUpload[i] = prefs->tableSortAscendingUpload[i-1];
+				tableSortItemUpload[i] = tableSortItemUpload[i-1];
+				tableSortAscendingUpload[i] = tableSortAscendingUpload[i-1];
 			}
-			prefs->tableSortItemUpload[0] = sortItem;
+			tableSortItemUpload[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 		case tableQueue:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemQueue)-1; i++)
-				if (prefs->tableSortItemQueue[i] == sortItem ||
-					prefs->tableSortItemQueue[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemQueue)-1; i++)
+				if (tableSortItemQueue[i] == sortItem ||
+					tableSortItemQueue[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemQueue[i] = prefs->tableSortItemQueue[i-1];
-				prefs->tableSortAscendingQueue[i] = prefs->tableSortAscendingQueue[i-1];
+				tableSortItemQueue[i] = tableSortItemQueue[i-1];
+				tableSortAscendingQueue[i] = tableSortAscendingQueue[i-1];
 			}
-			prefs->tableSortItemQueue[0] = sortItem;
+			tableSortItemQueue[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 		case tableSearch:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemSearch)-1; i++)
-				if (prefs->tableSortItemSearch[i] == sortItem ||
-					prefs->tableSortItemSearch[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemSearch)-1; i++)
+				if (tableSortItemSearch[i] == sortItem ||
+					tableSortItemSearch[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemSearch[i] = prefs->tableSortItemSearch[i-1];
-				prefs->tableSortAscendingSearch[i] = prefs->tableSortAscendingSearch[i-1];
+				tableSortItemSearch[i] = tableSortItemSearch[i-1];
+				tableSortAscendingSearch[i] = tableSortAscendingSearch[i-1];
 			}
-			prefs->tableSortItemSearch[0] = sortItem;
+			tableSortItemSearch[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 		case tableShared:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemShared)-1; i++)
-				if (prefs->tableSortItemShared[i] == sortItem ||
-					prefs->tableSortItemShared[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemShared)-1; i++)
+				if (tableSortItemShared[i] == sortItem ||
+					tableSortItemShared[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemShared[i] = prefs->tableSortItemShared[i-1];
-				prefs->tableSortAscendingShared[i] = prefs->tableSortAscendingShared[i-1];
+				tableSortItemShared[i] = tableSortItemShared[i-1];
+				tableSortAscendingShared[i] = tableSortAscendingShared[i-1];
 			}
-			prefs->tableSortItemShared[0] = sortItem;
+			tableSortItemShared[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 		case tableServer:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemServer)-1; i++)
-				if (prefs->tableSortItemServer[i] == sortItem ||
-					prefs->tableSortItemServer[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemServer)-1; i++)
+				if (tableSortItemServer[i] == sortItem ||
+					tableSortItemServer[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemServer[i] = prefs->tableSortItemServer[i-1];
-				prefs->tableSortAscendingServer[i] = prefs->tableSortAscendingServer[i-1];
+				tableSortItemServer[i] = tableSortItemServer[i-1];
+				tableSortAscendingServer[i] = tableSortAscendingServer[i-1];
 			}
-			prefs->tableSortItemServer[0] = sortItem;
+			tableSortItemServer[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 		case tableClientList:
 			// SLUGFILLER: multiSort - roll params
-			for (i = 0; i < ARRSIZE(prefs->tableSortItemClientList)-1; i++)
-				if (prefs->tableSortItemClientList[i] == sortItem ||
-					prefs->tableSortItemClientList[i] == -1)
+			for (i = 0; i < ARRSIZE(tableSortItemClientList)-1; i++)
+				if (tableSortItemClientList[i] == sortItem ||
+					tableSortItemClientList[i] == -1)
 					break;
 			for (; i > 0; i--) {
-				prefs->tableSortItemClientList[i] = prefs->tableSortItemClientList[i-1];
-				prefs->tableSortAscendingClientList[i] = prefs->tableSortAscendingClientList[i-1];
+				tableSortItemClientList[i] = tableSortItemClientList[i-1];
+				tableSortAscendingClientList[i] = tableSortAscendingClientList[i-1];
 			}
-			prefs->tableSortItemClientList[0] = sortItem;
+			tableSortItemClientList[0] = sortItem;
+			// SLUGFILLER: multiSort
+			break;
+		case tableFilenames:
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ARRSIZE(tableSortItemFilenames)-1; i++)
+				if (tableSortItemFilenames[i] == sortItem ||
+					tableSortItemFilenames[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				tableSortItemFilenames[i] = tableSortItemFilenames[i-1];
+				tableSortAscendingFilenames[i] = tableSortAscendingFilenames[i-1];
+			}
+			tableSortItemFilenames[0] = sortItem;
 			// SLUGFILLER: multiSort
 			break;
 	}
@@ -2799,25 +3364,28 @@ void CPreferences::SetColumnSortAscending(Table t, bool sortAscending)
 	switch(t) 
 	{
 		case tableDownload:
-			prefs->tableSortAscendingDownload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingDownload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableUpload:
-			prefs->tableSortAscendingUpload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingUpload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableQueue:
-			prefs->tableSortAscendingQueue[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingQueue[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableSearch:
-			prefs->tableSortAscendingSearch[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingSearch[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableShared:
-			prefs->tableSortAscendingShared[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingShared[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableServer:
-			prefs->tableSortAscendingServer[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingServer[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableClientList:
-			prefs->tableSortAscendingClientList[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			tableSortAscendingClientList[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
+			break;
+		case tableFilenames:
+			tableSortAscendingFilenames[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 	}
 }
@@ -2851,7 +3419,7 @@ bool CPreferences::MoveCat(UINT from, UINT to){
 	return true;
 }
 
-bool CPreferences::IsInstallationDirectory(const CString& rstrDir) const
+bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 {
 	CString strFullPath;
 	if (PathCanonicalize(strFullPath.GetBuffer(MAX_PATH), rstrDir))
@@ -2872,7 +3440,7 @@ bool CPreferences::IsInstallationDirectory(const CString& rstrDir) const
 	return false;
 }
 
-bool CPreferences::IsShareableDirectory(const CString& rstrDir) const
+bool CPreferences::IsShareableDirectory(const CString& rstrDir)
 {
 	if (IsInstallationDirectory(rstrDir))
 		return false;
@@ -2892,37 +3460,37 @@ bool CPreferences::IsShareableDirectory(const CString& rstrDir) const
 
 void CPreferences::UpdateLastVC()
 {
-	prefs->versioncheckLastAutomatic = safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+	versioncheckLastAutomatic = safe_mktime(CTime::GetCurrentTime().GetLocalTm());
 }
 
 void CPreferences::SetWSPass(CString strNewPass)
 {
-	sprintf(prefs->m_sWebPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
+	sprintf(m_sWebPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
 }
 
 void CPreferences::SetWSLowPass(CString strNewPass)
 {
-	sprintf(prefs->m_sWebLowPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
+	sprintf(m_sWebLowPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
 }
 
 void CPreferences::SetMMPass(CString strNewPass)
 {
-	sprintf(prefs->m_sMMPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
+	sprintf(m_sMMPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0));
 }
 
 void CPreferences::SetMaxUpload(uint16 in)
 {
-	prefs->maxupload = (in) ? in : UNLIMITED;
+	maxupload = (in) ? in : UNLIMITED;
 }
 
 void CPreferences::SetMaxDownload(uint16 in)
 {
-	prefs->maxdownload=(in) ? in : UNLIMITED;
+	maxdownload=(in) ? in : UNLIMITED;
 }
 
 uint16 CPreferences::GetMaxSourcePerFileSoft()
 {
-	UINT temp = ((UINT)prefs->maxsourceperfile * 9L) / 10;
+	UINT temp = ((UINT)maxsourceperfile * 9L) / 10;
 	if (temp > MAX_SOURCES_FILE_SOFT)
 		return MAX_SOURCES_FILE_SOFT;
 	return temp;
@@ -2930,10 +3498,15 @@ uint16 CPreferences::GetMaxSourcePerFileSoft()
 
 uint16 CPreferences::GetMaxSourcePerFileUDP()
 {	
-	UINT temp = ((UINT)prefs->maxsourceperfile * 3L) / 4;
+	UINT temp = ((UINT)maxsourceperfile * 3L) / 4;
 	if (temp > MAX_SOURCES_FILE_UDP)
 		return MAX_SOURCES_FILE_UDP;
 	return temp;
+}
+
+void CPreferences::SetNetworkKademlia(bool val)	{ 
+	networkkademlia = val; 
+//	theApp.emuledlg->toolbar->ReloadConfig();// TODO: Remove this line as soon as we always show the kadbutton
 }
 
 //MORPH START - Added by IceCream, high process priority
