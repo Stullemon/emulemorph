@@ -1210,7 +1210,7 @@ void CUpDownClient::ReGetClientSoft()
 
 	if (m_pszUsername == NULL){
 		m_clientSoft = SO_UNKNOWN;
-		return;
+		goto suite;
 	}
 	
 	int iHashType = GetHashType();
