@@ -110,7 +110,6 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 					//TRACE("CClientUDPSocket: OP_QUEUEFULL from client %s UDP:%u\n", host, port);
 					sender->SetRemoteQueueFull(true);
 					sender->UDPReaskACK(0);
-					sender->SetRemoteEDT(0, EDT_UNDEFINED); //<<-- enkeyDev(th1) -EDT-
 				}
 //			#ifdef _DEBUG
 //				else{
@@ -128,8 +127,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 				theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 				CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP_UDP(inet_addr(host), port);
 				if (sender){
-					//if (size != 2)//<<-- enkeyDev(th1) -EDT- original commented
-					if (size != 2 && size != 12) //<<-- enkeyDev(th1) -EDT-
+					if (size != 2)
 						break;
 
 					uint16 nRank;
@@ -137,14 +135,6 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 					sender->SetRemoteQueueFull(false);
 					sender->UDPReaskACK(nRank);
 					sender->AddAskedCountDown();
-					// START enkeyDev(th1) -EDT-
-					if (size == 12 && sender->GetDownloadTimeVersion()) {
-						uint32 avg_time, err_time;
-						memcpy(&avg_time,packet+4,4);
-						memcpy(&err_time,packet+8,4);
-						sender->SetRemoteEDT(avg_time, err_time);
-					}
-					// END enkeyDev(th1) -EDT-
 				}
 				break;
 			}

@@ -109,13 +109,6 @@
 #define L2HAC_MAX_TIME			3600000
 #define L2HAC_CALLBACK_PRECEDE	(CONNECTION_TIMEOUT >> 1)
 #define L2HAC_PREPARE_PRECEDE	(CONNECTION_TIMEOUT)
-#define EDT_PERIOD_CACHE		50				//<<-- enkeyDEV(th1) -EDT-
-#define EDT_MIN_PERIOD_CACHE	30				//<<-- enkeyDEV(th1) -EDT-
-#define EDT_UNDEFINED			((uint32)(-1))	//<<-- enkeyDEV(th1) -EDT-
-#define EDT_INFINITE_TIME		0xFFFFFFFF		//<<-- enkeyDEV(th1) -EDT-
-#define EDT_INFINITE_ERR		0xFFFFFFFE		//<<-- enkeyDEV(th1) -EDT-
-#define EDT_IMMINENT			300				//<<-- enkeyDEV(th1) -EDT-
-#define EDT_EDW_THRESHOLD		28800			//<<-- enkeyDEV(th1) -EDT-
 // END enkeyDEV(th1)
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
@@ -580,7 +573,7 @@
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 #define ET_MOD_VERSION 			0x55 // Maella -Support for tag ET_MOD_VERSION 0x55-
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-#define ET_DOWNLOADTIME			0x3C //<<-- enkeyDev(th1) -EDT-
+
 #define ET_L2HAC				0x3E //<<-- enkeyDEV(th1) -L2HAC-
 
 // emuleapp <-> emuleapp

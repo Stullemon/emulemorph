@@ -98,12 +98,11 @@ struct PartFileStamp {
 class CClientReqSocket;
 class CFriend;
 
-class CEdt; //<<--enkeyDev(th1) -EDT-
 
 class CUpDownClient: public CLoggable
 {
 	friend class CUploadQueue;
-	friend class CEdt; //<<--enkeyDev(th1) -EDT-
+
 public:
 	//base
 	CUpDownClient(CClientReqSocket* sender = 0);
@@ -186,14 +185,6 @@ public:
 	uint8			GetSourceExchangeVersion()	{return m_bySourceExchangeVer;}
 	
 	uint32			GetAskTime()	{return AskTime;} //MORPH - Added by SiRoB - Smart Upload Control v2 (SUC) [lovelace]
-	
-	// START enkeyDev(th1) -EDT-
-	bool			GetDownloadTimeVersion()	{return m_DownloadTimeVer;}
-	const CTime &	GetDownloadTime()			{return m_DownloadTime;}
-	uint32			GetDownloadTimeVal()		{return m_DownloadTimeVal;}
-	uint32			GetDownloadTimeErr()		{return m_DownloadTimeErr;}
-	void			EstimateDownloadTime(uint32 &avg_time, uint32 &err_time);
-	// END enkeyDev(th1) -EDT-
 	
 	void			SendPublicKeyPacket();
 	void			SendSignaturePacket();
@@ -302,7 +293,6 @@ public:
 	void			SetRemoteQueueFull( bool flag )	{m_bRemoteQueueFull = flag;}
 	bool			IsRemoteQueueFull()			{return m_bRemoteQueueFull;}
 	void			SetRemoteQueueRank(uint16 nr);
-	void			SetRemoteEDT(uint32 avg, uint32 err); //<<-- enkeyDEV(th1) -EDT-
 	void			DrawStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
 	void			EnableL2HAC()				{m_l2hac_enabled = true;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
 	void			DisableL2HAC()				{m_l2hac_enabled = false;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
@@ -458,10 +448,6 @@ private:
 
 	uint32	m_L2HAC_time;			//<<-- enkeyDEV(th1) -L2HAC-
 
-	uint32	m_DownloadTimeVer;		//<<-- enkeyDev(th1) -EDT-
-	CTime	m_DownloadTime;			//<<-- enkeyDev(th1) -EDT-
-	uint32	m_DownloadTimeVal;		//<<-- enkeyDev(th1) -EDT-
-	uint32	m_DownloadTimeErr;		//<<-- enkeyDev(th1) -EDT-
 
 	ESecureIdentState	m_SecureIdentState;
 	uint8	m_byInfopacketsReceived;			// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )

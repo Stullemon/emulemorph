@@ -368,7 +368,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					uint32 rank;
 					data.Read(&rank,4);
 					client->SetRemoteQueueRank(rank);
-					client->SetRemoteEDT(0, EDT_UNDEFINED); //<<-- enkeyDev(th1) -EDT-
 					break;
 				}
 				case OP_ACCEPTUPLOADREQ:{
@@ -1043,14 +1042,6 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					memcpy(&newrank,packet+0,2);
 					client->SetRemoteQueueFull(false);
 					client->SetRemoteQueueRank(newrank);
-					// START enkeyDev(th1) -EDT-
-					if (client->GetDownloadTimeVersion()) {
-						uint32 avg_time, err_time;
-						memcpy(&avg_time,packet+4,4);
-						memcpy(&err_time,packet+8,4);
-						client->SetRemoteEDT(avg_time, err_time);
-					}
-					// END enkeyDev(th1) -EDT-
 					break;
 				}
  				case OP_REQUESTSOURCES:{

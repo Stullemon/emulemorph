@@ -235,7 +235,6 @@ void CUpDownClient::SendFileRequest(){
 	if( IsEmuleClient() ){
 		SetRemoteQueueFull( true );
 		SetRemoteQueueRank(0);
-		SetRemoteEDT(0, EDT_UNDEFINED); //<<-- enkeyDev(th1) -EDT-
 	}	
 	if(IsSourceRequestAllowed()) {
 		reqfile->SetLastAnsweredTimeTimeout();
@@ -483,7 +482,6 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 				SetRemoteQueueFull(false);
 			SetRemoteQueueRank(0);
 			SetAskedCountDown(0);
-			SetRemoteEDT(0, EDT_UNDEFINED); //<<-- enkeyDev(th1) -EDT-
 		}
 		UpdateDisplayedInfo(true);
 	}
@@ -949,15 +947,6 @@ void CUpDownClient::SetRemoteQueueRank(uint16 nr){
 	m_nRemoteQueueRank = nr;
 	UpdateDisplayedInfo();
 }
-
-// START enkeyDev(th1) -EDT-
-void CUpDownClient::SetRemoteEDT(uint32 avg, uint32 err){
- 	m_DownloadTime = CTime::GetCurrentTime() + CTimeSpan(avg);
-	m_DownloadTimeErr = err;
-	m_DownloadTimeVal = avg;
-	UpdateDisplayedInfo();
-}
-// END enkeyDev(th1) -EDT-
 
 void CUpDownClient::UDPReaskACK(uint16 nNewQR){
 	m_bUDPPending = false;

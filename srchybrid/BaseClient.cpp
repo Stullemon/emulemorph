@@ -187,8 +187,6 @@ void CUpDownClient::Init(){
 	m_last_l2hac_exec = 0;				//<<--enkeyDEV(th1) -L2HAC-
 	m_L2HAC_time = 0;					//<<--enkeyDEV(th1) -L2HAC-
 	m_l2hac_enabled = false;			//<<--enkeyDEV(th1) -L2HAC- lowid side
-	m_DownloadTimeVer = 0;				//<<--enkeyDev(th1) -EDT-
-	SetRemoteEDT(0, EDT_UNDEFINED);		//<<--enkeyDev(th1) -EDT-
 
 	// khaos::kmod+
 	m_iLastSwapAttempt = 0;
@@ -621,7 +619,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 	//uint32 tagcount = 8; //+1;
 	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	uint32 tagcount = 10; //+2;//<<--enkeyDEV(th1) -L2HAC- -EDT- tag
+	uint32 tagcount = 9; //+1;//<<--enkeyDEV(th1) -L2HAC- tag
 	data.Write(&tagcount,4);
 	CTag tag(ET_COMPRESSION,1);
 	tag.WriteTagToFile(&data);
@@ -660,8 +658,6 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 
 	CTag tag9(ET_L2HAC,FILEREASKTIME);	//<<--enkeyDEV(th1) -L2HAC-
 	tag9.WriteTagToFile(&data);			//<<--enkeyDEV(th1) -L2HAC-
-	CTag tag10(ET_DOWNLOADTIME,1);		//<<--enkeyDev(th1) -EDT-
-	tag10.WriteTagToFile(&data);		//<<--enkeyDev(th1) -EDT-
 	Packet* packet = new Packet(&data,OP_EMULEPROT);
 	if (!bAnswer)
 		packet->opcode = OP_EMULEINFO;
@@ -708,7 +704,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize){
 	}
 	m_bEmuleProtocol = true;
 	m_L2HAC_time = 0;			//<<--enkeyDEV(th1) -L2HAC-
-	m_DownloadTimeVer = 0;		//<<-- enkeyDev(th1) -EDT-
 
 	uint32 tagcount;
 	data.Read(&tagcount,4);
@@ -761,11 +756,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize){
 				m_L2HAC_time = temptag.tag.intvalue;
 				break;
 			// END enkeyDEV(th1) -L2HAC-
-			// START enkeyDev(th1) -EDT-
-			case ET_DOWNLOADTIME:
-				m_DownloadTimeVer = temptag.tag.intvalue;
-				break;
-			// END enkeyDev(th1) -EDT-				
  			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 			case ET_MOD_VERSION: 
 				m_clientModString = temptag.tag.stringvalue;
@@ -788,7 +778,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize){
 		m_byAcceptCommentVer = 0;
 		m_nUDPPort = 0;
 		m_L2HAC_time = 0;			//<<-- enkeyDEV(th1) -L2HAC-
-		m_DownloadTimeVer = 0;		//<<-- enkeyDev(th1) -EDT-
 	}
 	ReGetClientSoft();
 	m_byInfopacketsReceived |= IP_EMULEPROTPACK;

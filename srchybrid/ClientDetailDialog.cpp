@@ -260,20 +260,6 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DSCORE)->SetWindowText("-");
 
-	// START enkeyDev(th1) -EDT-
-	if (file) {
-		uint32 avg_time;
-		uint32 err_time;
-		m_client->EstimateDownloadTime(avg_time, err_time);
-		if (m_client->GetDownloadTimeVersion())
-			GetDlgItem(IDC_EDTINFO)->SetWindowText(theApp.m_edt.FormatEDT(avg_time, err_time, CTime::GetCurrentTime() + CTimeSpan(avg_time)));
-		else
-			GetDlgItem(IDC_EDTINFO)->SetWindowText(theApp.m_edt.FormatEDT(avg_time, err_time, CTime::GetCurrentTime() + CTimeSpan(avg_time)) + " (N.S.)");
-	}
-	else
-		GetDlgItem(IDC_EDTINFO)->SetWindowText("");
-	// END enkeyDev(th1) -EDT-
-
 	return true;
 }
 

@@ -21,7 +21,6 @@ FIXED: Some change related to start crashing when a known.met file is corrupted 
 FIXED: FakeCheck now worked in search windows [SiRoB]
 TWEAKED: PowerShare Limit more occurate [SiRoB]
 CHANGED: reduce HD head moving (bluecow)[AndCycle]
-ADDED: Estimate Download Time(enkeyDEV)[AndCycle]
 ADDED: Lowid to Highid Automatic Callback(enkeyDEV)[AndCycle]
 
 ----------------------------------------
