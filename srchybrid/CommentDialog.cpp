@@ -8,17 +8,18 @@
 //
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 //GNU General Public License for more details.
 //
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#include "stdafx.h" 
-#include "emule.h" 
+#include "stdafx.h"
+#include "emule.h"
 #include "CommentDialog.h"
 #include "KnownFile.h"
 #include "OtherFunctions.h"
+#include "Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -27,82 +28,86 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-// CommentDialog dialog 
+// CommentDialog dialog
 
-IMPLEMENT_DYNAMIC(CCommentDialog, CDialog) 
-CCommentDialog::CCommentDialog(CKnownFile* file) 
-   : CDialog(CCommentDialog::IDD, 0) 
-{ 
-   m_file = file; 
-} 
+IMPLEMENT_DYNAMIC(CCommentDialog, CDialog)
 
-CCommentDialog::~CCommentDialog() 
-{ 
-} 
+BEGIN_MESSAGE_MAP(CCommentDialog, CDialog)
+	ON_BN_CLICKED(IDCOK, OnBnClickedOk)
+	ON_BN_CLICKED(IDCCANCEL, OnBnClickedCancel)
+	ON_BN_CLICKED(IDC_RESET, OnBnClickedReset)
+END_MESSAGE_MAP()
 
-void CCommentDialog::DoDataExchange(CDataExchange* pDX) 
-{ 
-   CDialog::DoDataExchange(pDX); 
-   DDX_Control(pDX, IDC_RATELIST, ratebox);//for rate 
-} 
+CCommentDialog::CCommentDialog(CKnownFile* file)
+	: CDialog(CCommentDialog::IDD, 0)
+{
+	m_file = file;
+}
 
-BEGIN_MESSAGE_MAP(CCommentDialog, CDialog) 
-   ON_BN_CLICKED(IDCOK, OnBnClickedApply) 
-   ON_BN_CLICKED(IDCCANCEL, OnBnClickedCancel) 
-END_MESSAGE_MAP() 
+CCommentDialog::~CCommentDialog()
+{
+}
 
+void CCommentDialog::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_RATELIST, m_ratebox);
+}
 
+void CCommentDialog::OnBnClickedOk()
+{
+	CString SValue;
+	GetDlgItem(IDC_CMT_TEXT)->GetWindowText(SValue);
+	m_file->SetFileComment(SValue);
+	m_file->SetFileRate((uint8)m_ratebox.GetCurSel());
+	CDialog::OnOK();
+}
 
-void CCommentDialog::OnBnClickedApply() 
-{ 
-   CString SValue; 
-   GetDlgItem(IDC_CMT_TEXT)->GetWindowText(SValue); 
-   m_file->SetFileComment(SValue); 
-   m_file->SetFileRate((uint8)ratebox.GetCurSel());//for Rate//
-   CDialog::OnOK(); 
-} 
+void CCommentDialog::OnBnClickedCancel()
+{
+	CDialog::OnCancel();
+}
 
-void CCommentDialog::OnBnClickedCancel() 
-{ 
-   CDialog::OnCancel(); 
-} 
+void CCommentDialog::OnBnClickedReset()
+{
+	SetDlgItemText(IDC_CMT_TEXT, _T(""));
+	m_ratebox.SetCurSel(0);
+}
 
-BOOL CCommentDialog::OnInitDialog(){ 
-	CDialog::OnInitDialog(); 
+BOOL CCommentDialog::OnInitDialog()
+{
+	CDialog::OnInitDialog();
 	InitWindowStyles(this);
-	Localize(); 
+	Localize();
 
-	GetDlgItem(IDC_CMT_TEXT)->SetWindowText(m_file->GetFileComment()); 
-	((CEdit*)GetDlgItem(IDC_CMT_TEXT))->SetLimitText(50);
+	GetDlgItem(IDC_CMT_TEXT)->SetWindowText(m_file->GetFileComment());
+	((CEdit*)GetDlgItem(IDC_CMT_TEXT))->SetLimitText(MAXFILECOMMENTLEN);
+	return TRUE;
+}
 
-	return TRUE; 
-} 
+void CCommentDialog::Localize(void)
+{
+	GetDlgItem(IDCCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
+	GetDlgItem(IDC_RESET)->SetWindowText(GetResString(IDS_PW_RESET));
 
-void CCommentDialog::Localize(void){ 
-   GetDlgItem(IDCOK)->SetWindowText(GetResString(IDS_PW_APPLY)); 
-   GetDlgItem(IDCCANCEL)->SetWindowText(GetResString(IDS_CANCEL)); 
+	GetDlgItem(IDC_CMT_LQUEST)->SetWindowText(GetResString(IDS_CMT_QUEST));
+	GetDlgItem(IDC_CMT_LAIDE)->SetWindowText(GetResString(IDS_CMT_AIDE));
 
-   GetDlgItem(IDC_CMT_LQUEST)->SetWindowText(GetResString(IDS_CMT_QUEST)); 
-   GetDlgItem(IDC_CMT_LAIDE)->SetWindowText(GetResString(IDS_CMT_AIDE)); 
+	GetDlgItem(IDC_RATEQUEST)->SetWindowText(GetResString(IDS_CMT_RATEQUEST));
+	GetDlgItem(IDC_RATEHELP)->SetWindowText(GetResString(IDS_CMT_RATEHELP));
 
-   //for rate// 
-   GetDlgItem(IDC_RATEQUEST)->SetWindowText(GetResString(IDS_CMT_RATEQUEST)); 
-   GetDlgItem(IDC_RATEHELP)->SetWindowText(GetResString(IDS_CMT_RATEHELP)); 
+	while (m_ratebox.GetCount()>0)
+		m_ratebox.DeleteString(0);
+	m_ratebox.AddString(GetResString(IDS_CMT_NOTRATED));
+	m_ratebox.AddString(GetResString(IDS_CMT_FAKE));
+	m_ratebox.AddString(GetResString(IDS_CMT_POOR));
+	m_ratebox.AddString(GetResString(IDS_CMT_GOOD));
+	m_ratebox.AddString(GetResString(IDS_CMT_FAIR));
+	m_ratebox.AddString(GetResString(IDS_CMT_EXCELLENT));
+	if (m_ratebox.SetCurSel(m_file->GetFileRate()) == CB_ERR)
+		m_ratebox.SetCurSel(0);
 
-   while (ratebox.GetCount()>0) ratebox.DeleteString(0); 
-   
-   ratebox.AddString(GetResString(IDS_CMT_NOTRATED)); 
-   ratebox.AddString(GetResString(IDS_CMT_FAKE)); 
-   ratebox.AddString(GetResString(IDS_CMT_POOR)); 
-   ratebox.AddString(GetResString(IDS_CMT_GOOD)); 
-   ratebox.AddString(GetResString(IDS_CMT_FAIR)); 
-   ratebox.AddString(GetResString(IDS_CMT_EXCELLENT)); 
-   if (ratebox.SetCurSel(m_file->GetFileRate())==CB_ERR)ratebox.SetCurSel(0) ; 
-   //--end rate--//
-
-   CString strTitle; 
-   strTitle.Format(GetResString(IDS_CMT_TITLE),m_file->GetFileName());
-
-   SetWindowText(strTitle); 
-    
-} 
+	CString strTitle;
+	strTitle.Format(GetResString(IDS_CMT_TITLE),m_file->GetFileName());
+	SetWindowText(strTitle);
+}

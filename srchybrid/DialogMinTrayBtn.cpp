@@ -48,12 +48,12 @@ END_TM_PART_STATES()
 
 #define BMP_TRAYBTN_WIDTH		(21)
 #define BMP_TRAYBTN_HEIGHT		(21)
-#define BMP_TRAYBTN_BLUE		"TRAYBUTTON_LUNA_BLUE_BMP"
-#define BMP_TRAYBTN_METALLIC	"TRAYBUTTON_LUNA_METALLIC_BMP"
-#define BMP_TRAYBTN_HOMESTEAD	"TRAYBUTTON_LUNA_HOMESTEAD_BMP"
+#define BMP_TRAYBTN_BLUE		_T("TRAYBUTTON_LUNA_BLUE_BMP")
+#define BMP_TRAYBTN_METALLIC	_T("TRAYBUTTON_LUNA_METALLIC_BMP")
+#define BMP_TRAYBTN_HOMESTEAD	_T("TRAYBUTTON_LUNA_HOMESTEAD_BMP")
 #define BMP_TRAYBTN_TRANSCOLOR	(RGB(255,0,255))
 
-TEMPLATE const CHAR *CDialogMinTrayBtn<BASE>::m_pszMinTrayBtnBmpName[] = { BMP_TRAYBTN_BLUE, BMP_TRAYBTN_METALLIC, BMP_TRAYBTN_HOMESTEAD };
+TEMPLATE const TCHAR *CDialogMinTrayBtn<BASE>::m_pszMinTrayBtnBmpName[] = { BMP_TRAYBTN_BLUE, BMP_TRAYBTN_METALLIC, BMP_TRAYBTN_HOMESTEAD };
 
 #define VISUALSTYLESXP_DEFAULTFILE		L"LUNA.MSSTYLES"
 #define VISUALSTYLESXP_BLUE				0
@@ -105,7 +105,7 @@ TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnInit()
 	// - Load the 'MSIMG32.DLL' only, if it's really needed.
 	if (!afxData.bWin95 && bBmpResult && !_TransparentBlt)
 	{
-		HMODULE hMsImg32= LoadLibrary("MSIMG32.DLL");
+		HMODULE hMsImg32= LoadLibrary(_T("MSIMG32.DLL"));
 		if (hMsImg32)
 		{
 			(FARPROC &)_TransparentBlt= GetProcAddress(hMsImg32, "TransparentBlt");
@@ -514,6 +514,5 @@ TEMPLATE BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnInitBitmap()
 	m_bmMinTrayBtnBitmap.DeleteObject();
 	if ((nColor= GetVisualStylesXPColor()) == -1)
 		return FALSE;
-	const CHAR *pszBmpName= m_pszMinTrayBtnBmpName[nColor];
-	return m_bmMinTrayBtnBitmap.LoadBitmap(pszBmpName);
+	return m_bmMinTrayBtnBitmap.LoadBitmap(m_pszMinTrayBtnBmpName[nColor]);
 }

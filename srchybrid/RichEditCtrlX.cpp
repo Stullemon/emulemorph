@@ -79,7 +79,8 @@ CRichEditCtrlX& CRichEditCtrlX::operator<<(LPCTSTR psz)
 
 CRichEditCtrlX& CRichEditCtrlX::operator<<(char* psz)
 {
-	ReplaceSel(psz);
+	USES_CONVERSION;
+	ReplaceSel(A2T(psz));
 	return *this;
 }
 

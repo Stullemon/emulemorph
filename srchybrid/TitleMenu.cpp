@@ -35,13 +35,13 @@ CTitleMenu::CTitleMenu()
 	clRight=::GetSysColor(27);  //COLOR_GRADIENTACTIVECAPTION
 	clText=::GetSysColor(COLOR_CAPTIONTEXT);
 	
-	hinst_msimg32 = LoadLibrary( "msimg32.dll" );
+	hinst_msimg32 = LoadLibrary(_T("msimg32.dll"));
 	m_bCanDoGradientFill = FALSE;
 	
 	if(hinst_msimg32)
 	{
 		m_bCanDoGradientFill = TRUE;		
-		dllfunc_GradientFill = ((LPFNDLLFUNC1) GetProcAddress( hinst_msimg32, "GradientFill" ));
+		dllfunc_GradientFill = ((LPFNDLLFUNC1) GetProcAddress(hinst_msimg32, "GradientFill"));
 	}
 	bDrawEdge=false;
 	flag_edge=BDR_SUNKENINNER;

@@ -26,7 +26,7 @@ class CPreviewThread : public CWinThread
 	DECLARE_DYNCREATE(CPreviewThread)
 
 public:
-	virtual	BOOL	InitInstance() {return true;}
+	virtual	BOOL	InitInstance();
 	virtual int		Run();
 	void	SetValues(CPartFile* pPartFile,CString player);
 

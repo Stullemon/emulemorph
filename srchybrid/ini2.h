@@ -46,9 +46,9 @@ public:
    // the module-directory will be add to the FileName,
    // to avoid storing in the windows-directory
    // bModulPath=TRUE: ModulDir, bModulPath=FALSE: CurrentDir
-   static void AddModulPath(CString& strFileName,BOOL bModulPath = TRUE);
-   static CString GetDefaultSection();
-   static CString GetDefaultIniFile(BOOL bModulPath = TRUE);
+	static void AddModulPath(CString& strFileName, BOOL bModulPath = TRUE);
+	static CString GetDefaultSection();
+	static CString GetDefaultIniFile(BOOL bModulPath = TRUE);
 
 	CIni( BOOL bModulPath = TRUE);
 	CIni(CIni const& Ini, BOOL bModulPath = TRUE);
@@ -56,89 +56,91 @@ public:
 	CIni(CString const& strFileName, CString const& strSection, BOOL bModulPath = TRUE);
 	virtual ~CIni();
 
-	void SetFileName(CString const& strFileName);
-	void SetSection(CString const& strSection);
-	CString const& GetFileName() const;
-	CString const& GetSection() const;
-private:
-	void Init(LPCSTR strIniFile, LPCSTR strSection = NULL);
-public:
-	CString		GetString(CString strEntry,	LPCSTR strDefault=NULL,					LPCSTR strSection = NULL);
-	double		GetDouble(CString strEntry,	double fDefault = 0.0,					LPCSTR strSection = NULL);
-	float		GetFloat(CString strEntry,	float fDefault = 0.0,					LPCSTR strSection = NULL);
-	int			GetInt(CString strEntry,	int nDefault = 0,						LPCSTR strSection = NULL);
-	WORD		GetWORD(CString strEntry,	WORD nDefault = 0,						LPCSTR strSection = NULL);
-	BOOL		GetBool(CString strEntry,	BOOL bDefault = FALSE,					LPCSTR strSection = NULL);
-	CPoint		GetPoint(CString strEntry,	CPoint ptDefault = CPoint(0,0),			LPCSTR strSection = NULL);
-	CRect		GetRect(CString strEntry,	CRect rectDefault = CRect(0,0,0,0),		LPCSTR strSection = NULL);
-	COLORREF	GetColRef(CString strEntry,	COLORREF crDefault = RGB(128,128,128),	LPCSTR strSection = NULL);
-	BOOL		GetBinary(LPCTSTR lpszEntry, BYTE** ppData, UINT* pBytes,			LPCTSTR strSection = NULL);
+	void SetFileName(const CString& strFileName);
+	void SetSection(const CString& strSection);
+	const CString& GetFileName() const;
+	const CString& GetSection() const;
 
-	void		WriteString(CString strEntry,CString	str,		LPCSTR strSection = NULL);
-	void		WriteDouble(CString strEntry,double		f,			LPCSTR strSection = NULL);
-	void		WriteFloat(CString strEntry,float		f,			LPCSTR strSection = NULL);
-	void		WriteInt(CString strEntry,int			n,			LPCSTR strSection = NULL);
-	void		WriteWORD(CString strEntry,WORD		n,			LPCSTR strSection = NULL);
-	void		WriteBool(CString strEntry,BOOL			b,			LPCSTR strSection = NULL);
-	void		WritePoint(CString strEntry,CPoint		pt,			LPCSTR strSection = NULL);
-	void		WriteRect(CString strEntry,CRect		rect,		LPCSTR strSection = NULL);
-	void		WriteColRef(CString strEntry,COLORREF	cr,			LPCSTR strSection = NULL);
-	BOOL		WriteBinary(LPCTSTR lpszEntry, LPBYTE pData, UINT nBytes, LPCTSTR strSection = NULL);
+	CString		GetString(LPCTSTR lpszEntry,	LPCTSTR		lpszDefault = NULL,				LPCTSTR lpszSection = NULL);
+	double		GetDouble(LPCTSTR lpszEntry,	double		fDefault = 0.0,					LPCTSTR lpszSection = NULL);
+	float		GetFloat(LPCTSTR lpszEntry,		float		fDefault = 0.0F,				LPCTSTR lpszSection = NULL);
+	int			GetInt(LPCTSTR lpszEntry,		int			nDefault = 0,					LPCTSTR lpszSection = NULL);
+	ULONGLONG	GetUInt64(LPCTSTR lpszEntry,	ULONGLONG	nDefault = 0,					LPCTSTR lpszSection = NULL);
+	WORD		GetWORD(LPCTSTR lpszEntry,		WORD		nDefault = 0,					LPCTSTR lpszSection = NULL);
+	BOOL		GetBool(LPCTSTR lpszEntry,		BOOL		bDefault = FALSE,				LPCTSTR lpszSection = NULL);
+	CPoint		GetPoint(LPCTSTR lpszEntry,		CPoint		ptDefault = CPoint(0,0),		LPCTSTR lpszSection = NULL);
+	CRect		GetRect(LPCTSTR lpszEntry,		CRect		rectDefault = CRect(0,0,0,0),	LPCTSTR lpszSection = NULL);
+	COLORREF	GetColRef(LPCTSTR lpszEntry,	COLORREF	crDefault = RGB(128,128,128),	LPCTSTR lpszSection = NULL);
+	BOOL		GetBinary(LPCTSTR lpszEntry,	BYTE** ppData, UINT* pBytes,				LPCTSTR lpszSection = NULL);
 
-	void		SerGetString(	BOOL bGet,CString	& str,	CString strEntry,	LPCSTR strSection = NULL,	LPCSTR strDefault=NULL);
-	void		SerGetDouble(	BOOL bGet,double	& f,	CString strEntry,	LPCSTR strSection = NULL,	double fDefault = 0.0);
-	void		SerGetFloat(	BOOL bGet,float		& f,	CString strEntry,	LPCSTR strSection = NULL,	float fDefault = 0.0);
-	void		SerGetInt(		BOOL bGet,int		& n,	CString strEntry,	LPCSTR strSection = NULL,	int nDefault = 0);
-	void		SerGetDWORD(	BOOL bGet,DWORD		& n,	CString strEntry,	LPCSTR strSection = NULL,	DWORD nDefault = 0);
-	void		SerGetBool(		BOOL bGet,BOOL		& b,	CString strEntry,	LPCSTR strSection = NULL,	BOOL bDefault = FALSE);
-	void		SerGetPoint(	BOOL bGet,CPoint	& pt,	CString strEntry,	LPCSTR strSection = NULL,	CPoint ptDefault = CPoint(0,0));
-	void		SerGetRect(		BOOL bGet,CRect		& rect,	CString strEntry,	LPCSTR strSection = NULL,	CRect rectDefault = CRect(0,0,0,0));
-	void		SerGetColRef(	BOOL bGet,COLORREF	& cr,	CString strEntry,	LPCSTR strSection = NULL,	COLORREF crDefault = RGB(128,128,128));
+	void		WriteString(LPCTSTR strEntry,	LPCTSTR		s,								LPCTSTR lpszSection = NULL);
+	void		WriteDouble(LPCTSTR lpszEntry,	double		f,								LPCTSTR lpszSection = NULL);
+	void		WriteFloat(LPCTSTR lpszEntry,	float		f,								LPCTSTR lpszSection = NULL);
+	void		WriteInt(LPCTSTR lpszEntry,		int			n,								LPCTSTR lpszSection = NULL);
+	void		WriteUInt64(LPCTSTR lpszEntry,	ULONGLONG	n,								LPCTSTR lpszSection = NULL);
+	void		WriteWORD(LPCTSTR lpszEntry,	WORD		n,								LPCTSTR lpszSection = NULL);
+	void		WriteBool(LPCTSTR lpszEntry,	BOOL		b,								LPCTSTR lpszSection = NULL);
+	void		WritePoint(LPCTSTR lpszEntry,	CPoint		pt,								LPCTSTR lpszSection = NULL);
+	void		WriteRect(LPCTSTR lpszEntry,	CRect		rect,							LPCTSTR lpszSection = NULL);
+	void		WriteColRef(LPCTSTR lpszEntry,	COLORREF	cr,								LPCTSTR lpszSection = NULL);
+	BOOL		WriteBinary(LPCTSTR lpszEntry,	LPBYTE pData, UINT nBytes,					LPCTSTR lpszSection = NULL);
 
-	void		SerGet(	BOOL bGet,CString	& str,	CString strEntry,	LPCSTR strSection = NULL,	LPCSTR strDefault=NULL);
-	void		SerGet(	BOOL bGet,double	& f,	CString strEntry,	LPCSTR strSection = NULL,	double fDefault = 0.0);
-	void		SerGet(	BOOL bGet,float		& f,	CString strEntry,	LPCSTR strSection = NULL,	float fDefault = 0.0);
-	void		SerGet(	BOOL bGet,int		& n,	CString strEntry,	LPCSTR strSection = NULL,	int nDefault = 0);
-	void		SerGet(	BOOL bGet,short		& n,	CString strEntry,	LPCSTR strSection = NULL,	int nDefault = 0);
-	void		SerGet(	BOOL bGet,DWORD		& n,	CString strEntry,	LPCSTR strSection = NULL,	DWORD nDefault = 0);
-	void		SerGet(	BOOL bGet,WORD		& n,	CString strEntry,	LPCSTR strSection = NULL,	DWORD nDefault = 0);
-//	void		SerGet(	BOOL bGet,BOOL		& b,	CString strEntry,	LPCSTR strSection = NULL,	BOOL bDefault = FALSE);
-	void		SerGet(	BOOL bGet,CPoint	& pt,	CString strEntry,	LPCSTR strSection = NULL,	CPoint ptDefault = CPoint(0,0));
-	void		SerGet(	BOOL bGet,CRect		& rect,	CString strEntry,	LPCSTR strSection = NULL,	CRect rectDefault = CRect(0,0,0,0));
-//	void		SerGet(	BOOL bGet,COLORREF	& cr,	CString strEntry,	LPCSTR strSection = NULL,	COLORREF crDefault = RGB(128,128,128));
+	void		SerGetString(	BOOL bGet, CString&		s,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	LPCTSTR strDefault = NULL);
+	void		SerGetDouble(	BOOL bGet, double&		f,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	double fDefault = 0.0);
+	void		SerGetFloat(	BOOL bGet, float&		f,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	float fDefault = 0.0);
+	void		SerGetInt(		BOOL bGet, int&			n,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	int nDefault = 0);
+	void		SerGetDWORD(	BOOL bGet, DWORD&		n,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	DWORD nDefault = 0);
+	void		SerGetBool(		BOOL bGet, BOOL&		b,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	BOOL bDefault = FALSE);
+	void		SerGetPoint(	BOOL bGet, CPoint&		pt,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	CPoint ptDefault = CPoint(0,0));
+	void		SerGetRect(		BOOL bGet, CRect&		rc,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	CRect rectDefault = CRect(0,0,0,0));
+	void		SerGetColRef(	BOOL bGet, COLORREF&	cr,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	COLORREF crDefault = RGB(128,128,128));
+
+	void		SerGet(	BOOL bGet, CString&	 s,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	LPCTSTR lpszDefault = NULL);
+	void		SerGet(	BOOL bGet, double&	 f,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	double fDefault = 0.0);
+	void		SerGet(	BOOL bGet, float&	 f,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	float fDefault = 0.0F);
+	void		SerGet(	BOOL bGet, int&		 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	int nDefault = 0);
+	void		SerGet(	BOOL bGet, short&	 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	int nDefault = 0);
+	void		SerGet(	BOOL bGet, DWORD&	 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	DWORD nDefault = 0);
+	void		SerGet(	BOOL bGet, WORD&	 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	DWORD nDefault = 0);
+//	void		SerGet(	BOOL bGet, BOOL&	 b,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	BOOL bDefault = FALSE);
+	void		SerGet(	BOOL bGet, CPoint&	 pt, LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	CPoint ptDefault = CPoint(0,0));
+	void		SerGet(	BOOL bGet, CRect&	 rc, LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	CRect rectDefault = CRect(0,0,0,0));
+//	void		SerGet(	BOOL bGet, COLORREF& cr, LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	COLORREF crDefault = RGB(128,128,128));
    
 //ARRAYs
-	void		SerGet(	BOOL bGet,CString	* str,	int nCount, CString strEntry, LPCSTR strSection = NULL, LPCSTR strDefault=NULL);
-	void		SerGet(	BOOL bGet,double	* f,	int nCount, CString strEntry, LPCSTR strSection = NULL, double fDefault = 0.0);
-	void		SerGet(	BOOL bGet,float		* f,	int nCount, CString strEntry, LPCSTR strSection = NULL, float fDefault = 0.0);
-	void		SerGet(	BOOL bGet,unsigned char	* n,int nCount, CString strEntry, LPCSTR strSection = NULL, unsigned char nDefault = 0);
-	void		SerGet(	BOOL bGet,int		* n,	int nCount, CString strEntry, LPCSTR strSection = NULL, int nDefault = 0);
-	void		SerGet(	BOOL bGet,short		* n,	int nCount, CString strEntry, LPCSTR strSection = NULL, int nDefault = 0);
-	void		SerGet(	BOOL bGet,DWORD		* n,	int nCount, CString strEntry, LPCSTR strSection = NULL, DWORD nDefault = 0);
-	void		SerGet(	BOOL bGet,WORD		* n,	int nCount, CString strEntry, LPCSTR strSection = NULL, DWORD nDefault = 0);
-	void		SerGet(	BOOL bGet,CPoint	* pt,	int nCount, CString strEntry, LPCSTR strSection = NULL, CPoint ptDefault = CPoint(0,0));
-	void		SerGet(	BOOL bGet,CRect		* rect,	int nCount, CString strEntry, LPCSTR strSection = NULL, CRect rectDefault = CRect(0,0,0,0));
+	void		SerGet(	BOOL bGet, CString*	s,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, LPCTSTR lpszDefault = NULL);
+	void		SerGet(	BOOL bGet, double*	f,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, double fDefault = 0.0);
+	void		SerGet(	BOOL bGet, float*	f,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, float fDefault = 0.0F);
+	void		SerGet(	BOOL bGet, BYTE*	n,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, BYTE nDefault = 0);
+	void		SerGet(	BOOL bGet, int*		n,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, int nDefault = 0);
+	void		SerGet(	BOOL bGet, short*	n,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, int nDefault = 0);
+	void		SerGet(	BOOL bGet, DWORD*	n,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, DWORD nDefault = 0);
+	void		SerGet(	BOOL bGet, WORD*	n,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, DWORD nDefault = 0);
+	void		SerGet(	BOOL bGet, CPoint*	pt,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, CPoint ptDefault = CPoint(0,0));
+	void		SerGet(	BOOL bGet, CRect*	rc,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, CRect rectDefault = CRect(0,0,0,0));
 
-	int			Parse(CString &strIn, int nOffset, CString &strOut);
+	int			Parse(const CString&, int nOffset, CString &strOut);
 	void		DeleteKey(LPCTSTR pszKey);
    //MAKRO :
    //SERGET(bGet,value) SerGet(bGet,value,#value)
 
 private:
-	char* GetLPCSTR(CString strEntry,LPCSTR strSection,LPCSTR strDefault);
-   BOOL  m_bModulPath;  //TRUE: Filenames without path take the Modulepath
+	void Init(LPCTSTR lpszIniFile, LPCTSTR lpszSection = NULL);
+	LPTSTR GetLPCSTR(LPCTSTR lpszEntry, LPCTSTR lpszSection, LPCTSTR lpszDefault);
+
+	BOOL  m_bModulPath;  //TRUE: Filenames without path take the Modulepath
                         //FALSE: Filenames without path take the CurrentDirectory
 
 #define MAX_INI_BUFFER 256
-	char	m_chBuffer[MAX_INI_BUFFER];
+	TCHAR	m_chBuffer[MAX_INI_BUFFER];
 	CString m_strFileName;
 	CString m_strSection;
 //////////////////////////////////////////////////////////////////////
 // statische Methoden
 //////////////////////////////////////////////////////////////////////
 public:
-	static CString	Read( CString const& strFileName, CString const& strSection, CString const& strEntry, CString const& strDefault);
-	static void		Write(CString const& strFileName, CString const& strSection, CString const& strEntry, CString const& strValue);
+	static CString	Read( LPCTSTR strFileName, LPCTSTR strSection, LPCTSTR strEntry, LPCTSTR strDefault);
+	static void		Write(LPCTSTR strFileName, LPCTSTR strSection, LPCTSTR strEntry, LPCTSTR strValue);
 };
 
 #endif // !defined(AFX_INI_H__EEBAF800_182A_11D3_B51F_00104B4A13B4__INCLUDED_)

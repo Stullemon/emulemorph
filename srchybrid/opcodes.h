@@ -56,6 +56,7 @@
 #define	FILEREASKTIME			MIN2MS(29)	//29 mins
 #define SERVERREASKTIME			MIN2MS(15)	//15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
 #define UDPSERVERREASKTIME		MIN2MS(30)	//30 mins
+#define	MAX_SERVERFAILCOUNT		10
 #define SOURCECLIENTREASKS		MIN2MS(40)	//40 mins
 #define SOURCECLIENTREASKF		MIN2MS(5)	//5 mins
 #define KADEMLIAASKTIME			SEC2MS(1)	//1 second
@@ -81,15 +82,16 @@
 #define	MAX_SOURCES_FILE_UDP	50
 #define SESSIONMAXTRANS			(10*1024*1024) // 10 MBytes. "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
+#define	MAXFILECOMMENTLEN		50
 // MOD Note: end
 
-#define CONFIGFOLDER			"config\\"
+#define CONFIGFOLDER			_T("config\\")
 #define MAXCONPER5SEC			20	
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
 #define	UPLOAD_CLIENT_DATARATE	3072		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
 //#define	MAX_UP_CLIENTS_ALLOWED	250		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
-#define	MIN_UP_CLIENTS_ALLOWED	0		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
+#define	MIN_UP_CLIENTS_ALLOWED	2		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define MINNUMBEROFTRICKLEUPLOADS 0
 #define MINWAITBEFOREOPENANOTHERSLOTMS 1000
 #define DOWNLOADTIMEOUT			SEC2MS(100)
@@ -103,12 +105,12 @@
 #define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   3000
 #define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
 #define MINWAIT_BEFORE_CALCULATE_DL_RATE        1000
-#define MAXAVERAGETIME			SEC2MS(40) //millisecs
 #define CLIENTBANTIME			HR2MS(2)	// 2h
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
 #define KEEPTRACK_TIME			HR2MS(2)	// 2h	//how long to keep track of clients which were once in the uploadqueue
 #define LOCALSERVERREQUESTS		20000		// only one local src request during this timespan (WHERE IS THIS USED?)
 #define DISKSPACERECHECKTIME	MIN2MS(15)	// SLUGFILLER: checkDiskspace
+#define CLIENTLIST_CLEANUP_TIME	MIN2MS(34)	// 34 min
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 #define	MAXFRAGSIZE				1300
@@ -231,6 +233,11 @@
 #define OP_PREVIEWANSWER		0x91	// <HASH 16><frames 1>{frames * <len 4><frame len>}
 #define OP_MULTIPACKET			0x92
 #define OP_MULTIPACKETANSWER	0x93
+#define	OP_PEERCACHE_QUERY		0x94
+#define	OP_PEERCACHE_ANSWER		0x95
+#define	OP_PEERCACHE_ACK		0x96
+#define	OP_PUBLICIP_REQ			0x97
+#define	OP_PUBLICIP_ANSWER		0x98
 
 // extened prot client <-> extened prot client UDP
 #define OP_REASKFILEPING		0x90	// <HASH 16>
@@ -241,54 +248,55 @@
 // server.met
 #define ST_SERVERNAME			0x01	// <string>
 #define ST_DESCRIPTION			0x0B	// <string>
-#define ST_PING					0x0C	// <int>
-#define ST_PREFERENCE			0x0E	// <int>
-#define ST_FAIL					0x0D	// <int>
-#define	ST_DYNIP				0x85
+#define ST_PING					0x0C	// <uint32>
+#define ST_FAIL					0x0D	// <uint32>
+#define ST_PREFERENCE			0x0E	// <uint32>
+#define	ST_DYNIP				0x85	// <string>
 //#define ST_LASTPING			0x86	// <int> No longer used.
-#define ST_MAXUSERS				0x87
-#define ST_SOFTFILES			0x88
-#define ST_HARDFILES			0x89
-#define ST_LASTPING				0x90	// <int>
-#define	ST_VERSION				0x91	// <string>|<int>
-#define	ST_UDPFLAGS				0x92	// <int>
+#define ST_MAXUSERS				0x87	// <uint32>
+#define ST_SOFTFILES			0x88	// <uint32>
+#define ST_HARDFILES			0x89	// <uint32>
+#define ST_LASTPING				0x90	// <uint32>
+#define	ST_VERSION				0x91	// <string>|<uint32>
+#define	ST_UDPFLAGS				0x92	// <uint32>
 #define	ST_AUXPORTSLIST			0x93	// <string>
+#define	ST_LOWIDUSERS			0x94	// <uint32>
 
 //file tags
-#define FT_FILENAME				 0x01
-#define TAG_NAME				"\x01"
-#define FT_FILESIZE				 0x02	// <int>
-#define TAG_SIZE				"\x02"
+#define FT_FILENAME				 0x01	// <string>
+#define TAG_NAME				"\x01"	// <string>
+#define FT_FILESIZE				 0x02	// <uint32>
+#define TAG_SIZE				"\x02"	// <uint32>
 #define FT_FILETYPE				 0x03	// <string>
-#define TAG_TYPE				"\x03"
+#define TAG_TYPE				"\x03"	// <string>
 #define FT_FILEFORMAT			 0x04	// <string>
-#define TAG_FORMAT				"\x04"
-#define FT_LASTSEENCOMPLETE		 0x05
+#define TAG_FORMAT				"\x04"	// <string>
+#define FT_LASTSEENCOMPLETE		 0x05	// <uint32>
 #define TAG_COLLECTION			"\x05"
-#define	TAG_PART_PATH			"\x06"
+#define	TAG_PART_PATH			"\x06"	// <string>
 #define	TAG_PART_HASH			"\x07"
-#define FT_TRANSFERED			 0x08	// <int>
-#define	TAG_COPIED				"\x08"
-#define FT_GAPSTART				 0x09
-#define	TAG_GAP_START			"\x09"
-#define FT_GAPEND				 0x0A
-#define	TAG_GAP_END				"\x0A"
-#define	TAG_DESCRIPTION			"\x0B"
+#define FT_TRANSFERED			 0x08	// <uint32>
+#define	TAG_COPIED				"\x08"	// <uint32>
+#define FT_GAPSTART				 0x09	// <uint32>
+#define	TAG_GAP_START			"\x09"	// <uint32>
+#define FT_GAPEND				 0x0A	// <uint32>
+#define	TAG_GAP_END				"\x0A"	// <uint32>
+#define	TAG_DESCRIPTION			"\x0B"	// <string>
 #define	TAG_PING				"\x0C"
 #define	TAG_FAIL				"\x0D"
 #define	TAG_PREFERENCE			"\x0E"
 #define TAG_PORT				"\x0F"
 #define TAG_IP_ADDRESS			"\x10"
-#define TAG_VERSION				"\x11"
+#define TAG_VERSION				"\x11"	// <string>
 #define FT_PARTFILENAME			 0x12	// <string>
-#define TAG_TEMPFILE			"\x12"
+#define TAG_TEMPFILE			"\x12"	// <string>
 //#define FT_PRIORITY			 0x13	// Not used anymore
-#define TAG_PRIORITY			"\x13"
-#define FT_STATUS				 0x14
-#define TAG_STATUS				"\x14"
-#define FT_SOURCES				 0x15
-#define TAG_AVAILABILITY		"\x15"
-#define FT_PERMISSIONS			 0x16
+#define TAG_PRIORITY			"\x13"	// <uint32>
+#define FT_STATUS				 0x14	// <uint32>
+#define TAG_STATUS				"\x14"	// <uint32>
+#define FT_SOURCES				 0x15	// <uint32>
+#define TAG_AVAILABILITY		"\x15"	// <uint32>
+#define FT_PERMISSIONS			 0x16	// <uint32>
 #define TAG_QTIME				"\x16"
 //#define FT_ULPRIORITY			 0x17	// Not used anymore
 #define TAG_PARTS				"\x17"
@@ -298,20 +306,17 @@
 #define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
 #define	FT_FLAGS				 0x22	// <uint32>
 #define	FT_DL_ACTIVE_TIME		 0x23	// <uint32>
-// statistic
-#define FT_ATTRANSFERED			 0x50
-#define FT_ATREQUESTED			 0x51
-#define FT_ATACCEPTED			 0x52
-#define FT_CATEGORY				 0x53
-#define	FT_ATTRANSFEREDHI		 0x54
+#define	FT_CORRUPTEDPARTS		 0x24	// <string>
 #define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
+// statistic
+#define FT_ATTRANSFERED			 0x50	// <uint32>
+#define FT_ATREQUESTED			 0x51	// <uint32>
+#define FT_ATACCEPTED			 0x52	// <uint32>
+#define FT_CATEGORY				 0x53	// <uint32>
+#define	FT_ATTRANSFEREDHI		 0x54	// <uint32>
 // khaos::categorymod+
 #define FT_CATRESUMEORDER		0x55
 // khaos::categorymod-
-// -khaos--+++>
-#define FT_COMPRESSIONBYTES		0x56
-#define FT_CORRUPTIONBYTES		0x57
-// <-----khaos-
 // khaos::accuratetimerem+
 #define	FT_SECONDSACTIVE		0x80
 #define	FT_INITIALBYTES			0x81
@@ -397,6 +402,13 @@
 #define TAGTYPE_STR22			0x26	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
 
 
+#define	ED2KFTSTR_AUDIO			"Audio"	// value for eD2K tag FT_FILETYPE
+#define	ED2KFTSTR_VIDEO			"Video"	// value for eD2K tag FT_FILETYPE
+#define	ED2KFTSTR_IMAGE			"Image"	// value for eD2K tag FT_FILETYPE
+#define	ED2KFTSTR_DOCUMENT		"Doc"	// value for eD2K tag FT_FILETYPE
+#define	ED2KFTSTR_PROGRAM		"Pro"	// value for eD2K tag FT_FILETYPE
+#define	ED2KFTSTR_ARCHIVE		"Arc"	// eMule internal use only
+#define	ED2KFTSTR_CDIMAGE		"Iso"	// eMule internal use only
 
 // additional media meta data tags from eDonkeyHybrid (note also the uppercase/lowercase)
 #define	FT_ED2K_MEDIA_ARTIST	"Artist"	// <string>
@@ -429,6 +441,8 @@
 #define	CT_PORT					0x0f
 #define CT_VERSION				0x11
 #define	CT_SERVER_FLAGS			0x20	// currently only used to inform a server about supported features
+#define CT_MOD_VERSION			0x55
+#define	CT_EMULECOMPAT_OPTIONS1	0xef
 #define	CT_EMULE_RESERVED1		0xf0
 #define	CT_EMULE_RESERVED2		0xf1
 #define	CT_EMULE_RESERVED3		0xf2
@@ -461,7 +475,24 @@
 #define ET_EXTENDEDREQUEST		0x25
 #define ET_COMPATIBLECLIENT		0x26
 #define ET_FEATURES				0x27
-#define ET_MOD_VERSION 			0x55
+#define ET_MOD_VERSION			CT_MOD_VERSION
+
+
+#define	PCPCK_VERSION			0x01
+
+// PeerCache packet sub objcodes
+#define	PCOP_NONE				0x00
+#define	PCOP_REQ				0x01
+#define PCOP_RES				0x02
+#define	PCOP_ACK				0x03
+
+// PeerCache tags (NOTE: those tags are using the new eD2K tags (short tags))
+#define	PCTAG_CACHEIP			0x01
+#define	PCTAG_CACHEPORT			0x02
+#define	PCTAG_PUBLICIP			0x03
+#define	PCTAG_PUBLICPORT		0x04
+#define	PCTAG_PUSHID			0x05
+#define	PCTAG_FILEID			0x06
 
 // KADEMLIA (opcodes) (udp)
 #define KADEMLIA_BOOTSTRAP_REQ	0x00	// <PEER (sender) [25]>

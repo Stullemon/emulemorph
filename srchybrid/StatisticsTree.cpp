@@ -28,7 +28,6 @@
 #include "emule.h"
 #include "StatisticsTree.h"
 #include "StatisticsDlg.h"
-#include "UploadQueue.h"
 #include "emuledlg.h"
 #include "Preferences.h"
 #include "OtherFunctions.h"
@@ -118,7 +117,7 @@ void CStatisticsTree::DoMenu(CPoint doWhere, UINT nFlags)
 	CString		myBuffer;
 	int			myFlags;
 
-	myBuffer.Format("%sstatbkup.ini",thePrefs.GetConfigDir());
+	myBuffer.Format(_T("%sstatbkup.ini"),thePrefs.GetConfigDir());
 	if (!findBackUp.FindFile(myBuffer)) myFlags = MF_GRAYED;
 		else myFlags = MF_STRING;
 
@@ -165,6 +164,7 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 				AddLogLine(false, GetResString(IDS_STATS_NFORESET));
 				theApp.emuledlg->statisticswnd->ShowStatistics();
 
+				//MORPH - Removed by SiRoB, New Graph
 				/*
 				CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
 				GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
@@ -180,6 +180,7 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 					AddLogLine(true, GetResString(IDS_ERR_NOSTATBKUP));
 				else {
 					AddLogLine(false, GetResString(IDS_STATS_NFOLOADEDBKUP));
+					//MORPH - Removed by SiRoB, New Graph
 					/*
 					CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
 					GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
@@ -272,7 +273,7 @@ bool CStatisticsTree::CheckState(HTREEITEM hItem, UINT state)
 CString CStatisticsTree::GetItemText(HTREEITEM theItem)
 {
 	if (theItem == NULL)
-		return "";
+		return _T("");
 
 	TVITEM item;
 	TCHAR szText[1024]; 
@@ -284,7 +285,7 @@ CString CStatisticsTree::GetItemText(HTREEITEM theItem)
 	if (GetItem(&item))
 		return CString(item.pszText);
 
-	return "";   
+	return _T("");
 }
 
 // This seperates the title from the value in a tree item that has
@@ -299,18 +300,18 @@ CString CStatisticsTree::GetItemText(HTREEITEM theItem)
 CString CStatisticsTree::GetItemText(HTREEITEM theItem, int getPart)
 {
 	if (theItem == NULL)
-		return "";
+		return _T("");
 
 	CString fullText, returnText;
 	fullText = GetItemText(theItem);
 
 	if (fullText.IsEmpty())
-		return "";
+		return _T("");
 
-	int posSeparator = fullText.Find(": ");
+	int posSeparator = fullText.Find(_T(": "));
 	
 	if (posSeparator < 1) {
-		returnText = getPart == GET_TITLE ? fullText : "";
+		returnText = getPart == GET_TITLE ? fullText : _T("");
 		return returnText;
 	}
 
@@ -319,7 +320,7 @@ CString CStatisticsTree::GetItemText(HTREEITEM theItem, int getPart)
 	else if (getPart == GET_VALUE)
 		returnText = fullText.Mid(posSeparator + 2);
 	else
-		returnText = "";
+		returnText = _T("");
 
 	return returnText;
 }
@@ -332,7 +333,7 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
-	if (firstItem) strBuffer.Format("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+	if (firstItem) strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%hs]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 
 	if (theItem == NULL) {
 		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
@@ -346,17 +347,17 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 
 	while (hCurrent != NULL)
 	{
-		if (IsBold(hCurrent)) strItem = "<b>" + GetItemText(hCurrent) + "</b>";
+		if (IsBold(hCurrent)) strItem = _T("<b>") + GetItemText(hCurrent) + _T("</b>");
 		else strItem = GetItemText(hCurrent);
-		for (int i = 0; i < theItemLevel; i++) strBuffer += "&nbsp;&nbsp;&nbsp;";
-		if (theItemLevel==0) strBuffer.Append("\n");
-		strBuffer += strItem + "<br>";
+		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("&nbsp;&nbsp;&nbsp;");
+		if (theItemLevel==0) strBuffer.Append(_T("\n"));
+		strBuffer += strItem + _T("<br>");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
 			strBuffer += (CString) GetHTML(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
 		if (firstItem && theItem != NULL) break; // Copy Selected Branch was used, so we don't want to copy all branches at this level.  Only the one that was selected.
 	}
-	if (firstItem) strBuffer += "</font>";
+	if (firstItem) strBuffer += _T("</font>");
 	return strBuffer;
 }
 
@@ -407,7 +408,7 @@ CString CStatisticsTree::GetText(bool onlyVisible, HTREEITEM theItem, int theIte
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
-	if (firstItem) strBuffer.Format("eMule v%s %s [%s]\r\n\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
+	if (firstItem) strBuffer.Format(_T("eMule v%s %s [%hs]\r\n\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
 
 	if (theItem == NULL) hCurrent = GetRootItem(); // Copy All Vis or Copy All
 	else if (firstItem) {
@@ -418,8 +419,8 @@ CString CStatisticsTree::GetText(bool onlyVisible, HTREEITEM theItem, int theIte
 
 	while (hCurrent != NULL)
 	{
-		for (int i = 0; i < theItemLevel; i++) strBuffer += "   ";
-		strBuffer += GetItemText(hCurrent) + "\r\n";
+		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("   ");
+		strBuffer += GetItemText(hCurrent) + _T("\r\n");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
 			strBuffer += (CString) GetText(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
@@ -484,11 +485,11 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 
 	while (hCurrent != NULL)
 	{
-		if (IsBold(hCurrent)) strItem = "<span id=\"sec\">" + GetItemText(hCurrent) + "</span>";
-		else strItem = "<span id=\"item\">" + GetItemText(hCurrent) + "</span>";
-		for (int i = 0; i < theItemLevel; i++) strBuffer += "&nbsp;&nbsp;&nbsp;";
-		if (theItemLevel==0) strBuffer .Append("\n");
-		strBuffer += strItem + "<br>";
+		if (IsBold(hCurrent)) strItem = _T("<span id=\"sec\">") + GetItemText(hCurrent) + _T("</span>");
+		else strItem = _T("<span id=\"item\">") + GetItemText(hCurrent) + _T("</span>");
+		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("&nbsp;&nbsp;&nbsp;");
+		if (theItemLevel==0) strBuffer .Append(_T("\n"));
+		strBuffer += strItem + _T("<br>");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
 			strBuffer += (CString) GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
@@ -500,23 +501,24 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 void CStatisticsTree::ExportHTML(bool onlyvisible)
 {
 	CFile htmlFile;
-	CString htmlFileName, theHTML;
+	CString htmlFileName;
+	CStringA theHTML;
 
 	theApp.emuledlg->statisticswnd->ShowStatistics(!onlyvisible);
 
-	CFileDialog saveAsDlg (false, "html", "*.html", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, "HTML Files (*.html)|*.html|All Files (*.*)|*.*||", this, 0);
+	CFileDialog saveAsDlg (false, _T("html"), _T("*.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK) {
-		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%s]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%hs]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		theHTML += "<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n";
 		theHTML += "<body id=\"bdy\">\r\n";
-		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-		theHTML += GetHTMLForExport(onlyvisible) + "</body></html>";
+		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%hs]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		theHTML += GetHTMLForExport(onlyvisible) + _T("</body></html>");
 
 		htmlFileName = saveAsDlg.GetPathName();
-		htmlFile.Open(htmlFileName, CFile::modeCreate | CFile::modeWrite);
+		htmlFile.Open(htmlFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
 		htmlFile.Write(theHTML.GetString(), strlen(theHTML.GetString()));
 		htmlFile.Close();
 	}

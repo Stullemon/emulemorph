@@ -85,13 +85,13 @@ void CFriendListCtrl::SetAllIcons()
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader("FriendNoClient"));
-	iml.Add(CTempIconLoader("FriendWithClient"));
-	iml.Add(CTempIconLoader("FriendConnected"));
+	iml.Add(CTempIconLoader(_T("FriendNoClient")));
+	iml.Add(CTempIconLoader(_T("FriendWithClient")));
+	iml.Add(CTempIconLoader(_T("FriendConnected")));
 	//MORPH START - Added by SiRoB, Friend Addon
-	iml.Add(CTempIconLoader("FriendNoClientSlot"));
-	iml.Add(CTempIconLoader("FriendWithClientSlot"));
-	iml.Add(CTempIconLoader("FriendConnectedSlot"));
+	iml.Add(CTempIconLoader(_T("FriendNoClientSlot")));
+	iml.Add(CTempIconLoader(_T("FriendWithClientSlot")));
+	iml.Add(CTempIconLoader(_T("FriendConnectedSlot")));
 	//MORPH END   - Added by SiRoB, Friend Addon
 
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
@@ -111,72 +111,75 @@ void CFriendListCtrl::Localize()
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(0, &hdi);
 	strRes.ReleaseBuffer();
+
+	int iItems = GetItemCount();
+	for (int i = 0; i < iItems; i++)
+	UpdateFriend(i, (CFriend*)GetItemData(i));
 }
 
-void CFriendListCtrl::AddFriend(const CFriend* toadd)
+void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 {
-	int itemnr = GetItemCount();
-	InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE,itemnr,(LPCTSTR)toadd->m_strName,0,0,1,(LPARAM)toadd);
-	RefreshFriend(toadd);
-	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
-}
-
-void CFriendListCtrl::RemoveFriend(const CFriend* toremove)
-{
-	LVFINDINFO find;
-	find.flags = LVFI_PARAM;
-	find.lParam = (LPARAM)toremove;
-	int result = FindItem(&find);
-	if (result != -1)
-		DeleteItem(result);
-	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
-}
-
-void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
-{
-	LVFINDINFO find;
-	find.flags = LVFI_PARAM;
-	find.lParam = (LPARAM)toupdate;
-	int itemnr = FindItem(&find);
-	if (itemnr != -1)
-	{
-	    // Mighty Knife: log friend activities
-		//CString temp;
-		//temp.Format( "%s", toupdate->m_strName );
-		CString OldName = GetItemText (itemnr,0);
-		if ((OldName != toupdate->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
-  			char buffer[100]; buffer [0] = 0;
-			for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,toupdate->m_abyUserhash[i]);
-			#ifdef MIGHTY_TWEAKS
-			AddLogLine(false, "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s",
-										(LPCTSTR) OldName, (LPCTSTR) toupdate->m_strName, (uint8)toupdate->m_dwLastUsedIP, 
-										(uint8)(toupdate->m_dwLastUsedIP>>8), 
-										(uint8)(toupdate->m_dwLastUsedIP>>16),(uint8)(toupdate->m_dwLastUsedIP>>24), 
-										toupdate->m_nLastUsedPort, buffer);
-			#else
-			AddLogLine(false, "Friend changed his name: '%s'->'%s', hash %s",
-										(LPCTSTR) OldName, (LPCTSTR) toupdate->m_strName, buffer);
-			#endif
-		}
-		// [end] Mighty Knife
-
-		SetItemText(itemnr,0,(LPCTSTR)toupdate->m_strName);
-		int image;
-		
-		//MORPH START - Added by Yun.SF3, ZZ Upload System
-		if (!toupdate->GetLinkedClient())
-			image = 0;
-		else if (toupdate->GetLinkedClient()->socket && toupdate->GetLinkedClient()->socket->IsConnected())
-		//MORPH END - Added by Yun.SF3, ZZ Upload System
-			image = 2;
-		else
-			image = 1;
-		//MORPH START - Added by SiRoB, 
-		if (toupdate->GetFriendSlot()) image += 3;
-		//MORPH END   - Added by SiRoB, 
-		
-		SetItem(itemnr,0,LVIF_IMAGE,0,image,0,0,0,0);
+    // Mighty Knife: log friend activities
+	CString OldName = GetItemText (iItem,0);
+	if ((OldName != pFriend->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
+ 			TCHAR buffer[100]; buffer [0] = 0;
+		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,pFriend->m_abyUserhash[i]);
+		#ifdef MIGHTY_TWEAKS
+		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"),
+									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, (uint8)pFriend->m_dwLastUsedIP, 
+									(uint8)(pFriend->m_dwLastUsedIP>>8), 
+									(uint8)(pFriend->m_dwLastUsedIP>>16),(uint8)(pFriend->m_dwLastUsedIP>>24), 
+									pFriend->m_nLastUsedPort, buffer);
+		#else
+		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', hash %s"),
+									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, buffer);
+		#endif
 	}
+	// [end] Mighty Knife
+
+	SetItemText(iItem,0,pFriend->m_strName);
+
+	int iImage;
+    if (!pFriend->GetLinkedClient())
+		iImage = 0;
+	else if (pFriend->GetLinkedClient()->socket && pFriend->GetLinkedClient()->socket->IsConnected())
+		iImage = 2;
+	else
+		iImage = 1;
+	//MORPH START - Added by SiRoB, Friend Addon
+	if (pFriend->GetFriendSlot()) iImage += 3;
+	//MORPH END   - Added by SiRoB, Friend Addon 
+
+	SetItem(iItem,0,LVIF_IMAGE,0,iImage,0,0,0,0);
+}
+
+void CFriendListCtrl::AddFriend(const CFriend* pFriend)
+{
+	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),pFriend->m_strName,0,0,0,(LPARAM)pFriend);
+	if (iItem >= 0)
+		UpdateFriend(iItem, pFriend);
+	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
+}
+
+void CFriendListCtrl::RemoveFriend(const CFriend* pFriend)
+{
+	LVFINDINFO find;
+	find.flags = LVFI_PARAM;
+	find.lParam = (LPARAM)pFriend;
+	int iItem = FindItem(&find);
+	if (iItem != -1)
+		DeleteItem(iItem);
+	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
+}
+
+void CFriendListCtrl::RefreshFriend(const CFriend* pFriend)
+{
+	LVFINDINFO find;
+	find.flags = LVFI_PARAM;
+	find.lParam = (LPARAM)pFriend;
+	int iItem = FindItem(&find);
+	if (iItem != -1)
+		UpdateFriend(iItem, pFriend);
 	else
 		ASSERT(0);
 }
@@ -198,18 +201,15 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND));
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->m_LinkedClient && !cur_friend->m_LinkedClient->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-	//MORPH START - Modified by SiRoB, ZZ Upload System
+	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->GetLinkedClient() && !cur_friend->GetLinkedClient()->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	//MORPH START - Modified by SiRoB, Friend Slot
 	/*
 	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
-	if (cur_friend && cur_friend->m_LinkedClient && !cur_friend->m_LinkedClient->HasLowID()){
-		ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_ENABLED);
-		ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend->m_LinkedClient->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
-	}
-	else
-		ClientMenu.EnableMenuItem(MP_FRIENDSLOT, MF_GRAYED);
+	ClientMenu.EnableMenuItem(MP_FRIENDSLOT, (cur_friend)?MF_ENABLED : MF_GRAYED);
+	ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend && cur_friend->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
 	*/
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	//MORPH END   - Modified by SiRoB, Friend Slot
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
 	//MORPH END   - Added by SiRoB, Friend Addon
@@ -232,13 +232,11 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	switch (wParam){
 		case MP_MESSAGE:{
 			if (cur_friend){
-				//MORPH - Added by Yun.SF3, ZZ Upload System
 				if (cur_friend->GetLinkedClient())
 					theApp.emuledlg->chatwnd->StartSession(cur_friend->GetLinkedClient());
-				//MORPH - Added by Yun.SF3, ZZ Upload System
 				else{
 					CUpDownClient* chatclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
-					chatclient->SetUserName(cur_friend->m_strName.GetBuffer());
+					chatclient->SetUserName(cur_friend->m_strName);
 					theApp.clientlist->AddClient(chatclient);
 					theApp.emuledlg->chatwnd->StartSession(chatclient);
 				}
@@ -269,13 +267,11 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		case MP_SHOWLIST:
 		{
 			if (cur_friend){
-				//MORPH - Added by Yun.SF3, ZZ Upload System
 				if (cur_friend->GetLinkedClient())
 					cur_friend->GetLinkedClient()->RequestSharedFileList();
-				//MORPH - Added by Yun.SF3, ZZ Upload System
 				else{
 					CUpDownClient* newclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
-					newclient->SetUserName(cur_friend->m_strName.GetBuffer());
+					newclient->SetUserName(cur_friend->m_strName);
 					theApp.clientlist->AddClient(newclient);
 					newclient->RequestSharedFileList();
 				}
@@ -326,20 +322,19 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		//MORPH END - Added by IceCream, List Requested Files
 		case MP_FRIENDSLOT:
 		{
-			//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 			if (cur_friend){
 				bool IsAlready;
 				IsAlready = cur_friend->GetFriendSlot();
+				//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 				//theApp.friendlist->RemoveAllFriendSlots();
-				if( IsAlready ) {
-					cur_friend->SetFriendSlot(false);
-				} else {
+				if( !IsAlready )
 					cur_friend->SetFriendSlot(true);
-				}
+				else
+					cur_friend->SetFriendSlot(false);
+				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 			}
-			//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
 			//MORPH START - Added by SiRoB, Friend Addon
-			RefreshFriend(cur_friend); //KTS
+			UpdateFriend(iSel,cur_friend);
 			//MORPH END   - Added by SiRoB, Friend Addon
 			break;
 		}
@@ -358,10 +353,8 @@ void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 void CFriendListCtrl::ShowFriendDetails(const CFriend* pFriend)
 {
 	if (pFriend){
-		//MORPH - Added by Yun.SF3, ZZ Upload System
 		if (pFriend->GetLinkedClient()){
 			CClientDetailDialog dialog(pFriend->GetLinkedClient());
-		//MORPH - Added by Yun.SF3, ZZ Upload System
 			dialog.DoModal();
 		}
 		else{
@@ -417,7 +410,7 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	{
 		case 0:
 			//TODO avoid crash here in some case
-			iResult = item1->m_strName.CompareNoCase(item2->m_strName.GetBuffer());
+			iResult = _tcsicmp(item1->m_strName, item2->m_strName);
 			break;
 		default:
 			return 0;

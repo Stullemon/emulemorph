@@ -21,6 +21,8 @@
 #include "BarShader.h"
 
 class CClientReqSocket;
+class CPeerCacheDownSocket;
+class CPeerCacheUpSocket;
 class CFriend;
 class CPartFile;
 class CClientCredits;
@@ -77,6 +79,19 @@ enum EDownloadState{
 	DS_REMOTEQUEUEFULL  // not used yet, except in statistics
 };
 
+enum EPeerCacheDownState{
+	PCDS_NONE = 0,
+	PCDS_WAIT_CLIENT_REPLY,
+	PCDS_WAIT_CACHE_REPLY,
+	PCDS_DOWNLOADING
+};
+
+enum EPeerCacheUpState{
+	PCUS_NONE = 0,
+	PCUS_WAIT_CACHE_REPLY,
+	PCUS_UPLOADING
+};
+
 enum EChatState{
 	MS_NONE,
 	MS_CHATTING,
@@ -105,6 +120,7 @@ enum EClientSoftware{
 	SO_EDONKEYHYBRID	= 50,
 	SO_EDONKEY,
 	SO_OLDEMULE,
+	SO_URL,
 	SO_UNKNOWN
 };
 
@@ -127,7 +143,8 @@ enum ESourceFrom{
 	SF_KADEMLIA			= 1,
 	SF_SOURCE_EXCHANGE	= 2,
 	SF_PASSIVE			= 3,
-	SF_SLS				= 4 //MORPH - Added by SiRoB, Save Load Sources (SLS)
+	SF_LINK				= 4,
+	SF_SLS				= 5 //MORPH - Added by SiRoB, Save Load Sources (SLS)
 };
 
 struct PartFileStamp {
@@ -140,21 +157,63 @@ struct PartFileStamp {
 
 //#pragma pack(2)
 class CUpDownClient: public CLoggable
-#ifdef _DEBUG
 					,public CObject
-#endif
 {
+	DECLARE_DYNAMIC(CUpDownClient)
+
 	friend class CUploadQueue;
 public:
 	//base
 	CUpDownClient(CClientReqSocket* sender = 0);
 	CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid, uint32 in_serverup, uint16 in_serverport, bool ed2kID = false);
-	~CUpDownClient();
+	virtual ~CUpDownClient();
 
-	bool			Disconnected(CString strReason, bool bFromSocket = false);
-	bool			TryToConnect(bool bIgnoreMaxCon = false);
-	void			ConnectionEstablished();
+	///////////////////////////////////////////////////////////////////////////
+	// PeerCache client
+	// 
+	int m_iHttpSendState;
+	uint32 m_uPeerCacheDownloadPushId;
+	uint32 m_uPeerCacheUploadPushId;
+	CPeerCacheDownSocket* m_pPCDownSocket;
+	CPeerCacheUpSocket* m_pPCUpSocket;
+	uint32 m_uPeerCacheRemoteIP;
+	EPeerCacheDownState m_ePeerCacheDownState;
+	EPeerCacheUpState m_ePeerCacheUpState;
+	bool m_bPeerCacheDownHit;
+	bool m_bPeerCacheUpHit;
+
+	bool IsDownloadingFromPeerCache() const;
+	bool IsUploadingToPeerCache() const;
+	void SetPeerCacheDownState(EPeerCacheDownState eState);
+	void SetPeerCacheUpState(EPeerCacheUpState eState);
+
+	bool SendPeerCacheFileRequest();
+	bool ProcessPeerCacheQuery(const char* packet, UINT size);
+	bool ProcessPeerCacheAnswer(const char* packet, UINT size);
+	bool ProcessPeerCacheAcknowledge(const char* packet, UINT size);
+	void OnPeerCacheDownSocketClosed(int nErrorCode);
+	bool OnPeerCacheDownSocketTimeout();
+
+	bool ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHeaders);
+	bool ProcessPeerCacheDownHttpResponseBody(const BYTE* pucData, UINT uSize);
+	bool ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHeaders);
+	UINT ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeaders);
+
+	virtual bool ProcessHttpDownResponse(const CStringAArray& astrHeaders);
+	virtual bool ProcessHttpDownResponseBody(const BYTE* pucData, UINT uSize);
+
+	void StartDownload();
+	virtual void SendCancelTransfer(Packet* packet = NULL);
+	virtual void CheckDownloadTimeout();
+
+	virtual bool	IsEd2kClient() const { return true; }
+	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
+	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL);
+	virtual bool	Connect();
+	virtual void	ConnectionEstablished();
+	virtual void	OnSocketConnected(int nErrorCode);
 	bool			CheckHandshakeFinished(UINT protocol, UINT opcode) const;
+	void			CheckFailedFileIdReqs(const uchar* aucFileHash);
 	uint32			GetUserIDHybrid() const
 					{
 						return m_nUserIDHybrid;
@@ -163,11 +222,11 @@ public:
 					{
 						m_nUserIDHybrid = val;
 					}
-	LPCSTR			GetUserName() const			
+	LPCTSTR			GetUserName() const			
 					{
 						return m_pszUsername;
 					}
-	void			SetUserName(LPCSTR pszNewName);
+	void			SetUserName(LPCTSTR pszNewName);
 	uint32			GetIP() const
 					{
 						return m_dwUserIP;
@@ -246,6 +305,7 @@ public:
 					{
 						return m_bMultiPacket;
 					}
+	bool			SupportPeerCache() const { return m_fPeerCache; }
 	bool			IsEmuleClient() const
 					{
 						return m_byEmuleVersion;
@@ -302,10 +362,13 @@ public:
 	bool			ProcessHelloAnswer(char* pachPacket, uint32 nSize);
 	bool			ProcessHelloPacket(char* pachPacket, uint32 nSize);
 	void			SendHelloAnswer();
-	bool			SendHelloPacket();
+	virtual bool	SendHelloPacket();
 	void			SendMuleInfoPacket(bool bAnswer);
 	void			ProcessMuleInfoPacket(char* pachPacket, uint32 nSize);
 	void			ProcessMuleCommentPacket(char* pachPacket, uint32 nSize);
+	void			ProcessEmuleQueueRank(char* packet, UINT size);
+	void			ProcessEdonkeyQueueRank(char* packet, UINT size);
+	void			CheckQueueRankFlood();
 	bool			Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash = false) const;
 	void			ResetFileStatusInfo();
 	uint32			GetLastSrcReqTime() const	
@@ -353,6 +416,9 @@ public:
 					{
 						m_fSentCancelTransfer = bVal;
 					}
+	void			ProcessPublicIPAnswer(const BYTE* pbyData, UINT uSize);
+	void			SendPublicIPRequest();
+
 	//MORPH START - Added by IceCream, Anti-leecher feature
 	bool			IsLeecher()	const				{return m_bLeecher;}
 	//MORPH END   - Added by IceCream, Anti-leecher feature
@@ -398,7 +464,9 @@ public:
 					}
 	void			SetUploadState(EUploadState news);
 
-	uint32			GetWaitStartTime() const;
+	//uint32			GetWaitStartTime() const;
+	sint64			GetWaitStartTime() const;
+	//EastShare END - Modified by TAHO, modified SUQWT
 	void 			SetWaitStartTime();
 	void 			ClearWaitStartTime();
 	uint32			GetWaitTime() const
@@ -413,15 +481,10 @@ public:
 					{
 						return !m_BlockRequests_queue.IsEmpty();
 					}
-	//MORPH START - Changed by SiRoB, ZZ Upload System
-	/*
 	uint32			GetDatarate() const
 					{
 						return m_nUpDatarate;
 					}
-	*/
-	sint32			GetDatarate() const			{return m_nUpDatarate;}	
-	//MORPH END - Changed by SiRoB, ZZ Upload System
 	uint32			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
 
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
@@ -449,7 +512,7 @@ public:
 	void			AddRequestCount(const uchar* fileid);
 
 	void			UnBan();
-	void			Ban();
+	void			Ban(LPCTSTR pszReason = NULL);
 	void			BanLeecher(int log_message = true); //MORPH - Added by IceCream, Anti-leecher feature
 
 	uint32			GetAskedCount() const
@@ -543,10 +606,15 @@ public:
 						return (EDownloadState)m_nDownloadState;
 					}
 	void			SetDownloadState(EDownloadState nNewState);
-	uint32			GetLastAskedTime()	const
+// ZZ:DownloadManager -->
+	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const
 					{
 						return m_dwLastAskedTime;
 					}
+    void            SetLastAskedTime() {
+                        m_dwLastAskedTime = ::GetTickCount();
+                    }
+// <-- ZZ:DownloadManager
 	uint32			GetRequestedHashset()	{return m_dwRequestedHashset;}	// SLUGFILLER: SafeHash
 	bool			IsPartAvailable(uint16 iPart) const
 					{
@@ -586,33 +654,35 @@ public:
 
 	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
 	/*
-	void			DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat);
+	void			DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const;
 	*/
 	void			DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* File, bool  bFlat);
 	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 	bool			AskForDownload();
-	void			SendFileRequest();
+	virtual void	SendFileRequest();
 	void			SendStartupLoadReq();
 	void			ProcessFileInfo(CSafeMemFile* data, CPartFile* file);
 	void			ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPartFile* file);
 	void			ProcessHashSet(char* data, uint32 size);
+	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
-	void			SendBlockRequests();
-	void			ProcessBlockPacket(char* packet, uint32 size, bool packed = false);
+	void			CreateBlockRequests(int iMaxBlocks);
+	virtual void	SendBlockRequests();
+	virtual bool	SendHttpBlockRequests();
+	virtual void	ProcessBlockPacket(char* packet, uint32 size, bool packed = false);
+	virtual void	ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize);
 	void			ClearDownloadBlockRequests();
 	uint32			CalculateDownloadRate();
-	uint16			GetAvailablePartCount() const;
-
-	bool			SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL);
+	UINT			GetAvailablePartCount() const;
+	bool			SwapToAnotherFile(LPCTSTR pszReason, bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL, bool allowSame = true, bool isAboutToAsk = false, bool debug = false); // ZZ:DownloadManager
 	void			DontSwapTo(/*const*/ CPartFile* file);
-	bool			IsSwapSuspended(const CPartFile* file) /*const*/;
+	bool			IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime = false, const bool fileIsNNP = false) /*const*/; // ZZ:DownloadManager
+    uint32          GetTimeUntilReask() const;
+    uint32          GetTimeUntilReask(const CPartFile* file) const;
 	//MORPH - Changed by SiRoB, khaos::kmod+ Smart A4AF Handling
-	bool			DoSwap(CPartFile* SwapTo, bool anotherfile = false, int iDebugMode = 0);
 	bool			BalanceA4AFSources(bool byPriorityOnly = false);
 	bool			StackA4AFSources();
 	bool			SwapToForcedA4AF();
-	uint32			GetLastBalanceTick()		{return m_iLastSwapAttempt;}
-	uint32			GetLastForceA4AFTick()	{ return m_iLastForceA4AFAttempt; }
 	//MORPH - Changed by SiRoB, khaos::kmod-
 
 	void			UDPReaskACK(uint16 nNewQR);
@@ -620,6 +690,8 @@ public:
 	void			UDPReaskForDownload();
 	void			RequestHashset();	// SLUGFILLER: SafeHash
 	bool			IsSourceRequestAllowed() const;
+    bool            IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck = false) const; // ZZ:DownloadManager
+
 	bool			IsValidSource() const;
 
 	ESourceFrom		GetSourceFrom() const
@@ -627,20 +699,11 @@ public:
 						return (ESourceFrom)m_nSourceFrom;
 					}
 	void			SetSourceFrom(ESourceFrom val) {m_nSourceFrom = val;}
-
 	// -khaos--+++> Download Sessions Stuff
-	//MORPH START - Changed by SiRoB, Better Download rate calcul
-	/*
 	void			SetDownStartTime()
 					{
 						m_dwDownStartTime = ::GetTickCount();
 					}
-	*/
-	void			SetDownStartTime()
-					{
-						m_dwDownStartTime = ::GetTickCount();
-					}
-	//MORPH END   - Changed by SiRoB, Better Download rate calcul
 	uint32			GetDownTimeDifference()
 					{
 						uint32 myTime = m_dwDownStartTime; 
@@ -717,13 +780,6 @@ public:
 					}
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
 	int				unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
-	// Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
-	//MORPH START - Changed by SiRoB, See A4AF PartStatus
-	/*
-	void			ShowDownloadingParts(CString* partsYN) const;
-	*/
-	void			ShowDownloadingParts(CString* partsYN,uint16 m_nPartCount) const;
-	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
 	void			UpdateDisplayedInfo(bool force = false);
 	int             GetFileListRequested() const
 					{
@@ -774,12 +830,23 @@ public:
 					{
 						m_fMessageFiltered = bVal ? 1 : 0;
 					}
+	virtual void	SetRequestFile(CPartFile* pReqFile);
+
+	CString			GetDownloadStateDisplayString() const;
+	CString			GetUploadStateDisplayString() const;
+
 	LPCTSTR			DbgGetDownloadState() const;
 	LPCTSTR			DbgGetUploadState() const;
 	CString			DbgGetClientInfo(bool bFormatIP = false) const;
 	CString			DbgGetFullClientSoftVer() const;
 	const CString&	DbgGetHelloInfo() const { return m_strHelloInfo; }
 	const CString&	DbgGetMuleInfo() const { return m_strMuleInfo; }
+
+// ZZ:DownloadManager -->
+    const bool      IsInOtherRequestList(const CPartFile* fileToCheck) const;
+
+    const bool      SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool isNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping = false, bool debug = false);
+// <-- ZZ:DownloadManager
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -830,7 +897,7 @@ public:
 	uint32  GetUpTotalTime() const  {return m_nUpTotalTime;}//wistily
 	uint32  GetAvUpDatarate() const  {return m_nAvUpDatarate;}//wistily
 	//wistily stop
-private:
+protected:
 	// base
 	void	Init();
 	bool	ProcessHelloTypePacket(CSafeMemFile* data);
@@ -853,8 +920,8 @@ private:
 	bool	m_bEmuleProtocol;
 	bool	m_bIsHybrid;
 //--group to aligned int32
-	char*	m_pszUsername;
-	char*	old_m_pszUsername; //MORPH - Added by IceCream, Antileecher feature
+	TCHAR*	m_pszUsername;
+	TCHAR*	old_m_pszUsername; //MORPH - Added by IceCream, Antileecher feature
 	uchar	m_achUserHash[16];
 	uint16	m_nUDPPort;
 	uint16	m_nKadPort;
@@ -949,7 +1016,6 @@ private:
 	uint32      m_slotNumber;
 	DWORD       m_dwLastCheckedForEvictTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
-	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 
 	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 	bool	m_bPowerShared;
@@ -996,22 +1062,35 @@ private:
 		 m_fPreviewReqPending : 1,
 		 m_fPreviewAnsPending : 1,
 		 m_fIsSpammer		  : 1,
-		 m_fMessageFiltered   : 1;
+		 m_fMessageFiltered   : 1,
+		 m_fPeerCache		  : 1,
+		 m_fQueueRankPending  : 1,
+		 m_fUnaskQueueRankRecv: 2,
+		 m_fFailedFileIdReqs  : 4, // nr. of failed file-id related requests per connection
+		 m_fNeedOurPublicIP	  : 1; // we requested our IP from this client
 
 	// By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 	CList<TransferredData,TransferredData>			 m_AvarageDDR_list;
-	sint32	sumavgUDR;
+	uint32	sumavgUDR;
 	// END By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;
 	CString m_strHelloInfo;
 	CString m_strMuleInfo;
-	uint32		m_iLastSwapAttempt;
-	uint32		m_iLastActualSwap;
-	uint32		m_iLastForceA4AFAttempt;
+
+	CStringA m_strUrlPath;
+	UINT m_uReqStart;
+	UINT m_uReqEnd;
+	UINT m_nUrlStartPos;
+
+    bool    m_bSourceExchangeSwapped; // ZZ:DownloadManager
+    bool    DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR reason); // ZZ:DownloadManager
+    uint32  GetTimeUntilReask(const CPartFile* file, const bool allowShortReaskTime) const;
+
+	//MORPH START - Added by SiRoB, m_PartStatus_list
 	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
-	// khaos::kmod-
+	//MORPH END   - Added by SiRoB, m_PartStatus_list
 	uint32 m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
 	uint32 m_nUpTotalTime;//wistily total lenght of this client's uploads during this session in ms
 

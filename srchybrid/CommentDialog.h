@@ -1,28 +1,27 @@
-#pragma once 
+#pragma once
 
 class CKnownFile;
 
-class CCommentDialog : public CDialog 
-{ 
-   DECLARE_DYNAMIC(CCommentDialog) 
+class CCommentDialog : public CDialog
+{
+	DECLARE_DYNAMIC(CCommentDialog)
+public:
+	CCommentDialog(CKnownFile* file);	// standard constructor
+	virtual ~CCommentDialog();
 
-public: 
-   CCommentDialog(CKnownFile* file);   // standard constructor 
-   virtual ~CCommentDialog(); 
-   void Localize(); 
-   virtual BOOL OnInitDialog(); 
+	// Dialog Data
+	enum { IDD = IDD_COMMENT };
 
-    
+	void Localize();
 
-// Dialog Data 
-   enum { IDD = IDD_COMMENT }; 
-protected: 
-   virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support 
-   DECLARE_MESSAGE_MAP() 
-public: 
-   afx_msg void OnBnClickedApply(); 
-   afx_msg void OnBnClickedCancel(); 
-private: 
-	CComboBox   ratebox;//For rate 
-	CKnownFile* m_file; 
+protected:
+	CComboBox	m_ratebox;
+	CKnownFile* m_file;
+
+	virtual BOOL OnInitDialog();
+	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedReset();
 };

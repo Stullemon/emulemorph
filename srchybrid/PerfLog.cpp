@@ -16,16 +16,14 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <io.h>
+#include <share.h>
 #include "emule.h"
 #include "PerfLog.h"
 #include "ini2.h"
 #include "Opcodes.h"
 #include "Preferences.h"
-#include "DownloadQueue.h"
-#include "UploadQueue.h"
-#ifndef _CONSOLE
+#include "Statistics.h"
 #include "emuledlg.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -91,7 +89,7 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 	// do not localize this date/time string!
 	strftime(szTime, ARRSIZE(szTime), "%m/%d/%Y %H:%M:%S", localtime(&tNow));
 
-	FILE* fp = fopen(m_strFilePath, (m_eMode == OneSample) ? "wt" : "at");
+	FILE* fp = _tfsopen(m_strFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
 	if (fp == NULL){
 		theApp.emuledlg->AddLogLine(false, _T("Failed to open performance log file \"%s\" - %hs"), m_strFilePath, strerror(errno));
 		return;
@@ -117,16 +115,16 @@ void CPerfLog::LogSamples()
 	UINT nCurUp = theApp.stat_sessionSentBytes - m_nLastSessionSentBytes;
 
 	// 'overhead counters' amount of total overhead
-	uint64 nDnOHTotal = theApp.downloadqueue->GetDownDataOverheadFileRequest() + 
-						theApp.downloadqueue->GetDownDataOverheadSourceExchange() + 
-						theApp.downloadqueue->GetDownDataOverheadServer() + 
-						theApp.downloadqueue->GetDownDataOverheadKad() + 
-						theApp.downloadqueue->GetDownDataOverheadOther();
-	uint64 nUpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + 
-						theApp.uploadqueue->GetUpDataOverheadSourceExchange() + 
-						theApp.uploadqueue->GetUpDataOverheadServer() + 
-						theApp.uploadqueue->GetUpDataOverheadKad() + 
-						theApp.uploadqueue->GetUpDataOverheadOther();
+	uint64 nDnOHTotal = theStats.GetDownDataOverheadFileRequest() + 
+						theStats.GetDownDataOverheadSourceExchange() + 
+						theStats.GetDownDataOverheadServer() + 
+						theStats.GetDownDataOverheadKad() + 
+						theStats.GetDownDataOverheadOther();
+	uint64 nUpOHTotal = theStats.GetUpDataOverheadFileRequest() + 
+						theStats.GetUpDataOverheadSourceExchange() + 
+						theStats.GetUpDataOverheadServer() + 
+						theStats.GetUpDataOverheadKad() + 
+						theStats.GetUpDataOverheadOther();
 	UINT nCurDnOH = nDnOHTotal - m_nLastDnOH;
 	UINT nCurUpOH = nUpOHTotal - m_nLastUpOH;
 

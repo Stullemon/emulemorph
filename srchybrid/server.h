@@ -45,14 +45,26 @@ struct ServerMet_Struct {
 class CServer{
 public:
 	CServer(const ServerMet_Struct* in_data);
-	CServer(uint16 in_port, LPCSTR i_addr);
+	CServer(uint16 in_port, LPCTSTR i_addr);
 	CServer(const CServer* pOld);
 	~CServer();
 
-	void	AddTag(CTag* in_tag)					{taglist->AddTail(in_tag);}
-	LPCSTR	GetListName() const						{return listname;}
-	LPCSTR	GetFullIP() const						{return ipfull;}
-	LPCSTR	GetAddress() const;
+	bool	AddTagFromFile(CFileDataIO* servermet);
+
+	const CString& GetListName() const				{return m_strName;}
+	void	SetListName(LPCTSTR newname);
+
+	const CString& GetDescription() const			{return m_strDescription;}
+	void	SetDescription(LPCTSTR newdescription);
+
+	uint32	GetIP() const							{return ip;}
+	void	SetIP(uint32 newip);
+
+	const CString& GetDynIP() const					{return m_strDynIP;}
+	bool	HasDynIP() const						{return !m_strDynIP.IsEmpty();}
+	void	SetDynIP(LPCTSTR newdynip);
+	LPCTSTR	GetFullIP() const						{return ipfull;}
+	LPCTSTR	GetAddress() const;
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	/*
 	uint16	GetPort() const							{return port;}
@@ -61,36 +73,34 @@ public:
 	uint16	GetConnPort() const						{return port;}
 	void    SetPort(uint32 val)						{ realport = val;}
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-	bool	AddTagFromFile(CFileDataIO* servermet);
-	void	SetListName(LPCSTR newname);
-	void	SetDescription(LPCSTR newdescription);
-	uint32	GetIP() const							{return ip;}
 	uint32	GetFiles() const						{return files;}
+	void	SetFileCount(uint32 in_files)			{files = in_files;}
+
 	uint32	GetUsers() const						{return users;}
-	LPCSTR	GetDescription() const					{return description;}
-	uint32	GetPing() const							{return ping;}
+	void	SetUserCount(uint32 in_users)			{users = in_users;}
+
 	uint32	GetPreferences() const					{return preferences;}
+	void	SetPreference(uint32 in_preferences)	{preferences = in_preferences;}
+
+	uint32	GetPing() const							{return ping;}
+	void	SetPing(uint32 in_ping)					{ping = in_ping;}
+
 	uint32	GetMaxUsers() const						{return maxusers;}
 	void	SetMaxUsers(uint32 in_maxusers) 		{maxusers = in_maxusers;}
-	void	SetUserCount(uint32 in_users)			{users = in_users;}
-	void	SetFileCount(uint32 in_files)			{files = in_files;}
-	void	ResetFailedCount()						{failedcount = 0;} 
-	void	AddFailedCount()						{failedcount++;} 
+
 	uint32	GetFailedCount() const					{return failedcount;}
-	void	SetID(uint32 newip);
-	LPCSTR	GetDynIP() const						{return dynip;}
-	bool	HasDynIP() const						{return dynip;}
-	void	SetDynIP(LPCSTR newdynip);
+	void	AddFailedCount()						{failedcount++;} 
+	void	ResetFailedCount()						{failedcount = 0;} 
 	uint32	GetLastPingedTime() const				{return lastpingedtime;}
 	void	SetLastPingedTime(uint32 in_lastpingedtime)	{lastpingedtime = in_lastpingedtime;}
 	uint32	GetLastPinged() const					{return lastpinged;}
 	void	SetLastPinged(uint32 in_lastpinged)		{lastpinged = in_lastpinged;}
 	uint8	GetLastDescPingedCount() const			{return lastdescpingedcout;}
 	void	SetLastDescPingedCount(bool reset);
-	void	SetPing(uint32 in_ping)					{ping = in_ping;}
-	void	SetPreference(uint32 in_preferences)	{preferences = in_preferences;}
-	void	SetIsStaticMember(bool in)				{staticservermember=in;}
+
 	bool	IsStaticMember() const					{return staticservermember;}
+	void	SetIsStaticMember(bool in)				{staticservermember=in;}
+
 	uint32	GetChallenge() const					{return challenge;}
 	void	SetChallenge(uint32 in_challenge)		{challenge = in_challenge;}
 	uint32	GetDescReqChallenge() const				{return m_uDescReqChallenge;}
@@ -101,10 +111,15 @@ public:
 	void	SetHardFiles(uint32 in_hardfiles)		{hardfiles = in_hardfiles;}
 	const CString& GetVersion() const				{return m_strVersion;}
 	void	SetVersion(LPCTSTR pszVersion)			{m_strVersion = pszVersion;}
-	void	SetTCPFlags(uint32 uFlags)				{m_uTCPFlags = uFlags;}
+
 	uint32	GetTCPFlags() const						{return m_uTCPFlags;}
-	void	SetUDPFlags(uint32 uFlags)				{m_uUDPFlags = uFlags;}
+	void	SetTCPFlags(uint32 uFlags)				{m_uTCPFlags = uFlags;}
+
 	uint32	GetUDPFlags() const						{return m_uUDPFlags;}
+	void	SetUDPFlags(uint32 uFlags)				{m_uUDPFlags = uFlags;}
+
+	uint32	GetLowIDUsers() const					{return m_uLowIDUsers;}
+	void	SetLowIDUsers(uint32 uLowIDUsers)		{m_uLowIDUsers = uLowIDUsers;}
 
 private:
 	uint32		challenge;
@@ -119,20 +134,19 @@ private:
 	uint32		hardfiles;
 	uint32		preferences;
 	uint32		ping;
-	LPCSTR		description;
-	LPCSTR		listname;
-	LPCSTR		dynip;
-	uint32		tagcount;
-	CHAR		ipfull[3+1+3+1+3+1+3+1]; // 16
+	CString		m_strDescription;
+	CString		m_strName;
+	CString		m_strDynIP;
+	TCHAR		ipfull[3+1+3+1+3+1+3+1]; // 16
 	uint32		ip;
 	uint16		port;
 	uint16		realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	uint8		staticservermember;
 	uint32		failedcount; 
-	CTypedPtrList<CPtrList, CTag*>*	taglist;
 	CString		m_strVersion;
 	uint32		m_uTCPFlags;
 	uint32		m_uUDPFlags;
+	uint32		m_uLowIDUsers;
 
 //EastShare Start - added by AndCycle, IP to Country
 public:

@@ -135,34 +135,38 @@ void CQueueListCtrl::SetAllIcons()
 	imagelist.DeleteImageList();
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	imagelist.SetBkColor(CLR_NONE);
-	imagelist.Add(CTempIconLoader("ClientEDonkey"));
+	imagelist.Add(CTempIconLoader(_T("ClientEDonkey")));
 	//MORPH START - Changed by SiRoB, More client & Credit overlay icon
-	imagelist.Add(CTempIconLoader("ClientCompatible"));
-	//imagelist.Add(CTempIconLoader("ClientEDonkeyPlus"));
-	//imagelist.Add(CTempIconLoader("ClientCompatiblePlus"));
-	imagelist.Add(CTempIconLoader("Friend"));
-	imagelist.Add(CTempIconLoader("ClientMLDonkey"));
-	//imagelist.Add(CTempIconLoader("ClientMLDonkeyPlus"));
-	imagelist.Add(CTempIconLoader("ClientEDonkeyHybrid"));
-	//imagelist.Add(CTempIconLoader("ClientEDonkeyHybridPlus"));
-	imagelist.Add(CTempIconLoader("ClientShareaza"));
-	//imagelist.Add(CTempIconLoader("ClientShareazaPlus"));
-	imagelist.Add(CTempIconLoader("ClientRightEdonkey"));
-	imagelist.Add(CTempIconLoader("ClientMorph"));
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);//10
+	imagelist.Add(CTempIconLoader(_T("ClientCompatible")));
+	//imagelist.Add(CTempIconLoader(_T("ClientEDonkeyPlus")));
+	//imagelist.Add(CTempIconLoader(_T("ClientCompatiblePlus")));
+	imagelist.Add(CTempIconLoader(_T("Friend")));
+	imagelist.Add(CTempIconLoader(_T("ClientMLDonkey")));
+	//imagelist.Add(CTempIconLoader(_T("ClientMLDonkeyPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
+	//imagelist.Add(CTempIconLoader("ClientEDonkeyHybridPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientShareaza")));
+	//imagelist.Add(CTempIconLoader("ClientShareazaPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientAMule")));
+	//imagelist.Add(CTempIconLoader(_T("ClientAMulePlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientLPhant")));
+	//imagelist.Add(CTempIconLoader(_T("ClientLPhantPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
+	imagelist.Add(CTempIconLoader(_T("ClientMorph")));
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);//10
 	//MORPH END   - Added by SiRoB, More client icone & Credit overlay icon
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	m_overlayimages.SetBkColor(CLR_NONE);
-	m_overlayimages.Add(CTempIconLoader("Community"));
+	m_overlayimages.Add(CTempIconLoader(_T("Community")));
 	// [end] Mighty Knife
 	//MORPH START - Addded by SiRoB, Friend Addon
-	m_overlayimages.Add(CTempIconLoader("ClientFriendOvl"));
-	m_overlayimages.Add(CTempIconLoader("ClientFriendSlotOvl"));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
 }
 
@@ -358,10 +362,14 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							image = 3;
 						else if (client->GetClientSoft() == SO_SHAREAZA)
 							image = 5;
-						else if (client->GetClientSoft() == SO_EDONKEY)
+						else if (client->GetClientSoft() == SO_AMULE)
 							image = 6;
+						else if (client->GetClientSoft() == SO_LPHANT)
+							image = 7;
+						else if (client->GetClientSoft() == SO_EDONKEY)
+							image = 8;
 						else if (client->ExtProtocolAvailable())
-							image = (client->IsMorph())?7:1;
+							image = (client->IsMorph())?9:1;
 						else
 							image = 0;
 						//MORPH END   - Modified by SiRoB, More Icons
@@ -449,7 +457,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							//Morph Start - added by AndCycle, Equal Chance For Each File
 							if(thePrefs.IsEqualChanceEnable()){
 								if(file->GetPowerShared()){//keep file prio at PS
-									Sbuffer.Append(" ");
+									Sbuffer.Append(_T(" "));
 									Sbuffer.Append(file->statistic.GetEqualChanceValueString());
 								}
 								else{
@@ -469,38 +477,38 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							//MORPH END - Added by SiRoB, ZZ Upload System
 						}
 						else
-							Sbuffer = "?";
+							Sbuffer = _T("?");
 						break;
 					case 3:
-						Sbuffer.Format("%i",client->GetScore(false,false,true));
+						Sbuffer.Format(_T("%i"),client->GetScore(false,false,true));
 						break;
 					case 4:{
 							if (client->HasLowID()){
 								if (client->m_bAddNextConnect)
-									Sbuffer.Format("%i ****",client->GetScore(false));
+									Sbuffer.Format(_T("%i ****"),client->GetScore(false));
 								else
-									Sbuffer.Format("%i LowID",client->GetScore(false));
+									Sbuffer.Format(_T("%i LowID"),client->GetScore(false));
 							}
 							else
-								Sbuffer.Format("%i",client->GetScore(false));
+								Sbuffer.Format(_T("%i"),client->GetScore(false));
 
 							//EastShare START - Added by TAHO, Pay Back First
 							if(client->IsMoreUpThanDown()) {
 								CString tempStr;
-								tempStr.Format("%s %s", "PBF", Sbuffer);
+								tempStr.Format(_T("%s %s"), _T("PBF"), Sbuffer);
 								Sbuffer = tempStr;
 							}
 							//EastShare END - Added by TAHO, Pay Back First
 
 							//Morph Start - added by AndCycle, show out keep full chunk transfer
 							if(client->GetQueueSessionUp() > 0){
-								Sbuffer.Append(" F");
+								Sbuffer.Append(_T(" F"));
 							}
 							//Morph End - added by AndCycle, show out keep full chunk transfer
 						}
 						break;
 					case 5:
-						Sbuffer.Format("%i",client->GetAskedCount());
+						Sbuffer.Format(_T("%i"),client->GetAskedCount());
 						break;
 					case 6:
 						Sbuffer = CastSecondsToHM((::GetTickCount() - client->GetLastUpRequest())/1000);
@@ -531,12 +539,12 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 					// Mighty Knife: Community affiliation
 					case 11:
-						Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
+						Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
 						break;
 					// [end] Mighty Knife
 					// EastShare - Added by Pretender, Friend Tab
 					case 12:
-						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : "";
+						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
 						break;
 					// EastShare - Added by Pretender, Friend Tab
 				}
@@ -594,27 +602,25 @@ END_MESSAGE_MAP()
 void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
 
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED), MP_DETAIL, GetResString(IDS_SHOWDETAILS));
 	ClientMenu.SetDefaultItem(MP_DETAIL);
-	ClientMenu.AppendMenu(MF_STRING | ((client && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
 	//MORPH START - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	ClientMenu.AppendMenu(MF_STRING | ((!client || !client->GetViewSharedFilesSupport()) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsBanned()) ? MF_ENABLED : MF_GRAYED),MP_UNBAN, GetResString(IDS_UNBAN));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsBanned()) ? MF_ENABLED : MF_GRAYED), MP_UNBAN, GetResString(IDS_UNBAN));
 	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::getPrefs()->getLastContact())
-		ClientMenu.AppendMenu(MF_STRING | ((!client || client->GetKadPort()==0) ? MF_GRAYED : MF_ENABLED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -984,7 +990,7 @@ void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEve
 			update = theApp.uploadqueue->GetNextClient(update);
 		}
 	}
-	CATCH_DFLT_EXCEPTIONS("CQueueListCtrl::QueueUpdateTimer")
+	CATCH_DFLT_EXCEPTIONS(_T("CQueueListCtrl::QueueUpdateTimer"))
 }
 
 void CQueueListCtrl::ShowQueueClients()

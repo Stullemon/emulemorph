@@ -32,21 +32,14 @@ static char THIS_FILE[]=__FILE__;
 
 CServer::CServer(const ServerMet_Struct* in_data)
 {
-	taglist = new CTypedPtrList<CPtrList, CTag*>;
 	port = in_data->port;
 	realport = 0;//Morph - added by AndCycle, aux Ports, by lugdunummaster
-	tagcount = 0;
 	ip = in_data->ip;
-	in_addr host;
-	host.S_un.S_addr = ip;
-	strcpy(ipfull,inet_ntoa(host));
+	_tcscpy(ipfull, ipstr(ip));
 	files = 0;
 	users = 0;
 	preferences = 0;
 	ping = 0;
-	description = NULL;
-	listname = NULL;
-	dynip = 0;
 	failedcount = 0; 
 	lastpinged = 0;
 	lastpingedtime = 0;
@@ -58,34 +51,26 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	m_uTCPFlags = 0;
 	m_uUDPFlags = 0;
 	m_uDescReqChallenge = 0;
+	m_uLowIDUsers = 0;
+	challenge = 0;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
-CServer::CServer(uint16 in_port, LPCSTR i_addr)
+CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 {
+	USES_CONVERSION;
 	port = in_port;
-
 	realport = 0;//Morph - added by AndCycle, aux Ports, by lugdunummaster
-	taglist = new CTypedPtrList<CPtrList, CTag*>;
-	tagcount = 0;
-
-	if (inet_addr(i_addr) == INADDR_NONE && strcmp(i_addr, "255.255.255.255") != 0){
-		dynip = nstrdup(i_addr);
+	
+	if ((ip = inet_addr(T2CA(i_addr))) == INADDR_NONE && _tcscmp(i_addr, _T("255.255.255.255")) != 0){
+		m_strDynIP = i_addr;
 		ip = 0;
 	}
-	else{
-		ip = inet_addr(i_addr);
-		dynip = NULL;
-	}
-	in_addr host;
-	host.S_un.S_addr = ip;
-	strcpy(ipfull,inet_ntoa(host));
+	_tcscpy(ipfull, ipstr(ip));
 	files = 0;
 	users = 0;
 	preferences = 0;
 	ping = 0;
-	description = NULL;
-	listname = NULL;
 	failedcount = 0; 
 	lastpinged = 0;
 	lastpingedtime = 0;
@@ -97,22 +82,18 @@ CServer::CServer(uint16 in_port, LPCSTR i_addr)
 	m_uTCPFlags = 0;
 	m_uUDPFlags = 0;
 	m_uDescReqChallenge = 0;
+	m_uLowIDUsers = 0;
+	challenge = 0;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
 // copy constructor
 CServer::CServer(const CServer* pOld)
 {
-	taglist = new CTypedPtrList<CPtrList, CTag*>;
-	for (POSITION pos = pOld->taglist->GetHeadPosition(); pos != NULL; ){
-		CTag* pOldTag = pOld->taglist->GetNext(pos);
-		taglist->AddTail(pOldTag->CloneTag());
-	}
 	port = pOld->port;
 	ip = pOld->ip; 
 	staticservermember=pOld->IsStaticMember();
-	tagcount = pOld->tagcount;
-	strcpy(ipfull,pOld->ipfull);
+	_tcscpy(ipfull, pOld->ipfull);
 	files = pOld->files;
 	users = pOld->users;
 	realport = pOld->realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
@@ -125,33 +106,20 @@ CServer::CServer(const CServer* pOld)
 	softfiles = pOld->softfiles;
 	hardfiles = pOld->hardfiles;
 	lastdescpingedcout = pOld->lastdescpingedcout;
-	if (pOld->description)
-		description = nstrdup(pOld->description);
-	else
-		description = NULL;
-	if (pOld->listname)
-		listname = nstrdup(pOld->listname);
-	else
-		listname = NULL;
-	if (pOld->dynip)
-		dynip = nstrdup(pOld->dynip);
-	else
-		dynip = NULL;
+	m_strDescription = pOld->m_strDescription;
+	m_strName = pOld->m_strName;
+	m_strDynIP = pOld->m_strDynIP;
 	m_strVersion = pOld->m_strVersion;
 	m_uTCPFlags = pOld->m_uTCPFlags;
 	m_uUDPFlags = pOld->m_uUDPFlags;
 	m_uDescReqChallenge = pOld->m_uDescReqChallenge;
+	m_uLowIDUsers = pOld->m_uLowIDUsers;
+	challenge = pOld->challenge;
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
 CServer::~CServer()
 {
-	delete[] description;
-	delete[] listname;
-	delete[] dynip;
-	for(POSITION pos = taglist->GetHeadPosition(); pos != NULL; )
-		delete taglist->GetNext(pos);
-	delete taglist;
 }
 
 bool CServer::AddTagFromFile(CFileDataIO* servermet)
@@ -161,136 +129,134 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 	CTag* tag = new CTag(servermet);
 	switch(tag->tag.specialtag){		
 	case ST_SERVERNAME:
-		if(tag->tag.stringvalue)
-			listname = nstrdup(tag->tag.stringvalue);
-		else
-			listname = NULL;
-		delete tag;
+		ASSERT( tag->IsStr() );
+		if (tag->IsStr()){
+#ifdef _UNICODE
+			if (m_strName.IsEmpty())
+#endif
+				m_strName = tag->GetStr();
+		}
 		break;
 	case ST_DESCRIPTION:
-		if( tag->tag.stringvalue )
-			description = nstrdup(tag->tag.stringvalue);
-		else
-			description = NULL;
-		delete tag;
-		break;
-	case ST_PREFERENCE:
-		preferences =tag->tag.intvalue;
-		delete tag;
+		ASSERT( tag->IsStr() );
+		if (tag->IsStr()){
+#ifdef _UNICODE
+			if (m_strDescription.IsEmpty())
+#endif
+				m_strDescription = tag->GetStr();
+		}
 		break;
 	case ST_PING:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
 		ping = tag->tag.intvalue;
-		delete tag;
-		break;
-	case ST_DYNIP:
-		if ( tag->tag.stringvalue )
-			dynip = nstrdup(tag->tag.stringvalue);
-		else
-			dynip = NULL;
-		delete tag;
 		break;
 	case ST_FAIL:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
 		failedcount = tag->tag.intvalue;
-		delete tag;
 		break;
-	case ST_LASTPING:
-		lastpingedtime = tag->tag.intvalue;
-		delete tag;
+	case ST_PREFERENCE:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
+			preferences = tag->tag.intvalue;
+		break;
+	case ST_DYNIP:
+		ASSERT( tag->IsStr() );
+		if (tag->IsStr()){
+#ifdef _UNICODE
+			if (m_strDynIP.IsEmpty())
+#endif
+				m_strDynIP = tag->GetStr();
+		}
 		break;
 	case ST_MAXUSERS:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
 		maxusers = tag->tag.intvalue;
-		delete tag;
 		break;
 	case ST_SOFTFILES:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
 		softfiles = tag->tag.intvalue;
-		delete tag;
 		break;
 	case ST_HARDFILES:
 		hardfiles = tag->tag.intvalue;
-		delete tag;
+		break;
+	case ST_LASTPING:
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
+			lastpingedtime = tag->tag.intvalue;
 		break;
 	case ST_VERSION:
-		if (tag->tag.type == 2)
-			m_strVersion = tag->tag.stringvalue;
-		else if (tag->tag.type == 3)
+		if (tag->IsStr()){
+#ifdef _UNICODE
+			if (m_strVersion.IsEmpty())
+#endif
+				m_strVersion = tag->GetStr();
+		}
+		else if (tag->IsInt())
 			m_strVersion.Format(_T("%u.%u"), tag->tag.intvalue >> 16, tag->tag.intvalue & 0xFFFF);
-		delete tag;
+		else
+			ASSERT(0);
 		break;
 	case ST_UDPFLAGS:
-		if (tag->tag.type == 3)
+		ASSERT( tag->IsInt() );
+		if (tag->IsInt())
 			m_uUDPFlags = tag->tag.intvalue;
-		delete tag;
 		break;
 	default:
 		if (tag->tag.specialtag){
-			tag->tag.tagname = nstrdup("Unknown");
-			AddTag(tag);
+			ASSERT( 0 );
 		}
-		else if (!strcmp(tag->tag.tagname,"files")){
-			files = tag->tag.intvalue;
-			delete tag;
+		else if (!CmpED2KTagName(tag->tag.tagname,"files")){
+			ASSERT( tag->IsInt() );
+			if (tag->IsInt())
+				files = tag->tag.intvalue;
 		}
-		else if (!strcmp(tag->tag.tagname,"users")){
-			users = tag->tag.intvalue;
-			delete tag;
+		else if (!CmpED2KTagName(tag->tag.tagname,"users")){
+			ASSERT( tag->IsInt() );
+			if (tag->IsInt())
+				users = tag->tag.intvalue;
 		}
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
-		else if (!strcmp(tag->tag.tagname,"auxportslist")){
-			if (tag->tag.type == 2) realport = atoi(tag->tag.stringvalue);
-			delete tag;
+		else if (!CmpED2KTagName(tag->tag.tagname,_T("auxportslist"))){
+			ASSERT( tag->IsStr() );
+			if (tag->IsStr())	realport = atoi(tag->GetStr());
 		}
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-		else
-			AddTag(tag);
 	}
+	delete tag;
 	return true;
 }
 
-void CServer::SetListName(LPCSTR newname)
+void CServer::SetListName(LPCTSTR newname)
 {
-	if (listname){
-		delete[] listname;
-		listname = NULL;// needed, in case 'nstrdup' fires an exception!!
-	}
-	if (newname)
-		listname = nstrdup(newname);
+	m_strName = newname;
 }
 
-void CServer::SetDescription(LPCSTR newname)
+void CServer::SetDescription(LPCTSTR newname)
 {
-	if (description){
-		delete[] description;
-		description = NULL;// needed, in case 'nstrdup' fires an exception!!
-	}
-	if( newname )
-		description = nstrdup(newname);
+	m_strDescription = newname;
 }
 
-LPCSTR CServer::GetAddress() const
+LPCTSTR CServer::GetAddress() const
 {
-	if (dynip)
-		return dynip;
+	if (!m_strDynIP.IsEmpty())
+		return m_strDynIP;
 	else
 		return ipfull;
 }
 
-void CServer::SetID(uint32 newip)
+void CServer::SetIP(uint32 newip)
 {
 	ip = newip;
-	in_addr host;
-	host.S_un.S_addr = ip;
-	strcpy(ipfull,inet_ntoa(host));
-	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
+	_tcscpy(ipfull, ipstr(ip));
 }
 
-void CServer::SetDynIP(LPCSTR newdynip)
+void CServer::SetDynIP(LPCTSTR newdynip)
 {
-	if (dynip){
-		delete[] dynip;
-		dynip = NULL;// needed, in case 'nstrdup' fires an exception!!
-	}
-	if( newdynip )
-		dynip = nstrdup(newdynip);
+	m_strDynIP = newdynip;
 }
 
 void CServer::SetLastDescPingedCount(bool bReset)

@@ -75,7 +75,8 @@ END_MESSAGE_MAP()
 
 void CPPgGeneral::LoadSettings(void)
 {
-	GetDlgItem(IDC_NICK)->SetWindowText(thePrefs.nick);
+	USES_CONVERSION;
+	GetDlgItem(IDC_NICK)->SetWindowText(A2CT(thePrefs.GetUserNick()));
 
 	for(int i = 0; i < m_language.GetCount(); i++)
 		if(m_language.GetItemData(i) == thePrefs.GetLanguageID())
@@ -117,7 +118,7 @@ void CPPgGeneral::LoadSettings(void)
 		CheckDlgButton(IDC_CHECK4UPDATE,0);
 
 	CString strBuffer;
-	strBuffer.Format("%i %s",thePrefs.versioncheckdays,GetResString(IDS_DAYS2));
+	strBuffer.Format(_T("%i %s"),thePrefs.versioncheckdays,GetResString(IDS_DAYS2));
 	GetDlgItem(IDC_DAYS)->SetWindowText(strBuffer);
 }
 
@@ -248,7 +249,7 @@ void CPPgGeneral::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	if (pScrollBar==GetDlgItem(IDC_CHECKDAYS)) {
 		CSliderCtrl* slider =(CSliderCtrl*)pScrollBar;
 		CString text;
-		text.Format("%i %s",slider->GetPos(),GetResString(IDS_DAYS2));
+		text.Format(_T("%i %s"),slider->GetPos(),GetResString(IDS_DAYS2));
 		GetDlgItem(IDC_DAYS)->SetWindowText(text);
 	}
 
@@ -263,7 +264,7 @@ void CPPgGeneral::OnBnClickedEditWebservices()
 
 void CPPgGeneral::OnLangChange()
 {
-#define MIRRORS_URL	"http://langmirror%i.emule-project.org/lang/%i%i%i%i/"
+#define MIRRORS_URL	_T("http://langmirror%i.emule-project.org/lang/%i%i%i%i/")
 
 	WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
 	if (thePrefs.GetLanguageID() != byNewLang){
@@ -282,6 +283,7 @@ void CPPgGeneral::OnLangChange()
 				strFilename.Append(thePrefs.GetLangDLLNameByID(byNewLang));
 				// start
 				CHttpDownloadDlg dlgDownload;
+				dlgDownload.m_strTitle = _T("Downloading language file");
 				dlgDownload.m_sURLToDownload = strUrl;
 				dlgDownload.m_sFileToDownloadInto = strFilename;
 				if (dlgDownload.DoModal() == IDOK && thePrefs.IsLanguageSupported(byNewLang, true))

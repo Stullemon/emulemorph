@@ -24,7 +24,6 @@ void MD5Final (unsigned char [16], MD5_CTX *);
 
 MD5Sum::MD5Sum()
 {
-	m_sHash = "";
 }
 
 MD5Sum::MD5Sum(CString sSource)
@@ -32,25 +31,30 @@ MD5Sum::MD5Sum(CString sSource)
 	Calculate(sSource);
 }
 
-CString MD5Sum::Calculate(CString sSource)
+MD5Sum::MD5Sum(uchar* pachSource, uint32 nLen)
+{
+	Calculate(pachSource, nLen);
+}
+
+CString MD5Sum::Calculate(uchar* pachSource, uint32 nLen)
 {
 	MD5_CTX context;
-	unsigned char digest[16];
 
 	MD5Init (&context);
-	MD5Update (&context, (unsigned char *)sSource.GetBuffer(0), sSource.GetLength());
-	MD5Final (digest, &context);
+	MD5Update (&context, pachSource, nLen);
+	MD5Final (m_rawHash, &context);
 
-	m_sHash = "";
+	m_sHash.Empty();
 	for (int i = 0; i < 16; i++)
 	{
 		CString sT;
-		sT.Format("%02x", digest[i]);
+		sT.Format(_T("%02x"), m_rawHash[i]);
 		m_sHash += sT;
 	}
 
 	return m_sHash;
 }
+
 
 CString MD5Sum::GetHash()
 {

@@ -131,7 +131,7 @@ BOOL CPPgStats::OnApply()
 
 		TCHAR buffer[20];
 		GetDlgItem(IDC_CGRAPHSCALE)->GetWindowText(buffer, ARRSIZE(buffer));
-		int statsMax = atoi(buffer);
+		int statsMax = _tstoi(buffer);
 		if (statsMax > thePrefs.GetMaxConnections() + 5)
 		{
 			if (thePrefs.GetStatsMax() != thePrefs.GetMaxConnections() + 5){

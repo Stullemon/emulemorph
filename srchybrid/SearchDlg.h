@@ -28,6 +28,7 @@ public:
 	bool DoNewEd2kSearch(SSearchParams* pParams);
 	bool DoNewKadSearch(SSearchParams* pParams);
 	void CancelSearch();
+	void CancelKadSearch(UINT uSearchID);
 
 	void DownloadSelected();
 	void DownloadSelected(bool paused);

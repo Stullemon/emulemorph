@@ -24,10 +24,8 @@
 #include "SafeFile.h"
 #include "OtherFunctions.h"
 #include "opcodes.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
 #include "FriendListCtrl.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -55,11 +53,11 @@ bool CFriendList::LoadList(){
 	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(strFileName.GetBuffer(),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary, &fexp)){
+	if (!file.Open(strFileName.GetBuffer(),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_READEMFRIENDS));
-			char szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError,MAX_CFEXP_ERRORMSG)){
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 				strError += _T(" - ");
 				strError += szError;
 			}
@@ -86,8 +84,8 @@ bool CFriendList::LoadList(){
 		if (error->m_cause == CFileException::endOfFile)
 			AddLogLine(true,GetResString(IDS_ERR_EMFRIENDSINVALID));
 		else{
-			char buffer[MAX_CFEXP_ERRORMSG];
-			error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
+			TCHAR buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer, ARRSIZE(buffer));
 			AddLogLine(true,GetResString(IDS_ERR_READEMFRIENDS),buffer);
 		}
 		error->Delete();
@@ -99,16 +97,16 @@ bool CFriendList::LoadList(){
 
 void CFriendList::SaveList(){
 	if (thePrefs.GetLogFileSaving())
-		AddDebugLogLine(false, "Saving friends list file \"%s\"", EMFRIENDS_MET_FILENAME);
+		AddDebugLogLine(false, _T("Saving friends list file \"%s\""), EMFRIENDS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
 	CString strFileName = CString(thePrefs.GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(strFileName.GetBuffer(),CFile::modeCreate|CFile::modeWrite|CFile::typeBinary, &fexp)){
+	if (!file.Open(strFileName.GetBuffer(),CFile::modeCreate|CFile::modeWrite|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError(_T("Failed to save ") EMFRIENDS_MET_FILENAME _T(" file"));
-		char szError[MAX_CFEXP_ERRORMSG];
-		if (fexp.GetErrorMessage(szError,MAX_CFEXP_ERRORMSG)){
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -180,6 +178,7 @@ void CFriendList::ShowFriends() const {
 bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
 							uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash){
 	// client must have an IP (HighID) or a hash
+	// TODO: check if this can be switched to a hybridID so clients with *.*.*.0 can be added..
 	if (IsLowID(dwLastUsedIP) && dwHasHash==0)
 		return false;
 	if( dwLastUsedIP && IsAlreadyFriend(dwLastUsedIP, nLastUsedPort))
@@ -277,9 +276,7 @@ void CFriendList::RemoveFriend(CFriend* todel){
 	}
 	// [end] Mighty Knife
 
-	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	todel->SetLinkedClient(NULL);
-	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 
 	if (m_wndOutput)
 		m_wndOutput->RemoveFriend(todel);
@@ -293,9 +290,7 @@ void CFriendList::RemoveFriend(CFriend* todel){
 void CFriendList::RemoveAllFriendSlots(){
 	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0; ){
 		CFriend* cur_friend = m_listFriends.GetNext(pos);
-		//MORPH START - Added by Yun.SF3, ZZ Upload System
 		cur_friend->SetFriendSlot(false);
-		//MORPH END - Added by Yun.SF3, ZZ Upload System
 		//MORPH - Added by SiRoB, Friend Addon
 		RefreshFriend(cur_friend);
 		//MORPH - Added by SiRoB, Friend Addon

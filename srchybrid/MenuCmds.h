@@ -78,11 +78,7 @@
 #define MP_HM_PREFS				10217
 #define MP_HM_OPENINC			10218
 #define MP_HM_EXIT				10219
-#define MP_ALL_A4AF_TO_THIS		10220
-#define MP_ALL_A4AF_TO_OTHER	10221
 #define MP_ALL_A4AF_AUTO		10222
-#define MP_SWAP_A4AF_TO_THIS	10223
-#define MP_SWAP_A4AF_TO_OTHER	10224
 #define MP_META_DATA			10225
 #define MP_BOOT					10226
 #define MP_HM_CONVERTPF			10227
@@ -107,6 +103,7 @@
 #define	MP_HM_IPFILTER			10245
 #define	MP_WEBSVC_EDIT			10246
 #define	MP_HM_DIRECT_DOWNLOAD	10247
+#define	MP_INSTALL_SKIN			10248
 
 #define MP_PRIOVERYLOW			10300
 #define MP_PRIOLOW				10301
@@ -116,6 +113,7 @@
 #define MP_PRIOAUTO				10317
 #define MP_GETED2KLINK			10305
 #define MP_GETHTMLED2KLINK		10306
+#define	MP_GETED2KHASHSETLINK	10298
 #define	MP_GETSOURCEED2KLINK	10299
 #define MP_METINFO				10307
 #define MP_CONNECTTO			10311
@@ -143,6 +141,9 @@
 #define	MP_UNDO					10334
 #define	MP_CUT					10335
 #define	MP_PASTE				10336
+
+#define MP_DOWNLOAD_ALPHABETICAL 10337 // ZZ:DownloadManager
+#define MP_A4AF_CHECK_THIS_NOW 10338 // ZZ:DownloadManager
 
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10340
@@ -222,21 +223,29 @@
 #define	MP_PREVIEW_APP_MAX		(MP_PREVIEW_APP_MIN+49)
 
 #define Irc_Version				"(SMIRCv00.68)"
+#define Irc_Join				10240
+#define Irc_Close				10241
+#define Irc_Priv				10242
+#define Irc_AddFriend			10243
+#define	Irc_SendLink			10244
+#define Irc_SetSendLink			10245
+#define Irc_Kick				10246
+#define Irc_Ban					10247
+#define Irc_KB					10248
+#define Irc_Slap				10249
+//Note: reserve at least 50 ID's (Irc_OpCommands-Irc_OpCommands+49).
+#define Irc_OpCommands			10250
+//Note: reserve at least 100 ID's (Irc_ChanCommands-Irc_ChanCommands+99).
+#define Irc_ChanCommands		Irc_OpCommands+50
+/*
 #define Irc_Op					10240
 #define Irc_DeOp				10241
 #define Irc_Voice				10242
 #define Irc_DeVoice				10243
 #define Irc_HalfOp				10244
 #define Irc_DeHalfOp			10245
-#define Irc_Kick				10246
-#define Irc_Slap				10247
-#define Irc_Join				10248
-#define Irc_Close				10249
-#define Irc_Priv				10250
-#define Irc_AddFriend			10251
-#define	Irc_SendLink			10252
-#define Irc_SetSendLink			10253
 #define	Irc_Owner				10254
 #define Irc_DeOwner				10255
 #define	Irc_Protect				10256
 #define Irc_DeProtect			10257
+*/

@@ -30,9 +30,9 @@ void CWebSocket::SetParent(CWebServer *pParent)
 
 void CWebSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData, DWORD dwDataLen, in_addr inad)
 {
-	CString sHeader(pHeader, dwHeaderLen);
-	CString sData(pData, dwDataLen);
-	CString sURL;
+	CStringA sHeader(pHeader, dwHeaderLen);
+	CStringA sData(pData, dwDataLen);
+	CStringA sURL;
 	bool filereq=false;
 
 	if(sHeader.Left(3) == "GET")
@@ -141,11 +141,10 @@ void CWebSocket::OnReceived(void* pData, DWORD dwSize, in_addr inad)
 					bPrevEndl = false;
 
 	}
-
 	if (m_dwHttpHeaderLen && !m_bCanRecv && !m_dwHttpContentLen)
 		m_dwHttpContentLen = m_dwRecv - m_dwHttpHeaderLen; // of course
 
-	if (m_dwHttpHeaderLen && (!m_dwHttpContentLen || (m_dwHttpHeaderLen + m_dwHttpContentLen <= m_dwRecv)))
+	if (m_dwHttpHeaderLen && m_dwHttpContentLen < m_dwRecv && (!m_dwHttpContentLen || (m_dwHttpHeaderLen + m_dwHttpContentLen <= m_dwRecv)))
 	{
 		OnRequestReceived(m_pBuf, m_dwHttpHeaderLen, m_pBuf + m_dwHttpHeaderLen, m_dwHttpContentLen, inad);
 
@@ -231,6 +230,16 @@ void CWebSocket::SendContent(LPCSTR szStdResponse, const void* pContent, DWORD d
 	SendData(pContent, dwContentSize);
 }
 
+void CWebSocket::SendContent(LPCSTR szStdResponse, const CString& rstr)
+{
+#ifdef _UNICODE
+	CStringA strA(rstr);
+	SendContent(szStdResponse, strA, strA.GetLength());
+#else
+	SendContent(szStdResponse, rstr, rstr.GetLength());
+#endif
+}
+
 void CWebSocket::Disconnect()
 {
 	if (m_bValid && m_bCanSend)
@@ -259,6 +268,10 @@ void CWebSocket::Disconnect()
 UINT AFX_CDECL WebSocketAcceptedFunc(LPVOID pD)
 {
 	DbgSetThreadName("WebSocketAccepted");
+
+	srand(time(NULL));
+	InitThreadLocale();
+
 	SocketData *pData = (SocketData *)pD;
 	SOCKET hSocket = pData->hSocket;
 	CWebServer *pThis = (CWebServer *)pData->pThis;
@@ -384,6 +397,10 @@ UINT AFX_CDECL WebSocketAcceptedFunc(LPVOID pD)
 UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 {
 	DbgSetThreadName("WebSocketListening");
+
+	srand(time(NULL));
+	InitThreadLocale();
+
 //	WSADATA stData;
 //	if (!WSAStartup(MAKEWORD(1, 1), &stData))
 	{

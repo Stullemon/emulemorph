@@ -38,9 +38,10 @@ struct PORTANDHASH{
 
 class CDeletedClient{
 public:
-	CDeletedClient(CUpDownClient* pClient);
+	CDeletedClient(const CUpDownClient* pClient);
 	CArray<PORTANDHASH,PORTANDHASH> m_ItemsList;
 	uint32							m_dwInserted;
+	uint32							m_cBadRequest;
 };
 
 // ----------------------CClientList Class---------------
@@ -52,7 +53,7 @@ public:
 	CClientList();
 	~CClientList();
 	void	AddClient(CUpDownClient* toadd,bool bSkipDupTest = false);
-	void	RemoveClient(CUpDownClient* toremove);
+	void	RemoveClient(CUpDownClient* toremove, LPCTSTR pszReason = NULL);
 	void	GetStatistics(uint32& totalclient, int stats[],
 						  CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkey,
 						  CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkeyHybrid,
@@ -74,14 +75,18 @@ public:
 	CUpDownClient* GetRandomKadClient() const;
 //	void	GetClientListByFileID(CUpDownClientPtrList *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
 
+	// banned clients
 	void	AddBannedClient(uint32 dwIP);
-	bool	IsBannedClient(uint32 dwIP);
+	bool	IsBannedClient(uint32 dwIP) /*const*/;
 	void	RemoveBannedClient(uint32 dwIP);
-	uint16	GetBannedCount()			{return m_bannedList.GetCount(); }
+	UINT	GetBannedCount() const		{return m_bannedList.GetCount(); }
 
+	// Tracked clients
 	void	AddTrackClient(CUpDownClient* toadd);
 	bool	ComparePriorUserhash(uint32 dwIP, uint16 nPort, void* pNewHash);
-	uint16	GetClientsFromIP(uint32 dwIP);
+	UINT	GetClientsFromIP(uint32 dwIP) const;
+	void	TrackBadRequest(const CUpDownClient* upcClient, sint32 nIncreaseCounter);
+	uint32	GetBadRequests(const CUpDownClient* upcClient) const;
 
 	void	Process();
 	void	RequestTCP(Kademlia::CContact* contact);
@@ -90,15 +95,22 @@ public:
 	bool	IsValidClient(CUpDownClient* tocheck);
 	void	Debug_SocketDeleted(CClientReqSocket* deleted);
 
-	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
+    // ZZ:UploadSpeedSense -->
 	bool GiveClientsForTraceRoute();
-	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+	// ZZ:UploadSpeedSense <--
+
+    void ProcessA4AFClients(); // ZZ:DownloadManager
+
+protected:
+	void	CleanUpClientList();
+
 private:
 	CUpDownClientPtrList list;
 	CMap<uint32, uint32, uint32, uint32> m_bannedList;
 	CMap<uint32, uint32, CDeletedClient*, CDeletedClient*> m_trackedClientsList;
 	uint32	m_dwLastBannCleanUp;
 	uint32	m_dwLastTrackedCleanUp;
+	uint32 m_dwLastClientCleanUp;
 	CUpDownClientPtrList RequestTCPList;
 	CCriticalSection m_RequestTCPLock;
 

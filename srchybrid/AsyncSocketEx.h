@@ -91,10 +91,9 @@ class CAsyncSocketExLayer;
 #endif //NOLAYERS
 class CCriticalSectionWrapper;
 class CAsyncSocketEx: public CLoggable
-#ifdef _DEBUG
 					 ,public CObject
-#endif
 {
+	DECLARE_DYNAMIC(CAsyncSocketEx)
 public:
 	///////////////////////////////////////
 	//Functions that imitate CAsyncSocket//

@@ -39,8 +39,12 @@ public:
 	CIPFilter();
 	~CIPFilter();
 
+	CString GetDefaultFilePath() const;
+
 	void AddIPRange(uint32 IPfrom, uint32 IPto, UINT level, const CString& desc);
-	void	RemoveAllIPs();
+	void RemoveAllIPFilters();
+	bool RemoveIPFilter(const SIPFilter* pFilter);
+
 	int AddFromFile(LPCTSTR pszFilePath, bool bShowResponse = true);
 	int LoadFromDefaultFile(bool bShowResponse = true);
 	void SaveToDefaultFile();
@@ -50,7 +54,6 @@ public:
 	LPCTSTR GetLastHit() const;
 
 	const CIPFilterArray& GetIPFilter() const;
-	bool RemoveIPFilter(const SIPFilter* pFilter);
 	void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
 
 private:

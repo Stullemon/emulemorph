@@ -60,15 +60,13 @@ public:
 	void	DnsLookupDone(WPARAM wp, LPARAM lp);
 
 protected:
-	void	AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort);
+	void	AsyncResolveDNS(LPCSTR lpszHostAddress, UINT nHostPort);
 	HANDLE	m_DnsTaskHandle; // dns lookup handle
 	
 	virtual void OnSend(int nErrorCode);
 	virtual void OnReceive(int nErrorCode);
 
 private:
-	LPCTSTR m_lpszHostAddress;
-	UINT m_nHostPort;
 	HWND m_hWndResolveMessage;	// where to send WM_DNSRESOLVED
 	SOCKADDR_IN m_SaveAddr;
 	CUDPSocketWnd m_udpwnd;

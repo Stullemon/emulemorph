@@ -19,6 +19,7 @@
 #include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <share.h>
 #ifdef _DEBUG
 #include "DebugHelpers.h"
 #endif
@@ -27,7 +28,6 @@
 #include "KnownFileList.h"
 #include "SharedFileList.h"
 #include "UpDownClient.h"
-#include "UploadQueue.h"
 #include "MMServer.h"
 #include "ClientList.h"
 #include "opcodes.h"
@@ -67,11 +67,8 @@ typedef struct tagVIDEOINFOHEADER {
     BITMAPINFOHEADER bmiHeader;
 } VIDEOINFOHEADER;
 
-#ifndef _CONSOLE
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
-#endif
-
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -526,30 +523,29 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bo
 		m_bitmapSharedStatusBar.SetBitmapDimension(iWidth,  iHeight); 
 		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
 
-		COLORREF crProgress;
-		COLORREF crHave;
-		COLORREF crPending;
-		COLORREF crMissing = RGB(255, 0, 0);
-
-		if(bFlat) { 
-			crProgress = RGB(0, 150, 0);
-			crHave = RGB(0, 0, 0);
-			crPending = RGB(255,208,0);
-		} else { 
-			crProgress = RGB(0, 224, 0);
-			crHave = RGB(104, 104, 104);
-			crPending = RGB(255, 208, 0);
-		} 
-
-		s_ShareStatusBar.SetFileSize(this->GetFileSize()); 
-		s_ShareStatusBar.SetHeight(iHeight); 
-		s_ShareStatusBar.SetWidth(iWidth); 
+		const COLORREF crMissing = RGB(255, 0, 0);
+		s_ShareStatusBar.SetFileSize(GetFileSize()); 
+		s_ShareStatusBar.SetHeight(iHeight);
+		s_ShareStatusBar.SetWidth(iWidth);
 		s_ShareStatusBar.Fill(crMissing); 
-		COLORREF color;
+		
 		if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
-			for (int i = 0;i < GetPartCount();i++)
+			COLORREF crProgress;
+			COLORREF crHave;
+			COLORREF crPending;
+
+			if(bFlat) { 
+				crProgress = RGB(0, 150, 0);
+				crHave = RGB(0, 0, 0);
+				crPending = RGB(255,208,0);
+			} else { 
+				crProgress = RGB(0, 224, 0);
+				crHave = RGB(104, 104, 104);
+				crPending = RGB(255, 208, 0);
+			} 
+			for (int i = 0; i < GetPartCount(); i++)
 				if(m_AvailPartFrequency[i] > 0 ){
-					color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
+					COLORREF color = RGB(0, (210-(22*(m_AvailPartFrequency[i]-1)) <  0)? 0:210-(22*(m_AvailPartFrequency[i]-1)), 255);
 						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
 				}
 		}
@@ -746,28 +742,19 @@ void CKnownFile::SetFilePath(LPCTSTR pszFilePath)
 	m_strFilePath = pszFilePath;
 }
 
-bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
+bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOID pvProgressParam)
 {
 	SetPath(in_directory);
 	SetFileName(in_filename);
-
-	// Mighty Knife: Report hashing files
-	if (thePrefs.GetReportHashingFiles ()) {
-		CString hashfilename;
-		hashfilename.Format ("%s\\%s",in_directory, in_filename);
-		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
-		AddLogLine(false, "Hashing file: '%s'", (const char*) hashfilename);
-	}
-	// [end] Mighty Knife
 
 	// open file
 	CString strFilePath;
 	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, in_directory, in_filename, NULL);
 	strFilePath.ReleaseBuffer();
 	SetFilePath(strFilePath);
-	FILE* file = fopen(strFilePath, "rbS");
+	FILE* file = _tfsopen(strFilePath, _T("rbS"), _SH_DENYNO); // can not use _SH_DENYWR because we may access a completing part file
 	if (!file){
-		AddLogLine(false, GetResString(IDS_ERR_FILEOPEN) + CString(_T(" - %s")), strFilePath, _T(""), strerror(errno));
+		theApp.QueueLogLine(false, GetResString(IDS_ERR_FILEOPEN) + _T(" - %hs"), strFilePath, _T(""), strerror(errno));
 		return false;
 	}
 
@@ -791,7 +778,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 		uchar* newhash = new uchar[16];
 		CreateHashFromFile(file, PARTSIZE, newhash);
 		// SLUGFILLER: SafeHash - quick fallback
-		if (!theApp.emuledlg->IsRunning()){	// in case of shutdown while still hashing
+		if (theApp.emuledlg==NULL || !theApp.emuledlg->IsRunning()){ // in case of shutdown while still hashing
 			fclose(file);
 			delete[] newhash;
 			return false;
@@ -800,6 +787,14 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 		hashlist.Add(newhash);
 		togo -= PARTSIZE;
 		hashcount++;
+
+		if (pvProgressParam && theApp.emuledlg && theApp.emuledlg->IsRunning()){
+			ASSERT( ((CKnownFile*)pvProgressParam)->IsKindOf(RUNTIME_CLASS(CKnownFile)) );
+			ASSERT( ((CKnownFile*)pvProgressParam)->GetFileSize() == GetFileSize() );
+			UINT uProgress = ((ULONGLONG)(GetFileSize() - togo) * 100) / GetFileSize();
+			ASSERT( uProgress <= 100 );
+			VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)pvProgressParam) );
+		}
 	}
 	uchar* lasthash = new uchar[16];
 	md4clr(lasthash);
@@ -816,6 +811,14 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 			md4cpy(buffer+(i*16), hashlist[i]);
 		CreateHashFromString(buffer, hashlist.GetCount()*16, m_abyFileHash);
 		delete[] buffer;
+	}
+
+	if (pvProgressParam && theApp.emuledlg && theApp.emuledlg->IsRunning()){
+		ASSERT( ((CKnownFile*)pvProgressParam)->IsKindOf(RUNTIME_CLASS(CKnownFile)) );
+		ASSERT( ((CKnownFile*)pvProgressParam)->GetFileSize() == GetFileSize() );
+		UINT uProgress = 100;
+		ASSERT( uProgress <= 100 );
+		VERIFY( PostMessage(theApp.emuledlg->GetSafeHwnd(), TM_FILEOPPROGRESS, uProgress, (LPARAM)pvProgressParam) );
 	}
 
 	// set lastwrite date
@@ -840,7 +843,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 		CString hashfilename;
 		hashfilename.Format ("%s\\%s",in_directory, in_filename);
 		if (hashfilename.Find ("\\\\") >= 0) hashfilename.Format ("%s%s",in_directory, in_filename);
-		AddLogLine(false, "Hashing of file '%s' completed.", (const char*) hashfilename);
+		AddLogLine(false, "Completed hashing of file '%s'.", (const char*) hashfilename);
 	}
 	// [end] Mighty Knife
 	return true;	
@@ -918,13 +921,9 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 	}
 
 	// nr. of data parts
-	//MORPH START - Added by SiRoB, bugfix: Pichuein
-	/*
-	m_iPartCount = (nFileSize + (PARTSIZE - 1)) / PARTSIZE;
-	*/
-	m_iPartCount = nFileSize/PARTSIZE;
-	if (nFileSize % PARTSIZE) ++m_iPartCount;
-	//MORPH END   - Added by SiRoB, bugfix: Pichuein
+	ASSERT( (uint64)(((uint64)nFileSize + (PARTSIZE - 1)) / PARTSIZE) <= (UINT)USHRT_MAX );
+	m_iPartCount = ((uint64)nFileSize + (PARTSIZE - 1)) / PARTSIZE;
+
 	// nr. of parts to be used with OP_FILESTATUS
 	m_iED2KPartCount = nFileSize / PARTSIZE + 1;
 
@@ -937,6 +936,7 @@ bool CKnownFile::LoadHashsetFromFile(CFileDataIO* file, bool checkhash){
 	file->ReadHash16(checkid);
 	//TRACE("File size: %u (%u full parts + %u bytes)\n", GetFileSize(), GetFileSize()/PARTSIZE, GetFileSize()%PARTSIZE);
 	//TRACE("File hash: %s\n", md4str(checkid));
+	ASSERT( hashlist.GetCount() == 0 );
 	UINT parts = file->ReadUInt16();
 	//TRACE("Nr. hashs: %u\n", (UINT)parts);
 	for (UINT i = 0; i < parts; i++){
@@ -988,6 +988,43 @@ bool CKnownFile::LoadHashsetFromFile(CFileDataIO* file, bool checkhash){
 	}
 }
 
+bool CKnownFile::SetHashset(const CArray<uchar*, uchar*>& aHashset)
+{
+	// delete hashset
+	for (int i = 0; i < hashlist.GetSize(); i++)
+		delete[] hashlist[i];
+	hashlist.RemoveAll();
+
+	// set new hash
+	for (int i = 0; i < aHashset.GetSize(); i++)
+	{
+		uchar* pucHash = new uchar[16];
+		md4cpy(pucHash, aHashset.GetAt(i));
+		hashlist.Add(pucHash);
+	}
+
+	// verify new hash
+	if (hashlist.IsEmpty())
+		return true;
+
+	uchar aucHashsetHash[16];
+	uchar* buffer = new uchar[hashlist.GetCount()*16];
+	for (int i = 0; i < hashlist.GetCount(); i++)
+		md4cpy(buffer+(i*16), hashlist[i]);
+	CreateHashFromString(buffer, hashlist.GetCount()*16, aucHashsetHash);
+	delete[] buffer;
+
+	bool bResult = (md4cmp(aucHashsetHash, m_abyFileHash) == 0);
+	if (!bResult)
+	{
+		// delete hashset
+		for (int i = 0; i < hashlist.GetSize(); i++)
+			delete[] hashlist[i];
+		hashlist.RemoveAll();
+	}
+	return bResult;
+}
+
 bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 {
 	//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars
@@ -1002,10 +1039,12 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 		CTag* newtag = new CTag(file);
 		switch(newtag->tag.specialtag){
 			case FT_FILENAME:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 2) {
-					taglist.Add(newtag);
-					break;
+				ASSERT( newtag->IsStr() );
+				if (newtag->IsStr()){
+#ifdef _UNICODE
+					if (GetFileName().IsEmpty())
+#endif
+						SetFileName(newtag->GetStr());
 				}
 				// SLUGFILLER: SafeHash
 				SetFileName(newtag->tag.stringvalue);
@@ -1013,179 +1052,132 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			case FT_FILESIZE:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+				{
+					SetFileSize(newtag->tag.intvalue);
+					m_AvailPartFrequency.SetSize(GetPartCount());
+					for (uint32 i = 0; i < GetPartCount();i++)
+						m_AvailPartFrequency[i] = 0;
 				}
-				// error checking, don't allow 0-sized files
-				if (!newtag->tag.intvalue) {
-					delete newtag;
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				SetFileSize(newtag->tag.intvalue);
-				m_AvailPartFrequency.SetSize(GetPartCount());
-				for (uint32 i = 0; i < GetPartCount();i++)
-					m_AvailPartFrequency[i] = 0;
 				delete newtag;
 				break;
 			}
 			case FT_ATTRANSFERED:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				statistic.alltimetransferred = newtag->tag.intvalue;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					statistic.alltimetransferred = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
 			case FT_ATTRANSFEREDHI:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+				{
+					uint32 hi,low;
+					low=statistic.alltimetransferred;
+					hi = newtag->tag.intvalue;
+					uint64 hi2;
+					hi2=hi;
+					hi2=hi2<<32;
+					statistic.alltimetransferred=low+hi2;
 				}
-				// SLUGFILLER: SafeHash
-				uint32 hi,low;
-				low=statistic.alltimetransferred;
-				hi = newtag->tag.intvalue;
-				uint64 hi2;
-				hi2=hi;
-				hi2=hi2<<32;
-				statistic.alltimetransferred=low+hi2;
 				delete newtag;
 				break;
 			}
 			case FT_ATREQUESTED:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				statistic.alltimerequested = newtag->tag.intvalue;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					statistic.alltimerequested = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
  			case FT_ATACCEPTED:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				statistic.alltimeaccepted = newtag->tag.intvalue;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					statistic.alltimeaccepted = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
 			case FT_ULPRIORITY:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				uint8 autoprio = PR_AUTO;
-				m_iUpPriority = newtag->tag.intvalue;
-				if( m_iUpPriority == PR_AUTO ){
-					m_iUpPriority = PR_HIGH;
-					m_bAutoUpPriority = true;
-				}
-				else{
-					if (m_iUpPriority != PR_VERYLOW && m_iUpPriority != PR_LOW && m_iUpPriority != PR_NORMAL && m_iUpPriority != PR_HIGH && m_iUpPriority != PR_VERYHIGH)
-						m_iUpPriority = PR_NORMAL;
-					m_bAutoUpPriority = false;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+				{
+					m_iUpPriority = newtag->tag.intvalue;
+					if( m_iUpPriority == PR_AUTO ){
+						m_iUpPriority = PR_HIGH;
+						m_bAutoUpPriority = true;
+					}
+					else{
+						if (m_iUpPriority != PR_VERYLOW && m_iUpPriority != PR_LOW && m_iUpPriority != PR_NORMAL && m_iUpPriority != PR_HIGH && m_iUpPriority != PR_VERYHIGH)
+							m_iUpPriority = PR_NORMAL;
+						m_bAutoUpPriority = false;
+					}
 				}
 				delete newtag;
 				break;
 			}
 			case FT_KADLASTPUBLISHSRC:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				m_lastPublishTimeKadSrc = newtag->tag.intvalue;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					m_lastPublishTimeKadSrc = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
 			case FT_FLAGS:
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
 				// Misc. Flags
 				// ------------------------------------------------------------------------------
 				// Bits  3-0: Meta data version
 				//				0 = Unknown
 				//				1 = we have created that meta data by examining the file contents.
 				// Bits 31-4: Reserved
-				m_uMetaDataVer = newtag->tag.intvalue & 0x0F;
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					m_uMetaDataVer = newtag->tag.intvalue & 0x0F;
 				delete newtag;
 				break;
 			// old tags: as long as they are not needed, take the chance to purge them
+			//MORPH START - Added by SiRoB, Show Permission
+			case FT_PERMISSIONS:{
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+				{
+					m_iPermissions = newtag->tag.intvalue;
+					// Mighty Knife: Community visible filelist
+					if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE && m_iPermissions != PERM_COMMUNITY)
+						m_iPermissions = -1;
+					// [end] Mighty Knife
+				}
+				delete newtag;
+				break;
+			}
+			//MORPH END  - Added by SiRoB, Show Permission
+			case FT_KADLASTPUBLISHKEY:
+				ASSERT( newtag->IsInt() );
+				delete newtag;
+				break;
 			// EastShare START - Added by TAHO, .met file control
 			case FT_LASTUSED:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				statistic.SetLastUsed(newtag->tag.intvalue);
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					statistic.SetLastUsed(newtag->tag.intvalue);
 				delete newtag;
 				break;
 			}
 			// EastShare END - Added by TAHO, .met file control
 			//Morph - Added by AndCycle, Equal Chance For Each File
 			case FT_ATSHARED:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				statistic.SetSharedTime(newtag->tag.intvalue);
+				ASSERT( newtag->IsInt() );
+				if (newtag->IsInt())
+					statistic.SetSharedTime(newtag->tag.intvalue);
 				delete newtag;
 				break;
 			}
 			//Morph - Added by AndCycle, Equal Chance For Each File
-			//MORPH START - Added by SiRoB, Show Permission
-			case FT_PERMISSIONS:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				m_iPermissions = newtag->tag.intvalue;
-				// Mighty Knife: Community visible filelist
-				if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE && m_iPermissions != PERM_COMMUNITY)
-					m_iPermissions = -1;
-				// [end] Mighty Knife
-				delete newtag;
-				break;
-			}
-			//MORPH END  - Added by SiRoB, Show Permission
-			case FT_KADLASTPUBLISHKEY:
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 3) {
-					taglist.Add(newtag);
-					break;
-				}
-				// SLUGFILLER: SafeHash
-				delete newtag;
-				break;
 			default:
 				//MORPH START - Changed by SiRoB, SLUGFILLER: Spreadbars
 				// Mighty Knife: Take care of corrupted tags !!!
-				if((!newtag->tag.specialtag) && (newtag->tag.type == 3) && (newtag->tag.tagname)){
+				if(!newtag->tag.specialtag && newtag->IsInt() && newtag->tag.tagname){
 				// [end] Mighty Knife
 					uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
 					if (newtag->tag.tagname[0] == FT_SPREADSTART)
@@ -1280,9 +1272,11 @@ bool CKnownFile::LoadFromFile(CFileDataIO* file){
 	// SLUGFILLER: SafeHash
 }
 
-bool CKnownFile::WriteToFile(CFileDataIO* file){
+bool CKnownFile::WriteToFile(CFileDataIO* file)
+{
 	// date
 	file->WriteUInt32(m_tUtcLastModified);
+
 	// hashset
 	file->WriteHash16(m_abyFileHash);
 	UINT parts = hashlist.GetCount();
@@ -1290,61 +1284,55 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	for (UINT i = 0; i < parts; i++)
 		file->WriteHash16(hashlist[i]);
 	//tags
-	const int iFixedTags = 10 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 EastShare +1 ECFEF - met control, known files expire tag[TAHO]
-	uint32 tagcount = iFixedTags;
-	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
-	// a bug in the meta tag reading+writing code. To achive maximum backward 
-	// compatibility for met files with older eMule versions we just don't write float 
-	// tags. This is OK, because we (eMule) do not use float tags. The only float tags 
-	// we may have to handle is the '# Sent' tag from the Hybrid, which is pretty 
-	// useless but may be received from us via the servers.
-	// 
-	// The code for writing the float tags SHOULD BE ENABLED in SOME MONTHS (after most 
-	// people are using the newer eMule versions which do not write broken float tags).	
-	for (int j = 0; j < taglist.GetCount(); j++){
-		if (taglist[j]->tag.type == 2 || taglist[j]->tag.type == 3)
-			tagcount++;
-	}
-	//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars - count spread tags
-		for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; statistic.spreadlist.GetNext(pos))
-		if (statistic.spreadlist.GetValueAt(pos))
-			tagcount += 3;
-	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
+	uint32 uTagCount = 0;
+	ULONG uTagCountFilePos = (ULONG)file->GetPosition();
+	file->WriteUInt32(uTagCount);
 	
-	if (GetPermissions()>=0) tagcount++;		//MORPH - Added by SiRoB, Show Permissions
-	if (GetHideOS()>=0) tagcount++;				//MORPH - Added by SiRoB, HIDEOS
-	if (GetSelectiveChunk()>=0) tagcount++;		//MORPH - Added by SiRoB, HIDEOS
-	if (GetShareOnlyTheNeed()>=0) tagcount++;	//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	if (GetPowerSharedMode()>=0) tagcount++;			//MORPH - Added by SiRoB, Avoid misusing of powersharing
-	if (GetPowerShareLimit()>=0) tagcount++;	//MORPH - Added by SiRoB, POWERSHARE Limit
-
-	// standard tags
-	file->WriteUInt32(tagcount);
-	
+#ifdef _UNICODE
+	if (WriteOptED2KUTF8Tag(file, GetFileName(), FT_FILENAME))
+		uTagCount++;
+#endif
 	CTag nametag(FT_FILENAME, GetFileName());
 	nametag.WriteTagToFile(file);
+	uTagCount++;
 	
 	CTag sizetag(FT_FILESIZE, m_nFileSize);
 	sizetag.WriteTagToFile(file);
+	uTagCount++;
 	
 	// statistic
-	CTag attag1(FT_ATTRANSFERED, (uint32)statistic.alltimetransferred);
-	attag1.WriteTagToFile(file);
-	CTag attag4(FT_ATTRANSFEREDHI, (uint32)(statistic.alltimetransferred >> 32));
-	attag4.WriteTagToFile(file);
+	if (statistic.alltimetransferred){
+		CTag attag1(FT_ATTRANSFERED, (uint32)statistic.alltimetransferred);
+		attag1.WriteTagToFile(file);
+		uTagCount++;
+		
+		CTag attag4(FT_ATTRANSFEREDHI, (uint32)(statistic.alltimetransferred >> 32));
+		attag4.WriteTagToFile(file);
+		uTagCount++;
+	}
 
-	CTag attag2(FT_ATREQUESTED, statistic.GetAllTimeRequests());
-	attag2.WriteTagToFile(file);
+	if (statistic.GetAllTimeRequests()){
+		CTag attag2(FT_ATREQUESTED, statistic.GetAllTimeRequests());
+		attag2.WriteTagToFile(file);
+		uTagCount++;
+	}
 	
-	CTag attag3(FT_ATACCEPTED, statistic.GetAllTimeAccepts());
-	attag3.WriteTagToFile(file);
+	if (statistic.GetAllTimeAccepts()){
+		CTag attag3(FT_ATACCEPTED, statistic.GetAllTimeAccepts());
+		attag3.WriteTagToFile(file);
+		uTagCount++;
+	}
 
 	// priority N permission
 	CTag priotag(FT_ULPRIORITY, IsAutoUpPriority() ? PR_AUTO : m_iUpPriority);
 	priotag.WriteTagToFile(file);
+	uTagCount++;
 
-	CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, m_lastPublishTimeKadSrc);
-	kadLastPubSrc.WriteTagToFile(file);
+	if (m_lastPublishTimeKadSrc){
+		CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, m_lastPublishTimeKadSrc);
+		kadLastPubSrc.WriteTagToFile(file);
+		uTagCount++;
+	}
 
 	if (m_uMetaDataVer > 0)
 	{
@@ -1358,32 +1346,39 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 		uint32 uFlags = m_uMetaDataVer & 0x0F;
 		CTag tagFlags(FT_FLAGS, uFlags);
 		tagFlags.WriteTagToFile(file);
+		uTagCount++;
 	}
+
 	//MOPRH START - Added by SiRoB, Show Permissions
 	if (GetPermissions()>=0){
 		CTag permtag(FT_PERMISSIONS, GetPermissions());
 		permtag.WriteTagToFile(file);
+		uTagCount++;
 	}
 	//MOPRH END   - Added by SiRoB, Show Permissions
 
 	//EastShare START - Added by TAHO, .met file control
 	CTag lastUsedTag(FT_LASTUSED, ( theApp.sharedfiles->GetFileByID(GetFileHash())) ? time(NULL) : statistic.GetLastUsed());
 	lastUsedTag.WriteTagToFile(file);
+	uTagCount++;
 	//EastShare END - Added by TAHO, .met file control
 
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	CTag sharedTime(FT_ATSHARED, statistic.GetSharedTime());
 	sharedTime.WriteTagToFile(file);
+	uTagCount++;
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	if (GetHideOS()>=0){
 		CTag hideostag(FT_HIDEOS, GetHideOS());
 		hideostag.WriteTagToFile(file);
+		uTagCount++;
 	}
 	if (GetSelectiveChunk()>=0){
 		CTag selectivechunktag(FT_SELECTIVE_CHUNK, GetSelectiveChunk());
 		selectivechunktag.WriteTagToFile(file);
+		uTagCount++;
 	}
 	//MORPH END   - Added by SiRoB, HIDEOS
 
@@ -1391,6 +1386,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	if (GetShareOnlyTheNeed()>=0){
 		CTag shareonlytheneedtag(FT_SHAREONLYTHENEED, GetShareOnlyTheNeed());
 		shareonlytheneedtag.WriteTagToFile(file);
+		uTagCount++;
 	}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 
@@ -1398,12 +1394,14 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	if (GetPowerSharedMode()>=0){
 		CTag powersharetag(FT_POWERSHARE, GetPowerSharedMode());
 		powersharetag.WriteTagToFile(file);
+		uTagCount++;
 	}
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
 	if (GetPowerShareLimit()>=0){
 		CTag powersharelimittag(FT_POWERSHARE_LIMIT, GetPowerShareLimit());
 		powersharelimittag.WriteTagToFile(file);
+		uTagCount++;
 	}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
@@ -1427,16 +1425,16 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 		CTag(namebuffer,end).WriteTagToFile(file);
 		namebuffer[0] = FT_SPREADCOUNT;
 		CTag(namebuffer,count).WriteTagToFile(file);
+		uTagCount+=3;
 		i_pos++;
 	}
 	delete[] namebuffer;
 	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
-	//other tags
-	for (int j = 0; j < taglist.GetCount(); j++){
-		if (taglist[j]->tag.type == 2 || taglist[j]->tag.type == 3)
-			taglist[j]->WriteTagToFile(file);
-	}
+	file->Seek(uTagCountFilePos, CFile::begin);
+	file->WriteUInt32(uTagCount);
+	file->Seek(0, CFile::end);
+
 	return true;
 }
 
@@ -1575,7 +1573,7 @@ static void MD4Transform(uint32 Hash[4], uint32 x[16])
   Hash[3] += d;
 }
 
-void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars)
+void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars, bool bAutoSetFileType)
 { 
 	m_strFileName = pszFileName;
 	if (bReplaceInvalidFileSystemChars){
@@ -1585,14 +1583,37 @@ void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSys
 		m_strFileName.Replace(_T('*'), _T('-'));
 		m_strFileName.Replace(_T(':'), _T('-'));
 		m_strFileName.Replace(_T('?'), _T('-'));
+		m_strFileName.Replace(_T('\"'), _T('-'));
+		m_strFileName.Replace(_T('\\'), _T('-'));
+		m_strFileName.Replace(_T('|'), _T('-'));
 	}
-	SetFileType(GetFiletypeByName(m_strFileName));
+	if (bAutoSetFileType)
+		SetFileType(GetFileTypeByName(m_strFileName));
 } 
       
-void CAbstractFile::SetFileType(LPCTSTR pszFileType)
+void CAbstractFile::SetFileType(LPCSTR pszFileType)
 { 
 	m_strFileType = pszFileType;
 } 
+
+CString CAbstractFile::GetFileTypeDisplayStr() const
+{
+	CString strFileTypeDisplayStr(GetFileTypeDisplayStrFromED2KFileType(GetFileType()));
+	if (strFileTypeDisplayStr.IsEmpty())
+		strFileTypeDisplayStr = GetFileType();
+	return strFileTypeDisplayStr;
+}
+
+
+void CAbstractFile::SetFileHash(const uchar* pucFileHash)
+{
+	md4cpy(m_abyFileHash, pucFileHash);
+}
+
+bool CAbstractFile::HasNullHash() const
+{
+	return isnulmd4(m_abyFileHash);
+}
 
 uint32 CAbstractFile::GetIntTagValue(uint8 tagname) const
 {
@@ -1620,13 +1641,13 @@ uint32 CAbstractFile::GetIntTagValue(LPCSTR tagname) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
 		const CTag* pTag = taglist[i];
-		if (pTag->tag.specialtag==0 && pTag->tag.type==3 && stricmp(pTag->tag.tagname, tagname)==0)
+		if (pTag->tag.specialtag==0 && pTag->tag.type==3 && CmpED2KTagName(pTag->tag.tagname, tagname)==0)
 			return pTag->tag.intvalue;
 	}
 	return NULL;
 }
 
-LPCSTR CAbstractFile::GetStrTagValue(uint8 tagname) const
+LPCSTR CAbstractFile::GetStrTagValueA(uint8 tagname) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
 		const CTag* pTag = taglist[i];
@@ -1636,12 +1657,32 @@ LPCSTR CAbstractFile::GetStrTagValue(uint8 tagname) const
 	return NULL;
 }
 
-LPCSTR CAbstractFile::GetStrTagValue(LPCSTR tagname) const
+LPCSTR CAbstractFile::GetStrTagValueA(LPCSTR tagname) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
 		const CTag* pTag = taglist[i];
 		if (pTag->tag.specialtag==0 && pTag->tag.type==2 && stricmp(pTag->tag.tagname, tagname)==0)
 			return pTag->tag.stringvalue;
+	}
+	return NULL;
+}
+
+CString CAbstractFile::GetStrTagValue(uint8 tagname) const
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		const CTag* pTag = taglist[i];
+		if (pTag->tag.specialtag==tagname && pTag->tag.type==2)
+			return pTag->GetStr();
+	}
+	return NULL;
+}
+
+CString CAbstractFile::GetStrTagValue(LPCSTR tagname) const
+{
+	for (int i = 0; i < taglist.GetSize(); i++){
+		const CTag* pTag = taglist[i];
+		if (pTag->tag.specialtag==0 && pTag->tag.type==2 && CmpED2KTagName(pTag->tag.tagname, tagname)==0)
+			return pTag->GetStr();
 	}
 	return NULL;
 }
@@ -1660,7 +1701,7 @@ CTag* CAbstractFile::GetTag(LPCSTR tagname, uint8 tagtype) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
 		CTag* pTag = taglist[i];
-		if (pTag->tag.specialtag==0 && pTag->tag.type==tagtype && stricmp(pTag->tag.tagname, tagname)==0)
+		if (pTag->tag.specialtag==0 && pTag->tag.type==tagtype && CmpED2KTagName(pTag->tag.tagname, tagname)==0)
 			return pTag;
 	}
 	return NULL;
@@ -1680,7 +1721,7 @@ CTag* CAbstractFile::GetTag(LPCSTR tagname) const
 {
 	for (int i = 0; i < taglist.GetSize(); i++){
 		CTag* pTag = taglist[i];
-		if (pTag->tag.specialtag==0 && stricmp(pTag->tag.tagname, tagname)==0)
+		if (pTag->tag.specialtag==0 && CmpED2KTagName(pTag->tag.tagname, tagname)==0)
 			return pTag;
 	}
 	return NULL;
@@ -1691,7 +1732,7 @@ void CAbstractFile::AddTagUnique(CTag* pTag)
 	for (int i = 0; i < taglist.GetSize(); i++){
 		const CTag* pCurTag = taglist[i];
 		if ( (   (pCurTag->tag.specialtag!=0 && pCurTag->tag.specialtag==pTag->tag.specialtag)
-			  || (pCurTag->tag.tagname!=NULL && pTag->tag.tagname!=NULL && stricmp(pCurTag->tag.tagname, pTag->tag.tagname)==0)
+			  || (pCurTag->tag.tagname!=NULL && pTag->tag.tagname!=NULL && CmpED2KTagName(pCurTag->tag.tagname, pTag->tag.tagname)==0)
 			 )
 			 && pCurTag->tag.type == pTag->tag.type){
 			delete pCurTag;
@@ -1718,6 +1759,8 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 		const CUpDownClient *cur_src = m_ClientUploadList.GetNext(pos);
 		if(cur_src->HasLowID() || cur_src == forClient || !(cur_src->GetUploadState() == US_UPLOADING || cur_src->GetUploadState() == US_ONUPLOADQUEUE))
 			continue;
+		if (!cur_src->IsEd2kClient())
+			continue;
 
 		bool bNeeded = false;
 		uint8* rcvstatus = forClient->GetUpPartStatus();
@@ -1742,7 +1785,7 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 				{
 					// should never happen
 					if (thePrefs.GetVerbose())
-						DEBUG_ONLY(AddDebugLogLine(false,"*** %s - found source (%s) with wrong partcount (%u) attached to file \"%s\" (partcount=%u)", __FUNCTION__, cur_src->DbgGetClientInfo(), cur_src->GetUpPartCount(), GetFileName(), GetPartCount()));
+						DEBUG_ONLY(AddDebugLogLine(false,_T("*** %hs - found source (%s) with wrong partcount (%u) attached to file \"%s\" (partcount=%u)"), __FUNCTION__, cur_src->DbgGetClientInfo(), cur_src->GetUpPartCount(), GetFileName(), GetPartCount()));
 				}
 			}
 			else
@@ -1805,63 +1848,57 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 	if ( result->size > 354 )
 		result->PackPacket();
 	if (thePrefs.GetDebugSourceExchange())
-		AddDebugLogLine( false, "Send:Source User(%s) File(%s) Count(%i)", forClient->GetUserName(), GetFileName(), nCount );
+		AddDebugLogLine( false, _T("Send:Source User(%s) File(%s) Count(%i)"), forClient->GetUserName(), GetFileName(), nCount );
 	return result;
 }
 
-//For File Comment // 
-void CKnownFile::LoadComment(){ 
-	char buffer[100]; 
-	char* fullpath = new char[strlen(thePrefs.GetConfigDir())+13]; 
-	sprintf(fullpath,"%sfileinfo.ini",thePrefs.GetConfigDir()); 
-
-	buffer[0] = 0;
-	for (uint16 i = 0;i != 16;i++) 
-		sprintf(buffer,"%s%02X",buffer,m_abyFileHash[i]); 
-
-	CIni ini( fullpath, buffer); 
-	m_strComment = ini.GetString("Comment").Left(50); 
-	m_iRate = ini.GetInt("Rate", 0);//For rate
+void CKnownFile::LoadComment()
+{
+	CIni ini(thePrefs.GetFileCommentsFilePath(), md4str(GetFileHash()));
+	m_strComment = ini.GetString(_T("Comment")).Left(MAXFILECOMMENTLEN);
+	m_iRate = ini.GetInt(_T("Rate"), 0);
 	m_bCommentLoaded=true;
-	delete[] fullpath;
 }    
 
-void CKnownFile::SetFileComment(CString strNewComment){ 
-	char buffer[100]; 
-	char* fullpath = new char[strlen(thePrefs.GetConfigDir())+13]; 
-	sprintf(fullpath,"%sfileinfo.ini",thePrefs.GetConfigDir()); 
-	    
-	buffer[0] = 0; 
-	for (uint16 i = 0;i != 16;i++) 
-		sprintf(buffer,"%s%02X",buffer,m_abyFileHash[i]); 
-    
-	CIni ini( fullpath, buffer ); 
-	ini.WriteString ("Comment", strNewComment); 
-	m_strComment = strNewComment;
-	delete[] fullpath;
-   
-	for (POSITION pos = m_ClientUploadList.GetHeadPosition();pos != 0;)
-		m_ClientUploadList.GetNext(pos)->SetCommentDirty();
+const CString& CKnownFile::GetFileComment() /*const*/
+{
+	if (!m_bCommentLoaded)
+		LoadComment();
+	return m_strComment;
 }
 
+void CKnownFile::SetFileComment(LPCTSTR pszComment)
+{
+	if (m_strComment.Compare(pszComment) != 0)
+	{
+		CIni ini(thePrefs.GetFileCommentsFilePath(), md4str(GetFileHash()));
+		ini.WriteString(_T("Comment"), pszComment);
+		m_strComment = pszComment;
+   
+		for (POSITION pos = m_ClientUploadList.GetHeadPosition();pos != 0;)
+			m_ClientUploadList.GetNext(pos)->SetCommentDirty();
+	}
+}
+
+uint8 CKnownFile::GetFileRate() /*const*/
+{
+	if (!m_bCommentLoaded)
+		LoadComment();
+	return m_iRate;
+}
 // For File rate 
-void CKnownFile::SetFileRate(uint8 iNewRate){
-	char buffer[100]; 
-	char* fullpath = new char[strlen(thePrefs.GetConfigDir())+13]; 
-	sprintf(fullpath,"%sfileinfo.ini",thePrefs.GetConfigDir()); 
-	    
-	buffer[0] = 0; 
-	for (uint16 i = 0;i != 16;i++) 
-		sprintf(buffer,"%s%02X",buffer,m_abyFileHash[i]); 
+void CKnownFile::SetFileRate(uint8 uRate)
+{
+	if (m_iRate != uRate)
+	{
+		CIni ini(thePrefs.GetFileCommentsFilePath(), md4str(GetFileHash()));
+		ini.WriteInt(_T("Rate"), uRate);
+		m_iRate = uRate;
 
-	CIni ini( fullpath, buffer ); 
-	ini.WriteInt ("Rate", iNewRate); 
-	m_iRate = iNewRate; 
-	delete[] fullpath;
-
-	for (POSITION pos = m_ClientUploadList.GetHeadPosition();pos != 0;)
-		m_ClientUploadList.GetNext(pos)->SetCommentDirty();
-} 
+		for (POSITION pos = m_ClientUploadList.GetHeadPosition();pos != 0;)
+			m_ClientUploadList.GetNext(pos)->SetCommentDirty();
+	}
+}
 
 void CKnownFile::UpdateAutoUpPriority(){
 	if( !IsAutoUpPriority() )
@@ -1921,6 +1958,23 @@ void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength)
 	}
 }
 
+void SecToTimeLength(unsigned long ulSec, CStringW& rstrTimeLength)
+{
+	// this function creates the content for the "length" ed2k meta tag which was introduced by eDonkeyHybrid 
+	// with the data type 'string' :/  to save some bytes we do not format the duration with leading zeros
+	if (ulSec >= 3600){
+		UINT uHours = ulSec/3600;
+		UINT uMin = (ulSec - uHours*3600)/60;
+		UINT uSec = ulSec - uHours*3600 - uMin*60;
+		rstrTimeLength.Format(L"%u:%02u:%02u", uHours, uMin, uSec);
+	}
+	else{
+		UINT uMin = ulSec/60;
+		UINT uSec = ulSec - uMin*60;
+		rstrTimeLength.Format(L"%u:%02u", uMin, uSec);
+	}
+}
+
 void CKnownFile::RemoveMetaDataTags()
 {
 	static const struct
@@ -1977,8 +2031,9 @@ void CKnownFile::UpdateMetaDataTags()
 		_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
 
 		try{
+			USES_CONVERSION;
 			ID3_Tag myTag;
-			myTag.Link(szFullPath);
+			myTag.Link(T2A(szFullPath));
 
 			const Mp3_Headerinfo* mp3info;
 			mp3info = myTag.GetMp3HeaderInfo();
@@ -2269,7 +2324,7 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 	else{
 		//probably a client which got deleted while grabbing the frames for some reason
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, "Couldn't find Sender of FrameGrabbing Request");
+			AddDebugLogLine(false, _T("Couldn't find Sender of FrameGrabbing Request"));
 	}
 	//cleanup
 	for (int i = 0; i != nFramesGrabbed; i++){

@@ -52,6 +52,7 @@ public:
 	void	StartSearch(SSearchParams* pParams);
 	bool	SearchMore();
 	void	CancelSearch();
+	void	CancelKadSearch(UINT uSearchID);
 
 	bool	DoNewEd2kSearch(SSearchParams* pParams);
 	bool	DoNewKadSearch(SSearchParams* pParams);
@@ -63,6 +64,8 @@ public:
 	bool	CanDeleteAllSearches() const;
 	void	DeleteSearch(uint32 nSearchID);
 	void	DeleteAllSearchs();
+	bool	IsLocalSearchRunning() const { return (m_uTimerLocalServer != 0); }
+	bool	IsGlobalSearchRunning() const { return (global_search_timer != 0); }
 
 	void	LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
 	void	AddUDPResult(uint16 count);
@@ -98,6 +101,10 @@ protected:
 	CString	CreateWebQuery(SSearchParams* pParams);
 	void ShowResults(const SSearchParams* pParams);
 	void SetAllIcons();
+	void SetSearchResultsIcon(UINT uSearchID, int iImage);
+	void SetActiveSearchResultsIcon(UINT uSearchID);
+	void SetInactiveSearchResultsIcon(UINT uSearchID);
+	SSearchParams* GetSearchResultsParams(UINT uSearchID) const;
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 

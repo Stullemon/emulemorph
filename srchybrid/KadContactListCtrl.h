@@ -28,23 +28,22 @@ public:
 	CKadContactListCtrl();
 	virtual ~CKadContactListCtrl();
 
-	void	ContactAdd(Kademlia::CContact* contact);
-	void	ContactRem(Kademlia::CContact* contact);
-	void	ContactRef(Kademlia::CContact* contact);
+	void	ContactAdd(const Kademlia::CContact* contact);
+	void	ContactRem(const Kademlia::CContact* contact);
+	void	ContactRef(const Kademlia::CContact* contact);
 
 	void	Init();
 	void	Localize();
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	SaveAllSettings(CIni* ini);
-	void UpdateKadContactCount();
+	void	UpdateKadContactCount();
 
 protected:
 	CString m_strLVName;
 
-	void UpdateContact(int iItem, Kademlia::CContact* contact);
+	void UpdateContact(int iItem, const Kademlia::CContact* contact, bool bLocalize = false);
 	void SetAllIcons();
-	void ContactAdd();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

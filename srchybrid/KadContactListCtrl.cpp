@@ -50,7 +50,7 @@ END_MESSAGE_MAP()
 CKadContactListCtrl::CKadContactListCtrl()
 {
 	SetGeneralPurposeFind(true);
-	m_strLVName = "ONContactListCtrl";
+	m_strLVName = _T("ONContactListCtrl");
 }
 
 CKadContactListCtrl::~CKadContactListCtrl()
@@ -70,10 +70,10 @@ void CKadContactListCtrl::Init()
 
 	CString strIniFile;
 	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, "eMule");
+	CIni ini(strIniFile, _T("eMule"));
 	LoadSettings(&ini, m_strLVName);
-	int iSortItem = ini.GetInt(m_strLVName + "SortItem");
-	bool bSortAscending = ini.GetInt(m_strLVName + "SortAscending");
+	int iSortItem = ini.GetInt(m_strLVName + _T("SortItem"));
+	bool bSortAscending = ini.GetInt(m_strLVName + _T("SortAscending"));
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 }
@@ -81,8 +81,8 @@ void CKadContactListCtrl::Init()
 void CKadContactListCtrl::SaveAllSettings(CIni* ini)
 {
 	SaveSettings(ini, m_strLVName);
-	ini->WriteInt(m_strLVName + "SortItem", GetSortItem());
-	ini->WriteInt(m_strLVName + "SortAscending", GetSortAscending());
+	ini->WriteInt(m_strLVName + _T("SortItem"), GetSortItem());
+	ini->WriteInt(m_strLVName + _T("SortAscending"), GetSortAscending());
 }
 
 void CKadContactListCtrl::OnSysColorChange()
@@ -96,12 +96,12 @@ void CKadContactListCtrl::SetAllIcons()
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader("Contact0"));
-	iml.Add(CTempIconLoader("Contact2"));
-	iml.Add(CTempIconLoader("Contact4"));
+	iml.Add(CTempIconLoader(_T("Contact0")));
+	iml.Add(CTempIconLoader(_T("Contact2")));
+	iml.Add(CTempIconLoader(_T("Contact4")));
 	//right now we only have 3 types... But this may change in the future..
-	iml.Add(CTempIconLoader("Contact3"));
-	iml.Add(CTempIconLoader("Contact4"));
+	iml.Add(CTempIconLoader(_T("Contact3")));
+	iml.Add(CTempIconLoader(_T("Contact4")));
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
@@ -127,101 +127,91 @@ void CKadContactListCtrl::Localize()
 		pHeaderCtrl->SetItem(icol, &hdi);
 		strRes.ReleaseBuffer();
 	}
+
+	int iItems = GetItemCount();
+	for (int i = 0; i < iItems; i++)
+		UpdateContact(i, (Kademlia::CContact*)GetItemData(i), true);
 }
 	
-void CKadContactListCtrl::UpdateContact(int iItem, Kademlia::CContact* contact)
+void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact* contact, bool bLocalize)
 {
 	CString id;
-	id.Format("%i",contact->getType());
-	SetItemText(iItem,colType,id);
+	if (!bLocalize) // update the following fields only if really needed (it's quite expensive to always update them)
+	{
+		contact->getClientID(&id);
+		SetItemText(iItem,colID,id);
+
+		id.Format(_T("%i"),contact->getType());
+		SetItemText(iItem,colType,id);
+
+		contact->getDistance(&id);
+		SetItemText(iItem,colDistance,id);
+
+		SetItem(iItem,0,LVIF_IMAGE,0,contact->getType()>4?4:contact->getType(),0,0,0,0);
+	}
 	
 	if(contact->madeContact())
 		id = GetResString(IDS_YES);
 	else
 		id = GetResString(IDS_NO);
 	SetItemText(iItem,colContact,id);
-
-	contact->getDistance(&id);
-	SetItemText(iItem,colDistance,id);
 }
 
-void CKadContactListCtrl::ContactAdd(Kademlia::CContact* contact)
+void CKadContactListCtrl::UpdateKadContactCount()
+{
+	CString id;
+	id.Format(_T("%s (%i)"), GetResString(IDS_KADCONTACTLAB), GetItemCount());
+	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
+}
+
+void CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 {
 	try
 	{
 		ASSERT( contact != NULL );
-		uint32 result = GetItemCount();
-		CString id;
-		contact->getClientID(&id);
-		int iItem = InsertItem(LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM,result,id,0,0,contact->getType()>4?4:contact->getType(),(LPARAM)contact);
-//		Trying to update all the columns causes one of the connection freezes in win98
-//		ContactRef(contact);
-		// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
-		if (!afxData.bWin95 && iItem >= 0)
+		int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),NULL,0,0,0,(LPARAM)contact);
+		if (iItem >= 0)
+		{
+	//		Trying to update all the columns causes one of the connection freezes in win98
+	//		ContactRef(contact);
+			// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
+			if (!afxData.bWin95 && iItem >= 0)
+				UpdateContact(iItem, contact);
+			UpdateKadContactCount();
+		}
+	}
+	catch(...){ASSERT(0);}
+}
+
+void CKadContactListCtrl::ContactRem(const Kademlia::CContact* contact)
+{
+	try
+	{
+		ASSERT( contact != NULL );
+		LVFINDINFO find;
+		find.flags = LVFI_PARAM;
+		find.lParam = (LPARAM)contact;
+		int iItem = FindItem(&find);
+		if (iItem != -1)
+		{
+			DeleteItem(iItem);
+			UpdateKadContactCount();
+		}
+	}
+	catch(...){ASSERT(0);}
+}
+
+void CKadContactListCtrl::ContactRef(const Kademlia::CContact* contact)
+{
+	try
+	{
+		ASSERT( contact != NULL );
+		LVFINDINFO find;
+		find.flags = LVFI_PARAM;
+		find.lParam = (LPARAM)contact;
+		int iItem = FindItem(&find);
+		if (iItem != -1)
 			UpdateContact(iItem, contact);
-
-		UpdateKadContactCount();
-	}
-	catch(...){ASSERT(0);}
-}
-
-void CKadContactListCtrl::ContactAdd() {
-	CString id;
-	id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , GetItemCount());
-	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
-}
-
-void CKadContactListCtrl::ContactRem(Kademlia::CContact* contact)
-{
-	try
-	{
-		ASSERT( contact != NULL );
-		LVFINDINFO find;
-		find.flags = LVFI_PARAM;
-		find.lParam = (LPARAM)contact;
-		sint32 result = FindItem(&find);
-		if (result != (-1)){
-			DeleteItem(result);
-		}
-		UpdateKadContactCount();
-	}
-	catch(...){ASSERT(0);}
-}
-
-void CKadContactListCtrl::UpdateKadContactCount() {
-	CString id;
-	id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , GetItemCount() );
-	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
-}
-
-void CKadContactListCtrl::ContactRef(Kademlia::CContact* contact)
-{
-	try
-	{
-		ASSERT( contact != NULL );
-		LVFINDINFO find;
-		find.flags = LVFI_PARAM;
-		find.lParam = (LPARAM)contact;
-		sint32 result = FindItem(&find);
-		if (result != (-1)){
-			SetItem(result,0,LVIF_IMAGE,0,contact->getType()>4?4:contact->getType(),0,0,0,0);
-
-			CString id;
-			contact->getClientID(&id);
-			SetItemText(result,colID,id);
-			
-			id.Format("%i",contact->getType());
-			SetItemText(result,colType,id);
-			
-			if(contact->madeContact())
-				id = GetResString(IDS_YES);
-			else
-				id = GetResString(IDS_NO);
-			SetItemText(result,colContact,id);
-
-			contact->getDistance(&id);
-			SetItemText(result,colDistance,id);
-		}
 	}
 	catch(...){ASSERT(0);}
 }

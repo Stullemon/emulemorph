@@ -119,16 +119,16 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 	wcx.hCursor = LoadCursor(NULL,IDC_ARROW);
 	wcx.hbrBackground=::GetSysColorBrush(COLOR_WINDOW);
 	wcx.lpszMenuName = NULL;
-	wcx.lpszClassName = "TaskbarNotifierClass";
+	wcx.lpszClassName = _T("TaskbarNotifierClass");
 	wcx.hIconSm = NULL;
 
 	RegisterClassEx(&wcx);
       
-	return CreateEx(WS_EX_TOPMOST,"TaskbarNotifierClass",NULL,WS_POPUP,0,0,0,0,pWndParent->m_hWnd,NULL);
+	return CreateEx(WS_EX_TOPMOST,_T("TaskbarNotifierClass"),NULL,WS_POPUP,0,0,0,0,pWndParent->m_hWnd,NULL);
 }
 
 BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName) {
-	char buffer[510];
+	TCHAR buffer[510];
 	int nRed, nGreen, nBlue, sRed, sGreen, sBlue;
 	int rcLeft, rcTop, rcRight, rcBottom;	
 	int bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue;
@@ -137,37 +137,37 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName) {
 	
 	Hide();
 
-	CIni ini(szFileName,"CONFIG" );
+	CIni ini(szFileName,_T("CONFIG"));
 	_tcscpy(buffer, szFileName);
-	LPTSTR pszFileName = _tcsrchr(buffer, '\\');
+	LPTSTR pszFileName = _tcsrchr(buffer, _T('\\'));
 
 	if (pszFileName != NULL) {
-		*(pszFileName+1) = '\0';
+		*(pszFileName+1) = _T('\0');
 	}
 	else
 		return FALSE;
 
-	nRed   = ini.GetInt("TextNormalRed",255);
-	nGreen = ini.GetInt("TextNormalGreen",255);
-	nBlue  = ini.GetInt("TextNormalBlue",255);
-	sRed   = ini.GetInt("TextSelectedRed",255);
-	sGreen = ini.GetInt("TextSelectedGreen",255);
-	sBlue  = ini.GetInt("TextSelectedBlue",255);
-	bmpTrasparentRed   = ini.GetInt("bmpTrasparentRed",255);
-	bmpTrasparentGreen = ini.GetInt("bmpTrasparentGreen",0);
-	bmpTrasparentBlue  = ini.GetInt("bmpTrasparentBlue",255);
-	fontSize = ini.GetInt("TextFontSize",70);		
-	m_dwTimeToStay = ini.GetInt("TimeToStay", 4000);
-	m_dwTimeToShow = ini.GetInt("TimeToShow", 500); 
-	m_dwTimeToHide = ini.GetInt("TimeToHide", 200);
-	fontType = ini.GetString("FontType", "Arial");
-	bmpFullPath.Format("%s\\%s", buffer, ini.GetString("bmpFileName", "")); 
+	nRed   = ini.GetInt(_T("TextNormalRed"),255);
+	nGreen = ini.GetInt(_T("TextNormalGreen"),255);
+	nBlue  = ini.GetInt(_T("TextNormalBlue"),255);
+	sRed   = ini.GetInt(_T("TextSelectedRed"),255);
+	sGreen = ini.GetInt(_T("TextSelectedGreen"),255);
+	sBlue  = ini.GetInt(_T("TextSelectedBlue"),255);
+	bmpTrasparentRed   = ini.GetInt(_T("bmpTrasparentRed"),255);
+	bmpTrasparentGreen = ini.GetInt(_T("bmpTrasparentGreen"),0);
+	bmpTrasparentBlue  = ini.GetInt(_T("bmpTrasparentBlue"),255);
+	fontSize = ini.GetInt(_T("TextFontSize"),70);		
+	m_dwTimeToStay = ini.GetInt(_T("TimeToStay"), 4000);
+	m_dwTimeToShow = ini.GetInt(_T("TimeToShow"), 500); 
+	m_dwTimeToHide = ini.GetInt(_T("TimeToHide"), 200);
+	fontType = ini.GetString(_T("FontType"), _T("Arial"));
+	bmpFullPath.Format(_T("%s\\%s"), buffer, ini.GetString(_T("bmpFileName"), _T(""))); 
 
 	// get text rectangle coordinates
-	rcLeft = ini.GetInt("rcTextLeft",5);
-	rcTop  = ini.GetInt("rcTextTop",45);	
-	rcRight  = ini.GetInt("rcTextRight",220 );
-	rcBottom = ini.GetInt("rcTextBottom", 85);
+	rcLeft = ini.GetInt(_T("rcTextLeft"),5);
+	rcTop  = ini.GetInt(_T("rcTextTop"),45);	
+	rcRight  = ini.GetInt(_T("rcTextRight"),220 );
+	rcBottom = ini.GetInt(_T("rcTextBottom"), 85);
 	if (rcLeft<=0)	  rcLeft=1;
 	if (rcTop<=0)	  rcTop=1;	
 	if (rcRight<=0)   rcRight=1;
@@ -175,10 +175,10 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName) {
 	SetTextRect(CRect(rcLeft,rcTop,rcRight,rcBottom));
 
 	// get close button rectangle coordinates
-	rcLeft = ini.GetInt("rcCloseBtnLeft",286);
-	rcTop  = ini.GetInt("rcCloseBtnTop",40); 
-	rcRight  = ini.GetInt("rcCloseBtnRight", 300);
-	rcBottom = ini.GetInt("rcCloseBtnBottom", 54);
+	rcLeft = ini.GetInt(_T("rcCloseBtnLeft"),286);
+	rcTop  = ini.GetInt(_T("rcCloseBtnTop"),40); 
+	rcRight  = ini.GetInt(_T("rcCloseBtnRight"), 300);
+	rcBottom = ini.GetInt(_T("rcCloseBtnBottom"), 54);
 	if (rcLeft<=0)	  rcLeft=1;
 	if (rcTop<=0)	  rcTop=1;	
 	if (rcRight<=0)   rcRight=1;
@@ -186,10 +186,10 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName) {
 	SetCloseBtnRect(CRect(rcLeft,rcTop,rcRight,rcBottom));
 	
 	// get history button rectangle coordinates
-	rcLeft = ini.GetInt("rcHistoryBtnLeft",283);
-	rcTop  = ini.GetInt("rcHistoryBtnTop",14);	
-	rcRight  = ini.GetInt("rcHistoryBtnRight", 299);
-	rcBottom = ini.GetInt("rcHistoryBtnBottom", 39);
+	rcLeft = ini.GetInt(_T("rcHistoryBtnLeft"),283);
+	rcTop  = ini.GetInt(_T("rcHistoryBtnTop"),14);	
+	rcRight  = ini.GetInt(_T("rcHistoryBtnRight"), 299);
+	rcBottom = ini.GetInt(_T("rcHistoryBtnBottom"), 39);
 	if (rcLeft<=0)	  rcLeft=1;
 	if (rcTop<=0)	  rcTop=1;	
 	if (rcRight<=0)   rcRight=1;
@@ -199,7 +199,7 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName) {
 	if (!SetBitmap(bmpFullPath, bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue))
 	{
 		CEnBitmap m_imgTaskbar;
-		VERIFY (m_imgTaskbar.LoadImage(IDR_TASKBAR,"GIF"));
+		VERIFY (m_imgTaskbar.LoadImage(IDR_TASKBAR,_T("GIF")));
 		if (!SetBitmap(&m_imgTaskbar, bmpTrasparentRed, bmpTrasparentGreen, bmpTrasparentBlue))
 			return FALSE;
 	}
@@ -340,7 +340,7 @@ BOOL CTaskbarNotifier::SetBitmap(CBitmap* Bitmap,short red,short green,short blu
 }
 BOOL CTaskbarNotifier::SetBitmap(LPCTSTR szFileName,short red,short green,short blue)
 {
-	if (szFileName==NULL || szFileName[0]=='\0')
+	if (szFileName==NULL || szFileName[0]==_T('\0'))
 		return FALSE;
 	HBITMAP hBmp = (HBITMAP) ::LoadImage(AfxGetInstanceHandle(),szFileName,IMAGE_BITMAP,0,0, LR_LOADFROMFILE);
 	if (!hBmp)
@@ -429,7 +429,7 @@ void CTaskbarNotifier::Show(LPCTSTR szCaption,int nMsgType, BOOL bAutoClose)
 		
 	nScreenWidth=::GetSystemMetrics(SM_CXSCREEN);
 	nScreenHeight=::GetSystemMetrics(SM_CYSCREEN);
-	HWND hWndTaskbar = ::FindWindow("Shell_TrayWnd",0);
+	HWND hWndTaskbar = ::FindWindow(_T("Shell_TrayWnd"),0);
 	::GetWindowRect(hWndTaskbar,&rcTaskbar);
 
 	// Daniel Lohmann: Calculate taskbar position from its window rect. However, on XP
@@ -798,7 +798,7 @@ void CTaskbarNotifier::OnPaint()
 {
 	CPaintDC dc(this);
 	CFont *pOldFont;
-	char *szBuffer;
+	TCHAR *szBuffer;
 
 	if (m_bMouseIsOver)
 	{
@@ -821,8 +821,8 @@ void CTaskbarNotifier::OnPaint()
 		pOldFont=dc.SelectObject(&m_myNormalFont);
 	}
 
-	szBuffer=new char[m_strCaption.GetLength()+10];
-	strcpy(szBuffer,m_strCaption);
+	szBuffer=new TCHAR[m_strCaption.GetLength()+10];
+	_tcscpy(szBuffer,m_strCaption);
 
 	dc.SetBkMode(TRANSPARENT); 
 	dc.DrawText(szBuffer,-1,m_rcText,m_uTextFormat);

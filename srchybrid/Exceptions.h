@@ -22,11 +22,11 @@
 		TCHAR szError[1024]; \
 		e->GetErrorMessage(szError, ARRSIZE(szError)); \
 		const CRuntimeClass* pRuntimeClass = e->GetRuntimeClass(); \
-		LPCTSTR pszClassName = (pRuntimeClass) ? pRuntimeClass->m_lpszClassName : NULL; \
+		LPCSTR pszClassName = (pRuntimeClass) ? pRuntimeClass->m_lpszClassName : NULL; \
 		if (!pszClassName) \
-			pszClassName = _T("CException"); \
+			pszClassName = "CException"; \
 		if (thePrefs.GetVerbose() && theApp.emuledlg) \
-			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown %s exception in ") fname _T(" - %s"), pszClassName, szError); \
+			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown %hs exception in ") fname _T(" - %s"), pszClassName, szError); \
 		e->Delete(); \
 	} \
 	catch(CString strError){ \
@@ -49,6 +49,20 @@ public:
 	CString m_strMsg;
 	UINT m_uType;
 	UINT m_uHelpID;
+};
+
+class CClientException : public CException
+{
+	DECLARE_DYNAMIC(CClientException)
+public:
+	CClientException(LPCTSTR pszMsg, bool bDelete)
+	{
+		m_strMsg = pszMsg;
+		m_bDelete = bDelete;
+	}
+
+	CString m_strMsg;
+	bool m_bDelete;
 };
 
 #endif//!__DFLT_EXCEPTION_HANDLERS_H__

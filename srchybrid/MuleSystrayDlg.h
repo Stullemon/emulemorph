@@ -33,7 +33,7 @@ class CMuleSystrayDlg : public CDialog
 {
 	// Construction
 public:
-	CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown, int iMinUp);
+	CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown);
 	~CMuleSystrayDlg();
 
 	// Dialog Data

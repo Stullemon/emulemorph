@@ -59,7 +59,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	if (m_client->GetUserName())
 		GetDlgItem(IDC_DNAME)->SetWindowText(m_client->GetUserName());
 	else
-		GetDlgItem(IDC_DNAME)->SetWindowText("?");
+		GetDlgItem(IDC_DNAME)->SetWindowText(_T("?"));
 	
 	//EastShare Start - added by AndCycle, IP to Country
 	if(theApp.ip2country->IsIP2Country()){
@@ -73,48 +73,47 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	//EastShare End - added by AndCycle, IP to Country
 
 	if (m_client->HasValidHash()){
-		buffer ="";
+		buffer = _T("");
 		CString buffer2;
 		for (uint16 i = 0;i != 16;i++){
-			buffer2.Format("%02X",m_client->GetUserHash()[i]);
+			buffer2.Format(_T("%02X"),m_client->GetUserHash()[i]);
 			buffer+=buffer2;
 		}
 		GetDlgItem(IDC_DHASH)->SetWindowText(buffer);
 	}
 	else
-		GetDlgItem(IDC_DHASH)->SetWindowText("?");
+		GetDlgItem(IDC_DHASH)->SetWindowText(_T("?"));
 	
 	GetDlgItem(IDC_DSOFT)->SetWindowText(m_client->DbgGetFullClientSoftVer());
 
-	buffer.Format("%s",(m_client->HasLowID() ? GetResString(IDS_IDLOW):GetResString(IDS_IDHIGH)));
+	buffer.Format(_T("%s"),(m_client->HasLowID() ? GetResString(IDS_IDLOW):GetResString(IDS_IDHIGH)));
 	GetDlgItem(IDC_DID)->SetWindowText(buffer);
 	
 	if (m_client->GetServerIP()){
-		in_addr server;
-		server.S_un.S_addr = m_client->GetServerIP();
-		GetDlgItem(IDC_DSIP)->SetWindowText(inet_ntoa(server));
+		CString strServerIP = ipstr(m_client->GetServerIP());
+		GetDlgItem(IDC_DSIP)->SetWindowText(strServerIP);
 		
-		CServer* cserver = theApp.serverlist->GetServerByAddress(inet_ntoa(server), m_client->GetServerPort()); 
+		CServer* cserver = theApp.serverlist->GetServerByAddress(strServerIP, m_client->GetServerPort()); 
 		if (cserver)
 			GetDlgItem(IDC_DSNAME)->SetWindowText(cserver->GetListName());
 		else
-			GetDlgItem(IDC_DSNAME)->SetWindowText("?");
+			GetDlgItem(IDC_DSNAME)->SetWindowText(_T("?"));
 	}
 	else{
-		GetDlgItem(IDC_DSIP)->SetWindowText("?");
-		GetDlgItem(IDC_DSNAME)->SetWindowText("?");
+		GetDlgItem(IDC_DSIP)->SetWindowText(_T("?"));
+		GetDlgItem(IDC_DSNAME)->SetWindowText(_T("?"));
 	}
 
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(m_client->GetUploadFileID());
 	if (file)
-		GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(MakeStringEscaped(file->GetFileName()));
+		GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(file->GetFileName() );
 	else
-		GetDlgItem(IDC_DDOWNLOADING)->SetWindowText("-");
+		GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(_T("-"));
 
 	if (m_client->reqfile)
 		GetDlgItem(IDC_UPLOADING)->SetWindowText( m_client->reqfile->GetFileName()  );
 	else 
-		GetDlgItem(IDC_UPLOADING)->SetWindowText("-");
+		GetDlgItem(IDC_UPLOADING)->SetWindowText(_T("-"));
 
 	GetDlgItem(IDC_DDUP)->SetWindowText(CastItoXBytes(m_client->GetTransferedDown()));
 
@@ -122,24 +121,23 @@ BOOL CClientDetailDialog::OnInitDialog(){
 
 	//wistily
 	/*
-	buffer.Format("%.1f %s",(float)m_client->GetDownloadDatarate()/1024,GetResString(IDS_KBYTESEC));
+	buffer.Format(_T("%.1f %s"),(float)m_client->GetDownloadDatarate()/1024,GetResString(IDS_KBYTESEC));
 	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
-	*/
-	buffer.Format("%.1f %s",(float)m_client->GetAvDownDatarate()/1024,GetResString(IDS_KBYTESEC));
-	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
-
-	/*
-	buffer.Format("%.1f %s",(float)m_client->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
+	
+	buffer.Format(_T("%.1f %s"),(float)m_client->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
 	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
 	*/
-	buffer.Format("%.1f %s",(float)m_client->GetAvUpDatarate()/1024,GetResString(IDS_KBYTESEC));
+	buffer.Format(_T("%.1f %s"),(float)m_client->GetAvDownDatarate()/1024,GetResString(IDS_KBYTESEC));
+	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
+
+	buffer.Format(_T("%.1f %s"),(float)m_client->GetAvUpDatarate()/1024,GetResString(IDS_KBYTESEC));
 	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
 	//wistily stop
 	
 	if (m_client->Credits()){
 		GetDlgItem(IDC_DUPTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetDownloadedTotal()));
 		GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetUploadedTotal()));
-		buffer.Format("%.1f  [%.1f]",(float)m_client->Credits()->GetScoreRatio(m_client->GetIP()),(float)m_client->Credits()->GetMyScoreRatio(m_client->GetIP()));	// MORPH - Added by IceCream, VQB: ownCredits
+		buffer.Format(_T("%.1f  [%.1f]"),(float)m_client->Credits()->GetScoreRatio(m_client->GetIP()),(float)m_client->Credits()->GetMyScoreRatio(m_client->GetIP()));	// MORPH - Added by IceCream, VQB: ownCredits
 		GetDlgItem(IDC_DRATIO)->SetWindowText(buffer);
 		
 		if (theApp.clientcredits->CryptoAvailable()){
@@ -161,29 +159,29 @@ BOOL CClientDetailDialog::OnInitDialog(){
 			GetDlgItem(IDC_CDIDENT)->SetWindowText(GetResString(IDS_IDENTNOSUPPORT));
 	}	
 	else{
-		GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText("?");
-		GetDlgItem(IDC_DUPTOTAL)->SetWindowText("?");
-		GetDlgItem(IDC_DRATIO)->SetWindowText("?");
-		GetDlgItem(IDC_CDIDENT)->SetWindowText("?");
+		GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText(_T("?"));
+		GetDlgItem(IDC_DUPTOTAL)->SetWindowText(_T("?"));
+		GetDlgItem(IDC_DRATIO)->SetWindowText(_T("?"));
+		GetDlgItem(IDC_CDIDENT)->SetWindowText(_T("?"));
 	}
 
 	if (m_client->GetUserName()){
-		buffer.Format("%.1f",(float)m_client->GetScore(false,m_client->IsDownloading(),true));
+		buffer.Format(_T("%.1f"),(float)m_client->GetScore(false,m_client->IsDownloading(),true));
 		GetDlgItem(IDC_DRATING)->SetWindowText(buffer);
 	}
 	else
-		GetDlgItem(IDC_DRATING)->SetWindowText("?");;
+		GetDlgItem(IDC_DRATING)->SetWindowText(_T("?"));
 
 	if (m_client->GetUploadState() != US_NONE){
 		if (!m_client->GetFriendSlot()){
-			buffer.Format("%u",m_client->GetScore(false,m_client->IsDownloading(),false));
+			buffer.Format(_T("%u"),m_client->GetScore(false,m_client->IsDownloading(),false));
 			GetDlgItem(IDC_DSCORE)->SetWindowText(buffer);
 		}
 		else
 			GetDlgItem(IDC_DSCORE)->SetWindowText(GetResString(IDS_FRIENDDETAIL));
 	}
 	else
-		GetDlgItem(IDC_DSCORE)->SetWindowText("-");
+		GetDlgItem(IDC_DSCORE)->SetWindowText(_T("-"));
 	return true;
 }
 

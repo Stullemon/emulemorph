@@ -32,7 +32,7 @@ public:
 
 	CUpDownClient*		client;
 	CHTRichEditCtrl*	log;
-	char*				messagepending;
+	CStringA			strMessagePendingA;
 	bool				notify;
 	CStringArray		history;
 	int					history_pos;

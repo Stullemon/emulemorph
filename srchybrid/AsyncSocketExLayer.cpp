@@ -292,7 +292,7 @@ BOOL CAsyncSocketExLayer::ConnectNext(LPCTSTR lpszHostAddress, UINT nHostPort)
 		SOCKADDR_IN sockAddr;
 		memset(&sockAddr,0,sizeof(sockAddr));
 
-		LPSTR lpszAscii = T2A((LPTSTR)lpszHostAddress);
+		LPCSTR lpszAscii = T2CA(lpszHostAddress);
 		sockAddr.sin_family = AF_INET;
 		sockAddr.sin_addr.s_addr = inet_addr(lpszAscii);
 

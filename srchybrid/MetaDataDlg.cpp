@@ -98,6 +98,8 @@ BOOL CMetaDataDlg::OnInitDialog()
 
 	AddAnchor(IDC_TAGS, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_TOTAL_TAGS, BOTTOM_LEFT, BOTTOM_RIGHT);
+	
+	GetDlgItem(IDC_TOTAL_TAGS)->SetWindowText(GetResString(IDS_METATAGS));
 
 	m_tags.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_tags.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
@@ -219,7 +221,7 @@ CString GetValue(const CTag* pTag)
 {
 	CString strValue;
 	if (pTag->tag.type == 2)
-		strValue = pTag->tag.stringvalue;
+		strValue = pTag->GetStr();
 	else if (pTag->tag.type == 3)
 	{
 		if (pTag->tag.specialtag == 0x10 || pTag->tag.specialtag >= 0xFA)
@@ -350,7 +352,7 @@ void CMetaDataDlg::InitTags()
 		}
 	}
 	CString strTmp;
-	strTmp.Format(_T("Total tags: %u"), m_tags.GetItemCount());
+	strTmp.Format(_T("%s %u"), GetResString(IDS_METATAGS), m_tags.GetItemCount());
 	SetDlgItemText(IDC_TOTAL_TAGS, strTmp);
 	m_tags.SetRedraw();
 }

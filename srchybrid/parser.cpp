@@ -88,6 +88,9 @@ extern CStringArray _astrParserErrors;
 
 void ParsedSearchExpression(const CSearchExpr* pexpr);
 int yyerror(const char* errstr);
+#ifdef _UNICODE
+int yyerror(LPCTSTR errstr);
+#endif
 
 #pragma warning(disable:4065) // switch statement contains 'default' but no 'case' labels
 #pragma warning(disable:4102) // 'yyerrlab1' : unreferenced label
@@ -298,8 +301,8 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    43,    43,    49,    58,    67,    68,    78,    88,    98,
-     103,   109,   115,   120,   126,   131,   136,   143,   148
+       0,    46,    46,    52,    61,    70,    71,    81,    91,   101,
+     106,   112,   118,   123,   129,   134,   139,   146,   151
 };
 #endif
 
@@ -1390,7 +1393,16 @@ int yyerror(const char* errstr)
 	//yyerror ("syntax error");
 	//yyerror ("parser stack overflow");
 
+	USES_CONVERSION;
+	_astrParserErrors.Add(A2CT(errstr));
+	return EXIT_FAILURE;
+}
+
+#ifdef _UNICODE
+int yyerror(LPCTSTR errstr)
+{
 	_astrParserErrors.Add(errstr);
 	return EXIT_FAILURE;
 }
+#endif
 

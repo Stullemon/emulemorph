@@ -165,7 +165,7 @@ void CAsyncProxySocketLayer::SetProxy(int nProxyType)
 	m_ProxyData.nProxyType=nProxyType;
 }
 
-void CAsyncProxySocketLayer::SetProxy(int nProxyType, const char * pProxyHost, int ProxyPort)
+void CAsyncProxySocketLayer::SetProxy(int nProxyType, LPCTSTR pProxyHost, int ProxyPort)
 {
 	//Validate the parameters
 	ASSERT(nProxyType==PROXYTYPE_SOCKS4  ||
@@ -185,13 +185,13 @@ void CAsyncProxySocketLayer::SetProxy(int nProxyType, const char * pProxyHost, i
 	m_ProxyData.pProxyPass = NULL;
 
 	m_ProxyData.nProxyType = nProxyType;
-	m_ProxyData.pProxyHost = new char[_tcslen(pProxyHost)+1];
+	m_ProxyData.pProxyHost = new TCHAR[_tcslen(pProxyHost)+1];
 	_tcscpy(m_ProxyData.pProxyHost, pProxyHost);
 	m_ProxyData.nProxyPort = ProxyPort;
 	m_ProxyData.bUseLogon = FALSE;
 }
 
-void CAsyncProxySocketLayer::SetProxy(int nProxyType, const char * pProxyHost, int ProxyPort, const char * pProxyUser, const char * pProxyPass)
+void CAsyncProxySocketLayer::SetProxy(int nProxyType, LPCTSTR pProxyHost, int ProxyPort, LPCSTR pProxyUser, LPCSTR pProxyPass)
 {
 	//Validate the parameters
 	ASSERT(nProxyType==PROXYTYPE_SOCKS5 || nProxyType==PROXYTYPE_HTTP11);
@@ -208,18 +208,18 @@ void CAsyncProxySocketLayer::SetProxy(int nProxyType, const char * pProxyHost, i
 	m_ProxyData.pProxyPass = NULL;
 
 	m_ProxyData.nProxyType = nProxyType;
-	m_ProxyData.pProxyHost = new char[_tcslen(pProxyHost)+1];
+	m_ProxyData.pProxyHost = new TCHAR[_tcslen(pProxyHost)+1];
 	_tcscpy(m_ProxyData.pProxyHost, pProxyHost);
 	m_ProxyData.nProxyPort=ProxyPort;
 	if (pProxyUser)
 	{
-		m_ProxyData.pProxyUser = new TCHAR[_tcslen(pProxyUser)+1];
-		_tcscpy(m_ProxyData.pProxyUser, pProxyUser);
+		m_ProxyData.pProxyUser = new CHAR[strlen(pProxyUser)+1];
+		strcpy(m_ProxyData.pProxyUser, pProxyUser);
 	}
 	if (pProxyPass)
 	{
-		m_ProxyData.pProxyPass = new TCHAR[_tcslen(pProxyPass)+1];
-		_tcscpy(m_ProxyData.pProxyPass, pProxyPass);
+		m_ProxyData.pProxyPass = new CHAR[strlen(pProxyPass)+1];
+		strcpy(m_ProxyData.pProxyPass, pProxyPass);
 	}
 	m_ProxyData.bUseLogon = TRUE;
 }
@@ -457,7 +457,8 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 			}
 			//No auth needed
 			//Send connection request
-			LPCSTR lpszAsciiHost = m_pProxyPeerHost?m_pProxyPeerHost:"";
+			USES_CONVERSION;
+			LPCSTR lpszAsciiHost = m_pProxyPeerHost ? T2A(m_pProxyPeerHost) : "";
 			char *command=new char[10+strlen(lpszAsciiHost)+1];
 			memset(command,0,10+strlen(lpszAsciiHost)+1);
 			command[0]=5;
@@ -529,7 +530,8 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 					ClearBuffer();
 					return;
 				}
-				LPCSTR lpszAsciiHost = m_pProxyPeerHost?m_pProxyPeerHost:"";
+				USES_CONVERSION;
+				LPCSTR lpszAsciiHost = m_pProxyPeerHost ? T2A(m_pProxyPeerHost) : "";
 				char *command=new char[10+strlen(lpszAsciiHost)+1];
 				memset(command,0,10+strlen(lpszAsciiHost)+1);
 				command[0]=5;
@@ -811,8 +813,8 @@ BOOL CAsyncProxySocketLayer::Connect( LPCTSTR lpszHostAddress, UINT nHostPort )
 				m_nProxyPeerIp=0;
 				delete [] m_pProxyPeerHost;
 				m_pProxyPeerHost = NULL; // 'new' may throw an exception
-				m_pProxyPeerHost = new char[strlen(lpszHostAddress)+1];
-				strcpy(m_pProxyPeerHost, lpszHostAddress);
+				m_pProxyPeerHost = new TCHAR[_tcslen(lpszHostAddress)+1];
+				_tcscpy(m_pProxyPeerHost, lpszHostAddress);
 				m_nProxyOpID=PROXYOP_CONNECT;
 				return TRUE;
 			}
@@ -831,8 +833,8 @@ BOOL CAsyncProxySocketLayer::Connect( LPCTSTR lpszHostAddress, UINT nHostPort )
 	{
 		delete [] m_pProxyPeerHost;
 		m_pProxyPeerHost = NULL; // 'new' may throw an exception
-		m_pProxyPeerHost = new char[strlen(lpszHostAddress)+1];
-		strcpy(m_pProxyPeerHost, lpszHostAddress);
+		m_pProxyPeerHost = new TCHAR[_tcslen(lpszHostAddress)+1];
+		_tcscpy(m_pProxyPeerHost, lpszHostAddress);
 	}
 	return res;
 
@@ -903,7 +905,8 @@ void CAsyncProxySocketLayer::OnConnect(int nErrorCode)
 		if (m_ProxyData.nProxyType==PROXYTYPE_SOCKS4 || m_ProxyData.nProxyType==PROXYTYPE_SOCKS4A)
 		{ //SOCKS4 proxy
 			//Send request
-			LPCSTR lpszAscii = m_pProxyPeerHost?m_pProxyPeerHost:"";
+			USES_CONVERSION;
+			LPCSTR lpszAscii = m_pProxyPeerHost ? T2A(m_pProxyPeerHost) : "";
 			char *command=new char [9+strlen(lpszAscii)+1];
 			memset(command,0,9+strlen(lpszAscii)+1);
 			int len=9;
@@ -995,8 +998,9 @@ void CAsyncProxySocketLayer::OnConnect(int nErrorCode)
 			char * pHost = NULL;
 			if (m_pProxyPeerHost && *m_pProxyPeerHost)
 			{
-				pHost = new char[strlen(m_pProxyPeerHost)+1];
-				strcpy(pHost, m_pProxyPeerHost);
+				USES_CONVERSION;
+				pHost = new char[_tcslen(m_pProxyPeerHost)*2+1];
+				strcpy(pHost, T2A(m_pProxyPeerHost));
 			}
 			else
 			{
@@ -1259,7 +1263,7 @@ CString GetProxyError(UINT nError)
 		return _T("Listen socket created");
 	else{
 		CString strError;
-		strError.Format("Error: %u", nError);
+		strError.Format(_T("Error: %u"), nError);
 		return strError;
 	}
 }

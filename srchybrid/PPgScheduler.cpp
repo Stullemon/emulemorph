@@ -74,8 +74,8 @@ BOOL CPPgScheduler::OnInitDialog()
 	m_list.InsertColumn(0, GetResString(IDS_TITLE) ,LVCFMT_LEFT,150,0);
 	m_list.InsertColumn(1,GetResString(IDS_S_DAYS),LVCFMT_LEFT,80,1);
 	m_list.InsertColumn(2,GetResString(IDS_STARTTIME),LVCFMT_LEFT,80,2);
-	m_time.SetFormat("H:mm");
-	m_timeTo.SetFormat("H:mm");
+	m_time.SetFormat(_T("H:mm"));
+	m_timeTo.SetFormat(_T("H:mm"));
 
 	m_actions.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 	m_actions.ModifyStyle(LVS_SINGLESEL,0);
@@ -160,7 +160,7 @@ void CPPgScheduler::FillScheduleList() {
 		CTime time(theApp.scheduler->GetSchedule(index)->time);
 		CString timeS;
 		m_list.SetItemText(index, 1, GetDayLabel(theApp.scheduler->GetSchedule(index)->day));
-		timeS.Format( "%s",time.Format( "%H:%M"));
+		timeS.Format(_T("%s"),time.Format(_T("%H:%M")));
 		m_list.SetItemText(index, 2, timeS);
 	}
 	if (m_list.GetItemCount()>0) {
@@ -178,7 +178,7 @@ void CPPgScheduler::OnBnClickedAdd()
 	newschedule->enabled=false;
 	newschedule->time=time(NULL);
 	newschedule->time2=time(NULL);
-	newschedule->title="?";
+	newschedule->title=_T("?");
 	newschedule->ResetActions();
 
 	index=theApp.scheduler->AddSchedule(newschedule);
@@ -225,7 +225,7 @@ void CPPgScheduler::OnBnClickedApply()
 		m_list.SetItemText(index, 1, GetDayLabel(schedule->day));
 		CTime time(theApp.scheduler->GetSchedule(index)->time);
 		CString timeS;
-		timeS.Format( "%s",time.Format( "%H:%M"));
+		timeS.Format(_T("%s"),time.Format(_T("%H:%M")));
 		m_list.SetItemText(index, 2, timeS);
 	}
 	RecheckSchedules();
@@ -374,7 +374,7 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 	else if (wParam>=MP_SCHACTIONS+20 && wParam<=MP_SCHACTIONS+80)
 	{
 	   CString newval;
-	   newval.Format("%i",wParam-MP_SCHACTIONS-22);
+		newval.Format(_T("%i"),wParam-MP_SCHACTIONS-22);
 	   m_actions.SetItemText(item,1,newval);
    }
 	else if (wParam == ID_HELP)
@@ -393,7 +393,7 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 				switch (m_actions.GetItemData(item)) {
 					case 1:
 					case 2:
-						prompt=GetResString(IDS_SCHED_ENTERDATARATELIMIT)+" ("+GetResString(IDS_KBYTESEC)+")";
+						prompt=GetResString(IDS_SCHED_ENTERDATARATELIMIT)+_T(" (")+GetResString(IDS_KBYTESEC)+_T(")");
 						break;
 					default: prompt=GetResString(IDS_SCHED_ENTERVAL);
 				}

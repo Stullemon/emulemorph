@@ -23,8 +23,6 @@
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "PPgEastShare.h" //EastShare - Added by Pretender, TBH-AutoBackup
 
-// CPreferencesDlg
-
 class CPreferencesDlg : public CPropertySheet
 {
 	DECLARE_DYNAMIC(CPreferencesDlg)

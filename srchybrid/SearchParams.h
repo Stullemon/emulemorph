@@ -16,6 +16,8 @@ enum ESearchType
 };
 
 
+#define	MAX_SEARCH_EXPRESSION_LEN	512
+
 ///////////////////////////////////////////////////////////////////////////////
 // SSearchParams
 
@@ -40,7 +42,7 @@ struct SSearchParams
 	CString strKeyword;
 	CString strBooleanExpr;
 	ESearchType eType;
-	CString strFileType;
+	CStringA strFileType;
 	CString strMinSize;
 	ULONG ulMinSize;
 	CString strMaxSize;
@@ -57,4 +59,4 @@ struct SSearchParams
 	bool bMatchKeywords;
 };
 
-bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams);
+bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams, bool bOptUTF8 = false);

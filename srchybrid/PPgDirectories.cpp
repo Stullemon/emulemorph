@@ -120,7 +120,7 @@ BOOL CPPgDirectories::OnApply()
 
 	_sntprintf(thePrefs.incomingdir, ARRSIZE(thePrefs.incomingdir), _T("%s"), strIncomingDir);
 	MakeFoldername(thePrefs.incomingdir);
-	sprintf(thePrefs.GetCategory(0)->incomingpath,"%s",thePrefs.incomingdir);
+	_stprintf(thePrefs.GetCategory(0)->incomingpath,_T("%s"),thePrefs.incomingdir);
 
 	_sntprintf(thePrefs.tempdir, ARRSIZE(thePrefs.tempdir), _T("%s"), strTempDir);
 	MakeFoldername(thePrefs.tempdir);

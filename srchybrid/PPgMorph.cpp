@@ -400,8 +400,8 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iSUCPitch = thePrefs.m_iSUCPitch;
 	m_iSUCDrift = thePrefs.m_iSUCDrift;;
 	m_iUSSLog = thePrefs.m_bDynUpLog;
-	m_iUSSLimit = thePrefs.m_bIsUSSLimit; // EastShare - Added by TAHO, USS limit
-	m_iUSSPingLimit = thePrefs.m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
+	m_iUSSLimit = thePrefs.m_bDynUpUseMillisecondPingTolerance; // EastShare - Added by TAHO, USS limit
+	m_iUSSPingLimit = thePrefs.m_iDynUpPingToleranceMilliseconds; // EastShare - Added by TAHO, USS limit
     m_iUSSPingTolerance = thePrefs.m_iDynUpPingTolerance;
     m_iUSSGoingUpDivider = thePrefs.m_iDynUpGoingUpDivider;
     m_iUSSGoingDownDivider = thePrefs.m_iDynUpGoingDownDivider;
@@ -486,8 +486,8 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_iSUCPitch = m_iSUCPitch;
 	thePrefs.m_iSUCDrift = m_iSUCDrift;
 	thePrefs.m_bDynUpLog = m_iUSSLog;
-	thePrefs.m_bIsUSSLimit = m_iUSSLimit; // EastShare - Added by TAHO, USS limit
-	thePrefs.m_iDynUpPingLimit = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
+	thePrefs.m_bDynUpUseMillisecondPingTolerance = m_iUSSLimit; // EastShare - Added by TAHO, USS limit
+	thePrefs.m_iDynUpPingToleranceMilliseconds = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     thePrefs.m_iDynUpPingTolerance = m_iUSSPingTolerance;
     thePrefs.m_iDynUpGoingUpDivider = m_iUSSGoingUpDivider;
     thePrefs.m_iDynUpGoingDownDivider = m_iUSSGoingDownDivider;

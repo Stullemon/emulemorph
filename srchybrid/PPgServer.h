@@ -22,8 +22,6 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnBnClickedCheck1();
-	afx_msg void OnSrvRetryClick();
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnBnClickedEditadr();
 	afx_msg void OnHelp();

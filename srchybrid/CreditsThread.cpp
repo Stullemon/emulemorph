@@ -17,7 +17,7 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "CreditsThread.h"
-#include "opcodes.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,6 +60,7 @@ CCreditsThread::~CCreditsThread()
 
 BOOL CCreditsThread::InitInstance()
 {
+	InitThreadLocale();
 	BOOL bResult = CGDIThread::InitInstance();
 
 	// NOTE: Because this is a separate thread, we have to delete our GDI objects here (while
@@ -252,7 +253,7 @@ void CCreditsThread::CreateCredits()
 			// it's a bitmap
 
 			CBitmap bmp;
-			if(! bmp.LoadBitmap((const char *)m_arCredits.GetAt(n).Mid(2)))
+			if(! bmp.LoadBitmap(m_arCredits.GetAt(n).Mid(2)))
 			{
 				CString str; 
 				str.Format(_T("Could not find bitmap resource \"%s\". Be sure to assign the bitmap a QUOTED resource name"), m_arCredits.GetAt(n).Mid(2)); 
@@ -430,8 +431,8 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(sTmp);
 
 	m_arCredits.Add(_T("03:00:eMule"));
-	sTmp.Format("02:01:Version %s",theApp.m_strCurVersionLong);
-	m_arCredits.Add(_T(sTmp));
+	sTmp.Format(_T("02:01:Version %s"),theApp.m_strCurVersionLong);
+	m_arCredits.Add(sTmp);
 	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2004 Merkur"));
 	m_arCredits.Add(_T("S:50"));
 	m_arCredits.Add(_T("02:04:Developers"));
@@ -514,13 +515,13 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Finnish: Nikerabbit"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:French: Emzc, Lalrobin, Alexis, Bouc7, abc, obi1"));
+	m_arCredits.Add(_T("01:06:French: Emzc, Lalrobin"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Galician: Juan, Emilio R."));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Greek: Michael Papadakis"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Italian: Trevi"));
+	m_arCredits.Add(_T("01:06:Italian: Trevi, Franky5"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Japanese: Shinro T."));
 	m_arCredits.Add(_T("S:05"));
@@ -542,7 +543,9 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Portugese Brasilian: DarthMaul,Brasco"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Russian: BRMAIL, Veli M."));
+	m_arCredits.Add(_T("01:06:Romanian: Dragos"));
+	m_arCredits.Add(_T("S:05"));
+	m_arCredits.Add(_T("01:06:Russian: T-Mac, BRMAIL"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Slowenian: Rok Kralj"));
 	m_arCredits.Add(_T("S:05"));
@@ -578,7 +581,7 @@ int CCreditsThread::CalcCreditsHeight()
 			// it's a bitmap
 
 			CBitmap bmp;
-			if (! bmp.LoadBitmap((const char *)m_arCredits.GetAt(n).Mid(2)))
+			if (! bmp.LoadBitmap(m_arCredits.GetAt(n).Mid(2)))
 			{
 				CString str; 
 				str.Format(_T("Could not find bitmap resource \"%s\". Be sure to assign the bitmap a QUOTED resource name"), m_arCredits.GetAt(n).Mid(2)); 

@@ -479,7 +479,6 @@ BEGIN
     IDS_NOTHING             "nessuno"
     IDS_SETUPSPEED          "imposta limite upload"
     IDS_SETDOWNSPEED        "imposta limite download"
-    IDS_UNDO                "Undo"
     IDS_DAYLY               "quotidiano"
 END
 
@@ -760,7 +759,6 @@ BEGIN
     IDS_STREE               "Statistiche"
     IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
     IDS_STATSSETUPINFO      "Aspetto Statistiche"
-    IDS_IRC_SOUNDEVENTS     "Play sound events"
 END
 
 STRINGTABLE 
@@ -1083,7 +1081,6 @@ BEGIN
     IDS_COMMENT             "Commento"
     IDS_IPFILTERED          "IP Filtrato: %s (%s)"
     IDS_DL_TRANSFCOMPL      "Completato"
-    IDS_DL_ACTIVE_TIME      "Tempo di Download"
     IDS_STATS_FILTEREDCLIENTS "Filtrato: %i"
     IDS_FILTERLABEL         "Filtra Messaggi Contenenti: (Separatore | )"
     IDS_ERR_LARGEREQBLOCK   "Un client ha richiesto una parte troppo grande."
@@ -1403,7 +1400,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CUT                 "Cut"
     IDS_STATS_SECUREIDENT   "Identificazione sicura (OK : Fallita )"
     IDS_ONDISK              "Spazio su Disco: "
     IDS_CLIENTCOL           "Attenzione:  E' stato trovato un client accoppiato ad un altro attualmente connesso: %s (%s) e %s (%s)"
@@ -1426,7 +1422,6 @@ STRINGTABLE
 BEGIN
     IDS_VERSION             "Versione"
     IDS_ALL_A4AF_TO_THIS    "Usa gli A4AF per questo file"
-    IDS_PASTE               "Paste"
     IDS_ALL_A4AF_TO_OTHER   "Usa gli A4AF per un altro file"
     IDS_ALL_A4AF_AUTO       "Usa automaticamente gli A4AF per questo file"
     IDS_SWAP_A4AF_TO_THIS   "Usa fonte per questo file"
@@ -1558,7 +1553,6 @@ BEGIN
     IDS_CMT_COPYCLIPBOARD   "Copia commenti negli appunti"
     IDS_ASKDOWNLOADLANG     "La lingua che hai selezionato non è installata nel tuo sistema. Vuoi che eMule la scarichi da emule-project.net?"
     IDS_ASKDOWNLOADLANGCAP  "Download language files"
-    IDS_DELETESELECTED      "Elimina"
     IDS_ERR_FAILEDDOWNLOADLANG 
                             "Failed to download and install selected language dll from %s!"
     IDS_ERR_BADFOLDER       "Cartella non valida.\nLa cartella non può essere creata. Controllare il nome ed il percorso."
@@ -1594,7 +1588,6 @@ BEGIN
     IDS_KADUDPPORTERR       "La porta UDP usata da Kad è in confilitto con quella usata da eMule per il Protocollo Esteso o per la connessione ai Server. La porta è stata cambiata con la %u."
     IDS_CONFIRM_FILEDELETE  "Do you really want to remove all selected files from disk?"
     IDS_OPENFOLDER          "Open folder"
-    IDS_RUNASUSER           "Run eMule as unprivileged User"
     IDS_DELETE              "Delete from disk"
     IDS_BOOTSTRAP           "Bootstrap"
     IDS_VIAED2KSQ           "via eD2k Server/Coda"
@@ -1636,7 +1629,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Vuoi veramente eliminare i filtri IP selezionati?"
     IDS_TOTAL_IPFILTER_LABEL "Filtri IP totali:"
     IDS_TOTAL_IPS_LABEL     "IP Totali:"
-    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
+    IDS_DELETESELECTED             "Elimina"
     IDS_APPEND              "Aggiungi..."
     IDS_SAVE                "Salva"
     IDS_IP_START            "Inizio"
@@ -1651,13 +1644,20 @@ STRINGTABLE
 BEGIN
     IDS_ERR_NOTCONNECTEDKAD "Attualmente non sei connesso alla Rete Kad!"
     IDS_IRC_NOSFS           "Nessun file condiviso selezionato"
-    IDS_RESETLABEL          "Completamento automatico (funzione cronologia)"
     IDS_IRC_IGNOREMISCMESSAGE "Ignora i messaggi di informazioni varie"
     IDS_KNOWN               "Conosciuto"
-    IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
-    IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
+    IDS_DL_ACTIVE_TIME      "Tempo di Download"
+    IDS_RESETLABEL          "Completamento automatico (funzione cronologia)"
+    IDS_PASTE               "Paste"
+    IDS_UNDO                "Undo"
+    IDS_CUT                 "Cut"
+    IDS_IRC_SOUNDEVENTS     "Play sound events"
     IDS_KADCONTACTSREAD     "Read %ld contacts from file."
     IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
+    IDS_RUNASUSER           "Run eMule as unprivileged User"
+    IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
+    IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
+    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
 END
 
 STRINGTABLE 
@@ -1665,22 +1665,21 @@ BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "Controlla la disponibilità del File prima di iniziare il Download"
     IDS_DL_FORCE            "Forza il Download"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 
-                            "Salva il tempo di attesa in coda per l'upload "
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Salva il tempo di attesa in coda per l'Upload"
     IDS_DATEFILENAMELOG     "Inserisci la data nel file di Log"
     IDS_ECFEF               "Stesse possibilità per ogni File"
     IDS_ALL_TIME            "Sempre"
-    IDS_COPYFEEDBACK        "Copia il feedback negli Appunti"
-    IDS_ANTILEECHERLOG      "[Anti-leechermods] Il CLient %s è stato temporaneamente bannato perchè sospettato di azioni di leech"
+    IDS_COPYFEEDBACK        "Copia il commento negli Appunti"
+    IDS_ANTILEECHERLOG      "[Anti-LeecherMod] Il Client %s è stato temporaneamente bannato perchè sospettato di azioni di leech"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_UNASSIGN            "Deseleziona"
-    IDS_DOWNLOAD_IN_RED     "Evidenzia in Rosso I File in download "
+    IDS_DOWNLOAD_IN_RED     "Evidenzia in Rosso i File in Download"
     IDS_UPSLOTNUMBER        "Slot #"
-    IDS_STATS_LEECHERCLIENTS "Leechers: %u"
-    IDS_WARNINGMORPH        "Attenzione:  Non cambiare questi settaggi se non ne conosci il significato; potresti compromettere la funzionalità del client  .\neMule funzionerà correttamente anche lasciando i settagli di Default."
+    IDS_STATS_LEECHERCLIENTS "Leecher: %u"
+    IDS_WARNINGMORPH        "Attenzione:  Non cambiare questi settaggi se non ne conosci il significato; potresti compromettere la funzionalità del client.\neMule funzionerà correttamente anche lasciando i settagli di Default."
     IDS_DM                  "Gestione Download"
     IDS_SCC                 "Smart Category Control (SCC)"
     IDS_SAC                 "Smart A4AF Control (SAC)"
@@ -1688,79 +1687,76 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_POWERSHARE_ON       "Attivato"
-    IDS_POWERSHARE_OFF      "Disattivato"
+    IDS_POWERSHARE_ACTIVATED "Attivato"
+    IDS_POWERSHARE_DISABLED "Disattivato"
     IDS_POWERSHARE_ON_LABEL "On"
     IDS_POWERSHARE_OFF_LABEL "Off"
     IDS_POWERSHARE_COLUMN_LABEL "Powershare"
     IDS_POWERSHARE_PREFIX   "PS"
     IDS_POWERSHARE          "Powershare"
-    IDS_SF_UPLOADED_PARTS   "Barra di diffusione (Storico delle parti Uppate)"
+    IDS_SF_UPLOADED_PARTS   "Barra di Diffusione (Storico delle Parti Inviate)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SF_TURN_PART        "File UL (Parziale)"
-    IDS_SF_TURN_SIMPLE      "File UL (Semplice)"
-    IDS_SF_FULLUPLOAD       "File UL (Completo)"
+    IDS_SF_TURN_PART        "File UP (Parziale)"
+    IDS_SF_TURN_SIMPLE      "File UP (Semplice)"
+    IDS_SF_FULLUPLOAD       "File UP (Completo)"
     IDS_UM                  "Gestione Upload"
-    IDS_ANTI_LEECHER        "Abilita il controllo anti-leechers "
-    IDS_BOOST_LESS          "Velocizza I Files meno uploadati (sessione)"
-    IDS_BOOST_FRIENDS       "Velocizza gli Amici (x1.5)"
+    IDS_ANTI_LEECHER        "Abilita il controllo Anti-Leecher"
     IDS_PROGRESS_PERCENT    "Mostra la Percentuale nella barra di progresso"
-    IDS_DOWNLOAD_IN_BOLD    "Evidenzia in Grassetto I file in Download"
+    IDS_DOWNLOAD_IN_BOLD    "Evidenzia in Grassetto i File in Download"
     IDS_CAT_RESUMENEXT      "Ripristina il successivo"
-    IDS_CAT_PAUSELAST       "Ripristina l’Ultimo"
-    IDS_CAT_STOPLAST        "Ferma l’Ultimo"
+    IDS_CAT_PAUSELAST       "Metti in pausa l’ultimo"
+    IDS_CAT_STOPLAST        "Ferma l’ultimo"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_TRICKLING           "(trickle)"
     IDS_ST_TOTALU           "Upload Totali"
     IDS_STATS_TOTALUL       "Numero Totale di Upload: %i"
     IDS_SP_TOTALUL          "Numero Totale di Upload"
-    IDS_STATS_UDATA_FRIENDS "Dati totali per lo Slot Amico (Sessione): %s"
+    IDS_STATS_UDATA_FRIENDS "Dati Totali per lo Slot Amico (Sessione): %s"
     IDS_SP_ULFRIENDS        "Upload Corrente per gli Slot Amico"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SP_ULSLOTSNOOVERHEAD "Upload corrente escluso overhead (Solo Slot UL)"
-    IDS_STATS_FRATIO        "Rapporto UL:DL della sessione (Escluso UL Amici):"
-    IDS_ST_ULCURRENT        "Slot di UL + OverHead"
-    IDS_ST_ULSLOTSNOOVERHEAD "Solo slot UL"
-    IDS_ST_ULFRIEND         "Solo slot Amico"
+    IDS_SP_ULSLOTSNOOVERHEAD "Upload Corrente escluso overhead (Solo Slot UP)"
+    IDS_STATS_FRATIO        "Rapporto UP:DOWN Sessione (Escluso UP Amici):"
+    IDS_ST_ULCURRENT        "Slot di UP + OverHead"
+    IDS_ST_ULSLOTSNOOVERHEAD "Solo Slot UP"
+    IDS_ST_ULFRIEND         "Solo Slot Amico"
     IDS_POWERSHARE_DENIED_LABEL "Negato"
     IDS_POWERSHARE_ADVISED_LABEL "Consigliato"
-    IDS_POWERSHARE_AUTONEWDOWNLOADFILE 
-                            "I nuovi files in download saranno messi automaticamente in modalità powershare"
     IDS_POWERSHARE_AUTHORIZED_LABEL "Autorizzato"
     IDS_POWERSHARE_ACTIVATED_LABEL "Attivato"
-    IDS_POWERSHARE_DISABLED_LABEL "Disabilitato"
+    IDS_POWERSHARE_DISABLED_LABEL "Disattivato"
     IDS_POWERSHARE_AUTO_LABEL "Auto"
     IDS_POWERSHARE_AUTO     "Auto"
     IDS_DYNUPLOAD           "Upload Dinamico"
-    IDS_HIDEOVERSHARES      "Overshares prima di nascondere I Chunk (0 = Disabilitato)"
+    IDS_HIDEOVERSHARES      "Overshare prima di nascondere I Chunk (0 = Disabilitato)"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_CAT_MINIMUM         "Minimo"
     IDS_CAT_MAXIMUM         "Massimo"
-    IDS_CAT_DLGHELP         "I Box spuntati indicano che il criterio selezionato sarà utilizzato per i nuovi Files."
+    IDS_CAT_DLGHELP         "I Box spuntati indicano che il criterio selezionato sarà utilizzato quando selezione una categoria per i nuovi File."
     IDS_CAT_FILTERS         "Filtri di Categoria"
-    IDS_CAT_RS              "Dimensione rimenente (MB)"
+    IDS_CAT_RS              "Dimensione Rimanente (MB)"
     IDS_CAT_FS              "     Dimensioni del File (MB)"
-    IDS_CAT_RT              "Tempo rimanente (M)"
+    IDS_CAT_RT              "Tempo Rimanente (M)"
     IDS_CAT_SC              "Numero di Fonti"
-    IDS_CAT_ASC             "Numero di Fonti disponibile"
+    IDS_CAT_ASC             "Numero di Fonti Disponibili"
     IDS_CAT_THISCAT         "Questa Categoria"
     IDS_CAT_SUSPENDFILTERS  "Disabilita i Filtri"
     IDS_CAT_FROMCATSINFO    "Devi assegnare ad altre categorie tutti i file di questa categoria prima di impostare quest'ultima alla visione di 'tutti i file' o di 'tutti i file non assegnati'!"
-    IDS_CAT_FROMCATSCAP     "File non Assegnati"
+    IDS_CAT_FROMCATSCAP     "File Non Assegnati"
     IDS_CAT_ADVA4AF         "A4AF Avanzato"
     IDS_CAT_FILTERSACTIVE   "Filtri Attivi"
-    IDS_CAT_FILTERSSUSP     "Filtri Sospesi"
+    IDS_CAT_FILTERSSUSP     "Filtri Non Attivi"
 END
 
 STRINGTABLE 
@@ -1772,36 +1768,36 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CAT_SETORDER        "Setta la Linear Priority"
-    IDS_CAT_ORDER           "Inserisci un numero intero maggiore o uguale a zero. Il numero Minore viene avviato per primo."
+    IDS_CAT_SETORDER        "Imposta la Priorità Lineare"
+    IDS_CAT_ORDER           "Inserisci un numero intero maggiore o uguale a zero. Il numero minore viene avviato per primo."
     IDS_CAT_PAUSEDSHOWN     " | Mostra quelli in Pausa"
     IDS_CAT_PAUSEDHIDDEN    " | Mostra quelli Nascosti"
     IDS_CAT_COLCATEGORY     "Cat"
-    IDS_CAT_COLORDER        "LP"
-    IDS_CAT_MNUAUTOINC      "Incrementa Automaticamente i Selezionati"
-    IDS_CAT_MNUSTEPTHRU     "Seleziona ogni File Singolarmente"
+    IDS_CAT_COLORDER        "PL"
+    IDS_CAT_MNUAUTOINC      "Incremento Automatico Selezionato"
+    IDS_CAT_MNUSTEPTHRU     "Imposta ogni File Singolarmente"
     IDS_CAT_MNUALLSAME      "Imposta tutto ad un unico valore"
     IDS_CAT_EXPAUTOINC      "Inserisci un numero iniziale non negativo:"
     IDS_CAT_EXPSTEPTHRU     "Inserisci un numero non negativo, i numeri minori vengono avviati per primi.\nFile:"
-    IDS_CAT_EXPALLSAME      "Inserisci un numero non negativo, che sarà applicato a tutti i Files selezionati:"
-    IDS_CAT_ABORTSTEPTHRU   "Vuoi bloccare il Settaggio della Linear Priority?"
+    IDS_CAT_EXPALLSAME      "Inserisci un numero non negativo, che sarà applicato a tutti i File selezionati:"
+    IDS_CAT_ABORTSTEPTHRU   "Vuoi disattivare l'incremento della Priorità Lineare?"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ABORT               "Vuoi bloccare?"
+    IDS_ABORT               "Vuoi Annullare?"
     IDS_MINUPLOAD_SHORT     "Min. Up"
     IDS_SUC                 "Smart Upload Control (SUC)"
     IDS_SUC_ENABLED         "Abilitato"
-    IDS_MINUPLOAD           "Limite minimo per L'upload"
+    IDS_MINUPLOAD           "Limite minimo per l'Upload"
     IDS_SUC_HIGH            "High pass (default %i)"
     IDS_SUC_LOW             "Low pass (default %i)"
     IDS_SUC_PITCH           "Pitch (default %i)"
     IDS_SUC_DRIFT           "Drift (default %i)"
     IDS_SHOWSECUREDCONNECTION "Mostra le connessioni con i Client Sicuri"
-    IDS_ZERO_FILLED_TEST    "Allontana gli utenti che nn hanno parti a te necessarie"
-    IDS_SUC_LOG             "Guarda le attività nel log di Debug"
-    IDS_A4AF_SHOWDEBUG      "Guarda le attività nel log di Debug"
+    IDS_ZERO_FILLED_TEST    "Allontana gli utenti che non hanno parti a te necessarie"
+    IDS_SUC_LOG             "Mostra le attività nel registro di Debug"
+    IDS_A4AF_SHOWDEBUG      "Mostra le attività nel registro di Debug"
 END
 
 STRINGTABLE 
@@ -1809,18 +1805,18 @@ BEGIN
     IDS_CAT_SHOWPAUSED      "Mostra quelli in Pausa"
     IDS_CAT_HIDEPAUSED      "Nascondi quelli in Pausa"
     IDS_CAT_SELDLGTXT       "Seleziona la categoria dalla Lista o inserisci il titolo per una nuova Categoria:"
-    IDS_CAT_SELDLGCAP       "Seleziona una Nazione"
+    IDS_CAT_SELDLGCAP       "Seleziona una Categoria"
     IDS_CAT_SHOWCATNAME     "Mostra il nome completo della categoria nella colonna 'Cat'"
-    IDS_CAT_SHOWSELCATDLG   "Mostra il log della 'Categoria Selezionata'"
-    IDS_CAT_USEACTIVE       "I nuovi Download saranno inseriti nella categoria di Default"
+    IDS_CAT_SHOWSELCATDLG   "Mostra la finestra di dialogo della 'Categoria Selezionata'"
+    IDS_CAT_USEACTIVE       "I nuovi Download saranno inseriti nella categoria attiva"
     IDS_CAT_AUTORESUMEORD   "Assegna ed Incrementa automaticamente la Priorità Lineare"
-    IDS_CAT_SMALLFILEDLPUSH "Scarica prima i piccoli Files (< 150KB)"
-    IDS_A4AF_SMARTSWAP      "Abilita smart A4AF swapping"
+    IDS_CAT_SMALLFILEDLPUSH "Scarica prima i piccoli File (< 150KB)"
+    IDS_A4AF_SMARTSWAP      "Abilita lo scambio rapido A4AF"
     IDS_A4AF_BALANCE        "Bilancia le Fonti"
-    IDS_A4AF_STACK          "Stack sources"
+    IDS_A4AF_STACK          "Ammassa le Fonti"
     IDS_A4AF_DISABLED       "Disabilitato"
-    IDS_A4AF_ADVMODE        "Gestione Avanzata dell'A4AF "
-    IDS_CAT_STARTFILESONADD "Scarica # files quando sono aggiunti ad una nuova categoria"
+    IDS_A4AF_ADVMODE        "Gestione Avanzata dell'A4AF"
+    IDS_CAT_STARTFILESONADD "Inizia a scaricare # file quando sono aggiunti ad una nuova categoria"
 END
 
 STRINGTABLE 
@@ -1832,8 +1828,8 @@ BEGIN
     IDS_CAT_GROUP           "Gruppo"
     IDS_A4AF_FORCEALL       "Assegna tutti gli A4AF"
     IDS_A4AF_FLAGS          "Opzioni avanzate A4AF"
-    IDS_A4AF_ONFLAG         "Forza A4AF a On"
-    IDS_A4AF_OFFFLAG        "Forza A4AF a Off"
+    IDS_A4AF_ONFLAG         "Forza A4AF su On"
+    IDS_A4AF_OFFFLAG        "Forza A4AF su Off"
     IDS_INVERT              "Inverti"
     IDS_COMPRESSIONGAIN     "Compresso"
 END
@@ -1855,23 +1851,23 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOWIDRETRYLABEL     "Tentativi di Riconnessione in caso di ID Basso"
+    IDS_LOWIDRETRYLABEL     "Tentativi di riconnessione in caso di ID Basso"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_UPL_DL              "Upload/Download"
-    IDS_LISTREQUESTED       "Lista dei file richiesti"
-    IDS_LISTREQDL           "Elenco dei file in download:"
-    IDS_LISTREQUL           "Elenco dei file in upload:"
-    IDS_LISTREQNODL         "Questo utente non è presente nella tua coda di download!!!"
-    IDS_LISTREQNOUL         "Questo utente non è presente nella tua coda di upload!!!"
-    IDS_CORRUPTDATASENT     "L'utente '%s' (IP %s:%i), hash %s, client=%s è stato aggiunto temporaneamente  alla filtered list perchè ha inviato dati corrotti"
+    IDS_LISTREQUESTED       "Elenco dei file richiesti"
+    IDS_LISTREQDL           "Elenco dei file in Download:"
+    IDS_LISTREQUL           "Elenco dei file in Upload:"
+    IDS_LISTREQNODL         "Questo utente non è presente nella tua coda di Download!!!"
+    IDS_LISTREQNOUL         "Questo utente non è presente nella tua coda di Upload!!!"
+    IDS_CORRUPTDATASENT     "L'utente '%s' (IP %s:%i), hash %s, client=%s è stato aggiunto temporaneamente alla 'lista filtrati' perchè ha inviato dati corrotti"
     IDS_ULENDCANTRANS       "%s: Sessione di upload interrota perchè è stato cancellato il trasferimento"
     IDS_ULENDENDTRANS       "%s: Sessione di upload interrota perchè è stato completato il trasferimento"
-    IDS_LEECHERDETREM       "Leecher individuato e rimosso dalla coda di upload"
+    IDS_LEECHERDETREM       "Leecher individuato e rimosso dalla coda di Upload"
     IDS_LEECHERPUTBACK      "Leecher retrocesso in coda alla lista di attesa"
-    IDS_TRIEDDLOTHERFILE    "%s: Sessione di upload non permessa. Il client ha tentato di scaricare un altro file per il quale era in coda. FileID: (previsto=%s, richiesto=%s)"
+    IDS_TRIEDDLOTHERFILE    "%s: Sessione di Upload non permessa. Il client ha tentato di scaricare un altro file per il quale era in coda. FileID: (previsto=%s, richiesto=%s)"
     IDS_CLIENTPUTBACK       "Client scalato di posizione, mantenendo il tempo di attesa intatto"
 END
 
@@ -1884,44 +1880,44 @@ BEGIN
     IDS_FEEDBACK_FROM       "Statistiche da %s su [%s]"
     IDS_FEEDBACK_FILENAME   "Nome del file: %s"
     IDS_FEEDBACK_FILETYPE   "Tipo di file: %s"
-    IDS_FEEDBACK_FILESIZE   "Dimensione: %i MB"
+    IDS_FEEDBACK_FILESIZE   "Dimensioni: %i MB"
     IDS_FEEDBACK_DOWNLOADED "Scaricati: %i MB"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_TOTAL      "Fonti totali: %i"
-    IDS_FEEDBACK_AVAILABLE  "Fonti disponibili: %i"
-    IDS_FEEDBACK_NONEEDPART "Fonti con parti non necessarie: %i"
-    IDS_FEEDBACK_COMPLETE   "Fonti complete stimate: %i"
+    IDS_FEEDBACK_TOTAL      "Fonti Totali: %i"
+    IDS_FEEDBACK_AVAILABLE  "Fonti Disponibili: %i"
+    IDS_FEEDBACK_NONEEDPART "Fonti con Parti Non Necessarie: %i"
+    IDS_FEEDBACK_COMPLETE   "Fonti Complete Stimate: %i"
     IDS_COPYFEEDBACK_US     "Copia le statistiche del file negli appunti (US)"
-    IDS_UPDATEFAKES         "Aggiorna la fake list"
-    IDS_FAKECHECKUPERROR    "Errore durante l'aggiornamento della fake list"
-    IDS_HTTP_FAKECHECKCAPTION "Aggiornamento della fake list"
-    IDS_UPDATEFAKECHECKONSTART "Aggiornamento della fake list all'avvio"
-    IDS_FAKELIST_PERCENTAGE "Aggiornamento della fake list: %s%% su %s completato"
-    IDS_CHECKFAKE           "Controlla fake"
-    IDS_REMAININGSIZE       "Dimensione rimanente"
-    IDS_RELOADSHARE         "Ricarica i file condivisi"
+    IDS_UPDATEFAKES         "Aggiorna la lista Fake"
+    IDS_FAKECHECKUPERROR    "Errore durante l'aggiornamento della lista Fake"
+    IDS_HTTP_FAKECHECKCAPTION "Aggiornamento della lista Fake"
+    IDS_UPDATEFAKECHECKONSTART "Aggiornamento della lista Fake all'avvio"
+    IDS_FAKELIST_PERCENTAGE "Aggiornamento della lista Fake: %s%% su %s completato"
+    IDS_CHECKFAKE           "Controlla Fake"
+    IDS_REMAININGSIZE       "Dimensione Rimanente"
+    IDS_RELOADSHARE         "Ricarica i File Condivisi"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_USS                 "Upload Speed Sense (USS)"
     IDS_USS_ENABLED         "Attivo"
-    IDS_USS_LOG             "Mostra attività nel log di debug"
+    IDS_USS_LOG             "Mostra attività nel registro di Debug"
     IDS_USS_PINGTOLERANCE   "Tolleranza ping (in %%) (Default %i)"
     IDS_USS_GOINGUPDIVIDER  "Aumento ritardo (Default %i)"
     IDS_USS_GOINGDOWNDIVIDER "Abbassamento ritardo (Default %i)"
     IDS_USS_NUMBEROFPINGS   "Numero massimo per ping medi (Default %i)"
     IDS_USSFINDLASTCOMMON   "UploadSpeedSense: Inizio tracciamento per trovare ultimi hosts comuni."
-    IDS_USSFOUNDLASTCOMMON  "UploadSpeedSense: Trovati ultimi hosts comuni. LastCommonHost: %s @ TTL: %i HostToPing: %s"
-    IDS_USSSTARTLOWPING     "UploadSpeedSense: Ricerca di un valore di partenza per ping basso..."
-    IDS_USSCOLLECTINGHOSTS  "UploadSpeedSense: Prova #%i. Ordinamento degli hosts..."
-    IDS_USSENOUGHHOSTS      "UploadSpeedSense: Troppi hosts. Rintracciamento ping degli altri hosts:"
+    IDS_USSFOUNDLASTCOMMON  "UploadSpeedSense: Trovati ultimi host comuni. LastCommonHost: %s @ TTL: %i HostToPing: %s"
+    IDS_USSSTARTLOWPING     "UploadSpeedSense: Ricerca di un valore di partenza per il ping più basso..."
+    IDS_USSCOLLECTINGHOSTS  "UploadSpeedSense: Prova #%i. Ordinamento degli host..."
+    IDS_USSENOUGHHOSTS      "UploadSpeedSense: Troppi host. Rintracciamento ping degli altri host:"
     IDS_USSHOSTLISTING      "UploadSpeedSense: Host #%i: %s"
     IDS_USSLOWESTPING       "UploadSpeedSense: Ping più basso: %i ms"
-    IDS_USSREADY            "UploadSpeedSense: Eseguito correttamente. Inizio controllo dell'upload speed."
+    IDS_USSREADY            "UploadSpeedSense: Eseguito correttamente. Inizio controllo della velocità di upload."
     IDS_USSCANTPING         "UploadSpeedSense: Fallimento #%i ping all'host! (TTL: %i IP: %s errore: %i). Attesa 1 sec prima di riprovare. Motivo errore."
 END
 
@@ -1933,12 +1929,12 @@ BEGIN
     IDS_USSPINGFAILED       "UploadSpeedSense: Ping #%i fallito. Motivo seguente"
     IDS_USSNEWTRACEROUTE    "UploadSpeedSense: Topologia del network cambiata. TTL: %i Previsto ip: %s real ip: %s verrà eseguito un nuovo tracciamento."
     IDS_USSPINGNUMCONTINUE  "UploadSpeedSense: Ping #%i conseguito con successo. Continuo."
-    IDS_USSNEWLOWEST        "UploadSpeedSense: Nuovo ping più basso: %i ms. vecchio: %i ms"
+    IDS_USSNEWLOWEST        "UploadSpeedSense: Nuovo ping più basso: %i ms. Vecchio: %i ms"
     IDS_USSPINGFAILDIS      "UploadSpeedSense: Pinging fallito per troppe volte. Disabilitato l'Upload SpeedSense."
     IDS_USSTRACEFAILDIS     "UploadSpeedSense: Tracciamento fallito per troppe volte. Disabilitato l'Upload SpeedSense."
-    IDS_USSPINGERPINGREPLY  "UploadSpeedSense: Reply da %s: bytes=%d tempo=%ldms TTL=%i"
+    IDS_USSPINGERPINGREPLY  "UploadSpeedSense: Risposta da %s: byte=%d tempo=%ldms TTL=%i"
     IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() fallito, err: %d\n"
-    IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() fallito: non in grado di localizzare il ICMP.DLL!"
+    IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() fallito: non in grado di localizzare il file ICMP.DLL!"
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() fallito per almeno una funzione."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() fallito, err: "
     IDS_USSPINGERICMPENDERR "Errore durante la chiusura manuale dell'ICMP , err: "
@@ -1949,14 +1945,14 @@ STRINGTABLE
 BEGIN
     IDS_REMULSUCCESS        "Upload completati con successo."
     IDS_REMULHIGHERPRIO     "Upload terminato per dare spazio ad un client con priorità maggiore."
-    IDS_REMULMANYSLOTS      "Troppi slot aperti per l' upload."
-    IDS_ULSUCCESSFUL        "%s: Completamento a buon fine degli uploads. Totale trasferito: %s. Differenza da %s: %i bytes"
+    IDS_REMULMANYSLOTS      "Troppi slot aperti per l'Upload."
+    IDS_ULSUCCESSFUL        "%s: Completamento a buon fine degli upload. Totale trasferito: %s. Differenza da %s: %i byte"
     IDS_SKTDISREASON        "Disconnessione socket: "
     IDS_SKTDISUNKREASON     "Disconnessione socket. Ragione sconosciuta."
-    IDS_IPISFILTERED        "IP filtrato."
+    IDS_IPISFILTERED        "L'IP è filtrato."
     IDS_CNXTIMEOUT          "Connessione scaduta."
-    IDS_UPSTOPPEDLEECHER    "Sessione upload non abilitata a partire.Il client sembra essere un leecher."
-    IDS_IPSTOPPEDOTHFILE    "Sessione upload non abilitata a partire.Il client ha provato a scaricare un altro file per il quale è in coda."
+    IDS_UPSTOPPEDLEECHER    "Sessione upload non abilitata a partire. Il client sembra essere un leecher."
+    IDS_IPSTOPPEDOTHFILE    "Sessione upload non abilitata a partire. Il client ha provato a scaricare un altro file per il quale è in coda."
     IDS_UPENDUSERCANC       "%s: Fine sessione upload a causa del trasferimento interrotto. %s %s:%i"
     IDS_NEWMSGFROM          "Nuovo messaggio da '%s' (IP:%s)"
     IDS_FILTEREDFROM        "Messaggio filtrato da '%s' (IP:%s)"
@@ -1967,28 +1963,28 @@ END
 STRINGTABLE 
 BEGIN
     IDS_REMULUSERCANCEL     "Trasferimento interrotto dal client remoto."
-    IDS_REMULUSEREND        "Fine trasferimento da client remoto."
-    IDS_DWLSESSIONENDED     "Fine sessione download. Userr: %s Motivo: %s"
-    IDS_ST_ACTIVEU_ZZ       "Concentra gli Uploads"
+    IDS_REMULUSEREND        "Il client remoto ha terminato il trasferimento."
+    IDS_DWLSESSIONENDED     "Fine sessione download. User: %s Motivo: %s"
+    IDS_ST_ACTIVEU_ZZ       "Upload Concentrati"
     IDS_BANHASHCHANGED      "Client: %s (%s), Motivo del ban: Userhash diverso"
     IDS_BANHASHCHANGEDT     "Client: %s (%s), Motivo del ban: Userhash diverso (Trovato su TrackedClientsList)"
     IDS_BANHASHINVALID      "Client: %s (%s), Motivo del ban: Userhash non valido"
-    IDS_LOWIDRETRYING       "LowID -- riprova (%i altri tentativi)"
+    IDS_LOWIDRETRYING       "ID  Basso -- Riprovo. . . (altri %i tentativi)"
     IDS_IPFILTEREDSRV       "Usa filtro IP=%s (%s) per le fonti ricevute dal server"
     IDS_IPIGNOREDSRV        "Ignora fonti (IP=%s) recevute dal server"
     IDS_IPFILTEREDSE        "Usa filtro IP=%s (%s) per le fonti ricevute con lo scambio"
     IDS_IPIGNOREDSE         "Ignora fonti (IP=%s) ricevute attraverso lo scambio fonti"
-    IDS_SERVERFILTERED      "Usa filtro IP per i server con IP=%s (%s)"
+    IDS_SERVERFILTERED      "Server filtrati con IP=%s (%s)"
     IDS_SERVERIGNORED       "Ignora server con IP=%s"
-    IDS_STATS_ACTUL_ZZ      "Concentra gli Uploads/Necessari per riempire la banda: %i"
+    IDS_STATS_ACTUL_ZZ      "Concentra gli Upload/Necessari per riempire la banda: %i"
     IDS_URL_FOR_UPDATING    "URL per aggiornamento"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_SWITCHSUC           "Cambia da Dynamic Upload System a SmartUploadControl"
-    IDS_SWITCHDYNUP         "Cambia da Dynamic Upload System all' UploadSpeedSense"
-    IDS_AUTODYNUPSWITCHING  "Sistema automatico dei Dinamic Uploads"
+    IDS_SWITCHDYNUP         "Cambia da Dynamic Upload System ad UploadSpeedSense"
+    IDS_AUTODYNUPSWITCHING  "Cambio automatico dei sistemi di Upload Dinamico"
     IDS_MAXCONNECTIONSSWITCHBORDER "Limite cambio max connessioni"
 END
 
@@ -1999,19 +1995,19 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_BACKUP              "Backup"
+    IDS_BACKUP              "Copia di sicurezza"
     IDS_USS_MAXPING         "Valore Massimo per il Ping (ms) (Default %i)"
-    IDS_PAYBACKFIRST        "Pay Back First"
+    IDS_PAYBACKFIRST        "Contraccambia Prima"
     IDS_USS_USEMAXPING      "Usa il massimo valore per il ping"
-    IDS_CREDIT_SYSTEM       "Sistema di Crediti"
+    IDS_CREDIT_SYSTEM       "Sistema dei Crediti"
     IDS_OFFICIAL_CREDIT     "Crediti Ufficiali"
-    IDS_LOVELACE_CREDIT     "Crediti di lovelace "
-    IDS_RATIO_CREDIT        "Crediti Ratio "
+    IDS_LOVELACE_CREDIT     "Crediti di Lovelace"
+    IDS_RATIO_CREDIT        "Rapporto Crediti"
     IDS_EASTSHARE_CREDIT    "Crediti di EastShare"
-    IDS_PREFER_SHARE_ALL    "Preferisci condividere tutti i files"
+    IDS_PREFER_SHARE_ALL    "Preferisci condividere tutti i file"
     IDS_MET_FILE_CONTROL    "Controllo File .met (Attenzione a cambiare ogni parametro!!)"
-    IDS_EXPIRED_CLIENTS     "Periodo di validità dei Clients (gg) (0 = Disattivata)"
-    IDS_EXPIRED_KNOWN       "Periodo di validità dei Files Conosciuti (gg) (0 = Disattivata)"
+    IDS_EXPIRED_CLIENTS     "Periodo di validità dei Client (gg) (0 = Disattivato)"
+    IDS_EXPIRED_KNOWN       "Periodo di validità dei File Conosciuti (gg) (0 = Disattivato)"
     IDS_DELETEFILE          "Cancella il File"
     IDS_PAWCIO_CREDIT       "Crediti di Pawcio"
 END
@@ -2020,10 +2016,8 @@ STRINGTABLE
 BEGIN
     IDS_HIDEOS              "Nascondi Overshare"
     IDS_SHAREONLYTHENEED    "Condividi solo parti necessarie"
-    IDS_SHAREONLYTHENEEDDEFAULT 
-                            "Condividi solo parti necessarie (0 = Disabilitato)"
     IDS_SFM                 "Gestione File Condivisi"
-    IDS_IP2COUNTRY          "IP2Country"
+    IDS_IP2COUNTRY          "IP->Nazione"
 END
 
 STRINGTABLE 
@@ -2033,8 +2027,19 @@ BEGIN
     IDS_COUNTRYNAME_LONG    "Mostra il nome Completo (ITALY)"
     IDS_COUNTRYNAME_SHOWFLAG "Mostra le Bandiere"
     IDS_REMOVEALLFRIENDSLOT "Rimuovi tutti gli Slot Amico"
+    IDS_INFINITEQUEUE       "Coda di attesa Infinita"
+    IDS_PAYBACKFIRSTLIMIT   "Quantità prima dell'attivazione (Default 10MB)"
+    IDS_COMMUNITY           "Comunità"
+    IDS_COMMUNITYTAG        "Etichette della Comunità (separate da '|')"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_AUXPORTS            "Porte Ausiliarie"
+    IDS_SOLIDGRAPH          "Mostra il grafico pieno"
+    IDS_POWERSHARE_LIMITED  "Limitato"
+    IDS_POWERSHARE_LIMIT    "Limite di fonti complete"
+END
 #endif    // Italien (Italie) resources
 /////////////////////////////////////////////////////////////////////////////
 

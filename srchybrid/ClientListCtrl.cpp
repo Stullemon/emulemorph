@@ -116,15 +116,18 @@ void CClientListCtrl::SetAllIcons()
 	imagelist.DeleteImageList();
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	imagelist.SetBkColor(CLR_NONE);
-	imagelist.Add(CTempIconLoader("ClientEDonkey"));
-	imagelist.Add(CTempIconLoader("ClientCompatible"));
-	imagelist.Add(CTempIconLoader("Friend"));
-	imagelist.Add(CTempIconLoader("ClientMLDonkey"));
-	imagelist.Add(CTempIconLoader("ClientEDonkeyHybrid"));
-	imagelist.Add(CTempIconLoader("ClientShareaza"));
+	imagelist.Add(CTempIconLoader(_T("ClientEDonkey")));
+	imagelist.Add(CTempIconLoader(_T("ClientCompatible")));
+	imagelist.Add(CTempIconLoader(_T("Friend")));
+	imagelist.Add(CTempIconLoader(_T("ClientMLDonkey")));
+	imagelist.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
+	imagelist.Add(CTempIconLoader(_T("ClientShareaza")));
+	imagelist.Add(CTempIconLoader(_T("Server")));
+	imagelist.Add(CTempIconLoader(_T("ClientAMule")));
+	imagelist.Add(CTempIconLoader(_T("ClientLPhant")));
 	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
-	imagelist.Add(CTempIconLoader("ClientRightEdonkey"));
-	imagelist.Add(CTempIconLoader("ClientMorph"));
+	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
+	imagelist.Add(CTempIconLoader(_T("ClientMorph")));
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
 	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
@@ -311,11 +314,17 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						image = 3;
 					else if (client->GetClientSoft() == SO_SHAREAZA)
 						image = 5;
+					else if (client->GetClientSoft() == SO_URL)
+						image = 6;
+					else if (client->GetClientSoft() == SO_AMULE)
+						image = 7;
+					else if (client->GetClientSoft() == SO_LPHANT)
+						image = 8;
 					else if (client->ExtProtocolAvailable())
 					//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
-						image = (client->IsMorph())?7:1;
+						image = (client->IsMorph())?10:1;
 					else if (client->GetClientSoft() == SO_EDONKEY)
-						image = 6;
+						image = 9;
 					else
 						image = 0;
 
@@ -329,7 +338,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_NORMAL);
 					//MORPH END - Modified by SiRoB, More client icon
 					if (client->GetUserName()==NULL)
-						Sbuffer.Format("(%s)", GetResString(IDS_UNKNOWN));
+						Sbuffer.Format(_T("(%s)"), GetResString(IDS_UNKNOWN));
 					else
 						Sbuffer = client->GetUserName();
 
@@ -359,34 +368,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}
 				case 1:{
-					switch (client->GetUploadState()){
-						case US_ONUPLOADQUEUE:
-							Sbuffer = GetResString(IDS_ONQUEUE);
-							break;
-						case US_PENDING:
-							Sbuffer = GetResString(IDS_CL_PENDING);
-							break;
-						case US_LOWTOLOWIP:
-							Sbuffer = GetResString(IDS_CL_LOW2LOW);
-							break;
-						case US_BANNED:
-							Sbuffer = GetResString(IDS_BANNED);
-							break;
-						case US_ERROR:
-							Sbuffer = GetResString(IDS_ERROR);
-							break;
-						case US_CONNECTING:
-							Sbuffer = GetResString(IDS_CONNECTING);
-							break;
-						case US_WAITCALLBACK:
-							Sbuffer = GetResString(IDS_CONNVIASERVER);
-							break;
-						case US_UPLOADING:
-							Sbuffer = GetResString(IDS_TRANSFERRING);
-							break;
-						default:
-							Sbuffer.Empty();
-						}
+					Sbuffer = client->GetUploadStateDisplayString();
 					break;
 				}
 				case 2:{
@@ -397,40 +379,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}
 				case 3:{
-					switch (client->GetDownloadState()) {
-						case DS_CONNECTING:
-							Sbuffer = GetResString(IDS_CONNECTING);
-							break;
-						case DS_CONNECTED:
-							Sbuffer = GetResString(IDS_ASKING);
-							break;
-						case DS_WAITCALLBACK:
-							Sbuffer = GetResString(IDS_CONNVIASERVER);
-							break;
-						case DS_ONQUEUE:
-							if( client->IsRemoteQueueFull() )
-								Sbuffer = GetResString(IDS_QUEUEFULL);
-							else
-								Sbuffer = GetResString(IDS_ONQUEUE);
-							break;
-						case DS_DOWNLOADING:
-							Sbuffer = GetResString(IDS_TRANSFERRING);
-							break;
-						case DS_REQHASHSET:
-							Sbuffer = GetResString(IDS_RECHASHSET);
-							break;
-						case DS_NONEEDEDPARTS:
-							Sbuffer = GetResString(IDS_NONEEDEDPARTS);
-							break;
-						case DS_LOWTOLOWIP:
-							Sbuffer = GetResString(IDS_NOCONNECTLOW2LOW);
-							break;
-						case DS_TOOMANYCONNS:
-							Sbuffer = GetResString(IDS_TOOMANYCONNS);
-							break;
-						default:
-							Sbuffer.Empty();
-					}
+					Sbuffer = client->GetDownloadStateDisplayString();
 					break;
 				}
 				case 4:{
@@ -528,17 +477,17 @@ void CClientListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED), MP_DETAIL, GetResString(IDS_SHOWDETAILS));
 	ClientMenu.SetDefaultItem(MP_DETAIL);
-	ClientMenu.AppendMenu(MF_STRING | ((client && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
 	//MORPH START - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | uFlags, MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	ClientMenu.AppendMenu(MF_STRING | ((!client || !client->GetViewSharedFilesSupport()) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
-		ClientMenu.AppendMenu(MF_STRING | ((!client || client->GetKadPort()==0) ? MF_GRAYED : MF_ENABLED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
 	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka

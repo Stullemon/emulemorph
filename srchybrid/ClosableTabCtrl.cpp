@@ -174,7 +174,7 @@ void CClosableTabCtrl::SetAllIcons()
 		m_ImgLstCloseButton.DeleteImageList();
 		m_ImgLstCloseButton.Create(8, 8, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 		m_ImgLstCloseButton.SetBkColor(CLR_NONE);
-		m_ImgLstCloseButton.Add(CTempIconLoader("CloseTab", 8, 8));
+		m_ImgLstCloseButton.Add(CTempIconLoader(_T("CloseTab"), 8, 8));
 		m_ImgLstCloseButton.GetImageInfo(0, &m_iiCloseButton);
 		Invalidate();
 	}

@@ -20,6 +20,7 @@
 #include "OtherFunctions.h"
 #include "Preferences.h"
 #include "HelpIDs.h"
+#include "Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -29,6 +30,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgServer, CPropertyPage)
+
 CPPgServer::CPPgServer()
 	: CPropertyPage(CPPgServer::IDD)
 {
@@ -43,20 +45,12 @@ void CPPgServer::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 }
 
-
-
-void CPPgServer::OnSrvRetryClick(){
-	GetDlgItem(IDC_SERVERRETRIES)->EnableWindow(IsDlgButtonChecked(IDC_REMOVEDEAD));
-	SetModified();
-}
-
 BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_EN_CHANGE(IDC_SERVERRETRIES, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOSERVER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATESERVERCONNECT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATESERVERCLIENT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SCORE, OnSettingsChange)
-	ON_BN_CLICKED(IDC_REMOVEDEAD, OnSrvRetryClick)
 	ON_BN_CLICKED(IDC_SMARTIDCHECK, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SAFESERVERCONNECT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOCONNECTSTATICONLY, OnSettingsChange)
@@ -68,11 +62,6 @@ END_MESSAGE_MAP()
 
 // CPPgServer message handlers
 
-void CPPgServer::OnBnClickedCheck1()
-{
-	// TODO: Add your control notification handler code here
-}
-
 BOOL CPPgServer::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
@@ -80,24 +69,14 @@ BOOL CPPgServer::OnInitDialog()
 
 	LoadSettings();
 	Localize();
-	OnSrvRetryClick();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CPPgServer::LoadSettings(void)
 {
-//	switch(thePrefs.deadserver)
-//	{
-//		case 1:	this->CheckDlgButton(IDC_MARKDEAD,1);	break;
-//		case 2:	this->CheckDlgButton(IDC_DELETEDEAD,1);	break;
-//	}
-	
-	CString strBuffer;
-	strBuffer.Format("%d", thePrefs.deadserverretries);
-	GetDlgItem(IDC_SERVERRETRIES)->SetWindowText(strBuffer);
-		
+	SetDlgItemInt(IDC_SERVERRETRIES, thePrefs.deadserverretries, FALSE);
 
 	if(thePrefs.IsSafeServerConnectEnabled())
 		CheckDlgButton(IDC_SAFESERVERCONNECT,1);
@@ -114,11 +93,6 @@ void CPPgServer::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_SMARTIDCHECK,0);
 
-	if(thePrefs.deadserver)
-		CheckDlgButton(IDC_REMOVEDEAD,1);
-	else
-		CheckDlgButton(IDC_REMOVEDEAD,0);
-	
 	if(thePrefs.autoserverlist)
 		CheckDlgButton(IDC_AUTOSERVER,1);
 	else
@@ -139,7 +113,6 @@ void CPPgServer::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_SCORE,0);
 
-	// Barry
 	if(thePrefs.autoconnectstaticonly)
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,1);
 	else
@@ -148,12 +121,6 @@ void CPPgServer::LoadSettings(void)
 
 BOOL CPPgServer::OnApply()
 {	
-	char buffer[510];
-	
-//	if(IsDlgButtonChecked(IDC_MARKDEAD))
-//		thePrefs.deadserver = 1;
-//	else
-//		thePrefs.deadserver = 2;
 	thePrefs.SetSafeServerConnectEnabled((uint8)IsDlgButtonChecked(IDC_SAFESERVERCONNECT));
 
 	if(IsDlgButtonChecked(IDC_SMARTIDCHECK))
@@ -166,24 +133,18 @@ BOOL CPPgServer::OnApply()
 	else
 		thePrefs.m_bmanualhighprio = false;
 
-	thePrefs.deadserver = (uint8)IsDlgButtonChecked(IDC_REMOVEDEAD);
-	
-	if(GetDlgItem(IDC_SERVERRETRIES)->GetWindowTextLength())
-	{
-		GetDlgItem(IDC_SERVERRETRIES)->GetWindowText(buffer,20);
-		thePrefs.deadserverretries = (atoi(buffer)) ? atoi(buffer) : 5;
-	}
-	if(thePrefs.deadserverretries < 1) 
-		thePrefs.deadserverretries = 5;
+	thePrefs.deadserverretries = GetDlgItemInt(IDC_SERVERRETRIES, NULL, FALSE);
+	if (thePrefs.deadserverretries < 1)
+		thePrefs.deadserverretries = 1;
+	else if (thePrefs.deadserverretries > MAX_SERVERFAILCOUNT)
+		thePrefs.deadserverretries = MAX_SERVERFAILCOUNT;
 
 	thePrefs.scorsystem = (uint8)IsDlgButtonChecked(IDC_SCORE);
 	thePrefs.autoserverlist = (uint8)IsDlgButtonChecked(IDC_AUTOSERVER);
 	thePrefs.addserversfromserver = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCONNECT);
 	thePrefs.addserversfromclient = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
-	// Barry
 	thePrefs.autoconnectstaticonly = (uint8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
-	
-//	thePrefs.Save();
+
 	LoadSettings();
 
 	SetModified();
@@ -214,7 +175,7 @@ void CPPgServer::Localize(void)
 
 void CPPgServer::OnBnClickedEditadr()
 {
-	ShellExecute(NULL, "open", thePrefs.GetTxtEditor(), "\""+CString(thePrefs.GetConfigDir())+"adresses.dat\"", NULL, SW_SHOW); 
+	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(), _T("\"") + CString(thePrefs.GetConfigDir()) + _T("adresses.dat\""), NULL, SW_SHOW); 
 }
 
 void CPPgServer::OnHelp()

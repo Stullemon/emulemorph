@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <wininet.h>
 #include "resource.h"
 #include "ED2KLink.h"
 #include "OtherFunctions.h"
@@ -116,14 +117,15 @@ CED2KServerListLink::GetKind() const
 /////////////////////////////////////////////
 CED2KServerLink::CED2KServerLink(const TCHAR* ip,const TCHAR* port)
 {
-	m_ip = inet_addr(ip);
+	USES_CONVERSION;
+	m_ip = inet_addr(T2CA(ip));
 	unsigned long ul = _tcstoul(port,0,10);
 	if ( ul > 0xFFFF )
 		throw GetResString(IDS_ERR_BADPORT);
 	m_port = static_cast<uint16>(ul);
-	m_defaultName = "Server ";
+	m_defaultName = _T("Server ");
 	m_defaultName += ip;
-	m_defaultName += ":";
+	m_defaultName += _T(":");
 	m_defaultName += port;
 }
 
@@ -135,13 +137,11 @@ CED2KServerLink::~CED2KServerLink()
 void 
 CED2KServerLink::GetLink(CString& lnk)
 {
-	in_addr adr;
-	char buffer[32];
+	TCHAR buffer[32];
 	lnk = _T("ed2k://|server|");
-	adr.S_un.S_addr = m_ip;
-	lnk += inet_ntoa(adr);
+	lnk += ipstr(m_ip);
 	lnk += _T("|");
-	sprintf(buffer,"%d",static_cast<int>(m_port));
+	_stprintf(buffer,_T("%d"),static_cast<int>(m_port));
 	lnk += buffer;
 	lnk += _T("|/");
 }
@@ -174,24 +174,116 @@ CED2KServerLink::GetKind() const
 /////////////////////////////////////////////
 // CED2KFileLink implementation
 /////////////////////////////////////////////
-CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const TCHAR* sources)
-: m_name(name)
-, m_size(size)
+CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const CStringArray& astrParams, const TCHAR* sources)
+	: m_name(name)
+	, m_size(size)
 {
+	SourcesList = NULL;
+	m_hashset = NULL;
+
 	if ( _tcslen(hash) != 32 )
 		throw GetResString(IDS_ERR_ILLFORMEDHASH);
 
-	if (_atoi64(size)>=4294967295)
-			throw GetResString(IDS_ERR_TOOLARGEFILE);
-	if (_atoi64(size)<=0)
-			throw GetResString(IDS_ERR_NOTAFILELINK);
+	if (_tstoi64(size)>=4294967295)
+		throw GetResString(IDS_ERR_TOOLARGEFILE);
+	if (_tstoi64(size)<=0)
+		throw GetResString(IDS_ERR_NOTAFILELINK);
 	
-
 	for ( int idx = 0 ; idx < 16 ; ++idx) {
 		m_hash[idx] = FromHexDigit(*hash++)*16;
 		m_hash[idx] += FromHexDigit(*hash++);
 	}
-	SourcesList=NULL;
+
+	bool bError = false;
+	for (int i = 0; !bError && i < astrParams.GetCount(); i++)
+	{
+		const CString& strParam = astrParams.GetAt(i);
+		ASSERT( !strParam.IsEmpty() );
+
+		CString strTok;
+		int iPos = strParam.Find(_T('='));
+		if (iPos != -1)
+			strTok = strParam.Left(iPos);
+		if (strTok == _T("s"))
+		{
+			CString strURL = strParam.Mid(iPos + 1);
+			if (!strURL.IsEmpty())
+			{
+				TCHAR szScheme[INTERNET_MAX_SCHEME_LENGTH];
+				TCHAR szHostName[INTERNET_MAX_HOST_NAME_LENGTH];
+				TCHAR szUrlPath[INTERNET_MAX_PATH_LENGTH];
+				TCHAR szUserName[INTERNET_MAX_USER_NAME_LENGTH];
+				TCHAR szPassword[INTERNET_MAX_PASSWORD_LENGTH];
+				TCHAR szExtraInfo[INTERNET_MAX_URL_LENGTH];
+				URL_COMPONENTS Url = {0};
+				Url.dwStructSize = sizeof(Url);
+				Url.lpszScheme = szScheme;
+				Url.dwSchemeLength = ARRSIZE(szScheme);
+				Url.lpszHostName = szHostName;
+				Url.dwHostNameLength = ARRSIZE(szHostName);
+				Url.lpszUserName = szUserName;
+				Url.dwUserNameLength = ARRSIZE(szUserName);
+				Url.lpszPassword = szPassword;
+				Url.dwPasswordLength = ARRSIZE(szPassword);
+				Url.lpszUrlPath = szUrlPath;
+				Url.dwUrlPathLength = ARRSIZE(szUrlPath);
+				Url.lpszExtraInfo = szExtraInfo;
+				Url.dwExtraInfoLength = ARRSIZE(szExtraInfo);
+				if (InternetCrackUrl(strURL, 0, 0, &Url) && Url.dwHostNameLength > 0)
+				{
+					SUnresolvedHostname* hostname = new SUnresolvedHostname;
+					hostname->strURL = strURL;
+					hostname->strHostname = szHostName;
+					m_HostnameSourcesList.AddTail(hostname);
+				}
+			}
+			else
+				ASSERT(0);
+		}
+		else if (strTok == _T("p"))
+		{
+			CString strPartHashs = strParam.Tokenize(_T("="), iPos);
+
+			if (m_hashset != NULL){
+				ASSERT(0);
+				bError = true;
+				break;
+			}
+
+			m_hashset = new CSafeMemFile(256);
+			m_hashset->WriteHash16(m_hash);
+			m_hashset->WriteUInt16(0);
+
+			int iPartHashs = 0;
+			int iPosPH = 0;
+			CString strHash = strPartHashs.Tokenize(_T(":"), iPosPH);
+			while (!strHash.IsEmpty())
+			{
+				uchar aucPartHash[16];
+				if (!strmd4(strHash, aucPartHash)){
+					bError = true;
+					break;
+				}
+				m_hashset->WriteHash16(aucPartHash);
+				iPartHashs++;
+				strHash = strPartHashs.Tokenize(_T(":"), iPosPH);
+			}
+			if (bError)
+				break;
+
+			m_hashset->Seek(16, CFile::begin);
+			m_hashset->WriteUInt16(iPartHashs);
+			m_hashset->Seek(0, CFile::begin);
+		}
+		else
+			ASSERT(0);
+	}
+
+	if (bError)
+	{
+		delete m_hashset;
+		m_hashset = NULL;
+	}
 
 	if (sources){
 
@@ -260,16 +352,16 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 					*pPort = 0;	// terminate ip string
 					pPort++;	// point pPort to port string.
 
-					dwID = inet_addr( pIP );
+					USES_CONVERSION;
+					dwID = inet_addr(T2A(pIP));
 					ul = _tcstoul( pPort, 0, 10 );
 					nPort = static_cast<uint16>(ul);
 
 					// skip bad ips / ports
-					// SLUGFILLER: hostnameSources - progressive filtering
 					if (ul > 0xFFFF || ul == 0 )	// port
 					{	nInvalid++;	continue;	}
 					if( dwID == INADDR_NONE) {	// hostname?
-						if (strlen(pIP) > 512)
+						if (_tcslen(pIP) > 512)
 						{	nInvalid++;	continue;	}
 						SUnresolvedHostname* hostname = new SUnresolvedHostname;
 						hostname->nPort = nPort;
@@ -280,7 +372,6 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 					//TODO: This will filter out *.*.*.0 clients. Is there a nice way to fix?
 					if( IsLowID(dwID) )	// ip
 					{	nInvalid++;	continue;	}
-					// SLUGFILLER: hostnameSources
 
 					SourcesList->WriteUInt32(dwID);
 					SourcesList->WriteUInt16(nPort);
@@ -307,10 +398,9 @@ CED2KFileLink::~CED2KFileLink()
 		delete SourcesList;
 		SourcesList=NULL;
 	}
-	// SLUGFILLER: hostnameSources
 	while (!m_HostnameSourcesList.IsEmpty())
 		delete m_HostnameSourcesList.RemoveHead();
-	// SLUGFILLER: hostnameSources
+	delete m_hashset;
 }
 
 void 
@@ -359,46 +449,76 @@ CED2KFileLink::GetKind() const
 CED2KLink* 
 CED2KLink::CreateLinkFromUrl( const TCHAR * uri)
 {
-	// Parse pseudo-URI
-	const TCHAR* pChArray[7];
-	if (uri==0) 
-		throw CString(_T("null ed2k link"));
-	TCHAR* pNewString = _tcsdup(uri);
-	autoFree liberator(pNewString);
-	TCHAR* pCh = pNewString;
-	const TCHAR* pStart = pCh;
-	int idx = 0;
-	for (idx=0;idx<7;idx++) pChArray[idx]=NULL;
-	idx = 0;
-	while( idx <7 && ((pCh = _tcschr(pCh,_T('|'))) !=0) ) {
-		pChArray[idx++] = pStart;
-		*pCh = 0;
-		++ pCh;
-		pStart = pCh;
+	CString strURI(uri);
+	int iPos = 0;
+	CString strTok = strURI.Tokenize(_T("|"), iPos);
+	if (strTok == _T("ed2k://"))
+	{
+		strTok = strURI.Tokenize(_T("|"), iPos);
+		if (strTok == _T("file"))
+		{
+			CString strName = strURI.Tokenize(_T("|"), iPos);
+			if (!strName.IsEmpty())
+			{
+				CString strSize = strURI.Tokenize(_T("|"), iPos);
+				if (!strSize.IsEmpty())
+				{
+					CString strHash = strURI.Tokenize(_T("|"), iPos);
+					if (!strHash.IsEmpty())
+					{
+						CStringArray astrEd2kParams;
+						bool bEmuleExt = false;
+						CString strEmuleExt;
+
+						CString strLastTok;
+						strTok = strURI.Tokenize(_T("|"), iPos);
+						while (!strTok.IsEmpty())
+						{
+							strLastTok = strTok;
+							if (strTok == _T("/"))
+							{
+								if (bEmuleExt)
+									break;
+								bEmuleExt = true;
+							}
+							else
+							{
+								if (bEmuleExt)
+								{
+									if (!strEmuleExt.IsEmpty())
+										strEmuleExt += _T('|');
+									strEmuleExt += strTok;
+								}
+								else
+									astrEd2kParams.Add(strTok);
+							}
+							strTok = strURI.Tokenize(_T("|"), iPos);
+						}
+
+						if (strLastTok == _T("/"))
+							return new CED2KFileLink(strName, strSize, strHash, astrEd2kParams, strEmuleExt.IsEmpty() ? (LPCTSTR)NULL : (LPCTSTR)strEmuleExt);
+					}
+				}
+			}
+		}
+		else if (strTok == _T("serverlist"))
+		{
+			CString strURL = strURI.Tokenize(_T("|"), iPos);
+			if (!strURL.IsEmpty() && strURI.Tokenize(_T("|"), iPos) == _T("/"))
+				return new CED2KServerListLink(strURL);
+		}
+		else if (strTok == _T("server"))
+		{
+			CString strServer = strURI.Tokenize(_T("|"), iPos);
+			if (!strServer.IsEmpty())
+			{
+				CString strPort = strURI.Tokenize(_T("|"), iPos);
+				if (!strPort.IsEmpty() && strURI.Tokenize(_T("|"), iPos) == _T("/"))
+					return new CED2KServerLink(strServer, strPort);
+			}
+		}
 	}
-	if ( *pStart != _T('/') ) {
-		throw GetResString(IDS_ERR_BADED2KLINK);
-	}
-	if (   idx < 3
-		|| pChArray[0] == 0 
-		|| pChArray[1] == 0 
-		|| pChArray[2] == 0 
-//		|| pChArray[3] == 0 // This was preventing ed2k serverlist links from working.. 
-		|| _tcscmp( _T("ed2k://") , pChArray[0]  ) != 0 
-	   ) {
-			throw GetResString(IDS_ERR_BADED2KLINK);
-	}
-	if ( _tcscmp( _T("file") , pChArray[1]  ) == 0 && idx >=  5 && pChArray[4] != 0 ) {
-		return new CED2KFileLink(pChArray[2],pChArray[3],pChArray[4],pChArray[6]);
-	}
-	else if ( _tcscmp( _T("serverlist") , pChArray[1] ) == 0 && idx == 3 ) {
-		return new CED2KServerListLink(pChArray[2]);
-	}
-	else if ( _tcscmp( _T("server") , pChArray[1]  ) == 0 && idx == 4 ) {
-		return new CED2KServerLink(pChArray[2],pChArray[3]);
-	}
-	else {
-		throw GetResString(IDS_ERR_NOSLLINK);
-	}
-	return 0;
+
+	throw GetResString(IDS_ERR_NOSLLINK);
+	return NULL;
 }

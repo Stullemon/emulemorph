@@ -17,6 +17,7 @@
 #pragma once
 
 class CAbstractFile;
+class CKnownFile;
 struct Requested_Block_Struct;
 class CUpDownClient;
 
@@ -31,7 +32,7 @@ __inline char* nstrdup(const char* todup){
    return (char*)memcpy(new char[len], todup, len);
 }
 
-CHAR *stristr(const CHAR *str1, const CHAR *str2);
+TCHAR *stristr(const TCHAR *str1, const TCHAR *str2);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,7 @@ CString	CastSecondsToLngHM(__int64 count);
 CString GetFormatedUInt(ULONG ulVal);
 CString GetFormatedUInt64(ULONGLONG ullVal);
 void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
+void SecToTimeLength(unsigned long ulSec, CStringW& rstrTimeLength);
 CString LeadingZero(uint32 units);
 // khaos::categorymod+ Takes a string and returns bytes...
 ULONG	CastXBytesToI(const CString& strExpr);
@@ -72,6 +74,7 @@ CString URLEncode(CString sIn);
 CString MakeStringEscaped(CString in);
 CString	StripInvalidFilenameChars(CString strText, bool bKeepSpaces = true);
 CString	CreateED2kLink(const CAbstractFile* f);
+CString CreateED2kHashsetLink(const CKnownFile* f);
 CString	CreateHTMLED2kLink(const CAbstractFile* f);
 
 
@@ -81,13 +84,13 @@ CString	CreateHTMLED2kLink(const CAbstractFile* f);
 CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen);
 CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen);
 unsigned int DecodeLengthBase16(unsigned int base16Length);
-bool DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer, unsigned int bufflen);
+bool DecodeBase16(const TCHAR *base16Buffer, unsigned int base16BufLen, byte *buffer, unsigned int bufflen);
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // File/Path string helpers
 //
-void MakeFoldername(char* path);
+void MakeFoldername(TCHAR* path);
 CString RemoveFileExtension(const CString& rstrFilePath);
 int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in,uint16 length);
@@ -98,6 +101,7 @@ bool ExpandEnvironmentStrings(CString& rstrStrings);
 ///////////////////////////////////////////////////////////////////////////////
 // GUI helpers
 //
+void InstallSkin(LPCTSTR pszSkinPackage);
 void ShellOpenFile(CString name);
 void ShellOpenFile(CString name, LPCTSTR pszVerb);
 bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle = NULL, LPCTSTR pszDlgTitle = NULL);
@@ -107,6 +111,7 @@ void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
 void InitWindowStyles(CWnd* pWnd);
 CString GetRateString(uint16 rate);
 HWND GetComboBoxEditCtrl(CComboBox& cb);
+HWND ReplaceRichEditCtrl(CWnd* pwndRE, CWnd* pwndParent, CFont* pFont);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,6 +128,7 @@ CString _GetResString(RESSTRIDTYPE StringID);
 CString GetResString(RESSTRIDTYPE StringID);
 #define _GetResString(id)	GetResString(id)
 #endif//!USE_STRING_IDS
+void InitThreadLocale();
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,8 +152,12 @@ CString DbgGetMuleClientTCPOpcode(UINT opcode);
 CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode);
 CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size);
 CString DbgGetBlockInfo(const Requested_Block_Struct* block);
-void DebugRecv(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet = NULL, uint32 nIP = 0);
-void DebugSend(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet = NULL);
+void DebugRecv(LPCSTR pszMsg, const CUpDownClient* client, const char* packet = NULL, uint32 nIP = 0);
+void DebugRecv(LPCSTR pszOpcode, uint32 ip, uint16 port);
+void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const char* packet = NULL);
+void DebugSend(LPCSTR pszOpcode, uint32 ip, uint16 port);
+void DebugSendF(LPCSTR pszOpcode, uint32 ip, uint16 port, LPCTSTR pszMsg, ...);
+void DebugHttpHeaders(const CStringAArray& astrHeaders);
 
 
 
@@ -191,6 +201,13 @@ __inline int md4cmp(const void* hash1, const void* hash2) {
 		     ((uint32*)hash1)[3] == ((uint32*)hash2)[3]);
 }
 
+__inline int isnulmd4(const void* hash) {
+	return  (((uint32*)hash)[0] == 0 &&
+		     ((uint32*)hash)[1] == 0 &&
+		     ((uint32*)hash)[2] == 0 &&
+		     ((uint32*)hash)[3] == 0);
+}
+
 // md4clr -- replacement for memset(hash,0,16)
 __inline void md4clr(const void* hash) {
 	((uint32*)hash)[0] = ((uint32*)hash)[1] = ((uint32*)hash)[2] = ((uint32*)hash)[3] = 0;
@@ -206,7 +223,9 @@ __inline void md4cpy(void* dst, const void* src) {
 
 #define	MAX_HASHSTR_SIZE (16*2+1)
 CString md4str(const uchar* hash);
-void md4str(const uchar* hash, char* pszHash);
+CStringA md4strA(const uchar* hash);
+void md4str(const uchar* hash, TCHAR* pszHash);
+void md4strA(const uchar* hash, CHAR* pszHash);
 bool strmd4(const char* pszHash, uchar* hash);
 bool strmd4(const CString& rstr, uchar* hash);
 
@@ -259,7 +278,8 @@ enum EED2KFileType
 	ED2KFT_CDIMAGE
 };
 
-CString GetFiletypeByName(LPCTSTR pszFileName);
+CStringA GetFileTypeByName(LPCTSTR pszFileName);
+CString GetFileTypeDisplayStrFromED2KFileType(LPCSTR pszED2KFileType);
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
 
@@ -274,6 +294,13 @@ __inline bool IsLowID(uint32 id){
 	return (id < 16777216);
 }
 CString ipstr(uint32 nIP);
+CStringA ipstrA(uint32 nIP);
+__inline CString ipstr(in_addr nIP){
+	return ipstr(*(uint32*)&nIP);
+}
+__inline CStringA ipstrA(in_addr nIP){
+	return ipstrA(*(uint32*)&nIP);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -281,3 +308,10 @@ CString ipstr(uint32 nIP);
 //
 time_t safe_mktime(struct tm* ptm);
 bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Random Numbers
+//
+uint16 GetRandomUInt16();
+uint32 GetRandomUInt32();

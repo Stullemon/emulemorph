@@ -86,13 +86,13 @@ BOOL CPPgWebServer::OnInitDialog()
 	CRect rect;
 	GetDlgItem(IDC_GUIDELINK)->GetWindowRect(rect);
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	m_wndMobileLink.CreateEx(NULL,0,"MsgWnd",WS_BORDER | WS_VISIBLE | WS_CHILD | HTC_WORDWRAP | HTC_UNDERLINE_HOVER,rect.left,rect.top,rect.Width(),rect.Height(),m_hWnd,0);
+	m_wndMobileLink.CreateEx(NULL,0,_T("MsgWnd"),WS_BORDER | WS_VISIBLE | WS_CHILD | HTC_WORDWRAP | HTC_UNDERLINE_HOVER,rect.left,rect.top,rect.Width(),rect.Height(),m_hWnd,0);
 	m_wndMobileLink.SetBkColor(::GetSysColor(COLOR_3DFACE)); // still not the right color, will fix this later (need to merge the .rc file before it changes ;) )
 	m_wndMobileLink.SetFont(GetFont());
 	if (!bCreated){
 		bCreated = true;
-		m_wndMobileLink.AppendText("Link: ");
-		m_wndMobileLink.AppendHyperLink(GetResString(IDS_MMGUIDELINK),0,CString("http://mobil.emule-project.net"),0,0);
+		m_wndMobileLink.AppendText(_T("Link: "));
+		m_wndMobileLink.AppendHyperLink(GetResString(IDS_MMGUIDELINK),0,CString(_T("http://mobil.emule-project.net")),0,0);
 	}
 	return TRUE;
 }
@@ -105,10 +105,10 @@ void CPPgWebServer::LoadSettings(void)
 	GetDlgItem(IDC_WSPASSLOW)->SetWindowText(HIDDEN_PASSWORD);
 	GetDlgItem(IDC_MMPASSWORDFIELD)->SetWindowText(HIDDEN_PASSWORD);
 
-	strBuffer.Format("%d", thePrefs.GetWSPort());
+	strBuffer.Format(_T("%d"), thePrefs.GetWSPort());
 	GetDlgItem(IDC_WSPORT)->SetWindowText(strBuffer);
 
-	strBuffer.Format("%d", thePrefs.GetMMPort());
+	strBuffer.Format(_T("%d"), thePrefs.GetMMPort());
 	GetDlgItem(IDC_MMPORT_FIELD)->SetWindowText(strBuffer);
 
 	GetDlgItem(IDC_TMPLPATH)->SetWindowText(thePrefs.GetTemplate());
@@ -151,8 +151,8 @@ BOOL CPPgWebServer::OnApply()
 			thePrefs.SetWSLowPass(sBuf);
 
 		GetDlgItem(IDC_WSPORT)->GetWindowText(sBuf);
-		if (atoi(sBuf)!=oldPort) {
-			thePrefs.SetWSPort(atoi(sBuf));
+		if (_tstoi(sBuf)!=oldPort) {
+			thePrefs.SetWSPort(_tstoi(sBuf));
 			theApp.webserver->RestartServer();
 		}
 		thePrefs.SetWSIsEnabled((uint8)IsDlgButtonChecked(IDC_WSENABLED));
@@ -165,8 +165,8 @@ BOOL CPPgWebServer::OnApply()
 
 		// mobilemule
 		GetDlgItem(IDC_MMPORT_FIELD)->GetWindowText(sBuf);
-		if (atoi(sBuf)!= thePrefs.GetMMPort() ) {
-			thePrefs.SetMMPort(atoi(sBuf));
+		if (_tstoi(sBuf)!= thePrefs.GetMMPort() ) {
+			thePrefs.SetMMPort(_tstoi(sBuf));
 			theApp.mmserver->StopServer();
 			theApp.mmserver->Init();
 		}
@@ -247,8 +247,8 @@ void CPPgWebServer::OnBnClickedTmplbrowse()
 	CString strTempl;
 	GetDlgItemText(IDC_TMPLPATH, strTempl);
 	CString buffer;
-	buffer=GetResString(IDS_WS_RELOAD_TMPL)+"(*.tmpl)|*.tmpl||";
-    if (DialogBrowseFile(buffer, "Template "+buffer, strTempl)){
+	buffer=GetResString(IDS_WS_RELOAD_TMPL)+_T("(*.tmpl)|*.tmpl||");
+    if (DialogBrowseFile(buffer, _T("Template ")+buffer, strTempl)){
 		GetDlgItem(IDC_TMPLPATH)->SetWindowText(buffer);
 		SetModified();
 	}

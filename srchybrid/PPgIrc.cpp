@@ -57,6 +57,7 @@ CPPgIRC::CPPgIRC()
 	m_iPartMessage = 0;
 	m_iQuitMessage = 0;
 	m_iEmuleProto = 0;
+	m_iEmuleAllowAddFriend = 0;
 	m_iEmuleAddFriend = 0;
 	m_iEmuleSendLink = 0;
 	m_iAcceptLinks = 0;
@@ -73,6 +74,7 @@ CPPgIRC::CPPgIRC()
 	m_htiQuitMessage = NULL;
 	m_htiEmuleProto = NULL;
 	m_htiEmuleAddFriend = NULL;
+	m_htiEmuleAllowAddFriend = NULL;
 	m_htiEmuleSendLink = NULL;
 	m_htiAcceptLinks = NULL;
 	m_htiAcceptLinksFriends = NULL;
@@ -102,6 +104,7 @@ void CPPgIRC::DoDataExchange(CDataExchange* pDX)
 		m_htiEmuleProto = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE), TVI_ROOT, FALSE);
 		m_htiEmuleAddFriend = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_EMULEPROTO_IGNOREADDFRIEND), m_htiEmuleProto, m_iEmuleAddFriend);
 		m_htiEmuleSendLink = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_EMULEPROTO_IGNORESENDLINK), m_htiEmuleProto, m_iEmuleSendLink);
+		m_htiEmuleAllowAddFriend = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_EMULEPROTO_ALLOWADDFRIEND), TVI_ROOT, m_iEmuleAllowAddFriend);
 		m_htiAcceptLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ACCEPTLINKS), TVI_ROOT, m_iAcceptLinks);
 		m_htiAcceptLinksFriends = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ACCEPTLINKSFRIENDS), TVI_ROOT, m_iAcceptLinksFriends);
 
@@ -119,6 +122,7 @@ void CPPgIRC::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiPartMessage, m_iPartMessage);
 	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiQuitMessage, m_iQuitMessage);
 	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiEmuleAddFriend, m_iEmuleAddFriend);
+	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiEmuleAllowAddFriend, m_iEmuleAllowAddFriend);
 	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiEmuleSendLink, m_iEmuleSendLink);
 	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiAcceptLinks, m_iAcceptLinks);
 	DDX_TreeCheck(pDX, IDC_MISC_IRC, m_htiAcceptLinksFriends, m_iAcceptLinksFriends);
@@ -140,6 +144,7 @@ BOOL CPPgIRC::OnInitDialog()
 	m_iPartMessage = thePrefs.GetIrcIgnorePartMessage();
 	m_iQuitMessage = thePrefs.GetIrcIgnoreQuitMessage();
 	m_iEmuleAddFriend = thePrefs.GetIrcIgnoreEmuleProtoAddFriend();
+	m_iEmuleAllowAddFriend = thePrefs.GetIrcAllowEmuleProtoAddFriend();
 	m_iEmuleSendLink = thePrefs.GetIrcIgnoreEmuleProtoSendLink();
 	m_iAcceptLinks = thePrefs.GetIrcAcceptLinks();
 	m_iAcceptLinksFriends = thePrefs.GetIrcAcceptLinksFriends();
@@ -164,7 +169,7 @@ BOOL CPPgIRC::OnInitDialog()
 
 BOOL CPPgIRC::OnKillActive()
 {
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// if prop page is closed by pressing ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
 	return CPropertyPage::OnKillActive();
@@ -187,13 +192,13 @@ void CPPgIRC::LoadSettings(void)
 	GetDlgItem(IDC_IRC_NAME_BOX)->SetWindowText(thePrefs.m_sircchannamefilter);
 	GetDlgItem(IDC_IRC_PERFORM_BOX)->SetWindowText(thePrefs.m_sircperformstring);
 	CString strBuffer;
-	strBuffer.Format("%d", thePrefs.m_iircchanneluserfilter);
+	strBuffer.Format(_T("%d"), thePrefs.m_iircchanneluserfilter);
 	GetDlgItem(IDC_IRC_MINUSER_BOX)->SetWindowText(strBuffer);
 }
 
 BOOL CPPgIRC::OnApply()
 {
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// if prop page is closed by pressing ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
 
@@ -207,6 +212,7 @@ BOOL CPPgIRC::OnApply()
 	thePrefs.m_bircignorepartmessage = m_iPartMessage;
 	thePrefs.m_bircignorequitmessage = m_iQuitMessage;
 	thePrefs.m_bircignoreemuleprotoaddfriend = m_iEmuleAddFriend;
+	thePrefs.m_bircallowemuleprotoaddfriend = m_iEmuleAllowAddFriend;
 	thePrefs.m_bircignoreemuleprotosendlink = m_iEmuleSendLink;
 	thePrefs.m_bircacceptlinks = m_iAcceptLinks;
 	thePrefs.m_bircacceptlinksfriends = m_iAcceptLinksFriends;
@@ -223,44 +229,44 @@ BOOL CPPgIRC::OnApply()
 	else
 		thePrefs.m_bircuseperform = false;
 
-	char buffer[510];
+	TCHAR buffer[510];
 	if(GetDlgItem(IDC_IRC_NICK_BOX)->GetWindowTextLength() )
 	{
 		GetDlgItem(IDC_IRC_NICK_BOX)->GetWindowText(buffer,20);
-		if( strcmp(buffer, thePrefs.m_sircnick ) )
+		if( _tcscmp(buffer, thePrefs.m_sircnick ) )
 		{
-			theApp.emuledlg->ircwnd->SendString( (CString)"NICK " + buffer );
-			strcpy(thePrefs.m_sircnick,buffer);
+			theApp.emuledlg->ircwnd->SendString( (CString)_T("NICK ") + buffer );
+			_tcscpy(thePrefs.m_sircnick,buffer);
 		}
 	}
 
 	if(GetDlgItem(IDC_IRC_SERVER_BOX)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_IRC_SERVER_BOX)->GetWindowText(buffer,40);
-		strcpy(thePrefs.m_sircserver,buffer);
+		_tcscpy(thePrefs.m_sircserver,buffer);
 	}
 
 	if(GetDlgItem(IDC_IRC_NAME_BOX)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_IRC_NAME_BOX)->GetWindowText(buffer,40);
-		strcpy(thePrefs.m_sircchannamefilter,buffer);
+		_tcscpy(thePrefs.m_sircchannamefilter,buffer);
 	}
 
 	if(GetDlgItem(IDC_IRC_PERFORM_BOX)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_IRC_PERFORM_BOX)->GetWindowText(buffer,250);
-		strcpy(thePrefs.m_sircperformstring,buffer);
+		_tcscpy(thePrefs.m_sircperformstring,buffer);
 	}
 	else
 	{
-		sprintf( buffer, " " );
-		strcpy(thePrefs.m_sircperformstring,buffer);
+		_stprintf( buffer, _T(" ") );
+		_tcscpy(thePrefs.m_sircperformstring,buffer);
 	}
 
 	if(GetDlgItem(IDC_IRC_MINUSER_BOX)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_IRC_MINUSER_BOX)->GetWindowText(buffer,6);
-		thePrefs.m_iircchanneluserfilter = atoi(buffer);
+		thePrefs.m_iircchanneluserfilter = _tstoi(buffer);
 	}
 	else{
 		thePrefs.m_iircchanneluserfilter = 0;
@@ -294,6 +300,7 @@ void CPPgIRC::Localize(void)
 		if (m_htiQuitMessage) m_ctrlTreeOptions.SetItemText(m_htiQuitMessage, GetResString(IDS_IRC_IGNOREQUITMESSAGE));
 		if (m_htiEmuleProto) m_ctrlTreeOptions.SetItemText(m_htiEmuleProto, GetResString(IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE));
 		if (m_htiEmuleAddFriend) m_ctrlTreeOptions.SetItemText(m_htiEmuleAddFriend, GetResString(IDS_IRC_EMULEPROTO_IGNOREADDFRIEND));
+		if (m_htiEmuleAllowAddFriend) m_ctrlTreeOptions.SetItemText(m_htiEmuleAllowAddFriend, GetResString(IDS_IRC_EMULEPROTO_ALLOWADDFRIEND));
 		if (m_htiEmuleSendLink) m_ctrlTreeOptions.SetItemText(m_htiEmuleSendLink, GetResString(IDS_IRC_EMULEPROTO_IGNORESENDLINK));
 		if (m_htiAcceptLinks) m_ctrlTreeOptions.SetItemText(m_htiAcceptLinks, GetResString(IDS_IRC_ACCEPTLINKS));
 		if (m_htiAcceptLinksFriends) m_ctrlTreeOptions.SetItemText(m_htiAcceptLinksFriends, GetResString(IDS_IRC_ACCEPTLINKSFRIENDS));
@@ -324,6 +331,7 @@ void CPPgIRC::OnDestroy()
 	m_htiAcceptLinksFriends = NULL;
 	m_htiEmuleProto = NULL;
 	m_htiEmuleAddFriend = NULL;
+	m_htiEmuleAllowAddFriend = NULL;
 	m_htiEmuleSendLink = NULL;
 	m_htiHelpChannel = NULL;
 	m_htiChannelsOnConnect = NULL;

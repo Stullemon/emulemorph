@@ -25,8 +25,8 @@ public:
 	//MORPH END  - Added by SiRoB, Legend Graph
 	void SetRange(double dLower, double dUpper, int iTrend = 0);
 	void SetRanges(double dLower, double dUpper);
-	void SetXUnits(CString string, CString XMin = "", CString XMax = "");
-	void SetYUnits(CString string, CString YMin = "", CString YMax = "");
+	void SetXUnits(CString string, CString XMin = _T(""), CString XMax = _T(""));
+	void SetYUnits(CString string, CString YMin = _T(""), CString YMax = _T(""));
 	void SetGridColor(COLORREF color);
 	void SetPlotColor(COLORREF color, int iTrend = 0);
 	COLORREF GetPlotColor(int iTrend = 0);

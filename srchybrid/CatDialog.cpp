@@ -50,16 +50,9 @@ BOOL CCatDialog::OnInitDialog(){
 }
 
 void CCatDialog::UpdateData(){
-	CString buffer;
-
-	buffer.Format("%s",m_myCat->title);
-	GetDlgItem(IDC_TITLE)->SetWindowText(buffer);
-
-	buffer.Format("%s",m_myCat->incomingpath);
-	GetDlgItem(IDC_INCOMING)->SetWindowText(buffer);
-
-	buffer.Format("%s",m_myCat->comment);
-	GetDlgItem(IDC_COMMENT)->SetWindowText(buffer);
+	GetDlgItem(IDC_TITLE)->SetWindowText(m_myCat->title);
+	GetDlgItem(IDC_INCOMING)->SetWindowText(m_myCat->incomingpath);
+	GetDlgItem(IDC_COMMENT)->SetWindowText(m_myCat->comment);
 
 	COLORREF selcolor=m_myCat->color;
 	newcolor=m_myCat->color;
@@ -81,6 +74,7 @@ void CCatDialog::UpdateData(){
 	// khaos::kmod-
 
 	// khaos::categorymod+ Update the data for the filter options.
+	CString buffer;
 	GetDlgItem(IDC_FS_MIN)->SetWindowText(CastItoUIXBytes(m_myCat->viewfilters.nFSizeMin));
 	GetDlgItem(IDC_FS_MAX)->SetWindowText(CastItoUIXBytes(m_myCat->viewfilters.nFSizeMax));
 	GetDlgItem(IDC_RS_MIN)->SetWindowText(CastItoUIXBytes(m_myCat->viewfilters.nRSizeMin));
@@ -179,8 +173,8 @@ void CCatDialog::Localize(){
 	// khaos::categorymod-
 	GetDlgItem(IDC_CHECK_RESUMEFILEONLYINSAMECAT)->SetWindowText(GetResString(IDS_CAT_RESUMEFILEONLYINSAMECAT)); //MORPH - Added by SiRoB, Resume file only in the same category
 
-	m_ctlColor.CustomText = _T(GetResString(IDS_COL_MORECOLORS));
-	m_ctlColor.DefaultText = _T(GetResString(IDS_DEFAULT));
+	m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
+	m_ctlColor.DefaultText = GetResString(IDS_DEFAULT);
 	m_ctlColor.SetDefaultColor(NULL);
 
 	SetWindowText(GetResString(IDS_EDITCAT));
@@ -218,7 +212,7 @@ void CCatDialog::OnBnClickedOk()
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	/*
 	if (!thePrefs.IsShareableDirectory(m_myCat->incomingpath)){
-		_snprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), "%s", thePrefs.GetIncomingDir());
+		_sntprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), _T("%s"), thePrefs.GetIncomingDir());
 		MakeFoldername(m_myCat->incomingpath);
 	}
 	*/
@@ -226,7 +220,7 @@ void CCatDialog::OnBnClickedOk()
 	if (!PathFileExists(m_myCat->incomingpath)){
 		if (!::CreateDirectory(m_myCat->incomingpath, 0)){
 			AfxMessageBox(GetResString(IDS_ERR_BADFOLDER));
-			strcpy(m_myCat->incomingpath,oldpath);
+			_tcscpy(m_myCat->incomingpath,oldpath);
 			return;
 		}
 	}

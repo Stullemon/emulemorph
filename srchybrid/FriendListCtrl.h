@@ -34,9 +34,10 @@ public:
 
 protected:
 	void	SetAllIcons();
-	void	AddFriend(const CFriend* toadd);
-	void	RemoveFriend(const CFriend* toremove);
-	void	RefreshFriend(const CFriend* toupdate);
+	void	AddFriend(const CFriend* pFriend);
+	void	RemoveFriend(const CFriend* pFriend);
+	void	RefreshFriend(const CFriend* pFriend);
+	void	UpdateFriend(int iItem, const CFriend* pFriend);
 	void	ShowFriendDetails(const CFriend* pFriend);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

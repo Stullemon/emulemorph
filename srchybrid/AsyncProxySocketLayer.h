@@ -140,8 +140,8 @@ public:
 	virtual BOOL Listen( int nConnectionBacklog);
 
 	void SetProxy(int nProxyType); //Only PROXYTYPE_NOPROXY
-	void SetProxy(int nProxyType, const char * pProxyHost, int ProxyPort); //May not be PROXYTYPE_NOPROXY
-	void SetProxy(int nProxyType, const char * pProxyHost, int ProxyPort, const char * pProxyUser, const char * pProxyPass); //Only SOCKS5 and HTTP1.1 proxies
+	void SetProxy(int nProxyType, LPCTSTR pProxyHost, int ProxyPort); //May not be PROXYTYPE_NOPROXY
+	void SetProxy(int nProxyType, LPCTSTR pProxyHost, int ProxyPort, LPCSTR pProxyUser, LPCSTR pProxyPass); //Only SOCKS5 and HTTP1.1 proxies
 	//Sets the proxy details.
 	//nProxyType - Type of the proxy. May be PROXYTYPE_NONE, PROXYTYPE_SOCKS4, PROXYTYPE_SOCKS5 or PROXYTYPE_HTTP11
 	//ProxyHost - The address of the proxy. Can be either IP or URL
@@ -188,8 +188,8 @@ private:
 		int nProxyType;
 		LPTSTR pProxyHost;
 		int nProxyPort;
-		char * pProxyUser;
-		char * pProxyPass;
+		LPSTR pProxyUser;
+		LPSTR pProxyPass;
 		BOOL bUseLogon;
 	} t_proxydata; //This structure will be used to hold the proxy details
 

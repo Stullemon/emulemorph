@@ -53,7 +53,7 @@ END_MESSAGE_MAP()
 CKadSearchListCtrl::CKadSearchListCtrl()
 {
 	SetGeneralPurposeFind(true);
-	m_strLVName = "KadSearchListCtrl";
+	m_strLVName = _T("KadSearchListCtrl");
 }
 
 CKadSearchListCtrl::~CKadSearchListCtrl()
@@ -74,25 +74,25 @@ void CKadSearchListCtrl::Init()
 
 	CString strIniFile;
 	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, "eMule");
+	CIni ini(strIniFile, _T("eMule"));
 	LoadSettings(&ini, m_strLVName);
-	int iSortItem = ini.GetInt(m_strLVName + "SortItem");
-	bool bSortAscending = ini.GetInt(m_strLVName + "SortAscending");
+	int iSortItem = ini.GetInt(m_strLVName + _T("SortItem"));
+	bool bSortAscending = ini.GetInt(m_strLVName + _T("SortAscending"));
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 }
 
 void CKadSearchListCtrl::UpdateKadSearchCount() {
 	CString id;
-	id.Format("%s (%i)",GetResString(IDS_KADSEARCHLAB), GetItemCount() );
+	id.Format(_T("%s (%i)"),GetResString(IDS_KADSEARCHLAB), GetItemCount() );
 	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADSEARCHLAB)->SetWindowText(id);
 }
 
 void CKadSearchListCtrl::SaveAllSettings(CIni* ini)
 {
 	SaveSettings(ini, m_strLVName);
-	ini->WriteInt(m_strLVName + "SortItem", GetSortItem());
-	ini->WriteInt(m_strLVName + "SortAscending", GetSortAscending());
+	ini->WriteInt(m_strLVName + _T("SortItem"), GetSortItem());
+	ini->WriteInt(m_strLVName + _T("SortAscending"), GetSortAscending());
 }
 
 void CKadSearchListCtrl::OnSysColorChange()
@@ -106,11 +106,11 @@ void CKadSearchListCtrl::SetAllIcons()
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader("KadFileSearch"));
-	iml.Add(CTempIconLoader("KadWordSearch"));
-	iml.Add(CTempIconLoader("KadNodeSearch"));
-	iml.Add(CTempIconLoader("KadStoreFile"));
-	iml.Add(CTempIconLoader("KadStoreWord"));
+	iml.Add(CTempIconLoader(_T("KadFileSearch")));
+	iml.Add(CTempIconLoader(_T("KadWordSearch")));
+	iml.Add(CTempIconLoader(_T("KadNodeSearch")));
+	iml.Add(CTempIconLoader(_T("KadStoreFile")));
+	iml.Add(CTempIconLoader(_T("KadStoreWord")));
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
@@ -141,22 +141,75 @@ void CKadSearchListCtrl::Localize()
 		pHeaderCtrl->SetItem(icol, &hdi);
 		strRes.ReleaseBuffer();
 	}
+
+	int iItems = GetItemCount();
+	for (int i = 0; i < iItems; i++)
+		SearchRef((Kademlia::CSearch*)GetItemData(i));
 }
 
-void CKadSearchListCtrl::SearchAdd(Kademlia::CSearch* search)
+void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search)
+{
+	CString id;
+	id.Format(_T("%i"), search->getSearchID());
+	SetItemText(iItem,colNum,id);
+
+	switch(search->getSearchTypes()){
+		case Kademlia::CSearch::FILE:
+			id.Format(GetResString(IDS_KAD_SEARCHSRC), search->getCount(), search->getCountSent());
+			SetItem(iItem,0,LVIF_IMAGE,0,0,0,0,0,0);
+			break;
+		case Kademlia::CSearch::KEYWORD:
+			id.Format(GetResString(IDS_KAD_SEARCHKW), search->getCount(), search->getCountSent());
+			SetItem(iItem,0,LVIF_IMAGE,0,1,0,0,0,0);
+			break;
+		case Kademlia::CSearch::NODE:
+		case Kademlia::CSearch::NODECOMPLETE:
+			id.Format(GetResString(IDS_KAD_NODE), search->getCount(), search->getCountSent());
+			SetItem(iItem,0,LVIF_IMAGE,0,2,0,0,0,0);
+			break;
+		case Kademlia::CSearch::STOREFILE:
+			id.Format(GetResString(IDS_KAD_STOREFILE), search->getCount(), search->getCountSent());
+			SetItem(iItem,0,LVIF_IMAGE,0,3,0,0,0,0);
+			break;
+		case Kademlia::CSearch::STOREKEYWORD:
+			id.Format(GetResString(IDS_KAD_STOREKW), search->getCount(), search->getCountSent());
+			SetItem(iItem,0,LVIF_IMAGE,0,4,0,0,0,0);
+			break;
+		default:
+			id.Format(GetResString(IDS_KAD_UNKNOWN), search->getCount(), search->getCountSent());
+	}
+	SetItemText(iItem,colType,id);
+
+	SetItemText(iItem,colName,search->getFileName());
+
+	if(search->getTarget() != NULL)
+	{
+		search->getTarget().toHexString(&id);
+		SetItemText(iItem,colKey,id);
+	}
+
+	if(search->Stoping())
+		SetItemText(iItem,colStop,_T("Stopping"));
+	else
+		SetItemText(iItem,colStop,_T("Active"));
+}
+
+void CKadSearchListCtrl::SearchAdd(const Kademlia::CSearch* search)
 {
 	try
 	{
 		ASSERT( search != NULL );
-		sint32 itemnr = GetItemCount();
-		InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,0,0,0,0,(LPARAM)search);
-		SearchRef(search);
-		UpdateKadSearchCount();
+		int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),NULL,0,0,0,(LPARAM)search);
+		if (iItem >= 0)
+		{
+			UpdateSearch(iItem, search);
+			UpdateKadSearchCount();
+		}
 	}
 	catch(...){ASSERT(0);}
 }
 
-void CKadSearchListCtrl::SearchRem(Kademlia::CSearch* search)
+void CKadSearchListCtrl::SearchRem(const Kademlia::CSearch* search)
 {
 	try
 	{
@@ -166,15 +219,16 @@ void CKadSearchListCtrl::SearchRem(Kademlia::CSearch* search)
 		{
 			temp->SetKadFileSearchID(0);
 		}
+
 		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
 		find.lParam = (LPARAM)search;
-		sint32 result = FindItem(&find);
-		if (result != (-1))
+		int iItem = FindItem(&find);
+		if (iItem != -1)
 		{
-			DeleteItem(result);
+			DeleteItem(iItem);
+			UpdateKadSearchCount();
 		}
-		UpdateKadSearchCount();
 	}
 	catch(...)
 	{
@@ -182,7 +236,7 @@ void CKadSearchListCtrl::SearchRem(Kademlia::CSearch* search)
 	}
 }
 
-void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
+void CKadSearchListCtrl::SearchRef(const Kademlia::CSearch* search)
 {
 	try
 	{
@@ -190,48 +244,9 @@ void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
 		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
 		find.lParam = (LPARAM)search;
-		sint32 result = FindItem(&find);
-		if (result != (-1)){
-			CString id;
-			id.Format( "%i", search->getSearchID());
-			SetItemText(result,colNum,id);
-			switch(search->getSearchTypes()){
-				case Kademlia::CSearch::FILE:
-					id.Format(GetResString(IDS_KAD_SEARCHSRC), search->getCount(), search->getCountSent());
-					SetItem(result,0,LVIF_IMAGE,0,0,0,0,0,0);
-					break;
-				case Kademlia::CSearch::KEYWORD:
-					id.Format(GetResString(IDS_KAD_SEARCHKW), search->getCount(), search->getCountSent());
-					SetItem(result,0,LVIF_IMAGE,0,1,0,0,0,0);
-					break;
-				case Kademlia::CSearch::NODE:
-				case Kademlia::CSearch::NODECOMPLETE:
-					id.Format(GetResString(IDS_KAD_NODE), search->getCount(), search->getCountSent());
-					SetItem(result,0,LVIF_IMAGE,0,2,0,0,0,0);
-					break;
-				case Kademlia::CSearch::STOREFILE:
-					id.Format(GetResString(IDS_KAD_STOREFILE), search->getCount(), search->getCountSent());
-					SetItem(result,0,LVIF_IMAGE,0,3,0,0,0,0);
-					break;
-				case Kademlia::CSearch::STOREKEYWORD:
-					id.Format(GetResString(IDS_KAD_STOREKW), search->getCount(), search->getCountSent());
-					SetItem(result,0,LVIF_IMAGE,0,4,0,0,0,0);
-					break;
-				default:
-					id.Format(GetResString(IDS_KAD_UNKNOWN), search->getCount(), search->getCountSent());
-			}
-			SetItemText(result,colType,id);
-			SetItemText(result,colName,search->getFileName());
-			if(search->getTarget() != NULL)
-			{
-				search->getTarget().toHexString(&id);
-				SetItemText(result,colKey,id);
-			}
-			if(search->Stoping())
-				SetItemText(result,colStop,"Stopping");
-			else
-				SetItemText(result,colStop,"Active");
-		}
+		int iItem = FindItem(&find);
+		if (iItem != -1)
+			UpdateSearch(iItem, search);
 	}
 	catch(...){ASSERT(0);}
 }

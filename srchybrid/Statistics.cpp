@@ -17,8 +17,8 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "Statistics.h"
-#include "UploadQueue.h"
 #include "Preferences.h"
+#include "Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -27,17 +27,74 @@ static char THIS_FILE[]=__FILE__;
 extern _CRT_ALLOC_HOOK g_pfnPrevCrtAllocHook;
 #endif
 
+#define MAXAVERAGETIME			SEC2MS(40) //millisecs
+
+///////////////////////////////////////////////////////////////////////////////
+// CStatistics
+
+CStatistics theStats;
+
+float	CStatistics::maxDown;
+float	CStatistics::maxDownavg;
+float	CStatistics::cumDownavg;
+float	CStatistics::maxcumDownavg;
+float	CStatistics::maxcumDown;
+float	CStatistics::cumUpavg;
+float	CStatistics::maxcumUpavg;
+float	CStatistics::maxcumUp;
+float	CStatistics::maxUp;
+float	CStatistics::maxUpavg;
+float	CStatistics::rateDown;
+float	CStatistics::rateUp;
+uint32	CStatistics::timeTransfers;
+uint32	CStatistics::timeDownloads;
+uint32	CStatistics::timeUploads;
+uint32	CStatistics::start_timeTransfers;
+uint32	CStatistics::start_timeDownloads;
+uint32	CStatistics::start_timeUploads;
+uint32	CStatistics::time_thisTransfer;
+uint32	CStatistics::time_thisDownload;
+uint32	CStatistics::time_thisUpload;
+uint32	CStatistics::timeServerDuration;
+uint32	CStatistics::time_thisServerDuration;
+uint32	CStatistics::m_nDownDatarateOverhead;
+uint32	CStatistics::m_nDownDataRateMSOverhead;
+uint64	CStatistics::m_nDownDataOverheadSourceExchange;
+uint64	CStatistics::m_nDownDataOverheadSourceExchangePackets;
+uint64	CStatistics::m_nDownDataOverheadFileRequest;
+uint64	CStatistics::m_nDownDataOverheadFileRequestPackets;
+uint64	CStatistics::m_nDownDataOverheadServer;
+uint64	CStatistics::m_nDownDataOverheadServerPackets;
+uint64	CStatistics::m_nDownDataOverheadKad;
+uint64	CStatistics::m_nDownDataOverheadKadPackets;
+uint64	CStatistics::m_nDownDataOverheadOther;
+uint64	CStatistics::m_nDownDataOverheadOtherPackets;
+uint32	CStatistics::m_nUpDatarateOverhead;
+uint32	CStatistics::m_nUpDataRateMSOverhead;
+uint64	CStatistics::m_nUpDataOverheadSourceExchange;
+uint64	CStatistics::m_nUpDataOverheadSourceExchangePackets;
+uint64	CStatistics::m_nUpDataOverheadFileRequest;
+uint64	CStatistics::m_nUpDataOverheadFileRequestPackets;
+uint64	CStatistics::m_nUpDataOverheadServer;
+uint64	CStatistics::m_nUpDataOverheadServerPackets;
+uint64	CStatistics::m_nUpDataOverheadKad;
+uint64	CStatistics::m_nUpDataOverheadKadPackets;
+uint64	CStatistics::m_nUpDataOverheadOther;
+uint64	CStatistics::m_nUpDataOverheadOtherPackets;
+uint32	CStatistics::m_sumavgDDRO;
+uint32	CStatistics::m_sumavgUDRO;
+
 
 CStatistics::CStatistics()
 {
 	maxDown=0;
 	maxDownavg=0;
-	maxcumDown =			thePrefs.GetConnMaxDownRate();
-	cumUpavg =				thePrefs.GetConnAvgUpRate();
-	maxcumDownavg =			thePrefs.GetConnMaxAvgDownRate();
-	cumDownavg =			thePrefs.GetConnAvgDownRate();
-	maxcumUpavg =			thePrefs.GetConnMaxAvgUpRate();
-	maxcumUp =				thePrefs.GetConnMaxUpRate();
+	maxcumDown =			0;
+	cumUpavg =				0;
+	maxcumDownavg =			0;
+	cumDownavg =			0;
+	maxcumUpavg =			0;
+	maxcumUp =				0;
 	maxUp =					0;
 	maxUpavg =				0;
 	rateDown =				0;
@@ -53,58 +110,99 @@ CStatistics::CStatistics()
 	time_thisUpload =		0;
 	timeServerDuration =	0;
 	time_thisServerDuration=0;
+
+	m_nDownDataRateMSOverhead = 0;
+	m_nDownDatarateOverhead = 0;
+	m_nDownDataOverheadSourceExchange = 0;
+	m_nDownDataOverheadSourceExchangePackets = 0;
+	m_nDownDataOverheadFileRequest = 0;
+	m_nDownDataOverheadFileRequestPackets = 0;
+	m_nDownDataOverheadServer = 0;
+	m_nDownDataOverheadServerPackets = 0;
+	m_nDownDataOverheadKad = 0;
+	m_nDownDataOverheadKadPackets = 0;
+	m_nDownDataOverheadOther = 0;
+	m_nDownDataOverheadOtherPackets = 0;
+	m_sumavgDDRO = 0;
+
+	m_nUpDataRateMSOverhead = 0;
+	m_nUpDatarateOverhead = 0;
+	m_nUpDataOverheadSourceExchange = 0;
+	m_nUpDataOverheadSourceExchangePackets = 0;
+	m_nUpDataOverheadFileRequest = 0;
+	m_nUpDataOverheadFileRequestPackets = 0;
+	m_nUpDataOverheadServer = 0;
+	m_nUpDataOverheadServerPackets = 0;
+	m_nUpDataOverheadKad = 0;
+	m_nUpDataOverheadKadPackets = 0;
+	m_nUpDataOverheadOther = 0;
+	m_nUpDataOverheadOtherPackets = 0;
+	m_sumavgUDRO = 0;
 }
 
-CStatistics::~CStatistics()
+void CStatistics::Init()
 {
+	maxcumDown =			thePrefs.GetConnMaxDownRate();
+	cumUpavg =				thePrefs.GetConnAvgUpRate();
+	maxcumDownavg =			thePrefs.GetConnMaxAvgDownRate();
+	cumDownavg =			thePrefs.GetConnAvgDownRate();
+	maxcumUpavg =			thePrefs.GetConnMaxAvgUpRate();
+	maxcumUp =				thePrefs.GetConnMaxUpRate();
 }
-
 
 // -khaos--+++> This function is going to basically calculate and save a bunch of averages.
 //				I made a seperate funtion so that it would always run instead of having
 //				the averages not be calculated if the graphs are disabled (Which is bad!).
-void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate){
+void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate)
+{
 	rateUp = uploadrate;
 	rateDown = downloadrate;
 
-	if (maxUp<uploadrate) maxUp=uploadrate;
+	if (maxUp < uploadrate)
+		maxUp = uploadrate;
 	if (maxcumUp<maxUp) {
 		maxcumUp=maxUp;
-		thePrefs.Add2ConnMaxUpRate(maxcumUp);
+		thePrefs.SetConnMaxUpRate(maxcumUp);
 	}
 
-	if (maxDown<downloadrate) maxDown=downloadrate; // MOVED from SetCurrentRate!
+	if (maxDown < downloadrate)
+		maxDown = downloadrate;
 	if (maxcumDown<maxDown) {
 		maxcumDown=maxDown;
-		thePrefs.Add2ConnMaxDownRate(maxcumDown);
+		thePrefs.SetConnMaxDownRate(maxcumDown);
 	}
 
 	cumDownavg = GetAvgDownloadRate(AVG_TOTAL);
 	if (maxcumDownavg<cumDownavg) {
 		maxcumDownavg=cumDownavg;
-		thePrefs.Add2ConnMaxAvgDownRate(maxcumDownavg);
+		thePrefs.SetConnMaxAvgDownRate(maxcumDownavg);
 	}
 
 	cumUpavg = GetAvgUploadRate(AVG_TOTAL);
 	if (maxcumUpavg<cumUpavg) {
 		maxcumUpavg=cumUpavg;
-		thePrefs.Add2ConnMaxAvgUpRate(maxcumUpavg);
+		thePrefs.SetConnMaxAvgUpRate(maxcumUpavg);
 	}
-	
 
 	// Transfer Times (Increment Session)
 	if (uploadrate > 0 || downloadrate > 0) {
-		if (start_timeTransfers == 0) start_timeTransfers = GetTickCount();
-		else time_thisTransfer = (GetTickCount() - start_timeTransfers) / 1000;
+		if (start_timeTransfers == 0)
+			start_timeTransfers = GetTickCount();
+		else
+			time_thisTransfer = (GetTickCount() - start_timeTransfers) / 1000;
 
 		if (uploadrate > 0) {
-			if (start_timeUploads == 0) start_timeUploads = GetTickCount();
-			else time_thisUpload = (GetTickCount() - start_timeUploads) / 1000;
+			if (start_timeUploads == 0)
+				start_timeUploads = GetTickCount();
+			else
+				time_thisUpload = (GetTickCount() - start_timeUploads) / 1000;
 		}
 
 		if (downloadrate > 0) {
-			if (start_timeDownloads == 0) start_timeDownloads = GetTickCount();
-			else time_thisDownload = (GetTickCount() - start_timeDownloads) / 1000;
+			if (start_timeDownloads == 0)
+				start_timeDownloads = GetTickCount();
+			else
+				time_thisDownload = (GetTickCount() - start_timeDownloads) / 1000;
 		}
 	}
 
@@ -127,8 +225,10 @@ void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate){
 	}
 
 	// Server Durations
-	if (theApp.stat_serverConnectTime==0) theApp.statistics->time_thisServerDuration = 0;
-	else time_thisServerDuration = ( GetTickCount() - theApp.stat_serverConnectTime ) / 1000;
+	if (theApp.stat_serverConnectTime==0) 
+		time_thisServerDuration = 0;
+	else
+		time_thisServerDuration = (GetTickCount() - theApp.stat_serverConnectTime) / 1000;
 }
 // <-----khaos-
 
@@ -218,3 +318,59 @@ float CStatistics::GetAvgUploadRate(int averageType) {
 	}
 }
 // <-----khaos-
+
+void CStatistics::CompDownDatarateOverhead(){
+	// Patch By BadWolf - Accurate datarate Calculation
+	TransferredData newitem = {m_nDownDataRateMSOverhead,::GetTickCount()};
+	m_AvarageDDRO_list.AddTail(newitem);
+	m_sumavgDDRO += m_nDownDataRateMSOverhead;
+	m_nDownDataRateMSOverhead = 0;
+
+	while ((float)(m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp) > MAXAVERAGETIME) 
+		m_sumavgDDRO -= m_AvarageDDRO_list.RemoveHead().datalen;
+
+	if(m_AvarageDDRO_list.GetCount() > 10){
+		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp;
+		if (dwDuration)
+			m_nDownDatarateOverhead = 1000 * (m_sumavgDDRO-m_AvarageDDRO_list.GetHead().datalen) / dwDuration;
+	}
+	else
+		m_nDownDatarateOverhead = 0;
+	// END Patch By BadWolf
+}
+
+void CStatistics::CompUpDatarateOverhead(){
+	// Patch by BadWolf - Accurate datarate Calculation
+	TransferredData newitem = {m_nUpDataRateMSOverhead,::GetTickCount()};
+	m_AvarageUDRO_list.AddTail(newitem);
+	m_sumavgUDRO += m_nUpDataRateMSOverhead;
+	m_nUpDataRateMSOverhead = 0;
+
+	while ((float)(m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp) > MAXAVERAGETIME)
+		m_sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
+
+	if(m_AvarageUDRO_list.GetCount() > 10){
+		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
+		if (dwDuration)
+			m_nUpDatarateOverhead = 1000 * (m_sumavgUDRO-m_AvarageUDRO_list.GetHead().datalen) / dwDuration;
+	}
+	else
+		m_nUpDatarateOverhead = 0;
+	// END Patch by BadWolf	
+}
+
+void CStatistics::ResetDownDatarateOverhead()
+{
+	m_nDownDataRateMSOverhead = 0;
+	m_AvarageDDRO_list.RemoveAll();
+	m_sumavgDDRO = 0;
+	m_nDownDatarateOverhead = 0;
+}
+
+void CStatistics::ResetUpDatarateOverhead()
+{
+	m_nUpDataRateMSOverhead = 0;
+	m_sumavgUDRO = 0;
+	m_AvarageUDRO_list.RemoveAll();
+	m_nUpDatarateOverhead = 0;
+}

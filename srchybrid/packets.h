@@ -24,39 +24,50 @@ class Packet
 public:
 	Packet(uint8 protocol = OP_EDONKEYPROT);
 	Packet(char* header); // only used for receiving packets
-	//khaos Packet(char* pPacketPart,uint32 nSize,bool bLast); // only used for splitted packets!
-	Packet(CMemFile* datafile,uint8 protocol = OP_EDONKEYPROT);
-	// -khaos--+++> For use in upload statistics... Optional var, shouldn't affect anything.
-	Packet(uint8 in_opcode, uint32 in_size, uint8 protocol = OP_EDONKEYPROT, bool bFromPF = true);
-	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPF = true); // only used for splitted packets!
-	// <-----khaos-
-	~Packet();
-	char*	GetHeader();
-	char*	GetUDPHeader();
-	char*	GetPacket();
-	char*	DetachPacket();
-	uint32	GetRealPacketSize()		{return size+6;}
+	Packet(CMemFile* datafile, uint8 protocol = OP_EDONKEYPROT, uint8 ucOpcode = 0x00);
+	Packet(const CStringA& str, uint8 ucProtocol, uint8 ucOpcode);
+	Packet(uint8 in_opcode, uint32 in_size, uint8 protocol = OP_EDONKEYPROT, bool bFromPartFile = true);
+	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPartFile = true); // only used for splitted packets!
+	virtual ~Packet();
+
+	virtual char* GetHeader();
+	virtual char* GetUDPHeader();
+	virtual char* GetPacket();
+	virtual char* DetachPacket();
+	virtual uint32 GetRealPacketSize() const	{return size+6;}
 //	bool	IsSplitted()			{return m_bSplitted;}
 //	bool	IsLastSplitted()		{return m_bLastSplitted;}
+	bool	IsFromPF() const					{return m_bFromPF;}
 	void	PackPacket();
 	bool	UnPackPacket(UINT uMaxDecompressedSize = 50000);
 	char*	pBuffer;
 	uint32	size;
 	uint8	opcode;
 	uint8	prot;
-	// -khaos--+++> Returns either -1, 0 or 1.  -1 is unset, 0 is from complete file, 1 is from part file
-	bool	IsFromPF()				{return m_bFromPF;}
-	// <-----khaos-
-private:
+
+protected:
 	bool	m_bSplitted;
 	bool	m_bLastSplitted;
-	char	head[6];
+	bool	m_bPacked;
+	bool	m_bFromPF;
 	char*	completebuffer;
 	char*	tempbuffer;
-	bool	m_bPacked;
-	// -khaos--+++>
-	int		m_bFromPF;
-	// <-----khaos-
+	char	head[6];
+};
+
+class CRawPacket : public Packet
+{
+public:
+	CRawPacket(const CStringA& rstr);
+	CRawPacket(const char* pcData, UINT uSize, bool bFromPartFile = false);
+	virtual ~CRawPacket();
+
+	virtual char*	GetHeader();
+	virtual char*	GetUDPHeader();
+	virtual char*	GetPacket()					{return pBuffer; }
+	virtual void	AttachPacket(char* pcData, UINT uSize, bool bFromPartFile = false);
+	virtual char*	DetachPacket();
+	virtual uint32	GetRealPacketSize() const	{return size;}
 };
 
 struct STag{
@@ -71,6 +82,7 @@ struct STag{
 	  LPSTR	stringvalue;
 	  uint32 intvalue;
 	  float floatvalue;
+	  BYTE* pData;
 	};
 };
 
@@ -80,6 +92,7 @@ public:
 	CTag(uint8 special, uint32 intvalue);
 	CTag(LPCSTR name, LPCSTR strvalue);
 	CTag(uint8 special, LPCSTR strvalue);
+	CTag(uint8 uName, const BYTE* pucHash);
 	CTag(const STag& in_tag);
 	CTag(CFileDataIO* in_data);
 	~CTag();
@@ -87,6 +100,11 @@ public:
 	bool IsStr() const { return tag.type == TAGTYPE_STRING; }
 	bool IsInt() const { return tag.type == TAGTYPE_UINT32; }
 	bool IsFloat() const { return tag.type == TAGTYPE_FLOAT32; }
+	bool IsHash() const { return tag.type == TAGTYPE_HASH; }
+	
+	UINT GetInt() const { return tag.intvalue; }
+	CString GetStr() const;
+	const BYTE* GetHash() const { return tag.pData; }
 	
 	CTag* CloneTag() { return new CTag(tag); }
 	
@@ -97,4 +115,8 @@ public:
 	CString GetFullInfo() const;
 };
 
+__inline int CmpED2KTagName(LPCSTR pszTagName1, LPCSTR pszTagName2){
+	// string compare is independant from any codepage and/or LC_CTYPE setting.
+	return __ascii_stricmp(pszTagName1, pszTagName2);
+}
 void ConvertED2KTag(CTag*& pTag);

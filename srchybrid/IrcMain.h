@@ -22,8 +22,8 @@ class CIrcMain: public CLoggable
 public:
 	CIrcMain(void);
 	~CIrcMain(void);
-	void ParseMessage( CString message );
-	void PreParseMessage( CString buffer );
+	void ParseMessage( CStringA message );
+	void PreParseMessage( CStringA buffer );
 	void SendLogin();
 	void Connect();
 	void Disconnect( bool isshuttingdown = false);
@@ -39,7 +39,7 @@ public:
 private:
 	CIrcSocket*	ircsocket;
 	CIrcWnd*	m_pwndIRC;
-	CString		preParseBuffer;
+	CStringA	preParseBuffer;
 	CString		user;
 	CString		nick;
 	CString		version;

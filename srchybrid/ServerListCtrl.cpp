@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <share.h>
 #include "emule.h"
 #include "ServerListCtrl.h"
 #include "OtherFunctions.h"
@@ -26,6 +27,7 @@
 #include "MenuCmds.h"
 #include "ServerWnd.h"
 #include "IrcWnd.h"
+#include "Opcodes.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "MemDC.h"
 
@@ -63,7 +65,8 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	InsertColumn(10,GetResString(IDS_SOFTFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(11,GetResString(IDS_HARDFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(12,GetResString(IDS_VERSION),		LVCFMT_LEFT,  50);
-	InsertColumn(13,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
+	InsertColumn(13,GetResString(IDS_IDLOW),		LVCFMT_RIGHT, 50);
+	InsertColumn(14,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
 
 	SetAllIcons();
 	Localize();
@@ -100,7 +103,7 @@ void CServerListCtrl::SetAllIcons()
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader("Server"));
+	iml.Add(CTempIconLoader(_T("Server")));
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
 		ImageList_Destroy(himl);
@@ -179,10 +182,15 @@ void CServerListCtrl::Localize()
 	pHeaderCtrl->SetItem(12, &hdi);
 	strRes.ReleaseBuffer();
 
+	strRes = GetResString(IDS_IDLOW);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(13, &hdi);
+	strRes.ReleaseBuffer();
+
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	strRes = GetResString(IDS_AUXPORTS);
 	hdi.pszText = strRes.GetBuffer();
-	pHeaderCtrl->SetItem(13, &hdi);
+	pHeaderCtrl->SetItem(14, &hdi);
 	strRes.ReleaseBuffer();
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 }
@@ -196,25 +204,22 @@ void CServerListCtrl::RemoveServer(CServer* todel)
 	if (result != (-1) ){
 		server_list->RemoveServer((CServer*)GetItemData(result));
 		DeleteItem(result); 
+		ShowServerCount();
 	}
-	ShowServerCount();
 	return;
 }
 
-// Remove Dead Servers
-void CServerListCtrl::RemoveDeadServer()
+void CServerListCtrl::RemoveAllDeadServers()
 {
-	if( thePrefs.DeadServer() ){
-	   ShowWindow(SW_HIDE); 
-		for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
-			CServer* cur_server = server_list->list.GetAt(pos); 
-			if( cur_server->GetFailedCount() > thePrefs.GetDeadserverRetries() ){	// MAX_SERVERFAILCOUNT 
-				RemoveServer(cur_server);
-				pos = server_list->list.GetHeadPosition();
-			}
+	ShowWindow(SW_HIDE); 
+	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
+		CServer* cur_server = server_list->list.GetAt(pos); 
+		if (cur_server->GetFailedCount() >= thePrefs.GetDeadserverRetries()){
+			RemoveServer(cur_server);
+			pos = server_list->list.GetHeadPosition();
 		}
-	   ShowWindow(SW_SHOW); 
 	}
+   ShowWindow(SW_SHOW); 
 }
 
 bool CServerListCtrl::AddServer(CServer* toadd, bool bAddToList)
@@ -248,7 +253,7 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
 		&& cur_srv->GetPort() == server->GetPort()
 		&& cur_srv->GetConnPort() == server->GetConnPort()//Morph - added by AndCycle, aux Ports, by lugdunummaster
-		&& stricmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
+		&& _tcsicmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
 		SetItemState(itemnr,LVIS_GLOW,LVIS_GLOW);
 	else
 		SetItemState(itemnr, 0, LVIS_GLOW);
@@ -265,18 +270,17 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	SetItemText(itemnr, 1, temp);
 
 	//EastShare Start - added by AndCycle, IP to Country
-	CString tempServerName;
-	tempServerName = server->GetCountryName();
-	tempServerName.Append(server->GetListName()?(LPCTSTR)server->GetListName():_T(""));
-	SetItemText(itemnr,0,tempServerName);
-
 	/*
 	//original
-	SetItemText(itemnr,0,server->GetListName()?(LPCTSTR)server->GetListName():_T(""));
+	SetItemText(itemnr,0,server->GetListName());
 	*/
+	CString tempServerName;
+	tempServerName = server->GetCountryName();
+	tempServerName.Append(server->GetListName());
+	SetItemText(itemnr,0,tempServerName);
 	//EastShare End - added by AndCycle, IP to Country
 
-	SetItemText(itemnr,2,server->GetDescription()?(LPCTSTR)server->GetDescription():_T(""));
+	SetItemText(itemnr,2,server->GetDescription());
 
 	// Ping
 	if(server->GetPing()){
@@ -356,14 +360,21 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		}
 	}
 	SetItemText(itemnr,12,temp);
+
+	// LowID Users
+	if (server->GetLowIDUsers())
+		SetItemText(itemnr, 13, CastItoIShort(server->GetLowIDUsers()));
+	else
+		SetItemText(itemnr, 13,_T(""));
+
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	// aux Port
 	if(server->GetConnPort() != server->GetPort()){
 		temp.Format(_T("%i"), server->GetConnPort());
-		SetItemText(itemnr, 13, temp);
+		SetItemText(itemnr, 14, temp);
 	}
 	else{
-		SetItemText(itemnr,13,_T(""));
+		SetItemText(itemnr,14,_T(""));
 	}
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 }
@@ -632,12 +643,12 @@ void CServerListCtrl::OnNMLdblclk(NMHDR *pNMHDR, LRESULT *pResult)
 
 bool CServerListCtrl::AddServermetToList(const CString& strFile)
 { 
-   SetRedraw(false);
-   bool flag=server_list->AddServermetToList(strFile);
-   RemoveDeadServer();
+	SetRedraw(false);
+  	bool flag=server_list->AddServermetToList(strFile);
+	RemoveAllDeadServers();
 	ShowServerCount();
-   SetRedraw(true);
-   return flag;
+	SetRedraw(true);
+	return flag;
 }
 
 void CServerListCtrl::OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult) 
@@ -646,22 +657,22 @@ void CServerListCtrl::OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer);
-	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer);
-	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
+	int iSortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer);
+	bool bOldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer);
+	bool bSortAscending = (iSortItem != pNMListView->iSubItem) ? true : !bOldSortAscending;
 
 	// Item is column clicked
-	sortItem = pNMListView->iSubItem;
+	iSortItem = pNMListView->iSubItem;
 
 	// Save new preferences
-	thePrefs.SetColumnSortItem(CPreferences::tableServer, sortItem);
-	thePrefs.SetColumnSortAscending(CPreferences::tableServer, sortAscending);
+	thePrefs.SetColumnSortItem(CPreferences::tableServer, iSortItem);
+	thePrefs.SetColumnSortAscending(CPreferences::tableServer, bSortAscending);
 
 	// Sort table
-	SetSortArrow(sortItem, sortAscending);
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+	SetSortArrow(iSortItem, bSortAscending);
+	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 
-   this->Invalidate(); 
+	Invalidate();
    *pResult = 0; 
 } 
 
@@ -669,217 +680,125 @@ int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	const CServer* item1 = (CServer*)lParam1;
 	const CServer* item2 = (CServer*)lParam2;
-   if((item1 == NULL) || (item2 == NULL))
-	   return 0; 
-   int iTemp=0; 
-    
-   switch(lParamSort){ 
-      case 0: //(List) Server-name asc
-		  if (item1->GetListName() && item2->GetListName())
-			  return _tcsicmp(item1->GetListName(), item2->GetListName());
-		  return CString(item1->GetListName()).CompareNoCase(item2->GetListName());
-      case 100: //(List) Server-name desc 
-		  if (item2->GetListName() && item1->GetListName())
-			  return _tcsicmp(item2->GetListName(), item1->GetListName());
-		  return CString(item2->GetListName()).CompareNoCase(item1->GetListName());
-      case 1:{ //IP asc
-		  if( item1->HasDynIP() && item2->HasDynIP() )
-			  return CString(item1->GetDynIP()).CompareNoCase(item2->GetDynIP());
-		  else if( item1->HasDynIP() == true && item2->HasDynIP() == true )
-			  return 0;
-		  else if( item1->HasDynIP() )
-			  return 1;
-		  else if( item2->HasDynIP() )
-			  return 0;
+	if (item1 == NULL || item2 == NULL)
+		return 0;
+
+#define UNDEFINED_STR_AT_BOTTOM(s1, s2) \
+	if ((s1).IsEmpty() && (s2).IsEmpty()) \
+		return 0;						\
+	if ((s1).IsEmpty())					\
+		return 1;						\
+	if ((s2).IsEmpty())					\
+		return -1;						\
+
+#define UNDEFINED_INT_AT_BOTTOM(i1, i2) \
+	if ((i1) == (i2))					\
+		return 0;						\
+	if ((i1) == 0)						\
+		return 1;						\
+	if ((i2) == 0)						\
+		return -1;						\
+
+	int iResult;
+	switch (LOWORD(lParamSort)){
+	  case 0:
+		  UNDEFINED_STR_AT_BOTTOM(item1->GetListName(), item2->GetListName());
+		  iResult = item1->GetListName().CompareNoCase(item2->GetListName());
+		  break;
+
+	  case 1:
+		  if (item1->HasDynIP() && item2->HasDynIP())
+			  iResult = item1->GetDynIP().CompareNoCase(item2->GetDynIP());
+		  else if (item1->HasDynIP())
+			  iResult = -1;
+		  else if (item2->HasDynIP())
+			  iResult = 1;
 		  else{
-			  uint32 uIP1 = item1->GetIP();
-			  uint32 uIP2 = item2->GetIP();
-			  const uchar* pIP1 = (uchar*)&uIP1;
-			  const uchar* pIP2 = (uchar*)&uIP2;
-			  iTemp = 0;
-			  for (int i = 0; i < 4 && iTemp == 0; i++)
-				  iTemp = *pIP1++ - *pIP2++;
-			  if (iTemp == 0)
-				  iTemp = item1->GetPort() - item2->GetPort();
-			  return iTemp; 
+			  uint32 uIP1 = htonl(item1->GetIP());
+			  uint32 uIP2 = htonl(item2->GetIP());
+			  if (uIP1 < uIP2)
+				  iResult = -1;
+			  else if (uIP1 > uIP2)
+				  iResult = 1;
+			  else
+				  iResult = CompareUnsigned(item1->GetPort(), item2->GetPort());
 		  }
-			 }
-      case 101:{ //IP desc 
-		  if( item1->HasDynIP() && item2->HasDynIP() )
-			  return CString(item2->GetDynIP()).CompareNoCase(item1->GetDynIP());
-		  else if( item1->HasDynIP() == true && item2->HasDynIP() == true )
-			  return 0;
-		  else if( item1->HasDynIP() )
-			  return 0;
-		  else if( item2->HasDynIP() )
-			  return 1;
-		  else{
-			  uint32 uIP1 = item1->GetIP();
-			  uint32 uIP2 = item2->GetIP();
-			  const uchar* pIP1 = (uchar*)&uIP1;
-			  const uchar* pIP2 = (uchar*)&uIP2;
-			  iTemp = 0;
-			  for (int i = 0; i < 4 && iTemp == 0; i++)
-				  iTemp = *pIP1++ - *pIP2++;
-			  if (iTemp == 0)
-				  iTemp = item1->GetPort() - item2->GetPort();
-			  return -iTemp;
-		  }
-			  }
-      case 2: //Description asc 
-         if((item1->GetDescription() != NULL) && (item2->GetDescription() != NULL)) 
-            //the 'if' is necessary, because the Description-String is not 
-            //always initialisized in server.cpp 
-			return _tcsicmp(item2->GetDescription(), item1->GetDescription());
-		 else if( item1->GetDescription() == item2->GetDescription() )
-			 return 0;
-		 else if( item1->GetDescription() == NULL )
-			 return 1;
-		 else
-			 return 0;
-      case 102: //Desciption desc 
-         if((item1->GetDescription() != NULL) && (item2->GetDescription() != NULL))
-			return _tcsicmp(item1->GetDescription(), item2->GetDescription());
-		 else if( item1->GetDescription() == item2->GetDescription() )
-			 return 0;
-		 else if( item1->GetDescription() == NULL )
-			 return 1;
-		 else
-			 return 0;
-      case 3: //Ping asc
-		  if(item1->GetPing() == item2->GetPing())
-			  return 0;
-		  if(!item1->GetPing())
-			  return 1;
-		  if(!item2->GetPing())
-			  return -1;
-         return item1->GetPing() - item2->GetPing(); 
-      case 103: //Ping desc 
-		  if(item1->GetPing() == item2->GetPing())
-			  return 0;
-		  if(!item1->GetPing())
-			  return 1;
-		  if(!item2->GetPing())
-			  return -1;
-         return item2->GetPing() - item1->GetPing(); 
-      case 4: //Users asc 
-		  if(item1->GetUsers() == item2->GetUsers())
-			  return 0;
-		  if(!item1->GetUsers())
-			  return 1;
-		  if(!item2->GetUsers())
-			  return -1;
-         return item1->GetUsers() - item2->GetUsers(); 
-      case 104: //Users desc 
-		  if(item1->GetUsers() == item2->GetUsers())
-			  return 0;
-		  if(!item1->GetUsers())
-			  return 1;
-		  if(!item2->GetUsers())
-			  return -1;
-         return item2->GetUsers() - item1->GetUsers(); 
-      case 5: //Users asc 
-		  if(item1->GetMaxUsers() == item2->GetMaxUsers())
-			  return 0;
-		  if(!item1->GetMaxUsers())
-			  return 1;
-		  if(!item2->GetMaxUsers())
-			  return -1;
-         return item1->GetMaxUsers() - item2->GetMaxUsers(); 
-      case 105: //Users desc 
-		  if(item1->GetMaxUsers() == item2->GetMaxUsers())
-			  return 0;
-		  if(!item1->GetMaxUsers())
-			  return 1;
-		  if(!item2->GetMaxUsers())
-			  return -1;
-         return item2->GetMaxUsers() - item1->GetMaxUsers(); 
-      case 6: //Files asc 
-		  if(item1->GetFiles() == item2->GetFiles())
-			  return 0;
-		  if(!item1->GetFiles())
-			  return 1;
-		  if(!item2->GetFiles())
-			  return -1;
-         return item1->GetFiles() - item2->GetFiles(); 
-      case 106: //Files desc 
-		  if(item1->GetFiles() == item2->GetFiles())
-			  return 0;
-		  if(!item1->GetFiles())
-			  return 1;
-		  if(!item2->GetFiles())
-			  return -1;
-         return item2->GetFiles() - item1->GetFiles(); 
-      case 7: //Preferences asc 
-		  if( item2->GetPreferences() == item1->GetPreferences() )
-			  return 0;
-		  if( item2->GetPreferences() == SRV_PR_LOW )
-			  return 1;
-		  else if ( item1->GetPreferences() == SRV_PR_LOW )
-			  return -1;
-		  if( item2->GetPreferences() == SRV_PR_HIGH )
-			  return -1;
-		  else if ( item1->GetPreferences() == SRV_PR_HIGH )
-			  return 1;
-      case 107: //Preferences desc 
-		  if( item2->GetPreferences() == item1->GetPreferences() )
-			  return 0;
-		  if( item2->GetPreferences() == SRV_PR_LOW )
-			  return -1;
-		  else if ( item1->GetPreferences() == SRV_PR_LOW )
-			  return 1;
-		  if( item2->GetPreferences() == SRV_PR_HIGH )
-			  return 1;
-		  else if ( item1->GetPreferences() == SRV_PR_HIGH )
-			  return -1;
-      case 8: //failed asc 
-         return item1->GetFailedCount() - item2->GetFailedCount(); 
-      case 108: //failed desc 
-		  return item2->GetFailedCount() - item1->GetFailedCount(); 
-      case 9: //staticservers 
-		  return item2->IsStaticMember() - item1->IsStaticMember(); 
-      case 109: //staticservers-
-		  return item1->IsStaticMember() - item2->IsStaticMember(); 
-      case 10:  
-		  if(item1->GetSoftFiles() == item2->GetSoftFiles())
-			  return 0;
-		  if(!item1->GetSoftFiles())
-			  return 1;
-		  if(!item2->GetSoftFiles())
-			  return -1;
-		  return item1->GetSoftFiles() - item2->GetSoftFiles(); 
-      case 110: 
-		  if(item1->GetSoftFiles() == item2->GetSoftFiles())
-			  return 0;
-		  if(!item1->GetSoftFiles())
-			  return 1;
-		  if(!item2->GetSoftFiles())
-			  return -1;
-		  return item2->GetSoftFiles() - item1->GetSoftFiles(); 
-      case 11: 
-		  if(item1->GetHardFiles() == item2->GetHardFiles())
-			  return 0;
-		  if(!item1->GetHardFiles())
-			  return 1;
-		  if(!item2->GetHardFiles())
-			  return -1;
-		  return item1->GetHardFiles() - item2->GetHardFiles(); 
-      case 111: 
-		  if(item1->GetHardFiles() == item2->GetHardFiles())
-			  return 0;
-		  if(!item1->GetHardFiles())
-			  return 1;
-		  if(!item2->GetHardFiles())
-			  return -1;
-		  return item2->GetHardFiles() - item1->GetHardFiles(); 
+		  break;
+
+	  case 2:
+		  UNDEFINED_STR_AT_BOTTOM(item1->GetDescription(), item2->GetDescription());
+		  iResult = item1->GetDescription().CompareNoCase(item2->GetDescription());
+		  break;
+
+	  case 3:
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetPing(), item2->GetPing());
+		  iResult = CompareUnsigned(item1->GetPing(), item2->GetPing());
+		  break;
+
+	  case 4:
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetUsers(), item2->GetUsers());
+		  iResult = CompareUnsigned(item1->GetUsers(), item2->GetUsers());
+		  break;
+
+	  case 5:
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetMaxUsers(), item2->GetMaxUsers());
+		  iResult = CompareUnsigned(item1->GetMaxUsers(), item2->GetMaxUsers());
+		  break;
+
+	  case 6:
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetFiles(), item2->GetFiles());
+		  iResult = CompareUnsigned(item1->GetFiles(), item2->GetFiles());
+		  break;
+
+	  case 7:
+		  if (item2->GetPreferences() == item1->GetPreferences())
+			  iResult = 0;
+		  else if (item2->GetPreferences() == SRV_PR_LOW)
+			  iResult = 1;
+		  else if (item1->GetPreferences() == SRV_PR_LOW)
+			  iResult = -1;
+		  else if (item2->GetPreferences() == SRV_PR_HIGH)
+			  iResult = -1;
+		  else if (item1->GetPreferences() == SRV_PR_HIGH)
+			  iResult = 1;
+		  else
+			  iResult = 0;
+		  break;
+
+	  case 8:
+		  iResult = CompareUnsigned(item1->GetFailedCount(), item2->GetFailedCount());
+		  break;
+
+	  case 9:
+		  iResult = (int)item1->IsStaticMember() - (int)item2->IsStaticMember();
+		  break;
+
+	  case 10:  
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetSoftFiles(), item2->GetSoftFiles());
+		  iResult = CompareUnsigned(item1->GetSoftFiles(), item2->GetSoftFiles());
+		  break;
+
+	  case 11: 
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetHardFiles(), item2->GetHardFiles());
+		  iResult = CompareUnsigned(item1->GetHardFiles(), item2->GetHardFiles());
+		  break;
 
 	  case 12:
-		  return item1->GetVersion().CompareNoCase(item2->GetVersion());
-	  case 112:
-		  return item2->GetVersion().CompareNoCase(item1->GetVersion());
-      default: 
-         return 0; 
-   } 
+		  UNDEFINED_STR_AT_BOTTOM(item1->GetVersion(), item2->GetVersion());
+		  iResult = item1->GetVersion().CompareNoCase(item2->GetVersion());
+		  break;
+
+	  case 13:
+		  UNDEFINED_INT_AT_BOTTOM(item1->GetLowIDUsers(), item2->GetLowIDUsers());
+		  iResult = CompareUnsigned(item1->GetLowIDUsers(), item2->GetLowIDUsers());
+		  break;
+
+	  default: 
+		  iResult = 0;
+	} 
+	if (HIWORD(lParamSort))
+		iResult = -iResult;
+	return iResult;
 }
 
 bool CServerListCtrl::StaticServerFileAppend(CServer *server)
@@ -889,21 +808,21 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 		// Remove any entry before writing to avoid duplicates
 		StaticServerFileRemove(server);
 
-		FILE* staticservers = fopen(thePrefs.GetConfigDir() + CString("staticservers.dat"), "a");
+		FILE* staticservers = _tfsopen(thePrefs.GetConfigDir() + _T("staticservers.dat"), _T("a"), _SH_DENYWR);
 		if (staticservers==NULL) 
 		{
 			AddLogLine( false, GetResString(IDS_ERROR_SSF));
 			return false;
 		}
 		
-		if (fprintf(staticservers,
-					"%s:%i,%i,%s\n",
+		if (_ftprintf(staticservers,
+					_T("%s:%i,%i,%s\n"),
 					server->GetAddress(),
 					server->GetPort(), 
 					server->GetPreferences(),
 					server->GetListName()) != EOF) 
 		{
-			AddLogLine(false, "'%s:%i,%s' %s", server->GetAddress(), server->GetPort(), server->GetListName(), GetResString(IDS_ADDED2SSF));
+			AddLogLine(false, _T("'%s:%i,%s' %s"), server->GetAddress(), server->GetPort(), server->GetListName(), GetResString(IDS_ADDED2SSF));
 			server->SetIsStaticMember(true);
 			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(server);
 		}
@@ -927,13 +846,13 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 
 		CString strLine;
 		CString strTest;
-		char buffer[1024];
+		TCHAR buffer[1024];
 		int lenBuf = 1024;
 		int pos;
-		CString StaticFilePath = thePrefs.GetConfigDir() + CString("staticservers.dat");
-		CString StaticTempPath = thePrefs.GetConfigDir() + CString("statictemp.dat");
-		FILE* staticservers = fopen(StaticFilePath , "r");
-		FILE* statictemp = fopen(StaticTempPath , "w");
+		CString StaticFilePath = thePrefs.GetConfigDir() + _T("staticservers.dat");
+		CString StaticTempPath = thePrefs.GetConfigDir() + _T("statictemp.dat");
+		FILE* staticservers = _tfsopen(StaticFilePath , _T("r"), _SH_DENYWR);
+		FILE* statictemp = _tfsopen(StaticTempPath , _T("w"), _SH_DENYWR);
 
 		if ((staticservers == NULL) || (statictemp == NULL))
 		{
@@ -947,29 +866,29 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 
 		while (!feof(staticservers))
 		{
-			if (fgets(buffer, lenBuf, staticservers) == 0)
+			if (_fgetts(buffer, lenBuf, staticservers) == 0)
 				break;
 
 			strLine = buffer;
 
 			// ignore comments or invalid lines
-			if (strLine.GetAt(0) == '#' || strLine.GetAt(0) == '/')
+			if (strLine.GetAt(0) == _T('#') || strLine.GetAt(0) == _T('/'))
 				continue;
 			if (strLine.GetLength() < 5)
 				continue;
 
 			// Only interested in "host:port"
-			pos = strLine.Find(',');
+			pos = strLine.Find(_T(','));
 			if (pos == -1)
 				continue;
 			strLine = strLine.Left(pos);
 
 			// Get host and port from given server
-			strTest.Format("%s:%i", server->GetAddress(), server->GetPort());
+			strTest.Format(_T("%s:%i"), server->GetAddress(), server->GetPort());
 
 			// Compare, if not the same server write original line to temp file
 			if (strLine.Compare(strTest) != 0)
-				fprintf(statictemp, buffer);
+				_ftprintf(statictemp, buffer);
 		}
 
 		fclose(staticservers);
@@ -990,7 +909,7 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 void CServerListCtrl::ShowServerCount() {
 	CString counter;
 
-	counter.Format(" (%i)", GetItemCount());
+	counter.Format(_T(" (%i)"), GetItemCount());
 	theApp.emuledlg->serverwnd->GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST)+counter  );
 }
 

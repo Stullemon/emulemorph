@@ -108,11 +108,13 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 		CTag* newtag = new CTag(file);
 		switch(newtag->tag.specialtag){
 			case FF_NAME:{
-				// SLUGFILLER: SafeHash - tag-type verification
-				if (newtag->tag.type != 2)
-					break;
-				// SLUGFILLER: SafeHash
-				m_strName = newtag->tag.stringvalue;
+				ASSERT( newtag->IsStr() );
+				if (newtag->IsStr()){
+#ifdef _UNICODE
+					if (m_strName.IsEmpty())
+#endif
+						m_strName = newtag->GetStr();
+				}
 				break;
 			}
 			//MORPH START - Added by Yun.SF3, ZZ Upload System
@@ -136,24 +138,29 @@ void CFriend::WriteToFile(CFileDataIO* file)
 	file->WriteUInt32(m_dwLastSeen);
 	file->WriteUInt32(m_dwLastChatted);
 
-	UINT tagcount = 0;
-	if (!m_strName.IsEmpty())
-		tagcount++;
-//MORPH - Added by Yun.SF3, ZZ Upload System
-if(m_LinkedClient !=NULL && m_LinkedClient->GetFriendSlot()  || m_LinkedClient == NULL && m_friendSlot == true) {
-		tagcount++;
-    }
-	//MORPH - Added by Yun.SF3, ZZ Upload System
-	file->WriteUInt32(tagcount);
+	uint32 uTagCount = 0;
+	ULONG uTagCountFilePos = (ULONG)file->GetPosition();
+	file->WriteUInt32(uTagCount);
+
 	if (!m_strName.IsEmpty()){
+#ifdef _UNICODE
+		if (WriteOptED2KUTF8Tag(file, m_strName, FF_NAME))
+			uTagCount++;
+#endif
 		CTag nametag(FF_NAME, m_strName);
 		nametag.WriteTagToFile(file);
+		uTagCount++;
 	}
-//MORPH - Added by Yun.SF3, ZZ Upload System
-if(m_LinkedClient != NULL && m_LinkedClient->GetFriendSlot() || m_LinkedClient == NULL && m_friendSlot == true) {
+	//MORPH START - Added by SiRoB, Slot Friend
+	if(m_LinkedClient != NULL && m_LinkedClient->GetFriendSlot() || m_LinkedClient == NULL && m_friendSlot == true) {
 		CTag friendslottag(FF_FRIENDSLOT,1);
 		friendslottag.WriteTagToFile(file);
+		uTagCount++;
     }
+	//MORPH END   - Added by SiRoB, Slot Friend
+	file->Seek(uTagCountFilePos, CFile::begin);
+	file->WriteUInt32(uTagCount);
+	file->Seek(0, CFile::end);
 }
 
 bool CFriend::HasUserhash() {
@@ -182,26 +189,26 @@ bool CFriend::GetFriendSlot() const {
     }
 }
 void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
-    if(linkedClient != NULL) {
-        if(m_LinkedClient == NULL) {
-            linkedClient->SetFriendSlot(m_friendSlot);
-        } else {
-            linkedClient->SetFriendSlot(m_LinkedClient->GetFriendSlot());
-        }
-
-	    m_dwLastSeen = time(NULL);
-	    m_dwLastUsedIP = linkedClient->GetIP();
-	    m_nLastUsedPort = linkedClient->GetUserPort();
-	    m_strName = linkedClient->GetUserName();
-	    md4cpy(m_abyUserhash,linkedClient->GetUserHash());
-	    m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
-
-        linkedClient->m_Friend = this;
-    } else if(m_LinkedClient != NULL) {
-        m_friendSlot = m_LinkedClient->GetFriendSlot();
-    }
-
 	if(linkedClient != m_LinkedClient) {
+    	if(linkedClient != NULL) {
+    	    if(m_LinkedClient == NULL) {
+    	        linkedClient->SetFriendSlot(m_friendSlot);
+    	    } else {
+    	        linkedClient->SetFriendSlot(m_LinkedClient->GetFriendSlot());
+    	    }
+
+		    m_dwLastSeen = time(NULL);
+		    m_dwLastUsedIP = linkedClient->GetIP();
+		    m_nLastUsedPort = linkedClient->GetUserPort();
+		    m_strName = linkedClient->GetUserName();
+		    md4cpy(m_abyUserhash,linkedClient->GetUserHash());
+		    m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
+
+    	    linkedClient->m_Friend = this;
+    	} else if(m_LinkedClient != NULL) {
+    	    m_friendSlot = m_LinkedClient->GetFriendSlot();
+    	}
+
 		if(m_LinkedClient != NULL) {
             // the old client is no longer friend, since it is no longer the linked client
 			m_LinkedClient->SetFriendSlot(false);
@@ -211,4 +218,3 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 	}
     theApp.friendlist->RefreshFriend(this);
 }
-//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System

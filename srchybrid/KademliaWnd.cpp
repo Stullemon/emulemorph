@@ -72,7 +72,7 @@ BOOL CKademliaWnd::SaveAllSettings()
 
 	CString strIniFile;
 	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, "eMule");
+	CIni ini(strIniFile, _T("eMule"));
 
 	contactList->SaveAllSettings(&ini);
 	searchList->SaveAllSettings(&ini);
@@ -221,21 +221,22 @@ void CKademliaWnd::OnSysColorChange()
 void CKademliaWnd::SetAllIcons()
 {
 	// frames
-	m_ctrlBootstrap.Init("KADBOOTSTRAP");
+	m_ctrlBootstrap.Init(_T("KADBOOTSTRAP"));
 
 	if (icon_kadcont)
 		VERIFY( DestroyIcon(icon_kadcont) );
-	icon_kadcont = theApp.LoadIcon("KADContactList", 16, 16);
+	icon_kadcont = theApp.LoadIcon(_T("KADContactList"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_KADICO1))->SetIcon(icon_kadcont);
 
 	if (icon_kadsea)
 		VERIFY( DestroyIcon(icon_kadsea) );
-	icon_kadsea = theApp.LoadIcon("KadCurrentSearches", 16, 16);
+	icon_kadsea = theApp.LoadIcon(_T("KadCurrentSearches"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_KADICO2))->SetIcon(icon_kadsea);
 }
 
 void CKademliaWnd::Localize() {
-	GetDlgItem(IDC_BSSTATIC)->SetWindowText(GetResString(IDS_BOOTSTRAP));
+	m_ctrlBootstrap.SetText(GetResString(IDS_BOOTSTRAP));
+	//GetDlgItem(IDC_BSSTATIC)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS) + _T(":"));
 	GetDlgItem(IDC_SSTATIC7)->SetWindowText(GetResString(IDS_SV_PORT) + _T(":"));

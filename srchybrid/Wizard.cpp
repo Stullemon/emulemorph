@@ -68,12 +68,12 @@ END_MESSAGE_MAP()
 
 void Wizard::OnBnClickedApply()
 {
-	char buffer[510];
+	TCHAR buffer[510];
 	int upload, download;
 	if(GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->GetWindowTextLength())
 	{ 
 		GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->GetWindowText(buffer,20);
-		download = atoi(buffer);
+		download = _tstoi(buffer);
 	}
 	else
 	{
@@ -82,7 +82,7 @@ void Wizard::OnBnClickedApply()
 	if(GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->GetWindowTextLength())
 	{ 
 		GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->GetWindowText(buffer,20);
-		upload = atoi(buffer);
+		upload = _tstoi(buffer);
 	}
 	else
 	{
@@ -235,7 +235,7 @@ void Wizard::OnBnClickedWizHighdownloadRadio()
 void Wizard::OnBnClickedWizResetButton()
 {
 	CString strBuffer;
-	strBuffer.Format("%i", 0);
+	strBuffer.Format(_T("%i"), 0);
 	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(strBuffer); 
 	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(strBuffer); 
 }
@@ -259,32 +259,32 @@ BOOL Wizard::OnInitDialog(){
 	this->CheckDlgButton(IDC_KBYTES,0);
 
 	CString temp;
-	temp.Format("%u",thePrefs.maxGraphDownloadRate *8);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
-	temp.Format("%u",thePrefs.maxGraphUploadRate*8);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
+	temp.Format(_T("%u"),thePrefs.maxGraphDownloadRate *8);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
+	temp.Format(_T("%u"),thePrefs.maxGraphUploadRate*8);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
 
 	m_provider.InsertColumn(0,GetResString(IDS_PW_CONNECTION),LVCFMT_LEFT, 160);
 	m_provider.InsertColumn(1,GetResString(IDS_WIZ_DOWN),LVCFMT_LEFT, 85);
 	m_provider.InsertColumn(2,GetResString(IDS_WIZ_UP),LVCFMT_LEFT, 85);
 
 	m_provider.InsertItem(0,GetResString(IDS_WIZARD_CUSTOM) );m_provider.SetItemText(0,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(0,2,GetResString(IDS_WIZARD_ENTERBELOW));
-	m_provider.InsertItem(1,"56-k Modem");m_provider.SetItemText(1,1,"56");m_provider.SetItemText(1,2,"56");
-	m_provider.InsertItem(2,"ISDN");m_provider.SetItemText(2,1,"64");m_provider.SetItemText(2,2,"64");
-	m_provider.InsertItem(3,"ISDN 2x");m_provider.SetItemText(3,1,"128");m_provider.SetItemText(3,2,"128");
-	m_provider.InsertItem(4 ,"DSL");m_provider.SetItemText(4,1,"256");m_provider.SetItemText(4,2,"128");
-	m_provider.InsertItem(5,"DSL");m_provider.SetItemText(5,1,"384");m_provider.SetItemText(5,2,"91");
-	m_provider.InsertItem(6,"DSL");m_provider.SetItemText(6,1,"512");m_provider.SetItemText(6,2,"91");
-	m_provider.InsertItem(7 ,"DSL");m_provider.SetItemText(7,1,"512");m_provider.SetItemText(7,2,"128");
-	m_provider.InsertItem(8,"DSL");m_provider.SetItemText(8,1,"640");m_provider.SetItemText(8,2,"90");
-	m_provider.InsertItem(9,"DSL (newDSL, 1&1-DSL");m_provider.SetItemText(9,1,"768");m_provider.SetItemText(9,2,"128");
-	m_provider.InsertItem(10,"DSL (T-DSL 1000)");m_provider.SetItemText(10,1,"1000");m_provider.SetItemText(10,2,"128");
-	m_provider.InsertItem(11,"DSL (QDSL, NGI-DSL");m_provider.SetItemText(11,1,"1024");m_provider.SetItemText(11,2,"256");
-	m_provider.InsertItem(12,"DSL 1500 ('TDSL 1500')");m_provider.SetItemText(12,1,"1500");m_provider.SetItemText(12,2,"192");
-	m_provider.InsertItem(13,"DSL 1600");m_provider.SetItemText(13,1,"1600");m_provider.SetItemText(13,2,"90");
-	m_provider.InsertItem(14,"DSL 2000");m_provider.SetItemText(14,1,"2000");m_provider.SetItemText(14,2,"300");
-	m_provider.InsertItem(15,"Cable");m_provider.SetItemText(15,1,"187");m_provider.SetItemText(15,2,"32");
-	m_provider.InsertItem(16,"Cable");m_provider.SetItemText(16,1,"187");m_provider.SetItemText(16,2,"64");
-	m_provider.InsertItem(17,"T1");m_provider.SetItemText(17,1,"1500");m_provider.SetItemText(17,2,"1500");
-	m_provider.InsertItem(18,"T3+");m_provider.SetItemText(18,1,"44 Mbps");m_provider.SetItemText(18,2,"44 Mbps");
+	m_provider.InsertItem(1,_T("56-k Modem"));m_provider.SetItemText(1,1,_T("56"));m_provider.SetItemText(1,2,_T("56"));
+	m_provider.InsertItem(2,_T("ISDN"));m_provider.SetItemText(2,1,_T("64"));m_provider.SetItemText(2,2,_T("64"));
+	m_provider.InsertItem(3,_T("ISDN 2x"));m_provider.SetItemText(3,1,_T("128"));m_provider.SetItemText(3,2,_T("128"));
+	m_provider.InsertItem(4,_T("DSL"));m_provider.SetItemText(4,1,_T("256"));m_provider.SetItemText(4,2,_T("128"));
+	m_provider.InsertItem(5,_T("DSL"));m_provider.SetItemText(5,1,_T("384"));m_provider.SetItemText(5,2,_T("91"));
+	m_provider.InsertItem(6,_T("DSL"));m_provider.SetItemText(6,1,_T("512"));m_provider.SetItemText(6,2,_T("91"));
+	m_provider.InsertItem(7,_T("DSL"));m_provider.SetItemText(7,1,_T("512"));m_provider.SetItemText(7,2,_T("128"));
+	m_provider.InsertItem(8,_T("DSL"));m_provider.SetItemText(8,1,_T("640"));m_provider.SetItemText(8,2,_T("90"));
+	m_provider.InsertItem(9,_T("DSL (newDSL, 1&1-DSL"));m_provider.SetItemText(9,1,_T("768"));m_provider.SetItemText(9,2,_T("128"));
+	m_provider.InsertItem(10,_T("DSL (T-DSL 1000)"));m_provider.SetItemText(10,1,_T("1000"));m_provider.SetItemText(10,2,_T("128"));
+	m_provider.InsertItem(11,_T("DSL (QDSL, NGI-DSL"));m_provider.SetItemText(11,1,_T("1024"));m_provider.SetItemText(11,2,_T("256"));
+	m_provider.InsertItem(12,_T("DSL 1500 ('TDSL 1500')"));m_provider.SetItemText(12,1,_T("1500"));m_provider.SetItemText(12,2,_T("192"));
+	m_provider.InsertItem(13,_T("DSL 1600"));m_provider.SetItemText(13,1,_T("1600"));m_provider.SetItemText(13,2,_T("90"));
+	m_provider.InsertItem(14,_T("DSL 2000"));m_provider.SetItemText(14,1,_T("2000"));m_provider.SetItemText(14,2,_T("300"));
+	m_provider.InsertItem(15,_T("Cable"));m_provider.SetItemText(15,1,_T("187"));m_provider.SetItemText(15,2,_T("32"));
+	m_provider.InsertItem(16,_T("Cable"));m_provider.SetItemText(16,1,_T("187"));m_provider.SetItemText(16,2,_T("64"));
+	m_provider.InsertItem(17,_T("T1"));m_provider.SetItemText(17,1,_T("1500"));m_provider.SetItemText(17,2,_T("1500"));
+	m_provider.InsertItem(18,_T("T3+"));m_provider.SetItemText(18,1,_T("44 Mbps"));m_provider.SetItemText(18,2,_T("44 Mbps"));
 
 	m_provider.SetSelectionMark(0);
 
@@ -350,8 +350,8 @@ void Wizard::OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult)
 		default: return;
 	}
 	CString temp;
-	temp.Format("%u",down);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
-	temp.Format("%u",up);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
+	temp.Format(_T("%u"),down);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
+	temp.Format(_T("%u"),up);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
 	this->CheckDlgButton(IDC_KBITS,1);
 	this->CheckDlgButton(IDC_KBYTES,0);
 

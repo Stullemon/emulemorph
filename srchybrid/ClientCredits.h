@@ -147,7 +147,10 @@ public:
 	uint32	m_dwCryptRndChallengeFor;
 	uint32	m_dwCryptRndChallengeFrom;
 	EIdentState	GetCurrentIdentState(uint32 dwForIP); // can be != IdentState
-	uint32	GetSecureWaitStartTime(uint32 dwForIP);
+	//EastShare START - Modified by TAHO, modified SUQWT
+	//uint32	GetSecureWaitStartTime(uint32 dwForIP);
+	sint64	GetSecureWaitStartTime(uint32 dwForIP);
+	//EastShare END - Modified by TAHO, modified SUQWT
 	void	SetSecWaitStartTime(uint32 dwForIP);
 	void	SetSecWaitStartTime(); //EastShare - Added by TAHO, modified SUQWT
 

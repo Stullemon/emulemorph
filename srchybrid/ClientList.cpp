@@ -29,10 +29,8 @@
 #include "ListenSocket.h"
 #include "Opcodes.h"
 #include "Sockets.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
 #include "TransferWnd.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,6 +42,7 @@ static char THIS_FILE[]=__FILE__;
 CClientList::CClientList(){
 	m_dwLastBannCleanUp = 0;
 	m_dwLastTrackedCleanUp = 0;
+	m_dwLastClientCleanUp = 0;
 	m_bannedList.InitHashTable(331);
 	m_trackedClientsList.InitHashTable(2011);
 }
@@ -219,19 +218,24 @@ void CClientList::AddClient(CUpDownClient* toadd, bool bSkipDupTest)
 	theApp.emuledlg->transferwnd->clientlistctrl.AddClient(toadd);
 	list.AddTail(toadd);
 }
-//MORPH START - Added by SiRoB, ZZ Upload system (USS)
+
+// ZZ:UploadSpeedSense -->
 bool CClientList::GiveClientsForTraceRoute() {
     // this is a host that lastCommonRouteFinder can use to traceroute
     return theApp.lastCommonRouteFinder->AddHostsToCheck(list);
 }
-//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+// ZZ:UploadSpeedSense <--
 
-//MORPH START - Changed by SiRoB, ZZ Upload system
-void CClientList::RemoveClient(CUpDownClient* toremove){
+void CClientList::RemoveClient(CUpDownClient* toremove, LPCTSTR pszReason){
 	POSITION pos = list.Find(toremove);
 	if (pos){
 		//just to be sure...
-		theApp.uploadqueue->RemoveFromUploadQueue(toremove, "Client removed from CClientList::RemoveClient().");
+		CString strInfo(_T("Client removed from CClientList::RemoveClient()."));
+		if (pszReason){
+			strInfo += _T(" Reason: ");
+			strInfo += pszReason;
+		}
+		theApp.uploadqueue->RemoveFromUploadQueue(toremove, strInfo);
 		theApp.uploadqueue->RemoveFromWaitingQueue(toremove);
 		 // EastShare START - Added by TAHO, modified SUQWT
 		if ( toremove != NULL && toremove->Credits() != NULL) {
@@ -290,7 +294,7 @@ bool CClientList::AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket*
 					// if found_client is connected and has the IS_IDENTIFIED, it's safe to say that the other one is a bad guy
 					if (found_client->Credits() && found_client->Credits()->GetCurrentIdentState(found_client->GetIP()) == IS_IDENTIFIED){
 						if (thePrefs.GetLogBannedClients())
-							AddDebugLogLine(false, "Clients: %s (%s), Banreason: Userhash invalid", tocheck->GetUserName(), ipstr(tocheck->GetConnectIP()));
+							AddDebugLogLine(false, _T("Clients: %s (%s), Banreason: Userhash invalid"), tocheck->GetUserName(), ipstr(tocheck->GetConnectIP()));
 						tocheck->Ban();
 						return false;
 					}
@@ -408,13 +412,13 @@ void CClientList::AddBannedClient(uint32 dwIP){
 	m_bannedList.SetAt(dwIP, ::GetTickCount());
 }
 
-bool CClientList::IsBannedClient(uint32 dwIP){
-	uint32 dwBantime = 0;
+bool CClientList::IsBannedClient(uint32 dwIP) /*const*/
+{
+	uint32 dwBantime;
 	if (m_bannedList.Lookup(dwIP, dwBantime)){
 		if (dwBantime + CLIENTBANTIME > ::GetTickCount() )
 			return true;
-		else
-			RemoveBannedClient(dwIP);
+		RemoveBannedClient(dwIP);
 	}
 	return false; 
 }
@@ -423,6 +427,8 @@ void CClientList::RemoveBannedClient(uint32 dwIP){
 	m_bannedList.RemoveKey(dwIP);
 }
 
+////////////////////////////////////////
+/// Tracked clients
 void CClientList::AddTrackClient(CUpDownClient* toadd){
 	CDeletedClient* pResult = 0;
 	if (m_trackedClientsList.Lookup(toadd->GetIP(), pResult)){
@@ -459,12 +465,42 @@ bool CClientList::ComparePriorUserhash(uint32 dwIP, uint16 nPort, void* pNewHash
 	return true;
 }
 
-uint16 CClientList::GetClientsFromIP(uint32 dwIP){
-	CDeletedClient* pResult = 0;
-	if (m_trackedClientsList.Lookup(dwIP, pResult)){
+UINT CClientList::GetClientsFromIP(uint32 dwIP) const
+{
+	CDeletedClient* pResult;
+	if (m_trackedClientsList.Lookup(dwIP, pResult))
 		return pResult->m_ItemsList.GetCount();
-	}
 	return 0;
+}
+
+void CClientList::TrackBadRequest(const CUpDownClient* upcClient, sint32 nIncreaseCounter){
+	CDeletedClient* pResult = NULL;
+	if (upcClient->GetIP() == 0){
+		ASSERT( false );
+		return;
+	}
+	if (m_trackedClientsList.Lookup(upcClient->GetIP(), pResult)){
+		pResult->m_dwInserted = ::GetTickCount();
+		pResult->m_cBadRequest += nIncreaseCounter;
+	}
+	else{
+		CDeletedClient* ccToAdd = new CDeletedClient(upcClient);
+		ccToAdd->m_cBadRequest = nIncreaseCounter;
+		m_trackedClientsList.SetAt(upcClient->GetIP(), ccToAdd);
+	}
+}
+
+uint32 CClientList::GetBadRequests(const CUpDownClient* upcClient) const{
+	CDeletedClient* pResult = NULL;
+	if (upcClient->GetIP() == 0){
+		ASSERT( false );
+		return 0;
+	}
+	if (m_trackedClientsList.Lookup(upcClient->GetIP(), pResult)){
+		return pResult->m_cBadRequest;
+	}
+	else
+		return 0;
 }
 
 void CClientList::Process(){
@@ -486,7 +522,7 @@ void CClientList::Process(){
 	if (m_dwLastTrackedCleanUp + TRACKED_CLEANUP_TIME < cur_tick ){
 		m_dwLastTrackedCleanUp = cur_tick;
 		if (thePrefs.GetLogBannedClients())
-			AddDebugLogLine(false, "Cleaning up TrackedClientList, %i clients on List...", m_trackedClientsList.GetCount());
+			AddDebugLogLine(false, _T("Cleaning up TrackedClientList, %i clients on List..."), m_trackedClientsList.GetCount());
 		POSITION pos = m_trackedClientsList.GetStartPosition();
 		uint32 nKey;
 		CDeletedClient* pResult;
@@ -498,7 +534,7 @@ void CClientList::Process(){
 			}
 		}
 		if (thePrefs.GetLogBannedClients())
-			AddDebugLogLine(false, "...done, %i clients left on list", m_trackedClientsList.GetCount());
+			AddDebugLogLine(false, _T("...done, %i clients left on list"), m_trackedClientsList.GetCount());
 	}
 
 	//We need to try to connect to the clients in RequestTCPList
@@ -537,6 +573,8 @@ void CClientList::Process(){
 				RemoveTCP(cur_client);
 		}
 	}
+
+	CleanUpClientList();
 }
 
 #ifdef _DEBUG
@@ -577,11 +615,11 @@ void CClientList::RequestTCP(Kademlia::CContact* contact)
 		return;
 
 	//Add client to the lists to be processed.
-	CUpDownClient* test = new CUpDownClient(0, contact->getTCPPort(), contact->getIPAddress(), 0, 0, false );
-	test->SetKadPort(contact->getUDPPort());
-	test->SetKadState(KS_QUEUED_FWCHECK);
-	RequestTCPList.AddTail(test);
-	AddClient(test);
+	CUpDownClient* pNewClient = new CUpDownClient(0, contact->getTCPPort(), contact->getIPAddress(), 0, 0, false );
+	pNewClient->SetKadPort(contact->getUDPPort());
+	pNewClient->SetKadState(KS_QUEUED_FWCHECK);
+	RequestTCPList.AddTail(pNewClient);
+	AddClient(pNewClient);
 }
 
 void CClientList::RemoveTCP(CUpDownClient* torem){
@@ -592,12 +630,65 @@ void CClientList::RemoveTCP(CUpDownClient* torem){
 	}
 }
 
-CDeletedClient::CDeletedClient(CUpDownClient* pClient)
+void CClientList::CleanUpClientList(){
+	// we remove clients which are not needed any more by time
+	// this check is also done on CUpDownClient::Disconnected, however it will not catch all
+	// cases (if a client changes the state without beeing connected
+	//
+	// Adding this check directly to every point where any state changes would be more effective,
+	// is however not compatible with the current code, because there are points where a client has
+	// no state for some code lines and the code is also not prepared that a client object gets
+	// invalid while working with it (aka setting a new state)
+	// so this way is just the easy and safe one to go (as long as emule is basically single threaded)
+	const uint32 cur_tick = ::GetTickCount();
+	if (m_dwLastClientCleanUp + CLIENTLIST_CLEANUP_TIME < cur_tick ){
+		m_dwLastClientCleanUp = cur_tick;
+		POSITION pos1, pos2;
+		uint32 cDeleted = 0;
+		for (pos1 = list.GetHeadPosition();( pos2 = pos1 ) != NULL;){
+			list.GetNext(pos1);
+			CUpDownClient* pCurClient =	list.GetAt(pos2);
+			if ((pCurClient->GetUploadState() == US_NONE || pCurClient->GetUploadState() == US_BANNED && !pCurClient->IsBanned())
+				&& pCurClient->GetDownloadState() == DS_NONE
+				&& pCurClient->GetChatState() == MS_NONE
+				&& pCurClient->GetKadState() == KS_NONE
+				&& pCurClient->socket == NULL)
+			{
+				cDeleted++;
+				delete pCurClient;
+			}
+		}
+		DEBUG_ONLY(AddDebugLogLine(false,_T("Cleaned ClientList, removed %i not used known clients"), cDeleted));
+	}
+}
+
+
+CDeletedClient::CDeletedClient(const CUpDownClient* pClient)
 {
+	m_cBadRequest = 0;
 	m_dwInserted = ::GetTickCount();
 	PORTANDHASH porthash = { pClient->GetUserPort(), pClient->Credits()};
 	m_ItemsList.Add(porthash);
 }
+
+// ZZ:DownloadManager -->
+void CClientList::ProcessA4AFClients() {
+    //if(thePrefs.GetLogA4AF()) AddDebugLogLine(false, _T(">>> Starting A4AF check"));
+	POSITION pos1, pos2;
+	for (pos1 = list.GetHeadPosition();( pos2 = pos1 ) != NULL;){
+		list.GetNext(pos1);
+		CUpDownClient* cur_client =	list.GetAt(pos2);
+
+        if(cur_client->GetDownloadState() != DS_DOWNLOADING &&
+           cur_client->GetDownloadState() != DS_CONNECTED &&
+           (!cur_client->m_OtherRequests_list.IsEmpty() || !cur_client->m_OtherNoNeeded_list.IsEmpty())) {
+            //AddDebugLogLine(false, "+++ ZZ:DownloadManager: Trying for better file for source: %s '%s'", cur_client->GetUserName(), cur_client->reqfile->GetFileName());
+               cur_client->SwapToAnotherFile(_T("Periodic A4AF check CClientList::ProcessA4AFClients()"), false, false, false, NULL, true, false);
+        }
+	}
+    //if(thePrefs.GetLogA4AF()) AddDebugLogLine(false, _T(">>> Done with A4AF check"));
+}
+// <-- ZZ:DownloadManager
 
 //EastShare Start - added by AndCycle, IP to Country
 void CClientList::ResetIP2Country(){

@@ -24,6 +24,8 @@ struct Fakes_Struct{
    CString			RealTitle;
 };
 
+#define	DFLT_FAKECHECK_FILENAME	_T("fake.dat")
+
 typedef CTypedPtrArray<CPtrArray, Fakes_Struct*> CFakecheckArray;
 
 class CFakecheck: public CLoggable
@@ -37,6 +39,7 @@ public:
 	CString GetLastHit() const;
 	bool	IsFake(uchar* Hash2test, uint32 lenght);
 	void	DownloadFakeList();
+	CString GetDefaultFilePath() const;
 private:
 	const Fakes_Struct* m_pLastHit;
 	CFakecheckArray m_fakelist;

@@ -33,6 +33,7 @@
 //
 //--------------------------------------------------------------------------------------------
 #include "stdafx.h"
+#include <share.h>
 #include "CustomAutoComplete.h"
 
 #ifdef _DEBUG
@@ -76,7 +77,7 @@ BOOL CCustomAutoComplete::Bind(HWND p_hWndEdit, DWORD p_dwOptions, LPCTSTR p_lps
 		}
 
 		USES_CONVERSION;
-		if (SUCCEEDED(hr = m_pac->Init(p_hWndEdit, this, NULL, T2W(p_lpszFormatString))))
+		if (SUCCEEDED(hr = m_pac->Init(p_hWndEdit, this, NULL, T2CW(p_lpszFormatString))))
 		{
 			m_fBound = TRUE;
 			return TRUE;
@@ -247,7 +248,7 @@ STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR* rgelt, ULONG* pcelt
 			break;
 
 		rgelt[i] = (LPWSTR)::CoTaskMemAlloc((ULONG) sizeof(WCHAR) * (m_asList[m_nCurrentElement].GetLength() + 1));
-		wcscpy(rgelt[i], T2W(m_asList[m_nCurrentElement]));
+		wcscpy(rgelt[i], T2CW(m_asList[m_nCurrentElement]));
 
 		if (pceltFetched)
 			*pceltFetched++;
@@ -307,12 +308,12 @@ HRESULT CCustomAutoComplete::EnDisable(BOOL p_fEnable)
 
 BOOL CCustomAutoComplete::LoadList(LPCTSTR pszFileName)
 {
-	FILE* fp = _tfopen(pszFileName, _T("rt"));
+	FILE* fp = _tfsopen(pszFileName, _T("rt"), _SH_DENYWR);
 	if (fp == NULL)
 		return FALSE;
 
 	TCHAR szItem[256];
-	while (fgets(szItem, ARRSIZE(szItem), fp) != NULL){
+	while (_fgetts(szItem, ARRSIZE(szItem), fp) != NULL){
 		CString strItem(szItem);
 		strItem.Trim(_T(" \r\n"));
 		AddItem(strItem, -1);
@@ -323,12 +324,12 @@ BOOL CCustomAutoComplete::LoadList(LPCTSTR pszFileName)
 
 BOOL CCustomAutoComplete::SaveList(LPCTSTR pszFileName)
 {
-	FILE* fp = _tfopen(pszFileName, _T("wt"));
+	FILE* fp = _tfsopen(pszFileName, _T("wt"), _SH_DENYWR);
 	if (fp == NULL)
 		return FALSE;
 
 	for (int i = 0; i < m_asList.GetCount(); i++)
-		fprintf(fp, "%s\n", m_asList[i]);
+		_ftprintf(fp, _T("%s\n"), m_asList[i]);
 	fclose(fp);
 	return !ferror(fp);
 }

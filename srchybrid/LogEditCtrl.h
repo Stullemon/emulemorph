@@ -8,9 +8,10 @@ public:
 	CLogEditCtrl();
 	virtual ~CLogEditCtrl();
 
-	void Init(LPCTSTR pszTitle);
+	void Init(LPCTSTR pszTitle, LPCTSTR pszSkinKey = NULL);
 	void SetTitle(LPCTSTR pszTitle);
 	void Localize();
+	void ApplySkin();
 
 	void AddEntry(LPCTSTR pszMsg);
 	void Add(LPCTSTR pszMsg, int iLen = -1);
@@ -28,6 +29,10 @@ protected:
 	bool m_bNoPaint;
 	bool m_bEnErrSpace;
 	CString m_strTitle;
+	CString m_strSkinKey;
+	COLORREF m_crForeground;
+	COLORREF m_crBackground;
+	CBrush m_brBackground;
 
 	void AddLine(LPCTSTR pszMsg, int iLen);
 	void SelectAllItems();
@@ -45,4 +50,6 @@ protected:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnEnErrspace();
 	afx_msg void OnEnMaxtext();
+	afx_msg void OnSysColorChange();
+	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 };

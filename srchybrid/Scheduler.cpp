@@ -21,10 +21,8 @@
 #include "ini2.h"
 #include "Preferences.h"
 #include "DownloadQueue.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
 #include "MenuCmds.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -49,26 +47,26 @@ int CScheduler::LoadFromFile(){
 	CString strName;
 	CString temp;
 
-	strName.Format("%spreferences.ini",thePrefs.GetConfigDir());
-	CIni ini(strName, "Scheduler");
+	strName.Format(_T("%spreferences.ini"),thePrefs.GetConfigDir());
+	CIni ini(strName, _T("Scheduler"));
 	
-	uint8 max=ini.GetInt("Count",0);
+	uint8 max=ini.GetInt(_T("Count"),0);
 	uint8 count=0;
 
 	while (count<max) {
-		strName.Format("Schedule#%i",count);
-		temp=ini.GetString("Title","",strName);
-		if (temp!="") {
+		strName.Format(_T("Schedule#%i"),count);
+		temp=ini.GetString(_T("Title"),_T(""),strName);
+		if (temp!=_T("")) {
 			Schedule_Struct* news= new Schedule_Struct();
 			news->title=temp;
-			news->day=ini.GetInt("Day",0);
-			news->enabled=ini.GetBool("Enabled");
-			news->time=ini.GetInt("StartTime");
-			news->time2=ini.GetInt("EndTime");
+			news->day=ini.GetInt(_T("Day"),0);
+			news->enabled=ini.GetBool(_T("Enabled"));
+			news->time=ini.GetInt(_T("StartTime"));
+			news->time2=ini.GetInt(_T("EndTime"));
 			ini.SerGet(true, news->actions,
-				ARRSIZE(news->actions), "Actions");
+				ARRSIZE(news->actions), _T("Actions"));
 			ini.SerGet(true, news->values,
-				ARRSIZE(news->values), "Values");
+				ARRSIZE(news->values), _T("Values"));
 
 			AddSchedule(news);
 			count++;
@@ -78,32 +76,31 @@ int CScheduler::LoadFromFile(){
 }
 
 void CScheduler::SaveToFile(){
-	if (theApp.scheduler->GetCount()==0) return;
 
 	CString strName;
 	CString temp;
 	Schedule_Struct* schedule;
 
-	strName.Format("%spreferences.ini",thePrefs.GetConfigDir());
+	strName.Format(_T("%spreferences.ini"),thePrefs.GetConfigDir());
 
-	CIni ini(strName, "Scheduler");
+	CIni ini(strName, _T("Scheduler"));
 
-	ini.WriteInt("Count", GetCount());
+	ini.WriteInt(_T("Count"), GetCount());
 	
 	for (uint8 i=0; i<GetCount();i++) {
 		schedule=theApp.scheduler->GetSchedule(i);
 
-		strName.Format("Schedule#%i",i);
-		ini.WriteString("Title",schedule->title,strName);
-		ini.WriteInt("Day",schedule->day);
-		ini.WriteInt("StartTime",schedule->time);
-		ini.WriteInt("EndTime",schedule->time2);
-		ini.WriteBool("Enabled",schedule->enabled);
+		strName.Format(_T("Schedule#%i"),i);
+		ini.WriteString(_T("Title"),schedule->title,strName);
+		ini.WriteInt(_T("Day"),schedule->day);
+		ini.WriteInt(_T("StartTime"),schedule->time);
+		ini.WriteInt(_T("EndTime"),schedule->time2);
+		ini.WriteBool(_T("Enabled"),schedule->enabled);
 
 		ini.SerGet(false, schedule->actions,
-			ARRSIZE(schedule->actions), "Actions");
+			ARRSIZE(schedule->actions), _T("Actions"));
 		ini.SerGet(false, schedule->values,
-			ARRSIZE(schedule->values), "Values");
+			ARRSIZE(schedule->values), _T("Values"));
 	}
 }
 
@@ -201,7 +198,7 @@ void CScheduler::SaveOriginals() {
 	original_sources=thePrefs.GetMaxSourcePerFile();
 	
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
-	original_ussmaxping=thePrefs.GetDynUpPingLimit();
+	original_ussmaxping=thePrefs.GetDynUpPingToleranceMilliseconds();
 	original_ussgoup=thePrefs.GetDynUpGoingUpDivider();
 	original_ussgodown=thePrefs.GetDynUpGoingDownDivider();
 	original_ussminup=thePrefs.GetMinUpload();
@@ -216,7 +213,7 @@ void CScheduler::RestoreOriginals() {
 	thePrefs.SetMaxSourcesPerFile(original_sources);
 
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
-	thePrefs.SetDynUpPingLimit(original_ussmaxping);
+	thePrefs.SetDynUpPingToleranceMilliseconds(original_ussmaxping);
 	thePrefs.SetDynUpGoingUpDivider(original_ussgoup);
 	thePrefs.SetDynUpGoingDownDivider(original_ussgodown);
 	thePrefs.SetMinUpload(original_ussminup);
@@ -231,37 +228,37 @@ void CScheduler::ActivateSchedule(uint8 index,bool makedefault) {
 		if (schedule->values[ai]=="" /* maybe ignore in some future cases...*/ ) continue;
 
 		switch (schedule->actions[ai]) {
-			case 1 : thePrefs.SetMaxUpload(atoi(schedule->values[ai]));
-				if (makedefault) original_upload=atoi(schedule->values[ai]); 
+			case 1 : thePrefs.SetMaxUpload(_tstoi(schedule->values[ai]));
+				if (makedefault) original_upload=_tstoi(schedule->values[ai]); 
 				break;
-			case 2 : thePrefs.SetMaxDownload(atoi(schedule->values[ai]));
-				if (makedefault) original_download=atoi(schedule->values[ai]);
+			case 2 : thePrefs.SetMaxDownload(_tstoi(schedule->values[ai]));
+				if (makedefault) original_download=_tstoi(schedule->values[ai]);
 				break;
-			case 3 : thePrefs.SetMaxSourcesPerFile(atoi(schedule->values[ai]));
-				if (makedefault) original_sources=atoi(schedule->values[ai]);
+			case 3 : thePrefs.SetMaxSourcesPerFile(_tstoi(schedule->values[ai]));
+				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 4 : thePrefs.SetMaxConsPerFive(atoi(schedule->values[ai]));
-				if (makedefault) original_cons5s=atoi(schedule->values[ai]);
+			case 4 : thePrefs.SetMaxConsPerFive(_tstoi(schedule->values[ai]));
+				if (makedefault) original_cons5s=_tstoi(schedule->values[ai]);
 				break;
-			case 5 : thePrefs.SetMaxConnections(atoi(schedule->values[ai]));
-				if (makedefault) original_connections=atoi(schedule->values[ai]);
+			case 5 : thePrefs.SetMaxConnections(_tstoi(schedule->values[ai]));
+				if (makedefault) original_connections=_tstoi(schedule->values[ai]);
 				break;
 			
-			case 6 : theApp.downloadqueue->SetCatStatus(atoi(schedule->values[ai]),MP_STOP);break;
-			case 7 : theApp.downloadqueue->SetCatStatus(atoi(schedule->values[ai]),MP_RESUME);break;
+			case 6 : theApp.downloadqueue->SetCatStatus(_tstoi(schedule->values[ai]),MP_STOP);break;
+			case 7 : theApp.downloadqueue->SetCatStatus(_tstoi(schedule->values[ai]),MP_RESUME);break;
 
 			//EastShare START - Added by Pretender, add USS settings in scheduler tab
-			case 8 : thePrefs.SetDynUpPingLimit(atoi(schedule->values[ai]));
-				if (makedefault) original_sources=atoi(schedule->values[ai]);
+			case 8 : thePrefs.SetDynUpPingToleranceMilliseconds(_tstoi(schedule->values[ai]));
+				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 9 : thePrefs.SetDynUpGoingUpDivider(atoi(schedule->values[ai]));
-				if (makedefault) original_sources=atoi(schedule->values[ai]);
+			case 9 : thePrefs.SetDynUpGoingUpDivider(_tstoi(schedule->values[ai]));
+				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 10 : thePrefs.SetDynUpGoingDownDivider(atoi(schedule->values[ai]));
-				if (makedefault) original_sources=atoi(schedule->values[ai]);
+			case 10 : thePrefs.SetDynUpGoingDownDivider(_tstoi(schedule->values[ai]));
+				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
 				break;
-			case 11 : thePrefs.SetMinUpload(atoi(schedule->values[ai]));
-				if (makedefault) original_sources=atoi(schedule->values[ai]);
+			case 11 : thePrefs.SetMinUpload(_tstoi(schedule->values[ai]));
+				if (makedefault) original_sources=_tstoi(schedule->values[ai]);
 				break;
 			//EastShare END - Added by Pretender, add USS settings in scheduler tab
 		}

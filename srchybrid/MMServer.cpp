@@ -37,9 +37,7 @@
 #include "Preferences.h"
 #include "SearchParams.h"
 #include "kademlia/kademlia/kademlia.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -85,7 +83,7 @@ void CMMServer::Init(){
 			AddLogLine(false, GetResString(IDS_MMFAILED) );
 		}
 		else{
-			AddLogLine(false, GetResString(IDS_MMSTARTED), thePrefs.GetMMPort(), MM_STRVERSION );
+			AddLogLine(false, GetResString(IDS_MMSTARTED), thePrefs.GetMMPort(), _T(MM_STRVERSION));
 		}
 	}
 }
@@ -186,7 +184,7 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 	packet->WriteByte((uint8)theApp.downloadqueue->GetDownloadingFileCount());
 	packet->WriteByte((uint8)theApp.downloadqueue->GetPausedFileCount());
 	packet->WriteInt(theApp.stat_sessionReceivedBytes/1048576);
-	packet->WriteShort((uint16)((theApp.statistics->GetAvgDownloadRate(0)*1024)/100));
+	packet->WriteShort((uint16)((theStats.GetAvgDownloadRate(0)*1024)/100));
 	if (theApp.serverconnect->IsConnected()){
 		if(theApp.serverconnect->IsLowID())
 			packet->WriteByte(1);
@@ -399,26 +397,26 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	uint8 byType = data->ReadByte();
 	switch(byType){
 		case 0:
-			Params.strFileType = GetResString(IDS_SEARCH_ANY);
+			Params.strFileType.Empty();
 			break;
 		case 1:
-			Params.strFileType = GetResString(IDS_SEARCH_ARC);
+			Params.strFileType = ED2KFTSTR_ARCHIVE;
 			break;
 		case 2:
-			Params.strFileType = GetResString(IDS_SEARCH_AUDIO);
+			Params.strFileType = ED2KFTSTR_AUDIO;
 			break;
 		case 3:
-			Params.strFileType = GetResString(IDS_SEARCH_CDIMG);
+			Params.strFileType = ED2KFTSTR_CDIMAGE;
 			break;
 		case 4:
-			Params.strFileType = GetResString(IDS_SEARCH_PRG);
+			Params.strFileType = ED2KFTSTR_PROGRAM;
 			break;
 		case 5:
-			Params.strFileType = GetResString(IDS_SEARCH_VIDEO);
+			Params.strFileType = ED2KFTSTR_VIDEO;
 			break;
 		default:
 			ASSERT ( false );
-			Params.strFileType = GetResString(IDS_SEARCH_ANY);
+			Params.strFileType.Empty();
 	}
 
 	bool bServerError = false;
@@ -463,7 +461,7 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	theApp.searchlist->NewSearch(NULL, Params.strFileType, MMS_SEARCHID, true);
 	Packet* searchpacket = new Packet(&searchdata);
 	searchpacket->opcode = OP_SEARCHREQUEST;
-	theApp.uploadqueue->AddUpDataOverheadServer(searchpacket->size);
+	theStats.AddUpDataOverheadServer(searchpacket->size);
 	theApp.serverconnect->SendPacket(searchpacket,true);
 	char buffer[500];
 	wsprintfA(buffer, "HTTP/1.1 200 OK\r\nConnection: Close\r\nContent-Type: %s\r\n", GetContentType());
@@ -687,7 +685,7 @@ VOID CALLBACK CMMServer::CommandTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWOR
 				break;
 		}
 	}
-	CATCH_DFLT_EXCEPTIONS("CMMServer::CommandTimer")
+	CATCH_DFLT_EXCEPTIONS(_T("CMMServer::CommandTimer"))
 }
 
 void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){

@@ -195,7 +195,7 @@ void CDirectoryTreeCtrl::Init(void)
 		HIMAGELIST hImgList = NULL;
 
 		// Get the system image list using a "path" which is available on all systems. [patch by bluecow]
-		hImgList = (HIMAGELIST)SHGetFileInfo(".", 0, &shFinfo, sizeof(shFinfo),
+		hImgList = (HIMAGELIST)SHGetFileInfo(_T("."), 0, &shFinfo, sizeof(shFinfo),
 												SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
 		if(!hImgList)
 		{
@@ -209,25 +209,26 @@ void CDirectoryTreeCtrl::Init(void)
 	////////////////////////////////
 
 
-	char drivebuffer[500];
-	::GetLogicalDriveStrings(500, drivebuffer); // e.g. "a:\ c:\ d:\"
+	TCHAR drivebuffer[500];
+	::GetLogicalDriveStrings(ARRSIZE(drivebuffer), drivebuffer); // e.g. "a:\ c:\ d:\"
 
-	const char* pos = drivebuffer;
-	while(*pos != '\0'){
+	const TCHAR* pos = drivebuffer;
+	while(*pos != _T('\0')){
 
 		// Copy drive name
-		char drive[4];
-		memccpy(drive, pos, '\0', 4);
+		TCHAR drive[4];
+		_tcsncpy(drive, pos, ARRSIZE(drive));
+		drive[ARRSIZE(drive) - 1] = _T('\0');
 
 		switch(drive[0]){
-			case 'a':
-			case 'A':
-			case 'b':
-			case 'B':
+			case _T('a'):
+			case _T('A'):
+			case _T('b'):
+			case _T('B'):
 			// Skip floppy disk
 			break;
 		default:
-			drive[2] = '\0'; 
+			drive[2] = _T('\0');
 			AddChildItem(NULL, drive); // e.g. ("c:")
 		}
 
@@ -240,8 +241,8 @@ void CDirectoryTreeCtrl::Init(void)
 HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 {
 	CString strPath = GetFullPath(hRoot);
-	if (hRoot != NULL && strPath.Right(1) != "\\")
-		strPath += "\\";
+	if (hRoot != NULL && strPath.Right(1) != _T("\\"))
+		strPath += _T("\\");
 	CString strDir = strPath + strText;
 	TV_INSERTSTRUCT itInsert;
 	memset(&itInsert, 0, sizeof(itInsert));
@@ -279,8 +280,8 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
 	{
 		CString strTemp = strDir;
-		if(strTemp.Right(1) != "\\")
-			strTemp += "\\";
+		if(strTemp.Right(1) != _T("\\"))
+			strTemp += _T("\\");
 		
 		UINT nType = GetDriveType(strTemp);
 		if(DRIVE_REMOVABLE <= nType && nType <= DRIVE_RAMDISK)
@@ -344,7 +345,7 @@ CString CDirectoryTreeCtrl::GetFullPath(HTREEITEM hItem)
 			strSearchItemDir = pti->strPath;
 		else
 			strSearchItemDir = GetItemText(hSearchItem);
-		strDir = strSearchItemDir + "\\" + strDir;
+		strDir = strSearchItemDir + _T("\\") + strDir;
 		hSearchItem = GetParentItem(hSearchItem);
 	}
 	return strDir;
@@ -352,12 +353,10 @@ CString CDirectoryTreeCtrl::GetFullPath(HTREEITEM hItem)
 
 void CDirectoryTreeCtrl::AddSubdirectories(HTREEITEM hRoot, CString strDir)
 {
-	if (strDir.Right(1) != "\\")
-		strDir += "\\";
-	if (!::SetCurrentDirectory(strDir))
-		return;
+	if (strDir.Right(1) != _T("\\"))
+		strDir += _T("\\");
 	CFileFind finder;
-	BOOL bWorking = finder.FindFile("*.*");
+	BOOL bWorking = finder.FindFile(strDir+_T("*.*"));
 	while (bWorking)
 	{
 		bWorking = finder.FindNextFile();
@@ -369,8 +368,8 @@ void CDirectoryTreeCtrl::AddSubdirectories(HTREEITEM hRoot, CString strDir)
 			continue;
 		
 		CString strFilename = finder.GetFileName();
-		if (strFilename.ReverseFind('\\') != -1)
-			strFilename = strFilename.Mid(strFilename.ReverseFind('\\') + 1);
+		if (strFilename.ReverseFind(_T('\\')) != -1)
+			strFilename = strFilename.Mid(strFilename.ReverseFind(_T('\\')) + 1);
 		AddChildItem(hRoot, strFilename);
 	}
 	finder.Close();
@@ -378,11 +377,10 @@ void CDirectoryTreeCtrl::AddSubdirectories(HTREEITEM hRoot, CString strDir)
 
 bool CDirectoryTreeCtrl::HasSubdirectories(CString strDir)
 {
-	if (strDir.Right(1) != '\\')
-		strDir += '\\';
-	::SetCurrentDirectory(strDir);
+	if (strDir.Right(1) != _T('\\'))
+		strDir += _T('\\');
 	CFileFind finder;
-	BOOL bWorking = finder.FindFile("*.*");
+	BOOL bWorking = finder.FindFile(strDir+_T("*.*"));
 	while (bWorking)
 	{
 		bWorking = finder.FindNextFile();
@@ -412,9 +410,9 @@ void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list)
 	for (POSITION pos = list->GetHeadPosition(); pos != NULL; )
 	{
 		CString str = list->GetNext(pos);
-		if (str.Left(2)=="\\\\") continue;
-		if (str.Right(1) != '\\')
-			str += '\\';
+		if (str.Left(2)==_T("\\\\")) continue;
+		if (str.Right(1) != _T('\\'))
+			str += _T('\\');
 		m_lstShared.AddTail(str);
 	}
 	Init();
@@ -422,8 +420,8 @@ void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list)
 
 bool CDirectoryTreeCtrl::HasSharedSubdirectory(CString strDir)
 {
-	if (strDir.Right(1) != '\\')
-		strDir += '\\';
+	if (strDir.Right(1) != _T('\\'))
+		strDir += _T('\\');
 	strDir.MakeLower();
 	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; )
 	{
@@ -449,13 +447,13 @@ void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked)
 
 bool CDirectoryTreeCtrl::IsShared(CString strDir)
 {
-	if (strDir.Right(1) != '\\')
-		strDir += '\\';
+	if (strDir.Right(1) != _T('\\'))
+		strDir += _T('\\');
 	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; )
 	{
 		CString str = m_lstShared.GetNext(pos);
-		if (str.Right(1) != '\\')
-			str += '\\';
+		if (str.Right(1) != _T('\\'))
+			str += _T('\\');
 		if (str.CompareNoCase(strDir) == 0)
 			return true;
 	}
@@ -464,8 +462,8 @@ bool CDirectoryTreeCtrl::IsShared(CString strDir)
 
 void CDirectoryTreeCtrl::AddShare(CString strDir)
 {
-	if (strDir.Right(1) != '\\')
-		strDir += '\\';
+	if (strDir.Right(1) != _T('\\'))
+		strDir += _T('\\');
 	
 	if (IsShared(strDir) || !strDir.CompareNoCase(CString(thePrefs.GetConfigDir()) ))
 		return;
@@ -475,8 +473,8 @@ void CDirectoryTreeCtrl::AddShare(CString strDir)
 
 void CDirectoryTreeCtrl::DelShare(CString strDir)
 {
-	if (strDir.Right(1) != '\\')
-		strDir += '\\';
+	if (strDir.Right(1) != _T('\\'))
+		strDir += _T('\\');
 	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; )
 	{
 		POSITION pos2 = pos;
@@ -561,7 +559,7 @@ void CDirectoryTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 	if (wParam < MP_SHAREDFOLDERS_FIRST)
 	{
-		ShellExecute(NULL, "open", m_strLastRightClicked, NULL, NULL, SW_SHOW);
+		ShellExecute(NULL, _T("open"), m_strLastRightClicked, NULL, NULL, SW_SHOW);
 		return false;
 	}
 	int cnt = 0;
@@ -570,7 +568,7 @@ BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 		CString str = m_lstShared.GetNext(pos);
 		if (cnt == wParam-MP_SHAREDFOLDERS_FIRST)
 		{
-			ShellExecute(NULL, "open", str, NULL, NULL, SW_SHOW);
+			ShellExecute(NULL, _T("open"), str, NULL, NULL, SW_SHOW);
 			return true;
 		}
 		cnt++;

@@ -21,18 +21,20 @@
 #include "PartFile.h"
 #include "OtherFunctions.h"
 #include "ListenSocket.h"
-#include "opcodes.h"
+#include "PeerCacheSocket.h"
+//#include "opcodes.h" // ZZ:DownloadManager
 #include "Preferences.h"
 #include "SafeFile.h"
 #include "Packets.h"
-#include "UploadQueue.h"
+#include "Statistics.h"
 #include "ClientCredits.h"
 #include "DownloadQueue.h"
 #include "ClientUDPSocket.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
 #include "TransferWnd.h"
-#endif
+#include "PeerCacheFinder.h"
+#include "Exceptions.h"
+#include "clientlist.h"
 #include "IPFilter.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
@@ -40,6 +42,8 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+extern UINT GetPeerCacheSocketDownloadTimeout();
 
 //	members of CUpDownClient
 //	which are mainly used for downloading functions 
@@ -50,41 +54,19 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool
 */
 void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  bFlat)
 { 
-	COLORREF crBoth; 
 	COLORREF crNeither; 
-	COLORREF crClientOnly; 
-	COLORREF crPending;
-	COLORREF crNextPending;
-	//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
-	COLORREF crMeOnly; 
-	//--- :xrmb ---
-	COLORREF crA4AF; 
-	if(bFlat) { 
-		crBoth = RGB(0, 0, 0);
+	if(bFlat) {
 		crNeither = RGB(224, 224, 224);
-		crClientOnly = RGB(0, 100, 255);
-		crPending = RGB(0,150,0);
-		crNextPending = RGB(255,208,0);
-		//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
-		crMeOnly = RGB(112,112,112);
-		//--- :xrmb ---
-		crA4AF = RGB(192, 100, 255);
-	} else { 
-		crBoth = RGB(104, 104, 104);
+	} else {
 		crNeither = RGB(240, 240, 240);
-		crClientOnly = RGB(0, 100, 255);
-		crPending = RGB(0, 150, 0);
-		crNextPending = RGB(255,208,0);
-		//MORPH - Added by IceCream--- xrmb:seeTheNeed ---
-		crMeOnly = RGB(172,172,172);
-		//--- :xrmb ---
-		crA4AF = RGB(192, 100, 255);
-	} 
+	}
 
 	
 	//MORPH START - Changed by SiRoB, See A4AF PartStatus
-	//ASSERT(reqfile);
-	//s_StatusBar.SetFileSize(reqfile->GetFileSize()); 
+	/*
+	ASSERT(reqfile);
+	s_StatusBar.SetFileSize(reqfile->GetFileSize()); 
+	*/
 	ASSERT(file);
 	s_StatusBar.SetFileSize(file->GetFileSize()); 
 	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
@@ -92,33 +74,62 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	s_StatusBar.SetWidth(rect->right - rect->left); 
 	s_StatusBar.Fill(crNeither); 
 
-	uint32 uEnd; 
-
-	// Barry - was only showing one part from client, even when reserved bits from 2 parts
-	
 	//MORPH START - Changed by SiRoB, See A4AF PartStatus
 	uint8* thisStatus;
 	if(m_PartStatus_list.Lookup(file,thisStatus) && thisStatus){
-		CString gettingParts;
-		if (file == reqfile)
-			ShowDownloadingParts(&gettingParts,file->GetPartCount());
+		COLORREF crBoth; 
+		COLORREF crClientOnly; 
+		COLORREF crPending;
+		COLORREF crNextPending;
+		COLORREF crMeOnly; //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
+		COLORREF crA4AF; 
+		if(bFlat) { 
+			crBoth = RGB(0, 0, 0);
+			crClientOnly = RGB(0, 100, 255);
+			crPending = RGB(0,150,0);
+			crNextPending = RGB(255,208,0);
+			crMeOnly = RGB(112,112,112); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
+			crA4AF = RGB(192, 100, 255);
+		} else { 
+			crBoth = RGB(104, 104, 104);
+			crClientOnly = RGB(0, 100, 255);
+			crPending = RGB(0, 150, 0);
+			crNextPending = RGB(255,208,0);
+			crMeOnly = RGB(172,172,172); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
+			crA4AF = RGB(192, 100, 255);
+		} 
+
+		char* pcNextPendingBlks = NULL;
+		if (m_nDownloadState == DS_DOWNLOADING && file == reqfile){
+			pcNextPendingBlks = new char[m_nPartCount];
+			memset(pcNextPendingBlks, 'N', m_nPartCount); // do not use '_strnset' for uninitialized memory!
+			for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != 0; ){
+				UINT uPart = m_PendingBlocks_list.GetNext(pos)->block->StartOffset / PARTSIZE;
+				if (uPart < m_nPartCount)
+					pcNextPendingBlks[uPart] = 'Y';
+			}
+		}
+
 		for (uint32 i = 0;i < file->GetPartCount();i++){
-			if (thisStatus[i]){ 
-				uEnd = PARTSIZE*(i+1);
+			uint32 uEnd;
+			if (thisStatus[i]){
+				if (PARTSIZE*(i+1) > file->GetFileSize())
+					uEnd = file->GetFileSize();
+				else
+					uEnd = PARTSIZE*(i+1);
 				if (file->IsComplete(PARTSIZE*i,PARTSIZE*(i+1)-1))
 					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crBoth);
-				else if (file == reqfile){
-					if (m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset < uEnd &&
-							m_nLastBlockOffset >= PARTSIZE*i)
+				else if (file == reqfile)
+				{
+					if (m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset >= PARTSIZE*i && m_nLastBlockOffset < uEnd)
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crPending);
-					else if (gettingParts.GetAt((uint16)i) == 'Y') //Sony: cast to (uint16) to fix VC7.1 2GB+ file error
+					else if (pcNextPendingBlks != NULL && pcNextPendingBlks[i] == 'Y')
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crNextPending);
 					else
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
 				}
 				else
 					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crA4AF);
-				//MORPH END  - Changed by SiRoB, Advanced A4AF derivated from Khaos	
 			} 
 			//MORPH - Added by IceCream --- xrmb:seeTheNeed ---
 			else if (file->IsComplete(PARTSIZE*i,PARTSIZE*(i+1)-1)){ 
@@ -126,11 +137,11 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 					uEnd = file->GetFileSize(); 
 				else 
 					uEnd = PARTSIZE*(i+1); 
-
 				s_StatusBar.FillRange(PARTSIZE*i, uEnd, crMeOnly);
 			}
 			//--- :xrmb ---
-		} 
+		}
+		delete[] pcNextPendingBlks;
 	} 
 	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
 	s_StatusBar.Draw(dc, rect->left, rect->top, bFlat); 
@@ -198,19 +209,36 @@ bool CUpDownClient::AskForDownload()
 		theApp.downloadqueue->AddFailedUDPFileReasks();
 	}
 	m_bUDPPending = false;
-	m_dwLastAskedTime = ::GetTickCount();
+    SwapToAnotherFile(_T("A4AF check before tcp file reask. CUpDownClient::AskForDownload()"), true, false, false, NULL, true, true); // ZZ:DownloadManager
+    SetLastAskedTime(); // ZZ:DownloadManager
 	SetDownloadState(DS_CONNECTING);
 	return TryToConnect();
 }
 
 bool CUpDownClient::IsSourceRequestAllowed() const
 {
+    return IsSourceRequestAllowed(reqfile); // ZZ:DownloadManager
+} // ZZ:DownloadManager
+
+bool CUpDownClient::IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck) const // ZZ:DownloadManager
+{ // ZZ:DownloadManager
 	DWORD dwTickCount = ::GetTickCount() + CONNECTION_LATENCY;
 	unsigned int nTimePassedClient = dwTickCount - GetLastSrcAnswerTime();
-	unsigned int nTimePassedFile   = dwTickCount - reqfile->GetLastAnsweredTime();
+	unsigned int nTimePassedFile   = dwTickCount - partfile->GetLastAnsweredTime(); // ZZ:DownloadManager
 	bool bNeverAskedBefore = GetLastAskedForSources() == 0;
 
-	UINT uSources = reqfile->GetSourceCount();
+// ZZ:DownloadManager -->
+	UINT uSources = partfile->GetSourceCount();
+    UINT uValidSources = partfile->GetValidSourcesCount();
+
+    if(partfile != reqfile) {
+        uSources++;
+        uValidSources++;
+    }
+
+    UINT uReqValidSources = reqfile->GetValidSourcesCount();
+// <-- ZZ:DownloadManager
+
 	return (
 	         //if client has the correct extended protocol
 	         ExtProtocolAvailable() && GetSourceExchangeVersion() > 1 &&
@@ -222,16 +250,19 @@ bool CUpDownClient::IsSourceRequestAllowed() const
 	           (    !m_bCompleteSource
 				 && (bNeverAskedBefore || nTimePassedClient > SOURCECLIENTREASKS)
 			     && (uSources <= RARE_FILE/5)
+				 && (!sourceExchangeCheck || partfile == reqfile || uValidSources < uReqValidSources && uReqValidSources > 3) // ZZ:DownloadManager
 	           ) ||
 	           //source is not complete and file is rare
 	           ( !m_bCompleteSource
 				 && (bNeverAskedBefore || nTimePassedClient > SOURCECLIENTREASKS)
-			     && (uSources <= RARE_FILE || uSources - reqfile->GetValidSourcesCount() <= RARE_FILE / 2)
+			     && (uSources <= RARE_FILE || (!sourceExchangeCheck || partfile == reqfile) && uSources <= RARE_FILE / 2 + uValidSources) // ZZ:DownloadManager
 				 && (nTimePassedFile > SOURCECLIENTREASKF)
+				 && (!sourceExchangeCheck || partfile == reqfile || uValidSources < SOURCECLIENTREASKS/SOURCECLIENTREASKF && uValidSources < uReqValidSources) // ZZ:DownloadManager
 	           ) ||
 	           // OR if file is not rare
 			   ( (bNeverAskedBefore || nTimePassedClient > (unsigned)(SOURCECLIENTREASKS * MINCOMMONPENALTY)) 
 				 && (nTimePassedFile > (unsigned)(SOURCECLIENTREASKF * MINCOMMONPENALTY))
+				 && (!sourceExchangeCheck || partfile == reqfile || uValidSources < SOURCECLIENTREASKS/SOURCECLIENTREASKF && uValidSources < uReqValidSources) // ZZ:DownloadManager
 	           )
 	         )
 	       );
@@ -239,6 +270,9 @@ bool CUpDownClient::IsSourceRequestAllowed() const
 
 void CUpDownClient::SendFileRequest()
 {
+    // normally asktime has already been reset here, but then SwapToAnotherFile will return without much work, so check to make sure
+    SwapToAnotherFile(_T("A4AF check before tcp file reask. CUpDownClient::SendFileRequest()"), true, false, false, NULL, true, true); // ZZ:DownloadManager
+
 	ASSERT(reqfile != NULL);
 	if(!reqfile)
 		return;
@@ -268,70 +302,71 @@ void CUpDownClient::SendFileRequest()
 			reqfile->SetLastAnsweredTimeTimeout();
 			SetLastAskedForSources();
 			if (thePrefs.GetDebugSourceExchange())
-				AddDebugLogLine( false, "Send:Source Request User(%s) File(%s)", GetUserName(), reqfile->GetFileName() );
+				AddDebugLogLine(false, _T("Send:Source Request User(%s) File(%s)"), GetUserName(), reqfile->GetFileName() );
 		}
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__MultiPacket", this, (char*)reqfile->GetFileHash());
 		Packet* packet = new Packet(&dataFileReq, OP_EMULEPROT);
 		packet->opcode = OP_MULTIPACKET;
-		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+		theStats.AddUpDataOverheadFileRequest(packet->size);
 		socket->SendPacket(packet, true);
 	}
 	else
 	{
 		//This is extended information
-	if( GetExtendedRequestsVersion() > 0 ){
-		reqfile->WritePartStatus(&dataFileReq);
-	}
-	if( GetExtendedRequestsVersion() > 1 ){
+		if( GetExtendedRequestsVersion() > 0 ){
+			reqfile->WritePartStatus(&dataFileReq);
+		}
+		if( GetExtendedRequestsVersion() > 1 ){
 			reqfile->WriteCompleteSourcesCount(&dataFileReq);
-	}
+		}
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__FileRequest", this, (char*)reqfile->GetFileHash());
-	Packet* packet = new Packet(&dataFileReq);
+		Packet* packet = new Packet(&dataFileReq);
 		packet->opcode=OP_REQUESTFILENAME;
-	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-	socket->SendPacket(packet, true);
+		theStats.AddUpDataOverheadFileRequest(packet->size);
+		socket->SendPacket(packet, true);
 
-	// 26-Jul-2003: removed requesting the file status for files <= PARTSIZE for better compatibility with ed2k protocol (eDonkeyHybrid).
-	// if the remote client answers the OP_REQUESTFILENAME with OP_REQFILENAMEANSWER the file is shared by the remote client. if we
-	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
+		// 26-Jul-2003: removed requesting the file status for files <= PARTSIZE for better compatibility with ed2k protocol (eDonkeyHybrid).
+		// if the remote client answers the OP_REQUESTFILENAME with OP_REQFILENAMEANSWER the file is shared by the remote client. if we
+		// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 		if (reqfile->GetPartCount() > 1)
 		{
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
 				DebugSend("OP__SetReqFileID", this, (char*)reqfile->GetFileHash());
-	CSafeMemFile dataSetReqFileID(16);
+			CSafeMemFile dataSetReqFileID(16);
 			dataSetReqFileID.WriteHash16(reqfile->GetFileHash());
-	packet = new Packet(&dataSetReqFileID);
-	packet->opcode = OP_SETREQFILEID;
-	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-	socket->SendPacket(packet, true);
-	}
+			packet = new Packet(&dataSetReqFileID);
+			packet->opcode = OP_SETREQFILEID;
+		    theStats.AddUpDataOverheadFileRequest(packet->size);
+			socket->SendPacket(packet, true);
+		}
 
 		if( IsEmuleClient() )
 		{
-		SetRemoteQueueFull( true );
-		SetRemoteQueueRank(0);
-	}	
+			SetRemoteQueueFull( true );
+			SetRemoteQueueRank(0);
+		}	
 		if(IsSourceRequestAllowed()) 
 		{
 		    if (thePrefs.GetDebugClientTCPLevel() > 0){
 			    DebugSend("OP__RequestSources", this, (char*)reqfile->GetFileHash());
 			    if (GetLastAskedForSources() == 0)
-				    Debug("  first source request\n");
+				    Debug(_T("  first source request\n"));
 			    else
-				    Debug("  last source request was before %s\n", CastSecondsToHM((GetTickCount() - GetLastAskedForSources())/1000));
+				    Debug(_T("  last source request was before %s\n"), CastSecondsToHM((GetTickCount() - GetLastAskedForSources())/1000));
 		    }
 			reqfile->SetLastAnsweredTimeTimeout();
 			Packet* packet = new Packet(OP_REQUESTSOURCES,16,OP_EMULEPROT);
 			md4cpy(packet->pBuffer,reqfile->GetFileHash());
-			theApp.uploadqueue->AddUpDataOverheadSourceExchange(packet->size);
+			theStats.AddUpDataOverheadSourceExchange(packet->size);
 			socket->SendPacket(packet,true,true);
 			SetLastAskedForSources();
 			if (thePrefs.GetDebugSourceExchange())
-			AddDebugLogLine( false, "Send:Source Request User(%s) File(%s)", GetUserName(), reqfile->GetFileName() );
+				AddDebugLogLine(false, _T("Send:Source Request User(%s) File(%s)"), GetUserName(), reqfile->GetFileName() );
+		}
 	}
-}
+    SetLastAskedTime(); // ZZ:DownloadManager
 }
 void CUpDownClient::SendStartupLoadReq()
 {
@@ -347,8 +382,10 @@ void CUpDownClient::SendStartupLoadReq()
 	dataStartupLoadReq.WriteHash16(reqfile->GetFileHash());
 	Packet* packet = new Packet(&dataStartupLoadReq);
 	packet->opcode = OP_STARTUPLOADREQ;
-	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+	theStats.AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet, true, true);
+	m_fQueueRankPending = 1;
+	m_fUnaskQueueRankRecv = 0;
 }
 
 void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
@@ -399,7 +436,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			for (int i = 0; i < m_nPartCount; i++)
 				psz[i] = m_abyPartStatus[i] ? '#' : '.';
 			psz[i] = '\0';
-			Debug("  Parts=%u  %s  Needed=%u\n", m_nPartCount, psz, iNeeded);
+			Debug(_T("  Parts=%u  %hs  Needed=%u\n"), m_nPartCount, psz, iNeeded);
 			delete[] psz;
 		}
 		UpdateDisplayedInfo();
@@ -508,7 +545,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		for (int i = 0; i < m_nPartCount; i++)
 			psz[i] = m_abyPartStatus[i] ? '#' : '.';
 		psz[i] = '\0';
-		Debug("  Parts=%u  %s  Needed=%u\n", m_nPartCount, psz, iNeeded);
+		Debug(_T("  Parts=%u  %hs  Needed=%u\n"), m_nPartCount, psz, iNeeded);
 		delete[] psz;
 	}
 	
@@ -656,8 +693,10 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 void CUpDownClient::ProcessHashSet(char* packet,uint32 size){
 	if (!m_fHashsetRequesting)
 		throw CString(_T("unwanted hashset"));
-	if ( (!reqfile) || md4cmp(packet,reqfile->GetFileHash()))
+	if ( (!reqfile) || md4cmp(packet,reqfile->GetFileHash())){
+		CheckFailedFileIdReqs((uchar*)packet);
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessHashSet)");	
+	}
 	CSafeMemFile data((BYTE*)packet,size);
 	if (reqfile->LoadHashsetFromFile(&data,true)){
 		m_fHashsetRequesting = 0;
@@ -671,16 +710,12 @@ void CUpDownClient::ProcessHashSet(char* packet,uint32 size){
 	SendStartupLoadReq();
 }
 
-void CUpDownClient::SendBlockRequests(){
-	if (thePrefs.GetDebugClientTCPLevel() > 0)
-		DebugSend("OP__RequestParts", this, reqfile!=NULL ? (char*)reqfile->GetFileHash() : NULL);
-	m_dwLastBlockReceived = ::GetTickCount();
-	if (!reqfile)
-		return;
+void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
+{
+	ASSERT( iMaxBlocks >= 1 /*&& iMaxBlocks <= 3*/ );
 	if (m_DownloadBlocks_list.IsEmpty())
 	{
-		// Barry - instead of getting 3, just get how many is needed
-		uint16 count = 3 - m_PendingBlocks_list.GetCount();
+		uint16 count = iMaxBlocks - m_PendingBlocks_list.GetCount();
 		Requested_Block_Struct** toadd = new Requested_Block_Struct*[count];
 		if (reqfile->GetNextRequestedBlock(this,toadd,&count)){
 			for (int i = 0; i < count; i++)
@@ -689,9 +724,8 @@ void CUpDownClient::SendBlockRequests(){
 		delete[] toadd;
 	}
 
-	// Barry - Why are unfinished blocks requested again, not just new ones?
-
-	while (m_PendingBlocks_list.GetCount() < 3 && !m_DownloadBlocks_list.IsEmpty()){
+	while (m_PendingBlocks_list.GetCount() < iMaxBlocks && !m_DownloadBlocks_list.IsEmpty())
+	{
 		Pending_Block_Struct* pblock = new Pending_Block_Struct;
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
 		pblock->zStream = NULL;
@@ -700,15 +734,17 @@ void CUpDownClient::SendBlockRequests(){
 		pblock->fRecovered = 0;
 		m_PendingBlocks_list.AddTail(pblock);
 	}
+}
+
+void CUpDownClient::SendBlockRequests(){
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		DebugSend("OP__RequestParts", this, reqfile!=NULL ? (char*)reqfile->GetFileHash() : NULL);
+	m_dwLastBlockReceived = ::GetTickCount();
+	if (!reqfile)
+		return;
+	CreateBlockRequests(3);
 	if (m_PendingBlocks_list.IsEmpty()){
-		if (!GetSentCancelTransfer()){
-			if (thePrefs.GetDebugClientTCPLevel() > 0)
-				DebugSend("OP__CancelTransfer", this);
-			Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-			socket->SendPacket(packet,true,true);
-			SetSentCancelTransfer(1);
-		}
+		SendCancelTransfer();
 		SetDownloadState(DS_ONQUEUE);	// SLUGFILLER: noNeededRequeue
 		return;
 	}
@@ -738,11 +774,11 @@ void CUpDownClient::SendBlockRequests(){
 			data.WriteUInt32(endpos);
 			if (thePrefs.GetDebugClientTCPLevel() > 0){
 				CString strInfo;
-				strInfo.Format("  Block request: Start%u=%u  End%u=%u  Size=%u  Part=%u-%u", i, block->StartOffset, i, endpos, endpos - block->StartOffset, block->StartOffset/PARTSIZE, (endpos-1)/PARTSIZE);
-				strInfo.AppendFormat(",  Complete=%s", reqfile->IsComplete(block->StartOffset, block->EndOffset) ? "Yes(NOTE:)" : "No");
-				strInfo.AppendFormat(",  PureGap=%s", reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? "Yes" : "No(NOTE:)");
-				strInfo.AppendFormat(",  AlreadyRequested=%s", reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? "Yes" : "No(NOTE:)");
-				strInfo += '\n';
+				strInfo.Format(_T("  Block request: Start%u=%u  End%u=%u  Size=%u  Part=%u-%u"), i, block->StartOffset, i, endpos, endpos - block->StartOffset, block->StartOffset/PARTSIZE, (endpos-1)/PARTSIZE);
+				strInfo.AppendFormat(_T(",  Complete=%s"), reqfile->IsComplete(block->StartOffset, block->EndOffset) ? _T("Yes(NOTE:)") : _T("No"));
+				strInfo.AppendFormat(_T(",  PureGap=%s"), reqfile->IsPureGap(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+				strInfo.AppendFormat(_T(",  AlreadyRequested=%s"), reqfile->IsAlreadyRequested(block->StartOffset, block->EndOffset) ? _T("Yes") : _T("No(NOTE:)"));
+				strInfo += _T('\n');
 				Debug(strInfo);
 			}
 		}
@@ -750,10 +786,10 @@ void CUpDownClient::SendBlockRequests(){
 		{
 			data.WriteUInt32(0);
 			if (thePrefs.GetDebugClientTCPLevel() > 0)
-				Debug("  Block request: Start%u=%u  End%u=%u  Size=%u\n", i, 0, i, 0, 0);
+				Debug(_T("  Block request: Start%u=%u  End%u=%u  Size=%u\n"), i, 0, i, 0, 0);
 		}
 	}
-	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+	theStats.AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true,true);
 }
 
@@ -775,16 +811,18 @@ void CUpDownClient::SendBlockRequests(){
 void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 {
 	uint32 nDbgStartPos = *((uint32*)(packet+16));
-	if (thePrefs.GetDebugClientTCPLevel() > 0){
+	if (thePrefs.GetDebugClientTCPLevel() > 1){
 		if (packed)
-			Debug("  Start=%u  BlockSize=%u  Size=%u  %s\n", nDbgStartPos, *((uint32*)(packet + 16+4)), size-24, DbgGetFileInfo((uchar*)packet));
+			Debug(_T("  Start=%u  BlockSize=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), size-24, DbgGetFileInfo((uchar*)packet));
 		else
-			Debug("  Start=%u  End=%u  Size=%u  %s\n", nDbgStartPos, *((uint32*)(packet + 16+4)), *((uint32*)(packet + 16+4)) - nDbgStartPos, DbgGetFileInfo((uchar*)packet));
+			Debug(_T("  Start=%u  End=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), *((uint32*)(packet + 16+4)) - nDbgStartPos, DbgGetFileInfo((uchar*)packet));
 	}
 
 	// Ignore if no data required
-	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS))
+	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS)){
+		TRACE("%s - Invalid download state\n", __FUNCTION__);
 		return;
+	}
 
 	const int HEADER_SIZE = 24;
 
@@ -833,16 +871,17 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	// <-----khaos-
 
 	m_nDownDataRateMS += size - HEADER_SIZE;
-	credits->AddDownloaded(size - HEADER_SIZE, GetIP());
+	if (credits)
+		credits->AddDownloaded(size - HEADER_SIZE, GetIP());
 
 	// Move end back one, should be inclusive
 	nEndPos--;
 
 	// Loop through to find the reserved block that this is within
-		for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != NULL; )
-		{
-		    POSITION posLast = pos;
-		    Pending_Block_Struct *cur_block = m_PendingBlocks_list.GetNext(pos);
+	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != NULL; )
+	{
+		POSITION posLast = pos;
+		Pending_Block_Struct *cur_block = m_PendingBlocks_list.GetNext(pos);
 		if ((cur_block->block->StartOffset <= nStartPos) && (cur_block->block->EndOffset >= nStartPos))
 		{
 			// Found reserved block
@@ -951,7 +990,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						{
 							CString strZipError;
 							if (cur_block->zStream && cur_block->zStream->msg)
-								strZipError.Format(_T(" - %s"), cur_block->zStream->msg);
+								strZipError.Format(_T(" - %hs"), cur_block->zStream->msg);
 							if (result == Z_OK && (int)lenUnzipped < 0){
 								ASSERT(0);
 								strZipError.AppendFormat(_T("; Z_OK,lenUnzipped=%d"), lenUnzipped);
@@ -1022,6 +1061,8 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 			return;
 			}
 		}
+
+	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
 
 int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion)
@@ -1131,7 +1172,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 			{
 				CString strZipError;
 				if (zS->msg)
-					strZipError.Format(_T(" %d: '%s'"), err, zS->msg);
+					strZipError.Format(_T(" %d: '%hs'"), err, zS->msg);
 				else if (err != Z_OK)
 					strZipError.Format(_T(" %d"), err);
 				TRACE_UNZIP("; Error: %s\n", strZipError);
@@ -1144,7 +1185,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
   	}
   	catch (...){
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Unknown exception in %s: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
+			AddDebugLogLine(false, _T("Unknown exception in %hs: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
 		err = Z_DATA_ERROR;
 		ASSERT(0);
 	}
@@ -1153,7 +1194,6 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 }
 
 uint32 CUpDownClient::CalculateDownloadRate(){
-
 	// Patch By BadWolf - Accurate datarate Calculation
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	//MORPH START - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -1166,9 +1206,9 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000) {
+		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000)
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
-		}else
+		else
 			break;
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
@@ -1187,25 +1227,39 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	UpdateDisplayedInfo();
 
 	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
-
-	if ((::GetTickCount() - m_dwLastBlockReceived) > DOWNLOADTIMEOUT){
-		if (!GetSentCancelTransfer()){
-			if (thePrefs.GetDebugClientTCPLevel() > 0)
-				DebugSend("OP__CancelTransfer", this);
-			Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-			socket->SendPacket(packet,true,true);
-			SetSentCancelTransfer(1);
-		}
-		SetDownloadState(DS_ONQUEUE);
-	}
-		
+	
 	return m_nDownDatarate;
 }
 
-uint16 CUpDownClient::GetAvailablePartCount() const
+void CUpDownClient::CheckDownloadTimeout()
 {
-	uint16 result = 0;
+	if (IsDownloadingFromPeerCache() && m_pPCDownSocket && m_pPCDownSocket->IsConnected())
+	{
+		ASSERT( DOWNLOADTIMEOUT < m_pPCDownSocket->GetTimeOut() );
+		if (GetTickCount() - m_dwLastBlockReceived > DOWNLOADTIMEOUT)
+		{
+			OnPeerCacheDownSocketTimeout();
+		}
+	}
+	else
+	{
+		if ((::GetTickCount() - m_dwLastBlockReceived) > DOWNLOADTIMEOUT)
+		{
+			ASSERT( socket != NULL );
+			if (socket != NULL)
+			{
+				ASSERT( !socket->IsRawDataMode() );
+				if (!socket->IsRawDataMode())
+					SendCancelTransfer();
+			}
+			SetDownloadState(DS_ONQUEUE);
+		}
+	}
+}
+
+UINT CUpDownClient::GetAvailablePartCount() const
+{
+	UINT result = 0;
 	for (int i = 0;i < m_nPartCount;i++){
 		if (IsPartAvailable(i))
 			result++;
@@ -1231,24 +1285,33 @@ void CUpDownClient::SetRemoteQueueRank(uint16 nr){
 void CUpDownClient::UDPReaskACK(uint16 nNewQR){
 	m_bUDPPending = false;
 	SetRemoteQueueRank(nNewQR);
-	m_dwLastAskedTime = ::GetTickCount();
+    SetLastAskedTime(); // ZZ:DownloadManager
 }
 
 void CUpDownClient::UDPReaskFNF(){
 	m_bUDPPending = false;
 	if (GetDownloadState()!=DS_DOWNLOADING){ // avoid premature deletion of 'this' client
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,CString("UDP ANSWER FNF : %s - %s"),DbgGetClientInfo(), DbgGetFileInfo(reqfile ? reqfile->GetFileHash() : NULL));
-		theApp.downloadqueue->RemoveSource(this);
-		if (!socket){
-			if (Disconnected("UDPReaskFNF socket=NULL"))
-				delete this;
+			AddDebugLogLine(DLP_LOW, false, _T("UDP ANSWER FNF : %s - %s"),DbgGetClientInfo(), DbgGetFileInfo(reqfile ? reqfile->GetFileHash() : NULL));
+		switch (GetDownloadState()) {
+			case DS_ONQUEUE:
+			case DS_NONEEDEDPARTS:
+                DontSwapTo(reqfile); // ZZ:DownloadManager
+                if (SwapToAnotherFile(_T("Source says it doesn't have the file. CUpDownClient::UDPReaskFNF()"), true, true, true, NULL, false, false))
+					break;
+				/*fall through*/
+			default:
+				theApp.downloadqueue->RemoveSource(this);
+				if (!socket){
+					if (Disconnected(_T("UDPReaskFNF socket=NULL")))
+						delete this;
+				}
 		}
 	}
 	else
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,CString("UDP ANSWER FNF : %s - did not remove client because of current download state"),GetUserName());
+			AddDebugLogLine(false,_T("UDP ANSWER FNF : %s - did not remove client because of current download state"),GetUserName());
 	}
 }
 
@@ -1271,6 +1334,13 @@ void CUpDownClient::UDPReaskForDownload()
 		//don't use udp to ask for sources
 		if(IsSourceRequestAllowed())
 			return;
+
+// ZZ:DownloadManager -->
+        if(SwapToAnotherFile(_T("A4AF check before OP__ReaskFilePing. CUpDownClient::UDPReaskForDownload()"), true, false, false, NULL, true, true)) {
+            return; // we swapped, so need to go to tcp
+        }
+// ZZ:DownloadManager <--
+
 		m_bUDPPending = true;
 		CSafeMemFile data(128);
 		data.WriteHash16(reqfile->GetFileHash());
@@ -1287,7 +1357,7 @@ void CUpDownClient::UDPReaskForDownload()
 			DebugSend("OP__ReaskFilePing", this, (char*)reqfile->GetFileHash());
 		Packet* response = new Packet(&data, OP_EMULEPROT);
 		response->opcode = OP_REASKFILEPING;
-		theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
+		theStats.AddUpDataOverheadFileRequest(response->size);
 		theApp.downloadqueue->AddUDPFileReasks();
 		theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
 		m_nTotalUDPPackets++;
@@ -1302,7 +1372,7 @@ void CUpDownClient::RequestHashset(){
 			DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
 			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
 			md4cpy(packet->pBuffer,reqfile->GetFileHash());
-			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+			theStats.AddUpDataOverheadFileRequest(packet->size);
 			socket->SendPacket(packet, true, true);
 			SetDownloadState(DS_REQHASHSET);
 			m_fHashsetRequesting = 1;
@@ -1313,199 +1383,477 @@ void CUpDownClient::RequestHashset(){
 }
 // SLUGFILLER: SafeHash
 
-// Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
-//MORPH START - Changed by SiRoB, See A4AF PartStatus
-/*
-void CUpDownClient::ShowDownloadingParts(CString *partsYN) const
-*/
-void CUpDownClient::ShowDownloadingParts(CString *partsYN, uint16 m_nPartCount) const
-{
-	// Initialise to all N's
-	char *n = new char[m_nPartCount+1];
-	_strnset(n, 'N', m_nPartCount);
-	n[m_nPartCount] = 0;
-	partsYN->SetString(n, m_nPartCount);
-	delete [] n;
-
-	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != 0; )
-		partsYN->SetAt((m_PendingBlocks_list.GetNext(pos)->block->StartOffset / PARTSIZE), 'Y');
-}
-
 void CUpDownClient::UpdateDisplayedInfo(bool force)
 {
-    DWORD curTick = ::GetTickCount();
+#ifdef _DEBUG
+	force = true;
+#endif
+	DWORD curTick = ::GetTickCount();
 
-    if(force || curTick-m_lastRefreshedDLDisplay > MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000))) {
+    if(force || (curTick-m_lastRefreshedDLDisplay) > MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000))) {
 	    theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
         m_lastRefreshedDLDisplay = curTick;
     }
 }
 
+// ZZ:DownloadManager -->
+const bool CUpDownClient::IsInOtherRequestList(const CPartFile* fileToCheck) const {
+    for (POSITION pos = m_OtherRequests_list.GetHeadPosition();pos != 0;m_OtherRequests_list.GetNext(pos)) {
+        if(m_OtherRequests_list.GetAt(pos) == fileToCheck) {
+            return true;
+        }
+    }
 
-// IgnoreNoNeeded = will switch to files of which this source has no needed parts (if no better fiels found)
-// ignoreSuspensions = ignore timelimit for A4Af jumping
-// bRemoveCompletely = do not readd the file which the source is swapped from to the A4AF lists (needed if deleting or stopping a file)
-// toFile = Try to swap to this partfile only
-bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile){
-	if (GetDownloadState() == DS_DOWNLOADING)
+    return false;
+}
+// <-- ZZ:DownloadManager
+
+// ZZ:DownloadManager -->
+const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool curFileisNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping, bool debug) {
+    bool printDebug = debug && thePrefs.GetLogA4AF();
+
+    if(printDebug) {
+        AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: SwapToRightFile. Start compare SwapTo: %s and cur_file %s"), SwapTo?SwapTo->GetFileName():_T("null"), cur_file->GetFileName());
+        AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: doAgressiveSwapping: %s"), doAgressiveSwapping?_T("true"):_T("false"));
+    }
+
+    if (!SwapTo) {
+        return true;
+    }
+
+    if(!curFileisNNPFile && cur_file->GetSourceCount() < thePrefs.GetMaxSourcePerFile() ||
+        curFileisNNPFile && cur_file->GetSourceCount() < thePrefs.GetMaxSourcePerFile()*.8) {
+
+            if(printDebug)
+                AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: cur_file does probably not have too many sources."));
+
+            if(SwapTo->GetSourceCount() > thePrefs.GetMaxSourcePerFile() ||
+               SwapTo->GetSourceCount() >= thePrefs.GetMaxSourcePerFile()*.8 &&
+               SwapTo == reqfile &&
+               (
+                GetDownloadState() == DS_LOWTOLOWIP ||
+                GetDownloadState() == DS_REMOTEQUEUEFULL
+               )
+              ) {
+                if(printDebug)
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: SwapTo is about to be deleted due to too many sources on that file, so we can steal it."));
+                return true;
+            }
+
+            if(SwapToIsNNPFile && !curFileisNNPFile) {
+                if(printDebug)
+                    AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: SwapTo is NNP and cur_file is not."));
+                return true;
+            }
+            if(SwapToIsNNPFile == curFileisNNPFile) {
+                if(printDebug)
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: SwapToIsNNPFile == curFileisNNPFile"));
+
+                if(ignoreSuspensions  || !IsSwapSuspended(cur_file, doAgressiveSwapping, curFileisNNPFile)) {
+                    if(printDebug)
+                        AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: No suspend block."));
+
+                    if(
+                        !SwapTo->IsA4AFAuto() &&
+                        (
+                            cur_file->IsA4AFAuto() ||
+                            thePrefs.GetCategory(cur_file->GetCategory())->prio > thePrefs.GetCategory(SwapTo->GetCategory())->prio ||
+                            thePrefs.GetCategory(cur_file->GetCategory())->prio == thePrefs.GetCategory(SwapTo->GetCategory())->prio &&
+                            (
+                                cur_file->GetDownPriority() > SwapTo->GetDownPriority() ||
+                                cur_file->GetDownPriority() == SwapTo->GetDownPriority() &&
+                                (
+                                    cur_file->GetCategory() == SwapTo->GetCategory() && cur_file->GetCategory() != 0 &&
+                                    (thePrefs.GetCategory(cur_file->GetCategory())->downloadInAlphabeticalOrder && thePrefs.IsExtControlsEnabled()) && 
+                                    cur_file->GetFileName() && SwapTo->GetFileName() &&
+                                    cur_file->GetFileName().CompareNoCase(SwapTo->GetFileName()) < 0
+                                )
+                            )
+                        )
+                    ) {
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: Higher prio."));
+
+                        if(IsSourceRequestAllowed(cur_file) && (cur_file->AllowSwapForSourceExchange() || cur_file == reqfile) ||
+                           !(IsSourceRequestAllowed(SwapTo) && (SwapTo->AllowSwapForSourceExchange() || SwapTo == reqfile)) ||
+                           (GetDownloadState()==DS_ONQUEUE && GetRemoteQueueRank() <= 50)) {
+                            if(printDebug)
+                                AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: Source Request check ok."));
+                            return true;
+                        } else {
+                            if(printDebug)
+                                AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: Source Request check failed."));
+                            wasSkippedDueToSourceExchange = true;
+                        }
+                    }
+//
+//				//MORPH START - Added by SiRoB, Due to Khaos A4AF
+//					// -khaos--+++>
+//					else
+//					{
+//					// <-----khaos-
+//						// khaos::kmod+ Smart A4AF Source Balancing (Now on a by-category basis)
+//						// Brute Force A4AF Transferring
+//						// Spread Reask
+//						if (!cur_src->GetLastForceA4AFTick() || (dwCurTick - cur_src->GetLastForceA4AFTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
+//						{
+//							if(thePrefs.UseSmartA4AFSwapping())
+//								if (cur_src->SwapToForcedA4AF())
+//									break; // This source was transferred, nothing more to do here.
+//						}
+//						if (!cur_src->GetLastBalanceTick() || (dwCurTick - cur_src->GetLastBalanceTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
+//						{
+//							uint8 iA4AFMode = thePrefs.AdvancedA4AFMode();
+//							if (iA4AFMode && thePrefs.GetCategory(GetCategory())->iAdvA4AFMode)
+//								iA4AFMode = thePrefs.GetCategory(GetCategory())->iAdvA4AFMode;
+//							if (iA4AFMode == 1 && cur_src->BalanceA4AFSources()) 
+//								break; // This source was transferred, nothing more to do here.
+//							if (iA4AFMode == 2 && cur_src->StackA4AFSources())
+//								break; // This source was transferred, nothing more to do here.
+//						}
+//					}
+//					//MORPH END - Added by SiRoB, Due to Khaos A4AF
+//					
+//		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+//		//if (IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
+//		if (!thePrefs.AdvancedA4AFMode() && !thePrefs.UseSmartA4AFSwapping() && IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
+//		//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
+//		{
+//			m_LastNoNeededCheck = dwCurTick;
+//			POSITION pos1, pos2;
+//			for (pos1 = A4AFsrclist.GetHeadPosition();(pos2=pos1)!=NULL;)
+//			{
+//				A4AFsrclist.GetNext(pos1);
+//				CUpDownClient *cur_source = A4AFsrclist.GetAt(pos2);
+//				if( cur_source->GetDownloadState() != DS_DOWNLOADING
+//					&& cur_source->reqfile 
+//					&& ( (!cur_source->reqfile->IsA4AFAuto()) || cur_source->GetDownloadState() == DS_NONEEDEDPARTS)
+//					&& !cur_source->IsSwapSuspended(this) )
+//				{
+//					CPartFile* oldfile = cur_source->reqfile;
+//					if (cur_source->SwapToAnotherFile(false, false, false, this)){
+//						cur_source->DontSwapTo(oldfile);
+//					}
+//				}
+//			}
+//		}
+////MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+//				if (!thePrefs.UseSmartA4AFSwapping())
+//				{
+//				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+//				
+//				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+//				}
+//				else
+//				{
+//					if (thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources())
+//					{
+//						if (cur_file->ForceAllA4AF())
+//						{
+//							SwapTo = cur_file;
+//							SwapToIsNNP = false;
+//							finalpos=pos;
+//							break;
+//						}
+//						else if (!SwapTo)
+//						{
+//							SwapTo = cur_file;
+//							finalpos=pos;
+//						}
+//						else if (SwapTo->GetDownPriority() > cur_file->GetDownPriority())
+//						{
+//							SwapTo = cur_file;
+//							finalpos=pos;
+//						}
+//						else if (SwapTo->GetDownPriority() == cur_file->GetDownPriority() && SwapTo->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
+//						{
+//							SwapTo = cur_file;
+//							finalpos=pos;
+//						}
+//					}
+//				}
+//				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+//                */
+				    if(IsSourceRequestAllowed(cur_file, true) && (cur_file->AllowSwapForSourceExchange() || cur_file == reqfile) &&
+                       !(IsSourceRequestAllowed(SwapTo, true) && (SwapTo->AllowSwapForSourceExchange() || SwapTo == reqfile)) &&
+                       (GetDownloadState()!=DS_ONQUEUE || GetDownloadState()==DS_ONQUEUE && GetRemoteQueueRank() > 50)) {
+                        wasSkippedDueToSourceExchange = true;
+
+                        if(printDebug)
+                            AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: Source Exchange."));
+                        return true;
+                    }
+                } else if(printDebug) {
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: Suspend block."));
+                }
+            } else if(printDebug) {
+                AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: SwapTo is NNP and cur_file is not."));
+            }
+    } else if(printDebug) {
+        AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: cur_file probably has too many sources."));
+    }
+
+    if(printDebug)
+        AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: Return false"));
+
+    return false;
+}
+// <-- ZZ:DownloadManager
+
+// ZZ:DownloadManager -->
+bool CUpDownClient::SwapToAnotherFile(LPCTSTR reason, bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile, bool allowSame, bool isAboutToAsk, bool debug){
+    bool printDebug = debug && thePrefs.GetLogA4AF();
+
+    //if(GetDownloadState() == DS_NONEEDEDPARTS) {
+    //    printDebug = true;
+    //}
+
+    if(printDebug)
+        AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: Switching source \"%s\" Status %i; Remove = %s; bIgnoreNoNeeded = %s; allowSame = %s; Reason = \"%s\""), this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? _T("Yes") : _T("No")), (bIgnoreNoNeeded ? _T("Yes") : _T("No")), (allowSame ? _T("Yes") : _T("No")), reason);
+
+    if(!bRemoveCompletely && allowSame && thePrefs.GetA4AFSaveCpu()) {
+        // Only swap if we can't keep the old source
+        if(printDebug)
+            AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: return false since prefs setting to save cpu is enabled."));
+        return false;
+    }
+
+    if(!bRemoveCompletely && allowSame && m_OtherRequests_list.IsEmpty() && (!bIgnoreNoNeeded || m_OtherNoNeeded_list.IsEmpty())) {
+        // no file to swap too, and it's ok to keep it
+        if(printDebug)
+            AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: return false due to no file to swap too, and it's ok to keep it."));
+        return false;
+    }
+
+    if (!bRemoveCompletely &&
+        (GetDownloadState() != DS_ONQUEUE &&
+         GetDownloadState() != DS_NONEEDEDPARTS &&
+         GetDownloadState() != DS_TOOMANYCONNS &&
+         GetDownloadState() != DS_REMOTEQUEUEFULL &&
+         GetDownloadState() != DS_CONNECTED
+        )) {
+        if(printDebug)
+            AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: return false due to wrong state."));
 		return false;
+    }
+
+    bool doAgressiveSwapping = (bRemoveCompletely || !allowSame || isAboutToAsk);
+    if(printDebug)
+        AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: doAgressiveSwapping: %s"), doAgressiveSwapping?_T("true"):_T("false"));
 
 	CPartFile* SwapTo = NULL;
 	CPartFile* cur_file = NULL;
-	int cur_prio= -1;
+	//int cur_prio= -1; //ZZ:DownloadManager
 	POSITION finalpos = NULL;
-	CTypedPtrList<CPtrList, CPartFile*>* usedList = NULL;
+	CTypedPtrList<CPtrList, CPartFile*>* usedList;
+
+    if(allowSame && !bRemoveCompletely) {
+        SwapTo = reqfile;
+        if(printDebug)
+            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: allowSame: File %s SourceReq: %s"), reqfile->GetFileName(), IsSourceRequestAllowed(reqfile)?_T("true"):_T("false"));
+    }
+
+    bool SwapToIsNNP = (SwapTo != NULL && SwapTo == reqfile && GetDownloadState() == DS_NONEEDEDPARTS);
+
+    CPartFile* skippedDueToSourceExchange = NULL;
+    bool skippedIsNNP = false;
 
 	if (!m_OtherRequests_list.IsEmpty()){
+        if(printDebug)
+            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: m_OtherRequests_list"));
+
 		usedList = &m_OtherRequests_list;
 		for (POSITION pos = m_OtherRequests_list.GetHeadPosition();pos != 0;m_OtherRequests_list.GetNext(pos)){
 			cur_file = m_OtherRequests_list.GetAt(pos);
+
+            if(printDebug)
+                AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Checking file: %s SoureReq: %s"), cur_file->GetFileName(), IsSourceRequestAllowed(cur_file)?_T("true"):_T("false"));
+
+            if(!bRemoveCompletely && !ignoreSuspensions && allowSame && IsSwapSuspended(cur_file, doAgressiveSwapping, false)) {
+                if(printDebug)
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: continue due to IsSwapSuspended(file) == true"));
+                continue;
+            }
+
 			if (cur_file != reqfile && theApp.downloadqueue->IsPartFile(cur_file) && !cur_file->IsStopped() 
 				&& (!cur_file->notSeenCompleteSource()) //EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 				&& (cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY))	
 			{
-				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-				if (!thePrefs.UseSmartA4AFSwapping())
-				{
-				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-					if (toFile != NULL){
-						if (cur_file == toFile){
-							SwapTo = cur_file;
-							finalpos = pos;
-							break;
-						}
+                if(printDebug)
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: It's a partfile, not stopped, etc."));
+
+				if (toFile != NULL){
+					if (cur_file == toFile){
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Found toFile."));
+
+                        SwapTo = cur_file;
+                        SwapToIsNNP = false;
+						finalpos = pos;
+						break;
 					}
-					else if ( cur_file->GetDownPriority()>cur_prio 
-						&& (ignoreSuspensions  || (!ignoreSuspensions && !IsSwapSuspended(cur_file)) ) )
-					{
-						SwapTo = cur_file;
-						cur_prio=cur_file->GetDownPriority();
-						finalpos=pos;
-						if (cur_prio==PR_HIGH)
-							break;
-					}
-				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-				}
-				else
-				{
-					if (thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources())
-					{
-						if (cur_file->ForceAllA4AF())
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-							break;
-						}
-						else if (!SwapTo)
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-						}
-						else if (SwapTo->GetDownPriority() > cur_file->GetDownPriority())
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-						}
-						else if (SwapTo->GetDownPriority() == cur_file->GetDownPriority() && SwapTo->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-						}
-					}
-				}
-				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+				} else {
+                    bool wasSkippedDueToSourceExchange = false;
+                    if(SwapToRightFile(SwapTo, cur_file, ignoreSuspensions, SwapToIsNNP, false, wasSkippedDueToSourceExchange, doAgressiveSwapping, debug)) {
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Swapping to file %s"), cur_file->GetFileName());
+
+                        if(SwapTo && wasSkippedDueToSourceExchange) {
+                            if(debug && thePrefs.GetLogA4AF()) AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Swapped due to source exchange possibility"));
+                            bool discardSkipped = false;
+                            if(SwapToRightFile(skippedDueToSourceExchange, SwapTo, ignoreSuspensions, skippedIsNNP, SwapToIsNNP, discardSkipped, doAgressiveSwapping, debug)) {
+                                skippedDueToSourceExchange = SwapTo;
+                                skippedIsNNP = skippedIsNNP?true:(SwapTo == reqfile && GetDownloadState() == DS_NONEEDEDPARTS);
+                                if(printDebug)
+                                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Skipped file was better than last skipped file."));
+                            }
+                        }
+				
+                        SwapTo = cur_file;
+                        SwapToIsNNP = false;
+					    finalpos=pos;
+                    } else {
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Keeping file %s"), SwapTo->GetFileName());
+                        if(wasSkippedDueToSourceExchange) {
+                            if(printDebug)
+                                AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Kept the file due to source exchange possibility"));
+                            bool discardSkipped = false;
+                            if(SwapToRightFile(skippedDueToSourceExchange, cur_file, ignoreSuspensions, skippedIsNNP, false, discardSkipped, doAgressiveSwapping, debug)) {
+                                skippedDueToSourceExchange = cur_file;
+                                skippedIsNNP = false;
+                                if(printDebug)
+                                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Skipped file was better than last skipped file."));
+                            }
+                        }
+                    }
+                }
 			}
 		}
 	}
 
+    if ((!SwapTo || SwapTo == reqfile && GetDownloadState() == DS_NONEEDEDPARTS) && bIgnoreNoNeeded){
+        if(printDebug)
+            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: m_OtherNoNeeded_list"));
 
-	if (!SwapTo && bIgnoreNoNeeded){
 		usedList = &m_OtherNoNeeded_list;
 		for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition();pos != 0;m_OtherNoNeeded_list.GetNext(pos)){
 			cur_file = m_OtherNoNeeded_list.GetAt(pos);
+
+            if(printDebug)
+                AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Checking file: %s "), cur_file->GetFileName());
+
+            if(!bRemoveCompletely && !ignoreSuspensions && allowSame && IsSwapSuspended(cur_file, doAgressiveSwapping, true)) {
+                if(printDebug)
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: continue due to !IsSwapSuspended(file) == true"));
+                continue;
+            }
+
 			if (cur_file != reqfile && theApp.downloadqueue->IsPartFile(cur_file) && !cur_file->IsStopped() 
 				&& (cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) )	
 			{
-				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-				if (!thePrefs.UseSmartA4AFSwapping())
-				{
-				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-					if (toFile != NULL){
-						if (cur_file == toFile){
-							SwapTo = cur_file;
-							finalpos = pos;
-							break;
-						}
-					}
-					else if ( cur_file->GetDownPriority()>cur_prio 
-						&& (ignoreSuspensions  || (!ignoreSuspensions && !IsSwapSuspended(cur_file)) ) )
-					{
+                if(printDebug)
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: It's a partfile, not stopped, etc."));
+
+				if (toFile != NULL){
+					if (cur_file == toFile){
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Found toFile."));
+    
 						SwapTo = cur_file;
-						cur_prio=cur_file->GetDownPriority();
-						finalpos=pos;
-						if (cur_prio==PR_HIGH)
-							break;
+						finalpos = pos;
+						break;
 					}
-				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+				} else {
+                    bool wasSkippedDueToSourceExchange = false;
+                    if(SwapToRightFile(SwapTo, cur_file, ignoreSuspensions, SwapToIsNNP, true, wasSkippedDueToSourceExchange, doAgressiveSwapping, debug)) {
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Swapping to file %s"), cur_file->GetFileName());
+
+                        if(SwapTo && wasSkippedDueToSourceExchange) {
+                            if(printDebug)
+                                AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Swapped due to source exchange possibility"));
+                            bool discardSkipped = false;
+                            if(SwapToRightFile(skippedDueToSourceExchange, SwapTo, ignoreSuspensions, skippedIsNNP, SwapToIsNNP, discardSkipped, doAgressiveSwapping, debug)) {
+                                skippedDueToSourceExchange = SwapTo;
+                                skippedIsNNP = skippedIsNNP?true:(SwapTo == reqfile && GetDownloadState() == DS_NONEEDEDPARTS);
+                                if(printDebug)
+                                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Skipped file was better than last skipped file."));
+                            }
+                        }
+
+                        SwapTo = cur_file;
+                        SwapToIsNNP = true;
+					    finalpos=pos;
+                    } else {
+                        if(printDebug)
+                            AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Keeping file %s"), SwapTo->GetFileName());
+                        if(wasSkippedDueToSourceExchange) {
+                            if(debug && thePrefs.GetVerbose()) AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Kept the file due to source exchange possibility"));
+                            bool discardSkipped = false;
+                            if(SwapToRightFile(skippedDueToSourceExchange, cur_file, ignoreSuspensions, skippedIsNNP, true, discardSkipped, doAgressiveSwapping, debug)) {
+                                skippedDueToSourceExchange = cur_file;
+                                skippedIsNNP = true;
+                                if(printDebug)
+                                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Skipped file was better than last skipped file."));
+                            }
+                        }
+                    }
 				}
-				else
-				{
-					if (thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources())
-					{
-						if (cur_file->ForceAllA4AF())
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-							break;
-						}
-						else if (!SwapTo)
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-						}
-						else if (SwapTo->GetDownPriority() > cur_file->GetDownPriority())
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-						}
-						else if (SwapTo->GetDownPriority() == cur_file->GetDownPriority() && SwapTo->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
-						{
-							SwapTo = cur_file;
-							finalpos=pos;
-						}
-					}
-				}
-				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 			}
 		}
 	}
 
 	if (SwapTo){
-		//if (thePrefs.GetVerbose())
-		//AddDebugLogLine(false, "Swapped source '%s'; Status %i; Remove %s to %s", this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? "Yes" : "No" ), SwapTo->GetFileName());		
-		//MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos
-		//if (DoSwap(SwapTo,bRemoveCompletely)){		
-		if (DoSwap(SwapTo,bRemoveCompletely,3)){
+        if(printDebug) {
+            if(SwapTo != reqfile) {
+                AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: Found file to swap to %s"), SwapTo->GetFileName());
+            } else {
+                AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: Will keep current file. %s"), SwapTo->GetFileName());
+            }
+        }
+
+		CString strInfo(reason);
+        if(skippedDueToSourceExchange) {
+            bool wasSkippedDueToSourceExchange = false;
+            bool skippedIsBetter = SwapToRightFile(SwapTo, skippedDueToSourceExchange, ignoreSuspensions, SwapToIsNNP, skippedIsNNP, wasSkippedDueToSourceExchange, doAgressiveSwapping, debug);
+            if(skippedIsBetter || wasSkippedDueToSourceExchange) {
+                SwapTo->SetSwapForSourceExchangeTick();
+                strInfo = _T("******SourceExchange-Swap****** ") + strInfo;
+                if(printDebug) {
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Due to sourceExchange."));
+                } else if(thePrefs.GetLogA4AF() && reqfile == SwapTo) {
+                    AddDebugLogLine(DLP_LOW, false, _T("ooo Didn't swap source due to source exchange possibility. '%s' Status %i; Remove = %s '%s' Reason: %s"), this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? _T("Yes") : _T("No") ), (this->reqfile)?this->reqfile->GetFileName():_T("null"), strInfo);
+                }
+            } else if(printDebug) {
+				AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Normal. SwapTo better than skippedDueToSourceExchange."));
+            }
+        } else if(printDebug) {
+			AddDebugLogLine(DLP_VERYLOW, false, _T("ooo Debug: Normal. skippedDueToSourceExchange == NULL"));
+        }
+
+		if (SwapTo != reqfile && DoSwap(SwapTo,bRemoveCompletely, strInfo)){
+            if(debug && thePrefs.GetLogA4AF()) AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: Swap successful."));
 			usedList->RemoveAt(finalpos);
 			return true;
+        } else if(printDebug) {
+            AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: Swap didn't happen."));
 		}
 	}
+
+    if(printDebug)
+        AddDebugLogLine(DLP_LOW, false, _T("ooo Debug: Done \"%s\""), this->GetUserName());
 
 	return false;
 }
 
-//MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos
-/*
-bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely)
-*/
-bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebugMode)
+
+bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR reason) // ZZ:DownloadManager
 {
-	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-	m_iLastActualSwap = GetTickCount();
-	if (thePrefs.ShowA4AFDebugOutput()) AddDebugLogLine(false, "%s: Just swapped '%s' from '%s' to '%s'. (%s)", iDebugMode==2?"Smart A4AF Swapping":"Advanced A4AF Handling", GetUserName(), reqfile->GetFileName(), SwapTo->GetFileName(), iDebugMode==0?"Balancing":iDebugMode==1?"Stacking":iDebugMode==2?"Forced":"N/A");
-	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-	
+    if (thePrefs.GetLogA4AF()) // ZZ:DownloadManager
+        AddDebugLogLine(DLP_LOW, false, _T("ooo Swapped source '%s' Status %i; Remove = %s '%s'   -->   %s Reason: %s"), this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? _T("Yes") : _T("No") ), (this->reqfile)?this->reqfile->GetFileName():_T("null"), SwapTo->GetFileName(), reason); // ZZ:DownloadManager
+
 	// 17-Dez-2003 [bc]: This "reqfile->srclists[sourcesslot].Find(this)" was the only place where 
 	// the usage of the "CPartFile::srclists[100]" is more effective than using one list. If this
 	// function here is still (again) a performance problem there is a more effective way to handle
@@ -1513,44 +1861,46 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 	POSITION pos = reqfile->srclist.Find(this);
 	if(pos)
 	{
-		// remove this client from the A4AF list of our new reqfile
-		POSITION pos2 = SwapTo->A4AFsrclist.Find(this);
-		if (pos2){
-			SwapTo->A4AFsrclist.RemoveAt(pos2);
-			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource(this,SwapTo);
-		}
+    	reqfile->srclist.RemoveAt(pos);
+    } else {
+        AddDebugLogLine(DLP_HIGH, true, _T("o-o Unsync between parfile->srclist and client otherfiles list. Swapping client where client has file as reqfile, but file doesn't have client in srclist. '%s' Status %i; Remove = %s '%s'   -->   '%s'  SwapReason: %s"), this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? _T("Yes") : _T("No") ), (this->reqfile)?this->reqfile->GetFileName():_T("null"), SwapTo->GetFileName(), reason); // ZZ:DownloadManager
+    }
 
-		reqfile->srclist.RemoveAt(pos);
-		reqfile->RemoveDownloadingSource(this);
+	// remove this client from the A4AF list of our new reqfile
+	POSITION pos2 = SwapTo->A4AFsrclist.Find(this);
+	if (pos2){
+		SwapTo->A4AFsrclist.RemoveAt(pos2);
+    } else {
+        AddDebugLogLine(DLP_HIGH, true, _T("o-o Unsync between parfile->srclist and client otherfiles list. Swapping client where client has file in another list, but file doesn't have client in a4af srclist. '%s' Status %i; Remove = %s '%s'   -->   '%s'  SwapReason: %s"), this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? _T("Yes") : _T("No") ), (this->reqfile)?this->reqfile->GetFileName():_T("null"), SwapTo->GetFileName(), reason); // ZZ:DownloadManager
+    }
+	theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource(this,SwapTo);
 
-		if(!bRemoveCompletely)
-		{
-			reqfile->A4AFsrclist.AddTail(this);
-			if (GetDownloadState() == DS_NONEEDEDPARTS)
-				m_OtherNoNeeded_list.AddTail(reqfile);
-			else
-				m_OtherRequests_list.AddTail(reqfile);
+	reqfile->RemoveDownloadingSource(this);
 
-			if (!bRemoveCompletely)
-				theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(reqfile,this,true);
-		}
+	if(!bRemoveCompletely)
+	{
+		reqfile->A4AFsrclist.AddTail(this);
+		if (GetDownloadState() == DS_NONEEDEDPARTS)
+			m_OtherNoNeeded_list.AddTail(reqfile);
+		else
+			m_OtherRequests_list.AddTail(reqfile);
 
-
-		SetDownloadState(DS_NONE);
-		ResetFileStatusInfo();
-		m_nRemoteQueueRank = 0;
-		m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
-
-		reqfile->UpdatePartsInfo();
-		reqfile->UpdateAvailablePartsCount();
-		reqfile = SwapTo;
-
-		SwapTo->srclist.AddTail(this);
-		theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(SwapTo,this,false);
-
-		return true;
+		theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(reqfile,this,true);
 	}
-	return false;
+
+	SetDownloadState(DS_NONE);
+	ResetFileStatusInfo();
+	m_nRemoteQueueRank = 0;
+	m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
+
+	reqfile->UpdatePartsInfo();
+	reqfile->UpdateAvailablePartsCount();
+	SetRequestFile(SwapTo);
+
+	SwapTo->srclist.AddTail(this);
+	theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(SwapTo,this,false);
+
+	return true;
 }
 
 void CUpDownClient::DontSwapTo(/*const*/ CPartFile* file)
@@ -1566,8 +1916,14 @@ void CUpDownClient::DontSwapTo(/*const*/ CPartFile* file)
 	m_DontSwap_list.AddHead(newfs);
 }
 
-bool CUpDownClient::IsSwapSuspended(const CPartFile* file)
+bool CUpDownClient::IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime, const bool fileIsNNP) // ZZ:DownloadManager
 {
+// ZZ:DownloadManager -->
+    // Don't swap if we have reasked this client too recently
+    if(GetTimeUntilReask(file, allowShortReaskTime) > 0)
+        return true;
+// <-- ZZ:DownloadManager
+
 	if (m_DontSwap_list.GetCount()==0)
 		return false;
 
@@ -1587,6 +1943,40 @@ bool CUpDownClient::IsSwapSuspended(const CPartFile* file)
 	return false;
 }
 
+uint32 CUpDownClient::GetTimeUntilReask(const CPartFile* file, const bool allowShortReaskTime) const {
+    DWORD lastAskedTimeTick = GetLastAskedTime(file);
+    if(lastAskedTimeTick != 0) {
+        DWORD tick = ::GetTickCount();
+
+        DWORD reaskTime;
+        if(allowShortReaskTime) {
+            reaskTime = MIN_REQUESTTIME;
+        } else if(m_OtherRequests_list.GetSize() == 0 &&
+           (file == reqfile && GetDownloadState() == DS_NONEEDEDPARTS ||
+           file != reqfile /*&& !IsInOtherRequestList(file)*/)) {
+            reaskTime = FILEREASKTIME*2;
+        } else {
+            reaskTime = FILEREASKTIME;
+        }
+
+        if(tick-lastAskedTimeTick < reaskTime) {
+            return reaskTime-(tick-lastAskedTimeTick);
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+}
+
+uint32 CUpDownClient::GetTimeUntilReask(const CPartFile* file) const {
+    return GetTimeUntilReask(file, false);
+}
+
+uint32 CUpDownClient::GetTimeUntilReask() const {
+    return GetTimeUntilReask(reqfile);
+}
+
 bool CUpDownClient::IsValidSource() const
 {
 	bool valid = false;
@@ -1598,234 +1988,367 @@ bool CUpDownClient::IsValidSource() const
 		case DS_NONEEDEDPARTS:
 		case DS_REMOTEQUEUEFULL:
 		case DS_REQHASHSET:
-			valid = true;
+			valid = IsEd2kClient();
 	}
 	return valid;
 }
 
-// This next function is designed to balance the sources among
-// files of the same or greater priority.  What we're going to do
-// is:
-//		A) See if this client is A4AF for any other files.
-//		B) Make sure it isn't currently downloading.
-//		C) Try to transfer it to another file that meets the criteria.
-//			1. The new file MUST have higher priority OR...
-//			2. Have the same priority and...
-//			3. (new->sources < cur->sources) && ((cur->sources-new->sources)/new->sources > .1)
-// Returns false if source is not transferred, true if it is transferred.
-// This function works independent of the download manager.
-bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
+
+void CUpDownClient::StartDownload()
 {
-	m_iLastSwapAttempt = GetTickCount();
-
-	// Not exactly a great idea to swap sources that are currently transferring to us, now is it?
-	if (GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty() || reqfile == theApp.downloadqueue->forcea4af_file || reqfile->ForceAllA4AF())
-		return false;
-
-	// Don't swap in first three minutes of run time or within three minutes of the last swap.
-	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
-		return false;
-
-	CPartFile* pSwap = NULL;
-	POSITION finalpos = NULL;
-
-	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
-	{
-		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
-		if (pSwap && pSwap->ForceAllA4AF())
-			continue;
-
-		if (cur_file != reqfile &&
-			!cur_file->ForceA4AFOff() &&
-			theApp.downloadqueue->IsPartFile(cur_file) &&
-			!cur_file->IsStopped() &&
-			(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
-			(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
-		{
-			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
-				continue;
-			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			if (cur_file->notSeenCompleteSource())
-				continue;
-			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
-			if (cur_file->ForceAllA4AF()) {
-				pSwap = cur_file;
-				finalpos = pos;
-				continue;
-			}
-			else if (!pSwap){
-				pSwap = cur_file;
-				finalpos = pos;
-			}
-			else if (pSwap->GetDownPriority() < cur_file->GetDownPriority()){
-				pSwap = cur_file;
-				finalpos = pos;
-			}
-			else if (!byPriorityOnly && pSwap->GetDownPriority() == cur_file->GetDownPriority() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount()){
-				pSwap = cur_file;
-				finalpos = pos;
-			}
-		}
-	}
-
-	if (pSwap) {
-		// So we have a potential swap, but we still need to check to make sure that we
-		// wouldn't be better served to just leave this source where it is. (reqfile)
-		if (!pSwap->ForceAllA4AF())
-		{
-			if (pSwap->GetDownPriority() < reqfile->GetDownPriority())
-				return false;
-			else if (pSwap->GetDownPriority() == reqfile->GetDownPriority()) {
-				if (byPriorityOnly)
-					return false; // This option only uses the priority as a factor.
-				if (pSwap->GetSourceCount() >= reqfile->GetSourceCount())
-					return false;
-				// If the difference in source counts is less than 10%, leave this source right where it is.
-				// This is a simple way to avoid constant swapping, because the source counts will never be precisely
-				// the same for each file.  It works because at this point reqfile always has more sources than pSwap.
-				if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
-					return false;
-			}
-		}
-
-		if(DoSwap(pSwap, false, 0)){
-			m_OtherRequests_list.RemoveAt(finalpos);
-			return true;
-		}
-	}
-	
-	return false;
+	SetDownloadState(DS_DOWNLOADING);
+	InitTransferredDownMini();
+	SetDownStartTime();
+	m_lastPartAsked = 0xffff;
+	SendBlockRequests();
 }
 
-// This function is designed to give as many sources as possible
-// to the file with the lowest resume order in the category.  It
-// is yet another methodology for A4AF behavior, and designed to
-// complete the next file in a series as quickly as possible.
-// NOTE: This code requires my download manager to be installed!
-bool CUpDownClient::StackA4AFSources()
+void CUpDownClient::SendCancelTransfer(Packet* packet)
 {
-	m_iLastSwapAttempt = GetTickCount();
+	if (socket == NULL || !IsEd2kClient()){
+		ASSERT(0);
+		return;
+	}
+	
+	if (!GetSentCancelTransfer())
+	{
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__CancelTransfer", this);
 
-	if (GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty() || reqfile == theApp.downloadqueue->forcea4af_file || reqfile->ForceAllA4AF())
-		return false;
-
-	// Don't swap in first three minutes of run time or within three minutes of the last swap.
-	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
-		return false;
-
-	uint8 iCategory = reqfile->GetCategory();
-
-	CPartFile* pSwap = NULL;
-	POSITION finalpos = NULL;
-
-	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos)) {
-		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
-		if (pSwap && pSwap->ForceAllA4AF())
-			continue;
-
-		if ( cur_file->GetCategory() == iCategory &&
-			cur_file != reqfile &&
-			!cur_file->ForceA4AFOff() &&
-			theApp.downloadqueue->IsPartFile(cur_file) &&
-			!cur_file->IsStopped() &&
-			(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
-			(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
+		bool bDeletePacket;
+		Packet* pCancelTransferPacket;
+		if (packet)
 		{
-			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
-				return false;
-			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			if (cur_file->notSeenCompleteSource())
-				continue;
-			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
-			if (cur_file->ForceAllA4AF()) {
-				pSwap = cur_file;
-				finalpos = pos;
-				continue;
-			}
-			//Morph Start - added by AndCycle - the NNP shouldn't need to be checked, currently there is issue in maintain OtherRequest
-			else if (m_OtherNoNeeded_list.Find(cur_file)){
-				continue;
-			}
-			//Morph End - added by AndCycle
-			else if (!pSwap){
-                pSwap = cur_file;
-				finalpos = pos;
-			}
-			else if (pSwap->GetCatResumeOrder() > cur_file->GetCatResumeOrder()){
-				pSwap = cur_file;
-				finalpos = pos;
-			}
-			else if (pSwap->GetCatResumeOrder() == cur_file->GetCatResumeOrder() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount()){
-				pSwap = cur_file;
-				finalpos = pos;
+			pCancelTransferPacket = packet;
+			bDeletePacket = false;
+		}
+		else
+		{
+			pCancelTransferPacket = new Packet(OP_CANCELTRANSFER, 0);
+			bDeletePacket = true;
+		}
+		theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
+		socket->SendPacket(pCancelTransferPacket,bDeletePacket,true);
+		SetSentCancelTransfer(1);
+	}
+
+	if (m_pPCDownSocket)
+	{
+		m_pPCDownSocket->Safe_Delete();
+		m_pPCDownSocket = NULL;
+		SetPeerCacheDownState(PCDS_NONE);
+	}
+}
+
+void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
+{
+	reqfile = pReqFile;
+}
+
+void CUpDownClient::ProcessAcceptUpload()
+{
+	m_fQueueRankPending = 1;
+	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+	/*
+	if (reqfile && !reqfile->IsStopped() && (reqfile->GetStatus()==PS_READY || reqfile->GetStatus()==PS_EMPTY))
+	*/
+	if (reqfile && !reqfile->IsStopped() && (reqfile->GetStatus()==PS_READY || reqfile->GetStatus()==PS_EMPTY) && !reqfile->notSeenCompleteSource())
+	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+	{
+		SetSentCancelTransfer(0);
+		if (GetDownloadState() == DS_ONQUEUE)
+		{
+			// PC-TODO: If remote client does not answer the PeerCache query within a timeout, 
+			// automatically fall back to ed2k download.
+			if ( !SupportPeerCache() // client knows peercahce protocol
+				||!thePrefs.IsPeerCacheDownloadEnabled() // user has enabled peercache downlaods
+				|| !theApp.m_pPeerCache->IsCacheAvailable() // we have found our cache and its usable
+				|| !theApp.m_pPeerCache->IsClientPCCompatible(m_nClientVersion, GetClientSoft()) // the client version is accepted by the cahce
+				|| !SendPeerCacheFileRequest()) // request made
+			{
+				StartDownload();
 			}
 		}
 	}
-
-	if (!pSwap)
-		return BalanceA4AFSources(true); // If we were unable to find a stackable download for this source, we can try a priority-only balance.
 	else
 	{
-		if (!pSwap->ForceAllA4AF())
-		{
-			if (pSwap->GetCatResumeOrder() > reqfile->GetCatResumeOrder())
-				return false;
-			else if (pSwap->GetCatResumeOrder() == reqfile->GetCatResumeOrder())
-			{
-				if (pSwap->GetAvailableSrcCount() >= reqfile->GetAvailableSrcCount())
-					return false;
-				// If the difference in source counts is less than 10%, leave this source right where it is.
-				if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
-					return false;
-			}
-		}
-		
-		if(DoSwap(pSwap, false, 1)){
-			m_OtherRequests_list.RemoveAt(finalpos);
-			return true;
-		}
+		SendCancelTransfer();
+		SetDownloadState((reqfile==NULL || reqfile->IsStopped()) ? DS_NONE : DS_ONQUEUE);
 	}
-	
-	return false;
 }
 
-bool CUpDownClient::SwapToForcedA4AF()
+void CUpDownClient::ProcessEdonkeyQueueRank(char* packet, UINT size)
 {
-	m_iLastForceA4AFAttempt = GetTickCount();
+	CSafeMemFile data((BYTE*)packet, size);
+	uint32 rank = data.ReadUInt32();
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		Debug(_T("  %u (prev. %d)\n"), rank, IsRemoteQueueFull() ? (UINT)-1 : (UINT)GetRemoteQueueRank());
+	SetRemoteQueueRank(rank);
+	CheckQueueRankFlood();
+}
 
-	// Don't swap in first three minutes of run time or within three minutes of the last swap.
-	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
-		return false;
+void CUpDownClient::ProcessEmuleQueueRank(char* packet, UINT size)
+{
+	if (size != 12)
+		throw GetResString(IDS_ERR_BADSIZE);
+	uint16 rank = PeekUInt16(packet);
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		Debug(_T("  %u (prev. %d)\n"), rank, IsRemoteQueueFull() ? (UINT)-1 : (UINT)GetRemoteQueueRank());
+	SetRemoteQueueFull(false);
+	SetRemoteQueueRank(rank);
+	CheckQueueRankFlood();
+}
 
-	CPartFile* pForcedA4AF = theApp.downloadqueue->forcea4af_file;
-
-	if (pForcedA4AF == reqfile || pForcedA4AF == NULL || GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty())
-		return false;
-
-	bool swapToFA4AF = false;
-	POSITION finalpos = NULL;
-
-	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
+void CUpDownClient::CheckQueueRankFlood()
+{
+	if (m_fQueueRankPending == 0)
 	{
-		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
-		if (theApp.downloadqueue->IsPartFile(cur_file) &&
-				!cur_file->IsStopped() &&
-				(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
-				(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
-		{		
-			if (cur_file == pForcedA4AF){
-				finalpos = pos;
-				swapToFA4AF = true;
+		if (GetDownloadState() != DS_DOWNLOADING)
+		{
+			if (m_fUnaskQueueRankRecv < 3) // NOTE: Do not increase this nr. without increasing the bits for 'm_fUnaskQueueRankRecv'
+				m_fUnaskQueueRankRecv++;
+			if (m_fUnaskQueueRankRecv == 3)
+			{
+				if (theApp.clientlist->GetBadRequests(this) < 2)
+					theApp.clientlist->TrackBadRequest(this, 1);
+				if (theApp.clientlist->GetBadRequests(this) == 2){
+					theApp.clientlist->TrackBadRequest(this, -2); // reset so the client will not be rebanned right after the ban is lifted
+					Ban(_T("QR flood"));
+				}
+				throw CString(thePrefs.GetLogBannedClients() ? _T("QR flood") : _T(""));
 			}
 		}
 	}
-
-	if (swapToFA4AF)
+	else
 	{
-		if (DoSwap(pForcedA4AF, false, 2)){
-			m_OtherRequests_list.RemoveAt(finalpos);
-			return true;
-		}
+		m_fQueueRankPending = 0;
+		m_fUnaskQueueRankRecv = 0;
 	}
-	return false;
 }
+
+//// This next function is designed to balance the sources among
+//// files of the same or greater priority.  What we're going to do
+//// is:
+////		A) See if this client is A4AF for any other files.
+////		B) Make sure it isn't currently downloading.
+////		C) Try to transfer it to another file that meets the criteria.
+////			1. The new file MUST have higher priority OR...
+////			2. Have the same priority and...
+////			3. (new->sources < cur->sources) && ((cur->sources-new->sources)/new->sources > .1)
+//// Returns false if source is not transferred, true if it is transferred.
+//// This function works independent of the download manager.
+//bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
+//{
+//	m_iLastSwapAttempt = GetTickCount();
+//
+//	// Not exactly a great idea to swap sources that are currently transferring to us, now is it?
+//	if (GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty() || reqfile == theApp.downloadqueue->forcea4af_file || reqfile->ForceAllA4AF())
+//		return false;
+//
+//	// Don't swap in first three minutes of run time or within three minutes of the last swap.
+//	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
+//		return false;
+//
+//	CPartFile* pSwap = NULL;
+//	POSITION finalpos = NULL;
+//
+//	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
+//	{
+//		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
+//		if (pSwap && pSwap->ForceAllA4AF())
+//			continue;
+//
+//		if (cur_file != reqfile &&
+//			!cur_file->ForceA4AFOff() &&
+//			theApp.downloadqueue->IsPartFile(cur_file) &&
+//			!cur_file->IsStopped() &&
+//			(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
+//			(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
+//		{
+//			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
+//				continue;
+//			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+//			if (cur_file->notSeenCompleteSource())
+//				continue;
+//			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+//			if (cur_file->ForceAllA4AF()) {
+//				pSwap = cur_file;
+//				finalpos = pos;
+//				continue;
+//			}
+//			else if (!pSwap){
+//				pSwap = cur_file;
+//				finalpos = pos;
+//			}
+//			else if (pSwap->GetDownPriority() < cur_file->GetDownPriority()){
+//				pSwap = cur_file;
+//				finalpos = pos;
+//			}
+//			else if (!byPriorityOnly && pSwap->GetDownPriority() == cur_file->GetDownPriority() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount()){
+//				pSwap = cur_file;
+//				finalpos = pos;
+//			}
+//		}
+//	}
+//
+//	if (pSwap) {
+//		// So we have a potential swap, but we still need to check to make sure that we
+//		// wouldn't be better served to just leave this source where it is. (reqfile)
+//		if (!pSwap->ForceAllA4AF())
+//		{
+//			if (pSwap->GetDownPriority() < reqfile->GetDownPriority())
+//				return false;
+//			else if (pSwap->GetDownPriority() == reqfile->GetDownPriority()) {
+//				if (byPriorityOnly)
+//					return false; // This option only uses the priority as a factor.
+//				if (pSwap->GetSourceCount() >= reqfile->GetSourceCount())
+//					return false;
+//				// If the difference in source counts is less than 10%, leave this source right where it is.
+//				// This is a simple way to avoid constant swapping, because the source counts will never be precisely
+//				// the same for each file.  It works because at this point reqfile always has more sources than pSwap.
+//				if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
+//					return false;
+//			}
+//		}
+//
+//		if(DoSwap(pSwap, false, 0)){
+//			m_OtherRequests_list.RemoveAt(finalpos);
+//			return true;
+//		}
+//	}
+//	
+//	return false;
+//}
+//
+//// This function is designed to give as many sources as possible
+//// to the file with the lowest resume order in the category.  It
+//// is yet another methodology for A4AF behavior, and designed to
+//// complete the next file in a series as quickly as possible.
+//// NOTE: This code requires my download manager to be installed!
+//bool CUpDownClient::StackA4AFSources()
+//{
+//	m_iLastSwapAttempt = GetTickCount();
+//
+//	if (GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty() || reqfile == theApp.downloadqueue->forcea4af_file || reqfile->ForceAllA4AF())
+//		return false;
+//
+//	// Don't swap in first three minutes of run time or within three minutes of the last swap.
+//	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
+//		return false;
+//
+//	uint8 iCategory = reqfile->GetCategory();
+//
+//	CPartFile* pSwap = NULL;
+//	POSITION finalpos = NULL;
+//
+//	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos)) {
+//		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
+//		if (pSwap && pSwap->ForceAllA4AF())
+//			continue;
+//
+//		if ( cur_file->GetCategory() == iCategory &&
+//			cur_file != reqfile &&
+//			!cur_file->ForceA4AFOff() &&
+//			theApp.downloadqueue->IsPartFile(cur_file) &&
+//			!cur_file->IsStopped() &&
+//			(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
+//			(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
+//		{
+//			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
+//				return false;
+//			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+//			if (cur_file->notSeenCompleteSource())
+//				continue;
+//			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+//			if (cur_file->ForceAllA4AF()) {
+//				pSwap = cur_file;
+//				finalpos = pos;
+//				continue;
+//			}
+//			//Morph Start - added by AndCycle - the NNP shouldn't need to be checked, currently there is issue in maintain OtherRequest
+//			else if (m_OtherNoNeeded_list.Find(cur_file)){
+//				continue;
+//			}
+//			//Morph End - added by AndCycle
+//			else if (!pSwap){
+//                pSwap = cur_file;
+//				finalpos = pos;
+//			}
+//			else if (pSwap->GetCatResumeOrder() > cur_file->GetCatResumeOrder()){
+//				pSwap = cur_file;
+//				finalpos = pos;
+//			}
+//			else if (pSwap->GetCatResumeOrder() == cur_file->GetCatResumeOrder() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount()){
+//				pSwap = cur_file;
+//				finalpos = pos;
+//			}
+//		}
+//	}
+//
+//	if (!pSwap)
+//		return BalanceA4AFSources(true); // If we were unable to find a stackable download for this source, we can try a priority-only balance.
+//	else
+//	{
+//		if (!pSwap->ForceAllA4AF())
+//		{
+//			if (pSwap->GetCatResumeOrder() > reqfile->GetCatResumeOrder())
+//				return false;
+//			else if (pSwap->GetCatResumeOrder() == reqfile->GetCatResumeOrder())
+//			{
+//				if (pSwap->GetAvailableSrcCount() >= reqfile->GetAvailableSrcCount())
+//					return false;
+//				// If the difference in source counts is less than 10%, leave this source right where it is.
+//				if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
+//					return false;
+//			}
+//		}
+//		
+//		if(DoSwap(pSwap, false, 1)){
+//			m_OtherRequests_list.RemoveAt(finalpos);
+//			return true;
+//		}
+//	}
+//	
+//	return false;
+//}
+//
+//bool CUpDownClient::SwapToForcedA4AF()
+//{
+//	m_iLastForceA4AFAttempt = GetTickCount();
+//
+//	// Don't swap in first three minutes of run time or within three minutes of the last swap.
+//	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
+//		return false;
+//
+//	CPartFile* pForcedA4AF = theApp.downloadqueue->forcea4af_file;
+//
+//	if (pForcedA4AF == reqfile || pForcedA4AF == NULL || GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty())
+//		return false;
+//
+//	bool swapToFA4AF = false;
+//	POSITION finalpos = NULL;
+//
+//	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
+//	{
+//		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
+//		if (theApp.downloadqueue->IsPartFile(cur_file) &&
+//				!cur_file->IsStopped() &&
+//				(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
+//				(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
+//		{		
+//			if (cur_file == pForcedA4AF){
+//				finalpos = pos;
+//				swapToFA4AF = true;
+//			}
+//		}
+//	}
+//
+//	if (swapToFA4AF)
+//	{
+//		if (DoSwap(pForcedA4AF, false, 2)){
+//			m_OtherRequests_list.RemoveAt(finalpos);
+//			return true;
+//		}
+//	}
+//	return false;
+//}

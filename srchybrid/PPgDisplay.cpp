@@ -118,7 +118,7 @@ void CPPgDisplay::LoadSettings(void)
 	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
 
 	CString strBuffer;
-	strBuffer.Format("%u", thePrefs.m_iToolDelayTime);
+	strBuffer.Format(_T("%u"), thePrefs.m_iToolDelayTime);
 	GetDlgItem(IDC_TOOLTIPDELAY)->SetWindowText(strBuffer);
 
 }
@@ -143,7 +143,7 @@ BOOL CPPgDisplay::OnInitDialog()
 
 BOOL CPPgDisplay::OnApply()
 {
-	char buffer[510];
+	TCHAR buffer[510];
 	
 	uint8 mintotray_old= thePrefs.mintotray;
 	thePrefs.mintotray = (uint8)IsDlgButtonChecked(IDC_MINTRAY);
@@ -201,10 +201,10 @@ BOOL CPPgDisplay::OnApply()
 	}
 
 	GetDlgItem(IDC_TOOLTIPDELAY)->GetWindowText(buffer,20);
-	if(atoi(buffer) > 32)
+	if(_tstoi(buffer) > 32)
 		thePrefs.m_iToolDelayTime = 32;
 	else
-		thePrefs.m_iToolDelayTime = atoi(buffer);
+		thePrefs.m_iToolDelayTime = _tstoi(buffer);
 	
 	theApp.emuledlg->transferwnd->m_tooltipCats.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
@@ -224,7 +224,7 @@ BOOL CPPgDisplay::OnApply()
 	if (mintotray_old != thePrefs.mintotray)
 		theApp.emuledlg->TrayMinimizeToTrayChange();
 	if (!thePrefs.ShowRatesOnTitle()) {
-		sprintf(buffer,"eMule v%s",theApp.m_strCurVersionLong);
+		_stprintf(buffer,_T("eMule v%s"),theApp.m_strCurVersionLong);
 		theApp.emuledlg->SetWindowText(buffer);
 	}
 

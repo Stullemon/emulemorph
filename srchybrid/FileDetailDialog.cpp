@@ -348,9 +348,9 @@ void CFileDetailDialogInfo::RefreshData()
 	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCorrupted), uTransfered!=0 ? (uCorrupted * 100.0 / uTransfered) : 0.0);
 	SetDlgItemText(IDC_CORRUPTED, str);
 
-	str.Format("%i ",uRecovered);
+	str.Format(_T("%i "),uRecovered);
 	str.Append(GetResString(IDS_FD_PARTS));
-	str.Remove(':');	
+	str.Remove(_T(':'));	
 	SetDlgItemText(IDC_RECOVERED, str);
 
 	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompression), uTransfered!=0 ? (uCompression * 100.0 / uTransfered) : 0.0);
@@ -550,13 +550,13 @@ void CFileDetailDialogName::FillSourcenameList()
 			}
 
 			int ix=pmyListCtrl.InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE, pmyListCtrl.GetItemCount() ,cur_src->GetClientFilename(),0,0,iSystemIconIdx,(LPARAM)newitem);
-			pmyListCtrl.SetItemText(ix, 1, "1"); 
+			pmyListCtrl.SetItemText(ix, 1, _T("1")); 
 		}
 		else
 		{
 			FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl.GetItemData(itempos);
 			item->count+=1;
-			strText.Format("%i",item->count);
+			strText.Format(_T("%i"),item->count);
 			pmyListCtrl.SetItemText(itempos, 1,strText ); 
 		} 
 	} 
@@ -622,8 +622,8 @@ int CALLBACK CFileDetailDialogName::CompareListNameItems(LPARAM lParam1, LPARAM 
 	FCtrlItem_Struct* item1=(FCtrlItem_Struct*) lParam1;
 	FCtrlItem_Struct* item2=(FCtrlItem_Struct*) lParam2;
 	switch (lParamSort){
-		case 0: return ( stricmp(item1->filename,item2->filename)); break;
-		case 10: return ( stricmp(item2->filename,item1->filename)); break;
+		case 0: return ( _tcsicmp(item1->filename,item2->filename)); break;
+		case 10: return ( _tcsicmp(item2->filename,item1->filename)); break;
 		case 1: return (item1->count - item2->count); break;
 		case 11: return (item2->count - item1->count); break;
 

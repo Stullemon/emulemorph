@@ -73,7 +73,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	GetFont()->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
 	bold.CreateFontIndirect(&lf);
-	m_ctrlStatisticsFrm.Init("Statistics");
+	m_ctrlStatisticsFrm.Init(_T("Statistics"));
     m_ctrlStatisticsFrm.SetFont(&bold); // should run Init() *first* before setting font bold. 
     m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS)); // i_a: XXX: moved here from 'Localize()' 
     
@@ -103,7 +103,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	AddAnchor(IDC_POPBAR3,BOTTOM_LEFT);
 	AddAnchor(IDC_FSTATIC9,BOTTOM_LEFT);
 	AddAnchor(IDC_STRANSFERED2,BOTTOM_LEFT);
-	//MORPH START - Added by SiRoB, Share Category
+	
 	return TRUE;
 }
 
@@ -160,10 +160,10 @@ void CSharedFilesWnd::ShowDetails(const CKnownFile* cur_file)
 		pop_bar.SetRange32(0,theApp.knownfiles->requested);
 		pop_bar.SetPos(cur_file->statistic.GetRequests());
 		pop_bar.SetShowPercent();			
-		buffer.Format("%u",cur_file->statistic.GetRequests());
+		buffer.Format(_T("%u"),cur_file->statistic.GetRequests());
 		GetDlgItem(IDC_SREQUESTED)->SetWindowText(buffer);
 
-		buffer.Format("%u",cur_file->statistic.GetAccepts());
+		buffer.Format(_T("%u"),cur_file->statistic.GetAccepts());
 		pop_baraccept.SetRange32(0,theApp.knownfiles->accepted);
 		pop_baraccept.SetPos(cur_file->statistic.GetAccepts());
 		pop_baraccept.SetShowPercent();
@@ -171,15 +171,15 @@ void CSharedFilesWnd::ShowDetails(const CKnownFile* cur_file)
 
 		GetDlgItem(IDC_STRANSFERED2)->SetWindowText(CastItoXBytes(cur_file->statistic.GetAllTimeTransferred()));
 
-		buffer.Format("%u",cur_file->statistic.GetAllTimeRequests());
+		buffer.Format(_T("%u"),cur_file->statistic.GetAllTimeRequests());
 		GetDlgItem(IDC_SREQUESTED2)->SetWindowText(buffer);
 
-		buffer.Format("%u",cur_file->statistic.GetAllTimeAccepts());
+		buffer.Format(_T("%u"),cur_file->statistic.GetAllTimeAccepts());
 		GetDlgItem(IDC_SACCEPTED2)->SetWindowText(buffer);
 
 		md4cpy(shownFileHash,cur_file->GetFileHash());
 
-		CString title=GetResString(IDS_SF_STATISTICS)+" ("+ MakeStringEscaped(cur_file->GetFileName()) +")";
+		CString title=GetResString(IDS_SF_STATISTICS)+_T(" (")+ MakeStringEscaped(cur_file->GetFileName()) +_T(")");
 		m_ctrlStatisticsFrm.SetText(title);
 	}
 	else
@@ -249,7 +249,7 @@ void CSharedFilesWnd::SetAllIcons()
 {
 	if (icon_files)
 		VERIFY( DestroyIcon(icon_files) );
-	icon_files = theApp.LoadIcon("SharedFiles", 16, 16);
+	icon_files = theApp.LoadIcon(_T("SharedFiles"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
 }
 
@@ -266,8 +266,8 @@ void CSharedFilesWnd::Localize()
 	GetDlgItem(IDC_TOTAL_LBL)->SetWindowText(GetResString(IDS_SF_TOTAL));
 	GetDlgItem(IDC_FSTATIC6)->SetWindowText(GetResString(IDS_SF_TRANS));
 	GetDlgItem(IDC_FSTATIC5)->SetWindowText(GetResString(IDS_SF_ACCEPTED));
-	GetDlgItem(IDC_FSTATIC4)->SetWindowText(GetResString(IDS_SF_REQUESTS)+":");
+	GetDlgItem(IDC_FSTATIC4)->SetWindowText(GetResString(IDS_SF_REQUESTS)+_T(":"));
 	GetDlgItem(IDC_FSTATIC9)->SetWindowText(GetResString(IDS_SF_TRANS));
 	GetDlgItem(IDC_FSTATIC8)->SetWindowText(GetResString(IDS_SF_ACCEPTED));
-	GetDlgItem(IDC_FSTATIC7)->SetWindowText(GetResString(IDS_SF_REQUESTS)+":");
+	GetDlgItem(IDC_FSTATIC7)->SetWindowText(GetResString(IDS_SF_REQUESTS)+_T(":"));
 }

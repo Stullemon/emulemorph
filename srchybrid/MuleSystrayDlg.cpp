@@ -29,7 +29,7 @@ void CInputBox::OnContextMenu(CWnd* pWnd, CPoint point)
 /////////////////////////////////////////////////////////////////////////////
 // CMuleSystrayDlg dialog
 
-CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown, int iMinUp)
+CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown)
 : CDialog(CMuleSystrayDlg::IDD, pParent)
 {
 	if(iCurDown == UNLIMITED)
@@ -40,7 +40,7 @@ CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxD
 	//{{AFX_DATA_INIT(CMuleSystrayDlg)
 	m_nDownSpeedTxt = iMaxDown < iCurDown ? iMaxDown : iCurDown;
 	m_nUpSpeedTxt = iMaxUp < iCurUp ? iMaxUp : iCurUp;
-	m_nMinUpSpeedTxt = iMinUp;
+	m_nMinUpSpeedTxt = thePrefs.GetMinUpload();
 	//}}AFX_DATA_INIT
 
 	m_iMaxUp = iMaxUp;
@@ -131,9 +131,9 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	CString buffer;
 	CString buffer2;
 
-	m_hUpArrow = theApp.LoadIcon("UPLOAD");
-	m_hDownArrow = theApp.LoadIcon("DOWNLOAD");
-	m_hSUCIcon = theApp.LoadIcon("SUC");
+	m_hUpArrow = theApp.LoadIcon(_T("UPLOAD"));
+	m_hDownArrow = theApp.LoadIcon(_T("DOWNLOAD"));
+	m_hSUCIcon = theApp.LoadIcon(_T("SUC"));
 	m_ctrlUpArrow.SetIcon(m_hUpArrow);
 	m_ctrlDownArrow.SetIcon(m_hDownArrow);
 	m_ctrlMinUpIcon.SetIcon(m_hSUCIcon); 
@@ -158,23 +158,23 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		//p->GetWindowText(m_ctrlSpeed.m_strText);
 		
 		if(theApp.serverconnect->IsConnected())
-			buffer = "ED2K";
+			buffer = _T("ED2K");
 		else if (theApp.serverconnect->IsConnecting())
-			buffer = "ed2k";
+			buffer = _T("ed2k");
 		else
-			buffer = "";
+			buffer = _T("");
 
 		if(Kademlia::CKademlia::isConnected())
-			buffer += buffer.IsEmpty()?"KAD":" | KAD";
+			buffer += buffer.IsEmpty()?_T("KAD"):_T(" | KAD");
 		else if (Kademlia::CKademlia::isRunning())
-			buffer += buffer.IsEmpty()?"kad":" | kad";
+			buffer += buffer.IsEmpty()?_T("kad"):_T(" | kad");
 		
 		m_ctrlSpeed.m_strText = buffer;
 
 		m_ctrlSpeed.m_bUseIcon = true;
 		m_ctrlSpeed.m_sIcon.cx = 16;
 		m_ctrlSpeed.m_sIcon.cy = 16;
-		m_ctrlSpeed.m_hIcon = theApp.LoadIcon("TRAY_SPEED", m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy);
+		m_ctrlSpeed.m_hIcon = theApp.LoadIcon(_T("TRAY_SPEED"), m_ctrlSpeed.m_sIcon.cx, m_ctrlSpeed.m_sIcon.cy);
 		m_ctrlSpeed.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -200,7 +200,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlAllToMax.m_bUseIcon = true;
 		m_ctrlAllToMax.m_sIcon.cx = 16;
 		m_ctrlAllToMax.m_sIcon.cy = 16;
-		m_ctrlAllToMax.m_hIcon = theApp.LoadIcon("TRAY_TOMAX", m_ctrlAllToMax.m_sIcon.cx, m_ctrlAllToMax.m_sIcon.cy);
+		m_ctrlAllToMax.m_hIcon = theApp.LoadIcon(_T("TRAY_TOMAX"), m_ctrlAllToMax.m_sIcon.cx, m_ctrlAllToMax.m_sIcon.cy);
 		m_ctrlAllToMax.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlAllToMax.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -220,7 +220,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlAllToMin.m_bUseIcon = true;
 		m_ctrlAllToMin.m_sIcon.cx = 16;
 		m_ctrlAllToMin.m_sIcon.cy = 16;
-		m_ctrlAllToMin.m_hIcon = theApp.LoadIcon("TRAY_TOMIN", m_ctrlAllToMin.m_sIcon.cx, m_ctrlAllToMin.m_sIcon.cy);
+		m_ctrlAllToMin.m_hIcon = theApp.LoadIcon(_T("TRAY_TOMIN"), m_ctrlAllToMin.m_sIcon.cx, m_ctrlAllToMin.m_sIcon.cy);
 		m_ctrlAllToMin.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlAllToMin.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -240,7 +240,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlRestore.m_bUseIcon = true;
 		m_ctrlRestore.m_sIcon.cx = 16;
 		m_ctrlRestore.m_sIcon.cy = 16;
-		m_ctrlRestore.m_hIcon = theApp.LoadIcon("TRAY_RESTORE", m_ctrlRestore.m_sIcon.cx, m_ctrlRestore.m_sIcon.cy);
+		m_ctrlRestore.m_hIcon = theApp.LoadIcon(_T("TRAY_RESTORE"), m_ctrlRestore.m_sIcon.cx, m_ctrlRestore.m_sIcon.cy);
 		m_ctrlRestore.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -264,7 +264,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlConnect.m_bUseIcon = true;
 		m_ctrlConnect.m_sIcon.cx = 16;
 		m_ctrlConnect.m_sIcon.cy = 16;
-		m_ctrlConnect.m_hIcon = theApp.LoadIcon("BN_CONNECT", m_ctrlConnect.m_sIcon.cx, m_ctrlConnect.m_sIcon.cy);
+		m_ctrlConnect.m_hIcon = theApp.LoadIcon(_T("BN_CONNECT"), m_ctrlConnect.m_sIcon.cx, m_ctrlConnect.m_sIcon.cy);
 		m_ctrlConnect.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlConnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -284,7 +284,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlDisconnect.m_bUseIcon = true;
 		m_ctrlDisconnect.m_sIcon.cx = 16;
 		m_ctrlDisconnect.m_sIcon.cy = 16;
-		m_ctrlDisconnect.m_hIcon = theApp.LoadIcon("BN_DISCONNECT", m_ctrlDisconnect.m_sIcon.cx, m_ctrlDisconnect.m_sIcon.cy);
+		m_ctrlDisconnect.m_hIcon = theApp.LoadIcon(_T("BN_DISCONNECT"), m_ctrlDisconnect.m_sIcon.cx, m_ctrlDisconnect.m_sIcon.cy);
 		m_ctrlDisconnect.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlDisconnect.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -303,7 +303,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlPreferences.m_bUseIcon = true;
 		m_ctrlPreferences.m_sIcon.cx = 16;
 		m_ctrlPreferences.m_sIcon.cy = 16;
-		m_ctrlPreferences.m_hIcon = theApp.LoadIcon("PREF_GENERAL", m_ctrlPreferences.m_sIcon.cx, m_ctrlPreferences.m_sIcon.cy);
+		m_ctrlPreferences.m_hIcon = theApp.LoadIcon(_T("PREF_GENERAL"), m_ctrlPreferences.m_sIcon.cx, m_ctrlPreferences.m_sIcon.cy);
 		m_ctrlPreferences.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlPreferences.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -322,7 +322,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlReloadShares.m_bUseIcon = true;
 		m_ctrlReloadShares.m_sIcon.cx = 16;
 		m_ctrlReloadShares.m_sIcon.cy = 16;
-		m_ctrlReloadShares.m_hIcon = theApp.LoadIcon("SHAREDFILES", m_ctrlReloadShares.m_sIcon.cx, m_ctrlReloadShares.m_sIcon.cy, 0);
+		m_ctrlReloadShares.m_hIcon = theApp.LoadIcon(_T("SHAREDFILES"), m_ctrlReloadShares.m_sIcon.cx, m_ctrlReloadShares.m_sIcon.cy, 0);
 		m_ctrlReloadShares.m_bParentCapture = true;
 		if(bValidFont)
 			m_ctrlReloadShares.m_cfFont.CreateFontIndirect(&lfStaticFont);
@@ -332,8 +332,8 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	{
 		p->GetWindowRect(r);
 		ScreenToClient(r);
-		m_ctrlExit.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_TRAY_EXIT);
-		m_ctrlExit.m_nBtnID = IDC_TRAY_EXIT;
+		m_ctrlExit.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_EXIT);
+		m_ctrlExit.m_nBtnID = IDC_EXIT;
 		//p->GetWindowText(m_ctrlExit.m_strText);
 		m_ctrlExit.m_strText = GetResString(IDS_EXIT);
 		m_ctrlExit.m_strText.Remove(_T('&'));
@@ -341,7 +341,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlExit.m_bUseIcon = true;
 		m_ctrlExit.m_sIcon.cx = 16;
 		m_ctrlExit.m_sIcon.cy = 16;
-		m_ctrlExit.m_hIcon = theApp.LoadIcon("TRAY_EXIT", m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy);
+		m_ctrlExit.m_hIcon = theApp.LoadIcon(_T("TRAY_EXIT"), m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy);
 		m_ctrlExit.m_bParentCapture = true;
 		if(bValidFont)
 		{	
@@ -396,7 +396,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 
 	m_ctrlSidebar.SetHorizontal(false);
 	m_ctrlSidebar.SetFont(&Font);
-	m_ctrlSidebar.SetWindowText("eMule v"+theApp.m_strCurVersionLong);
+	m_ctrlSidebar.SetWindowText(_T("eMule v") + theApp.m_strCurVersionLong);
 
 	CRect rDesktop;
 	CWnd *pDesktopWnd = GetDesktopWindow();

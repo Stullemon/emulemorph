@@ -26,9 +26,8 @@
 #include "OtherFunctions.h"
 #include "UpDownClient.h"
 #include "DownloadQueue.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
+#include "TransferWnd.h"
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
@@ -62,7 +61,7 @@ bool CKnownFileList::Init()
 	fullpath.Append(KNOWN_MET_FILENAME);
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(fullpath,CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary, &fexp)){
+	if (!file.Open(fullpath,CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(_T("Failed to load ") KNOWN_MET_FILENAME _T(" file"));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -95,7 +94,7 @@ bool CKnownFileList::Init()
 		for (UINT i = 0; i < RecordsNumber; i++) {
 			pRecord = new CKnownFile(); //MORPH - Changed by SiRoB, Mem leak fix by bzubzu.
 			if (!pRecord->LoadFromFile(&file)){
-				TRACE("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n", i, 
+				TRACE(_T("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n"), i, 
 					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartCount());	// SLUGFILLER: SafeHash - removed unnececery hash counter
 				delete pRecord;
 				pRecord = NULL;  //MORPH - Added by SiRoB, Mem leak fix by bzubzu.
@@ -123,8 +122,8 @@ bool CKnownFileList::Init()
 		if (error->m_cause == CFileException::endOfFile)
 			AddLogLine(true,GetResString(IDS_ERR_SERVERMET_BAD));
 		else{
-			char buffer[MAX_CFEXP_ERRORMSG];
-			error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
+			TCHAR buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer, ARRSIZE(buffer));
 			AddLogLine(true,GetResString(IDS_ERR_SERVERMET_UNKNOWN),buffer);
 		}
 		error->Delete();
@@ -138,13 +137,13 @@ bool CKnownFileList::Init()
 void CKnownFileList::Save()
 {
 	if (thePrefs.GetLogFileSaving())
-		AddDebugLogLine(false, "Saving known files list file \"%s\"", KNOWN_MET_FILENAME);
+		AddDebugLogLine(false, _T("Saving known files list file \"%s\""), KNOWN_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount(); 
 	CString fullpath=thePrefs.GetConfigDir();
 	fullpath += KNOWN_MET_FILENAME;
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -218,8 +217,8 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 	CKnownFile* pFileInMap;
 	if (m_Files_map.Lookup(key, pFileInMap))
 	{
-		TRACE("%s: File already in known file list: %s \"%s\" \"%s\"\n", __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileName(), pFileInMap->GetFilePath());
-		TRACE("%s: Old entry replaced with:         %s \"%s\" \"%s\"\n", __FUNCTION__, md4str(toadd->GetFileHash()), toadd->GetFileName(), toadd->GetFilePath());
+		TRACE(_T("%hs: File already in known file list: %s \"%s\" \"%s\"\n"), __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileName(), pFileInMap->GetFilePath());
+		TRACE(_T("%hs: Old entry replaced with:         %s \"%s\" \"%s\"\n"), __FUNCTION__, md4str(toadd->GetFileHash()), toadd->GetFileName(), toadd->GetFilePath());
 #if 1
 		// if we hash files which are already in known file list and add them later (when the hashing thread is finished),
 		// we can not delete any already available entry from known files list. that entry can already be used by the
@@ -245,6 +244,12 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 
 		ASSERT( theApp.sharedfiles==NULL || !theApp.sharedfiles->IsFilePtrInList(pFileInMap) );
 		ASSERT( theApp.downloadqueue==NULL || !theApp.downloadqueue->IsPartFile(pFileInMap) );
+
+		// Quick fix: If we downloaded already downloaded files again and if those files all had the same file names
+		// and were renamed during file completion, we have a pending ptr in transfer window.
+		if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd)
+			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile((CPartFile*)pFileInMap);
+
 		delete pFileInMap;
 #else
 		// if the new entry is already in list, update the stats and return false, but do not delete the entry which is

@@ -68,7 +68,7 @@ bool CSecRunAsUser::PrepareUser(){
 		pNTsys->get_DomainName(&bstrDomainName);
 		m_strDomain = bstrDomainName;
 	
-		ADSPath.Format(T2W("WinNT://%s,computer"),cscompName);
+		ADSPath.Format(L"WinNT://%s,computer",cscompName);
 		if ( !SUCCEEDED(ADsGetObject(ADSPath.AllocSysString(),IID_IADsContainer,(void **)&pUsers)) )
 			throw CString("Failed ADsGetObject()");
 
@@ -322,7 +322,7 @@ bool CSecRunAsUser::RestartAsUser(){
 		TCHAR szAppPath[MAX_PATH];
 		GetModuleFileName(NULL, szAppPath, MAX_PATH);
 		CString strAppName;
-		strAppName.Format("\"%s\"",szAppPath);
+		strAppName.Format(_T("\"%s\""),szAppPath);
 		
 		STARTUPINFOW StartInf = {0};
 		StartInf.cb = sizeof(StartInf);
@@ -334,7 +334,7 @@ bool CSecRunAsUser::RestartAsUser(){
 		::CloseHandle(theApp.m_hMutexOneInstance);
 		
 		bResult = CreateProcessWithLogonW(EMULEACCOUNTW, m_strDomain, m_strPassword,
-			LOGON_WITH_PROFILE, NULL, T2W(strAppName), 0, NULL, NULL, &StartInf, &ProcessInfo);
+			LOGON_WITH_PROFILE, NULL, (LPWSTR)T2CW(strAppName), 0, NULL, NULL, &StartInf, &ProcessInfo);
 
 	}
 	catch(...){
@@ -358,16 +358,16 @@ CStringW CSecRunAsUser::GetCurrentUserW(){
 
 bool CSecRunAsUser::LoadAPI(){
 	if (m_hADVAPI32_DLL == 0)
-		m_hADVAPI32_DLL = LoadLibrary("Advapi32.dll");
+		m_hADVAPI32_DLL = LoadLibrary(_T("Advapi32.dll"));
 	if (m_hACTIVEDS_DLL == 0)
-		m_hACTIVEDS_DLL = LoadLibrary("ActiveDS");
+		m_hACTIVEDS_DLL = LoadLibrary(_T("ActiveDS"));
 
     if (m_hADVAPI32_DLL == 0) {
-        AddDebugLogLine(false,"Failed to load Advapi32.dll!");
+        AddDebugLogLine(false,_T("Failed to load Advapi32.dll!"));
         return false;
     }
     if (m_hACTIVEDS_DLL == 0) {
-        AddDebugLogLine(false,"Failed to load ActiveDS.dll!");
+        AddDebugLogLine(false,_T("Failed to load ActiveDS.dll!"));
         return false;
     }
 
@@ -391,7 +391,7 @@ bool CSecRunAsUser::LoadAPI(){
 	bSucceeded = bSucceeded && (ADsEnumerateNext = (TADsEnumerateNext)GetProcAddress(m_hACTIVEDS_DLL,"ADsEnumerateNext")) != NULL;
 	
 	if (!bSucceeded){
-		AddDebugLogLine(false,"Failed to load all functions from Advapi32.dll!");
+		AddDebugLogLine(false,_T("Failed to load all functions from Advapi32.dll!"));
 		FreeAPI();
 		return false;
 	}
@@ -399,9 +399,13 @@ bool CSecRunAsUser::LoadAPI(){
 }
 
 void CSecRunAsUser::FreeAPI(){
-	if (m_hADVAPI32_DLL != 0)
+	if (m_hADVAPI32_DLL != 0){
 		FreeLibrary(m_hADVAPI32_DLL);
-	if (m_hACTIVEDS_DLL != 0)
+		m_hADVAPI32_DLL = 0;
+	}
+	if (m_hACTIVEDS_DLL != 0){
 		FreeLibrary(m_hACTIVEDS_DLL);
-	m_hADVAPI32_DLL = 0;
+		m_hACTIVEDS_DLL = 0;
+	}
+
 }

@@ -15,6 +15,9 @@ extern CStringArray _astrParserErrors;
 
 void ParsedSearchExpression(const CSearchExpr* pexpr);
 int yyerror(const char* errstr);
+#ifdef _UNICODE
+int yyerror(LPCTSTR errstr);
+#endif
 
 #pragma warning(disable:4065) // switch statement contains 'default' but no 'case' labels
 #pragma warning(disable:4102) // 'yyerrlab1' : unreferenced label
@@ -169,6 +172,15 @@ int yyerror(const char* errstr)
 	//yyerror ("syntax error");
 	//yyerror ("parser stack overflow");
 
+	USES_CONVERSION;
+	_astrParserErrors.Add(A2CT(errstr));
+	return EXIT_FAILURE;
+}
+
+#ifdef _UNICODE
+int yyerror(LPCTSTR errstr)
+{
 	_astrParserErrors.Add(errstr);
 	return EXIT_FAILURE;
 }
+#endif

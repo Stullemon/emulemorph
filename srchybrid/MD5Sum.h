@@ -27,9 +27,13 @@ class MD5Sum
 public:
 	MD5Sum();
 	MD5Sum(CString sSource);
-	CString Calculate(CString sSource);
+	MD5Sum(uchar* pachSource, uint32 nLen);
+	CString Calculate(CString sSource)				{return Calculate((uchar*)sSource.GetBuffer(0), sSource.GetLength());}
+	CString Calculate(uchar* pachSource, uint32 nLen);
 	CString GetHash();
+	uchar*	GetRawHash()							{return m_rawHash;}
 
 private:
-	CString	m_sHash;
+	CString			m_sHash;
+	unsigned char	m_rawHash[16];
 };

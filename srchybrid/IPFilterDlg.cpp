@@ -21,6 +21,7 @@
 #include "OtherFunctions.h"
 #include "Preferences.h"
 #include "MenuCmds.h"
+#include "ZipFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,12 +69,16 @@ BEGIN_MESSAGE_MAP(CIPFilterDlg, CResizableDialog)
 	ON_COMMAND(MP_SELECTALL, OnSelectAllIPFilter)
 	ON_COMMAND(MP_FIND, OnFind)
 	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
-	ON_NOTIFY(LVN_DELETEALLITEMS, IDC_IPFILTER, OnLvnDeleteAllItemsIPfilter)
+	ON_NOTIFY(LVN_GETDISPINFO, IDC_IPFILTER, OnLvnGetdispinfoIpfilter)
+	ON_NOTIFY(LVN_DELETEITEM, IDC_IPFILTER, OnLvnDeleteitemIpfilter)
 END_MESSAGE_MAP()
 
 CIPFilterDlg::CIPFilterDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CIPFilterDlg::IDD, pParent)
 {
+	m_uIPFilterItems = 0;
+	m_ppIPFilterItems = NULL;
+	m_icoDlg = NULL;
 	m_pMenuIPFilter = NULL;
 	m_ulFilteredIPs = 0;
 	m_ipfilter.m_pParent = this;
@@ -83,8 +88,12 @@ CIPFilterDlg::CIPFilterDlg(CWnd* pParent /*=NULL*/)
 
 CIPFilterDlg::~CIPFilterDlg()
 {
+	if (m_ppIPFilterItems)
+		free(m_ppIPFilterItems);
 	delete m_pMenuIPFilter;
 	sm_iSortColumn = m_ipfilter.GetSortColumn();
+	if (m_icoDlg)
+		VERIFY( ::DestroyIcon(m_icoDlg) );
 }
 
 void CIPFilterDlg::DoDataExchange(CDataExchange* pDX)
@@ -93,10 +102,10 @@ void CIPFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_IPFILTER, m_ipfilter);
 }
 
-extern "C" int CALLBACK CIPFilterDlg::CompareItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
-{
-	ASSERT( lParamSort >= 0 && lParamSort < ARRSIZE(_aColumns) );
+static int _lParamSort = 0;
 
+int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
+{
 #define COMPARE_NUM( a, b ) ((a) < (b))			\
 							  ? -1				\
 							  : ( ((b) < (a))	\
@@ -106,59 +115,56 @@ extern "C" int CALLBACK CIPFilterDlg::CompareItems(LPARAM lParam1, LPARAM lParam
 
 	int iResult;
 
-	if (lParam1==0 && lParam2==0)
-		iResult = 0;
-	else if (lParam1==0)
-		iResult = 1;
-	else if (lParam2==0)
-		iResult = -1;
-	else{
-		if (lParamSort == IPFILTER_COL_START)
-		{
-			iResult = COMPARE_NUM(((SIPFilter*)lParam1)->start, ((SIPFilter*)lParam2)->start);
-		}
-		else if (lParamSort == IPFILTER_COL_END)
-		{
-			iResult = COMPARE_NUM(((SIPFilter*)lParam1)->end, ((SIPFilter*)lParam2)->end);
-		}
-		else if (lParamSort == IPFILTER_COL_LEVEL)
-		{
-			iResult = COMPARE_NUM(((SIPFilter*)lParam1)->level, ((SIPFilter*)lParam2)->level);
-		}
-		else if (lParamSort == IPFILTER_COL_HITS)
-		{
-			iResult = COMPARE_NUM(((SIPFilter*)lParam1)->hits, ((SIPFilter*)lParam2)->hits);
-		}
-		else if (lParamSort == IPFILTER_COL_DESC)
-		{
-			iResult = strcmp(((SIPFilter*)lParam1)->desc, ((SIPFilter*)lParam2)->desc);
-		}
-		else
-		{
-			ASSERT(0);
-			iResult = 0;
-		}
+	if (_lParamSort == IPFILTER_COL_START)
+	{
+		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->start, (*((const SIPFilter**)lParam2))->start);
 	}
+	else if (_lParamSort == IPFILTER_COL_END)
+	{
+		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->end, (*((const SIPFilter**)lParam2))->end);
+	}
+	else if (_lParamSort == IPFILTER_COL_LEVEL)
+	{
+		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->level, (*((const SIPFilter**)lParam2))->level);
+	}
+	else if (_lParamSort == IPFILTER_COL_HITS)
+	{
+		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->hits, (*((const SIPFilter**)lParam2))->hits);
+	}
+	else if (_lParamSort == IPFILTER_COL_DESC)
+	{
+		iResult = _tcscmp((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
+	}
+	else
+	{
+		ASSERT(0);
+		iResult = 0;
+	}
+
 #undef COMPARE_NUM
 
-	if (_aColumns[lParamSort].eSortOrder == DESCENDING)
+	if (_aColumns[_lParamSort].eSortOrder == DESCENDING)
 		return -iResult;
 	else
 		return iResult;
 }
 
-void CIPFilterDlg::UpdateItems()
+void CIPFilterDlg::SortIPFilterItems()
 {
 	// Update (sort, if needed) the listview items
 	if (m_ipfilter.GetSortColumn() != -1)
-		m_ipfilter.SortItems(CIPFilterDlg::CompareItems, m_ipfilter.GetSortColumn());
+	{
+		_lParamSort = m_ipfilter.GetSortColumn();
+		qsort((void*)m_ppIPFilterItems, m_uIPFilterItems, sizeof(*m_ppIPFilterItems), CompareIPFilterItems);
+	}
 }
 
 void CIPFilterDlg::OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	m_ipfilter.UpdateSortOrder(pNMLV, ARRSIZE(_aColumns), _aColumns);
-	UpdateItems();
+	SortIPFilterItems();
+	m_ipfilter.Update(-1);
 	*pResult = 0;
 }
 
@@ -179,12 +185,16 @@ BOOL CIPFilterDlg::OnInitDialog()
 	AddAnchor(IDOK, BOTTOM_RIGHT);
 	EnableSaveRestore(PREF_INI_SECTION);
 
+	ASSERT( m_ipfilter.GetStyle() & LVS_OWNERDATA );
 	m_ipfilter.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_ipfilter.EnableHdrCtrlSortBitmaps();
 	m_ipfilter.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
 	m_ipfilter.CreateColumns(ARRSIZE(_aColumns), _aColumns);
   	m_ipfilter.InitColumnOrders(ARRSIZE(_aColumns), _aColumns);
 	m_ipfilter.UpdateSortColumn(ARRSIZE(_aColumns), _aColumns);
+
+	m_icoDlg = theApp.LoadIcon(_T("IPFilter"));
+	SetIcon(m_icoDlg, FALSE);
 
 	InitIPFilters();
 	
@@ -220,61 +230,71 @@ BOOL CIPFilterDlg::OnInitDialog()
 void CIPFilterDlg::InitIPFilters()
 {
 	CWaitCursor curWait;
-	m_ipfilter.DeleteAllItems();
-	m_ipfilter.SetRedraw(FALSE);
-	m_ulFilteredIPs = 0;
+
+	m_uIPFilterItems = 0;
+	if (m_ppIPFilterItems)
+	{
+		free(m_ppIPFilterItems);
+		m_ppIPFilterItems = NULL;
+	}
 
 	const CIPFilterArray& ipfilter = theApp.ipfilter->GetIPFilter();
-	int iFilters = ipfilter.GetCount();
-	m_ipfilter.SetItemCount(iFilters);
-	for (int i = 0; i < iFilters; i++)
+	m_uIPFilterItems = ipfilter.GetCount();
+	m_ppIPFilterItems = (const SIPFilter**)malloc(sizeof(*m_ppIPFilterItems) * m_uIPFilterItems);
+
+	m_ulFilteredIPs = 0;
+	for (UINT i = 0; i < m_uIPFilterItems; i++)
 	{
 		const SIPFilter* pFilter = ipfilter[i];
-
+		m_ppIPFilterItems[i] = pFilter;
 		m_ulFilteredIPs += pFilter->end - pFilter->start + 1;
+	}
+	SortIPFilterItems();
+	m_ipfilter.SetItemCount(m_uIPFilterItems);
+	SetDlgItemText(IDC_TOTAL_IPFILTER, GetFormatedUInt(m_uIPFilterItems));
+	SetDlgItemText(IDC_TOTAL_IPS, GetFormatedUInt(m_ulFilteredIPs));
+}
 
-		TCHAR szBuff[256];
-		LVITEM lvi;
-		lvi.mask = LVIF_TEXT | LVIF_PARAM;
-		lvi.iItem = INT_MAX;
-		lvi.iSubItem = IPFILTER_COL_START;
-		in_addr ip;
-		ip.S_un.S_addr = htonl(pFilter->start);
-		lvi.pszText = inet_ntoa(ip);
-		lvi.lParam = (DWORD)pFilter;
-		int iItem = m_ipfilter.InsertItem(&lvi);
-		if (iItem >= 0)
+void CIPFilterDlg::OnLvnGetdispinfoIpfilter(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	NMLVDISPINFO* pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
+	if (pDispInfo->item.mask & LVIF_TEXT) // *have* to check that flag!!
+	{
+		switch (pDispInfo->item.iSubItem)
 		{
-			lvi.mask = LVIF_TEXT;
-			lvi.iItem = iItem;
-
-			ip.S_un.S_addr = htonl(pFilter->end);
-			lvi.pszText = inet_ntoa(ip);
-			lvi.iSubItem = IPFILTER_COL_END;
-			m_ipfilter.SetItem(&lvi);
-
-			itoa(pFilter->level, szBuff, 10);
-			lvi.pszText = szBuff;
-			lvi.iItem = iItem;
-			lvi.iSubItem = IPFILTER_COL_LEVEL;
-			m_ipfilter.SetItem(&lvi);
-
-			itoa(pFilter->hits, szBuff, 10);
-			lvi.pszText = szBuff;
-			lvi.iItem = iItem;
-			lvi.iSubItem = IPFILTER_COL_HITS;
-			m_ipfilter.SetItem(&lvi);
-
-			lvi.pszText = const_cast<LPTSTR>((LPCTSTR)pFilter->desc);
-			lvi.iItem = iItem;
-			lvi.iSubItem = IPFILTER_COL_DESC;
-			m_ipfilter.SetItem(&lvi);
+			case IPFILTER_COL_START:
+				if (pDispInfo->item.cchTextMax > 0){
+					_tcsncpy(pDispInfo->item.pszText, ipstr(htonl(m_ppIPFilterItems[pDispInfo->item.iItem]->start)), pDispInfo->item.cchTextMax);
+					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
+				}
+				break;
+			case IPFILTER_COL_END:
+				if (pDispInfo->item.cchTextMax > 0){
+					_tcsncpy(pDispInfo->item.pszText, ipstr(htonl(m_ppIPFilterItems[pDispInfo->item.iItem]->end)), pDispInfo->item.cchTextMax);
+					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
+				}
+				break;
+			case IPFILTER_COL_LEVEL:
+				if (pDispInfo->item.cchTextMax > 0){
+					_tcsncpy(pDispInfo->item.pszText, _itot(m_ppIPFilterItems[pDispInfo->item.iItem]->level, pDispInfo->item.pszText, 10), pDispInfo->item.cchTextMax);
+					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
+				}
+				break;
+			case IPFILTER_COL_HITS:
+				if (pDispInfo->item.cchTextMax > 0){
+					_tcsncpy(pDispInfo->item.pszText, _itot(m_ppIPFilterItems[pDispInfo->item.iItem]->hits, pDispInfo->item.pszText, 10), pDispInfo->item.cchTextMax);
+					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
+				}
+				break;
+			case IPFILTER_COL_DESC:
+				if (pDispInfo->item.cchTextMax > 0){
+					_tcsncpy(pDispInfo->item.pszText, m_ppIPFilterItems[pDispInfo->item.iItem]->desc, pDispInfo->item.cchTextMax);
+					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
+				}
+				break;
 		}
 	}
-	UpdateItems();
-	m_ipfilter.SetRedraw();
-	SetDlgItemText(IDC_TOTAL_IPFILTER, GetFormatedUInt(m_ipfilter.GetItemCount()));
-	SetDlgItemText(IDC_TOTAL_IPS, GetFormatedUInt(m_ulFilteredIPs));
+	*pResult = 0;
 }
 
 void CIPFilterDlg::OnBnClickedCopy()
@@ -321,51 +341,120 @@ void CIPFilterDlg::OnBnClickedAppend()
 	if (DialogBrowseFile(strFilePath, GetResString(IDS_IPFILTERFILES)))
 	{
 		CWaitCursor curWait;
+		CString strTempUnzipFilePath;
+		CZIPFile zip;
+		if (zip.Open(strFilePath))
+		{
+			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+			if (zfile)
+			{
+				_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+				strTempUnzipFilePath.ReleaseBuffer();
+				if (zfile->Extract(strTempUnzipFilePath))
+					strFilePath = strTempUnzipFilePath;
+				else
+				{
+					CString strError;
+					strError.Format(_T("Failed to extract IP filter file \"guarding.p2p\" from ZIP file \"%s\"."), strFilePath);
+					AfxMessageBox(strError);
+				}
+			}
+			else
+			{
+				CString strError;
+				strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" in ZIP file \"%s\"."), strFilePath);
+				AfxMessageBox(strError);
+			}
+			zip.Close();
+		}
+
 		if (theApp.ipfilter->AddFromFile(strFilePath, true))
+		{
 			InitIPFilters();
+			m_ipfilter.Update(-1);
+		}
+
+		if (!strTempUnzipFilePath.IsEmpty())
+			_tremove(strTempUnzipFilePath);
 	}
+}
+
+void CIPFilterDlg::OnLvnDeleteitemIpfilter(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+
+	ASSERT( m_uIPFilterItems > 0 );
+	if (m_uIPFilterItems > 0)
+	{
+		ASSERT( (UINT)pNMLV->iItem < m_uIPFilterItems );
+		if ((UINT)pNMLV->iItem < m_uIPFilterItems-1)
+		{
+			memmove(m_ppIPFilterItems + pNMLV->iItem, m_ppIPFilterItems + pNMLV->iItem + 1, (m_uIPFilterItems - (pNMLV->iItem + 1)) * sizeof(*m_ppIPFilterItems));
+		}
+		m_uIPFilterItems--;
+		m_ppIPFilterItems = (const SIPFilter**)realloc(m_ppIPFilterItems, sizeof(*m_ppIPFilterItems) * m_uIPFilterItems);
+	}
+
+	*pResult = 0;
 }
 
 void CIPFilterDlg::OnBnClickedDelete()
 {
 	if (m_ipfilter.GetSelectedCount() == 0)
 		return;
-	if (AfxMessageBox(_T(GetResString(IDS_DELETEIPFILTERS)), MB_YESNOCANCEL) != IDYES)
+	if (AfxMessageBox(GetResString(IDS_DELETEIPFILTERS), MB_YESNOCANCEL) != IDYES)
 		return;
 
 	CWaitCursor curWait;
-	CUIntArray aItems;
-	POSITION pos = m_ipfilter.GetFirstSelectedItemPosition();
-	while (pos)
-	{
-		int iItem = m_ipfilter.GetNextSelectedItem(pos);
-		const SIPFilter* pFilter = (SIPFilter*)m_ipfilter.GetItemData(iItem);
-		if (pFilter)
-		{
-			ULONG ulIPRange = pFilter->end - pFilter->start + 1;
-			if (theApp.ipfilter->RemoveIPFilter(pFilter))
-			{
-				aItems.Add(iItem);
-				m_ulFilteredIPs -= ulIPRange;
-			}
-		}
-	}
 
-	m_ipfilter.SetRedraw(FALSE);
-	for (int i = aItems.GetCount() - 1; i >= 0; i--)
-		m_ipfilter.DeleteItem(aItems[i]);
-	if (aItems.GetCount() > 0)
+	if (m_ipfilter.GetSelectedCount() == m_uIPFilterItems)
 	{
-		int iNextSelItem = aItems[0];
-		if (iNextSelItem >= m_ipfilter.GetItemCount())
-			iNextSelItem--;
-		if (iNextSelItem >= 0)
+		theApp.ipfilter->RemoveAllIPFilters();
+		m_uIPFilterItems = 0;
+		if (m_ppIPFilterItems)
 		{
-			m_ipfilter.SetItemState(iNextSelItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-			m_ipfilter.SetSelectionMark(iNextSelItem);
+			free(m_ppIPFilterItems);
+			m_ppIPFilterItems = NULL;
 		}
+		m_ipfilter.SetItemCount(m_uIPFilterItems);
+		m_ulFilteredIPs = 0;
 	}
-	m_ipfilter.SetRedraw();
+	else
+	{
+	    CUIntArray aItems;
+	    POSITION pos = m_ipfilter.GetFirstSelectedItemPosition();
+	    while (pos)
+	    {
+		    int iItem = m_ipfilter.GetNextSelectedItem(pos);
+			    const SIPFilter* pFilter = m_ppIPFilterItems[iItem];
+		    if (pFilter)
+		    {
+			    ULONG ulIPRange = pFilter->end - pFilter->start + 1;
+			    if (theApp.ipfilter->RemoveIPFilter(pFilter))
+			    {
+				    aItems.Add(iItem);
+				    m_ulFilteredIPs -= ulIPRange;
+			    }
+		    }
+	    }
+    
+	    m_ipfilter.SetRedraw(FALSE);
+	    for (int i = aItems.GetCount() - 1; i >= 0; i--)
+		    m_ipfilter.DeleteItem(aItems[i]);
+	    if (aItems.GetCount() > 0)
+	    {
+		    int iNextSelItem = aItems[0];
+		    if (iNextSelItem >= m_ipfilter.GetItemCount())
+			    iNextSelItem--;
+		    if (iNextSelItem >= 0)
+		    {
+			    m_ipfilter.SetItemState(iNextSelItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+			    m_ipfilter.SetSelectionMark(iNextSelItem);
+		    }
+	    }
+	    m_ipfilter.SetRedraw();
+	}
+	ASSERT( m_uIPFilterItems == m_ipfilter.GetItemCount() );
 	SetDlgItemText(IDC_TOTAL_IPFILTER, GetFormatedUInt(m_ipfilter.GetItemCount()));
 	SetDlgItemText(IDC_TOTAL_IPS, GetFormatedUInt(m_ulFilteredIPs));
 }
@@ -384,11 +473,6 @@ void CIPFilterDlg::OnLvnKeyDownIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 	else if (pLVKeyDow->wVKey == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
 		OnCopyIPFilter();
 	*pResult = 0;
-}
-
-void CIPFilterDlg::OnLvnDeleteAllItemsIPfilter(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	*pResult = TRUE;
 }
 
 void CIPFilterDlg::OnDestroy()

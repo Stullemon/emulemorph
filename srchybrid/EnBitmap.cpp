@@ -101,7 +101,7 @@ BOOL CEnBitmap::LoadImage(LPCTSTR szImagePath, COLORREF crBack)
 		HMODULE hLib = LoadLibrary(_T("gdiplus.dll"));
 		if (hLib != NULL)
 		{
-			_bGdiPlusInstalled = GetProcAddress(hLib, _T("GdiplusStartup")) != NULL;
+			_bGdiPlusInstalled = GetProcAddress(hLib, "GdiplusStartup") != NULL;
 			FreeLibrary(hLib);
 		}
 	}
@@ -119,7 +119,7 @@ BOOL CEnBitmap::LoadImage(LPCTSTR szImagePath, COLORREF crBack)
 	CFile			cFile;
 	CFileException	e;
 	
-	if (cFile.Open(szImagePath, CFile::modeRead | CFile::typeBinary, &e))
+	if (cFile.Open(szImagePath, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite, &e))
 	{
 		int nSize = cFile.GetLength();
 

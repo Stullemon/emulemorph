@@ -119,7 +119,7 @@ void CTrayDialog::TraySetIcon(LPCTSTR lpszResourceName, bool bDelete)
 }
 
 void CTrayDialog::TraySetToolTip(LPCTSTR lpszToolTip){
-	ASSERT(strlen(lpszToolTip) > 0 && strlen(lpszToolTip) < 64);
+	ASSERT(_tcslen(lpszToolTip) > 0 && _tcslen(lpszToolTip) < 64);
 	_tcsncpy(m_nidIconData.szTip,lpszToolTip,ARRSIZE(m_nidIconData.szTip));
 	m_nidIconData.szTip[ARRSIZE(m_nidIconData.szTip)-1] = _T('\0');
 	m_nidIconData.uFlags |= NIF_TIP;
@@ -264,7 +264,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 	}
 	else if ((nID & 0xFFF0) == SC_MINIMIZETRAY)
 	{
-			if (TrayShow())
+		if (TrayShow())
 			ShowWindow(SW_HIDE);
 	}
 	else

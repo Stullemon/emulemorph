@@ -55,7 +55,7 @@ void CMuleStatusBarCtrl::OnLButtonDblClk(UINT nFlags,CPoint point) {
 	int pane=GetPaneAtPosition(point);
 	switch (pane) {
 		case -1 : return;
-		case 0 : AfxMessageBox(_T( "eMule "+GetResString(IDS_SV_LOG)+"\n\n") + GetText(0));break;
+		case 0 : AfxMessageBox(_T( "eMule ") + GetResString(IDS_SV_LOG) + _T("\n\n") + GetText(0));break;
 		case 1 : break;
 		case 2 : theApp.emuledlg->SetActiveDialog(theApp.emuledlg->statisticswnd);break;
 		case 3 : 

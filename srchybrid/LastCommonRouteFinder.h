@@ -20,7 +20,8 @@ class CServer;
 class CUpDownClient;
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
-struct CurrentPingStruct {
+struct CurrentPingStruct
+{
 	//uint32	datalen;
     CString state;
 	uint32	latency;
@@ -40,7 +41,7 @@ public:
     bool AddHostsToCheck(CTypedPtrList<CPtrList, CServer*> &list);
     bool AddHostsToCheck(CUpDownClientPtrList &list);
 
-    //uint32 GetPingedHost();
+	//uint32 GetPingedHost();
     CurrentPingStruct GetCurrentPing();
     bool AcceptNewClient();
 

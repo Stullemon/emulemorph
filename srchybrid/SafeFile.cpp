@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "SafeFile.h"
+#include "Packets.h"
 #include "kademlia/utils/UInt128.h"
 
 #ifdef _DEBUG
@@ -62,10 +63,14 @@ void CFileDataIO::ReadHash16(uchar* pVal)
 CString CFileDataIO::ReadString()
 {
 	UINT uLen = ReadUInt16();
-	CString str;
+	CStringA str;
 	Read(str.GetBuffer(uLen), uLen);
 	str.ReleaseBuffer(uLen);
+#ifdef _UNICODE
+	return CString(str);
+#else
 	return str;
+#endif
 }
 
 void CFileDataIO::WriteUInt8(uint8 nVal)
@@ -93,11 +98,21 @@ void CFileDataIO::WriteHash16(const uchar* pVal)
 	Write(pVal, 16);
 }
 
-void CFileDataIO::WriteString(const CString& rstr)
+void CFileDataIO::WriteString(const CString& rstr, bool bOptUTF8)
 {
+#ifdef _UNICODE
+#else
 	UINT uLen = rstr.GetLength();
 	WriteUInt16(uLen);
 	Write((LPCSTR)rstr, uLen);
+#endif
+}
+
+void CFileDataIO::WriteString(LPCSTR psz)
+{
+	UINT uLen = strlen(psz);
+	WriteUInt16(uLen);
+	Write(psz, uLen);
 }
 
 
@@ -119,6 +134,11 @@ void CSafeFile::Write(const void* lpBuf, UINT nCount)
 ULONGLONG CSafeFile::Seek(LONGLONG lOff, UINT nFrom)
 {
 	return CFile::Seek(lOff, nFrom);
+}
+
+ULONGLONG CSafeFile::GetPosition() const
+{
+	return CFile::GetPosition();
 }
 
 
@@ -250,6 +270,11 @@ void CSafeMemFile::WriteHash16(const uchar* pVal)
 		m_nFileSize = m_nPosition;
 }
 
+ULONGLONG CSafeMemFile::GetPosition() const
+{
+	return CMemFile::GetPosition();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // CSafeBufferedFile
@@ -273,6 +298,11 @@ void CSafeBufferedFile::Write(const void* lpBuf, UINT nCount)
 ULONGLONG CSafeBufferedFile::Seek(LONGLONG lOff, UINT nFrom)
 {
 	return CStdioFile::Seek(lOff, nFrom);
+}
+
+ULONGLONG CSafeBufferedFile::GetPosition() const
+{
+	return CStdioFile::GetPosition();
 }
 
 int CSafeBufferedFile::printf(LPCTSTR pszFmt, ...)

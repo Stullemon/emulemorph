@@ -99,7 +99,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	EnableStackedTabs(FALSE);
 	BOOL bResult = CPropertySheet::OnInitDialog();
 
-	m_listbox.CreateEx(WS_EX_CLIENTEDGE,"Listbox",0,WS_CHILD|WS_VISIBLE|LBS_NOTIFY|WS_TABSTOP|LBS_HASSTRINGS|LBS_OWNERDRAWVARIABLE|WS_BORDER,CRect(0,0,0,0),this,111);
+	m_listbox.CreateEx(WS_EX_CLIENTEDGE,_T("Listbox"),0,WS_CHILD|WS_VISIBLE|LBS_NOTIFY|WS_TABSTOP|LBS_HASSTRINGS|LBS_OWNERDRAWVARIABLE|WS_BORDER,CRect(0,0,0,0),this,111);
 	::SendMessage(m_listbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
 	m_groupbox.Create(0,BS_GROUPBOX|WS_CHILD|WS_VISIBLE|BS_FLAT,CRect(0,0,0,0),this,666);
 	::SendMessage(m_groupbox.m_hWnd, WM_SETFONT, (WPARAM) ::GetStockObject(DEFAULT_GUI_FONT),0);
@@ -157,7 +157,7 @@ void CPreferencesDlg::Localize()
 	m_listbox.SetImageList(&ImageList);
 
 	CString title = GetResString(IDS_EM_PREFS); 
-	title.Remove('&'); 
+	title.Remove(_T('&')); 
 	SetTitle(title); 
 
 	m_wndGeneral.Localize();

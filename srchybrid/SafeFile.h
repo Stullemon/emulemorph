@@ -32,6 +32,7 @@ public:
 	virtual UINT Read(void* lpBuf, UINT nCount) = 0;
 	virtual void Write(const void* lpBuf, UINT nCount) = 0;
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom) = 0;
+	virtual ULONGLONG GetPosition() const = 0;
 
 	virtual uint8 ReadUInt8();
 	virtual uint16 ReadUInt16();
@@ -45,7 +46,8 @@ public:
 	virtual void WriteUInt32(uint32 nVal);
 	virtual void WriteUInt128(const Kademlia::CUInt128 *pVal);
 	virtual void WriteHash16(const uchar* pVal);
-	virtual void WriteString(const CString& rstr);
+	virtual void WriteString(const CString& rstr, bool bOptUTF8 = false);
+	virtual void WriteString(LPCSTR psz);
 };
 
 
@@ -56,12 +58,13 @@ class CSafeFile : public CFile, public CFileDataIO
 {
 public:
 	CSafeFile() {}
-	CSafeFile::CSafeFile(LPCSTR lpszFileName, UINT nOpenFlags)
+	CSafeFile::CSafeFile(LPCTSTR lpszFileName, UINT nOpenFlags)
 		: CFile(lpszFileName, nOpenFlags) {}
 
 	virtual UINT Read(void* lpBuf, UINT nCount);
 	virtual void Write(const void* lpBuf, UINT nCount);
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
+	virtual ULONGLONG GetPosition() const;
 };
 
 
@@ -83,6 +86,7 @@ public:
 	virtual UINT Read(void* lpBuf, UINT nCount);
 	virtual void Write(const void* lpBuf, UINT nCount);
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
+	virtual ULONGLONG GetPosition() const;
 
 	virtual uint8 ReadUInt8();
 	virtual uint16 ReadUInt16();
@@ -105,12 +109,13 @@ class CSafeBufferedFile : public CStdioFile, public CFileDataIO
 {
 public:
 	CSafeBufferedFile() {}
-	CSafeBufferedFile::CSafeBufferedFile(LPCSTR lpszFileName, UINT nOpenFlags)
+	CSafeBufferedFile::CSafeBufferedFile(LPCTSTR lpszFileName, UINT nOpenFlags)
 		: CStdioFile(lpszFileName, nOpenFlags) {}
 
 	virtual UINT Read(void* lpBuf, UINT nCount);
 	virtual void Write(const void* lpBuf, UINT nCount);
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
+	virtual ULONGLONG GetPosition() const;
 
 	int printf(LPCTSTR pszFmt, ...);
 };

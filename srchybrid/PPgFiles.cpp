@@ -56,7 +56,8 @@ BEGIN_MESSAGE_MAP(CPPgFiles, CPropertyPage)
 	ON_BN_CLICKED(IDC_FULLCHUNKTRANS, OnSettingsChange)
 	ON_BN_CLICKED(IDC_STARTNEXTFILE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_WATCHCB, OnSettingsChange)
-	ON_BN_CLICKED(IDC_STARTNEXTFILECAT, OnSettingsChange)
+	ON_BN_CLICKED(IDC_STARTNEXTFILECAT, OnSettingsChangeCat1)
+	ON_BN_CLICKED(IDC_STARTNEXTFILECAT2, OnSettingsChangeCat2)
 	ON_BN_CLICKED(IDC_FNCLEANUP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_FNC, OnSetCleanupFilter)
 	ON_EN_CHANGE(IDC_VIDEOPLAYER, OnSettingsChange)
@@ -116,8 +117,15 @@ void CPPgFiles::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_FULLCHUNKTRANS,0);
 
-	if(thePrefs.m_bstartnextfile)
+	CheckDlgButton( IDC_STARTNEXTFILECAT, FALSE);
+	CheckDlgButton( IDC_STARTNEXTFILECAT2, FALSE);
+	if(thePrefs.m_istartnextfile) {
 		CheckDlgButton(IDC_STARTNEXTFILE,1);
+		if (thePrefs.m_istartnextfile==2)
+			CheckDlgButton( IDC_STARTNEXTFILECAT, TRUE);
+		else if (thePrefs.m_istartnextfile==3)
+			CheckDlgButton( IDC_STARTNEXTFILECAT2, TRUE);
+	}
 	else
 		CheckDlgButton(IDC_STARTNEXTFILE,0);
 
@@ -127,7 +135,6 @@ void CPPgFiles::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_VIDEOBACKUP,0);
 
-	CheckDlgButton(IDC_STARTNEXTFILECAT, (uint8)thePrefs.GetResumeSameCat() );
 	CheckDlgButton(IDC_FNCLEANUP, (uint8)thePrefs.AutoFilenameCleanup());
 
 	if(thePrefs.watchclipboard)
@@ -164,12 +171,17 @@ BOOL CPPgFiles::OnApply()
 	else
 		thePrefs.m_bUAP = false;
 
-	if(IsDlgButtonChecked(IDC_STARTNEXTFILE))
-		thePrefs.m_bstartnextfile = true;
+	if(IsDlgButtonChecked(IDC_STARTNEXTFILE)) {
+		thePrefs.m_istartnextfile = 1;
+		if (IsDlgButtonChecked(IDC_STARTNEXTFILECAT))
+			thePrefs.m_istartnextfile = 2;
+		else if (IsDlgButtonChecked(IDC_STARTNEXTFILECAT2))
+			thePrefs.m_istartnextfile = 3;
+	}
 	else
-		thePrefs.m_bstartnextfile = false;
+		thePrefs.m_istartnextfile = 0;
 
-	thePrefs.resumeSameCat= (uint8)IsDlgButtonChecked(IDC_STARTNEXTFILECAT);
+//	thePrefs.resumeSameCat= (uint8)IsDlgButtonChecked(IDC_STARTNEXTFILECAT);
 
 	if(IsDlgButtonChecked(IDC_FULLCHUNKTRANS))
 		thePrefs.m_btransferfullchunks = true;
@@ -188,7 +200,7 @@ BOOL CPPgFiles::OnApply()
 	thePrefs.ICH = (uint8)IsDlgButtonChecked(IDC_ICH);
 
 	GetDlgItem(IDC_VIDEOPLAYER)->GetWindowText(buffer);
-	_snprintf(thePrefs.VideoPlayer, sizeof thePrefs.VideoPlayer, "%s", buffer);
+	_sntprintf(thePrefs.VideoPlayer, ARRSIZE(thePrefs.VideoPlayer), _T("%s"), buffer);
 
 	thePrefs.moviePreviewBackup = IsDlgButtonChecked(IDC_VIDEOBACKUP);
 
@@ -217,6 +229,7 @@ void CPPgFiles::Localize(void)
 		GetDlgItem(IDC_FULLCHUNKTRANS)->SetWindowText(GetResString(IDS_FULLCHUNKTRANS));
 		GetDlgItem(IDC_STARTNEXTFILE)->SetWindowText(GetResString(IDS_STARTNEXTFILE));
 		GetDlgItem(IDC_STARTNEXTFILECAT)->SetWindowText(GetResString(IDS_PREF_STARTNEXTFILECAT));
+		GetDlgItem(IDC_STARTNEXTFILECAT2)->SetWindowText(GetResString(IDS_PREF_STARTNEXTFILECATONLY));
 		GetDlgItem(IDC_FNC)->SetWindowText(GetResString(IDS_EDIT));
 		GetDlgItem(IDC_ONND)->SetWindowText(GetResString(IDS_ONNEWDOWNLOAD));
 		GetDlgItem(IDC_FNCLEANUP)->SetWindowText(GetResString(IDS_AUTOCLEANUPFN));
@@ -242,7 +255,7 @@ void CPPgFiles::BrowseVideoplayer()
 {
 	CString strPlayerPath;
 	GetDlgItemText(IDC_VIDEOPLAYER, strPlayerPath);
-	CFileDialog dlgFile(TRUE, "exe", strPlayerPath,OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,"Executable (*.exe)|*.exe||", NULL, 0);
+	CFileDialog dlgFile(TRUE, _T("exe"), strPlayerPath,OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY, _T("Executable (*.exe)|*.exe||"), NULL, 0);
 	if (dlgFile.DoModal()==IDOK){
 		GetDlgItem(IDC_VIDEOPLAYER)->SetWindowText(dlgFile.GetPathName());
 		SetModified();
@@ -268,4 +281,19 @@ BOOL CPPgFiles::OnHelpInfo(HELPINFO* pHelpInfo)
 {
 	OnHelp();
 	return TRUE;
+}
+
+void CPPgFiles::OnSettingsChange() {
+		SetModified();
+		GetDlgItem(IDC_STARTNEXTFILECAT)->EnableWindow( IsDlgButtonChecked(IDC_STARTNEXTFILE) );
+		GetDlgItem(IDC_STARTNEXTFILECAT2)->EnableWindow( IsDlgButtonChecked(IDC_STARTNEXTFILE) );
+}
+
+void CPPgFiles::OnSettingsChangeCat(uint8 index) {
+
+	bool on=IsDlgButtonChecked( index==1?IDC_STARTNEXTFILECAT:IDC_STARTNEXTFILECAT2 );
+	if (on)
+		CheckDlgButton( index==1?IDC_STARTNEXTFILECAT2:IDC_STARTNEXTFILECAT , FALSE);
+
+	OnSettingsChange();
 }

@@ -53,7 +53,10 @@ public:
 	CServer*	GetServerByIP(uint32 nIP) const;
 	CServer*	GetServerByIP(uint32 nIP, uint16 nPort) const;
 	bool		IsGoodServerIP(const CServer* in_server) const;
-	void		GetStatus(uint32& total, uint32& failed, uint32& user, uint32& file, uint32& tuser, uint32& tfile, float& occ) const;
+	void		GetStatus(uint32& total, uint32& failed, 
+						  uint32& user, uint32& file, uint32& lowiduser, 
+						  uint32& totaluser, uint32& totalfile, 
+						  float& occ) const;
 	void		GetUserFileStatus(uint32& user, uint32& file) const;
 	
 	void		Sort();
@@ -71,10 +74,6 @@ public:
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 
 private:
-//	void		SendNextPacket();
-//	uint32		udp_timer;
-//	POSITION	broadcastpos;
-//	Packet*		broadcastpacket;
 	uint32		serverpos;
 	uint32		searchserverpos;
 	uint32		statserverpos;

@@ -55,7 +55,12 @@ CSearchDlg::~CSearchDlg()
 
 BOOL CSearchDlg::Create(CWnd* pParent)
 {
-	CRect rc(0, 0, 500, 500);
+	// *) The initial size of that frame window must not exceed the window size of the
+	//    dialog resource template of the client window (the search results window).
+	// *) The dialog resource template's window size (of the search results window) must not 
+	//	  exceed the minimum client area of the frame window.
+	// Otherwise we may get scrollbars in the search results window
+	CRect rc(0, 0, 50, 50);
 	return CFrameWnd::Create(NULL, _T("Search"), WS_CHILD, rc, pParent, NULL, 0, NULL);
 }
 
@@ -176,6 +181,11 @@ void CSearchDlg::LocalSearchEnd(uint16 nCount, bool bMoreResultsAvailable)
 void CSearchDlg::CancelSearch()
 {
 	m_pwndResults->CancelSearch();
+}
+
+void CSearchDlg::CancelKadSearch(UINT uSearchID)
+{
+	m_pwndResults->CancelKadSearch(uSearchID);
 }
 
 void CSearchDlg::AddUDPResult(uint16 nCount)

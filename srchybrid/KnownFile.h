@@ -34,9 +34,8 @@ typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 class CFileStatistic
 {
 	friend class CKnownFile;
+	friend class CPartFile;
 public:
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	//	CFileStatistic()					{requested = transferred = accepted = alltimerequested= alltimetransferred = alltimeaccepted = 0;}
 	CFileStatistic(){
 		requested = 0;
 		transferred = 0;
@@ -44,11 +43,14 @@ public:
 		alltimerequested= 0;
 		alltimetransferred = 0;
 		alltimeaccepted = 0;
+
+		//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 		InChangedSpreadSortValue = false;
 		InChangedFullSpreadCount = false;
 		InChangedSpreadBar = false;
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
+		//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
@@ -57,7 +59,7 @@ public:
 		m_dLastEqualChanceSemiValue = 0;
 		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
-	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
+
 	void	MergeFileStats( CFileStatistic* toMerge );
 
 	void	AddRequest();
@@ -134,12 +136,18 @@ public:
 	virtual ~CAbstractFile() { }
 
 	const CString& GetFileName() const { return m_strFileName; }
-	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
+	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bAutoSetFileType = true); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
-	const CString& GetFileType() const { return m_strFileType; }
-	virtual void SetFileType(LPCTSTR pszFileType);
+	// returns the ED2K file type (an ASCII string)
+	const CStringA& GetFileType() const { return m_strFileType; }
+	virtual void SetFileType(LPCSTR pszFileType);
+
+	// returns the file type which is used to be shown in the GUI
+	CString GetFileTypeDisplayStr() const;
 
 	const uchar* GetFileHash() const { return m_abyFileHash; }
+	void SetFileHash(const uchar* pucFileHash);
+	bool HasNullHash() const;
 
 	uint32 GetFileSize() const { return m_nFileSize; }
 	virtual void SetFileSize(uint32 nFileSize) { m_nFileSize = nFileSize; }
@@ -147,8 +155,10 @@ public:
 	uint32 GetIntTagValue(uint8 tagname) const;
 	uint32 GetIntTagValue(LPCSTR tagname) const;
 	bool GetIntTagValue(uint8 tagname, uint32& ruValue) const;
-	LPCSTR GetStrTagValue(uint8 tagname) const;
-	LPCSTR GetStrTagValue(LPCSTR tagname) const;
+	LPCSTR GetStrTagValueA(uint8 tagname) const;
+	LPCSTR GetStrTagValueA(LPCSTR tagname) const;
+	CString GetStrTagValue(uint8 tagname) const;
+	CString GetStrTagValue(LPCSTR tagname) const;
 	CTag* GetTag(uint8 tagname, uint8 tagtype) const;
 	CTag* GetTag(LPCSTR tagname, uint8 tagtype) const;
 	CTag* GetTag(uint8 tagname) const;
@@ -168,7 +178,7 @@ protected:
 	uint32	m_nFileSize;
 	CString m_strComment;
 	uint8	m_iRate;
-	CString m_strFileType;	// this holds the localized(!) file type, TODO: change to ed2k file type
+	CStringA m_strFileType;
 	CArray<CTag*,CTag*> taglist;
 };
 
@@ -188,7 +198,7 @@ public:
 	const CString& GetFilePath() const { return m_strFilePath; }
 	void SetFilePath(LPCTSTR pszFilePath);
 
-	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
+	virtual bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
 	virtual bool IsPartFile() const { return false; }
 	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFileDataIO* file);
@@ -203,6 +213,8 @@ public:
 	// local available part hashs
 	uint16	GetHashCount() const	{return hashlist.GetCount();}
 	uchar*	GetPartHash(uint16 part) const;
+	const CArray<uchar*, uchar*>& GetHashset() const { return hashlist; }
+	bool	SetHashset(const CArray<uchar*, uchar*>& aHashset);
 
 	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 
@@ -234,11 +246,11 @@ public:
 	virtual void	DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool bFlat) /*const*/;
 
 	// comment 
-	CString GetFileComment() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_strComment; }
-	void	SetFileComment(CString strNewComment);
+	const CString& GetFileComment() /*const*/;
+	void	SetFileComment(LPCTSTR pszComment);
 
-	uint8	GetFileRate() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_iRate; }
-	void	SetFileRate(uint8 iNewRate);
+	uint8	GetFileRate() /*const*/;
+	void	SetFileRate(uint8 uRate);
 
 	bool	GetPublishedED2K() const { return m_PublishedED2K; }
 	void	SetPublishedED2K( bool val );

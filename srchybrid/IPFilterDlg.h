@@ -2,6 +2,8 @@
 #include "ResizableLib/ResizableDialog.h"
 #include "ListCtrlX.h"
 
+struct SIPFilter;
+
 class CIPFilterDlg : public CResizableDialog
 {
 	DECLARE_DYNAMIC(CIPFilterDlg)
@@ -14,13 +16,16 @@ public:
 	enum { IDD = IDD_IPFILTER };
 
 protected:
+	static int sm_iSortColumn;
 	CMenu* m_pMenuIPFilter;
 	CListCtrlX m_ipfilter;
+	HICON m_icoDlg;
+	UINT m_uIPFilterItems;
+	const SIPFilter** m_ppIPFilterItems;
 	ULONG m_ulFilteredIPs;
-	void UpdateItems();
+
+	void SortIPFilterItems();
 	void InitIPFilters();
-	static int CALLBACK CompareItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static int sm_iSortColumn;
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -30,7 +35,6 @@ protected:
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg void OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnKeyDownIPFilter(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnDeleteAllItemsIPfilter(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedAppend();
 	afx_msg void OnBnClickedCopy();
 	afx_msg void OnBnClickedDelete();
@@ -39,4 +43,6 @@ protected:
 	afx_msg void OnDeleteIPFilter();
 	afx_msg void OnSelectAllIPFilter();
 	afx_msg void OnFind();
+	afx_msg void OnLvnGetdispinfoIpfilter(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnDeleteitemIpfilter(NMHDR *pNMHDR, LRESULT *pResult);
 };

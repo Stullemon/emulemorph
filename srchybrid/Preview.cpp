@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <sys/stat.h>
+#include <share.h>
 #include "emule.h"
 #include "Preview.h"
 #include "OtherFunctions.h"
@@ -48,6 +49,12 @@ CPreviewThread::~CPreviewThread()
 {
 }
 
+BOOL CPreviewThread::InitInstance()
+{
+	InitThreadLocale();
+	return TRUE;
+}
+
 BOOL CPreviewThread::Run(){
 	DbgSetThreadName("PartFilePreview");
 
@@ -57,12 +64,12 @@ BOOL CPreviewThread::Run(){
 	try{
 		srcFile = m_pPartfile->m_hpartfile.Duplicate();
 		uint32 nSize = m_pPartfile->GetFileSize();
-		CString strExtension = CString(strrchr(m_pPartfile->GetFileName(), '.'));
+		CString strExtension = CString(_tcsrchr(m_pPartfile->GetFileName(), '.'));
 		CString strPreviewName = CString(thePrefs.GetTempDir())+ CString("\\") + CString(m_pPartfile->GetFileName()).Mid(0,5) + CString("_preview") + strExtension;
 		bool bFullSized = true;
-		if (!strExtension.CompareNoCase(".mpg") || !strExtension.CompareNoCase(".mpeg"))
+		if (!strExtension.CompareNoCase(_T(".mpg")) || !strExtension.CompareNoCase(_T(".mpeg")))
 			bFullSized = false;
-		destFile.Open(strPreviewName, CFile::modeWrite | CFile::shareExclusive | CFile::modeCreate);
+		destFile.Open(strPreviewName, CFile::modeWrite | CFile::shareDenyWrite | CFile::modeCreate);
 		srcFile->SeekToBegin();
 		if (bFullSized)
 			destFile.SetLength(nSize);
@@ -91,12 +98,12 @@ BOOL CPreviewThread::Run(){
 		SHELLEXECUTEINFO SE;
 		memset(&SE,0,sizeof(SE));
 		SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
-		SE.lpVerb = "open";
+		SE.lpVerb = _T("open");
 		
 		CString path;
 		if (m_player.GetLength()>0) {
 
-			char shortPath[512]; //Cax2 short path for vlc
+			TCHAR shortPath[512]; //Cax2 short path for vlc
 			GetShortPathName(strPreviewName,shortPath,512);
 
 			path=thePrefs.GetVideoPlayer();
@@ -159,14 +166,14 @@ int CPreviewApps::ReadAllApps()
 	RemoveAllApps();
 
 	CString strFilePath = GetDefaultAppsFile();
-	FILE* readFile = fopen(strFilePath, "r");
+	FILE* readFile = _tfsopen(strFilePath, _T("r"), _SH_DENYWR);
 	if (readFile != NULL)
 	{
 		CString name, url, sbuffer;
 		while (!feof(readFile))
 		{
-			char buffer[1024];
-			if (fgets(buffer, ARRSIZE(buffer), readFile) == NULL)
+			TCHAR buffer[1024];
+			if (_fgetts(buffer, ARRSIZE(buffer), readFile) == NULL)
 				break;
 			sbuffer = buffer;
 

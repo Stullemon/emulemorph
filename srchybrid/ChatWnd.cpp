@@ -96,44 +96,44 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	CString buffer;
 
 	// Name
-	if (pFriend->m_LinkedClient)
+	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_NAME_EDIT)->SetWindowText(pFriend->m_LinkedClient->GetUserName());
+		GetDlgItem(IDC_FRIENDS_NAME_EDIT)->SetWindowText(pFriend->GetLinkedClient()->GetUserName());
 	}
 	else
 	{
-		GetDlgItem(IDC_FRIENDS_NAME_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_NAME_EDIT)->SetWindowText(_T("?"));
 	}
 
 	// Hash
-	if (pFriend->m_LinkedClient)
+	if (pFriend->GetLinkedClient())
 	{
 		buffer ="";
 		CString buffer2;
 		for (uint16 i = 0;i != 16;i++)
 		{
-			buffer2.Format("%02X",pFriend->m_LinkedClient->GetUserHash()[i]);
+			buffer2.Format(_T("%02X"),pFriend->GetLinkedClient()->GetUserHash()[i]);
 			buffer+=buffer2;
 		}
 		GetDlgItem(IDC_FRIENDS_USERHASH_EDIT)->SetWindowText(buffer);
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_USERHASH_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_USERHASH_EDIT)->SetWindowText(_T("?"));
 	
 	// Client
-	if (pFriend->m_LinkedClient)
+	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->m_LinkedClient->DbgGetFullClientSoftVer());
+		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer());
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
 
 	// Identification
-	if (pFriend->m_LinkedClient)
+	if (pFriend->GetLinkedClient())
 	{
 		if (theApp.clientcredits->CryptoAvailable())
 		{
-			switch(pFriend->m_LinkedClient->Credits()->GetCurrentIdentState(pFriend->m_LinkedClient->GetIP()))
+			switch(pFriend->GetLinkedClient()->Credits()->GetCurrentIdentState(pFriend->GetLinkedClient()->GetIP()))
 			{
 				case IS_NOTAVAILABLE:
 					GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText(GetResString(IDS_IDENTNOSUPPORT));
@@ -152,22 +152,22 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 			GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText(GetResString(IDS_IDENTNOSUPPORT));
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText(_T("?"));
 
 	// Upoload and downloaded
-	if (pFriend->m_LinkedClient)
+	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(CastItoXBytes(pFriend->m_LinkedClient->Credits()->GetDownloadedTotal()));
+		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(CastItoXBytes(pFriend->GetLinkedClient()->Credits()->GetDownloadedTotal()));
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(_T("?"));
 
-	if (pFriend->m_LinkedClient)
+	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(CastItoXBytes(pFriend->m_LinkedClient->Credits()->GetUploadedTotal()));
+		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(CastItoXBytes(pFriend->GetLinkedClient()->Credits()->GetUploadedTotal()));
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(_T("?"));
 
 	}
 }

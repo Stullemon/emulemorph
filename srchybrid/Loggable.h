@@ -1,5 +1,12 @@
 #pragma once
 
+enum EDebugLogPriority{
+	DLP_VERYLOW = 0,
+	DLP_LOW,
+	DLP_DEFAULT,
+	DLP_HIGH,
+	DLP_VERYHIGH
+};
 ///////////////////////////////////////////////////////////////////////////////
 // CLoggable
 
@@ -10,12 +17,14 @@ public:
 	static void AddLogLine(bool addtostatusbar,LPCTSTR line,...);
 	static void AddDebugLogLine(bool addtostatusbar, UINT nID,...);
 	static void AddDebugLogLine(bool addtostatusbar, LPCTSTR line,...);
+	static void AddDebugLogLine(EDebugLogPriority Priority, bool addtostatusbar, UINT nID,...);
+	static void AddDebugLogLine(EDebugLogPriority Priority, bool addtostatusbar, LPCTSTR line,...);
 
-	void PacketToDebugLogLine(LPCTSTR info, char * packet, uint32 size, uint8 opcode) const;
+	void PacketToDebugLogLine(LPCTSTR info, char * packet, uint32 size, uint8 opcode, EDebugLogPriority dlpPriority) const;
 	void TagToDebugLogLine(LPCTSTR info, LPCTSTR tag, uint32 size, uint8 opcode) const;
 
 private:
-	static void AddLogText(bool debug, bool addtostatusbar, LPCTSTR line, va_list argptr);	
+	static void AddLogText(bool debug, bool addtostatusbar, EDebugLogPriority dlpPriority, LPCTSTR line, va_list argptr);	
 };
 
 

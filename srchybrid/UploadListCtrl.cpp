@@ -136,34 +136,38 @@ void CUploadListCtrl::SetAllIcons()
 	imagelist.DeleteImageList();
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	imagelist.SetBkColor(CLR_NONE);
-	imagelist.Add(CTempIconLoader("ClientEDonkey"));
-	imagelist.Add(CTempIconLoader("ClientCompatible"));
+	imagelist.Add(CTempIconLoader(_T("ClientEDonkey")));
+	imagelist.Add(CTempIconLoader(_T("ClientCompatible")));
 	//MORPH START - Modified by SiRoB, More client & Credit overlay icon
-	//imagelist.Add(CTempIconLoader("ClientEDonkeyPlus"));
-	//imagelist.Add(CTempIconLoader("ClientCompatiblePlus"));
-	imagelist.Add(CTempIconLoader("Friend"));
-	imagelist.Add(CTempIconLoader("ClientMLDonkey"));
-	//imagelist.Add(CTempIconLoader("ClientMLDonkeyPlus"));
-	imagelist.Add(CTempIconLoader("ClientEDonkeyHybrid"));
-	//imagelist.Add(CTempIconLoader("ClientEDonkeyHybridPlus"));
-	imagelist.Add(CTempIconLoader("ClientShareaza"));
-	//imagelist.Add(CTempIconLoader("ClientShareazaPlus"));
-	imagelist.Add(CTempIconLoader("ClientRightEdonkey"));
-	imagelist.Add(CTempIconLoader("ClientMorph"));//7
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);//10
+	//imagelist.Add(CTempIconLoader(_T("ClientEDonkeyPlus")));
+	//imagelist.Add(CTempIconLoader(_T("ClientCompatiblePlus")));
+	imagelist.Add(CTempIconLoader(_T("Friend")));
+	imagelist.Add(CTempIconLoader(_T("ClientMLDonkey")));
+	//imagelist.Add(CTempIconLoader(_T("ClientMLDonkeyPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientEDonkeyHybrid")));
+	//imagelist.Add(CTempIconLoader(_T("ClientEDonkeyHybridPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientShareaza")));
+	//imagelist.Add(CTempIconLoader(_T("ClientShareazaPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientAMule")));
+	//imagelist.Add(CTempIconLoader(_T("ClientAMulePlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientLPhant")));
+	//imagelist.Add(CTempIconLoader(_T("ClientLPhantPlus")));
+	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
+	imagelist.Add(CTempIconLoader(_T("ClientMorph")));
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);//10
 	//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	m_overlayimages.SetBkColor(CLR_NONE);
-	m_overlayimages.Add(CTempIconLoader("Community"));
+	m_overlayimages.Add(CTempIconLoader(_T("Community")));
 	// [end] Mighty Knife
 	//MORPH START - Addded by SiRoB, Friend Addon
-	m_overlayimages.Add(CTempIconLoader("ClientFriendOvl"));
-	m_overlayimages.Add(CTempIconLoader("ClientFriendSlotOvl"));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
 }
 
@@ -351,10 +355,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						image = 4;
 					else if (client->GetClientSoft() == SO_SHAREAZA )
 						image = 5;
-					else if (client->GetClientSoft() == SO_EDONKEY )
+					else if (client->GetClientSoft() == SO_AMULE)
 						image = 6;
+					else if (client->GetClientSoft() == SO_LPHANT)
+						image = 7;
+					else if (client->GetClientSoft() == SO_EDONKEY )
+						image = 8;
 					else if (client->ExtProtocolAvailable())
-						image = (client->IsMorph())?7:1;
+						image = (client->IsMorph())?9:1;
 					else
 						image = 0;
 
@@ -415,14 +423,14 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//Morph End - added by AndCycle, Equal Chance For Each File
 					}
 					else
-						Sbuffer = "?";
+						Sbuffer = _T("?");
 					break;
 				case 2:
 					//MORPH START- Modified by SiRoB, ZZ Upload System
 					if(client->GetDatarate() >= 0 && client->socket != NULL) {
-						Sbuffer.Format("%.1f %s",(float)client->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
+						Sbuffer.Format(_T("%.1f %s"),(float)client->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
 					} else {
-						Sbuffer.Format("?? %s",GetResString(IDS_KBYTESEC));
+						Sbuffer.Format(_T("?? %s"),GetResString(IDS_KBYTESEC));
 					}
 					//MORPH END - Modified by SiRoB, ZZ Upload System
 					break;
@@ -431,18 +439,18 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 						uint32 tempLastUploaded = client->GetQueueSessionUp() - client->GetSessionUp();
 						if(tempLastUploaded != 0){
-							Sbuffer.Format("%s=%s+%s (%s-%s)", CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()),CastItoXBytes(tempLastUploaded), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
+							Sbuffer.Format(_T("%s=%s+%s (%s-%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()),CastItoXBytes(tempLastUploaded), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
 						}
 						else{
 							// PENDING: ZZ: Debug printout of current buffer size for socket
-							Sbuffer.Format("%s (%s-%s)", CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
+							Sbuffer.Format(_T("%s (%s-%s)"), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
 						}
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 					}
 					break;
 				case 4:
 					if (client->HasLowID())
-						Sbuffer.Format("%s LowID",CastSecondsToHM((client->GetWaitTime())/1000));
+						Sbuffer.Format(_T("%s LowID"),CastSecondsToHM((client->GetWaitTime())/1000));
 					else
 						Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
 					break;
@@ -455,36 +463,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else if(file)
 							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
 							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
-						Sbuffer.Format("%s (+%s)", CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
+						Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain
 					break;
 				case 6:
-					switch (client->GetUploadState()){
-						case US_CONNECTING:
-							Sbuffer = GetResString(IDS_CONNECTING);
-							break;
-						case US_WAITCALLBACK:
-							Sbuffer = GetResString(IDS_CONNVIASERVER);
-							break;
-						case US_UPLOADING:
-							//MORPH START - Added by SiRoB, ZZ Upload System
-							if(client->GetSlotNumber() <= (uint32)theApp.uploadqueue->GetActiveUploadsCount() || client->GetDatarate() > 600 /* || client->GetSlotNumber() <= 1*/) {
-                                if(client->GetSlotNumber() <= (uint32)theApp.uploadqueue->GetActiveUploadsCount()) {
-							        Sbuffer = GetResString(IDS_TRANSFERRING);
-                                } else {
-							        Sbuffer = GetResString(IDS_TRANSFERRING)+"*";
-                                }
-                            } else {
-                                Sbuffer = GetResString(IDS_TRICKLING);
-                            }
-							break;
-							//MORPH END - Added by SiRoB, ZZ Upload System
-						default:
-							Sbuffer = GetResString(IDS_UNKNOWN);
-					}
+					Sbuffer = client->GetUploadStateDisplayString();
 					break;
 				case 7:
-				//MORPH START - Modified by SiRoB, ZZ Upload System 20030724-0336
 					//if( client->GetUpPartCount() )[
 						cur_rec.bottom--;
 						cur_rec.top++;
@@ -493,7 +478,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						cur_rec.top--;
 					//}
 					break;
-				//MORPH END - Modified by SiRoB, ZZ Upload System 20030724-0336
 
 				//MORPH START - Modified by SiRoB, Client Software
 				case 8:			
@@ -505,15 +489,15 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				case 9: //LSD Total UP/DL
 					{
 						if (client->Credits()){
-							Sbuffer.Format( "%s/%s",// %.1f",
+							Sbuffer.Format( _T("%s/%s"),// %.1f",
 								CastItoXBytes((float)client->Credits()->GetUploadedTotal()),
 								CastItoXBytes((float)client->Credits()->GetDownloadedTotal()));
 							//(float)client->Credits()->GetScoreRatio() );
 
 						}
 						else{
-							Sbuffer.Format( "%s/%s",// R%s",
-								"?","?");//,"?" );
+							Sbuffer.Format( _T("%s/%s"),// R%s",
+								_T("?"),_T("?"));//,"?" );
 						}
 						break;	
 
@@ -525,31 +509,31 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					{	
 						int qr = client->GetRemoteQueueRank();
 						if (client->GetDownloadDatarate() > 0){
-							Sbuffer.Format("%.1f %s",(float)client->GetDownloadDatarate()/1024, GetResString(IDS_KBYTESEC));
+							Sbuffer.Format(_T("%.1f %s"),(float)client->GetDownloadDatarate()/1024, GetResString(IDS_KBYTESEC));
 						}
 						else if (qr)
-								Sbuffer.Format("QR: %u",qr);
+								Sbuffer.Format(_T("QR: %u"),qr);
 						
 						else if(client->IsRemoteQueueFull())
-							Sbuffer.Format( "%s",GetResString(IDS_QUEUEFULL));
+							Sbuffer.Format(_T("%s"),GetResString(IDS_QUEUEFULL));
 						else
-							Sbuffer.Format("%s",GetResString(IDS_UNKNOWN));
+							Sbuffer.Format(_T("%s"),GetResString(IDS_UNKNOWN));
 					
 					}
 					break;	
 					//MORPH END - Added By Yun.SF3, Remote Status
 
 				case 11:{
-					Sbuffer.Format("%i", client->GetSlotNumber());
+					Sbuffer.Format(_T("%i"), client->GetSlotNumber());
 					//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
 					if (client->GetFriendSlot() && client->IsFriend()){
-						Sbuffer.Append(" FS");
+						Sbuffer.Append(_T(" FS"));
 					}
 					//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
 					else if (client->IsPBForPS()){
-						if(client->IsMoreUpThanDown() && client->GetPowerShared())	Sbuffer.Append(" PBF/PS");
-						else if (client->IsMoreUpThanDown())	Sbuffer.Append(" PBF");
-						else if (client->GetPowerShared())	Sbuffer.Append(" PS");
+						if(client->IsMoreUpThanDown() && client->GetPowerShared())	Sbuffer.Append(_T(" PBF/PS"));
+						else if (client->IsMoreUpThanDown())	Sbuffer.Append(_T(" PBF"));
+						else if (client->GetPowerShared())	Sbuffer.Append(_T(" PS"));
 
 						CString tempFilePrio;
 						if (file)
@@ -583,16 +567,16 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 									tempFilePrio.Empty();
 							}
 						}
-						Sbuffer.Append(" " + tempFilePrio);
+						Sbuffer.Append(_T(" ") + tempFilePrio);
 					}
 					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
 				}break;
 				//MORPH START - Added by SiRoB, Show Compression by Tarod
 				case 12:
 					if (client->GetCompression() < 0.1f)
-						Sbuffer = "-";
+						Sbuffer = _T("-");
 					else
-						Sbuffer.Format("%.1f%%", client->GetCompression());
+						Sbuffer.Format(_T("%.1f%%"), client->GetCompression());
 					break;
 				//MORPH END - Added by SiRoB, Show Compression by Tarod
 
@@ -660,27 +644,26 @@ END_MESSAGE_MAP()
 void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
 
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED), MP_DETAIL, GetResString(IDS_SHOWDETAILS));
 	ClientMenu.SetDefaultItem(MP_DETAIL);
-	ClientMenu.AppendMenu(MF_STRING | ((client && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
 	//MORPH START - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
+	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::getPrefs()->getLastContact())
-		ClientMenu.AppendMenu(MF_STRING | ((!client || client->GetKadPort()==0) ? MF_GRAYED : MF_ENABLED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
-	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -936,7 +919,6 @@ void CUploadListCtrl::ShowSelectedUserDetails()
 	SetItemState(-1, 0, LVIS_SELECTED);
 	SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	SetSelectionMark(it);   // display selection mark correctly! 
-	if (it == -1) return;
 
 	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 

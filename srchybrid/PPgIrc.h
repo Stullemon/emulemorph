@@ -24,6 +24,7 @@ protected:
 	int m_iQuitMessage;
 	int m_iEmuleProto;
 	int m_iEmuleAddFriend;
+	int m_iEmuleAllowAddFriend;
 	int m_iEmuleSendLink;
 	int m_iAcceptLinks;
 	int m_iAcceptLinksFriends;
@@ -41,6 +42,7 @@ protected:
 	HTREEITEM m_htiQuitMessage;
 	HTREEITEM m_htiEmuleProto;
 	HTREEITEM m_htiEmuleAddFriend;
+	HTREEITEM m_htiEmuleAllowAddFriend;
 	HTREEITEM m_htiEmuleSendLink;
 	HTREEITEM m_htiAcceptLinks;
 	HTREEITEM m_htiAcceptLinksFriends;

@@ -23,9 +23,7 @@
 #include "UpDownClient.h"
 #include "Preferences.h"
 #include "Pinger.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -48,7 +46,7 @@ LastCommonRouteFinder::LastCommonRouteFinder() {
     m_LowestInitialPingAllowed = 20;
     pingDelaysTotal = 0;
 
-    m_state = "";
+	m_state = _T("");
 
     needMoreHosts = false;
 
@@ -92,17 +90,13 @@ bool LastCommonRouteFinder::AddHostsToCheck(CTypedPtrList<CPtrList, CServer*> &l
                     if(IsGoodIP(ip, true)) {
                         hostsToTraceRoute.AddTail(ip);
                     }
-
-//                    if(pos == NULL) {
-//                        POSITION pos = list.GetHeadPosition();
-//                    }
                 }
             }
 
             if(hostsToTraceRoute.GetCount() >= 10) {
                 needMoreHosts = false;
 
-                // Signal that there's hosts to fetch.
+				// Signal that there's hosts to fetch.
                 newTraceRouteHostEvent->SetEvent();
 
                 addHostLocker.Unlock();
@@ -145,17 +139,13 @@ bool LastCommonRouteFinder::AddHostsToCheck(CUpDownClientPtrList &list) {
                     if(IsGoodIP(ip, true)) {
                         hostsToTraceRoute.AddTail(ip);
                     }
-
-//                    if(pos == NULL) {
-//                        POSITION pos = list.GetHeadPosition();
-//                    }
                 }
             }
 
             if(hostsToTraceRoute.GetCount() >= 10) {
                 needMoreHosts = false;
 
-                // Signal that there's hosts to fetch.
+				// Signal that there's hosts to fetch.
                 newTraceRouteHostEvent->SetEvent();
 
                 addHostLocker.Unlock();
@@ -185,7 +175,7 @@ CurrentPingStruct LastCommonRouteFinder::GetCurrentPing() {
         returnVal.currentLimit = m_upload;
         pingLocker.Unlock();
     } else {
-        returnVal.state = "";
+		returnVal.state = _T("");
         returnVal.latency = 0;
         returnVal.lowest = 0;
         returnVal.currentLimit = 0;
@@ -193,10 +183,6 @@ CurrentPingStruct LastCommonRouteFinder::GetCurrentPing() {
 
     return returnVal;
 }
-
-//uint32 LastCommonRouteFinder::GetPingedHost() {
-//    return 0;
-//}
 
 bool LastCommonRouteFinder::AcceptNewClient() {
     return acceptNewClient || !m_enabled; // if enabled, then return acceptNewClient, otherwise return true
@@ -228,18 +214,19 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
 
     if(pEnabled && m_enabled == false) {
         sendEvent = true;
-        // this will show the area for ping info in status bar.
+		// this will show the area for ping info in status bar.
 		theApp.emuledlg->SetStatusBarPartsSize();
     } else if(pEnabled == false) {
         if(m_enabled) {
             // this will remove the area for ping info in status bar.
 			theApp.emuledlg->SetStatusBarPartsSize();
         }
-        prefsEvent->ResetEvent();
+		//prefsEvent->ResetEvent();
+        sendEvent = true;
     }
 
+	// this will resize the area for ping info in status bar.
     if(m_bUseMillisecondPingTolerance != pUseMillisecondPingTolerance) {
-        // this will resize the area for ping info in status bar.
         theApp.emuledlg->SetStatusBarPartsSize();
     }
 
@@ -292,13 +279,13 @@ void LastCommonRouteFinder::SetUpload(uint32 newValue) {
  * looping.
  */
 void LastCommonRouteFinder::EndThread() {
-    // signal the thread to stop looping and exit.
+	// signal the thread to stop looping and exit.
     doRun = false;
 
     prefsEvent->SetEvent();
     newTraceRouteHostEvent->SetEvent();
 
-    // wait for the thread to signal that it has stopped looping.
+	// wait for the thread to signal that it has stopped looping.
     threadEndedEvent->Lock();
 }
 
@@ -311,6 +298,7 @@ void LastCommonRouteFinder::EndThread() {
  */
 UINT AFX_CDECL LastCommonRouteFinder::RunProc(LPVOID pParam) {
 	DbgSetThreadName("LastCommonRouteFinder");
+	InitThreadLocale();
     LastCommonRouteFinder* lastCommonRouteFinder = (LastCommonRouteFinder*)pParam;
 
     return lastCommonRouteFinder->RunInternal();
@@ -324,12 +312,12 @@ UINT LastCommonRouteFinder::RunInternal() {
     bool hasSucceededAtLeastOnce = false;
 
     while(doRun) {
-        // wait for updated prefs
+		// wait for updated prefs
         prefsEvent->Lock();
 
         bool enabled = m_enabled;
 
-        // retry loop. enabled will be set to false in end of this loop, if to many failures (tries too large)
+		// retry loop. enabled will be set to false in end of this loop, if to many failures (tries too large)
         while(doRun && enabled) {
             bool foundLastCommonHost = false;
             uint32 lastCommonHost = 0;
@@ -346,12 +334,12 @@ UINT LastCommonRouteFinder::RunInternal() {
             pingLocker.Lock();
             m_pingAverage = 0;
             m_lowestPing = 0;
-            m_state = "Preparing...";
+			m_state = _T("Preparing...");
             pingLocker.Unlock();
 			prefsLocker.Lock();
 			bool bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB
 			prefsLocker.Unlock();
-            // Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
+			// Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
             int startUpload = (maxUpload != _UI32_MAX)?maxUpload:10*1024;
 
             bool atLeastOnePingSucceded = false;
@@ -369,7 +357,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                     needMoreHosts = true;
                     addHostLocker.Unlock();
 
-                    // wait for hosts to traceroute
+					// wait for hosts to traceroute
                     newTraceRouteHostEvent->Lock();
 
 					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
@@ -385,16 +373,16 @@ UINT LastCommonRouteFinder::RunInternal() {
                             stDestAddr.s_addr = hostToTraceRoute;
 
 							if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-								theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTLISTING), counter, inet_ntoa(stDestAddr));
+								theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTLISTING), counter, ipstr(stDestAddr));
                         }
                     }
 
-                    // find the last common host, using traceroute
+					// find the last common host, using traceroute
 					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 						theApp.QueueDebugLogLine(false,GetResString(IDS_USSFINDLASTCOMMON));
 
 					// for the tracerouting phase (preparing...) we need to disable uploads so we get a faster traceroute and better ping values.
-					SetUpload(512);
+					SetUpload(2*1024);
 	                Sleep(SEC2MS(1));
 					
 					if(m_enabled == false) {
@@ -410,153 +398,147 @@ UINT LastCommonRouteFinder::RunInternal() {
 						useUdp = false; // PENDING: Get default value from prefs?
 
                         curHost = 0;
-						PingStatus pingStatus = {0};
-
                         if(m_enabled == false) {
                             enabled = false;
                         }
 
                         uint32 lastSuccedingPingAddress = 0;
-                        bool firstLoop = true;
+                        uint32 lastDestinationAddress = 0;
+                        uint32 hostsToTraceRouteCounter = 0;
+                        bool failedThisTtl = false;
                         POSITION pos = hostsToTraceRoute.GetHeadPosition();
-                        while(doRun && enabled && failed == false && pos != NULL &&
-                              (
-                               firstLoop ||
-                               pingStatus.success && pingStatus.destinationAddress == curHost ||
-                               pingStatus.success == false && pingStatus.error == IP_REQ_TIMED_OUT
-                              )
-                             ) {
+                        while(doRun && enabled && failed == false && failedThisTtl == false && pos != NULL &&
+                              ( lastDestinationAddress == 0 || lastDestinationAddress == curHost)) // || pingStatus.success == false && pingStatus.error == IP_REQ_TIMED_OUT ))
+						{
+    						PingStatus pingStatus = {0};
 
-                            firstLoop = false;
+							POSITION lastPos = pos;
 
-                            lastSuccedingPingAddress = 0;
+                            hostsToTraceRouteCounter++;
 
-                            POSITION lastPos = pos;
-
-                            // this is the current address we send ping to, in loop below.
-                            // PENDING: Don't confuse this with curHost, which is unfortunately almost
-                            // the same name. Will rename one of these variables as soon as possible, to
-                            // get more different names.
+							// this is the current address we send ping to, in loop below.
+							// PENDING: Don't confuse this with curHost, which is unfortunately almost
+							// the same name. Will rename one of these variables as soon as possible, to
+							// get more different names.
                             uint32 curAddress = hostsToTraceRoute.GetNext(pos);
 
                             pingStatus.success = false;
-                            for(int counter = 0; doRun && enabled && counter < 3 && (pingStatus.success == false || pingStatus.success == true && pingStatus.status != IP_SUCCESS && pingStatus.status != IP_TTL_EXPIRED_TRANSIT); counter++) {
+                            for(int counter = 0; doRun && enabled && counter < 2 && (pingStatus.success == false || pingStatus.success == true && pingStatus.status != IP_SUCCESS && pingStatus.status != IP_TTL_EXPIRED_TRANSIT); counter++) {
                             	pingStatus = pinger.Ping(curAddress, ttl, bIsUSSLog, useUdp); //MORPH - Modified by SiRoB, USS log debug
  								if(doRun && enabled &&
 									(
 									pingStatus.success == false ||
-                                    pingStatus.success == true && pingStatus.status != IP_SUCCESS && pingStatus.status != IP_TTL_EXPIRED_TRANSIT
+                                    pingStatus.success == true &&
+                                    pingStatus.status != IP_SUCCESS &&
+                                    pingStatus.status != IP_TTL_EXPIRED_TRANSIT
                                    ) &&
-                                   counter < 3-1) {
+                                   counter < 3-1)
+                                {
                                     IN_ADDR stDestAddr;
                                     stDestAddr.s_addr = curAddress;
 									if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-										theApp.QueueDebugLogLine(false,GetResString(IDS_USSCANTPING), counter+1, ttl, inet_ntoa(stDestAddr), pingStatus.error);
-                                    pinger.PIcmpErr(pingStatus.error);
+										theApp.QueueDebugLogLine(false,GetResString(IDS_USSCANTPING), counter+1, ttl, ipstr(stDestAddr), (pingStatus.success)?pingStatus.status:pingStatus.error);
+                                    pinger.PIcmpErr((pingStatus.success)?pingStatus.status:pingStatus.error);
 
                                     Sleep(1000);
 
-                                    if(m_enabled == false) {
+                                    if(m_enabled == false)
                                         enabled = false;
-                                    }
 
-                                    // trying other ping method
+									// trying other ping method
                                     useUdp = !useUdp;
                                 }
                             }
 
                             if(pingStatus.success == true && pingStatus.status == IP_TTL_EXPIRED_TRANSIT) {
-                                if(curHost == 0) {
+                                if(curHost == 0)
                                     curHost = pingStatus.destinationAddress;
-                                }
                                 atLeastOnePingSucceded = true;
                                 lastSuccedingPingAddress = curAddress;
+                                lastDestinationAddress = pingStatus.destinationAddress;
                             } else {
-                                // failed to ping this host for some reason.
-                                // Or we reached the actual host we are pinging. We don't want that, since it is too close.
-                                // Remove it.
+								// failed to ping this host for some reason.
+								// Or we reached the actual host we are pinging. We don't want that, since it is too close.
+								// Remove it.
                                 IN_ADDR stDestAddr;
                                 stDestAddr.s_addr = curAddress;
                                 if(pingStatus.success == true && pingStatus.status == IP_SUCCESS) {
 									if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-										theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, inet_ntoa(stDestAddr), pingStatus.status);
+										theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, ipstr(stDestAddr), pingStatus.status);
 
                                     hostsToTraceRoute.RemoveAt(lastPos);
-                                    failed = true;
-                                } else if(pingStatus.success == true) {
+									//failed = true;
+                                } else if(pingStatus.success == true && pingStatus.status == IP_DEST_HOST_UNREACHABLE) {
                                     if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-										theApp.QueueDebugLogLine(false,"UploadSpeedSense: Unknown pinging error! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps.", ttl, inet_ntoa(stDestAddr), pingStatus.status);
+										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Host unreacheable! (TTL: %i IP: %s status: %i). Removing this host. Status info follows."), ttl, ipstr(stDestAddr), pingStatus.status);
                                     pinger.PIcmpErr(pingStatus.status);
+
+									hostsToTraceRoute.RemoveAt(lastPos);
+                                } else if(pingStatus.success == true) {
+									if(bIsUSSLog)
+										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown ping status! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.status);
+									pinger.PIcmpErr(pingStatus.status);
                                     useUdp = !useUdp;
                                 } else {
-                                    if(pingStatus.error != IP_REQ_TIMED_OUT) {
+                                    if(pingStatus.error == IP_REQ_TIMED_OUT) {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-											theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTTOOCLOSE), ttl, inet_ntoa(stDestAddr), pingStatus.error);
+											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Timeout when pinging a host! (TTL: %i IP: %s Error: %i). Keeping host. Error info follows."), ttl, ipstr(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
 
-                                        hostsToTraceRoute.RemoveAt(lastPos);
-                                        failed = true;
+                                        if(hostsToTraceRouteCounter > 2 && lastSuccedingPingAddress == 0) {
+                                            // several pings have timed out on this ttl. Probably we can't ping on this ttl at all
+                                            failedThisTtl = true;
+                                        }
                                     } else {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-											theApp.QueueDebugLogLine(false,"UploadSpeedSense: Timeout when pinging a host! (TTL: %i IP: %s Error: %i). Keeping host. Error info follows.", ttl, inet_ntoa(stDestAddr), pingStatus.error);
+											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown pinging error! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
+    									useUdp = !useUdp;
+									}
                                     }
+
+                                if(hostsToTraceRoute.GetSize() <= 8) {
+									theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: To few hosts to traceroute left. Restarting host colletion."));
+                                    failed = true;
                                 }
                             }
                         }
 
                         if(failed == false) {
-                            if(curHost != 0) {
-                                if(pingStatus.success) {
-                                    if(pingStatus.destinationAddress == curHost) {
+                            if(curHost != 0 && lastDestinationAddress !=0 ) {
+                                if(lastDestinationAddress == curHost) {
                                     IN_ADDR stDestAddr;
                                     stDestAddr.s_addr = curHost;
 									if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-										theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTTTL), ttl, inet_ntoa(stDestAddr));
+										theApp.QueueDebugLogLine(false,GetResString(IDS_USSHOSTTTL), ttl, ipstr(stDestAddr));
 
                                     lastCommonHost = curHost;
                                     lastCommonTTL = ttl;
-                                    } else if(lastSuccedingPingAddress != 0) {
+                                    } else /*if(lastSuccedingPingAddress != 0)*/ {
                                     foundLastCommonHost = true;
                                     hostToPing = lastSuccedingPingAddress;
 
-                                    IN_ADDR stDestAddr;
-                                    stDestAddr.s_addr = hostToPing;
-                                        CString hostToPingString = inet_ntoa(stDestAddr);
+									CString hostToPingString = ipstr(hostToPing);
 
-                                        if(lastCommonHost != 0) {
-                                            if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-												theApp.QueueDebugLogLine(false,"UploadSpeedSense: Found differing host at TTL %i: %s. This will be the host to ping.", ttl, hostToPingString);
-                                        } else {
-                                            IN_ADDR stLastCommonHost;
-                                            stLastCommonHost.s_addr = curHost;
-                                            CString lastCommonHostString = inet_ntoa(stLastCommonHost);
-    
-                                    
-                                            lastCommonHost = curHost;
-                                            lastCommonTTL = ttl;
-                                            if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-												theApp.QueueDebugLogLine(false,"UploadSpeedSense: Found differing host at TTL %i, but last ttl couldn't be pinged so we don't know last common host. Taking a chance and using first differing ip as last commonhost. Host to ping: %s. Faked LastCommonHost: %s", ttl, hostToPingString, lastCommonHostString);
-                                        }
+                                    if(lastCommonHost != 0) {
+	                                    if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Found differing host at TTL %i: %s. This will be the host to ping."), ttl, hostToPingString);
                                     } else {
-                                        // Shouldn't happen. This would mean first ping for a ttl failed, and that it would also be a differing host
-                                        // on that ttl. How can 1 single host be differing?
-										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-											theApp.QueueDebugLogLine(false,"UploadSpeedSense: This should never happen. If it does, add tracing here.");
-                                        enabled = false;
-                                        foundLastCommonHost = false;
-                                    }
-                                } else {
-                                    enabled = false;
-                                    foundLastCommonHost = false;
+										CString lastCommonHostString = ipstr(curHost);
+                                    
+                                        lastCommonHost = curHost;
+                                        lastCommonTTL = ttl;
+                                        if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Found differing host at TTL %i, but last ttl couldn't be pinged so we don't know last common host. Taking a chance and using first differing ip as last commonhost. Host to ping: %s. Faked LastCommonHost: %s"), ttl, hostToPingString, lastCommonHostString);
+	                                }
                                 }
                             } else {
                                 if(ttl < 4) {
 									if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-										theApp.QueueDebugLogLine(false,"UploadSpeedSense: Could perform no ping at all at TTL %i. Trying next ttl.", ttl);
+										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Could perform no ping at all at TTL %i. Trying next ttl."), ttl);
                                 } else {
 									if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-										theApp.QueueDebugLogLine(false,"UploadSpeedSense: Could perform no ping at all at TTL %i. Giving up.", ttl);
+										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Could perform no ping at all at TTL %i. Giving up."), ttl);
                                 }
                                 lastCommonHost = 0;
                             }
@@ -565,47 +547,55 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                     if(foundLastCommonHost == false && traceRouteTries >= 3) {
                         if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-							theApp.QueueDebugLogLine(false,"UploadSpeedSense: Tracerouting failed several times. Waiting a few minutes before trying again.");
+							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Tracerouting failed several times. Waiting a few minutes before trying again."));
+
+                        SetUpload(maxUpload);
 
                         pingLocker.Lock();
-                        m_state = "Waiting...";
+                        m_state = _T("Waiting...");
                         pingLocker.Unlock();
 
                         prefsEvent->Lock(3*60*1000);
 
                         pingLocker.Lock();
-                        m_state = "Preparing...";
+                        m_state = _T("Preparing...");
                         pingLocker.Unlock();
+                    }
+
+			        if(m_enabled == false) {
+				        enabled = false;
                     }
                 }
 
-				if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-					theApp.QueueDebugLogLine(false,"UploadSpeedSense: Done tracerouting. Evaluating results.");
+				if(enabled) {
+					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+						theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Done tracerouting. Evaluating results."));
 
-                if(foundLastCommonHost == true) {
-                    IN_ADDR stLastCommonHostAddr;
-                    stLastCommonHostAddr.s_addr = lastCommonHost;
+	                if(foundLastCommonHost == true) {
+	                    IN_ADDR stLastCommonHostAddr;
+	                    stLastCommonHostAddr.s_addr = lastCommonHost;
 
-                    // log result
+	                    // log result
                     
-                    if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-						theApp.QueueDebugLogLine(false,"UploadSpeedSense: Found last common host. LastCommonHost: %s @ TTL: %i", inet_ntoa(stLastCommonHostAddr), lastCommonTTL);
+	                    if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Found last common host. LastCommonHost: %s @ TTL: %i"), ipstr(stLastCommonHostAddr), lastCommonTTL);
 
-                    IN_ADDR stHostToPingAddr;
-                    stHostToPingAddr.s_addr = hostToPing;
-					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-						theApp.QueueDebugLogLine(false,"UploadSpeedSense: Found last common host. HostToPing: %s", inet_ntoa(stHostToPingAddr));
-                } else {
-					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-						theApp.QueueDebugLogLine(false,GetResString(IDS_USSTRACEFAILDIS));
-                    enabled = false;
+	                    IN_ADDR stHostToPingAddr;
+	                    stHostToPingAddr.s_addr = hostToPing;
+						if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Found last common host. HostToPing: %s"), ipstr(stHostToPingAddr));
+	                } else {
+						if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+							theApp.QueueDebugLogLine(false,GetResString(IDS_USSTRACEFAILDIS));
+                    	enabled = false;
 
-					pingLocker.Lock();
-                    m_state = "Error.";
-                    pingLocker.Unlock();
-                    // PENDING: this may not be thread safe
-                    thePrefs.SetDynUpEnabled(false);
-                }
+						pingLocker.Lock();
+					    m_state = _T("Error.");
+                    	pingLocker.Unlock();
+                    	// PENDING: this may not be thread safe
+                    	thePrefs.SetDynUpEnabled(false);
+                	}
+				}
             }
 
             if(m_enabled == false) {
@@ -618,7 +608,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 					theApp.QueueDebugLogLine(false,GetResString(IDS_USSSTARTLOWPING));
 	        }
 
-            // PENDING:
+			// PENDING:
             prefsLocker.Lock();
             uint64 lowestInitialPingAllowed = m_LowestInitialPingAllowed;
 			prefsLocker.Unlock();
@@ -626,7 +616,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             uint32 initial_ping = _I32_MAX;
 
             bool foundWorkingPingMethod = false;
-            // finding lowest ping
+			// finding lowest ping
             for(int initialPingCounter = 0; doRun && enabled && initialPingCounter < 10; initialPingCounter++) {
                 Sleep(200);
 
@@ -640,12 +630,11 @@ UINT LastCommonRouteFinder::RunInternal() {
                     }
                 } else {
                     if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-						theApp.QueueDebugLogLine(false,"UploadSpeedSense: %s-Ping #%i failed. Reason follows", useUdp?"UDP":"ICMP", initialPingCounter);
+						theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: %s-Ping #%i failed. Reason follows"), useUdp?_T("UDP"):_T("ICMP"), initialPingCounter);
                     pinger.PIcmpErr(pingStatus.error);
 
 
                     if(!pingStatus.success && !foundWorkingPingMethod) {
-                        // trying other ping method
                         useUdp = !useUdp;
                     }
                 }
@@ -655,16 +644,15 @@ UINT LastCommonRouteFinder::RunInternal() {
                 }
             }
 
-            // Set the upload to a good starting point
+			// Set the upload to a good starting point
 			SetUpload(startUpload);
 			Sleep(SEC2MS(1));
 			DWORD initTime = ::GetTickCount();
 
-            // if all pings returned 0, initial_ping will not have been changed from default value.
-            // then set initial_ping to lowestInitialPingAllowed
-            if(initial_ping == _I32_MAX) {
+			// if all pings returned 0, initial_ping will not have been changed from default value.
+			// then set initial_ping to lowestInitialPingAllowed
+			if(initial_ping == _I32_MAX)
                 initial_ping = lowestInitialPingAllowed;
-            }
 
             uint32 upload = 0;
 
@@ -673,10 +661,10 @@ UINT LastCommonRouteFinder::RunInternal() {
             if(doRun && enabled) {
                 if(initial_ping > lowestInitialPingAllowed) {
 					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-						theApp.QueueDebugLogLine(false,"UploadSpeedSense: Lowest ping: %i ms", initial_ping);
+						theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Lowest ping: %i ms"), initial_ping);
                 } else {
 					if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-	                    theApp.QueueDebugLogLine(false,"UploadSpeedSense: Lowest ping: %i ms. (Filtered lower values. Lowest ping is never allowed to go under %i ms)", initial_ping, lowestInitialPingAllowed);
+	                    theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Lowest ping: %i ms. (Filtered lower values. Lowest ping is never allowed to go under %i ms)"), initial_ping, lowestInitialPingAllowed);
                 }
 
                 prefsLocker.Lock();
@@ -697,16 +685,16 @@ UINT LastCommonRouteFinder::RunInternal() {
 
             if(doRun && enabled) {
             	if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-					theApp.QueueDebugLogLine(false,"UploadSpeedSense: Done with preparations. Starting control of upload speed.");
+					theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Done with preparations. Starting control of upload speed."));
             }
 
             pingLocker.Lock();
-            m_state = "";
+            m_state = _T("");
             pingLocker.Unlock();
 
-            // There may be several reasons to start over with tracerouting again.
-            // Currently we only restart if we get an unexpected ip back from the
-            // ping at the set TTL.
+			// There may be several reasons to start over with tracerouting again.
+			// Currently we only restart if we get an unexpected ip back from the
+			// ping at the set TTL.
             bool restart = false;
 
             DWORD lastLoopTick = ::GetTickCount();
@@ -715,7 +703,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             while(doRun && enabled && restart == false) {
                 DWORD ticksBetweenPings = 1000;
                 if(upload > 0) {
-                    // ping packages being 64 bytes, this should use 1% of bandwidth (one hundredth of bw).
+					// ping packages being 64 bytes, this should use 1% of bandwidth (one hundredth of bw).
                     ticksBetweenPings = (64*100*1000)/upload;
 
                     if(ticksBetweenPings < 125) {
@@ -730,10 +718,8 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                 DWORD timeSinceLastLoop = curTick-lastLoopTick;
                 if(timeSinceLastLoop < ticksBetweenPings) {
-                    //theApp.QueueDebugLogLine(false,"UploadSpeedSense: Sleeping %i ms, timeSinceLastLoop %i ms ticksBetweenPings %i ms", ticksBetweenPings-timeSinceLastLoop, timeSinceLastLoop, ticksBetweenPings);
+					//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Sleeping %i ms, timeSinceLastLoop %i ms ticksBetweenPings %i ms"), ticksBetweenPings-timeSinceLastLoop, timeSinceLastLoop, ticksBetweenPings);
                     Sleep(ticksBetweenPings-timeSinceLastLoop);
-                } else {
-                    //theApp.QueueDebugLogLine(false,"UploadSpeedSense: Skipped sleeping. timeSinceLastLoop %i ms ticksBetweenPings %i ms", timeSinceLastLoop, ticksBetweenPings);
                 }
 
                 lastLoopTick = curTick;
@@ -749,18 +735,16 @@ UINT LastCommonRouteFinder::RunInternal() {
                 bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 				prefsLocker.Unlock();
 
-                {
-                    DWORD tempTick = ::GetTickCount();
+                DWORD tempTick = ::GetTickCount();
 
-                    if(tempTick - initTime < SEC2MS(60)) {
-                        goingUpDivider = 1;
-                        goingDownDivider = 1;
-                    } else if(/*tempTick - lastUploadReset > SEC2MS(5) ||*/ tempTick - initTime < SEC2MS(61)) {
+                if(tempTick - initTime < SEC2MS(60)) {
+                    goingUpDivider = 1;
+                    goingDownDivider = 1;
+                } else if(tempTick - initTime < SEC2MS(61)) {
                         lastUploadReset = tempTick;
                         prefsLocker.Lock();
                         upload = m_CurUpload;
                         prefsLocker.Unlock();
-                    }
                 }
 
                 uint32 soll_ping = initial_ping*pingTolerance;
@@ -776,51 +760,58 @@ UINT LastCommonRouteFinder::RunInternal() {
 
                 bool pingFailure = false;        
                 for(uint64 pingTries = 0; doRun && enabled && (pingTries == 0 || pingFailure) && pingTries < 60; pingTries++) {
+                    if(m_enabled == false) {
+                        enabled = false;
+                    }
+
                     // ping the host to ping
                     PingStatus pingStatus = pinger.Ping(hostToPing, lastCommonTTL, false, useUdp);
 
                     if(pingStatus.success && pingStatus.status == IP_TTL_EXPIRED_TRANSIT) {
                         if(pingStatus.destinationAddress != lastCommonHost) {
-                            // something has changed about the topology! We got another ip back from this ttl than expected.
-                            // Do the tracerouting again to figure out new topology
-                            IN_ADDR stLastCommonHostAddr;
-                            stLastCommonHostAddr.s_addr = lastCommonHost;
-                            CString lastCommonHostAddressString = inet_ntoa(stLastCommonHostAddr);
-
-                            IN_ADDR stDestinationAddr;
-                            stDestinationAddr.s_addr = pingStatus.destinationAddress;
-                            CString destinationAddressString = inet_ntoa(stDestinationAddr);
+							// something has changed about the topology! We got another ip back from this ttl than expected.
+							// Do the tracerouting again to figure out new topology
+							CString lastCommonHostAddressString = ipstr(lastCommonHost);
+							CString destinationAddressString = ipstr(pingStatus.destinationAddress);
 
                             if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-								theApp.QueueDebugLogLine(false,"UploadSpeedSense: Network topology has changed. TTL: %i Expected ip: %s Got ip: %s Will do a new traceroute.", lastCommonTTL, lastCommonHostAddressString, destinationAddressString);
+								theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Network topology has changed. TTL: %i Expected ip: %s Got ip: %s Will do a new traceroute."), lastCommonTTL, lastCommonHostAddressString, destinationAddressString);
                             restart = true;
                         }
 
                         raw_ping = (uint32)pingStatus.delay;
 
                         if(pingFailure) {
-                            // only several pings in row should fails, the total doesn't count, so reset for each successful ping
+							// only several pings in row should fails, the total doesn't count, so reset for each successful ping
                             pingFailure = false;
 
-                            //theApp.QueueDebugLogLine(false,"UploadSpeedSense: Ping #%i successful. Continuing.", pingTries);
+							//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Ping #%i successful. Continuing."), pingTries);
 						}
                     } else {
                         raw_ping = soll_ping*3+initial_ping*3; // this value will cause the upload speed be lowered.
 
                         pingFailure = true;
 
-						if(pingTries > 3) {
-                            Sleep(1000);
+                        if(m_enabled == false) {
+				            enabled = false;
+                        } else if(pingTries > 3) {
+							prefsEvent->Lock(1000);
                         }
 
-                        //theApp.QueueDebugLogLine(false,"UploadSpeedSense: %s-Ping #%i failed. Reason follows", useUdp?"UDP":"ICMP", pingTries);
-                        //pinger.PIcmpErr(pingStatus.error);
+						//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: %s-Ping #%i failed. Reason follows"), useUdp?_T("UDP"):_T("ICMP"), pingTries);
+						//pinger.PIcmpErr(pingStatus.error);
+                        }
+
+                    if(m_enabled == false) {
+				        enabled = false;
                     }
                 }
 
                 if(pingFailure) {
-                    if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-						theApp.QueueDebugLogLine(false,"UploadSpeedSense: No response to pings for a long time. Restarting...");
+					if(enabled) {
+						if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
+							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: No response to pings for a long time. Restarting..."));
+					}
                     restart = true;
                 }
 
@@ -848,46 +839,35 @@ UINT LastCommonRouteFinder::RunInternal() {
                     m_lowestPing = initial_ping;
                     pingLocker.Unlock();
 
-		            // Calculate Waiting Time
+					// Calculate Waiting Time
 		            sint64 hping = (soll_ping - (sint64)normalized_ping);
             		
-                    // Calculate change of upload speed
+					// Calculate change of upload speed
                     if(hping < 0) {
-                        // lower the speed
+						// lower the speed
                         sint64 ulDiff = hping*1024*10 / (sint64)(goingDownDivider*initial_ping);
                         acceptNewClient = false;
 
-                        //theApp.QueueDebugLogLine(false,"UploadSpeedSense: Down! Ping cur %i ms. Ave %I64i ms %i values. New Upload %i + %I64i = %I64i", raw_ping, pingDelaysTotal/pingDelays.GetCount(), pingDelays.GetCount(), upload, ulDiff, upload+ulDiff);
-                        // prevent underflow
+						//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Down! Ping cur %i ms. Ave %I64i ms %i values. New Upload %i + %I64i = %I64i"), raw_ping, pingDelaysTotal/pingDelays.GetCount(), pingDelays.GetCount(), upload, ulDiff, upload+ulDiff);
+						// prevent underflow
                         if(upload > -ulDiff) {
                             upload += ulDiff;
                         } else {
                             upload = 0;
                         }
                     } else if(hping > 0) {
-                        // raise the speed
+						// raise the speed
                         uint64 ulDiff = hping*1024*10 / (uint64)(goingUpDivider*initial_ping);
                         acceptNewClient = true;
 
-                        //theApp.QueueDebugLogLine(false,"UploadSpeedSense: Up! Ping cur %i ms. Ave %I64i ms %i values. New Upload %i + %I64i = %I64i", raw_ping, pingDelaysTotal/pingDelays.GetCount(), pingDelays.GetCount(), upload, ulDiff, upload+ulDiff);
-                        // prevent overflow
+						//theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Up! Ping cur %i ms. Ave %I64i ms %i values. New Upload %i + %I64i = %I64i"), raw_ping, pingDelaysTotal/pingDelays.GetCount(), pingDelays.GetCount(), upload, ulDiff, upload+ulDiff);
+						// prevent overflow
                         if(_I32_MAX-upload > ulDiff) {
                             upload += ulDiff;
                         } else {
                             upload = _I32_MAX;
                         }
                     }
-
-                    //if(abs(ulDiff) > 20) {
-                    //    uint64 divider = abs(ulDiff)/20;
-                    //    int tempNumberOfPingsForAverage = numberOfPingsForAverage/divider;
-
-                    //    while(pingDelays.GetCount() > tempNumberOfPingsForAverage) {
-                    //        uint32 pingDelay = pingDelays.RemoveHead();
-                    //        pingDelaysTotal -= pingDelay;
-                    //    }
-                    //}
-
                     prefsLocker.Lock();
                     if (upload < minUpload) {
                         upload = minUpload;
@@ -908,7 +888,7 @@ UINT LastCommonRouteFinder::RunInternal() {
         }
     }
 
-    // Signal that we have ended.
+	// Signal that we have ended.
     threadEndedEvent->SetEvent();
 
     return 0;

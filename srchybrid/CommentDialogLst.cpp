@@ -104,7 +104,7 @@ void CCommentDialogLst::CompleteList ()
 	for (POSITION pos = m_file->srclist.GetHeadPosition(); pos != NULL; )
 	{ 
 		CUpDownClient* cur_src = m_file->srclist.GetNext(pos);
-		if (cur_src->GetFileComment().GetLength()>0 || cur_src->GetFileRate()>0)
+		if (cur_src->GetFileRate()>0 || !cur_src->GetFileComment().IsEmpty())
 		{
 			pmyListCtrl.InsertItem(LVIF_TEXT|LVIF_PARAM,count,cur_src->GetUserName(),0,0,1,(LPARAM)cur_src);
 			pmyListCtrl.SetItemText(count, 1, cur_src->GetClientFilename()); 

@@ -151,7 +151,7 @@ void CMMSocket::OnReceive(int nErrorCode){
 	}
 	if (m_dwHttpHeaderLen && !m_dwHttpContentLen)
 		m_dwHttpContentLen = m_dwRecv - m_dwHttpHeaderLen;
-	if (m_dwHttpHeaderLen && (!m_dwHttpContentLen || (m_dwHttpHeaderLen + m_dwHttpContentLen <= m_dwRecv)))
+	if (m_dwHttpHeaderLen && m_dwHttpContentLen < m_dwRecv && (!m_dwHttpContentLen || (m_dwHttpHeaderLen + m_dwHttpContentLen <= m_dwRecv)))
 	{
 		OnRequestReceived(m_pBuf, m_dwHttpHeaderLen, m_pBuf + m_dwHttpHeaderLen, m_dwHttpContentLen);
 
@@ -299,7 +299,7 @@ void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData,
 			catch(CFileException* error){
 				ASSERT ( false ); // remove later
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, "Corrupt MobileMule Packet received");
+					AddDebugLogLine(false, _T("Corrupt MobileMule Packet received"));
 				error->Delete();
 			}
 		}
@@ -320,7 +320,7 @@ void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData,
 	catch(...){
 		ASSERT ( false ); // remove later
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, "Unexpected Error while processing MobileMule Packet");
+			AddDebugLogLine(false, _T("Unexpected Error while processing MobileMule Packet"));
 	}
 
 }

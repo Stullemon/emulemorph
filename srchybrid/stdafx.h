@@ -75,3 +75,17 @@
 #define free(p)           _free_dbg(p, _NORMAL_BLOCK)
 #define _msize(p)         _msize_dbg(p, _NORMAL_BLOCK)
 #endif
+
+#ifdef _UNICODE
+typedef	CArray<CStringA,CStringA> CStringAArray;
+#else
+typedef	CStringArray CStringAArray;
+#endif
+
+#ifdef _UNICODE
+#define _TWINAPI(fname)	fname "W"
+#else
+#define _TWINAPI(fname)	fname "A"
+#endif
+
+extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);

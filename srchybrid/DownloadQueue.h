@@ -34,7 +34,6 @@ namespace Kademlia
 #include "SelCategoryDlg.h"
 // khaos::categorymod-
 
-// SLUGFILLER: hostnameSources
 #define WM_HOSTNAMERESOLVED		(WM_USER + 0x101)
 
 class CSourceHostnameResolveWnd : public CWnd
@@ -44,7 +43,7 @@ public:
 	CSourceHostnameResolveWnd();
 	virtual ~CSourceHostnameResolveWnd();
 
-	void AddToResolve(const uchar* fileid, LPCTSTR pszHostname, uint16 port);
+	void AddToResolve(const uchar* fileid, LPCSTR pszHostname, uint16 port, LPCTSTR pszURL = NULL);
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -55,6 +54,7 @@ private:
 		uchar fileid[16];
 		CStringA strHostname;
 		uint16 port;
+		CString strURL;
 	};
 	CTypedPtrList<CPtrList, Hostname_Entry*> m_toresolve;
 	char m_aucHostnameBuffer[MAXGETHOSTSTRUCT];
@@ -68,8 +68,10 @@ class CDownloadQueue: public CLoggable
 public:
 	CDownloadQueue(CSharedFileList* in_sharedfilelist);
 	~CDownloadQueue();
+
 	void	Process();
 	void	Init();
+
 	// add/remove entries
 	void	AddPartFilesToShare();
 	void	AddDownload(CPartFile* newfile, bool paused);
@@ -89,14 +91,13 @@ public:
 	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true);
 	bool	IsPartFile(const CKnownFile* file) const;
 	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName) const;	// SLUGFILLER: SafeHash
+
 	CPartFile* GetFileByID(const uchar* filehash) const;
 	CPartFile* GetFileByIndex(int index) const;
 	CPartFile* GetFileByKadFileSearchID(uint32 ID) const;
 	// khaos::categorymod+
-	//void	StartNextFile()									{ StartNextFile(-1); }
-	//void	StartNextFile(int cat);	
-	
-	bool	StartNextFile(int Category = -1);
+	void	StartNextFile() { StartNextFile(-1); }
+	bool	StartNextFile(int cat,bool force=false);
 	void	StopPauseLastFile(int Mode = MP_PAUSE, int Category = -1);
 	uint16	GetMaxCatResumeOrder(uint8 iCategory = 0);
 	void	GetCategoryFileCounts(uint8 iCategory, int cntFiles[]);
@@ -118,7 +119,7 @@ public:
 	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
 	bool	IsInList(const CUpDownClient* client) const;
 
-	void    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
+	bool    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
 	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
 	bool	RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate = true);
 
@@ -129,34 +130,7 @@ public:
 	void	GetDownloadStats(SDownloadStats& results);
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
 	uint32	GetDatarate()			{return datarate;}
-	void	CompDownDatarateOverhead();
 
-	void	AddDownDataOverheadSourceExchange(uint32 data)	{ m_nDownDataRateMSOverhead += data;
-															  m_nDownDataOverheadSourceExchange += data;
-															  m_nDownDataOverheadSourceExchangePackets++;}
-	void	AddDownDataOverheadFileRequest(uint32 data)		{ m_nDownDataRateMSOverhead += data;
-															  m_nDownDataOverheadFileRequest += data;
-															  m_nDownDataOverheadFileRequestPackets++;}
-	void	AddDownDataOverheadServer(uint32 data)			{ m_nDownDataRateMSOverhead += data;
-															  m_nDownDataOverheadServer += data;
-															  m_nDownDataOverheadServerPackets++;}
-	void	AddDownDataOverheadOther(uint32 data)			{ m_nDownDataRateMSOverhead += data;
-															  m_nDownDataOverheadOther += data;
-															  m_nDownDataOverheadOtherPackets++;}
-	void	AddDownDataOverheadKad(uint32 data)				{ m_nDownDataRateMSOverhead += data;
-															  m_nDownDataOverheadKad += data;
-															  m_nDownDataOverheadKadPackets++;}
-	uint32	GetDownDatarateOverhead()			{return m_nDownDatarateOverhead;}
-	uint64	GetDownDataOverheadSourceExchange()	{return m_nDownDataOverheadSourceExchange;}
-	uint64	GetDownDataOverheadFileRequest()	{return m_nDownDataOverheadFileRequest;}
-	uint64	GetDownDataOverheadServer()			{return m_nDownDataOverheadServer;}
-	uint64	GetDownDataOverheadKad()					{return m_nDownDataOverheadKad;}
-	uint64	GetDownDataOverheadOther()			{return m_nDownDataOverheadOther;}
-	uint64	GetDownDataOverheadSourceExchangePackets()	{return m_nDownDataOverheadSourceExchangePackets;}
-	uint64	GetDownDataOverheadFileRequestPackets()		{return m_nDownDataOverheadFileRequestPackets;}
-	uint64	GetDownDataOverheadServerPackets()			{return m_nDownDataOverheadServerPackets;}
-	uint64	GetDownDataOverheadKadPackets()				{return m_nDownDataOverheadKadPackets;}
-	uint64	GetDownDataOverheadOtherPackets()			{return m_nDownDataOverheadOtherPackets;}
 	void	AddUDPFileReasks()								{m_nUDPFileReasks++;}
 	uint32	GetUDPFileReasks() const						{return m_nUDPFileReasks;}
 	void	AddFailedUDPFileReasks()						{m_nFailedUDPFileReasks++;}
@@ -167,6 +141,7 @@ public:
 	void	ResetCatParts(int cat, uint8 useCat = 0);
 	// khaos::categorymod-
 	void	SetCatPrio(int cat, uint8 newprio);
+    void    RemoveAutoPrioInCat(int cat, uint8 newprio); // ZZ:DownloadManager
 	void	SetCatStatus(int cat, int newstatus);
 	void	MoveCat(uint8 from, uint8 to);
 	//MORPH START - Removed by SiRoB, Due to Khaos Categorie
@@ -230,18 +205,6 @@ private:
 	uint32		lastkademliafilerequest;
 
 	uint64		m_datarateMS;
-	uint32		m_nDownDatarateOverhead;
-	uint32		m_nDownDataRateMSOverhead;
-	uint64		m_nDownDataOverheadSourceExchange;
-	uint64		m_nDownDataOverheadSourceExchangePackets;
-	uint64		m_nDownDataOverheadFileRequest;
-	uint64		m_nDownDataOverheadFileRequestPackets;
-	uint64		m_nDownDataOverheadServer;
-	uint64		m_nDownDataOverheadServerPackets;
-	uint64		m_nDownDataOverheadOther;
-	uint64		m_nDownDataOverheadOtherPackets;
-	uint64		m_nDownDataOverheadKad;
-	uint64		m_nDownDataOverheadKadPackets;
 	uint32		m_nUDPFileReasks;
 	uint32		m_nFailedUDPFileReasks;
 
@@ -251,15 +214,14 @@ private:
 		DWORD	timestamp;
 	};
 	//MORPH START - Removed by SiRoB, ZZ Upload System	
-	//CList<TransferredData,TransferredData> avarage_dr_list;*/
+	/*
+	CList<TransferredData,TransferredData> avarage_dr_list;
+	*/
 	//MORPH END   - Removed by SiRoB, ZZ Upload System
-	CList<TransferredData,TransferredData>	m_AvarageDDRO_list;
-	uint32 sumavgDDRO;
-	// END By BadWolf - Accurate Speed Measurement
+	
+	CSourceHostnameResolveWnd m_srcwnd;
 
-    //DWORD m_lastRefreshedDLDisplay;
-	CSourceHostnameResolveWnd m_srcwnd;		// SLUGFILLER: hostnameSources
-
+    DWORD       m_dwLastA4AFtime; // ZZ:DownloadManager
 	// khaos::categorymod+ For queuing ED2K link additions.
 	bool		m_bBusyPurgingLinks;
 	bool		PurgeED2KLinkQueue();

@@ -28,20 +28,21 @@ public:
 	CKadSearchListCtrl();
 	virtual ~CKadSearchListCtrl();
 
-	void	SearchAdd(Kademlia::CSearch* search);
-	void	SearchRem(Kademlia::CSearch* search);
-	void	SearchRef(Kademlia::CSearch* search);
+	void	SearchAdd(const Kademlia::CSearch* search);
+	void	SearchRem(const Kademlia::CSearch* search);
+	void	SearchRef(const Kademlia::CSearch* search);
 
 	void	Init();
 	void	Localize();
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	SaveAllSettings(CIni* ini);
-	void UpdateKadSearchCount();
+	void	UpdateKadSearchCount();
 
 protected:
 	CString m_strLVName;
-	
+
+	void UpdateSearch(int iItem, const Kademlia::CSearch* search);
 	void SetAllIcons();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);

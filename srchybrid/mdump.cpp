@@ -33,15 +33,15 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 										);
 
 
-LPCSTR MiniDumper::m_szAppName;
+LPCTSTR MiniDumper::m_szAppName;
 
-MiniDumper::MiniDumper( LPCSTR szAppName )
+MiniDumper::MiniDumper( LPCTSTR szAppName )
 {
 	// if this assert fires then you have two instances of MiniDumper
 	// which is not allowed
 	ASSERT( m_szAppName==NULL );
 
-	m_szAppName = szAppName ? strdup(szAppName) : "Application";
+	m_szAppName = szAppName ? _tcsdup(szAppName) : _T("Application");
 
 	::SetUnhandledExceptionFilter( TopLevelFilter );
 }
@@ -58,14 +58,14 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 	// look next to the EXE first, as the one in System32 might be old 
 	// (e.g. Windows 2000)
 	HMODULE hDll = NULL;
-	char szDbgHelpPath[_MAX_PATH];
+	TCHAR szDbgHelpPath[_MAX_PATH];
 
-	if (GetModuleFileName( NULL, szDbgHelpPath, _MAX_PATH ))
+	if (GetModuleFileName( NULL, szDbgHelpPath, ARRSIZE(szDbgHelpPath)))
 	{
-		char *pSlash = _tcsrchr( szDbgHelpPath, '\\' );
+		TCHAR *pSlash = _tcsrchr( szDbgHelpPath, _T('\\') );
 		if (pSlash)
 		{
-			_tcscpy( pSlash+1, "DBGHELP.DLL" );
+			_tcscpy( pSlash+1, _T("DBGHELP.DLL") );
 			hDll = ::LoadLibrary( szDbgHelpPath );
 		}
 	}
@@ -73,7 +73,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 	if (hDll==NULL)
 	{
 		// load any version we can
-		hDll = ::LoadLibrary( "DBGHELP.DLL" );
+		hDll = ::LoadLibrary( _T("DBGHELP.DLL") );
 	}
 
 	LPCTSTR szResult = NULL;
@@ -83,21 +83,19 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress( hDll, "MiniDumpWriteDump" );
 		if (pDump)
 		{
-			char szDumpPath[_MAX_PATH];
-			char szScratch [_MAX_PATH];
+			TCHAR szDumpPath[_MAX_PATH];
+			TCHAR szScratch [_MAX_PATH];
 
 			// work out a good place for the dump file
-			::GetModuleFileName(0,szDumpPath, 490);
-			LPTSTR pszFileName = _tcsrchr(szDumpPath, '\\') + 1;
-			*pszFileName = '\0';
-			//if (!GetTempPath( _MAX_PATH, szDumpPath ))
-			//	_tcscpy( szDumpPath, "c:\\temp\\" );
+			::GetModuleFileName(0,szDumpPath, ARRSIZE(szDumpPath));
+			LPTSTR pszFileName = _tcsrchr(szDumpPath, _T('\\')) + 1;
+			*pszFileName = _T('\0');
 
 			_tcscat( szDumpPath, m_szAppName );
-			_tcscat( szDumpPath, ".dmp" );
+			_tcscat( szDumpPath, _T(".dmp") );
 
 			// ask the user if they want to save a dump file
-			if (::MessageBox( NULL, "eMule crashed :-( A diagnostic file can be created which will help the author to resolve this problem.\n This file will be saved on your Disk (and not sent). Do you want to create this file now?", m_szAppName, MB_YESNO )==IDYES)
+			if (::MessageBox( NULL, _T("eMule crashed :-( A diagnostic file can be created which will help the author to resolve this problem.\n This file will be saved on your Disk (and not sent). Do you want to create this file now?"), m_szAppName, MB_YESNO )==IDYES)
 			{
 				// create the file
 				HANDLE hFile = ::CreateFile( szDumpPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
@@ -115,32 +113,32 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 					BOOL bOK = pDump( GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL );
 					if (bOK)
 					{
-						sprintf( szScratch, "Saved dump file to '%s'\nPlease send this file together with a bugreport to ornis@emule-project.net\nThank you for helping to improve eMule", szDumpPath );
+						_stprintf( szScratch, _T("Saved dump file to '%s'\nPlease send this file together with a bugreport to ornis@emule-project.net\nThank you for helping to improve eMule"), szDumpPath );
 						szResult = szScratch;
 						retval = EXCEPTION_EXECUTE_HANDLER;
 					}
 					else
 					{
-						sprintf( szScratch, "Failed to save dump file to '%s' (error %d)", szDumpPath, GetLastError() );
+						_stprintf( szScratch, _T("Failed to save dump file to '%s' (error %d)"), szDumpPath, GetLastError() );
 						szResult = szScratch;
 					}
 					::CloseHandle(hFile);
 				}
 				else
 				{
-					sprintf( szScratch, "Failed to create dump file '%s' (error %d)", szDumpPath, GetLastError() );
+					_stprintf( szScratch, _T("Failed to create dump file '%s' (error %d)"), szDumpPath, GetLastError() );
 					szResult = szScratch;
 				}
 			}
 		}
 		else
 		{
-			szResult = "DBGHELP.DLL too old";
+			szResult = _T("DBGHELP.DLL too old");
 		}
 	}
 	else
 	{
-		szResult = "DBGHELP.DLL not found";
+		szResult = _T("DBGHELP.DLL not found");
 	}
 
 	if (szResult)

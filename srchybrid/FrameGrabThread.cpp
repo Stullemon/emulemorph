@@ -41,9 +41,7 @@ typedef struct tagVIDEOINFOHEADER {
     BITMAPINFOHEADER bmiHeader;
 } VIDEOINFOHEADER;
 
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,6 +58,12 @@ CFrameGrabThread::CFrameGrabThread()
 
 CFrameGrabThread::~CFrameGrabThread()
 {
+}
+
+BOOL CFrameGrabThread::InitInstance()
+{
+	InitThreadLocale();
+	return TRUE;
 }
 
 BOOL CFrameGrabThread::Run(){

@@ -118,7 +118,7 @@ void CDirectDownloadDlg::OnOK()
 		catch(CString error)
 		{
 			TCHAR szBuffer[200];
-			_snprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
+			_sntprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
 			CString strError;
 			strError.Format(GetResString(IDS_ERR_LINKERROR), szBuffer);
 			AfxMessageBox(strError);
@@ -146,12 +146,16 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 	EnableSaveRestore(PREF_INI_SECTION);
 
 	SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
-	m_ctrlDirectDlFrm.Init("Download");
+	m_ctrlDirectDlFrm.Init(_T("Download"));
 	m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
 	m_ctrlDirectDlFrm.SetText(GetResString(IDS_SW_DIRECTDOWNLOAD));
     GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_DOWNLOAD));
     GetDlgItem(IDC_FSTATIC2)->SetWindowText(GetResString(IDS_SW_LINK));
-	GetDlgItem(IDC_CATLABEL)->SetWindowText(GetResString(IDS_CAT)+":");
+	GetDlgItem(IDC_CATLABEL)->SetWindowText(GetResString(IDS_CAT)+_T(":"));
+
+	GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_DOWNLOAD));
+	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
+	
 
 	if (thePrefs.GetCatCount()==0) {
 		GetDlgItem(IDC_CATLABEL)->ShowWindow(SW_HIDE);

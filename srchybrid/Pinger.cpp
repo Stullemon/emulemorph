@@ -48,7 +48,7 @@
 * it with WinSock 2 implementations.
 *
 * There is little documentation available (I first found it in the Win32
-* SDK in \MSTOOLS\ICMP, and it exists on the MS&nbsp;Developers' Network
+* SDK in \MSTOOLS\ICMP, and it exists on the MS Developers' Network
 * CD-ROM now, also). Microsoft disclaims this API about as strongly as 
 * possible.  The README.TXT that accompanies it says:
 *
@@ -94,10 +94,8 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "Pinger.h"
-#include "OtherFunctions.h" //Added by SiRoB
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
+#include "OtherFunctions.h"
 
 extern CString GetErrorMessage(DWORD dwError, DWORD dwFlags);
 
@@ -127,30 +125,30 @@ static char THIS_FILE[]=__FILE__;
  *    "IP_PENDING (11255)"
  */
 #define MAX_ICMP_ERR_STRING  IP_STATUS_BASE + 22
-char *aszSendEchoErr[] = {
-    "IP_STATUS_BASE (11000)",
-    "IP_BUF_TOO_SMALL (11001)",
-    "IP_DEST_NET_UNREACHABLE (11002)",
-    "IP_DEST_HOST_UNREACHABLE (11003)",
-    "IP_DEST_PROT_UNREACHABLE (11004)",
-    "IP_DEST_PORT_UNREACHABLE (11005)",
-    "IP_NO_RESOURCES (11006)",
-    "IP_BAD_OPTION (11007)",
-    "IP_HW_ERROR (11008)",
-    "IP_PACKET_TOO_BIG (11009)",
-    "IP_REQ_TIMED_OUT (11010)",
-    "IP_BAD_REQ (11011)",
-    "IP_BAD_ROUTE (11012)",
-    "IP_TTL_EXPIRED_TRANSIT (11013)",
-    "IP_TTL_EXPIRED_REASSEM (11014)",
-    "IP_PARAM_PROBLEM (11015)",
-    "IP_SOURCE_QUENCH (11016)",
-    "IP_OPTION_TOO_BIG (11017)",
-    "IP_BAD_DESTINATION (11018)",
-    "IP_ADDR_DELETED (11019)",
-    "IP_SPEC_MTU_CHANGE (11020)",
-    "IP_MTU_CHANGE (11021)",
-    "IP_UNLOAD (11022)"
+static const LPCTSTR aszSendEchoErr[] = {
+    _T("IP_STATUS_BASE (11000)"),
+    _T("IP_BUF_TOO_SMALL (11001)"),
+    _T("IP_DEST_NET_UNREACHABLE (11002)"),
+    _T("IP_DEST_HOST_UNREACHABLE (11003)"),
+    _T("IP_DEST_PROT_UNREACHABLE (11004)"),
+    _T("IP_DEST_PORT_UNREACHABLE (11005)"),
+    _T("IP_NO_RESOURCES (11006)"),
+    _T("IP_BAD_OPTION (11007)"),
+    _T("IP_HW_ERROR (11008)"),
+    _T("IP_PACKET_TOO_BIG (11009)"),
+    _T("IP_REQ_TIMED_OUT (11010)"),
+    _T("IP_BAD_REQ (11011)"),
+    _T("IP_BAD_ROUTE (11012)"),
+    _T("IP_TTL_EXPIRED_TRANSIT (11013)"),
+    _T("IP_TTL_EXPIRED_REASSEM (11014)"),
+    _T("IP_PARAM_PROBLEM (11015)"),
+    _T("IP_SOURCE_QUENCH (11016)"),
+    _T("IP_OPTION_TOO_BIG (11017)"),
+    _T("IP_BAD_DESTINATION (11018)"),
+    _T("IP_ADDR_DELETED (11019)"),
+    _T("IP_SPEC_MTU_CHANGE (11020)"),
+    _T("IP_MTU_CHANGE (11021)"),
+    _T("IP_UNLOAD (11022)")
 };
 
 Pinger::Pinger() {
@@ -177,16 +175,16 @@ Pinger::Pinger() {
             if (us == INVALID_SOCKET) {
                 closesocket(is);            // ignore return value - we need to close it anyway!
             } else {
-              udpStarted = true;
+                udpStarted = true;
             }
         }
     }
     // udp end
  
     // Open ICMP.DLL
-    hICMP_DLL = LoadLibrary("ICMP.DLL");
+    hICMP_DLL = LoadLibrary(_T("ICMP.DLL"));
     if (hICMP_DLL == 0) {
-        theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERLOADLIB));
+        theApp.QueueDebugLogLine(false,_T("Pinger: LoadLibrary() failed: Unable to locate ICMP.DLL!"));
         return;
     }
 
@@ -198,15 +196,15 @@ Pinger::Pinger() {
         (!lpfnIcmpCloseHandle) || 
         (!lpfnIcmpSendEcho)) {
 
-        theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERGPAFAIL));
+        theApp.QueueDebugLogLine(false,_T("Pinger: GetProcAddr() failed for at least one function."));
         return;
     }
 
     // Open the ping service
     hICMP = (HANDLE) lpfnIcmpCreateFile();
     if (hICMP == INVALID_HANDLE_VALUE) {
-		int nErr = GetLastError();
-        theApp.QueueDebugLogLine(false, GetResString(IDS_USSPINGERICFFAIL), nErr);
+        int nErr = GetLastError();
+        theApp.QueueDebugLogLine(false, _T("Pinger: IcmpCreateFile() failed, err: %u"), nErr);
         PIcmpErr(nErr);
         return;
     }
@@ -230,7 +228,7 @@ Pinger::~Pinger() {
     BOOL fRet = lpfnIcmpCloseHandle(hICMP);
     if (fRet == FALSE) {
         int nErr = GetLastError();
-        theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERICMPENDERR), nErr);
+        theApp.QueueDebugLogLine(false,_T("Error closing ICMP handle, err: %u"), nErr);
         PIcmpErr(nErr);
     }
 
@@ -284,7 +282,8 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 	// eMule is linking sockets functions using wsock32.lib (IP_TTL=7)
 	// to use IP_TTL define, we must enforce linker to bind this function 
 	// to ws2_32.lib (IP_TTL=4) (linker options: ignore wsock32.lib)
-	nRet = setsockopt(us, IPPROTO_IP, IP_TTL, (char*)&nTTL, sizeof(int));
+	nRet = setsockopt(us, IPPROTO_IP, 7, (char*)&nTTL, sizeof(int));
+	//nRet = setsockopt(us, IPPROTO_IP, IP_TTL, (char*)&nTTL, sizeof(int));
 	if (nRet==SOCKET_ERROR) { 
 		DWORD lastError = WSAGetLastError();
         PingStatus returnValue;
@@ -309,8 +308,8 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
         PingStatus returnValue;
 		returnValue.success = false;
 		returnValue.error = lastError;
-
-//    VERIFY( WSACleanup() == 0 );
+		//if (toNowTimeOut < 3) toNowTimeOut++;
+		//	lastTimeOut = 3;
 		return returnValue;
 	} 
 
@@ -376,15 +375,24 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 			(icmphdr->UDP.dest_port == htons(UDP_PORT)) && (icmphdr->hdrsent.dest_ip == lAddr)) {
 
             PingStatus returnValue;
-			returnValue.success = true;
-			returnValue.status = (icmphdr->type == ICMP_DEST_UNREACH) ? IP_SUCCESS : IP_TTL_EXPIRED_TRANSIT;
-			returnValue.delay = usResTime;
-			returnValue.destinationAddress = stDestAddr.s_addr;
-			returnValue.ttl = (icmphdr->type == ICMP_TTL_EXPIRE)?ttl:(64 - (reply->ttl & 63));
+
+            if(icmphdr->type == ICMP_TTL_EXPIRE) {
+                returnValue.success = true;
+			    returnValue.status = IP_TTL_EXPIRED_TRANSIT;
+			    returnValue.delay = usResTime;
+			    returnValue.destinationAddress = stDestAddr.s_addr;
+			    returnValue.ttl = ttl;
+            } else {
+                returnValue.success = true;
+                returnValue.status = IP_DEST_HOST_UNREACHABLE;
+			    returnValue.delay = usResTime;
+			    returnValue.destinationAddress = stDestAddr.s_addr;
+			    returnValue.ttl = 64 - (reply->ttl & 63);
+            }
 
 			if(doLog) {
-				theApp.QueueDebugLogLine(false,"Reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i",
-					inet_ntoa(stDestAddr),
+				theApp.QueueDebugLogLine(false,_T("Reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i"),
+					ipstr(stDestAddr),
 					nRet,
 					usResTime,
 					returnValue.ttl);
@@ -397,16 +405,16 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 			//		if (toNowTimeOut) lastTimeOut = 3;
 			//}
 			if(doLog) {
-				theApp.QueueDebugLogLine(false,"Filtered reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i type=%i",
-					inet_ntoa(stDestAddr),
+				theApp.QueueDebugLogLine(false,_T("Filtered reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i type=%i"),
+					ipstr(stDestAddr),
 					nRet,
 					usResTime,
 					64 - (reply->ttl & 63),
 					icmphdr->type);
 			}
 		}
-}
-
+	}
+	//if (usResTime >= TIMEOUT) {
 	//	if (toNowTimeOut < 3) toNowTimeOut++;
 	//	lastTimeOut = 3;
 	//}
@@ -422,6 +430,7 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 
 PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
     PingStatus returnValue;
+
     IN_ADDR stDestAddr;
     char achRepData[sizeof(ICMPECHO) + BUFSIZE];
 
@@ -440,7 +449,7 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
                                     achRepData, 
                                     sizeof(achRepData), 
                                     TIMEOUT
-                         );
+                            );
 	float usResTime=m_time.Tick();
     if (dwReplyCount != 0) {
         long pingTime = *(u_long *) &(achRepData[8]);
@@ -456,10 +465,10 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
         returnValue.ttl = (returnValue.status != IP_SUCCESS)?ttl:(*(char *)&(achRepData[20]))&0x00FF;
 
         if(doLog) {
-            theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERPINGREPLY),
-                                                        inet_ntoa(stDestAddr),
+            theApp.QueueDebugLogLine(false,_T("Reply (ICMP-pinger) from %s: bytes=%d time=%3.2fms (%3.2fms %ldms) TTL=%i"),
+                                                        ipstr(stDestAddr),
                                                         *(u_long *) &(achRepData[12]),
-                                                        returnValue.delay, 
+                                                        returnValue.delay,
                                                         m_time.isPerformanceCounter() ? usResTime : -1.0f, 
                                                         (u_long)(achRepData[8]),
                                                         returnValue.ttl);
@@ -469,8 +478,8 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
         returnValue.success = false;
         returnValue.error = lastError;
         if(doLog) {
-			theApp.QueueDebugLogLine(false,"Error from %s: Error=%i",
-				inet_ntoa(stDestAddr),
+			theApp.QueueDebugLogLine(false,_T("Error from %s: Error=%i"),
+				ipstr(stDestAddr),
 				returnValue.error);
         }
     }
@@ -486,10 +495,10 @@ void Pinger::PIcmpErr(int nICMPErr) {
         (nICMPErr < IP_STATUS_BASE+1)) {
 
         // Error value is out of range, display normally
-		theApp.QueueDebugLogLine(false,"Pinger: %s",GetErrorMessage(nICMPErr,1));
+		theApp.QueueDebugLogLine(false,_T("Pinger: %s"),GetErrorMessage(nICMPErr,1));
     } else {
 
         // Display ICMP Error String
-        theApp.QueueDebugLogLine(false,"%s", aszSendEchoErr[nErrIndex]);
+        theApp.QueueDebugLogLine(false,_T("%s"), aszSendEchoErr[nErrIndex]);
     }
 }

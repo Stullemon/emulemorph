@@ -267,6 +267,9 @@
 				RelativePath=".\FileProcessing.cpp">
 			</File>
 			<File
+				RelativePath="FirewallOpener.cpp">
+			</File>
+			<File
 				RelativePath="FrameGrabThread.cpp">
 			</File>
 			<File
@@ -279,6 +282,9 @@
 				RelativePath="FunnyNick.cpp">
 			</File>
 			<File
+				RelativePath="HttpClientReqSocket.cpp">
+			</File>
+			<File
 				RelativePath="I18n.cpp">
 			</File>
 			<File
@@ -289,12 +295,6 @@
 			</File>
 			<File
 				RelativePath="IPFilter.cpp">
-			</File>
-			<File
-				RelativePath="IrcMain.cpp">
-			</File>
-			<File
-				RelativePath="IrcSocket.cpp">
 			</File>
 			<File
 				RelativePath="KnownFile.cpp">
@@ -355,6 +355,12 @@
 			</File>
 			<File
 				RelativePath="PartFileConvert.cpp">
+			</File>
+			<File
+				RelativePath="PeerCacheClient.cpp">
+			</File>
+			<File
+				RelativePath="PeerCacheFinder.cpp">
 			</File>
 			<File
 				RelativePath="PerfLog.cpp">
@@ -432,6 +438,9 @@
 				RelativePath="UDPSocket.cpp">
 			</File>
 			<File
+				RelativePath="URLClient.cpp">
+			</File>
+			<File
 				RelativePath="UploadBandwidthThrottler.cpp">
 			</File>
 			<File
@@ -442,6 +451,9 @@
 			</File>
 			<File
 				RelativePath="WebSocket.cpp">
+			</File>
+			<File
+				RelativePath="ZIPFile.cpp">
 			</File>
 			<Filter
 				Name="Kademlia"
@@ -521,6 +533,16 @@
 					</File>
 				</Filter>
 			</Filter>
+			<Filter
+				Name="SMIRC"
+				Filter="">
+				<File
+					RelativePath="IrcMain.cpp">
+				</File>
+				<File
+					RelativePath="IrcSocket.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -550,6 +572,9 @@
 				RelativePath="ClientUDPSocket.h">
 			</File>
 			<File
+				RelativePath="ClientVersionInfo.h">
+			</File>
+			<File
 				RelativePath="DebugHelpers.h">
 			</File>
 			<File
@@ -574,6 +599,9 @@
 				RelativePath=".\FileProcessing.h">
 			</File>
 			<File
+				RelativePath="FirewallOpener.h">
+			</File>
+			<File
 				RelativePath="FrameGrabThread.h">
 			</File>
 			<File
@@ -586,6 +614,9 @@
 				RelativePath="FunnyNick.h">
 			</File>
 			<File
+				RelativePath="HttpClientReqSocket.h">
+			</File>
+			<File
 				RelativePath="Ini2.h">
 			</File>
 			<File
@@ -593,12 +624,6 @@
 			</File>
 			<File
 				RelativePath="IPFilter.h">
-			</File>
-			<File
-				RelativePath="IrcMain.h">
-			</File>
-			<File
-				RelativePath="IrcSocket.h">
 			</File>
 			<File
 				RelativePath="KnownFile.h">
@@ -644,6 +669,15 @@
 			</File>
 			<File
 				RelativePath="PartFileConvert.h">
+			</File>
+			<File
+				RelativePath="PeerCacheClient.h">
+			</File>
+			<File
+				RelativePath="PeerCacheFinder.h">
+			</File>
+			<File
+				RelativePath="PeerCacheSocket.h">
 			</File>
 			<File
 				RelativePath="PerfLog.h">
@@ -723,6 +757,9 @@
 				RelativePath="UDPSocket.h">
 			</File>
 			<File
+				RelativePath="URLClient.h">
+			</File>
+			<File
 				RelativePath="UpdownClient.h">
 			</File>
 			<File
@@ -739,6 +776,9 @@
 			</File>
 			<File
 				RelativePath="WebSocket.h">
+			</File>
+			<File
+				RelativePath="ZIPFile.h">
 			</File>
 			<Filter
 				Name="Kademlia"
@@ -832,6 +872,16 @@
 						RelativePath="kademlia\routing\RoutingZone.h">
 					</File>
 				</Filter>
+			</Filter>
+			<Filter
+				Name="SMIRC"
+				Filter="">
+				<File
+					RelativePath="IrcMain.h">
+				</File>
+				<File
+					RelativePath="IrcSocket.h">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -944,9 +994,6 @@
 			</File>
 			<File
 				RelativePath="IPFilterDlg.cpp">
-			</File>
-			<File
-				RelativePath="IrcWnd.cpp">
 			</File>
 			<File
 				RelativePath="KademliaWnd.cpp">
@@ -1199,6 +1246,22 @@
 					RelativePath="TrayMenuBtn.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="SMIRC"
+				Filter="">
+				<File
+					RelativePath="IrcChannelListCtrl.cpp">
+				</File>
+				<File
+					RelativePath="IrcChannelTabCtrl.cpp">
+				</File>
+				<File
+					RelativePath="IrcNickListCtrl.cpp">
+				</File>
+				<File
+					RelativePath="IrcWnd.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Interface Header"
@@ -1264,6 +1327,9 @@
 				RelativePath="CustomAutoComplete.h">
 			</File>
 			<File
+				RelativePath="DialogMinTrayBtn.h">
+			</File>
+			<File
 				RelativePath="DirectDownloadDlg.h">
 			</File>
 			<File
@@ -1297,6 +1363,9 @@
 				RelativePath="HTRichEditCtrl.h">
 			</File>
 			<File
+				RelativePath="HelpIDs.h">
+			</File>
+			<File
 				RelativePath="HttpDownloadDlg.h">
 			</File>
 			<File
@@ -1310,9 +1379,6 @@
 			</File>
 			<File
 				RelativePath="IPFilterDlg.h">
-			</File>
-			<File
-				RelativePath="IrcWnd.h">
 			</File>
 			<File
 				RelativePath="KademliaWnd.h">
@@ -1550,69 +1616,43 @@
 					RelativePath="TrayMenuBtn.h">
 				</File>
 			</Filter>
+			<Filter
+				Name="SMIRC"
+				Filter="">
+				<File
+					RelativePath="IrcChannelListCtrl.h">
+				</File>
+				<File
+					RelativePath="IrcChannelTabCtrl.h">
+				</File>
+				<File
+					RelativePath="IrcNickListCtrl.h">
+				</File>
+				<File
+					RelativePath="IrcWnd.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest">
 			<File
-				RelativePath=".\res\About.jpg">
+				RelativePath="res\ClientaMule.ico">
 			</File>
 			<File
-				RelativePath="res\back.ICO">
+				RelativePath="res\ClientaMulePlus.ico">
 			</File>
 			<File
-				RelativePath=".\res\backup.ico">
+				RelativePath="res\ClientlPhant.ico">
 			</File>
 			<File
-				RelativePath="res\bn_connect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_disconnect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_messages.ico">
-			</File>
-			<File
-				RelativePath="res\bn_statistics.ico">
-			</File>
-			<File
-				RelativePath="res\bn_stopcon.ico">
-			</File>
-			<File
-				RelativePath="res\cancel.ICO">
-			</File>
-			<File
-				RelativePath="res\chat.ico">
-			</File>
-			<File
-				RelativePath="res\client0.ICO">
-			</File>
-			<File
-				RelativePath="res\client1.ICO">
-			</File>
-			<File
-				RelativePath="res\client2.ICO">
-			</File>
-			<File
-				RelativePath="res\client3.ICO">
-			</File>
-			<File
-				RelativePath="res\client4.ICO">
+				RelativePath="res\ClientlPhantPlus.ico">
 			</File>
 			<File
 				RelativePath="res\ClientsKnown.ico">
 			</File>
 			<File
 				RelativePath="res\ClientsOnQueue.ico">
-			</File>
-			<File
-				RelativePath="res\close.ico">
-			</File>
-			<File
-				RelativePath=".\res\community.ico">
-			</File>
-			<File
-				RelativePath="res\compatible.ICO">
 			</File>
 			<File
 				RelativePath="res\ConnectedHighHigh.ico">
@@ -1657,15 +1697,6 @@
 				RelativePath="res\Contact4.ico">
 			</File>
 			<File
-				RelativePath="res\convert.ico">
-			</File>
-			<File
-				RelativePath=".\res\CreditOvl.ico">
-			</File>
-			<File
-				RelativePath=".\res\CreditSecureOvl.ico">
-			</File>
-			<File
 				RelativePath="res\CumulativeStats.ico">
 			</File>
 			<File
@@ -1675,73 +1706,13 @@
 				RelativePath="res\Display.ico">
 			</File>
 			<File
-				RelativePath="res\down.bmp">
-			</File>
-			<File
-				RelativePath="res\down2x.bmp">
-			</File>
-			<File
 				RelativePath="res\Download.ico">
-			</File>
-			<File
-				RelativePath=".\res\EastShare.ico">
-			</File>
-			<File
-				RelativePath=".\res\eDonkey.ico">
-			</File>
-			<File
-				RelativePath="res\eDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\emule.manifest">
-			</File>
-			<File
-				RelativePath="emule.rc">
-			</File>
-			<File
-				RelativePath="res\emule.rc2">
-			</File>
-			<File
-				RelativePath=".\res\EQfile.ico">
 			</File>
 			<File
 				RelativePath="res\Filedonkey.ico">
 			</File>
 			<File
-				RelativePath="res\forward.ICO">
-			</File>
-			<File
 				RelativePath="res\Friend.ico">
-			</File>
-			<File
-				RelativePath=".\res\FriendOvl.ico">
-			</File>
-			<File
-				RelativePath="res\friends1.ico">
-			</File>
-			<File
-				RelativePath=".\res\friends1slot.ICO">
-			</File>
-			<File
-				RelativePath="res\friends2.ico">
-			</File>
-			<File
-				RelativePath=".\res\friends2slot.ICO">
-			</File>
-			<File
-				RelativePath="res\friends3.ICO">
-			</File>
-			<File
-				RelativePath=".\res\friends3slot.ICO">
-			</File>
-			<File
-				RelativePath=".\res\FriendSlotOvl.ico">
-			</File>
-			<File
-				RelativePath="res\global.ico">
-			</File>
-			<File
-				RelativePath="res\help.ico">
 			</File>
 			<File
 				RelativePath="res\IDI_TVI_DAY.ico">
@@ -1759,19 +1730,19 @@
 				RelativePath="res\IDI_TVI_YEAR.ico">
 			</File>
 			<File
-				RelativePath="res\inetdownload.avi">
+				RelativePath="res\IPFilter.ico">
 			</File>
 			<File
 				RelativePath="res\IRC.ico">
+			</File>
+			<File
+				RelativePath="res\KADContactList.ico">
 			</File>
 			<File
 				RelativePath="res\Kad.ico">
 			</File>
 			<File
 				RelativePath="res\KadBootstrap.ico">
-			</File>
-			<File
-				RelativePath="res\KADContactList.ico">
 			</File>
 			<File
 				RelativePath="res\KadCurrentSearches.ico">
@@ -1795,67 +1766,13 @@
 				RelativePath="res\Log.ico">
 			</File>
 			<File
-				RelativePath="res\logo.jpg">
-			</File>
-			<File
-				RelativePath="res\message.ICO">
-			</File>
-			<File
-				RelativePath="res\mldonk.ico">
-			</File>
-			<File
-				RelativePath=".\res\Morph.ico">
-			</File>
-			<File
-				RelativePath="res\mpending.ICO">
-			</File>
-			<File
-				RelativePath="res\mule.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_grey.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_LowID.ico">
-			</File>
-			<File
-				RelativePath="res\mule_TrayIcon.ico">
-			</File>
-			<File
-				RelativePath="res\mule_wiz.gif">
-			</File>
-			<File
-				RelativePath="res\mule_wiz_hdr.gif">
-			</File>
-			<File
-				RelativePath="res\myinfo.ico">
-			</File>
-			<File
-				RelativePath="res\neutral.ico">
-			</File>
-			<File
 				RelativePath="res\NewServer.ico">
 			</File>
 			<File
 				RelativePath="res\NormalSearch.ico">
 			</File>
 			<File
-				RelativePath="res\plus.ICO">
-			</File>
-			<File
-				RelativePath="res\pluscompa.ICO">
-			</File>
-			<File
-				RelativePath="res\pluseDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\plusmldonk.ico">
-			</File>
-			<File
-				RelativePath="res\plusshareaza.ico">
-			</File>
-			<File
-				RelativePath="res\preferences.ico">
+				RelativePath="res\PROVIDER.ICO">
 			</File>
 			<File
 				RelativePath="res\Prefs_Connection.ico">
@@ -1891,49 +1808,31 @@
 				RelativePath="res\Prefs_tweak.ico">
 			</File>
 			<File
-				RelativePath="res\PROVIDER.ICO">
-			</File>
-			<File
-				RelativePath=".\res\Rating-Excellent.ico">
-			</File>
-			<File
-				RelativePath=".\res\Rating-Fair.ico">
-			</File>
-			<File
-				RelativePath=".\res\Rating-Fake.ico">
-			</File>
-			<File
-				RelativePath=".\res\Rating-Good.ico">
-			</File>
-			<File
-				RelativePath=".\res\Rating-NotRated.ico">
-			</File>
-			<File
-				RelativePath=".\res\Rating-Poor.ico">
-			</File>
-			<File
 				RelativePath="res\Rating.ico">
 			</File>
 			<File
 				RelativePath="res\Rating_bad.ico">
 			</File>
 			<File
-				RelativePath="res\search.ico">
+				RelativePath="res\SearchGlobalActive.ico">
 			</File>
 			<File
 				RelativePath="res\SearchKad.ico">
 			</File>
 			<File
+				RelativePath="res\SearchKadActive.ico">
+			</File>
+			<File
 				RelativePath="res\SearchResults.ico">
+			</File>
+			<File
+				RelativePath="res\SearchServerActive.ico">
 			</File>
 			<File
 				RelativePath="res\SecureHashOvl.ico">
 			</File>
 			<File
 				RelativePath="res\Security.ico">
-			</File>
-			<File
-				RelativePath="res\server.ico">
 			</File>
 			<File
 				RelativePath="res\ServerInfo.ico">
@@ -1951,9 +1850,6 @@
 				RelativePath="res\Shareaza.ico">
 			</File>
 			<File
-				RelativePath="res\shared.ico">
-			</File>
-			<File
 				RelativePath="res\SharedFiles.ico">
 			</File>
 			<File
@@ -1963,7 +1859,184 @@
 				RelativePath="res\Stats_HD.ico">
 			</File>
 			<File
-				RelativePath=".\res\suc.ico">
+				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
+			</File>
+			<File
+				RelativePath="res\Up0down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up0down1.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down1.ico">
+			</File>
+			<File
+				RelativePath="res\UpdateServers.ico">
+			</File>
+			<File
+				RelativePath="res\User.ico">
+			</File>
+			<File
+				RelativePath="res\WebServer.ico">
+			</File>
+			<File
+				RelativePath="res\back.ICO">
+			</File>
+			<File
+				RelativePath="res\bn_connect.ico">
+			</File>
+			<File
+				RelativePath="res\bn_disconnect.ico">
+			</File>
+			<File
+				RelativePath="res\bn_messages.ico">
+			</File>
+			<File
+				RelativePath="res\bn_statistics.ico">
+			</File>
+			<File
+				RelativePath="res\bn_stopcon.ico">
+			</File>
+			<File
+				RelativePath="res\cancel.ICO">
+			</File>
+			<File
+				RelativePath="res\chat.ico">
+			</File>
+			<File
+				RelativePath="res\client0.ICO">
+			</File>
+			<File
+				RelativePath="res\client1.ICO">
+			</File>
+			<File
+				RelativePath="res\client2.ICO">
+			</File>
+			<File
+				RelativePath="res\client3.ICO">
+			</File>
+			<File
+				RelativePath="res\client4.ICO">
+			</File>
+			<File
+				RelativePath="res\close.ico">
+			</File>
+			<File
+				RelativePath="res\compatible.ICO">
+			</File>
+			<File
+				RelativePath="res\convert.ico">
+			</File>
+			<File
+				RelativePath="res\down.bmp">
+			</File>
+			<File
+				RelativePath="res\down2x.bmp">
+			</File>
+			<File
+				RelativePath="res\eDonkeyHybrid.ico">
+			</File>
+			<File
+				RelativePath="res\emule.manifest">
+			</File>
+			<File
+				RelativePath="emule.rc">
+			</File>
+			<File
+				RelativePath="res\emule.rc2">
+			</File>
+			<File
+				RelativePath="res\forward.ICO">
+			</File>
+			<File
+				RelativePath="res\friends1.ico">
+			</File>
+			<File
+				RelativePath="res\friends2.ico">
+			</File>
+			<File
+				RelativePath="res\friends3.ICO">
+			</File>
+			<File
+				RelativePath="res\global.ico">
+			</File>
+			<File
+				RelativePath="res\help.ico">
+			</File>
+			<File
+				RelativePath="res\inetdownload.avi">
+			</File>
+			<File
+				RelativePath="res\logo.jpg">
+			</File>
+			<File
+				RelativePath="res\message.ICO">
+			</File>
+			<File
+				RelativePath="res\mldonk.ico">
+			</File>
+			<File
+				RelativePath="res\mpending.ICO">
+			</File>
+			<File
+				RelativePath="res\mule.ico">
+			</File>
+			<File
+				RelativePath="res\mule_Tr_LowID.ico">
+			</File>
+			<File
+				RelativePath="res\mule_Tr_grey.ico">
+			</File>
+			<File
+				RelativePath="res\mule_TrayIcon.ico">
+			</File>
+			<File
+				RelativePath="res\mule_wiz.gif">
+			</File>
+			<File
+				RelativePath="res\mule_wiz_hdr.gif">
+			</File>
+			<File
+				RelativePath="res\myinfo.ico">
+			</File>
+			<File
+				RelativePath="res\neutral.ico">
+			</File>
+			<File
+				RelativePath="res\plus.ICO">
+			</File>
+			<File
+				RelativePath="res\pluscompa.ICO">
+			</File>
+			<File
+				RelativePath="res\pluseDonkeyHybrid.ico">
+			</File>
+			<File
+				RelativePath="res\plusmldonk.ico">
+			</File>
+			<File
+				RelativePath="res\plusshareaza.ico">
+			</File>
+			<File
+				RelativePath="res\preferences.ico">
+			</File>
+			<File
+				RelativePath="res\search.ico">
+			</File>
+			<File
+				RelativePath="res\server.ico">
+			</File>
+			<File
+				RelativePath="res\shared.ico">
 			</File>
 			<File
 				RelativePath="res\systray_exit.ico">
@@ -1990,49 +2063,35 @@
 				RelativePath="res\transfer.ico">
 			</File>
 			<File
-				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
-			</File>
-			<File
 				RelativePath="res\up.bmp">
-			</File>
-			<File
-				RelativePath="res\Up0down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up0down1.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down1.ico">
 			</File>
 			<File
 				RelativePath="res\up2x.bmp">
 			</File>
 			<File
-				RelativePath="res\UpdateServers.ico">
-			</File>
-			<File
 				RelativePath="res\upload.ico">
 			</File>
+		</Filter>
+		<Filter
+			Name="Templates"
+			Filter="">
 			<File
-				RelativePath="res\User.ico">
+				RelativePath="..\setup\Template.eMuleSkin.ini">
 			</File>
 			<File
-				RelativePath="res\WebServer.ico">
+				RelativePath="..\setup\eMule.tmpl">
+			</File>
+			<File
+				RelativePath="..\setup\eMule_Chicane.tmpl">
+			</File>
+			<File
+				RelativePath="..\setup\staticservers.dat">
+			</File>
+			<File
+				RelativePath="..\setup\webservices.dat">
 			</File>
 		</Filter>
 	</Files>
 	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="emule.rc"/>
 	</Globals>
 </VisualStudioProject>

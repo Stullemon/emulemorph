@@ -27,16 +27,10 @@ public:
 	~CServerSocket();
 
 	void	ConnectToServer(CServer* server);
-	sint8	GetConnectionState()	{return connectionstate;} 
+	sint8	GetConnectionState() const	{ return connectionstate; } 
 	DWORD	GetLastTransmission() const { return m_dwLastTransmission; }
-	//MORPH START - Changed by SiRoB,	zz Upload System
-	/*
-	bool	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true);
-	*/
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-	//MORPH END   - Changed by SiRoB,	zz Upload System
 
-	CString info;
 protected:
 	void	OnClose(int nErrorCode);
 	void	OnConnect(int nErrorCode);
@@ -49,10 +43,6 @@ private:
 	CServerConnect*	serverconnect; 
 	sint8	connectionstate;
 	CServer* cur_server; // holds a copy of a CServer from the CServerList
-	bool	headercomplete;
-	uint32	sizetoget;
-	uint32	sizereceived;
-	char*	rbuffer;
 	bool	m_bIsDeleting;	// true: socket is already in deletion phase, don't destroy it in ::StopConnectionTry
 	DWORD	m_dwLastTransmission;
 };

@@ -24,6 +24,7 @@
 #include "OtherFunctions.h"
 #include "CustomAutoComplete.h"
 #include "HelpIDs.h"
+#include "Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -36,8 +37,6 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 #define	SEARCH_STRINGS_PROFILE	_T("AC_SearchStrings.dat")
-
-extern LPCTSTR _aszInvKadKeywordChars;
 
 IMPLEMENT_DYNAMIC(CSearchParamsWnd, CDialogBar);
 
@@ -69,6 +68,8 @@ CSearchParamsWnd::CSearchParamsWnd()
 {
 	m_szFloat.SetSize(0,0);
 	m_szMRU.SetSize(0,0);
+
+	// load default windows system cursor (a shared resource)
 	m_hcurMove = ::LoadCursor(NULL, IDC_SIZEALL);
 
 	m_searchdlg = NULL;
@@ -94,8 +95,10 @@ CSearchParamsWnd::~CSearchParamsWnd()
 		m_pacSearchString->Unbind();
 		m_pacSearchString->Release();
 	}
-	if (m_hcurMove)
-		VERIFY( DestroyCursor(m_hcurMove) );
+
+	// 'DestroyCursor' is not to be used for a shared cursor (as returned with LoadCursor) (?!)
+//	if (m_hcurMove)
+//		VERIFY( DestroyCursor(m_hcurMove) );
 }
 
 void CSearchParamsWnd::DoDataExchange(CDataExchange* pDX)
@@ -178,7 +181,7 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	else
 		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
 
-	m_ctlName.LimitText(512); // max. length of search expression
+	m_ctlName.LimitText(MAX_SEARCH_EXPRESSION_LEN); // max. length of search expression
 
 	InitMethodsCtrl();
 	if (m_ctlMethod.SetCurSel(thePrefs.GetSearchMethod()) == CB_ERR)
@@ -438,7 +441,18 @@ void CSearchParamsWnd::UpdateControls()
 {
 	int iMethod = m_ctlMethod.GetCurSel();
 	if (iMethod != CB_ERR)
-		thePrefs.SetSearchMethod(iMethod);
+	{
+		if (iMethod != thePrefs.GetSearchMethod())
+		{
+			if (iMethod == SearchTypeKademlia)
+				OnEnChangeName();
+			else if (iMethod == SearchTypeEd2kServer && m_searchdlg->IsLocalSearchRunning())
+				m_ctlStart.EnableWindow(FALSE);
+			else if (iMethod == SearchTypeEd2kGlobal && m_searchdlg->IsGlobalSearchRunning())
+				m_ctlStart.EnableWindow(FALSE);
+			thePrefs.SetSearchMethod(iMethod);
+		}
+	}
 
 	m_ctlOpts.SetItemData(orAvailability, (iMethod==SearchTypeFileDonkey) ? 1 : 0);
 	m_ctlOpts.SetItemData(orExtension, (iMethod==SearchTypeFileDonkey) ? 1 : 0);
@@ -456,10 +470,10 @@ void CSearchParamsWnd::SetAllIcons()
 	CImageList iml;
 	iml.Create(13,13,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader("SearchMethod_SERVER", 13, 13));
-	iml.Add(CTempIconLoader("SearchMethod_GLOBAL", 13, 13));
-	iml.Add(CTempIconLoader("SearchMethod_KADEMLIA", 13, 13));
-	iml.Add(CTempIconLoader("SearchMethod_FILEDONKEY", 13, 13));
+	iml.Add(CTempIconLoader(_T("SearchMethod_SERVER"), 13, 13));
+	iml.Add(CTempIconLoader(_T("SearchMethod_GLOBAL"), 13, 13));
+	iml.Add(CTempIconLoader(_T("SearchMethod_KADEMLIA"), 13, 13));
+	iml.Add(CTempIconLoader(_T("SearchMethod_FILEDONKEY"), 13, 13));
 	m_ctlMethod.SetImageList(&iml);
 	m_imlSearchMethods.DeleteImageList();
 	m_imlSearchMethods.Attach(iml.Detach());
@@ -502,16 +516,28 @@ void CSearchParamsWnd::Localize()
 	m_ctlCancel.SetWindowText(GetResString(IDS_CANCEL));
 	m_ctlMore.SetWindowText(GetResString(IDS_MORE));
 
+	SetWindowText(GetResString(IDS_SEARCHPARAMS));
+
 	InitMethodsCtrl();
 
 	m_ctlFileType.ResetContent();
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_ANY));
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_ARC));
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_AUDIO));
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_CDIMG));
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_PICS));
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_PRG));
-	m_ctlFileType.AddString(GetResString(IDS_SEARCH_VIDEO));
+	int iItem;
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_ANY))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)"");
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_ARC))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_ARCHIVE);
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_AUDIO))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_AUDIO);
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_CDIMG))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_CDIMAGE);
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_PICS))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_IMAGE);
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_PRG))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_PROGRAM);
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_VIDEO))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_VIDEO);
+	if ((iItem = m_ctlFileType.AddString(GetResString(IDS_SEARCH_DOC))) != CB_ERR)
+		m_ctlFileType.SetItemData(iItem, (DWORD_PTR)ED2KFTSTR_DOCUMENT);
 	m_ctlFileType.SetCurSel(m_ctlFileType.FindString(-1,GetResString(IDS_SEARCH_ANY)));
 
 	m_ctlOpts.SetItemText(orMinSize, 0, GetResString(IDS_SEARCHMINSIZE));
@@ -538,7 +564,7 @@ BOOL CSearchParamsWnd::PreTranslateMessage(MSG* pMsg)
 			&& (pMsg->wParam == VK_DELETE && pMsg->hwnd == m_ctlName.m_hWnd && (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)))
 			m_pacSearchString->Clear();
 
-   		if (pMsg->wParam == VK_RETURN)
+		if (pMsg->wParam == VK_RETURN && m_ctlStart.IsWindowEnabled())
 		{
 			if (m_pacSearchString && m_pacSearchString->IsBound() && pMsg->hwnd == m_ctlName.m_hWnd)
 			{
@@ -746,9 +772,14 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	m_ctlName.GetWindowText(strExpression);
 	strExpression.Trim();
 
-	CString strFileType;
-	m_ctlFileType.GetWindowText(strFileType);
-	//strFileType.Trim();
+	CStringA strFileType;
+	int iItem = m_ctlFileType.GetCurSel();
+	if (iItem != CB_ERR)
+	{
+		LPCSTR pszED2KFileType = (LPCSTR)m_ctlFileType.GetItemDataPtr(iItem);
+		ASSERT( pszED2KFileType != NULL );
+		strFileType = pszED2KFileType;
+	}
 
 	CString strMinSize = m_ctlOpts.GetItemText(orMinSize, 1);
 	ULONG ulMinSize = GetSearchSize(strMinSize);
@@ -828,17 +859,17 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 		if (!strMinLength.IsEmpty())
 		{
 			UINT hour = 0, min = 0, sec = 0;
-			if (sscanf(strMinLength, "%u : %u : %u", &hour, &min, &sec) == 3)
+			if (_stscanf(strMinLength, _T("%u : %u : %u"), &hour, &min, &sec) == 3)
 				ulMinLength = hour * 3600 + min * 60 + sec;
-			else if (sscanf(strMinLength, "%u : %u", &min, &sec) == 2)
+			else if (_stscanf(strMinLength, _T("%u : %u"), &min, &sec) == 2)
 				ulMinLength = min * 60 + sec;
-			else if (sscanf(strMinLength, "%u", &sec) == 1)
+			else if (_stscanf(strMinLength, _T("%u"), &sec) == 1)
 				ulMinLength = sec;
 
 			if (ulMinLength > 3600*24)
 			{
 				ulMinLength = 3600*24;
-				CStringA strValue;
+				CString strValue;
 				SecToTimeLength(ulMinLength, strValue);
 				m_ctlOpts.SetItemText(orLength, 1, strValue);
 			}

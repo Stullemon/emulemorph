@@ -50,6 +50,7 @@ class CMuleSystrayDlg;
 #define OP_CLCOMMAND			12001
 
 #define	EMULE_HOTMENU_ACCEL		'x'
+#define	EMULSKIN_BASEEXT		_T("eMuleSkin")
 
 class CemuleDlg : public CTrayDialog, public CLoggable
 {
@@ -159,6 +160,7 @@ protected:
 	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileCompleted(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnFileOpProgress(WPARAM wParam,LPARAM lParam);
 
 	//Framegrabbing
 	afx_msg LRESULT OnFrameGrabFinished(WPARAM wParam,LPARAM lParam);
@@ -174,6 +176,9 @@ protected:
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
 
+	// Peercache DNS
+	afx_msg LRESULT OnPeerCacheResponse(WPARAM wParam, LPARAM lParam);
+	
 	void OnOK() {}
 	void OnClose();
 	bool CanClose();
@@ -199,6 +204,9 @@ private:
 	CTitleMenu		trayPopup;
 	CMuleSystrayDlg* m_pSystrayDlg;
 	CMainFrameDropTarget* m_pDropTarget;
+	CMenu			m_SysMenuOptions;
+	CMenu			m_menuUploadCtrl;
+	CMenu			m_menuDownloadCtrl;
 
 	UINT_PTR m_hTimer;
 	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
@@ -249,6 +257,9 @@ enum EEmuleUserMsgs
 	// VC
 	WM_VERSIONCHECK_RESPONSE,
 
+	// PC
+	WM_PEERCHACHE_RESPONSE,
+
 	// Mighty Knife: CRC32-Tag - save rename
 	WM_CRC32_RENAMEFILE,
 	WM_CRC32_UPDATEFILE
@@ -266,5 +277,6 @@ enum EEmlueAppMsgs
 	// SLUGFILLER: SafeHash
 	TM_FRAMEGRABFINISHED,
 	TM_FILEALLOCEXC,
-	TM_FILECOMPLETED
+	TM_FILECOMPLETED,
+	TM_FILEOPPROGRESS
 };

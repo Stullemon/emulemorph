@@ -80,7 +80,7 @@ public:
 	COLORREF GetTextColor() { return m_clrTextOnBar; }
 	COLORREF GetTextColorOnBk() { return m_clrTextOnBk; }
 
-	void SetShowPercent(BOOL fShowPercent = TRUE) { SetTextFormat(fShowPercent ? "%d%%" : NULL, PBS_SHOW_PERCENT); }
+	void SetShowPercent(BOOL fShowPercent = TRUE) { SetTextFormat(fShowPercent ? _T("%d%%") : NULL, PBS_SHOW_PERCENT); }
 	BOOL GetShowPercent() { return GetStyle()&PBS_SHOW_PERCENT; }
 
 	void SetTextFormat(LPCTSTR szFormat, DWORD ffFormat = PBS_SHOW_TEXTONLY);

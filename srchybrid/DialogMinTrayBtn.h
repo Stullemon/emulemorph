@@ -77,5 +77,5 @@ private:
     UINT_PTR m_nMinTrayBtnTimerId;
 	CBitmap m_bmMinTrayBtnBitmap;
 	BOOL	m_bMinTrayBtnWindowsClassicStyle;
-	static const CHAR *m_pszMinTrayBtnBmpName[];
+	static const TCHAR *m_pszMinTrayBtnBmpName[];
 };

@@ -40,23 +40,18 @@ public:
 	uint32	m_dwHasHash;
 	CString m_strName;
 
-	CUpDownClient* m_LinkedClient;
-//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	CUpDownClient* GetLinkedClient() const { return m_LinkedClient; };
 	void SetLinkedClient(CUpDownClient* linkedClient);
-//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
+
 	void	LoadFromFile(CFileDataIO* file);
 	void	WriteToFile(CFileDataIO* file);
 
 	static const char sm_abyNullHash[16];
-	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	void SetFriendSlot(bool newValue);
 	bool GetFriendSlot() const;
-	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-	
 private:
 	bool HasUserhash();
 	bool m_friendSlot;
-};
-//MORPH - Added by Yun.SF3, ZZ Upload System
 
+	CUpDownClient* m_LinkedClient;
+};

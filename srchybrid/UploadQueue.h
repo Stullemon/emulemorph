@@ -27,10 +27,10 @@ public:
 	~CUploadQueue();
 
 	void	Process();
-//MORPH START - Added by Yun.SF3, ZZ upload system
+//MORPH START - Changed by Yun.SF3, ZZ upload system
 	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
-	bool	RemoveFromUploadQueue(CUpDownClient* client, CString reason = NULL, bool updatewindow = true, bool earlyabort = false);
-//MORPH END   - Added by Yun.SF3, ZZ upload system
+//MORPH END   - Changed by Yun.SF3, ZZ upload system
+	bool	RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason = NULL, bool updatewindow = true, bool earlyabort = false);
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
 	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0);}
@@ -86,36 +86,6 @@ public:
 	uint32	GetFailedUpCount()						{return failedupcount;}
 	uint32	GetAverageUpTime();
 //	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
-	//MORPH START - Changed by SiRoB, ZZ Upload system 20030818-1923
-	void	AddUpDataOverheadSourceExchange(uint32 data)	{ /*m_nUpDataRateMSOverhead += data;*/
-															  m_nUpDataOverheadSourceExchange += data;
-															  m_nUpDataOverheadSourceExchangePackets++;}
-	void	AddUpDataOverheadFileRequest(uint32 data)		{ /*m_nUpDataRateMSOverhead += data;*/
-															  m_nUpDataOverheadFileRequest += data;
-															  m_nUpDataOverheadFileRequestPackets++;}
-	void	AddUpDataOverheadServer(uint32 data)			{ /*m_nUpDataRateMSOverhead += data;*/
-															  m_nUpDataOverheadServer += data;
-															  m_nUpDataOverheadServerPackets++;}
-	void	AddUpDataOverheadKad(uint32 data)				{ /*m_nUpDataRateMSOverhead += data;*/
-															  m_nUpDataOverheadKad += data;
-															  m_nUpDataOverheadKadPackets++;}
-	
-	void	AddUpDataOverheadOther(uint32 data)				{ /*m_nUpDataRateMSOverhead += data;*/
-															  m_nUpDataOverheadOther += data;
-															  m_nUpDataOverheadOtherPackets++;}
-	uint32	GetUpDatarateOverhead();
-	//MORPH END   - Changed by SiRoB, ZZ Upload system 20030818-1923
-	uint64	GetUpDataOverheadSourceExchange()			{return m_nUpDataOverheadSourceExchange;}
-	uint64	GetUpDataOverheadFileRequest()				{return m_nUpDataOverheadFileRequest;}
-	uint64	GetUpDataOverheadServer()					{return m_nUpDataOverheadServer;}
-	uint64	GetUpDataOverheadKad()						{return m_nUpDataOverheadKad;}
-	uint64	GetUpDataOverheadOther()					{return m_nUpDataOverheadOther;}
-	uint64	GetUpDataOverheadSourceExchangePackets()	{return m_nUpDataOverheadSourceExchangePackets;}
-	uint64	GetUpDataOverheadFileRequestPackets()		{return m_nUpDataOverheadFileRequestPackets;}
-	uint64	GetUpDataOverheadServerPackets()			{return m_nUpDataOverheadServerPackets;}
-	uint64	GetUpDataOverheadKadPackets()				{return m_nUpDataOverheadKadPackets;}
-	uint64	GetUpDataOverheadOtherPackets()				{return m_nUpDataOverheadOtherPackets;}
-	//void	CompUpDatarateOverhead(); //MORPH - Removed by SiRoB, ZZ Upload system 20030818-1923
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
 	bool    RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove = false);
 	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL);
@@ -144,6 +114,9 @@ private:
 	uint32	GetMaxClientScore()						{return m_imaxscore;}
 	*/
 
+	CUpDownClientPtrList	waitinglist;
+	CUpDownClientPtrList	uploadinglist;
+	
     void InsertInUploadingList(CUpDownClient* newclient);
     void RemoveLowestFromWaitinglist();
     double GetAverageCombinedFilePrioAndCredit();
@@ -164,15 +137,11 @@ private:
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 
-	CUpDownClientPtrList	waitinglist;
-	CUpDownClientPtrList	uploadinglist;
 	uint32	datarate;   //datarate of sent to network (including friends)
 	uint32  friendDatarate; // datarate of sent to friends (included in above total)
 	//uint32	dataratems;
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 
-	uint32	datarateave; //datarage average (since progstart) *unused*
-	uint32	estadatarate; // esta. max datarate	
 	UINT_PTR h_timer;
 	uint32	successfullupcount;
 	uint32	failedupcount;
@@ -185,27 +154,11 @@ private:
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20040213-1623
 
 	uint32	m_nLastStartUpload;
-	uint32	m_nUpDatarateOverhead;
-	//uint32	m_nUpDataRateMSOverhead; //MORPH - Removed by SiRoB, ZZ Upload system 20030818-1923
-	uint64	m_nUpDataOverheadSourceExchange;
-	uint64	m_nUpDataOverheadFileRequest;
-	uint64	m_nUpDataOverheadServer;
-	uint64	m_nUpDataOverheadKad;
-	uint64	m_nUpDataOverheadOther;
-	uint64	m_nUpDataOverheadSourceExchangePackets;
-	uint64	m_nUpDataOverheadFileRequestPackets;
-	uint64	m_nUpDataOverheadServerPackets;
-	uint64	m_nUpDataOverheadKadPackets;
-	uint64	m_nUpDataOverheadOtherPackets;
 	bool	lastupslotHighID; // VQB lowID alternation
 	//MORPH - Removed by SiRoB, Not used in this mod, full chunk transfer is enforced	
 	/*
 	bool	m_bRemovedClientByScore;
 	*/
-	// By BadWolf - Accurate Speed Measurement
-	CList<uint64,uint64>	m_AvarageUDRO_list;
-	uint32	sumavgUDRO;
-	// END By BadWolf - Accurate Speed Measurement	
 
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030824-2238
 	DWORD   m_lastCalculatedDataRateTick;

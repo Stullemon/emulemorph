@@ -46,10 +46,12 @@ struct UDP_Header_Struct{
 Packet::Packet(uint8 protocol){
 	m_bSplitted = false;
 	m_bLastSplitted = false;
+	m_bFromPF = false;
 	size = 0;
 	pBuffer = 0;
 	completebuffer = 0;
 	tempbuffer = 0;
+	opcode = 0x00;
 	prot = protocol;
 	m_bPacked = false;
 }
@@ -58,6 +60,7 @@ Packet::Packet(char* header){
 	m_bSplitted = false;
 	m_bPacked = false;
 	m_bLastSplitted = false;
+	m_bFromPF = false;
 	tempbuffer = 0;
 	pBuffer = 0;
 	completebuffer = 0;
@@ -67,9 +70,8 @@ Packet::Packet(char* header){
 	prot = head->eDonkeyID;
 }
 
-// -khaos--+++> Slightly modified for our stats uses...
-Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// only used for splitted packets!
-	m_bFromPF = bFromPF;
+Packet::Packet(char* pPacketPart, uint32 nSize, bool bLast, bool bFromPartFile){// only used for splitted packets!
+	m_bFromPF = bFromPartFile;
 	m_bSplitted = true;
 	m_bPacked = false;
 	m_bLastSplitted = bLast;
@@ -77,14 +79,12 @@ Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// onl
 	pBuffer = 0;
 	completebuffer = pPacketPart;
 	size = nSize-6;
+	opcode = 0x00;
+	prot = 0x00;
 }
 
-// -khaos--+++> Slightly modified for our stats uses...
-//				If m_bFromPF = true then packet was formed from a partfile
-//				If m_bFromPF = false then this packet was formed from a complete shared file.
-Packet::Packet(uint8 in_opcode, uint32 in_size, uint8 protocol, bool bFromPF){
-	m_bFromPF = bFromPF;
-	// <-----khaos-
+Packet::Packet(uint8 in_opcode, uint32 in_size, uint8 protocol, bool bFromPartFile){
+	m_bFromPF = bFromPartFile;
 	m_bSplitted = false;
 	m_bPacked = false;
 	m_bLastSplitted = false;
@@ -103,10 +103,11 @@ Packet::Packet(uint8 in_opcode, uint32 in_size, uint8 protocol, bool bFromPF){
 	prot = protocol;
 }
 
-Packet::Packet(CMemFile* datafile,uint8 protocol){
+Packet::Packet(CMemFile* datafile, uint8 protocol, uint8 ucOpcode){
 	m_bSplitted = false;
 	m_bPacked = false;
 	m_bLastSplitted = false;
+	m_bFromPF = false;
 	size = datafile->GetLength();
 	completebuffer = new char[datafile->GetLength()+10];
 	pBuffer = completebuffer+6;
@@ -114,7 +115,22 @@ Packet::Packet(CMemFile* datafile,uint8 protocol){
 	memcpy(pBuffer,tmp,size);
 	free(tmp);
 	tempbuffer = 0;
+	opcode = ucOpcode;
 	prot = protocol;
+}
+
+Packet::Packet(const CStringA& str, uint8 ucProtocol, uint8 ucOpcode){
+	m_bSplitted = false;
+	m_bPacked = false;
+	m_bLastSplitted = false;
+	m_bFromPF = false;
+	size = str.GetLength();
+	completebuffer = new char[size+10];
+	pBuffer = completebuffer+6;
+	memcpy(pBuffer,(LPCSTR)str,size);
+	tempbuffer = 0;
+	opcode = ucOpcode;
+	prot = ucProtocol;
 }
 
 Packet::~Packet(){
@@ -230,6 +246,75 @@ bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// CRawPacket
+
+CRawPacket::CRawPacket(const CStringA& rstr)
+{
+	ASSERT( opcode == 0 );
+	ASSERT( !m_bSplitted );
+	ASSERT( !m_bLastSplitted );
+	ASSERT( !m_bPacked );
+	ASSERT( !m_bFromPF );
+	ASSERT( completebuffer == NULL );
+	ASSERT( tempbuffer == NULL );
+
+	prot = 0x00;
+	size = rstr.GetLength();
+	pBuffer = new char[size];
+	memcpy(pBuffer, (LPCSTR)rstr, size);
+}
+
+CRawPacket::CRawPacket(const char* pcData, UINT uSize, bool bFromPartFile)
+{
+	ASSERT( opcode == 0 );
+	ASSERT( !m_bSplitted );
+	ASSERT( !m_bLastSplitted );
+	ASSERT( !m_bPacked );
+	ASSERT( !m_bFromPF );
+	ASSERT( completebuffer == NULL );
+	ASSERT( tempbuffer == NULL );
+
+	prot = 0x00;
+	size = uSize;
+	pBuffer = new char[size];
+	memcpy(pBuffer, pcData, size);
+	m_bFromPF = bFromPartFile;
+}
+
+CRawPacket::~CRawPacket()
+{
+	ASSERT( completebuffer == NULL );
+}
+
+char* CRawPacket::GetHeader()
+{
+	ASSERT(0);
+	return NULL;
+}
+
+char* CRawPacket::GetUDPHeader()
+{
+	ASSERT(0);
+	return NULL;
+}
+
+void CRawPacket::AttachPacket(char* pPacketData, UINT uPacketSize, bool bFromPartFile)
+{
+	ASSERT( pBuffer == NULL );
+	pBuffer = pPacketData;
+	size = uPacketSize;
+	m_bFromPF = bFromPartFile;
+}
+
+char* CRawPacket::DetachPacket()
+{
+	char* pResult = pBuffer;
+	pBuffer = NULL;
+	return pResult;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // STag
 
 STag::STag()
@@ -264,6 +349,8 @@ STag::~STag()
 	delete[] tagname;
 	if (type == TAGTYPE_STRING)
 		delete[] stringvalue;
+	if (type == TAGTYPE_HASH)
+		delete[] pData;
 }
 
 
@@ -272,30 +359,38 @@ STag::~STag()
 
 CTag::CTag(LPCSTR name, uint32 intvalue)
 {
-	tag.tagname = nstrdup(name);
 	tag.type = TAGTYPE_UINT32;
+	tag.tagname = nstrdup(name);
 	tag.intvalue = intvalue;
 }
 
 CTag::CTag(uint8 special, uint32 intvalue)
 {
 	tag.type = TAGTYPE_UINT32;
-	tag.intvalue = intvalue;
 	tag.specialtag = special;
+	tag.intvalue = intvalue;
 }
 
 CTag::CTag(LPCSTR name, LPCSTR strvalue)
 {
-	tag.tagname = nstrdup(name);
 	tag.type = TAGTYPE_STRING;
+	tag.tagname = nstrdup(name);
 	tag.stringvalue = nstrdup(strvalue);
 }
 
 CTag::CTag(uint8 special, LPCSTR strvalue)
 {
 	tag.type = TAGTYPE_STRING;
-	tag.stringvalue = nstrdup(strvalue);
 	tag.specialtag = special;
+	tag.stringvalue = nstrdup(strvalue);
+}
+
+CTag::CTag(uint8 uName, const BYTE* pucHash)
+{
+	tag.type = TAGTYPE_HASH;
+	tag.specialtag = uName;
+	tag.pData = new BYTE[16];
+	md4cpy(tag.pData, pucHash);
 }
 
 CTag::CTag(const STag& in_tag)
@@ -362,8 +457,8 @@ CTag::CTag(CFileDataIO* data)
 	}
 	else if (tag.type == TAGTYPE_HASH)
 	{
-		TRACE("***NOTE: %s; Reading HASH tag\n", __FUNCTION__);
-		data->Seek(16, CFile::current);
+		tag.pData = new BYTE[16];
+		data->Read(tag.pData, 16);
 	}
 	else if (tag.type == TAGTYPE_BOOL)
 	{
@@ -467,6 +562,10 @@ bool CTag::WriteNewEd2kTag(CFileDataIO* data) const
 	{
 		data->Write(&tag.floatvalue, 4);
 	}
+	else if (uTagType == TAGTYPE_HASH)
+	{
+		data->WriteHash16(tag.pData);
+	}
 	else
 	{
 		TRACE("%s; Unknown tag: type=0x%02X\n", __FUNCTION__, uTagType);
@@ -569,4 +668,14 @@ CString CTag::GetFullInfo() const
 		strTag.AppendFormat(_T("Type=%u"), tag.type);
 	}
 	return strTag;
+}
+
+CString CTag::GetStr() const
+{
+	CString str;
+	if (IsStr() && tag.stringvalue != NULL)
+	{
+			str = tag.stringvalue;
+	}
+	return str;
 }

@@ -44,7 +44,6 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 #define	EMULTB_BASEEXT		_T("eMuleToolbar.kad02")
-#define	EMULSKIN_BASEEXT	_T("eMuleSkin")
 
 static const LPCTSTR _apszTBFiles[] = 
 {
@@ -321,7 +320,8 @@ void CMuleToolbarCtrl::SetBtnWidth()
 		ReleaseDC(pDC); // FoRcHa
 
 		GetClientRect(&r);
-		int iMaxPossible = r.Width() / GetButtonCount();
+		int bc=GetButtonCount(); if (bc==0) bc=1;
+		int iMaxPossible = r.Width() / bc;
 
 		// if the buttons are to big, reduze their size
 		if(iCalcSize > iMaxPossible)
@@ -522,7 +522,7 @@ void CMuleToolbarCtrl::OnTbnToolbarChange(NMHDR *pNMHDR, LRESULT *pResult)
 	for(int i=0;i<GetButtonCount();i++)
 		if(GetButton(i, &buttoninfo))
 		{
-			buffer.Format("%02i", (buttoninfo.idCommand!=0)?buttoninfo.idCommand-IDC_TOOLBARBUTTON:99);
+			buffer.Format(_T("%02i"), (buttoninfo.idCommand!=0)?buttoninfo.idCommand-IDC_TOOLBARBUTTON:99);
 			config.Append(buffer);
 		}
 
@@ -564,20 +564,20 @@ void CMuleToolbarCtrl::ChangeToolbarBitmap(CString path, bool refresh)
 	{
 		// load from icon ressources
 		ImageList.Create(32, 32, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-		ImageList.Add(CTempIconLoader("BN_CONNECT", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_DISCONNECT", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_STOPCONNECTING", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_KADEMLIA", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_SERVER", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_DOWNLOAD", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_SEARCH", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_FILES", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_MESSAGES", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_IRC", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_STATISTICS", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_PREFERENCES", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_TOOLS", 32, 32));
-		ImageList.Add(CTempIconLoader("BN_HELP", 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_CONNECT"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_DISCONNECT"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_STOPCONNECTING"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_KADEMLIA"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_SERVER"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_DOWNLOAD"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_SEARCH"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_FILES"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_MESSAGES"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_IRC"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_STATISTICS"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_PREFERENCES"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_TOOLS"), 32, 32));
+		ImageList.Add(CTempIconLoader(_T("BN_HELP"), 32, 32));
 		CImageList* pimlOld = SetImageList(&ImageList);
 		ImageList.Detach();
 		if (pimlOld)
@@ -648,7 +648,7 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		case MP_SELECT_SKIN_DIR:{
 			TCHAR buffer[MAX_PATH];
 			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), thePrefs.GetSkinProfileDir());
-			if(SelectDir(m_hWnd, buffer, "Select skin profile directory"))
+			if(SelectDir(m_hWnd, buffer, _T("Select skin profile directory")))
 				thePrefs.SetSkinProfileDir(buffer);
 			break;
 		}

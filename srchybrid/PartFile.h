@@ -22,16 +22,18 @@
 #include "SourceSaver.h" //<<-- enkeyDEV(Ottavio84) -New SLS-
 // khaos::kmod-
 
-#define	PS_READY			0
-#define	PS_EMPTY			1
-#define PS_WAITINGFORHASH	2
-#define PS_HASHING			3
-#define PS_ERROR			4
-#define PS_INSUFFICIENT		5	// SLUGFILLER: checkDiskspace
-#define	PS_UNKNOWN			6
-#define PS_PAUSED			7
-#define PS_COMPLETING		8
-#define PS_COMPLETE			9
+enum EPartFileStatus{
+	PS_READY			= 0,
+	PS_EMPTY			= 1,
+	PS_WAITINGFORHASH	= 2,
+	PS_HASHING			= 3,
+	PS_ERROR			= 4,
+	PS_INSUFFICIENT		= 5,	// SLUGFILLER: checkDiskspace
+	PS_UNKNOWN			= 6,
+	PS_PAUSED			= 7,
+	PS_COMPLETING		= 8,
+	PS_COMPLETE			= 9
+};
 
 #define PR_VERYLOW			4 // I Had to change this because it didn't save negative number correctly.. Had to modify the sort function for this change..
 #define PR_LOW				0 //*
@@ -56,6 +58,13 @@
 #define	FILE_COMPLETION_THREAD_FAILED	0x0000
 #define	FILE_COMPLETION_THREAD_SUCCESS	0x0001
 #define	FILE_COMPLETION_THREAD_RENAMED	0x0002
+
+enum EPartFileOp{
+	PFOP_NONE = 0,
+	PFOP_HASHING,
+	PFOP_COPYING,
+	PFOP_UNCOMPRESSING
+};
 
 class CSearchFile;
 class CUpDownClient;
@@ -130,7 +139,7 @@ public:
 	uint32	GetCrFileDate() const { return m_tCreated; }
 
 	void	InitializeFromLink(CED2KFileLink* fileLink);
-	bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename)	{return false;}// not supported in this class
+	bool	CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam) {return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
 	bool	WriteToFile(FILE* file) { return false; }
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
@@ -153,17 +162,21 @@ public:
 	bool	IsPureGap(uint32 start, uint32 end) const;
 	bool	IsAlreadyRequested(uint32 start, uint32 end) const;
 	bool	IsCorruptedPart(uint16 partnumber) const;
+	uint32	GetTotalGapSizeInRange(uint32 uRangeStart, uint32 uRangeEnd) const;
+	uint32	GetTotalGapSizeInPart(UINT uPart) const;
 	void	UpdateCompletedInfos();
+	void	UpdateCompletedInfos(uint32 uTotalGaps);
 	virtual void	UpdatePartsInfo();
 
 	bool	GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count) /*const*/;
 	void	WritePartStatus(CSafeMemFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
 	void	WriteCompleteSourcesCount(CSafeMemFile* file) const;
 	void	AddSources(CSafeMemFile* sources,uint32 serverip, uint16 serverport);
+	void	AddSource(LPCTSTR pszURL, uint32 nIP);
 	static bool CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped = NULL, bool Ed2kID = true);
 	
-	uint8	GetStatus(bool ignorepause = false) const;
-	void	SetStatus(uint8 in);
+	EPartFileStatus	GetStatus(bool ignorepause = false) const;
+	void	SetStatus(EPartFileStatus in);
 	bool	IsStopped() const { return stopped; }
 	bool	GetCompletionError() const { return m_bCompletionError;}
 	uint32  GetCompletedSize() const { return completedsize; }
@@ -178,7 +191,7 @@ public:
 	void	UpdateAutoDownPriority();
 
 	// khaos::kmod+ Source Counts Are Cached
-	uint16	GetAvailableSrcCount() const { return m_anStates[0]+m_anStates[1]; }
+	uint16	GetAvailableSrcCount() const;
 	// khaos::kmod-
 	
 	uint16	GetSourceCount() const	{ return srclist.GetCount(); }
@@ -188,12 +201,11 @@ public:
 	uint32	GetTransfered() const { return transfered; }
 	uint32	GetDatarate() const { return datarate; }
 	float	GetPercentCompleted() const { return percentcompleted; }
-	//MORPH START - Modifified by SiRoB
-	uint16  GetNotCurrentSourcesCount() const { return m_anStates[2]+m_anStates[3]+m_anStates[4]+m_anStates[5]+m_anStates[6]+m_anStates[7]+m_anStates[8]+m_anStates[9]+m_anStates[10]+m_anStates[11]+m_anStates[12]; } // m_iSourceCount - m_iSrcTransferring - m_iSrcOnQueue; }
-	int		GetValidSourcesCount() const { return m_anStates[1]+m_anStates[0]+m_anStates[2]+m_anStates[12] ;}// DS_ONQUEUE + DS_DOWNLOADING + DS_CONNECTED + DS_REMOTEQUEUEFULL; }
-	//MORPH END   - Modifified by SiRoB
+	uint16  GetNotCurrentSourcesCount() const;
+	int		GetValidSourcesCount() const;
 	bool	IsArchive(bool onlyPreviewable = false) const; // Barry - Also want to preview archives
 	sint32	getTimeRemaining() const;
+	sint32	getTimeRemainingSimple() const;
 	uint32	GetDlActiveTime() const;
 	bool	IsMovie() const; //MORPH - Added by IceCream, added preview also for music files
 	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
@@ -201,7 +213,7 @@ public:
 	bool	IsDocument() const; //MORPH - Added by IceCream, for defeat 0-filler
 
 	// Barry - Added as replacement for BlockReceived to buffer data before writing to disk
-	uint32	WriteToBuffer(uint32 transize, BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block);
+	uint32	WriteToBuffer(uint32 transize, const BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block);
 	void	FlushBuffer(bool forcewait=false);
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
 	// 'Gaps' returned are really the filled areas, and guaranteed to be in order
@@ -237,12 +249,10 @@ public:
 	uint32	GetLastAnsweredTime() const	{ return m_ClientSrcAnswered; }
 	void	SetLastAnsweredTime()			{ m_ClientSrcAnswered = ::GetTickCount(); }
 	void	SetLastAnsweredTimeTimeout();
-	// -khaos--+++>
-	uint32	GetLostDueToCorruption() const		{return m_iLostDueToCorruption+m_iSesCorruptionBytes;}
-	uint32	GetGainDueToCompression() const		{return m_iGainDueToCompression+m_iSesCompressionBytes;}
-	uint32	GetSesCorruptionBytes()	const		{return m_iSesCorruptionBytes;}
-	uint32	GetSesCompressionBytes() const		{return m_iSesCompressionBytes;}
-	// <-----khaos-
+
+	uint64	GetLostDueToCorruption() const { return m_iLostDueToCorruption; }
+	uint64	GetGainDueToCompression() const { return m_iGainDueToCompression; }
+
 	uint32	TotalPacketsSavedDueToICH() const	{return m_iTotalPacketsSavedDueToICH;}
 
 	bool	HasComment() const { return hasComment; }
@@ -302,6 +312,11 @@ public:
 	void	PerformFirstHash();		// SLUGFILLER: SafeHash
 	void	PerformFileCompleteEnd(DWORD dwResult);
 
+	void	SetFileOp(EPartFileOp eFileOp);
+	EPartFileOp GetFileOp() const { return m_eFileOp; }
+	void	SetFileOpProgress(UINT uProgress);
+	UINT	GetFileOpProgress() const { return m_uFileOpProgress; }
+
 	uint32	lastsearchtime;
 	uint32	lastsearchtimeKad;
 	uint32	m_iAllocinfo;
@@ -316,6 +331,8 @@ public:
 	bool	m_bLocalSrcReqQueued;
 	bool	srcarevisible;				// used for downloadlistctrl
 	bool	hashsetneeded;
+    bool    AllowSwapForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick > 30*1000; } // ZZ:DownloadManager
+    void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 	// khaos::categorymod+
 	void	SetCatResumeOrder(uint16 order)	{ m_catResumeOrder = order; SavePartFile(); }
 	uint16	GetCatResumeOrder() const				{ return m_catResumeOrder; }
@@ -354,12 +371,8 @@ private:
 	uint16	count;
 	uint16	m_anStates[STATES_COUNT];
 	uint32  completedsize;
-	// -khaos--+++>
-	uint32	m_iLostDueToCorruption;
-	uint32	m_iGainDueToCompression;
-	uint32	m_iSesCompressionBytes;
-	uint32	m_iSesCorruptionBytes;
-	// <-----khaos-
+	uint64	m_iLostDueToCorruption;
+	uint64	m_iGainDueToCompression;
 	uint32  m_iTotalPacketsSavedDueToICH; 
 	uint32	datarate;
 	CString	m_fullname;
@@ -371,7 +384,7 @@ private:
 	bool	m_bCompletionError;
 	uint8	m_iDownPriority;
 	bool	m_bAutoDownPriority;
-	uint8	status;
+	EPartFileStatus	status;
 	bool	newdate;	// indicates if there was a writeaccess to the .part file
 	uint32	lastpurgetime;
 	uint32	m_LastNoNeededCheck;
@@ -406,6 +419,8 @@ private:
 	uint32	m_nDlActiveTime;
 	uint32	m_tLastModified;	// last file modification time (NT's version of UTC), to be used for stats only!
 	uint32	m_tCreated;			// file creation time (NT's version of UTC), to be used for stats only!
+	volatile EPartFileOp m_eFileOp;
+	volatile UINT m_uFileOpProgress;
 
 
 	BOOL 	PerformFileComplete(); // Lord KiRon
@@ -417,6 +432,9 @@ private:
 	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
+
+    DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
+
 	void	PharseICHResult();	// SLUGFILLER: SafeHash
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;

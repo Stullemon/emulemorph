@@ -50,7 +50,7 @@ public:
 	CKnownFile*	GetFileByIndex(int index);
 	bool	IsFilePtrInList(const CKnownFile* file) const;
 	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, UINT uEmuleVer = 0);
-	uint64	GetDatasize(uint64 &pbytesLargest);
+	uint64	GetDatasize(uint64 &pbytesLargest) const;
 	uint16	GetCount()	{return m_Files_map.GetCount(); }
 	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER: SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
@@ -63,7 +63,9 @@ public:
 	void	AddKeywords(CKnownFile* pFile);
 	void	RemoveKeywords(CKnownFile* pFile);
 	void	DeletePartFileInstances() const;
+	bool	IsUnsharedFile(const uchar* auFileHash) const;
 	void	UpdatePartsInfo(); //MORPH - Added by SiRoB, POWERSHARE Limit
+
 private:
 	bool	AddFile(CKnownFile* pFile);
 	void	FindSharedFiles();
@@ -74,6 +76,7 @@ private:
 	// SLUGFILLER: SafeHash
 
 	CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> m_Files_map;
+	CMap<CSKey,const CSKey&, bool, bool>			 m_UnsharedFiles_map;
 	CPublishKeywordList* m_keywords;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> waitingforhash_list;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> currentlyhashing_list;	// SLUGFILLER: SafeHash
@@ -99,7 +102,7 @@ class CAddFileThread : public CWinThread
 protected:
 	CAddFileThread();
 public:
-	virtual BOOL InitInstance() {return TRUE;}
+	virtual BOOL InitInstance();
 	virtual int		Run();
 	void	SetValues(CSharedFileList* pOwner, LPCTSTR directory, LPCTSTR filename, CPartFile* partfile = NULL);
 

@@ -27,9 +27,7 @@
 #include <crypto51/osrng.h>
 #include <crypto51/files.h>
 #include <crypto51/sha.h>
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -324,7 +322,7 @@ CClientCreditsList::~CClientCreditsList()
 void CClientCreditsList::LoadList()
 {
 	CString strFileName = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
-	const int iOpenFlags = CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary;
+	const int iOpenFlags = CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite;
 	CSafeBufferedFile file;
 	CFileException fexp;
 
@@ -524,8 +522,8 @@ void CClientCreditsList::LoadList()
 		if (error->m_cause == CFileException::endOfFile)
 			AddLogLine(true, GetResString(IDS_CREDITFILECORRUPT));
 		else{
-			char buffer[MAX_CFEXP_ERRORMSG];
-			error->GetErrorMessage(buffer, MAX_CFEXP_ERRORMSG);
+			TCHAR buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer, ARRSIZE(buffer));
 			AddLogLine(true, GetResString(IDS_ERR_CREDITFILEREAD), buffer);
 		}
 		error->Delete();
@@ -536,7 +534,7 @@ void CClientCreditsList::LoadList()
 void CClientCreditsList::SaveList()
 {
 	if (thePrefs.GetLogFileSaving())
-		AddDebugLogLine(false, "Saving clients credit list file \"%s\"", CLIENTS_MET_FILENAME);
+		AddDebugLogLine(false, _T("Saving clients credit list file \"%s\""), CLIENTS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
 	CString name = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME);
@@ -544,7 +542,7 @@ void CClientCreditsList::SaveList()
 	CFileException fexp;
 	//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 	/*
-	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -555,7 +553,7 @@ void CClientCreditsList::SaveList()
 		return;
 	}
 	*/
-	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -568,7 +566,7 @@ void CClientCreditsList::SaveList()
 
 	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	CFile fileBack; // Moonlight: SUQWT - Also open a file to save original 30c format.
-	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
+	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -701,7 +699,7 @@ void CClientCredits::Verified(uint32 dwForIP){
 			m_pCredits->nUploadedHi = 0;
 			m_pCredits->nUploadedLo = 1; // in order to safe this client, set 1 byte
 			if (thePrefs.GetVerbose())
-				DEBUG_ONLY(AddDebugLogLine(false, "Credits deleted due to new SecureIdent"));
+				DEBUG_ONLY(AddDebugLogLine(false, _T("Credits deleted due to new SecureIdent")));
 		}
 	}
 	IdentState = IS_IDENTIFIED;
@@ -755,7 +753,7 @@ void CClientCreditsList::InitalizeCrypting(){
 	// load key
 	try{
 		// load private key
-		FileSource filesource(CString(thePrefs.GetConfigDir() + CString("cryptkey.dat")), true,new Base64Decoder);
+		FileSource filesource(CStringA(thePrefs.GetConfigDir() + _T("cryptkey.dat")), true,new Base64Decoder);
 		m_pSignkey = new RSASSA_PKCS1v15_SHA_Signer(filesource);
 		// calculate and store public key
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(*m_pSignkey);
@@ -782,17 +780,17 @@ bool CClientCreditsList::CreateKeyPair(){
 		InvertibleRSAFunction privkey;
 		privkey.Initialize(rng,RSAKEYSIZE);
 
-		Base64Encoder privkeysink(new FileSink(CString(thePrefs.GetConfigDir())+"cryptkey.dat"));
+		Base64Encoder privkeysink(new FileSink(CStringA(thePrefs.GetConfigDir() + _T("cryptkey.dat"))));
 		privkey.DEREncode(privkeysink);
 		privkeysink.MessageEnd();
 
 		if (thePrefs.GetLogSecureIdent())
-			AddDebugLogLine(false, "Created new RSA keypair");
+			AddDebugLogLine(false, _T("Created new RSA keypair"));
 	}
 	catch(...)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, "Failed to create new RSA keypair");
+			AddDebugLogLine(false, _T("Failed to create new RSA keypair"));
 		ASSERT ( false );
 		return false;
 	}
@@ -870,7 +868,7 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 				case CRYPT_CIP_REMOTECLIENT:
 					if (theApp.serverconnect->GetClientID() == 0 || theApp.serverconnect->IsLowID()){
 						if (thePrefs.GetLogSecureIdent())
-							AddDebugLogLine(false, "Warning: Maybe SecureHash Ident fails because LocalIP is unknown");
+							AddDebugLogLine(false, _T("Warning: Maybe SecureHash Ident fails because LocalIP is unknown"));
 						ChallengeIP = theApp.serverconnect->GetLocalIP();
 					}
 					else
@@ -890,7 +888,7 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 	catch(...)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Error: Unknown exception in %s"), __FUNCTION__);
+			AddDebugLogLine(false, _T("Error: Unknown exception in %hs"), __FUNCTION__);
 		//ASSERT(0);
 		bResult = false;
 	}
@@ -958,8 +956,12 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 }
 #endif
 
+//EastShare START - Modified by TAHO, modified SUQWT
+/*
 uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
-	// EASTSHART START - Modified by TAHO, modified SUQWT
+*/
+sint64 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
+//EastShare END - Modified by TAHO, modified SUQWT
 	if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0)
 		SetSecWaitStartTime(dwForIP);
 
@@ -981,7 +983,10 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 				if (thePrefs.GetLogSecureIdent())
 					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
 				if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-						m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+						//EastShare START - Modified by TAHO, modified SUQWT
+						//m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+						m_dwUnSecureWaitTime = ::GetTickCount() - ((sint64) m_pCredits->nUnSecuredWaitTime);
+						//EastShare END - Modified by TAHO, modified SUQWT
 				}
 				else{
 					m_dwUnSecureWaitTime = ::GetTickCount();//original
@@ -1023,8 +1028,12 @@ void CClientCredits::SetSecWaitStartTime() {
 void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-		m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime - 1;	// Moonlight: SUQWT
-		m_dwSecureWaitTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime - 1;		// Moonlight: SUQWT
+		//EastShare START - Added by TAHO, modified SUQWT
+		//m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime - 1;	// Moonlight: SUQWT
+		//m_dwSecureWaitTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime - 1;		// Moonlight: SUQWT
+		m_dwUnSecureWaitTime = ::GetTickCount() - ((sint64) m_pCredits->nUnSecuredWaitTime) - 1;
+		m_dwSecureWaitTime = ::GetTickCount() - ((sint64) m_pCredits->nSecuredWaitTime) - 1;
+		//EastShare END - Added by TAHO, modified SUQWT
 	}
 	else{
 		//original

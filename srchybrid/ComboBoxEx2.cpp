@@ -138,10 +138,10 @@ HWND GetComboBoxEditCtrl(CComboBox& cb)
 	CWnd* pWnd = cb.GetWindow(GW_CHILD);
 	while (pWnd)
 	{
-		TCHAR szClassName[MAX_PATH];
-		if (::GetClassName(*pWnd, szClassName, ARRSIZE(szClassName)))
+		CHAR szClassName[MAX_PATH];
+		if (::GetClassNameA(*pWnd, szClassName, ARRSIZE(szClassName)))
 		{
-			if (_tcsicmp(szClassName, _T("EDIT")) == 0)
+			if (__ascii_stricmp(szClassName, "EDIT") == 0)
 				return pWnd->m_hWnd;
 		}
 		pWnd = pWnd->GetNextWindow();

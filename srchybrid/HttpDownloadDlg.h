@@ -23,10 +23,11 @@ public:
 	CHttpDownloadDlg(CWnd* pParent = NULL);
 
 //Public Member variables
-  CString m_sURLToDownload;
-  CString m_sFileToDownloadInto;
-  CString m_sUserName;
-  CString m_sPassword;
+	CString m_strTitle;
+  	CString m_sURLToDownload;
+  	CString m_sFileToDownloadInto;
+  	CString m_sUserName;
+  	CString m_sPassword;
 
 protected:
 	//{{AFX_DATA(CHttpDownloadDlg)

@@ -54,8 +54,8 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 
 	CString strText;	
 	GetWindowText(strText);
-	SetWindowText("");
-	if(strText != "")
+	SetWindowText(_T(""));
+	if(!strText.IsEmpty())
 		m_strText = strText;
 
 	CRect rRect;
@@ -122,7 +122,7 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
     {
 		HTHEME hTheme = g_xpStyle.OpenThemeData(NULL, L"BUTTON"); 
 		USES_CONVERSION;
-		LPOLESTR oleText = T2OLE(m_strText); 
+		LPCWSTR oleText = T2CW(m_strText); 
 		g_xpStyle.DrawThemeText(hTheme, MemDC.m_hDC, BP_GROUPBOX, GBS_NORMAL, oleText, ocslen (oleText), 
 			DT_WORDBREAK | DT_CENTER | DT_WORD_ELLIPSIS, NULL, &rCaption); 
 		g_xpStyle.CloseThemeData(hTheme);

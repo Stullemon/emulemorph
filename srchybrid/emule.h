@@ -43,9 +43,11 @@ class CClientUDPSocket;
 class CIPFilter;
 class CWebServer;
 class CMMServer;
-class CStatistics;
 class CAbstractFile;
 class CUpDownClient;
+class CPeerCacheFinder;
+class CFirewallOpener;
+
 struct SLogItem;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
@@ -83,7 +85,9 @@ public:
 	CWebServer*			webserver;
 	CScheduler*			scheduler;
 	CMMServer*			mmserver;
-	CStatistics*		statistics;
+	CPeerCacheFinder*	m_pPeerCache;
+	CFirewallOpener*	m_pFirewallOpener;
+
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CIP2Country*		ip2country; //EastShare - added by AndCycle, IP to Country
@@ -109,7 +113,7 @@ public:
 	AppState			m_app_state; // defines application state for shutdown 
 	CMutex				hashing_mut;
 	CString*			pendinglink;
-	tagCOPYDATASTRUCT	sendstruct;
+	COPYDATASTRUCT		sendstruct;
 
 // Implementierung
 	virtual BOOL InitInstance();
@@ -131,7 +135,7 @@ public:
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 	bool		IsEd2kFileLinkInClipboard();
 	bool		IsEd2kServerLinkInClipboard();
-	bool		IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen);
+	bool		IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen);
 
 	CString		CreateED2kSourceLink(const CAbstractFile* f);
 	CString		CreateED2kHostnameSourceLink(const CAbstractFile* f);
@@ -149,12 +153,15 @@ public:
 	bool		IsFirewalled();
 	bool		DoCallback( CUpDownClient *client );
 	uint32		GetID();
+	uint32		GetPublicIP() const;	// return current (valid) public IP or 0 if unknown
+	void		SetPublicIP(const uint32 dwIP);
 
 	// because nearly all icons we are loading are 16x16, the default size is specified as 16 and not as 32 nor LR_DEFAULTSIZE
 	HICON		LoadIcon(LPCTSTR lpszResourceName, int cx = 16, int cy = 16, UINT uFlags = LR_DEFAULTCOLOR) const;
 	HICON		LoadIcon(UINT nIDResource) const;
 	HBITMAP		LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) const;
 	HBITMAP		LoadImage(UINT nIDResource, LPCTSTR pszResourceType) const;
+	bool		LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor);
 	void		ApplySkin(LPCTSTR pszSkinProfile);
 
 	CString		GetLangHelpFilePath();
@@ -192,6 +199,8 @@ protected:
     CTypedPtrList<CPtrList, SLogItem*> m_QueueDebugLog;
     CTypedPtrList<CPtrList, SLogItem*> m_QueueLog;
     // Elandal:ThreadSafeLogging <--
+
+	uint32 m_dwPublicIP;
 
 };
 

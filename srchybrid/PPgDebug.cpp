@@ -72,13 +72,13 @@ void CPPgDebug::DoDataExchange(CDataExchange* pDX)
 		int iImgClient = 8; // default icon
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
-			HICON hIcon = theApp.LoadIcon("Server");
+			HICON hIcon = theApp.LoadIcon(_T("Server"));
 			if (hIcon){
 				iImgServer = piml->Add(hIcon);
 				VERIFY( ::DestroyIcon(hIcon) );
 			}
 
-			hIcon = theApp.LoadIcon("StatsClients");
+			hIcon = theApp.LoadIcon(_T("StatsClients"));
 			if (hIcon){
 				iImgClient = piml->Add(hIcon);
 				VERIFY( ::DestroyIcon(hIcon) );
@@ -87,25 +87,25 @@ void CPPgDebug::DoDataExchange(CDataExchange* pDX)
 
 #define	ADD_DETAIL_ITEM(idx, label, group) \
 		m_cb[idx] = m_ctrlTreeOptions.InsertCheckBox(label, group); \
-		m_lv[idx] = m_ctrlTreeOptions.InsertItem("Level", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_cb[idx]); \
+		m_lv[idx] = m_ctrlTreeOptions.InsertItem(_T("Level"), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_cb[idx]); \
 		m_ctrlTreeOptions.AddEditBox(m_lv[idx], RUNTIME_CLASS(CNumTreeOptionsEdit))
 
 #define	ADD_INTEGER_ITEM(idx, label, group) \
 		m_htiInteger[idx] = m_ctrlTreeOptions.InsertItem(label, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, group); \
 		m_ctrlTreeOptions.AddEditBox(m_htiInteger[idx], RUNTIME_CLASS(CNumTreeOptionsEdit))
 
-		m_htiServer = m_ctrlTreeOptions.InsertCheckBox("Server", TVI_ROOT, FALSE);
-		ADD_DETAIL_ITEM(0, "TCP", m_htiServer);
-		ADD_DETAIL_ITEM(1, "UDP", m_htiServer);
-		ADD_DETAIL_ITEM(2, "Sources", m_htiServer);
-		ADD_DETAIL_ITEM(3, "Searches", m_htiServer);
+		m_htiServer = m_ctrlTreeOptions.InsertCheckBox(_T("Server"), TVI_ROOT, FALSE);
+		ADD_DETAIL_ITEM(0, _T("TCP"), m_htiServer);
+		ADD_DETAIL_ITEM(1, _T("UDP"), m_htiServer);
+		ADD_DETAIL_ITEM(2, _T("Sources"), m_htiServer);
+		ADD_DETAIL_ITEM(3, _T("Searches"), m_htiServer);
 
-		m_htiClient = m_ctrlTreeOptions.InsertCheckBox("Client", TVI_ROOT, FALSE);
-		ADD_DETAIL_ITEM(4, "TCP", m_htiClient);
-		ADD_DETAIL_ITEM(5, "UDP (eD2K)", m_htiClient);
-		ADD_DETAIL_ITEM(6, "UDP (Kad)", m_htiClient);
+		m_htiClient = m_ctrlTreeOptions.InsertCheckBox(_T("Client"), TVI_ROOT, FALSE);
+		ADD_DETAIL_ITEM(4, _T("TCP"), m_htiClient);
+		ADD_DETAIL_ITEM(5, _T("UDP (eD2K)"), m_htiClient);
+		ADD_DETAIL_ITEM(6, _T("UDP (Kad)"), m_htiClient);
 
-		ADD_INTEGER_ITEM(0, "Memory corruption check level", TVI_ROOT);
+		ADD_INTEGER_ITEM(0, _T("Memory corruption check level"), TVI_ROOT);
 
 #undef ADD_DETAIL_ITEM
 #undef ADD_INTEGER_ITEM
@@ -159,7 +159,7 @@ BOOL CPPgDebug::OnInitDialog()
 
 BOOL CPPgDebug::OnKillActive()
 {
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// if prop page is closed by pressing ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
 	return CPropertyPage::OnKillActive();
@@ -167,7 +167,7 @@ BOOL CPPgDebug::OnKillActive()
 
 BOOL CPPgDebug::OnApply()
 {
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// if prop page is closed by pressing ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
 

@@ -37,7 +37,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	uint8	GrabFrames();
 public:
-	virtual	BOOL	InitInstance() {return true;}
+	virtual	BOOL	InitInstance();
 	virtual int		Run();
 	void	SetValues(const CKnownFile* in_pOwner,CString in_strFileName,uint8 in_nFramesToGrab, double in_dStartTime, bool in_bReduceColor, uint16 in_nMaxWidth, void* pSender);
 	

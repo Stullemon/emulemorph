@@ -73,9 +73,9 @@ BOOL PreviewDlg::OnInitDialog()
 	m_nCurrentImage = 0;
 	ShowImage(0);
 
-	((CButton*)GetDlgItem(IDC_PV_EXIT))->SetIcon(m_icons[0] = theApp.LoadIcon("Cancel"));
-	((CButton*)GetDlgItem(IDC_PV_NEXT))->SetIcon(m_icons[1] = theApp.LoadIcon("Forward"));
-	((CButton*)GetDlgItem(IDC_PV_PRIOR))->SetIcon(m_icons[2] = theApp.LoadIcon("Back"));
+	((CButton*)GetDlgItem(IDC_PV_EXIT))->SetIcon(m_icons[0] = theApp.LoadIcon(_T("Cancel")));
+	((CButton*)GetDlgItem(IDC_PV_NEXT))->SetIcon(m_icons[1] = theApp.LoadIcon(_T("Forward")));
+	((CButton*)GetDlgItem(IDC_PV_PRIOR))->SetIcon(m_icons[2] = theApp.LoadIcon(_T("Back")));
 	return TRUE;
 }
 

@@ -21,8 +21,7 @@
 #include "IrcMain.h"
 #include "Preferences.h"
 #include "OtherFunctions.h"
-#include "DownloadQueue.h"
-#include "UploadQueue.h"
+#include "Statistics.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -90,24 +89,30 @@ void CIrcSocket::OnReceive(int nErrorCode)
 		return;
 	}
 
-	char buffer[256];
-	int length = Receive(buffer, sizeof(buffer)-1);
-	if (length < 0){
-		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(GetLastError(), 1));
-		return;
+	int length;
+	char buffer[1024];
+	do
+	{
+		length = Receive(buffer, sizeof(buffer)-1);
+		if (length < 0){
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(GetLastError(), 1));
+			return;
+		}
+		if (length > 0){
+			buffer[length] = '\0';
+			theStats.AddDownDataOverheadOther(length);
+			m_pIrcMain->PreParseMessage(buffer);
+		}
 	}
-	if (length > 0){
-		buffer[length] = '\0';
-		theApp.downloadqueue->AddDownDataOverheadOther(length);
-		m_pIrcMain->PreParseMessage(buffer);
-	}
+	while( length > 1022 );
 }
 
 void CIrcSocket::OnConnect(int nErrorCode)
 {
 	if (nErrorCode){
 		AddLogLine(true, _T("IRC socket: Failed to connect - %s"), GetErrorMessage(nErrorCode, 1));
+		m_pIrcMain->Disconnect();
 		return;
 	}
 	m_pIrcMain->SetConnectStatus(true);
@@ -121,16 +126,15 @@ void CIrcSocket::OnClose(int nErrorCode)
 			AddDebugLogLine(false, _T("IRC socket: Failed to close - %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
-	RemoveAllLayers();
-	m_pIrcMain->SetConnectStatus(false);
-	CAsyncSocketEx::Close();
+	m_pIrcMain->Disconnect();
 }
 
 int CIrcSocket::SendString(CString message){
 	message += _T("\r\n");
-	int size = message.GetLength();
-	theApp.uploadqueue->AddUpDataOverheadOther(size);
-	return Send(message, size);
+	CStringA strMessageA(message);
+	int size = strMessageA.GetLength();
+	theStats.AddUpDataOverheadOther(size);
+	return Send(strMessageA, size);
 }
 
 void CIrcSocket::RemoveAllLayers()

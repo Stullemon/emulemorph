@@ -213,7 +213,7 @@ protected:
 	}
 
 public:
-	virtual BOOL InitInstance() {return TRUE;}
+	virtual BOOL InitInstance();
 	virtual int	Run();
 	void SetValues(HWND hWnd, const CSimpleArray<const CKnownFile*>* paFiles)
 	{
@@ -459,11 +459,12 @@ CString GetWaveFormatTagName(UINT uWavFmtTag, CString& rstrComment)
 		{ 0x2000, "DVM (AC3-Digital)", "FAST Multimedia AG" }
 	};
 
+	USES_CONVERSION;
 	for (int i = 0; i < ARRSIZE(WavFmtTag); i++)
 	{
 		if (WavFmtTag[i].uFmtTag == uWavFmtTag){
 			rstrComment = WavFmtTag[i].pszComment;
-			return WavFmtTag[i].pszDefine;
+			return A2CT(WavFmtTag[i].pszDefine);
 		}
 	}
 
@@ -530,6 +531,9 @@ CString GetVideoFormatName(DWORD biCompression)
 BOOL CFileInfoDialog::OnInitDialog()
 {
 	CWaitCursor curWait; // we may get quite busy here..
+#ifdef _UNICODE
+	ReplaceRichEditCtrl(GetDlgItem(IDC_FULL_FILE_INFO), this, GetDlgItem(IDC_FD_XI1)->GetFont());
+#endif
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 	AddAnchor(IDC_FULL_FILE_INFO, TOP_LEFT, BOTTOM_RIGHT);
@@ -588,6 +592,12 @@ BOOL CFileInfoDialog::OnInitDialog()
 }
 
 IMPLEMENT_DYNCREATE(CGetMediaInfoThread, CWinThread)
+
+BOOL CGetMediaInfoThread::InitInstance()
+{
+	InitThreadLocale();
+	return TRUE;
+}
 
 int CGetMediaInfoThread::Run()
 {
@@ -1222,7 +1232,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 		return false;
 	ASSERT( !pFile->GetFilePath().IsEmpty() );
 
-	/*FILE* fp = fopen(pFile->GetFilePath(), "rb");
+	/*FILE* fp = _fsopen(pFile->GetFilePath(), "rb", _SH_DENYWR);
 	if (fp)
 	{
 		BYTE aucBuff[8192];
@@ -1281,8 +1291,9 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 	{
 		try
 		{
+			USES_CONVERSION;
 			ID3_Tag myTag;
-			myTag.Link(pFile->GetFilePath());
+			myTag.Link(T2CA(pFile->GetFilePath()));
 
 			const Mp3_Headerinfo* mp3info;
 			mp3info = myTag.GetMp3HeaderInfo();
@@ -1294,51 +1305,51 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				{
 					//m_fi.SetSelectionCharFormat(m_cfBold);
 					if (!mi->strInfo.str.IsEmpty())
-						mi->strInfo << "\n\n";
+						mi->strInfo << _T("\n\n");
 					//m_fi.SetSelectionCharFormat(m_cfBold);
-					mi->strInfo << "File: " << pFile->GetFileName() << "\n";
-					mi->strInfo << "MP3 Header Info\n";
+					mi->strInfo << _T("File: ") << pFile->GetFileName() << _T("\n");
+					mi->strInfo << _T("MP3 Header Info\n");
 					//m_fi.SetSelectionCharFormat(m_cfDef);
 				}
 
 				switch (mp3info->version)
 				{
 				case MPEGVERSION_2_5:
-					mi->strAudioFormat = "MPEG-2.5,";
+					mi->strAudioFormat = _T("MPEG-2.5,");
 					mi->audio.wFormatTag = 0x0055;
 					break;
 				case MPEGVERSION_2:
-					mi->strAudioFormat = "MPEG-2,";
+					mi->strAudioFormat = _T("MPEG-2,");
 					mi->audio.wFormatTag = 0x0055;
 					break;
 				case MPEGVERSION_1:
-					mi->strAudioFormat = "MPEG-1,";
+					mi->strAudioFormat = _T("MPEG-1,");
 					mi->audio.wFormatTag = 0x0055;
 					break;
 				default:
 					break;
 				}
-				mi->strAudioFormat += " ";
+				mi->strAudioFormat += _T(" ");
 
 				switch (mp3info->layer)
 				{
 				case MPEGLAYER_III:
-					mi->strAudioFormat += "Layer 3";
+					mi->strAudioFormat += _T("Layer 3");
 					break;
 				case MPEGLAYER_II:
-					mi->strAudioFormat += "Layer 2";
+					mi->strAudioFormat += _T("Layer 2");
 					break;
 				case MPEGLAYER_I:
-					mi->strAudioFormat += "Layer 1";
+					mi->strAudioFormat += _T("Layer 1");
 					break;
 				default:
 					break;
 				}
 				if (!bSingleFile)
 				{
-					mi->strInfo << "   Version:\t" << mi->strAudioFormat << "\n";
-					mi->strInfo << "   Bitrate:\t" << mp3info->bitrate/1000 << " kBit/s\n";
-					mi->strInfo << "   Frequency:\t" << mp3info->frequency/1000 << " kHz\n";
+					mi->strInfo << _T("   Version:\t") << mi->strAudioFormat << _T("\n");
+					mi->strInfo << _T("   Bitrate:\t") << mp3info->bitrate/1000 << _T(" kBit/s\n");
+					mi->strInfo << _T("   Frequency:\t") << mp3info->frequency/1000 << _T(" kHz\n");
 				}
 
 				mi->iAudioStreams++;
@@ -1346,43 +1357,43 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				mi->audio.nSamplesPerSec = mp3info->frequency;
 
 				if (!bSingleFile)
-					mi->strInfo << "   Mode:\t";
+					mi->strInfo << _T("   Mode:\t");
 				switch (mp3info->channelmode){
 				case MP3CHANNELMODE_STEREO:
 					if (!bSingleFile)
-						mi->strInfo << "Stereo";
+						mi->strInfo << _T("Stereo");
 					mi->audio.nChannels = 2;
 					break;
 				case MP3CHANNELMODE_JOINT_STEREO:
 					if (!bSingleFile)
-						mi->strInfo << "Joint Stereo";
+						mi->strInfo << _T("Joint Stereo");
 					mi->audio.nChannels = 2;
 					break;
 				case MP3CHANNELMODE_DUAL_CHANNEL:
 					if (!bSingleFile)
-						mi->strInfo << "Dual Channel";
+						mi->strInfo << _T("Dual Channel");
 					mi->audio.nChannels = 2;
 					break;
 				case MP3CHANNELMODE_SINGLE_CHANNEL:
 					if (!bSingleFile)
-						mi->strInfo << "Mono";
+						mi->strInfo << _T("Mono");
 					mi->audio.nChannels = 1;
 					break;
 				}
 				if (!bSingleFile)
-					mi->strInfo << "\n";
+					mi->strInfo << _T("\n");
 
 				// length
 				if (mp3info->time)
 				{
 					if (!bSingleFile)
 					{
-						CStringA strLength;
+						CString strLength;
 						SecToTimeLength(mp3info->time, strLength);
-						mi->strInfo << "   Length:\t" << (LPCSTR)strLength;
+						mi->strInfo << _T("   Length:\t") << strLength;
 						if (pFile->IsPartFile()){
 //							mi->strInfo.SetSelectionCharFormat(m_cfRed);
-							mi->strInfo << " (This may not reflect the final total length!)";
+							mi->strInfo << _T(" (This may not reflect the final total length!)");
 //							mi->strInfo.SetSelectionCharFormat(m_cfDef);
 						}
 						mi->strInfo << "\n";
@@ -1401,9 +1412,9 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				if (iTag == 0)
 				{
 					if (mp3info && !bSingleFile)
-						mi->strInfo << "\n";
+						mi->strInfo << _T("\n");
 //					mi->strInfo.SetSelectionCharFormat(m_cfBold);
-					mi->strInfo << "MP3 Tags\n";
+					mi->strInfo << _T("MP3 Tags\n");
 //					mi->strInfo.SetSelectionCharFormat(m_cfDef);
 				}
 				iTag++;
@@ -1411,7 +1422,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				LPCSTR desc = frame->GetDescription();
 				if (!desc)
 					desc = frame->GetTextID();
-				mi->strInfo << "   " << desc << ":\t";
+				mi->strInfo << _T("   ") << A2CT(desc) << _T(":\t");
 
 				ID3_FrameID eFrameID = frame->GetID();
 				switch (eFrameID)
@@ -1456,7 +1467,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_YEAR:
 				{
 					char *sText = ID3_GetString(frame, ID3FN_TEXT);
-					mi->strInfo << sText << "\n";
+					mi->strInfo << sText << _T("\n");
 					delete [] sText;
 					break;
 				}
@@ -1465,7 +1476,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					char
 					*sText = ID3_GetString(frame, ID3FN_TEXT),
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
-					mi->strInfo << "(" << sDesc << "): " << sText << "\n";
+					mi->strInfo << _T("(") << sDesc << _T("): ") << sText << _T("\n");
 					delete [] sText;
 					delete [] sDesc;
 					break;
@@ -1477,7 +1488,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					*sText = ID3_GetString(frame, ID3FN_TEXT),
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION),
 					*sLang = ID3_GetString(frame, ID3FN_LANGUAGE);
-					mi->strInfo << "(" << sDesc << ")[" << sLang << "]: " << sText << "\n";
+					mi->strInfo << _T("(") << sDesc << _T(")[") << sLang << _T("]: ") << sText << _T("\n");
 					delete [] sText;
 					delete [] sDesc;
 					delete [] sLang;
@@ -1493,7 +1504,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_WWWRADIOPAGE:
 				{
 					char *sURL = ID3_GetString(frame, ID3FN_URL);
-					mi->strInfo << sURL << "\n";
+					mi->strInfo << sURL << _T("\n");
 					delete [] sURL;
 					break;
 				}
@@ -1502,7 +1513,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					char
 					*sURL = ID3_GetString(frame, ID3FN_URL),
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
-					mi->strInfo << "(" << sDesc << "): " << sURL << "\n";
+					mi->strInfo << _T("(") << sDesc << _T("): ") << sURL << _T("\n");
 					delete [] sURL;
 					delete [] sDesc;
 					break;
@@ -1516,9 +1527,9 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 						mi->strInfo << sPeople;
 						delete [] sPeople;
 						if (nIndex + 1 < nItems)
-							mi->strInfo << ", ";
+							mi->strInfo << _T(", ");
 					}
-					mi->strInfo << "\n";
+					mi->strInfo << _T("\n");
 					break;
 				}
 				case ID3FID_PICTURE:
@@ -1530,9 +1541,9 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					size_t
 					nPicType   = frame->GetField(ID3FN_PICTURETYPE)->Get(),
 					nDataSize  = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << "(" << sDesc << ")[" << sFormat << ", "
-						<< nPicType << "]: " << sMimeType << ", " << nDataSize
-						<< " bytes" << "\n";
+					mi->strInfo << _T("(") << sDesc << _T(")[") << sFormat << _T(", ")
+						<< nPicType << _T("]: ") << sMimeType << _T(", ") << nDataSize
+						<< _T(" bytes") << _T("\n");
 					delete [] sMimeType;
 					delete [] sDesc;
 					delete [] sFormat;
@@ -1546,9 +1557,9 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					*sFileName = ID3_GetString(frame, ID3FN_FILENAME);
 					size_t
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << "(" << sDesc << ")["
-						<< sFileName << "]: " << sMimeType << ", " << nDataSize
-						<< " bytes" << "\n";
+					mi->strInfo << _T("(") << sDesc << _T(")[")
+						<< sFileName << _T("]: ") << sMimeType << _T(", ") << nDataSize
+						<< _T(" bytes") << _T("\n");
 					delete [] sMimeType;
 					delete [] sDesc;
 					delete [] sFileName;
@@ -1558,15 +1569,15 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				{
 					char *sOwner = ID3_GetString(frame, ID3FN_OWNER);
 					size_t nDataSize = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << sOwner << ", " << nDataSize
-						<< " bytes" << "\n";
+					mi->strInfo << sOwner << _T(", ") << nDataSize
+						<< _T(" bytes") << _T("\n");
 					delete [] sOwner;
 					break;
 				}
 				case ID3FID_PLAYCOUNTER:
 				{
 					size_t nCounter = frame->GetField(ID3FN_COUNTER)->Get();
-					mi->strInfo << nCounter << "\n";
+					mi->strInfo << nCounter << _T("\n");
 					break;
 				}
 				case ID3FID_POPULARIMETER:
@@ -1575,8 +1586,8 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					size_t
 					nCounter = frame->GetField(ID3FN_COUNTER)->Get(),
 					nRating = frame->GetField(ID3FN_RATING)->Get();
-					mi->strInfo << sEmail << ", counter="
-						<< nCounter << " rating=" << nRating << "\n";
+					mi->strInfo << sEmail << _T(", counter=")
+						<< nCounter << _T(" rating=") << nRating << _T("\n");
 					delete [] sEmail;
 					break;
 				}
@@ -1587,8 +1598,8 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					size_t
 					nSymbol = frame->GetField(ID3FN_ID)->Get(),
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << "(" << nSymbol << "): " << sOwner
-						<< ", " << nDataSize << " bytes" << "\n";
+					mi->strInfo << _T("(") << nSymbol << _T("): ") << sOwner
+						<< _T(", ") << nDataSize << _T(" bytes") << _T("\n");
 					break;
 				}
 				case ID3FID_SYNCEDLYRICS:
@@ -1600,18 +1611,18 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					//nTimestamp = frame->GetField(ID3FN_TIMESTAMPFORMAT)->Get(),
 					nRating = frame->GetField(ID3FN_CONTENTTYPE)->Get();
 					//const char* format = (2 == nTimestamp) ? "ms" : "frames";
-					mi->strInfo << "(" << sDesc << ")[" << sLang << "]: ";
+					mi->strInfo << _T("(") << sDesc << _T(")[") << sLang << _T("]: ");
 					switch (nRating)
 					{
-					case ID3CT_OTHER:    mi->strInfo << "Other"; break;
-					case ID3CT_LYRICS:   mi->strInfo << "Lyrics"; break;
-					case ID3CT_TEXTTRANSCRIPTION:     mi->strInfo << "Text transcription"; break;
-					case ID3CT_MOVEMENT: mi->strInfo << "Movement/part name"; break;
-					case ID3CT_EVENTS:   mi->strInfo << "Events"; break;
-					case ID3CT_CHORD:    mi->strInfo << "Chord"; break;
-					case ID3CT_TRIVIA:   mi->strInfo << "Trivia/'pop up' information"; break;
+					case ID3CT_OTHER:    mi->strInfo << _T("Other"); break;
+					case ID3CT_LYRICS:   mi->strInfo << _T("Lyrics"); break;
+					case ID3CT_TEXTTRANSCRIPTION:     mi->strInfo << _T("Text transcription"); break;
+					case ID3CT_MOVEMENT: mi->strInfo << _T("Movement/part name"); break;
+					case ID3CT_EVENTS:   mi->strInfo << _T("Events"); break;
+					case ID3CT_CHORD:    mi->strInfo << _T("Chord"); break;
+					case ID3CT_TRIVIA:   mi->strInfo << _T("Trivia/'pop up' information"); break;
 					}
-					mi->strInfo << "\n";
+					mi->strInfo << _T("\n");
 					/*ID3_Field* fld = frame->GetField(ID3FN_DATA);
 					if (fld)
 					{
@@ -1641,10 +1652,10 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_REVERB:
 				case ID3FID_SYNCEDTEMPO:
 				case ID3FID_METACRYPTO:
-					mi->strInfo << " (unimplemented)" << "\n";
+					mi->strInfo << _T(" (unimplemented)") << _T("\n");
 					break;
 				default:
-					mi->strInfo << " frame" << "\n";
+					mi->strInfo << _T(" frame") << _T("\n");
 					break;
 				}
 			}
@@ -1675,9 +1686,10 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 			{
 				try
 				{
+					USES_CONVERSION;
 					if (theMediaInfoDLL.Initialize())
 					{
-						void* Handle = (*theMediaInfoDLL.fpMediaInfo_Open)((LPSTR)(LPCSTR)pFile->GetFilePath());
+						void* Handle = (*theMediaInfoDLL.fpMediaInfo_Open)((LPSTR)T2CA(pFile->GetFilePath()));
 						if (Handle)
 						{
 							CStringA str;
@@ -1694,12 +1706,13 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 								mi->iVideoStreams = iVideoStreams;
 								mi->fVideoLengthSec = fFileLengthSec;
 
-								mi->strVideoFormat = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Video, 0, "Codec", Info_Text, Info_Name);
-								if (!mi->strVideoFormat.IsEmpty())
-									mi->video.bmiHeader.biCompression = *(LPDWORD)(LPCSTR)mi->strVideoFormat;
+								CStringA strCodecA = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Video, 0, "Codec", Info_Text, Info_Name);
+								mi->strVideoFormat = strCodecA;
+								if (!strCodecA.IsEmpty())
+									mi->video.bmiHeader.biCompression = *(LPDWORD)(LPCSTR)strCodecA;
 								str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Video, 0, "Codec_String", Info_Text, Info_Name);
 								if (!str.IsEmpty())
-									mi->strVideoFormat += _T(" (") + str + _T(")");
+									mi->strVideoFormat += _T(" (") + CString(str) + _T(")");
 
 								str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Video, 0, "Width", Info_Text, Info_Name);
 								mi->video.bmiHeader.biWidth = atoi(str);
@@ -1729,14 +1742,14 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 									mi->strAudioFormat = str;
 									str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Audio, 0, "Codec_String", Info_Text, Info_Name);
 									if (!str.IsEmpty())
-										mi->strAudioFormat += _T(" (") + str + _T(")");
+										mi->strAudioFormat += _T(" (") + CString(str) + _T(")");
 								}
 								else
 								{
 									mi->strAudioFormat = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Audio, 0, "Codec_String", Info_Text, Info_Name);
 									str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Audio, 0, "Codec_Info", Info_Text, Info_Name);
 									if (!str.IsEmpty())
-										mi->strAudioFormat += _T(" (") + str + _T(")");
+										mi->strAudioFormat += _T(" (") + CString(str) + _T(")");
 								}
 
 								str = (*theMediaInfoDLL.fpMediaInfo_Get)(Handle, Stream_Audio, 0, "Channels", Info_Text, Info_Name);
@@ -1780,7 +1793,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					if (SUCCEEDED(hr))
 					{
 						USES_CONVERSION;
-						if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2W(pFile->GetFilePath())))))
+						if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2CW(pFile->GetFilePath())))))
 						{
 							long lStreams;
 							if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
@@ -1801,10 +1814,10 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 													if (!bSingleFile)
 													{
 														if (!mi->strInfo.str.IsEmpty())
-															mi->strInfo << "\n\n";
-														mi->strInfo << "File: " << pFile->GetFileName() << "\n";
+															mi->strInfo << _T("\n\n");
+														mi->strInfo << _T("File: ") << pFile->GetFileName() << _T("\n");
 													}
-													mi->strInfo << "Additional Video Stream\n";
+													mi->strInfo << _T("Additional Video Stream\n");
 												}
 
 												AM_MEDIA_TYPE mt = {0};
@@ -1824,8 +1837,8 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 														}
 														else
 														{
-															mi->strInfo << "   Codec:\t" << (LPCSTR)GetVideoFormatName(pVIH->bmiHeader.biCompression) << "\n";
-															mi->strInfo << "   Width x Height:\t" << abs(pVIH->bmiHeader.biWidth) << " x " << abs(pVIH->bmiHeader.biHeight) << "\n";
+															mi->strInfo << _T("   Codec:\t") << (LPCTSTR)GetVideoFormatName(pVIH->bmiHeader.biCompression) << _T("\n");
+															mi->strInfo << _T("   Width x Height:\t") << abs(pVIH->bmiHeader.biWidth) << _T(" x ") << abs(pVIH->bmiHeader.biHeight) << _T("\n");
 															// do not use that 'dwBitRate', whatever this number is, it's not
 															// the bitrate of the encoded video stream. seems to be the bitrate
 															// of the uncompressed stream divided by 2 !??
@@ -1834,7 +1847,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 
 															double fFrameRate = 0.0;
 															if (SUCCEEDED(pMediaDet->get_FrameRate(&fFrameRate)) && fFrameRate)
-																mi->strInfo << "   Frames/sec:\t" << fFrameRate << "\n";
+																mi->strInfo << _T("   Frames/sec:\t") << fFrameRate << _T("\n");
 														}
 													}
 												}
@@ -1846,13 +1859,13 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 														mi->fVideoLengthSec = fLength;
 													else
 													{
-														CStringA strLength;
+														CString strLength;
 														SecToTimeLength(fLength, strLength);
-														mi->strInfo << "   Length:\t" << (LPCSTR)strLength;
+														mi->strInfo << _T("   Length:\t") << strLength;
 														if (pFile->IsPartFile()){
-															mi->strInfo << " (This may not reflect the final total length!)";
+															mi->strInfo << _T(" (This may not reflect the final total length!)");
 														}
-														mi->strInfo << "\n";
+														mi->strInfo << _T("\n");
 													}
 												}
 
@@ -1861,7 +1874,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 												if (mt.pbFormat != NULL)
 													CoTaskMemFree(mt.pbFormat);
 												if (mi->iVideoStreams > 1)
-													mi->strInfo << "\n";
+													mi->strInfo << _T("\n");
 											}
 											else if (major_type == MEDIATYPE_Audio)
 											{
@@ -1872,10 +1885,10 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 													if (!bSingleFile)
 													{
 														if (!mi->strInfo.str.IsEmpty())
-															mi->strInfo << "\n\n";
-														mi->strInfo << "File: " << pFile->GetFileName() << "\n";
+															mi->strInfo << _T("\n\n");
+														mi->strInfo << _T("File: ") << pFile->GetFileName() << _T("\n");
 													}
-													mi->strInfo << "Additional Audio Stream\n";
+													mi->strInfo << _T("Additional Audio Stream\n");
 												}
 
 												AM_MEDIA_TYPE mt = {0};
@@ -1893,22 +1906,22 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 														else
 														{
 															CString strFormat = GetWaveFormatTagName(wfx->wFormatTag);
-															mi->strInfo << "   Format:\t" << strFormat << "\n";
+															mi->strInfo << _T("   Format:\t") << strFormat << _T("\n");
 															if (wfx->nAvgBytesPerSec)
-																mi->strInfo << "   Bitrate:\t" << (UINT)(((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0) << " kBit/s\n";
+																mi->strInfo << _T("   Bitrate:\t") << (UINT)(((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0) << _T(" kBit/s\n");
 															if (wfx->nSamplesPerSec)
-																mi->strInfo << "   Samples/sec:\t" << wfx->nSamplesPerSec / 1000.0 << " kHz\n";
+																mi->strInfo << _T("   Samples/sec:\t") << wfx->nSamplesPerSec / 1000.0 << _T(" kHz\n");
 															if (wfx->wBitsPerSample)
-																mi->strInfo << "   Bit/sample:\t" << wfx->wBitsPerSample << " Bit\n";
+																mi->strInfo << _T("   Bit/sample:\t") << wfx->wBitsPerSample << _T(" Bit\n");
 
-															mi->strInfo << "   Mode:\t";
+															mi->strInfo << _T("   Mode:\t");
 															if (wfx->nChannels == 1)
-																mi->strInfo << "Mono";
+																mi->strInfo << _T("Mono");
 															else if (wfx->nChannels == 2)
-																mi->strInfo << "Stereo";
+																mi->strInfo << _T("Stereo");
 															else
-																mi->strInfo << wfx->nChannels << " channels";
-															mi->strInfo << "\n";
+																mi->strInfo << wfx->nChannels << _T(" channels");
+															mi->strInfo << _T("\n");
 														}
 														bResult = true;
 													}
@@ -1921,13 +1934,13 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 														mi->fAudioLengthSec = fLength;
 													else
 													{
-														CStringA strLength;
+														CString strLength;
 														SecToTimeLength(fLength, strLength);
-														mi->strInfo << "   Length:\t" << (LPCSTR)strLength;
+														mi->strInfo << _T("   Length:\t") << strLength;
 														if (pFile->IsPartFile()){
-															mi->strInfo << " (This may not reflect the final total length!)";
+															mi->strInfo << _T(" (This may not reflect the final total length!)");
 														}
-														mi->strInfo << "\n";
+														mi->strInfo << _T("\n");
 													}
 												}
 
@@ -1936,7 +1949,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 												if (mt.pbFormat != NULL)
 													CoTaskMemFree(mt.pbFormat);
 												if (mi->iAudioStreams > 1)
-													mi->strInfo << "\n";
+													mi->strInfo << _T("\n");
 											}
 											else{
 												TRACE("%s - Unknown stream type\n", pFile->GetFileName());
@@ -1970,21 +1983,23 @@ void CFileInfoDialog::DoDataExchange(CDataExchange* pDX)
 void CFileInfoDialog::Localize()
 {
 	GetDlgItem(IDC_FD_XI1)->SetWindowText(GetResString(IDS_FD_SIZE));
-	GetDlgItem(IDC_FD_XI2)->SetWindowText(GetResString(IDS_LENGTH)+":");
+	GetDlgItem(IDC_FD_XI2)->SetWindowText(GetResString(IDS_LENGTH)+_T(":"));
 	GetDlgItem(IDC_FD_XI3)->SetWindowText(GetResString(IDS_VIDEO));
 	GetDlgItem(IDC_FD_XI4)->SetWindowText(GetResString(IDS_AUDIO));
 
-	GetDlgItem(IDC_FD_XI5)->SetWindowText( GetResString(IDS_CODEC)+":");
-	GetDlgItem(IDC_FD_XI6)->SetWindowText( GetResString(IDS_CODEC)+":");
+	GetDlgItem(IDC_FD_XI5)->SetWindowText( GetResString(IDS_CODEC)+_T(":"));
+	GetDlgItem(IDC_FD_XI6)->SetWindowText( GetResString(IDS_CODEC)+_T(":"));
 
-	GetDlgItem(IDC_FD_XI7)->SetWindowText( GetResString(IDS_BITRATE)+":");
-	GetDlgItem(IDC_FD_XI8)->SetWindowText( GetResString(IDS_BITRATE)+":");
+	GetDlgItem(IDC_FD_XI7)->SetWindowText( GetResString(IDS_BITRATE)+_T(":"));
+	GetDlgItem(IDC_FD_XI8)->SetWindowText( GetResString(IDS_BITRATE)+_T(":"));
 
-	GetDlgItem(IDC_FD_XI9)->SetWindowText( GetResString(IDS_WIDTH)+":");
-	GetDlgItem(IDC_FD_XI11)->SetWindowText( GetResString(IDS_HEIGHT)+":");
-	GetDlgItem(IDC_FD_XI13)->SetWindowText( GetResString(IDS_FPS)+":");
-	GetDlgItem(IDC_FD_XI10)->SetWindowText( GetResString(IDS_CHANNELS)+":");
-	GetDlgItem(IDC_FD_XI12)->SetWindowText( GetResString(IDS_SAMPLERATE)+":");
+	GetDlgItem(IDC_FD_XI9)->SetWindowText( GetResString(IDS_WIDTH)+_T(":"));
+	GetDlgItem(IDC_FD_XI11)->SetWindowText( GetResString(IDS_HEIGHT)+_T(":"));
+	GetDlgItem(IDC_FD_XI13)->SetWindowText( GetResString(IDS_FPS)+_T(":"));
+	GetDlgItem(IDC_FD_XI10)->SetWindowText( GetResString(IDS_CHANNELS)+_T(":"));
+	GetDlgItem(IDC_FD_XI12)->SetWindowText( GetResString(IDS_SAMPLERATE)+_T(":"));
+
+	GetDlgItem(IDC_STATICFI)->SetWindowText( GetResString(IDS_FILEFORMAT)+_T(":"));
 }
 
 void CFileInfoDialog::AddFileInfo(LPCTSTR pszFmt, ...)

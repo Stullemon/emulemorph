@@ -17,12 +17,16 @@
 
 class CSafeMemFile;
 
-// SLUGFILLER: hostnameSources
-struct SUnresolvedHostname{
+struct SUnresolvedHostname
+{
+	SUnresolvedHostname()
+	{
+		nPort = 0;
+	}
 	CStringA strHostname;
 	uint16 nPort;
+	CString strURL;
 };
-// SLUGFILLER: hostnameSources
 
 class CED2KLink {
 public:
@@ -62,22 +66,21 @@ private:
 
 class CED2KFileLink : public CED2KLink {
 public:
-	CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const TCHAR* sources);
+	CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const CStringArray& param, const TCHAR* sources);
 	virtual ~CED2KFileLink();
 	virtual LinkType GetKind() const;
 	virtual CED2KServerListLink* GetServerListLink();
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
 	virtual void GetLink(CString& lnk);
-	const char* GetName() const { return m_name; }
-	long GetSize() const { return atol(m_size); }
+	const TCHAR* GetName() const { return m_name; }
+	long GetSize() const { return _tstol(m_size); }
 	const uchar* GetHashKey() const { return m_hash;}
 	bool HasValidSources() const {return (SourcesList!=NULL); }
 	CSafeMemFile* SourcesList;
-	// SLUGFILLER: hostnameSources
+	CSafeMemFile* m_hashset;
 	bool HasHostnameSources() const {return (!m_HostnameSourcesList.IsEmpty()); }
 	CTypedPtrList<CPtrList, SUnresolvedHostname*> m_HostnameSourcesList;
-	// SLUGFILLER: hostnameSources
 private:
 	CED2KFileLink(); // Not defined
 	CED2KFileLink(const CED2KFileLink&); // Not defined
@@ -96,7 +99,7 @@ public:
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
 	virtual void GetLink(CString& lnk);
-	const char* GetAddress() const { return m_address; }
+	const TCHAR* GetAddress() const { return m_address; }
 private:
 	CED2KServerListLink(); // Not defined
 	CED2KServerListLink(const CED2KFileLink&); // Not defined

@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <share.h>
 #include "emule.h"
 #include "LogEditCtrl.h"
 #include "OtherFunctions.h"
@@ -36,6 +37,8 @@ BEGIN_MESSAGE_MAP(CLogEditCtrl, CEdit)
 	ON_WM_PAINT()
 	ON_CONTROL_REFLECT(EN_ERRSPACE, OnEnErrspace)
 	ON_CONTROL_REFLECT(EN_MAXTEXT, OnEnMaxtext)
+	ON_WM_CTLCOLOR_REFLECT()
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 CLogEditCtrl::CLogEditCtrl(){
@@ -44,6 +47,8 @@ CLogEditCtrl::CLogEditCtrl(){
 	m_bNoPaint = false;
 	m_bEnErrSpace = false;
 	m_iMaxLogBuff = 0;
+	m_crForeground = CLR_DEFAULT;
+	m_crBackground = CLR_DEFAULT;
 }
 
 CLogEditCtrl::~CLogEditCtrl(){
@@ -52,11 +57,12 @@ CLogEditCtrl::~CLogEditCtrl(){
 void CLogEditCtrl::Localize(){
 }
 
-void CLogEditCtrl::Init(LPCTSTR pszTitle)
+void CLogEditCtrl::Init(LPCTSTR pszTitle, LPCTSTR pszSkinKey)
 {
-	TCHAR szClassName[MAX_PATH];
-	GetClassName(*this, szClassName, ARRSIZE(szClassName));
-	m_bRichEdit = _tcsicmp(szClassName, _T("EDIT")) != 0;
+	CHAR szClassName[MAX_PATH];
+	GetClassNameA(*this, szClassName, ARRSIZE(szClassName));
+	m_bRichEdit = __ascii_stricmp(szClassName, "EDIT") != 0;
+	m_strSkinKey = pszSkinKey;
 
 	SetTitle(pszTitle);
 
@@ -434,7 +440,7 @@ bool CLogEditCtrl::SaveLog(LPCTSTR pszDefName)
 	CFileDialog dlg(FALSE, _T("log"), pszDefName ? pszDefName : (LPCTSTR)m_strTitle, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Log Files (*.log)|*.log||"), this, 0);
 	if (dlg.DoModal() == IDOK)
 	{
-		FILE* fp = fopen(dlg.GetPathName(), "wt");
+		FILE* fp = _tfsopen(dlg.GetPathName(), _T("wt"), _SH_DENYWR);
 		if (fp)
 		{
 			CString strText;
@@ -500,4 +506,55 @@ void CLogEditCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 
 	CEdit::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+HBRUSH CLogEditCtrl::CtlColor(CDC* pDC, UINT nCtlColor)
+{
+	if (m_crForeground != CLR_DEFAULT)
+		pDC->SetTextColor(m_crForeground);
+	else
+	{
+		// explicitly set the (default) text color -- needed for some contrast window color schemes
+		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+	}
+
+	if (m_crBackground != CLR_DEFAULT && m_brBackground.m_hObject != NULL)
+	{
+		pDC->SetBkColor(m_crBackground);
+		return m_brBackground;
+	}
+	else
+	{
+		pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
+		return GetSysColorBrush(COLOR_WINDOW);
+	}
+}
+
+void CLogEditCtrl::OnSysColorChange()
+{
+	CEdit::OnSysColorChange();
+	ApplySkin();
+}
+
+void CLogEditCtrl::ApplySkin()
+{
+	if (!m_strSkinKey.IsEmpty())
+	{
+		COLORREF cr;
+		if (theApp.LoadSkinColor(m_strSkinKey + _T("Fg"), cr))
+			m_crForeground = cr;
+		else
+			m_crForeground = CLR_DEFAULT;
+		if (theApp.LoadSkinColor(m_strSkinKey + _T("Bk"), cr))
+		{
+			m_crBackground = cr;
+			m_brBackground.DeleteObject();
+			m_brBackground.CreateSolidBrush(m_crBackground);
+		}
+		else
+		{
+			m_crBackground = CLR_DEFAULT;
+			m_brBackground.DeleteObject();
+		}
+	}
 }

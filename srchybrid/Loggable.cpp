@@ -16,13 +16,12 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <io.h>
+#include <share.h>
 #include "emule.h"
 #include "loggable.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
-#ifndef _CONSOLE
 #include "emuledlg.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -35,7 +34,7 @@ void CLoggable::AddLogLine(bool addtostatusbar, UINT nID, ...)
 {
 	va_list argptr;
 	va_start(argptr, nID);	
-	AddLogText(false, addtostatusbar, GetResString(nID), argptr);	
+	AddLogText(false, addtostatusbar, DLP_DEFAULT, GetResString(nID), argptr);	
 	va_end(argptr);	
 }
 
@@ -45,7 +44,7 @@ void CLoggable::AddLogLine(bool addtostatusbar, LPCTSTR line, ...)
 
 	va_list argptr;
 	va_start(argptr, line);	
-	AddLogText(false, addtostatusbar, line, argptr);	
+	AddLogText(false, addtostatusbar, DLP_DEFAULT, line, argptr);	
 	va_end(argptr);
 }
 
@@ -53,7 +52,7 @@ void CLoggable::AddDebugLogLine(bool addtostatusbar, UINT nID, ...)
 {
 	va_list argptr;
 	va_start(argptr, nID);	
-	AddLogText(true, addtostatusbar, GetResString(nID), argptr);			
+	AddLogText(true, addtostatusbar, DLP_DEFAULT, GetResString(nID), argptr);			
 	va_end(argptr);	
 }
 
@@ -63,15 +62,33 @@ void CLoggable::AddDebugLogLine(bool addtostatusbar, LPCTSTR line, ...)
 
 	va_list argptr;
 	va_start(argptr, line);
-	AddLogText(true, addtostatusbar, line, argptr);	
+	AddLogText(true, addtostatusbar, DLP_DEFAULT, line, argptr);	
 	va_end(argptr);	
 }
 
-void CLoggable::AddLogText(bool debug, bool addtostatusbar,LPCTSTR line, va_list argptr)
+void CLoggable::AddDebugLogLine(EDebugLogPriority Priority, bool addtostatusbar, UINT nID, ...)
+{
+	va_list argptr;
+	va_start(argptr, nID);	
+	AddLogText(true, addtostatusbar, Priority, GetResString(nID), argptr);			
+	va_end(argptr);	
+}
+
+void CLoggable::AddDebugLogLine(EDebugLogPriority Priority, bool addtostatusbar, LPCTSTR line, ...)
 {
 	ASSERT(line != NULL);
 
-	if (debug && !thePrefs.GetVerbose())
+	va_list argptr;
+	va_start(argptr, line);
+	AddLogText(true, addtostatusbar, Priority, line, argptr);	
+	va_end(argptr);	
+}
+
+void CLoggable::AddLogText(bool debug, bool addtostatusbar, EDebugLogPriority dlpPriority,LPCTSTR line, va_list argptr)
+{
+	ASSERT(line != NULL);
+
+	if (debug && !(thePrefs.GetVerbose() && dlpPriority >= thePrefs.GetVerboseLogPriority()) )
 		return;	
 
 	const size_t bufferSize = 1000;
@@ -83,13 +100,13 @@ void CLoggable::AddLogText(bool debug, bool addtostatusbar,LPCTSTR line, va_list
 		theApp.emuledlg->AddLogText(addtostatusbar, bufferline, debug);	//Cax2 - debug log and normal log handled by the same subroutine now
 #ifdef _DEBUG
 	else{
-		TRACE("App Log: %s\n", bufferline);
+		TRACE(_T("App Log: %s\n"), bufferline);
 	}
 #endif
 }
 
 // DbT:Logging
-void CLoggable::PacketToDebugLogLine(LPCTSTR info, char * packet, uint32 size, uint8 opcode) const
+void CLoggable::PacketToDebugLogLine(LPCTSTR info, char * packet, uint32 size, uint8 opcode, EDebugLogPriority dlpPriority) const
 {
 	CString buffer; 
 	buffer.Format(_T("%s: %02x, size=%u"), info, opcode, size);
@@ -100,7 +117,7 @@ void CLoggable::PacketToDebugLogLine(LPCTSTR info, char * packet, uint32 size, u
 		buffer += _T(" ");
 	}
 	buffer += ((size < maxsize) ? _T("]") : _T("..]"));
-	AddDebugLogLine(false, buffer); 
+	AddDebugLogLine(dlpPriority, false, buffer); 
 }
 
 void CLoggable::TagToDebugLogLine(LPCTSTR info, LPCTSTR tag, uint32 size, uint8 opcode) const
@@ -197,7 +214,7 @@ bool CLog::Open()
 	if (m_fp != NULL)
 		return true;
 
-	m_fp = fopen(m_strFilePath, "ab");
+	m_fp = _tfsopen(m_strFilePath, _T("ab"), _SH_DENYWR);
 	if (m_fp != NULL)
 	{
 		m_tStarted = time(NULL);
@@ -260,8 +277,13 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
 
 	// don't use 'fputs' + '_filelength' -- gives poor performance
+#ifdef _UNICODE
+	CStringA strMsgA(pszMsg);
+	size_t uWritten = fwrite((LPCSTR)strMsgA, 1, strMsgA.GetLength(), m_fp);
+#else
 	size_t uToWrite = (iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen;
 	size_t uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
+#endif
 	bool bResult = !ferror(m_fp);
 	m_uBytesWritten += uWritten;
 

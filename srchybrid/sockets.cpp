@@ -22,7 +22,6 @@
 #include "UDPSocket.h"
 #include "Exceptions.h"
 #include "OtherFunctions.h"
-#include "UploadQueue.h"
 #include "Statistics.h"
 #include "ServerSocket.h"
 #include "ServerList.h"
@@ -32,12 +31,11 @@
 #include "Packets.h"
 #include "SharedFileList.h"
 #include "Version.h"
-#ifndef _CONSOLE
+#include "PeerCacheFinder.h"
 #include "emuleDlg.h"
 #include "SearchDlg.h"
 #include "ServerWnd.h"
 #include "TaskbarNotifier.h"
-#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -235,8 +233,8 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		Packet* packet = new Packet(&data);
 		packet->opcode = OP_LOGINREQUEST;
 		if (thePrefs.GetDebugServerTCPLevel() > 0)
-			Debug(">>> Sending OP__LoginRequest\n");
-		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
+			Debug(_T(">>> Sending OP__LoginRequest\n"));
+		theStats.AddUpDataOverheadServer(packet->size);
 		SendPacket(packet,true,sender);
 	}
 	else if (sender->GetConnectionState() == CS_CONNECTED){	
@@ -249,14 +247,14 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		StopConnectionTry();
 		theApp.sharedfiles->ClearED2KPublishInfo();
 		theApp.sharedfiles->SendListToServer();
-		theApp.emuledlg->serverwnd->serverlistctrl.RemoveDeadServer();
+		theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllDeadServers();
 		// tecxx 1609 2002 - serverlist update
 		if (thePrefs.AddServersFromServer())
 		{
 			Packet* packet = new Packet(OP_GETSERVERLIST,0);
 			if (thePrefs.GetDebugServerTCPLevel() > 0)
-				Debug(">>> Sending OP__GetServerList\n");
-			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
+				Debug(_T(">>> Sending OP__GetServerList\n"));
+			theStats.AddUpDataOverheadServer(packet->size);
 			SendPacket(packet,true);
 		}
 		CServer* update = theApp.serverlist->GetServerByAddress( sender->cur_server->GetAddress(), sender->cur_server->GetPort() );
@@ -351,7 +349,7 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 			theApp.emuledlg->searchwnd->CancelSearch();
 			// -khaos--+++> Tell our total server duration thinkymajig to update...
 			theApp.stat_serverConnectTime = 0;
-			theApp.statistics->Add2TotalServerDuration();
+			theStats.Add2TotalServerDuration();
 			// <-----khaos-
 			if (thePrefs.Reconnect() && !connecting){
 				ConnectToAnyServer();		
@@ -405,7 +403,7 @@ VOID CALLBACK CServerConnect::RetryConnectTimer(HWND hWnd, UINT nMsg, UINT nId, 
 
 		_this->ConnectToAnyServer();
 	}
-	CATCH_DFLT_EXCEPTIONS("CServerConnect::RetryConnectTimer")
+	CATCH_DFLT_EXCEPTIONS(_T("CServerConnect::RetryConnectTimer"))
 }
 
 void CServerConnect::CheckForTimeout()
@@ -419,14 +417,14 @@ void CServerConnect::CheckForTimeout()
 		connectionattemps.GetNextAssoc(pos,tmpkey,tmpsock);
 		if (!tmpsock) {
 			if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,"Error: Socket invalid at timeoutcheck" );
+				AddDebugLogLine(false, _T("Error: Socket invalid at timeoutcheck"));
 			connectionattemps.RemoveKey(tmpkey);
 			return;
 		}
 
 		//if (tmpkey<=maxage) {
 		if (dwCurTick - tmpkey > CONSERVTIMEOUT){
-			AddLogLine(false,GetResString(IDS_ERR_CONTIMEOUT),tmpsock->info, tmpsock->cur_server->GetFullIP(), tmpsock->cur_server->GetPort() );
+			AddLogLine(false,GetResString(IDS_ERR_CONTIMEOUT),tmpsock->cur_server->GetListName(), tmpsock->cur_server->GetFullIP(), tmpsock->cur_server->GetPort() );
 			connectionattemps.RemoveKey(tmpkey);
 			TryAnotherConnectionrequest();
 			DestroySocket(tmpsock);
@@ -442,7 +440,7 @@ bool CServerConnect::Disconnect(){
 
 		CServer* update = theApp.serverlist->GetServerByAddress( connectedsocket->cur_server->GetAddress(), connectedsocket->cur_server->GetPort() );
 		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update);
-		
+		theApp.SetPublicIP(0);
 		DestroySocket(connectedsocket);
 		connectedsocket = NULL;
 		theApp.emuledlg->ShowConnectionState();
@@ -452,7 +450,7 @@ bool CServerConnect::Disconnect(){
 		theApp.emuledlg->AddServerMessageLine(_T(""));
 		// -khaos--+++> Tell our total server duration thinkymajig to update...
 		theApp.stat_serverConnectTime=0;
-		theApp.statistics->Add2TotalServerDuration();
+		theStats.Add2TotalServerDuration();
 		// <-----khaos-
 		return true;
 	}
@@ -504,6 +502,10 @@ CServer* CServerConnect::GetCurrentServer(){
 
 void CServerConnect::SetClientID(uint32 newid){
 	clientid = newid;
+
+	if (!::IsLowID(newid))
+		theApp.SetPublicIP(newid);
+	
 	theApp.emuledlg->ShowConnectionState();
 }
 
@@ -573,8 +575,8 @@ void CServerConnect::KeepConnectionAlive()
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false, _T("Refreshing server connection"));
 		if (thePrefs.GetDebugServerTCPLevel() > 0)
-			Debug(">>> Sending OP__OfferFiles(KeepAlive) to server\n");
-		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
+			Debug(_T(">>> Sending OP__OfferFiles(KeepAlive) to server\n"));
+		theStats.AddUpDataOverheadServer(packet->size);
 		connectedsocket->SendPacket(packet,true);
 	}
 }

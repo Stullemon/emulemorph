@@ -17,6 +17,9 @@ static char THIS_FILE[] = __FILE__;
 #define YY_NEVER_INTERACTIVE 1
 
 extern int yyerror(const char* errstr);
+#ifdef _UNICODE
+extern int yyerror(LPCTSTR errstr);
+#endif
 
 #define	ECHO				TRACE
 #define	YY_INPUT			ReadLexBuff
@@ -25,8 +28,8 @@ extern int yyerror(const char* errstr);
 static void ReadLexBuff(char* pcBuff, int& riResult, size_t uMaxSize);
 static void FatalLexError(yyconst char msg[]);
 
-static CString _strInputBuff;
-static LPCTSTR _pszLexBuff;
+static CStringA _strInputBuff;
+static LPCSTR _pszLexBuff;
 %}
 
 %option noyywrap
@@ -44,7 +47,8 @@ keywordchar		[^ \"()]
 					CString strError;
 					try
 					{
-						CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(yytext);
+						USES_CONVERSION;
+						CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(A2T(yytext));
 						if (pLink && pLink->GetKind() == CED2KLink::kFile)
 						{
 							CED2KFileLink* pFileLink = pLink->GetFileLink();
@@ -204,14 +208,15 @@ static void FatalLexError(yyconst char msg[])
 #ifdef _CONSOLE
 	printf("Fatal error in flex scanner: %s\n", msg);
 #else
-	AfxMessageBox(CString(_T("Fatal error in flex scanner: ")) + msg, MB_ICONSTOP);
+	USES_CONVERSION;
+	AfxMessageBox(CString(_T("Fatal error in flex scanner: ")) + A2CT(msg), MB_ICONSTOP);
 #endif
 }
 
 void LexInit(LPCTSTR pszInput)
 {
 	_strInputBuff = pszInput;
-	_pszLexBuff = (LPCTSTR)_strInputBuff;
+	_pszLexBuff = (LPCSTR)_strInputBuff;
 }
 
 void LexFree()

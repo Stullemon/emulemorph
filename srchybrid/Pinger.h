@@ -70,7 +70,7 @@
 */
 #pragma once
 
-#include <Ws2tcpip.h>       // UDPing - raw socket and TTL setting support
+//#include <Ws2tcpip.h>       // UDPing - raw socket and TTL setting support
 #include "TimeTick.h"
 
 #define DEFAULT_TTL 64

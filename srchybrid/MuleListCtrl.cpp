@@ -231,9 +231,9 @@ void CMuleListCtrl::SaveSettings(CIni* ini, LPCTSTR pszLVName)
 		piColOrders[i] = m_aColumns[i].iLocation;
 	}
 
-	ini->SerGet(false, piColWidths, m_iColumnsTracked, CString(pszLVName) + "ColumnWidths");
-	ini->SerGet(false, piColHidden, m_iColumnsTracked, CString(pszLVName) + "ColumnHidden");
-	ini->SerGet(false, piColOrders, m_iColumnsTracked, CString(pszLVName) + "ColumnOrders");
+	ini->SerGet(false, piColWidths, m_iColumnsTracked, CString(pszLVName) + _T("ColumnWidths"));
+	ini->SerGet(false, piColHidden, m_iColumnsTracked, CString(pszLVName) + _T("ColumnHidden"));
+	ini->SerGet(false, piColOrders, m_iColumnsTracked, CString(pszLVName) + _T("ColumnOrders"));
 
 	delete[] piColOrders;
 	delete[] piColWidths;
@@ -280,9 +280,9 @@ void CMuleListCtrl::LoadSettings(CIni* ini, LPCTSTR pszLVName)
 	int* piColWidths = new int[m_iColumnsTracked];
 	int* piColHidden = new int[m_iColumnsTracked];
 	int* piColOrders = new int[m_iColumnsTracked];
-	ini->SerGet(true, piColWidths, m_iColumnsTracked, CString(pszLVName) + "ColumnWidths");
-	ini->SerGet(true, piColHidden, m_iColumnsTracked, CString(pszLVName) + "ColumnHidden");
-	ini->SerGet(true, piColOrders, m_iColumnsTracked, CString(pszLVName) + "ColumnOrders");
+	ini->SerGet(true, piColWidths, m_iColumnsTracked, CString(pszLVName) + _T("ColumnWidths"));
+	ini->SerGet(true, piColHidden, m_iColumnsTracked, CString(pszLVName) + _T("ColumnHidden"));
+	ini->SerGet(true, piColOrders, m_iColumnsTracked, CString(pszLVName) + _T("ColumnOrders"));
 
 	INT *piArray = new INT[m_iColumnsTracked];
 	for (int i = 0; i < m_iColumnsTracked; i++)
@@ -677,10 +677,10 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 				int iCount = pHeaderCtrl->GetItemCount();
 				for(int iCurrent = 1; iCurrent < iCount; iCurrent++) {
 					HDITEM item;
-					char text[255];
+					TCHAR text[255];
 					item.pszText = text;
 					item.mask = HDI_TEXT;
-					item.cchTextMax = 255;
+					item.cchTextMax = ARRSIZE(text);
 					pHeaderCtrl->GetItem(iCurrent, &item);
 
 					tmColumnMenu.AppendMenu(MF_STRING | m_aColumns[iCurrent].bHidden ? 0 : MF_CHECKED,
@@ -1347,7 +1347,7 @@ void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BO
 	}
 
 	if (bShowError)
-		AfxMessageBox(_T(GetResString(IDS_SEARCH_NORESULT)), MB_ICONINFORMATION);
+		AfxMessageBox(GetResString(IDS_SEARCH_NORESULT), MB_ICONINFORMATION);
 	else
 		MessageBeep((UINT)-1);
 }

@@ -428,10 +428,10 @@ public:
 			TCHAR szError[1024];
 			e->GetErrorMessage(szError, ARRSIZE(szError));
 			const CRuntimeClass* pRuntimeClass = e->GetRuntimeClass();
-			LPCTSTR pszClassName = (pRuntimeClass) ? pRuntimeClass->m_lpszClassName : NULL;
+			LPCSTR pszClassName = (pRuntimeClass) ? pRuntimeClass->m_lpszClassName : NULL;
 			if (!pszClassName)
-				pszClassName = _T("CException");
-			TRACE("*** Unknown %s exception in CAsyncSocketExHelperWindow::WindowProc - %s\n", pszClassName, szError);
+				pszClassName = "CException";
+			TRACE(_T("*** Unknown %hs exception in CAsyncSocketExHelperWindow::WindowProc - %s\n"), pszClassName, szError);
 			e->Delete();
 		}
 		catch (...) {
@@ -463,6 +463,8 @@ private:
 //////////////////////////////////////////////////////////////////////
 // Konstruktion/Destruktion
 //////////////////////////////////////////////////////////////////////
+
+IMPLEMENT_DYNAMIC(CAsyncSocketEx, CObject)
 
 CAsyncSocketEx::CAsyncSocketEx()
 {

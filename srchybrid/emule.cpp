@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include <locale.h>
 #include <io.h>
+#include <share.h>
 #include "emule.h"
 #include "version.h"
 #include "opcodes.h"
@@ -57,13 +58,14 @@
 #include "UpDownClient.h"
 #include "ED2KLink.h"
 #include "Preferences.h"
-#ifndef _CONSOLE
+#include "secrunasuser.h"
+#include "SafeFile.h"
+#include "PeerCacheFinder.h"
 #include "emuleDlg.h"
 #include "SearchDlg.h"
 #include "enbitmap.h"
-#endif
-#include "secrunasuser.h"
-#include "SafeFile.h"
+#include "FirewallOpener.h"
+
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
@@ -127,6 +129,9 @@ END_MESSAGE_MAP()
 CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	:CWinApp(lpszAppName)
 {
+	srand(time(NULL));
+	m_dwPublicIP = 0;
+
 	m_ullComCtrlVer = MAKEDLLVERULL(4,0,0,0);
 	m_hSystemImageList = NULL;
 	m_sizSmallSystemIcon.cx = 16;
@@ -140,7 +145,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_dwProductVersionLS = MAKELONG(VERSION_BUILD, VERSION_UPDATE);
 
 	// create a string version (e.g. "0.30a")
-	ASSERT( VERSION_UPDATE + 'a' <= 'g' );
+	ASSERT( VERSION_UPDATE + 'a' <= 'f' );
 #ifdef _DEBUG
 	m_strCurVersionLong.Format(_T("%u.%u%c.%u [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD, MOD_VERSION);
 #else
@@ -194,6 +199,15 @@ void __cdecl __AfxSocketTerm()
 
 BOOL CemuleApp::InitInstance()
 {
+#ifdef _DEBUG
+	// set Floating Point Processor to throw several exceptions, in particular the 'Floating point devide by zero'
+	UINT uEmCtrlWord = _control87(0, 0) & _MCW_EM;
+	_control87(uEmCtrlWord & ~(/*_EM_INEXACT |*/ _EM_UNDERFLOW | _EM_OVERFLOW | _EM_ZERODIVIDE | _EM_INVALID), _MCW_EM);
+
+	// output all ASSERT messages to debug device
+	_CrtSetReportMode(_CRT_ASSERT, _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_REPORT_MODE) | _CRTDBG_MODE_DEBUG);
+#endif
+
 	TCHAR szAppDir[MAX_PATH];
 	VERIFY( GetModuleFileName(m_hInstance, szAppDir, ARRSIZE(szAppDir)) );
 	VERIFY( PathRemoveFileSpec(szAppDir) );
@@ -217,7 +231,7 @@ BOOL CemuleApp::InitInstance()
 
 	_tsetlocale(LC_ALL, _T(""));		// set all categories of locale to user-default ANSI code page obtained from the OS.
 	_tsetlocale(LC_NUMERIC, _T("C"));	// set numeric category to 'C'
-	_tsetlocale(LC_CTYPE, _T("C"));		// set character types category to 'C' (VERY IMPORTANT, we need binary string compares!)
+	//_tsetlocale(LC_CTYPE, _T("C"));		// set character types category to 'C' (VERY IMPORTANT, we need binary string compares!)
 	AfxOleInit();
 
 	pendinglink = 0;
@@ -263,6 +277,7 @@ BOOL CemuleApp::InitInstance()
 
 	// create & initalize all the important stuff 
 	thePrefs.Init();
+	theStats.Init();
 
 	// check if we have to restart eMule as Secure user
 	if (thePrefs.IsRunAsUserEnabled()){
@@ -281,7 +296,7 @@ BOOL CemuleApp::InitInstance()
 	//MORPH END   - Added by IceCream, high process priority
 
 #ifdef _DEBUG
-	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), "%s\\%s", thePrefs.GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
+	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), _T("%s\\%s"), thePrefs.GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
 	VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule.log")) );
 	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("eMule_Verbose.log")) );
@@ -299,6 +314,30 @@ BOOL CemuleApp::InitInstance()
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
 		Ask4RegFix(false, true);
+
+	m_pFirewallOpener = new CFirewallOpener();
+	m_pFirewallOpener->Init(true); // we need to init it now (even if we may not use it yet) because of CoInitializeSecurity - which kinda ruins the sense of the class interface but ooohh well :P
+	// Open WinXP firewallports if set in preferences and possible
+	if (thePrefs.IsOpenPortsOnStartupEnabled()){
+		if (m_pFirewallOpener->DoesFWConnectionExist()){
+			// delete old rules added by eMule
+			m_pFirewallOpener->RemoveRule(EMULE_DEFAULTRULENAME_UDP);
+			m_pFirewallOpener->RemoveRule(EMULE_DEFAULTRULENAME_TCP);
+			// open port for this session
+			if (m_pFirewallOpener->OpenPort(thePrefs.GetPort(), NAT_PROTOCOL_TCP, EMULE_DEFAULTRULENAME_TCP, true))
+				QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_S), thePrefs.GetPort());
+			else
+				QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_F), thePrefs.GetPort());
+
+			if (thePrefs.GetUDPPort()){
+				// open port for this session
+				if (m_pFirewallOpener->OpenPort(thePrefs.GetUDPPort(), NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_UDP, true))
+					QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_S), thePrefs.GetUDPPort());
+				else
+					QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), thePrefs.GetUDPPort());
+			}
+		}
+	}
 
 	//MORPH START - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
     lastCommonRouteFinder = new LastCommonRouteFinder();
@@ -321,16 +360,14 @@ BOOL CemuleApp::InitInstance()
 	webserver = new CWebServer(); // Webserver [kuchin]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
-	statistics = new CStatistics();
+		m_pPeerCache = new CPeerCacheFinder();
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 
 	// reset statistic values
 	theApp.stat_sessionReceivedBytes=0;
 	theApp.stat_sessionSentBytes=0;
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	theApp.stat_sessionSentBytesToFriend = 0;
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
 	theApp.stat_reconnects=0;
 	theApp.stat_transferStarttime=0;
 	theApp.stat_serverConnectTime=0;
@@ -370,12 +407,12 @@ BOOL CemuleApp::InitInstance()
 #ifdef _DEBUG
 int CrtDebugReportCB(int reportType, char* message, int* returnValue)
 {
-	FILE* fp = fopen(_szCrtDebugReportFilePath, "a");
+	FILE* fp = _tfsopen(_szCrtDebugReportFilePath, _T("a"), _SH_DENYWR);
 	if (fp){
 		time_t tNow = time(NULL);
-		char szTime[40];
-		strftime(szTime, ARRSIZE(szTime), "%H:%M:%S", localtime(&tNow));
-		fprintf(fp, "%s  %u  %s", szTime, reportType, message);
+		TCHAR szTime[40];
+		_tcsftime(szTime, ARRSIZE(szTime), _T("%H:%M:%S"), localtime(&tNow));
+		_ftprintf(fp, _T("%s  %u  %hs"), szTime, reportType, message);
 		fclose(fp);
 	}
 	*returnValue = 0; // avoid invokation of 'AfxDebugBreak' in ASSERT macros
@@ -470,8 +507,8 @@ bool CemuleApp::ProcessCommandline()
 
     if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen) {
 		CString command = cmdInfo.m_strFileName;
-		if (command.Find("://")>0) {
-			sendstruct.cbData = command.GetLength()+1; 
+		if (command.Find(_T("://"))>0) {
+			sendstruct.cbData = (command.GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_ED2KLINK; 
 			sendstruct.lpData = command.GetBuffer(); 
     		if (maininst){
@@ -481,7 +518,7 @@ bool CemuleApp::ProcessCommandline()
     		else 
       			pendinglink = new CString(command);
 		} else {
-			sendstruct.cbData = command.GetLength()+1; 
+			sendstruct.cbData = (command.GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_CLCOMMAND;
 			sendstruct.lpData = command.GetBuffer(); 
     		if (maininst){
@@ -534,7 +571,6 @@ void CemuleApp::UpdateReceivedBytes(uint32 bytesToAdd) {
 	stat_sessionReceivedBytes+=bytesToAdd;
 }
 
-//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 void CemuleApp::UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend) {
 	SetTimeOnTransfer();
 
@@ -544,7 +580,6 @@ void CemuleApp::UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend) {
 	    stat_sessionSentBytesToFriend += bytesToAdd;
     }
 }
-//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 
 void CemuleApp::SetTimeOnTransfer() {
 	if (stat_transferStarttime>0) return;
@@ -556,12 +591,12 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 {
 	if (!IsConnected() || IsFirewalled()){
 		AddLogLine(true,GetResString(IDS_SOURCELINKFAILED));
-		return CString("");
+		return _T("");
 	}
 	uint32 dwID = GetID();
 
 	CString strLink;
-	strLink.Format("ed2k://|file|%s|%u|%s|/|sources,%i.%i.%i.%i:%i|/",
+	strLink.Format(_T("ed2k://|file|%s|%u|%s|/|sources,%i.%i.%i.%i:%i|/"),
 		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
@@ -572,7 +607,7 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 CString CemuleApp::CreateED2kHostnameSourceLink(const CAbstractFile* f)
 {
 	CString strLink;
-	strLink.Format("ed2k://|file|%s|%u|%s|/|sources,%s:%i|/",
+	strLink.Format(_T("ed2k://|file|%s|%u|%s|/|sources,%s:%i|/"),
 		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
@@ -587,7 +622,7 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 		return false;
 
 	//allocate global memory & lock it
-	HGLOBAL hGlobal = GlobalAlloc(GHND|GMEM_SHARE,strText.GetLength() + 1);
+	HGLOBAL hGlobal = GlobalAlloc(GHND | GMEM_SHARE, (strText.GetLength() + 1)*sizeof(TCHAR));
 	if(hGlobal == NULL)
 		return false;
 
@@ -598,7 +633,7 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 	}
 
 	//copy the text
-	strcpy(pGlobal,(LPCTSTR)strText);
+	_tcscpy(pGlobal, (LPCTSTR)strText);
 	GlobalUnlock(hGlobal);
 
 	//Open the Clipboard and insert the handle into the global memory
@@ -606,7 +641,11 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 	if( OpenClipboard(NULL) )
 	{
 		if( EmptyClipboard() )
+#ifdef _UNICODE
+			bResult = (SetClipboardData(CF_UNICODETEXT,hGlobal) != NULL);
+#else
 			bResult = (SetClipboardData(CF_TEXT,hGlobal) != NULL);
+#endif
 		CloseClipboard();
 	}
 	if (bResult)
@@ -620,18 +659,18 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 CString CemuleApp::CopyTextFromClipboard() 
 {
 	HGLOBAL	hglb; 
-	LPTSTR  lptstr; 
+	LPSTR  lptstr; 
 	CString	retstring;
 
 	if (!IsClipboardFormatAvailable(CF_TEXT)) 
-		return ""; 
+		return _T(""); 
 	if (!OpenClipboard(NULL)) 
-		return ""; 
+		return _T("");
 
 	hglb = GetClipboardData(CF_TEXT); 
 	if (hglb != NULL) 
 	{ 
-		lptstr = (LPTSTR)GlobalLock(hglb); 
+		lptstr = (LPSTR)GlobalLock(hglb); 
 		if (lptstr != NULL)
 			retstring = lptstr;
 	} 
@@ -649,9 +688,17 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 	CString strFullPath = thePrefs.GetAppDir();
 	strFullPath += _szFileName;
 
-    CFile file;
+	// The 'onlinesig.dat' is potentially read by other applications at more or less frequent intervals.
+	//	 -	Set the file shareing mode to allow other processes to read the file while we are writing
+	//		it (see also next point).
+	//	 -	Try to write the hole file data at once, so other applications are always reading 
+	//		a consistent amount of file data. C-RTL uses a 4 KB buffer, this is large enough to write
+	//		those 2 lines into the onlinesig.dat file with one IO operation.
+	//	 -	Although this file is a text file, we set the file mode to 'binary' because of backward 
+	//		compatibility with older eMule versions.
+    CSafeBufferedFile file;
 	CFileException fexp;
-    if (!file.Open(strFullPath, CFile::modeCreate|CFile::modeReadWrite, &fexp)){
+	if (!file.Open(strFullPath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite | CFile::typeBinary, &fexp)){
 		CString strError = GetResString(IDS_ERROR_SAVEFILE) + _T(" ") + CString(_szFileName);
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		fexp.GetErrorMessage(szError, ARRSIZE(szError));
@@ -663,24 +710,29 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 
 	try
 	{
+		USES_CONVERSION;
 		char buffer[20]; 
-		CString Kad;
+		CStringA strBuff;
 		if (IsConnected()){ 
 			file.Write("1",1); 
 			file.Write("|",1);
-			if(serverconnect->IsConnected())
-				file.Write(serverconnect->GetCurrentServer()->GetListName(),strlen(serverconnect->GetCurrentServer()->GetListName())); 
+			if(serverconnect->IsConnected()){
+				strBuff = serverconnect->GetCurrentServer()->GetListName();
+				file.Write(strBuff, strBuff.GetLength()); 
+			}
 			else{
-				Kad = "Kademlia";
-				file.Write(Kad,Kad.GetLength()); 
+				strBuff = "Kademlia";
+				file.Write(strBuff,strBuff.GetLength()); 
 			}
 
 			file.Write("|",1); 
-			if(serverconnect->IsConnected())
-				file.Write(serverconnect->GetCurrentServer()->GetFullIP(),strlen(serverconnect->GetCurrentServer()->GetFullIP())); 
+			if(serverconnect->IsConnected()){
+				strBuff = serverconnect->GetCurrentServer()->GetFullIP();
+				file.Write(strBuff,strBuff.GetLength()); 
+			}
 			else{
-				Kad = "0.0.0.0";
-				file.Write(Kad,Kad.GetLength()); 
+				strBuff = "0.0.0.0";
+				file.Write(strBuff,strBuff.GetLength()); 
 			}
 			file.Write("|",1); 
 			if(serverconnect->IsConnected()){
@@ -688,8 +740,8 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 				file.Write(buffer,strlen(buffer));
 			}
 			else{
-				Kad = "0";
-				file.Write(Kad,Kad.GetLength());
+				strBuff = "0";
+				file.Write(strBuff,strBuff.GetLength());
 			}
 		} 
 		else 
@@ -836,6 +888,30 @@ uint32 CemuleApp::GetID(){
 		ID = 0; //Once we can handle lowID users in Kad, this may change.
 	return ID;
 }
+
+uint32 CemuleApp::GetPublicIP() const {
+	if (m_dwPublicIP == 0 && Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled() )
+		return ntohl(Kademlia::CKademlia::getIPAddress());
+	return m_dwPublicIP;
+}
+
+void CemuleApp::SetPublicIP(const uint32 dwIP){
+	if (dwIP != 0){
+		ASSERT ( !IsLowID(dwIP));
+		ASSERT ( m_pPeerCache );
+		if ( GetPublicIP() == 0)
+			AddDebugLogLine(DLP_VERYLOW, false, _T("My public IP Address is: %s"),ipstr(dwIP));
+		else if (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled() && ntohl(Kademlia::CKademlia::getIPAddress()) != dwIP)
+			AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::getIPAddress())),ipstr(dwIP));
+		m_pPeerCache->FoundMyPublicIPAddress(dwIP);	
+	}
+	else
+		AddDebugLogLine(DLP_VERYLOW, false, _T("Deleted public IP"));
+	
+	m_dwPublicIP = dwIP;
+
+}
+
 
 bool CemuleApp::IsFirewalled()
 {
@@ -1081,6 +1157,27 @@ HBITMAP CemuleApp::LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) 
 	return NULL;
 }
 
+bool CemuleApp::LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor)
+{
+	LPCTSTR pszSkinProfile = thePrefs.GetSkinProfile();
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		TCHAR szColor[MAX_PATH];
+		GetPrivateProfileString(_T("Colors"), pszKey, _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+			{
+				crColor = RGB(red, grn, blu);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void CemuleApp::ApplySkin(LPCTSTR pszSkinProfile)
 {
 	thePrefs.SetSkinProfile(pszSkinProfile);
@@ -1135,7 +1232,7 @@ void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
 		catch(CString error)
 		{
 			TCHAR szBuffer[200];
-			_snprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
+			_sntprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
 			AddLogLine(true, GetResString(IDS_ERR_LINKERROR), szBuffer);
 		}
 		resToken = strlink.Tokenize(_T("\t\n\r"), curPos);
@@ -1191,7 +1288,7 @@ void CemuleApp::PasteClipboard(int Cat)
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 }
 
-bool CemuleApp::IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen)
+bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
 {
 	bool bFoundLink = false;
 	if (IsClipboardFormatAvailable(CF_TEXT))
@@ -1201,12 +1298,13 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen)
 			HGLOBAL	hText = GetClipboardData(CF_TEXT);
 			if (hText != NULL)
 			{ 
-				LPCTSTR pszText = (LPCTSTR)GlobalLock(hText);
+				// Use the ANSI string
+				LPCSTR pszText = (LPCSTR)GlobalLock(hText);
 				if (pszText != NULL)
 				{
-					while (*pszText == _T(' ') || *pszText == _T('\t') || *pszText == _T('\r') || *pszText == _T('\n'))
+					while (*pszText == ' ' || *pszText == '\t' || *pszText == '\r' || *pszText == '\n')
 						pszText++;
-					bFoundLink = (_tcsncmp(pszText, pszLinkType, iLinkTypeLen) == 0);
+					bFoundLink = (strncmp(pszText, pszLinkType, iLinkTypeLen) == 0);
 				}
 			}
 			CloseClipboard();
@@ -1218,13 +1316,13 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen)
 
 bool CemuleApp::IsEd2kFileLinkInClipboard()
 {
-	static const TCHAR _szEd2kFileLink[] = _T("ed2k://|file|");
+	static const CHAR _szEd2kFileLink[] = "ed2k://|file|"; // Use the ANSI string
 	return IsEd2kLinkInClipboard(_szEd2kFileLink, ARRSIZE(_szEd2kFileLink)-1);
 }
 
 bool CemuleApp::IsEd2kServerLinkInClipboard()
 {
-	static const TCHAR _szEd2kServerLink[] = _T("ed2k://|server|");
+	static const CHAR _szEd2kServerLink[] = "ed2k://|server|"; // Use the ANSI string
 	return IsEd2kLinkInClipboard(_szEd2kServerLink, ARRSIZE(_szEd2kServerLink)-1);
 }
 
@@ -1260,7 +1358,7 @@ void CemuleApp::QueueLogLine(bool addtostatusbar, LPCTSTR line,...)
 
 	va_list argptr;
 	va_start(argptr, line);
-	_vsnprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
 	va_end(argptr);
 
 	SLogItem* newItem = new SLogItem;

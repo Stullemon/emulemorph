@@ -39,14 +39,11 @@
 #include "Server.h"
 #include "ServerList.h"
 #include "WebServer.h"
-
-#ifndef _CONSOLE
 #include "emuledlg.h"
 #include "ServerWnd.h"
 #include "TransferWnd.h"
 #include "SearchDlg.h"
 #include "StatisticsDlg.h"
-#endif
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "PartFile.h" //MORPH - Added by SiRoB
 
@@ -58,6 +55,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 static uint32 counter, sec,statsave;
+static UINT _uSaveStatistics = 0;
 // -khaos--+++> Added iupdateconnstats...
 static uint32 igraph, istats, iupdateconnstats;
 // <-----khaos-
@@ -69,46 +67,29 @@ CUploadQueue::CUploadQueue()
 	VERIFY( (h_timer = SetTimer(0,0,100,UploadTimer)) != NULL );
 	if (thePrefs.GetVerbose() && !h_timer)
 		AddDebugLogLine(true,_T("Failed to create 'upload queue' timer - %s"),GetErrorMessage(GetLastError()));
-	estadatarate = 2000;
 	datarate = 0;
 	//MORPH - Removed by SiRoB, Not used
-	datarateave = 0;
 	counter=0;
 	successfullupcount = 0;
 	failedupcount = 0;
 	totaluploadtime = 0;
-	//MORPH - Removed by SiRoB, ZZ UPload System 20030818-1923
-	m_nUpDatarateOverhead = 0;
-	m_nUpDataOverheadSourceExchange = 0;
-	m_nUpDataOverheadFileRequest = 0;
-	m_nUpDataOverheadOther = 0;
-	m_nUpDataOverheadServer = 0;
-	m_nUpDataOverheadKad = 0;
-	m_nUpDataOverheadSourceExchangePackets = 0;
-	m_nUpDataOverheadFileRequestPackets = 0;
-	m_nUpDataOverheadOtherPackets = 0;
-	m_nUpDataOverheadServerPackets = 0;
-	m_nUpDataOverheadKadPackets = 0;
 	m_nLastStartUpload = 0;
 	statsave=0;
 	// -khaos--+++>
 	iupdateconnstats=0;
 	// <-----khaos-
+	//Removed by SiRoB, Not used in this mod
+	/*
+	m_bRemovedClientByScore = false;
+	*/
+
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	AvgRespondTime[0]=500;
 	AvgRespondTime[1]=thePrefs.GetSUCPitch()/2;//Changed by Yun.SF3 (this is too much divided, original is 3)
 	MaxVUR=512*(thePrefs.GetMaxUpload()+thePrefs.GetMinUpload()); //When we start with SUC take the middle range for upload
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	// By BadWolf - Accurate Speed Measurement
-	sumavgUDRO = 0;
-	// END By BadWolf - Accurate Speed Measurement
-	//Removed by SiRoB, Not used in this mod
-	/*
-	m_bRemovedClientByScore = false;
-	*/
 	
-
-//MORPH START - Added by SiRoB, ZZ Upload System 20040213-1623
+	//MORPH START - Added by SiRoB, ZZ Upload System 20040213-1623
 	m_MaxActiveClients = 0;
 	m_MaxActiveClientsShortTime = 0;
 
@@ -367,17 +348,8 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		{
 			cur_client->ClearWaitStartTime();
 			RemoveFromWaitingQueue(pos2,true);	
-			if (!cur_client->socket)
-			{
-				if(cur_client->Disconnected("AddUpNextClient - purged"))
-				{
-					delete cur_client;
-					cur_client = NULL;
-				}
-			}
 			continue;
 		}
-
 		// finished clearing
 		uint32 cur_score = cur_client->GetScore(false);
 		if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score))
@@ -621,7 +593,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__AcceptUploadReq", newclient);
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
-		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+		theStats.AddUpDataOverheadFileRequest(packet->size);
 		newclient->socket->SendPacket(packet,true);
 		newclient->SetUploadState(US_UPLOADING);
 	}
@@ -746,8 +718,8 @@ void CUploadQueue::Process() {
 		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
 		if (!cur_client->socket)
 		{
-			RemoveFromUploadQueue(cur_client);
-			if(cur_client->Disconnected("CUploadQueue::Process")){
+			RemoveFromUploadQueue(cur_client, _T("Uploading to client without socket? (CUploadQueue::Process)"));
+			if(cur_client->Disconnected(_T("CUploadQueue::Process"))){
 				delete cur_client;
 			}
 		} else {
@@ -815,11 +787,9 @@ void CUploadQueue::Process() {
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 	uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-	if (sentBytes>0 || sentBytesOverhead>0) {
+	if (sentBytes>0) {
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
-		m_AvarageUDRO_list.AddTail(sentBytesOverhead);
-		sumavgUDRO += sentBytesOverhead;
 		avarage_friend_dr_list.AddTail(theApp.stat_sessionSentBytesToFriend);
 		avarage_tick_list.AddTail(curTick);
 	}
@@ -827,7 +797,6 @@ void CUploadQueue::Process() {
 	while(avarage_tick_list.GetCount() > 0)
 		if ((curTick - avarage_tick_list.GetHead()) > 30000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
-			sumavgUDRO -= m_AvarageUDRO_list.RemoveHead();
 			avarage_friend_dr_list.RemoveHead();
 			avarage_tick_list.RemoveHead();
 		}else
@@ -951,7 +920,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				RemoveFromWaitingQueue(pos2,true);
 				if (!cur_client->socket)
 				{
-					if(cur_client->Disconnected("AddClientToQueue - same userhash 1"))
+					if(cur_client->Disconnected(_T("AddClientToQueue - same userhash 1")))
 					{
 						delete cur_client;
 					}
@@ -968,7 +937,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				RemoveFromWaitingQueue(pos2,true);
 				if (!cur_client->socket)
 				{
-					if(cur_client->Disconnected("AddClientToQueue - same userhash 2"))
+					if(cur_client->Disconnected(_T("AddClientToQueue - same userhash 2")))
 					{
 						delete cur_client;
 					}
@@ -986,13 +955,13 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	{
 		// do not accept more than 3 clients from the same IP
 		if (thePrefs.GetVerbose())
-			DEBUG_ONLY( AddDebugLogLine(false,"%s's (%s) request to enter the queue was rejected, because of too many clients with the same IP", client->GetUserName(), ipstr(client->GetConnectIP())) );
+			DEBUG_ONLY( AddDebugLogLine(false,_T("%s's (%s) request to enter the queue was rejected, because of too many clients with the same IP"), client->GetUserName(), ipstr(client->GetConnectIP())) );
 		return;
 	}
 	else if (theApp.clientlist->GetClientsFromIP(client->GetIP()) >= 3)
 	{
 		if (thePrefs.GetVerbose())
-			DEBUG_ONLY( AddDebugLogLine(false,"%s's (%s) request to enter the queue was rejected, because of too many clients with the same IP (found in TrackedClientsList)", client->GetUserName(), ipstr(client->GetConnectIP())) );
+			DEBUG_ONLY( AddDebugLogLine(false,_T("%s's (%s) request to enter the queue was rejected, because of too many clients with the same IP (found in TrackedClientsList)"), client->GetUserName(), ipstr(client->GetConnectIP())) );
 		return;
 	}
 	// done
@@ -1000,9 +969,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	// Add clients server to list.
 	if (thePrefs.AddServersFromClient() && client->GetServerIP() && client->GetServerPort())
 	{
-		in_addr host;
-		host.S_un.S_addr = client->GetServerIP();
-		CServer* srv = new CServer(client->GetServerPort(), inet_ntoa(host));
+		CServer* srv = new CServer(client->GetServerPort(), ipstr(client->GetServerIP()));
 		srv->SetListName(srv->GetAddress());
 
 		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(srv, true))
@@ -1052,7 +1019,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__AcceptUploadReq", client);
 			Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
-			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+			theStats.AddUpDataOverheadFileRequest(packet->size);
 			client->socket->SendPacket(packet,true);
 			return;
 		}
@@ -1096,9 +1063,7 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 	return m_fAverageCombinedFilePrioAndCredit;
 }
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, bool updatewindow, bool earlyabort){
-
-	theApp.clientlist->AddTrackClient(client); // Keep track of this client
+bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
 
 	//try to find client in uploadinglist
 	POSITION pos = uploadinglist.Find(client);
@@ -1118,13 +1083,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 	}
 	//EastShare End - added by AndCycle, Pay Back First
 
-	if(!reason.IsEmpty())
-		theApp.QueueDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
-	uploadinglist.RemoveAt(pos);
+	if (thePrefs.GetLogUlDlEvents())
+		AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->GetUserName(), pszReason==NULL ? _T("") : pszReason);
+    uploadinglist.RemoveAt(pos);
 	theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
 
 	if(client->GetQueueSessionUp()){
-		successfullupcount++;
+		++successfullupcount;
 
 		if(client->GetSessionUp()) {
 			//wistily
@@ -1132,17 +1097,17 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			client->Add2UpTotalTime(tempUpStartTimeDelay);
 			if (client->GetUpTotalTime() > 999) //Added by SiRoB, to avoid div by zero
 				client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
-			/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
+			/*
+			totaluploadtime += client->GetUpStartTimeDelay()/1000;
+			*/
 			totaluploadtime += tempUpStartTimeDelay/1000;
 
 			//wistily stop
 			totalCompletedBytes += client->GetSessionUp();
 		}
-		//} else if(client->HasBlocks() || client->GetUploadState() != US_UPLOADING) {
+	} else if(earlyabort == false)
+		++failedupcount;
 
-	} else if(earlyabort == false){
-		failedupcount++;
-	}
 
 	CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
@@ -1170,9 +1135,9 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 	// EastShare END - Marked by TAHO, modified SUQWT
 	//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
-
+	theApp.clientlist->AddTrackClient(client); // Keep track of this client
 	client->SetUploadState(US_NONE);
-	client->ClearUploadBlockRequests(/*!earlyabort*/);
+	client->ClearUploadBlockRequests();
 	return true;
 }
 
@@ -1223,20 +1188,20 @@ void CUploadQueue::UpdateMaxClientScore()
 }
 
 bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
-	if( client->GetUpStartTimeDelay() > SESSIONMAXTIME ){ // Try to keep the clients from downloading for ever.
-		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, "%s: Upload session ended due to max time %s.", client->GetUserName(), CastSecondsToHM(SESSIONMAXTIME/1000));
+	if (!thePrefs.TransferFullChunks()){
+	    if( client->GetUpStartTimeDelay() > SESSIONMAXTIME){ // Try to keep the clients from downloading for ever
+		    if (thePrefs.GetLogUlDlEvents())
+			    AddDebugLogLine(DLP_LOW, false, _T("%s: Upload session ended due to max time %s."), client->GetUserName(), CastSecondsToHM(SESSIONMAXTIME/1000));
 		return true;
 	}
 
-	if (!thePrefs.TransferFullChunks()){
 		// Cache current client score
 		const uint32 score = client->GetScore(true, true);
 
 		// Check if another client has a bigger score
 		if (score < GetMaxClientScore() && !m_bRemovedClientByScore) {
-			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, "%s: Upload session ended due to score.", client->GetUserName());
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, false, _T("%s: Upload session ended due to score."), client->GetUserName());
 			m_bRemovedClientByScore = true; //makes sure only one client gets removed per round, so we the best score can be recalculated after the next has its downloadslot
 			return true;
 		}
@@ -1244,8 +1209,8 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 	else{
 		// Allow the client to download a specified amount per session
 		if( client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS ){
-			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, "%s: Upload session ended due to max transfered amount. %s", client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS));
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_DEFAULT, false, _T("%s: Upload session ended due to max transfered amount. %s"), client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS));
 			return true;
 		}
 	}
@@ -1263,18 +1228,9 @@ uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client)
 {
 	if (!IsOnUploadQueue(client))
 		return 0;
-	
-	//MORPH START - Moved & Changed by SiRoB, This is a better place
-	//MORPH START - Added by IceCream, Anti-leecher feature
-	if (client->IsLeecher())
-		return GetRandRange(25,75); // nRank = 75;
-	//MORPH END   - Added by IceCream, Anti-leecher feature
-	//MORPH END   - Moved & Changed by SiRoB, This is a better place 
-	
 	UINT rank = 1;
 	uint32 myscore = client->GetScore(false);
-	for (POSITION pos = waitinglist.GetHeadPosition();pos != 0;)
-	{
+	for (POSITION pos = waitinglist.GetHeadPosition(); pos != 0; ){
 		//MORPH START - Added by SiRoB, ZZ Upload System
 		/*
 		if (waitinglist.GetNext(pos)->GetScore(false) > myscore)
@@ -1286,27 +1242,6 @@ uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client)
 	}
 	return rank;
 }
-//MORPH - Removed by SiRoB, ZZ UPload System 20030818-1923
-/*
-void CUploadQueue::CompUpDatarateOverhead(){
-	// Patch by BadWolf - Accurate datarate Calculation
-	TransferredData newitem = {m_nUpDataRateMSOverhead,::GetTickCount()};
-	this->m_AvarageUDRO_list.AddTail(newitem);
-	sumavgUDRO += m_nUpDataRateMSOverhead;
-	while ((float)(m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp)  > MAXAVERAGETIME)
-		sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
-	m_nUpDataRateMSOverhead = 0;
-	if(m_AvarageUDRO_list.GetCount() > 10){
-		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
-		if (dwDuration)
-			m_nUpDatarateOverhead = 1000 * sumavgUDRO / dwDuration;
-	}
-	else
-		m_nUpDatarateOverhead = 0;
-	return;
-	// END Patch by BadWolf	
-}
-*/
 
 VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime)
 {
@@ -1316,24 +1251,29 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// Barry - Don't do anything if the app is shutting down - can cause unhandled exceptions
 		if (!theApp.emuledlg->IsRunning())
 			return;
-		//MORPH START - Added by SiRoB, ZZ UPload System 20030818-1923
+
         // Elandal:ThreadSafeLogging -->
         // other threads may have queued up log lines. This prints them.
 		theApp.HandleDebugLogQueue();
         theApp.HandleLogQueue();
         // Elandal: ThreadSafeLogging <--
-		// Elandal: ThreadSafeLogging <--
 
 		// Send allowed data rate to UploadBandWidthThrottler in a thread safe way
 		//MOPRH START - Modified by SiRoB
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():thePrefs.GetMaxUpload()*1024, thePrefs.IsUSSLimit(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingLimit(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog());
+		/*
+		theApp.uploadBandwidthThrottler->SetAllowedDataRate(thePrefs.GetMaxUpload()*1024);
+		// ZZ:UploadSpeedSense -->
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, thePrefs.GetMaxUpload()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
+		*/
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():thePrefs.GetMaxUpload()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog());
 		//MOPRH END   - Modified by SiRoB
-		//MORPH END    - Added by SiRoB, ZZ UPload System 20030818-1923
 
 		theApp.uploadqueue->Process();
 		theApp.downloadqueue->Process();
-		//theApp.uploadqueue->CompUpDatarateOverhead(); //MORPH - Removed by SiRoB, ZZ UPload System 20030818-1923
-		theApp.downloadqueue->CompDownDatarateOverhead();
+		if (thePrefs.ShowOverhead()){
+			theStats.CompUpDatarateOverhead();
+			theStats.CompDownDatarateOverhead();
+		}
 		counter++;
 
 		// one second
@@ -1364,7 +1304,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			// 2 seconds
 			if (iupdateconnstats>=2) {
 				iupdateconnstats=0;
-				theApp.statistics->UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
+				theStats.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
 			}
 			// <-----khaos-
 
@@ -1375,7 +1315,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				if (igraph >= (uint32)(thePrefs.GetTrafficOMeterInterval()) ) {
 					igraph=0;
 					//theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024);
-					theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024, (float)(theApp.uploadqueue->GetDatarate()-theApp.uploadqueue->GetToNetworkDatarate())/1024, (float)(theApp.uploadqueue->GetUpDatarateOverhead())/1024);
+					theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024);
 					//theApp.uploadqueue->Zeroavg();
 				}
 			}
@@ -1391,7 +1331,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				}
 			}
 			//save rates every second
-			theApp.statistics->RecordRate();
+			theStats.RecordRate();
 			// mobilemule sockets
 			theApp.mmserver->Process();
 
@@ -1435,27 +1375,28 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			}
 
 			statsave++;
-			// -khaos--+++>
 			// 60 seconds
 			if (statsave>=60) {
-				// Time to save our cumulative statistics.
 				statsave=0;
+
 				if (thePrefs.GetWSIsEnabled())
 					theApp.webserver->UpdateSessionCount();
-				
-				// CPreferences::SaveStats() in Preferences.cpp
-				// This function does NOT update the tree!
-				thePrefs.SaveStats();
-			// <-----khaos-
 
 				theApp.serverconnect->KeepConnectionAlive();
+			}
+
+			_uSaveStatistics++;
+			if (_uSaveStatistics >= thePrefs.GetStatsSaveInterval())
+			{
+				_uSaveStatistics = 0;
+				thePrefs.SaveStats();
 			}
 		}
 
 		// need more accuracy here. don't rely on the 'sec' and 'statsave' helpers.
 		thePerfLog.LogSamples();
 	}
-	CATCH_DFLT_EXCEPTIONS("CUploadQueue::UploadTimer")
+	CATCH_DFLT_EXCEPTIONS(_T("CUploadQueue::UploadTimer"))
 }
 
 CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
@@ -1516,7 +1457,6 @@ void CUploadQueue::UpdateDatarates() {
 		if (avarage_tick_list.GetCount() > 0){
 			if (avarage_tick_list.GetCount() == 1){
 				datarate = (m_avarage_dr_sum*1000) / 30000;
-				m_nUpDatarateOverhead = (sumavgUDRO*1000) / 30000;
 				friendDatarate = 0;
 			}
 			else {
@@ -1525,12 +1465,10 @@ void CUploadQueue::UpdateDatarates() {
 					dwDuration = m_lastCalculatedDataRateTick - avarage_tick_list.GetHead() - dwDuration / (avarage_tick_list.GetCount()-1);
 				if (dwDuration < 5000) dwDuration = 5000;
 				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / dwDuration;
-				m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead())*1000) / dwDuration;
 				friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / dwDuration;
 			}
 		}else {
 			datarate = 0;
-			m_nUpDatarateOverhead = 0;
 			friendDatarate = 0;
 		}
 		//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -1540,11 +1478,6 @@ void CUploadQueue::UpdateDatarates() {
 uint32 CUploadQueue::GetDatarate() {
 	UpdateDatarates();
 	return datarate;
-}
-
-uint32 CUploadQueue::GetUpDatarateOverhead() {
-	UpdateDatarates();
-	return m_nUpDatarateOverhead;
 }
 
 uint32 CUploadQueue::GetToNetworkDatarate() {

@@ -61,8 +61,7 @@ UINT AFX_CDECL CArchiveRecovery::run(LPVOID lpParam)
 {
 	ThreadParam *tp = (ThreadParam *)lpParam;
 	DbgSetThreadName("ArchiveRecovery");
-
-	//::SetThreadLocale(thePrefs.GetLanguageID()); // 01.06.03 EC - ArchiveRecovery Thread wasn't localized
+	InitThreadLocale();
 
 	if (!performRecovery(tp->partFile, tp->filled, tp->preview))
 		AddLogLine(true, GetResString(IDS_RECOVERY_FAILED));
@@ -87,19 +86,19 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 
 		// Open temp file for reading
 		CFile temp;
-		if (!temp.Open(tempFileName, CFile::modeRead))
+		if (!temp.Open(tempFileName, CFile::modeRead|CFile::shareDenyWrite))
 			return false;
 
 		// Open the output file
 		CString ext = CString(partFile->GetFileName()).Right(4);
 		CString outputFileName = CString(thePrefs.GetTempDir()) + CString("\\") + CString(partFile->GetFileName()).Mid(0,5) + CString("-rec") + ext;
 		CFile output;
-		if (output.Open(outputFileName, CFile::modeWrite | CFile::shareExclusive | CFile::modeCreate))
+		if (output.Open(outputFileName, CFile::modeWrite | CFile::shareDenyWrite | CFile::modeCreate))
 		{
 			// Process the output file
-			if (ext.CompareNoCase(".zip") == 0)
+			if (ext.CompareNoCase(_T(".zip")) == 0)
 				success = recoverZip(&temp, &output, filled, (temp.GetLength() == partFile->GetFileSize()));
-			else if (ext.CompareNoCase(".rar") == 0)
+			else if (ext.CompareNoCase(_T(".rar")) == 0)
 				success = recoverRar(&temp, &output, filled);
 
 			// Close output
@@ -118,7 +117,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 				SHELLEXECUTEINFO SE;
 				memset(&SE,0,sizeof(SE));
 				SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
-				SE.lpVerb = "open";
+				SE.lpVerb = _T("open");
 				SE.lpFile = outputFileName.GetBuffer();
 				SE.nShow = SW_SHOW;
 				SE.cbSize = sizeof(SE);
@@ -551,7 +550,7 @@ bool CArchiveRecovery::CopyFile(CPartFile *partFile, CTypedPtrList<CPtrList, Gap
 
 		// Open destination file and set length to last filled end position
 		CFile destFile;
-		destFile.Open(tempFileName, CFile::modeWrite | CFile::shareExclusive | CFile::modeCreate);
+		destFile.Open(tempFileName, CFile::modeWrite | CFile::shareDenyWrite | CFile::modeCreate);
 		Gap_Struct *fill = filled->GetTail();
 		destFile.SetLength(fill->end);
 

@@ -20,7 +20,7 @@
 #include "packets.h"
 #include "HTRichEditCtrl.h"
 #include "emuledlg.h"
-#include "UploadQueue.h"
+#include "Statistics.h"
 #include "OtherFunctions.h"
 #include "UpDownClient.h"
 #include "Preferences.h"
@@ -46,7 +46,6 @@ CChatItem::CChatItem()
 {
 	client = NULL;
 	log = NULL;
-	messagepending = NULL;
 	notify = false;
 	history_pos = 0;
 }
@@ -54,7 +53,6 @@ CChatItem::CChatItem()
 CChatItem::~CChatItem()
 {
 	delete log;
-	delete[] messagepending;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,9 +157,11 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 	chatitem->log->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 	chatitem->log->SetEventMask(chatitem->log->GetEventMask() | ENM_LINK);
 	chatitem->log->SetFont(&theApp.emuledlg->m_fontHyperText);
+	chatitem->log->SetProfileSkinKey(_T("Chat"));
+	chatitem->log->ApplySkin();
 
 	CTime theTime = CTime::GetCurrentTime();
-	CString sessions = GetResString(IDS_CHAT_START) + client->GetUserName() + CString(_T(" - ")) + theTime.Format(_T("%c"))+ _T("\n");
+	CString sessions = GetResString(IDS_CHAT_START) + client->GetUserName() + CString(_T(" - ")) + theTime.Format(_T("%c")) + _T("\n");
 	chatitem->log->AppendKeyWord(sessions, RGB(255,0,0));
 	client->SetChatState(MS_CHATTING);
 
@@ -272,6 +272,7 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, char* message)
 
 bool CChatSelector::SendMessage(LPCTSTR message)
 {
+	USES_CONVERSION;
 	CChatItem* ci = GetCurrentChatItem();
 	if (!ci)
 		return false;
@@ -291,21 +292,22 @@ bool CChatSelector::SendMessage(LPCTSTR message)
 		AddTimeStamp(ci);
 	if (ci->client->socket && ci->client->socket->IsConnected())
 	{
-		uint16 mlen = (uint16)strlen(message);
+		CStringA strMsgA(message);
+		uint16 mlen = strMsgA.GetLength();
 		Packet* packet = new Packet(OP_MESSAGE, mlen+2);
 		PokeUInt16(packet->pBuffer, mlen);
-		memcpy(packet->pBuffer + 2, message, mlen);
-		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+		memcpy(packet->pBuffer + 2, strMsgA, mlen);
+		theStats.AddUpDataOverheadOther(packet->size);
 		ci->client->socket->SendPacket(packet, true, true);
 
-		ci->log->AppendKeyWord(thePrefs.GetUserNick(), RGB(1,180,20));
+		ci->log->AppendKeyWord(A2CT(thePrefs.GetUserNick()), RGB(1,180,20));
 		ci->log->AppendText(_T(": "));
 		ci->log->AppendText(CString(message) + _T("\n"));
 	}
 	else
 	{
 		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CONNECTING), RGB(255,0,0));
-		ci->messagepending = nstrdup(message);
+		ci->strMessagePendingA = message;
 		ci->client->SetChatState(MS_CONNECTING);
 		ci->client->TryToConnect();
 	}
@@ -314,16 +316,16 @@ bool CChatSelector::SendMessage(LPCTSTR message)
 
 void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 {
+	USES_CONVERSION;
 	CChatItem* ci = GetItemByClient(sender);
 	if (!ci)
 		return;
 
 	ci->client->SetChatState(MS_CHATTING);
 	if (!success){
-		if (ci->messagepending){
+		if (!ci->strMessagePendingA.IsEmpty()){
 			ci->log->AppendKeyWord(_T(" ") + GetResString(IDS_FAILED) + _T("\n"), RGB(255,0,0));
-			delete[] ci->messagepending;
-			ci->messagepending = NULL;
+			ci->strMessagePendingA.Empty();
 		}
 		else{
 			if (thePrefs.GetIRCAddTimestamp())
@@ -331,24 +333,23 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 			ci->log->AppendKeyWord(GetResString(IDS_CHATDISCONNECTED) + _T("\n"), RGB(255,0,0));
 		}
 	}
-	else if (ci->messagepending){
+	else if (!ci->strMessagePendingA.IsEmpty()){
 		ci->log->AppendKeyWord(_T(" ok\n"), RGB(255,0,0));
 		
-		uint16 mlen = (uint16)strlen(ci->messagepending);
+		uint16 mlen = ci->strMessagePendingA.GetLength();
 		Packet* packet = new Packet(OP_MESSAGE, mlen+2);
 		PokeUInt16(packet->pBuffer, mlen);
-		memcpy(packet->pBuffer + 2, ci->messagepending, mlen);
-		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+		memcpy(packet->pBuffer + 2, ci->strMessagePendingA, mlen);
+		theStats.AddUpDataOverheadOther(packet->size);
 		ci->client->socket->SendPacket(packet, true, true);
 
 		if (thePrefs.GetIRCAddTimestamp())
 			AddTimeStamp(ci);
-		ci->log->AppendKeyWord(thePrefs.GetUserNick(), RGB(1,180,20));
+		ci->log->AppendKeyWord(A2CT(thePrefs.GetUserNick()), RGB(1,180,20));
 		ci->log->AppendText(_T(": "));
-		ci->log->AppendText(CString(ci->messagepending) + _T("\n"));
+		ci->log->AppendText(CString(ci->strMessagePendingA) + _T("\n"));
 		
-		delete[] ci->messagepending;
-		ci->messagepending = NULL;
+		ci->strMessagePendingA.Empty();
 	}
 	else{
 		if (thePrefs.GetIRCAddTimestamp())
