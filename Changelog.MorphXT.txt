@@ -14,6 +14,7 @@ REMOVED: Resend FilePartstatus in some circonstance from Pawcio [SiRoB]
 
 ADDED  : Show permission: default state display in sharedfile window [SiRoB]
 ADDED  : Import Parts from SR13 [SiRoB]
+ADDED  : per-File setting for spreadbar history [AndCycle/SiRoB]
 
 CHANGED: USS: Trickle datarate is now 0.1kB/s for low speed datarate (i.e <6kB/s)[SiRoB]
 CHANGED: USC: Try to open new slot smoothly [SiRoB]

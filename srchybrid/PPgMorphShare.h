@@ -15,6 +15,7 @@ public:
 protected:
 
 	int m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	int	m_iSpreadbar; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	int m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	int m_iSelectiveShare;  //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -33,6 +34,11 @@ protected:
 	HTREEITEM m_htiPowershareAuto;
 	HTREEITEM m_htiPowershareLimited;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	HTREEITEM m_htiSpreadbar;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 	HTREEITEM m_htiHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED

@@ -608,6 +608,9 @@ public:
 	static uint8	LowIdRetries;
 	static uint8	LowIdRetried;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	static uint8	m_iSpreadbarSetStatus;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	static uint8	hideOS;
 	static uint8	selectiveShare;
@@ -1692,6 +1695,9 @@ public:
 	static	uint8	GetLowIdRetried()	{return LowIdRetried;}
 	static	uint8	GetLowIdRetries()	{return LowIdRetries;}
 	//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	static	uint8	GetSpreadbarSetStatus()	{return m_iSpreadbarSetStatus;}
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	static	uint8	GetHideOvershares()		{return hideOS;}
 	static	uint8	IsSelectiveShareEnabled()	{return selectiveShare;}

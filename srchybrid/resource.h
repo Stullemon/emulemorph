@@ -1426,6 +1426,8 @@
 #define IDS_SELSKINPROFILEDIR           1476
 #define IDS_ASKDLINCOMPLETE             1477
 #define IDS_DEADSOURCES                 1478
+#define IDS_RESET                       1479
+#define IDS_SPREADBAR                   1480
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -2692,6 +2694,7 @@
 #define IDS_DOWNLOADEMFRIENDSMET        6160
 #define IDS_EMFRIENDSMETURL             6161
 #define IDC_COUNTRYFLAG                 6200
+#define IDI_ICON1                       6204
 #define IDS_PWEBCACHE                   10646
 #define IDS_WrongPortforWebcache        11387
 #define IDD_PPG_WEBCACHESETTINGS        12787
@@ -2771,7 +2774,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6204
+#define _APS_NEXT_RESOURCE_VALUE        6205
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         6200
 #define _APS_NEXT_SYMED_VALUE           106

@@ -77,6 +77,7 @@ public:
 	void	DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/;
 	float	GetSpreadSortValue() /*const*/;
 	float	GetFullSpreadCount() /*const*/;
+	void	ResetSpreadBar(); //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
 	UINT	GetRequests() const				{return requested;}
 	UINT	GetAccepts() const				{return accepted;}
@@ -336,6 +337,10 @@ public:
 	void    SetPowerShared(int newValue);
 	bool    GetPowerShared() const;
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	void	SetSpreadbarSetStatus(int newValue) {m_iSpreadbarSetStatus = newValue;}
+	int		GetSpreadbarSetStatus() const {return m_iSpreadbarSetStatus;}
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, HIDEOS
 	void	SetHideOS(int newValue) {m_iHideOS = newValue;}
 	int		GetHideOS() const {return m_iHideOS;}
@@ -411,6 +416,9 @@ private:
 	int		m_iPermissions;
 	//MORPH END   - Added by SiRoB, Show Permission
 
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	int		m_iSpreadbarSetStatus;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, HIDEOS
 	int		m_iHideOS;
 	int		m_iSelectiveChunk;

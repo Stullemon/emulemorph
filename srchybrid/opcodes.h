@@ -358,6 +358,10 @@
 #define FT_POWERSHARE_LIMIT		"POWERSHARE_LIMIT"
 //MORPH END   - Added by SiRoB, POWERSHARE Limit
 
+//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+#define FT_SPREADBAR			"Spreadbar"
+//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 //MORPH START - Added by SiRoB, HIDEOS
 #define FT_HIDEOS				"HIDEOS"
 #define FT_SELECTIVE_CHUNK		"SELECT_CHUNK"

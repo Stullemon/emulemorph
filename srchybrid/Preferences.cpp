@@ -574,6 +574,9 @@ uint16	CPreferences::maxclientdatarate;
 uint8	CPreferences::LowIdRetries;
 uint8	CPreferences::LowIdRetried;
 //MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
+//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+uint8	CPreferences::m_iSpreadbarSetStatus;
+//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 //MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 uint8	CPreferences::hideOS;
 uint8	CPreferences::selectiveShare;
@@ -2652,6 +2655,9 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ini.WriteInt(_T("ReconnectOnLowIdRetries"),LowIdRetries,_T("eMule"));	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	ini.WriteInt(_T("SpreadbarSetStatus"), m_iSpreadbarSetStatus, _T("eMule"));
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	ini.WriteInt(_T("HideOvershares"),hideOS,_T("eMule"));
 	ini.WriteBool(_T("SelectiveShare"),selectiveShare,_T("eMule"));
@@ -3304,6 +3310,9 @@ void CPreferences::LoadPreferences()
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	LowIdRetries=ini.GetInt(_T("ReconnectOnLowIdRetries"),3);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	m_iSpreadbarSetStatus = ini.GetInt(_T("SpreadbarSetStatus"), 1);
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	hideOS=ini.GetInt(_T("HideOvershares"),0/*5*/);
 	selectiveShare=ini.GetBool(_T("SelectiveShare"),false);

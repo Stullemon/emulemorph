@@ -33,6 +33,13 @@
 #define MP_POWERSHARE_LIMIT_SET 10156
 //MORPH END   - Added by SiRoB, POWERSHARE Limit
 
+//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+#define MP_SPREADBAR_DEFAULT	10160
+#define MP_SPREADBAR_OFF		10161
+#define MP_SPREADBAR_ON			10162
+#define MP_SPREADBAR_RESET		10163
+//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 //MORPH START - Added by SiRoB, Keep Permission flag
 #define MP_PERMDEFAULT			10165
 #define MP_PERMALL				10166
@@ -42,6 +49,7 @@
 #define MP_PERMCOMMUNITY		10169
 // [end] Mighty Knife
 //MORPH END   - Added by SiRoB, Keep Permission flag
+
 //MORPH START - Added by SiRoB, HIDEOS
 #define MP_HIDEOS_DEFAULT       10170
 #define MP_HIDEOS_SET           10171

@@ -52,6 +52,7 @@ protected:
 	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
 	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
 	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System
+	CMenu		m_SpreadbarMenu; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	CMenu		m_HideOSMenu; //MORPH - Added by SiRoB, HIDEOS
 	CMenu		m_SelectiveChunkMenu; //MORPH - Added by SiRoB, HIDEOS
 	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED

@@ -281,7 +281,7 @@
 			UseOfMFC="1"
 			CharacterSet="1"
 			DeleteExtensionsOnClean="*.obj;*.ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.bat;*.asm;$(TargetPath)"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
@@ -2355,6 +2355,9 @@
 				RelativePath="res\ExportSelected.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\FileAddSrc.ico">
+			</File>
+			<File
 				RelativePath="res\FileComments.ico">
 			</File>
 			<File
@@ -2364,10 +2367,28 @@
 				RelativePath="res\FileDonkey.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\FileDownload.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\FileDownloadPaused.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\FileDownloadPreviewFirst.ico">
+			</File>
+			<File
 				RelativePath=".\res\Mod\FileHideOS.ico">
 			</File>
 			<File
+				RelativePath=".\res\Mod\fileimportparts.ico">
+			</File>
+			<File
 				RelativePath="res\FileInfo.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\fileinitiaterehash.ico">
+			</File>
+			<File
+				RelativePath=".\res\Mod\FileLinearPrio.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\FileMassRename.ico">

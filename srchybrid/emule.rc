@@ -12,12 +12,12 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(1252)
+#pragma code_page(950)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1809,7 +1809,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -2763,13 +2763,14 @@ FILEPOWERSHARE          ICON                    "res\\MOD\\filepowershare.ico"
 FILEHIDEOS              ICON                    "res\\MOD\\filehideos.ico"
 FILESHAREONLYTHENEED    ICON                    "res\\MOD\\fileshareonlytheneed.ico"
 FILEREQUESTED           ICON                    "res\\MOD\\filerequested.ico"
+FILESPREADBAR           ICON                    "res\\MOD\\FileSpreadbar.ico"
 FILEADDSRC              ICON                    "res\\MOD\\fileaddsrc.ico"
-FILEDOWNLOAD		ICON          		"res\\MOD\\FileDownload.ico"
-FILEDOWNLOADPAUSED     ICON                     "res\\MOD\\FileDownloadPaused.ico"
-FILEDOWNLOADPREVIEWFIRST	ICON            "res\\MOD\\FileDownloadPreviewFirst.ico"
-FILELINEARPRIO  	ICON    	        "res\\MOD\\FileLinearPrio.ico"
-FILEIMPORTPARTS  	ICON 	                "res\\MOD\\fileimportparts.ico"
-FILEINITIATEREHASH  	ICON 	                "res\\MOD\\fileinitiaterehash.ico"
+FILEDOWNLOAD            ICON                    "res\\MOD\\FileDownload.ico"
+FILEDOWNLOADPAUSED      ICON                    "res\\MOD\\FileDownloadPaused.ico"
+FILEDOWNLOADPREVIEWFIRST ICON                    "res\\MOD\\FileDownloadPreviewFirst.ico"
+FILELINEARPRIO          ICON                    "res\\MOD\\FileLinearPrio.ico"
+FILEIMPORTPARTS         ICON                    "res\\MOD\\fileimportparts.ico"
+FILEINITIATEREHASH      ICON                    "res\\MOD\\fileinitiaterehash.ico"
 ADVA4AF                 ICON                    "res\\MOD\\catAdvA4AF.ico"
 CATSTOPLAST             ICON                    "res\\MOD\\catStopLast.ico"
 CATPAUSELAST            ICON                    "res\\MOD\\catPauseLast.ico"
@@ -2884,12 +2885,33 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Chinese (Taiwan) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHT)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
+#pragma code_page(950)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+
+#endif    // Chinese (Taiwan) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4668,6 +4690,8 @@ BEGIN
     IDS_SELSKINPROFILEDIR   "Select skin profile directory"
     IDS_ASKDLINCOMPLETE     "Potentially incomplete file:\r\n\r\n%s\r\n\r\nThis file is supposed to be incomplete in the network and can therefore most likely not downloaded successfully! Do you really want to download this file?"
     IDS_DEADSOURCES         "Dead Sources"
+    IDS_RESET               "Reset"
+    IDS_SPREADBAR           "Spreadbar"
 END
 
 STRINGTABLE 
@@ -5297,7 +5321,7 @@ BEGIN
     IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

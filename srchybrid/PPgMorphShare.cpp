@@ -34,6 +34,7 @@ CPPgMorphShare::CPPgMorphShare()
 	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
 	m_bInitializedTreeOpts = false;
+	m_htiSpreadbar = NULL; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -84,6 +85,11 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		
 		CString Buffer;
 		m_htiSFM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SFM), iImgSFM, TVI_ROOT);
+
+		//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		m_htiSpreadbar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPREADBAR) + _T(" ") + GetResString(IDS_DEFAULT), m_htiSFM, m_iSpreadbar);
+		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 		//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 		m_htiHideOS = m_ctrlTreeOptions.InsertItem(GetResString(IDS_HIDEOVERSHARES), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSFM);
 		m_ctrlTreeOptions.AddEditBox(m_htiHideOS, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -129,6 +135,9 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
 		m_bInitializedTreeOpts = true;
 	}
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSpreadbar, m_iSpreadbar);
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiHideOS, m_iHideOS);
 	DDV_MinMaxInt(pDX, m_iHideOS, 0, INT_MAX);
@@ -157,6 +166,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgMorphShare::OnInitDialog()
 {
 	m_iPowershareMode = thePrefs.m_iPowershareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	m_iSpreadbar = thePrefs.GetSpreadbarSetStatus(); //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	m_iHideOS = thePrefs.hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iSelectiveShare = thePrefs.selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = thePrefs.ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -188,6 +198,7 @@ BOOL CPPgMorphShare::OnApply()
 	if (!UpdateData())
 		return FALSE;
 	thePrefs.m_iPowershareMode = m_iPowershareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	thePrefs.m_iSpreadbarSetStatus = m_iSpreadbar; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	thePrefs.hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	thePrefs.selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	thePrefs.ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -237,6 +248,7 @@ void CPPgMorphShare::Localize(void)
 	{
 		GetDlgItem(IDC_WARNINGMORPH)->SetWindowText(GetResString(IDS_WARNINGMORPH));
 		CString Buffer;
+		//if (m_htiSpreadbar) m_ctrlTreeOptions.SetItemText(m_htiSpreadbar, GetResString(IDS_SPREADBAR));//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 		if (m_htiHideOS) m_ctrlTreeOptions.SetEditLabel(m_htiHideOS, GetResString(IDS_HIDEOVERSHARES));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiSelectiveShare) m_ctrlTreeOptions.SetItemText(m_htiSelectiveShare, GetResString(IDS_SELECTIVESHARE));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiShareOnlyTheNeed) m_ctrlTreeOptions.SetItemText(m_htiShareOnlyTheNeed, GetResString(IDS_SHAREONLYTHENEED));//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -272,6 +284,7 @@ void CPPgMorphShare::OnDestroy()
 	m_ctrlTreeOptions.DeleteAllItems();
 	m_ctrlTreeOptions.DestroyWindow();
 	m_bInitializedTreeOpts = false;
+	m_htiSpreadbar = NULL; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED

@@ -815,7 +815,9 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	bool bFirstItem = true;
 	int iSelectedItems = GetSelectedCount();
 	int iCompleteFileSelected = -1;
+	CString buffer; //MORPH - added, for string format temp
 	int iPowerShareLimit = -1; //MORPH - Added by SiRoB, POWERSHARE Limit
+	int	iSpreadbar = -1; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	int iHideOS = -1; //MORPH - Added by SiRoB, HIDEOS
 
 	UINT uPrioMenuItem = 0;
@@ -823,6 +825,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	UINT uPowershareMenuItem = 0; //MORPH - Added by SiRoB, Powershare
 	UINT uPowerShareLimitMenuItem = 0; //MORPH - Added by SiRoB, POWERSHARE Limit
 	
+	UINT uSpreadbarMenuItem = 0; //MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	UINT uHideOSMenuItem = 0; //MORPH - Added by SiRoB, HIDEOS
 	UINT uSelectiveChunkMenuItem = 0; //MORPH - Added by SiRoB, HIDEOS
 	UINT uShareOnlyTheNeedMenuItem = 0; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -902,6 +905,23 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			uPowershareMenuItem = 0;
 		//MORPH END   - Added by SiRoB, Avoid misusing of powershare
 		
+		//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		UINT uCurSpreadbarMenuItem = 0;
+		if(pFile->GetSpreadbarSetStatus() == -1)
+			uCurSpreadbarMenuItem = MP_SPREADBAR_DEFAULT;
+		else if(pFile->GetSpreadbarSetStatus() == 0)
+			uCurSpreadbarMenuItem = MP_SPREADBAR_OFF;
+		else if(pFile->GetSpreadbarSetStatus() == 1)
+			uCurSpreadbarMenuItem = MP_SPREADBAR_ON;
+		else
+			ASSERT(0);
+
+		if (bFirstItem)
+			uSpreadbarMenuItem = uCurSpreadbarMenuItem;
+		else if (uSpreadbarMenuItem != uCurSpreadbarMenuItem)
+			uSpreadbarMenuItem = 0;
+		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 		//MORPH START - Added by SiRoB, POWERSHARE Limit
 		UINT uCurPowerShareLimitMenuItem = 0;
 		int iCurPowerShareLimit = pFile->GetPowerShareLimit();
@@ -1021,10 +1041,26 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem(MP_DETAIL, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_SHOWED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SpreadbarMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	switch (thePrefs.GetSpreadbarSetStatus()){
+		case 0:
+			buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
+			break;
+		case 1:
+			buffer.Format(_T(" (%s)"),GetResString(IDS_ENABLED));
+			break;
+		default:
+			buffer = _T(" (?)");
+			break;
+	}
+	m_SharedFilesMenu.ModifyMenu(MP_SPREADBAR_DEFAULT, MF_STRING, MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+	m_SharedFilesMenu.CheckMenuRadioItem(MP_SPREADBAR_DEFAULT, MP_SPREADBAR_ON, uSpreadbarMenuItem, 0);
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	CString buffer;
 	if (thePrefs.GetHideOvershares()==0)
 		buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
 	else
@@ -1498,6 +1534,44 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 			//MORPH END   - Added by SiRoB, POWERSHARE Limit
+			//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+			case MP_SPREADBAR_DEFAULT:
+			case MP_SPREADBAR_OFF:
+			case MP_SPREADBAR_ON:
+			{
+				POSITION pos = selectedList.GetHeadPosition();
+				while (pos != NULL)
+				{
+					file = selectedList.GetNext(pos);
+					switch (wParam) {
+						case MP_SPREADBAR_DEFAULT:
+							file->SetSpreadbarSetStatus(-1);
+							break;
+						case MP_SPREADBAR_OFF:
+							file->SetSpreadbarSetStatus(0);
+							break;
+						case MP_SPREADBAR_ON:
+							file->SetSpreadbarSetStatus(1);
+							break;
+						default:
+							file->SetSpreadbarSetStatus(-1);
+							break;
+					}
+					UpdateFile(file);
+				}
+				break;
+			}
+			case MP_SPREADBAR_RESET:
+			{
+				POSITION pos = selectedList.GetHeadPosition();
+				while (pos != NULL)
+				{
+					file = selectedList.GetNext(pos);
+					file->statistic.ResetSpreadBar();
+				}
+
+			}
+			//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 			//MORPH START - Added by SiRoB, HIDEOS
 			case MP_HIDEOS_DEFAULT:
 			case MP_HIDEOS_SET:
@@ -1547,27 +1621,23 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					{
 						case MP_PERMDEFAULT:
 							file->SetPermissions(-1);
-							UpdateFile(file);
 							break;
 						case MP_PERMNONE:
 							file->SetPermissions(PERM_NOONE);
-							UpdateFile(file);
 							break;
 						case MP_PERMFRIENDS:
 							file->SetPermissions(PERM_FRIENDS);
-							UpdateFile(file);
 							break;
 						// Mighty Knife: Community visible filelist
 						case MP_PERMCOMMUNITY:
 							file->SetPermissions(PERM_COMMUNITY);
-							UpdateFile(file);
 							break;
 						// [end] Mighty Knife
 						default : // case MP_PERMALL:
 							file->SetPermissions(PERM_ALL);
-							UpdateFile(file);
 							break;
 					}
+					UpdateFile(file);
 				}
 				Invalidate();
 				break;
@@ -2242,6 +2312,9 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, POWERSHARE LImit
 	if (m_PowerShareLimitMenu) VERIFY( m_PowerShareLimitMenu.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	if(m_SpreadbarMenu)	VERIFY(m_SpreadbarMenu.DestroyMenu());
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, HIDEOS
 	if (m_HideOSMenu) VERIFY( m_HideOSMenu.DestroyMenu() );
 	if (m_SelectiveChunkMenu) VERIFY( m_SelectiveChunkMenu.DestroyMenu() );
@@ -2295,6 +2368,15 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH END   - Added by SiRoB, ZZ Upload System
 
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	m_SpreadbarMenu.CreateMenu();
+	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT));
+	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_OFF, GetResString(IDS_DISABLED));
+	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_ON, GetResString(IDS_ENABLED));
+	m_SpreadbarMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
+	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_RESET, GetResString(IDS_RESET));
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_HideOSMenu.CreateMenu();
 	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT));
@@ -2338,6 +2420,11 @@ void CSharedFilesCtrl::CreateMenues()
 	m_PowershareMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	m_PowershareMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowerShareLimitMenu.m_hMenu, GetResString(IDS_POWERSHARE_LIMIT));
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SpreadbarMenu.m_hMenu, GetResString(IDS_SPREADBAR), _T("FILESPREADBAR"));
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_HideOSMenu.m_hMenu, GetResString(IDS_HIDEOS), _T("FILEHIDEOS"));
 	m_HideOSMenu.AppendMenu(MF_STRING|MF_SEPARATOR);

@@ -135,6 +135,15 @@ void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added
 void CFileStatistic::AddBlockTransferred(uint32 start, uint32 end, uint32 count){
 	if (start >= end || !count)
 		return;
+
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	if(fileParent->GetSpreadbarSetStatus() > 0 || fileParent->GetSpreadbarSetStatus() == -1 ? thePrefs.GetSpreadbarSetStatus() > 0 : false){
+		;
+	}
+	else
+		return;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 	InChangedSpreadSortValue = false;
 	InChangedFullSpreadCount = false;
@@ -322,6 +331,20 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
+//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+void CFileStatistic::ResetSpreadBar()
+{
+	spreadlist.RemoveAll();
+	spreadlist.SetAt(0, 0);
+	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
+	InChangedSpreadSortValue = false;
+	InChangedFullSpreadCount = false;
+	InChangedSpreadBar = false;
+	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
+	return;
+}
+//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 //Morph Start - added by AndCycle, Equal Chance For Each File
 double CFileStatistic::GetEqualChanceValue()
 {
@@ -419,6 +442,9 @@ CKnownFile::CKnownFile()
 	//MORPH START - Added by SiRoB, Show Permission
 	m_iPermissions = -1;
 	//MORPH END   - Added by SiRoB, Show Permission
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	m_iSpreadbarSetStatus = -1;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_iHideOS = -1;
 	m_iSelectiveChunk = -1;
@@ -1302,6 +1328,10 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 					else if(strcmp(newtag->GetName(), FT_POWERSHARE_LIMIT) == 0)
 						SetPowerShareLimit((newtag->GetInt()<=200)?newtag->GetInt():-1);
 					//MORPH END   - Added by SiRoB, POWERSHARE Limit
+					//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+					else if(strcmp(newtag->GetName(), FT_SPREADBAR) == 0)
+						SetSpreadbarSetStatus(newtag->GetInt());
+					//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 					//MORPH START - Added by SiRoB, HIDEOS
 					else if(strcmp(newtag->GetName(), FT_HIDEOS) == 0)
 						SetHideOS((newtag->GetInt()<=10)?newtag->GetInt():-1);
@@ -1472,6 +1502,12 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	uTagCount++;
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	CTag spreadBar(FT_SPREADBAR, GetSpreadbarSetStatus());
+	spreadBar.WriteTagToFile(file);
+	uTagCount++;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
 	//MORPH START - Added by SiRoB, HIDEOS
 	if (GetHideOS()>=0){
 		CTag hideostag(FT_HIDEOS, GetHideOS());
@@ -1508,29 +1544,33 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
-	char namebuffer[10];
-	char* number = &namebuffer[1];
-	uint16 i_pos = 0;
-	for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
-		uint32 count = statistic.spreadlist.GetValueAt(pos);
-		if (!count) {
+	if(GetSpreadbarSetStatus() > 0 || GetSpreadbarSetStatus() == -1 ? thePrefs.GetSpreadbarSetStatus() > 0 : false){//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+
+		char namebuffer[10];
+		char* number = &namebuffer[1];
+		uint16 i_pos = 0;
+		for (POSITION pos = statistic.spreadlist.GetHeadPosition(); pos; ){
+			uint32 count = statistic.spreadlist.GetValueAt(pos);
+			if (!count) {
+				statistic.spreadlist.GetNext(pos);
+				continue;
+			}
+			uint32 start = statistic.spreadlist.GetKeyAt(pos);
 			statistic.spreadlist.GetNext(pos);
-			continue;
+			ASSERT(pos != NULL);	// Last value should always be 0
+			uint32 end = statistic.spreadlist.GetKeyAt(pos);
+			itoa(i_pos,number,10);
+			namebuffer[0] = FT_SPREADSTART;
+			CTag(namebuffer,start).WriteTagToFile(file);
+			namebuffer[0] = FT_SPREADEND;
+			CTag(namebuffer,end).WriteTagToFile(file);
+			namebuffer[0] = FT_SPREADCOUNT;
+			CTag(namebuffer,count).WriteTagToFile(file);
+			uTagCount+=3;
+			i_pos++;
 		}
-		uint32 start = statistic.spreadlist.GetKeyAt(pos);
-		statistic.spreadlist.GetNext(pos);
-		ASSERT(pos != NULL);	// Last value should always be 0
-		uint32 end = statistic.spreadlist.GetKeyAt(pos);
-		itoa(i_pos,number,10);
-		namebuffer[0] = FT_SPREADSTART;
-		CTag(namebuffer,start).WriteTagToFile(file);
-		namebuffer[0] = FT_SPREADEND;
-		CTag(namebuffer,end).WriteTagToFile(file);
-		namebuffer[0] = FT_SPREADCOUNT;
-		CTag(namebuffer,count).WriteTagToFile(file);
-		uTagCount+=3;
-		i_pos++;
-	}
+
+	}//MORPH	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
 	//other tags
