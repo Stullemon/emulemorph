@@ -1,0 +1,238 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+#include "StdAfx.h"
+#include "knownfilelist.h"
+#include "opcodes.h"
+#include "emule.h"
+#include <io.h>
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+#define KNOWN_MET_FILENAME	_T("known.met")
+
+
+CKnownFileList::CKnownFileList()
+{
+	accepted = 0;
+	requested = 0;
+	transferred = 0;
+	m_nLastSaved = ::GetTickCount();
+	Init();
+}
+
+CKnownFileList::~CKnownFileList()
+{
+	Clear();
+}
+
+bool CKnownFileList::Init()
+{
+	CString fullpath=theApp.glob_prefs->GetConfigDir();
+	fullpath.Append(KNOWN_MET_FILENAME);
+	CSafeBufferedFile file;
+	CFileException fexp;
+	if (!file.Open(fullpath,CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary, &fexp)){
+		if (fexp.m_cause != CFileException::fileNotFound){
+			CString strError(_T("Failed to load ") KNOWN_MET_FILENAME _T(" file"));
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			AddLogLine(true, _T("%s"), strError);
+		}
+		return false;
+	}
+	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+
+	CSingleLock sLock(&list_mut);
+	try {
+		uint8 header;
+		file.Read(&header,1);
+		if (header != MET_HEADER){
+			file.Close();
+			return false;
+		}
+		
+		uint32 RecordsNumber;
+		file.Read(&RecordsNumber,4);
+		sLock.Lock();
+		for (uint32 i = 0; i < RecordsNumber; i++) {
+			CKnownFile* pRecord =  new CKnownFile();
+			if (!pRecord->LoadFromFile(&file)){
+				TRACE("*** Failed to load entry %u (name=%s  hash=%s  size=%u  parthashs=%u expected parthashs=%u) from known.met\n", i, 
+					pRecord->GetFileName(), md4str(pRecord->GetFileHash()), pRecord->GetFileSize(), pRecord->GetHashCount(), pRecord->GetED2KPartHashCount());
+				delete pRecord;
+				continue;
+			}
+			Add(pRecord);
+		}
+		sLock.Unlock();
+		file.Close();
+	}
+	catch(CFileException* error){
+		OUTPUT_DEBUG_TRACE();
+		if (error->m_cause == CFileException::endOfFile)
+			AddLogLine(true,GetResString(IDS_ERR_SERVERMET_BAD));
+		else{
+			char buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer,MAX_CFEXP_ERRORMSG);
+			AddLogLine(true,GetResString(IDS_ERR_SERVERMET_UNKNOWN),buffer);
+		}
+		error->Delete();
+		return false;
+	}
+
+	return true;
+}
+
+void CKnownFileList::Save()
+{
+	DEBUG_ONLY(AddDebugLogLine(false, "Saved KnownFileList"));
+	m_nLastSaved = ::GetTickCount(); 
+	CString fullpath=theApp.glob_prefs->GetConfigDir();
+	fullpath += KNOWN_MET_FILENAME;
+	CSafeBufferedFile file;
+	CFileException fexp;
+	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+		CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+			strError += _T(" - ");
+			strError += szError;
+		}
+		AddLogLine(true, _T("%s"), strError);
+		return;
+	}
+	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+
+	CSingleLock sLock(&list_mut);
+	try{
+		uint8 ucHeader = MET_HEADER;
+		file.Write(&ucHeader, 1);
+
+		ULONGLONG uRecNumFilePos = file.GetPosition();
+		uint32 RecordsNumber = GetCount();
+		file.Write(&RecordsNumber, 4);
+		
+		// save known files
+		for (uint32 i = 0; i < RecordsNumber; i++)
+			ElementAt(i)->WriteToFile(&file);
+
+		// save valid part files
+		int iSavedPartFiles = theApp.downloadqueue->SavePartFilesToKnown(&file);	// SLUGFILLER: mergeKnown - add part files
+		if (iSavedPartFiles > 0){
+			// update nr. of known.met entries
+			RecordsNumber += iSavedPartFiles;
+			file.Seek(uRecNumFilePos, SEEK_SET);
+			file.Write(&RecordsNumber, 4);
+		}
+
+		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+			file.Flush(); // flush file stream buffers to disk buffers
+			if (_commit(_fileno(file.m_pStream)) != 0) // commit disk buffers to disk
+				AfxThrowFileException(CFileException::hardIO, GetLastError(), file.GetFileName());
+		}
+		file.Close();
+	}
+	catch(CFileException* error){
+		CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		if (error->GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+			strError += _T(" - ");
+			strError += szError;
+		}
+		AddLogLine(true, _T("%s"), strError);
+		error->Delete();
+	}
+}
+
+void CKnownFileList::Clear()
+{
+	for (int i = 0; i < GetSize();i++)
+		safe_delete(this->ElementAt(i));
+	RemoveAll();
+	SetSize(0);
+}
+
+CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename,uint32 in_date,uint32 in_size)
+{
+	for (int i = 0;i < GetCount();i++){
+		CKnownFile* cur_file = ElementAt(i);
+		if (cur_file->GetFileDate() == in_date && cur_file->GetFileSize() == in_size && (!_tcscmp(filename,cur_file->GetFileName())))
+			return cur_file;
+	}
+	return 0;
+}
+
+void CKnownFileList::SafeAddKFile(CKnownFile* toadd)
+{
+	CSingleLock sLock(&list_mut,true);
+	Add(toadd);
+	sLock.Unlock();
+}
+
+CKnownFile* CKnownFileList::FindKnownFileByID(const uchar* hash){
+	for (int i = 0; i < GetCount(); i++){
+		CKnownFile* pCurKnownFile = ElementAt(i);
+		if (!md4cmp(pCurKnownFile->GetFileHash(), hash))
+			return pCurKnownFile;
+	}
+	return NULL;
+}
+
+void CKnownFileList::Process()
+{
+	if ( ::GetTickCount() - m_nLastSaved > MIN2MS(11))
+		this->Save();
+}
+
+bool CKnownFileList::IsKnownFile(void* pToTest){
+	for (int i = 0; i < GetCount(); i++){
+		if (ElementAt(i) == pToTest)
+			return true;
+	}
+	return false;
+}
+// SLUGFILLER: mergeKnown
+void CKnownFileList::RemoveFile(CKnownFile* toremove){
+	for (int i = 0;i != this->GetCount();i++)
+		if (ElementAt(i) == toremove){
+			RemoveAt(i);
+			return;
+		}
+}
+
+void CKnownFileList::FilterDuplicateKnownFiles(CKnownFile* original){
+	const uchar* filehash = original->GetFileHash();
+	for (int i = 0;i != this->GetCount();){
+		CKnownFile* other = ElementAt(i);
+		if (other == original || md4cmp(filehash, other->GetFileHash())){
+			i++;
+			continue;
+		}
+		original->statistic.Merge(&other->statistic);
+		RemoveAt(i);
+		delete other;
+	}
+}
+// SLUGFILLER: mergeKnown

@@ -1,0 +1,4018 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutre resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_HTTPDOWNLOAD DIALOGEX 0, 0, 231, 145
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Updating serverlist"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_ANIMATE1,"SysAnimate32",ACS_TRANSPARENT,7,7,192,
+                    32
+    LTEXT           "",IDC_STATUS,7,47,214,8
+    LTEXT           "",IDC_FILESTATUS,7,60,214,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,7,74,214,
+                    10
+    LTEXT           "Estimated time left:",IDC_STATIC,7,91,60,8
+    LTEXT           "",IDC_TIMELEFT,79,91,142,8
+    LTEXT           "Transfer rate:",IDC_STATIC,7,104,43,8
+    LTEXT           "",IDC_TRANSFER_RATE,80,104,141,8
+    DEFPUSHBUTTON   "&Cancel",IDCANCEL,171,122,50,14,BS_FLAT
+END
+
+IDD_FILEDETAILS_NAME DIALOGEX 0, 0, 312, 214
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "File Name"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Sources Names",IDC_FD_SN,7,7,298,142,BS_FLAT
+    CONTROL         "",IDC_LISTCTRLFILENAMES,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,12,19,289,89
+    PUSHBUTTON      "Take over",IDC_TAKEOVER,12,111,56,13,BS_FLAT
+    PUSHBUTTON      "Cleanup",IDC_BUTTONSTRIP,246,118,56,13,BS_FLAT
+    EDITTEXT        IDC_FILENAME,12,133,231,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Rename",IDC_RENAME,246,133,56,12,BS_FLAT
+END
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 230, 185
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+END
+
+IDD_EMULE_DIALOG DIALOGEX 0, 0, 516, 340
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
+CAPTION "eMule"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "^&x",IDC_HOTMENU,2,34,19,17,BS_FLAT | NOT WS_VISIBLE
+END
+
+IDD_TRANSFER DIALOGEX 3, 35, 507, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_DOWNLOADLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | 
+                    LVS_ALIGNLEFT | WS_TABSTOP,5,17,500,82,WS_EX_STATICEDGE
+    CONTROL         "",IDC_UPLOADLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
+                    WS_TABSTOP,5,234,500,43,WS_EX_STATICEDGE
+    CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,19,6,171,8
+    LTEXT           "IDS_TW_QUEUE",IDC_TSTATIC1,6,280,87,8
+    LTEXT           "0",IDC_QUEUECOUNT,100,280,78,8
+    CONTROL         "",IDC_SPLITTER,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
+                    85,102,420,4
+    CONTROL         "",IDC_QUEUELIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | NOT 
+                    WS_VISIBLE | WS_TABSTOP,5,215,500,63,WS_EX_STATICEDGE
+    ICON            "",IDC_DOWNLOAD_ICO,5,4,20,20
+    PUSHBUTTON      "Text",IDC_UPLOAD_ICO,1,99,34,15,BS_ICON | BS_FLAT
+    PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,437,278,68,11,BS_FLAT | 
+                    NOT WS_VISIBLE
+    CONTROL         "",IDC_CLIENTLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | NOT 
+                    WS_VISIBLE | WS_TABSTOP,5,171,500,106,WS_EX_STATICEDGE
+    CONTROL         "",IDC_DLTAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
+                    TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
+END
+
+IDD_SERVER DIALOGEX 3, 35, 510, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Add Server",IDC_SSTATIC,367,13,140,78,BS_FLAT
+    LTEXT           "&IP or Address:",IDC_SSTATIC4,375,24,76,8
+    EDITTEXT        IDC_IPADDRESS,372,34,84,12,ES_AUTOHSCROLL
+    LTEXT           ":",IDC_SSTATIC5,459,35,8,8
+    LTEXT           "&Port:",IDC_SSTATIC7,473,24,27,8
+    EDITTEXT        IDC_SPORT,472,34,26,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "&Name:",IDC_SSTATIC3,373,48,65,8
+    EDITTEXT        IDC_SNAME,372,58,130,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Chec&k Server",IDC_SBUTTON1,387,74,50,13,BS_FLAT | NOT 
+                    WS_VISIBLE | WS_DISABLED
+    PUSHBUTTON      "&Add",IDC_ADDSERVER,445,74,57,13,BS_FLAT
+    GROUPBOX        "Update server.met from UR&L",IDC_SSTATIC6,367,95,140,45,
+                    BS_FLAT
+    EDITTEXT        IDC_SERVERMETURL,372,107,130,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Update",IDC_UPDATESERVERMETFROMURL,445,123,57,13,
+                    BS_FLAT
+    ICON            "",IDC_SERVLST_ICO,5,3,20,20
+    CONTROL         "&Servers:",IDC_SERVLIST_TEXT,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,18,6,88,8
+    CONTROL         "",IDC_SERVLIST,"SysListView32",LVS_OWNERDRAWFIXED | 
+                    LVS_ALIGNLEFT | WS_TABSTOP,5,17,358,159,WS_EX_STATICEDGE
+    GROUPBOX        "My Info",IDC_MYINFO,367,144,140,32,BS_FLAT
+    CONTROL         "",IDC_MYINFOLIST,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,372,153,131,21
+    CONTROL         "",IDC_TAB3,"SysTabControl32",0x0,5,184,500,102
+    EDITTEXT        IDC_LOGBOX,9,200,491,82,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT 
+                    WS_BORDER | WS_VSCROLL,WS_EX_STATICEDGE
+    PUSHBUTTON      "&Reset",IDC_LOGRESET,461,181,45,15,BS_FLAT
+    CONTROL         "",IDC_SERVMSG,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,9,
+                    200,491,82
+    EDITTEXT        IDC_DEBUG_LOG,9,200,491,82,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT 
+                    WS_BORDER | WS_VSCROLL,WS_EX_STATICEDGE
+    PUSHBUTTON      "Connect",IDC_ED2KCONNECT,283,4,80,13,BS_FLAT
+END
+
+IDD_SEARCH DIALOGEX 3, 35, 507, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Search",IDC_SEARCH_FRM,4,5,207,62,BS_FLAT
+    CONTROL         "&Name:",IDC_MSTATIC3,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,11,14,48,8
+    EDITTEXT        IDC_SEARCHNAME,11,23,194,12,ES_AUTOHSCROLL
+    CONTROL         "Matc&h keywords",IDC_MATCH_KEYWORDS,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_RIGHT | BS_FLAT | 
+                    WS_TABSTOP,137,12,68,10
+    CONTROL         "&Type",IDC_MSTATIC7,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,11,39,60,8
+    COMBOBOX        IDC_TypeSearch,11,48,66,85,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Meth&od:",IDC_METH,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,80,39,70,8
+    CONTROL         "",IDC_COMBO1,"ComboBoxEx32",CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP,80,48,80,78
+    PUSHBUTTON      "&Reset",IDC_SEARCH_RESET,161,48,44,13,BS_FLAT
+    GROUPBOX        "Filter",IDC_STATIC_FILTER,215,5,120,62,BS_FLAT
+    CONTROL         "M&in size:",IDC_SEARCHMINSIZE,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,221,14,55,8
+    EDITTEXT        IDC_EDITSEARCHMIN,221,23,34,12,ES_AUTOHSCROLL
+    LTEXT           "MB",IDC_SD_MB1,260,25,14,8
+    CONTROL         "Max si&ze:",IDC_SEARCHMAXSIZE,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,279,14,51,8
+    EDITTEXT        IDC_EDITSEARCHMAX,279,23,34,12,ES_AUTOHSCROLL
+    LTEXT           "MB",IDC_SD_MB2,318,25,14,8
+    CONTROL         "&Availability:",IDC_SEARCHAVAIL,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,221,39,56,8
+    EDITTEXT        IDC_EDITSEARCHAVAIBILITY,221,48,49,12,ES_AUTOHSCROLL
+    CONTROL         "&Extension:",IDC_SEARCHEXTENTION,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,279,39,54,8
+    EDITTEXT        IDC_EDITSEARCHEXTENSION,279,48,49,12,ES_AUTOHSCROLL
+    GROUPBOX        "Direct Download",IDC_DDOWN_FRM,339,5,156,62,BS_FLAT
+    CONTROL         "eD&2K Link(s):",IIDC_FSTATIC2,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,345,14,125,8
+    EDITTEXT        IDC_ELINK,345,23,143,37,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_OEMCONVERT | ES_WANTRETURN | 
+                    WS_VSCROLL
+    DEFPUSHBUTTON   "&Start",IDC_STARTS,319,70,58,14,BS_FLAT
+    PUSHBUTTON      "&More",IDC_MORE,379,70,58,14,BS_FLAT | WS_DISABLED
+    PUSHBUTTON      "&Cancel",IDC_CANCELS,439,70,56,14,BS_FLAT | WS_DISABLED
+    PUSHBUTTON      "C&lear All",IDC_CLEARALL,379,88,116,14,BS_FLAT
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,3,89,374,15,
+                    WS_EX_ACCEPTFILES
+    CONTROL         "",IDC_SEARCHLIST,"SysListView32",LVS_REPORT | 
+                    LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
+                    WS_TABSTOP,3,102,492,160,WS_EX_STATICEDGE
+    PUSHBUTTON      "&Download Selected",IDC_SDOWNLOAD,4,274,88,14,BS_FLAT
+    ICON            "",IDC_SEARCHLST_ICO,5,76,20,20
+    LTEXT           "Search Res&ults",IDC_RESULTS_LBL,18,78,114,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,3,262,492,
+                    7
+END
+
+IDD_CHAT DIALOGEX 3, 35, 508, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CHATSEL,"SysTabControl32",TCS_TOOLTIPS,123,24,380,
+                    260
+    EDITTEXT        IDC_CMESSAGE,127,262,263,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "Send",IDC_CSEND,397,262,50,14,BS_FLAT
+    PUSHBUTTON      "Close",IDC_CCLOSE,449,262,50,14,BS_FLAT
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | 
+                    LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_TABSTOP,0,24,114,
+                    260,WS_EX_STATICEDGE
+    CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,138,11,236,13
+    ICON            "",IDC_MESSAGEICON,124,9,20,20
+    CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,11,80,13
+    ICON            "",IDC_FRIENDSICON,0,9,20,20
+END
+
+IDD_STATISTICS DIALOGEX 3, 35, 508, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_SCOPE_U,"Static",SS_ETCHEDFRAME | SS_RIGHTJUST | 
+                    SS_REALSIZEIMAGE | SS_SUNKEN | NOT WS_VISIBLE,221,112,
+                    284,107
+    CONTROL         "",IDC_STATSSCOPE,"Static",SS_ETCHEDFRAME | SS_SUNKEN | 
+                    NOT WS_VISIBLE,221,220,284,66
+    CONTROL         "",IDC_SCOPE_D,"Static",SS_ETCHEDFRAME | SS_SUNKEN | NOT 
+                    WS_VISIBLE,221,4,284,107
+    CONTROL         "",IDC_STATTREE,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | 
+                    WS_BORDER | WS_TABSTOP | 0x800,3,26,211,260
+    PUSHBUTTON      "V",IDC_BNMENU,198,8,16,14,BS_FLAT
+    LTEXT           "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,3,
+                    11,192,11
+END
+
+IDD_PPG_STATS DIALOGEX 0, 0, 229, 222
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION
+CAPTION "Statistics"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Graphs",IDC_GRAPHS,4,7,220,149
+    LTEXT           "Update Interval",IDC_SLIDERINFO,13,17,187,10
+    CONTROL         "",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
+                    WS_TABSTOP,13,29,181,12,WS_EX_STATICEDGE
+    LTEXT           "Time for Average-Graph",IDC_SLIDERINFO3,13,54,188,8
+    CONTROL         "",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,13,65,182,12,WS_EX_STATICEDGE
+    LTEXT           "Colors",IDC_PREFCOLORS,13,84,107,10
+    COMBOBOX        IDC_COLORSELECTOR,13,95,143,110,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_COLOR_BUTTON,160,93,34,16,BS_FLAT
+    LTEXT           "Connections Statistics Y-Axis Scale:",
+                    IDC_STATIC_CGRAPHSCALE,11,120,144,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_CGRAPHSCALE,160,116,35,12,ES_NUMBER
+    LTEXT           "Active Connections Ratio:",IDC_STATIC_CGRAPHRATIO,11,
+                    140,144,8,0,WS_EX_RIGHT
+    COMBOBOX        IDC_CRATIO,160,136,35,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    GROUPBOX        "Statistics Tree",IDC_STREE,4,161,220,48
+    LTEXT           "Update Interval",IDC_SLIDERINFO2,13,172,181,10
+    CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,13,185,180,12,WS_EX_STATICEDGE
+END
+
+IDD_SPLASH DIALOGEX 0, 0, 235, 171
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS | 
+    WS_CLIPCHILDREN
+EXSTYLE WS_EX_TOPMOST
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+END
+
+IDD_PPG_PROXY DIALOGEX 0, 0, 228, 239
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Settings",IDC_AUTH_LBL2,11,6,202,89
+    CONTROL         "Enable Proxy",IDC_ENABLEPROXY,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,18,17,178,9
+    COMBOBOX        IDC_PROXYTYPE,80,30,119,54,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Proxy Type",IDC_PROXYTYPE_LBL,18,33,60,8
+    EDITTEXT        IDC_PROXYNAME,80,50,118,13,ES_AUTOHSCROLL
+    LTEXT           "Proxy Address",IDC_PROXYNAME_LBL,18,52,60,8
+    EDITTEXT        IDC_PROXYPORT,80,71,34,13,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Proxy Port",IDC_PROXYPORT_LBL,18,73,60,8
+    GROUPBOX        "authentication",IDC_AUTH_LBL,11,99,202,63
+    CONTROL         "Enable authentication",IDC_ENABLEAUTH,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,23,110,157,9
+    EDITTEXT        IDC_USERNAME_A,80,124,118,13,ES_AUTOHSCROLL
+    LTEXT           "Username",IDC_USERNAME_LBL,23,126,55,8
+    EDITTEXT        IDC_PASSWORD,80,141,118,13,ES_PASSWORD | ES_AUTOHSCROLL
+    LTEXT           "Password",IDC_PASSWORD_LBL,23,143,55,8
+    CONTROL         "Automatic Serverconnect without Proxy",IDC_ASCWOP,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,12,169,
+                    201,9
+END
+
+IDD_PPG_SERVER DIALOGEX 0, 0, 225, 225
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Server"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Remove dead server after",IDC_REMOVEDEAD,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,7,105,10
+    EDITTEXT        IDC_SERVERRETRIES,115,6,22,12,ES_CENTER | ES_AUTOHSCROLL
+    LTEXT           "retries",IDC_RETRIES_LBL,140,8,77,8
+    CONTROL         "Auto-update serverlist at startup",IDC_AUTOSERVER,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,21,174,
+                    10
+    PUSHBUTTON      "Edit",IDC_EDITADR,185,20,39,12,BS_FLAT
+    CONTROL         "Update serverlist when connecting to a server",
+                    IDC_UPDATESERVERCONNECT,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,35,216,10
+    CONTROL         "Update serverlist when a client connects",
+                    IDC_UPDATESERVERCLIENT,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,49,216,10
+    CONTROL         "Use score system",IDC_SCORE,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,63,216,10
+    CONTROL         "Smart LowID check",IDC_SMARTIDCHECK,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,77,216,10
+    CONTROL         "Safe server connect",IDC_SAFESERVERCONNECT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,91,216,10
+    CONTROL         "Connect to static servers only",
+                    IDC_AUTOCONNECTSTATICONLY,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,106,216,10
+    CONTROL         "Set manually added servers to high priority",
+                    IDC_MANUALSERVERHIGHPRIO,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,121,216,10
+END
+
+IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 241
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "General"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_NICK,10,21,97,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_LANGS,121,21,95,75,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Beep on errors",IDC_BEEPER,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,61,202,10
+    CONTROL         "Bring to front on link click",IDC_BRINGTOFOREGROUND,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,73,
+                    202,10
+    CONTROL         "Onlinesig",IDC_ONLINESIG,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,85,202,10
+    CONTROL         "Prompt on exit",IDC_EXIT,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,98,202,10
+    CONTROL         "Check for new version on startup",IDC_CHECK4UPDATE,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,134,
+                    135,10
+    CONTROL         "",IDC_CHECKDAYS,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,159,
+                    134,53,10,WS_EX_STATICEDGE
+    CONTROL         "Show splashscreen",IDC_SPLASHON,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,146,192,10
+    CONTROL         "Startup Minimized",IDC_STARTMIN,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,157,190,10
+    PUSHBUTTON      "Edit Webservices",IDC_WEBSVEDIT,14,222,100,12,BS_FLAT
+    PUSHBUTTON      "eD2K Links",IDC_ED2KFIX,155,222,62,12,BS_FLAT
+    GROUPBOX        "Nick:",IDC_NICK_FRM,7,7,104,33,BS_FLAT
+    GROUPBOX        "Misc:",IDC_MISC_FRM,7,47,216,190,BS_FLAT
+    GROUPBOX        "Language:",IDC_LANG_FRM,114,7,109,33,BS_FLAT
+    GROUPBOX        "Static",IDC_STARTUP,14,119,202,56
+    LTEXT           "days",IDC_DAYS,161,124,48,9
+END
+
+IDD_PPG_FILES DIALOGEX 0, 0, 229, 243
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Files"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "See my share:",IDC_SEEMYSHARE_FRM,7,7,215,26,BS_FLAT
+    CONTROL         "Everybody",IDC_SEESHARE1,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_GROUP | WS_TABSTOP,13,17,73,10
+    CONTROL         "Only friends",IDC_SEESHARE2,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT,89,17,71,10
+    CONTROL         "Nobody",IDC_SEESHARE3,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT,171,17,47,10
+    GROUPBOX        "Intelligent Corruption Handling:",IDC_ICH_FRM,7,38,215,
+                    26,BS_FLAT | WS_GROUP
+    CONTROL         "I.C.H. active",IDC_ICH,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,13,49,162,10
+    GROUPBOX        "Static",IDC_ONND,7,67,215,61,BS_FLAT
+    CONTROL         "Add new added file for downloading in paused mode",
+                    IDC_ADDNEWFILESPAUSED,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,13,78,207,10
+    CONTROL         "Add new shared files with auto priority",IDC_UAP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,90,206,11
+    CONTROL         "Add new downloads with auto priority",IDC_DAP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,103,206,10
+    CONTROL         "Cleanup filenames of new downloads",IDC_FNCLEANUP,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,115,
+                    163,10
+    PUSHBUTTON      "Button1",IDC_FNC,177,114,44,12,BS_FLAT
+    CONTROL         "Try to transfer full chunks to all uploads",
+                    IDC_FULLCHUNKTRANS,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,13,133,209,10
+    CONTROL         "Try to Download preview chunks first.",IDC_PREVIEWPRIO,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,145,
+                    209,10
+    CONTROL         "IDS_PF_WATCHCB",IDC_WATCHCB,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,13,157,209,10
+    CONTROL         "Start next paused file when a file completes",
+                    IDC_STARTNEXTFILE,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,13,169,209,10
+    CONTROL         "Prefer same cat",IDC_STARTNEXTFILECAT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,179,197,10
+    GROUPBOX        "Static",IDC_STATICVIDEOPLAYER,7,189,216,47,BS_FLAT
+    EDITTEXT        IDC_VIDEOPLAYER,15,198,144,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BROWSEV,166,197,53,14,BS_FLAT
+    LTEXT           "(empty=default)",IDC_STATIC_EMPTY,15,211,173,10
+    CONTROL         "Create file backup for preview",IDC_VIDEOBACKUP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,15,223,195,8
+END
+
+IDD_PPG_DIRECTORIES DIALOGEX 0, 0, 230, 246
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Directories"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_INCFILES,14,19,145,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_SELINCDIR,166,18,50,14,BS_FLAT
+    EDITTEXT        IDC_TEMPFILES,14,50,145,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_SELTEMPDIR,166,49,50,14,BS_FLAT
+    CONTROL         "",IDC_SHARESELECTOR,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_CHECKBOXES | 
+                    WS_BORDER | WS_TABSTOP,14,79,202,110
+    CONTROL         "",IDC_UNCLIST,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,14,193,192,48
+    PUSHBUTTON      "+",IDC_UNCADD,207,193,14,13,BS_CENTER | BS_FLAT
+    PUSHBUTTON      "-",IDC_UNCREM,207,228,14,13,BS_CENTER | BS_FLAT
+    GROUPBOX        "Incoming files:",IDC_INCOMING_FRM,7,7,216,30,BS_FLAT
+    GROUPBOX        "Temp files:",IDC_TEMP_FRM,7,39,216,28,BS_FLAT
+    GROUPBOX        "Shared Directories (Ctrl-click  includes subdir):",
+                    IDC_SHARED_FRM,7,69,216,175,BS_FLAT
+END
+
+IDD_PPG_CONNECTION DIALOGEX 0, 0, 230, 244
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Connection"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_DOWNLOAD_CAP,14,33,45,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    EDITTEXT        IDC_UPLOAD_CAP,14,64,45,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_MAXDOWN_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,120,34,96,11,WS_EX_STATICEDGE
+    CONTROL         "",IDC_MAXUP_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,120,65,96,11,WS_EX_STATICEDGE
+    EDITTEXT        IDC_PORT,14,115,37,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "disable",IDC_UDPDISABLE,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,62,105,51,9
+    EDITTEXT        IDC_UDPPORT,62,115,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_KADUDPPORT,120,113,40,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_MAXSOURCEPERFILE,14,160,48,12,ES_RIGHT | 
+                    ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_MAXCON,120,160,68,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Autoconnect on startup",IDC_AUTOCONNECT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,185,138,10
+    CONTROL         "Reconnect on loss",IDC_RECONN,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,199,140,10
+    CONTROL         "Show overhead bandwidth",IDC_SHOWOVERHEAD,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,213,139,10
+    CONTROL         "Kademlia",IDC_NETWORK_KADEMLIA,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,158,199,57,10
+    CONTROL         "ED2K",IDC_NETWORK_ED2K,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,158,213,58,10
+    PUSHBUTTON      "Wizard",IDC_WIZARD,7,223,50,14,BS_FLAT
+    GROUPBOX        "Clientport:",IDC_CLIENTPORT_FRM,7,87,216,46,BS_FLAT
+    GROUPBOX        "Max Sources per file:",IDC_MAXSRC_FRM,7,137,93,40,
+                    BS_FLAT
+    GROUPBOX        "Max. Connections:",IDC_MAXCONN_FRM,113,137,110,40,
+                    BS_FLAT
+    GROUPBOX        "Capacities:",IDC_CAPACITIES_FRM,7,7,93,76,BS_FLAT
+    LTEXT           "Download",IDC_DCAP_LBL,14,21,78,8
+    LTEXT           "KB/s",IDC_KBS2,62,36,16,8
+    LTEXT           "KB/s",IDC_KBS3,62,67,15,8
+    LTEXT           "Upload",IDC_UCAP_LBL,14,52,79,8
+    GROUPBOX        "Limits:",IDC_LIMITS_FRM,113,7,110,76,BS_FLAT
+    RTEXT           "KB/s",IDC_KBS1,188,21,28,8
+    RTEXT           "KB/s",IDC_KBS4,188,52,28,8
+    LTEXT           "Hard Limit",IDC_MAXSRCHARD_LBL,14,148,85,8
+    LTEXT           "UDP",IDC_UDPPORTLABEL,62,97,16,8
+    LTEXT           "Static",IDC_MAXCONLABEL,120,148,86,8
+    LTEXT           "TCP",IDC_STATIC,14,99,18,8
+    LTEXT           "Kademlia UDP",IDC_KADUDPPORT_LABEL,120,97,96,8
+    GROUPBOX        "Network",IDC_CONNECTION_NETWORK,149,181,74,56
+    CONTROL         "Downloadlimit",IDC_DLIMIT_LBL,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,120,21,68,10
+    CONTROL         "Uploadlimit",IDC_ULIMIT_LBL,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_DISABLED | WS_TABSTOP,120,52,68,10
+END
+
+IDD_IRC DIALOGEX 3, 35, 508, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_NICKLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
+                    WS_TABSTOP,10,5,99,259,WS_EX_STATICEDGE
+    PUSHBUTTON      "Connect",IDC_BN_IRCCONNECT,10,268,49,14,BS_FLAT
+    CONTROL         "",IDC_TAB2,"SysTabControl32",TCS_MULTILINE,112,5,388,15
+    EDITTEXT        IDC_INPUTWINDOW,112,269,340,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TITLEWINDOW,112,20,388,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "Send",IDC_CHATSEND,453,268,47,14,BS_FLAT
+    CONTROL         "",IDC_SERVERCHANNELLIST,"SysListView32",LVS_REPORT | 
+                    LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,112,35,
+                    388,229,WS_EX_STATICEDGE
+    CONTROL         "",IDC_STATUSWINDOW,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE | WS_BORDER,112,35,388,229
+    PUSHBUTTON      "Close",IDC_CLOSECHAT,59,268,50,14,BS_FLAT
+END
+
+IDD_FILES DIALOGEX 3, 35, 507, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Re&load",IDC_RELOADSHAREDFILES,441,204,57,14,BS_FLAT
+    CONTROL         "",IDC_SFLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | 
+                    LVS_ALIGNLEFT | WS_TABSTOP,5,17,493,183,WS_EX_STATICEDGE
+    CONTROL         "Current Session:",IDC_CURSESSION_LBL,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,220,239,11
+    CONTROL         "Requested:",IDC_FSTATIC4,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,236,70,8
+    CONTROL         "Accepted Uploads:",IDC_FSTATIC5,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,252,70,8
+    CONTROL         "Transferred:",IDC_FSTATIC6,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,268,70,8
+    CONTROL         "-",IDC_SREQUESTED,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    86,236,40,8
+    CONTROL         "-",IDC_SACCEPTED,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    86,252,40,8
+    CONTROL         "-",IDC_STRANSFERED,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,86,268,40,8
+    CONTROL         "",IDC_POPBAR,"msctls_progress32",0x1,128,235,125,9,
+                    WS_EX_TRANSPARENT
+    CONTROL         "",IDC_POPBAR2,"msctls_progress32",0x1,128,251,125,9,
+                    WS_EX_TRANSPARENT
+    CONTROL         "",IDC_POPBAR3,"msctls_progress32",0x1,128,267,125,9,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Requested:",IDC_FSTATIC7,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,263,236,70,8
+    CONTROL         "Accepted Uploads:",IDC_FSTATIC8,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,263,252,70,8
+    CONTROL         "Transferred:",IDC_FSTATIC9,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,263,268,70,8
+    CONTROL         "-",IDC_SREQUESTED2,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,335,236,40,8
+    CONTROL         "-",IDC_SACCEPTED2,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    335,252,40,8
+    CONTROL         "-",IDC_STRANSFERED2,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,335,268,40,8
+    GROUPBOX        "Statistics",IDC_STATISTICS,7,205,375,78,BS_FLAT
+    LTEXT           "Total:",IDC_TOTAL_LBL,263,220,112,8
+    CONTROL         "Shared Files",IDC_TRAFFIC_TEXT,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,21,4,139,8
+    ICON            "",IDC_FILES_ICO,5,3,20,20
+END
+
+IDD_PPG_NOTIFY DIALOGEX 0, 0, 229, 218
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Notifications"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Pop up message",IDC_TASKBARNOTIFIER,7,7,215,165,BS_FLAT
+    CONTROL         "Use sound",IDC_CB_TBN_USESOUND,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,20,199,10
+    EDITTEXT        IDC_EDIT_TBN_WAVFILE,14,34,143,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_BTN_BROWSE_WAV,161,33,57,14,BS_FLAT
+    GROUPBOX        "Pop out when",IDC_TBN_OPTIONS,14,53,203,112,BS_FLAT
+    CONTROL         "Log entry added",IDC_CB_TBN_ONLOG,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,22,66,191,10
+    CONTROL         "Chat session started",IDC_CB_TBN_ONCHAT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,22,78,191,10
+    CONTROL         "Chat message received",IDC_CB_TBN_POP_ALWAYS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,22,90,191,10
+    CONTROL         "Download finished",IDC_CB_TBN_ONDOWNLOAD,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,22,114,191,10
+    CONTROL         "Download added",IDC_CB_TBN_ONNEWDOWNLOAD,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,22,102,191,10
+    CONTROL         "New eMule version detected",IDC_CB_TBN_ONNEWVERSION,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,22,126,
+                    191,10
+    CONTROL         "Urgent: out of diskspace, server connection lost",
+                    IDC_CB_TBN_IMPORTATNT,"Button",BS_AUTOCHECKBOX | BS_TOP | 
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,22,138,191,22
+END
+
+IDD_PPG_IRC DIALOGEX 0, 0, 229, 239
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "IRC"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_IRC_SERVER_BOX,25,16,191,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_IRC_NICK_BOX,25,43,191,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_IRC_NAME_BOX,25,80,114,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_IRC_MINUSER_BOX,149,80,67,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Use Channel Filter",IDC_IRC_USECHANFILTER,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,96,191,10
+    EDITTEXT        IDC_IRC_PERFORM_BOX,25,118,191,12,ES_AUTOHSCROLL
+    CONTROL         "Use perform string on connect",IDC_IRC_USEPERFORM,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,133,
+                    191,10
+    CONTROL         "Load channel list on connect.",IDC_IRC_LISTONCONNECT,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,168,
+                    191,10
+    CONTROL         "Add time stamp to messages.",IDC_IRC_TIMESTAMP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,178,191,10
+    CONTROL         "Ignore Info Messages.",IDC_IRC_INFOMESSAGE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,188,191,10
+    CONTROL         "Ignore Emule Proto Messages.",
+                    IDC_IRC_EMULEPROTO_INFOMESSAGE,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,25,198,191,10
+    CONTROL         "Accept files.",IDC_IRC_ACCEPTLINKS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,208,191,10
+    GROUPBOX        "Server",IDC_IRC_SERVER_FRM,7,7,215,26,BS_FLAT
+    GROUPBOX        "Misc",IDC_IRC_MISC_FRM,7,158,215,74,BS_FLAT
+    GROUPBOX        "Nick",IDC_IRC_NICK_FRM,7,34,215,26,BS_FLAT
+    GROUPBOX        "Channel List Filters",IDC_IRC_FILTER_FRM,7,62,215,45,
+                    BS_FLAT
+    LTEXT           "Name",IDC_IRC_NAME_TEXT,25,70,73,8
+    LTEXT           "Min users",IDC_IRC_MINUSER_TEXT,150,70,66,8
+    GROUPBOX        "Perform",IDC_IRC_PERFORM_FRM,7,109,215,45,BS_FLAT
+    CONTROL         "Connect to help channel.",IDC_IRC_HELPCHANNEL,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,25,143,191,10
+    CONTROL         "From friends only.",IDC_IRC_ACCEPTLINKSFRIENDS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,34,218,182,8
+END
+
+IDD_WIZARD DIALOGEX 0, 0, 263, 262
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Wizard"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "Win2K/XP",IDC_WIZ_XP_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_GROUP | WS_TABSTOP,20,20,91,10
+    CONTROL         "Win98/ME",IDC_WIZ_ME_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_TABSTOP,111,20,91,10
+    CONTROL         "1-5",IDC_WIZ_LOWDOWN_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_GROUP | WS_TABSTOP,20,55,48,10
+    CONTROL         "6-15",IDC_WIZ_MEDIUMDOWN_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | BS_FLAT | WS_TABSTOP,111,55,46,10
+    CONTROL         "16+",IDC_WIZ_HIGHDOWN_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_TABSTOP,183,55,43,10
+    CONTROL         "",IDC_PROVIDERS,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,13,107,235,85
+    EDITTEXT        IDC_WIZ_TRUEDOWNLOAD_BOX,20,206,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_WIZ_TRUEUPLOAD_BOX,140,206,40,14,ES_AUTOHSCROLL
+    CONTROL         "kBits/sec",IDC_KBITS,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_GROUP | WS_TABSTOP,61,223,47,11
+    CONTROL         "kBytes/sec",IDC_KBYTES,"Button",BS_AUTORADIOBUTTON | 
+                    BS_FLAT | WS_TABSTOP,109,223,72,11
+    DEFPUSHBUTTON   "Apply",IDC_WIZ_APPLY_BUTTON,135,243,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDC_WIZ_CANCEL_BUTTON,202,243,50,14,BS_FLAT
+    GROUPBOX        "OS",IDC_WIZ_OS_FRAME,10,10,242,25,BS_FLAT
+    GROUPBOX        "Concurrent Downloads",IDC_WIZ_CONCURENTDOWN_FRAME,10,45,
+                    242,25,BS_FLAT
+    GROUPBOX        "Connection type",IDC_WIZ_HOTBUTTON_FRAME,10,75,242,165,
+                    BS_FLAT
+    LTEXT           "True Upload Bandwidth",IDC_WIZ_TRUEUPLOAD_TEXT,140,196,
+                    104,10
+    LTEXT           "True Download Bandwidth",IDC_WIZ_TRUEDOWNLOAD_TEXT,20,
+                    196,115,10
+    LTEXT           "Unit:",IDC_UNIT,20,224,37,8
+    LTEXT           "",IDC_CTINFO,20,86,224,18
+END
+
+IDD_FILEINFO DIALOGEX 0, 0, 312, 251
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "File &Info"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Round Bitrate",IDC_ROUNDBIT,"Button",BS_AUTOCHECKBOX | 
+                    BS_LEFTTEXT | BS_FLAT | WS_TABSTOP,164,82,109,9
+    LTEXT           "Filesize:",IDC_FD_XI1,7,5,51,8
+    LTEXT           "",IDC_FILESIZE,61,5,87,8
+    LTEXT           "Length:",IDC_FD_XI2,7,17,50,8
+    LTEXT           "",IDC_LENGTH,61,17,87,8
+    GROUPBOX        "Video",IDC_FD_XI3,7,31,146,66,BS_FLAT
+    GROUPBOX        "Audio",IDC_FD_XI4,158,31,146,66,BS_FLAT
+    CONTROL         "Codec:",IDC_FD_XI5,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,42,47,8
+    CONTROL         "Bitrate:",IDC_FD_XI7,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,52,47,8
+    CONTROL         "Width:",IDC_FD_XI9,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,62,47,8
+    CONTROL         "Height:",IDC_FD_XI11,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,72,47,8
+    CONTROL         "Frames/Sec:",IDC_FD_XI13,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,14,82,47,8
+    CONTROL         "Codec:",IDC_FD_XI6,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,165,42,47,8
+    CONTROL         "Bitrate:",IDC_FD_XI8,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,165,52,47,8
+    CONTROL         "Channel:",IDC_FD_XI10,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,165,62,47,8
+    CONTROL         "Samplerate:",IDC_FD_XI12,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,165,72,47,8
+    CONTROL         "",IDC_VCODEC,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,65,42,83,8
+    CONTROL         "",IDC_VBITRATE,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,65,52,83,8
+    CONTROL         "",IDC_VWIDTH,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,65,62,83,8
+    CONTROL         "",IDC_VHEIGHT,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,65,72,83,8
+    CONTROL         "",IDC_VFPS,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,65,82,83,8
+    CONTROL         "",IDC_ACODEC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,218,
+                    42,80,8
+    CONTROL         "",IDC_ABITRATE,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,218,52,80,8
+    CONTROL         "",IDC_ACHANNEL,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
+                    WS_GROUP,218,62,80,8
+    CONTROL         "",IDC_ASAMPLERATE,"Static",SS_LEFTNOWORDWRAP | 
+                    SS_NOPREFIX | WS_GROUP,218,72,80,8
+    CONTROL         "",IDC_FULL_FILE_INFO,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL | WS_TABSTOP,7,102,297,143
+END
+
+IDD_PPG_TWEAKS DIALOGEX 0, 0, 227, 246
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Tweaks"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Static",IDC_WARNING,7,7,213,39
+    CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
+                    WS_BORDER | WS_TABSTOP,7,46,213,145
+    LTEXT           "File Buffer Size",IDC_FILEBUFFERSIZE_STATIC,7,195,213,8
+    CONTROL         "",IDC_FILEBUFFERSIZE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,14,205,206,11,WS_EX_STATICEDGE
+    LTEXT           "Queue Size",IDC_QUEUESIZE_STATIC,7,220,213,8
+    CONTROL         "",IDC_QUEUESIZE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,14,230,206,11,WS_EX_STATICEDGE
+END
+
+IDD_ADDFRIEND DIALOGEX 0, 0, 269, 172
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Add Friend"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Required Information",IDC_INFO1,7,7,256,50,BS_FLAT
+    CONTROL         "IP Address:",IDC_STATIC34,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,19,22,50,8
+    EDITTEXT        IDC_IP,72,20,91,12,ES_AUTOHSCROLL
+    CONTROL         "Port:",IDC_STATIC35,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,19,38,50,8
+    EDITTEXT        IDC_PORT,72,36,38,12,ES_AUTOHSCROLL
+    GROUPBOX        "Additional Information",IDC_INFO2,7,62,256,49,BS_FLAT
+    CONTROL         "Username:",IDC_STATIC31,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,19,77,50,8
+    EDITTEXT        IDC_USERNAME,72,75,184,12,ES_AUTOHSCROLL
+    CONTROL         "Userhash:",IDC_STATIC32,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,19,93,50,8
+    LTEXT           "Static",IDC_USERHASH,72,93,184,10
+    CONTROL         "Last seen:",IDC_LAST_SEEN_LABEL,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,19,128,69,8
+    EDITTEXT        IDC_EDIT2,91,128,165,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "&Add",IDC_ADD,163,153,46,15,BS_FLAT
+    PUSHBUTTON      "&Cancel",IDCANCEL,216,153,47,15,BS_FLAT
+    GROUPBOX        "",IDC_STATIC,7,116,256,29,BS_FLAT
+END
+
+IDD_COMMENT DIALOGEX 0, 0, 364, 161
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_CMT_TEXT,14,16,336,13,ES_AUTOHSCROLL
+    COMBOBOX        IDC_RATELIST,14,100,146,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDCOK,307,123,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDCCANCEL,307,140,50,14,BS_FLAT
+    LTEXT           "Static",IDC_CMT_LAIDE,15,32,335,32,WS_BORDER
+    LTEXT           "Static",IDC_RATEHELP,14,116,285,31,WS_BORDER
+    GROUPBOX        "Static",IDC_CMT_LQUEST,7,7,350,67
+    GROUPBOX        "Static",IDC_RATEQUEST,7,89,300,65
+END
+
+IDD_COMMENTLST DIALOGEX 0, 0, 408, 137
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
+    WS_THICKFRAME
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,4,7,398,109
+    PUSHBUTTON      "Refresh",IDCREF,348,119,54,14,BS_FLAT
+    LTEXT           "Static",IDC_CMSTATUS,4,117,236,9
+END
+
+IDD_CAT DIALOGEX 0, 0, 309, 300
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Edit Category Properties"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_TITLE,21,16,196,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_COMMENT,21,41,260,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_INCOMING,21,66,260,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BROWSE,286,66,16,12,BS_FLAT
+    COMBOBOX        IDC_PRIOCOMBO,21,90,115,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "",IDC_CATCOLOR,248,14,34,16,BS_FLAT
+    DEFPUSHBUTTON   "OK",IDOK,189,280,47,12,BS_FLAT
+    PUSHBUTTON      "&Cancel",IDCANCEL,252,280,50,12,BS_FLAT
+    LTEXT           "Title",IDC_STATIC_TITLE,7,6,209,8
+    LTEXT           "Comment",IDC_STATIC_COMMENT,7,31,295,8
+    LTEXT           "Color",IDC_STATIC_COLOR,232,5,50,8
+    LTEXT           "Priority For Added Files",IDC_STATIC_PRIO,7,80,131,8
+    LTEXT           "Incoming Files",IDC_STATIC_INCOMING,7,56,295,8
+    COMBOBOX        IDC_COMBO_A4AF,166,90,115,48,CBS_DROPDOWNLIST | 
+                    WS_TABSTOP
+    LTEXT           "Advanced A4AF Mode",IDC_STATIC_A4AF,150,80,131,8
+    EDITTEXT        IDC_AUTOCATEXT,40,253,241,12,ES_AUTOHSCROLL
+    GROUPBOX        "Category Filters",IDC_FILTERGROUP,7,105,295,167
+    GROUPBOX        "     File Size (MB)",IDC_STATIC_FSIZE,21,115,115,37
+    LTEXT           "Minimum",IDC_STATIC_MIN,28,125,34,8
+    LTEXT           "Maximum",IDC_STATIC_MAX,83,125,34,8
+    EDITTEXT        IDC_FS_MIN,40,134,35,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FS_MAX,95,134,35,12,ES_AUTOHSCROLL
+    GROUPBOX        "Remaining Size (MB)",IDC_STATIC_RSIZE,166,115,115,37
+    LTEXT           "Minimum",IDC_STATIC_MIN2,173,126,34,8
+    LTEXT           "Maximum",IDC_STATIC_MAX2,228,124,34,8
+    EDITTEXT        IDC_RS_MIN,185,134,35,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_RS_MAX,240,134,35,12,ES_AUTOHSCROLL
+    GROUPBOX        "Source Count",IDC_STATIC_SCOUNT,21,156,115,37
+    LTEXT           "Minimum",IDC_STATIC_MIN3,28,166,34,8
+    LTEXT           "Maximum",IDC_STATIC_MAX3,83,166,34,8
+    EDITTEXT        IDC_SC_MIN,40,175,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_SC_MAX,95,175,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        "Remaining Time (M)",IDC_STATIC_RTIME,166,156,115,37
+    LTEXT           "Minimum",IDC_STATIC_MIN4,173,167,34,8
+    LTEXT           "Maximum",IDC_STATIC_MAX4,228,165,34,8
+    EDITTEXT        IDC_RT_MIN,185,175,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_RT_MAX,240,175,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        "Available Source Count",IDC_STATIC_ASCOUNT,21,198,115,
+                    37
+    LTEXT           "Minimum",IDC_STATIC_MIN5,28,208,34,8
+    LTEXT           "Maximum",IDC_STATIC_MAX5,83,208,34,8
+    EDITTEXT        IDC_ASC_MIN,40,216,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_ASC_MAX,95,216,35,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_CHECK_FS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,
+                    115,9,8
+    LTEXT           "The check boxes indicate whether the criteria should be used when selecting a category for new files.",
+                    IDC_STATIC_EXP,166,200,115,35
+    CONTROL         "Advanced Filter Mask (Separator: | )",IDC_CHECK_MASK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,242,256,8
+END
+
+IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 241
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Display"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "3D Depth:",IDC_3DDEP,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,7,14,93,9
+    CONTROL         "",IDC_3DDEPTH,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,106,
+                    12,102,11,WS_EX_STATICEDGE
+    CONTROL         "flat",IDC_FLAT,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,99,
+                    24,36,9
+    CONTROL         "round",IDC_ROUND,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    159,24,49,9,WS_EX_RIGHT
+    CONTROL         "Tooltip delay time [seconds]",IDC_TOOLTIPDELAY_LBL,
+                    "Static",SS_LEFTNOWORDWRAP | WS_GROUP,7,40,115,8
+    EDITTEXT        IDC_TOOLTIPDELAY,122,38,28,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Downloadlist doubleclick to expand",IDC_DBLCLICK,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,56,216,10
+    CONTROL         "Indicate downloads with comments/rating by icon",
+                    IDC_INDICATERATINGS,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,7,68,216,10
+    CONTROL         "Show download percentage",IDC_SHOWDWLPERCENT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,80,216,10
+    CONTROL         "Show transfer rate on title",IDC_SHOWRATEONTITLE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,92,216,10
+    CONTROL         "CatInfo",IDC_SHOWCATINFO,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,104,216,8
+    CONTROL         "Minimize to trayicon",IDC_MINTRAY,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,116,216,10
+    GROUPBOX        "Lower CPU- && Memoryusage",IDC_STATIC_CPUMEM,7,131,216,
+                    65
+    CONTROL         "Disable Known Client List",IDC_DISABLEKNOWNLIST,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,144,202,10
+    CONTROL         "Disable Queue List",IDC_DISABLEQUEUELIST,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,156,202,10
+    CONTROL         "Keep queue list updated.",IDC_UPDATEQUEUE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,168,202,10
+    CONTROL         "Don't repaint graphs",IDC_REPAINT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,180,202,10
+    PUSHBUTTON      "Select font...",IDC_SELECT_HYPERTEXT_FONT,7,215,85,14,
+                    BS_FLAT
+    CONTROL         "Font for Server-, Message- and IRC-Window",
+                    IDC_HYPERTEXT_FONT_HINT,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,7,204,216,8
+END
+
+IDD_PPG_SECURITY DIALOGEX 0, 0, 230, 241
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Security"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "IP Filter",IDC_STATIC_IPFILTER,7,7,216,49,BS_FLAT
+    LTEXT           "Filterlevel:",IDC_STATIC_FILTERLEVEL,14,20,54,11
+    EDITTEXT        IDC_FILTERLEVEL,77,19,30,12,ES_AUTOHSCROLL | ES_NUMBER
+    PUSHBUTTON      "Edit",IDC_EDITFILTER,114,19,50,14,BS_FLAT
+    PUSHBUTTON      "Reload",IDC_RELOADFILTER,166,19,50,14,BS_FLAT
+    CONTROL         "Filter servers too (rejects dynIP-servers too)",
+                    IDC_FILTERSERVERBYIPFILTER,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,40,206,10
+    GROUPBOX        "Messages",IDC_MSG,7,58,215,86,BS_FLAT
+    LTEXT           "Filter messages containing: (Separator | )",
+                    IDC_FILTERLABEL,13,68,205,8
+    EDITTEXT        IDC_FILTER,14,78,206,28,ES_MULTILINE | ES_AUTOHSCROLL
+    CONTROL         "Accept from friends only",IDC_MSGONLYFRIENDS,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,109,202,8
+    CONTROL         "Only from valid senders",IDC_MSGONLYSEC,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,120,202,8
+    CONTROL         "Advanced spamfilter",IDC_ADVSPAMFILTER,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,131,202,10
+    GROUPBOX        "Comments",IDC_STATIC_COMMENTS,7,147,216,56,BS_FLAT
+    LTEXT           "Ignore Comments containing: (Separator | )",
+                    IDC_FILTERCOMMENTSLABEL,14,158,205,8
+    EDITTEXT        IDC_COMMENTFILTER,14,168,206,28,ES_MULTILINE | 
+                    ES_AUTOHSCROLL
+    GROUPBOX        "Misc",IDC_SEC_MISC,7,206,216,28,BS_FLAT
+    CONTROL         "Use secure Identification",IDC_USESECIDENT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,217,202,10
+    LTEXT           "<",IDC_STATIC_FILTERLEVEL2,69,20,8,11
+END
+
+IDD_INPUTBOX DIALOGEX 0, 0, 250, 59
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
+CAPTION "Inputbox"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_TEXT,2,23,245,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,143,38,50,14,BS_FLAT
+    PUSHBUTTON      "Abbrechen",IDCANCEL,197,38,50,14,BS_FLAT
+    LTEXT           "Static",IDC_IBLABEL,2,4,245,19
+    PUSHBUTTON      "Clean Filename",IDC_CLEANFILENAME,2,38,59,14,BS_FLAT
+    EDITTEXT        IDC_TEXTNUM,2,25,245,12,ES_AUTOHSCROLL | ES_NUMBER | NOT 
+                    WS_VISIBLE
+END
+
+IDD_SELCATEGORY DIALOGEX 0, 0, 186, 60
+STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | 
+    DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION
+EXSTYLE WS_EX_TOPMOST
+CAPTION "Select Category"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,70,42,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDCANCEL,130,42,50,14,BS_FLAT
+    COMBOBOX        IDC_CATCOMBO,7,23,172,42,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Select a category or type in a title for a new category for this link.",
+                    IDC_STATIC_INS,6,3,174,16
+END
+
+IDD_PPG_WEBSRV DIALOGEX 0, 0, 230, 241
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Werb Server"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "General",IDC_STATIC_GENERAL,7,7,216,78
+    CONTROL         "Check1",IDC_WSENABLED,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,17,107,11
+    LTEXT           "Port",IDC_WSPORT_LBL,14,33,42,8
+    EDITTEXT        IDC_WSPORT,88,30,26,13,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Template:",IDC_TEMPLATE,14,51,74,8
+    EDITTEXT        IDC_TMPLPATH,88,48,118,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_TMPLBROWSE,208,50,13,11,BS_FLAT
+    PUSHBUTTON      "Reload",IDC_WSRELOADTMPL,160,65,61,12,BS_FLAT
+    GROUPBOX        "Admin",IDC_STATIC_ADMIN,7,89,216,38
+    LTEXT           "Password",IDC_WSPASS_LBL,14,102,74,8
+    EDITTEXT        IDC_WSPASS,88,100,120,13,ES_PASSWORD | ES_AUTOHSCROLL
+    GROUPBOX        "low user",IDC_STATIC_LOWUSER,7,132,216,48
+    CONTROL         "Check1",IDC_WSENABLEDLOW,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,142,100,11
+    LTEXT           "Password",IDC_WSPASS_LBL2,14,159,74,8
+    EDITTEXT        IDC_WSPASSLOW,88,158,120,13,ES_PASSWORD | ES_AUTOHSCROLL
+    GROUPBOX        "MobileMule",IDC_STATIC_MOBILEMULE,7,186,216,48
+    CONTROL         "Enable MobileMule",IDC_MMENABLED,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,195,100,11
+    LTEXT           "Password",IDC_MMPASSWORD,14,209,45,8
+    EDITTEXT        IDC_MMPASSWORDFIELD,61,207,60,13,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    LTEXT           "Port",IDC_MMPORT_LBL,148,210,27,8
+    EDITTEXT        IDC_MMPORT_FIELD,178,207,30,13,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_GUIDELINK,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
+                    14,222,130,10
+END
+
+IDD_PPG_SCHEDULER DIALOGEX 0, 0, 230, 241
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Scheduler"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_ENABLE,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,12,6,90,12
+    PUSHBUTTON      "Remove",IDC_REMOVE,121,13,50,12,BS_FLAT
+    PUSHBUTTON      "New",IDC_NEW,175,13,48,12,BS_FLAT
+    CONTROL         "",IDC_SCHEDLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,7,26,216,63
+    CONTROL         "Enable",IDC_S_ENABLE,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,102,60,9
+    EDITTEXT        IDC_S_TITLE,54,112,162,11,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TIMESEL,54,125,75,60,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",IDC_DATETIMEPICKER1,"SysDateTimePick32",
+                    DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP,54,140,42,12
+    CONTROL         "",IDC_DATETIMEPICKER2,"SysDateTimePick32",
+                    DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP,107,140,42,12
+    CONTROL         "",IDC_SCHEDACTION,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,13,160,203,61
+    PUSHBUTTON      "Apply",IDC_APPLY,158,222,58,12,BS_FLAT
+    GROUPBOX        "Details",IDC_STATIC_DETAILS,7,92,216,147
+    LTEXT           "Title",IDC_STATIC_S_TITLE,14,114,40,8
+    LTEXT           "Time:",IDC_STATIC_S_TIME,14,128,38,8
+    LTEXT           "Action:",IDC_STATIC_S_ACTION,14,150,40,8
+    CTEXT           "-",IDC_STATIC,97,142,8,8
+    CONTROL         "Check1",IDC_CHECKNOENDTIME,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,153,142,63,9
+END
+
+IDD_WIZ1_WELCOME DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Welcome"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Welcome to eMule",IDC_WIZ1_TITLE,115,7,195,24
+    LTEXT           "This wizard will guide you...",IDC_WIZ1_ACTIONS,115,40,
+                    195,121
+    LTEXT           "To continue, click Next.",IDC_WIZ1_BTN_HINT,115,178,195,
+                    8
+END
+
+IDD_WIZ1_GENERAL DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_NICK,1,12,148,14,ES_AUTOHSCROLL
+    LTEXT           "Username:",IDC_NICK_FRM,1,1,148,8
+END
+
+IDD_WIZ1_DL_PRIO DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Download Priority"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Do you want eMule to manage your download priorities?\n\nTurning this on will allow eMule to make sure downloads with a lot of sources do not interfere with downloads that have few sources...",
+                    IDC_DAP,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
+                    BS_FLAT,1,1,315,141
+END
+
+IDD_WIZ1_UL_PRIO DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Upload Priority"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Do you want eMule to manage your upload priorities?\n\nTurning this on will allow eMule to boost rare files meaning popular files will be harder for other people to get.\nTurning this off...",
+                    IDC_UAP,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
+                    BS_FLAT,1,1,315,141
+END
+
+IDD_WIZ1_UPLOAD DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Upload Settings"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Do you want to upload full chunks?\n\nUsing full chunk gives the client a better chance to complete a chunk. Turning this off will help rotate your queue faster. If you are a dedicated releaser, you will want to turn this on.",
+                    IDC_FULLCHUNKTRANS,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | BS_FLAT,1,1,315,141
+END
+
+IDD_WIZ1_SERVER DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Server Settings"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Do you want eMule to connect using Safe Connect?\n\nTurning this feature off allows eMule to connect to servers a little faster, but can cause you to get more false lowID connects.",
+                    IDC_SAFESERVERCONNECT,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | BS_FLAT,7,42,303,57
+    CONTROL         "Do you want eMule to connect at startup?",
+                    IDC_AUTOCONNECT,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
+                    BS_FLAT,7,102,303,32
+    GROUPBOX        "Choose which network(s) you want to use.",
+                    IDC_WIZARD_NETWORK,1,1,315,28
+    CONTROL         "ED2K",IDC_WIZARD_NETWORK_ED2K,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,13,89,10
+    CONTROL         "Kademlia",IDC_WIZARD_NETWORK_KADEMLIA,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,158,13,94,10
+    GROUPBOX        "ED2K Setting",IDC_WIZARD_ED2K,1,33,315,109
+END
+
+IDD_WIZ1_END DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Finish"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Completing the Wizard",IDC_WIZ1_TITLE,115,7,195,24
+    LTEXT           "You have finished the eMule First Run Time Wizard.\n\nHappy sharing!",
+                    IDC_WIZ1_ACTIONS,115,40,195,109
+    LTEXT           "To close this wizard, click Finish.",IDC_WIZ1_BTN_HINT,
+                    115,178,195,8
+END
+
+IDD_LISTVIEW_SEARCH DIALOGEX 0, 0, 284, 65
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
+    WS_THICKFRAME
+CAPTION "Search"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "&Search text:",IDC_LISTVIEW_SEARCH_TEXT_LBL,7,7,269,8
+    EDITTEXT        IDC_LISTVIEW_SEARCH_TEXT,7,17,270,13,ES_AUTOHSCROLL
+    LTEXT           "Search in &column:",IDC_LISTVIEW_SEARCH_COLUMN_LBL,7,33,
+                    138,8
+    COMBOBOX        IDC_LISTVIEW_SEARCH_COLUMN,7,43,137,60,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,168,43,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDCANCEL,227,43,50,14,BS_FLAT
+END
+
+IDD_KADEMLIAWND DIALOGEX 3, 35, 508, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
+    WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Connect",IDC_KADCONNECT,3,14,60,14,BS_FLAT
+    PUSHBUTTON      "Recheck Firewallwall",IDC_FIREWALLCHECKBUTTON,75,14,83,
+                    14,BS_FLAT
+    EDITTEXT        IDC_BOOTSTRAPIP,313,16,82,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BOOTSTRAPPORT,399,16,40,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "BootStrap",IDC_BOOTSTRAPBUTTON,444,16,55,13,BS_FLAT
+    CONTROL         "",IDC_CONTACTLIST,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,43,498,104
+    CONTROL         "",IDC_SEARCHLIST,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,3,160,498,126
+    LTEXT           "Contacts",IDC_KADCONTACTLAB,3,35,145,8
+    LTEXT           "Current Searches",IDC_KADSEARCHLAB,3,152,231,8
+    LTEXT           "IP or Address",IDC_SSTATIC4,313,8,65,8
+    LTEXT           "Port",IDC_SSTATIC7,399,8,27,8
+    GROUPBOX        "BootStrap",IDC_BSSTATIC,306,0,195,33
+END
+
+IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 225
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Client Details"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "General",IDC_STATIC30,7,7,308,74,BS_FLAT
+    LTEXT           "Username:",IDC_STATIC31,19,20,46,8
+    LTEXT           "Static",IDC_DNAME,72,20,224,8
+    LTEXT           "Userhash:",IDC_STATIC32,19,31,46,8
+    LTEXT           "Static",IDC_DHASH,72,31,143,8
+    LTEXT           "Static",IDC_DID,215,31,93,8
+    LTEXT           "Clientsoftware:",IDC_STATIC33,19,42,50,8
+    LTEXT           "Static",IDC_DSOFT,72,42,83,8
+    LTEXT           "Clientversion:",IDC_STATIC36,163,42,45,8
+    LTEXT           "Static",IDC_DVERSION,215,42,89,8
+    LTEXT           "Server IP:",IDC_STATIC35,19,53,49,8
+    LTEXT           "Static",IDC_DSIP,72,53,83,8
+    LTEXT           "Servername:",IDC_STATIC38,163,53,47,8
+    LTEXT           "Static",IDC_DSNAME,215,53,92,8
+    LTEXT           "Identification:",IDC_STATIC133x,19,64,53,8
+    LTEXT           "Static",IDC_CDIDENT,72,64,184,8
+    GROUPBOX        "Transfer",IDC_STATIC40,7,87,308,71,BS_FLAT
+    LTEXT           "Currently downloading:",IDC_STATIC41,19,97,86,8
+    LTEXT           "Static",IDC_DDOWNLOADING,110,97,202,8
+    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,119,87,8
+    LTEXT           "Static",IDC_DDOWN,110,119,53,8
+    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,130,86,8
+    LTEXT           "Static",IDC_DAVDR,110,130,53,8
+    LTEXT           "Downloaded total:",IDC_STATIC44,19,141,83,8
+    LTEXT           "Static",IDC_DDOWNTOTAL,110,141,53,8
+    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,119,93,8
+    LTEXT           "Static",IDC_DDUP,256,119,51,8
+    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,130,93,8
+    LTEXT           "Static",IDC_DAVUR,256,130,50,8
+    LTEXT           "Uploaded total:",IDC_STATIC47,163,141,93,8
+    LTEXT           "Static",IDC_DUPTOTAL,256,141,50,8
+    GROUPBOX        "Scores",IDC_STATIC50,7,162,308,39,BS_FLAT
+    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,175,87,8
+    LTEXT           "Static",IDC_DRATIO,110,175,53,8
+    LTEXT           "Rating (total):",IDC_STATIC52,19,186,84,8
+    LTEXT           "Static",IDC_DRATING,110,186,53,8
+    LTEXT           "Uploadqueue Score:",IDC_STATIC53,163,186,91,8
+    LTEXT           "Static",IDC_DSCORE,256,186,55,8
+    DEFPUSHBUTTON   "&Close",IDOK,268,207,47,14,BS_FLAT
+    LTEXT           "Currently downloading:",IDC_STATIC48,19,108,86,8
+    LTEXT           "Static",IDC_UPLOADING,110,108,202,8
+END
+
+IDD_META_DATA DIALOGEX 0, 0, 408, 130
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Meta Data"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TAGS,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,4,7,398,109
+    LTEXT           "Total tags: 123",IDC_TOTAL_TAGS,4,118,302,8
+END
+
+IDD_FILEDETAILS_INFO DIALOGEX 0, 0, 312, 251
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "File Details"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "General",IDC_FD_X0,7,2,298,91,BS_FLAT
+    LTEXT           "Full Name:",IDC_FD_X1,17,12,50,8
+    LTEXT           "Static",IDC_FNAME,74,12,222,17
+    LTEXT           "met-File:",IDC_FD_X2,17,35,49,8
+    LTEXT           "Static",IDC_METFILE,74,35,222,18
+    LTEXT           "Hash:",IDC_FD_X3,17,54,48,8
+    EDITTEXT        IDC_FHASH,72,54,225,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER | NOT WS_TABSTOP
+    LTEXT           "Filesize:",IDC_FD_X4,17,66,47,8
+    LTEXT           "Static",IDC_FSIZE,74,66,124,8
+    LTEXT           "Partfilestatus:",IDC_FD_X5,17,78,57,8
+    LTEXT           "Static",IDC_PFSTATUS,74,78,151,8
+    LTEXT           "Last Seen Complete:",IDC_FD_X15,17,218,91,8
+    LTEXT           "Static",IDC_LASTSEENCOMPL,110,218,187,8
+    GROUPBOX        "Transfer",IDC_FD_X6,7,101,298,87,BS_FLAT
+    LTEXT           "Sources:",IDC_FD_X7,17,112,62,8
+    LTEXT           "Static",IDC_SOURCECOUNT,79,112,212,8
+    LTEXT           "Filepart-Count:",IDC_FD_X9,130,124,62,8
+    LTEXT           "Static",IDC_PARTCOUNT,198,124,56,8
+    LTEXT           "Static",IDC_PARTAVAILABLE,17,124,105,8
+    LTEXT           "Datarate:",IDC_FD_X13,17,136,62,8
+    LTEXT           "Static",IDC_DATARATE,79,136,56,8
+    LTEXT           "Last Receive:",IDC_FD_LASTCHANGE,17,231,90,8
+    LTEXT           "Static",IDC_LASTRECEIVED,110,231,187,8
+    LTEXT           "Transferred:",IDC_FD_X14,17,148,62,8
+    LTEXT           "Static",IDC_TRANSFERED,79,148,44,8
+    LTEXT           "Completed Size:",IDC_FD_X12,130,148,66,8
+    LTEXT           "Static",IDC_COMPLSIZE,198,148,46,8
+    LTEXT           "Static",IDC_PROCCOMPL,248,148,54,8
+    LTEXT           "Compression lost, gained and ICH-recovered packages",
+                    IDC_FD_STATS,17,164,284,18
+    LTEXT           "Static",IDC_FSIZE2,198,66,98,8
+    GROUPBOX        "Time && Dates",IDC_FD_X8,7,195,298,49,BS_FLAT
+    LTEXT           "Download Started:",IDC_FD_X16,17,206,90,8
+    LTEXT           "Static",IDC_FILECREATED,110,206,192,8
+END
+
+IDD_PREVIEWDIALOG DIALOGEX 0, 0, 280, 233
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "",IDC_PV_EXIT,257,212,16,14,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_PV_NEXT,238,212,16,14,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_PV_PRIOR,218,212,16,14,BS_ICON | BS_FLAT
+    CONTROL         "",IDC_PV_IMAGE,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+                    SS_SUNKEN,7,7,266,200,WS_EX_TRANSPARENT
+END
+
+IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 180
+STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
+EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Speed",IDC_SPEED,17,0,161,14,NOT WS_VISIBLE | WS_BORDER
+    LTEXT           "All to max",IDC_TOMAX,17,50,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Restore",IDC_RESTORE,17,148,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Connect to any server",IDC_CONNECT,17,84,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+    LTEXT           "Disconnect",IDC_DISCONNECT,17,99,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Exit",IDC_TRAYEXIT,17,165,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Download:",IDC_DOWNLBL,32,18,43,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_DOWNSLD,"msctls_trackbar32",0x0,75,18,56,12
+    EDITTEXT        IDC_DOWNTXT,133,18,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    LTEXT           "Upload:",IDC_UPLBL,32,34,43,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_UPSLD,"msctls_trackbar32",0x0,75,34,56,12
+    EDITTEXT        IDC_UPTXT,133,34,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,163,162,1
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,114,162,1
+    LTEXT           "KB/s",IDC_DOWNKB,159,18,19,12,SS_CENTERIMAGE
+    LTEXT           "KB/s",IDC_UPKB,159,34,19,12,SS_CENTERIMAGE
+    LTEXT           "",IDC_SIDEBAR,0,0,16,180
+    ICON            "",IDC_TRAYDOWN,17,19,21,20
+    ICON            "",IDC_TRAYUP,17,35,21,20
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,82,162,1
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,15,161,1
+    LTEXT           "SUC:",IDC_MINUPLBL,32,65,43,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_MINUPSLD,"msctls_trackbar32",0x0,75,65,56,12
+    EDITTEXT        IDC_MINUPTXT,133,65,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    LTEXT           "KB/s",IDC_MINUPKB,159,65,19,12,SS_CENTERIMAGE
+    ICON            "",IDC_TRAYSUC,17,67,21,20
+    LTEXT           "Preference",IDC_PREFERENCES,17,116,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,146,162,1
+    LTEXT           "Reload Share",IDC_TRAYRELOADSHARE,17,131,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+END
+
+IDD_PPG_MORPH DIALOGEX 0, 0, 230, 247
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Morph"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
+                    WS_BORDER | WS_TABSTOP,7,46,216,194
+    LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
+END
+
+IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 215
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Morph2"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,13,11,
+                    196,8
+    PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,143,28,81,14,BS_FLAT
+    EDITTEXT        IDC_UPDATE_URL_FAKELIST,13,29,128,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,13,20,96,8,0,
+                    WS_EX_TRANSPARENT
+    PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,143,69,81,14,
+                    BS_FLAT
+    CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,51,
+                    118,10
+    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,70,121,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,60,96,8,0,
+                    WS_EX_TRANSPARENT
+    EDITTEXT        IDC_LOWIDRETRY,113,100,22,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,17,102,92,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_HTTPDOWNLOAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 224
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 138
+    END
+
+    IDD_FILEDETAILS_NAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        VERTGUIDE, 17
+        VERTGUIDE, 247
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 207
+    END
+
+    IDD_EMULE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 513
+        BOTTOMMARGIN, 336
+        HORZGUIDE, 34
+    END
+
+    IDD_TRANSFER, DIALOG
+    BEGIN
+        RIGHTMARGIN, 505
+        BOTTOMMARGIN, 288
+    END
+
+    IDD_SERVER, DIALOG
+    BEGIN
+        RIGHTMARGIN, 507
+        VERTGUIDE, 5
+        VERTGUIDE, 9
+        VERTGUIDE, 363
+        VERTGUIDE, 372
+        VERTGUIDE, 445
+        VERTGUIDE, 500
+        VERTGUIDE, 502
+        VERTGUIDE, 505
+        HORZGUIDE, 29
+        HORZGUIDE, 45
+        HORZGUIDE, 176
+        HORZGUIDE, 193
+        HORZGUIDE, 200
+        HORZGUIDE, 282
+    END
+
+    IDD_SEARCH, DIALOG
+    BEGIN
+        RIGHTMARGIN, 505
+        VERTGUIDE, 138
+        VERTGUIDE, 205
+        VERTGUIDE, 221
+        VERTGUIDE, 279
+        VERTGUIDE, 379
+        VERTGUIDE, 495
+        BOTTOMMARGIN, 288
+        HORZGUIDE, 22
+        HORZGUIDE, 39
+        HORZGUIDE, 60
+        HORZGUIDE, 274
+    END
+
+    IDD_CHAT, DIALOG
+    BEGIN
+        RIGHTMARGIN, 503
+        BOTTOMMARGIN, 288
+        HORZGUIDE, 9
+        HORZGUIDE, 11
+        HORZGUIDE, 24
+        HORZGUIDE, 262
+        HORZGUIDE, 277
+        HORZGUIDE, 284
+    END
+
+    IDD_STATISTICS, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 505
+        VERTGUIDE, 373
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 286
+    END
+
+    IDD_PPG_STATS, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 224
+        BOTTOMMARGIN, 220
+    END
+
+    IDD_SPLASH, DIALOG
+    BEGIN
+        RIGHTMARGIN, 234
+        BOTTOMMARGIN, 170
+    END
+
+    IDD_PPG_PROXY, DIALOG
+    BEGIN
+        RIGHTMARGIN, 213
+        BOTTOMMARGIN, 200
+    END
+
+    IDD_PPG_SERVER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 218
+    END
+
+    IDD_PPG_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 100
+        VERTGUIDE, 107
+        VERTGUIDE, 114
+        VERTGUIDE, 121
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+        HORZGUIDE, 33
+        HORZGUIDE, 40
+        HORZGUIDE, 47
+        HORZGUIDE, 61
+        HORZGUIDE, 71
+        HORZGUIDE, 78
+        HORZGUIDE, 190
+        HORZGUIDE, 197
+        HORZGUIDE, 209
+    END
+
+    IDD_PPG_FILES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 222
+        VERTGUIDE, 13
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 236
+        HORZGUIDE, 27
+    END
+
+    IDD_PPG_DIRECTORIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 159
+        VERTGUIDE, 166
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+        HORZGUIDE, 91
+        HORZGUIDE, 105
+        HORZGUIDE, 193
+        HORZGUIDE, 200
+        HORZGUIDE, 222
+    END
+
+    IDD_PPG_CONNECTION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 62
+        VERTGUIDE, 100
+        VERTGUIDE, 113
+        VERTGUIDE, 120
+        VERTGUIDE, 158
+        VERTGUIDE, 180
+        VERTGUIDE, 188
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 237
+        HORZGUIDE, 97
+        HORZGUIDE, 127
+        HORZGUIDE, 133
+        HORZGUIDE, 156
+        HORZGUIDE, 172
+        HORZGUIDE, 195
+        HORZGUIDE, 209
+        HORZGUIDE, 223
+        HORZGUIDE, 237
+    END
+
+    IDD_IRC, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 505
+        VERTGUIDE, 10
+        VERTGUIDE, 59
+        VERTGUIDE, 109
+        VERTGUIDE, 112
+        VERTGUIDE, 500
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 286
+        HORZGUIDE, 5
+        HORZGUIDE, 20
+        HORZGUIDE, 35
+        HORZGUIDE, 264
+        HORZGUIDE, 269
+        HORZGUIDE, 280
+    END
+
+    IDD_FILES, DIALOG
+    BEGIN
+        RIGHTMARGIN, 505
+        VERTGUIDE, 21
+        VERTGUIDE, 110
+        VERTGUIDE, 160
+        VERTGUIDE, 391
+        VERTGUIDE, 412
+        BOTTOMMARGIN, 288
+        HORZGUIDE, 239
+        HORZGUIDE, 252
+        HORZGUIDE, 264
+        HORZGUIDE, 276
+    END
+
+    IDD_PPG_NOTIFY, DIALOG
+    BEGIN
+        RIGHTMARGIN, 222
+        VERTGUIDE, 14
+        VERTGUIDE, 213
+        VERTGUIDE, 223
+        BOTTOMMARGIN, 195
+    END
+
+    IDD_PPG_IRC, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 222
+        VERTGUIDE, 25
+        VERTGUIDE, 100
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 232
+    END
+
+    IDD_WIZARD, DIALOG
+    BEGIN
+        RIGHTMARGIN, 256
+        VERTGUIDE, 10
+        VERTGUIDE, 20
+        VERTGUIDE, 111
+        VERTGUIDE, 202
+        VERTGUIDE, 252
+        BOTTOMMARGIN, 257
+        HORZGUIDE, 10
+        HORZGUIDE, 20
+        HORZGUIDE, 35
+        HORZGUIDE, 45
+        HORZGUIDE, 55
+        HORZGUIDE, 70
+        HORZGUIDE, 75
+        HORZGUIDE, 86
+        HORZGUIDE, 116
+        HORZGUIDE, 120
+        HORZGUIDE, 124
+        HORZGUIDE, 134
+        HORZGUIDE, 144
+        HORZGUIDE, 166
+        HORZGUIDE, 204
+    END
+
+    IDD_FILEINFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        VERTGUIDE, 61
+        VERTGUIDE, 65
+        VERTGUIDE, 148
+        VERTGUIDE, 218
+        VERTGUIDE, 298
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 246
+    END
+
+    IDD_PPG_TWEAKS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 220
+        VERTGUIDE, 14
+        VERTGUIDE, 24
+        VERTGUIDE, 73
+        VERTGUIDE, 106
+        VERTGUIDE, 122
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 231
+    END
+
+    IDD_ADDFRIEND, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 263
+        VERTGUIDE, 19
+        VERTGUIDE, 72
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+
+    IDD_COMMENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 357
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 154
+    END
+
+    IDD_COMMENTLST, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 402
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 133
+    END
+
+    IDD_CAT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 21
+        TOPMARGIN, 5
+        BOTTOMMARGIN, 164
+    END
+
+    IDD_PPG_DISPLAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 100
+        VERTGUIDE, 107
+        VERTGUIDE, 114
+        VERTGUIDE, 121
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+        HORZGUIDE, 33
+        HORZGUIDE, 40
+        HORZGUIDE, 47
+        HORZGUIDE, 61
+        HORZGUIDE, 71
+        HORZGUIDE, 78
+        HORZGUIDE, 190
+        HORZGUIDE, 197
+        HORZGUIDE, 209
+    END
+
+    IDD_PPG_SECURITY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 100
+        VERTGUIDE, 107
+        VERTGUIDE, 114
+        VERTGUIDE, 121
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+        HORZGUIDE, 33
+        HORZGUIDE, 40
+        HORZGUIDE, 47
+    END
+
+    IDD_INPUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 247
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 52
+    END
+
+    IDD_PPG_WEBSRV, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 88
+        VERTGUIDE, 114
+        VERTGUIDE, 121
+        VERTGUIDE, 208
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+        HORZGUIDE, 33
+        HORZGUIDE, 40
+        HORZGUIDE, 47
+        HORZGUIDE, 61
+        HORZGUIDE, 71
+        HORZGUIDE, 78
+        HORZGUIDE, 220
+    END
+
+    IDD_PPG_SCHEDULER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        VERTGUIDE, 14
+        VERTGUIDE, 100
+        VERTGUIDE, 107
+        VERTGUIDE, 114
+        VERTGUIDE, 121
+        VERTGUIDE, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+        HORZGUIDE, 33
+        HORZGUIDE, 40
+        HORZGUIDE, 47
+        HORZGUIDE, 61
+        HORZGUIDE, 71
+        HORZGUIDE, 78
+        HORZGUIDE, 190
+        HORZGUIDE, 197
+        HORZGUIDE, 209
+    END
+
+    IDD_WIZ1_WELCOME, DIALOG
+    BEGIN
+        LEFTMARGIN, 115
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_WIZ1_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 316
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 142
+    END
+
+    IDD_WIZ1_DL_PRIO, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 316
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 142
+    END
+
+    IDD_WIZ1_UL_PRIO, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 316
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 142
+    END
+
+    IDD_WIZ1_UPLOAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 316
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 142
+    END
+
+    IDD_WIZ1_SERVER, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 316
+        VERTGUIDE, 7
+        VERTGUIDE, 158
+        VERTGUIDE, 310
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 142
+        HORZGUIDE, 13
+    END
+
+    IDD_WIZ1_END, DIALOG
+    BEGIN
+        LEFTMARGIN, 115
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_KADEMLIAWND, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 505
+        VERTGUIDE, 234
+        VERTGUIDE, 239
+        VERTGUIDE, 501
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 286
+        HORZGUIDE, 21
+        HORZGUIDE, 35
+        HORZGUIDE, 147
+        HORZGUIDE, 149
+        HORZGUIDE, 160
+    END
+
+    IDD_SOURCEDETAILWND, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 315
+        VERTGUIDE, 19
+        VERTGUIDE, 72
+        VERTGUIDE, 110
+        VERTGUIDE, 163
+        VERTGUIDE, 215
+        VERTGUIDE, 256
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 221
+        HORZGUIDE, 28
+        HORZGUIDE, 39
+        HORZGUIDE, 50
+        HORZGUIDE, 61
+        HORZGUIDE, 72
+        HORZGUIDE, 105
+        HORZGUIDE, 116
+        HORZGUIDE, 127
+        HORZGUIDE, 138
+        HORZGUIDE, 171
+        HORZGUIDE, 182
+    END
+
+    IDD_META_DATA, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 401
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 123
+    END
+
+    IDD_FILEDETAILS_INFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 305
+        VERTGUIDE, 17
+        VERTGUIDE, 74
+        VERTGUIDE, 110
+        VERTGUIDE, 130
+        VERTGUIDE, 182
+        VERTGUIDE, 198
+        VERTGUIDE, 225
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 244
+        HORZGUIDE, 27
+        HORZGUIDE, 39
+        HORZGUIDE, 50
+        HORZGUIDE, 61
+        HORZGUIDE, 74
+        HORZGUIDE, 85
+        HORZGUIDE, 122
+        HORZGUIDE, 137
+        HORZGUIDE, 146
+        HORZGUIDE, 158
+        HORZGUIDE, 170
+    END
+
+    IDD_PREVIEWDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 273
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
+    END
+
+    IDD_PPG_MORPH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 240
+        HORZGUIDE, 46
+    END
+
+    IDD_PPG_MORPH2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 224
+        BOTTOMMARGIN, 209
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\mule.ico"
+IDI_SERVERICON          ICON                    "res\\PROVIDER.ICO"
+IDI_NOTCONNECTED        ICON                    "res\\notconnected.ICO"
+IDI_CONNECTED           ICON                    "res\\connected.ICO"
+IDI_UPDOWN              ICON                    "res\\updown.ICO"
+IDI_UP1DOWN1            ICON                    "res\\Up1down1.ico"
+IDI_UP1DOWN0            ICON                    "res\\Up1down0.ico"
+IDI_UP0DOWN1            ICON                    "res\\Up0down1.ico"
+IDI_USER0               ICON                    "res\\neutral.ico"
+IDI_DCS1                ICON                    "res\\client0.ICO"
+IDI_DCS3                ICON                    "res\\client1.ICO"
+IDI_DCS2                ICON                    "res\\client2.ICO"
+IDI_DCS4                ICON                    "res\\client3.ICO"
+IDI_DCS5                ICON                    "res\\client4.ICO"
+IDI_MESSAGE             ICON                    "res\\message.ICO"
+IDI_MPENDING            ICON                    "res\\mpending.ICO"
+IDI_CHAT                ICON                    "res\\chat.ico"
+IDI_CONNECTEDHIGH       ICON                    "res\\connectedhigh.ICO"
+IDI_COMPPROT            ICON                    "res\\compatible.ICO"
+IDI_BN_CONNECT          ICON                    "res\\bn_connect.ico"
+IDI_BN_DISCONNECT       ICON                    "res\\bn_disconnect.ico"
+IDI_BN_SERVER           ICON                    "res\\server.ico"
+IDI_BN_SEARCH           ICON                    "res\\search.ico"
+IDI_BN_DOWNLOAD         ICON                    "res\\transfer.ico"
+IDI_BN_FILES            ICON                    "res\\shared.ico"
+IDI_BN_STATISTICS       ICON                    "res\\bn_statistics.ico"
+IDI_BN_PREFERENCES      ICON                    "res\\preferences.ico"
+IDI_BN_MESSAGES         ICON                    "res\\bn_messages.ico"
+IDR_TRAYICON            ICON                    "res\\mule_TrayIcon.ico"
+IDI_BN_STOPCONNECTING   ICON                    "res\\bn_stopcon.ico"
+IDR_TRAYICON_GREY       ICON                    "res\\mule_Tr_grey.ico"
+IDI_CLOSE               ICON                    "res\\close.ico"
+IDI_MLDONK              ICON                    "res\\mldonk.ico"
+IDI_RATING              ICON                    "res\\Rating.ico"
+IDI_RATINGBAD           ICON                    "res\\Rating_bad.ico"
+IDI_MYINFO              ICON                    "res\\myinfo.ico"
+IDI_EDONKEYHYBRID       ICON                    "res\\eDonkeyHybrid.ico"
+IDI_PREF_DISPLAY        ICON                    "res\\Display.ico"
+IDI_PREF_SECURITY       ICON                    "res\\Security.ico"
+IDI_PREF_WEBSERVER      ICON                    "res\\WebServer.ico"
+IDI_PREF_SCHEDULER      ICON                    "res\\Prefs_Scheduler.ico"
+IDI_PREF_TWEAK          ICON                    "res\\Prefs_tweak.ico"
+IDR_TRAYICONLOW         ICON                    "res\\mule_Tr_LowID.ico"
+IDI_TVI_CUMULATIVE      ICON                    "res\\CumulativeStats.ico"
+IDI_TVI_GENERIC         ICON                    "res\\IDI_TVI_GENERIC3.ico"
+IDI_TVI_DAY             ICON                    "res\\IDI_TVI_DAY.ico"
+IDI_TVI_MONTH           ICON                    "res\\IDI_TVI_MONTH.ico"
+IDI_TVI_YEAR            ICON                    "res\\IDI_TVI_YEAR.ico"
+IDI_BACKUP              ICON                    "res\\SafeWrite.ico"
+IDI_SECUREHASHCLIENTOVL ICON                    "res\\SecureHashOvl.ico"
+IDI_TRAY_CONNECT        ICON                    "res\\systray_connect.ico"
+IDI_TRAY_DISCONNECT     ICON                    "res\\systray_disconnect.ico"
+IDI_TRAY_EXIT           ICON                    "res\\systray_exit.ico"
+IDI_TRAY_RESTORE        ICON                    "res\\systray_restore.ico"
+IDI_TRAY_SPEED          ICON                    "res\\systray_speed.ico"
+IDI_TRAY_TOMAX          ICON                    "res\\systray_tomax.ico"
+IDI_SHAREDFILES         ICON                    "res\\SharedFiles.ico"
+IDI_SMALLSTATISTICS     ICON                    "res\\SmallStatistics.ico"
+IDI_SEARCHRESULTS       ICON                    "res\\SearchResults.ico"
+IDI_NORMALSEARCH        ICON                    "res\\NormalSearch.ico"
+IDI_WEBBASED            ICON                    "res\\WebBased.ico"
+IDI_DIRECTDOWNLOAD      ICON                    "res\\DirectDownload.ico"
+IDI_NEWSERVER           ICON                    "res\\NewServer.ico"
+IDI_UPDATESERVERS       ICON                    "res\\UpdateServers.ico"
+IDI_SERVERLIST          ICON                    "res\\ServerList.ico"
+IDI_SERVERINFO          ICON                    "res\\ServerInfo.ico"
+IDI_LOG                 ICON                    "res\\Log.ico"
+IDI_FRIEND              ICON                    "res\\Friend.ico"
+IDI_UPLOAD              ICON                    "res\\upload.ico"
+IDI_USER                ICON                    "res\\User.ico"
+IDI_BN_IRC              ICON                    "res\\IRC.ico"
+IDI_FRIENDS1            ICON                    "res\\friends1.ico"
+IDI_FRIENDS2            ICON                    "res\\friends2.ico"
+IDI_FRIENDS3            ICON                    "res\\friends3.ICO"
+IDI_PREF_SERVER         ICON                    "res\\Prefs_Server.ico"
+IDI_PREF_NOTIFICATIONS  ICON                    "res\\Prefs_Notifications.ico"
+IDI_PREF_CONNECTION     ICON                    "res\\Prefs_Connection.ico"
+IDI_PREF_FILES          ICON                    "res\\Prefs_Files.ico"
+IDI_PREF_FOLDERS        ICON                    "res\\Prefs_Folders.ico"
+IDI_PREF_GENERAL        ICON                    "res\\Prefs_General.ico"
+IDI_PREF_IRC            ICON                    "res\\Prefs_IRC.ico"
+IDI_PREF_STATISTICS     ICON                    "res\\Prefs_Statistics.ico"
+IDI_PREF_PROXY          ICON                    "res\\Prefs_Proxy.ico"
+IDI_SHAREAZA            ICON                    "res\\Shareaza.ico"
+IDI_BN_KADEMLIA         ICON                    "res\\Overnet.ico"
+IDI_SCH_SERVER          ICON                    "res\\SeverSearch.ico"
+IDI_SCH_FILEDONKEY      ICON                    "res\\Filedonkey.ico"
+IDI_SCH_JIGLE           ICON                    "res\\Jigle.ico"
+IDI_SCH_GLOBAL          ICON                    "res\\global.ico"
+IDI_SCH_KADEMLIA        ICON                    "res\\OvernetSearch.ico"
+IDI_STATS_HD            ICON                    "res\\Stats_HD.ico"
+IDI_CANCEL              ICON                    "res\\cancel.ICO"
+IDI_FORWARD             ICON                    "res\\forward.ICO"
+IDI_BACK                ICON                    "res\\back.ICO"
+IDI_SUC                 ICON                    "res\\suc.ico"
+IDI_RATING_NO           ICON                    "res\\Rating-NotRated.ico"
+IDI_RATING_EXCELLENT    ICON                    "res\\Rating-Excellent.ico"
+IDI_RATING_FAIR         ICON                    "res\\Rating-Fair.ico"
+IDI_RATING_GOOD         ICON                    "res\\Rating-Good.ico"
+IDI_RATING_POOR         ICON                    "res\\Rating-Poor.ico"
+IDI_RATING_FAKE         ICON                    "res\\Rating-Fake.ico"
+IDI_EDONKEY             ICON                    "res\\eDonkey.ico"
+IDI_CREDITCLIENTOVL     ICON                    "res\\CreditOvl.ico"
+IDI_CREDITSECUREOVL     ICON                    "res\\CreditSecureOvl.ico"
+IDI_MORPHNEXT           ICON                    "res\\MorphNext.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_UP                  BITMAP                  "res\\up.bmp"
+IDB_DOWN                BITMAP                  "res\\down.bmp"
+IDB_UP2X                BITMAP                  "res\\up2x.bmp"
+IDB_DOWN2X              BITMAP                  "res\\down2x.bmp"
+TRAYBUTTON_LUNA_METALLIC_BMP BITMAP                  "res\\TRAYBUTTON_LUNA_METALLIC.BMP"
+TRAYBUTTON_LUNA_BLUE_BMP BITMAP                  "res\\TRAYBUTTON_LUNA_BLUE.BMP"
+TRAYBUTTON_LUNA_HOMESTEAD_BMP BITMAP                  "res\\TRAYBUTTON_LUNA_HOMESTEAD.BMP"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+IDR_MANIFEST            RT_MANIFEST             "res\\emule.manifest"
+IDR_RT_MANIFEST1        RT_MANIFEST             "res\\emule.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AVI
+//
+
+IDR_HTTPDOWNLOAD_ANIMATION AVI                     "res\\inetdownload.avi"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// JPG
+//
+
+IDR_SPLASH              JPG                     "res\\About.jpg"
+IDR_ABOUT               JPG                     "res\\logo.jpg"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// GIF
+//
+
+IDR_TASKBAR             GIF                     "res\\taskbarNotifier.gif"
+IDR_WIZ1_WATERMARK      GIF                     "res\\mule_wiz.gif"
+IDR_WIZ1_HEADER         GIF                     "res\\mule_wiz_hdr.gif"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PPG_PROXY DLGINIT
+BEGIN
+    IDC_PROXYTYPE, 0x403, 9, 0
+0x6f4e, 0x5020, 0x6f72, 0x7978, "\000" 
+    IDC_PROXYTYPE, 0x403, 8, 0
+0x6f53, 0x6b63, 0x2073, 0x0034, 
+    IDC_PROXYTYPE, 0x403, 9, 0
+0x6f53, 0x6b63, 0x2073, 0x6134, "\000" 
+    IDC_PROXYTYPE, 0x403, 8, 0
+0x6f53, 0x6b63, 0x2073, 0x0035, 
+    IDC_PROXYTYPE, 0x403, 9, 0
+0x5448, 0x5054, 0x3120, 0x312e, "\000" 
+    0
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#include ""version.h""\r\n"
+    "#include ""res\\emule.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
+    "#include ""afxres.rc""         // Standardkomponenten\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Neutre resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Anglais (États-Unis) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_SOCKETS_INIT_FAILED "Error initiating the windows sockets."
+    IDS_ABOUTBOX            "&About eMule..."
+    IDS_HTTPDOWNLOAD_FILESTATUS "%1 from %2"
+    IDS_HTTPDOWNLOAD_CONNECTED "Connected to %1"
+    IDS_HTTPDOWNLOAD_RESOLVING_NAME "Resolving name: %1"
+    IDS_HTTPDOWNLOAD_RESOLVED_NAME "Resolved name to %1"
+    IDS_HTTPDOWNLOAD_CONNECTING "Connecting to %1"
+    IDS_HTTPDOWNLOAD_REDIRECTING "Redirecting to %1"
+    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Getting file information"
+    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR "An error occurred parsing the url: %s"
+    IDS_HTTPDOWNLOAD_GENERIC_ERROR 
+                            "An error occurred while attempting to download the file, Error:%1"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER 
+                            "An error occurred connecting to the server, Error:%1"
+    IDS_HTTPDOWNLOAD_INVALID_SERVER_RESPONSE 
+                            "Failed to receive a valid response from the server"
+    IDS_HTTPDOWNLOAD_INVALID_HTTP_RESPONSE 
+                            "Failed to receive a valid HTTP response from the server"
+    IDS_HTTPDOWNLOAD_ERROR_READFILE 
+                            "An error occurred while downloading the file, Error:%1"
+    IDS_HTTPDOWNLOAD_PERCENTAGE "Updating serverlist: %1% of %2 Completed"
+    IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Retrieving the file"
+    IDS_HTTPDOWNLOAD_OF     "%1 of %2"
+    IDS_HTTPDOWNLOAD_SECONDS "%1 sec"
+    IDS_HTTPDOWNLOAD_MINUTES "%1 min"
+    IDS_HTTPDOWNLOAD_MINUTES_AND_SECONDS "%1 min %2 sec"
+    IDS_HTTPDOWNLOAD_BYTES  "%1 Bytes"
+    IDS_HTTPDOWNLOAD_KILOBYTES "%1 KB"
+    IDS_CANCEL              "Cancel"
+    IDS_HTTPDOWNLOAD_MEGABYTES "%1 MB"
+    IDS_HTTP_CAPTION        "Updating serverlist"
+    IDS_HTTPDOWNLOAD_TIMELEFT "%1 (%2 copied)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_HTTPDOWNLOAD_BYTESPERSECOND "%1 Bytes/Sec"
+    IDS_HTTPDOWNLOAD_KILOBYTESPERSECOND "%1 KB/Sec"
+    IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE 
+                            "The file '%1' already exists.\nDo you want to replace it?"
+    IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN 
+                            "An error occured while opening the file to be downloaded, Error:%1"
+    IDS_HTTPDOWNLOAD_ABORTING_TRANSFER "Aborting transfer"
+    IDS_MAIN_READY          "eMule Version %s ready"
+    IDS_MAIN_SOCKETERROR    "Fatal Error: Unable to create socket on port %i"
+    IDS_MAIN_BTN_DISCONNECT "Dis&connect"
+    IDS_MAIN_BTN_DISCONNECT_TOOLTIP "Disconnect from current server"
+    IDS_ERR_WRONGFILEID     "wrong fileid sent"
+    IDS_ERR_BADHASHSET      "corrupted or invalid hashset received"
+    IDS_ERR_BADDATABLOCK    "corrupted or invalid DataBlock received"
+    IDS_ERR_ILLFORMEDHASH   "Ill-formed hash"
+    IDS_ERR_BADED2KLINK     "not a well-formed eD2K link"
+    IDS_ERR_NOSLLINK        "Not an eD2K server or file link"
+    IDS_ERR_WRONGPACKAGESIZE "invalid OP_FILEREQUEST packet size"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SL_SERVERNAME       "Server name"
+    IDS_IP                  "IP"
+    IDS_DESCRIPTION         "Description"
+    IDS_PING                "Ping"
+    IDS_FILES               "Files"
+    IDS_PREFERENCE          "Preference"
+    IDS_PRIONOPREF          "No Pref"
+    IDS_CONNECTTHIS         "Connect To Selected Server(s)"
+    IDS_CHAT_WELCOME        "Instant Messaging\n  \nRight-click on any client and select 'Send Message' to start a chatsession"
+    IDS_MAIN_BTN_CANCEL_TOOLTIP "Stops the current connection attempts"
+    IDS_MAIN_BTN_CONNECT    "&Connect"
+    IDS_ERR_SAVESERVERMET2  "Failed to save server.met! You may need to delete server.met and rename server.met.old to server.met!"
+    IDS_NOTCONNECTED        "Not Connected"
+    IDS_DISCONNECTED        "Disconnected"
+    IDS_USERS               "User: %i"
+    IDS_UPDOWN              "Up: %.1f(%.1f) | Down: %.1f(%.1f)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ASSIGNED2K          "eMule is not assigned to eD2K links. Do you want to assign eMule to eD2K links now (recommended) ?"
+    IDS_ERR_EMPTYADRESSESDAT 
+                            "No serverlistadress entry in 'adresses.dat' found. Please paste a valid serverlist address into this file in order to auto-update your serverlist"
+    IDS_ERR_EMPTYADRESSESDAT_TITLE "Unable to retrieve serverlist"
+    IDS_ERR_BADSERVERMETVERSION "Invalid versiontag in server.met (0x%X)!"
+    IDS_SERVERSFOUND        "%i servers in server.met found"
+    IDS_SERVERSADDED        "%d servers added, %d not added (already listed/invalid)"
+    IDS_ERR_BADSERVERLIST   "Error: the file server.met is corrupted, unable to load serverlist"
+    IDS_ERR_FILEERROR_SERVERMET 
+                            "Unexpected file error while reading server.met: %s, unable to load serverlist"
+    IDS_ERR_SAVESERVERMET   "Failed to save server.met!"
+    IDS_MAIN_CONNECTEDTO    "Connection established on:"
+    IDS_MAIN_BTN_CANCEL     "&Cancel"
+    IDS_AVAIL               "Parts: %u, Available: %u (%.1f%%)\n\n"
+    IDS_TYPE                "Type"
+    IDS_FILEID              "FileID"
+    IDS_FILE                "File"
+    IDS_DOWNLOAD            "Download"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CONNECTED           "Connected"
+    IDS_LINKNOTADDED        "Could not add link"
+    IDS_MAIN_EXIT           "Do you really want to exit eMule?"
+    IDS_MAIN_EXITTITLE      "Exit confirmation"
+    IDS_MAIN_POPUP_RESTORE  "Restore"
+    IDS_CONNECTTOANYSERVER  "Connect to Any Server"
+    IDS_EXIT                "E&xit"
+    IDS_CONNECTING          "Connecting"
+    IDS_FAILED              "Failed"
+    IDS_ERR_BADSERVERREPLY  "Corrupt or invalid reply to login received from server."
+    IDS_NEWCLIENTID         "New ClientID: %u"
+    IDS_NOSHAREDFOLDERS     "No Shared Folders"
+    IDS_SHAREDFOLDERS       "Shared Folders"
+    IDS_VIEW1               "View "
+    IDS_VIEW2               " (Not Shared)"
+    IDS_PRIOLOW             "Low"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PRIONORMAL          "Normal"
+    IDS_PRIOHIGH            "High"
+    IDS_DOWNLOADMENUTITLE   "Downloads"
+    IDS_PRIORITY            "Priority"
+    IDS_NEWSERVERS          "Received %d new servers."
+    IDS_DL_STOP             "&Stop"
+    IDS_DL_PAUSE            "&Pause"
+    IDS_DL_RESUME           "&Resume"
+    IDS_DL_OPEN             "&Open File"
+    IDS_DL_INFO             "File &Details"
+    IDS_DL_CLEAR            "C&lear Completed"
+    IDS_DL_LINK1            "Copy ED2K &Link"
+    IDS_DL_LINK2            "Copy ED2k &HTML Link"
+    IDS_SHOWDETAILS         "Show &Details"
+    IDS_SEND_MSG            "Send &Message"
+    IDS_ASKING              "Asking"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CONNVIASERVER       "Connecting Via Server"
+    IDS_ONQUEUE             "On Queue"
+    IDS_TRANSFERRING        "Transferring"
+    IDS_RECHASHSET          "Receiving Hash Set"
+    IDS_NONEEDEDPARTS       "No Needed Parts"
+    IDS_NOCONNECTLOW2LOW    "LowID to LowID"
+    IDS_UNKNOWN             "Unknown"
+    IDS_ASKED4ANOTHERFILE   "Asked for Another File"
+    IDS_Q_CANCELDL          "Are you sure that you want to cancel and delete these files?\n"
+    IDS_Q_CANCELDL2         "Are you sure that you want to cancel and delete this file?\n"
+    IDS_COPIED2CB           "Copied to clipboard: \n"
+    IDS_PROCDONE            "% done"
+    IDS_SELECTINCOMINGDIR   "Choose a folder for incoming files"
+    IDS_SELECTTEMPDIR       "Choose a folder for temp files"
+    IDS_DL_FILENAME         "File Name"
+    IDS_DL_SIZE             "Size"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DL_TRANSF           "Transferred"
+    IDS_DL_SPEED            "Speed"
+    IDS_DL_PROGRESS         "Progress"
+    IDS_DL_SOURCES          "Sources"
+    IDS_ERR_BADSERVERLISTRECEIVED "Invalid server-list packet received!"
+    IDS_STATUS              "Status"
+    IDS_DL_REMAINS          "Remaining"
+    IDS_QL_USERNAME         "Username"
+    IDS_ERR_PACKAGEHANDLING "Unhandled error while processing packet from server (%s)"
+    IDS_QL_RATING           "Rating"
+    IDS_CONNECTINGTO        "Connecting to %s (%s:%i)..."
+    IDS_CLIENTS             "Clients"
+    IDS_SEARCH_ANY          "Any"
+    IDS_SEARCH_AUDIO        "Audio"
+    IDS_SEARCH_PICS         "Pictures"
+    IDS_SEARCH_PRG          "Programs"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SEARCH_VIDEO        "Video"
+    IDS_SEARCH_CDIMG        "CD-Images"
+    IDS_SEARCH_ARC          "Archive"
+    IDS_ERR_INVALIDLINK     "This ED2K link is invalid: %s"
+    IDS_ERR_LINKERROR       "Invalid Link: %s"
+    IDS_ERR_NOTCONNECTED    "You are not connected to a server!"
+    IDS_REMOVETHIS          "Remove Selected Server"
+    IDS_REMOVEALL           "Remove All Servers"
+    IDS_SRV_ADDR            "Please enter a server address."
+    IDS_SRV_PORT            "Please enter a server port."
+    IDS_SRV_NOTADDED        "Server not added!"
+    IDS_SRV_READD           "Server was marked as dead.  It has been readded!"
+    IDS_SRV_NOURLAV         "No URL available."
+    IDS_INVALIDURL          "Invalid URL"
+    IDS_ERR_FAILEDDOWNLOADMET "Failed to download the server-list from %s"
+    IDS_PERMISSION          "Permission"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SHAREDFILES         "Shared Files"
+    IDS_PRIOVERYLOW         "Very Low"
+    IDS_PRIORELEASE         "Release"
+    IDS_FSTATUS_LOCKED      "Locked"
+    IDS_FSTATUS_FRIENDSONLY "Friends Only"
+    IDS_FSTATUS_PUBLIC      "Public"
+    IDS_PRIOHIGHEST         "Highest"
+    IDS_ERR_NOPRIMCHANGE    "You cannot change permissions while a file is still downloading!"
+    IDS_HIDDEN              "Hidden"
+    IDS_FSTAT_TRANSFER      "Transfer"
+    IDS_FSTAT_CONNECTION    "Connection"
+    IDS_FSTAT_CLIENTS       "Clients"
+    IDS_FSTAT_SERVERS       "Servers"
+    IDS_FSTAT_WAITING       "Waiting..."
+    IDS_TIME                "Time"
+    IDS_STATS_DDATA         "Downloaded Data: %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATS_UDATA         "Uploaded Data: %s"
+    IDS_STATS_AVGDL         "Average Download Rate: %.2f kB/s"
+    IDS_STATS_AVGUL         "Average Upload Rate: %.2f kB/s"
+    IDS_STATS_FOUNDSRC      "Found Sources: %i"
+    IDS_STATS_ACTDL         "Active Downloads (chunks): %i"
+    IDS_STATS_ACTUL         "Focused Uploads/Needed To Fill Bandwidth: %i"
+    IDS_STATS_WAITINGUSERS  "Waiting Uploads: %i"
+    IDS_STATS_RECONNECTS    "Reconnects: %i"
+    IDS_STATS_WAITTRANSF    "Waiting for transfer..."
+    IDS_STATS_WAITCONN      "Waiting for connection..."
+    IDS_STATS_CONNECTEDSINCE "Connected To Server Since: %s"
+    IDS_STATS_RATIO         "Session UL:DL Ratio (Session (Total)):"
+    IDS_STATS_UNKNOWNCLIENT "Unknown: %i"
+    IDS_STATS_TOTAL         "Total: %i"
+    IDS_STATS_WORKING       "Working: %i"
+    IDS_STATS_DEAD          "Dead/Deleted: %i"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DISABLED            "Disabled"
+    IDS_STOPPED             "Stopped"
+    IDS_STATS_UPDATELABEL   "Update delay: %i sec"
+    IDS_QUEUECOUNT          "%u (%u banned)"
+    IDS_NICKNAME            "Nickname: "
+    IDS_CLIENTSFILENAME     "\nClient's filename: "
+    IDS_ASKEDFAF            "\nA4AF"
+    IDS_WAITED              "Waited"
+    IDS_ERR_LOADCREDITFILE  "Failed to load creditfile, a new file will be created"
+    IDS_ERR_CREDITFILEOLD   "Creditfile is out of date and will be replaced"
+    IDS_CREDITFILELOADED    "Creditfile loaded, %u clients are known"
+    IDS_CREDITFILECORRUPT   "Error: the creditfile is corrupted and will be replaced!"
+    IDS_ERR_CREDITFILEREAD  "Unexpected file error while reading creditfile: %s"
+    IDS_ERR_FAILED_CREDITSAVE "Failed to save creditfile"
+    IDS_NOPARTSFOUND        "No part files found!"
+    IDS_FOUNDPARTS          "Found %i part files."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FILEBUFFERSIZE      "File Buffer Size (%i)"
+    IDS_QUEUESIZE           "Queue Size (%i)"
+    IDS_DAYS2               "days"
+    IDS_ERR_MAKEBAKCREDITFILE "Failed to make backup of credit file!"
+    IDS_COMMENT             "Comment"
+    IDS_IPFILTERED          "Filtered IP: %s (%s)"
+    IDS_DL_TRANSFCOMPL      "Completed"
+    IDS_STATS_FILTEREDCLIENTS "Filtered: %i"
+    IDS_FILTERLABEL         "Filter messages containing: (Separator | )"
+    IDS_ERR_LARGEREQBLOCK   "Client requested a block that was too large."
+    IDS_SHOWRATEONTITLE     "Show Transfer Rates on Titlebar"
+    IDS_TBN_NOMESSAGEHISTORY "No history message!"
+    IDS_PW_DAP              "Add New Downloads With Auto Priority"
+    IDS_FD_LASTCHANGE       "Last Reception:"
+    IDS_STATS_RUNTIME       "Run Time"
+    IDS_ALL                 "All"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NEWDOWNLOAD         "Downloading %s"
+    IDS_ERR_ALREADY_DOWNLOADING 
+                            "You are already trying to download this file: %s"
+    IDS_ERR_ALREADY_DOWNLOADED "You already have the file %s"
+    IDS_ERR_SERVERMET_BAD   "Error: the file known.met is corrupted, unable to load known files"
+    IDS_ERR_SERVERMET_UNKNOWN 
+                            "Unexpected file error while reading known.met: %s, unable to load known files"
+    IDS_ERR_CONNECTIONERROR "Error while connecting to %s (%s:%i): %d"
+    IDS_ERR_SOCKET          "Error in serversocket: %s (%s:%i): %u"
+    IDS_SHAREDFOUND         "Found %i known shared files"
+    IDS_SHAREDFOUNDHASHING  "Found %i known shared files, going to hash %i new files"
+    IDS_ERR_UDPEXT          "Error while processing incoming extended protocol UDP Packet"
+    IDS_ERR_INCOMPLETEBLOCK "asked for incomplete block"
+    IDS_ERR_OPEN            "failed to open requested file"
+    IDS_ERR_CLIENTERRORED   "Client '%s' caused error while creating package (%s) - disconnecting client"
+    IDS_ERR_REQ_FNF         "requested file not found"
+    IDS_CLIENTBLOCKED       "Client '%s' seems to be an aggressive client and is banned from the uploadqueue"
+    IDS_LUSERS              "users"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_WRONGHPACKAGESIZE "invalid OP_HASHSETREQUEST packet size"
+    IDS_ERR_BADCLIENTACTION "A client caused an error or did something bad: %s. Disconnecting client!"
+    IDS_ERR_UNKNOWNCLIENTACTION 
+                            "Unknown clients sends extended protocol packet"
+    IDS_ERR_OPENMET         "Error: Failed to open part.met file! (%s => %s)"
+    IDS_ERR_BADMETVERSION   "Error: Invalid part.met fileversion! (%s => %s)"
+    IDS_ERR_BADGAP          "Invalid Gap-Tag in part.met file"
+    IDS_ERR_METCORRUPT      "Error: %s (%s) is corrupt, unable to load file"
+    IDS_ERR_FILEERROR       "Unexpected file error while reading %s (%s): %s"
+    IDS_ERR_FILEOPEN        "Failed to open %s (%s)"
+    IDS_ERR_REHASH          "Warning: %s might be corrupted, performing rehash of completed parts"
+    IDS_ERR_PART_FNF        ".part file not found"
+    IDS_ERR_OPENMETFILE     "Failed to open part.met file"
+    IDS_ERR_SAVEMET         "ERROR while saving partfile: %s (%s)"
+    IDS_ERR_FOUNDCORRUPTION "Found corrupted part (%i) in %s"
+    IDS_HASHINGDONE         "Finished rehashing %s.  File seems to be okay."
+    IDS_ERR_PARTCORRUPT     "Downloaded part %i is corrupt :(  (%s)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ICHWORKED           "ICH: Recovered corrupted part %i  (%s)"
+    IDS_ERR_OUTOFSPACE      "You have insufficient diskspace to download %s!"
+    IDS_ERR_WRITEERROR      "Unexpected file error while writing %s : %s"
+    IDS_ERR_COMPLETIONFAILED 
+                            "Unexpected file error while completing %s. File paused, restart eMule to start another completing-try"
+    IDS_ERR_DELETEFAILED    "Failed to delete %s, you will need to do this by hand"
+    IDS_DOWNLOADDONE        "Finished downloading %s :-)"
+    IDS_ERR_DELETE          "Failed to delete %s"
+    IDS_ERR_HASHERRORWARNING 
+                            "Warning: Unable to hash downloaded part - hashset incomplete (%s)"
+    IDS_ERR_INCOMPLETEHASH  "Error: Unable to hash downloaded part - hashset incomplete (%s). This should never happen"
+    IDS_DOWNLOADING         "Downloading"
+    IDS_WAITING             "Waiting"
+    IDS_HASHING             "Hashing"
+    IDS_COMPLETING          "Completing"
+    IDS_COMPLETE            "Complete"
+    IDS_PAUSED              "Paused"
+    IDS_ERRORLIKE           "Erroneous"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LFILES              "files"
+    IDS_DESC                "Description: %s"
+    IDS_PORT                "Port"
+    IDS_ERR_NOVALIDSERVERSFOUND "No valid servers found in server-list!"
+    IDS_CONNECTEDTOREQ      "Connected to %s (%s:%i).  Sending login request."
+    IDS_ERR_FATAL           "Fatal error while trying to connect. Internet connection might be down"
+    IDS_ERR_LOSTC           "Lost connection to %s (%s:%i)."
+    IDS_ERR_DEAD            "%s (%s:%i) appears to be dead."
+    IDS_ERR_FULL            "%s (%s:%i) appears to be full"
+    IDS_ERR_NOSERVERSC      "No valid servers found in server-list!"
+    IDS_CONNECTEDTO         "Connection established on: %s."
+    IDS_DL_PREVIEW          "Preview"
+    IDS_VIEWQUEUE           "Show Queue"
+    IDS_VIEWUPLOADS         "Show Uploads"
+    IDS_TW_UPLOADS          "Uploads"
+    IDS_TW_DOWNLOADS        "Downloads"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_TW_QUEUE            "Clients on Queue:"
+    IDS_SW_SEARCHBOX        "Search"
+    IDS_SW_NAME             "Name"
+    IDS_SW_GLOBAL           "Search &Global"
+    IDS_SW_TYPE             "Type"
+    IDS_SW_DIRECTDOWNLOAD   "Direct Download"
+    IDS_SW_LINK             "ED2K Link(s)"
+    IDS_SW_START            "Start"
+    IDS_SCHEDULER           "Scheduler"
+    IDS_IRC                 "&IRC"
+    IDS_SW_RESULT           "Search Results"
+    IDS_SW_DOWNLOAD         "Download Selected"
+    IDS_SV_SERVERLIST       "Server List"
+    IDS_SV_SERVERINFO       "Server Info"
+    IDS_SV_LOG              "Log"
+    IDS_SV_NEWSERVER        "New Server"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAPACITY_LIMITS     "Bandwidth Limits"
+    IDS_ADMIN               "Administrator"
+    IDS_ACCESSDENIED        "Access Denied!"
+    IDS_WEB_LOWUSER         "Guest"
+    IDS_WEB_ERR_CANTLOAD    "Can't load templates. Can't open file: %s"
+    IDS_GLOBALSEARCH        "Global (Server)"
+    IDS_METHOD              "Method"
+    IDS_SW_WEBBASED         "Web-Based Search"
+    IDS_NOTHING             "Nothing"
+    IDS_SETUPSPEED          "set uploadlimit"
+    IDS_SETDOWNSPEED        "set downloadlimit"
+    IDS_DAYLY               "Daily"
+    IDS_DAY_MO_FR           "Mon-Fri"
+    IDS_DAY_SA_SO           "Sat-Sun"
+    IDS_MO                  "Monday"
+    IDS_DI                  "Tuesday"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SV_ADDRESS          "IP or Address"
+    IDS_SV_PORT             "Port"
+    IDS_SV_ADD              "Add To List"
+    IDS_SV_MET              "Update List From URL"
+    IDS_SV_UPDATE           "Update"
+    IDS_SF_FILES            "Shared Files"
+    IDS_SF_STATISTICS       "Statistics"
+    IDS_SF_RELOAD           "Reload"
+    IDS_SF_CURRENT          "Current Session"
+    IDS_SF_TOTAL            "Total"
+    IDS_SF_TRANS            "Transferred:"
+    IDS_SF_ACCEPTED         "Accepted Uploads:"
+    IDS_SF_REQUESTED        "Requested:"
+    IDS_ST_DOWNLOAD         "Download Speed"
+    IDS_ST_UPLOAD           "Upload Speed"
+    IDS_ST_CURRENT          "Current"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ST_SESSION          "Session Average"
+    IDS_ST_ACTIVED          "Active Downloads"
+    IDS_ST_ACTIVEU          "Focused Uploads"
+    IDS_ST_WAITINGU         "Waiting Uploads"
+    IDS_CW_MESSAGES         "Messages"
+    IDS_CW_FRIENDS          "Friends"
+    IDS_CW_SEND             "Send"
+    IDS_CW_CLOSE            "Close"
+    IDS_PW_GENERAL          "General"
+    IDS_PW_DIR              "Directories"
+    IDS_PW_NICK             "Nick"
+    IDS_PW_INCOMING         "Incoming Files"
+    IDS_PW_TEMP             "Temporary Files"
+    IDS_PW_BROWSE           "Browse"
+    IDS_PW_SHARED           "Shared Directories (Ctrl+Click To Include Sub-Dirs)"
+    IDS_PW_CONNECTION       "Connection"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_DOWNC            "Download Capacity"
+    IDS_PW_DOWNL            "Download Limit"
+    IDS_PW_UPC              "Upload Capacity"
+    IDS_PW_UPL              "Upload Limit"
+    IDS_PW_MAXC             "Max. Connections"
+    IDS_PW_CLIENTPORT       "Client Port"
+    IDS_PW_AUTOCON          "Connect to a Server on Start-Up"
+    IDS_PW_RECON            "Reconnect on Loss"
+    IDS_PW_SERVER           "Server"
+    IDS_PW_RDEAD            "Remove Dead Servers After"
+    IDS_PW_RETRIES          "Retries"
+    IDS_PW_SCORE            "Use Priority System"
+    IDS_PW_USC              "Update Servers when Connecting to a Server"
+    IDS_PW_UCC              "Update Servers when a Client Connects"
+    IDS_PW_FILTER           "Filter server and client LAN IPs"
+    IDS_PW_USS              "Update Servers on Start-Up"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_MISC             "Miscellaneous"
+    IDS_PW_TRAY             "Minimize to System Tray"
+    IDS_PW_BEEP             "Beep on Errors"
+    IDS_PW_PROMPT           "Prompt on Exit"
+    IDS_PW_SPLASH           "Show Splash Screen"
+    IDS_PW_DBLCLICK         "Double-Click to Show Sources"
+    IDS_PW_TOOL             "Tooltip Delay Time (Secs)"
+    IDS_PW_FRONT            "Bring to Front on ED2K Link"
+    IDS_PW_LANG             "Language"
+    IDS_PW_FILES            "Files"
+    IDS_PW_ICH              "&Intelligent Corruption Handling"
+    IDS_PW_SHARE            "See My Share"
+    IDS_PW_EVER             "Everybody"
+    IDS_PW_FRIENDS          "Friends"
+    IDS_PW_NOONE            "Nobody"
+    IDS_PW_RESET            "Reset"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_APPLY            "Apply"
+    IDS_EM_TRANS            "&Transfers"
+    IDS_EM_SERVER           "&Servers"
+    IDS_EM_SEARCH           "S&earch"
+    IDS_EM_FILES            "Shared &Files"
+    IDS_EM_MESSAGES         "&Messages"
+    IDS_EM_STATISTIC        "St&atistics"
+    IDS_EM_PREFS            "&Preferences"
+    IDS_MB_LANGUAGEINFO     "A default language was selected. You can change the language setting any time in the preferences dialog."
+    IDS_FD_GENERAL          "General"
+    IDS_FD_NAME             "Full Name:"
+    IDS_FD_MET              "Met-File:"
+    IDS_FD_HASH             "Hash:"
+    IDS_FD_SIZE             "File Size:"
+    IDS_FD_STATUS           "Part-File Status:"
+    IDS_FD_TRANSFER         "Transfer"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FD_SOURCES          "Found Sources:"
+    IDS_FD_HASHSETS         "Hashsets:"
+    IDS_FD_TRANS            "Transferred:"
+    IDS_FD_DATARATE         "Data Rate:"
+    IDS_FD_TRANSI           "Transferring:"
+    IDS_FD_COMPSIZE         "Completed Size:"
+    IDS_FD_CLOSE            "Close"
+    IDS_FD_TITLE            "File Details"
+    IDS_CD_GENERAL          "General"
+    IDS_CD_UNAME            "User Name:"
+    IDS_CD_UHASH            "User Hash:"
+    IDS_CD_CSOFT            "Client Software:"
+    IDS_CD_UIP              "IP Address:"
+    IDS_CD_SIP              "Server IP:"
+    IDS_CD_VERSION          "Client Version:"
+    IDS_CD_UID              "ID:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CD_SNAME            "Server Name:"
+    IDS_CD_CDOWN            "Currently Downloading:"
+    IDS_CD_DOWN             "Downloaded Session:"
+    IDS_CD_ADOWN            "Average Download Rate:"
+    IDS_CD_TDOWN            "Downloaded Total:"
+    IDS_CD_UP               "Uploaded Session:"
+    IDS_CD_AUP              "Average Upload Rate:"
+    IDS_CD_TUP              "Uploaded Total:"
+    IDS_CD_TRANS            "Transfer"
+    IDS_CD_SCORES           "Scores"
+    IDS_CD_MOD              "DL/UL Modifier:"
+    IDS_CD_RATING           "Rating:"
+    IDS_CD_USCORE           "Upload Queue Score:"
+    IDS_CD_TITLE            "Client Details"
+    IDS_EMULEW              "Click "
+    IDS_EMULEW2             "to see if a new version is available."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_EMULEW3             "here"
+    IDS_PW_MAXSOURCES       "Max. Sources Per File"
+    IDS_SHAREDFILESCOUNT    "Number of Shared Files: %i"
+    IDS_SF_SIZE             "Total Size of Shared Files: %s"
+    IDS_ERR_WRONGPARTNUMBER "Wrong part number."
+    IDS_ERR_BADPORT         "Bad port number."
+    IDS_ERR_NOHELLO         "Asked for something without saying hello."
+    IDS_ERR_INVALIDPACKAGE  "Invalid or corrupt packet received."
+    IDS_ERR_CLIENTERROR     "Client '%s' (IP:%s) caused an error: %s. Disconnecting client!"
+    IDS_ERR_BADSIZE         "Invalid size! (OP_QUEUERANKING)"
+    IDS_ERR_BADCLIENT2      "Client '%s' (IP:%s) caused an error: %u. Disconnecting client!"
+    IDS_ERR_NOTAFILELINK    "Not a File Link"
+    IDS_ERR_CREATEPARTFILE  "ERROR: Failed to create part-file!"
+    IDS_ERR_UDP_MISCONF     "Error while processing incoming UDP packet (Most likely a misconfigured server)."
+    IDS_CHAT_START          "*** Chatsession Start : "
+    IDS_FILEPRIO            "File Priority"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SCORE               "Score"
+    IDS_ASKED               "Asked"
+    IDS_LASTSEEN            "Last Seen"
+    IDS_BANNED              "Banned"
+    IDS_PRIOVERYHIGH        "Very High"
+    IDS_UUSERS              "Users"
+    IDS_UFAILED             "Failed"
+    IDS_OPENFILE            "Open File"
+    IDS_DATE                "Date"
+    IDS_PARTINFOS           "Partfilename:"
+    IDS_PARTINFOS2          "Downloading (from %d sources)"
+    IDS_USERID              "UserID"
+    IDS_CLIENT              "Client"
+    IDS_SERVER              "Server"
+    IDS_SOURCEINFO          "Asked: %d times - Available Part Count: %d"
+    IDS_CLIENTSOURCENAME    "\nClient's File Name: "
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_USERINFO            "Nick Name: %s\n"
+    IDS_FILESTATS_SESSION   "File stats for this session: Accepted %d of %d requests.  %s transferred\n"
+    IDS_FILESTATS_TOTAL     "File stats for all sessions: Accepted %d of %d requests.  %s transferred"
+    IDS_REQ_UNKNOWNFILE     "Requested Unknown File"
+    IDS_TRANSFERTIME        "Time Since First Transfer: %s"
+    IDS_SF_AVERAGESIZE      "Average File Size: %s"
+    IDS_SF_REQUESTS         "Requests"
+    IDS_SF_ACCEPTS          "Accepted Requests"
+    IDS_SF_TRANSFERRED      "Transferred Data"
+    IDS_REMOVESEARCHSTRING  "Close This Search"
+    IDS_REMOVESELECTED      "Remove Selected"
+    IDS_REMOVEALLSEARCH     "Remove All"
+    IDS_ENTERQUEUE          "Entered Queue"
+    IDS_SF_FAIL             "Failed Servers"
+    IDS_SF_WUSER            "Users on Working Servers"
+    IDS_SF_WFILE            "Files on Working Servers"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SF_USER             "Total Users"
+    IDS_SF_FILE             "Total Files"
+    IDS_UPLOADTIME          "Upload Time"
+    IDS_LASTSEENCOMPL       "Last Seen Complete:"
+    IDS_YES                 "Yes"
+    IDS_NO                  "No"
+    IDS_UNBAN               "Unban"
+    IDS_SF_WORKING          "Working Servers"
+    IDS_ADDTOSTATIC         "Add to Static Server List"
+    IDS_ADDED2SSF           "Added to Static Server List"
+    IDS_STATICSERVER        "Static"
+    IDS_ERROR_SSF           "Failed to open staticservers.dat!"
+    IDS_ERR_PACKAGEERROR    "Critical error while processing data packet for %s (Wrong Size).  Packet dropped."
+    IDS_SF_ACTIVECON        "Active Connections"
+    IDS_SF_MAXCONLIMITREACHED "Max. Connection Limit Reached"
+    IDS_SF_AVGCON           "Average Connections"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SF_PEAKCON          "Peak Connections"
+    IDS_ST_ACTIVEC          "Active Connections"
+    IDS_NETWORK             "Network"
+    IDS_SF_DELCOUNT         "Deleted Servers"
+    IDS_QUEUEFULL           "Queue Full"
+    IDS_AVG                 "Average"
+    IDS_BYTES               "Bytes"
+    IDS_KBYTES              "KB"
+    IDS_MBYTES              "MB"
+    IDS_GBYTES              "GB"
+    IDS_TBYTES              "TB"
+    IDS_SECS                "secs"
+    IDS_MINS                "mins"
+    IDS_HOURS               "h"
+    IDS_DAYS                "D"
+    IDS_ED2KLINKFIX         "ED2K Links"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_RECONNECT           "Automatic connection to server will retry in %d seconds."
+    IDS_SERVERADDED         "Server added: %s"
+    IDS_STATS_SUCCUPCOUNT   "Successful Upload Sessions: %i"
+    IDS_STATS_FAILUPCOUNT   "Failed Upload Sessions: %i"
+    IDS_STATS_AVEUPTIME     "Average Upload Time: %s"
+    IDS_SEARCHMINSIZE       "Min. Size"
+    IDS_SEARCHMAXSIZE       "Max. Size"
+    IDS_PREF_ONLINESIG      "Enable Online Signature"
+    IDS_ERROR_SAVEFILE      "Failed to Save"
+    IDS_REQ_SHAREDFILES     "User %s (%u) requested your list of shared files -> %s"
+    IDS_ACCEPTED            "Accepted"
+    IDS_DENIED              "Denied"
+    IDS_PW_CON_DOWNLBL      "Download"
+    IDS_PW_CON_UPLBL        "Upload"
+    IDS_PW_AUTOCONNECTSTATICONLY "Auto-Connect to Servers in Static List Only"
+    IDS_PW_CON_LIMITFRM     "Limits"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADMOVIECHUNKS "Give First and Last Chunks Higher Priority"
+    IDS_UPDATEQUEUE         "Do Not Update Queue List in Real Time"
+    IDS_RECOVER_SINGLE      "One file recovered."
+    IDS_RECOVER_MULTIPLE    "%ld files recovered."
+    IDS_ATTEMPTING_RECOVERY "Attempting archive recovery..."
+    IDS_RECOVERY_SUCCESSFUL "Archive recovery successful."
+    IDS_RECOVERY_FAILED     "Archive recovery failed."
+    IDS_STARTNEXTFILE       "Start Paused File When File Completes"
+    IDS_FULLCHUNKTRANS      "Try to Upload Full Chunks"
+    IDS_MANUALSERVERHIGHPRIO "Set Manually Added Servers to High Priority"
+    IDS_VERBOSE             "Verbose"
+    IDS_FLAT                "Flat"
+    IDS_ROUND               "Round"
+    IDS_SAMEUSERHASH        "Client '%s' and '%s' have the same user hash or IP.  Removed '%s'"
+    IDS_SEARCHEXTENTION     "Extension"
+    IDS_SEARCHAVAIL         "Availability"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_FILE_ICH         "I.C.H Active"
+    IDS_STATS_AVGLABEL      "Time For Average Graph: %i Mins"
+    IDS_GRAPHS              "Graphs"
+    IDS_STREE               "Statistics Tree"
+    IDS_STATSSETUPINFO      "Statistics"
+    IDS_HARDLIMIT           "Hard Limit"
+    IDS_COL_MORECOLORS      "More..."
+    IDS_KBYTESEC            "KB/s"
+    IDS_TOOMANYCONNS        "Too Many Connections"
+    IDS_DOWNLOADRENAMED     "A file with that name already exists, the file has been saved as %s"
+    IDS_TBN_DOWNLOADDONE    "Downloaded:"
+    IDS_TBN_DOWNLOADADDED   "Added to downloads:"
+    IDS_PW_TBN_USESOUND     "Use Sound"
+    IDS_PW_TBN_ONLOG        "New Entry on Log"
+    IDS_PW_TBN_ONCHAT       "Starts a New Chat Session"
+    IDS_PW_TBN_POP_ALWAYS   "A New Chat Message is Received"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PW_TBN_ONDOWNLOAD   "A Download is Added or Finished"
+    IDS_PW_EKDEV_OPTIONS    "Notifications"
+    IDS_PW_TASKBARNOTIFIER  "Pop Up Message"
+    IDS_PW_TBN_OPTIONS      "Pop Out When"
+    IDS_TBN_NEWCHATMSG      "Message From"
+    IDS_PW_CON_CAPFRM       "Capacities"
+    IDS_IRC_STATUSLOG       "Status Log"
+    IDS_IRC_STATUS          "Status"
+    IDS_IRC_PRIVATECHANSTART "* Private chat session started."
+    IDS_IRC_SLAPMSG         "* %s slaps %s around with a large Babelfish!"
+    IDS_IRC_PRIVMESSAGE     "Private Message"
+    IDS_IRC_OP              "Op"
+    IDS_IRC_DEOP            "DeOp"
+    IDS_IRC_VOICE           "Voice"
+    IDS_IRC_HALFOP          "HalfOp"
+    IDS_IRC_DEHALFOP        "DeHalfOp"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IRC_KICK            "Kick"
+    IDS_IRC_SLAP            "Slap"
+    IDS_IRC_JOIN            "Join"
+    IDS_IRC_CHANNELLIST     "Channel List"
+    IDS_IRC_CONNECT         "Connect"
+    IDS_IRC_DISCONNECT      "Disconnect"
+    IDS_IRC_HASJOINED       "* %s has joined %s"
+    IDS_IRC_HASPARTED       "* %s has parted %s (%s)"
+    IDS_IRC_WASKICKEDBY     "* %s was kicked by %s (%s)"
+    IDS_IRC_NICKUSED        "Your nick is already being used in the IRC server. Please choose a different nick in the IRC tab in Preferences."
+    IDS_IRC_DEVOICE         "DeVoice"
+    IDS_IRC_HASQUIT         "* %s has quit (%s)"
+    IDS_IRC_NOWKNOWNAS      "* %s is now known as %s"
+    IDS_IRC_SETSMODE        "* %s sets mode: %s %s"
+    IDS_IRC_NOTSUPPORTED    "** Some modes have been set that is not supported yet. You may need to leave and reenter channel to update nicklist.."
+    IDS_IRC_CHANNEL         "Channel"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IRC_NICK            "Nick"
+    IDS_IRC_SEND            "Send"
+    IDS_IRC_NAME            "Name"
+    IDS_IRC_SLAPMSGSEND     "PRIVMSG %s :\001ACTION slaps %s around with a large Babelfish!\001"
+    IDS_IRC_ADDTIMESTAMP    "Add timestamp to messages."
+    IDS_IRC_USEFILTER       "Use Channel List Filter"
+    IDS_IRC_PERFORM         "Perform"
+    IDS_IRC_USEPERFORM      "Use perform string on connect"
+    IDS_IRC_ADDTOFRIENDLIST "Add to friends list"
+    IDS_IRC_LOADCHANNELLISTONCON "Load server channel list on connect"
+    IDS_IRC_ADDASFRIEND     "added you as friend!"
+    IDS_PW_WARNING          "The number you have selected for ""%s"" is larger than your OS supports:  %d\nThis may cause your system to become unstable.\n\nAre you sure you want to do this?"
+    IDS_TAKEOVER            "Take Over"
+    IDS_CLEANUP             "Clean-Up"
+    IDS_RENAME              "Rename"
+    IDS_IRC_ADDLINKTOIRC    "Add To IRC Clipboard"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IRC_SENDLINK        "Send This To Friend: "
+    IDS_IRC_RECIEVEDLINK    "%s sent (%s) to be auto-started."
+    IDS_IRC_ACCEPTLINKS     "Accept ED2K Links in IRC (Use with caution!)"
+    IDS_SOURCENAMES         "Source Names"
+    IDS_PREF_STARTMIN       "Start Minimized"
+    IDS_PS_TBN_IMPORTANT    "Urgent: Out of Diskspace or Server Connection Lost"
+    IDS_COLORS              "Colors"
+    IDS_SP_BACKGROUND       "Background"
+    IDS_SP_GRID             "Grid"
+    IDS_SP_DL1              "Download Current"
+    IDS_SP_DL2              "Download Time-Average"
+    IDS_SP_DL3              "Download Session-Average"
+    IDS_SP_UL1              "Upload Current"
+    IDS_SP_UL2              "Upload Time-Average"
+    IDS_SP_UL3              "Upload Session-Average"
+    IDS_SP_ACTCON           "Active connections"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SP_ACTDL            "Active Downloads"
+    IDS_SP_ACTUL            "Active Uploads"
+    IDS_PW_TIT_UP           "Set Upload Limit"
+    IDS_PW_TIT_DOWN         "Set Download Limit"
+    IDS_PW_UNLIMITED        "Unlimited"
+    IDS_PW_MINREC           "Minimum Recommended\t%i "
+    IDS_PW_UA               "Maximum Up/Down Speed"
+    IDS_PW_PA               "Throttle Up/Down Speed"
+    IDS_IRC_IGNOREINFOMESSAGE "Ignore Info Messages"
+    IDS_CONNECTIONLOST      "Connection Lost"
+    IDS_WIZ_OS_FRAME        "Operating System"
+    IDS_WIZ_CONCURENTDOWN_FRAME 
+                            "How many downloads do you usually have going at once?"
+    IDS_WIZ_CUSTOM_FRAME    "If you tested your connection speed, put results here..."
+    IDS_WIZ_HOTBUTTON_FRAME "Preset Buttons"
+    IDS_WIZ_TRUEUPLOAD_TEXT "True Upload Bandwidth"
+    IDS_WIZ_TRUEDOWNLOAD_TEXT "True Download Bandwidth"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FRIENDLIST          "Friends"
+    IDS_CHATDISCONNECTED    "*** Disconnected"
+    IDS_WIZARD              "Wizard"
+    IDS_ADDFRIEND           "&Add To Friends"
+    IDS_REMOVEFRIEND        "Remove Friend"
+    IDS_REMOVEFROMSTOK      "Removed from static server list"
+    IDS_REMOVEFROMSTATIC    "Remove From Static Server List"
+    IDS_LENGTH              "Length"
+    IDS_VIDEO               "Video"
+    IDS_AUDIO               "Audio"
+    IDS_FILEINFO            "Media Info"
+    IDS_CODEC               "Codec"
+    IDS_BITRATE             "Bitrate"
+    IDS_WIDTH               "Width"
+    IDS_FPS                 "FPS"
+    IDS_CHANNELS            "Channels"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SAMPLERATE          "Sample Rate"
+    IDS_ROUNDBITRATE        "Round Bitrate"
+    IDS_HEIGHT              "Height"
+    IDS_SHAREDFILES_FAILED  "Unable to retrieve shared files from '%s'."
+    IDS_SHAREDFILES_REQUEST "Requesting shared files from '%s'."
+    IDS_VIEWFILES           "View Files"
+    IDS_FRIENDSLOT          "Establish Friend Slot"
+    IDS_FRIENDDETAIL        "(FS)"
+    IDS_ASCWOP_PROXYSUPPORT "Automatically connect to a server without a proxy."
+    IDS_UDPDISABLED         "Disable"
+    IDS_CTINFO              "Select your connection type here:"
+    IDS_WIZ_CTFRAME         "Connection Type"
+    IDS_CONCURDWL           "Concurrent Downloads"
+    IDS_UNIT                "Unit:"
+    IDS_WIZARD_CUSTOM       "Custom"
+    IDS_WIZARD_ENTERBELOW   "(enter below!)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATS_MAXAVGDL      "Max Average Download Rate: %.2f kB/s"
+    IDS_STATS_MAXDL         "Max Download Rate: %.2f kB/s"
+    IDS_PW_FASTSRVCON       "Safe Connect"
+    IDS_SOURCELINKFAILED    "You need a HighID to create a valid sourcelink."
+    IDS_CREATESOURCELINK    "Copy ED2K SourceLink"
+    IDS_ERR_LOADSERVERMET   "Failed to load server.met!"
+    IDS_ERR_CORRUPTCOMPRPKG "Corrupted compressed packet for %s received! (Error %i)"
+    IDS_ERR_EMFRIENDSINVALID "The file emfriends.met is invalid or corrupted!"
+    IDS_ERR_READEMFRIENDS   "Unknown error while reading emfriends.met: %s"
+    IDS_ERR_KNOWNSERVERINFOREC "Unknown server info received!"
+    IDS_ERR_TIMERCREATEFAILED "Fatal Error: Failed to create timer!"
+    IDS_WIZ_DOWN            "Down (Kbit/s)"
+    IDS_WIZ_UP              "Up (Kbit/s)"
+    IDS_SELECT_INCOMINGDIR  "Choose a folder for incoming files:"
+    IDS_SELECT_TEMPDIR      "Choose a folder for temp files:"
+    IDS_PRIOAUTO            "Auto"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PRIOAUTONORMAL      "Auto [No]"
+    IDS_PRIOAUTOHIGH        "Auto [Hi]"
+    IDS_PRIOAUTORELEASE     "Auto [Re]"
+    IDS_PRIOAUTOLOW         "Auto [Lo]"
+    IDS_ERR_CONTIMEOUT      "Connection attempt to '%s' (%s:%i) timed out."
+    IDS_ERR_CONFAILED       "Connecting to '%s' (%s:%i) failed."
+    IDS_OUTOFSERVERS        "Failed to connect to all servers listed. Making another pass."
+    IDS_PW_CONLIMITS        "Connection Limits"
+    IDS_MAXCON5SECLABEL     "Max. New Connections Per 5 Secs"
+    IDS_PW_UAP              "Default to Automatic Upload Priority for New Files"
+    IDS_MAXCLIENT           "Max Users"
+    IDS_PW_TWEAK            "Extended Settings"
+    IDS_TWEAKS_WARNING      "Warning:  Do not change these setting unless you know what you are doing. Otherwise you can easily make things worse for yourself.\neMule will run fine without adjusting any of these settings."
+    IDS_ADDAFRIEND          "Add a friend..."
+    IDS_PAF_REQINFO         "Required Information"
+    IDS_PAF_MOREINFO        "Additional Information"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_NOVALIDFRIENDINFO "You have to enter a valid IP and port!"
+    IDS_ADD                 "Add"
+    IDS_RECOVERED_PARTMET   "Recovered part.met file for: %s"
+    IDS_CMT_QUEST           "Comment:"
+    IDS_CMT_AIDE            "For a film, you can say its length, its story, the language... And if it is a fake, you can inform other eMule users...  Users who ask you for this file will receive your comment and can choose to view it."
+    IDS_CMT_TITLE           "%s File Comment"
+    IDS_CMT_ADD             "Change Comment"
+    IDS_CMT_NONE            "No Comments"
+    IDS_CMT_READ            "File Comment:"
+    IDS_CMT_NOTCONNECTED    "Not connected yet..."
+    IDS_CMT_SHOWALL         "Show All Comments"
+    IDS_CMT_REFRESH         "&Refresh"
+    IDS_CMT_READALL         "All Comments"
+    IDS_CMT_NOCOMMENT       "No comments entered..."
+    IDS_CMT_RATEQUEST       "File Quality"
+    IDS_CMT_RATEHELP        "Choose the file rating or advise users if the file is invalid!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CMT_FAKE            "Invalid / Corrupt / Fake"
+    IDS_CMT_POOR            "Poor"
+    IDS_CMT_GOOD            "Good"
+    IDS_CMT_FAIR            "Fair"
+    IDS_CMT_EXCELLENT       "Excellent"
+    IDS_CMT_NOTRATED        "Not Rated"
+    IDS_KILO                "K"
+    IDS_MEGA                "M"
+    IDS_GIGA                "G"
+    IDS_TERRA               "T"
+    IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "Ignore Emule Protocol Messages"
+    IDS_SMARTLOWIDCHECK     "Use Smart LowID Check on Connect"
+    IDS_SF_SRVOCC           "Server Occupation: %.2f%%"
+    IDS_3DDEP               "Progressbar Style"
+    IDS_AUTOTAKEED2KLINKS   "Accept ED2K Links Only During Run Time"
+    IDS_ADDNEWFILESPAUSED   "Add Files to Download Queue in Paused State"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FD_STATS            "Lost to corruption: %s       Gained by compression: %s\nPackages saved by ICH: %i"
+    IDS_ERR_NOHELP          "No help file found.\nPlease visit the download section of our homepage to get a copy of the newest help file!"
+    IDS_SHOWOVERHEAD        "Show Overhead Bandwidth"
+    IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f"
+    IDS_EDITLIST            "List"
+    IDS_SP_ICONBAR          "Systray Icon Speed-Bar"
+    IDS_RATINGRECV          "Rating for file '%s' received: %i"
+    IDS_DESCRIPTIONRECV     "Description for file '%s' received: %s"
+    IDS_WEBSERVICES         "Web Services"
+    IDS_WEBSVEDIT           "Edit Web Services"
+    IDS_CHECK4UPDATE        "Check for New Version"
+    IDS_STARTUP             "Start-Up"
+    IDS_NEWVERSIONAVL       "A new version of eMule is available! Check the project homepage for more information."
+    IDS_NEWVERSIONAVLPOPUP  "A new version of eMule is available. Click here to read about the new version!"
+    IDS_NEWVERSIONFAILED    "Unable to check for new version."
+    IDS_CB_TBN_ONNEWVERSION "New eMule version detected!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NONEWERVERSION      "No new eMule version detected."
+    IDS_VERSIONCHECK        "&Version Check"
+    IDS_VISITVERSIONCHECK   "\n\nDo you want do visit the information page now?"
+    IDS_PW_VIDEOPLAYER      "Video Player"
+    IDS_VIDEOBACKUP         "Create Copy For Preview"
+    IDS_STATIC_EMPTY        "Blank for default."
+    IDS_MYINFO              "My Info"
+    IDS_ID                  "ID"
+    IDS_IDLOW               "Low ID"
+    IDS_IDHIGH              "High ID"
+    IDS_UPSTATUS            "Obtained Parts"
+    IDS_TOVERHEAD           "Total Overhead: %s (%s Packets)"
+    IDS_FROVERHEAD          "File Request Overhead: %s (%s Packets)"
+    IDS_SSOVERHEAD          "Source Exchange Overhead: %s (%s Packets)"
+    IDS_SOVERHEAD           "Server Overhead: %s (%s Packets)"
+    IDS_ERR_FILECOMPLETIONTHREAD 
+                            "Error: File completion thread could not be initiated!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAT_ADD             "Add Category"
+    IDS_CAT_EDIT            "Edit Category"
+    IDS_CAT_REMOVE          "Remove Category"
+    IDS_CAT                 "Category"
+    IDS_TITLE               "Title"
+    IDS_COLOR               "Color"
+    IDS_DEFAULT             "Default"
+    IDS_PW_DISPLAY          "Display"
+    IDS_CAT_INVADD          "Show All Unassigned"
+    IDS_CAT_REINVADD        "Show All"
+    IDS_INDICATERATINGS     "Use Iconic Comment Indicator"
+    IDS_ALLOTHERS           "Uncategorized"
+    IDS_TOCAT               "Assign to Category"
+    IDS_CAT_UNASSIGN        "Unassign"
+    IDS_ADDDOWNLOADSFROMCB  "Add these files to the download queue?\n"
+    IDS_ADDDOWNLOADSFROMCBTITLE "ED2K Link(s) on Clipboard"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PF_WATCHCB          "Monitor Clipboard for ED2K File Links"
+    IDS_SECURITY            "Security"
+    IDS_IPFILTERLOADED      "%i IP-filters loaded"
+    IDS_IPFILTER            "IP-Filter"
+    IDS_EDIT                "Edit"
+    IDS_FILTERLEVEL         "Filter Level"
+    IDS_FILTERSERVERBYIPFILTER "Filter Servers (Rejects DynIP-Servers)"
+    IDS_FILTERCOMMENTSLABEL "Ignore comments containing: (Separator | )"
+    IDS_CLIENTLIST          "Known Clients"
+    IDS_FOLDER              "Folder"
+    IDS_CL_UPLOADSTATUS     "Upload Status"
+    IDS_CL_TRANSFUP         "Transferred Up"
+    IDS_CL_DOWNLSTATUS      "Download Status"
+    IDS_CL_TRANSFDOWN       "Transferred Down"
+    IDS_CL_PENDING          "Pending"
+    IDS_CL_LOW2LOW          "Low To Low IP"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERROR               "Error"
+    IDS_OPENINC             "&Open Incoming Folder"
+    IDS_HOTMENU             "Hot-Menu"
+    IDS_DISABLEKNOWNLIST    "Disable Known Client List"
+    IDS_DISABLEQUEUELIST    "Disable Queue List"
+    IDS_USECREDITSYSTEM     "Use Credit System (Reward Uploaders)"
+    IDS_FIRSTAUTODOWN       "Enable this option if you want eMule to manage your download priorities.\n\nTurning this on will allow eMule to make sure downloads with a lot of sources do not interfere with downloads that have few sources.\n\nIf you just updated from a client v0.26 and below, all current downloads have been defaulted to Auto Prio.\n\nThis option will only affect future downloads. (Default Enabled)"
+    IDS_FIRSTAUTOUP         "Enable this option if you want eMule to manage your upload priorities.\n\nTurning this on will allow eMule to boost rare files meaning popular files will be harder for other people to get.\n\nTurning this off will allow eMule to upload popular files more often meaning rare files will be harder for other people to get.\n\nIf you just updated from a client v0.26 and below, all current shared files have been defaulted to Auto Prio.\n\nThis option will only affect future shared files. (Default Enabled)"
+    IDS_FIRSTCREDITSYSTEM   "Do you want to reward people that upload to you?\n\nThis is commonly known as the Credit System. Turning this on will help fight against leachers. If you are a dedicated releaser, you will want to turn this off.\n\n(Default Yes)"
+    IDS_FIRSTFULLCHUNK      "Enable this option if you want to upload full chunks.\n\nUsing full chunk gives the client a better chance to complete a chunk. Turning this off will help rotate your queue faster. If you are a dedicated releaser, you will want to turn this on.\n\n(Default Enabled)"
+    IDS_FIRSTSAFECON        "Enable this option if you want eMule to connect using Safe Connect?\n\nTurning this feature off allows eMule to connect to servers a little faster, but can cause you to get more false low ID connects.\n\n(Default Disabled)"
+    IDS_FIRSTRUNASSIST      "Do you want to run the first-run setup wizard?"
+    IDS_FIRSTAUTOCON        "Enable this option if you want eMule to connect at startup.\n\n(Default Disabled)"
+    IDS_FIRSTCOMPLETE       "You have now completed the first time wizard.\n\nAll these settings and more can be changed by clicking the Preferences icon on the toolbar. For explanations and support check out the help file by pressing F1 in eMule!"
+    IDS_ENTERUSERNAME       "Please enter your user name:"
+    IDS_STATIC_CPUMEM       "Performance Tweaks"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG2DISKFRAME       "Save Logs to Disk"
+    IDS_LOG2DISK            "Log"
+    IDS_DEBUG2DISK          "Verbose"
+    IDS_EDITCAT             "Edit Category Properties"
+    IDS_PW_WS               "Web Interface"
+    IDS_ENABLED             "Enabled"
+    IDS_WEB_LOGIN           "Login"
+    IDS_WEB_ENTER_PASSWORD  "Enter your password here:"
+    IDS_WEB_LOGIN_NOW       "Login Now"
+    IDS_WEB_CONFIRM_REMOVE_SERVER 
+                            "Are you sure you want to remove this server from the list?"
+    IDS_WEB_CONTROL         "Web Control Panel"
+    IDS_WEB_LOGOUT          "Log Out"
+    IDS_WEB_ACTIONS         "Actions"
+    IDS_WEB_SHOW_UPLOAD_QUEUE "Show Queue"
+    IDS_WEB_HIDE_UPLOAD_QUEUE "Hide Queue"
+    IDS_WEB_GZIP_COMPRESSION "GZip Compression"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WEB_GZIP_COMMENT    "Save traffic, especially for graphs."
+    IDS_WEB_UPLOAD_QUEUE_COMMENT 
+                            "Enable or disable the display of the waiting queue in the transfer page."
+    IDS_WEB_REFRESH_TIME    "Refresh Time of Pages"
+    IDS_WEB_REFRESH_COMMENT "Time in seconds:"
+    IDS_SV_URL              "URL"
+    IDS_WS_RELOAD_TMPL      "Template"
+    IDS_SV_DEBUGLOG         "Debug Log"
+    IDS_WS_PASS             "Password"
+    IDS_WEB_FILESETTINGS    "File Settings"
+    IDS_WS_ERR_LOADTEMPLATE "Can't load templates.  Replace file '%s' with a newer version!"
+    IDS_WEB_CONLIMITS       "Connection Limits"
+    IDS_INFLST_USER_TOTALDOWNLOAD "Downloaded Total"
+    IDS_INFLST_USER_TOTALUPLOAD "Uploaded Total"
+    IDS_PRIORITY_UP         "Increase Priority"
+    IDS_PRIORITY_DOWN       "Decrease Priority"
+    IDS_SPEED_LIMITS        "Speed Limits"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MI                  "Wednesday"
+    IDS_DO                  "Thursday"
+    IDS_FR                  "Friday"
+    IDS_SA                  "Saturday"
+    IDS_SO                  "Sunday"
+    IDS_WEB_ADMINLOGIN      "Web Interface: Admin Login"
+    IDS_WEB_GUESTLOGIN      "Web Interface: Guest Login"
+    IDS_WEB_SESSIONEND      "Web Interface: Log Out"
+    IDS_DETAILS             "Details"
+    IDS_ACTION              "Action"
+    IDS_REMOVE              "Remove"
+    IDS_NEW                 "New"
+    IDS_WEB_BADLOGINATTEMPT "Web Interface: Failed Login Attempt!"
+    IDS_ERR_TOOLARGEFILE    "File larger than the supported size of the eDonkey Protocol! (>=4GB)"
+    IDS_MSGONLYFRIENDS      "Accept From Friends Only"
+    IDS_MSGONLYSEC          "Accept From Valid Clients Only"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DAY_MO_SA           "Mon-Sat"
+    IDS_LIMITSOURCES        "Limit Sources"
+    IDS_LIMITCONS5SEC       "Limit Connections Per 5 Secs"
+    IDS_SCHED_CATSTOP       "Cat: Stop Downloads"
+    IDS_SCHED_CATRESUME     "Cat: Resume Downloads"
+    IDS_S_DAYS              "Days"
+    IDS_STARTTIME           "Start Time"
+    IDS_VALUE               "Value"
+    IDS_SCHED_ENTERDATARATELIMIT "Enter the rate limit:"
+    IDS_SCHED_ENTERVAL      "Please enter the new value:"
+    IDS_SCHED_ACTCONFIG     "Configure Action"
+    IDS_SELECTCAT           "Select Category"
+    IDS_ALLUNASSIGNED       "All Uncategorized"
+    IDS_ACTSESSIONS         "Active Session(s)"
+    IDS_WEBSRV              "WebIfc."
+    IDS_SW_REFETCHRES       "Refetch Results"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FILEHASH            "File Hash"
+    IDS_GLOBALSEARCH2       "Global Search"
+    IDS_PW_PROXY            "Proxy"
+    IDS_PROXY_ENABLE        "Enable Proxy"
+    IDS_PROXY_TYPE          "Proxy Type:"
+    IDS_PROXY_HOST          "Proxy Host:"
+    IDS_PROXY_PORT          "Proxy Port:"
+    IDS_PROXY_AUTH          "Enable Authentication"
+    IDS_AUTH                "Authentication"
+    IDS_SHOWCATINFO         "Show Download Info on Category Tabs"
+    IDS_SW_SEARCHINGINFO    "Search in progress. Refetch results in a moment!"
+    IDS_LOGENTRY            "Log Entry"
+    IDS_COPY                "Copy"
+    IDS_SELECTALL           "Select All"
+    IDS_AUTOSCROLL          "Automatically Scroll"
+    IDS_WIZ1_WELCOME_TITLE  "Welcome to eMule"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WIZ1_WELCOME_ACTIONS 
+                            "This wizard will guide you through the first steps of configuring eMule."
+    IDS_WIZ1_WELCOME_BTN_HINT "To continue, click Next."
+    IDS_WIZ1_END_TITLE      "Completing the Wizard"
+    IDS_WIZ1                "eMule First-Run Wizard"
+    IDS_WIZ1_END_BTN_HINT   "To close this wizard, click Finish."
+    IDS_WIZ1_UPLOAD_SUBTITLE "Full Chunk Transfer"
+    IDS_DL_RESUMENEXT       "Resume Next Paused"
+    IDS_DONTCHANGE          "Don't Change"
+    IDS_STARTPRIO           "Priority For New Files"
+    IDS_PREF_STARTNEXTFILECAT "Prefer Same Category"
+    IDS_REPAINTGRAPHS       "Don't Redraw Statistic Graphs on Resize"
+    IDS_SOFTFILES           "Soft File Limit"
+    IDS_HARDFILES           "Hard File Limit"
+    IDS_FILTER              "Filter"
+    IDS_LINKS               "Links"
+    IDS_HM_SCHED_ON         "Switch Scheduler On"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_HM_SCHED_OFF        "Switch Scheduler Off"
+    IDS_HM_LINKHP           "eMule Homepage"
+    IDS_HM_LINKFAQ          "eMule FAQ"
+    IDS_HM_LINKVC           "eMule Version Check"
+    IDS_DEBUG_SOURCE_EXCHANGE "Display Source Exchange Entries"
+    IDS_SHAREDREQ1          "User %s (%u) requested your list of shared directories -> %s"
+    IDS_SHAREDREQ2          "User %s (%u) requested your list of shared files for directory '%s' -> %s"
+    IDS_SHAREDANSW          "User %s (%u) shares directory '%s'"
+    IDS_SHAREDANSW2         "User %s (%u) sent not requested list of shared directories - ignored"
+    IDS_SHAREDINFO1         "User %s (%u) sent list of shared files for directory '%s'"
+    IDS_SHAREDINFO2         "User %s (%u) finished sending lists of shared files"
+    IDS_SHAREDANSW3         "User %s (%u) sent not requested list of shared files for directory '%s' - ignored"
+    IDS_SHAREDREQDENIED     "User %s (%u) denied access to list of shared directories/files"
+    IDS_AUTOCLEANUPFN       "Clean-Up Filename"
+    IDS_ONNEWDOWNLOAD       "Initializations"
+    IDS_FILTERFILENAMEWORD  "Enter Words to Filter (Seperated By | )"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FNFILTERTITLE       "Edit filename word filter for name clean-up."
+    IDS_CHANGECATVIEW       "Select View Filter"
+    IDS_STATUS_NOTCOMPLETED "Incomplete"
+    IDS_STATS_CUMULATIVE    "Cumulative"
+    IDS_STATS_OVRHD         "Overhead"
+    IDS_STATS_RECORDS       "Records"
+    IDS_STATS_OVRHD2        "Overhead: %s (%s Packets)"
+    IDS_STATS_COMPDL        "Completed Downloads"
+    IDS_STATS_SVRECWORKING  "Max. Working Servers"
+    IDS_STATS_SVRECUSERS    "Max. Users Online"
+    IDS_SEARCH_TEXT         "Search for"
+    IDS_STATS_SVRECFILES    "Max. Files Available"
+    IDS_STATS_SHRECNUM      "Max. Files Ever Shared"
+    IDS_SEARCH_COLUMN       "Search in column"
+    IDS_STATS_SHRECSIZE     "Largest Share Size"
+    IDS_STATS_SHRECASIZE    "Largest Average File Size"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATS_MYRUNTIME     "Overall Run Time: %s"
+    IDS_STATS_SESSION       "Session"
+    IDS_STATS_SRATIO        "Session UL:DL Ratio:"
+    IDS_STATS_CRATIO        "Cumulative UL:DL Ratio:"
+    IDS_SEARCH_NORESULT     "No matching entry found."
+    IDS_STATS_CURRSRVDUR    "Current Server Duration"
+    IDS_LONGSECS            "Seconds"
+    IDS_STATS_DLSES         "Download Sessions"
+    IDS_LONGMINS            "Minutes"
+    IDS_STATS_SDLSES        "Successful Download Sessions"
+    IDS_STATS_FDLSES        "Failed Download Sessions"
+    IDS_STATS_AVGDATADLSES  "Average Downloaded Per Session"
+    IDS_STATS_ULSES         "Completed Upload Sessions"
+    IDS_STATS_GAINCOMP      "Gained Due To Compression: %s"
+    IDS_STATS_LOSTCORRUPT   "Lost Due To Corruption: %s"
+    IDS_STATS_AVGDATAULSES  "Average Uploaded Per Session"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATS_ICHSAVED      "Parts Saved Due To I.C.H: %u"
+    IDS_STATS_MBRESET_TXT   "Are you sure you wish to reset your cumulative statistics?\n\nIf you change your mind, you can reverse this action by clicking the 'Restore Stats' button."
+    IDS_STATS_MBRESET_CAP   "Confirm Reset"
+    IDS_STATS_MBRESTORE_TXT "Are you sure you wish to restore your cumulative statistics from the backup file?\n\nClicking 'Restore Stats' again will reload your current statistics."
+    IDS_STATS_MBRESTORE_CAP "Confirm Restore"
+    IDS_ERR_NOSTATBKUP      "ERROR: The backup statistics file was not found..."
+    IDS_STATS_NFOLOADEDBKUP "Loaded backed up statistical data..."
+    IDS_STATS_NFORESET      "Statistics have been reset!"
+    IDS_STATS_BNRESET       "Reset Statistics"
+    IDS_STATS_BNRESTORE     "Restore Statistics"
+    IDS_CONNECTIONSTATISTICS "Connection Statistics"
+    IDS_PPGSTATS_YSCALE     "Connections Statistics Y-Axis Scale:"
+    IDS_PPGSTATS_ACRATIO    "Active Connections Ratio:"
+    IDS_STATS_PROBLEMATIC   "Problematic"
+    IDS_LONGHRS             "Hours"
+    IDS_STATS_LARGESTFILE   "Largest Shared File"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CLIENTSOFTWARE      "Client Software"
+    IDS_STATS_DSPF          "Part File"
+    IDS_STATS_DATASOURCE    "Data Source"
+    IDS_STATS_DSFILE        "Complete File"
+    IDS_STATS_GENERAL       "General"
+    IDS_STATS_TRANSTIME     "Transfer Time"
+    IDS_STATS_DOWNTIME      "Download Time"
+    IDS_STATS_UPTIME        "Upload Time"
+    IDS_STATS_TOTALSRVDUR   "Total Server Duration"
+    IDS_STATS_MAXAVGUL      "Max Average Upload Rate"
+    IDS_STATS_MAXUL         "Max Upload Rate"
+    IDS_STATS_AVGDLTIME     "Average Download Time"
+    IDS_STATS_OLDCLIENTS    "Old"
+    IDS_STATS_PRTDEF        "Default"
+    IDS_STATS_PRTOTHER      "Other"
+    IDS_STATS_MNUTREETITLE  "Statistics Tree"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATS_MNUTREECPYSEL "Copy Selected Branch"
+    IDS_STATS_MNUTREECPYALL "Copy All Statistics"
+    IDS_STATS_MNUTREEHTML   "HTML Features"
+    IDS_STATS_EXPORT2HTML   "Export All Statistics"
+    IDS_STATS_EXPORTVIS     "Export All Visible"
+    IDS_STATS_MNUTREECPYVIS "Copy All Visible"
+    IDS_STATS_MNUTREEEXPANDALL "Expand All Sections"
+    IDS_STATS_MNUTREECOLLAPSEALL "Collapse All Sections"
+    IDS_STATS_MNUTREEEXPANDMAIN "Expand Main Sections"
+    IDS_STATS_LASTRESETSTATIC "Statistics last reset: %s"
+    IDS_STATS_MONTHLY       "Monthly"
+    IDS_STATS_YEARLY        "Yearly"
+    IDS_STATS_TIMESTATS     "Time Statistics"
+    IDS_STATS_AVGANDPROJ    "Projected Averages"
+    IDS_STATS_TIMESINCERESET "Time Since Last Reset: %s"
+    IDS_CRYPT_INITFAILED    "Failed to initalize cryptokeys - secure ident disabled"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CD_IDENT            "Identification:"
+    IDS_IDENTOK             "Successful"
+    IDS_IDENTFAILED         "Invalid"
+    IDS_IDENTNOSUPPORT      "Not supported or disabled"
+    IDS_COMMITFILES         "Safe .met/.dat file writing"
+    IDS_ERR_BADUNC          "invalid UNC-name"
+    IDS_NEVER               "Never"
+    IDS_ALWAYS              "Always"
+    IDS_ONSHUTDOWN          "On shutdown"
+    IDS_UNCFOLDERS          "UNC Folders"
+    IDS_USESECIDENT         "Use secure identification"
+    IDS_ADVSPAMFILTER       "Advanced spamfilter"
+    IDS_STATS_SECUREIDENT   "Secure Ident (OK : Failed )"
+    IDS_ONDISK              "Size on disk: "
+    IDS_CLIENTCOL           "Warning: Found matching client, to a currently connected client: %s (%s) and %s (%s)"
+    IDS_SEARCH_UNTERMSTRING "Unterminated string"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SEARCH_GENERALERROR "General error"
+    IDS_SEARCH_MISSINGORRIGHT "Missing right side for OR operator"
+    IDS_SEARCH_MISSINGNOTRIGHT "Missing right side for NOT operator"
+    IDS_SEARCH_MISSINGEXPRPARANT "Missing expression for '(' ')'"
+    IDS_SEARCH_MISSINGCLOSINGPARANT "Missing closing ')'"
+    IDS_SEARCH_MISSINGANDLEFT "Missing left side of AND operator"
+    IDS_SEARCH_MISSINGORLEFT "Missing left side of OR operator"
+    IDS_SEARCH_MISSINGNOTLEFT "Missing left side of NOT operator"
+    IDS_SEARCH_EXPRERROR    "Failed to parse search expression"
+    IDS_SEARCH_TOOCOMPLEX   "Expression too complex"
+    IDS_SEARCH_INVALIDMINMAX "Invalid units for Min/Max filesize specified"
+    IDS_VERSION             "Version"
+    IDS_ALL_A4AF_TO_THIS    "Swap All Sources To This File Now"
+    IDS_ALL_A4AF_TO_OTHER   "Swap All Sources To Any Other File Now"
+    IDS_ALL_A4AF_AUTO       "Automatically Swap All (A4AF) Sources To This File"
+    IDS_SWAP_A4AF_TO_THIS   "Swap (A4AF) Sources To This File Now"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SWAP_A4AF_TO_OTHER  "Swap (A4AF) Sources To Any Other File Now"
+    IDS_A4AF                "Sources Handling (A4AF)"
+    IDS_MOBILEMULE          "MobileMule"
+    IDS_ENABLEMM            "Enable MobileMule"
+    IDS_AUTOCAT_LABEL       "Auto Cat-Assignment (pattern, seperated by |)"
+    IDS_SHOWEXTSETTINGS     "Show more controls (advanced mode controls)"
+    IDS_TREEOPTIONS_TRUE    "True"
+    IDS_TREEOPTIONS_FALSE   "False"
+    IDS_TREEOPTIONS_OK      "OK"
+    IDS_HYPERTEXT_FONT_HINT "Font for Server-, Message- and IRC-Window"
+    IDS_SELECT_FONT         "Select font"
+    IDS_SERVER_LIMITS       "Soft- / Hard-Filelimit"
+    IDS_SERVERINFO          "Server Information"
+    IDS_KBITSSEC            "kBits/sec"
+    IDS_KBYTESSEC           "kBytes/sec"
+    IDS_ERR_CREATE_DIR      "Failed to create %s directory ""%s"" - %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WRN_INCFILE_RESERVED 
+                            "The incoming directory must not be set to an eMule installation directory."
+    IDS_WRN_TEMPFILES_RESERVED 
+                            "The temporary directory must not be set to an eMule installation directory."
+    IDS_WRN_INCTEMP_SAME    "Incoming directory and temporary directory must not be the same."
+    IDS_MMFAILED            "Failed to create MobileMule Socket!"
+    IDS_MMSTARTED           "MobileMule server started on Port %i. Protocol version: %s"
+    IDS_SHOWDWLPERCENTAGE   "Show percentage of download completion in progressbar"
+    IDS_TBN_ONNEWDOWNLOAD   "Download added"
+    IDS_ARTIST              "Artist"
+    IDS_ALBUM               "Album"
+    IDS_MMGUIDELINK         "MobileMule Guide"
+    IDS_CD_UPLOADREQ        "Requested to upload:"
+    IDS_SETTINGCHANGED_RESTART 
+                            "For the changed settings to take effect, please restart eMule!"
+    IDS_CREDITSEXPIRED      ", %i clients deleted (not seen within 5 month)"
+    IDS_SOURCESINFO         "%i  (Useful: %i, NNP: %i, A4AF: %i)"
+    IDS_SHOW_META_DATA      "Show &Meta Data..."
+    IDS_META_DATA           "Meta Data"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_TIMEBEFORE          "(%s ago)"
+    IDS_FD_TIMEDATE         "Dates"
+    IDS_FILEINFORMATION     "File Information"
+    IDS_STATS_FREESPACE     "Free Space on Tempdrive: "
+    IDS_IRC_HELPCHANNEL     "Connect to help channels."
+    IDS_IRC_HELPCHANNELPERFORM "join #emule"
+    IDS_IRC_ACCEPTLINKSFRIENDS "From friends only."
+    IDS_COMPLSOURCES        "Complete Sources"
+    IDS_CHECKNOENDTIME      "no end time"
+    IDS_FD_DOWNLOADSTARTED  "Download added:"
+    IDS_MATCH_KEYWORDS      "Match keywords"
+    IDS_FAILEDREOPEN        "Fatal Error: Failed to reopen Partfile '%s' (%s)!"
+    IDS_ERR_PREVIEWALREADY  "There is already a preview request pending from this client"
+    IDS_ERR_PREVIEWFAILED   "Preview from User '%s' failed"
+    IDS_DWTOT               "Disk Space"
+    IDS_DWTOT_NR            "Number of Downloads: %d"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DWTOT_TSD           "Total Size of Downloads: %s"
+    IDS_DWTOT_TCS           "Total Completed Size: %s (%.0f%%)"
+    IDS_DWTOT_TSL           "Total Size Left to Transfer: %s"
+    IDS_DWTOT_TSN           "Total Space Needed by Downloads: %s"
+    IDS_DWTOT_FS            "Free Space on Tempdrive: %s"
+    IDS_NEEDFREEDISKSPACE   "%s (you need to free %s!)"
+    IDS_SERVERKEEPALIVETIMEOUT "Server connection refresh interval [min.]"
+    IDS_MORE                "&More"
+    IDS_CREATEHOSTNAMESRCLINK "Copy eD2K Link To Clipboard (Hostname)"
+    IDS_HASHINGFILESCOUNT   " (%u hashing)"
+    IDS_CHECKDISKSPACE      "Check Diskspace"
+    IDS_YOURHOSTNAME        "Hostname for own eD2K links"
+    IDS_INSUFFICIENT        "Insufficient Diskspace"
+    IDS_MINFREEDISKSPACE    "Min. free diskspace [MB]"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WARNING             "Warning"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CUSTOMIZETOOLBAR    "Customize Toolbar"
+    IDS_KAD_RECHECKFW       "Recheck Firewall"
+    IDS_SHAREDTITLE         "Shared ED2K|Kademlia"
+    IDS_WARNINGNOBS         "Bootstrapping inactive now (Kademlia disabled or already connected)."
+    IDS_FIREWALLED          "Firewalled"
+    IDS_KADEMLIA            "Kademlia"
+    IDS_KADCONTACTLAB       "Contacts"
+    IDS_KADDISTANCE         "Distance"
+    IDS_KEY                 "Key"
+    IDS_NUMBER              "Number"
+    IDS_KAD_SEARCHSRC       "Search Sources (%i)"
+    IDS_KAD_SEARCHKW        "Search Keywords (%i)"
+    IDS_KAD_NODE            "Node Lookup (%i)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BOOTSTRAP           "Bootstrap"
+    IDS_VIAED2KSQ           "via ED2K Server/Queue"
+    IDS_EM_KADEMLIA         "&Kademlia"
+    IDS_VIAKAD              "via Kademlia"
+    IDS_VIASE               "via Source Exchange"
+    IDS_SELECTTOOLBARBITMAP "Select Toolbar Bitmap"
+    IDS_SELECTTOOLBARBITMAPDIR "Select Toolbar Bitmap Directory"
+    IDS_TOOLBARSKINS        "Toolbar Skins"
+    IDS_NOTEXTLABELS        "No Labels"
+    IDS_TEXTLABELSONRIGHT   "Right of Icon"
+    IDS_TEXTLABELS          "Text Labels"
+    IDS_ENABLETEXTLABELS    "Below Icon"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_KAD_STOREFILE       "Store File (%i:%i)"
+    IDS_KAD_STOREKW         "Store Keyword (%i:%i)"
+    IDS_KAD_UNKNOWN         "Unknown (%i)"
+    IDS_SRV_TCPCOMPR        "TCP compression"
+    IDS_KADSEARCHLAB        "Current Searches"
+    IDS_SRV_UDPSR           "Extended UDP protocol for source requests"
+    IDS_SRV_UDPFR           "Extended UDP protocol for file requests"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COPYFEEDBACK        "Copy feedback to clipboard"
+    IDS_ANTILEECHERLOG      "[Anti-leechermods] Client %s has been temporary banned because of suspicious leech action"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UNASSIGN            "Unassign"
+    IDS_DOWNLOAD_IN_RED     "Show downloading files in red"
+    IDS_UPSLOTNUMBER        "Slot #"
+    IDS_STATS_LEECHERCLIENTS "Leechers: %u"
+    IDS_WARNINGMORPH        "Warning:  Do not change these settings unless you know what you are doing.  You can easily make things worse for yourself.\neMule will run fine without adjusting any of these settings."
+    IDS_DM                  "Download Management"
+    IDS_SCC                 "Smart Category Control (SCC)"
+    IDS_SAC                 "Smart A4AF Control (SAC)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_POWERSHARE_ON       "Activated"
+    IDS_POWERSHARE_OFF      "Disabled"
+    IDS_POWERSHARE_ON_LABEL "On"
+    IDS_POWERSHARE_OFF_LABEL "Off"
+    IDS_POWERSHARE_COLUMN_LABEL "Powershare"
+    IDS_POWERSHARE_PREFIX   "PS"
+    IDS_POWERSHARE          "Powershare"
+    IDS_SF_UPLOADED_PARTS   "Spread bar (UL part history)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SF_TURN_PART        "File UL (part)"
+    IDS_SF_TURN_SIMPLE      "File UL (simple)"
+    IDS_SF_FULLUPLOAD       "File UL (full)"
+    IDS_UM                  "Upload Management"
+    IDS_ANTI_LEECHER        "Enable anti-leechers control"
+    IDS_BOOST_LESS          "Boost the less uploaded files (session)"
+    IDS_BOOST_FRIENDS       "Boost friends (x1.5)"
+    IDS_PROGRESS_PERCENT    "Show percentage in progress bar"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_STATS_TOTALUL       "Total number of uploads: %i"
+    IDS_SP_TOTALUL          "Total number of uploads"
+    IDS_STATS_UDATA_FRIENDS "Uploaded data to friend slots (Session): %s"
+    IDS_SP_ULFRIENDS        "Upload friend slots current"
+    IDS_SP_ULSLOTSNOOVERHEAD "Upload current excl overhead (UL Slots only)"
+    IDS_STATS_FRATIO        "Session UL:DL ratio (friends UL excluded):"
+    IDS_ST_ULCURRENT        "ul slots+overhead"
+    IDS_ST_ULSLOTSNOOVERHEAD "ul slots only"
+    IDS_ST_ULFRIEND         "friend slots only"
+    IDS_POWERSHARE_DENIED_LABEL "Denied"
+    IDS_POWERSHARE_ADVISED_LABEL "Advised"
+    IDS_POWERSHARE_AUTONEWDOWNLOADFILE 
+                            "New download files in auto powershare mode"
+    IDS_POWERSHARE_AUTHORIZED_LABEL "Authorized"
+    IDS_POWERSHARE_ACTIVATED_LABEL "Activated"
+    IDS_POWERSHARE_DISABLED_LABEL "Disabled"
+    IDS_POWERSHARE_AUTO_LABEL "Auto"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ST_TOTALU           "total uploads"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAT_MINIMUM         "Minimum"
+    IDS_CAT_MAXIMUM         "Maximum"
+    IDS_CAT_DLGHELP         "The check boxes indicate whether the criteria should be used when selecting a category for new files."
+    IDS_CAT_FILTERS         "Category filters"
+    IDS_CAT_RS              "Remaining size (MB)"
+    IDS_CAT_FS              "     File size (MB)"
+    IDS_CAT_RT              "Remaining time (M)"
+    IDS_CAT_SC              "Source count"
+    IDS_CAT_ASC             "Available source count"
+    IDS_CAT_THISCAT         "This category"
+    IDS_CAT_SUSPENDFILTERS  "Suspend view filters"
+    IDS_CAT_FROMCATSINFO    "You assign all of the files in this category to other categories before you can set this category to view All or All Unassigned!"
+    IDS_CAT_FROMCATSCAP     "Unassign files"
+    IDS_CAT_ADVA4AF         "Advanced A4AF"
+    IDS_CAT_FILTERSACTIVE   "Filters active"
+    IDS_CAT_FILTERSSUSP     "Filters suspended"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BOTH                "Both"
+    IDS_REALTIME            "Real-time"
+    IDS_ANTI_CREDITHACK     "Enable anti-credit hack control"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAT_SETORDER        "Set linear priority"
+    IDS_CAT_ORDER           "Enter an integer greater than zero, or zero.  Lower values resume first."
+    IDS_CAT_PAUSEDSHOWN     " | Paused shown"
+    IDS_CAT_PAUSEDHIDDEN    " | Paused hidden"
+    IDS_CAT_COLCATEGORY     "Cat"
+    IDS_CAT_COLORDER        "LP"
+    IDS_CAT_MNUAUTOINC      "Auto-increment selected"
+    IDS_CAT_MNUSTEPTHRU     "Step through each selected"
+    IDS_CAT_MNUALLSAME      "Set all to one value"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAT_EXPAUTOINC      "Enter a non-negative starting number:"
+    IDS_CAT_EXPSTEPTHRU     "Enter a non-negative number, lower values resume first.\nFile:"
+    IDS_CAT_EXPALLSAME      "Enter a non-negative number, which will be applied to all selected files:"
+    IDS_CAT_ABORTSTEPTHRU   "Do you wish to abort the linear priority step through?"
+    IDS_ABORT               "Abort?"
+    IDS_CAT_RESUMENEXT      "Resume next"
+    IDS_CAT_PAUSELAST       "Pause last"
+    IDS_CAT_STOPLAST        "Stop last"
+    IDS_CAT_SHOWPAUSED      "Show paused"
+    IDS_CAT_HIDEPAUSED      "Hide paused"
+    IDS_CAT_SELDLGTXT       "Select a category from the list or enter a title for a new category:"
+    IDS_CAT_SELDLGCAP       "Select category"
+    IDS_CAT_SHOWCATNAME     "Show full category name in 'Cat' column"
+    IDS_CAT_SHOWSELCATDLG   "Show the 'Select category' dialog"
+    IDS_CAT_USEACTIVE       "Default to the active category for new downloads"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CAT_AUTORESUMEORD   "Automatically increment and assign linear priority"
+    IDS_CAT_SMALLFILEDLPUSH "Download small files first (< 150KB)"
+    IDS_A4AF_SMARTSWAP      "Enable smart A4AF swapping"
+    IDS_A4AF_BALANCE        "Balance sources"
+    IDS_A4AF_STACK          "Stack sources"
+    IDS_A4AF_DISABLED       "Disabled"
+    IDS_A4AF_ADVMODE        "Advanced A4AF handling"
+    IDS_CAT_STARTFILESONADD "Start # files when added to a new category"
+    IDS_CAT_AUTOCAT         "Advanced filter mask (separator: | )"
+    IDS_CAT_USEAUTOCAT      "Add new downloads to categories using view filters"
+    IDS_SLS_USESLS          "Enable saving and loading of sources"
+    IDS_CAT_MERGE           "Merge category"
+    IDS_CAT_SETFILEGROUP    "Set file group"
+    IDS_CAT_GROUP           "Group"
+    IDS_CAT_SETFILEGROUPMSG "Enter the non-zero number of the file group you wish to assign this file to."
+    IDS_A4AF_FORCEALL       "Get all A4AF"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_A4AF_FLAGS          "Advanced A4AF flags"
+    IDS_A4AF_ONFLAG         "Force A4AF On"
+    IDS_A4AF_OFFFLAG        "Force A4AF Off"
+    IDS_INVERT              "Invert"
+    IDS_COMPRESSIONGAIN     "Compressed"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MINUPLOAD_SHORT     "Min. Up"
+    IDS_SUC                 "Smart Upload Control (SUC)"
+    IDS_SUC_ENABLED         "Enable"
+    IDS_MINUPLOAD           "Minimum upload limit"
+    IDS_SUC_HIGH            "High pass (default %i)"
+    IDS_SUC_LOW             "Low pass (default %i)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SUC_PITCH           "Pitch (default %i)"
+    IDS_SUC_DRIFT           "Drift (default %i)"
+    IDS_SHOWSECUREDCONNECTION "Display secured client connection"
+    IDS_ZERO_FILLED_TEST    "Defeat 0-filled part senders"
+    IDS_SUC_LOG             "Show activities in debug log"
+    IDS_A4AF_SHOWDEBUG      "Show activities in debug log"
+    IDS_OPENFILEFOLDER      "Open file folder"
+    IDS_HIGHPROCESS         "eMule process in high priority"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UPDATEIPFILTER      "Update IPFilter.dat"
+    IDS_UPDATEIPFILTERONSTART "Update IPFilter.dat on startup"
+    IDS_UPDATEIPFILTERERROR "Error updating IPFilter.dat"
+    IDS_HTTP_IPFILTERCAPTION "Updating IPFilter.dat"
+    IDS_IPFILTER_PERCENTAGE "Updating IPFilter.dat: %1% of %2 completed"
+    IDS_REMTIMEAVRREAL      "Remaining time display"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOWIDRETRYLABEL     "Low ID retry"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UPL_DL              "Upload/Download"
+    IDS_LISTREQUESTED       "List requested files"
+    IDS_LISTREQDL           "List of downloading files:"
+    IDS_LISTREQUL           "List of uploading files:"
+    IDS_LISTREQNODL         "This user is not in download queue!!!"
+    IDS_LISTREQNOUL         "This user is not in waiting queue!!!"
+    IDS_CORRUPTDATASENT     "User '%s' (IP %s:%i), hash %s, client=%s added temporarily to the filtered list because corrupt data send"
+    IDS_ULENDCANTRANS       "%s: Upload session ended due canceled transfer."
+    IDS_ULENDENDTRANS       "%s: Upload session ended due ended transfer."
+    IDS_LEECHERDETREM       "Leecher detected and removed from the uploadqueue."
+    IDS_LEECHERPUTBACK      "Leecher put back in the waiting queue."
+    IDS_TRIEDDLOTHERFILE    "%s: Upload session not allowed to start. Client tried to download another file than it was in queue for. FileID: (expected=%s, asked=%s)"
+    IDS_CLIENTPUTBACK       "Put client back on queue, with waiting time intact."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SUSPECTUSEOWNHASH   "Client '%s' using mod '%s' uses my hash, ip %i.%i.%i.%i:%i, suspicious actions: %i (%i in total/%i clients)!"
+    IDS_SUSPECTHAsHCHANGE   "Client '%s' using the mod '%s' changed hash, ip %i.%i.%i.%i:%i, suspicious actions: %i (%i in total/%i clients)!"
+    IDS_FINPARTNUMOFFILE    "Finished part %u of '%s'"
+    IDS_COMPLETESOURCES     "Complete sources"
+    IDS_FEEDBACK_FROM       "Feedback from %s on [%s]"
+    IDS_FEEDBACK_FILENAME   "File name: %s"
+    IDS_FEEDBACK_FILETYPE   "File type: %s"
+    IDS_FEEDBACK_FILESIZE   "Size: %i MB"
+    IDS_FEEDBACK_DOWNLOADED "Downloaded: %i MB"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FEEDBACK_TOTAL      "Total sources: %i"
+    IDS_FEEDBACK_AVAILABLE  "Available sources : %i"
+    IDS_FEEDBACK_NONEEDPART "No Needed Part sources: %i"
+    IDS_FEEDBACK_COMPLETE   "Estimated complete sources: %i"
+    IDS_COPYFEEDBACK_US     "Copy feedback to clipboard (US)"
+    IDS_UPDATEFAKES         "Update fake list"
+    IDS_FAKEREPORT          "Report fake"
+    IDS_FAKECHECKUPERROR    "Error updating fake list list"
+    IDS_HTTP_FAKECHECKCAPTION "Updating fake list"
+    IDS_UPDATEFAKECHECKONSTART "Update fake list on startup"
+    IDS_FAKELIST_PERCENTAGE "Updating fake list: %1% of %2 completed"
+    IDS_CHECKFAKE           "Check fake"
+    IDS_REMAININGSIZE       "Remaining size"
+    IDS_RELOADSHARE         "Reload Shared Files"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_USS                 "Upload Speed Sense (USS)"
+    IDS_USS_ENABLED         "Enable"
+    IDS_USS_LOG             "Show activities in debug log"
+    IDS_USS_PINGTOLERANCE   "Ping tolerance (in %%) (Default %i)"
+    IDS_USS_GOINGUPDIVIDER  "Going up slowness (Default %i)"
+    IDS_USS_GOINGDOWNDIVIDER "Going down slowness (Default %i)"
+    IDS_USS_NUMBEROFPINGS   "Max number of pings for average (Default %i)"
+    IDS_USSFINDLASTCOMMON   "UploadSpeedSense: Starting traceroutes to find last common host."
+    IDS_USSFOUNDLASTCOMMON  "UploadSpeedSense: Found last common host. LastCommonHost: %s @ TTL: %i HostToPing: %s"
+    IDS_USSSTARTLOWPING     "UploadSpeedSense: Finding a start value for lowest ping..."
+    IDS_USSCOLLECTINGHOSTS  "UploadSpeedSense: Try #%i. Collecting hosts..."
+    IDS_USSENOUGHHOSTS      "UploadSpeedSense: Got enough hosts. Listing the hosts that will be tracerouted:"
+    IDS_USSHOSTLISTING      "UploadSpeedSense: Host #%i: %s"
+    IDS_USSLOWESTPING       "UploadSpeedSense: Lowest ping: %i ms"
+    IDS_USSREADY            "UploadSpeedSense: Done with preparations. Starting control of upload speed."
+    IDS_USSCANTPING         "UploadSpeedSense: Failure #%i to ping host! (TTL: %i IP: %s error: %i). Sleeping 1 sec before retry. Error info follows."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_USSCANTPINGREMOVE   "UploadSpeedSense: Error when pinging a host! (TTL: %i IP: %s Error: %i). Removing this host and restarting host collection. Error info follows."
+    IDS_USSHOSTTOOCLOSE     "UploadSpeedSense: Host was too close! (TTL: %i IP: %s status: %i). Removing this host and restarting host collection."
+    IDS_USSHOSTTTL          "UploadSpeedSense: Host at TTL %i: %s"
+    IDS_USSPINGFAILED       "UploadSpeedSense: Ping #%i failed. Reason follows"
+    IDS_USSNEWTRACEROUTE    "UploadSpeedSense: Network topology has changed. TTL: %i Expected ip: %s Got ip: %s Will do a new traceroute."
+    IDS_USSPINGNUMCONTINUE  "UploadSpeedSense: Ping #%i successful. Continuing."
+    IDS_USSNEWLOWEST        "UploadSpeedSense: New lowest ping: %i ms. Old: %i ms"
+    IDS_USSPINGFAILDIS      "UploadSpeedSense: Pinging failed to many times. Disabling Upload SpeedSense."
+    IDS_USSTRACEFAILDIS     "UploadSpeedSense: Tracerouting failed to many times. Disabling Upload SpeedSense."
+    IDS_USSPINGERPINGREPLY  "UploadSpeedSense: Reply from %s: bytes=%d time=%ldms TTL=%i"
+    IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() failed, err: %d\n"
+    IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() failed: Unable to locate ICMP.DLL!"
+    IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() failed for at least one function."
+    IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() failed, err: "
+    IDS_USSPINGERICMPENDERR "Error closing ICMP handle, err: "
+    IDS_REMULREASON         "%s: Removing client from upload list. Reason: %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_REMULNOREASON       "No reason given."
+    IDS_REMULSUCCESS        "Successful completion of upload."
+    IDS_REMULHIGHERPRIO     "Ended upload to make room for higher prio client."
+    IDS_REMULMANYSLOTS      "Too many upload slots opened."
+    IDS_ULSUCCESSFUL        "%s: Successful completion of upload. Amount transfered: %s. Diff from %s: %i bytes"
+    IDS_SKTDISREASON        "Socket disconnect: "
+    IDS_SKTDISUNKREASON     "Socket disconnect. Unknown reason."
+    IDS_IPISFILTERED        "IP is filtered."
+    IDS_CNXTIMEOUT          "Connection timed out."
+    IDS_UPSTOPPEDLEECHER    "Upload session not allowed to start. Client seems to be a leecher."
+    IDS_IPSTOPPEDOTHFILE    "Upload session not allowed to start. Client tried to download another file than it was in queue for."
+    IDS_UPENDUSERCANC       "%s: Upload session ended due canceled transfer. %s %s:%i"
+    IDS_NEWMSGFROM          "New Message from '%s' (IP:%s)"
+    IDS_FILTEREDFROM        "Filtered Message from '%s' (IP:%s)"
+    IDS_ERRORPROCESSING     "Error when processing packet."
+    IDS_RECEIVEDSRCEXREQ    "RCV:Source Request User '%s' File '%s'"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_REMULUSERCANCEL     "Remote client canceled transfer."
+    IDS_REMULUSEREND        "Remote client ended transfer."
+    IDS_DWLSESSIONENDED     "Download session ended. User: %s Reason: %s"
+    IDS_ST_ACTIVEU_ZZ       "Focused Uploads"
+    IDS_BANHASHCHANGED      "Client: %s (%s), Banreason: Userhash changed"
+    IDS_BANHASHCHANGEDT     "Client: %s (%s), Banreason: Userhash changed (Found in TrackedClientsList)"
+    IDS_BANHASHINVALID      "Client: %s (%s), Banreason: Userhash invalid"
+    IDS_LOWIDRETRYING       "LowID -- Trying Again (%i more attempts)"
+    IDS_IPFILTEREDSRV       "IPfiltered source IP=%s (%s) received from server"
+    IDS_IPIGNOREDSRV        "Ignored source (IP=%s) received from server"
+    IDS_IPFILTEREDSE        "IPfiltered source IP=%s (%s) received via source exchange"
+    IDS_IPIGNOREDSE         "Ignored source (IP=%s) received via source exchange"
+    IDS_SERVERFILTERED      "IPfiltered server with IP=%s (%s)"
+    IDS_SERVERIGNORED       "Ignored server with IP=%s"
+    IDS_STATS_ACTUL_ZZ      "Focused Uploads/Needed To Fill Bandwidth: %i"
+    IDS_URL_FOR_UPDATING    "URL for updating"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SWITCHSUC           "Switching Dynamic Upload System to SmartUploadControl"
+    IDS_SWITCHDYNUP         "Switching Dynamic Upload System to UploadSpeedSense"
+    IDS_AUTODYNUPSWITCHING  "Automatic dynamic upload system switching"
+    IDS_MAXCONNECTIONSSWITCHBORDER "Border for switching"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_POWERSHARE_AUTO     "Auto"
+    IDS_DYNUP               "Dynamic Upload"
+    IDS_HIDEOVERSHARES      "Overshares before hiding chunks (0 = Disabled)"
+    IDS_SELECTIVESHARE      "Selective chunk sharing"
+END
+
+#endif    // Anglais (États-Unis) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#include "version.h"
+#include "res\emule.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
+#include "afxres.rc"         // Standardkomponenten
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

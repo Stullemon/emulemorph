@@ -1,0 +1,59 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+#pragma once
+#include "sharedfilesctrl.h"
+#include "ResizableLib\ResizableDialog.h"
+#include "progressctrlx.h"
+#include "afxwin.h"
+#include "iconstatic.h"
+
+// CSharedFilesWnd dialog
+
+class CSharedFilesWnd : public CResizableDialog
+{
+	DECLARE_DYNAMIC(CSharedFilesWnd)
+
+public:
+	CSharedFilesWnd(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CSharedFilesWnd();
+	void Localize();
+	void Check4StatUpdate(CKnownFile* file);
+// Dialog Data
+	enum { IDD = IDD_FILES };
+	CSharedFilesCtrl sharedfilesctrl;
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual BOOL	PreTranslateMessage(MSG* pMsg);
+	DECLARE_MESSAGE_MAP()
+
+	afx_msg void OnBnClickedReloadsharedfiles();
+	afx_msg void OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMClickSflist(NMHDR *pNMHDR, LRESULT *pResult);
+private:
+	void ShowDetails(CKnownFile* cur_file);
+	CProgressCtrlX pop_bar;
+	CProgressCtrlX pop_baraccept;
+	CProgressCtrlX pop_bartrans;
+	CFont bold;
+	uchar shownFileHash[16];
+	CIconStatic m_ctrlStatisticsFrm;
+	HICON icon_files;
+};

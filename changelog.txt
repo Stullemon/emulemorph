@@ -1,0 +1,393 @@
+	CHANGELOG FOR EMULE
+	===================
+
+----------------------
+- March 15th, 2003   -
+----------------------
+Unk: Original Programmer seems to have left the building. I'm am going through the code trying to see where he was going with it..
+----------------------
+- March 16th, 2003   -
+----------------------
+Unk: Changed opcodes to match eMule for easier merging later.
+----------------------
+- May 22nd, 2003   -
+----------------------
+Unk: Merged the base Kademlia code into eMule with the help of bluecow.
+Unk: Added a Overnet debug window.
+Unk: Added many new Overnet opcodes.
+Unk: Can now download from Overnet clients.
+Unk: Note to self: Need to find out why incoming Publish Requests send UDP port, but when we send a publish request, we HAVE to send a TCP port??????? (Fixed: mldonkey is the one sending UDP port which is incorrect and very bad!)
+Unk: Can now publish to the Overnet network. (Something still doesn't seem correct with Publish Requests)
+Unk: Indexing Overnet files. (Something still doesn't seem correct with Publish Requests)
+Unk: Beging to change the eMule base code to better handle the Overnet network as a seperate network. (So you can use both or just one)
+Unk: Duplicate clients are now found a little better. More CPU power needed, but it had to be done to detect cross source findings.. 
+Unk: CUpDownClient::CalculateDownloadRate() is causing strange exceptions.. WHY? (Update: fixed)
+----------------------
+- May 26nd, 2003   -
+----------------------
+Unk: Adding the overnet to the client brought up unknown issues with the original client.
+1. Rewrote how clients and sockets delete each other to avoid clientlist & socketlist corruptions.
+2. Clients are able to get in a connected or connecting state without a socket, these clients are now removed. (This may be releated to FileNotFound packets. Will rework that later..)
+----------------------
+- May 26nd, 2003   -
+----------------------
+Unk: Knownfile met is now saved periodically.
+Unk: Published ON files are now remember between restarts to cut down over publishing.
+Unk: We now detect if the our ON client is firewalled. Also, if the server side thinks we are firewalled but overnet isn't, we use the Overnet ID instead of the server ID.
+Unk: Found out that many of the mldonkey clients don't publish correctly. Hours wasted trying to debug a packet that is incorrect.. 
+Unk: Changed the order of publishing to make it more efficient.
+Unk: No longer treat bcp://hashid:ip:port as a source. These are firewalled sources and the ip and port is the firewalled server, not source..
+Unk: Corrected the searches to reflect correct search types.
+Unk: Uploading clients could get stuck in the upload list without a socket. This is the same problem as noted above, therefore it's not the sole problem with FileNotFound.
+----------------------
+- June 1st, 2003   -
+----------------------
+Unk: The timer for checking dead servers was changed to now get messed up when resetting your computer.
+Unk: Server Description requests delay has been increased to save server bandwidth.
+Unk: Found a major bug that sent packets to the wrong IP.. We now index Overnet publish requests.
+----------------------
+- June 3rd, 2003   -
+----------------------
+Unk: Changed how it displays connection status.
+Unk: Searches are now terminated better when a file is Stoped, Paused, or Canceled.
+----------------------
+- June 4th, 2003   -
+----------------------
+Unk: Now responding to fileID search requests and sending and search_end packets
+Unk: Connect button support added.
+Unk: The OVERNET_IDENTIFY_ACK now updates the TCP port of the Contacts and Indexes. (This was messing this up, needs redone)
+Unk: Added a Firewall recheck button.
+Unk: Change how it checks if firewalled. (Less wasted packets, better timing.)
+----------------------
+- June 5th, 2003   -
+----------------------
+Unk: Changed up the ON gui some.. Although it's not great, the lists are now seperate for easier manipulation later.
+Unk: Fixed duplicates of fileID indexed files.
+----------------------
+- June 6th, 2003   -
+----------------------
+Unk: Tried to go through and clear up some areas that check for LowID and Connected status.
+----------------------
+- June 22nd, 2003   -
+----------------------
+Unk: Corrected a bug that didn't let you just connect to Overnet.
+Unk: Fixed duplicate keyword indexed files.
+Unk: Rolled back to VS2002.. Seems to have corrected the socket bug.
+Unk: Removed a gui slowdown when a search quit and all the temp contacts were removed.
+Unk: Completely rewrote the messaging code between eMule and Overnet to clean it up.
+Unk: Added refresh messages to the Overnet lists. There should be no more ghosts or blanks in the lists.
+Unk: Your ID is now calculated differently. Also there is a better check if your firewalled if using both networks at once.
+-If you are seen to not be firewalled by either Overnet or ED2K, eMule will assume your not firewalled.
+-If either ED2K or Overnet has a high ID, eMule will use it.
+-If the server things your firewalled and Overnet knows better, you can still download from lowID users.
+-If the server things your firewalled and Overnet knows better, you will tell the other clients the correct ID.
+-Because we do not support firewalled users in Overnet yet, if you want to use overnet, you must also connect to a server before eMule starts working.
+----------------------
+- June 24th, 2003   -
+----------------------
+Unk: IP request now responds if the other client is firewalled.
+Unk: Found that damn bug that wasn't deleting clients when the socket timed out..
+Unk: Cleaned up some code.
+----------------------
+- June 25th, 2003   -
+----------------------
+Unk: There are now preferences that allow the user to choose which network to connect too.
+Unk: Added Network Choice to First Time Wizard.
+Unk: Changed how connection status is relayed between Overnet and eMule.
+Unk: Fixed some issues with the search dialog. SearchID is no longer and issue between eMule and Overnet and you can now select which network so search. 
+----------------------
+- June 26th, 2003   -
+----------------------
+Unk: Overnets overhead is now processed and added to the server catagory.
+Unk: Tweaked the overhead a little to try to get better estimates.
+bluecow: Fixed a deadlock at shutdown.
+bluecow: Fixed a bug when restarting ON during a single eMule session.
+Unk: Fixed a bug that allow the connect button to get confused.
+Unk: Fixed a bug that crash when trying to bootstrap
+----------------------
+- June 27th, 2003   -
+----------------------
+Unk: Entries in the Index list can now be removed. Which also fixes a bug with a lot of dangling pointers when restarting the overnet connection.. :)
+Unk: Fixed a bug that caused all kinds of issues if you disconnected and reconnected real fast with overnet.
+----------------------
+- June 28th, 2003   -
+----------------------
+bluecow: Added the code to process the incoming Keyword Search Requests.
+Unk: Added a simple response packet to keywords.
+bluecow: Fixed a crash on exit bug.
+----------------------
+- June 30th, 2003   -
+----------------------
+Unk: Single keyword search requests are now processed.
+Unk: Fixed a bug that could get the publishing stuck trying to publish a file over and over.
+
+First group private beta test. The team corrected several little bugs in publishing, and searching.
+----------------------
+- July 1st, 2003   -
+----------------------
+Unk: You can now see if your files are published to a ED2K Server and/or Overnet.
+Unk: You no longer republish files to a ED2K server that is already on there. This should save a lot of bandwidth and allow more files to be listed..
+----------------------
+- July 5th, 2003   -
+----------------------
+Unk: Contact type is now being updated. May later use this and "madeContact" to update the contact list a little better.
+Unk: Contact list no longer shows temp contacts during searches. Also, redid how contacts are updated to limit the number of refreshes needed. (Cpu Savers)
+Unk: Converted the ED2K ID system to the Hyrbids ID system to avoid false lowIDs that the ED2K ID system created and to be more compatable with the Hyrbid.
+---- Also standardized the LowID checks to 2 central methods (ED2K and Hybrid). We were using several different methods to check lowID.
+---- This changed a lot of code and needs tested well.
+----------------------
+- July 16th, 2003   -
+----------------------
+Unk: Testing out Maella request patch.
+Unk: Dead contacts are removed more efficiently.
+----------------------
+- July 24th, 2003   -
+----------------------
+Unk: Fixed a bug that allowed searches to access already deleted contacts.
+Unk: Serverlist is now updated when connected to Kademlia only.
+Unk: Seemed Kademila thread still tried to access some of it's main objects during shutdown. (Hopefully fixed)
+Unk: Fixed some connected status issues.
+----------------------
+- July 26th, 2003   -
+----------------------
+Unk: Contacts are now filtered from invalid IP and Ports.
+Unk: Again adjusted how dead contacts are removed.
+Unk: Older contacts are no longer added on restart.
+Unk: Trying to reduce UDP spikes that can flood connections.
+Unk: Moved Overnet Log and Debug line info into eMules Log and Debuglogs..
+----------------------
+- July 29th, 2003   -
+----------------------
+Unk: IRC: Now sorts nicks correctly.
+Unk: IRC: Can now add other eMule nicks as friends.
+Unk: IRC: Can now send each other ed2k links within the IRC.
+Unk: IRC: Added security to Add nick and Sending links. You can choose to accept all links, links for friends only, and no links at all.
+----------------------
+- August 7th, 2003   -
+----------------------
+Unk: More outgoing flood control to try to avoid lagging. (No more spikes)
+Unk: Major change to how we sent shared files to servers for better efficiency.
+Unk: Overnet status are now only updated once a sec to reduce CPU overhead.
+Unk: Kademlia searches are now regulated by total and type to keep from two many searches at once.
+
+----------------------
+- August 11th, 2003  -
+----------------------
+Unk: One more change to smoothing out the packets.. Hopefully this is the last.
+Unk: Contacts are now checked in a more systematic way to help lower bandwidth.
+Unk: Only low buckets are updated to lower bandwidth.
+Unk: Hopefully fixed another shutdown crash.
+
+----------------------
+- August 20th, 2003  -
+----------------------
+Unk: Changed how it detects firewalled users.
+Unk: Indexed keywords now handles all tags.
+Unk: Available is better updated during a search.
+Ornis: added stats of where sources came from (ed2k-server, ON, source exchange)
+Ornis: custimizable toolbar [eMule+]
+Ornis: Downloadlist: F2 opens inputbox to change filename of the selected file
+Ornis: Searchlist can expand items to show the received different filenames and their count
+
+----------------------
+- August 24th, 2003  -
+----------------------
+bluecow: Added support for Jigle SOAP interface to search the Jigle database with eMule [special thanks to Melange from Jigle for offering this great feature to eMule]
+bluecow: Jigle SOAP interface: search results are limited to 100 results; optimized code for less server load; local filtering of search results
+bluecow: Added extended combobox control for search methods [eMulePlus]
+
+----------------------
+- August 26th, 2003  -
+----------------------
+bluecow: More tweaks in the gSOAP module for better performance with Jigle server and reliable compiling by modders (always ensure that WITH_GZIP is defined!); a Jigle search request always has to include either a file type and/or a file extension, otherwise the request will not be sent for reducing server load; HTTP User-Agent field changed to reflect eMule version.
+bluecow: Fixed several issues with the new CComboBoxEx control (keyboard interface).
+bluecow: Several visual changes in the new search list view for proper windows color scheme handling and sorting of child items
+
+----------------------
+- Aug 29th, 2003     -
+----------------------
+Ornis: Filedetailsdialog restructured, + showing date of downloadstart and duration since (until now or until download completion)
+Ornis: added some missing percentages in  the statistic tree
+Ornis: added option to scheduler, to disable the endtime and therefor make changes of an event permanent
+
+----------------------
+- Aug 30th, 2003     -
+----------------------
+Unk: Rewrote the entire kademlia protocol.. We are no longer using Overnet..
+Unk: Adding availability to publishing.
+bluecow: Change in usage of search file type parameter "Program": When searching for a file of type "Program", the results are no longer locally filtered according Windows Program Files extension (*.exe, *.com, *.bat). The eD2K file type "Program" is meant to contain all file types which are "used" by a program like compressed archives and CD-ROM images. This means that you will get more search results than in previous versions. If you still want to search for a Windows Program File, specify "exe" for the file extension.
+bluecow: Added proxy support for IRC; all proxy settings are also used for IRC
+Ornis:   bugfix in webserver socket code, [Jan B.,nice bugreport]
+
+----------------------
+- September 1st, 2003-
+----------------------
+bluecow: Meta Data and File Comments dialogs changed into property pages which are shown together with File details property sheet. All property sheet/page related dialogs are resizeable and restore LRU size+position. Widths of columns in File Comments. File Names and Meta Data listviews saved+restored. Same applies for Meta Data dialogs for search results and shared files.
+bluecow: New "Match keywords" search option for both Jigle search methods.
+
+----------------------
+- September 3rd, 2003-
+----------------------
+Unk: Indexing is now updatable..
+Unk: Indexed files now have a life time.
+Unk: Indexed files are now reloaded on restarts.
+Unk: Fixed a bug that only published the file ID once..
+Unk: Recheck firewalled periodically.. This "should" also correct your IP on those 24hr disconnect users.
+Unk: Publishes no longer assumes a successful publish. It now only count successful responses.
+Unk: Kademlia searches now terminate if they have no more contacts pending.
+
+----------------------
+- September 4th, 2003-
+----------------------
+bluecow: Redid ON window listviews; sorting, restoring of col widths, sort order; tooltips for meta data
+bluecow: Meta data dialog shows classic and new tags.
+
+----------------------
+- September 4th, 2003-
+----------------------
+Unk: Slots now try as much as possible to stay at 3K or above.
+Unk: Contacts further away from you are now limited to remove overhead.
+
+-----------------------
+- September 10th, 2003-
+-----------------------
+bluecow: Added support for compressed server protocol for lugdunum 16.40 servers.
+bluecow: Added support for extended UDP server protocol for lugdunum 16.40 servers.
+
+----------------------
+- Sep 11th, 2003     -
+----------------------
+bluecow: Added server TCP/UDP protocol logging+debug code.
+bluecow: Added support for new welcome server message from lugdunum 16.40 servers.
+bluecow: Added support for compressed server protocol for lugdunum 16.40 servers; welcome message and file search results are received as compressed data; shared files are sent to server as compressed data
+bluecow: Added support for extended UDP server protocol for lugdunum 16.40 servers; global source finding is done more effeciently and with less bandwidth.
+bluecow: Fixed crash bug in host name resolution.
+bluecow: A global file search is started if the local server does not answer with file results within max. 50 seconds.
+bluecow: Fixed bug with eD2K link control in search window which did not accept more than 3 or 4 links.
+
+-----------------------
+- September 13th, 2003-
+-----------------------
+Unk: Fixed a bug that tried to access a Contact after deleting it.
+Unk: Fixed a overflow bug.
+Unk: Seperated the KadID from clientID. The eMule tags in the Hash interfered with the routing.
+Unk: Fixed a bug that didn't set experation of a contact correctly.
+Unk: Changed the MaxUp and Maxdown into sliders.
+
+----------------------
+- Sep 14th, 2003     -
+----------------------
+bluecow: Added support for extended UDP server protocol for lugdunum 16.40 servers to receive multiple file search results in one UDP packet.
+bluecow: Server UDP socket handles blocking socket state which could happen for larger UDP packets.
+bluecow: More helpful error/logging messages for server UDP socket related functions.
+bluecow: Optimizations in server UDP socket code for less CPU load (avoiding memory copy operations).
+bluecow: Fixed bug in client UDP socket which did not handled the blocking state correctly.
+bluecow: Search parameters are saved for each search result list; when selecting a search result list, the used search parameters are restored in the according controls
+bluecow: When deleting a search result list the search result list following the deleted one is selected instead of the first one
+bluecow: Last used search method is saved and restored in next eMule session.
+bluecow: Servers can be added by pasting an eD2K server link into the IP address control of the server window.
+bluecow: Shared files and downloading files are not counted in search results for the search result limit.
+
+----------------------
+- Sep 15th, 2003     -
+----------------------
+bluecow: Added support for showing all available MP3 tag information for downloads and shared files.
+Unk: Rework of the Kademlia protocol.
+ 1) Search requests no longer sends MaxResults.
+ 2) Search result packets now support sending more then one result per packet.
+  a) We still use one packet per result. This is for future expansion.
+  b) Once compression is added to the protocol, search results should start combining into one packets.
+ 3) Publish request packets new support sending more then one request per packet.
+  a) We also still send one packet per result. This is for future expansion.
+  b) Once compression is added to the protocol, these requests should also start combinging into one packets.
+ 4) Contact types went from 0-4 to 0-2.
+  a) This keeps a cleaner contact list
+  b) This also may increase overhead. Therefore, adjustment after first beta may change..
+ 5) The contact list is set to stop Node requests when a branch in the tree reaches level 4.
+  a) This means that when the network is in full force, contacts will be limited. (Not sure how much yet.)
+  b) At the moment I allow the right most branch to continue to build.
+   i) This allows a client to know more clients close to it's own hash. 
+   ii) Hopefully this allows searches to find home quicker..
+   iii) This may cause to much overhead and may need adjustment.
+ 6) Kademlia Requests now sends the recievers ID.
+  a) This adds a little bit of security.
+  b) If you change your KadID, this will hopefully help remove your old ID from the system.
+ 7) Redid how you set contact as alive.
+  a) You only set contacts the respond to a request as alive.
+  b) This keeps from scanning the contact list on EVERY packet.
+   1) Since we don't know the contacts ID we can't use the tree, but sequentually scan it.
+   2) We can't just add the contactID to the packet as we can't trust them.
+  c) This will most likely miss some opportunities to mark a contact as alive.
+   1) In some instances this wouldn't matter since it will be used in a Kad Request.
+   2) In other casses, it will matter as you would need to ping that client to see if it's still there.
+----------------------
+- Sep 16th, 2003     -
+----------------------
+Unk: Any large Kad packet is now compressed.
+
+----------------------
+- Sep 18th, 2003     -
+----------------------
+bluecow: Fixed bug with invalid client objects in upload list after a file was unshared/reshared [zegzav]
+bluecow: Shared files listview and Search Results list view; Alt+DoubleClick opens Details dialog.
+bluecow: Fixed several format string errors [mandrag0re]
+
+----------------------
+- Sep 20th, 2003     -
+----------------------
+bluecow: changed all meta tags with string names into integer IDs
+bluecow: changed "Length" meta tag for eMule/Kad internal to type "Integer"
+bluecow: eMule/Kad tags are converted on-the-fly into ED2K tags when sent to a server or client
+bluecow: received ED2K tags are converted into eMule/Kad tags; includes also ED2K tags read from known.met
+bluecow: Redid Kad meta tag class to support:
+ - data type for nr. of meta tags (in list) changed from uint32 to uint8
+ - "dynamic" integer tags - this tag type selects the appropriate integer (8,16,32 bit) depending on the actually value
+ - data conversion functions and property functions for each tag type to support on-the-fly and easy to use data conversion without caring about the actual data type
+Unk: Search & source results are now bundled.
+ - If your going to recieve more then 1 result from a client, this will save 16Bytes(data)+UDP(packet overhead) for all extra results.
+ - Also, compression seems be able to compress these packets close to 50%..
+Unk: Files with no valid keywords were able to stall publishing of all other files.. This was fixed.
+Unk: Kademlia search results are now process availability a little different to try to get a better idea of availability.
+
+----------------------
+- Sep 21th, 2003     -
+----------------------
+bluecow: Changed all integer (8,16,32,128 bit) data to little endian format at lowest (network) level.
+Unk: Initial merging of eMule and eDonkey's hello packets with help from bluecow.
+Unk: Created new format of eMule's version number to show more info.
+Unk: Cleaned up some of the Indexing code.
+Unk: Index list is now cleaned better.
+ Passive Cleaning) If someone does a search request and the client finds old keys to that request, they are deleted.
+ Acitve Cleaning) Once every 30 mins, the index is scrubbed of old keys.
+ 
+----------------------
+- Sep 25th, 2003     -
+----------------------
+bluecow: Added server TCP connection keep alive function.
+bluecow: Tooltips in search results listview are shown only if Shift+Ctrl is pressed while moving the mouse over a listview item.
+
+----------------------
+- October 1st, 2003  -
+----------------------
+Ornis: Added connect buttons to Kad and Servers.
+Unk: Passive contact collection during publishing is causing the contact list to grow too large..
+1) This will help the contact list to stay at a lower level..
+2) Also should lower the overhead as you don't have to keep track of as many contacts..
+Unk: A very unreliable user estimate.
+Unk: Extended the window to publish files..
+1) This allows more files to be published..
+2) Reduces overhead for those not sharing a lot of files..
+3) But will increase the amount of files everyone has to index.
+i ) This increase in indexes will actually be testing things for when publishing speed is increased..
+4) Will cause a more old sources to be indexed..
+Unk: All contacts after level 4 are now checked at least once an hour.
+bluecow: added the long awaited More button to search window for getting more search results from the local server.
+bluecow: rewrote tooltips for transfer window to fix several small glitches.
+bluecow: buffered partfile data is explicitly written to disk before a preview command is invoked.
+bluecow: partfile disk usage is determined with respect to NTFS compression and/or NTFS sparse files.
+
+----------------------
+- October 2nd, 2003  -
+----------------------
+Unk: Protocol change.. Going to have to restart the network.. (Everyone Update!)
+Unk: Kademlia searches should be far be far better.

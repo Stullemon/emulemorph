@@ -1,0 +1,41 @@
+#pragma once
+
+#include "preferences.h"
+#include "afxwin.h"
+
+// CPPgGeneral dialog
+
+class CPPgGeneral : public CPropertyPage
+{
+	DECLARE_DYNAMIC(CPPgGeneral)
+
+public:
+	CPPgGeneral();
+	virtual ~CPPgGeneral();
+
+	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
+
+// Dialog Data
+	enum { IDD = IDD_PPG_GENERAL };
+protected:
+	CPreferences *app_prefs;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	DECLARE_MESSAGE_MAP()
+public:
+	virtual BOOL OnInitDialog();
+private:
+	void LoadSettings(void);
+public:
+	virtual BOOL OnApply();
+	afx_msg void OnSettingsChange()					{ SetModified(); }
+	afx_msg void OnBnClickedEd2kfix();
+	afx_msg void OnBnClickedEditWebservices();
+
+protected:
+	CComboBox m_language;
+public:
+	void Localize(void);
+};
+
