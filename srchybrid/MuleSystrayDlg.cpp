@@ -423,7 +423,7 @@ void CMuleSystrayDlg::OnChangeMinUptxt()
 		m_nMinUpSpeedTxt = min(max(m_nMinUpSpeedTxt,1),m_iMaxUp);
 		
 		m_ctrlMinUpSpeedSld.SetPos(m_nMinUpSpeedTxt);
-		theApp.glob_prefs->SetMaxUpload(m_nMinUpSpeedTxt);
+		theApp.glob_prefs->SetMinUpload(m_nMinUpSpeedTxt);
 		UpdateData(FALSE);
 	}
 }
