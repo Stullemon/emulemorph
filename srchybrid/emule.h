@@ -21,6 +21,7 @@
 #include ".\Optimizer\cpu_info.h" //Commander - Added: Optimizer [ePlus]
 #include "resource.h"
 #include "loggable.h"
+#include "UPnPNat.h" //MORPH - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 #include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
@@ -206,6 +207,20 @@ public:
 	void	AddIncomingFolderIcon();
 	void	RemoveIncomingFolderIcon();
        // Commander - Added: Custom incoming folder icon [emulEspaña] - End
+
+	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+public:
+	CUPnPNat	m_UPnPNat;
+	BOOL		AddUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping, bool tryRandom = false);
+	BOOL		RemoveUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping);
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+
+	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	public:
+		CString		m_strModVersion;
+		CString		m_strModLongVersion;
+	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
+
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 public:
 	CWapServer*		wapserver;

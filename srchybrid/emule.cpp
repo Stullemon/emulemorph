@@ -69,6 +69,10 @@
 #include "FirewallOpener.h"
 #include "StringConversion.h"
 
+//MORPH START - Added by SiRoB [itsonlyme: -modname-]
+#include "ModName.h"
+//MORPH END   - Added by SiRoB [itsonlyme: -modname-]
+
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
@@ -225,9 +229,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	// create a string version (e.g. "0.30a")
 	ASSERT( VERSION_UPDATE + 'a' <= 'f' );
 #ifdef _DEBUG
-	m_strCurVersionLong.Format(_T("%u.%u%c.%u [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD, MOD_VERSION);
+	m_strCurVersionLong.Format(_T("%u.%u%c.%u"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD);
 #else
-	m_strCurVersionLong.Format(_T("%u.%u%c [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, MOD_VERSION);
+	m_strCurVersionLong.Format(_T("%u.%u%c"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE);
 #endif
 
 #ifdef _DUMP
@@ -249,6 +253,13 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_bGuardClipboardPrompt = false;
 
 	EnableHtmlHelp();
+
+	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
+	m_strModVersion = MOD_VERSION;
+	m_strModVersion.AppendFormat(_T(" %u"), MOD_VERSION_MJR);
+	m_strModLongVersion = MOD_VERSION;
+	m_strModLongVersion.AppendFormat(_T(" %u.%u"), MOD_VERSION_MJR, MOD_VERSION_MIN);
+	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 }
 
 
@@ -403,9 +414,10 @@ BOOL CemuleApp::InitInstance()
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
 	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
-        // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
+        
+	//MORPH START - Added by Commander, Custom incoming folder icon [emulEspaña]
 	theApp.AddIncomingFolderIcon();
-        // Commander - Added: Custom incoming folder icon [emulEspaña] - End        
+    //MORPH END   - Added by Commander, Custom incoming folder icon [emulEspaña]
 
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
@@ -418,12 +430,37 @@ BOOL CemuleApp::InitInstance()
 
 	m_pFirewallOpener = new CFirewallOpener();
 	m_pFirewallOpener->Init(true); // we need to init it now (even if we may not use it yet) because of CoInitializeSecurity - which kinda ruins the sense of the class interface but ooohh well :P
+
+	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+	if(!thePrefs.GetICFSupport() && thePrefs.GetICFSupportFirstTime() && m_pFirewallOpener->DoesFWConnectionExist()){ 	 
+		if(MessageBox(NULL, GetResString(IDS_ICFSUPPORTFIRST), _T("eMule"), MB_YESNO | MB_ICONQUESTION) == IDYES){ 	 
+			thePrefs.SetICFSupport(true); 	 
+        } 	 
+		thePrefs.SetICFSupportFirstTime(false); 	 
+	}
+	//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
 	// Open WinXP firewallports if set in preferences and possible
+	//MORPH START - Changed by SiRoB, [MoNKi: -Random Ports-]
+	/*
 	if (thePrefs.IsOpenPortsOnStartupEnabled()){
+	*/
+	if (thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetUseRandomPorts()){
+	//MORPH END   - Changed by SiRoB, [MoNKi: -Random Ports-]
 		if (m_pFirewallOpener->DoesFWConnectionExist()){
+			// delete old rules added by eMule
+			//MORPH START - Changed by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+			/*
 			// delete old rules added by eMule
 			m_pFirewallOpener->RemoveRule(EMULE_DEFAULTRULENAME_UDP);
 			m_pFirewallOpener->RemoveRule(EMULE_DEFAULTRULENAME_TCP);
+			*/
+			// delete old rules added by eMule
+			m_pFirewallOpener->ClearOld();
+			//MORPH END   - Changed by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
+
+			//MORPH START - Changed by SiRoB, [MoNKi: -Random Ports-]
+			/*
 			// open port for this session
 			if (m_pFirewallOpener->OpenPort(thePrefs.GetPort(), NAT_PROTOCOL_TCP, EMULE_DEFAULTRULENAME_TCP, true))
 				QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_S), thePrefs.GetPort());
@@ -437,6 +474,8 @@ BOOL CemuleApp::InitInstance()
 				else
 					QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), thePrefs.GetUDPPort());
 			}
+			*/
+			//MORPH END   - Changed by SiRoB, [MoNKi: -Random Ports-]
 		}
 	}
 
@@ -1600,6 +1639,33 @@ if (!emuledlg)
 	AddLogLine(false,_T("********Optimizer********"));
 }
 //Commander - Added: Optimizer [ePlus] - End
+
+//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
+BOOL CemuleApp::AddUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping, bool tryRandom){
+	if(m_UPnPNat.AddNATPortMapping(mapping, tryRandom) == CUPnPNat::UNAT_OK ){
+		if(theApp.emuledlg->IsRunning()){
+			AddLogLine(false, _T("Added UPnP NAT Support: (%s) NAT ROUTER/FIREWALL:%i -> %s:%i"),
+				mapping->description, mapping->externalPort, m_UPnPNat.GetLocalIPStr(), mapping->internalPort);
+		}
+		return true;
+	}
+	else{
+		if(theApp.emuledlg->IsRunning()){
+			AddLogLine(false, _T("Error adding UPnP NAT Support: (%s) NAT ROUTER/FIREWALL:%i -> %s:%i (%s)"),
+				mapping->description, mapping->externalPort, m_UPnPNat.GetLocalIPStr(), mapping->internalPort, m_UPnPNat.GetLastError());
+		}
+		return false;
+	}
+}
+
+BOOL CemuleApp::RemoveUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping){
+	if(m_UPnPNat.RemoveNATPortMapping(*mapping) == CUPnPNat::UNAT_OK )
+		return true;
+	else
+		return false;
+}
+//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
+
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 void CemuleApp::AddIncomingFolderIcon(){
 	CString desktopFile, exePath;
