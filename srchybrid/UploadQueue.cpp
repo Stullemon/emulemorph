@@ -339,7 +339,11 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		return	true;
 	}
 	// but rightClient has better score, so rightClient is better
-	else if(rightScore > leftScore){
+	else if(leftClient->GetPowerShared() &&
+		    rightClient->GetPowerShared() &&
+			leftClient->MoreUpThanDown() &&
+			rightClient->MoreUpThanDown() &&
+			rightScore > leftScore){
 		return	true;
 	}
 	return	false;
@@ -561,10 +565,9 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 					)//EastShare - added by AndCycle, PayBackFirst
 				) &&
 				(
-					(
-						!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
-						newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
-					)
+					!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
+					newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
+					// Compare scores is more right than comparing waittime.
 				)
 			)
           ) {
@@ -1042,7 +1045,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		}
 		else if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
 
-			if (client->GetFriendSlot() == false && // client is not a friend with friend slot
+			if (client->IsFriend() && client->GetFriendSlot() == false && // client is not a friend with friend slot
 				client->MoreUpThanDown() == false && // client don't need Pay Back First //Morph - Added by AndCycle, Pay Back First
 				client->GetPowerShared() == false && // client don't want powershared file //Morph - Added by AndCycle
 					(
