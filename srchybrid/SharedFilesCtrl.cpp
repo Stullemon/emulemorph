@@ -1347,7 +1347,10 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					InputBox inputbox;
 					CString title=GetResString(IDS_POWERSHARE);
 					CString currPowerShareLimit;
-					currPowerShareLimit.Format("%u", (file->GetPowerShareLimit()>=0)?file->GetPowerShareLimit():0);
+					if (file)
+						currPowerShareLimit.Format("%i", (file->GetPowerShareLimit()>=0)?file->GetPowerShareLimit():thePrefs.GetPowerShareLimit());
+					else
+						currPowerShareLimit = "0";
 					inputbox.SetLabels(GetResString(IDS_POWERSHARE), GetResString(IDS_POWERSHARE_LIMIT), currPowerShareLimit);
 					inputbox.SetNumber(true);
 					int result = inputbox.DoModal();
@@ -1378,7 +1381,10 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					InputBox inputbox;
 					CString title=GetResString(IDS_HIDEOS);
 					CString currHideOS;
-					currHideOS.Format("%u", (file->GetHideOS()>=0)?file->GetHideOS():0);
+					if (file)
+						currHideOS.Format("%i", (file->GetHideOS()>=0)?file->GetHideOS():thePrefs.GetHideOvershares());
+					else
+						currHideOS = "0";
 					inputbox.SetLabels(GetResString(IDS_HIDEOS), GetResString(IDS_HIDEOVERSHARES), currHideOS);
 					inputbox.SetNumber(true);
 					int result = inputbox.DoModal();
