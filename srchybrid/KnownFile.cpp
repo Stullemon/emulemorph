@@ -94,6 +94,15 @@ void CFileStatistic::AddAccepted(){
 	theApp.sharedfiles->UpdateFile(fileParent);
 }
 	
+//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
+void CFileStatistic::DelAccepted(){
+	accepted--;
+	alltimeaccepted--;
+	theApp.knownfiles->accepted--;
+	theApp.sharedfiles->UpdateFile(fileParent);
+}
+//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
+
 void CFileStatistic::AddTransferred(uint32 start, uint32 bytes){	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	transferred += bytes;
 	alltimetransferred += bytes;

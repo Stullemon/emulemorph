@@ -363,7 +363,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					}
 					case 1:
 						buffer = CastItoXBytes(file->GetFileSize());
-					uDTFlags |= DT_RIGHT;
+						uDTFlags |= DT_RIGHT;
 						break;
 					case 2:
 						buffer = file->GetFileType();

@@ -217,6 +217,53 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
  * @return true if right client is better, false if clients are equal. False if left client is better.
  */
 bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore) {
+
+//Morph Start - added by AndCycle, Equal Chance For Each File
+
+	bool	rightGetQueueFile;
+	CKnownFile* rightReqFile;
+	CKnownFile* leftReqFile;
+	
+	if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
+		rightGetQueueFile = false;
+	}
+	else if(!leftClient || !rightClient){
+		rightGetQueueFile = false;
+	}
+	else if((rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
+		(leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID()))){
+
+		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+
+			case ECFEF_ACCEPTED:{
+				rightGetQueueFile = 
+					rightReqFile->statistic.GetAccepts() < leftReqFile->statistic.GetAccepts();
+			}break;
+
+			case ECFEF_ACCEPTED_COMPLETE:{
+				rightGetQueueFile =
+					(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() <	
+					(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
+			}break;
+
+			case ECFEF_TRANSFERRED:{
+				rightGetQueueFile =
+					rightReqFile->statistic.GetTransferred() < leftReqFile->statistic.GetTransferred();
+			}break;
+
+			case ECFEF_TRANSFERRED_COMPLETE:{
+				rightGetQueueFile =
+					(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
+					(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+			}break;
+
+			default:{
+				rightGetQueueFile = false;
+			}break;
+		}
+	}
+//Morph End - added by AndCycle, Equal Chance For Each File
+
 	if(
 		(leftClient != NULL &&
 			(
@@ -233,7 +280,13 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && rightScore > leftScore // same prio file, but rightClient has better score, so rightClient is better
 						) ||  
 						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
-						rightScore > leftScore  // but rightClient has better score, so rightClient is better
+						(
+							rightGetQueueFile == true || //Morph - added by AndCycle, Equal Chance For Each File
+							rightGetQueueFile == false &&//Morph - added by AndCycle, Equal Chance For Each File
+							(
+								rightScore > leftScore  // but rightClient has better score, so rightClient is better
+							)
+						)
 					)//EastShare - added by AndCycle, PayBackFirst
 				)
 			) ||
@@ -554,7 +607,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
 	    if (reqfile)
 		reqfile->statistic.AddAccepted();
-//	}
+	//	}
 		
 	theApp.emuledlg->transferwnd.uploadlistctrl.AddClient(newclient);
         
@@ -589,11 +642,11 @@ void CUploadQueue::Process() {
 
         if(activeClientsSnapshot > tempMaxActiveClients) {
             tempMaxActiveClients = activeClientsSnapshot;
-	}
+		}
 
         if(activeClientsSnapshot > tempMaxActiveClientsShortTime && curTick - activeClientsTickSnapshot < 10 * 1000) {
             tempMaxActiveClientsShortTime = activeClientsSnapshot;
-	}
+		}
 
         activeClients_tick_list.GetNext(activeClientsTickPos);
         activeClients_list.GetNext(activeClientsListPos);
@@ -613,7 +666,7 @@ void CUploadQueue::Process() {
         if(added == false) {
             // set timer so we can wait a while
             m_dwLastCheckedForHighPrioClient = curTick;
-	} else{
+		}else{
             // there might be another highprio client
             // don't set timer, so that we check next call as well
         }
@@ -655,6 +708,15 @@ void CUploadQueue::Process() {
 
             //theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload since there are too many upload slots opened.", lastClient->GetUserName());
             // Remove from upload list.
+
+			//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
+			//require for equal chance for each file, accepted base
+			CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)lastClient->GetUploadFileID());
+			if (reqfile){
+				reqfile->statistic.DelAccepted();
+			}
+			//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
+			
             RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
 
 		    // add to queue again.

@@ -45,6 +45,7 @@ public:
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	void	AddRequest();
 	void	AddAccepted();
+	void	DelAccepted();//Morph - added by AndCycle, for zz prio system there are some situation need to take care with
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	void	AddTransferred(uint32 start, uint32 bytes);
 	void	AddBlockTransferred(uint32 start, uint32 end, uint32 count);

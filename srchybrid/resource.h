@@ -1102,6 +1102,7 @@
 #define IDS_SERVER_LIMITS               1147
 #define IDS_SERVERINFO                  1148
 #define IDS_KBITSSEC                    1149
+#define IDI_ICON3                       1149
 #define IDS_KBYTESSEC                   1150
 #define IDS_ERR_CREATE_DIR              1151
 #define IDS_WRN_INCFILE_RESERVED        1152
@@ -2382,7 +2383,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1147
+#define _APS_NEXT_RESOURCE_VALUE        1150
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         2481
 #define _APS_NEXT_SYMED_VALUE           106

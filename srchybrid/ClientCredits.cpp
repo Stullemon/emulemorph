@@ -371,7 +371,7 @@ void CClientCreditsList::LoadList()
 
 	CSafeBufferedFile	loadFile;
 
-	const int	totalLoadFile = 13;
+	const int	totalLoadFile = 9;
 
 	CString		loadFileName[totalLoadFile];
 	CFileStatus	loadFileStatus[totalLoadFile];
@@ -386,14 +386,10 @@ void CClientCreditsList::LoadList()
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir());
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup\\");
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), m_pAppPrefs->GetConfigDir()+"Backup2\\");
-	//totalLoadFile = 13;
+	//totalLoadFile = 9;
 
 	int	lastFile = -1;
 	for(int curFile = 0; curFile < totalLoadFile; curFile++){
@@ -615,6 +611,7 @@ void CClientCreditsList::SaveList()
 	{
 //Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
+		if (!theApp.emuledlg->IsRunning() && !theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->ClearUploadQueueWaitTime();
 		if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 		{
 			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT

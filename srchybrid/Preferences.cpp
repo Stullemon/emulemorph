@@ -1342,6 +1342,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("EnableAntiCreditHack", prefs->enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteBool("IsBoostLess", prefs->isboostless);//Added by Yun.SF3, boost the less uploaded files
 	ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteInt("EqualChanceForEachFileMode", prefs->equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
 	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
 	ini.WriteInt("MaxUpload",prefs->maxupload);
@@ -1837,6 +1838,7 @@ void CPreferences::LoadPreferences(){
 	enableHighProcess = ini.GetBool("EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
 	prefs->isboostless = ini.GetBool("IsBoostLess", false);//Added by Yun.SF3, boost the less uploaded files
 	prefs->creditSystemMode = (CreditSystemSelection)ini.GetInt("CreditSystemMode", CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
+	prefs->equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true); // EastShare - Added by TAHO, does USS limit
 	prefs->isboostfriends = ini.GetBool("IsBoostFriends", false);//Added by Yun.SF3, boost friends
 	prefs->maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);

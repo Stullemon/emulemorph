@@ -113,7 +113,7 @@ struct Category_Struct{
 
 #pragma pack()
 
-//EastShare - added by AndCycle, here is better then opcode.h, creditsystem integration
+//EastShare Start - added by AndCycle, here is better then opcode.h, creditsystem integration
 enum CreditSystemSelection {
 	//becareful the sort order for the damn radio button in PPgEastShare.cpp
 	CS_OFFICIAL = 0,	
@@ -122,7 +122,19 @@ enum CreditSystemSelection {
 	CS_PAWCIO,
 	CS_EASTSHARE
 };
-//EastShare - added by AndCycle, here is better then opcode.h, creditsystem integration
+//EastShare End - added by AndCycle, here is better then opcode.h, creditsystem integration
+
+//Morph Start - added by AndCycle, One-Queue-Per-File
+enum EqualChanceForEachFileSelection{
+
+	ECFEF_DISABLE = 0,
+	ECFEF_ACCEPTED,				//accroading the file accepted
+	ECFEF_ACCEPTED_COMPLETE,		//file accepted base, one complete file
+	ECFEF_TRANSFERRED,			//accroading transfered
+	ECFEF_TRANSFERRED_COMPLETE	//transfered base, one complete file
+
+};
+//Morph End - added by AndCycle, One-Queue-Per-File
 
 #pragma pack(1)
 struct Preferences_Struct{
@@ -136,6 +148,7 @@ struct Preferences_Struct{
 	bool	isZZRatioActivated;// Added By Yun.SF3, Option for Ratio Systems
 	bool	isboostless;//Added by Yun.SF3, boost the less uploaded files
 	CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
+	EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 	bool	isboostfriends;//Added by Yun.SF3, boost friends
 	bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -751,6 +764,7 @@ public:
 	bool IsBoostLess() const {return prefs->isboostless;}//Added by Yun.SF3, boost the less uploaded files
 
 	CreditSystemSelection  GetCreditSystem() const {return prefs->creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
+	EqualChanceForEachFileSelection	GetEqualChanceForEachFileMode() const {return prefs->equalChanceForEachFileMode;}	//Morph - added by AndCycle, Equal Chance For Each File
 	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	bool IsBoostFriends() const {return prefs->isboostfriends;}//Added by Yun.SF3, boost friends
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
