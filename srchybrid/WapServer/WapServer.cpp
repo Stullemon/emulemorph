@@ -4353,7 +4353,7 @@ void CWapServer::SendSmallestCxImage(WapThreadData Data, CxImage *cImage){
 
 CString CWapServer::RemoveWMLScriptInvalidChars(CString input)
 {
-	//This function removes accents, and chars >= 128 (ASCII)
+	//This function removes accents, and chars >= 128 (Latin-4/ISO 8859-4) http://www.free-definition.com/ISO-8859-4.html
 	//because some mobiles has problems with those chars in wmlscripts.
 	CString tmpStr;
 	tmpStr = input;
@@ -4362,79 +4362,79 @@ CString CWapServer::RemoveWMLScriptInvalidChars(CString input)
 		c = input.GetAt(i);
 		switch (c){
 			//Lower Case:
-			case _T('á'):
-			case _T('ä'):
-			case _T('à'):
-			case _T('â'):
+			case _T('\xE0'):
+			case _T('\xE1'):
+			case _T('\xE2'):
+			case _T('\xE4'):
 				c = _T('a');
 				break;
-			case _T('é'):
-			case _T('ë'):
-			case _T('è'):
-			case _T('ê'):
+			case _T('\xE8'):
+			case _T('\xE9'):
+			case _T('\xEA'):
+			case _T('\xEB'):
 				c = _T('e');
 				break;
-			case _T('í'):
-			case _T('ï'):
-			case _T('ì'):
-			case _T('î'):
+			case _T('\xEC'):
+			case _T('\xED'):
+			case _T('\xEE'):
+			case _T('\xEF'):
 				c = _T('i');
 				break;
-			case _T('ó'):
-			case _T('ö'):
-			case _T('ò'):
-			case _T('ô'):
+			case _T('\xF2'):
+			case _T('\xF3'):
+			case _T('\xF4'):
+			case _T('\xF6'):
 				c = _T('o');
 				break;
-			case _T('ú'):
-			case _T('ü'):
-			case _T('ù'):
-			case _T('û'):
+			case _T('\xF9'):
+			case _T('\xFA'):
+			case _T('\xFB'):
+			case _T('\xFC'):
 				c = _T('u');
 				break;
-			case _T('ý'):
-			case _T('ÿ'):
+			case _T('\xFD'):
+			case _T('\xFF'):
 				c = _T('y');
 				break;
-			case _T('ñ'):
+			case _T('\xF1'):
 				c = _T('n');
 				break;
 
 			//Upper Case:
-			case _T('Á'):
-			case _T('Ä'):
-			case _T('À'):
-			case _T('Â'):
+			case _T('\xC0'):
+			case _T('\xC1'):
+			case _T('\xC2'):
+			case _T('\xC4'):
 				c = _T('A');
 				break;
-			case _T('É'):
-			case _T('Ë'):
-			case _T('È'):
-			case _T('Ê'):
+			case _T('\xC8'):
+			case _T('\xC9'):
+			case _T('\xCA'):
+			case _T('\xCB'):
 				c = _T('E');
 				break;
-			case _T('Í'):
-			case _T('Ï'):
-			case _T('Ì'):
-			case _T('Î'):
+			case _T('\xCC'):
+			case _T('\xCD'):
+			case _T('\xCE'):
+			case _T('\xCF'):
 				c = _T('I');
 				break;
-			case _T('Ó'):
-			case _T('Ö'):
-			case _T('Ò'):
-			case _T('Ô'):
+			case _T('\xD2'):
+			case _T('\xD3'):
+			case _T('\xD4'):
+			case _T('\xD6'):
 				c = _T('O');
 				break;
-			case _T('Ú'):
-			case _T('Ü'):
-			case _T('Ù'):
-			case _T('Û'):
+			case _T('\xD9'):
+			case _T('\xDA'):
+			case _T('\xDB'):
+			case _T('\xDC'):
 				c = _T('U');
 				break;
-			case _T('Ý'):
+			case _T('\xDD'):
 				c = _T('Y');
 				break;
-			case _T('Ñ'):
+			case _T('\xD1'):
 				c = _T('N');
 				break;
 
