@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.8
+--------------------------------------
+MERGED : Merge to 0.44d in progress [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.7
 --------------------------------------
 FIXED  : The AutoSetResumeOrder have been corrected to work properly in all case [SiRoB]
