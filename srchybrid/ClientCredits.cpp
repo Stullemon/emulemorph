@@ -43,11 +43,11 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_dwSecureWaitTime = 0;
 	m_dwWaitTimeIP = 0;
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
 	m_bCheckScoreRatio = true;
 	m_fLastScoreRatio = 1;
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
-	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph End - Added by AndCycle, reduce a litte CPU usage for ratio count
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -60,11 +60,11 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_dwSecureWaitTime = ::GetTickCount();
 	m_dwWaitTimeIP = 0;
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
 	m_bCheckScoreRatio = true;
 	m_fLastScoreRatio = 1;
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
 }
 
 CClientCredits::~CClientCredits()
@@ -118,7 +118,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		return 1;
 	}
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
 	if(m_cssCurrentCreditSystem != theApp.glob_prefs->GetCreditSystem()){
 		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
 	}else if(m_bCheckScoreRatio == false){
@@ -126,9 +126,9 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 	}else if(m_bCheckScoreRatio == true){
 		m_bCheckScoreRatio = false;
 	}
-	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph End - Added by AndCycle, reduce a litte CPU usage for ratio count
 
-	//Morph Start - Modified by AndCycle, reduce a litte CPU usage for rating count
+	//Morph Start - Modified by AndCycle, reduce a litte CPU usage for ratio count
 
 	float result = 0;//everybody share one result.
     //EastShare START - Added by linekin, CreditSystem 
@@ -303,7 +303,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 	return m_fLastScoreRatio = result;
 	//EastShare END - Added by linekin, CreditSystem 
 
-	//Morph End - Modified by AndCycle, reduce a litte CPU usage for rating count
+	//Morph End - Modified by AndCycle, reduce a litte CPU usage for ratio count
 }
 //MORPH START - Added by IceCream, VQB: ownCredits
 float CClientCredits::GetMyScoreRatio(uint32 dwForIP)

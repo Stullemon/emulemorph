@@ -100,11 +100,11 @@ private:
 	uint32			m_dwUnSecureWaitTime;
 	uint32			m_dwWaitTimeIP;			   // client IP assigned to the waittime
 
-	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
 	bool			m_bCheckScoreRatio;
 	float			m_fLastScoreRatio;
 	CreditSystemSelection	m_cssCurrentCreditSystem;
-	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
+	//Morph End - Added by AndCycle, reduce a litte CPU usage for ratio count
 };
 
 class CClientCreditsList: public CLoggable
