@@ -499,7 +499,6 @@ bool	CPreferences::enableDownloadInRed; //MORPH - Added by IceCream, show downlo
 bool	CPreferences::enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
-bool	CPreferences::isZZRatioActivated;// Added By Yun.SF3, Option for Ratio Systems
 CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 EqualChanceForEachFileSelection CPreferences::equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
@@ -914,7 +913,9 @@ bool CPreferences::IsZZRatioDoesWork(){
 		return true;
 	if (theApp.stat_sessionSentBytesToFriend > 0)
 		return true;
-	return theApp.statistics->GetAvgUploadRate(0)<10.240;
+	if (theApp.statistics)
+		return theApp.statistics->GetAvgUploadRate(0)<16*(1+(uint32)theApp.statistics->maxDown/64)-6;
+	return false;
 }
 //MORPH - Added by SiRoB, ZZ ratio
 

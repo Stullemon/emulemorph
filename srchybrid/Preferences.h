@@ -571,7 +571,6 @@ public:
 	static bool	enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
-	static bool	isZZRatioActivated;// Added By Yun.SF3, Option for Ratio Systems
 	static CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	static EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
