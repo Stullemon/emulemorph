@@ -3,6 +3,8 @@ Changelog for eMule 0.44d MorphXT v5.1x
 --------------------------------------
 FIXED  : crash (introduced in previous version) when strat resume next occur and 'prefer same category' or 'only in same categry' prefrency is not checked [SiRoB]
 
+CHANGED: Revert back red and green color for QRdiff [SiRoB]
+
 TWEAKED: USC: Fully splittable upload bandwidth [SiRoB]
 
 --------------------------------------
