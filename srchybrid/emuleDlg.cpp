@@ -564,6 +564,9 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 			case 6:
 				theApp.emuledlg->status++;
 				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
+				theApp.emuledlg->status++;
+				break;
+			case 7:
 				break;
 			// SLUGFILLER: SafeHash				
 			default:
@@ -1081,7 +1084,7 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 }
 //MORPH START - Added by SiRoB, ZZ Upload system (USS)
 void CemuleDlg::ShowPing() {
-    if(IsWindowVisible()) {
+	if(IsWindowVisible()) {
         CurrentPingStruct lastPing = theApp.lastCommonRouteFinder->GetCurrentPing();
 
         CString buffer = "";
@@ -1198,17 +1201,11 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 		switch (pLink->GetKind()) {
 		case CED2KLink::kFile:
 			{
-				// khaos::categorymod+ Need to allocate memory so that our pointer
-				// remains valid until the link is added and removed from queue...
-				//MORPH START - HotFix by SiRoB, Khaos 14.6 Tempory Patch
-				//CED2KFileLink* pFileLink = new CED2KFileLink(pLink); 
+				//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 				CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(link.Trim());
-				//MORPH END - HotFix by SiRoB, Khaos 14.6 Tempory Patch
 				_ASSERT(pFileLink !=0);
-				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, true);
-				// This memory will be deallocated in CDownloadQueue::AddFileLinkToDownload
-				// or CDownloadQueue::PurgeED2KFileLinkQueue.
-				// khaos::categorymod-
+				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, -1, true);
+				//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 			}
 			break;
 		case CED2KLink::kServerList:

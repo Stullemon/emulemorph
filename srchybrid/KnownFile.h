@@ -28,6 +28,7 @@ typedef std::list<CString> WordList;
 class CUpDownClient;
 class Packet;
 class CFileDataIO;
+class CSafeMemFile;	// SLUGFILLER: hideOS
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CFileStatistic
@@ -205,7 +206,7 @@ public:
 
 	bool	LoadHashsetFromFile(CFileDataIO* file, bool checkhash);
 
-	bool	HideOvershares(CFile* file, CUpDownClient* client);	// SLUGFILLER: hideOS
+	bool	HideOvershares(CSafeMemFile* file, CUpDownClient* client);	// SLUGFILLER: hideOS
 
 	void	AddUploadingClient(CUpDownClient* client);
 	void	RemoveUploadingClient(CUpDownClient* client);
@@ -260,7 +261,7 @@ public:
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	
 	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
-	bool ShareOnlyTheNeed(CFile* file);//wistily Share only the need
+	bool ShareOnlyTheNeed(CSafeMemFile* file);//wistily Share only the need
 
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();

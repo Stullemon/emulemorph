@@ -367,7 +367,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         sendLocker.Lock();
 
         // Get current speed from UploadSpeedSense
-        allowedDataRate = theApp.lastCommonRouteFinder->GetUpload();
+		allowedDataRate = theApp.lastCommonRouteFinder->GetUpload();
 
         uint32 minFragSize = 1300;
         if(allowedDataRate < 6*1024) {
@@ -377,7 +377,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         const DWORD thisLoopTick = ::GetTickCount();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
         if(timeSinceLastLoop > 1*1000) {
-			theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long (%i).", timeSinceLastLoop);
+			//theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long (%i).", timeSinceLastLoop);
 
             timeSinceLastLoop = 1*1000;
             lastLoopTick = thisLoopTick - timeSinceLastLoop;

@@ -44,7 +44,7 @@ static char THIS_FILE[]=__FILE__;
 //	members of CUpDownClient
 //	which are mainly used for downloading functions 
 CBarShader CUpDownClient::s_StatusBar(16);
-//MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos
+//MORPH - Changed by SiRoB, See A4AF PartStatus
 /*
 void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat){ 
 */
@@ -80,12 +80,12 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	} 
 
 	
-	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+	//MORPH START - Changed by SiRoB, See A4AF PartStatus
 	//ASSERT(reqfile);
 	//s_StatusBar.SetFileSize(reqfile->GetFileSize()); 
-	ASSERT(reqfile);
+	ASSERT(file);
 	s_StatusBar.SetFileSize(file->GetFileSize()); 
-	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
+	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
 	s_StatusBar.SetHeight(rect->bottom - rect->top); 
 	s_StatusBar.SetWidth(rect->right - rect->left); 
 	s_StatusBar.Fill(crNeither); 
@@ -93,51 +93,20 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	uint32 uEnd; 
 
 	// Barry - was only showing one part from client, even when reserved bits from 2 parts
-	CString gettingParts;
-	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
-	//ShowDownloadingParts(&gettingParts);
 	
-	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
+	//MORPH START - Changed by SiRoB, See A4AF PartStatus
 	uint8* thisStatus;
-	if(m_PartStatus_list.Lookup(file,thisStatus)){
+	if(m_PartStatus_list.Lookup(file,thisStatus) && thisStatus){
+		CString gettingParts;
 		if (file != reqfile)
 			crClientOnly = RGB(192, 100, 255);
 		else
 			ShowDownloadingParts(&gettingParts);
-	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
-		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
-		/*
-		for (uint32 i = 0;i < m_nPartCount;i++){
-		if (m_abyPartStatus[i]){ 
-		*/
 		for (uint32 i = 0;i < file->GetPartCount();i++){
 			if (thisStatus[i]){ 
-		//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
-				//unneeded check: end value is already checked in Draw(...) function //wistily
-				/*
-				if (PARTSIZE*(i+1) > reqfile->GetFileSize())
-				uEnd = reqfile->GetFileSize();
-				else
 				uEnd = PARTSIZE*(i+1);
-				*/
-				uEnd = PARTSIZE*(i+1);
-				
-				//MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos	
-				/*
-				if (reqfile->IsComplete(PARTSIZE*i,PARTSIZE*(i+1)-1)) 
-				*/
 				if (file->IsComplete(PARTSIZE*i,PARTSIZE*(i+1)-1))
 					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crBoth);
-				//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos	
-				/*
-				else if (m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset < uEnd &&
-						m_nLastBlockOffset >= PARTSIZE*i)
-						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crPending);
-				else if (gettingParts.GetAt((uint16)i) == 'Y') //Sony: cast to (uint16) to fix VC7.1 2GB+ file error
-						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crNextPending);
-				else
-					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
-				*/
 				else if (file == reqfile){
 					if (m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset < uEnd &&
 							m_nLastBlockOffset >= PARTSIZE*i)
@@ -152,14 +121,9 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 				//MORPH END  - Changed by SiRoB, Advanced A4AF derivated from Khaos	
 			} 
 			//MORPH - Added by IceCream --- xrmb:seeTheNeed ---
-			//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos	
-			//else if (reqfile->IsComplete(PARTSIZE*i,PARTSIZE*(i+1)-1)){ 
-			//if (PARTSIZE*(i+1) > reqfile->GetFileSize()) 
-			//		uEnd = reqfile->GetFileSize(); 
 			else if (file->IsComplete(PARTSIZE*i,PARTSIZE*(i+1)-1)){ 
 				if (PARTSIZE*(i+1) > file->GetFileSize()) 
 					uEnd = file->GetFileSize(); 
-			//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos				
 				else 
 					uEnd = PARTSIZE*(i+1); 
 
@@ -168,6 +132,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 			//--- :xrmb ---
 		} 
 	} 
+	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
 	s_StatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
@@ -395,7 +360,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1)
 	{
-		//MORPH START - Changed by SiRoB, m_PartStatus_list
+		//MORPH START - Changed by SiRoB,  See A4AF PartStatus
 		/*
 		if (m_abyPartStatus)
 		{
@@ -410,12 +375,12 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			m_PartStatus_list.RemoveKey(reqfile);
 		}
 		m_abyPartStatus = NULL;
-		//MORPH   END - Changed by SiRoB, m_PartStatus_list
+		//MORPH   END - Changed by SiRoB, See A4AF PartStatus
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by SiRoB, m_PartStatus_list
-		m_PartStatus_list[reqfile] = m_abyPartStatus;
-		//MORPH END   - Added by SiRoB, Hot Fix for m_PartStatus_list
+		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		m_PartStatus_list.SetAt(reqfile,m_abyPartStatus);
+		//MORPH END   - Added by SiRoB, See A4AF PartStatus
 		memset(m_abyPartStatus,1,m_nPartCount);
 		m_bCompleteSource = true;
 
@@ -471,7 +436,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	}
 	uint16 nED2KPartCount = data->ReadUInt16();
 
-	//MORPH START - Added by SiRoB, m_PartStatus_List
+	//MORPH START - Added by SiRoB, See A4AF PartStatus
 	/*
 	if (m_abyPartStatus)
 	{
@@ -486,7 +451,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		m_PartStatus_list.RemoveKey(reqfile);
 	}
 	m_abyPartStatus = NULL;
-	//MORPH   END - Added by SiRoB, m_PartStatus_List
+	//MORPH   END - Added by SiRoB, See A4AF PartStatus
 
 	bool bPartsNeeded = false;
 	int iNeeded = 0;
@@ -494,6 +459,9 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	{
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
+		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		m_PartStatus_list.SetAt(reqfile, m_abyPartStatus);
+		//MORPH   END - Added by SiRoB, See A4AF PartStatus
 		memset(m_abyPartStatus,1,m_nPartCount);
 		bPartsNeeded = true;
 		m_bCompleteSource = true;
@@ -519,6 +487,9 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 
 		m_bCompleteSource = false;
 		m_abyPartStatus = new uint8[m_nPartCount];
+		//MORPH START - Added by SiRoB, See A4AF PartStatus
+		m_PartStatus_list.SetAt(reqfile, m_abyPartStatus);
+		//MORPH   END - Added by SiRoB, See A4AF PartStatus
 		uint16 done = 0;
 		while (done != m_nPartCount)
 		{
@@ -551,10 +522,6 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	}
 	
 	
-	//MORPH START - Added by SiRoB, m_PartStatus_List
-	m_PartStatus_list[reqfile] = m_abyPartStatus;
-	//MORPH   END - Added by SiRoB, m_PartStatus_List
-
 	UpdateDisplayedInfo();
 	reqfile->UpdateAvailablePartsCount();
     
@@ -686,12 +653,12 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			m_nDownDatarate = 0;
 			if (nNewState == DS_NONE){
 				
-				//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+				//MORPH START - Added by SiRoB, See A4AF PartStatus
 				/*
 				if (m_abyPartStatus)
 					delete[] m_abyPartStatus;
 				*/
-				//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
+				//MORPH   END - Added by SiRoB, See A4AF PartStatus
 				m_abyPartStatus = NULL;
 				m_nPartCount = 0;
 			}
@@ -1219,19 +1186,20 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if(m_AvarageDDR_list.GetCount() > (60000 / (1 + cur_tick - m_AvarageDDR_list.GetHead().timestamp)) ||
+		if(100*m_AvarageDDR_list.GetHead().datalen < m_nSumForAvgDownDataRate ||
 			(cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000) {
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		}else
 			break;
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
-		DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
-		if(dwDuration<1000) dwDuration = 30000;
 		if (m_AvarageDDR_list.GetCount() == 1)
-			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / dwDuration;
-		else
+			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 30000;
+		else{
+			DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
+			if (dwDuration<1000) dwDuration = 30000;
 			m_nDownDatarate = ((m_nSumForAvgDownDataRate - m_AvarageDDR_list.GetHead().datalen)*1000) / dwDuration;
+		}
 	}else
 		m_nDownDatarate = 0;
 	
@@ -1583,17 +1551,6 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 		SwapTo->srclist.AddTail(this);
 		theApp.emuledlg->transferwnd->downloadlistctrl.AddSource(SwapTo,this,false);
 
-		//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-		uint8* thisStatus;
-		if (m_PartStatus_list.Lookup(SwapTo, thisStatus))
-		{
-			m_abyPartStatus = thisStatus;
-			m_nPartCount = SwapTo->GetPartCount();
-			reqfile->UpdatePartsInfo();
-			reqfile->UpdateAvailablePartsCount();
-		}
-		//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-		
 		return true;
 	}
 	return false;

@@ -63,11 +63,6 @@ private:
 class CED2KFileLink : public CED2KLink {
 public:
 	CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const TCHAR* sources);
-	// khaos::categorymod+
-	CString GetSizeStr() { return m_size; }
-	int		GetCat() { return m_cat; }
-	void	SetCat(int in) { m_cat = in; }
-	// khaos::categorymod-
 	virtual ~CED2KFileLink();
 	virtual LinkType GetKind() const;
 	virtual CED2KServerListLink* GetServerListLink();
@@ -90,9 +85,6 @@ private:
 	CString m_name;
 	CString m_size;
 	uchar m_hash[16];
-	// khaos::categorymod+ Sometimes we need to assign a static category to a file link...
-	int m_cat;
-	// khaos::categorymod-
 };
 
 class CED2KServerListLink : public CED2KLink {

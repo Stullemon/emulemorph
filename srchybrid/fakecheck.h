@@ -23,25 +23,25 @@
 using namespace std;
 
 struct Fakes_Struct{
-   CString			Hash;
+   uchar			Hash[16];
    uint32			Lenght;
    CString			RealTitle;
-   ~Fakes_Struct() {  }
 };
+
+typedef CTypedPtrArray<CPtrArray, Fakes_Struct*> CFakecheckArray;
 
 class CFakecheck
 {
 public:
 	CFakecheck();
 	~CFakecheck();
-	void	AddFake(CString Hash,uint32 Lenght,CString Realtitle);
+	void	AddFake(uchar* Hash,uint32& Lenght,CString& Realtitle);
 	void	RemoveAllFakes();
 	int		LoadFromFile();
-	CString GetLastHit() { return lasthit;}
-	bool	IsFake(CString Hash2test, uint32 lenght);
+	CString GetLastHit() const;
+	bool	IsFake(uchar* Hash2test, uint32 lenght);
 	void	DownloadFakeList();
 private:
-	CString lasthit;
-	//CMutex m_Mutex;
-	std::map<CString,Fakes_Struct*> Fakelist;
+	const Fakes_Struct* m_pLastHit;
+	CFakecheckArray m_fakelist;
 };

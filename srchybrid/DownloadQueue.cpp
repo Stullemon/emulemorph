@@ -366,16 +366,16 @@ uint16 CDownloadQueue::GetMaxCatResumeOrder(uint8 iCategory /* = 0*/)
 // This function has been modified in order
 // to accomodate the category selection.
 // NEW PARAM:  bool AllocatedLink = false by default
-void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, bool AllocatedLink, bool SkipQueue)
+void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, int theCat, bool AllocatedLink)
 {
-	if (thePrefs.SelectCatForNewDL() && !SkipQueue)
+	if (thePrefs.SelectCatForNewDL() && theCat==-1)
 	{
 		m_ED2KLinkQueue.AddTail(pLink);
 		m_iLastLinkQueuedTick = GetTickCount();
 		return;
 	}
 
-	int useCat = pLink->GetCat();
+	int useCat = theCat;
 
 	if (thePrefs.UseAutoCat() && useCat == -1)
 		useCat = theApp.downloadqueue->GetAutoCat(CString(pLink->GetName()), (ULONG)pLink->GetSize());
@@ -894,7 +894,6 @@ void CDownloadQueue::Process(){
                 //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
 		   }
 		}
-
         // has this client downloaded more than it has uploaded this session? (friends included)
         // then limit its download speed from all friends
         // limit will be removed as soon as upload has catched up to download
@@ -1691,13 +1690,8 @@ void CDownloadQueue::ResetCatParts(int cat, uint8 useCat)
 
 void CDownloadQueue::SetCatPrio(int cat, uint8 newprio)
 {
-	// itsonlyme: selFix
-	CArray<CPartFile*> filesList;
-	CPartFile* cur_file;
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos))
-		filesList.Add(filelist.GetAt(pos));
-	for (int i = 0; i < filesList.GetSize(); i++){
-		cur_file = filesList[i];
+	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; ){
+		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cat==0 || cur_file->GetCategory()==cat)
 			if (newprio==PR_AUTO) {
 				cur_file->SetAutoDownPriority(true);
@@ -1708,7 +1702,6 @@ void CDownloadQueue::SetCatPrio(int cat, uint8 newprio)
 				cur_file->SetDownPriority(newprio);
 			}
 	}
-	// itsonlyme: selFix
 }
 
 void CDownloadQueue::SetCatStatus(int cat, int newstatus)

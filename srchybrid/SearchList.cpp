@@ -199,7 +199,7 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, uint32 nSearchID, uint32 nServerI
 		AddServer(server);
 	}
 	m_pszDirectory = pszDirectory ? nstrdup(pszDirectory) : NULL;
-	m_pszIsFake = theApp.FakeCheck->IsFake(EncodeBase16(m_abyFileHash, 16),GetFileSize()) ? nstrdup(theApp.FakeCheck->GetLastHit()) : NULL;; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+	m_pszIsFake = theApp.FakeCheck->IsFake(m_abyFileHash,GetFileSize()) ? nstrdup(theApp.FakeCheck->GetLastHit()) : NULL;; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_list_bExpanded = false;
 	m_list_parent = NULL;
 	m_list_childcount = 0;
@@ -223,7 +223,7 @@ CSearchFile::CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFil
 	m_nClientServerIP = 0;
 	m_nClientServerPort = 0;
 	m_pszDirectory = NULL;
-	m_pszIsFake = theApp.FakeCheck->IsFake(EncodeBase16(m_abyFileHash, 16),uFileSize) ? nstrdup(theApp.FakeCheck->GetLastHit()) : NULL; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+	m_pszIsFake = theApp.FakeCheck->IsFake(m_abyFileHash,uFileSize) ? nstrdup(theApp.FakeCheck->GetLastHit()) : NULL; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_list_bExpanded = false;
 	m_list_parent = NULL;
 	m_list_childcount = 0;

@@ -320,23 +320,18 @@ bool CKnownFileList::IsFilePtrInList(const CKnownFile* file) const
 }
 
 // SLUGFILLER: mergeKnown
-void CKnownFileList::RemoveFile(CKnownFile* toremove){
-	CCKey key(toremove->GetFileHash());
-	CKnownFile* pFileInMap;
-	if(m_Files_map.Lookup(key, pFileInMap)) {
-		m_Files_map.RemoveKey(key);
-	}
-}
-
-void CKnownFileList::FilterDuplicateKnownFiles(CKnownFile* original){
+void CKnownFileList::MergePartFileStats(CKnownFile* original){
 	CCKey key(original->GetFileHash());
 	CKnownFile* pFileInMap;
-	if(m_Files_map.Lookup(key, pFileInMap)) {
-		if(original != pFileInMap){
-			original->statistic.MergeFileStats(&pFileInMap->statistic); //MORPH - Changed by SiRoB, mergeKnown
-			m_Files_map.RemoveKey(key);
-			delete pFileInMap; //MORPH - Added by SiRoB
-		}
+	if (m_Files_map.Lookup(key, pFileInMap) && pFileInMap != original)
+	{
+		m_Files_map.RemoveKey(CCKey(pFileInMap->GetFileHash()));
+
+		ASSERT( original->GetFileSize() == pFileInMap->GetFileSize() );
+		if (original->GetFileSize() == pFileInMap->GetFileSize())
+			original->statistic.MergeFileStats(&pFileInMap->statistic);
+
+		delete pFileInMap;
 	}
 }
 // SLUGFILLER: mergeKnown

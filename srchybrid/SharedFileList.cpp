@@ -530,7 +530,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 			{
 				toadd->SetPath(rstrDirectory);
 				toadd->SetFilePath(ff.GetFilePath());
-				SafeAddKFile(toadd, true);	// SLUGFILLER: mergeKnown - no unmanagad adds
+				AddFile(toadd);
 			}
 		}
 		else
@@ -555,28 +555,6 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 {
 	bool bAdded = false;
 	RemoveFromHashing(toadd);	// SLUGFILLER: SafeHash - hashed ok, remove from list, in case it was on the list
-	// SLUGFILLER: mergeKnown - check for duplicates
-	CKnownFile* other = GetFileByID(toadd->GetFileHash());
-	if (other && other != toadd){
-		if (other->IsPartFile()){
-			if (!toadd->IsPartFile()){	// fail-safe, two part files shouldn't have the same hash
-				other->statistic.MergeFileStats(&toadd->statistic); //MORPH - Changed by SiRoB, mergeKnown
-				if (!bOnlyAdd && output)
-					output->UpdateFile(other);
-				theApp.knownfiles->RemoveFile(toadd);
-				delete toadd;
-				return false;
-			}
-		}
-		else {
-			toadd->statistic.MergeFileStats(&other->statistic);  //MORPH - Changed by SiRoB, mergeKnown
-			RemoveFile(other);
-			theApp.knownfiles->RemoveFile(other);
-			delete other;
-		}
-	}
-	theApp.knownfiles->FilterDuplicateKnownFiles(toadd);
-	// SLUGFILLER: mergeKnown
 	bAdded = AddFile(toadd);
 	if (bOnlyAdd)
 		return bAdded;
@@ -608,6 +586,9 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 			AddLogLine(false, _T("Duplicate shared files: \"%s\" and \"%s\""), pFileInMap->GetFilePath(), pFile->GetFilePath());
 		return false;
 	}
+	// SLUGFILLER: mergeKnown
+	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
+	// SLUGFILLER: mergeKnown
 	m_Files_map.SetAt(key, pFile);
 	m_keywords->AddKeywords(pFile);
 
@@ -645,8 +626,7 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 
 void CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
-	if (output)	// SLUGFILLER: mergeKnown - prevent crash in case of no output
-		output->RemoveFile(pFile);
+	output->RemoveFile(pFile);
 	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
 	m_keywords->RemoveKeywords(pFile);
 	pFile->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
@@ -657,9 +637,11 @@ void CSharedFileList::Reload()
 	// SLUGFILLER: SafeHash - don't allow to be called until after the control is loaded
 	if (!output)
 		return;
+	// SLUGFILLER: SafeHash
 	m_keywords->RemoveAllKeywordReferences();	
 	FindSharedFiles();
 	m_keywords->PurgeUnreferencedKeywords();
+	// SLUGFILLER: SafeHash remove - check moved up
 	output->ShowFileList(this);
 	// SLUGFILLER: SafeHash
 }

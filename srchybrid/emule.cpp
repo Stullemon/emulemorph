@@ -1025,10 +1025,13 @@ CTempIconLoader::~CTempIconLoader()
 		VERIFY( DestroyIcon(m_hIcon) );
 }
 
-// khaos::categorymod+ Removed Param: uint8 cat
-void CemuleApp::AddEd2kLinksToDownload(CString strlink, int theCat){
-// khaos:: categorymod-
-
+//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+/*
+void CemuleApp::AddEd2kLinksToDownload(CString strlink, uint8 cat)
+*/
+void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
+//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+{
 	int curPos=0;
 	CString resToken = strlink.Tokenize(_T("\t\n\r"),curPos);
 	while (resToken != _T(""))
@@ -1042,15 +1045,11 @@ void CemuleApp::AddEd2kLinksToDownload(CString strlink, int theCat){
 			{
 				if (pLink->GetKind() == CED2KLink::kFile)
 				{
-					// khaos::categorymod+ Modified to support sel cat
+					//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 					// pFileLink IS NOT A LEAK, DO NOT DELETE.
-					//MORPH START - HotFix by SiRoB, Khaos 14.6 Tempory Patch
-					//CED2KFileLink* pFileLink = new CED2KFileLink(pLink);
 					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(resToken.Trim());
-					//MORPH END - HotFix by SiRoB, Khaos 14.6 Tempory Patch
-					pFileLink->SetCat(theCat);
-					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, true, theCat>=0?true:false);
-					// khaos::categorymod-
+					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, cat, true);
+					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
 				else
 				{
@@ -1086,7 +1085,13 @@ void CemuleApp::SearchClipboard()
 	{
 		m_bGuardClipboardPrompt = true;
 		if (AfxMessageBox(GetResString(IDS_ED2KLINKFIX) + _T("\r\n\r\n") + GetResString(IDS_ADDDOWNLOADSFROMCB)+_T("\r\n") + strLinks, MB_YESNO | MB_TOPMOST) == IDYES)
+			//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+			/*
 			AddEd2kLinksToDownload(strLinks, 0);
+			*/
+			AddEd2kLinksToDownload(strLinks, -1);
+			/**/
+			//MORPH END  - Changed by SiRoB, Selection category support khaos::categorymod+
 	}
 	m_strLastClipboardContents = strLinks;
 	m_bGuardClipboardPrompt = false;
@@ -1099,7 +1104,13 @@ void CemuleApp::PasteClipboard()
 	if (strLinks.IsEmpty())
 		return;
 
+	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+	/*
 	AddEd2kLinksToDownload(strLinks, 0);
+	*/
+	AddEd2kLinksToDownload(strLinks, -1);
+	/**/
+	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 }
 
 bool CemuleApp::IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen)

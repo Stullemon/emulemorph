@@ -132,9 +132,6 @@ void CUpDownClient::Init()
 	m_nPartCount = 0;
 	m_nUpPartCount = 0;
 	m_abyPartStatus = 0;
-	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-	m_PartStatus_list.RemoveAll();
-	//MORPH END   - Added by SiRoB, HotFix related to khaos::kmod-
 	m_abyUpPartStatus = 0;
 	m_dwLastAskedTime = 0;
 	m_nDownloadState = DS_NONE;
@@ -248,7 +245,7 @@ CUpDownClient::~CUpDownClient(){
 		socket->Safe_Delete();
 	}
 
-	// khaos::kmod+ Free the memory from any stored statuses.
+	//MORPH START - Added by SiRoB, See A4AF PartStatus
 	POSITION			pos = m_PartStatus_list.GetStartPosition();
 	CPartFile*			curFile;
 	uint8*				curPS;
@@ -258,7 +255,7 @@ CUpDownClient::~CUpDownClient(){
 		if (curPS != m_abyPartStatus)
 			delete[] curPS;
 	}
-	// khaos::kmod-
+	//MORPH END   - Added by SiRoB, See A4AF PartStatus
 
 	delete[] m_pszUsername;	
 	delete[] m_abyPartStatus;
@@ -1833,13 +1830,13 @@ void CUpDownClient::InfoPacketsReceived(){
 
 void CUpDownClient::ResetFileStatusInfo()
 {
-	//MORPH START - Changed by SiRoB, due to partstatuslist
+	//MORPH START - Changed by SiRoB, See A4AF PartStatus
 	//if (m_abyPartStatus){
 	//	delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
 	//}
 	m_nPartCount = 0;
-	//MORPH END   - Changed by SiRoB, due to partstatuslist
+	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
 	m_strClientFilename.Empty();
 	m_bCompleteSource = false;
 	m_dwLastAskedTime = 0;

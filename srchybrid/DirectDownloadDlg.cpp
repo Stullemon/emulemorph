@@ -92,7 +92,15 @@ void CDirectDownloadDlg::OnOK()
 			{
 				if (pLink->GetKind() == CED2KLink::kFile)
 				{
+					
+					//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+					/*
 					theApp.downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), 0);
+					/*/
+					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
+					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, -1, true);
+					/**/
+					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
 				else
 				{

@@ -150,7 +150,7 @@ void CDownloadListCtrl::Init()
 	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownload);
 	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownload);
 	SetSortArrow(sortItem, sortAscending);
-	SortItems(SortProc, 0xFFFF);	// SLUGFILLER: DLsortFix - uses multi-sort for fall-back
+	SortItems(SortProc, 0x8000);	// SLUGFILLER: DLsortFix - uses multi-sort for fall-back
 	// SLUGFILLER: multiSort - load multiple params
 	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableDownload); i > 0; ) {
 		i--;
@@ -992,7 +992,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 					rec_status.right = iWidth; 
 					//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 					//lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(lpCtrlItem->type == UNAVAILABLE_SOURCE), thePrefs.UseFlatBar()); 
-					lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(CPartFile*)lpCtrlItem->parent->value, thePrefs.UseFlatBar());
+					lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(CPartFile*)lpCtrlItem->owner, thePrefs.UseFlatBar());
 					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 					lpCtrlItem->dwUpdated = dwTicks + (rand() % 128); 
 				} else 
@@ -2425,51 +2425,42 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
-	/*
 	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownload);
 	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownload);
 
+	int userSort = (GetAsyncKeyState(VK_CONTROL) < 0) ? 0x4000:0;	// SLUGFILLER: DLsortFix Ctrl sorts sources only
+	//MORPH START - Removed by SiRoB, Remain time and size Columns have been splited
+	/*
 	if (sortItem==9) {
 		m_bRemainSort=(sortItem != pNMListView->iSubItem) ? false : (m_oldSortAscending?m_bRemainSort:!m_bRemainSort);
 	}
-	
-	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
+	*/
+	//MORPH START - Removed by SiRoB, Remain time and size Columns have been splited
+	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 
 	// Item is column clicked
-	sortItem = pNMListView->iSubItem;
+	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix
 
 	// Save new preferences
 	thePrefs.SetColumnSortItem(CPreferences::tableDownload, sortItem);
 	thePrefs.SetColumnSortAscending(CPreferences::tableDownload, sortAscending);
+	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
+	/*
 	thePrefs.TransferlistRemainSortStyle(m_bRemainSort);
-
 	// Sort table
 	uint8 adder=0;
 	if (sortItem!=9 || !m_bRemainSort)
-	SetSortArrow(sortItem, sortAscending);
+		SetSortArrow(sortItem & 0xCFFF, sortAscending);	// SLUGFILLER: DLsortFix
 	else {
         SetSortArrow(sortItem, sortAscending?arrowDoubleUp : arrowDoubleDown);
 		adder=81;
 	}
 
-	
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder );
+	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder);
 	*/
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownload);
-	int userSort = (GetAsyncKeyState(VK_CONTROL) < 0) ? 0x8000:0;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
-	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownload);
-	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
-	// Item is column clicked
-	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix
-	// Save new preferences
-	thePrefs.SetColumnSortItem(CPreferences::tableDownload, sortItem);
-	thePrefs.SetColumnSortAscending(CPreferences::tableDownload, sortAscending);
-	// Sort table
-	if (sortItem < 0x8000)	// SLUGFILLER: DLsortFix - Don't set arrow for source-only sorting(TODO: Seperate arrow?)
-	SetSortArrow(sortItem, sortAscending);
+	SetSortArrow(sortItem & 0xCFFF, sortAscending);	// SLUGFILLER: DLsortFix
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
-	//MORPH END - Changed by SiRoB, Remain time and size Columns have been splited
+	//MORPH END  - Changed by SiRoB, Remain time and size Columns have been splited
 	*pResult = 0;
 }
 
@@ -2478,7 +2469,7 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 	CtrlItem_Struct* item2 = (CtrlItem_Struct*)lParam2;
 
 	int sortMod = 1;
-	if((lParamSort != 0xFFFF) && (lParamSort & 0x7FFF) >= 100) {	// SLUGFILLER: DLsortFix
+	if((lParamSort & 0x3FFF) >= 100) {	// SLUGFILLER: DLsortFix
 		sortMod = -1;
 		lParamSort -= 100;
 	}
@@ -2504,9 +2495,10 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 		comp = Compare(file1, file2, lParamSort);
 
 	} else {
-		comp = Compare((CPartFile*)(item1->parent->value), (CPartFile*)(item2->parent->value), lParamSort);
-		if(comp != 0)
-			return sortMod * comp;
+		// SLUGFILLER: DLsortFix - never compare sources of different files
+		if (item1->parent->value != item2->parent->value)
+			return sortMod * Compare((CPartFile*)(item1->parent->value), (CPartFile*)(item2->parent->value), lParamSort);
+		// SLUGFILLER: DLsortFix
 		if (item1->type != item2->type)
 			return item1->type - item2->type;
 
@@ -2553,12 +2545,12 @@ void CDownloadListCtrl::OnListModified(NMHDR *pNMHDR, LRESULT *pResult) {
 int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort)
 {
 	// SLUGFILLER: DLsortFix
-	if ((lParamSort & 0x8000) && (lParamSort != 0xFFFF))
+	if (lParamSort & 0x4000)
 		return 0;
 	// SLUGFILLER: DLsortFix
 	switch(lParamSort){
 	case 0: //filename asc
-		return file1->GetFileName().CompareNoCase(file2->GetFileName());	// SLUGFILLER: DLsortFix - Using CStrings
+		return _tcsicmp(file1->GetFileName(),file2->GetFileName());
 	case 1: //size asc
 		return CompareUnsigned(file1->GetFileSize(), file2->GetFileSize());
 	case 2: //transfered asc
@@ -2582,19 +2574,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 	case 7: //priority asc
 		return file1->GetDownPriority() - file2->GetDownPriority();
 	case 8: //Status asc 
-  //MORPH - Added by Yun.SF3, ZZ Upload System
-       {
-		    int comp =  file2->getPartfileStatusRang()-file1->getPartfileStatusRang();	//MORPH - Added by IceCream SLUGFILLER: DLsortFix - Low StatusRang<->Better status<->High status
-
-            // Second sort order on filename
-            if(comp == 0) {
-                comp = strcmpi(file1->GetFileName(),file2->GetFileName());
-            }
-
-            return comp;
-        }
-		//return file1->getPartfileStatusRang()-file2->getPartfileStatusRang(); 
- //MORPH - Added by Yun.SF3, ZZ Upload System
+		return file2->getPartfileStatusRang()-file1->getPartfileStatusRang();	// SLUGFILLER: DLsortFix - Low StatusRang<->Better status<->High status
 	case 9: //Remaining Time asc 
 		if (file1->GetDatarate())
 			if (file2->GetDatarate())
@@ -2659,7 +2639,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 			return 0;
 	// khaos::categorymod-
 	//MORPH START - Added by IceCream, SLUGFILLER: DLsortFix
-	case 0xFFFF:
+	case 0x8000:
 		return file1->GetPartMetFileName().CompareNoCase(file2->GetPartMetFileName());
 	// SLUGFILLER: DLsortFix
 	default:
@@ -2667,11 +2647,9 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 	}
 }
 
-int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient *client2, LPARAM lParamSort, int sortMod) {
-	// SLUGFILLER: DLsortFix
-	if (lParamSort != 0xFFFF)
-		lParamSort &= 0x7FFF;
-	// SLUGFILLER: DLsortFix
+int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient *client2, LPARAM lParamSort, int sortMod)
+{
+	lParamSort &= 0xBFFF;	// SLUGFILLER: DLsortFix
 	switch(lParamSort){
 	case 0: //name asc
 		if(client1->GetUserName() == client2->GetUserName())
@@ -2713,33 +2691,36 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		}
 		else if (client2->GetDownloadState() == DS_DOWNLOADING)
 			return -1;
-		if ( client1->GetRemoteQueueRank() == 0 ){
-			if ( client2->GetRemoteQueueRank() != 0 )
+
+		if ( client1->GetRemoteQueueRank() != 0 ){
+			if ( client2->GetRemoteQueueRank() == 0 )
+				return 1;
+			return client2->GetRemoteQueueRank() - client1->GetRemoteQueueRank();
+		}
+		else if ( client2->GetRemoteQueueRank() != 0 )
 				return -1;
-			if ( client1->GetDownloadState() != DS_ONQUEUE || client1->IsRemoteQueueFull() != true ){
-				if ( client2->GetDownloadState() == DS_ONQUEUE && client2->IsRemoteQueueFull() == true )
-					return -1;
-				return 0;
-			}
-			else if ( client2->GetDownloadState() != DS_ONQUEUE || client2->IsRemoteQueueFull() != true )
+
+		if ( client1->GetDownloadState() == DS_ONQUEUE && !client1->IsRemoteQueueFull() ){
+			if ( client2->GetDownloadState() != DS_ONQUEUE || client2->IsRemoteQueueFull() )
 			return 1;
 			return 0;
 		}
-		else if ( client2->GetRemoteQueueRank() == 0 )
-			return 1;
+		else if ( client2->GetDownloadState() == DS_ONQUEUE && !client2->IsRemoteQueueFull() )
+			return -1;
 
-		return client2->GetRemoteQueueRank() - client1->GetRemoteQueueRank();
+		return 0;
 		//MORPH END   - Added by IceCream, SLUGFILLER: DLsortFix
 	case 8:
 		if( client1->GetDownloadState() == client2->GetDownloadState() ){
 			//MORPH START - Added by IceCream, SLUGFILLER: DLsortFix - needed partial revamping
-			if( client1->IsRemoteQueueFull() ){
+			if( !client1->IsRemoteQueueFull() ){
 				if( client2->IsRemoteQueueFull() )
-					return 0;
-				return -1;
+					return 1;
+				return 0;
 			}
-			else if( client2->IsRemoteQueueFull() )
-				return 1;
+			else if( !client2->IsRemoteQueueFull() )
+				return -1;
+			return 0;
 			//MORPH END   - Added by IceCream, SLUGFILLER: DLsortFix
 		}
 		return client2->GetDownloadState() - client1->GetDownloadState();	//MORPH - Added by IceCream, SLUGFILLER: DLsortFix - match status sorting
@@ -2906,8 +2887,8 @@ void CDownloadListCtrl::ShowFilesCount() {
 		if (cur_item->type == FILE_TYPE){
 			CPartFile* file=(CPartFile*)cur_item->value;
 			if (file->CheckShowItemInGivenCat(curTab))
-				count++;
-			totcnt++;
+				++count;
+			++totcnt;
 		}
 	}
 

@@ -1220,9 +1220,10 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 							{
 								data_out.WriteUInt8(OP_FILESTATUS);
 								if (reqfile->IsPartFile())
-									((CPartFile*)reqfile)->WritePartStatus(&data_out);
-								else
-									data_out.WriteUInt16(0);
+									((CPartFile*)reqfile)->WritePartStatus(&data_out, client);	// SLUGFILLER: hideOS
+								else if (!reqfile->ShareOnlyTheNeed(&data_out)) //wistily SOTN
+									if (!reqfile->HideOvershares(&data_out, client))	//Slugfiller: HideOS
+										data_out.WriteUInt16(0);
 								break;
 							}
 							//We still send the source packet seperately.. 

@@ -16,9 +16,9 @@
 #pragma once
 #include "Loggable.h"
 #include "MenuCmds.h"
-#include "SafeFile.h"
 
 class CSafeMemFile;
+class CFileDataIO;	// SLUGFILLER: mergeKnown
 class CSearchFile;
 class CUpDownClient;
 class CServer;
@@ -70,11 +70,12 @@ public:
 	~CDownloadQueue();
 	void	Process();
 	void	Init();
-	// khaos::categorymod+ Modified these three functions by adding and in some cases removing params.
+	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+	//Modified these three functions by adding and in some cases removing params.
 	void	AddSearchToDownload(CSearchFile* toadd,uint8 paused=2,uint8 cat=0, uint16 useOrder = 0);
 	void	AddSearchToDownload(CString link,uint8 paused=2, uint8 cat=0, uint16 useOrder = 0);
-	void	AddFileLinkToDownload(class CED2KFileLink* pLink, bool AllocatedLink = false, bool SkipQueue = false);
-	// khaos::categorymod-
+	void	AddFileLinkToDownload(class CED2KFileLink* pLink, int cat=0, bool AllocatedLink = false);
+	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true);
 	bool	IsPartFile(const CKnownFile* file) const;
 	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName) const;	// SLUGFILLER: SafeHash

@@ -97,9 +97,16 @@ void CIrcMain::ProcessLink( CString ed2kLink )
 		switch (pLink->GetKind()) {
 		case CED2KLink::kFile:
 			{
+				//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+				/*
 				CED2KFileLink* pFileLink = pLink->GetFileLink();
 				_ASSERT(pFileLink !=0);
 				theApp.downloadqueue->AddFileLinkToDownload(pFileLink);
+				/*/
+				CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(link);
+				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, -1, true);
+				/**/
+				//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 			}
 			break;
 		case CED2KLink::kServerList:

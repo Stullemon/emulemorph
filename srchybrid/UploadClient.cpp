@@ -861,23 +861,20 @@ uint32 CUpDownClient::SendBlockData(){
 		sumavgUDR += sentBytesCompleteFile + sentBytesPartFile;
 	}
 			
-	// remove to old values in list
 	while (m_AvarageUDR_list.GetCount() > 0)
-		if (m_AvarageUDR_list.GetCount() > (60000 / (1 + curTick - m_AvarageUDR_list.GetHead().timestamp)) ||
-			(curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
-			// keep sum of all values in list up to date
+		if (100 * m_AvarageUDR_list.GetHead().datalen < sumavgUDR || (curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
 			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else
 			break;
 
-	// Calculate average speed for this slot
     if(m_AvarageUDR_list.GetCount() > 0) {
-		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
-		if (dwDuration<1000) dwDuration = 30000;
 		if(m_AvarageUDR_list.GetCount() == 1)
-			m_nUpDatarate = (sumavgUDR*1000) / dwDuration;
-		else
+			m_nUpDatarate = (sumavgUDR*1000) / 30000;
+		else {
+			DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
+			if (dwDuration<1000) dwDuration = 30000;
 			m_nUpDatarate = ((sumavgUDR - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
+		}
 	} else
         m_nUpDatarate = 0;
 	//MORPH END   - Modified by SiRoB, Better Upload rate calcul

@@ -784,54 +784,25 @@ void CUploadQueue::Process() {
 
 	// Save used bandwidth for speed calculations
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
-	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-	if (sentBytes>0) {
-		TransferredData newitem = {sentBytes,curTick};
-		avarage_dr_list.AddTail(newitem);
-		m_avarage_dr_sum += sentBytes;
-	}
-	
 	uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
-	if (sentBytesOverhead>0) {
-		TransferredData newitem = {sentBytesOverhead,curTick};
-		m_AvarageUDRO_list.AddTail(newitem);
+	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	if (sentBytes>0 || sentBytesOverhead>0) {
+		avarage_dr_list.AddTail(sentBytes);
+		m_avarage_dr_sum += sentBytes;
+		m_AvarageUDRO_list.AddTail(sentBytesOverhead);
 		sumavgUDRO += sentBytesOverhead;
+		avarage_friend_dr_list.AddTail(theApp.stat_sessionSentBytesToFriend);
+		avarage_tick_list.AddTail(curTick);
 	}
 	
-	TransferredData newitem = {theApp.stat_sessionSentBytesToFriend,curTick};
-	avarage_friend_dr_list.AddTail(newitem);
-	
-	// Save time beetween each speed snapshot
-	//avarage_tick_list.AddTail(curTick);
-
-	/*
-	// don't save more than 30 secs of data
-	while(avarage_tick_list.GetCount() > 3 && ::GetTickCount()-avarage_tick_list.GetHead() > 30*1000) {
-   		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
-		sumavgUDRO -= m_AvarageUDRO_list.RemoveHead();
-		avarage_friend_dr_list.RemoveHead();
-		avarage_tick_list.RemoveHead();
-	}*/
-	
-	while(avarage_dr_list.GetCount() > 0)
-		if (avarage_dr_list.GetCount() > (60000 / (1 + curTick - avarage_dr_list.GetHead().timestamp)) ||
-			(curTick - avarage_dr_list.GetHead().timestamp) > 30000) {
-			m_avarage_dr_sum -= avarage_dr_list.RemoveHead().datalen;
-		}else
-			break;
-	while(m_AvarageUDRO_list.GetCount() > 0)
-		if (m_AvarageUDRO_list.GetCount() > (60000 / (1 + curTick - m_AvarageUDRO_list.GetHead().timestamp)) ||
-			(curTick - m_AvarageUDRO_list.GetHead().timestamp) > 30000) {
-			sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
-		}else
-			break;
-	while(avarage_friend_dr_list.GetCount() > 0)
-		if (avarage_friend_dr_list.GetCount() > (60000 / (1 + curTick - avarage_friend_dr_list.GetHead().timestamp)) ||
-			(curTick - avarage_friend_dr_list.GetHead().timestamp) > 30000) {
+	while(avarage_tick_list.GetCount() > 0)
+		if (100 * avarage_dr_list.GetHead() < m_avarage_dr_sum || (curTick - avarage_tick_list.GetHead()) > 30000) {
+			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
+			sumavgUDRO -= m_AvarageUDRO_list.RemoveHead();
 			avarage_friend_dr_list.RemoveHead();
+			avarage_tick_list.RemoveHead();
 		}else
 			break;
-
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
 	// Don't save more than three minutes of data about number of fully active clients
 	while(curTick-activeClients_tick_list.GetHead() > 3*60*1000) {
@@ -1503,28 +1474,24 @@ void CUploadQueue::UpdateDatarates() {
 			friendDatarate = 0;
 		}
 		*/
-		if (avarage_dr_list.GetCount() > 0){
-			DWORD dwDuration = avarage_dr_list.GetTail().timestamp - avarage_dr_list.GetHead().timestamp;
-			if (dwDuration<1000) dwDuration = 30000;
-			if (avarage_dr_list.GetCount() == 1)
-				datarate = (m_avarage_dr_sum*1000) / dwDuration;
-			else
-				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead().datalen)*1000) / dwDuration;
-		}else
+		if (avarage_tick_list.GetCount() > 0){
+			if (avarage_tick_list.GetCount() == 1){
+				datarate = (m_avarage_dr_sum*1000) / 30000;
+				m_nUpDatarateOverhead = (sumavgUDRO*1000) / 30000;
+				friendDatarate = 0;
+			}
+			else {
+				DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
+				if (dwDuration<1000) dwDuration = 30000;
+				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / dwDuration;
+				m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead())*1000) / dwDuration;
+				friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / dwDuration;
+			}
+		}else {
 			datarate = 0;
-		if (m_AvarageUDRO_list.GetCount() > 0){
-			DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
-			if (dwDuration<1000) dwDuration = 30000;
-			if (m_AvarageUDRO_list.GetCount() == 1)
-				m_nUpDatarateOverhead = (sumavgUDRO*1000) / dwDuration;
-			else
-				m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead().datalen)*1000) / dwDuration;
-		}else
 			m_nUpDatarateOverhead = 0;
-		if (avarage_friend_dr_list.GetCount() > 1)
-			friendDatarate = ((avarage_friend_dr_list.GetTail().datalen-avarage_friend_dr_list.GetHead().datalen)*1000) / (avarage_friend_dr_list.GetTail().timestamp-avarage_friend_dr_list.GetHead().timestamp);
-		else
 			friendDatarate = 0;
+		}
 		//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 	}
 }
@@ -1551,13 +1518,14 @@ uint32 CUploadQueue::GetToNetworkDatarate() {
 uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
 	uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
 
-	if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
-		minNumber = 2;
-	} else if(minNumber < 1 && thePrefs.GetMaxUpload() >= 2) {
+	//if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
+	//	minNumber = 2;
+	//} else
+	if(minNumber < 1 && thePrefs.GetMaxUpload() >= 2) {
 		minNumber = 1;
 	}
 
-	return max(((uint32)uploadinglist.GetCount())*0.3, minNumber);
+	return max(((uint32)uploadinglist.GetCount())*0.1, minNumber);
 }
 
 /**

@@ -114,12 +114,12 @@ public:
 	virtual BOOL InitInstance();
 
 	// ed2k link functions
-	// khaos::categorymod+ Changed Param: uint8 cat
+	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 	/*
 	void		AddEd2kLinksToDownload(CString strLinks, uint8 cat);
 	*/
-	void	AddEd2kLinksToDownload(CString strlink, int theCat = -1);
-	// khaos::categorymod-
+	void		AddEd2kLinksToDownload(CString strLinks, int cat);
+	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 	void		SearchClipboard();
 	void		IgnoreClipboardLinks(CString strLinks) {m_strLastClipboardContents = strLinks;}
 	void		PasteClipboard();

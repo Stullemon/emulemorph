@@ -16,8 +16,6 @@
 #pragma once
 #include "KnownFile.h"
 
-class CServer; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
-
 #define	PARTSIZE			9728000
 
 // khaos::kmod+ Save/Load Sources
@@ -50,10 +48,6 @@ class CServer; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 #define STATES_COUNT		13
 
-//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-#define MAX_PREF_SERVERS	10	// itsonlyme: cacheUDPsearchResults
-//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
-
 #define PMT_UNKNOWN			0
 #define PMT_DEFAULTOLD		1
 #define PMT_SPLITTED		2
@@ -68,6 +62,7 @@ class CUpDownClient;
 enum EDownloadState;
 class CxImage;
 class CSafeMemFile;
+class CServer; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 #pragma pack(1)
 struct Requested_Block_Struct
@@ -100,9 +95,8 @@ class CPartFile : public CKnownFile
 	DECLARE_DYNAMIC(CPartFile)
 
 	friend class CPartFileConvert;
-public:
 	friend class CPartHashThread;	// SLUGFILLER: SafeHash
-
+public:
 	CPartFile();
 	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
 	CPartFile(CString edonkeylink);
@@ -130,7 +124,7 @@ public:
 	void	InitializeFromLink(CED2KFileLink* fileLink);
 	bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename)	{return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
-	// SLUGFILLER: mergeKnown - allow WriteToFile to be called	
+	bool	WriteToFile(FILE* file) { return false; }
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload);
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
@@ -271,8 +265,6 @@ public:
 
 	uint8*	MMCreatePartStatus();
 	
-	void	PerformFirstHash();		// SLUGFILLER: SafeHash	
-
 	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
 	// itsonlyme: cacheUDPsearchResults
 	struct SServer {
@@ -301,6 +293,7 @@ public:
 	void	FlushBuffersExceptionHandler(CFileException* error);
 	void	FlushBuffersExceptionHandler();
 
+	void	PerformFirstHash();		// SLUGFILLER: SafeHash
 	void	PerformFileCompleteEnd(DWORD dwResult);
 
 	uint32	lastsearchtime;
@@ -386,7 +379,6 @@ private:
 	uint16	m_PartsHashing;
 	CMutex	ICH_mut;	// ICH locks the file
 	CList<uint16,uint16>	m_ICHPartsComplete;
-	void	PharseICHResult();
 	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<uint16,uint16>	corrupted_list;
@@ -419,6 +411,7 @@ private:
 	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
+	void	PharseICHResult();	// SLUGFILLER: SafeHash
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;
 	uint16	m_catFileGroup;

@@ -44,19 +44,18 @@ CSourceSaver::~CSourceSaver(void)
 
 bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return false if sources not saved
 {
-	CString slsfilepath;
-	slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
-
-	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
-	//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
-	if (file->GetAvailableSrcCount() > 25)
-	{
-		if (PathFileExists(slsfilepath))
-			remove(slsfilepath);
-		return false;
-	}
-
 	if ((int)(::GetTickCount() - m_dwLastTimeSaved) > RESAVETIME) {
+		CString slsfilepath;
+		slsfilepath.Format("%s\\%s\\%s.txtsrc", thePrefs.GetTempDir(), "Source Lists", file->GetPartMetFileName());
+	
+		//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+		//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
+		if (file->GetAvailableSrcCount() > 25)
+		{
+			if (PathFileExists(slsfilepath))
+				remove(slsfilepath);
+			return false;
+		}
 		m_dwLastTimeSaved = ::GetTickCount() + (rand() * 30000 / RAND_MAX) - 15000;
 		SourceList srcs;
 		LoadSourcesFromFile(file, &srcs, slsfilepath);

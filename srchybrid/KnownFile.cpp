@@ -317,8 +317,7 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 	}
 	next /= filesize;
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	lastFullSpreadCount = min+next;
-	return lastFullSpreadCount;
+	return lastFullSpreadCount = min+next;
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
@@ -1146,47 +1145,32 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				// Mighty Knife: Take care of corrupted tags !!!
 				if((!newtag->tag.specialtag) && (newtag->tag.type == 3) && (newtag->tag.tagname)){
 				// [end] Mighty Knife
-					if (newtag->tag.tagname[0] == FT_SPREADSTART){
-						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
+					uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
+					if (newtag->tag.tagname[0] == FT_SPREADSTART)
 						spread_start_map.SetAt(spreadkey, newtag->tag.intvalue);
-						delete newtag;
-						break;
-					}else if (newtag->tag.tagname[0] == FT_SPREADEND){
-						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
+					else if (newtag->tag.tagname[0] == FT_SPREADEND)
 						spread_end_map.SetAt(spreadkey, newtag->tag.intvalue);
-						delete newtag;
-						break;
-					}else if (newtag->tag.tagname[0] == FT_SPREADCOUNT){
-						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
+					else if (newtag->tag.tagname[0] == FT_SPREADCOUNT)
 						spread_count_map.SetAt(spreadkey, newtag->tag.intvalue);
-						delete newtag;
-						break;
 					//MORPH START - Added by SiRoB, ZZ Upload System				
-					}else if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
+					else if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0)
 						//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 						//SetPowerShared(newtag->tag.intvalue == 1);
 						SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
 						//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
-						delete newtag;
-						break;
 					//MORPH END   - Added by SiRoB, ZZ Upload System
 					//MORPH START - Added by SiRoB, HIDEOS
-					}else if(strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
+					else if(strcmp(newtag->tag.tagname, FT_HIDEOS) == 0)
 						SetHideOS((newtag->tag.intvalue<=6)?newtag->tag.intvalue:-1);
-						delete newtag;
-						break;
-					}else if(strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
+					else if(strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0)
 						SetSelectiveChunk(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
-						delete newtag;
-						break;
 					//MORPH END   - Added by SiRoB, HIDEOS
 					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-					}else if(strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
+					else if(strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0)
 						SetShareOnlyTheNeed(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
-						delete newtag;
-						break;
-					}
 					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+					delete newtag;
+					break;
 				}
 				//MORPH END - Changed by SiRoB, SLUGFILLER: Spreadbars
 				ConvertED2KTag(newtag);
@@ -1242,7 +1226,7 @@ bool CKnownFile::LoadFromFile(CFileDataIO* file){
 		ret2 = true;
 	} else if (GetED2KPartCount()!=GetHashCount())
 		ret2 = false;	// Final hash-count verification, needs to be done after the tags are loaded.
-	return (ret1 && ret2 && ret3);
+	return ret1 && ret2 && ret3;
 	// SLUGFILLER: SafeHash
 }
 
@@ -2244,11 +2228,11 @@ void CKnownFile::UpdateClientUploadList()
 // SLUGFILLER: hideOS
 uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client)
 {
-	uint16 parts = GetED2KPartCount();
-	uint16 realparts = GetPartCount();
+	UINT parts = GetED2KPartCount();
+	UINT realparts = GetPartCount();
 	uint32 min;
-	uint16 mincount;
-	uint16 i;
+	UINT mincount;
+	UINT i;
 
 	ASSERT(client != NULL);
 
@@ -2409,35 +2393,35 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	return parts;
 };
 
-bool CKnownFile::HideOvershares(CFile* file, CUpDownClient* client){
+bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	uint8 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
 
 	if (!hideOS)
 		return FALSE;
 	CArray<uint32, uint32> partspread;
-	uint16 parts = CalcPartSpread(partspread, client);
+	UINT parts = CalcPartSpread(partspread, client);
 	if (!parts)
 		return FALSE;
 	uint32 max;
 	max = partspread[0];
-	for (uint16 i = 1; i < parts; i++)
+	for (UINT i = 1; i < parts; i++)
 		if (partspread[i] > max)
 			max = partspread[i];
 	if (max < hideOS)
 		return FALSE;
 
-	file->Write(&parts,2);
-	uint16 done = 0;
+	file->WriteUInt16(parts);
+	UINT done = 0;
 	while (done != parts){
 		uint8 towrite = 0;
-		for (uint32 i = 0;i != 8;i++){
+		for (UINT i = 0;i < 8;i++){
 			if (partspread[done] < hideOS)
 				towrite |= (1<<i);
 			done++;
 			if (done == parts)
 				break;
 		}
-		file->Write(&towrite,1);
+		file->WriteUInt8(towrite);
 	}
 	return TRUE;
 }
@@ -2445,20 +2429,20 @@ bool CKnownFile::HideOvershares(CFile* file, CUpDownClient* client){
 
 //MORPH - Changed by SiRoB, Avoid Sharing Nothing :( the return should be conditional
 //Wistily : Share only the need START (Inspired by lovelace release feature, adapted from Slugfiller hideOS code)
-bool CKnownFile::ShareOnlyTheNeed(CFile* file)
+bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file)
 {
-	uint16 parts = GetED2KPartCount();
+	UINT parts = GetED2KPartCount();
 	//SHARE_ONLY_THE_NEED
 	uint8 ShareOnlyTheNeed = GetShareOnlyTheNeed()==-1?thePrefs.GetShareOnlyTheNeed():GetShareOnlyTheNeed();
 	if (!parts || /*!m_bPowerShareAuto ||*/  ShareOnlyTheNeed==0)
 		return FALSE;
 		
-	file->Write(&parts,2);
-	uint16 done = 0;
+	file->WriteUInt16(parts);
+	UINT done = 0;
 	bool ok = false; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 	while (done != parts){
 		uint8 towrite = 0;
-		for (uint32 i = 0;i != 8;i++){
+		for (UINT i = 0;i < 8;i++){
 			if (m_AvailPartFrequency[done] <= ShareOnlyTheNeed)
 				towrite |= (1<<i);
 			done++;
@@ -2466,7 +2450,7 @@ bool CKnownFile::ShareOnlyTheNeed(CFile* file)
 				break;
 		}
 		ok |= (towrite!=0); //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
-		file->Write(&towrite,1);
+		file->WriteUInt8(towrite);
 	}
 	//return TRUE;
 	return ok; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(

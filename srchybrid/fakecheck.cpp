@@ -23,13 +23,13 @@
 #include "emuleDlg.h"
 #include "Preferences.h"
 #ifdef _DEBUG
+#define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
-#define new DEBUG_NEW
 #endif
 
 CFakecheck::CFakecheck(){
-	lasthit="";
+	m_pLastHit = NULL;
 	LoadFromFile();
 }
 
@@ -37,86 +37,122 @@ CFakecheck::~CFakecheck(){
 	RemoveAllFakes();
 }
 
-void CFakecheck::AddFake(CString Hash,uint32 Lenght,CString Realtitle){
-	Fakes_Struct* newFilter=new Fakes_Struct();
-
-	newFilter->Hash=Hash;
+void CFakecheck::AddFake(uchar* Hash,uint32& Lenght,CString& Realtitle){
+	Fakes_Struct* newFilter=new Fakes_Struct;
+	md4cpy(newFilter->Hash, Hash);
 	newFilter->Lenght=Lenght;
 	newFilter->RealTitle=Realtitle;
-	//MORPH START - Added by SiRoB, Fix Mem Leak at shutdown
-	if (IsFake(Hash,Lenght) && Fakelist.size())
-		delete newFilter;
-	else
-	//MORPH   END - Added by SiRoB, Fix Mem Leak at shutdown	
-		Fakelist[Hash]=newFilter;
+	m_fakelist.Add(newFilter);
+}
+
+static int __cdecl CmpFakeByHash_Lenght(const void* p1, const void* p2)
+{
+	const Fakes_Struct* pFake1 = *(Fakes_Struct**)p1;
+	const Fakes_Struct* pFake2 = *(Fakes_Struct**)p2;
+	int diff = memcmp(pFake1->Hash, pFake2->Hash, 16);
+	if (diff)
+		return diff;
+	return pFake1->Lenght-pFake2->Lenght;
 }
 
 int CFakecheck::LoadFromFile(){
-	CString sbuffer,sbuffer2,sbuffer3,sbuffer4;
-	int pos,fakecounter;
-	CString Hash,Title;
-	uint32 Lenght;
-	char buffer[1024];
-	int lenBuf = 1024;
-	fakecounter=0;
-	RemoveAllFakes();
-	FILE* readFile= fopen(CString(thePrefs.GetConfigDir())+"fakes.dat", "r");
+	FILE* readFile = fopen(thePrefs.GetConfigDir()+_T("fakes.dat"), "r");
 	if (readFile!=NULL) {
-		while (!feof(readFile)) {
-			if (fgets(buffer,lenBuf,readFile)==0) break;
+		CString sbuffer, sbuffer2;
+		int pos;
+		uint32 Lenght;
+		CString Title;
+		char buffer[1024];
+		int fakecounter = 0;
+		int iDuplicate = 0;
+		int iMerged = 0;
+		RemoveAllFakes();
+		while (fgets(buffer, ARRSIZE(buffer), readFile) != NULL)
+		{
+			
 			sbuffer=buffer;
-			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength()<5)
+			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
 				continue;
-			pos=sbuffer.Find(',');
+			pos=sbuffer.Find(_T(','));
 			if (pos==-1) continue;
-			Hash=sbuffer.Left(pos).Trim();
-			Hash.MakeUpper();
-			int pos2=sbuffer.Find(",",pos+1);
+			sbuffer2=sbuffer.Left(pos).Trim();
+			uchar Hash[16];
+			DecodeBase16(sbuffer2.GetBuffer(),sbuffer2.GetLength(),Hash,ARRSIZE(Hash));
+			int pos2=sbuffer.Find(_T(","),pos+1);
 			if (pos2==-1) continue;
-			sbuffer2=sbuffer.Mid(pos+1,pos2-pos-1).Trim();
-			Lenght=atoi(sbuffer2);
-			sbuffer2=sbuffer.Mid(pos2+1,sbuffer.GetLength()-pos2-2);
-			Title =	sbuffer2;
-			AddFake(Hash,Lenght,Title);
-			fakecounter++;
+			Lenght=atoi(sbuffer.Mid(pos+1,pos2-pos-1).Trim());
+			Title=sbuffer.Mid(pos2+1,sbuffer.GetLength()-pos2-2);
+			AddFake(&Hash[0],Lenght,Title);
+			++fakecounter;
 		}
 		fclose(readFile);
-		return fakecounter;
-	} else {
-		return 0;
-	}
+		// sort the FakeCheck entry by Hash 
+		qsort(m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Lenght);
 
-}
-
-void CFakecheck::RemoveAllFakes(){
-	Fakes_Struct* search;
-	
-	map<CString, Fakes_Struct*>::const_iterator it;
-	for ( it = Fakelist.begin(); it != Fakelist.end(); ++it ) {
-		search=(*it).second;
-		delete search;
-	}
-
-	Fakelist.clear();
-}
-
-bool CFakecheck::IsFake(CString Hash2test, uint32 lenght){
-	if (Fakelist.size()==0) return false;
-	Fakes_Struct* search;
-	
-	map<CString, Fakes_Struct*>::const_iterator it=Fakelist.upper_bound(Hash2test);
-	it--;
-	do {
-		search=(*it).second;
-		if (search->Hash == Hash2test && search->Lenght == lenght) {
-			lasthit=search->RealTitle;
-			return true;
+		// merge overlapping and adjacent filter ranges
+		if (m_fakelist.GetCount() >= 2)
+		{
+			Fakes_Struct* pPrv = m_fakelist[0];
+			int i = 1;
+			while (i < m_fakelist.GetCount())
+			{
+				Fakes_Struct* pCur = m_fakelist[i];
+				if ( pCur->Hash == pPrv->Hash && pCur->Lenght == pPrv->Lenght)
+				{
+					if (pCur->RealTitle != pPrv->RealTitle)
+					{
+						//pPrv->RealTitle += _T("; ") + pCur->RealTitle;
+						iMerged++;
+					}
+					else
+					{
+						iDuplicate++;
+					}
+					delete pCur;
+					m_fakelist.RemoveAt(i);
+					continue;
+				}
+				pPrv = pCur;
+				++i;
+			}
 		}
-		it--;
-	} while (it!=Fakelist.begin());
+
+		theApp.emuledlg->AddLogLine(false, _T("%i Fake Check reference loaded"), m_fakelist.GetCount());
+		if (thePrefs.GetVerbose())
+		{
+			theApp.emuledlg->AddDebugLogLine(false, _T("Found Fake Reference:%u  Duplicate:%u  Merged:%u"), fakecounter, iDuplicate, iMerged);
+		}
+	}
+	return m_fakelist.GetCount();
+}
+
+bool CFakecheck::IsFake(uchar* Hash2test, uint32 lenght){
+	if (m_fakelist.GetCount() == 0)
+		return false;
+	Fakes_Struct** ppFound = (Fakes_Struct**)bsearch(&Hash2test, m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Lenght);
+	if (ppFound)
+	{
+		m_pLastHit = *ppFound;
+		return true;
+	}
+
 	return false;
 }
-void CFakecheck::DownloadFakeList(){
+CString CFakecheck::GetLastHit() const
+{
+	return m_pLastHit ? m_pLastHit->RealTitle : _T("");
+}
+
+void CFakecheck::RemoveAllFakes()
+{
+	for (int i = 0; i < m_fakelist.GetCount(); i++)
+		delete m_fakelist[i];
+	m_fakelist.RemoveAll();
+	m_pLastHit = NULL;
+}
+
+void CFakecheck::DownloadFakeList()
+{
 	char buffer[5];
 	int lenBuf = 5;
 	CString sbuffer;

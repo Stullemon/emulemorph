@@ -157,10 +157,10 @@ private:
 		uint32	datalen;
 		DWORD	timestamp;
 	};
-	CList<TransferredData,TransferredData> avarage_dr_list;
-	CList<TransferredData,TransferredData> avarage_friend_dr_list;
-	//CList<DWORD,DWORD> avarage_tick_list;
-	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
+
+	CList<uint64,uint64> avarage_dr_list;
+    CList<uint64,uint64> avarage_friend_dr_list;
+	CList<DWORD,DWORD> avarage_tick_list;
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 
@@ -200,9 +200,7 @@ private:
 	bool	lastupslotHighID; // VQB lowID alternation
 
 	// By BadWolf - Accurate Speed Measurement
-	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-	CList<TransferredData,TransferredData>	m_AvarageUDRO_list;
-	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
+	CList<uint64,uint64>	m_AvarageUDRO_list;
 	uint32	sumavgUDRO;
 	// END By BadWolf - Accurate Speed Measurement	
 

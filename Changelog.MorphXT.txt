@@ -1,4 +1,16 @@
 --------------------------------------
+Changelog for eMule 0.42e MorphXT v2.?
+--------------------------------------
+FIXED  : Reviewed all ed2k download methode to keep Selection category support from Khaos [SiRoB]
+FIXED  : Eradicate Invalide Parameter (:p i hope) [SiRoB]
+
+ADDED  : Friend Column on uploadlist, queuelist & knownlist to be able to sort them from EastShare [AndCycle]
+
+CHANGED: Updated SafeHash, MergeKnown, HIDEOS, Multiple sorting From Slugfiller [SiRoB]
+CHANGED: Updated SafeHash From Slugfiller [SiRoB]
+CHANGED: Turning back average on 30'' for upload and download mesure [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.42e MorphXT v2.6
 --------------------------------------
 FIXED  : Invalide Parameter Message [SiRoB]

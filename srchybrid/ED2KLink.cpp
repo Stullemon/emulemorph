@@ -297,9 +297,6 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 			}
 		}
 	}
-	// khaos::categorymod+
-	m_cat = -1;
-	// khaos::categorymod-
 }
 
 

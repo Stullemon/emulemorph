@@ -553,7 +553,7 @@ CServer* CServerList::GetNextServer(const CServer* lastserver) const
 
 //Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
 // itsonlyme: cacheUDPsearchResults
-CServer* CServerList::GetNextServer(CServer *lastserver, CPartFile *file)
+CServer* CServerList::GetNextServer(const CServer *lastserver, CPartFile *file) const
 {
 	if (!file)
 		return GetNextServer(lastserver);

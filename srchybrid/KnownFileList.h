@@ -28,7 +28,6 @@ public:
 	CKnownFileList();
 	~CKnownFileList();
 	bool	SafeAddKFile(CKnownFile* toadd);
-	void	RemoveFile(CKnownFile* toremove);	// SLUGFILLER: mergeKnown - for duplicate removal
 	bool	Init();
 	void	Save();
 	void	Clear();
@@ -36,7 +35,7 @@ public:
 
 	CKnownFile* FindKnownFile(LPCTSTR filename, uint32 date, uint32 size) const;
 	CKnownFile* FindKnownFileByID(const uchar* hash) const;
-	void	FilterDuplicateKnownFiles(CKnownFile* original);	// SLUGFILLER: mergeKnown - for duplicate removal
+	void	MergePartFileStats(CKnownFile* original);	// SLUGFILLER: mergeKnown - retrieve part file stats from known file
 	bool	IsKnownFile(const CKnownFile* file) const;
 	bool	IsFilePtrInList(const CKnownFile* file) const;
 
