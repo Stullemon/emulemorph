@@ -1204,7 +1204,7 @@ BEGIN
     LTEXT           "Clientsoftware:",IDC_STATIC33,19,36,63,8
     LTEXT           "Static",IDC_DSOFT,84,36,227,8
     LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8
-    LTEXT           "Static",IDC_DSIP,84,47,54,8
+    LTEXT           "Static",IDC_DSIP,84,47,74,8
     LTEXT           "Servername:",IDC_STATIC38,164,47,52,8
     LTEXT           "Static",IDC_DSNAME,215,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
