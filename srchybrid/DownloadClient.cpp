@@ -943,11 +943,11 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 							// Log
 							AddLogLine(true,  _T("Received suspicious block: file '%s', part %i, block %i, blocksize %i, comp. blocksize %i, comp. factor %0.1f)"), reqfile->GetFileName(), cur_block->block->StartOffset/PARTSIZE, cur_block->block->StartOffset/EMBLOCKSIZE, lenUnzipped, nBlockSize, lenUnzipped/nBlockSize);
-							AddLogLine(false, _T("Username '%s' (IP %s:%i), hash %s"), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash);
+							AddLogLine(false, _T("Username '%s' (IP %s:%i), hash %s"), m_pszUsername, ipstr(GetIP()), GetUserPort(), userHash);
 
 							// Ban => serious error (Attack?)
 							if(lenUnzipped > 4*nBlockSize && reqfile->IsArchive() == true){
-								theApp.ipfilter->AddIPRange(GetConnectIP(), GetConnectIP(), 1, _T("Temporary"));
+								theApp.ipfilter->AddIP(GetIP(), 1, _T("Temporary"));
 								SetDownloadState(DS_ERROR);
 							}
 
@@ -1022,7 +1022,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						}
 						// Ban => serious error (Attack?)
 						AddLogLine(false, _T(GetResString(IDS_CORRUPTDATASENT)), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash, GetClientSoftVer()); //MORPH - Modified by IceCream
-						theApp.ipfilter->AddIPRange(GetConnectIP(), GetConnectIP(), 1, _T("Temporary"));
+						theApp.ipfilter->AddIP(GetIP(), 1, _T("Temporary"));
 						SetDownloadState(DS_ERROR);
 					}
 					//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
@@ -1421,7 +1421,24 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
     if (!SwapTo) {
         return true;
     }
+	//MORPH START - Added by SiRoB, ForcedA4AF
+	if (thePrefs.UseSmartA4AFSwapping())
+	{
+		if (cur_file == theApp.downloadqueue->forcea4af_file)
+		{
+			if(printDebug)
+                AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: Don't swap because cur_file have the GetAllA4AF checked."));
+			return true;
+		} else if (cur_file->ForceAllA4AF())
+		{
+			if(printDebug)
+                AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: Don't swap because cur_file have the ForcedA4AFON checked."));
+			return true;
+		}
+	}
 
+	//MORPH END   - Added by SiRoB, ForcedA4AF
+						
     if(!curFileisNNPFile && cur_file->GetSourceCount() < thePrefs.GetMaxSourcePerFile() ||
         curFileisNNPFile && cur_file->GetSourceCount() < thePrefs.GetMaxSourcePerFile()*.8) {
 
@@ -1446,6 +1463,15 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
                     AddDebugLogLine(DLP_LOW, false, _T("oooo Debug: SwapTo is NNP and cur_file is not."));
                 return true;
             }
+			//MORPH START - Added by SiRoB, Avanced A4AF
+			uint8 cur_file_iA4AFMode = thePrefs.AdvancedA4AFMode();
+			if (cur_file_iA4AFMode && thePrefs.GetCategory(cur_file->GetCategory())->iAdvA4AFMode)
+				cur_file_iA4AFMode = thePrefs.GetCategory(cur_file->GetCategory())->iAdvA4AFMode;
+			uint8 SwapTo_iA4AFMode = thePrefs.AdvancedA4AFMode();
+			if (SwapTo_iA4AFMode && thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode)
+				SwapTo_iA4AFMode = thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode;
+			
+			//MORPH END   - Added by SiRoB, Avanced A4AF
             if(SwapToIsNNPFile == curFileisNNPFile) {
                 if(printDebug)
                     AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: SwapToIsNNPFile == curFileisNNPFile"));
@@ -1455,23 +1481,51 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
                         AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: No suspend block."));
 
                     if(
-                        !SwapTo->IsA4AFAuto() &&
-                        (
-                            cur_file->IsA4AFAuto() ||
-                            thePrefs.GetCategory(cur_file->GetCategory())->prio > thePrefs.GetCategory(SwapTo->GetCategory())->prio ||
-                            thePrefs.GetCategory(cur_file->GetCategory())->prio == thePrefs.GetCategory(SwapTo->GetCategory())->prio &&
-                            (
-                                cur_file->GetDownPriority() > SwapTo->GetDownPriority() ||
-                                cur_file->GetDownPriority() == SwapTo->GetDownPriority() &&
-                                (
-                                    cur_file->GetCategory() == SwapTo->GetCategory() && cur_file->GetCategory() != 0 &&
-                                    (thePrefs.GetCategory(cur_file->GetCategory())->downloadInAlphabeticalOrder && thePrefs.IsExtControlsEnabled()) && 
-                                    cur_file->GetFileName() && SwapTo->GetFileName() &&
-                                    cur_file->GetFileName().CompareNoCase(SwapTo->GetFileName()) < 0
-                                )
-                            )
-                        )
-                    ) {
+						//MORPH START - Added by SiRoB, ForcedA4AF
+						thePrefs.UseSmartA4AFSwapping() && SwapTo != theApp.downloadqueue->forcea4af_file &&
+						(
+							cur_file->ForceA4AFOff() &&
+						//MORPH END   - Added by SiRoB, ForcedA4AF
+							!SwapTo->IsA4AFAuto() &&
+							(
+								cur_file->IsA4AFAuto() ||
+								//MORPH START - Added by SiRoB, Stacking A4AF
+								(
+									(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) == 2 &&
+									cur_file->GetCatResumeOrder() < SwapTo->GetCatResumeOrder() ||
+									(
+										cur_file->GetCatResumeOrder() == SwapTo->GetCatResumeOrder() &&
+										SwapTo_iA4AFMode == 2 &&
+										SwapTo_iA4AFMode == cur_file_iA4AFMode
+										||
+										(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) != 2 &&
+										(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) ==
+										(thePrefs.GetCategory(cur_file->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(cur_file->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode())
+									) &&
+								//MORPH END   - Added by SiRoB, Stacking A4AF		
+									(
+										thePrefs.GetCategory(cur_file->GetCategory())->prio > thePrefs.GetCategory(SwapTo->GetCategory())->prio ||
+										thePrefs.GetCategory(cur_file->GetCategory())->prio == thePrefs.GetCategory(SwapTo->GetCategory())->prio &&
+										(
+											cur_file->GetDownPriority() > SwapTo->GetDownPriority() ||
+											cur_file->GetDownPriority() == SwapTo->GetDownPriority() &&
+											(
+												cur_file->GetCategory() == SwapTo->GetCategory() && cur_file->GetCategory() != 0 &&
+												(thePrefs.GetCategory(cur_file->GetCategory())->downloadInAlphabeticalOrder && thePrefs.IsExtControlsEnabled()) && 
+												cur_file->GetFileName() && SwapTo->GetFileName() &&
+												cur_file->GetFileName().CompareNoCase(SwapTo->GetFileName()) < 0
+												//MORPH START - Added by SiRoB, Balancing A4AF
+												||
+												(thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode?thePrefs.GetCategory(SwapTo->GetCategory())->iAdvA4AFMode:thePrefs.AdvancedA4AFMode()) != 0 &&
+												cur_file->GetAvailableSrcCount() < SwapTo->GetAvailableSrcCount()
+												//MORPH END   - Added by SiRoB, Balancing A4AF
+											)
+										)
+									)
+								) //MORPH END   - Added by SiRoB, Stacking A4AF
+							)
+						) //MORPH - Added by SiRoB, ForcedA4AF
+					) {
                         if(printDebug)
                             AddDebugLogLine(DLP_VERYLOW, false, _T("oooo Debug: Higher prio."));
 
@@ -1502,79 +1556,7 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
 //								if (cur_src->SwapToForcedA4AF())
 //									break; // This source was transferred, nothing more to do here.
 //						}
-//						if (!cur_src->GetLastBalanceTick() || (dwCurTick - cur_src->GetLastBalanceTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
-//						{
-//							uint8 iA4AFMode = thePrefs.AdvancedA4AFMode();
-//							if (iA4AFMode && thePrefs.GetCategory(GetCategory())->iAdvA4AFMode)
-//								iA4AFMode = thePrefs.GetCategory(GetCategory())->iAdvA4AFMode;
-//							if (iA4AFMode == 1 && cur_src->BalanceA4AFSources()) 
-//								break; // This source was transferred, nothing more to do here.
-//							if (iA4AFMode == 2 && cur_src->StackA4AFSources())
-//								break; // This source was transferred, nothing more to do here.
-//						}
-//					}
-//					//MORPH END - Added by SiRoB, Due to Khaos A4AF
-//					
-//		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
-//		//if (IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
-//		if (!thePrefs.AdvancedA4AFMode() && !thePrefs.UseSmartA4AFSwapping() && IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
-//		//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
-//		{
-//			m_LastNoNeededCheck = dwCurTick;
-//			POSITION pos1, pos2;
-//			for (pos1 = A4AFsrclist.GetHeadPosition();(pos2=pos1)!=NULL;)
-//			{
-//				A4AFsrclist.GetNext(pos1);
-//				CUpDownClient *cur_source = A4AFsrclist.GetAt(pos2);
-//				if( cur_source->GetDownloadState() != DS_DOWNLOADING
-//					&& cur_source->reqfile 
-//					&& ( (!cur_source->reqfile->IsA4AFAuto()) || cur_source->GetDownloadState() == DS_NONEEDEDPARTS)
-//					&& !cur_source->IsSwapSuspended(this) )
-//				{
-//					CPartFile* oldfile = cur_source->reqfile;
-//					if (cur_source->SwapToAnotherFile(false, false, false, this)){
-//						cur_source->DontSwapTo(oldfile);
-//					}
-//				}
-//			}
-//		}
-////MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-//				if (!thePrefs.UseSmartA4AFSwapping())
-//				{
-//				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-//				
-//				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-//				}
-//				else
-//				{
-//					if (thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources())
-//					{
-//						if (cur_file->ForceAllA4AF())
-//						{
-//							SwapTo = cur_file;
-//							SwapToIsNNP = false;
-//							finalpos=pos;
-//							break;
-//						}
-//						else if (!SwapTo)
-//						{
-//							SwapTo = cur_file;
-//							finalpos=pos;
-//						}
-//						else if (SwapTo->GetDownPriority() > cur_file->GetDownPriority())
-//						{
-//							SwapTo = cur_file;
-//							finalpos=pos;
-//						}
-//						else if (SwapTo->GetDownPriority() == cur_file->GetDownPriority() && SwapTo->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
-//						{
-//							SwapTo = cur_file;
-//							finalpos=pos;
-//						}
-//					}
-//				}
-//				//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-//                */
+
 				    if(IsSourceRequestAllowed(cur_file, true) && (cur_file->AllowSwapForSourceExchange() || cur_file == reqfile) &&
                        !(IsSourceRequestAllowed(SwapTo, true) && (SwapTo->AllowSwapForSourceExchange() || SwapTo == reqfile)) &&
                        (GetDownloadState()!=DS_ONQUEUE || GetDownloadState()==DS_ONQUEUE && GetRemoteQueueRank() > 50)) {
@@ -2139,16 +2121,6 @@ void CUpDownClient::CheckQueueRankFlood()
 //// This function works independent of the download manager.
 //bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 //{
-//	m_iLastSwapAttempt = GetTickCount();
-//
-//	// Not exactly a great idea to swap sources that are currently transferring to us, now is it?
-//	if (GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty() || reqfile == theApp.downloadqueue->forcea4af_file || reqfile->ForceAllA4AF())
-//		return false;
-//
-//	// Don't swap in first three minutes of run time or within three minutes of the last swap.
-//	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
-//		return false;
-//
 //	CPartFile* pSwap = NULL;
 //	POSITION finalpos = NULL;
 //
@@ -2309,46 +2281,5 @@ void CUpDownClient::CheckQueueRankFlood()
 //		}
 //	}
 //	
-//	return false;
-//}
-//
-//bool CUpDownClient::SwapToForcedA4AF()
-//{
-//	m_iLastForceA4AFAttempt = GetTickCount();
-//
-//	// Don't swap in first three minutes of run time or within three minutes of the last swap.
-//	if ((GetTickCount()-theApp.stat_starttime) <= 180000 || (GetTickCount()-m_iLastActualSwap) <= 180000)
-//		return false;
-//
-//	CPartFile* pForcedA4AF = theApp.downloadqueue->forcea4af_file;
-//
-//	if (pForcedA4AF == reqfile || pForcedA4AF == NULL || GetDownloadState() == DS_DOWNLOADING || m_OtherRequests_list.IsEmpty())
-//		return false;
-//
-//	bool swapToFA4AF = false;
-//	POSITION finalpos = NULL;
-//
-//	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
-//	{
-//		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
-//		if (theApp.downloadqueue->IsPartFile(cur_file) &&
-//				!cur_file->IsStopped() &&
-//				(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
-//				(thePrefs.GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !thePrefs.RespectMaxSources()))
-//		{		
-//			if (cur_file == pForcedA4AF){
-//				finalpos = pos;
-//				swapToFA4AF = true;
-//			}
-//		}
-//	}
-//
-//	if (swapToFA4AF)
-//	{
-//		if (DoSwap(pForcedA4AF, false, 2)){
-//			m_OtherRequests_list.RemoveAt(finalpos);
-//			return true;
-//		}
-//	}
 //	return false;
 //}

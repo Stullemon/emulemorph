@@ -1486,7 +1486,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				iFileNotSeenCompleteSource += pFile->notSeenCompleteSource() && pFile->GetStatus() != PS_ERROR && !bFileDone;
 				//MORPH END   - Added by SiRoB, Only download complete files v2.1 (shadow)
 				//MORPH START - Added by SiRoB, A4AF
-				iFileForceAllA4AF += theApp.downloadqueue->forcea4af_file == pFile?1:0;
+				iFileForceAllA4AF += (theApp.downloadqueue->forcea4af_file == pFile)?1:0;
 				iFileForceA4AF += pFile->ForceAllA4AF()?1:0;
 				iFileForceA4AFOff += pFile->ForceA4AFOff()?1:0;
 				//MORPH END   - Added by SiRoB, A4AF
@@ -1575,12 +1575,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			
 			int total;
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
-			//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
-			/*
+
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
-			*/
-			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) && !thePrefs.UseSmartA4AFSwapping() && !thePrefs.AdvancedA4AFMode() ? MF_ENABLED : MF_GRAYED);
-			//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 			m_A4AFMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesNotDone == 1 && iFilesA4AFAuto == 1) ? MF_CHECKED : MF_UNCHECKED);
 			
 			m_FileMenu.EnableMenuItem(MP_GETED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
