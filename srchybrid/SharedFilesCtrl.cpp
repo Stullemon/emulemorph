@@ -667,15 +667,19 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer = _T("[") + GetResString((hideOSInWork>0)?IDS_POWERSHARE_ON_LABEL:IDS_POWERSHARE_OFF_LABEL) + _T("] ");
 						if(file->GetHideOS()<0)
 							buffer.Append(_T(" ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". "));
-						if (hideOSInWork){
+						hideOSInWork = (file->GetHideOS()>=0)?file->GetHideOS():thePrefs.GetHideOvershares();
+						if (hideOSInWork>0)
 							buffer.AppendFormat(_T("%i"), hideOSInWork);
-							if (file->GetSelectiveChunk()>=0)
-								if (file->GetSelectiveChunk())
-									buffer.AppendFormat(_T(" + %s") ,GetResString(IDS_SELECTIVESHARE));
+						else
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_DISABLED));
+						if (file->GetSelectiveChunk()>=0){
+							if (file->GetSelectiveChunk())
+								buffer.Append(_T(" + S"));
 						}else
-							buffer.Append(GetResString(IDS_DISABLED));
+							if (thePrefs.IsSelectiveShareEnabled())
+								buffer.Append(_T(" + ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". S"));
 						buffer.Append(_T(" ("));
-						if (file->GetPowerShareAuthorized())
+						if (file->GetHideOSAuthorized())
 							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
 						else
 							buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
