@@ -137,7 +137,7 @@ void CFileStatistic::AddBlockTransferred(uint32 start, uint32 end, uint32 count)
 		return;
 
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	if(fileParent->GetSpreadbarSetStatus() == 0 || (fileParent->GetSpreadbarSetStatus() == -1 && thePrefs.GetSparsePartFiles() == 0))
+	if(fileParent->GetSpreadbarSetStatus() == 0 || (fileParent->GetSpreadbarSetStatus() == -1 && thePrefs.GetSpreadbarSetStatus() == 0))
 		return;
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
@@ -356,7 +356,17 @@ double CFileStatistic::GetEqualChanceValue()
 	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 	//smaller value means greater priority
-	m_dLastEqualChanceSemiValue = (double)GetAllTimeTransferred()/fileParent->GetFileSize();
+	m_dLastEqualChanceSemiValue = ((double)GetAllTimeTransferred()/fileParent->GetFileSize());
+/*
+	//weight adjustment
+	if(fileParent->GetFileSize()%PARTSIZE != 0){
+		m_dLastEqualChanceSemiValue  log(1+log((double)PARTSIZE/(fileParent->GetFileSize()%PARTSIZE))/fileParent->GetPartCount());
+	}
+	else{
+		m_dLastEqualChanceSemiValue  log(1/fileParent->GetPartCount());
+	}
+*/
+
 	return m_dLastEqualChanceSemiValue/GetSharedTime();
 }
 
