@@ -127,7 +127,7 @@ int CImportPartsFileThread::Run()
 			continue;
 		}
 
-		f.Seek(part*PARTSIZE,CFile::begin);
+		f.Seek((uint32)part*PARTSIZE,CFile::begin); //MORPH - Added by Commander, Fix 2GB load bug [Death Knight]
 		partSize=f.Read(partData, PARTSIZE);
 
 		if(partSize==0)
