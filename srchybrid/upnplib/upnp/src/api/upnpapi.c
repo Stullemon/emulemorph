@@ -3728,23 +3728,36 @@ DBGONLY(
 int getlocalhostname( OUT char *out )
 #ifdef _WIN32
 {
-    char buffer[80];
-    struct addrinfo * addrInfoPtr;
-
-    int retVal = gethostname(buffer, 80);
-    retVal = getaddrinfo(buffer, "", NULL, &addrInfoPtr);
-    if (addrInfoPtr) {
-	if (addrInfoPtr->ai_family == PF_INET) {
-	    struct sockaddr * addrPtr = addrInfoPtr->ai_addr;
-	    struct sockaddr_in * sockAddrPtr = (struct sockaddr_in *) addrPtr;
-	    if (sockAddrPtr) {
-		strcpy(out, inet_ntoa( sockAddrPtr->sin_addr ));
-		retVal = 2;
-	    }
+	char szHost[256];
+	struct hostent* pHostEnt;
+	if (gethostname(szHost, sizeof szHost) == 0){
+		pHostEnt = gethostbyname(szHost);
+		if (pHostEnt != NULL && pHostEnt->h_length == 4 && pHostEnt->h_addr_list[0] != NULL){
+			strcpy(out, inet_ntoa(*(struct in_addr*)(pHostEnt->h_addr_list[0])));
+		    return UPNP_E_SUCCESS;
+		}
+		else if (pHostEnt == NULL){
+			DBGONLY(
+				UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
+				"gethostbyname error: %d\n", WSAGetLastError());
+			)
+		    return UPNP_E_INIT;
+		}
+		else{
+			DBGONLY(
+				UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
+				"Error getting local ip");
+			)
+		    return UPNP_E_INIT;
+		}
 	}
-    }
-    freeaddrinfo(addrInfoPtr);
-    return UPNP_E_SUCCESS;
+	else {
+		DBGONLY(
+			UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
+			"gethostname error: %d\n", WSAGetLastError());
+		)
+	    return UPNP_E_INIT;
+	}
 }
 #else
 {
