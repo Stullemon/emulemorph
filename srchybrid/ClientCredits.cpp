@@ -169,7 +169,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			}
 			result = 0;
 			if (GetUploadedTotal()<1000000)
-				result = 100.0f;
+				result = 10.0f * GetDownloadedTotal()/1000000.0f;
 			else
 				result = (float)(GetDownloadedTotal()*3)/GetUploadedTotal();
 			if ((GetDownloadedTotal() > 100000000)&&(GetUploadedTotal()<GetDownloadedTotal()+8000000)&&(result<50)) result=50;
