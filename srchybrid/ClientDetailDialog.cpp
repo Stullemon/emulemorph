@@ -84,7 +84,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DHASH)->SetWindowText(_T("?"));
 	
-	GetDlgItem(IDC_DSOFT)->SetWindowText(m_client->DbgGetFullClientSoftVer());
+	GetDlgItem(IDC_DSOFT)->SetWindowText(m_client->GetClientSoftVer());
 
 	buffer.Format(_T("%s"),(m_client->HasLowID() ? GetResString(IDS_IDLOW):GetResString(IDS_IDHIGH)));
 	GetDlgItem(IDC_DID)->SetWindowText(buffer);

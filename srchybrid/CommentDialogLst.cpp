@@ -112,7 +112,7 @@ void CCommentDialogLst::CompleteList ()
 			pmyListCtrl.SetItemText(count, 1, cur_src->GetClientFilename()); 
 			pmyListCtrl.SetItemText(count, 2, GetRateString(cur_src->GetFileRate())); 
 			pmyListCtrl.SetItemText(count, 3, cur_src->GetFileComment());
-			pmyListCtrl.SetItemText(count, 4, cur_src->DbgGetFullClientSoftVer()); //Commander - Added: ClientSoftware Column
+			pmyListCtrl.SetItemText(count, 4, cur_src->GetClientSoftVer()); //Commander - Added: ClientSoftware Column
                         pmyListCtrl.SetItemText(count, 5, cur_src->GetCountryName()); //Commander - Added: ClientCountry Column
 			count++;
 		} 

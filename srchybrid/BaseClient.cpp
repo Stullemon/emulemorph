@@ -1563,6 +1563,10 @@ void CUpDownClient::ReGetClientSoft()
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
+			//MORPH START - Added by SiRoB, MODSTRING
+			if(m_strModVersion.IsEmpty())
+				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
+			//MORPH END   - Added by SiRoB, MODSTRING
 		}
 		return;
 	}
@@ -1618,6 +1622,10 @@ void CUpDownClient::ReGetClientSoft()
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
+			//MORPH START - Added by SiRoB, MODSTRING
+			if(m_strModVersion.IsEmpty())
+				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
+			//MORPH END   - Added by SiRoB, MODSTRING
 		}
 		return;
 	}
@@ -1631,6 +1639,10 @@ void CUpDownClient::ReGetClientSoft()
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
+			//MORPH START - Added by SiRoB, MODSTRING
+			if(m_strModVersion.IsEmpty())
+				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
+			//MORPH END   - Added by SiRoB, MODSTRING
 		}
 		return;
 	}
@@ -1644,6 +1656,10 @@ void CUpDownClient::ReGetClientSoft()
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
+			//MORPH START - Added by SiRoB, MODSTRING
+			if(m_strModVersion.IsEmpty())
+				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
+			//MORPH END   - Added by SiRoB, MODSTRING
 		}
 		return;
 	}
@@ -1656,6 +1672,10 @@ void CUpDownClient::ReGetClientSoft()
 	if (iLen > 0){
 		memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 		m_strClientSoftware.ReleaseBuffer(iLen);
+		//MORPH START - Added by SiRoB, MODSTRING
+		if(m_strModVersion.IsEmpty())
+			m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
+		//MORPH END   - Added by SiRoB, MODSTRING
 	}
 }
 

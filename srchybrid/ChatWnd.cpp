@@ -124,7 +124,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	// Client
 	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer());
+		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->GetClientSoftVer());
 	}
 	else
 		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
@@ -416,8 +416,8 @@ void CChatWnd::SetAllIcons()
 		VERIFY( DestroyIcon(icon_friend) );
 	if (icon_msg)
 		VERIFY( DestroyIcon(icon_msg) );
-	icon_friend = theApp.LoadIcon("Friend", 16, 16);
-	icon_msg = theApp.LoadIcon("Message", 16, 16);
+	icon_friend = theApp.LoadIcon(_T("Friend"), 16, 16);
+	icon_msg = theApp.LoadIcon(_T("Message"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_MESSAGEICON))->SetIcon(icon_msg);
 	((CStatic*)GetDlgItem(IDC_FRIENDSICON))->SetIcon(icon_friend);
 }
@@ -456,7 +456,7 @@ void CChatWnd::ScrollHistory(bool down) {
 	
 	if (down) ++ci->history_pos; else --ci->history_pos;
 
-	buffer= (ci->history_pos==ci->history.GetCount())?"":ci->history.GetAt(ci->history_pos);
+	buffer = (ci->history_pos == ci->history.GetCount()) ? _T("") : ci->history.GetAt(ci->history_pos);
 
 	inputtext.SetWindowText(buffer);
 	inputtext.SetSel(buffer.GetLength(),buffer.GetLength());
@@ -496,7 +496,7 @@ void CChatWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 
 void CChatWnd::UpdateFriendlistCount(uint16 count) {
 	CString temp;
-	temp.Format(" (%i)",count);
+	temp.Format(_T(" (%i)"),count);
 	temp=GetResString(IDS_CW_FRIENDS)+temp;
 
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(temp);

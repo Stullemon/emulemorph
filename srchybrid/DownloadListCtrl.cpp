@@ -191,29 +191,29 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("ClientLPhant")));
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
-	m_ImageList.Add(CTempIconLoader("ClientRightEdonkey")); //17
-	m_ImageList.Add(CTempIconLoader("ClientMorph")); //18
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader("ClientCreditOvl")), 2); //19
-	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader("ClientCreditSecureOvl")), 3); //20
+	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey"))); //17
+	m_ImageList.Add(CTempIconLoader(_T("ClientMorph"))); //18
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2); //19
+	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3); //20
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
 	//MORPH START - Added by IceCream, eMule Plus rating icones
-	m_ImageList.Add(CTempIconLoader("RATING_NO"));  // 21
-	m_ImageList.Add(CTempIconLoader("RATING_EXCELLENT"));  // 22
-	m_ImageList.Add(CTempIconLoader("RATING_FAIR"));  // 23
-	m_ImageList.Add(CTempIconLoader("RATING_GOOD"));  // 24
-	m_ImageList.Add(CTempIconLoader("RATING_POOR"));  // 25
-	m_ImageList.Add(CTempIconLoader("RATING_FAKE"));  // 26
+	m_ImageList.Add(CTempIconLoader(_T("RATING_NO")));  // 21
+	m_ImageList.Add(CTempIconLoader(_T("RATING_EXCELLENT")));  // 22
+	m_ImageList.Add(CTempIconLoader(_T("RATING_FAIR")));  // 23
+	m_ImageList.Add(CTempIconLoader(_T("RATING_GOOD")));  // 24
+	m_ImageList.Add(CTempIconLoader(_T("RATING_POOR")));  // 25
+	m_ImageList.Add(CTempIconLoader(_T("RATING_FAKE")));  // 26
 	//MORPH END   - Added by IceCream, eMule Plus rating icones
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	m_overlayimages.SetBkColor(CLR_NONE);
-	m_overlayimages.Add(CTempIconLoader("Community"));
+	m_overlayimages.Add(CTempIconLoader(_T("Community")));
 	// [end] Mighty Knife
 	//MORPH START - Addded by SiRoB, Friend Addon
-	m_overlayimages.Add(CTempIconLoader("ClientFriendOvl"));
-	m_overlayimages.Add(CTempIconLoader("ClientFriendSlotOvl"));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
 	
 }
@@ -702,19 +702,19 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 						{
 							sint32 curTime = lpPartFile->getTimeRemaining();
 							sint32 avgTime = lpPartFile->GetTimeRemainingAvg();
-							buffer.Format("%s (%s)", CastSecondsToHM(curTime), CastSecondsToHM(avgTime));
+							buffer.Format(_T("%s (%s)"), CastSecondsToHM(curTime), CastSecondsToHM(avgTime));
 							break;
 						}
 					case 1:
 						{
 							sint32 curTime = lpPartFile->getTimeRemaining();
-							buffer.Format("%s", CastSecondsToHM(curTime));
+							buffer.Format(_T("%s"), CastSecondsToHM(curTime));
 							break;
 						}
 					case 2:
 						{
 							sint32 avgTime = lpPartFile->GetTimeRemainingAvg();
-							buffer.Format("%s", CastSecondsToHM(avgTime));
+							buffer.Format(_T("%s"), CastSecondsToHM(avgTime));
 							break;
 						}
 					}
@@ -756,15 +756,15 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 		case 12: // Category
 			{
 				if (!thePrefs.ShowCatNameInDownList())
-					buffer.Format("%u", lpPartFile->GetCategory());
+					buffer.Format(_T("%u"), lpPartFile->GetCategory());
 				else
-					buffer.Format("%s", thePrefs.GetCategory(lpPartFile->GetCategory())->title);
+					buffer.Format(_T("%s"), thePrefs.GetCategory(lpPartFile->GetCategory())->title);
 				dc->DrawText(buffer, (int) strlen(buffer), lpRect, DLC_DT_TEXT);
 				break;
 			}
 		case 13: // Resume Mod
 			{
-				buffer.Format("%u", lpPartFile->GetCatResumeOrder());
+				buffer.Format(_T("%u"), lpPartFile->GetCatResumeOrder());
 				dc->DrawText(buffer, (int) strlen(buffer), lpRect, DLC_DT_TEXT);
 				break;
 			}
@@ -777,7 +777,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 					uint32 remains;
 					remains=lpPartFile->GetFileSize()-lpPartFile->GetCompletedSize();	//<<-- 09/27/2002, CML
 
-					buffer.Format("%s", CastItoXBytes(remains));
+					buffer.Format(_T("%s"), CastItoXBytes(remains));
 
 				}
 				dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
@@ -899,12 +899,12 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				//Morph End - added by AndCycle, IP to Country
 
 				if (!lpUpDownClient->GetUserName())
-					buffer = "?";
+					buffer = _T("?");
 				else {
 					buffer = lpUpDownClient->GetUserName();
 					//MORPH START - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 					CString tempStr;
-					tempStr.Format("(%i) %s",lpUpDownClient->m_OtherRequests_list.GetCount()+1+lpUpDownClient->m_OtherNoNeeded_list.GetCount(),buffer);
+					tempStr.Format(_T("(%i) %s"),lpUpDownClient->m_OtherRequests_list.GetCount()+1+lpUpDownClient->m_OtherNoNeeded_list.GetCount(),buffer);
 					buffer = tempStr;
 					//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 				}
@@ -943,7 +943,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 					break;
 				//MORPH START - Added by SiRoB, Source Loader Saver [SLS]
 				case SF_SLS:
-					buffer = "SLS";
+					buffer = _T("SLS");
 					break;
 				//MORPH END   - Added by SiRoB, Source Loader Saver [SLS]
 				default:
@@ -1057,7 +1057,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 			break;
 
 		case 6:{		// sources
-			buffer = lpUpDownClient->DbgGetFullClientSoftVer();
+			buffer = lpUpDownClient->GetClientSoftVer();
 			if (buffer.IsEmpty())
 				buffer = GetResString(IDS_UNKNOWN);
 			dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
@@ -2728,7 +2728,7 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 		// Maella -Support for tag ET_MOD_VERSION 0x55-
 		if( client1->GetClientSoft() == client2->GetClientSoft() )
 			if(client2->GetVersion() == client1->GetVersion() && client1->GetClientSoft() == SO_EMULE){
-				return strcmpi(client2->DbgGetFullClientSoftVer(), client1->DbgGetFullClientSoftVer());
+				return strcmpi(client2->GetClientSoftVer(), client1->GetClientSoftVer());
 			}
 			else {
 			return client2->GetVersion() - client1->GetVersion();

@@ -136,21 +136,21 @@ void CClientListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
 	imagelist.Add(CTempIconLoader(_T("ClientMorph")));
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
-	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
+	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	m_overlayimages.SetBkColor(CLR_NONE);
-	m_overlayimages.Add(CTempIconLoader("Community"));
+	m_overlayimages.Add(CTempIconLoader(_T("Community")));
 	// [end] Mighty Knife
 	//MORPH START - Addded by SiRoB, Friend Addon
-	m_overlayimages.Add(CTempIconLoader("ClientFriendOvl"));
-	m_overlayimages.Add(CTempIconLoader("ClientFriendSlotOvl"));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendOvl")));
+	m_overlayimages.Add(CTempIconLoader(_T("ClientFriendSlotOvl")));
 	//MORPH END   - Addded by SiRoB, Friend Addon
 }
 
@@ -397,7 +397,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				}
 				case 5:{
-					Sbuffer = client->DbgGetFullClientSoftVer();
+					Sbuffer = client->GetClientSoftVer();
 					if (Sbuffer.IsEmpty())
 						Sbuffer = GetResString(IDS_UNKNOWN);
 					break;
@@ -417,17 +417,17 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					break;
 				// Mighty Knife: Community affiliation
 				case 8:
-					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
+					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
 					break;
 				// [end] Mighty Knife
 				// EastShare - Added by Pretender, Friend Tab
 				case 9:
-					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : "";
+					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
 					break;
 				// EastShare - Added by Pretender, Friend Tab
                 // Commander - Added: IP2Country column - Start
                 case 10:
-					Sbuffer.Format("%s", client->GetCountryName());
+					Sbuffer.Format(_T("%s"), client->GetCountryName());
 					break;
                 // Commander - Added: IP2Country column - End
 			}
@@ -489,7 +489,6 @@ END_MESSAGE_MAP()
 void CClientListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
 
 	CTitleMenu ClientMenu;
@@ -587,26 +586,26 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 				{
 					CString fileList;
 					fileList += GetResString(IDS_LISTREQDL);
-					fileList += "\n--------------------------\n" ; 
+					fileList += _T("\n--------------------------\n"); 
 					if (theApp.downloadqueue->IsPartFile(client->reqfile))
 					{
 						fileList += client->reqfile->GetFileName(); 
 						for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
 						{
-							fileList += "\n" ; 
+							fileList += _T("\n") ; 
 							fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
 						}
 						for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
 						{
-							fileList += "\n" ;
+							fileList += _T("\n");
 							fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
 						}
 					}
 					else
 						fileList += GetResString(IDS_LISTREQNODL);
-					fileList += "\n\n\n";
+					fileList += _T("\n\n\n");
 					fileList += GetResString(IDS_LISTREQUL);
-					fileList += "\n------------------------\n" ; 
+					fileList += _T("\n------------------------\n");
 					CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 					if(uploadfile)
 						fileList += uploadfile->GetFileName();
@@ -721,7 +720,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 5:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item2->DbgGetFullClientSoftVer(), item1->DbgGetFullClientSoftVer());
+					return strcmpi(item2->GetClientSoftVer(), item1->GetClientSoftVer());
 				}
 				else {
 					return item2->GetVersion() - item1->GetVersion();
@@ -731,7 +730,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 105:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item1->DbgGetFullClientSoftVer(), item2->DbgGetFullClientSoftVer());
+					return strcmpi(item1->GetClientSoftVer(), item2->GetClientSoftVer());
 				}
 				else {
 					return item1->GetVersion() - item2->GetVersion();
