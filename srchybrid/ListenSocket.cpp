@@ -1631,13 +1631,16 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 	CEMSocket::OnConnect(nErrorCode);
 	if (nErrorCode)
 	{
+        CString reason = "OnConnectError: Unknown";
 	    CString strTCPError;
 		if (thePrefs.GetVerbose())
 		{
 		    strTCPError = GetErrorMessage(nErrorCode, 1);
-		    if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
-			    AddDebugLogLine(false, _T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
+            //if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
+            reason.Format(_T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
+
+        Disconnect(reason);
 	}
 }
 
