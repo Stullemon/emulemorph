@@ -1067,7 +1067,7 @@ void CClientCredits::InitPayBackFirstStatus(){
 //test will be triggered at client have up/down transfered
 void CClientCredits::TestPayBackFirstStatus(){
 
-	if(GetDownloadedTotal() < SESSIONMAXTRANS){
+	if(GetDownloadedTotal() < (9.3*1024*1024)){
 		m_bPayBackFirst = false;
 		return; //MORPH - Added by SiRoB, Pay Back First Tweak 
 	}
