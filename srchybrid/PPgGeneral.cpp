@@ -63,13 +63,14 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_BEEPER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_EXIT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SPLASHON, OnSettingsChange)
+	ON_BN_CLICKED(IDC_STARTUPSOUNDON, OnSettingsChange)//Commander - Added: Enable/Disable Startupsound
 	ON_BN_CLICKED(IDC_BRINGTOFOREGROUND, OnSettingsChange)
 	ON_CBN_SELCHANGE(IDC_LANGS, OnLangChange)
 	ON_BN_CLICKED(IDC_ED2KFIX, OnBnClickedEd2kfix)
 	ON_BN_CLICKED(IDC_WEBSVEDIT , OnBnClickedEditWebservices)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnBnClickedCheck4Update)
-        //Commander - Added: Invisible Mode [TPT] - Start
+    //Commander - Added: Invisible Mode [TPT] - Start
 	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_SELECT_COMBO, OnSettingsChange)
 	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_KEY_COMBO, OnCbnSelchangeKeymodcombo)
 	ON_BN_CLICKED(IDC_INVISIBLE_MODE, OnBoxesChange)
@@ -126,6 +127,13 @@ void CPPgGeneral::LoadSettings(void)
 		CheckDlgButton(IDC_SPLASHON,1);
 	else
 		CheckDlgButton(IDC_SPLASHON,0);
+
+    //Commander - Added: Enable/Disable Startupsound - Start
+    if(thePrefs.startupsound)
+		CheckDlgButton(IDC_STARTUPSOUNDON,1);
+	else
+		CheckDlgButton(IDC_STARTUPSOUNDON,0);
+    //Commander - Added: Enable/Disable Startupsound - End
 
 	if(thePrefs.bringtoforeground)
 		CheckDlgButton(IDC_BRINGTOFOREGROUND,1);
@@ -229,6 +237,7 @@ BOOL CPPgGeneral::OnApply()
 	thePrefs.beepOnError= (uint8)IsDlgButtonChecked(IDC_BEEPER);
 	thePrefs.confirmExit= (uint8)IsDlgButtonChecked(IDC_EXIT);
 	thePrefs.splashscreen = (uint8)IsDlgButtonChecked(IDC_SPLASHON);
+	thePrefs.startupsound = (uint8)IsDlgButtonChecked(IDC_STARTUPSOUNDON);//Commander - Added: Enable/Disable Startupsound
 	thePrefs.bringtoforeground = (uint8)IsDlgButtonChecked(IDC_BRINGTOFOREGROUND);
 	thePrefs.updatenotify = (uint8)IsDlgButtonChecked(IDC_CHECK4UPDATE);
 	thePrefs.onlineSig= (uint8)IsDlgButtonChecked(IDC_ONLINESIG);
@@ -269,6 +278,7 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_BEEPER)->SetWindowText(GetResString(IDS_PW_BEEP));
 		GetDlgItem(IDC_EXIT)->SetWindowText(GetResString(IDS_PW_PROMPT));
 		GetDlgItem(IDC_SPLASHON)->SetWindowText(GetResString(IDS_PW_SPLASH));
+		GetDlgItem(IDC_STARTUPSOUNDON)->SetWindowText(GetResString(IDS_PW_STARTUPSOUND));//Commander - Added: Enable/Disable Startupsound
 		GetDlgItem(IDC_BRINGTOFOREGROUND)->SetWindowText(GetResString(IDS_PW_FRONT));
 		GetDlgItem(IDC_ONLINESIG)->SetWindowText(GetResString(IDS_PREF_ONLINESIG));	
 		GetDlgItem(IDC_STARTMIN)->SetWindowText(GetResString(IDS_PREF_STARTMIN));	

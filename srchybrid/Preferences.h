@@ -206,6 +206,7 @@ public:
 	static	DWORD	statcolors[15];
 
 	static	uint8	splashscreen;
+	static	uint8	startupsound;//Commander - Added: Enable/Disable Startupsound
 	static	uint8	filterLANIPs;
 	static	bool	m_bAllocLocalHostIP;
 	static	uint8	onlineSig;
@@ -1035,6 +1036,7 @@ public:
 	static	bool	IsErrorBeepEnabled()		{return beepOnError;}
 	static	bool	IsConfirmExitEnabled()		{return confirmExit;}
 	static	bool	UseSplashScreen()			{return splashscreen;}
+	static  bool	UseStartupSound()			{return startupsound;}//Commander - Added: Enable/Disable Startupsound	
 	static	bool	FilterLANIPs()				{return filterLANIPs;}
 	static	bool	GetAllowLocalHostIP()		{return m_bAllocLocalHostIP;}
 	static	bool	IsOnlineSignatureEnabled()	{return onlineSig;}

@@ -295,9 +295,16 @@ BOOL CemuleDlg::OnInitDialog()
 	// show splashscreen as early as possible to "entertain" user while starting emule up
 	if (thePrefs.UseSplashScreen() && !m_bStartMinimized){
 		ShowSplash();
+	}
+	//Commander - Added: Startupsound - Start
+	if (thePrefs.UseStartupSound() && !m_bStartMinimized){
 		if(PathFileExists(thePrefs.GetConfigDir() + _T("startup.wav"))) 
 			PlaySound(thePrefs.GetConfigDir() + _T("startup.wav"), NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
+		else
+			AddLogLine(false,GetResString(IDS_MISSING_STARTUPSOUND));
 	}
+	//Commander - Added: Startupsound - End
+
 	CTrayDialog::OnInitDialog();
 	InitWindowStyles(this);
 

@@ -569,6 +569,7 @@
 #define IDS_IRC_OP                      646
 #define IDS_COUNTRY                     646
 #define IDS_IRC_DEOP                    647
+#define IDS_MISSING_STARTUPSOUND        647
 #define IDS_SOURCEEXCHANGESWAP          648
 #define IDS_IRC_HALFOP                  649
 #define IDS_IRC_DEHALFOP                650
@@ -1562,6 +1563,7 @@
 #define IDC_EXIT                        2311
 #define IDC_C1_2                        2313
 #define IDC_SPLASHON                    2315
+#define IDC_STARTUPSOUNDON              2316
 #define IDC_C0_3                        2318
 #define IDC_TIMEAVG1                    2321
 #define IDC_TypeSearch                  2322
@@ -2425,6 +2427,7 @@
 #define IDC_SPLITTER_STAT               5009
 #define IDS_CLIENTPERCENTAGE            5009
 #define IDC_SPLITTER_FRIEND             5010
+#define IDS_PW_STARTUPSOUND             5010
 #define IDC_SPLITTER_STAT_HL            5011
 #define IDC_SPLITTER_STAT_HR            5012
 #define IDC_SPLITTER_IRC                5013
@@ -2481,9 +2484,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5005
+#define _APS_NEXT_RESOURCE_VALUE        5011
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5006
+#define _APS_NEXT_CONTROL_VALUE         5007
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

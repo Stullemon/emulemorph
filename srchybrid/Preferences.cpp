@@ -104,6 +104,7 @@ struct Preferences_Import20a_Struct{
 	int transferColumnWidths[9];
 	int serverColumnWidths[8];
 	uint8	splashscreen;
+	uint8   startupsound;//Commander - Added: Enable/Disable Startupsound
 	uint8	filterLANIPs;
 };
 #pragma pack()
@@ -141,6 +142,7 @@ struct Preferences_Import20b_Struct{
 	int transferColumnWidths[9];
 	int serverColumnWidths[8];
 	uint8	splashscreen;
+	uint8	startupsound;//Commander - Added: Enable/Disable Startupsound
 	uint8	filterLANIPs;
 	uint64	totalDownloadedBytes;
 	uint64	totalUploadedBytes;
@@ -213,6 +215,7 @@ INT		CPreferences::FilenamesListColumnOrder[2];
 
 DWORD	CPreferences::statcolors[15];
 uint8	CPreferences::splashscreen;
+uint8	CPreferences::startupsound;//Commander - Added: Enable/Disable Startupsound
 uint8	CPreferences::filterLANIPs;
 bool	CPreferences::m_bAllocLocalHostIP;
 uint8	CPreferences::onlineSig;
@@ -1987,6 +1990,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("AddServersFromServer"),addserversfromserver);
 	ini.WriteBool(_T("AddServersFromClient"),addserversfromclient);
 	ini.WriteBool(_T("Splashscreen"),splashscreen);
+	ini.WriteBool(_T("Startupsound"),startupsound);//Commander - Added: Enable/Disable Startupsound
 	ini.WriteBool(_T("BringToFront"),bringtoforeground);
 	ini.WriteBool(_T("TransferDoubleClick"),transferDoubleclick);
 	ini.WriteBool(_T("BeepOnError"),beepOnError);
@@ -2637,6 +2641,7 @@ void CPreferences::LoadPreferences()
 	addserversfromserver=ini.GetBool(_T("AddServersFromServer"),true);
 	addserversfromclient=ini.GetBool(_T("AddServersFromClient"),true);
 	splashscreen=ini.GetBool(_T("Splashscreen"),true);
+	startupsound=ini.GetBool(_T("Startupsound"),true);//Commander - Added: Enable/Disable Startupsound
 	bringtoforeground=ini.GetBool(_T("BringToFront"),true);
 	transferDoubleclick=ini.GetBool(_T("TransferDoubleClick"),true);
 	beepOnError=ini.GetBool(_T("BeepOnError"),true);
