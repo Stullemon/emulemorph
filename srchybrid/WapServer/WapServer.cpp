@@ -2997,23 +2997,23 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 		*/
 		// End emulEspaña
 		
-		if(_ParseURL(Data.sURL, _T("maxsources")) != "")
+		if(_ParseURL(Data.sURL, _T("maxsources")) != _T(""))
 		{
 			thePrefs.SetMaxSourcesPerFile(_ttoi(_ParseURL(Data.sURL, _T("maxsources"))));
 		}
-		if(_ParseURL(Data.sURL, _T("maxconnections")) != "")
+		if(_ParseURL(Data.sURL, _T("maxconnections")) != _T(""))
 		{
 			thePrefs.SetMaxConnections(_ttoi(_ParseURL(Data.sURL, _T("maxconnections"))));
 		}
-		if(_ParseURL(Data.sURL, _T("maxconnectionsperfive")) != "")
+		if(_ParseURL(Data.sURL, _T("maxconnectionsperfive")) != _T(""))
 		{
 			thePrefs.SetMaxConsPerFive(_ttoi(_ParseURL(Data.sURL, _T("maxconnectionsperfive"))));
 		}
-		thePrefs.SetTransferFullChunks((_ParseURL(Data.sURL, _T("fullchunks")).MakeLower() == "on"));
-		//thePrefs.SetPreviewPrio((_ParseURL(Data.sURL, "firstandlast").MakeLower() == "on"));	// emulEspaña: removed by Announ [Announ: -per file option for downloading preview parts-]
+		thePrefs.SetTransferFullChunks((_ParseURL(Data.sURL, _T("fullchunks")).MakeLower() == _T("on")));
+		thePrefs.SetPreviewPrio((_ParseURL(Data.sURL, _T("firstandlast")).MakeLower() == _T("on")));
 
-		thePrefs.SetNetworkED2K((_ParseURL(Data.sURL, _T("neted2k")).MakeLower() == "on"));
-		thePrefs.SetNetworkKademlia((_ParseURL(Data.sURL, _T("netkad")).MakeLower() == "on"));
+		thePrefs.SetNetworkED2K((_ParseURL(Data.sURL, _T("neted2k")).MakeLower() == _T("on")));
+		thePrefs.SetNetworkKademlia((_ParseURL(Data.sURL, _T("netkad")).MakeLower() == _T("on")));
 	}
 
 	// Fill form
@@ -3022,12 +3022,7 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 	Out.Replace(_T("[SendBWImagesVal]"),thePrefs.GetWapAllwaysSendBWImages()?_T("1"):_T("2"));
 	Out.Replace(_T("[SendImagesVal]"),thePrefs.GetWapSendImages()?_T("1"):_T("2"));
 	Out.Replace(_T("[SendProgressBarsVal]"),thePrefs.GetWapSendProgressBars()?_T("1"):_T("2"));
-	// emulEspaña: modified by Announ [Announ: -per file option for downloading preview parts-]
-	/*
-	Out.Replace("[FirstAndLastVal]",thePrefs.GetPreviewPrio()?"1":"2");
-	*/
-	// End emulEspaña
-
+	Out.Replace(_T("[FirstAndLastVal]"),thePrefs.GetPreviewPrio()?_T("1"):_T("2"));
 	Out.Replace(_T("[FullChunksVal]"),thePrefs.TransferFullChunks()?_T("1"):_T("2"));
 
 	CString sRefresh;
@@ -3333,6 +3328,7 @@ CString	CWapServer::_GetPlainResString(RESSTRIDTYPE nID, bool noquot)
 // EC + kuchin
 CString	CWapServer::_GetWebCharSet()
 {
+	/*
 	switch (thePrefs.GetLanguageID())
 	{
 		case MAKELANGID(LANG_POLISH,SUBLANG_DEFAULT):				return _T("windows-1250");
@@ -3349,6 +3345,9 @@ CString	CWapServer::_GetWebCharSet()
 	// Western (Latin) includes Catalan, Danish, Dutch, English, Faeroese, Finnish, French,
 	// German, Galician, Irish, Icelandic, Italian, Norwegian, Portuguese, Spanish and Swedish
 	return _T("ISO-8859-1");
+	*/
+
+	return _T("utf-8");
 }
 
 // Ornis: creating the progressbar. colored if ressources are given/available
