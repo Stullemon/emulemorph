@@ -174,8 +174,13 @@ bool UploadBandwidthThrottler::RemoveFromStandardList(ThrottledFileSocket* socke
 	bool returnValue;
     sendLocker.Lock();
 
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	/*
 	returnValue = RemoveFromStandardListNoLock(socket);
-
+	*/
+	returnValue = RemoveFromStandardListNoLock(socket, resort);
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	
     sendLocker.Unlock();
 
     return returnValue;
