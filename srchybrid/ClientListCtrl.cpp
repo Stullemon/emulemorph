@@ -79,7 +79,7 @@ void CClientListCtrl::Init()
 	InsertColumn(9,GetResString(IDS_FRIENDLIST),LVCFMT_LEFT,75,9);
 	// EastShare - Added by Pretender, Friend Tab
     // Commander - Added: IP2Country column - Start
-	InsertColumn(10,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,10);// Commander - added: IP2Country column
+	InsertColumn(10,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,10);
     // Commander - Added: IP2Country column - End
 
 	SetAllIcons();
@@ -769,8 +769,8 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 109:
 			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
 		// EastShare - Added by Pretender, Friend Tab
-                // Commander - Added: IP2Country column - Start
-                case 10:
+        // Commander - Added: IP2Country column - Start
+        case 10:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				return _tcsicmp(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))

@@ -88,8 +88,8 @@ void CQueueListCtrl::Init()
 	InsertColumn(12,GetResString(IDS_FRIENDLIST),LVCFMT_LEFT,75,12);
 	// EastShare - Added by Pretender, Friend Tab
 
-        // Commander - Added: IP2Country column - Start
-	InsertColumn(13,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,13);// Commander - added: IP2Country column
+    // Commander - Added: IP2Country column - Start
+	InsertColumn(13,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,13);
 	// Commander - Added: IP2Country column - End
 
         SetAllIcons();
@@ -556,11 +556,11 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
 						break;
 					// EastShare - Added by Pretender, Friend Tab
-                                        // Commander - Added: IP2Country column - Start
-                                        case 13:
+                    // Commander - Added: IP2Country column - Start
+                    case 13:
 						Sbuffer.Format("%s", client->GetCountryName());
 						break;
-                                        // Commander - Added: IP2Country column - End
+                    // Commander - Added: IP2Country column - End
 				}
 				if( iColumn != 9 && iColumn != 0)
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
@@ -579,7 +579,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		else HideColumn (11);
 	// [end] Mighty Knife
 */	
-        // Commander - Added: IP2Country column - Start
+    // Commander - Added: IP2Country column - Start
 		if ((thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE) != !IsColumnHidden (13))
 			if (thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE)
 				ShowColumn (13);

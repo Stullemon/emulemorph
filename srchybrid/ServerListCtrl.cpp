@@ -67,6 +67,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	InsertColumn(12,GetResString(IDS_VERSION),		LVCFMT_LEFT,  50);
 	InsertColumn(13,GetResString(IDS_IDLOW),		LVCFMT_RIGHT, 50);
 	InsertColumn(14,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
+    InsertColumn(15,GetResString(IDS_COUNTRY),      LVCFMT_LEFT,100);// Commander - Added: IP2Country column
 
 	SetAllIcons();
 	Localize();
@@ -193,6 +194,13 @@ void CServerListCtrl::Localize()
 	pHeaderCtrl->SetItem(14, &hdi);
 	strRes.ReleaseBuffer();
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+
+	// Commander - Added: IP2Country column - Start
+	strRes = GetResString(IDS_COUNTRY);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(15, &hdi);
+	strRes.ReleaseBuffer();
+    // Commander - Added: IP2Country column - End
 }
 
 void CServerListCtrl::RemoveServer(CServer* todel)
@@ -269,17 +277,19 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 	SetItemText(itemnr, 1, temp);
 
-	//EastShare Start - added by AndCycle, IP to Country
-	/*
-	//original
+	//Servername
 	SetItemText(itemnr,0,server->GetListName());
-	*/
+	
+        /* 
+		// Commander - Removed: IP2Country column - Start
 	CString tempServerName;
 	tempServerName = server->GetCountryName();
 	tempServerName.Append(server->GetListName());
 	SetItemText(itemnr,0,tempServerName);
-	//EastShare End - added by AndCycle, IP to Country
+        */
+        // Commander - Removed: IP2Country column - End
 
+    //Description
 	SetItemText(itemnr,2,server->GetDescription());
 
 	// Ping
@@ -377,6 +387,15 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		SetItemText(itemnr,14,_T(""));
 	}
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+    
+	
+	//Morph Start - added by AndCycle, IP to Country, modified by Commander
+	// Commander - Added: IP2Country column - Start
+	//Countryname
+	CString tempCountryName;
+	tempCountryName = server->GetCountryName();
+	SetItemText(itemnr,15,tempCountryName);
+	// Commander - Added: IP2Country column - End
 }
 
 //EastShare Start - added by AndCycle, IP to Country
@@ -792,7 +811,12 @@ int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		  UNDEFINED_INT_AT_BOTTOM(item1->GetLowIDUsers(), item2->GetLowIDUsers());
 		  iResult = CompareUnsigned(item1->GetLowIDUsers(), item2->GetLowIDUsers());
 		  break;
-
+          // Commander - Added: IP2Country column - Start
+      case 15:
+          UNDEFINED_STR_AT_BOTTOM(item1->GetCountryName(), item2->GetCountryName());
+          iResult = item1->GetCountryName().CompareNoCase(item2->GetCountryName());
+		  break;
+         // Commander - Added: IP2Country column - End
 	  default: 
 		  iResult = 0;
 	} 
