@@ -982,7 +982,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     */
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1))
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -1010,8 +1010,8 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
         activeSlots = m_MaxActiveClientsShortTime;
     }
 
-    if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
-       curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+    if(//curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
+       curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
         return true;
     }
 
