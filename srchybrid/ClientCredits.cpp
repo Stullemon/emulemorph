@@ -998,17 +998,17 @@ void CClientCredits::ClearWaitStartTime(){
 
 //EastShare Start - added by AndCycle, Pay Back First
 void CClientCredits::InitPayBackFirstStatus(){
-	if (GetDownloadedTotal() >= SESSIONAMOUNT)
-		m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal();
-	else 
-		m_bPayBackFirst = false;
+
+	m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS;
 
 }
 void CClientCredits::TestPayBackFirstStatus(){
 
-	if (GetDownloadedTotal() >= SESSIONAMOUNT)
-		m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal();
-	else 
+	if(GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS){
+		m_bPayBackFirst = true;
+	}
+	else if(GetDownloadedTotal() < GetUploadedTotal()){
 		m_bPayBackFirst = false;
+	}
 }
 //EastShare End - added by AndCycle, Pay Back First
