@@ -4379,7 +4379,6 @@ BEGIN
     IDS_COUNTRYNAME_LONG    "Display full name"
     IDS_COUNTRYNAME_SHOWFLAG "ShowFlag"
     IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
-    IDS_MULTIPLEINSTANCE    "Multiple Instances (requires restart)"
     IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_PAYBACKFIRSTLIMIT   "Amount before triggering (Default 10MB)"
 END
