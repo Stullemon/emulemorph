@@ -246,11 +246,9 @@ void CUpDownClient::Init()
 }
 
 CUpDownClient::~CUpDownClient(){
-	theApp.clientlist->RemoveClient(this);
+	theApp.clientlist->RemoveClient(this, _T("Destructing client object"));
 	if (m_Friend){
-		//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 		m_Friend->SetLinkedClient(NULL);
-		//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	}
 	if (socket){
 		socket->client = 0;
@@ -478,7 +476,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 			case CT_VERSION:
 				if (bDbgInfo)
-					m_strHelloInfo.AppendFormat("  VERSION=%u", temptag.tag.intvalue);
+					m_strHelloInfo.AppendFormat(_T("  VERSION=%u"), temptag.tag.intvalue);
 				m_nClientVersion = temptag.tag.intvalue;
 				break;
 			case CT_PORT:
@@ -972,16 +970,8 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	// eD2K Name
 
-	//MORPH START - Added by IceCream, Anti-leecher feature
-	LPCSTR strUsedName;
-	if (m_bGPLEvildoer)
-		strUsedName = "Please use a GPL-conform version of eMule";
-	else if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
-		strUsedName = m_pszUsername;
-	else
-		strUsedName = thePrefs.GetUserNick();
-	CTag tagName(CT_NAME,strUsedName);
-	//MORPH END   - Added by IceCream, Anti-leecher feature
+	// TODO implement multi language website which informs users of the effects of bad mods
+	CTag tagName(CT_NAME, (!m_bGPLEvildoer)?thePrefs.GetUserNick():"Please use a GPL-conform version of eMule" );
 	tagName.WriteTagToFile(data);
 
 	// eD2K Version
@@ -2213,7 +2203,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_nRemoteQueueRank;
 	(void)m_dwLastBlockReceived;
 	(void)m_nPartCount;
-	ASSERT( m_nSourceFrom >= SF_SERVER && m_nSourceFrom <= SF_PASSIVE );
+	ASSERT( m_nSourceFrom >= SF_SERVER && m_nSourceFrom <= SF_SLS );
 	CHECK_BOOL(m_bRemoteQueueFull);
 	CHECK_BOOL(m_bCompleteSource);
 	CHECK_BOOL(m_bReaskPending);
