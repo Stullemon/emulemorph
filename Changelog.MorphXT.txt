@@ -1,9 +1,11 @@
 ---------------------------------------- 
-Changelog for eMule 0.41b29 MorphXT 
+Changelog for eMule 0.41b29 MorphXT 1.1
 ---------------------------------------- 
 FIXED  : The Multiple affectation to HideOS, SelectiveChunk, and ShareOnlyTheNeed causing crash [SiRoB]
-FIXED  : TagCount Trouble [SiRoB]
+FIXED  : TagCount Trouble causing .part corruption [SiRoB]
 FIXED  : Popup menu permission state in the Download Windows  [SiRoB]
+FIXED  : The Known.met trouble and certainly many other, Great thanks to Tharghan for his support [SiRoB]
+ADDED  : 2 Columns in SharedFIle to see the HideOS & ShareOnlyTheNeed State [SiRoB]
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.0 
