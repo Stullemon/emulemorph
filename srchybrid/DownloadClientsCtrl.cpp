@@ -28,7 +28,6 @@
 #include "ClientDetailDialog.h"
 #include "emuledlg.h"
 #include "memdc.h"
-#include "KademliaMain.h"
 #include "MenuCmds.h"
 #include "FriendList.h"
 #include "TransferWnd.h"
@@ -711,10 +710,9 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 				return 1; 
 			else if (!item2->Credits())   
 				return -1; 
-
-			float r1=item1->credits->GetScoreRatio(item1->GetIP());   
-			float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
-			return r2 > r1 ? 1 : r2==r1?0:-1; 
+			float r1=item2->credits->GetScoreRatio(item2->GetIP());
+			float r2=item1->credits->GetScoreRatio(item1->GetIP());
+			return r1==r2? 0 : r1<r2? -1 : 1;
 		}
 	case 107:
 		{   
@@ -725,7 +723,7 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 
 			float r1=item1->credits->GetScoreRatio(item1->GetIP());   
 			float r2=item2->credits->GetScoreRatio(item2->GetIP()); 
-			return r1 > r2 ? 1 : r2==r1?0:-1;
+			return r1==r2? 0 : r1<r2? -1 : 1;
 		}
 		//SLAHAM: ADDED Last Asked =>
 	case 8: 
