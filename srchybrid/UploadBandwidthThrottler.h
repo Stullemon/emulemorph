@@ -80,10 +80,7 @@ private:
     uint64 m_SentBytesSinceLastCall;
     uint64 m_SentBytesSinceLastCallOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots;
-	//MORPH START - Added by SiRoB, Upload Splitting Class
-	uint32 m_highestNumberOfFullyActivatedSlotsClass[NB_SPLITTING_CLASS];
-	//MORPH END   - Added by SiRoB, Upload Splitting Class
-    uint32 m_allowedDataRate;
+	uint32 m_allowedDataRate;
 
     bool doRun;
 };
