@@ -1482,9 +1482,14 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
 
                     if(
 						//MORPH START - Added by SiRoB, ForcedA4AF
-						thePrefs.UseSmartA4AFSwapping() && SwapTo != theApp.downloadqueue->forcea4af_file &&
 						(
-							cur_file->ForceA4AFOff() &&
+							thePrefs.UseSmartA4AFSwapping() && SwapTo != theApp.downloadqueue->forcea4af_file
+							||
+							!thePrefs.UseSmartA4AFSwapping()
+						)
+						&&
+						(
+							!(thePrefs.UseSmartA4AFSwapping() && cur_file->ForceA4AFOff()) &&
 						//MORPH END   - Added by SiRoB, ForcedA4AF
 							!SwapTo->IsA4AFAuto() &&
 							(
