@@ -1835,6 +1835,7 @@ BEGIN
                     WS_TABSTOP,19,137,164,64
 END
 
+/*
 IDD_PPG_MORPH3 DIALOGEX 0, 0, 230, 186
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -1875,7 +1876,7 @@ BEGIN
     CONTROL         "",IDC_RE_DYNDNS_HELP,"RichEdit20A",ES_AUTOHSCROLL | 
                     WS_BORDER | WS_TABSTOP,7,7,201,221
 END
-
+*/
 IDD_PPG_EMULESPANA1 DIALOGEX 0, 0, 230, 258
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "emulEspa? Settings"
@@ -5178,9 +5179,9 @@ BEGIN
     IDS_DONTREMOVESPARETRICKLESLOT "Don't remove spare trickle slot"
     IDS_MINDATARATEFRIEND   "Global datarate (Default 0kB/s=unlimited)"
     IDS_MINDATARATEPOWERSHARE "Global datarate (Default 0kB/s=unlimited)"
-    IDS_MAXCLIENTDATARATEFRIEND "Client datarate (Dafault 0kB/s=focused)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Client datarate (Dafault 0kB/s=focused)"
-    IDS_MAXCLIENTDATARATE   "Client datarate (Dafault 0kB/s=focused)"
+    IDS_MAXCLIENTDATARATEFRIEND "Client datarate (Default 0kB/s=focused)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Client datarate (Default 0kB/s=focused)"
+    IDS_MAXCLIENTDATARATE   "Client datarate (Default 0kB/s=focused)"
 END
 
 STRINGTABLE 
