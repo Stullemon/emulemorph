@@ -10,6 +10,7 @@
 #define MP_EXIT					0x140
 #define	MP_ABOUTBOX				0x150
 #define MP_VERSIONCHECK			0x160
+#define MP_MVERSIONCHECK		0x170//MORPH - Added by SiRoB, New Version check
 
 #define MP_MESSAGE				10102
 #define MP_DETAIL				10103

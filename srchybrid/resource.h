@@ -2592,6 +2592,7 @@
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
+#define IDS_MVERSIONCHECK               5112
 #define IDS_NONEWMVERVERSION            5113
 #define IDS_NEWMVERSIONAVL              5114
 #define IDC_FRIENDS_COUNTRY_EDIT        5115

@@ -332,7 +332,11 @@ BOOL CemuleDlg::OnInitDialog()
 
 		ASSERT( (MP_VERSIONCHECK & 0xFFF0) == MP_VERSIONCHECK && MP_VERSIONCHECK < 0xF000);
 		pSysMenu->AppendMenu(MF_STRING, MP_VERSIONCHECK, GetResString(IDS_VERSIONCHECK));
-
+		//MORPH START - Added by SiRoB, New Version check
+		ASSERT( (MP_MVERSIONCHECK & 0xFFF0) == MP_MVERSIONCHECK && MP_MVERSIONCHECK < 0xF000);
+		pSysMenu->AppendMenu(MF_STRING, MP_VERSIONCHECK, GetResString(IDS_MVERSIONCHECK));
+		//MORPH END   - Added by SiRoB, New Version check
+		
 		// remaining system menu entries are created later...
 	}
 
@@ -555,13 +559,23 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 	if (WSAAsyncGetHostByName(m_hWnd, WM_VERSIONCHECK_RESPONSE, "vcdns2.emule-project.org", m_acVCDNSBuffer, sizeof(m_acVCDNSBuffer)) == 0){
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
-	//MORPH START - Added by SiRoB, New Version check
+}
+//MORPH START - Added by SiRoB, New Version check
+void CemuleDlg::DoMVersioncheck(bool manual) {
+
+	if (!manual && thePrefs.GetLastVC()!=0) {
+		CTime last(thePrefs.GetLastVC());
+		time_t tLast=safe_mktime(last.GetLocalTm());
+		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+
+		if ( (difftime(tNow,tLast) / 86400)<thePrefs.GetUpdateDays() )
+			return;
+	}
 	if (WSAAsyncGetHostByName(m_hWnd, WM_MVERSIONCHECK_RESPONSE, "morphvercheck.dyndns.info", m_acMVCDNSBuffer, sizeof(m_acMVCDNSBuffer)) == 0){
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
-	//MORPH END   - Added by SiRoB, New Version check
 }
-
+//MORPH END   - Added by SiRoB, New Version check
 
 void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime)
 {
@@ -645,6 +659,9 @@ void CemuleDlg::StopTimer(){
 		ASSERT(0);
 	}
 	if (thePrefs.UpdateNotify()) DoVersioncheck(false);
+	//MORPH START - Added by SiRoB, New Version check
+	DoMVersioncheck(false);
+	//MORPH END   - Added by SiRoB, New Version check
 	if (theApp.pendinglink){
 		OnWMData(NULL,(LPARAM) &theApp.sendstruct);//changed by Cax2 28/10/02
 		delete theApp.pendinglink;
@@ -672,6 +689,11 @@ void CemuleDlg::OnSysCommand(UINT nID, LPARAM lParam){
 			dlgAbout.DoModal();
 			break;
 		}
+		//MORPH START - Added by SiRoB, New Version check
+		case MP_MVERSIONCHECK:
+			DoMVersioncheck(true);
+			break;
+		//MORPH END   - Added by SiRoB, New Version check
 		case MP_VERSIONCHECK:
 			DoVersioncheck(true);
 			break;
@@ -2046,6 +2068,9 @@ void CemuleDlg::Localize()
 	{
 		VERIFY( pSysMenu->ModifyMenu(MP_ABOUTBOX, MF_BYCOMMAND | MF_STRING, MP_ABOUTBOX, GetResString(IDS_ABOUTBOX)) );
 		VERIFY( pSysMenu->ModifyMenu(MP_VERSIONCHECK, MF_BYCOMMAND | MF_STRING, MP_VERSIONCHECK, GetResString(IDS_VERSIONCHECK)) );
+		//MORPH START - Added by SiRoB, New Version check
+		VERIFY( pSysMenu->ModifyMenu(MP_MVERSIONCHECK, MF_BYCOMMAND | MF_STRING, MP_MVERSIONCHECK, GetResString(IDS_MVERSIONCHECK)) );
+		//MORPH END   - Added by SiRoB, New Version check
 
 		switch (thePrefs.GetWindowsVersion()){
 		case _WINVER_98_:

@@ -86,6 +86,9 @@ public:
 	// Barry - To find out if app is running or shutting/shut down
 	bool			IsRunning();
 	void			DoVersioncheck(bool manual);
+	//MORPH START - Added by SiRoB, New Version check
+	void			DoMVersioncheck(bool manual);
+	//MORPH END   - Added by SiRoB, New Version check
 	void			ApplyHyperTextFont(LPLOGFONT pFont);
 	void			ApplyLogFont(LPLOGFONT pFont);
 	void			ProcessED2KLink(LPCTSTR pszData);
