@@ -659,6 +659,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			// <--- enkeyDEV: ICS
 			//Morph End - added by AndCycle, ICS
 			default:
+				//<<< [SNAFU_V3] Check unknown tags !
+				if (!((temptag.GetNameID() & 0xF0)==0xF0))
+					ProcessUnknownHelloTag(&temptag);
+				//>>> [SNAFU_V3] Save unknown tags !
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
 		}
@@ -1029,6 +1033,10 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 			// <--- enkeyDEV: ICS
 			//Morph End - added by AndCycle, ICS
 			default:
+				//<<< [SNAFU_V3] Check unknown tags !
+				if (!((temptag.GetNameID() & 0xF0)==0xF0))
+					ProcessUnknownInfoTag(&temptag);
+				//>>> [SNAFU_V3] Check unknown tags !
 				if (bDbgInfo)
 					m_strMuleInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
 		}
@@ -2835,3 +2843,84 @@ void CUpDownClient::ResetIP2Country(){
 	m_structUserCountry = theApp.ip2country->GetCountryFromIP(m_dwUserIP);
 }
 //EastShare End - added by AndCycle, IP to Country
+//>>> eWombat [SNAFU_V3]
+//<<< eWombat [SNAFU_V3]
+void CUpDownClient::ProcessUnknownHelloTag(CTag *tag)
+{
+if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
+	return;
+
+LPCTSTR strSnafuTag=NULL;
+switch(tag->GetNameID())
+	{
+	case CT_UNKNOWNx12:
+	case CT_UNKNOWNx13:
+	case CT_UNKNOWNx14:
+	case CT_UNKNOWNx16:
+	case CT_UNKNOWNx17:			strSnafuTag=apszSnafuTag[0];break;//buffer=_T("DodgeBoards");break;
+	case CT_UNKNOWNx15:			strSnafuTag=apszSnafuTag[1];break;//buffer=_T("DodgeBoards & DarkMule |eVorte|X|");break;
+	case CT_UNKNOWNx22:			strSnafuTag=apszSnafuTag[2];break;//buffer=_T("DarkMule v6 |eVorte|X|");break;
+	//case CT_UNKNOWNx69:			strSnafuTag=apszSnafuTag[3];break;//buffer=_T("eMuleReactor");break;
+	case CT_UNKNOWNx79:			strSnafuTag=apszSnafuTag[4];break;//buffer=_T("Bionic");break;
+	case CT_UNKNOWNx88:
+		////If its a LSD its o.k
+		//if (m_strModVersion.IsEmpty() || !stristrex(((CString)m_strModVersion).Left(3),"lsd"))
+		//	strSnafuTag=apszSnafuTag[5];//[LSD7c]
+		break;
+	case CT_UNKNOWNx8c:			strSnafuTag=apszSnafuTag[5];break;//buffer=_T("[LSD7c]");break; 
+	case CT_UNKNOWNx8d:			strSnafuTag=apszSnafuTag[6];break;//buffer=_T("[0x8d] unknown Leecher - (client version:60)");break;
+	case CT_UNKNOWNx99:			strSnafuTag=apszSnafuTag[7];break;//buffer=_T("[RAMMSTEIN]");break;		//STRIKE BACK
+	case CT_UNKNOWNxc4:			strSnafuTag=apszSnafuTag[8];break;//buffer=_T("[MD5 Community]");break;	//USED BY NEW BIONIC => 0x12 Sender
+	case CT_FRIENDSHARING:		//STRIKE BACK
+		//if (theApp.glob_prefs->GetAntiFriendshare())
+		//	{
+		//	if (tag->tag.type==TAGTYPE_UINT32 && tag->tag.intvalue == FRIENDSHARING_ID) //Mit dieser ID Definitiv
+		//		{
+		//		DoSnafu(snafu_friendsharemod,false,false);
+		//		return;				
+		//		}
+		//	}
+		break;
+	case CT_DARK:				//STRIKE BACK				
+			strSnafuTag=apszSnafuTag[9];break;//buffer=_T("new DarkMule");
+		break;
+	}
+	if (strSnafuTag!=NULL)
+	{
+		CString buffer;
+		buffer.Format(_T("Suspect Hello-Tag: %s %s"), strSnafuTag, tag->GetFullInfo());
+		BanLeecher(buffer);
+	}
+}
+void CUpDownClient::ProcessUnknownInfoTag(CTag *tag)
+{
+if (!thePrefs.GetEnableAntiLeecher())
+	return;
+LPCTSTR strSnafuTag=NULL;
+switch(tag->GetNameID())
+	{
+	case ET_MOD_UNKNOWNx12:
+	case ET_MOD_UNKNOWNx13:
+	case ET_MOD_UNKNOWNx14:
+	case ET_MOD_UNKNOWNx17:		strSnafuTag=apszSnafuTag[0];break;//("[DodgeBoards]")
+	case ET_MOD_UNKNOWNx2F:		strSnafuTag=apszSnafuTag[10];break;//buffer=_T("[OMEGA v.07 Heiko]");break;
+	case ET_MOD_UNKNOWNx36:
+	case ET_MOD_UNKNOWNx5B:
+	case ET_MOD_UNKNOWNxA6:		strSnafuTag=apszSnafuTag[11];break;//buffer=_T("eMule v0.26 Leecher");break;
+	case ET_MOD_UNKNOWNx60:		strSnafuTag=apszSnafuTag[12];break;//buffer=_T("[Hunter]");break; //STRIKE BACK
+	case ET_MOD_UNKNOWNx76:		strSnafuTag=apszSnafuTag[0];break;//buffer=_T("[DodgeBoards]");break;
+	case ET_MOD_UNKNOWNx50:		
+	case ET_MOD_UNKNOWNxB1:		
+	case ET_MOD_UNKNOWNxB4:		
+	case ET_MOD_UNKNOWNxC8:		
+	case ET_MOD_UNKNOWNxC9:		strSnafuTag=apszSnafuTag[13];break;//buffer=_T("[Bionic 0.20 Beta]");break;
+	case ET_MOD_UNKNOWNxDA:		strSnafuTag=apszSnafuTag[14];break;//buffer=_T("[Rumata (rus)(Plus v1f)]");break;
+	}
+	if (strSnafuTag!=NULL)
+	{
+		CString buffer;
+		buffer.Format(_T("Suspect eMuleInfo-Tag: %s %s"), strSnafuTag, tag->GetFullInfo());
+		BanLeecher(buffer);
+	}
+}
+//>>> eWombat [SNAFU_V3]
