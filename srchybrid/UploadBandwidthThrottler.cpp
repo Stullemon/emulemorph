@@ -663,7 +663,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance){
 						realBytesToSpend = 999+bandwidthSavedTolerance;
 						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
-							m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
+							++m_highestNumberOfFullyActivatedSlots[classID];
 						//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
 					}
 				}else{

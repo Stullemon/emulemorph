@@ -846,7 +846,7 @@ void CUploadQueue::Process() {
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 		m_abAddClientOfThisClass[classID] = m_abOnClientOverHideClientDatarate[classID] || //one client in class reached max upload limit
 											m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID] || //Upload Throttler want new slot
-											curUploadSlots<m_aiSlotCounter[classID]; //Scheduled slot
+											m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>curUploadSlots; //Scheduled slot
 											
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	
@@ -905,7 +905,7 @@ void CUploadQueue::Process() {
 				delete cur_client;
 			}
 		} else {
-			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || /*cur_client->GetSlotNumber() <= GetActiveUploadsCount() ||*/ ForceNewClient(true)) {
+			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
