@@ -316,7 +316,8 @@
 				Name="VCLibrarianTool"
 				AdditionalOptions="/LTCG:STATUS"
 				OutputFile=".\ReleaseUnicode\ResizableLib.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
