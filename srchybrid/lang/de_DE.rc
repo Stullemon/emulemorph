@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// German (Germany) resources
+// Allemand (Allemagne) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -477,6 +477,7 @@ BEGIN
     IDS_NOTHING             "nichts"
     IDS_SETUPSPEED          "Uploadlimit setzen"
     IDS_SETDOWNSPEED        "Downloadlimit setzen"
+    IDS_UNDO                "Rückgängig"
     IDS_DAYLY               "täglich"
 END
 
@@ -758,6 +759,7 @@ BEGIN
     IDS_STREE               "Statistik-Baum"
     IDS_IRC_IGNOREQUITMESSAGE "ignoriere Chat-verlassen-Nachrichten (Quit)"
     IDS_STATSSETUPINFO      "Statistikanzeige"
+    IDS_IRC_SOUNDEVENTS     "Klänge für Ereignisse wiedergeben"
 END
 
 STRINGTABLE 
@@ -1081,6 +1083,7 @@ BEGIN
     IDS_COMMENT             "Kommentar"
     IDS_IPFILTERED          "gefilterte IP: %s (%s)"
     IDS_DL_TRANSFCOMPL      "Fertiggestellt"
+    IDS_DL_ACTIVE_TIME      "Downloadzeit"
     IDS_STATS_FILTEREDCLIENTS "Gefiltert: %i"
     IDS_FILTERLABEL         "Filtere Nachrichten mit folgenden Strings: (Trennzeichen | )"
     IDS_ERR_LARGEREQBLOCK   "Client fragte einen zu großen Block an."
@@ -1399,6 +1402,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_CUT                 "Ausschneiden"
     IDS_STATS_SECUREIDENT   "Identifikation (pos : neg)"
     IDS_ONDISK              "Größe auf Disk: "
     IDS_CLIENTCOL           "Warnung: zu einem bereits verbundenen Client wurde ein gleicher Client gefunden: %s (%s) und %s (%s)"
@@ -1421,6 +1425,7 @@ STRINGTABLE
 BEGIN
     IDS_VERSION             "Version"
     IDS_ALL_A4AF_TO_THIS    "alle Quellen zu dieser Datei"
+    IDS_PASTE               "Einfügen"
     IDS_ALL_A4AF_TO_OTHER   "alle Quellen zu einer anderen Datei"
     IDS_ALL_A4AF_AUTO       "automatisches Zuweisen von Quellen zu dieser Datei"
     IDS_SWAP_A4AF_TO_THIS   "Quelle zu dieser Datei"
@@ -1551,6 +1556,7 @@ BEGIN
     IDS_CMT_COPYCLIPBOARD   "Kommentar in Zwischenablage kopieren"
     IDS_ASKDOWNLOADLANG     "Die ausgewählte Sprache ist nicht installiert. Soll eMule diese jetzt von emule-project.net herunterladen?"
     IDS_ASKDOWNLOADLANGCAP  "Downloade Sprachdateien"
+    IDS_DELETESELECTED      "Löschen"
     IDS_ERR_FAILEDDOWNLOADLANG 
                             "Download und Installation der ausgewählten Sprache fehlgeschlagen (Download von:%s)!"
     IDS_ERR_BADFOLDER       "Ungültiges Verzeichnis.\nDas Verzeichnis kann nicht erstellt werden. Bitte prüfe den Namen!"
@@ -1586,6 +1592,7 @@ BEGIN
     IDS_KADUDPPORTERR       "Kads UDP-Port steht im Konflikt mit entweder dem Ext UDP-Port oder dem Server-UDP-Port. Der Port wurde auf %u gewechselt."
     IDS_CONFIRM_FILEDELETE  "Sollen die gewählten Dateien vom Datenträger gelöscht werden?"
     IDS_OPENFOLDER          "Verzeichnis öffnen"
+    IDS_RUNASUSER           "eMule als unpriviligierten Benutzer starten"
     IDS_DELETE              "Löschen"
     IDS_BOOTSTRAP           "Bootstrap"
     IDS_VIAED2KSQ           "via ED2K Server/Queue"
@@ -1627,7 +1634,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Sollen die markierten IP Filter gelöscht werden?"
     IDS_TOTAL_IPFILTER_LABEL "IP Filter gesamt:"
     IDS_TOTAL_IPS_LABEL     "IP Anzahl:"
-    IDS_DELETESELECTED             "Löschen"
+    IDS_RAU_WARNING         "Diese Einstellung gibt eMule mehr Sicherheit gegen Angriffe und Exploits. Wir empfehlen diese Option zu nutzen.\nWir empfehlen jedoch, vorher die eMule Dokumentation zu diesem Punkt zu lesen!\n\nDie Änderung wird nach dem Neustart von eMule aktiv."
     IDS_APPEND              "Verschmelzen..."
     IDS_SAVE                "Speichern"
     IDS_IP_START            "Start"
@@ -1642,20 +1649,13 @@ STRINGTABLE
 BEGIN
     IDS_ERR_NOTCONNECTEDKAD "Du bist derzeit nicht mit dem Kad-Netzwerk verbunden!"
     IDS_IRC_NOSFS           "Keine freigegbenen Dateien ausgewählt"
+    IDS_RESETLABEL          "Autovervollständigung (History-Funktion)"
     IDS_IRC_IGNOREMISCMESSAGE "Ignoriere verschiedene Info-Nachrichten"
     IDS_KNOWN               "bekannt"
-    IDS_DL_ACTIVE_TIME      "Downloadzeit"
-    IDS_RESETLABEL          "Autovervollständigung (History-Funktion)"
-    IDS_PASTE		    "Einfügen"
-    IDS_UNDO                "Rückgängig"
-    IDS_CUT                 "Ausschneiden"
-    IDS_IRC_SOUNDEVENTS     "Klänge für Ereignisse wiedergeben"
-    IDS_KADCONTACTSREAD     "%ld Kontakte aus Datei eingelesen."
-    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
-    IDS_RUNASUSER           "eMule als unpriviligierten Benutzer starten"
     IDS_RAU_RUNNING         "eMule läuft als unpriviligierter Benutzer ""%s"""
     IDS_RAU_FAILED          "eMule konnte nicht als unpriviligierter Benutzer ""eMule_Secure"" gestartet werden . Die Rechte des gegenwärtigen Benutzers (""%S"") werden beibehalten."
-    IDS_RAU_WARNING         "Diese Einstellung gibt eMule mehr Sicherheit gegen Angriffe und Exploits. Wir empfehlen diese Option zu nutzen.\nWir empfehlen jedoch, vorher die eMule Dokumentation zu diesem Punkt zu lesen!\n\nDie Änderung wird nach dem Neustart von eMule aktiv."
+    IDS_KADCONTACTSREAD     "%ld Kontakte aus Datei eingelesen."
+    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
 END
 
 STRINGTABLE 
@@ -1663,7 +1663,8 @@ BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "Überprüfe Verfügbarkeit der Datei, bevor der Download gestartet wird."
     IDS_DL_FORCE            "Erzwinge Download"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Speichern, der Wartezeit in der Warteliste."
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 
+                            "Speichern, der Wartezeit in der Warteliste."
     IDS_DATEFILENAMELOG     "Schreibe das Datum, in den Namen der Log-Datei."
     IDS_ECFEF               "Gleiche Chance für jede Datei"
     IDS_ALL_TIME            "Gesamt-Zeit"
@@ -1825,9 +1826,7 @@ BEGIN
     IDS_CAT_USEAUTOCAT      "Neue Downloads werden mit Ansicht-Filter, den Kategorien hinzugefügt"
     IDS_SLS_USESLS          "aktiviere Speichern und Laden von Quellen"
     IDS_CAT_MERGE           "vermischen von Kategorien"
-    IDS_CAT_SETFILEGROUP    "Einstellung für Dateien Gruppe"
     IDS_CAT_GROUP           "Gruppe"
-    IDS_CAT_SETFILEGROUPMSG "Eingabe der Anzahl der Dateien, die der Gruppe zugewiesen werden!"
     IDS_A4AF_FORCEALL       "alle erhältlichen A4AF"
     IDS_A4AF_FLAGS          "erweiterte A4AF Flags"
     IDS_A4AF_ONFLAG         "Erzwinge A4AF an"
@@ -2029,14 +2028,10 @@ BEGIN
     IDS_COUNTRYNAME_MID     "Anzeige 3 Buchstaben"
     IDS_COUNTRYNAME_LONG    "Anzeige ausgeschrieben"
     IDS_COUNTRYNAME_SHOWFLAG "IP dem Land zuordnen"
-END
-
-STRINGTABLE
-BEGIN
     IDS_REMOVEALLFRIENDSLOT "Entferne alle Freunde aus dem Uploadslot"
 END
 
-#endif    // German (Germany) resources
+#endif    // Allemand (Allemagne) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

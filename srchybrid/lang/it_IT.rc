@@ -14,7 +14,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Italian (Italy) resources
+// Italien (Italie) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ITA)
 #ifdef _WIN32
@@ -479,6 +479,7 @@ BEGIN
     IDS_NOTHING             "nessuno"
     IDS_SETUPSPEED          "imposta limite upload"
     IDS_SETDOWNSPEED        "imposta limite download"
+    IDS_UNDO                "Undo"
     IDS_DAYLY               "quotidiano"
 END
 
@@ -759,6 +760,7 @@ BEGIN
     IDS_STREE               "Statistiche"
     IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
     IDS_STATSSETUPINFO      "Aspetto Statistiche"
+    IDS_IRC_SOUNDEVENTS     "Play sound events"
 END
 
 STRINGTABLE 
@@ -1081,6 +1083,7 @@ BEGIN
     IDS_COMMENT             "Commento"
     IDS_IPFILTERED          "IP Filtrato: %s (%s)"
     IDS_DL_TRANSFCOMPL      "Completato"
+    IDS_DL_ACTIVE_TIME      "Tempo di Download"
     IDS_STATS_FILTEREDCLIENTS "Filtrato: %i"
     IDS_FILTERLABEL         "Filtra Messaggi Contenenti: (Separatore | )"
     IDS_ERR_LARGEREQBLOCK   "Un client ha richiesto una parte troppo grande."
@@ -1400,6 +1403,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_CUT                 "Cut"
     IDS_STATS_SECUREIDENT   "Identificazione sicura (OK : Fallita )"
     IDS_ONDISK              "Spazio su Disco: "
     IDS_CLIENTCOL           "Attenzione:  E' stato trovato un client accoppiato ad un altro attualmente connesso: %s (%s) e %s (%s)"
@@ -1422,6 +1426,7 @@ STRINGTABLE
 BEGIN
     IDS_VERSION             "Versione"
     IDS_ALL_A4AF_TO_THIS    "Usa gli A4AF per questo file"
+    IDS_PASTE               "Paste"
     IDS_ALL_A4AF_TO_OTHER   "Usa gli A4AF per un altro file"
     IDS_ALL_A4AF_AUTO       "Usa automaticamente gli A4AF per questo file"
     IDS_SWAP_A4AF_TO_THIS   "Usa fonte per questo file"
@@ -1553,6 +1558,7 @@ BEGIN
     IDS_CMT_COPYCLIPBOARD   "Copia commenti negli appunti"
     IDS_ASKDOWNLOADLANG     "La lingua che hai selezionato non è installata nel tuo sistema. Vuoi che eMule la scarichi da emule-project.net?"
     IDS_ASKDOWNLOADLANGCAP  "Download language files"
+    IDS_DELETESELECTED      "Elimina"
     IDS_ERR_FAILEDDOWNLOADLANG 
                             "Failed to download and install selected language dll from %s!"
     IDS_ERR_BADFOLDER       "Cartella non valida.\nLa cartella non può essere creata. Controllare il nome ed il percorso."
@@ -1588,6 +1594,7 @@ BEGIN
     IDS_KADUDPPORTERR       "La porta UDP usata da Kad è in confilitto con quella usata da eMule per il Protocollo Esteso o per la connessione ai Server. La porta è stata cambiata con la %u."
     IDS_CONFIRM_FILEDELETE  "Do you really want to remove all selected files from disk?"
     IDS_OPENFOLDER          "Open folder"
+    IDS_RUNASUSER           "Run eMule as unprivileged User"
     IDS_DELETE              "Delete from disk"
     IDS_BOOTSTRAP           "Bootstrap"
     IDS_VIAED2KSQ           "via eD2k Server/Coda"
@@ -1629,7 +1636,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Vuoi veramente eliminare i filtri IP selezionati?"
     IDS_TOTAL_IPFILTER_LABEL "Filtri IP totali:"
     IDS_TOTAL_IPS_LABEL     "IP Totali:"
-    IDS_DELETESELECTED             "Elimina"
+    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
     IDS_APPEND              "Aggiungi..."
     IDS_SAVE                "Salva"
     IDS_IP_START            "Inizio"
@@ -1644,20 +1651,13 @@ STRINGTABLE
 BEGIN
     IDS_ERR_NOTCONNECTEDKAD "Attualmente non sei connesso alla Rete Kad!"
     IDS_IRC_NOSFS           "Nessun file condiviso selezionato"
+    IDS_RESETLABEL          "Completamento automatico (funzione cronologia)"
     IDS_IRC_IGNOREMISCMESSAGE "Ignora i messaggi di informazioni varie"
     IDS_KNOWN               "Conosciuto"
-    IDS_DL_ACTIVE_TIME      "Tempo di Download"
-    IDS_RESETLABEL          "Completamento automatico (funzione cronologia)"
-    IDS_PASTE               "Paste"
-    IDS_UNDO                "Undo"
-    IDS_CUT                 "Cut"
-    IDS_IRC_SOUNDEVENTS     "Play sound events"
-    IDS_KADCONTACTSREAD     "Read %ld contacts from file."
-    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
-    IDS_RUNASUSER           "Run eMule as unprivileged User"
     IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
     IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
-    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
+    IDS_KADCONTACTSREAD     "Read %ld contacts from file."
+    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
 END
 
 STRINGTABLE 
@@ -1665,7 +1665,8 @@ BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "Controlla la disponibilità del File prima di iniziare il Download"
     IDS_DL_FORCE            "Forza il Download"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Salva il tempo di attesa in coda per l'upload "
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 
+                            "Salva il tempo di attesa in coda per l'upload "
     IDS_DATEFILENAMELOG     "Inserisci la data nel file di Log"
     IDS_ECFEF               "Stesse possibilità per ogni File"
     IDS_ALL_TIME            "Sempre"
@@ -1828,9 +1829,7 @@ BEGIN
     IDS_CAT_USEAUTOCAT      "Aggiungi i nuovi download alle categorie usando la vista filtri"
     IDS_SLS_USESLS          "Abilita il salvataggio e il caricamento delle fonti"
     IDS_CAT_MERGE           "Unisci categorie"
-    IDS_CAT_SETFILEGROUP    "Imposta il gruppo di file"
     IDS_CAT_GROUP           "Gruppo"
-    IDS_CAT_SETFILEGROUPMSG "Inserisci il numero (tranne zero) del  gruppo al quale vuoi assegnare questo file"
     IDS_A4AF_FORCEALL       "Assegna tutti gli A4AF"
     IDS_A4AF_FLAGS          "Opzioni avanzate A4AF"
     IDS_A4AF_ONFLAG         "Forza A4AF a On"
@@ -2021,7 +2020,8 @@ STRINGTABLE
 BEGIN
     IDS_HIDEOS              "Nascondi Overshare"
     IDS_SHAREONLYTHENEED    "Condividi solo parti necessarie"
-    IDS_SHAREONLYTHENEEDDEFAULT "Condividi solo parti necessarie (0 = Disabilitato)"
+    IDS_SHAREONLYTHENEEDDEFAULT 
+                            "Condividi solo parti necessarie (0 = Disabilitato)"
     IDS_SFM                 "Gestione File Condivisi"
     IDS_IP2COUNTRY          "IP2Country"
 END
@@ -2032,14 +2032,10 @@ BEGIN
     IDS_COUNTRYNAME_MID     "Mostra 3 lettere (ITA)"
     IDS_COUNTRYNAME_LONG    "Mostra il nome Completo (ITALY)"
     IDS_COUNTRYNAME_SHOWFLAG "Mostra le Bandiere"
-END
-
-STRINGTABLE
-BEGIN
     IDS_REMOVEALLFRIENDSLOT "Rimuovi tutti gli Slot Amico"
 END
 
-#endif    // Italian (Italy) resources
+#endif    // Italien (Italie) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
