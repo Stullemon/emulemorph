@@ -441,7 +441,7 @@ void CIPFilter::UpdateIPFilterURL()
 	fclose(readFile);
 	_tremove(szTempFilePath);
 
-	if (thePrefs.GetIPfilterVersion()< (uint32) _tstoi(sbuffer) || !PathFileExists(GetDefaultFilePath())) {
+	if (thePrefs.GetIPfilterVersion()< (uint32) _tstoi(sbuffer) || !PathFileExists(GetDefaultFilePath()) || FileSize(GetDefaultFilePath()) < 10240) {
 
 		CString IPFilterURL = thePrefs.GetUpdateURLIPFilter();
 
@@ -451,7 +451,7 @@ void CIPFilter::UpdateIPFilterURL()
 		dlgDownload.m_strTitle = _T("Downloading IP filter file");
 		dlgDownload.m_sURLToDownload = IPFilterURL;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
-		if (dlgDownload.DoModal() != IDOK)
+		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
 		{
 			_tremove(szTempFilePath);
 			AddLogLine(true, _T("IP Filter download failed"));

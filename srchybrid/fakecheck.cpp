@@ -188,7 +188,7 @@ void CFakecheck::DownloadFakeList()
 	fclose(readFile);
 	_tremove(szTempFilePath);
 
-	if ((thePrefs.GetFakesDatVersion() < (uint32) _tstoi(sbuffer)) || !PathFileExists(GetDefaultFilePath())) {
+	if ((thePrefs.GetFakesDatVersion() < (uint32) _tstoi(sbuffer)) || !PathFileExists(GetDefaultFilePath()) || FileSize(GetDefaultFilePath()) < 10240) {
 		
 		CString FakeCheckURL = thePrefs.GetUpdateURLFakeList();
 
@@ -198,7 +198,7 @@ void CFakecheck::DownloadFakeList()
 		dlgDownload.m_strTitle = _T("Downloading Fake Check file");
 		dlgDownload.m_sURLToDownload = FakeCheckURL;
 		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
-		if (dlgDownload.DoModal() != IDOK)
+		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
 		{
 			_tremove(szTempFilePath);
 			AddLogLine(true,GetResString(IDS_FAKECHECKUPERROR));

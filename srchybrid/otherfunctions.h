@@ -333,3 +333,5 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
 //
 uint16 GetRandomUInt16();
 uint32 GetRandomUInt32();
+
+long FileSize(LPCTSTR fileName); //MORPH - Added by SiRoB, Used for Fake and ipfilter updater

@@ -2749,3 +2749,19 @@ void HTMLParse(CString &buffer)
 	buffer.Replace(_T("<br>"),_T("\n"));
 }
 //MORPH END  - Added by SiRoB, XML News [O²]
+
+//MORPH START - Added by SiRoB, Used in Fake and ipfilter updater
+long FileSize(LPCTSTR fileName){
+	CFile file;
+	CFileException e;
+	long size=0;
+	
+	if(file.Open(fileName, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary, &e))
+	{
+		size=file.GetLength();
+		file.Close();
+		return size;
+	}
+	return 0;
+}
+//MORPH END   - Added by SiRoB, Used in Fake and ipfilter updater
