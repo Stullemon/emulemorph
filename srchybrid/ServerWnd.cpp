@@ -392,7 +392,7 @@ void CServerWnd::Localize()
 		//MORPH END   - Added by SiRoB, XML News [O²]
 
 		// Mighty Knife: Popup-Menu for editing news feeds
-		GetDlgItem(IDC_LOGRESET)->SetWindowText(GetResString(IDS_FEEDBUTTON));
+		GetDlgItem(IDC_FEEDCHANGE)->SetWindowText(GetResString(IDS_FEEDBUTTON));
 		// [end] Mighty Knife
     
 	    TCITEM item;
