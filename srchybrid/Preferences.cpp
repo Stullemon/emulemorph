@@ -446,8 +446,8 @@ int	CPreferences::tableSortItemDownload[34];
 BOOL	CPreferences::tableSortAscendingDownload[34];
 // SLUGFILLER: DLsortFix
 //SLAHAM: ADDED DownloadClientsCtrl =>
-int		CPreferences::tableSortItemdownloadClients[8];
-BOOL	CPreferences::tableSortAscendingdownloadClients[8];
+int		CPreferences::tableSortItemdownloadClients[12];
+BOOL	CPreferences::tableSortAscendingdownloadClients[12];
 //SLAHAM: ADDED DownloadClientsCtrl <=
 int	CPreferences::tableSortItemUpload[16];
 BOOL	CPreferences::tableSortAscendingUpload[16];

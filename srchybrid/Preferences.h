@@ -479,8 +479,8 @@ public:
 	static	BOOL	tableSortAscendingDownload[34];
 	// SLUGFILLER: DLsortFix
 	//SLAHAM: ADDED DownloadClientsCtrl =>
-	static	int		tableSortItemdownloadClients[8]; 	
-	static	BOOL	tableSortAscendingdownloadClients[8]; 
+	static	int		tableSortItemdownloadClients[12]; 	
+	static	BOOL	tableSortAscendingdownloadClients[12]; 
 	//SLAHAM: ADDED DownloadClientsCtrl <=
 	static	int		tableSortItemUpload[16];
 	static	BOOL	tableSortAscendingUpload[16];
