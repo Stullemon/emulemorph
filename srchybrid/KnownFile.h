@@ -40,6 +40,7 @@ public:
 		InChangedSpreadBar = false;
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
+		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	void	AddRequest();

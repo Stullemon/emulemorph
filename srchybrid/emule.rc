@@ -3745,6 +3745,7 @@ BEGIN
     IDS_IMP_DELSRC          "Do you want the source-partfile of successfully imported downloads?"
     IDS_IMP_SIZE            "%s (Disk:%s)"
     IDS_IMP_STATUS          "Importing %s: %s"
+    IDS_AUTO_CLEAR_COMPLETE "Auto Clear Complete"
 END
 
 STRINGTABLE 

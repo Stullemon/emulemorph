@@ -1178,6 +1178,7 @@
 #define IDS_IMP_DELSRC                  1222
 #define IDS_IMP_SIZE                    1223
 #define IDS_IMP_STATUS                  1224
+#define IDS_AUTO_CLEAR_COMPLETE         1225
 #define IDS_BOOTSTRAP                   1300
 #define IDS_VIAED2KSQ                   1301
 #define IDS_EM_KADEMLIA                 1302

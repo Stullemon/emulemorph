@@ -1644,9 +1644,9 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					file->StopFile();
 					break;
 				case MP_CLEARCOMPLETED:
-					SetRedraw(false);
+					//SetRedraw(false);//EastShare - modified by AndCycle - AutoClearComplete (NoamSon)
 					ClearCompleted();
-					SetRedraw(true);
+					//SetRedraw(true);//EastShare - modified by AndCycle - AutoClearComplete (NoamSon)
 					break;
 				/*case MP_ALL_A4AF_TO_THIS:
 				{
@@ -2189,6 +2189,7 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 
 
 void CDownloadListCtrl::ClearCompleted(bool ignorecats){
+	 SetRedraw(false);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	// Search for completed file(s)
 	for(ListItems::iterator it = m_ListItems.begin(); it != m_ListItems.end(); ){
 		CtrlItem_Struct* cur_item = it->second;
@@ -2201,6 +2202,7 @@ void CDownloadListCtrl::ClearCompleted(bool ignorecats){
 			}
 		}
 	}
+	SetRedraw(true);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 }
 
 void CDownloadListCtrl::SetStyle() {

@@ -15,6 +15,7 @@ ADDED: Add USS settings in scheduler tab [Pretender]
 ADDED: Pay Back First [AndCycle]
 ADDED: Delete Shared File (TheBlackHand) [linekin]
 TWEAKED: PowerShare Limit more occurate [SiRoB]
+ADDED: AutoClearComplete (NoamSon) [AndCycle]
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.6

@@ -418,6 +418,8 @@ struct Preferences_Struct{
 	bool	shareall;	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
+	bool	m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+
 	bool	m_bVerbose;
 	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
 	bool	m_bDebugSecuredConnection; //MORPH - Added by SiRoB, Debug Log option for Secured Connection
@@ -1152,7 +1154,7 @@ public:
 //	void	SetClientsMetDays(int m_iInClientsMetDays)	{prefs->m_iClientsMetDays = m_iInClientsMetDays;}	//EastShare - Added by TAHO, .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
 	void	SetKnownMetDays(int m_iInKnownMetDays)	{prefs->m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
 	bool	IsPayBackFirst()					{return prefs->m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
-
+	bool	IsAutoClearComplete()				{return prefs->m_bAutoClearComplete; }	//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 
 	char*	GetTxtEditor()						{return prefs->TxtEditor;}
 	CString	GetVideoPlayer()					{if (strlen(prefs->VideoPlayer)==0) return ""; else return CString(prefs->VideoPlayer);}

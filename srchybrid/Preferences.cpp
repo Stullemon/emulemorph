@@ -1341,7 +1341,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("EnableAntiLeecher", prefs->enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
 	ini.WriteBool("EnableAntiCreditHack", prefs->enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteBool("IsBoostLess", prefs->isboostless);//Added by Yun.SF3, boost the less uploaded files
-ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
 	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
 	ini.WriteInt("MaxUpload",prefs->maxupload);
@@ -1417,6 +1417,8 @@ ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added b
 //	ini.WriteInt("ClientsMetDays", prefs->m_iClientsMetDays);//EastShare - AndCycle, this official setting shoudlnt be change by user
 	ini.WriteInt("KnownMetDays", prefs->m_iKnownMetDays);
 	// EastShare END - Added by TAHO, .met file control
+
+	ini.WriteBool("AutoClearComplete", prefs->m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 
 	// Barry - New properties...
     ini.WriteBool("AutoConnectStaticOnly", prefs->autoconnectstaticonly);  
@@ -2031,6 +2033,7 @@ void CPreferences::LoadPreferences(){
 	prefs->m_bCreditSystem=true; //ini.GetInt("UseCreditSystem",true); //MORPH - Changed by SiRoB, CreditSystem allways used
 
 	prefs->m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
+	prefs->m_bAutoClearComplete = ini.GetBool("AutoClearComplete", false );//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 
 	prefs->scheduler=ini.GetBool("EnableScheduler",false);
 	prefs->msgonlyfriends=ini.GetBool("MessagesFromFriendsOnly",false);

@@ -29,6 +29,7 @@ CPPgEastShare::CPPgEastShare()
 	m_bInitializedTreeOpts = false;
 //	m_htiIsBoostLess = NULL;//Added by Yun.SF3, boost the less uploaded files //EastShare removed by linekin for CreditSystem integration
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
+	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;
@@ -37,7 +38,7 @@ CPPgEastShare::CPPgEastShare()
 	m_htiRatioCredit = NULL;
 	m_htiPawcioCredit = NULL;
 	m_htiESCredit = NULL;
-	m_htiBoostLess = NULL;
+//	m_htiBoostLess = NULL;
 	//EastShare END - Added by Pretender
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;
@@ -64,6 +65,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 			iImgMETC = piml->Add(CTempIconLoader("HARDDISK")); // EastShare START - Added by TAHO, .met control
 		}
 		m_htiEnablePreferShareAll = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFER_SHARE_ALL), TVI_ROOT, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
+		m_htiAutoClearComplete = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTO_CLEAR_COMPLETE), TVI_ROOT, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 		
 		// EastShare START - Added by linekin, new creditsystem by [lovelace]  // Modified by Pretender
 		m_htiCreditSystem = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_CREDIT_SYSTEM), iImgCS, TVI_ROOT);
@@ -72,6 +74,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		m_htiLovelaceCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_LOVELACE_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_LOVELACE);
 		m_htiRatioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_RATIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_RATIO);
 		m_htiPawcioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PAWCIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_PAWCIO);
+//		m_htiBoostLess = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_BOOST_LESS), m_htiCreditSystem, m_iCreditSystem == CS_BOOST_LESS);
 		m_htiESCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_EASTSHARE_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_EASTSHARE);
 		//EastShare End - CreditSystemSelection
 		m_htiIsPayBackFirst = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PAYBACKFIRST), m_htiCreditSystem, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
@@ -110,6 +113,7 @@ BOOL CPPgEastShare::OnInitDialog()
 {
 
 	m_bEnablePreferShareAll = app_prefs->prefs->shareall;//EastShare - PreferShareAll by AndCycle
+	m_bAutoClearComplete = app_prefs->prefs->m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_bIsPayBackFirst = app_prefs->prefs->m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	m_iCreditSystem = app_prefs->GetCreditSystem(); //EastShare - Added by linekin , CreditSystem 
 //	m_iClientsMetDays = app_prefs->GetClientsMetDays(); //EastShare - Added by TAHO , .met file control//EastShare - AndCycle, this official setting shoudlnt be change by user
@@ -139,6 +143,7 @@ BOOL CPPgEastShare::OnApply()
 		return FALSE;
 
 	app_prefs->prefs->shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
+	app_prefs->prefs->m_bAutoClearComplete = m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	app_prefs->prefs->m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 
 /*	theApp.emuledlg->serverwnd.ToggleDebugWindow();
@@ -187,14 +192,14 @@ void CPPgEastShare::OnDestroy()
 
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
-
+	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	//EastShare START - Added by Pretender
 	m_htiCreditSystem = NULL;
 	m_htiOfficialCredit = NULL;
 	m_htiLovelaceCredit = NULL;
 	m_htiRatioCredit = NULL;
 	m_htiPawcioCredit = NULL;
-	m_htiBoostLess = NULL;
+//	m_htiBoostLess = NULL;
 	m_htiESCredit = NULL;
 	//EastShare END - Added by Pretender
 

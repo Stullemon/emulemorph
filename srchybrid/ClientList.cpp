@@ -293,7 +293,7 @@ bool CClientList::IsBannedClient(uint32 dwIP){
 			RemoveBannedClient(dwIP);
 		}
 	return false; 
-		}
+}
 
 void CClientList::RemoveBannedClient(uint32 dwIP){
 	m_bannedList.RemoveKey(dwIP);

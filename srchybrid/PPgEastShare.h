@@ -21,7 +21,13 @@ protected:
 	CPreferences *app_prefs;
 	
 	int m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
+	HTREEITEM m_htiEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
+
 	int m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
+	HTREEITEM m_htiIsPayBackFirst; //EastShare - added by AndCycle, Pay Back First
+
+	int m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	HTREEITEM m_htiAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 	CreditSystemSelection m_iCreditSystem;
@@ -30,7 +36,7 @@ protected:
 	HTREEITEM m_htiLovelaceCredit;
 	HTREEITEM m_htiRatioCredit;
 	HTREEITEM m_htiPawcioCredit;
-	HTREEITEM m_htiBoostLess;
+//	HTREEITEM m_htiBoostLess;
 	HTREEITEM m_htiESCredit;
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 	// EastShare START - Added by TAHO, .met control
@@ -43,9 +49,6 @@ protected:
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
-
-	HTREEITEM m_htiEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
-	HTREEITEM m_htiIsPayBackFirst; //EastShare - added by AndCycle, Pay Back First
 
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
