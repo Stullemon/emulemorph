@@ -1354,8 +1354,6 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 	if (pos)
 		m_OtherNoNeeded_list.RemoveAt(pos);
 
-	theApp.downloadqueue->RemoveSource(this, false, false);
-
 	ResetFileStatusInfo();
     uint8* thisStatus;
 	if (m_PartStatus_list.Lookup(pNewFile, thisStatus))
@@ -1373,7 +1371,8 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 	m_nRemoteQueueRank = 0;
 		
 	reqfile->NewSrcPartsInfo();
-	
+	theApp.downloadqueue->RemoveSource(this, false, false);
+
 	pNewFile->srclists[sourcesslot].AddTail(this);
 	theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(pNewFile, this, false);
 	pNewFile->UpdateAvailablePartsCount();
