@@ -1,4 +1,13 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.x
+--------------------------------------
+FIXED  : Identified a very old bug that make crash app in particular queue configuration [SiRoB]
+
+CHANGED: SLS: LowID are now keept [SiRoB]
+
+TWEAKED: USS: Ensure proper new open slot in all case [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.45b MorphXT v6.1
 --------------------------------------
 MERGED : Ported to 0.45b Official version [SiRoB]
