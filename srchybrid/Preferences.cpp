@@ -1409,6 +1409,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("EqualChanceForEachFileMode", prefs->equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool("ECFEFallTime", prefs->m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
+	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	ini.WriteInt("MinUpload",prefs->minupload);
@@ -1481,7 +1482,7 @@ void CPreferences::SavePreferences(){
 	// itsonlyme: hostnameSource
 
 	ini.WriteBool("AutoDynUpSwitching",prefs->isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_inewdownloadfilepowersharemode); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ini.WriteInt("FakesDatVersion",prefs->m_FakesDatVersion);
 	ini.WriteBool("UpdateFakeStartup",prefs->UpdateFakeStartup);
@@ -1924,7 +1925,7 @@ void CPreferences::LoadPreferences(){
 	prefs->equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bECFEFallTime = ini.GetBool("ECFEFallTime", false);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true); // EastShare - Added by TAHO, does USS limit
-
+	prefs->isboostfriends = ini.GetBool("IsBoostFriends", false);//Added by Yun.SF3, boost friends
 	prefs->maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);
 	if (prefs->maxGraphDownloadRate==0) prefs->maxGraphDownloadRate=96;
 	prefs->maxGraphUploadRate=ini.GetInt("UploadCapacity",16);
@@ -2025,7 +2026,7 @@ void CPreferences::LoadPreferences(){
 	sprintf(prefs->yourHostname,"%s",ini.GetString("YourHostname",""));	// itsonlyme: hostnameSource
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	prefs->m_inewdownloadfilepowersharemode=ini.GetBool("AutoPowershareNewDownloadFile",true);
+	prefs->m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	prefs->m_FakesDatVersion=ini.GetInt("FakesDatVersion",0);

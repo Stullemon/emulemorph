@@ -5,8 +5,10 @@ FIXED  : the wrong construction of the A4AF available part causing messageBox (i
 FIXED  : Default ShareOnlyTheNeed State not saved [SiRoB]
 FIXED  : Give access to Multiple Comment Changing [SiRoB]
 FIXED  : Systray Popup doesn't disapair in some case (bond006) [SiRoB]
+FIXED  : New Download File in Auto or Disable PowerShareMode [SiRoB]
 ADDED  : IP2Country from Superlexx, http://forum.emule-project.net/index.php?showtopic=38374
 ADDED  : Preferency default for Show share permission [SiRoB]
+ADDED  : Boost Friend option from Yun.SF3 [SiRoB]
 CHANGED: Some reworked preferency [SiRoB]
 CHANGED: PaybackFirst now have same priority as PowerShare and 
          need (client uploaded to you-downloaded from you)>SESSIONAMOUNT(10MB) to reach the requirement [AndCycle]

@@ -63,6 +63,7 @@ CPPgMorph::CPPgMorph()
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	m_htiIsAutoPowershareNewDownloadFile = NULL; //MORPH - Added by SiRoB, Avoid misusing of powersharing	
 	//MORPH START - Added by SiRoB, Show Permission
 	m_htiPermissions = NULL;
 	m_htiPermAll = NULL;
@@ -93,6 +94,7 @@ CPPgMorph::CPPgMorph()
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
+	m_htiIsBoostFriends = NULL;//Added by Yun.SF3, boost friends
 }
 
 CPPgMorph::~CPPgMorph()
@@ -239,7 +241,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiUpSecu = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SECURITY), iImgSecu, m_htiUM);
 		m_htiEnableAntiLeecher = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_LEECHER), m_htiUpSecu, m_bEnableAntiLeecher); //MORPH - Added by IceCream, Enable Anti-leecher
 		m_htiEnableAntiCreditHack = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_CREDITHACK), m_htiUpSecu, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, Enable Anti-CreditHack
-		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiUM, m_iNewDownloadFilePowerShareMode); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+		m_htiIsBoostFriends = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_BOOST_FRIENDS), m_htiUM, m_bIsBoostFriends);//Added by Yun.SF3, boost friends
 		//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 		m_htiHideOS = m_ctrlTreeOptions.InsertItem(GetResString(IDS_HIDEOVERSHARES), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
 		m_ctrlTreeOptions.AddEditBox(m_htiHideOS, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -256,6 +258,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiPermFriend = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_FRIENDSONLY), m_htiPermissions, m_iPermissions == 1);
 		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
 		//MORPH END   - Added by SiRoB, Show Permission
+		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiUM, m_bIsAutoPowershareNewDownloadFile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
@@ -297,7 +300,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInBold, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiLeecher, m_bEnableAntiLeecher); //MORPH - Added by IceCream, enable Anti-leecher
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiIsAutoPowershareNewDownloadFile, m_iNewDownloadFilePowerShareMode);//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiIsBoostFriends, m_bIsBoostFriends);//Added by Yun.SF3, boost friends
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiIsAutoPowershareNewDownloadFile, m_bIsAutoPowershareNewDownloadFile);//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiHideOS, m_iHideOS);
 	DDV_MinMaxInt(pDX, m_iHideOS, 0, INT_MAX);
@@ -359,7 +363,8 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableDownloadInBold = app_prefs->prefs->enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bEnableAntiLeecher = app_prefs->prefs->enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = app_prefs->prefs->enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
-	m_iNewDownloadFilePowerShareMode = app_prefs->prefs->m_inewdownloadfilepowersharemode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	m_bIsBoostFriends = app_prefs->prefs->isboostfriends;//Added by Yun.SF3, boost friends
+	m_bIsAutoPowershareNewDownloadFile = app_prefs->prefs->m_bisautopowersharenewdownloadfile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	m_iHideOS = app_prefs->prefs->hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iSelectiveShare = app_prefs->prefs->selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = app_prefs->prefs->ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -433,7 +438,8 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->prefs->enableDownloadInBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	app_prefs->prefs->enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	app_prefs->prefs->enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	app_prefs->prefs->m_inewdownloadfilepowersharemode = m_iNewDownloadFilePowerShareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	app_prefs->prefs->isboostfriends = m_bIsBoostFriends;//Added by Yun.SF3, boost friends
+	app_prefs->prefs->m_bisautopowersharenewdownloadfile = m_bIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	app_prefs->prefs->hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	app_prefs->prefs->selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	app_prefs->prefs->ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -531,9 +537,11 @@ void CPPgMorph::Localize(void)
 		if (m_htiEnableDownloadInBold) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInBold, GetResString(IDS_DOWNLOAD_IN_BOLD)); //MORPH - Added by SiRoB, show download in Bold
 		if (m_htiEnableAntiLeecher) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiLeecher, GetResString(IDS_ANTI_LEECHER)); //MORPH - Added by IceCream, enable Anti-leecher
 		if (m_htiEnableAntiCreditHack) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiCreditHack, GetResString(IDS_ANTI_CREDITHACK)); //MORPH - Added by IceCream, enable Anti-CreditHack
+		if (m_htiIsBoostFriends) m_ctrlTreeOptions.SetItemText(m_htiIsBoostFriends, GetResString(IDS_BOOST_FRIENDS));//Added by Yun.SF3, boost friends
 		if (m_htiHideOS) m_ctrlTreeOptions.SetEditLabel(m_htiHideOS, GetResString(IDS_HIDEOVERSHARES));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiSelectiveShare) m_ctrlTreeOptions.SetItemText(m_htiSelectiveShare, GetResString(IDS_SELECTIVESHARE));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiShareOnlyTheNeed) m_ctrlTreeOptions.SetEditLabel(m_htiShareOnlyTheNeed, GetResString(IDS_SHAREONLYTHENEEDDEFAULT));//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+		if (m_htiIsAutoPowershareNewDownloadFile) m_ctrlTreeOptions.SetItemText(m_htiIsAutoPowershareNewDownloadFile, GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE)); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by SiRoB, Show Permission
 		if (m_htiPermissions) m_ctrlTreeOptions.SetItemText(m_htiPermissions, GetResString(IDS_PERMISSION));
 		if (m_htiPermAll) m_ctrlTreeOptions.SetItemText(m_htiPermAll, GetResString(IDS_FSTATUS_PUBLIC));
@@ -628,9 +636,11 @@ void CPPgMorph::OnDestroy()
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
+	m_htiIsBoostFriends = NULL;//MORPH - Added by Yun.SF3, boost friends
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	m_htiIsAutoPowershareNewDownloadFile = NULL; //MORPH - Added by SiRoB, Avoid misusing of powersharing	
 	//MORPH START - Added by SiRoB, Show Permission
 	m_htiPermissions = NULL;
 	m_htiPermAll = NULL;

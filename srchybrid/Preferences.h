@@ -154,9 +154,9 @@ struct Preferences_Struct{
 	CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 	bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
+	bool	isboostfriends;//Added by Yun.SF3, boost friends
 	bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	bool	m_inewdownloadfilepowersharemode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
-	bool	m_inewsharedfilepowersharemode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	char	nick[255];
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	uint16		minupload;
@@ -797,9 +797,7 @@ public:
 	bool	IsECFEFallTime()	const	{return prefs->m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
 	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
-	int NewDownloadFilePowerShareMode() const {return prefs->m_inewdownloadfilepowersharemode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
-	int NewSharedFilePowerShareMode() const {return prefs->m_inewsharedfilepowersharemode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
-
+	bool IsAutoPowershareNewDownloadFile() const {return prefs->m_bisautopowersharenewdownloadfile;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	CPreferences();
 	~CPreferences();
 

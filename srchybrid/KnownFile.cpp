@@ -389,7 +389,7 @@ CKnownFile::CKnownFile()
 	m_iShareOnlyTheNeed = -1;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
-	m_powershared = theApp.glob_prefs->NewSharedFilePowerShareMode()<3?theApp.glob_prefs->NewSharedFilePowerShareMode():0;
+	m_powershared = theApp.glob_prefs->IsAutoPowershareNewDownloadFile()?2:0;
 	m_bPowerShareAuthorized = true;
 	m_bPowerShareAuto = false;
 	m_nVirtualCompleteSourcesCount = 0;

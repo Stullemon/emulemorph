@@ -664,7 +664,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						// End Changes by Slugfiller for better exception handling
 						//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 						if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
-							SetPowerShared((newtag->tag.intvalue<3 && newtag->tag.intvalue!=1)?newtag->tag.intvalue:2);
+							SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
 							delete newtag;
 						}else
 						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
