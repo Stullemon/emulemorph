@@ -1547,7 +1547,7 @@ void CemuleDlg::OnClose()
 	// explicitly delete all listview items which may hold ptrs to objects which will get deleted
 	// by the dtors (some lines below) to avoid potential problems during application shutdown.
 	transferwnd->downloadlistctrl.DeleteAllItems();
-	transferwnd->downloadclientsctrl.DeleteAllItems(); // MORPH - Added by Commander, Crash fix
+	transferwnd->downloadclientsctrl.DeleteAllItems(); // MORPH - Added by Commander, DownloadClientsCtrl
 	chatwnd->chatselector.DeleteAllItems();
 	theApp.clientlist->DeleteAll();
 	searchwnd->DeleteAllSearchListCtrlItems();
