@@ -1520,7 +1520,7 @@ BEGIN
     EDITTEXT        IDC_CRC32PREFIX,2,14,245,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,143,76,50,14,BS_FLAT
     PUSHBUTTON      "Abbrechen",IDCANCEL,197,76,50,14,BS_FLAT
-    EDITTEXT        IDC_CRC32SUFFIX,2,44,245,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_CRC32SUFFIX,2,44,245,12,ES_AUTOHSCROLL
     LTEXT           "Suffix to add the end of the filename after the CRC32:",
                     IDC_STATIC,2,33,245,9
     CONTROL         "Don't add CRC32/Suffix to filename, only add prefix as static text",
