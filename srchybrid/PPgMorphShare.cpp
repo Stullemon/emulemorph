@@ -87,7 +87,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_htiSFM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SFM), iImgSFM, TVI_ROOT);
 
 		//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-		m_htiSpreadbar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPREADBAR) + _T(" ") + GetResString(IDS_DEFAULT), m_htiSFM, m_iSpreadbar);
+		m_htiSpreadbar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPREADBAR_DEFAULT_CHECKBOX), m_htiSFM, m_iSpreadbar);
 		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
 		//MORPH START - Added by SiRoB, SLUGFILLER: hideOS

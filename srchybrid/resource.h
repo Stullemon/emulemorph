@@ -1428,6 +1428,7 @@
 #define IDS_DEADSOURCES                 1478
 #define IDS_RESET                       1479
 #define IDS_SPREADBAR                   1480
+#define IDS_SPREADBAR_DEFAULT_CHECKBOX  1481
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
