@@ -298,7 +298,25 @@ BOOL CPPgTweaks::OnApply()
 	app_prefs->prefs->m_bVerbose = m_iVerbose;
 	app_prefs->prefs->m_bDebugSourceExchange = m_iDebugSourceExchange;
 	app_prefs->prefs->m_bCreditSystem = m_iCreditSystem;
-	app_prefs->prefs->DateFileNameLog = m_iDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
+
+	//Morph Start - added by AndCycle, Date File Name Log
+	if(app_prefs->prefs->DateFileNameLog != (m_iDateFileNameLog != 0)){
+
+		//close log first
+		theLog.Close();
+		theVerboseLog.Close();
+
+		//reset path
+		VERIFY( theLog.SetFilePath(app_prefs->GetAppDir() + _T("eMule.log")) );
+		VERIFY( theVerboseLog.SetFilePath(app_prefs->GetAppDir() + _T("eMule_Verbose.log")) );
+
+		//open log again
+		theLog.Open();
+		theVerboseLog.Open();
+	}
+	app_prefs->prefs->DateFileNameLog = m_iDateFileNameLog;
+	//Morph End - added by AndCycle, Date File Name Log
+
 	if (!app_prefs->prefs->log2disk && m_iLog2Disk)
 		theLog.Open();
 	else if (app_prefs->prefs->log2disk && !m_iLog2Disk)

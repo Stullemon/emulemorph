@@ -249,16 +249,8 @@ BOOL CemuleApp::InitInstance()
 #ifdef _DEBUG
 	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), "%s\\%s", glob_prefs->GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
-	//Morph START - Added by SiRoB, AndCycle, Date File Name Log
-	if(theApp.glob_prefs->DateFileNameLog()){
-		CTime nowT=CTime::GetCurrentTime();
-		VERIFY( theLog.SetFilePath(glob_prefs->GetAppDir()+ _T("eMule.") + nowT.Format("%Y%m%d") + _T(".log")));
-		VERIFY( theVerboseLog.SetFilePath(glob_prefs->GetAppDir()+ _T("eMule_Verbose.") + nowT.Format("%Y%m%d") + _T(".log")));
-	}else{
-	//Morph END   - Added by SiRoB, AndCycle, Date File Name Log
-		VERIFY( theLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule.log")) );
-		VERIFY( theVerboseLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule_Verbose.log")) );
-	}//Morph - Added by SiRoB, AndCycle, Date File Name Log
+	VERIFY( theLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule.log")) );
+	VERIFY( theVerboseLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule_Verbose.log")) );
 	theLog.SetMaxFileSize(glob_prefs->GetMaxLogFileSize());
 	theVerboseLog.SetMaxFileSize(glob_prefs->GetMaxLogFileSize());
 	if (glob_prefs->Log2Disk())

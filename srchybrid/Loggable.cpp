@@ -146,6 +146,17 @@ bool CLog::SetFilePath(LPCTSTR pszFilePath)
 	if (IsOpen())
 		return false;
 	m_strFilePath = pszFilePath;
+
+	//Morph START - Added by SiRoB, AndCycle, Date File Name Log
+	//get the original file name
+	TCHAR szDrv[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szNam[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+	_tsplitpath(m_strFilePath, szDrv, szDir, szNam, szExt);
+	m_strOriginFileName = szNam;
+	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
+
 	return true;
 }
 
@@ -201,13 +212,49 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 	if (m_fp == NULL)
 		return false;
 
+	//Morph START - Added by SiRoB, AndCycle, Date File Name Log
+	if (theApp.glob_prefs->DateFileNameLog()){
+		time_t tCurrent;
+		time(&tCurrent);
+		TCHAR szDateLogCurrent[40];
+		_tcsftime(szDateLogCurrent, ARRSIZE(szDateLogCurrent), _T("%Y.%m.%d"), localtime(&tCurrent));
+
+		TCHAR szDrv[_MAX_DRIVE];
+		TCHAR szDir[_MAX_DIR];
+		TCHAR szNam[_MAX_FNAME];
+		TCHAR szExt[_MAX_EXT];
+		_tsplitpath(m_strFilePath, szDrv, szDir, szNam, szExt);
+
+		CString strNewNam;
+		strNewNam = m_strOriginFileName;
+		strNewNam += _T(" - ");
+		strNewNam += szDateLogCurrent;
+
+		//check is current file name in current date, if not make it to current
+		if (strNewNam.Compare(szNam) != 0){
+			Close();
+			//remake path
+			TCHAR szNewFilePath[MAX_PATH];
+			_tmakepath(szNewFilePath, szDrv, szDir, strNewNam, szExt);
+			m_strFilePath = szNewFilePath;
+			Open();
+		}
+	}
+	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
+
 	// don't use 'fputs' + '_filelength' -- gives poor performance
 	size_t uToWrite = (iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen;
 	size_t uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
 	bool bResult = !ferror(m_fp);
 	m_uBytesWritten += uWritten;
 
+	//Morph START - added by AndCycle, Date File Name Log
+	//the start time (m_tStarted) is so strange, so I wanna keep my date log name intact
+	if (m_uBytesWritten >= m_uMaxFileSize && !theApp.glob_prefs->DateFileNameLog())
+	/*//original
 	if (m_uBytesWritten >= m_uMaxFileSize)
+	*/
+	//Morph END - added by AndCycle, Date File Name Log
 	{
 		time_t tStarted = m_tStarted;
 		Close();

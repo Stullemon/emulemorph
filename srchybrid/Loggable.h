@@ -44,4 +44,9 @@ protected:
 	CString m_strFilePath;
 	UINT m_uBytesWritten;
 	UINT m_uMaxFileSize;
+
+//Morph START - added by AndCycle, Date File Name Log
+private:
+	CString m_strOriginFileName;
+//Morph END - added by AndCycle, Date File Name Log
 };
