@@ -46,6 +46,6 @@
   #endif
 #endif
 
-#define MOD_VERSION		"MorphKad 0.6" //MORPH - Added by SiRoB
+#define MOD_VERSION		"MorphKad 0.7" //MORPH - Added by SiRoB
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(" [") MOD_VERSION _T("]")
 #endif /* !__VERSION_H__ */
