@@ -132,7 +132,13 @@ BOOL CServerWnd::OnInitDialog()
 		servermsgbox->ApplySkin();
 		servermsgbox->SetTitle(GetResString(IDS_SV_SERVERINFO));
 
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		/*
 		servermsgbox->AppendText(CString(CString("eMule v")+theApp.m_strCurVersionLong+CString("\n")));
+		*/
+		servermsgbox->AppendText(CString(CString(_T("eMule v")) + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]") + CString("\n")));
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+
 		// MOD Note: Do not remove this part - Merkur
 		m_strClickNewVersion = GetResString(IDS_EMULEW) + _T(" ") + GetResString(IDS_EMULEW3) + _T(" ") + GetResString(IDS_EMULEW2);
 		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strClickNewVersion,_T(""),false);
@@ -948,7 +954,7 @@ void CServerWnd::ListFeeds()
 			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength()<5)
 				continue;
 			
-			int pos=sbuffer.Find(_T(","));
+			int pos=sbuffer.Find(',');
 			if (pos>0 && pos<sbuffer.GetLength())
 			{
 				counter++;
@@ -1135,25 +1141,23 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 	using namespace pug;
 	xml_parser* xml = new xml_parser();
     
-	USES_CONVERSION;
 	// Load and parse the XML file
 	xml->parse_file(strTempFilename);
-    theApp.AddLogLine(false,_T("Entering Parsing..."));
+
 	// Create two XML nodes. One node represents the root and one represets
 	// the "channel" section in the file.
 	xml_node itelem;
 	xml_node itelemroot;
-	if (!xml->document().first_element_by_path(A2T("./rss")).empty()) {
-		itelemroot = xml->document().first_element_by_path(A2T("./rss"));
-		itelem = xml->document().first_element_by_path(A2T("./rss/channel"));
-	} else if (!xml->document().first_element_by_path(A2T("./rdf:RDF")).empty()) {
-		itelemroot = xml->document().first_element_by_path(A2T("./rdf:RDF"));
-		itelem = xml->document().first_element_by_path(A2T("./rdf:RDF/channel"));
+	if (!xml->document().first_element_by_path(_T("./rss")).empty()) {
+		itelemroot = xml->document().first_element_by_path(_T("./rss"));
+		itelem = xml->document().first_element_by_path(_T("./rss/channel"));
+	} else if (!xml->document().first_element_by_path(_T("./rdf:RDF")).empty()) {
+		itelemroot = xml->document().first_element_by_path(_T("./rdf:RDF"));
+		itelem = xml->document().first_element_by_path(_T("./rdf:RDF/channel"));
 	} else {
 		delete xml;
 		return;
 	}
-    theApp.AddLogLine(false,_T("A2T WORKED!!!"));
 
 	// We'll only continue if we find the "channel" section.
 	if(!itelem.empty()) {
@@ -1287,7 +1291,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 								urls.GetAt (urlpos));
 					inp.DoModal ();
 					CString url = inp.GetInput ();
-					if ((!inp.WasCancelled()) && (url != _T(""))) {
+					if ((!inp.WasCancelled()) && (url != "")) {
 					    // Create a 2nd Input box because the default implementation
 						// of this class does not reset the m_Cancel variable!
 						InputBox inp2;
@@ -1392,7 +1396,7 @@ void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
 		// Remove all LF characters
 		url = url.SpanExcluding (_T("\n"));
 		// Split the string on the place of the ","
-		int i=url.Find (_T(","));
+		int i=url.Find (',');
 		if (i != -1) {
 			CString name = url.Left (i);
 			url.Delete (0,i+1);
@@ -1420,7 +1424,7 @@ void CServerWnd::WriteXMLList (CStringList& _names, CStringList& _urls) {
 		if (name.IsEmpty ()) 
 			name = url;
 		// Replace all "," by " "
-		name.Replace (_T(","),_T(" "));
+		name.Replace (',',' ');
 		// Write the info; append CR/LF characters to the end of the line
 		_ftprintf (writefile,_T("%s,%s\n"), name, url);
 	}
