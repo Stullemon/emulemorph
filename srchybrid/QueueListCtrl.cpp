@@ -694,10 +694,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 								break;
 							case ECFEF_ACCEPTED_COMPLETE:
 								if(theApp.glob_prefs->IsECFEFallTime()){
-									result = (float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount();
+									result = //result is INT
+										(float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() == (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount() ? 0 :
+										(float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() > (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount() ? 1 : -1;
 								}
 								else{
-									result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+									result = //result is INT
+										(float)file2->statistic.GetAccepts()/file2->GetPartCount() == (float)file1->statistic.GetAccepts()/file1->GetPartCount() ? 0:
+										(float)file2->statistic.GetAccepts()/file2->GetPartCount() > (float)file1->statistic.GetAccepts()/file1->GetPartCount() ? 1 : -1;
 								}
 								break;
 							case ECFEF_TRANSFERRED:
@@ -710,10 +714,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 								break;
 							case ECFEF_TRANSFERRED_COMPLETE:
 								if(theApp.glob_prefs->IsECFEFallTime()){
-									result = (float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() - (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize();
+									result = //result is INT
+										(float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() == (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize() ? 0 :
+										(float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() > (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize() ? 1 : -1;
 								}
 								else{
-									result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+									result = //result is INT
+										(float)file2->statistic.GetTransferred()/file2->GetFileSize() == (float)file1->statistic.GetTransferred()/file1->GetFileSize() ? 0 :
+										(float)file2->statistic.GetTransferred()/file2->GetFileSize() > (float)file1->statistic.GetTransferred()/file1->GetFileSize() ? 1 : -1;
 								}
 								break;
 							default:
@@ -769,10 +777,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 							break;
 						case ECFEF_ACCEPTED_COMPLETE:
 							if(theApp.glob_prefs->IsECFEFallTime()){
-								result = (float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount();
+								result = //result is INT
+									(float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() == (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount() ? 0 :
+									(float)file2->statistic.GetAllTimeAccepts()/file2->GetPartCount() > (float)file1->statistic.GetAllTimeAccepts()/file1->GetPartCount() ? 1 : -1;
 							}
 							else{
-								result = (float)file2->statistic.GetAccepts()/file2->GetPartCount() - (float)file1->statistic.GetAccepts()/file1->GetPartCount();
+								result = //result is INT
+									(float)file2->statistic.GetAccepts()/file2->GetPartCount() == (float)file1->statistic.GetAccepts()/file1->GetPartCount() ? 0:
+									(float)file2->statistic.GetAccepts()/file2->GetPartCount() > (float)file1->statistic.GetAccepts()/file1->GetPartCount() ? 1 : -1;
 							}
 							break;
 						case ECFEF_TRANSFERRED:
@@ -785,10 +797,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 							break;
 						case ECFEF_TRANSFERRED_COMPLETE:
 							if(theApp.glob_prefs->IsECFEFallTime()){
-								result = (float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() - (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize();
+								result = //result is INT
+									(float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() == (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize() ? 0 :
+									(float)file2->statistic.GetAllTimeTransferred()/file2->GetFileSize() > (float)file1->statistic.GetAllTimeTransferred()/file1->GetFileSize() ? 1 : -1;
 							}
 							else{
-								result = (float)file2->statistic.GetTransferred()/file2->GetFileSize() - (float)file1->statistic.GetTransferred()/file1->GetFileSize();
+								result = //result is INT
+									(float)file2->statistic.GetTransferred()/file2->GetFileSize() == (float)file1->statistic.GetTransferred()/file1->GetFileSize() ? 0 :
+									(float)file2->statistic.GetTransferred()/file2->GetFileSize() > (float)file1->statistic.GetTransferred()/file1->GetFileSize() ? 1 : -1;
 							}
 							break;
 						default:
