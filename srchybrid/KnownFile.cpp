@@ -597,7 +597,7 @@ void CKnownFile::NewAvailPartsInfo(){
 			m_nVirtualCompleteSourcesCountMin = m_AvailPartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCountMin==1), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCountMin==1);
+	UpdatePowerShareLimit((m_nVirtualCompleteSourcesCountMax<51)?true:(m_nVirtualCompleteSourcesCountMin==1), m_nVirtualCompleteSourcesCountMin==1 && m_nVirtualCompleteSourcesCountMin==1);//changed (temporaly perhaps) [Yun.SF3]
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
