@@ -470,6 +470,7 @@ CKnownFile::CKnownFile()
 	m_iShareOnlyTheNeed = -1;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
+	m_bpowershared = false;
 	m_powershared = -1;
 	m_bPowerShareAuthorized = true;
 	m_bPowerShareAuto = false;
