@@ -1,4 +1,9 @@
 ---------------------------------------- 
+Changelog for eMule 0.41b29 MorphXT v1.?
+---------------------------------------- 
+ADDED  : Patch against daylight saving bug. Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
+
+---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.3
 ---------------------------------------- 
 FIXED  : Connection trouble [SiRoB]
