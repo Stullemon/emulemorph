@@ -4202,7 +4202,7 @@ void CPreferences::SetWapLowPass(CString strNewPass)
 void CPreferences::SaveDynDNS(){
 
 	CString DynDNSinif,ixStr,buffer;
-	catinif.Format(_T("%sDynDNS.ini"),configdir);
+	DynDNSinif.Format(_T("%sDynDNS.ini"),configdir);
 	_tremove(DynDNSinif);
 
 	CIni DynDNSini( DynDNSinif, _T("DynDNS") );
@@ -4217,19 +4217,19 @@ void CPreferences::SaveDynDNS(){
 	}
 }
 
-void CPreferences::LoadCats() {
+void CPreferences::LoadDynDNS() {
 	CString ixStr,DynDNSinif;
 	TCHAR buffer[100];
 
-	catinif.Format(_T("%sDynDNS.ini"),configdir);
+	DynDNSinif.Format(_T("%sDynDNS.ini"),configdir);
 	CIni DynDNSini;
 
 	int max=DynDNSini.GetInt(_T("Count"),0,_T("General"));
 
-	for (int ix = bCreateDefault ? 1 : 0; ix <= max; ix++)
+	for (int ix = 0; ix <= max; ix++)
 	{
 		ixStr.Format(_T("DynDNS#%i"),ix);
-        catini.SetSection(ixStr);
+        DynDNSini.SetSection(ixStr);
 
 		DynDNS_Struct* newDynDNSAccount = new DynDNS_Struct;
 		_stprintf(newDynDNSAccount->Username,_T("%s"),DynDNSini.GetString(_T("Username"),_T(""),ixStr));

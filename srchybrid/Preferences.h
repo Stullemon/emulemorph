@@ -1708,7 +1708,7 @@ public:
 	static	void	SaveDynDNS();
 	static	void	LoadDynDNS();
 	static	int		AddDynDNSAccount(DynDNS_Struct* DynDNSAccount) { DynDNSMap.Add(DynDNSAccount); return DynDNSMap.GetCount()-1;}
-	static	DynDNS_Struct* GetDynDNSAccount(int index) { if (index>=0 && index<DynDNS.GetCount()) return DynDNSMap.GetAt(index); else return NULL;}
+	static	DynDNS_Struct* GetDynDNSAccount(int index) { if (index>=0 && index<DynDNSMap.GetCount()) return DynDNSMap.GetAt(index); else return NULL;}
 	static	void	RemoveDynDNSAccount(int index);
 	static	int		GetDynDNSCount()			{ return DynDNSMap.GetCount();}
 	//MORPH END   - Added by SiRoB, DynDNS
