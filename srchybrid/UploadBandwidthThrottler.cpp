@@ -375,14 +375,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		tempQueueLocker.Unlock();
 	    
-        // Send any queued up control packets first
+		// Send any queued up control packets first
         while(bytesToSpend > 0 && spentBytes+minFragSize <= (uint64)bytesToSpend && !m_ControlQueue_list.IsEmpty()) {
 			CEMSocket* socket = m_ControlQueue_list.RemoveHead();
 
 			if(socket != NULL) {
 				SocketSentBytes socketSentBytes = socket->Send(bytesToSpend-spentBytes, true);
 				spentBytes += socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
-				spentOverhead += socketSentBytes.sentBytesControlPackets+40;
+				spentOverhead += socketSentBytes.sentBytesControlPackets;
 			}
 		}
 
