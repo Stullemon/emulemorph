@@ -137,10 +137,7 @@ void CFileStatistic::AddBlockTransferred(uint32 start, uint32 end, uint32 count)
 		return;
 
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	if(fileParent->GetSpreadbarSetStatus() > 0 || fileParent->GetSpreadbarSetStatus() == -1 ? thePrefs.GetSpreadbarSetStatus() > 0 : false){
-		;
-	}
-	else
+	if(fileParent->GetSpreadbarSetStatus() == 0 || (fileParent->GetSpreadbarSetStatus() == -1 && thePrefs.GetSparsePartFiles() == 0))
 		return;
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
@@ -2791,6 +2788,10 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 //MORPH START - Added by SiRoB, Avoid misusing of HideOS
 uint8	CKnownFile::HideOSInWork() const
 {
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	if(GetSpreadbarSetStatus() == 0 || (GetSpreadbarSetStatus() == -1 && thePrefs.GetSparsePartFiles() == 0))
+		return 0;
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	if (m_bHideOSAuthorized==true)
 		return  (m_iHideOS>=0)?m_iHideOS:thePrefs.GetHideOvershares();
 	else

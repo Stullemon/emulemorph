@@ -690,6 +690,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						hideOSInWork = (file->GetHideOS()>=0)?file->GetHideOS():thePrefs.GetHideOvershares();
 						if (hideOSInWork>0)
 							buffer.AppendFormat(_T("%i"), hideOSInWork);
+						//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+						else if(file->GetSpreadbarSetStatus() == 0 || (file->GetSpreadbarSetStatus() == -1 && thePrefs.GetSparsePartFiles() == 0))
+							buffer.AppendFormat(_T("%s"), GetResString(IDS_SPREADBAR) + _T(" ") + GetResString(IDS_DISABLED));
+						//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 						else
 							buffer.AppendFormat(_T("%s"), GetResString(IDS_DISABLED));
 						if (file->GetSelectiveChunk()>=0){
