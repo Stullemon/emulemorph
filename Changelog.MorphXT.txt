@@ -3,8 +3,6 @@ Changelog for eMule 0.45b MorphXT v6.x
 --------------------------------------
 FIXED  : Identified a very old bug that make crash app in particular queue configuration [SiRoB]
 
-ADDED  : CrashReport from SF-IOM, gnaddelwarz: crashRpt[AndCycle]
-
 CHANGED: SLS: LowID are now keept [SiRoB]
 CHANGED: SpreadBar is now disabled by default in share preferency [SiRoB]
 
