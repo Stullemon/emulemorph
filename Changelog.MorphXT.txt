@@ -1,11 +1,18 @@
 --------------------------------------
+Changelog for eMule 0.44b MorphXT v5.3
+--------------------------------------
+FIXED  : Fixed Upload Splitting Class [SiRoB]
+
+CHANGED: Package include an updated Websever with StatTree and loginfailed Template from emule+ [Commander/SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.2
 --------------------------------------
 MERGED : Merged WebCache 1.2f and fixed 2 issue [Commander/SiRoB]
 
 FIXED  : Source Load Saver have been corrected [SiRoB]
 FIXED  : Patch taken from other ListCtrl to avoid crash in the FriendListCtrl (at shutdown some item were not valide) [SiRoB]
-FIXED  : Porper PowerShare display in Queuelistctrl (related to unsecure client) [SiRoB]
+FIXED  : Proper PowerShare display in Queuelistctrl (related to unsecure client) [SiRoB]
 FIXED  : RSS news reader (XML Parsing) [SiRoB]
 FIXED  : Put back in waitingqueue when too many upload slot occur [SiRoB]
 
@@ -19,15 +26,12 @@ ADDED  : Upload Splitting Class in morph preferency [SiRoB]
 ADDED  : Don't Refresh item if not needed (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
 ADDED  : Version checker [SiRoB]
 
-TEAWKED: Hide Over Share display info now show all value in the column [SiRoB]
-TEAWKED: The auto powershare mecanisme have been changed to wait some complet source info before triggering [SiRoB]
-TWEAKED: IP2Country have been improuved (some tweak from emule+) and binairy search methode have been implemented [SiRoB]
+TWEAKED: Hide Over Share display info now show all value in the column [SiRoB]
+TWEAKED: The auto powershare mecanisme have been changed to wait some complet source info before triggering [SiRoB]
+TWEAKED: IP2Country have been improved (some tweak from emule+) and binairy search methode have been implemented [SiRoB]
 TWEAKED: Don't draw hidden columns (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
 TWEAKED: Don't draw hidden rect (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
-TWEAKED: Some Code Optimization to reduce CPU load when client on queue grow [SiRoB]
-
-TODO   : DynIP [Commander]
-TODO   : CPU Usage and progressbar [Commander]
+TWEAKED: Some Code Optimization to reduce CPU load when client on queue is growing [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.1
