@@ -470,12 +470,12 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 			posCounter--;
 		}
 	}
-
+	
 	if(insertPosition != NULL) {
 		POSITION renumberPosition = insertPosition;
 		uint32 renumberSlotNumber = posCounter;
 	    
-		uploadinglist.GetNext(renumberPosition);
+		//uploadinglist.GetNext(renumberPosition); //MORPH - Removed by SiRoB, Fix first sorting
 		while(renumberPosition != NULL) {
 			renumberSlotNumber++;
 
@@ -487,21 +487,25 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		}
 
 		// add it at found pos
-		newclient->SetSlotNumber(posCounter+1);
+		newclient->SetSlotNumber(posCounter);
 		uploadinglist.InsertBefore(insertPosition, newclient);
+		//MORPH START - Added by SiRoB, Upload Splitting Class
 		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),0);
 		else if (newclient->IsPBForPS())
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),1);
 		else
+		//MORPH END   - Added by SiRoB, Upload Splitting Class
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
 	}	else{
 		// Add it last
+		//MORPH START - Added by SiRoB, Upload Splitting Class
 		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
 		else if (newclient->IsPBForPS())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),1);
 		else
+		//MORPH END   - Added by SiRoB, Upload Splitting Class
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
 		uploadinglist.AddTail(newclient);
 		newclient->SetSlotNumber(uploadinglist.GetCount());
