@@ -276,56 +276,19 @@ double CUpDownClient::GetCombinedFilePrioAndCredit()
 {
 	ASSERT(credits != NULL);
 
-//Morph Start - added by AndCycle, Equal Chance For Each File
 	CKnownFile* clientReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 
 	if(clientReqFile){
-		
-		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
-			case ECFEF_ACCEPTED:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					return	(float)clientReqFile->statistic.GetAllTimeAccepts();
-				}
-				else{
-					return	(float)clientReqFile->statistic.GetAccepts();
-				}
-			}break;
-
-			case ECFEF_ACCEPTED_COMPLETE:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					return	(float)clientReqFile->statistic.GetAllTimeAccepts()/clientReqFile->GetPartCount();
-				}
-				else{
-					return	(float)clientReqFile->statistic.GetAccepts()/clientReqFile->GetPartCount();
-				}
-			}break;
-
-			case ECFEF_TRANSFERRED:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					return	(double)clientReqFile->statistic.GetAllTimeTransferred();
-				}
-				else{
-					return	(double)clientReqFile->statistic.GetTransferred();
-				}
-			}break;
-
-			case ECFEF_TRANSFERRED_COMPLETE:{
-				if(theApp.glob_prefs->IsECFEFallTime()){
-					return	(double)clientReqFile->statistic.GetAllTimeTransferred()/clientReqFile->GetFileSize();
-				}
-				else{
-					return	(double)clientReqFile->statistic.GetTransferred()/clientReqFile->GetFileSize();
-				}
-			}break;
-
-			default:{
-				return	(uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));//original
-			}break;
+	
+		//Morph Start - added by AndCycle, Equal Chance For Each File
+		if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+			return clientReqFile->GetEqualChanceValue();
 		}
+		//Morph End - added by AndCycle, Equal Chance For Each File
+
+		return	(uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));//original
 	}
 	return 0;
-//Morph End - added by AndCycle, Equal Chance For Each File
 
 }
 
