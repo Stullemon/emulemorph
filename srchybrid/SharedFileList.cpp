@@ -559,7 +559,7 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 	if (other && other != toadd){
 		if (other->IsPartFile()){
 			if (!toadd->IsPartFile()){	// fail-safe, two part files shouldn't have the same hash
-				other->statistic.Merge(&toadd->statistic);
+				other->statistic.MergeFileStats(&toadd->statistic); //MORPH - Changed by SiRoB, mergeKnown
 				if (!bOnlyAdd && output)
 					output->UpdateFile(other);
 				theApp.knownfiles->RemoveFile(toadd);
@@ -567,7 +567,7 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 			}
 		}
 		else {
-			toadd->statistic.Merge(&other->statistic);
+			toadd->statistic.MergeFileStats(&other->statistic);  //MORPH - Changed by SiRoB, mergeKnown
 			RemoveFile(other);
 			theApp.knownfiles->RemoveFile(other);
 			delete other;
