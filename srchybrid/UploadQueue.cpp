@@ -267,20 +267,33 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 	if(rightClient == NULL){
 		return -1;
 	}
+
 	if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == false && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == true){
 		return 1;
 	}
-	else if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == true && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == false){
+	if((leftClient->IsFriend() && leftClient->GetFriendSlot()) == true && (rightClient->IsFriend() && rightClient->GetFriendSlot()) == false){
 		return -1;
 	}
+
+	//Morph - added by AndCyle, selective PS internal Prio
+	if(thePrefs.IsPSinternalPrioEnable() && leftClient->IsPBForPS() == true && rightClient->IsPBForPS() == true){
+		if(leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber()){
+			return 1;
+		}
+		if(leftClient->GetFilePrioAsNumber() > rightClient->GetFilePrioAsNumber()){
+			return -1;
+		}
+		return 0;
+	}
+
 	if(leftClient->IsPBForPS() == false && rightClient->IsPBForPS() == true){
 		return 1;
 	}
 	if(leftClient->IsPBForPS() == true && rightClient->IsPBForPS() == false){
 		return -1;
 	}
-	else
-		return 0;
+
+	return 0;
 }
 //Morph End - added by AndCycle, separate special prio compare
 

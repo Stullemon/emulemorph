@@ -5199,6 +5199,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LD_ADDPHPBB         "Using phpBB URL-Tags style"
+    IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
 END
 
 #endif    // English (U.S.) resources

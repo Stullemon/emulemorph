@@ -3,6 +3,7 @@ Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
 
 ADDED  : "Using phpBB URL-Tags style" checkbox in FileDetail for ed2kFileLink creation [AndCycle]
+ADDED  : Options to Enable/Disable PowerShare internal File Priority [AndCycle]
 
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]

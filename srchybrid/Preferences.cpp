@@ -542,6 +542,7 @@ CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by li
 bool	CPreferences::m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 uint8	CPreferences::m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+bool	CPreferences::m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 uint16	CPreferences::maxconnectionsswitchborder;
 //EastShare Start- Added by Pretender, TBH-AutoBackup
 bool	CPreferences::autobackup;
@@ -2485,6 +2486,7 @@ void CPreferences::SavePreferences()
 
 	ini.WriteBool(_T("AutoDynUpSwitching"),isautodynupswitching,_T("eMule"));//MORPH - Added by Yun.SF3, Auto DynUp changing
 	ini.WriteInt(_T("PowershareMode"),m_iPowershareMode,_T("eMule")); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool(_T("PowershareInternalPrio"),m_bPowershareInternalPrio,_T("eMule"));//Morph - added by AndCyle, selective PS internal Prio
 
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
@@ -3132,6 +3134,7 @@ void CPreferences::LoadPreferences()
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	m_iPowershareMode=ini.GetInt(_T("PowershareMode"),2);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	m_bPowershareInternalPrio = ini.GetBool(_T("PowershareInternalPrio"),false);//Morph - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	m_FakesDatVersion=ini.GetInt(_T("FakesDatVersion"),0);
 	UpdateFakeStartup=ini.GetBool(_T("UpdateFakeStartup"),false);

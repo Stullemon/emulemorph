@@ -44,6 +44,7 @@ CPPgMorphShare::CPPgMorphShare()
 	m_htiPowershareAuto = NULL;
 	m_htiPowershareLimited = NULL;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing	
+	m_htiPowershareInternalPrio = NULL; //Morph - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by SiRoB, Show Permission
 	m_htiPermissions = NULL;
 	m_htiPermAll = NULL;
@@ -102,6 +103,9 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		m_htiPowerShareLimit = m_ctrlTreeOptions.InsertItem(GetResString(IDS_POWERSHARE_LIMIT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowershareLimited );
 		m_ctrlTreeOptions.AddEditBox(m_htiPowerShareLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, POWERSHARE Limit
+		//Morph Start - added by AndCyle, selective PS internal Prio
+		m_htiPowershareInternalPrio = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHAER_INTERPRIO), m_htiPowershareMode, m_iPowershareInternalPrio);
+		//Morph End - added by AndCyle, selective PS internal Prio
 		
 		//MORPH START - Added by SiRoB, Show Permission
 		m_htiPermissions = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PERMISSION), iImgPerm, m_htiSFM);
@@ -139,6 +143,9 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPowershareMode, m_iPowershareMode);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	//Morph Start - added by AndCyle, selective PS internal Prio
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiPowershareInternalPrio, m_iPowershareInternalPrio);
+	//Morph End - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by SiRoB, Show Permission
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
 	//MORPH END   - Added by SiRoB, Show Permission
@@ -153,6 +160,7 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_iSelectiveShare = thePrefs.selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = thePrefs.ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_iPowerShareLimit = thePrefs.PowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
+	m_iPowershareInternalPrio = thePrefs.m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
 	m_iFolderIcons = thePrefs.m_bShowFolderIcons;
 	
@@ -187,6 +195,7 @@ BOOL CPPgMorphShare::OnApply()
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
+	thePrefs.m_bPowershareInternalPrio = m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	if(thePrefs.m_bShowFolderIcons != m_iFolderIcons)
 	{
 		if(m_iFolderIcons)
@@ -236,6 +245,9 @@ void CPPgMorphShare::Localize(void)
 		//MORPH START - Added by SiRoB, POWERSHARE Limit
 		if (m_htiPowerShareLimit) m_ctrlTreeOptions.SetEditLabel(m_htiPowerShareLimit, GetResString(IDS_POWERSHARE_LIMIT));
 		//MORPH END   - Added by SiRoB, POWERSHARE Limit
+		//Morph Start - added by AndCyle, selective PS internal Prio
+		if (m_htiPowershareInternalPrio) m_ctrlTreeOptions.SetItemText(m_htiPowershareInternalPrio, GetResString(IDS_POWERSHAER_INTERPRIO));
+		//Morph End - added by AndCyle, selective PS internal Prio
 		//MORPH START - Added by SiRoB, Show Permission
 		if (m_htiPermissions) m_ctrlTreeOptions.SetItemText(m_htiPermissions, GetResString(IDS_PERMISSION));
 		if (m_htiPermAll) m_ctrlTreeOptions.SetItemText(m_htiPermAll, GetResString(IDS_FSTATUS_PUBLIC));
@@ -267,6 +279,7 @@ void CPPgMorphShare::OnDestroy()
 	m_htiPowershareAuto = NULL;
 	m_htiPowershareLimited = NULL;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing	
+	m_htiPowershareInternalPrio = NULL; //Morph - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by SiRoB, Show Permission
 	m_htiPermissions = NULL;
 	m_htiPermAll = NULL;

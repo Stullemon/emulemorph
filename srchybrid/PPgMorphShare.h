@@ -20,6 +20,7 @@ protected:
 	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	int m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	int m_iPermissions; //MORPH - Added by SiRoB, Show Permissions
+	int m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	int m_iFolderIcons;
 	
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
@@ -36,6 +37,7 @@ protected:
 	HTREEITEM m_htiSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	HTREEITEM m_htiPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
+	HTREEITEM m_htiPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	//MORPH START - Added by SiRoB, Show Permission
 	HTREEITEM m_htiPermissions;
 	HTREEITEM m_htiPermAll;

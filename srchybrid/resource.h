@@ -1430,6 +1430,7 @@
 #define IDS_IRC_NEWNICK                 1470
 #define IDS_IRC_NEWNICKDESC             1471
 #define IDS_LD_ADDPHPBB                 1472
+#define IDS_POWERSHAER_INTERPRIO        1473
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002

@@ -598,6 +598,7 @@ public:
 	static bool	m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static uint8	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	static bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	static uint16	maxconnectionsswitchborder;
 	//EastShare Start- Added by Pretender, TBH-AutoBackup
 	static bool	autobackup;
@@ -1568,6 +1569,7 @@ public:
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static	uint8  GetPowerShareMode()	{return m_iPowershareMode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	static	bool	IsPSinternalPrioEnable()	{return m_bPowershareInternalPrio;} //Morph - added by AndCyle, selective PS internal Prio
 	//EastShare START - Pretender, TBH-AutoBackup
 	static	bool    GetAutoBackup()	{ return autobackup;}
 	static	bool    GetAutoBackup2()	{ return autobackup2;}
