@@ -481,7 +481,10 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	xpos = m_rectPlot.left + 2;
 	ypos = m_rectPlot.bottom+2;
 	for (i=0 ; i < m_NTrends; i++){
+		if (xpos+12+m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel).cx+12>m_rectPlot.right){
+		/*
 		if (xpos+12+6*m_PlotData[i].LegendLabel.GetLength()>m_rectPlot.right){
+		*/
 			xpos = m_rectPlot.left + 2;
 			ypos = m_rectPlot.bottom+12;
 		}
@@ -490,7 +493,10 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		m_dcGrid.MoveTo(xpos, ypos+8);
 		m_dcGrid.LineTo(xpos + 8, ypos+4);
 		m_dcGrid.TextOut(xpos + 12 ,ypos, m_PlotData[i].LegendLabel);
+		/*
 		xpos += 12+6*m_PlotData[i].LegendLabel.GetLength();
+		*/
+		xpos += 12+m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel).cx+12;
 		m_dcGrid.SelectObject(oldPen);
 	}
 	
