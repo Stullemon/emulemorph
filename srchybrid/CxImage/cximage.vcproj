@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="CxImage"
+	ProjectGUID="{8FEC2660-7F95-4C2E-8747-36176E1FCF82}"
 	SccProjectName=""
 	SccLocalPath=""
 	Keyword="MFCProj">
