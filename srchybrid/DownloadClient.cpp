@@ -67,7 +67,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	//ASSERT(reqfile);
 	//s_StatusBar.SetFileSize(reqfile->GetFileSize()); 
-	ASSERT(reqfile);
+	ASSERT(file);
 	s_StatusBar.SetFileSize(file->GetFileSize()); 
 	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	s_StatusBar.SetHeight(rect->bottom - rect->top); 
@@ -83,10 +83,10 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
 	uint8* thisStatus;
-	if (!m_PartStatus_list.Lookup(file,thisStatus)){
+	if (!m_PartStatus_list.Lookup(file,thisStatus))
 		thisStatus = m_abyPartStatus;
+	else if (file != reqfile)
 		crClientOnly = RGB(192, 100, 255);
-	}
 	if (thisStatus){
 	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
