@@ -34,7 +34,7 @@ extern _CRT_ALLOC_HOOK g_pfnPrevCrtAllocHook;
 /*
 #define MAXAVERAGETIME			SEC2MS(40) //millisecs
 */
-#define MAXAVERAGETIME			SEC2MS(10) //millisecs
+#define MAXAVERAGETIME			SEC2MS(5) //millisecs
 //MORPH END   - Changed by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
 ///////////////////////////////////////////////////////////////////////////////
