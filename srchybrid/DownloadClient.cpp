@@ -1356,8 +1356,7 @@ void CUpDownClient::SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iD
 
 	theApp.downloadqueue->RemoveSource(this, false, false);
 
-	m_iRate=0;
-	m_strComment="";
+	ResetFileStatusInfo();
     uint8* thisStatus;
 	if (m_PartStatus_list.Lookup(pNewFile, thisStatus))
 	{
