@@ -366,12 +366,15 @@ CKnownFile::CKnownFile()
 
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030807-1911
 	//MORPH START - Changed by SiRoB, Avoid misusing of powershare
+	//m_powershared = 0;
 	m_powershared = theApp.glob_prefs->IsAutoPowershareNewDownloadFile()?2:0;
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powershare
 	//MORPH END   - Added by SiRoB, ZZ Upload System 20030723-0133
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
 	m_bPowerShareAuthorized = true;
 	m_bPowerShareAuto = false;
+	m_nVirtualCompleteSourcesCountMin = 1;
+	m_nVirtualCompleteSourcesCountMax = 1;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powershare
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 	InChangedSharedStatusBar = false;
@@ -585,7 +588,16 @@ void CKnownFile::NewAvailPartsInfo(){
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<51,m_nCompleteSourcesCountHi==1); //changed to allow autopowershare with small files too
+	m_nVirtualCompleteSourcesCountMin = (uint16)-1;
+	m_nVirtualCompleteSourcesCountMax = 0;
+	for (uint16 i = 0; i < partcount; i++){
+		if(m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCountMax)
+			m_nVirtualCompleteSourcesCountMax = m_AvailPartFrequency[i];
+		if(m_nVirtualCompleteSourcesCountMin > m_AvailPartFrequency[i])
+			m_nVirtualCompleteSourcesCountMin = m_AvailPartFrequency[i];
+	}
+
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCountMin==1), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCountMin==1);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;

@@ -297,6 +297,10 @@ public:
 	uint16 m_nCompleteSourcesCount;
 	uint16 m_nCompleteSourcesCountLo;
 	uint16 m_nCompleteSourcesCountHi;
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	uint16 m_nVirtualCompleteSourcesCountMin;
+	uint16 m_nVirtualCompleteSourcesCountMax;
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	CTypedPtrList<CPtrList, CUpDownClient*> m_ClientUploadList;
 	CArray<uint16,uint16> m_AvailPartFrequency;
 	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS

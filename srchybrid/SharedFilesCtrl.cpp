@@ -461,6 +461,11 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						{
 							buffer.Format("%u - %u", file->m_nCompleteSourcesCountLo, file->m_nCompleteSourcesCountHi);
 						}
+						//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+						CString buffer2;
+						buffer2.Format(" (%u - %u)",file->m_nVirtualCompleteSourcesCountMin, file->m_nVirtualCompleteSourcesCountMax);
+						buffer.Append(buffer2);
+						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 						break;
 					}
 					case 12:{
