@@ -608,10 +608,24 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 
 				if (thePrefs.GetUseDwlPercentage()) {
 					// HoaX_69: BEGIN Display percent in progress bar
-					COLORREF oldclr = dc->SetTextColor(RGB(255,255,255));
+					COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
 					int iOMode = dc->SetBkMode(TRANSPARENT);
 					buffer.Format(_T("%.1f%%"), lpPartFile->GetPercentCompleted());
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, (DLC_DT_TEXT & ~DT_LEFT) | DT_CENTER);
+					//MORPH START - Changed by SiRoB, Bold Percentage :) and right justify
+					CFont *pOldFont = dc->SelectObject(&m_fontBold);
+					rcDraw.left--;rcDraw.top--;rcDraw.right--;rcDraw.bottom--;
+					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+					rcDraw.left+=2;rcDraw.right+=2;
+					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+					rcDraw.top+=2;rcDraw.bottom+=2;
+					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+					rcDraw.left-=2;rcDraw.right-=2;
+					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+					rcDraw.left++;rcDraw.top--;rcDraw.right++;rcDraw.bottom--;
+					dc->SetTextColor(RGB(255,255,255));
+					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+					dc->SelectObject(pOldFont); //MORPH - Added by SiRoB, Bold Percentage :)
+					//MORPH END   - Changed by SiRoB, Bold Percentage :) and right justify
 					dc->SetBkMode(iOMode);
 					dc->SetTextColor(oldclr);
 					// HoaX_69: END
@@ -990,25 +1004,24 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 						if (percent > 0.05f)
 						{
 							//Commander - Added: Draw Client Percentage xored, caching before draw - Start
-							CDC cdcClientPercent;
-							cdcClientPercent.CreateCompatibleDC(dc);
-							CBitmap bmpClientPercent;
-							bmpClientPercent.CreateCompatibleBitmap(dc,  iWidth, iHeight);
-							bmpClientPercent.SetBitmapDimension(iWidth, iHeight);
-							HGDIOBJ hOldBmp = cdcClientPercent.SelectObject(bmpClientPercent);
-							COLORREF oldclr = cdcClientPercent.SetTextColor(RGB(255,255,255));
-							int iOMode = cdcClientPercent.SetBkMode(TRANSPARENT);
-							CString csClientPercent;
-							csClientPercent.Format(_T("%.1f%%"), percent);
-
-							cdcClientPercent.BitBlt(0, 0, iWidth, iHeight,  NULL, 0, 0, BLACKNESS);
-							cdcClientPercent.DrawText(csClientPercent, &rec_status, (DLC_DT_TEXT & ~DT_LEFT) | DT_CENTER);
-							cdcStatus.BitBlt(0, 0, iWidth, iHeight,  &cdcClientPercent, 0, 0, SRCPAINT);
-
-							cdcClientPercent.SetBkMode(iOMode);
-							cdcClientPercent.SetTextColor(oldclr);
-							cdcClientPercent.SelectObject(hOldBmp);
-							bmpClientPercent.DeleteObject();
+							COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
+							int iOMode = dc->SetBkMode(TRANSPARENT);
+							buffer.Format(_T("%.1f%%"), percent);
+							CFont *pOldFont = dc->SelectObject(&m_fontBold);
+							rec_status.left--;rec_status.top--;rec_status.right--;rec_status.top--;
+							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							rec_status.left+=2;rec_status.right+=2;
+							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							rec_status.top+=2;rec_status.bottom+=2;
+							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							rec_status.left-=2;rec_status.right-=2;
+							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							rec_status.left++;rec_status.top--;rec_status.right++;rec_status.bottom--;
+							dc->SetTextColor(RGB(255,255,255));
+							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							dc->SelectObject(&pOldFont);
+							dc->SetBkMode(iOMode);
+							dc->SetTextColor(oldclr);
 							//Commander - Added: Draw Client Percentage xored, caching before draw - End	
 						}
 					}
