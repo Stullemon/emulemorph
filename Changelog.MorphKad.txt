@@ -1,5 +1,5 @@
 ----------------------------------------
-Changelog for eMule 0.40f26 MorphKad 0.?
+Changelog for eMule 0.40f26 MorphKad 0.7
 ----------------------------------------
 ADDED: Only download complete files v2.1 (shadow)[AndCycle]
 ADDED: PreferShareAll option (SlugFiller) [AndCycle]
@@ -17,8 +17,9 @@ FIXED: Small bug, eMule allows to open unfinished files (NoamSon) [AndCycle]
 FIXED: Double click unfinished files in SharedFile window display FileDetail [SiRoB]
 FIXED: Some change related to start crashing when a known.met file is corrupted [SiRoB]
 FIXED: FakeCheck now worked in search windows [SiRoB]
+FIXED: Client staying in the transfert for a long time without sending something [SiRoB]
 CHANGED: Put the Official Percentage Display on the download progress bare with bold font [SiRoB]
-CHANGED: Adapted to choice the Official A4AF Handling or the Advanced A4AF from Khaos (disable Smart A4AF & Advanced A4AF to use official one) [SiRoB]
+CHANGED: Adapted to use the Official A4AF Handling or the Advanced A4AF from Khaos (disable Smart A4AF & Advanced A4AF to use official one) [SiRoB]
 TWEAKED: PowerShare Limit more occurate [SiRoB]
 
 ----------------------------------------
