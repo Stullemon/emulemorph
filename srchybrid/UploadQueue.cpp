@@ -951,7 +951,7 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 	{
 		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
-			if(classID==LAST_CASS && thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+			if(classID==LAST_CLASS && thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
 				DebugLog(LOG_USC, _T("USC: Added new slot since throttler needs it for class %i. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i m_aiSlotCounter[classID]: %i tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
 			return m_abAddClientOfThisClass[classID] = true;
 		}
