@@ -63,7 +63,7 @@ public:
 
 	void			AddServerMessageLine(LPCTSTR line);
 	void			ShowConnectionState();
-	void			ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF = false); 
+	void			ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink = NULL, bool ForceSoundOFF = false);
 	void			ShowUserCount();
 	void			ShowMessageState(uint8 iconnr);
 	void			SetActiveDialog(CWnd* dlg);
@@ -89,7 +89,6 @@ public:
 	void			DoVersioncheck(bool manual);
 	void			ApplyHyperTextFont(LPLOGFONT pFont);
 	void			ApplyLogFont(LPLOGFONT pFont);
-	void			SetKadButtonState();
 	void			ProcessED2KLink(LPCTSTR pszData);
 	void			SetStatusBarPartsSize();
 
@@ -112,10 +111,7 @@ public:
 	CFont			m_fontHyperText;
 	CFont			m_fontMarlett;
 	CFont			m_fontLog;
-	//Commander - Removed Invisible Mode
-	//EastShare, Added by linekin HotKey
-	//LRESULT   OnHotKey(WPARAM wParam, LPARAM lParam); 
-	//EastShare, Added by linekin HotKey
+
 protected:
 	HICON m_hIcon;
 
@@ -144,6 +140,7 @@ protected:
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEndSession(BOOL bEnding);
 	afx_msg LRESULT OnKickIdle(UINT nWhy, long lIdleCount);
+	afx_msg void OnShowWindow( BOOL bShow, UINT nStatus );
 
 	// quick-speed changer -- based on xrmb
 	afx_msg void QuickSpeedUpload(UINT nID);
@@ -153,12 +150,8 @@ protected:
 	
 	afx_msg LRESULT OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnWMData(WPARAM wParam,LPARAM lParam);
-	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileHashed(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnHashFailed(WPARAM wParam,LPARAM lParam);
-	afx_msg LRESULT OnPartHashedOK(WPARAM wParam,LPARAM lParam);
-	afx_msg LRESULT OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam);
-	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileCompleted(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileOpProgress(WPARAM wParam,LPARAM lParam);
@@ -198,6 +191,7 @@ private:
 	HICON			sourceTrayIconGrey;	// do not use those icons for anything else than the traybar!!!
 	HICON			sourceTrayIconLow;	// do not use those icons for anything else than the traybar!!!
 	int				m_iMsgIcon;
+	uint8			m_lasticoninfo;
 
 	uint32			lastuprate;
 	uint32			lastdownrate;
@@ -227,16 +221,6 @@ private:
 	void SetAllIcons();
 
 	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
-
-	// Mighty Knife: extended debug logging
-private:
-	int m_ExtDebugMessagesCount;
-	CStringList m_ExtDebugMessages;
-public:
-	void AddExtDebugMessage (CString _line,...);
-	void AddExtDebugDump (CString _headline, const char* _data, int _size, CString _subscript="");
-	void OutputExtDebugMessages ();
-	// [end] Mighty Knife
 
 //Commander - Added: Invisible Mode [TPT] - Start	
 public:
@@ -292,11 +276,7 @@ enum EEmlueAppMsgs
 {
 	//thread messages
 	TM_FINISHEDHASHING = WM_APP + 10,
-	// SLUGFILLER: SafeHash - new handling
 	TM_HASHFAILED,
-	TM_PARTHASHEDOK,
-	TM_PARTHASHEDCORRUPT,
-	// SLUGFILLER: SafeHash
 	TM_FRAMEGRABFINISHED,
 	TM_FILEALLOCEXC,
 	TM_FILECOMPLETED,

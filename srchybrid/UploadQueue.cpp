@@ -45,6 +45,7 @@
 #include "SearchDlg.h"
 #include "StatisticsDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
+#include "Kademlia/Kademlia/Prefs.h"
 #include "PartFile.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
@@ -68,7 +69,6 @@ CUploadQueue::CUploadQueue()
 	if (thePrefs.GetVerbose() && !h_timer)
 		AddDebugLogLine(true,_T("Failed to create 'upload queue' timer - %s"),GetErrorMessage(GetLastError()));
 	datarate = 0;
-	//MORPH - Removed by SiRoB, Not used
 	counter=0;
 	successfullupcount = 0;
 	failedupcount = 0;
@@ -78,79 +78,22 @@ CUploadQueue::CUploadQueue()
 	// -khaos--+++>
 	iupdateconnstats=0;
 	// <-----khaos-
-	//Removed by SiRoB, Not used in this mod
-	/*
 	m_bRemovedClientByScore = false;
-	*/
+    m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
+	m_MaxActiveClients = 0;
+	m_MaxActiveClientsShortTime = 0;
 
+	m_lastCalculatedDataRateTick = 0;
+	m_avarage_dr_sum = 0;
+	friendDatarate = 0;
+
+	m_dwLastResortedUploadSlots = 0;
+	
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	AvgRespondTime[0]=500;
 	AvgRespondTime[1]=thePrefs.GetSUCPitch()/2;//Changed by Yun.SF3 (this is too much divided, original is 3)
 	MaxVUR=512*(thePrefs.GetMaxUpload()+thePrefs.GetMinUpload()); //When we start with SUC take the middle range for upload
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	
-	//MORPH START - Added by SiRoB, ZZ Upload System 20040213-1623
-	m_MaxActiveClients = 0;
-	m_MaxActiveClientsShortTime = 0;
-
-	m_lastCalculatedDataRateTick = 0;
-	m_dwLastCheckedForHighPrioClient = 0;
-	m_dwLastResortedUploadSlots = 0;
-
-	m_dwLastCalculatedAverageCombinedFilePrioAndCredit = 0;
-	m_fAverageCombinedFilePrioAndCredit = 0;
-
-	m_avarage_dr_sum = 0;
-	m_dwLastSlotAddTick = 0;
-	friendDatarate = 0;
-	totalCompletedBytes = 0;
-	m_FirstRanOutOfSlotsTick = 0;
-	m_averageActiveClients = 0;
-//MORPH END - Added by SiRoB, ZZ Upload System 20040213-1623
-}
-
-/**
-* Remove the client from upload socket if there's another client with same/higher
-* class that wants to get an upload socket. If there's not another matching client
-* move this client down in the upload list so that it is after all other of it's class.
-*
-* @param client address of the client that should be removed or moved down
-*
-* @return true if the client was removed. false if it is still in upload list
-*/
-bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove) {
-	CUpDownClient* newclient = FindBestClientInQueue(true, client);
-
-	if(newclient != NULL && // Only remove the client if there's someone to replace it
-		RightClientIsSuperior(client, newclient) >= 0
-	){
-
-		// Remove client from ul list to make room for higher/same prio client
-		AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(SESSIONMAXTRANS*max(1, client->GetQueueSessionPayloadUp()/SESSIONMAXTRANS)), (sint32)client->GetQueueSessionPayloadUp()-SESSIONMAXTRANS*(max(1, client->GetQueueSessionPayloadUp()/SESSIONMAXTRANS)));
-
-		theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULSUCCESS));
-		theApp.uploadqueue->AddClientToQueue(client,true);
-
-		return true;
-	} else if(onlyCheckForRemove == false) {
-
-
-		// Move down
-		// first find the client in the uploadinglist
-		POSITION foundPos = uploadinglist.Find(client);
-		if(foundPos != NULL){
-			// Remove the found Client
-			uploadinglist.RemoveAt(foundPos);
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-
-			// then add it last in it's class
-			InsertInUploadingList(client);
-		}
-
-		return false;
-	} else {
-		return false;
-	}
 }
 
 /**
@@ -204,8 +147,8 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 				(iSuperior = RightClientIsSuperior(leftClient, rightClient)) > 0 ||
 				iSuperior == 0 &&
 				(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
-					leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
-					leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
+					leftClient->GetQueueSessionPayloadUp() < rightClient->GetQueueSessionPayloadUp() ||
+					leftClient->GetQueueSessionPayloadUp() == rightClient->GetQueueSessionPayloadUp() &&
 					(//Morph - added by AndCycle, Equal Chance For Each File
 						leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
 						leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
@@ -310,38 +253,41 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 			RemoveFromWaitingQueue(pos2,true);	
 			continue;
 		}
-		// finished clearing
-		uint32 cur_score = cur_client->GetScore(false);
-		if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score))
+		else
 		{
-			// cur_client is more worthy than current best client that is ready to go (connected).
-			if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected()))
+			// finished clearing
+			uint32 cur_score = cur_client->GetScore(false);
+
+			if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score))
 			{
-				// this client is a HighID or a lowID client that is ready to go (connected)
-				// and it is more worthy
-				bestscore = cur_score;
-				toadd = pos2;
-				newclient = cur_client;
-			}
-			else if(allowLowIdAddNextConnectToBeSet && !cur_client->m_bAddNextConnect)
-			{
-				// this client is a lowID client that is not ready to go (not connected)
-					// now that we know this client is not ready to go, compare it to the best not ready client
-				// the best not ready client may be better than the best ready client, so we need to check
-				// against that client
-				if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score)){
-					// it is more worthy, keep it
-					bestlowscore = cur_score;
-					toaddlow = pos2;
-					lowclient = cur_client;
+                // cur_client is more worthy than current best client that is ready to go (connected).
+				if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected())) {
+                    // this client is a HighID or a lowID client that is ready to go (connected)
+                    // and it is more worthy
+					bestscore = cur_score;
+					toadd = pos2;
+					newclient = cur_client;
+				} else if(allowLowIdAddNextConnectToBeSet && !cur_client->m_bAddNextConnect) {
+                    // this client is a lowID client that is not ready to go (not connected)
+    
+                    // now that we know this client is not ready to go, compare it to the best not ready client
+                    // the best not ready client may be better than the best ready client, so we need to check
+                    // against that client
+					if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score)){
+						// it is more worthy, keep it
+						bestlowscore = cur_score;
+						toaddlow = pos2;
+						lowclient = cur_client;
+					}
 				}
+			} else {
+					// cur_client is more worthy. Save it.
 			}
-		} else {
-				// cur_client is more worthy. Save it.
 		}
 	}
 		
-	if (lowclient != NULL && bestlowscore > bestscore && allowLowIdAddNextConnectToBeSet) {
+	if (bestlowscore > bestscore && lowclient && allowLowIdAddNextConnectToBeSet)
+	{
 		newclient = waitinglist.GetAt(toaddlow);
 
 		// is newclient in same or better class as lowIdClientMustBeInSameOrBetterClassAsThisClient?
@@ -352,157 +298,60 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		}
 	}
 
-	if (!toadd) {
+	if (!toadd)
+	{
 		return NULL;
-	} else {
+	}
+	else
+	{
 		return waitinglist.GetAt(toadd);
 	}
 }
 
-/**
-* Insert the client at the correct place in the uploading list.
-* The client should be inserted after all of its class, but before any
-* client of a lower ranking class.
-*
-* Clients are ranked in the following classes:
-*    1: Friends (friends are internally ranked by which file they want; if it is powershared; upload priority of file)
-*    x: Clients that need to be PayBackFirst
-*    2: Clients that wants powershared files of prio release
-*    3: Clients that wants powershared files of prio high
-*    4: Clients that wants powershared files of prio normal
-*    5: Clients that wants powershared files of prio low
-*    6: Clients that wants powershared files of prio lowest
-*    7: Other clients
-*
-* Since low ID clients are only put in an upload slot when they call us, it means they will
-* have to wait about 10-30 minutes longer to be put in an upload slot than a high id client.
-* In that time, the low ID client could possibly have gone from being a trickle slot, into
-* being a fully activated slot. At the time when the low ID client would have been put into an
-* upload slot, if it had been a high id slot, a boolean flag is set to true (AddNextConnect = true).
-*
-* A client that has AddNextConnect set when it calls back, will immiediately be given an upload slot.
-* When it is added to the upload list with this method, it will also get the time when it entered the
-* queue taken into consideration. It will be added so that it is before all clients (within in its class) 
-* that entered queue later than it. This way it will be able to possibly skip being a trickle slot,
-* since it has already been forced to wait extra time to be put in a upload slot. This makes the
-* low ID clients have almost exactly the same bandwidth from us (proportionally to the number of low ID
-* clients compared to the number of high ID clients) as high ID clients. This is a definitely a further
-* improvement of VQB's excellent low ID handling.
-*
-* @param newclient address of the client that should be inserted in the uploading list
-*/
 void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
-
-	POSITION insertPosition = NULL;
-	uint32 posCounter = uploadinglist.GetCount();
-
-	uint32 newclientScore = newclient->GetScore(false);
-
-	bool foundposition = false;
-	POSITION pos = uploadinglist.GetTailPosition();
-	while(pos != NULL && foundposition == false) {
-		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
-
-		int iSuperior;//Morph - added by AndCycle, separate special prio compare
-		if(
-			(iSuperior = RightClientIsSuperior(newclient, uploadingClient)) > 0 ||
-			iSuperior == 0 &&
-			(
-				!newclient->HasLowID() || !newclient->m_bAddNextConnect ||
-				newclient->HasLowID() && newclient->m_bAddNextConnect && newclientScore <= uploadingClient->GetScore(false)
-				// Compare scores is more right than comparing waittime.
-			)
-		) {
-			foundposition = true;
-		} else {
-			insertPosition = pos;
-			uploadinglist.GetPrev(pos);
-			posCounter--;
-		}
-	}
-
-	if(insertPosition != NULL) {
-		POSITION renumberPosition = insertPosition;
-		uint32 renumberSlotNumber = posCounter;
-	    
-		uploadinglist.GetNext(renumberPosition);
-		while(renumberPosition != NULL) {
-			renumberSlotNumber++;
-
-			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
-
-			renumberClient->SetSlotNumber(renumberSlotNumber+1);
-
-			uploadinglist.GetNext(renumberPosition);
-		}
-
-		// add it at found pos
-		newclient->SetSlotNumber(posCounter+1);
-		uploadinglist.InsertBefore(insertPosition, newclient);
-		theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->socket);
-	} else {
-		// Add it last
-		theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->socket);
-		uploadinglist.AddTail(newclient);
-		newclient->SetSlotNumber(uploadinglist.GetCount());
-	}
-
+    // Add it last
+    theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
+	uploadinglist.AddTail(newclient);
+	newclient->SetSlotNumber(uploadinglist.GetCount());
 }
 
 
-bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck) {
-	//POSITION toadd = 0;
-	//uint32	bestscore = 0;
+bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd){
 	CUpDownClient* newclient = NULL;
 	// select next client or use given client
-	if (!directadd){
-		newclient = FindBestClientInQueue((highPrioCheck == false));
+	if (!directadd)
+	{
+		newclient = FindBestClientInQueue(true);
 
-		if(newclient != NULL) {
-			if(highPrioCheck == true) {
-                if((newclient->IsFriend() && newclient->GetFriendSlot()) || newclient->IsPBForPS()) {
-					POSITION lastpos = uploadinglist.GetTailPosition();
-
-					CUpDownClient* lastClient = NULL;
-					if(lastpos != NULL) {
-						lastClient = uploadinglist.GetAt(lastpos);
-					}
-					if(lastClient != NULL) {
-
-						if (RightClientIsSuperior(lastClient, newclient) > 0) {
-
-							//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
-							// Remove last client from ul list to make room for higher prio client
-							theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
-
-							// add to queue again.
-							// the client is allowed to keep its waiting position in the queue, since it was pre-empted
-							AddClientToQueue(lastClient,true, true);
-						} else {
-							return false;
-						}
-					}
-                } else {
-                    return false;
-                }
-			}
-
-			//RemoveFromWaitingQueue(toadd, true);
+		if(newclient) {
+		    lastupslotHighID = true; // VQB LowID alternate
+		    //AddLogLine(true,"Added High ID: %s", newclient->GetUserName()); // VQB:  perhaps only add to debug log?
 			RemoveFromWaitingQueue(newclient, true);
 			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 		}
-	} else
+	}
+	else
+	{
 		newclient = directadd;
+		/*if (!IsDownloading(newclient)){
+            if (newclient->HasLowID())
+                AddLogLine(true,"DirectAdd:  LowID: %s", newclient->GetUserName());
+			else
+                AddLogLine(true,"DirectAdd:  HighID: %s", newclient->GetUserName());
+		}*/
+	}
 
 	if(newclient == NULL) {
 		return false;
 	}
 
+	if (!thePrefs.TransferFullChunks())
+		UpdateMaxClientScore(); // refresh score caching, now that the highest score is removed
+
 	if (IsDownloading(newclient))
 	{
 		return false;
 	}
-
 	// tell the client that we are now ready to upload
 	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
@@ -528,13 +377,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 	InsertInUploadingList(newclient);
 	
-	if(newclient->GetQueueSessionUp() > 0) {
-		// this client has already gotten a successfullupcount++ when it was early removed
-		// negate that successfullupcount++ so we can give it a new one when this session ends
-		// this prevents a client that gets put back first on queue, being counted twice in the
-		// stats.
-		successfullupcount--;
-	}
+    m_nLastStartUpload = ::GetTickCount();
 
 	// statistic
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
@@ -544,27 +387,27 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	
 	theApp.emuledlg->transferwnd->uploadlistctrl.AddClient(newclient);
 
-	m_dwLastSlotAddTick = ::GetTickCount();
 	return true;
 }
 
-/**
-* Maintenance method for the uploading slots. It adds and removes clients to/from the
-* uploading list. It also makes sure that all the uploading slots' Sockets always have
-* enough packets in their queues, etc.
-*
-* This method is called aproximately once every 100 milliseconds.
-*/
-void CUploadQueue::Process() {
-	theApp.sharedfiles->Publish();
-	DWORD curTick = ::GetTickCount();
+void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
+    // Save number of active clients for statistics
+    uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
-	ReSortUploadSlots();
+    if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
+        // debug info, will remove this when I'm done.
+        //AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
 
-    if(!activeClients_tick_list.IsEmpty()) {
-        // save 15 minutes of data about number of fully active clients
-        uint32 tempMaxRemoved = 0;
-        while(curTick-activeClients_tick_list.GetHead() > 15*60*1000) {
+		if(tempHighest > (uint32)uploadinglist.GetSize()) {
+        	tempHighest = uploadinglist.GetSize();
+		}
+    }
+
+    m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = tempHighest;
+
+    // save 15 minutes of data about number of fully active clients
+    uint32 tempMaxRemoved = 0;
+    while(!activeClients_tick_list.IsEmpty() && curTick-activeClients_tick_list.GetHead() > 20*1000) {
             activeClients_tick_list.RemoveHead();
 	        uint32 removed = activeClients_list.RemoveHead();
 
@@ -573,13 +416,15 @@ void CUploadQueue::Process() {
             }
         }
 
-		uint32 tempMaxActiveClients = 0;
-		uint32 tempMaxActiveClientsShortTime = 0;
-    	uint32 tempSumActiveClients = 0;
-    	uint32 tempCountActiveClients = 0;
+	activeClients_list.AddTail(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall);
+    activeClients_tick_list.AddTail(curTick);
+
+    if(activeClients_tick_list.GetSize() > 1) {
+        uint32 tempMaxActiveClients = m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
+        uint32 tempMaxActiveClientsShortTime = m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
         POSITION activeClientsTickPos = activeClients_tick_list.GetTailPosition();
         POSITION activeClientsListPos = activeClients_list.GetTailPosition();
-        while(activeClientsListPos != NULL && (tempMaxRemoved >= m_MaxActiveClients || curTick - activeClients_tick_list.GetAt(activeClientsTickPos) < 10 * 1000)) {
+        while(activeClientsListPos != NULL && (tempMaxRemoved > tempMaxActiveClients && tempMaxRemoved >= m_MaxActiveClients || curTick - activeClients_tick_list.GetAt(activeClientsTickPos) < 10 * 1000)) {
 			DWORD activeClientsTickSnapshot = activeClients_tick_list.GetAt(activeClientsTickPos);
 			uint32 activeClientsSnapshot = activeClients_list.GetAt(activeClientsListPos);
 
@@ -600,40 +445,43 @@ void CUploadQueue::Process() {
             activeClients_list.GetPrev(activeClientsListPos);
 		}
 
-        if(tempMaxRemoved > m_MaxActiveClients) {
+        if(tempMaxActiveClients > m_MaxActiveClients) {
 			m_MaxActiveClients = tempMaxActiveClients;
         }
 
 		m_MaxActiveClientsShortTime = tempMaxActiveClientsShortTime;
-
-    	m_averageActiveClients = (tempCountActiveClients>0?tempSumActiveClients/tempCountActiveClients:0);
     } else {
-        m_MaxActiveClients = 0;
-        m_MaxActiveClientsShortTime = 0;
-        m_averageActiveClients = 0;
+        m_MaxActiveClients = m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
+        m_MaxActiveClientsShortTime = m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
     }
+}
 
-	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
+/**
+ * Maintenance method for the uploading slots. It adds and removes clients to the
+ * uploading list. It also makes sure that all the uploading slots' Sockets always have
+ * enough packets in their queues, etc.
+ *
+ * This method is called aproximately once every 100 milliseconds.
+ */
+void CUploadQueue::Process() {
 
-    // How many slots should be open? Trickle slots included (at least 2 trickles, 30% of total, and the slots are expected to use UPLOAD_CLIENT_REALISTIC_AVERAGE_DATARATE in average, whichever number is largest)
-    //sint32 wantedNumberOfTotalUploads = max((uint32)(estadatarate/UPLOAD_CLIENT_DATARATE), m_MaxActiveClientsShortTime + MINNUMBEROFTRICKLEUPLOADS);
-    //wantedNumberOfTotalUploads = max(wantedNumberOfTotalUploads, m_MaxActiveClientsShortTime*1.3);
-    //sint32 wantedNumberOfTotalUploads = m_MaxActiveClientsShortTime;
+	theApp.sharedfiles->Publish();
 
-    // PENDING: Each 3 seconds
-	if(curTick - m_dwLastCheckedForHighPrioClient >= 3*1000) {
-		bool added = AddUpNextClient(NULL, true);
-		if(added == false) {
-            // set timer so we can wait a while
-			m_dwLastCheckedForHighPrioClient = curTick;
-		}else{
-            // there might be another highprio client
-            // don't set timer, so that we check next call as well
-		}
+    DWORD curTick = ::GetTickCount();
+
+    UpdateActiveClientsInfo(curTick);
+
+	if (ForceNewClient()){
+        // There's not enough open uploads. Open another one.
+		AddUpNextClient();
 	}
 
+	m_bRemovedClientByScore = false;
+
+    // The loop that feeds the upload slots with data.
 	POSITION pos = uploadinglist.GetHeadPosition();
-	while(pos != 0){
+	while(pos != NULL){
+        // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
 		if (thePrefs.m_iDbgHeap >= 2)
 			ASSERT_VALID(cur_client);
@@ -649,73 +497,20 @@ void CUploadQueue::Process() {
 		}
 	}
 
-	POSITION lastpos = uploadinglist.GetTailPosition();
-
-	CUpDownClient* lastClient = NULL;
-	if(lastpos != NULL) {
-		lastClient = uploadinglist.GetAt(lastpos);
-	}
-
-    // Save number of active clients for statistics
-	uint32 highestNumberOfFullyActivatedSlotsSinceLastCall = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
-    m_MaxActiveClients = max(m_MaxActiveClients, highestNumberOfFullyActivatedSlotsSinceLastCall);
-	activeClients_list.AddTail(highestNumberOfFullyActivatedSlotsSinceLastCall);
-	activeClients_tick_list.AddTail(curTick);
-
-	if(uploadinglist.GetCount() > MIN_UP_CLIENTS_ALLOWED &&
-		((uint32)uploadinglist.GetCount() > m_MaxActiveClients+wantedNumberOfTrickles ||
-		(uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+wantedNumberOfTrickles && AcceptNewClient(uploadinglist.GetCount()) == false)) {
-        // we need to close a trickle slot and put it back first on the queue
-		if(lastClient != NULL && lastClient->GetUpStartTimeDelay() > 3*1000) {
-
-            // There's to many open uploads (propably due to the user changing
-            // the upload limit to a lower value). Remove the last opened upload and put
-            // it back on the waitinglist. When it is put back, it get
-            // to keep its waiting time. This means it is likely to soon be
-            // choosen for upload again.
-
-			m_FirstRanOutOfSlotsTick = 0;
-
-            //AddDebugLogLine(false, "%s: Ended upload since there are too many upload slots opened.", lastClient->GetUserName());
-            // Remove from upload list.
-            RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
-
-			// add to queue again.
-            // the client is allowed to keep its waiting position in the queue, since it was pre-empted
-			AddClientToQueue(lastClient, true, true);
-		}
-	} else if(theApp.lastCommonRouteFinder->AcceptNewClient()) {
-		if(highestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > (uint32)uploadinglist.GetCount()) {
-            // we have given all slots bandwidth this round, and couldn't have given them more.
-			if(m_FirstRanOutOfSlotsTick == 0) {
-				m_FirstRanOutOfSlotsTick = curTick;
-			} else if(curTick-m_FirstRanOutOfSlotsTick > 500 && AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0
-                && (curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)
-            ) {
-                // open an extra slot so that we always have enough trickle slots
-                // There's not enough open uploads. Open another one.
-				AddUpNextClient();
-
-				m_FirstRanOutOfSlotsTick = 0;
-			}
-		} else {
-			m_FirstRanOutOfSlotsTick = 0;
-		}
-    } else {
-        m_FirstRanOutOfSlotsTick = 0;
-    }
-
-	// Save used bandwidth for speed calculations
-	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
-	uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	if (sentBytes>0) {
+    	// Save used bandwidth for speed calculations
+		uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
-		avarage_friend_dr_list.AddTail(theApp.stat_sessionSentBytesToFriend);
+		uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
+
+		avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
+    	// Save time beetween each speed snapshot
 		avarage_tick_list.AddTail(curTick);
 	}
-	
+
+	// don't save more than 30 secs of data
 	while(avarage_tick_list.GetCount() > 0)
 		if ((curTick - avarage_tick_list.GetHead()) > 30000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
@@ -724,22 +519,110 @@ void CUploadQueue::Process() {
 		}else
 			break;
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
-	// Don't save more than three minutes of data about number of fully active clients
+};
+
+bool CUploadQueue::AcceptNewClient(){
+	uint32 curUploadSlots = (uint32)uploadinglist.GetCount();
+    return AcceptNewClient(curUploadSlots);
 }
 
-bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
-	// check if we can allow a new client to start downloading form us
-	uint32 curUploadSlots = numberOfUploads;
-    uint32 datarate = GetDatarate();
+bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
+// check if we can allow a new client to start downloading from us
 
 	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
 
+	uint16 MaxSpeed;
+
+    if (thePrefs.IsDynUpEnabled())
+        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
+    else
+		MaxSpeed = thePrefs.GetMaxUpload();
+			// add to queue again.
+	if (curUploadSlots >= MAX_UP_CLIENTS_ALLOWED ||
+        curUploadSlots >= 4 &&
+        (
+         curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         (
+          thePrefs.GetMaxUpload() == UNLIMITED &&
+          !thePrefs.IsDynUpEnabled() &&
+          thePrefs.GetMaxGraphUploadRate() > 0 &&
+          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
+         )
+        )
+    ) // max number of clients to allow for all circumstances
+	    return false;
+
+	return true;
+}
+
+bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
+    if(!allowEmptyWaitingQueue && waitinglist.GetSize() <= 0)
+        return false;
+
+	if (::GetTickCount() - m_nLastStartUpload < 1000 && datarate < 102400 )
+		return false;
+
+	uint32 curUploadSlots = (uint32)uploadinglist.GetCount();
+
+	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
+		return true;
+
+    if(!AcceptNewClient(curUploadSlots) || !theApp.lastCommonRouteFinder->AcceptNewClient()) { // UploadSpeedSense can veto a new slot if USS enabled
+		return false;
+    }
+
+	uint16 MaxSpeed;
+
+    if (thePrefs.IsDynUpEnabled())
+        MaxSpeed = theApp.lastCommonRouteFinder->GetUpload()/1024;        
+    else
+		MaxSpeed = thePrefs.GetMaxUpload();
+
+	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
+
+    // if throttler doesn't require another slot, go with a slightly more restrictive method
+	if( MaxSpeed > 20 || MaxSpeed == UNLIMITED)
+		upPerClient += datarate/43;
+
+	if( upPerClient > 7680 )
+		upPerClient = 7680;
+
 	//now the final check
-    if (curUploadSlots < (datarate/UPLOAD_CLIENT_DATARATE)+3 ||
-        datarate < 2400*3 && curUploadSlots < datarate/UPLOAD_CLIENT_DATARATE)
+
+	if ( MaxSpeed == UNLIMITED )
+	{
+		if (curUploadSlots < (datarate/upPerClient))
+		return true;
+	}
+	else{
+		uint16 nMaxSlots;
+		if (MaxSpeed > 12)
+			nMaxSlots = (uint16)(((float)(MaxSpeed*1024)) / upPerClient);
+		else if (MaxSpeed > 7)
+			nMaxSlots = MIN_UP_CLIENTS_ALLOWED + 2;
+		else if (MaxSpeed > 3)
+			nMaxSlots = MIN_UP_CLIENTS_ALLOWED + 1;
+		else
+			nMaxSlots = MIN_UP_CLIENTS_ALLOWED;
+
+	//now the final check
+		if ( curUploadSlots < nMaxSlots )
+		{
 			return true;
-	//nope
+		}
+	}
+
+    if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall > (uint32)uploadinglist.GetSize()) {
+        // uploadThrottler requests another slot. If throttler says it needs another slot, we will allow more slots
+        // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
+        if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+            AddDebugLogLine(false, _T("UploadQueue: Added new slot since throttler needs it. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i uploadinglist.GetSize(): %i tick: %i"), m_iHighestNumberOfFullyActivatedSlotsSinceLastCall, uploadinglist.GetSize(), ::GetTickCount());
+			return true;
+    }
+
+    //nope
 	return false;
 }
 
@@ -772,28 +655,22 @@ CUpDownClient* CUploadQueue::GetWaitingClientByIP(uint32 dwIP){
 * @param client address of the client that should be added to the waiting queue
 *
 * @param bIgnoreTimelimit don't check timelimit to possibly ban the client.
-*
-* @param addInFirstPlace the client should be added first in queue, not last
 */
-void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit, bool addInFirstPlace)
+void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit)
 {
-	if(addInFirstPlace == false) {
-		if (theApp.serverconnect->IsConnected() && theApp.serverconnect->IsLowID() //This may need to be changed with the Kad now being used.
-			&& !theApp.serverconnect->IsLocalServer(client->GetServerIP(),client->GetServerPort())
-			&& client->GetDownloadState() == DS_NONE && !client->IsFriend()
-			&& GetWaitingUserCount() > 50)
-			return;
-		client->AddAskedCount();
-		client->SetLastUpRequest();
-		if (!bIgnoreTimelimit)
-		{
-			client->AddRequestCount(client->GetUploadFileID());
-		}
-		if ( client->IsBanned() )
-			return;
+	if (theApp.serverconnect->IsConnected() && theApp.serverconnect->IsLowID() //This may need to be changed with the Kad now being used.
+		&& !theApp.serverconnect->IsLocalServer(client->GetServerIP(),client->GetServerPort())
+		&& client->GetDownloadState() == DS_NONE && !client->IsFriend()
+		&& GetWaitingUserCount() > 50)
+		return;
+	client->AddAskedCount();
+	client->SetLastUpRequest();
+	if (!bIgnoreTimelimit)
+	{
+		client->AddRequestCount(client->GetUploadFileID());
 	}
-	
-
+	if ( client->IsBanned() )
+		return;
 	uint16 cSameIP = 0;
 	// check for double
 	POSITION pos1, pos2;
@@ -804,16 +681,22 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		if (cur_client == client)
 		{	
 			//already on queue
-            // VQB LowID Slot Patch, enhanced in ZZUL
-            if (addInFirstPlace == false && client->HasLowID()&&
-                client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount()))
+			// VQB LowID Slot Patch -- note:  should add limit so only if #slots < UL -or- UL+1 for Low UL (?)
+			if (client->HasLowID() &&
+                client->m_bAddNextConnect && AcceptNewClient())
 			{
+				if (lastupslotHighID) 
+			{
+                    if(thePrefs.GetLogUlDlEvents())
+                        AddDebugLogLine(true, _T("Adding ****lowid when reconneting. Client: %s"), client->DbgGetClientInfo());
 					client->m_bAddNextConnect = false;
 					RemoveFromWaitingQueue(client, true);
 					AddUpNextClient(client);
+					lastupslotHighID = false; // LowID alternate
 					return;
 				}
-// VQB end
+			}
+			// VQB end
 			client->SendRankingInfo();
 			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(client);
 			return;			
@@ -898,43 +781,31 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			delete srv;
 	}
 
-	if(addInFirstPlace == false)
-	{
-		// statistic values
-		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
-		if (reqfile)
-			reqfile->statistic.AddRequest();
-// <<---- start of change ---->
 
-		if(!thePrefs.IsInfiniteQueueEnabled()){ //Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-			// better ways to cap the list
-			uint32 softQueueLimit;
-			uint32 hardQueueLimit;
+	// statistic values
+	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
+	if (reqfile)
+		reqfile->statistic.AddRequest();
 
-			// these proportions could be tweaked. take 20 precent of queue size to buffer new client
-			softQueueLimit = thePrefs.GetQueueSize() - thePrefs.GetQueueSize()/5;
-			hardQueueLimit = thePrefs.GetQueueSize();
+	if(!thePrefs.IsInfiniteQueueEnabled()){ //Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	// cap the list
+    // the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
+    // high ranking clients after soft limit has been reached
+    uint32 softQueueLimit = thePrefs.GetQueueSize();
+    uint32 hardQueueLimit = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
 
-			if ((uint32)waitinglist.GetCount() >= hardQueueLimit){
-				return;
-			}
-			if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
-
-				if (client->GetFriendSlot() == false && // client is not a friend with friend slot
-            		client->IsPBForPS() == false && // client don't want powershared file
-						(
-							client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && !thePrefs.IsEqualChanceEnable() ||
-							client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.IsEqualChanceEnable()//Morph - added by AndCycle, Equal Chance For Each File
-						)// and client has lower credits/wants lower prio file than average client in queue
-					) {
-					// then block client from getting on queue
-					return;
-				}
-			}
+	if ((uint32)waitinglist.GetCount() >= hardQueueLimit ||
+		(uint32)waitinglist.GetCount() >= softQueueLimit && // soft queue limit is reached
+		(client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
+         client->IsPBForPS() == false && // client don't want powershared file
+		(
+			client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && !thePrefs.IsEqualChanceEnable() ||
+			client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.IsEqualChanceEnable()//Morph - added by AndCycle, Equal Chance For Each File
+		)// and client has lower credits/wants lower prio file than average client in queue
+		) {
+			// then block client from getting on queue
+			return;
 		}
-
-// <<---- end of change ---->
-
 		if (client->IsDownloading())
 		{
 			// he's already downloading and wants probably only another file
@@ -945,19 +816,21 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			client->socket->SendPacket(packet,true);
 			return;
 		}
-
-		client->ResetQueueSessionUp();
+	if (waitinglist.IsEmpty() && AcceptNewClient())
+	{
+		AddUpNextClient(client);
 	}
-	// EastShare - Added by TAHO, modified SUQWT
-	client->Credits()->SetSecWaitStartTime();
-	// EastShare - Added by TAHO, modified SUQWT
-	waitinglist.AddTail(client);
-	client->SetUploadState(US_ONUPLOADQUEUE);
-
-	// Add client to waiting list. If addInFirstPlace is set, client should not have its waiting time resetted
-	theApp.emuledlg->transferwnd->queuelistctrl.AddClient(client, (addInFirstPlace == false));
-	theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
-	client->SendRankingInfo();
+	else
+	{
+		// EastShare - Added by TAHO, modified SUQWT
+		client->Credits()->SetSecWaitStartTime();
+		// EastShare - Added by TAHO, modified SUQWT
+		waitinglist.AddTail(client);
+		client->SetUploadState(US_ONUPLOADQUEUE);
+		theApp.emuledlg->transferwnd->queuelistctrl.AddClient(client,true);
+		theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
+		client->SendRankingInfo();
+	}
 }
 
 double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
@@ -986,81 +859,86 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 }
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
-
-	//try to find client in uploadinglist
-	POSITION pos = uploadinglist.Find(client);
+    bool result = false;
+    uint32 slotCounter = 1;
+	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;){
+        POSITION curPos = pos;
+        CUpDownClient* curClient = uploadinglist.GetNext(pos);
+		if (client == curClient){
+			if (updatewindow)
+				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
 	
-	if (pos == NULL){
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
+            uploadinglist.RemoveAt(curPos);
+			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+            bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 
-		return false;	
-	}
+            //if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved)) {
+            //    AddDebugLogLine(false, _T("UploadQueue: Didn't find socket to delete. Adress: 0x%x"), client->socket);
+            //}
+			//EastShare Start - added by AndCycle, Pay Back First
+			//client normal leave the upload queue, check does client still satisfy requirement
+			if(earlyabort == false){
+				client->credits->InitPayBackFirstStatus();
+			}
+			//EastShare End - added by AndCycle, Pay Back First
 
-	if (updatewindow)
-		theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
+			if(client->GetSessionUp() > 0){
+				++successfullupcount;
+				//wistily
+				uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
+				client->Add2UpTotalTime(tempUpStartTimeDelay);
+				if (client->GetUpTotalTime() > 999) //Added by SiRoB, to avoid div by zero
+					client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
+				/*
+				totaluploadtime += client->GetUpStartTimeDelay()/1000;
+				*/
+				totaluploadtime += tempUpStartTimeDelay/1000;
+
+				//wistily stop
+			} else if(earlyabort == false)
+				++failedupcount;
+
+
+			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+
+		    if(requestedFile != NULL) {
+		        requestedFile->UpdatePartsInfo();
+		    }
+
+			theApp.clientlist->AddTrackClient(client); // Keep track of this client
+			client->SetUploadState(US_NONE);
+			client->ClearUploadBlockRequests();
 	
-	//EastShare Start - added by AndCycle, Pay Back First
-	//client normal leave the upload queue, check does client still satisfy requirement
-	if(earlyabort == false){
-		client->credits->InitPayBackFirstStatus();
+		    m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
+			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			// EastShare START - Marked by TAHO, modified SUQWT
+			if(earlyabort == true)
+			{
+				//client->Credits()->SaveUploadQueueWaitTime();
+			}
+			else if(client->GetSessionUp() < SESSIONMAXTRANS)
+			{
+				int keeppct = (100 - (100 * client->GetSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
+				if (keeppct < 0)    keeppct = 0;
+				client->Credits()->SaveUploadQueueWaitTime(keeppct);
+				client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
+			}
+			else
+			{
+				client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+				client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
+			}
+			// EastShare END - Marked by TAHO, modified SUQWT
+			//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			result = true;
+        } else {
+            curClient->SetSlotNumber(slotCounter);
+            slotCounter++;
+        }
 	}
-	//EastShare End - added by AndCycle, Pay Back First
-
-	if (thePrefs.GetLogUlDlEvents())
-		AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->GetUserName(), pszReason==NULL ? _T("") : pszReason);
-    uploadinglist.RemoveAt(pos);
-	theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-
-	if(client->GetQueueSessionUp()){
-		++successfullupcount;
-
-		if(client->GetSessionUp()) {
-			//wistily
-			uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
-			client->Add2UpTotalTime(tempUpStartTimeDelay);
-			if (client->GetUpTotalTime() > 999) //Added by SiRoB, to avoid div by zero
-				client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
-			/*
-			totaluploadtime += client->GetUpStartTimeDelay()/1000;
-			*/
-			totaluploadtime += tempUpStartTimeDelay/1000;
-
-			//wistily stop
-			totalCompletedBytes += client->GetSessionUp();
-		}
-	} else if(earlyabort == false)
-		++failedupcount;
-
-
-	CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-
-    if(requestedFile != NULL) {
-        requestedFile->UpdatePartsInfo();
-    }
-
-	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	// EastShare START - Marked by TAHO, modified SUQWT
-	//if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-		if(earlyabort == true){
-			//client->Credits()->SaveUploadQueueWaitTime();
-		}
-		else if(client->GetSessionUp() < SESSIONMAXTRANS){
-			int keeppct = (100 - (100 * client->GetSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
-			if (keeppct < 0)    keeppct = 0;
-			client->Credits()->SaveUploadQueueWaitTime(keeppct);
-			client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
-		}
-		else{
-			client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
-			client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
-		}
-	//}
-	// EastShare END - Marked by TAHO, modified SUQWT
-	//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
-	theApp.clientlist->AddTrackClient(client); // Keep track of this client
-	client->SetUploadState(US_NONE);
-	client->ClearUploadBlockRequests();
-	return true;
+	return result;
 }
 
 uint32 CUploadQueue::GetAverageUpTime(){
@@ -1098,7 +976,6 @@ void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){
 	todelete->SetUploadState(US_NONE);
 }
 
-/*
 void CUploadQueue::UpdateMaxClientScore()
 {
 	m_imaxscore=0;
@@ -1110,12 +987,16 @@ void CUploadQueue::UpdateMaxClientScore()
 }
 
 bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
+	//If we have nobody in the queue, do NOT remove the current uploads..
+	//This will save some bandwidth and some unneeded swapping from upload/queue/upload..
+	if ( waitinglist.IsEmpty() || client->GetFriendSlot() )
+		return false;
 	if (!thePrefs.TransferFullChunks()){
 	    if( client->GetUpStartTimeDelay() > SESSIONMAXTIME){ // Try to keep the clients from downloading for ever
 		    if (thePrefs.GetLogUlDlEvents())
 			    AddDebugLogLine(DLP_LOW, false, _T("%s: Upload session ended due to max time %s."), client->GetUserName(), CastSecondsToHM(SESSIONMAXTIME/1000));
 		return true;
-	}
+		}
 
 		// Cache current client score
 		const uint32 score = client->GetScore(true, true);
@@ -1130,15 +1011,64 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 	}
 	else{
 		// Allow the client to download a specified amount per session
+/*
+--------------
+		if(GetUploadState() == US_UPLOADING) {
+			bool wasRemoved = false;
+			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONMAXTRANS && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
+				m_dwLastCheckedForEvictTick = curTick;
+				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+				//reset
+				m_bPowerShared = false;
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+			}
+
+			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONMAXTRANS > m_curSessionAmountNumber) {
+				// Should we end this upload?
+
+				//EastShare Start - added by AndCycle, Pay Back First
+				//check again does client satisfy the conditions
+				credits->InitPayBackFirstStatus();
+				//EastShare End - added by AndCycle, Pay Back First
+
+				// first clear the average speed, to show ?? as speed in upload slot display
+				m_AvarageUDR_list.RemoveAll();
+				sumavgUDR = 0;
+	
+				// Give clients in queue a chance to kick this client out.
+				// It will be kicked out only if queue contains a client
+				// of same/higher class as this client, and that new
+				// client must either be a high ID client, or a low ID
+				// client that is currently connected.
+				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
+
+				if(!wasRemoved) {
+					// It wasn't removed, so it is allowed to pass into the next amount.
+					m_curSessionAmountNumber++;
+				}
+			}
+
+			if(wasRemoved == false) {
+				// read blocks from file and put on socket
+				CreateNextBlockPackage();
+			}
+		}
+	}
+---------------------
+*/
 		if( client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS ){
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+				//reset
+				m_bPowerShared = false;
+				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 			if (thePrefs.GetLogUlDlEvents())
-				AddDebugLogLine(DLP_DEFAULT, false, _T("%s: Upload session ended due to max transfered amount. %s"), client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS));
+				AddDebugLogLine(DLP_DEFAULT, false, _T("%s: Upload session ended due to max transfered amount. %s"), client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS, false, false));
 			return true;
 		}
 	}
 	return false;
 }
-*/
 
 void CUploadQueue::DeleteAll(){
 	waitinglist.RemoveAll();
@@ -1185,9 +1115,9 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		/*
 		theApp.uploadBandwidthThrottler->SetAllowedDataRate(thePrefs.GetMaxUpload()*1024);
 		// ZZ:UploadSpeedSense -->
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, thePrefs.GetMaxUpload()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20); // PENDING: Hard coded min pLowestPingAllowed
 		*/
-		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():thePrefs.GetMaxUpload()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog());
+		theApp.lastCommonRouteFinder->SetPrefs(thePrefs.IsDynUpEnabled(), theApp.uploadqueue->GetDatarate(), thePrefs.GetMinUpload()*1024, (thePrefs.IsSUCDoesWork())?theApp.uploadqueue->GetMaxVUR():(thePrefs.GetMaxUpload() != 0)?thePrefs.GetMaxUpload()*1024:thePrefs.GetMaxGraphUploadRate()*1024, thePrefs.IsDynUpUseMillisecondPingTolerance(), (thePrefs.GetDynUpPingTolerance() > 100)?((thePrefs.GetDynUpPingTolerance()-100)/100.0f):0, thePrefs.GetDynUpPingToleranceMilliseconds(), thePrefs.GetDynUpGoingUpDivider(), thePrefs.GetDynUpGoingDownDivider(), thePrefs.GetDynUpNumberOfPings(), 20, thePrefs.IsUSSLog());
 		//MOPRH END   - Modified by SiRoB
 
 		theApp.uploadqueue->Process();
@@ -1209,8 +1139,16 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			theApp.friendlist->Process();		// 19 minutes
 			theApp.clientlist->Process();
 			theApp.sharedfiles->Process();
-			Kademlia::CKademlia::process();
-
+			if( Kademlia::CKademlia::isRunning() )
+			{
+				ASSERT( Kademlia::CKademlia::getPrefs() != NULL);
+				Kademlia::CKademlia::process();
+				if(Kademlia::CKademlia::getPrefs()->hasLostConnection())
+				{
+					Kademlia::CKademlia::stop();
+					theApp.emuledlg->ShowConnectionState();
+				}
+			}
 			if( theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsSingleConnect() )
 				theApp.serverconnect->TryAnotherConnectionrequest();
 
@@ -1280,11 +1218,8 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				theApp.OnlineSig(); // Added By Bouc7 
 				theApp.emuledlg->ShowTransferRate();
 				
-				//MORPH - Removed by SiRoB
-				/*
 				if (!thePrefs.TransferFullChunks())
 					theApp.uploadqueue->UpdateMaxClientScore();
-				*/
 
 				// update cat-titles with downloadinfos only when needed
 				if (thePrefs.ShowCatTabInfos() && 
@@ -1294,6 +1229,8 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				
 				if (thePrefs.IsSchedulerEnabled())
 					theApp.scheduler->Check();
+
+                theApp.emuledlg->transferwnd->UpdateListCount(1, -1);
 			}
 
 			statsave++;
@@ -1356,7 +1293,8 @@ CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 		if(md4cmp(potential->GetUploadFileID(), filehash) == 0)
 			srclist->AddTail(potential);
 	}
-}*/
+}
+*/
 
 //MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 void CUploadQueue::UpdateDatarates() {
@@ -1366,14 +1304,10 @@ void CUploadQueue::UpdateDatarates() {
 
 		//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 		/*
-		if(avarage_dr_list.GetSize() >= 2 && m_AvarageUDRO_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
+		if(avarage_dr_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
 			datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
-			m_nUpDatarateOverhead = ((sumavgUDRO-m_AvarageUDRO_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
 			friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
-		//} else {
-		//	datarate = 0;
-		//	m_nUpDatarateOverhead = 0;
-		//	friendDatarate = 0;
+
 		}
 		*/
 		if (avarage_tick_list.GetCount() > 0){
@@ -1411,69 +1345,51 @@ uint32 CUploadQueue::GetToNetworkDatarate() {
 	}
 }
 
-uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
-	uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
-
-    //if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
-    //    minNumber = 2;
-    //} else
-    if(minNumber < 1 && GetDatarate() >= 2*1024 /*thePrefs.GetMaxUpload() >= 2*/) {
-		minNumber = 1;
-	}
-
-	return max(((uint32)uploadinglist.GetCount())*0.1, minNumber);
-}
-
-/**
-* Resort the upload slots, so they are kept sorted even if file priorities
-* are changed by the user, friend slot is turned on/off, etc
-*/
 void CUploadQueue::ReSortUploadSlots(bool force) {
     DWORD curtick = ::GetTickCount();
-    if(!force &&  curtick - m_dwLastResortedUploadSlots < 3*1000) {
-		return;
-	}
+    if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000) {
+    	m_dwLastResortedUploadSlots = curtick;
 
-    m_dwLastResortedUploadSlots = curtick;
+		theApp.uploadBandwidthThrottler->Pause(true);
 
-	theApp.uploadBandwidthThrottler->Pause(true);
+    	CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
 
-    CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
+    	// Remove all clients from uploading list and store in tempList
+    	POSITION ulpos = uploadinglist.GetHeadPosition();
+    	while (ulpos != NULL) {
+    	    POSITION curpos = ulpos;
+    	    uploadinglist.GetNext(ulpos);
 
-    // Remove all clients from uploading list and store in tempList
-    POSITION ulpos = uploadinglist.GetHeadPosition();
-    while (ulpos != NULL) {
-        POSITION curpos = ulpos;
-        uploadinglist.GetNext(ulpos);
+    	    // Get and remove the client from upload list.
+			CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
 
-        // Get and remove the client from upload list.
-		CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
+    	    uploadinglist.RemoveAt(curpos);
 
-        uploadinglist.RemoveAt(curpos);
+    	    // Remove the found Client from UploadBandwidthThrottler
+    	    theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
 
-        // Remove the found Client from UploadBandwidthThrottler
-        theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+    	    tempUploadinglist.AddTail(cur_client);
+    	}
 
-        tempUploadinglist.AddTail(cur_client);
-    }
+    	// Remove one at a time from temp list and reinsert in correct position in uploading list
+    	POSITION tempPos = tempUploadinglist.GetHeadPosition();
+    	while(tempPos != NULL) {
+    	    POSITION curpos = tempPos;
+    	    tempUploadinglist.GetNext(tempPos);
 
-    // Remove one at a time from temp list and reinsert in correct position in uploading list
-    POSITION tempPos = tempUploadinglist.GetHeadPosition();
-    while(tempPos != NULL) {
-        POSITION curpos = tempPos;
-        tempUploadinglist.GetNext(tempPos);
+    	    // Get and remove the client from upload list.
+			CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
 
-        // Get and remove the client from upload list.
-		CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
+    	    tempUploadinglist.RemoveAt(curpos);
 
-        tempUploadinglist.RemoveAt(curpos);
-
-        // This will insert in correct place
-        InsertInUploadingList(cur_client);
-	}
+    	    // This will insert in correct place
+    	    InsertInUploadingList(cur_client);
+		}
 
 	theApp.uploadBandwidthThrottler->Pause(false);
 }
+
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 uint32	CUploadQueue::GetMaxVUR()

@@ -17,7 +17,6 @@
 #include "stdafx.h"
 #include <math.h>
 #include <afxinet.h>
-#pragma comment(lib, "winmm.lib")
 #include <Mmsystem.h>
 #include <HtmlHelp.h>
 #include <share.h>
@@ -85,6 +84,8 @@
 #include "PeerCacheFinder.h"
 #include "Statistics.h"
 #include "FirewallOpener.h"
+#include "StringConversion.h"
+#include "aichsyncthread.h"
 
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
@@ -161,6 +162,7 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_pSplashWnd = NULL;
 	m_dwSplashTime = (DWORD)-1;
 	m_pSystrayDlg = NULL;
+	m_lasticoninfo=255;
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
 }
 
@@ -222,7 +224,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SYSCOLORCHANGE()
 	ON_MESSAGE(WM_COPYDATA, OnWMData)
 	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
+	ON_WM_SHOWWINDOW()
 	ON_MESSAGE(WM_HOTKEY, OnHotKey)	//Commander - Added: Invisible Mode [TPT]
+
 	///////////////////////////////////////////////////////////////////////////
 	// WM_COMMAND messages
 	//
@@ -260,14 +264,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	///////////////////////////////////////////////////////////////////////////
 	// WM_APP messages
 	//
-	// SLUGFILLER: SafeHash
 	ON_MESSAGE(TM_FINISHEDHASHING,OnFileHashed)
 	ON_MESSAGE(TM_FILEOPPROGRESS, OnFileOpProgress)
 	ON_MESSAGE(TM_HASHFAILED,OnHashFailed)
-	ON_MESSAGE(TM_PARTHASHEDOK,OnPartHashedOK)
-	ON_MESSAGE(TM_PARTHASHEDCORRUPT,OnPartHashedCorrupt)
-	// SLUGFILLER: SafeHash
-
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
@@ -285,14 +284,17 @@ BOOL CemuleDlg::OnInitDialog()
 	m_fontMarlett.CreatePointFont(10 * 10, _T("Marlett"));
 
 	m_bStartMinimized = thePrefs.GetStartMinimized();
+	if( !m_bStartMinimized )
+		m_bStartMinimized = theApp.DidWeAutoStart();
+
 	// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
 	if (thePrefs.IsFirstStart())
 		m_bStartMinimized = false;
 
 	// show splashscreen as early as possible to "entertain" user while starting emule up
-	if (thePrefs.UseSplashScreen() && !m_bStartMinimized){
+	if (thePrefs.UseSplashScreen() && !m_bStartMinimized)
 		ShowSplash();
-	}
+
 	//Commander - Added: Startupsound - Start
 	if (thePrefs.UseStartupSound() && !m_bStartMinimized){
 		if(PathFileExists(thePrefs.GetConfigDir() + _T("startup.wav"))) 
@@ -454,7 +456,6 @@ BOOL CemuleDlg::OnInitDialog()
 	TrayMinimizeToTrayChange();
 
 	ShowTransferRate(true);
-	
 	// ZZ:UploadSpeedSense -->
 	ShowPing();
 	// ZZ:UploadSpeedSense <--
@@ -474,7 +475,7 @@ BOOL CemuleDlg::OnInitDialog()
 	if (thePrefs.GetVerbose() && !m_hTimer)
 		AddDebugLogLine(true,_T("Failed to create 'startup' timer - %s"),GetErrorMessage(GetLastError()));
 
-	theApp.stat_starttime = GetTickCount();
+	theStats.starttime = GetTickCount();
 
 	if (thePrefs.IsFirstStart())
 	{
@@ -496,10 +497,8 @@ BOOL CemuleDlg::OnInitDialog()
 	// initalize PeerCache
 	theApp.m_pPeerCache->Init(thePrefs.GetPeerCacheLastSearch(), thePrefs.WasPeerCacheFound(), thePrefs.IsPeerCacheDownloadEnabled(), thePrefs.GetPeerCachePort());
 
-        //Commander - Removed Invisible Mode
-	//EastShare, Added by linekin HotKey
-	//RegisterHotKey(this->m_hWnd,100,MOD_WIN,'S'); 
-	//EastShare, Added by linekin HotKey
+	// start aichsyncthread
+	AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
 
 	return TRUE;
 }
@@ -530,7 +529,7 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 			case 0:
 				theApp.emuledlg->status++;
 				theApp.emuledlg->ready = true;
-				// SLUGFILLER: SafeHash remove - moved down
+				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
 				theApp.emuledlg->status++;
 				break;
 			case 1:
@@ -572,39 +571,16 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 				}
 				
 				if (!bError) // show the success msg, only if we had no serious error
-				{
-					//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
-					theApp.emuledlg->AddLogLine(false,"Winsock: Version %d.%d [%.40s] %.40s", HIBYTE( theApp.m_wsaData.wVersion ),LOBYTE(theApp.m_wsaData.wVersion ),
-					theApp.m_wsaData.szDescription, theApp.m_wsaData.szSystemStatus);
-					if (theApp.m_wsaData.iMaxSockets!=0)
-						AddLogLine(false,"Winsock: max. sockets %d", theApp.m_wsaData.iMaxSockets);
-					else
-						AddLogLine(false,"Winsock: unlimited sockets");
-					//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
-					AddLogLine(true, GetResString(IDS_TRANSVERSION)); //MORPH - Added by milobac, Translation version info
-					AddLogLine(true, GetResString(IDS_MAIN_READY),theApp.m_strCurVersionLong);
-				}
+					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong,GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
 
-				// SLUGFILLER: SafeHash remove - moved down
+				if(thePrefs.DoAutoConnect())
+					theApp.emuledlg->OnBnClickedButton2();
 				theApp.emuledlg->status++;
 				break;
 			}
 			case 5:
 				break;
-			// SLUGFILLER: SafeHash - delay load shared files
-			case 6:
-				theApp.emuledlg->status++;
-				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
-				theApp.emuledlg->status++;
-				break;
-			case 7:
-				break;
-			// SLUGFILLER: SafeHash				
 			default:
-				// SLUGFILLER: SafeHash - autoconnect only after emule loaded completely
-				if(thePrefs.DoAutoConnect())
-					theApp.emuledlg->OnBnClickedButton2();
-				// SLUGFILLER: SafeHash
 				theApp.emuledlg->StopTimer();
 		}
 	}
@@ -683,8 +659,25 @@ void CemuleDlg::OnPaint()
 	if (!startUpMinimizedChecked){
 		//TODO: Use full initialized 'WINDOWPLACEMENT' and remove the 'OnCancel' call...
 		startUpMinimizedChecked = true;
+		//I'm not a Gui person.. If you know a better way to do this, go for it.. :)
 		if (m_bStartMinimized)
+		{
+			if(theApp.DidWeAutoStart())
+			{
+				if (thePrefs.mintotray == false)
+				{
+					thePrefs.mintotray = true;
+					OnCancel();
+					thePrefs.mintotray = false;
+				}
+				else
 			OnCancel();
+	}
+			else
+			{
+				OnCancel();
+			}
+		}
 	}
 
 	if (IsIconic()){
@@ -958,7 +951,7 @@ void CemuleDlg::ShowUserCount(){
 	totaluser = totalfile = 0;
 	theApp.serverlist->GetUserFileStatus( totaluser, totalfile );
 	CString buffer;
-	buffer.Format(_T("%s: %s(%s) | %s: %s"), GetResString(IDS_UUSERS), CastItoIShort(totaluser), CastItoIShort(Kademlia::CKademlia::getKademliaUsers()), GetResString(IDS_FILES), CastItoIShort(totalfile));
+	buffer.Format(_T("%s:%s(%s)|%s:%s(%s)"), GetResString(IDS_UUSERS), CastItoIShort(totaluser, false, 1), CastItoIShort(Kademlia::CKademlia::getKademliaUsers(), false, 1), GetResString(IDS_FILES), CastItoIShort(totalfile, false, 1), CastItoIShort(Kademlia::CKademlia::getKademliaFiles(), false, 1));
 	statusbar->SetText(buffer,1,0);
 }
 
@@ -982,6 +975,9 @@ void CemuleDlg::ShowTransferStateIcon()
 
 void CemuleDlg::ShowTransferRate(bool forceAll){
 	TCHAR buffer[50];
+
+	if (forceAll)
+		m_lasticoninfo=255;
 
 	lastdownrate=theApp.downloadqueue->GetDatarate();
 	lastuprate=theApp.uploadqueue->GetDatarate();
@@ -1017,66 +1013,40 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 	}
 
 	if (IsWindowVisible() || forceAll) {
-		//MORPH START - Added by SiRoB, Show zz ratio activation
-		if (thePrefs.IsZZRatioDoesWork()){
-			TCHAR buffer2[100];		
-			_sntprintf(buffer2,ARRSIZE(buffer2),theApp.downloadqueue->IsZZRatioInWork()?_T("%s R"):_T("%s r"),buffer);
-			statusbar->SetText(buffer2,2,0);
-		}else
-		//MORPH END   - Added by SiRoB, Show zz ratio activation
-			statusbar->SetText(buffer,2,0);
+		statusbar->SetText(buffer,2,0);
 		ShowTransferStateIcon();
 	}
-	if (!TrayIsVisible() && thePrefs.ShowRatesOnTitle()) {
+	if (IsWindowVisible() && thePrefs.ShowRatesOnTitle()) {
 		_sntprintf(buffer,ARRSIZE(buffer),_T("(U:%.1f D:%.1f) eMule v%s"),(float)lastuprate/1024, (float)lastdownrate/1024,theApp.m_strCurVersionLong);
 		SetWindowText(buffer);
 	}
 }
-//MORPH START - Added by SiRoB, ZZ Upload system (USS)
+
+// ZZ:UploadSpeedSense -->
 void CemuleDlg::ShowPing() {
 	if(IsWindowVisible()) {
         CurrentPingStruct lastPing = theApp.lastCommonRouteFinder->GetCurrentPing();
 
-        char buffer[50];
+        CString buffer;
 
 		//MORPH START - Changed by SiRoB, Related to SUC &  USS
-        /*
-		if(thePrefs.IsDynUpEnabled()) {
-            if(lastPing.latency > 0) {
-                if(lastPing.lowest > 0) {
-                    sprintf(buffer,"%i ms %i%%",lastPing.latency, lastPing.latency*100/lastPing.lowest);
-                } else {
-                    sprintf(buffer,"%i ms",lastPing.latency);
-                }
-            } else {
-                sprintf(buffer,"Preparing...",lastPing);
-            }
-        } else {
-            sprintf(buffer,"");
-        }
-		*/
-		if(thePrefs.IsDynUpEnabled()) {
+        if(thePrefs.IsDynUpEnabled()) {
             if(lastPing.state.GetLength() == 0) {
-				if (!thePrefs.IsDynUpUseMillisecondPingTolerance()){
-					if(lastPing.lowest > 0 ) {
-						sprintf(buffer,"USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)lastPing.currentLimit/1024,GetResString(IDS_KBYTES));
-					} else {
-						sprintf(buffer,"USS %i ms %.1f%s/s",lastPing.latency, (float)lastPing.currentLimit/1024,GetResString(IDS_KBYTES));
-					}
-				} else
-					sprintf(buffer,"USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingToleranceMilliseconds(), (float)lastPing.currentLimit/1024,GetResString(IDS_KBYTES));
+				if(lastPing.lowest > 0 && !thePrefs.IsDynUpUseMillisecondPingTolerance()) {
+					buffer.Format(_T("%s | %ims | %i%%"),CastItoXBytes(lastPing.currentLimit,false,true),lastPing.latency, lastPing.latency*100/lastPing.lowest);
+				} else {
+					buffer.Format(_T("%s | %ims | %ims"),CastItoXBytes(lastPing.currentLimit,false,true),lastPing.latency);
+				}
 			} else {
-                sprintf(buffer,lastPing.state);
+                buffer.SetString(lastPing.state);
             }
 		} else if (thePrefs.IsSUCDoesWork()){
-			sprintf(buffer,"SUC r:%i vur:%.1f%s/s",theApp.uploadqueue->GetAvgRespondTime(0), (float)theApp.uploadqueue->GetMaxVUR()/1024,GetResString(IDS_KBYTES));
-		} else
-			sprintf(buffer,"");
+			buffer.Format(_T("vur:%s r:%i"),CastItoXBytes(theApp.uploadqueue->GetMaxVUR(),false,true),theApp.uploadqueue->GetAvgRespondTime(0));
 		//MORPH END   - Changed by SiRoB, Related to SUC &  USS
 		statusbar->SetText(buffer,4,0);
     }
 }
-//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+// ZZ:UploadSpeedSense <--
 
 void CemuleDlg::OnCancel()
 {
@@ -1141,9 +1111,13 @@ void CemuleDlg::SetStatusBarPartsSize()
 	/*
 	if(thePrefs.IsDynUpEnabled())
 	{
-		ussShift = 75;
+        if(thePrefs.IsDynUpUseMillisecondPingTolerance()) {
+            ussShift = 45;
+        } else {
+            ussShift = 90;
+        }
 	}
-	int aiWidths[5] = { rect.right-650-ussShift, rect.right-440-ussShift, rect.right-250-ussShift,rect.right-25-ussShift, -1 };
+	int aiWidths[5] = { rect.right-675-ussShift, rect.right-440-ussShift, rect.right-250-ussShift,rect.right-25-ussShift, -1 };
 	*/
 	if(thePrefs.IsDynUpEnabled() || thePrefs.IsSUCEnabled())
 	{
@@ -1168,7 +1142,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 		CString link;
 		link2 = pszData;
 		link2.Replace(_T("%7c"),_T("|"));
-		link=URLDecode(link2);
+		link = OptUtf8ToStr(URLDecode(link2));
 		CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(link);
 		_ASSERT( pLink !=0 );
 		switch (pLink->GetKind()) {
@@ -1206,7 +1180,8 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 				pSrv->SetListName(defName.GetBuffer());
 
 				// Barry - Default all new servers to high priority
-				pSrv->SetPreference(PR_HIGH);
+				if (thePrefs.GetManualHighPrio())
+					pSrv->SetPreference(SRV_PR_HIGH);
 
 				if (!serverwnd->serverlistctrl.AddServer(pSrv,true)) 
 					delete pSrv; 
@@ -1358,20 +1333,6 @@ LRESULT CemuleDlg::OnHashFailed(WPARAM wParam, LPARAM lParam)
 	theApp.sharedfiles->HashFailed((UnknownFile_Struct*)lParam);
 	return 0;
 }
-
-LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam){
-	CPartFile* pOwner = (CPartFile*)lParam;
-	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
-		pOwner->PartHashFinished((uint16)wParam, false);
-	return 0;
-}
-
-LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam){
-	CPartFile* pOwner = (CPartFile*)lParam;
-	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
-		pOwner->PartHashFinished((uint16)wParam, true);
-	return 0;
-}
 // SLUGFILLER: SafeHash
 
 LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
@@ -1443,6 +1404,10 @@ void CemuleDlg::OnClose()
 	}
 
 	Kademlia::CKademlia::stop();
+
+	// saving data & stuff
+	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
+	sLock1.Lock(2000);
 
 	// saving data & stuff
 	theApp.emuledlg->preferenceswnd->m_wndSecurity.DeleteDDB();
@@ -1671,8 +1636,8 @@ void CemuleDlg::StartConnection(){
 	}
 }
 
-void CemuleDlg::CloseConnection(){
-	
+void CemuleDlg::CloseConnection()
+{
 	if (theApp.serverconnect->IsConnected()){
 		theApp.serverconnect->Disconnect();
 	}
@@ -1685,7 +1650,8 @@ void CemuleDlg::CloseConnection(){
 	ShowConnectionState();
 }
 
-void CemuleDlg::RestoreWindow(){
+void CemuleDlg::RestoreWindow()
+{
 	if (TrayIsVisible())
 		TrayHide();	
 	
@@ -1694,12 +1660,29 @@ void CemuleDlg::RestoreWindow(){
 
 void CemuleDlg::UpdateTrayIcon(int procent)
 {
-	// start it up
+	// compute an id of the icon to be generated
+	uint8 m_newiconinfo=(procent>0)?(16-((procent*15/100)+1)):0;
+
 	if (theApp.IsConnected()){
-		if (theApp.IsFirewalled())
+		if (!theApp.IsFirewalled())
+			m_newiconinfo += 50;
+	} else
+		m_newiconinfo += 100;
+
+	// dont update if the same icon as displayed would be generated
+	if ( m_lasticoninfo==m_newiconinfo )
+		return;
+
+	m_lasticoninfo=m_newiconinfo;
+
+	// prepare it up
+	if (theApp.IsConnected()){
+		if (theApp.IsFirewalled()) {
 			trayIcon.Init(sourceTrayIconLow,100,1,1,16,16,thePrefs.GetStatsColor(11));
-		else 
+		}
+		else {
 			trayIcon.Init(sourceTrayIcon,100,1,1,16,16,thePrefs.GetStatsColor(11));
+		}
 	}
 	else
 		trayIcon.Init(sourceTrayIconGrey,100,1,1,16,16,thePrefs.GetStatsColor(11));
@@ -1723,8 +1706,12 @@ int CemuleDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return CTrayDialog::OnCreate(lpCreateStruct);
 }
 
+void CemuleDlg::OnShowWindow( BOOL bShow, UINT nStatus) {
+	if (IsRunning())
+		ShowTransferRate(true);
+}
 //START - enkeyDEV(kei-kun) -TaskbarNotifier-
-void CemuleDlg::ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF)
+void CemuleDlg::ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink, bool bForceSoundOFF)
 {
 	if (!notifierenabled)
 		return;
@@ -1732,65 +1719,76 @@ void CemuleDlg::ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF)
 	LPCTSTR pszSoundEvent = NULL;
 	int iSoundPrio = 0;
 	bool ShowIt = false;
-	switch(MsgType) {
+	switch (MsgType)
+	{
 		case TBN_CHAT:
-            if (thePrefs.GetUseChatNotifier()) {
-				m_wndTaskbarNotifier->Show(Text, MsgType);
+            if (thePrefs.GetUseChatNotifier())
+			{
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 				ShowIt = true;
 				pszSoundEvent = _T("eMule_Chat");
 				iSoundPrio = 1;
 			}
 			break;
 		case TBN_DLOAD:
-            if (thePrefs.GetUseDownloadNotifier()) {
-				m_wndTaskbarNotifier->Show(Text, MsgType);
+            if (thePrefs.GetUseDownloadNotifier())
+			{
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 				ShowIt = true;			
 				pszSoundEvent = _T("eMule_DownloadFinished");
 				iSoundPrio = 1;
 			}
 			break;
 		case TBN_DLOADADDED:
-            if (thePrefs.GetUseNewDownloadNotifier()) {
-				m_wndTaskbarNotifier->Show(Text, MsgType);
+            if (thePrefs.GetUseNewDownloadNotifier())
+			{
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 				ShowIt = true;			
 				pszSoundEvent = _T("eMule_DownloadAdded");
 				iSoundPrio = 1;
 			}
 			break;
 		case TBN_LOG:
-            if (thePrefs.GetUseLogNotifier()) {
-				m_wndTaskbarNotifier->Show(Text, MsgType);
+            if (thePrefs.GetUseLogNotifier())
+			{
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 				ShowIt = true;			
 				pszSoundEvent = _T("eMule_LogEntryAdded");
 			}
 			break;
 		case TBN_IMPORTANTEVENT:
-			if (thePrefs.GetNotifierPopOnImportantError()) {
-				m_wndTaskbarNotifier->Show(Text, MsgType);
+			if (thePrefs.GetNotifierPopOnImportantError())
+			{
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 				ShowIt = true;			
 				pszSoundEvent = _T("eMule_Urgent");
 				iSoundPrio = 1;
 			}
-			break;	// added by InterCeptor (bugfix) 27.11.02
+			break;
+
 		case TBN_NEWVERSION:
-			if (thePrefs.GetNotifierPopOnNewVersion()) {
-				m_wndTaskbarNotifier->Show(Text, MsgType);
+			if (thePrefs.GetNotifierPopOnNewVersion())
+			{
+				m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 				ShowIt = true;			
 				pszSoundEvent = _T("eMule_NewVersion");
 				iSoundPrio = 1;
 			}
 			break;
 		case TBN_NULL:
-            m_wndTaskbarNotifier->Show(Text, MsgType);
+            m_wndTaskbarNotifier->Show(Text, MsgType, pszLink);
 			ShowIt = true;			
 			break;
 	}
 	
-	if (ShowIt && !ForceSoundOFF){
-		if (thePrefs.GetUseSoundInNotifier()){
+	if (ShowIt && !bForceSoundOFF)
+	{
+		if (thePrefs.GetUseSoundInNotifier())
+		{
         PlaySound(thePrefs.GetNotifierWavSoundPath(), NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
 		}
-		else if (pszSoundEvent){
+		else if (pszSoundEvent)
+		{
 			// use 'SND_NOSTOP' only for low priority events, otherwise the 'Log message' event may overrule a more important
 			// event which is fired nearly at the same time.
 			PlaySound(pszSoundEvent, NULL, SND_APPLICATION | SND_ASYNC | SND_NODEFAULT | SND_NOWAIT | ((iSoundPrio > 0) ? 0 : SND_NOSTOP));
@@ -1798,18 +1796,36 @@ void CemuleDlg::ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF)
 	}
 }
 
-void CemuleDlg::LoadNotifier(CString configuration) {
+void CemuleDlg::LoadNotifier(CString configuration)
+{
 	notifierenabled = m_wndTaskbarNotifier->LoadConfiguration(configuration);
 }
 
 LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 {
-	switch(m_wndTaskbarNotifier->GetMessageType()){
+	if (lParam)
+	{
+		LPTSTR pszLink = (LPTSTR)lParam;
+		ShellOpenFile(pszLink);
+		free(pszLink);
+		pszLink = NULL;
+	}
+
+	switch (m_wndTaskbarNotifier->GetMessageType())
+	{
 		case TBN_CHAT:
 			RestoreWindow();
 			SetActiveDialog(chatwnd);
 			break;
 		case TBN_DLOAD:
+			// if we had a link and opened the downloaded file and if we currently in traybar, dont restore the app window
+			if (lParam==0 || !TrayIsVisible())
+			{
+				RestoreWindow();
+				SetActiveDialog(transferwnd);
+			}
+			break;
+
 		case TBN_DLOADADDED:
 			RestoreWindow();
 			SetActiveDialog(transferwnd);
@@ -1822,7 +1838,9 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 			RestoreWindow();
 			SetActiveDialog(serverwnd);	
 			break;
-		case TBN_NEWVERSION:{
+
+		case TBN_NEWVERSION:
+		{
 			CString theUrl;
 			theUrl.Format(_T("/en/version_check.php?version=%i&language=%i"),theApp.m_uCurVersionCheck,thePrefs.GetLanguageID());
 			theUrl = thePrefs.GetVersionCheckBaseURL()+theUrl;
@@ -1942,6 +1960,7 @@ void CemuleDlg::Localize()
 	ShowConnectionState();
 	ShowTransferRate(true);
 	ShowUserCount();
+	CPartFileConvert::Localize();
 }
 
 void CemuleDlg::ShowUserStateIcon()
@@ -2285,16 +2304,6 @@ void CemuleDlg::ApplyLogFont(LPLOGFONT plf)
 	}
 }
 
-void CemuleDlg::SetKadButtonState() {
-	//I'm temp removing this.. Will most likely split the status window from the servers.
-	//This have a true Server & Kademlia window.. We can then add and remove the buttons then..
-	//Also, I think it's best to hide the button, not disable..
-	if( Kademlia::CKademlia::isRunning() )
-		toolbar->HideButton(IDC_TOOLBARBUTTON+1, false);
-	else
-		toolbar->HideButton(IDC_TOOLBARBUTTON+1, !thePrefs.GetNetworkKademlia());
-}
-
 LRESULT CemuleDlg::OnFrameGrabFinished(WPARAM wParam,LPARAM lParam){
 	CKnownFile* pOwner = (CKnownFile*)wParam;
 	FrameGrabResult_Struct* result = (FrameGrabResult_Struct*)lParam;
@@ -2588,102 +2597,6 @@ LRESULT CemuleDlg::OnPeerCacheResponse(WPARAM wParam, LPARAM lParam)
 {
 	return theApp.m_pPeerCache->OnPeerCacheCheckResponse(wParam,lParam);
 }
-
-// MightyKnife: extended debug logging
-
-#define MAX_MESSAGES 500
-
-/* Name:     AddExtDebugMessage
-   Function: This function adds the message "line" to the debug list m_ExtDebugMessages.
-			 This list contains MAX_MESSAGES extended debug messages that are invisible to 
-			 the user. If the method OutputExtDebugMessages is called, these debug messages 
-			 are printed to the visible debug log.
-   Return:   -
-   Remarks:  -
-   Author:	 MightyKnife
-*/
-void CemuleDlg::AddExtDebugMessage (CString _line,...) {
-
-
-	char temp[1060]; 
-	char bufferline[1000];
-
-	va_list argptr;
-	va_start(argptr, _line);
-	_vsnprintf(bufferline, 1000, _line, argptr);
-	va_end(argptr);
-
-	CTime nowT=CTime::GetCurrentTime();
-	_snprintf(temp,sizeof temp,"%s/%d: %s",nowT.Format(thePrefs.GetDateTimeFormat4Log()),
-			  ++m_ExtDebugMessagesCount,bufferline);
-	m_ExtDebugMessages.AddTail (temp);
-
-	// remove some old debug messages if necessary
-	while (m_ExtDebugMessages.GetSize () > MAX_MESSAGES) 
-		m_ExtDebugMessages.RemoveHead ();
-}
-
-/* Name:     AddExtDebugDump
-   Function: This method works comparable AddExtDebugMessage. It first prints the
-			 _headline to the extended debug message (if it is != ""). Afterwards it 
-			 transforms the buffer _data into a hexadecimal string and prints it on 
-			 the  extended debug messages, too. So it's good for dumping data blocks.
-			 The _subscript is added afterwards, too, if it's != "".
-   Return:   -
-   Remarks:  -
-   Author:   Mighty Knife
-*/
-void CemuleDlg::AddExtDebugDump (CString _headline, const char* _data, int _size, CString _subscript) {
-
-
-	// Add timestamp to the headline
-	if (_headline != "") AddExtDebugMessage ("%s",(const char*) _headline);
-
-	// Only dump the first 256 bytes
-	if (_size > 256) _size = 256;
-
-	// output as hex string
-	CString tmp,tmp2;
-	for (int itmp=0; itmp < _size; itmp++) {
-		tmp2.Format (" %02X",(unsigned) (BYTE) (_data [itmp]));
-		tmp += tmp2;
-	}
-	m_ExtDebugMessages.AddTail (tmp);
-
-	// output as C++-string for inserting into the sourcecode for testing
-	tmp="\"";
-	for (int itmp=0; itmp < _size; itmp++) {
-		tmp2.Format ("\\x%02X",(unsigned) (BYTE) (_data [itmp]));
-		if ((_data [itmp] >= 32) && (_data [itmp] <= 'z') && 
-			(_data [itmp] != '\"') && (_data [itmp] != '\\'))
-			tmp += (unsigned char) _data [itmp];
-		else tmp += tmp2;
-	}
-	tmp += "\"";
-	m_ExtDebugMessages.AddTail (tmp);
-	
-	if (_subscript != "") m_ExtDebugMessages.AddTail (_subscript);
-
-	// remove some old debug messages if necessary
-	while (m_ExtDebugMessages.GetSize () > MAX_MESSAGES) 
-		m_ExtDebugMessages.RemoveHead ();
-}
-
-/* Name:     OutputExtDebugMessages
-   Function: Prints all messages in the m_ExtDebugMessages list to the debug log.
-			 Removes all messages from the list so that messages are only printed once.
-   Return:   -
-   Remarks:  -
-   Author:   Mighty Knife
-*/
-void CemuleDlg::OutputExtDebugMessages () {
-
-	while (!m_ExtDebugMessages.IsEmpty ()) {
-		CString temp = m_ExtDebugMessages.RemoveHead ();
-		serverwnd->debuglog.AddEntry(temp);
-	}
-}
-// [end] Mighty Knife
 
 //Commander - Removed Invisible Mode
 //EastShare start, Added by linekin, HotKey
