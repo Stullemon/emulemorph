@@ -1485,12 +1485,12 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 //Returned bool is not if the TryToConnect is successful or not..
 //false means the client was deleted!
 //true means the client was not deleted!
-//MORPH START - Changed by SiRoB, Don't add client not accepted by trytoconnect [SiRoB]
+//MORPH START - Changed by SiRoB, Don't add client not accepted by trytoconnect
 /*
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket)
 */
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket, bool accepted)
-//MORPH END   - Changed by SiRoB, Don't add client not accepted by trytoconnect [SiRoB]
+//MORPH END   - Changed by SiRoB, Don't add client not accepted by trytoconnect
 {
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 	{
@@ -1519,7 +1519,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
-			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 			return true;
 		}
 
@@ -1533,7 +1533,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
-			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 			return true;
 		}
 	}
@@ -1560,8 +1560,8 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 					delete this;
 					return false;
 				}
+				accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 			}
-			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 			return true;
 		}
 
@@ -1597,7 +1597,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if (!socket->Create())
 		{
 			socket->Safe_Delete();
-			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 			return true;
 		}
 	}
@@ -1618,7 +1618,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
-			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 			return true;
 		}
 
@@ -1644,7 +1644,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 						delete this;
 						return false;
 					}
-					accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
+					accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 					return true;
 				}
 				
@@ -1658,6 +1658,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 							delete this;
 							return false;
 						}
+						accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
 						return true;
 					}
 				}
