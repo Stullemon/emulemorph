@@ -37,12 +37,13 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+	// [MightyKnife] Private modification
 	#ifdef MIGHTY_TWEAKS
-	// Private modification
 	CStatic m_sAdditionalInfo;
 	CFont   m_fStdFont;
-	#endif
 
+	#endif
+	// [MightyKnife] end: Private Modifications
 
 	DECLARE_MESSAGE_MAP()
 };

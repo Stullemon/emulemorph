@@ -183,8 +183,8 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DSCORE)->SetWindowText(_T("-"));
 
+	// [MightyKnife] Private modification
 	#ifdef MIGHTY_TWEAKS
-	// Private modification
 	CString AddInfo;
 	uint32 ClientIP = m_client->GetIP ();
 	AddInfo.Format ("User-ID: %u   IP: %d.%d.%d.%d:%d",
@@ -211,6 +211,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 					"MS Shell Dlg"));                 // lpszFacename
 	m_sAdditionalInfo.SetFont (&m_fStdFont);
 	#endif
+	// [MightyKnife] end: Private Modifications
 
 	return true;
 }
