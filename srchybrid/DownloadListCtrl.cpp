@@ -937,6 +937,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 							if(m_iDifference == 0){
 								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,0));
 							}
+							else if(m_iDifference == lpUpDownClient->GetRemoteQueueRank()){
+								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(0,0,207));//new source
+							}
 							else if(m_iDifference > 0){
 								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(207,0,0));
 							}
@@ -952,7 +955,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 							dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
 						}
 					}
-				} else {
+				} else {	
 					dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
 				}
 			}
