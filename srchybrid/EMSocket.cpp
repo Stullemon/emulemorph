@@ -438,9 +438,9 @@ void CEMSocket::OnReceive(int nErrorCode){
 }
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
-	downloadLimit = limit;
-	downloadLimitEnable = true;	
 	//MORPH START - Added by SiRoB, Accumulate download limits [netfinity]
+	downloadLimit = +limit;
+	downloadLimitEnable = true;	
 	if(downloadLimit > 5 * limit) // Allow a maximum of 0.5 sec to accumulate
 		downloadLimit = 5 * limit;
 	//MORPH START - Added by SiRoB, Accumulate download limits [netfinity]
