@@ -1,5 +1,5 @@
 ---------------------------------------- 
-Changelog for eMule 0.41b29 MorphXT
+Changelog for eMule 0.41b29 MorphXT v1.2
 ---------------------------------------- 
 FIXED  : the wrong construction of the A4AF available part causing messageBox (invalide parameter) [SiRoB]
 FIXED  : Default ShareOnlyTheNeed State not saved [SiRoB]
@@ -7,7 +7,7 @@ FIXED  : Give access to Multiple Comment Changing [SiRoB]
 FIXED  : Systray Popup doesn't disapair in some case (bond006) [SiRoB]
 FIXED  : New Download File in Auto or Disable PowerShareMode [SiRoB]
 FIXED  : The software client statistic bug, during language change, seems to be out [SiRoB]
-ADDED  : IP2Country from Superlexx, http://forum.emule-project.net/index.php?showtopic=38374
+ADDED  : IP2Country from Superlexx, for testing purpose only, may be removed
 ADDED  : Preferency default for Show share permission [SiRoB]
 ADDED  : Boost Friend option from Yun.SF3 [SiRoB]
 CHANGED: Some reworked preferency [SiRoB]
@@ -15,7 +15,7 @@ CHANGED: PaybackFirst now have same priority as PowerShare and
          need (client uploaded to you-downloaded from you)>SESSIONAMOUNT(10MB) to reach the requirement [AndCycle]
 NOTE   : IP2Country require you to download latest IP-to-Country Database from http://ip-to-country.webhosting.info/,
          unzip the file then put the ip-to-country.csv at /config/, then you can enable IP2Country at EastShare tab(will require restart mule)
-
+         
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.1
 ---------------------------------------- 
