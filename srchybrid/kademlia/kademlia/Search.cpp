@@ -335,6 +335,11 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 						}
 						case STOREFILE:
 						{
+							if( getCount() > SEARCHSTOREFILE_TOTAL )
+							{
+								prepareToStop();
+								break;
+							}
 							uchar fileid[16];
 							target.toByteArray(fileid);
 							CKnownFile* file = theApp.sharedfiles->GetFileByID(fileid);
@@ -374,6 +379,11 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 						}
 						case STOREKEYWORD:
 						{
+							if( getCount() > SEARCHSTOREKEYWORD_TOTAL )
+							{
+								prepareToStop();
+								break;
+							}
 							CKademliaUDPListener *udpListner = CKademlia::getUDPListener();
 							ASSERT(udpListner != NULL); 
 							if( bio1 )
@@ -514,19 +524,19 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 			type			= tag->GetStr();
 		else if (!tag->m_name.Compare(TAG_FORMAT))
 			format			= tag->GetStr();
-		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_ARTIST))
+		else if (!tag->m_name.Compare(TAG_MEDIA_ARTIST))
 			artist			= tag->GetStr();
-		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_ALBUM))
+		else if (!tag->m_name.Compare(TAG_MEDIA_ALBUM))
 			album			= tag->GetStr();
-		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_TITLE))
+		else if (!tag->m_name.Compare(TAG_MEDIA_TITLE))
 			title			= tag->GetStr();
-		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_LENGTH))
+		else if (!tag->m_name.Compare(TAG_MEDIA_LENGTH))
 			length			= tag->GetInt();
-		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_BITRATE))
+		else if (!tag->m_name.Compare(TAG_MEDIA_BITRATE))
 			bitrate			= tag->GetInt();
-		else if (!tag->m_name.CompareNoCase(TAG_MEDIA_CODEC))
+		else if (!tag->m_name.Compare(TAG_MEDIA_CODEC))
 			codec			= tag->GetStr();
-		else if (!tag->m_name.CompareNoCase(TAG_AVAILABILITY))
+		else if (!tag->m_name.Compare(TAG_AVAILABILITY))
 		{
 			availability	= tag->GetInt();
 			if( availability > 65500 )

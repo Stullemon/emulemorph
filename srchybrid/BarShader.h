@@ -36,6 +36,7 @@ public:
 
 	//draws the bar
 	void Draw(CDC* dc, int iLeft, int iTop, bool bFlat);
+	void DrawPreview(CDC* dc, int iLeft, int iTop, uint8 previewLevel);		//Cax2 aqua bar
 
 protected:
 	void BuildModifiers();
@@ -47,6 +48,7 @@ protected:
 	double m_dPixelsPerByte;
 	double m_dBytesPerPixel;
 	uint32 m_uFileSize;
+	bool	m_bIsPreview;
 
 private:
 	CRBMap<uint32, COLORREF> m_Spans;	// SLUGFILLER: speedBarShader

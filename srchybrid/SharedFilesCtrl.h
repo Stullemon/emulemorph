@@ -44,8 +44,19 @@ public:
 	void	ShowComments(CKnownFile* file);
 
 protected:
+	CTitleMenu	m_SharedFilesMenu;
+	CMenu		m_PrioMenu;
+	bool		sortstat[4];
+	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
+	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
+	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System
+	CMenu		m_HideOSMenu; //MORPH - Added by SiRoB, HIDEOS
+	CMenu		m_SelectiveChunkMenu; //MORPH - Added by SiRoB, HIDEOS
+	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void UpdateItem(CKnownFile* file);
+	void		OpenFile(const CKnownFile* file);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
@@ -55,25 +66,11 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	// Mighty Knife: CRC32-Tag
 	CFileProcessingThread m_FileProcessingThread;
 	afx_msg LRESULT OnCRC32RenameFile (WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCRC32UpdateFile (WPARAM wParam, LPARAM lParam);
 	// [end] Mighty Knife
-
-private:
-
-	CTitleMenu	m_SharedFilesMenu;
-	CMenu		m_PrioMenu;
-	bool		sortstat[4];
-	void		OpenFile(const CKnownFile* file);
-
-	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
-	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
-	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System
-	CMenu		m_HideOSMenu; //MORPH - Added by SiRoB, HIDEOS
-	CMenu		m_SelectiveChunkMenu; //MORPH - Added by SiRoB, HIDEOS
-	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-
 };

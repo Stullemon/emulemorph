@@ -89,8 +89,8 @@ private:
 	UINT_PTR m_Timer;
 	bool m_blinkstate;
 	bool m_lastemptyicon;
-	CWnd* m_pMessageBox;
-	CWnd* m_pCloseBtn;
-	CWnd* m_pSendBtn;
+	HWND m_hwndMessageBox;
+	HWND m_hwndCloseBtn;
+	HWND m_hwndSendBtn;
 	CImageList m_imlChat;
 };

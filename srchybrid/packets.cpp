@@ -245,11 +245,11 @@ STag::STag(const STag& in)
 {
 	type = in.type;
 	tagname = in.tagname!=NULL ? nstrdup(in.tagname) : NULL;
-	if (in.type == 2)
+	if (in.type == TAGTYPE_STRING)
 		stringvalue = in.stringvalue!=NULL ? nstrdup(in.stringvalue) : NULL;
-	else if (in.type == 3)
+	else if (in.type == TAGTYPE_UINT32)
 		intvalue = in.intvalue;
-	else if (in.type == 4)
+	else if (in.type == TAGTYPE_FLOAT32)
 		floatvalue = in.floatvalue;
 	else{
 		ASSERT(0);
@@ -262,7 +262,7 @@ STag::STag(const STag& in)
 STag::~STag()
 {
 	delete[] tagname;
-	if (type == 2)
+	if (type == TAGTYPE_STRING)
 		delete[] stringvalue;
 }
 
@@ -270,26 +270,30 @@ STag::~STag()
 ///////////////////////////////////////////////////////////////////////////////
 // CTag
 
-CTag::CTag(LPCSTR name,uint32 intvalue){
+CTag::CTag(LPCSTR name, uint32 intvalue)
+{
 	tag.tagname = nstrdup(name);
-	tag.type = 3;
+	tag.type = TAGTYPE_UINT32;
 	tag.intvalue = intvalue;
 }
 
-CTag::CTag(uint8 special, uint32 intvalue){
-	tag.type = 3;
+CTag::CTag(uint8 special, uint32 intvalue)
+{
+	tag.type = TAGTYPE_UINT32;
 	tag.intvalue = intvalue;
 	tag.specialtag = special;
 }
 
-CTag::CTag(LPCSTR name,LPCSTR strvalue){
+CTag::CTag(LPCSTR name, LPCSTR strvalue)
+{
 	tag.tagname = nstrdup(name);
-	tag.type = 2;
+	tag.type = TAGTYPE_STRING;
 	tag.stringvalue = nstrdup(strvalue);
 }
 
-CTag::CTag(uint8 special, LPCSTR strvalue){
-	tag.type = 2;
+CTag::CTag(uint8 special, LPCSTR strvalue)
+{
+	tag.type = TAGTYPE_STRING;
 	tag.stringvalue = nstrdup(strvalue);
 	tag.specialtag = special;
 }
@@ -299,102 +303,221 @@ CTag::CTag(const STag& in_tag)
 {
 }
 
-CTag::CTag(CFileDataIO* in_data)
+CTag::CTag(CFileDataIO* data)
 {
-	tag.type = in_data->ReadUInt8();
-	UINT length = in_data->ReadUInt16();
-	if (length == 1)
-		tag.specialtag = in_data->ReadUInt8();
-	else {
-		tag.tagname = new char[length+1];
-		in_data->Read(tag.tagname,length);
-		tag.tagname[length] = 0;
+	tag.type = data->ReadUInt8();
+	if (tag.type & 0x80)
+	{
+		tag.type &= 0x7F;
+		tag.specialtag = data->ReadUInt8();
+	}
+	else
+	{
+		UINT length = data->ReadUInt16();
+		if (length == 1)
+			tag.specialtag = data->ReadUInt8();
+		else
+		{
+			tag.tagname = new char[length+1];
+			data->Read(tag.tagname,length);
+			tag.tagname[length] = '\0';
+		}
 	}
 
 	// NOTE: It's very important that we read the *entire* packet data, even if we do
 	// not use each tag. Otherwise we will get troubles when the packets are returned in 
 	// a list - like the search results from a server.
-	if (tag.type == 2){ // STRING
-		length = in_data->ReadUInt16();
+	if (tag.type == TAGTYPE_STRING)
+	{
+		UINT length = data->ReadUInt16();
 		tag.stringvalue = new char[length+1];
-		in_data->Read(tag.stringvalue,length);
-		tag.stringvalue[length] = 0;
+		data->Read(tag.stringvalue, length);
+		tag.stringvalue[length] = '\0';
 	}
-	else if (tag.type == 3){ // DWORD
-		tag.intvalue = in_data->ReadUInt32();
+	else if (tag.type == TAGTYPE_UINT32)
+	{
+		tag.intvalue = data->ReadUInt32();
 	}
-	else if (tag.type == 4){ // FLOAT (used by Hybrid 0.48)
-		in_data->Read(&tag.floatvalue,4);
+	else if (tag.type == TAGTYPE_UINT16)
+	{
+		tag.intvalue = data->ReadUInt16();
+		tag.type = TAGTYPE_UINT32;
 	}
-	else if (tag.type == 1){ // HASH (never seen)
-		TRACE("%s; Reading *unverified* HASH tag\n", __FUNCTION__);
-		in_data->Seek(16, CFile::current);
+	else if (tag.type == TAGTYPE_UINT8)
+	{
+		tag.intvalue = data->ReadUInt8();
+		tag.type = TAGTYPE_UINT32;
 	}
-	else if (tag.type == 5){ // BOOL (never seen; propably 1 bit)
-		// NOTE: This is preventive code, it was never tested
-		TRACE("%s; Reading *unverified* BOOL tag\n", __FUNCTION__);
-		in_data->Seek(1, CFile::current);
+	else if (tag.type == TAGTYPE_FLOAT32)
+	{
+		data->Read(&tag.floatvalue, 4);
 	}
-	else if (tag.type == 6){ // BOOL Array (never seen; propably <numbits> <bits>)
-		// NOTE: This is preventive code, it was never tested
-		TRACE("%s; Reading *unverified* BOOL Array tag\n", __FUNCTION__);
+	else if (tag.type >= TAGTYPE_STR1 && tag.type <= TAGTYPE_STR16)
+	{
+		UINT length = tag.type - TAGTYPE_STR1 + 1;
+		tag.stringvalue = new char[length+1];
+		data->Read(tag.stringvalue, length);
+		tag.stringvalue[length] = '\0';
+		tag.type = TAGTYPE_STRING;
+	}
+	else if (tag.type == TAGTYPE_HASH)
+	{
+		TRACE("***NOTE: %s; Reading HASH tag\n", __FUNCTION__);
+		data->Seek(16, CFile::current);
+	}
+	else if (tag.type == TAGTYPE_BOOL)
+	{
+		TRACE("***NOTE: %s; Reading BOOL tag\n", __FUNCTION__);
+		data->Seek(1, CFile::current);
+	}
+	else if (tag.type == TAGTYPE_BOOLARRAY)
+	{
+		TRACE("***NOTE: %s; Reading BOOL Array tag\n", __FUNCTION__);
 		uint16 len;
-		in_data->Read(&len,2);
-		in_data->Seek((len+7)/8, CFile::current);
+		data->Read(&len, 2);
+		// 07-Apr-2004: eMule versions prior to 0.42e.29 used the formula "(len+7)/8"!
+		data->Seek((len/8)+1, CFile::current);
 	}
-	else if (tag.type == 7){ // BLOB (never seen; propably <len> <byte>)
-		// NOTE: This is preventive code, it was never tested
-		TRACE("%s; Reading *unverified* BLOB tag\n", __FUNCTION__);
-		uint16 len;
-		in_data->Read(&len,2);
-		in_data->Seek(len, CFile::current);
+	else if (tag.type == TAGTYPE_BLOB) // (never seen; <len> <byte>)
+	{
+		TRACE("***NOTE: %s; Reading BLOB tag\n", __FUNCTION__);
+		uint32 len;
+		// 07-Apr-2004: eMule versions prior to 0.42e.29 handled the "len" as int16!
+		data->Read(&len,4);
+		data->Seek(len, CFile::current);
 	}
-	else{
-		if (length == 1)
+	else
+	{
+		if (tag.specialtag != 0)
 			TRACE("%s; Unknown tag: type=0x%02X  specialtag=%u\n", __FUNCTION__, tag.type, tag.specialtag);
 		else
 			TRACE("%s; Unknown tag: type=0x%02X  name=\"%s\"\n", __FUNCTION__, tag.type, tag.tagname);
 	}
 }
 
-CTag::~CTag(){
+CTag::~CTag()
+{
 }
 
-bool CTag::WriteTagToFile(CFileDataIO* file)
+bool CTag::WriteNewEd2kTag(CFileDataIO* data) const
+{
+	ASSERT( tag.type != 0 );
+
+	// Write tag type
+	UINT uTagStrValLen = 0;
+	uint8 uTagType;
+	if (IsInt())
+	{
+		if (tag.intvalue <= 0xFF)
+			uTagType = TAGTYPE_UINT8;
+		else if (tag.intvalue <= 0xFFFF)
+			uTagType = TAGTYPE_UINT16;
+		else
+			uTagType = TAGTYPE_UINT32;
+	}
+	else if (IsStr())
+	{
+		uTagStrValLen = strlen(tag.stringvalue);
+		if (uTagStrValLen >= 1 && uTagStrValLen <= 16)
+			uTagType = TAGTYPE_STR1 + uTagStrValLen - 1;
+		else
+			uTagType = TAGTYPE_STRING;
+	}
+	else
+		uTagType = tag.type;
+
+	// Write tag name
+	if (tag.tagname)
+	{
+		data->WriteUInt8(uTagType);
+		UINT uTagNameLen = strlen(tag.tagname);
+		data->WriteUInt16(uTagNameLen);
+		data->Write(tag.tagname, uTagNameLen);
+	}
+	else
+	{
+		ASSERT( tag.specialtag != 0 );
+		data->WriteUInt8(uTagType | 0x80);
+		data->WriteUInt8(tag.specialtag);
+	}
+
+	// Write tag data
+	if (uTagType == TAGTYPE_STRING)
+	{
+		data->WriteUInt16(uTagStrValLen);
+		data->Write(tag.stringvalue, uTagStrValLen);
+	}
+	else if (uTagType >= TAGTYPE_STR1 && uTagType <= TAGTYPE_STR16)
+	{
+		data->Write(tag.stringvalue, uTagStrValLen);
+	}
+	else if (uTagType == TAGTYPE_UINT32)
+	{
+		data->WriteUInt32(tag.intvalue);
+	}
+	else if (uTagType == TAGTYPE_UINT16)
+	{
+		data->WriteUInt16(tag.intvalue);
+	}
+	else if (uTagType == TAGTYPE_UINT8)
+	{
+		data->WriteUInt8(tag.intvalue);
+	}
+	else if (uTagType == TAGTYPE_FLOAT32)
+	{
+		data->Write(&tag.floatvalue, 4);
+	}
+	else
+	{
+		TRACE("%s; Unknown tag: type=0x%02X\n", __FUNCTION__, uTagType);
+		ASSERT(0);
+		return false;
+	}
+
+	return true;
+}
+
+bool CTag::WriteTagToFile(CFileDataIO* file) const
 {
 	// don't write tags of unknown types, we wouldn't be able to read them in again 
 	// and the met file would be corrupted
-	if (tag.type==2 || tag.type==3 || tag.type==4){
+	if (tag.type == TAGTYPE_STRING || tag.type == TAGTYPE_UINT32 || tag.type == TAGTYPE_FLOAT32)
+	{
 		file->WriteUInt8(tag.type);
 		
-		if (tag.tagname){
+		if (tag.tagname)
+		{
 			UINT taglen = strlen(tag.tagname);
 			file->WriteUInt16(taglen);
-			file->Write(tag.tagname,taglen);
+			file->Write(tag.tagname, taglen);
 		}
-		else{
+		else
+		{
 			file->WriteUInt16(1);
 			file->WriteUInt8(tag.specialtag);
 		}
 
-		if (tag.type == 2){
+		if (tag.type == TAGTYPE_STRING)
+		{
 			UINT len = strlen(tag.stringvalue);
 			file->WriteUInt16(len);
 			file->Write(tag.stringvalue,len);
 		}
-		else if (tag.type == 3)
+		else if (tag.type == TAGTYPE_UINT32)
 			file->WriteUInt32(tag.intvalue);
-		else if (tag.type == 4)
-			file->Write(&tag.floatvalue,4);
+		else if (tag.type == TAGTYPE_FLOAT32)
+			file->Write(&tag.floatvalue, 4);
 		//TODO: Support more tag types
-		else{
+		else
+		{
 			TRACE("%s; Unknown tag: type=0x%02X\n", __FUNCTION__, tag.type);
 			ASSERT(0);
 			return false;
 		}
 		return true;
 	}
-	else{
+	else
+	{
 		TRACE("%s; Ignored tag with unknown type=0x%02X\n", __FUNCTION__, tag.type);
 		ASSERT(0);
 		return false;
@@ -404,34 +527,46 @@ bool CTag::WriteTagToFile(CFileDataIO* file)
 CString CTag::GetFullInfo() const
 {
 	CString strTag;
-	if (tag.tagname){
+	if (tag.tagname)
+	{
 		strTag = _T('\"');
 		strTag += tag.tagname;
 		strTag += _T('\"');
 	}
-	else{
+	else
+	{
 		strTag.Format(_T("0x%02X"), tag.specialtag);
 	}
 	strTag += _T("=");
-	if (tag.type == 2){
+	if (tag.type == TAGTYPE_STRING)
+	{
 		strTag += _T("\"");
 		strTag += tag.stringvalue;
 		strTag += _T("\"");
 	}
-	else if (tag.type == 3){
-		TCHAR szBuff[16];
-		_itot(tag.intvalue, szBuff, 10);
-		strTag += szBuff;
+	else if (tag.type >= TAGTYPE_STR1 && tag.type <= TAGTYPE_STR16)
+	{
+		strTag.AppendFormat(_T("(Str%u)\"%s\""), tag.type - TAGTYPE_STR1 + 1, tag.stringvalue);
 	}
-	else if (tag.type == 4){
-		TCHAR szBuff[16];
-		_sntprintf(szBuff, ARRSIZE(szBuff), _T("%f"), tag.floatvalue);
-		strTag += szBuff;
+	else if (tag.type == TAGTYPE_UINT32)
+	{
+		strTag.AppendFormat(_T("(Int32)%u"), tag.intvalue);
 	}
-	else{
-		CString strBuff;
-		strBuff.Format(_T("Type=%u"), tag.type);
-		strTag += strBuff;
+	else if (tag.type == TAGTYPE_UINT16)
+	{
+		strTag.AppendFormat(_T("(Int16)%u"), tag.intvalue);
+	}
+	else if (tag.type == TAGTYPE_UINT8)
+	{
+		strTag.AppendFormat(_T("(Int8)%u"), tag.intvalue);
+	}
+	else if (tag.type == TAGTYPE_FLOAT32)
+	{
+		strTag.AppendFormat(_T("(Float32)%f"), tag.floatvalue);
+	}
+	else
+	{
+		strTag.AppendFormat(_T("Type=%u"), tag.type);
 	}
 	return strTag;
 }

@@ -25,6 +25,7 @@
 #include "emuledlg.h"
 #include "TransferWnd.h"
 #include "ServerWnd.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -47,6 +48,7 @@ CPPgDisplay::~CPPgDisplay()
 void CPPgDisplay::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_PREVIEW, m_3DPreview);
 }
 
 
@@ -67,6 +69,8 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
 	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
 	ON_BN_CLICKED(IDC_RESETHIST, OnBtnClickedResetHist)
+	ON_WM_HELPINFO()
+//	ON_NOTIFY(NM_CUSTOMDRAW, IDC_3DDEPTH, On3DDepth)
 END_MESSAGE_MAP()
 
 void CPPgDisplay::LoadSettings(void)
@@ -116,6 +120,7 @@ void CPPgDisplay::LoadSettings(void)
 	CString strBuffer;
 	strBuffer.Format("%u", thePrefs.m_iToolDelayTime);
 	GetDlgItem(IDC_TOOLTIPDELAY)->SetWindowText(strBuffer);
+
 }
 
 BOOL CPPgDisplay::OnInitDialog()
@@ -127,6 +132,7 @@ BOOL CPPgDisplay::OnInitDialog()
 	CSliderCtrl *slider3D = (CSliderCtrl*)GetDlgItem(IDC_3DDEPTH);
 	slider3D->SetRange(0, 5, true);
 	slider3D->SetPos(thePrefs.Get3DDepth());
+	DrawPreview();
 
 	LoadSettings();
 	Localize();
@@ -202,11 +208,9 @@ BOOL CPPgDisplay::OnApply()
 	
 	theApp.emuledlg->transferwnd->m_tooltipCats.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
-	CToolTipCtrl* tooltip = theApp.emuledlg->searchwnd->searchlistctrl.GetToolTips();
-	if (tooltip)
-		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+	theApp.emuledlg->searchwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
 
-	tooltip = theApp.emuledlg->transferwnd->downloadlistctrl.GetToolTips();
+	CToolTipCtrl* tooltip = theApp.emuledlg->transferwnd->downloadlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
@@ -264,6 +268,8 @@ void CPPgDisplay::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 	UpdateData(false); 
 	CPropertyPage::OnHScroll(nSBCode, nPos, pScrollBar);
+
+	DrawPreview();
 }
 
 // NOTE: Can't use 'lCustData' for a structure which would hold that static members,
@@ -351,3 +357,40 @@ void CPPgDisplay::OnBtnClickedResetHist() {
 	theApp.emuledlg->searchwnd->ResetHistory();
 	theApp.emuledlg->serverwnd->ResetHistory();
 }
+
+void CPPgDisplay::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Display);
+}
+
+BOOL CPPgDisplay::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgDisplay::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
+}
+
+void CPPgDisplay::DrawPreview()
+{
+	int dep=((CSliderCtrl*)GetDlgItem(IDC_3DDEPTH))->GetPos();
+	m_3DPreview.SetSliderPos( dep);
+}
+/*
+void CPPgDisplay::On3DDepth(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	DrawPreview();
+theApp.AddLogLine(true,"ding");
+
+	*pResult = 0;
+}
+*/

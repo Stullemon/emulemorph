@@ -8,31 +8,31 @@ public:
 	CPPgScheduler();
 	virtual ~CPPgScheduler();
 
-
+	// Dialog Data
 	enum { IDD = IDD_PPG_SCHEDULER };
 
 	void Localize(void);
 
-	virtual BOOL OnInitDialog();
-	
 // Dialog Data
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	DECLARE_MESSAGE_MAP()
-private:
-	CString GetActionLabel(uint8 index);
-	CString GetDayLabel(uint8 index);
-	void LoadSchedule(uint8 index);
-	void RecheckSchedules();
-	void FillScheduleList();
 	CComboBox m_timesel;
 	CDateTimeCtrl m_time;
 	CDateTimeCtrl m_timeTo;
 	CListCtrl m_list;
 	CListCtrl m_actions;
-public:
+
+	CString GetActionLabel(uint8 index);
+	CString GetDayLabel(uint8 index);
+	void LoadSchedule(uint8 index);
+	void RecheckSchedules();
+	void FillScheduleList();
+
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedAdd();
 	afx_msg void OnBnClickedApply();
@@ -42,5 +42,6 @@ public:
 	afx_msg void OnDisableTime2();
 	afx_msg void OnNMDblclkActionlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult);
-
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

@@ -47,6 +47,12 @@ public:
 
 protected:
 	uint32	m_nResultsID;
+	CTitleMenu m_SearchFileMenu;
+	CSearchList* searchlist;
+
+	void	ExpandCollapseItem(int item);
+	void	HideSources(CSearchFile* toCollapse);
+	void	SetStyle();
 
 	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
@@ -65,12 +71,5 @@ protected:
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnDblClick(NMHDR *pNMHDR, LRESULT *pResult);
-
-private:
-	CTitleMenu	 m_SearchFileMenu;
-	CSearchList* searchlist;
-
-	void	ExpandCollapseItem(int item);
-	void	HideSources(CSearchFile* toCollapse);
-	void	SetStyle();
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };

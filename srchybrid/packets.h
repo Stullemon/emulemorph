@@ -84,9 +84,14 @@ public:
 	CTag(CFileDataIO* in_data);
 	~CTag();
 	
+	bool IsStr() const { return tag.type == TAGTYPE_STRING; }
+	bool IsInt() const { return tag.type == TAGTYPE_UINT32; }
+	bool IsFloat() const { return tag.type == TAGTYPE_FLOAT32; }
+	
 	CTag* CloneTag() { return new CTag(tag); }
 	
-	bool WriteTagToFile(CFileDataIO* file);
+	bool WriteTagToFile(CFileDataIO* file) const;		// old eD2K tags
+	bool WriteNewEd2kTag(CFileDataIO* file) const;	// new eD2K tags
 	
 	STag tag;
 	CString GetFullInfo() const;

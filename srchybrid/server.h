@@ -36,6 +36,7 @@ struct ServerMet_Struct {
 
 // Server TCP flags
 #define	SRV_TCPFLG_COMPRESSION	0x00000001
+#define	SRV_TCPFLG_NEWTAGS			0x00000008
 
 // Server UDP flags
 #define	SRV_UDPFLG_EXT_GETSOURCES	0x00000001

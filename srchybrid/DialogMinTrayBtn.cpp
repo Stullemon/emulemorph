@@ -6,12 +6,21 @@
 //  DialogMinTrayBtn.hpp
 //  zegzav - 2002,2003 - eMule project (http://www.emule-project.net)
 // ------------------------------------------------------------
-
-#include "AfxBeginMsgMapTemplate.h"
+#include "stdafx.h"
 #include "DialogMinTrayBtn.h"
 #include "VisualStylesXP.h"
+#include "ResizableLib\ResizableDialog.h"
+#include "AfxBeginMsgMapTemplate.h"
+#include "OtherFunctions.h"
 
-extern void InitWindowStyles(CWnd* pWnd);
+#if 0
+// define this to use that source file as template
+#define	TEMPLATE	template <class BASE>
+#else
+// define this to instantiate functions for class 'BASE' right in this CPP module
+#define	TEMPLATE template <>
+#define BASE		CResizableDialog
+#endif
 
 // ------------------------------
 //  constants
@@ -44,7 +53,7 @@ END_TM_PART_STATES()
 #define BMP_TRAYBTN_HOMESTEAD	"TRAYBUTTON_LUNA_HOMESTEAD_BMP"
 #define BMP_TRAYBTN_TRANSCOLOR	(RGB(255,0,255))
 
-template <class BASE> const CHAR *CDialogMinTrayBtn<BASE>::m_pszMinTrayBtnBmpName[] = { BMP_TRAYBTN_BLUE, BMP_TRAYBTN_METALLIC, BMP_TRAYBTN_HOMESTEAD };
+TEMPLATE const CHAR *CDialogMinTrayBtn<BASE>::m_pszMinTrayBtnBmpName[] = { BMP_TRAYBTN_BLUE, BMP_TRAYBTN_METALLIC, BMP_TRAYBTN_HOMESTEAD };
 
 #define VISUALSTYLESXP_DEFAULTFILE		L"LUNA.MSSTYLES"
 #define VISUALSTYLESXP_BLUE				0
@@ -62,36 +71,33 @@ template <class BASE> const CHAR *CDialogMinTrayBtn<BASE>::m_pszMinTrayBtnBmpNam
 		(static_cast< LRESULT (AFX_MSG_CALL CWnd::*)(void) > (_OnThemeChanged))		\
 	},
 
-// _WIN32_WINDOWS >= 0x0410 (95 not supported)
-//template <class BASE> BOOL (WINAPI *CDialogMinTrayBtn<BASE>::_TransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT)= NULL;
-
 
 // ------------------------------
 //  contructor/init
 // ------------------------------
 
-template <class BASE> CDialogMinTrayBtn<BASE>::CDialogMinTrayBtn() :
+TEMPLATE CDialogMinTrayBtn<BASE>::CDialogMinTrayBtn() :
     m_MinTrayBtnPos(0,0), m_MinTrayBtnSize(0,0), m_bMinTrayBtnEnabled(TRUE), m_bMinTrayBtnVisible(TRUE), 
     m_bMinTrayBtnUp(TRUE), m_bMinTrayBtnCapture(FALSE), m_bMinTrayBtnActive(FALSE), m_bMinTrayBtnHitTest(FALSE)
 {
     MinTrayBtnInit();
 }
 
-template <class BASE> CDialogMinTrayBtn<BASE>::CDialogMinTrayBtn(LPCTSTR lpszTemplateName, CWnd* pParentWnd) : BASE(lpszTemplateName, pParentWnd),
+TEMPLATE CDialogMinTrayBtn<BASE>::CDialogMinTrayBtn(LPCTSTR lpszTemplateName, CWnd* pParentWnd) : BASE(lpszTemplateName, pParentWnd),
     m_MinTrayBtnPos(0,0), m_MinTrayBtnSize(0,0), m_bMinTrayBtnEnabled(TRUE), m_bMinTrayBtnVisible(TRUE), 
     m_bMinTrayBtnUp(TRUE), m_bMinTrayBtnCapture(FALSE), m_bMinTrayBtnActive(FALSE), m_bMinTrayBtnHitTest(FALSE)
 {
     MinTrayBtnInit();
 }
 
-template <class BASE> CDialogMinTrayBtn<BASE>::CDialogMinTrayBtn(UINT nIDTemplate, CWnd* pParentWnd) : BASE(nIDTemplate, pParentWnd),
+TEMPLATE CDialogMinTrayBtn<BASE>::CDialogMinTrayBtn(UINT nIDTemplate, CWnd* pParentWnd) : BASE(nIDTemplate, pParentWnd),
     m_MinTrayBtnPos(0,0), m_MinTrayBtnSize(0,0), m_bMinTrayBtnEnabled(TRUE), m_bMinTrayBtnVisible(TRUE), 
     m_bMinTrayBtnUp(TRUE), m_bMinTrayBtnCapture(FALSE), m_bMinTrayBtnActive(FALSE), m_bMinTrayBtnHitTest(FALSE)
 {
     MinTrayBtnInit();
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnInit()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnInit()
 {
     m_nMinTrayBtnTimerId= 0;
 	BOOL bBmpResult = MinTrayBtnInitBitmap();
@@ -110,7 +116,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnInit()
 }
 
 
-BEGIN_MESSAGE_MAP_TEMPLATE(template <class BASE>, CDialogMinTrayBtn<BASE>, CDialogMinTrayBtn, BASE)
+BEGIN_MESSAGE_MAP_TEMPLATE(TEMPLATE, CDialogMinTrayBtn<BASE>, CDialogMinTrayBtn, BASE)
     ON_WM_NCPAINT()
     ON_WM_NCACTIVATE()
     ON_WM_NCHITTEST()
@@ -126,7 +132,7 @@ END_MESSAGE_MAP()
 //  messages
 // ------------------------------
 
-template <class BASE> BOOL CDialogMinTrayBtn<BASE>::OnInitDialog()
+TEMPLATE BOOL CDialogMinTrayBtn<BASE>::OnInitDialog()
 {
 	BOOL bReturn= BASE::OnInitDialog();
 	InitWindowStyles(this);
@@ -134,16 +140,14 @@ template <class BASE> BOOL CDialogMinTrayBtn<BASE>::OnInitDialog()
     return bReturn;
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::OnNcPaint() 
+TEMPLATE void CDialogMinTrayBtn<BASE>::OnNcPaint() 
 {
-    // TODO: Add your message handler code here
-
     BASE::OnNcPaint();
     MinTrayBtnUpdatePosAndSize();
     MinTrayBtnDraw();
 }
 
-template <class BASE> BOOL CDialogMinTrayBtn<BASE>::OnNcActivate(BOOL bActive)
+TEMPLATE BOOL CDialogMinTrayBtn<BASE>::OnNcActivate(BOOL bActive)
 {
     MinTrayBtnUpdatePosAndSize();
     BOOL bResult= BASE::OnNcActivate(bActive);
@@ -152,7 +156,7 @@ template <class BASE> BOOL CDialogMinTrayBtn<BASE>::OnNcActivate(BOOL bActive)
     return bResult;
 }
 
-template <class BASE> UINT CDialogMinTrayBtn<BASE>::OnNcHitTest(CPoint point)
+TEMPLATE UINT CDialogMinTrayBtn<BASE>::OnNcHitTest(CPoint point)
 {
     BOOL bPreviousHitTest= m_bMinTrayBtnHitTest;
     m_bMinTrayBtnHitTest= MinTrayBtnHitTest(point);
@@ -165,7 +169,7 @@ template <class BASE> UINT CDialogMinTrayBtn<BASE>::OnNcHitTest(CPoint point)
     return BASE::OnNcHitTest(point);
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::OnNcLButtonDown(UINT nHitTest, CPoint point) 
+TEMPLATE void CDialogMinTrayBtn<BASE>::OnNcLButtonDown(UINT nHitTest, CPoint point) 
 {
     if ((GetStyle() & WS_DISABLED) || (!MinTrayBtnIsEnabled()) || (!MinTrayBtnIsVisible()) || (!MinTrayBtnHitTest(point)))
     {
@@ -178,13 +182,13 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::OnNcLButtonDown(UINT nHitTes
     MinTrayBtnSetDown();
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::OnNcRButtonDown(UINT nHitTest, CPoint point) 
+TEMPLATE void CDialogMinTrayBtn<BASE>::OnNcRButtonDown(UINT nHitTest, CPoint point) 
 {
     if ((GetStyle() & WS_DISABLED) || (!MinTrayBtnIsVisible()) || (!MinTrayBtnHitTest(point)))
         BASE::OnNcRButtonDown(nHitTest, point);
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::OnMouseMove(UINT nFlags, CPoint point) 
+TEMPLATE void CDialogMinTrayBtn<BASE>::OnMouseMove(UINT nFlags, CPoint point) 
 {
     if ((GetStyle() & WS_DISABLED) || (!m_bMinTrayBtnCapture))
     { 
@@ -206,7 +210,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::OnMouseMove(UINT nFlags, CPo
     }
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::OnLButtonUp(UINT nFlags, CPoint point) 
+TEMPLATE void CDialogMinTrayBtn<BASE>::OnLButtonUp(UINT nFlags, CPoint point) 
 {
     if ((GetStyle() & WS_DISABLED) || (!m_bMinTrayBtnCapture))
     {
@@ -223,7 +227,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::OnLButtonUp(UINT nFlags, CPo
        SendMessage(WM_SYSCOMMAND, SC_MINIMIZETRAY, MAKELONG(point.x, point.y)); 
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::OnTimer(UINT_PTR nIDEvent)
+TEMPLATE void CDialogMinTrayBtn<BASE>::OnTimer(UINT_PTR nIDEvent)
 {
     if ((!IsWindowsClassicStyle()) && (nIDEvent == m_nMinTrayBtnTimerId))
     {
@@ -239,7 +243,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::OnTimer(UINT_PTR nIDEvent)
     }
 }
 
-template <class BASE> LRESULT CDialogMinTrayBtn<BASE>::_OnThemeChanged()
+TEMPLATE LRESULT CDialogMinTrayBtn<BASE>::_OnThemeChanged()
 {
 	// BASE::OnThemeChanged();
 	MinTrayBtnInitBitmap();
@@ -251,54 +255,64 @@ template <class BASE> LRESULT CDialogMinTrayBtn<BASE>::_OnThemeChanged()
 //  methods
 // ------------------------------
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnUpdatePosAndSize()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnUpdatePosAndSize()
 {
-    DWORD dwStyle= GetStyle();
-    DWORD dwExStyle= GetExStyle();
+    DWORD dwStyle = GetStyle();
+    DWORD dwExStyle = GetExStyle();
 
-    INT caption= ((dwExStyle & WS_EX_TOOLWINDOW) == 0) ? GetSystemMetrics(SM_CYCAPTION) - 1 : GetSystemMetrics(SM_CYSMCAPTION) - 1;
-    if (caption < CAPTION_MINHEIGHT)
-       caption= CAPTION_MINHEIGHT;
+    INT cyCaption = ((dwExStyle & WS_EX_TOOLWINDOW) == 0) ? GetSystemMetrics(SM_CYCAPTION) - 1 : GetSystemMetrics(SM_CYSMCAPTION) - 1;
+    if (cyCaption < CAPTION_MINHEIGHT)
+		cyCaption = CAPTION_MINHEIGHT;
 
     CSize borderfixed(-GetSystemMetrics(SM_CXFIXEDFRAME), GetSystemMetrics(SM_CYFIXEDFRAME));
     CSize bordersize(-GetSystemMetrics(SM_CXSIZEFRAME), GetSystemMetrics(SM_CYSIZEFRAME));
 
-    CRect window;
-    GetWindowRect(&window);
+    CRect rcWnd;
+    GetWindowRect(&rcWnd);
 
-    CSize button;
-    button.cy= caption - (CAPTION_BUTTONSPACE * 2);
-    button.cx= button.cy;
-    if (IsWindowsClassicStyle())
-        button.cx+= 2;
+	// get Windows' frame window button width/height (this may not always be a square!)
+    CSize szBtn;
+    szBtn.cy = cyCaption - (CAPTION_BUTTONSPACE * 2);
+	if (IsWindowsClassicStyle())
+		szBtn.cx = GetSystemMetrics(SM_CXSIZE) - 2;
+	else
+		szBtn.cx = GetSystemMetrics(SM_CXSIZE) - 4;
 
-    m_MinTrayBtnSize= button;
+	// set our frame window button width/height...
+	if (IsWindowsClassicStyle()){
+		// ...this is same as Windows' buttons for non WinXP
+		m_MinTrayBtnSize = szBtn;
+	}
+	else{
+		// ...this is a square for WinXP
+		m_MinTrayBtnSize.cx = szBtn.cy;
+		m_MinTrayBtnSize.cy = szBtn.cy;
+	}
 
-    m_MinTrayBtnPos.x= window.Width() - ((CAPTION_BUTTONSPACE + button.cx) * 2);
-    m_MinTrayBtnPos.y= CAPTION_BUTTONSPACE;
+	m_MinTrayBtnPos.x = rcWnd.Width() - (CAPTION_BUTTONSPACE + m_MinTrayBtnSize.cx + CAPTION_BUTTONSPACE + szBtn.cx);
+    m_MinTrayBtnPos.y = CAPTION_BUTTONSPACE;
 
     if ((dwStyle & WS_THICKFRAME) != 0)
     {
         // resizable window
-        m_MinTrayBtnPos+= bordersize;
+        m_MinTrayBtnPos += bordersize;
     }
     else
     {
         // fixed window
-        m_MinTrayBtnPos+= borderfixed;
+        m_MinTrayBtnPos += borderfixed;
     }
 
     if ( ((dwExStyle & WS_EX_TOOLWINDOW) == 0) && (((dwStyle & WS_MINIMIZEBOX) != 0) || ((dwStyle & WS_MAXIMIZEBOX) != 0)) )
     {
         if (IsWindowsClassicStyle())
-            m_MinTrayBtnPos.x-= (button.cx * 2) + CAPTION_BUTTONSPACE;
+            m_MinTrayBtnPos.x -= (szBtn.cx * 2) + CAPTION_BUTTONSPACE;
         else
-            m_MinTrayBtnPos.x-= (button.cx + CAPTION_BUTTONSPACE) * 2;
+            m_MinTrayBtnPos.x -= (szBtn.cx + CAPTION_BUTTONSPACE) * 2;
     }
-       
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnShow()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnShow()
 {
     if (MinTrayBtnIsVisible())
        return;
@@ -310,7 +324,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnShow()
     }
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnHide()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnHide()
 {
     if (!MinTrayBtnIsVisible())
        return;
@@ -322,7 +336,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnHide()
     }
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnEnable()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnEnable()
 {
     if (MinTrayBtnIsEnabled())
        return;
@@ -331,7 +345,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnEnable()
     MinTrayBtnSetUp();
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnDisable()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnDisable()
 {
     if (!MinTrayBtnIsEnabled())
        return;
@@ -345,7 +359,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnDisable()
     MinTrayBtnSetUp();
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnDraw()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnDraw()
 {
     if (!MinTrayBtnIsVisible())
        return;
@@ -435,7 +449,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnDraw()
     ReleaseDC(pDC);
 }
 
-template <class BASE> BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnHitTest(CPoint point) const
+TEMPLATE BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnHitTest(CPoint point) const
 {
     CRect rWnd;
     GetWindowRect(&rWnd);
@@ -445,30 +459,30 @@ template <class BASE> BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnHitTest(CPoint poi
     return (rBtn.PtInRect(point));
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnSetUp()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnSetUp()
 {
     m_bMinTrayBtnUp= TRUE;
     MinTrayBtnDraw();
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnSetDown()
+TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnSetDown()
 {
     m_bMinTrayBtnUp= FALSE;
     MinTrayBtnDraw();
 }
 
-template <class BASE> BOOL CDialogMinTrayBtn<BASE>::IsWindowsClassicStyle() const
+TEMPLATE BOOL CDialogMinTrayBtn<BASE>::IsWindowsClassicStyle() const
 {
 	return m_bMinTrayBtnWindowsClassicStyle;
 }
 
-template <class BASE> void CDialogMinTrayBtn<BASE>::SetWindowText(LPCTSTR lpszString)
+TEMPLATE void CDialogMinTrayBtn<BASE>::SetWindowText(LPCTSTR lpszString)
 {
 	BASE::SetWindowText(lpszString);
 	MinTrayBtnDraw();
 }
 
-template <class BASE> INT CDialogMinTrayBtn<BASE>::GetVisualStylesXPColor() const
+TEMPLATE INT CDialogMinTrayBtn<BASE>::GetVisualStylesXPColor() const
 {
 	if (IsWindowsClassicStyle())
 		return -1;
@@ -492,7 +506,7 @@ template <class BASE> INT CDialogMinTrayBtn<BASE>::GetVisualStylesXPColor() cons
 	return -1;
 }
 
-template <class BASE> BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnInitBitmap()
+TEMPLATE BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnInitBitmap()
 {
 	m_bMinTrayBtnWindowsClassicStyle = !(g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed());
 

@@ -23,6 +23,7 @@
 #include "emuledlg.h"
 #include "Preferences.h"
 #include "ServerWnd.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -63,6 +64,7 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_WSRELOADTMPL, OnReloadTemplates)
 	ON_BN_CLICKED(IDC_TMPLBROWSE, OnBnClickedTmplbrowse)
 	ON_BN_CLICKED(IDC_WS_GZIP, OnDataChange)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 
@@ -250,4 +252,25 @@ void CPPgWebServer::OnBnClickedTmplbrowse()
 		GetDlgItem(IDC_TMPLPATH)->SetWindowText(buffer);
 		SetModified();
 	}
+}
+
+void CPPgWebServer::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_WebInterface);
+}
+
+BOOL CPPgWebServer::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgWebServer::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

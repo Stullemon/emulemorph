@@ -31,6 +31,7 @@
 #include "KademliaWnd.h"
 #include "IrcWnd.h"
 #include "WebServices.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -69,6 +70,7 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnBnClickedCheck4Update)
 	ON_WM_HSCROLL()
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 void CPPgGeneral::LoadSettings(void)
@@ -134,7 +136,7 @@ BOOL CPPgGeneral::OnInitDialog()
 		m_language.SetItemData(m_language.AddString(szLang), aLanguageIDs[i]);
 	}
 
-	GetDlgItem(IDC_ED2KFIX)->EnableWindow(Ask4RegFix(true));
+	UpdateEd2kLinkFixCtrl();
 
 	CSliderCtrl *sliderUpdate = (CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS);
 	sliderUpdate->SetRange(2, 7, true);
@@ -172,7 +174,7 @@ BOOL CPPgGeneral::OnApply()
 			theApp.emuledlg->statisticswnd->CreateMyTree();
 			theApp.emuledlg->statisticswnd->Localize();
 			theApp.emuledlg->statisticswnd->ShowStatistics(true);
-			theApp.emuledlg->statisticswnd->RepaintMeters(); //MORPH - Added by SiRoB, Due to new Oscope
+			theApp.emuledlg->statisticswnd->RepaintMeters(); //MORPH - Added by SiRoB, Due to new graph
 			theApp.emuledlg->serverwnd->Localize();
 			theApp.emuledlg->transferwnd->Localize();
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
@@ -199,6 +201,17 @@ BOOL CPPgGeneral::OnApply()
 
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();
+}
+
+void CPPgGeneral::UpdateEd2kLinkFixCtrl()
+{
+	GetDlgItem(IDC_ED2KFIX)->EnableWindow(HaveEd2kRegAccess() && Ask4RegFix(true));
+}
+
+BOOL CPPgGeneral::OnSetActive()
+{
+	UpdateEd2kLinkFixCtrl();
+	return __super::OnSetActive();
 }
 
 void CPPgGeneral::OnBnClickedEd2kfix()
@@ -297,4 +310,25 @@ void CPPgGeneral::OnBnClickedCheck4Update()
 	SetModified();
 	GetDlgItem(IDC_CHECKDAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
 	GetDlgItem(IDC_DAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
+}
+
+void CPPgGeneral::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_General);
+}
+
+BOOL CPPgGeneral::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgGeneral::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchList.h"
+#include "SearchParams.h"
 #include "Packets.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
@@ -32,6 +33,7 @@
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "SearchDlg.h"
+#include "SearchListCtrl.h"
 #endif
 #include "Fakecheck.h" //MORPH - Added by SiRoB
 
@@ -67,22 +69,22 @@ void ConvertED2KTag(CTag*& pTag)
 			// Artist, Album and Title are disabled because they should be already part of the filename
 			// and would therefore be redundant information sent to the servers.. and the servers count the
 			// amount of sent data!
-			{ FT_MEDIA_ARTIST,  2, FT_ED2K_MEDIA_ARTIST },
-			{ FT_MEDIA_ALBUM,   2, FT_ED2K_MEDIA_ALBUM },
-			{ FT_MEDIA_TITLE,   2, FT_ED2K_MEDIA_TITLE },
-			{ FT_MEDIA_LENGTH,  2, FT_ED2K_MEDIA_LENGTH },
-			{ FT_MEDIA_BITRATE, 3, FT_ED2K_MEDIA_BITRATE },
-			{ FT_MEDIA_CODEC,   2, FT_ED2K_MEDIA_CODEC }
+			{ FT_MEDIA_ARTIST,  TAGTYPE_STRING, FT_ED2K_MEDIA_ARTIST },
+			{ FT_MEDIA_ALBUM,   TAGTYPE_STRING, FT_ED2K_MEDIA_ALBUM },
+			{ FT_MEDIA_TITLE,   TAGTYPE_STRING, FT_ED2K_MEDIA_TITLE },
+			{ FT_MEDIA_LENGTH,  TAGTYPE_STRING, FT_ED2K_MEDIA_LENGTH },
+			{ FT_MEDIA_LENGTH,  TAGTYPE_UINT32, FT_ED2K_MEDIA_LENGTH },
+			{ FT_MEDIA_BITRATE, TAGTYPE_UINT32, FT_ED2K_MEDIA_BITRATE },
+			{ FT_MEDIA_CODEC,   TAGTYPE_STRING, FT_ED2K_MEDIA_CODEC }
 		};
 
 		for (int j = 0; j < ARRSIZE(_aEmuleToED2KMetaTagsMap); j++)
 		{
-			if (stricmp(pTag->tag.tagname, _aEmuleToED2KMetaTagsMap[j].pszED2KName) == 0)
+			if (    stricmp(pTag->tag.tagname, _aEmuleToED2KMetaTagsMap[j].pszED2KName) == 0
+				&& (   (pTag->IsStr() && _aEmuleToED2KMetaTagsMap[j].nED2KType == TAGTYPE_STRING)
+					|| (pTag->IsInt() && _aEmuleToED2KMetaTagsMap[j].nED2KType == TAGTYPE_UINT32)))
 			{
-				if (   pTag->tag.type == _aEmuleToED2KMetaTagsMap[j].nED2KType
-					|| (_aEmuleToED2KMetaTagsMap[j].nID == FT_MEDIA_LENGTH && pTag->tag.type == 3))
-				{
-					if (pTag->tag.type == 2)
+				if (pTag->IsStr())
 					{
 						if (_aEmuleToED2KMetaTagsMap[j].nID == FT_MEDIA_LENGTH)
 						{
@@ -108,7 +110,7 @@ void ConvertED2KTag(CTag*& pTag)
 							pTag = tag;
 						}
 					}
-					else if (pTag->tag.type == 3)
+					else if (pTag->IsInt())
 					{
 						CTag* tag = (pTag->tag.intvalue != 0) 
 									  ? new CTag(_aEmuleToED2KMetaTagsMap[j].nID, pTag->tag.intvalue) 
@@ -116,7 +118,6 @@ void ConvertED2KTag(CTag*& pTag)
 						delete pTag;
 						pTag = tag;
 					}
-				}
 				break;
 			}
 		}
@@ -356,7 +357,7 @@ void CSearchList::RemoveResult(CSearchFile* todel)
 		CSearchFile* cur_file = list.GetNext(pos);
 		if (cur_file == todel)
 		{
-			theApp.emuledlg->searchwnd->searchlistctrl.RemoveResult( todel );
+			theApp.emuledlg->searchwnd->RemoveResult(todel);
 			list.RemoveAt(posLast);
 			delete todel;
 			return;

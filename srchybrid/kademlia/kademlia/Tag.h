@@ -34,11 +34,41 @@ there client on the eMule forum..
 namespace Kademlia {
 ////////////////////////////////////////
 
+class CTagNameString : public CStringA
+{
+public:
+	CTagNameString(){}
+
+	// A tag name may include character values >= 0xD0 and therefor also >= 0xF0. to prevent those
+	// characters be interpreted as multi byte character sequences we have to sensure that a binary
+	// string compare is performed.
+	int Compare(LPCSTR psz) const throw()
+	{
+		ATLASSERT( AtlIsValidString(psz) );
+		// Do a binary string compare.
+		return strcmp(GetString(), psz);
+	}
+
+	int CompareNoCase(LPCSTR psz) const throw()
+	{
+		ATLASSERT( AtlIsValidString(psz) );
+		// Do a case-insensitive ASCII string compare.
+		// NOTE: The current locale category LC_CTYPE *MUST* be set to "C"!
+		return stricmp(GetString(), psz);
+	}
+
+	CTagNameString& operator=(LPCSTR pszSrc)
+	{
+		CStringA::operator=(pszSrc);
+		return *this;
+	}
+};
+
 class CTag
 {
 public:
 	byte	m_type;
-	CString m_name;
+	CTagNameString m_name;
 
 	CTag(byte type, LPCSTR name) { m_type = type; m_name = name; }
 	virtual ~CTag() {}

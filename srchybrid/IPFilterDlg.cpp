@@ -208,7 +208,7 @@ BOOL CIPFilterDlg::OnInitDialog()
 	SetDlgItemText(IDC_TOTAL_IPFILTER_LABEL,GetResString(IDS_TOTAL_IPFILTER_LABEL));
 	SetDlgItemText(IDC_TOTAL_IPS_LABEL,GetResString(IDS_TOTAL_IPS_LABEL));
 	SetDlgItemText(IDC_COPY,GetResString(IDS_COPY));
-	SetDlgItemText(IDC_REMOVE,GetResString(IDS_DELETE2));
+	SetDlgItemText(IDC_REMOVE,GetResString(IDS_DELETESELECTED));
 	SetDlgItemText(IDC_APPEND,GetResString(IDS_APPEND));
 	SetDlgItemText(IDC_SAVE,GetResString(IDS_SAVE));
 	SetDlgItemText(IDOK,GetResString(IDS_FD_CLOSE));

@@ -428,7 +428,7 @@ void CDownloadListCtrl::RemoveSource(CUpDownClient* source, CPartFile* owner)
 	}
 }
 
-bool CDownloadListCtrl::RemoveFile(CPartFile* toremove)
+bool CDownloadListCtrl::RemoveFile(const CPartFile* toremove)
 {
 	bool bResult = false;
 	if (!theApp.emuledlg->IsRunning())
@@ -438,7 +438,7 @@ bool CDownloadListCtrl::RemoveFile(CPartFile* toremove)
 	ASSERT(toremove != NULL);
 	for(ListItems::iterator it = m_ListItems.begin(); it != m_ListItems.end(); ){
 		CtrlItem_Struct* delItem = it->second;
-		if(delItem->owner == toremove || delItem->value == toremove){
+		if(delItem->owner == toremove || delItem->value == (void*)toremove){
 			// Remove it from the m_ListItems
 			it = m_ListItems.erase(it);
 
@@ -1361,6 +1361,7 @@ BEGIN_MESSAGE_MAP(CDownloadListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclkDownloadlist)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
 	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 void CDownloadListCtrl::ExpandCollapseItem(int item,uint8 expand,bool collapsesource){
@@ -1572,10 +1573,13 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			else
 				m_FileMenu.SetDefaultItem((UINT)-1);
 			m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
-
-			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
+			
+			int total;
+			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
 			//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
-			//m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+			/*
+			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+			*/
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) && !thePrefs.UseSmartA4AFSwapping() && !thePrefs.AdvancedA4AFMode() ? MF_ENABLED : MF_GRAYED);
 			//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 			m_A4AFMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesNotDone == 1 && iFilesA4AFAuto == 1) ? MF_CHECKED : MF_UNCHECKED);
@@ -1707,6 +1711,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		}
 	}
 	else{
+		int total;
 		m_FileMenu.EnableMenuItem((UINT_PTR)m_PrioMenu.m_hMenu, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_CANCEL,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_PAUSE,MF_GRAYED);
@@ -1730,7 +1735,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_PREVIEW,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_METINFO, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, MF_GRAYED);
-		m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
+		m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab,total) > 0 ? MF_ENABLED : MF_GRAYED);
 		m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_GETED2KLINK, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_GETHTMLED2KLINK, MF_GRAYED);
@@ -1756,7 +1761,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 		case MP_PASTE:
-			theApp.PasteClipboard();
+			theApp.PasteClipboard(curTab);
 			return TRUE;
 	}
 
@@ -1974,21 +1979,25 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					}
 					SetRedraw(true);
 					break;
-				case MPG_F2: {
-					InputBox inputbox;
-					CString title=GetResString(IDS_RENAME);
-					title.Remove(_T('&'));
-					inputbox.SetLabels(title,GetResString(IDS_DL_FILENAME),file->GetFileName());
-					inputbox.SetEditFilenameMode();
-					inputbox.DoModal();
-					CString nn=inputbox.GetInput();
-					if (!inputbox.WasCancelled() && nn.GetLength()>0){
-						file->SetFileName(nn,true);
-						file->UpdateDisplayedInfo();
-						file->SavePartFile(); 
+				case MPG_F2:
+					if (file->GetStatus() != PS_COMPLETE && file->GetStatus() != PS_COMPLETING)
+					{
+						InputBox inputbox;
+						CString title=GetResString(IDS_RENAME);
+						title.Remove(_T('&'));
+						inputbox.SetLabels(title,GetResString(IDS_DL_FILENAME),file->GetFileName());
+						inputbox.SetEditFilenameMode();
+						inputbox.DoModal();
+						CString nn=inputbox.GetInput();
+						if (!inputbox.WasCancelled() && nn.GetLength()>0){
+							file->SetFileName(nn,true);
+							file->UpdateDisplayedInfo();
+							file->SavePartFile(); 
+						}
 					}
+					else
+						MessageBeep((UINT)-1);
 					break;
-				}
 				case MPG_ALTENTER:
 				case MP_METINFO:
 					ShowFileDialog();
@@ -2008,7 +2017,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					CString str;
 					while(!selectedList.IsEmpty()) { 
 					if (!str.IsEmpty())
-						str += _T("\r\n");
+							str += _T("<br />\r\n");
 						str += CreateHTMLED2kLink(selectedList.GetHead());
 						selectedList.RemoveHead(); 
 					}
@@ -2526,6 +2535,27 @@ void CDownloadListCtrl::ClearCompleted(bool ignorecats){
 	}
 }
 
+void CDownloadListCtrl::ClearCompleted(const CPartFile* pFile)
+{
+	if (!pFile->IsPartFile())
+	{
+		for (ListItems::iterator it = m_ListItems.begin(); it != m_ListItems.end(); )
+		{
+			CtrlItem_Struct* cur_item = it->second;
+			it++;
+			if (cur_item->type == FILE_TYPE)
+			{
+				const CPartFile* pCurFile = reinterpret_cast<CPartFile*>(cur_item->value);
+				if (pCurFile == pFile)
+				{
+					RemoveFile(pCurFile);
+					return;
+				}
+			}
+		}
+	}
+}
+
 void CDownloadListCtrl::SetStyle() {
 	if (thePrefs.IsDoubleClickEnabled())
 		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
@@ -2589,10 +2619,8 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 	//MORPH - Removed by SiRoB, Remain time and size Columns have been splited
 	/*
 	case 90: //Remaining SIZE asc 
-		return ((file1->GetFileSize()-file1->GetCompletedSize()) -
-			(file2->GetFileSize()-file2->GetCompletedSize()) );
+		return CompareUnsigned(file1->GetFileSize()-file1->GetCompletedSize(), file2->GetFileSize()-file2->GetCompletedSize());
 	*/
-
 	case 10: //last seen complete asc 
 		if (file1->lastseencomplete > file2->lastseencomplete)
 			return 1;
@@ -2930,6 +2958,28 @@ void CDownloadListCtrl::ShowSelectedFileDetails()
 	}
 }
 
+int CDownloadListCtrl::GetCompleteDownloads(int cat, int &total){
+	int count=0;
+	total=0;
+
+	for(ListItems::const_iterator it = m_ListItems.begin(); it != m_ListItems.end(); it++){
+		const CtrlItem_Struct* cur_item = it->second;
+		if (cur_item->type == FILE_TYPE){
+			CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
+			
+			if ( file->CheckShowItemInGivenCat(cat)) {
+				++total;
+
+				if (file->GetStatus()==PS_COMPLETE  )
+					++count;
+			}
+		}
+	}
+
+	return count;
+}
+
+
 void CDownloadListCtrl::ChangeCategory(int newsel){
 
 	SetRedraw(FALSE);
@@ -3177,4 +3227,15 @@ void CDownloadListCtrl::ShowFileDialog(CPartFile* pFile, bool bOpenCommentsPage)
 		CFileDetailDialog dialog(&aFiles, bOpenCommentsPage);
 		dialog.DoModal();
 	}
+}
+
+void CDownloadListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+C: Copy listview items to clipboard
+		SendMessage(WM_COMMAND, MP_GETED2KLINK);
+		return;
+	}
+	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }

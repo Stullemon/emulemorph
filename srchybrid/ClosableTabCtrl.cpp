@@ -17,6 +17,8 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "ClosableTabCtrl.h"
+#include "OtherFunctions.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -34,12 +36,14 @@ BEGIN_MESSAGE_MAP(CClosableTabCtrl, CTabCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_CREATE()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CClosableTabCtrl::CClosableTabCtrl()
 {
 	m_bCloseable = true;
 	memset(&m_iiCloseButton, 0, sizeof m_iiCloseButton);
+	m_ptCtxMenu.SetPoint(-1, -1);
 }
 
 CClosableTabCtrl::~CClosableTabCtrl()
@@ -174,4 +178,40 @@ void CClosableTabCtrl::SetAllIcons()
 		m_ImgLstCloseButton.GetImageInfo(0, &m_iiCloseButton);
 		Invalidate();
 	}
+}
+
+void CClosableTabCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
+{
+	if (m_bCloseable)
+	{
+		CMenu menu;
+		menu.CreatePopupMenu();
+		menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
+		m_ptCtxMenu = point;
+		ScreenToClient(&m_ptCtxMenu);
+		menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	}
+}
+
+BOOL CClosableTabCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == MP_REMOVE)
+	{
+		if (m_ptCtxMenu.x != -1 && m_ptCtxMenu.y != -1)
+		{
+			int iTabs = GetItemCount();
+			for (int i = 0; i < iTabs; i++)
+			{
+				CRect rcItem;
+				GetItemRect(i, rcItem);
+				if (rcItem.PtInRect(m_ptCtxMenu))
+				{
+					GetParent()->SendMessage(WM_CLOSETAB, (WPARAM)i);
+					break;
+				}
+			}
+			return TRUE;
+		}
+	}
+	return CTabCtrl::OnCommand(wParam, lParam);
 }

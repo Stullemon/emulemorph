@@ -27,8 +27,16 @@ static char THIS_FILE[]=__FILE__;
 
 IMPLEMENT_DYNAMIC(CPreferencesDlg, CPropertySheet)
 
-CPreferencesDlg::CPreferencesDlg(){
-	this->m_psh.dwFlags &= ~PSH_HASHELP;
+BEGIN_MESSAGE_MAP(CPreferencesDlg, CPropertySheet)
+	ON_WM_DESTROY()
+	ON_LBN_SELCHANGE(111,OnSelChanged)
+	ON_WM_CTLCOLOR()
+	ON_WM_HELPINFO()
+END_MESSAGE_MAP()
+
+CPreferencesDlg::CPreferencesDlg()
+{
+	m_psh.dwFlags &= ~PSH_HASHELP;
 	m_wndGeneral.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndDisplay.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndConnection.m_psp.dwFlags &= ~PSH_HASHELP;
@@ -78,12 +86,6 @@ CPreferencesDlg::CPreferencesDlg(){
 CPreferencesDlg::~CPreferencesDlg()
 {
 }
-
-BEGIN_MESSAGE_MAP(CPreferencesDlg, CPropertySheet)
-	ON_WM_DESTROY()
-	ON_LBN_SELCHANGE(111,OnSelChanged)
-	ON_WM_CTLCOLOR()
-END_MESSAGE_MAP()
 
 void CPreferencesDlg::OnDestroy()
 {
@@ -283,4 +285,57 @@ HBRUSH CPreferencesDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		hbr = GetSysColorBrush(COLOR_BTNFACE);
 	}
 	return hbr;
+}
+void CPreferencesDlg::OnHelp()
+{
+	int iCurSel = m_listbox.GetCurSel();
+	if (iCurSel >= 0)
+	{
+		CPropertyPage* pPage = GetPage(iCurSel);
+		if (pPage)
+		{
+			HELPINFO hi = {0};
+			hi.cbSize = sizeof hi;
+			hi.iContextType = HELPINFO_WINDOW;
+			hi.iCtrlId = 0;
+			hi.hItemHandle = pPage->m_hWnd;
+			hi.dwContextId = 0;
+			pPage->SendMessage(WM_HELP, 0, (LPARAM)&hi);
+			return;
+		}
+	}
+
+	theApp.ShowHelp(0, HELP_CONTENTS);
+}
+
+BOOL CPreferencesDlg::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPreferencesDlg::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
+}
+
+void CPreferencesDlg::OpenPage(UINT uResourceID)
+{
+	int iCurActiveWnd = m_nActiveWnd;
+	for (int i = 0; i < m_pages.GetSize(); i++)
+	{
+		CPropertyPage* pPage = GetPage(i);
+		if (pPage->m_psp.pszTemplate == MAKEINTRESOURCE(uResourceID))
+		{
+			m_nActiveWnd = i;
+			break;
+		}
+	}
+	DoModal();
+	m_nActiveWnd = iCurActiveWnd;
 }

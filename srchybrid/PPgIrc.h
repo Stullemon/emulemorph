@@ -50,14 +50,17 @@ protected:
 	void LoadSettings(void);
 	void UpdateControls();
 
-	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	virtual BOOL OnKillActive();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnBtnClickPerform();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

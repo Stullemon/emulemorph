@@ -21,6 +21,9 @@
 #include "emuledlg.h"
 #include "MetaDataDlg.h"
 #include "SearchDlg.h"
+#include "SearchListCtrl.h"
+#include "SearchParams.h"
+#include "ClosableTabCtrl.h"
 #include "PreviewDlg.h"
 #include "UpDownClient.h"
 #include "ClientList.h"
@@ -230,6 +233,7 @@ BEGIN_MESSAGE_MAP(CSearchListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_DELETEALLITEMS, OnLvnDeleteallitems)
 	ON_NOTIFY_REFLECT(NM_CLICK, OnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK,OnDblClick)
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 // CSearchListCtrl message handlers
@@ -237,7 +241,7 @@ END_MESSAGE_MAP()
 void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 {
 	// update tab-counter for the given searchfile
-	CClosableTabCtrl& searchselect = theApp.emuledlg->searchwnd->searchselect;
+	CClosableTabCtrl& searchselect = theApp.emuledlg->searchwnd->GetSearchSelector();
 	int iTabItems = searchselect.GetItemCount();
 	if (iTabItems > 0)
 	{
@@ -640,7 +644,7 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					while (pos!=NULL) 
 					{
 					if (!clpbrd.IsEmpty())
-						clpbrd += _T("\r\n");
+						clpbrd += _T("<br />\r\n");
 					clpbrd += CreateHTMLED2kLink((CSearchFile*)GetItemData(GetNextSelectedItem(pos)));
 					}
 					theApp.CopyTextToClipboard(clpbrd);
@@ -1504,4 +1508,15 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 		}
 		dc->SetTextColor(crOldTextColor);
 	}
+}
+
+void CSearchListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+C: Copy listview items to clipboard
+		SendMessage(WM_COMMAND, MP_GETED2KLINK);
+		return;
+	}
+	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }

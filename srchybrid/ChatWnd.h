@@ -22,11 +22,13 @@
 class CChatWnd : public CResizableDialog
 {
 	DECLARE_DYNAMIC(CChatWnd)
+
 public:
-	void ScrollHistory(bool down);
-	CChatSelector chatselector;
 	CChatWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CChatWnd();
+
+	void ScrollHistory(bool down);
+	CChatSelector chatselector;
 
 // Dialog Data
 	enum { IDD = IDD_CHAT };
@@ -38,6 +40,8 @@ public:
 
 protected:
 	CEdit inputtext;
+	HICON icon_friend;
+	HICON icon_msg;
 
 	void SetAllIcons();
 
@@ -50,8 +54,6 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnSysColorChange();
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
-
-private:
-	HICON icon_friend,icon_msg;
+	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

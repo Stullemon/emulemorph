@@ -77,6 +77,8 @@ protected:
 	afx_msg void OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
 	afx_msg void OnDDClicked();
+	afx_msg void OnSvrTextChange();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 
 private:
 	CIconStatic m_ctrlNewServerFrm;

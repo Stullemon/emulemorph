@@ -192,24 +192,24 @@ public:
 	static	uint16	downloadColumnWidths[16]; /*13 Official+ 3 Khaos*/
 	static	BOOL	downloadColumnHidden[16]; /*13 Official+ 3 Khaos*/
 	static	INT		downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
-	static	uint16	uploadColumnWidths[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
-	static	BOOL	uploadColumnHidden[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
-	static	INT		uploadColumnOrder[14];  /*8+1 MOD_VERSION+1 Compression+1 Community*/
-	static	uint16	queueColumnWidths[12];  /*10+1 MOD_VERSION+1 Community*/
-	static	BOOL	queueColumnHidden[12];  /*10+1 MOD_VERSION+1 Community*/
-	static	INT		queueColumnOrder[12];  /*10+1 MOD_VERSION+1 Community*/
+	static	uint16	uploadColumnWidths[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
+	static	BOOL	uploadColumnHidden[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
+	static	INT		uploadColumnOrder[15];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
+	static	uint16	queueColumnWidths[13];  /*10+1 MOD_VERSION+1 Community+1 Friend*/
+	static	BOOL	queueColumnHidden[13];  /*10+1 MOD_VERSION+1 Community+1 Friend*/
+	static	INT		queueColumnOrder[13];   /*10+1 MOD_VERSION+1 Community+1 Friend*/
 	static	uint16	searchColumnWidths[14]; /*13+1 Fakecheck*/
 	static	BOOL	searchColumnHidden[14]; /*13+1 Fakecheck*/
-	static	INT		searchColumnOrder[14]; /*13+1 Fakecheck*/
-	static	uint16	sharedColumnWidths[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
-	static	BOOL	sharedColumnHidden[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
-	static	INT		sharedColumnOrder[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
-	static	uint16	serverColumnWidths[13];
-	static	BOOL	serverColumnHidden[13];
-	static	INT		serverColumnOrder[13];
-	static	uint16	clientListColumnWidths[9]; //8+1 /*Community*/
-	static	BOOL	clientListColumnHidden[9]; //8+1 /*Community*/
-	static	INT		clientListColumnOrder[9]; //8+1 /*Community*/
+	static	INT		searchColumnOrder[14];  /*13+1 Fakecheck*/
+	static	uint16	sharedColumnWidths[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
+	static	BOOL	sharedColumnHidden[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
+	static	INT		sharedColumnOrder[22];  /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
+	static	uint16	serverColumnWidths[14]; /*13+ 1 Aux Port*/
+	static	BOOL	serverColumnHidden[14]; /*13+ 1 Aux Port*/
+	static	INT		serverColumnOrder[14];  /*13+ 1 Aux Port*/
+	static	uint16	clientListColumnWidths[10]; /*8+1 Community+1 Friend*/
+	static	BOOL	clientListColumnHidden[10]; /*8+1 Community+1 Friend*/
+	static	INT		clientListColumnOrder[10];  /*8+1 Community+1 Friend*/
 	static	uint16	FilenamesListColumnWidths[2];
 	static	BOOL	FilenamesListColumnHidden[2];
 	static	INT		FilenamesListColumnOrder[2];
@@ -255,16 +255,16 @@ public:
 	static	uint64	cumUpData_EDONKEYHYBRID;
 	static	uint64	cumUpData_EMULE;
 	static	uint64	cumUpData_MLDONKEY;
-	static	uint64	cumUpData_CDONKEY;
-	static	uint64	cumUpData_XMULE;
+	static	uint64	cumUpData_AMULE;
+	static	uint64	cumUpData_EMULECOMPAT;
 	static	uint64	cumUpData_SHAREAZA;
 	// Session client breakdown stats for sent bytes...
 	static	uint64	sesUpData_EDONKEY;
 	static	uint64	sesUpData_EDONKEYHYBRID;
 	static	uint64	sesUpData_EMULE;
 	static	uint64	sesUpData_MLDONKEY;
-	static	uint64	sesUpData_CDONKEY;
-	static	uint64	sesUpData_XMULE;
+	static	uint64	sesUpData_AMULE;
+	static	uint64	sesUpData_EMULECOMPAT;
 	static	uint64	sesUpData_SHAREAZA;
 
 	// Cumulative port breakdown stats for sent bytes...
@@ -306,16 +306,16 @@ public:
 	static	uint64	cumDownData_EDONKEYHYBRID;
 	static	uint64	cumDownData_EMULE;
 	static	uint64	cumDownData_MLDONKEY;
-	static	uint64	cumDownData_CDONKEY;
-	static	uint64	cumDownData_XMULE;
+	static	uint64	cumDownData_AMULE;
+	static	uint64	cumDownData_EMULECOMPAT;
 	static	uint64	cumDownData_SHAREAZA;
 	// Session client breakdown stats for received bytes...
 	static	uint64	sesDownData_EDONKEY;
 	static	uint64	sesDownData_EDONKEYHYBRID;
 	static	uint64	sesDownData_EMULE;
 	static	uint64	sesDownData_MLDONKEY;
-	static	uint64	sesDownData_CDONKEY;
-	static	uint64	sesDownData_XMULE;
+	static	uint64	sesDownData_AMULE;
+	static	uint64	sesDownData_EMULECOMPAT;
 	static	uint64	sesDownData_SHAREAZA;
 
 	// Cumulative port breakdown stats for received bytes...
@@ -463,18 +463,18 @@ public:
 	static	int		tableSortItemDownload[32];
 	static	BOOL	tableSortAscendingDownload[32];
 	// SLUGFILLER: DLsortFix
-	static	int		tableSortItemUpload[14];
-	static	BOOL	tableSortAscendingUpload[14];
-	static	int		tableSortItemQueue[12];
-	static	BOOL	tableSortAscendingQueue[12];
+	static	int		tableSortItemUpload[15];
+	static	BOOL	tableSortAscendingUpload[15];
+	static	int		tableSortItemQueue[13];
+	static	BOOL	tableSortAscendingQueue[13];
 	static	int		tableSortItemSearch[14];
 	static	BOOL	tableSortAscendingSearch[14];
 	static	int		tableSortItemShared[22];
 	static	BOOL	tableSortAscendingShared[22];
-	static	int		tableSortItemServer[13];
-	static	BOOL	tableSortAscendingServer[13];
-	static	int		tableSortItemClientList[9];
-	static	BOOL	tableSortAscendingClientList[9];
+	static	int		tableSortItemServer[14];
+	static	BOOL	tableSortAscendingServer[14];
+	static	int		tableSortItemClientList[10];
+	static	BOOL	tableSortAscendingClientList[10];
 	// SLUGFILLER: multiSort
 	static	int		tableSortItemFilenames[2];
 	static	BOOL	tableSortAscendingFilenames[2];
@@ -688,6 +688,7 @@ public:
 
 	static	int		m_iDbgHeap;
 	static	uint8	m_nWebMirrorAlertLevel;
+	static	bool	m_bRunAsUser;
 
 	enum Table
 	{
@@ -862,26 +863,30 @@ public:
 	static	uint32	GetSesPartsSavedByICH()				{ return sesPartsSavedByICH;}
 
 	// Cumulative client breakdown stats for sent bytes
-	static	uint64	GetUpTotalClientData()			{ return (GetCumUpData_EDONKEY() +			GetCumUpData_EDONKEYHYBRID() +
-															GetCumUpData_EMULE() +			GetCumUpData_MLDONKEY() +
-															GetCumUpData_CDONKEY() );}
+	static	uint64	GetUpTotalClientData()			{ return (  GetCumUpData_EDONKEY()
+															  + GetCumUpData_EDONKEYHYBRID()
+															  + GetCumUpData_EMULE()
+															  + GetCumUpData_MLDONKEY()
+															  + GetCumUpData_AMULE() );}
 	static	uint64	GetCumUpData_EDONKEY()			{ return (cumUpData_EDONKEY +		sesUpData_EDONKEY );}
 	static	uint64	GetCumUpData_EDONKEYHYBRID()	{ return (cumUpData_EDONKEYHYBRID +	sesUpData_EDONKEYHYBRID );}
 	static	uint64	GetCumUpData_EMULE()			{ return (cumUpData_EMULE +			sesUpData_EMULE );}
 	static	uint64	GetCumUpData_MLDONKEY()			{ return (cumUpData_MLDONKEY +		sesUpData_MLDONKEY );}
-	static	uint64	GetCumUpData_CDONKEY()			{ return (cumUpData_CDONKEY +		sesUpData_CDONKEY );}
-	static	uint64	GetCumUpData_XMULE()			{ return (cumUpData_XMULE +			sesUpData_XMULE );}
+	static	uint64	GetCumUpData_AMULE()			{ return (cumUpData_AMULE +			sesUpData_AMULE );}
+	static	uint64	GetCumUpData_EMULECOMPAT()		{ return (cumUpData_EMULECOMPAT +	sesUpData_EMULECOMPAT );}
 	static	uint64	GetCumUpData_SHAREAZA()			{ return (cumUpData_SHAREAZA +			sesUpData_SHAREAZA );}
 	// Session client breakdown stats for sent bytes
-	static	uint64	GetUpSessionClientData()		{ return (sesUpData_EDONKEY +		sesUpData_EDONKEYHYBRID +
-															sesUpData_EMULE +			sesUpData_MLDONKEY +
-															sesUpData_CDONKEY ); }
+	static	uint64	GetUpSessionClientData()		{ return (  sesUpData_EDONKEY 
+															  +	sesUpData_EDONKEYHYBRID 
+															  + sesUpData_EMULE 
+															  +	sesUpData_MLDONKEY 
+															  + sesUpData_AMULE ); }
 	static	uint64	GetUpData_EDONKEY()				{ return sesUpData_EDONKEY;}
 	static	uint64	GetUpData_EDONKEYHYBRID()		{ return sesUpData_EDONKEYHYBRID;}
 	static	uint64	GetUpData_EMULE()				{ return sesUpData_EMULE;}
 	static	uint64	GetUpData_MLDONKEY()			{ return sesUpData_MLDONKEY;}
-	static	uint64	GetUpData_CDONKEY()				{ return sesUpData_CDONKEY;}
-	static	uint64	GetUpData_XMULE()				{ return sesUpData_XMULE;}
+	static	uint64	GetUpData_AMULE()				{ return sesUpData_AMULE;}
+	static	uint64	GetUpData_EMULECOMPAT()			{ return sesUpData_EMULECOMPAT;}
 	static	uint64	GetUpData_SHAREAZA()				{ return sesUpData_SHAREAZA;}
 
 	// Cumulative port breakdown stats for sent bytes...
@@ -903,26 +908,30 @@ public:
 	static	uint64	GetUpData_Partfile()			{ return sesUpData_Partfile;}
 
 	// Cumulative client breakdown stats for received bytes
-	static	uint64	GetDownTotalClientData()		{ return (GetCumDownData_EDONKEY() +			GetCumDownData_EDONKEYHYBRID() +
-														  GetCumDownData_EMULE() +				GetCumDownData_MLDONKEY() +
-														  GetCumDownData_CDONKEY() ); }
+	static	uint64	GetDownTotalClientData()		{ return (  GetCumDownData_EDONKEY() 
+															  + GetCumDownData_EDONKEYHYBRID() 
+															  + GetCumDownData_EMULE() 
+															  +	GetCumDownData_MLDONKEY() 
+															  + GetCumDownData_AMULE() ); }
 	static	uint64	GetCumDownData_EDONKEY()		{ return (cumDownData_EDONKEY +			sesDownData_EDONKEY);}
 	static	uint64	GetCumDownData_EDONKEYHYBRID()	{ return (cumDownData_EDONKEYHYBRID +	sesDownData_EDONKEYHYBRID);}
 	static	uint64	GetCumDownData_EMULE()			{ return (cumDownData_EMULE +			sesDownData_EMULE);}
 	static	uint64	GetCumDownData_MLDONKEY()		{ return (cumDownData_MLDONKEY +			sesDownData_MLDONKEY);}
-	static	uint64	GetCumDownData_CDONKEY()		{ return (cumDownData_CDONKEY +			sesDownData_CDONKEY);}
-	static	uint64	GetCumDownData_XMULE()			{ return (cumDownData_XMULE +			sesDownData_XMULE );}
+	static	uint64	GetCumDownData_AMULE()			{ return (cumDownData_AMULE +			sesDownData_AMULE);}
+	static	uint64	GetCumDownData_EMULECOMPAT()	{ return (cumDownData_EMULECOMPAT +		sesDownData_EMULECOMPAT);}
 	static	uint64	GetCumDownData_SHAREAZA()		{ return (cumDownData_SHAREAZA +			sesDownData_SHAREAZA );}
 	// Session client breakdown stats for received bytes
-	static	uint64	GetDownSessionClientData()		{ return (sesDownData_EDONKEY +			sesDownData_EDONKEYHYBRID +
-														  sesDownData_EMULE +			sesDownData_MLDONKEY +
-														  sesDownData_CDONKEY ); }
+	static	uint64	GetDownSessionClientData()		{ return (  sesDownData_EDONKEY 
+															  + sesDownData_EDONKEYHYBRID 
+															  + sesDownData_EMULE 
+															  +	sesDownData_MLDONKEY 
+															  + sesDownData_AMULE ); }
 	static	uint64	GetDownData_EDONKEY()			{ return sesDownData_EDONKEY;}
 	static	uint64	GetDownData_EDONKEYHYBRID()		{ return sesDownData_EDONKEYHYBRID;}
 	static	uint64	GetDownData_EMULE()				{ return sesDownData_EMULE;}
 	static	uint64	GetDownData_MLDONKEY()			{ return sesDownData_MLDONKEY;}
-	static	uint64	GetDownData_CDONKEY()			{ return sesDownData_CDONKEY;}
-	static	uint64	GetDownData_XMULE()				{ return sesDownData_XMULE;}
+	static	uint64	GetDownData_AMULE()				{ return sesDownData_AMULE;}
+	static	uint64	GetDownData_EMULECOMPAT()		{ return sesDownData_EMULECOMPAT;}
 	static	uint64	GetDownData_SHAREAZA()			{ return sesDownData_SHAREAZA;}
 
 	// Cumulative port breakdown stats for received bytes...
@@ -1119,8 +1128,8 @@ public:
 	static	bool	IsKnownClientListDisabled()			{return m_bDisableKnownClientList;}
 	static	bool	IsQueueListDisabled()				{return m_bDisableQueueList;}
 	static	bool	IsFirstStart()						{return m_bFirstStart;}
-	static	bool	UseCreditSystem()					{return true;} // EastShare - Fixed by linekin
-	static	void	SetCreditSystem(bool m_bInCreditSystem)	{m_bCreditSystem = m_bInCreditSystem;}	//EastShare - Credit System select
+	static	bool	UseCreditSystem()					{return m_bCreditSystem;}
+	static	void	SetCreditSystem(bool m_bInCreditSystem)	{m_bCreditSystem = m_bInCreditSystem;}
 
 	static	char*	GetTxtEditor()						{return TxtEditor;}
 	static	CString	GetVideoPlayer()					{if (strlen(VideoPlayer)==0) return ""; else return CString(VideoPlayer);}
@@ -1306,6 +1315,7 @@ public:
 	static	void	SetWebMirrorAlertLevel(uint8 newValue)		{ m_nWebMirrorAlertLevel = newValue; }
 	static bool	IsDefaultNick(const CString strCheck);
 	static	uint8	GetWebMirrorAlertLevel();
+	static	bool	IsRunAsUserEnabled();
 
 	static	bool	IsUSSLog() {return m_bDynUpLog;}
 	static	bool	IsUSSLimit() { return m_bIsUSSLimit;} // EastShare - Added by TAHO, USS limit

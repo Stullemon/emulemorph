@@ -20,6 +20,7 @@
 #include "opcodes.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -53,6 +54,7 @@ BEGIN_MESSAGE_MAP(CPPgProxy, CPropertyPage)
 	ON_EN_CHANGE(IDC_USERNAME_A, OnEnChangeUsername)
 	ON_EN_CHANGE(IDC_PASSWORD, OnEnChangePassword)
 	ON_BN_CLICKED(IDC_ASCWOP, OnBnClickedAscwop)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 
@@ -190,4 +192,25 @@ void CPPgProxy::Localize(void)
 void CPPgProxy::OnBnClickedAscwop()
 {
 	SetModified(true);
+}
+
+void CPPgProxy::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Proxy);
+}
+
+BOOL CPPgProxy::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgProxy::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

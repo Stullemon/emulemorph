@@ -23,6 +23,8 @@
 #include "UpDownClient.h"
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
+#include "HelpIDs.h"
+#include "Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -63,6 +65,7 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
 	ON_WM_SYSCOLORCHANGE()
     ON_WM_CONTEXTMENU()
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 // CChatWnd message handlers
@@ -71,6 +74,7 @@ BOOL CChatWnd::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 
+	inputtext.SetLimitText(MAX_CLIENT_MSG_LEN);
 	chatselector.Init();
 	m_FriendListCtrl.Init();
 
@@ -187,4 +191,10 @@ void CChatWnd::UpdateFriendlistCount(uint16 count) {
 	temp=GetResString(IDS_CW_FRIENDS)+temp;
 
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(temp);
+}
+
+BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	theApp.ShowHelp(eMule_FAQ_Friends);
+	return TRUE;
 }

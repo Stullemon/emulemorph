@@ -23,9 +23,6 @@ public:
 
 	void Localize(void);
 
-	virtual BOOL OnInitDialog();
-	virtual BOOL OnApply();
-
 // Dialog Data
 	enum { IDD = IDD_PPG_NOTIFY };
 
@@ -33,11 +30,15 @@ protected:
 	void LoadSettings(void);
 
 	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog();
+	virtual BOOL OnApply();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSettingsChange() { SetModified(); }
 	afx_msg void OnBnClickedCbTbnOnchat();
 	afx_msg void OnBnClickedBtnBrowseWav();
 	afx_msg void OnBnClickedUseSound();
-
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

@@ -189,25 +189,25 @@ uint8	CPreferences::beepOnError;
 uint8	CPreferences::confirmExit;
 uint16	CPreferences::downloadColumnWidths[16]; /*13 Official+ 3 Khaos*/
 BOOL	CPreferences::downloadColumnHidden[16]; /*13 Official+ 3 Khaos*/
-INT	CPreferences::downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
-uint16	CPreferences::uploadColumnWidths[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
-BOOL	CPreferences::uploadColumnHidden[14]; /*8+1 MOD_VERSION+1 Compression+1 Community*/
-INT	CPreferences::uploadColumnOrder[14];  /*8+ 1 MOD_VERSION+1 Compression+1 Community*/
-uint16	CPreferences::queueColumnWidths[12];  /*10+1 MOD_VERSION+1 Community*/
-BOOL	CPreferences::queueColumnHidden[12];  /*10+1 MOD_VERSION+1 Community*/
-INT	CPreferences::queueColumnOrder[12];  /*10+1 MOD_VERSION+1 Community*/
+INT 	CPreferences::downloadColumnOrder[16];  /*13 Official+ 3 Khaos*/
+uint16	CPreferences::uploadColumnWidths[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
+BOOL	CPreferences::uploadColumnHidden[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
+INT 	CPreferences::uploadColumnOrder[15];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
+uint16	CPreferences::queueColumnWidths[13];  /*10+1 MOD_VERSION+1 Community+ 1 friend*/
+BOOL	CPreferences::queueColumnHidden[13];  /*10+1 MOD_VERSION+1 Community+ 1 friend*/
+INT 	CPreferences::queueColumnOrder[13];   /*10+1 MOD_VERSION+1 Community+ 1 friend*/
 uint16	CPreferences::searchColumnWidths[14]; /*13+1 Fakecheck*/
 BOOL	CPreferences::searchColumnHidden[14]; /*13+1 Fakecheck*/
-INT	CPreferences::searchColumnOrder[14]; /*13+1 Fakecheck*/
-uint16	CPreferences::sharedColumnWidths[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
-BOOL	CPreferences::sharedColumnHidden[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
-INT	CPreferences::sharedColumnOrder[22]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/+1/*HIDEOS*/+/*Share_Only_TheNeed*/+2/*CRC32-Tag*/
-uint16	CPreferences::serverColumnWidths[13];
-BOOL	CPreferences::serverColumnHidden[13];
-INT	CPreferences::serverColumnOrder[13];
-uint16	CPreferences::clientListColumnWidths[9]; //8+1 /*Community*/
-BOOL	CPreferences::clientListColumnHidden[9]; //8+1 /*Community*/
-INT	CPreferences::clientListColumnOrder[9]; //8+1 /*Community*/
+INT 	CPreferences::searchColumnOrder[14];  /*13+1 Fakecheck*/
+uint16	CPreferences::sharedColumnWidths[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
+BOOL	CPreferences::sharedColumnHidden[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
+INT 	CPreferences::sharedColumnOrder[22];  /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
+uint16	CPreferences::serverColumnWidths[14]; /*13+ 1 Aux Port*/
+BOOL	CPreferences::serverColumnHidden[14]; /*13+ 1 Aux Port*/
+INT 	CPreferences::serverColumnOrder[14];  /*13+ 1 Aux Port*/
+uint16	CPreferences::clientListColumnWidths[10]; /*8+1 Community+ 1 friend*/
+BOOL	CPreferences::clientListColumnHidden[10]; /*8+1 Community+ 1 friend*/
+INT 	CPreferences::clientListColumnOrder[10]; /*8+1 Community+ 1 friend*/
 
 uint16	CPreferences::FilenamesListColumnWidths[2];
 BOOL	CPreferences::FilenamesListColumnHidden[2];
@@ -245,15 +245,15 @@ uint64	CPreferences::cumUpData_EDONKEY;
 uint64	CPreferences::cumUpData_EDONKEYHYBRID;
 uint64	CPreferences::cumUpData_EMULE;
 uint64	CPreferences::cumUpData_MLDONKEY;
-uint64	CPreferences::cumUpData_CDONKEY;
-uint64	CPreferences::cumUpData_XMULE;
+uint64	CPreferences::cumUpData_AMULE;
+uint64	CPreferences::cumUpData_EMULECOMPAT;
 uint64	CPreferences::cumUpData_SHAREAZA;
 uint64	CPreferences::sesUpData_EDONKEY;
 uint64	CPreferences::sesUpData_EDONKEYHYBRID;
 uint64	CPreferences::sesUpData_EMULE;
 uint64	CPreferences::sesUpData_MLDONKEY;
-uint64	CPreferences::sesUpData_CDONKEY;
-uint64	CPreferences::sesUpData_XMULE;
+uint64	CPreferences::sesUpData_AMULE;
+uint64	CPreferences::sesUpData_EMULECOMPAT;
 uint64	CPreferences::sesUpData_SHAREAZA;
 uint64	CPreferences::cumUpDataPort_4662;
 uint64	CPreferences::cumUpDataPort_OTHER;
@@ -281,15 +281,15 @@ uint64	CPreferences::cumDownData_EDONKEY;
 uint64	CPreferences::cumDownData_EDONKEYHYBRID;
 uint64	CPreferences::cumDownData_EMULE;
 uint64	CPreferences::cumDownData_MLDONKEY;
-uint64	CPreferences::cumDownData_CDONKEY;
-uint64	CPreferences::cumDownData_XMULE;
+uint64	CPreferences::cumDownData_AMULE;
+uint64	CPreferences::cumDownData_EMULECOMPAT;
 uint64	CPreferences::cumDownData_SHAREAZA;
 uint64	CPreferences::sesDownData_EDONKEY;
 uint64	CPreferences::sesDownData_EDONKEYHYBRID;
 uint64	CPreferences::sesDownData_EMULE;
 uint64	CPreferences::sesDownData_MLDONKEY;
-uint64	CPreferences::sesDownData_CDONKEY;
-uint64	CPreferences::sesDownData_XMULE;
+uint64	CPreferences::sesDownData_AMULE;
+uint64	CPreferences::sesDownData_EMULECOMPAT;
 uint64	CPreferences::sesDownData_SHAREAZA;
 uint64	CPreferences::cumDownDataPort_4662;
 uint64	CPreferences::cumDownDataPort_OTHER;
@@ -408,18 +408,18 @@ uint8	CPreferences::versioncheckdays;
 int	CPreferences::tableSortItemDownload[32];
 BOOL	CPreferences::tableSortAscendingDownload[32];
 // SLUGFILLER: DLsortFix
-int	CPreferences::tableSortItemUpload[14];
-BOOL	CPreferences::tableSortAscendingUpload[14];
-int	CPreferences::tableSortItemQueue[12];
-BOOL	CPreferences::tableSortAscendingQueue[12];
+int	CPreferences::tableSortItemUpload[15];
+BOOL	CPreferences::tableSortAscendingUpload[15];
+int	CPreferences::tableSortItemQueue[13];
+BOOL	CPreferences::tableSortAscendingQueue[13];
 int	CPreferences::tableSortItemSearch[14];
 BOOL	CPreferences::tableSortAscendingSearch[14];
 int	CPreferences::tableSortItemShared[22];
 BOOL	CPreferences::tableSortAscendingShared[22];
-int	CPreferences::tableSortItemServer[13];
-BOOL	CPreferences::tableSortAscendingServer[13];
-int	CPreferences::tableSortItemClientList[9];
-BOOL	CPreferences::tableSortAscendingClientList[9];
+int	CPreferences::tableSortItemServer[14];
+BOOL	CPreferences::tableSortAscendingServer[14];
+int	CPreferences::tableSortItemClientList[10];
+BOOL	CPreferences::tableSortAscendingClientList[10];
 // SLUGFILLER: multiSort
 int	CPreferences::tableSortItemFilenames[2];
 BOOL	CPreferences::tableSortAscendingFilenames[2];
@@ -623,6 +623,8 @@ bool	CPreferences::m_UseProxyListenPort;
 uint16	CPreferences::ListenPort;
 CArray<Category_Struct*,Category_Struct*> CPreferences::catMap;
 uint8	CPreferences::m_nWebMirrorAlertLevel;
+bool	CPreferences::m_bRunAsUser;
+
 
 
 CPreferences::CPreferences()
@@ -687,7 +689,6 @@ void CPreferences::Init()
 
 	if (!preffile){
 		SetStandartValues();
-		//if (Ask4RegFix(true)) Ask4RegFix(false);
 	}
 	else{
 		fread(prefsExt,sizeof(Preferences_Ext_Struct),1,preffile);
@@ -914,11 +915,9 @@ bool CPreferences::IsZZRatioDoesWork(){
 		return true;
 	if (theApp.friendlist->IsFriendSlot())
 		return true;
-	if (theApp.statistics)
-		return theApp.statistics->GetAvgUploadRate(0)<16*(1+(uint32)theApp.statistics->maxDown/64)-6;
 	if (GetMaxUpload()<10)
 		return true;
-	return false;
+	return theApp.statistics->GetAvgUploadRate(0)<10;
 }
 //MORPH - Added by SiRoB, ZZ ratio
 
@@ -983,10 +982,10 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("DownData_EMULE", buffer );
 	buffer.Format("%I64u", GetCumDownData_MLDONKEY() );
 	ini.WriteString("DownData_MLDONKEY", buffer );
-	buffer.Format("%I64u", GetCumDownData_XMULE() );
+	buffer.Format("%I64u", GetCumDownData_EMULECOMPAT() );
 	ini.WriteString("DownData_LMULE", buffer );
-	buffer.Format("%I64u", GetCumDownData_CDONKEY() );
-	ini.WriteString("DownData_CDONKEY", buffer );
+	buffer.Format("%I64u", GetCumDownData_AMULE() );
+	ini.WriteString("DownData_AMULE", buffer );
 	buffer.Format("%I64u", GetCumDownData_SHAREAZA() );
 	ini.WriteString("DownData_SHAREAZA", buffer );
 
@@ -1045,10 +1044,10 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("UpData_EMULE", buffer );
 	buffer.Format("%I64u", GetCumUpData_MLDONKEY() );
 	ini.WriteString("UpData_MLDONKEY", buffer );
-	buffer.Format("%I64u", GetCumUpData_XMULE() );
+	buffer.Format("%I64u", GetCumUpData_EMULECOMPAT() );
 	ini.WriteString("UpData_LMULE", buffer );
-	buffer.Format("%I64u", GetCumUpData_CDONKEY() );
-	ini.WriteString("UpData_CDONKEY", buffer );
+	buffer.Format("%I64u", GetCumUpData_AMULE() );
+	ini.WriteString("UpData_AMULE", buffer );
 	buffer.Format("%I64u", GetCumUpData_SHAREAZA() );
 	ini.WriteString("UpData_SHAREAZA", buffer );
 
@@ -1254,14 +1253,16 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 			
 			switch (uClientID){
 				// Update session client breakdown stats for sent bytes...
-				case SO_EDONKEY:		sesUpData_EDONKEY+=bytes;		break;
+				case SO_EMULE:
+				case SO_OLDEMULE:		sesUpData_EMULE+=bytes;			break;
 				case SO_EDONKEYHYBRID:	sesUpData_EDONKEYHYBRID+=bytes;	break;
-				case SO_OLDEMULE:
-				case SO_EMULE:			sesUpData_EMULE+=bytes;			break;
+				case SO_EDONKEY:		sesUpData_EDONKEY+=bytes;		break;
 				case SO_MLDONKEY:		sesUpData_MLDONKEY+=bytes;		break;
-				case SO_CDONKEY:		sesUpData_CDONKEY+=bytes;		break;
-				case SO_XMULE:			sesUpData_XMULE+=bytes;			break;
+				case SO_AMULE:			sesUpData_AMULE+=bytes;			break;
 				case SO_SHAREAZA:		sesUpData_SHAREAZA+=bytes;		break;
+				case SO_CDONKEY:
+				case SO_LPHANT:
+				case SO_XMULE:			sesUpData_EMULECOMPAT+=bytes;	break;
 			}
 
 			switch (uClientPort){
@@ -1276,7 +1277,6 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 			//	Add to our total for sent bytes...
 			theApp.UpdateSentBytes(bytes, sentToFriend); //MORPH - Added by Yun.SF3, ZZ Upload System
 
-
 			break;
 
 		case false:
@@ -1284,14 +1284,16 @@ void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, 
 
 			switch (uClientID){
                 // Update session client breakdown stats for received bytes...
-				case SO_EDONKEY:		sesDownData_EDONKEY+=bytes;		break;
+				case SO_EMULE:
+				case SO_OLDEMULE:		sesDownData_EMULE+=bytes;		break;
 				case SO_EDONKEYHYBRID:	sesDownData_EDONKEYHYBRID+=bytes;break;
-				case SO_OLDEMULE:
-				case SO_EMULE:			sesDownData_EMULE+=bytes;		break;
+				case SO_EDONKEY:		sesDownData_EDONKEY+=bytes;		break;
 				case SO_MLDONKEY:		sesDownData_MLDONKEY+=bytes;		break;
-				case SO_CDONKEY:		sesDownData_CDONKEY+=bytes;		break;
-				case SO_XMULE:			sesDownData_XMULE+=bytes;		break;
+				case SO_AMULE:			sesDownData_AMULE+=bytes;		break;
 				case SO_SHAREAZA:		sesDownData_SHAREAZA+=bytes;		break;
+				case SO_CDONKEY:
+				case SO_LPHANT:
+				case SO_XMULE:			sesDownData_EMULECOMPAT+=bytes;	break;
 			}
 
 			switch (uClientPort){
@@ -1348,8 +1350,8 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumUpData_EDONKEYHYBRID=0;
 	cumUpData_EMULE=0;
 	cumUpData_MLDONKEY=0;
-	cumUpData_CDONKEY=0;
-	cumUpData_XMULE=0;
+	cumUpData_AMULE=0;
+	cumUpData_EMULECOMPAT=0;
 	cumUpData_SHAREAZA=0;
 	cumUpDataPort_4662=0;
 	cumUpDataPort_OTHER=0;
@@ -1364,8 +1366,8 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumDownData_EDONKEYHYBRID=0;
 	cumDownData_EMULE=0;
 	cumDownData_MLDONKEY=0;
-	cumDownData_CDONKEY=0;
-	cumDownData_XMULE=0;
+	cumDownData_AMULE=0;
+	cumDownData_EMULECOMPAT=0;
 	cumDownData_SHAREAZA=0;
 	cumDownDataPort_4662=0;
 	cumDownDataPort_OTHER=0;
@@ -1502,9 +1504,9 @@ bool CPreferences::LoadStats(int loadBackUp){
 	sprintf(buffer , "%s", ini.GetString(			"UpData_MLDONKEY"				, 0 ) );
 	cumUpData_MLDONKEY=				_atoi64( buffer );
 	sprintf(buffer , "%s", ini.GetString(			"UpData_LMULE"					, 0 ) );
-	cumUpData_XMULE=					_atoi64( buffer );
-	sprintf(buffer , "%s", ini.GetString(			"UpData_CDONKEY"				, 0 ) );
-	cumUpData_CDONKEY=				_atoi64( buffer );
+	cumUpData_EMULECOMPAT=				_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"UpData_AMULE"					, 0 ) );
+	cumUpData_AMULE=				_atoi64( buffer );
 	sprintf(buffer , "%s", ini.GetString(			"UpData_SHAREAZA"				, 0 ) );
 	cumUpData_SHAREAZA=				_atoi64( buffer );
 
@@ -1543,9 +1545,9 @@ bool CPreferences::LoadStats(int loadBackUp){
 	sprintf(buffer , "%s", ini.GetString(			"DownData_MLDONKEY"				, 0 ) );
 	cumDownData_MLDONKEY=			_atoi64( buffer );
 	sprintf(buffer , "%s", ini.GetString(			"DownData_LMULE"				, 0 ) );
-	cumDownData_XMULE=				_atoi64( buffer );
-	sprintf(buffer , "%s", ini.GetString(			"DownData_CDONKEY"				, 0 ) );
-	cumDownData_CDONKEY=				_atoi64( buffer );
+	cumDownData_EMULECOMPAT=		_atoi64( buffer );
+	sprintf(buffer , "%s", ini.GetString(			"DownData_AMULE"				, 0 ) );
+	cumDownData_AMULE=				_atoi64( buffer );
 	sprintf(buffer , "%s", ini.GetString(			"DownData_SHAREAZA"				, 0 ) );
 	cumDownData_SHAREAZA=				_atoi64( buffer );
 
@@ -1645,14 +1647,17 @@ bool CPreferences::LoadStats(int loadBackUp){
 		sesUpData_EDONKEYHYBRID =	0;
 		sesUpData_EMULE =			0;
 		sesUpData_MLDONKEY =			0;
-		sesUpData_CDONKEY =			0;
+		sesUpData_AMULE =			0;
+		sesUpData_EMULECOMPAT =		0;
+		sesUpData_SHAREAZA =		0;
 		sesUpDataPort_4662 =			0;
 		sesUpDataPort_OTHER =		0;
 		sesDownData_EDONKEY =		0;
 		sesDownData_EDONKEYHYBRID =	0;
 		sesDownData_EMULE =			0;
 		sesDownData_MLDONKEY =		0;
-		sesDownData_CDONKEY =		0;
+		sesDownData_AMULE =			0;
+		sesDownData_EMULECOMPAT =	0;
 		sesDownData_SHAREAZA =		0;
 		sesDownDataPort_4662 =		0;
 		sesDownDataPort_OTHER =		0;
@@ -2412,6 +2417,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteInt("USSNumberOfPings", m_iDynUpNumberOfPings, "eMule");
 	// ZZ:UploadSpeedSense <--
 	ini.WriteInt("WebMirrorAlertLevel", m_nWebMirrorAlertLevel, "eMule");
+ini.WriteBool("RunAsUnprivilegedUser", m_bRunAsUser, "eMule");
 }
 
 void CPreferences::SaveCats(){
@@ -3125,6 +3131,7 @@ void CPreferences::LoadPreferences(){
 	SetCRC32Suffix (ini.GetString("LastCRC32Suffix","\"]\"").Trim ("\""));
 	// [end] Mighty Knife
 
+	m_bRunAsUser = ini.GetBool("RunAsUnprivilegedUser", false, "eMule");
 	
     LoadCats();
 	//MORPH - Khaos Obsolete //if (GetCatCount()==1) SetAllcatType(0);
@@ -3705,19 +3712,16 @@ uint8 CPreferences::GetWebMirrorAlertLevel(){
 	// Known upcoming DDoS Attacks
 	if (m_nWebMirrorAlertLevel == 0){
 		//somefool.q 7th - 12th march on www.emule-project.net, mirrorlevel 1
-		if (CTime::GetCurrentTime() > CTime(2004,04,07,0,1,0) && CTime::GetCurrentTime() < CTime(2004,04,12,0,1,0)){
-			return 1;
-		}
-		//somefool.r 12th - 18th march on www.emule-project.net, mirrorlevel 1
-		if (CTime::GetCurrentTime() > CTime(2004,04,12,0,1,0) && CTime::GetCurrentTime() < CTime(2004,04,18,0,1,0)){
-			return 1;
-		}
 	}
 	// end
 	if (UpdateNotify())
 		return m_nWebMirrorAlertLevel;
 	else
 		return 0;
+}
+
+bool CPreferences::IsRunAsUserEnabled(){
+	return (GetWindowsVersion() == _WINVER_XP_ || GetWindowsVersion() == _WINVER_2K_) && m_bRunAsUser;
 }
 
 //MORPH START - Added by IceCream, high process priority

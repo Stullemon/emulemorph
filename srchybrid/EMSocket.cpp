@@ -128,10 +128,8 @@ CEMSocket::CEMSocket(void){
 
 	//MORPH START - Added by SiRoB, ZZ Upload
     m_bBusy = false;
-	/*
     int val = 0;
     SetSockOpt(SO_SNDBUF, &val, sizeof(int));
-	*/
 	//MORPH END   - Added by SiRoB, ZZ Upload
 }
 
@@ -700,7 +698,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
                 // if we reach this point, then there's something wrong with the while condition above!
                 ASSERT(0);
-                theApp.emuledlg->QueueDebugLogLine(true,"EMSocket: Couldn't get a new packet! There's an error in the first while condition in EMSocket::Send()");
+                theApp.QueueDebugLogLine(true,"EMSocket: Couldn't get a new packet! There's an error in the first while condition in EMSocket::Send()");
 
                 SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
                 return returnVal;

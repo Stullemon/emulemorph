@@ -22,9 +22,9 @@ protected:
 	void FillUncList(void);
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSettingsChange()					{ SetModified(); }
@@ -32,4 +32,6 @@ protected:
 	afx_msg void OnBnClickedSeltempdir();
 	afx_msg void OnBnClickedAddUNC();
 	afx_msg void OnBnClickedRemUNC();
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

@@ -74,6 +74,8 @@ CDownloadQueue::CDownloadQueue(CSharedFileList* in_sharedfilelist)
 	m_nDownDataOverheadOtherPackets = 0;
 	m_nDownDataOverheadServerPackets = 0;
 	m_nDownDataOverheadKadPackets = 0;
+	m_nUDPFileReasks = 0;
+	m_nFailedUDPFileReasks = 0;
 	sumavgDDRO = 0;
 	//m_lastRefreshedDLDisplay = 0;
 	m_dwNextTCPSrcReq = 0;
@@ -454,7 +456,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 	uint8	useCat;
 	int		addedFiles = 0;
 	bool	bCreatedNewCat = false;
-
+	bool	bCanceled = false; //MORPH - Added by SiRoB, WasCanceled
 	if (thePrefs.SelectCatForNewDL())
 	{
 		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
@@ -465,6 +467,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 		// links into a new category.
 		useCat = getCatDlg->GetInput();
 		bCreatedNewCat = getCatDlg->CreatedNewCat();
+		bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
 		delete getCatDlg;
 	}
 	else if (thePrefs.UseActiveCatForLinks())
@@ -479,7 +482,11 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 		CED2KFileLink*	pLink = m_ED2KLinkQueue.GetAt(pos);
 		CPartFile*		pNewFile =	new CPartFile(pLink);
 		
-		if (pNewFile->GetStatus() == PS_ERROR)
+		//MORPH - Changed by SiRoB, WasCanceled
+		/*
+		if (pNewFile->GetStatus() == PS_ERROR) 
+		*/
+		if (pNewFile->GetStatus() == PS_ERROR || bCanceled) 
 		{
 			delete pNewFile;
 			pNewFile = NULL;
@@ -798,7 +805,9 @@ void CDownloadQueue::AddDownload(CPartFile* newfile,bool paused) {
 		newfile->SetActivatedTick();
 	// khaos::accuratetimerem-
 	//MORPH - Removed by SiRoB, Due to Khaos Categorie
-	//SetAutoCat(newfile);// HoaX_69 / Slugfiller: AutoCat
+	/*
+	SetAutoCat(newfile);// HoaX_69 / Slugfiller: AutoCat
+	*/
 	filelist.AddTail(newfile);
 	SortByPriority();
 	CheckDiskspace();	// SLUGFILLER: checkDiskspace
@@ -1399,7 +1408,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 			dataGlobGetSources.WriteHash16(nextfile->GetFileHash());
 			iFiles++;
 			if (thePrefs.GetDebugServerUDPLevel() > 0 && thePrefs.GetDebugServerSourcesLevel() > 0)
-				Debug(">>> Sending OP__GlobGetSources to server(#%02x) %-15s (%3u of %3u); Buff  %u=%s\n", cur_udpserver->GetUDPFlags(), cur_udpserver->GetAddress(), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFiles, DbgGetFileInfo(nextfile->GetFileHash()));
+				Debug(">>> Queued  OP__GlobGetSources to server(#%02x) %-15s (%3u of %3u); Buff  %u=%s\n", cur_udpserver->GetUDPFlags(), cur_udpserver->GetAddress(), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFiles, DbgGetFileInfo(nextfile->GetFileHash()));
 		}
 	}
 
@@ -2104,7 +2113,7 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			if(!tcp)
 			{
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("Ignored source (IP=%s) received from Kademlia, no tcp port recieved"), inet_ntoa(*(in_addr*)&ip));
+					AddDebugLogLine(false, _T("Ignored source (IP=%s) received from Kademlia, no tcp port received"), inet_ntoa(*(in_addr*)&ip));
 				return;
 			}
 			if (!IsGoodIP(ED2Kip))

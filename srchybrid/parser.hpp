@@ -32,13 +32,15 @@
      TOK_STRING = 258,
      TOK_AND = 259,
      TOK_OR = 260,
-     TOK_NOT = 261
+     TOK_NOT = 261,
+     TOK_ED2K_LINK = 262
    };
 #endif
 #define TOK_STRING 258
 #define TOK_AND 259
 #define TOK_OR 260
 #define TOK_NOT 261
+#define TOK_ED2K_LINK 262
 
 
 

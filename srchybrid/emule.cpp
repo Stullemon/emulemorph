@@ -20,6 +20,7 @@
 #endif
 #include "stdafx.h"
 #include <locale.h>
+#include <io.h>
 #include "emule.h"
 #include "version.h"
 #include "opcodes.h"
@@ -55,11 +56,14 @@
 #include "Server.h"
 #include "UpDownClient.h"
 #include "ED2KLink.h"
+#include "Preferences.h"
 #ifndef _CONSOLE
 #include "emuleDlg.h"
 #include "SearchDlg.h"
 #include "enbitmap.h"
 #endif
+#include "secrunasuser.h"
+#include "SafeFile.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
@@ -70,8 +74,9 @@ CLog theVerboseLog;
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
+#endif
 
-
+#ifdef _DEBUG
 static CMemoryState oldMemState, newMemState, diffMemState;
 
 _CRT_ALLOC_HOOK g_pfnPrevCrtAllocHook = NULL;
@@ -84,24 +89,30 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 static TCHAR _szCrtDebugReportFilePath[MAX_PATH] = APP_CRT_DEBUG_LOG_FILE;
 #endif
 
+struct SLogItem
+{
+    bool addtostatusbar;
+    CString line;
+};
+
 void CALLBACK myErrHandler(Kademlia::CKademliaError *error)
 {
 	CString msg;
 	msg.Format(_T("\r\nError 0x%08X : %hs\r\n"), error->m_ErrorCode, error->m_ErrorDescription);
 	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
-		theApp.emuledlg->QueueDebugLogLine(false, msg);
+		theApp.QueueDebugLogLine(false, msg);
 }
 
 void CALLBACK myDebugAndLogHandler(LPCSTR lpMsg)
 {
 	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
-		theApp.emuledlg->QueueDebugLogLine(false, _T("%hs"), lpMsg);
+		theApp.QueueDebugLogLine(false, _T("%hs"), lpMsg);
 }
 
 void CALLBACK myLogHandler(LPCSTR lpMsg)
 {
 	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
-		theApp.emuledlg->QueueLogLine(false, _T("%hs"), lpMsg);
+		theApp.QueueLogLine(false, _T("%hs"), lpMsg);
 }
 
 const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(EMULE_GUID);
@@ -153,6 +164,8 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 // MOD Note: end
 
 	m_bGuardClipboardPrompt = false;
+
+	EnableHtmlHelp();
 }
 
 
@@ -202,8 +215,9 @@ BOOL CemuleApp::InitInstance()
 	MiniDumper dumper(m_strCurVersionLong);
 #endif
 
-	_tsetlocale(LC_ALL, _T(""));
-	_tsetlocale(LC_NUMERIC, _T("C"));
+	_tsetlocale(LC_ALL, _T(""));		// set all categories of locale to user-default ANSI code page obtained from the OS.
+	_tsetlocale(LC_NUMERIC, _T("C"));	// set numeric category to 'C'
+	_tsetlocale(LC_CTYPE, _T("C"));		// set character types category to 'C' (VERY IMPORTANT, we need binary string compares!)
 	AfxOleInit();
 
 	pendinglink = 0;
@@ -246,12 +260,20 @@ BOOL CemuleApp::InitInstance()
 		if (!AfxInitRichEdit())
 			AfxMessageBox(_T("No Rich Edit control library found!")); // should never happen..
 	}
-	// remove viruses which ddos us
-	if (!CheckForSomeFoolVirus())
-		return FALSE;
 
 	// create & initalize all the important stuff 
 	thePrefs.Init();
+
+	// check if we have to restart eMule as Secure user
+	if (thePrefs.IsRunAsUserEnabled()){
+		CSecRunAsUser rau;
+		if ( rau.PrepareUser() && rau.RestartAsUser() )
+			return FALSE; // emule restart as secure user, kill this instance
+		else if ( !rau.IsRunningEmuleAccount() ){
+			// something went wrong
+			theApp.QueueLogLine(false, GetResString(IDS_RAU_FAILED), rau.GetCurrentUserW()); 
+		}
+	}
 
 	//MORPH START - Added by IceCream, high process priority
 	if (thePrefs.GetEnableHighProcess())
@@ -319,6 +341,10 @@ BOOL CemuleApp::InitInstance()
 	thePerfLog.Startup();
 	dlg.DoModal();
 
+	// Barry - Restore old registry if required
+	if (thePrefs.AutoTakeED2KLinks())
+		RevertReg();
+
 	::CloseHandle(m_hMutexOneInstance);
 #ifdef _DEBUG
 	if (g_pfnPrevCrtAllocHook)
@@ -334,6 +360,10 @@ BOOL CemuleApp::InitInstance()
 #endif //_DEBUG
 
 	emuledlg = NULL;
+
+	ClearDebugLogQueue(true);
+	ClearLogQueue(true);
+
 	return FALSE;
 }
 
@@ -612,90 +642,133 @@ CString CemuleApp::CopyTextFromClipboard()
 
 void CemuleApp::OnlineSig() // Added By Bouc7 
 { 
-	if (!thePrefs.IsOnlineSignatureEnabled()) return;
-
-    char* fullpath = new char[strlen(thePrefs.GetAppDir())+MAX_PATH]; 
-    sprintf(fullpath,"%sonlinesig.dat",thePrefs.GetAppDir()); 
-    CFile file; 
-    if (!file.Open(fullpath,CFile::modeCreate|CFile::modeReadWrite)){ 
-		AddLogLine(true,GetResString(IDS_ERROR_SAVEFILE)+CString(" OnlineSig.dat"));
-	    delete[] fullpath; 
+	if (!thePrefs.IsOnlineSignatureEnabled())
 		return;
-    } 
-    char buffer[20]; 
-	CString Kad;
-	if (IsConnected()){ 
-		file.Write("1",1); 
-		file.Write("|",1);
-		if(serverconnect->IsConnected())
-			file.Write(serverconnect->GetCurrentServer()->GetListName(),strlen(serverconnect->GetCurrentServer()->GetListName())); 
-      // Not : file.Write(serverconnect->GetCurrentServer()->GetListName(),strlen(serverconnect->GetCurrentServer()- >GetRealName())); 
-		else{
-			Kad = "Kademlia";
-			file.Write(Kad,Kad.GetLength()); 
-		}
 
+	static const TCHAR _szFileName[] = _T("onlinesig.dat");
+	CString strFullPath = thePrefs.GetAppDir();
+	strFullPath += _szFileName;
+
+    CFile file;
+	CFileException fexp;
+    if (!file.Open(strFullPath, CFile::modeCreate|CFile::modeReadWrite, &fexp)){
+		CString strError = GetResString(IDS_ERROR_SAVEFILE) + _T(" ") + CString(_szFileName);
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		fexp.GetErrorMessage(szError, ARRSIZE(szError));
+		strError += _T(" - ");
+		strError += szError;
+		AddLogLine(true, _T("%s"), strError);
+		return;
+    }
+
+	try
+	{
+		char buffer[20]; 
+		CString Kad;
+		if (IsConnected()){ 
+			file.Write("1",1); 
+			file.Write("|",1);
+			if(serverconnect->IsConnected())
+				file.Write(serverconnect->GetCurrentServer()->GetListName(),strlen(serverconnect->GetCurrentServer()->GetListName())); 
+			else{
+				Kad = "Kademlia";
+				file.Write(Kad,Kad.GetLength()); 
+			}
+
+			file.Write("|",1); 
+			if(serverconnect->IsConnected())
+				file.Write(serverconnect->GetCurrentServer()->GetFullIP(),strlen(serverconnect->GetCurrentServer()->GetFullIP())); 
+			else{
+				Kad = "0.0.0.0";
+				file.Write(Kad,Kad.GetLength()); 
+			}
+			file.Write("|",1); 
+			if(serverconnect->IsConnected()){
+				itoa(serverconnect->GetCurrentServer()->GetPort(),buffer,10); 
+				file.Write(buffer,strlen(buffer));
+			}
+			else{
+				Kad = "0";
+				file.Write(Kad,Kad.GetLength());
+			}
+		} 
+		else 
+			file.Write("0",1); 
+
+		file.Write("\n",1); 
+		sprintf(buffer,"%.1f",(float)downloadqueue->GetDatarate()/1024); 
+		file.Write(buffer,strlen(buffer)); 
 		file.Write("|",1); 
-		if(serverconnect->IsConnected())
-			file.Write(serverconnect->GetCurrentServer()->GetFullIP(),strlen(serverconnect->GetCurrentServer()->GetFullIP())); 
-		else{
-			Kad = "0.0.0.0";
-			file.Write(Kad,Kad.GetLength()); 
-		}
+		sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate()/1024); 
+		file.Write(buffer,strlen(buffer)); 
 		file.Write("|",1); 
-		if(serverconnect->IsConnected()){
-			itoa(serverconnect->GetCurrentServer()->GetPort(),buffer,10); 
-			file.Write(buffer,strlen(buffer));
-		}
-		else{
-			Kad = "0";
-			file.Write(Kad,Kad.GetLength());
-		}
-	} 
-    else 
-      file.Write("0",1); 
+		itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
+		file.Write(buffer,strlen(buffer)); 
 
-    file.Write("\n",1); 
-    sprintf(buffer,"%.1f",(float)downloadqueue->GetDatarate()/1024); 
-    file.Write(buffer,strlen(buffer)); 
-    file.Write("|",1); 
-    sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate()/1024); 
-    file.Write(buffer,strlen(buffer)); 
-    file.Write("|",1); 
-    itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
-    file.Write(buffer,strlen(buffer)); 
-
-    file.Close(); 
-    delete[] fullpath; 
-    fullpath=NULL;
+		file.Close(); 
+	}
+	catch (CFileException* ex)
+	{
+		CString strError = GetResString(IDS_ERROR_SAVEFILE) + _T(" ") + CString(_szFileName);
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		ex->GetErrorMessage(szError, ARRSIZE(szError));
+		strError += _T(" - ");
+		strError += szError;
+		AddLogLine(true, _T("%s"), strError);
+		ex->Delete();
+	}
 } //End Added By Bouc7
 
-void CemuleApp::OnHelp() {
-
+CString CemuleApp::GetLangHelpFilePath()
+{
 	// Change extension for help file
 	CString strHelpFile = m_pszHelpFilePath;
 	CFileFind ff;
-
-	if (thePrefs.GetLanguageID()!=MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)) {
-		int pos=strHelpFile.ReverseFind('.');
+	if (thePrefs.GetLanguageID() != MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT))
+	{
+		int pos = strHelpFile.ReverseFind(_T('.'));
 		CString temp;
-		temp.Format("%s.%u.chm",strHelpFile.Left(pos),thePrefs.GetLanguageID());
-		if (pos>0) strHelpFile=temp;
+		temp.Format(_T("%s.%u.chm"), strHelpFile.Left(pos), thePrefs.GetLanguageID());
+		if (pos>0)
+			strHelpFile = temp;
 		
 		// if not exists, use original help (english)
-		if (!ff.FindFile(strHelpFile, 0)) strHelpFile = m_pszHelpFilePath;
+		if (!ff.FindFile(strHelpFile, 0))
+			strHelpFile = m_pszHelpFilePath;
 	}
 	ff.Close();
-	strHelpFile.Replace(".HLP", ".chm");
+	strHelpFile.Replace(_T(".HLP"), _T(".chm"));
+	return strHelpFile;
+}
 
-	// lets just open the helpfile by associated program, instead of more windows-dependency :)
-	if (ff.FindFile(strHelpFile, 0)) ShellOpenFile(strHelpFile); 
-	else
-		if (IDYES==AfxMessageBox(strHelpFile + _T("\n\n") + GetResString(IDS_ERR_NOHELP), MB_YESNO | MB_ICONERROR) ){
-			CString strUrl = thePrefs.GetHomepageBaseURL() + CString("/home/perl/help.cgi");
-			ShellExecute(NULL, NULL, strUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+void CemuleApp::SetHelpFilePath(LPCTSTR pszHelpFilePath)
+{
+	if (m_pszHelpFilePath)
+	{
+		free((void*)m_pszHelpFilePath);
+		m_pszHelpFilePath = NULL;
+	}
 
-		}
+	m_pszHelpFilePath = _tcsdup(pszHelpFilePath);
+}
+
+void CemuleApp::OnHelp()
+{
+	if (m_dwPromptContext != 0)
+	{
+		// do not call WinHelp when the error is failing to lauch help
+		if (m_dwPromptContext != HID_BASE_PROMPT+AFX_IDP_FAILED_TO_LAUNCH_HELP)
+			ShowHelp(m_dwPromptContext);
+		return;
+	}
+	ShowHelp(0, HELP_CONTENTS);
+}
+
+void CemuleApp::ShowHelp(UINT uTopic, UINT uCmd)
+{
+	CString strHelpFilePath = GetLangHelpFilePath();
+	SetHelpFilePath(strHelpFilePath);
+	WinHelpInternal(uTopic, uCmd);
 }
 
 int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -1 */)
@@ -1097,7 +1170,12 @@ void CemuleApp::SearchClipboard()
 	m_bGuardClipboardPrompt = false;
 }
 
-void CemuleApp::PasteClipboard()
+//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+/*
+void CemuleApp::PasteClipboard(uint8 uCategory)
+*/
+void CemuleApp::PasteClipboard(int Cat)
+//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 {
 	CString strLinks = CopyTextFromClipboard();
 	strLinks.Trim();
@@ -1106,9 +1184,9 @@ void CemuleApp::PasteClipboard()
 
 	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 	/*
-	AddEd2kLinksToDownload(strLinks, 0);
+	AddEd2kLinksToDownload(strLinks, uCategory);
 	*/
-	AddEd2kLinksToDownload(strLinks, -1);
+	AddEd2kLinksToDownload(strLinks, Cat);
 	/**/
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 }
@@ -1149,3 +1227,94 @@ bool CemuleApp::IsEd2kServerLinkInClipboard()
 	static const TCHAR _szEd2kServerLink[] = _T("ed2k://|server|");
 	return IsEd2kLinkInClipboard(_szEd2kServerLink, ARRSIZE(_szEd2kServerLink)-1);
 }
+
+// Elandal:ThreadSafeLogging -->
+void CemuleApp::QueueDebugLogLine(bool addtostatusbar, LPCTSTR line, ...)
+{
+	if (!thePrefs.GetVerbose())
+		return;
+
+	m_queueLock.Lock();
+
+	TCHAR bufferline[1000];
+
+	va_list argptr;
+	va_start(argptr, line);
+	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	va_end(argptr);
+
+	SLogItem* newItem = new SLogItem;
+	newItem->addtostatusbar = addtostatusbar;
+	newItem->line = bufferline;
+	m_QueueDebugLog.AddTail(newItem);
+
+	m_queueLock.Unlock();
+}
+
+void CemuleApp::QueueLogLine(bool addtostatusbar, LPCTSTR line,...)
+{
+
+	m_queueLock.Lock();
+
+	TCHAR bufferline[1000];
+
+	va_list argptr;
+	va_start(argptr, line);
+	_vsnprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	va_end(argptr);
+
+	SLogItem* newItem = new SLogItem;
+	newItem->addtostatusbar = addtostatusbar;
+	newItem->line = bufferline;
+	m_QueueLog.AddTail(newItem);
+
+	m_queueLock.Unlock();
+}
+
+void CemuleApp::HandleDebugLogQueue()
+{
+	m_queueLock.Lock();
+	while(!m_QueueDebugLog.IsEmpty()) {
+		const SLogItem* newItem = m_QueueDebugLog.RemoveHead();
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(newItem->addtostatusbar, newItem->line);
+		delete newItem;
+	}
+	m_queueLock.Unlock();
+}
+
+void CemuleApp::HandleLogQueue()
+{
+	m_queueLock.Lock();
+	while(!m_QueueLog.IsEmpty()) {
+		const SLogItem* newItem = m_QueueLog.RemoveHead();
+		AddLogLine(newItem->addtostatusbar, newItem->line);
+		delete newItem;
+	}
+	m_queueLock.Unlock();
+}
+
+void CemuleApp::ClearDebugLogQueue(bool bDebugPendingMsgs)
+{
+	m_queueLock.Lock();
+	while(!m_QueueDebugLog.IsEmpty())
+	{
+		if (bDebugPendingMsgs)
+			TRACE("Queued dbg log msg: %s\n", m_QueueDebugLog.GetHead()->line);
+		delete m_QueueDebugLog.RemoveHead();
+	}
+	m_queueLock.Unlock();
+}
+
+void CemuleApp::ClearLogQueue(bool bDebugPendingMsgs)
+{
+	m_queueLock.Lock();
+	while(!m_QueueLog.IsEmpty())
+	{
+		if (bDebugPendingMsgs)
+			TRACE("Queued log msg: %s\n", m_QueueLog.GetHead()->line);
+		delete m_QueueLog.RemoveHead();
+	}
+	m_queueLock.Unlock();
+}
+// Elandal:ThreadSafeLogging <--

@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "Loggable.h"
-#include "updownclient.h" //MORPH - Added by SiRoB
 
 class CClientReqSocket;
 class CUpDownClient;
@@ -54,7 +53,11 @@ public:
 	~CClientList();
 	void	AddClient(CUpDownClient* toadd,bool bSkipDupTest = false);
 	void	RemoveClient(CUpDownClient* toremove);
-	void	GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkey=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkeyHybrid=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEMule=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionLMule=NULL); // xrmb : statsclientstatus
+	void	GetStatistics(uint32& totalclient, int stats[],
+						  CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkey,
+						  CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkeyHybrid,
+						  CMap<uint32, uint32, uint32, uint32>& clientVersionEMule,
+						  CMap<uint32, uint32, uint32, uint32>& clientVersionAMule);
 	//MORPH START - Slugfiller: modid
 	void	GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
 	void	ReleaseModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);

@@ -19,6 +19,7 @@
 #include "OtherFunctions.h"
 #include <zlib/zlib.h>
 #include "SearchDlg.h"
+#include "SearchParams.h"
 #include "WebServer.h"
 #include "ED2KLink.h"
 #include "MD5Sum.h"
@@ -43,6 +44,7 @@
 #include "StatisticsDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Net/KademliaUDPListener.h"
+#include "Exceptions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -2477,7 +2479,9 @@ bool CWebServer::_GetFileHash(CString sHash, uchar *FileHash)
 
 __inline void PlainString(CString& rstr, bool noquot)
 {
-	rstr.Replace("&", "");
+	rstr.Replace("&", "&amp;");
+	rstr.Replace("<", "&lt;");
+	rstr.Replace(">", "&gt;");
 	if(noquot)
 	{
         rstr.Replace("'", "\\'");
@@ -2617,26 +2621,48 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 		SSearchParams* pParams = new SSearchParams;
 		pParams->strExpression = _ParseURL(Data.sURL, "tosearch");
 		pParams->strFileType = _ParseURL(Data.sURL, "type");
+		
 		pParams->ulMinSize = atol(_ParseURL(Data.sURL, "min"))*1048576;
 		pParams->ulMaxSize = atol(_ParseURL(Data.sURL, "max"))*1048576;
-		pParams->uAvailability = (_ParseURL(Data.sURL, "avail")=="")?-1:atoi(_ParseURL(Data.sURL, "avail"));
+		if (pParams->ulMaxSize < pParams->ulMinSize)
+			pParams->ulMaxSize = 0;
+		
+		pParams->uAvailability = (_ParseURL(Data.sURL, "avail")=="")?0:atoi(_ParseURL(Data.sURL, "avail"));
+		if (pParams->uAvailability > 1000000)
+			pParams->uAvailability = 1000000;
+
 		pParams->strExtension = _ParseURL(Data.sURL, "ext");
 		if (method == "kademlia")
 			pParams->eType = SearchTypeKademlia;
 		else if (method == "global")
-			pParams->eType = SearchTypeGlobal;
+			pParams->eType = SearchTypeEd2kGlobal;
 		else
-			pParams->eType = SearchTypeServer;
+			pParams->eType = SearchTypeEd2kServer;
 
-		if (pParams->eType != SearchTypeKademlia){
-		    if (!theApp.emuledlg->searchwnd->DoNewSearch(pParams))
-				delete pParams;
+		CString strResponse = _GetPlainResString(IDS_SW_SEARCHINGINFO);
+		try
+		{
+			if (pParams->eType != SearchTypeKademlia){
+				if (!theApp.emuledlg->searchwnd->DoNewEd2kSearch(pParams)){
+					delete pParams;
+					strResponse = _GetPlainResString(IDS_ERR_NOTCONNECTED);
+				}
+			}
+			else{
+				if (!theApp.emuledlg->searchwnd->DoNewKadSearch(pParams)){
+					delete pParams;
+					strResponse = _GetPlainResString(IDS_ERR_NOTCONNECTEDKAD);
+				}
+			}
 		}
-		else{
-			if (!theApp.emuledlg->searchwnd->DoNewKadSearch(pParams))
-				delete pParams;
+		catch (CMsgBoxException* ex)
+		{
+			strResponse = ex->m_strMsg;
+			PlainString(strResponse, false);
+			ex->Delete();
+			delete pParams;
 		}
-		Out.Replace("[Message]",_GetPlainResString(IDS_SW_SEARCHINGINFO));
+		Out.Replace("[Message]",strResponse);
 	}
 	else if(_ParseURL(Data.sURL, "tosearch") != "" && !IsSessionAdmin(Data,sSession) ) {
 		Out.Replace("[Message]",_GetPlainResString(IDS_ACCESSDENIED));

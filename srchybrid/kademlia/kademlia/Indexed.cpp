@@ -676,7 +676,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsStr() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsStr() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetStr().CompareNoCase(pSearchTerm->tag->GetStr()) == 0;
 			}
 		}
@@ -689,7 +689,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetInt() >= pSearchTerm->tag->GetInt();
 			}
 		}
@@ -699,7 +699,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetFloat() >= pSearchTerm->tag->GetFloat();
 			}
 		}
@@ -712,7 +712,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetInt() <= pSearchTerm->tag->GetInt();
 			}
 		}
@@ -722,7 +722,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetFloat() <= pSearchTerm->tag->GetFloat();
 			}
 		}
@@ -735,7 +735,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetInt() > pSearchTerm->tag->GetInt();
 			}
 		}
@@ -745,7 +745,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetFloat() > pSearchTerm->tag->GetFloat();
 			}
 		}
@@ -758,7 +758,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetInt() < pSearchTerm->tag->GetInt();
 			}
 		}
@@ -768,7 +768,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetFloat() < pSearchTerm->tag->GetFloat();
 			}
 		}
@@ -781,7 +781,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetInt() == pSearchTerm->tag->GetInt();
 			}
 		}
@@ -791,7 +791,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetFloat() == pSearchTerm->tag->GetFloat();
 			}
 		}
@@ -804,7 +804,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsInt() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsInt() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetInt() != pSearchTerm->tag->GetInt();
 			}
 		}
@@ -814,7 +814,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 			for (it = item->taglist.begin(); it != item->taglist.end(); it++)
 			{
 				const Kademlia::CTag* tag = *it;
-				if (tag->IsFloat() && pSearchTerm->tag->m_name == tag->m_name)
+				if (tag->IsFloat() && pSearchTerm->tag->m_name.Compare(tag->m_name) == 0)
 					return tag->GetFloat() != pSearchTerm->tag->GetFloat();
 			}
 		}

@@ -307,12 +307,12 @@ BEGIN
     IDS_PRIOVERYLOW         "Muy baja"
     IDS_PRIORELEASE         "Lanzamiento"
     IDS_FSTATUS_LOCKED      "Excluido"
-    IDS_KADALPHA            "Kademlia is still in an early development stage. We recommend to enabled it only if you are interested in testing it"
+    IDS_KADALPHA            "Kademlia está todavía en desarrollo. Te recomendamos activarlo solo si estás interesado en evaluarlo"
     IDS_FSTATUS_FRIENDSONLY "Sólo amigos"
     IDS_FSTATUS_PUBLIC      "Público"
     IDS_ERR_RENAMESF        "Error al renombrar\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
     IDS_PRIOHIGHEST         "Más alta"
-    IDS_AVAILABLE           "available"
+    IDS_AVAILABLE           "disponible"
     IDS_ERR_NOPRIMCHANGE    "¡No puedes cambiar los permisos mientras aún se descarga el archivo!"
     IDS_HIDDEN              "Oculto"
 END
@@ -729,9 +729,9 @@ BEGIN
     IDS_ED2KLINKFIX         "enlaces ED2K"
     IDS_RECONNECT           "Se reintentará la conexión automática al servidor en %d segundos"
     IDS_SERVERADDED         "Servidor añadido: %s"
-    IDS_IRC_IGNOREJOINMESSAGE "Ignore Join info messages"
+    IDS_IRC_IGNOREJOINMESSAGE "Ignorar mensajes de información de Union"
     IDS_STATS_SUCCUPCOUNT   "Total de subidas satisfactorias: %i (%.2f%%)"
-    IDS_IRC_IGNOREPARTMESSAGE "Ignore Part info messages"
+    IDS_IRC_IGNOREPARTMESSAGE "Ignorar mensajes de información de Partes"
     IDS_STATS_FAILUPCOUNT   "Total de subidas erróneas: %i (%.2f%%)"
     IDS_STATS_AVEUPTIME     "Tiempo medio de subida: %s"
     IDS_SEARCHMINSIZE       "Tamaño mín."
@@ -753,7 +753,7 @@ BEGIN
     IDS_STATS_AVGLABEL      "Tiempo de promedio del gráfico: %i minutos"
     IDS_GRAPHS              "Gráficos"
     IDS_STREE               "Árbol de estadísticas"
-    IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
+    IDS_IRC_IGNOREQUITMESSAGE "Ignorar mensajes de información al Salir"
     IDS_STATSSETUPINFO      "Configurar estadísticas"
 END
 
@@ -883,8 +883,8 @@ BEGIN
     IDS_PW_TIT_DOWN         "Cambiar límite de velocidad en Descarga"
     IDS_PW_UNLIMITED        "Ilimitado"
     IDS_PW_MINREC           "mínimo recomendado\t%i "
-    IDS_PW_UA               "Velocidad completa de subida/descarga"
-    IDS_PW_PA               "Regular velocidad subida/descarga"
+    IDS_PW_UA               "Velocidad máx. de subida/descarga"
+    IDS_PW_PA               "Velocidad mín. subida/descarga"
     IDS_IRC_IGNOREINFOMESSAGE "Ignorar mensajes de información."
     IDS_CONNECTIONLOST      "Conexión perdida"
     IDS_WIZ_OS_FRAME        "Sistema Operativo"
@@ -943,7 +943,7 @@ STRINGTABLE
 BEGIN
     IDS_STATS_MAXDL         "Descarga máxima: %.2f kB/s"
     IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
-                            "Ignore eMule add friend protocol messages"
+                            "Ignorar mensajes amigo añadido de eMule"
     IDS_PW_FASTSRVCON       "Conexión segura"
     IDS_SOURCELINKFAILED    "Necesitas una ID alta para crear un enlace de fuente válido"
     IDS_CREATESOURCELINK    "Copiar enlace ED2k (fuente) al portapapeles"
@@ -1025,7 +1025,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Perdido por corrupción: %s       Ganado por compresión: %s\nPaquetes salvados por ICH: %i"
-    IDS_ERR_NOHELP          "Archivo de ayuda no encontrado.\n Visita nuestra página web para conseguir una copia del archivo de ayuda mas reciente! (sección de descarga)\n¿Quieres en cambio ver la ayuda desde la web?"
+    IDS_ERR_NOHELP          "Please visit our homepage's download section to get a copy of the newest help file!\n\nDo you want to browse the online help now instead?"
     IDS_SHOWOVERHEAD        "Mostrar ancho de banda excedente"
     IDS_UPDOWNSMALL         "Subida: %.1f | Descarga: %.1f"
     IDS_EDITLIST            "Editar"
@@ -1035,7 +1035,7 @@ BEGIN
     IDS_WEBSERVICES         "Servicios &Web"
     IDS_WEBSVEDIT           "Editar Servicios Web"
     IDS_IRC_EMULEPROTO_IGNORESENDLINK 
-                            "Ignore eMule send link protocol messages"
+                            "Ignorar mensajes enviar enlace de eMule"
     IDS_CHECK4UPDATE        "Comprobar si hay una nueva versión"
     IDS_STARTUP             "Al iniciar"
     IDS_NEWVERSIONAVL       "Existe una nueva versión de eMule! Para mas información ve a la web de emule-project."
@@ -1148,12 +1148,12 @@ BEGIN
     IDS_ENTERUSERNAME       "Por favor introduce tu nombre de usuario:"
     IDS_STATIC_CPUMEM       "Conservar uso de CPU y Memoria"
     IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
-                            "Keyword too short.\r\n\r\nThe keyword(s) used in a Kad search expression must have a minimum length of 3 characters."
-    IDS_LOG2DISK            "Save log to disk"
+                            "PalabraClave demasiado corta.\r\n\r\nLa PalabraClave(s) usada en la expresión de búsqueda Kad debe tener un mínimo de 3 caracteres."
+    IDS_LOG2DISK            "Guardar a disco"
     IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 
-                            "There is already a Kad search ongoing for the keyword ""%s"".\r\n\r\nTo search again for that keyword, either wait until this keyword search is finished or close the according search results pane."
+                            "Ya existe una búsqueda en curso para la PalabraClave ""%s"".\r\n\r\nPara buscar otra vez esa PalabraClave, espere hasta que la búsqueda de la PalabraClave finalice o se cierre el panel de resultados de búsqueda."
     IDS_KAD_SEARCH_KEYWORD_INVALID 
-                            "Invalid Kad keyword.\r\n\r\nA Kad search expression has the following format:\r\n\r\n\t<kad-keyword> [ <ed2k-search-expression> ]\r\n\r\nThe <kad-keyword> must not contain any of the following characters:\r\n\r\n\t%s"
+                            "PalabraClave No válida.\r\n\r\nUna expresión de búsqueda de Kad tiene the siguiente formato:\r\n\r\n\t<kad-keyword> [ <ed2k-search-expression> ]\r\n\r\nThe <kad-keyword> no debe contener ninguno de los siguientes caracteres:\r\n\r\n\t%s"
     IDS_EDITCAT             "Editar Categoría-Propiedades"
     IDS_PW_WS               "Servidor Web"
     IDS_ENABLED             "activado"
@@ -1488,7 +1488,6 @@ BEGIN
                             "Intervalo actualiz. conexión a Servidor [min.]"
     IDS_MORE                "&Más"
     IDS_TOOLS               "He&rramientas"
-    IDS_ERR_JIGLENEEDSTYPE  "Si quieres buscar en la base de datos Jigle sin especificar el tipo de archivo, ¡tienes que especificar al menos la extensión!"
 END
 
 STRINGTABLE 
@@ -1534,8 +1533,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DYNUP_PINGTOLERANCE "Tolerancia de Ping (% del ping mas bajo)"
-    IDS_DYNUP_GOINGUPDIVIDER "Aumentando lentitud"
-    IDS_DYNUP_GOINGDOWNDIVIDER "Disminuyendo lentitud"
+    IDS_DYNUP_GOINGUPDIVIDER "Aumentar velocidad"
+    IDS_DYNUP_GOINGDOWNDIVIDER "Disminuir velocidad"
     IDS_DYNUP_NUMBEROFPINGS "Número máx. de pings de promedio"
     IDS_DYNUP_MINUPLOAD     "Velocidad de subida permitida mas baja"
     IDS_ESTTIMELEFT         "Tiempo restante estimado:"
@@ -1579,7 +1578,7 @@ BEGIN
     IDS_KADSEARCHLAB        "Búsquedas actuales"
     IDS_SRV_UDPSR           "Protocolo UDP extendido para peticiones de fuentes"
     IDS_SRV_UDPFR           "Protocolo UDP extendido para peticiones de archivo"
-    IDS_MINLENGTH           "Min. length [hh:mm:ss]"
+    IDS_MINLENGTH           "Duración min. [hh:mm:ss]"
     IDS_EM_HELP             "A&yuda"
     IDS_WRN_FRIENDDUPLIPPORT 
                             "Amigo no añadido.\r\n\r\nYa existe un amigo con la misma dirección IP y puerto disponible."
@@ -1596,11 +1595,11 @@ BEGIN
     IDS_TEXTLABELS          "Etiquetas de texto"
     IDS_ENABLETEXTLABELS    "debajo del icono"
     IDS_CUSTOMIZETOOLBAR    "Personalizar barra de herramientas"
-    IDS_MINBITRATE          "Min. bitrate [kBit/s]"
+    IDS_MINBITRATE          "Bitrate min. [kBit/s]"
     IDS_KAD_RECHECKFW       "Comprobar Cortafuegos"
     IDS_SHAREDTITLE         "Compartido ED2K|Kad"
     IDS_WARNINGNOBS         "Autoarranque inactivo (Kad desactivado o ya conectado)."
-    IDS_FIREWALLED          "Firewalled"
+    IDS_FIREWALLED          "Tras cortafuegos"
     IDS_KADEMLIA            "Kad"
     IDS_KADCONTACTLAB       "Contactos"
     IDS_KADDISTANCE         "Distancia"
@@ -1619,7 +1618,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "¿Quieres realmente elimiar los filtros IP seleccionados?"
     IDS_TOTAL_IPFILTER_LABEL "Total de IP filtradas:"
     IDS_TOTAL_IPS_LABEL     "Total IPs:"
-    IDS_DELETE2             "Eliminar"
+    IDS_DELETESELECTED             "Eliminar"
     IDS_APPEND              "Añadir..."
     IDS_SAVE                "Guardar"
     IDS_IP_START            "Inicio"
@@ -1632,13 +1631,24 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_NOTCONNECTEDKAD "You are currently not connected to the Kad Network!"
-    IDS_IRC_NOSFS           "No Shared Files Selected"
-    IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
-    IDS_KNOWN               "Known"
-    IDS_DL_ACTIVE_TIME      "Download time"
-    IDS_RESETLABEL          "Auto completion (history function)"
+    IDS_ERR_NOTCONNECTEDKAD "Ahora mismo No estás conectado a la red Kademlia!"
+    IDS_IRC_NOSFS           "No se han seleccionado archivos compartidos"
+    IDS_IRC_IGNOREMISCMESSAGE "Ignorar mensajes inf. Misc"
+    IDS_KNOWN               "Conocido"
+    IDS_DL_ACTIVE_TIME      "Tiempo de descarga"
+    IDS_RESETLABEL          "AutoCompletar (función registro)"
+    IDS_PASTE               "Pegar"
+    IDS_UNDO                "Deshacer"
+    IDS_CUT                 "Cortar"
+    IDS_IRC_SOUNDEVENTS     "Sonido en eventos"
+    IDS_KADCONTACTSREAD     "Read %ld contacts from file."
+    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
+    IDS_RUNASUSER           "Run eMule as unprivileged User"
+    IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
+    IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
+    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
 END
+
 STRINGTABLE 
 BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 

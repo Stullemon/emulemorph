@@ -118,7 +118,7 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 
 	rCaption.left += 22;
 	
-	if(g_xpStyle.IsAppThemed())
+	if(g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed())
     {
 		HTHEME hTheme = g_xpStyle.OpenThemeData(NULL, L"BUTTON"); 
 		USES_CONVERSION;

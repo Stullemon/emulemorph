@@ -242,7 +242,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		if(!m_bySupportSecIdent){
 			switch(thePrefs.GetCreditSystem()){
 				case CS_OFFICIAL:
-				//for those unsecure client have no credit, official gives lower Score
+					break;
 				case CS_PAWCIO:
 					if(modif == 1)
 						fBaseValue *= 0.95f;
@@ -433,7 +433,7 @@ public:
 };
 
 void CUpDownClient::CreateNextBlockPackage(){
-	// See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
+    // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
 	if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
 	m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready (at least 0.2 MBytes there)
 		return;
@@ -447,7 +447,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 	// <-----khaos-
 	CSyncHelper lockFile;
 	try{
-		// Buffer new data if current buffer is less than 1 MBytes
+        // Buffer new data if current buffer is less than 1 MBytes
 		while (!m_BlockRequests_queue.IsEmpty() &&
 			(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 100*1024)) {
 

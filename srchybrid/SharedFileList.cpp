@@ -765,6 +765,7 @@ CKnownFile* CSharedFileList::GetFileByIndex(int index){
 void CSharedFileList::ClearED2KPublishInfo(){
 	CKnownFile* cur_file;
 	CCKey bufKey;
+	m_lastPublishED2KFlag = true;
 	for (POSITION pos = m_Files_map.GetStartPosition();pos != 0;){
 		m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
 		cur_file->SetPublishedED2K(false);
@@ -858,12 +859,12 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 			// Artist, Album and Title are disabled because they should be already part of the filename
 			// and would therefore be redundant information sent to the servers.. and the servers count the
 			// amount of sent data!
-			{ false, FT_MEDIA_ARTIST,	2, FT_ED2K_MEDIA_ARTIST },
-			{ false, FT_MEDIA_ALBUM,	2, FT_ED2K_MEDIA_ALBUM },
-			{ false, FT_MEDIA_TITLE,	2, FT_ED2K_MEDIA_TITLE },
-			{ true,  FT_MEDIA_LENGTH,	2, FT_ED2K_MEDIA_LENGTH },
-			{ true,  FT_MEDIA_BITRATE,	3, FT_ED2K_MEDIA_BITRATE },
-			{ true,  FT_MEDIA_CODEC,	2, FT_ED2K_MEDIA_CODEC }
+			{ false, FT_MEDIA_ARTIST,	TAGTYPE_STRING, FT_ED2K_MEDIA_ARTIST },
+			{ false, FT_MEDIA_ALBUM,	TAGTYPE_STRING, FT_ED2K_MEDIA_ALBUM },
+			{ false, FT_MEDIA_TITLE,	TAGTYPE_STRING, FT_ED2K_MEDIA_TITLE },
+			{ true,  FT_MEDIA_LENGTH,	TAGTYPE_STRING, FT_ED2K_MEDIA_LENGTH },
+			{ true,  FT_MEDIA_BITRATE,	TAGTYPE_UINT32, FT_ED2K_MEDIA_BITRATE },
+			{ true,  FT_MEDIA_CODEC,	TAGTYPE_STRING, FT_ED2K_MEDIA_CODEC }
 		};
 		for (int i = 0; i < ARRSIZE(_aMetaTags); i++)
 		{
@@ -873,24 +874,37 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 			if (pTag != NULL)
 			{
 				// skip string tags with empty string values
-				if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
+				if (pTag->IsStr() && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
 					continue;
 				
 				// skip integer tags with '0' values
-				if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
+				if (pTag->IsInt() && pTag->tag.intvalue == 0)
 					continue;
 				
-				if (_aMetaTags[i].nED2KType == 2 && pTag->tag.type == 2)
-					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.stringvalue));
-				else if (_aMetaTags[i].nED2KType == 3 && pTag->tag.type == 3)
-					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
-				else if (_aMetaTags[i].nName == FT_MEDIA_LENGTH && pTag->tag.type == 3)
+				if (_aMetaTags[i].nED2KType == TAGTYPE_STRING && pTag->IsStr())
 				{
-					ASSERT( _aMetaTags[i].nED2KType == 2 );
+					if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
+						tags.Add(new CTag(_aMetaTags[i].nName, pTag->tag.stringvalue));
+					else
+					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.stringvalue));
+				}
+				else if (_aMetaTags[i].nED2KType == TAGTYPE_UINT32 && pTag->IsInt())
+				{
+					if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
+						tags.Add(new CTag(_aMetaTags[i].nName, pTag->tag.intvalue));
+					else
+					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
+				}
+				else if (_aMetaTags[i].nName == FT_MEDIA_LENGTH && pTag->IsInt())
+				{
+					ASSERT( _aMetaTags[i].nED2KType == TAGTYPE_STRING );
 					// All 'eserver' versions and eMule versions >= 0.42.4 support the media length tag with type 'integer'
 					if (   pServer!=NULL && (pServer->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
 						|| uEmuleVer >= MAKE_CLIENT_VERSION(0,42,4))
 					{
+						if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
+							tags.Add(new CTag(_aMetaTags[i].nName, pTag->tag.intvalue));
+						else
 						tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
 					}
 					else
@@ -928,9 +942,15 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 	}
 
 	files->WriteUInt32(tags.GetSize());
-	for (int i = 0; i < tags.GetSize(); i++){
-		tags[i]->WriteTagToFile(files);
-		delete tags[i];
+	for (int i = 0; i < tags.GetSize(); i++)
+	{
+		const CTag* pTag = tags[i];
+		//TRACE("  %s\n", pTag->GetFullInfo());
+		if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
+			pTag->WriteNewEd2kTag(files);
+		else
+			pTag->WriteTagToFile(files);
+		delete pTag;
 	}
 }
 

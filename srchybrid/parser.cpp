@@ -56,13 +56,15 @@
      TOK_STRING = 258,
      TOK_AND = 259,
      TOK_OR = 260,
-     TOK_NOT = 261
+     TOK_NOT = 261,
+     TOK_ED2K_LINK = 262
    };
 #endif
 #define TOK_STRING 258
 #define TOK_AND 259
 #define TOK_OR 260
 #define TOK_NOT 261
+#define TOK_ED2K_LINK 262
 
 
 
@@ -221,22 +223,22 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state. */
-#define YYFINAL  14
+#define YYFINAL  15
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   46
+#define YYLAST   52
 
 /* YYNTOKENS -- Number of terminals. */
-#define YYNTOKENS  9
+#define YYNTOKENS  10
 /* YYNNTS -- Number of nonterminals. */
 #define YYNNTS  4
 /* YYNRULES -- Number of rules. */
-#define YYNRULES  17
+#define YYNRULES  18
 /* YYNRULES -- Number of states. */
-#define YYNSTATES  27
+#define YYNSTATES  28
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   261
+#define YYMAXUTOK   262
 
 #define YYTRANSLATE(YYX) 						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -248,7 +250,7 @@ static const unsigned char yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       7,     8,     2,     2,     2,     2,     2,     2,     2,     2,
+       8,     9,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -270,7 +272,7 @@ static const unsigned char yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6
+       5,     6,     7
 };
 
 #if YYDEBUG
@@ -278,26 +280,26 @@ static const unsigned char yytranslate[] =
    YYRHS.  */
 static const unsigned char yyprhs[] =
 {
-       0,     0,     3,     5,     8,    10,    14,    18,    22,    26,
-      30,    34,    37,    41,    44,    47,    50,    52
+       0,     0,     3,     5,     7,    10,    12,    16,    20,    24,
+      28,    32,    36,    39,    43,    46,    49,    52,    54
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS. */
 static const yysigned_char yyrhs[] =
 {
-      10,     0,    -1,    11,    -1,    11,     1,    -1,    12,    -1,
-      11,     4,    11,    -1,    11,     5,    11,    -1,    11,     6,
-      11,    -1,     7,    11,     8,    -1,    11,     5,     1,    -1,
-      11,     6,     1,    -1,     7,     1,    -1,     7,    11,     1,
-      -1,     4,     1,    -1,     5,     1,    -1,     6,     1,    -1,
-       3,    -1,    12,     3,    -1
+      11,     0,    -1,    12,    -1,     7,    -1,    12,     1,    -1,
+      13,    -1,    12,     4,    12,    -1,    12,     5,    12,    -1,
+      12,     6,    12,    -1,     8,    12,     9,    -1,    12,     5,
+       1,    -1,    12,     6,     1,    -1,     8,     1,    -1,     8,
+      12,     1,    -1,     4,     1,    -1,     5,     1,    -1,     6,
+       1,    -1,     3,    -1,    13,     3,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned char yyrline[] =
 {
-       0,    42,    42,    49,    58,    59,    69,    79,    89,    94,
-     100,   106,   111,   117,   122,   127,   134,   139
+       0,    43,    43,    49,    58,    67,    68,    78,    88,    98,
+     103,   109,   115,   120,   126,   131,   136,   143,   148
 };
 #endif
 
@@ -307,8 +309,8 @@ static const unsigned char yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "TOK_STRING", "TOK_AND", "TOK_OR", 
-  "TOK_NOT", "'('", "')'", "$accept", "action", "searchexpr", 
-  "and_strings", 0
+  "TOK_NOT", "TOK_ED2K_LINK", "'('", "')'", "$accept", "action", 
+  "searchexpr", "and_strings", 0
 };
 #endif
 
@@ -317,22 +319,22 @@ static const char *const yytname[] =
    token YYLEX-NUM.  */
 static const unsigned short yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,    40,    41
+       0,   256,   257,   258,   259,   260,   261,   262,    40,    41
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const unsigned char yyr1[] =
 {
-       0,     9,    10,    10,    11,    11,    11,    11,    11,    11,
-      11,    11,    11,    11,    11,    11,    12,    12
+       0,    10,    11,    11,    11,    12,    12,    12,    12,    12,
+      12,    12,    12,    12,    12,    12,    12,    13,    13
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const unsigned char yyr2[] =
 {
-       0,     2,     1,     2,     1,     3,     3,     3,     3,     3,
-       3,     2,     3,     2,     2,     2,     1,     2
+       0,     2,     1,     1,     2,     1,     3,     3,     3,     3,
+       3,     3,     2,     3,     2,     2,     2,     1,     2
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -340,31 +342,31 @@ static const unsigned char yyr2[] =
    means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       0,    16,     0,     0,     0,     0,     0,     0,     4,    13,
-      14,    15,    11,     0,     1,     3,     0,     0,     0,    17,
-      12,     8,     5,     9,     6,    10,     7
+       0,    17,     0,     0,     0,     3,     0,     0,     0,     5,
+      14,    15,    16,    12,     0,     1,     4,     0,     0,     0,
+      18,    13,     9,     6,    10,     7,    11,     8
 };
 
 /* YYDEFGOTO[NTERM-NUM]. */
 static const yysigned_char yydefgoto[] =
 {
-      -1,     6,     7,     8
+      -1,     7,     8,     9
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -6
+#define YYPACT_NINF -7
 static const yysigned_char yypact[] =
 {
-      39,    -6,     1,     2,     9,    13,    15,    35,    19,    -6,
-      -6,    -6,    -6,     0,    -6,    -6,    39,    20,    27,    -6,
-      -6,    -6,    23,    -6,     3,    -6,    -6
+      38,    -7,     1,     2,     6,    -7,    13,    15,    34,    29,
+      -7,    -7,    -7,    -7,     0,    -7,    -7,    44,    19,    25,
+      -7,    -7,    -7,    30,    -7,     4,    -7,    -7
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yysigned_char yypgoto[] =
 {
-      -6,    -6,    -5,    -6
+      -7,    -7,    -6,    -7
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -374,29 +376,31 @@ static const yysigned_char yypgoto[] =
 #define YYTABLE_NINF -3
 static const yysigned_char yytable[] =
 {
-      13,    20,     9,    10,    16,    17,    18,    16,    21,    18,
-      11,    22,    24,    26,    12,    14,     1,     2,     3,     4,
-       5,    23,    19,     1,     2,     3,     4,     5,    25,    18,
-       1,     2,     3,     4,     5,    -2,    15,     0,     0,    16,
-      17,    18,     1,     2,     3,     4,     5
+      14,    21,    10,    11,    17,    18,    19,    12,    17,    22,
+      19,    23,    25,    27,    13,    15,     1,     2,     3,     4,
+      24,     6,     1,     2,     3,     4,    26,     6,     1,     2,
+       3,     4,    20,     6,    -2,    16,    19,     0,    17,    18,
+      19,     1,     2,     3,     4,     5,     6,     1,     2,     3,
+       4,     0,     6
 };
 
 static const yysigned_char yycheck[] =
 {
-       5,     1,     1,     1,     4,     5,     6,     4,     8,     6,
-       1,    16,    17,    18,     1,     0,     3,     4,     5,     6,
-       7,     1,     3,     3,     4,     5,     6,     7,     1,     6,
-       3,     4,     5,     6,     7,     0,     1,    -1,    -1,     4,
-       5,     6,     3,     4,     5,     6,     7
+       6,     1,     1,     1,     4,     5,     6,     1,     4,     9,
+       6,    17,    18,    19,     1,     0,     3,     4,     5,     6,
+       1,     8,     3,     4,     5,     6,     1,     8,     3,     4,
+       5,     6,     3,     8,     0,     1,     6,    -1,     4,     5,
+       6,     3,     4,     5,     6,     7,     8,     3,     4,     5,
+       6,    -1,     8
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const unsigned char yystos[] =
 {
-       0,     3,     4,     5,     6,     7,    10,    11,    12,     1,
-       1,     1,     1,    11,     0,     1,     4,     5,     6,     3,
-       1,     8,    11,     1,    11,     1,    11
+       0,     3,     4,     5,     6,     7,     8,    11,    12,    13,
+       1,     1,     1,     1,    12,     0,     1,     4,     5,     6,
+       3,     1,     9,    12,     1,    12,     1,    12
 };
 
 #if ! defined (YYSIZE_T) && defined (__SIZE_TYPE__)
@@ -1017,13 +1021,24 @@ yyreduce:
   case 3:
 
     {
+						CSearchExpr* pexpr = new CSearchExpr(yyvsp[0].pstr);
+						ParsedSearchExpression(pexpr);
+						delete pexpr;
+						delete yyvsp[0].pstr;
+						return 0;
+					;}
+    break;
+
+  case 4:
+
+    {
 						yyerror(GetResString(IDS_SEARCH_GENERALERROR));
 						delete yyvsp[-1].pexpr;
 						return 1;
 					;}
     break;
 
-  case 5:
+  case 6:
 
     {
 						CSearchExpr* pexpr = new CSearchExpr;
@@ -1036,7 +1051,7 @@ yyreduce:
 					;}
     break;
 
-  case 6:
+  case 7:
 
     {
 						CSearchExpr* pexpr = new CSearchExpr;
@@ -1049,7 +1064,7 @@ yyreduce:
 					;}
     break;
 
-  case 7:
+  case 8:
 
     {
 						CSearchExpr* pexpr = new CSearchExpr;
@@ -1062,14 +1077,14 @@ yyreduce:
 					;}
     break;
 
-  case 8:
+  case 9:
 
     {
 						yyval.pexpr = yyvsp[-1].pexpr;
 					;}
     break;
 
-  case 9:
+  case 10:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGORRIGHT));
@@ -1078,7 +1093,7 @@ yyreduce:
 					;}
     break;
 
-  case 10:
+  case 11:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGNOTRIGHT));
@@ -1087,7 +1102,7 @@ yyreduce:
 					;}
     break;
 
-  case 11:
+  case 12:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGEXPRPARANT));
@@ -1095,7 +1110,7 @@ yyreduce:
 					;}
     break;
 
-  case 12:
+  case 13:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGCLOSINGPARANT));
@@ -1104,7 +1119,7 @@ yyreduce:
 					;}
     break;
 
-  case 13:
+  case 14:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGANDLEFT));
@@ -1112,7 +1127,7 @@ yyreduce:
 					;}
     break;
 
-  case 14:
+  case 15:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGORLEFT));
@@ -1120,7 +1135,7 @@ yyreduce:
 					;}
     break;
 
-  case 15:
+  case 16:
 
     {
 						yyerror(GetResString(IDS_SEARCH_MISSINGNOTLEFT));
@@ -1128,7 +1143,7 @@ yyreduce:
 					;}
     break;
 
-  case 16:
+  case 17:
 
     {
 						yyval.pexpr = new CSearchExpr(yyvsp[0].pstr);
@@ -1136,7 +1151,7 @@ yyreduce:
 					;}
     break;
 
-  case 17:
+  case 18:
 
     {
 						/*$1->Concatenate($2);

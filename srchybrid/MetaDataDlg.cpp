@@ -148,6 +148,7 @@ static const struct {
 	//{ 0x16,				_T("QTime") },
 	{ 0x16,					_T("Permission") },	// though not (never) used, this will be found in almost all known.met files
 	{ 0x17,					_T("Parts") },
+	{ FT_COMPLETE_SOURCES,	_T("Complete sources") },
 	{ FT_MEDIA_ARTIST,		_T("Artist") },
 	{ FT_MEDIA_ALBUM,		_T("Album") },
 	{ FT_MEDIA_TITLE,		_T("Title") },
@@ -244,7 +245,7 @@ CString GetValue(const Kademlia::CTag* pTag)
 	{
 		if ((BYTE)pTag->m_name[0] == 0x10 || (BYTE)pTag->m_name[0] > 0xFA)
 			strValue.Format(_T("%u"), pTag->GetInt());
-		else if (pTag->m_name == TAG_MEDIA_LENGTH)
+		else if (pTag->m_name.Compare(TAG_MEDIA_LENGTH) == 0)
 			SecToTimeLength(pTag->GetInt(), strValue);
 		else
 			strValue = GetFormatedUInt(pTag->GetInt());

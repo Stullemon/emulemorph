@@ -383,6 +383,7 @@ void CPartFileConvert::ShowGUI(){
 	else {
 		m_convertgui= new CModeless();
 		m_convertgui->Create( IDD_CONVERTPARTFILES , CWnd::GetDesktopWindow() );//,  );
+		InitWindowStyles(m_convertgui);
 		m_convertgui->ShowWindow(SW_SHOW);
 
 		m_convertgui->AddAnchor(IDC_CONV_PB_CURRENT, TOP_LEFT, TOP_RIGHT);

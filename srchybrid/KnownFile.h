@@ -173,10 +173,11 @@ public:
 	virtual bool IsPartFile() const { return false; }
 	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFileDataIO* file);
-	CTime	GetCFileDate() const { return CTime(date); }
-	uint32	GetFileDate() const { return date; }
-	CTime	GetCrCFileDate() const { return CTime(dateC); }
-	uint32	GetCrFileDate() const { return dateC; }
+
+	// last file modification time in (DST corrected, if NTFS) real UTC format
+	// NOTE: this value can *not* be compared with NT's version of the UTC time
+	CTime	GetUtcCFileDate() const { return CTime(m_tUtcLastModified); }
+	uint32	GetUtcFileDate() const { return m_tUtcLastModified; }
 
 	virtual void SetFileSize(uint32 nFileSize);
 
@@ -247,8 +248,10 @@ public:
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
 
-	uint32	date;
-	uint32	dateC;
+	// last file modification time in (DST corrected, if NTFS) real UTC format
+	// NOTE: this value can *not* be compared with NT's version of the UTC time
+	uint32	m_tUtcLastModified;
+
 	CFileStatistic statistic;
 	time_t m_nCompleteSourcesTime;
 	uint16 m_nCompleteSourcesCount;

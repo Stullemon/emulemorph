@@ -302,17 +302,17 @@ void CServerList::ServerStats()
 		
 		ping_server->SetLastDescPingedCount(false);
 		if(ping_server->GetLastDescPingedCount() < 2){
-			if (thePrefs.GetDebugServerUDPLevel() > 0)
-				Debug(">>> Sending OP__ServDescReq     to %s:%u\n", ping_server->GetAddress(), ping_server->GetPort());
 			// eserver 16.45+ supports a new OP_SERVER_DESC_RES answer, if the OP_SERVER_DESC_REQ contains a uint32
 			// challenge, the server returns additional info with OP_SERVER_DESC_RES. To properly distinguish the
 			// old and new OP_SERVER_DESC_RES answer, the challenge has to be selected carefully. The first 2 bytes 
 			// of the challenge (in network byte order) MUST NOT be a valid string-len-int16!
 			packet = new Packet(OP_SERVER_DESC_REQ,4);
-			uint32 uDescReqChallenge = ((uint32)rand() << 16) + 0x0000F0FF; // 0xF0FF = an 'invalid' string length.
+			uint32 uDescReqChallenge = ((uint32)rand() << 16) + INV_SERV_DESC_LEN; // 0xF0FF = an 'invalid' string length.
 			ping_server->SetDescReqChallenge(uDescReqChallenge);
 			PokeUInt32(packet->pBuffer, uDescReqChallenge);
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
+			if (thePrefs.GetDebugServerUDPLevel() > 0)
+				Debug(">>> Sending OP__ServDescReq     to %s:%u, challenge %08x\n", ping_server->GetAddress(), ping_server->GetPort(), uDescReqChallenge);
 			theApp.serverconnect->SendUDPPacket( packet, ping_server, true );
 		}
 		else{

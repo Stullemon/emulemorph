@@ -20,6 +20,7 @@
 #include "Inputbox.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -61,6 +62,7 @@ BEGIN_MESSAGE_MAP(CPPgFiles, CPropertyPage)
 	ON_EN_CHANGE(IDC_VIDEOPLAYER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_VIDEOBACKUP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_BROWSEV, BrowseVideoplayer)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 BOOL CPPgFiles::OnInitDialog()
@@ -245,4 +247,25 @@ void CPPgFiles::BrowseVideoplayer()
 		GetDlgItem(IDC_VIDEOPLAYER)->SetWindowText(dlgFile.GetPathName());
 		SetModified();
 	}
+}
+
+void CPPgFiles::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Files);
+}
+
+BOOL CPPgFiles::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgFiles::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

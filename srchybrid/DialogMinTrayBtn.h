@@ -24,10 +24,11 @@ public:
     // methods
     void MinTrayBtnShow();
     void MinTrayBtnHide();
-    BOOL MinTrayBtnIsVisible() const;
+	__inline BOOL MinTrayBtnIsVisible() const { return m_bMinTrayBtnVisible; }
+
     void MinTrayBtnEnable();
     void MinTrayBtnDisable();
-    BOOL MinTrayBtnIsEnabled() const;
+	__inline BOOL MinTrayBtnIsEnabled() const { return m_bMinTrayBtnEnabled; }
 
 	void SetWindowText(LPCTSTR lpszString);
 
@@ -55,9 +56,9 @@ private:
     void MinTrayBtnSetUp();
     void MinTrayBtnSetDown();
 
-    const CPoint &MinTrayBtnGetPos() const;
-    const CSize &MinTrayBtnGetSize() const;
-    CRect MinTrayBtnGetRect() const;
+	__inline const CPoint &MinTrayBtnGetPos() const { return m_MinTrayBtnPos; }
+	__inline const CSize &MinTrayBtnGetSize() const { return m_MinTrayBtnSize; }
+	__inline CRect MinTrayBtnGetRect() const { return CRect(MinTrayBtnGetPos(), MinTrayBtnGetSize()); }
 
     BOOL IsWindowsClassicStyle() const;
 	INT GetVisualStylesXPColor() const;
@@ -78,30 +79,3 @@ private:
 	BOOL	m_bMinTrayBtnWindowsClassicStyle;
 	static const CHAR *m_pszMinTrayBtnBmpName[];
 };
-
-template <class BASE> inline const CPoint &CDialogMinTrayBtn<BASE>::MinTrayBtnGetPos() const
-{
-    return m_MinTrayBtnPos;
-}
-
-template <class BASE> inline const CSize &CDialogMinTrayBtn<BASE>::MinTrayBtnGetSize() const
-{
-    return m_MinTrayBtnSize;
-}
-
-template <class BASE> inline CRect CDialogMinTrayBtn<BASE>::MinTrayBtnGetRect() const
-{
-    return CRect(MinTrayBtnGetPos(), MinTrayBtnGetSize());
-}
-
-template <class BASE> inline BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnIsVisible() const
-{
-    return m_bMinTrayBtnVisible;
-}
-
-template <class BASE> inline BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnIsEnabled() const
-{
-    return m_bMinTrayBtnEnabled;
-}
-
-#include "DialogMinTrayBtn.hpp"

@@ -80,13 +80,13 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    ICON            "",IDC_DOWNLOAD_ICO,5,3,20,20
+    ICON            "",IDC_DOWNLOAD_ICO,5,5,20,20
     /*//MORPH START - Changed by SiRoB, Khaos Category
 	CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,18,4,94,8
+                    WS_GROUP,18,6,94,8
     */
 	CONTROL         "Downloads",IDC_DOWNLOAD_TEXT,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,21,4,140,8
+                    WS_GROUP,21,6,140,8
 	//MORPH RND  - Changed by SiRoB, Khaos Category
 	CONTROL         "",IDC_DOWNLOADLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | 
@@ -135,9 +135,9 @@ BEGIN
     CONTROL         "",IDC_MYINFOLIST,"RichEdit20A",ES_MULTILINE | 
                     ES_READONLY | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,372,
                     176,130,106,WS_EX_STATICEDGE
-    ICON            "",IDC_SERVLST_ICO,5,3,20,20
+    ICON            "",IDC_SERVLST_ICO,5,5,20,20
     CONTROL         "Servers:",IDC_SERVLIST_TEXT,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,18,4,91,8
+                    WS_GROUP,18,6,91,8
     CONTROL         "",IDC_SERVLIST,"SysListView32",LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | WS_TABSTOP,5,17,358,159,WS_EX_STATICEDGE
     CONTROL         "",IDC_TAB3,"SysTabControl32",0x0,5,184,358,102
@@ -153,66 +153,25 @@ BEGIN
     LTEXT           ":",IDC_SSTATIC5,458,59,8,8
 END
 
-IDD_SEARCH DIALOGEX 0, 35, 511, 289
-STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | 
-    WS_SYSMENU
+IDD_SEARCH DIALOGEX 0, 0, 511, 289
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Search",IDC_SEARCH_FRM,5,0,206,67,BS_FLAT
-    CONTROL         "&Name:",IDC_MSTATIC3,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,11,9,63,8
-    CONTROL         "",IDC_SEARCHNAME,"RichEdit20A",ES_AUTOHSCROLL | 
-                    WS_TABSTOP,11,18,182,12,WS_EX_STATICEDGE
-    PUSHBUTTON      "v",IDC_DD,194,18,11,12,BS_CENTER | BS_FLAT
-    CONTROL         "Matc&h keywords",IDC_MATCH_KEYWORDS,"Button",
-                    BS_AUTOCHECKBOX | BS_LEFTTEXT | BS_RIGHT | BS_FLAT | 
-                    WS_TABSTOP,115,7,90,10
-    CONTROL         "T&ype",IDC_MSTATIC7,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,11,38,60,8
-    COMBOBOX        IDC_TypeSearch,11,47,66,85,CBS_DROPDOWNLIST | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Method:",IDC_METH,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    80,38,70,8
-    CONTROL         "",IDC_COMBO1,"ComboBoxEx32",CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP,80,47,80,78
-    PUSHBUTTON      "&Reset",IDC_SEARCH_RESET,161,47,44,13,BS_FLAT
-    GROUPBOX        "Filter",IDC_STATIC_FILTER,215,0,293,67,BS_FLAT
-    CONTROL         "Min size:",IDC_SEARCHMINSIZE,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,221,9,55,8
-    EDITTEXT        IDC_EDITSEARCHMIN,221,18,34,12,ES_AUTOHSCROLL
-    LTEXT           "MB",IDC_SD_MB1,258,20,14,8
-    CONTROL         "Max si&ze:",IDC_SEARCHMAXSIZE,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,271,9,51,8
-    EDITTEXT        IDC_EDITSEARCHMAX,271,18,34,12,ES_AUTOHSCROLL
-    LTEXT           "MB",IDC_SD_MB2,308,20,14,8
-    CONTROL         "Availa&bility:",IDC_SEARCHAVAIL,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,221,38,47,8
-    EDITTEXT        IDC_EDITSEARCHAVAIBILITY,221,47,34,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    CONTROL         "&Extension:",IDC_SEARCHEXTENTION,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,271,38,44,8
-    EDITTEXT        IDC_EDITSEARCHEXTENSION,271,47,34,12,ES_AUTOHSCROLL
-    CONTROL         "",IDC_SEARCH_OPTS,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | 
-                    WS_BORDER | WS_TABSTOP,323,8,182,55,WS_EX_LEFTSCROLLBAR
-    DEFPUSHBUTTON   "&Start",IDC_STARTS,329,70,58,14,BS_FLAT
-    PUSHBUTTON      "More",IDC_MORE,389,70,58,14,BS_FLAT | WS_DISABLED
-    PUSHBUTTON      "Cance&l",IDC_CANCELS,449,70,56,14,BS_FLAT | WS_DISABLED
-    PUSHBUTTON      "C&lear All",IDC_CLEARALL,389,88,116,14,BS_FLAT
-    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,5,89,374,16
+    PUSHBUTTON      "C&lear All",IDC_CLEARALL,389,16,116,14,BS_FLAT
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,5,17,374,16
     CONTROL         "",IDC_SEARCHLIST,"SysListView32",LVS_REPORT | 
                     LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
-                    WS_TABSTOP,5,102,500,160,WS_EX_STATICEDGE
-    PUSHBUTTON      "&Download Selected",IDC_SDOWNLOAD,5,272,88,14,BS_FLAT
+                    WS_TABSTOP,5,30,500,236,WS_EX_STATICEDGE
+    PUSHBUTTON      "&Download Selected",IDC_SDOWNLOAD,5,273,88,14,BS_FLAT
     CONTROL         "",IDC_CATTAB2,"SysTabControl32",TCS_BUTTONS | 
-                    TCS_RAGGEDRIGHT | TCS_TOOLTIPS,114,272,392,14
-    ICON            "",IDC_SEARCHLST_ICO,5,76,20,20
-    LTEXT           "Search Res&ults",IDC_RESULTS_LBL,18,78,114,8
-    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,5,262,500,
+                    TCS_RAGGEDRIGHT | TCS_TOOLTIPS,114,273,392,14
+    ICON            "",IDC_SEARCHLST_ICO,5,5,21,20
+    LTEXT           "Search Res&ults",IDC_RESULTS_LBL,18,6,114,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,5,265,500,
                     7
-/*//MORPH START - Removed by SiRoB, Select Category
-    LTEXT           "->",IDC_STATIC_DLTOof,101,275,8,10
-*///MORPH END   - Removed by SiRoB, Select Category
+    LTEXT           "->",IDC_STATIC_DLTOof,101,276,8,10
+    PUSHBUTTON      "Search Parameters...",IDC_OPEN_PARAMS_WND,389,0,116,14,
+                    BS_FLAT
 END
 
 IDD_CHAT DIALOGEX 0, 35, 511, 289
@@ -228,11 +187,11 @@ BEGIN
                     LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,5,17,116,
                     267,WS_EX_STATICEDGE
     CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,137,4,236,8
-    ICON            "",IDC_MESSAGEICON,124,3,20,20
+                    WS_GROUP,137,6,236,8
+    ICON            "",IDC_MESSAGEICON,124,5,20,20
     CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,18,4,93,8
-    ICON            "",IDC_FRIENDSICON,5,3,20,20
+                    WS_GROUP,18,6,93,8
+    ICON            "",IDC_FRIENDSICON,5,5,21,20
 END
 
 IDD_STATISTICS DIALOGEX 0, 35, 511, 289
@@ -631,8 +590,8 @@ BEGIN
     GROUPBOX        "Statistics",IDC_STATISTICS,5,205,377,78,BS_FLAT
     LTEXT           "Total:",IDC_TOTAL_LBL,263,220,112,8
     CONTROL         "Shared Files",IDC_TRAFFIC_TEXT,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,18,4,142,8
-    ICON            "",IDC_FILES_ICO,5,3,20,20
+                    SS_LEFTNOWORDWRAP | WS_GROUP,18,6,142,8
+    ICON            "",IDC_FILES_ICO,5,5,20,20
 //MORPH START - Added by SiRoB, Share Category
 //	CONTROL         "",IDC_STAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
 //                    TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
@@ -866,6 +825,31 @@ BEGIN
     LTEXT           "Static",IDC_CMSTATUS,4,117,236,9
 END
 
+/*//MORPH START - Changed by SiRoB, Khaos Category
+IDD_CAT DIALOGEX 0, 0, 230, 169
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Categories"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_TITLE,21,16,64,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_COMMENT,21,43,181,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_INCOMING,21,68,181,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BROWSE,207,67,16,12,BS_FLAT
+    COMBOBOX        IDC_PRIOCOMBO,21,92,79,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_AUTOCATEXT,21,119,181,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_CATCOLOR,21,148,34,16,BS_FLAT
+    DEFPUSHBUTTON   "OK",IDOK,121,152,47,12,BS_FLAT
+    PUSHBUTTON      "&Cancel",IDCANCEL,173,152,50,12,BS_FLAT
+    LTEXT           "Title:",IDC_STATIC_TITLE,7,6,216,8
+    LTEXT           "Comment:",IDC_STATIC_COMMENT,7,33,216,8
+    LTEXT           "Color",IDC_STATIC_COLOR,7,138,123,8
+    LTEXT           "Static",IDC_STATIC_PRIO,7,82,216,8
+    LTEXT           "Incoming Dir:",IDC_STATIC_INCOMING,7,58,216,8
+    LTEXT           "Autocat",IDC_STATIC_AUTOCAT,7,108,216,8
+END
+*/
 IDD_CAT DIALOGEX 0, 0, 309, 300
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -924,6 +908,7 @@ BEGIN
     CONTROL         "Advanced Filter Mask (Separator: | )",IDC_CHECK_MASK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,242,256,8
 END
+//MORPH END   - Changed by SiRoB, Khaos Category
 
 IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -931,9 +916,9 @@ CAPTION "Display"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "3D Depth:",IDC_3DDEP,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,7,7,93,9
+                    WS_GROUP,7,7,84,9
     CONTROL         "",IDC_3DDEPTH,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,106,5,
+                    TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,121,5,
                     102,11,WS_EX_STATICEDGE
     CONTROL         "flat",IDC_FLAT,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,99,
                     17,36,9
@@ -980,6 +965,7 @@ BEGIN
                     217,216,8
     CONTROL         "Check1",IDC_DISABLEHIST,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,14,227,86,11
+    LTEXT           "",IDC_PREVIEW,93,4,26,13
 END
 
 IDD_PPG_SECURITY DIALOGEX 0, 0, 230, 241
@@ -1011,14 +997,17 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,138,202,8
     CONTROL         "Advanced spamfilter",IDC_ADVSPAMFILTER,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,148,202,10
-    GROUPBOX        "Comments",IDC_STATIC_COMMENTS,7,164,216,48,BS_FLAT
+    GROUPBOX        "Comments",IDC_STATIC_COMMENTS,7,164,216,39,BS_FLAT
     LTEXT           "Ignore Comments containing: (Separator | )",
                     IDC_FILTERCOMMENTSLABEL,14,175,205,8
-    EDITTEXT        IDC_COMMENTFILTER,14,185,206,20,ES_MULTILINE | 
+    EDITTEXT        IDC_COMMENTFILTER,14,185,206,13,ES_MULTILINE | 
                     ES_AUTOHSCROLL
-    GROUPBOX        "Misc",IDC_SEC_MISC,7,214,216,25,BS_FLAT
+    GROUPBOX        "Misc",IDC_SEC_MISC,7,205,216,34,BS_FLAT
     CONTROL         "Use secure Identification",IDC_USESECIDENT,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,224,202,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,215,202,10
+    CONTROL         "Run eMule as unprivileged User",IDC_RUNASUSER,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_DISABLED | WS_TABSTOP,14,
+                    226,202,10
 END
 
 IDD_INPUTBOX DIALOGEX 0, 0, 250, 59
@@ -1031,8 +1020,10 @@ BEGIN
     PUSHBUTTON      "&Cleanup",IDC_CLEANFILENAME,2,38,59,14,BS_FLAT
     DEFPUSHBUTTON   "OK",IDOK,143,38,50,14,BS_FLAT
     PUSHBUTTON      "Abbrechen",IDCANCEL,197,38,50,14,BS_FLAT
+//MORPH START - Added by SiRoB, Khaos Category
     EDITTEXT        IDC_TEXTNUM,2,25,245,12,ES_AUTOHSCROLL | ES_NUMBER | NOT 
                     WS_VISIBLE
+//MORPH START - Added by SiRoB, Khaos Category
 END
 
 IDD_SELCATEGORY DIALOGEX 0, 0, 186, 60
@@ -1243,13 +1234,15 @@ BEGIN
     CONTROL         "",IDC_SEARCHLIST,"SysListView32",LVS_REPORT | 
                     LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_BORDER | 
                     WS_TABSTOP,5,182,501,104
-    LTEXT           "Contacts:",IDC_KADCONTACTLAB,5,4,145,8
+    LTEXT           "Contacts:",IDC_KADCONTACTLAB,18,6,145,8
     CONTROL         "",IDC_CONTACTLIST,"SysListView32",LVS_REPORT | 
                     LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_BORDER | 
                     WS_TABSTOP,5,17,349,153
     LTEXT           "IP or Address:",IDC_SSTATIC4,376,49,74,8
     LTEXT           "Port:",IDC_SSTATIC7,458,49,27,8
-    LTEXT           "Searches:",IDC_KADSEARCHLAB,5,173,340,8
+    LTEXT           "Searches:",IDC_KADSEARCHLAB,20,172,340,8
+    ICON            "",IDC_KADICO1,5,5,20,20
+    ICON            "",IDC_KADICO2,5,172,20,20
 END
 
 IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 225
@@ -1263,15 +1256,15 @@ BEGIN
     LTEXT           "Static",IDC_DNAME,84,14,224,8
     LTEXT           "Userhash:",IDC_STATIC32,19,25,59,8
     LTEXT           "Static",IDC_DHASH,84,25,131,8
-    CTEXT           "Static",IDC_DID,215,25,96,8,0,WS_EX_TRANSPARENT
+    LTEXT           "Static",IDC_DID,231,25,79,8
     LTEXT           "Clientsoftware:",IDC_STATIC33,19,36,63,8
     LTEXT           "Static",IDC_DSOFT,84,36,227,8
     LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8
-    LTEXT           "Static",IDC_DSIP,84,47,74,8
-    LTEXT           "Servername:",IDC_STATIC38,164,47,52,8
+    LTEXT           "Static",IDC_DSIP,84,47,54,8
+    LTEXT           "Servername:",IDC_STATIC38,141,47,69,8
     LTEXT           "Static",IDC_DSNAME,215,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
-    LTEXT           "Static",IDC_CDIDENT,84,58,79,8
+    LTEXT           "Static",IDC_CDIDENT,84,58,172,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,81,308,71,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC41,19,91,86,8
     LTEXT           "Static",IDC_DDOWNLOADING,110,91,202,8
@@ -1297,8 +1290,10 @@ BEGIN
     DEFPUSHBUTTON   "&Close",IDOK,268,207,47,14,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC48,19,102,86,8
     LTEXT           "Static",IDC_UPLOADING,110,102,202,8
+//MORPH START - Added by SiRoB, IP to Country
     LTEXT           "Static",IDC_DLOC,215,58,92,8
     LTEXT           "Location:",IDC_DLOC2,163,58,49,8
+//MORPH END   - Added by SiRoB, IP to Country
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -1437,6 +1432,47 @@ BEGIN
                     WS_BORDER | WS_TABSTOP,2,4,227,226
 END
 
+/*
+IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 166
+STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
+EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "eMule Speed",IDC_SPEED,17,0,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "All to max",IDC_TOMAX,17,50,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Restore",IDC_RESTORE,17,134,161,15,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "All to min",IDC_TOMIN,17,66,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Connect to any server",IDC_CONNECT,17,84,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+    LTEXT           "Disconnect",IDC_DISCONNECT,17,98,161,15,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Preferences",IDC_PREFERENCES,17,116,161,15,NOT 
+                    WS_VISIBLE | WS_BORDER
+    LTEXT           "Exit",IDC_TRAY_EXIT,17,152,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Download:",IDC_DOWNLBL,32,18,37,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_DOWNSLD,"msctls_trackbar32",0x0,71,18,56,12
+    EDITTEXT        IDC_DOWNTXT,131,18,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    LTEXT           "Upload:",IDC_UPLBL,32,34,37,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_UPSLD,"msctls_trackbar32",0x0,71,34,56,12
+    EDITTEXT        IDC_UPTXT,131,34,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,150,162,1
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,132,162,1
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,114,162,1
+    LTEXT           "KB/s",IDC_DOWNKB,159,18,19,12,SS_CENTERIMAGE
+    LTEXT           "KB/s",IDC_UPKB,159,34,19,12,SS_CENTERIMAGE
+    LTEXT           "eMule",IDC_SIDEBAR,0,0,16,166
+    ICON            "",IDC_TRAYDOWN,18,18,20,20
+    ICON            "",IDC_TRAYUP,18,34,20,20
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,82,162,1
+END
+*/
 IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 180
 STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
 EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
@@ -1516,8 +1552,37 @@ BEGIN
     EDITTEXT        IDC_ELINK,13,25,297,70,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_AUTOHSCROLL | ES_OEMCONVERT | ES_WANTRETURN | 
                     WS_VSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,211,108,50,14
+    DEFPUSHBUTTON   "OK",IDOK,187,108,74,14
     PUSHBUTTON      "Cancel",IDCANCEL,266,108,50,14
+    LTEXT           "->",IDC_CATLABEL,9,111,11,8
+    CONTROL         "",IDC_CATS,"SysTabControl32",TCS_BUTTONS | TCS_TOOLTIPS,
+                    19,109,167,18
+END
+
+IDD_SEARCH_PARAMS DIALOGEX 0, 0, 478, 55
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "&Name:",IDC_MSTATIC3,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,0,0,63,8
+    EDITTEXT        IDC_SEARCHNAME,0,9,179,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "v",IDC_DD,183,9,11,12,BS_CENTER | BS_FLAT
+    CONTROL         "T&ype",IDC_MSTATIC7,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,0,31,60,8
+    COMBOBOX        IDC_TypeSearch,0,40,66,85,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Method:",IDC_METH,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    67,31,70,8
+    CONTROL         "",IDC_COMBO1,"ComboBoxEx32",CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP,67,40,80,78
+    PUSHBUTTON      "&Reset",IDC_SEARCH_RESET,148,40,44,13,BS_FLAT
+    CONTROL         "",IDC_SEARCH_OPTS,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,258,0,220,55,
+                    WS_EX_LEFTSCROLLBAR
+    DEFPUSHBUTTON   "&Start",IDC_STARTS,198,0,58,14,BS_FLAT
+    PUSHBUTTON      "More",IDC_MORE,198,18,58,14,BS_FLAT | WS_DISABLED
+    PUSHBUTTON      "Cance&l",IDC_CANCELS,198,36,58,14,BS_FLAT | WS_DISABLED
 END
 
 IDD_PPG_MORPH DIALOGEX 0, 0, 230, 247
@@ -2213,6 +2278,14 @@ BEGIN
         BOTTOMMARGIN, 122
     END
 
+    IDD_SEARCH_PARAMS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 471
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
     IDD_PPG_MORPH, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -2307,7 +2380,6 @@ PREF_PROXY              ICON                    "res\\Prefs_Proxy.ico"
 SEARCHPARAMS            ICON                    "res\\NormalSearch.ico"
 SEARCHMETHOD_SERVER     ICON                    "res\\SeverSearch.ico"
 SEARCHMETHOD_FILEDONKEY ICON                    "res\\Filedonkey.ico"
-SEARCHMETHOD_JIGLE      ICON                    "res\\Jigle.ico"
 SEARCHMETHOD_GLOBAL     ICON                    "res\\global.ico"
 SEARCHMETHOD_KADEMLIA   ICON                    "res\\SearchKad.ico"
 SEARCHRESULTS           ICON                    "res\\SearchResults.ico"
@@ -2377,12 +2449,17 @@ KADWORDSEARCH           ICON                    "res\\KadWordSearch.ico"
 KADNODESEARCH           ICON                    "res\\KadNodeSearch.ico"
 KADSTOREFILE            ICON                    "res\\KadStoreFile.ico"
 KADSTOREWORD            ICON                    "res\\KadStoreWord.ico"
-SYSTRAY_TOMAX           ICON                    "res\\systray_tomax.ico"
-SYSTRAY_SPEED           ICON                    "res\\systray_speed.ico"
-SYSTRAY_RESTORE         ICON                    "res\\systray_restore.ico"
-SYSTRAY_CONNECT         ICON                    "res\\systray_connect.ico"
-SYSTRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
-SYSTRAY_EXIT            ICON                    "res\\systray_exit.ico"
+TRAY_TOMAX           ICON                    "res\\systray_tomax.ico"
+TRAY_SPEED           ICON                    "res\\systray_speed.ico"
+TRAY_RESTORE         ICON                    "res\\systray_restore.ico"
+TRAY_CONNECT         ICON                    "res\\systray_connect.ico"
+TRAY_DISCONNECT      ICON                    "res\\systray_disconnect.ico"
+TRAY_EXIT            ICON                    "res\\systray_exit.ico"
+CLIENTSKNOWN            ICON                    "res\\ClientsKnown.ico"
+CLIENTSONQUEUE          ICON                    "res\\ClientsOnQueue.ico"
+KADCURRENTSEARCHES      ICON                    "res\\KadCurrentSearches.ico"
+KADCONTACTLIST          ICON                    "res\\KADContactList.ico"
+KADBOOTSTRAP            ICON                    "res\\KadBootstrap.ico"
 SUC                     ICON                    "res\\suc.ico"
 RATING_NO               ICON                    "res\\Rating-NotRated.ico"
 RATING_EXCELLENT        ICON                    "res\\Rating-Excellent.ico"
@@ -2501,7 +2578,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -3242,8 +3319,8 @@ BEGIN
     IDS_IRC_IGNOREPARTMESSAGE "Ignore Part info messages"
     IDS_STATS_FAILUPCOUNT   "Total failed upload sessions: %i (%.2f%%)"
     IDS_STATS_AVEUPTIME     "Average upload time: %s"
-    IDS_SEARCHMINSIZE       "min. Size"
-    IDS_SEARCHMAXSIZE       "max. Size"
+    IDS_SEARCHMINSIZE       "Min. Size [MB]"
+    IDS_SEARCHMAXSIZE       "Max. Size [MB]"
 END
 
 STRINGTABLE 
@@ -3273,7 +3350,10 @@ BEGIN
     IDS_RESETLABEL          "Auto completion (history function)"
     IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
     IDS_KNOWN               "Known"
-    IDS_AUXPORTS            "Aux Ports"
+    IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
+    IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
+    IDS_KADCONTACTSREAD     "Read %ld contacts from file."
+    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
 END
 
 STRINGTABLE 
@@ -3541,7 +3621,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Lost to corruption: %s       Gained by compression: %s\nPackages saved by I.C.H.: %i"
-    IDS_ERR_NOHELP          "No help file found.\n\nPlease visit our homepage's download section to get a copy of the newest help file!\n\nDo you want to browse the online help now instead?"
+    IDS_ERR_NOHELP          "Please visit our homepage's download section to get a copy of the newest help file!\n\nDo you want to browse the online help now instead?"
     IDS_SHOWOVERHEAD        "Show overhead bandwidth"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f"
     IDS_EDITLIST            "List..."
@@ -3966,7 +4046,7 @@ BEGIN
     IDS_SERVERKEEPALIVETIMEOUT "Server connection refresh interval [min.]"
     IDS_MORE                "&More"
     IDS_TOOLS               "T&ools"
-    IDS_ERR_JIGLENEEDSTYPE  "If you want to search the Jigle database without specifying a file type, you have to specify at least a file extension!"
+    IDS_SEARCHPARAMS        "Search Parameters"
 END
 
 STRINGTABLE 
@@ -4058,6 +4138,7 @@ BEGIN
     IDS_KADUDPPORTERR       "Kad's UDP port conflicts with either eMule's Ext UDP port or eMule's Server UDP port. The port has been changed to %u."
     IDS_CONFIRM_FILEDELETE  "Do you really want to remove all selected files from disk?"
     IDS_OPENFOLDER          "Open Folder"
+    IDS_RUNASUSER           "Run eMule as unprivileged User"
     IDS_DELETE              "Delete From Disk"
     IDS_BOOTSTRAP           "Bootstrap"
     IDS_VIAED2KSQ           "via eD2K Server"
@@ -4099,7 +4180,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Do you really want to delete the selected IP filters?"
     IDS_TOTAL_IPFILTER_LABEL "Total IP filters:"
     IDS_TOTAL_IPS_LABEL     "Total IPs:"
-    IDS_DELETE2             "Delete"
+    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
     IDS_APPEND              "Append..."
     IDS_SAVE                "Save"
     IDS_IP_START            "Start"
@@ -4490,6 +4571,10 @@ BEGIN
     IDS_COMMUNITYTAG        "Community Tags (separated by '|')"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_AUXPORTS            "Aux Ports"
+END
 #endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 

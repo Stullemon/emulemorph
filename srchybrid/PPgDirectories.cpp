@@ -23,6 +23,7 @@
 #include "InputBox.h"
 #include "SharedFileList.h"
 #include "Preferences.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -40,6 +41,7 @@ BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
 	ON_EN_CHANGE(IDC_TEMPFILES, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UNCADD,	OnBnClickedAddUNC)
 	ON_BN_CLICKED(IDC_UNCREM,	OnBnClickedRemUNC)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgDirectories::CPPgDirectories()
@@ -144,6 +146,11 @@ BOOL CPPgDirectories::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == USRMSG_ITEMSTATECHANGED)
 		SetModified();	
+	else if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
 	return CPropertyPage::OnCommand(wParam, lParam);
 }
 
@@ -210,4 +217,15 @@ void CPPgDirectories::OnBnClickedRemUNC()
 		return;
 	m_ctlUncPaths.DeleteItem(index);
 	SetModified();
+}
+
+void CPPgDirectories::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Directories);
+}
+
+BOOL CPPgDirectories::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

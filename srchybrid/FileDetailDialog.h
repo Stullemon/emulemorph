@@ -94,6 +94,7 @@ protected:
 	void RefreshData();
 	void FillSourcenameList();
 	void Copy();
+	bool CanRenameFile() const;
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

@@ -121,6 +121,14 @@ public:
 	void	GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uint32& pui32NeededSpace) const;
 	uint32	GetNeededSpace() const; // SLUGFILLER: checkDiskspace
 
+	// last file modification time (NT's version of UTC), to be used for stats only!
+	CTime	GetCFileDate() const { return CTime(m_tLastModified); }
+	uint32	GetFileDate() const { return m_tLastModified; }
+
+	// file creation time (NT's version of UTC), to be used for stats only!
+	CTime	GetCrCFileDate() const { return CTime(m_tCreated); }
+	uint32	GetCrFileDate() const { return m_tCreated; }
+
 	void	InitializeFromLink(CED2KFileLink* fileLink);
 	bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename)	{return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
@@ -152,7 +160,7 @@ public:
 	void	WritePartStatus(CSafeMemFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
 	void	WriteCompleteSourcesCount(CSafeMemFile* file) const;
 	void	AddSources(CSafeMemFile* sources,uint32 serverip, uint16 serverport);
-	static bool CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped = NULL);
+	static bool CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped = NULL, bool Ed2kID = true);
 	
 	uint8	GetStatus(bool ignorepause = false) const;
 	void	SetStatus(uint8 in);
@@ -214,9 +222,7 @@ public:
 	void	OpenFile() const;
 	void	PreviewFile();
 	void	DeleteFile();
-	// khaos::kmod+ New param used for completing files
-	void	StopFile(bool bCancel = false,bool setVars = true);
-	// khaos::kmod-
+	void	StopFile(bool bCancel = false);
 	void	PauseFile(bool bInsufficient = false);
 	void	StopPausedFile();
 	void	ResumeFile();
@@ -400,6 +406,8 @@ private:
 	DWORD	m_dwFileAttributes;
 	time_t	m_tActivated;
 	uint32	m_nDlActiveTime;
+	uint32	m_tLastModified;	// last file modification time (NT's version of UTC), to be used for stats only!
+	uint32	m_tCreated;			// file creation time (NT's version of UTC), to be used for stats only!
 
 
 	BOOL 	PerformFileComplete(); // Lord KiRon

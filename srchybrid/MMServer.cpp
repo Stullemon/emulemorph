@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2003 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2003-2004 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -34,9 +34,11 @@
 #include "CxImage/xImage.h"
 #include "WebServer.h"
 #include "otherfunctions.h"
+#include "Preferences.h"
+#include "SearchParams.h"
+#include "kademlia/kademlia/kademlia.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
-#include "searchdlg.h"
 #endif
 
 #ifdef _DEBUG
@@ -59,6 +61,9 @@ CMMServer::CMMServer(void)
 	m_pSocket = NULL;
 	m_nSessionID = 0;
 	m_pPendingCommandSocket = NULL;
+	m_nMaxDownloads = 0;
+	m_nMaxBufDownloads = 0;
+	m_bGrabListLogin =false;
 
 }
 
@@ -148,6 +153,10 @@ void CMMServer::ProcessHelloPacket(CMMData* data, CMMSocket* sender){
 		}
 		else{
 			m_bUseFakeContent = (data->ReadByte() != 0); 
+			m_nMaxDownloads = data->ReadShort();
+			m_nMaxBufDownloads = data->ReadShort();
+			m_bGrabListLogin = (data->ReadByte() != 0);
+
 			// everything ok, new sessionid
 			AddLogLine(false, GetResString(IDS_MM_NEWUSER));
 			packet->WriteByte(MMT_OK);
@@ -198,6 +207,23 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 		packet->WriteString("");
 	}
 
+	if(thePrefs.GetNetworkKademlia()){
+		if ( Kademlia::CKademlia::isConnected() ){
+			packet->WriteByte(2);
+			packet->WriteInt(Kademlia::CKademlia::getKademliaUsers());
+		}
+		else{
+			packet->WriteByte(1);
+			packet->WriteInt(0);
+		}
+	}
+	else{
+			packet->WriteByte(0);
+			packet->WriteInt(0);
+	}
+
+
+
 	sender->SendPacket(packet);
 }
 
@@ -214,7 +240,7 @@ void CMMServer::ProcessFileListRequest(CMMSocket* sender, CMMPacket* packet){
 		packet->WriteString(thePrefs.GetCategory(i)->title);
 	}
 
-	nCount = (theApp.downloadqueue->GetFileCount() > 50)? 50 : theApp.downloadqueue->GetFileCount();
+	nCount = (theApp.downloadqueue->GetFileCount() > m_nMaxDownloads)? m_nMaxDownloads : theApp.downloadqueue->GetFileCount();
 	m_SentFileList.SetSize(nCount);
 	packet->WriteByte(nCount);
 	for (int i = 0; i != nCount; i++){
@@ -238,6 +264,14 @@ void CMMServer::ProcessFileListRequest(CMMSocket* sender, CMMPacket* packet){
 		}
 		packet->WriteString(cur_file->GetFileName());
 		packet->WriteByte(cur_file->GetCategory());
+
+		if (i < m_nMaxBufDownloads){
+			packet->WriteByte(1);
+			WriteFileInfo(cur_file,packet);
+		}
+		else{
+			packet->WriteByte(0);
+		}
 	}
 	sender->SendPacket(packet);
 }
@@ -322,26 +356,10 @@ void  CMMServer::ProcessDetailRequest(CMMData* data, CMMSocket* sender){
 	}
 	CPartFile* selFile = m_SentFileList[byFileIndex];
 	CMMPacket* packet = new CMMPacket(MMP_FILEDETAILANS);
-	packet->WriteInt(selFile->GetFileSize());
-	packet->WriteInt(selFile->GetTransfered());
-	packet->WriteInt(selFile->GetCompletedSize());
-	packet->WriteShort(selFile->GetDatarate()/100);
-	packet->WriteShort(selFile->GetSourceCount());
-	packet->WriteShort(selFile->GetTransferingSrcCount());
-	if (selFile->IsAutoDownPriority()){
-		packet->WriteByte(4);
-	}
-	else{
-		packet->WriteByte(selFile->GetDownPriority());
-	}
-	uint8* parts = selFile->MMCreatePartStatus();
-	packet->WriteByte(selFile->GetPartCount());
-	for (int i = 0; i != selFile->GetPartCount(); i++){
-		packet->WriteByte(parts[i]);
-	}
-	delete[] parts;
+	WriteFileInfo(selFile, packet);
 	sender->SendPacket(packet);
 }
+
 
 void  CMMServer::ProcessCommandRequest(CMMData* data, CMMSocket* sender){
 	uint8 byCommand = data->ReadByte();
@@ -376,31 +394,31 @@ void  CMMServer::ProcessCommandRequest(CMMData* data, CMMSocket* sender){
 
 void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	DeleteSearchFiles();
-	CString strSearch = data->ReadString();
+	SSearchParams Params;
+	Params.strExpression = data->ReadString();
 	uint8 byType = data->ReadByte();
-	CString strLocalSearchType;
 	switch(byType){
 		case 0:
-			strLocalSearchType = GetResString(IDS_SEARCH_ANY);
+			Params.strFileType = GetResString(IDS_SEARCH_ANY);
 			break;
 		case 1:
-			strLocalSearchType = GetResString(IDS_SEARCH_ARC);
+			Params.strFileType = GetResString(IDS_SEARCH_ARC);
 			break;
 		case 2:
-			strLocalSearchType = GetResString(IDS_SEARCH_AUDIO);
+			Params.strFileType = GetResString(IDS_SEARCH_AUDIO);
 			break;
 		case 3:
-			strLocalSearchType = GetResString(IDS_SEARCH_CDIMG);
+			Params.strFileType = GetResString(IDS_SEARCH_CDIMG);
 			break;
 		case 4:
-			strLocalSearchType = GetResString(IDS_SEARCH_PRG);
+			Params.strFileType = GetResString(IDS_SEARCH_PRG);
 			break;
 		case 5:
-			strLocalSearchType = GetResString(IDS_SEARCH_VIDEO);
+			Params.strFileType = GetResString(IDS_SEARCH_VIDEO);
 			break;
 		default:
 			ASSERT ( false );
-			strLocalSearchType = GetResString(IDS_SEARCH_ANY);
+			Params.strFileType = GetResString(IDS_SEARCH_ANY);
 	}
 
 	bool bServerError = false;
@@ -413,7 +431,17 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	}
 
 	CSafeMemFile searchdata(100);
-	if (!GetSearchPacket(&searchdata, strSearch, strLocalSearchType, 0, 0, 0, "", 0, 0, 0, "", "", "", "", false, true) || searchdata.GetLength() == 0){
+	bool bResSearchPacket = false;
+	try
+	{
+		bResSearchPacket = GetSearchPacket(&searchdata, &Params);
+	}
+	catch (CMsgBoxException* ex)
+	{
+		ex->Delete();
+	}
+
+	if (!bResSearchPacket || searchdata.GetLength() == 0){
 		bServerError = true;
 	}
 	else{
@@ -432,7 +460,7 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	m_byPendingCommand = MMT_SEARCH;
 	m_pPendingCommandSocket = sender;
 
-	theApp.searchlist->NewSearch(NULL, strLocalSearchType , MMS_SEARCHID, true);
+	theApp.searchlist->NewSearch(NULL, Params.strFileType, MMS_SEARCHID, true);
 	Packet* searchpacket = new Packet(&searchdata);
 	searchpacket->opcode = OP_SEARCHREQUEST;
 	theApp.uploadqueue->AddUpDataOverheadServer(searchpacket->size);
@@ -694,4 +722,25 @@ void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){
 	}
 	ASSERT ( nPos == nRawDataSize );
 	sender->SendPacket(packet);
+}
+
+void CMMServer::WriteFileInfo(CPartFile* selFile, CMMPacket* packet){
+	packet->WriteInt(selFile->GetFileSize());
+	packet->WriteInt(selFile->GetTransfered());
+	packet->WriteInt(selFile->GetCompletedSize());
+	packet->WriteShort(selFile->GetDatarate()/100);
+	packet->WriteShort(selFile->GetSourceCount());
+	packet->WriteShort(selFile->GetTransferingSrcCount());
+	if (selFile->IsAutoDownPriority()){
+		packet->WriteByte(4);
+	}
+	else{
+		packet->WriteByte(selFile->GetDownPriority());
+	}
+	uint8* parts = selFile->MMCreatePartStatus();
+	packet->WriteByte(selFile->GetPartCount());
+	for (int i = 0; i != selFile->GetPartCount(); i++){
+		packet->WriteByte(parts[i]);
+	}
+	delete[] parts;
 }

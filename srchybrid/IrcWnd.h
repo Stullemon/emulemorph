@@ -99,6 +99,8 @@ protected:
 	afx_msg void	OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnQueryTab(WPARAM wParam, LPARAM lParam);
+	afx_msg BOOL	OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg void	OnBnClickedChatsend();
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -110,6 +112,7 @@ private:
 	bool			m_bConnected;
 	bool			m_bLoggedIn;
 	Channel*		m_pCurrentChannel;
+	void	OnChatTextChange();
 
 //Server Channel List
 public:
@@ -138,8 +141,8 @@ private:
 
 //Messages
 public:
-	void		AddStatus( CString recieved, ... );
-	void		AddInfoMessage( CString channelName, CString recieved, ... );
+	void		AddStatus( CString received, ... );
+	void		AddInfoMessage( CString channelName, CString received, ... );
 	void		AddMessage( CString channelName, CString targetname, CString line,...);
 	void		SetConnectStatus( bool connected );
 	void		NoticeMessage( CString source, CString message );
@@ -148,8 +151,6 @@ public:
 	void		SetTitle( CString channel, CString title );
 	void		SetActivity( CString channel, bool flag);
 	void		SendString( CString send );
-protected:
-	afx_msg void OnBnClickedChatsend();
 private:
 	CEdit			titleWindow;
 	CEdit			inputWindow;
@@ -161,7 +162,7 @@ public:
 	void		RemoveChannel( CString channel );
 	void		DeleteAllChannel();
 	void		JoinChannels();
-protected:
+
 private:
 	CPtrList		channelPtrList;
 };

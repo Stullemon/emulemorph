@@ -287,26 +287,20 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		SetItemText(itemnr,3,_T(""));
 
 	// Users
-	if(server->GetUsers()){
-		temp.Format(_T("%i"), server->GetUsers());
-		SetItemText(itemnr, 4, temp);
-	}
+	if (server->GetUsers())
+		SetItemText(itemnr, 4, CastItoIShort(server->GetUsers()));
 	else
 		SetItemText(itemnr,4,_T(""));
 
 	// Max Users
-	if(server->GetMaxUsers()){
-		temp.Format(_T("%i"), server->GetMaxUsers());
-		SetItemText(itemnr, 5, temp);
-	}
+	if (server->GetMaxUsers())
+		SetItemText(itemnr, 5, CastItoIShort(server->GetMaxUsers()));
 	else
 		SetItemText(itemnr,5,_T(""));
 
 	// Files
-	if(server->GetFiles()){
-		temp.Format(_T("%i"), server->GetFiles());
-		SetItemText(itemnr, 6, temp);
-	}
+	if (server->GetFiles())
+		SetItemText(itemnr, 6, CastItoIShort(server->GetFiles()));
 	else
 		SetItemText(itemnr,6,_T(""));
 
@@ -335,18 +329,14 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		SetItemText(itemnr,9,GetResString(IDS_NO));
 
 	// Soft Files
-	if(server->GetSoftFiles()){
-		temp.Format(_T("%i"), server->GetSoftFiles());
-		SetItemText(itemnr, 10, temp);
-	}
+	if (server->GetSoftFiles())
+		SetItemText(itemnr, 10, CastItoIShort(server->GetSoftFiles()));
 	else
 		SetItemText(itemnr,10,_T(""));
 
 	// Hard Files
-	if(server->GetHardFiles()){
-		temp.Format(_T("%i"), server->GetHardFiles());
-		SetItemText(itemnr, 11, temp);
-	}
+	if (server->GetHardFiles())
+		SetItemText(itemnr, 11, CastItoIShort(server->GetHardFiles()));
 	else
 		SetItemText(itemnr,11,_T(""));
 
@@ -394,6 +384,7 @@ BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT (NM_DBLCLK, OnNMLdblclk) //<-- mod bb 27.09.02 
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 // CServerListCtrl message handlers
@@ -491,7 +482,8 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	}
 	else if (wParam == MP_PASTE)
 	{
-		theApp.emuledlg->serverwnd->PasteServerFromClipboard();
+		if (theApp.IsEd2kServerLinkInClipboard())
+			theApp.emuledlg->serverwnd->PasteServerFromClipboard();
 		return TRUE;
 	}
 
@@ -1000,4 +992,21 @@ void CServerListCtrl::ShowServerCount() {
 
 	counter.Format(" (%i)", GetItemCount());
 	theApp.emuledlg->serverwnd->GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST)+counter  );
+}
+
+void CServerListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+C: Copy listview items to clipboard
+		SendMessage(WM_COMMAND, MP_GETED2KLINK);
+		return;
+	}
+	else if (nChar == 'V' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+C: Copy listview items to clipboard
+		SendMessage(WM_COMMAND, MP_PASTE);
+		return;
+	}
+	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }

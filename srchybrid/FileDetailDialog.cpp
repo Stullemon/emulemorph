@@ -19,7 +19,6 @@
 #include "OtherFunctions.h"
 #include "FileInfoDialog.h"
 #include "FileDetailDialog.h"
-#include "Ini2.h"
 #include "Preferences.h"
 #include "UpDownClient.h"
 #include "TitleMenu.h"
@@ -230,11 +229,10 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_PARTCOUNT, str);
 
 		// date created
-		if ((*m_paFiles)[0]->GetCrFileDate() != NULL){
-			time_t fromtime = ((*m_paFiles)[0]->GetStatus() != PS_COMPLETE) ? time(NULL) : (*m_paFiles)[0]->GetFileDate();
+		if ((*m_paFiles)[0]->GetCrFileDate() != 0){
 			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
 						(*m_paFiles)[0]->GetCrCFileDate().Format(thePrefs.GetDateTimeFormat()),
-						CastSecondsToLngHM(fromtime - (*m_paFiles)[0]->GetCrFileDate()));
+						CastSecondsToLngHM(time(NULL) - (*m_paFiles)[0]->GetCrFileDate()));
 		}
 		else
 			str = GetResString(IDS_UNKNOWN);
@@ -242,8 +240,10 @@ void CFileDetailDialogInfo::RefreshData()
 
 		// last seen complete
 		uint32 nDlActiveTime = (*m_paFiles)[0]->GetDlActiveTime();
-		if (nDlActiveTime) str=CastSecondsToLngHM(nDlActiveTime);
-			else str = GetResString(IDS_UNKNOWN);
+		if (nDlActiveTime)
+			str = CastSecondsToLngHM(nDlActiveTime);
+		else
+			str = GetResString(IDS_UNKNOWN);
 		SetDlgItemText(IDC_DL_ACTIVE_TIME, str);
 
 		// last seen complete
@@ -258,10 +258,25 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_LASTSEENCOMPL, str);
 
 		// last receive
-		if ((*m_paFiles)[0]->GetFileDate() != NULL && (*m_paFiles)[0]->GetRealFileSize() > 0){
+		if ((*m_paFiles)[0]->GetFileDate() != 0 && (*m_paFiles)[0]->GetRealFileSize() > 0)
+		{
+			// 'Last Modified' sometimes is up to 2 seconds greater than the current time ???
+			// If it's related to the FAT32 seconds time resolution the max. failure should still be only 1 sec.
+			// Happens at least on FAT32 with very high download speed.
+			uint32 tLastModified = (*m_paFiles)[0]->GetFileDate();
+			uint32 tNow = time(NULL);
+			uint32 tAgo;
+			if (tNow >= tLastModified)
+				tAgo = tNow - tLastModified;
+			else{
+				TRACE("tNow = %s\n", CTime(tNow).Format("%X"));
+				TRACE("tLMd = %s, +%u\n", CTime(tLastModified).Format("%X"), tLastModified - tNow);
+				TRACE("\n");
+				tAgo = 0;
+			}
 			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
 						(*m_paFiles)[0]->GetCFileDate().Format(thePrefs.GetDateTimeFormat()),
-						CastSecondsToLngHM(time(NULL) - (*m_paFiles)[0]->GetFileDate()));
+						CastSecondsToLngHM(tAgo));
 		}
 		else
 			str = GetResString(IDS_UNKNOWN);
@@ -385,9 +400,6 @@ void CFileDetailDialogInfo::Localize()
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialogName dialog
 
-#define	FILE_DETAIL_PREF_INI_SECTION	_T("FileDetailNameDlg")
-#define	FILE_DETAIL_PREF_INI_COLWIDTH	_T("Col%uWidth")
-
 IMPLEMENT_DYNAMIC(CFileDetailDialogName, CResizablePage)
 
 BEGIN_MESSAGE_MAP(CFileDetailDialogName, CResizablePage)
@@ -431,10 +443,6 @@ void CFileDetailDialogName::DoDataExchange(CDataExchange* pDX)
 
 BOOL CFileDetailDialogName::OnInitDialog()
 {
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
-	CIni ini(strIniFile, FILE_DETAIL_PREF_INI_SECTION);
-
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 	//pmyListCtrl = (CListCtrl*)GetDlgItem(IDC_LISTCTRLFILENAMES);
@@ -465,7 +473,11 @@ BOOL CFileDetailDialogName::OnInitDialog()
 
 void CFileDetailDialogName::RefreshData()
 {
-	GetDlgItem(IDC_RENAME)->EnableWindow((m_file->GetStatus() == PS_COMPLETE || m_file->GetStatus() == PS_COMPLETING) ? false:true);//add by CML 
+	bool bEnableRename = CanRenameFile();
+	GetDlgItem(IDC_RENAME)->EnableWindow(bEnableRename);
+	GetDlgItem(IDC_FILENAME)->EnableWindow(bEnableRename);
+	GetDlgItem(IDC_BUTTONSTRIP)->EnableWindow(bEnableRename);
+	GetDlgItem(IDC_TAKEOVER)->EnableWindow(bEnableRename);
 
 	CString bufferS;
 	GetDlgItem(IDC_FILENAME)->GetWindowText(bufferS);
@@ -566,13 +578,13 @@ void CFileDetailDialogName::FillSourcenameList()
 
 void CFileDetailDialogName::TakeOver()
 {
-	int itemPosition; 
-
 	if (pmyListCtrl.GetSelectedCount() > 0) {
 		POSITION pos = pmyListCtrl.GetFirstSelectedItemPosition(); 
-		itemPosition = pmyListCtrl.GetNextSelectedItem(pos); 
+		if (pos){
+			int itemPosition = pmyListCtrl.GetNextSelectedItem(pos); 
 		GetDlgItem(IDC_FILENAME)->SetWindowText(pmyListCtrl.GetItemText(itemPosition,0));
-	} 
+		} 
+	}
 }
 
 void CFileDetailDialogName::Copy()
@@ -666,13 +678,16 @@ BOOL CFileDetailDialogName::OnCommand(WPARAM wParam,LPARAM lParam )
 
 void CFileDetailDialogName::OnRename() 
 { 
-	CString NewFileName; 
-	GetDlgItem(IDC_FILENAME)->GetWindowText(NewFileName);
+	if (CanRenameFile())
+	{
+		CString NewFileName; 
+		GetDlgItem(IDC_FILENAME)->GetWindowText(NewFileName);
 
-	m_file->SetFileName(NewFileName, true); 
-	m_file->UpdateDisplayedInfo();
-	m_file->SavePartFile(); 
-} 
+		m_file->SetFileName(NewFileName, true); 
+		m_file->UpdateDisplayedInfo();
+		m_file->SavePartFile(); 
+	} 
+}
 
 BOOL CFileDetailDialogName::PreTranslateMessage(MSG* pMsg) 
 {
@@ -682,4 +697,9 @@ BOOL CFileDetailDialogName::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 	return CResizablePage::PreTranslateMessage(pMsg);
+}
+
+bool CFileDetailDialogName::CanRenameFile() const
+{
+	return (m_file->GetStatus() != PS_COMPLETE && m_file->GetStatus() != PS_COMPLETING);
 }

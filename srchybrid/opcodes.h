@@ -88,7 +88,7 @@
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
 #define	UPLOAD_CLIENT_DATARATE	4000		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
-//#define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
+//#define	MAX_UP_CLIENTS_ALLOWED	250		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	1		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define MINNUMBEROFTRICKLEUPLOADS 0
 #define MINWAITBEFOREOPENANOTHERSLOTMS 1000
@@ -177,6 +177,8 @@
 #define OP_SERVER_DESC_RES		0xA3	// <name_len 2><name name_len><desc_len 2 desc_en>
 #define OP_SERVER_LIST_REQ2		0xA4	// (null)
 
+#define INV_SERV_DESC_LEN		0xF0FF	// used as an 'invalid' string len for OP_SERVER_DESC_REQ/RES
+
 // client <-> client
 #define	OP_HELLO				0x01	// 0x10<HASH 16><ID 4><PORT 2><1 Tag_set>
 #define OP_SENDINGPART			0x46	// <HASH 16><von 4><bis 4><Daten len:(von-bis)>
@@ -209,6 +211,10 @@
 // this 'identifier' is used for referencing shared part (incomplete) files with the OP_ASKSHAREDDIRS and related opcodes
 // it was introduced with eDonkeyHybrid and is considered as part of the protocol.
 #define OP_INCOMPLETE_SHARED_FILES "!Incomplete Files"
+
+// eDonkeyHybrid truncates every received client message to 200 bytes, although it allows to send messages of any(?) size.
+#define	MAX_CLIENT_MSG_LEN		450		// using 200 is just too short
+#define	MAX_IRC_MSG_LEN			450		// 450 = same as in mIRC
 
 // extened prot client <-> extened prot client
 #define	OP_EMULEINFO			0x01	//
@@ -292,44 +298,13 @@
 #define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
 #define	FT_FLAGS				 0x22	// <uint32>
 #define	FT_DL_ACTIVE_TIME		 0x23	// <uint32>
-#define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
-#define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
-#define	 FT_MEDIA_ARTIST		 0xD0	// <string>
-#define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
-#define	 FT_MEDIA_ALBUM			 0xD1	// <string>
-#define	TAG_MEDIA_TITLE			"\xD2"	// <string>
-#define	 FT_MEDIA_TITLE			 0xD2	// <string>
-#define	TAG_MEDIA_LENGTH		"\xD3"	// <uint32> !!!
-#define	 FT_MEDIA_LENGTH		 0xD3	// <uint32> !!!
-#define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
-#define	 FT_MEDIA_BITRATE		 0xD4	// <uint32>
-#define	TAG_MEDIA_CODEC			"\xD5"	// <string>
-#define	 FT_MEDIA_CODEC			 0xD5	// <string>
-#define TAG_CLIENTLOWID			"\xF9"	// <uint32>
-#define TAG_SERVERPORT			"\xFA"	// <uint16>
-#define TAG_SERVERIP			"\xFB"	// <uint32>
-#define TAG_SOURCEUPORT			"\xFC"	// <uint16>
-#define TAG_SOURCEPORT			"\xFD"	// <uint16>
-#define TAG_SOURCEIP			"\xFE"	// <uint32>
-#define TAG_SOURCETYPE			"\xFF"	// <uint8>
-
-// additional media meta data tags from eDonkeyHybrid (note also the uppercase/lowercase)
-#define	FT_ED2K_MEDIA_ARTIST	"Artist"	// <string>
-#define	FT_ED2K_MEDIA_ALBUM		"Album"		// <string>
-#define	FT_ED2K_MEDIA_TITLE		"Title"		// <string>
-#define	FT_ED2K_MEDIA_LENGTH	"length"	// <string> !!!
-#define	FT_ED2K_MEDIA_BITRATE	"bitrate"	// <uint32>
-#define	FT_ED2K_MEDIA_CODEC		"codec"		// <string>
-#define TAG_NSENT				"# Sent"
-#define TAG_ONIP				"ip"
-#define TAG_ONPORT				"port"
-
 // statistic
-#define FT_ATTRANSFERED			0x50
-#define FT_ATREQUESTED			0x51
-#define FT_ATACCEPTED			0x52
-#define FT_CATEGORY				0x53
-#define	FT_ATTRANSFEREDHI		0x54
+#define FT_ATTRANSFERED			 0x50
+#define FT_ATREQUESTED			 0x51
+#define FT_ATACCEPTED			 0x52
+#define FT_CATEGORY				 0x53
+#define	FT_ATTRANSFEREDHI		 0x54
+#define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
 // khaos::categorymod+
 #define FT_CATRESUMEORDER		0x55
 // khaos::categorymod-
@@ -366,6 +341,71 @@
 #define FT_SPREADCOUNT			0x72
 //MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 #define FT_LASTUSED				0x95	// <uint32> // EastShare - Added by TAHO, .met file control
+#define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
+#define	 FT_MEDIA_ARTIST		 0xD0	// <string>
+#define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
+#define	 FT_MEDIA_ALBUM			 0xD1	// <string>
+#define	TAG_MEDIA_TITLE			"\xD2"	// <string>
+#define	 FT_MEDIA_TITLE			 0xD2	// <string>
+#define	TAG_MEDIA_LENGTH		"\xD3"	// <uint32> !!!
+#define	 FT_MEDIA_LENGTH		 0xD3	// <uint32> !!!
+#define	TAG_MEDIA_BITRATE		"\xD4"	// <uint32>
+#define	 FT_MEDIA_BITRATE		 0xD4	// <uint32>
+#define	TAG_MEDIA_CODEC			"\xD5"	// <string>
+#define	 FT_MEDIA_CODEC			 0xD5	// <string>
+#define TAG_CLIENTLOWID			"\xF9"	// <uint32>
+#define TAG_SERVERPORT			"\xFA"	// <uint16>
+#define TAG_SERVERIP			"\xFB"	// <uint32>
+#define TAG_SOURCEUPORT			"\xFC"	// <uint16>
+#define TAG_SOURCEPORT			"\xFD"	// <uint16>
+#define TAG_SOURCEIP			"\xFE"	// <uint32>
+#define TAG_SOURCETYPE			"\xFF"	// <uint8>
+
+#define	TAGTYPE_HASH			0x01
+#define	TAGTYPE_STRING			0x02
+#define	TAGTYPE_UINT32			0x03
+#define	TAGTYPE_FLOAT32			0x04
+#define	TAGTYPE_BOOL			0x05
+#define	TAGTYPE_BOOLARRAY		0x06
+#define	TAGTYPE_BLOB			0x07
+#define	TAGTYPE_UINT16			0x08
+#define	TAGTYPE_UINT8			0x09
+
+#define TAGTYPE_STR1			0x11
+#define TAGTYPE_STR2			0x12
+#define TAGTYPE_STR3			0x13
+#define TAGTYPE_STR4			0x14
+#define TAGTYPE_STR5			0x15
+#define TAGTYPE_STR6			0x16
+#define TAGTYPE_STR7			0x17
+#define TAGTYPE_STR8			0x18
+#define TAGTYPE_STR9			0x19
+#define TAGTYPE_STR10			0x1A
+#define TAGTYPE_STR11			0x1B
+#define TAGTYPE_STR12			0x1C
+#define TAGTYPE_STR13			0x1D
+#define TAGTYPE_STR14			0x1E
+#define TAGTYPE_STR15			0x1F
+#define TAGTYPE_STR16			0x20
+#define TAGTYPE_STR17			0x21	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
+#define TAGTYPE_STR18			0x22	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
+#define TAGTYPE_STR19			0x23	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
+#define TAGTYPE_STR20			0x24	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
+#define TAGTYPE_STR21			0x25	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
+#define TAGTYPE_STR22			0x26	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
+
+
+
+// additional media meta data tags from eDonkeyHybrid (note also the uppercase/lowercase)
+#define	FT_ED2K_MEDIA_ARTIST	"Artist"	// <string>
+#define	FT_ED2K_MEDIA_ALBUM		"Album"		// <string>
+#define	FT_ED2K_MEDIA_TITLE		"Title"		// <string>
+#define	FT_ED2K_MEDIA_LENGTH	"length"	// <string> !!!
+#define	FT_ED2K_MEDIA_BITRATE	"bitrate"	// <uint32>
+#define	FT_ED2K_MEDIA_CODEC		"codec"		// <string>
+#define TAG_NSENT				"# Sent"
+#define TAG_ONIP				"ip"
+#define TAG_ONPORT				"port"
 
 // ed2k search expression comparison operators
 #define ED2K_SEARCH_OP_EQUAL         0 // eserver 16.45+
@@ -404,6 +444,12 @@
 #define CT_EMULE_RESERVED12		0xfe
 #define CT_EMULE_RESERVED13		0xff
 
+
+#define SRVCAP_ZLIB				0x01
+#define SRVCAP_IP_IN_LOGIN		0x02
+#define SRVCAP_AUXPORT			0x04
+#define SRVCAP_NEWTAGS			0x08
+
 // emule tagnames
 #define ET_COMPRESSION			0x20
 #define ET_UDPPORT				0x21
@@ -420,9 +466,9 @@
 #define KADEMLIA_BOOTSTRAP_RES	0x08	// <CNT [2]> <PEER [25]>*(CNT)
 
 #define KADEMLIA_HELLO_REQ	 	0x10	// <PEER (sender) [25]>
-#define KADEMLIA_HELLO_RES     	0x18	// <PEER (reciever) [25]>
+#define KADEMLIA_HELLO_RES     	0x18	// <PEER (receiver) [25]>
 
-#define KADEMLIA_REQ		   	0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (reciever) 16>
+#define KADEMLIA_REQ		   	0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (receiver) 16>
 #define KADEMLIA_RES			0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
 
 #define KADEMLIA_SEARCH_REQ		0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]

@@ -184,7 +184,7 @@ Pinger::Pinger() {
     // Open ICMP.DLL
     hICMP_DLL = LoadLibrary("ICMP.DLL");
     if (hICMP_DLL == 0) {
-        theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERLOADLIB));
+        theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERLOADLIB));
         return;
     }
 
@@ -196,7 +196,7 @@ Pinger::Pinger() {
         (!lpfnIcmpCloseHandle) || 
         (!lpfnIcmpSendEcho)) {
 
-        theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERGPAFAIL));
+        theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERGPAFAIL));
         return;
     }
 
@@ -204,7 +204,7 @@ Pinger::Pinger() {
     hICMP = (HANDLE) lpfnIcmpCreateFile();
     if (hICMP == INVALID_HANDLE_VALUE) {
 		int nErr = GetLastError();
-        theApp.emuledlg->QueueDebugLogLine(false, GetResString(IDS_USSPINGERICFFAIL), nErr);
+        theApp.QueueDebugLogLine(false, GetResString(IDS_USSPINGERICFFAIL), nErr);
         PIcmpErr(nErr);
         return;
     }
@@ -228,7 +228,7 @@ Pinger::~Pinger() {
     BOOL fRet = lpfnIcmpCloseHandle(hICMP);
     if (fRet == FALSE) {
         int nErr = GetLastError();
-        theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERICMPENDERR), nErr);
+        theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERICMPENDERR), nErr);
         PIcmpErr(nErr);
     }
 
@@ -381,7 +381,7 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 			returnValue.ttl = (icmphdr->type == ICMP_TTL_EXPIRE)?ttl:(64 - (reply->ttl & 63));
 
 			if(doLog) {
-				theApp.emuledlg->QueueDebugLogLine(false,"Reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i",
+				theApp.QueueDebugLogLine(false,"Reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i",
 					inet_ntoa(stDestAddr),
 					nRet,
 					usResTime,
@@ -395,7 +395,7 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 			//		if (toNowTimeOut) lastTimeOut = 3;
 			//}
 			if(doLog) {
-				theApp.emuledlg->QueueDebugLogLine(false,"Filtered reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i type=%i",
+				theApp.QueueDebugLogLine(false,"Filtered reply (UDP-pinger) from %s: bytes=%d time=%3.2fms TTL=%i type=%i",
 					inet_ntoa(stDestAddr),
 					nRet,
 					usResTime,
@@ -454,7 +454,7 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
         returnValue.ttl = (returnValue.status != IP_SUCCESS)?ttl:(*(char *)&(achRepData[20]))&0x00FF;
 
         if(doLog) {
-            theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERPINGREPLY),
+            theApp.QueueDebugLogLine(false,GetResString(IDS_USSPINGERPINGREPLY),
                                                         inet_ntoa(stDestAddr),
                                                         *(u_long *) &(achRepData[12]),
                                                         returnValue.delay, 
@@ -467,7 +467,7 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
         returnValue.success = false;
         returnValue.error = lastError;
         if(doLog) {
-			theApp.emuledlg->QueueDebugLogLine(false,"Error from %s: Error=%i",
+			theApp.QueueDebugLogLine(false,"Error from %s: Error=%i",
 				inet_ntoa(stDestAddr),
 				returnValue.error);
         }
@@ -484,12 +484,12 @@ void Pinger::PIcmpErr(int nICMPErr) {
         (nICMPErr < IP_STATUS_BASE+1)) {
 
         // Error value is out of range, display normally
-        theApp.emuledlg->QueueDebugLogLine(false,"(%d) ", nICMPErr);
+        theApp.QueueDebugLogLine(false,"(%d) ", nICMPErr);
         DisplayErr(nICMPErr);
     } else {
 
         // Display ICMP Error String
-        theApp.emuledlg->QueueDebugLogLine(false,"%s", aszSendEchoErr[nErrIndex]);
+        theApp.QueueDebugLogLine(false,"%s", aszSendEchoErr[nErrIndex]);
     }
 }
 
@@ -505,7 +505,7 @@ void Pinger::DisplayErr(int nWSAErr) {
         (LPTSTR) &lpMsgBuf,
         0,    
         NULL );   
-    theApp.emuledlg->QueueDebugLogLine(false,lpMsgBuf);
+    theApp.QueueDebugLogLine(false,lpMsgBuf);
 
     // Free the buffer
     LocalFree(lpMsgBuf);

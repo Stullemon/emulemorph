@@ -42,13 +42,14 @@ class CStatisticsDlg;
 class CTaskbarNotifier;
 class CTransferWnd;
 struct Status;
-struct SLogItem;
 class CSplashScreen;
 class CMuleSystrayDlg;
 
 // emuleapp <-> emuleapp
 #define OP_ED2KLINK				12000
 #define OP_CLCOMMAND			12001
+
+#define	EMULE_HOTMENU_ACCEL		'x'
 
 class CemuleDlg : public CTrayDialog, public CLoggable
 {
@@ -64,7 +65,7 @@ public:
 	void			ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF = false); 
 	void			ShowUserCount();
 	void			ShowMessageState(uint8 iconnr);
-	void			SetActiveDialog(CDialog* dlg);
+	void			SetActiveDialog(CWnd* dlg);
 	void			ShowTransferRate(bool forceAll=false);
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	void			ShowPing();
@@ -79,15 +80,6 @@ public:
 	CString			GetLastDebugLogEntry();
 	CString			GetAllLogEntries();
 	CString			GetAllDebugLogEntries();
-    // Elandal:ThreadSafeLogging -->
-    // thread safe log calls
-    void			QueueDebugLogLine(bool addtostatusbar, LPCTSTR line,...);
-    void			HandleDebugLogQueue();
-    void			ClearDebugLogQueue(bool bDebugPendingMsgs = false);
-    void			QueueLogLine(bool addtostatusbar, LPCTSTR line,...);
-    void			HandleLogQueue();
-    void			ClearLogQueue(bool bDebugPendingMsgs = false);
-    // Elandal:ThreadSafeLogging <--
 
 	void			OnCancel();
 	void			StopTimer();
@@ -99,6 +91,8 @@ public:
 	void			SetKadButtonState();
 	void			ProcessED2KLink(LPCTSTR pszData);
 	void			SetStatusBarPartsSize();
+
+	virtual void HtmlHelp(DWORD_PTR dwData, UINT nCmd = 0x000F);
 
 	CTransferWnd*	transferwnd;
 	CServerWnd*		serverwnd;
@@ -112,8 +106,7 @@ public:
 	CTaskbarNotifier* m_wndTaskbarNotifier;
 	CMuleToolbarCtrl* toolbar;
 	CKademliaWnd*	kademliawnd;
-
-	CDialog*		activewnd;
+	CWnd*			activewnd;
 	uint8			status;
 	CFont			m_fontHyperText;
 	CFont			m_fontMarlett;
@@ -176,9 +169,6 @@ protected:
 	afx_msg LRESULT OnWebServerRemove(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnWebSharedFilesReload(WPARAM wParam, LPARAM lParam);
 
-	// Jigle SOAP service
-	afx_msg LRESULT OnJigleSearchResponse(WPARAM wParam, LPARAM lParam);
-
 	// VersionCheck DNS
 	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
 
@@ -227,13 +217,6 @@ private:
 
 	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
 
-    // Elandal:ThreadSafeLogging -->
-    // thread safe log calls
-    CCriticalSection m_queueLock;
-    CTypedPtrList<CPtrList, SLogItem*> m_QueueDebugLog;
-    CTypedPtrList<CPtrList, SLogItem*> m_QueueLog;
-    // Elandal:ThreadSafeLogging <--
-
 	// Mighty Knife: extended debug logging
 private:
 	int m_ExtDebugMessagesCount;
@@ -260,8 +243,6 @@ enum EEmuleUserMsgs
 	WEB_DISCONNECT_SERVER,
 	WEB_REMOVE_SERVER,
 	WEB_SHARED_FILES_RELOAD,
-
-	WM_JIGLE_SEARCH_RESPONSE,
 
 	// VC
 	WM_VERSIONCHECK_RESPONSE,

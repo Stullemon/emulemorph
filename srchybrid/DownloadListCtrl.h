@@ -53,8 +53,9 @@ public:
 	void	AddFile(CPartFile* toadd);
 	void	AddSource(CPartFile* owner,CUpDownClient* source,bool notavailable);
 	void	RemoveSource(CUpDownClient* source,CPartFile* owner);
-	bool	RemoveFile(CPartFile* toremove);
+	bool	RemoveFile(const CPartFile* toremove);
 	void	ClearCompleted(bool ignorecats=false);
+	void	ClearCompleted(const CPartFile* pFile);
 	void	SetStyle();
 	void	CreateMenues();
 	void	Localize();
@@ -68,8 +69,29 @@ public:
 	void	ExpandCollapseItem(int item,uint8 expand,bool collapsesource=false);
 	void	GetDisplayedFiles(CArray<CPartFile*,CPartFile*> *list);
 	void	MoveCompletedfilesCat(uint8 from, uint8 to);
-
+	int		GetCompleteDownloads(int cat,int &total);
 protected:
+	CImageList  m_ImageList;
+	// Mighty Knife: Community visualization
+	CImageList m_overlayimages;
+	// [end] Mighty Knife
+
+	CMenu		m_PrioMenu;
+	CTitleMenu	m_FileMenu;
+	CMenu		m_A4AFMenu;
+	
+	//MORPH - Removed by SiRoB, Remain time and size Columns have been splited
+	/*
+	bool		m_bRemainSort;
+	*/
+
+	CMenu		m_PermMenu;	// xMule_MOD: showSharePermissions
+	CMenu		m_A4AFMenuFlag; //MORPH - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+
+	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;
+	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;
+    ListItems	m_ListItems;
+
 	void ShowFileDialog(CPartFile* pFile = NULL, bool bOpenCommentsPage = false);
 	void SetAllIcons();
 	void DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
@@ -90,25 +112,5 @@ protected:
 	afx_msg void OnNMDblclkDownloadlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
-
-private:
-	CImageList  m_ImageList;
-
-	// Mighty Knife: Community visualization
-	CImageList m_overlayimages;
-	// [end] Mighty Knife
-
-	CMenu		m_PrioMenu;
-	CTitleMenu	m_FileMenu;
-	CMenu		m_A4AFMenu;
-	
-	//MORPH - Removed by SiRoB, Remain time and size Columns have been splited
-	//bool		m_bRemainSort;
-
-	CMenu		m_PermMenu;	// xMule_MOD: showSharePermissions
-	CMenu		m_A4AFMenuFlag; //MORPH - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
-
-	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;
-	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;
-    ListItems	m_ListItems;
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };

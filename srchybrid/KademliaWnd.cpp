@@ -26,6 +26,7 @@
 #include "CustomAutoComplete.h"
 #include "OtherFunctions.h"
 #include "emuledlg.h"
+#include "clientlist.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,6 +45,9 @@ CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
 	contactList = new CKadContactListCtrl;
 	searchList = new CKadSearchListCtrl;
 	m_pacONBSIPs = NULL;
+
+	icon_kadcont=NULL;
+	icon_kadsea=NULL;
 }
 
 CKademliaWnd::~CKademliaWnd()
@@ -54,6 +58,11 @@ CKademliaWnd::~CKademliaWnd()
 	}
 	delete contactList;
 	delete searchList;
+
+	if (icon_kadcont)
+		VERIFY( DestroyIcon(icon_kadcont) );
+	if (icon_kadsea)
+		VERIFY( DestroyIcon(icon_kadsea) );
 }
 
 BOOL CKademliaWnd::SaveAllSettings()
@@ -80,7 +89,6 @@ BOOL CKademliaWnd::OnInitDialog()
 
 	AddAnchor(IDC_CONTACTLIST,TOP_LEFT, CSize(100,50));
 	AddAnchor(IDC_SEARCHLIST,CSize(0,50),CSize(100,100));
-
 	AddAnchor(IDC_KADCONTACTLAB,TOP_LEFT);
 	AddAnchor(IDC_FIREWALLCHECKBUTTON, TOP_RIGHT);
 	AddAnchor(IDC_KADCONNECT, TOP_RIGHT);
@@ -95,6 +103,9 @@ BOOL CKademliaWnd::OnInitDialog()
 	AddAnchor(IDC_RADIP, TOP_RIGHT);
 
 	SetAllIcons();
+	
+	AddAnchor(IDC_KADICO2, CSize(0,50) );
+
 	Localize();
 
 	searchList->UpdateKadSearchCount();
@@ -119,6 +130,7 @@ void CKademliaWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SEARCHLIST, *searchList);
 	DDX_Control(pDX, IDC_KADCONTACTLAB, kadContactLab);
 	DDX_Control(pDX, IDC_KADSEARCHLAB, kadSearchLab);
+	DDX_Control(pDX, IDC_BSSTATIC, m_ctrlBootstrap);
 }
 
 
@@ -128,6 +140,10 @@ BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
 	ON_EN_SETFOCUS(IDC_BOOTSTRAPIP, OnEnSetfocusBootstrapip)
+	ON_EN_CHANGE(IDC_BOOTSTRAPIP, UpdateControlsState)
+	ON_EN_CHANGE(IDC_BOOTSTRAPPORT, UpdateControlsState)
+	ON_BN_CLICKED(IDC_RADCLIENTS, UpdateControlsState)
+	ON_BN_CLICKED(IDC_RADIP, UpdateControlsState)
 END_MESSAGE_MAP()
 
 
@@ -204,6 +220,18 @@ void CKademliaWnd::OnSysColorChange()
 
 void CKademliaWnd::SetAllIcons()
 {
+	// frames
+	m_ctrlBootstrap.Init("KADBOOTSTRAP");
+
+	if (icon_kadcont)
+		VERIFY( DestroyIcon(icon_kadcont) );
+	icon_kadcont = theApp.LoadIcon("KADContactList", 16, 16);
+	((CStatic*)GetDlgItem(IDC_KADICO1))->SetIcon(icon_kadcont);
+
+	if (icon_kadsea)
+		VERIFY( DestroyIcon(icon_kadsea) );
+	icon_kadsea = theApp.LoadIcon("KadCurrentSearches", 16, 16);
+	((CStatic*)GetDlgItem(IDC_KADICO2))->SetIcon(icon_kadsea);
 }
 
 void CKademliaWnd::Localize() {
@@ -234,5 +262,12 @@ void CKademliaWnd::UpdateControlsState()
 		strLabel = GetResString(IDS_MAIN_BTN_CONNECT);
 	strLabel.Remove(_T('&'));
 	GetDlgItem(IDC_KADCONNECT)->SetWindowText(strLabel);
-	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(!Kademlia::CKademlia::isConnected());
+
+	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow( !Kademlia::CKademlia::isConnected() &&
+		( 
+		( IsDlgButtonChecked(IDC_RADIP)>0 && GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowTextLength()>0 && GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowTextLength()>0)
+		||
+		( IsDlgButtonChecked(IDC_RADCLIENTS)>0 /* && theApp.clientlist->GetClientCount()>0*/  )
+		)
+	);
 }

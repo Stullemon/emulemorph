@@ -273,9 +273,14 @@ void CPreviewApps::RunApp(CPartFile* file, UINT uMenuID)
 
 	file->FlushBuffer(true);
 
+	CString strCommand = svc.strCommand;
+	ExpandEnvironmentStrings(strCommand);
+	ExpandEnvironmentStrings(strArgs);
+	ExpandEnvironmentStrings(strCommandDir);
+
 	TRACE("Starting preview application:\n");
-	TRACE("  Command =%s\n", svc.strCommand);
+	TRACE("  Command =%s\n", strCommand);
 	TRACE("  Args    =%s\n", strArgs);
 	TRACE("  Dir     =%s\n", strCommandDir);
-	ShellExecute(NULL, _T("open"), svc.strCommand, strArgs, strCommandDir, SW_SHOWNORMAL);
+	ShellExecute(NULL, _T("open"), strCommand, strArgs, strCommandDir, SW_SHOWNORMAL);
 }

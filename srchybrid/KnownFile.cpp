@@ -34,7 +34,6 @@
 #include "ini2.h"
 #define NOMD4MACROS
 #include "kademlia/utils/md4.h"
-#include "QArray.h"
 #include "FrameGrabThread.h"
 #include "CxImage/xImage.h"
 #include "OtherFunctions.h"
@@ -83,14 +82,15 @@ static char THIS_FILE[]=__FILE__;
 
 #define	META_DATA_VER	1
 
-// SLUGFILLER: mergeKnown
-void CFileStatistic::MergeFileStats(CFileStatistic *toMerge){
+void CFileStatistic::MergeFileStats(CFileStatistic *toMerge)
+{
 	requested += toMerge->GetRequests();
 	accepted += toMerge->GetAccepts();
 	transferred += toMerge->GetTransferred();
 	alltimerequested += toMerge->GetAllTimeRequests();
 	alltimetransferred += toMerge->GetAllTimeTransferred();
 	alltimeaccepted += toMerge->GetAllTimeAccepts();
+	// SLUGFILLER: mergeKnown
 	// SLUGFILLER: Spreadbars
 	if (!toMerge->spreadlist.IsEmpty()) {
 		POSITION pos = toMerge->spreadlist.GetHeadPosition();
@@ -107,8 +107,8 @@ void CFileStatistic::MergeFileStats(CFileStatistic *toMerge){
 		}
 	}
 	// SLUGFILLER: Spreadbars
+	// SLUGFILLER: mergeKnown
 }
-// SLUGFILLER: mergeKnown
 
 void CFileStatistic::AddRequest(){
 	requested++;
@@ -322,35 +322,6 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
-//MORPH - Removed by SiRoB, Please see on the top
-/*
-// SLUGFILLER: mergeKnown
-void CFileStatistic::Merge(CFileStatistic* other){
-	transferred += other->transferred;
-	requested += other->requested;
-	accepted += other->accepted;
-	alltimetransferred += other->alltimetransferred;
-	alltimerequested += other->alltimerequested;
-	alltimeaccepted += other->alltimeaccepted;
-	// SLUGFILLER: Spreadbars
-	if (!other->spreadlist.IsEmpty()) {
-		POSITION pos = other->spreadlist.GetHeadPosition();
-		uint32 start = other->spreadlist.GetKeyAt(pos);
-		uint32 count = other->spreadlist.GetValueAt(pos);
-		other->spreadlist.GetNext(pos);
-		while (pos){
-			uint32 end = other->spreadlist.GetKeyAt(pos);
-			if (count)
-				AddBlockTransferred(start, end, count);
-			start = end;
-			count = other->spreadlist.GetValueAt(pos);
-			other->spreadlist.GetNext(pos);
-		}
-	}
-	// SLUGFILLER: Spreadbars
-}
-// SLUGFILLER: mergeKnown
-*/
 IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
 
 CAbstractFile::CAbstractFile()
@@ -386,8 +357,7 @@ CKnownFile::CKnownFile()
 	m_iPartCount = 0;
 	m_iED2KPartCount = 0;
 	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
-	date = 0;
-	dateC =0;
+	m_tUtcLastModified = 0;
 	if(thePrefs.GetNewAutoUp()){
 		m_iUpPriority = PR_HIGH;
 		m_bAutoUpPriority = true;
@@ -451,8 +421,7 @@ void CKnownFile::AssertValid() const
 {
 	CAbstractFile::AssertValid();
 
-	(void)date;
-	(void)dateC;
+	(void)m_tUtcLastModified;
 	(void)statistic;
 	(void)m_nCompleteSourcesTime;
 	(void)m_nCompleteSourcesCount;
@@ -811,8 +780,8 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	// set lastwrite date
 	struct _stat fileinfo = {0};
 	_fstat(file->_file, &fileinfo);
-	date = fileinfo.st_mtime;
-	AdjustNTFSDaylightFileTime(date, strFilePath);
+	m_tUtcLastModified = fileinfo.st_mtime;
+	AdjustNTFSDaylightFileTime(m_tUtcLastModified, strFilePath);
 	
 	fclose(file);
 	file = NULL;
@@ -934,11 +903,21 @@ bool CKnownFile::LoadHashsetFromFile(CFileDataIO* file, bool checkhash){
 		if (parts <= 1)	// nothing to check
 			return true;
 	}
-	else if (md4cmp(m_abyFileHash, checkid))
+	else if (md4cmp(m_abyFileHash, checkid)){
+		// delete hashset
+		for (int i = 0; i < hashlist.GetSize(); i++)
+			delete[] hashlist[i];
+		hashlist.RemoveAll();
 		return false;	// wrong file?
+	}
 	else{
-		if (parts != GetED2KPartCount())		// removed unnececery hash counter
+		if (parts != GetED2KPartCount()){		// removed unnececery hash counter
+			// delete hashset
+			for (int i = 0; i < hashlist.GetSize(); i++)
+				delete[] hashlist[i];
+			hashlist.RemoveAll();
 			return false;
+		}
 	}
 	// SLUGFILLER: SafeHash
 
@@ -952,6 +931,7 @@ bool CKnownFile::LoadHashsetFromFile(CFileDataIO* file, bool checkhash){
 	if (!md4cmp(m_abyFileHash, checkid))
 		return true;
 	else{
+		// delete hashset
 		for (int i = 0; i < hashlist.GetSize(); i++)
 			delete[] hashlist[i];
 		hashlist.RemoveAll();
@@ -1206,7 +1186,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 }
 
 bool CKnownFile::LoadDateFromFile(CFileDataIO* file){
-	date = file->ReadUInt32();
+	m_tUtcLastModified = file->ReadUInt32();
 	return true;
 }
 
@@ -1232,7 +1212,7 @@ bool CKnownFile::LoadFromFile(CFileDataIO* file){
 
 bool CKnownFile::WriteToFile(CFileDataIO* file){
 	// date
-	file->WriteUInt32(date);
+	file->WriteUInt32(m_tUtcLastModified);
 	// hashset
 	file->WriteHash16(m_abyFileHash);
 	UINT parts = hashlist.GetCount();
@@ -2007,142 +1987,149 @@ void CKnownFile::UpdateMetaDataTags()
 		EED2KFileType eFileType = GetED2KFileTypeID(GetFileName());
 		if ((eFileType == ED2KFT_AUDIO || eFileType == ED2KFT_VIDEO) && GetFileSize() >= 32768)
 		{
-			TCHAR szFullPath[MAX_PATH];
-			_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
-			try{
-				CComPtr<IMediaDet> pMediaDet;
-				HRESULT hr = pMediaDet.CoCreateInstance(__uuidof(MediaDet));
-				if (SUCCEEDED(hr))
-				{
-					USES_CONVERSION;
-					if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2W(szFullPath)))))
+			// Avoid processing of some file types which are known to crash due to bugged DirectShow filters.
+			TCHAR szExt[_MAX_EXT];
+			_tsplitpath(GetFileName(), NULL, NULL, NULL, szExt);
+			_tcslwr(szExt);
+			if (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0)
+			{
+TCHAR szFullPath[MAX_PATH];
+				_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
+				try{
+					CComPtr<IMediaDet> pMediaDet;
+					HRESULT hr = pMediaDet.CoCreateInstance(__uuidof(MediaDet));
+					if (SUCCEEDED(hr))
 					{
-						// Get the first audio/video streams
-						long lAudioStream = -1;
-						long lVideoStream = -1;
-						double fVideoStreamLengthSec = 0.0;
-						DWORD dwVideoBitRate = 0;
-						DWORD dwVideoCodec = 0;
-						double fAudioStreamLengthSec = 0.0;
-						DWORD dwAudioBitRate = 0;
-						//DWORD dwAudioCodec = 0;
-						long lStreams;
-						if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
+						USES_CONVERSION;
+						if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2W(szFullPath)))))
 						{
-							for (long i = 0; i < lStreams; i++)
+							// Get the first audio/video streams
+							long lAudioStream = -1;
+							long lVideoStream = -1;
+							double fVideoStreamLengthSec = 0.0;
+							DWORD dwVideoBitRate = 0;
+							DWORD dwVideoCodec = 0;
+							double fAudioStreamLengthSec = 0.0;
+							DWORD dwAudioBitRate = 0;
+							//DWORD dwAudioCodec = 0;
+							long lStreams;
+							if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
 							{
-								if (SUCCEEDED(hr = pMediaDet->put_CurrentStream(i)))
+								for (long i = 0; i < lStreams; i++)
 								{
-									GUID major_type;
-									if (SUCCEEDED(hr = pMediaDet->get_StreamType(&major_type)))
+									if (SUCCEEDED(hr = pMediaDet->put_CurrentStream(i)))
 									{
-										if (major_type == MEDIATYPE_Video)
+										GUID major_type;
+										if (SUCCEEDED(hr = pMediaDet->get_StreamType(&major_type)))
 										{
-											if (lVideoStream == -1){
-												lVideoStream = i;
-												pMediaDet->get_StreamLength(&fVideoStreamLengthSec);
+											if (major_type == MEDIATYPE_Video)
+											{
+												if (lVideoStream == -1){
+													lVideoStream = i;
+													pMediaDet->get_StreamLength(&fVideoStreamLengthSec);
 
-												AM_MEDIA_TYPE mt = {0};
-												if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
-													if (mt.formattype == FORMAT_VideoInfo){
-														VIDEOINFOHEADER* pVIH = (VIDEOINFOHEADER*)mt.pbFormat;
-														// do not use that 'dwBitRate', whatever this number is, it's not
-														// the bitrate of the encoded video stream. seems to be the bitrate
-														// of the uncompressed stream divided by 2 !??
-														//dwVideoBitRate = pVIH->dwBitRate / 1000;
+													AM_MEDIA_TYPE mt = {0};
+													if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
+														if (mt.formattype == FORMAT_VideoInfo){
+															VIDEOINFOHEADER* pVIH = (VIDEOINFOHEADER*)mt.pbFormat;
+															// do not use that 'dwBitRate', whatever this number is, it's not
+															// the bitrate of the encoded video stream. seems to be the bitrate
+															// of the uncompressed stream divided by 2 !??
+															//dwVideoBitRate = pVIH->dwBitRate / 1000;
 
-														// for AVI files this gives that used codec
-														// for MPEG(1) files this just gives "Y41P"
-														dwVideoCodec = pVIH->bmiHeader.biCompression;
+															// for AVI files this gives that used codec
+															// for MPEG(1) files this just gives "Y41P"
+															dwVideoCodec = pVIH->bmiHeader.biCompression;
+														}
 													}
+
+													if (mt.pUnk != NULL)
+														mt.pUnk->Release();
+													if (mt.pbFormat != NULL)
+														CoTaskMemFree(mt.pbFormat);
 												}
-
-												if (mt.pUnk != NULL)
-													mt.pUnk->Release();
-												if (mt.pbFormat != NULL)
-													CoTaskMemFree(mt.pbFormat);
 											}
-										}
-										else if (major_type == MEDIATYPE_Audio)
-										{
-											if (lAudioStream == -1){
-												lAudioStream = i;
-												pMediaDet->get_StreamLength(&fAudioStreamLengthSec);
+											else if (major_type == MEDIATYPE_Audio)
+											{
+												if (lAudioStream == -1){
+													lAudioStream = i;
+													pMediaDet->get_StreamLength(&fAudioStreamLengthSec);
 
-												AM_MEDIA_TYPE mt = {0};
-												if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
-													if (mt.formattype == FORMAT_WaveFormatEx){
-														WAVEFORMATEX* wfx = (WAVEFORMATEX*)mt.pbFormat;
-														dwAudioBitRate = ((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0;
+													AM_MEDIA_TYPE mt = {0};
+													if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
+														if (mt.formattype == FORMAT_WaveFormatEx){
+															WAVEFORMATEX* wfx = (WAVEFORMATEX*)mt.pbFormat;
+															dwAudioBitRate = ((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0;
+														}
 													}
+
+													if (mt.pUnk != NULL)
+														mt.pUnk->Release();
+													if (mt.pbFormat != NULL)
+														CoTaskMemFree(mt.pbFormat);
 												}
-
-												if (mt.pUnk != NULL)
-													mt.pUnk->Release();
-												if (mt.pbFormat != NULL)
-													CoTaskMemFree(mt.pbFormat);
 											}
-										}
-										else{
-											TRACE("%s - Unknown stream type\n", GetFileName());
-										}
+											else{
+												TRACE("%s - Unknown stream type\n", GetFileName());
+											}
 
-										if (lVideoStream != -1 && lAudioStream != -1)
-											break;
+											if (lVideoStream != -1 && lAudioStream != -1)
+												break;
+										}
 									}
 								}
 							}
-						}
 
-						uint32 uLengthSec = 0.0;
-						CStringA strCodec;
-						uint32 uBitrate = 0;
-						if (fVideoStreamLengthSec > 0.0){
-							uLengthSec = fVideoStreamLengthSec;
-							if (dwVideoCodec == BI_RGB)
-								strCodec = "rgb";
-							else if (dwVideoCodec == BI_RLE8)
-								strCodec = "rle8";
-							else if (dwVideoCodec == BI_RLE4)
-								strCodec = "rle4";
-							else if (dwVideoCodec == BI_BITFIELDS)
-								strCodec = "bitfields";
-							else{
-								memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
-								strCodec.ReleaseBuffer(4);
-								strCodec.MakeLower();
+							uint32 uLengthSec = 0.0;
+							CStringA strCodec;
+							uint32 uBitrate = 0;
+							if (fVideoStreamLengthSec > 0.0){
+								uLengthSec = fVideoStreamLengthSec;
+								if (dwVideoCodec == BI_RGB)
+									strCodec = "rgb";
+								else if (dwVideoCodec == BI_RLE8)
+									strCodec = "rle8";
+								else if (dwVideoCodec == BI_RLE4)
+									strCodec = "rle4";
+								else if (dwVideoCodec == BI_BITFIELDS)
+									strCodec = "bitfields";
+								else{
+									memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
+									strCodec.ReleaseBuffer(4);
+									strCodec.MakeLower();
+								}
+								uBitrate = dwVideoBitRate;
 							}
-							uBitrate = dwVideoBitRate;
-						}
-						else if (fAudioStreamLengthSec > 0.0){
-							uLengthSec = fAudioStreamLengthSec;
-							uBitrate = dwAudioBitRate;
-						}
+							else if (fAudioStreamLengthSec > 0.0){
+								uLengthSec = fAudioStreamLengthSec;
+								uBitrate = dwAudioBitRate;
+							}
 
-						if (uLengthSec){
-							CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)uLengthSec);
-							AddTagUnique(pTag);
-							m_uMetaDataVer = META_DATA_VER;
-						}
+							if (uLengthSec){
+								CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)uLengthSec);
+								AddTagUnique(pTag);
+								m_uMetaDataVer = META_DATA_VER;
+							}
 
-						if (!strCodec.IsEmpty()){
-							CTag* pTag = new CTag(FT_MEDIA_CODEC, strCodec);
-							AddTagUnique(pTag);
-							m_uMetaDataVer = META_DATA_VER;
-						}
+							if (!strCodec.IsEmpty()){
+								CTag* pTag = new CTag(FT_MEDIA_CODEC, strCodec);
+								AddTagUnique(pTag);
+								m_uMetaDataVer = META_DATA_VER;
+							}
 
-						if (uBitrate){
-							CTag* pTag = new CTag(FT_MEDIA_BITRATE, (uint32)uBitrate);
-							AddTagUnique(pTag);
-							m_uMetaDataVer = META_DATA_VER;
+							if (uBitrate){
+								CTag* pTag = new CTag(FT_MEDIA_BITRATE, (uint32)uBitrate);
+								AddTagUnique(pTag);
+								m_uMetaDataVer = META_DATA_VER;
+							}
 						}
 					}
 				}
-			}
-			catch(...){
-				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("Unhandled exception while extracting meta data (MediaDet) from \"%s\""), szFullPath);
-				ASSERT(0);
+				catch(...){
+					if (thePrefs.GetVerbose())
+						AddDebugLogLine(false, _T("Unhandled exception while extracting meta data (MediaDet) from \"%s\""), szFullPath);
+					ASSERT(0);
+				}
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
+#include "IconStatic.h"
 
 class CKadContactListCtrl;
 class CKadSearchListCtrl;
@@ -17,6 +18,7 @@ public:
 	CKadSearchListCtrl* searchList;
 	CStatic kadContactLab;
 	CStatic kadSearchLab;
+	CIconStatic m_ctrlBootstrap;
 
 	void Localize();
 	void UpdateControlsState();
@@ -39,4 +41,9 @@ protected:
 	afx_msg void OnBnClickedFirewallcheckbutton();
 	afx_msg void OnSysColorChange();
 	afx_msg void OnEnSetfocusBootstrapip();
+
+private:
+	HICON icon_kadcont;
+	HICON icon_kadsea;
+
 };

@@ -97,8 +97,10 @@ enum EClientSoftware{
 	SO_EMULE			= 0,	// default
 	SO_CDONKEY			= 1,	// ET_COMPATIBLECLIENT
 	SO_XMULE			= 2,	// ET_COMPATIBLECLIENT
+	SO_AMULE			= 3,	// ET_COMPATIBLECLIENT
 	SO_SHAREAZA			= 4,	// ET_COMPATIBLECLIENT
 	SO_MLDONKEY			= 10,	// ET_COMPATIBLECLIENT
+	SO_LPHANT			= 20,	// ET_COMPATIBLECLIENT
 	// other client types which are not identified with ET_COMPATIBLECLIENT
 	SO_EDONKEYHYBRID	= 50,
 	SO_EDONKEY,
@@ -969,10 +971,13 @@ private:
 	uint32		m_nDownDataRateMS;
 	uint32		m_nAvDownDatarate; //Wistily
 	uint32		m_nSumForAvgDownDataRate;
+	uint32		m_dwLastBlockReceived;
+	uint32		m_nTotalUDPPackets;
+	uint32		m_nFailedUDPPackets;
+	//--group to aligned int32
 	uint16		m_cShowDR;
 	uint16		m_nRemoteQueueRank;
 	int			m_iDifferenceQueueRank;	//Morph - added by AndCycle, DiffQR
-	uint32		m_dwLastBlockReceived;
 	//--group to aligned int32
 	uint16		m_nPartCount;
 	bool		m_bRemoteQueueFull;

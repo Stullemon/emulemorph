@@ -9,17 +9,22 @@ public:
 	CPPgProxy();
 	virtual ~CPPgProxy();
 
-	virtual BOOL OnInitDialog();
-	virtual BOOL OnApply();
-
 	// Dialog Data
 	enum { IDD = IDD_PPG_PROXY };
 
+	void Localize(void);
+
 protected:
+	ProxySettings proxy;
+
+	void LoadSettings();
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual BOOL OnApply();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-public:
 	afx_msg void OnBnClickedEnableproxy();
 	afx_msg void OnBnClickedEnableauth();
 	afx_msg void OnCbnSelchangeProxytype();
@@ -28,8 +33,6 @@ public:
 	afx_msg void OnEnChangeUsername(){SetModified(true);}
 	afx_msg void OnEnChangePassword(){SetModified(true);}
 	afx_msg void OnBnClickedAscwop();
-	void Localize(void);
-private:
-	ProxySettings proxy;
-	void LoadSettings();
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

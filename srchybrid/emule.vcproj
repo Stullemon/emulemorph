@@ -39,10 +39,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\Debug\ResizableLib.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\Debug\ResizableLib.lib ADSIId.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="wsock32.lib;LIBC.lib;LIBCMT.lib;msvcrtd.lib"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -113,9 +112,9 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Release\ResizableLib.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Release\ResizableLib.lib ADSIId.lib"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="LIBC"
+				IgnoreDefaultLibraryNames="wsock32.lib"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -181,7 +180,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Debug\ResizableLib.lib ActiveDS.Lib ADSIId.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
@@ -321,6 +320,27 @@
 				RelativePath="Mdump.cpp">
 			</File>
 			<File
+				RelativePath="MfcStaticBinaryCompatible.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Dump|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="MMServer.cpp">
 			</File>
 			<File
@@ -361,6 +381,9 @@
 			</File>
 			<File
 				RelativePath="SearchList.cpp">
+			</File>
+			<File
+				RelativePath="SecRunAsUser.cpp">
 			</File>
 			<File
 				RelativePath="Server.cpp">
@@ -500,37 +523,6 @@
 					</File>
 				</Filter>
 			</Filter>
-			<Filter
-				Name="Jigle"
-				Filter="">
-				<File
-					RelativePath="Jigle\JigleSearch.cpp">
-				</File>
-				<File
-					RelativePath="Jigle\JigleSearch.h">
-				</File>
-				<File
-					RelativePath="Jigle\soapC.cpp">
-				</File>
-				<File
-					RelativePath="Jigle\soapClient.cpp">
-				</File>
-				<File
-					RelativePath="Jigle\soapH.h">
-				</File>
-				<File
-					RelativePath="Jigle\soapJigleService-1.0.nsmap">
-				</File>
-				<File
-					RelativePath="Jigle\soapStub.h">
-				</File>
-				<File
-					RelativePath="Jigle\stdsoap2.cpp">
-				</File>
-				<File
-					RelativePath="Jigle\stdsoap2.h">
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -611,9 +603,6 @@
 				RelativePath="IrcSocket.h">
 			</File>
 			<File
-				RelativePath="KillProcess.h">
-			</File>
-			<File
 				RelativePath="KnownFile.h">
 			</File>
 			<File
@@ -683,7 +672,13 @@
 				RelativePath="Scheduler.h">
 			</File>
 			<File
+				RelativePath="SearchFrm.h">
+			</File>
+			<File
 				RelativePath="SearchList.h">
+			</File>
+			<File
+				RelativePath="SecRunAsUser.h">
 			</File>
 			<File
 				RelativePath="Server.h">
@@ -837,6 +832,9 @@
 			Name="Interface Source"
 			Filter="">
 			<File
+				RelativePath="3DPreviewControl.cpp">
+			</File>
+			<File
 				RelativePath=".\AddCRC32TagDialog.cpp">
 			</File>
 			<File
@@ -889,6 +887,9 @@
 			</File>
 			<File
 				RelativePath="CustomAutoComplete.cpp">
+			</File>
+			<File
+				RelativePath="DialogMinTrayBtn.cpp">
 			</File>
 			<File
 				RelativePath="DirectDownloadDlg.cpp">
@@ -1086,6 +1087,12 @@
 				RelativePath="SearchDlg.cpp">
 			</File>
 			<File
+				RelativePath="SearchParamsWnd.cpp">
+			</File>
+			<File
+				RelativePath="SearchResultsWnd.cpp">
+			</File>
+			<File
 				RelativePath="SelCategoryDlg.cpp">
 			</File>
 			<File
@@ -1174,9 +1181,6 @@
 				Name="TrayMenu"
 				Filter="">
 				<File
-					RelativePath="DialogMinTrayBtn.hpp">
-				</File>
-				<File
 					RelativePath="GradientStatic.cpp">
 				</File>
 				<File
@@ -1193,6 +1197,9 @@
 		<Filter
 			Name="Interface Header"
 			Filter="">
+			<File
+				RelativePath="3DPreviewControl.h">
+			</File>
 			<File
 				RelativePath=".\AddCRC32TagDialog.h">
 			</File>
@@ -1425,6 +1432,15 @@
 				RelativePath="SearchExpr.h">
 			</File>
 			<File
+				RelativePath="SearchParams.h">
+			</File>
+			<File
+				RelativePath="SearchParamsWnd.h">
+			</File>
+			<File
+				RelativePath="SearchResultsWnd.h">
+			</File>
+			<File
 				RelativePath="SelCategoryDlg.h">
 			</File>
 			<File
@@ -1516,9 +1532,6 @@
 				Name="TrayMenu"
 				Filter="">
 				<File
-					RelativePath="DialogMinTrayBtn.h">
-				</File>
-				<File
 					RelativePath="GradientStatic.h">
 				</File>
 				<File
@@ -1536,22 +1549,10 @@
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest">
 			<File
-				RelativePath="res\About.jpg">
-			</File>
-			<File
 				RelativePath="res\back.ICO">
 			</File>
 			<File
-				RelativePath="res\backup.ico">
-			</File>
-			<File
-				RelativePath="res\bn_conne.ico">
-			</File>
-			<File
 				RelativePath="res\bn_connect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_disco.ico">
 			</File>
 			<File
 				RelativePath="res\bn_disconnect.ico">
@@ -1587,46 +1588,43 @@
 				RelativePath="res\client4.ICO">
 			</File>
 			<File
-				RelativePath="res\close.ico">
+				RelativePath="res\ClientsKnown.ico">
 			</File>
 			<File
-				RelativePath=".\res\community.ico">
+				RelativePath="res\ClientsOnQueue.ico">
+			</File>
+			<File
+				RelativePath="res\close.ico">
 			</File>
 			<File
 				RelativePath="res\compatible.ICO">
 			</File>
 			<File
-				RelativePath="res\connected.ICO">
+				RelativePath="res\ConnectedHighHigh.ico">
 			</File>
 			<File
-				RelativePath="res\connectedhigh.ICO">
+				RelativePath="res\ConnectedHighLow.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedHighHigh.ico">
+				RelativePath="res\ConnectedHighNot.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedHighLow.ico">
+				RelativePath="res\ConnectedLowHigh.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedHighNot.ico">
+				RelativePath="res\ConnectedLowLow.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedLowHigh.ico">
+				RelativePath="res\ConnectedLowNot.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedLowLow.ico">
+				RelativePath="res\ConnectedNotHigh.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedLowNot.ico">
+				RelativePath="res\ConnectedNotLow.ico">
 			</File>
 			<File
-				RelativePath=".\res\ConnectedNotHigh.ico">
-			</File>
-			<File
-				RelativePath=".\res\ConnectedNotLow.ico">
-			</File>
-			<File
-				RelativePath=".\res\ConnectedNotNot.ico">
+				RelativePath="res\ConnectedNotNot.ico">
 			</File>
 			<File
 				RelativePath="res\Contact0.ico">
@@ -1647,12 +1645,6 @@
 				RelativePath="res\convert.ico">
 			</File>
 			<File
-				RelativePath="res\CreditOvl.ico">
-			</File>
-			<File
-				RelativePath="res\CreditSecureOvl.ico">
-			</File>
-			<File
 				RelativePath="res\CumulativeStats.ico">
 			</File>
 			<File
@@ -1668,19 +1660,10 @@
 				RelativePath="res\down2x.bmp">
 			</File>
 			<File
-				RelativePath=".\res\Download.ico">
-			</File>
-			<File
-				RelativePath="res\EastShare.ico">
-			</File>
-			<File
-				RelativePath="res\eDonkey.ico">
+				RelativePath="res\Download.ico">
 			</File>
 			<File
 				RelativePath="res\eDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\emule.ico">
 			</File>
 			<File
 				RelativePath="res\emule.manifest">
@@ -1692,9 +1675,6 @@
 				RelativePath="res\emule.rc2">
 			</File>
 			<File
-				RelativePath="res\EQfile.ico">
-			</File>
-			<File
 				RelativePath="res\Filedonkey.ico">
 			</File>
 			<File
@@ -1704,46 +1684,19 @@
 				RelativePath="res\Friend.ico">
 			</File>
 			<File
-				RelativePath=".\res\FriendOvl.ico">
-			</File>
-			<File
 				RelativePath="res\friends1.ico">
-			</File>
-			<File
-				RelativePath=".\res\friends1slot.ICO">
 			</File>
 			<File
 				RelativePath="res\friends2.ico">
 			</File>
 			<File
-				RelativePath=".\res\friends2slot.ICO">
-			</File>
-			<File
 				RelativePath="res\friends3.ICO">
-			</File>
-			<File
-				RelativePath=".\res\friends3slot.ICO">
-			</File>
-			<File
-				RelativePath=".\res\FriendSlotOvl.ico">
 			</File>
 			<File
 				RelativePath="res\global.ico">
 			</File>
 			<File
 				RelativePath="res\help.ico">
-			</File>
-			<File
-				RelativePath="res\ico00001.ico">
-			</File>
-			<File
-				RelativePath="res\icon4.ico">
-			</File>
-			<File
-				RelativePath="res\icon6.ico">
-			</File>
-			<File
-				RelativePath="res\icon8.ico">
 			</File>
 			<File
 				RelativePath="res\IDI_TVI_DAY.ico">
@@ -1761,19 +1714,22 @@
 				RelativePath="res\IDI_TVI_YEAR.ico">
 			</File>
 			<File
-				RelativePath="res\idr_tray.ico">
-			</File>
-			<File
 				RelativePath="res\inetdownload.avi">
 			</File>
 			<File
 				RelativePath="res\IRC.ico">
 			</File>
 			<File
-				RelativePath="res\Jigle.ico">
+				RelativePath="res\Kad.ico">
 			</File>
 			<File
-				RelativePath=".\res\Kad.ico">
+				RelativePath="res\KadBootstrap.ico">
+			</File>
+			<File
+				RelativePath="res\KADContactList.ico">
+			</File>
+			<File
+				RelativePath="res\KadCurrentSearches.ico">
 			</File>
 			<File
 				RelativePath="res\KadFileSearch.ico">
@@ -1794,9 +1750,6 @@
 				RelativePath="res\Log.ico">
 			</File>
 			<File
-				RelativePath="res\logo.bmp">
-			</File>
-			<File
 				RelativePath="res\logo.jpg">
 			</File>
 			<File
@@ -1804,9 +1757,6 @@
 			</File>
 			<File
 				RelativePath="res\mldonk.ico">
-			</File>
-			<File
-				RelativePath="res\Morph.ico">
 			</File>
 			<File
 				RelativePath="res\mpending.ICO">
@@ -1819,9 +1769,6 @@
 			</File>
 			<File
 				RelativePath="res\mule_Tr_LowID.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_LowID_grey.ico">
 			</File>
 			<File
 				RelativePath="res\mule_TrayIcon.ico">
@@ -1845,19 +1792,7 @@
 				RelativePath="res\NormalSearch.ico">
 			</File>
 			<File
-				RelativePath="res\notconnected.ICO">
-			</File>
-			<File
-				RelativePath="res\Overnet.ico">
-			</File>
-			<File
-				RelativePath="res\OvernetSearch.ico">
-			</File>
-			<File
 				RelativePath="res\plus.ICO">
-			</File>
-			<File
-				RelativePath="res\plus1.ico">
 			</File>
 			<File
 				RelativePath="res\pluscompa.ICO">
@@ -1911,40 +1846,16 @@
 				RelativePath="res\PROVIDER.ICO">
 			</File>
 			<File
-				RelativePath="res\Rating-Excellent.ico">
-			</File>
-			<File
-				RelativePath="res\Rating-Fair.ico">
-			</File>
-			<File
-				RelativePath="res\Rating-Fake.ico">
-			</File>
-			<File
-				RelativePath="res\Rating-Good.ico">
-			</File>
-			<File
-				RelativePath="res\Rating-NotRated.ico">
-			</File>
-			<File
-				RelativePath="res\Rating-Poor.ico">
-			</File>
-			<File
 				RelativePath="res\Rating.ico">
 			</File>
 			<File
 				RelativePath="res\Rating_bad.ico">
 			</File>
 			<File
-				RelativePath="res\SafeWrite.ICO">
-			</File>
-			<File
 				RelativePath="res\search.ico">
 			</File>
 			<File
-				RelativePath="res\search_Overnet.ico">
-			</File>
-			<File
-				RelativePath=".\res\SearchKad.ico">
+				RelativePath="res\SearchKad.ico">
 			</File>
 			<File
 				RelativePath="res\SearchResults.ico">
@@ -1986,15 +1897,6 @@
 				RelativePath="res\Stats_HD.ico">
 			</File>
 			<File
-				RelativePath="res\suc.ico">
-			</File>
-			<File
-				RelativePath="res\systray_connect.ico">
-			</File>
-			<File
-				RelativePath="res\systray_disconnect.ico">
-			</File>
-			<File
 				RelativePath="res\systray_exit.ico">
 			</File>
 			<File
@@ -2007,13 +1909,10 @@
 				RelativePath="res\systray_tomax.ico">
 			</File>
 			<File
-				RelativePath="res\taskbarNotifier.bmp">
+				RelativePath="res\systray_tomin.ico">
 			</File>
 			<File
 				RelativePath="res\taskbarNotifier.gif">
-			</File>
-			<File
-				RelativePath="res\taskbarNotifier.jpg">
 			</File>
 			<File
 				RelativePath="res\tools.ico">
@@ -2034,7 +1933,7 @@
 				RelativePath="res\up.bmp">
 			</File>
 			<File
-				RelativePath=".\res\Up0down0.ICO">
+				RelativePath="res\Up0down0.ico">
 			</File>
 			<File
 				RelativePath="res\Up0down1.ico">
@@ -2052,19 +1951,10 @@
 				RelativePath="res\UpdateServers.ico">
 			</File>
 			<File
-				RelativePath="res\updown.ICO">
-			</File>
-			<File
 				RelativePath="res\upload.ico">
 			</File>
 			<File
 				RelativePath="res\User.ico">
-			</File>
-			<File
-				RelativePath="res\user1.ico">
-			</File>
-			<File
-				RelativePath="res\WebBased.ico">
 			</File>
 			<File
 				RelativePath="res\WebServer.ico">
@@ -2072,8 +1962,5 @@
 		</Filter>
 	</Files>
 	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="emule.rc"/>
 	</Globals>
 </VisualStudioProject>

@@ -8,22 +8,24 @@ public:
 	CPPgServer();
 	virtual ~CPPgServer();
 
-// Dialog Data
+	// Dialog Data
 	enum { IDD = IDD_PPG_SERVER };
+
+	void Localize(void);
+
 protected:
+	void LoadSettings(void);
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual BOOL OnApply();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-public:
 	afx_msg void OnBnClickedCheck1();
 	afx_msg void OnSrvRetryClick();
-	virtual BOOL OnInitDialog();
-private:
-	void LoadSettings(void);
-public:
-	virtual BOOL OnApply();
-
 	afx_msg void OnSettingsChange()					{ SetModified(); }
-	void Localize(void);
 	afx_msg void OnBnClickedEditadr();
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

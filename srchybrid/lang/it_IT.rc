@@ -1032,7 +1032,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Dati persi per corruzione: %s    Dati guadagnati con la compressione: %s\nPacchetti salvati dall'I.C.H.: %i"
-    IDS_ERR_NOHELP          "File di Help non trovato.\n Visita www.eMule-Project.net per scaricare la versione più nuova dell'help! (sezione 'download')"
+    IDS_ERR_NOHELP          "Please visit our homepage's download section to get a copy of the newest help file!\n\nDo you want to browse the online help now instead?"
     IDS_SHOWOVERHEAD        "Mostra overhead"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f"
     IDS_EDITLIST            "Lista"
@@ -1498,7 +1498,6 @@ BEGIN
                             "Intervallo Aggiornamento Connessione ai Server [min.]"
     IDS_MORE                "&Altro"
     IDS_TOOLS               "S&trumenti"
-    IDS_ERR_JIGLENEEDSTYPE  "Se vuoi cercare nel database di Jigle senza specificare il tipo file, devi almeno specificare l'estensione!"
 END
 
 STRINGTABLE 
@@ -1630,7 +1629,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Vuoi veramente eliminare i filtri IP selezionati?"
     IDS_TOTAL_IPFILTER_LABEL "Filtri IP totali:"
     IDS_TOTAL_IPS_LABEL     "IP Totali:"
-    IDS_DELETE2             "Elimina"
+    IDS_DELETESELECTED             "Elimina"
     IDS_APPEND              "Aggiungi..."
     IDS_SAVE                "Salva"
     IDS_IP_START            "Inizio"
@@ -1649,6 +1648,16 @@ BEGIN
     IDS_KNOWN               "Conosciuto"
     IDS_DL_ACTIVE_TIME      "Tempo di Download"
     IDS_RESETLABEL          "Completamento automatico (funzione cronologia)"
+    IDS_PASTE               "Paste"
+    IDS_UNDO                "Undo"
+    IDS_CUT                 "Cut"
+    IDS_IRC_SOUNDEVENTS     "Play sound events"
+    IDS_KADCONTACTSREAD     "Read %ld contacts from file."
+    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
+    IDS_RUNASUSER           "Run eMule as unprivileged User"
+    IDS_RAU_RUNNING         "eMule running as unprivileged user ""%s"""
+    IDS_RAU_FAILED          "Failed to start eMule as unprivileged user ""eMule_Secure"". Keeping the privileges of the current user (""%S"")."
+    IDS_RAU_WARNING         "This setting will give eMule additional security against attacks and exploits and we encourage the usage of this option.\nHowever it is strongly recommended to read the manual before activating it!\n\nChanges will take effect after restarting eMule."
 END
 
 STRINGTABLE 

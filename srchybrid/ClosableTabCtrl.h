@@ -16,15 +16,18 @@ public:
 protected:
 	CImageList m_ImgLstCloseButton;
 	IMAGEINFO m_iiCloseButton;
+	CPoint m_ptCtxMenu;
 
 	void SetAllIcons();
 	void GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseButton);
 
 	virtual void PreSubclassWindow();
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnSysColorChange();
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 };

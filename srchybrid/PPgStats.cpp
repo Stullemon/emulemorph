@@ -21,6 +21,7 @@
 #include "emuledlg.h"
 #include "Preferences.h"
 #include "StatisticsDlg.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -37,6 +38,7 @@ BEGIN_MESSAGE_MAP(CPPgStats, CPropertyPage)
     ON_MESSAGE(CPN_SELCHANGE, OnColorPopupSelChange)
 	ON_CBN_SELCHANGE(IDC_CRATIO, OnCbnSelchangeCRatio)
 	ON_EN_CHANGE(IDC_CGRAPHSCALE, OnEnChangeCGraphScale)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgStats::CPPgStats()
@@ -57,9 +59,7 @@ void CPPgStats::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COLORSELECTOR, m_colors);
 	DDX_Control(pDX, IDC_COLOR_BUTTON, m_ctlColor);
-	// -khaos--+++> Data exchange for the combo
 	DDX_Control(pDX, IDC_CRATIO, m_cratio);
-	// <-----khaos
 }
 
 void CPPgStats::SetModified(BOOL bChanged)
@@ -80,7 +80,6 @@ BOOL CPPgStats::OnInitDialog()
 	mystats2 = thePrefs.GetStatsInterval();
 	mystats3 = thePrefs.GetStatsAverageMinutes();
 
-	// -khaos--+++> Borrows from eMule Plus
 	// Set the Connections Statistics Y-Axis Scale
 	CString graphScale;
 	graphScale.Format(_T("%u"), thePrefs.GetStatsMax());
@@ -168,10 +167,8 @@ void CPPgStats::Localize(void)
 	{
 		GetDlgItem(IDC_GRAPHS)->SetWindowText(GetResString(IDS_GRAPHS));
 		GetDlgItem(IDC_STREE)->SetWindowText(GetResString(IDS_STREE));
-		// -khaos--+++>
 		GetDlgItem(IDC_STATIC_CGRAPHSCALE)->SetWindowText(GetResString(IDS_PPGSTATS_YSCALE));
 		GetDlgItem(IDC_STATIC_CGRAPHRATIO)->SetWindowText(GetResString(IDS_PPGSTATS_ACRATIO));
-		// <-----khaos-
 		SetWindowText(GetResString(IDS_STATSSETUPINFO));
 		GetDlgItem(IDC_PREFCOLORS)->SetWindowText(GetResString(IDS_COLORS));
 
@@ -272,5 +269,26 @@ LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
 		thePrefs.SetStatsColor(m_colors.GetCurSel(), setcolor);
 		SetModified(TRUE);
 	}
+	return TRUE;
+}
+
+void CPPgStats::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Statistics);
+}
+
+BOOL CPPgStats::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgStats::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
 	return TRUE;
 }

@@ -186,12 +186,17 @@ bool CUpDownClient::Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash) c
 // true = client was not deleted!
 bool CUpDownClient::AskForDownload()
 {
-	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) ){
+	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) )
+	{
 		if (GetDownloadState() != DS_TOOMANYCONNS)
 			SetDownloadState(DS_TOOMANYCONNS);
 		return true;
 	}
-
+	if (m_bUDPPending)
+	{
+		m_nFailedUDPPackets++;
+		theApp.downloadqueue->AddFailedUDPFileReasks();
+	}
 	m_bUDPPending = false;
 	m_dwLastAskedTime = ::GetTickCount();
 	SetDownloadState(DS_CONNECTING);
@@ -1278,6 +1283,9 @@ void CUpDownClient::UDPReaskForDownload()
 	if(!reqfile || m_bUDPPending)
 		return;
 
+	if( m_nTotalUDPPackets > 3 && ((float)(m_nFailedUDPPackets/m_nTotalUDPPackets) > .3))
+		return;
+
 	//the line "m_bUDPPending = true;" use to be here
 	// deadlake PROXYSUPPORT
 	const ProxySettings& proxy = thePrefs.GetProxy();
@@ -1305,7 +1313,9 @@ void CUpDownClient::UDPReaskForDownload()
 		Packet* response = new Packet(&data, OP_EMULEPROT);
 		response->opcode = OP_REASKFILEPING;
 		theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
+		theApp.downloadqueue->AddUDPFileReasks();
 		theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
+		m_nTotalUDPPackets++;
 	}
 }
 

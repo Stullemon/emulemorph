@@ -23,6 +23,7 @@
 #include "CustomAutoComplete.h"
 #include "HttpDownloadDlg.h"
 #include "emuledlg.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -64,6 +65,8 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 	ON_BN_CLICKED(IDC_LOADURL, OnLoadIPFFromURL)
 	ON_EN_CHANGE(IDC_UPDATEURL, OnEnChangeUpdateUrl)
 	ON_BN_CLICKED(IDC_DD,OnDDClicked)
+	ON_WM_HELPINFO()
+	ON_BN_CLICKED(IDC_RUNASUSER, OnBnClickedRunasuser)
 END_MESSAGE_MAP()
 
 void CPPgSecurity::LoadSettings(void)
@@ -97,6 +100,16 @@ void CPPgSecurity::LoadSettings(void)
 		CheckDlgButton(IDC_USESECIDENT,1);
 	else
 		CheckDlgButton(IDC_USESECIDENT,0);
+
+	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_)
+		GetDlgItem(IDC_RUNASUSER)->EnableWindow(TRUE);
+	else
+		GetDlgItem(IDC_RUNASUSER)->EnableWindow(FALSE);
+
+	if(thePrefs.IsRunAsUserEnabled())
+		CheckDlgButton(IDC_RUNASUSER,1);
+	else
+		CheckDlgButton(IDC_RUNASUSER,0);
 
 	GetDlgItem(IDC_FILTER)->SetWindowText(thePrefs.messageFilter);
 	GetDlgItem(IDC_COMMENTFILTER)->SetWindowText(thePrefs.commentFilter);
@@ -147,6 +160,7 @@ BOOL CPPgSecurity::OnApply()
 	thePrefs.msgsecure = (uint8)IsDlgButtonChecked(IDC_MSGONLYSEC);
 	thePrefs.m_bAdvancedSpamfilter = IsDlgButtonChecked(IDC_ADVSPAMFILTER);
 	thePrefs.m_bUseSecureIdent = IsDlgButtonChecked(IDC_USESECIDENT);
+	thePrefs.m_bRunAsUser = (uint8)IsDlgButtonChecked(IDC_RUNASUSER);
 
 	GetDlgItem(IDC_FILTER)->GetWindowText(thePrefs.messageFilter,511);
 	GetDlgItem(IDC_COMMENTFILTER)->GetWindowText(thePrefs.commentFilter,511);
@@ -182,6 +196,8 @@ void CPPgSecurity::Localize(void)
 
 		SetDlgItemText(IDC_STATIC_UPDATEFROM,GetResString(IDS_UPDATEFROM));
 		SetDlgItemText(IDC_LOADURL,GetResString(IDS_LOADURL));
+
+		SetDlgItemText(IDC_RUNASUSER,GetResString(IDS_RUNASUSER));
 	}
 }
 
@@ -269,5 +285,34 @@ void CPPgSecurity::OnDDClicked() {
 	box->SetFocus();
 	box->SetWindowText("");
 	box->SendMessage(WM_KEYDOWN,VK_DOWN,0x00510001);
+}
+
+void CPPgSecurity::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Security);
+}
+
+BOOL CPPgSecurity::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
 	
+BOOL CPPgSecurity::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
+}
+
+void CPPgSecurity::OnBnClickedRunasuser()
+{
+	if ( ((CButton*)GetDlgItem(IDC_RUNASUSER))->GetCheck() == BST_CHECKED){
+		if (AfxMessageBox(GetResString(IDS_RAU_WARNING),MB_OKCANCEL | MB_ICONINFORMATION,0) == IDCANCEL)
+			((CButton*)GetDlgItem(IDC_RUNASUSER))->SetCheck(BST_UNCHECKED);
+	}
+	OnSettingsChange();
 }

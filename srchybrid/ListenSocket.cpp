@@ -698,8 +698,8 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					uint32 nNewServerIP = data.ReadUInt32();
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						Debug("  NewUserID=%u (%08x, %s)  NewServerIP=%u (%08x, %s)\n", nNewUserID, nNewUserID, ipstr(nNewUserID), nNewServerIP, nNewServerIP, ipstr(nNewServerIP));
-					if (IsLowIDED2K(nNewUserID))
-					{	// client changed server and gots a LowID
+					if (IsLowID(nNewUserID))
+					{	// client changed server and has a LowID
 						CServer* pNewServer = theApp.serverlist->GetServerByIP(nNewServerIP);
 						if (pNewServer != NULL)
 						{
@@ -753,7 +753,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					
 					//MORPH START - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
 					/*
-					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL)) )
+					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL) )
 					*/
 					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL) || (thePrefs.GetEnableAntiLeecher() && (client->IsLeecher() || client->TestLeecher())))
 					//MORPH END - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
@@ -766,6 +766,12 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						}
 						client->SetMessageFiltered(true);
 						break;
+					}
+
+					if (length > MAX_CLIENT_MSG_LEN){
+						if (thePrefs.GetVerbose())
+							AddDebugLogLine(false, _T("Message from '%s' (IP:%s) exceeds limit by %u chars, truncated."), client->GetUserName(), ipstr(client->GetConnectIP()), length - MAX_CLIENT_MSG_LEN);
+						length = MAX_CLIENT_MSG_LEN;
 					}
 					char* message = new char[length+1];
 					memcpy(message,packet+2,length);
@@ -1267,11 +1273,11 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 											SendPacket(tosend, true);
 										}
 									}
-									else
-									{
-										if (thePrefs.GetVerbose())
-											AddDebugLogLine(false, "RCV: Source Request to fast. (This is testing the new timers to see how much older client will not receive this)");
-									}
+//									else
+//									{
+//										if (thePrefs.GetVerbose())
+//											AddDebugLogLine(false, "RCV: Source Request to fast. (This is testing the new timers to see how much older client will not receive this)");
+//									}
 								}
 								break;
 							}
@@ -1644,8 +1650,6 @@ void CClientReqSocket::OnConnect(int nErrorCode)
             //if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
             reason.Format(_T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
-
-        Disconnect(reason);
 	}
 }
 

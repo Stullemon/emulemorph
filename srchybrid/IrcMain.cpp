@@ -233,16 +233,21 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						message = message.Mid(6);
 						int soundlen = message.Find( " " );
 						CString sound;
+						CString strFileName;
 						if( soundlen != -1 )
 						{
-							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message.Left(soundlen));
+							strFileName = message.Left(soundlen);
 							message = message.Mid(soundlen);
 						}
 						else
 						{
-							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message);
+							strFileName = message;
 							message = " [sound]";
 						}
+						strFileName.Remove('\\');
+						strFileName.Remove('/');
+						sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), strFileName);
+
 						if(thePrefs.GetIrcSoundEvents())
 						{
 							PlaySound(sound, NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
@@ -279,16 +284,20 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						message = message.Mid(6);
 						int soundlen = message.Find( " " );
 						CString sound;
+						CString strFileName;
 						if( soundlen != -1 )
 						{
-							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message.Left(soundlen));
+							strFileName = message.Left(soundlen);
 							message = message.Mid(soundlen);
 						}
 						else
 						{
-							sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), message);
+							strFileName = message;
 							message = " [sound]";
 						}
+						strFileName.Remove('\\');
+						strFileName.Remove('/');
+						sound.Format("%sSounds\\IRC\\%s", thePrefs.GetAppDir(), strFileName);
 						if(thePrefs.GetIrcSoundEvents())
 						{
 							PlaySound(sound, NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
@@ -336,7 +345,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						{
 							if( !thePrefs.GetIrcIgnoreEmuleProtoSendLink() )
 							{
-								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file. If you wanted to accept the files from this person, enable Recieve files in the IRC Preferences.");
+								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file. If you wanted to accept the files from this person, enable Receive files in the IRC Preferences.");
 							}
 							return;
 						}
@@ -352,7 +361,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						uchar userid[16];
 						if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid,ARRSIZE(userid)))
 							return;
-						CString RecieveString, build;
+						CString ReceiveString, build;
 						if(!theApp.friendlist->SearchFriend(userid, 0, 0))
 						{
 							if( thePrefs.GetIrcAcceptLinksFriends() )
@@ -364,13 +373,13 @@ void CIrcMain::ParseMessage( CString rawMessage )
 								return;
 							}
 						}
-						RecieveString = message.Mid( index2+1 );
-						if( !RecieveString.IsEmpty() )
+						ReceiveString = message.Mid( index2+1 );
+						if( !ReceiveString.IsEmpty() )
 						{
-							build.Format( GetResString(IDS_IRC_RECIEVEDLINK), source, RecieveString );
+							build.Format( GetResString(IDS_IRC_RECIEVEDLINK), source, ReceiveString );
 							if( !thePrefs.GetIrcIgnoreEmuleProtoSendLink() )
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", build );
-							ProcessLink( RecieveString );
+							ProcessLink( ReceiveString );
 						}
 						return;
 					}
@@ -692,6 +701,8 @@ void CIrcMain::Connect()
 		ident.Format("e%u", ident_int);
 		if( ident.GetLength() > 8 )
 			ident.Truncate(8);
+		if(ircsocket)
+			Disconnect();
 		ircsocket = new CIrcSocket(this);
 		nick = (CString)thePrefs.GetIRCNick();
 		nick.Replace(".", "");
@@ -699,7 +710,7 @@ void CIrcMain::Connect()
 		nick.Replace(":", "");
 		nick.Replace("/", "");
 		nick.Replace("@", "");
-		if( nick.MakeLower() == "emule" )
+		if( !nick.CompareNoCase( "emule" ) )
 		{
 			uint16 ident_int = 0;
 			for( int i = 0; i < 16; i++)

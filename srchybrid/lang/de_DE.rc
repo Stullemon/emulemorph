@@ -731,9 +731,9 @@ BEGIN
     IDS_ED2KLINKFIX         "ED2K Links"
     IDS_RECONNECT           "Automatischer Verbindungsversuch wird in %d Sekunden gestartet..."
     IDS_SERVERADDED         "Server hinzugefügt: %s"
-    IDS_IRC_IGNOREJOINMESSAGE "Ignore Join info messages"
+    IDS_IRC_IGNOREJOINMESSAGE "ignoriere Raum-betreten-Infonachrichten (Join)"
     IDS_STATS_SUCCUPCOUNT   "erfolgreiche Upload-Sessions: %i (%.2f%%)"
-    IDS_IRC_IGNOREPARTMESSAGE "Ignore Part info messages"
+    IDS_IRC_IGNOREPARTMESSAGE "ignoriere Raum-verlassen-Nachrichten (Part)"
     IDS_STATS_FAILUPCOUNT   "fehlgeschlagende Upload-Sessions: %i (%.2f%%)"
     IDS_STATS_AVEUPTIME     "durchschnittliche Upload-Dauer: %s"
     IDS_SEARCHMINSIZE       "min. Größe"
@@ -756,7 +756,7 @@ BEGIN
     IDS_STATS_AVGLABEL      "Durchschnittsgraphen über %i mins errechnen"
     IDS_GRAPHS              "Graphen"
     IDS_STREE               "Statistik-Baum"
-    IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
+    IDS_IRC_IGNOREQUITMESSAGE "ignoriere Chat-verlassen-Nachrichten (Quit)"
     IDS_STATSSETUPINFO      "Statistikanzeige"
 END
 
@@ -947,7 +947,7 @@ STRINGTABLE
 BEGIN
     IDS_STATS_MAXDL         "Max Downloadrate: %.2f kB/s"
     IDS_IRC_EMULEPROTO_IGNOREADDFRIEND 
-                            "Ignore eMule add friend protocol messages"
+                            "ignoriere eMule Protokollnachrichten für Freunde hinzufügen"
     IDS_PW_FASTSRVCON       "sicheres / langsameres Verbinden zu Servern"
     IDS_SOURCELINKFAILED    "Eine hohe ID ist notwendig, um gültige Quellenlinks zu erstellen."
     IDS_CREATESOURCELINK    "Kopiere ED2k-Link (mit Quellen) in Zwischenablage"
@@ -1031,7 +1031,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Verlust durch fehlerhaften Transfer: %s       Kompressionsgewinn: %s\nPakete gerettet durch I.C.H.: %i"
-    IDS_ERR_NOHELP          "Die Hilfedatei konnte nicht gefunden werden.\nEine aktuelle Hilfedatei kann von unserer Homepage heruntergeladen werden (Download-Sektion)\n\nSoll jetzt im Browser die Hilfe auf unserer Homepage aufgerufen werden?"
+    IDS_ERR_NOHELP          "Bitte besuche den Downloadbereich unserer Homepage, um eine aktuelle Hiledatei zu erhalten.!\n\nSoll jetzt die Online-Hilfe aufgerufen werden?"
     IDS_SHOWOVERHEAD        "Zeige Overhead-Bandbreite an"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f"
     IDS_EDITLIST            "Liste"
@@ -1041,7 +1041,7 @@ BEGIN
     IDS_WEBSERVICES         "Web Dienste"
     IDS_WEBSVEDIT           "Webdienste ändern"
     IDS_IRC_EMULEPROTO_IGNORESENDLINK 
-                            "Ignore eMule send link protocol messages"
+                            "ignoriere eMule Protokollnachrichten für Link-Senden"
     IDS_CHECK4UPDATE        "auf neuere Version prüfen"
     IDS_STARTUP             "Programmstart"
     IDS_NEWVERSIONAVL       "Eine neuere Version von eMule ist verfügbar. Besuche die Projekt-Homepage um mehr Informationen zu erhalten."
@@ -1473,7 +1473,7 @@ BEGIN
     IDS_STATS_FREESPACE     "Freier Platz auf dem Temp-Laufwerk: "
     IDS_IRC_HELPCHANNEL     "Verbinde zu Hilfe-Räume."
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-german"
-    IDS_IRC_ACCEPTLINKSFRIENDS "Nur von Freunden."
+    IDS_IRC_ACCEPTLINKSFRIENDS "...nur von Freunden."
     IDS_COMPLSOURCES        "vollständige Quellen"
     IDS_CHECKNOENDTIME      "keine Endzeit"
     IDS_FD_DOWNLOADSTARTED  "Download hinzugefügt:"
@@ -1496,7 +1496,6 @@ BEGIN
     IDS_SERVERKEEPALIVETIMEOUT "Serververbindung Auffrischintervall [Min.]"
     IDS_MORE                "&mehr"
     IDS_TOOLS               "T&ools"
-    IDS_ERR_JIGLENEEDSTYPE  "Wenn du die Jigle-Datenbank ohne Dateityp-Spezifizierung durchsuchen willst, muss zumindest eine Dateierweiterung angegeben werden!"
 END
 
 STRINGTABLE 
@@ -1628,7 +1627,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "Sollen die markierten IP Filter gelöscht werden?"
     IDS_TOTAL_IPFILTER_LABEL "IP Filter gesamt:"
     IDS_TOTAL_IPS_LABEL     "IP Anzahl:"
-    IDS_DELETE2             "Löschen"
+    IDS_DELETESELECTED             "Löschen"
     IDS_APPEND              "Verschmelzen..."
     IDS_SAVE                "Speichern"
     IDS_IP_START            "Start"
@@ -1647,6 +1646,16 @@ BEGIN
     IDS_KNOWN               "bekannt"
     IDS_DL_ACTIVE_TIME      "Downloadzeit"
     IDS_RESETLABEL          "Autovervollständigung (History-Funktion)"
+    IDS_PASTE		    "Einfügen"
+    IDS_UNDO                "Rückgängig"
+    IDS_CUT                 "Ausschneiden"
+    IDS_IRC_SOUNDEVENTS     "Klänge für Ereignisse wiedergeben"
+    IDS_KADCONTACTSREAD     "%ld Kontakte aus Datei eingelesen."
+    IDS_ERR_KADCONTACTS     "No contacts found, please bootstrap, or download a nodes.dat file."
+    IDS_RUNASUSER           "eMule als unpriviligierten Benutzer starten"
+    IDS_RAU_RUNNING         "eMule läuft als unpriviligierter Benutzer ""%s"""
+    IDS_RAU_FAILED          "eMule konnte nicht als unpriviligierter Benutzer ""eMule_Secure"" gestartet werden . Die Rechte des gegenwärtigen Benutzers (""%S"") werden beibehalten."
+    IDS_RAU_WARNING         "Diese Einstellung gibt eMule mehr Sicherheit gegen Angriffe und Exploits. Wir empfehlen diese Option zu nutzen.\nWir empfehlen jedoch, vorher die eMule Dokumentation zu diesem Punkt zu lesen!\n\nDie Änderung wird nach dem Neustart von eMule aktiv."
 END
 
 STRINGTABLE 

@@ -29,7 +29,6 @@
 #include <shlobj.h>
 #include "emuledlg.h"
 #include "MenuCmds.h"
-#include "KillProcess.h"
 #endif
 
 #ifdef _DEBUG
@@ -287,46 +286,57 @@ CString MakeStringEscaped(CString in) {
 	return in;
 }
 
-bool Ask4RegFix(bool checkOnly, bool dontAsk){
+bool HaveEd2kRegAccess()
+{
+	CRegKey regkey;
+	DWORD dwRegResult = regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
+	regkey.Close();
+	return (dwRegResult == ERROR_SUCCESS);
+}
 
+bool Ask4RegFix(bool checkOnly, bool dontAsk)
+{
 	// Barry - Make backup first
 	if (!checkOnly)
 		BackupReg();
 
 	// check registry if ed2k links is assigned to emule
 	CRegKey regkey;
-	regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
+	if (regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
+	{
+		TCHAR rbuffer[500];
+		ULONG maxsize = ARRSIZE(rbuffer);
+		regkey.QueryStringValue(NULL, rbuffer, &maxsize);
 
-	TCHAR rbuffer[500];
-	ULONG maxsize = ARRSIZE(rbuffer);
-	regkey.QueryStringValue(NULL, rbuffer, &maxsize);
+		TCHAR modbuffer[490];
+		::GetModuleFileName(NULL, modbuffer, ARRSIZE(modbuffer));
+		CString strCanonFileName = modbuffer;
+		strCanonFileName.Replace(_T("%"), _T("%%"));
 
-	TCHAR modbuffer[490];
-	::GetModuleFileName(NULL, modbuffer, ARRSIZE(modbuffer));
-	CString strCanonFileName = modbuffer;
-	strCanonFileName.Replace(_T("%"), _T("%%"));
+		TCHAR regbuffer[520];
+		_sntprintf(regbuffer, ARRSIZE(regbuffer), _T("\"%s\" \"%%1\""), strCanonFileName);
+		if (_tcscmp(rbuffer, regbuffer) != 0)
+		{
+			if (checkOnly)
+				return true;
+			if (dontAsk || (AfxMessageBox(GetResString(IDS_ASSIGNED2K), MB_ICONQUESTION|MB_YESNO) == IDYES))
+			{
+				regkey.SetStringValue(NULL, regbuffer);	
+				
+				regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
+				regkey.SetStringValue(NULL, modbuffer);
 
-	TCHAR regbuffer[520];
-	_sntprintf(regbuffer, ARRSIZE(regbuffer), _T("\"%s\" \"%%1\""), strCanonFileName);
-	if (_tcscmp(rbuffer,regbuffer)){
-		if (checkOnly)
-			return true;
-		if (dontAsk || (AfxMessageBox(GetResString(IDS_ASSIGNED2K),MB_ICONQUESTION|MB_YESNO) == IDYES)){
-			regkey.SetStringValue(NULL, regbuffer);	
-			
-			regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
-			regkey.SetStringValue(NULL, modbuffer);
+				regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k"));
+				regkey.SetStringValue(NULL, _T("URL: ed2k Protocol"));
+				regkey.SetStringValue(_T("URL Protocol"), _T(""));
 
-			regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k"));
-			regkey.SetStringValue(NULL, _T("URL: ed2k Protocol"));
-			regkey.SetStringValue(_T("URL Protocol"), _T(""));
-
-			regkey.Open(HKEY_CLASSES_ROOT, _T("ed2k"));
-			regkey.RecurseDeleteKey(_T("ddexec"));
-			regkey.RecurseDeleteKey(_T("ddeexec"));
+				regkey.Open(HKEY_CLASSES_ROOT, _T("ed2k"));
+				regkey.RecurseDeleteKey(_T("ddexec"));
+				regkey.RecurseDeleteKey(_T("ddeexec"));
+			}
 		}
+		regkey.Close();
 	}
-	regkey.Close();
 	return false;
 }
 
@@ -334,22 +344,24 @@ void BackupReg(void)
 {
 	// Look for pre-existing old ed2k links
 	CRegKey regkey;
-	regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
-	TCHAR rbuffer[500];
-	ULONG maxsize = ARRSIZE(rbuffer);
-	// Is it ok to write new values
-	if ((regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) != ERROR_SUCCESS) || (maxsize == 0))
+	if (regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
 	{
-		maxsize = ARRSIZE(rbuffer);
-		regkey.QueryStringValue(NULL, rbuffer, &maxsize);
-		regkey.SetStringValue(_T("OldDefault"), rbuffer);
+		TCHAR rbuffer[500];
+		ULONG maxsize = ARRSIZE(rbuffer);
+		// Is it ok to write new values
+		if ((regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) != ERROR_SUCCESS) || (maxsize == 0))
+		{
+			maxsize = ARRSIZE(rbuffer);
+			if ( regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS )
+				regkey.SetStringValue(_T("OldDefault"), rbuffer);
 
-		regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
-		maxsize = ARRSIZE(rbuffer);
-		if (regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS)
-			regkey.SetStringValue(_T("OldIcon"), rbuffer);
+			regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
+			maxsize = ARRSIZE(rbuffer);
+			if (regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS)
+				regkey.SetStringValue(_T("OldIcon"), rbuffer);
+		}
+		regkey.Close();
 	}
-	regkey.Close();
 }
 
 // Barry - Restore previous values
@@ -357,24 +369,25 @@ void RevertReg(void)
 {
 	// restore previous ed2k links before being assigned to emule
 	CRegKey regkey;
-	regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
-	TCHAR rbuffer[500];
-	ULONG maxsize = ARRSIZE(rbuffer);
-	if (regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) == ERROR_SUCCESS)
+	if (regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
 	{
-		regkey.SetStringValue(NULL, rbuffer);
-		regkey.DeleteValue(_T("OldDefault"));
-		regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
-		maxsize = ARRSIZE(rbuffer);
-		if (regkey.QueryStringValue(_T("OldIcon"), rbuffer, &maxsize) == ERROR_SUCCESS)
+		TCHAR rbuffer[500];
+		ULONG maxsize = ARRSIZE(rbuffer);
+		if (regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) == ERROR_SUCCESS)
 		{
 			regkey.SetStringValue(NULL, rbuffer);
-			regkey.DeleteValue(_T("OldIcon"));
+			regkey.DeleteValue(_T("OldDefault"));
+			regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
+			maxsize = ARRSIZE(rbuffer);
+			if (regkey.QueryStringValue(_T("OldIcon"), rbuffer, &maxsize) == ERROR_SUCCESS)
+			{
+				regkey.SetStringValue(NULL, rbuffer);
+				regkey.DeleteValue(_T("OldIcon"));
+			}
 		}
+		regkey.Close();
 	}
-	regkey.Close();
 }
-
 int GetMaxWindowsTCPConnections() {
 	OSVERSIONINFOEX osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
@@ -1094,6 +1107,7 @@ struct SED2KFileType
 	{ _T(".vivo"),	ED2KFT_VIDEO },
 	{ _T(".vob"),	ED2KFT_VIDEO },
 	{ _T(".wmv"),	ED2KFT_VIDEO },
+	{ _T(".xvid"),	ED2KFT_VIDEO },
 
 	{ _T(".bmp"),	ED2KFT_IMAGE },
 	{ _T(".dcx"),	ED2KFT_IMAGE },
@@ -1469,9 +1483,7 @@ int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2)
 	return strDir1.CompareNoCase(strDir2);		// compare again
 }
 
-// ZZ:UploadSpeedSense -->
 bool IsGoodIP(uint32 nIP, bool forceCheck)
-// ZZ:UploadSpeedSense <--
 {
 	// always filter following IP's
 	// -------------------------------------------
@@ -1711,7 +1723,7 @@ LPCTSTR DbgGetHashTypeString(const uchar* hash)
 CString DbgGetClientID(uint32 nClientID)
 {
 	CString strClientID;
-	if (IsLowIDHybrid(nClientID))
+	if (IsLowID(nClientID))
 		strClientID.Format(_T("LowID=%u"), nClientID);
 	else
 		strClientID = inet_ntoa(*(in_addr*)&nClientID);
@@ -2104,88 +2116,24 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath)
 	return false;
 }
 
-bool CheckForSomeFoolVirus(){
-	CFileFind ff;
-	char buffer[512];
-	GetWindowsDirectory(buffer, 511);
-	CString searchpath;
-	CKillProcess kp;	
-	
-	//******************* SomeFool.Q
-	searchpath.Format(_T("%s\\SysMonXP.exe"),buffer);
-	bool found;
-	if ( (found = ff.FindFile(searchpath,0)) )
-		ff.FindNextFile();
-	if (found && ff.GetLength() == 28008){
-		//infected
-		int result = MessageBox(NULL,_T("eMule has detected that your PC is infected with the SomeFool.Q (alias netsky.q) virus, which is build to start a DDoS Attack against eMule's Homepage.\n\nDo you want eMule to try to remove this virus now (this may take some seconds)?\n\nNote: eMule will not start as long as your PC is infected"),
-			_T("Virus found"),MB_YESNO | MB_ICONWARNING);
-		if (result == IDNO)
-			return false;
-		// kill process
-		kp.KillProcess(_T("SysMonXP.exe"));
-		// delete its files
-		uint32 nTimeOut = GetTickCount() + 20000;
-		bool success = false;
-		while (nTimeOut > GetTickCount()){
-			if ( (success = DeleteFile(searchpath.GetBuffer())) )
-				break;
-		}
-		searchpath.Format(_T("%s\\firewalllogger.txt"),buffer);
-		DeleteFile(searchpath.GetBuffer());
-		// remove registry entry
-		CRegKey regkey;
-		if (regkey.Open(HKEY_LOCAL_MACHINE,_T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")) == ERROR_SUCCESS)
-			regkey.DeleteValue(_T("SysMonXP"));
+bool ExpandEnvironmentStrings(CString& rstrStrings)
+{
+	DWORD dwSize = ExpandEnvironmentStrings(rstrStrings, NULL, 0);
+	if (dwSize == 0)
+		return false;
 
-		// finished - hopefully	
-		if (success){
-			MessageBox(NULL,_T("eMule was able to remove the virus. However we STRONGLY recommend to install an up-to-date anti-virus software to run a full system check!"),
-			_T("Virus removed"),MB_ICONINFORMATION | MB_OK);
-		}
-		else{
-			MessageBox(NULL,_T("eMule was not able to remove the virus.\nPlease install an up-to-date anti-virus software and run a full system check!"),
-			_T("Virus removed"),MB_ICONERROR | MB_OK);
-		}
+	CString strExpanded;
+	DWORD dwCount = ExpandEnvironmentStrings(rstrStrings, strExpanded.GetBuffer(dwSize-1), dwSize);
+#ifdef _UNICODE
+	if (dwCount == 0 || dwCount != dwSize){
+#else
+	if (dwCount == 0 || dwCount != dwSize-1){
+#endif
+		ASSERT(0);
+		return false;
 	}
-
-	//******************* SomeFool.R
-	searchpath.Format(_T("%s\\PandaAVEngine.exe"),buffer);
-	if ( (found = ff.FindFile(searchpath,0)) )
-		ff.FindNextFile();
-	if (found && ff.GetLength() == 20624){
-		//infected
-		int result = MessageBox(NULL,_T("eMule has detected that your PC is infected with the SomeFool.R (alias netsky.r) virus, which is build to start a DDoS Attack against eMule's Homepage.\n\nDo you want eMule to try to remove this virus now (this may take some seconds)?\n\nNote: eMule will not start as long as your PC is infected"),
-			_T("Virus found"),MB_YESNO | MB_ICONWARNING);
-		if (result == IDNO)
-			return false;
-		// kill process
-		kp.KillProcess(_T("PandaAVEngine.exe"));
-		// delete its files
-		uint32 nTimeOut = GetTickCount() + 20000;
-		bool success = false;
-		while (nTimeOut > GetTickCount()){
-			if ( (success = DeleteFile(searchpath.GetBuffer())) )
-				break;
-		}
-		searchpath.Format(_T("%s\\temp09094283.dll"),buffer);
-		DeleteFile(searchpath.GetBuffer());
-		// remove registry entry
-		CRegKey regkey;
-		if (regkey.Open(HKEY_LOCAL_MACHINE,_T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")) == ERROR_SUCCESS)
-			regkey.DeleteValue(_T("PandaAVEngine"));
-
-		// finished - hopefully	
-		if (success){
-			MessageBox(NULL,_T("eMule was able to remove the virus. However we STRONGLY recommend to install an up-to-date anti-virus software to run a full system check!"),
-			_T("Virus removed"),MB_ICONINFORMATION | MB_OK);
-		}
-		else{
-			MessageBox(NULL,_T("eMule was not able to remove the virus.\nPlease install an up-to-date anti-virus software and run a full system check!"),
-			_T("Virus removed"),MB_ICONERROR | MB_OK);
-		}
-	}
-
+	strExpanded.ReleaseBuffer(dwCount-1);
+	rstrStrings = strExpanded;
 	return true;
 }
 

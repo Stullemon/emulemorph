@@ -30,6 +30,7 @@ CSelCategoryDlg::CSelCategoryDlg(CWnd* pWnd)
 		m_Return = 0;
 
 	m_bCreatedNew = false;
+	m_cancel = true; //MORPH - Added by SiRoB
 }
 
 CSelCategoryDlg::~CSelCategoryDlg()
@@ -68,6 +69,7 @@ BOOL CSelCategoryDlg::OnInitDialog()
 
 void CSelCategoryDlg::OnOK()
 {
+	m_cancel = false; //MORPH - Added by SiRoB
 	int	comboIndex = ((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetCurSel();
 
 	CString* catTitle = new CString(thePrefs.GetCategory(comboIndex)->title);

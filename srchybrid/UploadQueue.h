@@ -198,7 +198,10 @@ private:
 	uint64	m_nUpDataOverheadKadPackets;
 	uint64	m_nUpDataOverheadOtherPackets;
 	bool	lastupslotHighID; // VQB lowID alternation
-
+	//MORPH - Removed by SiRoB, Not used in this mod, full chunk transfer is enforced	
+	/*
+	bool	m_bRemovedClientByScore;
+	*/
 	// By BadWolf - Accurate Speed Measurement
 	CList<uint64,uint64>	m_AvarageUDRO_list;
 	uint32	sumavgUDRO;

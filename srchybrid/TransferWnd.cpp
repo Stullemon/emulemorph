@@ -459,6 +459,7 @@ void CTransferWnd::SwitchUploadList()
 		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
 	}
 	UpdateListCount(m_uWnd2);
+	SetWnd2Icon();
 }
 
 void CTransferWnd::ShowWnd2(uint8 uWnd2)
@@ -490,6 +491,7 @@ void CTransferWnd::ShowWnd2(uint8 uWnd2)
 		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
 		SetWnd2(1);
 	}
+	SetWnd2Icon();
 }
 
 void CTransferWnd::SetWnd2(uint8 uWnd2)
@@ -510,7 +512,17 @@ void CTransferWnd::SetAllIcons()
 		VERIFY( DestroyIcon(icon_download) );
 	icon_download = theApp.LoadIcon("Download", 16, 16);
 	((CStatic*)GetDlgItem(IDC_DOWNLOAD_ICO))->SetIcon(icon_download);
+	SetWnd2Icon();
+}
+
+void CTransferWnd::SetWnd2Icon()
+{
+	if (m_uWnd2 == 2)
+		m_uplBtn.SetIcon("ClientsOnQueue");
+	else if (m_uWnd2 == 1)
 	m_uplBtn.SetIcon("Upload");
+	else
+		m_uplBtn.SetIcon("ClientsKnown");
 }
 
 void CTransferWnd::Localize()
@@ -776,14 +788,15 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 	// khaos::categorymod+
 	Category_Struct* curCat;
 	curCat = thePrefs.GetCategory(rightclickindex);
-	/*if (wParam >= MP_CAT_SET0 && wParam <= MP_CAT_SET0 + 20) {
-		curCat = thePrefs.GetCategory(rightclickindex);
+	/*
+	if (wParam >= MP_CAT_SET0 && wParam <= MP_CAT_SET0 + 20) {
 		thePrefs.SetAllcatType(wParam-MP_CAT_SET0);
 		m_nLastCatTT=-1;
 		m_dlTab.SetCurSel(0);
 		downloadlistctrl.ChangeCategory(0);
-		EditCatTabLabel(0,GetCatTitle( thePrefs.GetAllcatType()));*/
-	//}
+		EditCatTabLabel(0,GetCatTitle( thePrefs.GetAllcatType()));
+	}
+	*/
 	// khaos::categorymod-
 
 	switch (wParam){ 
@@ -795,7 +808,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			if (dialog.WasCancelled())
 				thePrefs.RemoveCat(newindex);
 			else {
-				// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
+				theApp.emuledlg->searchwnd->UpdateCatTabs();
 				m_dlTab.InsertItem(newindex,thePrefs.GetCategory(newindex)->title);
 				EditCatTabLabel(newindex,thePrefs.GetCategory(newindex)->title);
 				thePrefs.SaveCats();
@@ -814,7 +827,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			csName.Format("%s", thePrefs.GetCategory(rightclickindex)->title );
 			EditCatTabLabel(rightclickindex,csName);
 		
-			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
+			theApp.emuledlg->searchwnd->UpdateCatTabs();
 			thePrefs.SaveCats();
 			if (m_dlTab.GetCurSel() == rightclickindex)
 				downloadlistctrl.ChangeCategory(rightclickindex);
@@ -855,7 +868,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			m_dlTab.SetCurSel(0);
 			downloadlistctrl.ChangeCategory(0);
 			thePrefs.SaveCats();
-			// khaos::categorymod+ obsolete //theApp.emuledlg->searchwnd.UpdateCatTabs();
+			theApp.emuledlg->searchwnd->UpdateCatTabs();
 			VerifyCatTabSize();
 			break;
 		}
@@ -892,15 +905,11 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
 		}
-		// khaos::categorymod+
-		/*case MP_RESUMENEXT: {
-			theApp.downloadqueue->StartNextFile(rightclickindex);
-			break;
-		}*/
-		case MP_CAT_RESUMENEXT: {
+		case MP_RESUMENEXT: {
 			theApp.downloadqueue->StartNextFile(rightclickindex);
 			break;
 		}
+		// khaos::categorymod+
 		case MP_CAT_STOPLAST: {
 			theApp.downloadqueue->StopPauseLastFile(MP_STOP, rightclickindex);
 			break;
@@ -996,7 +1005,14 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 	return TRUE;
 }
 
-void CTransferWnd::UpdateCatTabTitles() {
+void CTransferWnd::UpdateCatTabTitles(bool force) {
+
+
+	CPoint pt;
+	::GetCursorPos(&pt);
+	if (!force && GetTabUnderMouse(&pt)!=-1)		// avoid cat tooltip jumping
+		return;
+
 	for (uint8 i=0;i<m_dlTab.GetItemCount();i++)
 		//MORPH START - Changed by SiRoB, Due to Khaos Category
 		/*
@@ -1013,22 +1029,21 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 	m_dlTab.GetItem(index,&tabitem);
 	tabitem.mask = TCIF_TEXT;
 
+	newlabel.Replace("&","&&");
+	int count,dwl;
+
 	if (thePrefs.ShowCatTabInfos()) {
 		CPartFile* cur_file;
-		uint16 count,dwl;
 		count=dwl=0;
 		for (int i=0;i<theApp.downloadqueue->GetFileCount();i++) {
 			cur_file=theApp.downloadqueue->GetFileByIndex(i);
 			if (cur_file==0) continue;
 			if (cur_file->CheckShowItemInGivenCat(index)) {
-				count++;
-				if (cur_file->GetTransferingSrcCount()>0) dwl++;
-//				speed+=cur_file->GetDatarate()/1024.0f;
-//				size+=cur_file->GetFileSize();
-//				trsize+=cur_file->GetCompletedSize();
+				if (cur_file->GetTransferingSrcCount()>0) ++dwl;
 			}
 		}
 		CString title=newlabel;
+		int compl= theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(index,count);
 		newlabel.Format("%s (%i/%i)",title,dwl,count);
 	}
 
@@ -1142,8 +1157,8 @@ void CTransferWnd::UpdateTabToolTips(int tab)
 }
 
 CString CTransferWnd::GetTabStatistic(uint8 tab) {
-	uint16 count,dwl;
-	count=dwl=0;
+	uint16 count,dwl,err,compl,paus;
+	count=dwl=err=compl=paus=0;
 	float speed=0;
 	uint64 size=0;
 	uint64 trsize=0;
@@ -1161,12 +1176,26 @@ CString CTransferWnd::GetTabStatistic(uint8 tab) {
 			size+=cur_file->GetFileSize();
 			trsize+=cur_file->GetCompletedSize();
 			disksize+=cur_file->GetRealFileSize();
+			if (cur_file->GetStatus()==PS_ERROR) ++err;
+			if (cur_file->GetStatus()==PS_PAUSED) ++paus;
 		}
 	}
 
+	int total;
+	compl=theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(tab,total);
+
 	CString title;
-	title.Format("%s: %i/%i\n%s: %.1f %s\n%s: %s/%s\n%s%s",
-		GetResString(IDS_DOWNLOADING), dwl,count,GetResString(IDS_DL_SPEED) ,speed,GetResString(IDS_KBYTESEC),
+	title.Format("%s: %i\n\n%s: %i\n%s: %i\n%s: %i\n%s: %i\n\n%s: %.1f %s\n%s: %s/%s\n%s%s",
+		
+		GetResString(IDS_FILES), count+compl,
+		GetResString(IDS_DOWNLOADING), dwl,
+		GetResString(IDS_PAUSED) ,paus,
+		GetResString(IDS_ERRORLIKE) ,err,
+		GetResString(IDS_DL_TRANSFCOMPL) ,compl,
+
+		GetResString(IDS_DL_SPEED) ,speed,GetResString(IDS_KBYTESEC),
+
+
 		GetResString(IDS_DL_SIZE),CastItoXBytes(trsize),CastItoXBytes(size),
 		GetResString(IDS_ONDISK),CastItoXBytes(disksize)		);
 	return title;
@@ -1204,7 +1233,7 @@ void CTransferWnd::OnTabMovement(NMHDR *pNMHDR, LRESULT *pResult) {
 	m_dlTab.ReorderTab(from,to);
 
 	UpdateCatTabTitles();
-	// khaos::categorymod+ obsolete theApp.emuledlg->searchwnd.UpdateCatTabs();
+	theApp.emuledlg->searchwnd->UpdateCatTabs();
 
 	if (to>from) --to;
 	m_dlTab.SetCurSel(to);

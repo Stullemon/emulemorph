@@ -20,6 +20,7 @@
 #include "OScopeCtrl.h"
 #include "emuledlg.h"
 #include "Preferences.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -795,14 +796,14 @@ void COScopeCtrl::DrawPoint()
 				prevY = m_rectPlot.bottom - 
 				(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			}
-			if(!m_PlotData[iTrend].BarsPlot)
+			if(!(m_PlotData[iTrend].BarsPlot && drawBars))
 				m_dcPlot.MoveTo(prevX - 1, prevY);
 			// draw to the current point
 			currX = m_rectPlot.right;
 			currY = m_rectPlot.bottom -
 				(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			m_PlotData[iTrend].nPrevY = currY;
-			if(m_PlotData[iTrend].BarsPlot)
+			if(m_PlotData[iTrend].BarsPlot && drawBars)
 				m_dcPlot.MoveTo(currX - 1, m_rectPlot.bottom);
 			else
 			{

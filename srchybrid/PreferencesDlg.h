@@ -61,13 +61,18 @@ public:
 	int				m_iPrevPage;
 
 	void Localize();
+	void OpenPage(UINT uResourceID);
+
 protected:
 	UINT m_nActiveWnd;
 
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnSelChanged();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

@@ -26,6 +26,7 @@
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
 #include "ServerWnd.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -46,6 +47,7 @@ BEGIN_MESSAGE_MAP(CPPgTweaks, CPropertyPage)
 	ON_WM_HSCROLL()	
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgTweaks::CPPgTweaks()
@@ -109,7 +111,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
 
-	/* Temp removed until further testing
+	/*
 	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;
@@ -260,6 +262,7 @@ if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
 	if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, m_iVerbose);
 	if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, m_iVerbose);
 
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAutoTakeEd2kLinks, HaveEd2kRegAccess());
 	/*
 	// ZZ:UploadSpeedSense -->
     DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDynUpEnabled, m_iDynUpEnabled);
@@ -285,10 +288,11 @@ if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
 BOOL CPPgTweaks::OnInitDialog()
 {
 	m_iMaxConnPerFive = thePrefs.GetMaxConperFive();
-	m_iAutoTakeEd2kLinks = thePrefs.autotakeed2klinks;
+	m_iAutoTakeEd2kLinks = HaveEd2kRegAccess() ? thePrefs.AutoTakeED2KLinks() : 0;
 	if (thePrefs.GetEnableVerboseOptions())
 	{
 		m_iVerbose = thePrefs.m_bVerbose;
+		m_iDebug2Disk = thePrefs.debug2disk;							// do *not* use the according 'Get...' function here!
 		m_iDebugSourceExchange = thePrefs.m_bDebugSourceExchange;		// do *not* use the according 'Get...' function here!
 		m_iLogBannedClients = thePrefs.m_bLogBannedClients;				// do *not* use the according 'Get...' function here!
 		m_iLogRatingDescReceived = thePrefs.m_bLogRatingDescReceived;	// do *not* use the according 'Get...' function here!
@@ -355,8 +359,12 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.SetMaxConsPerFive(m_iMaxConnPerFive ? m_iMaxConnPerFive : DFLT_MAXCONPERFIVE);
 	theApp.scheduler->original_cons5s = thePrefs.GetMaxConperFive();
 
-	if (thePrefs.autotakeed2klinks != m_iAutoTakeEd2kLinks){
+	if (HaveEd2kRegAccess() && thePrefs.AutoTakeED2KLinks() != (bool)m_iAutoTakeEd2kLinks)
+	{
 		thePrefs.autotakeed2klinks = m_iAutoTakeEd2kLinks;
+		if (thePrefs.AutoTakeED2KLinks())
+			Ask4RegFix(false, true);
+		else
 		RevertReg();
 	}
 
@@ -410,7 +418,7 @@ BOOL CPPgTweaks::OnApply()
 	if (thePrefs.m_bExtControls != (bool)m_iExtControls) {
 		thePrefs.m_bExtControls = m_iExtControls;
 		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
-		theApp.emuledlg->searchwnd->searchlistctrl.CreateMenues();
+		theApp.emuledlg->searchwnd->CreateMenus();
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 	}
 	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
@@ -420,6 +428,12 @@ BOOL CPPgTweaks::OnApply()
 
 	/*
 	// ZZ:UploadSpeedSense -->
+	if( !thePrefs.m_bDynUpEnabled && m_iDynUpEnabled )
+	{
+		AfxMessageBox(GetResString(IDS_USS_MIN), MB_ICONERROR);
+	}
+	if( m_iDynUpMinUpload < 10 )
+		m_iDynUpMinUpload = 10;
     thePrefs.m_bDynUpEnabled = m_iDynUpEnabled;
     thePrefs.minupload = m_iDynUpMinUpload;
     thePrefs.m_iDynUpPingTolerance = m_iDynUpPingTolerance;
@@ -579,4 +593,25 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		SetModified();
 	}
 	return 0;
+}
+
+void CPPgTweaks::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Extended_Settings);
+}
+
+BOOL CPPgTweaks::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgTweaks::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

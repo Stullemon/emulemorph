@@ -6,7 +6,7 @@
     name="Microsoft.Windows.emule"
     type="win32" 
 /> 
-<description>eMule- http://www.emule-project.org</description> 
+<description>eMule- http://www.emule-project.net</description> 
 <dependency> 
     <dependentAssembly> 
         <assemblyIdentity 

@@ -1,0 +1,95 @@
+#pragma once
+
+#include "EditX.h"
+#include "ComboBoxEx2.h"
+#include "ListCtrlEditable.h"
+class CCustomAutoComplete;
+
+typedef enum EOptsRows
+{
+	orMinSize,
+	orMaxSize,
+	orAvailability,
+	orExtension,
+	orCompleteSources,
+	orCodec,
+	orBitrate,
+	orLength,
+	orTitle,
+	orAlbum,
+	orArtist
+};
+
+class CSearchParamsWnd : public CDialogBar
+{
+	DECLARE_DYNAMIC(CSearchParamsWnd);
+
+// Construction
+public:
+	CSearchParamsWnd();
+	virtual ~CSearchParamsWnd();
+
+	CEditX m_ctlName;
+	CButton m_ctlStart;
+	CButton m_ctlCancel;
+	CButton m_ctlMore;
+	CSearchResultsWnd* m_searchdlg;
+
+	void Localize();
+	void ResetHistory();
+	void SaveSettings();
+
+	SSearchParams* GetParameters();
+	void SetParameters(const SSearchParams* pParams);
+
+	virtual CSize CalcDynamicLayout(int, DWORD nMode);
+	virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+protected:
+	HCURSOR m_hcurMove;
+	CComboBoxEx2 m_ctlMethod;
+	CComboBox m_ctlFileType;
+	CEditableListCtrl m_ctlOpts;
+	CRect m_rcNameLbl;
+	CRect m_rcName;
+	CRect m_rcDropDownArrow;
+	CRect m_rcFileTypeLbl;
+	CRect m_rcFileType;
+	CRect m_rcReset;
+	CRect m_rcMethodLbl;
+	CRect m_rcMethod;
+	CRect m_rcOpts;
+	CRect m_rcStart;
+	CRect m_rcMore;
+	CRect m_rcCancel;
+	CImageList m_imlSearchMethods;
+	CSize m_szMRU;
+	CSize m_szFloat;
+	CCustomAutoComplete* m_pacSearchString;
+
+	void UpdateControls();
+	BOOL SaveSearchStrings();
+	void SetAllIcons();
+	void InitMethodsCtrl();
+	ULONG GetSearchSize(const CString& strExpr);
+
+	virtual void DoDataExchange(CDataExchange* pDX);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnInitDialog(WPARAM, LPARAM);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnBnClickedStart();
+	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedMore();
+	afx_msg void OnCbnSelChangeMethod();
+	afx_msg void OnCbnSelEndOkMethod();
+	afx_msg void OnDDClicked();
+	afx_msg void OnBnClickedSearchReset();
+	afx_msg void OnEnChangeName();
+	afx_msg void OnDestroy();
+	afx_msg void OnSysColorChange();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+};

@@ -36,14 +36,26 @@ struct StandardPacketQueueEntry {
     Packet* packet;
 };
 
+//MOPRH START - Changed by SiRoB, zz Upload System
+/*
+class CEMSocket : public CAsyncSocketEx
+*/
 class CEMSocket : public CAsyncSocketEx, public ThrottledSocket // ZZ:UploadBandWithThrottler (UDP)
+//MOPRH END   - Changed by SiRoB, zz Upload System
 {
+//MOPRH START - Removed by SiRoB, zz Upload System
 //    friend class UploadBandwidthThrottler;
+//MOPRH END   - Removed by SiRoB, zz Upload System
 public:
 	CEMSocket(void);
 	~CEMSocket(void);
 
+	//MOPRH START - Changed by SiRoB, zz Upload System
+	/*
+	void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	*/
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	//MOPRH END   - Changed by SiRoB, zz Upload System
     bool    HasQueues();
     bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
@@ -70,9 +82,10 @@ public:
     uint64 GetSentPayloadSinceLastCallAndReset();
     void TruncateQueues();
 
+	//MOPRH START - Added by SiRoB, zz Upload System
 	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket);
-
     uint32	GetNeededBytes();
+ 	//MOPRH END   - Added by SiRoB, zz Upload System
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -92,12 +105,16 @@ protected:
 	// deadlake PROXYSUPPORT
 	bool	m_ProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
-
+//MOPRH START - Removed by SiRoB, zz Upload System
+//    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
+//MOPRH END   - Removed by SiRoB, zz Upload System
 private:
 	void	ClearQueues();	
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
 
-    uint32 GetNextFragSize(uint32 current, uint32 minFragSize);
+    //MOPRH START - Added by SiRoB, zz Upload System
+	uint32 GetNextFragSize(uint32 current, uint32 minFragSize);
+	//MOPRH END   - Added by SiRoB, zz Upload System
 
 	// Download (pseudo) rate control	
 	uint32	downloadLimit;
@@ -131,9 +148,9 @@ private:
     uint64 m_numberOfSentBytesControlPacket;
     bool m_currentPackageIsFromPartFile;
 
-	bool	m_bAccelerateUpload;
+	bool	m_bAccelerateUpload; //MOPRH - Added by SiRoB, zz Upload System
     DWORD lastCalledSend;
-	uint32	lastFinishedStandard;
+	uint32	lastFinishedStandard; //MOPRH - Added by SiRoB, zz Upload System
 
     //void StoppedSendSoUpdateStats();
     //void CleanSendLatencyList();
@@ -146,5 +163,5 @@ private:
     uint32 m_actualPayloadSize;
     uint32 m_actualPayloadSizeSent;
 
-    boolean m_bBusy;
+    boolean m_bBusy; //MOPRH - Added by SiRoB, zz Upload System
 };

@@ -35,6 +35,7 @@ IMPLEMENT_DYNAMIC(CPPgDebug, CPropertyPage)
 BEGIN_MESSAGE_MAP(CPPgDebug, CPropertyPage)
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgDebug::CPPgDebug()
@@ -214,4 +215,25 @@ LRESULT CPPgDebug::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		SetModified();
 	}
 	return 0;
+}
+
+void CPPgDebug::OnHelp()
+{
+	//theApp.ShowHelp(0);
+}
+
+BOOL CPPgDebug::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgDebug::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

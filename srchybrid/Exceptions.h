@@ -34,4 +34,21 @@
 			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown CString exception in ") fname _T(" - %s"), strError); \
 	}
 
+
+class CMsgBoxException : public CException
+{
+	DECLARE_DYNAMIC(CMsgBoxException)
+public:
+	CMsgBoxException(LPCTSTR pszMsg, UINT uType = MB_ICONWARNING, UINT uHelpID = 0)
+	{
+		m_strMsg = pszMsg;
+		m_uType = uType;
+		m_uHelpID = uHelpID;
+	}
+
+	CString m_strMsg;
+	UINT m_uType;
+	UINT m_uHelpID;
+};
+
 #endif//!__DFLT_EXCEPTION_HANDLERS_H__

@@ -46,6 +46,7 @@ class CMMServer;
 class CStatistics;
 class CAbstractFile;
 class CUpDownClient;
+struct SLogItem;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 class CIP2Country; //EastShare - added by AndCycle, IP to Country
@@ -122,7 +123,12 @@ public:
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 	void		SearchClipboard();
 	void		IgnoreClipboardLinks(CString strLinks) {m_strLastClipboardContents = strLinks;}
-	void		PasteClipboard();
+	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+	/*
+	void		PasteClipboard(uint8 uCategory = 0);
+	*/
+	void		PasteClipboard(int Cat = -1);
+	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 	bool		IsEd2kFileLinkInClipboard();
 	bool		IsEd2kServerLinkInClipboard();
 	bool		IsEd2kLinkInClipboard(LPCTSTR pszLinkType, int iLinkTypeLen);
@@ -151,6 +157,20 @@ public:
 	HBITMAP		LoadImage(UINT nIDResource, LPCTSTR pszResourceType) const;
 	void		ApplySkin(LPCTSTR pszSkinProfile);
 
+	CString		GetLangHelpFilePath();
+	void		SetHelpFilePath(LPCTSTR pszHelpFilePath);
+	void		ShowHelp(UINT uTopic, UINT uCmd = HELP_CONTEXT);
+
+    // Elandal:ThreadSafeLogging -->
+    // thread safe log calls
+    void			QueueDebugLogLine(bool addtostatusbar, LPCTSTR line,...);
+    void			HandleDebugLogQueue();
+    void			ClearDebugLogQueue(bool bDebugPendingMsgs = false);
+    void			QueueLogLine(bool addtostatusbar, LPCTSTR line,...);
+    void			HandleLogQueue();
+    void			ClearLogQueue(bool bDebugPendingMsgs = false);
+    // Elandal:ThreadSafeLogging <--
+
 protected:
 	bool ProcessCommandline();
 	void SetTimeOnTransfer();
@@ -165,6 +185,14 @@ protected:
 
 	bool		m_bGuardClipboardPrompt;
 	CString		m_strLastClipboardContents;
+
+    // Elandal:ThreadSafeLogging -->
+    // thread safe log calls
+    CCriticalSection m_queueLock;
+    CTypedPtrList<CPtrList, SLogItem*> m_QueueDebugLog;
+    CTypedPtrList<CPtrList, SLogItem*> m_QueueLog;
+    // Elandal:ThreadSafeLogging <--
+
 };
 
 extern CemuleApp theApp;

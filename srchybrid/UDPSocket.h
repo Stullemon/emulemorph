@@ -74,8 +74,8 @@ private:
 	CUDPSocketWnd m_udpwnd;
 
 	void 	SendBuffer();
-	bool	ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR host, uint16 nUDPPort);
-	void	ProcessPacketError(UINT size, uint8 opcode, LPCTSTR host, uint16 nTCPPort, LPCTSTR pszError);
+	bool	ProcessPacket(uint8* packet, UINT size, UINT opcode, LPCTSTR host, uint16 nUDPPort);
+	void	ProcessPacketError(UINT size, UINT opcode, LPCTSTR host, uint16 nTCPPort, LPCTSTR pszError);
 
 	uint8*	m_sendbuffer;
 	uint32	m_sendblen;

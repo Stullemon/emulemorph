@@ -79,19 +79,17 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 	m_nUserPort = in_port;
 	//If this is a ED2K source, check if it's a lowID.. If not, convert it to a HyrbidID.
 	//TODO: Find out how Servers deal with these IP addresses ending with .0 and see what is the lowest we can put here to catch some of them.
-	if(ed2kID && !IsLowIDED2K(in_userid))
+	if(ed2kID && !IsLowID(in_userid))
 		m_nUserIDHybrid = ntohl(in_userid);
 	else
 		m_nUserIDHybrid = in_userid;
 
 	//If create the FullIP address depending on source type.
-	if (!HasLowID() && ed2kID){
+	//If highID and Kad source, incoming IP needs ntohl for the IP
+	if (!HasLowID() && ed2kID)
 		m_nConnectIP = in_userid;
-	}
-	else if(!HasLowID()){
-		in_userid = ntohl(in_userid);
-		m_nConnectIP = in_userid;
-	}
+	else if(!HasLowID())
+		m_nConnectIP = ntohl(in_userid);
 	m_dwServerIP = in_serverip;
 	m_nServerPort = in_serverport;
 }
@@ -214,6 +212,8 @@ void CUpDownClient::Init()
 	m_fNoViewSharedFiles = 0;
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
+	m_nTotalUDPPackets = 0;
+	m_nFailedUDPPackets = 0;
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
@@ -591,7 +591,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	}
 
 	//Because most sources are from ED2K, I removed the m_nUserIDHybrid != m_dwUserIP check since this will trigger 90% of the time anyway.
-	if(!HasLowID() || m_nUserIDHybrid == 0) 
+	//(b)Some older clients will not send a ID, these client are HighID users that are not connected to a server.
+	//(c)Kad users with a *.*.*.0 IPs will look like a lowID user they are actually a highID user.. They can be detected easily
+	//because they will send a ID that is the same as their IP..
+	if(!HasLowID() || m_nUserIDHybrid == 0 || m_nUserIDHybrid == m_dwUserIP ) 
 		m_nUserIDHybrid = ntohl(m_dwUserIP);
 
 	CClientCredits* pFoundCredits = theApp.clientcredits->GetCredit(m_achUserHash);
@@ -943,22 +946,15 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 {
 	data->WriteHash16(thePrefs.GetUserHash());
 	uint32 clientid;
-//	if(theApp.IsFirewalled())
-//	{
-		//If firewalled, send the actual ID..
-		clientid = theApp.GetID();
-//	}
-//	else
-//	{
-		//If NOT firewalled, we must send the ID in the Hybrid format to avoid the ED2K bug
-		//of marking all IP ending with .0 as a LowID!!
-//		clientid = ntohl(theApp.GetID());
-//	}
+	clientid = theApp.GetID();
+
 	data->WriteUInt32(clientid);
 	data->WriteUInt16(thePrefs.GetPort());
 
 	uint32 tagcount = 6/*5 OFFICIAL+1 MOD_VERSION*/;//MORPH - Changed by SiRoB
 	data->WriteUInt32(tagcount);
+
+	// eD2K Name
 
 	//MORPH START - Added by IceCream, Anti-leecher feature
 	LPCSTR strUsedName;
@@ -1408,13 +1404,17 @@ void CUpDownClient::ReGetClientSoft()
 				m_clientSoft = SO_XMULE;
 				pszSoftware = _T("xMule");
 				break;
-			case 3: // aMule
-				m_clientSoft = SO_XMULE;
+			case SO_AMULE:
+				m_clientSoft = SO_AMULE;
 				pszSoftware = _T("aMule");
 				break;
 			case SO_SHAREAZA:
 				m_clientSoft = SO_SHAREAZA;
 				pszSoftware = _T("Shareaza");
+				break;
+			case SO_LPHANT:
+				m_clientSoft = SO_LPHANT;
+				pszSoftware = _T("lphant");
 				break;
 			default:
 				if (m_bIsML || m_byCompatibleClient == SO_MLDONKEY){
@@ -1426,7 +1426,7 @@ void CUpDownClient::ReGetClientSoft()
 					pszSoftware = _T("eDonkeyHybrid");
 				}
 				else if (m_byCompatibleClient != 0){
-					m_clientSoft = SO_XMULE;
+					m_clientSoft = SO_XMULE; // means: 'eMule Compatible'
 					pszSoftware = _T("eMule Compat");
 				}
 				else{
@@ -1451,7 +1451,12 @@ void CUpDownClient::ReGetClientSoft()
 			UINT nClientMinVersion = (m_nClientVersion >> 10) & 0x7f;
 			UINT nClientUpVersion  = (m_nClientVersion >>  7) & 0x07;
 			m_nClientVersion = MAKE_CLIENT_VERSION(nClientMajVersion, nClientMinVersion, nClientUpVersion);
-			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u%c"), pszSoftware, nClientMajVersion, nClientMinVersion, _T('a') + nClientUpVersion);
+			if (m_clientSoft == SO_EMULE)
+				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u%c"), pszSoftware, nClientMajVersion, nClientMinVersion, _T('a') + nClientUpVersion);
+			else if (m_clientSoft == SO_AMULE || nClientUpVersion != 0)
+				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u.%u"), pszSoftware, nClientMajVersion, nClientMinVersion, nClientUpVersion);
+			else
+				iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u"), pszSoftware, nClientMajVersion, nClientMinVersion);
 		}
 		if (iLen > 0){
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
@@ -2009,7 +2014,7 @@ bool CUpDownClient::SafeSendPacket(Packet* packet){
 
 bool CUpDownClient::HasLowID() const
 {
-	return IsLowIDHybrid(m_nUserIDHybrid);
+	return IsLowID(m_nUserIDHybrid);
 }
 
 #ifdef _DEBUG
@@ -2053,7 +2058,7 @@ void CUpDownClient::AssertValid() const
 	CHECK_BOOL(m_bFriendSlot);
 	CHECK_BOOL(m_bCommentDirty);
 	CHECK_BOOL(m_bIsML);
-	ASSERT( m_clientSoft >= SO_EMULE && m_clientSoft <= SO_SHAREAZA || m_clientSoft == SO_MLDONKEY || m_clientSoft >= SO_EDONKEYHYBRID && m_clientSoft <= SO_UNKNOWN );
+	//ASSERT( m_clientSoft >= SO_EMULE && m_clientSoft <= SO_SHAREAZA || m_clientSoft == SO_MLDONKEY || m_clientSoft >= SO_EDONKEYHYBRID && m_clientSoft <= SO_UNKNOWN );
 	(void)m_strClientSoftware;
 	(void)m_dwLastSourceRequest;
 	(void)m_dwLastSourceAnswer;
@@ -2210,11 +2215,17 @@ bool CUpDownClient::CheckHandshakeFinished(UINT protocol, UINT opcode) const
 	return true;
 }
 
-void CUpDownClient::CheckForGPLEvilDoer(){
-	// check for known major gpl breaker 
-	if (((CString)m_strModVersion).Trim().MakeUpper().Find("LH") == 0 || ((CString)m_strModVersion).Trim().MakeUpper().Find("LIO") == 0){
+void CUpDownClient::CheckForGPLEvilDoer()
+{
+	LPCTSTR pszModVersion = (LPCTSTR)m_strModVersion;
+
+	// skip leading spaces
+	while (*pszModVersion == _T(' '))
+		pszModVersion++;
+
+	// check for known major gpl breaker
+	if (_tcsnicmp(pszModVersion, _T("LH"), 2)==0 || _tcsnicmp(pszModVersion, _T("LIO"), 3)==0)
 		m_bGPLEvildoer = true;
-	}
 }
 
 //EastShare Start - added by AndCycle, IP to Country

@@ -247,7 +247,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 					break;
 				}
 				if( thePrefs.GetSmartIdCheck() ){
-					if (!IsLowIDED2K(la->clientid))
+					if (!IsLowID(la->clientid))
 						thePrefs.SetSmartIdState(1);
 					else{
 						uint8 state = thePrefs.GetSmartIdState();
@@ -637,7 +637,9 @@ void CServerSocket::SetConnectionState(sint8 newstate){
 	}
 }
 
+//MORPH START - Changed by SiRoB,	zz Upload System
 void CServerSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
 	m_dwLastTransmission = GetTickCount();
 	CEMSocket::SendPacket(packet, delpacket, controlpacket, actualPayloadSize);
 }
+//MORPH END  - Changed by SiRoB,	zz Upload System

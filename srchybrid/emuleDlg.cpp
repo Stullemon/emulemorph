@@ -19,11 +19,13 @@
 #include <afxinet.h>
 #pragma comment(lib, "winmm.lib")
 #include <Mmsystem.h>
+#include <HtmlHelp.h>
 #include "emule.h"
 #include "emuleDlg.h"
 #include "ServerWnd.h"
 #include "KademliaWnd.h"
 #include "TransferWnd.h"
+#include "SearchResultsWnd.h"
 #include "SearchDlg.h"
 #include "SharedFilesWnd.h"
 #include "ChatWnd.h"
@@ -90,14 +92,10 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-struct SLogItem
-{
-    bool addtostatusbar;
-    CString line;
-};
-
 BOOL (WINAPI *_TransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT)= NULL;
 const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(_T(EMULE_GUID));
+
+IMPLEMENT_DYNAMIC(CMsgBoxException, CException)
 
 // CemuleDlg Dialog
 
@@ -175,7 +173,6 @@ CemuleDlg::~CemuleDlg()
 	delete kademliawnd;
 	delete transferwnd;
 	delete sharedfileswnd;
-	delete searchwnd;
 	delete chatwnd;
 	delete ircwnd;
 	delete statisticswnd;
@@ -232,9 +229,6 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(WEB_DISCONNECT_SERVER, OnWebServerDisonnect)
 	ON_MESSAGE(WEB_REMOVE_SERVER, OnWebServerRemove)
 	ON_MESSAGE(WEB_SHARED_FILES_RELOAD, OnWebSharedFilesReload)
-
-	// Jigle SOAP service
-	ON_MESSAGE(WM_JIGLE_SEARCH_RESPONSE, OnJigleSearchResponse)
 
 	// Version Check DNS
 	ON_MESSAGE(WM_VERSIONCHECK_RESPONSE, OnVersionCheckResponse)
@@ -307,7 +301,8 @@ BOOL CemuleDlg::OnInitDialog()
 	}
 
 	SetIcon(m_hIcon, TRUE);			
-	SetIcon(m_hIcon, FALSE);
+	// this scales the 32x32 icon down to 16x16, does not look nice at least under WinXP
+	//SetIcon(m_hIcon, FALSE);	
 
 	toolbar->Create(WS_CHILD | WS_VISIBLE , CRect(0,0,0,0), this, IDC_TOOLBAR);
 	toolbar->Init();
@@ -349,7 +344,7 @@ BOOL CemuleDlg::OnInitDialog()
 	// create main window dialog pages
 	serverwnd->Create(IDD_SERVER);
 	sharedfileswnd->Create(IDD_FILES);
-	searchwnd->Create(IDD_SEARCH);
+	searchwnd->Create(this);
 	chatwnd->Create(IDD_CHAT);
 	transferwnd->Create(IDD_TRANSFER);
 	statisticswnd->Create(IDD_STATISTICS);
@@ -445,8 +440,7 @@ BOOL CemuleDlg::OnInitDialog()
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	ShowPing();
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
-	// khaos::categorymod+ obsolete
-	//searchwnd->UpdateCatTabs();
+	searchwnd->UpdateCatTabs();
 	
 	// Restore saved window placement
 	WINDOWPLACEMENT wp = {0};
@@ -752,99 +746,6 @@ void CemuleDlg::AddLogText(bool addtostatusbar, const CString& txt, bool bDebug)
 	}
 }
 
-// Elandal:ThreadSafeLogging -->
-void CemuleDlg::QueueDebugLogLine(bool addtostatusbar, LPCTSTR line, ...)
-{
-	if (!thePrefs.GetVerbose())
-       return;
-
-   m_queueLock.Lock();
-
-   TCHAR bufferline[1000];
-
-   va_list argptr;
-   va_start(argptr, line);
-	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
-   va_end(argptr);
-
-	SLogItem* newItem = new SLogItem;
-   newItem->addtostatusbar = addtostatusbar;
-   newItem->line = bufferline;
-	m_QueueDebugLog.AddTail(newItem);
-
-	m_queueLock.Unlock();
-}
-
-void CemuleDlg::QueueLogLine(bool addtostatusbar, LPCTSTR line,...)
-{
-	if (!thePrefs.GetVerbose())
-		return;
-
-	m_queueLock.Lock();
-
-	TCHAR bufferline[1000];
-
-	va_list argptr;
-	va_start(argptr, line);
-	_vsnprintf(bufferline, ARRSIZE(bufferline), line, argptr);
-	va_end(argptr);
-
-	SLogItem* newItem = new SLogItem;
-	newItem->addtostatusbar = addtostatusbar;
-	newItem->line = bufferline;
-	m_QueueLog.AddTail(newItem);
-
-	m_queueLock.Unlock();
-}
-
-void CemuleDlg::HandleDebugLogQueue()
-{
-	m_queueLock.Lock();
-	while(!m_QueueDebugLog.IsEmpty()) {
-		const SLogItem* newItem = m_QueueDebugLog.RemoveHead();
-		if (thePrefs.GetVerbose())
-			AddDebugLogLine(newItem->addtostatusbar, newItem->line);
-		delete newItem;
-	}
-	m_queueLock.Unlock();
-}
-
-void CemuleDlg::HandleLogQueue()
-{
-	m_queueLock.Lock();
-	while(!m_QueueLog.IsEmpty()) {
-		const SLogItem* newItem = m_QueueLog.RemoveHead();
-		AddLogLine(newItem->addtostatusbar, newItem->line);
-		delete newItem;
-	}
-	m_queueLock.Unlock();
-}
-
-void CemuleDlg::ClearDebugLogQueue(bool bDebugPendingMsgs)
-{
-	m_queueLock.Lock();
-	while(!m_QueueDebugLog.IsEmpty())
-	{
-		if (bDebugPendingMsgs)
-			TRACE("Queued dbg log msg: %s\n", m_QueueDebugLog.GetHead()->line);
-		delete m_QueueDebugLog.RemoveHead();
-	}
-	m_queueLock.Unlock();
-}
-
-void CemuleDlg::ClearLogQueue(bool bDebugPendingMsgs)
-{
-	m_queueLock.Lock();
-	while(!m_QueueLog.IsEmpty())
-	{
-		if (bDebugPendingMsgs)
-			TRACE("Queued log msg: %s\n", m_QueueLog.GetHead()->line);
-		delete m_QueueLog.RemoveHead();
-	}
-	m_queueLock.Unlock();
-}
-// Elandal:ThreadSafeLogging <--
-
 CString CemuleDlg::GetLastLogEntry()
 {
 	return serverwnd->logbox.GetLastLogEntry();
@@ -1094,26 +995,41 @@ void CemuleDlg::ShowPing() {
 	if(IsWindowVisible()) {
         CurrentPingStruct lastPing = theApp.lastCommonRouteFinder->GetCurrentPing();
 
-        CString buffer = "";
+        char buffer[50];
 
-        if(thePrefs.IsDynUpEnabled()) {
+		//MORPH START - Changed by SiRoB, Related to SUC &  USS
+        /*
+		if(thePrefs.IsDynUpEnabled()) {
+            if(lastPing.latency > 0) {
+                if(lastPing.lowest > 0) {
+                    sprintf(buffer,"%i ms %i%%",lastPing.latency, lastPing.latency*100/lastPing.lowest);
+                } else {
+                    sprintf(buffer,"%i ms",lastPing.latency);
+                }
+            } else {
+                sprintf(buffer,"Preparing...",lastPing);
+            }
+        } else {
+            sprintf(buffer,"");
+        }
+		*/
+		if(thePrefs.IsDynUpEnabled()) {
             if(lastPing.state.GetLength() == 0) {
 				if (!thePrefs.IsUSSLimit()){
 					if(lastPing.lowest > 0 ) {
-						buffer.Format("USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+						sprintf(buffer,"USS %i ms %i%% %.1f%s/s",lastPing.latency, lastPing.latency*100/lastPing.lowest, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
 					} else {
-						buffer.Format("USS %i ms %.1f%s/s",lastPing.latency, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+						sprintf(buffer,"USS %i ms %.1f%s/s",lastPing.latency, (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
 					}
 				} else
-					buffer.Format("USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingLimit(), (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
+					sprintf(buffer,"USS %i ms %i ms %.1f%s/s",lastPing.latency, thePrefs.GetDynUpPingLimit(), (float)theApp.lastCommonRouteFinder->GetUpload()/1024,GetResString(IDS_KBYTES));
 			} else {
-                buffer.SetString(lastPing.state);
+                sprintf(buffer,lastPing.state);
             }
-		//MORPH START - Added by SiRoB, Related to SUC
 		} else if (thePrefs.IsSUCDoesWork()){
-			buffer.Format("SUC r:%i vur:%.1f%s/s",theApp.uploadqueue->GetAvgRespondTime(0), (float)theApp.uploadqueue->GetMaxVUR()/1024,GetResString(IDS_KBYTES));
-		//MORPH END   - Added by SiRoB, Related to SUC
+			sprintf(buffer,"SUC r:%i vur:%.1f%s/s",theApp.uploadqueue->GetAvgRespondTime(0), (float)theApp.uploadqueue->GetMaxVUR()/1024,GetResString(IDS_KBYTES));
 		}
+		//MORPH END   - Changed by SiRoB, Related to SUC &  USS
 		statusbar->SetText(buffer,4,0);
     }
 }
@@ -1134,7 +1050,7 @@ void CemuleDlg::OnCancel()
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 }
 
-void CemuleDlg::SetActiveDialog(CDialog* dlg)
+void CemuleDlg::SetActiveDialog(CWnd* dlg)
 {
 	if (dlg == activewnd)
 		return;
@@ -1178,13 +1094,20 @@ void CemuleDlg::SetStatusBarPartsSize()
 	CRect rect;
 	statusbar->GetClientRect(&rect);
 	int ussShift = 0;
-	//MORPH START - Added by SiRoB, Related to SUC
+	//MORPH START - Changed by SiRoB, Related to SUC
+	/*
+	if(thePrefs.IsDynUpEnabled())
+	{
+		ussShift = 75;
+	}
+	int aiWidths[5] = { rect.right-650-ussShift, rect.right-440-ussShift, rect.right-250-ussShift,rect.right-25-ussShift, -1 };
+	*/
 	if(thePrefs.IsDynUpEnabled() || thePrefs.IsSUCEnabled())
 	{
 		ussShift = 150;
 	}
-	//MORPH END   - Added by SiRoB, Related to SUC
 	int aiWidths[5] = { rect.right-525-ussShift, rect.right-315-ussShift, rect.right-125-ussShift, rect.right-25-ussShift, -1 };
+	//MORPH END   - Added by SiRoB, Related to SUC
 	statusbar->SetParts(5, aiWidths);
 }
 
@@ -1209,9 +1132,14 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 		case CED2KLink::kFile:
 			{
 				//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+				/*
+				CED2KFileLink* pFileLink = pLink->GetFileLink();
+				_ASSERT(pFileLink !=0);
+				theApp.downloadqueue->AddFileLinkToDownload(pFileLink,searchwnd->GetSelectedCat());
+				*/
 				CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(link.Trim());
 				_ASSERT(pFileLink !=0);
-				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, -1, true);
+				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, thePrefs.SelectCatForNewDL()?-1:searchwnd->GetSelectedCat(), true);
 				//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 			}
 			break;
@@ -1494,7 +1422,7 @@ void CemuleDlg::OnClose()
 	transferwnd->downloadlistctrl.DeleteAllItems();
 	chatwnd->chatselector.DeleteAllItems();
 	theApp.clientlist->DeleteAll();
-	searchwnd->searchlistctrl.DeleteAllItems();
+	searchwnd->DeleteAllSearchListCtrlItems();
 	sharedfileswnd->sharedfilesctrl.DeleteAllItems();
     transferwnd->queuelistctrl.DeleteAllItems();
 	transferwnd->clientlistctrl.DeleteAllItems();
@@ -1509,6 +1437,8 @@ void CemuleDlg::OnClose()
 	theApp.lastCommonRouteFinder->EndThread();
 
 	theApp.sharedfiles->DeletePartFileInstances();
+
+	searchwnd->SendMessage(WM_CLOSE);
 
     // NOTE: Do not move those dtors into 'CemuleApp::InitInstance' (althought they should be there). The
 	// dtors are indirectly calling functions which access several windows which would not be available 
@@ -1541,9 +1471,6 @@ void CemuleDlg::OnClose()
 	//MORPH - Added by SiRoB, More clean :|
 	delete theApp.FakeCheck;		theApp.FakeCheck = NULL;
 
-	ClearDebugLogQueue(true);
-	ClearLogQueue(true);
-	
 	thePrefs.Uninit();
 	theApp.m_app_state = APP_STATE_DONE;
 	CTrayDialog::OnCancel();
@@ -2255,14 +2182,6 @@ void CemuleDlg::ApplyLogFont(LPLOGFONT plf)
 	}
 }
 
-LRESULT CemuleDlg::OnJigleSearchResponse(WPARAM wParam, LPARAM lParam)
-{
-	if ( !IsRunning() )
-		return 1;
-	searchwnd->ProcessJigleSearchResponse(wParam, lParam);
-	return 0;
-}
-
 void CemuleDlg::SetKadButtonState() {
 	//I'm temp removing this.. Will most likely split the status window from the servers.
 	//This have a true Server & Kademlia window.. We can then add and remove the buttons then..
@@ -2449,6 +2368,18 @@ LRESULT CemuleDlg::OnKickIdle(UINT nWhy, long lIdleCount)
 		}
 	}
 
+	if (searchwnd && searchwnd->m_hWnd)
+	{
+//		searchwnd->SendMessage(WM_IDLEUPDATECMDUI);
+
+		if (theApp.m_app_state != APP_STATE_SHUTINGDOWN)
+		{
+			//extern void Mfc_IdleUpdateCmdUiTopLevelFrameList(CWnd* pMainFrame);
+			//Mfc_IdleUpdateCmdUiTopLevelFrameList(this);
+			theApp.OnIdle(0/*lIdleCount*/);	// NOTE: DO **NOT** CALL THIS WITH 'lIdleCount>0'
+		}
+	}
+
 	return lResult;
 }
 
@@ -2470,6 +2401,86 @@ BOOL CemuleDlg::PreTranslateMessage(MSG* pMsg)
 		UpdateWindow();
 	} 
 	return bResult;
+}
+
+void CemuleDlg::HtmlHelp(DWORD_PTR dwData, UINT nCmd)
+{
+	CWinApp* pApp = AfxGetApp();
+	ASSERT_VALID(pApp);
+	ASSERT(pApp->m_pszHelpFilePath != NULL);
+	// to call HtmlHelp the m_fUseHtmlHelp must be set in
+	// the application's constructor
+	ASSERT(pApp->m_eHelpType == afxHTMLHelp);
+
+	CWaitCursor wait;
+
+	PrepareForHelp();
+
+	// need to use top level parent (for the case where m_hWnd is in DLL)
+	CWnd* pWnd = GetTopLevelParent();
+
+	TRACE(traceAppMsg, 0, _T("HtmlHelp: pszHelpFile = '%s', dwData: $%lx, fuCommand: %d.\n"), pApp->m_pszHelpFilePath, dwData, nCmd);
+
+	bool bHelpError = false;
+	CString strHelpError;
+	int iTry = 0;
+	while (iTry++ < 2)
+	{
+		if (!AfxHtmlHelp(pWnd->m_hWnd, pApp->m_pszHelpFilePath, nCmd, dwData))
+		{
+			bHelpError = true;
+			strHelpError.LoadString(AFX_IDP_FAILED_TO_LAUNCH_HELP);
+
+			typedef struct tagHH_LAST_ERROR
+			{
+				int      cbStruct;
+				HRESULT  hr;
+				BSTR     description;
+			} HH_LAST_ERROR;
+			HH_LAST_ERROR hhLastError = {0};
+			hhLastError.cbStruct = sizeof hhLastError;
+			HWND hwndResult = AfxHtmlHelp(pWnd->m_hWnd, NULL, HH_GET_LAST_ERROR, reinterpret_cast<DWORD>(&hhLastError));
+			if (hwndResult != 0)
+			{
+				if (FAILED(hhLastError.hr))
+				{
+					if (hhLastError.description)
+					{
+						USES_CONVERSION;
+						strHelpError = OLE2T(hhLastError.description);
+						::SysFreeString(hhLastError.description);
+					}
+					if (   hhLastError.hr == 0x8004020A  /*no topics IDs available in Help file*/
+						|| hhLastError.hr == 0x8004020B) /*requested Help topic ID not found*/
+					{
+						// try opening once again without help topic ID
+						if (nCmd != HH_DISPLAY_TOC)
+						{
+							nCmd = HH_DISPLAY_TOC;
+							dwData = 0;
+							continue;
+						}
+					}
+				}
+			}
+			break;
+		}
+		else
+		{
+			bHelpError = false;
+			strHelpError.Empty();
+			break;
+		}
+	}
+
+	if (bHelpError)
+	{
+		if (AfxMessageBox(CString(pApp->m_pszHelpFilePath) + _T("\n\n") + strHelpError + _T("\n\n") + GetResString(IDS_ERR_NOHELP), MB_YESNO | MB_ICONERROR) == IDYES)
+		{
+			CString strUrl = thePrefs.GetHomepageBaseURL() + _T("/home/perl/help.cgi");
+			ShellExecute(NULL, NULL, strUrl, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+		}
+	}
 }
 
 // MightyKnife: extended debug logging

@@ -1174,6 +1174,7 @@
 #define IDS_MORE                        1229
 #define IDS_TOOLS                       1230
 #define IDS_ERR_JIGLENEEDSTYPE          1231
+#define IDS_SEARCHPARAMS                1231
 #define IDS_CREATEHOSTNAMESRCLINK       1232
 #define IDS_HASHINGFILESCOUNT           1233
 #define IDS_CHECKDISKSPACE              1234
@@ -1227,6 +1228,7 @@
 #define IDS_KADUDPPORTERR               1282
 #define IDS_CONFIRM_FILEDELETE          1283
 #define IDS_OPENFOLDER                  1284
+#define IDS_RUNASUSER                   1285
 #define IDS_DELETE                      1286
 #define IDS_BOOTSTRAP                   1287
 #define IDS_VIAED2KSQ                   1288
@@ -1276,7 +1278,7 @@
 #define IDS_DELETEIPFILTERS             1332
 #define IDS_TOTAL_IPFILTER_LABEL        1333
 #define IDS_TOTAL_IPS_LABEL             1334
-#define IDS_DELETE2                     1335
+#define IDS_RAU_WARNING                 1335
 #define IDS_APPEND                      1336
 #define IDS_SAVE                        1337
 #define IDS_IP_START                    1338
@@ -1289,9 +1291,15 @@
 #define IDS_IRC_NOSFS                   1345
 #define IDS_RESETLABEL                  1346
 #define IDS_IRC_IGNOREMISCMESSAGE       1347
-#define IDD_DIRECT_DOWNLOAD             1348
-#define IDS_KNOWN                       1349
-#define IDS_AUXPORTS                    1350
+#define IDD_DIRECT_DOWNLOAD             1347
+#define IDS_KNOWN                       1348
+#define IDD_SEARCH_PARAMS               1348
+#define IDS_RAU_RUNNING                 1349
+#define IDI_KadCurrentSearches          1350
+#define IDS_RAU_FAILED                  1350
+#define IDI_ICON1                       1351
+#define IDS_KADCONTACTSREAD             1351
+#define IDS_ERR_KADCONTACTS             1352
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -1381,6 +1389,7 @@
 #define IDC_SHOWOVERHEAD                2132
 #define IDC_INDICATERATINGS             2133
 #define IDC_USESECIDENT                 2134
+#define IDC_RUNASUSER                   2135
 #define IDC_MMENABLED                   2136
 #define IDC_WIZ_ME_RADIO                2139
 #define IDC_SHOWDWLPERCENT              2140
@@ -1927,6 +1936,12 @@
 #define IDC_DL_ACTIVE_TIME_LBL          2820
 #define IDC_SEARCH_OPTS                 2833
 #define IDC_DISABLEHIST                 2834
+#define IDC_OPEN_PARAMS_WND             2835
+#define IDC_PREVIEW                     2837
+#define IDC_KADICO1                     2838
+#define IDC_KADICO2                     2839
+#define IDC_CATLABEL                    2840
+#define IDC_CATS                        2841
 
 #define IDC_PARTMET                     3345
 #define IDD_PPG_BACKUP                  3378
@@ -2328,7 +2343,7 @@
 #define IDS_COMMUNITYTAG                4890
 #define IDC_RESETBUTTON                 4891
 #define IDC_RICHEDIT21                  4897
-
+#define IDS_AUXPORTS                    5000
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
@@ -2337,9 +2352,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        4878
+#define _APS_NEXT_RESOURCE_VALUE        5001
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         4898
+#define _APS_NEXT_CONTROL_VALUE         5001
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

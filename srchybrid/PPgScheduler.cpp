@@ -22,6 +22,7 @@
 #include "Preferences.h"
 #include "Scheduler.h"
 #include "MenuCmds.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,6 +61,7 @@ BEGIN_MESSAGE_MAP(CPPgScheduler, CPropertyPage)
 	ON_BN_CLICKED(IDC_REMOVE, OnBnClickedRemove)
 	ON_BN_CLICKED(IDC_ENABLE, OnEnableChange)
 	ON_BN_CLICKED(IDC_CHECKNOENDTIME, OnDisableTime2)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 BOOL CPPgScheduler::OnInitDialog()
@@ -355,22 +357,31 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-BOOL CPPgScheduler::OnCommand(WPARAM wParam,LPARAM lParam ){ 
+BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
+{ 
    int item= m_actions.GetSelectionMark(); 
-   // add
-   if (wParam>=MP_SCHACTIONS && wParam<MP_SCHACTIONS+20 && m_actions.GetItemCount()<16) {
+	// add
+	if (wParam>=MP_SCHACTIONS && wParam<MP_SCHACTIONS+20 && m_actions.GetItemCount()<16)
+	{
 		uint8 action=wParam-MP_SCHACTIONS;
 		uint8 i=m_actions.GetItemCount();
 		m_actions.InsertItem(i,GetActionLabel(action));
 		m_actions.SetItemData(i,action);
 		m_actions.SetSelectionMark(i);
-		if (action<6) OnCommand(MP_CAT_EDIT,0);
-   } else
-   if (wParam>=MP_SCHACTIONS+20 && wParam<=MP_SCHACTIONS+80) {
+		if (action<6)
+			OnCommand(MP_CAT_EDIT,0);
+	}
+	else if (wParam>=MP_SCHACTIONS+20 && wParam<=MP_SCHACTIONS+80)
+	{
 	   CString newval;
 	   newval.Format("%i",wParam-MP_SCHACTIONS-22);
 	   m_actions.SetItemText(item,1,newval);
    }
+	else if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
 
    switch (wParam){ 
 		case MP_CAT_EDIT: 
@@ -423,4 +434,15 @@ void CPPgScheduler::OnEnableChange() {
 
 void CPPgScheduler::OnDisableTime2() {
 	GetDlgItem(IDC_DATETIMEPICKER2)->EnableWindow( !IsDlgButtonChecked(IDC_CHECKNOENDTIME) );
+}
+
+void CPPgScheduler::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Scheduler);
+}
+
+BOOL CPPgScheduler::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

@@ -19,6 +19,7 @@
 #include "PPgServer.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -61,6 +62,7 @@ BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_AUTOCONNECTSTATICONLY, OnSettingsChange)
 	ON_BN_CLICKED(IDC_MANUALSERVERHIGHPRIO, OnSettingsChange)
 	ON_BN_CLICKED(IDC_EDITADR, OnBnClickedEditadr)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 
@@ -213,4 +215,25 @@ void CPPgServer::Localize(void)
 void CPPgServer::OnBnClickedEditadr()
 {
 	ShellExecute(NULL, "open", thePrefs.GetTxtEditor(), "\""+CString(thePrefs.GetConfigDir())+"adresses.dat\"", NULL, SW_SHOW); 
+}
+
+void CPPgServer::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Server);
+}
+
+BOOL CPPgServer::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgServer::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

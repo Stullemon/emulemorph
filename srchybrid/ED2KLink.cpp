@@ -277,7 +277,8 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 						m_HostnameSourcesList.AddTail(hostname);
 						continue;
 					}
-					if( IsLowIDED2K(dwID) )	// ip
+					//TODO: This will filter out *.*.*.0 clients. Is there a nice way to fix?
+					if( IsLowID(dwID) )	// ip
 					{	nInvalid++;	continue;	}
 					// SLUGFILLER: hostnameSources
 

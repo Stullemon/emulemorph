@@ -115,7 +115,9 @@ BOOL CEditableListCtrl::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_TAB)
 	{
-		CommitText();
+		CommitEditCtrl();
+		m_iEditRow = -1;
+		m_iEditCol = -1;
 		if (GetKeyState(VK_SHIFT) & 0x8000)
 		{
 			m_iCol--;
@@ -203,7 +205,7 @@ void CEditableListCtrl::OnSetFocus(CWnd* pOldWnd)
 	}
 }
 
-void CEditableListCtrl::CommitText()
+void CEditableListCtrl::CommitEditCtrl()
 {
 	if (m_iEditCol != -1 && m_iEditRow != -1)
 	{
@@ -214,8 +216,8 @@ void CEditableListCtrl::CommitText()
 			strItem.TrimLeft();
 			strItem.TrimRight();
 			SetItemText(m_iEditRow, m_iEditCol, strItem);
-			m_iEditRow = -1;
-			m_iEditCol = -1;
+//			m_iEditRow = -1;
+//			m_iEditCol = -1;
 		}
 		else if (m_pctrlComboBox && m_pctrlComboBox->IsWindowVisible())
 		{
@@ -224,15 +226,10 @@ void CEditableListCtrl::CommitText()
 			strItem.TrimLeft();
 			strItem.TrimRight();
 			SetItemText(m_iEditRow, m_iEditCol, strItem);
-			m_iEditRow = -1;
-			m_iEditCol = -1;
+//			m_iEditRow = -1;
+//			m_iEditCol = -1;
 		}
 	}
-}
-
-void CEditableListCtrl::CommitEditCtrl()
-{
-	CommitText();
 }
 
 void CEditableListCtrl::ShowEditCtrl()
@@ -281,6 +278,8 @@ void CEditableListCtrl::ShowEditCtrl()
 void CEditableListCtrl::OnEnKillFocus()
 {
 	CommitEditCtrl();
+	m_iEditRow = -1;
+	m_iEditCol = -1;
 	if (m_pctrlEdit)
 		m_pctrlEdit->ShowWindow(SW_HIDE);
 }
@@ -373,6 +372,8 @@ void CEditableListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		else if (m_pctrlEdit)
 		{
 			CommitEditCtrl();
+			m_iEditRow = -1;
+			m_iEditCol = -1;
 			m_pctrlEdit->ShowWindow(SW_HIDE);
 		}
 	}
@@ -390,6 +391,8 @@ void CEditableListCtrl::OnLvnBeginScroll(NMHDR *pNMHDR, LRESULT *pResult)
 	if (m_pctrlEdit)
 	{
 		CommitEditCtrl();
+		m_iEditRow = -1;
+		m_iEditCol = -1;
 		m_pctrlEdit->ShowWindow(SW_HIDE);
 	}
 	*pResult = 0;

@@ -177,5 +177,5 @@ private:
 #define MMT_PARTFILFE		0x01
 #define MMT_FINISHEDFILE	0x02
 
-#define MM_VERSION			0x7a
-#define MM_STRVERSION		"0.7a"
+#define MM_VERSION			0x08
+#define MM_STRVERSION		"0.8a"

@@ -23,7 +23,6 @@ protected:
 	void ResetTopPosition();
 	void ResetBottomPosition();
 	void VerifyScrollPos();
-	void CommitText();
 
 	BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 

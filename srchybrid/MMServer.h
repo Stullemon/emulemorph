@@ -64,9 +64,8 @@ public:
 protected:
 	static VOID CALLBACK CommandTimer(HWND hWnd, UINT nMsg, UINT nId, DWORD dwTime);
 	void	DeleteSearchFiles();
-#ifdef	DIRECTX_SDK_AVAILABLE
-	bool CMMServer::GrabAndWriteFrame(int nMaxWidth, CString strFileName, CMMPacket* packet);
-#endif
+	void	WriteFileInfo(CPartFile* selFile, CMMPacket* packet);
+
 private:
 	CListenMMSocket*	m_pSocket;
 	uint16				m_nSessionID;
@@ -76,4 +75,7 @@ private:
 	uint8				m_cPWFailed;
 	uint32				m_dwBlocked;
 	bool				m_bUseFakeContent;
+	uint16				m_nMaxDownloads;
+	uint16				m_nMaxBufDownloads;
+	bool				m_bGrabListLogin;
 };

@@ -29,7 +29,12 @@ public:
 	void	ConnectToServer(CServer* server);
 	sint8	GetConnectionState()	{return connectionstate;} 
 	DWORD	GetLastTransmission() const { return m_dwLastTransmission; }
+	//MORPH START - Changed by SiRoB,	zz Upload System
+	/*
+	bool	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true);
+	*/
 	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+	//MORPH END   - Changed by SiRoB,	zz Upload System
 
 	CString info;
 protected:

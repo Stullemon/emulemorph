@@ -31,6 +31,7 @@
 #include "ServerList.h"
 #include "Sockets.h"
 #include "MuleStatusBarCtrl.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -339,6 +340,11 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_ED2KCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
 	ON_BN_CLICKED(IDC_DD,OnDDClicked)
+	ON_WM_HELPINFO()
+	ON_EN_CHANGE(IDC_IPADDRESS, OnSvrTextChange)
+	ON_EN_CHANGE(IDC_SPORT, OnSvrTextChange)
+	ON_EN_CHANGE(IDC_SNAME, OnSvrTextChange)
+	ON_EN_CHANGE(IDC_SERVERMETURL, OnSvrTextChange)
 END_MESSAGE_MAP()
 
 
@@ -881,4 +887,15 @@ void CServerWnd::OnDDClicked() {
 void CServerWnd::ResetHistory() {
 	if (m_pacServerMetURL!=NULL)
 		m_pacServerMetURL->Clear();
+}
+BOOL CServerWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	theApp.ShowHelp(eMule_FAQ_Update_Server);
+	return TRUE;
+}
+
+void CServerWnd::OnSvrTextChange()
+{
+	GetDlgItem(IDC_ADDSERVER)->EnableWindow(GetDlgItem(IDC_IPADDRESS)->GetWindowTextLength());
+	GetDlgItem(IDC_UPDATESERVERMETFROMURL)->EnableWindow( GetDlgItem(IDC_SERVERMETURL)->GetWindowTextLength()>0 );
 }

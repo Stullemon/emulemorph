@@ -28,6 +28,7 @@
 #include "ListenSocket.h"
 #include "ServerList.h"
 #include "SharedFileList.h"
+#include "UpDownClient.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -506,6 +507,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "eDonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
 
+						DownDataClient = thePrefs.GetDownData_AMULE();
+						if ( DownDataTotal!=0 && DownDataClient!=0 )
+							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "aMule: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
+						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
+
 						DownDataClient = thePrefs.GetDownData_MLDONKEY();
 						if ( DownDataTotal!=0 && DownDataClient!=0 )
 							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
@@ -514,28 +523,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "MLdonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
 
-						DownDataClient = thePrefs.GetDownData_XMULE();
-						if ( DownDataTotal!=0 && DownDataClient!=0 )
-							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
-						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
-
-						DownDataClient = thePrefs.GetDownData_CDONKEY();
-						if ( DownDataTotal!=0 && DownDataClient!=0 )
-							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "cDonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
-						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
-
 						DownDataClient = thePrefs.GetDownData_SHAREAZA();
 						if ( DownDataTotal!=0 && DownDataClient!=0 )
 							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
 						else
 							percentClientTransferred = 0;
 						cbuffer.Format( "Shareaza: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
+						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
+
+						DownDataClient = thePrefs.GetDownData_EMULECOMPAT();
+						if ( DownDataTotal!=0 && DownDataClient!=0 )
+							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 						stattree.SetItemText( down_scb[i] , cbuffer ); i++;
 
 					}
@@ -609,6 +610,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					cbuffer.Format( "%s: %u" , GetResString( IDS_VIAPASSIVE ) , myStats.a[14] );
 					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
 
+					cbuffer.Format("%s: %s, %s: %s (%.1f%%)", _T("UDP File Reasks"), CastItoIShort(theApp.downloadqueue->GetUDPFileReasks()), GetResString(IDS_UFAILED), CastItoIShort(theApp.downloadqueue->GetFailedUDPFileReasks()), theApp.downloadqueue->GetUDPFileReasks() ? (theApp.downloadqueue->GetFailedUDPFileReasks() * 100.0 / theApp.downloadqueue->GetUDPFileReasks()) : 0.0 );
+					stattree.SetItemText( down_sources[i] , cbuffer ); i++;
 				}
 				// Set Download Sessions
 				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
@@ -718,6 +721,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "eDonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
 
+						DownDataClient = thePrefs.GetCumDownData_AMULE();
+						if ( DownDataTotal!=0 && DownDataClient!=0 )
+							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "aMule: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
+						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
+
 						DownDataClient = thePrefs.GetCumDownData_MLDONKEY();
 						if ( DownDataTotal!=0 && DownDataClient!=0 )
 							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
@@ -726,28 +737,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "MLdonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
 
-						DownDataClient = thePrefs.GetCumDownData_XMULE();
-						if ( DownDataTotal!=0 && DownDataClient!=0 )
-							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
-						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
-
-						DownDataClient = thePrefs.GetCumDownData_CDONKEY();
-						if ( DownDataTotal!=0 && DownDataClient!=0 )
-							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "cDonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
-						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
-
 						DownDataClient = thePrefs.GetCumDownData_SHAREAZA();
 						if ( DownDataTotal!=0 && DownDataClient!=0 )
 							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
 						else
 							percentClientTransferred = 0;
 						cbuffer.Format( "Shareaza: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
+						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
+
+						DownDataClient = thePrefs.GetCumDownData_EMULECOMPAT();
+						if ( DownDataTotal!=0 && DownDataClient!=0 )
+							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 						stattree.SetItemText( down_tcb[i] , cbuffer ); i++;
 					}
 					// Downloaded Data By Port
@@ -895,6 +898,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "eDonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
 
+						UpDataClient = thePrefs.GetUpData_AMULE();
+						if ( UpDataTotal!=0 && UpDataClient!=0 )
+							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "aMule: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
+						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
+
 						UpDataClient = thePrefs.GetUpData_MLDONKEY();
 						if ( UpDataTotal!=0 && UpDataClient!=0 )
 							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
@@ -903,28 +914,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "MLdonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
 
-						UpDataClient = thePrefs.GetUpData_XMULE();
-						if ( UpDataTotal!=0 && UpDataClient!=0 )
-							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
-						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
-
-						UpDataClient = thePrefs.GetUpData_CDONKEY();
-						if ( UpDataTotal!=0 && UpDataClient!=0 )
-							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "cDonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
-						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
-
 						UpDataClient = thePrefs.GetUpData_SHAREAZA();
 						if ( UpDataTotal!=0 && UpDataClient!=0 )
 							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
 						else
 							percentClientTransferred = 0;
 						cbuffer.Format( "Shareaza: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
+						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
+
+						UpDataClient = thePrefs.GetUpData_EMULECOMPAT();
+						if ( UpDataTotal!=0 && UpDataClient!=0 )
+							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 						stattree.SetItemText( up_scb[i] , cbuffer ); i++;
 					}
 					// Uploaded Data By Port
@@ -1091,6 +1094,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "eDonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
 
+						UpDataClient = thePrefs.GetCumUpData_AMULE();
+						if ( UpDataTotal!=0 && UpDataClient!=0 )
+							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "aMule: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
+						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
+
 						UpDataClient = thePrefs.GetCumUpData_MLDONKEY();
 						if ( UpDataTotal!=0 && UpDataClient!=0 )
 							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
@@ -1099,28 +1110,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "MLdonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
 
-						UpDataClient = thePrefs.GetCumUpData_XMULE();
-						if ( UpDataTotal!=0 && UpDataClient!=0 )
-							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
-						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
-
-						UpDataClient = thePrefs.GetCumUpData_CDONKEY();
-						if ( UpDataTotal!=0 && UpDataClient!=0 )
-							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( "cDonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
-						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
-
 						UpDataClient = thePrefs.GetCumUpData_SHAREAZA();
 						if ( UpDataTotal!=0 && UpDataClient!=0 )
 							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
 						else
 							percentClientTransferred = 0;
 						cbuffer.Format( "Shareaza: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
+						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
+
+						UpDataClient = thePrefs.GetCumUpData_EMULECOMPAT();
+						if ( UpDataTotal!=0 && UpDataClient!=0 )
+							percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
+						else
+							percentClientTransferred = 0;
+						cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 						stattree.SetItemText( up_tcb[i] , cbuffer ); i++;
 					}
 					// Uploaded Data By Port
@@ -1465,6 +1468,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 								cbuffer.Format( "eDonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
 
+								UpDataClient = (uint64) thePrefs.GetCumUpData_AMULE() * avgModifier[mx];
+								if ( UpDataTotal!=0 && UpDataClient!=0 )
+									percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
+								else
+									percentClientTransferred = 0;
+								cbuffer.Format( "aMule: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
+								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
+
 								UpDataClient = (uint64) thePrefs.GetCumUpData_MLDONKEY() * avgModifier[mx];
 								if ( UpDataTotal!=0 && UpDataClient!=0 )
 									percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
@@ -1473,28 +1484,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 								cbuffer.Format( "MLdonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
 
-								UpDataClient = (uint64) thePrefs.GetCumUpData_XMULE() * avgModifier[mx];
-								if ( UpDataTotal!=0 && UpDataClient!=0 )
-									percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
-								else
-									percentClientTransferred = 0;
-								cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
-								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
-
-								UpDataClient = (uint64) thePrefs.GetCumUpData_CDONKEY() * avgModifier[mx];
-								if ( UpDataTotal!=0 && UpDataClient!=0 )
-									percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
-								else
-									percentClientTransferred = 0;
-								cbuffer.Format( "cDonkey: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
-								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
-
 								UpDataClient = (uint64) thePrefs.GetCumUpData_SHAREAZA() * avgModifier[mx];
 								if ( UpDataTotal!=0 && UpDataClient!=0 )
 									percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
 								else
 									percentClientTransferred = 0;
 								cbuffer.Format( "Shareaza: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
+								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
+
+								UpDataClient = (uint64) thePrefs.GetCumUpData_EMULECOMPAT() * avgModifier[mx];
+								if ( UpDataTotal!=0 && UpDataClient!=0 )
+									percentClientTransferred = (double) 100 * UpDataClient / UpDataTotal;
+								else
+									percentClientTransferred = 0;
+								cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( UpDataClient ), percentClientTransferred );
 								stattree.SetItemText( time_aap_up_dc[mx][i] , cbuffer ); i++;
 							}
 							// Uploaded Data By Port
@@ -1638,6 +1641,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 								cbuffer.Format( "eDonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
 
+								DownDataClient = (uint64) thePrefs.GetCumDownData_AMULE() * avgModifier[mx];
+								if ( DownDataTotal!=0 && DownDataClient!=0 )
+									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+								else
+									percentClientTransferred = 0;
+								cbuffer.Format( "aMule: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
+								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
+
 								DownDataClient = (uint64) thePrefs.GetCumDownData_MLDONKEY() * avgModifier[mx];
 								if ( DownDataTotal!=0 && DownDataClient!=0 )
 									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
@@ -1646,28 +1657,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 								cbuffer.Format( "MLdonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
 
-								DownDataClient = (uint64) thePrefs.GetCumDownData_XMULE() * avgModifier[mx];
-								if ( DownDataTotal!=0 && DownDataClient!=0 )
-									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-								else
-									percentClientTransferred = 0;
-								cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
-								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
-
-								DownDataClient = (uint64) thePrefs.GetCumDownData_CDONKEY() * avgModifier[mx];
-								if ( DownDataTotal!=0 && DownDataClient!=0 )
-									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-								else
-									percentClientTransferred = 0;
-								cbuffer.Format( "cDonkey: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
-								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
-
 								DownDataClient = (uint64) thePrefs.GetCumDownData_SHAREAZA() * avgModifier[mx];
 								if ( DownDataTotal!=0 && DownDataClient!=0 )
 									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
 								else
 									percentClientTransferred = 0;
 								cbuffer.Format( "Shareaza: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
+								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
+
+								DownDataClient = (uint64) thePrefs.GetCumDownData_EMULECOMPAT() * avgModifier[mx];
+								if ( DownDataTotal!=0 && DownDataClient!=0 )
+									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
+								else
+									percentClientTransferred = 0;
+								cbuffer.Format( "eM Compat: %s (%1.1f%%)" , CastItoXBytes( DownDataClient ), percentClientTransferred );
 								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer ); i++;
 							}
 							// Downloaded Data By Port
@@ -1776,13 +1779,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 	//								sions being displayed the way they are, it makes sense.
 	//								Who wants to stare at totally blank tree items?  ;)
 	if (forceUpdate || stattree.IsExpanded(h_clients)) {
-		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkey;
-		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkeyHybrid;
-		CMap<uint16, uint16, uint32, uint32>	clientVersionEMule;
-		CMap<uint16, uint16, uint32, uint32>	clientVersionLMule;
+		CMap<uint32, uint32, uint32, uint32>	clientVersionEDonkey;
+		CMap<uint32, uint32, uint32, uint32>	clientVersionEDonkeyHybrid;
+		CMap<uint32, uint32, uint32, uint32>	clientVersionEMule;
+		CMap<uint32, uint32, uint32, uint32>	clientVersionAMule;
 		uint32									totalclient;
 		int										myStats[15];
-		theApp.clientlist->GetStatistics(totalclient, myStats, &clientVersionEDonkey, &clientVersionEDonkeyHybrid, &clientVersionEMule, &clientVersionLMule);
+
+		theApp.clientlist->GetStatistics(totalclient, myStats, 
+										 clientVersionEDonkey, 
+										 clientVersionEDonkeyHybrid, 
+										 clientVersionEMule, 
+										 clientVersionAMule);
 
 		cbuffer.Format("%s: %u ", GetResString(IDS_CLIENTLIST), totalclient);
 		stattree.SetItemText(cligen[5], cbuffer);
@@ -1801,10 +1809,10 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			cbuffer.Format("eMule: %i (%1.1f%%)",myStats[2],(double)100*myStats[2]/totalclient);stattree.SetItemText(clisoft[0], cbuffer);
 			cbuffer.Format("eD Hybrid: %i (%1.1f%%)",myStats[4],(double)100*myStats[4]/totalclient);stattree.SetItemText(clisoft[1], cbuffer);
 			cbuffer.Format("eDonkey: %i (%1.1f%%)",myStats[1],(double)100*myStats[1]/totalclient);stattree.SetItemText(clisoft[2], cbuffer);
-			cbuffer.Format("eM Compat: %i (%1.1f%%)",myStats[10],(double)100*myStats[10]/totalclient);stattree.SetItemText(clisoft[3], cbuffer);
+			cbuffer.Format("aMule: %i (%1.1f%%)",		myStats[10],(double)100*myStats[10]/totalclient);stattree.SetItemText(clisoft[3], cbuffer);
 			cbuffer.Format("MLdonkey: %i (%1.1f%%)",myStats[3],(double)100*myStats[3]/totalclient);stattree.SetItemText(clisoft[4], cbuffer);
-			cbuffer.Format("cDonkey: %i (%1.1f%%)",myStats[5],(double)100*myStats[5]/totalclient);stattree.SetItemText(clisoft[5], cbuffer);
-			cbuffer.Format("Shareaza: %i (%1.1f%%)",myStats[11],(double)100*myStats[11]/totalclient);stattree.SetItemText(clisoft[6], cbuffer);
+			cbuffer.Format("Shareaza: %i (%1.1f%%)",	myStats[11],(double)100*myStats[11]/totalclient);stattree.SetItemText(clisoft[5], cbuffer);
+			cbuffer.Format("eM Compat: %i (%1.1f%%)",	myStats[ 5],(double)100*myStats[ 5]/totalclient);stattree.SetItemText(clisoft[6], cbuffer);
 			cbuffer.Format(GetResString(IDS_STATS_UNKNOWNCLIENT)+" (%1.1f%%)",myStats[0] , (double)100*myStats[0]/totalclient);stattree.SetItemText(clisoft[7], cbuffer);
 
 			// CLIENTS -> CLIENT SOFTWARE -> EDONKEY SECTION
@@ -1823,7 +1831,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					double topper=0;
 					while(pos)
 					{
-						uint16	ver;
+						uint32	ver;
 						uint32	cnt;
 						clientVersionEDonkey.GetNextAssoc(pos, ver, cnt);
 						if(currtop<ver && ver<lasttop )
@@ -1885,7 +1893,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					double topper=0;
 					while(pos)
 					{
-						uint16	ver;
+						uint32	ver;
 						uint32	cnt;
 						clientVersionEDonkeyHybrid.GetNextAssoc(pos, ver, cnt);
 						if(currtop<ver && ver<lasttop )
@@ -1953,7 +1961,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					double topper=0;
 					while(pos)
 					{
-						uint16	ver;
+						uint32	ver;
 						uint32	cnt;
 						clientVersionEMule.GetNextAssoc(pos, ver, cnt);
 						if(currtop<ver && ver<lasttop )
@@ -1972,7 +1980,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						UINT verMaj = topver/(100*10*100);
 						UINT verMin = (topver - (verMaj*100*10*100))/(100*10);
 						UINT verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
+						if (topver >= MAKE_CLIENT_VERSION(0,40,0) || verUp != 0){
+							if (verUp < 26)
+								cbuffer.Format("v%u.%u%c: %i (%1.1f%%)", verMaj, verMin, _T('a') + verUp, topcnt, topper*100);
+							else
 						cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
+					}
+					else 
+							cbuffer.Format("v%u.%u: %i (%1.1f%%)", verMaj, verMin, topcnt, topper*100);
 					}
 					else 
 						continue;
@@ -2058,18 +2073,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				uint32	totalOther = 0;
 				for(uint32 i=0; i<8; i++)
 				{
-					POSITION pos=clientVersionLMule.GetStartPosition();
+					POSITION pos=clientVersionAMule.GetStartPosition();
 					uint32 topver=0;
 					uint32 topcnt=0;
 					double topper=0;
 					while(pos)
 					{
-						uint16	ver;
+						uint32	ver;
 						uint32	cnt;
-						clientVersionLMule.GetNextAssoc(pos, ver, cnt);
+						clientVersionAMule.GetNextAssoc(pos, ver, cnt);
 						if(currtop<ver && ver<lasttop )
 						{
-							if (ver==0xFFFFFFFF || ver==0xFF  ) continue;
+							if (ver==0xFFFFFFFF) continue;
 							topper=(double)cnt/myStats[10];
 							topver=ver;
 							topcnt=cnt;
@@ -2083,7 +2098,10 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						UINT verMaj = topver/(100*10*100);
 						UINT verMin = (topver - (verMaj*100*10*100))/(100*10);
 						UINT verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
+						if (topver >= MAKE_CLIENT_VERSION(0,40,0) || verUp != 0)
 						cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
+						else
+							cbuffer.Format("v%u.%u: %i (%1.1f%%)", verMaj, verMin, topcnt, topper*100);
 					}
 					else
 						continue;
@@ -2108,7 +2126,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					if ((cli_lastCount[3]+23-i) == 4) stattree.DeleteItem(cli_other[3]);
 				}
 				cli_lastCount[3] = verCount;
-			} // - End Clients -> Client Software -> eM Compat Section
+			} // End Clients -> Client Software -> aMule Section
 
 		} // - End Clients -> Client Software Section
 		// CLIENTS -> PORT SECTION
@@ -2138,35 +2156,35 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 		float	servocc;
 		theApp.serverlist->GetStatus( servtotal, servfail, servuser, servfile, servtuser, servtfile, servocc);
 		// Set working servers value
-		cbuffer.Format("%s: %i",GetResString(IDS_SF_WORKING),servtotal-servfail);stattree.SetItemText(srv[0], cbuffer);
+		cbuffer.Format("%s: %s",GetResString(IDS_SF_WORKING),CastItoIShort(servtotal-servfail));stattree.SetItemText(srv[0], cbuffer);
 		if (forceUpdate || stattree.IsExpanded(srv[0])) {			
 			// Set users on working servers value
-			cbuffer.Format("%s: %i",GetResString(IDS_SF_WUSER),servuser);stattree.SetItemText(srv_w[0], cbuffer);
+			cbuffer.Format("%s: %s",GetResString(IDS_SF_WUSER),CastItoIShort(servuser));stattree.SetItemText(srv_w[0], cbuffer);
 			// Set files on working servers value
-			cbuffer.Format("%s: %i",GetResString(IDS_SF_WFILE),servfile);stattree.SetItemText(srv_w[1], cbuffer);
+			cbuffer.Format("%s: %s",GetResString(IDS_SF_WFILE),CastItoIShort(servfile));stattree.SetItemText(srv_w[1], cbuffer);
 			// Set server occ value
 			cbuffer.Format(GetResString(IDS_SF_SRVOCC),servocc);stattree.SetItemText(srv_w[2], cbuffer);
 		}
 		// Set failed servers value
-		cbuffer.Format("%s: %i",GetResString(IDS_SF_FAIL),servfail);stattree.SetItemText(srv[1], cbuffer);
+		cbuffer.Format("%s: %s",GetResString(IDS_SF_FAIL),CastItoIShort(servfail));stattree.SetItemText(srv[1], cbuffer);
 		// Set deleted servers value
-		cbuffer.Format("%s: %i",GetResString(IDS_SF_DELCOUNT),theApp.serverlist->GetDeletedServerCount());stattree.SetItemText(srv[2], cbuffer);
+		cbuffer.Format("%s: %s",GetResString(IDS_SF_DELCOUNT),CastItoIShort(theApp.serverlist->GetDeletedServerCount()));stattree.SetItemText(srv[2], cbuffer);
 		// Set total servers value
-		cbuffer.Format("%s: %i",GetResString(IDS_SF_TOTAL),servtotal);stattree.SetItemText(srv[3], cbuffer);
+		cbuffer.Format("%s: %s",GetResString(IDS_SF_TOTAL),CastItoIShort(servtotal));stattree.SetItemText(srv[3], cbuffer);
 		// Set total users value
-		cbuffer.Format("%s: %i",GetResString(IDS_SF_USER),servtuser);stattree.SetItemText(srv[4], cbuffer);
+		cbuffer.Format("%s: %s",GetResString(IDS_SF_USER),CastItoIShort(servtuser));stattree.SetItemText(srv[4], cbuffer);
 		// Set total files value
-		cbuffer.Format("%s: %i",GetResString(IDS_SF_FILE),servtfile);stattree.SetItemText(srv[5], cbuffer);
+		cbuffer.Format("%s: %s",GetResString(IDS_SF_FILE),CastItoIShort(servtfile));stattree.SetItemText(srv[5], cbuffer);
 		// SERVERS -> RECORDS SECTION
 		if (forceUpdate || stattree.IsExpanded(hsrv_records)) {			
 			// Set most working servers
-			cbuffer.Format("%s: %u", GetResString(IDS_STATS_SVRECWORKING), thePrefs.GetSrvrsMostWorkingServers() );
+			cbuffer.Format("%s: %s", GetResString(IDS_STATS_SVRECWORKING), CastItoIShort(thePrefs.GetSrvrsMostWorkingServers()));
 			stattree.SetItemText(srv_r[0], cbuffer);
 			// Set most users online
-			cbuffer.Format("%s: %u", GetResString(IDS_STATS_SVRECUSERS), thePrefs.GetSrvrsMostUsersOnline() );
+			cbuffer.Format("%s: %s", GetResString(IDS_STATS_SVRECUSERS), CastItoIShort(thePrefs.GetSrvrsMostUsersOnline()));
 			stattree.SetItemText(srv_r[1], cbuffer);
 			// Set most files avail
-			cbuffer.Format("%s: %u", GetResString(IDS_STATS_SVRECFILES), thePrefs.GetSrvrsMostFilesAvail() );
+			cbuffer.Format("%s: %s", GetResString(IDS_STATS_SVRECFILES), CastItoIShort(thePrefs.GetSrvrsMostFilesAvail()));
 			stattree.SetItemText(srv_r[2], cbuffer);
 		} // - End Servers -> Records Section
 	} // - END SERVERS SECTION
@@ -2486,7 +2504,7 @@ void CStatisticsDlg::CreateMyTree() {
 		for(int i = 0; i<7; i++) down_scb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_scb);
 	  hdown_spb= stattree.InsertItem(GetResString(IDS_PORT),down_S[0]);							// Ports Section
 		for(int i = 0; i<2; i++) down_spb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_spb);
-		for(int i = 0; i<17; i++) down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
+		for(int i = 0; i<18; i++) down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
 		for(int i = 0; i<4; i++) down_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[4]);
 	hdown_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_session);				// Downline Overhead (Session)
 		for(int i = 0; i<ARRSIZE(down_soh); i++) down_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_soh);

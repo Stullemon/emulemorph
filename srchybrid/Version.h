@@ -30,8 +30,8 @@
 //
 #define VERSION_MJR		0
 #define VERSION_MIN		42
-#define VERSION_UPDATE	4
-#define VERSION_BUILD	27
+#define VERSION_UPDATE	6
+#define VERSION_BUILD	41
 #ifdef _DEBUG
   #ifdef _UNICODE
     #define VERSION_SPECIAL_BUILD	_T(" - Unicode Debug")
@@ -46,6 +46,6 @@
   #endif
 #endif
 
-#define MOD_VERSION		_T("MorphXT v2.8") //MORPH - Added by SiRoB
+#define MOD_VERSION		_T("MorphXT v2.9") //MORPH - Added by SiRoB
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE) _T(" [") MOD_VERSION _T("]")
 #endif /* !__VERSION_H__ */

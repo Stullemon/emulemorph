@@ -21,6 +21,7 @@
 #include "emuledlg.h"
 #include "Preferences.h"
 #include "IrcWnd.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -41,6 +42,7 @@ BEGIN_MESSAGE_MAP(CPPgIRC, CPropertyPage)
 	ON_EN_CHANGE(IDC_IRC_MINUSER_BOX, OnSettingsChange)
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgIRC::CPPgIRC()
@@ -347,4 +349,25 @@ LRESULT CPPgIRC::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		SetModified();
 	}
 	return 0;
+}
+
+void CPPgIRC::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_IRC);
+}
+
+BOOL CPPgIRC::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgIRC::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

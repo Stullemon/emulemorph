@@ -44,6 +44,7 @@ CBarShader::CBarShader(uint32 height, uint32 width) {
 	m_uFileSize = 1;
 	m_Spans.SetAt(0, 0);	// SLUGFILLER: speedBarShader
 	m_Modifiers = NULL;
+	m_bIsPreview=false;
 }
 
 CBarShader::~CBarShader(void) {
@@ -60,14 +61,15 @@ void CBarShader::BuildModifiers() {
 		m_Modifiers = NULL; // 'new' may throw an exception
 	}
 
-	m_used3dlevel=thePrefs.Get3DDepth();
+	if (!m_bIsPreview) 
+		m_used3dlevel=thePrefs.Get3DDepth();
 	// Barry - New property page slider to control depth of gradient
 
 	// Depth must be at least 2
 	// 2 gives greatest depth, the higher the value, the flatter the appearance
 	// m_Modifiers[count-1] will always be 1, m_Modifiers[0] depends on the value of depth
-	
-	int depth = (7-thePrefs.Get3DDepth());
+
+	int depth = (7-m_used3dlevel);
 	int count = HALF(m_iHeight);
 	double piOverDepth = PI/depth;
 	double base = piOverDepth * ((depth / 2.0) - 1);
@@ -226,7 +228,7 @@ void CBarShader::FillRect(CDC *dc, LPRECT rectSpan, float fRed, float fGreen,
 		dc->FillRect(rectSpan, &CBrush(color));
 
 	} else {
-		if (m_Modifiers == NULL || m_used3dlevel!=thePrefs.Get3DDepth())
+		if (m_Modifiers == NULL || (m_used3dlevel!=thePrefs.Get3DDepth() && !m_bIsPreview) )
 			BuildModifiers();
 		RECT rect = *rectSpan;
 		int iTop = rect.top;
@@ -244,4 +246,13 @@ void CBarShader::FillRect(CDC *dc, LPRECT rectSpan, float fRed, float fGreen,
 			dc->FillRect(&rect, &cbNew);
 		}
 	}
+}
+
+void CBarShader::DrawPreview(CDC* dc, int iLeft, int iTop, uint8 previewLevel)		//Cax2 aqua bar
+{
+	m_bIsPreview=true;
+	m_used3dlevel = previewLevel;
+	BuildModifiers();
+	Draw( dc, iLeft, iTop, (previewLevel==0));
+	m_bIsPreview=false;
 }

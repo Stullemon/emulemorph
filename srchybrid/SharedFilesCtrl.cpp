@@ -34,6 +34,7 @@
 #include "Opcodes.h"
 #include "InputBox.h"
 #include "WebServices.h"
+#include "TransferWnd.h"
 
 // Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
@@ -726,6 +727,7 @@ BEGIN_MESSAGE_MAP(CSharedFilesCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
+	ON_WM_KEYDOWN()
 	// Mighty Knife: CRC32-Tag - Save rename
 	ON_MESSAGE(WM_CRC32_RENAMEFILE,	OnCRC32RenameFile)
 	ON_MESSAGE(WM_CRC32_UPDATEFILE, OnCRC32UpdateFile)
@@ -997,7 +999,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				{
 					file = selectedList.GetNext(pos);
 					if (!str.IsEmpty())
-						str += _T("\r\n");
+						str += _T("<br />\r\n");
 					str += CreateHTMLED2kLink(file);
 				}
 				theApp.CopyTextToClipboard(str);
@@ -1083,6 +1085,8 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						UpdateFile(file);
 					}
 				}
+				else if (wParam == MPG_F2)
+					MessageBeep((UINT)-1);
 				break;
 			case MP_REMOVE:
 			case MPG_DELETE:{
@@ -1118,8 +1122,11 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							delsucc = (SHFileOperation(&fp) == 0);
 						}
 					}
-					if (delsucc)
+					if (delsucc){
 						theApp.sharedfiles->RemoveFile(myfile);
+						if (myfile->IsKindOf(RUNTIME_CLASS(CPartFile)))
+							theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(myfile));
+					}
 					else{
 						CString strError;
 						strError.Format(_T("Failed to delete file \"%s\"\r\n\r\n%s"), myfile->GetFilePath(), GetErrorMessage(GetLastError()));
@@ -1956,7 +1963,7 @@ void CSharedFilesCtrl::CreateMenues()
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_OPENFILE));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPENFOLDER, GetResString(IDS_OPENFOLDER));
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RENAME, GetResString(IDS_RENAME));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RENAME, GetResString(IDS_RENAME) + _T("..."));
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_DELETE));
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
@@ -2045,4 +2052,14 @@ void CSharedFilesCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 	}
 	*pResult = 0;
+}
+void CSharedFilesCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+C: Copy listview items to clipboard
+		SendMessage(WM_COMMAND, MP_GETED2KLINK);
+		return;
+	}
+	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }

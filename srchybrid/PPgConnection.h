@@ -10,24 +10,27 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_PPG_CONNECTION };
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	DECLARE_MESSAGE_MAP()
-public:
-	virtual BOOL OnInitDialog();
+
+	void Localize(void);
 	void LoadSettings(void);
-	
+
+protected:
+	bool guardian;
+
+	void ShowLimitValues();
+
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnEnChangeUDPDisable();
 	afx_msg void OnLimiterChange();
 	afx_msg void OnBnClickedWizard();
-	void Localize(void);
-
-private:
-	void ShowLimitValues();
-	bool guardian;
-public:
 	afx_msg void OnBnClickedNetworkKademlia();
+	afx_msg void OnHelp();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

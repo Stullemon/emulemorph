@@ -180,7 +180,7 @@ void CFriendList::ShowFriends() const {
 bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
 							uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash){
 	// client must have an IP (HighID) or a hash
-	if (IsLowIDED2K(dwLastUsedIP) && dwHasHash==0)
+	if (IsLowID(dwLastUsedIP) && dwHasHash==0)
 		return false;
 	if( dwLastUsedIP && IsAlreadyFriend(dwLastUsedIP, nLastUsedPort))
 		return false;

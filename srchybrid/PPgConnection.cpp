@@ -26,7 +26,7 @@
 #include "Opcodes.h"
 #include "StatisticsDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
-
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -52,7 +52,6 @@ void CPPgConnection::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
-
 	ON_EN_CHANGE(IDC_DOWNLOAD_CAP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UDPDISABLE, OnEnChangeUDPDisable)
 	ON_EN_CHANGE(IDC_UDPPORT, OnEnChangeUDPDisable)
@@ -65,12 +64,11 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	ON_BN_CLICKED(IDC_WIZARD, OnBnClickedWizard)
 	ON_BN_CLICKED(IDC_NETWORK_ED2K, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWOVERHEAD, OnSettingsChange)
-
 	ON_BN_CLICKED(IDC_ULIMIT_LBL, OnLimiterChange)
 	ON_BN_CLICKED(IDC_DLIMIT_LBL, OnLimiterChange)
-
 	ON_WM_HSCROLL()
 	ON_BN_CLICKED(IDC_NETWORK_KADEMLIA, OnBnClickedNetworkKademlia)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 
@@ -435,6 +433,7 @@ void CPPgConnection::OnLimiterChange() {
 	ShowLimitValues();
 	SetModified(TRUE);	
 }
+
 void CPPgConnection::OnBnClickedNetworkKademlia()
 {
 	if ( ((CButton*)GetDlgItem(IDC_NETWORK_KADEMLIA))->GetCheck() == BST_CHECKED){
@@ -442,4 +441,25 @@ void CPPgConnection::OnBnClickedNetworkKademlia()
 			((CButton*)GetDlgItem(IDC_NETWORK_KADEMLIA))->SetCheck(BST_UNCHECKED);
 	}
 	OnSettingsChange();
+}
+
+void CPPgConnection::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Connection);
+}
+
+BOOL CPPgConnection::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgConnection::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

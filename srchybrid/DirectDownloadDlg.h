@@ -32,6 +32,7 @@ public:
 
 protected:
 	CIconStatic m_ctrlDirectDlFrm;
+	CTabCtrl	m_cattabs;
 
 	void UpdateControls();
 
@@ -43,4 +44,6 @@ protected:
 	afx_msg void OnEnKillfocusElink();
 public:
 	afx_msg void OnEnUpdateElink();
+private:
+	void UpdateCatTabs();
 };

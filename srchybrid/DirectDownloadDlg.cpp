@@ -21,6 +21,7 @@
 #include "emuleDlg.h"
 #include "DownloadQueue.h"
 #include "ED2KLink.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -51,6 +52,7 @@ void CDirectDownloadDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_DDOWN_FRM, m_ctrlDirectDlFrm);
+	DDX_Control(pDX, IDC_CATS, m_cattabs);
 }
 
 void CDirectDownloadDlg::UpdateControls()
@@ -95,10 +97,12 @@ void CDirectDownloadDlg::OnOK()
 					
 					//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 					/*
-					theApp.downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), 0);
+					theApp.downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), 
+						(thePrefs.GetCatCount()==0)?0 : m_cattabs.GetCurSel() );
 					/*/
 					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
-					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, -1, true);
+					theApp.downloadqueue->AddFileLinkToDownload(pFileLink,
+						 thePrefs.SelectCatForNewDL()?-1:(thePrefs.GetCatCount()==0)?0 : m_cattabs.GetCurSel(), true);
 					/**/
 					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
@@ -134,16 +138,50 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 	AddAnchor(IDC_ELINK, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDCANCEL, BOTTOM_RIGHT);
 	AddAnchor(IDOK, BOTTOM_RIGHT);
+
+	AddAnchor(IDC_CATLABEL, BOTTOM_LEFT);
+	AddAnchor(IDC_CATS, BOTTOM_LEFT,BOTTOM_RIGHT);
+
 	EnableSaveRestore(PREF_INI_SECTION);
 
 	SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
 	m_ctrlDirectDlFrm.Init("Download");
 	m_ctrlDirectDlFrm.SetWindowText(GetResString(IDS_SW_DIRECTDOWNLOAD));
 	m_ctrlDirectDlFrm.SetText(GetResString(IDS_SW_DIRECTDOWNLOAD));
+    GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_DOWNLOAD));
     GetDlgItem(IDC_FSTATIC2)->SetWindowText(GetResString(IDS_SW_LINK));
+	GetDlgItem(IDC_CATLABEL)->SetWindowText(GetResString(IDS_CAT)+":");
+
+	if (thePrefs.GetCatCount()==0) {
+		GetDlgItem(IDC_CATLABEL)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_CATS)->ShowWindow(SW_HIDE);
+	}
+	else {
+		UpdateCatTabs();
+		if (theApp.emuledlg->m_fontMarlett.m_hObject){
+			GetDlgItem(IDC_CATLABEL)->SetFont(&theApp.emuledlg->m_fontMarlett);
+			GetDlgItem(IDC_CATLABEL)->SetWindowText(_T("8")); // show a right-arrow
+		}
+
+	}
 
 	UpdateControls();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CDirectDownloadDlg::UpdateCatTabs() {
+	int oldsel=m_cattabs.GetCurSel();
+	m_cattabs.DeleteAllItems();
+	//MORPH START - Added by SiRoB, Selection category support
+	if (thePrefs.SelectCatForNewDL())
+		return;
+	//MORPH END   - Added by SiRoB, Selection category support
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
+	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
+		oldsel=0;
+
+	m_cattabs.SetCurSel(oldsel);
 }

@@ -70,44 +70,28 @@ public:
 	~CDownloadQueue();
 	void	Process();
 	void	Init();
+	// add/remove entries
+	void	AddPartFilesToShare();
+	void	AddDownload(CPartFile* newfile, bool paused);
 	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 	//Modified these three functions by adding and in some cases removing params.
 	void	AddSearchToDownload(CSearchFile* toadd,uint8 paused=2,uint8 cat=0, uint16 useOrder = 0);
 	void	AddSearchToDownload(CString link,uint8 paused=2, uint8 cat=0, uint16 useOrder = 0);
 	void	AddFileLinkToDownload(class CED2KFileLink* pLink, int cat=0, bool AllocatedLink = false);
 	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
+	void	RemoveFile(CPartFile* toremove);
+	void	DeleteAll();
+
+	int		GetFileCount()						{return filelist.GetCount();}
+	UINT	GetDownloadingFileCount() const;
+	uint16	GetPausedFileCount();
+
 	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true);
 	bool	IsPartFile(const CKnownFile* file) const;
 	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName) const;	// SLUGFILLER: SafeHash
 	CPartFile* GetFileByID(const uchar* filehash) const;
 	CPartFile* GetFileByIndex(int index) const;
 	CPartFile* GetFileByKadFileSearchID(uint32 ID) const;
-	void    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
-	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
-	bool	RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate = true);
-	void	DeleteAll();
-	void	RemoveFile(CPartFile* toremove);
-	uint32	GetDatarate()			{return datarate;}
-	void	SortByPriority();
-	void	CheckDiskspace(bool bNotEnoughSpaceLeft = false); // SLUGFILLER: checkDiskspace
-	void	CheckDiskspaceTimed();
-	void	StopUDPRequests();
-	typedef struct{
-		int	a[19];
-	} SDownloadStats;
-	void	GetDownloadStats(SDownloadStats& results);
-	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
-	void	AddPartFilesToShare();
-
-	// SLUGFILLER: mergeKnown - include part files in known.met
-	void	SavePartFilesToKnown(CFileDataIO* file);
-	uint32	GetPartFilesCount();
-	// SLUGFILLER: mergeKnown
-
-	void	AddDownload(CPartFile* newfile, bool paused);
-	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
-	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
-	
 	// khaos::categorymod+
 	//void	StartNextFile()									{ StartNextFile(-1); }
 	//void	StartNextFile(int cat);	
@@ -122,6 +106,31 @@ public:
 	uint8	GetAutoCat(CString sFullName, ULONG nFileSize);
 	bool	ApplyFilterMask(CString sFullName, uint8 nCat);
 	// khaos::categorymod-
+
+	void	DisableAllA4AFAuto(void);
+
+	// SLUGFILLER: mergeKnown - include part files in known.met
+	void	SavePartFilesToKnown(CFileDataIO* file);
+	uint32	GetPartFilesCount();
+	// SLUGFILLER: mergeKnown
+
+	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
+	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
+	bool	IsInList(const CUpDownClient* client) const;
+
+	void    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
+	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
+	bool	RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate = true);
+
+	// statistics
+	typedef struct{
+		int	a[19];
+	} SDownloadStats;
+	void	GetDownloadStats(SDownloadStats& results);
+	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
+	uint32	GetDatarate()			{return datarate;}
+	void	CompDownDatarateOverhead();
+
 	void	AddDownDataOverheadSourceExchange(uint32 data)	{ m_nDownDataRateMSOverhead += data;
 															  m_nDownDataOverheadSourceExchange += data;
 															  m_nDownDataOverheadSourceExchangePackets++;}
@@ -148,29 +157,41 @@ public:
 	uint64	GetDownDataOverheadServerPackets()			{return m_nDownDataOverheadServerPackets;}
 	uint64	GetDownDataOverheadKadPackets()				{return m_nDownDataOverheadKadPackets;}
 	uint64	GetDownDataOverheadOtherPackets()			{return m_nDownDataOverheadOtherPackets;}
-	void	CompDownDatarateOverhead();
-	int		GetFileCount()						{return filelist.GetCount();}
+	void	AddUDPFileReasks()								{m_nUDPFileReasks++;}
+	uint32	GetUDPFileReasks() const						{return m_nUDPFileReasks;}
+	void	AddFailedUDPFileReasks()						{m_nFailedUDPFileReasks++;}
+	uint32	GetFailedUDPFileReasks() const					{return m_nFailedUDPFileReasks;}
+
+	// categories
 	// khaos::categorymod+	
 	void	ResetCatParts(int cat, uint8 useCat = 0);
 	// khaos::categorymod-
 	void	SetCatPrio(int cat, uint8 newprio);
 	void	SetCatStatus(int cat, int newstatus);
 	void	MoveCat(uint8 from, uint8 to);
-	UINT	GetDownloadingFileCount() const;
-	uint16	GetPausedFileCount();
-	void	DisableAllA4AFAuto(void);
 	//MORPH START - Removed by SiRoB, Due to Khaos Categorie
 	/*
 	void	SetAutoCat(CPartFile* newfile);
 	*/
 	//MORPH END   - Removed by SiRoB, Due to Khaos Categorie
+	// searching on local server
 	void	SendLocalSrcRequest(CPartFile* sender);
 	void	RemoveLocalServerRequest(CPartFile* pFile);
 	void	ResetLocalServerRequests();
-	bool 	IsInList(const CUpDownClient* client) const;
+
+	// searching in Kad
 	void	SetLastKademliaFileRequest()	{lastkademliafilerequest = ::GetTickCount();}
 	bool	DoKademliaFileRequest();
 	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
+
+	// searching on global servers
+	void	StopUDPRequests();
+
+	// check diskspace
+	void	SortByPriority();
+	void	CheckDiskspace(bool bNotEnoughSpaceLeft = false); // SLUGFILLER: checkDiskspace
+	void	CheckDiskspaceTimed();
+
 	void	ExportPartMetFilesOverview() const;
 	void	OnConnectionState(bool bConnected);
 
@@ -221,6 +242,8 @@ private:
 	uint64		m_nDownDataOverheadOtherPackets;
 	uint64		m_nDownDataOverheadKad;
 	uint64		m_nDownDataOverheadKadPackets;
+	uint32		m_nUDPFileReasks;
+	uint32		m_nFailedUDPFileReasks;
 
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {

@@ -217,9 +217,9 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 
 		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 		/*
-		CTag tagFlags(CT_SERVER_FLAGS,0x00000001);
+		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS);
 		*/
-		CTag tagFlags(CT_SERVER_FLAGS,0x00000005); // aux port compatable client
+		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | 0x00000004); // aux port compatable client
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		tagFlags.WriteTagToFile(&data);
 
@@ -581,5 +581,5 @@ void CServerConnect::KeepConnectionAlive()
 
 bool CServerConnect::IsLowID()
 {
-	return IsLowIDED2K(clientid);
+	return ::IsLowID(clientid);
 }

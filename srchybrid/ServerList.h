@@ -18,7 +18,7 @@
 #include "Loggable.h"
 
 class CPartFile; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
-class CPreferences;
+
 class CServer;
 
 class CServerList: public CLoggable

@@ -20,6 +20,7 @@
 #include "Preferences.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -101,6 +102,7 @@ BEGIN_MESSAGE_MAP(CPPgNotify, CPropertyPage)
 	ON_BN_CLICKED(IDC_CB_TBN_ONNEWVERSION, OnSettingsChange)
 	ON_EN_CHANGE(IDC_EDIT_TBN_WAVFILE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CB_TBN_ONNEWDOWNLOAD, OnSettingsChange)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 
@@ -154,4 +156,25 @@ void CPPgNotify::OnBnClickedUseSound()
 {
 	GetDlgItem(IDC_EDIT_TBN_WAVFILE)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
 	GetDlgItem(IDC_BTN_BROWSE_WAV)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
+}
+
+void CPPgNotify::OnHelp()
+{
+	theApp.ShowHelp(eMule_FAQ_Preferences_Notifications);
+}
+
+BOOL CPPgNotify::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == ID_HELP)
+	{
+		OnHelp();
+		return TRUE;
+	}
+	return __super::OnCommand(wParam, lParam);
+}
+
+BOOL CPPgNotify::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	OnHelp();
+	return TRUE;
 }

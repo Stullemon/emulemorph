@@ -101,8 +101,12 @@ CUploadQueue::CUploadQueue()
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	// By BadWolf - Accurate Speed Measurement
 	sumavgUDRO = 0;
-	//Removed by SiRoB, Not used in this mod
 	// END By BadWolf - Accurate Speed Measurement
+	//Removed by SiRoB, Not used in this mod
+	/*
+	m_bRemovedClientByScore = false;
+	*/
+	
 
 //MORPH START - Added by SiRoB, ZZ Upload System 20040213-1623
 	m_MaxActiveClients = 0;
@@ -1088,7 +1092,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 	//EastShare End - added by AndCycle, Pay Back First
 
 	if(!reason.IsEmpty())
-		theApp.emuledlg->QueueDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
+		theApp.QueueDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
 	uploadinglist.RemoveAt(pos);
 	theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
 
@@ -1197,11 +1201,12 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 		const uint32 score = client->GetScore(true, true);
 
 		// Check if another client has a bigger score
-		if (score<GetMaxClientScore()) {
+		if (score < GetMaxClientScore() && !m_bRemovedClientByScore) {
 			if (thePrefs.GetVerbose())
 				AddDebugLogLine(false, "%s: Upload session ended due to score.", client->GetUserName());
-				return true;
-			}
+			m_bRemovedClientByScore = true; //makes sure only one client gets removed per round, so we the best score can be recalculated after the next has its downloadslot
+			return true;
+		}
 	}
 	else{
 		// Allow the client to download a specified amount per session
@@ -1279,10 +1284,11 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		if (!theApp.emuledlg->IsRunning())
 			return;
 		//MORPH START - Added by SiRoB, ZZ UPload System 20030818-1923
-		// Elandal:ThreadSafeLogging -->
-		// other threads may have queued up log lines. This prints them.
-		theApp.emuledlg->HandleDebugLogQueue();
-        theApp.emuledlg->HandleLogQueue();
+        // Elandal:ThreadSafeLogging -->
+        // other threads may have queued up log lines. This prints them.
+		theApp.HandleDebugLogQueue();
+        theApp.HandleLogQueue();
+        // Elandal: ThreadSafeLogging <--
 		// Elandal: ThreadSafeLogging <--
 
 		// Send allowed data rate to UploadBandWidthThrottler in a thread safe way
@@ -1389,7 +1395,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				if (thePrefs.ShowCatTabInfos() && 
 					theApp.emuledlg->activewnd == theApp.emuledlg->transferwnd && 
 					theApp.emuledlg->IsWindowVisible()) 
-						theApp.emuledlg->transferwnd->UpdateCatTabTitles();
+						theApp.emuledlg->transferwnd->UpdateCatTabTitles(false);
 				
 				if (thePrefs.IsSchedulerEnabled())
 					theApp.scheduler->Check();

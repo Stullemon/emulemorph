@@ -178,17 +178,6 @@ void UploadBandwidthThrottler::RemoveFromStandardList(CEMSocket* socket) {
  *               does not exist in the list, this method will do nothing.
  */
 void UploadBandwidthThrottler::RemoveFromStandardListNoLock(CEMSocket* socket) {
-//MORPH START - Changed by SiRoB, Maybe the freeze fix
-    // Find the slot
-    INT_PTR slotCounter = m_StandardOrder_list.GetSize();
-    while(slotCounter--) {
-        if(m_StandardOrder_list.GetAt(slotCounter) == socket) {
-            // Remove the slot
-            m_StandardOrder_list.RemoveAt(slotCounter);
-            break;
-		}
-    }
-/*
     // Find the slot
     int slotCounter = 0;
     bool foundSocket = false;
@@ -201,8 +190,6 @@ void UploadBandwidthThrottler::RemoveFromStandardListNoLock(CEMSocket* socket) {
             slotCounter++;
         }
     }
-*/
-//MORPH END   - Changed by SiRoB, Maybe the freeze fix
 }
 
 /**
@@ -379,7 +366,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         const DWORD thisLoopTick = ::GetTickCount();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
         if(timeSinceLastLoop > 1*1000) {
-			theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long (%i).", timeSinceLastLoop);
+			theApp.QueueDebugLogLine(false,"UploadBandwidthThrottler: Time since last loop too long (%i).", timeSinceLastLoop);
 
             timeSinceLastLoop = 1*1000;
             lastLoopTick = thisLoopTick - timeSinceLastLoop;
@@ -450,7 +437,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						}
                		}
         	    } else {
-                	theApp.emuledlg->QueueDebugLogLine(false,"There was a NULL socket in the UploadBandwidthThrottler Standard list (trickle)! Prevented usage. Index: %i Size: %i", slotCounter, m_StandardOrder_list.GetSize());
+                	theApp.QueueDebugLogLine(false,"There was a NULL socket in the UploadBandwidthThrottler Standard list (trickle)! Prevented usage. Index: %i Size: %i", slotCounter, m_StandardOrder_list.GetSize());
            		}
         	}
 
@@ -474,7 +461,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                         	highestNumberOfFullyActivatedSlots = slotCounter+1;
                     	}
                 	} else {
-                    	theApp.emuledlg->QueueDebugLogLine(false,"There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i", slotCounter, m_StandardOrder_list.GetSize());
+                    	theApp.QueueDebugLogLine(false,"There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i", slotCounter, m_StandardOrder_list.GetSize());
                 	}
             	}
             	if(slotCounter+1 < highestNumberOfFullyActivatedSlots) {

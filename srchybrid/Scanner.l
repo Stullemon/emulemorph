@@ -6,6 +6,7 @@
 #include "scanner.h"
 #include "parser.hpp"
 #include "OtherFunctions.h"
+#include "ED2KLink.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -38,6 +39,40 @@ keywordchar		[^ \"()]
 "OR"			{ return TOK_OR; }
 "AND"			{ return TOK_AND; }
 "NOT"			{ return TOK_NOT; }
+
+"ed2k://|file|"[^|]+"|"[0-9]+"|"[a-fA-F0-9]{32}"|/"	{
+					CString strError;
+					try
+					{
+						CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(yytext);
+						if (pLink && pLink->GetKind() == CED2KLink::kFile)
+						{
+							CED2KFileLink* pFileLink = pLink->GetFileLink();
+							if (pFileLink)
+							{
+								yylval.pstr = new CString;
+								yylval.pstr->Format(_T("ed2k::%s"), md4str(pFileLink->GetHashKey()));
+								delete pLink;
+								return TOK_ED2K_LINK;
+							}
+						}
+						delete pLink;
+					}
+					catch(CString strEd2kLinkError)
+					{
+						strError = strEd2kLinkError;
+					}
+					if (strError.IsEmpty())
+						strError = _T("Invalid eD2K file link");
+					yyerror(strError);
+					yylval.pstr = new CString(yytext);
+					return TOK_STRING;
+				}
+
+"ed2k::"[a-fA-F0-9]{32}	{
+					yylval.pstr = new CString(yytext);
+					return TOK_ED2K_LINK;
+				}
 
 {keywordchar}*  {
 					yylval.pstr = new CString(yytext);

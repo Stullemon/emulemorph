@@ -90,6 +90,7 @@ CString RemoveFileExtension(const CString& rstrFilePath);
 int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in,uint16 length);
 CString CleanupFilename(CString filename);
+bool ExpandEnvironmentStrings(CString& rstrStrings);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -151,6 +152,7 @@ void DebugSend(LPCTSTR pszMsg, const CUpDownClient* client, const char* packet =
 ///////////////////////////////////////////////////////////////////////////////
 // Win32 specifics
 //
+bool HaveEd2kRegAccess();
 bool Ask4RegFix(bool checkOnly, bool dontAsk = false); // Barry - Allow forced update without prompt
 void BackupReg(void); // Barry - Store previous values
 void RevertReg(void); // Barry - Restore previous values
@@ -219,6 +221,15 @@ __inline int CompareUnsigned(uint32 uSize1, uint32 uSize2)
 	return 0;
 }
 
+__inline int CompareUnsigned64(uint64 uSize1, uint64 uSize2)
+{
+	if (uSize1 < uSize2)
+		return -1;
+	if (uSize1 > uSize2)
+		return 1;
+	return 0;
+}
+
 __inline int CompareOptStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 {
 	if (psz1 && psz2)
@@ -256,11 +267,9 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
 //
 bool IsGoodIP(uint32 nIP, bool forceCheck = false);
 bool IsGoodIPPort(uint32 nIP, uint16 nPort);
-__inline bool IsLowIDHybrid(uint32 id){
+//No longer need seperate lowID checks as we now know the servers just give *.*.*.0 users a lowID
+__inline bool IsLowID(uint32 id){
 	return (id < 16777216);
-}
-__inline bool IsLowIDED2K(uint32 id){
-	return (id < 16777216); //Need to verify what the highest LowID can be returned by the server.
 }
 CString ipstr(uint32 nIP);
 
@@ -270,8 +279,3 @@ CString ipstr(uint32 nIP);
 //
 time_t safe_mktime(struct tm* ptm);
 bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
-
-///////////////////////////////////////////////////////////////////////////////
-// SomeFool.Q-R Remover
-//
-bool CheckForSomeFoolVirus();

@@ -39,7 +39,7 @@ public:
 	void	ShowQueueCount(uint32 number);
 	void	UpdateListCount(uint8 listindex, int iCount = -1);
 	void	Localize();
-	void	UpdateCatTabTitles();
+	void UpdateCatTabTitles(bool force=true);
 	void	VerifyCatTabSize();
 	void SwitchUploadList();
 
@@ -77,12 +77,20 @@ protected:
 	void SetInitLayout();
 	void DoSplitResize(int delta);
 	void SetAllIcons();
+	void SetWnd2Icon();
 	void UpdateTabToolTips() {UpdateTabToolTips(-1);}
 	void UpdateTabToolTips(int tab);
 	CString GetTabStatistic(uint8 tab);
 	int GetTabUnderMouse(CPoint* point);
 	int GetItemUnderMouse(CListCtrl* ctrl);
-	//MOPRH Removed by SiRoB, Due to Khaos Cat /*CString GetCatTitle(int catid);*/
+	//MOPRH - Removed by SiRoB, Due to Khaos Cat
+	/*
+	CString GetCatTitle(int catid);
+	*/
+	//MOPRH - Moved by SiRoB, Due to Khaos Cat moved in public area
+	/*
+	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
+	*/
 	void EditCatTabLabel(int index,CString newlabel);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

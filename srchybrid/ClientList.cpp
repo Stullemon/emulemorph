@@ -59,76 +59,76 @@ CClientList::~CClientList(){
 	}
 }
 
-// xrmb : statsclientstatus
-// -khaos--+++> Rewritten to accomodate some new statistics, and just for cleanup's sake.
-//				I've added three new stats: Number of cDonkey clients, # errored clients, # banned clients.
-//				We also now support LMule
-void CClientList::GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkey, CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkeyHybrid, CMap<uint16, uint16, uint32, uint32> *clientVersionEMule, CMap<uint16, uint16, uint32, uint32> *clientVersionLMule){
+void CClientList::GetStatistics(uint32 &totalclient, int stats[], 
+								CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkey, 
+								CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkeyHybrid, 
+								CMap<uint32, uint32, uint32, uint32>& clientVersionEMule, 
+								CMap<uint32, uint32, uint32, uint32>& clientVersionAMule)
+{
 	totalclient = list.GetCount();
-	if(clientVersionEDonkeyHybrid)	clientVersionEDonkeyHybrid->RemoveAll();
-	if(clientVersionEDonkey)		clientVersionEDonkey->RemoveAll();
-	if(clientVersionEMule)			clientVersionEMule->RemoveAll();
-	if(clientVersionLMule)			clientVersionLMule->RemoveAll();
+	for (int i = 0; i < 15; i++)
+		stats[i] = 0;
 
-	for (int i=0;i<15;i++) stats[i]=0;
+	stats[7] = m_bannedList.GetCount();
 
-	stats[7]=m_bannedList.GetCount();
-
-	for (POSITION pos = list.GetHeadPosition(); pos != NULL;){
-		CUpDownClient* cur_client =	list.GetNext(pos);
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
+	{
+		const CUpDownClient* cur_client = list.GetNext(pos);
 
 		if (cur_client->HasLowID())
-			++stats[14];
+			stats[14]++;
 		
-		switch (cur_client->GetClientSoft()) {
-
-			case SO_EDONKEY :				
-				if(clientVersionEDonkey)
-				{
-					++stats[1];
-					(*clientVersionEDonkey)[cur_client->GetVersion()]++;
-				}
+		switch (cur_client->GetClientSoft())
+		{
+			case SO_EMULE:
+			case SO_OLDEMULE:{
+				stats[2]++;
+				uint8 version = cur_client->GetMuleVersion();
+				if (version == 0xFF || version == 0x66 || version==0x69 || version==0x90 || version==0x33 || version==0x60)
+					continue;
+				clientVersionEMule[cur_client->GetVersion()]++;
 				break;
+			}
 
 			case SO_EDONKEYHYBRID : 
-				if(clientVersionEDonkeyHybrid)
-				{
-					++stats[4];
-					(*clientVersionEDonkeyHybrid)[cur_client->GetVersion()]++;
-				}
+				stats[4]++;
+				clientVersionEDonkeyHybrid[cur_client->GetVersion()]++;
 				break;
-			case SO_EMULE   :
-			case SO_OLDEMULE:
-				if(clientVersionEMule)
-				{
-					++stats[2];
-					uint8 version = cur_client->GetMuleVersion();
-					if (version == 0xFF || version == 0x66 || version==0x69 || version==0x90 || version==0x33 || version==0x60)
-						continue;
-					(*clientVersionEMule)[cur_client->GetVersion()]++;
-				}
+			
+			case SO_AMULE:
+				stats[10]++;
+				clientVersionAMule[cur_client->GetVersion()]++;
 				break;
 
+			case SO_EDONKEY:
+				stats[1]++;
+				clientVersionEDonkey[cur_client->GetVersion()]++;
+				break;
+
+			case SO_MLDONKEY:
+				stats[3]++;
+				break;
+			
+			case SO_SHAREAZA:
+				stats[11]++;
+				break;
+
+			// all remaining 'eMule Compatible' clients
+			case SO_CDONKEY:
 			case SO_XMULE:
-				if(clientVersionLMule)
-				{
-					++stats[10];
-					uint8 version = cur_client->GetMuleVersion();
-					if (version == 0x66 || version==0x69 || version==0x90 || version==0x33)
-						continue;
-					(*clientVersionLMule)[cur_client->GetVersion()]++;
-				}
-
+			case SO_LPHANT:
+				stats[5]++;
 				break;
 
-			case SO_UNKNOWN :	++stats[0];		break;
-			case SO_CDONKEY :	++stats[5];		break;
-			case SO_MLDONKEY:	++stats[3];		break;
-			case SO_SHAREAZA:   ++stats[11];    break;
+			default:
+				stats[0]++;
+				break;
 		}
 
-		if (cur_client->Credits() != NULL){
-			switch(cur_client->Credits()->GetCurrentIdentState(cur_client->GetIP())){
+		if (cur_client->Credits() != NULL)
+		{
+			switch (cur_client->Credits()->GetCurrentIdentState(cur_client->GetIP()))
+			{
 				case IS_IDENTIFIED:
 					stats[12]++;
 					break;
@@ -136,22 +136,23 @@ void CClientList::GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, u
 				case IS_IDNEEDED:
 				case IS_IDBADGUY:
 					stats[13]++;
+					break;
 			}
 		}
 
-		if (cur_client->GetDownloadState()==DS_ERROR || cur_client->GetUploadState()==US_ERROR )
-				++stats[6]; // Error
+		if (cur_client->GetDownloadState()==DS_ERROR || cur_client->GetUploadState()==US_ERROR)
+			stats[6]++; // Error
 
-		switch (cur_client->GetUserPort()) {
+		switch (cur_client->GetUserPort())
+		{
 			case 4662:
-				++stats[8]; // Default Port
+				stats[8]++; // Default Port
 				break;
 			default:
-				++stats[9]; // Other Port
+				stats[9]++; // Other Port
 		}
 	}
 }
-// <-----khaos-
 
 //MOPRH START - Added by SiRoB, Slugfiller: modid
 void CClientList::GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods){

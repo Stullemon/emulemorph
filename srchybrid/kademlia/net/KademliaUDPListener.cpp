@@ -311,7 +311,7 @@ void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, uint
 	// Verify packet is expected size
 	if (lenPacket != 25){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -369,7 +369,7 @@ void CKademliaUDPListener::processBootstrapResponse (const byte *packetData, uin
 	// Verify packet is expected size
 	if (lenPacket < 27){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -397,7 +397,7 @@ void CKademliaUDPListener::processHelloRequest (const byte *packetData, uint32 l
 	// Verify packet is expected size
 	if (lenPacket != 25){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -426,7 +426,7 @@ void CKademliaUDPListener::processHelloResponse (const byte *packetData, uint32 
 	// Verify packet is expected size
 	if (lenPacket != 25){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -447,7 +447,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 	// Verify packet is expected size
 	if (lenPacket != 33){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -476,8 +476,9 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 	type = type & 0x1F;
 	if( type == 0 )
 	{
-		CKademlia::debugLine("***NOTE: Received wrong type packet in CKademliaUDPListener::processKademliaRequest");
-		return;
+		CString strError;
+		strError.Format("***NOTE: Received wrong type (0x%02x) in %s", type, __FUNCTION__);
+		throw strError;
 	}
 
 	//This is the target node trying to be found.
@@ -529,7 +530,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 	// Verify packet is expected size
 	if (lenPacket < 17){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -556,7 +557,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 	// Verify packet is expected size
 	if (lenPacket != 16+1 + (16+4+2+2+1)*numContacts){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -774,7 +775,7 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 	// Verify packet is expected size
 	if (lenPacket < 17){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -834,7 +835,7 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, uint32
 	// Verify packet is expected size
 	if (lenPacket < 37){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -873,7 +874,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 	// Verify packet is expected size
 	if (lenPacket < 37){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1015,7 +1016,7 @@ void CKademliaUDPListener::processPublishResponse (const byte *packetData, uint3
 	// Verify packet is expected size
 	if (lenPacket < 16){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1038,7 +1039,7 @@ void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, uin
 	// Verify packet is expected size
 	if (lenPacket != 2){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1066,7 +1067,7 @@ void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, ui
 	// Verify packet is expected size
 	if (lenPacket != 4){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1097,7 +1098,7 @@ void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, u
 	// Verify packet is expected size
 	if (lenPacket != 0){
 		CString strError;
-		strError.Format("***NOTE: Recieved wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
 		throw strError;
 	}
 

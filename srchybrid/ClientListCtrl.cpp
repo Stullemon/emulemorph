@@ -699,14 +699,14 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetUploadState()-item1->GetUploadState();
 		case 2:
 			if( item1->credits && item2->credits )
-				return item1->credits->GetUploadedTotal()-item2->credits->GetUploadedTotal();
+				return CompareUnsigned64(item1->credits->GetUploadedTotal(), item2->credits->GetUploadedTotal());
 			else if( !item1->credits )
 				return 1;
 			else
 				return -1;
 		case 102:
 			if( item1->credits && item2->credits )
-				return item2->credits->GetUploadedTotal()-item1->credits->GetUploadedTotal();
+				return CompareUnsigned64(item2->credits->GetUploadedTotal(), item1->credits->GetUploadedTotal());
 			else if( !item1->credits )
 				return 1;
 			else
@@ -737,14 +737,14 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetDownloadState()-item1->GetDownloadState();
 		case 4:
 			if( item1->credits && item2->credits )
-				return item1->credits->GetDownloadedTotal()-item2->credits->GetDownloadedTotal();
+				return CompareUnsigned64(item1->credits->GetDownloadedTotal(), item2->credits->GetDownloadedTotal());
 			else if( !item1->credits )
 				return 1;
 			else
 				return -1;
 		case 104:
 			if( item1->credits && item2->credits )
-				return item2->credits->GetDownloadedTotal()-item1->credits->GetDownloadedTotal();
+				return CompareUnsigned64(item2->credits->GetDownloadedTotal(), item1->credits->GetDownloadedTotal());
 			else if( !item1->credits )
 				return 1;
 			else
