@@ -409,7 +409,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//Morph Start - added by AndCycle, Equal Chance For Each File
 						//Morph - added by AndCycle, more detail...for debug?
 						if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
-							Sbuffer.Format("%s :%s", file->GetEqualChanceValueString(false), Sbuffer);
+							Sbuffer.Format("%s :%s", file->statistic.GetEqualChanceValueString(false), Sbuffer);
 						}
 						//Morph - added by AndCycle, more detail...for debug?
 						//Morph End - added by AndCycle, Equal Chance For Each File

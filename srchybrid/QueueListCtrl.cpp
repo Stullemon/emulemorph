@@ -448,10 +448,10 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 								if(file->GetPowerShared()){//keep file prio at PS
 									Sbuffer.Append(" ");
-									Sbuffer.Append(file->GetEqualChanceValueString());
+									Sbuffer.Append(file->statistic.GetEqualChanceValueString());
 								}
 								else{
-									Sbuffer = file->GetEqualChanceValueString();
+									Sbuffer = file->statistic.GetEqualChanceValueString();
 								}
 							}
 							//Morph End - added by AndCycle, Equal Chance For Each File
@@ -802,8 +802,8 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				if (result == 0 && file1 != file2 && thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
 					result =
-						file1->GetEqualChanceValue() < file2->GetEqualChanceValue() ? 1 :
-						file1->GetEqualChanceValue() > file2->GetEqualChanceValue() ? -1 :
+						file1->statistic.GetEqualChanceValue() < file2->statistic.GetEqualChanceValue() ? 1 :
+						file1->statistic.GetEqualChanceValue() > file2->statistic.GetEqualChanceValue() ? -1 :
 						0;
 				}
 				//Morph End - added by AndCycle, Equal Chance For Each File

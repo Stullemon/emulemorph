@@ -53,8 +53,10 @@ public:
 		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
-		shareStartTime = 0;//this value init will be done in other place 
+		shareStartTime = time(NULL);//this value init will be done in other place 
 		m_bCheckEqualChanceValue = true;
+		m_mLastEqualChanceSelection = thePrefs.GetEqualChanceForEachFileMode();
+		m_dLastEqualChanceSemiValue = 0;
 		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
@@ -83,8 +85,8 @@ public:
 	void	SetSharedTime(uint32 sharedTime)		{ shareStartTime = time(NULL) - sharedTime; }
 	uint32	GetSharedTime()							{ return time(NULL) - shareStartTime; }
 	uint32	GetShareStartTime()						{ return shareStartTime; }
-	bool	IsCheckEqualChanceValue()				{ return m_bCheckEqualChanceValue; }
-	void	ResetCheckEqualChanceValue()			{ m_bCheckEqualChanceValue = false; }
+	double	GetEqualChanceValue();
+	CString	GetEqualChanceValueString(bool detail = true);
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
@@ -112,6 +114,8 @@ private:
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	uint32	shareStartTime;
 	bool	m_bCheckEqualChanceValue;
+	double	m_dLastEqualChanceSemiValue;
+	EqualChanceForEachFileSelection m_mLastEqualChanceSelection;
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 };
 
@@ -284,11 +288,6 @@ public:
 	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
 	bool ShareOnlyTheNeed(CSafeMemFile* file);//wistily Share only the need
 
-	//Morph Start - added by AndCycle, Equal Chance For Each File
-	double	GetEqualChanceValue();
-	CString	GetEqualChanceValueString(bool detail = true);
-	//Morph End - added by AndCycle, Equal Chance For Each File
-
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -371,11 +370,6 @@ private:
 	bool	lastonlygreyrect;
 	bool	lastbFlat;
 	//MORPH END - Added by SiRoB,  SharedStatusBar CPU Optimisation
-
-	//Morph Start - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-	EqualChanceForEachFileSelection m_mLastEqualChanceSelection;
-	double	m_dLastEqualChanceSemiValue;
-	//Morph End - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 	//MORPH START - Added by SiRoB, Show Permission
 	int		m_iPermissions;

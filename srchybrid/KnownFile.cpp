@@ -330,6 +330,104 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
+//Morph Start - added by AndCycle, Equal Chance For Each File
+double CFileStatistic::GetEqualChanceValue()
+{
+	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
+	if(m_mLastEqualChanceSelection != thePrefs.GetEqualChanceForEachFileMode()){
+		m_mLastEqualChanceSelection = thePrefs.GetEqualChanceForEachFileMode();
+	}
+	else if(!m_bCheckEqualChanceValue){
+		return m_dLastEqualChanceSemiValue/GetSharedTime();
+	}
+	m_bCheckEqualChanceValue = false;
+	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
+
+	double ECvalue = 0;
+
+	//smaller value means greater priority
+	switch(thePrefs.GetEqualChanceForEachFileMode()){
+		case ECFEF_ACCEPTED:
+
+			ECvalue = thePrefs.IsECFEFallTime() ?
+				GetAllTimeAccepts() :
+				GetAccepts();
+
+		case ECFEF_ACCEPTED_COMPLETE:
+
+			ECvalue = thePrefs.IsECFEFallTime() ?
+				(float)GetAllTimeAccepts()/fileParent->GetPartCount() :
+				(float)GetAccepts()/fileParent->GetPartCount();
+
+		case ECFEF_TRANSFERRED:
+
+			ECvalue = thePrefs.IsECFEFallTime() ?
+				(double)GetAllTimeTransferred() :
+				(double)GetTransferred();
+
+		case ECFEF_TRANSFERRED_COMPLETE:
+
+			ECvalue = thePrefs.IsECFEFallTime() ?
+				(double)GetAllTimeTransferred()/fileParent->GetFileSize() :
+				(double)GetTransferred()/fileParent->GetFileSize();
+	}
+
+	m_dLastEqualChanceSemiValue = ECvalue;
+
+	return m_dLastEqualChanceSemiValue/GetSharedTime();
+}
+
+CString CFileStatistic::GetEqualChanceValueString(bool detail){
+
+	CString tempString;
+
+	switch(thePrefs.GetEqualChanceForEachFileMode()){
+		case ECFEF_DISABLE:
+			{
+				tempString.Empty();
+			}break;
+
+		case ECFEF_ACCEPTED:
+			{
+				thePrefs.IsECFEFallTime() ?
+					tempString.Format("%s : %u", CastSecondsToHM(GetSharedTime()), GetAllTimeAccepts()) :
+					tempString.Format("%s : %u", CastSecondsToHM(GetSharedTime()), GetAccepts());
+			}break;
+
+		case ECFEF_ACCEPTED_COMPLETE:
+			{
+				thePrefs.IsECFEFallTime() ?
+					detail ?
+						tempString.Format("%s : %.2f = %u/%u", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, GetAllTimeAccepts(), fileParent->GetPartCount()) :
+						tempString.Format("%s : %.2f", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue) :
+					detail ?
+						tempString.Format("%s : %.2f = %u/%u", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, GetAccepts(), fileParent->GetPartCount()) :
+						tempString.Format("%s : %.2f", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue);
+			}break;
+
+		case ECFEF_TRANSFERRED:
+			{
+				thePrefs.IsECFEFallTime() ?
+					tempString.Format("%s : %s", CastSecondsToHM(GetSharedTime()), CastItoXBytes(GetAllTimeTransferred())) :
+					tempString.Format("%s : %s", CastSecondsToHM(GetSharedTime()), CastItoXBytes(GetTransferred()));
+			}break;
+
+		case ECFEF_TRANSFERRED_COMPLETE:
+			{
+				thePrefs.IsECFEFallTime() ?
+					detail ?
+						tempString.Format("%s : %.2f = %s/%s", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetAllTimeTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
+						tempString.Format("%s : %.2f", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue) :
+					detail ?
+						tempString.Format("%s : %.2f = %s/%s", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(GetTransferred()), CastItoXBytes(fileParent->GetFileSize())) :
+						tempString.Format("%s : %.2f", CastSecondsToHM(GetSharedTime()), m_dLastEqualChanceSemiValue);
+			}break;
+	}
+
+	return tempString;
+}
+//Morph End - added by AndCycle, Equal Chance For Each File
+
 IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
 
 CAbstractFile::CAbstractFile()
@@ -410,11 +508,6 @@ CKnownFile::CKnownFile()
 	InChangedSharedStatusBar = false;
 	m_pbitmapOldSharedStatusBar = NULL;
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
-
-	//Morph Start - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-	m_mLastEqualChanceSelection = thePrefs.GetEqualChanceForEachFileMode();
-	m_dLastEqualChanceSemiValue = 0;
-	//Morph End - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 	// Mighty Knife: CRC32-Tag
 	m_sCRC32 [0] = '\0';
@@ -796,11 +889,11 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	struct _stat fileinfo = {0};
 	_fstat(file->_file, &fileinfo);
 	m_tUtcLastModified = fileinfo.st_mtime;
+	AdjustNTFSDaylightFileTime(m_tUtcLastModified, strFilePath);
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	statistic.SetSharedTime(0); //first time shared file
 	//Morph End - Added by AndCycle, Equal Chance For Each File
-	AdjustNTFSDaylightFileTime(m_tUtcLastModified, strFilePath);
-	
+
 	fclose(file);
 	file = NULL;
 
@@ -2494,104 +2587,6 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file)
 	return ok; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 }
 //Wistily : Share only the need STOP
-
-//Morph Start - added by AndCycle, Equal Chance For Each File
-double CKnownFile::GetEqualChanceValue(){
-
-	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-	if(m_mLastEqualChanceSelection != thePrefs.GetEqualChanceForEachFileMode()){
-		m_mLastEqualChanceSelection = thePrefs.GetEqualChanceForEachFileMode();
-	}
-	else if(!statistic.IsCheckEqualChanceValue()){
-		return m_dLastEqualChanceSemiValue/statistic.GetSharedTime();
-	}
-	statistic.ResetCheckEqualChanceValue();
-	//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
-
-	double ECvalue = 0;
-
-	//smaller value means greater priority
-	switch(thePrefs.GetEqualChanceForEachFileMode()){
-		case ECFEF_ACCEPTED:
-
-			ECvalue = thePrefs.IsECFEFallTime() ?
-				statistic.GetAllTimeAccepts() :
-				statistic.GetAccepts();
-
-		case ECFEF_ACCEPTED_COMPLETE:
-
-			ECvalue = thePrefs.IsECFEFallTime() ?
-				(float)statistic.GetAllTimeAccepts()/GetPartCount() :
-				(float)statistic.GetAccepts()/GetPartCount();
-
-		case ECFEF_TRANSFERRED:
-
-			ECvalue = thePrefs.IsECFEFallTime() ?
-				(double)statistic.GetAllTimeTransferred() :
-				(double)statistic.GetTransferred();
-
-		case ECFEF_TRANSFERRED_COMPLETE:
-
-			ECvalue = thePrefs.IsECFEFallTime() ?
-				(double)statistic.GetAllTimeTransferred()/GetFileSize() :
-				(double)statistic.GetTransferred()/GetFileSize();
-	}
-
-	m_dLastEqualChanceSemiValue = ECvalue;
-
-	return ECvalue/statistic.GetSharedTime();
-}
-
-CString CKnownFile::GetEqualChanceValueString(bool detail){
-
-	CString tempString;
-
-	switch(thePrefs.GetEqualChanceForEachFileMode()){
-		case ECFEF_DISABLE:
-			{
-				tempString.Empty();
-			}break;
-
-		case ECFEF_ACCEPTED:
-			{
-				thePrefs.IsECFEFallTime() ?
-					tempString.Format("%s : %u", CastSecondsToHM(statistic.GetSharedTime()), statistic.GetAllTimeAccepts()) :
-					tempString.Format("%s : %u", CastSecondsToHM(statistic.GetSharedTime()), statistic.GetAccepts());
-			}break;
-
-		case ECFEF_ACCEPTED_COMPLETE:
-			{
-				thePrefs.IsECFEFallTime() ?
-					detail ?
-						tempString.Format("%s : %.2f = %u/%u", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue, statistic.GetAllTimeAccepts(), GetPartCount()) :
-						tempString.Format("%s : %.2f", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue) :
-					detail ?
-						tempString.Format("%s : %.2f = %u/%u", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue, statistic.GetAccepts(), GetPartCount()) :
-						tempString.Format("%s : %.2f", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue);
-			}break;
-
-		case ECFEF_TRANSFERRED:
-			{
-				thePrefs.IsECFEFallTime() ?
-					tempString.Format("%s : %s", CastSecondsToHM(statistic.GetSharedTime()), CastItoXBytes(statistic.GetAllTimeTransferred())) :
-					tempString.Format("%s : %s", CastSecondsToHM(statistic.GetSharedTime()), CastItoXBytes(statistic.GetTransferred()));
-			}break;
-
-		case ECFEF_TRANSFERRED_COMPLETE:
-			{
-				thePrefs.IsECFEFallTime() ?
-					detail ?
-						tempString.Format("%s : %.2f = %s/%s", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(statistic.GetAllTimeTransferred()), CastItoXBytes(GetFileSize())) :
-						tempString.Format("%s : %.2f", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue) :
-					detail ?
-						tempString.Format("%s : %.2f = %s/%s", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue, CastItoXBytes(statistic.GetTransferred()), CastItoXBytes(GetFileSize())) :
-						tempString.Format("%s : %.2f", CastSecondsToHM(statistic.GetSharedTime()), m_dLastEqualChanceSemiValue);
-			}break;
-	}
-
-	return tempString;
-}
-//Morph End - added by AndCycle, Equal Chance For Each File
 
 //MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 bool CKnownFile::GetPowerShared() const

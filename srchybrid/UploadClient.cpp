@@ -286,7 +286,7 @@ double CUpDownClient::GetCombinedFilePrioAndCredit()
 	
 		//Morph Start - added by AndCycle, Equal Chance For Each File
 		if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
-			return clientReqFile->GetEqualChanceValue();
+			return clientReqFile->statistic.GetEqualChanceValue();
 		}
 		//Morph End - added by AndCycle, Equal Chance For Each File
 
@@ -366,7 +366,7 @@ double CUpDownClient::GetEqualChanceValue() const
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 
 	if(currentReqFile != NULL){
-		return currentReqFile->GetEqualChanceValue();
+		return currentReqFile->statistic.GetEqualChanceValue();
 	}
 	return 0;
 }
