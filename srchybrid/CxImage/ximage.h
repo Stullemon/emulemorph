@@ -170,7 +170,7 @@ struct rgb_color { BYTE r,g,b; };
 // members must be initialized with the InitTextInfo(&this) function.
 typedef struct DLL_EXP tagCxTextInfo
 {
-	char     text[4096];      // text
+	TCHAR     text[4096];      // text //UNICODE
 	LOGFONT  lfont;           // font and codepage data
     COLORREF fcolor;          // foreground color
     long     align;           // DT_CENTER, DT_RIGHT, DT_LEFT aligment for multiline text

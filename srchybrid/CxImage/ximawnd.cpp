@@ -864,7 +864,7 @@ long CxImage::DrawStringEx(HDC hdc, long x, long y, CXTEXTINFO *pTextType, bool 
 	RECT pos = {0,0,0,0};
 	
     // get text length and number of lines
-    long i=0, numlines=1, len=(long)strlen(pTextType->text);
+    long i=0, numlines=1, len=(long)_tcslen(pTextType->text); //UNICODE
     while (i<len)
     {
         if ( pTextType->text[i++]==13 )
@@ -993,7 +993,7 @@ void CxImage::InitTextInfo( CXTEXTINFO *txt )
     txt->lfont.lfClipPrecision = CLIP_DEFAULT_PRECIS; 
     txt->lfont.lfQuality       = PROOF_QUALITY; 
     txt->lfont.lfPitchAndFamily= DEFAULT_PITCH | FF_DONTCARE ; 
-    sprintf( txt->lfont.lfFaceName, "Arial") ;
+    _stprintf( txt->lfont.lfFaceName, _T("Arial")) ; //UNICODE
 
     // initial colors
     txt->fcolor = RGB( 255,255,160 );  // default foreground: light goldyellow
@@ -1005,7 +1005,7 @@ void CxImage::InitTextInfo( CXTEXTINFO *txt )
     txt->b_outline = 0;     // default: no outline (OUTLINE NOT IMPLEMENTED AT THIS TIME)
     txt->b_round   = 20;    // default: rounding radius is 20% of the rectangle height
     // the text 
-    sprintf( txt->text, "Sample Text 01234õû") ; // text
+    _stprintf( txt->text, _T("Sample Text 01234õû")) ; // text //UNICODE
     txt->align  = DT_CENTER;
     return;
 }
