@@ -591,7 +591,7 @@ void CKnownFile::UpdatePartsInfo()
 	if (flag)
 		count.SetSize(0, m_ClientUploadList.GetSize());
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	uint16 iCompleteSourcesCountInfoReceived = 1;
+	uint16 iCompleteSourcesCountInfoReceived = 0;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
