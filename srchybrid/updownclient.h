@@ -679,11 +679,6 @@ public:
 	bool			IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime = false, const bool fileIsNNP = false) /*const*/; // ZZ:DownloadManager
     uint32          GetTimeUntilReask() const;
     uint32          GetTimeUntilReask(const CPartFile* file) const;
-	//MORPH - Changed by SiRoB, khaos::kmod+ Smart A4AF Handling
-	bool			BalanceA4AFSources(bool byPriorityOnly = false);
-	bool			StackA4AFSources();
-	bool			SwapToForcedA4AF();
-	//MORPH - Changed by SiRoB, khaos::kmod-
 
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
