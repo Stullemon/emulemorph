@@ -1,8 +1,14 @@
 ---------------------------------------- 
-Changelog for eMule 0.41b29 MorphXT v1.x
+Changelog for eMule 0.42b14 MorphXT v1.?
 ---------------------------------------- 
+MERGED: Merging in progress [SiRoB]
+
+FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]
+
 ADDED  : Multiple Instances option from SlugFiller-itsonlyme by VQB
 ADDED  : Infinite Queue option from SlugFiller-itsonlyme
+
+TWEAKED: Friend Slot Management, Show slot assignement in the message window and visual fix [SiRoB]
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.5
@@ -10,7 +16,6 @@ Changelog for eMule 0.41b29 MorphXT v1.5
 FIXED  : Several bugfix and update (A4AF and others) [SiRoB/AndClyve]
 
 ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list, right-click and choose 'Mass rename...'. [MightyKnife]
-FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]
 ADDED  : Friend Slot Advanced Management, addon for a fast access to them inspired from KTS and Xman [SiRoB]
 
 ---------------------------------------- 
