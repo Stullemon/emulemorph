@@ -685,7 +685,7 @@ public:
 	static int		m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
 	static bool	m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	static bool m_bDontRemoveSpareTrickleSlot;//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	
+	static bool	m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	static uint32		m_FakesDatVersion;
 	static bool		UpdateFakeStartup;
@@ -1729,7 +1729,7 @@ public:
 	static	uint16	GetSUCPitch()				{return m_iSUCPitch;}
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	//MORPH START - Added by SiRoB, ZZ Ratio
-	static	bool	IsZZRatioDoesWork();
+	static	uint8	IsZZRatioDoesWork();
 	//MORPH END - Added by SiRoB, ZZ Ratio
 	static	void	SetKnownMetDays(int m_iInKnownMetDays)	{m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
 	static	bool	IsPayBackFirst()					{return m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
@@ -1737,6 +1737,7 @@ public:
 	static	bool	OnlyDownloadCompleteFiles()			{return m_bOnlyDownloadCompleteFiles;} //EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	static	bool	SaveUploadQueueWaitTime()			{return m_bSaveUploadQueueWaitTime;}//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	static	bool	DoRemoveSpareTrickleSlot()			{return !m_bDontRemoveSpareTrickleSlot;}//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	static	bool	DisplayFunnyNick()					{return m_bFunnyNick;}//MORPH - Added by SiRoB, Optionnal funnynick display
 	static	CString	GetUpdateURLFakeList()				{return CString(UpdateURLFakeList);}		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	static	CString	GetUpdateURLIPFilter()				{return CString(UpdateURLIPFilter);}//MORPH START added by Yun.SF3: Ipfilter.dat update
 	static  CString GetUpdateURLIP2Country()			{return CString(UpdateURLIP2Country);}//Commander - Added: IP2Country auto-updating
