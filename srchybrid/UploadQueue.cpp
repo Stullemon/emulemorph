@@ -224,11 +224,11 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 	CKnownFile* rightReqFile = NULL;
 	CKnownFile* leftReqFile = NULL;
 
-	if(rightClient && leftClient){
+	if(rightClient != NULL && leftClient != NULL ){
 		rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID());
 		leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID());
 	}
-	if(rightReqFile && leftReqFile){
+	if(rightReqFile != NULL && leftReqFile != NULL ){
 
 		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 
