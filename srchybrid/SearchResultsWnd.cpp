@@ -1576,9 +1576,18 @@ void CSearchResultsWnd::UpdateCatTabs() {
 }
 
 CString	CSearchResultsWnd::ToQueryString(CString str){
+// emulEspa Ía: Modified by MoNKi [MoNKi: -Fixed UTF-8 strings on web searchs-]
+/*
 	CString sTmp = URLEncode(str);
 	sTmp.Replace(_T("%20"), _T("+"));
 	return sTmp;
+ */
+	USES_CONVERSION;
+	CString sTmp = CA2CT(StrToUtf8(str));
+	sTmp = URLEncode(sTmp);
+	sTmp.Replace(_T("%20"), _T("+"));
+	return sTmp;
+// End -Fixed UTF-8 strings on web searchs-
 }
 
 void CSearchResultsWnd::ShowSearchSelector(bool visible)
