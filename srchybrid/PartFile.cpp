@@ -250,7 +250,8 @@ void CPartFile::Init(){
 CPartFile::~CPartFile(){
 	// Barry - Ensure all buffered data is written
 	try{
-		FlushBuffer();
+		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE)
+			FlushBuffer();
 	}
 	catch(CFileException* e){
 		e->Delete();
@@ -266,6 +267,13 @@ CPartFile::~CPartFile(){
 	m_SrcpartFrequency.RemoveAll();
 	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;gaplist.GetNext(pos))
 		delete gaplist.GetAt(pos);
+
+	pos = m_BufferedData_list.GetHeadPosition();
+	while (pos){
+		PartFileBufferedData *item = m_BufferedData_list.GetNext(pos);
+		delete[] item->data;
+		delete item;
+	}
 }
 
 void CPartFile::CreatePartFile(){
