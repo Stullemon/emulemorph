@@ -15,7 +15,7 @@ CHANGED: Anti-Leecher Mecanisme by adding the reason of detection in log [SiRoB]
 ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 ADDED  : CRC32 Localize [SiRoB]
 
-REMOVED: Ratio no longer present [SiRoB]
+REMOVED: Ratio no longer present use official way [SiRoB]
 
 TODO   : UNICODE Compatibility (in progess) [SiRoB]
 TODO   : Review Prio related to FS, PS and PBF [SiRoB]
