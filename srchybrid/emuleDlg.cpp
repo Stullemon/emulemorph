@@ -985,7 +985,7 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 		//MORPH START - Added by SiRoB, Show zz ratio activation
 		if (thePrefs.IsZZRatioDoesWork()){
 			char buffer2[100];		
-			_snprintf(buffer2,sizeof buffer2,"%s ZZ-Ratio",buffer);
+			_snprintf(buffer2,sizeof buffer2,"%s r",buffer);
 			statusbar->SetText(buffer2,2,0);
 		}else
 		//MORPH END   - Added by SiRoB, Show zz ratio activation
@@ -1114,7 +1114,7 @@ void CemuleDlg::SetStatusBarPartsSize()
 	{
 		ussShift = 150;
 	}
-	int aiWidths[5] = { rect.right-535-ussShift, rect.right-315-ussShift, rect.right-110-ussShift, rect.right-25-ussShift, -1 };
+	int aiWidths[5] = { rect.right-525-ussShift, rect.right-315-ussShift, rect.right-125-ussShift, rect.right-25-ussShift, -1 };
 	//MORPH END   - Added by SiRoB, Related to SUC
 	statusbar->SetParts(5, aiWidths);
 }
