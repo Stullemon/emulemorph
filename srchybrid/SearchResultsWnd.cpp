@@ -341,26 +341,27 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 
 	int useCat;
 	bool	bCreatedNewCat = false;
-	bool	bCanceled = false;
+	if (m_cattabs.GetCurSel()==-1){
+		if(thePrefs.SelectCatForNewDL())
+		{
+			CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
+			getCatDlg->DoModal();
 
-	if(thePrefs.SelectCatForNewDL())
-	{
-		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
-		getCatDlg->DoModal();
-
-		// Returns 0 on 'Cancel', otherwise it returns the selected category
-		// or the index of a newly created category.  Users can opt to add the
-		// links into a new category.
-		useCat = getCatDlg->GetInput();
-		bCreatedNewCat = getCatDlg->CreatedNewCat();
-		bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
-		delete getCatDlg;
+			// Returns 0 on 'Cancel', otherwise it returns the selected category
+			// or the index of a newly created category.  Users can opt to add the
+			// links into a new category.
+			useCat = getCatDlg->GetInput();
+			bCreatedNewCat = getCatDlg->CreatedNewCat();
+			bool	bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
+			delete getCatDlg;
+			if (bCanceled)
+				return;
+		}
+		else if(thePrefs.UseActiveCatForLinks())
+			useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
+		else
+			useCat = 0;
 	}
-	else if(thePrefs.UseActiveCatForLinks())
-		useCat = theApp.emuledlg->transferwnd->GetActiveCategory();
-	else
-		useCat = 0;
-
 	int useOrder = theApp.downloadqueue->GetMaxCatResumeOrder(useCat);
 	// khaos::categorymod-
 
@@ -371,7 +372,7 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 		{
 			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(index);
 			// khaos::categorymod+ m_cattabs is obsolete.
-			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat())
+			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && m_cattabs.GetCurSel()==-1)
 			{
 				useCat = theApp.downloadqueue->GetAutoCat(CString(cur_file->GetFileName()), (ULONG)cur_file->GetFileSize());
 				if (!useCat && thePrefs.UseActiveCatForLinks())

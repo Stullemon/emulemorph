@@ -1,9 +1,17 @@
 --------------------------------------
+Changelog for eMule 0.42g MorphXT v2.10
+--------------------------------------
+FIXED  : Completed files aren't well identified by the select view filter [SiRoB]
+FIXED  : The right statusbar containing some random text when no use of dynamic upload [SiRoB]
+FIXED  : Cancel selective category dialog don't abort download from search result [SiRoB]
+CHANGED: Changed the way to use the selective category, when we use it but the tab in search or PastEd2kLink dialog are used we bypass it [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.42g MorphXT v2.9
 --------------------------------------
 MERGED : Code merged to 0.42g [SiRoB]
 FIXED  : Columns Preferency Saving (Sort, Size, Visibility) [SiRoB]
-ADED   : Solid Graph Option in Statistic preferency [SiRoB]
+ADDED  : Solid Graph Option in Statistic preferency [SiRoB]
 CHANGED: Now Canceling Selection category mean aborting [SiRoB]
 CHANGED: Review the Selection category support (if not used take the official way) [SiRoB]
 CHANGED: ZZ ratio is applicable when:
