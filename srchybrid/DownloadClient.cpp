@@ -846,7 +846,11 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			case DS_TOOMANYCONNSKAD:
 				//This client had already been set to DS_CONNECTING.
 				//So we reset this time so it isn't stuck at TOOMANYCONNS for 20mins.
+				//MORPH - Changed by SiRoB, Reask -Patch-
+				/*
 				m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000;
+				*/			
+				m_dwLastTriedToConnect = (::GetTickCount()>20*60*1000)?::GetTickCount()-20*60*1000:0;
 				break;
 			case DS_WAITCALLBACKKAD:
 			case DS_WAITCALLBACK:
@@ -858,7 +862,11 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 					case DS_WAITCALLBACKKAD:
 						break;
 					default:
+						//MORPH - Changed by SiRoB, Reask -Patch-
+						/*
 						m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000;
+						*/			
+						m_dwLastTriedToConnect = (::GetTickCount()>20*60*1000)?::GetTickCount()-20*60*1000:0;
 						break;
 				}
 				break;
@@ -987,7 +995,7 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 void CUpDownClient::SendBlockRequests(){
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__RequestParts", this, reqfile!=NULL ? (char*)reqfile->GetFileHash() : NULL);
-	m_dwLastBlockReceived = ::GetTickCount();
+	//m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Moved by SiRoB
 	if (!reqfile)
 		return;
 	// MORPH START - Added by Commander, WebCache 1.2e
@@ -1039,6 +1047,7 @@ void CUpDownClient::SendBlockRequests(){
 // MORPH END - Added by Commander, WebCache 1.2e
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
+	m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Moved by SiRoB
 	CreateBlockRequests(3);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SendCancelTransfer();
@@ -1453,7 +1462,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_nDownDataRateMS = 0;
     }
 	
-	while (m_AvarageDDR_list.GetCount() > 0 && (m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
+	while (m_AvarageDDR_list.GetCount() > 0 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 	
 	if (m_AvarageDDR_list.GetCount() > 1){

@@ -94,12 +94,9 @@ void CWebCacheSocket::DetachFromClient()
 		}
 		if (GetClient()->m_pWCUpSocket == this){
 			ASSERT(0);
-			GetClient()->SetWebCacheUpState( WCUS_NONE ); //MOPRH - Moved by SiRoB, WebCache -Fix-
 			GetClient()->m_pWCUpSocket = NULL;
-			//MORPH - Removed by SiRoB, WebCache -Fix-
-			/*
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); //MORPH - Added by SiRoB, Just to be safe
 			GetClient()->SetWebCacheUpState( WCUS_NONE );
-			*/
 		}
 	}
 }
@@ -161,8 +158,8 @@ bool CWebCacheSocket::ProcessHttpRequest()
 void CWebCacheSocket::ResetTimeOutTimer()
 {
 	timeout_timer = ::GetTickCount();
-	if( GetClient() ) {
-		if( GetClient()->socket ) {
+	if( GetClient() && (GetClient()->m_pWCUpSocket == this || GetClient()->m_pWCDownSocket == this)) {
+		if( GetClient()->socket) {
 			ASSERT( !GetClient()->socket->IsKindOf( RUNTIME_CLASS( CWebCacheSocket ) ) );
 			GetClient()->socket->ResetTimeOutTimer();
 		}
@@ -453,14 +450,14 @@ bool CWebCacheUpSocket::ProcessFirstHttpGet( const char* header, UINT uSize )
 	}
 	if( !GetClient()->SupportsWebCache() ) {
 		DebugHttpHeaders(m_astrHttpHeaders);
-		TRACE(_T("*** Http GET from non-webcache client: %s"), client->DbgGetClientInfo() );
+		TRACE(_T("*** Http GET from non-webcache client: %s"), m_client->DbgGetClientInfo() );
 		return false;
 	}
 
 	if( GetClient()->m_pWCUpSocket ) {
 		ASSERT(GetClient()->m_pWCUpSocket != this);
 		if (thePrefs.GetLogWebCacheEvents())
-		AddDebugLogLine(false, _T("*** Http GET on standard listensocket from client with established http socket: %s"), client->DbgGetClientInfo() );
+		AddDebugLogLine(false, _T("*** Http GET on standard listensocket from client with established http socket: %s"), m_client->DbgGetClientInfo() );
 		GetClient()->m_pWCUpSocket->Safe_Delete();
 		GetClient()->m_pWCUpSocket = 0;
 	}
@@ -717,11 +714,14 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 		DebugHttpHeaders(astrHeaders);
 		return HTTP_STATUS_NOT_FOUND;
 	}
-	//MORPH - Changed by SiRoB, WebCache Fix
+	//MORPH START - Changed by SiRoB, WebCache Fix
 	/*
 	if (dwRangeEnd <= dwRangeStart){ // && dwRangeEnd-dwRangeStart <= MAX_WEBCACHE_BLOCK_SIZE ???
 	*/
+	if (dwRangeEnd > pUploadFile->GetFileSize() - 1)
+		dwRangeEnd = pUploadFile->GetFileSize() - 1;
 	if (dwRangeEnd < dwRangeStart){
+	//MORPH END - Changed by SiRoB, WebCache Fix
 		DebugHttpHeaders(astrHeaders);
 		TRACE(_T("*** Bad range in URL %s\n"), szUrl);
 		return HTTP_STATUS_INV_RANGE;

@@ -374,12 +374,12 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 	m_nUrlStartPos += uSize;
 
 //	if (thePrefs.GetDebugClientTCPLevel() > 0)
-//		Debug("  Start=%u  End=%u  Size=%u  %s\n", nStartPos, nEndPos, size, DbgGetFileInfo(reqfile->GetFileHash()));
+//		Debug(_T("  Start=%u  End=%u  Size=%u  %s\n"), nStartPos, nEndPos, size, DbgGetFileInfo(reqfile->GetFileHash()));
 
 	if (!(GetDownloadState() == DS_DOWNLOADING || GetDownloadState() == DS_NONEEDEDPARTS))
          // MORPH START - Added by Commander, WebCache 1.2e
 	{ // yonatan http
-
+		//throw CString(_T("Failed to process HTTP data block - Invalid download state"));
 		CString err;
 		err.Format( _T("Failed to process HTTP data block - Invalid download state: %u"), GetDownloadState() );
 		throw err;
@@ -477,7 +477,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 					}
 				}
 //				else
-//					TRACE("%hs - %d bytes missing\n", __FUNCTION__, cur_block->block->EndOffset - nEndPos);
+//					TRACE(_T("%hs - %d bytes missing\n"), __FUNCTION__, cur_block->block->EndOffset - nEndPos);
 			}
 
 			return;

@@ -145,7 +145,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
         sendLocker.Lock();
 
 		RemoveFromStandardListNoLock(socket);
-		if((INT_PTR)index > m_StandardOrder_list.GetSize()) {
+		if(index > (uint32)m_StandardOrder_list.GetSize()) {
 			index = m_StandardOrder_list.GetSize();
 		}
 		m_StandardOrder_list.InsertAt(index, socket);
@@ -561,7 +561,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
          	 	  }
        		}
 			// Check if any sockets haven't gotten data for a long time. Then trickle them a package.
-     		for(uint32 slotCounter = 0; (INT_PTR)slotCounter < m_StandardOrder_list.GetSize(); slotCounter++) {
+     		for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize(); slotCounter++) {
                 ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 				uint32 classID = m_StandardOrder_list_stat.GetAt(slotCounter)->classID;
 				
@@ -612,7 +612,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					
 					if(socket != NULL) {
 						uint64 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
-						if(allowedDataRateClass[classID] > 0 && classID < LAST_CLASS && (INT_PTR)slotCounterClass[classID]<m_StandardOrder_list.GetSize()){
+						if(allowedDataRateClass[classID] > 0 && classID < LAST_CLASS && slotCounterClass[classID]<(uint32)m_StandardOrder_list.GetSize()){
 							if(bytesToSpendClass[classID] > 0 && spentBytesClass[classID] < (uint64)bytesToSpendClass[classID])
 								bytesToSpendTemp = min(bytesToSpendClass[classID]-spentBytesClass[classID],bytesToSpendTemp);
 							else
@@ -714,7 +714,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
     sendLocker.Lock();
 
     m_ControlQueue_list.RemoveAll();
-    for(uint32 slotCounter = 0; (INT_PTR)slotCounter < m_StandardOrder_list.GetSize(); slotCounter++)
+    for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize(); slotCounter++)
 		delete m_StandardOrder_list_stat.GetAt(slotCounter);
 	m_StandardOrder_list.RemoveAll();
     sendLocker.Unlock();

@@ -264,6 +264,7 @@ void CWebCachedBlock::UpdateProxyClient()
 		theApp.clientlist->RemoveClient(SINGLEProxyClient);
 		if( SINGLEProxyClient->reqfile ) {
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( SINGLEProxyClient, SINGLEProxyClient->reqfile );
+			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(SINGLEProxyClient); // MORPH - Added by SiRoB, DownloadClientList ProxyClient
 			POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(SINGLEProxyClient);
 			if( pos )
 				SINGLEProxyClient->reqfile->srclist.RemoveAt(pos);

@@ -2302,11 +2302,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 			if(cur_src && cur_src->GetDownloadState() == DS_DOWNLOADING)
 			{
 				ASSERT( cur_src->socket || cur_src->m_pWCDownSocket);
-				//MORPH - Removed by SiRoB, WebCache
-				/*
-				if (cur_src->socket)
+				if (cur_src->socket || (cur_src->IsProxy() && cur_src->m_pWCDownSocket)/* || (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket)*/)
 				{
-				*/
 					cur_src->CheckDownloadTimeout();
 					cur_datarate = cur_src->CalculateDownloadRate();
 					datarateX+=cur_datarate;//MORPH - Changed by SiRoB,  -Fix-
@@ -2326,7 +2323,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							cur_src->m_pWCDownSocket->SetDownloadLimit(limit);// yonatan http
 						// MORPH END   - Added by SiRoB, WebCache
 					}
-				//} //MORPH - Removed by SiRoB, WebCache
+				}
 			}
 		}
 	}
@@ -2383,15 +2380,16 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                         curClientReducedDownload = friendReduceddownload;
                     }
 					ASSERT( cur_src->socket || cur_src->m_pWCDownSocket);
-					// MORPH START - Added by SiRoB, WebCache
+					// MORPH START - Changed by SiRoB, WebCache
 					/*
 					if (cur_src->socket)
 					{
 					*/
+					if (cur_src->socket || (cur_src->IsProxy() && cur_src->m_pWCDownSocket)/* || (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket)*/)
 						cur_src->CheckDownloadTimeout();
 						uint32 cur_datarate = cur_src->CalculateDownloadRate();
 						datarateX += cur_datarate; //MORPH - Changed by SiRoB,  -Fix-
-						if (curClientReducedDownload && cur_datarate)
+						if (curClientReducedDownload && cur_datarate && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
 							if (limit < 1000 && curClientReducedDownload == 200)

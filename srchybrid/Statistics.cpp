@@ -369,7 +369,7 @@ void CStatistics::CompDownDatarateOverhead()
 		m_sumavgDDRO += m_nDownDataRateMSOverhead;
 		m_nDownDataRateMSOverhead = 0;
 	}
-	while (m_AvarageDDRO_list.GetCount() > 0 &&  (m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp) > MAXAVERAGETIME)
+	while (m_AvarageDDRO_list.GetCount() > 1 &&  (curTick - m_AvarageDDRO_list.GetHead().timestamp) > MAXAVERAGETIME)
 		m_sumavgDDRO -= m_AvarageDDRO_list.RemoveHead().datalen;
 
 	if (m_AvarageDDRO_list.GetCount() > 1) {
@@ -404,7 +404,7 @@ void CStatistics::CompUpDatarateOverhead()
 		m_nUpDataRateMSOverhead = 0;
 	}
 
-	while (m_AvarageUDRO_list.GetCount() > 2 && (m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp) > MAXAVERAGETIME)
+	while (m_AvarageUDRO_list.GetCount() > 1 && (curTick - m_AvarageUDRO_list.GetHead().timestamp) > MAXAVERAGETIME)
 		m_sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
 
 	if (m_AvarageUDRO_list.GetCount() > 1){

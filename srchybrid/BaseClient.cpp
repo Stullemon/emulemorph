@@ -258,7 +258,11 @@ void CUpDownClient::Init()
 	//MORPH END   - Changed by SiRoB, ZZUL_20040904	
 
     m_bSourceExchangeSwapped = false; // ZZ:DownloadManager
-    m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000; // ZZ:DownloadManager
+	//MORPH - Changed by SiRoB, Reask -Patch-
+	/*
+	m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000; // ZZ:DownloadManager
+	*/
+	m_dwLastTriedToConnect = (::GetTickCount()>20*60*1000)?::GetTickCount()-20*60*1000:0; // ZZ:DownloadManager
 
 	m_fQueueRankPending = 0;
 	m_fUnaskQueueRankRecv = 0;

@@ -43,7 +43,7 @@ public:
 	*/
 	uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset(uint32 * HighestNumberOfFullyActivatedSlotsSinceLastCallClass);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
-    INT_PTR GetStandardListSize() { return m_StandardOrder_list.GetSize(); };
+    uint32 GetStandardListSize() { return m_StandardOrder_list.GetSize(); };
 
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
     /*

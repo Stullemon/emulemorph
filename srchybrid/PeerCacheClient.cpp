@@ -80,6 +80,7 @@ void CPeerCacheSocket::DetachFromClient()
 		if (GetClient()->m_pPCUpSocket == this){
 			ASSERT(0);
 			GetClient()->m_pPCUpSocket = NULL;
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); //MORPH - Added by SiRoB, Just to be safe
 		}
 	}
 }

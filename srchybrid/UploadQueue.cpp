@@ -637,6 +637,12 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			return false;
 		}
 		//MORPH END   - Added by SiRoB, Don't add client not accepted by trytoconnect
+		if (!newclient->socket) // Pawcio: BC
+		{
+			LogWarning(false,_T("---- Trying to add new client in queue with NULL SOCKET: %s"),newclient->DbgGetClientInfo());
+			newclient->SetUploadState(US_NONE);
+			return false;
+		}
 	}
 	else
 	{
@@ -702,7 +708,7 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 	uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass);
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
 	
-	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > uploadinglist.GetSize()) {
+	if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
         // debug info, will remove this when I'm done.
         DebugLogError(_T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
 
@@ -891,7 +897,7 @@ void CUploadQueue::Process() {
 	}
 
 	// don't save more than 5 secs of data
-	while(avarage_tick_list.GetCount() > 0 && (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
+	while(avarage_tick_list.GetCount() > 1 && (curTick - avarage_tick_list.GetHead()) > MAXAVERAGETIMEUPLOAD){
 		m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 		avarage_friend_dr_list.RemoveHead();
 		avarage_tick_list.RemoveHead();
@@ -919,7 +925,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 			// add to queue again.
 	if (curUploadSlots >= 4 &&
         (
-         curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
+         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
          curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
