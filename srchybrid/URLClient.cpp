@@ -60,12 +60,9 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 		memset(m_abyPartStatus, 1, m_nPartCount);
 		m_bCompleteSource = true;
 	}
-/*Removed by SiRoB, not needed
     // MORPH START - Added by Commander, WebCache 1.2e
 	else
 		ResetFileStatusInfo(); // Superlexx - from 0.44a code
-	// MORPH END - Added by Commander, WebCache 1.2e
-*/
 }
 
 bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
