@@ -1280,9 +1280,11 @@ bool CPartFile::SavePartFile()
 		// khaos::kmod+ A4AF flags
 		CTag forceon(FT_A4AFON, (uint32)(m_bForceAllA4AF?1:0));
 		forceon.WriteTagToFile(&file);
+		uTagCount++;
 
 		CTag forceoff(FT_A4AFOFF, (uint32)(m_bForceA4AFOff?1:0));
 		forceoff.WriteTagToFile(&file);
+		uTagCount++;
 		// khaos::kmod-
 
 		for (int j = 0; j < taglist.GetCount(); j++){
@@ -2275,10 +2277,11 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				case DS_WAITCALLBACK:
 				{
 					//MORPH START - Changed by SiRoB, Changed Spread Reask For Better SUC result and more
-					/*
+					/**/
 					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME))
-					*/
+					/*/
 					if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick > (cur_src->GetLastAskedTime()+FILEREASKTIME)) &&  (dwCurTick % FILEREASKTIME > (UINT32)((FILEREASKTIME / AvailableSrcCount) * (srcPosReask++ % AvailableSrcCount))))))
+					/**/
 					//MORPH END   - Changed by SiRoB, Spread Reask For Better SUC functioning and more
 					{
 						if(!cur_src->AskForDownload()) // NOTE: This may *delete* the client!!
