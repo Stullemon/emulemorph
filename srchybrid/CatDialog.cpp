@@ -172,6 +172,8 @@ void CCatDialog::Localize(){
 	GetDlgItem(IDC_STATIC_SCOUNT)->SetWindowText(GetResString(IDS_CAT_SC));
 	GetDlgItem(IDC_STATIC_ASCOUNT)->SetWindowText(GetResString(IDS_CAT_ASC));
 	// khaos::categorymod-
+    GetDlgItem(IDC_FILTERGROUP)->SetWindowText(GetResString(IDS_CAT_FILTERS));
+
 	GetDlgItem(IDC_CHECK_RESUMEFILEONLYINSAMECAT)->SetWindowText(GetResString(IDS_CAT_RESUMEFILEONLYINSAMECAT)); //MORPH - Added by SiRoB, Resume file only in the same category
 
 	m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
