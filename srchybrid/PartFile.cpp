@@ -941,7 +941,7 @@ bool CPartFile::SavePartFile(){
 		for (int x = 0; x != parts; x++)
 			file.Write(hashlist[x],16);
 		//tags
-		uint32 tagcount = 17/*9 Official +5 Khaos +1 ZZ+1 showSharePermissions */+(gaplist.GetCount()*2);
+		uint32 tagcount = 9/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +1/*showSharePermissions*/ +(gaplist.GetCount()*2);
 		// Float meta tags are currently not written. All older eMule versions < 0.28b have 
 		// a bug in the meta tag reading+writing code. To achive maximum backward 
 		// compatibility for met files with older eMule versions we just don't write float 
