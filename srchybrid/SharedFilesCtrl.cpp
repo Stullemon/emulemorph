@@ -801,7 +801,10 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem(MP_RENAME, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_REMOVE, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.SetDefaultItem(bEnableFileOpen ? MP_OPEN : -1);
-	m_SharedFilesMenu.EnableMenuItem(MP_CMT, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
+	//MORPH START - Changed by SiRoB, BatchComment
+	//m_SharedFilesMenu.EnableMenuItem(MP_CMT, iSelectedItems ==1 0 ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(MP_CMT, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	//MORPH END   - Changed by SiRoB, BatchComment
 	m_SharedFilesMenu.EnableMenuItem(MP_DETAIL, iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
 
 	//MORPH START - Added by SiRoB, HIDEOS
@@ -822,7 +825,6 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PowershareMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_PowershareMenu.EnableMenuItem(MP_POWERSHARE_ON,iCompleteFileSelected > 0 ? MF_ENABLED : MF_GRAYED); 
 	m_PowershareMenu.CheckMenuRadioItem(MP_POWERSHARE_OFF, MP_POWERSHARE_AUTO, uPowershareMenuItem, 0);
 	//MORPH END  - Added by SiRoB, Avoid misusing of powershare
 
@@ -1018,6 +1020,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_CMT:
 				if (file)
 					ShowComments(file);
+					
                 break; 
 			case MPG_ALTENTER:
 			case MP_DETAIL:
@@ -1587,8 +1590,22 @@ void CSharedFilesCtrl::CreateMenues()
 void CSharedFilesCtrl::ShowComments(CKnownFile* file)
 {
 	if (file){
-    		CCommentDialog dialog(file); 
+    	CCommentDialog dialog(file); 
 		dialog.DoModal(); 
+		//MORPH START - Added by IceCream, SLUGFILLER: batchComment
+		if (dialog.DoModal() == IDOK) {
+			POSITION pos = this->GetFirstSelectedItemPosition();
+			while( pos != NULL )
+			{
+				int iSel=this->GetNextSelectedItem(pos);
+				CKnownFile* otherfile = (CKnownFile*)this->GetItemData(iSel);
+				if (otherfile == file)
+					continue;
+				otherfile->SetFileComment(file->GetFileComment());
+				otherfile->SetFileRate(file->GetFileRate());
+			}
+		}
+		//MORPH END   - Added by IceCream, SLUGFILLER: batchComment
 	}
 }
 
