@@ -2133,7 +2133,7 @@ CString CWebServer::_GetStats(ThreadData Data)
 	/*
 	Out.Replace(_T("[STATSDATA]"), theApp.emuledlg->statisticswnd->stattree.GetHTML(false));
 	*/
-	Out.Replace(_T("[Stats]"), theApp.emuledlg->statisticswnd->stattree.GetHTMLForExport());
+	Out.Replace(_T("[STATSDATA]"), theApp.emuledlg->statisticswnd->stattree.GetHTMLForExport());
 	//MORPH END   - Changed by SiRoB/Commander, Tree Stat
 
 	return Out;
