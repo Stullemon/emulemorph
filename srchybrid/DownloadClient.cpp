@@ -576,18 +576,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		// even if the file is <= PARTSIZE, we _may_ need the hashset for that file (if the file size == PARTSIZE)
 		if (reqfile->hashsetneeded)
 		{
-			if (socket)
-			{
-				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-				md4cpy(packet->pBuffer,reqfile->GetFileHash());
-				theStats.AddUpDataOverheadFileRequest(packet->size);
-				socket->SendPacket(packet,true,true);
-				SetDownloadState(DS_REQHASHSET);
-				m_fHashsetRequesting = 1;
-				reqfile->hashsetneeded = false;
-			}
-			else
-				ASSERT(0);
+			RequestHashset();	// SLUGFILLER: SafeHash
 		}
 		else
 		{
@@ -699,26 +688,15 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	// NOTE: This function is invoked from TCP and UDP socket!
 	if (!bUdpPacket)
 	{
-		if (!bPartsNeeded)
-			SetDownloadState(DS_NONEEDEDPARTS);
-		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
-		else if (reqfile->hashsetneeded)
+		// SLUGFILLER: SafeHash - request hashset first, check needed parts later
+		if (reqfile->hashsetneeded)
 		{
-			if (socket)
-		{
-				if (thePrefs.GetDebugClientTCPLevel() > 0)
-					DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
-				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-				md4cpy(packet->pBuffer,reqfile->GetFileHash());
-				theStats.AddUpDataOverheadFileRequest(packet->size);
-				socket->SendPacket(packet, true, true);
-				SetDownloadState(DS_REQHASHSET);
-				m_fHashsetRequesting = 1;
-				reqfile->hashsetneeded = false;
-			}
-			else
-				ASSERT(0);
+			RequestHashset();
 		}
+		else if (!bPartsNeeded)
+			SetDownloadState(DS_NONEEDEDPARTS);
+		// SLUGFILLER: SafeHash
+		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
 		else
 		{
 			SendStartupLoadReq();
@@ -874,7 +852,14 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			}
 		}
 
-        if(nNewState == DS_DOWNLOADING && socket){ //MORPH - Changed by SiRoB, WebCache
+		// SLUGFILLER: SafeHash
+		if (reqfile && m_nDownloadState == DS_REQHASHSET && nNewState != DS_REQHASHSET)
+			reqfile->hashsetneeded = false;
+		if (nNewState == DS_REQHASHSET)
+			m_dwRequestedHashset = GetTickCount();
+		// SLUGFILLER: SafeHash
+
+		if(nNewState == DS_DOWNLOADING && socket){ //MORPH - Changed by SiRoB, WebCache
 		    socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
@@ -963,6 +948,8 @@ void CUpDownClient::ProcessHashSet(char* packet,uint32 size){
 	CSafeMemFile data((BYTE*)packet,size);
 	if (reqfile->LoadHashsetFromFile(&data,true)){
 		m_fHashsetRequesting = 0;
+		m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
+		reqfile->PerformFirstHash();		// SLUGFILLER: SafeHash - Rehash
 	}
 	else{
 		reqfile->hashsetneeded = true;
@@ -1035,7 +1022,7 @@ void CUpDownClient::SendBlockRequests(){
 		if (m_PendingBlocks_list.IsEmpty())
 		{
 			SendCancelTransfer();
-			SetDownloadState(DS_NONEEDEDPARTS);
+			SetDownloadState(DS_ONQUEUE);	// SLUGFILLER: noNeededRequeue
 			return;
 		}
 		if (isTestFile)
@@ -1067,7 +1054,7 @@ void CUpDownClient::SendBlockRequests(){
 	CreateBlockRequests(3);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SendCancelTransfer();
-		SetDownloadState(DS_NONEEDEDPARTS);
+		SetDownloadState(DS_ONQUEUE);	// SLUGFILLER: noNeededRequeue
 		return;
 	}
 	const int iPacketSize = 16+(3*4)+(3*4); // 40
@@ -1702,6 +1689,25 @@ void CUpDownClient::UDPReaskForDownload()
 		}
 	}
 }
+
+// SLUGFILLER: SafeHash
+void CUpDownClient::RequestHashset(){
+	if (socket)
+	{
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
+		Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+		md4cpy(packet->pBuffer,reqfile->GetFileHash());
+		theStats.AddUpDataOverheadFileRequest(packet->size);
+		socket->SendPacket(packet, true, true);
+		SetDownloadState(DS_REQHASHSET);
+		m_fHashsetRequesting = 1;
+		reqfile->hashsetneeded = false;
+	}
+	else
+		ASSERT(0);
+}
+// SLUGFILLER: SafeHash
 
 void CUpDownClient::UpdateDisplayedInfo(bool force)
 {

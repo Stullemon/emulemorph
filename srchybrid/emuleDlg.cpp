@@ -208,6 +208,12 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_FINISHEDHASHING,OnFileHashed)
 	ON_MESSAGE(TM_FILEOPPROGRESS, OnFileOpProgress)
 	ON_MESSAGE(TM_HASHFAILED,OnHashFailed)
+	// SLUGFILLER: SafeHash
+	ON_MESSAGE(TM_PARTHASHEDOK, OnPartHashedOK)
+	ON_MESSAGE(TM_PARTHASHEDCORRUPT, OnPartHashedCorrupt)
+	ON_MESSAGE(TM_PARTHASHEDOKAICHRECOVER, OnPartHashedOKAICHRecover)
+	ON_MESSAGE(TM_PARTHASHEDCORRUPTAICHRECOVER, OnPartHashedCorruptAICHRecover)
+	// SLUGFILLER: SafeHash
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
@@ -627,12 +633,15 @@ BOOL CemuleDlg::OnInitDialog()
 
 		DestroySplash();
 
+		// SLUGFILLER: SafeHash remove - wait until emule is ready before opening the wizard
+		/*
 		extern BOOL FirstTimeWizard();
 		if (FirstTimeWizard()){
 			// start connection wizard
 			CConnectionWizardDlg conWizard;
 			conWizard.DoModal();
 		}
+		*/
 	}
 
 	if(thePrefs.GetInvisibleMode()) RegisterInvisibleHotKey();//Commander - Added: Invisible Mode [TPT]
@@ -681,6 +690,16 @@ void CemuleDlg::DoMVersioncheck(bool manual) {
 
 void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime)
 {
+	// SLUGFILLER: doubleLucas - not ready to init, come back next cycle
+	if (!::IsWindow(theApp.emuledlg->m_hWnd))
+		return;
+	if (!::IsWindow(theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd))
+		return;
+	if (!::IsWindow(theApp.emuledlg->serverwnd->serverlistctrl.m_hWnd))
+		return;
+	if (!::IsWindow(theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd))
+		return;
+	// SLUGFILLER: doubleLucas
 	// NOTE: Always handle all type of MFC exceptions in TimerProcs - otherwise we'll get mem leaks
 	try
 	{
@@ -688,7 +707,10 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 			case 0:
 				theApp.emuledlg->status++;
 				theApp.emuledlg->ready = true;
+				// SLUGFILLER: SafeHash remove - moved down
+				/*
 				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
+				*/
 				theApp.emuledlg->status++;
 				break;
 			case 1:
@@ -736,14 +758,44 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 				if (!bError) // show the success msg, only if we had no serious error
 					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"),GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
 
+				// SLUGFILLER: SafeHash remove - moved down
+				/*
 				if(thePrefs.DoAutoConnect())
 					theApp.emuledlg->OnBnClickedButton2();
+				*/
 				theApp.emuledlg->status++;
 				break;
 			}
 			case 5:
 				break;
+			// SLUGFILLER: SafeHash - delay load shared files
+			case 6:
+				theApp.emuledlg->status++;
+				theApp.sharedfiles->SetOutputCtrl(&theApp.emuledlg->sharedfileswnd->sharedfilesctrl);
+				theApp.emuledlg->status++;
+				break;
+			case 7:
+				break;
+			case 255:
+				break;
+			// SLUGFILLER: SafeHash
 			default:
+				// SLUGFILLER: SafeHash
+				theApp.emuledlg->status = 255;
+				//autoconnect only after emule loaded completely
+				if(thePrefs.DoAutoConnect())
+					theApp.emuledlg->OnBnClickedButton2();
+				// wait until emule is ready before opening the wizard
+				if (thePrefs.IsFirstStart())
+				{
+					extern BOOL FirstTimeWizard();
+					if (FirstTimeWizard()){
+						// start connection wizard
+						CConnectionWizardDlg conWizard;
+						conWizard.DoModal();
+					}
+				}
+				// SLUGFILLER: SafeHash
 				theApp.emuledlg->StopTimer();
 		}
 	}
@@ -1575,6 +1627,38 @@ LRESULT CemuleDlg::OnFileOpProgress(WPARAM wParam, LPARAM lParam)
 LRESULT CemuleDlg::OnHashFailed(WPARAM wParam, LPARAM lParam)
 {
 	theApp.sharedfiles->HashFailed((UnknownFile_Struct*)lParam);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
+{
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinished((uint16)wParam, false);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
+{
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinished((uint16)wParam, true);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam)
+{
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinishedAICHRecover((uint16)wParam, false);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
+{
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinishedAICHRecover((uint16)wParam, true);
 	return 0;
 }
 // SLUGFILLER: SafeHash

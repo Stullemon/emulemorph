@@ -108,6 +108,7 @@ class CPartFile : public CKnownFile
 	DECLARE_DYNAMIC(CPartFile)
 
 	friend class CPartFileConvert;
+	friend class CPartHashThread;	// SLUGFILLER: SafeHash
 public:
 	CPartFile();
 	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
@@ -148,15 +149,17 @@ public:
 	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload);
 	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
 //	uint8	ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename , bool getsizeonly);
-	//MORPH START - Added by SiRoB, SLUGFILLER: SafeHash
+
+	bool	SavePartFile();
+	void	PartFileHashFinished(CKnownFile* result);
+	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
+	void	PartHashFinished(uint16 partnumber, bool corrupt);
+	void	PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt);
 	bool	IsPartShareable(uint16 partnumber) const;
 	bool	IsRangeShareable(uint32 start, uint32 end) const;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
 
-	bool	SavePartFile();
-	void	PartFileHashFinished(CKnownFile* result);
-	bool	HashSinglePart(uint16 partnumber); // true = ok , false = corrupted
-	
+
 	void	AddGap(uint32 start, uint32 end);
 	void	FillGap(uint32 start, uint32 end);
 	void	DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/;
@@ -290,6 +293,7 @@ public:
 	void	FlushBuffersExceptionHandler(CFileException* error);
 	void	FlushBuffersExceptionHandler();
 
+	void	PerformFirstHash();		// SLUGFILLER: SafeHash
 	void	PerformFileCompleteEnd(DWORD dwResult);
 
 	void	SetFileOp(EPartFileOp eFileOp);
@@ -370,6 +374,7 @@ private:
 	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
 	static UINT AFX_CDECL AllocateSpaceThread(LPVOID lpParam);
 	void		CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
+	void		ParseICHResult();	// SLUGFILLER: SafeHash
 
 	CCorruptionBlackBox	m_CorruptionBlackBox;
 	static CBarShader s_LoadBar;
@@ -403,6 +408,9 @@ private:
 	CArray<uint16,uint16> m_SrcpartFrequency;
 	// SLUGFILLER: SafeHash
 	CArray<bool,bool> m_PartsShareable;
+	uint16	m_PartsHashing;
+	CMutex	ICH_mut;	// ICH locks the file
+	CList<uint16,uint16>	m_ICHPartsComplete;
 	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<uint16,uint16>	corrupted_list;
@@ -508,3 +516,25 @@ private:
 	//JP Throttle OHCB-production END
 //MORPH END   - Added by SiRoB, WebCache 1.2f
 };
+
+// SLUGFILLER: SafeHash
+class CPartHashThread : public CWinThread
+{
+	DECLARE_DYNCREATE(CPartHashThread)
+protected:
+	CPartHashThread()	{}
+public:
+	virtual	BOOL	InitInstance() {return true;}
+	virtual int		Run();
+	uint16	SetFirstHash(CPartFile* pOwner);
+	void	SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused = false, bool AICHRecover = false);
+private:
+	CPartFile*				m_pOwner;
+	bool					m_ICHused;
+	bool					m_AICHRecover;
+	CString					directory;
+	CString					filename;
+	CArray<uint16,uint16>	m_PartsToHash;
+	CArray<uchar*,uchar*>	m_DesiredHashes;
+};
+// SLUGFILLER: SafeHash

@@ -1,3 +1,4 @@
+
 //this file is part of eMule
 //Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
@@ -291,8 +292,9 @@ public:
 	void			ProcessMuleInfoPacket(char* pachPacket, uint32 nSize);
 	void			ProcessMuleCommentPacket(char* pachPacket, uint32 nSize);
 	//<<< eWombat [SNAFU_V3]
-	void			ProcessUnknownHelloTag(CTag *tag);
-	void			ProcessUnknownInfoTag(CTag *tag);
+	//MORPH - Changed by SiRoB
+	void			ProcessUnknownHelloTag(CTag *tag, CString &pszReason);
+	void			ProcessUnknownInfoTag(CTag *tag, CString &pszReason);
 	//>>> eWombat [SNAFU_V3]
 	void			ProcessEmuleQueueRank(char* packet, UINT size);
 	void			ProcessEdonkeyQueueRank(char* packet, UINT size);
@@ -515,6 +517,7 @@ public:
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();
+	void			RequestHashset();	// SLUGFILLER: SafeHash
 	bool			IsSourceRequestAllowed() const;
     bool            IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck = false) const; // ZZ:DownloadManager
 
@@ -610,6 +613,13 @@ public:
     const bool      SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool isNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping = false, bool debug = false);
     const DWORD     getLastTriedToConnectTime() { return m_dwLastTriedToConnect; }
 // <-- ZZ:DownloadManager
+
+	// SLUGFILLER: SafeHash
+	const DWORD		GetRequestedHashset() const
+					{
+						return m_dwRequestedHashset;
+					}
+	// SLUGFILLER: SafeHash
 
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -1060,6 +1070,7 @@ protected:
     bool    DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR reason); // ZZ:DownloadManager
     CMap<CPartFile*, CPartFile*, DWORD, DWORD> m_fileReaskTimes; // ZZ:DownloadManager (one resk timestamp for each file)
     DWORD   m_dwLastTriedToConnect; // ZZ:DownloadManager (one resk timestamp for each file)
+	DWORD	m_dwRequestedHashset;	// SLUGFILLER: SafeHash
     bool    RecentlySwappedForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick < 30*1000; } // ZZ:DownloadManager
     void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 
@@ -1127,8 +1138,7 @@ static LPCTSTR apszSnafuTag[] =
 	_T("[Rumata (rus)(Plus v1f)]"),							//14
 	_T("[Fusspi]"),											//15
 	_T("[donkey2002]"),										//16
-	_T("[md4]"),									        //17
-	_T("Emulereactor Community Mod")						//18
+	_T("[md4]")									        //17
 	};
 
 //<<< new tags from eMule 0.04x
@@ -1147,13 +1157,16 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNx69			0x69 // eMuleReactor
 #define CT_UNKNOWNx6B			0x6B // md4
 #define CT_UNKNOWNx6C			0x6C // md4
+#define CT_UNKNOWNx74			0x74 // md4
 #define CT_UNKNOWNx76			0x76 // www.donkey2002.to
 #define CT_UNKNOWNx79			0x79 // Bionic
 #define CT_UNKNOWNx7A			0x7A // NewDarkMule
 #define CT_UNKNOWNx83			0x83 // Fusspi
+#define CT_UNKNOWNx87			0x87 // md4
 #define CT_UNKNOWNx88			0x88 // DarkMule v6 |eVorte|X|
 #define CT_UNKNOWNx8c			0x8c // eMule v0.27c [LSD7c] 
 #define CT_UNKNOWNx8d			0x8d // unknown Leecher - (client version:60)
+#define CT_UNKNOWNx97			0x97 // Emulereactor Community Mod
 #define CT_UNKNOWNx98			0x98 // Emulereactor Community Mod
 #define CT_UNKNOWNx99			0x99 // eMule v0.26d [RAMMSTEIN 8b]
 #define CT_UNKNOWNx9C			0x9C // Emulereactor Community Mod
@@ -1162,6 +1175,9 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNxCA			0xCA // NewDarkMule
 #define CT_UNKNOWNxCD			0xCD // www.donkey2002.to
 #define CT_UNKNOWNxDA			0xDA // Emulereactor Community Mod
+#define CT_UNKNOWNxF0			0xF0 // Emulereactor Community Mod
+#define CT_UNKNOWNxF4			0xF4 // Emulereactor Community Mod
+
 #define CT_FRIENDSHARING		0x66 //eWombat  [SNAFU]
 #define CT_DARK					0x54 //eWombat [SNAFU]
 #define FRIENDSHARING_ID 0x5F73F1A0 // Magic Key, DO NOT CHANGE!

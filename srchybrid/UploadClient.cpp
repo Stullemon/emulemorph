@@ -512,8 +512,12 @@ void CUpDownClient::CreateNextBlockPackage(){
 			
 			if (!srcfile->IsPartFile()){
 				bFromPF = false; // This is not a part file...
-				if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
+				// SLUGFILLER: SafeHash - if this happens, something is wrong with our shared files list
+				if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)) {
+					theApp.sharedfiles->Reload();
 					throw GetResString(IDS_ERR_OPEN);
+				}
+				// SLUGFILLER: SafeHash
 				file.Seek(currentblock->StartOffset,0);
 				
 				filedata = new byte[togo+500];
@@ -1031,20 +1035,20 @@ uint32 CUpDownClient::SendBlockData(){
 		m_nSumForAvgUpDataRate += sentBytesCompleteFile + sentBytesPartFile;
 	}
 			
-	while (m_AvarageUDR_list.GetCount() > 1 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > 2*MAXAVERAGETIMEUPLOAD)
+	while (m_AvarageUDR_list.GetCount() > 1 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > MAXAVERAGETIMEUPLOAD)
 		m_nSumForAvgUpDataRate -=  m_AvarageUDR_list.RemoveHead().datalen;
 
     if(m_AvarageUDR_list.GetCount() > 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp))
 			dwDuration += curTick - m_AvarageUDR_list.GetTail().timestamp - (m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp);
-		if (dwDuration < MAXAVERAGETIMEUPLOAD) dwDuration = MAXAVERAGETIMEUPLOAD;
+		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
 		m_nUpDatarate = ((ULONGLONG)(m_nSumForAvgUpDataRate - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
 	}else if(m_AvarageUDR_list.GetCount() == 1) {
 		DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDRPreviousAddedTimestamp;
 		if ((curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
 			dwDuration = curTick - m_AvarageUDR_list.GetTail().timestamp;
-		if (dwDuration < MAXAVERAGETIMEUPLOAD) dwDuration = MAXAVERAGETIMEUPLOAD;
+		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
 		m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / dwDuration;
 	} else {
    	    m_nUpDatarate = 0;

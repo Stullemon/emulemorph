@@ -218,6 +218,12 @@ protected:
 	afx_msg LRESULT OnWMData(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileHashed(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnHashFailed(WPARAM wParam,LPARAM lParam);
+	// SLUGFILLER: SafeHash
+	afx_msg LRESULT OnPartHashedOK(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnPartHashedOKAICHRecover(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam);
+	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileCompleted(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileOpProgress(WPARAM wParam,LPARAM lParam);
@@ -281,6 +287,12 @@ enum EEMuleAppMsgs
 	//thread messages
 	TM_FINISHEDHASHING = WM_APP + 10,
 	TM_HASHFAILED,
+	// SLUGFILLER: SafeHash - new handling
+	TM_PARTHASHEDOK,
+	TM_PARTHASHEDCORRUPT,
+	TM_PARTHASHEDOKAICHRECOVER,
+	TM_PARTHASHEDCORRUPTAICHRECOVER,
+	// SLUGFILLER: SafeHash
 	TM_FRAMEGRABFINISHED,
 	TM_FILEALLOCEXC,
 	TM_FILECOMPLETED,

@@ -490,7 +490,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		if(uploadingClient->IsScheduledForRemoval() == false && newclient->IsScheduledForRemoval() == true ||
     	   uploadingClient->IsScheduledForRemoval() && uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && newclient->IsScheduledForRemoval() && newclient->GetScheduledUploadShouldKeepWaitingTime() == false ||
 		   uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
-		   (!uploadingClient->IsScheduledForRemoval() && !newclient->IsScheduledForRemoval() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime()) &&
+		   (!uploadingClient->IsScheduledForRemoval() && !newclient->IsScheduledForRemoval() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime() && (uploadingClient->GetScheduledUploadShouldKeepWaitingTime() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == false && uploadingClient->GetQueueSessionPayloadUp() < newclient->GetQueueSessionPayloadUp())) &&
 		   RightClientIsSuperior(newclient, uploadingClient) >= 0)
 		{
 			foundposition = true;
@@ -1543,6 +1543,11 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// Barry - Don't do anything if the app is shutting down - can cause unhandled exceptions
 		if (!theApp.emuledlg->IsRunning())
 			return;
+
+		// SLUGFILLER: SafeHash - let eMule start first
+		if (theApp.emuledlg->status != 255)
+			return;
+		// SLUGFILLER: SafeHash
 
         // Elandal:ThreadSafeLogging -->
         // other threads may have queued up log lines. This prints them.

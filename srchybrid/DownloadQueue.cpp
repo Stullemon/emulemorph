@@ -102,12 +102,15 @@ void CDownloadQueue::Init(){
 		end = !ff.FindNextFile();
 		if (ff.IsDirectory())
 			continue;
+		// SLUGFILLER: SafeHash - one is enough
+		if (GetFileByMetFileName(ff.GetFileName()))
+			continue;
+		// SLUGFILLER: SafeHash
 		CPartFile* toadd = new CPartFile();
 		if (toadd->LoadPartFile(thePrefs.GetTempDir(),ff.GetFileName().GetBuffer())){
 			count++;
 			filelist.AddTail(toadd);			// to downloadqueue
-			if (toadd->GetStatus(true) == PS_READY)
-				theApp.sharedfiles->SafeAddKFile(toadd); // part files are always shared files
+			// SLUGFILLER: SafeHash remove - part files are shared later
 			theApp.emuledlg->transferwnd->downloadlistctrl.AddFile(toadd);// show in downloadwindow
 		}
 		else
@@ -122,13 +125,16 @@ void CDownloadQueue::Init(){
 		end = !ff.FindNextFile();
 		if (ff.IsDirectory())
 			continue;
+		// SLUGFILLER: SafeHash - one is enough
+		if (GetFileByMetFileName(RemoveFileExtension(ff.GetFileName())))
+			continue;
+		// SLUGFILLER: SafeHash
 		CPartFile* toadd = new CPartFile();
 		if (toadd->LoadPartFile(thePrefs.GetTempDir(),ff.GetFileName().GetBuffer())){
 			toadd->SavePartFile(); // resave backup
 			count++;
 			filelist.AddTail(toadd);			// to downloadqueue
-			if (toadd->GetStatus(true) == PS_READY)
-				theApp.sharedfiles->SafeAddKFile(toadd); // part files are always shared files
+			// SLUGFILLER: SafeHash remove - part files are shared later
 			theApp.emuledlg->transferwnd->downloadlistctrl.AddFile(toadd);// show in downloadwindow
 
 			AddLogLine(false, GetResString(IDS_RECOVERED_PARTMET), toadd->GetFileName());
@@ -1015,6 +1021,18 @@ CPartFile* CDownloadQueue::GetFileByIndex(int index) const
 		return filelist.GetAt(pos);
 	return NULL;
 }
+
+// SLUGFILLER: SafeHash
+CPartFile* CDownloadQueue::GetFileByMetFileName(const CString& rstrName) const
+{
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+		CPartFile* cur_file = filelist.GetNext(pos);
+		if (!rstrName.CompareNoCase(cur_file->GetPartMetFileName()))
+			return cur_file;
+	}
+	return 0;
+}
+// SLUGFILLER: SafeHash
 
 CPartFile* CDownloadQueue::GetFileByID(const uchar* filehash) const
 {

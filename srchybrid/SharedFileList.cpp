@@ -312,7 +312,7 @@ CSharedFileList::CSharedFileList(CServerConnect* in_server)
 	m_lastPublishKadSrc = 0;
 	m_lastPublishKadNotes = 0;
 	m_currFileKey = 0;
-	FindSharedFiles();
+	// SLUGFILLER: SafeHash remove - delay load shared files
 }
 
 CSharedFileList::~CSharedFileList(){
@@ -331,7 +331,10 @@ CSharedFileList::~CSharedFileList(){
 
 void CSharedFileList::FindSharedFiles()
 {
+	// SLUGFILLER: SafeHash remove - only called after the download queue is created
+	/*
 	if (!m_Files_map.IsEmpty())
+	*/
 	{
 		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
 		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
@@ -407,27 +410,7 @@ void CSharedFileList::FindSharedFiles()
 	else
 		AddLogLine(false,GetResString(IDS_SHAREDFOUNDHASHING), m_Files_map.GetCount(), waitingforhash_list.GetCount());
 	
-	// Mighty Knife: Report hashing files
-	if (!waitingforhash_list.IsEmpty()) {
-		if (thePrefs.GetReportHashingFiles ()) {
-			POSITION p = waitingforhash_list.GetHeadPosition ();
-			while (p != NULL) {
-				UnknownFile_Struct* f = waitingforhash_list.GetAt (p);
-				CString hashfilename;
-				hashfilename.Format (_T("%s\\%s"),f->strDirectory, f->strName);
-				if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),f->strDirectory, f->strName);
-				Log(GetResString(IDS_HASHING_NEWFILE), hashfilename);
-				waitingforhash_list.GetNext (p);
-			}
-		}
-		HashNextFile();   // Why should we call this procedure if there's no file to hash ?
-						  // so i moved the call into this if clause. This also removes
-					      // an unnecessary message "All files hashed", which is added to
-						  // the log there.
-	}
-	// HashNextFile();
-	// [end] Mighty Knife
-
+	HashNextFile();
 }
 
 void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
@@ -528,7 +511,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 		{
 			//not in knownfilelist - start adding thread to hash file if the hashing of this file isnt already waiting
 			// SLUGFILLER: SafeHash - don't double hash, MY way
-			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !thePrefs.IsTempFile(rstrDirectory, ff.GetFileName())){
+			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !theApp.downloadqueue->IsTempFile(rstrDirectory, ff.GetFileName()) && !thePrefs.IsConfigFile(rstrDirectory, ff.GetFileName())){
 			UnknownFile_Struct* tohash = new UnknownFile_Struct;
 				tohash->strDirectory = rstrDirectory;
 				tohash->strName = ff.GetFileName();
@@ -580,11 +563,11 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 			LogWarning(_T("Duplicate shared files: \"%s\" and \"%s\""), pFileInMap->GetFilePath(), pFile->GetFilePath());
 		return false;
 	}
+	m_UnsharedFiles_map.RemoveKey(CSKey(pFile->GetFileHash()));	
 	// SLUGFILLER: mergeKnown
 	pFile->SetLastSeen();	// okay, we see it
 	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
 	// SLUGFILLER: mergeKnown
-	m_UnsharedFiles_map.RemoveKey(CSKey(pFile->GetFileHash()));	
 	m_Files_map.SetAt(key, pFile);
 	m_keywords->AddKeywords(pFile);
 
@@ -630,10 +613,14 @@ void CSharedFileList::RemoveFile(CKnownFile* pFile)
 
 void CSharedFileList::Reload()
 {
+	// SLUGFILLER: SafeHash - don't allow to be called until after the control is loaded
+	if (!output)
+		return;
+	// SLUGFILLER: SafeHash
 	m_keywords->RemoveAllKeywordReferences();	
 	FindSharedFiles();
 	m_keywords->PurgeUnreferencedKeywords();
-	if (output)
+	// SLUGFILLER: SafeHash remove - check moved up
 		output->ReloadFileList();
 }
 
@@ -641,7 +628,7 @@ void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl)
 {
 	output = in_ctrl;
 	output->ReloadFileList();
-	HashNextFile();		// SLUGFILLER: SafeHash - if hashing not yet started, start it now
+	Reload();		// SLUGFILLER: SafeHash - load shared files after everything
 }
 
 uint8 GetRealPrio(uint8 in)
@@ -1007,7 +994,7 @@ bool CSharedFileList::IsFilePtrInList(const CKnownFile* file) const
 
 void CSharedFileList::HashNextFile(){
 	// SLUGFILLER: SafeHash
-	if (!theApp.emuledlg || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
+	if (!theApp.emuledlg || !theApp.emuledlg->IsRunning() || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
 		return;
 	if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
@@ -1027,7 +1014,7 @@ void CSharedFileList::HashNextFile(){
 		return;
 	UnknownFile_Struct* nextfile = waitingforhash_list.RemoveHead();
 	currentlyhashing_list.AddTail(nextfile);	// SLUGFILLER: SafeHash - keep track
-	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);	// SLUGFILLER: SafeHash - full speed hashing
 	addfilethread->SetValues(this,nextfile->strDirectory,nextfile->strName);
 	addfilethread->ResumeThread();
 	// SLUGFILLER: SafeHash - nextfile deleting handled elsewhere
@@ -1109,10 +1096,12 @@ int CAddFileThread::Run()
 
 	// locking that hashing thread is needed because we may create a couple of those threads at startup when rehashing
 	// potentially corrupted downloading part files. if all those hash threads would run concurrently, the io-system would be
+	// SLUGFILLER: SafeHash remove - locking code removed, unnecessary
+	/*
 	// under very heavy load and slowly progressing
 	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
 	sLock1.Lock();
-
+	*/
 	CString strFilePath;
 	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
 	strFilePath.ReleaseBuffer();
@@ -1148,7 +1137,10 @@ int CAddFileThread::Run()
 		delete newrecord;
 	}
 
+	// SLUGFILLER: SafeHash remove - locking code removed, unnecessary
+	/*
 	sLock1.Unlock();
+	*/
 	CoUninitialize();
 
 	return 0;

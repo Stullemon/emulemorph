@@ -950,10 +950,12 @@ public:
 	static	const CString& GetFeedsDir()			{return m_strFeedsDir;} // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
-	static	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName);
+	// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
+	//static	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName);
 	static	bool	IsConfigFile(const CString& rstrDirectory, const CString& rstrName);
-	static	bool	IsShareableDirectory(const CString& rstrDirectory);
-	static	bool	IsInstallationDirectory(const CString& rstrDir);
+	//static	bool	IsShareableDirectory(const CString& rstrDirectory);
+	//static	bool	IsInstallationDirectory(const CString& rstrDir);
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 	static	bool	Save();
 	static	void	SaveCats();

@@ -210,6 +210,7 @@ void CUpDownClient::Init()
 	m_structUserCountry = theApp.ip2country->GetCountryFromIP(GetIP());
 	//EastShare End - added by AndCycle, IP to Country
 	m_fHashsetRequesting = 0;
+	m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 	m_fSharedDirectories = 0;
 	m_fSentCancelTransfer = 0;
 	m_nClientVersion = 0;
@@ -590,7 +591,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	uint32 tagcount = data->ReadUInt32();
 	if (bDbgInfo)
 		m_strHelloInfo.AppendFormat(_T("  Tags=%u"), tagcount);
-	m_strNotOfficial.Empty(); //MOPRH - Added by SiRoB, Control Mod Tag
+	//MOPRH START - Added by SiRoB, Control Mod Tag
+	m_strNotOfficial.Empty();
+	CString strBanReason = NULL;
+ 	//MOPRH END   - Added by SiRoB, Control Mod Tag
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(data, true);
 		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
@@ -643,8 +647,14 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 			// MORPH START - Added by Commander, WebCache 1.2e
 			case WC_TAG_VOODOO:
-				m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
-				m_bWebCacheSupport = temptag.IsInt() && temptag.GetInt() == 'ARC4';
+				if(temptag.IsInt()) {
+					m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
+					m_bWebCacheSupport = temptag.IsInt() && temptag.GetInt() == 'ARC4';
+				//MOPRH START - Added by SiRoB, Control Mod Tag
+				}else if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher()){
+					strBanReason.Format(_T("Suspect Hello-Tag: %s"),apszSnafuTag[3]);
+				}
+				//MOPRH END   - Added by SiRoB, Control Mod Tag
 				break;
 			case WC_TAG_FLAGS:
 				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
@@ -745,9 +755,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			//Morph End - added by AndCycle, ICS
 			default:
 				//<<< [SNAFU_V3] Check unknown tags !
-				if (!((temptag.GetNameID() & 0xF0)==0xF0))
-					ProcessUnknownHelloTag(&temptag);
+				if (!((temptag.GetNameID() & 0xF0)==0xF0) || strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+					ProcessUnknownHelloTag(&temptag, strBanReason);
 				//>>> [SNAFU_V3] Save unknown tags !
+				m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
 		}
@@ -774,19 +785,26 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				m_strHelloInfo.AppendFormat(_T("\n  ***AddData: uint32=%u (0x%08x)"), test, test);
 		}
 		}
-	else if (bDbgInfo && data->GetPosition() < data->GetLength()){
+	else if (data->GetPosition() < data->GetLength()){
 		UINT uAddHelloDataSize = (UINT)(data->GetLength() - data->GetPosition());
-		if (uAddHelloDataSize == sizeof(uint32)){
-			DWORD dwAddHelloInt32 = data->ReadUInt32();
-			m_strHelloInfo.AppendFormat(_T("\n  ***AddData: uint32=%u (0x%08x)"), dwAddHelloInt32, dwAddHelloInt32);
+		//MOPRH - Added by SiRoB, Control Mod Tag
+		m_strNotOfficial.AppendFormat(_T(",ExtraByte=%u"),uAddHelloDataSize);
+		if(strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+			strBanReason=_T("ExtraBytes Detected");
+		//MOPRH - Added by SiRoB, Control Mod Tag
+		if (bDbgInfo) {
+			if (uAddHelloDataSize == sizeof(uint32)){
+				DWORD dwAddHelloInt32 = data->ReadUInt32();
+				m_strHelloInfo.AppendFormat(_T("\n  ***AddData: uint32=%u (0x%08x)"), dwAddHelloInt32, dwAddHelloInt32);
+			}
+			else if (uAddHelloDataSize == sizeof(uint32)+sizeof(uint16)){
+				DWORD dwAddHelloInt32 = data->ReadUInt32();
+				WORD w = data->ReadUInt16();
+				m_strHelloInfo.AppendFormat(_T("\n  ***AddData: uint32=%u (0x%08x),  uint16=%u (0x%04x)"), dwAddHelloInt32, dwAddHelloInt32, w, w);
+			}
+			else
+				m_strHelloInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), uAddHelloDataSize);
 		}
-		else if (uAddHelloDataSize == sizeof(uint32)+sizeof(uint16)){
-			DWORD dwAddHelloInt32 = data->ReadUInt32();
-			WORD w = data->ReadUInt16();
-			m_strHelloInfo.AppendFormat(_T("\n  ***AddData: uint32=%u (0x%08x),  uint16=%u (0x%04x)"), dwAddHelloInt32, dwAddHelloInt32, w, w);
-		}
-		else
-			m_strHelloInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), uAddHelloDataSize);
 	}
 
 	SOCKADDR_IN sockAddr = {0};
@@ -854,18 +872,22 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		m_bEmuleProtocol = true;
 		m_byInfopacketsReceived |= IP_EMULEPROTPACK;
 		//MORPH START - Added by SiRoB, Anti-leecher feature
-		LPCTSTR pszLeecherReason = NULL;
-		if(thePrefs.GetEnableAntiCreditHack())
+		if(thePrefs.GetEnableAntiCreditHack() && strBanReason.IsEmpty())
 			if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, thePrefs.GetUserHash(), 16)==0)
-				pszLeecherReason = _T("Anti Credit Hack");
-		if(thePrefs.GetEnableAntiLeecher() && pszLeecherReason == NULL)
-			pszLeecherReason = TestLeecher(); 
-		if(pszLeecherReason != NULL)
-			BanLeecher(pszLeecherReason);
-		else
-			m_bLeecher = false;
+				strBanReason = _T("Anti Credit Hack");
+		if(thePrefs.GetEnableAntiLeecher()){
+			if (strBanReason.IsEmpty())
+				strBanReason = TestLeecher(); 
+			if(!strBanReason.IsEmpty())
+				BanLeecher(strBanReason);
+		}
 		//MORPH END   - Added by SiRoB, Anti-leecher feature
 	}
+	//MORPH START - Added by SiRoB, Anti-leecher feature
+	else if(!strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+		BanLeecher(strBanReason);
+	//MORPH END   - Added by SiRoB, Anti-leecher feature
+
 	
 	
 	//MORPH START - Moved by SiRoB, xrmb Funnynick START
@@ -1020,6 +1042,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	uint32 tagcount = data.ReadUInt32();
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("  Tags=%u"), (UINT)tagcount);
+	CString strBanReason=NULL; //MORPH - Added by SiRoB, Control mod Tag
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(&data, false);
 		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
@@ -1110,9 +1133,10 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 			//Morph End - added by AndCycle, ICS
 			default:
 				//<<< [SNAFU_V3] Check unknown tags !
-				if (!((temptag.GetNameID() & 0xF0)==0xF0))
-					ProcessUnknownInfoTag(&temptag);
+				if (!((temptag.GetNameID() & 0xF0)==0xF0) || strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+					ProcessUnknownInfoTag(&temptag, strBanReason);
 				//>>> [SNAFU_V3] Check unknown tags !
+				m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (bDbgInfo)
 					m_strMuleInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
 		}
@@ -1124,8 +1148,14 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		m_nUDPPort = 0;
 		m_incompletepartVer = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
 	}
-	if (bDbgInfo && data.GetPosition() < data.GetLength()){
+	if (/*bDbgInfo &&*/ data.GetPosition() < data.GetLength()){
+		if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), data.GetLength() - data.GetPosition());
+		//MOPRH - Added by SiRoB, Control Mod Tag
+		m_strNotOfficial.AppendFormat(_T(",extrabyte=%u"),data.GetPosition() < data.GetLength());
+		if(strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+			strBanReason=_T("extrabytes Detected");
+		//MOPRH - Added by SiRoB, Control Mod Tag
 	}
 
 	ReGetClientSoft();
@@ -1137,11 +1167,10 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	//MORPH START - Added by SiRoB, Anti-leecher feature
 	if(thePrefs.GetEnableAntiLeecher())
 	{
-		LPCTSTR pszLeecherReason = TestLeecher();
-		if (pszLeecherReason != NULL)
-			BanLeecher(pszLeecherReason);
-		else
-			m_bLeecher = false;
+		if (strBanReason.IsEmpty())
+			strBanReason = TestLeecher();
+		if (!strBanReason.IsEmpty())
+			BanLeecher(strBanReason);
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 }
@@ -1499,6 +1528,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		m_fHashsetRequesting = 0;
+		m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 		SetSentCancelTransfer(0);
 		m_bHelloAnswerPending = false;
 		m_fQueueRankPending = 0;
@@ -2073,8 +2103,6 @@ void CUpDownClient::SetUserName(LPCTSTR pszNewName)
 		LPCTSTR pszLeecherReason = TestLeecher();
 		if (pszLeecherReason != NULL)
 			BanLeecher(pszLeecherReason);
-		else
-			m_bLeecher = false;
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	//MORPH START - Added by IceCream, xrmb Funnynick START
@@ -3047,11 +3075,8 @@ void CUpDownClient::ResetIP2Country(uint32 m_dwIP){
 //MORPH END - Changed by SiRoB, ProxyClient
 //EastShare End - added by AndCycle, IP to Country
 //<<< eWombat [SNAFU_V3]
-void CUpDownClient::ProcessUnknownHelloTag(CTag *tag)
+void CUpDownClient::ProcessUnknownHelloTag(CTag *tag, CString &pszReason)
 {
-if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
-	return;
-m_strNotOfficial.AppendFormat(_T(",%s"),tag->GetFullInfo());
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
 	{
@@ -3066,6 +3091,10 @@ switch(tag->GetNameID())
 	case CT_UNKNOWNx5D:
 	case CT_UNKNOWNx6B:
 	case CT_UNKNOWNx6C:			strSnafuTag=apszSnafuTag[17];break;
+	case CT_UNKNOWNx74:
+	case CT_UNKNOWNx87:			strSnafuTag=apszSnafuTag[17];break;
+	case CT_UNKNOWNxF0:
+	case CT_UNKNOWNxF4:			strSnafuTag=apszSnafuTag[17];break;
 	//case CT_UNKNOWNx69:			strSnafuTag=apszSnafuTag[3];break;//buffer=_T("eMuleReactor");break;
 	case CT_UNKNOWNx79:			strSnafuTag=apszSnafuTag[4];break;//buffer=_T("Bionic");break;
 	case CT_UNKNOWNx83:			strSnafuTag=apszSnafuTag[15];break;//buffer=_T("Fusspi");break;
@@ -3080,7 +3109,8 @@ switch(tag->GetNameID())
 	case CT_UNKNOWNx8d:			strSnafuTag=apszSnafuTag[6];break;//buffer=_T("[0x8d] unknown Leecher - (client version:60)");break;
 	case CT_UNKNOWNx99:			strSnafuTag=apszSnafuTag[7];break;//buffer=_T("[RAMMSTEIN]");break;		//STRIKE BACK
 	case CT_UNKNOWNx98:
-	case CT_UNKNOWNx9C:			strSnafuTag=apszSnafuTag[18];break;
+	case CT_UNKNOWNx9C:
+	case CT_UNKNOWNxDA:			strSnafuTag=apszSnafuTag[3];break;//buffer=_T("eMuleReactor");break;
 	case CT_UNKNOWNxc4:			strSnafuTag=apszSnafuTag[8];break;//buffer=_T("[MD5 Community]");break;	//USED BY NEW BIONIC => 0x12 Sender
 	case CT_FRIENDSHARING:		//STRIKE BACK
 		//if (theApp.glob_prefs->GetAntiFriendshare())
@@ -3100,16 +3130,11 @@ switch(tag->GetNameID())
 	}
 	if (strSnafuTag!=NULL)
 	{
-		CString buffer;
-		buffer.Format(_T("Suspect Hello-Tag: %s "), strSnafuTag);
-		BanLeecher(buffer);
+		pszReason.Format(_T("Suspect Hello-Tag: %s"),strSnafuTag);
 	}
 }
-void CUpDownClient::ProcessUnknownInfoTag(CTag *tag)
+void CUpDownClient::ProcessUnknownInfoTag(CTag *tag, CString &pszReason)
 {
-if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
-	return;
-m_strNotOfficial.AppendFormat(_T(",%s"),tag->GetFullInfo());
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
 	{
@@ -3132,9 +3157,7 @@ switch(tag->GetNameID())
 	}
 	if (strSnafuTag!=NULL)
 	{
-		CString buffer;
-		buffer.Format(_T("Suspect eMuleInfo-Tag: %s "), strSnafuTag);
-		BanLeecher(buffer);
+		pszReason.Format(_T("Suspect eMuleInfo-Tag: %s"), strSnafuTag);
 	}
 }
 //>>> eWombat [SNAFU_V3]

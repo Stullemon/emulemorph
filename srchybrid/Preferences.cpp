@@ -1064,8 +1064,7 @@ void CPreferences::Init()
 			if (PathCanonicalize(szFullPath, toadd))
 				toadd = szFullPath;
 
-			if (IsInstallationDirectory(toadd))
-				continue;
+				// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 			if (_taccess(toadd, 0) == 0){ // only add directories which still exist
 				if (toadd.Right(1) != _T('\\'))
@@ -1192,31 +1191,8 @@ void CPreferences::SetStandartValues()
 //	Save();
 }
 
-bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrName)
-{
-	if (CompareDirectories(rstrDirectory, GetTempDir()))
-		return false;
+// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
 
-	// do not share a file from the temp directory, if it matches one of the following patterns
-	CString strNameLower(rstrName);
-	strNameLower.MakeLower();
-	strNameLower += _T("|"); // append an EOS character which we can query for
-	static const LPCTSTR _apszNotSharedExts[] = {
-		_T("%u.part") _T("%c"), 
-		_T("%u.part.met") _T("%c"), 
-		_T("%u.part.met") PARTMET_BAK_EXT _T("%c"), 
-		_T("%u.part.met") PARTMET_TMP_EXT _T("%c") 
-	};
-	for (int i = 0; i < ARRSIZE(_apszNotSharedExts); i++){
-		UINT uNum;
-		TCHAR iChar;
-		// "misuse" the 'scanf' function for a very simple pattern scanning.
-		if (_stscanf(strNameLower, _apszNotSharedExts[i], &uNum, &iChar) == 2 && iChar == _T('|'))
-			return true;
-	}
-
-	return false;
-}
 
 // SLUGFILLER: SafeHash
 bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rstrName)
@@ -4344,10 +4320,7 @@ void CPreferences::LoadCats() {
 		_stprintf(newcat->title,_T("%s"),catini.GetString(_T("Title"),_T(""),ixStr));
 		_stprintf(newcat->incomingpath,_T("%s"),catini.GetString(_T("Incoming"),_T(""),ixStr));
 		MakeFoldername(newcat->incomingpath);
-		if (!IsShareableDirectory(newcat->incomingpath)){
-			_sntprintf(newcat->incomingpath, ARRSIZE(newcat->incomingpath), _T("%s"), GetIncomingDir());
-			MakeFoldername(newcat->incomingpath);
-		}
+		// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 		_stprintf(newcat->comment,_T("%s"),catini.GetString(_T("Comment"),_T(""),ixStr));
 		newcat->prio =catini.GetInt(_T("a4afPriority"),PR_NORMAL,ixStr); // ZZ:DownloadManager
 		_stprintf(buffer,_T("%s"),catini.GetString(_T("Color"),_T("0"),ixStr));
@@ -4464,49 +4437,6 @@ bool CPreferences::MoveCat(UINT from, UINT to){
 	return true;
 }
 
-
-bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
-{
-	CString strFullPath;
-	if (PathCanonicalize(strFullPath.GetBuffer(MAX_PATH), rstrDir))
-		strFullPath.ReleaseBuffer();
-	else
-		strFullPath = rstrDir;
-	
-	// skip sharing of several special eMule folders
-	if (!CompareDirectories(strFullPath, GetAppDir()))			// ".\eMule"
-		return true;
-	if (!CompareDirectories(strFullPath, GetConfigDir()))		// ".\eMule\config"
-		return true;
-	if (!CompareDirectories(strFullPath, GetWebServerDir()))	// ".\eMule\webserver"
-		return true;
-	if (!CompareDirectories(strFullPath, GetLangDir()))			// ".\eMule\lang"
-		return true;
-	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
-	if (!CompareDirectories(strFullPath, GetWapServerDir()))	// ".\eMule\wapserver"
-		return true;
-	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
-
-	return false;
-}
-
-bool CPreferences::IsShareableDirectory(const CString& rstrDir)
-{
-	if (IsInstallationDirectory(rstrDir))
-		return false;
-
-	CString strFullPath;
-	if (PathCanonicalize(strFullPath.GetBuffer(MAX_PATH), rstrDir))
-		strFullPath.ReleaseBuffer();
-	else
-		strFullPath = rstrDir;
-	
-	// skip sharing of several special eMule folders
-	if (!CompareDirectories(strFullPath, GetTempDir()))			// ".\eMule\temp"
-		return false;
-
-	return true;
-}
 
 void CPreferences::UpdateLastVC()
 {
