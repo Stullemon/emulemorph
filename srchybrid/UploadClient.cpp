@@ -475,7 +475,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			CString ext=srcfile->GetFileName();ext.MakeLower();
 			int pos=ext.ReverseFind('.');
 			if (pos>-1) ext=ext.Mid(pos);
-			bool compFlag=(ext!=".zip" && ext!=".rar" && ext!=".ace" && ext!=".ogm" && ext!=".tar");//no need to try compressing tar compressed files... [Yun.SF3]
+			bool compFlag=(ext!=".zip" && ext!=".rar" && ext!=".ace" && ext!=".ogm");
 			if (ext==".avi" && theApp.glob_prefs->GetDontCompressAvi()) compFlag=false;
 
 			// -khaos--+++> We're going to add bFromPF as a parameter to the calls to create packets...
