@@ -230,8 +230,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			m_htiLogA4AF = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_A4AF), m_htiVerboseGroup, m_iLogA4AF); // ZZ:DownloadManager
 			m_htiLogUlDlEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_ULDL_EVENTS), m_htiVerboseGroup, m_iLogUlDlEvents);
 			//MORPH START - Added by SiRoB, WebCache 1.2f
-			m_htiLogWebCacheEvents = m_ctrlTreeOptions.InsertCheckBox(_T("Log WebCache Events:"), m_htiVerboseGroup, m_iLogWebCacheEvents); //JP log webcache events
-			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(_T("Log IACH Events:"), m_htiVerboseGroup, m_iLogICHEvents); //JP log ICH events
+			m_htiLogWebCacheEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_WCEVENTS), m_htiVerboseGroup, m_iLogWebCacheEvents); //JP log webcache events
+			m_htiLogICHEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG_IACH), m_htiVerboseGroup, m_iLogICHEvents); //JP log ICH events
 			//MORPH END   - Added by SiRoB, WebCache 1.2f
 		}
 
@@ -631,8 +631,8 @@ void CPPgTweaks::Localize(void)
 		if (m_htiLogUlDlEvents) m_ctrlTreeOptions.SetItemText(m_htiLogUlDlEvents, GetResString(IDS_LOG_ULDL_EVENTS));
 
 		//MORPH START - Added by SiRoB, WebCache 1.2f
-		if (m_htiLogWebCacheEvents) m_ctrlTreeOptions.SetItemText(m_htiLogWebCacheEvents, _T("Log WebCache Events:"));//jp log webcache events
-		if (m_htiLogICHEvents) m_ctrlTreeOptions.SetItemText(m_htiLogICHEvents, _T("Log IACH Events:"));//JP log ICH events
+		if (m_htiLogWebCacheEvents) m_ctrlTreeOptions.SetItemText(m_htiLogWebCacheEvents, GetResString(IDS_LOG_WCEVENTS));//jp log webcache events
+		if (m_htiLogICHEvents) m_ctrlTreeOptions.SetItemText(m_htiLogICHEvents, GetResString(IDS_LOG_IACH));//JP log ICH events
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
 
 		if (m_htiCommit) m_ctrlTreeOptions.SetItemText(m_htiCommit, GetResString(IDS_COMMITFILES));

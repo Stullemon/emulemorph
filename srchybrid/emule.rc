@@ -1852,9 +1852,9 @@ BEGIN
     GROUPBOX        "ISP Proxyserver Settings",IDC_Webcache,7,41,216,161
     EDITTEXT        IDC_webcacheName,55,52,159,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_webcachePort,55,67,38,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Port",IDC_STATIC,14,70,38,9
-    LTEXT           "Address",IDC_STATIC,14,55,38,9
-    GROUPBOX        "Webcache Controls",IDC_STATIC,7,7,216,30
+    LTEXT           "Port",IDC_STATIC_PORT,14,70,38,9
+    LTEXT           "Address",IDC_STATIC_ADDRESS,14,55,38,9
+    GROUPBOX        "Webcache Controls",IDC_STATIC_CONTROLS,7,7,216,30
     CONTROL         "Enable Webcached Downloads",
                     IDC_Activatewebcachedownloads,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,14,17,121,12
@@ -1863,8 +1863,8 @@ BEGIN
     PUSHBUTTON      "Autodetect Webcache",IDC_DETECTWEBCACHE,14,163,201,12,
                     BS_FLAT
     LTEXT           "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)",
-                    IDC_BLOCKSTEXT,14,97,124,28
-    RTEXT           "180k-Blocks",IDC_BLOCKSTEXT2,174,113,41,8
+                    IDC_STATIC_NRBLOCKS,14,97,124,28
+    RTEXT           "180k-Blocks",IDC_STATIC_BLOCKS,174,113,41,8
     EDITTEXT        IDC_BLOCKS,141,108,30,13,ES_AUTOHSCROLL
     CONTROL         "Extra long timeout for webcache connections",
                     IDC_EXTRATIMEOUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
@@ -5308,6 +5308,29 @@ BEGIN
     IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
 END
 
+STRINGTABLE 
+BEGIN
+	IDS_WEBCACHE_ISP        "ISP Proxyserver Settings"
+    IDS_WC_PORT             "Port"
+    IDS_WC_ADDRESS          "Address"
+    IDS_WC_CONTROLS         "Webcache Controls"
+    IDS_WC_ENABLE           "Enable Webcached Downloads"
+    IDS_WC_WRONGPORT        "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!"
+    IDS_WC_AUTO             "Autodetect Webcache"
+    IDS_WC_NRBLOCKS         "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)"
+    IDS_WC_BLOCK            "180k-Blocks"
+    IDS_WC_TIMEOUT          "Extra long timeout for webcache connections"
+    IDS_WC_LOCAL            "This webcache does NOT cache traffic within the same ISP"
+    IDS_WC_SUBMIT_EMAIL     "Submit these settings via email"
+    IDS_WC_LINK             "Link: "
+    IDS_WC_PERSISTENT       "Persistent connections for proxy downloads"
+    IDS_WC_ADVANCED         "Show advanced controls"
+    IDS_WC_TEST             "Test webcache configuration. Might take up to 30 Seconds"
+    IDS_WC_HIDE_ADV         "Hide advanced controls"
+    IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
+    IDS_LOG_WCEVENTS	    "Log WebCache Events"
+    IDS_LOG_IACH	    "Log IACH Events"
+END
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

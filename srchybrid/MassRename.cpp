@@ -86,6 +86,8 @@ LRESULT CMassRenameEdit::OnUndo(WPARAM wParam, LPARAM lParam)
 
 CMassRenameDialog::~CMassRenameDialog()
 {
+	// Delete the CMassRenameEdit object we allocated in OnInitDialog
+	delete MassRenameEdit;
 }
 
 void CMassRenameDialog::DoDataExchange(CDataExchange* pDX)
@@ -202,9 +204,6 @@ BOOL CMassRenameDialog::OnInitDialog() {
 
 void CMassRenameDialog::OnClose()
 {
-	// Delete the CMassRenameEdit object we allocated in OnInitDialog
-	delete MassRenameEdit;
-	
 	CDialog::OnClose();
 }
 
@@ -304,15 +303,11 @@ void CMassRenameDialog::OnBnClickedMassrenameok()
 
 	// Everything is ok, the caller can take m_NewFilenames to rename the files.
 	EndDialog (IDOK);
-	// Delete the CMassRenameEdit object we allocated in OnInitDialog
-	delete MassRenameEdit;
 }
 
 void CMassRenameDialog::OnBnClickedMassrenamecancel()
 {
 	EndDialog (IDCANCEL);
-	// Delete the CMassRenameEdit object we allocated in OnInitDialog
-	delete MassRenameEdit;
 }
 
 // Copy the first line of the New-filenames edit field to the Mask edit-field
@@ -697,8 +692,8 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 	OpenClipboard ();
 	HGLOBAL hglb = ::GetClipboardData( CF_TEXT );
     if (hglb != NULL) { 
-        LPTSTR str;
-		str = (LPTSTR) GlobalLock(hglb); 
+        LPSTR str;
+		str = (LPSTR) GlobalLock(hglb); 
         if (str != NULL) { 
 			// Get the data
 			ClipboardData = str;
