@@ -992,7 +992,8 @@ bool CKnownFile::WriteToFile(CFile* file){
 	//tags
 	//MORPH START - Modified by SiRoB, ZZ Upload System
 	//const int iFixedTags = 10;
-	const int iFixedTags = 11;
+	//const int iFixedTags = 11;
+	const int iFixedTags = 12;//EastShare - met control, known files expire tag[TAHO]
 	//MORPH END - Modified by SiRoB, ZZ Upload System
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
