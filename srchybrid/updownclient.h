@@ -1124,8 +1124,10 @@ static LPCTSTR apszSnafuTag[] =
 	_T("[eMule v0.26 Leecher]"),							//11
 	_T("[Hunter]"),											//12
 	_T("[Bionic 0.20 Beta]"),								//13
-	_T("[Rumata (rus)(Plus v1f)]")							//14
-	_T("[Fusspi]")											//15
+	_T("[Rumata (rus)(Plus v1f)]"),							//14
+	_T("[Fusspi]"),											//15
+	_T("[donkey2002]"),										//16
+	_T("[md4]")										        //17
 	};
 
 //<<< new tags from eMule 0.04x
@@ -1138,9 +1140,13 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNx17			0x17 // http://www.haspepapa-welt.de (DodgeBoards)
 #define CT_UNKNOWNxE6			0xE6 // http://www.haspepapa-welt.de
 #define CT_UNKNOWNx22			0x22 // DarkMule |eVorte|X|
+#define CT_UNKNOWNx5D			0x5D // md4 
 #define CT_UNKNOWNx63			0x63 // ?
 #define CT_UNKNOWNx64			0x64 // ?
 #define CT_UNKNOWNx69			0x69 // eMuleReactor
+#define CT_UNKNOWNx6B			0x6B // md4
+#define CT_UNKNOWNx6C			0x6C // md4
+#define CT_UNKNOWNx76			0x76 // www.donkey2002.to
 #define CT_UNKNOWNx79			0x79 // Bionic
 #define CT_UNKNOWNx7A			0x7A // NewDarkMule
 #define CT_UNKNOWNx83			0x83 // Fusspi
@@ -1151,6 +1157,7 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNxbb			0xbb // emule.de (client version:60)
 #define CT_UNKNOWNxc4			0xc4 //MD5 Community from new bionic - hello
 #define CT_UNKNOWNxCA			0xCA // NewDarkMule
+#define CT_UNKNOWNxCD			0xCD // www.donkey2002.to
 #define CT_FRIENDSHARING		0x66 //eWombat  [SNAFU]
 #define CT_DARK					0x54 //eWombat [SNAFU]
 #define FRIENDSHARING_ID 0x5F73F1A0 // Magic Key, DO NOT CHANGE!

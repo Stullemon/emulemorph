@@ -1405,10 +1405,21 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	else{
 		// ensure that all possible block requests are removed from the partfile
 		ClearDownloadBlockRequests();
+		//MORPH START - Changed by SiRoB, 0.43b code
 		/*if(GetDownloadState() == DS_CONNECTED){
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			theApp.downloadqueue->RemoveSource(this);
 	    }*/
+		if(GetDownloadState() == DS_CONNECTED){
+		    // client didn't responsed to our request for some reasons (remotely banned?)
+		    // or it just doesn't has this file, so try to swap first
+            if (!SwapToAnotherFile(_T("No response from client. CUpDownClient::Disconnected()"), true, true, true, NULL, false, false)){ // ZZ:DownloadManager
+			    theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
+				theApp.downloadqueue->RemoveSource(this);
+			    //DEBUG_ONLY(AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
+		    }
+	    }
+		//MORPH END   - Changed by SiRoB, 0.43b code
 	}
 
 	// we had still an AICH request pending, handle it
@@ -1445,13 +1456,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			if (thePrefs.GetLogUlDlEvents())
 	            AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing connecting client from upload list. Reason: %s ----"), DbgGetClientInfo(), pszReason);
 		case US_WAITCALLBACK:
-			//MORPH START - Added by SiRoB, Failed Connect
-			if(m_uFailedConnect++ < 1)
-			{
-				bDelete = true;
-				break;
-			}
-			//MORPH START - Added by SiRoB, Failed Connect
 		case US_ERROR:
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
@@ -1459,13 +1463,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	switch(m_nDownloadState){
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
-			//MORPH START - Added by SiRoB, Failed Connect
-			if(m_uFailedConnect++ < 1)
-			{
-				bDelete = true;
-				break;
-			}
-			//MORPH END   - Added by SiRoB, Failed Connect
 		case DS_ERROR:
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
@@ -1499,15 +1496,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		return true;
 	}
 	else{
-		//MORPH START - Added by SIRoB, ReAsk state -Patch-
-		if (m_nDownloadState==DS_CONNECTED && m_nUploadState==US_ONUPLOADQUEUE)
-		{
-			if(GetRemoteQueueRank() && !IsRemoteQueueFull())
-				SetDownloadState(DS_ONQUEUE);
-		else
-				SetDownloadState(DS_NONE);
-		}
-		//MORPH END  - Added by SiRoB, ReAsk state -Patch-
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
 		m_fHashsetRequesting = 0;
@@ -3075,9 +3063,14 @@ switch(tag->GetNameID())
 	case CT_UNKNOWNxE6:			strSnafuTag=apszSnafuTag[0];break;//buffer=_T("DodgeBoards");break;
 	case CT_UNKNOWNx15:			strSnafuTag=apszSnafuTag[1];break;//buffer=_T("DodgeBoards & DarkMule |eVorte|X|");break;
 	case CT_UNKNOWNx22:			strSnafuTag=apszSnafuTag[2];break;//buffer=_T("DarkMule v6 |eVorte|X|");break;
+	case CT_UNKNOWNx5D:
+	case CT_UNKNOWNx6B:
+	case CT_UNKNOWNx6C:			strSnafuTag=apszSnafuTag[17];break;
 	//case CT_UNKNOWNx69:			strSnafuTag=apszSnafuTag[3];break;//buffer=_T("eMuleReactor");break;
 	case CT_UNKNOWNx79:			strSnafuTag=apszSnafuTag[4];break;//buffer=_T("Bionic");break;
 	case CT_UNKNOWNx83:			strSnafuTag=apszSnafuTag[15];break;//buffer=_T("Fusspi");break;
+	case CT_UNKNOWNx76:			
+	case CT_UNKNOWNxCD:			strSnafuTag=apszSnafuTag[16];break;//buffer=_T("www.donkey2002.to");break;
 	case CT_UNKNOWNx88:
 		////If its a LSD its o.k
 		if (m_strModVersion.IsEmpty() || _tcsnicmp(m_strModVersion, _T("LSD"),3)!=0)
@@ -3106,7 +3099,7 @@ switch(tag->GetNameID())
 	if (strSnafuTag!=NULL)
 	{
 		CString buffer;
-		buffer.Format(_T("Suspect Hello-Tag: %s %s"), strSnafuTag, tag->GetFullInfo());
+		buffer.Format(_T("Suspect Hello-Tag: %s "), strSnafuTag);
 		BanLeecher(buffer);
 	}
 }
@@ -3138,7 +3131,7 @@ switch(tag->GetNameID())
 	if (strSnafuTag!=NULL)
 	{
 		CString buffer;
-		buffer.Format(_T("Suspect eMuleInfo-Tag: %s %s"), strSnafuTag, tag->GetFullInfo());
+		buffer.Format(_T("Suspect eMuleInfo-Tag: %s "), strSnafuTag);
 		BanLeecher(buffer);
 	}
 }
