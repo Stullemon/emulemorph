@@ -469,9 +469,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 2:
 						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
-						//MORPH START - Added by SIRoB, Right Justify
+						//MORPH START - Added by SiRoB, Right Justify
 						dcdttext |= DT_RIGHT;
-						//MORPH END   - Added by SIRoB, Right Justify
+						//MORPH END   - Added by SiRoB, Right Justify
 						break;
 					case 3:
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
@@ -493,6 +493,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 5:
 						Sbuffer.Format(_T("%s"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000));
+						//MORPH START - Added by SiRoB, Right Justify
+						dcdttext |= DT_RIGHT;
+						//MORPH END   - Added by SiRoB, Right Justify
 						break;
 					case 6:
 						Sbuffer = client->GetUploadStateDisplayString();
@@ -555,10 +558,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer.Format(_T("%i"), client->GetSlotNumber());
 						//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
 						if (client->IsFriend() && client->GetFriendSlot()){
-							Sbuffer.Append(_T(",FS"));
+							Sbuffer.Append(_T(" FS"));
 						}
 						//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
-						if (file){
+						if (file && client->IsPBForPS()){
 							if (client->IsMoreUpThanDown(file))
 							{
 								Sbuffer.Append(_T(",PBF"));
