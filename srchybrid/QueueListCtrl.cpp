@@ -491,7 +491,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							//Morph End - added by AndCycle, Equal Chance For Each File
 
 							//MORPH START - Added by SiRoB, ZZ Upload System
-							if(file->GetPowerShared()) {
+							if(client->GetPowerShared()) {
 								CString tempString = GetResString(IDS_POWERSHARE_PREFIX);
 								tempString.Append(_T(" "));
 								tempString.Append(Sbuffer);

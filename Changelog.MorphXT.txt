@@ -4,6 +4,7 @@ Changelog for eMule 0.44b MorphXT v5.x
 
 FIXED  : Source Load Saver have been corrected [SiRoB]
 FIXED  : Patch taken from other ListCtrl to avoid crash in the FriendListCtrl (at shutdown some item were not valide) [SiRoB]
+FIXED  : Porper PowerShare display in Queuelistctrl (related to unsecure client) [SiRoB]
 
 CHANGED: Intelligent Chunk Selection now use the advanced per file setting for the preview first and last chunk [SiRoB]
 CHANGED: Normal slot are not focused [SiRoB]
