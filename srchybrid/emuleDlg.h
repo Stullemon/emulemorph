@@ -241,6 +241,16 @@ private:
     CTypedPtrList<CPtrList, SLogItem*> m_QueueDebugLog;
     CTypedPtrList<CPtrList, SLogItem*> m_QueueLog;
     // Elandal:ThreadSafeLogging <--
+
+	// Mighty Knife: extended debug logging
+private:
+	int m_ExtDebugMessagesCount;
+	CStringList m_ExtDebugMessages;
+public:
+	void AddExtDebugMessage (CString _line,...);
+	void AddExtDebugDump (CString _headline, const char* _data, int _size, CString _subscript="");
+	void OutputExtDebugMessages ();
+	// [end] Mighty Knife
 };
 
 

@@ -2525,3 +2525,100 @@ LRESULT CemuleDlg::OnVersionCheckResponse(WPARAM wParam, LPARAM lParam)
 	AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	return 0;
 }
+
+// MightyKnife: extended debug logging
+
+#define MAX_MESSAGES 500
+
+/* Name:     AddExtDebugMessage
+   Function: This function adds the message "line" to the debug list m_ExtDebugMessages.
+			 This list contains MAX_MESSAGES extended debug messages that are invisible to 
+			 the user. If the method OutputExtDebugMessages is called, these debug messages 
+			 are printed to the visible debug log.
+   Return:   -
+   Remarks:  -
+   Author:	 MightyKnife
+*/
+void CemuleDlg::AddExtDebugMessage (CString _line,...) {
+	ASSERT( theApp.glob_prefs!=NULL );
+
+	char temp[1060]; 
+	char bufferline[1000];
+
+	va_list argptr;
+	va_start(argptr, _line);
+	_vsnprintf(bufferline, 1000, _line, argptr);
+	va_end(argptr);
+
+	CTime nowT=CTime::GetCurrentTime();
+	_snprintf(temp,sizeof temp,"%s/%d: %s",nowT.Format(theApp.glob_prefs->GetDateTimeFormat4Log()),
+			  ++m_ExtDebugMessagesCount,bufferline);
+	m_ExtDebugMessages.AddTail (temp);
+
+	// remove some old debug messages if necessary
+	while (m_ExtDebugMessages.GetSize () > MAX_MESSAGES) 
+		m_ExtDebugMessages.RemoveHead ();
+}
+
+/* Name:     AddExtDebugDump
+   Function: This method works comparable AddExtDebugMessage. It first prints the
+			 _headline to the extended debug message (if it is != ""). Afterwards it 
+			 transforms the buffer _data into a hexadecimal string and prints it on 
+			 the  extended debug messages, too. So it's good for dumping data blocks.
+			 The _subscript is added afterwards, too, if it's != "".
+   Return:   -
+   Remarks:  -
+   Author:   Mighty Knife
+*/
+void CemuleDlg::AddExtDebugDump (CString _headline, const char* _data, int _size, CString _subscript) {
+	ASSERT( theApp.glob_prefs!=NULL );
+
+	// Add timestamp to the headline
+	if (_headline != "") AddExtDebugMessage ("%s",(const char*) _headline);
+
+	// Only dump the first 256 bytes
+	if (_size > 256) _size = 256;
+
+	// output as hex string
+	CString tmp,tmp2;
+	for (int itmp=0; itmp < _size; itmp++) {
+		tmp2.Format (" %02X",(unsigned) (BYTE) (_data [itmp]));
+		tmp += tmp2;
+	}
+	m_ExtDebugMessages.AddTail (tmp);
+
+	// output as C++-string for inserting into the sourcecode for testing
+	tmp="\"";
+	for (int itmp=0; itmp < _size; itmp++) {
+		tmp2.Format ("\\x%02X",(unsigned) (BYTE) (_data [itmp]));
+		if ((_data [itmp] >= 32) && (_data [itmp] <= 'z') && 
+			(_data [itmp] != '\"') && (_data [itmp] != '\\'))
+			tmp += (unsigned char) _data [itmp];
+		else tmp += tmp2;
+	}
+	tmp += "\"";
+	m_ExtDebugMessages.AddTail (tmp);
+	
+	if (_subscript != "") m_ExtDebugMessages.AddTail (_subscript);
+
+	// remove some old debug messages if necessary
+	while (m_ExtDebugMessages.GetSize () > MAX_MESSAGES) 
+		m_ExtDebugMessages.RemoveHead ();
+}
+
+/* Name:     OutputExtDebugMessages
+   Function: Prints all messages in the m_ExtDebugMessages list to the debug log.
+			 Removes all messages from the list so that messages are only printed once.
+   Return:   -
+   Remarks:  -
+   Author:   Mighty Knife
+*/
+void CemuleDlg::OutputExtDebugMessages () {
+	ASSERT( theApp.glob_prefs!=NULL );
+
+	while (!m_ExtDebugMessages.IsEmpty ()) {
+		CString temp = m_ExtDebugMessages.RemoveHead ();
+		serverwnd->debuglog.AddEntry(temp);
+	}
+}
+// [end] Mighty Knife
