@@ -1016,7 +1016,10 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			//already on queue
             // VQB LowID Slot Patch, enhanced in ZZUL
             if (addInFirstPlace == false && client->HasLowID() &&
-                client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick && AcceptNewClient())
+                client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick && AcceptNewClient() &&
+				(!(client->IsFriend() && client->GetFriendSlot()) && !client->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS] ||
+				 client->IsPBForPS() && m_abAddClientOfThisClass[1] ||
+				 client->IsFriend() && client->GetFriendSlot() && m_abAddClientOfThisClass[0])) //MORPH - Added by SiRoB, Upload Splitting Class
 			{
                     if(thePrefs.GetLogUlDlEvents())
                         AddDebugLogLine(true, _T("Adding ****lowid when reconneting. Client: %s"), client->DbgGetClientInfo());
