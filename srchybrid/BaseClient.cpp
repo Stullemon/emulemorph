@@ -1132,8 +1132,9 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
-	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/+1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
+	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	if (bSendModVersion || m_clientSoft == SO_LPHANT) tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
 
 	data->WriteUInt32(tagcount);
 
@@ -1224,7 +1225,16 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		//MORPH END   - Added by SiRoB, Anti-leecher feature
     	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 
-		// MORPH START - Added by SiRoB, WebCache 1.2f
+		//Morph Start - added by AndCycle, ICS
+		// enkeyDev: ICS
+		CTag tagIncompleteParts(ET_INCOMPLETEPARTS,1);
+		tagIncompleteParts.WriteTagToFile(data);
+		// <--- enkeyDev: ICS
+		//Morph End - added by AndCycle, ICS
+	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	// MORPH START - Added by SiRoB, WebCache 1.2f
+	if (bSendModVersion || m_clientSoft == SO_LPHANT)
+	{
 		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC4' );
 		tagWebCacheVoodoo.WriteTagToFile(data);
 		uint32 flags = WC_FLAGS_UDP | WC_FLAGS_NO_OHCBS;
@@ -1235,15 +1245,8 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 			flags |= WC_FLAGS_INFO_NEEDED;
 		CTag tagWebCacheFlags( WC_TAG_FLAGS, flags);
 		tagWebCacheFlags.WriteTagToFile(data);
-		// MORPH END   - Added by SiRoB, WebCache 1.2f
-
-		//Morph Start - added by AndCycle, ICS
-		// enkeyDev: ICS
-		CTag tagIncompleteParts(ET_INCOMPLETEPARTS,1);
-		tagIncompleteParts.WriteTagToFile(data);
-		// <--- enkeyDev: ICS
-		//Morph End - added by AndCycle, ICS
-	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	}
+	// MORPH END   - Added by SiRoB, WebCache 1.2f
 	uint32 dwIP;
 	uint16 nPort;
 	if (theApp.serverconnect->IsConnected()){
