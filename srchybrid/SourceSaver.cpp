@@ -153,7 +153,7 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 //#define SOURCESTOSAVE	10
 //MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 //#define EXPIREIN		3 //Day
-#define EXPIREIN		60 //Minute
+#define EXPIREIN		30 //Minute
 
 void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString& slsfile, int maxSourcesToSave)
 {
