@@ -3650,7 +3650,6 @@ BEGIN
     IDS_SERVERKEEPALIVETIMEOUT "Server connection refresh interval [min.]"
     IDS_MORE                "&More"
     IDS_TOOLS               "T&ools"
-    IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_CREATEHOSTNAMESRCLINK "Copy eD2K Link To Clipboard (Hostname)"
     IDS_HASHINGFILESCOUNT   " (%u hashing)"
     IDS_CHECKDISKSPACE      "Check Diskspace"

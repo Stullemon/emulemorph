@@ -2343,7 +2343,6 @@
 #define IDC_UPDATE_URL_FAKELIST         4865
 #define IDC_UPDATE_URL_IPFILTER         4866
 #define IDC_URL_FOR_UPDATING2           4867
-#define IDS_INFINITEQUEUE				4868
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
