@@ -128,17 +128,15 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
     // Mighty Knife: log friend activities
 	CString OldName = GetItemText (iItem,0);
 	if ((OldName != pFriend->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
- 			TCHAR buffer[100]; buffer [0] = 0;
-		for (uint16 i = 0;i != 16;i++) _stprintf(buffer,_T("%s%02X"),buffer,pFriend->m_abyUserhash[i]);
-		#ifdef MIGHTY_TWEAKS
+ 		#ifdef MIGHTY_TWEAKS
 		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"),
 									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, (uint8)pFriend->m_dwLastUsedIP, 
 									(uint8)(pFriend->m_dwLastUsedIP>>8), 
 									(uint8)(pFriend->m_dwLastUsedIP>>16),(uint8)(pFriend->m_dwLastUsedIP>>24), 
-									pFriend->m_nLastUsedPort, buffer);
+									pFriend->m_nLastUsedPort, md4str(pFriend->m_abyUserhash));
 		#else
 		AddLogLine(false, _T("Friend changed his name: '%s'->'%s', hash %s"),
-									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, buffer);
+									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, md4str(pFriend->m_abyUserhash));
 		#endif
 	}
 	// [end] Mighty Knife
