@@ -82,10 +82,9 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
-	uint8* thisStatus;
-	if (!m_PartStatus_list.Lookup(file,thisStatus))
-		thisStatus = m_abyPartStatus;
-	if (thisStatus){
+	uint8* thisStatus = NULL;
+	m_PartStatus_list.Lookup(file,thisStatus);
+	if(thisStatus){
 		if (file != reqfile)
 			crClientOnly = RGB(192, 100, 255);
 	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
@@ -1216,22 +1215,6 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 		ResetFileStatusInfo();
 		m_nRemoteQueueRank = 0;
 
-		//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-		uint8* thisStatus;
-		if (m_PartStatus_list.Lookup(SwapTo, thisStatus))
-		{
-			m_abyPartStatus = thisStatus;
-			m_nPartCount = SwapTo->GetPartCount();
-			SwapTo->NewSrcPartsInfo();
-			SwapTo->UpdateAvailablePartsCount();
-		}
-		else
-		{
-			m_nPartCount = 0;
-			m_abyPartStatus = NULL;
-		}
-		//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
-
 		reqfile->NewSrcPartsInfo();
 		reqfile->UpdateAvailablePartsCount();
 		reqfile = SwapTo;
@@ -1239,6 +1222,21 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 		SwapTo->srclists[sourcesslot].AddTail(this);
 		theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(SwapTo,this,false);
 
+		//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+		uint8* thisStatus;
+		if (m_PartStatus_list.Lookup(SwapTo, thisStatus))
+		{
+			m_abyPartStatus = thisStatus;
+			m_nPartCount = SwapTo->GetPartCount();
+			reqfile->NewSrcPartsInfo();
+			reqfile->UpdateAvailablePartsCount();
+		}
+		else
+		{
+			m_nPartCount = 0;
+			m_abyPartStatus = NULL;
+		}
+		//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 		
 		return true;
 	}
