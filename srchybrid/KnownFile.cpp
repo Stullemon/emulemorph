@@ -591,7 +591,7 @@ void CKnownFile::UpdatePartsInfo()
 	if (flag)
 		count.SetSize(0, m_ClientUploadList.GetSize());
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	bool bCompleteSourcesCountInfoReceived=false;
+	uint16 iCompleteSourcesCountInfoReceived = 1;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
@@ -608,9 +608,18 @@ void CKnownFile::UpdatePartsInfo()
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 			if (cur_src->GetUpCompleteSourcesCount()>0)
-				bCompleteSourcesCountInfoReceived = true;
+				iCompleteSourcesCountInfoReceived += 1;
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
+		//MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
+		if (cur_src->IsDownloading()){
+			uint8* m_abyUpPartUploadingAndUploaded = new uint8[partcount];
+			cur_src->GetUploadingAndUploadedPart(m_abyUpPartUploadingAndUploaded, partcount);
+			for (uint16 i = 0; i < partcount; i++)
+				m_AvailPartFrequency[i] += m_abyUpPartUploadingAndUploaded[i];
+			delete[] m_abyUpPartUploadingAndUploaded;
+		}
+		//MORPH END    - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 	}
 
 	if (flag)
@@ -691,11 +700,8 @@ void CKnownFile::UpdatePartsInfo()
 		if((m_AvailPartFrequency[i]) < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1 && bCompleteSourcesCountInfoReceived,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1 && iCompleteSourcesCountInfoReceived,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
-	UpdateHideOSLimit(m_nVirtualCompleteSourcesCount==1);
-	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB, Reduce ShareStatusBar CPU consumption
@@ -2690,12 +2696,15 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	client->m_bUpPartStatusHiddenBySOTN = true;
 	client->m_abyUpPartStatusHidden = new uint8[parts];
 	memset(client->m_abyUpPartStatusHidden,0,parts);
-	
-	bool revelatleastonechunk = false;
+	UINT iMinAvailablePartFrenquency = 2;
+	bool	revelatleastonechunk = false;
 	if (!m_AvailPartFrequency.IsEmpty())
 		for (UINT i = 0; i < parts; i++)
-			if (!client->IsPartAvailable(i) && m_AvailPartFrequency[i] <= 2)
+			if (!client->IsPartAvailable(i) && m_AvailPartFrequency[i]<iMinAvailablePartFrenquency)
+			{
+				iMinAvailablePartFrenquency = m_AvailPartFrequency[i];
 				revelatleastonechunk = true;
+			}
 	if (revelatleastonechunk==false)
 		return false;
 	UINT done = 0;
@@ -2727,12 +2736,13 @@ bool CKnownFile::GetPowerShared() const
 //MORPH START - Added by SiRoB, Avoid misusing of HideOS
 uint8	CKnownFile::HideOSInWork() const
 {
-	if (m_bHideOSAuthorized==true && !IsPartFile())
+	if (m_bHideOSAuthorized==true)
 		return  (m_iHideOS>=0)?m_iHideOS:thePrefs.GetHideOvershares();
 	else
 		return 0;
 }
-//MORPH END   - Added by SiRoB, Avoid misusing of HideOS// MORPH START - Added by Commander, WebCache 1.2e
+//MORPH END   - Added by SiRoB, Avoid misusing of HideOS
+// MORPH START - Added by Commander, WebCache 1.2e
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 //JP webcache release START
 uint32 CKnownFile::GetNumberOfClientsRequestingThisFileUsingThisWebcache(CString webcachename, uint32 maxCount)
