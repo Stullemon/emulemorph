@@ -637,6 +637,10 @@ void CServerWnd::UpdateMyInfo() {
 			m_MyInfo << GetResString(IDS_SW_NAME) << ":\t" << srv->GetListName() << "\r\n";
 			m_MyInfo << GetResString(IDS_DESCRIPTION) << ":\t" << srv->GetDescription() << "\r\n";
 			m_MyInfo << GetResString(IDS_IP) << ":\t" << srv->GetAddress() << ":" << srv->GetPort() << "\r\n";
+			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+//			if (srv->GetConnPort() != srv->GetPort())  
+			m_MyInfo << GetResString(IDS_AUXPORTS) << ":\t" << srv->GetConnPort() << "\r\n"; 
+			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 			m_MyInfo << GetResString(IDS_VERSION) << ":\t" << srv->GetVersion() << "\r\n";
 			m_MyInfo << GetResString(IDS_UUSERS) << ":\t" << GetFormatedUInt(srv->GetUsers()) << "\r\n";
 			m_MyInfo << GetResString(IDS_PW_FILES) << ":\t" << GetFormatedUInt(srv->GetFiles()) << "\r\n";

@@ -215,7 +215,12 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		CTag tagPort(CT_PORT,thePrefs.GetPort());
 		tagPort.WriteTagToFile(&data);
 
+		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+		/*
 		CTag tagFlags(CT_SERVER_FLAGS,0x00000001);
+		*/
+		CTag tagFlags(CT_SERVER_FLAGS,0x00000005); // aux port compatable client
+		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		tagFlags.WriteTagToFile(&data);
 
 		// eMule Version (14-Mar-2004: requested by lugdunummaster (need for LowID clients which have no chance 

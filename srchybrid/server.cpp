@@ -34,6 +34,7 @@ CServer::CServer(const ServerMet_Struct* in_data)
 {
 	taglist = new CTypedPtrList<CPtrList, CTag*>;
 	port = in_data->port;
+	realport = 0;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	tagcount = 0;
 	ip = in_data->ip;
 	in_addr host;
@@ -64,6 +65,7 @@ CServer::CServer(uint16 in_port, LPCSTR i_addr)
 {
 	port = in_port;
 
+	realport = 0;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	taglist = new CTypedPtrList<CPtrList, CTag*>;
 	tagcount = 0;
 
@@ -113,6 +115,7 @@ CServer::CServer(const CServer* pOld)
 	strcpy(ipfull,pOld->ipfull);
 	files = pOld->files;
 	users = pOld->users;
+	realport = pOld->realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	preferences = pOld->preferences;
 	ping = pOld->ping;
 	failedcount = pOld->failedcount; 
@@ -231,6 +234,12 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 			users = tag->tag.intvalue;
 			delete tag;
 		}
+		//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+		else if (!strcmp(tag->tag.tagname,"auxportslist")){
+			if (tag->tag.type == 2) realport = atoi(tag->tag.stringvalue);
+			delete tag;
+		}
+		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		else
 			AddTag(tag);
 	}

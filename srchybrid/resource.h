@@ -1289,8 +1289,9 @@
 #define IDS_IRC_NOSFS                   1345
 #define IDS_RESETLABEL                  1346
 #define IDS_IRC_IGNOREMISCMESSAGE       1347
-#define IDD_DIRECT_DOWNLOAD             1347
-#define IDS_KNOWN                       1348
+#define IDD_DIRECT_DOWNLOAD             1348
+#define IDS_KNOWN                       1349
+#define IDS_AUXPORTS                    1350
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002

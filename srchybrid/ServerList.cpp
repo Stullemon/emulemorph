@@ -630,7 +630,12 @@ bool CServerList::SaveServermetToFile()
 			const CServer* nextserver = GetServerAt(j);
 
 			sbuffer.ip = nextserver->GetIP();
+			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+			/*
 			sbuffer.port = nextserver->GetPort();
+			*/
+			sbuffer.port = nextserver->GetConnPort();
+			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 			uint16 tagcount = 11;
 			if (nextserver->GetListName() && nextserver->GetListName()[0] != '\0')
 				tagcount++;
@@ -638,6 +643,10 @@ bool CServerList::SaveServermetToFile()
 				tagcount++;
 			if (nextserver->GetDescription() && nextserver->GetDescription()[0] != '\0')
 				tagcount++;
+			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+			if (nextserver->GetPort() != nextserver->GetConnPort())
+				tagcount++;
+			//Morph End- added by AndCycle, aux Ports, by lugdunummaster
 			sbuffer.tagcount = tagcount;
 			servermet.Write(&sbuffer, sizeof sbuffer);
 			
@@ -661,6 +670,14 @@ bool CServerList::SaveServermetToFile()
 			serveruser.WriteTagToFile(&servermet);
 			CTag serverfiles("files", nextserver->GetFiles() );
 			serverfiles.WriteTagToFile(&servermet);
+			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+			if (nextserver->GetPort() != nextserver->GetConnPort()) {
+				char temp[64] ;
+				sprintf(temp, "%d", nextserver->GetPort()) ;
+				CTag auxportslist("auxportslist", temp);
+				auxportslist.WriteTagToFile(&servermet);
+			}
+			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 			CTag serverping(ST_PING, nextserver->GetPing() );
 			serverping.WriteTagToFile(&servermet);
 			CTag serverlastp(ST_LASTPING, nextserver->GetLastPingedTime() );

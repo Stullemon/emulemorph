@@ -3214,6 +3214,7 @@ BEGIN
     IDS_ERR_NOTCONNECTEDKAD "You are currently not connected to the Kad Network!"
     IDS_IRC_NOSFS           "No Shared File Selected"
     IDS_RESETLABEL          "Auto completion (history function)"
+    IDS_AUXPORTS            "Aux Ports"
     IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
     IDS_KNOWN               "Known"
 END

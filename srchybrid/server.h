@@ -52,7 +52,14 @@ public:
 	LPCSTR	GetListName() const						{return listname;}
 	LPCSTR	GetFullIP() const						{return ipfull;}
 	LPCSTR	GetAddress() const;
+	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	/*
 	uint16	GetPort() const							{return port;}
+	*/
+	uint16	GetPort() const							{return realport ? realport : port;}
+	uint16	GetConnPort() const						{return port;}
+	void    SetPort(uint32 val)						{ realport = val;}
+	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 	bool	AddTagFromFile(CFileDataIO* servermet);
 	void	SetListName(LPCSTR newname);
 	void	SetDescription(LPCSTR newdescription);
@@ -118,6 +125,7 @@ private:
 	CHAR		ipfull[3+1+3+1+3+1+3+1]; // 16
 	uint32		ip;
 	uint16		port;
+	uint16		realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	uint8		staticservermember;
 	uint32		failedcount; 
 	CTypedPtrList<CPtrList, CTag*>*	taglist;

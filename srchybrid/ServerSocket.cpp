@@ -198,19 +198,41 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 
 				// save TCP flags in 'cur_server'
 				ASSERT( cur_server );
+				//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+				uint32 ConnPort = 0;
+				uint32 rport = cur_server->GetConnPort();
+				//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 				if (cur_server){
 					if (size >= sizeof(LoginAnswer_Struct)+4){
 						if (thePrefs.GetDebugServerTCPLevel() > 0)
 							Debug("  Flags=%08x\n", *((uint32*)(packet + sizeof(LoginAnswer_Struct))));
 						cur_server->SetTCPFlags(*((uint32*)(packet + sizeof(LoginAnswer_Struct))));
+						//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+						if (size >= sizeof(LoginAnswer_Struct)+8) {
+							// aux port login : we should use the 'standard' port of this server to advertize to other clients
+							ConnPort = *((uint32*)(packet + sizeof(LoginAnswer_Struct) + 4)) ;
+							cur_server->SetPort(ConnPort) ;
+						}
+						//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 					}
 					else
 						cur_server->SetTCPFlags(0);
 
 					// copy TCP flags into the server in the server list
+					//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+					/*
 					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort());
 					if (pServer)
 						pServer->SetTCPFlags(cur_server->GetTCPFlags());
+					*/
+					CServer* pServer = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), rport);
+					if (pServer) {
+ 						pServer->SetTCPFlags(cur_server->GetTCPFlags());
+						if (ConnPort) pServer->SetPort(ConnPort);
+							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pServer);
+							theApp.emuledlg->serverwnd->UpdateMyInfo();
+					}
+					//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 				}
 
 				if (la->clientid == 0){
@@ -528,7 +550,12 @@ void CServerSocket::ConnectToServer(CServer* server){
 	}
 
 	SetConnectionState(CS_CONNECTING);
+	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	/*
 	if (!this->Connect(server->GetAddress(),server->GetPort())){
+	*/
+	if (!this->Connect(server->GetAddress(),server->GetConnPort())){
+	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 		int error = this->GetLastError();
 		if ( error != WSAEWOULDBLOCK){
 			AddLogLine(false,GetResString(IDS_ERR_CONNECTIONERROR),cur_server->GetListName(),cur_server->GetFullIP(),cur_server->GetPort(), GetErrorMessage(error, 1)); 

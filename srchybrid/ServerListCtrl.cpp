@@ -63,6 +63,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	InsertColumn(10,GetResString(IDS_SOFTFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(11,GetResString(IDS_HARDFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(12,GetResString(IDS_VERSION),		LVCFMT_LEFT,  50);
+	InsertColumn(13,GetResString(IDS_AUXPORTS),		LVCFMT_LEFT,  50);//Morph - added by AndCycle, aux Ports, by lugdunummaster
 
 	SetAllIcons();
 	Localize();
@@ -177,6 +178,13 @@ void CServerListCtrl::Localize()
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(12, &hdi);
 	strRes.ReleaseBuffer();
+
+	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	strRes = GetResString(IDS_AUXPORTS);
+	hdi.pszText = strRes.GetBuffer();
+	pHeaderCtrl->SetItem(13, &hdi);
+	strRes.ReleaseBuffer();
+	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 }
 
 void CServerListCtrl::RemoveServer(CServer* todel)
@@ -239,13 +247,21 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	if (theApp.serverconnect->IsConnected()
 		&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
 		&& cur_srv->GetPort() == server->GetPort()
+		&& cur_srv->GetConnPort() == server->GetConnPort()//Morph - added by AndCycle, aux Ports, by lugdunummaster
 		&& stricmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
 		SetItemState(itemnr,LVIS_GLOW,LVIS_GLOW);
 	else
 		SetItemState(itemnr, 0, LVIS_GLOW);
 
 	CString temp;
+	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	/*
 	temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+	*/
+	if (server->GetConnPort() != server->GetPort())
+			temp.Format(_T("%s : %i/%i"), server->GetAddress(), server->GetPort(), server->GetConnPort());
+	else temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 	SetItemText(itemnr, 1, temp);
 
 	//EastShare Start - added by AndCycle, IP to Country
@@ -350,6 +366,16 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 		}
 	}
 	SetItemText(itemnr,12,temp);
+	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
+	// aux Port
+	if(server->GetConnPort() != server->GetPort()){
+		temp.Format(_T("%i"), server->GetConnPort());
+		SetItemText(itemnr, 13, temp);
+	}
+	else{
+		SetItemText(itemnr,13,_T(""));
+	}
+	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 }
 
 //EastShare Start - added by AndCycle, IP to Country

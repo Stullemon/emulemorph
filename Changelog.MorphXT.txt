@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.42e MorphXT v2.x
+--------------------------------------
+ADDED  : aux Ports support from lugdunummaster [AndCycle]
+
+--------------------------------------
 Changelog for eMule 0.42e MorphXT v2.5
 --------------------------------------
 MERGED : Code merged to 0.42e [SiRoB]
