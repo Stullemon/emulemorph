@@ -1429,6 +1429,7 @@
 #define IDS_FEATURES                    1469
 #define IDS_IRC_NEWNICK                 1470
 #define IDS_IRC_NEWNICKDESC             1471
+#define IDS_DONTREMOVESPARETRICKLESLOT  1472
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -2517,8 +2518,11 @@
 #define IDC_DLOC                        4877
 #define IDC_DLOC2                       4878
 #define IDC_CRC32PREFIX                 4878
+#define IDS_URL_FOR_UPDATING_IP2COUNTRY 4878
+#define IDC_URL_FOR_UPDATING_IP2COUNTRY 4878
 #define IDS_IP2COUNTRY                  4879
 #define IDC_CRC32SUFFIX                 4879
+#define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 4879
 #define IDS_COUNTRYNAME_SHORT           4880
 #define IDC_DONTADDCRC                  4880
 #define IDS_COUNTRYNAME_MID             4881
@@ -2657,14 +2661,6 @@
 #define IDC_QUEUE                       5506
 #define IDC_QUEUEBORDER                 5507
 #define IDS_ADVANCED                    5600
-#define IDS_URL_FOR_UPDATING_IP2COUNTRY 4878
-#define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 6034
-#define IDC_URL_FOR_UPDATING_IP2COUNTRY 4878
-
-#define IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 4879
-#define IDS_AUTOUPIP2COUNTRY            6032
-#define IDS_UPDATEIPCURL                6033
-
 #define IDC_MORPH3_OPTS                 6000
 #define IDS_WAPSRV                      6001
 #define IDS_PW_WAP                      6002
@@ -2691,10 +2687,11 @@
 #define IDS_WAP_BASICDATA               6023
 #define IDS_WAP_REFRESH                 6024
 #define IDS_WAP_SORTBY                  6025
-
+#define IDS_AUTOUPIP2COUNTRY            6032
+#define IDS_UPDATEIPCURL                6033
+#define IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE 6034
 #define IDS_CHECK_DYNDNS_ENABLED        6100
 #define IDC_CHECK_DYNDNS_ENABLED        6100
-
 #define IDS_STATIC_DYNDNS_USERNAME      6101
 #define IDC_STATIC_DYNDNS_USERNAME      6101
 #define IDC_EDIT_DYNDNS_USERNAME        6102
@@ -2709,7 +2706,8 @@
 #define IDS_BUTTON_DYNDNS_RESET         6108
 #define IDC_BUTTON_DYNDNS_RESET         6108
 #define IDC_STATIC_DYNDNS_LASTUPDATE    6109
-
+#define IDC_AUTOBACKUP                  13324
+#define IDC_AUTOBACKUP2                 13325
 #define IDC_BTN_MENU                    20120
 #define IDS_USER_ALREADY_FRIEND         21062
 #define IDS_GETFRIENDED2KLINK           21063
@@ -2718,9 +2716,6 @@
 #define IDS_GETMYFRIENDED2KLINK         21067
 #define IDS_GETMYHTMLFRIENDED2KLINK     21068
 #define IDS_FRIENDLINKMENUTITLE         21070
-
-#define IDC_AUTOBACKUP                  13324
-#define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
 #define IDC_BACKUP_FILEFRAME            50501
 #define IDC_BACKUP_AUTO                 50503

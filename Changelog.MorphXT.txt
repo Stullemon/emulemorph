@@ -30,6 +30,7 @@ ADDED  : WapServer from emulEspaña (adapted) [SiRoB/Commander]
 ADDED  : Customized IncomingDir icon from emulEspaña [Commander]
 ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
 ADDED  : Intelligent Chunk Selection from stormit & pawcio by enkeyDEV [AndCycle]
+ADDED  : Option to stop removing trickle client from uploading [AndCycle]
 
 TODO   : UNICODE Compatibility (in progess) [SiRoB]
 TODO   : Several Preferences Options (after new Preferences-Cats System arrived) [Commander]
