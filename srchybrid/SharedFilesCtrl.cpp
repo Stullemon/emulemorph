@@ -1035,7 +1035,11 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		if (::InsertMenuItem(m_SharedFilesMenu, MP_OPENFOLDER, FALSE, &mii))
 			uInsertedMenuItem = mii.wID;
 	}
+	//MORPH - Changed by SIRoB, Open temp folder 
+	/*
 	m_SharedFilesMenu.EnableMenuItem(MP_OPENFOLDER, bSingleCompleteFileSelected ? MF_ENABLED : MF_GRAYED);
+	*/
+	m_SharedFilesMenu.EnableMenuItem(MP_OPENFOLDER, iSelectedItems==1 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_RENAME, bSingleCompleteFileSelected ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_REMOVE, iCompleteFileSelected > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.SetDefaultItem(bSingleCompleteFileSelected ? MP_OPEN : -1);
@@ -1255,10 +1259,14 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					InstallSkin(file->GetFilePath());
 				break;
 			case MP_OPENFOLDER:
+				/*
 				if (file && !file->IsPartFile()){
 					CString path = file->GetPath();
 					int bspos = path.ReverseFind(_T('\\'));
 					ShellExecute(NULL, _T("open"), path.Left(bspos), NULL, NULL, SW_SHOW);
+				}*/
+				if (file){
+					ShellExecute(NULL, _T("open"), file->GetPath(), NULL, NULL, SW_SHOW);
 				}
 				break; 
 			case MP_RENAME:
