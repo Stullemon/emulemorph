@@ -1,16 +1,16 @@
 /*
- * File:	xfile.h
- * Purpose:	General Purpose File Class 
+ * File:	ximajbg.h
+ * Purpose:	JBG Image Class Loader and Writer
  */
 /* === C R E D I T S  &  D I S C L A I M E R S ==============
+ * CxImageJBG (c) 18/Aug/2002 Davide Pizzolato - www.xdp.it
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
- * CxFile (c)  11/May/2002 Davide Pizzolato - www.xdp.it
- * CxFile version 2.00 23/Aug/2002
+ * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
  *
- * Special thanks to Chris Shearer Cooper for new features, enhancements and bugfixes
+ * based on LIBJBG Copyright (c) 2002, Markus Kuhn - All rights reserved.
  *
  * COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY
  * OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
@@ -25,40 +25,36 @@
  * Use at your own risk!
  * ==========================================================
  */
-#if !defined(__xfile_h)
-#define __xfile_h
+#if !defined(__ximaJBG_h)
+#define __ximaJBG_h
 
-#ifdef WIN32
- #include <windows.h>
-#endif
+#include "ximage.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#if CXIMAGE_SUPPORT_JBG
 
-#include "ximadefs.h"
-
-class DLL_EXP CxFile
-{
-public:
-	CxFile(void) { };
-	virtual ~CxFile() { };
-
-	virtual bool	Close() = 0;
-	virtual size_t	Read(void *buffer, size_t size, size_t count) = 0;
-	virtual size_t	Write(const void *buffer, size_t size, size_t count) = 0;
-	virtual bool	Seek(long offset, int origin) = 0;
-	virtual long	Tell() = 0;
-	virtual long	Size() = 0;
-	virtual bool	Flush() = 0;
-	virtual bool	Eof() = 0;
-	virtual long	Error() = 0;
-	virtual bool	PutC(unsigned char c)
-		{
-		// Default implementation
-		size_t nWrote = Write(&c, 1, 1);
-		return (bool)(nWrote == 1);
-		}
-	virtual long	GetC() = 0;
+extern "C" {
+#include "../jbig/jbig.h"
 };
 
-#endif //__xfile_h
+class CxImageJBG: public CxImage
+{
+public:
+	CxImageJBG(): CxImage(CXIMAGE_FORMAT_JBG) {}
+
+//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_JBG);}
+//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_JBG);}
+	bool Decode(CxFile * hFile);
+	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
+
+#if CXIMAGE_SUPPORT_ENCODE
+	bool Encode(CxFile * hFile);
+	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
+#endif // CXIMAGE_SUPPORT_ENCODE
+protected:
+	static void jbig_data_out(BYTE *buffer, unsigned int len, void *file)
+							{((CxFile*)file)->Write(buffer,len,1);}
+};
+
+#endif
+
+#endif

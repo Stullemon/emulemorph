@@ -1,8 +1,8 @@
 /*
  * File:	ximapng.cpp
  * Purpose:	Platform Independent PNG Image Class Loader and Writer
- * 07/Aug/2001 <ing.davide.pizzolato@libero.it>
- * CxImage version 5.71 25/Apr/2003
+ * 07/Aug/2001 Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  */
 
 #include "ximapng.h"
@@ -178,10 +178,7 @@ bool CxImagePNG::Decode(CxFile *hFile)
 	row_pointers = new BYTE[10+row_stride];
 
 	// turn on interlace handling
-	if (info_ptr->interlace_type)
-		number_passes = png_set_interlace_handling(png_ptr);
-	else
-		number_passes = 1;
+	number_passes = png_set_interlace_handling(png_ptr);
 
 	for (int pass=0; pass< number_passes; pass++) {
 		iter.Upset();
@@ -214,27 +211,31 @@ bool CxImagePNG::Decode(CxFile *hFile)
 			}
 #if CXIMAGE_SUPPORT_ALPHA	// <vho>
 			else { //alpha blend
+
+				//compute the correct position of the line
+				long ax,ay;
+				ay = head.biHeight-1-y;
+				BYTE* prow= iter.GetRow(ay);
+
+				//recover data from previous scan
+				if (info_ptr->interlace_type && pass>0 && pass!=7){
+					for(ax=head.biWidth;ax>=0;ax--){
+						row_pointers[ax*4]=prow[3*ax];
+						row_pointers[ax*4+1]=prow[3*ax+1];
+						row_pointers[ax*4+2]=prow[3*ax+2];
+						row_pointers[ax*4+3]=AlphaGet(ax,ay);
+					}
+				}
+
 				//read next row
 				png_read_row(png_ptr, row_pointers, NULL);
-				//compute the correct position of the line
-				long ay;
-				if (info_ptr->interlace_type){
-					if (y==0) ay=0;
-					else ay = head.biHeight-y;
-				} else ay = head.biHeight-1-y;
+
 				//RGBA -> RGB + A
-				if (pass==(number_passes-1)){
-					BYTE* prow= iter.GetRow(ay);
-					for(long ax=0;ax<head.biWidth;ax++){
-						AlphaSet(ax,ay,row_pointers[ax*4+3]);
-// <vho> - don't flip RGB->BGR. already done by png_set_bgr(png_ptr);
-//						prow[3*ax]=row_pointers[ax*4+2];
-//						prow[3*ax+1]=row_pointers[ax*4+1];
-//						prow[3*ax+2]=row_pointers[ax*4];
-						prow[3*ax]=row_pointers[ax*4];
-						prow[3*ax+1]=row_pointers[ax*4+1];
-						prow[3*ax+2]=row_pointers[ax*4+2];
-					}
+				for(ax=0;ax<head.biWidth;ax++){
+					prow[3*ax]=row_pointers[ax*4];
+					prow[3*ax+1]=row_pointers[ax*4+1];
+					prow[3*ax+2]=row_pointers[ax*4+2];
+					AlphaSet(ax,ay,row_pointers[ax*4+3]);
 				}
 			}
 #endif // CXIMAGE_SUPPORT_ALPHA		// vho
@@ -257,9 +258,11 @@ bool CxImagePNG::Decode(CxFile *hFile)
 	return TRUE;
 }
 ////////////////////////////////////////////////////////////////////////////////
+#if CXIMAGE_SUPPORT_ENCODE
+////////////////////////////////////////////////////////////////////////////////
 bool CxImagePNG::Encode(CxFile *hFile)
 {
-	if (hFile==NULL) return false;
+	if (EncodeSafeCheck(hFile)) return false;
 
 	CImageIterator iter(this);
 	BYTE trans[256];	//for transparency (don't move)
@@ -312,6 +315,18 @@ bool CxImagePNG::Encode(CxFile *hFile)
 	info_ptr->interlace_type=PNG_INTERLACE_NONE;
 	info_ptr->rowbytes = row_stride;
 
+	/* set compression level */
+	//png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
+
+	/* set background */
+	png_color_16 image_background={ 0, 255, 255, 255, 0 };
+	if (info.nBkgndIndex!=-1) {
+		image_background.blue = info.nBkgndColor.rgbBlue;
+		image_background.green = info.nBkgndColor.rgbGreen;
+		image_background.red = info.nBkgndColor.rgbRed;
+	}
+	png_set_bKGD(png_ptr, info_ptr, &image_background);
+
 	/* set metrics */
 	png_set_pHYs(png_ptr, info_ptr, head.biXPelsPerMeter, head.biYPelsPerMeter, PNG_RESOLUTION_METER);
 
@@ -335,16 +350,32 @@ bool CxImagePNG::Encode(CxFile *hFile)
 				if (info.pGhost) info.pGhost->SetTransIndex(0);
 			}
 		}
+
+		int nc = GetNumColors();
+
+		/* We not need to write unused colors! <Basara>*/
+		/* only for small images <DP>*/
+		if ((nc>2)&&((head.biWidth*head.biHeight)<65536)){
+			nc = 0;
+			for (DWORD y=0;y<GetHeight();y++){
+				for (DWORD x=0;x<GetWidth();x++){
+					if (GetPixelIndex(x,y)>nc){
+						nc=GetPixelIndex(x,y);
+					}
+				}
+			}
+			nc++;
+		}
+
 		if (info.bAlphaPaletteEnabled){
-			for(WORD ip=0; ip<head.biClrUsed;ip++)
+			for(WORD ip=0; ip<nc;ip++)
 				trans[ip]=GetPaletteColor((BYTE)ip).rgbReserved;
-			info_ptr->num_trans = (WORD)head.biClrUsed;
+			info_ptr->num_trans = (WORD)nc;
 			info_ptr->valid |= PNG_INFO_tRNS;
 			info_ptr->trans = trans;
 		}
 
 		// copy the palette colors
-		int nc = GetNumColors();
 		info_ptr->palette = new png_color[nc];
 		info_ptr->num_palette = (png_uint_16) nc;
 		for (int i=0; i<nc; i++)
@@ -359,12 +390,11 @@ bool CxImagePNG::Encode(CxFile *hFile)
 		if (!AlphaIsValid()){
 			bNeedTempAlpha = true;
 			AlphaCreate();
-			AlphaSet(255);
 		}
 		RGBQUAD c,ct=GetTransColor();
 		for(long y=0; y < head.biHeight; y++){
 			for(long x=0; x < head.biWidth ; x++){
-				c=GetPixelColor(x,y);
+				c=GetPixelColor(x,y,false);
 				if (*(long*)&c==*(long*)&ct)
 					AlphaSet(x,y,0);
 		}}
@@ -390,7 +420,6 @@ bool CxImagePNG::Encode(CxFile *hFile)
 		long ay=head.biHeight-1;
 		RGBQUAD c;
 		do	{
-			iter.GetRow(row_pointers, row_stride);
 			for (long ax=head.biWidth-1; ax>=0;ax--){
 				c=GetPixelColor(ax,ay);
 				row_pointers[ax*4+3]=(BYTE)((AlphaGet(ax,ay)*info.nAlphaMax)/255);
@@ -444,5 +473,7 @@ bool CxImagePNG::Encode(CxFile *hFile)
 	/* that's it */
 	return TRUE;
 }
+////////////////////////////////////////////////////////////////////////////////
+#endif // CXIMAGE_SUPPORT_ENCODE
 ////////////////////////////////////////////////////////////////////////////////
 #endif // CXIMAGE_SUPPORT_PNG

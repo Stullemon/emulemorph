@@ -1,6 +1,6 @@
 // xImaPal.cpp : Palette and Pixel functions
-/* 07/08/2001 v1.00 - ing.davide.pizzolato@libero.it
- * CxImage version 5.71 25/Apr/2003
+/* 07/08/2001 v1.00 - Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  */
 
 #include "ximage.h"
@@ -87,7 +87,7 @@ BYTE CxImage::GetPixelIndex(long x,long y)
 
 	if ((x<0)||(y<0)||(x>=head.biWidth)||(y>=head.biHeight)) {
 		if (info.nBkgndIndex != -1)	return (BYTE)info.nBkgndIndex;
-		else return 0;
+		else return *info.pImage;
 	}
 	if (head.biBitCount==8){
 		return info.pImage[y*info.dwEffWidth + x];
@@ -107,7 +107,7 @@ BYTE CxImage::GetPixelIndex(long x,long y)
 	return 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
-RGBQUAD CxImage::GetPixelColor(long x,long y)
+RGBQUAD CxImage::GetPixelColor(long x,long y, bool bGetAlpha)
 {
 //	RGBQUAD rgb={0,0,0,0};
 	RGBQUAD rgb=info.nBkgndColor; //<mpwolski>
@@ -129,7 +129,7 @@ RGBQUAD CxImage::GetPixelColor(long x,long y)
 		rgb.rgbRed  = *iDst;
 	}
 #if CXIMAGE_SUPPORT_ALPHA
-	if (pAlpha) rgb.rgbReserved = AlphaGet(x,y);
+	if (pAlpha && bGetAlpha) rgb.rgbReserved = AlphaGet(x,y);
 #else
 	rgb.rgbReserved = 0;
 #endif //CXIMAGE_SUPPORT_ALPHA
@@ -172,7 +172,7 @@ void CxImage::SetPixelColor(long x,long y,COLORREF cr)
 	SetPixelColor(x,y,RGBtoRGBQUAD(cr));
 }
 ////////////////////////////////////////////////////////////////////////////////
-void CxImage::SetPixelColor(long x,long y,RGBQUAD c, bool bEditAlpha)
+void CxImage::SetPixelColor(long x,long y,RGBQUAD c, bool bSetAlpha)
 {
 	if ((pDib==NULL)||(x<0)||(y<0)||
 		(x>=head.biWidth)||(y>=head.biHeight)) return;
@@ -184,7 +184,7 @@ void CxImage::SetPixelColor(long x,long y,RGBQUAD c, bool bEditAlpha)
 		*iDst++ = c.rgbGreen;
 		*iDst   = c.rgbRed;
 #if CXIMAGE_SUPPORT_ALPHA
-		if (bEditAlpha) AlphaSet(x,y,c.rgbReserved);
+		if (bSetAlpha) AlphaSet(x,y,c.rgbReserved);
 #endif //CXIMAGE_SUPPORT_ALPHA
 	}
 }
@@ -200,9 +200,9 @@ BYTE CxImage::GetNearestIndex(RGBQUAD c)
 
 	BYTE* iDst = (BYTE*)(pDib) + sizeof(BITMAPINFOHEADER);
 	long distance=200000;
-	int i,j=0;
+	int i,j = 0;
 	long k,l;
-	int m= (int)head.biClrUsed;
+	int m = (int)(head.biClrImportant==0 ? head.biClrUsed : head.biClrImportant);
 	for(i=0,l=0;i<m;i++,l+=sizeof(RGBQUAD)){
 		k = (iDst[l]-c.rgbBlue)*(iDst[l]-c.rgbBlue)+
 			(iDst[l+1]-c.rgbGreen)*(iDst[l+1]-c.rgbGreen)+
@@ -349,6 +349,126 @@ void CxImage::SwapIndex(BYTE idx1, BYTE idx2)
 			if (idx==idx1) SetPixelIndex(x,y,idx2);
 			if (idx==idx2) SetPixelIndex(x,y,idx1);
 		}
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+bool CxImage::IsTransparent(long x, long y)
+{
+	if (!pDib) return false;
+
+	if (info.nBkgndIndex>=0){
+		if (head.biClrUsed){
+			if (GetPixelIndex(x,y) == info.nBkgndIndex) return true;
+		} else {
+			RGBQUAD ct = info.nBkgndColor;
+			RGBQUAD c = GetPixelColor(x,y,false);
+			if (*(long*)&c==*(long*)&ct) return true;
+		}
+	}
+
+#if CXIMAGE_SUPPORT_ALPHA
+	if (!pAlpha) return AlphaGet(x,y)==0;
+#endif
+
+	return false;
+}
+////////////////////////////////////////////////////////////////////////////////
+void CxImage::SetClrImportant(DWORD ncolors)
+{
+	if (ncolors==0 || ncolors>256) {
+		head.biClrImportant = 0;
+		return;
+	}
+
+	switch(head.biBitCount){
+	case 1:
+		head.biClrImportant = min(ncolors,2);
+		break;
+	case 4:
+		head.biClrImportant = min(ncolors,16);
+		break;
+	case 8:
+		head.biClrImportant = ncolors;
+		break;
+	}
+	return;
+}
+////////////////////////////////////////////////////////////////////////////////
+void CxImage::DrawLine(int StartX, int EndX, int StartY, int EndY, COLORREF cr)
+{
+	DrawLine(StartX, EndX, StartY, EndY, RGBtoRGBQUAD(cr));
+}
+////////////////////////////////////////////////////////////////////////////////
+void CxImage::DrawLine(int StartX, int EndX, int StartY, int EndY, RGBQUAD color, bool bSetAlpha)
+{
+	if (!pDib) return;
+	//////////////////////////////////////////////////////
+	// Draws a line using the Bresenham line algorithm
+	// Thanks to Jordan DeLozier <JDL>
+	//////////////////////////////////////////////////////
+	int x1 = StartX;
+	int y1 = StartY;
+	int x = x1;                       // Start x off at the first pixel
+	int y = y1;                       // Start y off at the first pixel
+	int x2 = EndX;
+	int y2 = EndY;
+
+	int xinc1,xinc2,yinc1,yinc2;      // Increasing values
+	int den, num, numadd,numpixels;   
+	int deltax = abs(x2 - x1);        // The difference between the x's
+	int deltay = abs(y2 - y1);        // The difference between the y's
+
+	// Get Increasing Values
+	if (x2 >= x1) {                // The x-values are increasing
+		xinc1 = 1;
+		xinc2 = 1;
+	} else {                         // The x-values are decreasing
+		xinc1 = -1;
+		xinc2 = -1;
+	}
+
+	if (y2 >= y1) {                // The y-values are increasing
+		yinc1 = 1;
+		yinc2 = 1;
+	} else {                         // The y-values are decreasing
+		yinc1 = -1;
+		yinc2 = -1;
+	}
+
+	// Actually draw the line
+	if (deltax >= deltay)         // There is at least one x-value for every y-value
+	{
+		xinc1 = 0;                  // Don't change the x when numerator >= denominator
+		yinc2 = 0;                  // Don't change the y for every iteration
+		den = deltax;
+		num = deltax / 2;
+		numadd = deltay;
+		numpixels = deltax;         // There are more x-values than y-values
+	}
+	else                          // There is at least one y-value for every x-value
+	{
+		xinc2 = 0;                  // Don't change the x for every iteration
+		yinc1 = 0;                  // Don't change the y when numerator >= denominator
+		den = deltay;
+		num = deltay / 2;
+		numadd = deltax;
+		numpixels = deltay;         // There are more y-values than x-values
+	}
+	
+	for (int curpixel = 0; curpixel <= numpixels; curpixel++)
+	{
+		// Draw the current pixel
+		SetPixelColor(x,y,color,bSetAlpha);
+		
+		num += numadd;              // Increase the numerator by the top of the fraction
+		if (num >= den)             // Check if numerator >= denominator
+		{
+			num -= den;               // Calculate the new numerator value
+			x += xinc1;               // Change the x as appropriate
+			y += yinc1;               // Change the y as appropriate
+		}
+		x += xinc2;                 // Change the x as appropriate
+		y += yinc2;                 // Change the y as appropriate
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////

@@ -7,7 +7,7 @@ size_t CxMemFile::Read(void *buffer, size_t size, size_t count)
 	if (buffer==NULL) return 0;
 	if (m_Position > (long)m_Size) return 0;
 
-	long nCount = count*size;
+	long nCount = (long)(count*size);
 	if (nCount == 0) return 0;
 
 	long nRead;
@@ -27,7 +27,7 @@ size_t CxMemFile::Write(const void *buffer, size_t size, size_t count)
 	if (m_pBuffer==NULL) return 0;
 	if (buffer==NULL) return 0;
 
-	long nCount = count*size;
+	long nCount = (long)(count*size);
 	if (nCount == 0) return 0;
 
 	if (m_Position + nCount > m_Edge) Alloc(m_Position + nCount);

@@ -3,9 +3,9 @@
  * Purpose:	Declaration of the Platform Independent Image Base Class
  * Author:	Alejandro Aguilar Sierra
  * Created:	1995
- * Copyright:	(c) 1995, Alejandro Aguilar Sierra <asierra@servidor.unam.mx>
+ * Copyright:	(c) 1995, Alejandro Aguilar Sierra <asierra(at)servidor(dot)unam(dot)mx>
  *
- * 07/08/2001 <ing.davide.pizzolato@libero.it>
+ * 07/08/2001 Davide Pizzolato - www.xdp.it
  * - removed slow loops
  * - added safe checks
  *
@@ -68,6 +68,8 @@ public:
 
 	void SetY(int y);	/* AD - for interlace */
 	int  GetY() {return Ity;}
+	BOOL GetCol(BYTE* pCol, DWORD x);
+	BOOL SetCol(BYTE* pCol, DWORD x);
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -211,6 +213,40 @@ inline BOOL CImageIterator::PrevStep()
 		} else
 			return 0;
 	}
+}
+/////////////////////////////////////////////////////////////////////
+inline BOOL CImageIterator::GetCol(BYTE* pCol, DWORD x)
+{
+	if ((pCol==0)||(ima->GetBpp()<8)||(x>=ima->GetWidth()))
+		return 0;
+	DWORD h = ima->GetHeight();
+	DWORD line = ima->GetEffWidth();
+	BYTE bytes = ima->GetBpp()>>3;
+	BYTE* pSrc;
+	for (DWORD y=0;y<h;y++){
+		pSrc = ima->GetBits(y) + x*bytes;
+		for (BYTE w=0;w<bytes;w++){
+			*pCol++=*pSrc++;
+		}
+	}
+	return 1;
+}
+/////////////////////////////////////////////////////////////////////
+inline BOOL CImageIterator::SetCol(BYTE* pCol, DWORD x)
+{
+	if ((pCol==0)||(ima->GetBpp()<8)||(x>=ima->GetWidth()))
+		return 0;
+	DWORD h = ima->GetHeight();
+	DWORD line = ima->GetEffWidth();
+	BYTE bytes = ima->GetBpp()>>3;
+	BYTE* pSrc;
+	for (DWORD y=0;y<h;y++){
+		pSrc = ima->GetBits(y) + x*bytes;
+		for (BYTE w=0;w<bytes;w++){
+			*pSrc++=*pCol++;
+		}
+	}
+	return 1;
 }
 /////////////////////////////////////////////////////////////////////
 #endif

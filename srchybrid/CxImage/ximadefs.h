@@ -3,6 +3,8 @@
 
 #if defined(_AFXDLL)||defined(_USRDLL)
  #define DLL_EXP __declspec(dllexport)
+#elif defined(_MSC_VER)&&(_MSC_VER<1200)
+ #define DLL_EXP __declspec(dllimport)
 #else
  #define DLL_EXP
 #endif
@@ -61,6 +63,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef unsigned char  BYTE;
 typedef unsigned short WORD;
@@ -146,9 +149,13 @@ typedef struct tagRGBTRIPLE {
 #define GetBValue(rgb)      ((BYTE)((rgb)>>16))
 #define RGB(r,g,b)          ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
 
+#ifndef _COMPLEX_DEFINED
+
 typedef struct tagcomplex {
 	double x,y;
 } _complex;
+
+#endif
 
 #define _cabs(c) sqrt(c.x*c.x+c.y*c.y)
 

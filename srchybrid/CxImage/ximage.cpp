@@ -1,6 +1,6 @@
 // ximage.cpp : main implementation file
-/* 07/08/2001 v1.00 - ing.davide.pizzolato@libero.it
- * CxImage version 5.71 25/Apr/2003
+/* 07/08/2001 v1.00 - Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  */
 
 #include "ximage.h"
@@ -16,11 +16,10 @@ void CxImage::Startup(DWORD imagetype)
 	pLayers = NULL;
 	//init structures
 	memset(&head,0,sizeof(BITMAPINFOHEADER));
-    head.biSize = sizeof(BITMAPINFOHEADER);
 	memset(&info,0,sizeof(CXIMAGEINFO));
 	//init default attributes
     info.dwType = imagetype;
-	info.nQuality = 75;
+	info.nQuality = 90;
 	info.nAlphaMax = 255;
 	info.nBkgndIndex = -1;
 	info.bEnabled = true;
@@ -35,12 +34,7 @@ CxImage::CxImage(DWORD imagetype)
 	Startup(imagetype);
 }
 ////////////////////////////////////////////////////////////////////////////////
-CxImage::~CxImage()
-{
-	Destroy();
-}
-////////////////////////////////////////////////////////////////////////////////
-void CxImage::Destroy()
+bool CxImage::Destroy()
 {
 	//free this only if it's valid and it's not a ghost
 	if (info.pGhost==NULL){
@@ -51,7 +45,9 @@ void CxImage::Destroy()
 		if (pSelection) {free(pSelection); pSelection=0;}
 		if (pAlpha) {free(pAlpha); pAlpha=0;}
 		if (pDib) {free(pDib); pDib=0;}
+		return true;
 	}
+	return false;
 }
 ////////////////////////////////////////////////////////////////////////////////
 // Sized image constructor
@@ -120,13 +116,20 @@ CxImage& CxImage::operator = (const CxImage& isrc)
 void* CxImage::Create(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype)
 {
 	// destroy the existing image (if any)
-	Destroy();
+	if (!Destroy())
+		return NULL;
 
     // Make sure bits per pixel is valid
     if		(wBpp <= 1)	wBpp = 1;
     else if (wBpp <= 4)	wBpp = 4;
     else if (wBpp <= 8)	wBpp = 8;
     else				wBpp = 24;
+
+	// limit memory requirements (and also a check for bad parameters)
+	if (((dwWidth*dwHeight*wBpp)>>8) > CXIMAGE_MAX_MEMORY){
+		strcpy(info.szLastError,"CXIMAGE_MAX_MEMORY exceeded");
+		return NULL;
+	}
 
 	// set the correct bpp value
     switch (wBpp){
@@ -145,6 +148,7 @@ void* CxImage::Create(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype
     info.dwType = imagetype;
 
     // initialize BITMAPINFOHEADER
+	head.biSize = sizeof(BITMAPINFOHEADER); //<ralphw>
     head.biWidth = dwWidth;		// fill in width from parameter
     head.biHeight = dwHeight;	// fill in height from parameter
     head.biPlanes = 1;			// must be 1
@@ -156,7 +160,10 @@ void* CxImage::Create(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype
     head.biClrImportant = 0;
 
 	pDib = malloc(GetSize()); // alloc memory block to store our bitmap
-    if (!pDib) return NULL;
+    if (!pDib){
+		strcpy(info.szLastError,"CxImage::Create can't allocate memory");
+		return NULL;
+	}
 
 	//clear the palette
 	RGBQUAD* pal=GetPalette();
@@ -182,9 +189,19 @@ void* CxImage::Create(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype
 }
 ////////////////////////////////////////////////////////////////////////////////
 // returns the pointer to the image pixels
-BYTE* CxImage::GetBits()
+BYTE* CxImage::GetBits(DWORD row)
 { 
-	if (pDib)	return ((BYTE*)pDib + *(DWORD*)pDib + GetPaletteSize()); 
+	if (pDib){
+		if (row) {
+			if (row<(DWORD)head.biHeight){
+				return ((BYTE*)pDib + *(DWORD*)pDib + GetPaletteSize() + (info.dwEffWidth * row));
+			} else {
+				return NULL;
+			}
+		} else {
+			return ((BYTE*)pDib + *(DWORD*)pDib + GetPaletteSize());
+		}
+	}
 	return NULL;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,9 +222,10 @@ void CxImage::Clear(BYTE bval)
 }
 ////////////////////////////////////////////////////////////////////////////////
 // moves everything from (*from) to (this), (*from) become empty
-void CxImage::Transfer(CxImage &from)
+bool CxImage::Transfer(CxImage &from)
 {
-	Destroy();
+	if (!Destroy())
+		return false;
 
 	memcpy(&head,&from.head,sizeof(BITMAPINFOHEADER));
 	memcpy(&info,&from.info,sizeof(CXIMAGEINFO));
@@ -221,6 +239,7 @@ void CxImage::Transfer(CxImage &from)
 	memset(&from.info,0,sizeof(CXIMAGEINFO));
 	from.pDib = from.pSelection = from.pAlpha = NULL;
 	from.pLayers = NULL;
+	return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
 // (this) points to the same pDib owned by (*from), the image remains in (*from)
@@ -296,26 +315,75 @@ void CxImage::Bitfield2RGB(BYTE *src, WORD redmask, WORD greenmask, WORD bluemas
 	return;
 }
 ////////////////////////////////////////////////////////////////////////////////
-bool CxImage::CreateFromARGB(DWORD dwWidth,DWORD dwHeight,BYTE* argbArray)
+bool CxImage::CreateFromArray(BYTE* pArray,DWORD dwWidth,DWORD dwHeight,DWORD dwBitsperpixel, DWORD dwBytesperline, bool bFlipImage)
 {
-	if (argbArray==NULL) return false;
-	if (!Create(dwWidth,dwHeight,24)) return false;
+	if (pArray==NULL) return false;
+	if (!((dwBitsperpixel==1)||(dwBitsperpixel==4)||(dwBitsperpixel==8)||
+		(dwBitsperpixel==24)||(dwBitsperpixel==32))) return false;
 
-	BYTE* dst;
-	BYTE* src = argbArray;
+	if (!Create(dwWidth,dwHeight,dwBitsperpixel)) return false;
+
+	if (dwBitsperpixel<24) SetGrayPalette();
+
 #if CXIMAGE_SUPPORT_ALPHA
-	if (!AlphaIsValid()) AlphaCreate();
+	if (dwBitsperpixel==32) AlphaCreate();
 #endif //CXIMAGE_SUPPORT_ALPHA
-	for (long y = dwHeight-1; y >= 0; y--) {
-		dst = info.pImage+y*info.dwEffWidth;
-		for(DWORD x=0;x<dwWidth;x++){
-			*dst++=src[0];
-			*dst++=src[1];
-			*dst++=src[2];
+
+	BYTE *dst,*src;
+
+	for (DWORD y = 0; y<dwHeight; y++) {
+		dst = info.pImage + (bFlipImage?(dwHeight-1-y):y) * info.dwEffWidth;
+		src = pArray + y * dwBytesperline;
+		if (dwBitsperpixel==32){
+			for(DWORD x=0;x<dwWidth;x++){
+				*dst++=src[0];
+				*dst++=src[1];
+				*dst++=src[2];
 #if CXIMAGE_SUPPORT_ALPHA
-			AlphaSet(x,y,src[3]);
+				AlphaSet(x,y,src[3]);
 #endif //CXIMAGE_SUPPORT_ALPHA
-			src+=4;
+				src+=4;
+			}
+		} else {
+			memcpy(dst,src,min(info.dwEffWidth,dwBytesperline));
+		}
+	}
+	return true;
+}
+////////////////////////////////////////////////////////////////////////////////
+bool CxImage::CreateFromMatrix(BYTE** ppMatrix,DWORD dwWidth,DWORD dwHeight,DWORD dwBitsperpixel, DWORD dwBytesperline, bool bFlipImage)
+{
+	if (ppMatrix==NULL) return false;
+	if (!((dwBitsperpixel==1)||(dwBitsperpixel==4)||(dwBitsperpixel==8)||
+		(dwBitsperpixel==24)||(dwBitsperpixel==32))) return false;
+
+	if (!Create(dwWidth,dwHeight,dwBitsperpixel)) return false;
+
+	if (dwBitsperpixel<24) SetGrayPalette();
+
+#if CXIMAGE_SUPPORT_ALPHA
+	if (dwBitsperpixel==32) AlphaCreate();
+#endif //CXIMAGE_SUPPORT_ALPHA
+
+	BYTE *dst,*src;
+
+	for (DWORD y = 0; y<dwHeight; y++) {
+		dst = info.pImage + (bFlipImage?(dwHeight-1-y):y) * info.dwEffWidth;
+		src = ppMatrix[y];
+		if (src){
+			if (dwBitsperpixel==32){
+				for(DWORD x=0;x<dwWidth;x++){
+					*dst++=src[0];
+					*dst++=src[1];
+					*dst++=src[2];
+#if CXIMAGE_SUPPORT_ALPHA
+					AlphaSet(x,y,src[3]);
+#endif //CXIMAGE_SUPPORT_ALPHA
+					src+=4;
+				}
+			} else {
+				memcpy(dst,src,min(info.dwEffWidth,dwBytesperline));
+			}
 		}
 	}
 	return true;
@@ -365,9 +433,9 @@ void CxImage::SetFlags(DWORD flags, bool bLockReservedFlags)
 	else info.dwFlags = flags;
 }
 ////////////////////////////////////////////////////////////////////////////////
-const char* CxImage::GetVersion()
+const TCHAR* CxImage::GetVersion()
 {
-	static const char CxImageVersion[] = "CxImage 5.71";
+	static const TCHAR CxImageVersion[] = _T("CxImage 5.99a");
 	return (CxImageVersion);
 }
 //EOF

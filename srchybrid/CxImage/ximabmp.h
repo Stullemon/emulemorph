@@ -3,11 +3,11 @@
  * Purpose:	BMP Image Class Loader and Writer
  */
 /* === C R E D I T S  &  D I S C L A I M E R S ==============
- * CxImageBMP (c) 07/Aug/2001 <ing.davide.pizzolato@libero.it>
+ * CxImageBMP (c) 07/Aug/2001 Davide Pizzolato - www.xdp.it
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
- * CxImage version 5.71 25/Apr/2003
+ * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
  *
  * Special thanks to Troels Knakkergaard for new features, enhancements and bugfixes
@@ -34,6 +34,18 @@
 
 #include "ximage.h"
 
+const int RLE_COMMAND     = 0;
+const int RLE_ENDOFLINE   = 0;
+const int RLE_ENDOFBITMAP = 1;
+const int RLE_DELTA       = 2;
+
+#if !defined(BI_RLE8)
+ #define BI_RLE8  1L
+#endif
+#if !defined(BI_RLE4)
+ #define BI_RLE4  2L
+#endif
+
 #if CXIMAGE_SUPPORT_BMP
 
 class CxImageBMP: public CxImage
@@ -44,8 +56,10 @@ public:
 	bool Decode(CxFile * hFile);
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 
+#if CXIMAGE_SUPPORT_ENCODE
 	bool Encode(CxFile * hFile);
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
+#endif // CXIMAGE_SUPPORT_ENCODE
 
 protected:
 	bool DibReadBitmapInfo(CxFile* fh, BITMAPINFOHEADER *pdib);

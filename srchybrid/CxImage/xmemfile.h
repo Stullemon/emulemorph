@@ -41,7 +41,7 @@ public:
 		return (m_pBuffer!=0);
 	}
 //////////////////////////////////////////////////////////
-	BYTE*	GetBuffer() { m_bFreeOnClose = false; return m_pBuffer;}
+BYTE* GetBuffer(bool bDetachBuffer = true) { m_bFreeOnClose = !bDetachBuffer; return m_pBuffer;}
 //////////////////////////////////////////////////////////
 	virtual size_t	Read(void *buffer, size_t size, size_t count);
 	virtual size_t	Write(const void *buffer, size_t size, size_t count);

@@ -1,14 +1,17 @@
 /*
- * File:	ximawbmp.h
- * Purpose:	WBMP Image Class Loader and Writer
+ * File:	ximatga.h
+ * Purpose:	TARGA Image Class Loader and Writer
  */
 /* === C R E D I T S  &  D I S C L A I M E R S ==============
- * CxImageWBMP (c) 12/Jul/2002 Davide Pizzolato - www.xdp.it
+ * CxImageTGA (c) 05/Jan/2002 Davide Pizzolato - www.xdp.it
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
  * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
+ *
+ * Parts of the code come from Paintlib
+ * Copyright (c) 1996-1998 Ulrich von Zadow
  *
  * COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY
  * OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
@@ -23,29 +26,40 @@
  * Use at your own risk!
  * ==========================================================
  */
-#if !defined(__ximaWBMP_h)
-#define __ximaWBMP_h
+#if !defined(__ximaTGA_h)
+#define __ximaTGA_h
 
 #include "ximage.h"
 
-#if CXIMAGE_SUPPORT_WBMP
+#if CXIMAGE_SUPPORT_TGA
 
-class CxImageWBMP: public CxImage
+class CxImageTGA: public CxImage
 {
 #pragma pack(1)
-typedef struct tagWbmpHeader
+typedef struct tagTgaHeader
 {
-    BYTE   Type;            // 0
-    BYTE   FixHeader;       // 0
-    BYTE   ImageWidth;      // Image Width
-    BYTE   ImageHeight;     // Image Height
-} WBMPHEADER;
-#pragma pack()
-public:
-	CxImageWBMP(): CxImage(CXIMAGE_FORMAT_WBMP) {}
+    BYTE   IdLength;            // Image ID Field Length
+    BYTE   CmapType;            // Color Map Type
+    BYTE   ImageType;           // Image Type
 
-//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_WBMP);}
-//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_WBMP);}
+    WORD   CmapIndex;           // First Entry Index
+    WORD   CmapLength;          // Color Map Length
+    BYTE   CmapEntrySize;       // Color Map Entry Size
+
+    WORD   X_Origin;            // X-origin of Image
+    WORD   Y_Origin;            // Y-origin of Image
+    WORD   ImageWidth;          // Image Width
+    WORD   ImageHeight;         // Image Height
+    BYTE   PixelDepth;          // Pixel Depth
+    BYTE   ImagDesc;            // Image Descriptor
+} TGAHEADER;
+#pragma pack()
+
+public:
+	CxImageTGA(): CxImage(CXIMAGE_FORMAT_TGA) {}
+
+//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_TGA);}
+//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_TGA);}
 	bool Decode(CxFile * hFile);
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 
@@ -53,6 +67,9 @@ public:
 	bool Encode(CxFile * hFile);
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
 #endif // CXIMAGE_SUPPORT_ENCODE
+protected:
+	BYTE ExpandCompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int width, int y, BYTE rleLeftover);
+	void ExpandUncompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int width, int y, int xoffset);
 };
 
 #endif

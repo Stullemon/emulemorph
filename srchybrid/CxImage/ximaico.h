@@ -1,14 +1,17 @@
 /*
- * File:	ximawbmp.h
- * Purpose:	WBMP Image Class Loader and Writer
+ * File:	ximaico.h
+ * Purpose:	ICON Image Class Loader and Writer
  */
 /* === C R E D I T S  &  D I S C L A I M E R S ==============
- * CxImageWBMP (c) 12/Jul/2002 Davide Pizzolato - www.xdp.it
+ * CxImageICO (c) 07/Aug/2001 Davide Pizzolato - www.xdp.it
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
  * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
+ *
+ * Parts of the code come from FreeImage 2
+ * Design and implementation by Floris van den Berg <flvdberg(at)wxs(dot)nl>
  *
  * COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY
  * OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
@@ -23,29 +26,37 @@
  * Use at your own risk!
  * ==========================================================
  */
-#if !defined(__ximaWBMP_h)
-#define __ximaWBMP_h
+#if !defined(__ximaICO_h)
+#define __ximaICO_h
 
 #include "ximage.h"
 
-#if CXIMAGE_SUPPORT_WBMP
+#if CXIMAGE_SUPPORT_ICO
 
-class CxImageWBMP: public CxImage
+class CxImageICO: public CxImage
 {
-#pragma pack(1)
-typedef struct tagWbmpHeader
-{
-    BYTE   Type;            // 0
-    BYTE   FixHeader;       // 0
-    BYTE   ImageWidth;      // Image Width
-    BYTE   ImageHeight;     // Image Height
-} WBMPHEADER;
-#pragma pack()
+typedef struct tagIconDirectoryEntry {
+    BYTE  bWidth;
+    BYTE  bHeight;
+    BYTE  bColorCount;
+    BYTE  bReserved;
+    WORD  wPlanes;
+    WORD  wBitCount;
+    DWORD dwBytesInRes;
+    DWORD dwImageOffset;
+} ICONDIRENTRY;
+
+typedef struct tagIconDir {
+    WORD          idReserved;
+    WORD          idType;
+    WORD          idCount;
+} ICONHEADER;
+
 public:
-	CxImageWBMP(): CxImage(CXIMAGE_FORMAT_WBMP) {}
+	CxImageICO(): CxImage(CXIMAGE_FORMAT_ICO) {}
 
-//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_WBMP);}
-//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_WBMP);}
+//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_ICO);}
+//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_ICO);}
 	bool Decode(CxFile * hFile);
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 

@@ -1,6 +1,6 @@
 // xImaTran.cpp : Transformation functions
-/* 07/08/2001 v1.00 - ing.davide.pizzolato@libero.it
- * CxImage version 5.71 25/Apr/2003
+/* 07/08/2001 v1.00 - Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  */
 
 #include "ximage.h"
@@ -28,8 +28,16 @@ bool CxImage::GrayScale()
 		}
 		//transform to 8 bit gray scale
 		if (head.biBitCount==4 || head.biBitCount==1){
-			CxImage ima(head.biWidth,head.biHeight,8,info.dwType);
+			CxImage ima;
+			ima.CopyInfo(*this);
+			if (!ima.Create(head.biWidth,head.biHeight,8,info.dwType)) return false;
 			ima.SetGrayPalette();
+#if CXIMAGE_SUPPORT_SELECTION
+			ima.SelectionCopy(*this);
+#endif //CXIMAGE_SUPPORT_SELECTION
+#if CXIMAGE_SUPPORT_ALPHA
+			ima.AlphaCopy(*this);
+#endif //CXIMAGE_SUPPORT_ALPHA
 			BYTE *img=ima.GetBits();
 			long l=ima.GetEffWidth();
 			for (long y=0;y<head.biHeight;y++){
@@ -41,8 +49,13 @@ bool CxImage::GrayScale()
 		}
 	} else { //from RGB to 8 bit gray scale
 		BYTE *iSrc=info.pImage;
-		CxImage ima(head.biWidth,head.biHeight,8,info.dwType);
+		CxImage ima;
+		ima.CopyInfo(*this);
+		if (!ima.Create(head.biWidth,head.biHeight,8,info.dwType)) return false;
 		ima.SetGrayPalette();
+#if CXIMAGE_SUPPORT_SELECTION
+		ima.SelectionCopy(*this);
+#endif //CXIMAGE_SUPPORT_SELECTION
 #if CXIMAGE_SUPPORT_ALPHA
 		ima.AlphaCopy(*this);
 #endif //CXIMAGE_SUPPORT_ALPHA
@@ -59,6 +72,7 @@ bool CxImage::GrayScale()
 	}
 	return true;
 }
+////////////////////////////////////////////////////////////////////////////////
 bool CxImage::Flip()
 {
 	if (!pDib) return false;
@@ -354,7 +368,7 @@ bool CxImage::Rotate(float angle, CxImage* iDst)
 {
 	if (!pDib) return false;
 
-//  $Id: ximatran.cpp,v 1.1 2003-10-12 15:57:18 sirob Exp $
+//  $Id: ximatran.cpp,v 1.2 2004-09-18 01:57:29 sirob Exp $
 //  Copyright (c) 1996-1998 Ulrich von Zadow
 
 	// Negative the angle, because the y-axis is negative.
@@ -374,20 +388,20 @@ bool CxImage::Rotate(float angle, CxImage* iDst)
 
 	newP1.x = p1.x;
 	newP1.y = p1.y;
-	newP2.x = (long)(p2.x*cos_angle - p2.y*sin_angle);
-	newP2.y = (long)(p2.x*sin_angle + p2.y*cos_angle);
-	newP3.x = (long)(p3.x*cos_angle - p3.y*sin_angle);
-	newP3.y = (long)(p3.x*sin_angle + p3.y*cos_angle);
-	newP4.x = (long)(p4.x*cos_angle - p4.y*sin_angle);
-	newP4.y = (long)(p4.x*sin_angle + p4.y*cos_angle);
+	newP2.x = (long)floor(p2.x*cos_angle - p2.y*sin_angle);
+	newP2.y = (long)floor(p2.x*sin_angle + p2.y*cos_angle);
+	newP3.x = (long)floor(p3.x*cos_angle - p3.y*sin_angle);
+	newP3.y = (long)floor(p3.x*sin_angle + p3.y*cos_angle);
+	newP4.x = (long)floor(p4.x*cos_angle - p4.y*sin_angle);
+	newP4.y = (long)floor(p4.x*sin_angle + p4.y*cos_angle);
 
 	leftTop.x = min(min(newP1.x,newP2.x),min(newP3.x,newP4.x));
 	leftTop.y = min(min(newP1.y,newP2.y),min(newP3.y,newP4.y));
 	rightBottom.x = max(max(newP1.x,newP2.x),max(newP3.x,newP4.x));
 	rightBottom.y = max(max(newP1.y,newP2.y),max(newP3.y,newP4.y));
 	leftBottom.x = leftTop.x;
-	leftBottom.y = rightBottom.y;
-	rightTop.x = rightBottom.x;
+	leftBottom.y = 2+rightBottom.y;
+	rightTop.x = 2+rightBottom.x;
 	rightTop.y = leftTop.y;
 
 	newWidth = rightTop.x - leftTop.x;
@@ -501,11 +515,6 @@ bool CxImage::Resample(long newx, long newy, int mode, CxImage* iDst)
 	newImage.SetPalette(GetPalette());
 	if (!newImage.IsValid()) return false;
 
-	if (head.biWidth==newx && head.biHeight==newy){
-		Transfer(newImage);
-		return true;
-	}
-
 	switch (mode) {
 	case 1: // nearest pixel
 	{ 
@@ -525,35 +534,54 @@ bool CxImage::Resample(long newx, long newy, int mode, CxImage* iDst)
 		float f_x, f_y, a, b, rr, gg, bb, r1, r2;
 		int   i_x, i_y, xx, yy;
 		RGBQUAD rgb;
+		BYTE* iDst;
 		for(long y=0; y<newy; y++){
 			info.nProgress = (long)(100*y/newy);
 			if (info.nEscape) break;
-			f_y = (float) y * yScale;
+			f_y = (float) y * yScale - 0.5f;
 			i_y = (int) floor(f_y);
 			a   = f_y - (float)floor(f_y);
 			for(long x=0; x<newx; x++){
-				f_x = (float) x * xScale;
+				f_x = (float) x * xScale - 0.5f;
 				i_x = (int) floor(f_x);
 				b   = f_x - (float)floor(f_x);
 
-				rr = gg = bb = 0.0F;
+				rr = gg = bb = 0.0f;
 				for(int m=-1; m<3; m++) {
 					r1 = b3spline((float) m - a);
+					yy = i_y+m;
+					if (yy<0) yy=0;
+					if (yy>=head.biHeight) yy = head.biHeight-1;
 					for(int n=-1; n<3; n++) {
-						r2 = b3spline(-1.0F*((float)n - b)); 
-						xx = i_x+n+2;
-						yy = i_y+m+2;
+						r2 = r1 * b3spline(b - (float)n);
+						xx = i_x+n;
 						if (xx<0) xx=0;
-						if (yy<0) yy=0;
 						if (xx>=head.biWidth) xx=head.biWidth-1;
-						if (yy>=head.biHeight) yy=head.biHeight-1;
-						rgb = GetPixelColor(xx,yy);
-						rr += rgb.rgbRed * r1 * r2;
-						gg += rgb.rgbGreen * r1 * r2;
-						bb += rgb.rgbBlue * r1 * r2;
+
+						if (head.biClrUsed){
+							rgb = GetPixelColor(xx,yy);
+						} else {
+							iDst  = info.pImage + yy*info.dwEffWidth + xx*3;
+							rgb.rgbBlue = *iDst++;
+							rgb.rgbGreen= *iDst++;
+							rgb.rgbRed  = *iDst;
+						}
+
+						rr += rgb.rgbRed * r2;
+						gg += rgb.rgbGreen * r2;
+						bb += rgb.rgbBlue * r2;
 					}
 				}
-				newImage.SetPixelColor(x,y,RGB(rr,gg,bb));
+
+				if (head.biClrUsed)
+					newImage.SetPixelColor(x,y,RGB(rr,gg,bb));
+				else {
+					iDst = newImage.info.pImage + y*newImage.info.dwEffWidth + x*3;
+					*iDst++ = (BYTE)bb;
+					*iDst++ = (BYTE)gg;
+					*iDst   = (BYTE)rr;
+				}
+
 			}
 		}
 		break;
@@ -713,11 +741,14 @@ bool CxImage::Resample(long newx, long newy, int mode, CxImage* iDst)
 	return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
-bool CxImage::DecreaseBpp(DWORD nbit, bool errordiffusion, RGBQUAD* ppal)
+bool CxImage::DecreaseBpp(DWORD nbit, bool errordiffusion, RGBQUAD* ppal, DWORD clrimportant)
 {
 	if (!pDib) return false;
 	if (head.biBitCount <  nbit) return false;
-	if (head.biBitCount == nbit) return true;
+	if (head.biBitCount == nbit){
+		if (clrimportant==0) return true;
+		if (head.biClrImportant && (head.biClrImportant<clrimportant)) return true;
+	}
 
 	long er,eg,eb;
 	RGBQUAD c,ce;
@@ -725,6 +756,7 @@ bool CxImage::DecreaseBpp(DWORD nbit, bool errordiffusion, RGBQUAD* ppal)
 	CxImage tmp;
 	tmp.CopyInfo(*this);
 	tmp.Create(head.biWidth,head.biHeight,(WORD)nbit,info.dwType);
+	if (clrimportant) tmp.SetClrImportant(clrimportant);
 
 #if CXIMAGE_SUPPORT_SELECTION
 	tmp.SelectionCopy(*this);
@@ -736,7 +768,7 @@ bool CxImage::DecreaseBpp(DWORD nbit, bool errordiffusion, RGBQUAD* ppal)
 
 	switch (tmp.head.biBitCount){
 	case 1:
-		if (ppal) tmp.SetPalette(ppal,16);
+		if (ppal) tmp.SetPalette(ppal,2);
 		else {
 			tmp.SetPaletteColor(0,0,0,0);
 			tmp.SetPaletteColor(1,255,255,255);
@@ -871,6 +903,9 @@ bool CxImage::IncreaseBpp(DWORD nbit)
 			tmp.CopyInfo(*this);
 			tmp.Create(head.biWidth,head.biHeight,24,info.dwType);
 
+			if (info.nBkgndIndex>=0) //translate transparency
+				tmp.info.nBkgndColor=GetPaletteColor((BYTE)info.nBkgndIndex);
+
 #if CXIMAGE_SUPPORT_SELECTION
 			tmp.SelectionCopy(*this);
 #endif //CXIMAGE_SUPPORT_SELECTION
@@ -926,7 +961,9 @@ bool CxImage::Dither(long method)
   
 		GrayScale();
 
-		CxImage tmp(head.biWidth,head.biHeight,1,info.dwType);
+		CxImage tmp;
+		tmp.CopyInfo(*this);
+		tmp.Create(head.biWidth,head.biHeight,1,info.dwType);
 
 #if CXIMAGE_SUPPORT_SELECTION
 			tmp.SelectionCopy(*this);
@@ -966,7 +1003,9 @@ bool CxImage::Dither(long method)
 
 		GrayScale();
 
-		CxImage tmp(head.biWidth,head.biHeight,1,info.dwType);
+		CxImage tmp;
+		tmp.CopyInfo(*this);
+		tmp.Create(head.biWidth,head.biHeight,1,info.dwType);
 
 #if CXIMAGE_SUPPORT_SELECTION
 		tmp.SelectionCopy(*this);
@@ -1016,6 +1055,61 @@ bool CxImage::Dither(long method)
 	return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
+// <VATI>
+bool CxImage::CropRotatedRectangle( long topx, long topy, long width, long height, float angle, CxImage* iDst)
+{
+	if (!pDib) return false;
+
+	//-------------------------------
+	// params:
+	//
+	// topx,topy : topmost and leftmost point of the rectangle 
+	//             (topmost, and if there are 2 topmost points, the left one)
+	// width     : size of the right hand side of rect, from (topx,topy) roundwalking clockwise
+	// height    : size of the left hand side of rect, from (topx,topy) roundwalking clockwise
+	// angle     : angle of the right hand side of rect, from (topx,topy)
+	
+	long startx,starty,endx,endy;
+	double cos_angle = cos(angle/*/57.295779513082320877*/);
+    double sin_angle = sin(angle/*/57.295779513082320877*/);
+
+	// if there is nothing special, call the original Crop():
+	if ( fabs(angle)<0.0002 )
+		return Crop( topx, topy, topx+width, topy+height, iDst);
+
+	startx = min(topx, topx - (long)(sin_angle*(double)height));
+	endx   = topx + (long)(cos_angle*(double)width);
+	endy   = topy + (long)(cos_angle*(double)height + sin_angle*(double)width);
+	// check: corners of the rectangle must be inside
+	if ( IsInside( startx, topy )==false ||
+		 IsInside( endx, endy ) == false )
+		 return false;
+
+	// first crop to bounding rectangle
+	CxImage tmp(*this,false/*pSelection!=0*/,true,true);
+	tmp.Copy(*this, true, false, true); 
+    if ( false == tmp.Crop( startx, topy, endx, endy ) )
+		return false;
+	
+	// the midpoint of the image now became the same as the midpoint of the rectangle
+	// rotate new image with minus angle amount
+    if ( false == tmp.Rotate( (float)(-angle*57.295779513082320877) ) ) // Rotate expects angle in degrees
+		return false;
+
+	// crop rotated image to the original selection rectangle
+    endx   = (tmp.head.biWidth+width)/2;
+	startx = (tmp.head.biWidth-width)/2;
+	starty = (tmp.head.biHeight+height)/2;
+    endy   = (tmp.head.biHeight-height)/2;
+    if ( false == tmp.Crop( startx, starty, endx, endy ) )
+		return false;
+
+	if (iDst) iDst->Transfer(tmp);
+	else Transfer(tmp);
+
+	return true;
+}
+////////////////////////////////////////////////////////////////////////////////
 bool CxImage::Crop(long left, long top, long right, long bottom, CxImage* iDst)
 {
 	if (!pDib) return false;
@@ -1050,16 +1144,31 @@ bool CxImage::Crop(long left, long top, long right, long bottom, CxImage* iDst)
 	case 8:
 	case 24:
 	{
+		int linelen = tmp.head.biWidth * tmp.head.biBitCount >> 3;
 		BYTE* pDest = tmp.info.pImage;
 		BYTE* pSrc = info.pImage + starty * info.dwEffWidth + (startx*head.biBitCount >> 3);
 		for(long y=starty; y<endy; y++){
 			info.nProgress = (long)(100*y/endy); //<Anatoly Ivasyuk>
-			memcpy(pDest,pSrc,tmp.info.dwEffWidth);
+			memcpy(pDest,pSrc,linelen);
 			pDest+=tmp.info.dwEffWidth;
 			pSrc+=info.dwEffWidth;
 		}
     }
 	}
+
+#if CXIMAGE_SUPPORT_ALPHA
+	if (AlphaIsValid()){ //<oboolo>
+		tmp.AlphaCreate();
+		BYTE* pDest = tmp.pAlpha;
+		BYTE* pSrc = pAlpha + startx + starty*head.biWidth;
+		for (long y=starty; y<endy; y++){
+			memcpy(pDest,pSrc,endx-startx);
+			pDest+=tmp.head.biWidth;
+			pSrc+=head.biWidth;
+		}
+	}
+#endif //CXIMAGE_SUPPORT_ALPHA
+
 	//select the destination
 	if (iDst) iDst->Transfer(tmp);
 	else Transfer(tmp);
@@ -1069,15 +1178,20 @@ bool CxImage::Crop(long left, long top, long right, long bottom, CxImage* iDst)
 ////////////////////////////////////////////////////////////////////////////////
 float CxImage::b3spline(float x)
 {
+	// thanks to Kristian Kratzenstein
 	float a, b, c, d;
+	float xm1 = x - 1.0f; // Was calculatet anyway cause the "if((x-1.0f) < 0)"
+	float xp1 = x + 1.0f;
+	float xp2 = x + 2.0f;
 
-	if((x + 2.0f) <= 0.0f) a = 0.0f; else a = (float)pow((x + 2.0f), 3.0f);
-	if((x + 1.0f) <= 0.0f) b = 0.0f; else b = (float)pow((x + 1.0f), 3.0f);
-	if(x <= 0) c = 0.0f; else c = (float)pow(x, 3.0f);  
-	if((x - 1.0f) <= 0.0f) d = 0.0f; else d = (float)pow((x - 1.0f), 3.0f);
+	if ((xp2) <= 0.0f) a = 0.0f; else a = xp2*xp2*xp2; // Only float, not float -> double -> float
+	if ((xp1) <= 0.0f) b = 0.0f; else b = xp1*xp1*xp1;
+	if (x <= 0) c = 0.0f; else c = x*x*x;  
+	if ((xm1) <= 0.0f) d = 0.0f; else d = xm1*xm1*xm1;
 
 	return (0.16666666666666666667f * (a - (4.0f * b) + (6.0f * c) - (4.0f * d)));
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 bool CxImage::Skew(float xgain, float ygain, long xpivot, long ypivot)
 {
@@ -1116,5 +1230,202 @@ bool CxImage::Skew(float xgain, float ygain, long xpivot, long ypivot)
 	Transfer(tmp);
 	return true;
 }
+////////////////////////////////////////////////////////////////////////////////
+bool CxImage::Expand(long left, long top, long right, long bottom, RGBQUAD canvascolor, CxImage* iDst)
+{
+	//thanks to <Colin Urquhart>
+
+    if (!pDib) return false;
+
+    if ((left < 0) || (right < 0) || (bottom < 0) || (top < 0)) return false;
+
+    long newWidth = head.biWidth + left + right;
+    long newHeight = head.biHeight + top + bottom;
+
+    right = left + head.biWidth - 1;
+    top = bottom + head.biHeight - 1;
+    
+    CxImage tmp(newWidth, newHeight, head.biBitCount, info.dwType);
+
+    tmp.SetPalette(GetPalette(),head.biClrUsed);
+    tmp.info.nBkgndIndex = info.nBkgndIndex;
+    tmp.info.nBkgndColor = info.nBkgndColor;
+
+    switch (head.biBitCount) {
+    case 1:
+    case 4:
+    {
+        BYTE pixel = tmp.GetNearestIndex(canvascolor);
+        for(long y=0; y < newHeight; y++){
+            info.nProgress = (long)(100*y/newHeight); //
+            for(long x=0; x < newWidth; x++){
+                if ((y < bottom) || (y > top) || (x < left) || (x > right)) {
+                    tmp.SetPixelIndex(x,y, pixel);
+                } else {
+                    tmp.SetPixelIndex(x,y,GetPixelIndex(x-left,y-bottom));
+                }
+            }
+        }
+        break;
+    }
+    case 8:
+    case 24:
+    {
+        if (head.biBitCount == 8) {
+            BYTE pixel = tmp.GetNearestIndex( canvascolor);
+            memset(tmp.info.pImage, pixel,  + (tmp.info.dwEffWidth * newHeight));
+        } else {
+            for (long y = 0; y < newHeight; ++y) {
+                BYTE *pDest = tmp.info.pImage + (y * tmp.info.dwEffWidth);
+                for (long x = 0; x < newWidth; ++x) {
+                    *pDest++ = canvascolor.rgbBlue;
+                    *pDest++ = canvascolor.rgbGreen;
+                    *pDest++ = canvascolor.rgbRed;
+                }
+            }
+        }
+
+        BYTE* pDest = tmp.info.pImage + (tmp.info.dwEffWidth * bottom) + (left*(head.biBitCount >> 3));
+        BYTE* pSrc = info.pImage;
+        for(long y=bottom; y <= top; y++){
+            info.nProgress = (long)(100*y/(1 + top - bottom));
+            memcpy(pDest,pSrc,(head.biBitCount >> 3) * (right - left + 1));
+            pDest+=tmp.info.dwEffWidth;
+            pSrc+=info.dwEffWidth;
+        }
+    }
+    }
+    //select the destination
+    if (iDst) iDst->Transfer(tmp);
+    else Transfer(tmp);
+
+    return true;
+}
+////////////////////////////////////////////////////////////////////////////////
+bool CxImage::Expand(long newx, long newy, RGBQUAD canvascolor, CxImage* iDst)
+{
+	//thanks to <Colin Urquhart>
+
+    if (!pDib) return false;
+
+    if ((newx < head.biWidth) || (newy < head.biHeight)) return false;
+
+    int nAddLeft = (newx - head.biWidth) / 2;
+    int nAddTop = (newy - head.biHeight) / 2;
+
+    return Expand(nAddLeft, nAddTop, newx - (head.biWidth + nAddLeft), newy - (head.biHeight + nAddTop), canvascolor, iDst);
+}
+////////////////////////////////////////////////////////////////////////////////
+bool CxImage::Thumbnail(long newx, long newy, RGBQUAD canvascolor, CxImage* iDst)
+{
+	//thanks to <Colin Urquhart>
+
+    if (!pDib) return false;
+
+    if ((newx <= 0) || (newy <= 0)) return false;
+
+    CxImage tmp(*this);
+
+    // determine whether we need to shrink the image
+    if ((head.biWidth > newx) || (head.biHeight > newy)) {
+        float fScale;
+        float fAspect = (float) newx / (float) newy;
+        if (fAspect * head.biHeight > head.biWidth) {
+            fScale = (float) newy / head.biHeight;
+        } else {
+            fScale = (float) newx / head.biWidth;
+        }
+        tmp.Resample((long) (fScale * head.biWidth), (long) (fScale * head.biHeight), 0);
+    }
+
+    // expand the frame
+    tmp.Expand(newx, newy, canvascolor, iDst);
+
+    //select the destination
+    if (iDst) iDst->Transfer(tmp);
+    else Transfer(tmp);
+    return true;
+}
+////////////////////////////////////////////////////////////////////////////////
+/*added by Arkadiy Olovyannikov ark(at)msun(dot)ru
+Perform circle_based transformations.
+int type - for different transformations
+0 for normal (proturberant) FishEye
+1 for reverse (concave) FishEye
+2 for Swirle 
+3 for Cilinder mirror
+4 for bathroom*/
+
+bool CxImage::CircleTransform(int type,long rmax,float Koeff)
+{
+	if (!pDib) return false;
+
+	long nx,ny;
+	double angle,radius,rnew;
+
+	CxImage tmp(*this,pSelection!=0,true,true);
+
+	long xmin,xmax,ymin,ymax,xmid,ymid;
+	if (pSelection){
+		xmin = info.rSelectionBox.left; xmax = info.rSelectionBox.right;
+		ymin = info.rSelectionBox.bottom; ymax = info.rSelectionBox.top;
+	} else {
+		xmin = ymin = 0;
+		xmax = head.biWidth; ymax=head.biHeight;
+	}
+	
+	xmid = (long) (tmp.GetWidth()/2);
+	ymid = (long) (tmp.GetHeight()/2);
+
+	if (!rmax) rmax=(long)sqrt((float)((xmid-xmin)*(xmid-xmin)+(ymid-ymin)*(ymid-ymin)));
+	if (Koeff==0.0f) Koeff=1.0f;
+
+	for(long y=ymin; y<ymax; y++){
+		info.nProgress = (long)(100*y/head.biHeight);
+		if (info.nEscape) break;
+		for(long x=xmin; x<xmax; x++){
+#if CXIMAGE_SUPPORT_SELECTION
+			if (SelectionIsInside(x,y))
+#endif //CXIMAGE_SUPPORT_SELECTION
+			{
+				nx=xmid-x;
+				ny=ymid-y;
+				radius=sqrt((float)(nx*nx+ny*ny));
+				if (radius<rmax) {
+					angle=atan2((double)ny,(double)nx);
+					if (type==0)	  rnew=radius*radius/rmax;
+					else if (type==1) rnew=sqrt(radius*rmax);
+					else if (type==2) {rnew=radius;angle += radius / Koeff;}
+					if (type<3){
+						nx = xmid + (long)(rnew * cos(angle));
+						ny = ymid - (long)(rnew * sin(angle));
+					}
+					else if (type==3){
+						nx = (long)fabs((angle*xmax/6.2831852));
+						ny = (long)fabs((radius*ymax/rmax));
+					}
+					else {
+						nx=x+(x%32)-16;
+						ny=y;
+					}
+//					nx=max(xmin,min(nx,xmax));
+//					ny=max(ymin,min(ny,ymax));
+				}
+				else { nx=-1;ny=-1;}
+				if (head.biClrUsed==0){
+					tmp.SetPixelColor(x,y,GetPixelColor(nx,ny));
+				} else {
+					tmp.SetPixelIndex(x,y,GetPixelIndex(nx,ny));
+				}
+#if CXIMAGE_SUPPORT_ALPHA
+				tmp.AlphaSet(x,y,AlphaGet(nx,ny));
+#endif //CXIMAGE_SUPPORT_ALPHA
+			}
+		}
+	}
+	Transfer(tmp);
+	return true;
+}
+////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 #endif //CXIMAGE_SUPPORT_TRANSFORMATION

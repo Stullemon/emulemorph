@@ -1,8 +1,8 @@
 /*
  * File:	ximawbmp.cpp
  * Purpose:	Platform Independent WBMP Image Class Loader and Writer
- * 12/Jul/2002 <ing.davide.pizzolato@libero.it>
- * CxImage version 5.71 25/Apr/2003
+ * 12/Jul/2002 Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  */
 
 #include "ximawbmp.h"
@@ -48,9 +48,11 @@ bool CxImageWBMP::Decode(CxFile *hFile)
     return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
+#if CXIMAGE_SUPPORT_ENCODE
+////////////////////////////////////////////////////////////////////////////////
 bool CxImageWBMP::Encode(CxFile * hFile)
 {
-	if (hFile==NULL) return false;
+	if (EncodeSafeCheck(hFile)) return false;
 
 	//check format limits
 	if ((head.biWidth>255)||(head.biHeight>255)||(head.biBitCount!=1)){
@@ -77,5 +79,7 @@ bool CxImageWBMP::Encode(CxFile * hFile)
 	return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
-#endif 	// CXIMAGE_SUPPORT_WBMP
+#endif // CXIMAGE_SUPPORT_ENCODE
+////////////////////////////////////////////////////////////////////////////////
+#endif // CXIMAGE_SUPPORT_WBMP
 

@@ -3,11 +3,11 @@
  * Purpose:	PNG Image Class Loader and Writer
  */
 /* === C R E D I T S  &  D I S C L A I M E R S ==============
- * CxImagePNG (c) 07/Aug/2001 <ing.davide.pizzolato@libero.it>
+ * CxImagePNG (c) 07/Aug/2001 Davide Pizzolato - www.xdp.it
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
- * CxImage version 5.71 25/Apr/2003
+ * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
  *
  * Special thanks to Troels Knakkergaard for new features, enhancements and bugfixes
@@ -39,7 +39,7 @@
 #if CXIMAGE_SUPPORT_PNG
 
 extern "C" {
-#include "../../png/png.h"
+#include "../png/png.h"
 }
 
 class CxImagePNG: public CxImage
@@ -50,10 +50,12 @@ public:
 //	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_PNG);}
 //	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_PNG);}
 	bool Decode(CxFile * hFile);
-	bool Encode(CxFile * hFile);
-
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
+
+#if CXIMAGE_SUPPORT_ENCODE
+	bool Encode(CxFile * hFile);
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
+#endif // CXIMAGE_SUPPORT_ENCODE
 
 protected:
 	void ima_png_error(png_struct *png_ptr, char *message);

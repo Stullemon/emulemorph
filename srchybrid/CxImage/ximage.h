@@ -6,8 +6,8 @@
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
- * CxImage (c)  07/Aug/2001 <ing.davide.pizzolato@libero.it>
- * CxImage version 5.71 25/Apr/2003
+ * CxImage (c)  07/Aug/2001 Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
  *
  * original CImage and CImageIterator implementation are:
@@ -35,10 +35,21 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CxImage supported features
+// emulEspaña: Modified by MoNKi [Announ: -emulEspaña property page-]
+// emulEspaña: Modified by MoNKi [MoNKi: -Toolbar Transparency On Win2k-]
+/*
 #define CXIMAGE_SUPPORT_ALPHA          0
+*/
+#define CXIMAGE_SUPPORT_ALPHA          1
+// End emulEspaña
 #define CXIMAGE_SUPPORT_SELECTION      0
 #define CXIMAGE_SUPPORT_TRANSFORMATION 1
+// emulEspaña: Modified by MoNKi [MoNKi: -Toolbar Transparency On Win2k-]
+/*
 #define CXIMAGE_SUPPORT_DSP            0
+*/
+#define CXIMAGE_SUPPORT_DSP            1
+// End emulEspaña
 #define CXIMAGE_SUPPORT_LAYERS		   0
 
 #define CXIMAGE_SUPPORT_DECODE	1
@@ -49,7 +60,12 @@
 /////////////////////////////////////////////////////////////////////////////
 // CxImage supported formats
 #define CXIMAGE_SUPPORT_BMP 1
+// emulEspaña: Modified by MoNKi [MoNKi: -Skin Selector-], [MoNKi: -Wap Server-]
+/*
 #define CXIMAGE_SUPPORT_GIF 0
+*/
+#define CXIMAGE_SUPPORT_GIF 1
+// End emulEspaña
 #define CXIMAGE_SUPPORT_JPG 0
 #define CXIMAGE_SUPPORT_PNG 1
 #define CXIMAGE_SUPPORT_MNG 0
@@ -57,7 +73,12 @@
 #define CXIMAGE_SUPPORT_TIF 0
 #define CXIMAGE_SUPPORT_TGA 0
 #define CXIMAGE_SUPPORT_PCX 0
+// emulEspaña: Modified by MoNKi [MoNKi: -Wap Server-]
+/*
 #define CXIMAGE_SUPPORT_WBMP 0
+*/
+#define CXIMAGE_SUPPORT_WBMP 1
+// End emulEspaña
 #define CXIMAGE_SUPPORT_WMF 0
 #define CXIMAGE_SUPPORT_J2K 0		// Beta, use JP2
 #define CXIMAGE_SUPPORT_JBG 0		// GPL'd see ../jbig/copying.txt & ../jbig/patents.htm
@@ -69,6 +90,8 @@
 #define CXIMAGE_SUPPORT_RAS 0
 
 /////////////////////////////////////////////////////////////////////////////
+
+#include <TCHAR.h>	// For UNICODE support
 #include "xfile.h"
 #include "xiofile.h"
 #include "xmemfile.h"
@@ -142,6 +165,24 @@ CMAX_IMAGE_FORMATS
 
 struct rgb_color { BYTE r,g,b; };
 
+
+// <VATI> text placement data
+// members must be initialized with the InitTextInfo(&this) function.
+typedef struct DLL_EXP tagCxTextInfo
+{
+	char     text[4096];      // text
+	LOGFONT  lfont;           // font and codepage data
+    COLORREF fcolor;          // foreground color
+    long     align;           // DT_CENTER, DT_RIGHT, DT_LEFT aligment for multiline text
+    BYTE     opaque;          // text has background or hasn't. Default is true.
+             // data for background (ignored if .opaque==FALSE) 
+    COLORREF bcolor;          // background color
+    float    b_opacity;       // opacity value for background between 0.0-1.0 Default is 0. (opaque)
+    BYTE     b_outline;       // outline width for background (zero: no outline)
+    BYTE     b_round;         // rounding radius for background rectangle. % of the height, between 0-50. Default is 10.
+                              // (backgr. always has a frame: width = 3 pixel + 10% of height by default.)
+}  CXTEXTINFO;
+
 /////////////////////////////////////////////////////////////////////////////
 // CxImage class
 /////////////////////////////////////////////////////////////////////////////
@@ -160,6 +201,7 @@ typedef struct tagCxImageInfo {
 	long	nBkgndIndex;		//used for GIF, PNG, MNG
 	RGBQUAD nBkgndColor;		//used for RGB transparency
 	BYTE	nQuality;			//used for JPEG
+	BYTE	nScale;				//used for JPEG <ignacio>
 	long	nFrame;				//used for TIF, GIF, MNG : actual frame
 	long	nNumFrames;			//used for TIF, GIF, MNG : total number of frames
 	DWORD	dwFrameDelay;		//used for GIF, MNG
@@ -171,7 +213,7 @@ typedef struct tagCxImageInfo {
 	bool	bEnabled;			//enables the painting functions
 	long	xOffset;
 	long	yOffset;
-	DWORD	dwEncodeOption;		//for GIF, TIF : 0=def.1=unc,2=fax3,3=fax4,4=pack,5=jpg
+	DWORD	dwCodecOption;		//for GIF, TIF : 0=def.1=unc,2=fax3,3=fax4,4=pack,5=jpg
 	RGBQUAD last_c;				//for GetNearestIndex optimization
 	BYTE	last_c_index;
 	bool	last_c_isvalid;
@@ -185,24 +227,26 @@ public:
 	CxImage(DWORD imagetype = 0);
 	CxImage(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype = 0);
 	CxImage(const CxImage &src, bool copypixels = true, bool copyselection = true, bool copyalpha = true);
-	CxImage(const char * filename, DWORD imagetype);
+	CxImage(const TCHAR * filename, DWORD imagetype);	// For UNICODE support: char -> TCHAR
+//	CxImage(const char * filename, DWORD imagetype);
 	CxImage(FILE * stream, DWORD imagetype);
 	CxImage(CxFile * stream, DWORD imagetype);
 	CxImage(BYTE * buffer, DWORD size, DWORD imagetype);
-	virtual ~CxImage();
+	virtual ~CxImage() { Destroy(); };
 	CxImage& operator = (const CxImage&);
 
 	//initializzation
 	void*	Create(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype = 0);
-	void	Destroy();
+	bool	Destroy();
 	void	Clear(BYTE bval=0);
 	void	Copy(const CxImage &src, bool copypixels = true, bool copyselection = true, bool copyalpha = true);
-	void	Transfer(CxImage &from);
-	bool	CreateFromARGB(DWORD dwWidth,DWORD dwHeight,BYTE* argbArray);
+	bool	Transfer(CxImage &from);
+	bool	CreateFromArray(BYTE* pArray,DWORD dwWidth,DWORD dwHeight,DWORD dwBitsperpixel, DWORD dwBytesperline, bool bFlipImage);
+	bool	CreateFromMatrix(BYTE** ppMatrix,DWORD dwWidth,DWORD dwHeight,DWORD dwBitsperpixel, DWORD dwBytesperline, bool bFlipImage);
 
 	//Attributes
 	long	GetSize();
-	BYTE*	GetBits();
+	BYTE*	GetBits(DWORD row = 0);
 	BYTE	GetColorType();
 	void*	GetDIB()		const {return pDib;}
 	DWORD	GetHeight()		const {return head.biHeight;}
@@ -212,7 +256,7 @@ public:
 	WORD	GetBpp()		const {return head.biBitCount;}
 	DWORD	GetType()		const {return info.dwType;}
 	char*	GetLastError()	{return info.szLastError;}
-	const char* GetVersion();
+	const TCHAR* GetVersion();
 
 	DWORD	GetFrameDelay() const {return info.dwFrameDelay;}
 	void	SetFrameDelay(DWORD d) {info.dwFrameDelay=d;}
@@ -223,10 +267,17 @@ public:
 	BYTE	GetJpegQuality() const {return info.nQuality;}
 	void	SetJpegQuality(BYTE q) {info.nQuality = q;}
 
+	//<ignacio> used for scaling down during JPEG decoding valid numbers are 1, 2, 4, 8
+	BYTE	GetJpegScale() const {return info.nScale;}
+	void	SetJpegScale(BYTE q) {info.nScale = q;}
+
 	long	GetXDPI()		const {return info.xDPI;}
 	long	GetYDPI()		const {return info.yDPI;}
 	void	SetXDPI(long dpi);
 	void	SetYDPI(long dpi);
+
+	DWORD	GetClrImportant() const {return head.biClrImportant;}
+	void	SetClrImportant(DWORD ncolors = 0);
 
 	long	GetProgress()	const {return info.nProgress;}
 	long	GetEscape()     const {return info.nEscape;}
@@ -236,11 +287,11 @@ public:
 	long	GetTransIndex()	const {return info.nBkgndIndex;}
 	RGBQUAD	GetTransColor();
 	void	SetTransIndex(long idx) {info.nBkgndIndex = idx;}
-	void	SetTransColor(RGBQUAD rgb) {info.nBkgndColor = rgb;}
+	void	SetTransColor(RGBQUAD rgb) {rgb.rgbReserved=0; info.nBkgndColor = rgb;}
 	bool	IsTransparent() const {return info.nBkgndIndex>=0;} // <vho>
 
-	DWORD	GetEncodeOption() const {return info.dwEncodeOption;}
-	void	SetEncodeOption(DWORD opt) {info.dwEncodeOption = opt;}
+	DWORD	GetCodecOption() const {return info.dwCodecOption;}
+	void	SetCodecOption(DWORD opt) {info.dwCodecOption = opt;}
 
 	DWORD	GetFlags() const {return info.dwFlags;}
 	void	SetFlags(DWORD flags, bool bLockReservedFlags = true);
@@ -269,12 +320,16 @@ public:
 
 	//pixel operations
 	bool	IsInside(long x, long y);
+	bool	IsTransparent(long x,long y);
+	RGBQUAD GetPixelColor(long x,long y, bool bGetAlpha = true);
 	BYTE	GetPixelIndex(long x,long y);
-	RGBQUAD GetPixelColor(long x,long y);
-	void	SetPixelColor(long x,long y,RGBQUAD c, bool bEditAlpha = false);
-	void	SetPixelIndex(long x,long y,BYTE i);
-	void	SetPixelColor(long x,long y,COLORREF cr);
 	BYTE	GetPixelGray(long x, long y);
+	void	SetPixelColor(long x,long y,RGBQUAD c, bool bSetAlpha = false);
+	void	SetPixelColor(long x,long y,COLORREF cr);
+	void	SetPixelIndex(long x,long y,BYTE i);
+	void	DrawLine(int StartX, int EndX, int StartY, int EndY, RGBQUAD color, bool bSetAlpha=false);
+	void	DrawLine(int StartX, int EndX, int StartY, int EndY, COLORREF cr);
+
 
 	//painting operations
 #if CXIMAGE_SUPPORT_WINCE
@@ -284,35 +339,46 @@ public:
 	HBITMAP MakeBitmap(HDC hdc = NULL);
 	HANDLE	CopyToHandle();
 	bool	CreateFromHANDLE(HANDLE hMem);		//Windows objects (clipboard)
-	void	CreateFromHBITMAP(HBITMAP hbmp);	//Windows resource
-	void	CreateFromHICON(HICON hico);
+	bool	CreateFromHBITMAP(HBITMAP hbmp, HPALETTE hpal=0);	//Windows resource
+	bool	CreateFromHICON(HICON hico);
 	long	Draw(HDC hdc, long x=0, long y=0, long cx = -1, long cy = -1, RECT* pClipRect = 0);
 	long	Draw(HDC hdc, const RECT& rect, RECT* pClipRect=NULL) { return Draw(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, pClipRect); }
-	long	Stretch(HDC hdc, long xoffset, long yoffset, long xsize, long ysize);
-	long	Stretch(HDC hdc, const RECT& rect) { return Stretch(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top); }
+	long	Stretch(HDC hdc, long xoffset, long yoffset, long xsize, long ysize, DWORD dwRop = SRCCOPY);
+	long	Stretch(HDC hdc, const RECT& rect, DWORD dwRop = SRCCOPY) { return Stretch(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, dwRop); }
 	long	Tile(HDC hdc, RECT *rc);
 	long	Draw2(HDC hdc, long x=0, long y=0, long cx = -1, long cy = -1);
 	long	Draw2(HDC hdc, const RECT& rect) { return Draw2(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top); }
-	long	DrawText(HDC hdc, long x, long y, const char* text, RGBQUAD color, const char* font, long lSize=0, long lWeight=400, BYTE bItalic=0, BYTE bUnderline=0);
+	//long	DrawString(HDC hdc, long x, long y, const char* text, RGBQUAD color, const char* font, long lSize=0, long lWeight=400, BYTE bItalic=0, BYTE bUnderline=0, bool bSetAlpha=false);
+	long	DrawString(HDC hdc, long x, long y, const TCHAR* text, RGBQUAD color, const TCHAR* font, long lSize=0, long lWeight=400, BYTE bItalic=0, BYTE bUnderline=0, bool bSetAlpha=false);
+	// <VATI> extensions
+	long    DrawStringEx(HDC hdc, long x, long y, CXTEXTINFO *pTextType, bool bSetAlpha=false );
+	void    InitTextInfo( CXTEXTINFO *txt );
 #endif //CXIMAGE_SUPPORT_WINDOWS
 
 	// file operations
 #if CXIMAGE_SUPPORT_DECODE
 #ifdef WIN32
-	bool Load(LPCWSTR filename, DWORD imagetype=0);
+	//bool Load(LPCWSTR filename, DWORD imagetype=0);
 	bool LoadResource(HRSRC hRes, DWORD imagetype, HMODULE hModule=NULL);
 #endif
-	bool Load(const char * filename, DWORD imagetype=0);
+	// For UNICODE support: char -> TCHAR
+	bool Load(const TCHAR* filename, DWORD imagetype=0);
+	//bool Load(const char * filename, DWORD imagetype=0);
 	bool Decode(FILE * hFile, DWORD imagetype);
 	bool Decode(CxFile * hFile, DWORD imagetype);
 	bool Decode(BYTE * buffer, DWORD size, DWORD imagetype);
 #endif //CXIMAGE_SUPPORT_DECODE
 
 #if CXIMAGE_SUPPORT_ENCODE
+protected:
+	bool EncodeSafeCheck(CxFile *hFile);
+public:
 #ifdef WIN32
-	bool Save(LPCWSTR filename, DWORD imagetype=0);
+	//bool Save(LPCWSTR filename, DWORD imagetype=0);
 #endif
-	bool Save(const char * filename, DWORD imagetype=0);
+	// For UNICODE support: char -> TCHAR
+	bool Save(const TCHAR* filename, DWORD imagetype=0);
+	//bool Save(const char * filename, DWORD imagetype=0);
 	bool Encode(FILE * hFile, DWORD imagetype);
 	bool Encode(CxFile * hFile, DWORD imagetype);
 	bool Encode(CxFile * hFile, CxImage ** pImages, int pagecount, DWORD imagetype);
@@ -344,12 +410,18 @@ public:
 	bool Rotate(float angle, CxImage* iDst = NULL);
 	bool Rotate180(CxImage* iDst = NULL);
 	bool Resample(long newx, long newy, int mode = 1, CxImage* iDst = NULL);
-	bool DecreaseBpp(DWORD nbit, bool errordiffusion, RGBQUAD* ppal = 0);
+	bool DecreaseBpp(DWORD nbit, bool errordiffusion, RGBQUAD* ppal = 0, DWORD clrimportant = 0);
 	bool IncreaseBpp(DWORD nbit);
 	bool Dither(long method = 0);
 	bool Crop(long left, long top, long right, long bottom, CxImage* iDst = NULL);
 	bool Crop(const RECT& rect, CxImage* iDst = NULL) { return Crop(rect.left, rect.top, rect.right, rect.bottom, iDst); }
+	bool CropRotatedRectangle( long topx, long topy, long width, long height, float angle, CxImage* iDst = NULL);
 	bool Skew(float xgain, float ygain, long xpivot=0, long ypivot=0);
+	bool Expand(long left, long top, long right, long bottom, RGBQUAD canvascolor, CxImage* iDst = 0);
+	bool Expand(long newx, long newy, RGBQUAD canvascolor, CxImage* iDst = 0);
+	bool Thumbnail(long newx, long newy, RGBQUAD canvascolor, CxImage* iDst = 0);
+	bool CircleTransform(int type,long rmax=0,float Koeff=1.0f);
+
 protected:
 	float b3spline(float x);
 public:
@@ -357,7 +429,7 @@ public:
 
 #if CXIMAGE_SUPPORT_DSP
 	bool Contour();
-	bool HistogramStretch();
+	bool HistogramStretch(long method = 0);
 	bool HistogramEqualize();
 	bool HistogramNormalize();
 	bool HistogramRoot();
@@ -381,11 +453,20 @@ public:
 	void HuePalette(float correction=1);
 	enum ImageOpType { OpAdd, OpAnd, OpXor, OpOr, OpMask, OpSrcCopy, OpDstCopy, OpSub, OpSrcBlend };
 	void Mix(CxImage & imgsrc2, ImageOpType op, long lXOffset = 0, long lYOffset = 0);
+	void MixFrom(CxImage & imagesrc2, long lXOffset, long lYOffset);
+	bool UnsharpMask(float radius = 5.0, float amount = 0.5, int threshold = 0);
+	bool Lut(BYTE* pLut);
+	bool Lut(BYTE* pLutR, BYTE* pLutG, BYTE* pLutB, BYTE* pLutA = 0);
+
 protected:
 	bool IsPowerof2(long x);
 	bool FFT(int dir,int m,double *x,double *y);
 	bool DFT(int dir,long m,double *x1,double *y1,double *x2,double *y2);
 	bool RepairChannel(CxImage *ch, float radius);
+	// <nipper>
+	int gen_convolve_matrix (float radius, float **cmatrix_p);
+	float* gen_lookup_table (float *cmatrix, int cmatrix_length);
+	void blur_line (float *ctable, float *cmatrix, int cmatrix_length, BYTE* cur_col, BYTE* dest_col, int y, long bytes);
 public:
 	//color conversion utilities
 	bool SplitRGB(CxImage* r,CxImage* g,CxImage* b);
@@ -417,6 +498,7 @@ public:
 	bool SelectionAddEllipse(RECT r);
 	bool SelectionAddPolygon(POINT *points, long npoints);
 	bool SelectionAddColor(RGBQUAD c);
+	bool SelectionAddPixel(int x, int y);
 	bool SelectionCopy(CxImage &from);
 	bool SelectionIsInside(long x, long y);
 	bool SelectionIsValid(){return pSelection!=0;}
@@ -442,6 +524,7 @@ public:
 	BYTE AlphaGetMax() const {return info.nAlphaMax;}
 	void AlphaSetMax(BYTE nAlphaMax) {info.nAlphaMax=nAlphaMax;}
 	bool AlphaIsValid(){return pAlpha!=0;}
+	BYTE* AlphaGetBits() const {return pAlpha;}
 
 	void AlphaPaletteClear();
 	void AlphaPaletteEnable(bool enable=true){info.bAlphaPaletteEnabled=enable;}
@@ -475,5 +558,11 @@ protected:
 	BYTE*				pAlpha; //alpha channel
 	CxImage**			pLayers; //generic layers
 };
+////////////////////////////////////////////////////////////////////////////
+
+#define	CXIMAGE_MAX_MEMORY 256000000
+
+#define CXIMAGE_ERR_NOFILE "null file handler"
+#define CXIMAGE_ERR_NOIMAGE "null image!!!"
 ////////////////////////////////////////////////////////////////////////////
 #endif // !defined(__CXIMAGE_H)

@@ -1,14 +1,16 @@
 /*
- * File:	ximawbmp.h
- * Purpose:	WBMP Image Class Loader and Writer
+ * File:	ximaj2k.h
+ * Purpose:	J2K Image Class Loader and Writer
  */
 /* === C R E D I T S  &  D I S C L A I M E R S ==============
- * CxImageWBMP (c) 12/Jul/2002 Davide Pizzolato - www.xdp.it
+ * CxImageJ2K (c) 04/Aug/2002 Davide Pizzolato - www.xdp.it
  * Permission is given by the author to freely redistribute and include
  * this code in any program as long as this credit is given where due.
  *
  * CxImage version 5.99a 08/Feb/2004
  * See the file history.htm for the complete bugfix and news report.
+ *
+ * based on LIBJ2K Copyright (c) 2001-2002, David Janssens - All rights reserved.
  *
  * COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY
  * OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES
@@ -23,29 +25,25 @@
  * Use at your own risk!
  * ==========================================================
  */
-#if !defined(__ximaWBMP_h)
-#define __ximaWBMP_h
+#if !defined(__ximaJ2K_h)
+#define __ximaJ2K_h
 
 #include "ximage.h"
 
-#if CXIMAGE_SUPPORT_WBMP
+#if CXIMAGE_SUPPORT_J2K
 
-class CxImageWBMP: public CxImage
+#define LIBJ2K_EXPORTS
+extern "C" {
+#include "../j2k/j2k.h"
+};
+
+class CxImageJ2K: public CxImage
 {
-#pragma pack(1)
-typedef struct tagWbmpHeader
-{
-    BYTE   Type;            // 0
-    BYTE   FixHeader;       // 0
-    BYTE   ImageWidth;      // Image Width
-    BYTE   ImageHeight;     // Image Height
-} WBMPHEADER;
-#pragma pack()
 public:
-	CxImageWBMP(): CxImage(CXIMAGE_FORMAT_WBMP) {}
+	CxImageJ2K(): CxImage(CXIMAGE_FORMAT_J2K) {}
 
-//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_WBMP);}
-//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_WBMP);}
+//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_J2K);}
+//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_J2K);}
 	bool Decode(CxFile * hFile);
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 
@@ -53,6 +51,10 @@ public:
 	bool Encode(CxFile * hFile);
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
 #endif // CXIMAGE_SUPPORT_ENCODE
+protected:
+	void j2k_calc_explicit_stepsizes(j2k_tccp_t *tccp, int prec);
+	void j2k_encode_stepsize(int stepsize, int numbps, int *expn, int *mant);
+	int j2k_floorlog2(int a);
 };
 
 #endif

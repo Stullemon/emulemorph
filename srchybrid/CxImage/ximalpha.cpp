@@ -1,6 +1,6 @@
 // xImalpha.cpp : Alpha channel functions
-/* 07/08/2001 v1.00 - ing.davide.pizzolato@libero.it
- * CxImage version 5.71 25/Apr/2003
+/* 07/08/2001 v1.00 - Davide Pizzolato - www.xdp.it
+ * CxImage version 5.99a 08/Feb/2004
  */
 
 #include "ximage.h"
@@ -20,8 +20,10 @@ void CxImage::AlphaSet(BYTE level)
 ////////////////////////////////////////////////////////////////////////////////
 void CxImage::AlphaCreate()
 {
-	AlphaDelete();
-	pAlpha = (BYTE*)calloc(head.biWidth * head.biHeight, 1);
+	if (pAlpha==NULL) {
+		pAlpha = (BYTE*)malloc(head.biWidth * head.biHeight);
+		if (pAlpha) memset(pAlpha,255,head.biWidth * head.biHeight);
+	}
 }
 ////////////////////////////////////////////////////////////////////////////////
 void CxImage::AlphaDelete()
@@ -43,7 +45,7 @@ void CxImage::AlphaInvert()
 ////////////////////////////////////////////////////////////////////////////////
 bool CxImage::AlphaCopy(CxImage &from)
 {
-	if (from.pAlpha == NULL || head.biWidth != from.head.biWidth || head.biWidth != from.head.biWidth) return false;
+	if (from.pAlpha == NULL || head.biWidth != from.head.biWidth || head.biHeight != from.head.biHeight) return false;
 	if (pAlpha==NULL) pAlpha = (BYTE*)malloc(head.biWidth * head.biHeight);
 	memcpy(pAlpha,from.pAlpha,head.biWidth * head.biHeight);
 	info.nAlphaMax=from.info.nAlphaMax;
@@ -52,7 +54,7 @@ bool CxImage::AlphaCopy(CxImage &from)
 ////////////////////////////////////////////////////////////////////////////////
 bool CxImage::AlphaSet(CxImage &from)
 {
-	if (!from.IsGrayScale() || head.biWidth != from.head.biWidth || head.biWidth != from.head.biWidth) return false;
+	if (!from.IsGrayScale() || head.biWidth != from.head.biWidth || head.biHeight != from.head.biHeight) return false;
 	if (pAlpha==NULL) pAlpha = (BYTE*)malloc(head.biWidth * head.biHeight);
 	BYTE* src = from.info.pImage;
 	BYTE* dst = pAlpha;
