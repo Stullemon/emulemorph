@@ -9,6 +9,7 @@ FIXED  : Improper treatment of sets of empty parameters in preferences.ini. [Mig
 FIXED  : Oscop mouse cursor fix by apph [SiRoB]
 FIXED  : USC: Friend, Powershare and Pay Back First slots are properly added by respecting setting [SiRoB]
 FIXED  : USC: Small mistake that create some extra slot open while we remove one [SiRoB]
+FIXED  : Put back completsourcecount fix in ResetFileStatusInfo() to avoid file completsourcecount mix (A4AF) [SiRoB]
 
 REMOVED: Defeat zero filled part sender (use less now) [SiRoB]
 
