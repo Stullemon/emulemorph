@@ -491,7 +491,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		   uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
 		   (!uploadingClient->IsScheduledForRemoval() /*&& !newclient->IsScheduledForRemoval()*/ || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime()) &&
 		   (uploadingClient->IsScheduledForRemoval() && !uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && uploadingClient->GetScheduledForRemovalAtTick() >= newclient->GetScheduledForRemovalAtTick() || //Keep Order For completing scheduled slot
-			(!uploadingClient->IsScheduledForRemoval() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime()) && //Keep Order For completing scheduled slot
+			(!uploadingClient->IsScheduledForRemoval() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && uploadingClient->GetScheduledForRemovalAtTick() <= newclient->GetScheduledForRemovalAtTick()) && //Keep Order For completing scheduled slot
 			 RightClientIsSuperior(newclient, uploadingClient) >= 0))
 		{
 			foundposition = true;
