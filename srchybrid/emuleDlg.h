@@ -249,6 +249,11 @@ private:
 //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
 	HICON	sourceTrayMessage;
 //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
+
+	// Mighty Knife: Save settings
+public:
+	void SaveSettings (bool _shutdown=false);
+	// [end] Mighty Knife
 };
 
 

@@ -1501,8 +1501,16 @@ void CemuleDlg::OnClose()
 	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
 	sLock1.Lock(2000);
 
+	// Mighty Knife: Saving of preferences capsuled
+
 	// saving data & stuff
-	theApp.emuledlg->preferenceswnd->m_wndSecurity.DeleteDDB();
+	SaveSettings (true);
+
+	// todo: the "searchwnd->SendMessage(WM_CLOSE);"-command below will
+	// save the settings of the search window into the preferences.ini, too.
+	// This should also be capsuled so that it can be called from outside...
+
+/*	theApp.emuledlg->preferenceswnd->m_wndSecurity.DeleteDDB();
 
 	theApp.knownfiles->Save();
 	transferwnd->downloadlistctrl.SaveSettings(CPreferences::tableDownload);
@@ -1519,6 +1527,9 @@ void CemuleDlg::OnClose()
 	theApp.scheduler->RestoreOriginals();
 	thePrefs.Save();
 	thePerfLog.Shutdown();
+*/
+
+	// [end] Mighty Knife
 
 	//EastShare START - Pretender, TBH-AutoBackup
 	if (thePrefs.GetAutoBackup2())
@@ -2882,3 +2893,32 @@ BOOL CALLBACK CemuleDlg::AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam){
 	return res; 
 } 
 //Commander - Added: Invisible Mode [TPT] - End
+
+// Mighty Knife: Save settings in preferences.ini
+void CemuleDlg::SaveSettings (bool _shutdown) {
+	if (_shutdown) {
+		theApp.emuledlg->preferenceswnd->m_wndSecurity.DeleteDDB();
+	}
+
+	theApp.knownfiles->Save();
+	transferwnd->downloadlistctrl.SaveSettings(CPreferences::tableDownload);
+	transferwnd->downloadclientsctrl.SaveSettings(CPreferences::tabledownloadClients);  //SLAHAM: ADDED DownloadClientsCtrl
+	transferwnd->uploadlistctrl.SaveSettings(CPreferences::tableUpload);
+	transferwnd->queuelistctrl.SaveSettings(CPreferences::tableQueue);
+	transferwnd->clientlistctrl.SaveSettings(CPreferences::tableClientList);
+	searchwnd->SaveAllSettings();
+	sharedfileswnd->sharedfilesctrl.SaveSettings(CPreferences::tableShared);
+	serverwnd->SaveAllSettings();
+	kademliawnd->SaveAllSettings();
+
+	theApp.m_pPeerCache->Save();
+	if (_shutdown) {
+		theApp.scheduler->RestoreOriginals();
+	}
+	thePrefs.Save();
+	if (_shutdown) {
+		thePerfLog.Shutdown();
+	}
+	theApp.scheduler->SaveToFile();
+}
+// [end] Mighty Knife
