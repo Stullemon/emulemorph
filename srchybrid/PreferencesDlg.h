@@ -48,7 +48,7 @@ public:
 	CPPgScheduler	m_wndScheduler;
 	CPPgProxy		m_wndProxy;
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
-	CPPgMorph		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
+	CPPgMorph2		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
 
 	CPreferences	*app_prefs;
 	CListBoxST		m_listbox;

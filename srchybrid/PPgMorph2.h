@@ -1,11 +1,9 @@
 #pragma once
 
 #include "preferences.h"
-#include "afxwin.h"
-#include "loggable.h"
 // CPPgMorph dialog
 
-class CPPgMorph2 : public CPropertyPage, public CLoggable
+class CPPgMorph2 : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgMorph2)
 
@@ -20,21 +18,15 @@ public:
 protected:
 	CPreferences *app_prefs;
 
-
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
 	DECLARE_MESSAGE_MAP()
+
 public:
-	virtual BOOL OnInitDialog();
-	void LoadSettings(void);
 	virtual BOOL OnApply();
-
-
+	virtual BOOL OnInitDialog();
 	void Localize(void);
-
-private:
-
-public:
+	void LoadSettings(void);
+	afx_msg void OnSettingsChange() {SetModified();}
 	afx_msg void OnBnClickedUpdatefakes();//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	afx_msg void OnBnClickedUpdateipfurl();//MORPH START added by Yun.SF3: Ipfilter.dat update
 };

@@ -93,7 +93,7 @@ BOOL CPPgMorph2::OnApply()
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	if(GetDlgItem(IDC_LOWIDRETRY)->GetWindowTextLength())
 	{
-		GetDlgItem(IDC_LOWIDRETRY)->GetWindowText(buffer,20);
+		GetDlgItem(IDC_LOWIDRETRY)->GetWindowText(buffer);
 		app_prefs->SetLowIdRetries(atoi(buffer));
 	}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
@@ -115,11 +115,11 @@ BOOL CPPgMorph2::OnApply()
 	
 	return CPropertyPage::OnApply();
 }
-void CPPgFiles::Localize(void)
+void CPPgMorph2::Localize(void)
 {
 	if(m_hWnd)
 	{
-		SetWindowText(GetResString(IDS_MORPH2));
+		//SetWindowText(GetResString(IDS_MORPH2));
 		
 		//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 		GetDlgItem(IDC_LOWIDRETRYLABEL)->SetWindowText(GetResString(IDS_LOWIDRETRYLABEL));
@@ -140,14 +140,14 @@ void CPPgFiles::Localize(void)
 	}
 }
 
-void CPPgFiles::OnBnClickedUpdatefakes()
+void CPPgMorph2::OnBnClickedUpdatefakes()
 {
 	if(!theApp.FakeCheck->DownloadFakeList())
 		theApp.emuledlg->AddLogLine(true, GetResString(IDS_FAKECHECKUPERROR));
 }
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
-void CPPgSecurity::OnBnClickedUpdateipfurl()
+void CPPgMorph2::OnBnClickedUpdateipfurl()
 {
 	theApp.ipfilter->UpdateIPFilterURL();
 }
