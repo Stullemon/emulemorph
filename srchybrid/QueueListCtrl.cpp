@@ -722,10 +722,9 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if (item1->GetPowerShared()) result ++;
  				if (item2->GetPowerShared()) result --;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(item1->GetPowerShared() && item2->GetPowerShared()){//Equal chance keep the file prio under PowerShare
+				if(result == 0 && theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE)
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				}
-				if (result == 0 && file1 != file2){
+				else if (result == 0 && file1 != file2){
 					result =
 						file1->GetEqualChanceValue() < file2->GetEqualChanceValue() ? 1 :
 						file1->GetEqualChanceValue() > file2->GetEqualChanceValue() ? -1 :
