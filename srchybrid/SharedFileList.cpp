@@ -582,6 +582,7 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	}
 	// SLUGFILLER: mergeKnown
 	pFile->SetLastSeen();	// okay, we see it
+	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
 	// SLUGFILLER: mergeKnown
 	m_UnsharedFiles_map.RemoveKey(CSKey(pFile->GetFileHash()));	
 	m_Files_map.SetAt(key, pFile);

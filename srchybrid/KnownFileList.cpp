@@ -296,6 +296,23 @@ CKnownFile* CKnownFileList::FindKnownFileByID(const uchar* hash) const
 	return NULL;
 }
 
+// SLUGFILLER: mergeKnown
+void CKnownFileList::MergePartFileStats(CKnownFile* original){
+	CCKey key(original->GetFileHash());
+	CKnownFile* pFileInMap;
+	if (m_Files_map.Lookup(key, pFileInMap) && pFileInMap != original)
+	{
+		m_Files_map.RemoveKey(CCKey(pFileInMap->GetFileHash()));
+
+		ASSERT( original->GetFileSize() == pFileInMap->GetFileSize() );
+		if (original->GetFileSize() == pFileInMap->GetFileSize())
+			original->statistic.MergeFileStats(&pFileInMap->statistic);
+
+		delete pFileInMap;
+	}
+}
+// SLUGFILLER: mergeKnown
+
 bool CKnownFileList::IsKnownFile(const CKnownFile* file) const
 {
 	if (file)

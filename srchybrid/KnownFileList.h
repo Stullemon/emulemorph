@@ -36,6 +36,7 @@ public:
 
 	CKnownFile* FindKnownFile(LPCTSTR filename, uint32 date, uint32 size) const;
 	CKnownFile* FindKnownFileByID(const uchar* hash) const;
+	void	MergePartFileStats(CKnownFile* original);	// SLUGFILLER: mergeKnown - retrieve part file stats from known file
 	bool	IsKnownFile(const CKnownFile* file) const;
 	bool	IsFilePtrInList(const CKnownFile* file) const;
 	const CKnownFilesMap& GetKnownFiles() const { return m_Files_map; }
