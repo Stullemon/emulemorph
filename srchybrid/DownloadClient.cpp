@@ -362,7 +362,7 @@ void CUpDownClient::SendStartupLoadReq()
 {
 	if (socket==NULL || reqfile==NULL)
 	{
-		ASSERT(0);
+		//ASSERT(0); //MORPH - Removed by SiRoB
 		return;
 	}
 	SetDownloadState(DS_ONQUEUE);
@@ -390,7 +390,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1)
 	{
-		//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+		//MORPH START - Added by SiRoB, m_PartStatus_list
 		/*
 		if (m_abyPartStatus)
 		{
@@ -398,13 +398,13 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			m_abyPartStatus = NULL;
 		}
 		*/
+		//MORPH   END - Added by SiRoB, m_PartStatus_list
+		m_nPartCount = reqfile->GetPartCount();
+		m_abyPartStatus = new uint8[m_nPartCount];
+		//MORPH START - Added by SiRoB, m_PartStatus_list
 		uint8* thisStatus;
 		if(m_PartStatus_list.Lookup(reqfile, thisStatus))
 			delete[] thisStatus;
-		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+
-		m_nPartCount = reqfile->GetPartCount();
-		m_abyPartStatus = new uint8[m_nPartCount];
-		//MORPH START - Added by SiRoB, Hot Fix for m_PartStatus_list
 		m_PartStatus_list[reqfile] = m_abyPartStatus;
 		//MORPH END   - Added by SiRoB, Hot Fix for m_PartStatus_list
 		memset(m_abyPartStatus,1,m_nPartCount);
@@ -454,7 +454,7 @@ void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
 	}
 	uint16 nED2KPartCount = data->ReadUInt16();
 
-	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+	//MORPH START - Added by SiRoB, m_PartStatusList
 	/*
 	if (m_abyPartStatus)
 	{
@@ -462,12 +462,7 @@ void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
 		m_abyPartStatus = NULL;
 	}
 	*/
-	uint8* thisStatus;
-	if(m_PartStatus_list.Lookup(reqfile, thisStatus)){
-		delete[] thisStatus;
-		m_PartStatus_list.RemoveKey(reqfile);
-	}
-	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
+	//MORPH   END - Added by SiRoB, m_PartStatusList
 	bool bPartsNeeded = false;
 	int iNeeded = 0;
 	if (!nED2KPartCount)
@@ -529,14 +524,18 @@ void CUpDownClient::ProcessFileStatus(CSafeMemFile* data, CPartFile* file)
 		Debug("  Parts=%u  %s  Needed=%u\n", m_nPartCount, psz, iNeeded);
 		delete[] psz;
 	}
+	
+	
+	//MORPH START - Added by SiRoB, m_PartStatus_List
+	uint8* thisStatus;
+	if(m_PartStatus_list.Lookup(reqfile, thisStatus))
+		delete[] thisStatus;
+	m_PartStatus_list[reqfile] = m_abyPartStatus;
+	//MORPH   END - Added by SiRoB, m_PartStatus_List
 
 	UpdateDisplayedInfo();
 	reqfile->UpdateAvailablePartsCount();
     
-	// khaos::kmod+ Save part statuses
-	m_PartStatus_list[reqfile] = m_abyPartStatus;
-	// khaos::kmod-
-
 	if (!bPartsNeeded)
 		SetDownloadState(DS_NONEEDEDPARTS);
 	//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
@@ -637,12 +636,15 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 				
 			m_nDownDatarate = 0;
 			if (nNewState == DS_NONE){
-				//khaos::kmod+ m_PartStatus_list
-				/*if (m_abyPartStatus)
+				
+				//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+				/*
+				if (m_abyPartStatus)
 					delete[] m_abyPartStatus;
+				*/
+				//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
 				m_abyPartStatus = NULL;
-				m_nPartCount = 0;*/
-				// khaos::kmod- m_PartStatus_list
+				m_nPartCount = 0;
 			}
 			if (socket && nNewState != DS_ERROR)
 				socket->DisableDownloadLimit();
