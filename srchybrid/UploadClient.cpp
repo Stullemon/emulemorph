@@ -94,7 +94,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 				if (currequpfile->m_AvailPartFrequency[i] <= 2 && !m_abyUpPartStatus[i])
 					partsneeded = true;
 			for (i; i < currequpfile->GetED2KPartCount(); i++)
-				if (currequpfile->m_AvailPartFrequency[i] <= 2 && !m_abyUpPartStatus[i])
+				if (currequpfile->m_AvailPartFrequency[i] <= 2)
 					partsneeded = true;
 			isHiddenPart &= partsneeded;
 		}
