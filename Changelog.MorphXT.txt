@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.15
+--------------------------------------
+FIXED  : USC: use of only one class make slot open until limit [SiRoB]
+FIXED  : Small visual bug arround the tiny vertical bar of news downloadclient switch icon [FrankyFive]
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.14
 --------------------------------------
 FIXED  : Possible crash in mass-rename if filename contains "%"-characters [MightyKnife]
