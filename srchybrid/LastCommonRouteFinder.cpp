@@ -360,9 +360,7 @@ UINT LastCommonRouteFinder::RunInternal() {
             m_lowestPing = 0;
 			m_state = _T("Preparing...");
             pingLocker.Unlock();
-			prefsLocker.Lock();
 			bool bIsUSSLog = m_bIsUSSLog; //MORPH - Added by SiRoB
-			prefsLocker.Unlock();
 			// Calculate a good starting value for the upload control. If the user has entered a max upload value, we use that. Otherwise 10 KBytes/s
             int startUpload = (maxUpload != _UI32_MAX)?maxUpload:10*1024;
 
@@ -470,10 +468,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                                         enabled = false;
 
 									// trying other ping method
-                                    /*
 									useUdp = !useUdp;
-									*/
-									useUdp |= true;
                                 }
                             }
 
@@ -505,10 +500,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 									if(bIsUSSLog)
 										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown ping status! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.status);
 									pinger.PIcmpErr(pingStatus.status);
-                                    /*
 									useUdp = !useUdp;
-									*/
-									useUdp |= useUdp;
                                 } else {
                                     if(pingStatus.error == IP_REQ_TIMED_OUT) {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
@@ -523,12 +515,9 @@ UINT LastCommonRouteFinder::RunInternal() {
 										if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 											theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Unknown pinging error! (TTL: %i IP: %s status: %i). Reason follows. Changing ping method to see if it helps."), ttl, ipstr(stDestAddr), pingStatus.error);
                                         pinger.PIcmpErr(pingStatus.error);
-    									/*
 										useUdp = !useUdp;
-										*/
-										useUdp |= useUdp;
 									}
-                                    }
+                                   }
 
                                 if(hostsToTraceRoute.GetSize() <= 8) {
 									theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: To few hosts to traceroute left. Restarting host colletion."));
@@ -625,6 +614,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 						pingLocker.Lock();
 					    m_state = _T("Error.");
                     	pingLocker.Unlock();
+
                     	// PENDING: this may not be thread safe
                     	thePrefs.SetDynUpEnabled(false);
                 	}
@@ -668,10 +658,7 @@ UINT LastCommonRouteFinder::RunInternal() {
 
 
                     if(!pingStatus.success && !foundWorkingPingMethod) {
-                        /*
 						useUdp = !useUdp;
-						*/
-						useUdp |= useUdp;
                     }
                 }
 
