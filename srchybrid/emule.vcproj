@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="emule"
 	ProjectGUID="{584EA69D-3443-4197-8994-364880FC1B9B}"
+	RootNamespace="emule"
 	Keyword="MFCProj">
 	<Platforms>
 		<Platform
@@ -21,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1"
 				MinimalRebuild="TRUE"
 				RuntimeLibrary="1"
@@ -36,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib .\pthreads\pthreads\release\pthreadVC.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames=""
@@ -90,12 +91,12 @@
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
-				EnableFunctionLevelLinking="TRUE"
+				EnableFunctionLevelLinking="FALSE"
 				TreatWChar_tAsBuiltInType="FALSE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
@@ -105,7 +106,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib .\upnplib\win32project\Release\upnplib.lib .\pthreads\pthreads\release\pthreadVC.lib"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
@@ -490,7 +491,7 @@
 				RelativePath="UploadQueue.cpp">
 			</File>
 			<File
-				RelativePath=".\UPnPNat.cpp">
+				RelativePath=".\UPnP_IGDControlPoint.cpp">
 			</File>
 			<File
 				RelativePath="URLClient.cpp">
@@ -582,25 +583,6 @@
 				</File>
 				<File
 					RelativePath="IrcSocket.cpp">
-				</File>
-			</Filter>
-			<Filter
-				Name="Optimizer"
-				Filter="">
-				<File
-					RelativePath="Optimizer\cpu_info.cpp">
-				</File>
-				<File
-					RelativePath="Optimizer\cpu_info.h">
-				</File>
-				<File
-					RelativePath="Optimizer\memcpy_amd.cpp">
-				</File>
-				<File
-					RelativePath="Optimizer\memcpy_amd.h">
-				</File>
-				<File
-					RelativePath=".\Optimizer\optimize.h">
 				</File>
 			</Filter>
 		</Filter>
@@ -851,7 +833,7 @@
 				RelativePath="UploadQueue.h">
 			</File>
 			<File
-				RelativePath=".\UPnPNat.h">
+				RelativePath=".\UPnP_IGDControlPoint.h">
 			</File>
 			<File
 				RelativePath="URLClient.h">

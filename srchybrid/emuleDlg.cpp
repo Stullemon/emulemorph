@@ -1592,7 +1592,6 @@ bool CemuleDlg::CanClose()
 {
 	if (theApp.m_app_state == APP_STATE_RUNNING && thePrefs.IsConfirmExitEnabled())
 	{   
-		CFadeWnd wndFade(this);
 		if (AfxMessageBox(GetResString(IDS_MAIN_EXIT), MB_YESNO | MB_DEFBUTTON2) == IDNO)
 			return false;
 	}

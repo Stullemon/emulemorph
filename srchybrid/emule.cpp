@@ -80,6 +80,7 @@
 CLogFile theLog;
 CLogFile theVerboseLog;
 
+/*
 //Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
 // gnaddelwarz: crashRpt
 #include "../crashrpt/crashrpt/include/crashrptDL.h"
@@ -97,7 +98,7 @@ BOOL WINAPI CrashCallback(LPVOID lpvState)
 }
 // gnaddelwarz: crashRpt
 //Morph End   - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
-
+*/
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -270,6 +271,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strModLongVersion = MOD_LONG_VERSION;
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), MOD_VERSION_MJR, MOD_VERSION_MIN);
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
+	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	m_UPnPNat = CUPnP_IGDControlPoint::AddInstance();
+	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 }
 
 
@@ -443,8 +447,21 @@ BOOL CemuleApp::InitInstance()
 	CemuleDlg dlg;
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
-	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
-        
+
+	uint32 startMesure = GetTickCount();
+	char hash1[512],hash2[512];
+	uint64 loop = 10000000;
+	startMesure = GetTickCount();
+	for(uint64 cur = 0; cur<loop; cur++){
+		md4cpy(hash1,hash2);
+	}
+	AddLogLine(false,_T("echo emulecpy %i"), GetTickCount() - startMesure);
+	startMesure = GetTickCount();
+	for(uint64 cur = 0; cur<loop; cur++){
+		memcpy(hash1,hash2,512);
+	}
+	AddLogLine(false,_T("echo memcpy %i"), GetTickCount() - startMesure);
+
 	//MORPH START - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 	if(thePrefs.ShowFolderIcons()){
 		theApp.AddIncomingFolderIcon();
@@ -481,7 +498,6 @@ BOOL CemuleApp::InitInstance()
 	if (thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetUseRandomPorts()){
 	//MORPH END   - Changed by SiRoB, [MoNKi: -Random Ports-]
 		if (m_pFirewallOpener->DoesFWConnectionExist()){
-			// delete old rules added by eMule
 			//MORPH START - Changed by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 			/*
 			// delete old rules added by eMule
@@ -538,6 +554,7 @@ BOOL CemuleApp::InitInstance()
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 
+	/*
 	//Morph Start - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
 	// gnaddelwarz: crashRpt
 	CrashRptDLL = GetInstanceDL();
@@ -550,7 +567,7 @@ BOOL CemuleApp::InitInstance()
 	}
 	// gnaddelwarz: crashRpt
 	//Morph End   - Added by AndCycle, from SF-IOM, gnaddelwarz: crashRpt
-
+	*/
 	thePerfLog.Startup();
 	dlg.DoModal();
 
@@ -1822,57 +1839,16 @@ void CemuleApp::CreateBackwardDiagonalBrush()
 	}
 }
 
-//Commander - Added: Optimizer [ePlus] - Start
-void CemuleApp::OptimizerInfo(void)
-{
-if (!emuledlg)
-	return;
-	AddLogLine(false,_T("********Optimizer********"));
-	USES_CONVERSION;
-	AddLogLine(false,_T("%s"),A2CT(cpu.GetExtendedProcessorName()));
-	switch (get_cpu_type())
-	{
-		case 1:
-			AddLogLine(false, GetResString(IDS_FPU_ACTIVE));
-			break;
-		case 2:
-			AddLogLine(false, GetResString(IDS_MMX_ACTIVE));
-			break;
-		case 3:
-			AddLogLine(false, GetResString(IDS_AMD_ACTIVE));
-			break;
-		case 4:
-		case 5:
-			AddLogLine(false, GetResString(IDS_SSE_ACTIVE));
-			break;
-		default:
-			AddLogLine(false, GetResString(IDS_OPTIMIZATIONS_DISABLED));
-			break;
-	}
-	AddLogLine(false,_T("********Optimizer********"));
-}
-//Commander - Added: Optimizer [ePlus] - End
-
 //MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
-BOOL CemuleApp::AddUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping, bool tryRandom){
-	if(m_UPnPNat.AddNATPortMapping(mapping, tryRandom) == CUPnPNat::UNAT_OK ){
-		if(theApp.emuledlg->IsRunning()){
-			AddLogLine(false, _T("Added UPnP NAT Support: (%s) NAT ROUTER/FIREWALL:%i -> %s:%i"),
-				mapping->description, mapping->externalPort, m_UPnPNat.GetLocalIPStr(), mapping->internalPort);
-		}
+BOOL CemuleApp::AddUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
+	if(m_UPnPNat->AddPortMapping(mapping) == CUPnP_IGDControlPoint::UNAT_OK )
 		return true;
-	}
-	else{
-		if(theApp.emuledlg->IsRunning()){
-			AddLogLine(false, _T("Error adding UPnP NAT Support: (%s) NAT ROUTER/FIREWALL:%i -> %s:%i (%s)"),
-				mapping->description, mapping->externalPort, m_UPnPNat.GetLocalIPStr(), mapping->internalPort, m_UPnPNat.GetLastError());
-		}
+	else
 		return false;
-	}
 }
 
-BOOL CemuleApp::RemoveUPnPNatPort(CUPnPNat::UPNPNAT_MAPPING *mapping){
-	if(m_UPnPNat.RemoveNATPortMapping(*mapping) == CUPnPNat::UNAT_OK )
+BOOL CemuleApp::RemoveUPnPNatPort(CUPnP_IGDControlPoint::UPNPNAT_MAPPING *mapping){
+	if(m_UPnPNat->DeletePortMapping(*mapping) == CUPnP_IGDControlPoint::UNAT_OK )
 		return true;
 	else
 		return false;
