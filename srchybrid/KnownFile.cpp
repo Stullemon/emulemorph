@@ -588,6 +588,9 @@ void CKnownFile::UpdatePartsInfo()
 	CArray<uint16, uint16> count;
 	if (flag)
 		count.SetSize(0, m_ClientUploadList.GetSize());
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	bool bCompleteSourcesCountInfoReceived=false;
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
 		CUpDownClient* cur_src = m_ClientUploadList.GetNext(pos);
@@ -601,6 +604,10 @@ void CKnownFile::UpdatePartsInfo()
 			}
 			if ( flag )
 				count.Add(cur_src->GetUpCompleteSourcesCount());
+			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+			if (cur_src->GetUpCompleteSourcesCount()>0)
+				bCompleteSourcesCountInfoReceived = true;
+			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
 	}
 
@@ -682,7 +689,7 @@ void CKnownFile::UpdatePartsInfo()
 		if((m_AvailPartFrequency[i]) < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1 && bCompleteSourcesCountInfoReceived,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
 	UpdateHideOSLimit(m_nVirtualCompleteSourcesCount==1);
