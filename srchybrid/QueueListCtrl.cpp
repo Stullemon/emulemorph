@@ -318,8 +318,8 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (!lpDrawItemStruct->itemData)
 		return;
 	//MORPH START - Added by SiRoB, Don't draw hidden Rect
-	CRect clientRect;
-	GetClientRect(clientRect);
+	RECT clientRect;
+	GetClientRect(&clientRect);
 	RECT cur_rec = lpDrawItemStruct->rcItem;
 	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
 		&&
