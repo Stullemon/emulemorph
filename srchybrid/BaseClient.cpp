@@ -223,7 +223,7 @@ void CUpDownClient::Init(){
 	// khaos::kmod-
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	m_dwLastCheckedForEvictTick = 0;
-    	//m_addedPayloadQueueSession = 0;
+    	m_addedPayloadQueueSession = 0;
 	//MORPH END   - Added by SiRoB, ZZ Upload System
 	//MORPH STRAT - Added by SiRoB, Better Download rate calcul
 	m_AvarageDDRlastRemovedHeadTimestamp = 0;
