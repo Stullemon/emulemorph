@@ -128,9 +128,10 @@ bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
 		m_nConnectIP = nIP;
 	else
 		m_nConnectIP = inet_addr(T2A(szHostName));
+	ResetIP2Country(m_nConnectIP); //MORPH Added by SiRoB, IPtoCountry URLClient
 //	if (m_nConnectIP == INADDR_NONE)
 //		m_nConnectIP = 0;
-	m_nUserIDHybrid = m_nConnectIP;
+	m_nUserIDHybrid = htonl(m_nConnectIP); //MORPH - Changed by SiRoB, -Fix-
 	ASSERT( m_nUserIDHybrid != 0 );
 	m_nUserPort = Url.nPort;
 	return true;
