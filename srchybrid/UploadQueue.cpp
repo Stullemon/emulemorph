@@ -998,26 +998,25 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 	{
-			if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
-				if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
-					DebugLog(LOG_USC, _T("USC: Added new slot since throttler needs it for class %i. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i m_aiSlotCounter[classID]: %i tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
-				m_abAddClientOfThisClass[classID] == true;
-				return true;
-			}
-			else if (m_abAddClientOfThisClass[classID] == true && m_aiSlotCounter[classID]>0){
-				if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
+			if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+				DebugLog(LOG_USC, _T("USC: Added new slot since throttler needs it for class %i. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i m_aiSlotCounter[classID]: %i tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
+			m_abAddClientOfThisClass[classID] = true;
+			return true;
+		}
+		else if (m_abAddClientOfThisClass[classID] == true && m_aiSlotCounter[classID]>0){
+			if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+			{
+				uint32 datarateperclient;
+				switch (classID)
 				{
-					uint32 datarateperclient;
-					switch (classID)
-					{
-						case 0: datarateperclient = thePrefs.GetMaxClientDataRateFriend();break;
-						case 1: datarateperclient = thePrefs.GetMaxClientDataRatePowerShare();break;
-						default: datarateperclient = thePrefs.GetMaxClientDataRate();break;
-					}
-					DebugLog(LOG_USC, _T("USC: Added New Slot for class %i to respect %s per client: %i wanted, %i currently, %i tick"), classID, CastItoXBytes(datarateperclient,false,true), m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
+					case 0: datarateperclient = thePrefs.GetMaxClientDataRateFriend();break;
+					case 1: datarateperclient = thePrefs.GetMaxClientDataRatePowerShare();break;
+					default: datarateperclient = thePrefs.GetMaxClientDataRate();break;
 				}
-				return true;
+				DebugLog(LOG_USC, _T("USC: Added New Slot for class %i to respect %s per client: %i wanted, %i currently, %i tick"), classID, CastItoXBytes(datarateperclient,false,true), m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
 			}
+			return true;
 		}
 	}
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
