@@ -35,6 +35,7 @@ protected:
 	int m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	int m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	int m_iClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
+	int m_iMaxUploadFriend;//MORPH - Added by SiRoB, Upload Splitting Class
 	int	m_iDynUpMode;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int	m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	//MORPH START - Added by SiRoB, khaos::categorymod+
@@ -86,6 +87,7 @@ protected:
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
+	HTREEITEM m_htiMaxUploadFriend;//MORPH - Added by SiRoB, Upload Splitting Class
 	HTREEITEM m_htiUpDisplay; //MORPH - Added by Commander, UM -> Display
 
 	HTREEITEM m_htiSCC;

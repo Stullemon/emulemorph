@@ -604,7 +604,7 @@ public:
 	static bool	autobackup;
 	static bool	autobackup2;
 	//EastShare End - Added by Pretender, TBH-AutoBackup
-	
+	static uint16	maxuploadfriend;//MORPH - Added by SiRoB, Upload Splitting Class
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	static uint8	LowIdRetries;
 	static uint8	LowIdRetried;

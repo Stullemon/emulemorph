@@ -548,7 +548,7 @@ uint16	CPreferences::maxconnectionsswitchborder;
 bool	CPreferences::autobackup;
 bool	CPreferences::autobackup2;
 //EastShare End - Added by Pretender, TBH-AutoBackup
-
+uint16	CPreferences::maxuploadfriend;//MORPH - Added by SiRoB, Upload Splitting Class
 //MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 uint8	CPreferences::LowIdRetries;
 uint8	CPreferences::LowIdRetried;
@@ -560,17 +560,9 @@ uint8	CPreferences::selectiveShare;
 
 bool	CPreferences::infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
-//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-uint8	CPreferences::ShareOnlyTheNeed;
-//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-
-//MORPH START - Added by SiRoB, POWERSHARE Limit
-uint8	CPreferences::PowerShareLimit;
-//MORPH END   - Added by SiRoB, POWERSHARE Limit
-
-//MORPH START - Added by SiRoB, Show Permissions
-uint8	CPreferences::permissions;
-//MORPH END   - Added by SiRoB, Show Permissions
+uint8	CPreferences::ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+uint8	CPreferences::PowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
+uint8	CPreferences::permissions;//MORPH - Added by SiRoB, Show Permissions
 
 //EastShare Start - PreferShareAll by AndCycle
 bool	CPreferences::shareall;	// SLUGFILLER: preferShareAll
@@ -1129,7 +1121,7 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 //MORPH START - Added by SiRoB, Upload Splitting Class
 uint32	CPreferences::GetMaxFriendByteToSend()
 {
-	return _UI32_MAX;
+	return maxuploadfriend*1024;//_UI32_MAX;
 }
 //MORPH END   - Added by SiRoB, Upload Splitting Class
 // -khaos--+++> A whole bunch of methods!  Keep going until you reach the end tag.
@@ -2502,6 +2494,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteInt(_T("MaxUploadFriend"),maxuploadfriend,_T("eMule"));//MORPH - Added by SiRoB, Upload Splitting Class
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ini.WriteInt(_T("ReconnectOnLowIdRetries"),LowIdRetries,_T("eMule"));	// SLUGFILLER: lowIdRetry
@@ -3108,7 +3101,9 @@ void CPreferences::LoadPreferences()
 	m_iIP2CountryNameMode = (IP2CountryNameSelection)ini.GetInt(_T("IP2Country"), IP2CountryName_DISABLE); 
 	m_bIP2CountryShowFlag = ini.GetBool(_T("IP2CountryShowFlag"), false);
 	//EastShare - added by AndCycle, IP to Country
-
+	
+	maxuploadfriend=ini.GetInt(_T("MaxUploadFriend"),3);//MORPH - Added by SiRoB, Upload Splitting Class
+	
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	LowIdRetries=ini.GetInt(_T("ReconnectOnLowIdRetries"),3);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry

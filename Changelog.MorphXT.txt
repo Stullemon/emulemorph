@@ -6,6 +6,7 @@ CHANGED: Intelligent Chunk Selection now use the advanced per file setting for t
 
 ADDED  : "Using phpBB URL-Tags style" checkbox in FileDetail for ed2kFileLink creation [AndCycle]
 ADDED  : Options to Enable/Disable PowerShare internal File Priority [AndCycle]
+ADDED  : Bandwidth limit for friend in morph preferency [SiRoB]
 
 TEAWKED: Hide Over Share display info now show all value in the column [SiRoB]
 TEAWKED: The auto powershare mecanisme have been changed to wait some complet source info before triggering [SiRoB]
