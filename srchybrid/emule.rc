@@ -129,7 +129,7 @@ BEGIN
     CONTROL         "",IDC_MYINFOLIST,"RichEdit20A",ES_MULTILINE | 
                     ES_READONLY | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,372,
                     176,130,106,WS_EX_STATICEDGE
-    ICON            "",IDC_SERVLST_ICO,5,5,20,20
+    ICON            "",IDC_SERVLST_ICO,5,5,21,20
     CONTROL         "Servers:",IDC_SERVLIST_TEXT,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,18,6,91,8
     CONTROL         "",IDC_SERVLIST,"SysListView32",LVS_OWNERDRAWFIXED | 
@@ -145,10 +145,11 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT 
                     WS_BORDER | WS_VSCROLL | WS_HSCROLL,WS_EX_STATICEDGE
     LTEXT           ":",IDC_SSTATIC5,458,59,8,8
-    COMBOBOX        IDC_FEEDLIST,5,163,301,83,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_FEEDLIST,5,163,242,83,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
     PUSHBUTTON      "Reload",IDC_FEEDUPDATE,312,162,51,15,BS_FLAT | 
                     WS_DISABLED
+    PUSHBUTTON      "News feeds >",IDC_FEEDCHANGE,252,162,55,14,BS_FLAT
 END
 
 IDD_SEARCH DIALOGEX 0, 0, 329, 231
@@ -4666,15 +4667,6 @@ BEGIN
     IDS_SHIFTKEY            "SHIFT"
 END
 
-STRINGTABLE
-BEGIN
-    IDS_FPU_ACTIVE          "FPU optimizations active"
-    IDS_MMX_ACTIVE          "MMX optimizations active"
-    IDS_AMD_ACTIVE          "AMD optimizations active"
-    IDS_SSE_ACTIVE          "SSE optimizations active"
-    IDS_OPTIMIZATIONS_DISABLED "Optimizations disabled"
-END
-
 STRINGTABLE 
 BEGIN
     IDS_INVMODE_GROUP       "Invisible Mode"
@@ -4682,6 +4674,11 @@ BEGIN
     IDS_INVMODE_HOTKEY      "Select the hotkey to restore the window"
     IDS_INVMODE_MODKEY      "Modifier Keys:"
     IDS_INVMODE_VKEY        "Key:"
+    IDS_FPU_ACTIVE          "FPU optimizations active"
+    IDS_MMX_ACTIVE          "MMX optimizations active"
+    IDS_AMD_ACTIVE          "AMD optimizations active"
+    IDS_SSE_ACTIVE          "SSE optimizations active"
+    IDS_OPTIMIZATIONS_DISABLED "Optimizations disabled"
 END
 
 #endif    // Englisch (USA) resources

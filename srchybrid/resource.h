@@ -1995,6 +1995,8 @@
 #define IDC_OPENPORTS                   2844
 #define IDC_SIMPLECLEANUP               2844
 #define IDC_NEWCHARACTER                2844
+#define IDC_NEWSFEEDSBUTTON             2844
+#define IDC_FEEDCHANGE                  2844
 #define IDS_STATS_FRATIO                2845
 #define IDC_SIMPLECLEANUP2              2845
 #define IDS_STATS_UDATA_FRIENDS         2846
@@ -2474,13 +2476,11 @@
 #define IDS_INVMODE_HOTKEY              5122
 #define IDS_INVMODE_MODKEY              5123
 #define IDS_INVMODE_VKEY                5124
-//Commander - Added: Optimizer [ePlus] - Start
-#define IDS_FPU_ACTIVE			5125
-#define IDS_MMX_ACTIVE			5126
-#define IDS_AMD_ACTIVE			5127
-#define IDS_SSE_ACTIVE			5128
-#define IDS_OPTIMIZATIONS_DISABLED	5129
-//Commander - Added: Optimizer [ePlus] - End
+#define IDS_FPU_ACTIVE                  5125
+#define IDS_MMX_ACTIVE                  5126
+#define IDS_AMD_ACTIVE                  5127
+#define IDS_SSE_ACTIVE                  5128
+#define IDS_OPTIMIZATIONS_DISABLED      5129
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125

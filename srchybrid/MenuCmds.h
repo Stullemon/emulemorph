@@ -178,6 +178,13 @@
 #define MP_MASSRENAME    		10385
 // [end] Mighty Knife
 
+// Mighty Knife: Context menu for editing news feeds
+#define MP_NEWFEED				10390
+#define MP_EDITFEED				10391
+#define MP_DELETEFEED           10392
+#define MP_DELETEALLFEEDS		10393
+// [end] Mighty Knife
+
 // quick-speed changer
 #define MP_QS_U10				10501
 #define MP_QS_U20				10502

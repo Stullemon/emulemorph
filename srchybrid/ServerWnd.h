@@ -97,6 +97,11 @@ public:
 	afx_msg void OnEnLinkNewsBox(NMHDR *pNMHDR, LRESULT *pResult);
 	//MORPH END - Added by SiRoB, XML News [O²]
 	
+	// Mighty Knife: Context menu for editing news feeds
+	CMenu m_FeedsMenu;
+	void ReadXMLList (CStringList& _names, CStringList& _urls);
+	void WriteXMLList (CStringList& _names, CStringList& _urls);
+	// [end] Mighty Knife
 
 protected:
 	void SetAllIcons();
@@ -115,6 +120,7 @@ protected:
 	afx_msg void OnDDClicked();
 	afx_msg void OnSvrTextChange();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 private:
 	CIconStatic m_ctrlNewServerFrm;
@@ -132,4 +138,6 @@ private:
 	CCustomAutoComplete* m_pacServerMetURL;
 	CString m_strClickNewVersion;
 	LCID m_uLangID;
+public:
+	afx_msg void OnBnClickedFeedchange();
 };

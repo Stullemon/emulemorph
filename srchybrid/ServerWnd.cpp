@@ -32,11 +32,18 @@
 #include "Sockets.h"
 #include "MuleStatusBarCtrl.h"
 #include "HelpIDs.h"
+
+// Mighty Knife: Popup-Menu for editing news feeds
+#include "MenuCmds.h"
+#include "InputBox.h"
+// [end] Mighty Knife
+
 //MORPH START - Added by SiRoB, XML News [O²]
 #define PUGAPI_VARIANT 0x58475550
 #define PUGAPI_VERSION_MAJOR 1
 #define PUGAPI_VERSION_MINOR 2
 #include "pugxml.h"
+#include ".\serverwnd.h"
 //MORPH END   - Added by SiRoB, XML News [O²]
 
 #ifdef _DEBUG
@@ -192,6 +199,7 @@ BOOL CServerWnd::OnInitDialog()
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	AddAnchor(IDC_FEEDUPDATE, MIDDLE_RIGHT);
+	AddAnchor(IDC_FEEDCHANGE, MIDDLE_RIGHT);
 	AddAnchor(IDC_FEEDLIST, MIDDLE_LEFT, MIDDLE_RIGHT);
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	
@@ -210,6 +218,17 @@ BOOL CServerWnd::OnInitDialog()
 	//MORPH START - Added by SiRoB, XML News [O²]
 	newsmsgbox->ShowWindow(SW_HIDE); // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
+
+	// Mighty Knife: Context menu for editing news feeds
+	if (m_FeedsMenu) VERIFY (m_FeedsMenu.DestroyMenu ());
+	m_FeedsMenu.CreatePopupMenu();
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_NEWFEED,"New...");
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_EDITFEED,"Edit...");
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEFEED,"Delete");
+	m_FeedsMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
+	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEALLFEEDS,"Delete all");
+	// [end] Mighty Knife
+
 	if (servermsgbox->m_hWnd)
 		servermsgbox->ShowWindow(SW_SHOW);
 
@@ -417,6 +436,9 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_LBN_SELCHANGE(IDC_FEEDLIST, OnFeedListSelChange)
 	ON_CBN_DROPDOWN(IDC_FEEDLIST, ListFeeds)
 	//MORPH END   - Added by SiRoB, XML News [O²]
+	// Mighty Knife: News feed edit button
+	ON_BN_CLICKED(IDC_FEEDCHANGE, OnBnClickedFeedchange)
+	// [end] Mighty Knife
 END_MESSAGE_MAP()
 
 
@@ -1099,8 +1121,13 @@ void CServerWnd::DownloadFeed()
 {
 	CString sbuffer;
 	int numero = m_feedlist.GetCurSel();
+	// if no item is selected there's nothing to do...
+	if (numero==CB_ERR) return;
+	// Get the URL to download
 	CString strURL = aFeedUrls.GetAt(numero);
 	CString strTempFilename; 
+	// Delete the old temporary copy in the "feeds" subdirectory
+	// of this feed if necessary
 	strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),numero);
 	FILE* readFile = fopen(strTempFilename, "r");
 	if (readFile!=NULL)
@@ -1109,6 +1136,7 @@ void CServerWnd::DownloadFeed()
 		remove(strTempFilename);
 	}
 	readFile = fopen(strTempFilename, "r");
+	// Start the download dialog and retrieve the file
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = _T("Download RSS feed file");
 	dlgDownload.m_sURLToDownload = strURL;
@@ -1118,6 +1146,7 @@ void CServerWnd::DownloadFeed()
 		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
 		return;
 	}
+	// Parse it
 	ParseNewsFile(strTempFilename);
 }
 
@@ -1269,3 +1298,208 @@ void CServerWnd::OnFeedListSelChange()
 	ParseNewsFile(strTempFilename);
 }
 //MORPH END - Added by SiRoB, XML News [O²]
+
+// Mighty Knife: News feed edit button
+void CServerWnd::OnBnClickedFeedchange()
+{
+	// Generate a popup menu directly next to the button.
+	// The user can change the news-feeds with the items in this menu.
+	CWnd* FeedButton = GetDlgItem (IDC_FEEDCHANGE);
+	CRect R;
+	FeedButton->GetWindowRect (R);
+	R.left += R.Width ();
+	m_FeedsMenu.TrackPopupMenu (TPM_LEFTALIGN,R.left,R.top,this);
+}
+
+BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
+	switch (wParam) {
+		case MP_NEWFEED: {
+			// Show two input boxes so that the user can enter the URL
+			// and optionally a name for that feed
+			InputBox inp;
+			inp.SetLabels ("Add news feeds",
+						   "Please enter the URL of the feed source:",
+						   "");
+			inp.DoModal ();
+			CString url = inp.GetInput ();
+			if ((!inp.WasCancelled()) && (url != "")) {
+				// Create a 2nd Input box because the default implementation
+				// of this class does not reset the m_Cancel variable!
+				InputBox inp2;
+				inp2.SetLabels ("Add news feeds",
+							    "Please enter a name for this feed (optional):",
+							    "");
+				inp2.DoModal ();
+				if (!inp2.WasCancelled()) {
+					CString name = inp2.GetInput ();
+					// Reload the XML list
+					CStringList names;
+					CStringList urls;
+					ReadXMLList (names,urls);
+					// Append the new adresses
+					names.AddTail (name);
+					urls.AddTail (url);
+					// Rewrite the XML News file
+					WriteXMLList (names,urls);
+					ListFeeds ();
+				}
+			}
+			return true;
+		} break;
+		case MP_EDITFEED: {
+			// Show two input boxes so that the user can edit the URL
+			// and the name for that feed
+			int i=m_feedlist.GetCurSel ();
+			if (i != CB_ERR) {
+				// Reload the XML list
+				CStringList names;
+				CStringList urls;
+				ReadXMLList (names,urls);
+				// Find our entry
+				if (i < names.GetCount ()) {
+					// But first we have to walk to it
+					POSITION namepos = names.GetHeadPosition ();
+					POSITION urlpos = urls.GetHeadPosition ();
+					while (i > 0) {
+						names.GetNext (namepos);
+						urls.GetNext (urlpos);
+						i--;
+					}
+					// Create an input box
+					InputBox inp;
+					inp.SetLabels ("Edit news feeds",
+								"Please enter the URL of the feed source:",
+								urls.GetAt (urlpos));
+					inp.DoModal ();
+					CString url = inp.GetInput ();
+					if ((!inp.WasCancelled()) && (url != "")) {
+					    // Create a 2nd Input box because the default implementation
+						// of this class does not reset the m_Cancel variable!
+						InputBox inp2;
+						inp2.SetLabels ("Edit news feeds",
+									"Please enter a name for this feed (optional):",
+									names.GetAt (namepos));
+						inp2.DoModal ();
+						if (!inp2.WasCancelled()) {
+							CString name = inp2.GetInput ();
+							// Append the new adresses
+							names.SetAt (namepos,name);
+							urls.SetAt (urlpos,url);
+							// Rewrite the XML News file
+							WriteXMLList (names,urls);
+							ListFeeds ();
+							m_feedlist.SetCurSel (-1);
+						}
+					}
+				}
+			}
+			return true;
+		} break;
+		case MP_DELETEFEED: {
+			int sel=m_feedlist.GetCurSel ();
+			if (sel != CB_ERR) {
+				// Reload the XML list
+				CStringList names;
+				CStringList urls;
+				ReadXMLList (names,urls);
+				// Remove the entry
+				int i=sel;
+				if (i < names.GetCount ()) {
+					// But first we have to walk to it
+					POSITION namepos = names.GetHeadPosition ();
+					POSITION urlpos = urls.GetHeadPosition ();
+					while (i > 0) {
+						names.GetNext (namepos);
+						urls.GetNext (urlpos);
+						i--;
+					}
+					// Got it - throw it away
+					names.RemoveAt (namepos);
+					urls.RemoveAt (urlpos);
+					// Rewrite the XML News file
+					WriteXMLList (names,urls);
+					// The last thing we have to do is to rename all 
+					// files in the "feed" subdirectory (temporary stored
+					// news) so that their numbers fit again to the
+					// corresponding number of the entrys in the ComboBox.
+					for (int j=sel; j < names.GetSize (); j++) {
+						CString Source, Dest;
+						Source.Format("%s%d.xml",thePrefs.GetFeedsDir(),j+1);
+						Dest.Format("%s%d.xml",thePrefs.GetFeedsDir(),j);
+						DeleteFile ((const char*) Dest);
+						rename ((const char*) Source,(const char*) Dest);
+					}
+
+				}
+			}
+			// Reload the list, change the ComboBox to "nothing", remove the
+			// content of the "news" window.
+			ListFeeds();
+			m_feedlist.SetCurSel (-1);
+			GetDlgItem(IDC_FEEDUPDATE)->EnableWindow(false);
+			newsmsgbox->Reset();
+			return true;
+		} break;
+		case MP_DELETEALLFEEDS: {
+			// Delete the file and reload the feeds for the ComboBox
+			DeleteFile (CString(thePrefs.GetConfigDir())+"XMLNews.dat");
+			ListFeeds ();
+			return true;
+		} break;
+		default: return CResizableDialog::OnCommand (wParam, lParam);
+	}
+	return true;
+}
+
+// Read the content of the XMLNews.dat file. The file is constructed as:
+//    name, url
+//    name, url
+//    name, url
+// ...
+// There's no "," sign allowed in the name!
+void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
+	FILE* readfile = fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "r");
+	while (!feof (readfile)) {
+		// Read the current line
+		CString url;
+		char* pbuf = url.GetBuffer (1024);
+		fgets (pbuf,1024,readfile);
+		url.ReleaseBuffer ();
+		// Remove all LF characters
+		url = url.SpanExcluding ("\n");
+		// Split the string on the place of the ","
+		int i=url.Find (',');
+		if (i != -1) {
+			CString name = url.Left (i);
+			url.Delete (0,i+1);
+			// If the name is empty, use the URL as name
+			if (name.IsEmpty ()) 
+				name = url;
+			_names.AddTail (name);
+			_urls.AddTail (url);
+		}
+	}
+	fclose (readfile);
+}
+
+// Rewrite the XMLNews.dat file.
+// Filter all "," characters if some exist
+void CServerWnd::WriteXMLList (CStringList& _names, CStringList& _urls) {
+	FILE* writefile = fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "w");
+	POSITION posnames = _names.GetHeadPosition ();
+	POSITION posurls = _urls.GetHeadPosition ();
+	while ((posnames != NULL) && (posurls != NULL)) {
+		CString name = _names.GetNext (posnames);
+		CString url = _urls.GetNext (posurls);
+		// If the name is empty, use the URL as name
+		if (name.IsEmpty ()) 
+			name = url;
+		// Replace all "," by " "
+		name.Replace (',',' ');
+		// Write the info; append CR/LF characters to the end of the line
+		fprintf (writefile,"%s,%s\n",(const char*) name,(const char*) url);
+	}
+	fclose (writefile);
+}
+
+// [end] Mighty Knife
