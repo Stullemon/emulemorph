@@ -2999,16 +2999,16 @@ void CPreferences::LoadPreferences()
 	m_iPayBackFirstLimit=ini.GetInt(_T("PayBackFirstLimit"),10);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("")));//MORPH START added by Yun.SF3: Ipfilter.dat update
-	_stprintf(UpdateURLIP2Country,_T("%s"),ini.GetString(_T("UpdateURLIP2Country"),_T("")));//Commander - Added: IP2Country auto-updating
-	_stprintf(UpdateVerURLIP2Country,_T("%s"),ini.GetString(_T("UpdateVerURLIP2Country"),_T("")));//Commander - Added: IP2Country auto-updating
+	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.txt")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.txt")));//MORPH START added by Yun.SF3: Ipfilter.dat update
+	_stprintf(UpdateURLIP2Country,_T("%s"),ini.GetString(_T("UpdateURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip")));//Commander - Added: IP2Country auto-updating
+	_stprintf(UpdateVerURLIP2Country,_T("%s"),ini.GetString(_T("UpdateVerURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/latest")));//Commander - Added: IP2Country auto-updating
 	if (StrStrI(UpdateURLFakeList,_T("http://www.emuleitor.com/downloads/Morph/fakes.txt")) ||
 		StrStrI(UpdateURLFakeList,_T("http://membres.lycos.fr/ipfilter/fakes.txt")))
-		sprintf(UpdateURLFakeList,_T("%s"),_T(""));
+		sprintf(UpdateURLFakeList,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.txt"));
 	if (StrStrI(UpdateURLIPFilter,_T("http://www.emuleitor.com/downloads/Morph/ipfilter.txt")) ||
 		StrStrI(UpdateURLIPFilter,_T("http://membres.lycos.fr/ipfilter/ipfilter.txt")))
-		sprintf(UpdateURLIPFilter,_T("%s"),_T(""));
+		sprintf(UpdateURLIPFilter,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.txt"));
 	
 	// khaos::categorymod+ Load Preferences
 	m_bShowCatNames=ini.GetBool(_T("ShowCatName"),true);
