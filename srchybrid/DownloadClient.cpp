@@ -1540,21 +1540,6 @@ const bool CUpDownClient::SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file
                             wasSkippedDueToSourceExchange = true;
                         }
                     }
-//
-//				//MORPH START - Added by SiRoB, Due to Khaos A4AF
-//					// -khaos--+++>
-//					else
-//					{
-//					// <-----khaos-
-//						// khaos::kmod+ Smart A4AF Source Balancing (Now on a by-category basis)
-//						// Brute Force A4AF Transferring
-//						// Spread Reask
-//						if (!cur_src->GetLastForceA4AFTick() || (dwCurTick - cur_src->GetLastForceA4AFTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
-//						{
-//							if(thePrefs.UseSmartA4AFSwapping())
-//								if (cur_src->SwapToForcedA4AF())
-//									break; // This source was transferred, nothing more to do here.
-//						}
 
 				    if(IsSourceRequestAllowed(cur_file, true) && (cur_file->AllowSwapForSourceExchange() || cur_file == reqfile) &&
                        !(IsSourceRequestAllowed(SwapTo, true) && (SwapTo->AllowSwapForSourceExchange() || SwapTo == reqfile)) &&
