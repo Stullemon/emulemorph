@@ -995,7 +995,8 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
         // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
         if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
             AddDebugLogLine(false, _T("UploadQueue: Added new slot since throttler needs it. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i uploadinglist.GetSize(): %i tick: %i"), m_iHighestNumberOfFullyActivatedSlotsSinceLastCall, iCount, ::GetTickCount());
-			return true;
+		m_abAddClientOfThisClass[LAST_CLASS] = true;
+		return true;
     }
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
