@@ -1459,6 +1459,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 // There's no "," sign allowed in the name!
 void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
 	FILE* readfile = fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "r");
+	if (readfile == NULL) return; 
 	while (!feof (readfile)) {
 		// Read the current line
 		CString url;
@@ -1486,6 +1487,7 @@ void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
 // Filter all "," characters if some exist
 void CServerWnd::WriteXMLList (CStringList& _names, CStringList& _urls) {
 	FILE* writefile = fopen(CString(thePrefs.GetConfigDir())+"XMLNews.dat", "w");
+	if (writefile == NULL) return; 
 	POSITION posnames = _names.GetHeadPosition ();
 	POSITION posurls = _urls.GetHeadPosition ();
 	while ((posnames != NULL) && (posurls != NULL)) {
