@@ -219,18 +219,18 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore) {
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
-
 	bool	rightGetQueueFile;
 	CKnownFile* rightReqFile;
 	CKnownFile* leftReqFile;
-	
+
 	if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
 		rightGetQueueFile = false;
 	}
-	else if(!leftClient || !rightClient){
+	else if(!rightClient || !leftClient){
 		rightGetQueueFile = false;
 	}
-	else if((rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
+	else if(
+		(rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
 		(leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID()))){
 
 		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
@@ -264,6 +264,92 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 	}
 //Morph End - added by AndCycle, Equal Chance For Each File
 
+//Morph Start - added by AndCycle, rewrite compare for clear code
+	// don't allow banned client to be best
+	if(rightClient->IsBanned()){
+		return	false;
+	}
+	// don't allow downloading clients to be best
+	else if(IsDownloading(rightClient)){
+		return	false;
+	}
+	//EastShare - added by AndCycle, don't allow identificaion failed client get upload?
+	else if((
+				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDFAILED || 
+				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDBADGUY || 
+				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDNEEDED
+				) && theApp.clientcredits->CryptoAvailable()){
+		return	false;
+	}
+	// there's no old client to compare with, so rightClient is better (than null)
+	else if(leftClient == NULL){
+		return	true;
+	}
+	// rightClient has friend slot, but leftClient has not, so rightClient is better
+	else if((rightClient->IsFriend() && rightClient->GetFriendSlot()) == true && (leftClient->IsFriend() && leftClient->GetFriendSlot()) == false){
+		return	true;
+	}
+	// leftClient has friend slot, but rightClient has not, so leftClient is better
+	else if((rightClient->IsFriend() && rightClient->GetFriendSlot()) == false && (leftClient->IsFriend() && leftClient->GetFriendSlot()) == true){
+		return	false;
+	}
+	// both or none have friend slot, let file prio and score decide
+	//EastShare - added by AndCycle, PayBackFirst
+	// rightClient need to be PaybackFirst
+	else if(rightClient->MoreUpThanDown() == true && leftClient->MoreUpThanDown() == false){
+		return	true;
+	}
+	// leftClient need to be PaybackFirst
+	else if(rightClient->MoreUpThanDown() == false && leftClient->MoreUpThanDown() == true){
+		return	false;
+	}
+	// both or none need to be PaybackFirst
+	// rightClient wants powershare file, but leftClient not, so rightClient is better
+	else if(rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == false){
+		return	true;
+	}
+	else if(rightClient->GetPowerShared() == false && leftClient->GetPowerShared() == true){
+		return	false;
+	}
+	// they both want powershare file
+	else if(rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == true){
+		// and rightClient wants higher prio file, so rightClient is better
+		if(rightClient->GetFilePrioAsNumber() > leftClient->GetFilePrioAsNumber()){
+			return	true;
+		}
+		// and leftClient wants higher prio file, so leftClient is better
+		else if(rightClient->GetFilePrioAsNumber() < leftClient->GetFilePrioAsNumber()){
+			return	false;
+		}
+		// same prio file, 
+		else if(leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber()){
+			//Morph - added by AndCycle, Equal Chance For Each File
+			if(rightGetQueueFile == true){
+				return	true;
+			}
+			//but rightClient has better score, so rightClient is better
+			else if(rightScore > leftScore){
+				return	true;
+			}
+			else{
+				return	false;
+			}
+		}
+	}//neither want powershare file
+	//Morph - added by AndCycle, Equal Chance For Each File
+	else if(rightGetQueueFile == true){
+		return	true;
+	}
+	// but rightClient has better score, so rightClient is better
+	else if(rightScore > leftScore){
+		return	true;
+	}
+	return	false;
+
+//Morph End - added by AndCycle, rewrite compare for clear code
+
+
+/*
 	if(
 		(leftClient != NULL &&
 			(
@@ -309,6 +395,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 	} else {
 		return false;
 	}
+*/
 }
 
 /**
@@ -605,7 +692,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 	// statistic
 	CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
-	    if (reqfile)
+	if (reqfile)
 		reqfile->statistic.AddAccepted();
 	//	}
 		
@@ -709,6 +796,8 @@ void CUploadQueue::Process() {
             //theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload since there are too many upload slots opened.", lastClient->GetUserName());
             // Remove from upload list.
 
+            RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
+
 			//Morph Start - added by AndCycle, for zz prio system there are some situation need to take care with
 			//require for equal chance for each file, accepted base
 			CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)lastClient->GetUploadFileID());
@@ -716,8 +805,6 @@ void CUploadQueue::Process() {
 				reqfile->statistic.DelAccepted();
 			}
 			//Morph End - added by AndCycle, for zz prio system there are some situation need to take care with
-			
-            RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULMANYSLOTS), true, true);
 
 		    // add to queue again.
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
