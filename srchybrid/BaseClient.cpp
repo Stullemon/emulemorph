@@ -2822,11 +2822,11 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 			strState = GetResString(IDS_CONNVIASERVER);
 			break;
 		case US_UPLOADING:
-			//if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount()) {
+			if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount()) {
 				strState = GetResString(IDS_TRANSFERRING);
-            //} else {
-            //   strState = GetResString(IDS_TRICKLING);
-            //}
+            } else {
+                strState = GetResString(IDS_TRICKLING);
+            }
             //CString strStateTemp = strState;
             //strState.Format(_T("%i: %s"), GetSlotNumber(), strStateTemp);
 			break;
