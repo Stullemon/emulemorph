@@ -842,9 +842,12 @@ void CUploadQueue::Process() {
 		for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
 			++m_aiSlotCounter[i];
 	}
+	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 		m_abAddClientOfThisClass[classID] = m_abOnClientOverHideClientDatarate[classID] || //one client in class reached max upload limit
-											m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]; //Upload Throttler want new slot
+											m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID] || //Upload Throttler want new slot
+											curUploadSlots<m_aiSlotCounter[classID]; //Scheduled slot
+											
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	
 	CheckForHighPrioClient();
@@ -1013,12 +1016,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
     }
 
     if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
-       //MORPH - Changed by SiRoB, Upload Splitting Class
-	   /*
-	   curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
-	   */
-	   curUploadSlotsReal > curUploadSlots && curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall+1 && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
-        m_abAddClientOfThisClass[LAST_CLASS] = true; //MORPH - Added by SiRoB, Upload Splitting Class
+       curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
     }
 

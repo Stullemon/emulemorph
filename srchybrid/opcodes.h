@@ -92,8 +92,8 @@
 // MOD Note: end
 
 //MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-#define	MAXAVERAGETIMEUPLOAD	SEC2MS(5)
-#define	MAXAVERAGETIMEDOWNLOAD	SEC2MS(5)
+#define	MAXAVERAGETIMEUPLOAD	SEC2MS(15)
+#define	MAXAVERAGETIMEDOWNLOAD	SEC2MS(15)
 //MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 
 #define CONFIGFOLDER			_T("config\\")
