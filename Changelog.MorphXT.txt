@@ -9,20 +9,24 @@ Changelog for eMule 0.44b MorphXT v5.x
 MERGED : Code merged to 0.44a [SiRoB]
 MERGED : Code merged to 0.44b [SiRoB]
 
-FIXED  : Resource ID [SiRoB]
-FIXED  : minor gui display bug arround the category priority [SiRoB]
+FIXED  : Resource ID's several times [SiRoB]
+FIXED  : Minor gui display bug arround the category priority [SiRoB]
 FIXED  : Definitly fixed the Resume Next in the category context menu, this is not anymore a globaly Resume Next but a per-category resume [SiRoB]
 FIXED  : Temporary banned client by ip detected by the zerofilled feature are well done (resort ip binary array) [SiRoB]
+FIXED  : Localized / hardcoded IDS's [Commander]
 
-CHANGED: Removed the "..." and change the tree in Morph preferency [SiRoB]
+CHANGED: Removed the "..." and changed the tree in Morph preferency to [+] [SiRoB]
 CHANGED: Make one menu for CRC32 related function [SiRoB]
 CHANGED: Anti-Leecher Mecanisme by adding the reason of detection in log [SiRoB]
 CHANGED: Percentage aspect on download progress bar [SiRoB]
 
-ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
+ADDED  : Recalculate CRC32. Can be used to force eMule to generate the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 ADDED  : CRC32 Localize [SiRoB]
-ADDED  : ClientQueueProgressBar [Commander/SiRoB] (Idea by Roman2k)
+ADDED  : ClientQueueProgressBar to TransferWnd [Commander/SiRoB] (Idea by Roman2k)
 ADDED  : Blinking Tray On Message Recieve from emulEspaña [Commander]
+ADDED  : ed2k FriendLink support from emulEspaña (adapted) (ed2k://|friend|Username|Userhash|/ and ed2k://|friendlist|Url of emfriends.met|/) [Commander] 
+ADDED  : WapServer from emulEspaña (adapted) [SiRoB/Commander]
+ADDED  : Customized IncomingDir icon from emulEspaña [Commander]
 ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
 ADDED  : Intelligent Chunk Selection from stormit & pawcio by enkeyDEV [AndCycle]
 
@@ -30,6 +34,7 @@ TODO   : UNICODE Compatibility (in progess) [SiRoB]
 TODO   : Several Preferences Options (after new Preferences-Cats System arrived) [Commander]
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
+TODO   : Fixing RSS News Feed Display ... [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
@@ -832,12 +837,3 @@ ADDED: Beta-patch from stobo about the download limit may stop downloads, too mu
 ADDED: Support for tag ET_MOD_VERSION 0x55 II- From Maella [Yun.SF3]
 ADDED: Defeat 0-filled Part Senders - From Maella [IceCream]
 CHANGED: Transfer full chunk & Secure Identification are now True by default [IceCream]
-
------------------------------------
-ADDED:
-FIXED:
-MERGED:
-TWEAKED:
-REMOVED:
-CHANGED:
-NOTES:
