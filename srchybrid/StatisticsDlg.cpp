@@ -2529,7 +2529,7 @@ void CStatisticsDlg::CreateMyTree() {
 		cligen[3] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 		
 		for(int i = 0; i<3; i++) cligen[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
-
+	cligen[6] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients); //MORPH - Added by SiRoB, Leecher counter
 	h_servers = stattree.InsertItem(GetResString(IDS_FSTAT_SERVERS),4,4);					// Servers section
 		for(int i = 0; i<6; i++) srv[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_servers);		// Servers Items
 			for(int i = 0; i<3; i++) srv_w[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), srv[0]);	// Working Servers Items

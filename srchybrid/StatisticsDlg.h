@@ -134,7 +134,7 @@ private:
 	HTREEITEM	h_connection, h_conn_session, h_conn_total; // Connection Section Headers
 	HTREEITEM	hconn_sg, conn_sg[5], hconn_su, conn_su[4], hconn_sd, conn_sd[4]; // Connection Session Section Headers and Items
 	HTREEITEM	hconn_tg, conn_tg[4], hconn_tu, conn_tu[3], hconn_td, conn_td[3]; // Connection Total Section Headers and Items
-	HTREEITEM	h_clients, cligen[8/*7*/], hclisoft, clisoft[8], cli_versions[32], cli_other[5], hcliport, cliport[2]; // Clients Section //MORPH - Modified by IceCream, add one new section in cligen[6] for leecher
+	HTREEITEM	h_clients, cligen[7], hclisoft, clisoft[8], cli_versions[32], cli_other[5], hcliport, cliport[2]; // Clients Section //MORPH - Modified by IceCream, add one new section in cligen[6] for leecher
 	HTREEITEM	h_servers, srv[6], srv_w[3], hsrv_records, srv_r[3]; // Servers Section
 	HTREEITEM	h_shared, shar[4], hshar_records, shar_r[4]; // Shared Section
 	// The time/projections section.  Yes, it's huge.
