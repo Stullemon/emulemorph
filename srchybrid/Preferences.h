@@ -662,6 +662,10 @@ public:
     //MORPH START - Added by Commander, ClientQueueProgressBar
     static bool m_bClientQueueProgressBar;
 	//MORPH END - Added by Commander, ClientQueueProgressBar
+    
+	//MORPH START - Added by Commander, Show WC stats
+	static bool m_bCountWCSessionStats;
+	//MORPH END - Added by Commander, Show WC stats
 
 	//MORPH START - Added by Commander, FolderIcons
 	static bool m_bShowFolderIcons;
@@ -1557,8 +1561,12 @@ public:
 	static bool ShowClientQueueProgressBar()					{ return m_bClientQueueProgressBar;}
     //MORPH END - Added by Commander, ClientQueueProgressBar
 
+    //MORPH START - Added by Commander, Show WC stats
+	static bool CountWCSessionStats()							{ return m_bCountWCSessionStats;}
+    //MORPH END - Added by Commander, Show WC stats
+
 	//MORPH START - Added by Commander, FolderIcons
-	static bool ShowFolderIcons()					{ return m_bShowFolderIcons;}
+	static bool ShowFolderIcons()								{ return m_bShowFolderIcons;}
 	//MORPH END - Added by Commander, FolderIcons
 
 	//Toolbar

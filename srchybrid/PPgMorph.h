@@ -36,6 +36,7 @@ protected:
 	int m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	int m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	int m_iClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
+	int m_iCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	int m_iGlobalDataRateFriend;
 	int m_iMaxClientDataRateFriend;
@@ -95,6 +96,7 @@ protected:
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	HTREEITEM m_htiCountWCSessionStats;//MORPH - Added by Commander, Show WC stats
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	HTREEITEM m_htiFriend;

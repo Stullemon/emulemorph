@@ -523,6 +523,10 @@ CArray<DynDNS_Struct*,DynDNS_Struct*> CPreferences::DynDNSMap;
 bool CPreferences::m_bClientQueueProgressBar;
 //MORPH END - Added by Commander, ClientQueueProgressBar
 
+//MORPH START - Added by Commander, Show WC stats
+bool CPreferences::m_bCountWCSessionStats;
+//MORPH END - Added by Commander, Show WC stats
+
 //MORPH START - Added by Commander, FolderIcons
 bool CPreferences::m_bShowFolderIcons;
 //MORPH END - Added by Commander, FolderIcons
@@ -2684,6 +2688,10 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("ClientQueueProgressBar"),m_bClientQueueProgressBar, _T("eMule"));
 	//MORPH END - Added by Commander, ClientQueueProgressBar
 
+	//MORPH START - Added by Commander, Show WC stats
+	ini.WriteBool(_T("CountWCSessionStats"),m_bCountWCSessionStats, _T("eMule"));
+    //MORPH END - Added by Commander, Show WC stats
+
 	//MORPH START - Added by Commander, FolderIcons  
 	ini.WriteBool(_T("ShowFolderIcons"),m_bShowFolderIcons, _T("eMule"));
 	//MORPH END - Added by Commander, FolderIcons
@@ -3337,6 +3345,10 @@ void CPreferences::LoadPreferences()
     //MORPH START - Added by Commander, ClientQueueProgressBar
 	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),false);
     //MORPH END - Added by Commander, ClientQueueProgressBar
+	
+	//MORPH START - Added by Commander, Show WC stats
+	m_bCountWCSessionStats=ini.GetBool(_T("CountWCSessionStats"),false);
+    //MORPH END - Added by Commander, Show WC stats
 
 	//MORPH START - Added by Commander, FolderIcons
 	m_bShowFolderIcons=ini.GetBool(_T("ShowFolderIcons"),false);

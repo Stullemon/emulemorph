@@ -2753,6 +2753,7 @@
 #define IDS_CRC_DONTADDCRC              6206
 #define IDS_CRC_PREFIX                  6207
 #define IDS_CRC_SUFFIX                  6208
+#define IDS_COUNTWCSESSIONSTATS         6209
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053
