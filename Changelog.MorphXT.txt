@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.44b MorphXT v5.5
+--------------------------------------
+FIXED  : Fixed Upload Splitting Class [SiRoB]
+FIXED  : First sorting when adding PS PBF FS slot in uploading list is now correcly done (bugFix arround zz code insertslot()) [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.4
 --------------------------------------
 MERGED : Mobile Mule 0.9a [SiRoB]
