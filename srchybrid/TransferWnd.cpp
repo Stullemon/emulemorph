@@ -299,7 +299,8 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 }
 
 //SLAHAM: REMOVED [TPT] - TBH Transfer Window Buttons
-/*void CTransferWnd::SetInitLayout() {
+/*
+void CTransferWnd::SetInitLayout() {
 		CRect rcDown,rcSpl,rcW;
 		CWnd* pWnd;
 
@@ -602,8 +603,8 @@ void CTransferWnd::SwitchUploadList()
 		uploadlistctrl.Hide();
 		clientlistctrl.Hide();
 		downloadclientsctrl.Hide(); //SLAHAM: ADDED DownloadClientsCtrl
-		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW);
 		queuelistctrl.Visable();
+		GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE));
 		//SLAHAM: ADDED Switch Lists Icons =>
 		GetDlgItem(IDC_UL_CHANGEVIEW)->EnableWindow(true);
@@ -907,6 +908,7 @@ void CTransferWnd::ShowList(uint16 list) {
 			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
 			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
 			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
+			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
 			break;
 		case IDC_UPLOADLIST:
 			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
@@ -924,6 +926,7 @@ void CTransferWnd::ShowList(uint16 list) {
 			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);			
 			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
 			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
+			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
 			break;
 		case IDC_QUEUELIST:
 			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
@@ -941,6 +944,7 @@ void CTransferWnd::ShowList(uint16 list) {
 			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(false);
 			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
 			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
+			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_SHOW); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
 			break;
 		case IDC_DOWNLOADCLIENTS:
 			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
@@ -958,6 +962,7 @@ void CTransferWnd::ShowList(uint16 list) {
 			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
 			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(false);
 			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(bKl);
+			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
 			break;
 		case IDC_CLIENTLIST:
 			m_dlTab.ShowWindow(SW_HIDE); //MORPH - Added by SiRoB, Show/Hide dlTab
@@ -975,6 +980,7 @@ void CTransferWnd::ShowList(uint16 list) {
 			GetDlgItem(IDC_DL_QUEUE)->EnableWindow(bQl);
 			GetDlgItem(IDC_DL_TRANSFERS)->EnableWindow(true);
 			GetDlgItem(IDC_DL_CLIENT)->EnableWindow(false);
+			GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->ShowWindow(SW_HIDE); //MORPH - Added by AndCycle, Show/Hide Q RefreshButton
 			break;
 	}
 	AddAnchor(list,TOP_LEFT,BOTTOM_RIGHT);
@@ -1608,9 +1614,9 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 				break;
 			}
 		case IDC_DL_UPLOADS: {
-			ShowList(IDC_UPLOADLIST);
-			break;
-							 }
+				ShowList(IDC_UPLOADLIST);
+				break;
+			}
 		case IDC_DL_QUEUE: 
 			{
 				ShowList(IDC_QUEUELIST);
