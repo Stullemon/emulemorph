@@ -728,12 +728,19 @@ void COScopeCtrl::DrawPoint()
 	{
 		if(m_nShiftPixels > 0)
 		{
+			//MORPH - Removed by SiRoB, useless [apph]
+			/*
 			ScrollRect.left = m_rectPlot.left;
 			ScrollRect.top  = m_rectPlot.top + 1;
 			ScrollRect.right  = m_rectPlot.left + m_nPlotWidth;
 			ScrollRect.bottom = m_rectPlot.top + 1 + m_nPlotHeight;
+			*/
 			ScrollRect = m_rectPlot;
-			ScrollRect.right ++;
+			ScrollRect.right++;
+			//MORPH START - Added by SiRoB, fix [apph]
+			ScrollRect.left++;
+			ScrollRect.bottom++;
+			//MORPH END - Added by SiRoB, fix [apph]
 			m_dcPlot.ScrollDC(-m_nShiftPixels, 0, (LPCRECT)&ScrollRect, (LPCRECT)&ScrollRect, NULL, NULL);
 
 			// establish a rectangle over the right side of plot
@@ -741,6 +748,7 @@ void COScopeCtrl::DrawPoint()
 			rectCleanUp = m_rectPlot;
 			rectCleanUp.left  = rectCleanUp.right - m_nShiftPixels + 1;
 			rectCleanUp.right ++;
+			rectCleanUp.bottom ++; //MORPH - Added by SiRoB, fix [apph]
 			// fill the cleanup area with the background
 			m_dcPlot.FillRect(rectCleanUp, &m_brushBack);
 		}
@@ -763,14 +771,14 @@ void COScopeCtrl::DrawPoint()
 				(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			}
 			if(!m_PlotData[iTrend].BarsPlot)
-				m_dcPlot.MoveTo(prevX - 1, prevY);
+				m_dcPlot.MoveTo(prevX /*- 1*/, prevY); //MORPH - Changed by SiRoB, fix [apph]
 			// draw to the current point
 			currX = m_rectPlot.right;
 			currY = m_rectPlot.bottom -
 				(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			m_PlotData[iTrend].nPrevY = currY;
 			if(m_PlotData[iTrend].BarsPlot)
-				m_dcPlot.MoveTo(currX - 1, m_rectPlot.bottom);
+				m_dcPlot.MoveTo(currX /*- 1*/, m_rectPlot.bottom); //MORPH - Changed by SiRoB, fix [apph]
 			else
 			{
 				if(abs(prevX - currX) > abs(prevY - currY))
@@ -782,7 +790,7 @@ void COScopeCtrl::DrawPoint()
 					currY += prevY - currY>0 ? -1 : 1;
 				}
 			}
-			m_dcPlot.LineTo(currX - 1, currY);
+			m_dcPlot.LineTo(currX /*- 1*/, currY);//MORPH - Changed by SiRoB, fix [apph]
 			//if(drawBars) || m_PlotData[iTrend].BarsPlot)
 			//	m_dcPlot.LineTo(currX - 1, m_rectPlot.bottom);
 			
@@ -797,7 +805,12 @@ void COScopeCtrl::DrawPoint()
 			// as opposed to always calling IntersectClipRect
 			if((prevY <= m_rectPlot.top) || (currY <= m_rectPlot.top))
 				m_dcPlot.FillRect(CRect(prevX - 1, m_rectClient.top, currX + 5, m_rectPlot.top + 1), &m_brushBack);
+			
+			//MORPH - Changed by SiRoB, fix [apph]
+			/*
 			if((prevY >= m_rectPlot.bottom) || (currY >= m_rectPlot.bottom))
+			*/
+			if((prevY > m_rectPlot.bottom) || (currY > m_rectPlot.bottom))
 				m_dcPlot.FillRect(CRect(prevX - 1, m_rectPlot.bottom + 1, currX + 5, m_rectClient.bottom + 1), &m_brushBack);
 			
 			// store the current point for connection to the next point
