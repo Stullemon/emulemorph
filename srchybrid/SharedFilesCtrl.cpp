@@ -1265,8 +1265,10 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					POSITION pos = selectedList.GetHeadPosition();
 					while (pos != NULL) {
 						CCRC32CalcWorker* worker = new CCRC32CalcWorker;
-						const uchar* FileHash = selectedList.GetAt (pos)->GetFileHash ();
+						CKnownFile*  file = selectedList.GetAt (pos);
+						const uchar* FileHash = file->GetFileHash ();
 						worker->SetFileHashToProcess (FileHash);
+						worker->SetFilePath (file->GetFilePath ());
 						m_FileProcessingThread.AddFileProcessingWorker (worker);
 						selectedList.GetNext (pos);
 					}
@@ -1297,13 +1299,15 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						while (pos != NULL) {
 							// first create a worker thread that calculates the CRC
 							// if it's not already calculated...
-							const uchar* FileHash = selectedList.GetAt (pos)->GetFileHash ();
+							CKnownFile*  file = selectedList.GetAt (pos);
+							const uchar* FileHash = file->GetFileHash ();
 
 							// But don't add the worker thread if the CRC32 should not
 							// be calculated !
 							if (!AddCRCDialog.GetDontAddCRC32 ()) {
 								CCRC32CalcWorker* workercrc = new CCRC32CalcWorker;
 								workercrc->SetFileHashToProcess (FileHash);
+								workercrc->SetFilePath (file->GetFilePath ());
 								m_FileProcessingThread.AddFileProcessingWorker (workercrc);
 							}
 
@@ -1312,6 +1316,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							// The method OnCRC32RenameFilename will then rename the file
 							CCRC32RenameWorker* worker = new CCRC32RenameWorker;
 							worker->SetFileHashToProcess (FileHash);
+							worker->SetFilePath (file->GetFilePath ());
 							worker->SetFilenamePrefix (AddCRCDialog.GetCRC32Prefix ());
 							worker->SetFilenameSuffix (AddCRCDialog.GetCRC32Suffix ());
 							worker->SetDontAddCRCAndSuffix (AddCRCDialog.GetDontAddCRC32 ());
@@ -1372,33 +1377,49 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 	// Get the worker thread
 	CCRC32RenameWorker* worker = (CCRC32RenameWorker*) lParam;
 	// In this case the worker thread is a helper thread for this routine !
-	CKnownFile* f = worker->ValidateKnownFile (worker->m_fileHashToProcess);
+
+	// We are in the "main" thread, so we can be sure that the filelist is not
+	// deleted while we access it - so we try to get a pointer to the desired file
+	// directly without worker->ValidateKnownFile !
+	// This of course avoids possible deadlocks because we don't lock the list;
+	// and we don't need to do an worker->UnlockSharedFilesList...
+	CKnownFile* f = theApp.sharedfiles->GetFileByID (worker->GetFileHashToProcess ());
 	if (f==NULL) {
 		// File doesn't exist in the list; deleted and reloaded the shared files list in
 		// the meantime ?
-		theApp.AddLogLine (false,"Warning: File that should be renamed does not exist in the list anymore !");
+		// Let's hope the creator of this Worker thread has set the filename so we can
+		// display it...
+		if (worker->GetFilePath () == "") {
+			theApp.AddLogLine (false,"Warning: A File that should be renamed is not shared anymore. Renaming skipped.");
+		} else {
+			theApp.AddLogLine (false,"Warning: File '%s' is not shared anymore. File is not renamed.",
+				worker->GetFilePath ());
+		}
 		return 0;         
 	}
 	if (f->IsPartFile () && !worker->m_DontAddCRCAndSuffix) {     
 		// We can't add a CRC suffix to files which are not complete
 		theApp.AddLogLine (false,"Can't add CRC to file '%s'; file is a part file and not complete !",
 						   f->GetFileName ());
-		worker->UnlockSharedFilesList ();
 		return 0;
 	}
 	if (!worker->m_DontAddCRCAndSuffix && !f->IsCRC32Calculated ()) {
-		// The CRC must have been calculate, otherwise we can't add it
+		// The CRC must have been calculate, otherwise we can't add it.
+		// Normally this mesage is not shown because if the CRC is not calculated
+		// the main thread creates a worker thread before to calculate it...
 		theApp.AddLogLine (false,"Can't add CRC32 to file '%s'; CRC is not calculated !",
 						   f->GetFileName ());
-		worker->UnlockSharedFilesList ();
 		return 0;
 	}
-	CString fn = f->GetFilePath ();
-	char* p1 = (char*) malloc (fn.GetLength ()+1);
-	char* p2 = (char*) malloc (fn.GetLength ()+1);
-	char* p3 = (char*) malloc (fn.GetLength ()+1);
-	char* p4 = (char*) malloc (fn.GetLength ()+1);
-	_splitpath (fn,p1,p2,p3,p4);
+
+	// Split the old filename to name and extension
+	CString fn = f->GetFileName ();
+	CString p3,p4;
+	_splitpath (fn,NULL,NULL,p3.GetBuffer (MAX_PATH),p4.GetBuffer (MAX_PATH));
+	p3.ReleaseBuffer();
+	p4.ReleaseBuffer();
+
+	// Create the new filename
 	CString NewFn = p3;
 	NewFn = NewFn + worker->m_FilenamePrefix;
 	if (!worker->m_DontAddCRCAndSuffix) {
@@ -1406,15 +1427,16 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 	}
 	NewFn = NewFn + p4;
 
-	theApp.AddLogLine (false,"File '%s%s' will be renamed to '%s'...",
-					   p3,p4,NewFn);
+	theApp.AddLogLine (false,"File '%s' will be renamed to '%s'...",fn,NewFn);
 
-	CString NewPath; // = CString (p1) + CString (p2) + NewFn;
-	PathCombine(NewPath.GetBuffer(MAX_PATH), f->GetPath(), NewFn);
+	// Add the path of the old filename to the new one
+	CString NewPath; 
+	PathCombine(NewPath.GetBuffer(MAX_PATH), f->GetPath (), NewFn);
 	NewPath.ReleaseBuffer();
 
-	if (_trename(fn, NewPath) != 0) {
-		theApp.AddLogLine (false,"Can't rename file '%s%s' ! Error: %s",p3,p4,strerror(errno));
+	// Try to rename
+	if (_trename(f->GetFilePath (), NewPath) != 0) {
+		theApp.AddLogLine (false,"Can't rename file '%s' ! Error: %s",fn,strerror(errno));
 	} else {
 		theApp.sharedfiles->RemoveKeywords(f);
 		f->SetFileName(NewFn);
@@ -1423,21 +1445,21 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		UpdateFile (f);
 	}
 	
-	worker->UnlockSharedFilesList ();
-
-	// we don't need the splitted parts of the filename anymore
-	free (p4);
-	free (p3);
-	free (p2);
-	free (p1);
 	return 0;
 }
 
 // Update the file which CRC was just calculated.
-// The LPARAM parameter is a pointer to that file
-afx_msg LRESULT CSharedFilesCtrl::OnCRC32UpdateFile	(WPARAM wParam, LPARAM lParam) {
-	CKnownFile* file = (CKnownFile*) lParam;
-	UpdateFile (file);
+// The LPARAM parameter is a pointer to the hash of the file to be updated.
+LRESULT CSharedFilesCtrl::OnCRC32UpdateFile	(WPARAM wParam, LPARAM lParam) {
+	uchar* filehash = (uchar*) lParam;
+	// We are in the "main" thread, so we can be sure that the filelist is not
+	// deleted while we access it - so we try to get a pointer to the desired file
+	// directly without worker->ValidateKnownFile !
+	// This of course avoids possible deadlocks because we don't lock the list;
+	// and we don't need to do an worker->UnlockSharedFilesList...
+	CKnownFile* file = theApp.sharedfiles->GetFileByID (filehash);
+	if (file != NULL)		// Update the file if it exists
+		UpdateFile (file);
 	return 0;
 }
 // [end] Mighty Knife

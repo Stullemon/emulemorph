@@ -34,6 +34,9 @@ class CFileProcessingWorker : public CObject
 	DECLARE_DYNCREATE(CFileProcessingWorker)
 protected:
 	CSingleLock* m_SharedFileListLock;
+	uchar		 m_fileHashToProcess [16];
+	CString		 m_FilePath; 
+	CFileProcessingThread* m_pOwner;
 
 	// The following function requests the pointer of the file with the specified hash-id.
 	// If it exists the SharedFileList will be locked and the pointer will be returned.
@@ -41,16 +44,17 @@ protected:
 	// The caller should call UnlockSharedFileList as soon as possible to unlock the 
 	// SharedFileList !
 public:
-	uchar				   m_fileHashToProcess [16];
-	CFileProcessingThread* m_pOwner;
-
 	CKnownFile*	ValidateKnownFile (const uchar* _fileHash);
-	void		UnlockSharedFilesList ();
-	void SetOwner (CFileProcessingThread* _owner)	{ m_pOwner=_owner; }
 	CFileProcessingWorker() { m_pOwner=NULL; 
 							  m_SharedFileListLock = NULL; 
 							  md4clr (m_fileHashToProcess); }
-	virtual void SetFileHashToProcess (const uchar* _fileHash);
+	void							UnlockSharedFilesList ();
+	virtual void					SetFileHashToProcess (const uchar* _fileHash);
+	virtual const uchar*			GetFileHashToProcess () { return m_fileHashToProcess; }
+	virtual void					SetFilePath (CString _s) { m_FilePath = _s; }
+	virtual CString					GetFilePath () { return m_FilePath; }
+	void							SetOwner (CFileProcessingThread* _owner) { m_pOwner=_owner; }
+	virtual CFileProcessingThread*	GetOwner () { return m_pOwner; }
 	virtual ~CFileProcessingWorker () { UnlockSharedFilesList(); }
 	
 	// The following abstract function is called by the main implementation of the 

@@ -92,8 +92,8 @@ void CCRC32RenameWorker::Run () {
 	// They are not being thread save...
 	// We send the address of this thread in the LPARAM parameter to the
 	// shared files window so it can access all parameters needed to rename the file.
-	SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_RENAMEFILE,
-				 0, (LPARAM) this);
+	::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_RENAMEFILE,
+		  		   0, (LPARAM) this);
 }
 
 IMPLEMENT_DYNCREATE(CCRC32CalcWorker, CFileProcessingWorker)
@@ -105,7 +105,13 @@ void CCRC32CalcWorker::Run () {
 	if (f==NULL) {
 		// File doesn't exist in the list; deleted and reloaded the shared files list in
 		// the meantime ?
-		theApp.AddLogLine (false,"Warning: A file for which the CRC32 should be calculated does not exist!");
+		// Let's hope the creator of this Worker thread has set the filename so we can
+		// display it...
+		if (m_FilePath == "") {
+			theApp.AddLogLine (false,"Warning: A file for which the CRC32 should be calculated is not shared anymore. Calculation skipped.");
+		} else {
+			theApp.AddLogLine (false,"Warning: File '%s' is not shared anymore. CRC32 calculation skipped.",m_FilePath);
+		}
 		return;         
 	}
 	if (f->IsCRC32Calculated ()) {     
@@ -155,8 +161,9 @@ void CCRC32CalcWorker::Run () {
 			return;
 		}
 		if (m_pOwner->IsTerminating ()) {
-			// Calculation aborted
-			theApp.AddLogLine (false,"CRC32 calculation of file '%s' aborted.",Filename);
+			// Calculation aborted; this will stop all calculations, so we can tell
+			// the user its completly stopped.
+			theApp.AddLogLine (false,"CRC32 calculation aborted.");
 			return;
 		}
 
@@ -172,13 +179,20 @@ void CCRC32CalcWorker::Run () {
 		// relock the list, get the file pointer
 		f = ValidateKnownFile (m_fileHashToProcess);
 		// store the CRC
-		f->SetLastCalculatedCRC32 (sCRC32);
-		// Inform the file window that the CRC calculation was successful.
-		// The window should then show the CRC32 in the corresponding column.
-		::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_UPDATEFILE,
-					0, (LPARAM) f);
+		if (f != NULL) {
+			f->SetLastCalculatedCRC32 (sCRC32);
+		} // No error message if file does not exist...
+
 		// Release the lock of the list again
 		UnlockSharedFilesList ();
+		// Inform the file window that the CRC calculation was successful.
+		// The window should then show the CRC32 in the corresponding column.
+		// We tell the file window the file hash by lParam - not the pointer to the 
+		// CKnownFile object because this could lead to a deadlock if the list
+		// is blocked and the user pressed the Reload button at the time when the message
+		// is pending !
+		::SendMessage (theApp.emuledlg->sharedfileswnd->sharedfilesctrl.m_hWnd,WM_CRC32_UPDATEFILE,
+					0, (LPARAM) m_fileHashToProcess);
 	} else {
 		// File cannot be accessed
 		theApp.AddLogLine (false,"Warning: Can't open file '%s' for CRC32 calculation. File skipped.",
