@@ -230,21 +230,17 @@ CUpDownClient::~CUpDownClient(){
 	if (m_pszUsername)
 		delete[] m_pszUsername;
 	// khaos::kmod+ Free the memory from any stored statuses.
-	// Not ready Prefer to leave the memleak at eMule's close for now
-	//POSITION			pos = m_PartStatus_list.GetStartPosition();
-	//CPartFile*			curFile;
-	//uint8*				curPS;
-	//while (pos)
-	//{
-	//	m_PartStatus_list.GetNextAssoc(pos, curFile, curPS);
-	//	if (curPS){
-	//		if (curPS == m_abyPartStatus)
-	//			m_abyPartStatus = NULL;
-	//		delete[] curPS;
-	//		curPS = NULL;
-	//	}
-	//}
-	//m_PartStatus_list.RemoveAll();
+	POSITION			pos = m_PartStatus_list.GetStartPosition();
+	CPartFile*			curFile;
+	uint8*				curPS;
+	while (pos)
+	{
+		m_PartStatus_list.GetNextAssoc(pos, curFile, curPS);
+		if (curPS == m_abyPartStatus)
+			m_abyPartStatus = NULL;
+		delete[] curPS;
+	}
+	m_PartStatus_list.RemoveAll();
 	// khaos::kmod-
 	if (m_abyPartStatus)
 		delete[] m_abyPartStatus;
@@ -563,9 +559,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	if (bIsMule){
 		m_bEmuleProtocol = true;
 		m_byInfopacketsReceived |= IP_EMULEPROTPACK;
-	}	
-	//MORPH START - Added by SiRoB, Anti-leecher feature
-	if (bIsMule){
+		//MORPH START - Added by SiRoB, Anti-leecher feature
 		bool bLeecher = false;
 		if(theApp.glob_prefs->GetEnableAntiCreditHack())
 			if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, theApp.glob_prefs->GetUserHash(), 16)==0)
@@ -577,8 +571,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 			BanLeecher(!IsBanned());
 		else
 			m_bLeecher = false;
+		//MORPH END   - Added by SiRoB, Anti-leecher feature
 	}
-	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	return bIsMule;
 }
 
@@ -829,8 +823,7 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	uint16 nPort = theApp.glob_prefs->GetPort();
 	data->Write(&nPort,2);
 
-//	uint32 tagcount = 6/*5*/;//MORPH - Changed by SiRoB, MOD_VERSION tag//EastShare - commented out by AndCycle, just keep the rule until Kad is ready to go.
-	uint32 tagcount = 5;
+	uint32 tagcount = 6/*5*/;//MORPH - Changed by SiRoB, MOD_VERSION tag
 	data->Write(&tagcount,4);
 	// eD2K Name
 	//MORPH START - Added by IceCream, Anti-leecher feature
