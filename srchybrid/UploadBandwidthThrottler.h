@@ -24,7 +24,7 @@
 #define LAST_CLASS NB_SPLITTING_CLASS-1
 struct Socket_stat{
 	int	classID;
-	sint64 LastSpentBytes;
+	sint64 realBytesToSpend;
 };
 //MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
 
