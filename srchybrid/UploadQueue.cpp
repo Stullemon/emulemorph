@@ -931,7 +931,7 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < 1000 && datarate < 102400)
 	*/
-	if (::GetTickCount() - m_nLastStartUpload < 3000)
+	if (::GetTickCount() - m_nLastStartUpload < 10000)
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -1213,7 +1213,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
 
 			if (thePrefs.GetLogUlDlEvents())
-				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
+				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s , UploadState: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason, client->GetUploadStateDisplayString());
         	client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
         	uploadinglist.RemoveAt(curPos);
 
