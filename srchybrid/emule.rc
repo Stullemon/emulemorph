@@ -1670,12 +1670,11 @@ BEGIN
     CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,16,
                     202,8
-    PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,135,53,81,14,BS_FLAT
+    PUSHBUTTON      "Update",IDC_UPDATEFAKES,168,53,48,14,BS_FLAT
     EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,202,8,0,
                     WS_EX_TRANSPARENT
-    PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,135,125,81,14,
-                    BS_FLAT
+    PUSHBUTTON      "Update",IDC_UPDATEIPFURL,168,125,48,14,BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
                     202,10
@@ -1684,8 +1683,7 @@ BEGIN
                     WS_EX_TRANSPARENT
     GROUPBOX        "File",IDC_MORPH2_FILE,7,6,217,67,BS_FLAT
     GROUPBOX        "Security",IDC_MORPH2_SECURITY,7,76,217,69,BS_FLAT
-    PUSHBUTTON      "Update IP2Country",IDC_UPDATEIPCURL,135,226,81,14,
-                    BS_FLAT
+    PUSHBUTTON      "Update",IDC_UPDATEIPCURL,168,226,48,14,BS_FLAT
     CONTROL         "Update Ip-to-country.csv on startup",
                     IDC_AUTOUPIP2COUNTRY,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,14,159,202,10
@@ -1701,9 +1699,9 @@ BEGIN
     LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,237,65,8
     LTEXT           "Static",IDC_IPFILTER_VERSION,14,136,65,8
     LTEXT           "Static",IDC_FAKELIST_VERSION,14,64,66,8
-    PUSHBUTTON      "Reset",IDC_RESETFAKESURL,82,53,48,14,BS_FLAT
-    PUSHBUTTON      "Reset",IDC_RESETIPFURL,81,125,48,14,BS_FLAT
-    PUSHBUTTON      "Reset",IDC_RESETIPCURL,82,226,48,14,BS_FLAT
+    PUSHBUTTON      "Reset",IDC_RESETFAKESURL,115,53,48,14,BS_FLAT
+    PUSHBUTTON      "Reset",IDC_RESETIPFURL,114,125,48,14,BS_FLAT
+    PUSHBUTTON      "Reset",IDC_RESETIPCURL,115,226,48,14,BS_FLAT
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -4865,6 +4863,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_UPDATEIPFILTER      "Update"
     IDS_UPDATEIPFILTERONSTART "Update IPFilter.dat on startup"
     IDS_UPDATEIPFILTERERROR "Error updating IPFilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Updating IPFilter.dat"
@@ -4921,6 +4920,7 @@ BEGIN
     IDS_FEEDBACK_NONEEDPART "No Needed Part sources: %i"
     IDS_FEEDBACK_COMPLETE   "Complete sources: %i (%i)"
     IDS_COPYFEEDBACK_US     "Copy feedback to clipboard (US)"
+    IDS_UPDATEFAKES         "Update"
     IDS_FAKECHECKUPERROR    "Error updating fake list list"
     IDS_HTTP_FAKECHECKCAPTION "Updating fake list"
     IDS_UPDATEFAKECHECKONSTART "Update fake list on startup"
@@ -5497,14 +5497,14 @@ END
 //MORPH END - Added by FrankyFive
 
 // Mighty Knife: Additional scheduler events
-STRINGTABLE
+STRINGTABLE 
 BEGIN
 	IDS_SCHED_BACKUP           "Backup CONFIG-folder"
 	IDS_SCHED_UPDATE_IPCONFIG  "Update IPFILTER.DAT-file"
 	IDS_SCHED_UPDATE_FAKES     "Update FAKES.DAT-file"
-	IDS_SCHED_BACKUP_LOG            "Scheduled backup initiated."
-	IDS_SCHED_UPDATE_IPCONFIG_LOG   "Scheduled IPFILTER.DAT-update initiated."
-	IDS_SCHED_UPDATE_FAKES_LOG      "Scheduled FAKES.DAT-update initiated."
+    IDS_SCHED_BACKUP_LOG    "Scheduled backup initiated."
+    IDS_SCHED_UPDATE_IPCONFIG_LOG "Scheduled IPFILTER.DAT-update initiated."
+    IDS_SCHED_UPDATE_FAKES_LOG "Scheduled FAKES.DAT-update initiated."
 	IDS_SCHED_UPDATE_WARNING   "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
 END
 

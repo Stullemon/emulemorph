@@ -2370,6 +2370,7 @@
 #define IDS_DELETEFILE                  4014
 #define IDS_PAWCIO_CREDIT               4015
 #define IDD_PPG_MORPH_SHARE             4100
+#define IDS_UPDATEIPFILTER              4642
 #define IDS_UPDATEIPFILTERONSTART       4643
 #define IDS_UPDATEIPFILTERERROR         4644
 #define IDS_HTTP_IPFILTERCAPTION        4646
@@ -2422,6 +2423,7 @@
 #define IDS_FEEDBACK_NONEEDPART         4786
 #define IDS_FEEDBACK_COMPLETE           4787
 #define IDS_COPYFEEDBACK_US             4788
+#define IDS_UPDATEFAKES                 4789
 #define IDS_FAKECHECKUPERROR            4791
 #define IDS_HTTP_FAKECHECKCAPTION       4792
 #define IDS_UPDATEFAKECHECKONSTART      4793
