@@ -1822,7 +1822,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_WEBCACHE         "Webcaché"
+    IDS_PW_WEBCACHE         "WebCaché"
 END
 
 STRINGTABLE 
@@ -1884,8 +1884,8 @@ BEGIN
     IDS_PROGRESS_PERCENT    "Mostrar Porcentage en la barra de progreso"
     IDS_DOWNLOAD_IN_BOLD    "Mostrar en Negrita archivos descargandose"
     IDS_CAT_RESUMENEXT      "Reanudar Siguiente"
-    IDS_CAT_PAUSELAST       "Pausar Ultimo"
-    IDS_CAT_STOPLAST        "Parar Ultimo"
+    IDS_CAT_PAUSELAST       "Pausar Último"
+    IDS_CAT_STOPLAST        "Parar Último"
 END
 
 STRINGTABLE 
@@ -1897,7 +1897,7 @@ BEGIN
     IDS_POWERSHARE_DISABLED_LABEL "Desactivado"
     IDS_POWERSHARE_AUTO_LABEL "Auto"
     IDS_POWERSHARE_AUTO     "Auto"
-    IDS_DYNUPLOAD           "Subida Dinamica"
+    IDS_DYNUPLOAD           "Subida Dinámica"
     IDS_HIDEOVERSHARES      "Ocultar trozos con Exceso de reparto (0 = Desactivado)"
 END
 
@@ -1939,15 +1939,15 @@ BEGIN
     IDS_CAT_MNUAUTOINC      "Auto-incrementar seleccionado"
     IDS_CAT_MNUSTEPTHRU     "Pasar por los seleccionado"
     IDS_CAT_MNUALLSAME      "Poner todos a un valor"
-    IDS_CAT_EXPAUTOINC      "Introducir un numero inicial no negativo:"
-    IDS_CAT_EXPSTEPTHRU     "Introducir un numero no negatico, valores negativos resumen al primero.\nArchivo:"
-    IDS_CAT_EXPALLSAME      "Introducir un numero no negatico, que será aplicado a todos los archivos selecionados:"
-    IDS_CAT_ABORTSTEPTHRU   "Desea cancelar el paso de prioridades lineal?"
+    IDS_CAT_EXPAUTOINC      "Introducir un número inicial no negativo:"
+    IDS_CAT_EXPSTEPTHRU     "Introducir un número no negatico, valores negativos resumen al primero.\nArchivo:"
+    IDS_CAT_EXPALLSAME      "Introducir un número no negatico, que será aplicado a todos los archivos selecionados:"
+    IDS_CAT_ABORTSTEPTHRU   "¿Desea cancelar el paso de prioridades lineal?"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ABORT               "Cancelar?"
+    IDS_ABORT               "¿Cancelar?"
     IDS_MINUPLOAD_SHORT     "Min. Subida"
     IDS_SUC                 "Control Inteligente de Subida (SUC)"
     IDS_SUC_ENABLED         "Activar"
@@ -2079,7 +2079,7 @@ BEGIN
     IDS_USS_PINGTOLERANCE   "Tolerancia del Ping (en %%) (Por defecto %i)"
     IDS_USS_GOINGUPDIVIDER  "Velocidad de asceno (Por defecto %i)"
     IDS_USS_GOINGDOWNDIVIDER "Velocidad de descenso (Por defecto %i)"
-    IDS_USS_NUMBEROFPINGS   "Numero maximo de pings de media (Por defecto %i)"
+    IDS_USS_NUMBEROFPINGS   "Número maximo de pings de media (Por defecto %i)"
     IDS_USSFINDLASTCOMMON   "Sensor de Velocidad de Subida (USS): Iniciando traceroutes para encontrar último host en comun."
     IDS_USSFOUNDLASTCOMMON  "Sensor de Velocidad de Subida (USS): Ultimo host en común encontrado. UltimoHostEnComún: %s @ TTL: %i HostToPing: %s"
     IDS_USSSTARTLOWPING     "Sensor de Velocidad de Subida (USS): Buscando un valor inicial para pings más bajos..."
@@ -2150,10 +2150,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SWITCHSUC           "Conmutando del Sistema Dinamico de Subida al Control de Subida Inteligente"
-    IDS_SWITCHDYNUP         "Conmutando del Sistema Dinamico de Subida al Sensor de Velocidad de Subida (USS)"
-    IDS_AUTODYNUPSWITCHING  "Conmutación del Sistema de Subida Dinamico Automatico"
-    IDS_MAXCONNECTIONSSWITCHBORDER "Límite para la Conmutacion"
+    IDS_SWITCHSUC           "Conmutando del Sistema Dinámico de Subida al Control de Subida Inteligente"
+    IDS_SWITCHDYNUP         "Conmutando del Sistema Dinámico de Subida al Sensor de Velocidad de Subida (USS)"
+    IDS_AUTODYNUPSWITCHING  "Conmutación del Sistema de Subida Dinámico Automático"
+    IDS_MAXCONNECTIONSSWITCHBORDER "Límite para la Conmutación"
 END
 
 STRINGTABLE 
@@ -2170,16 +2170,16 @@ BEGIN
     IDS_USS_MAXPING         "Valor de ping máximo (ms) (Por Defecto %i)"
     IDS_PAYBACKFIRST        "Dar Primero"
     IDS_USS_USEMAXPING      "usar máximo valor de ping"
-    IDS_CREDIT_SYSTEM       "Sistema de Creditos"
-    IDS_OFFICIAL_CREDIT     "Crédito oficial"
-    IDS_LOVELACE_CREDIT     "Crédito por ser fiel"
+    IDS_CREDIT_SYSTEM       "Sistema de Créditos"
+    IDS_OFFICIAL_CREDIT     "Crédito Oficial"
+    IDS_LOVELACE_CREDIT     "Crédito por Fidelidad"
     IDS_RATIO_CREDIT        "Crédito por Ratio"
-    IDS_EASTSHARE_CREDIT    "EastShare Credit"
-    IDS_PREFER_SHARE_ALL    "Preferir Compartir Todo"
+    IDS_EASTSHARE_CREDIT    "EastShare"
+    IDS_PREFER_SHARE_ALL    "Preferir Compartir Toda La Lista"
     IDS_MET_FILE_CONTROL    "Control de Archivos .met (cuidado con cambiar algun valor!!)"
     IDS_EXPIRED_KNOWN       "Tiempo concurrido de Archivos Conocidos (días) (0 = Por Defecto)"
     IDS_DELETEFILE          "Eliminar Archivo"
-    IDS_PAWCIO_CREDIT       "Pawcio Credit"
+    IDS_PAWCIO_CREDIT       "Pawcio"
 END
 
 STRINGTABLE 
@@ -2187,7 +2187,7 @@ BEGIN
     IDS_HIDEOS              "Hide Over Share"
     IDS_SHAREONLYTHENEED    "Compartir Sólo Lo Necesario"
     IDS_SFM                 "Administración de Archivos Compartidos"
-    IDS_IP2COUNTRY          "País a IP"
+    IDS_IP2COUNTRY          "País de IP"
 END
 
 STRINGTABLE 
@@ -2275,7 +2275,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_VISITMVERSIONCHECK  "\n\nQuieres visitar la pagina web de Morph?"
+    IDS_VISITMVERSIONCHECK  "\n\n¿Quieres visitar la pagina web de Morph?"
     IDS_MVERSIONCHECK       "&Versioncheck (Morph)"
     IDS_NONEWMVERVERSION    "No se ha detectado ninguna versión nueva de Morph"
     IDS_NEWMVERSIONAVL      "Una nueva versión de eMule Morph esta disponible! Visita la pagina para más información."
@@ -2342,7 +2342,7 @@ BEGIN
     IDS_CHECKUNDERLINETOSPACE "Convertir ""_"" en "" """
     IDS_CHECKCONVERTAPOSTROPHES 
                             "Convertir apostrofes incorrectos ""´"", ""`"" a los estadar "" ' """
-    IDS_CHECKCONVERTHEX     "Convertir numeros hexadecimales ""%xx"" a caracteres"
+    IDS_CHECKCONVERTHEX     "Convertir números hexadecimales ""%xx"" a caracteres"
     IDS_CHECKSEARCHANDREPLACE "Buscar y Reemplazar:"
     IDS_SC_SEARCHFOR        "Buscar:"
     IDS_SC_REPLACEBY        "Reemplazar por:"
@@ -2396,7 +2396,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ICFSUPPORT          "Activar soporte del CortaFuegos de Windows (ICF)"
-    IDS_ICFSUPPORTFIRST     "eMule ha detectado el CortaFuegos de Windows (ICF),\n\rQuieres que el eMule lo autoconfigure? (Recomendado)"
+    IDS_ICFSUPPORTFIRST     "eMule ha detectado el CortaFuegos de Windows (ICF),\n\r¿Quieres que el eMule lo autoconfigure? (Recomendado)"
     IDS_ICF                 "CortaFuegos de Windows (ICF)"
     IDS_ICF_SERVERUDP       "Añadir regla para el puerto ""Server UDP"" "
 END
@@ -2497,7 +2497,7 @@ BEGIN
     IDS_WC_PORT             "Puerto"
     IDS_WC_ADDRESS          "Direccion"
     IDS_WC_CONTROLS         "Controles Webcache"
-    IDS_WC_ENABLE           "Activar Descargas con Webcache"
+    IDS_WC_ENABLE           "Activar Descargas con WebCaché"
 END
 
 STRINGTABLE 
@@ -2574,11 +2574,11 @@ BEGIN
     IDS_LOG_FC_ERR1         "No se pudo extraer el archivo de comprobador de Fakes del ZIP descargado (""%s"")."
     IDS_LOG_FC_ERR2         "El archivo de comprobado de Fakes ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
     IDS_MASSRENAME_TITLE    "Renombrar-Masivo"
-    IDS_LOG_CRC32_WRN1      "Alerta: Un archivo con el que el CRC32 debería ser calculado ya no está siendo compartido. Paso de hacer el cálculo."
-    IDS_LOG_CRC32_WRN2      "Alerta: El archivo '%s' ya no está siendo compartido. Por eso no he hecho el cálculo de CRC32."
-    IDS_LOG_CRC32_WRN3      "Alerta: No puedo abrir el archivo '%s' para poder calcular el CRC32. Paso de ese archivo."
-    IDS_LOG_CRC32_SKIP1     "El cálculo del CRC32 del archivo '%s' no ha sido realizado - es que ya lo hice antes."
-    IDS_LOG_CRC32_SKIP2     "No puedo calcular el CRC32 del archivo '%s'; el archivo es sólo parte de un archivo, no uno completo!"
+    IDS_LOG_CRC32_WRN1      "Alerta: Un archivo con el que el CRC32 debería ser calculado ya no está siendo compartido. Por ello el cálculo no se ha realizado."
+    IDS_LOG_CRC32_WRN2      "Alerta: El archivo '%s' ya no está siendo compartido. Por ello el cálculo del CRC32 no ha podido realizarse."
+    IDS_LOG_CRC32_WRN3      "Alerta: No se pudo abrir el archivo '%s' para poder calcular el CRC32. Archivo no analizado."
+    IDS_LOG_CRC32_SKIP1     "El cálculo del CRC32 del archivo '%s' no ha sido realizado - ya se había hecho con anterioridad."
+    IDS_LOG_CRC32_SKIP2     "No se pudo calcular el CRC32 del archivo '%s'; el archivo es sólo parte de un archivo, no uno completo!"
 END
 
 STRINGTABLE 
@@ -2609,9 +2609,9 @@ BEGIN
     IDS_IP2COUNTRY_NALONG   "No Aplicable"
     IDS_IP2COUNTRY_NASHORT  "N/A"
     IDS_SOURCE_LOADER_SAVER "SLS"
-    IDS_SHORTTAGS           "Short tags"
+    IDS_SHORTTAGS           "Etiquetas Cortas"
     IDS_NEWFRIEND           "Nuevo amigo:"
-    IDS_REMOVEDFRIEND       "Paso de este chaval:"
+    IDS_REMOVEDFRIEND       "Amigo Eliminado:"
 END
 
 STRINGTABLE 
@@ -2628,7 +2628,7 @@ BEGIN
     IDS_HASHING_COMPLETED2  "Hashing de nuevos archivos completado."
     IDS_HASHING_NEWFILE     "Archivo nuevo: '%s'"
     IDS_SUQWT_LOAD          "Cargar %s"
-    IDS_VERBOSE_TITLE       "Verbose"
+    IDS_VERBOSE_TITLE       "Información Extra"
     IDS_CAT_TOTAL           "Total"
     IDS_UP_LOWID            "%s LowID"
     IDS_UP_LOWID_DELAYED    "%s LowID retrasado %s"
@@ -2640,7 +2640,7 @@ BEGIN
     IDS_SCHED_UPDATE_IPCONFIG_LOG "Actualización del IPFILTER.DAT programada iniciada."
     IDS_SCHED_UPDATE_FAKES_LOG "Actualización del FAKES.DAT programada iniciada."
     IDS_SCHED_UPDATE_WARNING 
-                            "No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana y vas que chutas!"
+                            "No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana es más que suficiente."
 END
 
 #endif    // Spanish (Castilian) resources
