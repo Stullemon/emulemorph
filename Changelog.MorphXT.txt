@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.44d MorphXT v5.x
+--------------------------------------
+FIXED  : Credit file priority load has been corrected [SiRoB]
+FIXED  : Systray icone didn't display the speed bar in some case [Commander]
+FIXED  : Official Web Template can be used now and get also the nice stat view [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44d MorphXT v5.8
 --------------------------------------
 MERGED : Code ported to 0.44d Official version [SiRoB]
