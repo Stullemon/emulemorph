@@ -1,4 +1,9 @@
 ----------------------------------------
+Changelog for eMule 0.40f26 MorphKad 0.8
+----------------------------------------
+
+
+----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.7
 ----------------------------------------
 ADDED: PreferShareAll option (SlugFiller) [AndCycle]
