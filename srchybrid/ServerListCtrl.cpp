@@ -108,6 +108,12 @@ void CServerListCtrl::SetAllIcons()
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
 		ImageList_Destroy(himl);
+	//MORPH START - Changed b SiRoB, CountryFlag Addon
+	imagelist.DeleteImageList();
+	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	imagelist.SetBkColor(CLR_NONE);
+	imagelist.Add(CTempIconLoader(_T("Server")));
+	//MORPH END  - Changed b SiRoB, CountryFlag Addon
 }
 
 void CServerListCtrl::Localize()
@@ -255,7 +261,10 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	int itemnr = FindItem(&find);
 	if (itemnr == -1)
 		return;
-
+	//MORPH START - Added by SiRoB,  CountryFlag Addon
+	Update(itemnr);
+	return;
+	//MORPH START - Added by SiRoB,  CountryFlag Addon
 	const CServer* cur_srv;
 	if (theApp.serverconnect->IsConnected()
 		&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
@@ -1021,10 +1030,12 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//Sbuffer = tempStr;
                     
 					//Draw Country Flag
+					POINT point2= {cur_rec.left,cur_rec.top+1};
 					if(theApp.ip2country->ShowCountryFlag()){
-						POINT point2= {cur_rec.left,cur_rec.top+1};
 						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 					}
+					else
+						imagelist.DrawIndirect(dc, 0, point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
 
 					cur_rec.left +=20;
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
