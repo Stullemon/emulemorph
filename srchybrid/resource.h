@@ -2320,7 +2320,6 @@
 #define IDS_SUC_PITCH                   3704
 #define IDS_SUC_DRIFT                   3705
 #define IDS_SHOWSECUREDCONNECTION       3706
-#define IDS_ZERO_FILLED_TEST            3707
 #define IDS_SUC_LOG                     3708
 #define IDS_A4AF_SHOWDEBUG              3709
 #define IDS_HIGHPROCESS                 3712
