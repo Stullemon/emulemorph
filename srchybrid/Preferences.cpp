@@ -1036,14 +1036,11 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 //MORPH START - Added by SiRoB, Upload Splitting Class
 uint32	CPreferences::GetMaxFriendByteToSend()
 {
-	if (theStats.sessionReceivedBytes>=theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)
+	if (theStats.sessionSentBytes > theStats.sessionSentBytesToFriend && theStats.sessionReceivedBytes>=theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)
 	{
 		if ((float)theStats.sessionReceivedBytes/(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)>=3)
 		{
-			if (3*theApp.uploadqueue->GetDatarate()>theApp.downloadqueue->GetDatarate())
-				return theApp.uploadqueue->GetDatarate()-theApp.downloadqueue->GetDatarate()/3;
-			else
-				return 0;
+			return 0;
 		}else
 			return _UI32_MAX;
 	}
