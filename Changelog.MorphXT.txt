@@ -32,13 +32,16 @@ ADDED  : Optimizer [ePlus] + emulespania methode [Commander/SiRoB]
 ADDED  : Displaying the friend's country in the chatwnd info groupbox [Commander]
 ADDED  : CPU Optimization Mode display on Splashscreen [Commander]
 ADDED  : RSS news feeds can be added/modified/deleted via a button/menu in the server window [MightyKnife]
+ADDED  : Preferences Side Banner [Commander]
+ADDED  : IP2Country.csv auto-updating [Commander]
+ADDED  : MassRename in downloadlist [Commander] [Dragon]
+ADDED  : Show version-numbers of Fakes- and IPfilter.dat and ip-to-country.csv in MorphII settings [Commander]
+ADDED  : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander] [Dragon]
 
 TWEAKED: Mass-Rename Simple-Cleanup is now configurable. Remove '.', '_' characters, Replace "´","`" characters, arbitrary Search and Replace, convert hexadecimal numbers '%xx' to characters, convert (german and other) umlauts to standard characters. [MightyKnife]
 TWEAKED: Mass-Rename SimpleCleanup tweaked [MightyKnife]
+TWEAKED: IP2Country Autoupdate [Commander]
 
-TODO   : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander]
-TODO   : Rechecking SUQWT [Commander]
-TODO   : Recheck file completing (user report->possible bug?)
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
