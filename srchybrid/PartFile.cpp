@@ -1493,6 +1493,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 
 		// -khaos--+++> Moved this here, otherwise we were setting our permanent variables to 0 every tenth of a second...
 		memset(m_anStates,0,sizeof(m_anStates));
+		memset(src_stats,0,sizeof(src_stats));
 		uint16 nCountForState;
 
 		//MORPH START - Added by SiRoB, Spread Reask For Better SUC functioning and more
@@ -1635,12 +1636,9 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 										break; // This source was transferred, nothing more to do here.
 								}
 							}
-							//MORPH - HotFix by IceCream & SiRoB about wrong test for UDPReask
-							//if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - (cur_src->GetLastAskedTime() + GetRandRange(1,10000)/* Spread Reask */) > FILEREASKTIME-20000)))
-							if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick - cur_src->GetLastAskedTime() + GetRandRange(1,10000)/* Spread Reask */) > FILEREASKTIME-20000)))
-								cur_src->UDPReaskForDownload();
-							// khaos::kmod-
 							//MORPH END - Added by SiRoB, Due to Khaos A4AF
+							if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME-20000))
+								cur_src->UDPReaskForDownload();
 
 						}
 						case DS_CONNECTING:
