@@ -2115,6 +2115,7 @@ bool CKnownFile::HideOvershares(CFile* file, CUpDownClient* client){
 }
 // SLUGFILLER: hideOS
 
+//MORPH - Changed by SiRoB, Avoid Sharing Nothing :( the return should be conditional
 //Wistily : Share only the need START (Inspired by lovelace release feature, adapted from Slugfiller hideOS code)
 bool CKnownFile::ShareOnlyTheNeed(CFile* file)
 {
@@ -2124,17 +2125,20 @@ bool CKnownFile::ShareOnlyTheNeed(CFile* file)
 		
 	file->Write(&parts,2);
 	uint16 done = 0;
+	bool ok = false; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 	while (done != parts){
 		uint8 towrite = 0;
 		for (uint32 i = 0;i != 8;i++){
-			if (m_AvailPartFrequency[done]== 0)
+			if (m_AvailPartFrequency[done] <= 1)
 				towrite |= (1<<i);
 			done++;
 			if (done == parts)
 				break;
 		}
+		ok |= (towrite!=0); //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 		file->Write(&towrite,1);
 	}
-	return TRUE;
+	//return TRUE;
+	return ok; //MORPH - Added by SiRoB, Avoid Sharing Nothing :(
 }
 //Wistily : Share only the need STOP
