@@ -1,10 +1,15 @@
 ----------------------------------------
+Changelog for eMule 0.40e21 MorphKad 0.2
+----------------------------------------
+CHANGED: ZZ Patch No prio on the uploading list (order by inserted time)[SiRoB]
+CHANGED: Powershare is now limited only by complet source number [SiRoB]
+
+----------------------------------------
 Changelog for eMule 0.40e21 MorphKad 0.1
 ----------------------------------------
 MERGED: Code merged to 0.40e21 [SiRoB]
 REMOVED: Smart Source Request from Khaos [SiRoB]
 REMOVED: Manual reask server for source [SiRoB]
-CHANGED: ZZ Patch No prio on the uploading list (order by inserted time)[SiRoB]
 CHANGED: Updated SpreadBar from SLUGFILLER [SiRoB]
 CHANGED: Updated hideOS from SLUGFILLER [SiRoB]
 
