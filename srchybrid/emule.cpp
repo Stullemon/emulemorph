@@ -112,7 +112,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 
 	// create a string version (e.g. "0.30a")
 	ASSERT( VERSION_UPDATE + 'a' <= 'f' );
-	m_strCurVersionLong.Format(_T("%u.%u%c.%u"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD);
+	m_strCurVersionLong.Format(_T("%u.%u%c.%u [%s]"), VERSION_MJR, VERSION_MIN, _T('a') + VERSION_UPDATE, VERSION_BUILD,MOD_VERSION);
 #ifdef _DUMP
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
