@@ -2198,7 +2198,7 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 
 
 void CDownloadListCtrl::ClearCompleted(bool ignorecats){
-	 SetRedraw(false);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
+	SetRedraw(false);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	// Search for completed file(s)
 	for(ListItems::iterator it = m_ListItems.begin(); it != m_ListItems.end(); ){
 		CtrlItem_Struct* cur_item = it->second;

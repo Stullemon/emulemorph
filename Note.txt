@@ -3,3 +3,7 @@ Note:
 :>
 need to make some standard format for the code Tag
 AndCycle <--- this guy merged many code from other mods without alter the Tag to a proper format
+
+:>
+AutoClearComplete setting cant save ~_~,
+I cant find what's wrong...
