@@ -9,12 +9,6 @@ the IP to country data is provided by http://ip-to-country.webhosting.info/
 
  */
 
-/*
-
-flags are from http://sf.net/projects/flags/
-
-*/
-
 // by Superlexx, based on IPFilter by Bouc7
 
 #include "StdAfx.h"
@@ -278,6 +272,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_ZM, IDI_COUNTRY_FLAG_ZW, 
 			IDI_COUNTRY_FLAG_UK, //by tharghan
 			IDI_COUNTRY_FLAG_CS, //by propaganda
+			IDI_COUNTRY_FLAG_TP, //by commander
 
 			65535//the end
 		};
@@ -302,7 +297,8 @@ bool CIP2Country::LoadCountryFlagLib(){
 			"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", 
 			"VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YU", "ZA", "ZM", "ZW", 
 			"UK", //by tharghan
-			"CS" //by propaganda
+			"CS", //by propaganda
+			"TP" //by commander
 		};
 
 		HICON iconHandle;

@@ -269,6 +269,7 @@ IDI_COUNTRY_FLAG_ZW     ICON                    "res\\zw.ico"
 IDI_COUNTRY_FLAG_UK     ICON                    "res\\uk.ico"
 IDI_COUNTRY_FLAG_CS     ICON                    "res\\cs.ico"
 IDI_COUNTRY_FLAG_NOFLAG ICON                    "res\\not.ico"
+IDI_COUNTRY_FLAG_TP     ICON                    "res\\tp.ico"
 #endif    // ¤¤©Ê resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.42g MorphXT v3.x
+--------------------------------------
+CHANGED: IP2Country added a new flag map [Commander]
+
+--------------------------------------
 Changelog for eMule 0.42g MorphXT v3.0
 --------------------------------------
 FIXED  : Selection Category Support for weblink [SiRoB]
