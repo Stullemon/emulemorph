@@ -4,12 +4,14 @@ Changelog for eMule 0.44d MorphXT v5.x
 FIXED  : Removed a check in AcceptNewClient that could block the open of new slot [SiRoB]
 FIXED  : DownloadClientCtrl: fix that could crash emule with WebCache activated [SiRoB]
 FIXED  : DownloadClientCtrl: columns preferency [SiRoB]
-FIXED  : Infinit ReAsk state behavior have been isolated [SiRoB]
 FIXED  : WebCache: timeout fix [SiRoB]
 
 ADDED  : Ip Country for ProxyClient [SiRoB]
 
 CHANGED: Advised PowerShare for partfile [SiRoB]
+CHANGED: GUI: Statistic Graph Better displayed [SiRoB]
+CHANGED: A4AF: Infos are now fusionned (e.g.: complet source and partstatus are keep) [SiRoB]
+CHANGED: HOS: desactivated for imcomplet file not well spreaded [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.15
