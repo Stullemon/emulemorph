@@ -4,6 +4,8 @@ Changelog for eMule 0.44b MorphXT v5.x
 FIXED  : The AutoSetResumeOrder have been corrected to work properly in all case [SiRoB]
 FIXED  : zz Upload System have been reviewed to properly remove WebCache Socket from standardOrderList [SiRoB]
 
+TWEAKED: Display the new version when we manualy update a file [SiRoB]
+
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.6
 --------------------------------------

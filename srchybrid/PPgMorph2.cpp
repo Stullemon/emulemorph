@@ -181,12 +181,16 @@ void CPPgMorph2::Localize(void)
 void CPPgMorph2::OnBnClickedUpdatefakes()
 {
 	theApp.FakeCheck->DownloadFakeList();
+	strBuffer.Format(_T("v.%u"), thePrefs.GetFakesDatVersion());
+	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(strBuffer);
 }
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
 void CPPgMorph2::OnBnClickedUpdateipfurl()
 {
 	theApp.ipfilter->UpdateIPFilterURL();
+	strBuffer.Format(_T("v.%u"), thePrefs.GetIPfilterVersion());
+	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
@@ -194,5 +198,7 @@ void CPPgMorph2::OnBnClickedUpdateipfurl()
 void CPPgMorph2::OnBnClickedUpdateipcurl()
 {
 	theApp.ip2country->UpdateIP2CountryURL();
+	strBuffer.Format(_T("v.%u"), thePrefs.GetIP2CountryVersion());
+	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(strBuffer);
 }
 //Commander - Added: IP2Country Auto-updating - End
