@@ -190,16 +190,14 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
-		char buffer[100]; buffer [0] = 0;
-		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,Record->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
  	    AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
 									Record->m_strName, (uint8)Record->m_dwLastUsedIP, (uint8)(Record->m_dwLastUsedIP>>8), 
 									(uint8)(Record->m_dwLastUsedIP>>16),(uint8)(Record->m_dwLastUsedIP>>24), 
-									Record->m_nLastUsedPort, buffer);
+									Record->m_nLastUsedPort, md4str(Record->m_abyUserhash));
 		#else
 		AddLogLine(false, _T("New friend: '%s', hash: %s"),
-									Record->m_strName, buffer);
+									Record->m_strName, md4str(Record->m_abyUserhash));
 		#endif
 	}
 	// [end] Mighty Knife
@@ -234,17 +232,15 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 	SaveList();
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
-		char buffer[100]; buffer [0] = 0;
-		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,NewFriend->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
 		AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
 									NewFriend->m_strName, (uint8)NewFriend->m_dwLastUsedIP, 
 									(uint8)(NewFriend->m_dwLastUsedIP>>8), 
 									(uint8)(NewFriend->m_dwLastUsedIP>>16),(uint8)(NewFriend->m_dwLastUsedIP>>24), 
-									NewFriend->m_nLastUsedPort, buffer);
+									NewFriend->m_nLastUsedPort, md4str(NewFriend->m_abyUserhash));
 		#else
 		AddLogLine(false, _T("New friend: '%s', hash: %s"),
-									NewFriend->m_strName, buffer);
+									NewFriend->m_strName, md4str(NewFriend->m_abyUserhash));
 		#endif
 	}
 	// [end] Mighty Knife
@@ -261,17 +257,15 @@ void CFriendList::RemoveFriend(CFriend* todel){
 
 	// Mighty Knife: log friend activities
 	if (thePrefs.GetLogFriendlistActivities ()) {
-		char buffer[100]; buffer [0] = 0;
-		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,todel->m_abyUserhash[i]);
 		#ifdef MIGHTY_TWEAKS
-		AddLogLine(false, "Removed friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+		AddLogLine(false, _T("Removed friend: '%s', ip %i.%i.%i.%i:%i, hash %s"),
 									todel->m_strName, (uint8)todel->m_dwLastUsedIP, 
 									(uint8)(todel->m_dwLastUsedIP>>8), 
 									(uint8)(todel->m_dwLastUsedIP>>16),(uint8)(todel->m_dwLastUsedIP>>24), 
-									todel->m_nLastUsedPort, buffer);
+									todel->m_nLastUsedPort, md4str(todel->m_abyUserhash));
 		#else
 		AddLogLine(false, _T("Removed friend: '%s', hash: %s"),
-									todel->m_strName, buffer);
+									todel->m_strName, md4str(todel->m_abyUserhash));
 		#endif
 	}
 	// [end] Mighty Knife
