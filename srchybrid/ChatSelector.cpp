@@ -314,7 +314,12 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CONNECTING), RGB(255,0,0));
 		ci->strMessagePending = rstrMessage;
 		ci->client->SetChatState(MS_CONNECTING);
+		//MORPH START - Changed by SiRoB, Ignore Max Connection -Patch-
+		/*
 		ci->client->TryToConnect();
+		*/
+		ci->client->TryToConnect(true);
+		//MORPH END   - Changed by SiRoB, Ignore Max Connection -Patch-
 	}
 	return true;
 }
@@ -700,6 +705,10 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 				EndSession(ci->client);
 			break;
 		}
+		// MORPH START - Added by SiRoB, event on chat button -Fix-
+		default:
+			return CClosableTabCtrl::OnCommand(wParam, lParam);
+		// MORPH END - Added by SiRoB, event on chat button -Fix-
 	}
 	return TRUE;
 }
