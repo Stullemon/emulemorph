@@ -51,7 +51,6 @@
 #define IDD_SEARCH                      142
 #define IDS_STRING142                   142
 #define IDS_WIZARD_ED2K                 142
-#define IDS_IP2COUNTRY                  143
 #define IDS_MAIN_SOCKETERROR            144
 #define IDS_MAIN_BTN_DISCONNECT         145
 #define IDS_MAIN_BTN_DISCONNECT_TOOLTIP 146
@@ -72,14 +71,11 @@
 #define IDS_ERR_FILEERROR               161
 #define IDS_ERR_FILEOPEN                162
 #define IDD_HTTPDOWNLOAD                163
-#define IDS_COUNTRYNAME_SHORT           163
 #define IDS_ERR_REHASH                  164
 #define IDD_CHAT                        165
-#define IDS_COUNTRYNAME_MID             165
 #define IDS_ERR_PART_FNF                166
 #define IDS_ERR_OPENMETFILE             167
 #define IDR_HTTPDOWNLOAD_ANIMATION      168
-#define IDS_COUNTRYNAME_LONG            168
 #define IDS_ERR_SAVEMET                 169
 #define IDS_ERR_FOUNDCORRUPTION         170
 #define IDS_HASHINGDONE                 171
@@ -87,7 +83,6 @@
 #define IDS_ICHWORKED                   173
 #define IDS_ERR_OUTOFSPACE              174
 #define IDD_SOURCEDETAILWND             175
-#define IDS_COUNTRYNAME_SHOWFLAG        175
 #define IDS_ERR_WRITEERROR              176
 #define IDS_ERR_COMPLETIONFAILED        177
 #define IDS_ERR_DELETEFAILED            178
@@ -2243,6 +2238,12 @@
 #define IDC_URL_FOR_UPDATING2           4877
 #define IDC_DLOC                        4877
 #define IDC_DLOC2                       4878
+#define IDS_IP2COUNTRY                  4879
+#define IDS_COUNTRYNAME_SHORT           4880
+#define IDS_COUNTRYNAME_MID             4881
+#define IDS_COUNTRYNAME_LONG            4882
+#define IDS_COUNTRYNAME_SHOWFLAG        4883
+
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
