@@ -1600,7 +1600,7 @@ bool CUpDownClient::SwapToForcedA4AF()
 				(theApp.glob_prefs->GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !theApp.glob_prefs->RespectMaxSources()))
 		{		
 			if (cur_file == pForcedA4AF){
-				finalpos = NULL;
+				finalpos = pos;
 				swapToFA4AF = true;
 			}
 		}
