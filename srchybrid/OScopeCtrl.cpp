@@ -775,6 +775,7 @@ void COScopeCtrl::DrawPoint()
 			// grab the plotting pen
 			oldPen = m_dcPlot.SelectObject(&m_PlotData[iTrend].penPlot);
 			
+			//Morph Start - modified by SiRoB
 			if(m_PlotData[iTrend].BarsPlot)
 			{
 				currX = m_rectPlot.right;
@@ -812,6 +813,7 @@ void COScopeCtrl::DrawPoint()
 				}
 				m_dcPlot.LineTo(currX, currY);
 			}
+			//Morph End   - modified by SiRoB
 			
 			// restore the pen 
 			m_dcPlot.SelectObject(oldPen);

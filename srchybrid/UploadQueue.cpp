@@ -1349,7 +1349,11 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			++failedupcount;
 
 			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-
+			/* //Morph - removed by SiRoB
+            if(requestedFile != NULL) {
+                requestedFile->UpdatePartsInfo();
+            }
+        	*/
 			//MORPH START - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
 			client->SetUploadState(US_NONE);

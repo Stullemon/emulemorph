@@ -2271,7 +2271,7 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 	if (nErrorCode)
 	{
 	    CString strTCPError;
-		strTCPError = GetErrorMessage(nErrorCode, 1);
+		strTCPError = GetErrorMessage(nErrorCode, 1); //Morph - Moved up by SiRoB
 
 		if (thePrefs.GetVerbose())
 		{
@@ -2631,8 +2631,10 @@ void CListenSocket::OnAccept(int nErrorCode){
 		uint32 nFataErrors = 0;
 		while( m_nPendingConnections )
 		{
+			//Morph Start - Moved up by SiRoB
 			m_nPendingConnections--;
 			AddConnection();
+			//Morph End -   Moved up by SiRoB
 			
 			CClientReqSocket* newclient = new CClientReqSocket();
 			SOCKADDR_IN SockAddr = {0};

@@ -1,7 +1,13 @@
 #pragma once
+/* Morph - "loggable.h" is no more used, SiRoB
+#include "loggable.h"
+*/
 
 struct Status;
 
+/* Morph - "loggable.h" is no more used, SiRoB
+class CKademliaMain : public CLoggable
+*/
 class CKademliaMain
 {
 	friend UINT AFX_CDECL KadStopFunc(LPVOID pvParams);
