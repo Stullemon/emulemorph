@@ -2499,7 +2499,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 		return false;
 	UINT parts = GetED2KPartCount();
 	bool partsneeded = false;
-	if (client->m_abyUpPartStatus)
+	if (client->m_abyUpPartStatus && !m_AvailPartFrequency.IsEmpty())
 		for (UINT i = 0; i < parts; i++)
 			if (m_AvailPartFrequency[i] <= 2 && !client->IsPartAvailable(i))
 				partsneeded = true;
