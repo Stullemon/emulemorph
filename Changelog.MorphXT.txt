@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.44b MorphXT v5.x
+--------------------------------------
+
+TODO   : DynIP [Commander]
+TODO   : CPU Usage and progressbar [Commander]
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.1
 --------------------------------------
 
@@ -12,9 +19,6 @@ FIXED  : Manual Backup causing crash have been solved [SiRoB]
 CHANGED: Don't remove custumization folder when we start emule [SiRoB]
 CHANGED: Removed controversal MODSTRING detection [SiRoB]
 CHANGED: Show ProgressQueueBar disable by default in preferency [SiRoB]
-
-TODO   : DynIP [Commander]
-TODO   : CPU Usage and progressbar [Commander]
 
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.0
