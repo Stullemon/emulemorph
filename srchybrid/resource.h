@@ -1991,7 +1991,9 @@
 #define IDC_BUTTON1                     2844
 #define IDC_RESET                       2844
 #define IDC_OPENPORTS                   2844
+#define IDC_SIMPLECLEANUP               2844
 #define IDS_STATS_FRATIO                2845
+#define IDC_SIMPLECLEANUP2              2845
 #define IDS_STATS_UDATA_FRIENDS         2846
 #define IDC_PARTMET                     3345
 #define IDD_PPG_BACKUP                  3378
@@ -2401,10 +2403,11 @@
 #define IDS_POWERSHARE_LIMITED          5002
 #define IDC_CRCFORCEUPPERCASE           5002
 #define IDS_POWERSHARE_LIMIT            5003
-#define IDC_FORCEADDING                 5003
 #define IDC_CRCFORCEADDING              5003
 #define IDS_STRING1353                  5004
 #define IDS_CHAT_DOWNLOADED             5004
+#define IDC_BUTTON2                     5004
+#define IDC_INSERTTEXTCOLUMN            5004
 #define IDS_CHAT_UPLOADED               5005
 #define IDS_CHAT_IDENT                  5006
 #define IDC_FEEDLIST                    5007
@@ -2462,7 +2465,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        5005
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5004
+#define _APS_NEXT_CONTROL_VALUE         5006
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

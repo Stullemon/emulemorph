@@ -54,11 +54,13 @@ protected:
 	CRichEditCtrl* NFNLeft;
 	CRichEditCtrl* NFNRight;
 	CRichEditCtrl* OldFN;
+	CWnd* m_LastFocusedEdit;  // Saves the (Edit-)Control that gained the focus at last
 	int LastDelPos;   // Position where the last character was deleted; for UNDO
 	int LastEditPos;  // Position where the last character was inserted at; for UNDO
 	bool InDel;           // For Delete-tracking in UNDO
 	bool LastEditWasUndo; // Remember if the last change was an UNDO
 	CString UndoBuffer;
+	void UpdateEditMask ();
 public:
 	// The caller of this dialog has to store pointers for all files in the
 	// following list before calling DoModal
@@ -78,10 +80,15 @@ public:
 	afx_msg void OnBnClickedMassrenameok();
 	afx_msg void OnBnClickedMassrenamecancel();
 	afx_msg void OnEnSetfocusFilenamemaskedit();
+	afx_msg void OnEnSetfocusRichEdit();
 	afx_msg void OnBnClickedFilenameleft();
 	afx_msg void OnBnClickedFilenameright();
 	afx_msg void OnBnClickedReset();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnEnChangeFilenamemaskedit();
 	afx_msg void OnBnClickedButtonStrip(); //MORPH - Added by SiRoB, Clean MassRename
+	afx_msg void OnBnClickedSimplecleanup();
+	afx_msg void OnBnClickedInserttextcolumn();
 };
+
+CString SimpleCleanupFilename (CString _filename);

@@ -40,7 +40,6 @@ BEGIN_MESSAGE_MAP(CMassRenameEdit, CEdit)
 	ON_MESSAGE(WM_UNDO,OnUndo)
 END_MESSAGE_MAP()
 
-
 IMPLEMENT_DYNAMIC(CMassRenameEdit, CEdit)
 
 IMPLEMENT_DYNAMIC(CMassRenameDialog, CDialog)
@@ -99,6 +98,8 @@ BEGIN_MESSAGE_MAP(CMassRenameDialog, CDialog)
 	ON_BN_CLICKED(IDOK, OnBnClickedMassrenameok)
 	ON_BN_CLICKED(IDCANCEL, OnBnClickedMassrenamecancel)
 	ON_EN_SETFOCUS(IDC_FILENAMEMASKEDIT, OnEnSetfocusFilenamemaskedit)
+	ON_EN_SETFOCUS(IDC_NEWFILENAMESEDITLEFT, OnEnSetfocusRichEdit)
+	ON_EN_SETFOCUS(IDC_NEWFILENAMESEDITRIGHT, OnEnSetfocusRichEdit)
 	ON_BN_CLICKED(IDC_FILENAMELEFT, OnBnClickedFilenameleft)
 	ON_BN_CLICKED(IDC_FILENAMERIGHT, OnBnClickedFilenameright)
 	ON_BN_CLICKED(IDC_RESETBUTTON, OnBnClickedReset)
@@ -106,6 +107,8 @@ BEGIN_MESSAGE_MAP(CMassRenameDialog, CDialog)
 	ON_WM_CHAR()
 	ON_EN_CHANGE(IDC_FILENAMEMASKEDIT, OnEnChangeFilenamemaskedit)
 	ON_BN_CLICKED(IDC_BUTTONSTRIP, OnBnClickedButtonStrip) //MORPH - Added by SiRoB, Clean MassRename
+	ON_BN_CLICKED(IDC_SIMPLECLEANUP, OnBnClickedSimplecleanup)
+	ON_BN_CLICKED(IDC_INSERTTEXTCOLUMN, OnBnClickedInserttextcolumn)
 END_MESSAGE_MAP()
 
 void CMassRenameDialog::OnOK() {
@@ -279,18 +282,35 @@ void CMassRenameDialog::OnBnClickedMassrenamecancel()
 	EndDialog (IDCANCEL);
 }
 
-void CMassRenameDialog::OnEnSetfocusFilenamemaskedit()
+// Copy the first line of the New-filenames edit field to the Mask edit-field
+void CMassRenameDialog::UpdateEditMask()
 {
 	m_DontTrackKeys = true;
 	// Take the first line of the "New filenames" edit control as a mask for all filenames
 	CString FirstLine;
 	NFNLeft->GetWindowText (FirstLine);
+	bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
+	if (RightJustify) 
+		NFNRight->GetWindowText (FirstLine);
 	int i = FirstLine.Find ('\r');
 	if (i != -1) {
 		FirstLine = FirstLine.Left (i);
 	}
 	GetDlgItem (IDC_FILENAMEMASKEDIT)->SetWindowText (FirstLine);
 	m_DontTrackKeys = false;
+}
+
+void CMassRenameDialog::OnEnSetfocusFilenamemaskedit()
+{
+	UpdateEditMask ();
+	
+	m_LastFocusedEdit = GetDlgItem (IDC_FILENAMEMASKEDIT);
+}
+
+// Remember the Edit control that gained the focus at last
+void CMassRenameDialog::OnEnSetfocusRichEdit()
+{
+	m_LastFocusedEdit = GetFocus ();
 }
 
 void CMassRenameDialog::OnBnClickedFilenameleft()
@@ -451,12 +471,217 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 		}
 	}
 }
-//MORPH START - Added by SiRoB, Clean MassRename
+
 void CMassRenameDialog::OnBnClickedButtonStrip()
 {
-	CString filename;
+	// Choose the current active RichEdit - the one which shows the filenames
+	// left justified or right justified
+	CRichEditCtrl* NFNEdit = NFNLeft;
+	bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
+	if (RightJustify) {
+		NFNEdit = NFNRight;
+	}
 
-	NFNLeft->GetWindowText(filename);
-	NFNLeft->SetWindowText( CleanupFilename(filename) );
+	CString filenames;
+
+	// Now process through each line and cleanup that filename
+	for (int i=0; i < NFNEdit->GetLineCount (); i++) {
+		// Get the filename
+		CString filename;
+		NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+		filename.ReleaseBuffer();
+		// Clean it up
+		filename = CleanupFilename (filename);
+		// and add it to the current list of filenames
+		if (filenames != "") filenames += "\r\n";
+		filenames += filename;
+	}
+
+	// at the end save the list of filenames to the Richedit controls
+	NFNLeft->SetWindowText( filenames );
+	NFNRight->SetWindowText( filenames );
 }
-//MORPH END   - Added by SiRoB, Clean MassRename
+
+// A "simple" version for cleaning up filenames - only removes ".", "_", "\r" and "\n".
+CString SimpleCleanupFilename (CString _filename) {
+	// The last "." must not be replaced - it's the separator for the extension!
+	int lastdot = _filename.ReverseFind ('.');
+	for (int i=0; i < _filename.GetLength(); i++) {
+		switch (_filename.GetAt (i)) {
+			case '.':
+			case '_': {
+				if (i != lastdot) _filename.SetAt (i,' ');
+			}
+		}
+	}
+	// Strip "\r" and "\n"
+	return _filename.SpanExcluding ("\r\n");
+}
+
+
+void CMassRenameDialog::OnBnClickedSimplecleanup()
+{
+	// Choose the current active RichEdit - the one which shows the filenames
+	// left justified or right justified
+	CRichEditCtrl* NFNEdit = NFNLeft;
+	bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
+	if (RightJustify) {
+		NFNEdit = NFNRight;
+	}
+
+	CString filenames;
+
+	// Now process through each line and cleanup that filename
+	for (int i=0; i < NFNEdit->GetLineCount (); i++) {
+		// Get the filename
+		CString filename;
+		NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+		filename.ReleaseBuffer();
+		// Clean it up
+		filename = SimpleCleanupFilename (filename);
+		// and add it to the current list of filenames
+		if (filenames != "") filenames += "\r\n";
+		filenames += filename;
+	}
+
+	// at the end save the list of filenames to the Richedit controls
+	NFNLeft->SetWindowText( filenames );
+	NFNRight->SetWindowText( filenames );
+}
+
+void CMassRenameDialog::OnBnClickedInserttextcolumn()
+{
+	// Choose the current active RichEdit - the one which shows the filenames
+	// left justified or right justified
+	CRichEditCtrl* NFNEdit = NFNLeft;
+	bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
+	if (RightJustify) {
+		NFNEdit = NFNRight;
+	}
+
+	// Prepare the UNDO-Buffer; for future implementation since the Windows Undo handling
+	// is very crazy...
+	LastEditWasUndo = true;
+	CString allFNText;
+	NFNEdit->GetWindowText (allFNText);
+	UndoBuffer = allFNText;
+	InDel = false;
+
+	// Now determine where we have to insert the clipboard data.
+	// If the "EditMask" edit line is selected, start from the top.
+	// If the cursor is placed in the RichEdit with all the filenames, we insert
+	// the data starting at the current cursor position.
+	// StartX receives the X-Position in the current line where to start inserting,
+	// EndX receives the end position of the current selection. If there's text
+	// selected in the current line, this will be deleted in every line!
+	int StartX=0, EndX = 0;
+	int StartLine = 0, CurrentLineLength = 0;
+	MassRenameEdit->GetSel (StartX, EndX);
+	CurrentLineLength = MassRenameEdit->LineLength();
+
+	// Determine the last focused Edit control with the help of m_LastFocusedEdit.
+	// This trick has to be used because windows even changes the focus to the button
+	// when hitting it with the mouse.
+	if (m_LastFocusedEdit != MassRenameEdit) {
+		// Get the cursor position from the RichEdit-control
+		long StartXL=0, EndXL=0;
+		NFNEdit->GetSel (StartXL, EndXL);
+		StartLine = NFNEdit->LineFromChar (StartXL);
+		// It's not allowed to select multple lines here!
+		if (NFNEdit->LineFromChar (EndXL) != StartLine) EndXL = StartXL;
+		// Correct the Index positions concernung the start position of the current line
+		StartXL -= NFNEdit->LineIndex ();
+		EndXL -= NFNEdit->LineIndex ();
+
+		CurrentLineLength = NFNEdit->LineLength();
+
+		StartX = StartXL;
+		EndX = EndXL;
+	}
+
+	// If we are in "Right-justify" mode, invert start and end coordinates
+	if (RightJustify) {
+		StartX = CurrentLineLength - StartX;
+		EndX = CurrentLineLength - EndX;
+		// From now on these coordinates have to be treated inverted!
+	}
+
+	// Get the content of the clipboard
+	CString ClipboardData;
+	OpenClipboard ();
+	HGLOBAL hglb = ::GetClipboardData( CF_TEXT );
+    if (hglb != NULL) { 
+        LPTSTR str;
+		str = (LPTSTR) GlobalLock(hglb); 
+        if (str != NULL) { 
+			// Get the data
+			ClipboardData = str;
+            GlobalUnlock(hglb); 
+        } 
+    } 
+    CloseClipboard(); 
+
+	int clstart=0;
+	int clend=0;
+
+	// Only proceed if there's something to insert
+	if (!ClipboardData.IsEmpty ()) {
+
+		CString filenames;
+
+		// Now process through each line and cleanup that filename
+		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
+			// Get the filename
+			CString filename;
+			NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+			filename.ReleaseBuffer();
+
+			// Remove "\r\n" from the current filename if necessary
+			filename = filename.SpanExcluding ("\r\n");
+
+			// We only proceed those lines that are larger than our StartLine - all
+			// other filenames have to be copied.
+			// Apart of that if there's no mor data in the clipboard buffer, we are 
+			// finished and only have to copy all the other lines.
+			if ((i >= StartLine) && (clstart <= ClipboardData.GetLength ())) {
+
+				// Delete the marked characters from the filename (if anything is marked) and
+				// insert the next part of the clipboard at the current cursor position
+				clend = ClipboardData.Find ("\r",clstart);
+				if (clend==-1) clend = ClipboardData.GetLength ();
+				// Extract the characters to be inserted. Make sure not to copy the
+				// trailing "\r"!
+				CString NextChars = ClipboardData.Mid (clstart,clend-clstart);
+				CurrentLineLength = filename.GetLength ();
+				if (!RightJustify) {
+					// Delete the marked characters
+					filename.Delete (StartX, EndX-StartX);
+					// Insert this line into the filename
+					filename.Insert (StartX,NextChars);
+				} else {
+					// Insert this line into the filename
+					filename.Insert (CurrentLineLength - StartX, NextChars);
+					// Delete the marked characters; the length of the 
+					// string has changed!
+					filename.Delete (filename.GetLength () - StartX, StartX-EndX);
+				}
+				// Move the clipboard cursor position to the next line; skip "\r\n"
+				clstart = clend+2;
+			}
+
+			// and add it to the current list of filenames
+			if (filenames != "") filenames += "\r\n";
+			filenames += filename;
+
+		}
+
+		// at the end save the list of filenames to the Richedit controls
+		NFNLeft->SetWindowText( filenames );
+		NFNRight->SetWindowText( filenames );
+
+		// update the MaskEdit-control
+		UpdateEditMask ();
+	}
+
+}
+

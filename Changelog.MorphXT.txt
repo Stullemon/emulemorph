@@ -2,6 +2,10 @@
 Changelog for eMule 0.43b MorphXT v4.x
 --------------------------------------
 FIXED  : TRAY EXIT [SiRoB]
+ADDED  : CRC32-Calculation can now be used to convert existing CRC's to uppercase [MightyKnife]
+FIXED  : Mass-Rename: Cleanup now works correctly for every line in the "New filenames" window [MightyKnife]
+ADDED  : Mass-Rename: Simple-Cleanup; only removes '.' and '_' characters [MightyKnife]
+ADDED  : Mass-Rename: Insert-text-column-from-clipboard; pastes the clipboard data as a column to the current cursor position in the "New filenames" window. Should help to paste a list of episode titles into the filenames. [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
