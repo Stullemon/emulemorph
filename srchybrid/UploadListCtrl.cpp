@@ -124,6 +124,10 @@ void CUploadListCtrl::Init()
 	else HideColumn (13);
 	// [end] Mighty Knife
 */
+	// Commander - Added: IP2Country column - Start
+	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
+		HideColumn (15);
+	// Commander - Added: IP2Country column - End
 }
 
 CUploadListCtrl::~CUploadListCtrl(){
@@ -623,12 +627,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		else HideColumn (13);
 	// [end] Mighty Knife
 */
-// Commander - Added: IP2Country column - Start
-		if ((thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE) != !IsColumnHidden (15))
-			if (thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE)
-				ShowColumn (15);
-			else HideColumn (15);
-// Commander - Added: IP2Country column - End
+	// Commander - Added: IP2Country column - Start
+	if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(15))
+		HideColumn (15);
+	// Commander - Added: IP2Country column - End
 	
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))

@@ -103,8 +103,8 @@ void CClientListCtrl::Init()
 	// [end] Mighty Knife
 */
 // Commander - Added: IP2Country column - Start
-	if (theApp.ip2country->IsIP2Country()) ShowColumn (10);
-	else HideColumn (10);
+	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
+	    HideColumn (10);
 // Commander - Added: IP2Country column - End
 }
 
@@ -445,12 +445,12 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		else HideColumn (8);
 	// [end] Mighty Knife
 */
-// Commander - Added: IP2Country column - Start
-		if ((thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE) != !IsColumnHidden (10))
-			if (thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE)
-				ShowColumn (10);
-			else HideColumn (10);
-// Commander - Added: IP2Country column - End
+
+    // Commander - Added: IP2Country column - Start
+		if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(10))
+			HideColumn (10);
+    // Commander - Added: IP2Country column - End
+
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{

@@ -113,10 +113,10 @@ void CQueueListCtrl::Init()
 	else HideColumn (11);
 	// [end] Mighty Knife
 */
-// Commander - Added: IP2Country column - Start
-	if (theApp.ip2country->IsIP2Country()) ShowColumn (13);
-	else HideColumn (13);
-// Commander - Added: IP2Country column - End
+	// Commander - Added: IP2Country column - Start
+	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
+		HideColumn (13);
+	// Commander - Added: IP2Country column - End
 }
 
 CQueueListCtrl::~CQueueListCtrl()
@@ -579,12 +579,11 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		else HideColumn (11);
 	// [end] Mighty Knife
 */	
-    // Commander - Added: IP2Country column - Start
-		if ((thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE) != !IsColumnHidden (13))
-			if (thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE)
-				ShowColumn (13);
-			else HideColumn (13);
+	// Commander - Added: IP2Country column - Start
+	if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(13))
+		HideColumn (13);
 	// Commander - Added: IP2Country column - End
+
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
