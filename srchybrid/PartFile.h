@@ -117,14 +117,9 @@ public:
 	// khaos::kmod+ Source Counts Are Cached
 	uint16	GetAvailableSrcCount()							{return m_anStates[0]+m_anStates[1];}	
 	// khaos::kmod-
-	uint16	GetSrcA4AFCount()								{return m_iSrcA4AF;}
+	uint16	GetSrcA4AFCount()								{return A4AFsrclist.GetCount();}
 	uint16  GetSrcStatisticsValue(uint16 value); // value = EDownloadState
 	uint16	GetTransferingSrcCount();			// == GetSrcStatisticsValue(DS_DOWNLOADING)
-	//MORPH START - Added by SiRoB, A4AF counter
-	void	IncreaseSourceCountA4AF()						{m_iSrcA4AF++;}
-	void	DecreaseSourceCountA4AF()						{m_iSrcA4AF--;}
-	void	CleanA4AFSource(CPartFile* toremove);
-	//MORPH END    - Added by SiRoB, A4AF counter
 	
 	// khaos::categorymod+
 	bool	IsPaused()										{return GetStatus()==PS_PAUSED;}
@@ -204,9 +199,8 @@ public:
 	void	RemoveDownloadingSource(CUpDownClient* client);
 	void	SetStatus(uint8 in);
 
-	//MORPH - Removed by SiRoB, Due to Khaos A4AF 
-	/*void	SetA4AFAuto(bool in)			{m_is_A4AF_auto = in;} // [sivka / Tarod]
-	bool	IsA4AFAuto()					{return m_is_A4AF_auto;} // [sivka / Tarod]*/
+	void	SetA4AFAuto(bool in)			{m_is_A4AF_auto = in;} // [sivka / Tarod]
+	bool	IsA4AFAuto()					{return m_is_A4AF_auto;} // [sivka / Tarod]
 	CString GetProgressString(uint16 size);
 	CString GetInfoSummary(CPartFile* partfile);
 
@@ -225,8 +219,7 @@ public:
 	CFile	m_hpartfile;	//permanent opened handle to avoid write conflicts
 	volatile bool m_bPreviewing;
 	CMutex 	m_FileCompleteMutex; // Lord KiRon - Mutex for file completion
-	//MORPH - Removed by SiRoB, Due to Khaos A4AF
-	/*CTypedPtrList<CPtrList, CUpDownClient*> A4AFsrclist; //<<-- enkeyDEV(Ottavio84) -A4AF-*/
+	CTypedPtrList<CPtrList, CUpDownClient*> A4AFsrclist; //<<-- enkeyDEV(Ottavio84) -A4AF-
 	// khaos::categorymod+
 	void	SetCatResumeOrder(uint16 order)	{ m_catResumeOrder = order; SavePartFile(); }
 	uint16	GetCatResumeOrder()				{ return m_catResumeOrder; }
@@ -257,9 +250,6 @@ protected:
 	// khaos::kmod-
 private:
 	uint16	count;
-	// -khaos--+++>
-	uint16	m_iSrcA4AF;
-	// <-----khaos-
 	uint16	m_anStates[STATES_COUNT];
 	uint32  completedsize;
 	// -khaos--+++>
@@ -309,8 +299,7 @@ private:
 	uint32 m_nTotalBufferData;
 	uint32 m_nLastBufferFlushTime;
 	uint8	m_category;
-	//MORPH - Removed by SiRoB, Due to Khaos A4AF
-	/*bool	m_is_A4AF_auto;*/
+	bool	m_is_A4AF_auto;
 
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;

@@ -89,6 +89,7 @@ private:
 	CMenu		m_PrioMenu;
 	CTitleMenu	m_FileMenu;
 	CMenu		m_A4AFMenu;
+	CMenu		m_A4AFMenuFlag; //MORPH - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	CMenu		m_Web;
 
 	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;

@@ -51,6 +51,9 @@ CDownloadListCtrl::CDownloadListCtrl() {
 CDownloadListCtrl::~CDownloadListCtrl(){
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	if (m_A4AFMenu) VERIFY( m_A4AFMenu.DestroyMenu() );
+	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+	if (m_A4AFMenuFlag) VERIFY( m_A4AFMenuFlag.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
 	while(m_ListItems.empty() == false){
 		delete m_ListItems.begin()->second; // second = CtrlItem_Struct*
@@ -549,8 +552,12 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 					int iOMode = dc->SetBkMode(TRANSPARENT);
 					buffer.Format("%.1f%%", lpPartFile->GetPercentCompleted());
 					   
-					int iOLeft = lpRect->left;
-					lpRect->left += iWidth / 2 - 10; // Close enough 
+					//MORPH START - Added by SiRoB, Right Align percentage look better
+					//int iOLeft = lpRect->left;
+					//lpRect->left += iWidth / 2 - 10; // Close enough 
+					int iORight = lpRect->right;
+					lpRect->right -= iWidth / 2 - 20; // Close enough 
+					//MORPH END   - Added by SiRoB, Right Align percentage look better
 					//MORPH START - Added by SiRoB, Bold percentage
 					CFont newFont;
 					CFont *pOldFont;
@@ -561,12 +568,15 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 					newFont.CreateFontIndirect(&logFont);
 					pOldFont = dc->SelectObject(&newFont);
 					//MORPH END   - Added by SiRoB, Bold percentage
-					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 					//MORPH START - Added by SiRoB, Bold percentage
 					dc->SelectObject (pOldFont);
 					newFont.DeleteObject ();
 					//MORPH END   - Added by SiRoB, Bold percentage					   
-					lpRect->left = iOLeft;
+					//MORPH START - Added by SiRoB, Right Align percentage look better
+					//lpRect->left = iOLeft;
+					lpRect->right = iORight;
+					//MORPH END   - Added by SiRoB, Right Align percentage look better
 					dc->SetBkMode(iOMode);
 					dc->SetTextColor(oldclr);
 					// HoaX_69: END
@@ -815,7 +825,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				else {
 					//MORPH START - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 					//buffer = lpUpDownClient->GetUserName();
-					buffer.Format("(%i) %s",lpUpDownClient->m_OtherRequests_list.GetCount()+1,lpUpDownClient->GetUserName());
+					buffer.Format("(%i+%i) %s",lpUpDownClient->m_OtherRequests_list.GetCount()+1,lpUpDownClient->m_OtherNoNeeded_list.GetCount(),lpUpDownClient->GetUserName());
 					//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 				}
 				dc->DrawText(buffer,buffer.GetLength(),&cur_rec, DLC_DT_TEXT);
@@ -889,8 +899,10 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 					rec_status.top = 0; 
 					rec_status.bottom = iHeight; 
 					rec_status.right = iWidth; 
-					lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(lpCtrlItem->type == UNAVAILABLE_SOURCE), theApp.glob_prefs->UseFlatBar()); 
-
+					//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+					//lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(lpCtrlItem->type == UNAVAILABLE_SOURCE), theApp.glob_prefs->UseFlatBar()); 
+					lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(CPartFile*)lpCtrlItem->parent->value, theApp.glob_prefs->UseFlatBar());
+					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 					lpCtrlItem->dwUpdated = dwTicks + (rand() % 128); 
 				} else 
 					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->status); 
@@ -1328,10 +1340,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			// khaos::kmod+ Popup menu should be disabled when advanced A4AF mode is turned off and we need to check appropriate A4AF items.
 			m_FileMenu.CheckMenuItem(MP_FORCEA4AF, (theApp.downloadqueue->forcea4af_file == file && GetSelectedCount() == 1) ? MF_CHECKED : MF_UNCHECKED);
-			m_FileMenu.EnableMenuItem(MP_FORCEA4AF, ((GetSelectedCount() == 1) ? MF_ENABLED : MF_GRAYED));
+			m_FileMenu.EnableMenuItem(MP_FORCEA4AF, (theApp.glob_prefs->UseSmartA4AFSwapping() && (GetSelectedCount() == 1) ? MF_ENABLED : MF_GRAYED));
 			m_FileMenu.EnableMenuItem(2, (theApp.glob_prefs->AdvancedA4AFMode() || theApp.glob_prefs->UseSmartA4AFSwapping() ? MF_ENABLED : MF_GRAYED) | MF_BYPOSITION);
-			m_A4AFMenu.ModifyMenu(MP_FORCEA4AFONFLAG, (file->ForceAllA4AF() && GetSelectedCount() == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFONFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + " " : "") + GetResString(IDS_A4AF_ONFLAG));
-			m_A4AFMenu.ModifyMenu(MP_FORCEA4AFOFFFLAG, (file->ForceA4AFOff() && GetSelectedCount() == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFOFFFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + " " : "") + GetResString(IDS_A4AF_OFFFLAG));
+			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFONFLAG, (file->ForceAllA4AF() && GetSelectedCount() == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFONFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + " " : "") + GetResString(IDS_A4AF_ONFLAG));
+			m_A4AFMenuFlag.ModifyMenu(MP_FORCEA4AFOFFFLAG, (file->ForceA4AFOff() && GetSelectedCount() == 1 ? MF_CHECKED : MF_UNCHECKED) | MF_STRING, MP_FORCEA4AFOFFFLAG, ((GetSelectedCount() > 1) ? GetResString(IDS_INVERT) + " " : "") + GetResString(IDS_A4AF_OFFFLAG));
 			// khaos::kmod-
 
 			m_FileMenu.EnableMenuItem(MP_PAUSE,((file->GetStatus() != PS_PAUSED && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));
@@ -1352,6 +1364,11 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_PrioMenu.CheckMenuItem(MP_PRIOHIGH, ((file->GetDownPriority() == PR_HIGH && !file->IsAutoDownPriority()) ? MF_CHECKED:MF_UNCHECKED));
 			m_PrioMenu.CheckMenuItem(MP_PRIONORMAL, ((file->GetDownPriority() == PR_NORMAL && !file->IsAutoDownPriority()) ? MF_CHECKED:MF_UNCHECKED));
 			m_PrioMenu.CheckMenuItem(MP_PRIOLOW, ((file->GetDownPriority() == PR_LOW && !file->IsAutoDownPriority()) ? MF_CHECKED:MF_UNCHECKED));
+			m_A4AFMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (file->IsA4AFAuto()) ? MF_CHECKED:MF_UNCHECKED );
+			//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu,(theApp.glob_prefs->UseSmartA4AFSwapping() || theApp.glob_prefs->AdvancedA4AFMode())?MF_GRAYED:MF_ENABLED);
+			//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
+			
 
 			int counter;
 			m_Web.CreateMenu();
@@ -1413,10 +1430,11 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			if(theApp.kademlia->GetThreadID() && !theApp.kademlia->isConnected() )
 				m_ClientMenu.AppendMenu(MF_STRING,MP_BOOT, "BootStrap");
 
-			//MORPH - Removed by SiRoB, Due to Khaos A4AF
-			/*CMenu mc_A4AFMenu;
+			CMenu mc_A4AFMenu;
 			mc_A4AFMenu.CreateMenu();
-			if (theApp.glob_prefs->IsExtControlsEnabled()) {
+			//MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos
+			//if (theApp.glob_prefs->IsExtControlsEnabled()) {
+			if (theApp.glob_prefs->IsExtControlsEnabled() && !theApp.glob_prefs->UseSmartA4AFSwapping()) {
 				if (content->type == UNAVAILABLE_SOURCE)
 					mc_A4AFMenu.AppendMenu(MF_STRING,MP_SWAP_A4AF_TO_THIS,GetResString(IDS_SWAP_A4AF_TO_THIS)); // Added by sivka [Ambdribant]
 				if (content->type == AVAILABLE_SOURCE)
@@ -1424,12 +1442,15 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 				if (mc_A4AFMenu.GetMenuItemCount()>0) 
 					m_ClientMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)mc_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));				
-			}*/
+			}
+			
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			m_ClientMenu.AppendMenu(MF_SEPARATOR);
 			m_ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 			//MORPH END - Added by Yun.SF3, List Requested Files
 			m_ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+			
+			VERIFY( mc_A4AFMenu.DestroyMenu() );
 			VERIFY( m_ClientMenu.DestroyMenu() );
 		}
 	}
@@ -1661,7 +1682,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					ClearCompleted();
 					//SetRedraw(true);//EastShare - modified by AndCycle - AutoClearComplete (NoamSon)
 					break;
-				/*case MP_ALL_A4AF_TO_THIS:
+				case MP_ALL_A4AF_TO_THIS:
 				{
 					SetRedraw(false);
 					if (selectedCount == 1 
@@ -1718,7 +1739,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					}
 					SetRedraw(true);
 					break;
-				}*/
+				}
 				case MPG_F2: {
 						InputBox inputbox;
 						CString title=GetResString(IDS_RENAME);
@@ -2065,8 +2086,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					}
 					break;
 				}
-				//MORPH - Removed by SiRoB, Due to khaos A4AF
-				/*case MP_SWAP_A4AF_TO_THIS: { // added by sivka [enkeyDEV(Ottavio84) -A4AF-]
+				case MP_SWAP_A4AF_TO_THIS: { // added by sivka [enkeyDEV(Ottavio84) -A4AF-]
 					if(file->GetStatus(false) == PS_READY || file->GetStatus(false) == PS_EMPTY)
 					{
 						if(!client->GetDownloadState() == DS_DOWNLOADING)
@@ -2081,7 +2101,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					if ((client != NULL)  && !(client->GetDownloadState() == DS_DOWNLOADING))
 						client->SwapToAnotherFile(true, true, false, NULL);
 					break;
-				*/
 				//MORPH START - Added by Yun.SF3, List Requested Files
 				case MP_LIST_REQUESTED_FILES: { // added by sivka
 					if (client != NULL)
@@ -2460,7 +2479,9 @@ void CDownloadListCtrl::CreateMenues() {
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	// khaos::kmod+
 	if (m_A4AFMenu)	VERIFY( m_A4AFMenu.DestroyMenu() );
-	// khaos::kmod-
+	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+	if (m_A4AFMenuFlag)	VERIFY( m_A4AFMenuFlag.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
 
 	m_PrioMenu.CreateMenu();
@@ -2471,20 +2492,22 @@ void CDownloadListCtrl::CreateMenues() {
 
 
 	m_A4AFMenu.CreateMenu();
-	//MORPH - Removed by SiRoB, Due ti Khaos A4AF
-	/*m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_THIS, GetResString(IDS_ALL_A4AF_TO_THIS)); // sivka [Tarod]
+	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_THIS, GetResString(IDS_ALL_A4AF_TO_THIS)); // sivka [Tarod]
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_OTHER, GetResString(IDS_ALL_A4AF_TO_OTHER)); // sivka
-	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]*/
-	//MORPH START - Added by SiRoB, Advanced A4AF Flag from khaos
-	m_A4AFMenu.AppendMenu(MF_STRING, MP_FORCEA4AFONFLAG, GetResString(IDS_A4AF_ONFLAG));
-	m_A4AFMenu.AppendMenu(MF_STRING, MP_FORCEA4AFOFFFLAG, GetResString(IDS_A4AF_OFFFLAG));
-	//MORPH END   - Added by SiRoB, Advanced A4AF Flag from khaos
+	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]
+
+	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+	m_A4AFMenuFlag.CreateMenu();
+	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFONFLAG, GetResString(IDS_A4AF_ONFLAG));
+	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFOFFFLAG, GetResString(IDS_A4AF_OFFFLAG));
+	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 
 	m_FileMenu.CreatePopupMenu();
 	m_FileMenu.AddMenuTitle(GetResString(IDS_DOWNLOADMENUTITLE));
 	// khaos::kmod+
 	m_FileMenu.AppendMenu(MF_STRING, MP_FORCEA4AF, GetResString(IDS_A4AF_FORCEALL));
-	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF_FLAGS));
+	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_A4AFMenuFlag.m_hMenu, GetResString(IDS_A4AF_FLAGS));
+	if (theApp.glob_prefs->IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	// khaos::kmod-
 	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) );
@@ -2512,8 +2535,8 @@ void CDownloadListCtrl::CreateMenues() {
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
 
-	//MORPH - Removed by SiRoB, Due to Khaos A4AF
-	/*if (theApp.glob_prefs->IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));*/
+	//MORPH - Moved by SiRoB, see on top
+	//if (theApp.glob_prefs->IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
 
 	m_FileMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1) );
 	m_FileMenu.AppendMenu(MF_STRING,MP_GETHTMLED2KLINK, GetResString(IDS_DL_LINK2));

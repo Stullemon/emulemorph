@@ -207,8 +207,7 @@ void CPartFile::Init(){
 	m_category=0;
 	updatemystatus=true;
 	m_lastRefreshedDLDisplay = 0;
-	//MORPH - Removed by SiRoB, Due to Khaos A4AF
-	//m_is_A4AF_auto=false;
+	m_is_A4AF_auto=false;
 	m_bLocalSrcReqQueued = false;	
 	memset(src_stats,0,sizeof(src_stats));
 	m_nCompleteSourcesTime = time(NULL);
@@ -223,7 +222,6 @@ void CPartFile::Init(){
 	m_iSesCompressionBytes = 0;
 	m_iSesCorruptionBytes = 0;
 	//MORPH END - HotFix by SiRoB, khaos 14.6 missing
-	m_iSrcA4AF = 0; //MORPH - Added by SiRoB, A4AF counter
 	// khaos::categorymod+
 	m_catResumeOrder=0;
 	m_catFileGroup=0;
@@ -1559,13 +1557,6 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 		uint16 srcPosReask = 0;
 		//MORPH END   - Added by SiRoB, Spread Reask For Better SUC functioning and more
 		
-		// khaos::kmod+ Smart A4AF Swapping
-		bool b_SwapNNP = false;
-		if ((dwCurTick-m_LastNoNeededCheck) > 10000) {
-			m_LastNoNeededCheck = dwCurTick;
-			b_SwapNNP = true;
-		}
-		// khaos::kmod-
 		POSITION pos1, pos2;
 		for (uint32 sl = 0; sl < SOURCESSLOTS; sl++){
 			if (!srclists[sl].IsEmpty()){
@@ -1626,8 +1617,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							if (theApp.IsFirewalled())
 								break;
 						case DS_NONEEDEDPARTS:{
-							//MORPH - Changed by SiRoB, Due to Khaos A4AF
-							/*// we try to purge noneeded source, even without reaching the limit
+							// we try to purge noneeded source, even without reaching the limit
 							if( cur_src->GetDownloadState() == DS_NONEEDEDPARTS && (dwCurTick - lastpurgetime) > 40000 ){
 								if( !cur_src->SwapToAnotherFile( false , false, false , NULL ) ){
 									//however we only delete them if reaching the limit
@@ -1642,19 +1632,6 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 									lastpurgetime = dwCurTick;
 									break;
 								}
-							}*/
-							if( b_SwapNNP ) {
-								if( cur_src->GetDownloadState() == DS_NONEEDEDPARTS && (dwCurTick - lastpurgetime) > 40000 ){
-									if( !cur_src->SwapToAnotherFile( false ) ) {
-										if (GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8) ) {
-											lastpurgetime = dwCurTick;
-											theApp.downloadqueue->RemoveSource( cur_src );
-											break; // This source was deleted!
-										}
-									}
-									else break; // This source was transferred!
-								}
-								
 							}
 							// doubled reasktime for no needed parts - save connections and traffic
 							if (!((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME*2))
@@ -1683,8 +1660,9 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								// Spread Reask
 								if (!cur_src->GetLastForceA4AFTick() || (dwCurTick - cur_src->GetLastForceA4AFTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
 								{
-									if (cur_src->SwapToForcedA4AF())
-										break; // This source was transferred, nothing more to do here.
+									if(theApp.glob_prefs->UseSmartA4AFSwapping())
+										if (cur_src->SwapToForcedA4AF())
+											break; // This source was transferred, nothing more to do here.
 								}
 								if (!cur_src->GetLastBalanceTick() || (dwCurTick - cur_src->GetLastBalanceTick()) > (uint32)GetRandRange(150000,180000)/* 2m30s to 3m */)
 								{
@@ -1734,8 +1712,10 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				}
 			}
 		}
-		//MORPH - Removed by SiRoB, Due to Khaos A4AF
-		/*if (IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
+		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
+		//if (IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
+		if (!theApp.glob_prefs->AdvancedA4AFMode() && !theApp.glob_prefs->UseSmartA4AFSwapping() && IsA4AFAuto() && ((!m_LastNoNeededCheck) || (dwCurTick - m_LastNoNeededCheck > 900000)) )
+		//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		{
 			m_LastNoNeededCheck = dwCurTick;
 			POSITION pos1, pos2;
@@ -1754,7 +1734,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					}
 				}
 			}
-		}*/
+		}
 		if( theApp.glob_prefs->GetMaxSourcePerFileUDP() > GetSourceCount()){
 			if (theApp.downloadqueue->DoKademliaFileRequest() && (theApp.kademlia->getStatus()->m_totalFile < KADEMLIATOTALFILE) && (!lastsearchtimeKad || (dwCurTick - lastsearchtimeKad) > KADEMLIAREASKTIME) &&  theApp.kademlia->isConnected() && theApp.IsConnected() && !stopped){ //Once we can handle lowID users in ON, we remove the second IsConnected
 				//Kademlia
@@ -2241,8 +2221,7 @@ void CPartFile::CompleteFile(bool bIsHashingDone){
 		StopFile(false); // khaos::kmod- Don't change the vars to true.
 		UpdateDisplayedInfo(true); // khaos::kmod+ Show that the sources have been removed.
 		SetStatus( PS_COMPLETING);
-		//MORPH - Removed by SiRoB, Due to Khaos A4AF
-		/*m_is_A4AF_auto=false;*/
+		m_is_A4AF_auto=false;
 		CWinThread *pThread = AfxBeginThread(CompleteThreadProc, this, THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED); // Lord KiRon - using threads for file completion
 		if (pThread)
 			pThread->ResumeThread();
@@ -2468,21 +2447,44 @@ void  CPartFile::RemoveAllSources(bool bTryToSwap){
 			for( pos1 = srclists[sl].GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 				srclists[sl].GetNext(pos1);
 				if (bTryToSwap){
-					//MORPH START - Changed by SiRoB, Due to Khaos A4AF
-					if (!srclists[sl].GetAt(pos2)->SwapToAnotherFile(true))
-						theApp.downloadqueue->RemoveSource(srclists[sl].GetAt(pos2));
-					//MORPH END   - Changed by SiRoB, Due to Khaos A4AF
+					if (!srclists[sl].GetAt(pos2)->SwapToAnotherFile(true, true, true, NULL) )
+						theApp.downloadqueue->RemoveSource(srclists[sl].GetAt(pos2),true, false);
 				}
 				else
-					theApp.downloadqueue->RemoveSource(srclists[sl].GetAt(pos2));
+					theApp.downloadqueue->RemoveSource(srclists[sl].GetAt(pos2),true, false);
 			}
 		}
 	}
 	NewSrcPartsInfo(); 
 	UpdateAvailablePartsCount();
-	//MORPH START - Added by SiRoB, A4AF counter
-	CleanA4AFSource(this);
-	//MORPH END   - Added by SiRoB, A4AF counter
+
+	//[enkeyDEV(Ottavio84) -A4AF-]
+	// remove all links A4AF in sources to this file
+	if(!A4AFsrclist.IsEmpty())
+	{
+		POSITION pos1, pos2;
+		for(pos1 = A4AFsrclist.GetHeadPosition();(pos2=pos1)!=NULL;)
+		{
+			A4AFsrclist.GetNext(pos1);
+			
+			POSITION pos3 = A4AFsrclist.GetAt(pos2)->m_OtherRequests_list.Find(this); 
+			if(pos3)
+			{ 
+				A4AFsrclist.GetAt(pos2)->m_OtherRequests_list.RemoveAt(pos3);
+				theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(this->A4AFsrclist.GetAt(pos2),this);
+			}
+			else{
+				pos3 = A4AFsrclist.GetAt(pos2)->m_OtherNoNeeded_list.Find(this); 
+				if(pos3)
+				{ 
+					A4AFsrclist.GetAt(pos2)->m_OtherNoNeeded_list.RemoveAt(pos3);
+					theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(A4AFsrclist.GetAt(pos2),this);
+				}
+			}
+		}
+		A4AFsrclist.RemoveAll();
+	}
+	
 	UpdateFileRatingCommentAvail();
 }
 
@@ -4160,40 +4162,6 @@ void CPartFile::GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uin
 			pui32NeededSpace = cur_gap->end - cur_gap->start;
 	}
 }
-
-//MORPH START - Added by SiRoB, A4AF counter
-void CPartFile::CleanA4AFSource(CPartFile* toremove){
-	POSITION pos1, pos2;
-	CPartFile* cur_file;
-	CUpDownClient* cur_src;
-	for (POSITION filepos = theApp.downloadqueue->filelist.GetHeadPosition(); filepos != 0; theApp.downloadqueue->filelist.GetNext(filepos)){
-		cur_file = theApp.downloadqueue->filelist.GetAt(filepos);
-		for (uint32 sl = 0; sl < SOURCESSLOTS; sl++)
-			if (!cur_file->srclists[sl].IsEmpty())
-				for (pos1 = cur_file->srclists[sl].GetHeadPosition();( pos2 = pos1 ) != NULL;){
-					cur_file->srclists[sl].GetNext(pos1);
-					cur_src = cur_file->srclists[sl].GetAt(pos2);
-					if (!cur_src->m_OtherRequests_list.IsEmpty()){
-						if (cur_file!=toremove){
-							POSITION myPos = cur_src->m_OtherRequests_list.Find(toremove);
-							if (myPos){
-								cur_src->m_OtherRequests_list.RemoveAt(myPos);
-								toremove->DecreaseSourceCountA4AF();
-								theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(cur_src,toremove);
-							}
-						}else{
-							POSITION myPos = cur_src->m_OtherRequests_list.Find(cur_file);
-							if (myPos){
-								cur_src->m_OtherRequests_list.RemoveAt(myPos);
-								cur_file->DecreaseSourceCountA4AF();
-								theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(cur_src,cur_file);
-							}
-						}
-					}
-				}
-	}
-}
-//MORPH END   - Added by SiRoB, A4AF counter
 
 //MORPH START - Added by IceCream, eMule Plus rating icons
 int CPartFile::GetRating(){  

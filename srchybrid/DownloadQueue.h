@@ -74,9 +74,7 @@ public:
 	CPartFile*	GetFileByKadFileSearchID(uint32 ID );
 	void    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
 	void    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
-	// khaos::kmod+ New Param: resetstatusinfo
-	bool	RemoveSource(CUpDownClient* toremove, bool updatewindow = true, bool resetstatusinfo = true);
-	// khaos::kmod-
+	bool	RemoveSource(CUpDownClient* toremove, bool updatewindow = true, bool bDoStatsUpdate = true); // delete later ->{ return RemoveSource(toremove,NULL,updatewindow);}
 	void	DeleteAll();
 	void	RemoveFile(CPartFile* toremove);
 	uint32	GetDatarate()			{return datarate;}
@@ -135,9 +133,7 @@ public:
 	void	MoveCat(uint8 from, uint8 to);
 	uint16	GetDownloadingFileCount();
 	uint16	GetPausedFileCount();
-	//MORPH START - Removed by SiRoB, Due to Khaos A4AF
-	//void	DisableAllA4AFAuto(void);
-	//MORPH END   - Removed by SiRoB, Due to Khaos A4AF
+	void	DisableAllA4AFAuto(void);
 	//MORPH START - Removed by SiRoB, Due to Khaos Categorie
 	//void	SetAutoCat(CPartFile* newfile);
 	//MORPH END   - Removed by SiRoB, Due to Khaos Categorie
@@ -151,7 +147,6 @@ public:
 	CPartFile* forcea4af_file;
 	// khaos::kmod-
 
-	CTypedPtrList<CPtrList, CPartFile*> filelist; //MORPH - Added by SiRoB, A4AF counter
 protected:
 	bool	SendNextUDPPacket();
 	void	ProcessLocalRequests();
@@ -164,7 +159,7 @@ private:
 	void	SwapParts(POSITION pos1, POSITION pos2);
 	void	HeapSort(uint16 first, uint16 last);
 	// SLUGFILLER: checkDiskspace
-	//CTypedPtrList<CPtrList, CPartFile*> filelist; //MORPH - Moved by SiRoB, in Public area For A4AF counter
+	CTypedPtrList<CPtrList, CPartFile*> filelist;
 	CTypedPtrList<CPtrList, CPartFile*> m_localServerReqQueue;
 	CSharedFileList* sharedfilelist;
 	CPreferences*	 app_prefs;

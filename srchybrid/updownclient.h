@@ -293,7 +293,10 @@ public:
 	void			SetRemoteQueueFull( bool flag )	{m_bRemoteQueueFull = flag;}
 	bool			IsRemoteQueueFull()			{return m_bRemoteQueueFull;}
 	void			SetRemoteQueueRank(uint16 nr);
-	void			DrawStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
+	//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
+	//void			DrawStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
+	void			DrawStatusBar(CDC* dc, RECT* rect, CPartFile* File, bool  bFlat);
+	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 	void			EnableL2HAC()				{m_l2hac_enabled = true;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
 	void			DisableL2HAC()				{m_l2hac_enabled = false;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
 	bool			IsL2HACEnabled()			{return m_l2hac_enabled;} //<<-- enkeyDEV(th1) -L2HAC- lowid side
@@ -308,12 +311,16 @@ public:
 	void			ProcessBlockPacket(char* packet, uint32 size, bool packed = false);
 	uint32			CalculateDownloadRate();
 	uint16			GetAvailablePartCount();
+	bool			SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL);
+	void			DontSwapTo(CPartFile* file);
+	bool			IsSwapSuspended(CPartFile* file);
+	bool			DoSwap(CPartFile* SwapTo, bool anotherfile=false, int iDebugMode = 0);
 	// khaos::kmod+ Smart A4AF Handling
-	bool			SwapToAnotherFile(bool bIgnoreNoNeeded = false, bool forceSmart = false);
+	//bool			SwapToAnotherFile(bool bIgnoreNoNeeded = false, bool forceSmart = false);
 	bool			BalanceA4AFSources(bool byPriorityOnly = false);
 	bool			StackA4AFSources();
 	bool			SwapToForcedA4AF();
-	void			SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iDebugMode = 0);
+	//void			SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iDebugMode = 0);
 	uint32			GetLastBalanceTick()		{return m_iLastSwapAttempt;}
 	uint32			GetLastForceA4AFTick()	{ return m_iLastForceA4AFAttempt; }
 	// khaos::kmod-
@@ -324,7 +331,10 @@ public:
 	// -khaos--+++> Download Sessions Stuff
 	uint8			GetSourceFrom()				{return m_bySourceFrom;}
 	void			SetSourceFrom(uint8 val)	{m_bySourceFrom=val;}
-	void			SetDownStartTime()			{m_dwDownStartTime = ::GetTickCount();}
+	//MORPH START - Changed by SiRoB, Better Download rate calcul
+	//void			SetDownStartTime()			{m_dwDownStartTime = ::GetTickCount();}
+	void			SetDownStartTime()			{m_dwDownStartTime = ::GetTickCount(); m_AvarageDDRlastRemovedHeadTimestamp = 0;}
+	//MORPH END   - Changed by SiRoB, Better Download rate calcul
 	uint32			GetDownTimeDifference()		{uint32 myTime = m_dwDownStartTime; m_dwDownStartTime = 0; return ::GetTickCount() - myTime;}
 	bool			GetTransferredDownMini()	{return m_bTransferredDownMini;}
 	void			SetTransferredDownMini()	{m_bTransferredDownMini=true;}

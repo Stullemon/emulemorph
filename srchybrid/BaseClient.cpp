@@ -989,7 +989,7 @@ bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
 	else if(GetDownloadState() == DS_CONNECTED){
 		// client didn't responsed to our request for some reasons (remotely banned?)
 		// or it just doesn't has this file, so try to swap first
-		if (!SwapToAnotherFile(true)){ //MOPRH - Changed by SiRoB, relative to Khaos
+		if (!SwapToAnotherFile(true, true, true, NULL)){
 			theApp.downloadqueue->RemoveSource(this);
 			//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "Removed %s from downloadqueue - didn't responsed to filerequests",GetUserName()));
 		}

@@ -1118,7 +1118,7 @@ void CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 	UpdateDisplayedInfo();
 }
 
-bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool	updatewindow, bool resetstatusinfo){
+bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool	updatewindow, bool bDoStatsUpdate){
 	bool removed = false;
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
 		CPartFile* cur_file = filelist.GetAt(pos);
@@ -1126,9 +1126,9 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool	updatewindow, bo
 			for (POSITION pos2 = cur_file->srclists[sl].GetHeadPosition();pos2 != 0; cur_file->srclists[sl].GetNext(pos2)){
 				if (toremove == cur_file->srclists[sl].GetAt(pos2)){
 					cur_file->srclists[sl].RemoveAt(pos2);
-
+					
 					removed = true;
-					if ( resetstatusinfo ){
+					if ( bDoStatsUpdate ){
 						cur_file->RemoveDownloadingSource(toremove);
 						cur_file->NewSrcPartsInfo();
 					}
@@ -1136,27 +1136,36 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool	updatewindow, bo
 				}
 			}
 		}
-		if ( resetstatusinfo )
+		if ( bDoStatsUpdate )
 			cur_file->UpdateAvailablePartsCount();
 	}
-	// khaos::kmod+ Don't want to reset all status info for A4AF transfers.
-	if (resetstatusinfo){
-		//MORPH START - Added by SiRoB, A4AF counter
-		if (!toremove->m_OtherRequests_list.IsEmpty()){
-			POSITION pos1, pos2;
-			for (pos1 = toremove->m_OtherRequests_list.GetHeadPosition();(pos2 = pos1) != NULL;){
-				toremove->m_OtherRequests_list.GetNext(pos1);
-				CPartFile* cur_file = toremove->m_OtherRequests_list.GetAt(pos2);
-				if (theApp.downloadqueue->filelist.Find(cur_file)){
-					cur_file->DecreaseSourceCountA4AF();
-					theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(toremove,cur_file);
-				}
-			}
-			toremove->m_OtherRequests_list.RemoveAll();
+	
+	// remove this source on all files in the downloadqueue who link this source
+	// pretty slow but no way arround, maybe using a Map is better, but that's slower on other parts
+	POSITION pos3, pos4;
+	for(pos3 = toremove->m_OtherRequests_list.GetHeadPosition();(pos4=pos3)!=NULL;)
+	{
+		toremove->m_OtherRequests_list.GetNext(pos3);				
+		POSITION pos5 = toremove->m_OtherRequests_list.GetAt(pos4)->A4AFsrclist.Find(toremove); 
+		if(pos5)
+		{ 
+			toremove->m_OtherRequests_list.GetAt(pos4)->A4AFsrclist.RemoveAt(pos5);
+			theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(toremove,toremove->m_OtherRequests_list.GetAt(pos4));
+			toremove->m_OtherRequests_list.RemoveAt(pos4);
 		}
-		//MORPH END - Added by SiRoB, A4AF counter
-		toremove->ResetFileStatusInfo();
-	}// khaos::kmod-
+	}
+	for(pos3 = toremove->m_OtherNoNeeded_list.GetHeadPosition();(pos4=pos3)!=NULL;)
+	{
+		toremove->m_OtherNoNeeded_list.GetNext(pos3);				
+		POSITION pos5 = toremove->m_OtherNoNeeded_list.GetAt(pos4)->A4AFsrclist.Find(toremove); 
+		if(pos5)
+		{ 
+			toremove->m_OtherNoNeeded_list.GetAt(pos4)->A4AFsrclist.RemoveAt(pos5);
+			theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(toremove,toremove->m_OtherNoNeeded_list.GetAt(pos4));
+			toremove->m_OtherNoNeeded_list.RemoveAt(pos4);
+		}
+	}
+
 	if (toremove->GetFileComment().GetLength()>0 || toremove->GetFileRate()>0 )
 		toremove->reqfile->UpdateFileRatingCommentAvail();
 
@@ -1164,7 +1173,7 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool	updatewindow, bo
 		toremove->SetDownloadState(DS_NONE);
 		theApp.emuledlg->transferwnd.downloadlistctrl.RemoveSource(toremove,0);
 	}
-
+	toremove->ResetFileStatusInfo();
 	toremove->reqfile = 0;
 	return removed;
 }
@@ -1706,16 +1715,15 @@ uint16 CDownloadQueue::GetPausedFileCount(){
 }
 
 
-//MORPH START - Removed by SiRoB, Due to Khaos A4AF
-/*void CDownloadQueue::DisableAllA4AFAuto(void)
+void CDownloadQueue::DisableAllA4AFAuto(void)
 {
 	CPartFile* cur_file;
 	for (POSITION pos = filelist.GetHeadPosition(); pos != NULL; filelist.GetNext(pos)) {
 		cur_file = (CPartFile*)filelist.GetAt(pos);
 		if (cur_file != NULL) cur_file->SetA4AFAuto(false);
 	}
-}*/
-//MORPH END   - Removed by SiRoB, Due to Khaos A4AF
+}
+
 //MORPH START - Removed by SiRoB, Due to Khaos Categorie
 /*// HoaX_69: BEGIN AutoCat function
 void CDownloadQueue::SetAutoCat(CPartFile* newfile){

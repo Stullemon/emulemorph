@@ -321,7 +321,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 								case DS_CONNECTED:
 							case DS_ONQUEUE:
 							case DS_NONEEDEDPARTS:
-								if (!client->SwapToAnotherFile(true)) { //MORPH - Changed by SiRoB, Relative to Khaos A4AF
+								if (!client->SwapToAnotherFile(true, true, true, NULL)) {
 									theApp.downloadqueue->RemoveSource(client, true);
 							}
 							break;
