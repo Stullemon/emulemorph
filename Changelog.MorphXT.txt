@@ -53,7 +53,9 @@ TWEAKED: Mass-Rename SimpleCleanup tweaked [MightyKnife]
 TWEAKED: IP2Country Autoupdate [Commander]
 TWEAKED: Version Saving of Autoupdates [Commander]
 
-MOVED  : LowID retry dialog to Server Preferences [SiRoB]
+MOVED  : LowID retry dialog to Server Preferency [SiRoB]
+
+NOTE: Compiled with libpng 1.2.6 to fix security issu
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
