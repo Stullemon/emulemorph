@@ -2252,6 +2252,8 @@
 #define IDS_MET_FILE_CONTROL            4011
 #define IDS_EXPIRED_CLIENTS             4012
 #define IDS_EXPIRED_KNOWN               4013
+
+#define IDS_DELETEFILE                  4014
 #define IDS_UPDATEIPFILTER              4742
 #define IDS_UPDATEIPFILTERONSTART       4743
 #define IDS_UPDATEIPFILTERERROR         4744

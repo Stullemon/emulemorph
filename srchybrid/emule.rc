@@ -4153,6 +4153,7 @@ BEGIN
     IDS_MET_FILE_CONTROL    ".met File Control (be ware of changing any value !!)"
     IDS_EXPIRED_CLIENTS     "Expired time of clients (day) (0 = Disabled)"
     IDS_EXPIRED_KNOWN       "Expired time of known files (day) (0 = Disabled)"
+    IDS_DELETEFILE          "Delete File"
 END
 
 #endif    // 英文 (美國) resources

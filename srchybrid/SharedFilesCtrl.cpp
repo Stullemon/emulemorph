@@ -1218,7 +1218,7 @@ void CSharedFilesCtrl::CreateMenues() {
 	//MORPH START - Added by SiRoB, About Open File Folder entry
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPENFILEFOLDER, GetResString(IDS_OPENFILEFOLDER)); //MORPH - Added by SiRoB, About Popup Open File Folder entry
 	//MORPH END - Added by SiRoB, About Open File Folder entry
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DELFILE, "Delete File"); // EastShare added by linekin, TBH delete shared file
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DELFILE, GetResString(IDS_DELETEFILE)); // EastShare added by linekin, TBH delete shared file
 	//***Comments 11/27/03**// 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD)); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
