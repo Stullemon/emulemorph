@@ -117,7 +117,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 						s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
 				}
 				else
-					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crClientOnly);
+					s_StatusBar.FillRange(PARTSIZE*i, uEnd, crA4AF);
 				//MORPH END  - Changed by SiRoB, Advanced A4AF derivated from Khaos	
 			} 
 			//MORPH - Added by IceCream --- xrmb:seeTheNeed ---
