@@ -1509,7 +1509,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
 		if (m_AvarageDDR_list.GetCount() == 1)
-			// Mighty Knife: Slight change in the formula to prevent a "Divide by 0"
+			// Mighty Knife: Slight change in the formula to prevent a "Divide by 0" in Win98
 			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / ( (cur_tick-m_dwDownStartTime) == 0 ? 1 : (cur_tick-m_dwDownStartTime) );
 			// [end] Mighty Knife
 		else{
@@ -2542,7 +2542,9 @@ uint32 CUpDownClient::GetAvDownDatarate() const
 	if (GetDownloadState() == DS_DOWNLOADING)
 		tempDownCurrentTotalTime += GetTickCount() - m_dwDownStartTime;
 	if (tempDownCurrentTotalTime & ~1023)
-		return	GetTransferedDown()/(tempDownCurrentTotalTime/1000);
+		// Mighty Knife: Slight change in the formula to prevent a "Divide by 0" in Win98
+		return	GetTransferedDown()/( (tempDownCurrentTotalTime==0 ? 1 : tempDownCurrentTotalTime) /1000);
+		// [end] Mighty Knife
 	else
 		return 0;
 }
