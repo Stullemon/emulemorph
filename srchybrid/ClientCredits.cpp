@@ -397,23 +397,8 @@ void CClientCreditsList::LoadList()
 	for(int curFile = 0; curFile < totalLoadFile; curFile++){
 		//check credits.met status
 		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp);
-		if (!successLoadFile[curFile]){
-/*
-			if (fexp.m_cause != CFileException::fileNotFound){
-				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-				TCHAR szError[MAX_CFEXP_ERRORMSG];
-				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-					strError += _T(" - ");
-					strError += szError;
-				}
-				AddLogLine(false, _T("%s"), strError);
-			}else{
-				//AddLogLine(false, "%s does not exist,", loadFileName[curFile]);
-			}
-*/
-		}else{
+		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
-			loadFile.Close();
 
 			if(lastFile == -1){
 				lastFile = curFile;
@@ -424,10 +409,10 @@ void CClientCreditsList::LoadList()
 				lastFile = curFile;
 			}
 		}
+		loadFile.Close();
 	}
 
-	if(lastFile == -1)	return;
-	strFileName = loadFileName[lastFile];
+	if(lastFile != -1)	strFileName = loadFileName[lastFile];
 	AddLogLine(false, "Load %s", strFileName);
 
 //Morph End - added by AndCycle, choose .met to load
