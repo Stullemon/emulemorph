@@ -91,7 +91,8 @@ private:
     uint32 m_lowestPing;
     uint64 m_LowestInitialPingAllowed;
 
-	bool m_bIsUSSLog; //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
-
-    CString m_state;
+	CString m_state;
+	//MORPH START - Added by SiRoB, Log Flag to trace or not the USS activities
+	bool m_bIsUSSLog;
+	//MORPH START - Added by SiRoB, Log Flag to trace or not the USS activities
 };
