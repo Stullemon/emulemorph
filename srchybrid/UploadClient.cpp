@@ -124,12 +124,7 @@ void CUpDownClient::SetUploadState(EUploadState news){
  */
 float CUpDownClient::GetCombinedFilePrioAndCredit() {
 	ASSERT(credits != NULL);
-	//MORPH START - Added by Yun.SF3, Only give credits to secured clients
-	if (credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED || theApp.glob_prefs->GetEnableAntiCreditHack())
-		return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
-	else 
-		return float(GetFilePrioAsNumber());
-	//MORPH END - Added by Yun.SF3, Only give credits to secured clients
+	return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
 	}
 
 
@@ -225,13 +220,10 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		fBaseValue += (float)(::GetTickCount() - m_dwUploadTime > 900000)? 900000:1800000;
 		fBaseValue /= 1000;
 	}
-	if (((theApp.glob_prefs->UseCreditSystem()) && (credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED)) || ((!IsEmuleClient()) && (GetSourceExchangeVersion()== 0)) || theApp.glob_prefs->GetEnableAntiCreditHack()) //MORPH - Added by IceCream, count credit also for edonkey users
-	{
 		float modif = credits->GetScoreRatio(GetIP());
 		fBaseValue *= modif;
-		if( !m_bySupportSecIdent && modif == 1 )
+		if(!m_bySupportSecIdent)
 			fBaseValue *= 0.85f;
-	}
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
 	//MORPH START - Added by Yun.SF3, boost the less uploaded files

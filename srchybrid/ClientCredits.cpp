@@ -112,12 +112,6 @@ uint64	CClientCredits::GetDownloadedTotal(){
 
 float CClientCredits::GetScoreRatio(uint32 dwForIP)
 {
-	// check the client ident status
-	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-		// bad guy - no credits for you
-		return 1;
-	}
-
 	//Morph Start - Added by AndCycle, reduce a litte CPU usage for ratio count
 	if(m_cssCurrentCreditSystem != theApp.glob_prefs->GetCreditSystem()){
 		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
@@ -136,25 +130,25 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 
 		// EastShare - Added by linekin, lovelace Credit
 		case CS_LOVELACE: 
-		{
-			// new creditsystem by [lovelace]
-			double cl_up,cl_down; 
-			if (this->m_pCredits){
-				cl_up = GetUploadedTotal()/(double)1048576;
-			  	cl_down = GetDownloadedTotal()/(double)1048576;
-			  	result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
-			  	if (fabs(result)>20000.0f) 
-					result*=20000.0f/fabs(result);
-		  		result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001))),6.6667f);
-			  	if (result<0.1f) 
-					result=0.1f;
-			   	if (((m_pCredits->nKeySize == 0)||(GetCurrentIdentState(dwForIP)!=IS_IDENTIFIED))&&(result>10.0f)) 
-					result=10.0f;
-			}else{
-		 		result = 0.1f;
-			}
-			// end new creditsystem by [lovelace]
-		}break;
+			{
+				// new creditsystem by [lovelace]
+				double cl_up,cl_down; 
+				if (this->m_pCredits){
+						cl_up = GetUploadedTotal()/(double)1048576;
+						cl_down = GetDownloadedTotal()/(double)1048576;
+						result=(float)(3.0 * cl_down * cl_down - cl_up * cl_up);
+						if (fabs(result)>20000.0f) 
+							result*=20000.0f/fabs(result);
+						result=100.0f*powf((float)(1-1/(1.0f+expf(result*0.001))),6.6667f);
+						if (result<0.1f) 
+							result=0.1f;
+						if (result>100.f)
+							result=100.f;
+				}else{
+					result = 0.1f;
+				}
+				// end new creditsystem by [lovelace]
+			}break;
 /*
 		//Ratio mod Credit
 		case CS_RATIO: 
