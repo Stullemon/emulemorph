@@ -2497,10 +2497,11 @@ BEGIN
     IDS_WC_SUBMIT_EMAIL     "Diese Einstellungen per E-Mail einsenden"
     IDS_WC_LINK             "Link: "
     IDS_WC_PERSISTENT       "Anhaltende Verbindungen für Proxy Downloads"
-    IDS_WC_ADVANCED         "fortgeschrittene Einstellungen"
+    IDS_WC_ADVANCED         "detaillierte Einstellungen"
     IDS_WC_TEST             "Webcache-Konfiguration testen. Kann bis 30 Sek. dauern."
     IDS_WC_HIDE_ADV         "einfache Einstellungen"
     IDS_WC_SUBMIT_WEB       "Diese Informationen per Webform einsenden"
+    IDS_WC_SOURCES          "Webcache Quellen"
 END
 
 STRINGTABLE 
