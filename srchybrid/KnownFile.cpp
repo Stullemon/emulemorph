@@ -1251,7 +1251,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	for (UINT i = 0; i < parts; i++)
 		file->WriteHash16(hashlist[i]);
 	//tags
-	const int iFixedTags = 9 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 EastShare - met control, known files expire tag[TAHO]
+	const int iFixedTags = 10 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 EastShare +1 ECFEF - met control, known files expire tag[TAHO]
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
 	// a bug in the meta tag reading+writing code. To achive maximum backward 
@@ -1278,8 +1278,6 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	if (GetShareOnlyTheNeed()>=0) tagcount++;	//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 	if (GetPowerSharedMode()>=0) tagcount++;			//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	if (GetPowerShareLimit()>=0) tagcount++;	//MORPH - Added by SiRoB, POWERSHARE Limit
-	
-	tagcount++;//Morph - Added by AndCycle, Equal Chance For Each File
 
 	// standard tags
 	file->WriteUInt32(tagcount);
