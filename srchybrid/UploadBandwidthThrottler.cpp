@@ -221,8 +221,8 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
         m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize();
 		return 2;
     }
-
 	//MORPH START - Added by SiRoB, Upload Splitting Class	
+	slotCounter = 0;
 	while(slotCounter < m_PowerShareOrder_list.GetSize() && foundSocket == false) {
         if(m_PowerShareOrder_list.GetAt(slotCounter) == socket) {
 			// Remove the slot
@@ -232,10 +232,11 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
             slotCounter++;
         }
     }
-	if(foundSocket && m_highestNumberOfFullyActivatedSlotsFriend > (uint32)m_FriendOrder_list.GetSize()) {
-        m_highestNumberOfFullyActivatedSlotsFriend = m_FriendOrder_list.GetSize();
-        return 1;
+	if(foundSocket && m_highestNumberOfFullyActivatedSlotsPowerShare > (uint32)m_PowerShareOrder_list.GetSize() ) {
+		m_highestNumberOfFullyActivatedSlotsPowerShare = (uint32)m_PowerShareOrder_list.GetSize();
+		return 0;
 	}
+	slotCounter = 0;
 	while(slotCounter < m_FriendOrder_list.GetSize() && foundSocket == false) {
         if(m_FriendOrder_list.GetAt(slotCounter) == socket) {
 			// Remove the slot
@@ -246,9 +247,9 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
         }
     }
 	
-	if(foundSocket && m_highestNumberOfFullyActivatedSlotsPowerShare > (uint32)m_PowerShareOrder_list.GetSize() ) {
-		m_highestNumberOfFullyActivatedSlotsPowerShare = (uint32)m_PowerShareOrder_list.GetSize();
-		return 0;
+	if(foundSocket && m_highestNumberOfFullyActivatedSlotsFriend > (uint32)m_FriendOrder_list.GetSize()) {
+        m_highestNumberOfFullyActivatedSlotsFriend = m_FriendOrder_list.GetSize();
+        return 1;
 	}
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
     return -1;
@@ -643,7 +644,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             }
 */
 		   	// Any bandwidth that hasn't been used yet are used first to last.
-			for(uint32 slotCounter = 0; slotCounter < (uint32)m_FriendOrder_list.GetSize() && min(bytesToSpend,FriendByteToSend) > 0 && spentBytes < (uint64)min(bytesToSpend,FriendByteToSend); slotCounter++) {
+			for(uint32 slotCounter = 0; slotCounter < (uint32)m_FriendOrder_list.GetSize() && bytesToSpend > 0 && spentBytes < (uint64)min(bytesToSpend,FriendByteToSend); slotCounter++) {
 				ThrottledFileSocket* socket = m_FriendOrder_list.GetAt(slotCounter);
 				
                	if(socket != NULL) {
