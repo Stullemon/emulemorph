@@ -195,10 +195,11 @@ BOOL CPPgMorphShare::OnApply()
 	thePrefs.PowerShareLimit = m_iPowerShareLimit;
 	theApp.sharedfiles->UpdatePartsInfo();
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
-	if(thePrefs.m_bPowershareInternalPrio != (m_iPowershareInternalPrio==1))
-		theApp.uploadqueue->ReSortUploadSlots(true);
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
+	bool oldValue = thePrefs.m_bPowershareInternalPrio;
 	thePrefs.m_bPowershareInternalPrio = m_iPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
+	if(thePrefs.m_bPowershareInternalPrio != oldValue)
+		theApp.uploadqueue->ReSortUploadSlots(true);
 	if(thePrefs.m_bShowFolderIcons != (m_iFolderIcons == 1))
 	{
 		if(m_iFolderIcons)

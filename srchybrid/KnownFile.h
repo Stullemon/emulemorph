@@ -358,7 +358,7 @@ public:
 	int		GetPowerShareLimit() const {return m_iPowerShareLimit;}
 	bool	GetPowerShareLimited() const {return m_bPowerShareLimited;}
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
-	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare, bool limitedpowershare) {m_bPowerShareAuthorized = authorizepowershare;m_bPowerShareAuto = autopowershare;m_bPowerShareLimited = limitedpowershare;}
+	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare, bool limitedpowershare);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 
 	// Mighty Knife: CRC32-Tag
@@ -427,6 +427,7 @@ private:
 	int		m_powershared;
 	bool	m_bPowerShareAuthorized;
 	bool	m_bPowerShareAuto;
+	bool	m_bpowershared;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
 	int		m_iPowerShareLimit;

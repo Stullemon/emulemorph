@@ -2459,6 +2459,22 @@ void CKnownFile::SetPowerShared(int newValue) {
     if(theApp.uploadqueue && oldValue != newValue)
         theApp.uploadqueue->ReSortUploadSlots(true);
 }
+
+void CKnownFile::UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare, bool limitedpowershare)
+{
+	m_bPowerShareAuthorized = authorizepowershare;
+	m_bPowerShareAuto = autopowershare;
+	m_bPowerShareLimited = limitedpowershare;
+	int temppowershared = (m_powershared>=0)?m_powershared:thePrefs.GetPowerShareMode();
+	bool oldPowershare = m_bpowershared;
+	m_bpowershared = ((temppowershared&1) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
+	if (theApp.uploadqueue && oldPowershare != m_bpowershared)
+		theApp.uploadqueue->ReSortUploadSlots(true);
+}
+bool CKnownFile::GetPowerShared() const
+{
+	return m_bpowershared;
+}
 //MORPH END   - Added by SiRoB, Power Share
 
 // SLUGFILLER: hideOS
@@ -2696,7 +2712,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	client->m_bUpPartStatusHiddenBySOTN = true;
 	client->m_abyUpPartStatusHidden = new uint8[parts];
 	memset(client->m_abyUpPartStatusHidden,0,parts);
-	UINT iMinAvailablePartFrenquency = 2;
+	UINT iMinAvailablePartFrenquency = (UINT)-1;
 	bool	revelatleastonechunk = false;
 	if (!m_AvailPartFrequency.IsEmpty())
 		for (UINT i = 0; i < parts; i++)
@@ -2712,7 +2728,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= 2)
+			if (m_AvailPartFrequency[done] <= iMinAvailablePartFrenquency)
 				towrite |= (1<<i);
 			else
 				client->m_abyUpPartStatusHidden[done] = 1;
@@ -2726,13 +2742,6 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 }
 //Wistily : Share only the need STOP
 
-//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-bool CKnownFile::GetPowerShared() const
-{
-	int temppowershared = (m_powershared>=0)?m_powershared:thePrefs.GetPowerShareMode();
-	return ((temppowershared&1) || ((temppowershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized && !((temppowershared == 3) && m_bPowerShareLimited);
-}
-//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 //MORPH START - Added by SiRoB, Avoid misusing of HideOS
 uint8	CKnownFile::HideOSInWork() const
 {
