@@ -84,6 +84,9 @@ CPPgMorph::CPPgMorph()
 	m_htiTimeRemRealTime = NULL;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	//MORPH START - Added by SiRoB, ICS Optional
+	m_htiUseICS = NULL;
+	//MORPH END   - Added by SiRoB, ICS Optional
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiInfiniteQueue = NULL;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_htiDontRemoveSpareTrickleSlot = NULL; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
@@ -190,7 +193,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_iUseSLS);
 		//MORPH END - Added by SiRoB, khaos::categorymod+
-		
+		//MORPH START - Added by SiRoB, ICS Optional
+		m_htiUseICS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ICS_USEICS), m_htiDM, m_iUseICS);
+		//MORPH END   - Added by SiRoB, ICS Optional
+
 		CString Buffer;
 		m_htiUM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_UM), iImgUM, TVI_ROOT);
 		m_htiDYNUP = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUPLOAD), iImgDYNUP, m_htiUM);
@@ -345,6 +351,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiTimeRemainingMode, m_iTimeRemainingMode);
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseICS, m_iUseICS);//MORPH - Added by SiRoB, ICS Optional
+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_iHighProcess); //MORPH - Added by IceCream, high process priority 
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
@@ -415,6 +423,9 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iTimeRemainingMode = thePrefs.GetTimeRemainingMode();
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	//MORPH START - Added by SiRoB, ICS Optional
+	m_iUseICS = thePrefs.UseICS();
+	//MORPH END   - Added by SiRoB, ICS Optional
 	//MORPH START - Added by IceCream, high process priority
 	m_iHighProcess = thePrefs.GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
@@ -503,6 +514,10 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_iTimeRemainingMode = m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	//MORPH START - Added by SiRoB, ICS Optional
+	thePrefs.m_bUseIntelligentChunkSelection = m_iUseICS;
+	//MORPH END   - Added by SiRoB, ICS Optional
+
 	//MORPH START - Added by IceCream, high process priority
 	thePrefs.SetEnableHighProcess(m_iHighProcess);
 	//MORPH END   - Added by IceCream, high process priority
@@ -616,6 +631,9 @@ void CPPgMorph::Localize(void)
 		if (m_htiTimeRemAverage) m_ctrlTreeOptions.SetItemText(m_htiTimeRemAverage, GetResString(IDS_AVG));
 		// khaos::accuratetimerem-
 		//MORPH END - Added by SiRoB, khaos::categorymod+
+		//MORPH START - Added by SiRoB, ICS Optional
+		if (m_htiUseICS) m_ctrlTreeOptions.SetItemText(m_htiUseICS, GetResString(IDS_ICS_USEICS));
+		//MORPH START - Added by SiRoB, ICS Optional
 		//MORPH START - Added by IceCream, high process priority
 		if (m_htiHighProcess) m_ctrlTreeOptions.SetItemText(m_htiHighProcess, GetResString(IDS_HIGHPROCESS));
 		//MORPH END   - Added by IceCream, high process priority
@@ -691,6 +709,7 @@ void CPPgMorph::OnDestroy()
 	m_htiTimeRemRealTime = NULL;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	m_htiUseICS = NULL;//MORPH - Added by SiRoB, ICS Optional
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	CPropertyPage::OnDestroy();
 }

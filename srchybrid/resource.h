@@ -2539,6 +2539,7 @@
 #define IDS_COMMUNITYTAG                4890
 #define IDC_RESETBUTTON                 4891
 #define IDS_INVISIBLEMODE               4891
+#define IDS_ICS_USEICS                  4892
 #define IDC_RICHEDIT21                  4897
 #define IDS_AUXPORTS                    5000
 #define IDC_SOLIDGRAPH                  5001

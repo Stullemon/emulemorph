@@ -2928,11 +2928,13 @@ uint32 CPartFile::GetPartSizeToDownload(uint16 partNumber)
 #define	CM_SHARE_MINSRC			25
 #define CM_MAX_SRC_CHUNK		3
 
-bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count)
+bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count)
 {
+	//MORPH - Removed by SiRoB, ICS Optional
+	/*
 	if (!(*count)) return false;					// added as in 29a
 	if (!(sender->GetPartStatus())) return false;	// added as in 29a
-
+	*/
 	// Select mode: RELEASE, SPREAD or SHARE
 
 	uint16	part_idx;
@@ -2948,11 +2950,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Str
 	if (min_src <= CM_SPREAD_MINSRC)		m_ics_filemode = CM_RELEASE_MODE;
 	else if (min_src <= CM_SHARE_MINSRC)	m_ics_filemode = CM_SPREAD_MODE;
 	else									m_ics_filemode = CM_SHARE_MODE;
-	//MORPH START - Changed by SiRoB, Enable Preview for release file
-	if(thePrefs.IsExtControlsEnabled() && GetPreviewPrio())
-		m_ics_filemode = CM_SHARE_MODE;
-	//MORPH END   - Changed by SiRoB, Enable Preview for release file
-			
+		
 	// Chunk list ordered by preference
 
 	CList<uint16,uint16> chunk_list;
@@ -5212,8 +5210,6 @@ uint16 CPartFile::GetTransferingSrcCount() const
 	return GetSrcStatisticsValue(DS_DOWNLOADING);
 }
 
-//Morph Start - removed by AndCycle, ICS
-/* // enkeyDev: ICS
 // [Maella -Enhanced Chunk Selection- (based on jicxicmic)]
 
 #pragma pack(1)
@@ -5229,7 +5225,7 @@ struct Chunk {
 bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, 
 									Requested_Block_Struct** newblocks, 
 									  uint16* count) /*const*/
-/*
+
 {
 	// The purpose of this function is to return a list of blocks (~180KB) to
 	// download. To avoid a prematurely stop of the downloading, all blocks that 
@@ -5283,7 +5279,12 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 		return false;
 	if(sender->GetPartStatus() == NULL)
 		return false;
-
+	//MORPH START - Added by SiRoB, ICS Optional
+	const bool isPreviewEnable = (thePrefs.GetPreviewPrio() || thePrefs.IsExtControlsEnabled() && GetPreviewPrio()) && IsPreviewableFileType();
+	if(!isPreviewEnable && IsComplete(0,PARTSIZE-1) && IsComplete(PARTSIZE*(GetPartCount()-1),GetFileSize()-1) && thePrefs.UseICS() && GetNextRequestedBlockICS(sender,newblocks,count))
+		return true;
+	//MORPH END   - Added by SiRoB, ICS Optional
+	
 	// Define and create the list of the chunks to download
 	const uint16 partCount = GetPartCount();
 	CList<Chunk> chunksList(partCount);
@@ -5518,8 +5519,6 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	return (newBlockCount > 0);
 }
 // Maella end
-*/ // enkeyDev: ICS
-//Morph End - removed by AndCycle, ICS
 
 CString CPartFile::GetInfoSummary(CPartFile* partfile) const
 {

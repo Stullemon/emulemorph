@@ -60,6 +60,7 @@ protected:
 	int m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	int m_iUseICS; //MORPH - Added by SIRoB, ICS Optional
 	int m_iHighProcess; //MORPH - Added by IceCream, high process priority
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
@@ -132,6 +133,7 @@ protected:
 	HTREEITEM m_htiTimeRemRealTime;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
+	HTREEITEM m_htiUseICS; //MORPH - Added by SIRoB, ICS Optional
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities

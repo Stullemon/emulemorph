@@ -692,6 +692,9 @@ public:
 	// khaos::accuratetimerem+
 	static uint8		m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = average
 	// khaos::accuratetimerem-
+	//MORPH START - Added by SiRoB, ICS Optional
+	static bool		m_bUseIntelligentChunkSelection;
+	//MORPH END   - Added by SiRoB, ICS Optional
 	
 	// Mighty Knife: Community Visualization, Report hashing files, Log friendlist activities
 	static TCHAR	m_sCommunityName [256];
@@ -1758,6 +1761,9 @@ public:
 	// khaos::accuratetimerem+
 	static	uint8	GetTimeRemainingMode()	{ return m_iTimeRemainingMode; }
 	// khaos::accuratetimerem-
+	//MORPH START - Added by SiRoB, ICS Optional
+	static	bool	UseICS()	{ return m_bUseIntelligentChunkSelection; }
+	//MORPH END   - Added by SiRoB, ICS Optional
 
     //Commander - Added: Invisible Mode [TPT] - Start
     static	bool GetInvisibleMode() { return m_bInvisibleMode; }

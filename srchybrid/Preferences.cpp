@@ -639,6 +639,10 @@ bool	CPreferences::m_bUseSaveLoadSources;
 uint8	CPreferences::m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = average
 // khaos::accuratetimerem-
 
+//MORPH START - Added by SiRoB, ICS Optional
+bool	CPreferences::m_bUseIntelligentChunkSelection;
+//MORPH END   - Added by SiRoB, ICS Optional
+
 // Mighty Knife: Community Visualization, Report hashing files, Log friendlist activities
 TCHAR	CPreferences::m_sCommunityName [256];
 bool	CPreferences::m_bReportHashingFiles;
@@ -2692,6 +2696,9 @@ void CPreferences::SavePreferences()
 	// khaos::accuratetimerem+
 	ini.WriteInt(_T("TimeRemainingMode"), m_iTimeRemainingMode,_T("eMule"));
 	// khaos::accuratetimerem-
+	//MORPH START - Added by SiRoB, ICS Optional
+	ini.WriteBool(_T("UseIntelligentChunkSelection"), m_bUseIntelligentChunkSelection,_T("eMule"));
+	//MORPH END   - Added by SiRoB, ICS Optional
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	ini.WriteBool(_T("SUCEnabled"),m_bSUCEnabled,_T("eMule"));
 	ini.WriteInt(_T("SUCLog"),m_bSUCLog,_T("eMule"));
@@ -3354,6 +3361,9 @@ void CPreferences::LoadPreferences()
 	// khaos::accuratetimerem+
 	m_iTimeRemainingMode=ini.GetInt(_T("TimeRemainingMode"), 0);
 	// khaos::accuratetimerem-
+	//MORPH START - Added by SiRoB, ICS Optional
+	m_bUseIntelligentChunkSelection=ini.GetBool(_T("UseIntelligentChunkSelection"), true);
+	//MORPH END   - Added by SiRoB, ICS Optional
 	//MORPH START - Added by SiRoB, XML News [O²]
 	enableNEWS=ini.GetBool(_T("ShowNews"), 1);
 	//MORPH END   - Added by SiRoB, XML News [O²]

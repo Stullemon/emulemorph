@@ -167,6 +167,9 @@ public:
 	virtual void	UpdatePartsInfo();
 
 	bool	GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count) /*const*/;
+	//MORPH START - Added by SiRoB, ICS Optional
+	bool	GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count);
+	//MORPH END   - Added by SiRoB, ICS Optional
 	void	WritePartStatus(CSafeMemFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
 	void	WriteCompleteSourcesCount(CSafeMemFile* file) const;
 	void	AddSources(CSafeMemFile* sources,uint32 serverip, uint16 serverport);
