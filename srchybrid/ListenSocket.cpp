@@ -499,7 +499,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_CANCELTRANSFER:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-					if(theApp.uploadqueue->RemoveFromUploadQueue(client,"OP_CANCELTRANSFER",false))
+					if(theApp.uploadqueue->RemoveFromUploadQueue(client,"OP_CANCELTRANSFER"))
 						AddDebugLogLine(false, "%s: Upload session ended due canceled transfer.", client->GetUserName());
 					client->SetUploadFileID(NULL);
 					break;
