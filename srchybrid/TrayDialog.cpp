@@ -18,7 +18,6 @@
 #include "emule.h"
 #include "TrayDialog.h"
 #include "emuledlg.h"
-#include "Preferences.h" //Commander - Added: Invisible Mode [TPT]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -257,30 +256,16 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 	{
 		if ((nID & 0xFFF0) == SC_MINIMIZE)
 		{
-		//Commander - Modified: Invisible Mode [TPT] - Start
-	        if (!thePrefs.GetInvisibleMode())
-                  {
-				if (TrayShow()) 
+			if (TrayShow()) 
 				ShowWindow(SW_HIDE);
-			}
-			else 
-                ShowWindow(SW_HIDE);	
-		//Commander - Modified: Invisible Mode [TPT] - End
 		}
-		else
+		else 
 			CTrayDialogBase::OnSysCommand(nID, lParam);	
 	}
 	else if ((nID & 0xFFF0) == SC_MINIMIZETRAY)
 	{
-	//Commander - Modified: Invisible Mode [TPT] - Start
-	if (!thePrefs.GetInvisibleMode())
-          {
 	    if (TrayShow()) 
 	        ShowWindow(SW_HIDE);
-			}
-		else 
-            ShowWindow(SW_HIDE);
-	//Commander - Modified: Invisible Mode [TPT] - End
 	}
 	else
 		CTrayDialogBase::OnSysCommand(nID, lParam);
@@ -333,10 +318,3 @@ LRESULT CTrayDialog::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
 	}
 	return true;
 }
-
-//SLAHAM: ADDED Invisible Mode =>
-void CTrayDialog::HideTray()
-{
-	ShowWindow(SW_HIDE);
-}
-//SLAHAM: ADDED Invisible Mode <=

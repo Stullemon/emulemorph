@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -129,7 +129,7 @@ BEGIN
     CONTROL         "",IDC_MYINFOLIST,"RichEdit20A",ES_MULTILINE | 
                     ES_READONLY | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,372,
                     176,130,106,WS_EX_STATICEDGE
-    ICON            "",IDC_SERVLST_ICO,5,5,21,20
+    ICON            "",IDC_SERVLST_ICO,5,5,20,20
     CONTROL         "Servers:",IDC_SERVLIST_TEXT,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,18,6,91,8
     CONTROL         "",IDC_SERVLIST,"SysListView32",LVS_OWNERDRAWFIXED | 
@@ -382,10 +382,10 @@ BEGIN
     LTEXT           "Modifier Keys:",IDC_INVISIBLE_MODE_MODIFIER_STATIC,18,
                     200,93,8
     LTEXT           "Key:",IDC_INVISIBLE_MODE_KEY_STATIC,142,200,60,8
-    COMBOBOX        IDC_INVISIBLE_MODE_KEY_COMBO,18,211,95,30,CBS_DROPDOWN | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_INVISIBLE_MODE_SELECT_COMBO,142,211,63,30,
-                    CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INVISIBLE_MODE_KEY_COMBO,18,211,95,73,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INVISIBLE_MODE_SELECT_COMBO,142,211,63,79,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "+",IDC_INVISIBLE_MODE_SYMBOL_STATIC,125,213,8,8
     CONTROL         "Play startupsound",IDC_STARTUPSOUNDON,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,155,138,10
@@ -2577,12 +2577,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// Allemand (Allemagne) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 #ifdef _WIN32
@@ -2596,12 +2596,12 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 //
 
 IDB_MORPH_BANNER        BITMAP                  "res\\morph_banner.bmp"
-#endif    // Deutsch (Deutschland) resources
+#endif    // Allemand (Allemagne) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4769,7 +4769,7 @@ BEGIN
     IDS_DOWNLOADALLFEEDS    "Update all"
 END
 
-#endif    // Englisch (USA) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

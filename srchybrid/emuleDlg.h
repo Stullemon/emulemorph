@@ -215,7 +215,6 @@ private:
 	void StartConnection();
 	void CloseConnection();
 	void RestoreWindow();
-	void HideWindow(); //SLAHAM: ADDED Invisible Mode
 	void UpdateTrayIcon(int procent);
 	void ShowConnectionStateIcon();
 	void ShowTransferStateIcon();
@@ -243,14 +242,22 @@ public:
 public:
 	BOOL	RegisterInvisibleHotKey();
 	BOOL	UnRegisterInvisibleHotKey();
-	BOOL	IsWndVisible; //SLAHAM: ADDED Invisible Mode
 protected:
 	LRESULT	OnHotKey(WPARAM wParam, LPARAM lParam);
 
 	// Allows "invisible mode" on multiple instances of eMule
 	afx_msg LRESULT OnRestoreWindowInvisibleMode(WPARAM, LPARAM);
 	static BOOL CALLBACK AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam);
-//Commander - Added: Invisible Mode [TPT] - End
+
+	//MORPH - Added by SiRoB, Toggle Show Hide window
+private:
+	void	ToggleShow();
+	void	ToggleHide();
+	bool	b_TrayWasVisible;
+	bool	b_HideApp;
+	//MORPH - Added by SiRoB, Toggle Show Hide window
+
+	//Commander - Added: Invisible Mode [TPT] - End
 };
 
 
@@ -305,6 +312,7 @@ enum EEmuleHotKeysIDs
 enum EEMuleInvisibleModeEnumOptions
 {
 	INVMODE_RESTOREWINDOW,
-	INVMODE_REGISTERHOTKEY
+	INVMODE_REGISTERHOTKEY,
+	INVMODE_HIDEWINDOW //MORPH - Added by SiRoB, Toggle Show Hide window 
 };
 //Commander - Added: Invisible Mode [TPT] - End

@@ -161,6 +161,7 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_pSplashWnd = NULL;
 	m_dwSplashTime = (DWORD)-1;
 	m_pSystrayDlg = NULL;
+	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
 }
 
 CemuleDlg::~CemuleDlg()
@@ -270,10 +271,6 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
-	//EastShare, Added by linekin HotKey
-	ON_MESSAGE(WM_HOTKEY,OnHotKey) 
-	//EastShare, Added by linekin HotKey
-	
 END_MESSAGE_MAP()
 
 // CemuleDlg eventhandler
@@ -503,7 +500,6 @@ BOOL CemuleDlg::OnInitDialog()
 	//EastShare, Added by linekin HotKey
 	//RegisterHotKey(this->m_hWnd,100,MOD_WIN,'S'); 
 	//EastShare, Added by linekin HotKey
-	IsWndVisible = true; //SLAHAM: ADDED Invisible Mode
 
 	return TRUE;
 }
@@ -1075,16 +1071,10 @@ void CemuleDlg::ShowPing() {
 void CemuleDlg::OnCancel()
 {
 	if (*thePrefs.GetMinTrayPTR()){
-		//Commander - Added: Invisible Mode [TPT] - Start
-		if (!thePrefs.GetInvisibleMode())
-		{
-			if(TrayShow())
+		TrayShow();
 		ShowWindow(SW_HIDE);
 	}
-		else
-			ShowWindow(SW_HIDE);
-		//Commander - Added: Invisible Mode [TPT] - End
-	} else {
+	else{
 		ShowWindow(SW_MINIMIZE);
 	}
 	ShowTransferRate();
@@ -1690,7 +1680,6 @@ void CemuleDlg::RestoreWindow(){
 		TrayHide();	
 	
 	ShowWindow(SW_SHOW);
-	IsWndVisible = true; //SLAHAM: ADDED Invisible Mode
 }
 
 void CemuleDlg::UpdateTrayIcon(int procent)
@@ -2692,21 +2681,42 @@ void CemuleDlg::OutputExtDebugMessages () {
 //Commander - Added: Invisible Mode [TPT] - Start
 LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM lParam)
 {
-	if(wParam == HOTKEY_INVISIBLEMODE_ID) 
-		//SLAHAM: MODIFIED Invisible Mode =>
-		if(IsWndVisible)
-			HideWindow();
-		else
-			RestoreWindow();
-	//SLAHAM: MODIFIED Invisible Mode <=
-
+	//MORPH START - Changed by SiRoB, Toggle Show Hide window
+	/*
+	if(wParam == HOTKEY_INVISIBLEMODE_ID) RestoreWindow();
 	// Allows "invisible mode" on multiple instances of eMule
 	// Restore the rest of hidden emules
-	// EnumWindows(AskEmulesForInvisibleMode, INVMODE_RESTOREWINDOW); //SLAHAM: No Differece
-	
+	EnumWindows(AskEmulesForInvisibleMode, INVMODE_RESTOREWINDOW);
+	*/
+	if(wParam == HOTKEY_INVISIBLEMODE_ID)
+		if(b_HideApp = !b_HideApp)
+		{
+			EnumWindows(AskEmulesForInvisibleMode, INVMODE_HIDEWINDOW);
+		}
+		else
+		{
+			EnumWindows(AskEmulesForInvisibleMode, INVMODE_RESTOREWINDOW);
+		}
+	//MORPH END   - Changed by SiRoB, Toggle Show Hide window
 	return 0;
 }
-
+//MORPH - Added by SiRoB, Toggle Show Hide window
+void CemuleDlg::ToggleHide()
+{
+	b_HideApp = true;
+	b_TrayWasVisible = TrayIsVisible();
+	TrayHide();
+	ShowWindow(SW_HIDE);
+}
+void CemuleDlg::ToggleShow()
+{
+	b_HideApp = false;
+	if(b_TrayWasVisible)
+		TrayShow();
+	else
+		ShowWindow(SW_SHOW);
+}
+//MORPH - Added by SiRoB, Toggle Show Hide window
 BOOL CemuleDlg::RegisterInvisibleHotKey()
 {
 	if(m_hWnd && IsRunning()){
@@ -2744,11 +2754,20 @@ LRESULT CemuleDlg::OnRestoreWindowInvisibleMode(WPARAM wParam, LPARAM lParam)
 		(char)HIWORD(wParam) == thePrefs.GetInvisibleModeHKKey()) {
 			switch(lParam){
 				case INVMODE_RESTOREWINDOW:
+					//MORPH - Changed by SiRoB, Toggle Show Hide window
+					/*
 					RestoreWindow();
+					*/
+					ToggleShow();
 					break;
 				case INVMODE_REGISTERHOTKEY:
 					RegisterInvisibleHotKey();
 					break;
+				//MORPH START - Added by SiRoB, Toggle Show Hide window
+				case INVMODE_HIDEWINDOW:
+					ToggleHide();
+				//MORPH END   - Added by SiRoB, Toggle Show Hide window
+			
 			}
 			return UWM_RESTORE_WINDOW_IM;
 	} else
@@ -2769,11 +2788,3 @@ BOOL CALLBACK CemuleDlg::AskEmulesForInvisibleMode(HWND hWnd, LPARAM lParam){
 	return res; 
 } 
 //Commander - Added: Invisible Mode [TPT] - End
-
-//SLAHAM: ADDED Invisible Mode =>
-void CemuleDlg::HideWindow()
-{
-	theApp.emuledlg->HideTray();
-	IsWndVisible = false;
-}
-//SLAHAM: ADDED Invisible Mode <= 

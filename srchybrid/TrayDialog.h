@@ -4,7 +4,6 @@
 
 class CTrayDialog : public CDialogMinTrayBtn<CResizableDialog>{
 	// Construction
-	friend class CemuleDlg;
 protected:
 	typedef CDialogMinTrayBtn<CResizableDialog> CTrayDialogBase;
 
@@ -21,7 +20,7 @@ public:
 	void TraySetIcon(UINT nResourceID, bool bDelete= false);
 	void TraySetIcon(LPCTSTR lpszResourceName, bool bDelete= false);
 	void TrayMinimizeToTrayChange();
-	void HideTray(); //SLAHAM: ADDED Invisible Mode
+
 	BOOL TrayIsVisible();
 	CTrayDialog(UINT uIDD,CWnd* pParent = NULL);   // standard constructor
 	
