@@ -570,6 +570,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 					uint32 posSocket = isFocused?maxCounter:lastpos+rememberedSlotCounterClass[classID];
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(posSocket);
+					
 					if(socket != NULL) {
 						uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
 						if(allowedDataRateClass[classID] > 0 && classID < LAST_CLASS){
@@ -579,8 +580,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								break;
 						}
 						if(!isFocused) bytesToSpendTemp = min(ClientDataRate[classID],bytesToSpendTemp);
-						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
+						Socket_stat* stat = m_StandardOrder_list_stat.GetAt(posSocket);
+						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(min((bytesToSpendTemp+stat->LastSpentBytes)/2,bytesToSpendTemp), doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
+						stat->LastSpentBytes = lastSpentBytes;
 						//MORPH START - Added by SiRoB, Upload Splitting Class
 						if(posSocket+1 > m_highestNumberOfFullyActivatedSlots && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/)) {
 							m_highestNumberOfFullyActivatedSlots = posSocket+1;
@@ -647,7 +650,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					        sint64 newRealBytesToSpend = 999+bandwidthSavedTolerance;
 					        //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i"), realBytesToSpend, newRealBytesToSpend);
 	           				realBytesToSpendClass[classID] = newRealBytesToSpend;
-							if(thisLoopTick-lastTickReachedBandwidth > max(50, timeSinceLastLoop*2)) {
+							if(thisLoopTick-lastTickReachedBandwidth > max(100, timeSinceLastLoop*2)) {
 	           		            if (classID==LAST_CLASS)
 								{
 									m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;
