@@ -915,35 +915,41 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 			}
 			// EastShare END - Added by TAHO, .met file control
 			default:
-				//MORPH START - Added by SiRoB, ZZ Upload System
-				if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
-					//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-					//SetPowerShared(newtag->tag.intvalue == 1);
-					SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
-					//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
-					delete newtag;
-				} else
-				//MORPH END - Added by SiRoB, ZZ Upload System
-				//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars
-				if ((!newtag->tag.specialtag) &&
-					(newtag->tag.tagname[0] == FT_SPREADSTART ||
-					newtag->tag.tagname[0] == FT_SPREADEND ||
-					newtag->tag.tagname[0] == FT_SPREADCOUNT)){
-					uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
-					if (newtag->tag.tagname[0] == FT_SPREADSTART)
+				//MORPH START - Changed by SiRoB, ZZ Upload System
+				if((!newtag->tag.specialtag) && newtag->tag.type == 3){
+					if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
+						//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
+						//SetPowerShared(newtag->tag.intvalue == 1);
+						SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
+						//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
+						delete newtag;
+						break;
+					}else
+				//MORPH END   - Changed by SiRoB, ZZ Upload System
+				//MORPH START - Changed by SiRoB, SLUGFILLER: Spreadbars
+					if (newtag->tag.tagname[0] == FT_SPREADSTART){
+						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
 						spread_start_map.SetAt(spreadkey, newtag->tag.intvalue);
-					else if (newtag->tag.tagname[0] == FT_SPREADEND)
+						delete newtag;
+						break;
+					}else if (newtag->tag.tagname[0] == FT_SPREADEND){
+						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
 						spread_end_map.SetAt(spreadkey, newtag->tag.intvalue);
-					else if (newtag->tag.tagname[0] == FT_SPREADCOUNT)
+						delete newtag;
+						break;
+					}else if (newtag->tag.tagname[0] == FT_SPREADCOUNT){
+						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
 						spread_count_map.SetAt(spreadkey, newtag->tag.intvalue);
-					delete newtag;
+						delete newtag;
+						break;
+					}
+					
 				}
-				else {
-					ConvertED2KTag(newtag);
-					if (newtag)
-						taglist.Add(newtag);
-				}
-				//MORPH END - Added by SiRoB, SLUGFILLER: Spreadbars
+				//MORPH END - Changed by SiRoB, SLUGFILLER: Spreadbars
+				ConvertED2KTag(newtag);
+				if (newtag)
+					taglist.Add(newtag);
+			
 		}	
 	}
 	//MORPH START - Added by SiRoB, SLUGFILLER: Spreadbars - Now to flush the map into the list
