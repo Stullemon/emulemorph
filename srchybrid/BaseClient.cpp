@@ -278,6 +278,7 @@ void CUpDownClient::Init()
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
+	m_uNotOfficial = 0;  //MOPRH - Added by SiRoB,  Control Mod Tag
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session
 	//Morph Start - added by AndCycle, ICS
@@ -313,6 +314,7 @@ void CUpDownClient::Init()
 	GenerateKey(Crypt.remoteMasterKey);	// generate a key - will be done right before sending
 	for (int i=0; i<WC_KEYLENGTH; i++) Crypt.localMasterKey[i] = 0; // fill with zeroes so we can say if the key is valid
     // MORPH END - Added by Commander, WebCache 1.2e
+	m_uFailedConnect = 0;
 }
 
 CUpDownClient::~CUpDownClient(){
@@ -500,13 +502,14 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			old_m_pszUsername = m_pszUsername;
 			return _T("Bad USERNAME detected");
 		}
-	//MOPRH START - Added by SiRoB, GhostMod
 	}
-	if (m_bNotOfficial == true && m_strModVersion.IsEmpty() == true && m_clientSoft == SO_EMULE && m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE)){
-		
+	if (m_bNotOfficial && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
 		return _T("Ghost Mod Detected");
-	//MOPRH END  - Added by SiRoB, GhostMod
-	}else if (IsLeecher())
+	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion < MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
+		return _T("Fake MODSTRING Detected");
+	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
+		return _T("Fake emuleVersion Detected");
+	}else	if (IsLeecher())
 		return _T("Allready Known");
 	return NULL;
 }
@@ -532,14 +535,6 @@ void CUpDownClient::ClearHelloProperties()
 	m_uPeerCacheDownloadPushId = 0;
 	m_uPeerCacheUploadPushId = 0;
 	m_byKadVersion = 0;
-
-	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
-	m_strModVersion.Empty();
-	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
-	//MOPRH START - Added by SiRoB, Is Morph Client?
-	m_bIsMorph = false;
-	//MOPRH END   - Added by SiRoB, Is Morph Client?
-	m_incompletepartVer = 0; // enkeyDev: ICS //Morph - added by AndCycle, ICS
 }
 
 bool CUpDownClient::ProcessHelloPacket(char* pachPacket, uint32 nSize){
@@ -567,7 +562,15 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	m_bIsML = false;
 	m_fNoViewSharedFiles = 0;
 	m_bUnicodeSupport = false;
-
+	m_incompletepartVer = 0; // enkeyDev: ICS //Morph - added by AndCycle, ICS
+	m_uNotOfficial = 0; //MOPRH - Added by SiRoB, Control Mod Tag
+	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
+	m_strModVersion.Empty();
+	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
+	//MOPRH START - Added by SiRoB, Is Morph Client?
+	m_bIsMorph = false;
+	//MOPRH END   - Added by SiRoB, Is Morph Client?
+	
 	data->ReadHash16(m_achUserHash);
 	if (bDbgInfo)
 		m_strHelloInfo.AppendFormat(_T("Hash=%s (%s)"), md4str(m_achUserHash), DbgGetHashTypeString(m_achUserHash));
@@ -585,6 +588,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	m_bNotOfficial = false; //MOPRH - Added by SiRoB, GhostMod
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(data, true);
+		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
+		m_uNotOfficial ^= temptag.GetNameID(); //MOPRH - Added by SiRoB,  Control Mod Tag
 		switch (temptag.GetNameID()){
 			case CT_NAME:
 				if (m_pszUsername){
@@ -859,7 +864,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	
 	
 	//MORPH START - Moved by SiRoB, xrmb Funnynick START
-	if (!IsLeecher()){ //MORPH - Added by SiRoB, Keep Leecher name
+	if (!IsLeecher() && thePrefs.DisplayFunnyNick()){ //MORPH - Added by SiRoB, Keep Leecher name
 		if (!m_pszUsername)
 			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
 		else if((_tcsnicmp(m_pszUsername, _T("http://emule"),12)==0)
@@ -921,7 +926,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	data.WriteUInt8(theApp.m_uCurVersionShort);
 	data.WriteUInt8(EMULE_PROTOCOL);
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
+	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername!=NULL) && !IsLeecher();
 	if (bSendModVersion)
 		data.WriteUInt32(7/*7 OFFICIAL*/+1/*ET_MOD_VERSION*/+1/*enkeyDev: ICS*/); // nr. of tags
 	else
@@ -976,7 +981,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	m_byEmuleVersion = data.ReadUInt8();
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("EmuleVer=0x%x"), (UINT)m_byEmuleVersion);
-	if( m_byEmuleVersion == 0x2B )
+	if( m_byEmuleVersion == 0x2B)
 		m_byEmuleVersion = 0x22;
 	uint8 protversion = data.ReadUInt8();
 	if (bDbgInfo)
@@ -1010,9 +1015,10 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	uint32 tagcount = data.ReadUInt32();
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("  Tags=%u"), (UINT)tagcount);
-	m_bNotOfficial = false; //MOPRH - Added by SiRoB, GhostMod
 	for (uint32 i = 0;i < tagcount; i++){
 		CTag temptag(&data, false);
+		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
+		m_uNotOfficial ^= temptag.GetNameID(); //MOPRH - Added by SiRoB,  Control Mod Tag
 		switch (temptag.GetNameID()){
 			case ET_COMPRESSION:
 				// Bits 31- 8: 0 - reserved
@@ -1116,6 +1122,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	if (bDbgInfo && data.GetPosition() < data.GetLength()){
 		m_strMuleInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), data.GetLength() - data.GetPosition());
 	}
+
 	ReGetClientSoft();
 	m_byInfopacketsReceived |= IP_EMULEPROTPACK;
 
@@ -1155,6 +1162,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	data->WriteHash16(thePrefs.GetUserHash());
 	uint32 clientid;
 	clientid = theApp.GetID();
+
 	data->WriteUInt32(clientid);
 	data->WriteUInt16(thePrefs.GetPort());
 
@@ -1164,7 +1172,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		tagcount += 2;
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
+	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername!=NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	if (bSendModVersion || m_clientSoft == SO_LPHANT) tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
@@ -1432,6 +1440,13 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			if (thePrefs.GetLogUlDlEvents())
 	            AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing connecting client from upload list. Reason: %s ----"), DbgGetClientInfo(), pszReason);
 		case US_WAITCALLBACK:
+			//MORPH START - Added by SiRoB, Failed Connect
+			if(m_uFailedConnect++ < 1)
+			{
+				bDelete = true;
+				break;
+			}
+			//MORPH START - Added by SiRoB, Failed Connect
 		case US_ERROR:
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
@@ -1439,6 +1454,13 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	switch(m_nDownloadState){
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
+			//MORPH START - Added by SiRoB, Failed Connect
+			if(m_uFailedConnect++ < 1)
+			{
+				bDelete = true;
+				break;
+			}
+			//MORPH END   - Added by SiRoB, Failed Connect
 		case DS_ERROR:
 			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 			bDelete = true;
@@ -1751,7 +1773,7 @@ bool CUpDownClient::Connect()
 void CUpDownClient::ConnectionEstablished()
 {
 	// ok we have a connection, lets see if we want anything from this client
-	
+
 	// check if we should use this client to retrieve our public IP
 	if (theApp.GetPublicIP() == 0 && theApp.serverconnect->IsConnected() && m_fPeerCache)
 		SendPublicIPRequest();
@@ -2055,7 +2077,7 @@ void CUpDownClient::SetUserName(LPCTSTR pszNewName)
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	//MORPH START - Added by IceCream, xrmb Funnynick START
-	if (!IsLeecher()) {//MORPH - Added by SiRoB, Keep Leecher name
+	if (!IsLeecher() && thePrefs.DisplayFunnyNick()) {//MORPH - Added by SiRoB, Keep Leecher name
 		if (!m_pszUsername)
 			m_pszUsername=funnyNick.gimmeFunnyNick(m_achUserHash);
 		else if((_tcsnicmp(m_pszUsername, _T("http://emule"),12)==0)
@@ -2383,6 +2405,10 @@ void CUpDownClient::ResetFileStatusInfo()
 
 bool CUpDownClient::IsBanned() const
 {
+	//MORPH START - Added by SiRoB, Code Optimization
+	if (m_nUploadState == US_BANNED)
+		return true;
+	//MORPH END   - Added by SiRoB, Code Optimization
 	return theApp.clientlist->IsBannedClient(GetIP());
 }
 
@@ -2810,36 +2836,37 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			strState = GetResString(IDS_KAD_TOOMANDYKADLKPS);
 			break;
 	}
-
+/*
 	if (thePrefs.GetPeerCacheShow())
 	{
-		switch (m_ePeerCacheDownState)
+*/		switch (m_ePeerCacheDownState)
 		{
 		case PCDS_WAIT_CLIENT_REPLY:
-			strState += _T(" Peer")+GetResString(IDS_PCDS_CLIENTWAIT);
+			strState = _T("Peer")+GetResString(IDS_PCDS_CLIENTWAIT);
 			break;
 		case PCDS_WAIT_CACHE_REPLY:
-			strState += _T(" Peer")+GetResString(IDS_PCDS_CACHEWAIT);
+			strState = _T("Peer")+GetResString(IDS_PCDS_CACHEWAIT);
 			break;
 		case PCDS_DOWNLOADING:
-			strState += _T(" Peer")+GetResString(IDS_CACHE);
+			strState = _T("Peer")+GetResString(IDS_CACHE);
 			break;
 		}
 		if (m_ePeerCacheDownState != PCDS_NONE && m_bPeerCacheDownHit)
-			strState += _T(" Hit");
+			strState = _T("Peer Hit");
+/*
 	}
-
+*/
 	// MORPH START - Added by Commander, WebCache 1.2e
 	switch (m_eWebCacheDownState)
 	{
 	case WCDS_WAIT_CLIENT_REPLY:
-		strState += _T(" ProxyWait");
+		strState = _T("ProxyWait");
 		break;
 	case WCDS_WAIT_CACHE_REPLY:
-		strState += _T(" WC-Bug:CacheWait"); // not needed...
+		strState = _T("WC-Bug:CacheWait"); // not needed...
 		break;
 	case WCDS_DOWNLOADING:
-		strState += _T(" Via Proxy");
+		strState = _T("Via Proxy");
 		break;
 	}
 	// MORPH END - Added by Commander, WebCache 1.2e
@@ -2883,25 +2910,26 @@ CString CUpDownClient::GetUploadStateDisplayString() const
             //strState.Format(_T("%i: %s"), GetSlotNumber(), strStateTemp);
 			break;
 	}
-
+/*
 	if (thePrefs.GetPeerCacheShow())
 	{
-		switch (m_ePeerCacheUpState)
+*/		switch (m_ePeerCacheUpState)
 		{
 		case PCUS_WAIT_CACHE_REPLY:
-			strState += _T(" PeerCacheWait");
+			strState = _T("PeerCacheWait");
 			break;
 		case PCUS_UPLOADING:
-			strState += _T(" PeerCache");
+			strState = _T("PeerCache");
 			break;
 		}
 		if (m_ePeerCacheUpState != PCUS_NONE && m_bPeerCacheUpHit)
 			strState += _T(" Hit");
+/*
 	}
-
+*/
 	// MORPH START - Added by Commander, WebCache 1.2e
 	if( m_eWebCacheUpState == WCUS_UPLOADING )
-		strState += _T(" Via Proxy");
+		strState = _T("Via Proxy");
 	// MORPH START - Added by Commander, WebCache 1.2e
 
 	return strState;
@@ -3014,7 +3042,6 @@ void CUpDownClient::ResetIP2Country(uint32 m_dwIP){
 }
 //MORPH END - Changed by SiRoB, ProxyClient
 //EastShare End - added by AndCycle, IP to Country
-//>>> eWombat [SNAFU_V3]
 //<<< eWombat [SNAFU_V3]
 void CUpDownClient::ProcessUnknownHelloTag(CTag *tag)
 {
@@ -3067,6 +3094,7 @@ void CUpDownClient::ProcessUnknownInfoTag(CTag *tag)
 {
 if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
 	return;
+m_bNotOfficial = true;
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
 	{
