@@ -267,6 +267,9 @@ bool CUpDownClient::MoreUpThanDown(){
 		credits->GetCurrentIdentState(GetIP()) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()){
 		return false;
 
+	}else if(credits->GetDownloadedTotal() < 1048578){
+		return false;
+
 	}else if(GetUploadState() == US_UPLOADING){
 		//kick PayBackFirst client after full chunk transfer
 		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){
@@ -276,7 +279,7 @@ bool CUpDownClient::MoreUpThanDown(){
 			return chkPayBackFirstTag();
 		}
 	}else{
-		setPayBackFirstTag(credits->GetDownloadedTotal() > credits->GetUploadedTotal() && credits->GetDownloadedTotal() > 1048578);
+		setPayBackFirstTag(credits->GetDownloadedTotal() > credits->GetUploadedTotal());
 	}
 
 	return chkPayBackFirstTag();
