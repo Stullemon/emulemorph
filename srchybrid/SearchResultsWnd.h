@@ -69,7 +69,11 @@ public:
 
 	bool	CreateNewTab(SSearchParams* pParams);
 	void	ShowSearchSelector(bool visible);
+	//MORPH - Changed by SiRoB, Selection Category Support
+	/*
 	uint8	GetSelectedCat()							{return m_cattabs.GetCurSel();}
+	*/
+	int	GetSelectedCat()							{return m_cattabs.GetCurSel();}
 	void	UpdateCatTabs();
 	void	SaveSettings();
 

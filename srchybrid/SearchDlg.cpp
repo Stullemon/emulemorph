@@ -137,7 +137,11 @@ void CSearchDlg::OpenParametersWnd()
 	ShowControlBar(m_pwndParams, TRUE, TRUE);
 }
 
+//MORPH - Changed by SiRoB, Selective Category Support
+/*
 uint8 CSearchDlg::GetSelectedCat()
+*/
+int CSearchDlg::GetSelectedCat()
 {
 	return m_pwndResults->GetSelectedCat();
 }

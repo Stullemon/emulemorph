@@ -408,20 +408,6 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		if (reqfile->hashsetneeded)
 		{
 			RequestHashset();	// SLUGFILLER: SafeHash
-			/*
-			if (socket)
-			{
-				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-				md4cpy(packet->pBuffer,reqfile->GetFileHash());
-				theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-				socket->SendPacket(packet,true,true);
-				SetDownloadState(DS_REQHASHSET);
-				m_fHashsetRequesting = 1;
-				reqfile->hashsetneeded = false;
-			}
-			else
-				ASSERT(0);
-			*/
 		}
 		else
 		{

@@ -44,7 +44,11 @@ public:
 	void ShowSearchSelector(bool visible);
 	CClosableTabCtrl& GetSearchSelector();
 
+	//MORPH - Changed by SiRoB, Selection Category Support
+	/*
 	uint8 GetSelectedCat();
+	*/
+	int GetSelectedCat();
 	void UpdateCatTabs();
 	void SaveAllSettings();
 	BOOL SaveSearchStrings();
