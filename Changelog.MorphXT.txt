@@ -1,4 +1,17 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.6
+--------------------------------------
+FIXED  : proper Scheduled slot order (keep older completing last and newer pre-empted first) [SiRoB]
+FIXED  : Missed some SafeHash code [SiRoB]
+
+CHANGED: Reworked again the USC to get smoother upload (more upload slot that the way to get linear upload) [SiRoB]
+
+TWEAKED: PBF: Lower a bit the CPU load on start [SiRoB]
+TWEAKED: Avoid Kad consume too much CPU (changed the while by if in uploadBandWidthThrottler) [SiRoB]
+
+REMOVED: FIXED  : USS udp ping switcher take long time to establish due to icmp udp alternate [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.45b MorphXT v6.5
 --------------------------------------
 FIXED  : USC: Reworked completly the per client datarate limit [SiRoB]
