@@ -76,6 +76,9 @@ void CSimpleCleanupDialog::Localize () {
 
 BOOL CSimpleCleanupDialog::OnInitDialog() {
 	CDialog::OnInitDialog();
+
+	Localize ();
+
 	InitWindowStyles(this);
 
 	m_ReplaceListBox = (CListCtrl*) GetDlgItem (IDC_REPLACECHARSLIST);
