@@ -39,7 +39,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	virtual BOOL OnKillActive();
-	void LoadSettings(void);
 
 	void SetModified(BOOL bChanged = TRUE){
 		m_bModified = bChanged;

@@ -111,7 +111,7 @@ void CPPgMorph3::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPPgMorph3::OnInitDialog()
 {
-        // Added by by MoNKi [MoNKi: -Wap Server-]
+    // Added by by MoNKi [MoNKi: -Wap Server-]
 	m_bWapEnable = thePrefs.GetWapServerEnabled();
 	m_iWapPort = thePrefs.GetWapPort();
 	m_sWapTemplate = thePrefs.GetWapTemplate();
@@ -123,14 +123,6 @@ BOOL CPPgMorph3::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	Localize();
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CPPgMorph3::LoadSettings(void)
-{
 	CString strBuffer;
 
 	strBuffer.Format(_T("%s"), thePrefs.GetDynDNSUsername());
@@ -146,7 +138,10 @@ void CPPgMorph3::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_CHECK_DYNDNS_ENABLED,0);
 
-	SetModified(FALSE);	// FoRcHa
+	Localize();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CPPgMorph3::OnKillActive()
