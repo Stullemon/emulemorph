@@ -1028,7 +1028,8 @@ void CemuleDlg::ShowPing() {
             }
 		} else if (thePrefs.IsSUCDoesWork()){
 			sprintf(buffer,"SUC r:%i vur:%.1f%s/s",theApp.uploadqueue->GetAvgRespondTime(0), (float)theApp.uploadqueue->GetMaxVUR()/1024,GetResString(IDS_KBYTES));
-		}
+		} else
+			sprintf(buffer,"");
 		//MORPH END   - Changed by SiRoB, Related to SUC &  USS
 		statusbar->SetText(buffer,4,0);
     }
@@ -1139,7 +1140,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 				*/
 				CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(link.Trim());
 				_ASSERT(pFileLink !=0);
-				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, thePrefs.SelectCatForNewDL()?-1:searchwnd->GetSelectedCat(), true);
+				theApp.downloadqueue->AddFileLinkToDownload(pFileLink, searchwnd->GetSelectedCat(), true);
 				//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 			}
 			break;
