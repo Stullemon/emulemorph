@@ -581,7 +581,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									m_highestNumberOfFullyActivatedSlots[classID] = min(slotCounter+1,m_highestNumberOfFullyActivatedSlots[classID]);
 								if (classID < LAST_CLASS){
 									spentBytesClass[LAST_CLASS] += lastSpentBytes;
-									spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID]
+									spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
 									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS]>0)
 										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = min(m_highestNumberOfFullyActivatedSlots[classID],m_highestNumberOfFullyActivatedSlots[LAST_CLASS]);
 								}
