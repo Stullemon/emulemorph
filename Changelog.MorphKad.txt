@@ -14,6 +14,7 @@ ADDED: Lowid to Highid Automatic Callback(enkeyDEV)[AndCycle]
 ADDED: Partfile Name Recovery (enkeyDEV)[AndCycle]
 ADDED: Now we can see the chunk disponibility of A4AF source (fixed and inspired from Khaos partstatuslist) [SiRoB]
 ADDED: Save Upload Queue Wait Time v2 (Moonlight) [AndCylce]
+	//Save a credits file in 0.30c format along with the modified one named clients.met.30c.bak name.
 FIXED: Small bug, eMule allows to open unfinished files (NoamSon) [AndCycle]
 FIXED: Double click unfinished files in SharedFile window display FileDetail [SiRoB]
 FIXED: Some change related to start crashing when a known.met file is corrupted [SiRoB]
