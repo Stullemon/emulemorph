@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.45b MorphXT v6.x
+Changelog for eMule 0.45b MorphXT v6.2
 --------------------------------------
 FIXED  : Identified a very old bug that make crash morph in particular waiting-queue configuration [SiRoB]
 FIXED  : Friend eLink minor fix from emulEspaña [SiRoB]
@@ -7,7 +7,6 @@ FIXED  : DoubleClick on the chat window friend icon open the file preferency [Si
 FIXED  : AddSource memory exception Official Bugfix by WiZaRd [SiRoB]
 FIXED  : DownloadClientCtrl: Double click on client item is working now [SiRoB]
 
-ADDED  : CrashReporter from SF-IOM, gnaddelwarz: crashRpt[AndCycle]
 ADDED  : Scheduled remove slot from zz mod [AndCycle/SiRoB]
 ADDED  : zzRatio triggered and activated reason [SiRoB]
 ADDED  : Optionnal funnyNick Display [SiRoB]
@@ -20,6 +19,7 @@ CHANGED: USC: Reworked to work properly with the new scheduled remove slot [SiRo
 CHANGED: updated -UPnPNAT Support- by MoNKi from emulEspania [SiRoB]
 CHANGED: updated -Improved ICS-Firewall support- by MoNKi from emulEspania [SiRoB]
 CHANGED: updated -Random Ports- by MoNKi from emulEspania [SiRoB]
+CHANGED: Datarate is based on 5'' instead of 10'' before (30'' for official) [SiRoB]
 
 REMOVED: CPU live optimization [SiRoB]
 REMOVED: No more ban on bad user name [SiRoB]
@@ -27,6 +27,7 @@ REMOVED: No more ban on bad user name [SiRoB]
 TWEAKED: USC: Ensure proper new open slot in all case [SiRoB]
 
 NOTE: About upnp support now you can disable the XP service :), big thanks to MoNKi.
+Also don't be surprised to see graph not as linear than the official.
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.1
