@@ -394,21 +394,111 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						else
 							Sbuffer = GetResString(IDS_UNKNOWN);
 					}
-						break;	
-				case 11:
+					break;	
+					//MORPH END - Added By Yun.SF3, Remote Status
+				case 11:{
                     Sbuffer.Format("%i", client->GetSlotNumber());
-					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
+					//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
+					CKnownFile* clientReqFile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());//Morph - added by AndCycle, more detail...for debug?
 					//EastShare START - Added by TAHO, Pay Back First
 					if (client->MoreUpThanDown())
 						Sbuffer.Append(" PBF");
 					//EastShare END - Added by TAHO, Pay Back First
 					if (client->GetFriendSlot() && client->IsFriend())
 						Sbuffer.Append(" FS");
-					else if (client->GetPowerShared())
-						Sbuffer.Append(" PS");
+					else if (client->GetPowerShared()){
+						Sbuffer.Append(" PS ");
+
+						CString tempFilePrio;
+
+						switch (clientReqFile->GetUpPriority()) {
+								case PR_VERYLOW : {
+									tempFilePrio = GetResString(IDS_PRIOVERYLOW);
+									break; }
+								case PR_LOW : {
+									if( clientReqFile->IsAutoUpPriority() )
+										tempFilePrio = GetResString(IDS_PRIOAUTOLOW);
+									else
+										tempFilePrio = GetResString(IDS_PRIOLOW);
+									break; }
+								case PR_NORMAL : {
+									if( clientReqFile->IsAutoUpPriority() )
+										tempFilePrio = GetResString(IDS_PRIOAUTONORMAL);
+									else
+										tempFilePrio = GetResString(IDS_PRIONORMAL);
+									break; }
+								case PR_HIGH : {
+									if( clientReqFile->IsAutoUpPriority() )
+										tempFilePrio = GetResString(IDS_PRIOAUTOHIGH);
+									else
+										tempFilePrio = GetResString(IDS_PRIOHIGH);
+									break; }
+								case PR_VERYHIGH : {
+									tempFilePrio = GetResString(IDS_PRIORELEASE);
+									break; }
+								default:
+									tempFilePrio.Empty();
+						}
+						Sbuffer.Append(tempFilePrio);
+					}
 					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
-					break;
-					//MORPH END - Added By Yun.SF3, Remote Status
+
+					//Morph Start - added by AndCycle, Equal Chance For Each File
+					//Morph - added by AndCycle, more detail...for debug?
+					if(theApp.glob_prefs->GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+
+						CString ecfef;
+
+						switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+
+							case ECFEF_ACCEPTED:{
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									ecfef.Format("%u", clientReqFile->statistic.GetAllTimeAccepts());
+								}
+								else{
+									ecfef.Format("%u", clientReqFile->statistic.GetAccepts());
+								}
+							}break;
+
+							case ECFEF_ACCEPTED_COMPLETE:{
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									ecfef.Format("%.2f: %u/%u", (float)clientReqFile->statistic.GetAllTimeAccepts()/clientReqFile->GetPartCount(), clientReqFile->statistic.GetAllTimeAccepts(), clientReqFile->GetPartCount());
+								}
+								else{
+									ecfef.Format("%.2f: %u/%u", (float)clientReqFile->statistic.GetAccepts()/clientReqFile->GetPartCount(), clientReqFile->statistic.GetAccepts(), clientReqFile->GetPartCount());
+								}
+							}break;
+
+							case ECFEF_TRANSFERRED:{
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									ecfef.Format("%s", CastItoXBytes(clientReqFile->statistic.GetAllTimeTransferred()));
+								}
+								else{
+									ecfef.Format("%s", CastItoXBytes(clientReqFile->statistic.GetTransferred()));
+								}
+							}break;
+
+							case ECFEF_TRANSFERRED_COMPLETE:{
+								if(theApp.glob_prefs->IsECFEFallTime()){
+									ecfef.Format("%.2f: %s/%s", (float)clientReqFile->statistic.GetAllTimeTransferred()/clientReqFile->GetFileSize(), CastItoXBytes(clientReqFile->statistic.GetAllTimeTransferred()), CastItoXBytes(clientReqFile->GetFileSize()));
+								}
+								else{
+									ecfef.Format("%.2f: %s/%s", (float)clientReqFile->statistic.GetTransferred()/clientReqFile->GetFileSize(), CastItoXBytes(clientReqFile->statistic.GetTransferred()), CastItoXBytes(clientReqFile->GetFileSize()));
+								}
+							}break;
+
+							default:{
+								ecfef.Empty();
+							}break;
+						}
+						Sbuffer.Append(":");
+						Sbuffer.Append(ecfef);
+					}
+					//Morph - added by AndCycle, more detail...for debug?
+					//Morph End - added by AndCycle, Equal Chance For Each File
+
+				}break;
+					
 				//MORPH START - Added by SiRoB, Show Compression by Tarod
 				case 12:
 					if (client->GetCompression() < 0.1f)

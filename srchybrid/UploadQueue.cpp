@@ -311,18 +311,24 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 //Morph Start - added by AndCycle, Equal Chance For Each File
 	bool	rightGetQueueFile = false;
 	bool	bothGetQueueFile = true;
-	CKnownFile* rightReqFile;
-	CKnownFile* leftReqFile;
+	CKnownFile* rightReqFile = NULL;
+	CKnownFile* leftReqFile = NULL;
 
 	if(!rightClient || !leftClient){
 		rightGetQueueFile = false;
 		bothGetQueueFile = true;
 	}
-	else if(
-		(rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
-		(leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID()))){
+	else{
+		rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID());
+		leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID());
+	}
+	if(rightReqFile && leftReqFile){
 
 		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+			case ECFEF_DISABLE:{
+				rightGetQueueFile = false;
+				bothGetQueueFile = true;
+			}break;
 
 			case ECFEF_ACCEPTED:{
 				if(theApp.glob_prefs->IsECFEFallTime()){
@@ -393,15 +399,13 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 				}
 			}break;
 
-			default:{//ECFEF_DISABLE
+			default:{
 				rightGetQueueFile = false;
 				bothGetQueueFile = true;
 			}break;
 		}
 	}
 	//Morph End - added by AndCycle, Equal Chance For Each File
-	
-
 
 	if(
 		(leftClient != NULL &&
