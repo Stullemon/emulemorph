@@ -42,6 +42,7 @@ CIP2Country::CIP2Country()
 
 	defaultIP2Country.FlagIndex = NO_FLAG;
 
+	FlagAmount = 0;
 	EnableIP2Country = false;
 	EnableCountryFlag = false;
 
@@ -113,9 +114,12 @@ bool CIP2Country::LoadFromFile(){
 					}
 					count++;
 
-					//tempStr[4] is full country name
+					//tempStr[4] is full country name, capitalize country name from rayita
+					//currently have ATL exception in side :(
+					/*
 					tempStr[4].MakeLower();
 					tempStr[4].SetAt(0, tempStr[4].Left(1).MakeUpper().GetAt(0));
+					*/
 
 					AddIPRange(atoi(tempStr[0]),atoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
 				}
@@ -243,10 +247,14 @@ bool CIP2Country::LoadCountryFlagLib(){
 
 		for(int cur_pos = 0; resID[cur_pos] != NO_FLAG; cur_pos++){
 
-			CountryIDtoFlagIndex[countryID[cur_pos]] = cur_pos;
+			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], cur_pos);
+
 			iconHandle = LoadIcon(_hCountryFlagDll, MAKEINTRESOURCE(resID[cur_pos]));
 			if(iconHandle == NULL) throw CString(_T("Invalid resID"));
-			CountryFlagIcon[cur_pos] = iconHandle;
+		
+			FlagAmount++;
+
+			CountryFlagIcon.SetAt(cur_pos, iconHandle);
 		}
 
 	}
@@ -260,26 +268,36 @@ bool CIP2Country::LoadCountryFlagLib(){
 }
 
 void CIP2Country::RemoveAllIPs(){
-	IPRange_Struct2* search;
 
-	std::map<uint32, IPRange_Struct2*>::const_iterator it;
-	for (it = iplist.begin(); it != iplist.end(); it++ ) {
-		search=(*it).second;
-		delete search;
+	uint32 key;
+	IPRange_Struct2* value;
+	POSITION pos1;
+	for(POSITION pos = iplist.GetHeadPosition(); pos1 = pos; )
+	{
+		iplist.GetNextAssoc(pos, key, value);
+		delete value;
+		iplist.RemoveAt(pos1);
 	}
+	iplist.RemoveAll();
 
-	iplist.clear();
 }
 
 void CIP2Country::RemoveAllFlags(){
 
 
-	std::map<uint16, HICON>::const_iterator it;
-	for(it = CountryFlagIcon.begin(); it != CountryFlagIcon.end(); it++){
-		if(it->second != NULL)	DestroyIcon(it->second);
+	uint16 key;
+	HICON value;
+	POSITION pos1;
+	for(POSITION pos = iplist.GetHeadPosition(); pos1 = pos; )
+	{
+		CountryFlagIcon.GetNextAssoc(pos, key, value);
+		if(value != NULL)	DestroyIcon(value);
+		CountryFlagIcon.RemoveAt(pos1);
 	}
+	CountryFlagIcon.RemoveAll();
 
-	CountryFlagIcon.clear();
+	//also clean out the map table
+	CountryIDtoFlagIndex.RemoveAll();
 }
 
 bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName){
@@ -292,11 +310,12 @@ bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName
 	newRange->LongCountryName = longCountryName;
 
 	if(EnableCountryFlag){
-		std::map<CString, uint16>::const_iterator it;
-		it = CountryIDtoFlagIndex.find(shortCountryName);
 
-		if(it != NULL){
-			newRange->FlagIndex = it->second;
+		CRBMap<CString, uint16>::CPair* pair;
+		pair = CountryIDtoFlagIndex.Lookup(shortCountryName);
+
+		if(pair != NULL){
+			newRange->FlagIndex = pair->m_value;
 		}
 		else{
 			newRange->FlagIndex = NO_FLAG;
@@ -306,27 +325,36 @@ bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName
 		newRange->FlagIndex = NO_FLAG;
 	}
 	
-	iplist[IPfrom] = newRange;
+	iplist.SetAt(IPfrom, newRange);
 	return true;
 }
 
 struct IPRange_Struct2* CIP2Country::GetCountryFromIP(uint32 ClientIP){
-	if (iplist.size()==0 || ClientIP==0){
-		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP doesn't have ip to search for, or iplist doesn't exist");
+
+	if(iplist.IsEmpty()){
+		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP iplist doesn't exist");
+		return &defaultIP2Country;
+	}
+	else if (ClientIP == 0){
+		AddDebugLogLine(false, "CIP2Country::GetCountryFromIP doesn't have ip to search for");
 		return &defaultIP2Country;
 	}
 
-	IPRange_Struct2* search;
 	ClientIP = htonl(ClientIP);
+	POSITION pos = iplist.FindFirstKeyAfter(ClientIP);
+	if(!pos){
+		pos = iplist.GetTailPosition();
+	}
+	else{
+		iplist.GetPrev(pos);
+	}
 
-	std::map<uint32, IPRange_Struct2*>::const_iterator it = iplist.upper_bound(ClientIP);
-	it--;
-	do {
-		search = (*it).second;
-		if (search->IPend<ClientIP) return &defaultIP2Country;
-		if (search->IPstart<=ClientIP && ClientIP<=search->IPend)	return search;
-		it--;
-	} while (it != iplist.begin());
+	while(pos){
+		const CRBMap<uint32, IPRange_Struct2*>::CPair* pair = iplist.GetPrev(pos);
+
+		if (ClientIP > pair->m_value->IPend) break;
+		if (ClientIP >= pair->m_key && ClientIP <= pair->m_value->IPend) return pair->m_value;
+	}
 	return &defaultIP2Country;
 }
 
@@ -334,17 +362,13 @@ HICON CIP2Country::GetCountryFlagByIndex(int index){
 
 	if(index == NO_FLAG) return NULL;
 
-	std::map<uint16, HICON>::const_iterator it;
-	it = CountryFlagIcon.find(index);
-	if(it == NULL){
+	CRBMap<uint16, HICON>::CPair* pair;
+	pair = CountryFlagIcon.Lookup(index);
+
+	if(pair == NULL){
 		return NULL;
 	}
-	return it->second;
-}
-
-int CIP2Country::GetCountryFlagAmount(){
-
-	return CountryFlagIcon.size();
+	return pair->m_value;
 }
 
 bool CIP2Country::ShowCountryFlag(){

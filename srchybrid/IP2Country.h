@@ -3,7 +3,7 @@
 // by Superlexx, based on IPFilter by Bouc7
 #pragma once
 #include "loggable.h"
-#include <map>
+#include <atlcoll.h>
 
 struct IPRange_Struct2{
 	uint32          IPstart;
@@ -32,16 +32,19 @@ class CIP2Country: public CLoggable
 		bool	AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName, CString midCountryName, CString longCountryName);
 		IPRange_Struct2*	GetCountryFromIP(uint32 IP);
 		HICON	GetCountryFlagByIndex(int index);
-		int		GetCountryFlagAmount();
+		int		GetCountryFlagAmount(){return FlagAmount;};
 		WORD	GetFlagResIDfromCountryCode(CString shortCountryName);
 	private:
 		HINSTANCE _hCountryFlagDll;
+		int		FlagAmount;
+
 		bool	EnableIP2Country;
 		bool	EnableCountryFlag;
 		struct	IPRange_Struct2 defaultIP2Country;
-		std::map<uint32,IPRange_Struct2*> iplist;
-		std::map<uint16, HICON>		CountryFlagIcon;
-		std::map<CString, uint16>	CountryIDtoFlagIndex;
+
+		CRBMap<uint32, IPRange_Struct2*> iplist;
+		CRBMap<uint16, HICON>	CountryFlagIcon;
+		CRBMap<CString, uint16>	CountryIDtoFlagIndex;
 };
 
 //EastShare End - added by AndCycle, IP to Country
