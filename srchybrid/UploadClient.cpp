@@ -648,7 +648,12 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 			SetUpCompleteSourcesCount(nCompleteCountNew);
 			if (nCompleteCountLast != nCompleteCountNew)
 		{
-				tempreqfile->UpdatePartsInfo();
+				//MORPH START - Added by SiRoB, -Fix-
+				if(tempreqfile->IsPartFile())
+					((CPartFile*)tempreqfile)->UpdatePartsInfo();
+				else
+				//MORPH END   - Added by SiRoB, -Fix-
+					tempreqfile->UpdatePartsInfo();
 			}
 		}
 	}
@@ -953,8 +958,7 @@ uint32 CUpDownClient::SendBlockData(){
                 m_dwLastCheckedForEvictTick = curTick;
                 wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
             }
-			//The main reason for this is that if we put the client back on queue and it goes
-            if(wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+			if(wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
                 // Should we end this upload?
 				//EastShare Start - added by AndCycle, Pay Back First
 				//check again does client satisfy the conditions
@@ -971,14 +975,18 @@ uint32 CUpDownClient::SendBlockData(){
                 // client must either be a high ID client, or a low ID
                 // client that is currently connected.
                 wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
-			//the downloader didn't send any reqeust blocks. Then the connection times out..
-                if(!wasRemoved) {
+			    if(!wasRemoved) {
                     // It wasn't removed, so it is allowed to pass into the next amount.
                     m_curSessionAmountNumber++;
                 }
             }
-			//I did some tests with eDonkey also and it seems to work well with them also..
-            if(wasRemoved) {
+			if(wasRemoved) {
+				//OP_OUTOFPARTREQS will tell the downloading client to go back to OnQueue..
+				//The main reason for this is that if we put the client back on queue and it goes
+				//back to the upload before the socket times out... We get a situation where the
+				//downloader things it already send the requested blocks and the uploader thinks
+				//the downloader didn't send any reqeust blocks. Then the connection times out..
+				//I did some tests with eDonkey also and it seems to work well with them also..
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					DebugSend("OP__OutOfPartReqs", this);
 				Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
