@@ -584,9 +584,12 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 
 	Out.Replace(_T("[Session]"), sSession);
 	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
-
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
 	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
-	
+	*/
+	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]")));
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 	Out.Replace(_T("[WapControl]"), _GetPlainResString(IDS_WAP_CONTROL));
 	Out.Replace(_T("[Transfer]"), _GetPlainResString(IDS_CD_TRANS));
 	Out.Replace(_T("[Server]"), _GetPlainResString(IDS_SV_SERVERLIST));
@@ -651,6 +654,17 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 	MaxDownload.Format(_T("%i"),thePrefs.GetMaxDownload());
 	if (MaxUpload == _T("65535"))  MaxUpload = GetResString(IDS_PW_UNLIMITED);
 	if (MaxDownload == _T("65535")) MaxDownload = GetResString(IDS_PW_UNLIMITED);
+	/*/
+	if ( CPreferences::GetMaxUpload() < UNLIMITED )
+		MaxUpload.Format(_T("%.1f"), CPreferences::GetMaxUpload());
+	else
+		MaxUpload = GetResString(IDS_PW_UNLIMITED);
+	if ( CPreferences::GetMaxDownload() < UNLIMITED )
+		MaxDownload.Format(_T("%.1f"), CPreferences::GetMaxDownload());
+	else
+		MaxDownload = GetResString(IDS_PW_UNLIMITED);
+	/**/
+	// End emulEspaña
 	
 	sLimits.Format(_T("%s/%s"), MaxUpload, MaxDownload);
 	// EC Ends
@@ -1711,7 +1725,13 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 	}
 
 	
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
 	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
+	*/
+	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]")));
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+	
 	
 	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
 	Out.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
@@ -1749,7 +1769,13 @@ CString CWapServer::_GetTransferUpList(WapThreadData Data)
 
 	Out += pThis->m_Templates.sTransferUpList;
 
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
 	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
+	*/
+	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]")));
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+	
 	
 	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
 	Out.Replace(_T("[Section]"), _GetPlainResString(IDS_PW_CON_UPLBL));
@@ -1869,7 +1895,13 @@ CString CWapServer::_GetTransferQueueList(WapThreadData Data)
 	Out=pThis->m_Templates.sTransferUpQueueList;
 
 	
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
 	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
+	*/
+	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]")));
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
+	
 	
 	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
 	Out.Replace(_T("[Section]"), _GetPlainResString(IDS_ONQUEUE));
@@ -2539,6 +2571,18 @@ CString CWapServer::_GetGraphs(WapThreadData Data)
 	Out.Replace(_T("[MaxDownload]"), s1);
 	Out.Replace(_T("[MaxUpload]"), s2);
 	Out.Replace(_T("[MaxConnections]"), s3);
+	/*/
+	CString s1, s2, s3;
+	s1.Format(_T("%d"), (int)thePrefs.GetMaxGraphDownloadRate() + 4);
+	s2.Format(_T("%d"), (int)thePrefs.GetMaxGraphUploadRate() + 4);
+	s3.Format(_T("%d"), thePrefs.GetMaxConnections()+20);
+	
+	Out.Replace("[ScaleTime]", sScale);
+	Out.Replace("[MaxDownload]", s1);
+	Out.Replace("[MaxUpload]", s2);
+	Out.Replace("[MaxConnections]", s3);
+	/**/
+	// End emulEspaña
 
 	return Out;
 }
@@ -2913,6 +2957,33 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 			theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.GetMaxGraphUploadRate());
 		if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
 			theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.GetMaxGraphDownloadRate());
+		/*/
+		if(_ParseURL(Data.sURL, _T("maxdown")) != "")
+		{
+			float maxdown = _ttof(_ParseURL(Data.sURL, _T("maxdown")));
+			if(maxdown > 0.0f)
+				thePrefs.SetMaxDownload(maxdown);
+			else
+				thePrefs.SetMaxDownload(UNLIMITED);
+		}
+		if(_ParseURL(Data.sURL, _T("maxup")) != "")
+		{
+			float maxup = _ttof(_ParseURL(Data.sURL, _T("maxup")));
+			if(maxup > 0.0f)
+				thePrefs.SetMaxUpload(maxup);
+			else
+				thePrefs.SetMaxUpload(UNLIMITED);
+		}
+		if(_ParseURL(Data.sURL, _T("maxcapdown")) != "")
+		{
+			thePrefs.SetMaxGraphDownloadRate(_ttof(_ParseURL(Data.sURL, _T("maxcapdown"))));
+		}
+		if(_ParseURL(Data.sURL, _T("maxcapup")) != "")
+		{
+			thePrefs.SetMaxGraphUploadRate(_ttof(_ParseURL(Data.sURL, _T("maxcapup"))));
+		}
+		*/
+		// End emulEspaña
 		
 		if(_ParseURL(Data.sURL, _T("maxsources")) != "")
 		{
@@ -2939,6 +3010,12 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 	Out.Replace(_T("[SendBWImagesVal]"),thePrefs.GetWapAllwaysSendBWImages()?_T("1"):_T("2"));
 	Out.Replace(_T("[SendImagesVal]"),thePrefs.GetWapSendImages()?_T("1"):_T("2"));
 	Out.Replace(_T("[SendProgressBarsVal]"),thePrefs.GetWapSendProgressBars()?_T("1"):_T("2"));
+	// emulEspaña: modified by Announ [Announ: -per file option for downloading preview parts-]
+	/*
+	Out.Replace("[FirstAndLastVal]",thePrefs.GetPreviewPrio()?"1":"2");
+	*/
+	// End emulEspaña
+
 	Out.Replace(_T("[FullChunksVal]"),thePrefs.TransferFullChunks()?_T("1"):_T("2"));
 
 	CString sRefresh;
@@ -3048,7 +3125,12 @@ CString CWapServer::_GetLoginScreen(WapThreadData Data)
 
 	Out.Replace(_T("[eMulePlus]"), _T("eMule"));
 	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	/*
 	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
+	*/
+	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]")));
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 	Out.Replace(_T("[Login]"), _GetPlainResString(IDS_WEB_LOGIN));
 	Out.Replace(_T("[EnterPassword]"), _GetPlainResString(IDS_WEB_ENTER_PASSWORD));
 	Out.Replace(_T("[LoginNow]"), _GetPlainResString(IDS_WEB_LOGIN_NOW));
