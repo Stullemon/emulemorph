@@ -1627,6 +1627,8 @@ public:
 	static	void SetInvisibleMode(bool on, UINT keymodifier, char key);
    //Commander - Added: Invisible Mode [TPT] - End
 
+	static	uint32	GetMaxFriendByteToSend();  //MORPH - Added by SiRoB, Upload Splitting Class
+
 protected:
 	static	CString appdir;
 	static	CString configdir;

@@ -1033,6 +1033,24 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 	return (( (maxup < 10*1024) && (maxup*4 < maxdownload*1024) )? maxup*4 : maxdownload*1024);
 }
 
+//MORPH START - Added by SiRoB, Upload Splitting Class
+uint32	CPreferences::GetMaxFriendByteToSend()
+{
+	if (theStats.sessionReceivedBytes>=theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)
+	{
+		if ((float)theStats.sessionReceivedBytes/(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)>=3)
+		{
+			if (3*theApp.uploadqueue->GetDatarate()>theApp.downloadqueue->GetDatarate())
+				return theApp.uploadqueue->GetDatarate()-theApp.downloadqueue->GetDatarate()/3;
+			else
+				return 0;
+		}else
+			return _UI32_MAX;
+	}
+	else
+		return _UI32_MAX;
+}
+//MORPH END   - Added by SiRoB, Upload Splitting Class
 // -khaos--+++> A whole bunch of methods!  Keep going until you reach the end tag.
 void CPreferences::SaveStats(int bBackUp){
 	// This function saves all of the new statistics in my addon.  It is also used to
