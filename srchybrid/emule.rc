@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1286,7 +1286,7 @@ BEGIN
     LTEXT           "Static",IDC_WCSTATISTICS,110,242,197,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     LTEXT           "Static",IDC_CLIENTDETAIL_KADCON,219,57,92,8
-    LTEXT           "Static",IDC_DLOC,98,69,92,8
+    LTEXT           "Static",IDC_DLOC,84,69,92,8
     LTEXT           "Country:",IDC_DLOC2,19,69,49,8
     LTEXT           "WebCache:",IDC_STATIC,19,229,64,10
     LTEXT           "Static",IDC_Webcache,110,229,197,10
@@ -1294,7 +1294,7 @@ BEGIN
     LTEXT           "Successfull/Requested:",IDC_STATIC,19,242,84,10
     LTEXT           "Is trusted OHCB sender:",IDC_STATIC,19,255,83,10
     LTEXT           "Static",IDC_TRUSTEDOHCBSENDER,110,255,197,8
-    ICON            "",IDC_COUNTRYFLAG,84,68,21,20
+    ICON            "",IDC_COUNTRYFLAG,68,68,21,20
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
@@ -2872,33 +2872,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
-#ifdef _WIN32
-LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-FLAG_NA                 ICON                    "res\\MOD\\not.ico"
-#endif    // Deutsch (Deutschland) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5306,7 +5285,7 @@ BEGIN
     IDS_POWERSHAER_INTERPRIO "Enable PS internal File Prio"
 END
 
-#endif    // Englisch (USA) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

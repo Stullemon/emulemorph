@@ -62,18 +62,15 @@ BOOL CClientDetailDialog::OnInitDialog(){
 		GetDlgItem(IDC_DNAME)->SetWindowText(_T("?"));
 	
 	//EastShare Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->IsIP2Country() && thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE){
+	if(theApp.ip2country->IsIP2Country()){
 		// Superlexx
 		bool longCountryName = true;
 		GetDlgItem(IDC_DLOC)->SetWindowText(m_client->GetCountryName(longCountryName));
 		//MORPH START - Added by Commander, CountryFlag
-		countryflag = theApp.ip2country->GetFlagImageList()->ExtractIcon(m_client->GetCountryFlagIndex());
-		((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
-	}
-	else{
-		GetDlgItem(IDC_DLOC)->SetWindowText(GetResString(IDS_DISABLED));
-		countryflag = theApp.LoadIcon(_T("FLAG_NA"), 18, 16);
-		((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
+		if (theApp.ip2country->ShowCountryFlag()){
+			countryflag = theApp.ip2country->GetFlagImageList()->ExtractIcon(m_client->GetCountryFlagIndex());
+			((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
+		}
 	}
 	//MORPH END - Added by Commander, CountryFlag
 	//EastShare End - added by AndCycle, IP to Country
