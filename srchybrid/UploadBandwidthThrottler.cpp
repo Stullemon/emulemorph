@@ -691,19 +691,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*512*1000;
            		        if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance)
 							realBytesToSpend = 999+bandwidthSavedTolerance;
-						if(thisLoopTick-lastTickReachedBandwidth[classID] > max(1000, timeSinceLastLoop*2)){
-							if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
-								m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
-							if(classID<LAST_CLASS){
-								if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
-									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
-							}
-							//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
-       					}
-						lastTickNotReachedBandwidth[classID] = thisLoopTick;
-	           		} else {
-           		        if(thisLoopTick-lastTickNotReachedBandwidth[classID] > max(1000, timeSinceLastLoop*2))
-							lastTickReachedBandwidth[classID] = thisLoopTick;
+						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
+							m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
+						if(classID<LAST_CLASS){
+							if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
+								m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
+						}
+						//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
            			}
        			//}
 				realBytesToSpendClass[classID] = realBytesToSpend;
