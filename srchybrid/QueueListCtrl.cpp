@@ -237,7 +237,9 @@ void CQueueListCtrl::Localize()
 void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
 {
 	if( resetclient && client){
-			client->SetWaitStartTime();
+			// EastShare START - Marked by TAHO, modified SUQWT
+			//client->SetWaitStartTime();
+			// EastShare END - Marked by TAHO, modified SUQWT
 			client->SetAskedCount(1);
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	} else if( client ) {
