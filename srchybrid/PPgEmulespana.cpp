@@ -332,6 +332,7 @@ void CPPgEmulespana::Localize()
 {
 	if ( m_hWnd )
 	{
+		GetDlgItem(IDC_WARNING)->SetWindowText(GetResString(IDS_WARNINGMORPH));
 /*Commented by SiRoB
 		SetWindowText(GetResString(IDS_PW_EMULESPANA));
 
