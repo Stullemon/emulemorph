@@ -339,10 +339,10 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		return	true;
 	}
 	// but rightClient has better score, so rightClient is better
-	else if(leftClient->GetPowerShared() &&
-		    rightClient->GetPowerShared() &&
-			leftClient->MoreUpThanDown() &&
-			rightClient->MoreUpThanDown() &&
+	else if(leftClient->GetPowerShared() == false &&
+		    rightClient->GetPowerShared() == false &&
+			leftClient->MoreUpThanDown() == false &&
+			rightClient->MoreUpThanDown() == false &&
 			rightScore > leftScore){
 		return	true;
 	}
