@@ -258,7 +258,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strModVersion = MOD_VERSION;
 	m_strModVersion.AppendFormat(_T(" %u"), MOD_VERSION_MJR);
 	m_strModLongVersion = MOD_LONG_VERSION;
-	m_strModLongVersion.AppendFormat(_T(" %u.%u"), MOD_VERSION_MJR, MOD_VERSION_MIN);
+	m_strModLongVersion.AppendFormat(_T("%u.%u"), MOD_VERSION_MJR, MOD_VERSION_MIN);
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 }
 
