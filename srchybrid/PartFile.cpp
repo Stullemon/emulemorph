@@ -2028,16 +2028,16 @@ void CPartFile::NewSrcPartsInfo(){
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	VirtualCompleteSourcesCountMin = (uint16)-1;
-	VirtualCompleteSourcesCountMax = 0;
+	m_nVirtualCompleteSourcesCountMin = (uint16)-1;
+	m_nVirtualCompleteSourcesCountMax = 0;
 	for (uint16 i = 0; i < partcount; i++){
-		if(m_SrcpartFrequency[i] > VirtualCompleteSourcesCountMax)
-			VirtualCompleteSourcesCountMax = m_SrcpartFrequency[i];
-		if(VirtualCompleteSourcesCountMin > m_SrcpartFrequency[i])
-			VirtualCompleteSourcesCountMin = m_SrcpartFrequency[i];
+		if(m_SrcpartFrequency[i] > m_nVirtualCompleteSourcesCountMax)
+			m_nVirtualCompleteSourcesCountMax = m_SrcpartFrequency[i];
+		if(m_nVirtualCompleteSourcesCountMin > m_SrcpartFrequency[i])
+			m_nVirtualCompleteSourcesCountMin = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(VirtualCompleteSourcesCountMin==0), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && VirtualCompleteSourcesCountMin>0));
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(m_nVirtualCompleteSourcesCountMin==0), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCountMin>0));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo();
