@@ -999,8 +999,6 @@ void CUpDownClient::SendBlockRequests(){
 	if (!reqfile)
 		return;
 	// MORPH START - Added by Commander, WebCache 1.2e
-	if (thePrefs.GetLogWebCacheEvents()) //JP log webcache events
-		AddDebugLogLine(false, _T("Proxy-Connections for this file: %u Allowed: %u"), reqfile->GetNumberOfCurrentWebcacheConnectionsForThisFile(), reqfile->GetMaxNumberOfWebcacheConnectionsForThisFile());
 	if( thePrefs.IsWebCacheDownloadEnabled()
 		&& UsesCachedTCPPort() // uses a port that is usually cached
 		&& SupportsWebCache() // client knows webcache protocol
@@ -1013,6 +1011,8 @@ void CUpDownClient::SendBlockRequests(){
 		&& (thePrefs.GetWebCacheCachesLocalTraffic() || !IsBehindOurWebCache()) //JP changed to new IsBehindOurWebCache-function 		// WC-TODO: Shorter names?
 		&& reqfile->GetNumberOfCurrentWebcacheConnectionsForThisFile() < reqfile->GetMaxNumberOfWebcacheConnectionsForThisFile() ) //JP Throttle OHCB-production
 	{
+		if (thePrefs.GetLogWebCacheEvents()) //JP log webcache events
+			AddDebugLogLine(false, _T("Proxy-Connections for this file: %u Allowed: %u"), reqfile->GetNumberOfCurrentWebcacheConnectionsForThisFile(), reqfile->GetMaxNumberOfWebcacheConnectionsForThisFile());
 		if (!m_PendingBlocks_list.IsEmpty()) return; //Added by SiRoB
 		// Superlexx - COtN - start
 		byte WC_TestFileHash[16] = { 0xE9, 0x05, 0x7A, 0xDC, 0x38, 0x05, 0x4A, 0xFA, 0x24, 0x81, 0x6E, 0x86, 0xBB, 0x08, 0xD2, 0x70 };
@@ -1021,7 +1021,15 @@ void CUpDownClient::SendBlockRequests(){
 		CreateBlockRequests(1);
 		if (m_PendingBlocks_list.IsEmpty())
 		{
+			//MORPH - Changed by SiRoB, WebCache Fix
+			/*
 			SendCancelTransfer();
+			*/
+			if (m_pWCDownSocket != NULL){
+				m_pWCDownSocket->Safe_Delete();
+				ASSERT( m_pWCDownSocket == NULL );
+			}
+			//MORPH - Changed by SiRoB, WebCache Fix
 			SetDownloadState(DS_NONEEDEDPARTS);
 			return;
 		}
@@ -1131,7 +1139,6 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 		return;
 	}
 
-	theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
 	const int HEADER_SIZE = 24;
 
 	// Update stats
@@ -1172,6 +1179,8 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	thePrefs.Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, false, size - HEADER_SIZE, false);
 	// <-----khaos-
 
+	theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);  //SLAHAM: ADDED DownloadClientsCtrl
+	
 	m_nDownDataRateMS += size - HEADER_SIZE;
 	if (credits)
 		credits->AddDownloaded(size - HEADER_SIZE, GetIP());
@@ -1462,7 +1471,7 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 		m_nDownDataRateMS = 0;
     }
 	
-	while (m_AvarageDDR_list.GetCount() > 0 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
+	while (m_AvarageDDR_list.GetCount() > 1 && (cur_tick - m_AvarageDDR_list.GetHead().timestamp) > MAXAVERAGETIMEDOWNLOAD)
 		m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 	
 	if (m_AvarageDDR_list.GetCount() > 1){
@@ -1681,6 +1690,7 @@ void CUpDownClient::UpdateDisplayedInfo(bool force)
 	DWORD curTick = ::GetTickCount();
     if(force || curTick-m_lastRefreshedDLDisplay > MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+m_random_update_wait) {
 	    theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
+		theApp.emuledlg->transferwnd->downloadclientsctrl.RefreshClient(this);  //MORPH - Added by SiRoB, DownloadClientsCtrl
 		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
         m_lastRefreshedDLDisplay = curTick;
     }

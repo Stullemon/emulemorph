@@ -55,7 +55,6 @@ struct WCInfo_Struct{
 void detectWebcacheOnStart();
 bool DetectWebCache(WCInfo_Struct* detectedWebcache);
 CString	ReverseDnsLookupForWebCache(DWORD dwIP);
-// yonatan tmp - void RemoveAllWebCachesFromDatabase();
 
 void GenerateKey (byte* key);	// generates a key for encryption
 

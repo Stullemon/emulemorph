@@ -37,10 +37,7 @@ public:
 	void	SetClient(CUpDownClient* pClient);
 	void	Disconnect(LPCTSTR pszReason);
 	void	WaitForOnConnect();
-	//MORPH - Changed by SiRoB, WebCache 1.2f
-	/*
-	void	ResetTimeOutTimer();
-	*/
+// WebCache ////////////////////////////////////////////////////////////////////////////////////
 	virtual void	ResetTimeOutTimer(); // yonatan http - made virtual, WC-TODO ?
 	bool	CheckTimeOut();
 	virtual UINT GetTimeOut();

@@ -45,7 +45,7 @@ void CWebCachedBlockList::TryToDL()
 	}
 	if( SINGLEProxyClient && SINGLEProxyClient->GetRequestFile() ) {
 		theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource(SINGLEProxyClient,SINGLEProxyClient->GetRequestFile());
-		theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(SINGLEProxyClient); // MORPH - Added by Commander, ProxyClient Crash fix
+		theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(SINGLEProxyClient); // MORPH - Added by Commander, DownloadClientsCtrl ProxyClient
 		POSITION pos = SINGLEProxyClient->GetRequestFile()->srclist.Find(SINGLEProxyClient);
 		if (pos)
 			SINGLEProxyClient->GetRequestFile()->srclist.RemoveAt(pos);

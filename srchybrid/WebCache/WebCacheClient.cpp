@@ -95,7 +95,7 @@ void CWebCacheSocket::DetachFromClient()
 		if (GetClient()->m_pWCUpSocket == this){
 			ASSERT(0);
 			GetClient()->m_pWCUpSocket = NULL;
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); //MORPH - Added by SiRoB, Just to be safe
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); //MORPH - Added by SiRoB, WebCache Fix
 			GetClient()->SetWebCacheUpState( WCUS_NONE );
 		}
 	}
@@ -158,8 +158,8 @@ bool CWebCacheSocket::ProcessHttpRequest()
 void CWebCacheSocket::ResetTimeOutTimer()
 {
 	timeout_timer = ::GetTickCount();
-	if( GetClient() && (GetClient()->m_pWCUpSocket == this || GetClient()->m_pWCDownSocket == this)) {
-		if( GetClient()->socket) {
+	if( GetClient() ) {
+		if( GetClient()->socket ) {
 			ASSERT( !GetClient()->socket->IsKindOf( RUNTIME_CLASS( CWebCacheSocket ) ) );
 			GetClient()->socket->ResetTimeOutTimer();
 		}
@@ -463,7 +463,8 @@ bool CWebCacheUpSocket::ProcessFirstHttpGet( const char* header, UINT uSize )
 	}
 
 	GetClient()->m_pWCUpSocket = this;
-
+	SetTimeOut(GetWebCacheSocketUploadTimeout());  //MORPH - Added by SiRoB, WebCache Fix
+	
 	ClearHttpHeaders();
 	SetHttpState( HttpStateRecvExpected );
 	//theApp.uploadBandwidthThrottler->AddToStandardList(0, this); // Superlexx - from 0.44a PC code guess
@@ -903,7 +904,11 @@ void CUpDownClient::OnWebCacheDownSocketClosed(int nErrorCode)
 		return;
 
 	// restart WC download if cache just closed the connection without obvious reason
-	if (GetDownloadState() == DS_DOWNLOADING)
+	if (GetDownloadState() == DS_DOWNLOADING
+		//MORPH START - Added by SiRoB, WebCache Fix
+		&& m_eWebCacheDownState == WCDS_DOWNLOADING
+		&& !m_PendingBlocks_list.IsEmpty())
+		//MORPH END - Added by SiRoB, WebCache Fix
 	{
 		if (thePrefs.GetLogWebCacheEvents())
 		AddDebugLogLine(DLP_HIGH, false, _T("WebCache: Socket closed unexpedtedly, trying to reestablish connection"));
@@ -925,7 +930,11 @@ void CUpDownClient::OnWebCacheDownSocketClosed(int nErrorCode)
 void CUpDownClient::OnWebCacheDownSocketTimeout()
 {
 	// restart WC download if cache just stalls
-	if (GetDownloadState() == DS_DOWNLOADING)
+	if (GetDownloadState() == DS_DOWNLOADING
+		//MORPH START - Added by SiRoB, WebCache Fix
+		&& m_eWebCacheDownState == WCDS_DOWNLOADING
+		&& !m_PendingBlocks_list.IsEmpty())
+		//MORPH END   - Added by SiRoB, WebCache Fix
 	{
 		if (thePrefs.GetLogWebCacheEvents())
 		AddDebugLogLine(DLP_HIGH, false, _T("WebCache Error: Socket TimeOut, trying to reestablish connection"));
@@ -1161,7 +1170,7 @@ if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender)
 //JP trusted OHCB-senders END
 void CUpDownClient::SendResumeOHCBSendingUDP()
 {
-if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender && SupportsWebCacheUDP() && !HasLowID()) 
+	if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender && SupportsWebCacheUDP() && !HasLowID() && thePrefs.GetUDPPort() != 0) 
 {
 	CSafeMemFile data;
 	data.WriteUInt32( m_uWebCacheDownloadId );

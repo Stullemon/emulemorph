@@ -135,6 +135,8 @@ void CClientReqSocket::ResetTimeOutTimer(){
 
 UINT CClientReqSocket::GetTimeOut()
 {
+	// yonatan http: Added WC stuff to CWebCacheSocket::ResetTimeOutTimer() - WC-TODO ?
+	
 	// PC-TODO
 	// the PC socket may even already be disconnected and deleted and we still need to keep the
 	// ed2k socket open because remote client may still be downloading from cache.

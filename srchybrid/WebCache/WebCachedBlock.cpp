@@ -241,10 +241,13 @@ void CWebCachedBlock::UpdateProxyClient()
 
 	CStringA strWCRequest;
 	CString username;
-	if (m_uProxyIp == 0)
+	if (m_uProxyIp == 0){
 		username = "Transparent HTTP Proxy"; // Superlexx - TPS
-	else
+		SINGLEProxyClient->ResetIP2Country(m_uHostIp); //MORPH Added by SiRoB, IPtoCountry ProxyClient
+	}else{
 		username.Format( _T("HTTP Proxy @ %s"), ipstr(m_uProxyIp) );
+		SINGLEProxyClient->ResetIP2Country(m_uProxyIp); //MORPH Added by SiRoB, IPtoCountry ProxyClient
+	}
 	SINGLEProxyClient->SetUserName( username );
 	SINGLEProxyClient->Crypt.SetRemoteKey( remoteKey ); // Superlexx - encryption
 	SINGLEProxyClient->SetRequestFile( GetFile() );
@@ -264,7 +267,7 @@ void CWebCachedBlock::UpdateProxyClient()
 		theApp.clientlist->RemoveClient(SINGLEProxyClient);
 		if( SINGLEProxyClient->reqfile ) {
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveSource( SINGLEProxyClient, SINGLEProxyClient->reqfile );
-			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(SINGLEProxyClient); // MORPH - Added by SiRoB, DownloadClientList ProxyClient
+			theApp.emuledlg->transferwnd->downloadclientsctrl.RemoveClient(SINGLEProxyClient); // MORPH - Added by SiRoB, DownloadClientsCtrl ProxyClient
 			POSITION pos = SINGLEProxyClient->reqfile->srclist.Find(SINGLEProxyClient);
 			if( pos )
 				SINGLEProxyClient->reqfile->srclist.RemoveAt(pos);
