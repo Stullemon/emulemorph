@@ -765,7 +765,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 				if(item1->GetPowerShared() && item2->GetPowerShared()){//Equal chance keep the file prio under PowerShare
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				}
-				if(result == 0)
+				if(result == 0){
 					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 						case ECFEF_ACCEPTED:
 							if(theApp.glob_prefs->IsECFEFallTime()){
@@ -807,10 +807,12 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 									(float)file2->statistic.GetTransferred()/file2->GetFileSize() > (float)file1->statistic.GetTransferred()/file1->GetFileSize() ? 1 : -1;
 							}
 							break;
-						default:
-							result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 					}
+				}
 				//Morph End - added by AndCycle, Equal Chance For Each File
+				if(result == 0){
+					result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
+				}
 			}
 			else if( file1 == NULL )
 				result = 1;
