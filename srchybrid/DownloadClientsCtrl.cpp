@@ -484,7 +484,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				// EastShare - Added by Pretender: IP2Country column
 				}
 
-				if( iColumn != 4 && iColumn != 0 && iColumn != 3)
+				if( iColumn != 4 && iColumn != 0 && iColumn != 3 && iColumn != 11)
 				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			}//MORPH - Added by SiRoB, Don't draw hidden columns
 			cur_rec.left += GetColumnWidth(iColumn);
