@@ -48,8 +48,11 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
+	//Removed by SiRoB , for speedup creditfile load
+	/*
 	m_fLastScoreRatio = 0;
 	m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
+	*/
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
 	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
@@ -73,8 +76,11 @@ CClientCredits::CClientCredits(const uchar* key)
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
+	//Removed by SiRoB , for speedup creditfile load
+	/*
 	m_fLastScoreRatio = 0;
 	m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
+	*/
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 
 	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
@@ -253,7 +259,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 	return m_fLastScoreRatio = result;
 	//EastShare END - Added by linekin, CreditSystem 
 
-	//Morph End - Modified by AndCycle, reduce a little CPU usage for ratio count
+	//EastShare END - Added by linekin, CreditSystem 
 }
 
 //MORPH START - Added by IceCream, VQB: ownCredits
@@ -326,8 +332,8 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile file;
 	CFileException fexp;
 
-	m_bSaveUploadQueueWaitTime = thePrefs.SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
-//Morph Start - added by AndCycle, choose .met to load
+	//MORPH START - Changed by SiRoB, Allternative choose .met to load
+	//Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
 
@@ -350,107 +356,41 @@ void CClientCreditsList::LoadList()
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+_T("Backup2\\"));
 	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+_T("Backup2\\"));
 	//totalLoadFile = 9;
+	uint8 prioOrderfile[totalLoadFile];
 
-	int	lastFile = -1;
+	int	index = 0;
 	for(int curFile = 0; curFile < totalLoadFile; curFile++){
 		//check clients.met status
 		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp);
 		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
-
-			if(lastFile == -1){
-				lastFile = curFile;
-			}
-			//SUQWTv2.met have bigger number than clients.met, so it will replace the clients.met that have the same m_mtime
-			else if(m_bSaveUploadQueueWaitTime){
-				if(loadFileStatus[curFile].m_mtime >= loadFileStatus[lastFile].m_mtime){
-					lastFile = curFile;
-				}
-			}
-			//take client.met
-			else if(loadFileStatus[curFile].m_mtime > loadFileStatus[lastFile].m_mtime){
-				lastFile = curFile;
-			}
-			loadFile.Close(); //MORPH - Moved by SiRoB, close file when succefully opened
+			prioOrderfile[index++]=curFile;
+			loadFile.Close();
 		}
 	}
-
-	if(lastFile != -1)	strFileName = loadFileName[lastFile];
-	AddLogLine(false, _T("Load %s"), strFileName);
-
-//Morph End - added by AndCycle, choose .met to load
-
-	if (!file.Open(strFileName, iOpenFlags, &fexp)){
-		if (fexp.m_cause != CFileException::fileNotFound){
-			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
-				strError += _T(" - ");
-				strError += szError;
-			}
-			AddLogLine(true, _T("%s"), strError);
-		}
-		return;
-	}
-	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-	
-	try{
-		uint8 version = file.ReadUInt8();
-		//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		/*
-		if (version != CREDITFILE_VERSION && version != CREDITFILE_VERSION_29){
-			AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
-			file.Close();
-			return;
-		}
-		*/
-		// Moonlight: SUQWT - Import CreditStruct from 0.30c and SUQWTv1
-		if (version != CREDITFILE_VERSION_30_SUQWTv1 && version != CREDITFILE_VERSION_30_SUQWTv2 &&
-			version != CREDITFILE_VERSION_30 && version != CREDITFILE_VERSION_29){
-			AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
-			file.Close();
-			return;
-		}
-		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
-		// everything is ok, lets see if the backup exist...
-		CString strBakFileName;
-		//Morph start - modify by AndCycle, backup loaded file
-		/*
-		strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), thePrefs.GetConfigDir());
-		*/
-		strBakFileName.Format(_T("%s") _T(".BAK"), strFileName);
-		//Morph end - modify by AndCycle, backup loaded file
-
-		DWORD dwBakFileSize = 0;
-		BOOL bCreateBackup = TRUE;
-
-		HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (hBakFile != INVALID_HANDLE_VALUE)
+	uint8 tmpprioOrderfile;
+	uint8 maxavailablefile = index;
+	while (index-- > 0){
+		for (uint8 i=1; i<index;i++)
 		{
-			// Ok, the backup exist, get the size
-			dwBakFileSize = ::GetFileSize(hBakFile, NULL); //debug
-			if (dwBakFileSize > (DWORD)file.GetLength())
+			if(loadFileStatus[prioOrderfile[i-1]].m_mtime < loadFileStatus[prioOrderfile[i]].m_mtime)
 			{
-				// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
-				bCreateBackup = FALSE;
+				tmpprioOrderfile = prioOrderfile[i-1];
+				prioOrderfile[i-1] = prioOrderfile[i];
+				prioOrderfile[i] = tmpprioOrderfile;
 			}
-			//else: backup is smaller or the same size as org. file, proceed with copying of file
-			::CloseHandle(hBakFile);
 		}
-		//else: the backup doesn't exist, create it
+	}
 
-		if (bCreateBackup)
-		{
-			file.Close(); // close the file before copying
+	for (uint8 i=0;i<maxavailablefile;i++)
+	{
+		strFileName = loadFileName[prioOrderfile[i]];
+		AddLogLine(false, _T("Load %s"), strFileName);
+	//Morph End - added by AndCycle, choose .met to load
+	//MORPH END  - Changed by SiRoB, Allternative choose .met to load
 
-			if (!::CopyFile(strFileName, strBakFileName, FALSE))
-				AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
-
-			// reopen file
-			CFileException fexp;
-			if (!file.Open(strFileName, iOpenFlags, &fexp)){
+		if (!file.Open(strFileName, iOpenFlags, &fexp)){
+			if (fexp.m_cause != CFileException::fileNotFound){
 				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 				TCHAR szError[MAX_CFEXP_ERRORMSG];
 				if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
@@ -458,76 +398,158 @@ void CClientCreditsList::LoadList()
 					strError += szError;
 				}
 				AddLogLine(true, _T("%s"), strError);
-				return;
 			}
-			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-			file.Seek(1, CFile::begin); //set filepointer behind file version byte
-		}
-
-		UINT count = file.ReadUInt32();
-		m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
-
-		const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
-		uint32 cDeleted = 0;
-		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		CreditStruct* newcstruct;
-		//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
-		for (UINT i = 0; i < count; i++){
-			//Morph Start - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			//MORPH START - Changed by SiRoB, Allternative choose .met to load
 			/*
-			CreditStruct* newcstruct = new CreditStruct;
+            return;
 			*/
-			newcstruct = new CreditStruct;
-			//Morph End   - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			
-			memset(newcstruct, 0, sizeof(CreditStruct));
+			continue;
+			//MORPH END  - Changed by SiRoB, Allternative choose .met to load
+		}
+		setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+		
+		try{
+			uint8 version = file.ReadUInt8();
 			//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			/*
-			if (version == CREDITFILE_VERSION_29)
-				file.Read(newcstruct, sizeof(CreditStruct_29a));
-			else
-				file.Read(newcstruct, sizeof(CreditStruct));
+			if (version != CREDITFILE_VERSION && version != CREDITFILE_VERSION_29){
+				AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
+				file.Close();
+				return;
+			}
 			*/
-			// --> Moonlight: SUQWT - import 0.30c and 30c-SUQWTv1 structures.
-			if (version == CREDITFILE_VERSION)
-				file.Read(newcstruct, sizeof(CreditStruct_30c_SUQWTv2));
-			else if (version == CREDITFILE_VERSION_30_SUQWTv1) {
-				file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c_SUQWTv1) - 8);
-				file.Read(((uint8*)newcstruct), 8);
-			}
-			else if (version == CREDITFILE_VERSION_30)
-				file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c));
-			else
-				file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_29a));
-			// <-- Moonlight: SUQWT			
-			//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		
-			if (newcstruct->nLastSeen < dwExpired){
-				cDeleted++;
-				delete newcstruct;
+			// Moonlight: SUQWT - Import CreditStruct from 0.30c and SUQWTv1
+			if (version != CREDITFILE_VERSION_30_SUQWTv1 && version != CREDITFILE_VERSION_30_SUQWTv2 &&
+				version != CREDITFILE_VERSION_30 && version != CREDITFILE_VERSION_29){
+				AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
+				file.Close();
+				//MORPH START - Changed by SiRoB, Allternative choose .met to load
+				/*
+				return;
+				*/
 				continue;
+				//MORPH END  - Changed by SiRoB, Allternative choose .met to load
+			}
+			//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
+			// everything is ok, lets see if the backup exist...
+			CString strBakFileName;
+			//Morph start - modify by AndCycle, backup loaded file
+			/*
+			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), thePrefs.GetConfigDir());
+			*/
+			strBakFileName.Format(_T("%s") _T(".BAK"), strFileName);
+			//Morph end - modify by AndCycle, backup loaded file
+
+			DWORD dwBakFileSize = 0;
+			BOOL bCreateBackup = TRUE;
+
+			HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+											OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (hBakFile != INVALID_HANDLE_VALUE)
+			{
+				// Ok, the backup exist, get the size
+				dwBakFileSize = ::GetFileSize(hBakFile, NULL); //debug
+				if (dwBakFileSize > (DWORD)file.GetLength())
+				{
+					// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
+					bCreateBackup = FALSE;
+				}
+				//else: backup is smaller or the same size as org. file, proceed with copying of file
+				::CloseHandle(hBakFile);
+			}
+			//else: the backup doesn't exist, create it
+
+			if (bCreateBackup)
+			{
+				file.Close(); // close the file before copying
+
+				if (!::CopyFile(strFileName, strBakFileName, FALSE))
+					AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
+
+				// reopen file
+				CFileException fexp;
+				if (!file.Open(strFileName, iOpenFlags, &fexp)){
+					CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+					TCHAR szError[MAX_CFEXP_ERRORMSG];
+					if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+						strError += _T(" - ");
+						strError += szError;
+					}
+					AddLogLine(true, _T("%s"), strError);
+					continue;
+				}
+				setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+				file.Seek(1, CFile::begin); //set filepointer behind file version byte
 			}
 
-			CClientCredits* newcredits = new CClientCredits(newcstruct);
-			m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
-		}
-		file.Close();
+			UINT count = file.ReadUInt32();
+			m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
 
-		if (cDeleted>0) AddLogLine(false, GetResString(IDS_CREDITFILELOADED) + GetResString(IDS_CREDITSEXPIRED), count-cDeleted,cDeleted);
-			else AddLogLine(false, GetResString(IDS_CREDITFILELOADED), count);
+			const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
+			uint32 cDeleted = 0;
+			//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			CreditStruct* newcstruct;
+			//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
-	}
-	catch(CFileException* error){
-		if (error->m_cause == CFileException::endOfFile)
-			AddLogLine(true, GetResString(IDS_CREDITFILECORRUPT));
-		else{
-			TCHAR buffer[MAX_CFEXP_ERRORMSG];
-			error->GetErrorMessage(buffer, ARRSIZE(buffer));
-			AddLogLine(true, GetResString(IDS_ERR_CREDITFILEREAD), buffer);
+			for (UINT i = 0; i < count; i++){
+				//Morph Start - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				/*
+				CreditStruct* newcstruct = new CreditStruct;
+				*/
+				newcstruct = new CreditStruct;
+				//Morph End   - Changed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				
+				memset(newcstruct, 0, sizeof(CreditStruct));
+				//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				/*
+				if (version == CREDITFILE_VERSION_29)
+					file.Read(newcstruct, sizeof(CreditStruct_29a));
+				else
+					file.Read(newcstruct, sizeof(CreditStruct));
+				*/
+				// --> Moonlight: SUQWT - import 0.30c and 30c-SUQWTv1 structures.
+				if (version == CREDITFILE_VERSION)
+					file.Read(newcstruct, sizeof(CreditStruct_30c_SUQWTv2));
+				else if (version == CREDITFILE_VERSION_30_SUQWTv1) {
+					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c_SUQWTv1) - 8);
+					file.Read(((uint8*)newcstruct), 8);
+				}
+				else if (version == CREDITFILE_VERSION_30)
+					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_30c));
+				else
+					file.Read(((uint8*)newcstruct) + 8, sizeof(CreditStruct_29a));
+				// <-- Moonlight: SUQWT			
+				//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+			
+				if (newcstruct->nLastSeen < dwExpired){
+					cDeleted++;
+					delete newcstruct;
+					continue;
+				}
+
+				CClientCredits* newcredits = new CClientCredits(newcstruct);
+				m_mapClients.SetAt(CCKey(newcredits->GetKey()), newcredits);
+			}
+			file.Close();
+
+			if (cDeleted>0) AddLogLine(false, GetResString(IDS_CREDITFILELOADED) + GetResString(IDS_CREDITSEXPIRED), count-cDeleted,cDeleted);
+				else AddLogLine(false, GetResString(IDS_CREDITFILELOADED), count);
+			
+			//We got a valide Credit file so exit now
+			break; //Added by SiRoB
 		}
-		error->Delete();
-	}
+		catch(CFileException* error){
+			if (error->m_cause == CFileException::endOfFile)
+				AddLogLine(true, GetResString(IDS_CREDITFILECORRUPT));
+			else{
+				TCHAR buffer[MAX_CFEXP_ERRORMSG];
+				error->GetErrorMessage(buffer, ARRSIZE(buffer));
+				AddLogLine(true, GetResString(IDS_ERR_CREDITFILEREAD), buffer);
+			}
+			error->Delete();
+		}
+	}//MORPH - Added by SiRoB, Alternative choose .met to load
 }
 
 // Moonlight: SUQWT - Save the wait times before saving the list.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1060,18 +1082,20 @@ void CClientCredits::InitPayBackFirstStatus(){
 //test will be triggered at client have up/down transfered
 void CClientCredits::TestPayBackFirstStatus(){
 
-	if(GetDownloadedTotal() < (9.3*1024*1024)){
+	if(GetDownloadedTotal() < 9728000){
 		m_bPayBackFirst = false;
-		return; //MORPH - Added by SiRoB, Pay Back First Tweak 
-	}
-
-	//MORPH START - Changed by SiRoB, Pay Back First Tweak
-	if(GetDownloadedTotal() > GetUploadedTotal()+1024*1024*(uint64)thePrefs.GetPayBackFirstLimit()){
-	//MORPH END   - Changed by SiRoB, Pay Back First Tweak
-		m_bPayBackFirst = true;
-	}
-	else if(GetDownloadedTotal() < GetUploadedTotal()){
-		m_bPayBackFirst = false;
+	}else
+	{
+		uint64 clientUpload = GetDownloadedTotal();
+		uint64 clientDownload = GetUploadedTotal();
+		//MORPH START - Changed by SiRoB, Pay Back First Tweak
+		if(clientUpload > clientDownload+((uint64)thePrefs.GetPayBackFirstLimit()<<20)){
+		//MORPH END   - Changed by SiRoB, Pay Back First Tweak
+			m_bPayBackFirst = true;
+		}
+		else if(clientUpload < clientDownload){
+			m_bPayBackFirst = false;
+		}
 	}
 }
 //EastShare End - added by AndCycle, Pay Back First Tweak
