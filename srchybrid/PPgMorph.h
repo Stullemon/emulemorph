@@ -35,7 +35,6 @@ protected:
 	int m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	int m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	int m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	int m_bEnableChunkAvaibility; //MORPH - Added by IceCream, enable ChunkAvaibility
 	int m_bIsBoostLess;//Added by Yun.SF3, boost the less uploaded files
 	int m_bIsBoostFriends;//Added by Yun.SF3, boost friends
 	int	m_iDynUpMode;//MORPH - Added by Yun.SF3, Auto DynUp changing
@@ -59,9 +58,6 @@ protected:
 	int m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
-	int m_iCheckDiskSpace;
-	//MORPH END - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
 	int m_iHighProcess; //MORPH - Added by IceCream, high process priority
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
@@ -89,7 +85,6 @@ protected:
 	HTREEITEM m_htiEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	HTREEITEM m_htiEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	HTREEITEM m_htiEnableChunkAvaibility; //MORPH - Added by IceCream, enable ChunkAvaibility
 	HTREEITEM m_htiIsBoostLess;//Added by Yun.SF3, boost the less uploaded files
 	HTREEITEM m_htiIsBoostFriends;//Added by Yun.SF3, boost friends
 	HTREEITEM m_htiIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -119,9 +114,6 @@ protected:
 	HTREEITEM m_htiTimeRemRealTime;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
-	HTREEITEM m_htiCheckDiskSpace;
-	//MORPH END - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();

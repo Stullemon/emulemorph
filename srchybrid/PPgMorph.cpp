@@ -50,7 +50,6 @@ CPPgMorph::CPPgMorph()
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, activate Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, activate Anti-CreditHack
-	m_htiEnableChunkAvaibility = NULL; //MORPH - Added by IceCream, activate ChunkAvaibility
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	
@@ -77,9 +76,6 @@ CPPgMorph::CPPgMorph()
 	m_htiTimeRemRealTime = NULL;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by SiRoB/IceCream, Check diskspace v1.2 [SLUGFILLER]
-	m_htiCheckDiskSpace = NULL;
-	//MORPH END - Added by SiRoB/IceCream, Check diskspace v1.2 [SLUGFILLER]
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiIsBoostLess = NULL;//Added by Yun.SF3, boost the less uploaded files
 	m_htiIsBoostFriends = NULL;//Added by Yun.SF3, boost friends
@@ -187,10 +183,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_iUseSLS);
 		//MORPH END - Added by SiRoB, khaos::categorymod+
 		
-		//MORPH START - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
-		m_htiCheckDiskSpace = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKDISKSPACE), m_htiDM, m_iCheckDiskSpace);
-		//MORPH END - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
-
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), m_htiDM, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
@@ -312,9 +304,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiTimeRemainingMode, m_iTimeRemainingMode);
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]  
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCheckDiskSpace, m_iCheckDiskSpace);  
-	//MORPH END - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_iHighProcess); //MORPH - Added by IceCream, high process priority 
 }
 
@@ -345,7 +334,6 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableDownloadInRed = app_prefs->prefs->enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	m_bEnableAntiLeecher = app_prefs->prefs->enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = app_prefs->prefs->enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
-	m_bEnableChunkAvaibility = app_prefs->prefs->enableChunkAvaibility; //MORPH - Added by IceCream, enabnle ChunkAvaibility
 	m_bIsBoostLess = app_prefs->prefs->isboostless;//Added by Yun.SF3, boost the less uploaded files
 	m_bIsBoostFriends = app_prefs->prefs->isboostfriends;//Added by Yun.SF3, boost friends
 	m_bIsAutoPowershareNewDownloadFile = app_prefs->prefs->m_bisautopowersharenewdownloadfile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -367,9 +355,6 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iTimeRemainingMode = app_prefs->GetTimeRemainingMode();
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by SiRoB/IceCream, Check diskspace v1.2 [SLUGFILLER]
-	m_iCheckDiskSpace = app_prefs->IsCheckDiskspaceEnabled();
-	//MORPH END - Added by SiRoB/IceCReam, Check diskspace v1.2 [SLUGFILLER]
 	//MORPH START - Added by IceCream, high process priority
 	m_iHighProcess = app_prefs->GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
@@ -420,7 +405,6 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->prefs->enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	app_prefs->prefs->enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	app_prefs->prefs->enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
-	app_prefs->prefs->enableChunkAvaibility = m_bEnableChunkAvaibility; //MORPH - Added by IceCream, enable ChunkAvaibility
 	app_prefs->prefs->isboostless = m_bIsBoostLess;//Added by Yun.SF3, boost the less uploaded files
 	app_prefs->prefs->isboostfriends = m_bIsBoostFriends;//Added by Yun.SF3, boost friends
 	app_prefs->prefs->m_bisautopowersharenewdownloadfile = m_bIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
@@ -445,11 +429,6 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->prefs->m_iTimeRemainingMode = m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by IceCream, Check diskspace v1.2 [SLUGFILLER]
-	app_prefs->prefs->checkDiskspace = m_iCheckDiskSpace;
-	if (app_prefs->prefs->checkDiskspace)
-		theApp.downloadqueue->CheckDiskspace();
-	//MORPH END    - Added by IceCream, Check diskspace v1.2 [SLUGFILLER]
 	//MORPH START - Added by IceCream, high process priority
 	app_prefs->SetEnableHighProcess(m_iHighProcess);
 	//MORPH END   - Added by IceCream, high process priority
@@ -551,9 +530,6 @@ void CPPgMorph::Localize(void)
 		if (m_htiTimeRemAverage) m_ctrlTreeOptions.SetItemText(m_htiTimeRemAverage, GetResString(IDS_AVG));
 		// khaos::accuratetimerem-
 		//MORPH END - Added by SiRoB, khaos::categorymod+
-		//MORPH START - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
-		if (m_htiCheckDiskSpace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskSpace, GetResString(IDS_CHECKDISKSPACE));
-		//MORPH END - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
 		//MORPH START - Added by IceCream, high process priority
 		if (m_htiHighProcess) m_ctrlTreeOptions.SetItemText(m_htiHighProcess, GetResString(IDS_HIGHPROCESS));
 		//MORPH END   - Added by IceCream, high process priority
@@ -589,7 +565,6 @@ void CPPgMorph::OnDestroy()
 	m_htiEnableZeroFilledTest = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
-	m_htiEnableChunkAvaibility = NULL; //MORPH - Added by IceCream, enable ChunkAvaibility
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack
 	m_htiSCC = NULL;
 	//MORPH START - Added by SiRoB, khaos::categorymod+
@@ -614,9 +589,6 @@ void CPPgMorph::OnDestroy()
 	m_htiTimeRemRealTime = NULL;
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
-	//MORPH START - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
-	m_htiCheckDiskSpace = NULL;
-	//MORPH END - Added by SiRoB, Check diskspace v1.2 [SLUGFILLER]
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiIsBoostLess = NULL;//MORPH - Added by Yun.SF3, boost the less uploaded files
 	m_htiIsBoostFriends = NULL;//MORPH - Added by Yun.SF3, boost friends
