@@ -478,8 +478,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				m_fSharedDirectories = 1;
 				dwEmuleTags |= 4;
 				break;
-//EastShare - commented out by AndCycle, just keep the rule until Kad is ready to go.
-/*				
 			//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 			case ET_MOD_VERSION: 
 				if( temptag.tag.stringvalue ){
@@ -490,7 +488,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 				}
 				break;
 			//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
-*/
 		}
 	}
 	m_nUserPort = nUserPort;
