@@ -355,6 +355,9 @@ private:
 #define PERM_ALL		0
 #define PERM_FRIENDS	1
 #define PERM_NOONE		2
+// MightyKnife: Community visible files
+#define PERM_COMMUNITY  3
+// [end] Mighty Knife
 
 // constants for MD4Transform
 #define S11 3

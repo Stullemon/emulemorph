@@ -436,7 +436,9 @@ void CKnownFile::AssertValid() const
 	ASSERT( m_iUpPriority == PR_VERYLOW || m_iUpPriority == PR_LOW || m_iUpPriority == PR_NORMAL || m_iUpPriority == PR_HIGH || m_iUpPriority == PR_VERYHIGH );
 
 	//MORPH - Added by SiRoB, Keep permission flag	
-	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
+	// Mighty Knife: Community visible filelist
+	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE || m_iPermissions == PERM_COMMUNITY);
+	// [end] Mighty Knife
 
 	CHECK_BOOL(m_bAutoUpPriority);
 	(void)m_iQueuedCount;
@@ -697,9 +699,17 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	SetPath(in_directory);
 	SetFileName(in_filename);
 
+	// Mighty Knife: Report hashing files
+	if (theApp.glob_prefs->GetReportHashingFiles ()) {
+		CString hashfilename;
+		hashfilename.Format ("%s%s",in_directory, in_filename);
+		theApp.emuledlg->AddLogLine(false, "Hashing file: '%s'", (const char*) hashfilename);
+	}
+	// [end] Mighty Knife
+
 	// open file
 	CString namebuffer;
-	namebuffer.Format("%s\\%s", in_directory, in_filename);
+	namebuffer.Format("%s%s", in_directory, in_filename);
 	SetFilePath(namebuffer);
 	FILE* file = fopen(namebuffer, "rbS");
 	if (!file){
@@ -791,6 +801,15 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	UpdateMetaDataTags();
 
 	NewAvailPartsInfo();
+
+	// Mighty Knife: Report hashing files
+	if (theApp.glob_prefs->GetReportHashingFiles ()) {
+		CString hashfilename;
+		hashfilename.Format ("%s%s",in_directory, in_filename);
+		theApp.emuledlg->AddLogLine(false, "Hashing of file '%s' completed.", (const char*) hashfilename);
+	}
+	// [end] Mighty Knife
+
 	return true;	
 }
 
@@ -1014,8 +1033,10 @@ bool CKnownFile::LoadTagsFromFile(CFile* file)
 			//MORPH START - Added by SiRoB, Show Permission
 			case FT_PERMISSIONS:{
 				m_iPermissions = newtag->tag.intvalue;
-				if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE)
+				// Mighty Knife: Community visible filelist
+				if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE && m_iPermissions != PERM_COMMUNITY)
 					m_iPermissions = -1;
+				// [end] Mighty Knife
 				delete newtag;
 				break;
 			}
@@ -1724,7 +1745,9 @@ void CKnownFile::SetUpPriority(uint8 iNewUpPriority, bool bSave)
 //MOPRH - Added by SiRoB, Keep Permission flag
 void CKnownFile::SetPermissions(int iNewPermissions)
 {
-	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
+	// Mighty Knife: Community visible filelist
+	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE || m_iPermissions == PERM_COMMUNITY);
+	// [end] Mighty Knife
 	m_iPermissions = iNewPermissions;
 }
 
