@@ -2512,12 +2512,12 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 void CKnownFile::SetPowerShared(int newValue) {
     int oldValue = m_powershared;
     m_powershared = newValue;
+	if (IsPartFile())
+		((CPartFile*)this)->UpdatePartsInfo();
+	else
+		UpdatePartsInfo();
 	if(theApp.uploadqueue && oldValue != newValue)
 	{
-		if (IsPartFile())
-			((CPartFile*)this)->UpdatePartsInfo();
-		else
-			UpdatePartsInfo();
 		theApp.uploadqueue->ReSortUploadSlots(true);
 	}
 }
