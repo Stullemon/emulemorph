@@ -2729,7 +2729,7 @@ void CPartFile::UpdatePartsInfo()
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			}
 			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-			if (cur_src->GetUpCompleteSourcesCount()>0 && 10*m_anStates[DS_TOOMANYCONNS]<GetSourceCount())
+			if (cur_src->GetUpCompleteSourcesCount()>0 && 10*m_anStates[DS_TOOMANYCONNS]<GetValidSourcesCount())
 				bCompleteSourcesCountInfoReceived = true;
 			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
