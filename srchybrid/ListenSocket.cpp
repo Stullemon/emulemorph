@@ -659,7 +659,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 								theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_IPSTOPPEDOTHFILE), true, true);
 	
 								// Put back with wating time intact
-								theApp.uploadqueue->AddClientToQueue(client, true);
+								theApp.uploadqueue->AddClientToQueue(client, true, true);
 
 								AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
 						
