@@ -551,7 +551,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                 }
 
        	     if(socket != NULL) {
-				    SocketSentBytes socketSentBytes = socket->SendControlData(bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS], minFragSize);
+				    SocketSentBytes socketSentBytes = socket->SendControlData(_I32_MAX/*bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS]*/, minFragSize);
                     uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
          	       	spentBytesClass[LAST_CLASS] += lastSpentBytes;
 					spentOverheadClass[LAST_CLASS] += socketSentBytes.sentBytesControlPackets;
@@ -581,6 +581,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									m_highestNumberOfFullyActivatedSlots[classID] = min(slotCounter+1,m_highestNumberOfFullyActivatedSlots[classID]);
 								if (classID < LAST_CLASS){
 									spentBytesClass[LAST_CLASS] += lastSpentBytes;
+									spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID]
 									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS]>0)
 										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = min(m_highestNumberOfFullyActivatedSlots[classID],m_highestNumberOfFullyActivatedSlots[LAST_CLASS]);
 								}
@@ -628,6 +629,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							m_highestNumberOfFullyActivatedSlots[classID] = posSocket+1;
 						if (classID < LAST_CLASS){
 							spentBytesClass[LAST_CLASS] += lastSpentBytes;
+							spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
 							if (m_highestNumberOfFullyActivatedSlots[classID]>m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
 								m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 						}
@@ -663,6 +665,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								m_highestNumberOfFullyActivatedSlots[classID] = slotCounter+1;
 							if (classID < LAST_CLASS){
 								spentBytesClass[LAST_CLASS] += lastSpentBytes;
+								spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
 								if(m_highestNumberOfFullyActivatedSlots[classID]>m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
 									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 							}
