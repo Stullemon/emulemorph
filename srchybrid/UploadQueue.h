@@ -31,7 +31,12 @@ public:
 	bool	RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason = NULL, bool updatewindow = true, bool earlyabort = false);
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
-	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0);}
+	//MORPH START - Changed by SiRoB, ResortUploadSlot fix
+	/*
+	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0;}
+	*/
+	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0 || tempUploadinglist.Find(client)!=0);}
+	//MORPH END   - Changed by SiRoB, ResortUploadSlot fix
 
     void    UpdateDatarates();
 	uint32	GetDatarate();
@@ -112,7 +117,8 @@ private:
 
 	CUpDownClientPtrList	waitinglist;
 	CUpDownClientPtrList	uploadinglist;
-	CCriticalSection uploaddinglistblock;
+	CUpDownClientPtrList	tempUploadinglist;
+			
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
 		uint32	datalen;

@@ -702,7 +702,7 @@ void CUploadQueue::Process() {
 	/*
 	if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	*/
-	/*if(thePrefs.DoRemoveSpareTrickleSlot() && uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
+	if(thePrefs.DoRemoveSpareTrickleSlot() && uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
         // we need to close a trickle slot and put it back first on the queue
 
@@ -727,7 +727,7 @@ void CUploadQueue::Process() {
             // the client is allowed to keep its waiting position in the queue, since it was pre-empted
             AddClientToQueue(lastClient,true, true);
         }
-    } else*/ if (ForceNewClient()){
+    } else if (ForceNewClient()){
         // There's not enough open uploads. Open another one.
 		AddUpNextClient();
 	}
@@ -951,7 +951,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CUpDownClient* cur_client = waitinglist.GetAt(pos2);
 		if (cur_client == client)
 		{	
-			//MORPH - Removed by SiRoB, Bug Fix possible disturb of the uploading list
+			//MORPH - Removed by SiRoB, Bug Fix possible disturb of the uploadinglist
 			/*
 			//already on queue
             // VQB LowID Slot Patch, enhanced in ZZUL
@@ -1134,10 +1134,28 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
     bool result = false;
-    uint32 slotCounter = 1;
+	uint32 slotCounter = 1;
+	//MORPH END - Changed by SiRoB, Fix ResortUploadSlot
+	/*
 	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;){
         POSITION curPos = pos;
-        CUpDownClient* curClient = uploadinglist.GetNext(pos);
+    	CUpDownClient* curClient = uploadinglist.GetNext(pos);
+	*/
+	CUpDownClientPtrList* tmpuploadinglist = &uploadinglist;
+	//if we have the entry in the both list that mean we are in resortuploadslot between .Add and .RemoveAt
+	POSITION pos = uploadinglist.Find(client);
+	POSITION pos2 = tempUploadinglist.Find(client);
+	if (pos2){
+		slotCounter = uploadinglist.GetCount();
+		tmpuploadinglist = &tempUploadinglist;
+		pos = pos2;
+	}
+
+	while (pos != 0)
+	{
+	    POSITION curPos = pos;
+    	CUpDownClient* curClient = tmpuploadinglist->GetNext(pos);
+	//MORPH END - Changed by SiRoB, Fix ResortUploadSlot
 		if (client == curClient){
 			if (updatewindow)
 				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
@@ -1145,10 +1163,8 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
             client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
-            uploaddinglistblock.Lock();
-			uploadinglist.RemoveAt(curPos);
-			uploaddinglistblock.Unlock();
-            bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+            uploadinglist.RemoveAt(curPos);
+			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
             bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
 			//MORPH START - Added by SiRoB, due to zz upload system WebCache
 			bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
@@ -1313,6 +1329,7 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 void CUploadQueue::DeleteAll(){
 	waitinglist.RemoveAll();
 	uploadinglist.RemoveAll();
+	tempUploadinglist.RemoveAll();
     // PENDING: Remove from UploadBandwidthThrottler as well!
 }
 
@@ -1615,48 +1632,44 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
  */
 void CUploadQueue::ReSortUploadSlots(bool force) {
     DWORD curtick = ::GetTickCount();
-    if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000) {
-    	m_dwLastResortedUploadSlots = curtick;
-
-		theApp.uploadBandwidthThrottler->Pause(true);
-
-    	CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
-		uploaddinglistblock.Lock();
-    	// Remove all clients from uploading list and store in tempList
-    	POSITION ulpos = uploadinglist.GetHeadPosition();
-    	while (ulpos != NULL) {
-    	    POSITION curpos = ulpos;
-    	    uploadinglist.GetNext(ulpos);
-
-    	    // Get and remove the client from upload list.
+	if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000)
+	{
+    	theApp.uploadBandwidthThrottler->Pause(true);
+		// Remove all clients from uploading list and store in tempList
+   		POSITION ulpos = uploadinglist.GetHeadPosition();
+   		while (ulpos != NULL) {
+   			POSITION curpos = ulpos;
+   			uploadinglist.GetNext(ulpos);
+   			// Get and remove the client from upload list.
 			CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
 
-    	    uploadinglist.RemoveAt(curpos);
-
-    	    // Remove the found Client from UploadBandwidthThrottler
-    	    theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
-            theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
+   			//MORPH - Moved by SiRoB, See below
+			//uploadinglist.RemoveAt(curpos);
+			
+			// Remove the found Client from UploadBandwidthThrottler
+   			theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
 			//MORPH START - Added by SiRoB, due to zz upload system WebCache
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
 			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
-    	    tempUploadinglist.AddTail(cur_client);
-    	}
+   			tempUploadinglist.AddTail(cur_client);
+			uploadinglist.RemoveAt(curpos);
+		}
 
 		// Remove one at a time from temp list and reinsert in correct position in uploading list
-    	POSITION tempPos = tempUploadinglist.GetHeadPosition();
-    	while(tempPos != NULL) {
-    	    POSITION curpos = tempPos;
-    	    tempUploadinglist.GetNext(tempPos);
+   		POSITION tempPos = tempUploadinglist.GetHeadPosition();
+   		while(tempPos != NULL) {
+   			POSITION curpos = tempPos;
+   			tempUploadinglist.GetNext(tempPos);
 
-    	    // Get and remove the client from upload list.
+			// Get and remove the client from upload list.
 			CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
 
-    	    tempUploadinglist.RemoveAt(curpos);
+			tempUploadinglist.RemoveAt(curpos);
 
-    	    // This will insert in correct place
-    	    InsertInUploadingList(cur_client);
+			// This will insert in correct place
+   			InsertInUploadingList(cur_client);
 		}
-		uploaddinglistblock.Unlock();
 		theApp.uploadBandwidthThrottler->Pause(false);
 	}
 }
@@ -1676,14 +1689,12 @@ void CUploadQueue::CheckForHighPrioClient() {
 // MORPH START - Added by Commander, WebCache 1.2e
 CUpDownClient*	CUploadQueue::FindClientByWebCacheUploadId(const uint32 id) // Superlexx - webcache - can be made more efficient
 {
-	uploaddinglistblock.Lock();
 	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
 		if ( cur_client->m_uWebCacheUploadId == id )
 			return cur_client;
 	}
-	uploaddinglistblock.Unlock();
 	return 0;
 }
 // MORPH END - Added by Commander, WebCache 1.2e
