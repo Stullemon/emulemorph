@@ -202,13 +202,18 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
         minUpload = pMinUpload;
     }
 
-    if(pMaxUpload != 0 && pMaxUpload != UNLIMITED*1024) {//MORPH - Changed by SiRoB, Fix
+    if(pMaxUpload != 0 && pMaxUpload != UNLIMITED*1024) {//MORPH - Changed by SiRoB, USS -Fix-
         maxUpload = pMaxUpload;
         if(maxUpload < minUpload) {
             minUpload = maxUpload;
         }
     } else {
+		//MORPH - Changed by SiRoB, USS -Fix-
+		/*
 		maxUpload = pCurUpload+10*1024; //_UI32_MAX;
+		*/
+		maxUpload = _UI32_MAX;
+		//MORPH - Changed by SiRoB, USS -Fix-
     }
 
     if(pEnabled && m_enabled == false) {
