@@ -2,6 +2,11 @@ FIXED  : Possible crash in mass-rename if filename contains "%"-characters [Migh
 FIXED  : Various display bugs. [MightyKnife]
 FIXED  : Possible "Divide by 0"-crash. [MightyKnife]
 FIXED  : Renaming existing CRC32 to uppercase only worked for the first 4 characters in Unicode built. [MightyKnife]
+FIXED  : Improper treatment of sets of empty parameters in preferences.ini. [MightyKnife]
+
+ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
+
+TWEAKED: Parameters and file information will be saved before backing up config-folder, not only on program end. [MightyKnife]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.13
