@@ -73,6 +73,11 @@ protected:
 	UINT m_uBytesWritten;
 	UINT m_uMaxFileSize;
 	bool m_bInOpenCall;
+//Morph START - added by AndCycle, Date File Name Log
+private:
+	CString m_strOriginFileName;
+	DWORD	m_dwNextRenameTick;
+//Morph END - added by AndCycle, Date File Name Log
 };
 
 extern CLogFile theLog;
