@@ -334,7 +334,7 @@ BOOL CemuleDlg::OnInitDialog()
 		pSysMenu->AppendMenu(MF_STRING, MP_VERSIONCHECK, GetResString(IDS_VERSIONCHECK));
 		//MORPH START - Added by SiRoB, New Version check
 		ASSERT( (MP_MVERSIONCHECK & 0xFFF0) == MP_MVERSIONCHECK && MP_MVERSIONCHECK < 0xF000);
-		pSysMenu->AppendMenu(MF_STRING, MP_VERSIONCHECK, GetResString(IDS_MVERSIONCHECK));
+		pSysMenu->AppendMenu(MF_STRING, MP_MVERSIONCHECK, GetResString(IDS_MVERSIONCHECK));
 		//MORPH END   - Added by SiRoB, New Version check
 		
 		// remaining system menu entries are created later...
