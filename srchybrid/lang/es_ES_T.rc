@@ -976,7 +976,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Perdido por corrupción: %s       Ganado por compresión: %s\nPaquetes salvados por ICH: %i"
-    IDS_ERR_NOHELP          "Archivo de ayuda no encontrado.\n Visita nuestra página web para conseguir una copia del archivo de ayuda mas reciente! (sección de descarga)"
+    IDS_ERR_NOHELP          "Archivo de ayuda no encontrado.\n Visita nuestra página web para conseguir una copia del archivo de ayuda mas reciente! (sección de descarga)\n¿Quieres en cambio ver la ayuda desde la web?"
     IDS_SHOWOVERHEAD        "Mostrar ancho de banda excedente"
     IDS_UPDOWNSMALL         "Subida: %.1f | Descarga: %.1f"
     IDS_EDITLIST            "Editar"
@@ -1015,8 +1015,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FILEBUFFERSIZE      "Tamaño del buffer por archivo (%i)"
-    IDS_QUEUESIZE           "Tamaño cola de espera (%i)"
+    IDS_FILEBUFFERSIZE      "Tamaño del buffer por archivo"
+    IDS_QUEUESIZE           "Tamaño cola de espera"
     IDS_DAYS2               "días"
     IDS_ERR_MAKEBAKCREDITFILE "Error al crear copia del archivo de créditos"
     IDS_COMMENT             "Comentario"
@@ -1096,9 +1096,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG2DISKFRAME       "Guardar los registros a disco"
-    IDS_LOG2DISK            "Registro"
-    IDS_DEBUG2DISK          "Inf. extra"
+    IDS_LOG2DISK            "Save log to disk"
     IDS_EDITCAT             "Editar Categoría-Propiedades"
     IDS_PW_WS               "Servidor Web"
     IDS_ENABLED             "activado"
@@ -1570,8 +1568,39 @@ BEGIN
     IDS_MM_NEWUSER          "Nuevo usuario conectado con éxito al Servidor-MobileMule"
     IDS_RADCLIENTS          "de clientes conocidos"
     IDS_KADUDPPORTERR       "El puerto UDP Kademlia está en conflicto con otro puerto UDP externo ó puerto Servidor de eMule. El puerto se ha cambiado a %u."
-    IDS_KADOVERHEAD         "Kad Overhead (Packets): %s (%s)"
+    IDS_KADOVERHEAD         "Tráfico excedente Kad (Paquetes): %s (%s)"
 END
+
+STRINGTABLE 
+BEGIN
+    IDS_SEL_SKIN            "Seleccionar Skin.."
+    IDS_SEL_SKINDIR         "Seleccionar Carpeta de Skin.."
+    IDS_SKIN_PROF           "Perfiles Skin"
+    IDS_KADOPEN             "Abierto"
+    IDS_PASSIVE             "Pasivo"
+    IDS_SE                  "Intercambio Fuentes"
+	IDS_LOG_BANNED_CLIENTS	"Log banned clients"
+	IDS_LOG_RATING_RECV     "Log received file descriptions and ratings"
+	IDS_LOG_FILTERED_IPS	"Log filtered and/or ignored IPs"
+	IDS_LOG_FILE_SAVING		"Log file save actions"
+	IDS_FIND				"Find..."
+    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
+    IDS_LOG_SECURE_IDENT    "Log secure ident"
+    IDS_IPFILTERFILES       "All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"
+    IDS_DELETEIPFILTERS     "Do you really want to delete the selected IP filters?"
+    IDS_TOTAL_IPFILTER_LABEL "Total IP filters:"
+    IDS_TOTAL_IPS_LABEL     "Total IPs:"
+    IDS_DELETE2             "Delete"
+    IDS_APPEND              "Append..."
+    IDS_SAVE                "Save"
+    IDS_IP_START            "Start"
+    IDS_IP_END              "End"
+    IDS_IP_LEVEL            "Level"
+    IDS_IP_DESC             "Description"
+    IDS_IP_HITS             "Hits"
+    IDS_IP_RULES            "IP Filters:"
+END
+
 STRINGTABLE 
 BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 

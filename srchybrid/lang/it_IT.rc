@@ -1020,8 +1020,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FILEBUFFERSIZE      "Dimensione Buffer dei File (%i)"
-    IDS_QUEUESIZE           "Dimensione Coda (%i)"
+    IDS_FILEBUFFERSIZE      "Dimensione Buffer dei File"
+    IDS_QUEUESIZE           "Dimensione Coda"
     IDS_DAYS2               "giorni"
     IDS_ERR_MAKEBAKCREDITFILE 
                             "Impossibile creare un backup del file dei Client"
@@ -1103,9 +1103,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG2DISKFRAME       "Salva il log su disco"
-    IDS_LOG2DISK            "Log"
-    IDS_DEBUG2DISK          "Verboso"
+    IDS_LOG2DISK            "Save log to disk"
     IDS_EDITCAT             "Modifica le proprietà delle Categorie"
     IDS_PW_WS               "Webserver"
     IDS_ENABLED             "Attivo"
@@ -1582,6 +1580,37 @@ BEGIN
     IDS_RADCLIENTS          "dai Client Conosciuti"
     IDS_KADUDPPORTERR       "La porta UDP usata da Kad è in confilitto con quella usata da eMule per il Protocollo Esteso o per la connessione ai Server. La porta è stata cambiata con la %u."
     IDS_KADOVERHEAD         "Kad Overhead (Packets): %s (%s)"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_SEL_SKIN            "Select Skin..."
+    IDS_SEL_SKINDIR         "Select Skin Directory..."
+    IDS_SKIN_PROF           "Skin Profiles"
+    IDS_KADOPEN             "Open"
+    IDS_PASSIVE             "Passive"
+    IDS_SE                  "Source Exchange"
+	IDS_LOG_BANNED_CLIENTS	"Log banned clients"
+	IDS_LOG_RATING_RECV     "Log received file descriptions and ratings"
+	IDS_LOG_FILTERED_IPS	"Log filtered and/or ignored IPs"
+	IDS_LOG_FILE_SAVING		"Log file save actions"
+	IDS_FIND				"Find..."
+    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
+    IDS_LOG_SECURE_IDENT    "Log secure ident"
+    IDS_IPFILTERFILES       "All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"
+    IDS_DELETEIPFILTERS     "Do you really want to delete the selected IP filters?"
+    IDS_TOTAL_IPFILTER_LABEL "Total IP filters:"
+    IDS_TOTAL_IPS_LABEL     "Total IPs:"
+    IDS_DELETE2             "Delete"
+    IDS_APPEND              "Append..."
+    IDS_SAVE                "Save"
+    IDS_IP_START            "Start"
+    IDS_IP_END              "End"
+    IDS_IP_LEVEL            "Level"
+    IDS_IP_DESC             "Description"
+    IDS_IP_HITS             "Hits"
+    IDS_IP_RULES            "IP Filters:"
 END
 
 STRINGTABLE 

@@ -503,9 +503,9 @@ BEGIN
     IDS_PW_RETRIES          "tentativas"
     IDS_PW_SCORE            "Usar Sistema de Prioridades"
     IDS_PW_USC              "Atualizar lista de servidores ao conectar a um servidor"
-    IDS_PW_UCC              "Atualizar lista de servidores ao conectar a um cliente"
+    IDS_PW_UCC              "Atualizar lista de servidores ao conectar a um usuario"
     IDS_PW_FILTER           "Filter server and client LAN IPs"
-    IDS_PW_USS              "Auto Atualizar a lista de servidores ao iniciar"
+    IDS_PW_USS              "Atualizar a lista de servidores ao iniciar"
 END
 
 STRINGTABLE 
@@ -813,7 +813,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_IRC_SENDLINK        "Enviar para um amigo: "
-    IDS_IRC_RECIEVEDLINK    "%s recebido (%s) para ser auto iniciado."
+    IDS_IRC_RECIEVEDLINK    "%s recebido (%s) para ser iniciado automaticamente."
     IDS_IRC_ACCEPTLINKS     "Aceitar Links ED2K no IRC. (Use com cuidado!)"
     IDS_SOURCENAMES         "Nomes das Fontes"
     IDS_PREF_STARTMIN       "Iniciar minimizado"
@@ -916,7 +916,7 @@ STRINGTABLE
 BEGIN
     IDS_PRIOAUTONORMAL      "Autom.[Normal]"
     IDS_PRIOAUTOHIGH        "Autom.[Alta]"
-    IDS_PRIOAUTORELEASE     "Autom.[Lançam]"
+    IDS_PRIOAUTORELEASE     "Autom.[Lançamento]"
     IDS_PRIOAUTOLOW         "Autom.[Baixa]"
     IDS_ERR_CONTIMEOUT      "Tentativa de conexão em ""%s"" tempo esgotado"
     IDS_ERR_CONFAILED       "Tentativa de conexão em ""%s"" falhou."
@@ -975,7 +975,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Perdas devido corrompimento: %s       Ganho devido compressão: %s\nPacotes salvos por I.C.H.: %i"
-    IDS_ERR_NOHELP          "Nenhum arquivo de ajuda encontrado.\n Por favor visite nossa homepage para baixar uma cópia do novo arquivo de Ajuda! (Sessão download)"
+    IDS_ERR_NOHELP          "Nenhum arquivo de ajuda encontrado.\nPor favor visite nossa homepage para baixar uma cópia do novo arquivo de Ajuda! (Sessão download)\nVocê deseja procurar pela ajuda on-line agora?"
     IDS_SHOWOVERHEAD        "Exibir banda overhead"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f"
     IDS_EDITLIST            "Listar"
@@ -1015,8 +1015,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FILEBUFFERSIZE      "Tamanho do Buffer do arquivo (%i)"
-    IDS_QUEUESIZE           "Tamanho da Fila (%i)"
+    IDS_FILEBUFFERSIZE      "Tamanho do Buffer do arquivo"
+    IDS_QUEUESIZE           "Tamanho da Fila"
     IDS_DAYS2               "dias"
     IDS_ERR_MAKEBAKCREDITFILE "Falha ao criar backup do arquivo de crédito"
     IDS_COMMENT             "Comentário"
@@ -1082,8 +1082,8 @@ BEGIN
     IDS_DISABLEKNOWNLIST    "Desativar Lista de Usuários Conhecidos (menor uso da CPU)"
     IDS_DISABLEQUEUELIST    "Desabilitar Lista de Filas"
     IDS_USECREDITSYSTEM     "Ativar Sistema de Crédito (Recompensar Uploaders)"
-    IDS_FIRSTAUTODOWN       "Você deseja que o eMule controle as propriedades dos seus downloads?\r\rAtivando esta opção você permitirá que o eMule faça os downloads com muitas fontes não interferindo nos downloads que possuem poucas fontes.\r\rSe você atualizar da versão v0.26 e anteriores, todos os downloads atuais seram optados para o opção de Auto-Prioridade por padrão.\rEsta opção terá efeito somente nos downloads futuros. (Padrão Sim)"
-    IDS_FIRSTAUTOUP         "Você deseja que o eMule controle as propriedades dos seus uploads?\r\rAtivando esta opção você permitirá que o eMule impulsione os arquivos raros, dificultando que as pessoas baixem os arquivos populares.\rDesativando esta opção você permitirá que o eMule impulsione os arquivos populares, dificultando que as pessoas baixem os arquivos raros.\r\rSe você atualizar da versão v0.26 e anteriores, todos os Arquivos Compartilhados atuais seram optados para o opção de Auto-Prioridade por padrão.\rEsta opção terá efeito somente nos downloads futuros. (Padrão Sim)"
+    IDS_FIRSTAUTODOWN       "Você deseja que o eMule controle as propriedades dos seus downloads?\r\rAtivando esta opção você permitirá que o eMule faça os downloads com muitas fontes não interferindo nos downloads que possuem poucas fontes.\r\rSe você atualizar da versão v0.26 e anteriores, todos os downloads atuais seram optados para o opção de AutoPrioridade por padrão.\rEsta opção terá efeito somente nos downloads futuros. (Padrão Sim)"
+    IDS_FIRSTAUTOUP         "Você deseja que o eMule controle as propriedades dos seus uploads?\r\rAtivando esta opção você permitirá que o eMule impulsione os arquivos raros, dificultando que as pessoas baixem os arquivos populares.\rDesativando esta opção você permitirá que o eMule impulsione os arquivos populares, dificultando que as pessoas baixem os arquivos raros.\r\rSe você atualizar da versão v0.26 e anteriores, todos os Arquivos Compartilhados atuais seram optados para o opção de AutoPrioridade por padrão.\rEsta opção terá efeito somente nos downloads futuros. (Padrão Sim)"
     IDS_FIRSTCREDITSYSTEM   "Você deseja recompensar as pessoas que fazem upload para você?\r\rIsto é conhecido como Sistema de Créditos. Ativando esta opção você ajudará na luta contra os sugadores (leachers). Se você for um lançador de arquivos, você devera desabilitar esta opção.\r\r(Padrão Sim)"
     IDS_FIRSTFULLCHUNK      "Você deseja fazer Upload de partes completas?\r\rAtivando as partes completas você dará uma melhor possibilidade de comcluir uma parte. Não utilizar está função ajudará uma mais rápida rotação de sua fila. Se você for um lançador de arquivos, você devera marcar isto.\r\r(Padrão Sim)"
     IDS_FIRSTSAFECON        "Você deseja que o eMule utilize  a Conexão Segura?\r\rAtivando esta caracteristica você permitirá que o eMule conecte aos Servidores mais rapidamente, mas poderá fazer com que você conecte com ID Baixo.\r\r(Padrão Não)"
@@ -1096,9 +1096,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG2DISKFRAME       "Salvar logs no disco"
     IDS_LOG2DISK            "Log"
-    IDS_DEBUG2DISK          "Verbose"
     IDS_EDITCAT             "Editar Propriedades das Categorias"
     IDS_PW_WS               "Servidor Web"
     IDS_ENABLED             "ativado"
@@ -1117,7 +1115,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEB_GZIP_COMMENT    "Salvar tráfico, especialmente nos gráficos."
+    IDS_WEB_GZIP_COMMENT    "Savar tráfico, especialmente nos gráficos."
     IDS_WEB_UPLOAD_QUEUE_COMMENT 
                             "Ativar ou desativar a exibição de espera na area de transferência."
     IDS_WEB_REFRESH_TIME    "Atualizar Tempo de Páginas"
@@ -1192,7 +1190,7 @@ BEGIN
     IDS_LOGENTRY            "Entrada do Registro "
     IDS_COPY                "Copiar"
     IDS_SELECTALL           "Selecionar tudo"
-    IDS_AUTOSCROLL          "Auto-Rolagem"
+    IDS_AUTOSCROLL          "AutoRolagem"
     IDS_WIZ1_WELCOME_TITLE  "Bem Vindo ao eMule"
 END
 
@@ -1232,7 +1230,7 @@ BEGIN
     IDS_SHAREDINFO2         "O Usuário %s (%u) completou envio da lista de arquivos compartilhados"
     IDS_SHAREDANSW3         "O Usuário %s (%u) enviou lista não requisitada de arquivos compartilhados - ignorado"
     IDS_SHAREDREQDENIED     "O Usuário %s (%u) negou acesso à lista de diretórios/arquivos compartilhados"
-    IDS_AUTOCLEANUPFN       "Limpar o nome do arquivo"
+    IDS_AUTOCLEANUPFN       "Limpar os nomes dos arquivos"
     IDS_ONNEWDOWNLOAD       "Inicialização"
     IDS_FILTERFILENAMEWORD  "Digite palavras à filtrar separadas por |"
 END
@@ -1384,12 +1382,12 @@ BEGIN
     IDS_A4AF                "Manipulador de Fontes A4AF"
     IDS_MOBILEMULE          "MobileMule"
     IDS_ENABLEMM            "Ativar MobileMule"
-    IDS_AUTOCAT_LABEL       "Auto Tarefa de Categ. (Padrão, separado por |)"
+    IDS_AUTOCAT_LABEL       "Tarefa automatica de Categorias (Padrão, separado por |)"
     IDS_SHOWEXTSETTINGS     "Exibir mais Controles (Controles em Modo Avançado)"
     IDS_TREEOPTIONS_TRUE    "Verdadeiro"
     IDS_TREEOPTIONS_FALSE   "Falso"
     IDS_TREEOPTIONS_OK      "OK"
-    IDS_HYPERTEXT_FONT_HINT "Fonte para o Servidor, Messagens e Janela IRC"
+    IDS_HYPERTEXT_FONT_HINT "Fontes para as Janelas: Servidores, Mensagens e IRC"
     IDS_SELECT_FONT         "Selecionar Fonte"
     IDS_SERVER_LIMITS       "Baixo/Alto Limite de Arquivo"
     IDS_SERVERINFO          "Informação do Servidor"
@@ -1488,8 +1486,8 @@ BEGIN
     IDS_IMP_STATUSQUEUED    "Na Fila"
     IDS_IMP_ALRDWL          "Fazendo Download"
     IDS_IMP_ADDBTN          "&Adicionar Importações"
-    IDS_IMP_RETRYBTN        "&Tentar novamente o selecionado"
-    IDS_IMP_REMOVEBTN       "Re&mover selecionado"
+    IDS_IMP_RETRYBTN        "&Importar selecionados"
+    IDS_IMP_REMOVEBTN       "Re&mover selecionados"
     IDS_IMP_SELFOLDER       "Por favor escolha uma única pasta partmet ou sua antiga pasta temporária com todas as sub-pastas partmet!"
     IDS_IMP_DELSRC          "Você deseja que a fonte dos arquivos part baixados e importados com sucesso seja deletada?"
     IDS_IMP_SIZE            "%s (Disco:%s)"
@@ -1518,10 +1516,10 @@ BEGIN
     IDS_DELETE              "Apagar do disco"
     IDS_WIZARD_NETWORK      "Escolha qual(is) rede(s) você deseja utilizar."
     IDS_WIZARD_ED2K         "Configurações ED2k"
-    IDS_FD_RECOV            "Recovered"
-    IDS_FD_COMPR            "Compression"
-    IDS_HSAV                "Hashset available"
-    IDS_FD_CORR             "Corrupted"
+    IDS_FD_RECOV            "Recuperado"
+    IDS_FD_COMPR            "Compressão"
+    IDS_HSAV                "Hashset Disponível"
+    IDS_FD_CORR             "Corrompido"
 END
 
 STRINGTABLE 
@@ -1544,9 +1542,9 @@ BEGIN
     IDS_CUSTOMIZETOOLBAR    "Personalizar Barra de Ferramentas"
     IDS_KAD_RECHECKFW       "Verificar Firewall"
     IDS_SHAREDTITLE         "Compart. ED2K|Kad"
-    IDS_WARNINGNOBS         "Bootstrap inativo agora (Kademlia desabilitado ou já conectado)."
-    IDS_FIREWALLED          "Firewalled"
-    IDS_KADEMLIA            "Kad"
+    IDS_WARNINGNOBS         "Auxílio Externo (Bootstrap) inativo agora (Kademlia desabilitado ou já conectado)."
+    IDS_FIREWALLED          "Sob Firewall"
+    IDS_KADEMLIA            "Kademlia"
     IDS_KADCONTACTLAB       "Contatos"
     IDS_KADDISTANCE         "Distância"
     IDS_KEY                 "Chave"
@@ -1558,24 +1556,55 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_BOOTSTRAP           "Bootstrap"
+    IDS_BOOTSTRAP           "Auxílio Externo"
     IDS_VIAED2KSQ           "Via ED2K Servidor/Fila"
-    IDS_EM_KADEMLIA         "&Kad"
-    IDS_VIAKAD              "Via Kad"
+    IDS_EM_KADEMLIA         "&Kademlia"
+    IDS_VIAKAD              "Via Kademlia"
     IDS_VIASE               "Via Troca de Fontes"
     IDS_SELECTTOOLBARBITMAP "Selecionar Pele para Barra de Ferramentas"
-    IDS_SELECTTOOLBARBITMAPDIR "Selecionar Diretório das Peles"
+    IDS_SELECTTOOLBARBITMAPDIR "Selecionar Diretório de Peles"
     IDS_TOOLBARSKINS        "Peles para Barra de Ferramentas"
     IDS_NOTEXTLABELS        "Sem Rótulos"
     IDS_TEXTLABELSONRIGHT   "À direita do Ícone"
     IDS_TEXTLABELS          "Rótulos de Texto"
     IDS_ENABLETEXTLABELS    "Embaixo do Ícone"
     IDS_AUTOREMOVEFD        "Auto limpar downloads concluídos"
-    IDS_MM_BLOCK            "3 logins falhos para o MobileMule - qualquer tentativa está bloqueada por 10 min!"
+    IDS_MM_BLOCK            "Falharam 3 tentativas de login para o MobileMule registrado - qualquer tentativa será bloqueada por 10 minutos!"
     IDS_MM_NEWUSER          "Novo usuário logado com sucesso no Servidor MobileMule"
     IDS_RADCLIENTS          "dos clientes conhecidos"
     IDS_KADUDPPORTERR       "A porta UDP do Kademlia conflitou com alguma porta externa ou porta UDP de Servidor do eMule. A porta foi modificada para %u."
-    IDS_KADOVERHEAD         "Kad Overhead (Pacotes): %s (%s)"
+    IDS_KADOVERHEAD         "Overhead Kademlia (Pacotes): %s (%s)"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_SEL_SKIN            "Selecionar Pele..."
+    IDS_SEL_SKINDIR         "Selecionar Diretório de Peles..."
+    IDS_SKIN_PROF           "Perfis de Pele"
+    IDS_KADOPEN             "Aberto"
+    IDS_PASSIVE             "Passivo"
+    IDS_SE                  "Troca de Fonte"
+	IDS_LOG_BANNED_CLIENTS	"Criar log de usuarios banidos"
+	IDS_LOG_RATING_RECV		"Registrar as avaliações recebidas dos arquivos"
+	IDS_LOG_FILTERED_IPS	"Registrar os IPs filtrados e/ou ignorados"
+	IDS_LOG_FILE_SAVING		"Registrar as ações de salvamento dos arquivos"
+	IDS_FIND				"Procurando..."
+    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
+    IDS_LOG_SECURE_IDENT    "Log secure ident"
+    IDS_IPFILTERFILES       "All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"
+    IDS_DELETEIPFILTERS     "Do you really want to delete the selected IP filters?"
+    IDS_TOTAL_IPFILTER_LABEL "Total IP filters:"
+    IDS_TOTAL_IPS_LABEL     "Total IPs:"
+    IDS_DELETE2             "Delete"
+    IDS_APPEND              "Append..."
+    IDS_SAVE                "Save"
+    IDS_IP_START            "Start"
+    IDS_IP_END              "End"
+    IDS_IP_LEVEL            "Level"
+    IDS_IP_DESC             "Description"
+    IDS_IP_HITS             "Hits"
+    IDS_IP_RULES            "IP Filters:"
 END
 
 STRINGTABLE 

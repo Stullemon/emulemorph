@@ -209,7 +209,7 @@ BEGIN
     IDS_NONEEDEDPARTS       "Pas de parties à charger"
     IDS_NOCONNECTLOW2LOW    "Connexion impossible entre deux LowID"
     IDS_UNKNOWN             "Inconnu"
-    IDS_ASKED4ANOTHERFILE   "Demande un autre fichier"
+    IDS_ASKED4ANOTHERFILE   "Autre fichier demandé"
     IDS_Q_CANCELDL          "Etes-vous sûr d'annuler et effacer ces fichiers ?\n"
     IDS_Q_CANCELDL2         "Etes-vous sûr d'annuler et effacer ce fichier ?\n"
     IDS_COPIED2CB           "Copié : \n"
@@ -284,8 +284,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_UDATA         "Données envoyées : %s"
-    IDS_STATS_AVGDL         "Vitesse moyenne de réception: %.2f kB/s"
-    IDS_STATS_AVGUL         "Vitesse moyenne d'émission: %.2f kB/s"
+    IDS_STATS_AVGDL         "Vitesse moyenne de réception: %.2f ko/s"
+    IDS_STATS_AVGUL         "Vitesse moyenne d'émission: %.2f ko/s"
     IDS_STATS_FOUNDSRC      "Sources trouvées : %i"
     IDS_STATS_ACTDL         "Réceptions actives (morceaux) : %i"
     IDS_STATS_ACTUL         "Envois actifs : %i"
@@ -457,7 +457,7 @@ BEGIN
     IDS_SF_CURRENT          "Session en cours"
     IDS_SF_TOTAL            "Total"
     IDS_SF_TRANS            "Transféré : "
-    IDS_SF_ACCEPTED         "Demandes acceptées : "
+    IDS_SF_ACCEPTED         "Acceptées : "
     IDS_SF_REQUESTED        "Demandes : "
     IDS_ST_DOWNLOAD         "Vitesse de réception"
     IDS_ST_UPLOAD           "Vitesse d'émission"
@@ -567,15 +567,15 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CD_SNAME            "Nom serveur : "
-    IDS_CD_CDOWN            "Réception en cours : "
-    IDS_CD_DOWN             "Reçu (session): "
+    IDS_CD_CDOWN            "Le client demande: "
+    IDS_CD_DOWN             "Le client a reçu (session): "
     IDS_CD_ADOWN            "Moyenne réception : "
     IDS_CD_TDOWN            "Total réception : "
-    IDS_CD_UP               "Envoyé (cette session) : "
+    IDS_CD_UP               "Le client a envoyé (session): "
     IDS_CD_AUP              "Moyenne envoi : "
     IDS_CD_TUP              "Total envoi : "
     IDS_CD_TRANS            "Transfert"
-    IDS_CD_SCORES           "Scores"
+    IDS_CD_SCORES           "Scores du client"
     IDS_CD_MOD              "R/E Modificateur : "
     IDS_CD_RATING           "Evaluation (total) : "
     IDS_CD_USCORE           "Score file d'attente : "
@@ -630,11 +630,11 @@ BEGIN
     IDS_FILESTATS_SESSION   "Fichier statistique pour cette session : %d requêtes acceptées sur %d, %s transferés\n"
     IDS_FILESTATS_TOTAL     "Fichier statistique pour toutes les sessions : %d requêtes acceptées sur %d, %s transferés"
     IDS_REQ_UNKNOWNFILE     "Fichier demandé inconnu"
-    IDS_TRANSFERTIME        "Délais depuis le premier transfert : %s"
+    IDS_TRANSFERTIME        "Délai depuis le premier transfert : %s"
     IDS_SF_AVERAGESIZE      "Taille moyenne fichier : %s"
     IDS_SF_REQUESTS         "Demandes"
-    IDS_SF_ACCEPTS          "Demandes acceptées"
-    IDS_SF_TRANSFERRED      "Données transferées "
+    IDS_SF_ACCEPTS          "Acceptées"
+    IDS_SF_TRANSFERRED      "Transferé "
     IDS_REMOVESEARCHSTRING  "Supprimer recherche(s) sélectionné(es)"
     IDS_REMOVESELECTED      "Supprimer sélection"
     IDS_REMOVEALLSEARCH     "Tout supprimer"
@@ -715,7 +715,7 @@ BEGIN
     IDS_RECOVERY_SUCCESSFUL "Récupération d'archives réussie."
     IDS_RECOVERY_FAILED     "Récupération d'archives échouée."
     IDS_STARTNEXTFILE       "Lancer prochain fichier en pause quand un est terminé"
-    IDS_FULLCHUNKTRANS      "Essayer de transférer toutes les parties des fichiers en UL"
+    IDS_FULLCHUNKTRANS      "Essayer d'envoyer des parties complètes à chaque client"
     IDS_MANUALSERVERHIGHPRIO 
                             "Serveurs ajoutés manuellement : Placés en priorité haute"
     IDS_VERBOSE             "Fenêtre Debug"
@@ -972,7 +972,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Pertes dues à la corruption : %s       Gain dû à la compression : %s\nParties sauvées grâce à l'I.C.H. : %i"
-    IDS_ERR_NOHELP          "Pas de fichier d'aide trouvé.\n Visitez notre homepage pour avoir le nouveau fichier d'aide ! (section download)"
+    IDS_ERR_NOHELP          "Aucun fichier d'aide trouvé.\n Veuillez visiter notre page d'accueil pour récupérer la dernière version disponible ! (section Download)\nSouhaitez-vous parcourir maintenant l'aide en ligne à la place ?"
     IDS_SHOWOVERHEAD        "Montrer le surplus de bande passante"
     IDS_UPDOWNSMALL         "E : %.1f | R : %.1f"
     IDS_EDITLIST            "Editer"
@@ -1012,8 +1012,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FILEBUFFERSIZE      "Taille fichier buffer (%i)"
-    IDS_QUEUESIZE           "Taille file d'attente (%i)"
+    IDS_FILEBUFFERSIZE      "Taille fichier buffer"
+    IDS_QUEUESIZE           "Taille file d'attente"
     IDS_DAYS2               "jours"
     IDS_ERR_MAKEBAKCREDITFILE 
                             "La création d'une sauvegarde du fichier de crédits a échouée"
@@ -1093,9 +1093,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG2DISKFRAME       "Sauver les journaux sur le disque"
-    IDS_LOG2DISK            "Journal"
-    IDS_DEBUG2DISK          "Debogage"
+    IDS_LOG2DISK            "Save log to disk"
     IDS_EDITCAT             "Editer les propriétés des catégories"
     IDS_PW_WS               "Serveur Web"
     IDS_ENABLED             "Activé"
@@ -1410,7 +1408,7 @@ BEGIN
     IDS_ARTIST              "Artiste"
     IDS_ALBUM               "Album"
     IDS_MMGUIDELINK         "Guide MobileMule"
-    IDS_CD_UPLOADREQ        "Envoi demandé:"
+    IDS_CD_UPLOADREQ        "Demandé au client:"
     IDS_SETTINGCHANGED_RESTART 
                             "Pour que les changements prennent effet, veuillez redémarrer eMule!"
     IDS_CREDITSEXPIRED      ", %i clients supprimés (pas vus depuis 5 mois)"
@@ -1428,7 +1426,7 @@ BEGIN
     IDS_IRC_HELPCHANNEL     "Se connecter aux canaux d'aide."
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-french"
     IDS_IRC_ACCEPTLINKSFRIENDS "Venant d'amis seulement."
-    IDS_COMPLSOURCES        "Sources Complètes"
+    IDS_COMPLSOURCES        "Srcs Complètes"
     IDS_CHECKNOENDTIME      "pas de date de fin"
     IDS_FD_DOWNLOADSTARTED  "Téléchargement ajouté:"
     IDS_MATCH_KEYWORDS      "Mots entiers"
@@ -1560,9 +1558,9 @@ BEGIN
     IDS_EM_KADEMLIA         "&Kad"
     IDS_VIAKAD              "via Kad"
     IDS_VIASE               "via Echange de Sources"
-    IDS_SELECTTOOLBARBITMAP "Selectionner une image pour la barre d'outils"
-    IDS_SELECTTOOLBARBITMAPDIR "Choisir rep. Image"
-    IDS_TOOLBARSKINS        "Skins Barre d'outils"
+    IDS_SELECTTOOLBARBITMAP "Choisir une barre d'outils"
+    IDS_SELECTTOOLBARBITMAPDIR "Emplacement des barres d'outils"
+    IDS_TOOLBARSKINS        "Thèmes Barre d'outils"
     IDS_NOTEXTLABELS        "Pas d'étiquette"
     IDS_TEXTLABELSONRIGHT   "à droite de l'icône"
     IDS_TEXTLABELS          "Etiquettes texte"
@@ -1573,6 +1571,36 @@ BEGIN
     IDS_RADCLIENTS          "à partir des clients connus"
     IDS_KADUDPPORTERR       "Le port UDP de Kad est en conflit avec le port UDP d'eMule ou le port UDP Serveurs. Le port a été changé en %u."
     IDS_KADOVERHEAD         "Surplus de Bande passante Kad (Paquets): %s (%s)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SEL_SKIN            "Choisir un thème..."
+    IDS_SEL_SKINDIR         "Emplacement des Thèmes..."
+    IDS_SKIN_PROF           "Thèmes Interface"
+    IDS_KADOPEN             "Ouvert"
+    IDS_PASSIVE             "Passive"
+    IDS_SE                  "Echange Sources"
+	IDS_LOG_BANNED_CLIENTS	"Consigner les clients bannis"
+	IDS_LOG_RATING_RECV     "Log received file descriptions and ratings"
+	IDS_LOG_FILTERED_IPS	"Consigner les IPs filtrées et/ou ignorées"
+	IDS_LOG_FILE_SAVING		"Consigner les opérations de sauvegarde de fichier"
+	IDS_FIND				"Trouver..."
+    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
+    IDS_LOG_SECURE_IDENT    "Log secure ident"
+    IDS_IPFILTERFILES       "All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"
+    IDS_DELETEIPFILTERS     "Do you really want to delete the selected IP filters?"
+    IDS_TOTAL_IPFILTER_LABEL "Total IP filters:"
+    IDS_TOTAL_IPS_LABEL     "Total IPs:"
+    IDS_DELETE2             "Delete"
+    IDS_APPEND              "Append..."
+    IDS_SAVE                "Save"
+    IDS_IP_START            "Start"
+    IDS_IP_END              "End"
+    IDS_IP_LEVEL            "Level"
+    IDS_IP_DESC             "Description"
+    IDS_IP_HITS             "Hits"
+    IDS_IP_RULES            "IP Filters:"
 END
 
 STRINGTABLE 
