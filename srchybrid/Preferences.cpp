@@ -190,24 +190,24 @@ uint8	CPreferences::confirmExit;
 uint16	CPreferences::downloadColumnWidths[15]; /*13 Official+ 2 Khaos*/
 BOOL	CPreferences::downloadColumnHidden[15]; /*13 Official+ 2 Khaos*/
 INT 	CPreferences::downloadColumnOrder[15];  /*13 Official+ 2 Khaos*/
-uint16	CPreferences::uploadColumnWidths[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
-BOOL	CPreferences::uploadColumnHidden[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
-INT 	CPreferences::uploadColumnOrder[15];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
-uint16	CPreferences::queueColumnWidths[13];  /*10+1 MOD_VERSION+1 Community+ 1 friend*/
-BOOL	CPreferences::queueColumnHidden[13];  /*10+1 MOD_VERSION+1 Community+ 1 friend*/
-INT 	CPreferences::queueColumnOrder[13];   /*10+1 MOD_VERSION+1 Community+ 1 friend*/
+uint16	CPreferences::uploadColumnWidths[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
+BOOL	CPreferences::uploadColumnHidden[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
+INT 	CPreferences::uploadColumnOrder[16];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
+uint16	CPreferences::queueColumnWidths[14];  /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country*/
+BOOL	CPreferences::queueColumnHidden[14];  /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country*/
+INT 	CPreferences::queueColumnOrder[14];   /*10+1 MOD_VERSION+1 Community+ 1 friend+1 Country*/
 uint16	CPreferences::searchColumnWidths[15]; /*14+1 Fakecheck*/
 BOOL	CPreferences::searchColumnHidden[15]; /*14+1 Fakecheck*/
 INT 	CPreferences::searchColumnOrder[15];  /*14+1 Fakecheck*/
 uint16	CPreferences::sharedColumnWidths[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
 BOOL	CPreferences::sharedColumnHidden[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
 INT 	CPreferences::sharedColumnOrder[22];  /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
-uint16	CPreferences::serverColumnWidths[15]; /*14+ 1 Aux Port*/
-BOOL	CPreferences::serverColumnHidden[15]; /*14+ 1 Aux Port*/
-INT 	CPreferences::serverColumnOrder[15];  /*14+ 1 Aux Port*/
-uint16	CPreferences::clientListColumnWidths[10]; /*8+1 Community+ 1 friend*/
-BOOL	CPreferences::clientListColumnHidden[10]; /*8+1 Community+ 1 friend*/
-INT 	CPreferences::clientListColumnOrder[10]; /*8+1 Community+ 1 friend*/
+uint16	CPreferences::serverColumnWidths[16]; /*14+ 1 Aux Port+1 Country*/
+BOOL	CPreferences::serverColumnHidden[16]; /*14+ 1 Aux Port+1 Country*/
+INT 	CPreferences::serverColumnOrder[16];  /*14+ 1 Aux Port+1 Country*/
+uint16	CPreferences::clientListColumnWidths[11]; /*8+1 Community+ 1 friend+1 Country*/
+BOOL	CPreferences::clientListColumnHidden[11]; /*8+1 Community+ 1 friend+1 Country*/
+INT 	CPreferences::clientListColumnOrder[11]; /*8+1 Community+ 1 friend+1 Country*/
 
 uint16	CPreferences::FilenamesListColumnWidths[2];
 BOOL	CPreferences::FilenamesListColumnHidden[2];

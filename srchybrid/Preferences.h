@@ -182,24 +182,24 @@ public:
 	static	uint16	downloadColumnWidths[15]; /*13 Official+ 2 Khaos*/
 	static	BOOL	downloadColumnHidden[15]; /*13 Official+ 2 Khaos*/
 	static	INT		downloadColumnOrder[15];  /*13 Official+ 2 Khaos*/
-	static	uint16	uploadColumnWidths[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
-	static	BOOL	uploadColumnHidden[15]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
-	static	INT		uploadColumnOrder[15];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend*/
-	static	uint16	queueColumnWidths[13];  /*10+1 MOD_VERSION+1 Community+1 Friend*/
-	static	BOOL	queueColumnHidden[13];  /*10+1 MOD_VERSION+1 Community+1 Friend*/
-	static	INT		queueColumnOrder[13];   /*10+1 MOD_VERSION+1 Community+1 Friend*/
+	static	uint16	uploadColumnWidths[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
+	static	BOOL	uploadColumnHidden[16]; /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
+	static	INT		uploadColumnOrder[16];  /*8+1 MOD_VERSION+1 Upload/Download+1 Download Status+1 Slot+1 Compression+1 Community+1 Friend+1 Country*/
+	static	uint16	queueColumnWidths[14];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country*/
+	static	BOOL	queueColumnHidden[14];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country*/
+	static	INT		queueColumnOrder[14];  /*10+1 MOD_VERSION+1 Community+1 Friend+1 Country*/
 	static	uint16	searchColumnWidths[15]; /*14+1 Fakecheck*/
 	static	BOOL	searchColumnHidden[15]; /*14+1 Fakecheck*/
 	static	INT		searchColumnOrder[15];  /*14+1 Fakecheck*/
 	static	uint16	sharedColumnWidths[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
 	static	BOOL	sharedColumnHidden[22]; /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
 	static	INT		sharedColumnOrder[22];  /*12+1 PERMISSION+1 PWSHARE+4 Spreadbars+1 HIDEOS+1 Share_Only_TheNeed+2 CRC32-Tag*/
-	static	uint16	serverColumnWidths[15]; /*14+ 1 Aux Port*/
-	static	BOOL	serverColumnHidden[15]; /*14+ 1 Aux Port*/
-	static	INT		serverColumnOrder[15];  /*14+ 1 Aux Port*/
-	static	uint16	clientListColumnWidths[10]; /*8+1 Community+1 Friend*/
-	static	BOOL	clientListColumnHidden[10]; /*8+1 Community+1 Friend*/
-	static	INT		clientListColumnOrder[10];  /*8+1 Community+1 Friend*/
+	static	uint16	serverColumnWidths[16]; /*14+ 1 Aux Port+1 Country*/
+	static	BOOL	serverColumnHidden[16]; /*14+ 1 Aux Port+1 Country*/
+	static	INT		serverColumnOrder[16];  /*14+ 1 Aux Port+1 Country*/
+	static	uint16	clientListColumnWidths[11]; /*8+1 Community+1 Friend+1 Country*/
+	static	BOOL	clientListColumnHidden[11]; /*8+1 Community+1 Friend+1 Country*/
+	static	INT		clientListColumnOrder[11];  /*8+1 Community+1 Friend+1 Country*/
 	static	uint16	FilenamesListColumnWidths[2];
 	static	BOOL	FilenamesListColumnHidden[2];
 	static	INT		FilenamesListColumnOrder[2];
