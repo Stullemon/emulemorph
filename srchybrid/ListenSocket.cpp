@@ -575,12 +575,15 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_OUTOFPARTREQS:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					if (client->GetDownloadState() == DS_DOWNLOADING)
 						client->SetDownloadState(DS_ONQUEUE);
 					break;
 				}
 				case OP_SETREQFILEID:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
+
 					// IP banned, no answer for this request
 					if (client->IsBanned() ){
 						break;						
