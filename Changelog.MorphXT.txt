@@ -1,7 +1,8 @@
 --------------------------------------
-Changelog for eMule 0.42g MorphXT v???
+Changelog for eMule 0.42g MorphXT v3.0
 --------------------------------------
 FIXED  : Selection Category Support for weblink [SiRoB]
+FIXED  : Freeze trouble is away (Congratulation to zz to identify the cause) [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v2.11
