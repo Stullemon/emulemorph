@@ -2446,7 +2446,7 @@ void CPreferences::SaveCats(){
 		catini.WriteInt("vfSourceCountMax", catMap.GetAt(ix)->viewfilters.nSourceCountMax, ixStr);
 		catini.WriteInt("vfAvailSourceCountMin", catMap.GetAt(ix)->viewfilters.nAvailSourceCountMin, ixStr);
 		catini.WriteInt("vfAvailSourceCountMax", catMap.GetAt(ix)->viewfilters.nAvailSourceCountMax, ixStr);
-		catini.WriteString("AdvancedFilterMask", catMap.GetAt(ix)->viewfilters.sAdvancedFilterMask, ixStr);
+		catini.WriteString("vfAdvancedFilterMask", catMap.GetAt(ix)->viewfilters.sAdvancedFilterMask, ixStr);
 		// Save Selection Criteria
 		catini.WriteBool("scFileSize", catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
 		catini.WriteBool("scAdvancedFilterMask", catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
