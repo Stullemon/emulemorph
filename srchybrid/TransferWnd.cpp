@@ -538,20 +538,6 @@ void CTransferWnd::OnNMRclickDltab(NMHDR *pNMHDR, LRESULT *pResult)
 
 	Category_Struct* curCat = thePrefs.GetCategory(rightclickindex);
 	if (curCat) { //MORPH - HOTFIX by SiRoB, Possible crash when NULL is returned by GetCategory()
-		//MORPH START - Added by SiRoB, Fix to show the category prio 
-		UINT uCurPrioMenuItem = -1;
-		if (curCat->prio == PR_AUTO)
-			uCurPrioMenuItem = MP_PRIOAUTO;
-		else if (curCat->prio == PR_HIGH)
-			uCurPrioMenuItem = MP_PRIOHIGH;
-		else if (curCat->prio == PR_NORMAL)
-			uCurPrioMenuItem = MP_PRIONORMAL;
-		else if (curCat->prio == PR_LOW)
-			uCurPrioMenuItem = MP_PRIOLOW;
-		else
-			ASSERT(0);
-		m_mnuCatPriority.CheckMenuRadioItem(MP_PRIOLOW,MP_PRIOAUTO,uCurPrioMenuItem,0);
-		//MORPH END  - Added by SiRoB, Fix to show the category prio 
 		// Check and enable the appropriate menu items in Select View Filter
 		m_mnuCatViewFilter.CheckMenuItem(MP_CAT_SET0, (curCat->viewfilters.nFromCats == 0) ? MF_CHECKED : MF_UNCHECKED);
 		//m_mnuCatViewFilter.CheckMenuItem(MP_CAT_SET0+1, (curCat->viewfilters.nFromCats == 1) ? MF_CHECKED : MF_UNCHECKED);

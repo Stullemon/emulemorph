@@ -1970,16 +1970,15 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		//already deleted
 		return;
 	}
-	uint32 nImgSize;
 	BYTE* pBuffer = NULL;
 	try{
 	for (int i = 0; i != nCount; i++){
-			nImgSize = data.ReadUInt32();
+			uint32 nImgSize = data.ReadUInt32();
 			if (nImgSize > nSize)
 				throw CString(_T("CUpDownClient::ProcessPreviewAnswer - Provided image size exceeds limit"));
-			pBuffer = new BYTE[nSize];
-		data.Read(pBuffer,nSize);
-		CxImage* image = new CxImage(pBuffer, nSize,CXIMAGE_FORMAT_PNG);
+			pBuffer = new BYTE[nImgSize];
+			data.Read(pBuffer, nImgSize);
+			CxImage* image = new CxImage(pBuffer, nImgSize, CXIMAGE_FORMAT_PNG);
 		delete[] pBuffer;
 			pBuffer = NULL;
 		if (image->IsValid()){

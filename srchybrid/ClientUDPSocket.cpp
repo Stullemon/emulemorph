@@ -357,6 +357,7 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 			memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 			if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
+				controlpacket_queue.RemoveHead();
 				delete cur_packet->packet;
 				delete cur_packet;
 			}
