@@ -348,6 +348,10 @@ public:
 	uint16			GetPartCount() const		{return m_nPartCount;}
 	uint32			GetDownloadDatarate() const	{return m_nDownDatarate;}
 
+	// Mighty Knife: Community visualization
+	bool			IsCommunity() const;
+	// [end] Mighty Knife
+
 	uint16			GetRemoteQueueRank() const	{return m_nRemoteQueueRank;}
 	void			SetRemoteQueueRank(uint16 nr);
 	bool			IsRemoteQueueFull() const	{return m_bRemoteQueueFull;}
