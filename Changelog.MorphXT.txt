@@ -8,6 +8,7 @@ FIXED  : Renaming existing CRC32 to uppercase only worked for the first 4 charac
 FIXED  : Improper treatment of sets of empty parameters in preferences.ini. [MightyKnife]
 FIXED  : Oscop mouse cursor fix by apph [SiRoB]
 FIXED  : USC: Friend, Powershare and Pay Back First slots are properly added by respecting setting [SiRoB]
+FIXED  : USC: Small mistake that create some extra slot open while we remove one [SiRoB]
 
 ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
 
