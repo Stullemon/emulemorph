@@ -443,9 +443,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				case 3:
 					//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 					if(client->GetSessionUp() == client->GetQueueSessionUp()) {
-						Sbuffer.Format(_T("%s (%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false));
+						Sbuffer.Format(_T("%s (%s-%s)"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false),CastItoXBytes(client->GetPayloadInBuffer(),false,false));
                     } else {
-						Sbuffer.Format(_T("%s=%s+%s (%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
+						Sbuffer.Format(_T("%s=%s+%s (%s-%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionUp()-client->GetSessionUp()), CastItoXBytes(client->GetQueueSessionPayloadUp()),CastItoXBytes(client->GetPayloadInBuffer(),false,false));
 					}
 					//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 					break;
