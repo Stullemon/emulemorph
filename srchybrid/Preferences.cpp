@@ -1070,7 +1070,10 @@ uint32	CPreferences::GetMaxFriendByteToSend()
 	{
 		if ((float)theStats.sessionReceivedBytes/(theStats.sessionSentBytes-theStats.sessionSentBytesToFriend)>=3)
 		{
-			return 0;
+			if (3*theApp.uploadqueue->GetDatarate()>theApp.downloadqueue->GetDatarate())
+				return theApp.uploadqueue->GetDatarate()-theApp.downloadqueue->GetDatarate()/3;
+			else
+				return 0;
 		}else
 			return _UI32_MAX;
 	}
@@ -2381,21 +2384,21 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("PCPort"), m_nPeerCachePort);
         
         // Added by MoNKi [MoNKi: -Wap Server-]
-	ini.WriteBool("WapEnabled", m_bWapEnabled, "emulEspaña");
-	ini.WriteString("WapTemplateFile",m_sWapTemplateFile, "emulEspaña");
-	ini.WriteInt("WapPort", m_nWapPort, "emulEspaña");
-	ini.WriteInt("WapGraphWidth", m_iWapGraphWidth, "emulEspaña");
-	ini.WriteInt("WapGraphHeight", m_iWapGraphHeight, "emulEspaña");
-	ini.WriteBool("WapFilledGraphs", m_bWapFilledGraphs, "emulEspaña");
-	ini.WriteInt("WapMaxItemsInPage", m_iWapMaxItemsInPages, "emulEspaña");
-	ini.WriteBool("WapSendImages", m_bWapSendImages, "emulEspaña");
-	ini.WriteBool("WapSendGraphs", m_bWapSendGraphs, "emulEspaña");
-	ini.WriteBool("WapSendProgressBars", m_bWapSendProgressBars, "emulEspaña");
-	ini.WriteBool("WapSendBWImages", m_bWapAllwaysSendBWImages, "emulEspaña");
-	ini.WriteInt("WapLogsSize", m_iWapLogsSize, "emulEspaña");
-	ini.WriteString("WapPassword", m_sWapPassword, "emulEspaña");
-	ini.WriteString("WapPasswordLow", m_sWapLowPassword, "emulEspaña");
-	ini.WriteBool("WapLowEnable", m_bWapLowEnabled, "emulEspaña");
+	ini.WriteBool(_T("WapEnabled"), m_bWapEnabled, _T("emulEspaña"));
+	ini.WriteString(_T("WapTemplateFile"),m_sWapTemplateFile, _T("emulEspaña"));
+	ini.WriteInt(_T("WapPort"), m_nWapPort, _T("emulEspaña"));
+	ini.WriteInt(_T("WapGraphWidth"), m_iWapGraphWidth, _T("emulEspaña"));
+	ini.WriteInt(_T("WapGraphHeight"), m_iWapGraphHeight, _T("emulEspaña"));
+	ini.WriteBool(_T("WapFilledGraphs"), m_bWapFilledGraphs, _T("emulEspaña"));
+	ini.WriteInt(_T("WapMaxItemsInPage"), m_iWapMaxItemsInPages, _T("emulEspaña"));
+	ini.WriteBool(_T("WapSendImages"), m_bWapSendImages, _T("emulEspaña"));
+	ini.WriteBool(_T("WapSendGraphs"), m_bWapSendGraphs, _T("emulEspaña"));
+	ini.WriteBool(_T("WapSendProgressBars"), m_bWapSendProgressBars, _T("emulEspaña"));
+	ini.WriteBool(_T("WapSendBWImages"), m_bWapAllwaysSendBWImages, _T("emulEspaña"));
+	ini.WriteInt(_T("WapLogsSize"), m_iWapLogsSize, _T("emulEspaña"));
+	ini.WriteString(_T("WapPassword"), m_sWapPassword, _T("emulEspaña"));
+	ini.WriteString(_T("WapPasswordLow"), m_sWapLowPassword, _T("emulEspaña"));
+	ini.WriteBool(_T("WapLowEnable"), m_bWapLowEnabled, _T("emulEspaña"));
 	// End MoNKi        
 
 	ini.WriteBool(_T("InfiniteQueue"),infiniteQueue,_T("eMule"));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -3374,21 +3377,21 @@ void CPreferences::LoadPreferences()
 	// Section: "WapServer"
 	//
         // added by MoNKi [MoNKi: -Wap Server-]
-	m_bWapEnabled=ini.GetBool("WapEnabled", false, "emulEspaña");
-	sprintf(m_sWapTemplateFile,"%s",ini.GetString("WapTemplateFile","eMule_Wap.tmpl","emulEspaña"));
-	m_nWapPort=ini.GetInt("WapPort", 80, "emulEspaña");
-	m_iWapGraphWidth=ini.GetInt("WapGraphWidth", 60, "emulEspaña");
-	m_iWapGraphHeight=ini.GetInt("WapGraphHeight", 45, "emulEspaña");
-	m_bWapFilledGraphs=ini.GetBool("WapFilledGraphs", false, "emulEspaña");
-	m_iWapMaxItemsInPages = ini.GetInt("WapMaxItemsInPage", 5, "emulEspaña");
-	m_bWapSendImages=ini.GetBool("WapSendImages", true, "emulEspaña");
-	m_bWapSendGraphs=ini.GetBool("WapSendGraphs", true, "emulEspaña");
-	m_bWapSendProgressBars=ini.GetBool("WapSendProgressBars", true, "emulEspaña");
-	m_bWapAllwaysSendBWImages=ini.GetBool("WapSendBWImages", true, "emulEspaña");
-	m_iWapLogsSize=ini.GetInt("WapLogsSize", 1024, "emulEspaña");
-	m_sWapPassword = ini.GetString("WapPassword", "WapServer", "emulEspaña");
-	m_sWapLowPassword = ini.GetString("WapPasswordLow", "", "emulEspaña");
-	m_bWapLowEnabled = ini.GetBool("WapLowEnable", false, "emulEspaña");
+	m_bWapEnabled=ini.GetBool(_T("WapEnabled"), false, _T("emulEspaña"));
+	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("emulEspaña"));
+	m_nWapPort=ini.GetInt("WapPort", 80, _T("emulEspaña"));
+	m_iWapGraphWidth=ini.GetInt(_T("WapGraphWidth"), 60, _T("emulEspaña"));
+	m_iWapGraphHeight=ini.GetInt(_T("WapGraphHeight"), 45, _T("emulEspaña"));
+	m_bWapFilledGraphs=ini.GetBool(_T("WapFilledGraphs"), false, _T("emulEspaña"));
+	m_iWapMaxItemsInPages = ini.GetInt(_T("WapMaxItemsInPage"), 5, _T("emulEspaña"));
+	m_bWapSendImages=ini.GetBool(_T("WapSendImages"), true, _T("emulEspaña"));
+	m_bWapSendGraphs=ini.GetBool(_T("WapSendGraphs"), true, _T("emulEspaña"));
+	m_bWapSendProgressBars=ini.GetBool(_T("WapSendProgressBars"), true, _T("emulEspaña"));
+	m_bWapAllwaysSendBWImages=ini.GetBool(_T("WapSendBWImages"), true, _T("emulEspaña"));
+	m_iWapLogsSize=ini.GetInt(_T("WapLogsSize"), 1024, _T("emulEspaña"));
+	m_sWapPassword = ini.GetString(_T("WapPassword"), _T("WapServer"), _T("emulEspaña"));
+	m_sWapLowPassword = ini.GetString(_T("WapPasswordLow"), _T(""), _T("emulEspaña"));
+	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("emulEspaña"));
 	// End MoNKi
 
     LoadCats();
