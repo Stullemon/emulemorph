@@ -6,6 +6,8 @@ FIXED  : Improper treatment of sets of empty parameters in preferences.ini. [Mig
 
 ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
 
+CHANGED: ImportParts: you can take temp part file without the need to copy them manualy [SiRoB]
+
 TWEAKED: Parameters and file information will be saved before backing up config-folder, not only on program end. [MightyKnife]
 
 --------------------------------------

@@ -101,7 +101,7 @@ int CImportPartsFileThread::Run()
 	uint16 partcount=m_partfile->GetPartCount();
 
 	CFile f;
-	if(!f.Open(m_strFilePath, CFile::modeRead)){
+	if(!f.Open(m_strFilePath, CFile::modeRead|CFile::shareDenyNone)){
 		LogError(LOG_STATUSBAR, _T("Import aborted: Couldn't open %s."), m_strFilePath);
 		return false;
 	}
