@@ -262,17 +262,14 @@ bool CUpDownClient::MoreUpThanDown(){
 	if(!theApp.glob_prefs->IsPayBackFirst()){
 		return false;
 
-	}else if((credits->GetCurrentIdentState(GetIP()) == IS_IDFAILED || 
-		credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY || 
-		credits->GetCurrentIdentState(GetIP()) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()){
+	}else if(credits->GetDownloadedTotal() < 1000000){
 		return false;
 
-	}else if(credits->GetDownloadedTotal() < 1048576){
-		return false;
+	//keep PayBackFirst client for full chunk transfer
+	}else if(GetQueueSessionPayloadUp() > 0 && theApp.glob_prefs->TransferFullChunks()){
 
-	}else if(GetQueueSessionPayloadUp() > 0 && theApp.glob_prefs->TransferFullChunks()){//keep PayBackFirst client for full chunk transfer
-
-		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){//kick PayBackFirst client after full chunk transfer
+		//kick PayBackFirst client after full chunk transfer
+		if(GetQueueSessionPayloadUp() > SESSIONAMOUNT){
 			return false;
 		}else{
 			return chkPayBackFirstTag();
@@ -292,11 +289,7 @@ bool CUpDownClient::MoreUpThanDown(){
  * @return true if the requested file has release priority
  */
 bool CUpDownClient::GetPowerShared() {
-	if ((credits->GetCurrentIdentState(GetIP()) == IS_IDFAILED || 
-		credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY || 
-		credits->GetCurrentIdentState(GetIP()) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()){
-		return false;
-	}
+
 	if(GetUploadFileID() != NULL &&
        theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		return theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();

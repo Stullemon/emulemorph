@@ -241,6 +241,16 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		) &&
 		(!rightClient->IsBanned()) && // don't allow banned client to be best
 		IsDownloading(rightClient) == false // don't allow downloading clients to be best
+		//EastShare Start- added by AndCycle, dont allow identificaion failed client get upload?
+		&& 
+		!(
+			(
+				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDFAILED || 
+				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDBADGUY || 
+				rightClient->credits->GetCurrentIdentState(rightClient->GetIP()) == IS_IDNEEDED
+			) && theApp.clientcredits->CryptoAvailable()
+		)
+		//EastShare End- added by AndCycle, dont allow identificaion failed client get upload?
 	) {
 		return true;
 	} else {
