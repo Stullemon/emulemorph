@@ -1,8 +1,18 @@
 --------------------------------------
-Changelog for eMule 0.42g MorphXT v3.x
+Changelog for eMule 0.43b MorphXT v4.x
 --------------------------------------
+MERGED : Code merged to 0.43b [SiRoB]
+
+FIXED  : Various fix & optimization [SiRoB]
+
 CHANGED: Simplify Equal Chance for Each File to a checkbox [AndCycle]
 CHANGED: Adapt to SLUGFILLER's expired time known.met control [AndCycle]
+CHANGED: r in StatusBar to said that we will be limited when 1:3 session ratio is reach [SiRoB]
+CHANGED: R in StatusBar to said that we are actualy limited in download [SiRoB]
+
+ADDED  : Now we can visualise parts that we hide when we use the HideOS feature (cyan color) [SiRoB]
+
+NOTE: Khaos A4AF
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.5
@@ -61,7 +71,7 @@ CHANGED: Updated from the zz upload system 20040531-1749 [SiRoB]
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.1
 --------------------------------------
-FIXED  : Variaous fixe arround Slection category support [SiRoB]
+FIXED  : Variaous fixe arround Selection category support [SiRoB]
 FIXED  : Show Permission preferency saving [SiRoB]
 
 ADDED  : PowerShare Limit per file, you can now specify when you want to stop powersharing a file based on complete source [SiRoB]
