@@ -846,11 +846,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			case DS_TOOMANYCONNSKAD:
 				//This client had already been set to DS_CONNECTING.
 				//So we reset this time so it isn't stuck at TOOMANYCONNS for 20mins.
-				//MORPH - Changed by SiRoB, Reask -Patch-
-				/*
 				m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000;
-				*/			
-				m_dwLastTriedToConnect = (::GetTickCount()>20*60*1000)?::GetTickCount()-20*60*1000:0;
 				break;
 			case DS_WAITCALLBACKKAD:
 			case DS_WAITCALLBACK:
@@ -862,11 +858,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 					case DS_WAITCALLBACKKAD:
 						break;
 					default:
-						//MORPH - Changed by SiRoB, Reask -Patch-
-						/*
 						m_dwLastTriedToConnect = ::GetTickCount()-20*60*1000;
-						*/			
-						m_dwLastTriedToConnect = (::GetTickCount()>20*60*1000)?::GetTickCount()-20*60*1000:0;
 						break;
 				}
 				break;
