@@ -378,7 +378,7 @@ void CClientCreditsList::LoadList()
 	CFileStatus	loadFileStatus[totalLoadFile];
 	bool		successLoadFile[totalLoadFile];
 
-	//SUQWTv2.met must have bigger number than original credits.met to have higher prio
+	//SUQWTv2.met must have bigger number than original clients.met to have higher prio
 	loadFileName[0].Format(_T("%s") CLIENTS_MET_FILENAME, m_pAppPrefs->GetConfigDir());
 	loadFileName[1].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), m_pAppPrefs->GetConfigDir());
 	loadFileName[2].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
@@ -395,7 +395,7 @@ void CClientCreditsList::LoadList()
 
 	int	lastFile = -1;
 	for(int curFile = 0; curFile < totalLoadFile; curFile++){
-		//check credits.met status
+		//check clients.met status
 		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp);
 		if (successLoadFile[curFile]){
 			loadFile.GetStatus(loadFileStatus[curFile]);
@@ -403,9 +403,8 @@ void CClientCreditsList::LoadList()
 			if(lastFile == -1){
 				lastFile = curFile;
 			}
-
-			//SUQWTv2.met have bigger number than credits.met, so it will replace the credits.met that have the same m_mtime
-			if(loadFileStatus[curFile].m_mtime >= loadFileStatus[lastFile].m_mtime){
+			//SUQWTv2.met have bigger number than clients.met, so it will replace the clients.met that have the same m_mtime
+			else if(loadFileStatus[curFile].m_mtime >= loadFileStatus[lastFile].m_mtime){
 				lastFile = curFile;
 			}
 		}
