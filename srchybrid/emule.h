@@ -204,7 +204,7 @@ protected:
 	uint32 m_dwPublicIP;
 public:
 	void OptimizerInfo(void); // Commander - Added: Optimizer [ePlus]
-
+	WSADATA				m_wsaData; //MORPH - Added by SiRoB, eWombat [WINSOCK2]
 };
 
 extern CemuleApp theApp;

@@ -40,9 +40,9 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <afxole.h>			// MFC OLE support
 
-#include <winsock2.h>
-#define _WINSOCKAPI_
-#include <afxsock.h>		// MFC support for Windows Sockets
+//<<< eWombat [WINSOCK2]
+#include "system\afxsock.h"		// MFC-Socket-Erweiterungen
+//>>> eWombat [WINSOCK2]
 #include <afxdhtml.h>
 
 #include <afxmt.h>			// MFC Multithreaded Extensions (Syncronization Objects)

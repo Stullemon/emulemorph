@@ -572,8 +572,18 @@ void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD
 				}
 				
 				if (!bError) // show the success msg, only if we had no serious error
-					AddLogLine(true, GetResString(IDS_MAIN_READY)+" "+GetResString(IDS_TRANSVERSION),theApp.m_strCurVersionLong); //MORPH - Added by milobac, Translation version info
-
+				{
+					//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
+					theApp.emuledlg->AddLogLine(false,"Winsock: Version %d.%d [%.40s] %.40s", HIBYTE( theApp.m_wsaData.wVersion ),LOBYTE(theApp.m_wsaData.wVersion ),
+					theApp.m_wsaData.szDescription, theApp.m_wsaData.szSystemStatus);
+					if (theApp.m_wsaData.iMaxSockets!=0)
+						AddLogLine(false,"Winsock: max. sockets %d", theApp.m_wsaData.iMaxSockets);
+					else
+						AddLogLine(false,"Winsock: unlimited sockets");
+					//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
+					AddLogLine(true, GetResString(IDS_TRANSVERSION)); //MORPH - Added by milobac, Translation version info
+					AddLogLine(true, GetResString(IDS_MAIN_READY),theApp.m_strCurVersionLong);
+				}
 
 				// SLUGFILLER: SafeHash remove - moved down
 				theApp.emuledlg->status++;
