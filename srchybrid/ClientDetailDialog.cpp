@@ -182,6 +182,36 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	}
 	else
 		GetDlgItem(IDC_DSCORE)->SetWindowText(_T("-"));
+
+	#ifdef MIGHTY_TWEAKS
+	// Private modification
+	CString AddInfo;
+	uint32 ClientIP = m_client->GetIP ();
+	AddInfo.Format ("User-ID: %u   IP: %d.%d.%d.%d:%d",
+					m_client->GetUserIDHybrid (),
+					(ClientIP >> 24) & 0xFF, (ClientIP >> 16) & 0xFF,
+					(ClientIP >> 8) & 0xFF, ClientIP & 0xFF, 
+					m_client->GetUserPort ());
+	CRect R (29,340,300,360);
+	m_sAdditionalInfo.Create (AddInfo,WS_CHILD|WS_VISIBLE,R,this);
+	VERIFY(m_fStdFont.CreateFont(
+					12,                        // nHeight
+					0,                         // nWidth
+					0,                         // nEscapement
+					0,                         // nOrientation
+					FW_NORMAL,                 // nWeight
+					FALSE,                     // bItalic
+					FALSE,                     // bUnderline
+					0,                         // cStrikeOut
+					ANSI_CHARSET,              // nCharSet
+					OUT_DEFAULT_PRECIS,        // nOutPrecision
+					CLIP_DEFAULT_PRECIS,       // nClipPrecision
+					DEFAULT_QUALITY,           // nQuality
+					DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+					"MS Shell Dlg"));                 // lpszFacename
+	m_sAdditionalInfo.SetFont (&m_fStdFont);
+	#endif
+
 	return true;
 }
 

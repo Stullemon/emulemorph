@@ -37,5 +37,12 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+	#ifdef MIGHTY_TWEAKS
+	// Private modification
+	CStatic m_sAdditionalInfo;
+	CFont   m_fStdFont;
+	#endif
+
+
 	DECLARE_MESSAGE_MAP()
 };
