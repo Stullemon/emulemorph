@@ -1351,9 +1351,6 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 					// Request next block
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("More block requests", this);
-					// MORPH START - Added by Commander, WebCache 1.2e
-					if (m_PendingBlocks_list.IsEmpty()) // Superlexx - tmp
-					// MORPH END - Added by Commander, WebCache 1.2e
 					SendBlockRequests();	
 				}
 			}
