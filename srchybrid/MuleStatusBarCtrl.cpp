@@ -25,7 +25,7 @@
 #include "Sockets.h"
 #include "Server.h"
 #include "ServerList.h"
-
+#include "downloadqueue.h" //MORPH - Added by SiRoB, zzRatio activation reason
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -112,6 +112,19 @@ CString CMuleStatusBarCtrl::GetPaneToolTipText(EStatusBarPane iPane) const
 			}
 		}
 		break;
+	//MORPH START - Added by SiRoB, Show zz ratio activation reason
+	case SBarUpDown:
+		{
+			uint8 ActivatedRatioReason = thePrefs.IsZZRatioDoesWork();
+			strText.Format(_T("zzRatio: %s"),(ActivatedRatioReason)?_T("Activated"):_T("Not activated"));
+			strText.AppendFormat(_T("\r\n\x2022 1/3 Ratio reached: %s"),(theApp.downloadqueue->IsZZRatioInWork())?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\r\n\x2022 PowerSharing incomplet file: %s"),(ActivatedRatioReason & 1)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\r\n\x2022 Using friend slot: %s"),(ActivatedRatioReason & 2)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\r\n\x2022 Upload limit under 10KB/s: %s"),(ActivatedRatioReason & 4)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\r\n\x2022 Average upload under 10KB/s: %s"),(ActivatedRatioReason & 8)?_T("Yes"):_T("No"));
+			break;
+		}
+	//MORPH END   - Added by SiRoB, Show zz ratio activation reason
 	}
 	return strText;
 }
