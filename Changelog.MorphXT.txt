@@ -8,6 +8,7 @@ FIXED  : MassRename: Insert text column from clipboard [SiRoB]
 REMOVED: Resend FilePartstatus in some circonstance from Pawcio (if you want to share with out interruption just disable SOTN and HideOS) [SiRoB]
 
 CHANGED: localize for translation [SiRoB]
+CHANGED: Equal Chance formula now push small file [AndCycle]
 
 ADDED  : Webcache localization from pawcio [SiRoB]
 

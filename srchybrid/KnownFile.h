@@ -57,8 +57,10 @@ public:
 		//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
-		shareStartTime = time(NULL);//this value init will be done in other place 
+		shareStartTime = time(NULL);//this value init will be done in other place
 		m_bInChangedEqualChanceValue = false;
+		lastCheckEqualChanceSemiValue = time(NULL);
+		m_dLastEqualChanceBiasValue = 1;
 		m_dLastEqualChanceSemiValue = 0;
 		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
@@ -119,6 +121,8 @@ private:
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	uint32	shareStartTime;
 	bool	m_bInChangedEqualChanceValue;
+	uint32	lastCheckEqualChanceSemiValue;
+	double	m_dLastEqualChanceBiasValue;
 	double	m_dLastEqualChanceSemiValue;
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 };
