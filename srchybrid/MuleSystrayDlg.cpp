@@ -146,9 +146,15 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		
 		if (theApp.IsConnected())
 		{
-			if (theApp.serverconnect->IsConnected()) buffer = _T("ED2K");
-			if (theApp.kademlia->isConnected()) buffer2 = _T("KAD");
-			m_ctrlSpeed.m_strText = (GetResString(IDS_CONNECTED) + " [" + buffer + "|" + buffer2 + "]");
+			if (theApp.serverconnect->IsConnected() && theApp.kademlia->isConnected())
+				buffer = "ED2K|KAD";
+			else if (theApp.kademlia->isConnected())
+				buffer = "KAD";
+			else if (theApp.serverconnect->IsConnected())
+				buffer = "ED2K";
+			else
+				buffer = "?";
+			m_ctrlSpeed.m_strText = (GetResString(IDS_CONNECTED) + " [" + buffer + "]");
 		} else
 			m_ctrlSpeed.m_strText = (GetResString(IDS_NOTCONNECTED));
 
