@@ -1004,12 +1004,9 @@ void CClientCredits::InitPayBackFirstStatus(){
 }
 void CClientCredits::TestPayBackFirstStatus(){
 
-	if(GetDownloadedTotal() >= GetUploadedTotal()){
-		m_bPayBackFirst = true;
-	}
-	else if(GetDownloadedTotal() < GetUploadedTotal()){
-		m_bPayBackFirst = false;
-	}
+	if (GetDownloadedTotal() >= SESSIONAMOUNT)
+		m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal();
+
 
 }
 //EastShare End - added by AndCycle, Pay Back First
