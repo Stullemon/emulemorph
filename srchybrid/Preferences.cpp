@@ -2661,7 +2661,7 @@ void CPreferences::SavePreferences()
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	ini.WriteBool(_T("WapEnabled"), m_bWapEnabled, _T("WapServer"));
 	ini.WriteString(_T("WapTemplateFile"),m_sWapTemplateFile, _T("WapServer"));
-	ini.WriteInt(_T("WapPort"), m_nWapPort, _T("emulEspaña"));
+	ini.WriteInt(_T("WapPort"), m_nWapPort, _T("WapServer"));
 	ini.WriteInt(_T("WapGraphWidth"), m_iWapGraphWidth, _T("WapServer"));
 	ini.WriteInt(_T("WapGraphHeight"), m_iWapGraphHeight, _T("WapServer"));
 	ini.WriteBool(_T("WapFilledGraphs"), m_bWapFilledGraphs, _T("WapServer"));
