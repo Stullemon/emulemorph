@@ -195,19 +195,24 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		case CS_EASTSHARE:{
 			result = ((m_pCredits->nKeySize == 0)||(GetCurrentIdentState(dwForIP)!=IS_IDENTIFIED)) ? 80 : 100;
 			
-			if (GetDownloadedTotal() < GetUploadedTotal())
+/*			if (GetDownloadedTotal() < GetUploadedTotal())
 				result += (float)(((double)GetDownloadedTotal()-(double)GetUploadedTotal())/524288.0 + (double)pow((double)GetDownloadedTotal()/1048576.0,0.7));
 			else if ((double)GetDownloadedTotal() <= 1048576.0)
 				result += (float)((double)GetDownloadedTotal()/174762.7 - (double)GetUploadedTotal()/174762.7);
-			else
-				result += (float)((double)GetDownloadedTotal()/174762.7 - (double)GetUploadedTotal()/174762.7 + (double)pow((double)GetDownloadedTotal()/1048576.0,0.7));
-			
+			else */ 
+			if ((double)GetDownloadedTotal() > 1024)
+				result +=50;
+			result += (float)((double)GetDownloadedTotal()/174762.67 - (double)GetUploadedTotal()/524288); //Modefied by Pretender - 20040120
+			if ((result < 50) && ((double)GetDownloadedTotal() > 104857.6))
+				result = 50; //Modefied by Pretender - 20040128
+
 			if ( result < 10 ) {
 				result = 10;
-			}else if ( result > 2500 ) {
-				result = 2500;
+			}else if ( result > 5000 ) {
+				result = 5000;
 			}
 			result = result / 100;
+
 		}break;
 		// EastShare END - Added by TAHO, new Credit System
 
