@@ -991,13 +991,6 @@ void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 }
 
 void CUpDownClient::SendBlockRequests(){
-	if (thePrefs.GetDebugClientTCPLevel() > 0)
-		DebugSend("OP__RequestParts", this, reqfile!=NULL ? (char*)reqfile->GetFileHash() : NULL);
-	//m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Moved by SiRoB
-	if (!reqfile){
-		m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Added by SiRoB
-		return;
-	}
 	// MORPH START - Added by Commander, WebCache 1.2e
 	if( thePrefs.IsWebCacheDownloadEnabled()
 		&& UsesCachedTCPPort() // uses a port that is usually cached
@@ -1050,7 +1043,11 @@ void CUpDownClient::SendBlockRequests(){
 // MORPH END - Added by Commander, WebCache 1.2e
 
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
-	m_dwLastBlockReceived = ::GetTickCount(); //MORPH - Moved by SiRoB
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		DebugSend("OP__RequestParts", this, reqfile!=NULL ? (char*)reqfile->GetFileHash() : NULL);
+	m_dwLastBlockReceived = ::GetTickCount();
+	if (!reqfile)
+		return;
 	CreateBlockRequests(3);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SendCancelTransfer();
