@@ -749,11 +749,20 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						throw CString(_T("invalid message packet"));
 					AddLogLine(true,"New Message from '%s' (IP:%s)", client->GetUserName(), ipstr(client->GetConnectIP()));
 					//filter me?
-					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL) )
+						
+					
+					//MORPH START - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
+					/*
+					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL)) )
+					*/
+					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL) || (thePrefs.GetEnableAntiLeecher() && (client->IsLeecher() || client->TestLeecher())))
+					//MORPH END - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
 					{
 						if (!client->GetMessageFiltered()){
 							if (thePrefs.GetVerbose())
-								AddDebugLogLine(false,"Filtered Message from '%s' (IP:%s)", client->GetUserName(), ipstr(client->GetConnectIP()));
+							//MORPH START - Changed by SiRoB, Just Add client soft version
+								AddDebugLogLine(false,"Filtered Message from '%s' (IP:%s) (%s)", client->GetUserName(), ipstr(client->GetConnectIP()), client->DbgGetFullClientSoftVer());
+							//MORPH END   - Changed by SiRoB, Just Add client soft version
 						}
 						client->SetMessageFiltered(true);
 						break;
