@@ -41,6 +41,7 @@ public:
 	uint32	AddSources(uint32 count);
 	uint32	GetSourceCount() const;
 	uint32	GetSearchID() const { return m_nSearchID; }
+	LPCSTR	GetFakeComment() const { return m_pszIsFake; } //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	LPCTSTR GetDirectory() const { return m_pszDirectory; }
 	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
 
@@ -114,7 +115,7 @@ private:
 	CSimpleArray<SServer> m_aServers;
 	CSimpleArray<CxImage*> m_listImages;
 	LPSTR m_pszDirectory;
-
+	LPSTR m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	bool		 m_list_bExpanded;
 	uint16		 m_list_childcount;
 	CSearchFile* m_list_parent;

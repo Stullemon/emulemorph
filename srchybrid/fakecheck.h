@@ -37,7 +37,8 @@ public:
 	void	AddFake(CString Hash,uint32 Lenght,CString Realtitle);
 	void	RemoveAllFakes();
 	int		LoadFromFile();
-	CString	IsFake(CString Hash2test, uint32 lenght);
+	CString GetLastHit() { return lasthit;}
+	bool	IsFake(CString Hash2test, uint32 lenght);
 	bool	DownloadFakeList();
 private:
 	CString lasthit;

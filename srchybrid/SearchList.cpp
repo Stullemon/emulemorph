@@ -121,6 +121,7 @@ CSearchFile::CSearchFile(CSearchFile* copyfrom)
 	m_nClientPort = copyfrom->GetClientPort();
 	m_nClientServerPort = copyfrom->GetClientServerPort();
 	m_pszDirectory = copyfrom->GetDirectory()? nstrdup(copyfrom->GetDirectory()) : NULL;
+	m_pszIsFake = copyfrom->GetFakeComment()? nstrdup(copyfrom->GetFakeComment()) : NULL; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_nSearchID = copyfrom->GetSearchID();
 	m_nKademlia = copyfrom->IsKademlia();
 	for (int i = 0; i < copyfrom->GetTags().GetCount(); i++)
@@ -183,7 +184,7 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 		AddServer(server);
 	}
 	m_pszDirectory = pszDirectory ? nstrdup(pszDirectory) : NULL;
-	
+	m_pszIsFake = theApp.FakeCheck->IsFake(EncodeBase16(m_abyFileHash, 16),GetFileSize()) ? nstrdup(theApp.FakeCheck->GetLastHit()) : NULL;; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_list_bExpanded = false;
 	m_list_parent = NULL;
 	m_list_childcount = 0;
@@ -206,6 +207,7 @@ CSearchFile::CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFil
 	m_nClientServerIP = 0;
 	m_nClientServerPort = 0;
 	m_pszDirectory = NULL;
+	m_pszIsFake = theApp.FakeCheck->IsFake(EncodeBase16(m_abyFileHash, 16),uFileSize) ? nstrdup(theApp.FakeCheck->GetLastHit()) : NULL; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_list_bExpanded = false;
 	m_list_parent = NULL;
 	m_list_childcount = 0;
@@ -218,6 +220,7 @@ CSearchFile::~CSearchFile(){
 	taglist.RemoveAll();
 	taglist.SetSize(0);
 	delete[] m_pszDirectory;
+	delete[] m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	for (int i = 0; i != m_listImages.GetSize(); i++)
 		safe_delete(m_listImages[i]);
 }

@@ -339,7 +339,7 @@ void CSearchListCtrl::AddResult(CSearchFile* toshow)
 		cbuffer[0] = _T('\0');
 	SetItemText(itemnr,9,cbuffer);
 	SetItemText(itemnr,10,toshow->GetStrTagValue(FT_MEDIA_CODEC));
-	SetItemText(itemnr,11,theApp.FakeCheck->IsFake(EncodeBase16(toshow->GetFileHash(), 16),toshow->GetFileSize())); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+	SetItemText(itemnr,11,toshow->GetFakeComment()); //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 
 	if (toshow->GetDirectory()){
 		if (m_iColumns < 13){
@@ -549,9 +549,9 @@ int CSearchListCtrl::Compare(CSearchFile* item1, CSearchFile* item2, LPARAM lPar
 			return -CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
 		//Morph Start - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
 		case 11:
-			return CompareOptStringNoCase(theApp.FakeCheck->IsFake(EncodeBase16(item1->GetFileHash(), 16),item1->GetFileSize()), theApp.FakeCheck->IsFake(EncodeBase16(item2->GetFileHash(), 16),item2->GetFileSize()));
+			return CompareOptStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
 		case 111:
-			return -CompareOptStringNoCase(theApp.FakeCheck->IsFake(EncodeBase16(item1->GetFileHash(), 16),item1->GetFileSize()), theApp.FakeCheck->IsFake(EncodeBase16(item2->GetFileHash(), 16),item2->GetFileSize()));
+			return -CompareOptStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
 		case 12: //path asc
 			return CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
 		case 112: //path desc
@@ -1321,8 +1321,10 @@ void CSearchListCtrl::DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, CSear
 			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
 			//case 11:{		// dir
 			case 11:{		// fake check
-				buffer=theApp.FakeCheck->IsFake(EncodeBase16(src->GetFileHash(), 16),src->GetFileSize());
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				if (src->GetFakeComment()){
+					buffer=src->GetFakeComment();
+					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				}
 				break;
 			}
 			case 12:{		// dir
@@ -1412,8 +1414,10 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, CSea
 			//MORPH  START - Changed by SiRoB, FakeCheck, FakeReport, Auto-updating			
 			//case 11:{		// dir
 			case 11:{		// fake check
-				buffer=theApp.FakeCheck->IsFake(EncodeBase16(src->GetFileHash(), 16),src->GetFileSize());
-				dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				if (src->GetFakeComment()){
+					buffer=src->GetFakeComment();
+					dc->DrawText(buffer, buffer.GetLength() ,lpRect, DLC_DT_TEXT);
+				}
 				break;
 			}
 			case 12:{		// dir
