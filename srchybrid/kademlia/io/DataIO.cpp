@@ -27,7 +27,6 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #include "stdafx.h"
 #include "resource.h"
 #include "DataIO.h"
@@ -39,6 +38,7 @@ there client on the eMule forum..
 #include "StringConversion.h"
 #include "SafeFile.h"
 #include <atlenc.h>
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -105,7 +105,13 @@ BYTE* CDataIO::readBsob(uint8* puSize)
 	if (getAvailable() < *puSize)
 		throw new CIOException(ERR_BUFFER_TOO_SMALL);
 	BYTE* pucBsob = new BYTE[*puSize];
-	readArray(pucBsob, *puSize);
+	try{
+		readArray(pucBsob, *puSize);
+	}
+	catch(CException*){
+		delete[] pucBsob;
+		throw;
+	}
 	return pucBsob;
 }
 
@@ -143,10 +149,12 @@ CTag *CDataIO::readTag(bool bOptACP)
 {
 	CTag *retVal = NULL;
 	char *name = NULL;
+	byte type = 0;
+	uint16 lenName = 0;
 	try
 	{
-		byte type = readByte();
-		uint16 lenName = readUInt16();
+		type = readByte();
+		lenName = readUInt16();
 		name = new char[lenName+1];
 		name[lenName] = 0;
 		readArray(name, lenName);
@@ -200,12 +208,12 @@ CTag *CDataIO::readTag(bool bOptACP)
 			{
 				uint8 size;
 				BYTE* value = readBsob(&size);
-				try
-				{
+				try{
 					retVal = new CTagBsob(name, value, size);
 				}
-				catch(CMemoryException* e){
-					e->Delete();
+				catch(CException*){
+					delete[] value;
+					throw;
 				}
 				delete[] value;
 				break;
@@ -220,57 +228,28 @@ CTag *CDataIO::readTag(bool bOptACP)
 				break;
 
 			default:
-				AddDebugLogLine(false, _T("****************************"));
-				AddDebugLogLine(false, _T("Found Unknown TAG Type (0x%02X)"), type);
-				AddDebugLogLine(false, _T("****************************"));
-				retVal = NULL;
+				throw new CNotSupportedException;
 		}
 		delete [] name;
 		name = NULL;
-	} 
-	catch (CIOException *ioe)
-	{
-		AddDebugLogLine( false, _T("Exception in CDataIO:readTag (IO Error(%i))"), ioe->m_cause);
-		if( name )
-			delete[] name;
-		if( retVal )
-			delete retVal;
-		ioe->Delete();
-		return NULL;
 	}
-	catch (...) 
+	catch (...)
 	{
-		AddDebugLogLine(false, _T("Exception in CDataIO:readTag"));
-		if( name )
-			delete[] name;
-		if( retVal )
-			delete retVal;
-		return NULL;
+		DebugLogError(_T("Invalid Kad tag; type=0x%02x  lenName=%u  name=0x%02x"), type, lenName, name!=NULL ? (BYTE)name[0] : 0);
+		delete[] name;
+		delete retVal;
+		throw;
 	}
 	return retVal;
 }
 
-TagList* CDataIO::readTagList(bool bOptACP)
-{
-	TagList *retVal = new TagList;
-	uint32 count = readByte();
-	for (uint32 i=0; i<count; i++)
-	{
-		CTag* tag = readTag(bOptACP);
-		if(tag)
-			retVal->push_back(tag);
-	}
-	return retVal;
-}
-
-void CDataIO::readTagList(TagList& taglist, bool bOptACP)
+void CDataIO::readTagList(TagList* taglist, bool bOptACP)
 {
 	uint32 count = readByte();
 	for (uint32 i=0; i<count; i++)
 	{
 		CTag* tag = readTag(bOptACP);
-		if(tag)
-			taglist.push_back(tag);
+		taglist->push_back(tag);
 	}
 }
 
@@ -341,7 +320,7 @@ void CDataIO::writeTag(const CTag* tag)
 		switch (type)
 		{
 			case TAGTYPE_HASH:
-				// Do NOT use this to transfere any tags for at least half a year!!
+				// Do NOT use this to transfer any tags for at least half a year!!
 				writeHash(tag->GetHash());
 				ASSERT(0);
 				break;
@@ -359,7 +338,7 @@ void CDataIO::writeTag(const CTag* tag)
 				writeFloat(tag->GetFloat());
 				break;
 			case TAGTYPE_BSOB:
-				// Do NOT use this to transfere any tags for at least half a year!!
+				// Do NOT use this to transfer any tags for at least half a year!!
 				writeBsob(tag->GetBsob(), tag->GetBsobSize());
 				ASSERT(0);
 				break;
@@ -417,9 +396,19 @@ void CDataIO::writeTagList(const TagList& tagList)
 		writeTag(*it);
 }
 
+namespace Kademlia {
+void deleteTagListEntries(TagList* taglist)
+{
+	TagList::const_iterator it;
+	for (it = taglist->begin(); it != taglist->end(); it++)
+		delete *it;
+	taglist->clear();
+}
+}
+
 static WCHAR _awcLowerMap[0x10000];
 
-bool KadInitUnicode(HMODULE hInst)
+bool CKademlia::initUnicode(HMODULE hInst)
 {
 	bool bResult = false;
 	HRSRC hResInfo = FindResource(hInst, MAKEINTRESOURCE(IDR_WIDECHARLOWERMAP), _T("WIDECHARMAP"));

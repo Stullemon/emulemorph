@@ -27,7 +27,6 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #include "stdafx.h"
 #include "Kademlia.h"
 #include "Prefs.h"
@@ -44,6 +43,9 @@ there client on the eMule forum..
 #include "opcodes.h"
 #include "defines.h"
 #include "Preferences.h"
+#include "Log.h"
+#include "MD4.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -416,4 +418,18 @@ CIndexed *CKademlia::getIndexed(void)
 	if ( instance == NULL || instance->m_indexed == NULL)
 		return NULL;
 	return instance->m_indexed;
+}
+
+void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* pKadID)
+{
+	CMD4 md4;
+	md4.Add((byte*)(LPCSTR)rstrKeywordA, rstrKeywordA.GetLength());
+	md4.Finish();
+	pKadID->setValueBE(md4.GetHash());
+}
+
+void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID)
+{
+	CStringA strA(wc2utf8(rstrKeywordW));
+	KadGetKeywordHash(strA, pKadID);
 }

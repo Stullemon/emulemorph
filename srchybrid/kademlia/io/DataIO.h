@@ -31,7 +31,6 @@ there client on the eMule forum..
 #pragma once
 
 #include <list>
-#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -41,7 +40,7 @@ class CUInt128;
 class CTag;
 typedef std::list<CTag*> TagList;
 
-class CDataIO: public CLoggable
+class CDataIO
 {
 public:
 	byte		readByte();
@@ -54,8 +53,7 @@ public:
 	float		readFloat();
 	CStringW	readStringUTF8(bool bOptACP = false);
 	CTag*		readTag(bool bOptACP = false);
-	TagList*	readTagList(bool bOptACP = false);
-	void		readTagList(TagList& taglist, bool bOptACP = false);
+	void		readTagList(TagList* taglist, bool bOptACP = false);
 
 	void		writeByte(byte val);
 	void		writeUInt8(uint8 val);

@@ -27,7 +27,6 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #include "stdafx.h"
 #include "Prefs.h"
 #include "../utils/UInt128.h"
@@ -42,6 +41,7 @@ there client on the eMule forum..
 #include "emuledlg.h"
 #include "SafeFile.h"
 #include "serverlist.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -234,7 +234,7 @@ void CPrefs::setKademliaFiles(void)
 	if( nKadAverage < 108 )
 	{
 		#ifdef _DEBUG
-		method.Format(_T("Kad file estimate used default avg(108"));
+		method.Format(_T("Kad file estimate used default avg(108)"));
 		#endif
 		nKadAverage = 108;
 	}

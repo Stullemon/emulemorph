@@ -43,7 +43,6 @@ there client on the eMule forum..
  * All key unique id's are relative to the center (self), which
  * is considered to be 000..000
  */
-
 #include "stdafx.h"
 #include <math.h>
 #include "RoutingZone.h"
@@ -64,6 +63,7 @@ there client on the eMule forum..
 #include "KadContactListCtrl.h"
 #include "kademliawnd.h"
 #include "SafeFile.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

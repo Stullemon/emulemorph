@@ -27,7 +27,6 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #include "stdafx.h"
 #include "KademliaUDPListener.h"
 #include "../kademlia/Prefs.h"
@@ -57,6 +56,7 @@ there client on the eMule forum..
 #include "updownclient.h"
 #include "listensocket.h"
 #include "StringConversion.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -881,8 +881,17 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, uint32
 		// supposed to be 'viewed' by user only and not feed into the Kad engine again!
 		// If that tag list is once used for something else than for viewing, special care has to be taken for any
 		// string conversion!
-		TagList *tags = bio.readTagList(true/*bOptACP*/);
-		CSearchManager::processResult(target, ip, port, answer,tags);
+		TagList* tags = new TagList;
+		try{
+			bio.readTagList(tags, true/*bOptACP*/);
+		}
+		catch(...){
+			deleteTagListEntries(tags);
+			delete tags;
+			tags = NULL;
+			throw;
+		}
+		CSearchManager::processResult(target, ip, port, answer, tags);
 		count--;
 	}
 }
@@ -1150,8 +1159,17 @@ void CKademliaUDPListener::processSearchNotesResponse (const byte *packetData, u
 		// supposed to be 'viewed' by user only and not feed into the Kad engine again!
 		// If that tag list is once used for something else than for viewing, special care has to be taken for any
 		// string conversion!
-		TagList *tags = bio.readTagList(true/*bOptACP*/);
-		CSearchManager::processResult(target, ip, port, answer,tags);
+		TagList* tags = new TagList;
+		try{
+			bio.readTagList(tags, true/*bOptACP*/);
+		}
+		catch(...){
+			deleteTagListEntries(tags);
+			delete tags;
+			tags = NULL;
+			throw;
+		}
+		CSearchManager::processResult(target, ip, port, answer, tags);
 		count--;
 	}
 }
@@ -1200,7 +1218,7 @@ void CKademliaUDPListener::processPublishNotesRequest (const byte *packetData, u
 		entry->keyID.setValue(target);
 		entry->sourceID.setValue(source);
 		uint32 tags = bio.readByte();
-		bio.readTagList( &(entry->taglist) );
+		bio.readTagList(&entry->taglist);
 		entry->source = false;
 	}
 	catch(...)

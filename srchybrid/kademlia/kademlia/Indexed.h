@@ -35,7 +35,6 @@ there client on the eMule forum..
 #include "../routing/Maps.h"
 #include "../utils/UInt128.h"
 #include "Entry.h"
-#include "Loggable.h"
 
 typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
 
@@ -91,7 +90,7 @@ struct SSearchTerm
 namespace Kademlia {
 ////////////////////////////////////////
 
-class CIndexed: public CLoggable
+class CIndexed
 {
 
 public:

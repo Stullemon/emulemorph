@@ -33,13 +33,13 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #include "stdafx.h"
 #include "RoutingBin.h"
 #include "Contact.h"
 #include "../kademlia/Kademlia.h"
 #include "../kademlia/Defines.h"
 #include "../routing/RoutingZone.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

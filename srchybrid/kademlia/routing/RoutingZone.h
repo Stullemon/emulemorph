@@ -36,7 +36,6 @@ there client on the eMule forum..
 #pragma once
 #include "Maps.h"
 #include "../utils/UInt128.h"
-#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -55,7 +54,7 @@ class CContact;
  * All key pseudoaddresses are relative to the center (self), which
  * is considered to be 000..000
  */
-class CRoutingZone: public CLoggable
+class CRoutingZone
 {
 	friend CRoutingZone;
 public:

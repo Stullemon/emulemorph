@@ -27,7 +27,6 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #include "stdafx.h"
 #include "resource.h"
 #include "SearchManager.h"
@@ -38,12 +37,12 @@ there client on the eMule forum..
 #include "Tag.h"
 #include "../routing/Contact.h"
 #include "../utils/UInt128.h"
-#include "../utils/MD4.h"
 #include "../io/ByteIO.h"
 #include "../io/IOException.h"
 #include "../kademlia/prefs.h"
 #include "SafeFile.h"
 #include "OtherFunctions.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -173,7 +172,7 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, bool bUnic
 			// backward compatibility: use local ACP encoding
 			// TODO: to be removed in some months (when majority of nodes are Unicode compatible)
 			CStringA strA(wstrKeyword);
-			Kademlia::CMD4::hash((byte*)(LPCSTR)strA, strA.GetLength(), &s->m_target);
+			KadGetKeywordHash(strA, &s->m_target);
 		}
 
 		if (alreadySearchingFor(s->m_target))

@@ -32,7 +32,6 @@ there client on the eMule forum..
 #include <list>
 #include "../utils/UInt128.h"
 #include "../routing/Maps.h"
-#include "loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -42,6 +41,7 @@ class CSearch;
 class CRoutingZone;
 class CTag;
 typedef std::list<CTag*> TagList;
+void deleteTagListEntries(TagList* taglist);
 
 // If type is unknown it will be an empty string
 // If there are any properties about the file to report, there will follow LPCSTR key/value pairs.
@@ -57,7 +57,7 @@ typedef std::map<CUInt128, CSearch*> SearchMap;
 #define SEARCH_DOC		"-doc"
 #define SEARCH_PRO		"-pro"
 
-class CSearchManager: public CLoggable
+class CSearchManager
 {
 	friend class CRoutingZone;
 	friend class CKademlia;

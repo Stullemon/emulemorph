@@ -30,7 +30,6 @@ there client on the eMule forum..
 #pragma once
 #include "../utils/UInt128.h"
 #include "../io/ByteIO.h"
-#include "Loggable.h"
 
 class CKnownFile;
 class CSafeMemFile;
@@ -54,7 +53,7 @@ namespace Kademlia {
 
 class CSearch;
 
-class CKademliaUDPListener: public CLoggable
+class CKademliaUDPListener
 {
 	friend class CSearch;
 

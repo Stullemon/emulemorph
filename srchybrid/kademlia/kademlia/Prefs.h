@@ -29,13 +29,12 @@ there client on the eMule forum..
 */
 #pragma once
 #include "../utils/UInt128.h"
-#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
 
-class CPrefs: public CLoggable
+class CPrefs
 {
 public:
 	

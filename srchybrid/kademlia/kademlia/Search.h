@@ -41,8 +41,9 @@ namespace Kademlia {
 ////////////////////////////////////////
 
 typedef std::list<CTag*> TagList;
+void deleteTagListEntries(TagList* taglist);
 
-class CSearch: public CLoggable
+class CSearch
 {
 	friend class CSearchManager;
 
@@ -115,4 +116,5 @@ private:
 
 } // End namespace
 
-void KadGetKeywordHash(const CStringW& rwstrKeyword, Kademlia::CUInt128* pKadID);
+void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID);
+void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* pKadID);

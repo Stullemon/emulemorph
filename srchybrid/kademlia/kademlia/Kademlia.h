@@ -29,7 +29,6 @@ there client on the eMule forum..
 */
 #pragma once
 #include <map>
-#include "Loggable.h"
 
 class CSharedFileList;
 struct Status;
@@ -51,10 +50,9 @@ typedef std::map<CRoutingZone*, CRoutingZone*> EventMap;
 
 #define KADEMLIA_VERSION 0.1
 
-class CKademlia: public CLoggable
+class CKademlia
 {
 public:
-
 	static void start(void);
 	static void start(CPrefs *prefs);
 	static void stop();
@@ -81,6 +79,7 @@ public:
 	static void addEvent(CRoutingZone *zone);
 	static void removeEvent(CRoutingZone *zone);
 	static void process();
+	static bool initUnicode(HMODULE hInst);
 
 private:
 	CKademlia() {}

@@ -35,7 +35,6 @@ there client on the eMule forum..
 */
 #pragma once
 #include "Maps.h"
-#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -45,7 +44,7 @@ class CUInt128;
 class CRoutingZone;
 class CContact;
 
-class CRoutingBin: public CLoggable
+class CRoutingBin
 {
 	friend class CRoutingZone;
 
