@@ -235,11 +235,9 @@ void CPeerCacheUpSocket::DetachFromClient()
 	if (GetClient())
 	{
         if (GetClient()->m_pPCUpSocket == this) {
+			
 			GetClient()->m_pPCUpSocket = NULL;
-            //MORPH - Removed by SiRoB, PeerCache -Fix-
-			/*
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this);
-			*/
         }
 	}
 }
