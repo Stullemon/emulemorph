@@ -523,7 +523,7 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->SetDaylightSavingPatch(m_iDaylightSavingPatch);
 	// #endif
 
-	// Mighty Knife: Report hashing files
+	// Mighty Knife: Report hashing files, Log friendlist activities
 	app_prefs->SetReportHashingFiles (m_bReportHashingFiles);
 	app_prefs->SetLogFriendlistActivities (m_bLogFriendlistActivities);
 	// [end] Mighty Knife
