@@ -1509,7 +1509,9 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
 		if (m_AvarageDDR_list.GetCount() == 1)
-			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / (cur_tick-m_dwDownStartTime);
+			// Mighty Knife: Slight change in the formula to prevent a "Divide by 0"
+			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / ( (cur_tick-m_dwDownStartTime) == 0 ? 1 : (cur_tick-m_dwDownStartTime) );
+			// [end] Mighty Knife
 		else{
 			DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
 			if ((m_AvarageDDR_list.GetCount() - 1)*(cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
