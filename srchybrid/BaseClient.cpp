@@ -1347,8 +1347,11 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 	ASSERT(theApp.clientlist->IsValidClient(this));
 
 	SetKadState(KS_NONE);
-
-    if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING)
+	//MORPH - Removed by SIRoB, ensure that in any case the client will not stay in uploadqueue i.e. banned client
+    //comment: i saw a banned client detected while he was entered in uploading queue maybe after a call back
+	/*
+	if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING)
+	*/
 		theApp.uploadqueue->RemoveFromUploadQueue(this, pszReason);
 	// 28-Jun-2004 [bc]: re-applied this patch which was in 0.30b-0.30e. it does not seem to solve the bug but
 	// it does not hurt either...
