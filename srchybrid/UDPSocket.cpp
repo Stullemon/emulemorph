@@ -575,7 +575,7 @@ int CUDPSocket::SendTo(uint8* lpBuf, int nBufLen, uint32 dwIP, uint16 nPort){
 		}
 		else{
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet to %s:%u - %s"), inet_ntoa(host), nPort, GetErrorMessage(dwError, 1));
+				theApp.QueueDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet to %s:%u - %s"), inet_ntoa(host), nPort, GetErrorMessage(dwError, 1));
 			return 0; // error
 		}
 	}

@@ -415,7 +415,7 @@ int CClientUDPSocket::SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort){
 			return -1;
 		}
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Error: Client UDP socket, failed to send data to %s:%u: %s"), inet_ntoa(host), nPort, GetErrorMessage(error, 1));
+			theApp.QueueDebugLogLine(false, _T("Error: Client UDP socket, failed to send data to %s:%u: %s"), inet_ntoa(host), nPort, GetErrorMessage(error, 1));
 	}
 	return 0;
 }
