@@ -247,12 +247,6 @@
 				RelativePath="ClientUDPSocket.cpp">
 			</File>
 			<File
-				RelativePath=".\system\cpu_info.cpp">
-			</File>
-			<File
-				RelativePath=".\system\cpu_optimize.cpp">
-			</File>
-			<File
 				RelativePath="CustomAutoComplete.cpp">
 			</File>
 			<File
@@ -552,9 +546,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath=".\system\afxsock.h">
-			</File>
-			<File
 				RelativePath="ArchiveRecovery.h">
 			</File>
 			<File
@@ -579,13 +570,10 @@
 				RelativePath="ClientUDPSocket.h">
 			</File>
 			<File
-				RelativePath=".\system\cpu_info.h">
-			</File>
-			<File
-				RelativePath=".\system\cpu_optimize.h">
-			</File>
-			<File
 				RelativePath="CustomAutoComplete.h">
+			</File>
+			<File
+				RelativePath=".\definereplace.h">
 			</File>
 			<File
 				RelativePath="DownloadQueue.h">
@@ -1990,6 +1978,22 @@
 			</File>
 			<File
 				RelativePath="res\WebServer.ico">
+			</File>
+		</Filter>
+		<Filter
+			Name="system"
+			Filter="">
+			<File
+				RelativePath=".\system\cpu_info.cpp">
+			</File>
+			<File
+				RelativePath=".\system\cpu_info.h">
+			</File>
+			<File
+				RelativePath=".\system\cpu_optimize.cpp">
+			</File>
+			<File
+				RelativePath=".\system\cpu_optimize.h">
 			</File>
 		</Filter>
 	</Files>

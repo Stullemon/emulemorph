@@ -87,7 +87,7 @@ void CMMServer::DeleteSearchFiles(){
 bool CMMServer::PreProcessPacket(char* pPacket, uint32 nSize, CMMSocket* sender){
 	if (nSize >= 3){
 		uint16 nSessionID;
-		memcpy(&nSessionID,pPacket+1,sizeof(nSessionID));
+		MEMCOPY(&nSessionID,pPacket+1,sizeof(nSessionID));
 		if ( (m_nSessionID && nSessionID == m_nSessionID) || pPacket[0] == MMP_HELLO){
 			return true;
 		}

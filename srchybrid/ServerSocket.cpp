@@ -111,7 +111,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					UINT uLen = *(uint16*)packet;
 					if (uLen > size-2)
 						uLen = size-2;
-					memcpy(strMessages.GetBuffer(uLen), packet + sizeof uint16, uLen);
+					MEMCOPY(strMessages.GetBuffer(uLen), packet + sizeof uint16, uLen);
 					strMessages.ReleaseBuffer(uLen);
 				}
 
@@ -283,9 +283,9 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				if (size < 8)
 					break;//throw "Invalid status packet";
 				uint32 cur_user;
-				memcpy(&cur_user,packet,4);
+				MEMCOPY(&cur_user,packet,4);
 				uint32 cur_files;
-				memcpy(&cur_files,packet+4,4);
+				MEMCOPY(&cur_files,packet+4,4);
 				CServer* update = theApp.serverlist->GetServerByAddress( cur_server->GetAddress(), cur_server->GetPort() );
 				if (update){
 					update->SetUserCount(cur_user); 
@@ -432,9 +432,9 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				if (size == 6){
 					uint32 dwIP;
-					memcpy(&dwIP,packet,4);
+					MEMCOPY(&dwIP,packet,4);
 					uint16 nPort;
-					memcpy(&nPort,packet+4,2);
+					MEMCOPY(&nPort,packet+4,2);
 					CUpDownClient* client = theApp.clientlist->FindClientByIP(dwIP,nPort);
 					if (client)
 						client->TryToConnect();

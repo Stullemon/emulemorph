@@ -326,7 +326,7 @@ char* CIni::GetLPCSTR(CString strEntry, LPCSTR strSection, LPCSTR strDefault)
 		temp = Read(m_strFileName,m_strSection,strEntry,CString());
 	else
 		temp = Read(m_strFileName,m_strSection,strEntry,strDefault);
-	return (char*)memcpy(m_chBuffer,(LPCTSTR)temp,temp.GetLength()+1);// '+1' damit die Null am Ende mit kopiert wird
+	return (char*)MEMCOPY(m_chBuffer,(LPCTSTR)temp,temp.GetLength()+1);// '+1' damit die Null am Ende mit kopiert wird
 }
 void CIni::SerGetString(	BOOL bGet,CString &	str,CString strEntry,LPCSTR strSection,LPCSTR strDefault)
 {

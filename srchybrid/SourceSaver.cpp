@@ -26,8 +26,8 @@ CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const char* exp)
 	sourcePort = client->GetUserPort(); 
 	partsavailable = client->GetAvailablePartCount();
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
-	//memcpy(expiration, exp, 7);
-	memcpy(expiration, exp, 11);
+	//MEMCOPY(expiration, exp, 7);
+	MEMCOPY(expiration, exp, 11);
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//expiration[6] = 0;
 	expiration[10] = 0;

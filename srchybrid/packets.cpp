@@ -95,7 +95,7 @@ Packet::Packet(CMemFile* datafile,uint8 protocol){
 	completebuffer = new char[datafile->GetLength()+10];
 	pBuffer = completebuffer+6;
 	BYTE* tmp = datafile->Detach();;
-	memcpy(pBuffer,tmp,size);
+	MEMCOPY(pBuffer,tmp,size);
 	free(tmp);
 	tempbuffer = 0;
 	prot = protocol;
@@ -113,7 +113,7 @@ Packet::~Packet(){
 char* Packet::GetPacket(){
 	if (completebuffer){
 		if (!m_bSplitted)
-			memcpy(completebuffer,GetHeader(),6);
+			MEMCOPY(completebuffer,GetHeader(),6);
 		return completebuffer;
 	}
 	else{
@@ -122,8 +122,8 @@ char* Packet::GetPacket(){
 			tempbuffer = NULL; // 'new' may throw an exception
 		}
 		tempbuffer = new char[size+10];
-		memcpy(tempbuffer,GetHeader(),6);
-		memcpy(tempbuffer+6,pBuffer,size);
+		MEMCOPY(tempbuffer,GetHeader(),6);
+		MEMCOPY(tempbuffer+6,pBuffer,size);
 
 		return tempbuffer;
 	}
@@ -132,7 +132,7 @@ char* Packet::GetPacket(){
 char* Packet::DetachPacket(){
 	if (completebuffer){
 		if (!m_bSplitted)
-			memcpy(completebuffer,GetHeader(),6);
+			MEMCOPY(completebuffer,GetHeader(),6);
 		char* result = completebuffer;
 		completebuffer = 0;
 		pBuffer = 0;
@@ -144,8 +144,8 @@ char* Packet::DetachPacket(){
 			tempbuffer = NULL; // 'new' may throw an exception
 		}
 		tempbuffer = new char[size+10];
-		memcpy(tempbuffer,GetHeader(),6);
-		memcpy(tempbuffer+6,pBuffer,size);
+		MEMCOPY(tempbuffer,GetHeader(),6);
+		MEMCOPY(tempbuffer+6,pBuffer,size);
 		char* result = tempbuffer;
 		tempbuffer = 0;
 		return result;
@@ -180,7 +180,7 @@ void Packet::PackPacket(){
 		return;
 	}
 	prot = OP_PACKEDPROT;
-	memcpy(pBuffer,output,newsize);
+	MEMCOPY(pBuffer,output,newsize);
 	//MORPH START - Added by IceCream, Hotfix by MKThunderStorm about the source exchange compression
 	size = newsize;
 	//MORPH END   - Added by IceCream, Hotfix by MKThunderStorm about the source exchange compression

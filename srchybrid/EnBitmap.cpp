@@ -129,7 +129,7 @@ IPicture* CEnBitmap::LoadFromBuffer(BYTE* pBuff, int nSize)
 {
 	HGLOBAL hGlobal = GlobalAlloc(GMEM_MOVEABLE, nSize);
 	void* pData = GlobalLock(hGlobal);
-	memcpy(pData, pBuff, nSize);
+	MEMCOPY(pData, pBuff, nSize);
 	GlobalUnlock(hGlobal);
 
 	IStream* pStream = NULL;
@@ -177,7 +177,7 @@ BOOL CEnBitmap::GetResource(LPCTSTR lpName, LPCTSTR lpType, HMODULE hInst, void*
 		{
 			if (nBufSize >= (int)SizeofResource(hInst, hResInfo))
 			{
-				memcpy(pResource, lpRes, nBufSize);
+				MEMCOPY(pResource, lpRes, nBufSize);
 				bResult = true;
 			}
 		} 

@@ -58,7 +58,7 @@ CClientCredits::CClientCredits(const uchar* key)
 {
 	m_pCredits = new CreditStruct;
 	memset(m_pCredits, 0, sizeof(CreditStruct));
-	md4cpy(m_pCredits->abyKey, key);
+	MD4COPY(m_pCredits->abyKey, key);
 	InitalizeIdent();
 	m_dwUnSecureWaitTime = ::GetTickCount();
 	m_dwSecureWaitTime = ::GetTickCount();
@@ -610,7 +610,7 @@ void CClientCreditsList::SaveList()
 		if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 		{
 			cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
-			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+			MEMCOPY(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
 			fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
 			count++; 
 		}
@@ -619,7 +619,7 @@ void CClientCreditsList::SaveList()
 		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
 		if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
 		{
-			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+			MEMCOPY(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
 			count++; 
 		}
 		*/
@@ -683,7 +683,7 @@ void CClientCredits::InitalizeIdent(){
 	}
 	else{
 		m_nPublicKeyLen = m_pCredits->nKeySize;
-		memcpy(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
+		MEMCOPY(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
 		IdentState = IS_IDNEEDED;
 	}
 	m_dwCryptRndChallengeFor = 0;
@@ -696,7 +696,7 @@ void CClientCredits::Verified(uint32 dwForIP){
 	// client was verified, copy the keyto store him if not done already
 	if (m_pCredits->nKeySize == 0){
 		m_pCredits->nKeySize = m_nPublicKeyLen; 
-		memcpy(m_pCredits->abySecureIdent, m_abyPublicKey, m_nPublicKeyLen);
+		MEMCOPY(m_pCredits->abySecureIdent, m_abyPublicKey, m_nPublicKeyLen);
 		if (GetDownloadedTotal() > 0){
 			// for security reason, we have to delete all prior credits here
 			m_pCredits->nDownloadedHi = 0;
@@ -712,7 +712,7 @@ void CClientCredits::Verified(uint32 dwForIP){
 bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verified Public key cannot change, use only if there is not public key yet
 	if (MAXPUBKEYSIZE < nIdentLen || m_pCredits->nKeySize != 0 )
 		return false;
-	memcpy(m_abyPublicKey,pachIdent, nIdentLen);
+	MEMCOPY(m_abyPublicKey,pachIdent, nIdentLen);
 	m_nPublicKeyLen = nIdentLen;
 	IdentState = IS_IDNEEDED;
 	return true;
@@ -815,16 +815,16 @@ uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOu
 		AutoSeededRandomPool rng;
 		byte abyBuffer[MAXPUBKEYSIZE+9];
 		uint32 keylen = pTarget->GetSecIDKeyLen();
-		memcpy(abyBuffer,pTarget->GetSecureIdent(),keylen);
+		MEMCOPY(abyBuffer,pTarget->GetSecureIdent(),keylen);
 		// 4 additional bytes random data send from this client
 		uint32 challenge = pTarget->m_dwCryptRndChallengeFrom;
 		ASSERT ( challenge != 0 );
-		memcpy(abyBuffer+keylen,&challenge,4);
+		MEMCOPY(abyBuffer+keylen,&challenge,4);
 		uint16 ChIpLen = 0;
 		if ( byChaIPKind != 0){
 			ChIpLen = 5;
-			memcpy(abyBuffer+keylen+4,&ChallengeIP,4);
-			memcpy(abyBuffer+keylen+4+4,&byChaIPKind,1);
+			MEMCOPY(abyBuffer+keylen+4,&ChallengeIP,4);
+			MEMCOPY(abyBuffer+keylen+4+4,&byChaIPKind,1);
 		}
 		sigkey->SignMessage(rng, abyBuffer ,keylen+4+ChIpLen , sbbSignature.begin());
 		ArraySink asink(pachOutput, nMaxSize);
@@ -852,10 +852,10 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(ss_Pubkey);
 		// 4 additional bytes random data send from this client +5 bytes v2
 		byte abyBuffer[MAXPUBKEYSIZE+9];
-		memcpy(abyBuffer,m_abyMyPublicKey,m_nMyPublicKeyLen);
+		MEMCOPY(abyBuffer,m_abyMyPublicKey,m_nMyPublicKeyLen);
 		uint32 challenge = pTarget->m_dwCryptRndChallengeFor;
 		ASSERT ( challenge != 0 );
-		memcpy(abyBuffer+m_nMyPublicKeyLen,&challenge,4);
+		MEMCOPY(abyBuffer+m_nMyPublicKeyLen,&challenge,4);
 		// v2 security improvments (not supported by 29b, not used as default by 29c)
 		uint8 nChIpSize = 0;
 		if (byChaIPKind != 0){
@@ -877,8 +877,8 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 					ChallengeIP = 0;
 					break;
 			}
-			memcpy(abyBuffer+m_nMyPublicKeyLen+4,&ChallengeIP,4);
-			memcpy(abyBuffer+m_nMyPublicKeyLen+4+4,&byChaIPKind,1);
+			MEMCOPY(abyBuffer+m_nMyPublicKeyLen+4,&ChallengeIP,4);
+			MEMCOPY(abyBuffer+m_nMyPublicKeyLen+4+4,&byChaIPKind,1);
 		}
 		//v2 end
 

@@ -252,8 +252,8 @@ bool CChatSelector::SendMessage(char* message){
 	if (ci->client->socket && ci->client->socket->IsConnected()){
 		uint16 mlen = (uint16)strlen(message);
 		Packet* packet = new Packet(OP_MESSAGE,mlen+2);
-		memcpy(packet->pBuffer,&mlen,2);
-		memcpy(packet->pBuffer+2,message,mlen);
+		MEMCOPY(packet->pBuffer,&mlen,2);
+		MEMCOPY(packet->pBuffer+2,message,mlen);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 		ci->client->socket->SendPacket(packet,true,true);
 		ci->log->AppendKeyWord(CString(theApp.glob_prefs->GetUserNick()),RGB(1,180,20));
@@ -290,8 +290,8 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender,bool success){
 		ci->log->AppendKeyWord(CString(" ok\n"),RGB(255,0,0));
 		uint16 mlen = (uint16)strlen(ci->messagepending);
 		Packet* packet = new Packet(OP_MESSAGE,mlen+2);
-		memcpy(packet->pBuffer,&mlen,2);
-		memcpy(packet->pBuffer+2,ci->messagepending,mlen);
+		MEMCOPY(packet->pBuffer,&mlen,2);
+		MEMCOPY(packet->pBuffer+2,ci->messagepending,mlen);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 		ci->client->socket->SendPacket(packet,true,true);
 		if (theApp.glob_prefs->GetIRCAddTimestamp())

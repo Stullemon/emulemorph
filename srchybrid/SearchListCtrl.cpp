@@ -1087,7 +1087,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		(lpDrawItemStruct->itemState & ODS_SELECTED) &&
 		(content->GetListParent()==NULL)) {
 		RECT outline_rec;
-		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;

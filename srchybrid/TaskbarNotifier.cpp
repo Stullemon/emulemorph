@@ -616,7 +616,7 @@ HRGN CTaskbarNotifier::CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color)
 				// if buffer full reallocate it
 				if ( pRgnData->nCount >= cBlocks * MAXBUF ){
 					LPBYTE pRgnDataNew = new BYTE[ RDHDR + ++cBlocks * MAXBUF * sizeof(RECT) ];
-					memcpy( pRgnDataNew, pRgnData, RDHDR + (cBlocks - 1) * MAXBUF * sizeof(RECT) );
+					MEMCOPY( pRgnDataNew, pRgnData, RDHDR + (cBlocks - 1) * MAXBUF * sizeof(RECT) );
 					delete pRgnData;
 					pRgnData = (RGNDATAHEADER*)pRgnDataNew;
 				}

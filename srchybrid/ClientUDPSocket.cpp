@@ -137,7 +137,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 						break;
 
 					uint16 nRank;
-					memcpy(&nRank,packet,2);
+					MEMCOPY(&nRank,packet,2);
 					sender->SetRemoteQueueFull(false);
 					sender->UDPReaskACK(nRank);
 					sender->AddAskedCountDown();
@@ -189,8 +189,8 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 	while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy()){
 		UDPPack* cur_packet = controlpacket_queue.GetHead();
 		char* sendbuffer = new char[cur_packet->packet->size+2];
-		memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
-		memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
+		MEMCOPY(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
+		MEMCOPY(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 		if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort) ){
 			controlpacket_queue.RemoveHead();
 			delete cur_packet->packet;
@@ -225,8 +225,8 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 		return true;
 	}
 	char* sendbuffer = new char[packet->size+2];
-	memcpy(sendbuffer,packet->GetUDPHeader(),2);
-	memcpy(sendbuffer+2,packet->pBuffer,packet->size);
+	MEMCOPY(sendbuffer,packet->GetUDPHeader(),2);
+	MEMCOPY(sendbuffer+2,packet->pBuffer,packet->size);
 	if (SendTo(sendbuffer, packet->size+2, dwIP, nPort)){
 		controlpacket_queue.AddTail(newpending);
 	}

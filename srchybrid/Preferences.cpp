@@ -72,7 +72,7 @@ CPreferences::CPreferences(){
 	if ( PathFileExists(appdir+"webservices.dat")) MoveFile(appdir+"webservices.dat",configdir+"webservices.dat");
 
 	CreateUserHash();
-	md4cpy(&prefs->userhash,&userhash);
+	MD4COPY(&prefs->userhash,&userhash);
 
 	// load preferences.dat or set standart values
 	char* fullpath = new char[strlen(configdir)+16];
@@ -101,9 +101,9 @@ CPreferences::CPreferences(){
 				fseek(preffile,0,0);
 				fread(prefsImport20b,sizeof(Preferences_Import20b_Struct),1,preffile);
 
-				md4cpy(&prefs->userhash,&prefsImport20b->userhash);
-				memcpy(&prefs->incomingdir,&prefsImport20b->incomingdir,510);
-				memcpy(&prefs->tempdir,&prefsImport20b->tempdir,510);
+				MD4COPY(&prefs->userhash,&prefsImport20b->userhash);
+				MEMCOPY(&prefs->incomingdir,&prefsImport20b->incomingdir,510);
+				MEMCOPY(&prefs->tempdir,&prefsImport20b->tempdir,510);
 				sprintf(prefs->nick,prefsImport20b->nick);
 
 				prefs->totalDownloadedBytes=prefsImport20b->totalDownloadedBytes;
@@ -115,9 +115,9 @@ CPreferences::CPreferences(){
 				fseek(preffile,0,0);
 				fread(prefsImport20a,sizeof(Preferences_Import20a_Struct),1,preffile);
 
-				md4cpy(&prefs->userhash,&prefsImport20a->userhash);
-				memcpy(&prefs->incomingdir,&prefsImport20a->incomingdir,510);
-				memcpy(&prefs->tempdir,&prefsImport20a->tempdir,510);
+				MD4COPY(&prefs->userhash,&prefsImport20a->userhash);
+				MEMCOPY(&prefs->incomingdir,&prefsImport20a->incomingdir,510);
+				MEMCOPY(&prefs->tempdir,&prefsImport20a->tempdir,510);
 				sprintf(prefs->nick,prefsImport20a->nick);
 
 				prefs->totalDownloadedBytes=prefsImport20a->totalDownloaded;
@@ -132,17 +132,17 @@ CPreferences::CPreferences(){
 
 				if (prefsExt->version<3) {
 					CreateUserHash();
-					md4cpy(&prefs->userhash,&userhash);
-				} else {md4cpy(&prefs->userhash,&prefsImport19c->userhash);}
-				memcpy(&prefs->incomingdir,&prefsImport19c->incomingdir,510);memcpy(&prefs->tempdir,&prefsImport19c->tempdir,510);
+					MD4COPY(&prefs->userhash,&userhash);
+				} else {MD4COPY(&prefs->userhash,&prefsImport19c->userhash);}
+				MEMCOPY(&prefs->incomingdir,&prefsImport19c->incomingdir,510);MEMCOPY(&prefs->tempdir,&prefsImport19c->tempdir,510);
 				sprintf(prefs->nick,prefsImport19c->nick);
 			}
  		} else {
-			md4cpy(&prefs->userhash,&prefsExt->userhash);
+			MD4COPY(&prefs->userhash,&prefsExt->userhash);
 			prefs->EmuleWindowPlacement=prefsExt->EmuleWindowPlacement;
 		}
 		fclose(preffile);
-		md4cpy(&userhash,&prefs->userhash);
+		MD4COPY(&userhash,&prefs->userhash);
 		prefs->smartidstate=0;
 	}
 
@@ -229,7 +229,7 @@ CPreferences::CPreferences(){
 
 void CPreferences::SetStandartValues(){
 	CreateUserHash();
-	md4cpy(&prefs->userhash,&userhash);
+	MD4COPY(&prefs->userhash,&userhash);
 
 	WINDOWPLACEMENT defaultWPM;
 	defaultWPM.length = sizeof(WINDOWPLACEMENT);
@@ -1073,7 +1073,7 @@ bool CPreferences::Save(){
 	if (preffile){
 		prefsExt->version=PREFFILE_VERSION;
 		prefsExt->EmuleWindowPlacement=prefs->EmuleWindowPlacement;
-		md4cpy(&prefsExt->userhash,&prefs->userhash);
+		MD4COPY(&prefsExt->userhash,&prefs->userhash);
 
 		error = fwrite(prefsExt,sizeof(Preferences_Ext_Struct),1,preffile);
 		if (theApp.glob_prefs->GetCommitFiles() >= 2 || (theApp.glob_prefs->GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
@@ -1130,7 +1130,7 @@ bool CPreferences::Save(){
 void CPreferences::CreateUserHash(){
 	for (int i = 0;i != 8; i++){ 
 		uint16	random = rand();
-		memcpy(&userhash[i*2],&random,2);
+		MEMCOPY(&userhash[i*2],&random,2);
 	}
 	// mark as emule client. that will be need in later version
 	userhash[5] = 14;
@@ -1251,25 +1251,25 @@ int CPreferences::GetColumnOrder(Table t, int index) const {
 void CPreferences::SetColumnOrder(Table t, INT *piOrder) {
 	switch(t) {
 	case tableDownload:
-		memcpy(prefs->downloadColumnOrder, piOrder, sizeof(prefs->downloadColumnOrder));
+		MEMCOPY(prefs->downloadColumnOrder, piOrder, sizeof(prefs->downloadColumnOrder));
 		break;
 	case tableUpload:
-		memcpy(prefs->uploadColumnOrder, piOrder, sizeof(prefs->uploadColumnOrder));
+		MEMCOPY(prefs->uploadColumnOrder, piOrder, sizeof(prefs->uploadColumnOrder));
 		break;
 	case tableQueue:
-		memcpy(prefs->queueColumnOrder, piOrder, sizeof(prefs->queueColumnOrder));
+		MEMCOPY(prefs->queueColumnOrder, piOrder, sizeof(prefs->queueColumnOrder));
 		break;
 	case tableSearch:
-		memcpy(prefs->searchColumnOrder, piOrder, sizeof(prefs->searchColumnOrder));
+		MEMCOPY(prefs->searchColumnOrder, piOrder, sizeof(prefs->searchColumnOrder));
 		break;
 	case tableShared:
-		memcpy(prefs->sharedColumnOrder, piOrder, sizeof(prefs->sharedColumnOrder));
+		MEMCOPY(prefs->sharedColumnOrder, piOrder, sizeof(prefs->sharedColumnOrder));
 		break;
 	case tableServer:
-		memcpy(prefs->serverColumnOrder, piOrder, sizeof(prefs->serverColumnOrder));
+		MEMCOPY(prefs->serverColumnOrder, piOrder, sizeof(prefs->serverColumnOrder));
 		break;
 	case tableClientList:
-		memcpy(prefs->clientListColumnOrder, piOrder, sizeof(prefs->clientListColumnOrder));
+		MEMCOPY(prefs->clientListColumnOrder, piOrder, sizeof(prefs->clientListColumnOrder));
 
 		break;
 	}
@@ -2204,7 +2204,7 @@ void CPreferences::LoadPreferences(){
 	LPBYTE pData = NULL;
 	UINT uSize = sizeof prefs->m_lfHyperText;
 	if (ini.GetBinary("HyperTextFont", &pData, &uSize) && uSize == sizeof prefs->m_lfHyperText)
-		memcpy(&prefs->m_lfHyperText, pData, sizeof prefs->m_lfHyperText);
+		MEMCOPY(&prefs->m_lfHyperText, pData, sizeof prefs->m_lfHyperText);
 	else
 		memset(&prefs->m_lfHyperText, 0, sizeof prefs->m_lfHyperText);
 	delete[] pData;

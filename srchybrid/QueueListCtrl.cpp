@@ -253,7 +253,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
-	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 	CString Sbuffer;
 
@@ -423,7 +423,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		RECT outline_rec;
-		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;

@@ -312,7 +312,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 
 	// Copy back the partial header into the global read buffer for processing
 	if(pendingHeaderSize > 0) {
-  		memcpy(GlobalReadBuffer, pendingHeader, pendingHeaderSize);
+  		MEMCOPY(GlobalReadBuffer, pendingHeader, pendingHeaderSize);
 		ret += pendingHeaderSize;
 		pendingHeaderSize = 0;
 	}
@@ -382,7 +382,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 			             (pendingPacket->size - pendingPacketSize) : (uint32)(rend - rptr);
 
 		// Copy Bytes from Global buffer to packet's internal buffer
-		memcpy(&pendingPacket->pBuffer[pendingPacketSize], rptr, toCopy);
+		MEMCOPY(&pendingPacket->pBuffer[pendingPacketSize], rptr, toCopy);
 		pendingPacketSize += toCopy;
 		rptr += toCopy;
 		
@@ -408,7 +408,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(rptr != rend) {
 		// Keep the partial head
 		pendingHeaderSize = rend - rptr;
-		memcpy(pendingHeader, rptr, pendingHeaderSize);
+		MEMCOPY(pendingHeader, rptr, pendingHeaderSize);
 	}	
 }
 
@@ -458,7 +458,7 @@ bool CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, u
 	if (!delpacket){
 		//ASSERT ( !packet->IsSplitted() );
 		Packet* copy = new Packet(packet->opcode,packet->size);
-		memcpy(copy->pBuffer,packet->pBuffer,packet->size);
+		MEMCOPY(copy->pBuffer,packet->pBuffer,packet->size);
 		packet = copy;
 	}
 

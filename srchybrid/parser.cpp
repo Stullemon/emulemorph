@@ -183,7 +183,7 @@ union yyalloc
 # ifndef YYCOPY
 #  if 1 < __GNUC__
 #   define YYCOPY(To, From, Count) \
-      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
+      __builtin_MEMCOPY (To, From, (Count) * sizeof (*(From)))
 #  else
 #   define YYCOPY(To, From, Count)		\
       do					\

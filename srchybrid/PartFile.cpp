@@ -51,7 +51,7 @@ CPartFile::CPartFile()
 CPartFile::CPartFile(CSearchFile* searchresult)
 {
 	Init();
-	md4cpy(m_abyFileHash, searchresult->GetFileHash());
+	MD4COPY(m_abyFileHash, searchresult->GetFileHash());
 	for (int i = 0; i < searchresult->taglist.GetCount();i++){
 		const CTag* pTag = searchresult->taglist[i];
 		switch (pTag->tag.specialtag){
@@ -139,7 +139,7 @@ void CPartFile::InitializeFromLink(CED2KFileLink* fileLink)
 	try{
 		SetFileName(fileLink->GetName());
 		SetFileSize(fileLink->GetSize());
-		md4cpy(m_abyFileHash, fileLink->GetHashKey());
+		MD4COPY(m_abyFileHash, fileLink->GetHashKey());
 		if (!theApp.downloadqueue->IsFileExisting(m_abyFileHash))
 			CreatePartFile();
 		else
@@ -360,7 +360,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			LoadDateFromFile(&metFile);
 			uchar gethash[16];
 			metFile.Read(&gethash, 16);
-			md4cpy(m_abyFileHash, gethash);
+			MD4COPY(m_abyFileHash, gethash);
 		} else {
 
 			LoadDateFromFile(&metFile);
@@ -550,7 +550,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			if (!hashlist.IsEmpty()){
 				uchar* buffer = new uchar[hashlist.GetCount()*16];
 				for (int i = 0; i < hashlist.GetCount(); i++)
-					md4cpy(buffer+(i*16), hashlist[i]);
+					MD4COPY(buffer+(i*16), hashlist[i]);
 				CreateHashFromString(buffer, hashlist.GetCount()*16, checkhash);
 				delete[] buffer;
 			}
@@ -1081,7 +1081,7 @@ bool CPartFile::GetNextEmptyBlockInPart(uint16 partNumber, Requested_Block_Struc
 			{
 				result->StartOffset = start;
 				result->EndOffset = end;
-				md4cpy(result->FileID, GetFileHash());
+				MD4COPY(result->FileID, GetFileHash());
 				result->transferred = 0;
 			}
 			return true;
@@ -3191,7 +3191,7 @@ uint32 CPartFile::WriteToBuffer(uint32 transize, BYTE *data, uint32 start, uint3
 
 	// Create copy of data as new buffer
 	BYTE *buffer = new BYTE[lenData];
-	memcpy(buffer, data, lenData);
+	MEMCOPY(buffer, data, lenData);
 
 		// Create a new buffered queue entry
 		PartFileBufferedData *item = new PartFileBufferedData;

@@ -145,7 +145,7 @@ uint8 CFrameGrabThread::GrabFrames(){
 				bfh.bfType = 'MB';
 				bfh.bfSize = nFullBufferLen;
 				bfh.bfOffBits = sizeof( BITMAPINFOHEADER ) + sizeof( BITMAPFILEHEADER );
-				memcpy(buffer,&bfh,sizeof( bfh ) );
+				MEMCOPY(buffer,&bfh,sizeof( bfh ) );
 
 				try {
 					hr = pDet->GetBitmapBits(dStartTime+ (nFramesGrabbed*TIMEBETWEENFRAMES), NULL, buffer + sizeof( bfh ), width, height);

@@ -274,7 +274,7 @@ void CUpDownClient::SendFileRequest(){
 	if(IsSourceRequestAllowed()) {
 		reqfile->SetLastAnsweredTimeTimeout();
 		Packet* packet = new Packet(OP_REQUESTSOURCES,16,OP_EMULEPROT);
-		md4cpy(packet->pBuffer,reqfile->GetFileHash());
+		MD4COPY(packet->pBuffer,reqfile->GetFileHash());
 		theApp.uploadqueue->AddUpDataOverheadSourceExchange(packet->size);
 		socket->SendPacket(packet,true,true);
 		SetLastAskedForSources();
@@ -345,7 +345,7 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 		// even if the file is <= PARTSIZE, we _may_ need the hashset for that file (if the file size == PARTSIZE)
 		if (reqfile->hashsetneeded){
 			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-			md4cpy(packet->pBuffer,reqfile->GetFileHash());
+			MD4COPY(packet->pBuffer,reqfile->GetFileHash());
 			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 			socket->SendPacket(packet,true,true);
 			SetDownloadState(DS_REQHASHSET);
@@ -431,7 +431,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 		SetDownloadState(DS_NONEEDEDPARTS);
 	else if (reqfile->hashsetneeded){
 		Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-		md4cpy(packet->pBuffer,reqfile->GetFileHash());
+		MD4COPY(packet->pBuffer,reqfile->GetFileHash());
 		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 		socket->SendPacket(packet, true, true);
 		SetDownloadState(DS_REQHASHSET);
@@ -904,7 +904,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
     
 		    // Copy any data that was successfully unzipped to new array
 		    BYTE *temp = new BYTE[newLength];
-		    memcpy(temp, (*unzipped), (zS->total_out - block->totalUnzipped));
+		    MEMCOPY(temp, (*unzipped), (zS->total_out - block->totalUnzipped));
 			delete [] (*unzipped);
 		    (*unzipped) = temp;
 		    (*lenUnzipped) = newLength;
@@ -1036,11 +1036,11 @@ void CUpDownClient::UDPReaskForDownload(){
 		if (GetUDPVersion() >= 3)
 			packetsize+= 2;
 		Packet* response = new Packet(OP_REASKFILEPING,packetsize,OP_EMULEPROT);	// #zegzav:completesrc (modify)
-		md4cpy(response->pBuffer,reqfile->GetFileHash());
+		MD4COPY(response->pBuffer,reqfile->GetFileHash());
 		if (GetUDPVersion() >= 3)
 		{
 			uint16 completecount= reqfile->m_nCompleteSourcesCount;
-			memcpy(response->pBuffer+16, &completecount, 2);
+			MEMCOPY(response->pBuffer+16, &completecount, 2);
 		}
 		// #zegzav:completesrc_udp (add) - END
 //MORPH END - Yun.SF3, Complete source feature v0.07a zegzav

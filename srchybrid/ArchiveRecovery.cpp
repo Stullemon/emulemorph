@@ -485,7 +485,7 @@ bool CArchiveRecovery::processZipEntry(CFile *zipInput, CFile *zipOutput, uint32
 			if (entry.lenExtraField > 0)
 				cdEntry->extraField = entry.extraField;
 			cdEntry->comment = new BYTE[cdEntry->lenComment];
-			memcpy(cdEntry->comment, ZIP_COMMENT, cdEntry->lenComment);
+			MEMCOPY(cdEntry->comment, ZIP_COMMENT, cdEntry->lenComment);
 			centralDirectoryEntries->AddTail(cdEntry);
 		}
 		else

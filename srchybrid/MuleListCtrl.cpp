@@ -948,7 +948,7 @@ BOOL CMuleListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LR
 
 			m_bCustomDraw = CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
 			if(m_bCustomDraw)
-				memcpy(&m_lvcd, (void*)lParam, sizeof(NMLVCUSTOMDRAW));
+				MEMCOPY(&m_lvcd, (void*)lParam, sizeof(NMLVCUSTOMDRAW));
 
 			return m_bCustomDraw;
 		}

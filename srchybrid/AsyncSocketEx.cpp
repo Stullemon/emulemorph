@@ -200,7 +200,7 @@ public:
 				m_nWindowDataSize=MAX_SOCKETS;
 			t_AsyncSocketExWindowData *tmp=m_pAsyncSocketExWindowData;
 			m_pAsyncSocketExWindowData = new t_AsyncSocketExWindowData[m_nWindowDataSize];
-			memcpy(m_pAsyncSocketExWindowData, tmp, nOldWindowDataSize * sizeof(t_AsyncSocketExWindowData));
+			MEMCOPY(m_pAsyncSocketExWindowData, tmp, nOldWindowDataSize * sizeof(t_AsyncSocketExWindowData));
 			memset(m_pAsyncSocketExWindowData+nOldWindowDataSize, 0, (m_nWindowDataSize-nOldWindowDataSize)*sizeof(t_AsyncSocketExWindowData));
 			delete [] tmp;
 		}

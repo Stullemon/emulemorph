@@ -80,62 +80,62 @@ void CMuleToolbarCtrl::Init(void)
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_KADEMLIA)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_KADEMLIA), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_KADEMLIA), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_SERVER)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_SERVER), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_SERVER), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_TRANS)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_TRANS), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_TRANS), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_SEARCH)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_SEARCH), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_SEARCH), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_FILES)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_FILES), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_FILES), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_MESSAGES)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_MESSAGES), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_MESSAGES), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_IRC)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_IRC), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_IRC), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_STATISTIC)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_STATISTIC), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_STATISTIC), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_PREFS)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_PREFS), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_PREFS), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_TOOLS)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_TOOLS), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_TOOLS), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_HELP)) + 1;
-	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_HELP), lLen2);
+	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_HELP), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	// terminate
-	memcpy(cButtonStrings+lLen, "\0", 1);
+	MEMCOPY(cButtonStrings+lLen, "\0", 1);
 
 	AddStrings(cButtonStrings);
 

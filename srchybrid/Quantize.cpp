@@ -26,7 +26,7 @@ BOOL CQuantizer::ProcessImage (HANDLE hImage)
 	int	i, j;
 
 	BITMAPINFOHEADER ds;
-	memcpy(&ds,hImage, sizeof(ds));
+	MEMCOPY(&ds,hImage, sizeof(ds));
 	int effwdt = ((((ds.biBitCount * ds.biWidth ) + 31) / 32) * 4);
 
 	int	nPad = effwdt - (((ds.biWidth *	ds.biBitCount) + 7) / 8);

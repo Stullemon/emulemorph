@@ -246,7 +246,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (!client->GetWaitStartTime())
 							client->SetWaitStartTime();
 						uchar reqfileid[16];
-						md4cpy(reqfileid,packet);
+						MD4COPY(reqfileid,packet);
 						CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(reqfileid);
 						if (!reqfile){
 							// if we've just started a download we may want to use that client as a source
@@ -266,7 +266,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// DbT:FileRequest
 							// send file request no such file packet (0x48)
 //							Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-//							md4cpy(replypacket->pBuffer, packet);
+//							MD4COPY(replypacket->pBuffer, packet);
 //							theApp.uploadqueue->AddUpDataOverheadFileRequest(replypacket->size);
 //							SendPacket(replypacket, true);
 							// DbT:End
@@ -287,7 +287,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 //						reqfile->AddQueuedCount();
 						// send filename etc
 						client->SetUploadFileID((uchar*)packet);
-//						md4cpy(client->reqfileid,packet);
+//						MD4COPY(client->reqfileid,packet);
 						CSafeMemFile data(128);
 						data.Write(reqfile->GetFileHash(),16);
 						uint16 namelength = (uint16)strlen(reqfile->GetFileName());
@@ -347,7 +347,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 					if( size == 16 ){
 						uchar reqfileid[16];
-						md4cpy(reqfileid,packet);
+						MD4COPY(reqfileid,packet);
 						CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(reqfileid);
 						if (reqfile){
 							if (reqfile->IsPartFile())
@@ -413,9 +413,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					data.Read(&reqblock1->EndOffset,4);
 					data.Read(&reqblock2->EndOffset,4);
 					data.Read(&reqblock3->EndOffset,4);
-					md4cpy(&reqblock1->FileID,reqfilehash);
-					md4cpy(&reqblock2->FileID,reqfilehash);
-					md4cpy(&reqblock3->FileID,reqfilehash);
+					MD4COPY(&reqblock1->FileID,reqfilehash);
+					MD4COPY(&reqblock2->FileID,reqfilehash);
+					MD4COPY(&reqblock3->FileID,reqfilehash);
 					
 					//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
 					uchar tempfileid[16];
@@ -451,7 +451,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 
 						// save original file id asked for, to be able to log it
 						uchar uploadFileId[16];
-						md4cpy(uploadFileId, client->GetUploadFileID());
+						MD4COPY(uploadFileId, client->GetUploadFileID());
 
 						if(client->HasLowID() && (client->IsFriend() && client->GetFriendSlot()) == true) {
 							allowSwitch = true;
@@ -589,7 +589,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (!reqfile){
 							// send file request no such file packet (0x48)
 							Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-							md4cpy(replypacket->pBuffer, packet);
+							MD4COPY(replypacket->pBuffer, packet);
 							theApp.uploadqueue->AddUpDataOverheadFileRequest(replypacket->size);
 							SendPacket(replypacket, true);
 							break;
@@ -611,7 +611,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 
 						//send filestatus
 						client->SetUploadFileID((uchar*)packet);
-//						md4cpy(client->reqfileid,packet);
+//						MD4COPY(client->reqfileid,packet);
 						CSafeMemFile data(16+16);
 						data.Write(reqfile->GetFileHash(),16);
 						if (reqfile->IsPartFile())
@@ -667,7 +667,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					if (size < 2)
 						throw CString(_T("invalid message packet"));
 					uint16 length;
-					memcpy(&length,packet,2);
+					MEMCOPY(&length,packet,2);
 					if ((UINT)(length+2) != size)
 						throw CString(_T("invalid message packet"));
 
@@ -681,7 +681,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						break;
 					}
 					char* message = new char[length+1];
-					memcpy(message,packet+2,length);
+					MEMCOPY(message,packet+2,length);
 					message[length] = '\0';
 					theApp.emuledlg->chatwnd.chatselector.ProcessMessage(client,message);
 					delete[] message;
@@ -1039,7 +1039,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					if (size != 12)
 						throw GetResString(IDS_ERR_BADSIZE);
 					uint16 newrank;
-					memcpy(&newrank,packet+0,2);
+					MEMCOPY(&newrank,packet+0,2);
 					client->SetRemoteQueueFull(false);
 					client->SetRemoteQueueRank(newrank);
 					break;

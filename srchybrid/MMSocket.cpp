@@ -181,7 +181,7 @@ bool CMMSocket::SendPacket(CMMPacket* packet, bool bQueueFirst){
 			nLen = wsprintfA(szBuf, "Content-Length: %ld\r\n\r\n", packet->m_pBuffer->GetLength());
 		m_nSendLen = nLen + packet->m_pBuffer->GetLength();
 		m_pSendBuffer =	new char[m_nSendLen];
-		memcpy(m_pSendBuffer,szBuf,nLen);
+		MEMCOPY(m_pSendBuffer,szBuf,nLen);
 		packet->m_pBuffer->SeekToBegin();
 		packet->m_pBuffer->Read(m_pSendBuffer+nLen,packet->m_pBuffer->GetLength()); 
 		

@@ -471,7 +471,7 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 		char *p = strchr(pDirectory, '\\');
 		if(p)
 		{
-			memcpy(cDrive, pDirectory, p-pDirectory);
+			MEMCOPY(cDrive, pDirectory, p-pDirectory);
 			cDrive[p-pDirectory] = '\0';
 		}
 		else

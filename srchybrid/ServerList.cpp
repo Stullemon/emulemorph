@@ -256,7 +256,7 @@ void CServerList::ServerStats(){
 		srand((unsigned)time(NULL));
 		uint32 time = 0x55AA0000 + (uint16)rand();
 		ping_server->SetChallenge(time);
-		memcpy( packet->pBuffer, &time, 4 );
+		MEMCOPY( packet->pBuffer, &time, 4 );
 		ping_server->SetLastPinged( ::GetTickCount() );
 		ping_server->SetLastPingedTime( temp );
 		ping_server->AddFailedCount();

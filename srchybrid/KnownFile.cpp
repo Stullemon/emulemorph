@@ -671,14 +671,14 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	md4clr(lasthash);
 	CreateHashFromFile(file, togo, lasthash);
 	if (!hashcount){
-		md4cpy(m_abyFileHash, lasthash);
+		MD4COPY(m_abyFileHash, lasthash);
 		delete[] lasthash; // i_a: memleak 
 	} 
 	else {
 		hashlist.Add(lasthash);
 		uchar* buffer = new uchar[hashlist.GetCount()*16];
 		for (int i = 0; i < hashlist.GetCount(); i++)
-			md4cpy(buffer+(i*16), hashlist[i]);
+			MD4COPY(buffer+(i*16), hashlist[i]);
 		CreateHashFromString(buffer, hashlist.GetCount()*16, m_abyFileHash);
 		delete[] buffer;
 	}
@@ -799,7 +799,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 
 	// SLUGFILLER: SafeHash - always check for valid hashlist
 	if (!checkhash){
-		md4cpy(m_abyFileHash, checkid);
+		MD4COPY(m_abyFileHash, checkid);
 		if (parts <= 1)	// nothing to check
 		return true;
 	}
@@ -814,7 +814,7 @@ bool CKnownFile::LoadHashsetFromFile(CFile* file, bool checkhash){
 	if (!hashlist.IsEmpty()){
 		uchar* buffer = new uchar[hashlist.GetCount()*16];
 		for (int i = 0; i < hashlist.GetCount(); i++)
-			md4cpy(buffer+(i*16), hashlist[i]);
+			MD4COPY(buffer+(i*16), hashlist[i]);
 		CreateHashFromString(buffer, hashlist.GetCount()*16, checkid);
 		delete[] buffer;
 	}
@@ -1159,10 +1159,10 @@ void CKnownFile::CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar*
 	// add size (convert to bits)
 	uint32 Length2 = Length >> 29;
 	Length <<= 3;
-	memcpy(&X[56], &Length, 4);
-	memcpy(&X[60], &Length2, 4);
+	MEMCOPY(&X[56], &Length, 4);
+	MEMCOPY(&X[60], &Length2, 4);
 	MD4Transform(Hash, (uint32*)X);
-	md4cpy(Output, Hash);
+	MD4COPY(Output, Hash);
 	safe_delete(data);
 }
 
@@ -1703,7 +1703,7 @@ void CKnownFile::GetMetaDataTags()
 				else if (pbmi->biCompression == BI_BITFIELDS)
 					strCodec = "bitfields";
 				else{
-					memcpy(strCodec.GetBuffer(4), &pbmi->biCompression, 4);
+					MEMCOPY(strCodec.GetBuffer(4), &pbmi->biCompression, 4);
 					strCodec.ReleaseBuffer(4);
 					strCodec.MakeLower();
 				}
@@ -1827,7 +1827,7 @@ void CKnownFile::GetMetaDataTags()
 							else if (dwVideoCodec == BI_BITFIELDS)
 								strCodec = "bitfields";
 							else{
-								memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
+								MEMCOPY(strCodec.GetBuffer(4), &dwVideoCodec, 4);
 								strCodec.ReleaseBuffer(4);
 								strCodec.MakeLower();
 							}

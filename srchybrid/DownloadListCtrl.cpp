@@ -755,7 +755,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 		case 0:		// icon, name, status
 			{
 				RECT cur_rec;
-				memcpy(&cur_rec, lpRect, sizeof(RECT));
+				MEMCOPY(&cur_rec, lpRect, sizeof(RECT));
 				POINT point = {cur_rec.left, cur_rec.top+1};
 				if (lpCtrlItem->type == AVAILABLE_SOURCE){
 					switch (lpUpDownClient->GetDownloadState()) {
@@ -1032,7 +1032,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	int tree_end=0;
 
 	RECT cur_rec;
-	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 	//offset was 4, now it's the standard 2 spaces
 	int iOffset = dc->GetTextExtent(_T(" "), 1 ).cx*2;
@@ -1101,7 +1101,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		(lpDrawItemStruct->itemState & ODS_SELECTED) &&
 		(content->type == FILE_TYPE)) {
 			RECT outline_rec;
-			memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+			MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;

@@ -900,7 +900,7 @@ void CFileInfoDialog::RefreshData()
 													else if (pVIH->bmiHeader.biCompression == BI_BITFIELDS)
 														strCodec = "BITFIELDS";
 													else{
-														memcpy(strCodec.GetBuffer(4), &pVIH->bmiHeader.biCompression, 4);
+														MEMCOPY(strCodec.GetBuffer(4), &pVIH->bmiHeader.biCompression, 4);
 														strCodec.ReleaseBuffer(4);
 														strCodec.MakeUpper();
 													}

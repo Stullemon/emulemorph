@@ -211,7 +211,7 @@ void CBarShader::FillRect(CDC *dc, LPRECT rectSpan, float fRed, float fGreen,
 		if (m_Modifiers == NULL || m_used3dlevel!=theApp.glob_prefs->Get3DDepth())
 			BuildModifiers();
 		RECT rect;
-		memcpy(&rect, rectSpan, sizeof(RECT));
+		MEMCOPY(&rect, rectSpan, sizeof(RECT));
 		int iTop = rect.top;
 		int iBot = rect.bottom;
 		int iMax = HALF(m_iHeight);

@@ -482,8 +482,8 @@ void CUDPSocket::SendBuffer(){
 void CUDPSocket::SendPacket(Packet* packet,CServer* host){
 	m_cur_server = new CServer(host);
 	m_sendbuffer = new uint8[packet->size+2];
-	memcpy(m_sendbuffer,packet->GetUDPHeader(),2);
-	memcpy(m_sendbuffer+2,packet->pBuffer,packet->size);
+	MEMCOPY(m_sendbuffer,packet->GetUDPHeader(),2);
+	MEMCOPY(m_sendbuffer+2,packet->pBuffer,packet->size);
 	m_sendblen = packet->size+2;
 	AsyncResolveDNS(m_cur_server->GetAddress(),m_cur_server->GetPort()+4);
 }

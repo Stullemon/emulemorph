@@ -524,7 +524,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	if(!HasLowID() || m_nUserIDHybrid == 0) 
 		m_nUserIDHybrid = ntohl(m_dwUserIP);
 	uchar key[16];
-	md4cpy(key,m_achUserHash);
+	MD4COPY(key,m_achUserHash);
 	CClientCredits* pFoundCredits = theApp.clientcredits->GetCredit(key);
 	if (credits == NULL){
 		credits = pFoundCredits;
@@ -1123,7 +1123,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 
 		if (theApp.serverconnect->IsLocalServer(m_dwServerIP,m_nServerPort)){
 			Packet* packet = new Packet(OP_CALLBACKREQUEST,4);
-			memcpy(packet->pBuffer,&m_nUserIDHybrid,4);
+			MEMCOPY(packet->pBuffer,&m_nUserIDHybrid,4);
 			if (theApp.glob_prefs->GetDebugServerTCP())
 				Debug(">>> Sending OP__CallbackRequest\n");
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
@@ -1359,7 +1359,7 @@ void CUpDownClient::SetUserHash(uchar* m_achTempUserHash){
 		md4clr(m_achUserHash);
 		return;
 	}
-	md4cpy(m_achUserHash,m_achTempUserHash);
+	MD4COPY(m_achUserHash,m_achTempUserHash);
 }
 
 void CUpDownClient::SendPublicKeyPacket(){
@@ -1374,7 +1374,7 @@ void CUpDownClient::SendPublicKeyPacket(){
 
     Packet* packet = new Packet(OP_PUBLICKEY,theApp.clientcredits->GetPubKeyLen() + 1,OP_EMULEPROT);
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-	memcpy(packet->pBuffer+1,theApp.clientcredits->GetPublicKey(), theApp.clientcredits->GetPubKeyLen());
+	MEMCOPY(packet->pBuffer+1,theApp.clientcredits->GetPublicKey(), theApp.clientcredits->GetPubKeyLen());
 	packet->pBuffer[0] = theApp.clientcredits->GetPubKeyLen();
 	socket->SendPacket(packet,true,true);
 	m_SecureIdentState = IS_SIGNATURENEEDED;
@@ -1427,7 +1427,7 @@ void CUpDownClient::SendSignaturePacket(){
 	}
 	Packet* packet = new Packet(OP_SIGNATURE,siglen + 1+ ( (bUseV2)? 1:0 ),OP_EMULEPROT);
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-	memcpy(packet->pBuffer+1,achBuffer, siglen);
+	MEMCOPY(packet->pBuffer+1,achBuffer, siglen);
 	packet->pBuffer[0] = siglen;
 	if (bUseV2)
 		packet->pBuffer[1+siglen] = byChaIPKind;
@@ -1534,7 +1534,7 @@ void CUpDownClient::SendSecIdentStatePacket(){
 		Packet* packet = new Packet(OP_SECIDENTSTATE,5,OP_EMULEPROT);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 		packet->pBuffer[0] = nValue;
-		memcpy(packet->pBuffer+1,&dwRandom, sizeof(dwRandom));
+		MEMCOPY(packet->pBuffer+1,&dwRandom, sizeof(dwRandom));
 		socket->SendPacket(packet,true,true);
 	}
 	else
@@ -1560,7 +1560,7 @@ void CUpDownClient::ProcessSecIdentStatePacket(uchar* pachPacket, uint32 nSize){
 				break;
 		}
 	uint32 dwRandom;
-	memcpy(&dwRandom, pachPacket+1,4);
+	MEMCOPY(&dwRandom, pachPacket+1,4);
 	credits->m_dwCryptRndChallengeFrom = dwRandom;
 	//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "recieved SecIdentState Packet, state: %i", pachPacket[0]));
 }
@@ -1601,7 +1601,7 @@ void CUpDownClient::SendPreviewRequest(CAbstractFile* pForFile){
 	if (!m_bPreviewReqPending){
 		m_bPreviewReqPending = true;
 		Packet* packet = new Packet(OP_REQUESTPREVIEW,16,OP_EMULEPROT);
-		memcpy(packet->pBuffer,pForFile->GetFileHash(),16);
+		MEMCOPY(packet->pBuffer,pForFile->GetFileHash(),16);
 		SafeSendPacket(packet);
 	}
 	else{
