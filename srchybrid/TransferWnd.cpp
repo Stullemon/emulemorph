@@ -242,7 +242,7 @@ void CTransferWnd::ShowQueueCount(uint32 number){
 		#ifdef _UNICODE
 			TCHAR symbol[2] = _T("\x221E");
 		#else
-			TCHAR symbol[3] = "IFQ";
+			TCHAR symbol[4] = "IFQ";
 		#endif
 		_stprintf(buffer,_T("%u / %s (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"),number, symbol,theApp.clientlist->GetBannedCount()); // \x221E -> InfiniteSign
 	}
