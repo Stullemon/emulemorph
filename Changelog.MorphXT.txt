@@ -4,7 +4,7 @@ Changelog for eMule 0.42g MorphXT v3.x
 FIXED: Download file in search window will now work properly in case you don't use selectcategory or  you select a category tab item [SiRoB]
 TWEAKED: Equal Chance Value now involed a time quantum base on file shared time
 
-NOTE: for the RSS news you can edit 
+NOTE: for the RSS news you can edit entry in XMLNews.dat
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.3
