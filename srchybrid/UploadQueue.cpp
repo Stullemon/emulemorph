@@ -235,9 +235,9 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 				iSuperior == 0 &&
 				//MORPH START - Added by SiRoB, Upload Splitting Class
 				(!checkforaddinuploadinglist ||
-				 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0] ||
+				 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS] ||
 				 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
-				 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS]) &&
+				 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0]) &&
 				//MORPH END  - Added by SiRoB, Upload Splitting Class
 				(//Morph - added by AndCycle, Equal Chance For Each File
 					leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
@@ -261,9 +261,9 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			leftClient == NULL &&  // there's no old client to compare with, so rightClient is better (than null)
 			 //MORPH START - Added by SiRoB, Upload Splitting Class
 			 (!checkforaddinuploadinglist ||
-			 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0] ||
+			 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS] ||
 			 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
-			 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS])
+			 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0])
 			 //MORPH END   - Added by SiRoB, Upload Splitting Class
 		) &&
 		(!rightClient->IsBanned()) && // don't allow banned client to be best
@@ -316,11 +316,11 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 	return 0;
 	*/
 	int retvalue = 0;
-	if (m_abAddClientOfThisClass[0] == true || checkforaddinuploadinglist == false){ //MORPH - Added by SiRoB, Upload Splitting Class
+	if (checkforaddinuploadinglist == false || m_abAddClientOfThisClass[0] == true){ //MORPH - Added by SiRoB, Upload Splitting Class
 		if(leftClient->IsFriend() && leftClient->GetFriendSlot()) --retvalue;
 		if(rightClient->IsFriend() && rightClient->GetFriendSlot()) ++retvalue;
 	}
-	if (m_abAddClientOfThisClass[1] == true || checkforaddinuploadinglist == false){ //MORPH - Added by SiRoB, Upload Splitting Class
+	if (checkforaddinuploadinglist == false || m_abAddClientOfThisClass[1] == true){ //MORPH - Added by SiRoB, Upload Splitting Class
 		if(retvalue==0)
 		{
 			if (leftClient->IsPBForPS()) --retvalue;
