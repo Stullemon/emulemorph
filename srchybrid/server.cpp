@@ -275,13 +275,13 @@ CString CServer::GetCountryName() const{
 
 	switch(thePrefs.GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
-			tempStr.Format("<%s>",m_structServerCountry->ShortCountryName);
+			tempStr.Format("%s",m_structServerCountry->ShortCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_MID:
-			tempStr.Format("<%s>",m_structServerCountry->MidCountryName);
+			tempStr.Format("%s",m_structServerCountry->MidCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_LONG:
-			tempStr.Format("<%s>",m_structServerCountry->LongCountryName);
+			tempStr.Format("%s",m_structServerCountry->LongCountryName);//Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 	}
 	return "";

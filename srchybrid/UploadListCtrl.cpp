@@ -98,6 +98,10 @@ void CUploadListCtrl::Init()
 	InsertColumn(14,GetResString(IDS_FRIENDLIST),LVCFMT_LEFT,75,14);
 	// EastShare - Added by Pretender, Friend Tab
 
+    // Commander - Added: IP2Country column - Start
+	InsertColumn(15,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,15);
+    // Commander - Added: IP2Country column - End
+
 	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableUpload);
@@ -386,10 +390,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						
 					Sbuffer = client->GetUserName();
 
-					//EastShare Start - added by AndCycle, IP to Country
-					CString tempStr;
-					tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
-					Sbuffer = tempStr;
+					//EastShare Start - added by AndCycle, IP to Country, modified by Commander
+					//CString tempStr;
+					//tempStr.Format("<%s>%s", client->GetCountryName(), Sbuffer);
+					//Sbuffer = tempStr;
+                                        //Commander: There is a column now to show the country name
 
 					if(theApp.ip2country->ShowCountryFlag()){
 						cur_rec.left+=20;
@@ -597,6 +602,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : "";
 					break;
 				// EastShare - Added by Pretender, Friend Tab
+                                // Commander - Added: IP2Country column - Start
+                                case 15:
+					Sbuffer.Format("%s", client->GetCountryName());
+					break;
+                                // Commander - Added: IP2Country column - End	
 			}
 	
 			if( iColumn != 7 && iColumn != 0 )
@@ -613,6 +623,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		else HideColumn (13);
 	// [end] Mighty Knife
 */
+// Commander - Added: IP2Country column - Start
+		if ((thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE) != !IsColumnHidden (15))
+			if (thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE)
+				ShowColumn (15);
+			else HideColumn (15);
+// Commander - Added: IP2Country column - Start
+	
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
@@ -907,7 +924,23 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 114:
 			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
 		// EastShare - Added by Pretender, Friend Tab
-
+                // Commander - Added: IP2Country column - Start
+                case 15:
+			if(item1->GetCountryName(true) && item2->GetCountryName(true))
+				return _tcsicmp(item1->GetCountryName(true), item2->GetCountryName(true));
+			else if(item1->GetCountryName(true))
+				return 1;
+			else
+				return -1;
+		
+		case 115:
+			if(item1->GetCountryName(true) && item2->GetCountryName(true))
+				return _tcsicmp(item2->GetCountryName(true), item1->GetCountryName(true));
+			else if(item2->GetCountryName(true))
+				return 1;
+			else
+				return -1;
+                // Commander - Added: IP2Country column - End
 		default:
 			return 0;
 	}

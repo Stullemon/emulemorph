@@ -2506,13 +2506,13 @@ CString	CUpDownClient::GetCountryName(bool longName) const {
 
 	switch(thePrefs.GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
-			tempStr.Format("<%s>",m_structUserCountry->ShortCountryName);
+			tempStr.Format("%s",m_structUserCountry->ShortCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_MID:
-			tempStr.Format("<%s>",m_structUserCountry->MidCountryName);
+			tempStr.Format("%s",m_structUserCountry->MidCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 		case IP2CountryName_LONG:
-			tempStr.Format("<%s>",m_structUserCountry->LongCountryName);
+			tempStr.Format("%s",m_structUserCountry->LongCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
 			return tempStr;
 	}
 	return "";

@@ -567,6 +567,7 @@
 #define IDS_IRC_SLAPMSG                 644
 #define IDS_IRC_PRIVMESSAGE             645
 #define IDS_IRC_OP                      646
+#define IDS_COUNTRY                     646
 #define IDS_IRC_DEOP                    647
 #define IDS_SOURCEEXCHANGESWAP          648
 #define IDS_IRC_HALFOP                  649

@@ -3322,6 +3322,7 @@ BEGIN
     IDS_IRC_PRIVATECHANSTART "* Private chat session started"
     IDS_IRC_SLAPMSG         "* %s slaps %s around with a large Babelfish!"
     IDS_IRC_PRIVMESSAGE     "Private Message"
+    IDS_COUNTRY             "Country"
     IDS_SOURCEEXCHANGESWAP  "Temporary Source Exchange Swap"
     IDS_PR_SHORT_LOW        "[Lo]"
     IDS_IRC_KICK            "Kick"
