@@ -196,6 +196,23 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 	m_listFriends.AddTail(Record);
 	ShowFriends();
 	SaveList();
+
+	// Mighty Knife: log friend activities
+	if (theApp.glob_prefs->GetLogFriendlistActivities ()) {
+		char buffer[100]; buffer [0] = 0;
+		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,Record->m_abyUserhash[i]);
+		#ifdef MIGHTY_TWEAKS
+ 	    theApp.emuledlg->AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+									Record->m_strName, (uint8)Record->m_dwLastUsedIP, (uint8)(Record->m_dwLastUsedIP>>8), 
+									(uint8)(Record->m_dwLastUsedIP>>16),(uint8)(Record->m_dwLastUsedIP>>24), 
+									Record->m_nLastUsedPort, buffer);
+		#else
+		theApp.emuledlg->AddLogLine(false, "New friend: '%s', hash: %s",
+									Record->m_strName, buffer);
+		#endif
+	}
+	// [end] Mighty Knife
+
 	return true;
 }
 
@@ -224,6 +241,23 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 		m_wndOutput->UpdateList();
 	}
 	SaveList();
+	// Mighty Knife: log friend activities
+	if (theApp.glob_prefs->GetLogFriendlistActivities ()) {
+		char buffer[100]; buffer [0] = 0;
+		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,NewFriend->m_abyUserhash[i]);
+		#ifdef MIGHTY_TWEAKS
+		theApp.emuledlg->AddLogLine(false, "New friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+									NewFriend->m_strName, (uint8)NewFriend->m_dwLastUsedIP, 
+									(uint8)(NewFriend->m_dwLastUsedIP>>8), 
+									(uint8)(NewFriend->m_dwLastUsedIP>>16),(uint8)(NewFriend->m_dwLastUsedIP>>24), 
+									NewFriend->m_nLastUsedPort, buffer);
+		#else
+		theApp.emuledlg->AddLogLine(false, "New friend: '%s', hash: %s",
+									NewFriend->m_strName, buffer);
+		#endif
+	}
+	// [end] Mighty Knife
+
 	return true;
 }
 
@@ -233,6 +267,24 @@ void CFriendList::RemoveFriend(CFriend* todel){
 		ASSERT ( false );
 		return;
 	}
+
+	// Mighty Knife: log friend activities
+	if (theApp.glob_prefs->GetLogFriendlistActivities ()) {
+		char buffer[100]; buffer [0] = 0;
+		for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,todel->m_abyUserhash[i]);
+		#ifdef MIGHTY_TWEAKS
+		theApp.emuledlg->AddLogLine(false, "Removed friend: '%s', ip %i.%i.%i.%i:%i, hash %s",
+									todel->m_strName, (uint8)todel->m_dwLastUsedIP, 
+									(uint8)(todel->m_dwLastUsedIP>>8), 
+									(uint8)(todel->m_dwLastUsedIP>>16),(uint8)(todel->m_dwLastUsedIP>>24), 
+									todel->m_nLastUsedPort, buffer);
+		#else
+		theApp.emuledlg->AddLogLine(false, "Removed friend: '%s', hash: %s",
+									todel->m_strName, buffer);
+		#endif
+	}
+	// [end] Mighty Knife
+
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	todel->SetLinkedClient(NULL);
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System

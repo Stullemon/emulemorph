@@ -132,6 +132,26 @@ void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
 	int itemnr = FindItem(&find);
 	if (itemnr != -1)
 	{
+	    // Mighty Knife: log friend activities
+		//CString temp;
+		//temp.Format( "%s", toupdate->m_strName );
+		CString OldName = GetItemText (itemnr,0);
+		if ((OldName != toupdate->m_strName) && (theApp.glob_prefs->GetLogFriendlistActivities ())) {
+  			char buffer[100]; buffer [0] = 0;
+			for (uint16 i = 0;i != 16;i++) sprintf(buffer,"%s%02X",buffer,toupdate->m_abyUserhash[i]);
+			#ifdef MIGHTY_TWEAKS
+			theApp.emuledlg->AddLogLine(false, "Friend changed his name: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s",
+										(LPCTSTR) OldName, (LPCTSTR) toupdate->m_strName, (uint8)toupdate->m_dwLastUsedIP, 
+										(uint8)(toupdate->m_dwLastUsedIP>>8), 
+										(uint8)(toupdate->m_dwLastUsedIP>>16),(uint8)(toupdate->m_dwLastUsedIP>>24), 
+										toupdate->m_nLastUsedPort, buffer);
+			#else
+			theApp.emuledlg->AddLogLine(false, "Friend changed his name: '%s'->'%s', hash %s",
+										(LPCTSTR) OldName, (LPCTSTR) toupdate->m_strName, buffer);
+			#endif
+		}
+		// [end] Mighty Knife
+
 		SetItemText(itemnr,0,(LPCTSTR)toupdate->m_strName);
 		int image;
 		
