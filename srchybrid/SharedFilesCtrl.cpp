@@ -1360,19 +1360,29 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							CString newname = MRDialog.m_NewFilenames.at (i);
 							CString newpath = MRDialog.m_NewFilePaths.at (i);
 							CKnownFile* file = selectedList.GetAt (pos);
-							if (_trename(file->GetFilePath(), newpath) != 0){
+							// .part files could be renamed by simply changing the filename
+							// in the CKnownFile object.
+							if ((!file->IsPartFile()) && (_trename(file->GetFilePath(), newpath) != 0)){
 								CString strError;
 								strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, strerror(errno));
 								AddLogLine(false,strError);
 							} else {
 								CString strres;
-								strres.Format(_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
-								AddLogLine(false,strres);
-								theApp.sharedfiles->RemoveKeywords(file);
-								file->SetFileName(newname);
-								theApp.sharedfiles->AddKeywords(file);
-								file->SetFilePath(newpath);
-								UpdateFile(file);
+								if (!file->IsPartFile()) {
+									strres.Format(_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
+									theApp.sharedfiles->RemoveKeywords(file);
+									file->SetFileName(newname);
+									theApp.sharedfiles->AddKeywords(file);
+									file->SetFilePath(newpath);
+									UpdateFile(file);
+								} else {
+									strres.Format(_T("Successfully renamed .part file '%s' to '%s'"), file->GetFileName(), newname);
+									AddLogLine(false,strres);
+									file->SetFileName(newname, true); 
+									((CPartFile*) file)->UpdateDisplayedInfo();
+									((CPartFile*) file)->SavePartFile(); 
+									UpdateFile(file);
+								}
 							}
 
 							// Next item
@@ -1479,14 +1489,28 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 	NewPath.ReleaseBuffer();
 
 	// Try to rename
-	if (_trename(f->GetFilePath (), NewPath) != 0) {
-		theApp.AddLogLine (false,"Can't rename file '%s' ! Error: %s",fn,strerror(errno));
+	if ((!f->IsPartFile()) && (_trename(f->GetFilePath (), NewPath) != 0)) {
+		theApp.AddLogLine (false,"Can't rename file '%s' ! Error: %hs",fn,strerror(errno));
 	} else {
-		theApp.sharedfiles->RemoveKeywords(f);
-		f->SetFileName(NewFn);
-		theApp.sharedfiles->AddKeywords(f);
-		f->SetFilePath(NewPath);
-		UpdateFile (f);
+		CString strres;
+		if (!f->IsPartFile()) {
+			strres.Format(_T("Successfully renamed file '%s' to '%s'"), f->GetFileName(), NewPath);
+			AddLogLine(false,strres);
+
+			theApp.sharedfiles->RemoveKeywords(f);
+			f->SetFileName(NewFn);
+			theApp.sharedfiles->AddKeywords(f);
+			f->SetFilePath(NewPath);
+			UpdateFile (f);
+		} else {
+			strres.Format(_T("Successfully renamed .part file '%s' to '%s'"), f->GetFileName(), NewFn);
+			AddLogLine(false,strres);
+
+			f->SetFileName(NewFn, true); 
+			((CPartFile*) f)->UpdateDisplayedInfo();
+			((CPartFile*) f)->SavePartFile(); 
+			UpdateFile(f);
+		}
 	}
 	
 	return 0;
