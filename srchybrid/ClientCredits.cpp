@@ -565,7 +565,7 @@ void CClientCreditsList::SaveList()
 	}
 
 	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	CFile fileBack; // Moonlight: SUQWT - Also open a file to save original 30c format.
+	CSafeBufferedFile fileBack; // Moonlight: SUQWT - Also open a file to save original 30c format.
 	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -576,7 +576,7 @@ void CClientCreditsList::SaveList()
 		AddLogLine(true, _T("%s"), strError);
 		return;
 	}
-
+	setvbuf(fileBack.m_pStream, NULL, _IOFBF, 16384); //buffering needed here since backup file write in-time
 	fileBack.Seek(5, CFile::begin);
 	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
