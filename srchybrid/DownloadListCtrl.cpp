@@ -204,6 +204,13 @@ void CDownloadListCtrl::SetAllIcons()
 		}
 	}
 	//Morph End - added by AndCycle, IP to Country
+
+	// Mighty Knife: Community icon
+	m_overlayimages.DeleteImageList ();
+	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	m_overlayimages.SetBkColor(CLR_NONE);
+	m_overlayimages.Add(CTempIconLoader("Community"));
+	// [end] Mighty Knife
 }
 
 void CDownloadListCtrl::Localize()
@@ -886,6 +893,12 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 						m_ImageList.Draw(dc, 14, point2, ILD_NORMAL | uOvlImg);
 				else
 					m_ImageList.Draw(dc, 7, point2, ILD_NORMAL | uOvlImg);
+
+				// Mighty Knife: Community visualization
+				if (lpUpDownClient->IsCommunity())
+					m_overlayimages.Draw(dc,0, point2, ILD_TRANSPARENT);
+				// [end] Mighty Knife
+
 				cur_rec.left += 20;
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
@@ -1514,6 +1527,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 					uCurPermMenuItem = MP_PERMFRIENDS;
 				else if (pFile->GetPermissions() == PERM_NOONE)
 					uCurPermMenuItem = MP_PERMNONE;
+				// Mighty Knife: Community visible filelist
+				else if (pFile->GetPermissions() == PERM_COMMUNITY)
+					uCurPermMenuItem = MP_PERMCOMMUNITY;
+				// [end] Mighty Knife
 				else
 					ASSERT(0);
 
@@ -1583,12 +1600,19 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 				case PERM_NOONE:
 					buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
 					break;
+				// Mighty Knife: Community visible filelist
+				case PERM_COMMUNITY:
+					buffer.Format(" (%s)","Community");
+					break;
+				// [end] Mighty Knife
 				default:
 					buffer = " (?)";
 					break;
 			}
 			m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
-			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMNONE, uPermMenuItem, 0);
+			// Mighty Knife: Community visible filelist
+			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMCOMMUNITY, uPermMenuItem, 0);
+			// [end] Mighty Knife
 			//MORPH END   - Added by SiRoB, Show Share Permissions
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
@@ -1997,6 +2021,9 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				case MP_PERMDEFAULT:
 				case MP_PERMNONE:
 				case MP_PERMFRIENDS:
+				// Mighty Knife: Community visible filelist
+				case MP_PERMCOMMUNITY:
+				// [end] Mighty Knife
 				case MP_PERMALL: {
 					while(!selectedList.IsEmpty()) { 
 						CPartFile *file = selectedList.GetHead();
@@ -2011,6 +2038,11 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							case MP_PERMFRIENDS:
 								file->SetPermissions(PERM_FRIENDS);
 								break;
+							// Mighty Knife: Community visible filelist
+							case MP_PERMCOMMUNITY:
+								file->SetPermissions(PERM_COMMUNITY);
+								break;
+							// [end] Mighty Knife
 							default : // case MP_PERMALL:
 								file->SetPermissions(PERM_ALL);
 								break;
@@ -2720,6 +2752,9 @@ void CDownloadListCtrl::CreateMenues() {
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
+	// Mighty Knife: Community visible filelist
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,"Community");
+	// [end] Mighty Knife
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
 	// xMule_MOD: showSharePermissions
 

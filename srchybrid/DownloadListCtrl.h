@@ -93,6 +93,11 @@ protected:
 
 private:
 	CImageList  m_ImageList;
+
+	// Mighty Knife: Community visualization
+	CImageList m_overlayimages;
+	// [end] Mighty Knife
+
 	CMenu		m_PrioMenu;
 	CTitleMenu	m_FileMenu;
 	CMenu		m_A4AFMenu;
