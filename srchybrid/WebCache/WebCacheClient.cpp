@@ -311,7 +311,10 @@ void CWebCacheUpSocket::DetachFromClient()
 	{
 		if (GetClient()->m_pWCUpSocket == this) {
 			GetClient()->m_pWCUpSocket = NULL;
+			//MORPH - Removed by SiRoB, WebCache Fix
+			/*
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this); // Superlexx - from 0.44a PC code
+			*/
 			GetClient()->SetWebCacheUpState( WCUS_NONE );
 		}
 	}
@@ -858,7 +861,12 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 		strWCRequest.AppendFormat("Proxy-Connection: keep-alive\r\n" );
 	strWCRequest.AppendFormat("Pragma: IDs=%u|", m_uWebCacheDownloadId);
 	strWCRequest.AppendFormat("%s\r\n", b64_remoteSlaveKey);	// Superlexx - encryption : the remote slave key
+	//MORPH START - Changed by SiRoB, ModID
+	/*
 	strWCRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(MOD_VERSION));
+	*/
+	strWCRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+	//MORPH END   - Changed by SiRoB, ModID
 	strWCRequest.AppendFormat("\r\n");
 
 	if (thePrefs.GetDebugClientTCPLevel() > 0){
