@@ -3,6 +3,10 @@ Changelog for eMule 0.41b29 MorphXT v1.?
 ---------------------------------------- 
 FIXED  : The default view value (HideOS, SelectiveChunk,  Permissions & Share Only the Need) in the DownloadFile and SharedFile popup [SiRoB]
 ADDED  : Patch against daylight saving bug. Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
+ADDED  : Limited community support with community tags: Community icon, Columns for community affiliation in up-/client-/queuelist, Shared files visible for community.
+         (Of course no change of client rating in upload queue) [MightyKnife]
+ADDED  : Report hashing files activities [MightyKnife]
+ADDED  : Report activities in friendlist [MightyKnife]
 NOTE   : IP2Country now support to display flag of the country, this require countryflag.dll, also put it at /config/, currently you can get this from Morph CVS
 
 ---------------------------------------- 
