@@ -253,9 +253,14 @@ void CClientListCtrl::RefreshClient(const CUpDownClient* client)
 	// I added this IsRunning() check to this function and the DrawItem method and
 	// this seems to keep it from crashing. This is not the fix but a patch until
 	// someone points out what is going wrong.. Also, it will still assert in debug mode..
-	if( !theApp.emuledlg->IsRunning() )
+	if( !theApp.emuledlg->IsRunning())
 		return;
 
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd)
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+	
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
@@ -272,6 +277,15 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	CRect clientRect;
+	GetClientRect(clientRect);
+	RECT cur_rec = lpDrawItemStruct->rcItem;
+	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
+		&&
+		(cur_rec.bottom < clientRect.top || cur_rec.bottom > clientRect.bottom))
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if( (lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED )){
@@ -285,7 +299,10 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec = lpDrawItemStruct->rcItem;
+	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
 	int iOldBkMode;
@@ -302,137 +319,143 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left - 8;
 	cur_rec.left += 4;
-
 	for(int iCurrent = 0; iCurrent < iCount; iCurrent++){
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 		if( !IsColumnHidden(iColumn) ){
 			cur_rec.right += GetColumnWidth(iColumn);
-			switch(iColumn){
-				case 0:{
-					uint8 image;
-					//MORPH - Removed by SiRoB, Friend Addon
-					/*
-					if (client->IsFriend())
-						image = 2;
-					
-					else*/ if (client->GetClientSoft() == SO_EDONKEYHYBRID)
-						image = 4;
-					else if (client->GetClientSoft() == SO_MLDONKEY)
-						image = 3;
-					else if (client->GetClientSoft() == SO_SHAREAZA)
-						image = 5;
-					else if (client->GetClientSoft() == SO_URL)
-						image = 6;
-					else if (client->GetClientSoft() == SO_AMULE)
-						image = 7;
-					else if (client->GetClientSoft() == SO_LPHANT)
-						image = 8;
-					else if (client->ExtProtocolAvailable())
-					//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
-						image = (client->IsMorph())?10:1;
-					else if (client->GetClientSoft() == SO_EDONKEY)
-						image = 9;
-					else
-						image = 0;
+			//MORPH START - Added by SiRoB, Don't draw hidden columns
+			if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
+				||
+				cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+			{
+			//MORPH END   - Added by SiRoB, Don't draw hidden columns
+				switch(iColumn){
+					case 0:{
+						uint8 image;
+						//MORPH - Removed by SiRoB, Friend Addon
+						/*
+						if (client->IsFriend())
+							image = 2;
+						
+						else*/ if (client->GetClientSoft() == SO_EDONKEYHYBRID)
+							image = 4;
+						else if (client->GetClientSoft() == SO_MLDONKEY)
+							image = 3;
+						else if (client->GetClientSoft() == SO_SHAREAZA)
+							image = 5;
+						else if (client->GetClientSoft() == SO_URL)
+							image = 6;
+						else if (client->GetClientSoft() == SO_AMULE)
+							image = 7;
+						else if (client->GetClientSoft() == SO_LPHANT)
+							image = 8;
+						else if (client->ExtProtocolAvailable())
+						//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
+							image = (client->IsMorph())?10:1;
+						else if (client->GetClientSoft() == SO_EDONKEY)
+							image = 9;
+						else
+							image = 0;
 
-					POINT point = {cur_rec.left, cur_rec.top+1};
-					imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
-					// Mighty Knife: Community visualization
-					if (client->IsCommunity())
-						m_overlayimages.Draw(dc,0, point, ILD_NORMAL/*ILD_TRANSPARENT*/);
-					// [end] Mighty Knife
-					if (client->IsFriend())
-						m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_NORMAL);
-					//MORPH END - Modified by SiRoB, More client icon
-					if (client->GetUserName()==NULL)
-						Sbuffer.Format(_T("(%s)"), GetResString(IDS_UNKNOWN));
-					else
-						Sbuffer = client->GetUserName();
+						POINT point = {cur_rec.left, cur_rec.top+1};
+						imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
+						// Mighty Knife: Community visualization
+						if (client->IsCommunity())
+							m_overlayimages.Draw(dc,0, point, ILD_NORMAL/*ILD_TRANSPARENT*/);
+						// [end] Mighty Knife
+						if (client->IsFriend())
+							m_overlayimages.Draw(dc,client->GetFriendSlot()?2:1, point, ILD_NORMAL);
+						//MORPH END - Modified by SiRoB, More client icon
+						if (client->GetUserName()==NULL)
+							Sbuffer.Format(_T("(%s)"), GetResString(IDS_UNKNOWN));
+						else
+							Sbuffer = client->GetUserName();
 
-					//EastShare Start - added by AndCycle, IP to Country, modified by Commander
-					//CString tempStr;
-					//tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
-					//Sbuffer = tempStr;
-                                        //Commander: There is a column now to show the country name
-					if(theApp.ip2country->ShowCountryFlag()){
-						cur_rec.left+=20;
-						POINT point2= {cur_rec.left,cur_rec.top+1};
-						int index = client->GetCountryFlagIndex();
-						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
-					}
-					//EastShare End - added by AndCycle, IP to Country
-
-					cur_rec.left +=20;
-					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-					cur_rec.left -=20;
-
-					//EastShare Start - added by AndCycle, IP to Country
-					if(theApp.ip2country->ShowCountryFlag()){
-						cur_rec.left-=20;
-					}
-					//EastShare End - added by AndCycle, IP to Country
-
-					break;
-				}
-				case 1:{
-					Sbuffer = client->GetUploadStateDisplayString();
-					break;
-				}
-				case 2:{
-					if(client->credits)
-						Sbuffer = CastItoXBytes(client->credits->GetUploadedTotal(), false, false);
-					else
-						Sbuffer.Empty();
-					break;
-				}
-				case 3:{
-					Sbuffer = client->GetDownloadStateDisplayString();
-					break;
-				}
-				case 4:{
-					if(client->credits)
-						Sbuffer = CastItoXBytes(client->credits->GetDownloadedTotal(), false, false);
-					else
-						Sbuffer.Empty();
-					break;
-				}
-				case 5:{
-					Sbuffer = client->GetClientSoftVer();
-					if (Sbuffer.IsEmpty())
-						Sbuffer = GetResString(IDS_UNKNOWN);
-					break;
-				}
-				case 6:{
-					if(client->socket){
-						if(client->socket->IsConnected()){
-							Sbuffer = GetResString(IDS_YES);
-							break;
+						//EastShare Start - added by AndCycle, IP to Country, modified by Commander
+						//CString tempStr;
+						//tempStr.Format("%s%s", client->GetCountryName(), Sbuffer);
+						//Sbuffer = tempStr;
+											//Commander: There is a column now to show the country name
+						if(theApp.ip2country->ShowCountryFlag()){
+							cur_rec.left+=20;
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							int index = client->GetCountryFlagIndex();
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 						}
+						//EastShare End - added by AndCycle, IP to Country
+
+						cur_rec.left +=20;
+						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+						cur_rec.left -=20;
+
+						//EastShare Start - added by AndCycle, IP to Country
+						if(theApp.ip2country->ShowCountryFlag()){
+							cur_rec.left-=20;
+						}
+						//EastShare End - added by AndCycle, IP to Country
+
+						break;
 					}
-					Sbuffer = GetResString(IDS_NO);
-					break;
+					case 1:{
+						Sbuffer = client->GetUploadStateDisplayString();
+						break;
+					}
+					case 2:{
+						if(client->credits)
+							Sbuffer = CastItoXBytes(client->credits->GetUploadedTotal(), false, false);
+						else
+							Sbuffer.Empty();
+						break;
+					}
+					case 3:{
+						Sbuffer = client->GetDownloadStateDisplayString();
+						break;
+					}
+					case 4:{
+						if(client->credits)
+							Sbuffer = CastItoXBytes(client->credits->GetDownloadedTotal(), false, false);
+						else
+							Sbuffer.Empty();
+						break;
+					}
+					case 5:{
+						Sbuffer = client->GetClientSoftVer();
+						if (Sbuffer.IsEmpty())
+							Sbuffer = GetResString(IDS_UNKNOWN);
+						break;
+					}
+					case 6:{
+						if(client->socket){
+							if(client->socket->IsConnected()){
+								Sbuffer = GetResString(IDS_YES);
+								break;
+							}
+						}
+						Sbuffer = GetResString(IDS_NO);
+						break;
+					}
+					case 7:
+						Sbuffer = md4str(client->GetUserHash());
+						break;
+					// Mighty Knife: Community affiliation
+					case 8:
+						Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
+						break;
+					// [end] Mighty Knife
+					// EastShare - Added by Pretender, Friend Tab
+					case 9:
+						Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
+						break;
+					// EastShare - Added by Pretender, Friend Tab
+					// Commander - Added: IP2Country column - Start
+					case 10:
+						Sbuffer.Format(_T("%s"), client->GetCountryName());
+						break;
+					// Commander - Added: IP2Country column - End
 				}
-				case 7:
-					Sbuffer = md4str(client->GetUserHash());
-					break;
-				// Mighty Knife: Community affiliation
-				case 8:
-					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : _T("");
-					break;
-				// [end] Mighty Knife
-				// EastShare - Added by Pretender, Friend Tab
-				case 9:
-					Sbuffer = client->IsFriend () ? GetResString(IDS_YES) : _T("");
-					break;
-				// EastShare - Added by Pretender, Friend Tab
-                // Commander - Added: IP2Country column - Start
-                case 10:
-					Sbuffer.Format(_T("%s"), client->GetCountryName());
-					break;
-                // Commander - Added: IP2Country column - End
-			}
-			if( iColumn != 0)
-				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+				if( iColumn != 0)
+					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
+			}//MORPH - Added by SiRoB, Don't draw hidden colums
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
