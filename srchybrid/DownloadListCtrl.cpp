@@ -1529,7 +1529,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_PrioMenu.CheckMenuRadioItem(MP_PRIOLOW, MP_PRIOAUTO, uPrioMenuItem, 0);
 
 			//MORPH - Added by SiRoB, khaos::kmod+ Popup menu should be disabled when advanced A4AF mode is turned off and we need to check appropriate A4AF items.
-			m_FileMenu.EnableMenuItem(MP_FORCEA4AF, theApp.glob_prefs->UseSmartA4AFSwapping() && iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED);
+			m_FileMenu.EnableMenuItem(MP_FORCEA4AF, theApp.glob_prefs->UseSmartA4AFSwapping() && iSelectedItems == 1 && iFilesNotDone == 1? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.CheckMenuItem(MP_FORCEA4AF,  iFileForceAllA4AF > 0 && iSelectedItems == 1 ? MF_CHECKED : MF_UNCHECKED);
 			
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenuFlag.m_hMenu, iFilesNotDone > 0 && (theApp.glob_prefs->AdvancedA4AFMode() || theApp.glob_prefs->UseSmartA4AFSwapping())? MF_ENABLED : MF_GRAYED);
