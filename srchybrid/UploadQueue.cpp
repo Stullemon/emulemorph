@@ -915,7 +915,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			softQueueLimit = thePrefs.GetQueueSize() - thePrefs.GetQueueSize()/5;
 			hardQueueLimit = thePrefs.GetQueueSize();
 
-			if ((uint32)waitinglist.GetCount() > hardQueueLimit){
+			if ((uint32)waitinglist.GetCount() >= hardQueueLimit){
 				return;
 			}
 			if((uint32)waitinglist.GetCount() > softQueueLimit){// soft queue limit is reached
