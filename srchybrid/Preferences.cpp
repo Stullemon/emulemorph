@@ -4219,7 +4219,6 @@ void CPreferences::SaveDynDNS(){
 
 void CPreferences::LoadDynDNS() {
 	CString ixStr,DynDNSinif;
-	TCHAR buffer[100];
 
 	DynDNSinif.Format(_T("%sDynDNS.ini"),configdir);
 	CIni DynDNSini;
