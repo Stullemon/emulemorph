@@ -318,7 +318,6 @@ void CUpDownClient::Init()
 	m_bWebCacheSupportsMultiOHCBs = false;
 	// yonatan http end ////////////////////////////////////////////////////////////////////////////
 	// MORPH END - Added by Commander, WebCache 1.2e
-	m_uFailedConnect = 0;
 }
 
 CUpDownClient::~CUpDownClient(){
@@ -465,12 +464,13 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
 			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")))||
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
+			StrStrI(m_strModVersion,_T("ACAT")) ||
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
 			)
 		{
 			old_m_strClientSoftware = m_strClientSoftware;
-			return _T("Bad MODSTRING detected");
+			return _T("Bad MODSTRING");
 		}
 	}
 	/*if (old_m_pszUsername != m_pszUsername)
@@ -505,16 +505,16 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			)
 		{
 			old_m_pszUsername = m_pszUsername;
-			return _T("Bad USERNAME detected");
+			return _T("Bad USERNAME");
 		}
 	}
 	*/
 	if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
-		return _T("Ghost Mod Detected");
+		return _T("Ghost MOD");
 	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion < MAKE_CLIENT_VERSION(VERSION_MJR, VERSION_MIN, VERSION_UPDATE))){
-		return _T("Fake MODSTRING Detected");
+		return _T("Fake MODSTRING");
 	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
-		return _T("Fake emuleVersion Detected");
+		return _T("Fake emuleVersion");
 	}else	if (IsLeecher())
 		return _T("Allready Known");
 	return NULL;
@@ -671,7 +671,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 			// MORPH START - Added by Commander, WebCache 1.2e
 			case WC_TAG_VOODOO:
-				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo());
+				m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo());
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
@@ -822,10 +822,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
+				m_strNotOfficial.AppendFormat(_T(",ICS=%s"),temptag.GetFullInfo());
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_INCOMPLETEPARTS"));
-					m_strNotOfficial.AppendFormat(_T(",%s"),temptag.GetFullInfo());
 					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
@@ -870,7 +870,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		//MOPRH - Added by SiRoB, Control Mod Tag
 		m_strNotOfficial.AppendFormat(_T(",ExtraByte=%u"),uAddHelloDataSize);
 		if(strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
-			strBanReason=_T("ExtraBytes Detected");
+			strBanReason=_T("ExtraBytes");
 		//MOPRH - Added by SiRoB, Control Mod Tag
 		if (bDbgInfo) {
 			if (uAddHelloDataSize == sizeof(uint32)){
@@ -1033,7 +1033,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	data.WriteUInt8(theApp.m_uCurVersionShort);
 	data.WriteUInt8(EMULE_PROTOCOL);
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername!=NULL) && !IsLeecher();
+	bool bSendModVersion = m_strModVersion.GetLength() && IsSecure() && !IsLeecher();
 	if (bSendModVersion)
 		data.WriteUInt32(7/*7 OFFICIAL*/+1/*ET_MOD_VERSION*/+1/*enkeyDev: ICS*/); // nr. of tags
 	else
@@ -1271,10 +1271,10 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
 				//MOPRH START - Added by SiRoB,  Control Mod Tag
+				m_strNotOfficial.AppendFormat(_T(",ics=%s"),temptag.GetFullInfo());
 				if (!temptag.IsInt()){
 					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
 						strBanReason.Format(_T("BadType eMuleInfo-Tag: ET_INCOMPLETEPARTS"));
-					m_strNotOfficial.AppendFormat(_T(",ics=%s"),temptag.GetFullInfo());
 					break;
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
@@ -1305,7 +1305,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		//MOPRH - Added by SiRoB, Control Mod Tag
 		m_strNotOfficial.AppendFormat(_T(",extrabyte=%u"),data.GetPosition() < data.GetLength());
 		if(strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
-			strBanReason=_T("extrabytes Detected");
+			strBanReason=_T("extrabytes");
 		//MOPRH - Added by SiRoB, Control Mod Tag
 	}
 
@@ -1357,7 +1357,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		tagcount += 2;
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername!=NULL) && !IsLeecher();
+	bool bSendModVersion = m_strModVersion.GetLength() && IsSecure() && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	if (bSendModVersion || m_clientSoft == SO_LPHANT) tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
