@@ -57,33 +57,25 @@
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
-			UseOfMFC="1"
-			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			UseOfMFC="0">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
+				Optimization="1"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="TRUE"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="TRUE"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="NDEBUG;WIN32"
+				KeepComments="FALSE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalOptions="/LTCG:STATUS"
 				OutputFile="$(OutDir)/zlib.lib"
 				IgnoreAllDefaultLibraries="FALSE"/>
 			<Tool
