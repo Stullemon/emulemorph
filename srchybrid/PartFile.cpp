@@ -1965,7 +1965,9 @@ void CPartFile::NewSrcPartsInfo(){
 		}
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
-	
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<21, m_nCompleteSourcesCountHi==1);
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo();
 	//MORPH END   - Added by Yun.SF3, ZZ Upload System
