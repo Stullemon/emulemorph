@@ -596,15 +596,17 @@ void CClientCreditsList::SaveList()
 	/*
 	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 	*/
-	if (!file.Open(name+_T(".SUQWTv2.met"), CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
-		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
-		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
-			strError += _T(" - ");
-			strError += szError;
+	if (m_bSaveUploadQueueWaitTime){
+		if (!file.Open(name+_T(".SUQWTv2.met"), CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+			CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			LogError(LOG_STATUSBAR, _T("%s"), strError);
+			return;
 		}
-		LogError(LOG_STATUSBAR, _T("%s"), strError);
-		return;
 	}
 
 	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
