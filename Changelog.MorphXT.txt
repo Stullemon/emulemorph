@@ -1,22 +1,25 @@
 --------------------------------------
-Changelog for eMule 0.43b MorphXT v4.x
+Changelog for eMule 0.43b MorphXT v4.1
 --------------------------------------
 FIXED  : TRAY EXIT [SiRoB]
 FIXED  : Mass-Rename: Cleanup now works correctly for every line in the "New filenames" window [MightyKnife]
-FIXED  : duplicated part file statistics no longer save in known.met [AndCycle] - Removed
+FIXED  : duplicated part file statistics no longer save in known.met [AndCycle] - Removed [Commander]
 FIXED  : Code alignment [Commander]
 FIXED  : SUQWT [Commander]
-FIXED  : Ip2Country column settings saved
+FIXED  : Ip2Country column settings saved [Commander]
 FIXED  : Serverlist->LowId column display and sort [Commander]
 FIXED  : cat->rightclick->Resume Next works now [Commander]
-FIXED  : SharedFileList -> Transfered data now saved correctly [AndCycle/Commander]
+FIXED  : SharedFileList -> Transfered data now saved correctly [AndCycle/Commander/SiRoB]
 FIXED  : RSS news feeds should now work for most .rss/.rdf files. Please report nonstandard feed servers/files. [MightyKnife]
 FIXED  : SmartA4AFSwaping reviewed [SiRoB]
 FIXED  : SeverList Column Sorting [SiRoB]
+FIXED  : Finaly Fixed Resume Only in the samecat [SiRoB]
+FIXED  : Reviewed MergeKnown Code [SiRoB]
 
 CHANGED: Added dots '...' behind some items in the Morph preferences tab to indicate that they can be expanded with a double click (at least in the english version) [MightyKnife]
 CHANGED: Log files are now placed in a 'logs' folder instead of the eMule folder [MightyKnife]
 CHANGED: PartFile Statistic are now saved in the .part (as well spreadBar statistic) (no more in known.met) [SiRoB]
+CHANGED: Draw Connections-Graph solid [Commander]
 
 ADDED  : CRC32-Calculation can now be used to convert existing CRC's to uppercase [MightyKnife]
 ADDED  : Mass-Rename: Insert-text-column-from-clipboard; pastes the clipboard data as a column to the current cursor position in the "New filenames" window. Should help to paste a list of episode titles into the filenames. [MightyKnife]
@@ -25,23 +28,26 @@ ADDED  : IP2Country columns to upload,queue,client and serverlist [Commander]
 ADDED  : Country and Clientsoftware columns to the commentlist [Commander]
 ADDED  : Show Client Percentage in the downloadlist [Commander]
 ADDED  : Dynamic Invisible Mode [Commander]
-ADDED  : Enable/Disable startupsound (Preferences -> General ->Play startupsound) [Commander]
+ADDED  : Enable/Disable startupsound (Preferences->General->Play startupsound) [Commander]
 ADDED  : Save known.met when clicking 'reload' [MightyKnife]
 ADDED  : CountryFlag to serverlist [Commander/Iberica/SiRoB]
 ADDED  : Optimizer [ePlus] + emulespania methode [Commander/SiRoB]
 ADDED  : Displaying the friend's country in the chatwnd info groupbox [Commander]
 ADDED  : CPU Optimization Mode display on Splashscreen [Commander]
 ADDED  : RSS news feeds can be added/modified/deleted via a button/menu in the server window [MightyKnife]
-ADDED  : Preferences Side Banner [Commander]
+ADDED  : Preferences Side Banner / Enable-Disable on the Fly [Commander/SiRoB] [TPT]
 ADDED  : IP2Country.csv auto-updating [Commander]
 ADDED  : MassRename in downloadlist [Commander] [Dragon]
 ADDED  : Show version-numbers of Fakes- and IPfilter.dat and ip-to-country.csv in MorphII settings [Commander]
 ADDED  : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander] [Dragon]
+ADDED  : DownloadAllFeedsAtOnce [Commander/MightyKnife]
 
 TWEAKED: Mass-Rename Simple-Cleanup is now configurable. Remove '.', '_' characters, Replace "´","`" characters, arbitrary Search and Replace, convert hexadecimal numbers '%xx' to characters, convert (german and other) umlauts to standard characters. [MightyKnife]
 TWEAKED: Mass-Rename SimpleCleanup tweaked [MightyKnife]
 TWEAKED: IP2Country Autoupdate [Commander]
+TWEAKED: Version Saving of Autoupdates [Commander]
 
+MOVED  : LowID retry dialog to Server Preferences [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
