@@ -1994,6 +1994,7 @@
 #define IDC_RESET                       2844
 #define IDC_OPENPORTS                   2844
 #define IDC_SIMPLECLEANUP               2844
+#define IDC_NEWCHARACTER                2844
 #define IDS_STATS_FRATIO                2845
 #define IDC_SIMPLECLEANUP2              2845
 #define IDS_STATS_UDATA_FRIENDS         2846
@@ -2418,7 +2419,9 @@
 #define IDS_CHAT_DOWNLOADED             5004
 #define IDC_BUTTON2                     5004
 #define IDC_INSERTTEXTCOLUMN            5004
+#define IDC_DELETECHARACTER             5004
 #define IDS_CHAT_UPLOADED               5005
+#define IDD_SIMPLECLEANUP               5005
 #define IDS_CHAT_IDENT                  5006
 #define IDC_FEEDLIST                    5007
 #define IDS_CHAT_CLIENT                 5007
@@ -2431,6 +2434,20 @@
 #define IDC_SPLITTER_STAT_HL            5011
 #define IDC_SPLITTER_STAT_HR            5012
 #define IDC_SPLITTER_IRC                5013
+#define IDC_BUTTONEDIT                  5014
+#define IDC_BUTTONCHANGE                5015
+#define IDC_CHARSOURCE                  5016
+#define IDC_CHARDEST                    5017
+#define IDC_CHECKDOTTOSPACE             5018
+#define IDC_CHECKUNDERLINETOSPACE       5019
+#define IDC_CHECKCONVERTAPOSTROPHES     5020
+#define IDC_CHECKSEARCHANDREPLACE       5021
+#define IDC_CHECKCONVERTHEX             5022
+#define IDC_EDITSEARCH                  5023
+#define IDC_EDITREPLACEBY               5024
+#define IDC_CHECKCHARACTERREPLACE       5025
+#define IDC_CHECKCASESENSITIVE          5026
+#define IDC_REPLACECHARSLIST            5027
 #define IDC_FRIENDS_USERHASH            5102
 #define IDC_FRIENDS_NAME                5103
 #define IDC_FRIENDS_CLIENT              5104
@@ -2486,7 +2503,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        5011
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5007
+#define _APS_NEXT_CONTROL_VALUE         5028
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

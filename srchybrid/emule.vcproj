@@ -1155,6 +1155,9 @@
 				RelativePath="SharedFilesWnd.cpp">
 			</File>
 			<File
+				RelativePath=".\SimpleCleanup.cpp">
+			</File>
+			<File
 				RelativePath="SplashScreen.cpp">
 			</File>
 			<File
@@ -1520,6 +1523,9 @@
 			</File>
 			<File
 				RelativePath="SharedFilesWnd.h">
+			</File>
+			<File
+				RelativePath=".\SimpleCleanup.h">
 			</File>
 			<File
 				RelativePath="SplashScreen.h">

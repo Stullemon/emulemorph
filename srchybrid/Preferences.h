@@ -684,6 +684,14 @@ public:
 	static char		m_sCRC32Suffix [256];
 	// [end] Mighty Knife
 
+	// Mighty Knife: Simple cleanup options
+	static int      m_SimpleCleanupOptions;
+	static CString  m_SimpleCleanupSearch;
+	static CString  m_SimpleCleanupReplace;
+	static CString  m_SimpleCleanupSearchChars;
+	static CString  m_SimpleCleanupReplaceChars;
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	static bool		m_bSUCEnabled;
 	static uint16		m_iSUCHigh;
@@ -1539,6 +1547,19 @@ public:
 	static	void	SetCRC32Prefix (CString _s)				{ sprintf (m_sCRC32Prefix,"%s",_s); }
 	static	CString GetCRC32Suffix ()						{ return m_sCRC32Suffix; }
 	static	void	SetCRC32Suffix (CString _s)				{ sprintf (m_sCRC32Suffix,"%s",_s); }
+	// [end] Mighty Knife
+
+	// Mighty Knife: Simple cleanup options
+	static	void	SetSimpleCleanupOptions (int _i)	      { m_SimpleCleanupOptions = _i; }
+	static	int 	GetSimpleCleanupOptions ()			      { return m_SimpleCleanupOptions; }
+	static	void	SetSimpleCleanupSearch (CString _s)	      { m_SimpleCleanupSearch = _s; }
+	static	CString	GetSimpleCleanupSearch ()			      { return m_SimpleCleanupSearch; }
+	static	void	SetSimpleCleanupReplace (CString _s)	  { m_SimpleCleanupReplace = _s; }
+	static	CString	GetSimpleCleanupReplace ()				  { return m_SimpleCleanupReplace; }
+	static	void	SetSimpleCleanupSearchChars (CString _s)  { m_SimpleCleanupSearchChars = _s; }
+	static	CString	GetSimpleCleanupSearchChars ()			  { return m_SimpleCleanupSearchChars; }
+	static	void	SetSimpleCleanupReplaceChars (CString _s) { m_SimpleCleanupReplaceChars = _s; }
+	static	CString	GetSimpleCleanupReplaceChars ()			  { return m_SimpleCleanupReplaceChars; }
 	// [end] Mighty Knife
 
 	static bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; } //MORPH START added by Yun.SF3: Ipfilter.dat update

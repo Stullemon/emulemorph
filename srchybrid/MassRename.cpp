@@ -19,9 +19,10 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "Preferences.h"
 #include "MassRename.h"
 #include "OtherFunctions.h"
-#include ".\massrename.h"
+#include "SimpleCleanup.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -521,6 +522,7 @@ CString SimpleCleanupFilename (CString _filename) {
 
 void CMassRenameDialog::OnBnClickedSimplecleanup()
 {
+	/*
 	// Choose the current active RichEdit - the one which shows the filenames
 	// left justified or right justified
 	CRichEditCtrl* NFNEdit = NFNLeft;
@@ -547,6 +549,58 @@ void CMassRenameDialog::OnBnClickedSimplecleanup()
 	// at the end save the list of filenames to the Richedit controls
 	NFNLeft->SetWindowText( filenames );
 	NFNRight->SetWindowText( filenames );
+	*/
+
+	CSimpleCleanupDialog sclean;
+	sclean.SetConfig (thePrefs.GetSimpleCleanupOptions (),
+		thePrefs.GetSimpleCleanupSearch (),
+		thePrefs.GetSimpleCleanupReplace (),
+		thePrefs.GetSimpleCleanupSearchChars (),
+		thePrefs.GetSimpleCleanupReplaceChars ());
+	if (sclean.DoModal()==IDOK) {
+		// Get the config how to perform the cleanup
+		int options;
+		CString source, dest;
+		CString sourcechar, destchar;
+		sclean.GetConfig (options,source,dest,sourcechar,destchar);
+
+		// Save the options in the preferences 
+		thePrefs.SetSimpleCleanupOptions (options);
+		thePrefs.SetSimpleCleanupSearch (source);
+		thePrefs.SetSimpleCleanupReplace (dest);
+		thePrefs.SetSimpleCleanupSearchChars (sourcechar);
+		thePrefs.SetSimpleCleanupReplaceChars (destchar);
+
+		// Choose the current active RichEdit - the one which shows the filenames
+		// left justified or right justified
+		CRichEditCtrl* NFNEdit = NFNLeft;
+		bool RightJustify = !IsDlgButtonChecked (IDC_FILENAMELEFT);
+		if (RightJustify) {
+			NFNEdit = NFNRight;
+		}
+
+		CString filenames;
+
+		// Now process through each line and cleanup that filename
+		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
+			// Get the filename
+			CString filename;
+			NFNEdit->GetLine (i,filename.GetBuffer (MAX_PATH+1),MAX_PATH);
+			filename.ReleaseBuffer();
+			// Clean it up
+			filename = SimpleCleanupFilename (filename.SpanExcluding ("\r\n"),
+											  options,source,dest,
+											  sourcechar,destchar);
+			// and add it to the current list of filenames
+			if (filenames != "") filenames += "\r\n";
+			filenames += filename;
+		}
+
+		// at the end save the list of filenames to the Richedit controls
+		NFNLeft->SetWindowText( filenames );
+		NFNRight->SetWindowText( filenames );
+
+	}
 }
 
 void CMassRenameDialog::OnBnClickedInserttextcolumn()
@@ -684,4 +738,3 @@ void CMassRenameDialog::OnBnClickedInserttextcolumn()
 	}
 
 }
-

@@ -617,6 +617,14 @@ char	CPreferences::m_sCRC32Prefix [256];
 char	CPreferences::m_sCRC32Suffix [256];
 // [end] Mighty Knife
 
+// Mighty Knife: Simple cleanup options
+int      CPreferences::m_SimpleCleanupOptions;
+CString  CPreferences::m_SimpleCleanupSearch;
+CString  CPreferences::m_SimpleCleanupReplace;
+CString  CPreferences::m_SimpleCleanupSearchChars;
+CString  CPreferences::m_SimpleCleanupReplaceChars;
+// [end] Mighty Knife
+
 //MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 bool	CPreferences::m_bSUCEnabled;
 uint16	CPreferences::m_iSUCHigh;
@@ -994,6 +1002,9 @@ uint16 CPreferences::GetMaxDownload(){
 		return maxdownload;
 	//MORPH END   - Added by SiRoB, ZZ Upload system
 	uint16 maxup=GetMaxUpload();
+	#ifdef MIGHTY_TWEAKS
+	return maxdownload;
+	#endif
 	if( maxup < 4 )
 		return (( (maxup < 10) && (maxup*3 < maxdownload) )? maxup*3 : maxdownload);
 	return (( (maxup < 10) && (maxup*4 < maxdownload) )? maxup*4 : maxdownload);
@@ -2424,6 +2435,17 @@ void CPreferences::SavePreferences()
 	temp.Format ("\"%s\"",m_sCRC32Suffix);
 	ini.WriteString("LastCRC32Suffix",temp,"eMule");
 	// [end] Mighty Knife
+
+	// Mighty Knife: Simple cleanup options
+	ini.WriteInt ("SimpleCleanupOptions",m_SimpleCleanupOptions);
+	// Enclose the strings with '"' before writing them to the file.
+	// These will be filtered if the string is read again
+	ini.WriteString ("SimpleCleanupSearch",CString ('\"')+m_SimpleCleanupSearch+'\"');
+	ini.WriteString ("SimpleCleanupReplace",CString ('\"')+m_SimpleCleanupReplace+'\"');
+	ini.WriteString ("SimpleCleanupSearchChars",CString ('\"')+m_SimpleCleanupSearchChars+'\"');
+	ini.WriteString ("SimpleCleanupReplaceChars",CString ('\"')+m_SimpleCleanupReplaceChars+'\"');
+	// [end] Mighty Knife
+
 	ini.WriteBool("SolidGraph", m_bSolidGraph,"eMule"); //MORPH - Added by SiRoB, New Graph
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("USSLog", m_bDynUpLog,"eMule");
@@ -3172,9 +3194,22 @@ void CPreferences::LoadPreferences()
 	SetCRC32ForceAdding (ini.GetBool (_T("ForceCRC32Adding"),false));
 	// From the prefix/suffix delete the leading/trailing "".
 	SetCRC32Prefix (ini.GetString(_T("LastCRC32Prefix"),"\" [\"").Trim ("\""));
-	SetCRC32Suffix (ini.GetString("LastCRC32Suffix","\"]\"").Trim ("\""));
+	SetCRC32Suffix (ini.GetString(_T("LastCRC32Suffix"),"\"]\"").Trim ("\""));
 	// [end] Mighty Knife
 
+	// Mighty Knife: Simple cleanup options
+	SetSimpleCleanupOptions (ini.GetInt (_T("SimpleCleanupOptions"),3));
+	SetSimpleCleanupSearch (ini.GetString (_T("SimpleCleanupSearch")));
+	SetSimpleCleanupReplace (ini.GetString (_T("SimpleCleanupReplace")));
+	// Format of the preferences string for character replacement:
+	//      "str";"str";"str";...;"str"
+	// Every "str" in SimpleCleanupSearchChars corresponds to a "str"
+	// in SimpleCleanupReplaceChars at the same position.
+	SetSimpleCleanupSearchChars (ini.GetString (_T("SimpleCleanupSearchChars"),
+								 "\"ä\";\"ö\";\"ü\";\"Ä\";\"Ö\";\"Ü\";\"ß\""));
+	SetSimpleCleanupReplaceChars (ini.GetString (_T("SimpleCleanupReplaceChars"),
+								 "\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\""));
+	// [end] Mighty Knife
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "Proxy"

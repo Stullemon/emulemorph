@@ -1651,6 +1651,47 @@ BEGIN
                     126,235,131,14,BS_FLAT
 END
 
+IDD_SIMPLECLEANUP DIALOGEX 0, 0, 246, 228
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Simple Cleanup"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,133,207,50,14
+    PUSHBUTTON      "Abbrechen",IDCANCEL,189,207,50,14
+    CONTROL         "Convert ""."" to "" """,IDC_CHECKDOTTOSPACE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,7,70,10
+    CONTROL         "Convert ""_"" to "" """,IDC_CHECKUNDERLINETOSPACE,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,17,71,
+                    10
+    CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
+                    IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,7,37,197,10
+    CONTROL         "Convert wrong apostrophes ""´"", ""`"" to standard apostrophes "" ' """,
+                    IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,7,27,232,10
+    CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,47,90,10
+    LTEXT           "Search for:",IDC_STATIC,19,61,37,8
+    LTEXT           "Replace by:",IDC_STATIC,19,76,39,8
+    EDITTEXT        IDC_EDITSEARCH,60,58,179,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDITREPLACEBY,60,75,179,14,ES_AUTOHSCROLL
+    CONTROL         "Replace characters:",IDC_CHECKCHARACTERREPLACE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,105,80,10
+    CONTROL         "Case sensitive search",IDC_CHECKCASESENSITIVE,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,19,92,85,10
+    PUSHBUTTON      "&Add",IDC_NEWCHARACTER,189,119,50,14
+    PUSHBUTTON      "&Delete",IDC_DELETECHARACTER,189,157,50,14
+    PUSHBUTTON      "&Change",IDC_BUTTONCHANGE,189,138,50,14
+    EDITTEXT        IDC_CHARSOURCE,49,120,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_CHARDEST,107,120,40,14,ES_AUTOHSCROLL
+    LTEXT           "Replace",IDC_STATIC,19,121,26,8
+    LTEXT           "by",IDC_STATIC,95,122,9,8
+    CONTROL         "",IDC_REPLACECHARSLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,19,137,164,64
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2261,6 +2302,16 @@ BEGIN
         HORZGUIDE, 32
         HORZGUIDE, 53
         HORZGUIDE, 231
+    END
+
+    IDD_SIMPLECLEANUP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        VERTGUIDE, 19
+        VERTGUIDE, 60
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 221
     END
 END
 #endif    // APSTUDIO_INVOKED

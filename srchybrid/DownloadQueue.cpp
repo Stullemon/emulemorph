@@ -836,6 +836,7 @@ void CDownloadQueue::Process(){
 
     uint32 friendDownspeed = downspeed;
 	bool tempIsZZRatioInWork = false; //MORPH - Added by SiRoB, ZZ Ratio in work
+	#ifndef MIGHTY_TWEAKS
 
 	if(theApp.uploadqueue->GetUploadQueueLength() > 0 && thePrefs.IsZZRatioDoesWork()) {
         // has this client downloaded more than it has uploaded this session? (friends excluded)
@@ -875,6 +876,7 @@ void CDownloadQueue::Process(){
         }
 	}
 
+	#endif
 	m_bIsZZRatioInWork = tempIsZZRatioInWork; //MORPH - Added by SiRoB, ZZ Ratio in work
 
 	uint32 datarateX=0;
