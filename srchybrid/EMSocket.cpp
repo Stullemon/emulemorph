@@ -686,7 +686,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
     maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
-    bool bWasLongTimeSinceSend = (::GetTickCount() - lastSent) > 1000;
+    bool bWasLongTimeSinceSend = (::GetTickCount() - lastSent) >=/*>*/ 1000; //MORPH - Changed by SiRoB, Littlechange
 
     lastCalledSend = ::GetTickCount();
 
