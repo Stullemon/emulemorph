@@ -619,9 +619,9 @@ void CKnownFile::NewAvailPartsInfo()
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	m_nVirtualCompleteSourcesCount = 0;
+	m_nVirtualCompleteSourcesCount = (uint16)-1;
 	for (uint16 i = 0; i < partcount; i++){
-		if(m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCount)
+		if(m_AvailPartFrequency[i] < m_nVirtualCompleteSourcesCount)
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
 
