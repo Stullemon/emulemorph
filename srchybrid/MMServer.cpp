@@ -641,7 +641,7 @@ void CMMServer::Process(){
 		m_pSocket->Process(); 
 	} 
 }
-//Changed by SiRoB, Fix UNICODE
+//Changed by SiRoB, UNICODE -Fix-
 CStringA CMMServer::GetContentType(){
 	if (m_bUseFakeContent)
 		return CStringA("image/vnd.wap.wbmp");
