@@ -1000,7 +1000,11 @@ public:
 
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() const { return m_slotNumber; }
-    CEMSocket* GetFileUploadSocket(bool log = false);
+	//MORPH - Changed by SiRoB, WebCache Fix
+	/*
+	CEMSocket* GetFileUploadSocket(bool log = false);
+	*/
+	CClientReqSocket* GetFileUploadSocket(bool log = false);
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	LPCTSTR		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
 	//MORPH START - Added by SiRoB, Is Morph Client
