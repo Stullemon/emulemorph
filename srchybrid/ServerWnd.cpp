@@ -610,7 +610,7 @@ void CServerWnd::UpdateMyInfo() {
 	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
 	m_MyInfo << "\r\n";
 	buffer.Format("%s",(LPCTSTR)(md4str((uchar*)theApp.glob_prefs->GetUserHash())));
-	m_MyInfo << GetResString(IDS_CD_UHASH) << ":\t" << buffer.Left (16) << "-";
+	m_MyInfo << GetResString(IDS_CD_UHASH) << "\t" << buffer.Left (16) << "-";
 	m_MyInfo << "\r\n\t" << buffer.Mid (16,255);
 	//MORPH END   - Added by SiRoB, [end] Mighty Knife
 
