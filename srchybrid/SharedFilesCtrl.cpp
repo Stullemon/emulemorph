@@ -609,6 +609,8 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								buffer = _T("?");
 								break;
 						}
+						if (file->GetPermissions() < 0)
+							buffer = GetResString(IDS_DEFAULT) + _T(" [") + buffer + _T(")");
 						// xMule_MOD: showSharePermissions
 						break;
 					}
