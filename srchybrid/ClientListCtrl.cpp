@@ -72,6 +72,10 @@ void CClientListCtrl::Init()
 	coltemp=GetResString(IDS_CD_UHASH);coltemp.Remove(':');
 	InsertColumn(7,coltemp,LVCFMT_LEFT,150,7);
 	
+	// Mighty Knife: Community affiliation
+	InsertColumn(8,"Community",LVCFMT_LEFT,100,8);
+	// [end] Mighty Knife
+
 	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableClientList);
@@ -86,6 +90,11 @@ void CClientListCtrl::Init()
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
+
+	// Mighty Knife: Community affiliation
+	if (theApp.glob_prefs->IsCommunityEnabled ()) ShowColumn (8);
+	else HideColumn (8);
+	// [end] Mighty Knife
 }
 
 CClientListCtrl::~CClientListCtrl()
@@ -126,6 +135,13 @@ void CClientListCtrl::SetAllIcons()
 		}
 	}
 	//Morph End- added by AndCycle, IP to Country
+
+	// Mighty Knife: Community icon
+	m_overlayimages.DeleteImageList ();
+	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	m_overlayimages.SetBkColor(CLR_NONE);
+	m_overlayimages.Add(CTempIconLoader("Community"));
+	// [end] Mighty Knife
 }
 
 void CClientListCtrl::Localize()
@@ -307,6 +323,11 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 					POINT point = {cur_rec.left, cur_rec.top+1};
 					imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
+					// Mighty Knife: Community visualization
+					if (client->IsCommunity())
+						m_overlayimages.Draw(dc,0, point, ILD_NORMAL/*ILD_TRANSPARENT*/);
+					// [end] Mighty Knife
+
 					//MORPH END - Modified by SiRoB, More client icon
 					if (client->GetUserName()==NULL)
 						Sbuffer.Format("(%s)", GetResString(IDS_UNKNOWN));
@@ -439,13 +460,27 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				case 7:
 					Sbuffer = md4str(client->GetUserHash());
 					break;
+				// Mighty Knife: Community affiliation
+				case 8:
+					Sbuffer = client->IsCommunity () ? GetResString(IDS_YES) : "";
+					break;
+				// [end] Mighty Knife
 			}
 			if( iColumn != 0)
 				dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-//draw rectangle around selected item(s)
+	
+	// Mighty Knife: Community affiliation
+	// Show/Hide community column if changed in the preferences
+	if (theApp.glob_prefs->IsCommunityEnabled () != !IsColumnHidden (8))
+		if (theApp.glob_prefs->IsCommunityEnabled ())
+				ShowColumn (8);
+		else HideColumn (8);
+	// [end] Mighty Knife
+
+	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		RECT outline_rec;
@@ -716,6 +751,12 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return memcmp(item1->GetUserHash(), item2->GetUserHash(), 16);
 		case 107:
 			return memcmp(item2->GetUserHash(), item1->GetUserHash(), 16);
+		// Mighty Knife: Community affiliation
+		case 8:
+			return (item1->IsCommunity() && !item2->IsCommunity()) ? -1 : 1;
+		case 108:
+			return (item1->IsCommunity() && !item2->IsCommunity()) ? 1 : -1;
+		// [end] Mighty Knife
 		default:
 			return 0;
 	}
