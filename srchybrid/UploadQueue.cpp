@@ -771,7 +771,7 @@ void CUploadQueue::Process() {
 
 	// don't save more than 30 secs of data
 	while(avarage_tick_list.GetCount() > 0)
-		if ((curTick - avarage_tick_list.GetHead()) > 30000) {
+		if ((curTick - avarage_tick_list.GetHead()) > 15000) {
 			m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
 			avarage_friend_dr_list.RemoveHead();
 			avarage_tick_list.RemoveHead();
@@ -791,11 +791,6 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
 
-	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
-    if(curUploadSlots > m_MaxActiveClients+wantedNumberOfTrickles) {
-		return false;
-    }
-
    	uint16 MaxSpeed;
 
     if (thePrefs.IsDynUpEnabled())
@@ -806,7 +801,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots >= 4 &&
         (
          curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
-         /*curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||*/
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&
@@ -885,9 +880,8 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 		}
 	}
 
-    //uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
     uint32 iCount = (uint32)uploadinglist.GetSize();
-	if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+ wantedNumberOfTrickles*/ > iCount) {
+	if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall > iCount) {
         // uploadThrottler requests another slot. If throttler says it needs another slot, we will allow more slots
         // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
         if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
@@ -1176,9 +1170,9 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
 			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
     	    
-			if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
+			/*if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
                 DebugLogError(false, _T("UploadQueue: Didn't find socket to delete. socket: 0x%x, PCUpSocket: 0x%x, WCUpSocket: 0x%x"), client->socket,client->m_pPCUpSocket,client->m_pWCUpSocket);
-            }
+            }*/
 			//EastShare Start - added by AndCycle, Pay Back First
 			//client normal leave the upload queue, check does client still satisfy requirement
 			if(earlyabort == false){
@@ -1586,12 +1580,12 @@ void CUploadQueue::UpdateDatarates() {
 		*/
 		if (avarage_tick_list.GetCount() > 0){
 			if (avarage_tick_list.GetCount() == 1){
-				datarate = (m_avarage_dr_sum*1000) / 30000;
+				datarate = (m_avarage_dr_sum*1000) / 15000;
 				friendDatarate = 0;
 			}
 			else {
 				DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-				if ((avarage_tick_list.GetCount() - 1) * (m_lastCalculatedDataRateTick - avarage_tick_list.GetTail()) > dwDuration)
+				if ((avarage_tick_list.GetCount() - 1) * (m_lastCalculatedDataRateTick - avarage_tick_list.GetTail()) >= dwDuration)
 					dwDuration = m_lastCalculatedDataRateTick - avarage_tick_list.GetHead() - dwDuration / (avarage_tick_list.GetCount()-1);
 				if (dwDuration < 5000) dwDuration = 5000;
 				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / dwDuration;
@@ -1617,19 +1611,6 @@ uint32 CUploadQueue::GetToNetworkDatarate() {
 	} else {
 		return 0;
 	}
-}
-
-uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
-//    uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
-//	uint32 minNumber = MINNUMBEROFTRICKLEUPLOADS;
-//    //if(minNumber < 2 && thePrefs.GetMaxUpload() >= 4) {
-//    //    minNumber = 2;
-//    //} else
-//    if(minNumber < 1 && GetDatarate() >= 2*1024 /*thePrefs.GetMaxUpload() >= 2*/) {
-//        minNumber = 1;
-//    }
-//	return max(((uint32)uploadinglist.GetCount())*0.2, minNumber);
-	return 1;
 }
 
 /**

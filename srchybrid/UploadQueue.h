@@ -111,7 +111,6 @@ private:
 
     void InsertInUploadingList(CUpDownClient* newclient);
     double GetAverageCombinedFilePrioAndCredit();
-	uint32 GetWantedNumberOfTrickleUploads();
 	void CheckForHighPrioClient();
 
 	CUpDownClientPtrList	waitinglist;
