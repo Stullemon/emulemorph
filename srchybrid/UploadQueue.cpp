@@ -231,7 +231,13 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 		(leftClient != NULL &&
 			(
 				(iSuperior = RightClientIsSuperior(leftClient, rightClient, checkforaddinuploadinglist)) > 0 || //MORPH - Changed by SiRoB, Upload Splitting Class
-				iSuperior == 0 && (!checkforaddinuploadinglist || m_abAddClientOfThisClass[LAST_CLASS]) && //MORPH - Changed by SiRoB, Upload Splitting Class
+				iSuperior == 0 &&
+				//MORPH START - Added by SiRoB, Upload Splitting Class
+				(!checkforaddinuploadinglist ||
+				 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0] ||
+				 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
+				 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS]) &&
+				//MORPH END  - Added by SiRoB, Upload Splitting Class
 				(//Morph - added by AndCycle, Equal Chance For Each File
 					leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
 					leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
@@ -251,7 +257,13 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 					)
 				)
 			) ||
-			leftClient == NULL && (!checkforaddinuploadinglist || m_abAddClientOfThisClass[LAST_CLASS]) // there's no old client to compare with, so rightClient is better (than null)
+			leftClient == NULL &&  // there's no old client to compare with, so rightClient is better (than null)
+			 //MORPH START - Added by SiRoB, Upload Splitting Class
+			 (!checkforaddinuploadinglist ||
+			 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0] ||
+			 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
+			 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS])
+			 //MORPH END   - Added by SiRoB, Upload Splitting Class
 		) &&
 		(!rightClient->IsBanned()) && // don't allow banned client to be best
 		IsDownloading(rightClient) == false // don't allow downloading clients to be best
