@@ -19,11 +19,19 @@
 			ConfigurationType="4"
 			UseOfMFC="1"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="1">
+			CharacterSet="1"
+			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
+				OptimizeForProcessor="0"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\jpeg,..\png,..\..\zlib,..\mng,..\tiff,..\j2k,..\jasper\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;JAS_WIN_MSVC_BUILD"
 				StringPooling="TRUE"
@@ -41,6 +49,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalOptions="/LTCG:STATUS"
 				OutputFile=".\Release\CxImage.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
