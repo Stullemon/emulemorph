@@ -218,52 +218,6 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
  */
 bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore) {
 
-//Morph Start - added by AndCycle, Equal Chance For Each File
-	bool	rightGetQueueFile;
-	CKnownFile* rightReqFile;
-	CKnownFile* leftReqFile;
-
-	if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
-		rightGetQueueFile = false;
-	}
-	else if(!rightClient || !leftClient){
-		rightGetQueueFile = false;
-	}
-	else if(
-		(rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
-		(leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID()))){
-
-		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-
-			case ECFEF_ACCEPTED:{
-				rightGetQueueFile = 
-					rightReqFile->statistic.GetAccepts() < leftReqFile->statistic.GetAccepts();
-			}break;
-
-			case ECFEF_ACCEPTED_COMPLETE:{
-				rightGetQueueFile =
-					(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() <	
-					(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
-			}break;
-
-			case ECFEF_TRANSFERRED:{
-				rightGetQueueFile =
-					rightReqFile->statistic.GetTransferred() < leftReqFile->statistic.GetTransferred();
-			}break;
-
-			case ECFEF_TRANSFERRED_COMPLETE:{
-				rightGetQueueFile =
-					(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
-					(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
-			}break;
-
-			default:{
-				rightGetQueueFile = false;
-			}break;
-		}
-	}
-//Morph End - added by AndCycle, Equal Chance For Each File
-
 //Morph Start - added by AndCycle, rewrite compare for clear code
 	// don't allow banned client to be best
 	if(rightClient->IsBanned()){
@@ -311,8 +265,52 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 	else if(rightClient->GetPowerShared() == false && leftClient->GetPowerShared() == true){
 		return	false;
 	}
+
+//Morph Start - added by AndCycle, Equal Chance For Each File
+	bool	rightGetQueueFile;
+	CKnownFile* rightReqFile;
+	CKnownFile* leftReqFile;
+
+	if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
+		rightGetQueueFile = false;
+	}
+	else if(
+		(rightReqFile = theApp.sharedfiles->GetFileByID((uchar*)rightClient->GetUploadFileID())) &&
+		(leftReqFile = theApp.sharedfiles->GetFileByID((uchar*)leftClient->GetUploadFileID()))){
+
+		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
+
+			case ECFEF_ACCEPTED:{
+				rightGetQueueFile = 
+					rightReqFile->statistic.GetAccepts() < leftReqFile->statistic.GetAccepts();
+			}break;
+
+			case ECFEF_ACCEPTED_COMPLETE:{
+				rightGetQueueFile =
+					(float)rightReqFile->statistic.GetAccepts()/rightReqFile->GetPartCount() <	
+					(float)leftReqFile->statistic.GetAccepts()/leftReqFile->GetPartCount() ;
+			}break;
+
+			case ECFEF_TRANSFERRED:{
+				rightGetQueueFile =
+					rightReqFile->statistic.GetTransferred() < leftReqFile->statistic.GetTransferred();
+			}break;
+
+			case ECFEF_TRANSFERRED_COMPLETE:{
+				rightGetQueueFile =
+					(float)rightReqFile->statistic.GetTransferred()/rightReqFile->GetFileSize() < 
+					(float)leftReqFile->statistic.GetTransferred()/leftReqFile->GetFileSize();
+			}break;
+
+			default:{
+				rightGetQueueFile = false;
+			}break;
+		}
+	}
+//Morph End - added by AndCycle, Equal Chance For Each File
+
 	// they both want powershare file
-	else if(rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == true){
+	if(rightClient->GetPowerShared() == true && leftClient->GetPowerShared() == true){
 		// and rightClient wants higher prio file, so rightClient is better
 		if(rightClient->GetFilePrioAsNumber() > leftClient->GetFilePrioAsNumber()){
 			return	true;

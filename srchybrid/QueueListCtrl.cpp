@@ -658,69 +658,74 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
  					result = -1;
 				else if(item1->GetPowerShared() == true && item2->GetPowerShared() == true)//Morph - modified by AndCycle,  Equal Chance For Each File
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
-				else{//Morph Start - added by AndCycle, Equal Chance For Each File
-					switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
-						case ECFEF_DISABLE:
-							result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());//original
-						case ECFEF_ACCEPTED:
-							if(file1->statistic.GetAccepts() < file2->statistic.GetAccepts()){
-								result = 1;
-							}
-							else if(file1->statistic.GetAccepts() > file2->statistic.GetAccepts()){
-								result = -1;
-							}
-							else{
-								result = 0;
-							}
-							break;
+				else 
+					result = 0;
 
-						case ECFEF_ACCEPTED_COMPLETE:
-							if((float)file1->statistic.GetAccepts()/file1->GetPartCount() <	
-								(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
-								result = 1;
-							}
-							else if((float)file1->statistic.GetAccepts()/file1->GetPartCount() >
-								(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
-								result = -1;
-							}
-							else{
-								result = 0;
-							}
-							break;
+				//Morph Start - added by AndCycle, Equal Chance For Each File
+				if(result == 0)
+					if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
+						result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());//original
+					}else{
+						switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 
-						case ECFEF_TRANSFERRED:
-							if(file1->statistic.GetTransferred() < file2->statistic.GetTransferred()){
-								result = 1;
-							}
-							else if(file1->statistic.GetTransferred() > file2->statistic.GetTransferred()){
-								result = -1;
-							}
-							else{
-								result = 0;
-							}
-							break;
+							case ECFEF_ACCEPTED:
+								if(file1->statistic.GetAccepts() < file2->statistic.GetAccepts()){
+									result = 1;
+								}
+								else if(file1->statistic.GetAccepts() > file2->statistic.GetAccepts()){
+									result = -1;
+								}
+								else{
+									result = 0;
+								}
+								break;
 
-						case ECFEF_TRANSFERRED_COMPLETE:
-							if((float)file1->statistic.GetTransferred()/file1->GetFileSize() < 
-								(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
-								result = 1;
-							}
-							else if((float)file1->statistic.GetTransferred()/file1->GetFileSize() > 
-								(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
-								result = -1;
-							}
-							else{
-								result = 0;
-							}
-							break;
+							case ECFEF_ACCEPTED_COMPLETE:
+								if((float)file1->statistic.GetAccepts()/file1->GetPartCount() <	
+									(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
+									result = 1;
+								}
+								else if((float)file1->statistic.GetAccepts()/file1->GetPartCount() >
+									(float)file2->statistic.GetAccepts()/file2->GetPartCount()){
+									result = -1;
+								}
+								else{
+									result = 0;
+								}
+								break;
 
-						default:
-							result = 0;
-							break;
+							case ECFEF_TRANSFERRED:
+								if(file1->statistic.GetTransferred() < file2->statistic.GetTransferred()){
+									result = 1;
+								}
+								else if(file1->statistic.GetTransferred() > file2->statistic.GetTransferred()){
+									result = -1;
+								}
+								else{
+									result = 0;
+								}
+								break;
+
+							case ECFEF_TRANSFERRED_COMPLETE:
+								if((float)file1->statistic.GetTransferred()/file1->GetFileSize() < 
+									(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
+									result = 1;
+								}
+								else if((float)file1->statistic.GetTransferred()/file1->GetFileSize() > 
+									(float)file2->statistic.GetTransferred()/file2->GetFileSize()){
+									result = -1;
+								}
+								else{
+									result = 0;
+								}
+								break;
+
+							default:
+								result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
+								break;
+						}
 					}
-
-				}
-				//Morph End - added by AndCycle, Equal Chance For Each File
+					//Morph End - added by AndCycle, Equal Chance For Each File
 			else if( file1 == NULL )
 				result = 1;
 			else
@@ -810,7 +815,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 								result = -1;
 							}
 							else{
-								result = 0;
+								result = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 							}
 							break;
 
