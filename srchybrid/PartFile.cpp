@@ -2000,7 +2000,7 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 			//MORPH START - Added by SiRoB, See chunk that we hide
 			}else
 				if (hideOS && client)
-					client->m_abyUpPartStatusHidden[done] = true;
+					client->m_abyUpPartStatusHidden[done] = 1;
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			done++;
 			if (done == parts)

@@ -2553,7 +2553,7 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 				towrite |= (1<<i);
 			//MORPH START - Added by SiRoB, See chunk that we hide
 			else
-				client->m_abyUpPartStatusHidden[i] = true;
+				client->m_abyUpPartStatusHidden[i] = 1;
 			//MORPH END   - Added by SiRoB, See chunk that we hide
 			done++;
 			if (done == parts)
@@ -2592,10 +2592,10 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[i] <= 2)
+			if (m_AvailPartFrequency[done] <= 2)
 				towrite |= (1<<i);
 			else
-				client->m_abyUpPartStatusHidden[i] = true;
+				client->m_abyUpPartStatusHidden[done] = 1;
 			done++;
 			if (done == parts)
 				break;
