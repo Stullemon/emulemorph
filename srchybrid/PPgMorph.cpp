@@ -258,7 +258,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiPermFriend = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_FRIENDSONLY), m_htiPermissions, m_iPermissions == 1);
 		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
 		//MORPH END   - Added by SiRoB, Show Permission
-		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiUM, m_bIsAutoPowershareNewDownloadFile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiDM, m_bIsAutoPowershareNewDownloadFile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority

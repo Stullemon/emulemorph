@@ -796,6 +796,7 @@ public:
 	EqualChanceForEachFileSelection	GetEqualChanceForEachFileMode() const {return prefs->equalChanceForEachFileMode;}	//Morph - added by AndCycle, Equal Chance For Each File
 	bool	IsECFEFallTime()	const	{return prefs->m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
 	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
+	bool IsBoostFriends() const {return prefs->isboostfriends;}//Added by Yun.SF3, boost friends
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	bool IsAutoPowershareNewDownloadFile() const {return prefs->m_bisautopowersharenewdownloadfile;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	CPreferences();
