@@ -367,7 +367,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	data.Read(&nED2KPartCount,2);
 	
 	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-	uint8* thisStatus;
+	uint8* thisStatus = NULL;
 	m_PartStatus_list.Lookup(reqfile, thisStatus);
 	if (thisStatus){
 		delete[] thisStatus;
