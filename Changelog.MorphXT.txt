@@ -1,4 +1,15 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.1
+--------------------------------------
+MERGED : Ported to 0.45b Official version [SiRoB]
+
+FIXED  : WC: when enable crash can occure (thx jpkoester1) [SiRoB]
+
+CHANGED: Roll back some 5.18 code [SiRoB]
+
+NOTE: I keept the multisort from SlugFiller
+
+--------------------------------------
 Changelog for eMule 0.45a MorphXT v6.0
 --------------------------------------
 MERGED : Ported to 0.45a Official version [SiRoB]
