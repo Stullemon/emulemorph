@@ -1486,6 +1486,23 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		    // Mighty Knife: CRC32-Tag
+			case MP_RECALCCRC32: 
+				// Remove existing CRC32 tags from the selected files
+				if (!selectedList.IsEmpty()){
+					POSITION pos = selectedList.GetHeadPosition();
+					while (pos != NULL) {
+						CKnownFile* file = selectedList.GetAt (pos);
+						file->SetLastCalculatedCRC32 ("");
+						//UpdateFile(file);
+						selectedList.GetNext (pos);
+					}
+				}
+				// Repaint the list 
+				Invalidate();
+				// !!! NO "break;" HERE !!!
+				// This case branch must lead into the MP_CALCCRC32 branch - 
+				// so after removing the CRC's from the selected files they
+				// are immediately recalculated!
 			case MP_CALCCRC32: 
 				if (!selectedList.IsEmpty()){
 					// For every chosen file create a worker thread and add it
@@ -2233,6 +2250,7 @@ void CSharedFilesCtrl::CreateMenues()
 	
 	// Mighty Knife: CRC32-Tag
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CALCCRC32,"Calculate CRC32");
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RECALCCRC32,"Recalculate CRC32");
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ADDCRC32TOFILENAME,"Add Release-Tag/CRC32 to filename...");
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_ABORTCRC32CALC,"Abort CRC32 calculation");
 	// [end] Mighty Knife

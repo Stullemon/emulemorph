@@ -7,6 +7,8 @@ FIXED  : Definitly fixed the Resume Next in the category context menu, this is n
 
 CHANGED: Removed the "..." and change the tree in Morph preferency [SiRoB]
 
+ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
+
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
 --------------------------------------

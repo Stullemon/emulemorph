@@ -172,6 +172,7 @@
 #define MP_CALCCRC32            10380
 #define MP_ADDCRC32TOFILENAME   10381
 #define MP_ABORTCRC32CALC		10382
+#define MP_RECALCCRC32          10383
 // [end] Mighty Knife
 
 // Mighty Knife: Mass Rename
