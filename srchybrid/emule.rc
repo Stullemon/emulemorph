@@ -1652,16 +1652,16 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,16,
-                    210,8
+                    202,8
     PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,135,53,81,14,BS_FLAT
     EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
-    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,203,8,0,
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,202,8,0,
                     WS_EX_TRANSPARENT
     PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,135,125,81,14,
                     BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
-                    210,10
+                    202,10
     EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,202,8,0,
                     WS_EX_TRANSPARENT
@@ -1671,7 +1671,7 @@ BEGIN
                     BS_FLAT
     CONTROL         "Update Ip-to-country.csv on startup",
                     IDC_AUTOUPIP2COUNTRY,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,159,210,10
+                    WS_TABSTOP,14,159,202,10
     EDITTEXT        IDC_UPDATE_URL_IP2COUNTRY,14,182,202,12,ES_AUTOHSCROLL
     LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING_IP2COUNTRY,
                     14,171,202,8,0,WS_EX_TRANSPARENT
@@ -1681,9 +1681,12 @@ BEGIN
     LTEXT           "Version-File-URL for updating",
                     IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE,15,200,202,8,0,
                     WS_EX_TRANSPARENT
-    LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,237,100,8
-    LTEXT           "Static",IDC_IPFILTER_VERSION,14,136,100,8
-    LTEXT           "Static",IDC_FAKELIST_VERSION,14,64,100,8
+    LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,237,65,8
+    LTEXT           "Static",IDC_IPFILTER_VERSION,14,136,65,8
+    LTEXT           "Static",IDC_FAKELIST_VERSION,14,64,66,8
+    PUSHBUTTON      "Reset",IDC_RESETFAKESURL,82,53,48,14,BS_FLAT
+    PUSHBUTTON      "Reset",IDC_RESETIPFURL,81,125,48,14,BS_FLAT
+    PUSHBUTTON      "Reset",IDC_RESETIPCURL,82,226,48,14,BS_FLAT
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
@@ -2502,6 +2505,8 @@ BEGIN
         RIGHTMARGIN, 224
         VERTGUIDE, 14
         VERTGUIDE, 216
+        HORZGUIDE, 39
+        HORZGUIDE, 53
     END
 
     IDD_PPG_BACKUP, DIALOG

@@ -24,6 +24,9 @@ public:
 	void LoadSettings(void);
 	afx_msg void OnSettingsChange() {SetModified();}
 	afx_msg void OnBnClickedUpdatefakes();//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	afx_msg void OnBnClickedResetfakes();
 	afx_msg void OnBnClickedUpdateipfurl();//MORPH START added by Yun.SF3: Ipfilter.dat update
+	afx_msg void OnBnClickedResetipfurl();
 	afx_msg void OnBnClickedUpdateipcurl();// Commander - Added: IP2Country auto-updating
+	afx_msg void OnBnClickedResetipcurl();
 };

@@ -2496,6 +2496,9 @@
 #define IDS_INVISIBLEMODE               4891
 #define IDS_ICS_USEICS                  4892
 #define IDC_RICHEDIT21                  4897
+#define IDC_RESETFAKESURL               4898
+#define IDC_RESETIPFURL                 4899
+#define IDC_RESETIPCURL                 4900
 #define IDS_AUXPORTS                    5000
 #define IDC_SOLIDGRAPH                  5001
 #define IDS_SOLIDGRAPH                  5001

@@ -3374,12 +3374,7 @@ void CPreferences::LoadPreferences()
 	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip")));//MORPH START added by Yun.SF3: Ipfilter.dat update
 	_stprintf(UpdateURLIP2Country,_T("%s"),ini.GetString(_T("UpdateURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip")));//Commander - Added: IP2Country auto-updating
 	_stprintf(UpdateVerURLIP2Country,_T("%s"),ini.GetString(_T("UpdateVerURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/latest")));//Commander - Added: IP2Country auto-updating
-	if (StrStrI(UpdateURLIPFilter,_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.txt")))
-		_stprintf(UpdateURLFakeList,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.dat"));
-	if (StrStrI(UpdateURLIPFilter,_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.dat")) ||
-		StrStrI(UpdateURLIPFilter,_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.txt")))
-		_stprintf(UpdateURLIPFilter,_T("%s"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"));
-	
+
 	// khaos::categorymod+ Load Preferences
 	m_bShowCatNames=ini.GetBool(_T("ShowCatName"),true);
 	m_bValidSrcsOnly=ini.GetBool(_T("ValidSrcsOnly"), false);
