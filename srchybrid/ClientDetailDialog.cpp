@@ -62,16 +62,16 @@ BOOL CClientDetailDialog::OnInitDialog(){
 		GetDlgItem(IDC_DNAME)->SetWindowText(_T("?"));
 	
 	//EastShare Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->IsIP2Country()){
-		// Superlexx
-		bool longCountryName = true;
-		GetDlgItem(IDC_DLOC)->SetWindowText(m_client->GetCountryName(longCountryName));
-		//MORPH START - Added by Commander, CountryFlag
-		if (theApp.ip2country->ShowCountryFlag()){
-			countryflag = theApp.ip2country->GetFlagImageList()->ExtractIcon(m_client->GetCountryFlagIndex());
-			((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
-		}
+	// Superlexx
+	bool longCountryName = true;
+	GetDlgItem(IDC_DLOC)->SetWindowText(m_client->GetCountryName(longCountryName));
+	//MORPH START - Added by Commander, CountryFlag
+	if (theApp.ip2country->ShowCountryFlag()){
+		countryflag = theApp.ip2country->GetFlagImageList()->ExtractIcon(m_client->GetCountryFlagIndex());
+		((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
+		((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->ShowWindow(SW_SHOW);
 	}
+		
 	//MORPH END - Added by Commander, CountryFlag
 	//EastShare End - added by AndCycle, IP to Country
 
