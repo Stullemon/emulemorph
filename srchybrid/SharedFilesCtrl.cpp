@@ -1487,7 +1487,12 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					file = selectedList.GetNext(pos);
 					if  (newPowerShareLimit == file->GetPowerShareLimit()) break;
 					file->SetPowerShareLimit(newPowerShareLimit);
-					file->UpdatePartsInfo();
+					//MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
+					if (file->IsPartFile())
+						((CPartFile*)file)->UpdatePartsInfo();
+					else
+					//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
+						file->UpdatePartsInfo();
 					UpdateFile(file);
 				}
 				break;
