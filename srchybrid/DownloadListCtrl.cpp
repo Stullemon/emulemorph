@@ -147,7 +147,9 @@ void CDownloadListCtrl::Init()
 		m_fontBold.CreateFontIndirect(&lfFont);
 	//} //MORPH - Removed by SiRoB, Allways creat the font
 	//MORPH START - Added by SiRoB, Draw Client Percentage
-	m_fontBoldSmaller.CreateFont(12,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Serif"));
+	//m_fontBoldSmaller.CreateFont(12,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Serif"));
+	lfFont.lfHeight = 11;
+	m_fontBoldSmaller.CreateFontIndirect(&lfFont);
 	//MORPH END   - Added by SiRoB, Draw Client Percentage
 
 	// Barry - Use preferred sort order from preferences
@@ -615,17 +617,30 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 					buffer.Format(_T("%.1f%%"), lpPartFile->GetPercentCompleted());
 					//MORPH START - Changed by SiRoB, Bold Percentage :) and right justify
 					CFont *pOldFont = dc->SelectObject(&m_fontBold);
-					rcDraw.left--;rcDraw.top--;rcDraw.right--;rcDraw.bottom--;
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-					rcDraw.left+=2;rcDraw.right+=2;
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-					rcDraw.top+=2;rcDraw.bottom+=2;
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-					rcDraw.left-=2;rcDraw.right-=2;
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-					rcDraw.left++;rcDraw.top--;rcDraw.right++;rcDraw.bottom--;
+					
+#define	DrawPercentText	dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
+					DrawPercentText;
+					rcDraw.left+=1;rcDraw.right+=1;
+					DrawPercentText;
+					rcDraw.left+=1;rcDraw.right+=1;
+					DrawPercentText;
+					
+					rcDraw.top+=1;rcDraw.bottom+=1;
+					DrawPercentText;
+					rcDraw.top+=1;rcDraw.bottom+=1;
+					DrawPercentText;
+					
+					rcDraw.left-=1;rcDraw.right-=1;
+					DrawPercentText;
+					rcDraw.left-=1;rcDraw.right-=1;
+					DrawPercentText;
+					
+					rcDraw.top-=1;rcDraw.bottom-=1;
+					DrawPercentText;
+					
+					rcDraw.left++;rcDraw.right++;
 					dc->SetTextColor(RGB(255,255,255));
-					dc->DrawText(buffer, buffer.GetLength(), &rcDraw, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+					DrawPercentText;
 					dc->SelectObject(pOldFont); //MORPH - Added by SiRoB, Bold Percentage :)
 					//MORPH END   - Changed by SiRoB, Bold Percentage :) and right justify
 					dc->SetBkMode(iOMode);
@@ -1010,17 +1025,18 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 							int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
 							buffer.Format(_T("%.1f%%"), percent);
 							CFont *pOldFont = cdcStatus.SelectObject(&m_fontBoldSmaller);
-							rec_status.left--;rec_status.top--;rec_status.right--;rec_status.top--;
-							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-							rec_status.left+=2;rec_status.right+=2;
-							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-							rec_status.top+=2;rec_status.bottom+=2;
-							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-							rec_status.left-=2;rec_status.right-=2;
-							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-							rec_status.left++;rec_status.top--;rec_status.right++;rec_status.bottom--;
+#define	DrawClientPercentText		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
+							rec_status.top-=1;rec_status.bottom-=1;
+							DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
+							DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;
+							DrawClientPercentText;rec_status.top+=1;rec_status.bottom+=1;
+							DrawClientPercentText;rec_status.top+=1;rec_status.bottom+=1;
+							DrawClientPercentText;rec_status.left-=1;rec_status.right-=1;
+							DrawClientPercentText;rec_status.left-=1;rec_status.right-=1;
+							DrawClientPercentText;rec_status.top-=1;rec_status.bottom-=1;
+							DrawClientPercentText;rec_status.left++;rec_status.right++;
 							cdcStatus.SetTextColor(RGB(255,255,255));
-							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							DrawClientPercentText;
 							cdcStatus.SelectObject(pOldFont);
 							cdcStatus.SetBkMode(iOMode);
 							cdcStatus.SetTextColor(oldclr);
