@@ -206,7 +206,13 @@ BOOL CMiniMule::OnInitDialog()
 		m_layeredWnd.SetTransparentPercentage(m_hWnd, m_uWndTransparency);
 	}
 
+	//MORPH START - Changed by SiRoB, ModID
+	/*
 	SetWindowText(_T("eMule v") + theApp.m_strCurVersionLong);
+	*/
+	SetWindowText(_T("eMule v") + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
+	//MORPH END   - Changed by SiRoB, ModID
+	
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
