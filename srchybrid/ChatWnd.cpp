@@ -570,12 +570,12 @@ void CChatWnd::OnBnClickedBnmenu()
 {
 	CTitleMenu tmColumnMenu;
 	VERIFY ( tmColumnMenu.CreatePopupMenu() );
-	tmColumnMenu.AddMenuTitle(GetResString(IDS_FRIENDLINKMENUTITLE));
+	tmColumnMenu.AddMenuTitle(GetResString(IDS_FRIENDLINKMENUTITLE),true);
 
-	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETFRIENDED2KLINK, GetResString(IDS_GETMYFRIENDED2KLINK)) );
-	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETMYHTMLFRIENDED2KLINK)) );
+	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETFRIENDED2KLINK, GetResString(IDS_GETMYFRIENDED2KLINK), _T("ED2KLINK")) );
+	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETMYHTMLFRIENDED2KLINK),_T("ED2KLINK")) );
 	VERIFY ( tmColumnMenu.AppendMenu(MF_SEPARATOR) ); 
-    VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETEMFRIENDMETFROMURL, GetResString(IDS_DOWNLOADEMFRIENDSMET)) ); //MORPH - Added by Commander, Manual Download and load of emfriends.met
+    VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETEMFRIENDMETFROMURL, GetResString(IDS_DOWNLOADEMFRIENDSMET),_T("WEB")) ); //MORPH - Added by Commander, Manual Download and load of emfriends.met
 
 	RECT rectBtn;
 	GetDlgItem(IDC_BTN_MENU)->GetWindowRect(&rectBtn);

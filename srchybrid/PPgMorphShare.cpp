@@ -77,7 +77,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgSFM = piml->Add(CTempIconLoader(_T("SHAREDFILES")));
-			iImgPS = piml->Add(CTempIconLoader(_T("FILES"))); //MORPH - Added by SiRoB, POWERSHARE Limit
+			iImgPS = piml->Add(CTempIconLoader(_T("FILEPOWERSHARE"))); //MORPH - Added by SiRoB, POWERSHARE Limit
 			iImgPerm = piml->Add(CTempIconLoader(_T("FILEPERMISSION"))); //MORPH - Added by SiRoB, Show Permission
 			iImgDisp = piml->Add(CTempIconLoader(_T("DISPLAY")));
 		}
