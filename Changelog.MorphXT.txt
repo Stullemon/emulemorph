@@ -6,12 +6,13 @@ ADDED  : CRC32-Calculation can now be used to convert existing CRC's to uppercas
 FIXED  : Mass-Rename: Cleanup now works correctly for every line in the "New filenames" window [MightyKnife]
 ADDED  : Mass-Rename: Simple-Cleanup; only removes '.' and '_' characters [MightyKnife]
 ADDED  : Mass-Rename: Insert-text-column-from-clipboard; pastes the clipboard data as a column to the current cursor position in the "New filenames" window. Should help to paste a list of episode titles into the filenames. [MightyKnife]
+CHANGED: List of known files will be saved when clicking 'Reload' in the list of shared files [MightyKnife]
 ADDED  : IP2Country columns to upload,queue,client and serverlist [Commander]
 ADDED  : Country and Clientsoftware columns to the commentlist [Commander]
 ADDED  : Show Client Percentage in the downloadlist [Commander]
 CHANGED: Invisible Mode [Commander]
 ADDED  : Dynamic Invisible Mode [Commander]
-TODO   : OnClick [HotKey] -> move to invisible mode, OnCLick [HotKey] -> move out of invisible mode [Commander]
+TODO   : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move out of invisible mode [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0

@@ -127,6 +127,9 @@ END_MESSAGE_MAP()
 void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 {
 	Reload();
+	// MightyKnife: Save known files on reload
+	theApp.knownfiles->Save();
+	// [end] MightyKnife
 }
 
 void CSharedFilesWnd::Check4StatUpdate(const CKnownFile* file)
