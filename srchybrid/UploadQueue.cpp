@@ -153,9 +153,19 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
         // first find the client in the uploadinglist
         POSITION foundPos = uploadinglist.Find(client);
 		if(foundPos != NULL) {
-            // Remove the found Client
+            //MORPH START - Added by SiRoB, Renumber slot -Fix-
+			POSITION renumberPosition = uploadinglist.GetTailPosition();
+			while(renumberPosition != foundPos) {
+				CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
+				renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
+				uploadinglist.GetPrev(renumberPosition);
+			}
+			//MORPH END   - Added by SiRoB, Renumber slot -Fix-
+			
+			// Remove the found Client
 		    uploadinglist.RemoveAt(foundPos);
-            theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket,true);
+            
+			theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket,true);
 			//MORPH START - Added by SiRoB, due to zz upload system PeerCache
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket,true);
 			//MORPH END   - Added by SiRoB, due to zz upload system PeerCache
@@ -1280,7 +1290,12 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
 			if(requestedFile != NULL) {
-			    requestedFile->UpdatePartsInfo();
+			    //MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
+				if(requestedFile->IsPartFile())
+					((CPartFile*)requestedFile)->UpdatePartsInfo();
+				else
+				//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
+					requestedFile->UpdatePartsInfo();
 			}
 
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
