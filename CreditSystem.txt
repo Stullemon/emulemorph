@@ -31,3 +31,7 @@ Pawcio:
 Ratio:
 
 EastShare:
+
+base ratings: id. users(100); not supported users(80); invalid id. users(0); min.=10, max.=2500
++6 per one MB for uploaded and -5~-6(-6n+n**0.8) for downloaded
+if clients download from you < upload to you, -2 for each (download-upload) MB
