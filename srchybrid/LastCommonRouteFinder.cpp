@@ -276,8 +276,14 @@ uint32 LastCommonRouteFinder::GetUpload() {
 //MORPH START - Added by SiRoB, Upload Splitting Class
 void LastCommonRouteFinder::GetClassByteToSend(uint32* AllowedDataRate,uint32* ClientDataRate) {
     uploadLocker.Lock();
-    *AllowedDataRate = m_iGlobalDataRateFriend;
-	*++AllowedDataRate = m_iGlobalDataRatePowerShare;
+    if (m_iGlobalDataRatePowerShare < m_upload)
+		*AllowedDataRate = m_iGlobalDataRateFriend;
+	else 
+		*AllowedDataRate = m_upload;
+	if (m_iGlobalDataRatePowerShare < m_upload)
+		*++AllowedDataRate = m_iGlobalDataRatePowerShare;
+	else
+		*++AllowedDataRate = m_upload;
 	*++AllowedDataRate =  m_upload;
 	*ClientDataRate = m_iMaxClientDataRateFriend;
 	*++ClientDataRate = m_iMaxClientDataRatePowerShare;

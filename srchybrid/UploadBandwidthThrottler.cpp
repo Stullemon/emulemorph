@@ -40,7 +40,8 @@ UploadBandwidthThrottler::UploadBandwidthThrottler(void) {
 	m_highestNumberOfFullyActivatedSlots = 0;
 	*/
 	memzero(m_highestNumberOfFullyActivatedSlots,sizeof(m_highestNumberOfFullyActivatedSlots));
-
+	memzero(slotCounterClass,sizeof(slotCounterClass));
+		
 	threadEndedEvent = new CEvent(0, 1);
     pauseEvent = new CEvent(TRUE, TRUE);
 
@@ -152,6 +153,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
 		Socket_stat* cur_socket_stat = new Socket_stat;
 		cur_socket_stat->classID = classID;
 		m_StandardOrder_list_stat.InsertAt(index, cur_socket_stat);
+		++slotCounterClass[classID];
 		//MORPH END - Added by SiRoB & AndCycle, Upload Splitting Class
 
         sendLocker.Unlock();
@@ -209,6 +211,7 @@ bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket*
 			classID = stat->classID;
 			delete stat;
 			m_StandardOrder_list_stat.RemoveAt(slotCounter);
+			--slotCounterClass[classID];
 			foundSocket = true;
         } else {
             slotCounter++;
@@ -556,13 +559,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
          	       	spentBytesClass[LAST_CLASS] += lastSpentBytes;
 					spentOverheadClass[LAST_CLASS] += socketSentBytes.sentBytesControlPackets;
          	 	  }
-       	   }
-			//MORPH START - Added by SiRoB, Upload Splitting Class
-			uint32 slotCounterClass[NB_SPLITTING_CLASS];
-			memzero(slotCounterClass,sizeof(slotCounterClass));
-			//MORPH END   - Added by SiRoB, Upload Splitting Class
-     	   // Check if any sockets haven't gotten data for a long time. Then trickle them a package.
-     	   for(uint32 slotCounter = 0; (INT_PTR)slotCounter < m_StandardOrder_list.GetSize(); slotCounter++) {
+       		}
+			// Check if any sockets haven't gotten data for a long time. Then trickle them a package.
+     		for(uint32 slotCounter = 0; (INT_PTR)slotCounter < m_StandardOrder_list.GetSize(); slotCounter++) {
                 ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 				uint32 classID = m_StandardOrder_list_stat.GetAt(slotCounter)->classID;
 				
@@ -576,23 +575,19 @@ UINT UploadBandwidthThrottler::RunInternal() {
                             uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
                     	    spentBytesClass[classID] += lastSpentBytes;
 							spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
-							if (m_highestNumberOfFullyActivatedSlots[classID] > 0){
-								if(lastSpentBytes > 0)
-									m_highestNumberOfFullyActivatedSlots[classID] = min(slotCounter+1,m_highestNumberOfFullyActivatedSlots[classID]);
-								if (classID < LAST_CLASS){
-									spentBytesClass[LAST_CLASS] += lastSpentBytes;
-									spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
-									if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS]>0)
-										m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = min(m_highestNumberOfFullyActivatedSlots[classID],m_highestNumberOfFullyActivatedSlots[LAST_CLASS]);
-								}
+							if(lastSpentBytes > 0 && m_highestNumberOfFullyActivatedSlots[classID] > 0)
+								m_highestNumberOfFullyActivatedSlots[classID] = min(slotCounter+1,m_highestNumberOfFullyActivatedSlots[classID]);
+							if (classID < LAST_CLASS){
+								spentBytesClass[LAST_CLASS] += lastSpentBytes;
+								spentOverheadClass[LAST_CLASS] += spentOverheadClass[classID];
+								if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS]<m_highestNumberOfFullyActivatedSlots[classID])
+									m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
 							}
-
 						}
                		}
         	    } else {
 				    theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (trickle)! Prevented usage. Index: %i Size: %i"), slotCounter, m_StandardOrder_list.GetSize());
            		}
-				++slotCounterClass[classID];
         	}
 			//MORPH START - Added by SiRoB, Upload Splitting Class
 
@@ -600,6 +595,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
             for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
 				if (slotCounterClass[classID]==0) continue;
+				if (allowedDataRateClass[classID]==0)
+					bytesToSpendClass[classID] = bytesToSpendClass[LAST_CLASS];
+
 				bool isFocused = ClientDataRate[classID] == 0;
 				for(uint32 maxCounter = lastpos; maxCounter < lastpos+slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					uint32 posSocket = maxCounter;
@@ -620,7 +618,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							else
 								break;
 						}
-						if (isFocused == false) bytesToSpendTemp = doubleSendSize;
+						if (isFocused == false) bytesToSpendTemp = min(doubleSendSize,bytesToSpendTemp);
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 						spentBytesClass[classID] += lastSpentBytes;
@@ -680,32 +678,25 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				
 			}
 
-			//MORPH START - Added by SiRoB, Upload Splitting Class
+			//MORPH START - Changed by SiRoB, Upload Splitting Class
 			uint32 sumofclientinclass = 0;
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{
 				sumofclientinclass += slotCounterClass[classID];
-				realBytesToSpend = realBytesToSpendClass[classID];
-				/*if(realBytesToSpend < -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000) {
-           			sint64 newRealBytesToSpend = -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000;
-           			realBytesToSpend = newRealBytesToSpend;
-           		    lastTickReachedBandwidth[classID] = thisLoopTick;
-       			} else {*/
-           		    uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*minFragSize*1000;
-					if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
-						realBytesToSpend = 999+bandwidthSavedTolerance;
-						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
-							m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
-						if(classID<LAST_CLASS){
-							if (m_highestNumberOfFullyActivatedSlots[LAST_CLASS] < m_highestNumberOfFullyActivatedSlots[classID])
-								m_highestNumberOfFullyActivatedSlots[LAST_CLASS] = m_highestNumberOfFullyActivatedSlots[classID];
-						}
-						//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
-           			}
-       			//}
-				realBytesToSpendClass[classID] = realBytesToSpend;
+				if (allowedDataRateClass[classID]==0 && sumofclientinclass==m_StandardOrder_list.GetSize())
+					realBytesToSpend = realBytesToSpendClass[LAST_CLASS];
+				else
+					realBytesToSpend = realBytesToSpendClass[classID];
+				uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*minFragSize*1000;
+				if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
+					realBytesToSpend = 999+bandwidthSavedTolerance;
+					if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
+						m_highestNumberOfFullyActivatedSlots[classID] = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1;
+					//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
+           		}
+       			realBytesToSpendClass[classID] = realBytesToSpend;
 			}
-			//MORPH END   - Added by SiRoB, Upload Splitting Class
+			//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
        		m_SentBytesSinceLastCall += spentBytesClass[LAST_CLASS];
 	    	m_SentBytesSinceLastCallOverhead += spentOverheadClass[LAST_CLASS];
