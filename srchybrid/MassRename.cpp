@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CMassRenameEdit, CEdit)
 	ON_WM_CHAR()
 	ON_WM_KEYDOWN()
 	ON_MESSAGE(WM_PASTE,OnPaste)
+	ON_MESSAGE(WM_UNDO,OnUndo)
 END_MESSAGE_MAP()
 
 
@@ -58,7 +59,7 @@ void CMassRenameEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CMassRenameEdit::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// Get the current string before edit and the selection - then default message processing
+	// Get the current string before edit and the selection - then default message processing	if (Start1!=-1) {
 	GetSel (Start1,End1);
 	GetWindowText (m_BeforeEdit);
 	CEdit::OnKeyDown(nChar, nRepCnt, nFlags);
@@ -70,6 +71,14 @@ LRESULT CMassRenameEdit::OnPaste(WPARAM wParam, LPARAM lParam)
 	GetSel (Start1,End1);
 	GetWindowText (m_BeforeEdit);
 	return Default();
+}
+
+LRESULT CMassRenameEdit::OnUndo(WPARAM wParam, LPARAM lParam)
+{
+	// Set Start1=End1=-1 to signal the main window that an UNDO is going on
+	Start1=End1=-1;
+	LRESULT res = Default();
+	return res;
 }
 
 // CMassRenameDialog dialog
@@ -125,6 +134,7 @@ BOOL CMassRenameDialog::OnInitDialog() {
 	OldFN->SetWindowText (FileListString);
 	NFNLeft->SetWindowText (FileListString);
 	NFNRight->SetWindowText (FileListString);
+	UndoBuffer = FileListString;
 
 	// Show the left justify edit control
 	NFNLeft->ModifyStyle (0,WS_VISIBLE);
@@ -301,6 +311,7 @@ void CMassRenameDialog::OnBnClickedReset()
 	OldFN->GetWindowText (txt);
 	NFNLeft->SetWindowText (txt);
 	NFNRight->SetWindowText (txt);
+	UndoBuffer = txt;
 	OnEnSetfocusFilenamemaskedit();
 }
 
@@ -339,6 +350,15 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 
 	CString allFNText;
 	NFNEdit->GetWindowText (allFNText);
+
+	if (Start1==-1) {
+		// There's an UNDO goin on...
+		NFNLeft->SetWindowText (UndoBuffer);
+		NFNRight->SetWindowText (UndoBuffer);
+		UndoBuffer = allFNText;
+		return; // Cancel here
+	}
+
 	if ((MassRenameEdit->Start1==End1) && (Start2==End2) && (Start2 <= Start1)) {
 		// DEL or ENTF pressed; remove 1 character on position Start2
 		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
@@ -355,6 +375,7 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 			if (!nochange) NFNEdit->ReplaceSel ("");
 		}
 	} else {
+		UndoBuffer = allFNText;		// Save the old content for Undo
 		// Remove some characters Start1..End1 and replace them by Start1..End2
 		CString NewChars = AfterEdit.Mid (Start1,End2-Start1);
 		for (int i=0; i < NFNEdit->GetLineCount (); i++) {
@@ -362,10 +383,10 @@ void CMassRenameDialog::OnEnChangeFilenamemaskedit()
 			int llen = NFNEdit->LineLength (lstart);
 			bool nochange=false;  // Don't edit if position is not in the current line
 			if (!RightJustify) {
-				NFNEdit->SetSel (lstart+Start1,lstart+End1);
+				NFNEdit->SetSel (lstart+Start1,lstart+min(End1,llen));
 				if (lstart+Start1 > lstart+llen) nochange = true;
 			} else {
-				NFNEdit->SetSel (lstart+llen-StartR1,lstart+llen-EndR1);
+				NFNEdit->SetSel (lstart+max(llen-StartR1,0),lstart+llen-EndR1);
 				if (llen-StartR1 < 0) nochange = true;
 			}
 			if (!nochange) NFNEdit->ReplaceSel (NewChars);

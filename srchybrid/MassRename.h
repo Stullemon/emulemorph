@@ -32,6 +32,7 @@ public:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg LRESULT OnPaste(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUndo(WPARAM wParam, LPARAM lParam);
 };
 
 class CMassRenameDialog : public CDialog
@@ -53,6 +54,7 @@ protected:
 	CRichEditCtrl* NFNLeft;
 	CRichEditCtrl* NFNRight;
 	CRichEditCtrl* OldFN;
+	CString UndoBuffer;
 public:
 	// The caller of this dialog has to store pointers for all files in the
 	// following list before calling DoModal
