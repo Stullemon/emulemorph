@@ -112,17 +112,22 @@ bool CIP2Country::LoadFromFile(){
 					if(tempStr[forCount].IsEmpty()) {
 						throw CString(_T("error line in"));
 					}
-					count++;
-
-					//tempStr[4] is full country name, capitalize country name from rayita
-					//currently have ATL exception in side :(
-					/*
-					tempStr[4].MakeLower();
-					tempStr[4].SetAt(0, tempStr[4].Left(1).MakeUpper().GetAt(0));
-					*/
-
-					AddIPRange(atoi(tempStr[0]),atoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
 				}
+				
+				//tempStr[4] is full country name, capitalize country name from rayita
+				int index;
+				index = 0;
+				tempStr[4].TrimRight();
+				tempStr[4].MakeLower();
+				tempStr[4].SetAt(0, tempStr[4].Left(1).MakeUpper().GetAt(0));
+				index = tempStr[4].Find(' ');
+				if(index != -1){
+					index++;
+					tempStr[4].SetAt(index, tempStr[4].Mid(index, 1).MakeUpper().GetAt(0));
+				}
+
+				count++;
+				AddIPRange(atoi(tempStr[0]),atoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
 			}
 			fclose(readFile);
 		}
@@ -311,7 +316,7 @@ bool CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, CString shortCountryName
 
 	if(EnableCountryFlag){
 
-		CRBMap<CString, uint16>::CPair* pair;
+		const CRBMap<CString, uint16>::CPair* pair;
 		pair = CountryIDtoFlagIndex.Lookup(shortCountryName);
 
 		if(pair != NULL){
@@ -362,7 +367,7 @@ HICON CIP2Country::GetCountryFlagByIndex(int index){
 
 	if(index == NO_FLAG) return NULL;
 
-	CRBMap<uint16, HICON>::CPair* pair;
+	const CRBMap<uint16, HICON>::CPair* pair;
 	pair = CountryFlagIcon.Lookup(index);
 
 	if(pair == NULL){
