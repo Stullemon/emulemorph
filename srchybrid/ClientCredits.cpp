@@ -631,7 +631,7 @@ void CClientCreditsList::SaveList()
 //Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	}
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	uint8 version = CREDITFILE_VERSION_30_SUQWTv2;
+	uint8 version = CREDITFILE_VERSION_30;//Morph - modified by AndCycle, corrected version
 	fileBack.SeekToBegin();
 	fileBack.Write(&version, 1);
 	fileBack.Write(&count, 4);
