@@ -242,9 +242,11 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 				}
 				else{
 					rightGetQueueFile = 
-						rightReqFile->statistic.GetAccepts() < leftReqFile->statistic.GetAccepts();
+						rightReqFile->statistic.GetAccepts() < 
+						leftReqFile->statistic.GetAccepts();
 					bothGetQueueFile =
-						rightReqFile->statistic.GetAccepts() == leftReqFile->statistic.GetAccepts();
+						rightReqFile->statistic.GetAccepts() == 
+						leftReqFile->statistic.GetAccepts();
 				}
 			}break;
 
@@ -270,15 +272,19 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			case ECFEF_TRANSFERRED:{
 				if(theApp.glob_prefs->IsECFEFallTime()){
 					rightGetQueueFile =
-						rightReqFile->statistic.GetAllTimeTransferred() < leftReqFile->statistic.GetTransferred();
+						rightReqFile->statistic.GetAllTimeTransferred() < 
+						leftReqFile->statistic.GetAllTimeTransferred();
 					bothGetQueueFile =
-						rightReqFile->statistic.GetAllTimeTransferred() == leftReqFile->statistic.GetTransferred();
+						rightReqFile->statistic.GetAllTimeTransferred() == 
+						leftReqFile->statistic.GetAllTimeTransferred();
 				}
 				else{
 					rightGetQueueFile =
-						rightReqFile->statistic.GetTransferred() < leftReqFile->statistic.GetTransferred();
+						rightReqFile->statistic.GetTransferred() < 
+						leftReqFile->statistic.GetTransferred();
 					bothGetQueueFile =
-						rightReqFile->statistic.GetTransferred() == leftReqFile->statistic.GetTransferred();
+						rightReqFile->statistic.GetTransferred() == 
+						leftReqFile->statistic.GetTransferred();
 				}
 			}break;
 
