@@ -1130,7 +1130,7 @@ void CClientCredits::TestPayBackFirstStatus(){
 }
 //EastShare End - added by AndCycle, Pay Back First Tweak
 
-//MORPH START - Changed by SiRoB, reduce a little CPU usage for ratio count
+//MORPH START - Added by SiRoB, reduce a little CPU usage for ratio count
 void CClientCreditsList::ResetCheckScoreRatio(){
 	CClientCredits* cur_credit;
 	CCKey tempkey(0);
@@ -1141,4 +1141,4 @@ void CClientCreditsList::ResetCheckScoreRatio(){
 		cur_credit->m_bCheckScoreRatio = true;
 	}
 }
-//MORPH END   - Changed by SiRoB, reduce a little CPU usage for ratio count
+//MORPH END   - Added by SiRoB, reduce a little CPU usage for ratio count

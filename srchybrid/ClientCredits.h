@@ -168,9 +168,9 @@ public:
 	bool	GetPayBackFirstStatus()			{return m_bPayBackFirst;}
 	void	InitPayBackFirstStatus();
 	//EastShare End - added by AndCycle, Pay Back First
-	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
+	//MORPH START - Added by SiRoB, reduce a little CPU usage for ratio count
 	void	ResetCheckScoreRatio() {m_bCheckScoreRatio = true;}
-	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
+	//MORPH END   - Added by SiRoB, reduce a little CPU usage for ratio count
 
 protected:
 	void	Verified(uint32 dwForIP);
@@ -221,7 +221,7 @@ public:
 	byte*	GetPublicKey()					{return m_abyMyPublicKey;}
 	bool	CryptoAvailable();
 	bool	IsSaveUploadQueueWaitTime() { return m_bSaveUploadQueueWaitTime;}//MORPH - Added by AndCycle, Save Upload Queue Wait Time (SUQWT)
-	void	ResetCheckScoreRatio(); //MORPH START - Changed by SiRoB, reduce a little CPU usage for ratio count
+	void	ResetCheckScoreRatio(); //MORPH START - Added by SiRoB, reduce a little CPU usage for ratio count
 protected:
 	void	LoadList();
 	void	SaveList();
