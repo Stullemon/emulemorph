@@ -558,7 +558,11 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = CastSecondsToHM((::GetTickCount() - client->GetWaitStartTime())/1000);
 						break;
 					case 8:
+						//MORPH START - Changed by SiRoB, Code Optimization
+						/*
 						if(client->IsBanned())
+						*/
+						if(client->GetUploadState() == US_BANNED)
 							Sbuffer = GetResString(IDS_YES);
 						else
 							Sbuffer = GetResString(IDS_NO);
@@ -937,9 +941,17 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			}
 			//EastShare END - Modified by TAHO, modified SUQWT
 		case 8: 
+			//MORPH - Changed by SiRoB, Code Optimization
+			/*		
 			return item1->IsBanned() - item2->IsBanned();
+			*/
+			return (item1->GetUploadState() == US_BANNED) - (item2->GetUploadState() == US_BANNED);
 		case 108: 
+			//MORPH - Changed by SiRoB, Code Optimization
+			/*		
 			return item2->IsBanned() - item1->IsBanned();
+			*/
+			return (item2->GetUploadState() == US_BANNED) - (item1->GetUploadState() == US_BANNED);
 		
 		case 9: 
 			return item1->GetUpPartCount()- item2->GetUpPartCount();

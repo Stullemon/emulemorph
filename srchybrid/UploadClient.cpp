@@ -301,7 +301,11 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (IsFriend() && GetFriendSlot() && !HasLowID())
 		return 0x0FFFFFFF;
 
+	//MORPH - Changed by SiRoB, Code Optimization
+	/*
 	if (IsBanned() || m_bGPLEvildoer)
+	*/
+	if (m_nUploadState==US_BANNED || m_bGPLEvildoer)
 		return 0;
 
 	if (sysvalue && HasLowID() && !(socket && socket->IsConnected())){
@@ -1304,11 +1308,18 @@ bool CUpDownClient::GetFriendSlot() const
 {
 	if (credits && theApp.clientcredits->CryptoAvailable()){
 		switch(credits->GetCurrentIdentState(GetIP())){
+			//MORPH - Changed by SiRoB, Code Optimization
+			/*
 			case IS_IDFAILED:
 			case IS_IDNEEDED:
 			case IS_IDBADGUY:
 				return false;
+			*/
+			case IS_NOTAVAILABLE:
+			case IS_IDENTIFIED:
+				return m_bFriendSlot;
 		}
+		return false;
 	}
 	return m_bFriendSlot;
 }

@@ -141,7 +141,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
         //AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(client->GetCurrentSessionLimit()), (sint32)client->GetQueueSessionPayloadUp()-client->GetCurrentSessionLimit());
 
         //client->SetWaitStartTime();
-	    theApp.uploadqueue->ScheduleRemovalFromUploadQueue(client, _T("Successful completion of upload."), GetResString(IDS_UPLOAD_COMPLETED));
+	    ScheduleRemovalFromUploadQueue(client, _T("Successful completion of upload."), GetResString(IDS_UPLOAD_COMPLETED));
 		//theApp.uploadqueue->AddClientToQueue(client,true);
 
         return true;
@@ -265,7 +265,12 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 			) ||
 			leftClient == NULL  // there's no old client to compare with, so rightClient is better (than null)
 		) &&
+		//MORPH START - Changed by SiRoB, Code Optimization
+		/*
 		(!rightClient->IsBanned()) && // don't allow banned client to be best
+		*/
+		(rightClient->GetUploadState() != US_BANNED) && // don't allow banned client to be best
+		//MORPH END   - Changed by SiRoB, Code Optimization
 		IsDownloading(rightClient) == false // don't allow downloading clients to be best
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		&&
@@ -1281,7 +1286,6 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
 		if (thePrefs.GetLogUlDlEvents())
                AddDebugLogLine(DLP_VERYLOW, true,_T("Removing client from upload list: %s Client: %s Transferred: %s SessionUp: %s QueueSessionUp: %s QueueSessionPayload: %s"), pszReason==NULL ? _T("") : pszReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000), CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false));
-       	client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
        	client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
 		client->UnscheduleForRemoval();
 		uploadinglist.RemoveAt(foundPos);

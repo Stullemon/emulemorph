@@ -1957,7 +1957,11 @@ CString CWapServer::_GetTransferQueueList(WapThreadData Data)
 			_stprintf(HTTPTempC, _T("%i") , cur_client->GetScore(false));
 			CString HTTPTemp = HTTPTempC;
 			HTTPProcessData.Replace(_T("[Score]"), HTTPTemp);
+			//MORPH - Changed by SiRoB, Code Optimization
+			/*		
 			if (cur_client->IsBanned())
+			*/
+			if (cur_client->GetUploadState() == US_BANNED)
 				HTTPProcessData.Replace(_T("[Banned]"), _GetPlainResString(IDS_YES));
 			else
 				HTTPProcessData.Replace(_T("[Banned]"), _GetPlainResString(IDS_NO));

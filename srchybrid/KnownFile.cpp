@@ -2966,7 +2966,7 @@ POSITION pos = m_ClientUploadList.GetHeadPosition();
 while (pos != NULL)
 {
 	CUpDownClient* cur_client = m_ClientUploadList.GetNext(pos);
-	if (cur_client->GetWebCacheName() == webcachename && !cur_client->HasLowID() && !cur_client->IsBanned())
+	if (cur_client->GetWebCacheName() == webcachename && !cur_client->HasLowID() && cur_client->GetUploadState() != US_BANNED) //MORPH - Changed by SiRoB, Code Optimization
 	{
 		//search for IP in IP_List
 		bool found = false;
