@@ -218,8 +218,8 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
     ClientMenu.AppendMenu(MF_STRING | (theApp.IsEd2kFriendLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE));
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETFRIENDED2KLINK, GetResString(IDS_GETFRIENDED2KLINK));
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETHTMLFRIENDED2KLINK));
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	ClientMenu.AppendMenu(MF_SEPARATOR);
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
