@@ -15,6 +15,7 @@ public:
 	void Localize(void);
 
 protected:
+	bool m_bModified;
     bool	m_bInitializedTreeOpts;
 	CTreeOptionsCtrlEx	m_ctrlTreeOptions;
 
@@ -32,15 +33,23 @@ protected:
 	CString		m_sWapPass;
 	BOOL		m_bWapLowEnable;
 	CString		m_sWapLowPass;
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	virtual BOOL OnKillActive();
+	void LoadSettings(void);
+
+	void SetModified(BOOL bChanged = TRUE){
+		m_bModified = bChanged;
+		CPropertyPage::SetModified(bChanged);
+	}
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSettingsChange() {SetModified();}
     afx_msg void OnDestroy();
+	afx_msg void OnDataChange()		{SetModified();}
+	afx_msg void OnEnChangeDynDNSEnabled();
 };

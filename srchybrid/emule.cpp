@@ -48,7 +48,7 @@
 #include "Statistics.h"
 #include "OtherFunctions.h"
 #include "WebServer.h"
-#include "WapServer/WapServer.h"	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+#include "WapServer/WapServer.h"	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 #include "UploadQueue.h"
 #include "SharedFileList.h"
 #include "ServerList.h"
@@ -459,10 +459,10 @@ BOOL CemuleApp::InitInstance()
 	uploadqueue = new CUploadQueue();
 	ipfilter 	= new CIPFilter();
 	webserver = new CWebServer(); // Webserver [kuchin]
-	wapserver = new CWapServer(); // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	wapserver = new CWapServer(); //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
-		m_pPeerCache = new CPeerCacheFinder();
+	m_pPeerCache = new CPeerCacheFinder();
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 

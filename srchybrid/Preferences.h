@@ -541,6 +541,13 @@ public:
 	static	bool	m_bWebLowEnabled;
 	static	TCHAR	m_sWebResDir[MAX_PATH];
 
+    // DynDNS
+
+	static	TCHAR	m_sDynDNSUsername[256];
+	static	TCHAR	m_sDynDNSPassword[256];
+	static	TCHAR	m_sDynDNSHostname[256];
+	static	bool	m_bDynDNSEnabled;
+
 	static	TCHAR	m_sTemplateFile[MAX_PATH];
 	static	ProxySettings proxy; // deadlake PROXYSUPPORT
 	static	bool	m_bIsASCWOP;
@@ -730,7 +737,7 @@ public:
 
         static bool     m_bA4AFSaveCpu; // ZZ:DownloadManager
         
-        // Added by MoNKi [MoNKi: -Wap Server-]
+        //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	static TCHAR	m_sWapTemplateFile[MAX_PATH];
 	static bool		m_bWapEnabled;
 	static uint16	m_nWapPort;
@@ -747,7 +754,7 @@ public:
 	static CString	m_sWapPassword;
 	static CString	m_sWapLowPassword;
 	static bool		m_bWapLowEnabled;
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	static	CStringList shareddir_list;
 	static	CStringList adresses_list;
@@ -1354,6 +1361,17 @@ public:
 	static	bool	GetNetworkED2K()						{ return networked2k;}
 	static	void	SetNetworkED2K(bool val)				{ networked2k = val;}
 
+    //DynDNS
+    
+	static	CString GetDynDNSUsername()						{ return CString(m_sDynDNSUsername); }
+    static	void	SetDynDNSUsername(CString strNewUsername);
+	static	CString GetDynDNSPassword()						{ return CString(m_sDynDNSPassword); }
+	static	void	SetDynDNSPassword(CString strNewPass);
+	static	CString GetDynDNSHostname()						{ return CString(m_sDynDNSHostname); }
+	static	void	SetDynDNSHostname(CString strNewHostname);
+	static	bool	GetDynDNSIsEnabled()					{ return m_bDynDNSEnabled; }
+	static	void	SetDynDNSIsEnabled(bool bEnable)		{ m_bDynDNSEnabled=bEnable; }
+	
 	// mobileMule
 	static	CString GetMMPass()								{ return CString(m_sMMPassword); }
 	static	void	SetMMPass(CString strNewPass);
@@ -1703,7 +1721,7 @@ public:
 	static void		SetWapIsLowUserEnabled(bool in)	{ m_bWapLowEnabled=in; }
 	static const	CString& GetWapLowPass()			{ return m_sWapLowPassword; }
 	static void		SetWapLowPass(CString strNewPass);
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 };
 
 extern CPreferences thePrefs;

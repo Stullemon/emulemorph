@@ -86,9 +86,9 @@ private:
 	CMenu				mnuHTML;
 	bool				m_bExpandingAll;
 
-// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 public:
 	CString				GetWML( bool onlyVisible = true, bool onlyBold = false, bool noRecursive = false, HTREEITEM theItem = NULL, int theItemLevel = 0, bool firstItem = true );
 	bool				ItemExist(HTREEITEM item, HTREEITEM curItem = NULL);
-// End emulEspaña
+//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 };

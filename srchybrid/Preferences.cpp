@@ -484,6 +484,12 @@ int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 TCHAR	CPreferences::m_sWebPassword[256];
 TCHAR	CPreferences::m_sWebLowPassword[256];
+//DynDNS
+TCHAR	CPreferences::m_sDynDNSUsername[256];
+TCHAR	CPreferences::m_sDynDNSPassword[256];
+TCHAR	CPreferences::m_sDynDNSHostname[256];
+bool	CPreferences::m_bDynDNSEnabled;
+//DynDNS End
 uint16	CPreferences::m_nWebPort;
 bool	CPreferences::m_bWebEnabled;
 bool	CPreferences::m_bWebUseGzip;
@@ -698,7 +704,7 @@ CString	CPreferences::m_strFeedsDir;
 bool	CPreferences::enableNEWS;
 //MORPH END   - Added by SiRoB, XML News [O²]
 
-// Added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	TCHAR	CPreferences::m_sWapTemplateFile[MAX_PATH];
 	bool	CPreferences::m_bWapEnabled;
 	uint16	CPreferences::m_nWapPort;
@@ -715,7 +721,7 @@ bool	CPreferences::enableNEWS;
 	CString	CPreferences::m_sWapPassword;
 	CString	CPreferences::m_sWapLowPassword;
 	bool	CPreferences::m_bWapLowEnabled;
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 CPreferences::CPreferences()
 {
@@ -753,10 +759,10 @@ void CPreferences::Init()
 	*/
 #ifndef _DEBUG
 	m_strWebServerDir = appdir + _T("webserver\\");
-	m_strWapServerDir = appdir + _T("wapserver\\");	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	m_strWapServerDir = appdir + _T("wapserver\\");	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 #else
 	m_strWebServerDir = appdir + _T("..\\webserver\\");
-	m_strWapServerDir = appdir + _T("..\\wapserver\\");	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	m_strWapServerDir = appdir + _T("..\\wapserver\\");	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 #endif
 	//End emulEspaña
 	m_strLangDir = appdir + _T("lang\\");
@@ -2371,6 +2377,13 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("PageRefreshTime"), m_nWebPageRefresh);
 	ini.WriteBool(_T("UseLowRightsUser"), m_bWebLowEnabled);
 
+	///////////////////////////////////////////////////////////////////////////
+	// Section: "DynDNS"
+	//
+	ini.WriteString(_T("Username"), GetDynDNSUsername(), _T("DynDNS"));
+	ini.WriteString(_T("Password"), GetDynDNSPassword(), _T("DynDNS"));
+	ini.WriteString(_T("Hostname"), GetDynDNSHostname(), _T("DynDNS"));
+	ini.WriteBool(_T("Enabled"), m_bDynDNSEnabled);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
@@ -2388,23 +2401,23 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("Enabled"), m_bPeerCacheEnabled);
 	ini.WriteInt(_T("PCPort"), m_nPeerCachePort);
         
-        // Added by MoNKi [MoNKi: -Wap Server-]
-	ini.WriteBool(_T("WapEnabled"), m_bWapEnabled, _T("emulEspaña"));
-	ini.WriteString(_T("WapTemplateFile"),m_sWapTemplateFile, _T("emulEspaña"));
+    //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
+	ini.WriteBool(_T("WapEnabled"), m_bWapEnabled, _T("WapServer"));
+	ini.WriteString(_T("WapTemplateFile"),m_sWapTemplateFile, _T("WapServer"));
 	ini.WriteInt(_T("WapPort"), m_nWapPort, _T("emulEspaña"));
-	ini.WriteInt(_T("WapGraphWidth"), m_iWapGraphWidth, _T("emulEspaña"));
-	ini.WriteInt(_T("WapGraphHeight"), m_iWapGraphHeight, _T("emulEspaña"));
-	ini.WriteBool(_T("WapFilledGraphs"), m_bWapFilledGraphs, _T("emulEspaña"));
-	ini.WriteInt(_T("WapMaxItemsInPage"), m_iWapMaxItemsInPages, _T("emulEspaña"));
-	ini.WriteBool(_T("WapSendImages"), m_bWapSendImages, _T("emulEspaña"));
-	ini.WriteBool(_T("WapSendGraphs"), m_bWapSendGraphs, _T("emulEspaña"));
-	ini.WriteBool(_T("WapSendProgressBars"), m_bWapSendProgressBars, _T("emulEspaña"));
-	ini.WriteBool(_T("WapSendBWImages"), m_bWapAllwaysSendBWImages, _T("emulEspaña"));
-	ini.WriteInt(_T("WapLogsSize"), m_iWapLogsSize, _T("emulEspaña"));
-	ini.WriteString(_T("WapPassword"), m_sWapPassword, _T("emulEspaña"));
-	ini.WriteString(_T("WapPasswordLow"), m_sWapLowPassword, _T("emulEspaña"));
-	ini.WriteBool(_T("WapLowEnable"), m_bWapLowEnabled, _T("emulEspaña"));
-	// End MoNKi        
+	ini.WriteInt(_T("WapGraphWidth"), m_iWapGraphWidth, _T("WapServer"));
+	ini.WriteInt(_T("WapGraphHeight"), m_iWapGraphHeight, _T("WapServer"));
+	ini.WriteBool(_T("WapFilledGraphs"), m_bWapFilledGraphs, _T("WapServer"));
+	ini.WriteInt(_T("WapMaxItemsInPage"), m_iWapMaxItemsInPages, _T("WapServer"));
+	ini.WriteBool(_T("WapSendImages"), m_bWapSendImages, _T("WapServer"));
+	ini.WriteBool(_T("WapSendGraphs"), m_bWapSendGraphs, _T("WapServer"));
+	ini.WriteBool(_T("WapSendProgressBars"), m_bWapSendProgressBars, _T("WapServer"));
+	ini.WriteBool(_T("WapSendBWImages"), m_bWapAllwaysSendBWImages, _T("WapServer"));
+	ini.WriteInt(_T("WapLogsSize"), m_iWapLogsSize, _T("WapServer"));
+	ini.WriteString(_T("WapPassword"), m_sWapPassword, _T("WapServer"));
+	ini.WriteString(_T("WapPasswordLow"), m_sWapLowPassword, _T("WapServer"));
+	ini.WriteBool(_T("WapLowEnable"), m_bWapLowEnabled, _T("WapServer"));
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]        
 
 	ini.WriteBool(_T("InfiniteQueue"),infiniteQueue,_T("eMule"));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
@@ -3366,6 +3379,15 @@ void CPreferences::LoadPreferences()
 	m_nWebPageRefresh=ini.GetInt(_T("PageRefreshTime"), 120);
 
 	///////////////////////////////////////////////////////////////////////////
+	// Section: "DynDNS"
+	//
+	_stprintf(m_sDynDNSUsername,_T("%s"),ini.GetString(_T("Username"), _T(""),_T("DynDNS")));
+    _stprintf(m_sDynDNSPassword,_T("%s"),ini.GetString(_T("Password"), _T(""),_T("DynDNS")));
+	_stprintf(m_sDynDNSHostname,_T("%s"),ini.GetString(_T("Hostname"), _T(""),_T("DynDNS")));
+	m_bDynDNSEnabled=ini.GetBool(_T("Enabled"), false);
+	
+
+	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
 	//
 	_stprintf(m_sMMPassword,_T("%s"),ini.GetString(_T("Password"), _T(""),_T("MobileMule")));
@@ -3380,26 +3402,26 @@ void CPreferences::LoadPreferences()
 	m_bPeerCacheEnabled = ini.GetBool(_T("Enabled"), true);
 	m_nPeerCachePort = ini.GetInt(_T("PCPort"), 0);
         
-        ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 	// Section: "WapServer"
 	//
-        // added by MoNKi [MoNKi: -Wap Server-]
-	m_bWapEnabled=ini.GetBool(_T("WapEnabled"), false, _T("emulEspaña"));
-	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("emulEspaña")));
-	m_nWapPort=ini.GetInt(_T("WapPort"), 80, _T("emulEspaña"));
-	m_iWapGraphWidth=ini.GetInt(_T("WapGraphWidth"), 60, _T("emulEspaña"));
-	m_iWapGraphHeight=ini.GetInt(_T("WapGraphHeight"), 45, _T("emulEspaña"));
-	m_bWapFilledGraphs=ini.GetBool(_T("WapFilledGraphs"), false, _T("emulEspaña"));
-	m_iWapMaxItemsInPages = ini.GetInt(_T("WapMaxItemsInPage"), 5, _T("emulEspaña"));
-	m_bWapSendImages=ini.GetBool(_T("WapSendImages"), true, _T("emulEspaña"));
-	m_bWapSendGraphs=ini.GetBool(_T("WapSendGraphs"), true, _T("emulEspaña"));
-	m_bWapSendProgressBars=ini.GetBool(_T("WapSendProgressBars"), true, _T("emulEspaña"));
-	m_bWapAllwaysSendBWImages=ini.GetBool(_T("WapSendBWImages"), true, _T("emulEspaña"));
-	m_iWapLogsSize=ini.GetInt(_T("WapLogsSize"), 1024, _T("emulEspaña"));
-	m_sWapPassword = ini.GetString(_T("WapPassword"), _T("WapServer"), _T("emulEspaña"));
-	m_sWapLowPassword = ini.GetString(_T("WapPasswordLow"), _T(""), _T("emulEspaña"));
-	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("emulEspaña"));
-	// End MoNKi
+    //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
+	m_bWapEnabled=ini.GetBool(_T("WapEnabled"), false, _T("WapServer"));
+	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("WapServer")));
+	m_nWapPort=ini.GetInt(_T("WapPort"), 80, _T("WapServer"));
+	m_iWapGraphWidth=ini.GetInt(_T("WapGraphWidth"), 60, _T("WapServer"));
+	m_iWapGraphHeight=ini.GetInt(_T("WapGraphHeight"), 45, _T("WapServer"));
+	m_bWapFilledGraphs=ini.GetBool(_T("WapFilledGraphs"), false, _T("WapServer"));
+	m_iWapMaxItemsInPages = ini.GetInt(_T("WapMaxItemsInPage"), 5, _T("WapServer"));
+	m_bWapSendImages=ini.GetBool(_T("WapSendImages"), true, _T("WapServer"));
+	m_bWapSendGraphs=ini.GetBool(_T("WapSendGraphs"), true, _T("WapServer"));
+	m_bWapSendProgressBars=ini.GetBool(_T("WapSendProgressBars"), true, _T("WapServer"));
+	m_bWapAllwaysSendBWImages=ini.GetBool(_T("WapSendBWImages"), true, _T("WapServer"));
+	m_iWapLogsSize=ini.GetInt(_T("WapLogsSize"), 1024, _T("WapServer"));
+	m_sWapPassword = ini.GetString(_T("WapPassword"), _T("WapServer"), _T("WapServer"));
+	m_sWapLowPassword = ini.GetString(_T("WapPasswordLow"), _T(""), _T("WapServer"));
+	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("WapServer"));
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
     LoadCats();
 	//MORPH - Khaos Obsolete
@@ -3865,10 +3887,10 @@ bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 		return true;
 	if (!CompareDirectories(strFullPath, GetLangDir()))			// ".\eMule\lang"
 		return true;
-	// emulEspaña - Added by MoNKi [MoNKi: -Wap Server-]
+	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	if (!CompareDirectories(strFullPath, GetWapServerDir()))	// ".\eMule\wapserver"
 		return true;
-	// End emulEspaña
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	return false;
 }
@@ -3900,6 +3922,23 @@ void CPreferences::SetWSPass(CString strNewPass)
 {
 	_stprintf(m_sWebPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
 }
+
+//DynDNS
+void CPreferences::SetDynDNSPassword(CString strNewPass)
+{
+	_stprintf(m_sDynDNSPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
+}
+
+void CPreferences::SetDynDNSUsername(CString strNewUsername)
+{
+	_stprintf(m_sDynDNSUsername,_T("%s"),strNewUsername);
+}
+
+void CPreferences::SetDynDNSHostname(CString strNewHostname)
+{
+	_stprintf(m_sDynDNSHostname,_T("%s"),strNewHostname);
+}
+//End DynDNS
 
 void CPreferences::SetWSLowPass(CString strNewPass)
 {
@@ -4053,7 +4092,7 @@ void CPreferences::SetInvisibleMode(bool on, UINT keymodifier, char key)
 	}
 }
 //Commander - Added: Invisible Mode [TPT] - End
-// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 void CPreferences::SetWapPass(CString strNewPass)
 {
 	m_sWapPassword = MD5Sum(strNewPass).GetHash();
@@ -4063,4 +4102,4 @@ void CPreferences::SetWapLowPass(CString strNewPass)
 {
 	m_sWapLowPassword = MD5Sum(strNewPass).GetHash();
 }
-// End emulEspaña
+//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]

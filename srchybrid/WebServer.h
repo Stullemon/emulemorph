@@ -1,6 +1,6 @@
 #pragma once
 #include "Loggable.h"
-#include "WapServer/WebWapDefinitions.h"	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+#include "WapServer/WebWapDefinitions.h"	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 class CWebSocket;
 class CUpDownClient;

@@ -266,13 +266,8 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
 		rCtrl << _T("URL:\t") << _T("http://") << ipstr(nLocalIP) << _T(":") << thePrefs.GetWSPort() << _T("/\r\n");
 	}
-	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
-	rCtrl << _T("\r\n");
-	buffer.Format(_T("%s"),(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
-	rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << buffer.Left (16) << _T("-");
-	rCtrl << _T("\r\n\t") << buffer.Mid (16,255);
-	//MORPH END   - Added by SiRoB, [end] Mighty Knife
-    // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	
+    //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	///////////////////////////////////////////////////////////////////////////
 	// Wap Interface
 	///////////////////////////////////////////////////////////////////////////
@@ -289,5 +284,12 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
 		rCtrl << _T("URL:\t") << _T("http://") << inet_ntoa(*(in_addr*)&nLocalIP) << _T(":") << thePrefs.GetWapPort() << _T("/\r\n");
 	}
-	// End emulEspaña
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+
+	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
+	rCtrl << _T("\r\n");
+	buffer.Format(_T("%s"),(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
+	rCtrl << GetResString(IDS_CD_UHASH) << _T("\t") << buffer.Left (16) << _T("-");
+	rCtrl << _T("\r\n\t") << buffer.Mid (16,255);
+	//MORPH END   - Added by SiRoB, [end] Mighty Knife
 }

@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -1639,13 +1639,14 @@ BEGIN
                     IDC_AUTOUPIP2COUNTRY,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,14,159,210,10
     EDITTEXT        IDC_UPDATE_URL_IP2COUNTRY,14,182,202,12,ES_AUTOHSCROLL
-    LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING3,14,171,202,
-                    8,0,WS_EX_TRANSPARENT
+    LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING_IP2COUNTRY,
+                    14,171,202,8,0,WS_EX_TRANSPARENT
     GROUPBOX        "Country",IDC_MORPH2_SECURITY2,7,148,217,98,BS_FLAT
     EDITTEXT        IDC_UPDATE_VER_URL_IP2COUNTRY,14,211,202,12,
                     ES_AUTOHSCROLL
-    LTEXT           "Version-File-URL for updating",IDC_URL_FOR_UPDATING4,15,
-                    200,202,8,0,WS_EX_TRANSPARENT
+    LTEXT           "Version-File-URL for updating",
+                    IDC_URL_FOR_UPDATING_IP2COUNTRY_VERFILE,15,200,202,8,0,
+                    WS_EX_TRANSPARENT
     LTEXT           "Static",IDC_IP2COUNTRY_VERSION,14,237,100,8
     LTEXT           "Static",IDC_IPFILTER_VERSION,14,136,100,8
     LTEXT           "Static",IDC_FAKELIST_VERSION,14,64,100,8
@@ -1800,20 +1801,22 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION |
 CAPTION "Morph3"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "DynIP",IDC_GROUP_DYNIP,7,142,217,104
-    EDITTEXT        IDC_EDIT1,97,167,119,11,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT11,97,203,119,11,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT12,97,185,119,11,ES_AUTOHSCROLL
-    PUSHBUTTON      "Update",IDC_BUTTON1,160,219,56,11,BS_FLAT
-    CONTROL         "Enable automatic DynIP Update",IDC_CHECK1,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,153,202,10
-    LTEXT           "DynDNS Host",IDC_STATIC,14,167,81,11
-    LTEXT           "Username",IDC_STATIC,14,185,81,11
-    LTEXT           "Password",IDC_STATIC,14,203,81,11
-    PUSHBUTTON      "Reset",IDC_BUTTON2,160,232,56,11,BS_FLAT
-    LTEXT           "Last Update - #",IDC_STATIC,15,237,78,8
-    CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_NOSCROLL | 
-                    WS_BORDER | WS_TABSTOP,7,3,217,136
+    GROUPBOX        "DynIP",IDC_GROUP_DYNIP,7,142,217,107
+    EDITTEXT        IDC_EDIT_DYNDNS_HOSTNAME,97,169,119,11,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_DYNDNS_PASSWORD,97,205,119,11,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_DYNDNS_USERNAME,97,187,119,11,ES_AUTOHSCROLL
+    PUSHBUTTON      "Update",IDC_BUTTON_DYNDNS_UPDATE,160,223,56,11,BS_FLAT
+    CONTROL         "Enable automatic DynIP Update",IDC_CHECK_DYNDNS_ENABLED,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,153,
+                    202,10
+    LTEXT           "DynDNS Host",IDC_STATIC_DYNDNS_HOSTNAME,14,169,81,11
+    LTEXT           "Username",IDC_STATIC_DYNDNS_USERNAME,14,187,81,11
+    LTEXT           "Password",IDC_STATIC_DYNDNS_PASSWORD,14,205,81,11
+    PUSHBUTTON      "Reset",IDC_BUTTON_DYNDNS_RESET,160,235,56,11,BS_FLAT
+    LTEXT           "Last Update - #",IDC_STATIC_DYNDNS_LASTUPDATE,15,237,78,
+                    8
+    CONTROL         "",IDC_MORPH3_OPTS,"SysTreeView32",TVS_NOSCROLL | 
+                    WS_BORDER | WS_TABSTOP,7,5,217,136
 END
 
 
@@ -2750,12 +2753,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -4855,6 +4858,7 @@ BEGIN
     IDS_HIDEOS              "Hide Over Share"
     IDS_SHAREONLYTHENEED    "Share Only The Need"
     IDS_SFM                 "Shared File Management"
+    IDC_URL_FOR_UPDATING_IP2COUNTRY "File-URL for updating"
     IDS_IP2COUNTRY          "IP2Country"
 END
 
@@ -5060,9 +5064,22 @@ BEGIN
     IDS_WAP_BASICDATA       "Basic Data"
     IDS_WAP_REFRESH         "Refresh Page"
     IDS_WAP_SORTBY          "Sort By"
+    IDS_CHECK_DYNDNS_ENABLED "Enable DynDNS"
+    IDS_STATIC_DYNDNS_USERNAME "Username"
+    IDS_STATIC_DYNDNS_PASSWORD "Password"
+    IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostname"
+    IDS_BUTTON_DYNDNS_UPDATE "Update"
+    IDS_BUTTON_DYNDNS_RESET "Reset"
 END
 
-#endif    // Anglais (États-Unis) resources
+STRINGTABLE 
+BEGIN
+    IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv on startup"
+    IDS_UPDATEIPCURL        "Update"
+    IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE "Version-File-URL for updating"
+END
+
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

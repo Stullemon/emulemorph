@@ -648,7 +648,7 @@ int CStatisticsTree::ApplyExpandedMask(CString theMask, HTREEITEM theItem, int t
 	}
 	return theStringIndex;
 }
-// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 //	This is the primary function for generating basic WML output of the statistics tree.
 //	It is recursive.
 CString CStatisticsTree::GetWML(bool onlyVisible, bool onlyBold, bool noRecursive, HTREEITEM theItem, int theItemLevel, bool firstItem)
@@ -711,4 +711,4 @@ bool CStatisticsTree::ItemExist(HTREEITEM item, HTREEITEM curItem)
 	}
 	return found;
 }
-// End emulEspaña
+//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]

@@ -490,10 +490,10 @@ BOOL CemuleDlg::OnInitDialog()
 		theApp.webserver->StartServer();
 	theApp.mmserver->Init();
 
-	// emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	if (thePrefs.GetWapServerEnabled())
 		theApp.wapserver->StartServer();
-	// End emulEspaña
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 300, StartupTimer)) != NULL );
 	if (thePrefs.GetVerbose() && !m_hTimer)
@@ -1527,9 +1527,9 @@ void CemuleDlg::OnClose()
 	//MORPH - Added by SiRoB, More clean :|
 	delete theApp.FakeCheck;		theApp.FakeCheck = NULL;
         
-        // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+    //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	delete theApp.wapserver;		theApp.wapserver = NULL;
-	// End emulEspaña
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	thePrefs.Uninit();
 	theApp.m_app_state = APP_STATE_DONE;

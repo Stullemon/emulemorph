@@ -13,18 +13,22 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-// added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 #include "TreeOptsPrefs\PassTreeOptionsEdit.h"
 #include "emuledlg.h"
 #include "serverwnd.h"
 #define HIDDEN_PASSWORD _T("*****")
-// End MoNKi
+//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // CPPgMorph3 dialog
 
 BEGIN_MESSAGE_MAP(CPPgMorph3, CPropertyPage)
+	ON_EN_CHANGE(IDC_EDIT_DYNDNS_USERNAME, OnDataChange)
+	ON_EN_CHANGE(IDC_EDIT_DYNDNS_PASSWORD, OnDataChange)
+	ON_EN_CHANGE(IDC_EDIT_DYNDNS_HOSTNAME, OnDataChange)
+	ON_EN_CHANGE(IDC_CHECK_DYNDNS_ENABLE, OnDataChange)
 	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
@@ -51,7 +55,7 @@ CPPgMorph3::CPPgMorph3()
 	m_sWapPass = "";
 	m_bWapLowEnable = false;
 	m_sWapLowPass = "";
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 }
 
@@ -68,7 +72,7 @@ void CPPgMorph3::DoDataExchange(CDataExchange* pDX)
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 
 
-		// Added by MoNKi [MoNKi: -Wap server-]
+		//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 		int iImgWap = 8; // default icon
 		if (piml){
 			iImgWap = piml->Add(CTempIconLoader(_T("MOBILE")));
@@ -86,7 +90,7 @@ void CPPgMorph3::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddPassEditBox(m_htiWapLowPass, RUNTIME_CLASS(CPassTreeOptionsEdit));
 
 		m_ctrlTreeOptions.Expand(m_htiWapRoot, TVE_EXPAND);
-		// End MoNKi
+		//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 		m_ctrlTreeOptions.SelectItem(m_ctrlTreeOptions.GetRootItem());
 		m_bInitializedTreeOpts = true;
@@ -100,7 +104,7 @@ void CPPgMorph3::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH3_OPTS, m_htiWapPass, m_sWapPass);
 	DDX_TreeCheck(pDX, IDC_MORPH3_OPTS, m_htiWapLowEnable, m_bWapLowEnable);
 	DDX_TreeEdit(pDX, IDC_MORPH3_OPTS, m_htiWapLowPass, m_sWapLowPass);
-	// end MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 }
 
 // CPPgMorph3 message handlers
@@ -114,7 +118,7 @@ BOOL CPPgMorph3::OnInitDialog()
 	m_sWapPass = HIDDEN_PASSWORD;
 	m_bWapLowEnable = thePrefs.GetWapIsLowUserEnabled();
 	m_sWapLowPass = HIDDEN_PASSWORD;
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
@@ -123,6 +127,26 @@ BOOL CPPgMorph3::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPPgMorph3::LoadSettings(void)
+{
+	CString strBuffer;
+
+	strBuffer.Format(_T("%s"), thePrefs.GetDynDNSUsername());
+	GetDlgItem(IDC_EDIT_DYNDNS_USERNAME)->SetWindowText(strBuffer);
+
+    GetDlgItem(IDC_EDIT_DYNDNS_PASSWORD)->SetWindowText(HIDDEN_PASSWORD);
+
+	strBuffer.Format(_T("%s"), thePrefs.GetDynDNSHostname());
+	GetDlgItem(IDC_EDIT_DYNDNS_HOSTNAME)->SetWindowText(strBuffer);
+
+	if(thePrefs.GetDynDNSIsEnabled())
+		CheckDlgButton(IDC_CHECK_DYNDNS_ENABLED,1);
+	else
+		CheckDlgButton(IDC_CHECK_DYNDNS_ENABLED,0);
+
+	SetModified(FALSE);	// FoRcHa
 }
 
 BOOL CPPgMorph3::OnKillActive()
@@ -135,6 +159,31 @@ BOOL CPPgMorph3::OnKillActive()
 
 BOOL CPPgMorph3::OnApply()
 {
+	if(m_bModified)
+	{   
+		CString sBuf;
+		CString oldUsername=thePrefs.GetDynDNSUsername();
+		CString oldHostname=thePrefs.GetDynDNSHostname();
+        int oldState=thePrefs.GetDynDNSIsEnabled();
+
+		GetDlgItem(IDC_EDIT_DYNDNS_USERNAME)->GetWindowText(sBuf);
+		if(sBuf != oldUsername )
+			thePrefs.SetDynDNSUsername(sBuf);
+
+		GetDlgItem(IDC_EDIT_DYNDNS_PASSWORD)->GetWindowText(sBuf);
+		if(sBuf != HIDDEN_PASSWORD)
+			thePrefs.SetDynDNSPassword(sBuf);
+
+		GetDlgItem(IDC_EDIT_DYNDNS_HOSTNAME)->GetWindowText(sBuf);
+		if(sBuf != oldHostname )
+			thePrefs.SetDynDNSHostname(sBuf);
+
+		GetDlgItem(IDC_CHECK_DYNDNS_ENABLED)->GetWindowText(sBuf);
+		if (_tstoi(sBuf)!=oldState)
+			thePrefs.SetWSPort(_tstoi(sBuf));
+		
+	}
+
 	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
@@ -162,7 +211,7 @@ BOOL CPPgMorph3::OnApply()
 	}
 	theApp.wapserver->StartServer();
 	theApp.emuledlg->serverwnd->UpdateMyInfo();
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	
 
 	SetModified(FALSE);
@@ -174,6 +223,13 @@ void CPPgMorph3::Localize(void)
 	{
 		SetWindowText(_T("Morph III"));
 
+        GetDlgItem(IDC_CHECK_DYNDNS_ENABLED)->SetWindowText(GetResString(IDS_CHECK_DYNDNS_ENABLED));
+		GetDlgItem(IDC_STATIC_DYNDNS_USERNAME)->SetWindowText(GetResString(IDS_STATIC_DYNDNS_USERNAME));
+		GetDlgItem(IDC_STATIC_DYNDNS_PASSWORD)->SetWindowText(GetResString(IDS_STATIC_DYNDNS_PASSWORD));
+		GetDlgItem(IDC_STATIC_DYNDNS_HOSTNAME)->SetWindowText(GetResString(IDS_STATIC_DYNDNS_HOSTNAME));
+		GetDlgItem(IDC_BUTTON_DYNDNS_UPDATE)->SetWindowText(GetResString(IDS_BUTTON_DYNDNS_UPDATE));
+		GetDlgItem(IDC_BUTTON_DYNDNS_RESET)->SetWindowText(GetResString(IDS_BUTTON_DYNDNS_RESET));
+
 		// Added by MoNKi [ MoNKi: -Wap Server- ]
 		if (m_htiWapRoot)		m_ctrlTreeOptions.SetItemText(m_htiWapRoot, GetResString(IDS_PW_WAP));
 		if (m_htiWapEnable)		m_ctrlTreeOptions.SetItemText(m_htiWapEnable, GetResString(IDS_ENABLED));
@@ -182,8 +238,19 @@ void CPPgMorph3::Localize(void)
 		if (m_htiWapPass)		m_ctrlTreeOptions.SetEditLabel(m_htiWapPass, GetResString(IDS_WS_PASS));
 		if (m_htiWapLowEnable)	m_ctrlTreeOptions.SetItemText(m_htiWapLowEnable, GetResString(IDS_WEB_LOWUSER));
 		if (m_htiWapLowPass)	m_ctrlTreeOptions.SetEditLabel(m_htiWapLowPass, GetResString(IDS_WS_PASS));
-		// End MoNKi
+		//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	}
+}
+
+void CPPgMorph3::OnEnChangeDynDNSEnabled()
+{
+	GetDlgItem(IDC_EDIT_DYNDNS_USERNAME)->EnableWindow(IsDlgButtonChecked(IDC_CHECK_DYNDNS_ENABLED));	
+	GetDlgItem(IDC_EDIT_DYNDNS_PASSWORD)->EnableWindow(IsDlgButtonChecked(IDC_CHECK_DYNDNS_ENABLED));	
+	GetDlgItem(IDC_EDIT_DYNDNS_HOSTNAME)->EnableWindow(IsDlgButtonChecked(IDC_CHECK_DYNDNS_ENABLED));	
+	GetDlgItem(IDC_BUTTON_DYNDNS_UPDATE)->EnableWindow(IsDlgButtonChecked(IDC_CHECK_DYNDNS_ENABLED));	
+	GetDlgItem(IDC_BUTTON_DYNDNS_RESET)->EnableWindow(IsDlgButtonChecked(IDC_CHECK_DYNDNS_ENABLED));	
+
+	SetModified();
 }
 
 LRESULT CPPgMorph3::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
@@ -211,7 +278,7 @@ void CPPgMorph3::OnDestroy()
 	m_htiWapPass = NULL;
 	m_htiWapLowEnable = NULL;
 	m_htiWapLowPass = NULL;
-	// End MoNKi
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	CPropertyPage::OnDestroy();
 }

@@ -21,7 +21,7 @@
 #include ".\Optimizer\cpu_info.h" //Commander - Added: Optimizer [ePlus]
 #include "resource.h"
 #include "loggable.h"
-#include "WapServer/WapServer.h" // emulEspaña: Added by MoNKi [MoNKi: -Wap Server-]
+#include "WapServer/WapServer.h" //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
 #define	DEFAULT_TCP_PORT	4662
@@ -206,7 +206,7 @@ public:
 	void	AddIncomingFolderIcon();
 	void	RemoveIncomingFolderIcon();
        // Commander - Added: Custom incoming folder icon [emulEspaña] - End
-// Added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 public:
 	CWapServer*		wapserver;
 // End -Wap Server-

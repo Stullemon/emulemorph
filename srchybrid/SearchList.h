@@ -190,10 +190,8 @@ private:
 	uint32	m_nCurrentSearch;
 	bool	m_MobilMuleSearch;
 
-// emulEspaña
 public:
-	//Added by MoNKi [MoNKi -Wap Server-]
+	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	CString GetWapList(CString linePattern,int sortby,bool asc, int start, int max, bool &more) const;
-	//end MoNKi
-// End emulEspaña
+	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 };

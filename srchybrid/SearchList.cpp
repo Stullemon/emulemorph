@@ -957,7 +957,7 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	delete temp;
 }
 
-// emulEspaña - Added by MoNKi [MoNKi: -Wap Server-]
+//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 CString CSearchList::GetWapList(CString linePattern,int sortby,bool asc, int start, int max, bool &more) const {
 	CString buffer;
 	CString temp;
@@ -1038,4 +1038,4 @@ CString CSearchList::GetWapList(CString linePattern,int sortby,bool asc, int sta
 
 	return buffer;
 }
-// End emulEspaña
+//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
