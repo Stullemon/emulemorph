@@ -96,13 +96,14 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 	CString gettingParts;
 	//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 	//ShowDownloadingParts(&gettingParts);
-	ShowDownloadingParts(&gettingParts,file->GetPartCount());
 	
 	//if (!onlygreyrect && reqfile && m_abyPartStatus) { 
 	uint8* thisStatus;
 	if(m_PartStatus_list.Lookup(file,thisStatus)){
 		if (file != reqfile)
 			crClientOnly = RGB(192, 100, 255);
+		else
+			ShowDownloadingParts(&gettingParts);
 	//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		/*
@@ -1352,12 +1353,7 @@ void CUpDownClient::RequestHashset(){
 // SLUGFILLER: SafeHash
 
 // Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
-//MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
-/*
 void CUpDownClient::ShowDownloadingParts(CString *partsYN) const
-*/
-void CUpDownClient::ShowDownloadingParts(CString *partsYN, uint16 m_nPartCount) const
-//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
 {
 	// Initialise to all N's
 	char *n = new char[m_nPartCount+1];
