@@ -458,7 +458,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						SendPacket(packet,true);
 						//Morph Start - added by AndCycle, ICS
 					    // enkeyDEV: ICS - Send incomplete parts
-					    if (client->GetIncompletePartVersion())
+					    if (client->GetIncompletePartVersion() && reqfile->IsPartFile()) // netfinity: Don't send on complete files
 					    {
 						    CSafeMemFile data(16+16);
 						    data.WriteHash16(reqfile->GetFileHash());
@@ -1387,8 +1387,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								
 								//Morph Start - added by AndCycle, ICS
 								// enkeyDev: ICS - Send incomplete parts
-								if (client->GetIncompletePartVersion())
-								{
+								if (client->GetIncompletePartVersion() && reqfile->IsPartFile()) // netfinity: Don't send on complete files
+					    		{
 									data_out.WriteUInt8(OP_FILEINCSTATUS);
 									if (reqfile->IsPartFile())
 										((CPartFile*)reqfile)->WriteIncPartStatus(&data_out);
@@ -2585,13 +2585,7 @@ void CListenSocket::OnAccept(int nErrorCode){
 		{
 			m_nPendingConnections--;
 			AddConnection();
-			// MORPH START - Added by SiRoB, WebCache 1.2f
-			// JP detect fake HighID
-			// MOD BEGIN netfinity: Fake HighID
-			thePrefs.m_bHighIdPossible = true;
-			// MOD END netfinity
-			// MORPH END   - Added by SiRoB, WebCache 1.2f
-
+			
 			CClientReqSocket* newclient = new CClientReqSocket();
 			SOCKADDR_IN SockAddr = {0};
 			int iSockAddrLen = sizeof SockAddr;
@@ -2629,7 +2623,15 @@ void CListenSocket::OnAccept(int nErrorCode){
 		}
 
 			ASSERT( SockAddr.sin_addr.S_un.S_addr != 0 && SockAddr.sin_addr.S_un.S_addr != INADDR_NONE );
-
+			
+			// MORPH START - Added by SiRoB, WebCache 1.2f
+			// JP detect fake HighID
+			// MOD BEGIN netfinity: Fake HighID
+			if (IsGoodIP(SockAddr.sin_addr.S_un.S_addr, true))
+				thePrefs.m_bHighIdPossible = true;
+			// MOD END netfinity
+			// MORPH END   - Added by SiRoB, WebCache 1.2f
+			
 			if (theApp.ipfilter->IsFiltered(SockAddr.sin_addr.S_un.S_addr)){
 				if (thePrefs.GetLogFilteredIPs())
 					AddDebugLogLine(false, _T("Rejecting connection attempt (IP=%s) - IP filter (%s)"), ipstr(SockAddr.sin_addr.S_un.S_addr), theApp.ipfilter->GetLastHit());
