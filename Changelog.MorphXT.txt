@@ -6,10 +6,11 @@ MERGED : WebCache 1.2f [Commander/SiRoB]
 FIXED  : Source Load Saver have been corrected [SiRoB]
 FIXED  : Patch taken from other ListCtrl to avoid crash in the FriendListCtrl (at shutdown some item were not valide) [SiRoB]
 FIXED  : Porper PowerShare display in Queuelistctrl (related to unsecure client) [SiRoB]
-FIXED  : XML Parsing [SiRoB]
+FIXED  : RSS news reader (XML Parsing) [SiRoB]
 FIXED  : Put back in waitingqueue when too many upload slot occur [SiRoB]
 
 CHANGED: Intelligent Chunk Selection now use the advanced per file setting for the preview first and last chunk [SiRoB]
+CHANGED: Intelligent Chunk Selectionadapted to work with WebCache [SiRoB]
 
 ADDED  : "Using phpBB URL-Tags style" checkbox in FileDetail for ed2kFileLink creation [AndCycle]
 ADDED  : Options to Enable/Disable PowerShare internal File Priority [AndCycle]
