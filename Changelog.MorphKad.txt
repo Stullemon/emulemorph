@@ -6,6 +6,8 @@ FIXED: color interference between transfert in red and the category color [SiRoB
 FIXED: InputBox trouble causing some feature to not work (Renaming, Scheduler...) [AndCycle]
 FIXED: Statistic for max download average stay at 0 [SiRoB]
 FIXED: Category tab masking [SiRoB]
+FIXED: Rating icons always display no rating [SiRoB]
+FIXED: Source Saver isn't correct work [SiRoB]
 
 ----------------------------------------
 Changelog for eMule 0.41a10 MorphKad 0.9
