@@ -3,7 +3,7 @@ Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
 
 FIXED  : Source Load Saver have been corrected [SiRoB]
-FIXED  : Patch toke from other ListCtrl to avoid crash in the FriendListCtrl (at shutdown some item were not valide) [SiRoB]
+FIXED  : Patch taken from other ListCtrl to avoid crash in the FriendListCtrl (at shutdown some item were not valide) [SiRoB]
 
 CHANGED: Intelligent Chunk Selection now use the advanced per file setting for the preview first and last chunk [SiRoB]
 CHANGED: Normal slot are not focused [SiRoB]
@@ -11,10 +11,13 @@ CHANGED: Normal slot are not focused [SiRoB]
 ADDED  : "Using phpBB URL-Tags style" checkbox in FileDetail for ed2kFileLink creation [AndCycle]
 ADDED  : Options to Enable/Disable PowerShare internal File Priority [AndCycle]
 ADDED  : Bandwidth limit for friend in morph preferency [SiRoB]
+ADDED  : Don't Refresh item if not needed (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
 
 TEAWKED: Hide Over Share display info now show all value in the column [SiRoB]
 TEAWKED: The auto powershare mecanisme have been changed to wait some complet source info before triggering [SiRoB]
 TWEAKED: IP2Country have been improuved (some tweak from emule+) and binairy search methode have been implemented [SiRoB]
+TWEAKED: Don't draw hidden columns (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
+TWEAKED: Don't draw hidden rect (DownloadListCtrl, uploadListCtrl, QueueListCtrl, ClientListCtrl) [SiRoB]
 
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
