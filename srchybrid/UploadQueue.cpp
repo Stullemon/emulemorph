@@ -86,7 +86,10 @@ CUploadQueue::CUploadQueue()
 	m_MaxActiveClients = 0;
 	m_MaxActiveClientsShortTime = 0;
 
+	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	/*
 	m_lastCalculatedDataRateTick = 0;
+	*/
 	m_avarage_dr_sum = 0;
 	friendDatarate = 0;
 
@@ -580,9 +583,36 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		newclient->SetUploadState(US_CONNECTING);
 		if (!newclient->TryToConnect(true))
 			return false;
+		if (!newclient->socket) // Pawcio: BC
+			return false;
 	}
 	else
 	{
+		//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
+		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(newclient->GetUploadFileID());
+		if (reqfile){
+			CSafeMemFile data(16+16);
+			data.WriteHash16(reqfile->GetFileHash());
+			bool send = true;
+			if (reqfile->IsPartFile()){
+				((CPartFile*)reqfile)->WritePartStatus(&data, newclient);	// SLUGFILLER: hideOS
+				send = reqfile->GetHideOS()>=0 ? reqfile->GetHideOS() : thePrefs.GetHideOvershares();
+			}
+			else if (!reqfile->ShareOnlyTheNeed(&data, newclient)) // Wistly SOTN
+				if (!reqfile->HideOvershares(&data, newclient))	// Slugfiller: HideOS
+					send = false;
+			if (send){
+				Packet* packet = new Packet(&data);
+				packet->opcode = OP_FILESTATUS;
+				theStats.AddUpDataOverheadFileRequest(packet->size);
+				newclient->socket->SendPacket(packet,true);
+			}
+			else {
+				BYTE* tmp = data.Detach();
+				free(tmp);
+			}
+		}
+		//MORPH END   - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			DebugSend("OP__AcceptUploadReq", newclient);
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
@@ -696,6 +726,10 @@ void CUploadQueue::Process() {
 
     DWORD curTick = ::GetTickCount();
 
+	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
+	UpdateDatarates();
+	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
+
 	UpdateActiveClientsInfo(curTick);
 
     CheckForHighPrioClient();
@@ -706,7 +740,7 @@ void CUploadQueue::Process() {
 	if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	*/
 	uint32 iCount = (uint32)uploadinglist.GetCount();
-	if(thePrefs.DoRemoveSpareTrickleSlot() && iCount > 0 && iCount > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(iCount-1) == false) {
+	if(thePrefs.DoRemoveSpareTrickleSlot() && iCount > 0 && iCount > m_MaxActiveClientsShortTime+1 && AcceptNewClient(iCount-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
 	//MORPH END   - Changed by SiRoB, 
         // we need to close a trickle slot and put it back first on the queue
@@ -1206,7 +1240,35 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
 			client->SetUploadState(US_NONE);
 			client->ClearUploadBlockRequests();
-	
+			if (client->socket){ 
+				//MORPH START - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
+				if (requestedFile){
+					CSafeMemFile data(16+16);
+					data.WriteHash16(requestedFile->GetFileHash());
+					bool send = true;
+					if (requestedFile->IsPartFile()){
+						((CPartFile*)requestedFile)->WritePartStatus(&data);	// SLUGFILLER: hideOS
+						send = requestedFile->GetHideOS()>=0 ? requestedFile->GetHideOS() : thePrefs.GetHideOvershares();
+					}
+					else {
+						if (!requestedFile->ShareOnlyTheNeed(&data, client)) // Wistly SOTN
+							if (!requestedFile->HideOvershares(&data, client))	// Slugfiller: HideOS
+								send = false;
+						data.WriteUInt16(0);
+					}
+					if (send){
+						Packet* packet = new Packet(&data);
+						packet->opcode = OP_FILESTATUS;
+						theStats.AddUpDataOverheadFileRequest(packet->size);
+						client->socket->SendPacket(packet,true);
+					}
+					else {
+						BYTE* tmp = data.Detach();
+						free(tmp);
+					}
+				}
+				//MORPH END   - Added by SiRoB, Resend partstatus From Pawcio: PowerShare
+			}
             m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 
 			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1567,8 +1629,12 @@ CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 //MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 void CUploadQueue::UpdateDatarates() {
 	// Calculate average datarate
+	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	/*
 	if(::GetTickCount()-m_lastCalculatedDataRateTick > 500) {
-		m_lastCalculatedDataRateTick = ::GetTickCount();
+	m_lastCalculatedDataRateTick = ::GetTickCount();
+	*/
+		
 
 		//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 		/*
@@ -1585,8 +1651,9 @@ void CUploadQueue::UpdateDatarates() {
 			}
 			else {
 				DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-				if ((avarage_tick_list.GetCount() - 1) * (m_lastCalculatedDataRateTick - avarage_tick_list.GetTail()) >= dwDuration)
-					dwDuration = m_lastCalculatedDataRateTick - avarage_tick_list.GetHead() - dwDuration / (avarage_tick_list.GetCount()-1);
+				DWORD curtick = ::GetTickCount();
+				if ((avarage_tick_list.GetCount() - 1) * (curtick - avarage_tick_list.GetTail()) >= dwDuration)
+					dwDuration = curtick - avarage_tick_list.GetHead() - dwDuration / (avarage_tick_list.GetCount()-1);
 				if (dwDuration < 5000) dwDuration = 5000;
 				datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / dwDuration;
 				friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / dwDuration;
@@ -1596,16 +1663,25 @@ void CUploadQueue::UpdateDatarates() {
 			friendDatarate = 0;
 		}
 		//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
+	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	/*
 	}
+	*/
 }
 
 uint32 CUploadQueue::GetDatarate() {
+	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	/*
 	UpdateDatarates();
+	*/
 	return datarate;
 }
 
 uint32 CUploadQueue::GetToNetworkDatarate() {
+	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	/*
 	UpdateDatarates();
+	*/
 	if(datarate > friendDatarate) {
 		return datarate - friendDatarate;
 	} else {
