@@ -478,6 +478,14 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		}
 	}
 	
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	uint32 classID = LAST_CLASS;
+	if (newclient->IsFriend() && newclient->GetFriendSlot())
+		classID = 0;
+	else if (newclient->IsPBForPS())
+		classID = 1;
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
 	if(insertPosition != NULL) {
 		POSITION renumberPosition = insertPosition;
 		uint32 renumberSlotNumber = posCounter;
@@ -496,24 +504,20 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		// add it at found pos
 		newclient->SetSlotNumber(posCounter+1);
 		uploadinglist.InsertBefore(insertPosition, newclient);
-		//MORPH START - Added by SiRoB, Upload Splitting Class
-		if (newclient->IsFriend() && newclient->GetFriendSlot())
-			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),0);
-		else if (newclient->IsPBForPS())
-			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),1);
-		else
-		//MORPH END   - Added by SiRoB, Upload Splitting Class
-			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
+		//MORPH START - Changed by SiRoB, Upload Splitting Class
+		/*
+		theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
+		*/
+		theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),classID);
+		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	}else{
 		// Add it last
-		//MORPH START - Added by SiRoB, Upload Splitting Class
-		if (newclient->IsFriend() && newclient->GetFriendSlot())
-			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
-		else if (newclient->IsPBForPS())
-			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),1);
-		else
-		//MORPH END   - Added by SiRoB, Upload Splitting Class
-			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
+		//MORPH START - Changed by SiRoB, Upload Splitting Class
+		/*
+		theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
+		*/
+		theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),classID);
+		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		uploadinglist.AddTail(newclient);
 		newclient->SetSlotNumber(uploadinglist.GetCount());
 	}
