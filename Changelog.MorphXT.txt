@@ -14,6 +14,7 @@ FIXED  : SmartA4AFSwaping reviewed [SiRoB]
 FIXED  : SeverList Column Sorting [SiRoB]
 FIXED  : Finaly Fixed Resume Only in the samecat [SiRoB]
 FIXED  : Reviewed MergeKnown Code [SiRoB]
+FIXED  : TimeRemainAverage Sorting in the download window [SiRoB]
 
 CHANGED: Added dots '...' behind some items in the Morph preferences tab to indicate that they can be expanded with a double click (at least in the english version) [MightyKnife]
 CHANGED: Log files are now placed in a 'logs' folder instead of the eMule folder [MightyKnife]
