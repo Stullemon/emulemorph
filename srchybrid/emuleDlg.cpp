@@ -284,7 +284,8 @@ BOOL CemuleDlg::OnInitDialog()
 	// show splashscreen as early as possible to "entertain" user while starting emule up
 	if (thePrefs.UseSplashScreen() && !m_bStartMinimized){
 		ShowSplash();
-		PlaySound(thePrefs.GetAppDir() + _T("startup.wav"), NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
+		if(PathFileExists(thePrefs.GetConfigDir() + _T("startup.wav"))) 
+			PlaySound(thePrefs.GetConfigDir() + _T("startup.wav"), NULL, SND_FILENAME | SND_NOSTOP | SND_NOWAIT | SND_ASYNC);
 	}
 	CTrayDialog::OnInitDialog();
 	InitWindowStyles(this);
