@@ -136,7 +136,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	if(newclient != NULL && // Only remove the client if there's someone to replace it
 		(
 			(client->IsFriend() && client->GetFriendSlot()) == false &&	// if it is not in a class that gives it a right
-			client->IsPBForPS() == false &&						// to have a check performed to see if it can stay, we remove at once
+			client->IsPBForPS() == false ||						// to have a check performed to see if it can stay, we remove at once
 			//client->m_BlockRequests_queue.IsEmpty() ||				// or if it doesn't want any more blocks
 			(
 				(
