@@ -203,6 +203,9 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_VI, IDI_COUNTRY_FLAG_VN, IDI_COUNTRY_FLAG_VU, IDI_COUNTRY_FLAG_WF, 
 			IDI_COUNTRY_FLAG_WS, IDI_COUNTRY_FLAG_YE, IDI_COUNTRY_FLAG_YU, IDI_COUNTRY_FLAG_ZA, 
 			IDI_COUNTRY_FLAG_ZM, IDI_COUNTRY_FLAG_ZW, 
+
+			IDI_COUNTRY_FLAG_GB,//http://geography.about.com/library/faq/blqzuk.htm, by tharghan
+
 			NO_FLAG};
 
 		CString countryID[] = {
@@ -222,6 +225,9 @@ bool CIP2Country::LoadCountryFlagLib(){
 			"SO", "SR", "ST", "SU", "SV", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", 
 			"TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", 
 			"VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YU", "ZA", "ZM", "ZW", 
+
+			"UK",//http://geography.about.com/library/faq/blqzuk.htm, by tharghan
+
 			"N/A"
 		};
 
