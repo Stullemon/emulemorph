@@ -112,6 +112,11 @@ bool CIP2Country::LoadFromFile(){
 						throw CString(_T("error line in"));
 					}
 					count++;
+
+					//tempStr[4] is full country name
+					tempStr[4].MakeLower();
+					tempStr[4].SetAt(0, tempStr[4].Left(1).MakeUpper().GetAt(0));
+
 					AddIPRange(atoi(tempStr[0]),atoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
 				}
 			}
