@@ -69,8 +69,8 @@ CIP2Country::CIP2Country(){
 		Load();
 	}
 
-	AddLogLine(false, "IP2Country uses the IP-to-Country Database provided by WebHosting.Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info.");
-
+	AddLogLine(false, "IP2Country uses the IP-to-Country Database provided by WebHosting.");
+	AddLogLine(false, "Info (http://www.webhosting.info), available from http://ip-to-country.webhosting.info.");
 	m_bRunning = true;
 }
 
