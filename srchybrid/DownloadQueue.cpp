@@ -876,7 +876,7 @@ void CDownloadQueue::Process(){
 		}
     }
 
-	if (maxDownload != UNLIMITED && datarate > 300){
+	if ((maxDownload != UNLIMITED && datarate > 300) || thePrefs.IsZZRatioDoesWork()){
 		downspeed = (maxDownload*1024*100)/(datarate+1); //(uint16)((float)((float)(thePrefs.GetMaxDownload()*1024)/(datarate+1)) * 100);
 		if (downspeed < 50)
 			downspeed = 50;

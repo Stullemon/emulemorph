@@ -1,13 +1,23 @@
 --------------------------------------
-Changelog for eMule 0.42g MorphXT v3.x
+Changelog for eMule 0.42g MorphXT v3.1
 --------------------------------------
+FIXED  : Variaous fixe arround Slection category support [SiRoB]
+FIXED  : Show Permission preferency saving [SiRoB]
+
+ADDED  : PowerShare Limit per file, you can now specify when you want to stop powersharing a file based on complete source [SiRoB]
+
 CHANGED: IP2Country added a new flag map [Commander]
+CHANGED: Updated to the latest zz Upload system [SiRoB]
+CHANGED: Don't use the search selection tab official way for ed2k weblink [SiRoB]
+CHANGED: Turning ShareOnlyTheNeed preferency into boolean [SiRoB]
+
+REMOVED: Boost Friends [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.0
 --------------------------------------
 FIXED  : Selection Category Support for weblink [SiRoB]
-FIXED  : Freeze trouble is away (Congratulation to zz to identify the cause) [SiRoB]
+FIXED  : Freeze trouble is gone :) (Congratulation to zz to identify the cause) [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v2.11
