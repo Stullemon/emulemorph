@@ -1035,7 +1035,7 @@ void CemuleDlg::ShowPing() {
 				if(lastPing.lowest > 0 && !thePrefs.IsDynUpUseMillisecondPingTolerance()) {
 					buffer.Format(_T("%s | %ims | %i%%"),CastItoXBytes(lastPing.currentLimit,false,true),lastPing.latency, lastPing.latency*100/lastPing.lowest);
 				} else {
-					buffer.Format(_T("%s | %ims | %ims"),CastItoXBytes(lastPing.currentLimit,false,true),lastPing.latency);
+					buffer.Format(_T("%s | %ims | %ims"),CastItoXBytes(lastPing.currentLimit,false,true),lastPing.latency, thePrefs.GetDynUpPingToleranceMilliseconds());
 				}
 			} else {
                 buffer.SetString(lastPing.state);
