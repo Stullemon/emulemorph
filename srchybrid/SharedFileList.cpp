@@ -335,38 +335,38 @@ void CSharedFileList::FindSharedFiles()
 {
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 
-		//Morph - ??? by AndCycle, could someone tell me why this part be commentted?
-		/*
-		POSITION pos = m_Files_map.GetStartPosition();
-		while (pos)
-		{
-			POSITION posLast = pos;
-			CCKey key;
-			CKnownFile* cur_file;
-			m_Files_map.GetNextAssoc(pos, key, cur_file);
-			if (cur_file->IsKindOf(RUNTIME_CLASS(CPartFile)) 
-				&& !theApp.downloadqueue->IsPartFile(cur_file) 
-				&& !theApp.knownfiles->IsFilePtrInList(cur_file))
-				continue;
-			m_Files_map.RemoveKey(key);
-		}
-		*/
-		
-		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
-		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
-		// They must not be deleted when the CRC32-Thread writes the CRC into the object !
-		CSingleLock sLockCRC32 (&FileListLockMutex,true);
-		// [end] Mighty Knife
-		
-		m_Files_map.RemoveAll();
+	//Morph - ??? by AndCycle, could someone tell me why this part be commentted?
+	/*
+	POSITION pos = m_Files_map.GetStartPosition();
+	while (pos)
+	{
+		POSITION posLast = pos;
+		CCKey key;
+		CKnownFile* cur_file;
+		m_Files_map.GetNextAssoc(pos, key, cur_file);
+		if (cur_file->IsKindOf(RUNTIME_CLASS(CPartFile)) 
+			&& !theApp.downloadqueue->IsPartFile(cur_file) 
+			&& !theApp.knownfiles->IsFilePtrInList(cur_file))
+			continue;
+		m_Files_map.RemoveKey(key);
+	}
+	*/
+	
+	// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
+	// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
+	// They must not be deleted when the CRC32-Thread writes the CRC into the object !
+	CSingleLock sLockCRC32 (&FileListLockMutex,true);
+	// [end] Mighty Knife
+	
+	m_Files_map.RemoveAll();
 
-		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
-		sLockCRC32.Unlock ();
-		// [end] Mighty Knife
-		
-		ASSERT( theApp.downloadqueue );
-		if (theApp.downloadqueue)
-			theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
+	// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
+	sLockCRC32.Unlock ();
+	// [end] Mighty Knife
+	
+	ASSERT( theApp.downloadqueue );
+	if (theApp.downloadqueue)
+		theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
 
 	// khaos::kmod+ Fix: Shared files loaded multiple times.
@@ -564,6 +564,7 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 					output->UpdateFile(other);
 				theApp.knownfiles->RemoveFile(toadd);
 				delete toadd;
+				return false;
 			}
 		}
 		else {

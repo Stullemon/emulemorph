@@ -334,8 +334,10 @@ void CKnownFileList::FilterDuplicateKnownFiles(CKnownFile* original){
 	CCKey key(original->GetFileHash());
 	CKnownFile* pFileInMap;
 	if(m_Files_map.Lookup(key, pFileInMap)) {
-		original->statistic.MergeFileStats(&pFileInMap->statistic); //MORPH - Changed by SiRoB, mergeKnown
-		m_Files_map.RemoveKey(key);
+		if(original != pFileInMap){
+			original->statistic.MergeFileStats(&pFileInMap->statistic); //MORPH - Changed by SiRoB, mergeKnown
+			m_Files_map.RemoveKey(key);
+		}
 	}
 }
 // SLUGFILLER: mergeKnown
