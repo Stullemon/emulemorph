@@ -498,7 +498,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	        bytesToSpend = _I32_MAX;
         	    }
         	} else {
-        	    realBytesToSpend = 0; //_I64_MAX;
+        	    realBytesToSpend = _I64_MAX;
         	    bytesToSpend = _I32_MAX;
         	}
 		//MORPH START - Added by SiRoB, Upload Splitting Class
