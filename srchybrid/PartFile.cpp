@@ -1638,10 +1638,6 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								break; 
 						}
 						case DS_ONQUEUE:{
-							//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && (lastseencomplete==NULL) && theApp.glob_prefs->OnlyDownloadCompleteFiles())
-								break;//shadow#(onlydownloadcompletefiles)
-							//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 							if( cur_src->IsRemoteQueueFull() ) {
 								if( ((dwCurTick - lastpurgetime) > 60000) && (this->GetSourceCount() >= (theApp.glob_prefs->GetMaxSourcePerFile()*.8 )) ){
 									theApp.downloadqueue->RemoveSource( cur_src );
@@ -1677,6 +1673,10 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 								}
 							}
 							//MORPH END - Added by SiRoB, Due to Khaos A4AF
+							//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && (lastseencomplete==NULL) && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+								break;//shadow#(onlydownloadcompletefiles)
+							//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 							if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME-20000))
 								cur_src->UDPReaskForDownload();
 						    // START enkeyDEV(th1) -L2HAC- highid side, "prepare" phase

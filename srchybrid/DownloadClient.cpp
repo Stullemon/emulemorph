@@ -1083,6 +1083,7 @@ bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensio
 		for (POSITION pos = m_OtherRequests_list.GetHeadPosition();pos != 0;m_OtherRequests_list.GetNext(pos)){
 			cur_file = m_OtherRequests_list.GetAt(pos);
 			if (cur_file != reqfile && theApp.downloadqueue->IsPartFile(cur_file) && !cur_file->IsStopped() 
+				&& (cur_file->lastseencomplete != NULL || !theApp.glob_prefs->OnlyDownloadCompleteFiles()) //EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 				&& (cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY))	
 			{
 				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
@@ -1316,6 +1317,10 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 		{
 			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
 				continue;
+			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+			if (cur_file->lastseencomplete == NULL && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+				continue;
+			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 			if (cur_file->ForceAllA4AF()) {
 				pSwap = cur_file;
 				continue;
@@ -1334,19 +1339,19 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 		// wouldn't be better served to just leave this source where it is. (reqfile)
 		if (!pSwap->ForceAllA4AF())
 		{
-		if (pSwap->GetDownPriority() < reqfile->GetDownPriority())
-			return false;
-		else if (pSwap->GetDownPriority() == reqfile->GetDownPriority()) {
-			if (byPriorityOnly)
-				return false; // This option only uses the priority as a factor.
-			if (pSwap->GetSourceCount() >= reqfile->GetSourceCount())
+			if (pSwap->GetDownPriority() < reqfile->GetDownPriority())
 				return false;
-			// If the difference in source counts is less than 10%, leave this source right where it is.
-			// This is a simple way to avoid constant swapping, because the source counts will never be precisely
-			// the same for each file.  It works because at this point reqfile always has more sources than pSwap.
-			if ( ( (float)(pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
-				return false;
-		}
+			else if (pSwap->GetDownPriority() == reqfile->GetDownPriority()) {
+				if (byPriorityOnly)
+					return false; // This option only uses the priority as a factor.
+				if (pSwap->GetSourceCount() >= reqfile->GetSourceCount())
+					return false;
+				// If the difference in source counts is less than 10%, leave this source right where it is.
+				// This is a simple way to avoid constant swapping, because the source counts will never be precisely
+				// the same for each file.  It works because at this point reqfile always has more sources than pSwap.
+				if ( ( (float)(pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
+					return false;
+			}
 		}
 
 		DoSwap(pSwap, false, 0);
@@ -1392,6 +1397,10 @@ bool CUpDownClient::StackA4AFSources()
 		{
 			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
 				return false;
+			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+			if (cur_file->lastseencomplete == NULL && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+				continue;
+			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 			if (cur_file->ForceAllA4AF()) {
 				pSwap = cur_file;
 				continue;
