@@ -267,7 +267,7 @@ bool CUpDownClient::MoreUpThanDown(){
 		credits->GetCurrentIdentState(GetIP()) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()){
 		return false;
 
-	}else if(credits->GetDownloadedTotal() < 1048578){
+	}else if(credits->GetDownloadedTotal() < 1048576){
 		return false;
 
 	}else if(GetUploadState() == US_UPLOADING){
