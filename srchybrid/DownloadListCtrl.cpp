@@ -887,7 +887,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				cdcStatus.CreateCompatibleDC(dc);
 				int cx = lpCtrlItem->status.GetBitmapDimension().cx;
 				DWORD dwTicks = GetTickCount();
-				if((lpCtrlItem->dwUpdated + (3000-DLC_BARUPDATE)/3*lpCtrlItem->owner->GetSourceCount()+DLC_BARUPDATE) < dwTicks || cx !=  iWidth  || !lpCtrlItem->dwUpdated) { //MORPH - Changed by SiRoB, Reduce PartStatus CPU consomption
+				if((lpCtrlItem->dwUpdated + DLC_BARUPDATE*lpCtrlItem->owner->GetSourceCount()+DLC_BARUPDATE) < dwTicks || cx !=  iWidth  || !lpCtrlItem->dwUpdated) { //MORPH - Changed by SiRoB, Reduce PartStatus CPU consomption
 					lpCtrlItem->status.DeleteObject(); 
 					lpCtrlItem->status.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
 					lpCtrlItem->status.SetBitmapDimension(iWidth,  iHeight); 
