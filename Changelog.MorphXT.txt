@@ -13,7 +13,7 @@ FIXED  : USC: Small mistake that create some extra slot open while we remove one
 ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
 
 CHANGED: ImportParts: you can take temp part file without the need to copy them manualy [SiRoB]
-CHANGED: Overhead datarate calcul have been changed based on 10'' [SiRoB]
+CHANGED: Overhead datarate calcul has been changed to 10'' instead of 40'' [SiRoB]
 
 TWEAKED: Parameters and file information will be saved before backing up config-folder, not only on program end. [MightyKnife]
 TWEAKED: Better datarate mesurement for low and high speed [SiRoB]
