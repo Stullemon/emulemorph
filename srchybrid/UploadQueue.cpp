@@ -1213,11 +1213,28 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
         	uploadinglist.RemoveAt(curPos);
 
 			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-        	bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
+
+			// Mighty Knife: more detailed logging
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, true,_T("---- Main socket %ssuccessully removed from upload list."),removed ? _T("") : _T("NOT "));
+			// [end] Mighty Knife
+
+			bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
+
+			// Mighty Knife: more detailed logging
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, true,_T("---- PeerCache-socket %ssuccessully removed from upload list."),pcRemoved ? _T("") : _T("NOT "));
+			// [end] Mighty Knife
+
 			//MORPH START - Added by SiRoB, due to zz upload system WebCache
 			bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
 			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
-    	
+
+			// Mighty Knife: more detailed logging
+			if (thePrefs.GetLogUlDlEvents())
+				AddDebugLogLine(DLP_VERYLOW, true,_T("---- WebCache-socket %ssuccessully removed from upload list."),wcRemoved ? _T("") : _T("NOT "));
+			// [end] Mighty Knife
+
 			/*if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
         	    DebugLogError(false, _T("UploadQueue: Didn't find socket to delete. socket: 0x%x, PCUpSocket: 0x%x, WCUpSocket: 0x%x"), client->socket,client->m_pPCUpSocket,client->m_pWCUpSocket);
         	}*/
