@@ -484,12 +484,28 @@ int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 TCHAR	CPreferences::m_sWebPassword[256];
 TCHAR	CPreferences::m_sWebLowPassword[256];
+
 //DynDNS
-TCHAR	CPreferences::m_sDynDNSUsername[256];
-TCHAR	CPreferences::m_sDynDNSPassword[256];
-TCHAR	CPreferences::m_sDynDNSHostname[256];
-bool	CPreferences::m_bDynDNSEnabled;
+
+//Account 1
+TCHAR	CPreferences::m_sDynDNSUsername_a1[256];
+TCHAR	CPreferences::m_sDynDNSPassword_a1[256];
+TCHAR	CPreferences::m_sDynDNSHostname_a1[256];
+bool	CPreferences::m_bDynDNSEnabled_a1;
+
+//Account 2
+TCHAR	CPreferences::m_sDynDNSUsername_a2[256];
+TCHAR	CPreferences::m_sDynDNSPassword_a2[256];
+TCHAR	CPreferences::m_sDynDNSHostname_a2[256];
+bool	CPreferences::m_bDynDNSEnabled_a2;
+
+//Account 3
+TCHAR	CPreferences::m_sDynDNSUsername_a3[256];
+TCHAR	CPreferences::m_sDynDNSPassword_a3[256];
+TCHAR	CPreferences::m_sDynDNSHostname_a3[256];
+bool	CPreferences::m_bDynDNSEnabled_a3;
 //DynDNS End
+
 uint16	CPreferences::m_nWebPort;
 bool	CPreferences::m_bWebEnabled;
 bool	CPreferences::m_bWebUseGzip;
@@ -2381,10 +2397,23 @@ void CPreferences::SavePreferences()
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "DynDNS"
 	//
-	ini.WriteString(_T("Username"), GetDynDNSUsername(), _T("DynDNS"));
-	ini.WriteString(_T("Password"), GetDynDNSPassword(), _T("DynDNS"));
-	ini.WriteString(_T("Hostname"), GetDynDNSHostname(), _T("DynDNS"));
-	ini.WriteBool(_T("Enabled"), m_bDynDNSEnabled);
+	int account
+	ini.WriteString(_T("Username_a1"), GetDynDNSUsername(1), _T("DynDNS"));
+	ini.WriteString(_T("Password_a1"), GetDynDNSPassword(1), _T("DynDNS"));
+	ini.WriteString(_T("Hostname_a1"), GetDynDNSHostname(1), _T("DynDNS"));
+	ini.WriteBool(_T("Enabled_a1"), m_bDynDNSEnabled_a1);
+
+	int account
+	ini.WriteString(_T("Username_a2"), GetDynDNSUsername(2), _T("DynDNS"));
+	ini.WriteString(_T("Password_a2"), GetDynDNSPassword(2), _T("DynDNS"));
+	ini.WriteString(_T("Hostname_a2"), GetDynDNSHostname(2), _T("DynDNS"));
+	ini.WriteBool(_T("Enabled_a2"), m_bDynDNSEnabled_a2);
+
+	int account
+	ini.WriteString(_T("Username_a3"), GetDynDNSUsername(3), _T("DynDNS"));
+	ini.WriteString(_T("Password_a3"), GetDynDNSPassword(3), _T("DynDNS"));
+	ini.WriteString(_T("Hostname_a3"), GetDynDNSHostname(3), _T("DynDNS"));
+	ini.WriteBool(_T("Enabled_a3"), m_bDynDNSEnabled_a3);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
@@ -3381,10 +3410,24 @@ void CPreferences::LoadPreferences()
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "DynDNS"
 	//
-	_stprintf(m_sDynDNSUsername,_T("%s"),ini.GetString(_T("Username"), _T(""),_T("DynDNS")));
-    _stprintf(m_sDynDNSPassword,_T("%s"),ini.GetString(_T("Password"), _T(""),_T("DynDNS")));
-	_stprintf(m_sDynDNSHostname,_T("%s"),ini.GetString(_T("Hostname"), _T(""),_T("DynDNS")));
-	m_bDynDNSEnabled=ini.GetBool(_T("Enabled"), false);
+
+	//Account 1
+	_stprintf(m_sDynDNSUsername_a1,_T("%s"),ini.GetString(_T("Username_a1"), _T(""),_T("DynDNS")));
+    _stprintf(m_sDynDNSPassword_a1,_T("%s"),ini.GetString(_T("Password_a1"), _T(""),_T("DynDNS")));
+	_stprintf(m_sDynDNSHostname_a1,_T("%s"),ini.GetString(_T("Hostname_a1"), _T(""),_T("DynDNS")));
+	m_bDynDNSEnabled_a1=ini.GetBool(_T("Enabled_a1"), false);
+
+	//Account 2
+	_stprintf(m_sDynDNSUsername_a2,_T("%s"),ini.GetString(_T("Username_a2"), _T(""),_T("DynDNS")));
+	_stprintf(m_sDynDNSPassword_a2,_T("%s"),ini.GetString(_T("Password_a2"), _T(""),_T("DynDNS")));
+	_stprintf(m_sDynDNSHostname_a2,_T("%s"),ini.GetString(_T("Hostname_a2"), _T(""),_T("DynDNS")));
+	m_bDynDNSEnabled_a2=ini.GetBool(_T("Enabled_a2"), false);
+
+	//Account 3
+	_stprintf(m_sDynDNSUsername_a3,_T("%s"),ini.GetString(_T("Username_a3"), _T(""),_T("DynDNS")));
+	_stprintf(m_sDynDNSPassword_a3,_T("%s"),ini.GetString(_T("Password_a3"), _T(""),_T("DynDNS")));
+	_stprintf(m_sDynDNSHostname_a3,_T("%s"),ini.GetString(_T("Hostname_a3"), _T(""),_T("DynDNS")));
+	m_bDynDNSEnabled_a3=ini.GetBool(_T("Enabled_a3"), false);
 	
 
 	///////////////////////////////////////////////////////////////////////////
@@ -3924,19 +3967,62 @@ void CPreferences::SetWSPass(CString strNewPass)
 }
 
 //DynDNS
-void CPreferences::SetDynDNSPassword(CString strNewPass)
-{
-	_stprintf(m_sDynDNSPassword,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
+void CPreferences::SetDynDNSPassword(CString strNewPass, int account)
+{    
+	switch(account){
+		case '1':
+			_stprintf(m_sDynDNSPassword_a1,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
+			break;
+		case '2':
+			_stprintf(m_sDynDNSPassword_a2,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
+			break;
+		case '3':
+			_stprintf(m_sDynDNSPassword_a3,_T("%s"),MD5Sum(strNewPass).GetHash().GetBuffer(0));
+			break;
+
+		default:
+			AddLogLine(false,_T("Invalid Account ID!"));
+			break;
+	}
 }
 
-void CPreferences::SetDynDNSUsername(CString strNewUsername)
+void CPreferences::SetDynDNSUsername(CString strNewUsername, int account)
 {
-	_stprintf(m_sDynDNSUsername,_T("%s"),strNewUsername);
+	switch(account){
+		case '1':
+			_stprintf(m_sDynDNSUsername_a1,_T("%s"),strNewUsername);
+			break;
+		case '2':
+			_stprintf(m_sDynDNSUsername_a2,_T("%s"),strNewUsername);
+			break;
+		case '3':
+			_stprintf(m_sDynDNSUsername_a3,_T("%s"),strNewUsername);
+			break;
+
+		default:
+			AddLogLine(false,_T("Invalid Account ID!"));
+			break;
+	}
 }
 
-void CPreferences::SetDynDNSHostname(CString strNewHostname)
+void CPreferences::SetDynDNSHostname(CString strNewHostname,int account)
 {
-	_stprintf(m_sDynDNSHostname,_T("%s"),strNewHostname);
+	switch(account){
+		case '1':
+			_stprintf(m_sDynDNSHostname_a1,_T("%s"),strNewHostname);
+			break;
+		case '2':
+		    _stprintf(m_sDynDNSHostname_a2,_T("%s"),strNewHostname);
+			break;
+		case '3':
+			_stprintf(m_sDynDNSHostname_a3,_T("%s"),strNewHostname);
+			break;
+
+		default:
+			AddLogLine(false,_T("Invalid Account ID!"));
+			break;
+	}
+
 }
 //End DynDNS
 

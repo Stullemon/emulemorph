@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="Windows-1252"?>
+<?xml version="1.0" encoding = "Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.00"
@@ -65,13 +65,7 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
@@ -140,13 +134,7 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Debug_Dump|Win32"
@@ -204,13 +192,7 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Unicode Debug|Win32"
@@ -267,13 +249,7 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Unicode Release|Win32"
@@ -341,23 +317,21 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
 				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
-	<References>
-	</References>
 	<Files>
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
 				RelativePath="AICHSyncThread.cpp">
+			</File>
+			<File
+				RelativePath="AmHttpSocket.cpp">
+			</File>
+			<File
+				RelativePath="AmHttpSocket.h">
 			</File>
 			<File
 				RelativePath="ArchiveRecovery.cpp">
@@ -396,6 +370,9 @@
 				RelativePath="DownloadQueue.cpp">
 			</File>
 			<File
+				RelativePath="DynDNS.cpp">
+			</File>
+			<File
 				RelativePath="ED2KLink.cpp">
 			</File>
 			<File
@@ -403,9 +380,6 @@
 			</File>
 			<File
 				RelativePath="Emule.cpp">
-			</File>
-			<File
-				RelativePath="fakecheck.cpp">
 			</File>
 			<File
 				RelativePath=".\FileProcessing.cpp">
@@ -432,13 +406,13 @@
 				RelativePath="I18n.cpp">
 			</File>
 			<File
-				RelativePath="Ini2.cpp">
-			</File>
-			<File
 				RelativePath=".\IP2Country.cpp">
 			</File>
 			<File
 				RelativePath="IPFilter.cpp">
+			</File>
+			<File
+				RelativePath="Ini2.cpp">
 			</File>
 			<File
 				RelativePath="KnownFile.cpp">
@@ -457,6 +431,12 @@
 			</File>
 			<File
 				RelativePath="MD5Sum.cpp">
+			</File>
+			<File
+				RelativePath="MMServer.cpp">
+			</File>
+			<File
+				RelativePath="MMSocket.cpp">
 			</File>
 			<File
 				RelativePath="Mdump.cpp">
@@ -493,12 +473,6 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="MMServer.cpp">
-			</File>
-			<File
-				RelativePath="MMSocket.cpp">
 			</File>
 			<File
 				RelativePath="OtherFunctions.cpp">
@@ -572,6 +546,12 @@
 				RelativePath="Quantize.cpp">
 			</File>
 			<File
+				RelativePath="SHA.cpp">
+			</File>
+			<File
+				RelativePath="SHAHashSet.cpp">
+			</File>
+			<File
 				RelativePath="SafeFile.cpp">
 			</File>
 			<File
@@ -637,12 +617,6 @@
 				RelativePath="ServerSocket.cpp">
 			</File>
 			<File
-				RelativePath="SHA.cpp">
-			</File>
-			<File
-				RelativePath="SHAHashSet.cpp">
-			</File>
-			<File
 				RelativePath="SharedFileList.cpp">
 			</File>
 			<File
@@ -697,6 +671,9 @@
 				RelativePath="UDPSocket.cpp">
 			</File>
 			<File
+				RelativePath="URLClient.cpp">
+			</File>
+			<File
 				RelativePath="UploadBandwidthThrottler.cpp">
 			</File>
 			<File
@@ -706,13 +683,13 @@
 				RelativePath="UploadQueue.cpp">
 			</File>
 			<File
-				RelativePath="URLClient.cpp">
-			</File>
-			<File
 				RelativePath="WebSocket.cpp">
 			</File>
 			<File
 				RelativePath="ZIPFile.cpp">
+			</File>
+			<File
+				RelativePath="fakecheck.cpp">
 			</File>
 			<Filter
 				Name="Kademlia"
@@ -730,10 +707,10 @@
 					RelativePath="kademlia\io\FileIO.cpp">
 				</File>
 				<File
-					RelativePath="kademlia\kademlia\Indexed.cpp">
+					RelativePath="kademlia\io\IOException.cpp">
 				</File>
 				<File
-					RelativePath="kademlia\io\IOException.cpp">
+					RelativePath="kademlia\kademlia\Indexed.cpp">
 				</File>
 				<File
 					RelativePath="kademlia\kademlia\Kademlia.cpp">
@@ -845,6 +822,9 @@
 				RelativePath="DownloadQueue.h">
 			</File>
 			<File
+				RelativePath="DynDNS.h">
+			</File>
+			<File
 				RelativePath="ED2KLink.h">
 			</File>
 			<File
@@ -855,9 +835,6 @@
 			</File>
 			<File
 				RelativePath="Exceptions.h">
-			</File>
-			<File
-				RelativePath="fakecheck.h">
 			</File>
 			<File
 				RelativePath=".\FileProcessing.h">
@@ -881,13 +858,13 @@
 				RelativePath="HttpClientReqSocket.h">
 			</File>
 			<File
-				RelativePath="Ini2.h">
-			</File>
-			<File
 				RelativePath=".\IP2Country.h">
 			</File>
 			<File
 				RelativePath="IPFilter.h">
+			</File>
+			<File
+				RelativePath="Ini2.h">
 			</File>
 			<File
 				RelativePath="KnownFile.h">
@@ -905,19 +882,19 @@
 				RelativePath="Loggable.h">
 			</File>
 			<File
-				RelativePath="MapKey.h">
-			</File>
-			<File
 				RelativePath="MD5Sum.h">
-			</File>
-			<File
-				RelativePath="Mdump.h">
 			</File>
 			<File
 				RelativePath="MMServer.h">
 			</File>
 			<File
 				RelativePath="MMSocket.h">
+			</File>
+			<File
+				RelativePath="MapKey.h">
+			</File>
+			<File
+				RelativePath="Mdump.h">
 			</File>
 			<File
 				RelativePath="Opcodes.h">
@@ -956,18 +933,16 @@
 				RelativePath="Preview.h">
 			</File>
 			<File
-				RelativePath="pugxml.h">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="Quantize.h">
 			</File>
 			<File
 				RelativePath="Resource.h">
+			</File>
+			<File
+				RelativePath="SHA.h">
+			</File>
+			<File
+				RelativePath="SHAHashSet.h">
 			</File>
 			<File
 				RelativePath="SafeFile.h">
@@ -992,12 +967,6 @@
 			</File>
 			<File
 				RelativePath="ServerSocket.h">
-			</File>
-			<File
-				RelativePath="SHA.h">
-			</File>
-			<File
-				RelativePath="SHAHashSet.h">
 			</File>
 			<File
 				RelativePath="SharedFileList.h">
@@ -1030,6 +999,9 @@
 				RelativePath="UDPSocket.h">
 			</File>
 			<File
+				RelativePath="URLClient.h">
+			</File>
+			<File
 				RelativePath="UpdownClient.h">
 			</File>
 			<File
@@ -1037,9 +1009,6 @@
 			</File>
 			<File
 				RelativePath="UploadQueue.h">
-			</File>
-			<File
-				RelativePath="URLClient.h">
 			</File>
 			<File
 				RelativePath="Version.h">
@@ -1052,6 +1021,17 @@
 			</File>
 			<File
 				RelativePath="ZIPFile.h">
+			</File>
+			<File
+				RelativePath="fakecheck.h">
+			</File>
+			<File
+				RelativePath="pugxml.h">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
 			</File>
 			<Filter
 				Name="Kademlia"
@@ -1078,10 +1058,10 @@
 					RelativePath="kademlia\io\FileIO.h">
 				</File>
 				<File
-					RelativePath="kademlia\kademlia\Indexed.h">
+					RelativePath="kademlia\io\IOException.h">
 				</File>
 				<File
-					RelativePath="kademlia\io\IOException.h">
+					RelativePath="kademlia\kademlia\Indexed.h">
 				</File>
 				<File
 					RelativePath="kademlia\kademlia\Kademlia.h">
@@ -1093,10 +1073,10 @@
 					RelativePath="kademlia\utils\LittleEndian.h">
 				</File>
 				<File
-					RelativePath="kademlia\routing\Maps.h">
+					RelativePath="kademlia\utils\MD4.h">
 				</File>
 				<File
-					RelativePath="kademlia\utils\MD4.h">
+					RelativePath="kademlia\routing\Maps.h">
 				</File>
 				<File
 					RelativePath="kademlia\utils\MiscUtils.h">
@@ -1246,22 +1226,22 @@
 				RelativePath="HyperTextCtrl.cpp">
 			</File>
 			<File
+				RelativePath="IPFilterDlg.cpp">
+			</File>
+			<File
 				RelativePath="IconStatic.cpp">
 			</File>
 			<File
 				RelativePath="InputBox.cpp">
 			</File>
 			<File
-				RelativePath="IPFilterDlg.cpp">
+				RelativePath="KCSideBannerWnd.cpp">
 			</File>
 			<File
 				RelativePath="KadContactHistogramCtrl.cpp">
 			</File>
 			<File
 				RelativePath="KademliaWnd.cpp">
-			</File>
-			<File
-				RelativePath="KCSideBannerWnd.cpp">
 			</File>
 			<File
 				RelativePath="ListBoxST.cpp">
@@ -1363,6 +1343,9 @@
 				RelativePath="PPgWebServer.cpp">
 			</File>
 			<File
+				RelativePath="PShtWiz1.cpp">
+			</File>
+			<File
 				RelativePath="PreferencesDlg.cpp">
 			</File>
 			<File
@@ -1370,9 +1353,6 @@
 			</File>
 			<File
 				RelativePath="ProgressCtrlX.cpp">
-			</File>
-			<File
-				RelativePath="PShtWiz1.cpp">
 			</File>
 			<File
 				RelativePath="RichEditCtrlX.cpp">
@@ -1613,10 +1593,10 @@
 				RelativePath="GDIThread.h">
 			</File>
 			<File
-				RelativePath="HelpIDs.h">
+				RelativePath="HTRichEditCtrl.h">
 			</File>
 			<File
-				RelativePath="HTRichEditCtrl.h">
+				RelativePath="HelpIDs.h">
 			</File>
 			<File
 				RelativePath="HttpDownloadDlg.h">
@@ -1625,22 +1605,22 @@
 				RelativePath="HyperTextCtrl.h">
 			</File>
 			<File
+				RelativePath="IPFilterDlg.h">
+			</File>
+			<File
 				RelativePath="IconStatic.h">
 			</File>
 			<File
 				RelativePath="InputBox.h">
 			</File>
 			<File
-				RelativePath="IPFilterDlg.h">
+				RelativePath="KCSideBannerWnd.h">
 			</File>
 			<File
 				RelativePath="KadContactHistogramCtrl.h">
 			</File>
 			<File
 				RelativePath="KademliaWnd.h">
-			</File>
-			<File
-				RelativePath="KCSideBannerWnd.h">
 			</File>
 			<File
 				RelativePath="ListBoxST.h">
@@ -1683,9 +1663,6 @@
 			</File>
 			<File
 				RelativePath="OScopeCtrl.h">
-			</File>
-			<File
-				RelativePath="Parser.hpp">
 			</File>
 			<File
 				RelativePath=".\PPgBackup.h">
@@ -1746,6 +1723,9 @@
 			</File>
 			<File
 				RelativePath="PPgWebServer.h">
+			</File>
+			<File
+				RelativePath="Parser.hpp">
 			</File>
 			<File
 				RelativePath="PreferencesDlg.h">
@@ -1911,49 +1891,7 @@
 				RelativePath=".\res\About.jpg">
 			</File>
 			<File
-				RelativePath="res\back.ICO">
-			</File>
-			<File
-				RelativePath=".\res\backup.ico">
-			</File>
-			<File
 				RelativePath=".\res\Banner_Morph.jpg">
-			</File>
-			<File
-				RelativePath="res\bn_connect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_disconnect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_messages.ico">
-			</File>
-			<File
-				RelativePath="res\bn_statistics.ico">
-			</File>
-			<File
-				RelativePath="res\bn_stopcon.ico">
-			</File>
-			<File
-				RelativePath="res\cancel.ICO">
-			</File>
-			<File
-				RelativePath="res\chat.ico">
-			</File>
-			<File
-				RelativePath="res\client0.ICO">
-			</File>
-			<File
-				RelativePath="res\client1.ICO">
-			</File>
-			<File
-				RelativePath="res\client2.ICO">
-			</File>
-			<File
-				RelativePath="res\client3.ICO">
-			</File>
-			<File
-				RelativePath="res\client4.ICO">
 			</File>
 			<File
 				RelativePath="res\ClientaMule.ico">
@@ -1972,15 +1910,6 @@
 			</File>
 			<File
 				RelativePath="res\ClientsOnQueue.ico">
-			</File>
-			<File
-				RelativePath="res\close.ico">
-			</File>
-			<File
-				RelativePath=".\res\community.ico">
-			</File>
-			<File
-				RelativePath="res\compatible.ICO">
 			</File>
 			<File
 				RelativePath="res\ConnectedHighHigh.ico">
@@ -2025,9 +1954,6 @@
 				RelativePath="res\Contact4.ico">
 			</File>
 			<File
-				RelativePath="res\convert.ico">
-			</File>
-			<File
 				RelativePath=".\res\CreditOvl.ico">
 			</File>
 			<File
@@ -2043,40 +1969,16 @@
 				RelativePath="res\Display.ico">
 			</File>
 			<File
-				RelativePath="res\down.bmp">
-			</File>
-			<File
-				RelativePath="res\down2x.bmp">
-			</File>
-			<File
 				RelativePath="res\Download.ico">
-			</File>
-			<File
-				RelativePath=".\res\EastShare.ico">
-			</File>
-			<File
-				RelativePath=".\res\eDonkey.ico">
-			</File>
-			<File
-				RelativePath="res\eDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\emule.manifest">
-			</File>
-			<File
-				RelativePath="emule.rc">
-			</File>
-			<File
-				RelativePath="res\emule.rc2">
 			</File>
 			<File
 				RelativePath=".\res\EQfile.ico">
 			</File>
 			<File
-				RelativePath="res\Filedonkey.ico">
+				RelativePath=".\res\EastShare.ico">
 			</File>
 			<File
-				RelativePath="res\forward.ICO">
+				RelativePath="res\Filedonkey.ico">
 			</File>
 			<File
 				RelativePath="res\Friend.ico">
@@ -2085,31 +1987,7 @@
 				RelativePath=".\res\FriendOvl.ico">
 			</File>
 			<File
-				RelativePath="res\friends1.ico">
-			</File>
-			<File
-				RelativePath=".\res\friends1slot.ICO">
-			</File>
-			<File
-				RelativePath="res\friends2.ico">
-			</File>
-			<File
-				RelativePath=".\res\friends2slot.ICO">
-			</File>
-			<File
-				RelativePath="res\friends3.ICO">
-			</File>
-			<File
-				RelativePath=".\res\friends3slot.ICO">
-			</File>
-			<File
 				RelativePath=".\res\FriendSlotOvl.ico">
-			</File>
-			<File
-				RelativePath="res\global.ico">
-			</File>
-			<File
-				RelativePath="res\help.ico">
 			</File>
 			<File
 				RelativePath="res\IDI_TVI_DAY.ico">
@@ -2127,25 +2005,19 @@
 				RelativePath="res\IDI_TVI_YEAR.ico">
 			</File>
 			<File
-				RelativePath="res\incomingfolder.ico">
-			</File>
-			<File
-				RelativePath="res\inetdownload.avi">
-			</File>
-			<File
 				RelativePath="res\IPFilter.ico">
 			</File>
 			<File
 				RelativePath="res\IRC.ico">
 			</File>
 			<File
+				RelativePath="res\KADContactList.ico">
+			</File>
+			<File
 				RelativePath="res\Kad.ico">
 			</File>
 			<File
 				RelativePath="res\KadBootstrap.ico">
-			</File>
-			<File
-				RelativePath="res\KADContactList.ico">
 			</File>
 			<File
 				RelativePath="res\KadCurrentSearches.ico">
@@ -2169,55 +2041,7 @@
 				RelativePath="res\Log.ico">
 			</File>
 			<File
-				RelativePath="res\logo.jpg">
-			</File>
-			<File
-				RelativePath="res\message.ICO">
-			</File>
-			<File
-				RelativePath="res\mldonk.ico">
-			</File>
-			<File
 				RelativePath=".\res\Morph.ico">
-			</File>
-			<File
-				RelativePath=".\res\morph_banner.bmp">
-			</File>
-			<File
-				RelativePath="res\mpending.ICO">
-			</File>
-			<File
-				RelativePath="res\mule.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_grey.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_LowID.ico">
-			</File>
-			<File
-				RelativePath=".\res\mule_tray_message.ico">
-			</File>
-			<File
-				RelativePath=".\res\mule_tray_message_grey.ico">
-			</File>
-			<File
-				RelativePath=".\res\mule_tray_message_low.ico">
-			</File>
-			<File
-				RelativePath="res\mule_TrayIcon.ico">
-			</File>
-			<File
-				RelativePath="res\mule_wiz.gif">
-			</File>
-			<File
-				RelativePath="res\mule_wiz_hdr.gif">
-			</File>
-			<File
-				RelativePath="res\myinfo.ico">
-			</File>
-			<File
-				RelativePath="res\neutral.ico">
 			</File>
 			<File
 				RelativePath="res\NewServer.ico">
@@ -2226,22 +2050,7 @@
 				RelativePath="res\NormalSearch.ico">
 			</File>
 			<File
-				RelativePath="res\plus.ICO">
-			</File>
-			<File
-				RelativePath="res\pluscompa.ICO">
-			</File>
-			<File
-				RelativePath="res\pluseDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\plusmldonk.ico">
-			</File>
-			<File
-				RelativePath="res\plusshareaza.ico">
-			</File>
-			<File
-				RelativePath="res\preferences.ico">
+				RelativePath="res\PROVIDER.ICO">
 			</File>
 			<File
 				RelativePath="res\Prefs_Connection.ico">
@@ -2277,9 +2086,6 @@
 				RelativePath="res\Prefs_tweak.ico">
 			</File>
 			<File
-				RelativePath="res\PROVIDER.ICO">
-			</File>
-			<File
 				RelativePath=".\res\Rating-Excellent.ico">
 			</File>
 			<File
@@ -2304,9 +2110,6 @@
 				RelativePath="res\Rating_bad.ico">
 			</File>
 			<File
-				RelativePath="res\search.ico">
-			</File>
-			<File
 				RelativePath="res\SearchGlobalActive.ico">
 			</File>
 			<File
@@ -2328,9 +2131,6 @@
 				RelativePath="res\Security.ico">
 			</File>
 			<File
-				RelativePath="res\server.ico">
-			</File>
-			<File
 				RelativePath="res\ServerInfo.ico">
 			</File>
 			<File
@@ -2346,9 +2146,6 @@
 				RelativePath="res\Shareaza.ico">
 			</File>
 			<File
-				RelativePath="res\shared.ico">
-			</File>
-			<File
 				RelativePath="res\SharedFiles.ico">
 			</File>
 			<File
@@ -2356,6 +2153,222 @@
 			</File>
 			<File
 				RelativePath="res\Stats_HD.ico">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
+			</File>
+			<File
+				RelativePath="res\Up0down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up0down1.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down1.ico">
+			</File>
+			<File
+				RelativePath="res\UpdateServers.ico">
+			</File>
+			<File
+				RelativePath="res\User.ico">
+			</File>
+			<File
+				RelativePath="res\WebServer.ico">
+			</File>
+			<File
+				RelativePath=".\res\WideCharLowerMap.bin">
+			</File>
+			<File
+				RelativePath="res\back.ICO">
+			</File>
+			<File
+				RelativePath=".\res\backup.ico">
+			</File>
+			<File
+				RelativePath="res\bn_connect.ico">
+			</File>
+			<File
+				RelativePath="res\bn_disconnect.ico">
+			</File>
+			<File
+				RelativePath="res\bn_messages.ico">
+			</File>
+			<File
+				RelativePath="res\bn_statistics.ico">
+			</File>
+			<File
+				RelativePath="res\bn_stopcon.ico">
+			</File>
+			<File
+				RelativePath="res\cancel.ICO">
+			</File>
+			<File
+				RelativePath="res\chat.ico">
+			</File>
+			<File
+				RelativePath="res\client0.ICO">
+			</File>
+			<File
+				RelativePath="res\client1.ICO">
+			</File>
+			<File
+				RelativePath="res\client2.ICO">
+			</File>
+			<File
+				RelativePath="res\client3.ICO">
+			</File>
+			<File
+				RelativePath="res\client4.ICO">
+			</File>
+			<File
+				RelativePath="res\close.ico">
+			</File>
+			<File
+				RelativePath=".\res\community.ico">
+			</File>
+			<File
+				RelativePath="res\compatible.ICO">
+			</File>
+			<File
+				RelativePath="res\convert.ico">
+			</File>
+			<File
+				RelativePath="res\down.bmp">
+			</File>
+			<File
+				RelativePath="res\down2x.bmp">
+			</File>
+			<File
+				RelativePath=".\res\eDonkey.ico">
+			</File>
+			<File
+				RelativePath="res\eDonkeyHybrid.ico">
+			</File>
+			<File
+				RelativePath="res\emule.manifest">
+			</File>
+			<File
+				RelativePath="emule.rc">
+			</File>
+			<File
+				RelativePath="res\emule.rc2">
+			</File>
+			<File
+				RelativePath="res\forward.ICO">
+			</File>
+			<File
+				RelativePath="res\friends1.ico">
+			</File>
+			<File
+				RelativePath=".\res\friends1slot.ICO">
+			</File>
+			<File
+				RelativePath="res\friends2.ico">
+			</File>
+			<File
+				RelativePath=".\res\friends2slot.ICO">
+			</File>
+			<File
+				RelativePath="res\friends3.ICO">
+			</File>
+			<File
+				RelativePath=".\res\friends3slot.ICO">
+			</File>
+			<File
+				RelativePath="res\global.ico">
+			</File>
+			<File
+				RelativePath="res\help.ico">
+			</File>
+			<File
+				RelativePath="res\incomingfolder.ico">
+			</File>
+			<File
+				RelativePath="res\inetdownload.avi">
+			</File>
+			<File
+				RelativePath="res\logo.jpg">
+			</File>
+			<File
+				RelativePath="res\message.ICO">
+			</File>
+			<File
+				RelativePath="res\mldonk.ico">
+			</File>
+			<File
+				RelativePath=".\res\morph_banner.bmp">
+			</File>
+			<File
+				RelativePath="res\mpending.ICO">
+			</File>
+			<File
+				RelativePath="res\mule.ico">
+			</File>
+			<File
+				RelativePath="res\mule_Tr_LowID.ico">
+			</File>
+			<File
+				RelativePath="res\mule_Tr_grey.ico">
+			</File>
+			<File
+				RelativePath="res\mule_TrayIcon.ico">
+			</File>
+			<File
+				RelativePath=".\res\mule_tray_message.ico">
+			</File>
+			<File
+				RelativePath=".\res\mule_tray_message_grey.ico">
+			</File>
+			<File
+				RelativePath=".\res\mule_tray_message_low.ico">
+			</File>
+			<File
+				RelativePath="res\mule_wiz.gif">
+			</File>
+			<File
+				RelativePath="res\mule_wiz_hdr.gif">
+			</File>
+			<File
+				RelativePath="res\myinfo.ico">
+			</File>
+			<File
+				RelativePath="res\neutral.ico">
+			</File>
+			<File
+				RelativePath="res\plus.ICO">
+			</File>
+			<File
+				RelativePath="res\pluscompa.ICO">
+			</File>
+			<File
+				RelativePath="res\pluseDonkeyHybrid.ico">
+			</File>
+			<File
+				RelativePath="res\plusmldonk.ico">
+			</File>
+			<File
+				RelativePath="res\plusshareaza.ico">
+			</File>
+			<File
+				RelativePath="res\preferences.ico">
+			</File>
+			<File
+				RelativePath="res\search.ico">
+			</File>
+			<File
+				RelativePath="res\server.ico">
+			</File>
+			<File
+				RelativePath="res\shared.ico">
 			</File>
 			<File
 				RelativePath=".\res\suc.ico">
@@ -2385,51 +2398,21 @@
 				RelativePath="res\transfer.ico">
 			</File>
 			<File
-				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
-			</File>
-			<File
 				RelativePath="res\up.bmp">
-			</File>
-			<File
-				RelativePath="res\Up0down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up0down1.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down1.ico">
 			</File>
 			<File
 				RelativePath="res\up2x.bmp">
 			</File>
 			<File
-				RelativePath="res\UpdateServers.ico">
-			</File>
-			<File
 				RelativePath="res\upload.ico">
-			</File>
-			<File
-				RelativePath="res\User.ico">
-			</File>
-			<File
-				RelativePath="res\WebServer.ico">
-			</File>
-			<File
-				RelativePath=".\res\WideCharLowerMap.bin">
 			</File>
 		</Filter>
 		<Filter
 			Name="Templates"
 			Filter="">
+			<File
+				RelativePath="..\setup\Template.eMuleSkin.ini">
+			</File>
 			<File
 				RelativePath="..\setup\eMule.tmpl">
 			</File>
@@ -2438,9 +2421,6 @@
 			</File>
 			<File
 				RelativePath="..\setup\staticservers.dat">
-			</File>
-			<File
-				RelativePath="..\setup\Template.eMuleSkin.ini">
 			</File>
 			<File
 				RelativePath="..\setup\webservices.dat">

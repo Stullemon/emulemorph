@@ -542,11 +542,26 @@ public:
 	static	TCHAR	m_sWebResDir[MAX_PATH];
 
     // DynDNS
+    
+	// Account 1
+	static	TCHAR	m_sDynDNSUsername_a1[256];
+	static	TCHAR	m_sDynDNSPassword_a1[256];
+	static	TCHAR	m_sDynDNSHostname_a1[256];
+	static	bool	m_bDynDNSEnabled_a1;
 
-	static	TCHAR	m_sDynDNSUsername[256];
-	static	TCHAR	m_sDynDNSPassword[256];
-	static	TCHAR	m_sDynDNSHostname[256];
-	static	bool	m_bDynDNSEnabled;
+	// Account 2
+	static	TCHAR	m_sDynDNSUsername_a2[256];
+	static	TCHAR	m_sDynDNSPassword_a2[256];
+	static	TCHAR	m_sDynDNSHostname_a2[256];
+	static	bool	m_bDynDNSEnabled_a2;
+
+	// Account 3
+	static	TCHAR	m_sDynDNSUsername_a3[256];
+	static	TCHAR	m_sDynDNSPassword_a3[256];
+	static	TCHAR	m_sDynDNSHostname_a3[256];
+	static	bool	m_bDynDNSEnabled_a3;
+
+    //DynDNS End
 
 	static	TCHAR	m_sTemplateFile[MAX_PATH];
 	static	ProxySettings proxy; // deadlake PROXYSUPPORT
@@ -1364,14 +1379,14 @@ public:
 
     //DynDNS
     
-	static	CString GetDynDNSUsername()						{ return CString(m_sDynDNSUsername); }
-    static	void	SetDynDNSUsername(CString strNewUsername);
-	static	CString GetDynDNSPassword()						{ return CString(m_sDynDNSPassword); }
-	static	void	SetDynDNSPassword(CString strNewPass);
-	static	CString GetDynDNSHostname()						{ return CString(m_sDynDNSHostname); }
-	static	void	SetDynDNSHostname(CString strNewHostname);
-	static	bool	GetDynDNSIsEnabled()					{ return m_bDynDNSEnabled; }
-	static	void	SetDynDNSIsEnabled(bool bEnable)		{ m_bDynDNSEnabled=bEnable; }
+	static	CString GetDynDNSUsername(int account)						{ return CString(m_sDynDNSUsername_a1); }
+    static	void	SetDynDNSUsername(CString strNewUsername, int account);
+	static	CString GetDynDNSPassword(int account)						{ return CString(m_sDynDNSPassword_a2); }
+	static	void	SetDynDNSPassword(CString strNewPass, int account);
+	static	CString GetDynDNSHostname(int account)						{ return CString(m_sDynDNSHostname_a3); }
+	static	void	SetDynDNSHostname(CString strNewHostname, int account);
+	static	bool	GetDynDNSIsEnabled(int account)					{ return m_bDynDNSEnabled; }
+	static	void	SetDynDNSIsEnabled(bool bEnable, int account)	{ m_bDynDNSEnabled=bEnable; }
 	
 	// mobileMule
 	static	CString GetMMPass()								{ return CString(m_sMMPassword); }

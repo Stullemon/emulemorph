@@ -122,6 +122,26 @@ BOOL CPPgMorph3::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
+    
+	//MORPH START - Added by Commander, Various Symbols
+	if ( theApp.emuledlg->m_fontMarlett.m_hObject )
+	{
+		GetDlgItem(IDC_BUTTON_DYNDNS_PREVIOUS)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_BUTTON_DYNDNS_PREVIOUS)->SetWindowText(_T("3"));
+
+		GetDlgItem(IDC_BUTTON_DYNDNS_NEXT)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_BUTTON_DYNDNS_NEXT)->SetWindowText(_T("4"));
+        
+		GetDlgItem(IDC_STATIC_DYNDNS_CURRENTIP_ARROW)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_STATIC_DYNDNS_CURRENTIP_ARROW)->SetWindowText(_T("4"));
+
+		GetDlgItem(IDC_STATIC_DYNDNS_LASTUPDATE_ARROW)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_STATIC_DYNDNS_LASTUPDATE_ARROW)->SetWindowText(_T("4"));
+
+		GetDlgItem(IDC_BUTTON_DYNDNS_HELP)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_BUTTON_DYNDNS_HELP)->SetWindowText(_T("s"));
+	}
+	//MORPH END - Added by Commander, Various Symbols
 
 	CString strBuffer;
 

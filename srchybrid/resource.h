@@ -2128,6 +2128,7 @@
 #define IDC_BUTTON1                     2899
 #define IDC_LD_LINKGROUP                2900
 #define IDC_BUTTON2                     2900
+#define IDC_BUTTON_DYNDNS_NEXT          2900
 #define IDC_LD_BASICGROUP               2901
 #define IDC_LD_ADVANCEDGROUP            2902
 #define IDC_LD_CLIPBOARDBUT             2903
@@ -2557,6 +2558,7 @@
 #define IDC_CHARSOURCE                  5016
 #define IDC_CHARDEST                    5017
 #define IDC_CHECKDOTTOSPACE             5018
+#define IDD_DYNDNS_HELP                 5018
 #define IDC_CHECKUNDERLINETOSPACE       5019
 #define IDC_CHECKCONVERTAPOSTROPHES     5020
 #define IDC_CHECKSEARCHANDREPLACE       5021
@@ -2594,6 +2596,14 @@
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
+#define IDC_BUTTON_DYNDNS_HELP          5048
+#define IDC_BUTTON_DYNDNS_PREVIOUS      5051
+#define IDC_STATIC_DYNDNS_CURRENTIP     5052
+#define IDC_STATIC_DYNDNS_CURRENTIP2    5053
+#define IDC_STATIC_DYNDNS_LASTUPDATE2   5054
+#define IDC_STATIC_DYNDNS_LASTUPDATE_ARROW 5055
+#define IDC_STATIC_DYNDNS_CURRENTIP_ARROW 5056
+#define IDC_RE_DYNDNS_HELP              5057
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
 #define IDS_CHAT_COUNTRY                5115
 #define IDC_SHOWCLIENTPERCENTAGE        5116
@@ -2745,9 +2755,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        5017
+#define _APS_NEXT_RESOURCE_VALUE        5019
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5047
+#define _APS_NEXT_CONTROL_VALUE         5058
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif
