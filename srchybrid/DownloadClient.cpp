@@ -2329,10 +2329,37 @@ void CUpDownClient::ProcessAcceptUpload()
 			{
 				StartDownload();
 			}
+			//MORPH START - Added by SiRoB, Debug To catch the failed up/dw reason
+			else{
+				if(thePrefs.GetLogUlDlEvents()){
+					DebugLog(DLP_VERYLOW,_T("---- %s: PeerCache Transfert Attempt ----"),DbgGetClientInfo());
+				}
+			}
+			//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 		}
+		//MORPH START - Added by SiRoB, Debug To catch the failed up/dw reason
+		else{
+			if(thePrefs.GetLogUlDlEvents())
+				DebugLog(LOG_WARNING | DLP_VERYLOW,_T("---- %s: Accept Upload aborted: download state not OnQueue ----"),DbgGetClientInfo());
+		}
+		//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 	}
 	else
 	{
+		//MORPH START - Added by SiRoB, Debug To catch the failed up/dw reason
+		if(thePrefs.GetLogUlDlEvents()){
+			CString Buffer;
+			if (!reqfile)
+				Buffer = _T("reqfile == NULL");
+			else if (!reqfile->IsStopped())
+				Buffer = _T("file stopped");
+			else if (reqfile->GetStatus()==PS_READY || reqfile->GetStatus()==PS_EMPTY)
+				Buffer = reqfile->getPartfileStatus();
+			else
+				Buffer = _T("'Only download Complet file' is checked in pref");
+			DebugLog(LOG_WARNING | DLP_VERYLOW,_T("---- %s: Accept Upload aborted: %s ----"),DbgGetClientInfo(),Buffer);
+		}
+		//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
 		SendCancelTransfer();
 		SetDownloadState((reqfile==NULL || reqfile->IsStopped()) ? DS_NONE : DS_ONQUEUE);
 	}
