@@ -535,32 +535,6 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 					rec_status.right = iWidth; 
 					lpPartFile->DrawStatusBar(&cdcStatus,  &rec_status, theApp.glob_prefs->UseFlatBar()); 
 					
-					//MORPH START - Added by IceCream, show percentage in progress bar   
-                                         if (theApp.glob_prefs->GetUseDwlPercentage())   
-                                         {   
-                                                 // HoaX_69: BEGIN Display percent in progress bar   
-                                                 CDC cdcPrecent;   
-                                                 cdcPrecent.CreateCompatibleDC(dc);   
-                                                 CBitmap bmpPrecent;   
-                                                 bmpPrecent.CreateCompatibleBitmap(dc,  iWidth, iHeight);   
-                                                 bmpPrecent.SetBitmapDimension(iWidth, iHeight);   
-                                                 HGDIOBJ hOldBmp = cdcPrecent.SelectObject(bmpPrecent);   
-                                                 COLORREF oldclr = cdcPrecent.SetTextColor(RGB(255,255,255));   
-                                                 int iOMode = cdcPrecent.SetBkMode(TRANSPARENT);   
-                                                 CString csPercent;   
-                                                 csPercent.Format("%.1f%%", lpPartFile->GetPercentCompleted());   
-    
-                                                 cdcPrecent.BitBlt(0, 0, iWidth, iHeight,  NULL, 0, 0, BLACKNESS);   
-                                                 cdcPrecent.DrawText(csPercent, &rec_status, DLC_DT_TEXT | DT_CENTER);   
-                                                 cdcStatus.BitBlt(0, 0, iWidth, iHeight,  &cdcPrecent, 0, 0, SRCPAINT /*SRCINVERT*/); //MORPH - Modified by IceCream to keep text in white
-    
-                                                 cdcPrecent.SetBkMode(iOMode);   
-                                                 cdcPrecent.SetTextColor(oldclr);   
-                                                 cdcPrecent.SelectObject(hOldBmp);   
-                                                 // HoaX_69: END   
-                                         }   
-                                         //MORPH END   - Added by IceCream, show percentage in progress bar 
-
 					lpCtrlItem->dwUpdated = dwTicks + (rand() % 128); 
 				} else 
 					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->status); 
@@ -568,6 +542,22 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 				dc->BitBlt(lpRect->left, lpRect->top, iWidth, iHeight,  &cdcStatus, 0, 0, SRCCOPY); 
 				cdcStatus.SelectObject(hOldBitmap);
 				//added end
+
+				if (theApp.glob_prefs->GetUseDwlPercentage()) {
+					// HoaX_69: BEGIN Display percent in progress bar
+					COLORREF oldclr = dc->SetTextColor(RGB(255,255,255));
+					int iOMode = dc->SetBkMode(TRANSPARENT);
+					buffer.Format("%.1f%%", lpPartFile->GetPercentCompleted());
+					   
+					int iOLeft = lpRect->left;
+					lpRect->left += iWidth / 2 - 10; // Close enough 
+					dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT);
+					   
+					lpRect->left = iOLeft;
+					dc->SetBkMode(iOMode);
+					dc->SetTextColor(oldclr);
+					// HoaX_69: END
+				}
 
 				lpRect->bottom ++;
 				lpRect->top --;
