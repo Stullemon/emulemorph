@@ -217,7 +217,7 @@ public:
 	virtual void SendCancelTransfer(Packet* packet = NULL);
 	virtual bool	IsEd2kClient() const { return true; }
 	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
-	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL);
+	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL, bool accepted = true);
 	virtual bool	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);

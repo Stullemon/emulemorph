@@ -1485,7 +1485,12 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 //Returned bool is not if the TryToConnect is successful or not..
 //false means the client was deleted!
 //true means the client was not deleted!
+//MORPH START - Added by SiRoB, Don't add client not accepted -Patch-
+/*
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket)
+*/
+bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket, bool accepted)
+//MORPH START - Added by SiRoB, Don't add client not accepted -Patch-
 {
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 	{
@@ -1514,6 +1519,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 			return true;
 		}
 
@@ -1527,6 +1533,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 			return true;
 		}
 	}
@@ -1554,6 +1561,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 					return false;
 				}
 			}
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 			return true;
 		}
 
@@ -1589,6 +1597,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if (!socket->Create())
 		{
 			socket->Safe_Delete();
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 			return true;
 		}
 	}
@@ -1609,6 +1618,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				delete this;
 				return false;
 			}
+			accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 			return true;
 		}
 
@@ -1634,6 +1644,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 						delete this;
 						return false;
 					}
+					accepted = false;//MORPH - Added by SiRoB, Don't add client not accepted -Patch-
 					return true;
 				}
 				
