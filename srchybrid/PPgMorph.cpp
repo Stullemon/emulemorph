@@ -53,7 +53,9 @@ CPPgMorph::CPPgMorph()
     m_htiUSSNumberOfPings = NULL;
 	m_htiMinUpload = NULL;
 	m_htiUpSecu = NULL;
+	m_htiDlSecu = NULL;
 	m_htiEnableZeroFilledTest = NULL;
+	m_htiDisp = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, activate Anti-leecher
@@ -111,6 +113,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		int iImgTimeRem = 8;
 		//MORPH END - Added by SiRoB, khaos::categorymod+
 		int iImgSecu = 8;
+		int iImgDisp = 8;
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgUM = piml->Add(CTempIconLoader("UPLOAD"));
@@ -125,6 +128,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			// khaos::accuratetimerem-
 			//MORPH END - Added by SiRoB, khaos::categorymod+
 			iImgSecu = piml->Add(CTempIconLoader("PREF_SECURITY"));
+			iImgDisp = piml->Add(CTempIconLoader("PREF_DISPLAY"));
 		}
 		
 		m_htiDM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DM), iImgDM, TVI_ROOT);
@@ -158,9 +162,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiTimeRemAverage = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_AVG), m_htiTimeRemainingMode, m_iTimeRemainingMode == 2);
 		//m_ctrlTreeOptions.Expand(m_htiTimeRemainingMode, TVE_EXPAND); // khaos::accuratetimerem+
 		// khaos::accuratetimerem-
-		m_htiEnableZeroFilledTest = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ZERO_FILLED_TEST), m_htiDM, m_bEnableZeroFilledTest);
-		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDM, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
-		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDM, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
+		m_htiDlSecu = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SECURITY), iImgSecu, m_htiDM);
+		m_htiEnableZeroFilledTest = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ZERO_FILLED_TEST), m_htiDlSecu, m_bEnableZeroFilledTest);
+		m_htiDisp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, m_htiDM);
+		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDisp, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
+		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDisp, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 				
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		m_htiUseSLS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SLS_USESLS), m_htiDM, m_iUseSLS);
@@ -567,7 +573,9 @@ void CPPgMorph::OnDestroy()
     m_htiUSSGoingDownDivider = NULL;
     m_htiUSSNumberOfPings = NULL;
 	m_htiMinUpload = NULL;
+	m_htiDlSecu = NULL;
 	m_htiEnableZeroFilledTest = NULL;
+	m_htiDisp = NULL;
 	m_htiEnableDownloadInRed = NULL; //MORPH - Added by IceCream, show download in red
 	m_htiEnableDownloadInBold = NULL; //MORPH - Added by SiRoB, show download in Bold
 	m_htiUpSecu = NULL;
