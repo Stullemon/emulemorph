@@ -1442,9 +1442,11 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 				finalpos = pos;
 				continue;
 			}
+			//Morph Start - added by AndCycle - the NNP shouldn't need to be checked, currently there is issue in maintain OtherRequest
 			else if (m_OtherNoNeeded_list.Find(cur_file)){
 				continue;
 			}
+			//Morph End - added by AndCycle
 			else if (!pSwap){
 				pSwap = cur_file;
 				finalpos = pos;
@@ -1534,9 +1536,11 @@ bool CUpDownClient::StackA4AFSources()
 				finalpos = pos;
 				continue;
 			}
+			//Morph Start - added by AndCycle - the NNP shouldn't need to be checked, currently there is issue in maintain OtherRequest
 			else if (m_OtherNoNeeded_list.Find(cur_file)){
 				continue;
 			}
+			//Morph End - added by AndCycle
 			else if (!pSwap){
                 pSwap = cur_file;
 				finalpos = pos;
