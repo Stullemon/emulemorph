@@ -74,15 +74,15 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	LoadSettings(CPreferences::tableServer);
 
 	// Barry - Use preferred sort order from preferences
-	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer);
-	bool sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer);
-	SetSortArrow(sortItem, sortAscending);
+	int iSortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer);
+	bool bSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer);
+	SetSortArrow(iSortItem, bSortAscending);
 	// SLUGFILLER: multiSort - load multiple params
 	for (int i = thePrefs.GetColumnSortCount(CPreferences::tableServer); i > 0; ) {
 		i--;
-		sortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer, i);
-		sortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer, i);
-		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+		iSortItem = thePrefs.GetColumnSortItem(CPreferences::tableServer, i);
+		bSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableServer, i);
+		SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
 	}
 	// SLUGFILLER: multiSort
 	ShowServerCount();
@@ -207,6 +207,10 @@ void CServerListCtrl::Localize()
 	pHeaderCtrl->SetItem(15, &hdi);
 	strRes.ReleaseBuffer();
     // Commander - Added: IP2Country column - End
+
+	int iItems = GetItemCount();
+	for (int i = 0; i < iItems; i++)
+		RefreshServer((CServer*)GetItemData(i));
 }
 
 void CServerListCtrl::RemoveServer(CServer* todel)
