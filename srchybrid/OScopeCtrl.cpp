@@ -759,28 +759,33 @@ void COScopeCtrl::DrawPoint()
 			// grab the plotting pen
 			oldPen = m_dcPlot.SelectObject(&m_PlotData[iTrend].penPlot);
 			
-			// move to the previous point
-			prevX = m_rectPlot.right - m_nShiftPixels;
-			if(m_PlotData[iTrend].nPrevY > 0)
-			{
-				prevY = m_PlotData[iTrend].nPrevY;
-			}
-			else
-			{
-				prevY = m_rectPlot.bottom - 
-				(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
-			}
-			if(!m_PlotData[iTrend].BarsPlot)
-				m_dcPlot.MoveTo(prevX /*- 1*/, prevY); //MORPH - Changed by SiRoB, fix [apph]
-			// draw to the current point
-			currX = m_rectPlot.right;
-			currY = m_rectPlot.bottom -
-				(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
-			m_PlotData[iTrend].nPrevY = currY;
 			if(m_PlotData[iTrend].BarsPlot)
+			{
+				currX = m_rectPlot.right;
+				currY = m_rectPlot.bottom -
+					(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 				m_dcPlot.MoveTo(currX /*- 1*/, m_rectPlot.bottom); //MORPH - Changed by SiRoB, fix [apph]
+				m_dcPlot.LineTo(currX /*- 1*/, currY);//MORPH - Changed by SiRoB, fix [apph]
+			}
 			else
 			{
+				// move to the previous point
+				prevX = m_rectPlot.right - m_nShiftPixels;
+				if(m_PlotData[iTrend].nPrevY > 0)
+				{
+					prevY = m_PlotData[iTrend].nPrevY;
+				}
+				else
+				{
+					prevY = m_rectPlot.bottom - 
+					(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
+				}
+				m_dcPlot.MoveTo(prevX /*- 1*/, prevY); //MORPH - Changed by SiRoB, fix [apph]
+				// draw to the current point
+				currX = m_rectPlot.right;
+				currY = m_rectPlot.bottom -
+					(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
+				m_PlotData[iTrend].nPrevY = currY;
 				if(abs(prevX - currX) > abs(prevY - currY))
 				{
 					currX += prevX - currX>0 ? -1 : 1;
@@ -789,8 +794,8 @@ void COScopeCtrl::DrawPoint()
 				{
 					currY += prevY - currY>0 ? -1 : 1;
 				}
+				m_dcPlot.LineTo(currX /*- 1*/, currY);//MORPH - Changed by SiRoB, fix [apph]
 			}
-			m_dcPlot.LineTo(currX /*- 1*/, currY);//MORPH - Changed by SiRoB, fix [apph]
 			//if(drawBars) || m_PlotData[iTrend].BarsPlot)
 			//	m_dcPlot.LineTo(currX - 1, m_rectPlot.bottom);
 			
