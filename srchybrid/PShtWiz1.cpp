@@ -231,6 +231,7 @@ BOOL CPPgWiz1General::OnInitDialog()
 {
 	CDlgPageWizard::OnInitDialog();
 	InitWindowStyles(this);
+	((CEdit*)GetDlgItem(IDC_NICK))->SetLimitText(thePrefs.GetMaxUserNickLength());
 	GetDlgItem(IDC_NICK_FRM)->SetWindowText(GetResString(IDS_ENTERUSERNAME));
 	return TRUE;
 }
@@ -424,7 +425,7 @@ public:
 	{
 		m_iSafeServerConnect = 0;
 		m_iAutoConnectAtStart = 0;
-		m_iKademlia = 1;
+		m_iKademlia = 0;
 		m_iED2K = 1;
 	}
 	virtual ~CPPgWiz1Server();
@@ -454,7 +455,7 @@ CPPgWiz1Server::CPPgWiz1Server()
 {
 	m_iSafeServerConnect = 0;
 	m_iAutoConnectAtStart = 0;
-	m_iKademlia = 1;
+	m_iKademlia = 0;
 	m_iED2K = 1;
 }
 
@@ -479,6 +480,7 @@ BOOL CPPgWiz1Server::OnInitDialog()
 	GetDlgItem(IDC_AUTOCONNECT)->SetWindowText(GetResString(IDS_FIRSTAUTOCON));
 	GetDlgItem(IDC_WIZARD_NETWORK)->SetWindowText(GetResString(IDS_WIZARD_NETWORK));
 	GetDlgItem(IDC_WIZARD_ED2K)->SetWindowText(GetResString(IDS_WIZARD_ED2K));
+	GetDlgItem(IDC_KADALPHA)->SetWindowText(GetResString(IDS_KADALPHA));
 
 	return TRUE;
 }
@@ -617,29 +619,33 @@ BOOL FirstTimeWizard()
 	page7.m_psp.dwFlags |= PSP_HIDEHEADER;
 	sheet.AddPage(&page7);
 
-	page2.m_strNick = theApp.glob_prefs->GetUserNick();
+	page2.m_strNick = thePrefs.GetUserNick();
 	if (page2.m_strNick.IsEmpty())
-		page2.m_strNick = _T("http://www.emule-project.net");
+		page2.m_strNick = DEFAULT_NICK;
 	page3.m_iDAP = 1;
 	page4.m_iUAP = 1;
 	page5.m_iULFullChunks = 1;
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iAutoConnectAtStart = 0;
-	page6.m_iKademlia = 1;
+	page6.m_iKademlia = 0;
 	page6.m_iED2K = 1;
 
 	int iResult = sheet.DoModal();
 	if (iResult == IDCANCEL)
 		return FALSE;
 
-	theApp.glob_prefs->SetUserNick(page2.m_strNick);
-	theApp.glob_prefs->SetNewAutoDown(page3.m_iDAP);
-	theApp.glob_prefs->SetNewAutoUp(page4.m_iUAP);
-	theApp.glob_prefs->SetTransferFullChunks(page5.m_iULFullChunks);
-	theApp.glob_prefs->SetSafeServerConnectEnabled(page6.m_iSafeServerConnect);
-	theApp.glob_prefs->SetAutoConnect(page6.m_iAutoConnectAtStart);
-	theApp.glob_prefs->SetNetworkKademlia(page6.m_iKademlia);
-	theApp.glob_prefs->SetNetworkED2K(page6.m_iED2K);
+	page2.m_strNick.Trim();
+	if (page2.m_strNick.IsEmpty())
+		page2.m_strNick = DEFAULT_NICK;
+
+	thePrefs.SetUserNick(page2.m_strNick);
+	thePrefs.SetNewAutoDown(page3.m_iDAP);
+	thePrefs.SetNewAutoUp(page4.m_iUAP);
+	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks);
+	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect);
+	thePrefs.SetAutoConnect(page6.m_iAutoConnectAtStart);
+	thePrefs.SetNetworkKademlia(page6.m_iKademlia);
+	thePrefs.SetNetworkED2K(page6.m_iED2K);
 
 	theApp.emuledlg->SetKadButtonState();
 	return TRUE;

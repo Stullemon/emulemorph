@@ -8,12 +8,8 @@ public:
 	CPPgScheduler();
 	virtual ~CPPgScheduler();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
-
 
 	enum { IDD = IDD_PPG_SCHEDULER };
-
-	CPreferences *app_prefs;
 
 	void Localize(void);
 

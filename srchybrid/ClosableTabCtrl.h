@@ -1,9 +1,8 @@
 #pragma once
-#include "loggable.h"
 
 #define WM_CLOSETAB		(WM_USER + 0x101)
 
-class CClosableTabCtrl : public CTabCtrl, public CLoggable
+class CClosableTabCtrl : public CTabCtrl
 {
 	DECLARE_DYNAMIC(CClosableTabCtrl)
 
@@ -11,10 +10,14 @@ public:
 	CClosableTabCtrl();
 	virtual ~CClosableTabCtrl();
 
+	bool m_bCloseable;
+
 protected:
-	CImageList m_ImgLst;
+	CImageList m_ImgLstCloseButton;
+	IMAGEINFO m_iiCloseButton;
 
 	void SetAllIcons();
+	void GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseButton);
 
 	virtual void PreSubclassWindow();
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);

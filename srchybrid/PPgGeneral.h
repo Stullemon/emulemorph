@@ -8,12 +8,8 @@ public:
 	CPPgGeneral();
 	virtual ~CPPgGeneral();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
-
 // Dialog Data
 	enum { IDD = IDD_PPG_GENERAL };
-protected:
-	CPreferences *app_prefs;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

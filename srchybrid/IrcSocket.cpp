@@ -44,7 +44,7 @@ CIrcSocket::~CIrcSocket()
 
 BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR lpszSocketAddress)
 {
-	const ProxySettings& proxy = theApp.glob_prefs->GetProxy();
+	const ProxySettings& proxy = thePrefs.GetProxy();
 	if (proxy.UseProxy && proxy.type != PROXYTYPE_NOPROXY)
 	{
 		m_pProxyLayer = new CAsyncProxySocketLayer;
@@ -79,20 +79,22 @@ BOOL CIrcSocket::Create(UINT nSocketPort, int nSocketType, long lEvent, LPCTSTR 
 
 void CIrcSocket::Connect()
 {
-	CAsyncSocketEx::Connect(theApp.glob_prefs->GetIRCServer(), 6667);
+	CAsyncSocketEx::Connect(thePrefs.GetIRCServer(), 6667);
 }
 
 void CIrcSocket::OnReceive(int nErrorCode)
 {
 	if (nErrorCode){
-		AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(nErrorCode, 1));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
 
 	char buffer[256];
 	int length = Receive(buffer, sizeof(buffer)-1);
 	if (length < 0){
-		AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(GetLastError(), 1));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("IRC socket: Failed to read - %s"), GetErrorMessage(GetLastError(), 1));
 		return;
 	}
 	if (length > 0){
@@ -115,7 +117,8 @@ void CIrcSocket::OnConnect(int nErrorCode)
 void CIrcSocket::OnClose(int nErrorCode)
 {
 	if (nErrorCode){
-		AddDebugLogLine(false, _T("IRC socket: Failed to close - %s"), GetErrorMessage(nErrorCode, 1));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("IRC socket: Failed to close - %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
 	RemoveAllLayers();

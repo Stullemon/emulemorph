@@ -8,12 +8,8 @@ public:
 	CPPgIRC();
 	virtual ~CPPgIRC();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
-
 // Dialog Data
 	enum { IDD = IDD_PPG_IRC };
-protected:
-	CPreferences *app_prefs;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 

@@ -95,7 +95,7 @@ void CMuleToolbarCtrl::Init(void)
 	bitmappaths.RemoveAll();
 
 	ModifyStyle(0, TBSTYLE_FLAT | CCS_ADJUSTABLE | TBSTYLE_TRANSPARENT | CCS_NODIVIDER);
-	ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), false);
+	ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), false);
 	// add button-text:
 	TCHAR cButtonStrings[2000];
 	int lLen, lLen2;
@@ -203,7 +203,7 @@ void CMuleToolbarCtrl::Init(void)
 	sepButton.iBitmap = -1;
 	
 	int iAddedButtons = 0;
-	CString config = theApp.glob_prefs->GetToolbarSettings();
+	CString config = thePrefs.GetToolbarSettings();
 	for(i=0;i<config.GetLength();i+=2)
 	{
 		int index = _tstoi(config.Mid(i,2));
@@ -219,7 +219,7 @@ void CMuleToolbarCtrl::Init(void)
 	// recalc toolbar-size:	
 	Localize();		// at first we have to localize the button-text!!!
 	m_iToolbarLabelSettings=4;
-	ChangeTextLabelStyle(theApp.glob_prefs->GetToolbarLabelSettings(), false);
+	ChangeTextLabelStyle(thePrefs.GetToolbarLabelSettings(), false);
 	SetBtnWidth();		// then calc and set the button width
 	AutoSize();		// and finally call the original (but maybe obsolete) function
 	
@@ -340,10 +340,10 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	if (GetKeyState(VK_CONTROL) & 0x8000)
 	{
-		if (!theApp.glob_prefs->GetToolbarBitmapSettings().IsEmpty())
-			ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
-		if (!CString(theApp.glob_prefs->GetSkinProfile()).IsEmpty())
-			theApp.ApplySkin(theApp.glob_prefs->GetSkinProfile());
+		if (!thePrefs.GetToolbarBitmapSettings().IsEmpty())
+			ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
+		if (!CString(thePrefs.GetSkinProfile()).IsEmpty())
+			theApp.ApplySkin(thePrefs.GetSkinProfile());
 
 		*pResult = TRUE;
 		return;
@@ -362,7 +362,7 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 	m_BitmapsMenu.AppendMenu(MF_SEPARATOR);
 	m_BitmapsMenu.AppendMenu(MF_STRING,MP_TOOLBARBITMAP,GetResString(IDS_DEFAULT));
 	bitmappaths.RemoveAll();
-	CString currentBitmapSettings = theApp.glob_prefs->GetToolbarBitmapSettings();
+	CString currentBitmapSettings = thePrefs.GetToolbarBitmapSettings();
 	bool checked=false;
 	if(currentBitmapSettings=="")
 	{
@@ -372,13 +372,13 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 	bitmappaths.Add(_T(""));
 	int i = 1;
-	if (!theApp.glob_prefs->GetToolbarBitmapFolderSettings().IsEmpty())
+	if (!thePrefs.GetToolbarBitmapFolderSettings().IsEmpty())
 	{
 		for (int f = 0; f < ARRSIZE(_apszTBFiles); f++)
 		{
 			bool bFinished = false;
 			WIN32_FIND_DATA FileData;
-			HANDLE hSearch = FindFirstFile(theApp.glob_prefs->GetToolbarBitmapFolderSettings() + CString(_T("\\")) + _apszTBFiles[f], &FileData);
+			HANDLE hSearch = FindFirstFile(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + _apszTBFiles[f], &FileData);
 			if (hSearch == INVALID_HANDLE_VALUE)
 				bFinished = true;
 			for (/**/; !bFinished && i < 50; i++)
@@ -391,7 +391,7 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 				else
 					bitmapBaseName = bitmapFileName;
 				m_BitmapsMenu.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, bitmapBaseName);
-				bitmappaths.Add(theApp.glob_prefs->GetToolbarBitmapFolderSettings() + CString(_T("\\")) + bitmapFileName);
+				bitmappaths.Add(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + bitmapFileName);
 				if (!checked && currentBitmapSettings == bitmappaths[i])
 				{
 					m_BitmapsMenu.CheckMenuItem(MP_TOOLBARBITMAP+i, MF_CHECKED);
@@ -415,12 +415,12 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 
 	CMenu m_SkinsMenu;
 	m_SkinsMenu.CreateMenu();
-	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_FILE, "Select Skin...");
-	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_DIR, "Select Skin Directory...");
+	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_FILE, GetResString(IDS_SEL_SKIN));
+	m_SkinsMenu.AppendMenu(MF_STRING,MP_SELECT_SKIN_DIR, GetResString(IDS_SEL_SKINDIR));
 	m_SkinsMenu.AppendMenu(MF_SEPARATOR);
 	m_SkinsMenu.AppendMenu(MF_STRING,MP_SKIN_PROFILE,GetResString(IDS_DEFAULT));
 	aSkinPaths.RemoveAll();
-	CString currentSkin = theApp.glob_prefs->GetSkinProfile();
+	CString currentSkin = thePrefs.GetSkinProfile();
 	checked=false;
 	if(currentSkin=="")
 	{
@@ -430,13 +430,13 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 	aSkinPaths.Add(_T(""));
 	i = 1;
-	if (!theApp.glob_prefs->GetSkinProfileDir().IsEmpty())
+	if (!thePrefs.GetSkinProfileDir().IsEmpty())
 	{
 		for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++)
 		{
 			bool bFinished = false;
 			WIN32_FIND_DATA FileData;
-			HANDLE hSearch = FindFirstFile(theApp.glob_prefs->GetSkinProfileDir() + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
+			HANDLE hSearch = FindFirstFile(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
 			if (hSearch == INVALID_HANDLE_VALUE)
 				bFinished = true;
 			for (/**/; !bFinished && i < 50; i++)
@@ -449,7 +449,7 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 				else
 					skinBaseName = skinFileName;
 				m_SkinsMenu.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, skinBaseName);
-				aSkinPaths.Add(theApp.glob_prefs->GetSkinProfileDir() + CString(_T("\\")) + skinFileName);
+				aSkinPaths.Add(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + skinFileName);
 				if (!checked && currentSkin == aSkinPaths[i])
 				{
 					m_SkinsMenu.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
@@ -469,15 +469,15 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 		m_SkinsMenu.EnableMenuItem(MP_SKIN_PROFILE + i, MF_DISABLED);
 		aSkinPaths.Add(currentSkin);
 	}
-	m_ToolbarMenu.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_SkinsMenu.m_hMenu, "Skin Profiles");
+	m_ToolbarMenu.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_SkinsMenu.m_hMenu, GetResString(IDS_SKIN_PROF));
 	
 	CMenu m_TextLabelsMenu;
 	m_TextLabelsMenu.CreateMenu();
 	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_NOTEXTLABELS, GetResString(IDS_NOTEXTLABELS));
 	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_TEXTLABELS,GetResString(IDS_ENABLETEXTLABELS));
 	m_TextLabelsMenu.AppendMenu(MF_STRING,MP_TEXTLABELSONRIGHT,GetResString(IDS_TEXTLABELSONRIGHT));
-	m_TextLabelsMenu.CheckMenuItem(theApp.glob_prefs->GetToolbarLabelSettings(),MF_BYPOSITION|MF_CHECKED);
-	m_TextLabelsMenu.EnableMenuItem(theApp.glob_prefs->GetToolbarLabelSettings(),MF_BYPOSITION|MF_DISABLED);
+	m_TextLabelsMenu.CheckMenuItem(thePrefs.GetToolbarLabelSettings(),MF_BYPOSITION|MF_CHECKED);
+	m_TextLabelsMenu.EnableMenuItem(thePrefs.GetToolbarLabelSettings(),MF_BYPOSITION|MF_DISABLED);
 	m_ToolbarMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_TextLabelsMenu.m_hMenu, GetResString(IDS_TEXTLABELS));
 	m_ToolbarMenu.AppendMenu(MF_STRING,MP_CUSTOMIZETOOLBAR, GetResString(IDS_CUSTOMIZETOOLBAR));
 	m_ToolbarMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -526,7 +526,7 @@ void CMuleToolbarCtrl::OnTbnToolbarChange(NMHDR *pNMHDR, LRESULT *pResult)
 			config.Append(buffer);
 		}
 
-	theApp.glob_prefs->SetToolbarSettings(config);
+	thePrefs.SetToolbarSettings(config);
 	Localize();
 
 	theApp.emuledlg->ShowConnectionState();
@@ -594,9 +594,9 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	{
 		case MP_SELECTTOOLBARBITMAPDIR:{
 			TCHAR buffer[MAX_PATH];
-			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), theApp.glob_prefs->GetToolbarBitmapFolderSettings());
+			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), thePrefs.GetToolbarBitmapFolderSettings());
 			if(SelectDir(m_hWnd, buffer, GetResString(IDS_SELECTTOOLBARBITMAPDIR)))
-				theApp.glob_prefs->SetToolbarBitmapFolderSettings(buffer);
+				thePrefs.SetToolbarBitmapFolderSettings(buffer);
 			break;
 		}
 		case MP_CUSTOMIZETOOLBAR:
@@ -622,34 +622,34 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			strFilter += _T("||");
 			CFileDialog dialog(TRUE, EMULTB_BASEEXT _T(".bmp"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
 			if (IDOK == dialog.DoModal())
-				if(theApp.glob_prefs->GetToolbarBitmapSettings()!=dialog.GetPathName())
+				if(thePrefs.GetToolbarBitmapSettings()!=dialog.GetPathName())
 				{
 					ChangeToolbarBitmap(dialog.GetPathName(), true);
-					theApp.glob_prefs->SetToolbarBitmapSettings(dialog.GetPathName());
+					thePrefs.SetToolbarBitmapSettings(dialog.GetPathName());
 				}
 			break;
 		}
 
 		case MP_NOTEXTLABELS:
 			ChangeTextLabelStyle(0,TRUE);
-			theApp.glob_prefs->SetToolbarLabelSettings(0);
+			thePrefs.SetToolbarLabelSettings(0);
 			break;
 
 		case MP_TEXTLABELS:
 			ChangeTextLabelStyle(1,TRUE);
-			theApp.glob_prefs->SetToolbarLabelSettings(1);
+			thePrefs.SetToolbarLabelSettings(1);
 			break;
 
 		case MP_TEXTLABELSONRIGHT:
 			ChangeTextLabelStyle(2,TRUE);
-			theApp.glob_prefs->SetToolbarLabelSettings(2);
+			thePrefs.SetToolbarLabelSettings(2);
 			break;
 
 		case MP_SELECT_SKIN_DIR:{
 			TCHAR buffer[MAX_PATH];
-			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), theApp.glob_prefs->GetSkinProfileDir());
+			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), thePrefs.GetSkinProfileDir());
 			if(SelectDir(m_hWnd, buffer, "Select skin profile directory"))
-				theApp.glob_prefs->SetSkinProfileDir(buffer);
+				thePrefs.SetSkinProfileDir(buffer);
 			break;
 		}
 		case MP_SELECT_SKIN_FILE:
@@ -670,7 +670,7 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			CFileDialog dialog(TRUE, EMULSKIN_BASEEXT _T(".ini"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
 			if (IDOK == dialog.DoModal())
 			{
-				if(theApp.glob_prefs->GetSkinProfile()!=dialog.GetPathName())
+				if(thePrefs.GetSkinProfile()!=dialog.GetPathName())
 					theApp.ApplySkin(dialog.GetPathName());
 			}
 			break;
@@ -679,15 +679,15 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		default:
 			if(wParam >= MP_TOOLBARBITMAP && wParam < MP_TOOLBARBITMAP + 50)
 			{
-				if(theApp.glob_prefs->GetToolbarBitmapSettings()!=bitmappaths[wParam-MP_TOOLBARBITMAP])
+				if(thePrefs.GetToolbarBitmapSettings()!=bitmappaths[wParam-MP_TOOLBARBITMAP])
 				{
 					ChangeToolbarBitmap(bitmappaths[wParam-MP_TOOLBARBITMAP], true);
-					theApp.glob_prefs->SetToolbarBitmapSettings(bitmappaths[wParam-MP_TOOLBARBITMAP]);
+					thePrefs.SetToolbarBitmapSettings(bitmappaths[wParam-MP_TOOLBARBITMAP]);
 				}
 			}
 			else if (wParam >= MP_SKIN_PROFILE && wParam < MP_SKIN_PROFILE + 50)
 			{
-				if (theApp.glob_prefs->GetSkinProfile() != aSkinPaths[wParam - MP_SKIN_PROFILE])
+				if (thePrefs.GetSkinProfile() != aSkinPaths[wParam - MP_SKIN_PROFILE])
 					theApp.ApplySkin(aSkinPaths[wParam - MP_SKIN_PROFILE]);
 			}
 	}
@@ -823,7 +823,7 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 		AddButtons(1,&TBButtons[index]);
 	}
 	// save new (default) configuration 
-	theApp.glob_prefs->SetToolbarSettings(config.GetBuffer(256));
+	thePrefs.SetToolbarSettings(config.GetBuffer(256));
 	config.ReleaseBuffer();
 
 	Localize();		// we have to localize the button-text
@@ -831,7 +831,7 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 	theApp.emuledlg->ShowConnectionState();
 
 	m_iToolbarLabelSettings=4;
-	ChangeTextLabelStyle(theApp.glob_prefs->GetToolbarLabelSettings(), false);
+	ChangeTextLabelStyle(thePrefs.GetToolbarLabelSettings(), false);
 	SetBtnWidth();		// then calc and set the button width
 	AutoSize();		
 }
@@ -844,5 +844,11 @@ void CMuleToolbarCtrl::OnTbnInitCustomize(NMHDR *pNMHDR, LRESULT *pResult)
 void CMuleToolbarCtrl::OnSysColorChange()
 {
 	CToolBarCtrl::OnSysColorChange();
-	ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
+	ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
+}
+
+void CMuleToolbarCtrl::ReloadConfig(){
+	while (GetButtonCount() != 0)
+		DeleteButton(0);
+	Init();
 }

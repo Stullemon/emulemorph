@@ -19,7 +19,6 @@
 #include "kademlia/kademlia/tag.h"
 #include "MetaDataDlg.h"
 #include "OtherFunctions.h"
-#include "Ini2.h"
 #include "Preferences.h"
 #include "MenuCmds.h"
 #include "Packets.h"
@@ -30,20 +29,6 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
-
-
-//////////////////////////////////////////////////////////////////////////////
-// LCX_COLUMN_INIT
-
-typedef struct
-{
-	int				iColID;
-	LPCTSTR			pszHeading;
-	UINT			uFormat;
-	int				iWidth;
-	int				iOrder;
-	LPCTSTR			pszSample;
-} LCX_COLUMN_INIT;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -58,13 +43,12 @@ enum EMetaDataCols
 
 static LCX_COLUMN_INIT _aColumns[] =
 {
-	{ META_DATA_COL_NAME,		"Name",		LVCFMT_LEFT,	-1, 0, _T("Temporary file MMMMM") },
-	{ META_DATA_COL_TYPE,		"Type",			LVCFMT_LEFT,	-1, 1, _T("Integer") },
-	{ META_DATA_COL_VALUE,		"Value",		LVCFMT_LEFT,	-1, 2, _T("long long long long long long long long file name.avi") }
+	{ META_DATA_COL_NAME,		"Name",		LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("Temporary file MMMMM") },
+	{ META_DATA_COL_TYPE,		"Type",		LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("Integer") },
+	{ META_DATA_COL_VALUE,		"Value",	LVCFMT_LEFT,	-1, 2, ASCENDING,  NONE, _T("long long long long long long long long file name.avi") }
 };
 
 #define	PREF_INI_SECTION	_T("MetaDataDlg")
-#define	PREF_INI_COLWIDTH	_T("Col%uWidth")
 
 // CMetaDataDlg dialog
 
@@ -74,7 +58,6 @@ BEGIN_MESSAGE_MAP(CMetaDataDlg, CResizablePage)
 	ON_NOTIFY(LVN_KEYDOWN, IDC_TAGS, OnLvnKeydownTags)
 	ON_COMMAND(MP_COPYSELECTED, OnCopyTags)
 	ON_COMMAND(MP_SELECTALL, OnSelectAllTags)
-	ON_WM_CONTEXTMENU()
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -87,6 +70,9 @@ CMetaDataDlg::CMetaDataDlg()
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_pMenuTags = NULL;
+	m_tags.m_pParent = this;
+	m_tags.SetRegistryKey(PREF_INI_SECTION);
+	m_tags.SetRegistryPrefix(_T("MetaDataTags_"));
 }
 
 CMetaDataDlg::~CMetaDataDlg()
@@ -114,58 +100,20 @@ BOOL CMetaDataDlg::OnInitDialog()
 	AddAnchor(IDC_TOTAL_TAGS, BOTTOM_LEFT, BOTTOM_RIGHT);
 
 	m_tags.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
-	CIni ini(strIniFile, PREF_INI_SECTION);
-
-	m_tags.InsertColumn(0, _T("Dummy"), LVCFMT_LEFT, 0);
-	for (int iCol = 0; iCol < ARRSIZE(_aColumns); iCol++)
-	{
-		int iColWidth;
-		if (_aColumns[iCol].iWidth >= 0) {
-			iColWidth = _aColumns[iCol].iWidth;
-		}
-		else
-		{
-			CString strColKey;
-			strColKey.Format(PREF_INI_COLWIDTH, iCol);
-			iColWidth = ini.GetInt(strColKey, -1);
-			if (iColWidth == -1)
-			{
-			    // Get the 'Optimal Column Width'
-			    if (_aColumns[iCol].pszSample){
-				    int iWidthSample = m_tags.GetStringWidth(_aColumns[iCol].pszSample);
-				    int iWidthHeader = m_tags.GetStringWidth(_aColumns[iCol].pszHeading);
-				    iWidthHeader += 30; // if using the COMCTL 6.0 header bitmaps (up/down arrows), we need more space
-    
-				    iColWidth = 6 + __max(iWidthSample, iWidthHeader) + 6;	// left+right margin
-				    if (_aColumns[iCol].uFormat & LVCFMT_RIGHT) // right-justified text(!)
-					    iColWidth += 4;
-			    }
-			    else
-				    iColWidth = 0;
-		    }
-		}
-
-		LVCOLUMN lvc;
-		lvc.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT | LVCF_SUBITEM;
-		lvc.pszText = const_cast<LPTSTR>(_aColumns[iCol].pszHeading);
-		lvc.cx = iColWidth;
-		lvc.fmt = _aColumns[iCol].uFormat;
-		lvc.iSubItem = _aColumns[iCol].iColID;
-		m_tags.InsertColumn(_aColumns[iCol].iColID + 1/*skip dummy column*/, &lvc);
-	}
-	m_tags.DeleteColumn(0);
+	m_tags.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
+	m_tags.CreateColumns(ARRSIZE(_aColumns), _aColumns);
 
 	InitTags();
 
 	m_pMenuTags = new CMenu();
-	if (m_pMenuTags->CreatePopupMenu()){
+	if (m_pMenuTags->CreatePopupMenu())
+	{
 		m_pMenuTags->AppendMenu(MF_ENABLED | MF_STRING, MP_COPYSELECTED, GetResString(IDS_COPY));
 		m_pMenuTags->AppendMenu(MF_SEPARATOR);
 		m_pMenuTags->AppendMenu(MF_ENABLED | MF_STRING, MP_SELECTALL, GetResString(IDS_SELECTALL));
 	}
+	m_tags.m_pMenu = m_pMenuTags;
+	m_tags.m_pParent = this;
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -421,44 +369,20 @@ void CMetaDataDlg::OnCopyTags()
 
 void CMetaDataDlg::OnSelectAllTags()
 {
-	m_tags.SetItemState(-1, LVIS_SELECTED, LVIS_SELECTED);
+	m_tags.SelectAllItems();
 }
 
 void CMetaDataDlg::OnLvnKeydownTags(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMLVKEYDOWN pLVKeyDow = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
+	LPNMLVKEYDOWN pLVKeyDown = reinterpret_cast<LPNMLVKEYDOWN>(pNMHDR);
 
-	if (pLVKeyDow->wVKey == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
+	if (pLVKeyDown->wVKey == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
 		OnCopyTags();
-	else if (pLVKeyDow->wVKey == 'A' && (GetKeyState(VK_CONTROL) & 0x8000))
-		OnSelectAllTags();
 	*pResult = 0;
-}
-
-void CMetaDataDlg::OnContextMenu(CWnd * /*pWnd*/, CPoint point)
-{
-	if (m_pMenuTags == NULL){
-		Default();
-		return;
-	}
-
-	if (m_pMenuTags != NULL){
-		GetPopupMenuPos(m_tags, point);
-		m_pMenuTags->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RIGHTBUTTON, point.x, point.y, this);
-	}
 }
 
 void CMetaDataDlg::OnDestroy()
 {
-	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
-	CIni ini(strIniFile, PREF_INI_SECTION);
-	for (int iCol = 0; iCol < ARRSIZE(_aColumns); iCol++)
-	{
-		CString strColKey;
-		strColKey.Format(PREF_INI_COLWIDTH, iCol);
-		ini.WriteInt(strColKey, _aColumns[iCol].iWidth = m_tags.GetColumnWidth(iCol));
-	}
-
+	m_tags.WriteColumnStats(ARRSIZE(_aColumns), _aColumns);
 	CResizablePage::OnDestroy();
 }

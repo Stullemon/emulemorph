@@ -40,7 +40,12 @@ CEnBitmap::~CEnBitmap()
 
 }
 
-BOOL CEnBitmap::LoadImage(UINT uIDRes, LPCTSTR szResourceType, HMODULE hInst, COLORREF crBack)
+BOOL CEnBitmap::LoadImage(UINT uIDRes, LPCTSTR pszResourceType, HMODULE hInst, COLORREF crBack)
+{
+	return LoadImage(MAKEINTRESOURCE(uIDRes), pszResourceType, hInst, crBack);
+}
+
+BOOL CEnBitmap::LoadImage(LPCTSTR lpszResourceName, LPCTSTR szResourceType, HMODULE hInst, COLORREF crBack)
 {
 	ASSERT(m_hObject == NULL);      // only attach once, detach on destroy
 
@@ -52,14 +57,14 @@ BOOL CEnBitmap::LoadImage(UINT uIDRes, LPCTSTR szResourceType, HMODULE hInst, CO
 	BOOL bResult = FALSE;
 
 	// first call is to get buffer size
-	if (GetResource(MAKEINTRESOURCE(uIDRes), szResourceType, hInst, 0, nSize))
+	if (GetResource(lpszResourceName, szResourceType, hInst, 0, nSize))
 	{
 		if (nSize > 0)
 		{
 			pBuff = new BYTE[nSize];
 			
 			// this loads it
-			if (GetResource(MAKEINTRESOURCE(uIDRes), szResourceType, hInst, pBuff, nSize))
+			if (GetResource(lpszResourceName, szResourceType, hInst, pBuff, nSize))
 			{
 				IPicture* pPicture = LoadFromBuffer(pBuff, nSize);
 

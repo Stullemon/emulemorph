@@ -86,11 +86,11 @@ CUDPSocket::~CUDPSocket(){
 }
 
 bool CUDPSocket::Create(){
-	if (theApp.glob_prefs->GetServerUDPPort()){
+	if (thePrefs.GetServerUDPPort()){
 	    VERIFY( m_udpwnd.CreateEx(0, AfxRegisterWndClass(0),_T("Emule Socket Wnd"),WS_OVERLAPPED, 0, 0, 0, 0, NULL, NULL));
 	    m_hWndResolveMessage = m_udpwnd.m_hWnd;
 	    m_udpwnd.m_pOwner = this;
-		if (!CAsyncSocket::Create(theApp.glob_prefs->GetServerUDPPort()==0xFFFF ? 0 : theApp.glob_prefs->GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
+		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
 			AddLogLine(true, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
 			return false;
 		}
@@ -100,8 +100,10 @@ bool CUDPSocket::Create(){
 }
 
 void CUDPSocket::OnReceive(int nErrorCode){
-	if (nErrorCode)
-		AddDebugLogLine(false, _T("Error: Server UDP socket: Receive failed - %s"), GetErrorMessage(nErrorCode, 1));
+	if (nErrorCode){
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Error: Server UDP socket: Receive failed - %s"), GetErrorMessage(nErrorCode, 1));
+	}
 
 	uint8 buffer[5000];
 	CString host;
@@ -111,7 +113,7 @@ void CUDPSocket::OnReceive(int nErrorCode){
 	{
 		if (buffer[0] == OP_EDONKEYPROT)
 			ProcessPacket(buffer+2, length-2, buffer[1], host, nUDPPort);
-		else if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
+		else if (thePrefs.GetDebugServerUDPLevel() > 0)
 			Debug("***NOTE: ServerUDPMessage from %s:%u - Unknown protocol 0x%02x\n", host, nUDPPort-4, buffer[0]);
 	}
 }
@@ -131,7 +133,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				int iLeft;
 				int iPacket = 1;
 				do{
-					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
+					if (thePrefs.GetDebugServerUDPLevel() > 0){
 						uint32 nClientID = *((uint32*)(packet+16));
 						uint16 nClientPort = *((uint16*)(packet+20));
 						Debug("ServerUDPMessage from %s:%u - OP_GlobSearchResult(%u); %s\n", host, nUDPPort-4, iPacket++, DbgGetFileInfo((uchar*)packet), DbgGetClientID(nClientID), nClientPort);
@@ -142,8 +144,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 					// check if there is another source packet
 					iLeft = (int)(data.GetLength() - data.GetPosition());
 					if (iLeft >= 2){
-						uint8 protocol;
-						data.Read(&protocol, 1);
+						uint8 protocol = data.ReadUInt8();
 						iLeft--;
 						if (protocol != OP_EDONKEYPROT){
 							data.Seek(-1, SEEK_CUR);
@@ -151,8 +152,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 							break;
 						}
 
-						uint8 opcode;
-						data.Read(&opcode, 1);
+						uint8 opcode = data.ReadUInt8();
 						iLeft--;
 						if (opcode != OP_GLOBSEARCHRES){
 							data.Seek(-2, SEEK_CUR);
@@ -163,9 +163,9 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				}
 				while (iLeft > 0);
 
-				if (iLeft > 0 && theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
+				if (iLeft > 0 && thePrefs.GetDebugServerUDPLevel() > 0){
 					Debug("OP_GlobSearchResult contains %d additionl bytes\n", iLeft);
-					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 1)
+					if (thePrefs.GetDebugServerUDPLevel() > 1)
 						DebugHexDump(data);
 				}
 				break;
@@ -177,23 +177,21 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				int iPacket = 1;
 				do{
 					uchar fileid[16];
-					data.Read(fileid,16);
-					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
+					data.ReadHash16(fileid);
+					if (thePrefs.GetDebugServerUDPLevel() > 0)
 						Debug("ServerUDPMessage from %s:%u - OP_GlobFoundSources(%u); %s\n", host, nUDPPort-4, iPacket++, DbgGetFileInfo(fileid));
 					if (CPartFile* file = theApp.downloadqueue->GetFileByID(fileid))
 						file->AddSources(&data, inet_addr(host), nUDPPort-4);
 					else{
 						// skip sources for that file
-						uint8 count;
-						data.Read(&count, 1);
+						UINT count = data.ReadUInt8();
 						data.Seek(count*(4+2), SEEK_SET);
 					}
 
 					// check if there is another source packet
 					iLeft = (int)(data.GetLength() - data.GetPosition());
 					if (iLeft >= 2){
-						uint8 protocol;
-						data.Read(&protocol, 1);
+						uint8 protocol = data.ReadUInt8();
 						iLeft--;
 						if (protocol != OP_EDONKEYPROT){
 							data.Seek(-1, SEEK_CUR);
@@ -201,8 +199,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 							break;
 						}
 
-						uint8 opcode;
-						data.Read(&opcode, 1);
+						uint8 opcode = data.ReadUInt8();
 						iLeft--;
 						if (opcode != OP_GLOBFOUNDSOURCES){
 							data.Seek(-2, SEEK_CUR);
@@ -213,15 +210,15 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				}
 				while (iLeft > 0);
 
-				if (iLeft > 0 && theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
+				if (iLeft > 0 && thePrefs.GetDebugServerUDPLevel() > 0){
 					Debug("OP_GlobFoundSources contains %d additionl bytes\n", iLeft);
-					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 1)
+					if (thePrefs.GetDebugServerUDPLevel() > 1)
 						DebugHexDump(data);
 				}
 				break;
 			}
  			case OP_GLOBSERVSTATRES:{
-				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
+				if (thePrefs.GetDebugServerUDPLevel() > 0)
 					Debug("ServerUDPMessage from %s:%u - OP_GlobServStatRes\n", host, nUDPPort-4);
 				if( size < 12 || update == NULL )
 					return true;
@@ -244,10 +241,10 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				}
 				if( size >= 28 ){
 					uUDPFlags = get_uint32(packet+24);
-					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
+					if (thePrefs.GetDebugServerUDPLevel() > 0)
 						Debug(" UDP flags=0x%08x\n", uUDPFlags);
 				}
-				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
+				if (thePrefs.GetDebugServerUDPLevel() > 0){
 					if( size > 28 ){
 					    Debug("***NOTE: ServerUDPMessage from %s:%u - OP_GlobServStatRes:  ***AddData: %s\n", host, nUDPPort-4, GetHexDump(packet+24, size-24));
 					}
@@ -274,23 +271,15 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 			}
 
  			case OP_SERVER_DESC_RES:{
-				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
+				if (thePrefs.GetDebugServerUDPLevel() > 0)
 					Debug("ServerUDPMessage from %s:%u - OP_ServerDescRes\n", host, nUDPPort-4);
 				if(!update)
 					return true;
 				CSafeMemFile srvinfo(packet,size);
-				uint16 stringlen;
-				srvinfo.Read(&stringlen,2);
-				CString strName;
-				srvinfo.Read(strName.GetBuffer(stringlen),stringlen);
-				strName.ReleaseBuffer(stringlen);
-				
-				srvinfo.Read(&stringlen,2);
-				CString strDesc;
-				srvinfo.Read(strDesc.GetBuffer(stringlen),stringlen);
-				strDesc.ReleaseBuffer(stringlen);
+				CString strName = srvinfo.ReadString();
+				CString strDesc = srvinfo.ReadString();
 
-				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
+				if (thePrefs.GetDebugServerUDPLevel() > 0){
 					UINT uAddData = srvinfo.GetLength() - srvinfo.GetPosition();
 					if (uAddData)
 						Debug("***NOTE: ServerUDPMessage from %s:%u - OP_ServerDescRes:  ***AddData: %s\n", host, nUDPPort-4, GetHexDump(packet + srvinfo.GetPosition(), uAddData));
@@ -303,7 +292,8 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				break;
 			}
 			default:
-				Debug("***NOTE: ServerUDPMessage from %s:%u - Unknown packet: opcode=0x%02X  %s\n", host, nUDPPort-4, opcode, GetHexDump(packet, size));
+				if (thePrefs.GetDebugServerUDPLevel() > 0)
+					Debug("***NOTE: ServerUDPMessage from %s:%u - Unknown packet: opcode=0x%02X  %s\n", host, nUDPPort-4, opcode, GetHexDump(packet, size));
 				return false;
 		}
 
@@ -341,11 +331,14 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 
 void CUDPSocket::ProcessPacketError(UINT size, uint8 opcode, LPCTSTR host, uint16 nTCPPort, LPCTSTR pszError)
 {
-	CString strName;
-	CServer* pServer = theApp.serverlist->GetServerByAddress(host, nTCPPort);
-	if (pServer)
-		strName = _T(" (") + CString(pServer->GetListName()) + _T(")");
-	AddDebugLogLine(false, _T("Error: Failed to process server UDP packet from %s:%u%s opcode=0x%02x size=%u - %s"), host, nTCPPort, strName, opcode, size, pszError);
+	if (thePrefs.GetVerbose())
+	{
+		CString strName;
+		CServer* pServer = theApp.serverlist->GetServerByAddress(host, nTCPPort);
+		if (pServer)
+			strName = _T(" (") + CString(pServer->GetListName()) + _T(")");
+		AddDebugLogLine(false, _T("Error: Failed to process server UDP packet from %s:%u%s opcode=0x%02x size=%u - %s"), host, nTCPPort, strName, opcode, size, pszError);
+	}
 }
 
 void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
@@ -357,8 +350,7 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 
 	// see if we have a ip already
 	USES_CONVERSION;
-	SOCKADDR_IN sockAddr;
-	memset(&sockAddr,0,sizeof(sockAddr));
+	SOCKADDR_IN sockAddr = {0};
 	LPSTR lpszAscii = T2A((LPTSTR)m_lpszHostAddress);
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_addr.s_addr = inet_addr(lpszAscii);
@@ -379,7 +371,8 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 			MAXGETHOSTSTRUCT);
 
 		if (m_DnsTaskHandle == NULL){
-			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for '%s' - %s"), lpszHostAddress, GetErrorMessage(GetLastError(), 1));
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for '%s' - %s"), lpszHostAddress, GetErrorMessage(GetLastError(), 1));
 			delete[] m_sendbuffer;
 			m_sendbuffer = NULL;
 			delete m_cur_server;
@@ -396,7 +389,8 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 
 	/* An asynchronous database routine completed. */
 	if (WSAGETASYNCERROR(lp) != 0){
-		AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s) - %s"), m_cur_server ? m_cur_server->GetListName() : "", m_cur_server ? m_cur_server->GetAddress() : "", GetErrorMessage(WSAGETASYNCERROR(lp), 1));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s) - %s"), m_cur_server ? m_cur_server->GetListName() : "", m_cur_server ? m_cur_server->GetAddress() : "", GetErrorMessage(WSAGETASYNCERROR(lp), 1));
 		delete[] m_sendbuffer;
 		m_sendbuffer = NULL;
 		delete m_cur_server;
@@ -418,13 +412,13 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 		if (m_SaveAddr.sin_addr.s_addr != INADDR_NONE){
 			bool bRemoveServer = false;
 			if (!IsGoodIP(m_SaveAddr.sin_addr.s_addr)){
-				if (theApp.glob_prefs->GetLogFilteredIPs())
+				if (thePrefs.GetLogFilteredIPs())
 					AddDebugLogLine(false, _T("Resolved IP for server '%s' is %s - Invalid IP or LAN address, server deleted."), m_cur_server->GetListName(), ipstr(m_SaveAddr.sin_addr.s_addr));
 				bRemoveServer = true;
 			}
 			if (!bRemoveServer && theApp.ipfilter->IsFiltered(m_SaveAddr.sin_addr.s_addr)){
-				if (theApp.glob_prefs->GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Resolved IP for server '%s' is %s - Found in IP-filter, server deleted."), m_cur_server->GetListName(), ipstr(m_SaveAddr.sin_addr.s_addr));
+				if (thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Resolved IP for server '%s' is %s - Found in IP filter, server deleted."), m_cur_server->GetListName(), ipstr(m_SaveAddr.sin_addr.s_addr));
 				bRemoveServer = true;
 			}
 
@@ -447,7 +441,8 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 		}
 		else{
 			// still no valid IP for this server - delete packet
-			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
 			delete m_cur_server;
 			m_cur_server = NULL;
 			delete[] m_sendbuffer;
@@ -459,7 +454,8 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 
 void CUDPSocket::OnSend(int nErrorCode){
 	if (nErrorCode){
-		AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet - %s"), GetErrorMessage(nErrorCode, 1));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet - %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
 	m_bWouldBlock = false;
@@ -485,7 +481,8 @@ int CUDPSocket::SendTo(uint8* lpBuf, int nBufLen, uint32 dwIP, uint16 nPort){
 			return -1; // blocked
 		}
 		else{
-			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet to %s:%u - %s"), inet_ntoa(host), nPort, GetErrorMessage(dwError, 1));
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet to %s:%u - %s"), inet_ntoa(host), nPort, GetErrorMessage(dwError, 1));
 			return 0; // error
 		}
 	}
@@ -516,7 +513,7 @@ void CUDPSocket::SendBuffer(){
 
 void CUDPSocket::SendPacket(Packet* packet,CServer* host){
 	// if the last DNS query did not yet return, we may still have a packet queued - delete it
-	if (m_cur_server)
+	if (thePrefs.GetVerbose() && m_cur_server)
 		AddDebugLogLine(false, _T("Warning: Server UDP socket: Timeout occured when trying to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
 	delete m_cur_server;
 	m_cur_server = NULL;

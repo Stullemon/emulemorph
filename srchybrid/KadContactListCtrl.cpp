@@ -69,7 +69,7 @@ void CKadContactListCtrl::Init()
 	Localize();
 
 	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
+	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
 	CIni ini(strIniFile, "eMule");
 	LoadSettings(&ini, m_strLVName);
 	int iSortItem = ini.GetInt(m_strLVName + "SortItem");
@@ -142,10 +142,16 @@ void CKadContactListCtrl::ContactAdd(Kademlia::CContact* contact)
 		// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
 		if (!afxData.bWin95 && iItem >= 0)
 			UpdateContact(iItem, contact);
-		id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , result+1);
-		theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
+
+		UpdateKadContactCount();
 	}
 	catch(...){ASSERT(0);}
+}
+
+void CKadContactListCtrl::ContactAdd() {
+	CString id;
+	id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , GetItemCount());
+	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
 }
 
 void CKadContactListCtrl::ContactRem(Kademlia::CContact* contact)
@@ -160,11 +166,15 @@ void CKadContactListCtrl::ContactRem(Kademlia::CContact* contact)
 		if (result != (-1)){
 			DeleteItem(result);
 		}
-		CString id;
-		id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , GetItemCount());
-		theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
+		UpdateKadContactCount();
 	}
 	catch(...){ASSERT(0);}
+}
+
+void CKadContactListCtrl::UpdateKadContactCount() {
+	CString id;
+	id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , GetItemCount() );
+	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
 }
 
 void CKadContactListCtrl::ContactRef(Kademlia::CContact* contact)

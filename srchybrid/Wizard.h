@@ -7,7 +7,6 @@ class Wizard : public CDialog
 public:
 	Wizard(CWnd* pParent = NULL);   // standard constructor
 	virtual ~Wizard();
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
 	void Localize();
 	virtual BOOL OnInitDialog();
 
@@ -18,7 +17,6 @@ public:
 // Dialog Data
 	enum { IDD = IDD_WIZARD };
 protected:
-	CPreferences* app_prefs;
 	void SetCustomItemsActivation();
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

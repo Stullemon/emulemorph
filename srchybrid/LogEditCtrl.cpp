@@ -71,7 +71,7 @@ void CLogEditCtrl::Init(LPCTSTR pszTitle)
 	m_LogMenu.AppendMenu(MF_STRING, MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
 
 	VERIFY( SendMessage(EM_SETUNDOLIMIT, 0, 0) == 0 );
-	int iMaxLogBuff = theApp.glob_prefs->GetMaxLogBuff();
+	int iMaxLogBuff = thePrefs.GetMaxLogBuff();
 	if (afxData.bWin95)
 		LimitText(m_iMaxLogBuff = (iMaxLogBuff > 0xFFFF ? 0xFFFF : iMaxLogBuff));
 	else

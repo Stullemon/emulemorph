@@ -370,7 +370,7 @@ void CCreditsThread::InitFonts()
 	lf.lfWeight = 700;
 	//lf.lfItalic = TRUE;
 	lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
-	_tcscpy(lf.lfFaceName, _T("Times Roman"));
+	_tcscpy(lf.lfFaceName, _T("Arial"));
 	font2->CreateFontIndirect(&lf);
 	m_arFonts.Add(font2);
 
@@ -384,7 +384,7 @@ void CCreditsThread::InitFonts()
 	lf.lfHeight = 25;
 	lf.lfWeight = 900;
 	lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
-	_tcscpy(lf.lfFaceName, _T("Times Roman"));
+	_tcscpy(lf.lfFaceName, _T("Arial"));
 	font3->CreateFontIndirect(&lf);
 	m_arFonts.Add(font3);
 
@@ -432,7 +432,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("03:00:eMule"));
 	sTmp.Format("02:01:Version %s",theApp.m_strCurVersionLong);
 	m_arCredits.Add(_T(sTmp));
-	m_arCredits.Add(_T("01:06:Copyright (C)2002-2003 Merkur"));
+	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2004 Merkur"));
 	m_arCredits.Add(_T("S:50"));
 	m_arCredits.Add(_T("02:04:Developers"));
 	m_arCredits.Add(_T("S:5"));

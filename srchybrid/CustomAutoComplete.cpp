@@ -20,6 +20,8 @@
 //						- splitted original code into cpp/h file
 //						- removed registry stuff
 //						- added file stuff
+//					15-Jan-2004 [Ornis]:
+//						- changed adding strings to replace existing ones on a new position
 //
 //
 //  Notes:			
@@ -113,17 +115,25 @@ BOOL CCustomAutoComplete::AddItem(const CString& p_sItem, int iPos)
 {
 	if (p_sItem.GetLength() != 0)
 	{
-		if (FindItem(p_sItem) == -1)
+		int oldpos=FindItem(p_sItem);
+		if (oldpos == -1)
 		{
 			// use a LRU list
 			if (iPos == -1)
 				m_asList.Add(p_sItem);
 			else
-				m_asList.InsertAt(0, p_sItem);
+				m_asList.InsertAt(iPos, p_sItem);
 
 			while (m_asList.GetSize() > m_iMaxItemCount)
 				m_asList.RemoveAt(m_asList.GetSize() - 1);
+			return TRUE;
+		} else if (iPos!=-1) {
+			m_asList.RemoveAt(oldpos);
+			if (oldpos<iPos) --iPos;
+			m_asList.InsertAt(iPos, p_sItem);
 
+			while (m_asList.GetSize() > m_iMaxItemCount)
+				m_asList.RemoveAt(m_asList.GetSize() - 1);
 			return TRUE;
 		}
 	}
@@ -321,4 +331,9 @@ BOOL CCustomAutoComplete::SaveList(LPCTSTR pszFileName)
 		fprintf(fp, "%s\n", m_asList[i]);
 	fclose(fp);
 	return !ferror(fp);
+}
+
+CString CCustomAutoComplete::GetItem(int pos){
+	if (pos>=m_asList.GetCount()) return NULL; 
+	else return m_asList.GetAt(pos);
 }

@@ -20,7 +20,6 @@
 #include "Preferences.h"
 #include "OtherFunctions.h"
 
-
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -58,6 +57,8 @@ void CPPgDebug::ClearAllMembers()
 	memset(m_lv, 0, sizeof m_lv);
 	memset(m_checks, 0, sizeof m_checks);
 	memset(m_levels, 0, sizeof m_levels);
+	memset(m_htiInteger, 0, sizeof m_htiInteger);
+	memset(m_iValInteger, 0, sizeof m_iValInteger);
 }
 
 void CPPgDebug::DoDataExchange(CDataExchange* pDX)
@@ -85,8 +86,12 @@ void CPPgDebug::DoDataExchange(CDataExchange* pDX)
 
 #define	ADD_DETAIL_ITEM(idx, label, group) \
 		m_cb[idx] = m_ctrlTreeOptions.InsertCheckBox(label, group); \
-		m_lv[idx] = m_ctrlTreeOptions.InsertItem("Level", m_cb[idx]); \
-		m_ctrlTreeOptions.AddEditBox(m_lv[idx], RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_lv[idx] = m_ctrlTreeOptions.InsertItem("Level", TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_cb[idx]); \
+		m_ctrlTreeOptions.AddEditBox(m_lv[idx], RUNTIME_CLASS(CNumTreeOptionsEdit))
+
+#define	ADD_INTEGER_ITEM(idx, label, group) \
+		m_htiInteger[idx] = m_ctrlTreeOptions.InsertItem(label, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, group); \
+		m_ctrlTreeOptions.AddEditBox(m_htiInteger[idx], RUNTIME_CLASS(CNumTreeOptionsEdit))
 
 		m_htiServer = m_ctrlTreeOptions.InsertCheckBox("Server", TVI_ROOT, FALSE);
 		ADD_DETAIL_ITEM(0, "TCP", m_htiServer);
@@ -96,7 +101,13 @@ void CPPgDebug::DoDataExchange(CDataExchange* pDX)
 
 		m_htiClient = m_ctrlTreeOptions.InsertCheckBox("Client", TVI_ROOT, FALSE);
 		ADD_DETAIL_ITEM(4, "TCP", m_htiClient);
-		ADD_DETAIL_ITEM(5, "UDP", m_htiClient);
+		ADD_DETAIL_ITEM(5, "UDP (eD2K)", m_htiClient);
+		ADD_DETAIL_ITEM(6, "UDP (Kad)", m_htiClient);
+
+		ADD_INTEGER_ITEM(0, "Memory corruption check level", TVI_ROOT);
+
+#undef ADD_DETAIL_ITEM
+#undef ADD_INTEGER_ITEM
 
 		m_ctrlTreeOptions.Expand(m_htiServer, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiClient, TVE_EXPAND);
@@ -111,21 +122,32 @@ void CPPgDebug::DoDataExchange(CDataExchange* pDX)
 
 	for (int i = 0; i < ARRSIZE(m_lv); i++)
 		DDX_TreeEdit(pDX, IDC_DEBUG_OPTS, m_lv[i], m_levels[i]);
+
+	for (int i = 0; i < ARRSIZE(m_htiInteger); i++)
+		DDX_TreeEdit(pDX, IDC_DEBUG_OPTS, m_htiInteger[i], m_iValInteger[i]);
 }
 
 BOOL CPPgDebug::OnInitDialog()
 {
 #define	SET_DETAIL_OPT(idx, var) \
 	m_checks[idx] = ((var) > 0); \
-	m_levels[idx] = ((var) > 0) ? (var) : -(var);
+	m_levels[idx] = ((var) > 0) ? (var) : -(var)
 
-	SET_DETAIL_OPT(0, app_prefs->prefs->m_iDebugServerTCPLevel);
-	SET_DETAIL_OPT(1, app_prefs->prefs->m_iDebugServerUDPLevel);
-	SET_DETAIL_OPT(2, app_prefs->prefs->m_iDebugServerSourcesLevel);
-	SET_DETAIL_OPT(3, app_prefs->prefs->m_iDebugServerSearchesLevel);
-	SET_DETAIL_OPT(4, app_prefs->prefs->m_iDebugClientTCPLevel);
-	SET_DETAIL_OPT(5, app_prefs->prefs->m_iDebugClientUDPLevel);
+#define	SET_INTEGER_OPT(idx, var) \
+	m_iValInteger[idx] = var
+
+	SET_DETAIL_OPT(0, thePrefs.m_iDebugServerTCPLevel);
+	SET_DETAIL_OPT(1, thePrefs.m_iDebugServerUDPLevel);
+	SET_DETAIL_OPT(2, thePrefs.m_iDebugServerSourcesLevel);
+	SET_DETAIL_OPT(3, thePrefs.m_iDebugServerSearchesLevel);
+	SET_DETAIL_OPT(4, thePrefs.m_iDebugClientTCPLevel);
+	SET_DETAIL_OPT(5, thePrefs.m_iDebugClientUDPLevel);
+	SET_DETAIL_OPT(6, thePrefs.m_iDebugClientKadUDPLevel);
+
+	SET_INTEGER_OPT(0, thePrefs.m_iDbgHeap);
+
 #undef SET_OPT
+#undef SET_INTEGER_OPT
 
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
@@ -155,15 +177,23 @@ BOOL CPPgDebug::OnApply()
 	if (m_checks[idx]) \
 		opt = (m_levels[idx] > 0) ? m_levels[idx] : 1; \
 	else \
-		opt = -m_levels[idx];
+		opt = -m_levels[idx]
 
-	GET_DETAIL_OPT(0, app_prefs->prefs->m_iDebugServerTCPLevel);
-	GET_DETAIL_OPT(1, app_prefs->prefs->m_iDebugServerUDPLevel);
-	GET_DETAIL_OPT(2, app_prefs->prefs->m_iDebugServerSourcesLevel);
-	GET_DETAIL_OPT(3, app_prefs->prefs->m_iDebugServerSearchesLevel);
-	GET_DETAIL_OPT(4, app_prefs->prefs->m_iDebugClientTCPLevel);
-	GET_DETAIL_OPT(5, app_prefs->prefs->m_iDebugClientUDPLevel);
+#define	GET_INTEGER_OPT(idx, opt) \
+	opt = m_iValInteger[idx]
+
+	GET_DETAIL_OPT(0, thePrefs.m_iDebugServerTCPLevel);
+	GET_DETAIL_OPT(1, thePrefs.m_iDebugServerUDPLevel);
+	GET_DETAIL_OPT(2, thePrefs.m_iDebugServerSourcesLevel);
+	GET_DETAIL_OPT(3, thePrefs.m_iDebugServerSearchesLevel);
+	GET_DETAIL_OPT(4, thePrefs.m_iDebugClientTCPLevel);
+	GET_DETAIL_OPT(5, thePrefs.m_iDebugClientUDPLevel);
+	GET_DETAIL_OPT(6, thePrefs.m_iDebugClientKadUDPLevel);
+
+	GET_INTEGER_OPT(0, thePrefs.m_iDbgHeap);
+
 #undef GET_DETAIL_OPT
+#undef GET_INTEGER_OPT
 
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();
@@ -180,7 +210,7 @@ void CPPgDebug::OnDestroy()
 LRESULT CPPgDebug::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_DEBUG_OPTS){
-		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
+		//TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
 		SetModified();
 	}
 	return 0;

@@ -766,3 +766,8 @@ BOOL CIni::WriteBinary(LPCTSTR lpszEntry, LPBYTE pData, UINT nBytes, LPCTSTR psz
 	delete[] lpsz;
 	return TRUE;
 }
+
+void CIni::DeleteKey(LPCTSTR pszKey)
+{
+	WritePrivateProfileString(m_strSection, pszKey, NULL, m_strFileName);
+}

@@ -8,7 +8,7 @@ protected:
 	typedef CDialogMinTrayBtn<CResizableDialog> CTrayDialogBase;
 
 public:
-	void TraySetMinimizeToTray(int8* bMinimizeToTray);
+	void TraySetMinimizeToTray(uint8* bMinimizeToTray);
 	BOOL TraySetMenu(UINT nResourceID,UINT nDefaultPos=0);	
 	BOOL TraySetMenu(HMENU hMenu,UINT nDefaultPos=0);	
 	BOOL TraySetMenu(LPCTSTR lpszMenuName,UINT nDefaultPos=0);	
@@ -27,7 +27,7 @@ public:
 	virtual void OnTrayLButtonDown(CPoint pt);
 	virtual void OnTrayLButtonDblClk(CPoint pt);
 	
-	virtual void OnTrayRButtonDown(CPoint pt);
+	virtual void OnTrayRButtonUp(CPoint pt);
 	virtual void OnTrayRButtonDblClk(CPoint pt);
 
 	virtual void OnTrayMouseMove(CPoint pt);
@@ -44,7 +44,7 @@ private:
 	afx_msg LRESULT OnTrayNotify(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTaskBarCreated(WPARAM wParam, LPARAM lParam);
 
-	int8*			m_bMinimizeToTray;
+	uint8*			m_bMinimizeToTray;
     bool			m_bCurIconDelete;   // #zegzav (added)
     HICON           m_hPrevIconDelete;  // #zegzav (added)
 	bool			m_bdoubleclicked;

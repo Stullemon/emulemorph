@@ -9,7 +9,6 @@ public:
 	CPPgStats();
 	virtual ~CPPgStats();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
 	void Localize(void);
 	void SetModified(BOOL bChanged = TRUE);
 
@@ -17,7 +16,6 @@ public:
 	enum { IDD = IDD_PPG_STATS };
 
 protected:
-	CPreferences *app_prefs;
 	CComboBox m_colors, m_cratio;
 	CColorButton m_ctlColor;
 	int mystats1, mystats2, mystats3;

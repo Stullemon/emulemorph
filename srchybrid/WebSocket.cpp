@@ -381,15 +381,15 @@ UINT AFX_CDECL WebSocketAcceptedFunc(LPVOID pD)
 UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 {
 	DbgSetThreadName("WebSocketListening");
-	WSADATA stData;
-	if (!WSAStartup(MAKEWORD(2, 2), &stData))
+//	WSADATA stData;
+//	if (!WSAStartup(MAKEWORD(1, 1), &stData))
 	{
 		SOCKET hSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
 		if (INVALID_SOCKET != hSocket)
 		{
 			SOCKADDR_IN stAddr;
 			stAddr.sin_family = AF_INET;
-			stAddr.sin_port = htons(theApp.glob_prefs->GetWSPort());
+			stAddr.sin_port = htons(thePrefs.GetWSPort());
 			stAddr.sin_addr.S_un.S_addr = INADDR_ANY;
 
 			if (!bind(hSocket, (sockaddr*)&stAddr, sizeof(stAddr)) && !listen(hSocket, SOMAXCONN))
@@ -411,7 +411,7 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 								if (INVALID_SOCKET == hAccepted)
 									break;
 
-								if(theApp.glob_prefs->GetWSIsEnabled())
+								if(thePrefs.GetWSIsEnabled())
 								{
 									SocketData *pData = new SocketData;
 									pData->hSocket = hAccepted;
@@ -437,7 +437,7 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 			}
 			VERIFY( !closesocket(hSocket) );
 		}
-		VERIFY( !WSACleanup() );
+//		VERIFY( !WSACleanup() );
 	}
 
 	return 0;

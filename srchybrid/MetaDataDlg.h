@@ -1,5 +1,6 @@
 #pragma once
 #include "ResizableLib/ResizablePage.h"
+#include "ListCtrlX.h"
 #include <list>
 
 class CAbstractFile;
@@ -27,7 +28,7 @@ protected:
 	Kademlia::TagList* m_taglist;
 	CString m_strCaption;
 	CMenu* m_pMenuTags;
-	CListCtrl m_tags;
+	CListCtrlX m_tags;
 
 	void InitTags();
 
@@ -38,6 +39,5 @@ protected:
 	afx_msg void OnLvnKeydownTags(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCopyTags();
 	afx_msg void OnSelectAllTags();
-	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg void OnDestroy();
 };

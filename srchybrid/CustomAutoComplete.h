@@ -41,6 +41,7 @@ public:
 
 	BOOL AddItem(const CString& p_sItem, int iPos);
 	BOOL RemoveItem(const CString& p_sItem);
+	CString GetItem(int pos);
 	
 	BOOL Clear();
 	BOOL Disable();

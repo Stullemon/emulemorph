@@ -50,7 +50,7 @@ BOOL CPreviewThread::Run(){
 		srcFile = m_pPartfile->m_hpartfile.Duplicate();
 		uint32 nSize = m_pPartfile->GetFileSize();
 		CString strExtension = CString(strrchr(m_pPartfile->GetFileName(), '.'));
-		CString strPreviewName = CString(theApp.glob_prefs->GetTempDir())+ CString("\\") + CString(m_pPartfile->GetFileName()).Mid(0,5) + CString("_preview") + strExtension;
+		CString strPreviewName = CString(thePrefs.GetTempDir())+ CString("\\") + CString(m_pPartfile->GetFileName()).Mid(0,5) + CString("_preview") + strExtension;
 		bool bFullSized = true;
 		if (!strExtension.CompareNoCase(".mpg") || !strExtension.CompareNoCase(".mpeg"))
 			bFullSized = false;
@@ -91,7 +91,7 @@ BOOL CPreviewThread::Run(){
 			char shortPath[512]; //Cax2 short path for vlc
 			GetShortPathName(strPreviewName,shortPath,512);
 
-			path=theApp.glob_prefs->GetVideoPlayer();
+			path=thePrefs.GetVideoPlayer();
 			int pos=path.ReverseFind('\\');
 			if (pos==-1) path=""; else path=path.Left(pos+1);
 			SE.lpFile = m_player.GetBuffer();

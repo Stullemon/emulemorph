@@ -20,8 +20,8 @@
 #include "FileInfoDialog.h"
 #include "CommentDialogLst.h"
 #include "MetaDataDlg.h"
-
-class CMuleListCtrl;
+#include "MuleListCtrl.h"
+//class CMuleListCtrl;
 
 struct FCtrlItem_Struct{
    CString	filename;
@@ -82,7 +82,9 @@ public:
 protected:
 	CString m_strCaption;
 	CPartFile* m_file;
-	CListCtrl* pmyListCtrl;
+	//CListCtrl* pmyListCtrl;
+	CMuleListCtrl pmyListCtrl;
+
 	uint32 m_timer;
 	int m_aiColWidths[2];
 	uint8	m_sortindex;
@@ -91,9 +93,11 @@ protected:
 	void Localize();
 	void RefreshData();
 	void FillSourcenameList();
+	void Copy();
 
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	static int CALLBACK CompareListNameItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
@@ -124,13 +128,14 @@ public:
 protected:
 	bool m_bInvokeCommentsPage;
 	CPartFile*	m_file;
+	CSimpleArray<const CKnownFile*> m_aKnownFiles;
 	CFileDetailDialogInfo m_wndInfo;
 	CFileDetailDialogName m_wndName;
 	CFileInfoDialog m_wndVideo;
 	CCommentDialogLst m_wndComments;
 	CMetaDataDlg m_wndMetaData;
 
-	static int sm_iLastActivePage;
+	static LPCTSTR m_pPshStartPage;
 
 	virtual BOOL OnInitDialog();
 

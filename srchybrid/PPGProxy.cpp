@@ -61,7 +61,7 @@ BOOL CPPgProxy::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	proxy = app_prefs->GetProxy();
+	proxy = thePrefs.GetProxy();
 	LoadSettings();
 	Localize();
 
@@ -71,7 +71,7 @@ BOOL CPPgProxy::OnInitDialog()
 
 BOOL CPPgProxy::OnApply()
 {
-	theApp.glob_prefs->SetProxyASCWOP(IsDlgButtonChecked(IDC_ASCWOP));
+	thePrefs.SetProxyASCWOP(IsDlgButtonChecked(IDC_ASCWOP));
 	proxy.UseProxy=(IsDlgButtonChecked(IDC_ENABLEPROXY));
 	proxy.EnablePassword = ((CButton*)GetDlgItem(IDC_ENABLEAUTH))->GetCheck();
 	proxy.type = ((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->GetCurSel();
@@ -106,7 +106,7 @@ BOOL CPPgProxy::OnApply()
 		proxy.password[0] = 0;
 		proxy.EnablePassword = false;
 	}
-	app_prefs->SetProxySettings(proxy);
+	thePrefs.SetProxySettings(proxy);
 	LoadSettings();
 	return TRUE;
 }
@@ -155,7 +155,7 @@ void CPPgProxy::OnCbnSelchangeProxytype()
 
 void CPPgProxy::LoadSettings()
 {
-	CheckDlgButton(IDC_ASCWOP,(theApp.glob_prefs->IsProxyASCWOP() ));
+	CheckDlgButton(IDC_ASCWOP,(thePrefs.IsProxyASCWOP() ));
 	
 	((CButton*)GetDlgItem(IDC_ENABLEPROXY))->SetCheck(proxy.UseProxy);
 	((CButton*)GetDlgItem(IDC_ENABLEAUTH))->SetCheck(proxy.EnablePassword);

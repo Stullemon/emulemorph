@@ -65,25 +65,28 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 	CDC MemDC;
 	CBitmap *pOldBMP;
 	
-	MemDC.CreateCompatibleDC(pDC);
+	VERIFY( MemDC.CreateCompatibleDC(pDC) );
 
 	CFont *pOldFont = MemDC.SelectObject(GetFont());
 
 	CRect rCaption(0,0,0,0);
 	MemDC.DrawText(m_strText, rCaption, DT_CALCRECT);
-	if(rCaption.Height() < 16)
+	ASSERT( rCaption.Width() >= 0 );
+	ASSERT( rCaption.Height() >= 0 );
+	if (rCaption.Height() < 16)
 		rCaption.bottom = rCaption.top + 16;
 	rCaption.right += 25;
-	if(rCaption.Width() > rRect.Width() - 16)
+	if (rCaption.Width() > rRect.Width() - 16)
 		rCaption.right = rCaption.left + rRect.Width() - 16;
 
-	m_MemBMP.DeleteObject();
-	m_MemBMP.CreateCompatibleBitmap(pDC, rCaption.Width(), rCaption.Height());
+	if (m_MemBMP.m_hObject)
+		VERIFY( m_MemBMP.DeleteObject() );
+	VERIFY( m_MemBMP.CreateCompatibleBitmap(pDC, rCaption.Width(), rCaption.Height()) );
 	pOldBMP = MemDC.SelectObject(&m_MemBMP);
 
 	MemDC.FillSolidRect(rCaption, GetSysColor(COLOR_BTNFACE));
 	
-	DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL);
+	VERIFY( DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL) );
 
 	// clear all alpha channel data
 	BITMAP bmMem;
@@ -168,5 +171,6 @@ bool CIconStatic::SetIcon(LPCTSTR pszIconID)
 void CIconStatic::OnSysColorChange()
 {
 	CStatic::OnSysColorChange();
-	Init(m_pszIconID);
+	if (m_pszIconID)
+		Init(m_pszIconID);
 }

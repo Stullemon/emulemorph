@@ -18,6 +18,7 @@
 #include <zlib/zlib.h>
 #include "Packets.h"
 #include "OtherFunctions.h"
+#include "SafeFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -28,16 +29,16 @@ static char THIS_FILE[]=__FILE__;
 
 #pragma pack(1)
 struct Header_Struct{
-	int8	eDonkeyID;
-	int32	packetlength;
-	int8	command;
+	uint8	eDonkeyID;
+	uint32	packetlength;
+	uint8	command;
 };
 #pragma pack()
 
 #pragma pack(1)
 struct UDP_Header_Struct{
-	int8	eDonkeyID;
-	int8	command;
+	uint8	eDonkeyID;
+	uint8	command;
 };
 #pragma pack()
 
@@ -81,7 +82,7 @@ Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// onl
 // -khaos--+++> Slightly modified for our stats uses...
 //				If m_bFromPF = true then packet was formed from a partfile
 //				If m_bFromPF = false then this packet was formed from a complete shared file.
-Packet::Packet(int8 in_opcode,uint32 in_size,uint8 protocol,bool bFromPF){
+Packet::Packet(uint8 in_opcode, uint32 in_size, uint8 protocol, bool bFromPF){
 	m_bFromPF = bFromPF;
 	// <-----khaos-
 	m_bSplitted = false;
@@ -109,7 +110,7 @@ Packet::Packet(CMemFile* datafile,uint8 protocol){
 	size = datafile->GetLength();
 	completebuffer = new char[datafile->GetLength()+10];
 	pBuffer = completebuffer+6;
-	BYTE* tmp = datafile->Detach();;
+	BYTE* tmp = datafile->Detach();
 	memcpy(pBuffer,tmp,size);
 	free(tmp);
 	tempbuffer = 0;
@@ -119,10 +120,9 @@ Packet::Packet(CMemFile* datafile,uint8 protocol){
 Packet::~Packet(){
 	if (completebuffer)
 		delete[] completebuffer;
-	else if (pBuffer)
+	else
 		delete [] pBuffer;
-	if (tempbuffer)
-		delete[] tempbuffer;
+	delete[] tempbuffer;
 }
 
 char* Packet::GetPacket(){
@@ -177,7 +177,6 @@ char* Packet::GetHeader(){
 
 char* Packet::GetUDPHeader(){
 	ASSERT ( !m_bSplitted );
-	memset(head,0,6);
 	UDP_Header_Struct* header = (UDP_Header_Struct*) head;
 	header->command = opcode;
 	header->eDonkeyID =  prot;
@@ -193,7 +192,10 @@ void Packet::PackPacket(){
 		delete[] output;
 		return;
 	}
-	prot = OP_PACKEDPROT;
+	if( prot == OP_KADEMLIAHEADER )
+		prot = OP_KADEMLIAPACKEDPROT;
+	else
+		prot = OP_PACKEDPROT;
 	memcpy(pBuffer,output,newsize);
 	size = newsize;
 	delete[] output;
@@ -201,7 +203,7 @@ void Packet::PackPacket(){
 }
 
 bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
-	ASSERT ( prot == OP_PACKEDPROT); 
+	ASSERT ( prot == OP_PACKEDPROT || prot == OP_KADEMLIAPACKEDPROT); 
 	uint32 nNewSize = size*10+300;
 	if (nNewSize > uMaxDecompressedSize){
 		//ASSERT(0);
@@ -216,7 +218,10 @@ bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
 		size = unpackedsize;
 		delete[] pBuffer;
 		pBuffer = (char*)unpack;
-		prot =  OP_EMULEPROT;
+		if( prot == OP_KADEMLIAPACKEDPROT )
+			prot = OP_KADEMLIAHEADER;
+		else
+			prot =  OP_EMULEPROT;
 		return true;
 	}
 	delete[] unpack;
@@ -256,9 +261,8 @@ STag::STag(const STag& in)
 
 STag::~STag()
 {
-	if (tagname)
-		delete[] tagname;
-	if (type == 2 && stringvalue)
+	delete[] tagname;
+	if (type == 2)
 		delete[] stringvalue;
 }
 
@@ -272,7 +276,7 @@ CTag::CTag(LPCSTR name,uint32 intvalue){
 	tag.intvalue = intvalue;
 }
 
-CTag::CTag(int8 special, uint32 intvalue){
+CTag::CTag(uint8 special, uint32 intvalue){
 	tag.type = 3;
 	tag.intvalue = intvalue;
 	tag.specialtag = special;
@@ -284,7 +288,7 @@ CTag::CTag(LPCSTR name,LPCSTR strvalue){
 	tag.stringvalue = nstrdup(strvalue);
 }
 
-CTag::CTag(int8 special, LPCSTR strvalue){
+CTag::CTag(uint8 special, LPCSTR strvalue){
 	tag.type = 2;
 	tag.stringvalue = nstrdup(strvalue);
 	tag.specialtag = special;
@@ -295,13 +299,12 @@ CTag::CTag(const STag& in_tag)
 {
 }
 
-CTag::CTag(CFile* in_data)
+CTag::CTag(CFileDataIO* in_data)
 {
-	in_data->Read(&tag.type,1);
-	uint16 length;
-	in_data->Read(&length,2);
+	tag.type = in_data->ReadUInt8();
+	UINT length = in_data->ReadUInt16();
 	if (length == 1)
-		in_data->Read(&tag.specialtag,1);
+		tag.specialtag = in_data->ReadUInt8();
 	else {
 		tag.tagname = new char[length+1];
 		in_data->Read(tag.tagname,length);
@@ -312,88 +315,87 @@ CTag::CTag(CFile* in_data)
 	// not use each tag. Otherwise we will get troubles when the packets are returned in 
 	// a list - like the search results from a server.
 	if (tag.type == 2){ // STRING
-		in_data->Read(&length,2);
+		length = in_data->ReadUInt16();
 		tag.stringvalue = new char[length+1];
 		in_data->Read(tag.stringvalue,length);
 		tag.stringvalue[length] = 0;
 	}
 	else if (tag.type == 3){ // DWORD
-		in_data->Read(&tag.intvalue,4);
+		tag.intvalue = in_data->ReadUInt32();
 	}
 	else if (tag.type == 4){ // FLOAT (used by Hybrid 0.48)
 		in_data->Read(&tag.floatvalue,4);
 	}
 	else if (tag.type == 1){ // HASH (never seen)
-		TRACE("CTag::CTag(CFile*); Reading *unverified* HASH tag\n");
+		TRACE("%s; Reading *unverified* HASH tag\n", __FUNCTION__);
 		in_data->Seek(16, CFile::current);
 	}
 	else if (tag.type == 5){ // BOOL (never seen; propably 1 bit)
 		// NOTE: This is preventive code, it was never tested
-		TRACE("CTag::CTag(CFile*); Reading *unverified* BOOL tag\n");
+		TRACE("%s; Reading *unverified* BOOL tag\n", __FUNCTION__);
 		in_data->Seek(1, CFile::current);
 	}
 	else if (tag.type == 6){ // BOOL Array (never seen; propably <numbits> <bits>)
 		// NOTE: This is preventive code, it was never tested
-		TRACE("CTag::CTag(CFile*); Reading *unverified* BOOL Array tag\n");
+		TRACE("%s; Reading *unverified* BOOL Array tag\n", __FUNCTION__);
 		uint16 len;
 		in_data->Read(&len,2);
 		in_data->Seek((len+7)/8, CFile::current);
 	}
 	else if (tag.type == 7){ // BLOB (never seen; propably <len> <byte>)
 		// NOTE: This is preventive code, it was never tested
-		TRACE("CTag::CTag(CFile*); Reading *unverified* BLOB tag\n");
+		TRACE("%s; Reading *unverified* BLOB tag\n", __FUNCTION__);
 		uint16 len;
 		in_data->Read(&len,2);
 		in_data->Seek(len, CFile::current);
 	}
 	else{
 		if (length == 1)
-			TRACE("CTag::CTag(CFile*); Unknown tag: type=0x%02X  specialtag=%u\n", tag.type, tag.specialtag);
+			TRACE("%s; Unknown tag: type=0x%02X  specialtag=%u\n", __FUNCTION__, tag.type, tag.specialtag);
 		else
-			TRACE("CTag::CTag(CFile*); Unknown tag: type=0x%02X  name=\"%s\"\n", tag.type, tag.tagname);
+			TRACE("%s; Unknown tag: type=0x%02X  name=\"%s\"\n", __FUNCTION__, tag.type, tag.tagname);
 	}
 }
 
 CTag::~CTag(){
 }
 
-bool CTag::WriteTagToFile(CFile* file)
+bool CTag::WriteTagToFile(CFileDataIO* file)
 {
 	// don't write tags of unknown types, we wouldn't be able to read them in again 
 	// and the met file would be corrupted
 	if (tag.type==2 || tag.type==3 || tag.type==4){
-		file->Write(&tag.type,1);
+		file->WriteUInt8(tag.type);
 		
 		if (tag.tagname){
-			uint16 taglen= (uint16)strlen(tag.tagname);
-			file->Write(&taglen,2);
+			UINT taglen = strlen(tag.tagname);
+			file->WriteUInt16(taglen);
 			file->Write(tag.tagname,taglen);
 		}
 		else{
-			uint16 taglen = 1;
-			file->Write(&taglen,2);
-			file->Write(&tag.specialtag,taglen);
+			file->WriteUInt16(1);
+			file->WriteUInt8(tag.specialtag);
 		}
 
 		if (tag.type == 2){
-			uint16 len = (uint16)strlen(tag.stringvalue);
-			file->Write(&len,2);
+			UINT len = strlen(tag.stringvalue);
+			file->WriteUInt16(len);
 			file->Write(tag.stringvalue,len);
 		}
 		else if (tag.type == 3)
-			file->Write(&tag.intvalue,4);
+			file->WriteUInt32(tag.intvalue);
 		else if (tag.type == 4)
 			file->Write(&tag.floatvalue,4);
 		//TODO: Support more tag types
 		else{
-			TRACE("CTag::WriteTagToFile(CFile*); Unknown tag: type=0x%02X\n", tag.type);
+			TRACE("%s; Unknown tag: type=0x%02X\n", __FUNCTION__, tag.type);
 			ASSERT(0);
 			return false;
 		}
 		return true;
 	}
 	else{
-		TRACE("CTag::WriteTagToFile(CFile*); Ignored tag with unknown type=0x%02X\n", tag.type);
+		TRACE("%s; Ignored tag with unknown type=0x%02X\n", __FUNCTION__, tag.type);
 		ASSERT(0);
 		return false;
 	}

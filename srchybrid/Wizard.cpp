@@ -91,42 +91,42 @@ void Wizard::OnBnClickedApply()
 
 	if(IsDlgButtonChecked(IDC_KBITS)==1) {upload/=8;download/=8;}
 
-	app_prefs->prefs->maxGraphDownloadRate = download;
-	app_prefs->prefs->maxGraphUploadRate = upload;
+	thePrefs.maxGraphDownloadRate = download;
+	thePrefs.maxGraphUploadRate = upload;
 
 	if( upload > 0 && download > 0 ){
 		// Elandal: typesafe, integer math only
 		// removes warning regarding implicit cast
-		app_prefs->prefs->maxupload = (uint16)((upload * 4L) / 5);
+		thePrefs.maxupload = (uint16)((upload * 4L) / 5);
 		if( upload < 4 && download > upload*3 ){
-			app_prefs->prefs->maxdownload = app_prefs->prefs->maxupload * 3;
+			thePrefs.maxdownload = thePrefs.maxupload * 3;
 			download = upload*3;
 		}
 		if( upload < 10 && download > upload*4 ){
-			app_prefs->prefs->maxdownload = app_prefs->prefs->maxupload * 4;
+			thePrefs.maxdownload = thePrefs.maxupload * 4;
 			download = upload*4;
 		}
 		else
 			// Elandal: typesafe, integer math only
 			// removes warning regarding implicit cast
-			app_prefs->prefs->maxdownload = (uint16)((download * 9L) / 10);
+			thePrefs.maxdownload = (uint16)((download * 9L) / 10);
 
-		theApp.emuledlg->statisticswnd->SetARange(false,app_prefs->prefs->maxGraphUploadRate);
-		theApp.emuledlg->statisticswnd->SetARange(true,app_prefs->prefs->maxGraphDownloadRate);
+		theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.maxGraphUploadRate);
+		theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.maxGraphDownloadRate);
 
 		if( m_iOS == 1 )
-			app_prefs->prefs->maxconnections = 50;
+			thePrefs.maxconnections = 50;
 		else{
 		if( upload <= 7 )	
-			app_prefs->prefs->maxconnections = 80;
+			thePrefs.maxconnections = 80;
 		else if( upload < 12 )
-			app_prefs->prefs->maxconnections = 200;	
+			thePrefs.maxconnections = 200;	
 		else if( upload < 25 )
-			app_prefs->prefs->maxconnections = 400;
+			thePrefs.maxconnections = 400;
 		else if( upload < 37 )
-			app_prefs->prefs->maxconnections = 600;
+			thePrefs.maxconnections = 600;
 		else
-			app_prefs->prefs->maxconnections = 800;	
+			thePrefs.maxconnections = 800;	
 
 		}
 		if( m_iOS == 1 )
@@ -135,65 +135,65 @@ void Wizard::OnBnClickedApply()
 		if( download <= 7 ){
 			switch( m_iTotalDownload ){
 				case 0:
-					app_prefs->prefs->maxsourceperfile = 100;
+					thePrefs.maxsourceperfile = 100;
 				break;
 				case 1:
-					app_prefs->prefs->maxsourceperfile = 60;
+					thePrefs.maxsourceperfile = 60;
 				break;
 				case 2:
-					app_prefs->prefs->maxsourceperfile = 40;
+					thePrefs.maxsourceperfile = 40;
 				break;
 			}
 		}
 		else if( download < 62 ){
 			switch( m_iTotalDownload ){
 				case 0:
-					app_prefs->prefs->maxsourceperfile = 300;
+					thePrefs.maxsourceperfile = 300;
 				break;
 				case 1:
-					app_prefs->prefs->maxsourceperfile = 200;
+					thePrefs.maxsourceperfile = 200;
 				break;
 				case 2:
-					app_prefs->prefs->maxsourceperfile = 100;
+					thePrefs.maxsourceperfile = 100;
 				break;
 			}
 		}
 		else if( download < 187 ){
 			switch( m_iTotalDownload ){
 				case 0:
-					app_prefs->prefs->maxsourceperfile = 500;
+					thePrefs.maxsourceperfile = 500;
 				break;
 				case 1:
-					app_prefs->prefs->maxsourceperfile = 400;
+					thePrefs.maxsourceperfile = 400;
 				break;
 				case 2:
-					app_prefs->prefs->maxsourceperfile = 350;
+					thePrefs.maxsourceperfile = 350;
 				break;
 			}
 		}
 		else if( download <= 312 ){
 			switch( m_iTotalDownload ){
 				case 0:
-					app_prefs->prefs->maxsourceperfile = 800;
+					thePrefs.maxsourceperfile = 800;
 				break;
 				case 1:
-					app_prefs->prefs->maxsourceperfile = 600;
+					thePrefs.maxsourceperfile = 600;
 				break;
 				case 2:
-					app_prefs->prefs->maxsourceperfile = 400;
+					thePrefs.maxsourceperfile = 400;
 				break;
 			}
 		}
 		else {
 			switch( m_iTotalDownload ){
 			case 0:
-				app_prefs->prefs->maxsourceperfile = 1000;
+				thePrefs.maxsourceperfile = 1000;
 				break;
 			case 1:
-				app_prefs->prefs->maxsourceperfile = 750;
+				thePrefs.maxsourceperfile = 750;
 				break;
 			case 2:
-				app_prefs->prefs->maxsourceperfile = 500;
+				thePrefs.maxsourceperfile = 500;
 				break;
 			}
 		}
@@ -259,8 +259,8 @@ BOOL Wizard::OnInitDialog(){
 	this->CheckDlgButton(IDC_KBYTES,0);
 
 	CString temp;
-	temp.Format("%u",app_prefs->prefs->maxGraphDownloadRate *8);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
-	temp.Format("%u",app_prefs->prefs->maxGraphUploadRate*8);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
+	temp.Format("%u",thePrefs.maxGraphDownloadRate *8);	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->SetWindowText(temp); 
+	temp.Format("%u",thePrefs.maxGraphUploadRate*8);GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->SetWindowText(temp); 
 
 	m_provider.InsertColumn(0,GetResString(IDS_PW_CONNECTION),LVCFMT_LEFT, 160);
 	m_provider.InsertColumn(1,GetResString(IDS_WIZ_DOWN),LVCFMT_LEFT, 85);

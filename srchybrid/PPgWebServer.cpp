@@ -103,30 +103,30 @@ void CPPgWebServer::LoadSettings(void)
 	GetDlgItem(IDC_WSPASSLOW)->SetWindowText(HIDDEN_PASSWORD);
 	GetDlgItem(IDC_MMPASSWORDFIELD)->SetWindowText(HIDDEN_PASSWORD);
 
-	strBuffer.Format("%d", app_prefs->GetWSPort());
+	strBuffer.Format("%d", thePrefs.GetWSPort());
 	GetDlgItem(IDC_WSPORT)->SetWindowText(strBuffer);
 
-	strBuffer.Format("%d", app_prefs->GetMMPort());
+	strBuffer.Format("%d", thePrefs.GetMMPort());
 	GetDlgItem(IDC_MMPORT_FIELD)->SetWindowText(strBuffer);
 
-	GetDlgItem(IDC_TMPLPATH)->SetWindowText(app_prefs->GetTemplate());
+	GetDlgItem(IDC_TMPLPATH)->SetWindowText(thePrefs.GetTemplate());
 
-	if(app_prefs->GetWSIsEnabled())
+	if(thePrefs.GetWSIsEnabled())
 		CheckDlgButton(IDC_WSENABLED,1);
 	else
 		CheckDlgButton(IDC_WSENABLED,0);
 
-	if(app_prefs->GetWSIsLowUserEnabled())
+	if(thePrefs.GetWSIsLowUserEnabled())
 		CheckDlgButton(IDC_WSENABLEDLOW,1);
 	else
 		CheckDlgButton(IDC_WSENABLEDLOW,0);
 
-	if(app_prefs->IsMMServerEnabled())
+	if(thePrefs.IsMMServerEnabled())
 		CheckDlgButton(IDC_MMENABLED,1);
 	else
 		CheckDlgButton(IDC_MMENABLED,0);
 
-	CheckDlgButton(IDC_WS_GZIP,(app_prefs->GetWebUseGzip())?1:0 );
+	CheckDlgButton(IDC_WS_GZIP,(thePrefs.GetWebUseGzip())?1:0 );
 	
 	OnEnChangeMMEnabled();
 
@@ -138,46 +138,44 @@ BOOL CPPgWebServer::OnApply()
 	if(m_bModified)
 	{
 		CString sBuf;
-		uint16 oldPort=app_prefs->GetWSPort();
+		uint16 oldPort=thePrefs.GetWSPort();
 
 		GetDlgItem(IDC_WSPASS)->GetWindowText(sBuf);
 		if(sBuf != HIDDEN_PASSWORD)
-			app_prefs->SetWSPass(sBuf);
+			thePrefs.SetWSPass(sBuf);
 		
 		GetDlgItem(IDC_WSPASSLOW)->GetWindowText(sBuf);
 		if(sBuf != HIDDEN_PASSWORD)
-			app_prefs->SetWSLowPass(sBuf);
+			thePrefs.SetWSLowPass(sBuf);
 
 		GetDlgItem(IDC_WSPORT)->GetWindowText(sBuf);
 		if (atoi(sBuf)!=oldPort) {
-			app_prefs->SetWSPort(atoi(sBuf));
+			thePrefs.SetWSPort(atoi(sBuf));
 			theApp.webserver->RestartServer();
 		}
-		app_prefs->SetWSIsEnabled((int8)IsDlgButtonChecked(IDC_WSENABLED));
-		app_prefs->SetWSIsLowUserEnabled((int8)IsDlgButtonChecked(IDC_WSENABLEDLOW));
-		app_prefs->SetWebUseGzip( (int8)IsDlgButtonChecked(IDC_WS_GZIP));
-
+		thePrefs.SetWSIsEnabled((uint8)IsDlgButtonChecked(IDC_WSENABLED));
+		thePrefs.SetWSIsLowUserEnabled((uint8)IsDlgButtonChecked(IDC_WSENABLEDLOW));
+		thePrefs.SetWebUseGzip( (uint8)IsDlgButtonChecked(IDC_WS_GZIP));
 		theApp.webserver->StartServer();
 
 		GetDlgItem(IDC_TMPLPATH)->GetWindowText(sBuf);
-		app_prefs->SetTemplate(sBuf);
+		thePrefs.SetTemplate(sBuf);
 
 		// mobilemule
 		GetDlgItem(IDC_MMPORT_FIELD)->GetWindowText(sBuf);
-		if (atoi(sBuf)!= theApp.glob_prefs->GetMMPort() ) {
-			app_prefs->SetMMPort(atoi(sBuf));
+		if (atoi(sBuf)!= thePrefs.GetMMPort() ) {
+			thePrefs.SetMMPort(atoi(sBuf));
 			theApp.mmserver->StopServer();
 			theApp.mmserver->Init();
 		}
-		app_prefs->SetMMIsEnabled((int8)IsDlgButtonChecked(IDC_MMENABLED));
-		
+		thePrefs.SetMMIsEnabled((uint8)IsDlgButtonChecked(IDC_MMENABLED));
 		if (IsDlgButtonChecked(IDC_MMENABLED))
 			theApp.mmserver->Init();
 		else
 			theApp.mmserver->StopServer();
 		GetDlgItem(IDC_MMPASSWORDFIELD)->GetWindowText(sBuf);
 		if(sBuf != HIDDEN_PASSWORD)
-			app_prefs->SetMMPass(sBuf);
+			thePrefs.SetMMPass(sBuf);
 
 		theApp.emuledlg->serverwnd->UpdateMyInfo();
 		SetModified(FALSE);

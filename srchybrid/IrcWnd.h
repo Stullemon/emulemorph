@@ -1,6 +1,7 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "MuleListCtrl.h"
+#include "ClosableTabCtrl.h"
 
 class CIrcMain;
 struct ChannelList;
@@ -98,9 +99,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
+	int				GetTabUnderMouse(CPoint point);
 	CImageList		m_imagelist;
 	CIrcMain*		m_pIrcMain;
-	CTabCtrl		channelselect;
+	CClosableTabCtrl		channelselect;
 	CString			m_sSendString;
 	bool			m_bConnected;
 	bool			m_bLoggedIn;

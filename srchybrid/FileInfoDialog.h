@@ -18,6 +18,7 @@
 #include "RichEditCtrlX.h"
 
 class CKnownFile;
+struct SMediaInfo;
 
 /////////////////////////////////////////////////////////////////////////////
 // CFileInfoDialog dialog
@@ -30,22 +31,20 @@ public:
 	CFileInfoDialog();   // standard constructor
 	virtual ~CFileInfoDialog();
 
-	void SetMyfile(const CKnownFile* file) {m_file=file;}
+	void SetMyfile(const CSimpleArray<const CKnownFile*>* paFiles) { m_paFiles = paFiles; }
 
 // Dialog Data
 	enum { IDD = IDD_FILEINFO };
 
 protected:
 	CString m_strCaption;
-	const CKnownFile* m_file;
-	long m_lAudioBitrate;
-	BOOL m_bAudioRoundBitrate;
+	const CSimpleArray<const CKnownFile*>* m_paFiles;
 	CRichEditCtrlX m_fi;
-	CHARFORMAT m_cfDef;
-	CHARFORMAT m_cfBold;
-	CHARFORMAT m_cfRed;
+//	CHARFORMAT m_cfDef;
+//	CHARFORMAT m_cfBold;
+//	CHARFORMAT m_cfRed;
 
-	void RefreshData();
+	bool GetMediaInfo(const CKnownFile* file, SMediaInfo* mi, bool bSingleFile);
 	void Localize();
 	void AddFileInfo(LPCTSTR pszFmt, ...);
 
@@ -54,4 +53,5 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedRoundbit();
+	afx_msg LRESULT OnMediaInfoResult(WPARAM, LPARAM);
 };

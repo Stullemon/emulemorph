@@ -31,7 +31,6 @@
 #define CS_RETRYCONNECTTIME  30 // seconds
 
 class CServerList;
-class CPreferences;
 class CUDPSocket;
 class CServerSocket;
 class CServer;
@@ -40,7 +39,7 @@ class Packet;
 class CServerConnect: public CLoggable
 {
 public:
-	CServerConnect(CServerList* in_serverlist, CPreferences* in_prefs);
+	CServerConnect(CServerList* in_serverlist);
 	~CServerConnect();
 	void	ConnectionFailed(CServerSocket* sender);
 	void	ConnectionEstablished(CServerSocket* sender);
@@ -79,9 +78,8 @@ private:
 	bool	connecting;
 	bool	singleconnecting;
 	bool	connected;
-	int8	max_simcons;
+	uint8	max_simcons;
 	uint32 lastStartAt;
-	CPreferences*	app_prefs;
 	CServerSocket*	connectedsocket;
 	CServerList*	used_list;
 	CUDPSocket*		udpsocket;

@@ -14,14 +14,12 @@ public:
 	enum { IDD = IDD_SPLASH };
 
 protected:
+	CBitmap m_imgSplash;
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	BOOL OnInitDialog();
-	DECLARE_MESSAGE_MAP()
-	void OnTimer(UINT_PTR nIDEvent);
 	BOOL PreTranslateMessage(MSG* pMsg);
+
+	DECLARE_MESSAGE_MAP()
 	void OnPaint(); 
-private:
-	uint32 m_timer;
-	uint16 m_translucency;
-	CEnBitmap m_imgSplash;
 };

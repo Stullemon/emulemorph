@@ -298,7 +298,8 @@ void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData,
 			}
 			catch(CFileException* error){
 				ASSERT ( false ); // remove later
-				AddDebugLogLine(false, "Corrupt MobileMule Packet received");
+				if (thePrefs.GetVerbose())
+					AddDebugLogLine(false, "Corrupt MobileMule Packet received");
 				error->Delete();
 			}
 		}
@@ -318,7 +319,8 @@ void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData,
 	}
 	catch(...){
 		ASSERT ( false ); // remove later
-		AddDebugLogLine(false, "Unexpected Error while processing MobileMule Packet");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Unexpected Error while processing MobileMule Packet");
 	}
 
 }
@@ -337,7 +339,7 @@ CListenMMSocket::~CListenMMSocket(void)
 }
 
 bool  CListenMMSocket::Create(){
-	return CAsyncSocket::Create(theApp.glob_prefs->GetMMPort(),SOCK_STREAM,FD_ACCEPT) && Listen();;
+	return CAsyncSocket::Create(thePrefs.GetMMPort(),SOCK_STREAM,FD_ACCEPT) && Listen();;
 }
 
 

@@ -47,5 +47,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 private:
-	CEnBitmap m_imgSplash;
+	CBitmap m_imgSplash;
 };

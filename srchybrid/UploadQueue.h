@@ -212,11 +212,6 @@ private:
 	DWORD   m_FirstRanOutOfSlotsTick;
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030824-2238
 
-	//Morph Start - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
-	uint32	m_LastCheckedRemainBytes;
-	uint32	m_RemainBytes;
-	//Morph End - added by AndCycle, check remain bandwidth for ZZ UploadBandwidthTrottler
-
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	uint32	AvgRespondTime[2];
 	uint32	MaxVUR;

@@ -10,9 +10,10 @@ public:
 	void LogSamples();
 
 protected:
-	enum ELogMode {
+	enum ELogMode{
 		None,
-		OneSample
+		OneSample,
+		AllSamples
 	} m_eMode;
 	DWORD m_dwInterval;
 	bool m_bInitialized;

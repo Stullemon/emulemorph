@@ -27,10 +27,14 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CSplashScreen, CDialog)
+
+BEGIN_MESSAGE_MAP(CSplashScreen, CDialog)
+	ON_WM_PAINT()
+END_MESSAGE_MAP()
+
 CSplashScreen::CSplashScreen(CWnd* pParent /*=NULL*/)
 	: CDialog(CSplashScreen::IDD, pParent)
 {
-	m_timer = 0;
 }
 
 CSplashScreen::~CSplashScreen()
@@ -43,47 +47,45 @@ void CSplashScreen::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 }
 
-BOOL CSplashScreen::OnInitDialog(){
+BOOL CSplashScreen::OnInitDialog()
+{
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
-	//GetParent()->ShowWindow(SW_SHOW);
-	VERIFY (m_imgSplash.LoadImage(IDR_SPLASH,"JPG"));
-	m_translucency = 0;
-	VERIFY( (m_timer = SetTimer(300,90,0)) != NULL );
-	return true;
-}
 
-BEGIN_MESSAGE_MAP(CSplashScreen, CDialog)
-	ON_WM_TIMER()
-	ON_WM_PAINT()
-END_MESSAGE_MAP()
-
-void CSplashScreen::OnTimer(UINT_PTR nIDEvent){
-	m_translucency += 18;
-	if (m_translucency > 255){
-		if (m_translucency < 450){
-			//::SetLayeredWindowAttributes(GetParent()->m_hWnd, 0, 255, LWA_ALPHA);
-			//::SetLayeredWindowAttributes(m_hWnd, 0, 255 - (m_translucency-255), LWA_ALPHA);
-			return;
+	VERIFY( m_imgSplash.Attach(theApp.LoadImage(_T("ABOUT"), _T("JPG"))) );
+	if (m_imgSplash.GetSafeHandle())
+	{
+		BITMAP bmp = {0};
+		if (m_imgSplash.GetBitmap(&bmp) > 0)
+		{
+			WINDOWPLACEMENT wp;
+			GetWindowPlacement(&wp);
+			wp.rcNormalPosition.right = wp.rcNormalPosition.left + bmp.bmWidth;
+			wp.rcNormalPosition.bottom = wp.rcNormalPosition.top + bmp.bmHeight;
+			SetWindowPlacement(&wp);
 		}
-		if (m_timer){
-			KillTimer(m_timer);
-			m_timer = 0;
-		}
-		//::SetWindowLong(GetParent()->m_hWnd,GWL_EXSTYLE,::GetWindowLong(GetParent()->m_hWnd,GWL_EXSTYLE) ^ WS_EX_LAYERED);
-		OnOK();
-		GetParent()->RedrawWindow();
-		return;
 	}
-	//::SetLayeredWindowAttributes(GetParent()->m_hWnd, 0, m_translucency, LWA_ALPHA);
+
+	return TRUE;
 }
 
-BOOL CSplashScreen::PreTranslateMessage(MSG* pMsg) {
-   if(pMsg->message == WM_LBUTTONDOWN){
-		m_translucency = 500;
-   }
+BOOL CSplashScreen::PreTranslateMessage(MSG* pMsg)
+{
+	BOOL bResult = CDialog::PreTranslateMessage(pMsg);
 
-   return CDialog::PreTranslateMessage(pMsg);
+	if ((pMsg->message == WM_KEYDOWN	   ||
+		 pMsg->message == WM_SYSKEYDOWN	   ||
+		 pMsg->message == WM_LBUTTONDOWN   ||
+		 pMsg->message == WM_RBUTTONDOWN   ||
+		 pMsg->message == WM_MBUTTONDOWN   ||
+		 pMsg->message == WM_NCLBUTTONDOWN ||
+		 pMsg->message == WM_NCRBUTTONDOWN ||
+		 pMsg->message == WM_NCMBUTTONDOWN))
+	{
+		DestroyWindow();
+	}
+
+	return bResult;
 }
 
 void CSplashScreen::OnPaint() 
@@ -93,15 +95,43 @@ void CSplashScreen::OnPaint()
 	if (m_imgSplash.GetSafeHandle())
 	{
 		CDC dcMem;
-
 		if (dcMem.CreateCompatibleDC(&dc))
 		{
 			CBitmap* pOldBM = dcMem.SelectObject(&m_imgSplash);
 			BITMAP BM;
 			m_imgSplash.GetBitmap(&BM);
 			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, SRCCOPY);
-			dcMem.SelectObject(pOldBM);
+			if (pOldBM)
+				dcMem.SelectObject(pOldBM);
+
+			CRect rc(0, BM.bmHeight * 0.65, BM.bmWidth, BM.bmHeight);
+			dc.FillSolidRect(rc.left+1, rc.top+1, rc.Width()-2, rc.Height()-2, RGB(255,255,255));
+
+			LOGFONT lf = {0};
+			lf.lfHeight = 30;
+			lf.lfWeight = FW_BOLD;
+			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+			_tcscpy(lf.lfFaceName, _T("Arial"));
+			CFont font;
+			font.CreateFontIndirect(&lf);
+			CFont* pOldFont = dc.SelectObject(&font);
+			rc.top += dc.DrawText(_T("eMule ") + theApp.m_strCurVersionLong, &rc, DT_CENTER | DT_NOPREFIX);
+			if (pOldFont)
+				dc.SelectObject(pOldFont);
+			font.DeleteObject();
+
+			rc.top += 8;
+
+			lf.lfHeight = 14;
+			lf.lfWeight = FW_NORMAL;
+			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+			_tcscpy(lf.lfFaceName, _T("Arial"));
+			font.CreateFontIndirect(&lf);
+			pOldFont = dc.SelectObject(&font);
+			dc.DrawText(_T("Copyright (C) 2002-2004 Merkur"), &rc, DT_CENTER | DT_NOPREFIX);
+			if (pOldFont)
+				dc.SelectObject(pOldFont);
+			font.DeleteObject();
 		}
 	}
 }
-// CSplashScreen message handlers

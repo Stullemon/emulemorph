@@ -198,53 +198,56 @@ BOOL CTrayDialog::TraySetMenu(HMENU hMenu,UINT nDefaultPos){
 	return TRUE;
 }
 
-LRESULT CTrayDialog::OnTrayNotify(WPARAM wParam, LPARAM lParam) { 
-    UINT uID = (UINT) wParam; 
-    UINT uMsg = (UINT) lParam; 
+LRESULT CTrayDialog::OnTrayNotify(WPARAM wParam, LPARAM lParam)
+{
+    UINT uID; 
+    UINT uMsg; 
+ 
+    uID = (UINT) wParam; 
+    uMsg = (UINT) lParam; 
  
 	if (uID != 1)
-		return 0;
+		return false;
 	
 	CPoint pt;	
 
-    switch (uMsg) 
+    switch (uMsg)
 	{ 
-	case WM_MOUSEMOVE:
-		GetCursorPos(&pt);
-		ClientToScreen(&pt);
-		OnTrayMouseMove(pt);
-		break;
-	case WM_LBUTTONDOWN:
-		GetCursorPos(&pt);
-		ClientToScreen(&pt);
-		OnTrayLButtonDown(pt);
-		break;
-	case WM_LBUTTONDBLCLK:
-		GetCursorPos(&pt);
-		ClientToScreen(&pt);
-		OnTrayLButtonDblClk(pt);
-		break;
-	
-	case WM_RBUTTONDOWN:
-	case WM_CONTEXTMENU:
-		GetCursorPos(&pt);
-		//ClientToScreen(&pt);
-		OnTrayRButtonDown(pt);
-		break;
-	case WM_RBUTTONDBLCLK:
-		GetCursorPos(&pt);
-		ClientToScreen(&pt);
-		OnTrayRButtonDblClk(pt);
-		break;
-	case WM_LBUTTONUP: // [reCDVst]
-		if(m_bdoubleclicked)
-		{
-			if(TrayHide())
-				ShowWindow(SW_SHOW);
-			m_bdoubleclicked = false;
-		}
-		break;
-    } 
+		case WM_MOUSEMOVE:
+			GetCursorPos(&pt);
+			ClientToScreen(&pt);
+			OnTrayMouseMove(pt);
+			break;
+		case WM_LBUTTONDOWN:
+			GetCursorPos(&pt);
+			ClientToScreen(&pt);
+			OnTrayLButtonDown(pt);
+			break;
+		case WM_LBUTTONDBLCLK:
+			GetCursorPos(&pt);
+			ClientToScreen(&pt);
+			OnTrayLButtonDblClk(pt);
+			break;
+		case WM_RBUTTONUP:
+		case WM_CONTEXTMENU:
+			GetCursorPos(&pt);
+			//ClientToScreen(&pt);
+			OnTrayRButtonUp(pt);//bond006: systray menu gets stuck (bugfix)
+			break;
+		case WM_RBUTTONDBLCLK:
+			GetCursorPos(&pt);
+			ClientToScreen(&pt);
+			OnTrayRButtonDblClk(pt);
+			break;
+		case WM_LBUTTONUP:
+			if(m_bdoubleclicked)
+			{
+				if(TrayHide())
+					ShowWindow(SW_SHOW);
+				m_bdoubleclicked=false;
+			}
+			break;
+	} 
 	return true; 
 }
 
@@ -268,7 +271,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 		CTrayDialogBase::OnSysCommand(nID, lParam);
 }
 
-void CTrayDialog::TraySetMinimizeToTray(int8* bMinimizeToTray)
+void CTrayDialog::TraySetMinimizeToTray(uint8* bMinimizeToTray)
 {
 	m_bMinimizeToTray = bMinimizeToTray;
 }
@@ -283,7 +286,7 @@ void CTrayDialog::TrayMinimizeToTrayChange()
 		MinTrayBtnShow();
 }
 
-void CTrayDialog::OnTrayRButtonDown(CPoint pt)
+void CTrayDialog::OnTrayRButtonUp(CPoint pt)
 {
 	//m_mnuTrayMenu.GetSubMenu(0)->TrackPopupMenu(TPM_BOTTOMALIGN|TPM_LEFTBUTTON|TPM_RIGHTBUTTON,pt.x,pt.y,this);
 	//m_mnuTrayMenu.GetSubMenu(0)->SetDefaultItem(m_nDefaultMenuItem,TRUE);

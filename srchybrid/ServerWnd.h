@@ -20,6 +20,7 @@
 #include "LogEditCtrl.h"
 #include "IconStatic.h"
 #include "RichEditCtrlX.h"
+#include "ClosableTabCtrl.h"
 
 class CHTRichEditCtrl;
 class CCustomAutoComplete;
@@ -43,11 +44,19 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_SERVER };
+
+	enum ELogPaneItems
+	{
+		PaneServerInfo	= 0, // those are CTabCtrl item indices
+		PaneLog			= 1,
+		PaneVerboseLog	= 2
+	};
+
 	CServerListCtrl serverlistctrl;
 	CHTRichEditCtrl* servermsgbox;
 	CLogEditCtrl logbox;
 	CLogEditCtrl debuglog;
-	CTabCtrl StatusSelector;
+	CClosableTabCtrl StatusSelector;
 
 protected:
 	void SetAllIcons();
@@ -64,12 +73,13 @@ protected:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
+	afx_msg void OnDDClicked();
 
 private:
 	CIconStatic m_ctrlNewServerFrm;
 	CIconStatic m_ctrlUpdateServerFrm;
 	CIconStatic m_ctrlMyInfo;
-	CImageList imagelist;
+	CImageList m_imlLogPanes;
 	HICON icon_srvlist;
 	bool	debug;
 	CRichEditCtrlX m_MyInfo;

@@ -21,7 +21,6 @@ public:
 	CPPgNotify();
 	virtual ~CPPgNotify();	
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
 	void Localize(void);
 
 	virtual BOOL OnInitDialog();
@@ -31,7 +30,6 @@ public:
 	enum { IDD = IDD_PPG_NOTIFY };
 
 protected:
-	CPreferences* app_prefs;
 	void LoadSettings(void);
 
 	virtual void DoDataExchange(CDataExchange* pDX);

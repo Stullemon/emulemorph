@@ -43,6 +43,9 @@ protected:
 
 	void UpdateContact(int iItem, Kademlia::CContact* contact);
 	void SetAllIcons();
+	void ContactAdd();
+	void UpdateKadContactCount();
+
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam);

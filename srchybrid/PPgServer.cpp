@@ -43,13 +43,19 @@ void CPPgServer::DoDataExchange(CDataExchange* pDX)
 }
 
 
+
+void CPPgServer::OnSrvRetryClick(){
+	GetDlgItem(IDC_SERVERRETRIES)->EnableWindow(IsDlgButtonChecked(IDC_REMOVEDEAD));
+	SetModified();
+}
+
 BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 	ON_EN_CHANGE(IDC_SERVERRETRIES, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOSERVER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATESERVERCONNECT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UPDATESERVERCLIENT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SCORE, OnSettingsChange)
-	ON_BN_CLICKED(IDC_REMOVEDEAD, OnSettingsChange)
+	ON_BN_CLICKED(IDC_REMOVEDEAD, OnSrvRetryClick)
 	ON_BN_CLICKED(IDC_SMARTIDCHECK, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SAFESERVERCONNECT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOCONNECTSTATICONLY, OnSettingsChange)
@@ -72,6 +78,7 @@ BOOL CPPgServer::OnInitDialog()
 
 	LoadSettings();
 	Localize();
+	OnSrvRetryClick();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -79,59 +86,59 @@ BOOL CPPgServer::OnInitDialog()
 
 void CPPgServer::LoadSettings(void)
 {
-//	switch(app_prefs->prefs->deadserver)
+//	switch(thePrefs.deadserver)
 //	{
 //		case 1:	this->CheckDlgButton(IDC_MARKDEAD,1);	break;
 //		case 2:	this->CheckDlgButton(IDC_DELETEDEAD,1);	break;
 //	}
 	
 	CString strBuffer;
-	strBuffer.Format("%d", app_prefs->prefs->deadserverretries);
+	strBuffer.Format("%d", thePrefs.deadserverretries);
 	GetDlgItem(IDC_SERVERRETRIES)->SetWindowText(strBuffer);
 		
 
-	if(app_prefs->IsSafeServerConnectEnabled())
+	if(thePrefs.IsSafeServerConnectEnabled())
 		CheckDlgButton(IDC_SAFESERVERCONNECT,1);
 	else
 		CheckDlgButton(IDC_SAFESERVERCONNECT,0);
 
-	if(app_prefs->prefs->m_bmanualhighprio)
+	if(thePrefs.m_bmanualhighprio)
 		CheckDlgButton(IDC_MANUALSERVERHIGHPRIO,1);
 	else
 		CheckDlgButton(IDC_MANUALSERVERHIGHPRIO,0);
 
-	if(app_prefs->GetSmartIdCheck())
+	if(thePrefs.GetSmartIdCheck())
 		CheckDlgButton(IDC_SMARTIDCHECK,1);
 	else
 		CheckDlgButton(IDC_SMARTIDCHECK,0);
 
-	if(app_prefs->prefs->deadserver)
+	if(thePrefs.deadserver)
 		CheckDlgButton(IDC_REMOVEDEAD,1);
 	else
 		CheckDlgButton(IDC_REMOVEDEAD,0);
 	
-	if(app_prefs->prefs->autoserverlist)
+	if(thePrefs.autoserverlist)
 		CheckDlgButton(IDC_AUTOSERVER,1);
 	else
 		CheckDlgButton(IDC_AUTOSERVER,0);
 
-	if(app_prefs->prefs->addserversfromserver)
+	if(thePrefs.addserversfromserver)
 		CheckDlgButton(IDC_UPDATESERVERCONNECT, 1);
 	else
 		CheckDlgButton(IDC_UPDATESERVERCONNECT, 0);
 	
-	if(app_prefs->prefs->addserversfromclient)
+	if(thePrefs.addserversfromclient)
 		CheckDlgButton(IDC_UPDATESERVERCLIENT, 1);
 	else
 		CheckDlgButton(IDC_UPDATESERVERCLIENT, 0);
 
-	if(app_prefs->prefs->scorsystem)
+	if(thePrefs.scorsystem)
 		CheckDlgButton(IDC_SCORE,1);
 	else
 		CheckDlgButton(IDC_SCORE,0);
 
 	// Barry
-	if(app_prefs->prefs->autoconnectstaticonly)
+	if(thePrefs.autoconnectstaticonly)
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,1);
 	else
 		CheckDlgButton(IDC_AUTOCONNECTSTATICONLY,0);
@@ -142,39 +149,39 @@ BOOL CPPgServer::OnApply()
 	char buffer[510];
 	
 //	if(IsDlgButtonChecked(IDC_MARKDEAD))
-//		app_prefs->prefs->deadserver = 1;
+//		thePrefs.deadserver = 1;
 //	else
-//		app_prefs->prefs->deadserver = 2;
-	app_prefs->SetSafeServerConnectEnabled((int8)IsDlgButtonChecked(IDC_SAFESERVERCONNECT));
+//		thePrefs.deadserver = 2;
+	thePrefs.SetSafeServerConnectEnabled((uint8)IsDlgButtonChecked(IDC_SAFESERVERCONNECT));
 
 	if(IsDlgButtonChecked(IDC_SMARTIDCHECK))
-		app_prefs->prefs->smartidcheck = true;
+		thePrefs.smartidcheck = true;
 	else
-		app_prefs->prefs->smartidcheck = false;
+		thePrefs.smartidcheck = false;
 
 	if(IsDlgButtonChecked(IDC_MANUALSERVERHIGHPRIO))
-		app_prefs->prefs->m_bmanualhighprio = true;
+		thePrefs.m_bmanualhighprio = true;
 	else
-		app_prefs->prefs->m_bmanualhighprio = false;
+		thePrefs.m_bmanualhighprio = false;
 
-	app_prefs->prefs->deadserver = (int8)IsDlgButtonChecked(IDC_REMOVEDEAD);
+	thePrefs.deadserver = (uint8)IsDlgButtonChecked(IDC_REMOVEDEAD);
 	
 	if(GetDlgItem(IDC_SERVERRETRIES)->GetWindowTextLength())
 	{
 		GetDlgItem(IDC_SERVERRETRIES)->GetWindowText(buffer,20);
-		app_prefs->prefs->deadserverretries = (atoi(buffer)) ? atoi(buffer) : 5;
+		thePrefs.deadserverretries = (atoi(buffer)) ? atoi(buffer) : 5;
 	}
-	if(app_prefs->prefs->deadserverretries < 1) 
-		app_prefs->prefs->deadserverretries = 5;
+	if(thePrefs.deadserverretries < 1) 
+		thePrefs.deadserverretries = 5;
 
-	app_prefs->prefs->scorsystem = (int8)IsDlgButtonChecked(IDC_SCORE);
-	app_prefs->prefs->autoserverlist = (int8)IsDlgButtonChecked(IDC_AUTOSERVER);
-	app_prefs->prefs->addserversfromserver = (int8)IsDlgButtonChecked(IDC_UPDATESERVERCONNECT);
-	app_prefs->prefs->addserversfromclient = (int8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
+	thePrefs.scorsystem = (uint8)IsDlgButtonChecked(IDC_SCORE);
+	thePrefs.autoserverlist = (uint8)IsDlgButtonChecked(IDC_AUTOSERVER);
+	thePrefs.addserversfromserver = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCONNECT);
+	thePrefs.addserversfromclient = (uint8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
 	// Barry
-	app_prefs->prefs->autoconnectstaticonly = (int8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
+	thePrefs.autoconnectstaticonly = (uint8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
 	
-//	app_prefs->Save();
+//	thePrefs.Save();
 	LoadSettings();
 
 	SetModified();
@@ -205,5 +212,5 @@ void CPPgServer::Localize(void)
 
 void CPPgServer::OnBnClickedEditadr()
 {
-	ShellExecute(NULL, "open", theApp.glob_prefs->GetTxtEditor(), "\""+CString(theApp.glob_prefs->GetConfigDir())+"adresses.dat\"", NULL, SW_SHOW); 
+	ShellExecute(NULL, "open", thePrefs.GetTxtEditor(), "\""+CString(thePrefs.GetConfigDir())+"adresses.dat\"", NULL, SW_SHOW); 
 }

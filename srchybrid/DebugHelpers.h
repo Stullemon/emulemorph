@@ -10,5 +10,3 @@
 #ifndef _DEBUG
 #define USE_CLIENT_TCP_CATCH_ALL_HANDLER
 #endif
-
-extern int _iDbgHeap;

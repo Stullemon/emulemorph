@@ -10,14 +10,11 @@ public:
 	CPPgWebServer();
 	virtual ~CPPgWebServer();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
 	enum { IDD = IDD_PPG_WEBSRV };
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	
 protected:
-	CPreferences *app_prefs;
-	
 	bool m_bModified;
 	void SetModified(BOOL bChanged = TRUE)
 	{

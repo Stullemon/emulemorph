@@ -1,9 +1,8 @@
 #pragma once
 #include "TreeOptionsCtrlEx.h"
 
-class CPreferences;
-
-#define	MAX_DEBUG_ITEMS	6
+#define	MAX_DETAIL_ITEMS	7
+#define	MAX_INTEGER_ITEMS	1
 
 class CPPgDebug : public CPropertyPage
 {
@@ -13,19 +12,23 @@ public:
 	CPPgDebug();
 	virtual ~CPPgDebug();
 
-	void SetPrefs(CPreferences* in_prefs) { app_prefs = in_prefs;}
-
 // Dialog Data
 	enum { IDD = IDD_PPG_DEBUG };
 
 protected:
-	CPreferences *app_prefs;
 	HTREEITEM m_htiServer;
 	HTREEITEM m_htiClient;
-	HTREEITEM m_cb[MAX_DEBUG_ITEMS];
-	HTREEITEM m_lv[MAX_DEBUG_ITEMS];
-	BOOL m_checks[MAX_DEBUG_ITEMS];
-	int m_levels[MAX_DEBUG_ITEMS];
+
+	// detail level items
+	HTREEITEM m_cb[MAX_DETAIL_ITEMS];
+	HTREEITEM m_lv[MAX_DETAIL_ITEMS];
+	BOOL m_checks[MAX_DETAIL_ITEMS];
+	int m_levels[MAX_DETAIL_ITEMS];
+
+	// integer items
+	HTREEITEM m_htiInteger[MAX_INTEGER_ITEMS];
+	int m_iValInteger[MAX_INTEGER_ITEMS];
+
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
 

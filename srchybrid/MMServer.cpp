@@ -57,6 +57,7 @@ CMMServer::CMMServer(void)
 	m_cPWFailed = 0;
 	m_dwBlocked = 0;
 	m_pSocket = NULL;
+	m_nSessionID = 0;
 	m_pPendingCommandSocket = NULL;
 
 }
@@ -72,14 +73,14 @@ CMMServer::~CMMServer(void)
 }
 
 void CMMServer::Init(){
-	if (theApp.glob_prefs->IsMMServerEnabled() && !m_pSocket){
+	if (thePrefs.IsMMServerEnabled() && !m_pSocket){
 		m_pSocket = new CListenMMSocket(this);
 		if (!m_pSocket->Create()){
 			StopServer();
 			AddLogLine(false, GetResString(IDS_MMFAILED) );
 		}
 		else{
-			AddLogLine(false, GetResString(IDS_MMSTARTED), theApp.glob_prefs->GetMMPort(), MM_STRVERSION );
+			AddLogLine(false, GetResString(IDS_MMSTARTED), thePrefs.GetMMPort(), MM_STRVERSION );
 		}
 	}
 }
@@ -133,7 +134,7 @@ void CMMServer::ProcessHelloPacket(CMMData* data, CMMSocket* sender){
 		}
 		CString plainPW = data->ReadString();
 		CString testValue =MD5Sum(plainPW).GetHash();
-		if (testValue != theApp.glob_prefs->GetMMPass() || plainPW.GetLength() == 0 ){
+		if (testValue != thePrefs.GetMMPass() || plainPW.GetLength() == 0 ){
 			m_dwBlocked = 0;
 			packet->WriteByte(MMT_WRONGPASSWORD);
 			sender->SendPacket(packet);
@@ -152,9 +153,9 @@ void CMMServer::ProcessHelloPacket(CMMData* data, CMMSocket* sender){
 			packet->WriteByte(MMT_OK);
 			m_nSessionID = rand();
 			packet->WriteShort(m_nSessionID);
-			packet->WriteString(theApp.glob_prefs->GetUserNick());
-			packet->WriteShort((theApp.glob_prefs->GetMaxUpload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxUpload());
-			packet->WriteShort((theApp.glob_prefs->GetMaxDownload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxDownload());
+			packet->WriteString(thePrefs.GetUserNick());
+			packet->WriteShort((thePrefs.GetMaxUpload() == UNLIMITED) ? 0 : thePrefs.GetMaxUpload());
+			packet->WriteShort((thePrefs.GetMaxDownload() == UNLIMITED) ? 0 : thePrefs.GetMaxDownload());
 			ProcessStatusRequest(sender,packet);
 			//sender->SendPacket(packet);
 		}
@@ -170,9 +171,9 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 		packet->WriteByte(MMP_STATUSANSWER);
 
 	packet->WriteShort((uint16)theApp.uploadqueue->GetDatarate()/100);
-	packet->WriteShort((uint16)((theApp.glob_prefs->GetMaxGraphUploadRate()*1024)/100));
+	packet->WriteShort((uint16)((thePrefs.GetMaxGraphUploadRate()*1024)/100));
 	packet->WriteShort((uint16)theApp.downloadqueue->GetDatarate()/100);
-	packet->WriteShort((uint16)((theApp.glob_prefs->GetMaxGraphDownloadRate()*1024)/100));
+	packet->WriteShort((uint16)((thePrefs.GetMaxGraphDownloadRate()*1024)/100));
 	packet->WriteByte((uint8)theApp.downloadqueue->GetDownloadingFileCount());
 	packet->WriteByte((uint8)theApp.downloadqueue->GetPausedFileCount());
 	packet->WriteInt(theApp.stat_sessionReceivedBytes/1048576);
@@ -207,10 +208,10 @@ void CMMServer::ProcessFileListRequest(CMMSocket* sender, CMMPacket* packet){
 	else
 		packet->WriteByte(MMP_FILELISTANS);
 	
-	int nCount = theApp.glob_prefs->GetCatCount();
+	int nCount = thePrefs.GetCatCount();
 	packet->WriteByte(nCount);
 	for (int i = 0; i != nCount; i++){
-		packet->WriteString(theApp.glob_prefs->GetCategory(i)->title);
+		packet->WriteString(thePrefs.GetCategory(i)->title);
 	}
 
 	nCount = (theApp.downloadqueue->GetFileCount() > 50)? 50 : theApp.downloadqueue->GetFileCount();
@@ -243,10 +244,10 @@ void CMMServer::ProcessFileListRequest(CMMSocket* sender, CMMPacket* packet){
 
 void CMMServer::ProcessFinishedListRequest(CMMSocket* sender){
 	CMMPacket* packet = new CMMPacket(MMP_FINISHEDANS);
-	int nCount = theApp.glob_prefs->GetCatCount();
+	int nCount = thePrefs.GetCatCount();
 	packet->WriteByte(nCount);
 	for (int i = 0; i != nCount; i++){
-		packet->WriteString(theApp.glob_prefs->GetCategory(i)->title);
+		packet->WriteString(thePrefs.GetCategory(i)->title);
 	}
 
 	nCount = (m_SentFinishedList.GetCount() > 30)? 30 : m_SentFinishedList.GetCount();
@@ -293,7 +294,7 @@ void CMMServer::ProcessFileCommand(CMMData* data, CMMSocket* sender){
 					selFile->DeleteFile(); 
 					break;
 				default:
-					if (theApp.glob_prefs->StartNextFile()) 
+					if (thePrefs.StartNextFile()) 
 						theApp.downloadqueue->StartNextFile();
 					selFile->DeleteFile(); 
 			}
@@ -445,12 +446,12 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 void  CMMServer::ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender){
 	uint16 nNewUpload = data->ReadShort();
 	uint16 nNewDownload = data->ReadShort();
-	theApp.glob_prefs->SetMaxUpload(nNewUpload);
-	theApp.glob_prefs->SetMaxDownload(nNewDownload);
+	thePrefs.SetMaxUpload(nNewUpload);
+	thePrefs.SetMaxDownload(nNewDownload);
 
 	CMMPacket* packet = new CMMPacket(MMP_CHANGELIMITANS);
-	packet->WriteShort((theApp.glob_prefs->GetMaxUpload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxUpload());
-	packet->WriteShort((theApp.glob_prefs->GetMaxDownload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxDownload());
+	packet->WriteShort((thePrefs.GetMaxUpload() == UNLIMITED) ? 0 : thePrefs.GetMaxUpload());
+	packet->WriteShort((thePrefs.GetMaxDownload() == UNLIMITED) ? 0 : thePrefs.GetMaxDownload());
 	sender->SendPacket(packet);
 }
 
@@ -671,7 +672,7 @@ void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){
 	ASSERT (nPos + nCompressEvery * nWidth == nRawDataSize || (nPos == 0 && nRawDataSize < nWidth));
 	
 	CMMPacket* packet = new CMMPacket(MMP_STATISTICSANS);
-	packet->WriteShort((nRawDataSize-nPos)*theApp.glob_prefs->GetTrafficOMeterInterval());
+	packet->WriteShort((nRawDataSize-nPos)*thePrefs.GetTrafficOMeterInterval());
 	packet->WriteShort(min(nWidth, nRawDataSize));
 	while (nPos < nRawDataSize){
 		nAddUp = nAddDown = nAddCon = 0;

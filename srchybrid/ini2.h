@@ -120,6 +120,7 @@ public:
 	void		SerGet(	BOOL bGet,CRect		* rect,	int nCount, CString strEntry, LPCSTR strSection = NULL, CRect rectDefault = CRect(0,0,0,0));
 
 	int			Parse(CString &strIn, int nOffset, CString &strOut);
+	void		DeleteKey(LPCTSTR pszKey);
    //MAKRO :
    //SERGET(bGet,value) SerGet(bGet,value,#value)
 

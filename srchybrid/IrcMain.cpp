@@ -71,12 +71,14 @@ void CIrcMain::PreParseMessage( CString buffer ){
 		}
 		catch(...)
 		{
-			AddDebugLogLine(false, "Exception in CIrcMain::PreParseMessage(1)");
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(false, "Exception in CIrcMain::PreParseMessage(1)");
 		}
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::PreParseMessage(2)");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::PreParseMessage(2)");
 	}
 }
 
@@ -120,7 +122,7 @@ void CIrcMain::ProcessLink( CString ed2kLink )
 				pSrv->SetListName(defName.GetBuffer());
 
 				// Barry - Default all new irc servers to high priority
-				if( theApp.glob_prefs->GetManualHighPrio() )
+				if( thePrefs.GetManualHighPrio() )
 					pSrv->SetPreference(SRV_PR_HIGH);
 
 				if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(pSrv,true)) 
@@ -270,18 +272,18 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						else
 							sport = "0";
 						CString build;
-						build.Format( "PRIVMSG %s :\001REPFRIEND eMule%s%s|%s|%u:%u|%s:%s|%s|\001", source, theApp.m_strCurVersionLong, Irc_Version, sverify, theApp.IsFirewalled() ? 0 : theApp.GetID(), theApp.glob_prefs->GetPort(), sip, sport, EncodeBase16((const unsigned char*)theApp.glob_prefs->GetUserHash(), 16));
+						build.Format( "PRIVMSG %s :\001REPFRIEND eMule%s%s|%s|%u:%u|%s:%s|%s|\001", source, theApp.m_strCurVersionLong, Irc_Version, sverify, theApp.IsFirewalled() ? 0 : theApp.GetID(), thePrefs.GetPort(), sip, sport, EncodeBase16((const unsigned char*)thePrefs.GetUserHash(), 16));
 						ircsocket->SendString( build );
 						build.Format( "%s %s", source, GetResString(IDS_IRC_ADDASFRIEND));
-						if( !theApp.glob_prefs->GetIrcIgnoreEmuleProtoInfoMessage() )
+						if( !thePrefs.GetIrcIgnoreEmuleProtoInfoMessage() )
 							m_pwndIRC->NoticeMessage( "*EmuleProto*", build );
 						return;
 					}
 					if( message.Left(8) == "SENDLINK" )
 					{
-						if ( !theApp.glob_prefs->GetIrcAcceptLinks() )
+						if ( !thePrefs.GetIrcAcceptLinks() )
 						{
-							if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreInfoMessage() )
 							{
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file. If you wanted to accept the files from this person, enable Recieve files in the IRC Preferences.");
 							}
@@ -301,7 +303,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						CString RecieveString, build;
 						if(!theApp.friendlist->SearchFriend(userid, 0, 0))
 						{
-							if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreInfoMessage() )
 							{
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", source + " attempted to send you a file but wasn't a friend. If you wanted to accept files from this person, add person as a friend or disable from friends only in the IRC preferences.");
 							}
@@ -311,7 +313,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 						if( !RecieveString.IsEmpty() )
 						{
 							build.Format( GetResString(IDS_IRC_RECIEVEDLINK), source, RecieveString );
-							if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+							if( !thePrefs.GetIrcIgnoreInfoMessage() )
 								m_pwndIRC->NoticeMessage( "*EmuleProto*", build );
 							ProcessLink( RecieveString );
 						}
@@ -370,7 +372,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASJOINED), source, target );
 			return;
 			}
-			if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreInfoMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASJOINED), source, target );
 			m_pwndIRC->NewNick( target, source );
 			return;
@@ -385,7 +387,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 				return;
 			}
 			m_pwndIRC->RemoveNick( target, source );
-			if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreInfoMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_HASPARTED), source, target, message );
 			return;
 		}
@@ -427,7 +429,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 				return;
 			}
 			m_pwndIRC->RemoveNick( target, target2 );
-			if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreInfoMessage() )
 				m_pwndIRC->AddInfoMessage( target, GetResString(IDS_IRC_WASKICKEDBY), target2, source, message );
 			return;
 		}
@@ -448,7 +450,7 @@ void CIrcMain::ParseMessage( CString rawMessage )
 		if( command == "001" )
 		{
 			m_pwndIRC->SetLoggedIn( true );
-			if( theApp.glob_prefs->GetIRCListOnConnect() )
+			if( thePrefs.GetIRCListOnConnect() )
 				ircsocket->SendString("list");
 			ParsePerform();
 		}
@@ -522,7 +524,8 @@ void CIrcMain::ParseMessage( CString rawMessage )
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::ParseMessage");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::ParseMessage");
 	}
 }
 
@@ -536,7 +539,8 @@ void CIrcMain::SendLogin()
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::SendLogin");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::SendLogin");
 	}
 }
 
@@ -547,9 +551,9 @@ void CIrcMain::ParsePerform()
 	//help channel and to keep both options from interfering with each other.
 	try
 	{
-		if (theApp.glob_prefs->GetIrcUsePerform())
+		if (thePrefs.GetIrcUsePerform())
 		{
-			CString strUserPerform = theApp.glob_prefs->GetIrcPerformString();
+			CString strUserPerform = thePrefs.GetIrcPerformString();
 			strUserPerform.Trim();
 			if (!strUserPerform.IsEmpty())
 			{
@@ -575,12 +579,13 @@ void CIrcMain::ParsePerform()
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::ParsePerform(1)");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::ParsePerform(1)");
 	}
 
 	try
 	{
-		if (theApp.glob_prefs->GetIrcHelpChannel())
+		if (thePrefs.GetIrcHelpChannel())
 		{
 			// NOTE: putting this IRC command string into the language resource file is not a good idea. most 
 			// translators do not know that this resource string does NOT have to be translated.
@@ -615,7 +620,8 @@ void CIrcMain::ParsePerform()
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::ParsePerform(2)");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::ParsePerform(2)");
 	}
 }
 void CIrcMain::Connect()
@@ -626,13 +632,13 @@ void CIrcMain::Connect()
 		uint16 ident_int = 0;
 		for( int i = 0; i < 16; i++)
 		{
-			ident_int += theApp.glob_prefs->GetUserHash()[i] * theApp.glob_prefs->GetUserHash()[15-i];
+			ident_int += thePrefs.GetUserHash()[i] * thePrefs.GetUserHash()[15-i];
 		}
 		ident.Format("e%u", ident_int);
 		if( ident.GetLength() > 8 )
 			ident.Truncate(8);
 		ircsocket = new CIrcSocket(this);
-		nick = (CString)theApp.glob_prefs->GetIRCNick();
+		nick = (CString)thePrefs.GetIRCNick();
 		nick.Replace(".", "");
 		nick.Replace(" ", "");
 		nick.Replace(":", "");
@@ -646,7 +652,8 @@ void CIrcMain::Connect()
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::Connect");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::Connect");
 	}
 }
 
@@ -662,7 +669,8 @@ void CIrcMain::Disconnect(bool isshuttingdown)
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::Disconnect");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::Disconnect");
 	}
 }
 
@@ -674,7 +682,8 @@ void CIrcMain::SetConnectStatus( bool connected )
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false, "Exception in CIrcMain::SetConnectStatus");
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(false, "Exception in CIrcMain::SetConnectStatus");
 	}
 }
 

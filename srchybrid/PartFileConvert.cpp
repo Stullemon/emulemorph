@@ -89,7 +89,7 @@ void CPartFileConvert::ConvertToeMule(CString folder,bool deletesource)
 	if (!PathFileExists(folder))
 		return;
 	
-	//if ( folder.Left(strlen(theApp.glob_prefs->GetTempDir())).CompareNoCase(theApp.glob_prefs->GetTempDir()) ==0 ) return;
+	//if ( folder.Left(strlen(thePrefs.GetTempDir())).CompareNoCase(thePrefs.GetTempDir()) ==0 ) return;
 
 	ConvertJob* newjob=new ConvertJob ();
 	newjob->folder=folder;
@@ -212,7 +212,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 			
 			UpdateGUI(pfconverting);
 
-			if (GetFreeDiskSpaceX(theApp.glob_prefs->GetTempDir()) < (maxindex*PARTSIZE) ) {
+			if (GetFreeDiskSpaceX(thePrefs.GetTempDir()) < (maxindex*PARTSIZE) ) {
 				delete file;
 				return CONV_OUTOFDISKSPACE;
 			}
@@ -279,7 +279,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 
 		UpdateGUI(pfconverting);
 
-		if (!pfconverting->removeSource && (GetFreeDiskSpaceX(theApp.glob_prefs->GetTempDir()) < pfconverting->spaceneeded) ) {
+		if (!pfconverting->removeSource && (GetFreeDiskSpaceX(thePrefs.GetTempDir()) < pfconverting->spaceneeded) ) {
 			delete file;
 			return CONV_OUTOFDISKSPACE;
 		}
@@ -319,7 +319,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		file->gaplist.RemoveAt(file->gaplist.GetHeadPosition());
 	}
 
-	if (!file->LoadPartFile(theApp.glob_prefs->GetTempDir(),file->GetPartMetFileName(),false)) {
+	if (!file->LoadPartFile(thePrefs.GetTempDir(),file->GetPartMetFileName(),false)) {
 		delete file;
 		return CONV_FAILED;
 	}
@@ -332,7 +332,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 
 	UpdateGUI( 100 ,GetResString(IDS_IMP_ADDDWL));
 
-	theApp.downloadqueue->AddDownload(file,theApp.glob_prefs->AddNewFilesPaused());
+	theApp.downloadqueue->AddDownload(file,thePrefs.AddNewFilesPaused());
 	file->SavePartFile();
 
 	if (pfconverting->removeSource) {

@@ -38,22 +38,42 @@ END_MESSAGE_MAP()
 
 CClosableTabCtrl::CClosableTabCtrl()
 {
+	m_bCloseable = true;
+	memset(&m_iiCloseButton, 0, sizeof m_iiCloseButton);
 }
 
 CClosableTabCtrl::~CClosableTabCtrl()
 {
 }
 
+void CClosableTabCtrl::GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseButton)
+{
+	rcCloseButton.top = rcItem.top + 2;
+	rcCloseButton.bottom = rcCloseButton.top + (m_iiCloseButton.rcImage.bottom - m_iiCloseButton.rcImage.top);
+	rcCloseButton.right = rcItem.right - 2;
+	rcCloseButton.left = rcCloseButton.right - (m_iiCloseButton.rcImage.right - m_iiCloseButton.rcImage.left);
+}
+
 void CClosableTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	int ntabs = GetItemCount();
-	CRect clsbutrect;
-	for (int i = 0; i < ntabs; i++) {
-		GetItemRect(i, clsbutrect);
-		clsbutrect.DeflateRect(2, 2, clsbutrect.right - clsbutrect.left - 16, 0);
-		if (clsbutrect.PtInRect(point)) {
-			GetParent()->SendMessage(WM_CLOSETAB, (WPARAM) i);
-			return; 
+	if (m_bCloseable)
+	{
+		int iTabs = GetItemCount();
+		for (int i = 0; i < iTabs; i++)
+		{
+			CRect rcItem;
+			GetItemRect(i, rcItem);
+			CRect rcCloseButton;
+			GetCloseButtonRect(rcItem, rcCloseButton);
+			rcCloseButton.top -= 2;
+			rcCloseButton.left -= 4;
+			rcCloseButton.right += 2;
+			rcCloseButton.bottom += 4;
+			if (rcCloseButton.PtInRect(point))
+			{
+				GetParent()->SendMessage(WM_CLOSETAB, (WPARAM) i);
+				return; 
+			}
 		}
 	}
 	
@@ -68,48 +88,53 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	BOOL bSelected = (nTabIndex == GetCurSel());
 
-	TCHAR szLabel[64];
+	TCHAR szLabel[256];
 	TC_ITEM tci;
-	tci.mask = TCIF_TEXT|TCIF_IMAGE;
+	tci.mask = TCIF_TEXT | TCIF_IMAGE | TCIF_STATE;
 	tci.pszText = szLabel;
 	tci.cchTextMax = ARRSIZE(szLabel);
+	tci.dwStateMask = TCIS_HIGHLIGHTED;
 	if (!GetItem(nTabIndex, &tci))
 		return;
 
 	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	if (!pDC)
 		return;
-	int nSavedDC = pDC->SaveDC();
 
-	rect.top += ::GetSystemMetrics(SM_CYEDGE);
+	int iOldBkMode = pDC->SetBkMode(TRANSPARENT);
 
-	pDC->SetBkMode(TRANSPARENT);
-
-	// Draw image
-	if (tci.iImage >= 0) {
-		rect.left += pDC->GetTextExtent(_T(" ")).cx;		// Margin
-
-		// Get height of image so we 
-		IMAGEINFO info;
-		m_ImgLst.GetImageInfo(0, &info);
-		CRect ImageRect(info.rcImage);
-		int nYpos = rect.top;
-
-		m_ImgLst.Draw(pDC, 0, CPoint(rect.left, nYpos), ILD_TRANSPARENT);
-		rect.left += ImageRect.Width();
+	// Draw image on left side
+	CImageList* piml = GetImageList();
+	if (tci.iImage >= 0 && piml && piml->m_hImageList)
+	{
+		IMAGEINFO ii;
+		piml->GetImageInfo(0, &ii);
+		rect.left += bSelected ? 8 : 4;
+		piml->Draw(pDC, tci.iImage, CPoint(rect.left, rect.top + 2), ILD_TRANSPARENT);
+		rect.left += (ii.rcImage.right - ii.rcImage.left);
+		if (!bSelected)
+			rect.left += 4;
 	}
 
-	if (bSelected) {
-		rect.top -= ::GetSystemMetrics(SM_CYEDGE);
-		pDC->DrawText(szLabel, rect, DT_SINGLELINE|DT_VCENTER|DT_CENTER|DT_NOPREFIX);
-		rect.top += ::GetSystemMetrics(SM_CYEDGE);
-	}
-	else {
-		pDC->DrawText(szLabel, rect, DT_SINGLELINE|DT_BOTTOM|DT_CENTER|DT_NOPREFIX);
+	// Draw 'Close button' at right side
+	if (m_bCloseable && m_ImgLstCloseButton.m_hImageList)
+	{
+		CRect rcCloseButton;
+		GetCloseButtonRect(rect, rcCloseButton);
+		m_ImgLstCloseButton.Draw(pDC, 0, rcCloseButton.TopLeft(), ILD_TRANSPARENT);
+		rect.right = rcCloseButton.left - 2;
 	}
 
-	if (nSavedDC)
-		pDC->RestoreDC(nSavedDC);
+	COLORREF crOldColor;
+	if (tci.dwState & TCIS_HIGHLIGHTED)
+		crOldColor = pDC->SetTextColor(RGB(192, 0, 0));
+
+	rect.top += 4;
+	pDC->DrawText(szLabel, rect, DT_SINGLELINE | DT_TOP | DT_CENTER | DT_NOPREFIX);
+
+	if (tci.dwState & TCIS_HIGHLIGHTED)
+		pDC->SetTextColor(crOldColor);
+	pDC->SetBkMode(iOldBkMode);
 }
 
 void CClosableTabCtrl::PreSubclassWindow()
@@ -136,9 +161,13 @@ void CClosableTabCtrl::OnSysColorChange()
 
 void CClosableTabCtrl::SetAllIcons()
 {
-	m_ImgLst.DeleteImageList();
-	m_ImgLst.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
-	m_ImgLst.SetBkColor(CLR_NONE);
-	m_ImgLst.Add(CTempIconLoader("CloseTab"));
-	Invalidate();
+	if (m_bCloseable)
+	{
+		m_ImgLstCloseButton.DeleteImageList();
+		m_ImgLstCloseButton.Create(8, 8, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+		m_ImgLstCloseButton.SetBkColor(CLR_NONE);
+		m_ImgLstCloseButton.Add(CTempIconLoader("CloseTab", 8, 8));
+		m_ImgLstCloseButton.GetImageInfo(0, &m_iiCloseButton);
+		Invalidate();
+	}
 }

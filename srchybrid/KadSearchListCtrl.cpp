@@ -39,7 +39,8 @@ enum ECols
 	colNum = 0,
 	colKey,
 	colType,
-	colName
+	colName,
+	colStop
 };
 
 IMPLEMENT_DYNAMIC(CKadSearchListCtrl, CMuleListCtrl)
@@ -67,17 +68,26 @@ void CKadSearchListCtrl::Init()
 	InsertColumn(colKey, GetResString(IDS_KEY) ,LVCFMT_LEFT,50);
 	InsertColumn(colType, GetResString(IDS_TYPE) ,LVCFMT_LEFT,100);
 	InsertColumn(colName, GetResString(IDS_SW_NAME) ,LVCFMT_LEFT,100);
+	InsertColumn(colStop, "Status" ,LVCFMT_LEFT,100);
 	SetAllIcons();
 	Localize();
 
 	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
+	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
 	CIni ini(strIniFile, "eMule");
 	LoadSettings(&ini, m_strLVName);
 	int iSortItem = ini.GetInt(m_strLVName + "SortItem");
 	bool bSortAscending = ini.GetInt(m_strLVName + "SortAscending");
 	SetSortArrow(iSortItem, bSortAscending);
 	SortItems(SortProc, MAKELONG(iSortItem, (bSortAscending ? 0 : 0x0001)));
+
+	UpdateKadSearchCount();
+}
+
+void CKadSearchListCtrl::UpdateKadSearchCount() {
+	CString id;
+	id.Format("%s (%i)",GetResString(IDS_KADSEARCHLAB), GetItemCount() );
+	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADSEARCHLAB)->SetWindowText(id);
 }
 
 void CKadSearchListCtrl::SaveAllSettings(CIni* ini)
@@ -121,9 +131,7 @@ void CKadSearchListCtrl::SearchAdd(Kademlia::CSearch* search)
 		sint32 itemnr = GetItemCount();
 		InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,0,0,0,0,(LPARAM)search);
 		SearchRef(search);
-		CString id;
-		id.Format("%s (%i)",GetResString(IDS_KADSEARCHLAB), itemnr+1);
-		theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADSEARCHLAB)->SetWindowText(id);
+		UpdateKadSearchCount();
 	}
 	catch(...){ASSERT(0);}
 }
@@ -134,21 +142,24 @@ void CKadSearchListCtrl::SearchRem(Kademlia::CSearch* search)
 	{
 		ASSERT( search != NULL );
 		CPartFile* temp = theApp.downloadqueue->GetFileByKadFileSearchID(search->getSearchID());
-		if(temp){
+		if(temp)
+		{
 			temp->SetKadFileSearchID(0);
 		}
 		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
 		find.lParam = (LPARAM)search;
 		sint32 result = FindItem(&find);
-		if (result != (-1)){
+		if (result != (-1))
+		{
 			DeleteItem(result);
 		}
-		CString id;
-		id.Format("%s (%i)", GetResString(IDS_KADSEARCHLAB), GetItemCount());
-		theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADSEARCHLAB)->SetWindowText(id);
+		UpdateKadSearchCount();
 	}
-	catch(...){ASSERT(0);}
+	catch(...)
+	{
+		ASSERT(0);
+	}
 }
 
 void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
@@ -196,6 +207,10 @@ void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
 				search->getTarget().toHexString(&id);
 				SetItemText(result,colKey,id);
 			}
+			if(search->Stoping())
+				SetItemText(result,colStop,"Stopping");
+			else
+				SetItemText(result,colStop,"Active");
 		}
 	}
 	catch(...){ASSERT(0);}

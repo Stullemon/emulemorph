@@ -50,10 +50,10 @@ END_MESSAGE_MAP()
 void CGradientStatic::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
-
+	
 	CRect rClient;
 	GetClientRect(rClient);
-
+	
 	if(m_bInit)
 	{		
 		CreateGradient(&dc, &rClient);
@@ -75,14 +75,14 @@ void CGradientStatic::CreateGradient(CDC *pDC, CRect *pRect)
 		m_Mem.dc.DeleteDC();
 	}
 	m_Mem.dc.CreateCompatibleDC(pDC);
-
+	
 	if(m_Mem.bmp.GetSafeHandle())
 		m_Mem.bmp.DeleteObject();
 	m_Mem.bmp.CreateCompatibleBitmap(pDC, m_Mem.cx, m_Mem.cy);
 
 	m_Mem.pold = m_Mem.dc.SelectObject(&m_Mem.bmp);
 
-	//-----------------------------------------------------------------
+//-----------------------------------------------------------------
 
 	if(m_bHorizontal)
 	{
@@ -98,35 +98,35 @@ void CGradientStatic::CreateGradient(CDC *pDC, CRect *pRect)
 
 void CGradientStatic::DrawHorizontalGradient()
 {
-	float fRstep = (GetRValue(m_crColorRT) - GetRValue(m_crColorLB)) / (float)m_Mem.cx;
-	float fGstep = (GetGValue(m_crColorRT) - GetGValue(m_crColorLB)) / (float)m_Mem.cx;
-	float fBstep = (GetBValue(m_crColorRT) - GetBValue(m_crColorLB)) / (float)m_Mem.cx;
-	float r = GetRValue(m_crColorLB);
-	float g = GetGValue(m_crColorLB);
-	float b = GetBValue(m_crColorLB);
+	double dblRstep = (GetRValue(m_crColorRT) - GetRValue(m_crColorLB)) / static_cast<double>(m_Mem.cx);
+	double dblGstep = (GetGValue(m_crColorRT) - GetGValue(m_crColorLB)) / static_cast<double>(m_Mem.cx);
+	double dblBstep = (GetBValue(m_crColorRT) - GetBValue(m_crColorLB)) / static_cast<double>(m_Mem.cx);
+	double r = GetRValue(m_crColorLB);
+	double g = GetGValue(m_crColorLB);
+	double b = GetBValue(m_crColorLB);
 
 	for(int x = 0; x < m_Mem.cx; x++)
 	{
-		CPen Pen(PS_SOLID, 1, RGB(r,g,b)), *pOld;
-		pOld = m_Mem.dc.SelectObject(&Pen);
+		CPen Pen(PS_SOLID, 1, RGB(r,g,b));
+		CPen* pOld = m_Mem.dc.SelectObject(&Pen);
 		m_Mem.dc.MoveTo(x,0);
 		m_Mem.dc.LineTo(x,m_Mem.cy);
 		m_Mem.dc.SelectObject(pOld);
 
-		r += fRstep;
-		g += fGstep;
-		b += fBstep;
+		r += dblRstep;
+		g += dblGstep;
+		b += dblBstep;
 	}
 }
 
 void CGradientStatic::DrawVerticalGradient()
 {
-	float fRstep = (GetRValue(m_crColorLB) - GetRValue(m_crColorRT)) / (float)m_Mem.cy;
-	float fGstep = (GetGValue(m_crColorLB) - GetGValue(m_crColorRT)) / (float)m_Mem.cy;
-	float fBstep = (GetBValue(m_crColorLB) - GetBValue(m_crColorRT)) / (float)m_Mem.cy;
-	float r = GetRValue(m_crColorRT);
-	float g = GetGValue(m_crColorRT);
-	float b = GetBValue(m_crColorRT);
+	double dblRstep = (GetRValue(m_crColorLB) - GetRValue(m_crColorRT)) / static_cast<double>(m_Mem.cy);
+	double dblGstep = (GetGValue(m_crColorLB) - GetGValue(m_crColorRT)) / static_cast<double>(m_Mem.cy);
+	double dblBstep = (GetBValue(m_crColorLB) - GetBValue(m_crColorRT)) / static_cast<double>(m_Mem.cy);
+	double r = GetRValue(m_crColorRT);
+	double g = GetGValue(m_crColorRT);
+	double b = GetBValue(m_crColorRT);
 
 	for(int y = 0; y < m_Mem.cy; y++)
 	{
@@ -136,52 +136,52 @@ void CGradientStatic::DrawVerticalGradient()
 		m_Mem.dc.LineTo(m_Mem.cx,y);
 		m_Mem.dc.SelectObject(pOld);
 
-		r += fRstep;
-		g += fGstep;
-		b += fBstep;
+		r += dblRstep;
+		g += dblGstep;
+		b += dblBstep;
 	}
 }
 
 void CGradientStatic::DrawHorizontalText(CRect *pRect)
 {
-	CFont *pOldFont;
-
-	if(m_cfFont.GetSafeHandle())
+	CFont *pOldFont = NULL;
+	if (m_cfFont.GetSafeHandle())
 		pOldFont = m_Mem.dc.SelectObject(&m_cfFont);
-
+	
 	CString strText;
 	GetWindowText(strText);
 
 	m_Mem.dc.SetTextColor(m_crTextColor);
 	m_Mem.dc.SetBkMode(TRANSPARENT);
 	m_Mem.dc.DrawText(strText, pRect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
-	m_Mem.dc.SelectObject(pOldFont);
+	if (pOldFont)
+		m_Mem.dc.SelectObject(pOldFont);
 }
 
-void DrawRotatedText(HDC hdc, char *str, LPRECT rect, double angle, UINT nOptions = 0)
+void DrawRotatedText(HDC hdc, LPCTSTR str, LPRECT rect, double angle, UINT nOptions = 0)
 {
-	// convert angle to radian
-	double pi = 3.141592654;
-	double radian = pi * 2 / 360 * angle;
+   // convert angle to radian
+   double pi = 3.141592654;
+   double radian = pi * 2 / 360 * angle;
 
-	// get the center of a not-rotated text
-	SIZE TextSize;;
-	GetTextExtentPoint32(hdc, str, strlen(str), &TextSize);
+   // get the center of a not-rotated text
+   SIZE TextSize;;
+   GetTextExtentPoint32(hdc, str, _tcslen(str), &TextSize);
 
-	POINT center;
-	center.x = TextSize.cx / 2;
-	center.y = TextSize.cy / 2;
+   POINT center;
+   center.x = TextSize.cx / 2;
+   center.y = TextSize.cy / 2;
 
-	// now calculate the center of the rotated text
-	POINT rcenter;
-	rcenter.x = long(cos(radian) * center.x - sin(radian) * center.y);
-	rcenter.y = long(sin(radian) * center.x + cos(radian) * center.y);
+   // now calculate the center of the rotated text
+   POINT rcenter;
+   rcenter.x = long(cos(radian) * center.x - sin(radian) * center.y);
+   rcenter.y = long(sin(radian) * center.x + cos(radian) * center.y);
 
-	// finally draw the text and move it to the center of the rectangle
-	SetTextAlign(hdc, TA_BOTTOM);
-	SetBkMode(hdc, TRANSPARENT);
-	ExtTextOut(hdc, rect->left + (rect->right - rect->left) / 2 - rcenter.x,
-		rect->bottom, nOptions, rect, str, strlen(str), NULL);
+   // finally draw the text and move it to the center of the rectangle
+   SetTextAlign(hdc, TA_BOTTOM);
+   SetBkMode(hdc, TRANSPARENT);
+   ExtTextOut(hdc, rect->left + (rect->right - rect->left) / 2 - rcenter.x,
+              rect->bottom, nOptions, rect, str, _tcslen(str), NULL);
 }
 
 void CGradientStatic::DrawVerticalText(CRect *pRect)
@@ -197,10 +197,10 @@ void CGradientStatic::DrawVerticalText(CRect *pRect)
 	{	
 		CFont *pFont = GetFont();
 		pFont->GetLogFont(&lfFont);
-		strcpy(lfFont.lfFaceName, "Arial");	// some fonts won't turn :(
+		_tcscpy(lfFont.lfFaceName, _T("Arial"));	// some fonts won't turn :(
 	}
 	lfFont.lfEscapement = 900;
-
+	
 	CFont Font;
 	Font.CreateFontIndirect(&lfFont);
 	pOldFont = m_Mem.dc.SelectObject(&Font);
@@ -212,8 +212,8 @@ void CGradientStatic::DrawVerticalText(CRect *pRect)
 	m_Mem.dc.SetBkColor(TRANSPARENT);
 	CRect rText = pRect;
 	rText.bottom -= 5;
-	DrawRotatedText(m_Mem.dc.m_hDC, (char*)strText.operator LPCTSTR(), rText, 90);
-
+	DrawRotatedText(m_Mem.dc.m_hDC, strText, rText, 90);
+	
 	m_Mem.dc.SelectObject(pOldFont);
 }	
 

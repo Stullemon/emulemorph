@@ -13,6 +13,7 @@ public:
 
 	void Init(void);
 	void Localize(void);
+	void ReloadConfig();
 
 	// Customization might splits up the button-group, so we have to (un-)press them on our own
 	void PressMuleButton(int nID)

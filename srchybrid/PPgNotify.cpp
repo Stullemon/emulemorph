@@ -46,27 +46,27 @@ void CPPgNotify::DoDataExchange(CDataExchange* pDX)
 
 void CPPgNotify::LoadSettings(void)
 {
-	if (app_prefs->prefs->useDownloadNotifier) 
+	if (thePrefs.useDownloadNotifier) 
 		CheckDlgButton(IDC_CB_TBN_ONDOWNLOAD, BST_CHECKED);
-	if (app_prefs->prefs->useNewDownloadNotifier) 
+	if (thePrefs.useNewDownloadNotifier) 
 		CheckDlgButton(IDC_CB_TBN_ONNEWDOWNLOAD, BST_CHECKED);
-	if (app_prefs->prefs->useChatNotifier)  
+	if (thePrefs.useChatNotifier)  
 		CheckDlgButton(IDC_CB_TBN_ONCHAT, BST_CHECKED);
-	if (app_prefs->prefs->useSoundInNotifier)
+	if (thePrefs.useSoundInNotifier)
 		CheckDlgButton(IDC_CB_TBN_USESOUND, BST_CHECKED);
-	if (app_prefs->prefs->useLogNotifier)
+	if (thePrefs.useLogNotifier)
 		CheckDlgButton(IDC_CB_TBN_ONLOG, BST_CHECKED);
-	if (app_prefs->prefs->notifierPopsEveryChatMsg)
+	if (thePrefs.notifierPopsEveryChatMsg)
 		CheckDlgButton(IDC_CB_TBN_POP_ALWAYS, BST_CHECKED);
-	if (app_prefs->prefs->notifierImportantError) 
+	if (thePrefs.notifierImportantError) 
 		CheckDlgButton(IDC_CB_TBN_IMPORTATNT, BST_CHECKED);
-	if (app_prefs->prefs->notifierNewVersion) 
+	if (thePrefs.notifierNewVersion) 
 		CheckDlgButton(IDC_CB_TBN_ONNEWVERSION, BST_CHECKED);
 	
 	CButton* btnPTR = (CButton*) GetDlgItem(IDC_CB_TBN_POP_ALWAYS);
 	btnPTR->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_ONCHAT));
 	CEdit* editPtr = (CEdit*) GetDlgItem(IDC_EDIT_TBN_WAVFILE);
-	editPtr->SetWindowText(LPCTSTR(app_prefs->prefs->notifierSoundFilePath));
+	editPtr->SetWindowText(LPCTSTR(thePrefs.notifierSoundFilePath));
 	GetDlgItem(IDC_EDIT_TBN_WAVFILE)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
 	GetDlgItem(IDC_BTN_BROWSE_WAV)->EnableWindow(IsDlgButtonChecked(IDC_CB_TBN_USESOUND));
 }
@@ -117,16 +117,16 @@ BOOL CPPgNotify::OnInitDialog()
 
 BOOL CPPgNotify::OnApply()
 {
-    app_prefs->prefs->useDownloadNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONDOWNLOAD);
-    app_prefs->prefs->useNewDownloadNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONNEWDOWNLOAD);
-    app_prefs->prefs->useChatNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONCHAT);
-    app_prefs->prefs->useLogNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONLOG);        
-    app_prefs->prefs->useSoundInNotifier = IsDlgButtonChecked(IDC_CB_TBN_USESOUND);
-    app_prefs->prefs->notifierPopsEveryChatMsg = IsDlgButtonChecked(IDC_CB_TBN_POP_ALWAYS);
-	app_prefs->prefs->notifierImportantError = IsDlgButtonChecked(IDC_CB_TBN_IMPORTATNT);
-	app_prefs->prefs->notifierNewVersion = IsDlgButtonChecked(IDC_CB_TBN_ONNEWVERSION);
+    thePrefs.useDownloadNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONDOWNLOAD);
+    thePrefs.useNewDownloadNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONNEWDOWNLOAD);
+    thePrefs.useChatNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONCHAT);
+    thePrefs.useLogNotifier = IsDlgButtonChecked(IDC_CB_TBN_ONLOG);        
+    thePrefs.useSoundInNotifier = IsDlgButtonChecked(IDC_CB_TBN_USESOUND);
+    thePrefs.notifierPopsEveryChatMsg = IsDlgButtonChecked(IDC_CB_TBN_POP_ALWAYS);
+	thePrefs.notifierImportantError = IsDlgButtonChecked(IDC_CB_TBN_IMPORTATNT);
+	thePrefs.notifierNewVersion = IsDlgButtonChecked(IDC_CB_TBN_ONNEWVERSION);
 
-	GetDlgItemText(IDC_EDIT_TBN_WAVFILE, app_prefs->prefs->notifierSoundFilePath, ARRSIZE(app_prefs->prefs->notifierSoundFilePath));
+	GetDlgItemText(IDC_EDIT_TBN_WAVFILE, thePrefs.notifierSoundFilePath, ARRSIZE(thePrefs.notifierSoundFilePath));
     
 	//SaveConfiguration();
 	SetModified(FALSE);

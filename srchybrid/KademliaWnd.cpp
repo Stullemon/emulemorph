@@ -19,14 +19,13 @@
 #include "KademliaWnd.h"
 #include "KadContactListCtrl.h"
 #include "KadSearchListCtrl.h"
-#include "Kademlia/routing/timer.h"
 #include "Kademlia/Kademlia/kademlia.h"
 #include "Kademlia/Kademlia/prefs.h"
 #include "Kademlia/net/kademliaudplistener.h"
 #include "Ini2.h"
 #include "CustomAutoComplete.h"
 #include "OtherFunctions.h"
-#include "KademliaMain.h"
+#include "emuledlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,10 +59,10 @@ CKademliaWnd::~CKademliaWnd()
 BOOL CKademliaWnd::SaveAllSettings()
 {
 	if (m_pacONBSIPs)
-		m_pacONBSIPs->SaveList(CString(theApp.glob_prefs->GetConfigDir()) + _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
+		m_pacONBSIPs->SaveList(CString(thePrefs.GetConfigDir()) + _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
 
 	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
+	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
 	CIni ini(strIniFile, "eMule");
 
 	contactList->SaveAllSettings(&ini);
@@ -98,11 +97,11 @@ BOOL CKademliaWnd::OnInitDialog()
 	SetAllIcons();
 	Localize();
 
-	if (theApp.glob_prefs->GetUseAutocompletion()){
+	if (thePrefs.GetUseAutocompletion()){
 		m_pacONBSIPs = new CCustomAutoComplete();
 		m_pacONBSIPs->AddRef();
 		if (m_pacONBSIPs->Bind(::GetDlgItem(m_hWnd, IDC_BOOTSTRAPIP), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-			m_pacONBSIPs->LoadList(CString(theApp.glob_prefs->GetConfigDir()) +  _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
+			m_pacONBSIPs->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
 	}
 
 	CheckDlgButton(IDC_RADCLIENTS,1);
@@ -133,10 +132,7 @@ END_MESSAGE_MAP()
 
 void CKademliaWnd::OnBnClickedBootstrapbutton()
 {
-	if(!Kademlia::CTimer::getThreadID())
-	{
-		theApp.kademlia->Connect();
-	}
+	Kademlia::CKademlia::start();
 
 	uint16 tempVal=0;
 	CString strBuffer;
@@ -157,7 +153,7 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 	// boot by kad-client
 	if ( IsDlgButtonChecked(IDC_RADCLIENTS) )
 	{
-		theApp.kademlia->Bootstrap(strBuffer,tempVal);
+		Kademlia::CKademlia::bootstrap(strBuffer,tempVal);
 		return;
 	}
 
@@ -168,24 +164,26 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 	if (m_pacONBSIPs && m_pacONBSIPs->IsBound())
 		m_pacONBSIPs->AddItem(strBuffer +":"+CString(buffer) ,0);
 
-	theApp.kademlia->Bootstrap(strBuffer,tempVal);
+	Kademlia::CKademlia::bootstrap(strBuffer,tempVal);
 }
 
 void CKademliaWnd::OnBnClickedFirewallcheckbutton()
 {
-	if(Kademlia::CTimer::getThreadID()){
-		//This isn't thread safe and needs to be changed to a message.
+	if(Kademlia::CKademlia::isRunning())
+	{
 		Kademlia::CKademlia::getPrefs()->setRecheckIP();
 	}
 }
 
-void CKademliaWnd::OnBnConnect() {
-	if (theApp.kademlia->isConnected() )
-		theApp.kademlia->DisConnect();
-	else if( Kademlia::CTimer::getThreadID() )
-		theApp.kademlia->DisConnect();
+void CKademliaWnd::OnBnConnect()
+{
+	if (Kademlia::CKademlia::isConnected())
+		Kademlia::CKademlia::stop();
+	else if (Kademlia::CKademlia::isRunning())
+		Kademlia::CKademlia::stop();
 	else
-		theApp.kademlia->Connect();
+		Kademlia::CKademlia::start();
+	theApp.emuledlg->ShowConnectionState();
 }
 
 void CKademliaWnd::OnSysColorChange()
@@ -218,13 +216,13 @@ void CKademliaWnd::Localize() {
 void CKademliaWnd::UpdateControlsState()
 {
 	CString strLabel;
-	if (theApp.kademlia->isConnected())
+	if (Kademlia::CKademlia::isConnected())
 		strLabel = GetResString(IDS_MAIN_BTN_DISCONNECT);
-	else if (Kademlia::CTimer::getThreadID())
+	else if (Kademlia::CKademlia::isRunning())
 		strLabel = GetResString(IDS_MAIN_BTN_CANCEL);
 	else
 		strLabel = GetResString(IDS_MAIN_BTN_CONNECT);
 	strLabel.Remove(_T('&'));
 	GetDlgItem(IDC_KADCONNECT)->SetWindowText(strLabel);
-	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(!theApp.kademlia->isConnected());
+	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(!Kademlia::CKademlia::isConnected());
 }

@@ -188,7 +188,7 @@ void CDirectoryTreeCtrl::Init(void)
 	ModifyStyle( 0, TVS_CHECKBOXES );
 
 	// START: added by FoRcHa /////////////
-	WORD wWinVer = theApp.glob_prefs->GetWindowsVersion();	// maybe causes problems on 98 & nt4
+	WORD wWinVer = thePrefs.GetWindowsVersion();	// maybe causes problems on 98 & nt4
 	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
 	{
 		SHFILEINFO shFinfo;
@@ -247,7 +247,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	memset(&itInsert, 0, sizeof(itInsert));
 	
 	// START: changed by FoRcHa /////
-	WORD wWinVer = theApp.glob_prefs->GetWindowsVersion();
+	WORD wWinVer = thePrefs.GetWindowsVersion();
 	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
 	{
 		itInsert.item.mask = TVIF_CHILDREN | TVIF_HANDLE | TVIF_TEXT |
@@ -467,7 +467,7 @@ void CDirectoryTreeCtrl::AddShare(CString strDir)
 	if (strDir.Right(1) != '\\')
 		strDir += '\\';
 	
-	if (IsShared(strDir) || !strDir.CompareNoCase(CString(theApp.glob_prefs->GetConfigDir()) ))
+	if (IsShared(strDir) || !strDir.CompareNoCase(CString(thePrefs.GetConfigDir()) ))
 		return;
 
 	m_lstShared.AddTail(strDir);

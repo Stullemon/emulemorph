@@ -12,8 +12,6 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
-
 	// Dialog Data
 	enum { IDD = IDD_PPG_PROXY };
 
@@ -32,7 +30,6 @@ public:
 	afx_msg void OnBnClickedAscwop();
 	void Localize(void);
 private:
-	CPreferences* app_prefs;
 	ProxySettings proxy;
 	void LoadSettings();
 };

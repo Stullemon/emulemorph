@@ -9,8 +9,6 @@ public:
 	CPPgDirectories();									// standard constructor
 	virtual ~CPPgDirectories();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
-
 // Dialog Data
 	enum { IDD = IDD_PPG_DIRECTORIES };
 
@@ -28,7 +26,7 @@ public:
 	afx_msg void OnBnClickedRemUNC();
 	void Localize(void);
 	CDirectoryTreeCtrl m_ShareSelector;
-	CPreferences* app_prefs;
+
 private:
 	void LoadSettings(void);
 	CListCtrl* m_uncfolders;

@@ -67,48 +67,48 @@ END_MESSAGE_MAP()
 
 void CPPgDisplay::LoadSettings(void)
 {
-	if(app_prefs->prefs->mintotray)
+	if(thePrefs.mintotray)
 		CheckDlgButton(IDC_MINTRAY,1);
 	else
 		CheckDlgButton(IDC_MINTRAY,0);
 
-	if(app_prefs->prefs->transferDoubleclick)
+	if(thePrefs.transferDoubleclick)
 		CheckDlgButton(IDC_DBLCLICK,1);
 	else
 		CheckDlgButton(IDC_DBLCLICK,0);
 
-	if(app_prefs->prefs->indicateratings)
+	if(thePrefs.indicateratings)
 		CheckDlgButton(IDC_INDICATERATINGS,1);
 	else
 		CheckDlgButton(IDC_INDICATERATINGS,0);
 
-	if(app_prefs->prefs->showRatesInTitle)
+	if(thePrefs.showRatesInTitle)
 		CheckDlgButton(IDC_SHOWRATEONTITLE,1);
 	else
 		CheckDlgButton(IDC_SHOWRATEONTITLE,0);
 
-	if(app_prefs->prefs->m_bupdatequeuelist)
+	if(thePrefs.m_bupdatequeuelist)
 		CheckDlgButton(IDC_UPDATEQUEUE,0);
 	else
 		CheckDlgButton(IDC_UPDATEQUEUE,1);
 
-	if(app_prefs->prefs->m_bDisableKnownClientList)
+	if(thePrefs.m_bDisableKnownClientList)
 		CheckDlgButton(IDC_DISABLEKNOWNLIST,1);
 	else
 		CheckDlgButton(IDC_DISABLEKNOWNLIST,0);
 
-	if(app_prefs->prefs->m_bDisableQueueList)
+	if(thePrefs.m_bDisableQueueList)
 		CheckDlgButton(IDC_DISABLEQUEUELIST,1);
 	else
 		CheckDlgButton(IDC_DISABLEQUEUELIST,0);
 
-	CheckDlgButton(IDC_SHOWCATINFO,(UINT)theApp.glob_prefs->ShowCatTabInfos());
-	CheckDlgButton(IDC_REPAINT,(UINT)theApp.glob_prefs->IsGraphRecreateDisabled() );
-	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)theApp.glob_prefs->GetUseDwlPercentage() );
-	CheckDlgButton(IDC_CLEARCOMPL, (uint8)app_prefs->GetRemoveFinishedDownloads());
+	CheckDlgButton(IDC_SHOWCATINFO,(UINT)thePrefs.ShowCatTabInfos());
+	CheckDlgButton(IDC_REPAINT,(UINT)thePrefs.IsGraphRecreateDisabled() );
+	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
+	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
 
 	CString strBuffer;
-	strBuffer.Format("%u", app_prefs->prefs->m_iToolDelayTime);
+	strBuffer.Format("%u", thePrefs.m_iToolDelayTime);
 	GetDlgItem(IDC_TOOLTIPDELAY)->SetWindowText(strBuffer);
 }
 
@@ -120,7 +120,7 @@ BOOL CPPgDisplay::OnInitDialog()
 	// Barry - Controls depth of 3d colour shading
 	CSliderCtrl *slider3D = (CSliderCtrl*)GetDlgItem(IDC_3DDEPTH);
 	slider3D->SetRange(0, 5, true);
-	slider3D->SetPos(app_prefs->Get3DDepth());
+	slider3D->SetPos(thePrefs.Get3DDepth());
 
 	LoadSettings();
 	Localize();
@@ -133,50 +133,50 @@ BOOL CPPgDisplay::OnApply()
 {
 	char buffer[510];
 	
-	int8 mintotray_old= app_prefs->prefs->mintotray;
-	app_prefs->prefs->mintotray = (int8)IsDlgButtonChecked(IDC_MINTRAY);
-	app_prefs->prefs->transferDoubleclick= (int8)IsDlgButtonChecked(IDC_DBLCLICK);
-	app_prefs->prefs->depth3D = ((CSliderCtrl*)GetDlgItem(IDC_3DDEPTH))->GetPos();
-	app_prefs->prefs->indicateratings= (int8)IsDlgButtonChecked(IDC_INDICATERATINGS);
-	app_prefs->prefs->dontRecreateGraphs=(int8)IsDlgButtonChecked(IDC_REPAINT);
-	app_prefs->prefs->m_bShowDwlPercentage=(int8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
-	app_prefs->prefs->m_bRemoveFinishedDownloads=(int8)IsDlgButtonChecked(IDC_CLEARCOMPL);
+	uint8 mintotray_old= thePrefs.mintotray;
+	thePrefs.mintotray = (uint8)IsDlgButtonChecked(IDC_MINTRAY);
+	thePrefs.transferDoubleclick= (uint8)IsDlgButtonChecked(IDC_DBLCLICK);
+	thePrefs.depth3D = ((CSliderCtrl*)GetDlgItem(IDC_3DDEPTH))->GetPos();
+	thePrefs.indicateratings= (uint8)IsDlgButtonChecked(IDC_INDICATERATINGS);
+	thePrefs.dontRecreateGraphs=(uint8)IsDlgButtonChecked(IDC_REPAINT);
+	thePrefs.m_bShowDwlPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
+	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
-		app_prefs->prefs->m_bupdatequeuelist = false;
+		thePrefs.m_bupdatequeuelist = false;
 	else
-		app_prefs->prefs->m_bupdatequeuelist = true;
+		thePrefs.m_bupdatequeuelist = true;
 
 	if(IsDlgButtonChecked(IDC_SHOWRATEONTITLE))
-		app_prefs->prefs->showRatesInTitle= true;
+		thePrefs.showRatesInTitle= true;
 	else
-		app_prefs->prefs->showRatesInTitle= false;
+		thePrefs.showRatesInTitle= false;
 
-	bool flag = app_prefs->prefs->m_bDisableKnownClientList;
+	bool flag = thePrefs.m_bDisableKnownClientList;
 
 	if(IsDlgButtonChecked(IDC_DISABLEKNOWNLIST))
-		app_prefs->prefs->m_bDisableKnownClientList = true;
+		thePrefs.m_bDisableKnownClientList = true;
 	else
-		app_prefs->prefs->m_bDisableKnownClientList = false;
+		thePrefs.m_bDisableKnownClientList = false;
 
-	theApp.glob_prefs->ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO));
-	if (!theApp.glob_prefs->ShowCatTabInfos()) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
+	thePrefs.ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO));
+	if (!thePrefs.ShowCatTabInfos()) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 
-	if( flag != app_prefs->prefs->m_bDisableKnownClientList){
+	if( flag != thePrefs.m_bDisableKnownClientList){
 		if( !flag )
 			theApp.emuledlg->transferwnd->clientlistctrl.DeleteAllItems();
 		else
 			theApp.emuledlg->transferwnd->clientlistctrl.ShowKnownClients();
 	}
 
-	flag = app_prefs->prefs->m_bDisableQueueList;
+	flag = thePrefs.m_bDisableQueueList;
 
 	if(IsDlgButtonChecked(IDC_DISABLEQUEUELIST))
-		app_prefs->prefs->m_bDisableQueueList = true;
+		thePrefs.m_bDisableQueueList = true;
 	else
-		app_prefs->prefs->m_bDisableQueueList = false;
+		thePrefs.m_bDisableQueueList = false;
 
-	if( flag != app_prefs->prefs->m_bDisableQueueList){
+	if( flag != thePrefs.m_bDisableQueueList){
 		if( !flag )
 			theApp.emuledlg->transferwnd->queuelistctrl.DeleteAllItems();
 		else
@@ -185,30 +185,30 @@ BOOL CPPgDisplay::OnApply()
 
 	GetDlgItem(IDC_TOOLTIPDELAY)->GetWindowText(buffer,20);
 	if(atoi(buffer) > 32)
-		app_prefs->prefs->m_iToolDelayTime = 32;
+		thePrefs.m_iToolDelayTime = 32;
 	else
-		app_prefs->prefs->m_iToolDelayTime = atoi(buffer);
+		thePrefs.m_iToolDelayTime = atoi(buffer);
 	
-	((CemuleDlg*)AfxGetMainWnd())->transferwnd->m_tooltip.SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+	((CemuleDlg*)AfxGetMainWnd())->transferwnd->m_tooltip.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
 	CToolTipCtrl* tooltip = ((CemuleDlg*)AfxGetMainWnd())->searchwnd->searchlistctrl.GetToolTips();
 	if (tooltip)
-		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
 	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd->downloadlistctrl.GetToolTips();
 	if (tooltip)
-		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
 	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd->uploadlistctrl.GetToolTips();
 	if (tooltip)
-		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 	LoadSettings();
 
-	if (mintotray_old != app_prefs->prefs->mintotray)
+	if (mintotray_old != thePrefs.mintotray)
 		theApp.emuledlg->TrayMinimizeToTrayChange();
-	if (!theApp.glob_prefs->ShowRatesOnTitle()) {
+	if (!thePrefs.ShowRatesOnTitle()) {
 		sprintf(buffer,"eMule v%s",theApp.m_strCurVersionLong);
 		theApp.emuledlg->SetWindowText(buffer);
 	}

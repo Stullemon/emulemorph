@@ -506,7 +506,7 @@ BOOL CIrcWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		   Channel* chan = (Channel*)item.lParam;
 		   if( nick && chan ){
 			   CString send;
-			   send.Format( "PRIVMSG %s :\001SENDLINK|%s|%s\001", nick->nick, EncodeBase16((const unsigned char*)theApp.glob_prefs->GetUserHash(), 16), GetSendFileString() );
+			   send.Format( "PRIVMSG %s :\001SENDLINK|%s|%s\001", nick->nick, EncodeBase16((const unsigned char*)thePrefs.GetUserHash(), 16), GetSendFileString() );
 			   m_pIrcMain->SendString(send);
 		   }
 		   return true;
@@ -555,6 +555,7 @@ void CIrcWnd::OnBnClickedClosechat(int nItem)
 	item.mask = TCIF_PARAM;
 	if (nItem == -1)
 		nItem = channelselect.GetCurSel();
+
 	if (nItem == -1)
 		return;
 
@@ -650,10 +651,10 @@ void CIrcWnd::AddChannelToList( CString name, CString user, CString description 
 	CString ntemp = name;
 	CString dtemp = description;
 	int usertest = atoi(user);
-	if( (theApp.glob_prefs->GetIRCChanNameFilter() || theApp.glob_prefs->GetIRCChannelUserFilter()) && theApp.glob_prefs->GetIRCUseChanFilter()){
-		if( usertest < theApp.glob_prefs->GetIRCChannelUserFilter() )
+	if( (thePrefs.GetIRCChanNameFilter() || thePrefs.GetIRCChannelUserFilter()) && thePrefs.GetIRCUseChanFilter()){
+		if( usertest < thePrefs.GetIRCChannelUserFilter() )
 			return;
-		if( dtemp.MakeLower().Find(theApp.glob_prefs->GetIRCChanNameFilter().MakeLower()) == -1 && ntemp.MakeLower().Find(theApp.glob_prefs->GetIRCChanNameFilter().MakeLower()) == -1)
+		if( dtemp.MakeLower().Find(thePrefs.GetIRCChanNameFilter().MakeLower()) == -1 && ntemp.MakeLower().Find(thePrefs.GetIRCChanNameFilter().MakeLower()) == -1)
 			return;
 	}
 	ChannelList* toadd = new ChannelList;
@@ -889,7 +890,7 @@ void CIrcWnd::DeleteNickInAll( CString nick, CString message ){
 		channelPtrList.GetNext(pos1);
 		Channel* cur_channel = (Channel*)channelPtrList.GetAt(pos2);
 		if(RemoveNick( cur_channel->name, nick )){
-			if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreInfoMessage() )
 				AddInfoMessage( cur_channel->name, GetResString(IDS_IRC_HASQUIT), nick, message);
 		}
 	}
@@ -985,7 +986,7 @@ void CIrcWnd::ParseChangeMode( CString channel, CString changer, CString command
 	try{
 		if( commands.GetLength() == 2 ){
 			if( ChangeMode( channel, names, commands ))
-				if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+				if( !thePrefs.GetIrcIgnoreInfoMessage() )
 					AddInfoMessage( channel, GetResString(IDS_IRC_SETSMODE), changer, commands, names);
 			return;
 		}
@@ -1001,7 +1002,7 @@ void CIrcWnd::ParseChangeMode( CString channel, CString changer, CString command
 					test = names.Mid(currName, currNameBack-currName);
 					currName = currNameBack +1;
 					if( ChangeMode( channel, test, dir + commands[currMode]))
-						if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+						if( !thePrefs.GetIrcIgnoreInfoMessage() )
 							AddInfoMessage( channel, GetResString(IDS_IRC_SETSMODE), changer, dir + commands[currMode] , test);
 					currNameBack = names.Find(" ", currName+1);
 					if( currNameBack == -1)
@@ -1041,7 +1042,7 @@ void CIrcWnd::ChangeAllNick( CString oldnick, CString newnick ){
 		channelPtrList.GetNext(pos1);
 		Channel* cur_channel = (Channel*)channelPtrList.GetAt(pos2);
 		if(ChangeNick( cur_channel->name, oldnick, newnick )){
-			if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+			if( !thePrefs.GetIrcIgnoreInfoMessage() )
 				AddInfoMessage( cur_channel->name, GetResString(IDS_IRC_NOWKNOWNAS), oldnick, newnick);
 		}
 	}
@@ -1049,7 +1050,7 @@ void CIrcWnd::ChangeAllNick( CString oldnick, CString newnick ){
 
 /*
 void CIrcWnd::SetNick( CString in_nick ){
-	theApp.glob_prefs->SetIRCNick( in_nick.GetBuffer() );
+	thePrefs.SetIRCNick( in_nick.GetBuffer() );
 	//Need to also update the preference window for this to work right..
 }
 */
@@ -1238,7 +1239,7 @@ void CIrcWnd::AddStatus( CString line,...){
 	temp.FormatV(line, argptr);
 	va_end(argptr);
 	CString timestamp = "";
-	if( theApp.glob_prefs->GetIRCAddTimestamp() )
+	if( thePrefs.GetIRCAddTimestamp() )
 		timestamp = CTime::GetCurrentTime().Format("%X: ");
 	Channel* update_channel = (Channel*)channelPtrList.GetHead();
 	if( !update_channel ){
@@ -1274,7 +1275,7 @@ void CIrcWnd::AddInfoMessage( CString channelName, CString line,...){
 	temp.FormatV(line, argptr);
 	va_end(argptr);
 	CString timestamp = "";
-	if( theApp.glob_prefs->GetIRCAddTimestamp() )
+	if( thePrefs.GetIRCAddTimestamp() )
 		timestamp = CTime::GetCurrentTime().Format("%X: ");
 	Channel* update_channel = FindChannelByName(channelName);
 	if( !update_channel ){
@@ -1315,7 +1316,7 @@ void CIrcWnd::AddMessage( CString channelName, CString targetname, CString line,
 	line = temp;
 	va_end(argptr);
 	CString timestamp = "";
-	if( theApp.glob_prefs->GetIRCAddTimestamp() )
+	if( thePrefs.GetIRCAddTimestamp() )
 		timestamp = CTime::GetCurrentTime().Format("%X: ");
 	Channel* update_channel = FindChannelByName(channelName);
 	if( !update_channel ){
@@ -1484,7 +1485,7 @@ void CIrcWnd::OnBnClickedChatsend()
 	GetDlgItem(IDC_INPUTWINDOW)->SetWindowText("");
 	GetDlgItem(IDC_INPUTWINDOW)->SetFocus();
 
-	if (m_pCurrentChannel->history.GetCount()==theApp.glob_prefs->GetMaxChatHistoryLines()) m_pCurrentChannel->history.RemoveAt(0);
+	if (m_pCurrentChannel->history.GetCount()==thePrefs.GetMaxChatHistoryLines()) m_pCurrentChannel->history.RemoveAt(0);
 	m_pCurrentChannel->history.Add(send);
 	m_pCurrentChannel->history_pos=m_pCurrentChannel->history.GetCount();
 
@@ -1693,7 +1694,7 @@ void CIrcWnd::ScrollHistory(bool down) {
 
 void CIrcWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 { 
-	int iCurTab = channelselect.GetCurSel();
+	int iCurTab = GetTabUnderMouse(point); //channelselect.GetCurSel();
 
 	CTitleMenu ChatMenu;
 	ChatMenu.CreatePopupMenu();
@@ -1703,4 +1704,22 @@ void CIrcWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		ChatMenu.EnableMenuItem(MP_REMOVE, MF_GRAYED);
 	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 	VERIFY( ChatMenu.DestroyMenu() );
+}
+
+int CIrcWnd::GetTabUnderMouse(CPoint point) {
+		TCHITTESTINFO hitinfo;
+		CRect rect;
+		channelselect.GetWindowRect(&rect);
+		point.Offset(0-rect.left,0-rect.top);
+		hitinfo.pt = point;
+
+		if( channelselect.GetItemRect( 0, &rect ) )
+			if (hitinfo.pt.y< rect.top+30 && hitinfo.pt.y >rect.top-30)
+				hitinfo.pt.y = rect.top;
+
+		// Find the destination tab...
+		unsigned int nTab = channelselect.HitTest( &hitinfo );
+		if( hitinfo.flags != TCHT_NOWHERE )
+			return nTab;
+		else return -1;
 }

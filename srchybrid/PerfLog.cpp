@@ -61,11 +61,11 @@ void CPerfLog::Startup()
 	strDefFilePath += _T("\\perflog.csv");
 
 	CString strIniFile;
-	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
+	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
 	CIni ini(strIniFile, _T("PerfLog"));
 
 	m_eMode = (ELogMode)ini.GetInt(_T("Mode"), None);
-	if (m_eMode != None && m_eMode != OneSample)
+	if (m_eMode != None && m_eMode != OneSample && m_eMode != AllSamples)
 		m_eMode = None;
 
 	m_dwInterval = MIN2MS(ini.GetInt(_T("Interval"), 5));
@@ -91,13 +91,14 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 	// do not localize this date/time string!
 	strftime(szTime, ARRSIZE(szTime), "%m/%d/%Y %H:%M:%S", localtime(&tNow));
 
-	FILE* fp = fopen(m_strFilePath, "wt");
+	FILE* fp = fopen(m_strFilePath, (m_eMode == OneSample) ? "wt" : "at");
 	if (fp == NULL){
 		theApp.emuledlg->AddLogLine(false, _T("Failed to open performance log file \"%s\" - %hs"), m_strFilePath, strerror(errno));
 		return;
 	}
 	setvbuf(fp, NULL, _IOFBF, 16384); // ensure that all lines are written to file with one call
-	fprintf(fp, "\"(PDH-CSV 4.0)\",\"DatDown\",\"DatUp\",\"OvrDown\",\"OvrUp\"\n");
+	if (m_eMode == OneSample || _filelength(fileno(fp)) == 0)
+		fprintf(fp, "\"(PDH-CSV 4.0)\",\"DatDown\",\"DatUp\",\"OvrDown\",\"OvrUp\"\n");
 	fprintf(fp, "\"%s\",\"%u\",\"%u\",\"%u\",\"%u\"\n", szTime, nCurDn, nCurUp, nCurDnOH, nCurUpOH);
 	fclose(fp);
 }

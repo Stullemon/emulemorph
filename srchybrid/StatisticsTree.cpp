@@ -94,7 +94,7 @@ void CStatisticsTree::OnLButtonUp( UINT nFlags, CPoint point )
 void CStatisticsTree::OnItemExpanded( NMHDR* pNMHDR, LRESULT* pResult )
 {
 	if (!m_bExpandingAll)
-		theApp.glob_prefs->SetExpandedTreeItems(GetExpandedMask());
+		thePrefs.SetExpandedTreeItems(GetExpandedMask());
 }
 
 // Displays the command menu.  This function is overloaded
@@ -118,7 +118,7 @@ void CStatisticsTree::DoMenu(CPoint doWhere, UINT nFlags)
 	CString		myBuffer;
 	int			myFlags;
 
-	myBuffer.Format("%sstatbkup.ini",theApp.glob_prefs->GetConfigDir());
+	myBuffer.Format("%sstatbkup.ini",thePrefs.GetConfigDir());
 	if (!findBackUp.FindFile(myBuffer)) myFlags = MF_GRAYED;
 		else myFlags = MF_STRING;
 
@@ -161,11 +161,11 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 				if(AfxMessageBox(GetResString(IDS_STATS_MBRESET_TXT), MB_YESNO | MB_ICONEXCLAMATION) == IDNO)
 					break;
 
-				theApp.glob_prefs->ResetCumulativeStatistics();
+				thePrefs.ResetCumulativeStatistics();
 				AddLogLine(false, GetResString(IDS_STATS_NFORESET));
 				theApp.emuledlg->statisticswnd->ShowStatistics();
 
-				CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), theApp.glob_prefs->GetStatsLastResetStr(true));
+				CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
 				GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
 
 				break;
@@ -175,11 +175,11 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 				if (AfxMessageBox(GetResString(IDS_STATS_MBRESTORE_TXT), MB_YESNO | MB_ICONQUESTION) == IDNO)
 					break;
 
-				if(!theApp.glob_prefs->LoadStats(1))
+				if(!thePrefs.LoadStats(1))
 					AddLogLine(true, GetResString(IDS_ERR_NOSTATBKUP));
 				else {
 					AddLogLine(false, GetResString(IDS_STATS_NFOLOADEDBKUP));
-					CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), theApp.glob_prefs->GetStatsLastResetStr(true));
+					CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
 					GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
 				}
 
@@ -202,7 +202,7 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 				SetRedraw(false);
 				CollapseAll();
 lblSaveExpanded:
-				theApp.glob_prefs->SetExpandedTreeItems(GetExpandedMask());
+				thePrefs.SetExpandedTreeItems(GetExpandedMask());
 				SetRedraw(true);
 				break;
 			}
@@ -329,7 +329,7 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
-	if (firstItem) strBuffer.Format("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), theApp.glob_prefs->GetUserNick());
+	if (firstItem) strBuffer.Format("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 
 	if (theItem == NULL) {
 		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
@@ -404,7 +404,7 @@ CString CStatisticsTree::GetText(bool onlyVisible, HTREEITEM theItem, int theIte
 	HTREEITEM	hCurrent;
 	
 	strBuffer.Empty();
-	if (firstItem) strBuffer.Format("eMule v%s Statistics [%s]\r\n\r\n", theApp.m_strCurVersionLong, theApp.glob_prefs->GetUserNick());
+	if (firstItem) strBuffer.Format("eMule v%s Statistics [%s]\r\n\r\n", theApp.m_strCurVersionLong, thePrefs.GetUserNick());
 
 	if (theItem == NULL) hCurrent = GetRootItem(); // Copy All Vis or Copy All
 	else if (firstItem) {
@@ -503,13 +503,13 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 
 	CFileDialog saveAsDlg (false, "html", "*.html", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, "HTML Files (*.html)|*.html|All Files (*.*)|*.*||", this, 0);
 	if (saveAsDlg.DoModal() == IDOK) {
-		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%s]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), theApp.glob_prefs->GetUserNick());
+		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%s]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		theHTML += "<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n";
 		theHTML += "<body id=\"bdy\">\r\n";
-		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), theApp.glob_prefs->GetUserNick());
+		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		theHTML += GetHTMLForExport(onlyvisible) + "</body></html>";
 
 		htmlFileName = saveAsDlg.GetPathName();

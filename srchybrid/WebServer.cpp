@@ -30,7 +30,6 @@
 #include "KadSearchListCtrl.h"
 #include "UploadQueue.h"
 #include "DownloadQueue.h"
-#include "KademliaMain.h"
 #include "WebSocket.h"
 #include "ServerList.h"
 #include "SharedFileList.h"
@@ -42,6 +41,8 @@
 #include "PartFile.h"
 #include "UpDownClient.h"
 #include "StatisticsDlg.h"
+#include "Kademlia/Kademlia/Kademlia.h"
+#include "Kademlia/Net/KademliaUDPListener.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -84,9 +85,9 @@ void CWebServer::ReloadTemplates()
 	setlocale(LC_TIME, sPrevLocale);
 
 	CString sFile;
-	if (theApp.glob_prefs->GetTemplate()=="" || theApp.glob_prefs->GetTemplate().MakeLower()=="emule.tmpl")
-		sFile= theApp.glob_prefs->GetAppDir() + CString("eMule.tmpl");
-	else sFile=theApp.glob_prefs->GetTemplate();
+	if (thePrefs.GetTemplate()=="" || thePrefs.GetTemplate().MakeLower()=="emule.tmpl")
+		sFile= thePrefs.GetAppDir() + CString("eMule.tmpl");
+	else sFile=thePrefs.GetTemplate();
 
 	CStdioFile file;
 	if(file.Open(sFile, CFile::modeRead|CFile::typeText))
@@ -184,7 +185,8 @@ CString CWebServer::_LoadTemplate(CString sAll, CString sTemplateName)
 	} else{
 		if (sTemplateName=="TMPL_VERSION")
 			AddLogLine(true,GetResString(IDS_WS_ERR_LOADTEMPLATE),sTemplateName);
-		if (nStart==-1) AddDebugLogLine(false,GetResString(IDS_WEB_ERR_CANTLOAD),sTemplateName);
+		if (thePrefs.GetVerbose() && nStart==-1)
+			AddDebugLogLine(false,GetResString(IDS_WEB_ERR_CANTLOAD),sTemplateName);
 	}
 
 	return sRet;
@@ -198,8 +200,8 @@ void CWebServer::RestartServer() {	//Cax2 - restarts the server with the new por
 
 void CWebServer::StartServer(void)
 {
-	if(m_bServerWorking != theApp.glob_prefs->GetWSIsEnabled())
-		m_bServerWorking = theApp.glob_prefs->GetWSIsEnabled();
+	if(m_bServerWorking != thePrefs.GetWSIsEnabled())
+		m_bServerWorking = thePrefs.GetWSIsEnabled();
 	else
 		return;
 
@@ -208,7 +210,7 @@ void CWebServer::StartServer(void)
 		StartSockets(this);
 	} else StopSockets();
 
-	if(theApp.glob_prefs->GetWSIsEnabled())
+	if(thePrefs.GetWSIsEnabled())
 		AddLogLine(false,"%s: %s",_GetPlainResString(IDS_PW_WS), _GetPlainResString(IDS_ENABLED));
 	else
 		AddLogLine(false,"%s: %s",_GetPlainResString(IDS_PW_WS), _GetPlainResString(IDS_DISABLED));
@@ -288,7 +290,7 @@ void CWebServer::ProcessFileReq(ThreadData Data) {
 	filename.Replace('/','\\');
 
 	if (filename.GetAt(0)=='\\') filename.Delete(0);
-	filename=theApp.glob_prefs->GetWebServerDir()+filename;
+	filename=thePrefs.GetWebServerDir()+filename;
 	CFile file;
 	if(file.Open(filename, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary))
 	{
@@ -306,7 +308,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 	if(pThis == NULL)
 		return;
 
-	//SetThreadLocale(theApp.glob_prefs->GetLanguageID());
+	//SetThreadLocale(thePrefs.GetLanguageID());
 
 	//////////////////////////////////////////////////////////////////////////
 	// Here we are in real trouble! We are accessing the entire emule main thread
@@ -317,7 +319,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 	CoInitialize(NULL);
 
 	try{
-		bool isUseGzip = theApp.glob_prefs->GetWebUseGzip();
+		bool isUseGzip = thePrefs.GetWebUseGzip();
 		CString Out = "";
 		CString OutE = "";	// List Entry Templates
 		CString OutE2 = "";
@@ -340,7 +342,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 			bool login=false;
 			CString ip=inet_ntoa( Data.inadr );
 
-			if(MD5Sum(_ParseURL(Data.sURL, "p")).GetHash() == theApp.glob_prefs->GetWSPass())
+			if(MD5Sum(_ParseURL(Data.sURL, "p")).GetHash() == thePrefs.GetWSPass())
 			{
 				Session ses;
 				ses.admin=true;
@@ -351,7 +353,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				AddLogLine(true,GetResString(IDS_WEB_ADMINLOGIN)+" (%s)",ip);
 				login=true;
 			}
-			else if(theApp.glob_prefs->GetWSIsLowUserEnabled() && theApp.glob_prefs->GetWSLowPass()!="" && MD5Sum(_ParseURL(Data.sURL, "p")).GetHash() == theApp.glob_prefs->GetWSLowPass())
+			else if(thePrefs.GetWSIsLowUserEnabled() && thePrefs.GetWSLowPass()!="" && MD5Sum(_ParseURL(Data.sURL, "p")).GetHash() == thePrefs.GetWSLowPass())
 			{
 				Session ses;
 				ses.admin=false;
@@ -600,7 +602,7 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 
 	Out.Replace("[CharSet]", _GetWebCharSet());
 
-	if(theApp.glob_prefs->GetWebPageRefresh() != 0)
+	if(thePrefs.GetWebPageRefresh() != 0)
 	{
 		CString sPage = _ParseURL(Data.sURL, "w");
 		if ((sPage == "transfer") ||
@@ -613,7 +615,7 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 			(sPage == "stats"))
 		{
 			CString sT = pThis->m_Templates.sHeaderMetaRefresh;
-			CString sRefresh; sRefresh.Format("%d", theApp.glob_prefs->GetWebPageRefresh());
+			CString sRefresh; sRefresh.Format("%d", thePrefs.GetWebPageRefresh());
 			sT.Replace("[RefreshVal]", sRefresh);
 
 			CString catadd="";
@@ -676,8 +678,8 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 	// EC 25-12-2003
 	CString MaxUpload;
 	CString MaxDownload;
-	MaxUpload.Format("%i",theApp.glob_prefs->GetMaxUpload());
-	MaxDownload.Format("%i",theApp.glob_prefs->GetMaxDownload());
+	MaxUpload.Format("%i",thePrefs.GetMaxUpload());
+	MaxDownload.Format("%i",thePrefs.GetMaxDownload());
 	if (MaxUpload == "65535")  MaxUpload = GetResString(IDS_PW_UNLIMITED);
 	if (MaxDownload == "65535") MaxDownload = GetResString(IDS_PW_UNLIMITED);
 	buffer.Format("%s/%s", MaxUpload, MaxDownload);
@@ -686,29 +688,29 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 
 	buffer=GetResString(IDS_KADEMLIA)+": ";
 
-	if (!theApp.glob_prefs->GetNetworkKademlia()) {
+	if (!thePrefs.GetNetworkKademlia()) {
 		buffer.Append(GetResString(IDS_DISABLED));
 	}
-	else if (!theApp.kademlia->isConnected() && !theApp.kademlia->GetThreadID()) {
+	else if ( !Kademlia::CKademlia::isRunning() ) {
 
 		buffer.Append(GetResString(IDS_DISCONNECTED));
 
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=" (<small><a href=\"?ses=" + sSession + "&w=kad&c=connect\">"+_GetPlainResString(IDS_MAIN_BTN_CONNECT)+"</a></small>)";
 	}
-	else if (!theApp.kademlia->isConnected() && theApp.kademlia->GetThreadID()) {
+	else if ( Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected() ) {
 
 		buffer.Append(GetResString(IDS_CONNECTING));
 
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=" (<small><a href=\"?ses=" + sSession + "&w=kad&c=disconnect\">"+_GetPlainResString(IDS_MAIN_BTN_DISCONNECT)+"</a></small>)";
 	}
-	else if (theApp.kademlia->isFirewalled()) {
+	else if (Kademlia::CKademlia::isFirewalled()) {
 		buffer.Append(GetResString(IDS_FIREWALLED));
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=" (<small><a href=\"?ses=" + sSession + "&w=kad&c=disconnect\">"+_GetPlainResString(IDS_IRC_DISCONNECT)+"</a></small>)";
 	}
-	else if (theApp.kademlia->isConnected()) {
+	else if (Kademlia::CKademlia::isConnected()) {
 		buffer.Append(GetResString(IDS_CONNECTED));
 		if (IsSessionAdmin(Data,sSession)) 
 			buffer+=" (<small><a href=\"?ses=" + sSession + "&w=kad&c=disconnect\">"+_GetPlainResString(IDS_IRC_DISCONNECT)+"</a></small>)";
@@ -1464,7 +1466,7 @@ CString CWebServer::_GetDownloadLink(ThreadData Data)
 	Out.Replace("[Start]", _GetPlainResString(IDS_SW_START));
 	Out.Replace("[Session]", sSession);
 
-	if (theApp.glob_prefs->GetCatCount()>1)
+	if (thePrefs.GetCatCount()>1)
 		InsertCatBox(Out,0, pThis->m_Templates.sCatArrow );
 	else Out.Replace("[CATBOX]","");
 
@@ -1890,12 +1892,12 @@ CString CWebServer::_GetGraphs(ThreadData Data)
 	Out.Replace("[TxtTime]", _GetPlainResString(IDS_TIME));
 
 	CString sScale;
-	sScale.Format("%s", CastSecondsToHM(theApp.glob_prefs->GetTrafficOMeterInterval() * WEB_GRAPH_WIDTH) );
+	sScale.Format("%s", CastSecondsToHM(thePrefs.GetTrafficOMeterInterval() * WEB_GRAPH_WIDTH) );
 
 	CString s1, s2,s3;
-	s1.Format("%d", theApp.glob_prefs->GetMaxGraphDownloadRate() + 4);
-	s2.Format("%d", theApp.glob_prefs->GetMaxGraphUploadRate() + 4);
-	s3.Format("%d", theApp.glob_prefs->GetMaxConnections()+20);
+	s1.Format("%d", thePrefs.GetMaxGraphDownloadRate() + 4);
+	s2.Format("%d", thePrefs.GetMaxGraphUploadRate() + 4);
+	s3.Format("%d", thePrefs.GetMaxConnections()+20);
 
 	Out.Replace("[ScaleTime]", sScale);
 	Out.Replace("[MaxDownload]", s1);
@@ -1921,7 +1923,8 @@ CString CWebServer::_GetAddServerBox(ThreadData Data)
 	{
 		CServer* nsrv = new CServer(atoi(_ParseURL(Data.sURL, "serverport")), _ParseURL(Data.sURL, "serveraddr").GetBuffer() );
 		nsrv->SetListName(_ParseURL(Data.sURL, "servername"));
-		theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv,true);
+		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv,true))
+			delete nsrv;
 		CString resultlog = _SpecialChars(theApp.emuledlg->GetLastLogEntry());
 		Out.Replace("[Message]",resultlog);
 	}
@@ -2081,11 +2084,11 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 	if ((_ParseURL(Data.sURL, "saveprefs") == "true") && IsSessionAdmin(Data,sSession) ) {
 		if(_ParseURL(Data.sURL, "gzip") == "true" || _ParseURL(Data.sURL, "gzip").MakeLower() == "on")
 		{
-			theApp.glob_prefs->SetWebUseGzip(true);
+			thePrefs.SetWebUseGzip(true);
 		}
 		if(_ParseURL(Data.sURL, "gzip") == "false" || _ParseURL(Data.sURL, "gzip") == "")
 		{
-			theApp.glob_prefs->SetWebUseGzip(false);
+			thePrefs.SetWebUseGzip(false);
 		}
 		if(_ParseURL(Data.sURL, "showuploadqueue") == "true" || _ParseURL(Data.sURL, "showuploadqueue").MakeLower() == "on" )
 		{
@@ -2097,55 +2100,55 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 		}
 		if(_ParseURL(Data.sURL, "refresh") != "")
 		{
-			theApp.glob_prefs->SetWebPageRefresh(atoi(_ParseURL(Data.sURL, "refresh")));
+			thePrefs.SetWebPageRefresh(atoi(_ParseURL(Data.sURL, "refresh")));
 		}
 		if(_ParseURL(Data.sURL, "maxdown") != "")
 		{
-			theApp.glob_prefs->SetMaxDownload(atoi(_ParseURL(Data.sURL, "maxdown")));
+			thePrefs.SetMaxDownload(atoi(_ParseURL(Data.sURL, "maxdown")));
 		}
 		if(_ParseURL(Data.sURL, "maxup") != "")
 		{
-			theApp.glob_prefs->SetMaxUpload(atoi(_ParseURL(Data.sURL, "maxup")));
+			thePrefs.SetMaxUpload(atoi(_ParseURL(Data.sURL, "maxup")));
 		}
-		uint16 lastmaxgu=theApp.glob_prefs->GetMaxGraphUploadRate();
-		uint16 lastmaxgd=theApp.glob_prefs->GetMaxGraphDownloadRate();
+		uint16 lastmaxgu=thePrefs.GetMaxGraphUploadRate();
+		uint16 lastmaxgd=thePrefs.GetMaxGraphDownloadRate();
 
 		if(_ParseURL(Data.sURL, "maxcapdown") != "")
 		{
-			theApp.glob_prefs->SetMaxGraphDownloadRate(atoi(_ParseURL(Data.sURL, "maxcapdown")));
+			thePrefs.SetMaxGraphDownloadRate(atoi(_ParseURL(Data.sURL, "maxcapdown")));
 		}
 		if(_ParseURL(Data.sURL, "maxcapup") != "")
 		{
-			theApp.glob_prefs->SetMaxGraphUploadRate(atoi(_ParseURL(Data.sURL, "maxcapup")));
+			thePrefs.SetMaxGraphUploadRate(atoi(_ParseURL(Data.sURL, "maxcapup")));
 		}
 
-		if(lastmaxgu != theApp.glob_prefs->GetMaxGraphUploadRate()) 
-			theApp.emuledlg->statisticswnd->SetARange(false,theApp.glob_prefs->GetMaxGraphUploadRate());
-		if(lastmaxgd!=theApp.glob_prefs->GetMaxGraphDownloadRate())
-			theApp.emuledlg->statisticswnd->SetARange(true,theApp.glob_prefs->GetMaxGraphDownloadRate());
+		if(lastmaxgu != thePrefs.GetMaxGraphUploadRate()) 
+			theApp.emuledlg->statisticswnd->SetARange(false,thePrefs.GetMaxGraphUploadRate());
+		if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
+			theApp.emuledlg->statisticswnd->SetARange(true,thePrefs.GetMaxGraphDownloadRate());
 
 
 		if(_ParseURL(Data.sURL, "maxsources") != "")
 		{
-			theApp.glob_prefs->SetMaxSourcesPerFile(atoi(_ParseURL(Data.sURL, "maxsources")));
+			thePrefs.SetMaxSourcesPerFile(atoi(_ParseURL(Data.sURL, "maxsources")));
 		}
 		if(_ParseURL(Data.sURL, "maxconnections") != "")
 		{
-			theApp.glob_prefs->SetMaxConnections(atoi(_ParseURL(Data.sURL, "maxconnections")));
+			thePrefs.SetMaxConnections(atoi(_ParseURL(Data.sURL, "maxconnections")));
 		}
 		if(_ParseURL(Data.sURL, "maxconnectionsperfive") != "")
 		{
-			theApp.glob_prefs->SetMaxConsPerFive(atoi(_ParseURL(Data.sURL, "maxconnectionsperfive")));
+			thePrefs.SetMaxConsPerFive(atoi(_ParseURL(Data.sURL, "maxconnectionsperfive")));
 		}
-		theApp.glob_prefs->SetTransferFullChunks((_ParseURL(Data.sURL, "fullchunks").MakeLower() == "on"));
-		theApp.glob_prefs->SetPreviewPrio((_ParseURL(Data.sURL, "firstandlast").MakeLower() == "on"));
+		thePrefs.SetTransferFullChunks((_ParseURL(Data.sURL, "fullchunks").MakeLower() == "on"));
+		thePrefs.SetPreviewPrio((_ParseURL(Data.sURL, "firstandlast").MakeLower() == "on"));
 
-		theApp.glob_prefs->SetNetworkED2K((_ParseURL(Data.sURL, "neted2k").MakeLower() == "on"));
-		theApp.glob_prefs->SetNetworkKademlia((_ParseURL(Data.sURL, "netkad").MakeLower() == "on"));
+		thePrefs.SetNetworkED2K((_ParseURL(Data.sURL, "neted2k").MakeLower() == "on"));
+		thePrefs.SetNetworkKademlia((_ParseURL(Data.sURL, "netkad").MakeLower() == "on"));
 	}
 	
 	// Fill form
-	if(theApp.glob_prefs->GetWebUseGzip())
+	if(thePrefs.GetWebUseGzip())
 	{
 		Out.Replace("[UseGzipVal]", "checked");
 	}
@@ -2161,7 +2164,7 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 	{
 		Out.Replace("[ShowUploadQueueVal]", "");
 	}
-	if(theApp.glob_prefs->GetPreviewPrio())
+	if(thePrefs.GetPreviewPrio())
 	{
 		Out.Replace("[FirstAndLastVal]", "checked");
 	}
@@ -2169,7 +2172,7 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 	{
 		Out.Replace("[FirstAndLastVal]", "");
 	}
-	if(theApp.glob_prefs->TransferFullChunks())
+	if(thePrefs.TransferFullChunks())
 	{
 		Out.Replace("[FullChunksVal]", "checked");
 	}
@@ -2179,20 +2182,20 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 	}
 	CString sRefresh;
 	
-	sRefresh.Format("%d", theApp.glob_prefs->GetWebPageRefresh());
+	sRefresh.Format("%d", thePrefs.GetWebPageRefresh());
 	Out.Replace("[RefreshVal]", sRefresh);
 
-	sRefresh.Format("%d", theApp.glob_prefs->GetMaxSourcePerFile());
+	sRefresh.Format("%d", thePrefs.GetMaxSourcePerFile());
 	Out.Replace("[MaxSourcesVal]", sRefresh);
 
-	sRefresh.Format("%d", theApp.glob_prefs->GetMaxConnections());
+	sRefresh.Format("%d", thePrefs.GetMaxConnections());
 	Out.Replace("[MaxConnectionsVal]", sRefresh);
 
-	sRefresh.Format("%d", theApp.glob_prefs->GetMaxConperFive());
+	sRefresh.Format("%d", thePrefs.GetMaxConperFive());
 	Out.Replace("[MaxConnectionsPer5Val]", sRefresh);
 
-	Out.Replace("[ED2KVAL]", (theApp.glob_prefs->GetNetworkED2K())?"checked":"" );
-	Out.Replace("[KADVAL]", (theApp.glob_prefs->GetNetworkKademlia())?"checked":"" );
+	Out.Replace("[ED2KVAL]", (thePrefs.GetNetworkED2K())?"checked":"" );
+	Out.Replace("[KADVAL]", (thePrefs.GetNetworkKademlia())?"checked":"" );
 
 	Out.Replace("[KBS]", _GetPlainResString(IDS_KBYTESEC)+":");
 	Out.Replace("[FileSettings]", CString(_GetPlainResString(IDS_WEB_FILESETTINGS)+":"));
@@ -2222,7 +2225,7 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 
 	Out.Replace("[NETWORKS]", _GetPlainResString(IDS_NETWORK));
 
-	//if ( !theApp.kademlia->GetThreadID() || theApp.kademlia->isConnected()) {}
+	//if ( !Kademlia::CKademlia::isRunning() || theApp.kademlia->isConnected()) {}
 
 	Out.Replace("[BOOTSTRAP]", _GetPlainResString(IDS_BOOTSTRAP));
 	Out.Replace("[BS_IP]", _GetPlainResString(IDS_IP));
@@ -2231,17 +2234,17 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 	Out.Replace("[KADEMLIA]", GetResString(IDS_KADEMLIA) );
 
 	CString sT;
-	int n = (int)theApp.glob_prefs->GetMaxDownload();
+	int n = (int)thePrefs.GetMaxDownload();
 	if(n < 0 || n == 65535) n = 0;
 	sT.Format("%d", n);
 	Out.Replace("[MaxDownVal]", sT);
-	n = (int)theApp.glob_prefs->GetMaxUpload();
+	n = (int)thePrefs.GetMaxUpload();
 	if(n < 0 || n == 65535) n = 0;
 	sT.Format("%d", n);
 	Out.Replace("[MaxUpVal]", sT);
-	sT.Format("%d", theApp.glob_prefs->GetMaxGraphDownloadRate());
+	sT.Format("%d", thePrefs.GetMaxGraphDownloadRate());
 	Out.Replace("[MaxCapDownVal]", sT);
-	sT.Format("%d", theApp.glob_prefs->GetMaxGraphUploadRate());
+	sT.Format("%d", thePrefs.GetMaxGraphUploadRate());
 	Out.Replace("[MaxCapUpVal]", sT);
 
 	return Out;
@@ -2491,7 +2494,7 @@ CString	CWebServer::_GetPlainResString(RESSTRIDTYPE nID, bool noquot)
 // EC + kuchin
 CString	CWebServer::_GetWebCharSet()
 {
-	switch (theApp.glob_prefs->GetLanguageID())
+	switch (thePrefs.GetLanguageID())
 	{
 		case MAKELANGID(LANG_POLISH,SUBLANG_DEFAULT):				return "windows-1250";
 		case MAKELANGID(LANG_RUSSIAN,SUBLANG_DEFAULT):				return "windows-1251";
@@ -2645,7 +2648,7 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 	CString result=pThis->m_Templates.sSearchHeader +
 		theApp.searchlist->GetWebList(pThis->m_Templates.sSearchResultLine,pThis->m_iSearchSortby,pThis->m_bSearchAsc);
 
-	if (theApp.glob_prefs->GetCatCount()>1) InsertCatBox(Out,0,pThis->m_Templates.sCatArrow); else Out.Replace("[CATBOX]","");
+	if (thePrefs.GetCatCount()>1) InsertCatBox(Out,0,pThis->m_Templates.sCatArrow); else Out.Replace("[CATBOX]","");
 	
 	CString sortimg;
 	if (pThis->m_bSearchAsc) sortimg="<img src=\"l_up.gif\">";
@@ -2731,18 +2734,18 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 	else tempBuf2=">";
 	CString tempBuf="<form><select name=\"cat\" size=\"1\""+tempBuf2;
 
-	for (int i=0;i< theApp.glob_prefs->GetCatCount();i++) {
+	for (int i=0;i< thePrefs.GetCatCount();i++) {
 		tempBuf3= (i==preselect)? " selected":"";
-		tempBuf2.Format("<option%s value=\"%i\">%s</option>",tempBuf3,i, (i==0)?_GetPlainResString(IDS_ALL):theApp.glob_prefs->GetCategory(i)->title );
+		tempBuf2.Format("<option%s value=\"%i\">%s</option>",tempBuf3,i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
 		tempBuf.Append(tempBuf2);
 	}
 	if (extraCats) {
-		if (theApp.glob_prefs->GetCatCount()>1){
+		if (thePrefs.GetCatCount()>1){
 			tempBuf2.Format("<option>------------</option>");
 			tempBuf.Append(tempBuf2);
 		}
 	
-		for (int i=(theApp.glob_prefs->GetCatCount()>1)?1:2;i<=12;i++) {
+		for (int i=(thePrefs.GetCatCount()>1)?1:2;i<=12;i++) {
 			tempBuf3= ( (-i)==preselect)? " selected":"";
 			tempBuf2.Format("<option%s value=\"%i\">%s</option>",tempBuf3,-i, GetSubCatLabel(-i) );
 			tempBuf.Append(tempBuf2);
@@ -2806,7 +2809,7 @@ CString	CWebServer::_GetKadPage(ThreadData Data)
 	if(pThis == NULL)
 		return "";
 
-	if (!theApp.glob_prefs->GetNetworkKademlia()) return "";
+	if (!thePrefs.GetNetworkKademlia()) return "";
 
 	CString sSession = _ParseURL(Data.sURL, "ses");
 	CString Out = pThis->m_Templates.sKad;
@@ -2817,34 +2820,34 @@ CString	CWebServer::_GetKadPage(ThreadData Data)
 		if (pos!=-1) {
 			uint16 port=atoi(dest.Right( dest.GetLength()-pos-1));
 			CString ip=dest.Left(pos);
-			theApp.kademlia->Bootstrap(ip,port);
+			Kademlia::CKademlia::bootstrap(ip,port);
 		}
 	}
 
 	if (_ParseURL(Data.sURL, "c") == "connect" && IsSessionAdmin(Data,sSession) ) {
-		theApp.kademlia->Connect();
+		Kademlia::CKademlia::start();
 	}
 
 	if (_ParseURL(Data.sURL, "c") == "disconnect" && IsSessionAdmin(Data,sSession) ) {
-		theApp.kademlia->DisConnect();
+		Kademlia::CKademlia::stop();
 	}
 
 	// check the condition if bootstrap is possible
-	if ( theApp.kademlia->GetThreadID() &&  !theApp.kademlia->isConnected()) {
+	if ( Kademlia::CKademlia::isRunning() &&  !Kademlia::CKademlia::isConnected()) {
 
 		Out.Replace("[BOOTSTRAPLINE]", pThis->m_Templates.sBootstrapLine );
 
 		// Bootstrap
 		CString bsip=_ParseURL(Data.sURL, "bsip");
-		int16 bsport=atoi(_ParseURL(Data.sURL, "bsport"));
+		uint16 bsport=atoi(_ParseURL(Data.sURL, "bsport"));
 
 		if (!bsip.IsEmpty() && bsport>0)
-			theApp.kademlia->Bootstrap(bsip,bsport);
+			Kademlia::CKademlia::bootstrap(bsip,bsport);
 	} else Out.Replace("[BOOTSTRAPLINE]", "" );
 
 	// Infos
 	CString info;
-	if (theApp.glob_prefs->GetNetworkKademlia()) {
+	if (thePrefs.GetNetworkKademlia()) {
 		CString buffer;
 			
 			buffer.Format("%s: %i<br>", GetResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->contactList->GetItemCount());

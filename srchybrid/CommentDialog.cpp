@@ -58,7 +58,7 @@ void CCommentDialog::OnBnClickedApply()
    CString SValue; 
    GetDlgItem(IDC_CMT_TEXT)->GetWindowText(SValue); 
    m_file->SetFileComment(SValue); 
-   m_file->SetFileRate((int8)ratebox.GetCurSel());//for Rate// 
+   m_file->SetFileRate((uint8)ratebox.GetCurSel());//for Rate//
    CDialog::OnOK(); 
 } 
 

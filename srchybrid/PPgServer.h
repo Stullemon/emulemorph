@@ -8,18 +8,15 @@ public:
 	CPPgServer();
 	virtual ~CPPgServer();
 
-	void SetPrefs(CPreferences* in_prefs) {	app_prefs = in_prefs; }
-
 // Dialog Data
 	enum { IDD = IDD_PPG_SERVER };
-protected:
-	CPreferences *app_prefs;
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedCheck1();
+	afx_msg void OnSrvRetryClick();
 	virtual BOOL OnInitDialog();
 private:
 	void LoadSettings(void);

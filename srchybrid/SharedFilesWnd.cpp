@@ -229,6 +229,8 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 		if (it == -1)
 			return FALSE;
 
+		sharedfilesctrl.SetItemState(-1, 0, LVIS_SELECTED);
+		sharedfilesctrl.SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 		sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly! 
 		sharedfilesctrl.ShowComments((CKnownFile*)sharedfilesctrl.GetItemData(it));
 		return TRUE;

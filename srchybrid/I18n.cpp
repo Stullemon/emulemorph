@@ -147,7 +147,7 @@ static void FreeLangDLL()
 	}
 }
 
-void CPreferences::GetLanguages(CWordArray& aLanguageIDs) const
+void CPreferences::GetLanguages(CWordArray& aLanguageIDs)
 {
 	const SLanguage* pLang = _aLanguages;
 	while (pLang->lid){
@@ -158,14 +158,14 @@ void CPreferences::GetLanguages(CWordArray& aLanguageIDs) const
 	}
 }
 
-WORD CPreferences::GetLanguageID() const
+WORD CPreferences::GetLanguageID()
 {
-	return prefs->languageID;
+	return languageID;
 }
 
 void CPreferences::SetLanguageID(WORD lid)
 {
-	prefs->languageID = lid;
+	languageID = lid;
 }
 
 bool CheckLangDLLVersion(const CString& rstrLangDLL)
@@ -244,8 +244,8 @@ void CPreferences::SetLanguage()
 	InitLanguages(GetLangDir());
 
 	bool bFoundLang = false;
-	if (prefs->languageID)
-		bFoundLang = LoadLangLib(GetLangDir(), prefs->languageID);
+	if (languageID)
+		bFoundLang = LoadLangLib(GetLangDir(), languageID);
 
 	if (!bFoundLang){
 		LANGID lidLocale = (LANGID)::GetThreadLocale();
@@ -255,18 +255,18 @@ void CPreferences::SetLanguage()
 		bFoundLang = LoadLangLib(GetLangDir(), lidLocale);
 		if (!bFoundLang){
 			LoadLangLib(GetLangDir(), LANGID_EN_US);
-			prefs->languageID = LANGID_EN_US;
+			languageID = LANGID_EN_US;
 			CString strLngEnglish = GetResString(IDS_MB_LANGUAGEINFO);
 			AfxMessageBox(strLngEnglish, MB_ICONASTERISK);
 		}
 		else
-			prefs->languageID = lidLocale;
+			languageID = lidLocale;
 	}
 
 	// if loading a string fails, set language to English
 	if (GetResString(IDS_MB_LANGUAGEINFO).IsEmpty()) {
 		LoadLangLib(GetLangDir(), LANGID_EN_US);
-		prefs->languageID = LANGID_EN_US;
+		languageID = LANGID_EN_US;
 	}
 }
 

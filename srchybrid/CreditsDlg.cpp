@@ -4,6 +4,7 @@
 		make it invisible etc.
 */
 #include "stdafx.h"
+#include "emule.h"
 #include "CreditsDlg.h"
 #include "CreditsThread.h"
 
@@ -81,7 +82,7 @@ void CCreditsDlg::OnLButtonDown(UINT nFlags, CPoint point)
 BOOL CCreditsDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	VERIFY (m_imgSplash.LoadImage(IDR_ABOUT,"JPG"));
+	VERIFY( m_imgSplash.Attach(theApp.LoadImage(_T("ABOUT"), _T("JPG"))) );
 	m_rectScreen.SetRect(SCREEN_LEFT, SCREEN_TOP, SCREEN_RIGHT, SCREEN_BOTTOM);
 	StartThread();
 
