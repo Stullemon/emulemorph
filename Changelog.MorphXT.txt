@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.43b MorphXT v4.x
+Changelog for eMule 0.43b MorphXT v4.0
 --------------------------------------
 MERGED : Code merged to 0.43b [SiRoB]
 
@@ -11,8 +11,19 @@ CHANGED: r in StatusBar to said that we will be limited when 1:3 session ratio i
 CHANGED: R in StatusBar to said that we are actualy limited in download [SiRoB]
 
 ADDED  : Now we can visualise parts that we hide when we use the HideOS feature (cyan color) [SiRoB]
+ADDED  : PBF Progression to avoid some brain-storming [SiRoB]
+ADDED  : Splash Song by Commander [SiRoB]
 
-NOTE: Khaos A4AF
+NOTE:
+About A4AF, the A4AF system from Khaos and offcial new one are fonction together.
+
+Here a simplified priority explaination:
+1: Advanced A4AF from Khaos (GetAllA4AF,Force A4AF On, Force A4AF Off)
+2: Auto Swap All (A4AF) to this file
+3: Linear Priority from Khaos fonctionnal when category is in Stacking mode
+4: Category Priority
+5: File Priority
+6: Alphabetic Order | Balancing mode
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v3.5
