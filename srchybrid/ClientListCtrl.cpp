@@ -58,6 +58,7 @@ void CClientListCtrl::Init()
 	InsertColumn(6,GetResString(IDS_CONNECTED),LVCFMT_LEFT,150,6);
 	coltemp=GetResString(IDS_CD_UHASH);coltemp.Remove(':');
 	InsertColumn(7,coltemp,LVCFMT_LEFT,150,7);
+	Localize();
 	LoadSettings(CPreferences::tableClientList);
 	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableClientList);
 	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableClientList);
@@ -87,9 +88,12 @@ void CClientListCtrl::Localize()
 	imagelist.Add(CTempIconLoader("ClientMLDonkey"));
 	imagelist.Add(CTempIconLoader("ClientEDonkeyHybrid"));
 	imagelist.Add(CTempIconLoader("ClientShareaza"));
+	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.Add(CTempIconLoader("ClientRightEdonkey"));
 	imagelist.Add(CTempIconLoader("ClientMorph"));
+	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientSecureOvl")), 1);
+	//MORPH START - Added by SiRoB, More client icon & Credit ovelay icon
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
