@@ -2,6 +2,7 @@
 Changelog for eMule 0.40f26 MorphKad 0.?
 ----------------------------------------
 CHANGED: Put the Official Percentage Display on the download progress bare [SiRoB]
+CHANGED: A4AF from Khaos related to the completes sources feature and ObtainedPart [SiRoB]
 ADDED: Only download complete files v2.1 (shadow)[AndCycle]
 ADDED: PreferShareAll option (SlugFiller) [AndCycle]
 ADDED: OnConnect notification for sockets (Pawcio) [AndCycle]
@@ -15,9 +16,9 @@ ADDED: Pay Back First [AndCycle]
 ADDED: Delete Shared File (TheBlackHand) [linekin]
 ADDED: AutoClearComplete (NoamSon) [AndCycle]
 FIXED: Small bug, eMule allows to open unfinished files (NoamSon) [AndCycle]
-FIXED: Some change related to start crashing when a know.met file is corrupted [SiRoB]
+FIXED: Double click unfinished files in SharedFile window display FileDetail [SiRoB]
+FIXED: Some change related to start crashing when a known.met file is corrupted [SiRoB]
 TWEAKED: PowerShare Limit more occurate [SiRoB]
-
 
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.6
