@@ -894,7 +894,7 @@ void CDownloadQueue::Process(){
             }
         }
 	}
-
+	m_bIsZZRatioInWork = tempIsZZRatioInWork;  //MORPH - Added by SiRoB, ZZ Ratio in work
 	//MORPH START - Removed by SiRoB, sum datarate calculated for each file
 	/*
 	while(avarage_dr_list.GetCount()>0 && (GetTickCount() - avarage_dr_list.GetHead().timestamp > 10*1000) )
