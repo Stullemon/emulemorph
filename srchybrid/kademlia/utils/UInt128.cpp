@@ -154,18 +154,18 @@ CUInt128& CUInt128::xorBE(const byte *valueBE)
 
 void CUInt128::toHexString(CString *str) const
 {
-	str->SetString("");
+	str->SetString(_T(""));
 	CString element;
 	for (int i=0; i<4; i++)
 	{
-		element.Format("%08X", m_data[i]);
+		element.Format(_T("%08X"), m_data[i]);
 		str->Append(element);
 	}
 }
 
 void CUInt128::toBinaryString(CString *str, bool trim) const
 {
-	str->SetString("");
+	str->SetString(_T(""));
 	CString element;
 	int b;
 	for (int i=0; i<128; i++)
@@ -173,13 +173,13 @@ void CUInt128::toBinaryString(CString *str, bool trim) const
 		b = getBitNumber(i);
 		if ((!trim) || (b != 0))
 		{
-			element.Format("%d", b);
+			element.Format(_T("%d"), b);
 			str->Append(element);
 			trim = false;
 		}
 	}
 	if (str->GetLength() == 0)
-		str->SetString("0");
+		str->SetString(_T("0"));
 }
 
 #if defined(_M_IX86) && (_MSC_FULL_VER > 13009037)

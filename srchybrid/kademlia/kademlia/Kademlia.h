@@ -58,11 +58,11 @@ public:
 	static void start(CPrefs *prefs);
 	static void stop();
  
-	static void logMsg				(LPCSTR lpMsg, ...);
-	static void logLine				(LPCSTR lpMsg);
+	static void logMsg				(LPCTSTR lpMsg, ...);
+	static void logLine				(LPCTSTR lpMsg);
 	static void debugMsg			(LPCSTR lpMsg, ...);
 	static void debugLine			(LPCSTR lpLine);
-	static void reportError			(int errorCode, LPCSTR errorDescription, ...);
+	static void reportError			(int errorCode, LPCTSTR errorDescription, ...);
 
 	static CPrefs				*getPrefs(void);
 	static CRoutingZone			*getRoutingZone(void);
@@ -78,7 +78,7 @@ public:
 	static bool					getPublish(void);
 	static uint32				getIPAddress(void);
 	static void					bootstrap(uint32 ip, uint16 port);
-	static void					bootstrap(LPCSTR host, uint16 port);
+	static void					bootstrap(LPCTSTR host, uint16 port);
 	static void					processPacket(const byte* data, uint32 lenData, uint32 ip, uint16 port);
 
 	static void addEvent(CRoutingZone *zone);

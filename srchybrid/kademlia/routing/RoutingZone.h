@@ -87,7 +87,7 @@ public:
 	UINT getBootstrapContacts(ContactList *results, UINT maxRequired);
 
 	/** Debugging. */
-	void dumpContents(LPCSTR prefix = NULL) const;
+	void dumpContents(LPCTSTR prefix = NULL) const;
 	void selfTest(void);
 
 	uint64 getApproximateNodeCount(UINT ourLevel) const;

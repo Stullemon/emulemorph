@@ -159,9 +159,9 @@ CTag *CDataIO::readTag(void)
 				break;
 
 			default:
-				CKademlia::logMsg("****************************");
-				CKademlia::logMsg("Found Unknown TAG Type (0x%02X)", type);
-				CKademlia::logMsg("****************************");
+				CKademlia::logMsg(_T("****************************"));
+				CKademlia::logMsg(_T("Found Unknown TAG Type (0x%02X)"), type);
+				CKademlia::logMsg(_T("****************************"));
 				retVal = new CTagUnk(type, name);
 		}
 		delete [] name;
@@ -264,7 +264,7 @@ void CDataIO::writeTag(const CTag *tag)
 
 		writeByte(type);
 
-		CString name = tag->m_name;
+		CStringA name = tag->m_name;
 		writeUInt16(name.GetLength());
 		writeArray(name.GetBuffer(0), name.GetLength());
 
@@ -272,10 +272,17 @@ void CDataIO::writeTag(const CTag *tag)
 		{
 			case 0x01:
 				break;
-			case 0x02:
+			case 0x02:{
+#ifdef _UNICODE
+				CStringA strA(tag->GetStr());
+				writeUInt16(strA.GetLength());
+				writeArray((LPCSTR)strA, strA.GetLength());
+#else
 				writeUInt16(tag->GetStr().GetLength());
-				writeArray(tag->GetStr(), tag->GetStr().GetLength());
+				writeArray((LPCSTR)tag->GetStr(), tag->GetStr().GetLength());
+#endif
 				break;
+			}
 			case 0x03:
 				writeUInt32(tag->GetInt());
 				break;

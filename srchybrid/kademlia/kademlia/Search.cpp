@@ -54,6 +54,7 @@ there client on the eMule forum..
 #include "SafeFile.h"
 #include "Sockets.h"
 #include "Server.h"
+#include "SearchDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -155,6 +156,7 @@ void CSearch::prepareToStop()
 			break;
 		case KEYWORD:
 			baseTime = SEARCHKEYWORD_LIFETIME;
+			theApp.emuledlg->searchwnd->CancelKadSearch(getSearchID());
 			break;
 		case STOREFILE:
             baseTime = SEARCHSTOREFILE_LIFETIME;
@@ -492,13 +494,13 @@ void CSearch::processResultFile(const CUInt128 &target, uint32 fromIP, uint16 fr
 void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
 {
 	bool interested = false;
-	CString name = "";
+	CString name;
 	uint32 size = 0;
-	CString type = "";
-	CString format = "";
-	CString artist = "";
-	CString album = "";
-	CString title = "";
+	CString type;
+	CString format;
+	CString artist;
+	CString album;
+	CString title;
 	uint32 length = 0;
 	CString codec;
 	uint32 bitrate = 0;
@@ -586,35 +588,15 @@ void CSearch::processResultKeyword(const CUInt128 &target, uint32 fromIP, uint16
 	if (interested)
 	{
 		m_count++;
-		if (format.GetLength() == 0)
-		{
-			theApp.searchlist->KademliaSearchKeyword(m_searchID, &answer, name.GetBuffer(0), size, type.GetBuffer(0), 0);
-		}
-		else if (length != 0 || !codec.IsEmpty() || bitrate != 0)
-		{
-			theApp.searchlist->KademliaSearchKeyword(m_searchID, &answer, name.GetBuffer(0), size, type.GetBuffer(0), 8, 
-					2, TAG_FORMAT, format.GetBuffer(0), 
-					2, TAG_MEDIA_ARTIST, artist, 
-					2, TAG_MEDIA_ALBUM, album, 
-					2, TAG_MEDIA_TITLE, title, 
-					3, TAG_MEDIA_LENGTH, length, 
-					3, TAG_MEDIA_BITRATE, bitrate, 
-					2, TAG_MEDIA_CODEC, codec, 
-					3, TAG_AVAILABILITY, availability);
-		}
-		else if ((!type.Compare("Image")) && (artist.GetLength() > 0))
-		{
-			theApp.searchlist->KademliaSearchKeyword(m_searchID, &answer, name.GetBuffer(0), size, type.GetBuffer(0), 3, 
-					2, TAG_FORMAT, format.GetBuffer(0), 
-					2, TAG_MEDIA_ARTIST, artist, 
-					3, TAG_AVAILABILITY, availability);
-		}
-		else
-		{
-			theApp.searchlist->KademliaSearchKeyword(m_searchID, &answer, name.GetBuffer(0), size, type.GetBuffer(0), 2, 
-					2, TAG_FORMAT, format.GetBuffer(0), 
-					3, TAG_AVAILABILITY, availability);
-		}
+		theApp.searchlist->KademliaSearchKeyword(m_searchID, &answer, name, size, type, 8, 
+				2, TAG_FORMAT, (LPCTSTR)format, 
+				2, TAG_MEDIA_ARTIST, (LPCTSTR)artist, 
+				2, TAG_MEDIA_ALBUM, (LPCTSTR)album, 
+				2, TAG_MEDIA_TITLE, (LPCTSTR)title, 
+				3, TAG_MEDIA_LENGTH, length, 
+				3, TAG_MEDIA_BITRATE, bitrate, 
+				2, TAG_MEDIA_CODEC, (LPCTSTR)codec, 
+				3, TAG_AVAILABILITY, availability);
 	}
 }
 
@@ -697,6 +679,7 @@ void CSearch::PreparePacketForTags( CByteIO *bio, CKnownFile *file)
 			taglist.push_back(new CTagUInt(TAG_AVAILABILITY, (uint32)file->m_nCompleteSourcesCount));
 			
 			// eD2K file type (Audio, Video, ...)
+			// NOTE: Archives and CD-Images are published with file type "Pro"
 			CString strED2KFileType(GetED2KFileTypeSearchTerm(GetED2KFileTypeID(file->GetFileName())));
 			if (!strED2KFileType.IsEmpty())
 				taglist.push_back(new CTagStr(TAG_TYPE, strED2KFileType));
@@ -736,16 +719,16 @@ void CSearch::PreparePacketForTags( CByteIO *bio, CKnownFile *file)
 					if (pTag)
 					{
 						// skip string tags with empty string values
-						if (pTag->tag.type == 2 && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
+						if (pTag->IsStr() && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
 							continue;
 						// skip integer tags with '0' values
-						if (pTag->tag.type == 3 && pTag->tag.intvalue == 0)
+						if (pTag->IsInt() && pTag->tag.intvalue == 0)
 							continue;
 						char szKadTagName[2];
 						szKadTagName[0] = pTag->tag.specialtag;
 						szKadTagName[1] = '\0';
 						if (pTag->tag.type == 2)
-							taglist.push_back(new CTagStr(szKadTagName, pTag->tag.stringvalue));
+							taglist.push_back(new CTagStr(szKadTagName, pTag->GetStr()));
 						else
 							taglist.push_back(new CTagUInt(szKadTagName, pTag->tag.intvalue));
 					}

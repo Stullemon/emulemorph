@@ -72,7 +72,7 @@ public:
 	static CSearch* prepareFindFile(uint32 type, bool start, const CUInt128 &id);
 
 	// Will return unique search id, returns zero if already searching for this keyword.
-	static CSearch* prepareFindKeywords(uint32 type, bool start, LPCSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
+	static CSearch* prepareFindKeywords(uint32 type, bool start, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
 
 	static bool startSearch(CSearch* pSearch);
 	static void deleteSearch(CSearch* pSearch);
@@ -81,7 +81,7 @@ public:
 	static void processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info);
 	static void processPublishResult(const CUInt128 &target);
 
-	static void getWords(LPCSTR str, WordList *words);
+	static void getWords(LPCTSTR str, WordList *words);
 
 	static void updateStats(void);
 

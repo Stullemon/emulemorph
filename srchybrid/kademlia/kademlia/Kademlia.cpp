@@ -106,7 +106,7 @@ void CKademlia::start(CPrefs *prefs)
 	}
 	catch (CException *e)
 	{
-		char err[512];
+		TCHAR err[512];
 		e->GetErrorMessage(err, 512);
 		reportError(ERR_UNKNOWN, err);
 		e->Delete();
@@ -359,7 +359,7 @@ bool CKademlia::getPublish(void)
 	return 0;
 }
 
-void CKademlia::bootstrap(LPCSTR host, uint16 port)
+void CKademlia::bootstrap(LPCTSTR host, uint16 port)
 {
 	if( instance && instance->m_udpListener )
 		instance->m_udpListener->bootstrap( host, port);
@@ -375,7 +375,7 @@ void CKademlia::bootstrap(uint32 ip, uint16 port)
 //		CKademlia::debugLine("Exception in CKademlia::bootstrap");
 }
 
-void CKademlia::logMsg(LPCSTR lpMsg, ...)
+void CKademlia::logMsg(LPCTSTR lpMsg, ...)
 {
 	try
 	{
@@ -384,7 +384,7 @@ void CKademlia::logMsg(LPCSTR lpMsg, ...)
 		va_start(args, lpMsg);
 		msg.FormatV(lpMsg, args);
 		va_end(args);
-		theApp.AddLogLine(false, msg);
+		theApp.AddLogLine(false, _T("%s"), msg);
 	}
 	catch(...)
 	{
@@ -393,11 +393,11 @@ void CKademlia::logMsg(LPCSTR lpMsg, ...)
 	}
 }
 
-void CKademlia::logLine(LPCSTR lpLine)
+void CKademlia::logLine(LPCTSTR lpLine)
 {
 	try
 	{
-		theApp.AddLogLine(false, lpLine);
+		theApp.AddLogLine(false, _T("%s"), lpLine);
 	}
 	catch(...)
 	{
@@ -412,12 +412,12 @@ void CKademlia::debugMsg(LPCSTR lpMsg, ...)
 	{
 		if (thePrefs.GetVerbose())
 		{
-			CString msg;
+			CStringA msg;
 			va_list args;
 			va_start(args, lpMsg);
 			msg.FormatV(lpMsg, args);
 			va_end(args);
-			theApp.AddDebugLogLine( false, msg );
+			theApp.AddDebugLogLine( false, _T("%hs"), msg );
 		}
 	}
 	catch(...)
@@ -432,7 +432,7 @@ void CKademlia::debugLine(LPCSTR lpLine)
 	try
 	{
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, lpLine);
+			theApp.AddDebugLogLine(false, _T("%hs"), lpLine);
 	}
 	catch(...)
 	{
@@ -440,7 +440,7 @@ void CKademlia::debugLine(LPCSTR lpLine)
 		return;
 	}
 }
-void CKademlia::reportError(int errorCode, LPCSTR errorDescription, ...)
+void CKademlia::reportError(int errorCode, LPCTSTR errorDescription, ...)
 {
 	try
 	{
@@ -451,8 +451,7 @@ void CKademlia::reportError(int errorCode, LPCSTR errorDescription, ...)
 			va_start(args, errorDescription);
 			msg.FormatV(errorDescription, args);
 			va_end(args);
-			CKademliaError error(errorCode, msg.GetBuffer(0));
-			theApp.AddDebugLogLine(false, "(%i) : %u", errorCode, msg);
+			theApp.AddDebugLogLine(false, _T("(%i) : %s"), errorCode, msg);
 		}
 	}
 	catch(...)

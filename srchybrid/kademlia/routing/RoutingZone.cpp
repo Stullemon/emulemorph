@@ -81,7 +81,7 @@ void DebugSend(LPCTSTR pszMsg, uint32 ip, uint16 port);
 // This is just a safety precaution
 #define CONTACT_FILE_LIMIT 5000
 
-CString CRoutingZone::m_filename = "";
+CString CRoutingZone::m_filename;
 CUInt128 CRoutingZone::me = (ULONG)0;
 
 CRoutingZone::CRoutingZone()
@@ -92,7 +92,7 @@ CRoutingZone::CRoutingZone()
 	prefs->getClientID(&me);
 	m_filename = CMiscUtils::getAppDir();
 	m_filename.Append(CONFIGFOLDER);
-	m_filename.Append("nodes.dat");
+	m_filename.Append(_T("nodes.dat"));
 	CUInt128 zero((ULONG)0);
 	init(NULL, 0, zero);
 
@@ -158,7 +158,7 @@ void CRoutingZone::readFile(void)
 		uint32 numContacts = 0;
 		CSafeBufferedFile file;
 		CFileException fexp;
-		if (file.Open(m_filename, CFile::modeRead | CFile::osSequentialScan|CFile::typeBinary, &fexp))
+		if (file.Open(m_filename, CFile::modeRead | CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp))
 		{
 			setvbuf(file.m_pStream, NULL, _IOFBF, 32768);
 
@@ -208,7 +208,7 @@ void CRoutingZone::writeFile(void)
 		CUInt128 id;
 		CSafeBufferedFile file;
 		CFileException fexp;
-		if (file.Open(m_filename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary, &fexp))
+		if (file.Open(m_filename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary|CFile::shareDenyWrite, &fexp))
 		{
 			setvbuf(file.m_pStream, NULL, _IOFBF, 32768);
 
@@ -486,7 +486,7 @@ uint64 CRoutingZone::getApproximateNodeCount(uint32 ourLevel) const
 	return (m_subZones[0]->getApproximateNodeCount(ourLevel+1) + m_subZones[1]->getApproximateNodeCount(ourLevel+1)) / 2;
 }
 
-void CRoutingZone::dumpContents(LPCSTR prefix) const
+void CRoutingZone::dumpContents(LPCTSTR prefix) const
 {
 #ifdef DEBUG
 	CString msg;
@@ -494,22 +494,22 @@ void CRoutingZone::dumpContents(LPCSTR prefix) const
 	m_zoneIndex.toBinaryString(&ziStr, true);
 
 	if (prefix == NULL)
-		OutputDebugString("------------------------------------------------------\r\n");
+		OutputDebugString(_T("------------------------------------------------------\r\n"));
 	if (isLeaf()) 
 	{
-		msg.Format("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s\r\n", 
-			m_level, (prefix == NULL) ? "ROOT" : prefix, getNumContacts(), ziStr);
+		msg.Format(_T("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s\r\n"), 
+			m_level, (prefix == NULL) ? _T("ROOT") : prefix, getNumContacts(), ziStr);
 		OutputDebugString(msg);
 		m_bin->dumpContents();
 	} 
 	else 
 	{
-		msg.Format("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s NODE\r\n", 
-					m_level, (prefix == NULL) ? "ROOT" : prefix, getNumContacts(), ziStr);
+		msg.Format(_T("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s NODE\r\n"), 
+					m_level, (prefix == NULL) ? _T("ROOT") : prefix, getNumContacts(), ziStr);
 		OutputDebugString(msg);
-		msg.Format("%s0", (prefix == NULL) ? "" : prefix);
+		msg.Format(_T("%s0"), (prefix == NULL) ? _T("") : prefix);
 		m_subZones[0]->dumpContents(msg.GetBuffer(0));
-		msg.Format("%s1", (prefix == NULL) ? "" : prefix);
+		msg.Format(_T("%s1"), (prefix == NULL) ? _T("") : prefix);
 		m_subZones[1]->dumpContents(msg.GetBuffer(0));
 	}
 #endif
@@ -788,7 +788,7 @@ void CRoutingZone::selfTest(void)
 		id.setValueRandom();
 id.toHexString(&msg);
 OutputDebugString(msg);
-OutputDebugString("\r\n");
+OutputDebugString(_T("\r\n"));
 
 		if (!add(id, 0xC0A80001, 0x1234, 0x4321, 0))
 			break;
@@ -807,7 +807,7 @@ OutputDebugString("\r\n");
 		close = new CUInt128(me, 1+i%128);
 close->toHexString(&msg);
 OutputDebugString(msg);
-OutputDebugString("\r\n");
+OutputDebugString(_T("\r\n"));
 		if (!add(*close, 0xC0A80001, 0x1234, 0x4321, 0))
 			break;
 //		if (i%20 == 0)
@@ -820,15 +820,15 @@ OutputDebugString("\r\n");
 
 	id.setValueRandom();
 	id.toHexString(&msg);
-	OutputDebugString("Trying to find nearest to : ");
+	OutputDebugString(_T("Trying to find nearest to : "));
 	OutputDebugString(msg);
-	OutputDebugString("\r\n");
+	OutputDebugString(_T("\r\n"));
 	CUInt128 x(me);
 	x.xor(id);
-	OutputDebugString("Distance from me                 : ");
+	OutputDebugString(_T("Distance from me                 : "));
 	x.toBinaryString(&msg);
 	OutputDebugString(msg);
-	OutputDebugString("\r\n");
+	OutputDebugString(_T("\r\n"));
 
 	ContactMap result;
 	getClosestTo(0, id, 20, &result);
@@ -843,7 +843,7 @@ OutputDebugString("\r\n");
 		c = it->second;
 		c->m_clientID.toHexString(&hex);
 		c->getDistance(&distance);
-		line.Format("%s : %s\r\n", hex, distance);
+		line.Format(_T("%s : %s\r\n"), hex, distance);
 		OutputDebugString(line);
 	}
 }

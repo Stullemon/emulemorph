@@ -52,7 +52,7 @@ there client on the eMule forum..
 #include "KadContactListCtrl.h"
 #include "kademliawnd.h"
 #include "clientlist.h"
-#include "UploadQueue.h"
+#include "Statistics.h"
 #include "SafeFile.h"
 
 #ifdef _DEBUG
@@ -66,39 +66,19 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-void DebugSend(LPCTSTR pszOpcode, uint32 ip, uint16 port)
+void CKademliaUDPListener::bootstrap(LPCTSTR host, uint16 port)
 {
-	Debug(_T(">>> %-20s to   %-15s:%u\n"), pszOpcode, ipstr(ntohl(ip)), port);
-}
-
-void DebugSendF(LPCTSTR pszOpcode, uint32 ip, uint16 port, LPCTSTR pszMsg, ...)
-{
-	va_list args;
-	va_start(args, pszMsg);
-	CString str;
-	str.Format(_T(">>> %-20s to   %-15s:%-5u; "), pszOpcode, ipstr(ntohl(ip)), port);
-	str.AppendFormatV(pszMsg, args);
-	va_end(args);
-	Debug(_T("%s\n"), str);
-}
-
-void DebugRecv(LPCTSTR pszOpcode, uint32 ip, uint16 port)
-{
-	Debug(_T("%-24s from %-15s:%u\n"), pszOpcode, ipstr(ntohl(ip)), port);
-}
-
-void CKademliaUDPListener::bootstrap(LPCSTR host, uint16 port)
-{
+	USES_CONVERSION;
 	uint32 retVal = 0;
-	if (isalpha(host[0])) 
+	if (_istalpha(host[0])) 
 	{
-		hostent *hp = gethostbyname(host);
+		hostent *hp = gethostbyname(T2CA(host));
 		if (hp == NULL) 
 			return;
 		memcpy (&retVal, hp->h_addr, sizeof(retVal));
 	}
 	else
-		retVal = inet_addr(host);
+		retVal = inet_addr(T2CA(host));
 	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 		DebugSend("KadBootstrapReq", ntohl(retVal), port);
 	sendMyDetails(KADEMLIA_BOOTSTRAP_REQ, ntohl(retVal), port);
@@ -173,7 +153,7 @@ void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint3
 	const byte *packetData = data + 2;
 	uint32 lenPacket = lenData - 2;
 
-//	CKademlia::debugMsg("Processing UDP Packet from %s port %ld : opcode length %ld", inet_ntoa(senderAddress->sin_addr), ntohs(senderAddress->sin_port), lenPacket);
+//	CKademlia::debugMsg("Processing UDP Packet from %s port %ld : opcode length %ld", ipstr(senderAddress->sin_addr), ntohs(senderAddress->sin_port), lenPacket);
 //	CMiscUtils::debugHexDump(packetData, lenPacket);
 
 	switch (opcode)
@@ -246,7 +226,7 @@ void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint3
 		default:
 		{
 			CString strError;
-			strError.Format("Unknown opcode %02x", opcode);
+			strError.Format(_T("Unknown opcode %02x"), opcode);
 			throw strError;
 		}
 	}
@@ -311,7 +291,7 @@ void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, uint
 	// Verify packet is expected size
 	if (lenPacket != 25){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -369,7 +349,7 @@ void CKademliaUDPListener::processBootstrapResponse (const byte *packetData, uin
 	// Verify packet is expected size
 	if (lenPacket < 27){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -397,7 +377,7 @@ void CKademliaUDPListener::processHelloRequest (const byte *packetData, uint32 l
 	// Verify packet is expected size
 	if (lenPacket != 25){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -426,7 +406,7 @@ void CKademliaUDPListener::processHelloResponse (const byte *packetData, uint32 
 	// Verify packet is expected size
 	if (lenPacket != 25){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -447,7 +427,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 	// Verify packet is expected size
 	if (lenPacket != 33){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -477,7 +457,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 	if( type == 0 )
 	{
 		CString strError;
-		strError.Format("***NOTE: Received wrong type (0x%02x) in %s", type, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong type (0x%02x) in %hs"), type, __FUNCTION__);
 		throw strError;
 	}
 
@@ -519,7 +499,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 	}
 
 	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-		DebugSendF("KadRes", ip, port, "Count=%u", count);
+		DebugSendF("KadRes", ip, port, _T("Count=%u"), count);
 
 	sendPacket(&bio2, KADEMLIA_RES, ip, port);
 }
@@ -530,7 +510,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 	// Verify packet is expected size
 	if (lenPacket < 17){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -557,7 +537,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 	// Verify packet is expected size
 	if (lenPacket != 16+1 + (16+4+2+2+1)*numContacts){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -675,7 +655,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 	else if (op == 0x01) // String
 	{
 		uint16 len = bio.ReadUInt16();
-		CString str;
+		CStringA str;
 		bio.Read(str.GetBuffer(len), len);
 		str.ReleaseBuffer(len);
 
@@ -700,14 +680,14 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 	else if (op == 0x02) // Meta tag
 	{
 		// read tag value
-		CString strValue;
+		CStringA strValue;
 		uint16 lenValue = bio.ReadUInt16();
 		bio.Read(strValue.GetBuffer(lenValue), lenValue);
 		strValue.ReleaseBuffer(lenValue);
 		strValue.MakeLower(); // make lowercase, the search code expects lower case strings!
 
 		// read tag name
-		CString strTagName;
+		CStringA strTagName;
 		uint16 lenTagName = bio.ReadUInt16();
 		bio.Read(strTagName.GetBuffer(lenTagName), lenTagName);
 		strTagName.ReleaseBuffer(lenTagName);
@@ -725,7 +705,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 	{
 		static const struct {
 			SSearchTerm::ESearchTermType eSearchTermOp;
-			LPCTSTR pszOp;
+			LPCSTR pszOp;
 		} _aOps[] =
 		{
 			{ SSearchTerm::OpEqual,			"="		}, // mmop=0x00
@@ -747,7 +727,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		}
 
 		// read tag name
-		CString strTagName;
+		CStringA strTagName;
 		uint16 lenTagName = bio.ReadUInt16();
 		bio.Read(strTagName.GetBuffer(lenTagName), lenTagName);
 		strTagName.ReleaseBuffer(lenTagName);
@@ -775,7 +755,7 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, uint32 
 	// Verify packet is expected size
 	if (lenPacket < 17){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -835,7 +815,7 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, uint32
 	// Verify packet is expected size
 	if (lenPacket < 37){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -874,7 +854,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 	// Verify packet is expected size
 	if (lenPacket < 37){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -934,7 +914,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 					entry->fileName = tag->GetStr();
 					entry->fileName.MakeLower(); // make lowercase, the search code expects lower case strings!
 					if (bDbgInfo)
-						strInfo.AppendFormat("  Name=\"%s\"", entry->fileName);
+						strInfo.AppendFormat(_T("  Name=\"%s\""), entry->fileName);
 					// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
 					entry->taglist.push_back(tag);
 				}
@@ -942,7 +922,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 				{
 					entry->size = tag->GetInt();
 					if (bDbgInfo)
-						strInfo.AppendFormat("  Size=%u", entry->size);
+						strInfo.AppendFormat(_T("  Size=%u"), entry->size);
 					// NOTE: always add the 'size' tag, even if it's stored separately in 'size'. the tag is still needed for answering search request
 					entry->taglist.push_back(tag);
 				}
@@ -959,7 +939,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 				tags--;
 			}
 			if (bDbgInfo && !strInfo.IsEmpty())
-				Debug("%s\n", strInfo);
+				Debug(_T("%s\n"), strInfo);
 		}
 		catch(...)
 		{
@@ -1016,7 +996,7 @@ void CKademliaUDPListener::processPublishResponse (const byte *packetData, uint3
 	// Verify packet is expected size
 	if (lenPacket < 16){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1039,7 +1019,7 @@ void CKademliaUDPListener::processFirewalledRequest (const byte *packetData, uin
 	// Verify packet is expected size
 	if (lenPacket != 2){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1067,7 +1047,7 @@ void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, ui
 	// Verify packet is expected size
 	if (lenPacket != 4){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1098,7 +1078,7 @@ void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, u
 	// Verify packet is expected size
 	if (lenPacket != 0){
 		CString strError;
-		strError.Format("***NOTE: Received wrong size (%u) packet in %s", lenPacket, __FUNCTION__);
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
 		throw strError;
 	}
 
@@ -1124,7 +1104,7 @@ void CKademliaUDPListener::sendPacket(const byte *data, uint32 lenData, uint32 d
 	packet->size = lenData-2;
 	if( lenData > 200 )
 		packet->PackPacket();
-	theApp.uploadqueue->AddUpDataOverheadKad(packet->size);
+	theStats.AddUpDataOverheadKad(packet->size);
 	theApp.clientudp->SendPacket(packet, ntohl(destinationHost), destinationPort);
 }
 
@@ -1137,7 +1117,7 @@ void CKademliaUDPListener::sendPacket(const byte *data, uint32 lenData, byte opc
 	packet->size = lenData;
 	if( lenData > 200 )
 		packet->PackPacket();
-	theApp.uploadqueue->AddUpDataOverheadKad(packet->size);
+	theStats.AddUpDataOverheadKad(packet->size);
 	theApp.clientudp->SendPacket(packet, ntohl(destinationHost), destinationPort);
 }
 
@@ -1147,6 +1127,6 @@ void CKademliaUDPListener::sendPacket(CSafeMemFile *data, byte opcode, uint32 de
 	packet->opcode = opcode;
 	if( packet->size > 200 )
 		packet->PackPacket();
-	theApp.uploadqueue->AddUpDataOverheadKad(packet->size);
+	theStats.AddUpDataOverheadKad(packet->size);
 	theApp.clientudp->SendPacket(packet, ntohl(destinationHost), destinationPort);
 }

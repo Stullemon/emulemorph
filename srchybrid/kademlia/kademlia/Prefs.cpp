@@ -55,8 +55,8 @@ using namespace Kademlia;
 CPrefs::CPrefs()
 {
 	CString filename = CMiscUtils::getAppDir();
-	filename.Append(_T(CONFIGFOLDER));
-	filename.Append("preferencesK.dat");
+	filename.Append(CONFIGFOLDER);
+	filename.Append(_T("preferencesK.dat"));
 	init(filename.GetBuffer(0));
 }
 
@@ -66,7 +66,7 @@ CPrefs::~CPrefs(void)
 		writeFile();
 }
 
-void CPrefs::init(LPCSTR filename)
+void CPrefs::init(LPCTSTR filename)
 {
 	m_clientID.setValueRandom();
 	m_lastContact = 0;
@@ -91,7 +91,7 @@ void CPrefs::readFile(void)
 	{
 		CSafeBufferedFile file;
 		CFileException fexp;
-		if (file.Open(m_filename.GetBuffer(0),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary, &fexp))
+		if (file.Open(m_filename.GetBuffer(0),CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp))
 		{
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			m_ip = file.ReadUInt32();
@@ -113,7 +113,7 @@ void CPrefs::writeFile(void)
 	{
 		CSafeBufferedFile file;
 		CFileException fexp;
-		if (file.Open(m_filename.GetBuffer(0), CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp))
+		if (file.Open(m_filename.GetBuffer(0), CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp))
 		{
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.WriteUInt32(m_ip);

@@ -56,29 +56,29 @@ public:
 	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type, const CUInt128 &target);
 //	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, byte type, uint16 tcpPort);
 
-	void getClientID(CUInt128 *id);
-	void getClientID(CString *id);
+	void getClientID(CUInt128 *id) const;
+	void getClientID(CString *id) const;
 	void setClientID(const CUInt128 &clientID);
 
-	void getDistance(CUInt128 *distance);
-	void getDistance(CString *distance);
+	void getDistance(CUInt128 *distance) const;
+	void getDistance(CString *distance) const;
 
-	uint32 getIPAddress(void);
-	void getIPAddress(CString *ip);
+	uint32 getIPAddress(void) const;
+	void getIPAddress(CString *ip) const;
 	void setIPAddress(uint32 ip);
 
-	uint16 getTCPPort(void);
-	void getTCPPort(CString *port);
+	uint16 getTCPPort(void) const;
+	void getTCPPort(CString *port) const;
 	void setTCPPort(uint16 port);
 
-	uint16 getUDPPort(void);
-	void getUDPPort(CString *port);
+	uint16 getUDPPort(void) const;
+	void getUDPPort(CString *port) const;
 	void setUDPPort(uint16 port);
 
-	byte getType(void);
+	byte getType(void) const;
 	void setType(byte type);
 
-	bool madeContact(void);
+	bool madeContact(void) const;
 	void madeContact(bool val);
 
 private:

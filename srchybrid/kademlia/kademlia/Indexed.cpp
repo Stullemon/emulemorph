@@ -56,18 +56,18 @@ using namespace Kademlia;
 
 void DebugSend(LPCTSTR pszMsg, uint32 ip, uint16 port);
 
-CString CIndexed::m_kfilename = "";
-CString CIndexed::m_sfilename = "";
+CString CIndexed::m_kfilename;
+CString CIndexed::m_sfilename;
 
 CIndexed::CIndexed()
 {
 	m_Keyword_map.InitHashTable(1031);
 	m_sfilename = CMiscUtils::getAppDir();
-	m_sfilename.Append(_T(CONFIGFOLDER));
-	m_sfilename.Append("s_index.dat");
+	m_sfilename.Append(CONFIGFOLDER);
+	m_sfilename.Append(_T("s_index.dat"));
 	m_kfilename = CMiscUtils::getAppDir();
-	m_kfilename.Append(_T(CONFIGFOLDER));
-	m_kfilename.Append("k_index.dat");
+	m_kfilename.Append(CONFIGFOLDER);
+	m_kfilename.Append(_T("k_index.dat"));
 	m_lastClean = time(NULL) + (60*30);
 	m_totalIndexSource = 0;
 	m_totalIndexKeyword = 0;
@@ -88,7 +88,7 @@ void CIndexed::readFile(void)
 		time_t k_expire = time(NULL) - (KADEMLIAREPUBLISHTIMEK);
 
 		CBufferedFileIO k_file;
-		if (k_file.Open(m_kfilename, CFile::modeRead | CFile::typeBinary))
+		if (k_file.Open(m_kfilename, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
 		{
 			setvbuf(k_file.m_pStream, NULL, _IOFBF, 32768);
 
@@ -169,7 +169,7 @@ void CIndexed::readFile(void)
 		}
 
 		CBufferedFileIO s_file;
-		if (s_file.Open(m_sfilename, CFile::modeRead | CFile::typeBinary))
+		if (s_file.Open(m_sfilename, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
 		{
 			setvbuf(s_file.m_pStream, NULL, _IOFBF, 32768);
 
@@ -259,7 +259,7 @@ CIndexed::~CIndexed()
 		uint32 k_total = 0;
 
 		CBufferedFileIO s_file;
-		if (s_file.Open(m_sfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary))
+		if (s_file.Open(m_sfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
 		{
 			setvbuf(s_file.m_pStream, NULL, _IOFBF, 32768);
 
@@ -301,7 +301,7 @@ CIndexed::~CIndexed()
 		}
 
 		CBufferedFileIO k_file;
-		if (k_file.Open(m_kfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary))
+		if (k_file.Open(m_kfilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
 		{
 			setvbuf(k_file.m_pStream, NULL, _IOFBF, 32768);
 
@@ -640,7 +640,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* it
 		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
 		{
 			// this will not give the same results as when tokenizing the filename string, but it is 20 times faster.
-			if (strstr(item->fileName, pSearchTerm->astr->GetAt(iSearchTerm)) == NULL)
+			if (_tcsstr(item->fileName, pSearchTerm->astr->GetAt(iSearchTerm)) == NULL)
 				return false;
 		}
 #endif

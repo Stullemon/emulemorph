@@ -43,29 +43,29 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-CString CMiscUtils::appDirectory = "";
+CString CMiscUtils::appDirectory;
 
 void CMiscUtils::ipAddressToString(uint32 ip, CString *string)
 {
-	string->Format("%ld.%ld.%ld.%ld", 
+	string->Format(_T("%ld.%ld.%ld.%ld"), 
 					((ip >> 24) & 0xFF), 
 					((ip >> 16) & 0xFF), 
 					((ip >>  8) & 0xFF), 
 					((ip      ) & 0xFF) );
 }
 
-LPCSTR CMiscUtils::getAppDir(void)
+LPCTSTR CMiscUtils::getAppDir(void)
 {
 	if (appDirectory.GetLength() == 0)
 	{
-		char *buffer = new char[MAX_PATH];
+		TCHAR *buffer = new TCHAR[MAX_PATH];
 		GetModuleFileName(0, buffer, MAX_PATH);
-		LPTSTR end = _tcsrchr(buffer, '\\') + 1;
-		*end = '\0';
+		LPTSTR end = _tcsrchr(buffer, _T('\\')) + 1;
+		*end = _T('\0');
 		appDirectory = buffer;
 		delete [] buffer;
 	}
-	return appDirectory.GetBuffer(0);
+	return appDirectory;
 }
 
 void CMiscUtils::debugHexDump(const byte *data, uint32 lenData)
@@ -79,8 +79,8 @@ void CMiscUtils::debugHexDump(const byte *data, uint32 lenData)
 
 		while (pos < lenData)
 		{
-			CString line;
-			CString single;
+			CStringA line;
+			CStringA single;
 			line.Format("%08X ", pos);
 			lenLine = min((lenData - pos), 16);
 			for (int i=0; i<lenLine; i++)

@@ -47,11 +47,11 @@ class CSearch
 	friend class CSearchManager;
 
 public:
-	uint32 getSearchID() {return m_searchID;}
-	uint32 getSearchTypes() {return m_type;}
+	uint32 getSearchID() const {return m_searchID;}
+	uint32 getSearchTypes() const {return m_type;}
 	void setSearchTypes( uint32 val ) {m_type = val;}
-	uint32 getCount() {if(bio2 == NULL)return m_count;else if(bio3 == NULL)return m_count/2;else return m_count/3;}
-	uint32 getCountSent() {return m_countSent;}
+	uint32 getCount() const {if(bio2 == NULL)return m_count;else if(bio3 == NULL)return m_count/2;else return m_count/3;}
+	uint32 getCountSent() const {return m_countSent;}
 	CUInt128 m_keywordPublish; //Need to make this private...
 	byte packet1[1024*50];
 	byte packet2[1024*50];
@@ -59,12 +59,12 @@ public:
 	CByteIO *bio1;
 	CByteIO *bio2;
 	CByteIO *bio3;
-	CString getFileName(void) {return m_fileName;}
-	CUInt128 getTarget(void) {return m_target;}
+	CString getFileName(void) const {return m_fileName;}
+	CUInt128 getTarget(void) const {return m_target;}
 	void addFileID(const CUInt128& id);
 	void PreparePacket(void);
 	void PreparePacketForTags( CByteIO* packet, CKnownFile* file );
-	bool Stoping(void) {return m_stoping;}
+	bool Stoping(void) const {return m_stoping;}
 
 	enum
 	{

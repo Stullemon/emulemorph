@@ -95,7 +95,7 @@ private:
 	uint32		m_kademliaUsers;
 	bool		m_Publish;
 
-	void init(LPCSTR filename);
+	void init(LPCTSTR filename);
 	void reset(void);
 	void setDefaults(void);
 	void readFile(void);

@@ -52,7 +52,7 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-LPCTSTR _aszInvKadKeywordChars = " ()[]{}<>,._-!?";
+LPCTSTR _aszInvKadKeywordChars = _T(" ()[]{}<>,._-!?");
 
 ////////////////////////////////////////
 using namespace Kademlia;
@@ -158,7 +158,7 @@ void CSearchManager::deleteSearch(CSearch* pSearch)
 	delete pSearch;
 }
 
-CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
+CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
 {
 	CSearch *s = new CSearch;
 	try
@@ -172,13 +172,14 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR key
 			throw GetResString(IDS_KAD_SEARCH_KEYWORD_TOO_SHORT);
 		}
 
-		CString k = s->m_words.front();
-		CMD4::hash((byte*)k.GetBuffer(0), k.GetLength(), &s->m_target);
+		CString strKeyword(s->m_words.front());
+		CStringA strKeywordA(strKeyword);
+		CMD4::hash((byte*)(LPCSTR)strKeywordA, strKeywordA.GetLength(), &s->m_target);
 		if (alreadySearchingFor(s->m_target))
 		{
 			delete s;
 			CString strError;
-			strError.Format(GetResString(IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING), k);
+			strError.Format(GetResString(IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING), strKeyword);
 			throw strError;
 		}
 
@@ -203,7 +204,7 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR key
 	catch (CIOException* ioe)
 	{
 		CString strError;
-		strError.Format(_T("IO-Exception in %s: Error %u"), __FUNCTION__, ioe->m_cause);
+		strError.Format(_T("IO-Exception in %hs: Error %u"), __FUNCTION__, ioe->m_cause);
 		ioe->Delete();
 		delete s;
 		throw strError;
@@ -214,7 +215,7 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR key
 		e->m_strFileName = "search packet";
 		e->GetErrorMessage(szError, ARRSIZE(szError));
 		CString strError;
-		strError.Format(_T("Exception in %s: %s"), __FUNCTION__, szError);
+		strError.Format(_T("Exception in %hs: %s"), __FUNCTION__, szError);
 		e->Delete();
 		delete s;
 		throw strError;
@@ -226,7 +227,7 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCSTR key
 	catch (...) 
 	{
 		CString strError;
-		strError.Format(_T("Unknown exception in %s"), __FUNCTION__);
+		strError.Format(_T("Unknown exception in %hs"), __FUNCTION__);
 		delete s;
 		throw strError;
 	}
@@ -343,16 +344,16 @@ bool CSearchManager::alreadySearchingFor(const CUInt128 &target)
 	return retVal;
 }
 
-void CSearchManager::getWords(LPCSTR str, WordList *words)
+void CSearchManager::getWords(LPCTSTR str, WordList *words)
 {
-	LPSTR s = (LPSTR)str;
+	LPCTSTR s = str;
 	int len = 0;
 	CString word;
 	CString wordtemp;
 	uint32 i;
-	while (strlen(s) > 0)
+	while (_tcslen(s) > 0)
 	{
-		len = (int)strcspn(s, _aszInvKadKeywordChars);
+		len = (int)_tcscspn(s, _aszInvKadKeywordChars);
 		if (len > 2)
 		{
 			word = s;
@@ -367,7 +368,7 @@ void CSearchManager::getWords(LPCSTR str, WordList *words)
 			}
 			words->push_back(word);
 		}
-		if (len < (int)strlen(s))
+		if (len < (int)_tcslen(s))
 			len++;
 		s += len;
 	}

@@ -57,7 +57,7 @@ class CKademliaUDPListener
 	friend class CSearch;
 
 public:
-	void bootstrap(LPCSTR ip, uint16 port);
+	void bootstrap(LPCTSTR ip, uint16 port);
 	void bootstrap(uint32 ip, uint16 port);
 	void firewalledCheck(uint32 ip, uint16 port);
 	void sendMyDetails(byte opcode, uint32 ip, uint16 port);

@@ -123,12 +123,12 @@ CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 t
 //	Kademlia::CKademlia::reportContactAdd(this);
 }
 */
-void CContact::getClientID(CUInt128 *id)
+void CContact::getClientID(CUInt128 *id) const
 {
 	id->setValue(m_clientID);
 }
 
-void CContact::getClientID(CString *id)
+void CContact::getClientID(CString *id) const
 {
 	m_clientID.toHexString(id);
 }
@@ -142,22 +142,22 @@ void CContact::setClientID(const CUInt128 &clientID)
 	m_distance.xor(clientID);
 }
 
-void CContact::getDistance(CUInt128 *distance)
+void CContact::getDistance(CUInt128 *distance) const
 {
 	distance->setValue(m_distance);
 }
 
-void CContact::getDistance(CString *distance)
+void CContact::getDistance(CString *distance) const
 {
 	m_distance.toBinaryString(distance);
 }
 
-uint32 CContact::getIPAddress(void)
+uint32 CContact::getIPAddress(void) const
 {
 	return m_ip;
 }
 
-void CContact::getIPAddress(CString *ip)
+void CContact::getIPAddress(CString *ip) const
 {
 	CMiscUtils::ipAddressToString(m_ip, ip);
 }
@@ -167,14 +167,14 @@ void CContact::setIPAddress(uint32 ip)
 	m_ip = ip;
 }
 
-uint16 CContact::getTCPPort(void)
+uint16 CContact::getTCPPort(void) const
 {
 	return m_tcpPort;
 }
 
-void CContact::getTCPPort(CString *port)
+void CContact::getTCPPort(CString *port) const
 {
-	port->Format("%ld", m_tcpPort);
+	port->Format(_T("%ld"), m_tcpPort);
 }
 
 void CContact::setTCPPort(uint16 port)
@@ -182,14 +182,14 @@ void CContact::setTCPPort(uint16 port)
 	m_tcpPort = port;
 }
 
-uint16 CContact::getUDPPort(void)
+uint16 CContact::getUDPPort(void) const
 {
 	return m_udpPort;
 }
 
-void CContact::getUDPPort(CString *port)
+void CContact::getUDPPort(CString *port) const
 {
-	port->Format("%ld", m_udpPort);
+	port->Format(_T("%ld"), m_udpPort);
 }
 
 void CContact::setUDPPort(uint16 port)
@@ -197,7 +197,7 @@ void CContact::setUDPPort(uint16 port)
 	m_udpPort = port;
 }
 
-byte CContact::getType(void)
+byte CContact::getType(void) const
 {
 	return m_type;
 }
@@ -227,7 +227,7 @@ void CContact::setType(byte type)
 	theApp.emuledlg->kademliawnd->contactList->ContactRef(this);
 }
 
-bool CContact::madeContact(void)
+bool CContact::madeContact(void) const
 {
 	return m_madeContact;
 }

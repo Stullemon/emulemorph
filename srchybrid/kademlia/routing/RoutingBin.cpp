@@ -257,7 +257,7 @@ void CRoutingBin::dumpContents(void)
 		c->m_clientID.toHexString(&hex);
 		c->getIPAddress(&ipStr);
 		c->getDistance(&distance);
-		line.Format("\t%s\t%s (%ld)\tDistance: %s\r\n", hex, ipStr, c->getUDPPort(), distance);
+		line.Format(_T("\t%s\t%s (%ld)\tDistance: %s\r\n"), hex, ipStr, c->getUDPPort(), distance);
 		OutputDebugString(line);
 	}
 }

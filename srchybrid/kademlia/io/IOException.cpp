@@ -46,9 +46,9 @@ using namespace Kademlia;
 
 BOOL CIOException::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, PUINT pnHelpContext)
 {
-	CString msg = "ONLY AVAILABLE WITH EMULE INTEGRATION";
+	CString msg = _T("ONLY AVAILABLE WITH EMULE INTEGRATION");
 //	CString msg = GetResString(IOEXCEPTION_ERR_BASE + m_cause);
-	strncpy(lpszError, msg.GetBuffer(0), nMaxError);
+	_tcsncpy(lpszError, msg.GetBuffer(0), nMaxError);
 	lpszError[nMaxError-1] = 0;
 
 	if (pnHelpContext != NULL)
