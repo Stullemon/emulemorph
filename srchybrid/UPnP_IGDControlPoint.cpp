@@ -1127,8 +1127,9 @@ void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int evntkey, IXML_Docu
 		if(srv){
 			if(strcmp(srv->SubscriptionID, sid) == 0){
 				//Parse Event
-				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Event received from service \"%s\" [SID=%s]"), srv->ServiceType, CA2CT(srv->SubscriptionID));
+				//	theApp.QueueDebugLogLine(false, _T("UPnP: Event received from service \"%s\" [SID=%s]"), srv->ServiceType, CA2CT(srv->SubscriptionID));
+				
+				//Parse Event
 				IXML_NodeList *properties = NULL;
 
 				properties = ixmlDocument_getElementsByTagName( changes, "e:property" );
