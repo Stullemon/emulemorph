@@ -1801,6 +1801,29 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
+                            "Импорт отменен: Не могу импортировать в целый файл."
+    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
+                            "Импорт отменен: неполный хэшсет для %s (%i хэши для %i частей)."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Импорт отменен: Не смог открыть %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART 
+                            "Импортирую %i части (от 0 до %i) до %s."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
+                            "Часть %i: пропущена, так как уже готова."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Часть %i: импортирована."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Часть %i: импортирована для управления ICH."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
+                            "Часть %i: пропущена, не совпадает частично завершенный блок."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH
+                            "Импорт завершен. %i части были импортированы в %s."
+    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
+                            "%i плохие части были импортированы для A/ICH. Начинаю перехэширование."
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
+                            "Выполняется другой импорт. Подождите, пока он завершится."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_WEBCACHE         "Webcache"
 END
 
@@ -2220,17 +2243,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MORPH2_FILE         "Файл"
-    IDS_MORPH2_SECURITY     "Безопасность"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_MORPH2_SERVER       "Сервер"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_MORPH_RFHA          "Записывать хеширование"
     IDS_MORPH_RAIF          "Записывать активность в списке друзей"
     IDS_MORPH_KSSERV        "Не убирать статичные сервера из списка во время работы"
@@ -2622,6 +2634,13 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Начато запланированное обновление FAKES.DAT."
     IDS_SCHED_UPDATE_WARNING 
                             "Не планировать автообновление слишком часто, чтобы не увеличивать траффик!\r\nРаз в неделю достаточно!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FRIENDNAME_CHANGED1 "Друг поменял имя: '%s'->'%s', ip %i.%i.%i.%i:%i, хэш %s"
+    IDS_FRIENDNAME_CHANGED2 "Друг поменял имя: '%s'->'%s', хэш %s"
+    IDS_FAILEDTOLOAD        "Не удалось загрузить"
 END
 
 #endif    // Russian resources
