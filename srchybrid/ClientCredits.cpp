@@ -292,7 +292,7 @@ float CClientCredits::GetMyScoreRatio(uint32 dwForIP)
 // Moonlight: SUQWT - Conditions to determine an active record.
 // Returns true if the client has been seen recently
 bool CClientCredits::IsActive(uint32 dwExpired) {
-	return (GetUploadedTotal() || GetDownloadedTotal() || m_pCredits->nSecuredWaitTime || m_pCredits->nSecuredWaitTime) &&
+	return (GetUploadedTotal() || GetDownloadedTotal() || m_pCredits->nSecuredWaitTime || m_pCredits->nUnSecuredWaitTime) &&
 			(m_pCredits->nLastSeen >= dwExpired);
 }
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
