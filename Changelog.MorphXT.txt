@@ -3,10 +3,15 @@ Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
 FIXED  : The AutoSetResumeOrder have been corrected to work properly in all case [SiRoB]
 FIXED  : zz Upload System have been reviewed to properly remove WebCache Socket from standardOrderList [SiRoB]
+FIXED  : WebCache Fix arround the test of valide blockrequest range [SiRoB]
+FIXED  : Upload Splitting Class [SiRoB]
+FIXED  : Legend Graph are now correcly drawn in case of wide caractere language use [SiRoB]
 
 CHANGED: Now we allways use the most recent credit.met file if it's corrupted use backup one [SiRoB]
+CHANGED: Rewritten some code [SiRoB]
 
-TWEAKED: Display the new version when we manualy update a file [SiRoB]
+
+TWEAKED: Display the new version when we manualy update a file in morph preferency [SiRoB]
 TWEAKED: Improve credit.met loading [SiRoB]
 TWEAKED: Improve Slot Focus for high datarate [SiRoB]
 
