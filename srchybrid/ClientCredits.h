@@ -149,9 +149,7 @@ public:
 	EIdentState	GetCurrentIdentState(uint32 dwForIP); // can be != IdentState
 	uint32	GetSecureWaitStartTime(uint32 dwForIP);
 	void	SetSecWaitStartTime(uint32 dwForIP);
-	//EastShare - Added by TAHO, modified SUQWT
-	void	SetStartTimeResetable(bool isResetable);  
-	//EastShare - Added by TAHO, modified SUQWT
+	void	SetSecWaitStartTime(); //EastShare - Added by TAHO, modified SUQWT
 
 	//EastShare Start - added by AndCycle, Pay Back First
 	bool	GetPayBackFirstStatus()			{return m_bPayBackFirst;}
@@ -172,9 +170,6 @@ private:
 	uint32			m_dwUnSecureWaitTime;
 	uint32			m_dwWaitTimeIP;			   // client IP assigned to the waittime
 // EastShare - added by TAHO, modified SUQWT
-	bool			m_isStartTimeResetable;
-// EastShare - added by TAHO, modified SUQWT
-	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	bool			m_bCheckScoreRatio;
 	float			m_fLastScoreRatio;
 	int /*CreditSystemSelection*/	m_cssCurrentCreditSystem;

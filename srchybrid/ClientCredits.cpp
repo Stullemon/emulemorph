@@ -47,7 +47,6 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 	m_dwWaitTimeIP = 0;
-	m_isStartTimeResetable = true;   // EastShare - added by TAHO, modified SUQWT
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
@@ -64,10 +63,15 @@ CClientCredits::CClientCredits(const uchar* key)
 	memset(m_pCredits, 0, sizeof(CreditStruct));
 	md4cpy(m_pCredits->abyKey, key);
 	InitalizeIdent();
-	m_dwUnSecureWaitTime = ::GetTickCount();
-	m_dwSecureWaitTime = ::GetTickCount();
+
+	// EastShare START - Modified by TAHO, modified SUQWT
+	//m_dwUnSecureWaitTime = ::GetTickCount();
+	//m_dwSecureWaitTime = ::GetTickCount();
+	m_dwUnSecureWaitTime = 0;
+	m_dwSecureWaitTime = 0;
+	// EastShare END - Modified by TAHO, modified SUQWT
+
 	m_dwWaitTimeIP = 0;
-	m_isStartTimeResetable = true;   // EastShare - added by TAHO, modified SUQWT
 
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
@@ -203,16 +207,12 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		case CS_EASTSHARE:{
 			result = (IdentState == IS_NOTAVAILABLE) ? 80 : 100;
 			
-/*			if (GetDownloadedTotal() < GetUploadedTotal())
-				result += (float)(((double)GetDownloadedTotal()-(double)GetUploadedTotal())/524288.0 + (double)pow((double)GetDownloadedTotal()/1048576.0,0.7));
-			else if ((double)GetDownloadedTotal() <= 1048576.0)
-				result += (float)((double)GetDownloadedTotal()/174762.7 - (double)GetUploadedTotal()/174762.7);
-			else */ 
-			if ((double)GetDownloadedTotal() > 1024)
-				result +=50;
 			result += (float)((double)GetDownloadedTotal()/174762.67 - (double)GetUploadedTotal()/524288); //Modefied by Pretender - 20040120
-			if ((result < 50) && ((double)GetDownloadedTotal() > 104857.6))
-				result = 50; //Modefied by Pretender - 20040128
+			
+			if ((double)GetDownloadedTotal() > 1048576) {
+				result += 100; 
+				if (result<50 && ((double)GetDownloadedTotal()*10 > (double)GetUploadedTotal())) result=50;
+				} //Modefied by Pretender - 20040330
 
 			if ( result < 10 ) {
 				result = 10;
@@ -960,41 +960,16 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 
 uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 	// EASTSHART START - Modified by TAHO, modified SUQWT
-	// if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0)
-		//SetSecWaitStartTime(dwForIP);
-
-	uint32 secureTime;
-	uint32 unSecureTime;
-	if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0) {
-		if (!theApp.clientcredits->IsSaveUploadQueueWaitTime() || m_isStartTimeResetable){
+	if (m_dwUnSecureWaitTime == 0 || m_dwSecureWaitTime == 0)
 		SetSecWaitStartTime(dwForIP);
-			secureTime = m_dwSecureWaitTime;
-			unSecureTime = m_dwUnSecureWaitTime;
-		}
-		else{
-			secureTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime;
-			unSecureTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;
-		}
-	}
-	else{
-		secureTime = m_dwSecureWaitTime;
-		unSecureTime = m_dwUnSecureWaitTime;
-	}
-	// EASTSHART END - Modified by TAHO, modified SUQWT
 
 	if (m_pCredits->nKeySize != 0){	// this client is a SecureHash Client
 		if (GetCurrentIdentState(dwForIP) == IS_IDENTIFIED){ // good boy
-			// EASTSHART START - Modified by TAHO, modified SUQWT
-			//return m_dwSecureWaitTime;
-			return secureTime;
-			// EASTSHART END - Modified by TAHO, modified SUQWT
+			return m_dwSecureWaitTime;
 		}
 		else{	// not so good boy
 			if (dwForIP == m_dwWaitTimeIP){
-				// EASTSHART START - Modified by TAHO, modified SUQWT
-				//return m_dwUnSecureWaitTime;
-				return unSecureTime;
-				// EASTSHART END - Modified by TAHO, modified SUQWT
+				return m_dwUnSecureWaitTime;
 			}
 			else{	// bad boy
 				// this can also happen if the client has not identified himself yet, but will do later - so maybe he is not a bad boy :) .
@@ -1006,33 +981,29 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 				if (thePrefs.GetLogSecureIdent())
 					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
 				if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-					if (m_isStartTimeResetable) // EASTSHART - Added by TAHO, modified SUQWT
 						m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 				}
 				else{
 					m_dwUnSecureWaitTime = ::GetTickCount();//original
 				}
 				m_dwWaitTimeIP = dwForIP;
-				// EASTSHART START - Modified by TAHO, modified SUQWT
-				//return m_dwUnSecureWaitTime;
-				return unSecureTime;
-				// EASTSHART END - Modified by TAHO, modified SUQWT
+				return m_dwUnSecureWaitTime;
 			}	
 		}
 	}
 	else{	// not a SecureHash Client - handle it like before for now (no security checks)
-		// EASTSHART START - Modified by TAHO, modified SUQWT
-		//return m_dwUnSecureWaitTime;
-		return unSecureTime;
-		// EASTSHART END - Modified by TAHO, modified SUQWT
+		return m_dwUnSecureWaitTime;
 	}
 }
+
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Save the wait times.
 void CClientCredits::SaveUploadQueueWaitTime(int iKeepPct) {
 	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = ((GetTickCount() - m_dwUnSecureWaitTime) / 100) * iKeepPct;
 	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = ((GetTickCount() - m_dwSecureWaitTime) / 100) * iKeepPct;
-	SetSecWaitStartTime(m_dwWaitTimeIP);
+	// EastShare START - Marked by TAHO, modified SUQWT
+	// SetSecWaitStartTime(m_dwWaitTimeIP);
+	// EastShare END - Marked by TAHO, modified SUQWT
 }
 // Moonlight: SUQWT - Clear the wait times.
 void CClientCredits::ClearUploadQueueWaitTime() {
@@ -1041,6 +1012,13 @@ void CClientCredits::ClearUploadQueueWaitTime() {
 	// Doing SaveUploadQueueWaitTime(0) should be reduced to something equivalent during compile.
 }
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+
+//EastShare START - Added by TAHO, modified SUQWT
+void CClientCredits::SetSecWaitStartTime() {
+	SetSecWaitStartTime(m_dwWaitTimeIP);
+}
+//EastShare END - Added by TAHO, modified SUQWT
+
 // Moonlight: SUQWT: Adjust to take previous wait time into account.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1061,12 +1039,6 @@ void CClientCredits::ClearWaitStartTime(){
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 }
-
-//EastShare Start - added by AndCycle, Pay Back First
-void CClientCredits::SetStartTimeResetable(bool isResetable){
-	m_isStartTimeResetable = isResetable;
-}
-//EastShare END - Added by TAHO, modified SUQWT
 
 //EastShare Start - added by AndCycle, Pay Back First
 

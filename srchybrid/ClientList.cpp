@@ -233,6 +233,11 @@ void CClientList::RemoveClient(CUpDownClient* toremove){
 		//just to be sure...
 		theApp.uploadqueue->RemoveFromUploadQueue(toremove, "Client removed from CClientList::RemoveClient().");
 		theApp.uploadqueue->RemoveFromWaitingQueue(toremove);
+		 // EastShare START - Added by TAHO, modified SUQWT
+		if ( toremove != NULL && toremove->Credits() != NULL) {
+			toremove->Credits()->ClearWaitStartTime();
+		}
+		 // EastShare END - Added by TAHO, modified SUQWT
 		theApp.downloadqueue->RemoveSource(toremove);
 		theApp.emuledlg->transferwnd->clientlistctrl.RemoveClient(toremove);
 		RemoveTCP(toremove);
