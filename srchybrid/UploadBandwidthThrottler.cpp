@@ -218,8 +218,13 @@ bool UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket*
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	if(resort == false && foundSocket) {
-        for (uint32 i = classID; i < NB_SPLITTING_CLASS;i++)
-			if (m_highestNumberOfFullyActivatedSlots[i] > 0) --m_highestNumberOfFullyActivatedSlots[i];
+        uint32 sumofclientinclass = 0;
+		for (uint32 i = 0; i < NB_SPLITTING_CLASS;i++)
+		{
+			sumofclientinclass += slotCounterClass[i];
+			if (sumofclientinclass > 0 && i >= classID && m_highestNumberOfFullyActivatedSlots[i] > sumofclientinclass)
+				m_highestNumberOfFullyActivatedSlots[i] = sumofclientinclass;
+		}
     }
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
 
@@ -659,13 +664,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				else
 					realBytesToSpend = realBytesToSpendClass[classID];
 				if(realBytesToSpend > 999) {
-					uint64 bandwidthSavedTolerance = ClientDataRate[classID]?slotCounterClass[classID]*minFragSize*1000:0;
-					if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance){
+					uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*minFragSize*1000;
+					if ((uint64)realBytesToSpend > 999+bandwidthSavedTolerance)
 						realBytesToSpend = 999+bandwidthSavedTolerance;
-						if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
-							++m_highestNumberOfFullyActivatedSlots[classID];
-						//theApp.QueueDebugLogLine(false, _T("UploadBandwidthThrottler: Throttler requests new slot due to bw not reached. m_highestNumberOfFullyActivatedSlots: %i m_StandardOrder_list.GetSize(): %i tick: %i"), m_highestNumberOfFullyActivatedSlots, m_StandardOrder_list.GetSize(), thisLoopTick);
-					}
+					if (m_highestNumberOfFullyActivatedSlots[classID] < ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():sumofclientinclass)+1)
+						++m_highestNumberOfFullyActivatedSlots[classID];
 				}else{
 					if (sumofclientinclass > 0 && m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
 						m_highestNumberOfFullyActivatedSlots[classID] = sumofclientinclass;
