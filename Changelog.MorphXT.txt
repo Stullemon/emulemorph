@@ -1,5 +1,10 @@
 --------------------------------------
-Changelog for eMule 0.42e MorphXT v2.?
+Changelog for eMule 0.42e MorphXT v2.7
+--------------------------------------
+FIXED  : Killing this ******* Invalide Parameter [SiRoB]
+
+--------------------------------------
+Changelog for eMule 0.42e MorphXT v2.7
 --------------------------------------
 FIXED  : Reviewed all ed2k download methode to keep Selection category support from Khaos [SiRoB]
 FIXED  : Eradicate Invalide Parameter (:p i hope) [SiRoB]
@@ -9,6 +14,11 @@ ADDED  : Friend Column on uploadlist, queuelist & knownlist to be able to sort t
 CHANGED: Updated SafeHash, MergeKnown, HIDEOS, Multiple sorting From Slugfiller [SiRoB]
 CHANGED: Updated SafeHash From Slugfiller [SiRoB]
 CHANGED: Turning back average on 30'' for upload and download mesure [SiRoB]
+CHANGED: Pay Back First only available for Complet file since some polemic [SiRoB]
+CHANGED: ZZ ratio is applicable when:
+		-incomplet file is forced to powershare
+		-friend slot have been used
+		-average upload should be more than 10kB/s if you expect to download up to 64kB/s (26kB/s for 128kB/s)
 
 --------------------------------------
 Changelog for eMule 0.42e MorphXT v2.6
