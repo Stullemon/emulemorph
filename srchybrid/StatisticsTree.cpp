@@ -165,9 +165,10 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 				AddLogLine(false, GetResString(IDS_STATS_NFORESET));
 				theApp.emuledlg->statisticswnd->ShowStatistics();
 
+				/*
 				CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
 				GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
-
+				*/
 				break;
 			}
 		case MP_STATTREE_RESTORE:
@@ -179,8 +180,10 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 					AddLogLine(true, GetResString(IDS_ERR_NOSTATBKUP));
 				else {
 					AddLogLine(false, GetResString(IDS_STATS_NFOLOADEDBKUP));
+					/*
 					CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
 					GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
+					*/
 				}
 
 				break;
