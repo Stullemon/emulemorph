@@ -1,7 +1,7 @@
 // emulEspaña: Added by MoNKi [ MoNKi: -Pass Edit on TreeOptionsCtrl- ]
 
 #pragma once
-#include "..\..\TreeOptionsCtrl.h"
+#include "..\TreeOptionsCtrl.h"
 
 class CPassTreeOptionsEdit :
 	public CTreeOptionsEdit
