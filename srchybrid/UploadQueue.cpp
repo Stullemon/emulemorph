@@ -153,7 +153,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	){
 
 		// Remove client from ul list to make room for higher/same prio client
-		theApp.emuledlg->AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(SESSIONAMOUNT*max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)), (sint32)client->GetQueueSessionPayloadUp()-SESSIONAMOUNT*(max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)));
+		AddDebugLogLine(false, GetResString(IDS_ULSUCCESSFUL), client->GetUserName(), CastItoXBytes(client->GetQueueSessionPayloadUp()), CastItoXBytes(SESSIONAMOUNT*max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)), (sint32)client->GetQueueSessionPayloadUp()-SESSIONAMOUNT*(max(1, client->GetQueueSessionPayloadUp()/SESSIONAMOUNT)));
 
 		theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULSUCCESS));
 		theApp.uploadqueue->AddClientToQueue(client,true);
@@ -1069,7 +1069,11 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 	} else if(earlyabort == false){
 		failedupcount++;
 	}
+			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
+            if(requestedFile != NULL) {
+                requestedFile->UpdatePartsInfo();
+            }
 	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		if(earlyabort == true){

@@ -48,11 +48,7 @@ public:
 	CEMSocket(void);
 	~CEMSocket(void);
 
-	//MORPH - Changed by SiRoB, ZZ Upload
-	/*
 	void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-	*/
-	virtual void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
     bool    HasQueues();
     bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
