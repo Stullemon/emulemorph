@@ -768,18 +768,33 @@ void CUploadQueue::Process() {
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
+		bool wasRemoved = false;
 		if (thePrefs.m_iDbgHeap >= 2)
 			ASSERT_VALID(cur_client);
 		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
 		if (!cur_client->socket)
 		{
+			//MORPH START - Changed by SiRoB, Uploadinglist -Fix-
+			/*
 			RemoveFromUploadQueue(cur_client, _T("Uploading to client without socket? (CUploadQueue::Process)"));
+			*/
+			wasRemoved = RemoveFromUploadQueue(cur_client, _T("Uploading to client without socket? (CUploadQueue::Process)"));
+			//MORPH END   - Changed by SiRoB, UPloadinglist -Fix-
 			if(cur_client->Disconnected(_T("CUploadQueue::Process"))){
 				delete cur_client;
 			}
 		} else {
+			//MORPH START - Changed by SiRoB, Uploadinglist -Fix-
+			/*
 			cur_client->SendBlockData();
+			*/
+			wasRemoved = cur_client->SendBlockData();
+			//MORPH END   - Changed by SiRoB, Uploadinglist -Fix-
 		}
+		//MORPH START - Added by SiRoB, Uploadinglist -Fix-
+		if (wasRemoved)
+			pos = uploadinglist.GetHeadPosition();
+		//MORPH END   - Added by SiRoB, Uploadinglist -Fix-
 	}
 
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
@@ -1160,7 +1175,6 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
     bool result = false;
-	uint32 slotCounter = 1;
 	//MORPH START - Changed by SiRoB, ResortUploadSlot Fix
 	/*
 	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;){
@@ -1173,94 +1187,88 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 	POSITION pos2 = tempUploadinglist.Find(client);
 	if (pos2){
 		if (pos) uploadinglist.RemoveAt(pos);
-		slotCounter = uploadinglist.GetCount()+1;
 		tmpuploadinglist = &tempUploadinglist;
+		pos = pos2;
 	}
-	pos = tmpuploadinglist->GetHeadPosition();
-	while (pos != 0)
+	if (pos != NULL)
 	{
-	    POSITION curPos = pos;
-    	CUpDownClient* curClient = tmpuploadinglist->GetNext(pos);
+		CUpDownClient* curClient = tmpuploadinglist->GetAt(pos);
 	//MORPH END - Changed by SiRoB, ResortUploadSlot Fix
-		if (client == curClient){
-			if (updatewindow)
-				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
-	
-			if (thePrefs.GetLogUlDlEvents())
-				AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
-            client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
-            tmpuploadinglist->RemoveAt(curPos);
-			bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-            bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
-			//MORPH START - Added by SiRoB, due to zz upload system WebCache
-			bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
-			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
-    	    
-			/*if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
-                DebugLogError(false, _T("UploadQueue: Didn't find socket to delete. socket: 0x%x, PCUpSocket: 0x%x, WCUpSocket: 0x%x"), client->socket,client->m_pPCUpSocket,client->m_pWCUpSocket);
-            }*/
-			//EastShare Start - added by AndCycle, Pay Back First
-			//client normal leave the upload queue, check does client still satisfy requirement
-			if(earlyabort == false){
-				client->credits->InitPayBackFirstStatus();
+		if (updatewindow)
+			theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
+
+		if (thePrefs.GetLogUlDlEvents())
+			AddDebugLogLine(DLP_VERYLOW, true,_T("---- %s: Removing client from upload list. Reason: %s ----"), client->DbgGetClientInfo(), pszReason==NULL ? _T("") : pszReason);
+        client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
+        tmpuploadinglist->RemoveAt(pos);
+		bool removed = theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
+        bool pcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket);
+		//MORPH START - Added by SiRoB, due to zz upload system WebCache
+		bool wcRemoved = theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
+		//MORPH END   - Added by SiRoB, due to zz upload system WebCache
+    	
+		/*if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
+            DebugLogError(false, _T("UploadQueue: Didn't find socket to delete. socket: 0x%x, PCUpSocket: 0x%x, WCUpSocket: 0x%x"), client->socket,client->m_pPCUpSocket,client->m_pWCUpSocket);
+        }*/
+		//EastShare Start - added by AndCycle, Pay Back First
+		//client normal leave the upload queue, check does client still satisfy requirement
+		if(earlyabort == false){
+			client->credits->InitPayBackFirstStatus();
+		}
+		//EastShare End - added by AndCycle, Pay Back First
+
+		if(client->GetQueueSessionUp() > 0){
+			++successfullupcount;
+			theStats.IncTotalCompletedBytes(client->GetQueueSessionUp());
+			if(client->GetSessionUp() > 0) {
+				//wistily
+				uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
+				client->Add2UpTotalTime(tempUpStartTimeDelay);
+				totaluploadtime += tempUpStartTimeDelay/1000;
+				/*
+				totaluploadtime += client->GetUpStartTimeDelay()/1000;
+				*/
+				//wistily stop
 			}
-			//EastShare End - added by AndCycle, Pay Back First
-
-			if(client->GetQueueSessionUp() > 0){
-				++successfullupcount;
-				theStats.IncTotalCompletedBytes(client->GetQueueSessionUp());
-				if(client->GetSessionUp() > 0) {
-					//wistily
-					uint32 tempUpStartTimeDelay=client->GetUpStartTimeDelay();
-					client->Add2UpTotalTime(tempUpStartTimeDelay);
-					totaluploadtime += tempUpStartTimeDelay/1000;
-					/*
-					totaluploadtime += client->GetUpStartTimeDelay()/1000;
-					*/
-					//wistily stop
-				}
-			} else if(earlyabort == false)
-				++failedupcount;
+		} else if(earlyabort == false)
+			++failedupcount;
 
 
-			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+		CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
-		    if(requestedFile != NULL) {
-		        requestedFile->UpdatePartsInfo();
-		    }
+		if(requestedFile != NULL) {
+		    requestedFile->UpdatePartsInfo();
+		}
 
-			theApp.clientlist->AddTrackClient(client); // Keep track of this client
-			client->SetUploadState(US_NONE);
-			client->ClearUploadBlockRequests();
+		theApp.clientlist->AddTrackClient(client); // Keep track of this client
+		client->SetUploadState(US_NONE);
+		client->ClearUploadBlockRequests();
 
-            m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
+        m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 
-			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			// EastShare START - Marked by TAHO, modified SUQWT
-			if(earlyabort == true)
-			{
-				//client->Credits()->SaveUploadQueueWaitTime();
-			}
-			else if(client->GetQueueSessionUp() < SESSIONMAXTRANS)
-			{
-				int keeppct = (100 - (100 * client->GetQueueSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
-				if (keeppct < 0)    keeppct = 0;
-				client->Credits()->SaveUploadQueueWaitTime(keeppct);
-				client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
-			}
-			else
-			{
-				client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
-				client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
-			}
-			// EastShare END - Marked by TAHO, modified SUQWT
-			//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-			result = true;
-        } else {
-            curClient->SetSlotNumber(slotCounter);
-            slotCounter++;
-        }
-	}
+		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		// EastShare START - Marked by TAHO, modified SUQWT
+		if(earlyabort == true)
+		{
+			//client->Credits()->SaveUploadQueueWaitTime();
+		}
+		else if(client->GetQueueSessionUp() < SESSIONMAXTRANS)
+		{
+			int keeppct = (100 - (100 * client->GetQueueSessionUp()/SESSIONMAXTRANS)) - 10;// At least 10% time credit 'penalty'
+			if (keeppct < 0)    keeppct = 0;
+			client->Credits()->SaveUploadQueueWaitTime(keeppct);
+			client->Credits()->SetSecWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
+		}
+		else
+		{
+			client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+			client->Credits()->ClearWaitStartTime(); // EastShare - Added by TAHO, modified SUQWT
+		}
+		// EastShare END - Marked by TAHO, modified SUQWT
+		//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		result = true;
+		ReSortUploadSlots(true);
+    }
 	return result;
 }
 
@@ -1678,26 +1686,37 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 		//MORPH END  - Added by SiRoB, ResortUploadSlot Fix
 			// Remove all clients from uploading list and store in tempList
    			while (uploadinglist.GetHeadPosition() != NULL) {
-   				// Get and remove the client from upload list.
-				CUpDownClient* cur_client = uploadinglist.GetHead();
-			
+   				CUpDownClient* cur_client = uploadinglist.RemoveHead();
+				tempUploadinglist.AddTail(cur_client);
 				// Remove the found Client from UploadBandwidthThrottler
    				theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
 				theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
 				//MORPH START - Added by SiRoB, due to zz upload system WebCache
 				theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
 				//MORPH END   - Added by SiRoB, due to zz upload system WebCache
-   				tempUploadinglist.AddTail(cur_client);
-				uploadinglist.RemoveHead();
 			}
 
 			// Remove one at a time from temp list and reinsert in correct position in uploading list
-   			while(tempUploadinglist.GetHeadPosition() != NULL) {
-   				// Get and remove the client from upload list.
+			while(tempUploadinglist.GetHeadPosition() != NULL) {
+	   			// Get and remove the client from upload list.
 				CUpDownClient* cur_client = tempUploadinglist.GetHead();
-   				// This will insert in correct place
+
+				//tempUploadinglist.RemoveAt(curpos);
+
+				// This will insert in correct place
    				InsertInUploadingList(cur_client);
-				tempUploadinglist.RemoveHead();
+				POSITION pos = NULL;
+				if ((pos = tempUploadinglist.Find(cur_client)) == NULL) //client have been removed by RemoveUploadQueue
+				{
+					// Remove the found Client from UploadBandwidthThrottler
+   					theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+					theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
+					//MORPH START - Added by SiRoB, due to zz upload system WebCache
+					theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket);
+					//MORPH END   - Added by SiRoB, due to zz upload system WebCache
+				}
+				else
+					tempUploadinglist.RemoveAt(pos);
 			}
 		}
 		theApp.uploadBandwidthThrottler->Pause(false);

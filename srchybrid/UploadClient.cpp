@@ -906,14 +906,15 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 	m_BlockRequests_queue.AddTail(reqblock);
 }
 
-uint32 CUpDownClient::SendBlockData(){
+bool CUpDownClient::SendBlockData(){
 	DWORD curTick = ::GetTickCount();
 
 	uint64 sentBytesCompleteFile = 0;
 	uint64 sentBytesPartFile = 0;
 	uint64 sentBytesPayload = 0;
+	bool wasRemoved = false; //MORPH - Moved by SiRoB
 
-    if(GetFileUploadSocket() && (m_ePeerCacheUpState != PCUS_WAIT_CACHE_REPLY)) {
+	if(GetFileUploadSocket() && (m_ePeerCacheUpState != PCUS_WAIT_CACHE_REPLY)) {
 		CEMSocket* s = GetFileUploadSocket();
 
         if(m_pPCUpSocket && IsUploadingToPeerCache()) {
@@ -953,7 +954,6 @@ uint32 CUpDownClient::SendBlockData(){
 		m_nCurQueueSessionPayloadUp += sentBytesPayload;
 
         if(GetUploadState() == US_UPLOADING) {
-            bool wasRemoved = false;
             if(GetQueueSessionPayloadUp() > SESSIONMAXTRANS+20*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
                 m_dwLastCheckedForEvictTick = curTick;
                 wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
@@ -1038,7 +1038,12 @@ uint32 CUpDownClient::SendBlockData(){
 		m_lastRefreshedULDisplay = curTick;
 	}
 
+	//MORPH - Changed by SiRoB, Uploadinglist -Fix-
+	/*
 	return sentBytesCompleteFile + sentBytesPartFile;
+	*/
+	return wasRemoved;
+	//MORPH - Changed by SiRoB, Uploadinglist -Fix-
 }
 
 /**
