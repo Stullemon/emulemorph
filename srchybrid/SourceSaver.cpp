@@ -29,7 +29,9 @@ CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const TCHAR* exp)
 		sourceID = client->GetUserIDHybrid();
 	else
 		sourceID = client->GetIP();
-	sourcePort = client->GetUserPort(); 
+	sourcePort = client->GetUserPort();
+	serverip = client->GetServerIP();
+	serverport = client->GetServerPort();
 	partsavailable = client->GetAvailablePartCount();
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//memcpy(expiration, exp, 7);
@@ -120,12 +122,27 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* file, SourceList* sources, LPC
 		if (IsExpired(strExpiration))
 			continue;
 		strLine = strLine.Mid(pos+1);
+		pos = strLine.Find(',');
+		if (pos == -1)
+			continue;
+		uint8 nSrcExchangeVer = _tstoi(strLine.Left(pos));
+		strLine = strLine.Mid(pos+1);
+		pos = strLine.Find(':');
+		if (pos == -1)
+			continue;
+		CString strserverip = strLine.Left(pos);
+		strLine = strLine.Mid(pos+1);
+		uint32 dwserverip = inet_addr(T2CA(strserverip));
+		if (dwserverip == INADDR_NONE) 
+			continue;
 		pos = strLine.Find(';');
 		if (pos == -1 || strLine.GetLength() < 2)
 			continue;
-		uint8 nSrcExchangeVer = _tstoi(strLine.Left(pos));
-
-		CSourceData* newsource = new CSourceData(dwID, wPort, strExpiration, nSrcExchangeVer);
+		CString strserverport = strLine.Left(pos);
+		uint16 wserverport = _tstoi(strserverport);
+		if (!wserverport)
+			continue;
+		CSourceData* newsource = new CSourceData(dwID, wPort, dwserverip, wserverport, strExpiration, nSrcExchangeVer);
 		// khaos::kmod-
 		sources->AddTail(newsource);
 		
@@ -145,9 +162,9 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 		//MORPH START - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		//newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0);
 		if( cur_src->nSrcExchangeVer == 3 )
-				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, false);
+				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, cur_src->serverip, cur_src->serverport, false);
 		else
-				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, true);
+				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, cur_src->serverip, cur_src->serverport, true);
 		newclient->SetSourceFrom(SF_SLS);
 		//MORPH END   - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		theApp.downloadqueue->CheckAndAddSource(file, newclient);
@@ -174,8 +191,6 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 	// Choose best sources for the file
 	for(POSITION pos = file->srclist.GetHeadPosition();pos!=0;){
 		cur_src = file->srclist.GetNext(pos);
-		if (cur_src->HasLowID())
-			continue;
 		if (srcstosave.IsEmpty()) {
 			sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
 			srcstosave.AddHead(sourcedata);
@@ -189,21 +204,17 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 			for (pos2 = srcstosave.GetTailPosition();pos2 != 0;srcstosave.GetPrev(pos2)){
 				CSourceData* cur_srctosave = srcstosave.GetAt(pos2);
 				// khaos::kmod+ Source Exchange Version
-				if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) &&
-					cur_srctosave->nSrcExchangeVer > cur_src->GetSourceExchangeVersion())
-				{
-					bInserted = true;
-				}
-				else if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) && 
-							cur_srctosave->nSrcExchangeVer == cur_src->GetSourceExchangeVersion() &&
-							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
-				{
-					bInserted = true;
-				}
-				else if (file->GetAvailableSrcCount() <= (maxSourcesToSave*2) &&
-							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
-				{
-					bInserted = true;
+				uint8* srcstatus = cur_src->GetPartStatus();
+				if (srcstatus){
+					if (cur_src->GetPartCount() == file->GetPartCount()){
+						// only save sources which have needed parts
+						for (int x = 0; x < file->GetPartCount(); x++){
+							if (srcstatus[x] && !file->IsPartShareable(x)){	// SLUGFILLER: SafeHash
+								bInserted = true;
+								break;
+							}
+						}
+					}
 				}
 				if (bInserted)
 				{
@@ -252,7 +263,9 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 		CSourceData* cur_src = srcstosave.RemoveHead();
 		uint32 dwID = cur_src->sourceID;
 		uint16 wPort = cur_src->sourcePort;
-		strLine.Format(_T("%i.%i.%i.%i:%i,%s,%i;\r\n"), (uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), wPort, cur_src->expiration, cur_src->nSrcExchangeVer);
+		uint32 dwserverip = cur_src->serverip;
+		uint16 wserverport = cur_src->serverport;
+		strLine.Format(_T("%s:%i,%s,%i,%s:%i;\r\n"), ipstr(dwID), wPort, cur_src->expiration, cur_src->nSrcExchangeVer, ipstr(dwserverip), wserverport);
 		delete cur_src;
 		f.WriteString(strLine);
 	}

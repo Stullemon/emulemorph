@@ -24,8 +24,10 @@ protected:
 		//																			memcpy(expiration, exp, 7);
 		//																			expiration[6] = 0;
 		//																			nSrcExchangeVer = srcexver;}
-		CSourceData(uint32 dwID, uint16 wPort, const TCHAR* exp, uint8 srcexver) {	sourceID = dwID; 
+		CSourceData(uint32 dwID, uint16 wPort,uint32 dwserverip, uint16 wserverport, const TCHAR* exp, uint8 srcexver) {	sourceID = dwID; 
 																					sourcePort = wPort; 
+																					serverip = dwserverip;
+																					serverport = wserverport;
 																					memcpy(expiration, exp, 11*sizeof(TCHAR));
 																					expiration[10] = 0;
 																					nSrcExchangeVer = srcexver;}
@@ -40,6 +42,8 @@ protected:
 		//															nSrcExchangeVer = pOld->nSrcExchangeVer;}
 		CSourceData(CSourceData* pOld) {							sourceID = pOld->sourceID; 
 																	sourcePort = pOld->sourcePort; 
+																	serverip = pOld->serverip;
+																	serverport = pOld->serverport;
 																	memcpy(expiration, pOld->expiration, 11*sizeof(TCHAR)); 
 																	partsavailable = pOld->partsavailable;
 																	expiration[10] = 0;
@@ -50,6 +54,8 @@ protected:
 
 		uint32	sourceID;
 		uint16	sourcePort;
+		uint32	serverip;
+		uint16	serverport;
 		uint32	partsavailable;
 		//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		//char	expiration[7];
