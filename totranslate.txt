@@ -275,12 +275,12 @@ BEGIN
     IDS_USSNEWLOWEST        "UploadSpeedSense: New lowest ping: %i ms. Old: %i ms"
     IDS_USSPINGFAILDIS      "UploadSpeedSense: Pinging failed to many times. Disabling Upload SpeedSense."
     IDS_USSTRACEFAILDIS     "UploadSpeedSense: Tracerouting failed to many times. Disabling Upload SpeedSense."
-    IDS_USSPINGERPINGREPLY  "UploadSpeedSense: Reply from %s: bytes=%d time=%ldms TTL=%i"
+    IDS_USSPINGERPINGREPLY  "Reply (ICMP-pinger) from %s: bytes=%d time=%3.2fms (%3.2fms %ldms) TTL=%i""
     IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() failed, err: %d\n"
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() failed: Unable to locate ICMP.DLL!"
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() failed for at least one function."
-    IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() failed, err: "
-    IDS_USSPINGERICMPENDERR "Error closing ICMP handle, err: "
+    IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() failed, err: %u"
+    IDS_USSPINGERICMPENDERR "Error closing ICMP handle, err: %u"
     IDS_REMULREASON         "%s: Removing client from upload list. Reason: %s"
 END
 

@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.42e MorphXT v2.5
+--------------------------------------
+MERGED : Code merged to 0.42e [SiRoB]
+FIXED  : Not identified client will not get anymore PS or FS [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.42d MorphXT v2.4
 --------------------------------------
 FIXED  : Systray Fix to avoid all the schedulable parameter to not correctly be saved at shutdown [SiRoB]

@@ -1,8 +1,371 @@
 	CHANGELOG FOR EMULE
 	===================
+
+v0.42e
+----------------------
+- April 1st,2004     -
+----------------------
+Ornis: reduced javascript dependence on webinterface templates
+
+----------------------
+- Mar 31th, 2004     -
+----------------------
+bluecow: Added Paste command for ed2k file/server links to Transfer and Server window context menus.
+bluecow: Fixed memory leak in Kad packet parsing [thx bzubzu.]
+
+----------------------
+- Mar 30th, 2004     -
+----------------------
+bluecow: Fixed security exploit in IRC module and Web server [thx DonDiego]
+
+----------------------
+- Mar 29th, 2004     -
+----------------------
+bluecow: Add seperate dialog for "Paste eD2K Links" function (prev. called as 'Direct Download'). Dialog can be invoked from Tools menu or eMule context menu.
+bluecow: Added MLdonkey compatible client tag recognition.
+
+----------------------
+- Mar 28th, 2004     -
+----------------------
+bluecow: Fixed crash bug with selectively deleting of expanded search results.
+Ornis:   on category creation, if the edit dialog is canceled, no category will be created
+
+----------------------
+- Mar 27th, 2004     -
+----------------------
+bluecow: Added support for new eserver 16.45 UDP description packet.
+
+----------------------
+- Mar 25th, 2004     -
+----------------------
+Ornis: fixed security risk in the webserver [thx4hint2 MKThunderStorm]
+bluecow: Added syntax coloring for search name (expression) control.
+Unk: /topic and /msg now works with the IRC.
+Unk: Changed some of how complete sources is determined..
+ - Complete files will now show better complete numbers.
+ - Somehow dead files continued to show many complete sources? This should correct itself as people upgrade.
+
+----------------------
+- Mar 24th, 2004     -
+----------------------
+bluecow: Added some error/help messages for invalid Kad search expressions.
+
+----------------------
+- Mar 23th, 2004     -
+----------------------
+bluecow: Filename detail dialog, shows system file icons for remote client's filenames.
+
+----------------------
+- Mar 21th, 2004     -
+----------------------
+bluecow: Fixed some minor bugs in ed2k searches related to comparison operators.
+bluecow: Added more comparison operators to Kad search expression evaluation.
+
+----------------------
+- Mar 20th, 2004     -
+----------------------
+bluecow: Added a set of additional search parameters (Complete sources, Length, Bitrate, Codec, Title, Album, Artist)
+Ornis:   Preferences/Display: Option to clear or disable autocompletion boxes (search-name, servermet-urls, ipfilter-urls). Disabling takes full effect after restart.
+
+----------------------
+- Mar 19th, 2004     -
+----------------------
+bluecow: Webservices are split into file based and general URLs. General URLs are shown only in Tools/Links.
+
+----------------------
+- Mar 18th, 2004     -
+----------------------
+bluecow: Fixed crash bug with downloading of already downloaded files which were already in known file list.
+
+----------------------
+- Mar 16th, 2004     -
+----------------------
+bluecow: Fixed bug with recovering block requests of compressed packets after a zstream error occured.
+
+----------------------
+- Mar 15th, 2004     -
+----------------------
+bluecow: Added 'Active download time' stats for part files which shows the amount of time the file was active in download queue.
+bluecow: Added: Completed files are republished to servers to update the 'complete sources' info.
+bluecow: Fixed bug with reloading of shared files where just completed and externaly removed/renamed files still showed up.
+
+----------------------
+- Mar 14th, 2004     -
+----------------------
+bluecow: Fixed possible mem leak with OP_REQUESTPARTS message. [thx eklmn]
+bluecow: Added support for integer media length eD2K tag for servers and clients. [thx lugdunummaster]
+bluecow: Added publishing of basic file status (complete/incomplete) to servers.
+bluecow: Added: Nr. of complete sources returned from servers are shown with availability data in search result list.
+bluecow: Added: Viewing shared files of remote clients also transferes the nr. of complete sources.
+unk: IRC now remembers your last nick.
+unk: Added a couple more IRC info message options.
+
+----------------------
+- Mar 13th, 2004     -
+----------------------
+bluecow: Added customizable preview commands (new config file PreviewApps.dat)
+
+----------------------
+- Mar 7th, 2004      -
+----------------------
+bluecow: Verbose options are disabled and not shown by default. To enable the verbose options specify "VerboseOptions=1" in "eMule" section in preferences.ini.
+bluecow: Fixed bug with processing of remote preview answer.
+bluecow: Fixed bug in IRC property page; "Load channel list on connect" option was missing.
+bluecow: Removed "ResizableLib" from source tree. Donwload the library at http://sourceforge.net/projects/resizablelib/
+
+v0.42d
+----------------------
+- Mar 7th, 2004      -
+----------------------
+.: Fixed bug which let eMule crash when there is too much load on the UDP Socket
+
+v0.42c
+----------------------
+- Mar 5th, 2004      -
+----------------------
+bluecow: Fixed rehashing on change of Daylight Saving Time (DST) [MightyKnife]. To disable this patch, add "AdjustNTFSDaylightFileTime=0" in "[eMule]" section in preferences.ini file.
+
+----------------------
+- Mar 3rd, 2004      -
+----------------------
+bluecow: Fixed bug with colors and known-type in searchlist control after files were canceled and/or added/removed from share.
+bluecow: Fixed bug with sorting by category in download listview.
+Unk: USS will temporarly be limited to a minimum of 10K until we correct a couple issues at lower speeds.
+
+----------------------
+- Mar 2nd, 2004      -
+----------------------
+bluecow: Fixed bug in UDP socket with ReaskFilePing which was not answered for files in most cases
+bluecow: Fixed bug in IP filter; adjacent ranges with different levels were merged.
+Unk: IRC now handles sound events. (/sound [*.wav] [message]) (Sounds are stored in "../eMule/Sounds/IRC" dir)
+Unk: Fix KadID bug which created some clusters and reported bad user counts..
+
+----------------------
+- Mar 1st, 2004     -
+----------------------
+Unk: Packets for the UDP socket send queue now have a lifetime now to keep from creating a backlog of packets. 
+
+----------------------
+- Feb 29th, 2004     -
+----------------------
+Ornis: fixed a bug, that resumed 2 (instead of 1) files for the function "start next paused file, when a files completes"
+Ornis: correction in the statistics for source-type passive - and several minor GUI fixes
+bluecow: fixed invoking the comment page
+Ornis: fixed Chicane webinterface template, to be able to start downloads from searchresults
+Unk: Fixed a IRC crash bug thanks to reports from several irc ops..
+Unk: Fixed the IRC Accept links from friends only option.
+Unk: IRC default name gets a pseudo random nick on connect to avoid nick collisions.
+Unk: Extra IRC filter options.
+
+----------------------
+- Feb 28th, 2004     -
+----------------------
+bluecow: Fixed flaw in exception handling which did not immediatly disconnect a client which sends invalid file data packets.
+bluecow: Fixed bug in UDP socket with processing of a received file status.
+bluecow: Fixed several flaws in Kad window with connect and bootstrap function/buttons.
+Unk: Put back ping info for USS and small adjustment to USS - zz
+Unk: Removed some debug info in the upload bars
+
+v0.42b
+----------------------
+- Feb 28th, 2004     -
+----------------------
+Unk: Hotfix for keyword publishing..
+
+v0.42a
+----------------------
+- Feb 27th, 2004     -
+----------------------
+Ornis: Several minor corrections on the GUI
+
+----------------------
+- Feb 22th, 2004     -
+----------------------
+bluecow: Several changes and optimizations to verbose log options.
+Unk: Hopefully reduced keyword overhead some more by only publishing complete files.
+
+----------------------
+- Feb 21th, 2004     -
+----------------------
+bluecow: Added new connection state icon showing seperate eD2K and Kad network connection state and seperate LowID/HighID.
+
+----------------------
+- Feb 20th, 2004     -
+----------------------
+bluecow: Added new AVI file parsing code for getting attributes in File Info dialog.
+bluecow: Added a thread for getting audio/video attributes of multiple files when using File Info dialog.
+
+----------------------
+- Feb 19th, 2004     -
+----------------------
+bluecow: Added optional support for MediaInfoLib (http://mediainfo.sourceforge.net) for viewing audio/video attributes of part and shared files. This feature is optional and will only be used if version 0.4.0.1 of MediaInfoLib (MediaInfo.DLL) is copied to eMule application folder.
+
+----------------------
+- Feb 18th, 2004     -
+----------------------
+bluecow: Added merging of audio/video attributes in File Info dialog. All audio/video attributes from all selected (part) files are merged to verify if selected files are of same audio/video format.
 	
 ----------------------
-- Jan 05th, 2003     -
+- Feb 16th, 2004     -
+----------------------
+bluecow: Added new column to search results showing local file info.
+
+----------------------
+- Feb 15th, 2004     -
+----------------------
+bluecow: Search type or shared files list request is shown in each search results tab.
+bluecow: Added automatic creation of 'downloads.txt' file in eMule application folder. This file holds the current part file names and related ed2k links to recover more easily after lost part.met files.
+
+----------------------
+- Feb 14th, 2004     -
+----------------------
+bluecow: Windows thumbs.db files with missing system file attribute are no longer shared.
+bluecow: Thoroughly handling of max. nick name length.
+
+----------------------
+- Feb 12th, 2004     -
+----------------------
+bluecow: Tweaked tab controls in server window/chat window to show unread log/chat messages.
+
+----------------------
+- Feb 10th, 2004     -
+----------------------
+bluecow: Added caching of webservices menu entries.
+bluecow: Fixed multi threading issue with file completion.
+bluecow: Fixed some problems with duplicate entries in known file list and shared file list.
+
+----------------------
+- Feb 9th, 2004      -
+----------------------
+bluecow: Added a lot of protocol logging and debugging code.
+bluecow: Several optimizations in processing search expressions for keyword index.
+bluecow: Reworked UDP socket exception handling.
+Unk: Split source and keyword indexing to allow specific tweaking later.
+
+----------------------
+- Feb 6th, 2004      -
+----------------------
+bluecow: Added more logging options in Extended Settings.
+Unk: Kad now allows smaller local networks if you turn off LANIP filtering. (This should only be used for debuging and testing)
+Unk: A lot of Kad has been converted to use CSafeMemFile.. To finish converting all, we need to convert the Kad's Tags and Kad's Taglist to work with it..
+Unk: When duplicates are found in the KnownFileList, the stats are now merged..
+
+----------------------
+- Feb 4th, 2004      -
+----------------------
+bluecow: Reworked internal storage of preferences.
+bluecow: Fixed bug with downloads added from search result in paused mode which dropped possible found sources.
+unk: Redid the knownfilelist.. Before you could have multi entires.
+
+----------------------
+- Feb 3nd, 2004      -
+----------------------
+bluecow: Fixed bug with Kad keyword publishing list due to renaming a shared file which was completed in current session.
+
+----------------------
+- Feb 2nd, 2004      -
+----------------------
+bluecow: Fixed bug in Kad search with implicit ANDed search expressions.
+. :	Merging of the extended trayicon menue [eMule+]
+
+----------------------
+- Feb 1st, 2004      -
+----------------------
+bluecow: Reworked IP filter
+- Optimized IP filter lookup for less CPU load.
+- Optimized loading of IP filter files.
+- Added merge of overlapping and adjacent filter ranges.
+- More safety in determining format of IP filter files (support for eMule IP filter and PeerGuardian file formats).
+- More tolerance in eMule IP filter format files (level and description is now optional).
+- Added IP filter dialog for basic editing and viewing IP filters (accessible via Tool menu).
+- Added IP filter rule hit statistics.
+Unk: Fixed a bug in the UDP port that resent UDP packets to dead clients.
+
+----------------------
+- Jan 29th, 2004     -
+----------------------
+Unk: Major rewrite of the Kad code..
+ - Kad is now part of eMule's thread so we don't have to worry about Sync issues.
+ - Although many will say that this is a performance loss, I feel the the simplification of the code out ways this.
+ - Kad will now use eMule's UDP port (And eMule's TCP port in the future) instead of their own.
+
+----------------------
+- Jan 27th, 2004     -
+----------------------
+bluecow: New data (packet + files) processing code for less CPU load.
+
+----------------------
+- Jan 25th, 2004     -
+----------------------
+Unk: Fixed a few issues that occured when a partfile became a complete file.
+
+----------------------
+- Jan 22th, 2004     -
+----------------------
+bluecow: Fixed bug with wrong category directory shown for new created downloads.
+bluecow: Fixed printf-flaw with category directories.
+bluecow: Fixed problem with empty file data packets which could corrupt the gap list.
+bluecow: Fixed timing issue in PerfLog module.
+bluecow: Fixed statistics bug with ICH in download session category.
+
+----------------------
+- Jan 19th, 2004     -
+----------------------
+bluecow: Fixed: If the very first downloaded part of a file was recovered by ICH, the file was though not shared until another part was completed without ICH.
+Unk: Incoming ExtendedFileInfo was done without checking the version number.
+ - This fix seems to have found that a couple older eMule Mods and Shareaza (And maybe a some other mods) are sending the wrong version number here.
+ - They say they support the ExtendedFileInfo which makes us send the our info, but they in return do not send it to us when we are expecting it..
+Unk: A part of the ED2K protocol has been redone into a eMule protocol. This allows us to do several ED2K type packets with just one packet hopeing to save overhead.
+Unk: The UDP file reask now updates the FileStatus and it transmits all the ExtendedFileInfo.
+Unk: File reasks have been extended for less overhead.
+Unk: Source exchange times have been adjusted for less overhead. (May have to set the received source request time check back to older values so older clients don't suffer. Needs testing.)
+
+----------------------
+- Jan 17th, 2004     -
+----------------------
+Unk: The switch for processing sources for a download had some fall through bugs.
+Unk: There was a bug the allowed the client to send a UDP and TCP file reask at the same time.
+Unk: NNP sources was allowed to do a UDP reask which does not update our chunk info.. So, this was a wasted packet..
+Unk: It was possible (But unlikely) for the client to send a UDP reask to a client he has never done a TCP reask..
+Unk: AskForDownload() now returns a result so we know if the source was deleted.
+Unk: Only count sent Kad overhead that was actually sent, not queued or failed..
+Unk: Clients even without a valid file request could still get on the queue.
+Unk: There were three different methods creating a per file upload list. Some of them rebuilt this list each time needed. We now maintain an upload list per each client in real time to avoid this.
+ - Update: there is a bug that allows the same file to be in the KnownFileList.. This messes up this real time management..
+ - For the moment, there is a debug code in the client the saves from creating dangling pointers..
+ - This code will be removed once we fix the issues..
+Unk: Source exhange for a complete file is now like part files, you only send sources that has chunks the user needs.
+
+----------------------
+- Jan 15th, 2004     -
+----------------------
+Ornis: IPFilter - file can be now in peerguardian-format as well
+Ornis: Preferences/Security: option to download the ipfilter-file from an URL
+Ornis: Fix: Handling of deleting files, which are currently into diskspace allocation
+bluecow: View Shared Files command of remote clients is disabled if client published that he does not support that feature.
+bluecow: Fixed bug in viewing shared files from remote client - shared part files were not shown.
+bluecow: Reduced memory usage of client instances #2.
+bluecow: Fixed Kad UDP socket usage to avoid loss of packets to send.
+bluecow: Optimized client listview controls for less CPU load.
+bluecow: Fixed several flaws in context menus, shortcuts and usage of middle mouse button.
+Unk: Try to filter self sources better.
+Unk: We receive all incoming Kad sources now. (Was a bug that blocked them if the file got a lot of sources from a server or source exchange)
+Unk: Again LowID Callbacks were messing up because of Kad and ED2K states. This is now checked more closly.
+Unk: Nodal searches for publishing extended to allow full publish. Nodal searches for sources is lessened to reduce overhead with very rare files.
+
+----------------------
+- Jan 10th, 2004     -
+----------------------
+bluecow: Some changes for more proper Winsock initialisation and termination.
+bluecow: Fixed and added some statistics for file data transfer.
+Unk: Nodal lookups are now deleted with a delay when allowed. In other words, we try not to waste delayed incoming result packets.
+Unk: There is a bug with the experation timer to Nodal lookups when you exhausted all pending contacts.
+Unk: Keyword republishing is delayed longer to lower overhead.
+
+
+0.41b.29 release
+----------------------
+- Jan 05th, 2004     -
 ----------------------
 bluecow: Fixed several flaws in client and server overhead computation. (Note: You will see somehow increased overhead).
 bluecow: Added Kademlia overhead statistics.
@@ -12,7 +375,7 @@ bluecow: Fixed bug server connection duration statistics [Gnaddelwarz]
 Unk: We delay publishing keywords to avoid spamming network with users that only stay connected for a very short time.
 
 ----------------------
-- Jan 04th, 2003     -
+- Jan 04th, 2004     -
 ----------------------
 bluecow: Added thread safe synchronous command processing to Kad listener socket.
 bluecow: Added explicit removing of file block requests for disconnected client to avoid file completion problems.
