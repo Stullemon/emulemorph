@@ -317,14 +317,13 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1){
 		//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-		uint8* thisStatus;
-		if(m_PartStatus_list.Lookup(reqfile, thisStatus)){
-			if (thisStatus){
-				delete[] thisStatus;
-				if (thisStatus==m_abyPartStatus)
-					m_abyPartStatus = NULL;
-				m_PartStatus_list[reqfile] = NULL;
-			}
+		uint8* thisStatus = NULL;
+		m_PartStatus_list.Lookup(reqfile, thisStatus);
+		if(thisStatus){
+			delete[] thisStatus;
+			if (thisStatus==m_abyPartStatus)
+				m_abyPartStatus = NULL;
+			m_PartStatus_list.RemoveKey(reqfile);
 		}
 		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+
 		if (m_abyPartStatus){
@@ -372,14 +371,13 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	data.Read(&nED2KPartCount,2);
 	
 	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
-	uint8* thisStatus;
-	if(m_PartStatus_list.Lookup(reqfile, thisStatus)){
-		if (thisStatus){
-			delete[] thisStatus;
-			if (thisStatus==m_abyPartStatus)
-				m_abyPartStatus = NULL;
-			m_PartStatus_list[reqfile] = NULL;
-		}
+	uint8* thisStatus = NULL;
+	m_PartStatus_list.Lookup(reqfile, thisStatus);
+	if(thisStatus){
+		delete[] thisStatus;
+		if (thisStatus==m_abyPartStatus)
+			m_abyPartStatus = NULL;
+		m_PartStatus_list.RemoveKey(reqfile);
 	}
 	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
 		
@@ -1241,8 +1239,9 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 		theApp.emuledlg->transferwnd.downloadlistctrl.AddSource(SwapTo,this,false);
 
 		//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
-		uint8* thisStatus;
-		if (m_PartStatus_list.Lookup(SwapTo, thisStatus))
+		uint8* thisStatus = NULL;
+		m_PartStatus_list.Lookup(SwapTo, thisStatus);
+		if (thisStatus)
 		{
 			m_abyPartStatus = thisStatus;
 			m_nPartCount = SwapTo->GetPartCount();
@@ -1318,7 +1317,8 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 		return false;
 
 	CPartFile* pSwap = NULL;
-	
+	POSITION finalpos = NULL;
+
 	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
 	{
 		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
@@ -1340,14 +1340,21 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 			if (cur_file->ForceAllA4AF()) {
 				pSwap = cur_file;
+				finalpos = pos;
 				continue;
 			}
-			else if (!pSwap)
+			else if (!pSwap){
 				pSwap = cur_file;
-			else if (pSwap->GetDownPriority() < cur_file->GetDownPriority())
+				finalpos = pos;
+			}
+			else if (pSwap->GetDownPriority() < cur_file->GetDownPriority()){
 				pSwap = cur_file;
-			else if (!byPriorityOnly && pSwap->GetDownPriority() == cur_file->GetDownPriority() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
+				finalpos = pos;
+			}
+			else if (!byPriorityOnly && pSwap->GetDownPriority() == cur_file->GetDownPriority() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount()){
 				pSwap = cur_file;
+				finalpos = pos;
+			}
 		}
 	}
 
@@ -1371,9 +1378,11 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 			}
 		}
 
-		DoSwap(pSwap, false, 0);
-
-		return true;
+		if(DoSwap(pSwap, false, 0)){
+			m_OtherRequests_list.RemoveAt(finalpos);
+			finalpos = pos;
+			return true;
+		}
 	}
 	
 	return false;
@@ -1398,6 +1407,7 @@ bool CUpDownClient::StackA4AFSources()
 	uint8 iCategory = reqfile->GetCategory();
 
 	CPartFile* pSwap = NULL;
+	POSITION finalpos = NULL;
 
 	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos)) {
 		CPartFile* cur_file = m_OtherRequests_list.GetAt(pos);
@@ -1420,14 +1430,21 @@ bool CUpDownClient::StackA4AFSources()
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 			if (cur_file->ForceAllA4AF()) {
 				pSwap = cur_file;
+				finalpos = pos;
 				continue;
 			}
-			else if (!pSwap)
+			else if (!pSwap){
+                pSwap = cur_file;
+				finalpos = pos;
+			}
+			else if (pSwap->GetCatResumeOrder() > cur_file->GetCatResumeOrder()){
 				pSwap = cur_file;
-			else if (pSwap->GetCatResumeOrder() > cur_file->GetCatResumeOrder())
+				finalpos = pos;
+			}
+			else if (pSwap->GetCatResumeOrder() == cur_file->GetCatResumeOrder() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount()){
 				pSwap = cur_file;
-			else if (pSwap->GetCatResumeOrder() == cur_file->GetCatResumeOrder() && pSwap->GetAvailableSrcCount() > cur_file->GetAvailableSrcCount())
-				pSwap = cur_file;
+				finalpos = pos;
+			}
 		}
 	}
 
@@ -1449,9 +1466,11 @@ bool CUpDownClient::StackA4AFSources()
 		}
 		}
 		
-		DoSwap(pSwap, false, 1);
-
-		return true;
+		if(DoSwap(pSwap, false, 1)){
+			m_OtherRequests_list.RemoveAt(finalpos);
+			finalpos = pos;
+			return true;
+		}
 	}
 	
 	return false;
@@ -1471,6 +1490,7 @@ bool CUpDownClient::SwapToForcedA4AF()
 		return false;
 
 	bool swapToFA4AF = false;
+	POSITION finalpos = NULL;
 
 	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos != NULL; m_OtherRequests_list.GetNext(pos))
 	{
@@ -1480,15 +1500,19 @@ bool CUpDownClient::SwapToForcedA4AF()
 				(cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY) &&
 				(theApp.glob_prefs->GetMaxSourcePerFileSoft() > cur_file->GetSourceCount() || !theApp.glob_prefs->RespectMaxSources()))
 		{		
-			if (cur_file == pForcedA4AF)
+			if (cur_file == pForcedA4AF){
+				finalpos = NULL;
 				swapToFA4AF = true;
+			}
 		}
 	}
 
 	if (swapToFA4AF)
 	{
-		DoSwap(pForcedA4AF, false, 2);
-		return true;
+		if (DoSwap(pForcedA4AF, false, 2)){
+			m_OtherRequests_list.RemoveAt(finalpos);
+			return true;
+		}
 	}
 	return false;
 }

@@ -113,6 +113,9 @@ void CUpDownClient::Init(){
 	m_nPartCount = 0;
 	m_nUpPartCount = 0;
 	m_abyPartStatus = 0;
+	//MORPH START - Added by SiRoB, HotFix related to khaos::kmod+ 
+	m_PartStatus_list.RemoveAll();
+	//MORPH END   - Added by SiRoB, HotFix related to khaos::kmod+
 	m_abyUpPartStatus = 0;
 	m_dwLastAskedTime = 0;
 	m_nDownloadState = DS_NONE;
@@ -234,9 +237,9 @@ CUpDownClient::~CUpDownClient(){
 	while (pos)
 	{
 		m_PartStatus_list.GetNextAssoc(pos, curFile, curPS);
+		delete[] curPS;
 		if (curPS == m_abyPartStatus)
 			m_abyPartStatus = NULL;
-		delete[] curPS;
 	}
 	m_PartStatus_list.RemoveAll();
 	// khaos::kmod-
@@ -1092,7 +1095,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 		socket = new CClientReqSocket(theApp.glob_prefs,this);
 		if (!socket->Create()){
 			socket->Safe_Delete();
-			return true;
+			return false; //Fix
 		}
 	}
 	else if (!socket->IsConnected()){
@@ -1100,7 +1103,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 		socket = new CClientReqSocket(theApp.glob_prefs,this);
 		if (!socket->Create()){
 			socket->Safe_Delete();
-			return true;
+			return false; //Fix
 		}
 	}
 	else{
