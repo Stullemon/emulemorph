@@ -3,7 +3,16 @@ Changelog for eMule 0.44d MorphXT v5.x
 --------------------------------------
 FIXED  : Credit file priority load has been corrected [SiRoB]
 FIXED  : Systray icone didn't display the speed bar in some case [Commander]
-FIXED  : Official Web Template can be used now and get also the nice stat view [SiRoB]
+FIXED  : Official Web Template can be used now [SiRoB]
+FIXED  : Powershared client in uploadinglist are correctly sorted when other client lose this state [SiRoB]
+
+ADDED  : Show permission: default state display in sharedfile window [SiRoB]
+ADDED  : Import Parts from SR13 [SiRoB]
+
+CHANGED: USS: Trickle datarate is now 0.5kB/s for low speed datarate [SiRoB]
+CHANGED: USC: Try to open new slot smoothly [SiRoB]
+
+NOTE   : For win2k user you can have 256 colors systray display by patching your explorer.exe
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.8
