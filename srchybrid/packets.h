@@ -26,7 +26,12 @@ public:
 	Packet(CMemFile* datafile,uint8 protocol = OP_EDONKEYPROT);
 	// -khaos--+++> For use in upload statistics... Optional var, shouldn't affect anything.
 	Packet(int8 in_opcode,int32 in_size,uint8 protocol = OP_EDONKEYPROT,bool bFromPF = true);
+	//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
+	Packet(char* pPacketPart, uint32 nSize, bool bFromPF);
+	/*
 	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPF = true); // only used for splitted packets!
+	*/
+	//Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
 	// <-----khaos-
 	~Packet();
 	char*	GetHeader();
@@ -34,8 +39,12 @@ public:
 	char*	GetPacket();
 	char*	DetachPacket();
 	uint32	GetRealPacketSize()		{return size+6;}
+	//Morph Start - removed by AndCycle, ZZ Upload System 20040106-1735
+	/*
 	bool	IsSplitted()			{return m_bSplitted;}
 	bool	IsLastSplitted()		{return m_bLastSplitted;}
+	*/
+	//Morph End - removed by AndCycle, ZZ Upload System 20040106-1735
 	void	PackPacket();
 	bool	UnPackPacket(UINT uMaxDecompressedSize = 50000);
 	char*	pBuffer;

@@ -834,6 +834,7 @@ void CDownloadQueue::Process(){
 
 	uint32 downspeed = 0;
 
+	// ZZ:UploadSpeedSense -->
     // Enforce a session ul:dl ratio of 1:3 no matter what upload speed.
     // The old ratio code is only used if the upload-queue is empty.
     // If the queue is empty, the client may not have gotten enough
@@ -865,6 +866,7 @@ void CDownloadQueue::Process(){
 		else if (downspeed > 200)
 			downspeed = 200;
 	}
+	// ZZ:UploadSpeedSense <--
 
     uint32 friendDownspeed = downspeed;
 
@@ -872,30 +874,30 @@ void CDownloadQueue::Process(){
         // has this client downloaded more than it has uploaded this session? (friends excluded)
         // then limit its download speed from all clients but friends
         // limit will be removed as soon as upload has catched up to download
-	
-        if(theApp.stat_sessionReceivedBytes/3 > theApp.stat_sessionSentBytes && 
+        if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes-theApp.stat_sessionSentBytesToFriend) &&
            datarate > 1500) {
+	
             // calc allowed dl speed for rest of network (those clients that don't have
             // friend slots. Since you don't upload as much to them, you won't be able to download
             // as much from them. This will only be lower than friends speed if you are currently
             // uploading to a friend slot, otherwise they are the same.
-            uint32 secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-theApp.stat_sessionSentBytes)/(theApp.uploadqueue->GetToNetworkDatarate()+1);
-          uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
 
- 			//MORPH END   - Changed by IceCream, Increase the ZZ upload:download ratio from 1:3 to 1:4 [IceCream]
+            uint32 secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-(theApp.stat_sessionSentBytes-theApp.stat_sessionSentBytesToFriend))/(theApp.uploadqueue->GetToNetworkDatarate()+1);
+            uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
+
            if(downspeed == 0 || tempDownspeed < downspeed) {
                 downspeed = tempDownspeed;
                 //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
 		   }
-		   }
+		}
 
         // has this client downloaded more than it has uploaded this session? (friends included)
         // then limit its download speed from all friends
         // limit will be removed as soon as upload has catched up to download
-
-		if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend) &&
+        if(theApp.stat_sessionReceivedBytes/3 > (theApp.stat_sessionSentBytes) &&
            datarate > 1500) {
-            float secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-(theApp.stat_sessionSentBytes + theApp.stat_sessionSentBytesToFriend))/(theApp.uploadqueue->GetDatarate()+1);
+
+            float secondsNeededToEvenOut = (theApp.stat_sessionReceivedBytes/3-theApp.stat_sessionSentBytes)/(theApp.uploadqueue->GetDatarate()+1);
 			uint32 tempDownspeed = max(min(3*100/max(secondsNeededToEvenOut, 1), 200), 30);
 
 			if(friendDownspeed == 0 || tempDownspeed < friendDownspeed) {
@@ -906,24 +908,32 @@ void CDownloadQueue::Process(){
 
 	uint32 datarateX=0;
 	udcounter++;
+
+	//filelist is already sorted by prio, therefore I removed all the extra loops..
 	for (POSITION pos =filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
 		CPartFile* cur_file =  filelist.GetAt(pos);
-		if ((cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY) && cur_file->GetDownPriority() == PR_HIGH){
+		if ((cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY)/* && cur_file->GetDownPriority() == PR_HIGH*/){
 			datarateX += cur_file->Process(downspeed, udcounter, friendDownspeed);
 		}
+		else{
+			//This will make sure we don't keep old sources to paused and stoped files..
+			cur_file->StopPausedFile();
+		}
 	}
-	for (POSITION pos =filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
+
+/*	for (POSITION pos =filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
 		CPartFile* cur_file =  filelist.GetAt(pos);
 		if ((cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY) && cur_file->GetDownPriority() == PR_NORMAL){
-			datarateX += cur_file->Process(downspeed, udcounter, friendDownspeed);
+			datarateX += cur_file->Process(downspeed,udcounter);
 		}
 	}
 	for (POSITION pos =filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
 		CPartFile* cur_file =  filelist.GetAt(pos);
-		if ((cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY) && (cur_file->GetDownPriority() == PR_LOW || cur_file->GetDownPriority() == PR_AUTO )){
-			datarateX += cur_file->Process(downspeed, udcounter, friendDownspeed);
+		if ((cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY) && (cur_file->GetDownPriority() == PR_LOW)){
+			datarateX += cur_file->Process(downspeed,udcounter);
 		}
 	}
+*/
     datarate = datarateX;
 
 	if (udcounter == 5){
@@ -1906,7 +1916,12 @@ void CDownloadQueue::ProcessLocalRequests()
 		{
 			// create one 'packet' which contains all buffered OP_GETSOURCES eD2K packets to be sent with one TCP frame
 			// server credits: 16*iMaxFilesPerTcpFrame+1 = 241
+			//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
+			Packet* packet = new Packet(new char[iSize], dataTcpFrame.GetLength(), false);
+			/*
 			Packet* packet = new Packet(new char[iSize], dataTcpFrame.GetLength(), true, false);
+			*/
+			//Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
 			dataTcpFrame.Seek(0, CFile::begin);
 			dataTcpFrame.Read(packet->GetPacket(), iSize);
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);

@@ -321,6 +321,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		allowedDataRate = theApp.lastCommonRouteFinder->GetUpload();
 	    
+        uint32 minFragSize = allowedDataRate / 50;
+        if(minFragSize < 50) {
+            minFragSize = 50;
+        } else if(minFragSize > 2800) {
+            minFragSize = 2800;
+        }
+
 		const DWORD thisLoopTick = ::GetTickCount();
 		timeSinceLastLoop = thisLoopTick - lastLoopTick;
 		if(timeSinceLastLoop > 1*1000) {
@@ -353,7 +360,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		tempQueueLocker.Unlock();
 	    
 		// Send any queued up control packets first
-		while(bytesToSpend > 0 && spentBytes+MINFRAGSIZE <= (uint64)bytesToSpend && !m_ControlQueue_list.IsEmpty()) {
+        while(bytesToSpend > 0 && spentBytes+minFragSize <= (uint64)bytesToSpend && !m_ControlQueue_list.IsEmpty()) {
 			CEMSocket* socket = m_ControlQueue_list.RemoveHead();
 
 			if(socket != NULL) {
@@ -368,12 +375,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			CEMSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 
 			if(socket != NULL) {
-				//Morph Start, changed by AndCycle, add up define for trickle client datarate
-				//if((thisLoopTick-socket->GetLastCalledSend())*1000 > (MINFRAGSIZE*1000*1000)/512) {//original
-				if((thisLoopTick-socket->GetLastCalledSend()) > MINFRAGSIZE*1000/TRICKLE_CLIENT_DATARATE) {
-				//Morph End, changed by AndCycle, add up define for trickle client datarate
+                if((thisLoopTick-socket->GetLastCalledSend())*1000 > (minFragSize*1000*1000)/512) {
 					// trickle
-					SocketSentBytes socketSentBytes = socket->Send(MINFRAGSIZE);
+                    SocketSentBytes socketSentBytes = socket->Send(minFragSize);
 					spentBytes += socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 					spentOverhead += socketSentBytes.sentBytesControlPackets;
 				}
@@ -383,13 +387,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		}
 
 		// Any bandwidth that hasn't been used yet are used for the fully activated upload slots.
-		for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize() && bytesToSpend > 0 && spentBytes+MINFRAGSIZE <= (uint64)bytesToSpend; slotCounter++) {
+        for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize() && bytesToSpend > 0 && spentBytes+minFragSize <= (uint64)bytesToSpend; slotCounter++) {
 			CEMSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 
 			if(socket != NULL) {
 				bool firstLoop = true;
 				uint32 lastSpentBytes = 0;
-				while((lastSpentBytes > 0 || firstLoop == true) && bytesToSpend > 0 && spentBytes+MINFRAGSIZE <= (uint64)bytesToSpend) {
+                while((lastSpentBytes > 0 || firstLoop == true) && bytesToSpend > 0 && spentBytes+minFragSize <= (uint64)bytesToSpend) {
 					SocketSentBytes socketSentBytes = socket->Send(bytesToSpend-spentBytes);
 					lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 
@@ -409,14 +413,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		bytesToSpend -= spentBytes;
 
-		if(bytesToSpend < -((sint64)m_StandardOrder_list.GetSize()*MINFRAGSIZE)) {
-			sint64 newBytesToSpend = -((sint64)m_StandardOrder_list.GetSize()*MINFRAGSIZE);
+        if(bytesToSpend < -((sint64)m_StandardOrder_list.GetSize()*minFragSize)) {
+            sint64 newBytesToSpend = -((sint64)m_StandardOrder_list.GetSize()*minFragSize);
 
 			theApp.emuledlg->QueueDebugLogLine(false,"UploadBandwidthThrottler::RunInternal(): Overcharged bytesToSpend. Limiting negative value. Old value: %I64i New value: %I64i", bytesToSpend, newBytesToSpend);
 
 			bytesToSpend = newBytesToSpend;
-		} else if(bytesToSpend > MINFRAGSIZE) {
-			bytesToSpend = MINFRAGSIZE;
+        } else if(bytesToSpend > minFragSize) {
+            bytesToSpend = minFragSize;
 
 			m_highestNumberOfFullyActivatedSlots = m_StandardOrder_list.GetSize()+1;
 		}

@@ -86,6 +86,11 @@ protected:
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);
 
+	//Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
+    virtual void OnConnect(int nErrorCode);
+    virtual void OnConnectError(int nErrorCode) {};
+	//Morph End - added by AndCycle, ZZ Upload System 20040106-1735
+
 	uint8	byConnected;
 
 	// deadlake PROXYSUPPORT

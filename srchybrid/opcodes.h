@@ -86,6 +86,9 @@
 #define MAXCONPER5SEC			20	
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
+//Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
+#define	UPLOAD_LOW_CLIENT_DR	2400	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
+//Morph End - added by AndCycle, ZZ Upload System 20040106-1735
 #define	UPLOAD_CLIENT_DATARATE	3072	// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
 //MORPH START - Added by Yun.SF3, ZZ Upload System 20030807-1911
 #define MINNUMBEROFTRICKLEUPLOADS 0 /*Old 2*/
@@ -113,8 +116,6 @@
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 //MOPRH START - Added by SiRoB, ZZ Upload System 20030824-2238
 #define SESSIONAMOUNT			(10*1024*1024) // 10 Mbytes. "Try to send complete chunks" always sends this amount of data
-#define MINFRAGSIZE             2500/*512*/
-#define TRICKLE_CLIENT_DATARATE	(UPLOAD_CLIENT_DATARATE/6)
 //MOPRH END   - Added by SiRoB, ZZ Upload System 20030824-2238
 #define	MAXFRAGSIZE				1300
 #define EMBLOCKSIZE				184320

@@ -113,7 +113,9 @@ CEMSocket::CEMSocket(void){
     //m_latency_sum = 0;
     //m_wasBlocked = false;
 
-    m_currentPacket_is_controlpacket = false;
+	//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
+    m_currentPacket_is_controlpacket = true; // set to true, since default value of GetSockOpt(SO_SNDBUF) corresponds to this.
+    //Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
 	m_currentPackageIsFromPartFile = false;
 
     m_numberOfSentBytesCompleteFile = 0;
@@ -901,6 +903,20 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 }
 // end deadlake
 
+
+/**
+ * Does this socket want to send?
+ *
+ * @return true if the socket has something to send, false otherwise
+ */
+bool CEMSocket::HasQueues() {
+    sendLocker.Lock();
+    bool hasQueues = (sendbuffer != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty());
+    sendLocker.Unlock();
+
+    return hasQueues;
+}
+
 /**
  * Removes all packets from the standard queue that don't have to be sent for the socket to be able to send a control packet.
  *
@@ -921,6 +937,14 @@ void CEMSocket::TruncateQueues() {
 
     sendLocker.Unlock();
 }
+
+//Morph Start - added by AndCycle, ZZ Upload System 20040106-1735
+void CEMSocket::OnConnect(int nErrorCode){
+  CAsyncSocketEx::OnConnect(nErrorCode);
+  if (nErrorCode /*&& nErrorCode != WSAEHOSTUNREACH*/)
+      OnConnectError(nErrorCode);
+}
+//Morph End - added by AndCycle, ZZ Upload System 20040106-1735
 
 #ifdef _DEBUG
 void CEMSocket::AssertValid() const

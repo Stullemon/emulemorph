@@ -66,6 +66,19 @@ Packet::Packet(char* header){
 	prot = head->eDonkeyID;
 }
 
+//Morph Start - modified by AndCycle, ZZ Upload System 20040106-1735
+// -khaos--+++> Slightly modified for our stats uses...
+Packet::Packet(char* pPacketPart, uint32 nSize, bool bFromPF){
+	m_bFromPF = bFromPF;
+	m_bSplitted = false; // true
+	m_bPacked = false;
+	m_bLastSplitted = false;
+	tempbuffer = 0;
+	pBuffer = 0;
+	completebuffer = pPacketPart;
+	size = nSize-6;
+}
+/*//original
 // -khaos--+++> Slightly modified for our stats uses...
 Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// only used for splitted packets!
 	m_bFromPF = bFromPF;
@@ -77,6 +90,8 @@ Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// onl
 	completebuffer = pPacketPart;
 	size = nSize-6;
 }
+*/
+//Morph End - modified by AndCycle, ZZ Upload System 20040106-1735
 
 // -khaos--+++> Slightly modified for our stats uses...
 //				If m_bFromPF = true then packet was formed from a partfile
