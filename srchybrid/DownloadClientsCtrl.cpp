@@ -59,7 +59,6 @@ BEGIN_MESSAGE_MAP(CDownloadClientsCtrl, CMuleListCtrl)
 	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclkDownloadClientlist)
-	ON_WM_MEASUREITEM() //SLAHAM: ADDED [TPT] - New Menu Styles
 END_MESSAGE_MAP()
 
 void CDownloadClientsCtrl::Init()
@@ -451,6 +450,8 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			case 7:
 				if(client->Credits())
 				    Sbuffer.Format(_T("%.1f/%.1f"),client->credits->GetScoreRatio(client->GetIP()), client->credits->GetMyScoreRatio(client->GetIP()));
+				else
+					Sbuffer.Format(_T(""));
 				break;
 				//SLAHAM: ADDED Last Asked Counter =>
 			case 8:
@@ -809,17 +810,6 @@ void CDownloadClientsCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	//MORPH END - Added by Yun.SF3, List Requested Files
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-}
-//SLAHAM: ADDED [TPT] - New Menu Styles <=
-
-//SLAHAM: ADDED [TPT] - New Menu Styles =>
-void CDownloadClientsCtrl::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) 
-{
-	HMENU hMenu = AfxGetThreadState()->m_hTrackingMenu;
-	CMenu	*pMenu = CMenu::FromHandle(hMenu);
-	pMenu->MeasureItem(lpMeasureItemStruct);
-
-	CWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
 }
 //SLAHAM: ADDED [TPT] - New Menu Styles <=
 
