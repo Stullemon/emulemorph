@@ -212,8 +212,13 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(21), _T("Debug"));
 	#endif
 	}
-
 	m_banner.UpdateSize(); //Commander - Added: Preferences Banner [TPT]	
+	//MORPH START - Added by SiRoB, Adjust tabHeigh
+	CRect rectTab,rectClient;
+	pTree->GetWindowRect(rectTab);
+	GetClientRect(rectClient);
+	//MORPH END   - Added by SiRoB, Adjust tabHeigh
+	pTree->SetWindowPos(NULL,-1,-1,rectTab.Width(),rectClient.Height()-13,SWP_NOZORDER | SWP_NOMOVE);
 	UpdateCaption();
 }
 

@@ -1294,7 +1294,7 @@ BEGIN
     LTEXT           "Successfull/Requested:",IDC_STATIC,19,242,84,10
     LTEXT           "Is trusted OHCB sender:",IDC_STATIC,19,255,83,10
     LTEXT           "Static",IDC_TRUSTEDOHCBSENDER,110,255,197,8
-    ICON            "",IDC_COUNTRYFLAG,68,68,21,20
+    ICON            "",IDC_COUNTRYFLAG,68,68,20,20,NOT WS_VISIBLE
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
