@@ -1,7 +1,9 @@
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT
 ---------------------------------------- 
-FIXED: the wrong construction of the A4AF available part causing messageBox (invalide parameter) [SiRoB]
+FIXED  : the wrong construction of the A4AF available part causing messageBox (invalide parameter) [SiRoB]
+FIXED  : Default ShareOnlyTheNeed State not saved [SiRoB]
+FIXED  : Give access to Multiple Comment Changing [SiRoB]
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT 1.1
