@@ -2838,7 +2838,7 @@ void CPreferences::LoadPreferences(){
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
 	m_iKnownMetDays = ini.GetInt("KnownMetDays", 150);
-	if (m_iKnownMetDays = 0) m_iKnownMetDays = 150;
+	if (m_iKnownMetDays == 0) m_iKnownMetDays = 150;
 	// EastShare END - Added by TAHO, .met file control
 	isautodynupswitching=ini.GetBool("AutoDynUpSwitching",false);
 	m_bDateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
