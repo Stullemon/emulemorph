@@ -310,24 +310,50 @@ int CUpDownClient::GetFilePrioAsNumber() const
 	int filepriority = 10; // standard
 	if(GetUploadFileID() != NULL){ 
 		if(theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL){ 
-			switch(theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetUpPriority()){ 
-				case PR_VERYHIGH:
-					filepriority = 18;
-					break;
-				case PR_HIGH: 
-					filepriority = 9; 
+			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+				switch(theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetUpPriority()){ 
+				//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				// --> Moonlight: SUQWT - Changed the priority distribution for a wider spread.
+					case PR_VERYHIGH:
+						filepriority = 27;  // 18, 50% boost    <-- SUQWT - original values commented.
+						break;
+					case PR_HIGH: 
+						filepriority = 12;  // 9, 33% boost
+						break; 
+					case PR_LOW: 
+						filepriority = 5;   // 6, 17% reduction
+						break; 
+					case PR_VERYLOW:
+						filepriority = 2;   // 2, no change
+						break;
+					case PR_NORMAL: 
+						default: 
+						filepriority = 8;   // 7, 14% boost
 					break; 
-				case PR_LOW: 
-					filepriority = 6; 
+				// <-- Moonlight: SUQWT
+				//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				} 
+			}
+			else{
+				switch(theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetUpPriority()){ 
+					case PR_VERYHIGH:
+						filepriority = 18;
+						break;
+					case PR_HIGH: 
+						filepriority = 9; 
+						break; 
+					case PR_LOW: 
+						filepriority = 6; 
+						break; 
+					case PR_VERYLOW:
+						filepriority = 2;
+						break;
+					case PR_NORMAL: 
+						default: 
+						filepriority = 7; 
 					break; 
-				case PR_VERYLOW:
-					filepriority = 2;
-					break;
-				case PR_NORMAL: 
-					default: 
-					filepriority = 7; 
-				break; 
-			} 
+				} 
+			}
 		} 
 	} 
 //MORPH - Added by Yun.SF3, ZZ Upload System

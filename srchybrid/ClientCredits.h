@@ -131,8 +131,8 @@ public:
 	uint8	GetSecIDKeyLen()				{return m_nPublicKeyLen;}
 	CreditStruct* GetDataStruct()			{return m_pCredits;}
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	void	SaveUploadQueueWaitTime();		// Moonlight: SUQWT
-	void	ClearUploadQueueWaitTime();		// Moonlight: SUQWT
+	void    SaveUploadQueueWaitTime(int iKeepPct = 100);		// Moonlight: SUQWT
+	void	ClearUploadQueueWaitTime();							// Moonlight: SUQWT
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	void	ClearWaitStartTime();
 	void	AddDownloaded(uint32 bytes, uint32 dwForIP);

@@ -963,15 +963,16 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 }
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Save the wait times.
-void CClientCredits::SaveUploadQueueWaitTime() {
-	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = GetTickCount() - m_dwUnSecureWaitTime;
-	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = GetTickCount() - m_dwSecureWaitTime;
+void CClientCredits::SaveUploadQueueWaitTime(int iKeepPct) {
+	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = ((GetTickCount() - m_dwUnSecureWaitTime) / 100) * iKeepPct;
+	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = ((GetTickCount() - m_dwSecureWaitTime) / 100) * iKeepPct;
 	SetSecWaitStartTime(m_dwWaitTimeIP);
 }
 // Moonlight: SUQWT - Clear the wait times.
 void CClientCredits::ClearUploadQueueWaitTime() {
 	m_pCredits->nUnSecuredWaitTime = 0;
 	m_pCredits->nSecuredWaitTime = 0;
+	// Doing SaveUploadQueueWaitTime(0) should be reduced to something equivalent during compile.
 }
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT: Adjust to take previous wait time into account.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
