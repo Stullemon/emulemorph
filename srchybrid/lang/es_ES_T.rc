@@ -1822,6 +1822,29 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
+                            "Importación cancelada: No se puede importar a un archivo completado."
+    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
+                            "Importación cancelada: hashset no completado para %s (%i hashes para %i partes)."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import cancelado: No se pudo abrir %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART 
+                            "Importando %i partes (de 0 a %i) a %s."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
+                            "Parte %i: saltada porque ya estaba completada."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Parte %i: importada."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Parte %i: importada para manejo de ICH."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
+                            "Parte %i: saltada, no cuadra con el bloque parcialmente completo."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH
+                            "Importación finalizada. %i partes fueron importadas a %s."
+    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
+                            "%i partes corruptas fueron importadas para A/ICH. Iniciando nuevo hash."
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
+                            "Otra importación ya está en proceso. Por favor espere a que haya terminado."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_WEBCACHE         "WebCaché"
 END
 
@@ -2239,17 +2262,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MORPH2_FILE         "Archivo"
-    IDS_MORPH2_SECURITY     "Seguridad"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_MORPH2_SERVER       "Servidor"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_MORPH_RFHA          "Informar de Actividades de Hashing"
     IDS_MORPH_RAIF          "Informar de Actividades en la lista de amigos"
     IDS_MORPH_KSSERV        "No eliminar servidores estáticos de la lista de servidores durante la ejecución"
@@ -2641,6 +2653,13 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Actualización del FAKES.DAT programada iniciada."
     IDS_SCHED_UPDATE_WARNING 
                             "No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana es más que suficiente."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FRIENDNAME_CHANGED1 "Amigo cambió su nombre: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
+    IDS_FRIENDNAME_CHANGED2 "Amigo cambió sy nombre: '%s'->'%s', hash %s"
+    IDS_FAILEDTOLOAD        "No se pudo cargar"
 END
 
 #endif    // Spanish (Castilian) resources
