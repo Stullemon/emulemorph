@@ -1314,7 +1314,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_CAPTION |
     WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "Convert Partfiles"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+FONT 8, "MS Sans Serif"
 BEGIN
     PUSHBUTTON      "&Add imports",IDC_ADDITEM,7,215,70,16,BS_FLAT
     PUSHBUTTON      "&Retry selected",IDC_RETRY,83,215,70,16,BS_FLAT
@@ -1332,6 +1332,144 @@ BEGIN
     GROUPBOX        "",IDC_CURJOB,7,7,434,49
     CONTROL         "",IDC_CONV_PB_CURRENT,"msctls_progress32",WS_BORDER,13,
                     31,419,15
+END
+
+                    48,419,15
+    PUSHBUTTON      "Retry",IDC_RETRY,83,215,70,16,BS_FLAT
+    LTEXT           "",IDC_JOBINFO,13,17,419,10
+    PUSHBUTTON      "Info && Explaination",IDC_CONV_EXPLAIN,297,215,87,16,
+                    BS_FLAT
+    PUSHBUTTON      "Remove",IDC_CONVREMOVE,156,215,70,16,BS_FLAT
+END
+
+IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 180
+STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
+EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Speed",IDC_SPEED,17,0,161,14,NOT WS_VISIBLE | WS_BORDER
+    LTEXT           "All to max",IDC_TOMAX,17,50,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Restore",IDC_RESTORE,17,148,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Connect to any server",IDC_CONNECT,17,84,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+    LTEXT           "Disconnect",IDC_DISCONNECT,17,99,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Exit",IDC_TRAYEXIT,17,165,161,14,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "Download:",IDC_DOWNLBL,32,18,43,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_DOWNSLD,"msctls_trackbar32",0x0,75,18,56,12
+    EDITTEXT        IDC_DOWNTXT,133,18,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    LTEXT           "Upload:",IDC_UPLBL,32,34,43,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_UPSLD,"msctls_trackbar32",0x0,75,34,56,12
+    EDITTEXT        IDC_UPTXT,133,34,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,163,162,1
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,114,162,1
+    LTEXT           "KB/s",IDC_DOWNKB,159,18,19,12,SS_CENTERIMAGE
+    LTEXT           "KB/s",IDC_UPKB,159,34,19,12,SS_CENTERIMAGE
+    LTEXT           "",IDC_SIDEBAR,0,0,16,180
+    ICON            "",IDC_TRAYDOWN,17,19,21,20
+    ICON            "",IDC_TRAYUP,17,35,21,20
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,82,162,1
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,15,161,1
+    LTEXT           "SUC:",IDC_MINUPLBL,32,65,43,12,SS_CENTERIMAGE
+    CONTROL         "",IDC_MINUPSLD,"msctls_trackbar32",0x0,75,65,56,12
+    EDITTEXT        IDC_MINUPTXT,133,65,24,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_TABSTOP
+    LTEXT           "KB/s",IDC_MINUPKB,159,65,19,12,SS_CENTERIMAGE
+    ICON            "",IDC_TRAYSUC,17,67,21,20
+    LTEXT           "Preference",IDC_PREFERENCES,17,116,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,17,146,162,1
+    LTEXT           "Reload Share",IDC_TRAYRELOADSHARE,17,131,161,14,NOT 
+                    WS_VISIBLE | WS_BORDER
+END
+
+IDD_PPG_MORPH DIALOGEX 0, 0, 230, 247
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Morph"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
+                    WS_BORDER | WS_TABSTOP,7,46,216,194
+    LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
+END
+
+IDD_PPG_MORPH2 DIALOGEX 0, 0, 230, 215
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Morph2"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,16,
+                    196,8
+    PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,135,53,81,14,BS_FLAT
+    EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,13,28,203,8,0,
+                    WS_EX_TRANSPARENT
+    PUSHBUTTON      "Update IPFilter.dat",IDC_UPDATEIPFURL,135,125,81,14,
+                    BS_FLAT
+    CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
+                    118,10
+    EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,109,202,12,ES_AUTOHSCROLL
+    LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,101,202,8,0,
+                    WS_EX_TRANSPARENT
+    EDITTEXT        IDC_LOWIDRETRY,114,156,22,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    LTEXT           "Low ID retries",IDC_LOWIDRETRYLABEL,22,159,85,8
+    GROUPBOX        "Server",IDC_STATIC,14,148,125,25,BS_FLAT
+    GROUPBOX        "File",IDC_STATIC,7,6,217,67,BS_FLAT
+    GROUPBOX        "Security",IDC_STATIC,7,76,217,69,BS_FLAT
+END
+
+IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Backup"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Select File Types to Backup",IDC_STATIC,7,7,213,91,
+                    BS_FLAT
+    GROUPBOX        "Auto Backup",IDC_STATIC,8,103,112,47,BS_FLAT
+    CONTROL         "Note:",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
+                    10,160,22,8
+    LTEXT           "A Directory named ""Backup"" will be created  under your eMule Application directory to store Backups",
+                    IDC_STATIC,10,172,205,21
+    CONTROL         "*.dat",IDC_DAT,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,22,33,10
+    CONTROL         "*.met",IDC_MET,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,37,35,10
+    CONTROL         "*.ini",IDC_INI,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,52,29,10
+    CONTROL         "*.part",IDC_PART,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,14,67,36,10
+    CONTROL         "*.part.met",IDC_PARTMET,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,14,82,51,10
+    DEFPUSHBUTTON   "Select All",IDC_SELECTALL,169,55,44,14,BS_FLAT
+    PUSHBUTTON      "Backup Now",IDC_BACKUPNOW,169,78,44,14,BS_FLAT | 
+                    WS_DISABLED
+    CONTROL         "Auto Backup on Exit",IDC_AUTOBACKUP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,118,87,10
+    CONTROL         "Double Backup",IDC_AUTOBACKUP2,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,25,133,63,10
+END
+
+IDD_PPG_EASTSHARE DIALOGEX 0, 0, 230, 247
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "EastShare"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_EASTSHARE_OPTS,"SysTreeView32",
+                    TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,
+                    194
+    LTEXT           "Static",IDC_WARNINGEASTSHARE,7,7,213,39
 END
 
 

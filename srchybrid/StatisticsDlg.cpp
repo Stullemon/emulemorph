@@ -967,13 +967,13 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						cbuffer.Format( "%s: %s" , GetResString(IDS_STATS_AVGDATAULSES) , GetResString(IDS_FSTAT_WAITING) );
                     }
 					stattree.SetItemText(up_ssessions[2], cbuffer);
-					cbuffer.Format(GetResString(IDS_STATS_SUCCUPCOUNT)+" (%.2f%%)" ,statGoodSessions,percentSessions);
+					cbuffer.Format(GetResString(IDS_STATS_SUCCUPCOUNT) ,statGoodSessions,percentSessions);
 					stattree.SetItemText(up_ssessions[0], cbuffer);
 					// Set Failed Upload Sessions
 					if (percentSessions != 0 && statBadSessions > 0) percentSessions = 100 - percentSessions; // There were some good sessions and bad ones...
 					else if (percentSessions == 0 && statBadSessions > 0) percentSessions = 100; // There were bad sessions and no good ones, must be 100%
 					else percentSessions = 0; // No sessions at all, or no bad ones.
-					cbuffer.Format(GetResString(IDS_STATS_FAILUPCOUNT)+" (%.2f%%)",statBadSessions,percentSessions);
+					cbuffer.Format(GetResString(IDS_STATS_FAILUPCOUNT) ,statBadSessions,percentSessions);
 					stattree.SetItemText(up_ssessions[1], cbuffer);
 					// Set Avg Upload time
 					//DWORD running=theApp.uploadqueue->GetAverageUpTime();
