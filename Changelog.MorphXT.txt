@@ -3,12 +3,31 @@ Changelog for eMule 0.44d MorphXT v5.x
 --------------------------------------
 MERGED : Code ported to 0.44d Official version [SiRoB]
 
-FIXED  : Official BugFix: Event on the two Chat button [SiRoB]
+FIXED  : Official -Fix-: Event on the two Chat button [SiRoB]
+FIXED  : Official -Fix-: Stat where not reseted when stopping or completed file occur [SiRoB]
 FIXED  : Reworked some zz code to avoid some possible uploadinglist disturb [SiRoB]
+FIXED  : USC: No-focused class give now the same datarate to every slot [SiRoB]
+FIXED  : PartFile download statistic are now correctly cached [SiRoB]
+FIXED  : The use of inteligent chunk selection make some possible crash [SiRoB] 
+FIXED  : SUWQT file is now correctly loaded [SiRoB]
 
-CHANGED: Now we see the flag on the clientdetail window [Commander]
+REMOVED: The eMule+ Preferency dialog have been removed temporaly [SIRoB]
+REMOVED: Keep Powershare state when client added in uploadinglist have been removed [SiRoB]
+REMOVED: Restriction on hideos for partfile have been removed [SiRoB]
 
-TWEAKED: Reviewed the Upload Splitting Class to open less slot [SiRoB]
+CHANGED: Some official icone were changed [SiRoB/Commander] 
+CHANGED: Moved 'Show Client Percentage' in Morph preferency [SiRoB]
+CHANGED: Turning back HideOS available on partfile [SiRoB]
+
+ADDED  : Some missing icone in popup menu [SiRoB/Commander]
+ADDED  : a Flag on the clientdetail window [Commander/SiRoB]
+ADDED  : Draw date and time log in default color [SiRoB]
+ADDED  : Resend FilePartstatus when client added in uploadinglist from Pawcio [SiRoB]
+
+TWEAKED: USC: Reviewed to open less slot [SiRoB]
+TWEAKED: SOTN: Revelate to a client only the rarest part with the equal min availability [SiRoB]
+TWEAKED: SOTN: Allready Requested part in uploadinglist are now taken into account [SiRoB]
+TWEAKED: Reviewed auto Powershare [SIRoB]
 
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.7
