@@ -546,21 +546,21 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			memcpy(maxSlot,slotCounterClass,sizeof(slotCounterClass));
 
 			uint32 lastpos = 0;
-            uint32 TotalMaxSlot = 0;
+            uint32 TotalWantedMaxSlot = 0;
 			for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
 				bool isFocused = ClientDataRate[classID] == 0;
 				if (!isFocused) {
 					if (allowedDataRateClass[classID] > 0){
 						if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
-							maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
-						}
-					}
-					TotalMaxSlot+=maxSlot[classID];
-					if( TotalMaxSlot > m_highestNumberOfFullyActivatedSlots) {
-						m_highestNumberOfFullyActivatedSlots = TotalMaxSlot;
-            		}
-				}
+							TotalWantedMaxSlot +=  max(1,allowedDataRateClass[classID]/ClientDataRate[classID]);
+						}else
+							TotalWantedMaxSlot += maxSlot[classID];
+					}else
+						TotalWantedMaxSlot += maxSlot[classID];
+					if( TotalWantedMaxSlot > m_highestNumberOfFullyActivatedSlots)
+						m_highestNumberOfFullyActivatedSlots = TotalWantedMaxSlot;
+            	}
 				for(uint32 maxCounter = lastpos; maxCounter < lastpos+(isFocused?slotCounterClass[classID]:maxSlot[classID]) && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					if(isFocused == false)
 					{
