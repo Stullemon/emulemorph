@@ -1054,11 +1054,10 @@ void CClientCredits::ClearWaitStartTime(){
 //init will be triggered at 
 //1. client credit create, 
 //2. when reach 10MB transfered, between first time remove check and second time remove check
+//anyway, this just make a check at "check point" :p
+
 void CClientCredits::InitPayBackFirstStatus(){
 	//MORPH START - Changed by SiRoB, Pay Back First Tweak
-	/*
-	m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal()+SESSIONMAXTRANS;
-	*/
 	m_bPayBackFirst = false;
 	TestPayBackFirstStatus();
 	//MORPH END   - Changed by SiRoB, Pay Back First Tweak
