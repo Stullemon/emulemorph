@@ -266,7 +266,7 @@ bool CDownloadQueue::StartNextFile(int cat, bool force){
 	    for (pos = filelist.GetHeadPosition();pos != 0;){
 		    cur_file = filelist.GetNext(pos);
 		    if (cur_file->GetStatus() == PS_PAUSED &&
-                CPartFile::RightFileHasHigherPrio(pfile, cur_file))
+                CPartFile::RightFileHasHigherPrio(pfile, cur_file) && !thePrefs.GetCategory(cur_file->GetCategory())->bResumeFileOnlyInSameCat)  //MORPH - Added by SiRoB, Resume file only in the same category
 		    {
                 // pick first found matching file, since they are sorted in prio order with most important file first.
 			    pfile = cur_file;
