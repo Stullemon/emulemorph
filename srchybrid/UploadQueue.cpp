@@ -811,7 +811,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 	if (curUploadSlots >= 4 &&
         (
          curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
-         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         /*curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||*/
          (
           thePrefs.GetMaxUpload() == UNLIMITED &&
           !thePrefs.IsDynUpEnabled() &&
@@ -1612,7 +1612,10 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
 //        minNumber = 1;
 //    }
 //	return max(((uint32)uploadinglist.GetCount())*0.2, minNumber);
-	return 1;
+	if (thePrefs.GetMaxClientDataRate() > 0)
+		return 0;
+	else
+		return 1;
 }
 
 /**
