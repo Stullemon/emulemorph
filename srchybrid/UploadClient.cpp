@@ -53,7 +53,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crClientOnly; 
 	COLORREF crSending;
 	COLORREF crNextSending;
-    COLORREF crBuffer;
+	COLORREF crBuffer;
 
 	if(bFlat) { 
 		crBoth = RGB(0, 0, 0);
@@ -61,7 +61,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		crBoth = RGB(104, 104, 104);
 	} 
 
-    crNeither = RGB(224, 224, 224);
+	crNeither = RGB(224, 224, 224);
 	crClientOnly = RGB(0, 220, 255);
 	crSending = RGB(0, 150, 0);
 	crNextSending = RGB(255,208,0);
@@ -93,10 +93,10 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
 		}
 	}
-    // PENDING: this is currently commented so that a yellow block is only shown for the next
-    //          requested package. I would like for this to be commented the next test release.
-    //          When we have confirmed that sockets no longer just stop requesting blocks,
-    //          the code can be restored. /zz
+	// PENDING: this is currently commented so that a yellow block is only shown for the next
+	//          requested package. I would like for this to be commented the next test release.
+	//          When we have confirmed that sockets no longer just stop requesting blocks,
+	//          the code can be restored. /zz
 	//if (!m_DoneBlocks_list.IsEmpty()){
 	//	block = m_DoneBlocks_list.GetTail();
 	//	if(block){
@@ -110,29 +110,29 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		//	s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
 		//}
 
-        // Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
-        uint32 total = 0;
+		// Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
+		uint32 total = 0;
 
 		for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
 			Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
 
-            if(total + (block->EndOffset-block->StartOffset) < GetQueueSessionPayloadUp()) {
-                // block is sent
-			    s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
-                total += block->EndOffset-block->StartOffset;
-            } else if(total < GetQueueSessionPayloadUp()) {
-                // block partly sent, partly in buffer
-                total += block->EndOffset-block->StartOffset;
-                uint32 rest = total - GetQueueSessionPayloadUp();
-                uint32 newEnd = block->EndOffset-rest;
+			if(total + (block->EndOffset-block->StartOffset) < GetQueueSessionPayloadUp()) {
+				// block is sent
+				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+				total += block->EndOffset-block->StartOffset;
+			} else if(total < GetQueueSessionPayloadUp()) {
+				// block partly sent, partly in buffer
+				total += block->EndOffset-block->StartOffset;
+				uint32 rest = total - GetQueueSessionPayloadUp();
+				uint32 newEnd = block->EndOffset-rest;
 
     			s_UpStatusBar.FillRange(block->StartOffset, newEnd, crSending);
     			s_UpStatusBar.FillRange(newEnd, block->EndOffset, crBuffer);
-            } else {
-                // entire block is still in buffer
-                total += block->EndOffset-block->StartOffset;
+			} else {
+				// entire block is still in buffer
+				total += block->EndOffset-block->StartOffset;
     			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
-            }
+			}
 		}
 	}
    	s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
@@ -145,9 +145,9 @@ void CUpDownClient::SetUploadState(EUploadState news){
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
- * Gets the queue score multiplier for this client, taking into consideration client's credits
- * and the requested file's priority.
- */
+* Gets the queue score multiplier for this client, taking into consideration client's credits
+* and the requested file's priority.
+*/
 double CUpDownClient::GetCombinedFilePrioAndCredit() {
 	ASSERT(credits != NULL);
 
@@ -206,8 +206,8 @@ double CUpDownClient::GetCombinedFilePrioAndCredit() {
 
 
 /**
- * Gets the file multiplier for the file this client has requested.
- */
+* Gets the file multiplier for the file this client has requested.
+*/
 int CUpDownClient::GetFilePrioAsNumber() {
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 	// TODO coded by tecxx & herbert, one yet unsolved problem here:
@@ -242,9 +242,9 @@ int CUpDownClient::GetFilePrioAsNumber() {
 }
 
 /**
- * Gets the current waiting score for this client, taking into consideration waiting
- * time, priority of requested file, and the client's credits.
- */
+* Gets the current waiting score for this client, taking into consideration waiting
+* time, priority of requested file, and the client's credits.
+*/
 uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasevalue){
 
 	DWORD curTick = ::GetTickCount();
@@ -357,7 +357,22 @@ bool CUpDownClient::MoreUpThanDown(){
 		return false;
 	}
 
-	return credits->GetPayBackFirstStatus();
+	bool curPayBackFirstStatus = credits->GetPayBackFirstStatus();
+
+	//this to prevent continuous up and down
+	if(
+		//during uping and downing, if client fall from PBF and can't follow up our uploading speed,
+		GetUploadState() == US_UPLOADING && GetDownloadState() == DS_DOWNLOADING &&
+		chkPayBackFirstTag() && !curPayBackFirstStatus && 
+		//buffer up to Max SESSIONAMOUNT data to him
+		GetQueueSessionUp() < SESSIONAMOUNT){
+		return true;
+	}
+	setPayBackFirstTag(curPayBackFirstStatus);
+
+	return curPayBackFirstStatus;
+
+//	return credits->GetPayBackFirstStatus();
 }
 //EastShare End - added by AndCycle, Pay Back First
 
@@ -369,12 +384,13 @@ double CUpDownClient::GetEqualChanceValue(){
 	if(currentReqFile != NULL){
 		return currentReqFile->GetEqualChanceValue();
 	}
+
 	return 0;
 }
 //Morph End - added by AndCycle, Equal Chance For Each File
 
 //Morph - added by AndCycle, keep full chunk transfer
-bool	CUpDownClient::needFullChunkTransfer(){
+bool CUpDownClient::needFullChunkTransfer(){
 
 	if(!theApp.glob_prefs->TransferFullChunks()){
 		return false;
@@ -386,10 +402,10 @@ bool	CUpDownClient::needFullChunkTransfer(){
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
- * Checks if the file this client has requested has release priority.
- *
- * @return true if the requested file has release priority
- */
+* Checks if the file this client has requested has release priority.
+*
+* @return true if the requested file has release priority
+*/
 bool CUpDownClient::GetPowerShared() {
 
 	if(GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
@@ -416,13 +432,13 @@ public:
 };
 
 void CUpDownClient::CreateNextBlockPackage(){
-    // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
-    if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
-       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready (at least 0.2 MBytes there)
-        return;
-    }
+	// See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
+	if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
+	m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready (at least 0.2 MBytes there)
+		return;
+	}
 
-    CFile file;
+	CFile file;
 	byte* filedata = 0;
 	CString fullname;
 	// -khaos--+++> Statistic to breakdown uploaded data by complete file vs. partfile.
@@ -430,9 +446,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 	// <-----khaos-
 	CSyncHelper lockFile;
 	try{
-        // Buffer new data if current buffer is less than 1 MBytes
-        while (!m_BlockRequests_queue.IsEmpty() &&
-               (m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 100*1024)) {
+		// Buffer new data if current buffer is less than 1 MBytes
+		while (!m_BlockRequests_queue.IsEmpty() &&
+			(m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 100*1024)) {
 
 			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);
@@ -522,7 +538,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			//srcfile->statistic.AddTransferred(togo);
 			srcfile->statistic.AddTransferred(currentblock->StartOffset, togo);
 			//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
-            m_addedPayloadQueueSession += togo;
+			m_addedPayloadQueueSession += togo;
 
 			m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 			delete[] filedata;
@@ -612,11 +628,10 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 }
 
-
 // -khaos--+++> Added new parameter: bool bFromPF
 //MORPH START - Modified by SiRoB, ZZ Upload system 20030818-1923
 uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
-    uint64 totalBytes = 0;
+	uint64 totalBytes = 0;
 //MORPH END   - Modified by SiRoB, ZZ Upload system 20030818-1923
 	// <-----khaos-
 	uint32 nPacketSize;
@@ -654,7 +669,7 @@ uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bl
 // -khaos--+++> Added new parameter: bool bFromPF
 //MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Block_Struct* currentblock, bool bFromPF){
-    uint64 totalBytes = 0;
+	uint64 totalBytes = 0;
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	// <-----khaos-
 	BYTE* output = new BYTE[togo+300];
@@ -765,24 +780,24 @@ uint32 CUpDownClient::SendBlockData(){
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 	DWORD curTick = ::GetTickCount();
 
-    uint64 sentBytesCompleteFile = 0;
-    uint64 sentBytesPartFile = 0;
-    uint64 sentBytesPayload = 0;
+	uint64 sentBytesCompleteFile = 0;
+	uint64 sentBytesPartFile = 0;
+	uint64 sentBytesPayload = 0;
 
-    if(socket) {
-        // Perform book keeping
+	if(socket) {
+		// Perform book keeping
 
-        // first get how many bytes was send
-        sentBytesCompleteFile = socket->GetSentBytesCompleteFileSinceLastCallAndReset();
-        sentBytesPartFile = socket->GetSentBytesPartFileSinceLastCallAndReset();
+		// first get how many bytes was send
+		sentBytesCompleteFile = socket->GetSentBytesCompleteFileSinceLastCallAndReset();
+		sentBytesPartFile = socket->GetSentBytesPartFileSinceLastCallAndReset();
 
-        // store this information in proper places
-        // -khaos--+++>
-	    // Extended statistics information based on which client software and which port we sent this data to...
-	    // This also updates the grand total for sent bytes, etc.  And where this data came from.  Yeesh.
-	    theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, true, sentBytesCompleteFile, (IsFriend()&& GetFriendSlot()));
-	    theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
-	    m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
+		// store this information in proper places
+		// -khaos--+++>
+		// Extended statistics information based on which client software and which port we sent this data to...
+		// This also updates the grand total for sent bytes, etc.  And where this data came from.  Yeesh.
+		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, true, sentBytesCompleteFile, (IsFriend()&& GetFriendSlot()));
+		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
+		m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
 //Give more credits to rare files uploaders [Yun.SF3]
 		if (theApp.glob_prefs->IsBoostLess()){
 			CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);//check this if download completion problems occurs [Yun.SF3]
@@ -794,83 +809,83 @@ uint32 CUpDownClient::SendBlockData(){
 			credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
 //Give more credits to rare files uploaders [Yun.SF3]
 
-        sentBytesPayload = socket->GetSentPayloadSinceLastCallAndReset();
-        m_nCurQueueSessionPayloadUp += sentBytesPayload;
+		sentBytesPayload = socket->GetSentPayloadSinceLastCallAndReset();
+		m_nCurQueueSessionPayloadUp += sentBytesPayload;
 
-        if(GetUploadState() == US_UPLOADING) {
-            bool useChunkLimit = false; // PENDING: Get from prefs, or enforce?
+		if(GetUploadState() == US_UPLOADING) {
+			bool useChunkLimit = false; // PENDING: Get from prefs, or enforce?
 
-            bool wasRemoved = false;
-            if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONAMOUNT && curTick-m_dwLastCheckedForEvictTick >= 5) {
-                m_dwLastCheckedForEvictTick = curTick;
-                wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
-            }
-
-            if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONAMOUNT > m_curSessionAmountNumber) {
-                // Should we end this upload?
-
-                // first clear the average speed, to show ?? as speed in upload slot display
-                m_AvarageUDR_list.RemoveAll();
-                sumavgUDR = 0;
-	
-                // Give clients in queue a chance to kick this client out.
-                // It will be kicked out only if queue contains a client
-                // of same/higher class as this client, and that new
-                // client must either be a high ID client, or a low ID
-                // client that is currently connected.
-                wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
-
-                if(!wasRemoved) {
-                    // It wasn't removed, so it is allowed to pass into the next amount.
-                    m_curSessionAmountNumber++;
-                }
-            }
-
-            if(wasRemoved == false) {
-                // read blocks from file and put on socket
-                CreateNextBlockPackage();
-                }
+			bool wasRemoved = false;
+			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONAMOUNT && curTick-m_dwLastCheckedForEvictTick >= 5) {
+				m_dwLastCheckedForEvictTick = curTick;
+				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
 			}
-    }
 
-    if(sentBytesCompleteFile + sentBytesPartFile > 0 ||
-        m_AvarageUDR_list.GetCount() == 0 || (::GetTickCount() - m_AvarageUDR_list.GetTail().timestamp) > 1*1000) {
-        // Store how much data we've transfered this round,
-        // to be able to calculate average speed later
-        // keep sum of all values in list up to date
-        TransferredData newitem = {sentBytesCompleteFile + sentBytesPartFile, curTick};
-        m_AvarageUDR_list.AddTail(newitem);
-        sumavgUDR += sentBytesCompleteFile + sentBytesPartFile;
-    }
-			
-    // remove to old values in list
-    while (m_AvarageUDR_list.GetCount() > 0 && (::GetTickCount() - m_AvarageUDR_list.GetHead().timestamp) > 10*1000) {
-        // keep sum of all values in list up to date
-        sumavgUDR -= m_AvarageUDR_list.RemoveHead().datalen;
+			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONAMOUNT > m_curSessionAmountNumber) {
+				// Should we end this upload?
+
+				// first clear the average speed, to show ?? as speed in upload slot display
+				m_AvarageUDR_list.RemoveAll();
+				sumavgUDR = 0;
+	
+				// Give clients in queue a chance to kick this client out.
+				// It will be kicked out only if queue contains a client
+				// of same/higher class as this client, and that new
+				// client must either be a high ID client, or a low ID
+				// client that is currently connected.
+				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
+
+				if(!wasRemoved) {
+					// It wasn't removed, so it is allowed to pass into the next amount.
+					m_curSessionAmountNumber++;
+				}
+			}
+
+			if(wasRemoved == false) {
+				// read blocks from file and put on socket
+				CreateNextBlockPackage();
+			}
 		}
-
-    // Calculate average speed for this slot
-    if(m_AvarageUDR_list.GetCount() > 0 && (::GetTickCount() - m_AvarageUDR_list.GetHead().timestamp) > 0 && GetUpStartTimeDelay() > 2*1000) {
-        m_nUpDatarate = (sumavgUDR*1000) / (::GetTickCount()-m_AvarageUDR_list.GetHead().timestamp);
-    } else {
-        // not enough values to calculate trustworthy speed. Use -1 to tell this
-        m_nUpDatarate = -1;
 	}
 
-    // Check if it's time to update the display.
-    if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
-        // Update display
-        theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
-        theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
-        m_lastRefreshedULDisplay = curTick;
-    }
+	if(sentBytesCompleteFile + sentBytesPartFile > 0 ||
+		m_AvarageUDR_list.GetCount() == 0 || (::GetTickCount() - m_AvarageUDR_list.GetTail().timestamp) > 1*1000) {
+		// Store how much data we've transfered this round,
+		// to be able to calculate average speed later
+		// keep sum of all values in list up to date
+		TransferredData newitem = {sentBytesCompleteFile + sentBytesPartFile, curTick};
+		m_AvarageUDR_list.AddTail(newitem);
+		sumavgUDR += sentBytesCompleteFile + sentBytesPartFile;
+	}
+			
+	// remove to old values in list
+	while (m_AvarageUDR_list.GetCount() > 0 && (::GetTickCount() - m_AvarageUDR_list.GetHead().timestamp) > 10*1000) {
+		// keep sum of all values in list up to date
+		sumavgUDR -= m_AvarageUDR_list.RemoveHead().datalen;
+	}
+
+	// Calculate average speed for this slot
+	if(m_AvarageUDR_list.GetCount() > 0 && (::GetTickCount() - m_AvarageUDR_list.GetHead().timestamp) > 0 && GetUpStartTimeDelay() > 2*1000) {
+		m_nUpDatarate = (sumavgUDR*1000) / (::GetTickCount()-m_AvarageUDR_list.GetHead().timestamp);
+	} else {
+		// not enough values to calculate trustworthy speed. Use -1 to tell this
+		m_nUpDatarate = -1;
+	}
+
+	// Check if it's time to update the display.
+	if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
+		// Update display
+		theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
+		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+		m_lastRefreshedULDisplay = curTick;
+	}
 	
-    return sentBytesCompleteFile + sentBytesPartFile;
+	return sentBytesCompleteFile + sentBytesPartFile;
 }
 
 /**
- * See description for CEMSocket::TruncateQueues().
- */
+* See description for CEMSocket::TruncateQueues().
+*/
 void CUpDownClient::FlushSendBlocks(){ // call this when you stop upload, or the socket might be not able to send
 	//MORPH START - Added by Yun.SF3, ZZ Upload System    
 	if (socket)	//socket may be NULL...
@@ -1029,7 +1044,6 @@ void CUpDownClient::BanLeecher(int log_message){
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
 
-
 void CUpDownClient::UDPFileReasked(){
 	AddAskedCount();
 	SetLastUpRequest();
@@ -1083,7 +1097,6 @@ void CUpDownClient::ClearWaitStartTime(){
 	}
 	credits->ClearWaitStartTime();
 }
-
 
 bool CUpDownClient::GetFriendSlot(){
 	if (credits && theApp.clientcredits->CryptoAvailable()){
