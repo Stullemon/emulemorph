@@ -160,8 +160,6 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 		return true;
 	} else if(onlyCheckForRemove == false) {
 
-		//Morph - added by AndCycle, lock up slot to prevent interleaving
-		UploadingSlot.Lock();
 
 		// Move down
 		// first find the client in the uploadinglist
@@ -174,9 +172,6 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 			// then add it last in it's class
 			InsertInUploadingList(client);
 		}
-
-		//Morph - added by AndCycle, lock up slot to prevent interleaving
-		UploadingSlot.Unlock();
 
 		return false;
 	} else {
@@ -420,9 +415,6 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 */
 void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 
-//Morph - added by AndCycle, lock up slot to prevent interleaving
-//lock from outside before entering here
-
 	POSITION insertPosition = NULL;
 	uint32 posCounter = uploadinglist.GetCount();
 
@@ -566,14 +558,8 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 		newclient->ResetCompressionGain();
 		// khaos::kmod-
 
-		//Morph - added by AndCycle, lock up slot to prevent interleaving
-		UploadingSlot.Lock();
-	
 		InsertInUploadingList(newclient);
 	
-		//Morph - added by AndCycle, lock up slot to prevent interleaving
-		UploadingSlot.Unlock();
-
 		if(newclient->GetQueueSessionUp() > 0) {
 			// this client has already gotten a successfullupcount++ when it was early removed
 			// negate that successfullupcount++ so we can give it a new one when this session ends
@@ -651,9 +637,6 @@ void CUploadQueue::Process() {
 		}
 	}
 
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	UploadingSlot.Lock();
-
 	//Morph - added by AndCycle, remove list
 	CTypedPtrList<CPtrList, CUpDownClient*> removeUploadinglist;
 
@@ -680,9 +663,6 @@ void CUploadQueue::Process() {
 	if(lastpos != NULL) {
 		lastClient = uploadinglist.GetAt(lastpos);
 	}
-
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	UploadingSlot.Unlock();
 
 	//Morph - added by AndCycle, remove list
 	POSITION rmpos = removeUploadinglist.GetHeadPosition();
@@ -1013,20 +993,12 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, bool updatewindow, bool earlyabort){
 
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	//lock up uploading list
-	UploadingSlot.Lock();
-
 	theApp.clientlist->AddTrackClient(client); // Keep track of this client
 
 	//try to find client in uploadinglist
 	POSITION pos = uploadinglist.Find(client);
 	
 	if (pos == NULL){
-
-		//Morph - added by AndCycle, lock up slot to prevent interleaving
-		//not in list, unlock and exit
-		UploadingSlot.Unlock();
 
 		return false;	
 	}
@@ -1045,10 +1017,6 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 		AddDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
 	uploadinglist.RemoveAt(pos);
 	theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
-
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	//remove done, unlock list
-	UploadingSlot.Unlock();
 
 	if(client->GetQueueSessionUp()){
 		successfullupcount++;
@@ -1454,9 +1422,6 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 		return;
 	}
 
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	UploadingSlot.Lock();
-
     m_dwLastResortedUploadSlots = curtick;
 
     CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
@@ -1492,9 +1457,6 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
         // This will insert in correct place
         InsertInUploadingList(cur_client);
 	}
-
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	UploadingSlot.Unlock();
 
 }
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923

@@ -144,9 +144,6 @@ private:
     double GetAverageCombinedFilePrioAndCredit();
     uint32 GetWantedNumberOfTrickleUploads();
 
-	//Morph - added by AndCycle, lock up slot to prevent interleaving
-	CCriticalSection	UploadingSlot;
-
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 	void	ReSortUploadSlots(bool force = false);
 
