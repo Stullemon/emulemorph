@@ -41,27 +41,55 @@ class CUPnP_IGDControlPoint
 public:
 	bool Init();
 
-	typedef struct UPNP_INFO_VAR{
-		CString Name;
-		CString Value;
-	};
+	//typedef struct UPNP_INFO_VAR{
+	//	CString Name;
+	//	CString Value;
+	//};
 
-	typedef CList<UPNP_INFO_VAR, UPNP_INFO_VAR>	UPNP_INFO_LIST;
-	typedef CList<CString, CString>				STR_LIST;
+	//typedef CList<UPNP_INFO_VAR, UPNP_INFO_VAR>	UPNP_INFO_LIST;
+	//typedef CList<CString, CString>				STR_LIST;
 
-	typedef struct UPNP_SERVICE{
-		UPNP_INFO_LIST		infoList;
+	class UPNP_SERVICE
+	{
+	public:
+		//UPNP_INFO_LIST	infoList;
+		//STR_LIST			Vars;
 		CString				ServiceID;
 		CString				ServiceType;
-		STR_LIST			Vars;
 		CString				EventURL;
 		Upnp_SID			SubscriptionID;
 		CString				ControlURL;
 		int					Connected;	//-1 not initialized, 0 false, 1 true
+
+		UPNP_SERVICE &operator= (UPNP_SERVICE &srv){
+			Connected = srv.Connected;
+			ControlURL = srv.ControlURL;
+			EventURL = srv.EventURL;
+			ServiceID = srv.ServiceID;
+			ServiceType = srv.ServiceType;
+			memcpy(SubscriptionID, srv.SubscriptionID, 44);
+			
+			//POSITION pos = srv.infoList.GetHeadPosition();
+			//while(pos){
+			//	UPNP_INFO_VAR info_org, info_copy;
+			//	info_org = srv.infoList.GetNext(pos);
+			//	info_copy.Name = info_org.Name;
+			//	info_copy.Value = info_org.Value;
+			//	infoList.AddTail(info_copy);
+			//}
+
+			//pos = srv.Vars.GetHeadPosition();
+			//while(pos){
+			//	CString var_copy;
+			//	var_copy = srv.Vars.GetNext(pos);
+			//	Vars.AddTail(var_copy);
+			//}
+			return *this;
+		}
 	};
 
 	typedef struct UPNP_DEVICE{
-		UPNP_INFO_LIST	infoList;
+		//UPNP_INFO_LIST	infoList;
 	    CString			UDN;
 		CString			DescDocURL;
 		CString			FriendlyName;
@@ -125,8 +153,9 @@ private:
 
 	typedef struct UPNPNAT_ACTIONPARAM {
 		UPNPNAT_ACTIONTYPE type;
-		UPNP_SERVICE *srv;
+		UPNP_SERVICE srv;
 		UPNPNAT_MAPPING mapping;
+		bool bUpdating;
 	};
 
 	// Singleton
@@ -153,9 +182,6 @@ private:
 	static UINT ActionThreadFunc( LPVOID pParam );
 	static CCriticalSection m_ActionThreadCS;
 
-	static CString	m_slocalIP;
-	static WORD		m_uLocalIP;
-
 	static int				IGD_Callback( Upnp_EventType EventType, void* Event, void* Cookie );
 	static CString			GetFirstDocumentItem(IXML_Document * doc, CString item );
 	static CString			GetFirstElementItem( IXML_Element * element, CString item );
@@ -173,10 +199,9 @@ private:
 	static bool				IsServiceConnected(UPNP_SERVICE *srv);
 	static void				OnEventReceived(Upnp_SID sid, int evntkey, IXML_Document * changes );
 
-	static void				InitLocalIP();
 	static CString			GetLocalIPStr();
-	static WORD				GetLocalIP();
 	static bool				IsLANIP(WORD nIP);
+	static bool				IsLANIP(char *cIP);
 	static bool				UpdateAllMappings( bool bLockDeviceList = true, bool bUpdating = true );
 };
 

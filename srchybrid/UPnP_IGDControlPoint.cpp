@@ -43,8 +43,6 @@ CUPnP_IGDControlPoint::SERVICE_LIST		CUPnP_IGDControlPoint::m_knownServices;
 CCriticalSection						CUPnP_IGDControlPoint::m_devListLock;
 CUPnP_IGDControlPoint::MAPPING_LIST		CUPnP_IGDControlPoint::m_Mappings;
 CCriticalSection						CUPnP_IGDControlPoint::m_MappingsLock;
-CString									CUPnP_IGDControlPoint::m_slocalIP;
-WORD									CUPnP_IGDControlPoint::m_uLocalIP;
 CCriticalSection						CUPnP_IGDControlPoint::m_ActionThreadCS;
 //-----
 
@@ -58,6 +56,9 @@ CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 
 CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 {
+	m_devListLock.Lock();
+	m_MappingsLock.Lock();
+
 	if(m_ctrlPoint){
 		UpnpUnRegisterClient(m_ctrlPoint);
 		UpnpFinish();
@@ -73,21 +74,26 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 	}
 	m_devices.RemoveAll();
 	m_knownServices.RemoveAll();
+	m_Mappings.RemoveAll();
+
+	m_MappingsLock.Unlock();
+	m_devListLock.Unlock();
 }
 
 bool CUPnP_IGDControlPoint::Init(){
 	if(m_bInit)
 		return true;
 
-	if(!IsLANIP(GetLocalIP())){
-		AddLogLine(false, _T("UPnP: Your IP is a public internet IP, UPnP will be disabled"));
-		return false;
-	}
-
 	int rc;
 	rc = UpnpInit( NULL, thePrefs.GetUPnPPort() );
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, _T("UPnP: Failed initiating UPnP on port %d (%d)"), thePrefs.GetUPnPPort(), rc );
+		UpnpFinish();
+		return false;
+	}
+
+	if(!IsLANIP(UpnpGetServerIpAddress())){
+		AddLogLine(false, _T("UPnP: Your IP is a public internet IP, UPnP will be disabled"));
 		UpnpFinish();
 		return false;
 	}
@@ -115,13 +121,13 @@ bool CUPnP_IGDControlPoint::Init(){
 			theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPTCP_F), UpnpGetServerPort());
 	}
 
-	AddLogLine(false, _T("UPnP: Initiated on port %d, searching devices..."), UpnpGetServerPort());
+	m_bInit = true;
+	AddLogLine(false, _T("UPnP: Initiated on %s:%d, searching devices..."), GetLocalIPStr(), UpnpGetServerPort());
 
 	// Some routers only reply to one of this SSDP searchs:
 	UpnpSearchAsync(m_ctrlPoint, 5, "upnp:rootdevice", &m_ctrlPoint);
 	UpnpSearchAsync(m_ctrlPoint, 5, "urn:schemas-upnp-org:device:InternetGatewayDevice:1", &m_ctrlPoint);
 
-	m_bInit = true;
 	return m_bInit;
 }
 
@@ -240,11 +246,9 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 					UPNPNAT_ACTIONPARAM *action = new UPNPNAT_ACTIONPARAM;
 					if(action){
 						action->type = UPNPNAT_ACTION_ADD;
-						action->srv = srv;
-						action->mapping.description = mapping->description;
-						action->mapping.externalPort = mapping->externalPort;
-						action->mapping.internalPort = mapping->internalPort;
-						action->mapping.protocol = mapping->protocol;
+						action->srv = *srv;
+						action->mapping = *mapping;
+						action->bUpdating = false;
 						AfxBeginThread(ActionThreadFunc, action);
 					}
 				}
@@ -284,11 +288,9 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(C
 						UPNPNAT_ACTIONPARAM *action = new UPNPNAT_ACTIONPARAM;
 						if(action){
 							action->type = UPNPNAT_ACTION_DELETE;
-							action->srv = srv;
-							action->mapping.description = mapping.description;
-							action->mapping.externalPort = mapping.externalPort;
-							action->mapping.internalPort = mapping.internalPort;
-							action->mapping.protocol = mapping.protocol;
+							action->srv = *srv;
+							action->mapping = mapping;
+							action->bUpdating = false;
 							AfxBeginThread(ActionThreadFunc, action);
 						}
 					}
@@ -343,7 +345,15 @@ bool CUPnP_IGDControlPoint::UpdateAllMappings( bool bLockDeviceList, bool bUpdat
 					POSITION map_pos = m_Mappings.GetHeadPosition();
 					while(map_pos){
 						UPNPNAT_MAPPING mapping = m_Mappings.GetNext(map_pos);
-						AddPortMappingToService(srv, &mapping, bUpdating);
+
+						UPNPNAT_ACTIONPARAM *action = new UPNPNAT_ACTIONPARAM;
+						if(action){
+							action->type = UPNPNAT_ACTION_ADD;
+							action->srv = *srv;
+							action->mapping= mapping;
+							action->bUpdating = bUpdating;
+							AfxBeginThread(ActionThreadFunc, action);
+						}
 					}
 					m_MappingsLock.Unlock();
 				}
@@ -986,65 +996,14 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::GetSpecificPortMapp
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// Initializes m_localIP variable, for future access to GetLocalIP()
-/////////////////////////////////////////////////////////////////////////////////
-void CUPnP_IGDControlPoint::InitLocalIP()
-{
-	try{
-		char szHost[256];
-		if (gethostname(szHost, sizeof szHost) == 0){
-			hostent* pHostEnt = gethostbyname(szHost);
-			if (pHostEnt != NULL && pHostEnt->h_length == 4 && pHostEnt->h_addr_list[0] != NULL){
-				struct in_addr addr;
-
-				memcpy(&addr, pHostEnt->h_addr_list[0], sizeof(struct in_addr));
-				m_slocalIP = inet_ntoa(addr);
-				m_uLocalIP = addr.S_un.S_addr;
-			}
-			else{
-				m_slocalIP = "";
-				m_uLocalIP = 0;
-			}
-		}
-		else{
-			m_slocalIP = "";
-			m_uLocalIP = 0;
-		}
-	}
-	catch(...){
-		m_slocalIP = "";
-		m_uLocalIP = 0;
-	}	
-
-	if(thePrefs.GetUPnPVerboseLog()){
-		if(m_uLocalIP != 0)
-			theApp.QueueDebugLogLine(false, _T("UPnP: Local IP initiated: %s"), m_slocalIP);
-		else
-			theApp.QueueDebugLogLine(false, _T("UPnP: Failed to init local IP"));
-	}
-
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Returns the Local IP
-/////////////////////////////////////////////////////////////////////////////////
-WORD CUPnP_IGDControlPoint::GetLocalIP()
-{
-	if(m_uLocalIP == 0)
-		InitLocalIP();
-	
-	return m_uLocalIP;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 // Returns a CString with the local IP in format xxx.xxx.xxx.xxx
 /////////////////////////////////////////////////////////////////////////////////
 CString CUPnP_IGDControlPoint::GetLocalIPStr()
 {
-	if(m_slocalIP.IsEmpty())
-		InitLocalIP();
-	
-	return m_slocalIP;
+	if(!m_bInit)
+		return CString(_T(""));
+	else
+		return CString(CA2CT(UpnpGetServerIpAddress()));
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1073,18 +1032,41 @@ bool CUPnP_IGDControlPoint::IsLANIP(WORD nIP){
 	return false; 
 }
 
+bool CUPnP_IGDControlPoint::IsLANIP(char *cIP){
+	if(cIP == NULL)
+		return false;
+
+	USES_CONVERSION;
+
+	CString strIP = CA2CT(cIP);
+	CString tok;
+	int nIP = 0;
+	int curPos= 0;
+	int ipPos = 0;
+
+	tok= strIP.Tokenize(_T("."),curPos);
+	while (!tok.IsEmpty() && ipPos < 4)
+	{
+		nIP |= _tstoi(tok) << 8*ipPos;
+
+		ipPos++;
+		tok= strIP.Tokenize(_T("."),curPos);
+	}
+	return IsLANIP(nIP);
+}
+
 UINT CUPnP_IGDControlPoint::ActionThreadFunc( LPVOID pParam ){
 	m_ActionThreadCS.Lock();
 	UPNPNAT_ACTIONPARAM *action	= reinterpret_cast<UPNPNAT_ACTIONPARAM *>(pParam);
 
 	if(action){
-		if(IsServiceConnected(action->srv)){
+		if(IsServiceConnected(&(action->srv))){
 			switch(action->type){
 				case UPNPNAT_ACTION_ADD:
-					AddPortMappingToService(action->srv, &(action->mapping));
+					AddPortMappingToService(&(action->srv), &(action->mapping), &(action->bUpdating));
 					break;
 				case UPNPNAT_ACTION_DELETE:
-					DeletePortMappingFromService(action->srv, &(action->mapping));
+					DeletePortMappingFromService(&(action->srv), &(action->mapping));
 					break;
 			}
 		}
