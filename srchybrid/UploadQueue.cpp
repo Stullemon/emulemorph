@@ -501,7 +501,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 
 	if(insertPosition != NULL) {
 		POSITION renumberPosition = insertPosition;
-		uint32 renumberSlotNumber = posCounter+1;
+        uint32 renumberSlotNumber = posCounter;
 	    
 		while(renumberPosition != NULL) {
 			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
