@@ -2193,21 +2193,27 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						// .part files could be renamed by simply changing the filename
 						// in the CKnownFile object.
 						if ((!file->IsPartFile()) && (_trename(file->GetFilePath(), newpath) != 0)){
-							CString strError;
-							strError.Format(_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, _tcserror(errno));
-							AddLogLine(false,strError);
+							// Use the "Format"-Syntax of AddLogLine here instead of
+							// CString.Format+AddLogLine, because if "%"-characters are
+							// in the string they would be misinterpreted as control sequences!
+							AddLogLine(false,_T("Failed to rename '%s' to '%s', Error: %hs"), file->GetFilePath(), newpath, _tcserror(errno));
 						} else {
 							CString strres;
 							if (!file->IsPartFile()) {
-								strres.Format(_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
+								// Use the "Format"-Syntax of AddLogLine here instead of
+								// CString.Format+AddLogLine, because if "%"-characters are
+								// in the string they would be misinterpreted as control sequences!
+								AddLogLine(false,_T("Successfully renamed '%s' to '%s'"), file->GetFilePath(), newpath);
 								theApp.sharedfiles->RemoveKeywords(file);
 								file->SetFileName(newname);
 								theApp.sharedfiles->AddKeywords(file);
 								file->SetFilePath(newpath);
 								file->UpdateDisplayedInfo();
 							} else {
-								strres.Format(_T("Successfully renamed .part file '%s' to '%s'"), file->GetFileName(), newname);
-								AddLogLine(false,strres);
+								// Use the "Format"-Syntax of AddLogLine here instead of
+								// CString.Format+AddLogLine, because if "%"-characters are
+								// in the string they would be misinterpreted as control sequences!
+								AddLogLine(false,_T("Successfully renamed .part file '%s' to '%s'"), file->GetFileName(), newname);
 								file->SetFileName(newname, true); 
 								((CPartFile*) file)->UpdateDisplayedInfo();
 								((CPartFile*) file)->SavePartFile(); 
