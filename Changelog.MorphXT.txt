@@ -1,4 +1,11 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.x
+--------------------------------------
+FIXED  : USC: Reworked completly the per client datarate limit [SiRoB]
+
+ADDED  : SlugFiller SafeHash [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.45b MorphXT v6.4
 --------------------------------------
 FIXED  : False message box telling credit file is corrupted [SiRoB]
