@@ -623,13 +623,13 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// Commander - Added: IP2Country column - Start
 					case 15:
 						Sbuffer.Format(_T("%s"), client->GetCountryName());
-						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+						if(theApp.ip2country->ShowCountryFlag()){
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 							cur_rec.left+=20;
 						}
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+						if(theApp.ip2country->ShowCountryFlag()){
 							cur_rec.left-=20;
 						}
 						break;

@@ -1289,14 +1289,14 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 		//MORPH START - Added by SiRoB, IP2Country
 		case 16:
 			RECT cur_rec = *lpRect;
-			if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+			if(theApp.ip2country->ShowCountryFlag()){
 				POINT point3= {cur_rec.left,cur_rec.top+1};
 				theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 				cur_rec.left+=20;
 			}
 			buffer.Format(_T("%s"), lpUpDownClient->GetCountryName());
 			dc->DrawText(buffer,buffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-			if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+			if(theApp.ip2country->ShowCountryFlag()){
 				cur_rec.left-=20;
 			}
 			break;

@@ -443,7 +443,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					// Commander - Added: IP2Country column - Start
 					case 10:
 						//Commander: There is a column now to show the country name
-						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+						if(theApp.ip2country->ShowCountryFlag()){
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							int index = client->GetCountryFlagIndex();
 							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
@@ -451,7 +451,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						}
 						Sbuffer.Format(_T("%s"), client->GetCountryName());
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
-						if(theApp.ip2country->ShowCountryFlag() && cur_rec.left+16 < cur_rec.right){
+						if(theApp.ip2country->ShowCountryFlag()){
 							cur_rec.left-=20;
 						}
 						break;
