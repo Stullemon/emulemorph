@@ -1074,7 +1074,14 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 	}
 
 	if (IsWindowVisible() || forceAll) {
-		statusbar->SetText(buffer,2,0);
+		//MORPH START - Added by SiRoB, Show zz ratio activation
+		if (thePrefs.IsZZRatioDoesWork()){
+			char buffer2[100];		
+			_snprintf(buffer2,sizeof buffer2,"%s r",buffer);
+			statusbar->SetText(buffer2,2,0);
+		}else
+		//MORPH END   - Added by SiRoB, Show zz ratio activation
+			statusbar->SetText(buffer,2,0);
 		ShowTransferStateIcon();
 	}
 	if (!TrayIsVisible() && thePrefs.ShowRatesOnTitle()) {
