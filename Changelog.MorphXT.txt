@@ -1,8 +1,10 @@
 ---------------------------------------- 
-Changelog for eMule 0.41b29 MorphXT v1.?
+Changelog for eMule 0.41b29 MorphXT v1.5
 ---------------------------------------- 
-ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list,
-         right-click and choose 'Mass rename...'. [MightyKnife]
+FIXED  : Several bugfix and update (A4AF and others) [SiRoB/AndClyve]
+
+ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list, right-click and choose 'Mass rename...'. [MightyKnife]
+ADDED  : Friend Slot Advanced Management, addon for a fast access to them inspired from KTS and Xman [SiRoB]
 
 ---------------------------------------- 
 Changelog for eMule 0.41b29 MorphXT v1.4
