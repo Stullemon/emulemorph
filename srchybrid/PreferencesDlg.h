@@ -10,6 +10,7 @@
 #include "PPgIRC.h"
 #include "PPgTweaks.h"
 #include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
+#include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgDisplay.h"
 #include "PPgSecurity.h"
 #include "PPgWebServer.h"
@@ -47,7 +48,7 @@ public:
 	CPPgScheduler	m_wndScheduler;
 	CPPgProxy		m_wndProxy;
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
-
+	CPPgMorph		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
 
 	CPreferences	*app_prefs;
 	CListBoxST		m_listbox;
@@ -71,6 +72,7 @@ public:
 		m_wndSecurity.SetPrefs(in_prefs);
 		m_wndWebServer.SetPrefs(in_prefs);
 		m_wndMorph.SetPrefs(in_prefs); //MORPH - Added by IceCream, Morph Prefs
+		m_wndMorph2.SetPrefs(in_prefs);	//MORPH - Added by SiRoB, Morph Prefs
 		m_wndScheduler.SetPrefs(in_prefs);
 		m_wndProxy.SetPrefs(in_prefs);
 	}

@@ -29,6 +29,7 @@ CPreferencesDlg::CPreferencesDlg(){
 	m_wndTweaks.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndSecurity.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
+	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndProxy.m_psp.dwFlags &= ~PSH_HASHELP; // deadlake PROXYSUPPORT
 
@@ -46,8 +47,8 @@ CPreferencesDlg::CPreferencesDlg(){
 	AddPage(&m_wndScheduler);
 	AddPage(&m_wndWebServer);
 	AddPage(&m_wndTweaks);
-	AddPage(&m_wndMorph);//MORPH - Added by IceCream, Morph Prefs
-
+	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
+	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
 	m_nActiveWnd = 0;
 	m_iPrevPage = -1;
 
@@ -68,7 +69,7 @@ CPreferencesDlg::CPreferencesDlg(){
 	ImageList.Add(theApp.LoadIcon(IDI_PREF_WEBSERVER));
 	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));
 	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));  //MORPH - Added by IceCream, Morph Prefs
-	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));  //MORPH - Added by IceCream, Morph Prefs
+	ImageList.Add(theApp.LoadIcon(IDI_PREF_TWEAK));  //MORPH - Added by SiRoB, Morph Prefs
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -148,7 +149,7 @@ void CPreferencesDlg::Localize()
 	m_wndScheduler.Localize();
 	m_wndProxy.Localize();
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
-
+	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	
 	TC_ITEM item; 
 	item.mask = TCIF_TEXT; 
@@ -169,7 +170,7 @@ void CPreferencesDlg::Localize()
 	buffer.Add(GetResString(IDS_PW_WS));
 	buffer.Add(GetResString(IDS_PW_TWEAK)); 
 	buffer.Add("Morph"); //MORPH - Added by IceCream, Morph Prefs
-
+	buffer.Add("Morph II"); //MORPH - Added by SiRoB, Morph Prefs
 	for (int i = 0; i < buffer.GetCount(); i++)
 		buffer[i].Remove(_T('&'));
 
