@@ -476,7 +476,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	    // prevent overflow
         	    if(timeSinceLastLoop == 0) {
         	        // no time has passed, so don't add any bytes. Shouldn't happen.
-        	        bytesToSpend = realBytesToSpend/1000; //0;
+        	        bytesToSpend = realBytesToSpend/1000;
         	    } else if(_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpend) {
         	        if (classID == LAST_CLASS) lastLoopTick = thisLoopTick; //MORPH - Added by SiRoB, lastLoopTick Fix
 					if(timeSinceLastLoop > sleepTime + 2000) {
@@ -531,10 +531,23 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	}
     
        		tempQueueLocker.Unlock();
-        
+
+			for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize(); slotCounter++) {
+                ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
+				Socket_stat* stat = NULL;
+				m_stat_list.Lookup(socket,stat);
+				uint32 classID = stat->classID;
+				if (sumtimeSinceLastLoop>0){
+					if (ClientDataRate[classID] == 0)
+						stat->realBytesToSpend = _I64_MAX;
+					else if (_I64_MAX/sumtimeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*sumtimeSinceLastLoop > stat->realBytesToSpend)
+						stat->realBytesToSpend += ClientDataRate[classID]*sumtimeSinceLastLoop;
+					else
+						stat->realBytesToSpend = _I64_MAX;
+				}
+			}
 			// Send any queued up control packets first
-			//MORPH - Changed by SiRoB, Avoid KAD to consume too much CPU
-			if/*while*/(bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] <  (uint64)bytesToSpendClass[LAST_CLASS] && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
+			while(bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] <  (uint64)bytesToSpendClass[LAST_CLASS] && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
                 ThrottledControlSocket* socket = NULL;
     			
 				if(!m_ControlQueueFirst_list.IsEmpty()) {
@@ -557,14 +570,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				Socket_stat* stat = NULL;
 				m_stat_list.Lookup(socket,stat);
 				uint32 classID = stat->classID;
-				if (sumtimeSinceLastLoop>0){
-					if (ClientDataRate[classID] == 0)
-						stat->realBytesToSpend = _I64_MAX;
-					else if (_I64_MAX/sumtimeSinceLastLoop > ClientDataRate[classID] && _I64_MAX-ClientDataRate[classID]*sumtimeSinceLastLoop > stat->realBytesToSpend)
-						stat->realBytesToSpend += ClientDataRate[classID]*sumtimeSinceLastLoop;
-					else
-						stat->realBytesToSpend = _I64_MAX;
-				}
 				if(socket != NULL) {
 				    if(thisLoopTick-socket->GetLastCalledSend() >= SEC2MS(1)) {
       	              // trickle
@@ -630,27 +635,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 				lastpos += slotCounterClass[classID];
 			}
-
-			//MORPH START - Added by SiRoB, Consume remain available bandwidth
-			// Send any queued up control packets first
-			while(bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] <  (uint64)bytesToSpendClass[LAST_CLASS] && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
-                ThrottledControlSocket* socket = NULL;
-    			
-				if(!m_ControlQueueFirst_list.IsEmpty()) {
-                    socket = m_ControlQueueFirst_list.RemoveHead();
-                } else if(!m_ControlQueue_list.IsEmpty()) {
-                    socket = m_ControlQueue_list.RemoveHead();
-                }
-
-       			if(socket != NULL) {
-				    SocketSentBytes socketSentBytes = socket->SendControlData(bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS], minFragSize);
-                    uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
-         	       	spentBytesClass[LAST_CLASS] += lastSpentBytes;
-					spentOverheadClass[LAST_CLASS] += socketSentBytes.sentBytesControlPackets;
-         	 	  }
-       		}
-			//MORPH END   - Added by SiRoB, Consume remain available bandwidth
-
 			// Any bandwidth that hasn't been used yet are used first to last.
 			// According allready ByteToSpend in class
 			lastpos = 0;
@@ -704,10 +688,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(maxCounter);
 					Socket_stat* stat = NULL;
 					m_stat_list.Lookup(socket,stat);
-					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*1000)
-						stat->realBytesToSpend = -((sint64)ClientDataRate[classID])*1000;
-					else if(stat->realBytesToSpend > 999)
-						stat->realBytesToSpend = 999;
+					if(stat->realBytesToSpend < -((sint64)ClientDataRate[classID])*10000)
+						stat->realBytesToSpend = -((sint64)ClientDataRate[classID])*10000;
+					else if(stat->realBytesToSpend > 999+ClientDataRate[classID]*1000)
+						stat->realBytesToSpend = 999+ClientDataRate[classID]*1000;
 				}
 				sumofclientinclass += slotCounterClass[classID];
 				if (slotCounterClass[classID])
@@ -718,7 +702,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					if (m_highestNumberOfFullyActivatedSlots[classID] > sumofclientinclass)
 						--m_highestNumberOfFullyActivatedSlots[classID];
 				} else {
-					uint64 bandwidthSavedTolerance = 0;//((classID==LAST_CLASS)?maxClientDataRate:ClientDataRate[classID])*1000;
+					uint64 bandwidthSavedTolerance = 0;
 					if(realBytesToSpend > 0 && (uint64)realBytesToSpend > 999+bandwidthSavedTolerance) {
 						sint64 newRealBytesToSpend = 999+bandwidthSavedTolerance;
 						realBytesToSpend = newRealBytesToSpend;
