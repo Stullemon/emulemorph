@@ -1,6 +1,11 @@
 --------------------------------------
-Changelog for eMule 0.44a MorphXT v5.x
+Changelog for eMule 0.44b MorphXT v5.x
 --------------------------------------
+
+--------------------------------------
+|NOTE:     MERGE IN PROGRESS!        |
+--------------------------------------
+
 MERGED : Merging in progress (plz to other dev tell me if you made change before commite) [SiRoB]
 
 FIXED  : Resource ID [SiRoB]
@@ -14,11 +19,16 @@ CHANGED: Anti-Leecher Mecanisme by adding the reason of detection in log [SiRoB]
 
 ADDED  : Recalculate CRC32. Can be used to force EMule to compute the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 ADDED  : CRC32 Localize [SiRoB]
+ADDED  : ClientQueueProgressBar [Commander/SiRoB] (Idea by Roman2k)
+ADDED  : Blinking Tray On Message Recieve from emulEspaña [Commander]
 
 REMOVED: Ratio no longer present use official way [SiRoB]
 
 TODO   : UNICODE Compatibility (in progess) [SiRoB]
 TODO   : Review Prio related to FS, PS and PBF [SiRoB]
+TODO   : Several Preferences Options (after new Preferences-Cats System arrived) [Commander]
+TODO   : DynIP [Commander]
+TODO   : CPU Usage and progressbar [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
