@@ -54,6 +54,9 @@ protected:
 	CRichEditCtrl* NFNLeft;
 	CRichEditCtrl* NFNRight;
 	CRichEditCtrl* OldFN;
+	int LastDelPos;   // Position where the last character was deleted; for UNDO
+	int LastEditPos;  // Position where the last character was inserted at; for UNDO
+	bool InDel;         // For Delete-tracking in UNDO
 	CString UndoBuffer;
 public:
 	// The caller of this dialog has to store pointers for all files in the
