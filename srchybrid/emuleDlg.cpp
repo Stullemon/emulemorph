@@ -939,7 +939,7 @@ void CemuleDlg::AddLogText(UINT uFlags, LPCTSTR pszText)
 				theLog.Log(temp, iLen);
 		}
 		//MORPH START - Added by SiRoB, Morph Log
-		if (thePrefs.GetVerbose() && (uFlags & LOG_MORPH))
+		if (uFlags & LOG_MORPH)
 		{
 			serverwnd->morphlog->AddTyped(temp, iLen, uFlags);
 			if (IsWindow(serverwnd->StatusSelector) && (thePrefs.GetVerbose() && serverwnd->StatusSelector.GetCurSel() != CServerWnd::PaneMorphLog || !thePrefs.GetVerbose() && serverwnd->StatusSelector.GetCurSel()+1 != CServerWnd::PaneMorphLog))
