@@ -2054,20 +2054,32 @@ void CKnownFile::UpdateAutoUpPriority(){
 		return;
 	if ( GetQueuedCount() > 20 ){
 		if( GetUpPriority() != PR_LOW ){
-			SetUpPriority( PR_LOW );
+			//MORPH - Changed by SiRoB, No need to force saving part.met optimization
+			/*
+			SetUpPriority( PR_LOW);
+			*/
+			SetUpPriority( PR_LOW , false);
 			theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 		}
 		return;
 	}
 	if ( GetQueuedCount() > 1 ){
 		if( GetUpPriority() != PR_NORMAL ){
+			//MORPH - Changed by SiRoB, No need to force saving part.met optimization
+			/*
 			SetUpPriority( PR_NORMAL );
+			*/
+			SetUpPriority( PR_NORMAL , false);
 			theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 		}
 		return;
 	}
 	if( GetUpPriority() != PR_HIGH){
+		//MORPH - Changed by SiRoB, No need to force saving part.met optimization
+		/*
 		SetUpPriority( PR_HIGH );
+		*/
+		SetUpPriority( PR_HIGH , false);
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 	}
 }

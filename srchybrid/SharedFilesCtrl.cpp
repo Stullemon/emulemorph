@@ -1390,6 +1390,12 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 								UpdateItem(file);
 								break;	
 							case MP_PRIOAUTO:
+								//MORPH START - Added by SiRoB, force savepart to update auto up flag since i removed the update in UpdateAutoUpPriority optimization
+								if(file->IsPartFile() && !file->IsAutoUpPriority()){
+									file->SetAutoUpPriority(true);
+									((CPartFile*)file)->SavePartFile();
+								}else
+								//MORPH END   - Added by SiRoB, force savepart to update auto up flag since i removed the update in UpdateAutoUpPriority optimization
 								file->SetAutoUpPriority(true);
 								file->UpdateAutoUpPriority();
 								UpdateFile(file); 
