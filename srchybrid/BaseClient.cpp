@@ -1761,31 +1761,6 @@ void CUpDownClient::ConnectionEstablished()
 		case US_WAITCALLBACK:
 			if (theApp.uploadqueue->IsDownloading(this))
 			{
-			//MORPH START - Added by SiROB, Pawcio: PowerShare
-			CKnownFile* reqfile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
-			if (reqfile){
-				CSafeMemFile data(16+16);
-				data.WriteHash16(reqfile->GetFileHash());
-				bool send = true;
-				if (reqfile->IsPartFile()){
-					((CPartFile*)reqfile)->WritePartStatus(&data, this);	// SLUGFILLER: hideOS
-					send = reqfile->HideOSInWork();
-				}
-				else if (!reqfile->ShareOnlyTheNeed(&data, this)) // Wistly SOTN
-					if (!reqfile->HideOvershares(&data, this))	// Slugfiller: HideOS
-						send = false;
-				if (send){
-					Packet* packet = new Packet(&data);
-					packet->opcode = OP_FILESTATUS;
-					theStats.AddUpDataOverheadFileRequest(packet->size);
-					socket->SendPacket(packet,true);
-				}
-				else {
-					BYTE* tmp = data.Detach();
-					free(tmp);
-				}
-			}
-			//MORPH END   - Added by SiROB, Pawcio: PowerShare
 				SetUploadState(US_UPLOADING);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					DebugSend("OP__AcceptUploadReq", this);
