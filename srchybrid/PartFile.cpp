@@ -2376,7 +2376,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
                         curClientReducedDownload = friendReduceddownload;
                     }
 
-					if(curClientReducedDownload && cur_datarate)
+					if(curClientReducedDownload)
 					{
 						uint32 limit = curClientReducedDownload*cur_datarate/1000;
 						if(limit<1000 && curClientReducedDownload == 200)
@@ -2438,15 +2438,15 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 
 			if (cur_src->GetServerIP() && cur_src->GetServerPort())
 			{
-				++net_stats[0];
+				net_stats[0]++;
 				if(cur_src->GetKadPort())
-					++net_stats[2];
+					net_stats[2]++;
 			}
 			if (cur_src->GetKadPort())
-				++net_stats[1];
+				net_stats[1]++;
 
 			ASSERT( nCountForState < sizeof(m_anStatesTemp)/sizeof(m_anStatesTemp[0]) );
-			++m_anStatesTemp[nCountForState];
+			m_anStatesTemp[nCountForState]++;
 			
 			switch (cur_src->GetDownloadState())
 			{
@@ -2465,7 +2465,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	                    if(cur_src->IsFriend() && cur_src->GetFriendSlot()) {
                     	    curClientReducedDownload = friendReduceddownload;
                     	}
-						if (curClientReducedDownload && cur_datarate && cur_src->GetDownloadState() == DS_DOWNLOADING)
+						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
 							if (limit < 1000 && curClientReducedDownload == 200)
