@@ -175,7 +175,6 @@ private:
 	bool			m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	void			TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
-	bool			m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 };
 
 class CClientCreditsList: public CLoggable
@@ -193,11 +192,13 @@ public:
 	uint8	GetPubKeyLen()					{return m_nMyPublicKeyLen;}
 	byte*	GetPublicKey()					{return m_abyMyPublicKey;}
 	bool	CryptoAvailable();
+	bool	IsSaveUploadQueueWaitTime() { return m_bSaveUploadQueueWaitTime;}//MORPH - Added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 protected:
 	void	LoadList();
 	void	SaveList();
 	void	InitalizeCrypting();
 	bool	CreateKeyPair();
+	bool	m_bSaveUploadQueueWaitTime;//MORPH - Added by SiRoB, Save Upload Queue Wait Time (SUQWT)
 #ifdef _DEBUG
 	bool	Debug_CheckCrypting();
 #endif

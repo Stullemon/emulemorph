@@ -968,14 +968,20 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 					client->m_nAvUpDatarate= client->GetTransferedUp()/(client->GetUpTotalTime()/1000);
 					/*totaluploadtime += client->GetUpStartTimeDelay()/1000;*/
 					totaluploadtime += tempUpStartTimeDelay/1000;
-					client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+					//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+					if (theApp.clientcredits->IsSaveUploadQueueWaitTime())
+						client->Credits()->ClearUploadQueueWaitTime();	// Moonlight: SUQWT
+					//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 					//wistily stop
                     totalCompletedBytes += client->GetSessionUp();
                 }
 			    //} else if(client->HasBlocks() || client->GetUploadState() != US_UPLOADING) {
             } else if(earlyabort == false){
 				failedupcount++;
-				client->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				if (theApp.clientcredits->IsSaveUploadQueueWaitTime())
+					client->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			}
             CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
@@ -1023,10 +1029,12 @@ void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){
 	waitinglist.RemoveAt(pos);
 	if (updatewindow)
 		theApp.emuledlg->transferwnd.queuelistctrl.RemoveClient(todelete);
-//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	todelete->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
-	todelete->Credits()->ClearWaitStartTime();		// Moonlight: SUQWT
-//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)	
+	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+		todelete->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
+		todelete->Credits()->ClearWaitStartTime();		// Moonlight: SUQWT
+	}
+	//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	todelete->SetUploadState(US_NONE);
 }
 

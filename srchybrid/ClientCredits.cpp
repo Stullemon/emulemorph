@@ -51,7 +51,6 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
-	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -71,7 +70,6 @@ CClientCredits::CClientCredits(const uchar* key)
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
-	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 }
 
 CClientCredits::~CClientCredits()
@@ -286,9 +284,8 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			}
 		}break;
 	}
-	m_fLastScoreRatio = result;
 
-	return result;
+	return m_fLastScoreRatio = result;
 	//EastShare END - Added by linekin, CreditSystem 
 
 	//Morph End - Modified by AndCycle, reduce a little CPU usage for ratio count
@@ -369,7 +366,8 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile file;
 	CFileException fexp;
 
-//Morph Start - added by AndCycle, choose .met to load
+	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
+	//Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
 
@@ -974,7 +972,7 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 				}
 				//if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
 					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
-				if(m_bSaveUploadQueueWaitTime){
+				if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 					m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 				}
 				else{
@@ -992,34 +990,20 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Save the wait times.
 void CClientCredits::SaveUploadQueueWaitTime() {
-	if ( ( GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDFAILED || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDBADGUY || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-		return;
-	}
-	if(m_bSaveUploadQueueWaitTime){
-		if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = GetTickCount() - m_dwUnSecureWaitTime;
-		if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = GetTickCount() - m_dwSecureWaitTime;
-	}
-	else{
-		if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime += GetTickCount() - m_dwUnSecureWaitTime;
-		if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime += GetTickCount() - m_dwSecureWaitTime;
-	}
+	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = GetTickCount() - m_dwUnSecureWaitTime;
+	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = GetTickCount() - m_dwSecureWaitTime;
 	SetSecWaitStartTime(m_dwWaitTimeIP);
 }
-
 // Moonlight: SUQWT - Clear the wait times.
 void CClientCredits::ClearUploadQueueWaitTime() {
-	if ( ( GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDFAILED || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDBADGUY || GetCurrentIdentState(m_dwWaitTimeIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
-		return;
-	}
 	m_pCredits->nUnSecuredWaitTime = 0;
 	m_pCredits->nSecuredWaitTime = 0;
 }
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
 // Moonlight: SUQWT: Adjust to take previous wait time into account.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	if(m_bSaveUploadQueueWaitTime){
+	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime - 1;	// Moonlight: SUQWT
 		m_dwSecureWaitTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime - 1;		// Moonlight: SUQWT
 	}
@@ -1031,7 +1015,6 @@ void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	m_dwWaitTimeIP = dwForIP;
 }
-
 void CClientCredits::ClearWaitStartTime(){
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;

@@ -1021,7 +1021,7 @@ void  CUpDownClient::UnBan(){
 // Moonlight: SUQWT - Reset the wait time on ban, do not give time credit for banned clients queue time!//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CUpDownClient::Ban(){
 	theApp.clientlist->AddTrackClient(this);
-	ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if ( !IsBanned() ){
 		AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
 	}
