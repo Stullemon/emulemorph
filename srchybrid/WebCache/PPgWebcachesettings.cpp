@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(CPPgWebcachesettings, CPropertyPage)
 	ON_BN_CLICKED(IDC_EXTRATIMEOUT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LOCALTRAFFIC, OnSettingsChange)
 	ON_BN_CLICKED(IDC_PERSISTENT_PROXY_CONNS, OnSettingsChange)
+	ON_BN_CLICKED(IDC_UPDATE_WCSETTINGS, OnSettingsChange)
 	ON_BN_CLICKED(IDC_ADVANCEDCONTROLS, OnBnClickedAdvancedcontrols)
 	ON_BN_CLICKED(IDC_TestProxy, OnBnClickedTestProxy)//JP TMP
 	ON_WM_HSCROLL()
@@ -88,48 +89,7 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 	//		 we rather use an already existing class
 
 	// Create email-proxy-submission link. The current settings will be included in the email.
-	CRect rect;
-	GetDlgItem(IDC_WEBCACHELINK)->GetWindowRect(rect);
-	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	m_wndSubmitWebcacheLink.CreateEx(NULL,0,_T("MsgWnd"),WS_BORDER | WS_VISIBLE | WS_CHILD | HTC_WORDWRAP | HTC_UNDERLINE_HOVER,rect.left,rect.top,rect.Width(),rect.Height(),m_hWnd,0);
-	m_wndSubmitWebcacheLink.SetBkColor(::GetSysColor(COLOR_3DFACE)); // still not the right color, will fix this later (need to merge the .rc file before it changes ;) )
-	m_wndSubmitWebcacheLink.SetFont(GetFont());
-	// make the relevant information into strings
-	CString proxyname, proxyport, limit, lastresolvedname, blocklimit, timeout, localtraffic, persistentconns;
-		proxyname.Format(_T("%s"), thePrefs.webcacheName);
-		proxyport.Format(_T("%i"), thePrefs.webcachePort);
-		limit.Format(_T("%i"), thePrefs.GetWebCacheBlockLimit());
-		lastresolvedname.Format(_T("%s"), thePrefs.GetLastResolvedName());
-		if (lastresolvedname == _T("")) 
-			lastresolvedname = _T("PLEASE USE 'AUTODETECT WEBCACHE' AT LEAST ONCE AND RESTART EMULE FOR THIS INFORMATION TO BE INCLUDED");
-		if (thePrefs.GetWebCacheExtraTimeout())timeout.Format(_T("True"));
-		else timeout.Format(_T("False"));
-		if (thePrefs.GetWebCacheCachesLocalTraffic()) localtraffic.Format(_T("False"));
-		else localtraffic.Format(_T("True"));
-		if (thePrefs.PersistentConnectionsForProxyDownloads) persistentconns.Format(_T("True"));
-		else persistentconns.Format(_T("False"));
-	// create hyperlink string
-	CString hyperlink;
-	hyperlink = _T("mailto:proxydata@arcor.de?Subject=Submit%20webcache&Body=Server%3A%20")
-				+ proxyname
-				+ _T("%0D%0APort%3A%20") 
-				+ proxyport
-				+ _T("%0D%0AISP%20Identifyer%3A%20") 
-				+ lastresolvedname
-				+ _T("%0D%0ANumber%20of%20blocks%3A%20") 
-				+ limit
-				+ _T("%0D%0AExtra%20timeout%3A%20") 
-				+ timeout
-				+ _T("%0D%0ADoesn%27t%20cache%20local%3A%20") 
-				+ localtraffic
-				+ _T("%0D%0ASupports%20persistent%20connections%20for%20proxy%20downloads%3A%20") 
-				+ persistentconns
-				+ _T("%0D%0A%0D%0AISP%3A%20PLEASE%20ADD%20YOUR%20ISP%20NAME%20AND%20COUNTRY%20HERE%0D%0ACOMMENTS%3A%20PLEASE%20ADD%20ANY%20COMMENTS%20YOU%20MIGHT%20HAVE%20HERE");
-	if (!bCreated){
-		bCreated = true;
-		m_wndSubmitWebcacheLink.AppendText(_T("email ") + GetResString(IDS_WC_LINK));
-		m_wndSubmitWebcacheLink.AppendHyperLink(GetResString(IDS_WC_SUBMIT_EMAIL),0,hyperlink,0,0);
-	}
+	// Superlexx - email proxy submissions are not available anymore, use the web form
 
 // Create website-proxy-submission link
 	CRect rect2;
@@ -140,6 +100,13 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 	m_wndSubmitWebcacheLink2.SetFont(GetFont());
 	if (!bCreated2){
 		bCreated2 = true;
+		CString URL = _T("http://ispcachingforemule.de.vu/index.php?show=submitProxy");
+		CString proxyName, proxyPort, hostName;
+		proxyName.Format(_T("%s"), thePrefs.webcacheName);
+		proxyPort.Format(_T("%i"), thePrefs.webcachePort);
+		hostName.Format(_T("%s"), thePrefs.GetLastResolvedName());
+
+		URL += _T("&hostName=") + hostName + _T("&proxyName=") + proxyName + _T("&proxyPort=") + proxyPort;
 		m_wndSubmitWebcacheLink2.AppendText(GetResString(IDS_WC_LINK));
 		m_wndSubmitWebcacheLink2.AppendHyperLink(GetResString(IDS_WC_SUBMIT_WEB),0,CString(_T("http://ispcachingforemule.de.vu/submitproxy.html")),0,0);
 	}
@@ -154,6 +121,7 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 		GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_UPDATE_WCSETTINGS)->ShowWindow(SW_SHOW);
 	}
 	else
 	{
@@ -164,6 +132,7 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 		GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_UPDATE_WCSETTINGS)->ShowWindow(SW_HIDE);
 	}
 
 
@@ -184,6 +153,7 @@ void CPPgWebcachesettings::OnEnChangeActivatewebcachedownloads(){
 		GetDlgItem(IDC_EXTRATIMEOUT)->EnableWindow(IsDlgButtonChecked(IDC_Activatewebcachedownloads));
 		GetDlgItem(IDC_LOCALTRAFFIC)->EnableWindow(IsDlgButtonChecked(IDC_Activatewebcachedownloads));
 		GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->EnableWindow(IsDlgButtonChecked(IDC_Activatewebcachedownloads));
+		GetDlgItem(IDC_UPDATE_WCSETTINGS)->EnableWindow(IsDlgButtonChecked(IDC_Activatewebcachedownloads));
 		GetDlgItem(IDC_ADVANCEDCONTROLS)->EnableWindow(IsDlgButtonChecked(IDC_Activatewebcachedownloads));
 		guardian=false;
 }
@@ -231,6 +201,9 @@ void CPPgWebcachesettings::LoadSettings(void)
 			// disable advanced settings button
 			GetDlgItem(IDC_ADVANCEDCONTROLS)->EnableWindow(false);
 
+			// disable WC autoupdate
+			GetDlgItem(IDC_UPDATE_WCSETTINGS)->EnableWindow(false);
+
 			return;
 		}
 
@@ -273,6 +246,10 @@ void CPPgWebcachesettings::LoadSettings(void)
 
 		// show advanced settings button
 		GetDlgItem(IDC_ADVANCEDCONTROLS)->EnableWindow(thePrefs.webcacheEnabled==true);
+
+		// load autoupdate
+		GetDlgItem(IDC_UPDATE_WCSETTINGS)->EnableWindow(thePrefs.webcacheEnabled==true);
+		CheckDlgButton(IDC_UPDATE_WCSETTINGS,(thePrefs.WCAutoupdate==true));
 
 	}
 }
@@ -331,6 +308,9 @@ BOOL CPPgWebcachesettings::OnApply()
 	// set thePrefs.PersistentConnectionsForProxyDownloads
 	thePrefs.PersistentConnectionsForProxyDownloads = ((uint8)IsDlgButtonChecked(IDC_PERSISTENT_PROXY_CONNS));
 
+	// set thePrefs.WCAutoupdate
+	thePrefs.WCAutoupdate = ((uint8)IsDlgButtonChecked(IDC_UPDATE_WCSETTINGS));
+
 	SetModified(FALSE);
 	LoadSettings();
 
@@ -366,41 +346,14 @@ void CPPgWebcachesettings::Localize(void)
 		GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->SetWindowText( GetResString(IDS_WC_PERSISTENT) );
 		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText( GetResString(IDS_WC_ADVANCED) );
 		GetDlgItem(IDC_TestProxy)->SetWindowText( GetResString(IDS_WC_TEST) );
+		GetDlgItem(IDC_UPDATE_WCSETTINGS)->SetWindowText( GetResString(IDS_WC_TEST) );
 	}
 }
 void CPPgWebcachesettings::OnBnClickedDetectWebCache()
 {
-	/*CString temp, WCNametemp, ISPNametemp, WCPorttemp;
-	int pos=0;
 
-	try
-	{
-		temp=DetectWebCache();
-	}
-	catch(CString strError)
-	{
-		AfxMessageBox(strError ,MB_OK | MB_ICONINFORMATION,0);
-		return;
-	}
-	catch (...)
-	{
-		AfxMessageBox(_T("Autodetection failed") ,MB_OK | MB_ICONINFORMATION,0);
-		return;
-	}
-
-	WCNametemp=temp.Tokenize(_T(":"),pos);
-	WCPorttemp=temp.Tokenize(_T(":"),pos);
-	ISPNametemp=temp.Tokenize(_T(":"),pos);
- if (AfxMessageBox((_T("Your ISP is:\t\t")+ISPNametemp+_T("\nYour Proxy Name is:\t")+WCNametemp+_T("\nThe Proxy-Port is:\t\t")+WCPorttemp),MB_OKCANCEL | MB_ICONINFORMATION,0) == IDCANCEL) return;
-	thePrefs.webcacheName=WCNametemp;
-	thePrefs.webcachePort=atoi(WCPorttemp);
-	LoadSettings();
-	AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));*/
-
-    //CString WCNametemp, ISPNametemp, WCPorttemp;
 	WCInfo_Struct* detectedWebcache = new WCInfo_Struct();
-	//int pos=0;
-	bool reaskedDNS;	// tells if a DNS backward lookup has been performed during detection
+	bool reaskedDNS;	// tells if a DNS reverse lookup has been performed during detection; unneeded since we don't show it anymore
 
 	try
 	{
@@ -419,30 +372,32 @@ void CPPgWebcachesettings::OnBnClickedDetectWebCache()
 		return;
 	}
 
-	if (AfxMessageBox((_T("Your ISP is:\t\t") + detectedWebcache->isp + _T("\n") +
+	CString comment = detectedWebcache->comment;
+	for (int i=1; i*45 < comment.GetLength(); i++) // some quick-n-dirty beautifying  
+		comment = comment.Left(i*45) + _T(" \n\t\t\t") + comment.Right(comment.GetLength() - i*45);
+
+	CString message =	_T("Your ISP is:\t\t") + detectedWebcache->isp + _T(", ") + detectedWebcache->country + _T("\n") +
 		_T("Your proxy name is:\t") + detectedWebcache->webcache + _T("\n") +
-		_T("The proxy port is:\t\t") + detectedWebcache->port + _T("\n\n") +
-		_T("The block limit is:\t\t") + detectedWebcache->blockLimit + _T("\n") +
-		_T("extra timeout needed:\t") + detectedWebcache->extraTimeout + _T("\n") +
-		_T("caches local traffic:\t\t") + detectedWebcache->cachesLocal + _T("\n") +
-		_T("Use persistent connections:\t") + detectedWebcache->persistentconns + _T("\n\n") +
-		_T("reverse DNS lookup performed:\t") + (reaskedDNS?_T("yes"):_T("no"))
-		),MB_OKCANCEL | MB_ICONINFORMATION,0) == IDCANCEL)
+						_T("The proxy port is:\t\t") + detectedWebcache->port + _T("\n") +
+						(comment != _T("") ? _T("comment: \t\t") + comment : _T(""));
+	if (detectedWebcache->active == "0")
+		message += _T("\n\ndue to detection results, webcache downloading has been deactivated;\nsee the comment for more details");
+
+	if (AfxMessageBox(message, MB_OKCANCEL | MB_ICONINFORMATION,0) == IDCANCEL)
 	{
 		delete detectedWebcache;
 		return;
 	}
 
-	thePrefs.webcacheName=detectedWebcache->webcache;
-	thePrefs.webcachePort=(uint16)_tstol(detectedWebcache->port);
-	thePrefs.SetWebCacheBlockLimit((uint16)_tstol(detectedWebcache->blockLimit));
-	thePrefs.SetWebCacheExtraTimeout(detectedWebcache->extraTimeout == _T("yes") ? true : false);
-	thePrefs.SetWebCacheCachesLocalTraffic(detectedWebcache->cachesLocal == _T("yes") ? true : false);
-	thePrefs.PersistentConnectionsForProxyDownloads = (detectedWebcache->persistentconns == _T("yes") ? true : false);
-	delete detectedWebcache;
-	LoadSettings();
-	AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
+	CheckDlgButton(IDC_Activatewebcachedownloads, detectedWebcache->active == "1" ? BST_CHECKED : BST_UNCHECKED);
+	GetDlgItem(IDC_webcacheName)->SetWindowText(detectedWebcache->webcache);
+	GetDlgItem(IDC_webcachePort)->SetWindowText(detectedWebcache->port);
+	GetDlgItem(IDC_BLOCKS)->SetWindowText(detectedWebcache->blockLimit);
+	CheckDlgButton(IDC_EXTRATIMEOUT, detectedWebcache->extraTimeout == "1" ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_LOCALTRAFFIC, detectedWebcache->cachesLocal == "0" ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_PERSISTENT_PROXY_CONNS, detectedWebcache->persistentconns == "1" ? BST_CHECKED : BST_UNCHECKED);
 
+	delete detectedWebcache;
 }
 
 
@@ -468,6 +423,7 @@ if (showadvanced)
 	GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_SHOW);
 	GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_SHOW);
 	GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_UPDATE_WCSETTINGS)->ShowWindow(SW_SHOW);
 }
 else
 {
@@ -478,6 +434,7 @@ else
 	GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_UPDATE_WCSETTINGS)->ShowWindow(SW_HIDE);
 }
 }
 //JP proxy configuration test
@@ -512,5 +469,5 @@ void CPPgWebcachesettings::OnBnClickedTestProxy()
 			AfxMessageBox(_T("No New Test Started. There is already a Test in progress"));
 	}
 	else
-		AfxMessageBox(_T("No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID"));
+		AfxMessageBox(_T("No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"));
 }

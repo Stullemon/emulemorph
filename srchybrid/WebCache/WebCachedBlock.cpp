@@ -13,9 +13,10 @@
 #include "WebCacheSocket.h"
 #include "WebCachedBlockList.h"
 #include "ThrottledChunkList.h" // jp Don't request chunks for which we are currently receiving proxy sources
+#include "KnownFileList.h"
 #include "Log.h"
 
-CWebCachedBlock::CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client )
+CWebCachedBlock::CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client, bool XpressOHCB )
 {
 	m_uRequestCount = 0; // what is this for?
 	m_bDownloaded = false;
@@ -48,15 +49,14 @@ CWebCachedBlock::CWebCachedBlock( const char* packet, uint32 size, CUpDownClient
 
 	const CPartFile* file = GetFile();
 
-	if( !file ) {
-		if (thePrefs.GetLogWebCacheEvents())
+	if( !file )
+	{
+		const CKnownFile* knownFile = GetKnownFile();
+		if( knownFile && thePrefs.GetLogWebCacheEvents())
+			AddDebugLogLine( false, _T("deleting CWebCachedBlock because %s is not a PartFile\n"), knownFile->GetFileName() );
+		else if (!knownFile && thePrefs.GetLogWebCacheEvents())
 			AddDebugLogLine( false, _T("deleting CWebCachedBlock because we don't know a file with the hash: %s\n"), md4str( m_FileID ) );
-		delete this;
-		return;
-	}
-	if( !file->IsPartFile() ) {
-		if (thePrefs.GetLogWebCacheEvents())
-			AddDebugLogLine( false, _T("deleting CWebCachedBlock because %s is not a PartFile\n"), file->GetFileName() );
+	
 		delete this;
 		return;
 	}
@@ -119,7 +119,7 @@ CWebCachedBlock::CWebCachedBlock( const char* packet, uint32 size, CUpDownClient
 	// jp Don't request chunks for which we are currently receiving proxy sources END
 		GetFile()->AddGap(m_uStart, m_uEnd);
 		if( !DownloadIfPossible() ) {
-			WebCachedBlockList.AddTail( this );
+			XpressOHCB ? WebCachedBlockList.AddHead( this ) : WebCachedBlockList.AddTail( this );
 			if (thePrefs.GetLogWebCacheEvents())
 			AddDebugLogLine( false, _T("WebCachedBlock added to queue") );
 		}
@@ -141,7 +141,7 @@ if( theApp.clientlist )
 			if( client )
 				client->AddWebCachedBlockToStats( m_bDownloaded );
 			if (file)
-				file->AddWebCachedBlockToStats( m_bDownloaded );
+			file->AddWebCachedBlockToStats( m_bDownloaded, m_uEnd-m_uStart  );
 	}
 	}
 
@@ -153,6 +153,11 @@ if( theApp.clientlist )
 CPartFile* CWebCachedBlock::GetFile() const
 {
 	return( theApp.downloadqueue->GetFileByID( m_FileID ) );
+}
+
+CKnownFile* CWebCachedBlock::GetKnownFile() const
+{
+	return( theApp.knownfiles->FindKnownFileByID( m_FileID ) );
 }
 
 uint32 CWebCachedBlock::GetProxyIp() const

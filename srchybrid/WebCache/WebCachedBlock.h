@@ -17,6 +17,7 @@
 #pragma once
 
 #include "PartFile.h"
+#include "KnownFile.h"
 #include "UpDownClient.h"
 
 class CWebCacheProxyClient;
@@ -36,6 +37,7 @@ private:
 	bool m_bDownloaded;				// set if block DL succeeded
 	bool m_bRequested;				// set if block was requested
 	CPartFile* GetFile() const;
+	CKnownFile* GetKnownFile() const;
 	void UpdateProxyClient();
 public:
 	uint32 m_uTime; //jp remove old chunks (currently only for Stopped-List)
@@ -47,6 +49,6 @@ public:
 	void OnSuccessfulDownload();
 	void OnWebCacheBlockRequestSent();
 	Pending_Block_Struct* CWebCachedBlock::CreatePendingBlock();
-	CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client );
+	CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client, bool XpressOHCB = false );
 	~CWebCachedBlock();
 };

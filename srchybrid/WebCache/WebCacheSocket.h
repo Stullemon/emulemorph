@@ -31,6 +31,7 @@ class CWebCacheSocket : public CHttpClientReqSocket
 
 public:
 	virtual CUpDownClient* GetClient() const { return m_client; }
+	virtual void SetClient(CUpDownClient* new_client) { m_client = new_client; }
 	virtual void Safe_Delete();
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	bool m_bReceivedHttpClose; // 'Connection: close' detector

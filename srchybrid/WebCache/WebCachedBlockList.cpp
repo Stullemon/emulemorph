@@ -9,6 +9,8 @@
 #include "eMule.h"
 #include "WebCacheSocket.h" //JP block-selection
 #include "opcodes.h" //JP HR2MS needed in GetNextBlockToDownload()
+#include "SafeFile.h"
+#include "ClientList.h"
 #include "Log.h"
 #define MAX_WCBLOCKLIST_SIZE 2000
 #define MAX_TIME_TO_KEEP_OHCB_IN_LIST 60*60*1000  //this is currently only used for Stopped WC-Block-List
@@ -146,4 +148,51 @@ while (i < GetCount())
 		else
 			i++;
 }
+}
+
+// Superlexx - process the multi-OHCB-packet
+
+/*bool CWebCachedBlockList::ProcessWCBlocks(char* packet, uint32 size)
+{
+	if (size < WC_OHCB_PACKET_SIZE + 8)	// check the minimal packet size
+		return false;
+	CSafeMemFile indata((BYTE*)packet, size );
+	CUpDownClient* client = theApp.clientlist->FindClientByWebCacheUploadId(indata.ReadUInt32());
+
+	if (client)
+		return ProcessWCBlocks(packet, size, client);
+	
+	return false;
+}*/
+
+
+bool CWebCachedBlockList::ProcessWCBlocks(char* packet, uint32 size, UINT opcode, CUpDownClient* client)
+{
+	if (size < WC_OHCB_PACKET_SIZE + 8)	// check the minimal packet size
+		return false;
+	CSafeMemFile indata((BYTE*)packet, size );
+
+	if (!client)
+		client = theApp.clientlist->FindClientByWebCacheUploadId(indata.ReadUInt32());
+	else
+		indata.ReadUInt32();
+
+	if (!client)	// client not found
+		return false;
+
+	uint32 nrOfBlocks = indata.ReadUInt32();
+	if (size != nrOfBlocks*WC_OHCB_PACKET_SIZE + 8)	// check for right packet size, 50 bytes per OHCB + 8 bytes (uploadID and the number of blocks)
+		return false;
+
+	uint32 blockNr = 0;
+	if (opcode == OP_XPRESS_MULTI_HTTP_CACHED_BLOCKS)
+	{
+		CWebCachedBlock* newblock = new CWebCachedBlock( packet + 8, WC_OHCB_PACKET_SIZE, client, true );
+		blockNr++;
+	}
+
+	for(; blockNr < nrOfBlocks; blockNr++)
+		CWebCachedBlock* newblock = new CWebCachedBlock( packet + 8 + blockNr * WC_OHCB_PACKET_SIZE, WC_OHCB_PACKET_SIZE, client);
+
+	return true;
 }

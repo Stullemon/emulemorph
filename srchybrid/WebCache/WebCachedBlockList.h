@@ -31,6 +31,8 @@ public:
 	bool IsFull();
 	POSITION AddTail( CWebCachedBlock* newelement );
 	void TryToDL();
+//	bool ProcessWCBlocks(char* packet, uint32 size);	// reads MultiOHCBPacket, finds the sender and adds the blocks to the queue
+	bool ProcessWCBlocks(char* packet, uint32 size, UINT opcode = NULL, CUpDownClient* client = NULL);	// reads MultiOHCBPacket and adds the blocks to the queue
 };
 
 ////////CStoppedWebCachedBlockList////////////////////////////////////////////////////

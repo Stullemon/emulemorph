@@ -1034,15 +1034,7 @@ void CUpDownClient::SendBlockRequests(){
 		CreateBlockRequests(1);
 		if (m_PendingBlocks_list.IsEmpty())
 		{
-			//MORPH - Changed by SiRoB, WebCache Fix
-			/*
 			SendCancelTransfer();
-			*/
-			if (m_pWCDownSocket != NULL){
-				m_pWCDownSocket->Safe_Delete();
-				ASSERT( m_pWCDownSocket == NULL );
-			}
-			//MORPH - Changed by SiRoB, WebCache Fix
 			SetDownloadState(DS_NONEEDEDPARTS);
 			return;
 		}

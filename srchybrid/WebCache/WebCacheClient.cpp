@@ -36,10 +36,10 @@
 #include "WebCacheProxyClient.h"
 #include "WebCachedBlockList.h"
 #include "ClientUDPSocket.h"
+#include "WebCacheOHCBManager.h"
 // yonatan http end ////////////////////////////////////////////////////////////////////////////
-// Superlexx - Proxy AutoDetect - start ////////////////////////////////////////////////////////
-#include "ws2tcpip.h"
-// Superlexx - Proxy AutoDetect - end //////////////////////////////////////////////////////////
+//#include "ws2tcpip.h" // Superlexx - Proxy AutoDetect
+#include "DownloadQueue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -366,6 +366,64 @@ bool CWebCacheUpSocket::ProcessHttpRequest()
 	if (GetClient() == NULL)
 		throw CString(__FUNCTION__ " - No client attached to HTTP socket");
 
+	// DFA
+	// yonatan http - extract client from header
+	uint32 id;
+	for (int i = 0; i < m_astrHttpHeaders.GetCount(); i++)
+	{
+		const CStringA& rstrHdr = m_astrHttpHeaders.GetAt(i);
+		if (_strnicmp(rstrHdr, "Pragma: IDs=", 12) == 0)
+		{
+			try
+			{
+				int posStart = 0;
+				rstrHdr.Tokenize("=", posStart);
+				int posEnd = posStart;
+				rstrHdr.Tokenize("|", posEnd);
+				id = atoi(rstrHdr.Mid(posStart, posEnd-posStart));
+			}
+			catch(...)
+			{
+				DebugHttpHeaders(m_astrHttpHeaders);
+				TRACE(_T("*** Unexpected HTTP %hs\n"), rstrHdr);
+				return false;
+			}
+		}
+	}
+
+	CUpDownClient* m_client_new = theApp.uploadqueue->FindClientByWebCacheUploadId( id );
+
+	if( !m_client_new ) {
+		DebugHttpHeaders(m_astrHttpHeaders);
+		TRACE(_T("*** Http GET from unknown client, webcache-id: %u"), id );
+		return false;
+	}
+	if( !m_client_new->SupportsWebCache() ) {
+		DebugHttpHeaders(m_astrHttpHeaders);
+		TRACE(_T("*** Http GET from non-webcache client: %s"), client->DbgGetClientInfo() );
+		return false;
+	}
+// DFA
+/*	if( GetClient()->m_pWCUpSocket ) {
+		ASSERT(GetClient()->m_pWCUpSocket != this);
+		if (thePrefs.GetLogWebCacheEvents())
+			AddDebugLogLine(false, _T("*** Http GET on standard listensocket from client with established http socket: %s"), client->DbgGetClientInfo() );
+		GetClient()->m_pWCUpSocket->Safe_Delete();
+		GetClient()->m_pWCUpSocket = 0;
+	}*/
+
+	if (m_client != m_client_new) // HTTP request of another client arrived here
+	{
+		TRACE(_T("*** DFA: switching socket from ") + CString(m_client->GetUserName()) + _T(" to ") + CString(m_client_new->GetUserName()) + _T("\n"));
+		// Xchange the sockets
+		//CWebCacheUpSocket* tmp = m_client->m_pWCUpSocket;
+		m_client->m_pWCUpSocket = m_client_new->m_pWCUpSocket;
+		m_client->m_pWCUpSocket->SetClient(m_client);
+		//m_client_new->m_pWCUpSocket = this;
+	}
+	m_client = m_client_new; // set the (maybe new) owner in the class variable
+	GetClient()->m_pWCUpSocket = this;
+
 	UINT uHttpRes = GetClient()->ProcessWebCacheUpHttpRequest(m_astrHttpHeaders);
 
 	if (uHttpRes != HTTP_STATUS_OK){
@@ -375,7 +433,7 @@ bool CWebCacheUpSocket::ProcessHttpRequest()
 		strResponse.AppendFormat("\r\n");
 
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
-			Debug(_T("Sending WebCache HTTP respone:\n%hs"), strResponse);
+			Debug(_T("Sending WebCache HTTP response:\n%hs"), strResponse);
 		CRawPacket* pHttpPacket = new CRawPacket(strResponse);
 		theStats.AddUpDataOverheadFileRequest(pHttpPacket->size);
 		SendPacket(pHttpPacket);
@@ -408,7 +466,7 @@ bool CWebCacheUpSocket::ProcessFirstHttpGet( const char* header, UINT uSize )
 	{
 		const CStringA& rstrHdr = m_astrHttpHeaders.GetAt(i);
 
-		//JP proxy configuration test
+		//JP proxy configuration test START
 		if (_strnicmp(rstrHdr, "GET /encryptedData/WebCachePing.htm HTTP/1.1", 30) == 0)
 		{
 			if (thePrefs.expectingWebCachePing)
@@ -422,7 +480,7 @@ bool CWebCacheUpSocket::ProcessFirstHttpGet( const char* header, UINT uSize )
 					AddDebugLogLine(false, _T("WebCachePing received, but no test in progress"));
 		return true; //everything that needs to be done with this packet has been done
 		}
-		//JP proxy configuration test
+		//JP proxy configuration test END
 
 		if (_strnicmp(rstrHdr, "Pragma: IDs=", 12) == 0)
 		{
@@ -589,7 +647,10 @@ bool CUpDownClient::ProcessWebCacheDownHttpResponse(const CStringAArray& astrHea
 	// Also, we have to support both type of downloads within in the same connection.
 
 	// WC-TODO: Find out when, if and where this is changed. Should this line be here?
-	SetWebCacheDownState(WCDS_DOWNLOADING);
+	if (IsProxy())
+		SetWebCacheDownState(WCDS_DOWNLOADINGFROM);
+	else
+		SetWebCacheDownState(WCDS_DOWNLOADINGVIA);
 
 	return true;
 }
@@ -649,6 +710,7 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 			}
 			slaveKeyFound = true;
 		}
+//		else if ( buffer == "Connection: close" )
 		else if ( buffer.Left( 11 ).CompareNoCase( "Connection:" ) == 0 )
 		{
 			int pos = 11;
@@ -712,6 +774,12 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 		DebugHttpHeaders(astrHeaders);
 		return HTTP_STATUS_BAD_REQUEST;
 	}*/
+
+	if (md4cmp(aucUploadFileID, requpfileid) != 0) // client sending an HTTP request for wrong file
+	{
+		DebugHttpHeaders(astrHeaders);
+		return HTTP_STATUS_FORBIDDEN;
+	}
 
 	CKnownFile* pUploadFile = theApp.sharedfiles->GetFileByID(aucUploadFileID);
 	if (pUploadFile == NULL){
@@ -778,6 +846,15 @@ bool CUpDownClient::ProcessWebCacheUpHttpResponse(const CStringAArray& astrHeade
 
 bool CUpDownClient::SendWebCacheBlockRequests()
 {
+	//JP test if proxy is working
+	if (thePrefs.ses_PROXYREQUESTS>100 && thePrefs.ses_successfullPROXYREQUESTS == 0) //disable webcache for this session if more than 100 blocks were tried withouth success
+	{
+		thePrefs.WebCacheDisabledThisSession = true;
+		AfxMessageBox(_T("Your Proxy server is not responding to your requests. Please check your webcachesettings."));
+		return false;
+	}
+
+	Crypt.useNewKey = true;	// moved here from SendBlockRequests()
 	ASSERT( !m_PendingBlocks_list.IsEmpty() );
 
 	USES_CONVERSION;
@@ -880,11 +957,14 @@ bool CUpDownClient::SendWebCacheBlockRequests()
 		Debug(_T("  %hs\n"), strWCRequest);
 	}
 
+	TRACE("HTTP GET sent:\r\n" + strWCRequest);
+
 	CRawPacket* pHttpPacket = new CRawPacket(strWCRequest);
 	theStats.AddUpDataOverheadFileRequest(pHttpPacket->size);
 	m_pWCDownSocket->SendPacket(pHttpPacket);
 	m_pWCDownSocket->SetHttpState(HttpStateRecvExpected);
 	SetWebCacheDownState(WCDS_WAIT_CLIENT_REPLY);
+	thePrefs.ses_PROXYREQUESTS++;
 	return true;
 }
 
@@ -907,11 +987,7 @@ void CUpDownClient::OnWebCacheDownSocketClosed(int nErrorCode)
 		return;
 
 	// restart WC download if cache just closed the connection without obvious reason
-	if (GetDownloadState() == DS_DOWNLOADING
-		//MORPH START - Added by SiRoB, WebCache Fix
-		&& m_eWebCacheDownState == WCDS_DOWNLOADING
-		&& !m_PendingBlocks_list.IsEmpty())
-		//MORPH END - Added by SiRoB, WebCache Fix
+	if (GetDownloadState() == DS_DOWNLOADING)
 	{
 		if (thePrefs.GetLogWebCacheEvents())
 		AddDebugLogLine(DLP_HIGH, false, _T("WebCache: Socket closed unexpedtedly, trying to reestablish connection"));
@@ -933,11 +1009,7 @@ void CUpDownClient::OnWebCacheDownSocketClosed(int nErrorCode)
 void CUpDownClient::OnWebCacheDownSocketTimeout()
 {
 	// restart WC download if cache just stalls
-	if (GetDownloadState() == DS_DOWNLOADING
-		//MORPH START - Added by SiRoB, WebCache Fix
-		&& m_eWebCacheDownState == WCDS_DOWNLOADING
-		&& !m_PendingBlocks_list.IsEmpty())
-		//MORPH END   - Added by SiRoB, WebCache Fix
+	if (GetDownloadState() == DS_DOWNLOADING)
 	{
 		if (thePrefs.GetLogWebCacheEvents())
 		AddDebugLogLine(DLP_HIGH, false, _T("WebCache Error: Socket TimeOut, trying to reestablish connection"));
@@ -987,28 +1059,40 @@ void CUpDownClient::SetWebCacheUpState(EWebCacheUpState eState)
 
 void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 {
+	POSITION OHCBpos = WC_OHCBManager.AddWCBlock(	thePrefs.WebCacheIsTransparent() ? 0 : ResolveWebCacheName(),
+													GetIP(),
+													GetUserPort(),
+													reqfile->GetFileHash(),
+													block->StartOffset,
+													block->EndOffset,
+													Crypt.remoteKey);
+
 	POSITION pos = reqfile->srclist.GetHeadPosition();
 	const uchar* filehash;
 
 	uint16 part = block->StartOffset / PARTSIZE;
+	uint32 nrOfSentOHCBs = 0;
 	filehash = reqfile->GetFileHash();
 
-	while( pos ) {
+	while( pos )
+	{
 		CUpDownClient* cur_client = reqfile->srclist.GetNext( pos );
 		if( !cur_client->IsProxy()
 			&& cur_client != this // 'this' is the client we have downloaded the block from
 			&& cur_client->m_bIsAcceptingOurOhcbs
-			&& !cur_client->IsPartAvailable( part ) 
-			&& cur_client->IsBehindOurWebCache() ) { // inefficient
+			&& !cur_client->IsPartAvailable( part )	// using standard function for pre-1.9a clients
+			&& !cur_client->SupportsMultiOHCBs()	// pre-1.9a client
+			&& cur_client->IsBehindOurWebCache() )	// inefficient
+		{
 			CSafeMemFile data;
-			// <Proxy IP 4><IP 4><PORT 2><filehash 16><offset 4><key CString>
+			// <Proxy IP 4><IP 4><PORT 2><filehash 16><offset 4><key 16>
 			if (thePrefs.WebCacheIsTransparent())
 				data.WriteUInt32( 0 ); // Superlexx - TPS
 			else
 				data.WriteUInt32( ResolveWebCacheName() ); // Proxy IP
 			data.WriteUInt32( GetIP() ); // Source client IP
 			data.WriteUInt16( GetUserPort() ); // Source client port
-			data.WriteHash16( reqfile->GetFileHash() ); // filehash
+			data.WriteHash16( block->FileID/*reqfile->GetFileHash()*/ ); // filehash
 			data.WriteUInt32( block->StartOffset ); // start offset
 			data.WriteUInt32( block->EndOffset ); // end offset
 
@@ -1016,28 +1100,28 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			data.Write( Crypt.remoteKey, WC_KEYLENGTH );
 			// Superlexx end
 
-			//MORPH START - Changed by SiRoB, WebCache Fix: temp patch to not send by udp if disabled
-			/*
-			if( cur_client->SupportsWebCacheUDP() && !cur_client->HasLowID() )
-			*/
-			if(cur_client->SupportsWebCacheUDP() && !cur_client->HasLowID() != 0 && thePrefs.GetUDPPort() != 0)
-			//MORPH END  - Changed by SiRoB, temp patch to not send by udp if disabled
-			{
+			if( cur_client->SupportsWebCacheUDP()
+				&& !cur_client->HasLowID()
+				&& GetUDPPort() != 0	// thx to SiRoB
+				&& !(cur_client->socket && socket->IsConnected()))
+			{	// send UDP
 				data.WriteUInt32( cur_client->m_uWebCacheDownloadId );
 				if (thePrefs.GetLogWebCacheEvents())
 					AddDebugLogLine( false, _T("WCBlock sent to client - UDP"));
 				Packet* packet = new Packet(&data);
-				packet->opcode = OP_HTTP_CACHED_BLOCK;
 				if (cur_client->SupportsWebCacheProtocol())
 					packet->prot = OP_WEBCACHEPROT; //if the client supports webcacheprot use that (keep backwards compatiblity)
 				else
 					packet->prot = OP_EMULEPROT; //UDP-Packets use eMule-protocol WC-TODO: remove this eventually
+				packet->opcode = OP_HTTP_CACHED_BLOCK;
 				if (thePrefs.GetDebugClientUDPLevel() > 0)
 					DebugSend("OP__Http_Cached_Block (UDP)", cur_client );
 				theApp.clientudp->SendPacket(packet, cur_client->GetIP(), cur_client->GetUDPPort());
+				WC_OHCBManager.AddRecipient(OHCBpos, cur_client);
+				nrOfSentOHCBs++;
 			}
 			else
-			{
+			{	// send TCP
 				Packet* packet = new Packet(&data);
 				if (cur_client->SupportsWebCacheProtocol())
 					packet->prot = OP_WEBCACHEPROT;
@@ -1047,17 +1131,72 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 				theStats.AddUpDataOverheadOther(packet->size);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					DebugSend("OP__Http_Cached_Block (TCP)", cur_client );
-				if( cur_client->socket && socket->IsConnected() ) {
+				if( cur_client->socket && socket->IsConnected() )
+				{
 					if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("WCBlock sent to client - TCP") );
 					cur_client->socket->SendPacket( packet );
-				} else {
+					nrOfSentOHCBs++;
+				}
+				else
+				{
 					if (thePrefs.GetLogWebCacheEvents())
 						AddDebugLogLine( false, _T("WCBlock added to list - TCP") );
 					cur_client->m_WaitingPackets_list.AddTail(packet);
 				}
+				WC_OHCBManager.AddRecipient(OHCBpos, cur_client);
 			}
 		}
+	}
+
+	if (nrOfSentOHCBs < WC_NR_OF_XPRESS_OHCBS)
+	{
+		uint32 now = GetTickCount();
+		CUpDownClientPtrList* XpressOHCBRecipients = theApp.clientlist->XpressOHCBRecipients(WC_NR_OF_XPRESS_OHCBS - nrOfSentOHCBs, block);
+		uint32 nrOfOHCBsInThePacket = 0;
+		while (XpressOHCBRecipients->GetCount() > 0)
+		{
+			CUpDownClient* cur_client = XpressOHCBRecipients->GetHead();
+			Packet* packet = WC_OHCBManager.GetWCBlocksForClient(cur_client, nrOfOHCBsInThePacket, OHCBpos);
+			theStats.AddUpDataOverheadOther(packet->size);
+
+			if( cur_client->SupportsWebCacheUDP()
+				&& !cur_client->HasLowID()
+				&& GetUDPPort() != 0
+				&& !(cur_client->socket && socket->IsConnected())
+				&& nrOfOHCBsInThePacket <= WC_MAX_OHCBS_IN_UDP_PACKET
+				&& theApp.downloadqueue->GetFailedUDPFileReasks() * 100.0 / (theApp.downloadqueue->GetUDPFileReasks() + 1) < 0,2 // less than 20% of UDP reasks failed globally
+				&& cur_client->m_nTotalUDPPackets > 4 && (float)(cur_client->m_nFailedUDPPackets/cur_client->m_nTotalUDPPackets) < 0,2) // less than 20% of UDP reasks failed for this client
+			{	// send UDP
+				if (thePrefs.GetLogWebCacheEvents())
+					AddDebugLogLine( false, _T("Multi-WCBlock (%d OHCBs, UDP) sent to client %s"), nrOfOHCBsInThePacket, cur_client->DbgGetClientInfo());
+				if (thePrefs.GetDebugClientUDPLevel() > 0)
+					DebugSend("OP__Multi_Http_Cached_Block (UDP)", cur_client );
+				lastMultiOHCBPacketSent = now;
+				theApp.clientudp->SendPacket(packet, cur_client->GetIP(), cur_client->GetUDPPort());
+			}
+			else
+			{
+				if (thePrefs.GetDebugClientTCPLevel() > 0)
+					DebugSend("OP__Multi_Http_Cached_Block (TCP)", cur_client );
+				if( cur_client->socket && socket->IsConnected() )
+				{
+					if (thePrefs.GetLogWebCacheEvents())
+						AddDebugLogLine( false, _T("Multi-WCBlock (%d OHCBs, TCP) sent to client %s"), nrOfOHCBsInThePacket, cur_client->DbgGetClientInfo());
+					lastMultiOHCBPacketSent = now;
+					cur_client->socket->SendPacket( packet );
+				}
+				else
+				{
+					if (thePrefs.GetLogWebCacheEvents())
+						AddDebugLogLine( false, _T("Multi-WCBlock (%d OHCBs, TCP SafeSendPacket) sent to client %s"), nrOfOHCBsInThePacket, cur_client->DbgGetClientInfo());
+					lastMultiOHCBPacketSent = now;
+					cur_client->SafeSendPacket(packet);
+				}
+			}
+			XpressOHCBRecipients->RemoveHead();
+		}
+		delete XpressOHCBRecipients;
 	}
 }
 
@@ -1087,27 +1226,47 @@ uint16 CUpDownClient::GetNumberOfClientsBehindOurWebCacheAskingForSameFile()
 	return toReturn;
 }
 
-uint16 CUpDownClient::GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending) // Superlexx - COtN
-{
-	uint16 toReturn = 0;
-	uint16 part = pending->block->StartOffset / PARTSIZE;
-	POSITION pos = reqfile->srclist.GetHeadPosition();
-	while( pos )
-	{
-		CUpDownClient* cur_client = reqfile->srclist.GetNext( pos );
-		if( !cur_client->IsProxy()
-			&& cur_client != this // 'this' is the client we want to download data from
-			&& cur_client->IsBehindOurWebCache()
-			&& !cur_client->IsPartAvailable(part))
-			toReturn++;
-	}
-	return toReturn;
-}
+//uint16 CUpDownClient::GetNumberOfClientsBehindOurWebCacheHavingSameFileAndNeedingThisBlock(Pending_Block_Struct* pending, uint32 maxClients) // Superlexx - COtN
+//{
+//	uint16 toReturn = 0;
+//	uint16 part = pending->block->StartOffset / PARTSIZE;
+////	POSITION pos = reqfile->srclist.GetHeadPosition();
+//	POSITION pos = 
+//	while( pos )
+//	{
+//		CUpDownClient* cur_client = reqfile->srclist.GetNext( pos );
+//		if( cur_client->m_bIsAcceptingOurOhcbs
+//			&& !cur_client->IsProxy()
+//			&& cur_client != this // 'this' is the client we want to download data from
+//			&& cur_client->IsBehindOurWebCache()
+//			&& !cur_client->IsPartAvailable(part))
+//			toReturn++;
+//	}
+//	return toReturn;
+//}
 //JP trusted OHCB-senders START
 
 // yonatan - moved code from IsTrustedOhcbSender to AddWebCachedBlockToStats,
 // might delete the client who sent the OHCB (if IsGood==false SafeSendPacket is called)
+
 void CUpDownClient::AddWebCachedBlockToStats( bool IsGood )
+{
+	WebCachedBlockRequests++;
+	if (IsGood)
+		SuccessfulWebCachedBlockDownloads++;
+
+	// check if we still trust the senders' ohcbs 
+	if (WebCachedBlockRequests<100 //we need to try 100 blocks before the statistic is meaningfull 
+		|| (SuccessfulWebCachedBlockDownloads*100/WebCachedBlockRequests >= thePrefs.webcacheTrustLevel)) //if we have tried those blocks we need to be more successfull than the trustlevel 
+		return; 
+	// client has sent too many bad ohcbs 
+	if (thePrefs.GetLogWebCacheEvents()) 
+		AddDebugLogLine(false, _T("We don't trust OHCBs from client %s"), DbgGetClientInfo());      
+	m_bIsTrustedOHCBSender = false; 
+	SendStopOHCBSending(); // Support for this is checked in SendStopOHCBSending 
+}
+
+/*void CUpDownClient::AddWebCachedBlockToStats( bool IsGood )
 {
 	WebCachedBlockRequests++;
 	if (IsGood)
@@ -1131,7 +1290,7 @@ if (WebCachedBlockRequests<10) //if less than 10 requests made
 			AddDebugLogLine(false, _T("We don't trust OHCBs from client %s"), DbgGetClientInfo());	
 		m_bIsTrustedOHCBSender = false;
 	SendStopOHCBSending(); // Support for this is checked in SendStopOHCBSending
-}
+}*/
 //JP trusted OHCB-senders END
 
 void CUpDownClient::SendStopOHCBSending() //make a new TCP-connection here because it's important
@@ -1149,7 +1308,7 @@ if( SupportsOhcbSuppression() )
 }
 }
 
-//JP WE ARE NOT USING IT YET
+//JP TEST THIS!!! (WE ARE NOT USING IT YET)
 void CUpDownClient::SendResumeOHCBSendingTCP() //only add the packet to the queue because it's not so important ??
 {
 if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender) 
@@ -1160,31 +1319,120 @@ if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender)
 		DebugSend("OP_RESUME_SEND_OHCBS (TCP)", this );
 	if( socket && socket->IsConnected() ) {
 		if (thePrefs.GetLogWebCacheEvents())
-			AddDebugLogLine( false, _T("OP_RESUME_SEND_OHCBS sent to %s (TCP) "), DbgGetClientInfo() );
+			AddDebugLogLine( false, _T("OP_RESUME_SEND_OHCBS sent to client - TCP") );
 		socket->SendPacket( packet );
 	} else {
 		if (thePrefs.GetLogWebCacheEvents())
-			AddDebugLogLine( false, _T("OP_RESUME_SEND_OHCBS to %s added to list (TCP) "), DbgGetClientInfo() );
+			AddDebugLogLine( false, _T("OP_RESUME_SEND_OHCBS added to list - TCP") );
 		m_WaitingPackets_list.AddTail(packet);
 		}
 	m_bIsAllowedToSendOHCBs = true;
 }
 }
-//JP trusted OHCB-senders END
+//JP Add THIS!!! (WE ARE NOT USING IT YET)
 void CUpDownClient::SendResumeOHCBSendingUDP()
 {
-	if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender && SupportsWebCacheUDP() && !HasLowID() && thePrefs.GetUDPPort() != 0) 
+	if( SupportsOhcbSuppression() && m_bIsTrustedOHCBSender && SupportsWebCacheUDP() && !HasLowID()) 
+	{
+		//JP WC-TODO: add sending the UDP packet here
+		m_bIsAllowedToSendOHCBs = true;
+	}
+}
+
+// Superlexx - MFR
+// note that the requesting a file in the usual way doesn't mean requesting OHCBs for it anymore
+// the chunk states might be useful for chunk selection, not implemented and not planned ATM
+
+Packet* CUpDownClient::CreateMFRPacket()
 {
-	CSafeMemFile data;
-	data.WriteUInt32( m_uWebCacheDownloadId );
-	Packet* packet = new Packet(&data);
-	packet->prot = OP_WEBCACHEPROT;
-	packet->opcode = OP_RESUME_SEND_OHCBS;
-	if (thePrefs.GetDebugClientUDPLevel() > 0)
-		DebugSend("OP_RESUME_SEND_OHCBS (UDP)", this );
-	theApp.clientudp->SendPacket(packet, GetIP(), GetUDPPort());
-	if (thePrefs.GetLogWebCacheEvents())
-		AddDebugLogLine( false, _T("OP_RESUME_SEND_OHCBS sent to %s (UDP) "), DbgGetClientInfo() );
-	m_bIsAllowedToSendOHCBs = true;
+	CSafeMemFile* data = new CSafeMemFile();
+	if (!AttachMultiOHCBsRequest(*data))
+		return NULL;	// we don't want anything from this client
+	Packet* toSend = new Packet(data, OP_WEBCACHEPROT, OP_MULTI_FILE_REQ);
+	delete data;
+	uint32 unpackedSize = toSend->size;
+	toSend->PackPacket();
+	if (toSend->size > unpackedSize)
+		toSend->UnPackPacket(unpackedSize);
+	return toSend;
+}
+
+uint8 CUpDownClient::AttachMultiOHCBsRequest(CSafeMemFile &data)
+{
+	if (!SupportsWebCache()
+		|| !IsBehindOurWebCache()
+		|| !SupportsMultiOHCBs())
+		return 0;
+	ASSERT(reqfile);
+	uint8 fileCount = 1;
+
+	data.WriteUInt8(0); // number of requested files will be written here later
+//	byte fileHash[] = new byte[16];
+//	fileHash = reqfile->GetFileHash();
+	data.WriteHash16(reqfile->GetFileHash());
+	reqfile->WritePartStatus(&data);
+	
+	for (POSITION pos = m_OtherRequests_list.GetHeadPosition(); pos && (fileCount != -2); m_OtherRequests_list.GetNext(pos))
+	{
+		data.WriteHash16(m_OtherRequests_list.GetAt(pos)->GetFileHash());
+		m_OtherRequests_list.GetAt(pos)->WritePartStatus(&data);
+		fileCount++;
+	}
+	
+	for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition(); pos && (fileCount != -1); m_OtherNoNeeded_list.GetNext(pos))
+	{
+		data.WriteHash16(m_OtherNoNeeded_list.GetAt(pos)->GetFileHash());
+		m_OtherNoNeeded_list.GetAt(pos)->WritePartStatus(&data);
+		fileCount++;
+	}
+	data.SeekToBegin();
+	data.WriteUInt8(fileCount);
+	return fileCount;
+}
+
+void CUpDownClient::SendOHCBsNow()
+{
+	uint32 nrOfOHCBsInThePacket = 0;
+	uint32 now = GetTickCount();
+	Packet* packet = WC_OHCBManager.GetWCBlocksForClient(this, nrOfOHCBsInThePacket, NULL);
+	if (!packet) // nothing to send
+		return;
+	theStats.AddUpDataOverheadOther(packet->size);
+	if( !HasLowID()
+		&& GetUDPPort() != 0
+		&& !(socket && socket->IsConnected())
+//		&& nrOfOHCBsInThePacket <= WC_MAX_OHCBS_IN_UDP_PACKET
+		&& a(nrOfOHCBsInThePacket)
+//		&& (theApp.downloadqueue->GetFailedUDPFileReasks() * 100.0 / (theApp.downloadqueue->GetUDPFileReasks() + 1) < 0,2 ) // less than 20% of UDP reasks failed globally
+		&& b(theApp.downloadqueue->GetFailedUDPFileReasks(), theApp.downloadqueue->GetUDPFileReasks()) // less than 20% of UDP reasks failed globally
+//		&& (m_nTotalUDPPackets > 4 && (m_nFailedUDPPackets * 100) / m_nTotalUDPPackets < 20)) // less than 20% of UDP reasks failed for this client
+		&& c(m_nTotalUDPPackets, m_nFailedUDPPackets)) // less than 20% of UDP reasks failed for this client
+	{	// send UDP
+		if (thePrefs.GetLogWebCacheEvents())
+			AddDebugLogLine( false, _T("multi-OHCB-packet sent to client - UDP"));
+		if (thePrefs.GetDebugClientUDPLevel() > 0)
+			DebugSend("OP__Multi_Http_Cached_Block (UDP)", this );
+		lastMultiOHCBPacketSent = now;
+		theApp.clientudp->SendPacket(packet, GetIP(), GetUDPPort());
+	}
+	else if (!HasLowID() // don't try to send data to disconnected lowIDs
+			|| (socket && socket->IsConnected()))
+	{	// send TCP
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__Multi_Http_Cached_Block (TCP)", this);
+		if( socket && socket->IsConnected() )
+		{
+			if (thePrefs.GetLogWebCacheEvents())
+				AddDebugLogLine( false, _T("Multi-WCBlock sent to client - TCP") );
+			lastMultiOHCBPacketSent = now;
+			socket->SendPacket( packet );
+		}
+		else
+		{
+		if (thePrefs.GetLogWebCacheEvents())
+				AddDebugLogLine( false, _T("Multi-WCBlock sent to client - TCP SafeSendPacket") );
+			lastMultiOHCBPacketSent = now;
+			SafeSendPacket(packet); // it's ugly, I know...
+		}
 }
 }

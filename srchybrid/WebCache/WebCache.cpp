@@ -7,8 +7,6 @@
 #include "eMule.h"
 #include "WebCachedBlockList.h"
 #include <windns.h>
-#include <crypto51/modes.h>
-#include <crypto51/aes.h>
 #include <crypto51/osrng.h>
 #include "opcodes.h"
 #include "kademlia/kademlia/Kademlia.h"
@@ -18,6 +16,9 @@
 #include "WebCacheSocket.h"//JP proxy configuration test
 #include "Packets.h"//JP proxy configuration test
 #include "Statistics.h" //JP proxy configuration test
+
+#include <atlrx.h>
+#import <msxml3.dll> // Superlexx - XML-based proxy auto-detector
 
 #define MAX_PROXY_CONN 5
 
@@ -154,66 +155,79 @@ CString ReverseDnsLookupForWebCache(DWORD dwIP)	// taken from 0.43b PeerCache co
 }
 
 //jp detect webcache on startup
-void detectWebcacheOnStart()
+void AutodetectWebcache()
 {
 	WCInfo_Struct* detectedWebcache = new WCInfo_Struct();
-
-	bool reaskedDNS;	// tells if a DNS backward lookup has been performed during detection
+	bool reaskedDNS;	// tells if a DNS reverse lookup has been performed during detection
 
 	try
 	{
-		reaskedDNS=DetectWebCache(detectedWebcache);
+		reaskedDNS=DetectWebCache(detectedWebcache, 2); // force using online DB
 	}
+
 	catch(CString strError)
 	{
 		delete detectedWebcache;
 		if (thePrefs.GetLogWebCacheEvents())
-		AddDebugLogLine( false,_T("Error during webcachedetection on first start: ") + strError); // jp log
-		if	((strError != _T("parsing webcache database failed")) &&
-			(strError != _T("Not starting a detection:\nlast failed DNS reverse lookup attempt is too near,\nIP has not changed")))
-		// AfxMessageBox(strError ,MB_OK | MB_ICONINFORMATION,0); //jp no messagebox for detect on startup
+			AddDebugLogLine( false,_T("Error during automatic webcachedetection: ") + strError); // jp log
 		return;
 	}
 	catch (...)
 	{
 		delete detectedWebcache;
-		// AfxMessageBox(_T("Autodetection failed") ,MB_OK | MB_ICONINFORMATION,0); //jp no messagebox for detect on startup
 		return;
 	}
 	
-	if (AfxMessageBox((_T("Webcache detected, do you want to activate the webcache feature? \n\nYour ISP is:\t\t") + detectedWebcache->isp + _T("\n") +
-		_T("Your proxy name is:\t") + detectedWebcache->webcache + _T("\n") +
-		_T("The proxy port is:\t\t") + detectedWebcache->port + _T("\n\n") +
-		_T("The block limit is:\t\t") + detectedWebcache->blockLimit + _T("\n") +
-		_T("extra timeout needed:\t") + detectedWebcache->extraTimeout + _T("\n") +
-		_T("caches local traffic:\t\t") + detectedWebcache->cachesLocal + _T("\n") +
-		_T("Use persistent connections:\t") + detectedWebcache->persistentconns + _T("\n\n") +
-		_T("reverse DNS lookup performed:\t") + (reaskedDNS?_T("yes"):_T("no")) +
-		_T("\n\n") +
-		_T("if you select NO your current settings will not be changed. You change them later in preferences-webcachesettings")
-		),MB_YESNO | MB_ICONINFORMATION,0) == IDNO)
+	if (detectedWebcache->active == _T("0"))
 	{
+		AddDebugLogLine(false, _T("Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."));
+		thePrefs.webcacheEnabled = false;
+		thePrefs.WebCacheDisabledThisSession = true;
 		delete detectedWebcache;
 		return;
 	}
-
 	else 
 	{
-	thePrefs.webcacheEnabled = true;
+		bool restart = false;
+		if (thePrefs.webcacheName != detectedWebcache->webcache || thePrefs.webcachePort != _tstoi(detectedWebcache->port))
+		{
+			restart = true;
+			thePrefs.WebCacheDisabledThisSession = true;
+		}
 	thePrefs.webcacheName=detectedWebcache->webcache;
 	thePrefs.webcachePort=_tstoi(detectedWebcache->port);
 	thePrefs.SetWebCacheBlockLimit(_tstoi(detectedWebcache->blockLimit));
-	thePrefs.SetWebCacheExtraTimeout(detectedWebcache->extraTimeout == _T("yes") ? true : false);
-	thePrefs.SetWebCacheCachesLocalTraffic(detectedWebcache->cachesLocal == _T("yes") ? true : false);
-	thePrefs.PersistentConnectionsForProxyDownloads = (detectedWebcache->persistentconns == _T("yes") ? true : false);	
+		thePrefs.SetWebCacheExtraTimeout(detectedWebcache->extraTimeout == _T("1") ? true : false);
+		thePrefs.SetWebCacheCachesLocalTraffic(detectedWebcache->cachesLocal == _T("1") ? true : false);
+		thePrefs.PersistentConnectionsForProxyDownloads = (detectedWebcache->persistentconns == _T("1") ? true : false);	
+		thePrefs.webcacheTrustLevel = _tstoi(detectedWebcache->trustLevel);
+		if (thePrefs.webcacheEnabled && restart) //WC-ToDo need a modal dialogue here
+			AddDebugLogLine( false, _T("Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until eMule is restarted.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."));
+		else if (!thePrefs.webcacheEnabled && restart)
+		{
+			CString comment = detectedWebcache->comment;
+			for (int i=1; i*45 < comment.GetLength(); i++) // some quick-n-dirty beautifying  
+				comment = comment.Left(i*45) + _T(" \n\t\t\t") + comment.Right(comment.GetLength() - i*45);
+			
+			CString message =	_T("Your ISP is:\t\t") + detectedWebcache->isp + _T(", ") + detectedWebcache->country + _T(", ") + detectedWebcache->location + _T("\n") +
+								_T("Your proxy name is:\t") + detectedWebcache->webcache + _T("\n") +
+								_T("The proxy port is:\t\t") + detectedWebcache->port + _T("\n") +
+								(comment != _T("") ? _T("comment: \t\t") + comment : _T("")) + _T("\n") +
+								_T("You can activate WebCache in the Webcachesettings");
+			AddDebugLogLine( false, message);
+		}
+		else
+			AddDebugLogLine( false, _T("Webcache Autodetection detected no changes!"));
 	delete detectedWebcache;
-	AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
+	return;
 	}
 }
 // jp detect webcache on startup END
 
-bool DetectWebCache(WCInfo_Struct* detectedWebcache)	// find the webcache based on the local data base
+// Superlexx - XML-based proxy autodetector - start ////////////////////////////////////////////
+bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 {
+	using namespace MSXML2;
 	if (!theApp.GetPublicIP() && !Kademlia::CKademlia::getIPAddress())
 		throw CString(_T("No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"));
 
@@ -237,7 +251,7 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache)	// find the webcache based 
 		shostName = thePrefs.GetLastResolvedName();	// we had success last time, maybe our proxy is in the database now
 	else
 	{
-		throw CString(_T("Not starting a detection:\nlast failed DNS backward lookup attempt is too near,\nIP has not changed"));
+		throw CString(_T("Not starting a detection:\nlast failed DNS reverse lookup attempt is too near,\nIP has not changed"));
 	}
 	if (shostName==_T(""))
 	{
@@ -246,127 +260,141 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache)	// find the webcache based 
 
 // see if we can detect the webcache
 
-// open the webcaches.csv
-
-	FILE* readFile = _tfsopen(thePrefs.GetConfigDir() + _T("webcaches.csv"), _T("r"), _SH_DENYWR);
-	if (readFile == NULL)
-		throw CString(_T("webcaches.csv not found"));
-
-// try to find a matching record
-
 	bool webcacheFound = false;
-	char buffer[1024];
-	int	lenBuf = 1024;
-	int pos = 0;
-	CString sbuffer, identifier, webcache, port, isp, blockLimit, extraTimeout, cachesLocal, persistentconns;
-	int lineNumber = 0;
-	while (!feof(readFile) && !webcacheFound)
+	MSXML2::IXMLDOMDocumentPtr pXMLDom;
+	HRESULT hr;
+
+	CoInitialize(NULL);
+
+	hr = pXMLDom.CreateInstance(__uuidof(DOMDocument30));
+	if (FAILED(hr)) 
+		throw printf("Failed to instantiate DOMDocument30 class.");
+
+	pXMLDom->async = VARIANT_FALSE;
+	switch (attempt)
 	{
-		if (fgets(buffer,lenBuf,readFile)==0) break;
-		lineNumber++;
-		sbuffer = buffer;
-		
-		// remove comments
-		pos = sbuffer.Find(_T("//"));
-		if (pos>=0)
-			sbuffer.Truncate(pos);
-
-		pos = 0;
-		sbuffer.Trim(_T("\r\n"));
-
-		CString toTrim = _T("\t ");
-
-		if (!sbuffer.IsEmpty())
+	case 1:	// first attempt, load data from a local file
+		if (pXMLDom->load(thePrefs.GetConfigDir() + "webcaches.xml") != VARIANT_TRUE)
 		{
-			identifier = sbuffer.Tokenize(_T("\t"),pos);	if (pos <= 0) goto ParseError;		identifier.Trim(toTrim);
-			webcache = sbuffer.Tokenize(_T(":"),pos);		if (pos <= 0) goto ParseError;		webcache.Trim(toTrim);
-			port = sbuffer.Tokenize(_T("\t"),pos);			if (pos <= 0) goto ParseError;		port.Trim(toTrim);
-			isp = sbuffer.Tokenize(_T("\t"),pos);			if (pos <= 0) goto ParseError;		isp.Trim(toTrim);
-			blockLimit = sbuffer.Tokenize(_T("\t"),pos);	if (pos <= 0) goto ParseError;		blockLimit.Trim(toTrim);
-			extraTimeout = sbuffer.Tokenize(_T("\t"),pos);	if (pos <= 0) goto ParseError;		extraTimeout.Trim(toTrim);
-			cachesLocal = sbuffer.Tokenize(_T("\t"),pos);	if (pos <= 0) goto ParseError;		cachesLocal.Trim(toTrim);
-			persistentconns = sbuffer.Tokenize(_T("\t"),pos);									persistentconns.Trim(toTrim);
-			
-			if( !(persistentconns == _T("yes") || persistentconns == _T("no"))
-				|| !(cachesLocal == _T("yes") || cachesLocal == _T("no"))
-				|| !(extraTimeout == _T("yes") || extraTimeout == _T("no")) )
-				goto ParseError;
+			DetectWebCache(detectedWebcache, 2); // make a second attempt, load data from the website
+			return reaskedDNS;
+		}
+		break;
+	case 2:
+	{
+			if ( pXMLDom->load("http://webcache-emule.sourceforge.net/webcacheURL.php") != VARIANT_TRUE)
+				throw("Your ISP was not found in the local database; loading the URL of xml data from the SF website failed.");
+			MSXML2::IXMLDOMNodePtr configURLNode = pXMLDom->selectSingleNode("/webcacheemule/configURL");
+			int result = pXMLDom->load((_bstr_t)(configURLNode->text + _T("?hostName=") + shostName));
+			configURLNode.Release();
+			if (result != VARIANT_TRUE)
+				throw("Failed loading xml data from the webcache-emule website.");			
+		}
+		break;
+	default:
+		throw (_T("invalid argument"));
+	}
+	
+	MSXML2::IXMLDOMNodeListPtr proxies, proxyParms;
+		
+	proxies = pXMLDom->selectNodes("/webcacheemule/proxies");
+	int imax = proxies->length;
 
-			if (shostName.Right(identifier.GetLength()) == identifier)
+	CString query, pattern, nodeName;
+	CAtlRegExp<> reHostName;
+
+// maybe the string casting is a bit too optimistic, but it works
+
+	for (int i = 0; i < imax; i++)
+		{
+		// Query a node-set.
+		query.Format(_T("/webcacheemule/proxies[%i]/*"), i);
+		proxyParms = pXMLDom->selectNodes((_bstr_t)query);
+
+		pattern = (CString)(char*)proxyParms->item[0]->text;
+		// transform the wildcards to patterns
+		pattern.Replace(_T("."), _T("\\."));
+		pattern.Replace(_T("?"), _T("\\a?"));
+		pattern.Replace(_T("*"), _T("\\a+"));
+
+		REParseError status = reHostName.Parse(pattern);
+		if (REPARSE_ERROR_OK != status)
+			throw (_T("bad host name"));
+			
+		CAtlREMatchContext<> mcHostName;
+
+		if (reHostName.Match(shostName, &mcHostName))
+		{
+			webcacheFound = true;
+			// set default values
+			detectedWebcache->location = _T("");
+			detectedWebcache->active = _T("1");
+			detectedWebcache->persistentconns = _T("0");
+			detectedWebcache->cachesLocal = _T("1");
+			detectedWebcache->extraTimeout = _T("0");
+			detectedWebcache->blockLimit = _T("0");
+			detectedWebcache->trustLevel = _T("30");
+
+
+			for (int ii = 0; ii<proxyParms->length; ii++)
 			{
-				detectedWebcache->webcache = webcache;
-				detectedWebcache->port = port;
-				detectedWebcache->isp = isp;
-				detectedWebcache->blockLimit = blockLimit;
-				detectedWebcache->extraTimeout = extraTimeout;
-				detectedWebcache->cachesLocal = cachesLocal;
-				detectedWebcache->persistentconns = persistentconns;
-				webcacheFound = true;
+				nodeName = (CString)(char*)proxyParms->item[ii]->nodeName;
+				if (nodeName == "proxyName")
+					detectedWebcache->webcache = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "proxyPort")
+					detectedWebcache->port = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "ISPName")
+					detectedWebcache->isp = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "country")
+					detectedWebcache->country = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "location")
+					detectedWebcache->location = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "blockLimit")
+					detectedWebcache->blockLimit = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "extraTimeout")
+					detectedWebcache->extraTimeout = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "cachesLocal")
+					detectedWebcache->cachesLocal = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "persistentConn")
+					detectedWebcache->persistentconns = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "comment")
+					detectedWebcache->comment = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "active")
+					detectedWebcache->active = (CString)(char*)proxyParms->item[ii]->text;
+				else if (nodeName == "trustLevel")
+					detectedWebcache->trustLevel = (CString)(char*)proxyParms->item[ii]->text;
+
 			}
 		}
 	}
 
-// close the webcaches.csv
-	fclose(readFile);
+	pXMLDom.Release();
+	proxies.Release();
+	proxyParms.Release();
+	CoUninitialize();
 
 	if (!webcacheFound)
+		switch (attempt)
+	{
+		case 1:
+			DetectWebCache(detectedWebcache, 2);
+			break;
+		case 2:
 	{
 		CString message;
 		message.Format(_T("Sorry, your ISP is not in the database,\nyour ISP identifier is %s\n"), shostName);
 		message += _T("To enable autodetection, please find out and submit your ISPs proxy.");
 		throw message;
 	}
-	return reaskedDNS;
+		default:
+			throw (_T("invalid argument"));
+	}
 
-ParseError:
-	CString strParseError = _T("parsing webcache database failed");
-	strParseError.AppendFormat( _T(" - line %d:\n%s"), lineNumber, sbuffer );
-	fclose( readFile );
-	throw strParseError;
 	return reaskedDNS;
 }
-
-// Superlexx - Proxy AutoDetect - end //////////////////////////////////////////////////////////
+// Superlexx - XML-based proxy autodetector - end //////////////////////////////////////////////
 
 // Superlexx - en/decryption - start ///////////////////////////////////////////////////////////
-bool AESEncrypt(byte* data, uint32 size, byte* key)
-{
-	using namespace CryptoPP;
-	byte iv[AES::BLOCKSIZE];
-	for (int i=0; i<AES::BLOCKSIZE; i++)
-		iv[i] = 0;
-
-	CFB_Mode<AES >::Encryption cfbEncryption(key, WC_KEYLENGTH, iv);
-
-	byte enc_data[EMBLOCKSIZE]; // used for temporary storing of the ciphertext
-
-	//data[0] = 13;
-	// encrypt
-	cfbEncryption.ProcessData(enc_data, data, size);
-
-	for (uint32 i=0; i<size; i++) // data := enc_data // better use memcpy here?
-		data[i] = enc_data[i];
-
-	return true;
-}
-
-bool AESDecrypt(byte* data, uint32 size, byte* key)
-{
-	using namespace CryptoPP;
-	byte iv[AES::BLOCKSIZE];
-	for (int i=0; i<AES::BLOCKSIZE; i++)
-		iv[i] = 0;
-	byte dec_data[EMBLOCKSIZE];
-
-	CFB_Mode<AES >::Decryption cfbDecryption(key, WC_KEYLENGTH, iv);
-	cfbDecryption.ProcessData(dec_data, data, size);
-
-	for (uint32 i=0; i<size; i++) // data := dec_data // better use memcpy here?
-		data[i] = dec_data[i];
-
-	return true;
-}
-
 void GenerateKey (byte* key)
 {
 	using namespace CryptoPP;
