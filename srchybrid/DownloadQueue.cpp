@@ -226,7 +226,7 @@ void CDownloadQueue::StartNextFileIfPrefs(int cat) {
     if (thePrefs.StartNextFile()) {
         int catTemp = thePrefs.StartNextFile() > 1?cat:-1;
 		//MORPH START - Added by SiRoB, Per cat Resume file only in the same category
-		if (catTemp!=-1 && thePrefs.GetCategory(cat)->bResumeFileOnlyInSameCat)
+		if (cat!=-1 && thePrefs.GetCategory(cat)->bResumeFileOnlyInSameCat)
 			catTemp = cat;
 		//MORPH END  - Added by SiRoB, Per cat Resume file only in the same category
 		
