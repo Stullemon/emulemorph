@@ -995,7 +995,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					break;
 				//MORPH START - Added by SiRoB, Source Loader Saver [SLS]
 				case SF_SLS:
-					buffer = _T("SLS");
+					buffer = GetResString(IDS_SOURCE_LOADER_SAVER); //ADDED IDS by FrankyFive
 					break;
 				//MORPH END   - Added by SiRoB, Source Loader Saver [SLS]
 			}

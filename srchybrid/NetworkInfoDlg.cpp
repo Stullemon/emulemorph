@@ -203,7 +203,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 						rCtrl << GetResString(IDS_NO);
 					rCtrl << _T("\r\n");
 
-					rCtrl << _T("Short tags") << _T(": ");
+					rCtrl << GetResString(IDS_SHORTTAGS) << _T(": ");
 					if (srv->GetTCPFlags() & SRV_TCPFLG_NEWTAGS)
 						rCtrl << GetResString(IDS_YES);
 					else

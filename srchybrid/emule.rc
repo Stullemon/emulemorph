@@ -5493,19 +5493,21 @@ BEGIN
     IDS_UP_LOWID2           "%i LowID"
     IDS_UP_LOWID_AWAITED    "%i **** Awaited reconnect %s"
     IDS_UPNP                "Universal Plug & Play (UPnP)"
+    IDS_SOURCE_LOADER_SAVER "SLS"
+    IDS_SHORTTAGS           "Short tags"
 END
 //MORPH END - Added by FrankyFive
 
 // Mighty Knife: Additional scheduler events
 STRINGTABLE 
 BEGIN
-	IDS_SCHED_BACKUP           "Backup CONFIG-folder"
-	IDS_SCHED_UPDATE_IPCONFIG  "Update IPFILTER.DAT-file"
-	IDS_SCHED_UPDATE_FAKES     "Update FAKES.DAT-file"
+    IDS_SCHED_BACKUP        "Backup CONFIG-folder"
+    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT-file"
+    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT-file"
     IDS_SCHED_BACKUP_LOG    "Scheduled backup initiated."
     IDS_SCHED_UPDATE_IPCONFIG_LOG "Scheduled IPFILTER.DAT-update initiated."
     IDS_SCHED_UPDATE_FAKES_LOG "Scheduled FAKES.DAT-update initiated."
-	IDS_SCHED_UPDATE_WARNING   "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
+    IDS_SCHED_UPDATE_WARNING   "Don't schedule automatic update-events too often to keep network traffic low!\r\nOnce per week should be enough!"
 END
 
 #endif    // Englisch (USA) resources

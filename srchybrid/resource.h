@@ -2768,6 +2768,8 @@
 #define IDS_CRC_PREFIX                  6207
 #define IDS_CRC_SUFFIX                  6208
 #define IDS_COUNTWCSESSIONSTATS         6209
+
+//MORPH START - Added by FrankyFive
 #define IDS_WEBCACHE_NOPROXY            6210
 #define IDS_CD_WCSUCCFAIL               6211
 #define IDS_CD_WCTRUSTSENDER            6212
@@ -2835,6 +2837,10 @@
 #define IDS_UP_LOWID_AWAITED            6274
 #define IDS_IP2COUNTRY_NALONG           6275
 #define IDS_IP2COUNTRY_NASHORT          6276
+#define IDS_SOURCE_LOADER_SAVER         6277
+#define IDS_SHORTTAGS                   6278
+//MORPH END - Added by FrankyFive
+
 #define IDS_TW_TRANSFERS                7051
 #define IDS_DL_ULDL                     7052
 #define IDS_TRANSDN                     7053
@@ -2918,7 +2924,7 @@
 #define IDS_MORPH2_SECURITY             51524
 #define IDS_MORPH_RFHA                  51541
 #define IDS_MORPH_RAIF                  51542
-#define IDS_MORPH_KSSERV				51543
+#define IDS_MORPH_KSSERV                51543
 #define IDS_WEBSERVER_LINK              51561
 #define IDS_CCRC32                      51562
 #define IDS_ARTCTF                      51563
