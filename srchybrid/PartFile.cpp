@@ -468,7 +468,7 @@ void CPartFile::CreatePartFile()
 	// enkeyDEV: ICS
 	m_SrcIncPartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
-		m_SrcIncPartFrequency.Add(0);
+		m_SrcIncPartFrequency[i] = 0;
 	// enkeyDEV: ICS
 	//Morph End - added by AndCycle, ICS
 	paused = false;
@@ -1012,7 +1012,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		// enkeyDEV: ICS
 		m_SrcIncPartFrequency.SetSize(GetPartCount());
 		for (uint32 i = 0; i < GetPartCount();i++)
-			m_SrcIncPartFrequency.Add(0);
+			m_SrcIncPartFrequency[i] = 0;
 		// enkeyDEV: ICS
 		//Morph End - added by AndCycle, ICS
 		SetStatus(PS_EMPTY);

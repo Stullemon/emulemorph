@@ -95,7 +95,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 			crPending = RGB(0,150,0);
 			crNextPending = RGB(255,208,0);
 			crMeOnly = RGB(112,112,112); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
-			crClientPartial = RGB(150,0,200); // enkeyDev: ICS //Morph - added by AndCycle, ICS
+			crClientPartial = RGB(170,50,224); // enkeyDev: ICS //Morph - added by AndCycle, ICS
 			crA4AF = RGB(192, 100, 255);
 		} else { 
 			crBoth = RGB(104, 104, 104);
@@ -103,7 +103,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 			crPending = RGB(0, 150, 0);
 			crNextPending = RGB(255,208,0);
 			crMeOnly = RGB(172,172,172); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
-			crClientPartial = RGB(150,0,200); // enkeyDev: ICS //Morph - added by AndCycle, ICS
+			crClientPartial = RGB(170,50,224); // enkeyDev: ICS //Morph - added by AndCycle, ICS
 			crA4AF = RGB(192, 100, 255);
 		} 
 
@@ -151,7 +151,6 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* file, bool  
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDev: ICS
 			else if (b_incPartStatus != 0 && thisIncPartStatus && thisIncPartStatus[i]){
-				uint32 uEnd;
 				if (PARTSIZE*(i+1) > reqfile->GetFileSize()) 
 					uEnd = reqfile->GetFileSize(); 
 				else 
@@ -606,7 +605,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 			{
 				if (!reqfile->IsComplete(i*PARTSIZE,((i+1)*PARTSIZE)-1))
 					iNeeded++;
-	}
+			}
 		}
 	}
 	else
