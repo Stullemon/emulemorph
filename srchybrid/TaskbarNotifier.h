@@ -21,6 +21,10 @@ enum TbnMsg {
 };
 //END - enkeyDEV(kei-kun) -TaskbarNotifier-
 
+
+///////////////////////////////////////////////////////////////////////////////
+// CTaskbarNotifierHistory
+
 class CTaskbarNotifierHistory : public CObject
 {
 public:
@@ -29,23 +33,25 @@ public:
 
 	CString m_strMessage;
 	int m_nMessageType;
+	CString m_strLink;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
 // CTaskbarNotifier
 
 class CTaskbarNotifier : public CWnd
 {
 	DECLARE_DYNAMIC(CTaskbarNotifier)
-
 public:
 	CTaskbarNotifier();
 	virtual ~CTaskbarNotifier();
 
 	int Create(CWnd *pWndParent);
-	void Show(LPCTSTR szCaption, int nMsgType, BOOL bAutoClose=TRUE); 
-	void ShowLastHistoryMessage(); 
+	void Show(LPCTSTR szCaption, int nMsgType, LPCTSTR pszLink, BOOL bAutoClose = TRUE);
+	void ShowLastHistoryMessage();
 	int GetMessageType();
-	void Hide();	 
+	void Hide();
 	BOOL SetBitmap(UINT nBitmapID,short red=-1,short green=-1,short blue=-1);
 	BOOL SetBitmap(LPCTSTR szFileName,short red=-1,short green=-1,short blue=-1);
 	BOOL SetBitmap(CBitmap* Bitmap,short red,short green,short blue);
@@ -58,24 +64,20 @@ public:
 	void SetTextFormat(UINT uTextFormat);
 	BOOL LoadConfiguration(LPCTSTR szFileName);
 	void SetAutoClose(BOOL autoClose);
-	
-protected:
-	HRGN CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color);
 
+protected:
 	CWnd *m_pWndParent;
-	
 	CFont m_myNormalFont;
 	CFont m_mySelectedFont;
 	COLORREF m_crNormalTextColor;
 	COLORREF m_crSelectedTextColor;
 	HCURSOR m_hCursor;
-	
 	CBitmap m_bitmapBackground;
 	HRGN m_hBitmapRegion;
 	int m_nBitmapWidth;
 	int m_nBitmapHeight;
-
 	CString m_strCaption;
+	CString m_strLink;
 	CRect  m_rcText;
 	CRect  m_rcCloseBtn;
 	CRect  m_rcHistoryBtn;
@@ -84,7 +86,6 @@ protected:
 	BOOL m_bMouseIsOver;
 	BOOL m_bTextSelected;
 	BOOL m_bAutoClose;
-
 	int m_nAnimStatus;
 	int m_nTaskbarPlacement;
 	DWORD m_dwTimerPrecision;
@@ -99,13 +100,13 @@ protected:
 	int m_nCurrentHeight;
 	int m_nIncrementShow;
 	int m_nIncrementHide;
-	int m_nHistoryPosition;       //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
-	int m_nActiveMessageType;     //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
-	CObList m_MessageHistory;     //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
+	int m_nHistoryPosition;		  //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
+	int m_nActiveMessageType;	  //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
+	CObList m_MessageHistory;	  //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
 
-protected:
+	HRGN CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color);
+
 	DECLARE_MESSAGE_MAP()
-public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg LRESULT OnMouseHover(WPARAM w, LPARAM l);

@@ -66,9 +66,7 @@ to tim.kosse@gmx.de
 
 #pragma once
 #define FD_FORCEREAD (1<<15)
-
-//MORPH - Removed by SiRoB, eWombat [WINSOCK2]
-//#include "winsock.h" //<<< eWombat [WINSOCK2]
+#include "winsock.h"
 #include "loggable.h"
 
 #if defined(_AFXDLL) && (_MFC_VER==0x0700)

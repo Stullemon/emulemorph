@@ -432,11 +432,6 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 				tempMaxActiveClients = activeClientsSnapshot;
 			}
 
-    	    if(curTick - activeClientsTickSnapshot < 3 * 1000) {
-    	        tempCountActiveClients++;
-    	        tempSumActiveClients += activeClientsSnapshot;
-    	    }
-
 			if(activeClientsSnapshot > tempMaxActiveClientsShortTime && curTick - activeClientsTickSnapshot < 10 * 1000) {
 				tempMaxActiveClientsShortTime = activeClientsSnapshot;
 			}
@@ -498,9 +493,9 @@ void CUploadQueue::Process() {
 	}
 
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 	if (sentBytes>0) {
     	// Save used bandwidth for speed calculations
-		uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 		avarage_dr_list.AddTail(sentBytes);
 		m_avarage_dr_sum += sentBytes;
 		uint64 sentBytesOverhead = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
@@ -788,34 +783,35 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		reqfile->statistic.AddRequest();
 
 	if(!thePrefs.IsInfiniteQueueEnabled()){ //Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	// cap the list
-    // the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
-    // high ranking clients after soft limit has been reached
-    uint32 softQueueLimit = thePrefs.GetQueueSize();
-    uint32 hardQueueLimit = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
+		// cap the list
+    	// the queue limit in prefs is only a soft limit. Hard limit is 25% higher, to let in powershare clients and other
+    	// high ranking clients after soft limit has been reached
+    	uint32 softQueueLimit = thePrefs.GetQueueSize();
+    	uint32 hardQueueLimit = thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200);
 
-	if ((uint32)waitinglist.GetCount() >= hardQueueLimit ||
-		(uint32)waitinglist.GetCount() >= softQueueLimit && // soft queue limit is reached
-		(client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
-         client->IsPBForPS() == false && // client don't want powershared file
-		(
-			client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && !thePrefs.IsEqualChanceEnable() ||
-			client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.IsEqualChanceEnable()//Morph - added by AndCycle, Equal Chance For Each File
-		)// and client has lower credits/wants lower prio file than average client in queue
-		) {
-			// then block client from getting on queue
-			return;
-		}
-		if (client->IsDownloading())
-		{
-			// he's already downloading and wants probably only another file
-		if (thePrefs.GetDebugClientTCPLevel() > 0)
-			DebugSend("OP__AcceptUploadReq", client);
-			Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
-			theStats.AddUpDataOverheadFileRequest(packet->size);
-			client->socket->SendPacket(packet,true);
-			return;
-		}
+		if ((uint32)waitinglist.GetCount() >= hardQueueLimit ||
+			(uint32)waitinglist.GetCount() >= softQueueLimit && // soft queue limit is reached
+			(client->IsFriend() && client->GetFriendSlot()) == false && // client is not a friend with friend slot
+    	     client->IsPBForPS() == false && // client don't want powershared file
+			(
+				client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && !thePrefs.IsEqualChanceEnable() ||
+				client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.IsEqualChanceEnable()//Morph - added by AndCycle, Equal Chance For Each File
+			)// and client has lower credits/wants lower prio file than average client in queue
+			) {
+				// then block client from getting on queue
+				return;
+			}
+			if (client->IsDownloading())
+			{
+				// he's already downloading and wants probably only another file
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__AcceptUploadReq", client);
+				Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
+				theStats.AddUpDataOverheadFileRequest(packet->size);
+				client->socket->SendPacket(packet,true);
+				return;
+			}
+	}
 	if (waitinglist.IsEmpty() && AcceptNewClient())
 	{
 		AddUpNextClient(client);
@@ -1011,56 +1007,10 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 	}
 	else{
 		// Allow the client to download a specified amount per session
-/*
---------------
-		if(GetUploadState() == US_UPLOADING) {
-			bool wasRemoved = false;
-			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONMAXTRANS && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
-				m_dwLastCheckedForEvictTick = curTick;
-				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
-				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-				//reset
-				m_bPowerShared = false;
-				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-			}
-
-			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONMAXTRANS > m_curSessionAmountNumber) {
-				// Should we end this upload?
-
-				//EastShare Start - added by AndCycle, Pay Back First
-				//check again does client satisfy the conditions
-				credits->InitPayBackFirstStatus();
-				//EastShare End - added by AndCycle, Pay Back First
-
-				// first clear the average speed, to show ?? as speed in upload slot display
-				m_AvarageUDR_list.RemoveAll();
-				sumavgUDR = 0;
-	
-				// Give clients in queue a chance to kick this client out.
-				// It will be kicked out only if queue contains a client
-				// of same/higher class as this client, and that new
-				// client must either be a high ID client, or a low ID
-				// client that is currently connected.
-				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
-
-				if(!wasRemoved) {
-					// It wasn't removed, so it is allowed to pass into the next amount.
-					m_curSessionAmountNumber++;
-				}
-			}
-
-			if(wasRemoved == false) {
-				// read blocks from file and put on socket
-				CreateNextBlockPackage();
-			}
-		}
-	}
----------------------
-*/
 		if( client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS ){
 				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 				//reset
-				m_bPowerShared = false;
+				client->m_bPowerShared = false;
 				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 			if (thePrefs.GetLogUlDlEvents())
 				AddDebugLogLine(DLP_DEFAULT, false, _T("%s: Upload session ended due to max transfered amount. %s"), client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS, false, false));
@@ -1388,6 +1338,7 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 		}
 
 	theApp.uploadBandwidthThrottler->Pause(false);
+	}
 }
 
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923

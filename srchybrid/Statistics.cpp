@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -84,11 +84,20 @@ uint64	CStatistics::m_nUpDataOverheadOtherPackets;
 uint32	CStatistics::m_sumavgDDRO;
 uint32	CStatistics::m_sumavgUDRO;
 
+uint64	CStatistics::sessionReceivedBytes;
+uint64	CStatistics::sessionSentBytes;
+uint64	CStatistics::sessionSentBytesToFriend;
+uint16	CStatistics::reconnects;
+DWORD	CStatistics::transferStarttime;
+DWORD	CStatistics::serverConnectTime;
+uint32	CStatistics::filteredclients;
+DWORD	CStatistics::starttime;
+uint32	CStatistics::leecherclients; //Added by SiRoB
 
 CStatistics::CStatistics()
 {
-	maxDown=0;
-	maxDownavg=0;
+	maxDown =				0;
+	maxDownavg =			0;
 	maxcumDown =			0;
 	cumUpavg =				0;
 	maxcumDownavg =			0;
@@ -110,6 +119,17 @@ CStatistics::CStatistics()
 	time_thisUpload =		0;
 	timeServerDuration =	0;
 	time_thisServerDuration=0;
+
+	sessionReceivedBytes=0;
+	sessionSentBytes=0;
+    sessionSentBytesToFriend=0;
+	reconnects=0;
+	transferStarttime=0;
+	serverConnectTime=0;
+	filteredclients=0;
+	leecherclients=0; //MORPH - Added by SiRoB
+	starttime=0;
+	
 
 	m_nDownDataRateMSOverhead = 0;
 	m_nDownDatarateOverhead = 0;
@@ -150,7 +170,7 @@ void CStatistics::Init()
 	maxcumUp =				thePrefs.GetConnMaxUpRate();
 }
 
-// -khaos--+++> This function is going to basically calculate and save a bunch of averages.
+// This function is going to basically calculate and save a bunch of averages.
 //				I made a seperate funtion so that it would always run instead of having
 //				the averages not be calculated if the graphs are disabled (Which is bad!).
 void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate)
@@ -160,30 +180,30 @@ void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate)
 
 	if (maxUp < uploadrate)
 		maxUp = uploadrate;
-	if (maxcumUp<maxUp) {
-		maxcumUp=maxUp;
+	if (maxcumUp < maxUp){
+		maxcumUp = maxUp;
 		thePrefs.SetConnMaxUpRate(maxcumUp);
 	}
 
 	if (maxDown < downloadrate)
 		maxDown = downloadrate;
-	if (maxcumDown<maxDown) {
-		maxcumDown=maxDown;
+	if (maxcumDown < maxDown){
+		maxcumDown = maxDown;
 		thePrefs.SetConnMaxDownRate(maxcumDown);
 	}
 
 	cumDownavg = GetAvgDownloadRate(AVG_TOTAL);
-	if (maxcumDownavg<cumDownavg) {
-		maxcumDownavg=cumDownavg;
+	if (maxcumDownavg < cumDownavg){
+		maxcumDownavg = cumDownavg;
 		thePrefs.SetConnMaxAvgDownRate(maxcumDownavg);
 	}
 
 	cumUpavg = GetAvgUploadRate(AVG_TOTAL);
-	if (maxcumUpavg<cumUpavg) {
-		maxcumUpavg=cumUpavg;
+	if (maxcumUpavg < cumUpavg){
+		maxcumUpavg = cumUpavg;
 		thePrefs.SetConnMaxAvgUpRate(maxcumUpavg);
 	}
-
+	
 	// Transfer Times (Increment Session)
 	if (uploadrate > 0 || downloadrate > 0) {
 		if (start_timeTransfers == 0)
@@ -225,138 +245,145 @@ void CStatistics::UpdateConnectionStats(float uploadrate, float downloadrate)
 	}
 
 	// Server Durations
-	if (theApp.stat_serverConnectTime==0) 
+	if (theStats.serverConnectTime == 0) 
 		time_thisServerDuration = 0;
 	else
-		time_thisServerDuration = (GetTickCount() - theApp.stat_serverConnectTime) / 1000;
+		time_thisServerDuration = (GetTickCount() - theStats.serverConnectTime) / 1000;
 }
-// <-----khaos-
 
-void CStatistics::RecordRate() {
-	
-	if (theApp.stat_transferStarttime==0) return;
+void CStatistics::RecordRate()
+{
+	if (theStats.transferStarttime == 0)
+		return;
 
-	// every second By BadWolf - Accurate datarate Calculation
-	uint32 stick =  ::GetTickCount();
-	TransferredData newitemUP = {theApp.stat_sessionSentBytes, stick};
-	TransferredData newitemDN = {theApp.stat_sessionReceivedBytes, stick};
+	// Accurate datarate Calculation
+	uint32 stick = GetTickCount();
+	TransferredData newitemUP = {theStats.sessionSentBytes, stick};
+	TransferredData newitemDN = {theStats.sessionReceivedBytes, stick};
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
-	TransferredData newitemFriends = {theApp.stat_sessionSentBytesToFriend, stick};
+	TransferredData newitemFriends = {theStats.sessionSentBytesToFriend, stick};
 	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
 
 	downrateHistory.push_front(newitemDN);
 	uprateHistory.push_front(newitemUP);
+
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
 	uprateHistoryFriends.push_front(newitemFriends);
 	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
 
 	// limit to maxmins
-	int iAverageSeconds = thePrefs.GetStatsAverageMinutes()*60;
-	while ((float)(downrateHistory.front().timestamp - downrateHistory.back().timestamp) / 1000.0 > iAverageSeconds)
+	UINT uAverageMilliseconds = thePrefs.GetStatsAverageMinutes() * 60000;
+	while (downrateHistory.front().timestamp - downrateHistory.back().timestamp > uAverageMilliseconds)
 		downrateHistory.pop_back();
-	while ((float)(uprateHistory.front().timestamp - uprateHistory.back().timestamp) / 1000.0 > iAverageSeconds)
+	while (uprateHistory.front().timestamp - uprateHistory.back().timestamp > uAverageMilliseconds)
 		uprateHistory.pop_back();
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
-	while ((float)(uprateHistoryFriends.front().timestamp - uprateHistoryFriends.back().timestamp) / 1000.0 > iAverageSeconds)
+	while (uprateHistoryFriends.front().timestamp - uprateHistoryFriends.back().timestamp > uAverageMilliseconds)
 		uprateHistoryFriends.pop_back();
 	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
-	//theApp.emuledlg->ShowTransferRate(false);
 }
 
 // Changed these two functions (khaos)...
-float CStatistics::GetAvgDownloadRate(int averageType) {
+float CStatistics::GetAvgDownloadRate(int averageType)
+{
 	DWORD running;
-	switch(averageType) {
+	switch (averageType)
+	{
 		case AVG_SESSION:
-			if (theApp.stat_transferStarttime == 0) return 0;            
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return 0;
-			return (float) (theApp.stat_sessionReceivedBytes/1024) / running;
+			if (theStats.transferStarttime == 0)
+				return 0.0F;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			if (running < 5)
+				return 0.0F;
+			return (float)(theStats.sessionReceivedBytes / 1024) / running;
 
 		case AVG_TOTAL:
-			if (theApp.stat_transferStarttime == 0) return thePrefs.GetConnAvgDownRate();
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return thePrefs.GetConnAvgDownRate();
-			return (float) ((( (float) (theApp.stat_sessionReceivedBytes/1024) / running ) + thePrefs.GetConnAvgDownRate() ) / 2 );
+			if (theStats.transferStarttime == 0)
+				return thePrefs.GetConnAvgDownRate();
+			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			if (running < 5)
+				return thePrefs.GetConnAvgDownRate();
+			return (((float)(theStats.sessionReceivedBytes / 1024) / running) + thePrefs.GetConnAvgDownRate()) / 2.0F;
 
 		default:
-			// By BadWolf - Accurate datarate Calculation
-			if (downrateHistory.size()==0) return 0;
-			float deltat = (float)(downrateHistory.front().timestamp - downrateHistory.back().timestamp) / 1000.0;
-			if (deltat > 0.0) 
-				return (float)((float)(downrateHistory.front().datalen-downrateHistory.back().datalen) / deltat)/1024;
-			else
-				return 0;
-			// END By BadWolf - Accurate datarate Calculation
+			if (downrateHistory.size() == 0)
+				return 0.0F;
+			float deltat = (downrateHistory.front().timestamp - downrateHistory.back().timestamp) / 1000.0F;
+			if (deltat > 0.0F)
+				return ((downrateHistory.front().datalen - downrateHistory.back().datalen) / deltat) / 1024.0F;
+			return 0.0F;
 	}
 }
 
-float CStatistics::GetAvgUploadRate(int averageType) {
+float CStatistics::GetAvgUploadRate(int averageType)
+{
 	DWORD running;
-	switch(averageType) {
+	switch (averageType)
+	{
 		case AVG_SESSION:
-			if (theApp.stat_transferStarttime == 0) return 0;            
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return 0;
-			return (float) (theApp.stat_sessionSentBytes/1024) / running;
+			if (theStats.transferStarttime == 0)
+				return 0.0F;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			if (running < 5)
+				return 0.0F;
+			return (float)(theStats.sessionSentBytes / 1024) / running;
 
 		case AVG_TOTAL:
-			if (theApp.stat_transferStarttime == 0) return thePrefs.GetConnAvgUpRate();
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return thePrefs.GetConnAvgUpRate();
-			return (float) ((( (float) (theApp.stat_sessionSentBytes/1024) / running ) + thePrefs.GetConnAvgUpRate() ) / 2 );
+			if (theStats.transferStarttime == 0)
+				return thePrefs.GetConnAvgUpRate();
+			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			if (running < 5)
+				return thePrefs.GetConnAvgUpRate();
+			return (((float)(theStats.sessionSentBytes / 1024) / running) + thePrefs.GetConnAvgUpRate()) / 2.0F;
 
 		default:
-			// By BadWolf - Accurate datarate Calculation
-			if (uprateHistory.size()==0) return 0;
-			float deltat = (float)(uprateHistory.front().timestamp - uprateHistory.back().timestamp) / 1000.0;
-			if (deltat > 0.0) 
-				return (float)((float)(uprateHistory.front().datalen-uprateHistory.back().datalen) / deltat)/1024;
-			else
-				return 0;
-			// END By BadWolf - Accurate datarate Calculation
+			if (uprateHistory.size() == 0)
+				return 0.0F;
+			float deltat = (uprateHistory.front().timestamp - uprateHistory.back().timestamp) / 1000.0F;
+			if (deltat > 0.0F)
+				return ((uprateHistory.front().datalen - uprateHistory.back().datalen) / deltat) / 1024.0F;
+			return 0.0F;
 	}
 }
-// <-----khaos-
 
-void CStatistics::CompDownDatarateOverhead(){
-	// Patch By BadWolf - Accurate datarate Calculation
-	TransferredData newitem = {m_nDownDataRateMSOverhead,::GetTickCount()};
+void CStatistics::CompDownDatarateOverhead()
+{
+	TransferredData newitem = {m_nDownDataRateMSOverhead, GetTickCount()};
 	m_AvarageDDRO_list.AddTail(newitem);
 	m_sumavgDDRO += m_nDownDataRateMSOverhead;
 	m_nDownDataRateMSOverhead = 0;
 
-	while ((float)(m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp) > MAXAVERAGETIME) 
+	while (m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp > MAXAVERAGETIME)
 		m_sumavgDDRO -= m_AvarageDDRO_list.RemoveHead().datalen;
 
-	if(m_AvarageDDRO_list.GetCount() > 10){
+	if (m_AvarageDDRO_list.GetCount() > 10)
+	{
 		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp;
 		if (dwDuration)
-			m_nDownDatarateOverhead = 1000 * (m_sumavgDDRO-m_AvarageDDRO_list.GetHead().datalen) / dwDuration;
+			m_nDownDatarateOverhead = 1000 * (m_sumavgDDRO - m_AvarageDDRO_list.GetHead().datalen) / dwDuration;
 	}
 	else
 		m_nDownDatarateOverhead = 0;
-	// END Patch By BadWolf
 }
 
-void CStatistics::CompUpDatarateOverhead(){
-	// Patch by BadWolf - Accurate datarate Calculation
-	TransferredData newitem = {m_nUpDataRateMSOverhead,::GetTickCount()};
+void CStatistics::CompUpDatarateOverhead()
+{
+	TransferredData newitem = {m_nUpDataRateMSOverhead, GetTickCount()};
 	m_AvarageUDRO_list.AddTail(newitem);
 	m_sumavgUDRO += m_nUpDataRateMSOverhead;
 	m_nUpDataRateMSOverhead = 0;
 
-	while ((float)(m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp) > MAXAVERAGETIME)
+	while (m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp > MAXAVERAGETIME)
 		m_sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
 
-	if(m_AvarageUDRO_list.GetCount() > 10){
+	if (m_AvarageUDRO_list.GetCount() > 10)
+	{
 		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
 		if (dwDuration)
-			m_nUpDatarateOverhead = 1000 * (m_sumavgUDRO-m_AvarageUDRO_list.GetHead().datalen) / dwDuration;
+			m_nUpDatarateOverhead = 1000 * (m_sumavgUDRO - m_AvarageUDRO_list.GetHead().datalen) / dwDuration;
 	}
 	else
 		m_nUpDatarateOverhead = 0;
-	// END Patch by BadWolf	
 }
 
 void CStatistics::ResetDownDatarateOverhead()

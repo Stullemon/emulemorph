@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ public:
 
 	CUpDownClient*		client;
 	CHTRichEditCtrl*	log;
-	CStringA			strMessagePendingA;
+	CString				strMessagePending;
 	bool				notify;
 	CStringArray		history;
 	int					history_pos;
@@ -56,8 +56,8 @@ public:
 	void		EndSession(CUpDownClient* client = 0);
 	uint16		GetTabByClient(CUpDownClient* client);
 	CChatItem*	GetItemByClient(CUpDownClient* client);
-	void		ProcessMessage(CUpDownClient* sender, char* message);
-	bool		SendMessage(LPCTSTR message);
+	void		ProcessMessage(CUpDownClient* sender, const CString& message);
+	bool		SendMessage(const CString& rstrMessage);
 	void		DeleteAllItems();
 	void		ShowChat();
 	void		ConnectingResult(CUpDownClient* sender,bool success);

@@ -25,7 +25,10 @@ class CSearchFile : public CAbstractFile
 	friend class CPartFile;
 	friend class CSearchListCtrl;
 public:
-	CSearchFile(CFileDataIO* in_data, uint32 nSearchID, uint32 nServerIP=0, uint16 nServerPort=0, LPCTSTR pszDirectory = NULL, bool nKademlia = false);
+	CSearchFile(CFileDataIO* in_data, bool bOptUTF8, uint32 nSearchID,
+				uint32 nServerIP=0, uint16 nServerPort=0,
+				LPCTSTR pszDirectory = NULL, 
+				bool nKademlia = false);
 	CSearchFile(const CSearchFile* copyfrom);
 	CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability);
 	~CSearchFile();
@@ -153,8 +156,8 @@ public:
 	void	Clear();
 	void	NewSearch(CSearchListCtrl* in_wnd, CStringA strResultFileType, uint32 nSearchID, bool MobilMuleSearch = false);
 	uint16	ProcessSearchanswer(char* packet, uint32 size, CUpDownClient* Sender, bool* pbMoreResultsAvailable, LPCTSTR pszDirectory = NULL);
-	uint16	ProcessSearchanswer(char* packet, uint32 size, uint32 nServerIP, uint16 nServerPort, bool* pbMoreResultsAvailable);
-	uint16	ProcessUDPSearchanswer(CFileDataIO& packet, uint32 nServerIP, uint16 nServerPort);
+	uint16	ProcessSearchanswer(char* packet, uint32 size, bool bOptUTF8, uint32 nServerIP, uint16 nServerPort, bool* pbMoreResultsAvailable);
+	uint16	ProcessUDPSearchanswer(CFileDataIO& packet, bool bOptUTF8, uint32 nServerIP, uint16 nServerPort);
 	uint16	GetResultCount() const;
 	uint16	GetResultCount(uint32 nSearchID) const;
 	void	AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCount);
@@ -183,7 +186,7 @@ private:
 	CMap<uint32, uint32, uint16, uint16> m_foundSourcesCount;
 
 	CSearchListCtrl*	outputwnd;
-	CStringA m_strResultFileType;
+	CString m_strResultFileType;
 	uint32	m_nCurrentSearch;
 	bool	m_MobilMuleSearch;
 };

@@ -185,7 +185,7 @@ void CPPgStats::Localize(void)
 		SetWindowText(GetResString(IDS_STATSSETUPINFO));
 		GetDlgItem(IDC_PREFCOLORS)->SetWindowText(GetResString(IDS_COLORS));
 	
-		GetDlgItem(IDC_SOLIDGRAPH)->SetWindowText(GetResString(IDS_SOLIDGRAPH)); //MORPH - Added by SiRoB, New Graph		
+		GetDlgItem(IDC_SOLIDGRAPH)->SetWindowText(GetResString(IDS_SOLIDGRAPH)); //MORPH - Added by SiRoB, New Graph
 		m_colors.ResetContent();
 		m_colors.AddString(GetResString(IDS_SP_BACKGROUND));
 		m_colors.AddString(GetResString(IDS_SP_GRID));
@@ -196,15 +196,12 @@ void CPPgStats::Localize(void)
 		m_colors.AddString(GetResString(IDS_SP_UL2));
 		m_colors.AddString(GetResString(IDS_SP_UL3));
 		m_colors.AddString(GetResString(IDS_SP_ACTCON));
-		//MORPH - Added by Yun.SF3, ZZ Upload System
 		m_colors.AddString(GetResString(IDS_SP_TOTALUL));
 		m_colors.AddString(GetResString(IDS_SP_ACTUL));
-		//MORPH - Added by Yun.SF3, ZZ Upload System
-		//m_colors.AddString(GetResString(IDS_SP_ACTDL)); //MORPH - Removed by SiRoB, To preserve SystrayColor index
 		m_colors.AddString(GetResString(IDS_SP_ICONBAR));
-		m_colors.AddString(GetResString(IDS_SP_ACTDL)); //MORPH - Moved by SiRoB, To preserve SystrayColor index
-		m_colors.AddString(GetResString(IDS_SP_ULFRIENDS)); //MORPH - Added by Yun.SF3, ZZ Upload System
-		m_colors.AddString(GetResString(IDS_SP_ULSLOTSNOOVERHEAD)); //MORPH - Added by SiRoB, ZZ Upload System 20030818-1923
+		m_colors.AddString(GetResString(IDS_SP_ACTDL));
+		m_colors.AddString(GetResString(IDS_SP_ULFRIENDS));
+		m_colors.AddString(GetResString(IDS_SP_ULSLOTSNOOVERHEAD));
 
 		m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
 		m_ctlColor.DefaultText = NULL;
@@ -281,6 +278,7 @@ LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
 	int iCurColor = thePrefs.GetStatsColor(m_colors.GetCurSel());
 	if (iCurColor != setcolor){
 		thePrefs.SetStatsColor(m_colors.GetCurSel(), setcolor);
+		theApp.emuledlg->ShowTransferRate(true);
 		SetModified(TRUE);
 	}
 	return TRUE;

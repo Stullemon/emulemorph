@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -133,7 +133,7 @@ int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
 	}
 	else if (_lParamSort == IPFILTER_COL_DESC)
 	{
-		iResult = _tcscmp((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
+		iResult = CompareLocaleStringNoCase((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
 	}
 	else
 	{

@@ -26,6 +26,9 @@ the IP to country data is provided by http://ip-to-country.webhosting.info/
 #include "serverwnd.h"
 #include "serverlistctrl.h"
 
+#include "HttpDownloadDlg.h"//MORPH - Added by SiRoB, IP2Country auto-updating
+#include "ZipFile.h"//MORPH - Added by SiRoB, ZIP File download decompress
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -446,3 +449,122 @@ bool CIP2Country::ShowCountryFlag(){
 }
 
 //EastShare End - added by AndCycle, IP to Country
+
+//Commander - Added: IP2Country auto-updating - Start
+void CIP2Country::UpdateIP2CountryURL()
+{   
+	char buffer[9]; //Versionformat: Ymmdd -> 20040101
+	int lenBuf = 9;
+	CString sbuffer;
+	CString strVerURL = thePrefs.GetUpdateVerURLIP2Country(); //Version URL to keep it separated
+	CString strURL = thePrefs.GetUpdateURLIP2Country(); // File URL
+	CString strTempFilename;
+	strTempFilename.Format(CString(thePrefs.GetAppDir())+"ip-to-country.txt");
+	FILE* readFile= fopen(strTempFilename, "r");
+	CHttpDownloadDlg dlgDownload;
+	dlgDownload.m_strTitle = _T("Downloading IP2Country version file");
+	dlgDownload.m_sURLToDownload = strVerURL;
+	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	if (dlgDownload.DoModal() != IDOK)
+	{
+		AddLogLine(true, "Error downloading %s", strVerURL);
+		return;
+	}
+	readFile= fopen(strTempFilename, "r");
+	fgets(buffer,lenBuf,readFile);
+	sbuffer = buffer;
+	sbuffer = sbuffer.Trim();
+	fclose(readFile);
+	remove(strTempFilename);
+
+    // Compare the Version numbers
+	if ((thePrefs.GetIP2CountryVersion()< (uint32) atoi(sbuffer)) || (readFile == NULL)) {
+		
+		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+			theApp.ip2country->Unload();
+			AddLogLine(false,"IP2Country.csv unloaded due to update in progress");
+		}
+		CString IP2CountryURL = strURL;
+		CString ext;
+		
+		ext = strURL;
+		ext.TrimRight("."); //Trim the file URL in order to save its extension in ext
+
+		strTempFilename.Format(CString(thePrefs.GetConfigDir())+"ip-to-country."+"ext"); //create a file with the original extension
+
+		if (fopen(strTempFilename, "r")) {
+			fclose(readFile);
+			remove(strTempFilename);
+		}
+
+		TCHAR szTempFilePath[MAX_PATH];
+		_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
+
+		CHttpDownloadDlg dlgDownload;
+		dlgDownload.m_strTitle = _T("Downloading IP2Country file");
+		dlgDownload.m_sURLToDownload = IP2CountryURL;
+		dlgDownload.m_sFileToDownloadInto = szTempFilePath;
+		if (dlgDownload.DoModal() != IDOK)
+		{
+			_tremove(szTempFilePath);
+			AddLogLine(true, _T("IP2Country file download failed"));
+			if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+				theApp.ip2country->Load();
+				AddLogLine(false,"IP2Country.csv loaded after unsuccessful update (backup file loaded)");
+			}
+			return;
+		}
+        
+		bool bIsZipFile = false;
+		bool bUnzipped = false;
+		CZIPFile zip;
+		if (zip.Open(szTempFilePath))
+		{
+			bIsZipFile = true;
+
+			CZIPFile::File* zfile = zip.GetFile(_T("ip-to-country.csv")); // It has to be a zip-file which includes a file called: ip-to-country.csv
+			if (zfile)
+			{
+				TCHAR szTempUnzipFilePath[MAX_PATH];
+				_tmakepath(szTempUnzipFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
+				TCHAR szTempCurrentFilePath[MAX_PATH];
+				_tmakepath(szTempCurrentFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(""));
+
+				if (zfile->Extract(szTempUnzipFilePath))
+				{
+					zip.Close();
+					zfile = NULL;
+                    //Successfully unziped, rename the unzipped temp file to its destination name and remove the zipped file
+					bUnzipped = true;
+                    if(PathFileExists(thePrefs.GetConfigDir()+_T("ip-to-country.csv")))
+						_tremove(szTempCurrentFilePath);
+					_trename(szTempUnzipFilePath, thePrefs.GetConfigDir()+_T("ip-to-country.csv"));
+					_tremove(szTempFilePath);
+				}
+				else
+					AddLogLine(true, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+			}
+			else
+				AddLogLine(true, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath); //File not found inside the zip-file
+
+			zip.Close();
+		}
+		else 
+			_trename(szTempFilePath, thePrefs.GetConfigDir()+_T("ip-to-country.csv")); //If its not a zipfile, rename it to its destination name
+		
+        
+		if(bIsZipFile && bUnzipped == false){ //Is Zipfile and failed to unzip
+			return;
+		}
+
+        //load the new one
+		if(thePrefs.GetIP2CountryNameMode() != IP2CountryName_DISABLE || thePrefs.IsIP2CountryShowFlag()){
+		  theApp.ip2country->Load();
+		  AddLogLine(false,"IP2Country.csv loaded after successful update");
+		}
+
+		thePrefs.SetIP2CountryVersion(atoi(sbuffer)); //Commander - Added: Update version number
+		thePrefs.Save();
+	}
+}
+//Commander - Added: IP2Country auto-updating - End

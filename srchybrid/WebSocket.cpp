@@ -1,5 +1,4 @@
 #include <stdafx.h>
-#pragma comment(lib, "ws2_32.lib")
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "WebSocket.h"

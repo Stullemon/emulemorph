@@ -7,6 +7,7 @@
 #include "parser.hpp"
 #include "OtherFunctions.h"
 #include "ED2KLink.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,8 +55,8 @@ keywordchar		[^ \"()]
 							CED2KFileLink* pFileLink = pLink->GetFileLink();
 							if (pFileLink)
 							{
-								yylval.pstr = new CString;
-								yylval.pstr->Format(_T("ed2k::%s"), md4str(pFileLink->GetHashKey()));
+								yylval.pstr = new CStringA;
+								yylval.pstr->Format("ed2k::%s", md4strA(pFileLink->GetHashKey()));
 								delete pLink;
 								return TOK_ED2K_LINK;
 							}
@@ -69,17 +70,17 @@ keywordchar		[^ \"()]
 					if (strError.IsEmpty())
 						strError = _T("Invalid eD2K file link");
 					yyerror(strError);
-					yylval.pstr = new CString(yytext);
+					yylval.pstr = new CStringA(yytext);
 					return TOK_STRING;
 				}
 
 "ed2k::"[a-fA-F0-9]{32}	{
-					yylval.pstr = new CString(yytext);
+					yylval.pstr = new CStringA(yytext);
 					return TOK_ED2K_LINK;
 				}
 
 {keywordchar}*  {
-					yylval.pstr = new CString(yytext);
+					yylval.pstr = new CStringA(yytext);
 					return TOK_STRING;
                 }
 
@@ -180,7 +181,7 @@ keywordchar		[^ \"()]
 						}
 					}
 					psz[i] = '\0';
-					yylval.pstr = new CString(psz);
+					yylval.pstr = new CStringA(psz);
 					free(psz);
 					return TOK_STRING;
 				}
@@ -215,7 +216,7 @@ static void FatalLexError(yyconst char msg[])
 
 void LexInit(LPCTSTR pszInput)
 {
-	_strInputBuff = pszInput;
+	_strInputBuff = StrToUtf8(pszInput);
 	_pszLexBuff = (LPCSTR)_strInputBuff;
 }
 

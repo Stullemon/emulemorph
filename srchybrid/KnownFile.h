@@ -19,15 +19,19 @@
 #include "BarShader.h"
 #include <list>
 
+#define	PARTSIZE			9728000
+
 class CTag;
 class CxImage;
 namespace Kademlia{
 class CUInt128;
-typedef std::list<CString> WordList;
+	typedef std::list<CStringW> WordList;
 };
 class CUpDownClient;
 class Packet;
 class CFileDataIO;
+class CAICHHashTree;
+class CAICHHashSet;
 class CSafeMemFile;	// SLUGFILLER: hideOS
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
@@ -36,7 +40,8 @@ class CFileStatistic
 	friend class CKnownFile;
 	friend class CPartFile;
 public:
-	CFileStatistic(){
+	CFileStatistic()
+	{
 		requested = 0;
 		transferred = 0;
 		accepted = 0;
@@ -71,11 +76,11 @@ public:
 	float	GetSpreadSortValue() /*const*/;
 	float	GetFullSpreadCount() /*const*/;
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
-	uint16	GetRequests() const				{return requested;}
-	uint16	GetAccepts() const				{return accepted;}
+	UINT	GetRequests() const				{return requested;}
+	UINT	GetAccepts() const				{return accepted;}
 	uint64	GetTransferred() const			{return transferred;}
-	uint16	GetAllTimeRequests() const		{return alltimerequested;}
-	uint16	GetAllTimeAccepts() const		{return alltimeaccepted;}
+	UINT	GetAllTimeRequests() const		{return alltimerequested;}
+	UINT	GetAllTimeAccepts() const		{return alltimeaccepted;}
 	uint64	GetAllTimeTransferred() const	{return alltimetransferred;}
 	
 	CKnownFile* fileParent;
@@ -103,8 +108,8 @@ private:
 	float	lastFullSpreadCount;
 	//MORPH - Added by SiRoB, Reduce SpreadBar CPU consumption
 	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
-	uint16 requested;
-	uint16 accepted;
+	uint32 requested;
+	uint32 accepted;
 	uint64 transferred;
 	uint32 alltimerequested;
 	uint64 alltimetransferred;
@@ -139,8 +144,8 @@ public:
 	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bAutoSetFileType = true); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	// returns the ED2K file type (an ASCII string)
-	const CStringA& GetFileType() const { return m_strFileType; }
-	virtual void SetFileType(LPCSTR pszFileType);
+	const CString& GetFileType() const { return m_strFileType; }
+	virtual void SetFileType(LPCTSTR pszFileType);
 
 	// returns the file type which is used to be shown in the GUI
 	CString GetFileTypeDisplayStr() const;
@@ -155,10 +160,8 @@ public:
 	uint32 GetIntTagValue(uint8 tagname) const;
 	uint32 GetIntTagValue(LPCSTR tagname) const;
 	bool GetIntTagValue(uint8 tagname, uint32& ruValue) const;
-	LPCSTR GetStrTagValueA(uint8 tagname) const;
-	LPCSTR GetStrTagValueA(LPCSTR tagname) const;
-	CString GetStrTagValue(uint8 tagname) const;
-	CString GetStrTagValue(LPCSTR tagname) const;
+	const CString& GetStrTagValue(uint8 tagname) const;
+	const CString& GetStrTagValue(LPCSTR tagname) const;
 	CTag* GetTag(uint8 tagname, uint8 tagtype) const;
 	CTag* GetTag(LPCSTR tagname, uint8 tagtype) const;
 	CTag* GetTag(uint8 tagname) const;
@@ -177,8 +180,8 @@ protected:
 	uchar	m_abyFileHash[16];
 	uint32	m_nFileSize;
 	CString m_strComment;
-	uint8	m_iRate;
-	CStringA m_strFileType;
+	uint8	m_uRating;
+	CString m_strFileType;
 	CArray<CTag*,CTag*> taglist;
 };
 
@@ -207,6 +210,7 @@ public:
 	virtual bool IsPartFile() const { return false; }
 	virtual bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFileDataIO* file);
+	bool	CreateAICHHashSetOnly();
 
 	// last file modification time in (DST corrected, if NTFS) real UTC format
 	// NOTE: this value can *not* be compared with NT's version of the UTC time
@@ -221,7 +225,8 @@ public:
 	const CArray<uchar*, uchar*>& GetHashset() const { return hashlist; }
 	bool	SetHashset(const CArray<uchar*, uchar*>& aHashset);
 
-	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
+	// nr. of part hashs according the file size wrt ED2K protocol
+	UINT	GetED2KPartHashCount() const { return m_iED2KPartHashCount; }
 
 	// nr. of 9MB parts (file data)
 	__inline uint16 GetPartCount() const { return m_iPartCount; }
@@ -254,8 +259,8 @@ public:
 	const CString& GetFileComment() /*const*/;
 	void	SetFileComment(LPCTSTR pszComment);
 
-	uint8	GetFileRate() /*const*/;
-	void	SetFileRate(uint8 uRate);
+	uint8	GetFileRating() /*const*/;
+	void	SetFileRating(uint8 uRating);
 
 	bool	GetPublishedED2K() const { return m_PublishedED2K; }
 	void	SetPublishedED2K( bool val );
@@ -270,8 +275,8 @@ public:
 
 	uint32	GetLastPublishTimeKadSrc() const { return m_lastPublishTimeKadSrc; }
 	void	SetLastPublishTimeKadSrc( uint32 val ) {m_lastPublishTimeKadSrc = val;}
-	int		PublishKey( Kademlia::CUInt128* nextID);
-	bool	PublishSrc( Kademlia::CUInt128* nextID);
+
+	bool	PublishSrc();
 
 	// file sharing
 	virtual	Packet*	CreateSrcInfoPacket(CUpDownClient* forClient) const;
@@ -281,9 +286,16 @@ public:
 
 	// preview
 	bool	IsMovie() const;
+	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
+	bool	IsCDImage() const; //MORPH - Added by IceCream, for defeat 0-filler
+	bool	IsDocument() const; //MORPH - Added by IceCream, for defeat 0-filler
+
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
 
+	// aich
+	CAICHHashSet*	GetAICHHashset() const							{return m_pAICHHashSet;}
+	void			SetAICHHashset(CAICHHashSet* val)				{m_pAICHHashSet = val;}
 	// last file modification time in (DST corrected, if NTFS) real UTC format
 	// NOTE: this value can *not* be compared with NT's version of the UTC time
 	uint32	m_tUtcLastModified;
@@ -350,22 +362,22 @@ protected:
 	bool	GrabImage(CString strFileName,uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	bool	LoadTagsFromFile(CFileDataIO* file);
 	bool	LoadDateFromFile(CFileDataIO* file);
-	void	CreateHashFromFile(FILE* file, int Length, uchar* Output) const { CreateHashFromInput(file, NULL, Length, Output, NULL); }
-	void	CreateHashFromFile(CFile* file, int Length, uchar* Output) const { CreateHashFromInput(NULL, file, Length, Output, NULL); }
-	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output) const { CreateHashFromInput(NULL, NULL, Length, Output, in_string); }
+	void	CreateHashFromFile(FILE* file, int Length, uchar* Output, CAICHHashTree* pShaHashOut) const { CreateHashFromInput(file, NULL, Length, Output, NULL, pShaHashOut); }
+	void	CreateHashFromFile(CFile* file, int Length, uchar* Output, CAICHHashTree* pShaHashOut) const { CreateHashFromInput(NULL, file, Length, Output, NULL, pShaHashOut); }
+	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output) const { CreateHashFromInput(NULL, NULL, Length, Output, in_string, NULL); }
 	void	LoadComment();
 	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;
 	CString	m_strDirectory;
 	CString m_strFilePath;
-
+	CAICHHashSet*			m_pAICHHashSet; 
 private:
-	void	CreateHashFromInput(FILE* file, CFile* file2, int Length, uchar* Output, uchar* = NULL) const;
+	void	CreateHashFromInput(FILE* file, CFile* file2, int Length, uchar* Output, uchar* in_string, CAICHHashTree* pShaHashOut) const;
 
 	static CBarShader s_ShareStatusBar;
 	uint16	m_iPartCount;
 	uint16  m_iED2KPartCount;
-	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
+	uint16	m_iED2KPartHashCount;
 	uint8	m_iUpPriority;
 	bool	m_bAutoUpPriority;
 	bool	m_bCommentLoaded;

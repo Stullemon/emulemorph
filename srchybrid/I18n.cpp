@@ -27,7 +27,7 @@ static char THIS_FILE[]=__FILE__;
 #define LANGID_HE_IL MAKELANGID(LANG_HEBREW,SUBLANG_DEFAULT)
 #define LANGID_HU_HU MAKELANGID(LANG_HUNGARIAN,SUBLANG_DEFAULT)
 #define LANGID_IT_IT MAKELANGID(LANG_ITALIAN,SUBLANG_DEFAULT)
-#define LANGID_JP_JP MAKELANGID(LANG_JAPANESE,SUBLANG_DEFAULT)
+//#define LANGID_JP_JP MAKELANGID(LANG_JAPANESE,SUBLANG_DEFAULT)
 #define LANGID_KO_KR MAKELANGID(LANG_KOREAN,SUBLANG_DEFAULT)
 #define LANGID_LT_LT MAKELANGID(LANG_LITHUANIAN,SUBLANG_DEFAULT)
 #define LANGID_LV_LV MAKELANGID(LANG_LATVIAN,SUBLANG_DEFAULT)
@@ -140,7 +140,7 @@ static SLanguage _aLanguages[] =
 	{LANGID_HE_IL,	_T(""),				FALSE,	_T("he_IL"),	1255,	_T("windows-1255")},	// Hebrew
 	{LANGID_HU_HU,	_T("hungarian"),	FALSE,	_T("hu_HU"),	1250,	_T("windows-1250")},	// Hungarian
 	{LANGID_IT_IT,	_T("italian"),		FALSE,	_T("it_IT"),	1252,	_T("windows-1252")},	// Italian (Italy)
-	{LANGID_JP_JP,	_T("japanese"),		FALSE,	_T("jp_JP"),	 932,	_T("shift_jis")},		// Japanese
+//	{LANGID_JP_JP,	_T("japanese"),		FALSE,	_T("jp_JP"),	 932,	_T("shift_jis")},		// Japanese
 	{LANGID_KO_KR,	_T("korean"),		FALSE,	_T("ko_KR"),	 949,	_T("euc-kr")},			// Korean
 	{LANGID_LT_LT,	_T(""),				FALSE,	_T("lt_LT"),	1257,	_T("windows-1257")},	// Lithuanian
 	{LANGID_LV_LV,	_T(""),				FALSE,	_T("lv_LV"),	1257,	_T("windows-1257")},	// Latvian
@@ -345,32 +345,40 @@ CString CPreferences::GetLangDLLNameByID(LANGID lidSelected){
 
 void CPreferences::InitThreadLocale()
 {
-	ASSERT( m_wLanguageID != 0 );
 #ifdef _UNICODE
-	// set thread locale, this is used for:
-	//	- MBCS->Unicode conversions (e.g. search results).
-	//	- Unicode->MBCS conversions (e.g. publishing local files (names) in network, or savint text files on local disk)...
-	SetThreadLocale(m_wLanguageID);
+//#ifdef _DEBUG
+	ASSERT( m_wLanguageID != 0 );
 
-	const SLanguage* pLangs = _aLanguages;
-	while (pLangs->lid)
+	// NOTE: This function is for testing multi language support only.
+	// NOTE: This function is *NOT* to be enabled in release builds nor to be offered by any Mod!
+	if (theApp.GetProfileInt(_T("eMule"), _T("SetLanguageACP"), 0) != 0)
 	{
-		if (pLangs->lid == m_wLanguageID)
+		// set thread locale, this is used for:
+		//	- MBCS->Unicode conversions (e.g. search results).
+		//	- Unicode->MBCS conversions (e.g. publishing local files (names) in network, or savint text files on local disk)...
+		SetThreadLocale(m_wLanguageID);
+
+		const SLanguage* pLangs = _aLanguages;
+		while (pLangs->lid)
 		{
-			// if we set the thread locale (see comments above) we also have to specify the proper
-			// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS (Unicode->MBCS
-			// conversion may fail)
-			if (pLangs->uCodepage)
+			if (pLangs->lid == m_wLanguageID)
 			{
-				CString strCodepage;
-				strCodepage.Format(_T(".%u"), pLangs->uCodepage);
-				_tsetlocale(LC_CTYPE, strCodepage);
+				// if we set the thread locale (see comments above) we also have to specify the proper
+				// codepage for the C-RTL, otherwise we may not be able to store some strings as MBCS (Unicode->MBCS
+				// conversion may fail)
+				if (pLangs->uCodepage)
+				{
+					CString strCodepage;
+					strCodepage.Format(_T(".%u"), pLangs->uCodepage);
+					_tsetlocale(LC_CTYPE, strCodepage);
+				}
+				break;
 			}
-			break;
+			pLangs++;
 		}
-		pLangs++;
 	}
-#endif
+//#endif //_DEBUG
+#endif //_UNICODE
 }
 
 void InitThreadLocale()

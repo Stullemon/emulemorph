@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -15,11 +15,16 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <afxinet.h>
+
 #include "emule.h"
 #include "enbitmap.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
 #include "emuledlg.h"
+#include "Statistics.h"
+#include "ListenSocket.h"
+#include "ClientUDPSocket.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -192,6 +197,8 @@ public:
 	CPPgWiz1General(UINT nIDTemplate, LPCTSTR pszCaption = NULL, LPCTSTR pszHeaderTitle = NULL, LPCTSTR pszHeaderSubTitle = NULL)
 		: CDlgPageWizard(nIDTemplate, pszCaption, pszHeaderTitle, pszHeaderSubTitle)
 	{
+		m_iAutoConnectAtStart = 0;
+		m_iAutoStart = 0;
 	}
 	virtual ~CPPgWiz1General();
 	virtual BOOL OnInitDialog();
@@ -200,6 +207,8 @@ public:
 	enum { IDD = IDD_WIZ1_GENERAL };
 
 	CString m_strNick;
+	int m_iAutoConnectAtStart;
+	int m_iAutoStart;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -215,6 +224,8 @@ END_MESSAGE_MAP()
 CPPgWiz1General::CPPgWiz1General()
 	: CDlgPageWizard(CPPgWiz1General::IDD)
 {
+	m_iAutoConnectAtStart = 0;
+	m_iAutoStart = 0;
 }
 
 CPPgWiz1General::~CPPgWiz1General()
@@ -225,6 +236,8 @@ void CPPgWiz1General::DoDataExchange(CDataExchange* pDX)
 {
 	CDlgPageWizard::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_NICK, m_strNick);
+	DDX_Check(pDX, IDC_AUTOCONNECT, m_iAutoConnectAtStart);
+	DDX_Check(pDX, IDC_AUTOSTART, m_iAutoStart);
 }
 
 BOOL CPPgWiz1General::OnInitDialog()
@@ -233,65 +246,190 @@ BOOL CPPgWiz1General::OnInitDialog()
 	InitWindowStyles(this);
 	((CEdit*)GetDlgItem(IDC_NICK))->SetLimitText(thePrefs.GetMaxUserNickLength());
 	GetDlgItem(IDC_NICK_FRM)->SetWindowText(GetResString(IDS_ENTERUSERNAME));
+	GetDlgItem(IDC_AUTOCONNECT)->SetWindowText(GetResString(IDS_FIRSTAUTOCON));
+	GetDlgItem(IDC_AUTOSTART)->SetWindowText(GetResString(IDS_WIZ_STARTWITHWINDOWS));
 	return TRUE;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
-// CPPgWiz1DlPrio dialog
+// CPPgWiz1Ports & Connections test dialog
 
-class CPPgWiz1DlPrio : public CDlgPageWizard
+class CPPgWiz1Ports : public CDlgPageWizard
 {
-	DECLARE_DYNAMIC(CPPgWiz1DlPrio)
+	DECLARE_DYNAMIC(CPPgWiz1Ports)
 
 public:
-	CPPgWiz1DlPrio();
-	CPPgWiz1DlPrio(UINT nIDTemplate, LPCTSTR pszCaption = NULL, LPCTSTR pszHeaderTitle = NULL, LPCTSTR pszHeaderSubTitle = NULL)
+	CPPgWiz1Ports();
+	CPPgWiz1Ports(UINT nIDTemplate, LPCTSTR pszCaption = NULL, LPCTSTR pszHeaderTitle = NULL, LPCTSTR pszHeaderSubTitle = NULL)
 		: CDlgPageWizard(nIDTemplate, pszCaption, pszHeaderTitle, pszHeaderSubTitle)
 	{
-		m_iDAP = 1;
 	}
-	virtual ~CPPgWiz1DlPrio();
+
+	void ValidateShownPorts();
+
+	virtual ~CPPgWiz1Ports();
 	virtual BOOL OnInitDialog();
+	afx_msg void OnStartConTest();
+	afx_msg void OnEnChangeUDPDisable();
+
+	afx_msg void OnEnChangeUDP();
+	afx_msg void OnEnChangeTCP();
+	void OnPortChange(uint8 tcpport);
+
+	CString m_sTestURL,m_sUDP,m_sTCP;
+	uint16 GetTCPPort();
+	uint16 GetUDPPort();
 
 // Dialog Data
-	enum { IDD = IDD_WIZ1_DL_PRIO };
-
-	int m_iDAP;
+	enum { IDD = IDD_WIZ1_PORTS };
 
 protected:
+	CString lastudp;
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
 };
 
-IMPLEMENT_DYNAMIC(CPPgWiz1DlPrio, CDlgPageWizard)
+IMPLEMENT_DYNAMIC(CPPgWiz1Ports, CDlgPageWizard)
 
-BEGIN_MESSAGE_MAP(CPPgWiz1DlPrio, CDlgPageWizard)
-END_MESSAGE_MAP()
 
-CPPgWiz1DlPrio::CPPgWiz1DlPrio()
-	: CDlgPageWizard(CPPgWiz1DlPrio::IDD)
+
+CPPgWiz1Ports::CPPgWiz1Ports()
+	: CDlgPageWizard(CPPgWiz1Ports::IDD)
 {
 }
 
-CPPgWiz1DlPrio::~CPPgWiz1DlPrio()
+CPPgWiz1Ports::~CPPgWiz1Ports()
 {
-	m_iDAP = 1;
 }
 
-void CPPgWiz1DlPrio::DoDataExchange(CDataExchange* pDX)
+void CPPgWiz1Ports::DoDataExchange(CDataExchange* pDX)
 {
 	CDlgPageWizard::DoDataExchange(pDX);
-	DDX_Check(pDX, IDC_DAP, m_iDAP);
+	//{{AFX_DATA_MAP(CPPgWiz1Ports)
+	DDX_Text(pDX, IDC_TCP, m_sTCP);
+	DDX_Text(pDX, IDC_UDP, m_sUDP);
+	//}}AFX_DATA_MAP
 }
 
-BOOL CPPgWiz1DlPrio::OnInitDialog()
+BEGIN_MESSAGE_MAP(CPPgWiz1Ports, CDlgPageWizard)
+	//{{AFX_MSG_MAP(CPPgWiz1Ports)
+	ON_BN_CLICKED(IDC_STARTTEST, OnStartConTest)
+	ON_BN_CLICKED(IDC_UDPDISABLE, OnEnChangeUDPDisable)
+	ON_EN_CHANGE(IDC_TCP, OnEnChangeTCP)
+	ON_EN_CHANGE(IDC_UDP, OnEnChangeUDP)
+
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+void CPPgWiz1Ports::OnEnChangeTCP() {
+	OnPortChange(1);
+}
+void CPPgWiz1Ports::OnEnChangeUDP() {
+	OnPortChange(0);
+}
+
+uint16 CPPgWiz1Ports::GetTCPPort() {
+	CString buffer;
+
+	GetDlgItem(IDC_TCP)->GetWindowText(buffer);
+	return _tstoi(buffer);
+}
+
+uint16 CPPgWiz1Ports::GetUDPPort() {
+	uint16 udp=0;
+	CString buffer;
+
+	if (!IsDlgButtonChecked(IDC_UDPDISABLE)) {
+		GetDlgItem(IDC_UDP)->GetWindowText(buffer);
+		udp=_tstoi(buffer); //GetUDPPort();
+	}
+	return udp;
+}
+
+/*
+uint16 CPPgWiz1Ports::GetTCPPort() {
+	return _tstoi(m_sTCP);
+}
+
+uint16 CPPgWiz1Ports::GetUDPPort() {
+	if (IsDlgButtonChecked(IDC_UDPDISABLE)) 
+		return 0;
+	else
+		return _tstoi(m_sUDP);
+}
+*/
+
+
+void CPPgWiz1Ports::OnPortChange(uint8 tcpport) {
+	
+	bool flag= (theApp.IsPortchangeAllowed() && 
+		( 
+		(theApp.listensocket->GetConnectedPort()!=GetTCPPort()  || theApp.listensocket->GetConnectedPort()==0)
+		||
+		(theApp.clientudp->GetConnectedPort()!=GetUDPPort() || theApp.clientudp->GetConnectedPort()==0 )    
+		)	
+	);
+	
+	GetDlgItem(IDC_STARTTEST)->EnableWindow(flag);
+}
+
+void CPPgWiz1Ports::OnStartConTest() {
+
+	uint16 tcp=GetTCPPort();
+	uint16 udp=GetUDPPort();
+
+	if (tcp==0)
+		return;
+
+	if ( (tcp!=theApp.listensocket->GetConnectedPort() || udp!=theApp.clientudp->GetConnectedPort() ) ) {
+
+		if (!theApp.IsPortchangeAllowed()) {
+			AfxMessageBox(GetResString(IDS_NOPORTCHANGEPOSSIBLE));
+			return;
+		}
+
+		// set new ports
+		thePrefs.port=tcp;
+		thePrefs.udpport=udp;
+
+		theApp.listensocket->Rebind() ;
+		theApp.clientudp->Rebind();
+	}
+
+	TriggerPortTest(tcp,udp);
+}
+
+
+BOOL CPPgWiz1Ports::OnInitDialog()
 {
 	CDlgPageWizard::OnInitDialog();
 	InitWindowStyles(this);
-	GetDlgItem(IDC_DAP)->SetWindowText(GetResString(IDS_FIRSTAUTODOWN));
+	
+	lastudp = m_sUDP;
+
+	// disable changing ports to prevent harm
+	SetDlgItemText(IDC_PORTINFO , GetResString(IDS_PORTINFO) );
+	SetDlgItemText(IDC_TESTFRAME , GetResString(IDS_CONNECTIONTEST) );
+	SetDlgItemText(IDC_TESTINFO , GetResString(IDS_TESTINFO) );
+	SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
+	SetDlgItemText(IDC_UDPDISABLE, GetResString(IDS_UDPDISABLED));
+
 	return TRUE;
+}
+
+void CPPgWiz1Ports::OnEnChangeUDPDisable() {
+	bool disabled=IsDlgButtonChecked(IDC_UDPDISABLE);
+	GetDlgItem(IDC_UDP)->EnableWindow(!disabled);
+	
+	if (disabled) {
+		GetDlgItemText(IDC_UDP, lastudp);
+		GetDlgItem(IDC_UDP)->SetWindowText(_T("0"));
+	}
+	else
+		GetDlgItem(IDC_UDP)->SetWindowText(lastudp);
+	
+	OnPortChange(0);
 }
 
 
@@ -308,6 +446,7 @@ public:
 		: CDlgPageWizard(nIDTemplate, pszCaption, pszHeaderTitle, pszHeaderSubTitle)
 	{
 		m_iUAP = 1;
+		m_iDAP = 1;
 	}
 	virtual ~CPPgWiz1UlPrio();
 	virtual BOOL OnInitDialog();
@@ -316,6 +455,7 @@ public:
 	enum { IDD = IDD_WIZ1_UL_PRIO };
 
 	int m_iUAP;
+	int m_iDAP;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -332,6 +472,7 @@ CPPgWiz1UlPrio::CPPgWiz1UlPrio()
 	: CDlgPageWizard(CPPgWiz1UlPrio::IDD)
 {
 	m_iUAP = 1;
+	m_iDAP = 1;
 }
 
 CPPgWiz1UlPrio::~CPPgWiz1UlPrio()
@@ -342,6 +483,7 @@ void CPPgWiz1UlPrio::DoDataExchange(CDataExchange* pDX)
 {
 	CDlgPageWizard::DoDataExchange(pDX);
 	DDX_Check(pDX, IDC_UAP, m_iUAP);
+	DDX_Check(pDX, IDC_DAP, m_iDAP);
 }
 
 BOOL CPPgWiz1UlPrio::OnInitDialog()
@@ -349,6 +491,8 @@ BOOL CPPgWiz1UlPrio::OnInitDialog()
 	CDlgPageWizard::OnInitDialog();
 	InitWindowStyles(this);
 	GetDlgItem(IDC_UAP)->SetWindowText(GetResString(IDS_FIRSTAUTOUP));
+	GetDlgItem(IDC_DAP)->SetWindowText(GetResString(IDS_FIRSTAUTODOWN));
+
 	return TRUE;
 }
 
@@ -424,8 +568,7 @@ public:
 		: CDlgPageWizard(nIDTemplate, pszCaption, pszHeaderTitle, pszHeaderSubTitle)
 	{
 		m_iSafeServerConnect = 0;
-		m_iAutoConnectAtStart = 0;
-		m_iKademlia = 0;
+		m_iKademlia = 1;
 		m_iED2K = 1;
 	}
 	virtual ~CPPgWiz1Server();
@@ -435,7 +578,6 @@ public:
 	enum { IDD = IDD_WIZ1_SERVER };
 
 	int m_iSafeServerConnect;
-	int m_iAutoConnectAtStart;
 	int m_iKademlia;
 	int m_iED2K;
 
@@ -454,8 +596,7 @@ CPPgWiz1Server::CPPgWiz1Server()
 	: CDlgPageWizard(CPPgWiz1Server::IDD)
 {
 	m_iSafeServerConnect = 0;
-	m_iAutoConnectAtStart = 0;
-	m_iKademlia = 0;
+	m_iKademlia = 1;
 	m_iED2K = 1;
 }
 
@@ -467,7 +608,6 @@ void CPPgWiz1Server::DoDataExchange(CDataExchange* pDX)
 {
 	CDlgPageWizard::DoDataExchange(pDX);
 	DDX_Check(pDX, IDC_SAFESERVERCONNECT, m_iSafeServerConnect);
-	DDX_Check(pDX, IDC_AUTOCONNECT, m_iAutoConnectAtStart);
 	DDX_Check(pDX, IDC_WIZARD_NETWORK_KADEMLIA, m_iKademlia);
 	DDX_Check(pDX, IDC_WIZARD_NETWORK_ED2K, m_iED2K);
 }
@@ -477,11 +617,8 @@ BOOL CPPgWiz1Server::OnInitDialog()
 	CDlgPageWizard::OnInitDialog();
 	InitWindowStyles(this);
 	GetDlgItem(IDC_SAFESERVERCONNECT)->SetWindowText(GetResString(IDS_FIRSTSAFECON));
-	GetDlgItem(IDC_AUTOCONNECT)->SetWindowText(GetResString(IDS_FIRSTAUTOCON));
 	GetDlgItem(IDC_WIZARD_NETWORK)->SetWindowText(GetResString(IDS_WIZARD_NETWORK));
 	GetDlgItem(IDC_WIZARD_ED2K)->SetWindowText(GetResString(IDS_WIZARD_ED2K));
-	GetDlgItem(IDC_KADALPHA)->SetWindowText(GetResString(IDS_KADALPHA));
-
 	return TRUE;
 }
 
@@ -603,16 +740,16 @@ BOOL FirstTimeWizard()
 	CPPgWiz1General page2(IDD_WIZ1_GENERAL, GetResString(IDS_WIZ1), GetResString(IDS_PW_GENERAL), GetResString(IDS_QL_USERNAME));
 	sheet.AddPage(&page2);
 
-	CPPgWiz1DlPrio page3(IDD_WIZ1_DL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_DOWNLOAD), GetResString(IDS_PRIORITY));
+	CPPgWiz1Ports page3(IDD_WIZ1_PORTS, GetResString(IDS_WIZ1), GetResString(IDS_PORTSCON), GetResString(IDS_PW_CONNECTION));
 	sheet.AddPage(&page3);
 	
-	CPPgWiz1UlPrio page4(IDD_WIZ1_UL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_PRIORITY));
+	CPPgWiz1UlPrio page4(IDD_WIZ1_ULDL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_DOWNLBL) + _T(" / ") + GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_PRIORITY));
 	sheet.AddPage(&page4);
 	
 	CPPgWiz1Upload page5(IDD_WIZ1_UPLOAD, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_WIZ1_UPLOAD_SUBTITLE));
 	sheet.AddPage(&page5);
 	
-	CPPgWiz1Server page6(IDD_WIZ1_SERVER, GetResString(IDS_WIZ1), GetResString(IDS_PW_SERVER), GetResString(IDS_PW_CONNECTION));
+	CPPgWiz1Server page6(IDD_WIZ1_SERVER, GetResString(IDS_WIZ1), GetResString(IDS_PW_SERVER), GetResString(IDS_NETWORK));
 	sheet.AddPage(&page6);
 	
 	CPPgWiz1End page7(IDD_WIZ1_END, GetResString(IDS_WIZ1));
@@ -622,31 +759,64 @@ BOOL FirstTimeWizard()
 	page2.m_strNick = thePrefs.GetUserNick();
 	if (page2.m_strNick.IsEmpty())
 		page2.m_strNick = DEFAULT_NICK;
-	page3.m_iDAP = 1;
+	page2.m_iAutoConnectAtStart = 0;
+	page3.m_sTCP.Format(_T("%u"), thePrefs.GetPort());
+	page3.m_sUDP.Format(_T("%u"), thePrefs.GetUDPPort());
+	page4.m_iDAP = 1;
 	page4.m_iUAP = 1;
 	page5.m_iULFullChunks = 1;
 	page6.m_iSafeServerConnect = 0;
-	page6.m_iAutoConnectAtStart = 0;
-	page6.m_iKademlia = 0;
+	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
 
+	uint16 oldtcpport=thePrefs.GetPort();
+	uint16 oldudpport=thePrefs.GetUDPPort();
+
 	int iResult = sheet.DoModal();
-	if (iResult == IDCANCEL)
+	if (iResult == IDCANCEL) {
+
+		// restore port settings?
+		thePrefs.port=oldtcpport;
+		thePrefs.udpport=oldudpport;
+		theApp.listensocket->Rebind() ;
+		theApp.clientudp->Rebind();
+
 		return FALSE;
+	}
 
 	page2.m_strNick.Trim();
 	if (page2.m_strNick.IsEmpty())
 		page2.m_strNick = DEFAULT_NICK;
 
 	thePrefs.SetUserNick(page2.m_strNick);
-	thePrefs.SetNewAutoDown(page3.m_iDAP);
+	thePrefs.SetAutoConnect(page2.m_iAutoConnectAtStart);
+	thePrefs.SetAutoStart(page2.m_iAutoStart);
+	if( thePrefs.GetAutoStart() )
+		AddAutoStart();
+	else
+		RemAutoStart();
+	thePrefs.SetNewAutoDown(page4.m_iDAP);
 	thePrefs.SetNewAutoUp(page4.m_iUAP);
 	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks);
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect);
-	thePrefs.SetAutoConnect(page6.m_iAutoConnectAtStart);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia);
 	thePrefs.SetNetworkED2K(page6.m_iED2K);
 
-	theApp.emuledlg->SetKadButtonState();
+	// set ports
+	thePrefs.port=_tstoi(page3.m_sTCP);
+	thePrefs.udpport=_tstoi(page3.m_sUDP);
+	ASSERT( thePrefs.port!=0 && thePrefs.udpport!=10 );
+	if (thePrefs.port == 0)
+		thePrefs.port = DEFAULT_TCP_PORT;
+	if (thePrefs.udpport == 0 || thePrefs.udpport == 10)
+		thePrefs.udpport = DEFAULT_UDP_PORT;
+	if ( (thePrefs.port!=theApp.listensocket->GetConnectedPort()) || (thePrefs.udpport!=theApp.clientudp->GetConnectedPort()) )
+		if (!theApp.IsPortchangeAllowed())
+			AfxMessageBox(GetResString(IDS_NOPORTCHANGEPOSSIBLE));
+		else {
+			theApp.listensocket->Rebind() ;
+			theApp.clientudp->Rebind();
+		}
+	
 	return TRUE;
 }

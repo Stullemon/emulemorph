@@ -82,14 +82,10 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 		m_PlotData[i].dRange      =   m_PlotData[i].dUpperLimit - 
 		m_PlotData[i].dLowerLimit;   // protected member variable
 		m_PlotData[i].lstPoints.AddTail(0.0);
-		// -khaos--+++> Initialize our new trend ratio variable to 1
+		// Initialize our new trend ratio variable to 1
 		m_PlotData[i].iTrendRatio = 1;
-		// <-----khaos-
-		//MORPH START - Added by SiRoB, Legend Graph
-		m_PlotData[i].LegendLabel.Format("Legend %i",i);
+		m_PlotData[i].LegendLabel.Format(_T("Legend %i"),i);
 		m_PlotData[i].BarsPlot = false;
-		//MORPH END - Added by SiRoB, Legend Graph
-
 	}
 	
 	// public variable for the number of decimal places on the y axis
@@ -142,7 +138,6 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	m_bDoUpdate = true;
 	m_nRedrawTimer = 0;
 
-	// [TPT]
 	ready = false;
 }  // COScopeCtrl
 
@@ -223,20 +218,19 @@ void COScopeCtrl::SetTrendRatio(int iTrend, unsigned int iRatio)
 		InvalidateCtrl();
 	}
 }
-// <-----khaos-
-//MORPH START - Added by SiRoB, Legend Graph
+
 void COScopeCtrl::SetLegendLabel(CString string, int iTrend)
 {
 	m_PlotData[iTrend].LegendLabel = string;
 	InvalidateCtrl(false);
 }
+
 void COScopeCtrl::SetBarsPlot(bool BarsPlot, int iTrend)
 {
 	m_PlotData[iTrend].BarsPlot = BarsPlot;
 	InvalidateCtrl(false);
 }
-//MORPH END - Added by SiRoB, Legend Graph
-/////////////////////////////////////////////////////////////////////////////
+
 void COScopeCtrl::SetRange(double dLower, double dUpper, int iTrend)
 {
 	ASSERT(dUpper > dLower);
@@ -345,7 +339,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	
 	CPen *oldPen;
 	CPen solidPen(PS_SOLID, 0, m_crGridColor);
-	CFont axisFont, yUnitFont, *oldFont, LegendFont; //MORPH - Changed by SiRoB, Legend Graph
+	CFont axisFont, yUnitFont, *oldFont, LegendFont;
 	CString strTemp;
 	
 	// in case we haven't established the memory dc's
@@ -383,9 +377,8 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	
 	// adjust the plot rectangle dimensions
 	// assume 6 pixels per character (this may need to be adjusted)
-	// -khaos--+++> From eMule+: Changed this so that the Y-Units wouldn't overlap the Y-Scale.
-	m_rectPlot.left = m_rectClient.left + 8*7+4;//(nCharacters) ; // DonGato 8 was 6
-	// <-----khaos-
+	// Changed this so that the Y-Units wouldn't overlap the Y-Scale.
+	m_rectPlot.left = m_rectClient.left + 8*7+4;//(nCharacters) ;
 	m_nPlotWidth    = m_rectPlot.Width();
 	
 	// draw the plot rectangle
@@ -407,15 +400,6 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		for(i = m_rectPlot.left; i < m_rectPlot.right; i += 4)
 			m_dcGrid.SetPixel(i, GridPos, m_crGridColor);
 	}
-	
-	/*
-	for(j = 1; j < (m_nXGrids + 1); j++)
-	{
-	GridPos = m_rectPlot.Width()*j/ (m_nXGrids + 1) + m_rectPlot.left;
-	for(i = m_rectPlot.top; i < m_rectPlot.bottom; i += 4)
-	m_dcGrid.SetPixel(GridPos, i, m_crGridColor);
-	}
-	*/
 	
 	// create some fonts (horizontal and vertical)
 	// use a height of 14 pixels and 300 weight 
@@ -466,34 +450,11 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	else
 		strTemp = m_str.YMin;
 	m_dcGrid.TextOut(m_rectPlot.left - 4, m_rectPlot.bottom-7, strTemp);
-	/*
-	// x min
-	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
-	if(m_str.XMin.IsEmpty())
-	m_dcGrid.TextOut(m_rectPlot.left, m_rectPlot.bottom + 4, "0");
-	else
-	m_dcGrid.TextOut(m_rectPlot.left, m_rectPlot.bottom + 4, (LPCTSTR)m_str.XMin);
-	
-	  // x max
-	  m_dcGrid.SetTextAlign(TA_RIGHT | TA_TOP);
-	  if(m_str.XMax.IsEmpty())
-	  {
-	  if(m_nTrendPoints < 0)
-	  strTemp.Format("%d", m_nPlotWidth/m_nShiftPixels); 
-	  else
-	  strTemp.Format("%d", m_nTrendPoints - 1); 
-	  }
-	  else
-	  strTemp = m_str.XMax;
-	  m_dcGrid.TextOut(m_rectPlot.right, m_rectPlot.bottom + 4, strTemp);
-	*/
+
 	// x units
-	//MORPH START - Changed by SiRoB
 	m_dcGrid.SetTextAlign(TA_RIGHT | TA_BOTTOM);
-	/*m_dcGrid.TextOut((m_rectPlot.left + m_rectPlot.right)/2, 
-		m_rectPlot.bottom + 4, m_str.XUnits);*/
 	m_dcGrid.TextOut (m_rectClient.right-2,m_rectClient.bottom-2,m_str.XUnits);
-	//MORPH END   - Changed by SiRoB
+
 	// restore the font
 	m_dcGrid.SelectObject(oldFont);
 	
@@ -507,14 +468,12 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		((m_rectPlot.bottom+m_rectPlot.top)/2)-rText.Height()/2, m_str.YUnits) ;
 	m_dcGrid.SelectObject(oldFont);
 	
-	//MORPH START - Added by SiRoB, Legend Graph
 	LegendFont.CreateFont(12, 0, 0, 0, 300,
-		//FALSE, FALSE, 0, ANSI_CHARSET,
 		FALSE, FALSE, 0, DEFAULT_CHARSET, // EC
 		OUT_DEFAULT_PRECIS, 
 		CLIP_DEFAULT_PRECIS,
 		DEFAULT_QUALITY, 
-		DEFAULT_PITCH | FF_SWISS, "Arial");
+		DEFAULT_PITCH | FF_SWISS, _T("Arial"));
 	oldFont = m_dcGrid.SelectObject(&LegendFont);
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
 	
@@ -557,7 +516,6 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		m_dcPlot.FillRect(m_rectClient, &m_brushBack);
 	}
 
-	//MORPH START - Changed by SiRoB, Maella -Code Fix- [TPT]
 	int iNewSize = m_rectClient.Width() / m_nShiftPixels + 10;		// +10 just in case :)
 	if(m_nMaxPointCnt < iNewSize)
 		m_nMaxPointCnt = iNewSize;									// keep the bigest value
@@ -574,7 +532,6 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	}
 	//MORPH END   - Changed by SiRoB, Maella -Code Fix- [TPT]
 
-	// finally, force the plot area to redraw
 	InvalidateRect(m_rectClient);
 } // InvalidateCtrl
 
@@ -598,17 +555,14 @@ void COScopeCtrl::AppendPoints(double dNewPoint[], bool bInvalidate, bool bAdd2L
 		if(bAdd2List)
 		{
 			m_PlotData[iTrend].lstPoints.AddTail(m_PlotData[iTrend].dCurrentPosition);
-			// <-----khaos-
 			while(m_PlotData[iTrend].lstPoints.GetCount() > m_nMaxPointCnt)
 				m_PlotData[iTrend].lstPoints.RemoveHead();
 		}
 	}
 	
-	//MORPH START - Changed by SiRoB, Maella -Code Fix- [TPT]
 	// Sometime responsible for 'ghost' point on the left after a resize
 	if(m_bDoUpdate == false)		
 		return;
-	//MORPH END   - Changed by SiRoB, Maella -Code Fix- [TPT]
 
 	if(m_nTrendPoints > 0)
 	{
@@ -646,7 +600,6 @@ void COScopeCtrl::AppendPoints(double dNewPoint[], bool bInvalidate, bool bAdd2L
 // -khaos--+++> Added parameter: bool bUseTrendRatio (TRUE by default)
 void COScopeCtrl::AppendEmptyPoints(double dNewPoint[], bool bInvalidate, bool bAdd2List, bool bUseTrendRatio)
 {
-// <-----khaos-
 	int iTrend, currY;
 	CRect ScrollRect, rectCleanUp;
 	// append a data point to the plot
@@ -660,7 +613,6 @@ void COScopeCtrl::AppendEmptyPoints(double dNewPoint[], bool bInvalidate, bool b
 			m_PlotData[iTrend].dCurrentPosition = dNewPoint[iTrend];
 		if(bAdd2List)
 			m_PlotData[iTrend].lstPoints.AddTail(m_PlotData[iTrend].dCurrentPosition);
-		// <-----khaos-
 	}
 	if(m_nTrendPoints > 0)
 	{

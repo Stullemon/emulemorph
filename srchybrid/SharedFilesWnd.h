@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -29,10 +29,10 @@ public:
 	virtual ~CSharedFilesWnd();
 
 	void Localize();
-	void Check4StatUpdate(const CKnownFile* file);
+	void ShowSelectedFilesSummary();
 	void Reload();
 
-	//MORPH START - Added by SiRoB, Share Category
+// Dialog Data
 	enum { IDD = IDD_FILES };
 
 	CSharedFilesCtrl sharedfilesctrl;
@@ -51,13 +51,10 @@ protected:
 	afx_msg void OnSysColorChange();
 
 private:
-	void ShowDetails(const CKnownFile* cur_file);
-
 	CProgressCtrlX pop_bar;
 	CProgressCtrlX pop_baraccept;
 	CProgressCtrlX pop_bartrans;
 	CFont bold;
-	uchar shownFileHash[16];
 	CIconStatic m_ctrlStatisticsFrm;
 	HICON icon_files;
 };

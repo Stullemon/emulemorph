@@ -97,13 +97,14 @@ void CMiscUtils::debugHexDump(const byte *data, uint32 lenData)
 				single.Format("%c", (((c > 31) && (c < 127)) ? c : '.'));
 				line += single;
 			}
-			CKademlia::debugLine(line);
+			//JOHNTODO Is this method Unicode friendly?
+			AddDebugLogLine(false, _T("%s"), line);
 			pos += lenLine;
 		}
 	} 
 	catch (...)
 	{
-		CKademlia::debugLine("Exception in CMiscUtils::debugHexDump\n");
+		AddDebugLogLine(false, _T("Exception in CMiscUtils::debugHexDump\n"));
 	}
 #endif
 }

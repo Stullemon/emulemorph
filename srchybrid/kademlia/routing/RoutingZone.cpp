@@ -89,7 +89,7 @@ CRoutingZone::CRoutingZone()
 	// Can only create routing zone after prefs
 	CPrefs *prefs = CKademlia::getPrefs();
 	ASSERT(prefs != NULL); 
-	prefs->getClientID(&me);
+	prefs->getKadID(&me);
 	m_filename = CMiscUtils::getAppDir();
 	m_filename.Append(CONFIGFOLDER);
 	m_filename.Append(_T("nodes.dat"));
@@ -103,7 +103,7 @@ CRoutingZone::CRoutingZone(LPCSTR filename)
 	// Can only create routing zone after prefs
 	CPrefs *prefs = CKademlia::getPrefs();
 	ASSERT(prefs != NULL); 
-	prefs->getClientID(&me);
+	prefs->getKadID(&me);
 	m_filename = filename;
 	CUInt128 zero((ULONG)0);
 	init(NULL, 0, zero);
@@ -135,7 +135,7 @@ CRoutingZone::~CRoutingZone()
 {
 	if ((m_superZone == NULL) && (m_filename.GetLength() > 0))
 	{
-		theApp.emuledlg->kademliawnd->contactList->Hide();
+		theApp.emuledlg->kademliawnd->HideContacts();
 		writeFile();
 	}
 	if (isLeaf())
@@ -146,15 +146,14 @@ CRoutingZone::~CRoutingZone()
 		delete m_subZones[1];
 	}
 	if (m_superZone == NULL)
-		theApp.emuledlg->kademliawnd->contactList->Visable();
+		theApp.emuledlg->kademliawnd->ShowContacts();
 }
 
 void CRoutingZone::readFile(void)
 {
-	Lock();
 	try
 	{
-		theApp.emuledlg->kademliawnd->contactList->Hide();
+		theApp.emuledlg->kademliawnd->HideContacts();
 		uint32 numContacts = 0;
 		CSafeBufferedFile file;
 		CFileException fexp;
@@ -183,26 +182,23 @@ void CRoutingZone::readFile(void)
 				}
 			}
 			file.Close();
-			CKademlia::logMsg(GetResString(IDS_KADCONTACTSREAD), numContacts);
+			AddLogLine( false, GetResString(IDS_KADCONTACTSREAD), numContacts);
 		}
 		if (numContacts == 0)
-			CKademlia::reportError(ERR_NO_CONTACTS, GetResString(IDS_ERR_KADCONTACTS));
+			AddDebugLogLine( false, GetResString(IDS_ERR_KADCONTACTS));
 	} 
 	//TODO: Make this catch an CFileException..
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::readFile");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::readFile"));
 	}
-	theApp.emuledlg->kademliawnd->contactList->Visable();
-	Unlock();
+	theApp.emuledlg->kademliawnd->ShowContacts();
 }
 
 void CRoutingZone::writeFile(void)
 {
-	Lock();
 	try
 	{
-//		dumpContents();
 		uint32 count = 0;
 		CContact *c;
 		CUInt128 id;
@@ -213,7 +209,7 @@ void CRoutingZone::writeFile(void)
 			setvbuf(file.m_pStream, NULL, _IOFBF, 32768);
 
 			ContactList contacts;
-			getAllEntries(&contacts);
+			getBootstrapContacts(&contacts, 200);
 			file.WriteUInt32((uint32)min(contacts.size(), CONTACT_FILE_LIMIT));
 			ContactList::const_iterator it;
 			for (it = contacts.begin(); it != contacts.end(); it++)
@@ -231,14 +227,13 @@ void CRoutingZone::writeFile(void)
 			}
 			file.Close();
 		}
-		CKademlia::debugMsg("Wrote %ld contact%s to file.", count, ((count == 1) ? "" : "s"));
+		AddDebugLogLine( false, _T("Wrote %ld contact%s to file."), count, ((count == 1) ? _T("") : _T("s")));
 	} 
 	//TODO: Make this catch an CFileException..
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::writeFile");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::writeFile"));
 	}
-	Unlock();
 }
 
 bool CRoutingZone::canSplit(void) const
@@ -250,46 +245,6 @@ bool CRoutingZone::canSplit(void) const
 	if ( (m_zoneIndex < KK || m_level < KBASE) && m_bin->getSize() == K)
 		return true;
 	return false;
-	
-	/* Check if we need to split to keep the vicinity consistent */
-//	return areWeInFirstSubtreeOfEnoughSize();
-}
-
-bool CRoutingZone::areWeInFirstSubtreeOfEnoughSize(void) const
-{
-	if (m_zoneIndex == 0) 
-	{
-		CRoutingZone *z = m_subZones[0];
-		if (z == NULL || z->getNumContacts() < K)
-			return true;
-		else
-			return false;
-	} 
-	else
-		return m_superZone->areWeInFirstSubtreeOfEnoughSize();
-}
-
-void CRoutingZone::consolidate(void)
-{
-	Lock();
-	try
-	{
-		if (isLeaf() && m_superZone != NULL)
-			m_superZone->consolidate();
-		else if ((!isLeaf()) 
-			&& (m_subZones[0]->isLeaf() && m_subZones[1]->isLeaf()) 
-			&&	(!canSplit()) 
-			&&	(m_subZones[0]->m_bin->getRemaining() < 1 || m_subZones[1]->m_bin->getRemaining() < 1) )
-		{
-			if (m_superZone != NULL)
-				m_superZone->consolidate();
-		}
-	} 
-	catch (...) 
-	{
-		CKademlia::debugLine("Exception in CRoutingZone::consolidate");
-	}
-	Unlock();
 }
 
 bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport, byte type)
@@ -302,7 +257,6 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 	distance.xor(id);
 	CContact *c = NULL;
 
-	Lock();
 	try
 	{
 		if (!isLeaf()) 
@@ -316,14 +270,17 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 				c->setUDPPort(port);
 				c->setTCPPort(tport);
 				retVal = true;
-				theApp.emuledlg->kademliawnd->contactList->ContactRef(c);
+				theApp.emuledlg->kademliawnd->ContactRef(c);
 			}
 			else if (m_bin->getRemaining() > 0)
 			{
 				c = new CContact(id, ip, port, tport, type);
 				retVal = m_bin->add(c);
 				if(retVal)
-					theApp.emuledlg->kademliawnd->contactList->ContactAdd(c);
+				{
+					if (theApp.emuledlg->kademliawnd->ContactAdd(c))
+						c->setGuiRefs(true);
+				}
 			}
 			else if (canSplit()) 
 			{
@@ -336,7 +293,10 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 				c = new CContact(id, ip, port, tport, type);
 				retVal = m_bin->add(c);
 				if(retVal)
-					theApp.emuledlg->kademliawnd->contactList->ContactAdd(c);
+				{
+					if (theApp.emuledlg->kademliawnd->ContactAdd(c))
+						c->setGuiRefs(true);
+				}
 			}
 
 			if (!retVal)
@@ -348,15 +308,13 @@ bool CRoutingZone::add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport,
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::add");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::add"));
 	}
-	Unlock();
 	return retVal;
 }
 
 void CRoutingZone::setAlive(uint32 ip, uint16 port)
 {
-	Lock();
 	try
 	{
 		if (isLeaf())
@@ -369,17 +327,8 @@ void CRoutingZone::setAlive(uint32 ip, uint16 port)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::setAlive");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::setAlive"));
 	}
-	Unlock();
-}
-
-bool CRoutingZone::contains(const CUInt128 &id) const
-{
-	if (isLeaf())
-		return m_bin->contains(id);
-	else
-		return m_subZones[id.getBitNumber(m_level)]->contains(id);
 }
 
 CContact *CRoutingZone::getContact(const CUInt128 &id) const
@@ -390,19 +339,19 @@ CContact *CRoutingZone::getContact(const CUInt128 &id) const
 		return m_subZones[id.getBitNumber(m_level)]->getContact(id);
 }
 
-int CRoutingZone::getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst) const
+int CRoutingZone::getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst, bool inUse) const
 {
 	// If leaf zone, do it here
 	if (isLeaf())
-		return m_bin->getClosestTo(maxType, target, maxRequired, result, emptyFirst);
+		return m_bin->getClosestTo(maxType, target, maxRequired, result, emptyFirst, inUse);
 	
 	// otherwise, recurse in the closer-to-the-target subzone first
 	int closer = target.getBitNumber(m_level);
-	int found = m_subZones[closer]->getClosestTo(maxType, target, maxRequired, result, emptyFirst);
+	int found = m_subZones[closer]->getClosestTo(maxType, target, maxRequired, result, emptyFirst, inUse);
 
 	// if still not enough tokens found, recurse in the other subzone too
 	if (found < maxRequired)
-		found += m_subZones[1-closer]->getClosestTo(maxType, target, maxRequired-found, result, false);
+		found += m_subZones[1-closer]->getClosestTo(maxType, target, maxRequired-found, result, false, inUse);
 	
 	return found;
 }
@@ -411,16 +360,14 @@ void CRoutingZone::getAllEntries(ContactList *result, bool emptyFirst)
 {
 	if (isLeaf())
 	{
-		Lock();
 		try
 		{
 			m_bin->getEntries(result, emptyFirst);
 		} 
 		catch (...) 
 		{
-			CKademlia::debugLine("Exception in CRoutingZone::getAllEntries");
+			AddDebugLogLine(false, _T("Exception in CRoutingZone::getAllEntries"));
 		}
-		Unlock();
 	}
 	else
 	{
@@ -433,16 +380,14 @@ void CRoutingZone::topDepth(int depth, ContactList *result, bool emptyFirst)
 {
 	if (isLeaf())
 	{
-		Lock();
 		try
 		{
 			m_bin->getEntries(result, emptyFirst);
 		} 
 		catch (...) 
 		{
-			CKademlia::debugLine("Exception in CRoutingZone::topDepth");
+			AddDebugLogLine(false, _T("Exception in CRoutingZone::topDepth"));
 		}
-		Unlock();
 	}
 	else if (depth <= 0)
 		randomBin(result, emptyFirst);
@@ -457,16 +402,14 @@ void CRoutingZone::randomBin(ContactList *result, bool emptyFirst)
 {
 	if (isLeaf())
 	{
-		Lock();
 		try
 		{
 			m_bin->getEntries(result, emptyFirst);
 		} 
 		catch (...) 
 		{
-			CKademlia::debugLine("Exception in CRoutingZone::randomBin");
+			AddDebugLogLine(false, _T("Exception in CRoutingZone::randomBin"));
 		}
-		Unlock();
 	}
 	else
 		m_subZones[rand()&1]->randomBin(result, emptyFirst);
@@ -479,45 +422,8 @@ uint32 CRoutingZone::getMaxDepth(void) const
 	return 1 + max(m_subZones[0]->getMaxDepth(), m_subZones[1]->getMaxDepth());
 }
 
-uint64 CRoutingZone::getApproximateNodeCount(uint32 ourLevel) const
-{
-	if (isLeaf()) 
-		return ((uint64)1 << ourLevel) * (uint64)m_bin->getSize();
-	return (m_subZones[0]->getApproximateNodeCount(ourLevel+1) + m_subZones[1]->getApproximateNodeCount(ourLevel+1)) / 2;
-}
-
-void CRoutingZone::dumpContents(LPCTSTR prefix) const
-{
-#ifdef DEBUG
-	CString msg;
-	CString ziStr;
-	m_zoneIndex.toBinaryString(&ziStr, true);
-
-	if (prefix == NULL)
-		OutputDebugString(_T("------------------------------------------------------\r\n"));
-	if (isLeaf()) 
-	{
-		msg.Format(_T("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s\r\n"), 
-			m_level, (prefix == NULL) ? _T("ROOT") : prefix, getNumContacts(), ziStr);
-		OutputDebugString(msg);
-		m_bin->dumpContents();
-	} 
-	else 
-	{
-		msg.Format(_T("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s NODE\r\n"), 
-					m_level, (prefix == NULL) ? _T("ROOT") : prefix, getNumContacts(), ziStr);
-		OutputDebugString(msg);
-		msg.Format(_T("%s0"), (prefix == NULL) ? _T("") : prefix);
-		m_subZones[0]->dumpContents(msg.GetBuffer(0));
-		msg.Format(_T("%s1"), (prefix == NULL) ? _T("") : prefix);
-		m_subZones[1]->dumpContents(msg.GetBuffer(0));
-	}
-#endif
-}
-
 void CRoutingZone::split(void)
 {
-	Lock();
 	try
 	{
 		stopTimer();
@@ -539,14 +445,12 @@ void CRoutingZone::split(void)
 	} 
 	catch (...)
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::split");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::split"));
 	}
-	Unlock();
 }
 
 void CRoutingZone::merge(void)
 {
-	Lock();
 	try
 	{
         if (isLeaf() && m_superZone != NULL)
@@ -590,9 +494,8 @@ void CRoutingZone::merge(void)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::merge");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::merge"));
 	}
-	Unlock();
 }
 
 bool CRoutingZone::isLeaf(void) const
@@ -637,21 +540,19 @@ bool CRoutingZone::onBigTimer(void)
 	return false;
 }
 
-//This estimate does not work very well.. Once the network is working well with many
-//users, we can then start to test methods simular to this.. This estimate is based
-//on Overnets method of estimating users.
-uint32 CRoutingZone::estimateCount(void)
+//This is used when we find a leaf and want to know what this sample looks like.
+//We fall back two levels and take a sample to try to minimize any areas of the 
+//tree that will give very bad results.
+uint32 CRoutingZone::estimateCount()
 {
+	if( !isLeaf() )
+		return 0;
 	if( m_level < KBASE )
 		return (pow(2, m_level)*10);
-	CRoutingZone* curZone = m_superZone;
-	//This count use to be based on how Overnet estimates it's count.. But it is now
-	//obvious that Overnet takes it's real estimate and doubles it to make thier
-	//user base look twice as big as it really is..
-	float modify = (float)curZone->getNumContacts()/20;
-	if( modify > 1.5 )
-		modify = 1.5;
-	return (pow( 2, m_level))*10*(modify);
+	CRoutingZone* curZone = m_superZone->m_superZone->m_superZone;
+
+	float modify = ((float)curZone->getNumContacts())/20.0F;
+	return (pow( 2, m_level-2))*10*(modify);
 }
 
 void CRoutingZone::onSmallTimer(void)
@@ -667,7 +568,6 @@ void CRoutingZone::onSmallTimer(void)
 	ContactList entries;
 	ContactList::iterator it;
 
-	Lock();
 	try
 	{
 		// Remove dead entries
@@ -679,19 +579,16 @@ void CRoutingZone::onSmallTimer(void)
 			{
 				if (((c->m_expires > 0) && (c->m_expires <= now)))
 				{
-					m_bin->remove(c);
-					delete c;
+					if(!c->inUse())
+					{
+						m_bin->remove(c);
+						delete c;
+					}
 					continue;
 				}
 			}
 			if(c->m_expires == 0 && c->madeContact() == false)
-			{
-				if( c->getType() > 1)
-					//Don't lower this timer. This timer makes sure you don't delete a contact that is still being used!
-					c->m_expires = now + MIN2S(3);
-				else
-					c->m_expires = now;
-			}
+				c->m_expires = now;
 		}
 		c = NULL;
 		//Ping only contacts that are in the branches that meet the set level and are not close to our ID.
@@ -710,9 +607,8 @@ void CRoutingZone::onSmallTimer(void)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::onSmallTimer");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::onSmallTimer"));
 	}
-	Unlock();
 	if(c != NULL)
 	{
 		c->setType(c->getType()+1);
@@ -749,7 +645,6 @@ uint32 CRoutingZone::getBootstrapContacts(ContactList *results, uint32 maxRequir
 	results->clear();
 
 	uint32 retVal = 0;
-	Lock();
 	try
 	{
 		ContactList top;
@@ -768,12 +663,21 @@ uint32 CRoutingZone::getBootstrapContacts(ContactList *results, uint32 maxRequir
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CRoutingZone::getBoostStrapContacts");
+		AddDebugLogLine(false, _T("Exception in CRoutingZone::getBoostStrapContacts"));
 	}
-	Unlock();
 	return retVal;
 }
 
+/*
+uint64 CRoutingZone::getApproximateNodeCount(uint32 ourLevel) const
+{
+	if (isLeaf()) 
+		return ((uint64)1 << ourLevel) * (uint64)m_bin->getSize();
+	return (m_subZones[0]->getApproximateNodeCount(ourLevel+1) + m_subZones[1]->getApproximateNodeCount(ourLevel+1)) / 2;
+}
+*/
+
+/*
 void CRoutingZone::selfTest(void)
 {
 	// This is not intended to be a conclusive test of the routing zone, 
@@ -847,3 +751,35 @@ OutputDebugString(_T("\r\n"));
 		OutputDebugString(line);
 	}
 }
+*/
+/*
+//Don't delete, just keep for future reference..
+void CRoutingZone::dumpContents(LPCTSTR prefix) const
+{
+#ifdef DEBUG
+	CString msg;
+	CString ziStr;
+	m_zoneIndex.toBinaryString(&ziStr, true);
+
+	if (prefix == NULL)
+		OutputDebugString(_T("------------------------------------------------------\r\n"));
+	if (isLeaf()) 
+	{
+		msg.Format(_T("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s\r\n"), 
+			m_level, (prefix == NULL) ? _T("ROOT") : prefix, getNumContacts(), ziStr);
+		OutputDebugString(msg);
+		m_bin->dumpContents();
+	} 
+	else 
+	{
+		msg.Format(_T("Zone level: %ld\tZone prefix: %s\tContacts: %ld\tZoneIndex: %s NODE\r\n"), 
+					m_level, (prefix == NULL) ? _T("ROOT") : prefix, getNumContacts(), ziStr);
+		OutputDebugString(msg);
+		msg.Format(_T("%s0"), (prefix == NULL) ? _T("") : prefix);
+		m_subZones[0]->dumpContents(msg.GetBuffer(0));
+		msg.Format(_T("%s1"), (prefix == NULL) ? _T("") : prefix);
+		m_subZones[1]->dumpContents(msg.GetBuffer(0));
+	}
+#endif
+}
+*/

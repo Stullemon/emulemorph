@@ -219,6 +219,13 @@ bool CLog::Open()
 	{
 		m_tStarted = time(NULL);
 		m_uBytesWritten = _filelength(fileno(m_fp));
+#ifdef _UNICODE
+		if (m_uBytesWritten == 0)
+		{
+			// write Unicode byte-order mark 0xFEFF
+			fputwc(0xFEFF, m_fp);
+		}
+#endif
 	}
 	return m_fp != NULL;
 }
@@ -277,13 +284,8 @@ bool CLog::Log(LPCTSTR pszMsg, int iLen)
 	//Morph END - Added by SiRoB, AndCycle, Date File Name Log
 
 	// don't use 'fputs' + '_filelength' -- gives poor performance
-#ifdef _UNICODE
-	CStringA strMsgA(pszMsg);
-	size_t uWritten = fwrite((LPCSTR)strMsgA, 1, strMsgA.GetLength(), m_fp);
-#else
-	size_t uToWrite = (iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen;
+	size_t uToWrite = ((iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen)*sizeof(TCHAR);
 	size_t uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
-#endif
 	bool bResult = !ferror(m_fp);
 	m_uBytesWritten += uWritten;
 

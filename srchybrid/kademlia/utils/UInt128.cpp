@@ -31,6 +31,8 @@ there client on the eMule forum..
 #include "stdafx.h"
 #include "UInt128.h"
 
+#include <crypto51/osrng.h>
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -40,11 +42,25 @@ static char THIS_FILE[]=__FILE__;
 
 ////////////////////////////////////////
 using namespace Kademlia;
+using namespace CryptoPP;
 ////////////////////////////////////////
 
 CUInt128::CUInt128()
 {
 	setValue((ULONG)0);
+}
+
+CUInt128::CUInt128(bool fill)
+{
+	if( fill )
+	{
+		m_data[0] = (ULONG)-1;
+		m_data[1] = (ULONG)-1;
+		m_data[2] = (ULONG)-1;
+		m_data[3] = (ULONG)-1;
+	}
+	else
+		setValue((ULONG)0);
 }
 
 CUInt128::CUInt128(ULONG value)
@@ -101,9 +117,10 @@ CUInt128& CUInt128::setValueBE(const byte *valueBE)
 
 CUInt128& CUInt128::setValueRandom(void)
 {
-	setValueGUID();
-	for (int i=0; i<16; i++)
-		m_data[i/4] ^= rand() << (8*(3-(i%4)));
+	AutoSeededRandomPool rng;
+	byte randomBytes[16];
+	rng.GenerateBlock(randomBytes, 16);
+	setValueBE( randomBytes );
 	return *this;
 }
 

@@ -1,8 +1,10 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "IconStatic.h"
+#include "kademlia/routing/contact.h"
 
 class CKadContactListCtrl;
+class CKadContactHistogramCtrl;
 class CKadSearchListCtrl;
 class CCustomAutoComplete;
 
@@ -14,21 +16,34 @@ public:
 	CKademliaWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CKademliaWnd();
 
-	CKadContactListCtrl* contactList;
+	// Dialog Data
+	enum { IDD = IDD_KADEMLIAWND };
+
+	// Contacts
+	UINT GetContactCount() const;
+	void UpdateKadContactCount();
+	void ShowContacts();
+	void HideContacts();
+	bool ContactAdd(const Kademlia::CContact* contact);
+	void ContactRem(const Kademlia::CContact* contact);
+	void ContactRef(const Kademlia::CContact* contact);
+
+	// Searches
 	CKadSearchListCtrl* searchList;
-	CStatic kadContactLab;
-	CStatic kadSearchLab;
-	CIconStatic m_ctrlBootstrap;
 
 	void Localize();
 	void UpdateControlsState();
 	BOOL SaveAllSettings();
 
-// Dialog Data
-	enum { IDD = IDD_KADEMLIAWND };
-
 protected:
+	CStatic kadContactLab;
+	CStatic kadSearchLab;
+	CIconStatic m_ctrlBootstrap;
+	CKadContactListCtrl* m_contactListCtrl;
+	CKadContactHistogramCtrl* m_contactHistogramCtrl;
 	CCustomAutoComplete* m_pacONBSIPs;
+	HICON icon_kadcont;
+	HICON icon_kadsea;
 
 	void SetAllIcons();
 
@@ -41,9 +56,4 @@ protected:
 	afx_msg void OnBnClickedFirewallcheckbutton();
 	afx_msg void OnSysColorChange();
 	afx_msg void OnEnSetfocusBootstrapip();
-
-private:
-	HICON icon_kadcont;
-	HICON icon_kadsea;
-
 };

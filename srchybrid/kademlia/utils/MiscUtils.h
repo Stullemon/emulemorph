@@ -28,13 +28,15 @@ Any mod that changes anything within the Kademlia side will not be allowed to ad
 there client on the eMule forum..
 */
 
+#include "Loggable.h"
+
 #pragma once
 
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
 
-class CMiscUtils
+class CMiscUtils: public CLoggable
 {
 public:
 

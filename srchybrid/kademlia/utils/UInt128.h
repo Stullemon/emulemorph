@@ -39,6 +39,7 @@ class CUInt128
 public:
 
 	CUInt128();
+	CUInt128(bool fill);
 	CUInt128(ULONG value);
 	CUInt128(const byte *valueBE);
 	/**

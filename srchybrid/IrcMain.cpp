@@ -20,7 +20,6 @@
 //Much of it may never be used, but it's here just in case..
 
 #include "stdafx.h"
-#pragma comment(lib, "winmm.lib")
 #include <Mmsystem.h>
 #include "emule.h"
 #include "IRCMain.h"
@@ -35,6 +34,7 @@
 #include "emuledlg.h"
 #include "ServerWnd.h"
 #include "IRCWnd.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -71,8 +71,9 @@ void CIrcMain::PreParseMessage( CStringA buffer )
 				rawMessage.Remove('\n');
 				rawMessage.Remove('\r');
 				ParseMessage( rawMessage );
+				if( preParseBuffer != _T("") )
 				preParseBuffer = preParseBuffer.Mid(index+1);
-				index = preParseBuffer.Find("\n");
+				index = preParseBuffer.Find('\n');
 			}
 		}
 		catch(...)
@@ -88,14 +89,12 @@ void CIrcMain::PreParseMessage( CStringA buffer )
 	}
 }
 
-//extern void URLDecode(CString& result, const char* buff);
-
 void CIrcMain::ProcessLink( CString ed2kLink ) 
 {
 	try 
 	{
 		CString link;
-		link=URLDecode(ed2kLink);
+		link = OptUtf8ToStr(URLDecode(ed2kLink));
 		CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(link);
 		_ASSERT( pLink !=0 );
 		switch (pLink->GetKind()) 
@@ -447,7 +446,7 @@ void CIrcMain::ParseMessage( CStringA rawMessage )
 						}
 						//Create our response.
 						CString build;
-						build.Format( _T("PRIVMSG %s :\001REPFRIEND eMule%s%s|%s|%u:%u|%s:%s|%s|\001"), source, theApp.m_strCurVersionLong, Irc_Version, sverify, theApp.IsFirewalled() ? 0 : theApp.GetID(), thePrefs.GetPort(), sip, sport, EncodeBase16((const unsigned char*)thePrefs.GetUserHash(), 16));
+						build.Format( _T("PRIVMSG %s :\001REPFRIEND eMule%s%s|%s|%u:%u|%s:%s|%s|\001"), source, theApp.m_strCurVersionLong, Irc_Version, sverify, theApp.IsFirewalled() ? 0 : theApp.GetID(), thePrefs.GetPort(), sip, sport, md4str(thePrefs.GetUserHash()));
 						ircsocket->SendString( build );
 						build.Format( _T("%s %s"), source, GetResString(IDS_IRC_ADDASFRIEND));
 						if( !thePrefs.GetIrcIgnoreEmuleProtoAddFriend() )
@@ -494,7 +493,7 @@ void CIrcMain::ParseMessage( CStringA rawMessage )
 							throw CString( _T("SMIRC Error: Received Invalid friend reply") );
 						CString hash(message.Mid( index2 + 1, index1 - index2 -1));
 						uchar userid[16];
-						if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid,ARRSIZE(userid)))
+						if (!strmd4(hash,userid))
 							throw CString( _T("SMIRC Error: Received Invalid friend reply") );
 						theApp.friendlist->AddFriend( userid, 0, newClientID, newClientPort, 0, source, 1);
 						return;
@@ -522,7 +521,7 @@ void CIrcMain::ParseMessage( CStringA rawMessage )
 							throw CString( _T("SMIRC Error: Received Invalid ED2K link") );
 						CString hash = message.Mid(index1+1, index2-index1-1);
 						uchar userid[16];
-						if (hash.GetLength()!=32 || !DecodeBase16(hash.GetBuffer(),hash.GetLength(),userid,ARRSIZE(userid)))
+						if (!strmd4(hash,userid))
 							throw CString( _T("SMIRC Error: Received Invalid ED2K link") );
 						if(!theApp.friendlist->SearchFriend(userid, 0, 0))
 						{
@@ -2061,32 +2060,15 @@ void CIrcMain::Connect()
 	try
 	{
 		CString ident;
-		uint16 ident_int = 0;
-		for( int i = 0; i < 16; i++)
-		{
-			ident_int += thePrefs.GetUserHash()[i] * thePrefs.GetUserHash()[15-i];
-		}
-		ident.Format(_T("%ue%u"), thePrefs.GetLanguageID(), ident_int);
-		if( ident.GetLength() > 8 )
-			ident.Truncate(8);
+		CString hash;
+		hash = md4str(thePrefs.GetUserHash());
+		ident.Format(_T("%u%s"), thePrefs.GetLanguageID(), hash);
 		if(ircsocket)
 			Disconnect();
 		ircsocket = new CIrcSocket(this);
 		nick = (CString)thePrefs.GetIRCNick();
-		nick.Replace(_T("."), _T(""));
-		nick.Replace(_T(" "), _T(""));
-		nick.Replace(_T(":"), _T(""));
-		nick.Replace(_T("/"), _T(""));
-		nick.Replace(_T("@"), _T(""));
 		if( !nick.CompareNoCase( _T("emule") ) )
-		{
-			uint16 ident_int = 0;
-			for( int i = 0; i < 16; i++)
-			{
-				ident_int += thePrefs.GetUserHash()[i] * thePrefs.GetUserHash()[15-i];
-			}
-			nick.Format(_T("eMuleIRC%u-%u"), thePrefs.GetLanguageID(), ident_int);
-		}
+			nick.Format(_T("eMuleIRC%u-%s"), thePrefs.GetLanguageID(), hash);
 		nick = nick.Left(25);
 		version = _T("eMule") + theApp.m_strCurVersionLong + (CString)Irc_Version;
 		user = _T("USER ") + ident + _T(" 8 * :") + version;

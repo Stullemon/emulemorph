@@ -308,9 +308,23 @@ HRESULT CCustomAutoComplete::EnDisable(BOOL p_fEnable)
 
 BOOL CCustomAutoComplete::LoadList(LPCTSTR pszFileName)
 {
-	FILE* fp = _tfsopen(pszFileName, _T("rt"), _SH_DENYWR);
+	FILE* fp = _tfsopen(pszFileName, _T("rb"), _SH_DENYWR);
 	if (fp == NULL)
 		return FALSE;
+
+	// verify Unicode byte-order mark 0xFEFF
+	WORD wBOM = fgetwc(fp);
+#ifdef _UNICODE
+	if (wBOM != 0xFEFF){
+#else
+	if (wBOM == 0xFEFF){
+#endif
+		fclose(fp);
+		return FALSE;
+	}
+#ifndef _UNICODE
+	fseek(fp, 0, SEEK_SET);
+#endif
 
 	TCHAR szItem[256];
 	while (_fgetts(szItem, ARRSIZE(szItem), fp) != NULL){
@@ -324,12 +338,17 @@ BOOL CCustomAutoComplete::LoadList(LPCTSTR pszFileName)
 
 BOOL CCustomAutoComplete::SaveList(LPCTSTR pszFileName)
 {
-	FILE* fp = _tfsopen(pszFileName, _T("wt"), _SH_DENYWR);
+	FILE* fp = _tfsopen(pszFileName, _T("wb"), _SH_DENYWR);
 	if (fp == NULL)
 		return FALSE;
 
+#ifdef _UNICODE
+	// write Unicode byte-order mark 0xFEFF
+	fputwc(0xFEFF, fp);
+#endif
+
 	for (int i = 0; i < m_asList.GetCount(); i++)
-		_ftprintf(fp, _T("%s\n"), m_asList[i]);
+		_ftprintf(fp, _T("%s\r\n"), m_asList[i]);
 	fclose(fp);
 	return !ferror(fp);
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 #include "ED2KLink.h"
 #include "OtherFunctions.h"
 #include "SafeFile.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -180,6 +181,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 {
 	SourcesList = NULL;
 	m_hashset = NULL;
+	m_bAICHHashValid = false;
 
 	if ( _tcslen(hash) != 32 )
 		throw GetResString(IDS_ERR_ILLFORMEDHASH);
@@ -274,6 +276,22 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 			m_hashset->Seek(16, CFile::begin);
 			m_hashset->WriteUInt16(iPartHashs);
 			m_hashset->Seek(0, CFile::begin);
+		}
+		else if (strTok == _T("h"))
+		{
+			CString strHash = strParam.Mid(iPos + 1);
+			if (!strHash.IsEmpty())
+			{
+				if (DecodeBase32(strHash, m_AICHHash.GetRawHash(), CAICHHash::GetHashSize()) == CAICHHash::GetHashSize()){
+					m_bAICHHashValid = true;
+					ASSERT( m_AICHHash.GetString().CompareNoCase(strHash) == 0 );
+				}
+				else
+					ASSERT( false );
+			}
+			else
+				ASSERT( false );
+
 		}
 		else
 			ASSERT(0);
@@ -407,7 +425,7 @@ void
 CED2KFileLink::GetLink(CString& lnk)
 {
 	lnk = _T("ed2k://|file|");
-	lnk += m_name;
+	lnk += EncodeUrlUtf8(m_name);
 	lnk += _T("|");
 	lnk += m_size;
 	lnk += _T("|");
@@ -434,7 +452,7 @@ CED2KFileLink::GetServerLink()
 CED2KFileLink* 
 CED2KFileLink::GetFileLink() 
 { 
-	m_name=URLDecode(m_name);
+	m_name = OptUtf8ToStr(URLDecode(m_name));
 	return this; 
 }
 

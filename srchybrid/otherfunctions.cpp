@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -31,6 +31,9 @@
 #include "emuledlg.h"
 #include "MenuCmds.h"
 #include "ZipFile.h"
+#include <atlbase.h>
+#include "StringConversion.h"
+#include "shahashset.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -71,33 +74,106 @@ static byte base16Lookup[BASE16_LOOKUP_MAX][2] = {
     { 'F', 0xF }
 };
 
-CString CastItoXBytes(uint64 count){
+CString CastItoXBytes(uint16 count, bool isK, bool isPerSec, uint32 decimal){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+}
+
+CString CastItoXBytes(uint32 count, bool isK, bool isPerSec, uint32 decimal){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+}
+
+CString CastItoXBytes(uint64 count, bool isK, bool isPerSec, uint32 decimal){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+}
+
+CString CastItoXBytes(float count, bool isK, bool isPerSec, uint32 decimal){
+	return CastItoXBytes((double)count, isK, isPerSec, decimal);
+}
+
+CString CastItoXBytes(double count, bool isK, bool isPerSec, uint32 decimal){
+	if( count <= 0.0 )
+	{
+		if(isPerSec)
+			return _T("0 ") + GetResString(IDS_BYTESPERSEC);
+		else
+			return _T("0 ") + GetResString(IDS_BYTES);
+	}
+	else if( isK )
+	{
+		if( count >  1.7E+300 )
+			count =  1.7E+300;
+		else
+			count *= 1024.0;
+	}
 	CString buffer;
-	if (count < 1024)
-		buffer.Format(_T("%.0f %s"),(float)count,GetResString(IDS_BYTES));
-	else if (count < 1048576)
-		buffer.Format(_T("%.0f %s"),(float)count/1024,GetResString(IDS_KBYTES));
-	else if (count < 1073741824)
-		buffer.Format(_T("%.2f %s"),(float)count/1048576,GetResString(IDS_MBYTES));
-	else if (count < 1099511627776)
-		buffer.Format(_T("%.2f %s"),(float)count/1073741824,GetResString(IDS_GBYTES));
-	else 
-		buffer.Format(_T("%.3f %s"),(float)count/1099511627776,GetResString(IDS_TBYTES));
+	if( isPerSec )
+	{
+		if (count < 1024.0)
+			buffer.Format(_T("%.0f %s"), count, GetResString(IDS_BYTESPERSEC));
+		else if (count < 1024000.0)
+			buffer.Format(_T("%.*f %s"), decimal, count/1024.0, GetResString(IDS_KBYTESPERSEC));
+		else if (count < 1048576000.0)
+			buffer.Format(_T("%.*f %s"), decimal, count/1048576.0, GetResString(IDS_MBYTESPERSEC));
+		else if (count < 1073741824000.0)
+			buffer.Format(_T("%.*f %s"), decimal, count/1073741824.0, GetResString(IDS_GBYTESPERSEC));
+		else 
+			buffer.Format(_T("%.*f %s"), decimal, count/1099511627776.0, GetResString(IDS_TBYTESPERSEC));
+	}
+	else
+	{
+		if (count < 1024.0)
+			buffer.Format(_T("%.0f %s"), count, GetResString(IDS_BYTES));
+		else if (count < 1024000.0)
+			buffer.Format(_T("%.*f %s"), decimal, count/1024.0, GetResString(IDS_KBYTES));
+		else if (count < 1048576000.0)
+			buffer.Format(_T("%.*f %s"), decimal, count/1048576.0, GetResString(IDS_MBYTES));
+		else if (count < 1073741824000.0)
+			buffer.Format(_T("%.*f %s"), decimal, count/1073741824.0, GetResString(IDS_GBYTES));
+		else 
+			buffer.Format(_T("%.*f %s"), decimal, count/1099511627776.0, GetResString(IDS_TBYTES));
+	}
 	return buffer;
 }
 
-CString CastItoIShort(uint64 count){
+CString CastItoIShort(uint16 count, bool isK, uint32 decimal){
+	return CastItoIShort((double)count, isK, decimal);
+}
+
+CString CastItoIShort(uint32 count, bool isK, uint32 decimal){
+	return CastItoIShort((double)count, isK, decimal);
+}
+
+CString CastItoIShort(uint64 count, bool isK, uint32 decimal){
+	return CastItoIShort((double)count, isK, decimal);
+}
+
+CString CastItoIShort(float count, bool isK, uint32 decimal){
+	return CastItoIShort((double)count, isK, decimal);
+}
+
+CString CastItoIShort(double count, bool isK, uint32 decimal){
+	if( count <= 0.0 )
+	{
+		return _T("0");
+	}
+	else if( isK )
+	{
+		if( count >  1.7E+300 )
+			count =  1.7E+300;
+		else
+			count *= 1000.0;
+	}
 	CString output;
-	if (count < 1000)
-		output.Format(_T("%i"),count);
-	else if (count < 1000000)
-		output.Format(_T("%.0f%s"),(float)count/1000, GetResString(IDS_KILO));
-	else if (count < 1000000000)
-		output.Format(_T("%.2f%s"),(float)count/1000000, GetResString(IDS_MEGA));
-	else if (count < 1000000000000)
-		output.Format(_T("%.2f%s"),(float)count/1000000000, GetResString(IDS_GIGA));
-	else if (count < 1000000000000000)
-		output.Format(_T("%.2f%s"),(float)count/1000000000000, GetResString(IDS_TERRA));
+	if (count < 1000.0)
+		output.Format(_T("%.0f"), count);
+	else if (count < 1000000.0)
+		output.Format(_T("%.*f%s"), decimal, count/1000.0, GetResString(IDS_KILO));
+	else if (count < 1000000000.0)
+		output.Format(_T("%.*f%s"), decimal, count/1000000.0, GetResString(IDS_MEGA));
+	else if (count < 1000000000000.0)
+		output.Format(_T("%.*f%s"), decimal, count/1000000000.0, GetResString(IDS_GIGA));
+	else if (count < 1000000000000000.0)
+		output.Format(_T("%.*f%s"), decimal, count/1000000000000.0, GetResString(IDS_TERRA));
 	return output;
 }
 
@@ -183,60 +259,31 @@ namespace {
 	}
 }
 
-CString URLDecode(CString inStr) {
-	
+CString URLDecode(const CString& inStr)
+{
+	// decode escape sequences
 	CString res;
-	for (int x = 0; x < inStr.GetLength() ; ++x )
+	for (int x = 0; x < inStr.GetLength(); x++)
 	{
-		if ( inStr.GetAt(x)== _T('%') && x+2 < inStr.GetLength() && IsHexDigit(inStr.GetAt(x+1)) && IsHexDigit(inStr.GetAt(x+2)) ) {
-
-			TCHAR hexstr[3]; hexstr[2]=0;
-			// Copy the two bytes following the %
-			_tcsncpy(hexstr, inStr.Mid(x+1,2).GetBuffer(), 2);
-
-			// Skip over the hex
-			x = x + 2;
+		if (inStr.GetAt(x) == _T('%') && x + 2 < inStr.GetLength() && IsHexDigit(inStr.GetAt(x+1)) && IsHexDigit(inStr.GetAt(x+2)))
+		{
+			TCHAR hexstr[3];
+			_tcsncpy(hexstr, inStr.Mid(x+1, 2), 2);
+			hexstr[2] = _T('\0');
+			x += 2;
 
 			// Convert the hex to ASCII
 			res.AppendChar((TCHAR)_tcstoul(hexstr, NULL, 16));
 		}
-		else {
-			res.AppendChar( inStr.GetAt(x));
+		else
+		{
+			res.AppendChar(inStr.GetAt(x));
 		}
 	}
 	return res;
 }
 
-void URLDecode(CString& result, const TCHAR* buff)
-{
-	int buflen = (int)_tcslen(buff);
-	int x;
-	int y;
-	TCHAR* buff2 = _tcsdup(buff); // length of buff2 will be less or equal to length of buff
-	for (x = 0, y = 0; x < buflen ; ++x )
-	{
-		if ( buff[x] == _T('%') && x+2 < buflen && IsHexDigit(buff[x+1]) && IsHexDigit(buff[x+2]) ) {
-			TCHAR hexstr[3];
-			// Copy the two bytes following the %
-			_tcsncpy(hexstr, &buff[x + 1], 2);
-
-			// Skip over the hex
-			x = x + 2;
-
-			// Convert the hex to ASCII
-			buff2[y++] = (TCHAR)_tcstoul(hexstr, NULL, 16);
-		}
-		else {
-			buff2[y++] = buff[x];
-			break;
-		}
-	}
-	result = buff2;
-	free(buff2);
-}
-
-
-CString URLEncode(CString sInT)
+CString URLEncode(const CString& sInT)
 {
 	CStringA sIn(sInT);
     LPCSTR pInBuf = sIn;
@@ -248,9 +295,9 @@ CString URLEncode(CString sInT)
 		// do encoding
 		while (*pInBuf)
 		{
-			if (isalnum(*pInBuf))
+			if (_istalnum((_TUCHAR)*pInBuf))
 				*pOutBuf++ = (BYTE)*pInBuf;
-			else if (isspace(*pInBuf))
+			else if (_istspace((_TUCHAR)*pInBuf))
 				*pOutBuf++ = _T('+');
 			else
 			{
@@ -266,9 +313,9 @@ CString URLEncode(CString sInT)
     return sOut;
 }
 
-CString MakeStringEscaped(CString in) {
-	in.Replace(_T("&"),_T("&&"));
-	
+CString MakeStringEscaped(CString in)
+{
+	in.Replace(_T("&"), _T("&&"));
 	return in;
 }
 
@@ -374,6 +421,7 @@ void RevertReg(void)
 		regkey.Close();
 	}
 }
+
 int GetMaxWindowsTCPConnections() {
 	OSVERSIONINFOEX osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
@@ -509,22 +557,16 @@ CString GetRateString(uint16 rate)
 	switch (rate){ 
 	case 0: 
 		return GetResString(IDS_CMT_NOTRATED); 
-		break; 
 	case 1: 
 		return GetResString(IDS_CMT_FAKE); 
-		break; 
 	case 2: 
 		return GetResString(IDS_CMT_POOR); 
-		break; 
 	case 3: 
 		return GetResString(IDS_CMT_GOOD); 
-		break; 
 	case 4: 
 		return GetResString(IDS_CMT_FAIR); 
-		break; 
 	case 5: 
 		return GetResString(IDS_CMT_EXCELLENT); 
-		break; 
 	} 
 	return GetResString(IDS_CMT_NOTRATED); 
 } 
@@ -635,6 +677,51 @@ unsigned int DecodeLengthBase16(unsigned int base16Length)
 	return base16Length / 2U;
 }
 
+uint32 DecodeBase32(LPCTSTR pszInput, uchar* paucOutput, uint32 nBufferLen)
+{
+	if (pszInput == NULL)
+		return false;
+	uint32 nDecodeLen = (_tcslen(pszInput)*5)/8;
+	if ((_tcslen(pszInput)*5) % 8 > 0)
+		nDecodeLen++;
+	uint32 nInputLen = _tcslen( pszInput );
+	if (paucOutput == NULL || nBufferLen == 0)
+		return nDecodeLen;
+	if (nDecodeLen > nBufferLen || paucOutput == NULL) 
+		return 0;
+
+	DWORD nBits	= 0;
+	int nCount	= 0;
+
+	for ( int nChars = nInputLen ; nChars-- ; pszInput++ )
+	{
+		if ( *pszInput >= 'A' && *pszInput <= 'Z' )
+			nBits |= ( *pszInput - 'A' );
+		else if ( *pszInput >= 'a' && *pszInput <= 'z' )
+			nBits |= ( *pszInput - 'a' );
+		else if ( *pszInput >= '2' && *pszInput <= '7' )
+			nBits |= ( *pszInput - '2' + 26 );
+		else
+			return 0;
+		
+		nCount += 5;
+
+		if ( nCount >= 8 )
+		{
+			*paucOutput++ = (BYTE)( nBits >> ( nCount - 8 ) );
+			nCount -= 8;
+		}
+
+		nBits <<= 5;
+	}
+
+	return nDecodeLen;
+}
+
+uint32 DecodeBase32(LPCTSTR pszInput, CAICHHash& Hash){
+	return DecodeBase32(pszInput, Hash.GetRawHash(), Hash.GetHashSize());
+}
+
 CWebServices::CWebServices()
 {
 	m_tDefServicesFileLastModified = 0;
@@ -665,11 +752,10 @@ int CWebServices::ReadAllServices()
 			TCHAR buffer[1024];
 			if (_fgetts(buffer, ARRSIZE(buffer), readFile) == NULL)
 				break;
-			sbuffer=buffer;
-			
+			sbuffer = buffer;
+
 			// ignore comments & too short lines
-			//MORPH - Changed by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
-			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 3)
+			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
 				continue;
 				
 			int iPos = sbuffer.Find(_T(','));
@@ -722,6 +808,7 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags)
 	}
 
 	int iMenuEntries = 0;
+	bool bIsLastMenuSeparator = false; 	//MORPH - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
 	for (int i = 0; i < m_aServices.GetCount(); i++)
 	{
 		const SEd2kLinkService& rSvc = m_aServices.GetAt(i);
@@ -729,8 +816,9 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags)
 		int pos;
 		for(pos=1;rSvc.strMenuLabel.GetAt(0)==rSvc.strMenuLabel.GetAt(pos)&&pos<4;pos++) continue;
 
-		if ( pos>2 || rSvc.strMenuLabel.GetAt(0)=='-')
+		if (( pos>2 || rSvc.strMenuLabel.GetAt(0)=='-') && !iMenuEntries)
 		{
+			bIsLastMenuSeparator = true;
 			rMenu.AppendMenu(MF_SEPARATOR);
 			continue;
 		}
@@ -739,9 +827,14 @@ int CWebServices::GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags)
 			continue;
 		if ((dwFlags & WEBSVC_FILE_URLS) && !rSvc.bFileMacros)
 			continue;
-		if(rMenu.AppendMenu(MF_STRING, MP_WEBURL + i, rSvc.strMenuLabel))
+		if (rMenu.AppendMenu(MF_STRING, MP_WEBURL + i, rSvc.strMenuLabel))
+		{
 			iMenuEntries++;
+			bIsLastMenuSeparator = true; //MORPH START - Added by SiRoB, Webservices PopupMenuSeparator Intelligent Detection
+		}
 	}
+	if (bIsLastMenuSeparator == true)
+//		rMenu.
 	return iMenuEntries;
 }
 
@@ -879,7 +972,7 @@ CString md4str(const uchar* hash)
 
 void md4strA(const uchar* hash, CHAR* pszHash)
 {
-    static const char _acHexDigits[] = "0123456789ABCDEF";
+    static const CHAR _acHexDigits[] = "0123456789ABCDEF";
     for (int i = 0; i < 16; i++){
 		*pszHash++ = _acHexDigits[hash[i] >> 4];
 		*pszHash++ = _acHexDigits[hash[i] & 0xf];
@@ -889,7 +982,7 @@ void md4strA(const uchar* hash, CHAR* pszHash)
 
 CStringA md4strA(const uchar* hash)
 {
-	char szHash[MAX_HASHSTR_SIZE];
+	CHAR szHash[MAX_HASHSTR_SIZE];
 	md4strA(hash, szHash);
 	return CStringA(szHash);
 }
@@ -932,39 +1025,42 @@ bool strmd4(const CString& rstr, uchar* hash)
 	return true;
 }
 
-CString CleanupFilename(CString filename) {
-	
-	CString tempStr;
-	filename=URLDecode(filename);
+CString CleanupFilename(CString filename)
+{
+	filename = URLDecode(filename);
 	filename.MakeLower();
 
 	//remove substrings, defined in the preferences (.ini)
-	CString resToken;
-	CString strlink=thePrefs.GetFilenameCleanups().MakeLower();
-	int curPos=0;
-	resToken= strlink.Tokenize(_T("|"),curPos);
-	while (!resToken.IsEmpty()) {
-		filename.Replace(resToken,_T(""));
-		resToken= strlink.Tokenize(_T("|"),curPos);
+	CString strlink = thePrefs.GetFilenameCleanups().MakeLower();
+	int curPos = 0;
+	CString resToken = strlink.Tokenize(_T("|"), curPos);
+	while (!resToken.IsEmpty())
+	{
+		filename.Replace(resToken, _T(""));
+		resToken = strlink.Tokenize(_T("|"), curPos);
 	}
 
-	// Replace . with Spaces - except the last one (extention-dot)
-	int extpos=filename.ReverseFind(_T('.'));
-	if (extpos>=0) {
-		for (int i=0;i<extpos;++i) {
-			if (filename.GetAt(i)!=_T('.')) continue;
-			if (i>0 && i<filename.GetLength()-1 && isdigit(filename.GetAt(i-1)) && isdigit(filename.GetAt(i+1)) ) continue;
-			filename.SetAt(i,_T(' '));
+	// Replace "." with spaces - except the last one (extension-dot)
+	int extpos = filename.ReverseFind(_T('.'));
+	if (extpos > 0)
+	{
+		for (int i = 0; i < extpos; i++)
+		{
+			if (filename.GetAt(i) != _T('.'))
+				continue;
+			if (i > 0 && i < filename.GetLength()-1 && _istdigit(filename.GetAt(i-1)) && _istdigit(filename.GetAt(i+1)))
+				continue;
+			filename.SetAt(i, _T(' '));
 		}
 	}
 
-	// Replace Space-holders with Spaces
-	filename.Replace(_T('_'),_T(' '));
-	filename.Replace(_T("+"),_T(" ")); //SyruS for Jigle
+	// replace space-holders with spaces
+	filename.Replace(_T('_'), _T(' '));
+	filename.Replace(_T('+'), _T(' '));
+	filename.Replace(_T('='), _T(' '));
 
-	//SyruS additional cleanup
-	// invalid for filenames
-	filename.Replace(_T("\\"), _T("")); //[edit: oops, one \ was missing]
+	// replace invalid filename characters
+	filename.Replace(_T("\\"), _T(""));
 	filename.Replace(_T("\""), _T(""));
 	filename.Replace(_T("/"), _T(""));
 	filename.Replace(_T(":"), _T(""));
@@ -973,68 +1069,68 @@ CString CleanupFilename(CString filename) {
 	filename.Replace(_T("<"), _T(""));
 	filename.Replace(_T(">"), _T(""));
 	filename.Replace(_T("|"), _T(""));
-	// other common nonsense (u can use dots here!)
-	filename.Replace(_T("="), _T(""));
 
-	int pos1,pos2;
-	pos1=-1;
+	CString tempStr;
+	int pos1 = -1;
 	for (;;)
 	{
-		pos1=filename.Find(_T('['),pos1+1);
-		if (pos1==-1) break;
-		pos2=filename.Find(_T(']'),pos1);
-		if (pos1>-1 && pos2>pos1) {
-			if (pos2-pos1 > 1) {
-				tempStr=filename.Mid(pos1+1,pos2-pos1-1);
-				int numcount=0;
-				for (int i=0;i<tempStr.GetLength();++i)
-					if (isdigit(tempStr.GetAt(i))) ++numcount;
-				if (numcount>tempStr.GetLength()/2) continue;
+		pos1 = filename.Find(_T('['), pos1+1);
+		if (pos1 == -1)
+			break;
+		int pos2 = filename.Find(_T(']'), pos1);
+		if (pos1 > -1 && pos2 > pos1)
+		{
+			if (pos2 - pos1 > 1)
+			{
+				tempStr = filename.Mid(pos1+1, pos2-pos1-1);
+				int numcount = 0;
+				for (int i = 0; i < tempStr.GetLength(); i++)
+				{
+					if (_istdigit(tempStr.GetAt(i)))
+						numcount++;
+				}
+				if (numcount > tempStr.GetLength()/2)
+					continue;
 			}
-			filename=filename.Left(pos1)+filename.Right(filename.GetLength()-pos2-1);
+			filename = filename.Left(pos1) + filename.Right(filename.GetLength()-pos2-1);
 			pos1--;
-		} else break;
+		}
+		else
+			break;
 	}
 
-	// Barry - Some additional formatting
+	// additional formatting
 	filename.Replace(_T("()"), _T(""));
 	filename.Replace(_T("  "), _T(" "));
 	filename.Replace(_T(" ."), _T("."));
-
 	filename.Replace(_T("( "), _T("("));
 	filename.Replace(_T(" )"), _T(")"));
 	filename.Replace(_T("()"), _T(""));
-	//CML - for chinese string
-	if(	(thePrefs.GetLanguageID() != MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_TRADITIONAL))&&
-		(thePrefs.GetLanguageID() != MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED)))
-	{
-		filename.Replace(_T("{ "), _T("{"));
-		filename.Replace(_T(" }"), _T("}"));
-		filename.Replace(_T("{}"), _T(""));
-	}
+	filename.Replace(_T("{ "), _T("{"));
+	filename.Replace(_T(" }"), _T("}"));
+	filename.Replace(_T("{}"), _T(""));
 
 	// Make leading Caps 
-	if (filename.GetLength()>1)
+	if (filename.GetLength() > 1)
 	{
-		tempStr=filename.GetAt(0);
+		tempStr = filename.GetAt(0);
 		tempStr.MakeUpper();
 		filename.SetAt(0, tempStr.GetAt(0));
-		int topos=filename.ReverseFind(_T('.'))-1;
-		if (topos<0) topos=filename.GetLength()-1;
 
-		for (int ix=0; ix<topos; ix++)
+		int topos = filename.ReverseFind(_T('.')) - 1;
+		if (topos < 0)
+			topos = filename.GetLength() - 1;
+
+		for (int ix = 0; ix < topos; ix++)
 		{
-			//EastShare - Added by Pretender, so8so's fix
-			//if (!IsCharAlpha(filename.GetAt(ix))) //if (filename.GetAt(ix) == ' ' || isdigit(filename.GetAt(ix)) ) 
-			if ((IsCharAlpha(filename.GetAt(ix)) == 0) && ((uint8)filename.GetAt(ix) < 0x80))  
-			//EastShare - Added by Pretender, so8so's fix
+			if (!IsCharAlpha(filename.GetAt(ix)))
 			{
-				if (ix<filename.GetLength()-2 && isdigit(filename.GetAt(ix+2) ))
+				if (ix < filename.GetLength()-2 && _istdigit(filename.GetAt(ix+2)))
 					continue;
 
-				tempStr=filename.GetAt(ix+1);
+				tempStr = filename.GetAt(ix+1);
 				tempStr.MakeUpper();
-				filename.SetAt(ix+1,tempStr.GetAt(0));
+				filename.SetAt(ix+1, tempStr.GetAt(0));
 			}
 		}
 	}
@@ -1049,133 +1145,133 @@ struct SED2KFileType
 } _aED2KFileTypes[] = 
 {
     { _T(".669"),   ED2KFT_AUDIO },
-	{ _T(".aac"),	ED2KFT_AUDIO },
-	{ _T(".aif"),	ED2KFT_AUDIO },
-	{ _T(".aiff"),	ED2KFT_AUDIO },
+    { _T(".aac"),   ED2KFT_AUDIO },
+    { _T(".aif"),   ED2KFT_AUDIO },
+    { _T(".aiff"),  ED2KFT_AUDIO },
     { _T(".amf"),   ED2KFT_AUDIO },
     { _T(".ams"),   ED2KFT_AUDIO },
-	{ _T(".ape"),	ED2KFT_AUDIO },
-	{ _T(".au"),	ED2KFT_AUDIO },
+    { _T(".ape"),   ED2KFT_AUDIO },
+    { _T(".au"),    ED2KFT_AUDIO },
     { _T(".dbm"),   ED2KFT_AUDIO },
     { _T(".dmf"),   ED2KFT_AUDIO },
     { _T(".dsm"),   ED2KFT_AUDIO },
     { _T(".far"),   ED2KFT_AUDIO },
-	{ _T(".flac"),	ED2KFT_AUDIO },
+    { _T(".flac"),  ED2KFT_AUDIO },
     { _T(".it"),    ED2KFT_AUDIO },
     { _T(".mdl"),   ED2KFT_AUDIO },
     { _T(".med"),   ED2KFT_AUDIO },
-	{ _T(".mid"),	ED2KFT_AUDIO },
-	{ _T(".midi"),	ED2KFT_AUDIO },
+    { _T(".mid"),   ED2KFT_AUDIO },
+    { _T(".midi"),  ED2KFT_AUDIO },
     { _T(".mod"),   ED2KFT_AUDIO },
     { _T(".mol"),   ED2KFT_AUDIO },
-	{ _T(".mp1"),	ED2KFT_AUDIO },
-	{ _T(".mp2"),	ED2KFT_AUDIO },
-	{ _T(".mp3"),	ED2KFT_AUDIO },
-	{ _T(".mp4"),	ED2KFT_AUDIO },
-	{ _T(".mpa"),	ED2KFT_AUDIO },
-	{ _T(".mpc"),	ED2KFT_AUDIO },
-	{ _T(".mpp"),	ED2KFT_AUDIO },
+    { _T(".mp1"),   ED2KFT_AUDIO },
+    { _T(".mp2"),   ED2KFT_AUDIO },
+    { _T(".mp3"),   ED2KFT_AUDIO },
+    { _T(".mp4"),   ED2KFT_AUDIO },
+    { _T(".mpa"),   ED2KFT_AUDIO },
+    { _T(".mpc"),   ED2KFT_AUDIO },
+    { _T(".mpp"),   ED2KFT_AUDIO },
     { _T(".mtm"),   ED2KFT_AUDIO },
     { _T(".nst"),   ED2KFT_AUDIO },
-	{ _T(".ogg"),	ED2KFT_AUDIO },
+    { _T(".ogg"),   ED2KFT_AUDIO },
     { _T(".okt"),   ED2KFT_AUDIO },
     { _T(".psm"),   ED2KFT_AUDIO },
     { _T(".ptm"),   ED2KFT_AUDIO },
-	{ _T(".ra"),	ED2KFT_AUDIO },
-	{ _T(".rmi"),	ED2KFT_AUDIO },
+    { _T(".ra"),    ED2KFT_AUDIO },
+    { _T(".rmi"),   ED2KFT_AUDIO },
     { _T(".s3m"),   ED2KFT_AUDIO },
     { _T(".stm"),   ED2KFT_AUDIO },
     { _T(".ult"),   ED2KFT_AUDIO },
     { _T(".umx"),   ED2KFT_AUDIO },
-	{ _T(".wav"),	ED2KFT_AUDIO },
-	{ _T(".wma"),	ED2KFT_AUDIO },
+    { _T(".wav"),   ED2KFT_AUDIO },
+    { _T(".wma"),   ED2KFT_AUDIO },
     { _T(".wow"),   ED2KFT_AUDIO },
     { _T(".xm"),    ED2KFT_AUDIO },
 
-	{ _T(".asf"),	ED2KFT_VIDEO },
-	{ _T(".avi"),	ED2KFT_VIDEO },
-	{ _T(".divx"),	ED2KFT_VIDEO },
-	{ _T(".m1v"),	ED2KFT_VIDEO },
-	{ _T(".m2v"),	ED2KFT_VIDEO },
-	{ _T(".mkv"),	ED2KFT_VIDEO },
-	{ _T(".mov"),	ED2KFT_VIDEO },
-	{ _T(".mp1v"),	ED2KFT_VIDEO },
-	{ _T(".mp2v"),	ED2KFT_VIDEO },
-	{ _T(".mpe"),	ED2KFT_VIDEO },
-	{ _T(".mpeg"),	ED2KFT_VIDEO },
-	{ _T(".mpg"),	ED2KFT_VIDEO },
-	{ _T(".mps"),	ED2KFT_VIDEO },
-	{ _T(".mpv"),	ED2KFT_VIDEO },
-	{ _T(".mpv1"),	ED2KFT_VIDEO },
-	{ _T(".mpv2"),	ED2KFT_VIDEO },
-	{ _T(".ogm"),	ED2KFT_VIDEO },
-	{ _T(".qt"),	ED2KFT_VIDEO },
-	{ _T(".ram"),	ED2KFT_VIDEO },
-	{ _T(".rm"),	ED2KFT_VIDEO },
-	{ _T(".rv"),	ED2KFT_VIDEO },
-	{ _T(".rv9"),	ED2KFT_VIDEO },
-	{ _T(".ts"),	ED2KFT_VIDEO },
-	{ _T(".vivo"),	ED2KFT_VIDEO },
-	{ _T(".vob"),	ED2KFT_VIDEO },
-	{ _T(".wmv"),	ED2KFT_VIDEO },
-	{ _T(".xvid"),	ED2KFT_VIDEO },
+    { _T(".asf"),   ED2KFT_VIDEO },
+    { _T(".avi"),   ED2KFT_VIDEO },
+    { _T(".divx"),  ED2KFT_VIDEO },
+    { _T(".m1v"),   ED2KFT_VIDEO },
+    { _T(".m2v"),   ED2KFT_VIDEO },
+    { _T(".mkv"),   ED2KFT_VIDEO },
+    { _T(".mov"),   ED2KFT_VIDEO },
+    { _T(".mp1v"),  ED2KFT_VIDEO },
+    { _T(".mp2v"),  ED2KFT_VIDEO },
+    { _T(".mpe"),   ED2KFT_VIDEO },
+    { _T(".mpeg"),  ED2KFT_VIDEO },
+    { _T(".mpg"),   ED2KFT_VIDEO },
+    { _T(".mps"),   ED2KFT_VIDEO },
+    { _T(".mpv"),   ED2KFT_VIDEO },
+    { _T(".mpv1"),  ED2KFT_VIDEO },
+    { _T(".mpv2"),  ED2KFT_VIDEO },
+    { _T(".ogm"),   ED2KFT_VIDEO },
+    { _T(".qt"),    ED2KFT_VIDEO },
+    { _T(".ram"),   ED2KFT_VIDEO },
+    { _T(".rm"),    ED2KFT_VIDEO },
+    { _T(".rv"),    ED2KFT_VIDEO },
+    { _T(".rv9"),   ED2KFT_VIDEO },
+    { _T(".ts"),    ED2KFT_VIDEO },
+    { _T(".vivo"),  ED2KFT_VIDEO },
+    { _T(".vob"),   ED2KFT_VIDEO },
+    { _T(".wmv"),   ED2KFT_VIDEO },
+    { _T(".xvid"),  ED2KFT_VIDEO },
 
-	{ _T(".bmp"),	ED2KFT_IMAGE },
-	{ _T(".dcx"),	ED2KFT_IMAGE },
-	{ _T(".emf"),	ED2KFT_IMAGE },
-	{ _T(".gif"),	ED2KFT_IMAGE },
-	{ _T(".ico"),	ED2KFT_IMAGE },
-	{ _T(".jpeg"),	ED2KFT_IMAGE },
-	{ _T(".jpg"),	ED2KFT_IMAGE },
-	{ _T(".pct"),	ED2KFT_IMAGE },
-	{ _T(".pcx"),	ED2KFT_IMAGE },
-	{ _T(".pic"),	ED2KFT_IMAGE },
-	{ _T(".pict"),	ED2KFT_IMAGE },
-	{ _T(".png"),	ED2KFT_IMAGE },
-	{ _T(".psd"),	ED2KFT_IMAGE },
-	{ _T(".psp"),	ED2KFT_IMAGE },
-	{ _T(".tga"),	ED2KFT_IMAGE },
-	{ _T(".tif"),	ED2KFT_IMAGE },
-	{ _T(".tiff"),	ED2KFT_IMAGE },
-	{ _T(".wmf"),	ED2KFT_IMAGE },
-	{ _T(".xif"),	ED2KFT_IMAGE },
+    { _T(".bmp"),   ED2KFT_IMAGE },
+    { _T(".dcx"),   ED2KFT_IMAGE },
+    { _T(".emf"),   ED2KFT_IMAGE },
+    { _T(".gif"),   ED2KFT_IMAGE },
+    { _T(".ico"),   ED2KFT_IMAGE },
+    { _T(".jpeg"),  ED2KFT_IMAGE },
+    { _T(".jpg"),   ED2KFT_IMAGE },
+    { _T(".pct"),   ED2KFT_IMAGE },
+    { _T(".pcx"),   ED2KFT_IMAGE },
+    { _T(".pic"),   ED2KFT_IMAGE },
+    { _T(".pict"),  ED2KFT_IMAGE },
+    { _T(".png"),   ED2KFT_IMAGE },
+    { _T(".psd"),   ED2KFT_IMAGE },
+    { _T(".psp"),   ED2KFT_IMAGE },
+    { _T(".tga"),   ED2KFT_IMAGE },
+    { _T(".tif"),   ED2KFT_IMAGE },
+    { _T(".tiff"),  ED2KFT_IMAGE },
+    { _T(".wmf"),   ED2KFT_IMAGE },
+    { _T(".xif"),   ED2KFT_IMAGE },
 
-	{ _T(".ace"),	ED2KFT_ARCHIVE },
-	{ _T(".arj"),	ED2KFT_ARCHIVE },
+    { _T(".ace"),   ED2KFT_ARCHIVE },
+    { _T(".arj"),   ED2KFT_ARCHIVE },
     { _T(".bz2"),   ED2KFT_ARCHIVE },
     { _T(".cab"),   ED2KFT_ARCHIVE },
-	{ _T(".gz"),	ED2KFT_ARCHIVE },
-	{ _T(".hqx"),	ED2KFT_ARCHIVE },
-	{ _T(".lha"),	ED2KFT_ARCHIVE },
+    { _T(".gz"),    ED2KFT_ARCHIVE },
+    { _T(".hqx"),   ED2KFT_ARCHIVE },
+    { _T(".lha"),   ED2KFT_ARCHIVE },
     { _T(".msi"),   ED2KFT_ARCHIVE },
-	{ _T(".rar"),	ED2KFT_ARCHIVE },
-	{ _T(".sea"),	ED2KFT_ARCHIVE },
-	{ _T(".sit"),	ED2KFT_ARCHIVE },
-	{ _T(".tar"),	ED2KFT_ARCHIVE },
-	{ _T(".tgz"),	ED2KFT_ARCHIVE },
-	{ _T(".uc2"),	ED2KFT_ARCHIVE },
-	{ _T(".zip"),	ED2KFT_ARCHIVE },
+    { _T(".rar"),   ED2KFT_ARCHIVE },
+    { _T(".sea"),   ED2KFT_ARCHIVE },
+    { _T(".sit"),   ED2KFT_ARCHIVE },
+    { _T(".tar"),   ED2KFT_ARCHIVE },
+    { _T(".tgz"),   ED2KFT_ARCHIVE },
+    { _T(".uc2"),   ED2KFT_ARCHIVE },
+    { _T(".zip"),   ED2KFT_ARCHIVE },
 
-	{ _T(".bat"),	ED2KFT_PROGRAM },
-	{ _T(".cmd"),	ED2KFT_PROGRAM },
-	{ _T(".com"),	ED2KFT_PROGRAM },
-	{ _T(".exe"),	ED2KFT_PROGRAM },
+    { _T(".bat"),   ED2KFT_PROGRAM },
+    { _T(".cmd"),   ED2KFT_PROGRAM },
+    { _T(".com"),   ED2KFT_PROGRAM },
+    { _T(".exe"),   ED2KFT_PROGRAM },
 
-	{ _T(".bin"),	ED2KFT_CDIMAGE },
-	{ _T(".bwa"),	ED2KFT_CDIMAGE },
-	{ _T(".bwi"),	ED2KFT_CDIMAGE },
-	{ _T(".bws"),	ED2KFT_CDIMAGE },
-	{ _T(".bwt"),	ED2KFT_CDIMAGE },
-	{ _T(".ccd"),	ED2KFT_CDIMAGE },
-	{ _T(".cue"),	ED2KFT_CDIMAGE },
-	{ _T(".dmg"),	ED2KFT_CDIMAGE },
-	{ _T(".dmz"),	ED2KFT_CDIMAGE },
-	{ _T(".img"),	ED2KFT_CDIMAGE },
-	{ _T(".iso"),	ED2KFT_CDIMAGE },
-	{ _T(".mdf"),	ED2KFT_CDIMAGE },
-	{ _T(".mds"),	ED2KFT_CDIMAGE },
-	{ _T(".nrg"),	ED2KFT_CDIMAGE },
-	{ _T(".sub"),	ED2KFT_CDIMAGE },
+    { _T(".bin"),   ED2KFT_CDIMAGE },
+    { _T(".bwa"),   ED2KFT_CDIMAGE },
+    { _T(".bwi"),   ED2KFT_CDIMAGE },
+    { _T(".bws"),   ED2KFT_CDIMAGE },
+    { _T(".bwt"),   ED2KFT_CDIMAGE },
+    { _T(".ccd"),   ED2KFT_CDIMAGE },
+    { _T(".cue"),   ED2KFT_CDIMAGE },
+    { _T(".dmg"),   ED2KFT_CDIMAGE },
+    { _T(".dmz"),   ED2KFT_CDIMAGE },
+    { _T(".img"),   ED2KFT_CDIMAGE },
+    { _T(".iso"),   ED2KFT_CDIMAGE },
+    { _T(".mdf"),   ED2KFT_CDIMAGE },
+    { _T(".mds"),   ED2KFT_CDIMAGE },
+    { _T(".nrg"),   ED2KFT_CDIMAGE },
+    { _T(".sub"),   ED2KFT_CDIMAGE },
     { _T(".toast"), ED2KFT_CDIMAGE },
 
     { _T(".chm"),   ED2KFT_DOCUMENT },
@@ -1234,35 +1330,35 @@ LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID)
 	return NULL;
 }
 
-// Returns a localized typename, examining the extention of the given filename
-CStringA GetFileTypeByName(LPCTSTR pszFileName)
+// Returns a file type which is used eMule internally only, examining the extention of the given filename
+CString GetFileTypeByName(LPCTSTR pszFileName)
 {
 	EED2KFileType iFileType = GetED2KFileTypeID(pszFileName);
 	switch (iFileType) {
-		case ED2KFT_AUDIO:		return ED2KFTSTR_AUDIO;
-		case ED2KFT_VIDEO:		return ED2KFTSTR_VIDEO;
-		case ED2KFT_IMAGE:		return ED2KFTSTR_IMAGE;
-		case ED2KFT_DOCUMENT:	return ED2KFTSTR_DOCUMENT;
-		case ED2KFT_PROGRAM:	return ED2KFTSTR_PROGRAM;
-		case ED2KFT_ARCHIVE:	return ED2KFTSTR_ARCHIVE;
-		case ED2KFT_CDIMAGE:	return ED2KFTSTR_CDIMAGE;
-		default:				return "";
+		case ED2KFT_AUDIO:		return _T(ED2KFTSTR_AUDIO);
+		case ED2KFT_VIDEO:		return _T(ED2KFTSTR_VIDEO);
+		case ED2KFT_IMAGE:		return _T(ED2KFTSTR_IMAGE);
+		case ED2KFT_DOCUMENT:	return _T(ED2KFTSTR_DOCUMENT);
+		case ED2KFT_PROGRAM:	return _T(ED2KFTSTR_PROGRAM);
+		case ED2KFT_ARCHIVE:	return _T(ED2KFTSTR_ARCHIVE);
+		case ED2KFT_CDIMAGE:	return _T(ED2KFTSTR_CDIMAGE);
+		default:				return _T("");
 	}
 }
 
-
-CString GetFileTypeDisplayStrFromED2KFileType(LPCSTR pszED2KFileType)
+// Returns a file type which is used eMule internally only (GUI)
+CString GetFileTypeDisplayStrFromED2KFileType(LPCTSTR pszED2KFileType)
 {
 	ASSERT( pszED2KFileType != NULL );
 	if (pszED2KFileType != NULL)
 	{
-		if (strcmp(pszED2KFileType, ED2KFTSTR_AUDIO) == 0)			return GetResString(IDS_SEARCH_AUDIO);
-		else if (strcmp(pszED2KFileType, ED2KFTSTR_VIDEO) == 0)     return GetResString(IDS_SEARCH_VIDEO);
-		else if (strcmp(pszED2KFileType, ED2KFTSTR_IMAGE) == 0)     return GetResString(IDS_SEARCH_PICS);
-		else if (strcmp(pszED2KFileType, ED2KFTSTR_DOCUMENT) == 0)	return GetResString(IDS_SEARCH_DOC);
-		else if (strcmp(pszED2KFileType, ED2KFTSTR_PROGRAM) == 0)   return GetResString(IDS_SEARCH_PRG);
-		else if (strcmp(pszED2KFileType, ED2KFTSTR_ARCHIVE) == 0)	return GetResString(IDS_SEARCH_ARC);
-		else if (strcmp(pszED2KFileType, ED2KFTSTR_CDIMAGE) == 0)   return GetResString(IDS_SEARCH_CDIMG);
+		if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_AUDIO)) == 0)			return GetResString(IDS_SEARCH_AUDIO);
+		else if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_VIDEO)) == 0)    return GetResString(IDS_SEARCH_VIDEO);
+		else if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_IMAGE)) == 0)    return GetResString(IDS_SEARCH_PICS);
+		else if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_DOCUMENT)) == 0)	return GetResString(IDS_SEARCH_DOC);
+		else if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_PROGRAM)) == 0)  return GetResString(IDS_SEARCH_PRG);
+		else if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_ARCHIVE)) == 0)	return GetResString(IDS_SEARCH_ARC);
+		else if (_tcscmp(pszED2KFileType, _T(ED2KFTSTR_CDIMAGE)) == 0)  return GetResString(IDS_SEARCH_CDIMG);
 	}
 	return _T("");
 }
@@ -1437,11 +1533,11 @@ int GetAppImageListColorFlag()
 	return iIlcFlag;
 }
 
-CString GetHexDump(const uint8* data, UINT size)
+CString DbgGetHexDump(const uint8* data, UINT size)
 {
 	CString buffer; 
-	buffer.Format(_T("size=%u"), size);
-	buffer += _T(", data=[");
+	buffer.Format(_T("Size=%u"), size);
+	buffer += _T(", Data=[");
 	UINT i = 0;
 	for(; i < size && i < 50; i++){
 		if (i > 0)
@@ -1545,14 +1641,13 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 
 	if (!thePrefs.FilterLANIPs() && !forceCheck/*ZZ:UploadSpeedSense*/)
 		return true;
-	// ZZ:UploadSpeedSense <--
 
 	// filter LAN IP's
 	// -------------------------------------------
-	//	0.*
-	//	10.0.0.0 - 10.255.255.255		class A
-	//	172.16.0.0 - 172.31.255.255		class B
-	//	192.168.0.0 - 192.168.255.255	class C
+	//	0.*								"This" Network
+	//	10.0.0.0 - 10.255.255.255		Class A
+	//	172.16.0.0 - 172.31.255.255		Class B
+	//	192.168.0.0 - 192.168.255.255	Class C
 
 	uint8 nFirst = (uint8)nIP;
 	uint8 nSecond = (uint8)(nIP >> 8);
@@ -1584,8 +1679,9 @@ CString GetFormatedUInt(ULONG ulVal)
 		nf.NumDigits = 0;
 		nf.LeadingZero = 0;
 		nf.Grouping = 3;
-		nf.lpDecimalSep = _T(",");
-		nf.lpThousandSep = _T(".");
+		// we are hardcoding the following two format chars by intention because the C-RTL also has the decimal sep hardcoded to '.'
+		nf.lpDecimalSep = _T(".");
+		nf.lpThousandSep = _T(",");
 		nf.NegativeOrder = 0;
 	}
 	CString strVal;
@@ -1607,8 +1703,9 @@ CString GetFormatedUInt64(ULONGLONG ullVal)
 		nf.NumDigits = 0;
 		nf.LeadingZero = 0;
 		nf.Grouping = 3;
-		nf.lpDecimalSep = _T(",");
-		nf.lpThousandSep = _T(".");
+		// we are hardcoding the following two format chars by intention because the C-RTL also has the decimal sep hardcoded to '.'
+		nf.lpDecimalSep = _T(".");
+		nf.lpThousandSep = _T(",");
 		nf.NegativeOrder = 0;
 	}
 	CString strVal;
@@ -1726,13 +1823,17 @@ CString DbgGetBlockInfo(const Requested_Block_Struct* block)
 	CString strInfo;
 	strInfo.Format(_T("%u-%u (%u bytes)"), block->StartOffset, block->EndOffset, block->EndOffset - block->StartOffset + 1);
 
-	strInfo.AppendFormat(_T("; part %u"), block->StartOffset/PARTSIZE);
+	strInfo.AppendFormat(_T(", Part %u"), block->StartOffset/PARTSIZE);
 	if (block->StartOffset/PARTSIZE != block->EndOffset/PARTSIZE)
-		strInfo.AppendFormat(_T("-%u(!!!)"), block->EndOffset/PARTSIZE);
+		strInfo.AppendFormat(_T("-%u(**)"), block->EndOffset/PARTSIZE);
 
-	strInfo.AppendFormat(_T("; block %u"), block->StartOffset/EMBLOCKSIZE);
+	strInfo.AppendFormat(_T(", Block %u"), block->StartOffset/EMBLOCKSIZE);
 	if (block->StartOffset/EMBLOCKSIZE != block->EndOffset/EMBLOCKSIZE)
-		strInfo.AppendFormat(_T("-%u(!!!)"), block->EndOffset/EMBLOCKSIZE);
+	{
+		strInfo.AppendFormat(_T("-%u"), block->EndOffset/EMBLOCKSIZE);
+		if (block->EndOffset/EMBLOCKSIZE - block->StartOffset/EMBLOCKSIZE > 1)
+			strInfo += _T("(**)");
+	}
 
 	return strInfo;
 }
@@ -1929,15 +2030,19 @@ void DebugSend(LPCSTR pszMsg, const CUpDownClient* client, const char* packet)
 
 void DebugSend(LPCSTR pszOpcode, uint32 ip, uint16 port)
 {
-	Debug(_T(">>> %-20hs to   %-15s:%u\n"), pszOpcode, ipstr(ntohl(ip)), port);
+	TCHAR szIPPort[22];
+	_stprintf(szIPPort, _T("%s:%u"), ipstr(ntohl(ip)), port);
+	Debug(_T(">>> %-20hs to   %-21s\n"), pszOpcode, szIPPort);
 }
 
 void DebugSendF(LPCSTR pszOpcode, uint32 ip, uint16 port, LPCTSTR pszMsg, ...)
 {
 	va_list args;
 	va_start(args, pszMsg);
+	TCHAR szIPPort[22];
+	_stprintf(szIPPort, _T("%s:%u"), ipstr(ntohl(ip)), port);
 	CString str;
-	str.Format(_T(">>> %-20hs to   %-15s:%-5u; "), pszOpcode, ipstr(ntohl(ip)), port);
+	str.Format(_T(">>> %-20hs to   %-21s; "), pszOpcode, szIPPort);
 	str.AppendFormatV(pszMsg, args);
 	va_end(args);
 	Debug(_T("%s\n"), str);
@@ -1945,7 +2050,9 @@ void DebugSendF(LPCSTR pszOpcode, uint32 ip, uint16 port, LPCTSTR pszMsg, ...)
 
 void DebugRecv(LPCSTR pszOpcode, uint32 ip, uint16 port)
 {
-	Debug(_T("%-24hs from %-15s:%u\n"), pszOpcode, ipstr(ntohl(ip)), port);
+	TCHAR szIPPort[22];
+	_stprintf(szIPPort, _T("%s:%u"), ipstr(ntohl(ip)), port);
+	Debug(_T("%-24hs from %-21s\n"), pszOpcode, szIPPort);
 }
 
 void DebugHttpHeaders(const CStringAArray& astrHeaders)
@@ -2047,61 +2154,38 @@ time_t safe_mktime(struct tm* ptm)
 	return mktime(ptm);
 }
 
-CString StripInvalidFilenameChars(CString strText, bool bKeepSpaces)
+CString StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces)
 {
-	LPTSTR pszBuffer = strText.GetBuffer();
-	LPTSTR pszSource = pszBuffer;
-	LPTSTR pszDest = pszBuffer;
+	LPCTSTR pszSource = strText;
+	CString strDest;
 
-	while (*pszSource != '\0')
+	while (*pszSource != _T('\0'))
 	{
-		if (!((*pszSource <= 31 && *pszSource >= 0)	|| // lots of invalid chars for filenames in windows :=)
-			*pszSource == '\"' || *pszSource == '*' || *pszSource == '<'  || *pszSource == '>' ||
-			*pszSource == '?'  || *pszSource == '|' || *pszSource == '\\' || *pszSource == '/' || 
-			*pszSource == ':') )
+		if (!(((_TUCHAR)*pszSource >= 0 && (_TUCHAR)*pszSource <= 31) ||
+			// lots of invalid chars for filenames in windows :=)
+			*pszSource == _T('\"') || *pszSource == _T('*') || *pszSource == _T('<')  || *pszSource == _T('>') ||
+			*pszSource == _T('?')  || *pszSource == _T('|') || *pszSource == _T('\\') || *pszSource == _T('/') || 
+			*pszSource == _T(':')) )
 		{
-			if (!bKeepSpaces && *pszSource == ' ')
-				*pszDest = '.';
-			*pszDest = *pszSource;
-			pszDest++;
+			if (!bKeepSpaces && *pszSource == _T(' '))
+				strDest += _T("%20");
+			else
+				strDest += *pszSource;
 		}
 		pszSource++;
 	}
-	*pszDest = '\0';
-	strText.ReleaseBuffer();
-	return strText;
+	return strDest;
 }
 
-CString CreateED2kLink(const CAbstractFile* f)
-{
-	CString strLink;
-	strLink.Format(_T("ed2k://|file|%s|%u|%s|/"),
-		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
-		f->GetFileSize(),
-		EncodeBase16(f->GetFileHash(),16)
-		);
-	return strLink;
-}
-
-CString CreateED2kHashsetLink(const CKnownFile* pFile)
+CString CreateED2kLink(const CAbstractFile* pFile, bool bEscapeLink)
 {
 	CString strLink;
 	strLink.Format(_T("ed2k://|file|%s|%u|%s|"),
-		StripInvalidFilenameChars(pFile->GetFileName(), false),	// spaces to dots
+		EncodeUrlUtf8(StripInvalidFilenameChars(pFile->GetFileName(), false)),
 		pFile->GetFileSize(),
 		EncodeBase16(pFile->GetFileHash(),16));
-	if (pFile->GetHashCount() > 0 && pFile->GetHashCount() == pFile->GetED2KPartCount())// SLUGFILLER: SafeHash - use GetED2KPartCount
-	{
-		strLink += _T("p=");
-		for (int i = 0; i < pFile->GetHashCount(); i++)
-		{
-			if (i > 0)
-				strLink += _T(':');
-			strLink += EncodeBase16(pFile->GetPartHash(i), 16);
-		}
-		strLink += _T('|');
-	}
-	strLink += _T('/');
+	if (bEscapeLink)
+		strLink += _T("/");
 	return strLink;
 }
 
@@ -2229,6 +2313,7 @@ bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath)
 	return false;
 }
 
+
 bool ExpandEnvironmentStrings(CString& rstrStrings)
 {
 	DWORD dwSize = ExpandEnvironmentStrings(rstrStrings, NULL, 0);
@@ -2249,6 +2334,7 @@ bool ExpandEnvironmentStrings(CString& rstrStrings)
 	rstrStrings = strExpanded;
 	return true;
 }
+
 uint16 GetRandomUInt16()
 {
 #if RAND_MAX == 0x7fff
@@ -2392,6 +2478,62 @@ void InstallSkin(LPCTSTR pszSkinPackage)
 		}
 		zip.Close();
 	}
+}
+
+void TriggerPortTest(uint16 tcp, uint16 udp) {
+	CString m_sTestURL;
+
+	// do not alter the connection test, this is a manual test only. If you want to change the behaviour, use your server!
+	m_sTestURL.Format(_T("http://porttest.emule-project.net/connectiontest.php?tcpport=%i&udpport=%i&lang=%i"), tcp, udp , thePrefs.GetLanguageID() );
+
+	ShellOpenFile(m_sTestURL);
+}
+
+int CompareLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
+{
+	// SDK says: The 'CompareString' function is optimized to run at the highest speed when 'dwCmpFlags' is set to 0 
+	// or NORM_IGNORECASE, and 'cchCount1' and 'cchCount2' have the value -1.
+	int iResult = CompareString(GetThreadLocale(), NORM_IGNORECASE, psz1, -1, psz2, -1);
+	if (iResult == 0)
+		return 0;
+	return iResult - 2;
+}
+
+void AddAutoStart()
+{
+	#if defined(_DEBUG)
+		return;
+	#endif
+	RemAutoStart();
+	CString strKeyName;
+	strKeyName = "eMuleAutoStart";
+    TCHAR sExeFilePath[490];
+	DWORD length;
+	length = ::GetModuleFileName(NULL, sExeFilePath, 490);
+	if(!length)
+		return;
+	CString sFullExeCommand;
+	sFullExeCommand.Format(_T("%s -AutoStart"), sExeFilePath);
+	CRegKey mKey;
+	mKey.Create(HKEY_CURRENT_USER,
+		_T("Software\\Microsoft\\Windows\\CurrentVersion\\Run"),
+		REG_NONE,REG_OPTION_NON_VOLATILE,
+		KEY_ALL_ACCESS,	NULL,NULL);
+	mKey.SetStringValue(strKeyName, sFullExeCommand);
+	mKey.Close();
+}
+
+void RemAutoStart()
+{
+	CString strKeyName;
+	strKeyName = "eMuleAutoStart";
+	CRegKey mKey;
+	mKey.Create(HKEY_CURRENT_USER,
+		_T("Software\\Microsoft\\Windows\\CurrentVersion\\Run"),
+		REG_NONE,REG_OPTION_NON_VOLATILE,
+		KEY_ALL_ACCESS,	NULL,NULL);
+	mKey.DeleteValue(strKeyName);
+	mKey.Close();
 }
 
 // khaos::kmod+ Functions to return a random number within a given range.

@@ -432,6 +432,9 @@ void CCreditsThread::InitText()
 
 	m_arCredits.Add(_T("03:00:eMule"));
 	sTmp.Format(_T("02:01:Version %s"),theApp.m_strCurVersionLong);
+#ifdef _UNICODE
+	sTmp += _T(" Unicode");
+#endif
 	m_arCredits.Add(sTmp);
 	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2004 Merkur"));
 	m_arCredits.Add(_T("S:50"));
@@ -547,7 +550,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Greek: Michael Papadakis"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Italian: Trevi, Franky5"));
+	m_arCredits.Add(_T("01:06:Italian: Trevi, FrankyFive"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Japanese: Shinro T."));
 	m_arCredits.Add(_T("S:05"));

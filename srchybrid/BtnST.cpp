@@ -2,7 +2,6 @@
 #include "BtnST.h"
 #include "emule.h"
 #ifdef	BTNST_USE_SOUND
-#pragma comment(lib, "winmm.lib")
 #include <Mmsystem.h>
 #endif
 

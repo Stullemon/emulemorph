@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Ini2.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -177,6 +178,19 @@ CString CIni::GetString(LPCTSTR strEntry, LPCTSTR strDefault/*=NULL*/, LPCTSTR s
 		return CString(GetLPCSTR(strEntry,strSection,strDefault));
 }
 
+CString CIni::GetStringUTF8(LPCTSTR strEntry, LPCTSTR strDefault/*=NULL*/, LPCTSTR strSection/* = NULL*/)
+{
+	USES_CONVERSION;
+	if(strSection != NULL)
+		m_strSection = strSection;
+
+	CStringA strUTF8;
+	GetPrivateProfileStringA(T2CA(m_strSection), T2CA(strEntry), T2CA(strDefault), 
+							 strUTF8.GetBufferSetLength(MAX_INI_BUFFER), MAX_INI_BUFFER, T2CA(m_strFileName));
+	strUTF8.ReleaseBuffer();
+	return OptUtf8ToStr(strUTF8);
+}
+
 double CIni::GetDouble(LPCTSTR strEntry, double fDefault/* = 0.0*/, LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
@@ -279,6 +293,15 @@ void CIni::WriteString(LPCTSTR strEntry, LPCTSTR str, LPCTSTR strSection/* = NUL
 	if(strSection != NULL) 
 		m_strSection = strSection;
 	WritePrivateProfileString(m_strSection,strEntry,str,m_strFileName);
+}
+
+void CIni::WriteStringUTF8(LPCTSTR strEntry, LPCTSTR psz, LPCTSTR strSection/* = NULL*/)
+{
+	USES_CONVERSION;
+	if(strSection != NULL) 
+		m_strSection = strSection;
+	CString str(psz);
+	WritePrivateProfileStringA(T2CA(m_strSection), T2CA(strEntry), StrToUtf8(str), T2CA(m_strFileName));
 }
 
 void CIni::WriteDouble(LPCTSTR strEntry,double f, LPCTSTR strSection/*= NULL*/)
@@ -735,7 +758,7 @@ int			CIni::Parse(const CString& strIn, int nOffset, CString& strOut) {
 			nOffset++;
 
 		while(nOffset < nLength) {
-			if(!isspace(strIn[nOffset]))
+			if(!_istspace((_TUCHAR)strIn[nOffset]))
 				break;
 
 			nOffset++;

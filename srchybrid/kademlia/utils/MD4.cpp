@@ -34,6 +34,7 @@ there client on the eMule forum..
 //#include <memory.h>
 #include <stdio.h>
 #include "UInt128.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -246,4 +247,9 @@ void CMD4::final(MD4_CTX *context, CUInt128 *digest)
 
 	// Zeroize sensitive information.
 	init(context);
+}
+void KadGetKeywordHash(const CStringW& rwstrKeyword, Kademlia::CUInt128* pKadID)
+{
+	CStringA strA(wc2utf8(rwstrKeyword));
+	Kademlia::CMD4::hash((byte*)(LPCSTR)strA, strA.GetLength(), pKadID);
 }

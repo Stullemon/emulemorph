@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2003-2004 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2003-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -183,7 +183,7 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 	packet->WriteShort((uint16)((thePrefs.GetMaxGraphDownloadRate()*1024)/100));
 	packet->WriteByte((uint8)theApp.downloadqueue->GetDownloadingFileCount());
 	packet->WriteByte((uint8)theApp.downloadqueue->GetPausedFileCount());
-	packet->WriteInt(theApp.stat_sessionReceivedBytes/1048576);
+	packet->WriteInt(theStats.sessionReceivedBytes/1048576);
 	packet->WriteShort((uint16)((theStats.GetAvgDownloadRate(0)*1024)/100));
 	if (theApp.serverconnect->IsConnected()){
 		if(theApp.serverconnect->IsLowID())
@@ -326,8 +326,7 @@ void CMMServer::ProcessFileCommand(CMMData* data, CMMSocket* sender){
 					selFile->DeleteFile(); 
 					break;
 				default:
-					if (thePrefs.StartNextFile()) 
-						theApp.downloadqueue->StartNextFile();
+                    theApp.downloadqueue->StartNextFileIfPrefs(selFile->GetCategory());
 					selFile->DeleteFile(); 
 			}
 			break;
@@ -736,7 +735,7 @@ void CMMServer::WriteFileInfo(CPartFile* selFile, CMMPacket* packet){
 		packet->WriteByte(selFile->GetDownPriority());
 	}
 	uint8* parts = selFile->MMCreatePartStatus();
-	packet->WriteByte(selFile->GetPartCount());
+	packet->WriteShort(selFile->GetPartCount());
 	for (int i = 0; i != selFile->GetPartCount(); i++){
 		packet->WriteByte(parts[i]);
 	}

@@ -29,6 +29,7 @@ there client on the eMule forum..
 */
 #pragma once
 #include <map>
+#include "Loggable.h"
 
 class CSharedFileList;
 struct Status;
@@ -50,7 +51,7 @@ typedef std::map<CRoutingZone*, CRoutingZone*> EventMap;
 
 #define KADEMLIA_VERSION 0.1
 
-class CKademlia
+class CKademlia: public CLoggable
 {
 public:
 
@@ -58,12 +59,6 @@ public:
 	static void start(CPrefs *prefs);
 	static void stop();
  
-	static void logMsg				(LPCTSTR lpMsg, ...);
-	static void logLine				(LPCTSTR lpMsg);
-	static void debugMsg			(LPCSTR lpMsg, ...);
-	static void debugLine			(LPCSTR lpLine);
-	static void reportError			(int errorCode, LPCTSTR errorDescription, ...);
-
 	static CPrefs				*getPrefs(void);
 	static CRoutingZone			*getRoutingZone(void);
 	static CKademliaUDPListener	*getUDPListener(void);
@@ -71,7 +66,9 @@ public:
 	static bool					isRunning(void) {return m_running;}
 	static bool					isConnected(void);
 	static bool					isFirewalled(void);
+	static void					RecheckFirewalled(void);
 	static uint32				getKademliaUsers(void);
+	static uint32				getKademliaFiles(void);
 	static uint32				getTotalStoreKey(void);
 	static uint32				getTotalStoreSrc(void);
 	static uint32				getTotalFile(void);
@@ -93,8 +90,10 @@ private:
 	static time_t	m_nextSearchJumpStart;
 	static time_t	m_nextSelfLookup;
 	static time_t	m_nextFirewallCheck;
+	static time_t	m_nextFindBuddy;
 	static time_t	m_statusUpdate;
 	static time_t	m_bigTimer;
+	static time_t	m_bootstrap;
 	static bool		m_running;
 
 	CPrefs					*m_prefs;

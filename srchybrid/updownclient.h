@@ -14,8 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#ifndef __UP_DOWN_CLIENT_H__
-#define	__UP_DOWN_CLIENT_H__
 #pragma once
 #include "loggable.h"
 #include "BarShader.h"
@@ -32,6 +30,9 @@ class Packet;
 class CxImage;
 struct Requested_Block_Struct;
 class CSafeMemFile;
+class CEMSocket;
+class CAICHHash;
+enum EUtf8Str;
 
 struct IPRange_Struct2; //EastShare - added by AndCycle, IP to Country
 
@@ -69,9 +70,11 @@ enum EDownloadState{
 	DS_CONNECTED,
 	DS_CONNECTING,
 	DS_WAITCALLBACK,
+	DS_WAITCALLBACKKAD,
 	DS_REQHASHSET,
 	DS_NONEEDEDPARTS,
 	DS_TOOMANYCONNS,
+	DS_TOOMANYCONNSKAD,
 	DS_LOWTOLOWIP,
 	DS_BANNED,
 	DS_ERROR,
@@ -105,7 +108,12 @@ enum EKadState{
 	KS_CONNECTING_FWCHECK,
 	KS_CONNECTED_FWCHECK,
 	KS_QUEUED_BUDDY,
-	KS_CONNECTED_BUDDY
+	KS_INCOMING_BUDDY,
+	KS_CONNECTING_BUDDY,
+	KS_CONNECTED_BUDDY,
+	KS_NONE_LOWID,
+	KS_WAITCALLBACK_LOWID,
+	KS_QUEUE_LOWID
 };
 
 enum EClientSoftware{
@@ -231,6 +239,12 @@ public:
 					{
 						return m_dwUserIP;
 					}
+	//Only use this when you know the real IP or when your clearing it.
+	void			SetIP( uint32 val )
+					{
+						m_dwUserIP = val;
+						m_nConnectIP = val;
+					}
 	bool			HasLowID() const;
 	uint32			GetConnectIP() const				{return m_nConnectIP;}
 	uint16			GetUserPort() const
@@ -276,6 +290,31 @@ public:
 						return ((const int*)m_achUserHash[0]) != 0 || ((const int*)m_achUserHash[1]) != 0 || ((const int*)m_achUserHash[2]) != 0 || ((const int*)m_achUserHash[3]) != 0; 
 					}
 	int				GetHashType() const;
+	const uchar*	GetBuddyID() const
+					{
+						return (uchar*)m_achBuddyID;
+					}
+	void			SetBuddyID(const uchar* m_achTempBuddyID);
+	bool			HasValidBuddyID() const
+					{
+						return m_bBuddyIDValid; 
+					}
+	void			SetBuddyIP( uint32 val )
+					{
+						m_nBuddyIP = val;
+					}
+	uint32			GetBuddyIP() const
+					{
+						return m_nBuddyIP;
+					}
+	void			SetBuddyPort( uint16 val )
+					{
+						m_nBuddyPort = val;
+					}
+	uint16			GetBuddyPort() const
+					{
+						return m_nBuddyPort;
+					}
 	EClientSoftware	GetClientSoft() const
 					{
 						return (EClientSoftware)m_clientSoft;
@@ -513,7 +552,7 @@ public:
 
 	void			UnBan();
 	void			Ban(LPCTSTR pszReason = NULL);
-	void			BanLeecher(int log_message = true); //MORPH - Added by IceCream, Anti-leecher feature
+	void			BanLeecher(LPCTSTR pszReason = NULL); //MORPH - Added by IceCream, Anti-leecher feature
 
 	uint32			GetAskedCount() const
 					{
@@ -541,28 +580,16 @@ public:
 					{
 						return m_nTransferedUp - m_nCurSessionUp;
 					}
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	void			ResetSessionUp()
 					{
 						m_nCurSessionUp = m_nTransferedUp;
-						m_addedPayloadQueueSession = GetQueueSessionPayloadUp();
-						//m_nCurQueueSessionPayloadUp = 0;
-					}
-	uint32			GetQueueSessionUp()	const
-					{
-						return m_nTransferedUp - m_nCurQueueSessionUp;
-					}
-	void			ResetQueueSessionUp()
-					{
-						m_nCurQueueSessionUp = m_nTransferedUp;
+						m_addedPayloadQueueSession = 0;
 						m_nCurQueueSessionPayloadUp = 0;
-						m_curSessionAmountNumber = 0;
 					}
 	uint32			GetQueueSessionPayloadUp() const
 					{
 						return m_nCurQueueSessionPayloadUp;
 					}
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	void			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
 	uint16			GetUpPartCount() const
 					{
@@ -584,7 +611,6 @@ public:
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 	bool			GetPowerShared() const;
-	void			ClearUploadDoneBlocks();
 	double			GetCombinedFilePrioAndCredit();
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
 	
@@ -606,16 +632,12 @@ public:
 						return (EDownloadState)m_nDownloadState;
 					}
 	void			SetDownloadState(EDownloadState nNewState);
-// ZZ:DownloadManager -->
-	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const
-					{
-						return m_dwLastAskedTime;
-					}
+
+	uint32			GetLastAskedTime(const CPartFile* partFile = NULL) const;
     void            SetLastAskedTime() {
-                        m_dwLastAskedTime = ::GetTickCount();
+                        m_fileReaskTimes.SetAt(reqfile, ::GetTickCount()); // ZZ:DownloadManager (one resk timestamp for each file)
                     }
-// <-- ZZ:DownloadManager
-	uint32			GetRequestedHashset()	{return m_dwRequestedHashset;}	// SLUGFILLER: SafeHash
+
 	bool			IsPartAvailable(uint16 iPart) const
 					{
 						return	( (iPart >= m_nPartCount) || (!m_abyPartStatus) )? 0:m_abyPartStatus[iPart];
@@ -656,7 +678,7 @@ public:
 	/*
 	void			DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const;
 	*/
-	void			DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* File, bool  bFlat);
+	void			DrawStatusBar(CDC* dc, LPCRECT rect, CPartFile* File, bool  bFlat) const;
 	//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 	bool			AskForDownload();
 	virtual void	SendFileRequest();
@@ -679,11 +701,10 @@ public:
 	bool			IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime = false, const bool fileIsNNP = false) /*const*/; // ZZ:DownloadManager
     uint32          GetTimeUntilReask() const;
     uint32          GetTimeUntilReask(const CPartFile* file) const;
-
+    uint32			GetTimeUntilReask(const CPartFile* file, const bool allowShortReaskTime, const bool useGivenNNP = false, const bool givenNNP = false) const;
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();
-	void			RequestHashset();	// SLUGFILLER: SafeHash
 	bool			IsSourceRequestAllowed() const;
     bool            IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck = false) const; // ZZ:DownloadManager
 
@@ -757,22 +778,15 @@ public:
 						m_nKadState = nNewS;
 					}
 	//File Comment 
-    const CString&	GetFileComment() const
-					{
-						return m_strComment;
-					} 
-    void			SetFileComment(LPCSTR desc)
-					{
-						m_strComment = desc;
-					}
-    uint8			GetFileRate() const
-					{
-						return m_iRate;
-					}
-    void			SetFileRate(uint8 iNewRate)
-					{
-						m_iRate = iNewRate;
-					}
+	//File Comment
+	bool			HasFileComment() const						{ return !m_strFileComment.IsEmpty(); }
+    const CString&	GetFileComment() const						{ return m_strFileComment; } 
+    void			SetFileComment(LPCTSTR pszComment)			{ m_strFileComment = pszComment; }
+
+	bool			HasFileRating() const						{ return m_uFileRating > 0; }
+    uint8			GetFileRating() const						{ return m_uFileRating; }
+    void			SetFileRating(uint8 uRating)				{ m_uFileRating = uRating; }
+
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
 	int				unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZipped, BYTE **unzipped, uint32 *lenUnzipped, int iRecursion = 0);
 	void			UpdateDisplayedInfo(bool force = false);
@@ -826,6 +840,18 @@ public:
 						m_fMessageFiltered = bVal ? 1 : 0;
 					}
 	virtual void	SetRequestFile(CPartFile* pReqFile);
+	CPartFile*		GetRequestFile() const						{return reqfile;}
+	// AICH Stuff
+	void			SetReqFileAICHHash(CAICHHash* val);
+	CAICHHash*		GetReqFileAICHHash() const					{return m_pReqFileAICHHash;}
+	bool			IsSupportingAICH() const					{return m_fSupportsAICH & 0x01;}
+	void			SendAICHRequest(CPartFile* pForFile, uint16 nPart);
+	bool			IsAICHReqPending() const					{return m_fAICHRequested; }
+	void			ProcessAICHAnswer(char* packet, UINT size);
+	void			ProcessAICHRequest(char* packet, UINT size);
+	void			ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file);
+
+	EUtf8Str		GetUnicodeSupport() const;
 
 	CString			GetDownloadStateDisplayString() const;
 	CString			GetUploadStateDisplayString() const;
@@ -838,9 +864,11 @@ public:
 	const CString&	DbgGetMuleInfo() const { return m_strMuleInfo; }
 
 // ZZ:DownloadManager -->
-    const bool      IsInOtherRequestList(const CPartFile* fileToCheck) const;
+    const bool      IsInNoNeededList(const CPartFile* fileToCheck) const;
 
     const bool      SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool isNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping = false, bool debug = false);
+// <-- ZZ:DownloadManager
+    const DWORD     getLastTriedToConnectTime() { return m_dwLastTriedToConnect; }
 // <-- ZZ:DownloadManager
 #ifdef _DEBUG
 	// Diagnostic Support
@@ -851,7 +879,6 @@ public:
 	CClientReqSocket* socket;
 	CClientCredits*	credits;
 	CFriend*		m_Friend;
-	CPartFile*		reqfile;
 	uint32			compressiongain; /// Add show compression
 	uint32			notcompressed; // Add show compression
 	uint8*			m_abyUpPartStatus;
@@ -862,11 +889,11 @@ public:
 	uint16			m_lastPartAsked;
 	bool			m_bAddNextConnect;  // VQB Fix for LowID slots only on connection
 
-	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() const { return m_slotNumber; }
+    CEMSocket* GetFileUploadSocket(bool log = false);
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
-	bool		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
+	LPCTSTR		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
 	//MORPH START - Added by SiRoB, Is Morph Client
 	bool IsMorph() const { return m_bIsMorph;}
 	//MORPH END   - Added by SiRoB, Is Morph Client
@@ -946,9 +973,9 @@ protected:
 	uint32	m_dwLastSourceAnswer;
 	uint32	m_dwLastAskedForSources;
     int     m_iFileListRequested;
-	CString	m_strComment;
+	CString	m_strFileComment;
 	//--group to aligned int32
-	uint8	m_iRate;
+	uint8	m_uFileRating;
 	uint8	m_cMessagesReceived;		// count of chatmessages he sent to me
 	uint8	m_cMessagesSent;			// count of chatmessages I sent to him
 	bool	m_bMultiPacket;
@@ -992,14 +1019,13 @@ protected:
 	uint32		m_cAsked;
 	uint32		m_dwLastUpRequest;
 	uint32		m_nCurSessionUp;
-	uint32      m_nCurQueueSessionUp;
 	uint32      m_nCurQueueSessionPayloadUp;
 	uint32      m_addedPayloadQueueSession;
-	uint32      m_curSessionAmountNumber;
 	uint16		m_nUpPartCount;
 	uint16		m_nUpCompleteSourcesCount;
 	static CBarShader s_UpStatusBar;
 	uchar		requpfileid[16];
+    uint32      m_slotNumber;
 
 	typedef struct TransferredData {
 		uint32	datalen;
@@ -1009,20 +1035,15 @@ protected:
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_BlockRequests_queue;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DoneBlocks_list;
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030807-1911
-	uint32      m_slotNumber;
-	DWORD       m_dwLastCheckedForEvictTick;
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
 
 	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 	bool	m_bPowerShared;
 	//MORPH END   - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 
 	//download
+	CPartFile*	reqfile;
 	uint32		m_cDownAsked;
 	uint8*		m_abyPartStatus;
-	uint32		m_dwLastAskedTime;
-	uint32		m_dwRequestedHashset;	// SLUGFILLER: SafeHash
 	CString		m_strClientFilename;
 	uint32		m_nTransferedDown;
 	// -khaos--+++> Download Session Stats
@@ -1048,7 +1069,17 @@ protected:
 	bool		m_bReaskPending;
 	bool		m_bUDPPending;
 	bool		m_bTransferredDownMini;
+	bool		m_bUnicodeSupport;
+	//--group to aligned int32
+	uint32		m_nBuddyIP;
+	uint16		m_nBuddyPort;
+	bool		m_bBuddyIDValid;
+	uchar		m_achBuddyID[16];
+	
 	static CBarShader s_StatusBar;
+	CAICHHash*  m_pReqFileAICHHash; 
+	
+    uint32      m_random_update_wait;
 
 	// using bitfield for less important flags, to save some bytes
 	UINT m_fHashsetRequesting : 1, // we have sent a hashset request to this client in the current connection
@@ -1064,7 +1095,9 @@ protected:
 		 m_fQueueRankPending  : 1,
 		 m_fUnaskQueueRankRecv: 2,
 		 m_fFailedFileIdReqs  : 4, // nr. of failed file-id related requests per connection
-		 m_fNeedOurPublicIP	  : 1; // we requested our IP from this client
+		 m_fNeedOurPublicIP	  : 1, // we requested our IP from this client
+		 m_fSupportsAICH	  : 3,
+		 m_fAICHRequested     : 1; 
 
 	// By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 	CList<TransferredData,TransferredData>			 m_AvarageDDR_list;
@@ -1082,8 +1115,12 @@ protected:
 	UINT m_nUrlStartPos;
 
     bool    m_bSourceExchangeSwapped; // ZZ:DownloadManager
+    DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
     bool    DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR reason); // ZZ:DownloadManager
-    uint32  GetTimeUntilReask(const CPartFile* file, const bool allowShortReaskTime) const;
+    CMap<CPartFile*, CPartFile*, DWORD, DWORD> m_fileReaskTimes; // ZZ:DownloadManager (one resk timestamp for each file)
+    DWORD   m_dwLastTriedToConnect; // ZZ:DownloadManager (one resk timestamp for each file)
+    bool    RecentlySwappedForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick < 30*1000; } // ZZ:DownloadManager
+    void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
 
 	//MORPH START - Added by SiRoB, m_PartStatus_list
 	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
@@ -1101,5 +1138,3 @@ private:
 //EastShare End - added by AndCycle, IP to Country
 };
 //#pragma pack()
-
-#endif//__UP_DOWN_CLIENT_H__

@@ -219,6 +219,9 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		*/
 		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | 0x00000004); // aux port compatable client
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+#ifdef _UNICODE
+		tagFlags.SetInt(tagFlags.GetInt() | SRVCAP_UNICODE);
+#endif
 		tagFlags.WriteTagToFile(&data);
 
 		// eMule Version (14-Mar-2004: requested by lugdunummaster (need for LowID clients which have no chance 
@@ -238,8 +241,8 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		SendPacket(packet,true,sender);
 	}
 	else if (sender->GetConnectionState() == CS_CONNECTED){	
-		theApp.stat_reconnects++;
-		theApp.stat_serverConnectTime=GetTickCount();
+		theStats.reconnects++;
+		theStats.serverConnectTime=GetTickCount();
 		connected = true;
 		AddLogLine(true,GetResString(IDS_CONNECTEDTO),sender->cur_server->GetListName());
 		theApp.emuledlg->ShowConnectionState();
@@ -348,7 +351,7 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 			connectedsocket = NULL;
 			theApp.emuledlg->searchwnd->CancelSearch();
 			// -khaos--+++> Tell our total server duration thinkymajig to update...
-			theApp.stat_serverConnectTime = 0;
+			theStats.serverConnectTime = 0;
 			theStats.Add2TotalServerDuration();
 			// <-----khaos-
 			if (thePrefs.Reconnect() && !connecting){
@@ -449,7 +452,7 @@ bool CServerConnect::Disconnect(){
 		theApp.emuledlg->AddServerMessageLine(_T(""));
 		theApp.emuledlg->AddServerMessageLine(_T(""));
 		// -khaos--+++> Tell our total server duration thinkymajig to update...
-		theApp.stat_serverConnectTime=0;
+		theStats.serverConnectTime = 0;
 		theStats.Add2TotalServerDuration();
 		// <-----khaos-
 		return true;

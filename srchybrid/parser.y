@@ -25,7 +25,7 @@ int yyerror(LPCTSTR errstr);
 %}
 
 %union {
-	CString*		pstr;
+	CStringA*		pstr;
 	CSearchExpr*	pexpr;
 }
 

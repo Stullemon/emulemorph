@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -22,6 +22,13 @@ namespace Kademlia{
 
 #define MAX_CFEXP_ERRORMSG	(MAX_PATH + 256)
 
+enum EUtf8Str
+{
+	utf8strNone,
+	utf8strOptBOM,
+	utf8strRaw
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDataIO
@@ -33,21 +40,26 @@ public:
 	virtual void Write(const void* lpBuf, UINT nCount) = 0;
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom) = 0;
 	virtual ULONGLONG GetPosition() const = 0;
+	virtual ULONGLONG GetLength() const = 0;
 
 	virtual uint8 ReadUInt8();
 	virtual uint16 ReadUInt16();
 	virtual uint32 ReadUInt32();
 	virtual void ReadUInt128(Kademlia::CUInt128 *pVal);
 	virtual void ReadHash16(uchar* pVal);
-	virtual CString ReadString();
+	virtual CString ReadString(bool bOptUTF8);
+	virtual CString ReadString(bool bOptUTF8, UINT uRawSize);
+	virtual CStringW ReadStringUTF8();
 
 	virtual void WriteUInt8(uint8 nVal);
 	virtual void WriteUInt16(uint16 nVal);
 	virtual void WriteUInt32(uint32 nVal);
 	virtual void WriteUInt128(const Kademlia::CUInt128 *pVal);
 	virtual void WriteHash16(const uchar* pVal);
-	virtual void WriteString(const CString& rstr, bool bOptUTF8 = false);
+	virtual void WriteString(const CString& rstr, EUtf8Str eEncode = utf8strNone);
 	virtual void WriteString(LPCSTR psz);
+	virtual void WriteLongString(const CString& rstr, EUtf8Str eEncode = utf8strNone);
+	virtual void WriteLongString(LPCSTR psz);
 };
 
 
@@ -65,6 +77,7 @@ public:
 	virtual void Write(const void* lpBuf, UINT nCount);
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
 	virtual ULONGLONG GetPosition() const;
+	virtual ULONGLONG GetLength() const;
 };
 
 
@@ -87,6 +100,7 @@ public:
 	virtual void Write(const void* lpBuf, UINT nCount);
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
 	virtual ULONGLONG GetPosition() const;
+	virtual ULONGLONG GetLength() const;
 
 	virtual uint8 ReadUInt8();
 	virtual uint16 ReadUInt16();
@@ -116,6 +130,7 @@ public:
 	virtual void Write(const void* lpBuf, UINT nCount);
 	virtual ULONGLONG Seek(LONGLONG lOff, UINT nFrom);
 	virtual ULONGLONG GetPosition() const;
+	virtual ULONGLONG GetLength() const;
 
 	int printf(LPCTSTR pszFmt, ...);
 };
@@ -157,3 +172,29 @@ __inline void PokeUInt32(void* p, uint32 nVal)
 {
 	*((uint32*)p) = nVal;
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Array
+
+template<class T>
+class Array
+{
+public:
+	Array(UINT nCount)
+	{
+		m_aT = new T[nCount];
+	}
+	~Array()
+	{
+		delete[] m_aT;
+	}
+
+	operator T* ()
+	{
+		return m_aT;
+	}
+
+protected:
+	T* m_aT;
+};

@@ -31,6 +31,7 @@ there client on the eMule forum..
 #pragma once
 
 #include <list>
+#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -40,45 +41,40 @@ class CUInt128;
 class CTag;
 typedef std::list<CTag*> TagList;
 
-class CDataIO
+class CDataIO: public CLoggable
 {
 public:
-
-	byte		readByte(void);
-	uint8		readUInt8BE(void);
-	uint16		readUInt16BE(void);
-	uint32		readUInt32BE(void);
-	void		readUInt128BE(CUInt128 *value);
-	uint8		readUInt8(void);
-	uint16		readUInt16(void);
-	uint32		readUInt32(void);
-	void		readUInt128(CUInt128 *value);
-	float		readFloat(void);
-	CTag		*readTag(void);
-	TagList		*readTagList(void);
+	byte		readByte();
+	uint8		readUInt8();
+	uint16		readUInt16();
+	uint32		readUInt32();
+	void		readUInt128(CUInt128* value);
+	void		readHash(BYTE* value);
+	BYTE*		readBsob(uint8* size);
+	float		readFloat();
+	CStringW	readStringUTF8(bool bOptACP = false);
+	CTag*		readTag(bool bOptACP = false);
+	TagList*	readTagList(bool bOptACP = false);
+	void		readTagList(TagList& taglist, bool bOptACP = false);
 
 	void		writeByte(byte val);
-	void		writeUInt8BE(uint8 val);
-	void		writeUInt16BE(uint16 val);
-	void		writeUInt32BE(uint32 val);
-	void		writeUInt128BE(const CUInt128 &val);
 	void		writeUInt8(uint8 val);
 	void		writeUInt16(uint16 val);
 	void		writeUInt32(uint32 val);
-	void		writeUInt128(const CUInt128 &val);
+	void		writeUInt128(const CUInt128& val);
+	void		writeHash( const BYTE* val);
+	void		writeBsob( const BYTE* val, uint8 size);
 	void		writeFloat(float val);
-	void		writeTag(const CTag *tag);
-	void		writeTag(byte type, LPCSTR name);
-	void		writeTag(LPCSTR name, LPCSTR value);
+	void		writeTag(const CTag* tag);
 	void		writeTag(LPCSTR name, uint8 value);
 	void		writeTag(LPCSTR name, uint16 value);
 	void		writeTag(LPCSTR name, uint32 value);
 	void		writeTag(LPCSTR name, float value);
-	void		writeTagList(const TagList &tagList);
+	void		writeTagList(const TagList& tagList);
 
 	virtual void readArray(LPVOID lpResult, uint32 byteCount) = 0;
 	virtual void writeArray(LPCVOID lpVal, uint32 byteCount) = 0;
-
+	virtual UINT getAvailable() const = 0;
 };
 
 } // End namespace

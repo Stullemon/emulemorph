@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@
 #include "ClosableTabCtrl.h"
 #include "HelpIDs.h"
 #include "Opcodes.h"
+#include "InputBox.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -255,10 +256,10 @@ switch (message) {
 
    if (rcW.Width()>0) {
 
-	rcSpl.left=rctree.right+5;
+	rcSpl.left=rctree.right;
     rcSpl.right=rcSpl.left+5;
     rcSpl.top=rctree.top;
-    rcSpl.bottom=rcW.bottom-5;
+    rcSpl.bottom=rcW.bottom-40;
     
     m_wndSplitterIRC.MoveWindow(rcSpl,true);
 
@@ -441,6 +442,19 @@ void CIrcWnd::OnBnClickedBnIrcconnect()
 {
 	if(!m_bConnected)
 	{
+		if( thePrefs.GetIRCNick().MakeLower() == _T("emule") || thePrefs.GetIRCNick().MakeLower().Find(_T("emuleirc")) != -1 )
+		{
+			InputBox inputbox;
+			inputbox.SetLabels(GetResString(IDS_IRC_NEWNICK), GetResString(IDS_IRC_NEWNICKDESC), _T("eMule"));
+			if (inputbox.DoModal() == IDOK)
+			{
+				CString input = inputbox.GetInput();
+				input.Trim();
+				input = input.SpanExcluding(_T(" !@#$%^&*():;<>,.?{}~`+=-"));
+				if( input != "" )
+					thePrefs.SetIRCNick(input.GetBuffer());
+			}
+		}
 		//if not connected, connect..
 		m_pIrcMain->Connect();
 	}

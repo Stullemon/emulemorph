@@ -17,7 +17,7 @@ All rights reserved.
 
 /////////////////////////////////  Includes  //////////////////////////////////
 #include "stdafx.h"
-#include "resource.h"
+#include "emule.h"
 #include "HttpDownloadDlg.h"
 #include "OtherFunctions.h"
 
@@ -240,7 +240,8 @@ LRESULT CHttpDownloadDlg::OnThreadFinished(WPARAM wParam, LPARAM /*lParam*/)
 		EndDialog(IDCANCEL);
 	else if (wParam)
 	{
-		//AfxMessageBox(m_sError);
+		if (!m_sError.IsEmpty())
+			theApp.AddDebugLogLine(false, _T("%s"), m_sError);
 		EndDialog(IDCANCEL);
 	}
 	else
@@ -357,7 +358,7 @@ UINT AFX_CDECL CHttpDownloadDlg::_DownloadThread(LPVOID pParam)
 
 void CHttpDownloadDlg::SetPercentage(int nPercentage)
 {
-	//Change the progress control
+	//Change the caption text
 	CString sPercentage;
 	sPercentage.Format(_T("%d"), nPercentage);
 	CString sCaption;
@@ -377,72 +378,11 @@ void CHttpDownloadDlg::SetProgress(DWORD dwBytesRead)
 
 void CHttpDownloadDlg::SetTimeLeft(DWORD dwSecondsLeft, DWORD dwBytesRead, DWORD dwFileSize)
 {
-	CString sCopied;
-	if (dwBytesRead < 1024)
-	{
-		CString sBytes;
-		sBytes.Format(_T("%d"), dwBytesRead);
-		sCopied.Format(GetResString(IDS_HTTPDOWNLOAD_BYTES), sBytes);
-	}
-	else if (dwBytesRead < 1048576)
-	{
-		CString sKiloBytes;
-		sKiloBytes.Format(_T("%0.1f"), dwBytesRead/1024.0);
-		sCopied.Format(GetResString(IDS_HTTPDOWNLOAD_KILOBYTES), sKiloBytes);
-	}
-	else
-	{
-		CString sMegaBytes;
-		sMegaBytes.Format(_T("%0.2f"), dwBytesRead/1048576.0);
-		sCopied.Format(GetResString(IDS_HTTPDOWNLOAD_MEGABYTES), sMegaBytes);
-	}
-
-	CString sTotal;
-	if (dwFileSize < 1024)
-	{
-		CString sBytes;
-		sBytes.Format(_T("%d"), dwFileSize);
-		sTotal.Format(GetResString(IDS_HTTPDOWNLOAD_BYTES), sBytes);
-	}
-	else if (dwFileSize < 1048576)
-	{
-		CString sKiloBytes;
-		sKiloBytes.Format(_T("%0.1f"), dwFileSize/1024.0);
-		sTotal.Format(GetResString(IDS_HTTPDOWNLOAD_KILOBYTES), sKiloBytes);
-	}
-	else
-	{
-		CString sMegaBytes;
-		sMegaBytes.Format(_T("%0.2f"), dwFileSize/1048576.0);
-		sTotal.Format(GetResString(IDS_HTTPDOWNLOAD_MEGABYTES), sMegaBytes);
-	}
-
 	CString sOf;
-	sOf.Format(GetResString(IDS_HTTPDOWNLOAD_OF), sCopied, sTotal);
-
-	CString sTime;
-	if (dwSecondsLeft < 60)
-	{
-		CString sSeconds;
-		sSeconds.Format(_T("%d"), dwSecondsLeft);
-		sTime.Format(GetResString(IDS_HTTPDOWNLOAD_SECONDS), sSeconds);
-	}
-	else
-	{
-		DWORD dwMinutes = dwSecondsLeft / 60;
-		DWORD dwSeconds = dwSecondsLeft % 60;
-		CString sSeconds;
-		sSeconds.Format(_T("%d"), dwSeconds);
-		CString sMinutes;
-		sMinutes.Format(_T("%d"), dwMinutes);
-		if (dwSeconds == 0)
-			sTime.Format(GetResString(IDS_HTTPDOWNLOAD_MINUTES), sMinutes);
-		else
-			sTime.Format(GetResString(IDS_HTTPDOWNLOAD_MINUTES_AND_SECONDS), sMinutes, sSeconds);
-	}
+	sOf.Format(GetResString(IDS_HTTPDOWNLOAD_OF), CastItoXBytes((uint64)dwBytesRead, false, false), CastItoXBytes((uint64)dwFileSize, false, false));
 
 	CString sTimeLeft;
-	sTimeLeft.Format(GetResString(IDS_HTTPDOWNLOAD_TIMELEFT), sTime, sOf);
+	sTimeLeft.Format(GetResString(IDS_HTTPDOWNLOAD_TIMELEFT), CastSecondsToHM(dwSecondsLeft), sOf);
 	m_ctrlTimeLeft.SetWindowText(sTimeLeft);
 }
 
@@ -461,24 +401,7 @@ void CHttpDownloadDlg::SetStatus(CString nID, const CString& lpsz1)
 void CHttpDownloadDlg::SetTransferRate(double KbPerSecond)
 {
 	CString sRate;
-	if (KbPerSecond < 1)
-	{
-		CString sBytesPerSecond;
-		sBytesPerSecond.Format(_T("%0.0f"), KbPerSecond*1024);
-		sRate.Format(GetResString(IDS_HTTPDOWNLOAD_BYTESPERSECOND), sBytesPerSecond);
-	}
-	else if (KbPerSecond < 10)
-	{
-		CString sKiloBytesPerSecond;
-		sKiloBytesPerSecond.Format(_T("%0.2f"), KbPerSecond);
-		sRate.Format(GetResString(IDS_HTTPDOWNLOAD_KILOBYTESPERSECOND), sKiloBytesPerSecond);
-	}
-	else
-	{
-		CString sKiloBytesPerSecond;
-		sKiloBytesPerSecond.Format(_T("%0.0f"), KbPerSecond);
-		sRate.Format(GetResString(IDS_HTTPDOWNLOAD_KILOBYTESPERSECOND), sKiloBytesPerSecond);
-	}
+	sRate.Format( _T("%s"), CastItoXBytes(KbPerSecond, true, true));
 	m_ctrlTransferRate.SetWindowText(sRate);
 }
 

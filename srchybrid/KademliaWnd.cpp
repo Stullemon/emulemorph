@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@
 #include "emule.h"
 #include "KademliaWnd.h"
 #include "KadContactListCtrl.h"
+#include "KadContactHistogramCtrl.h"
 #include "KadSearchListCtrl.h"
 #include "Kademlia/Kademlia/kademlia.h"
 #include "Kademlia/Kademlia/prefs.h"
@@ -42,7 +43,8 @@ IMPLEMENT_DYNAMIC(CKademliaWnd, CDialog)
 CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CKademliaWnd::IDD, pParent)
 {
-	contactList = new CKadContactListCtrl;
+	m_contactListCtrl = new CKadContactListCtrl;
+	m_contactHistogramCtrl = new CKadContactHistogramCtrl;
 	searchList = new CKadSearchListCtrl;
 	m_pacONBSIPs = NULL;
 
@@ -56,7 +58,8 @@ CKademliaWnd::~CKademliaWnd()
 		m_pacONBSIPs->Unbind();
 		m_pacONBSIPs->Release();
 	}
-	delete contactList;
+	delete m_contactListCtrl;
+	delete m_contactHistogramCtrl;
 	delete searchList;
 
 	if (icon_kadcont)
@@ -74,7 +77,7 @@ BOOL CKademliaWnd::SaveAllSettings()
 	strIniFile.Format(_T("%spreferences.ini"), thePrefs.GetConfigDir());
 	CIni ini(strIniFile, _T("eMule"));
 
-	contactList->SaveAllSettings(&ini);
+	m_contactListCtrl->SaveAllSettings(&ini);
 	searchList->SaveAllSettings(&ini);
 
 	return TRUE;
@@ -84,10 +87,11 @@ BOOL CKademliaWnd::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
-	contactList->Init();
+	m_contactListCtrl->Init();
 	searchList->Init();
 
 	AddAnchor(IDC_CONTACTLIST,TOP_LEFT, CSize(100,50));
+	AddAnchor(IDC_KAD_HISTOGRAM,TOP_RIGHT, CSize(100,50));
 	AddAnchor(IDC_SEARCHLIST,CSize(0,50),CSize(100,100));
 	AddAnchor(IDC_KADCONTACTLAB,TOP_LEFT);
 	AddAnchor(IDC_FIREWALLCHECKBUTTON, TOP_RIGHT);
@@ -109,7 +113,7 @@ BOOL CKademliaWnd::OnInitDialog()
 	Localize();
 
 	searchList->UpdateKadSearchCount();
-	contactList->UpdateKadContactCount();
+	m_contactListCtrl->UpdateKadContactCount();
 
 	if (thePrefs.GetUseAutocompletion()){
 		m_pacONBSIPs = new CCustomAutoComplete();
@@ -126,7 +130,8 @@ BOOL CKademliaWnd::OnInitDialog()
 void CKademliaWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_CONTACTLIST, *contactList);
+	DDX_Control(pDX, IDC_CONTACTLIST, *m_contactListCtrl);
+	DDX_Control(pDX, IDC_KAD_HISTOGRAM, *m_contactHistogramCtrl);
 	DDX_Control(pDX, IDC_SEARCHLIST, *searchList);
 	DDX_Control(pDX, IDC_KADCONTACTLAB, kadContactLab);
 	DDX_Control(pDX, IDC_KADSEARCHLAB, kadSearchLab);
@@ -187,18 +192,18 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 			m_pacONBSIPs->AddItem(strIP + _T(":") + strPort, 0);
 	}
 
-	Kademlia::CKademlia::start();
-	theApp.emuledlg->ShowConnectionState();
+	if( !Kademlia::CKademlia::isRunning() )
+	{
+		Kademlia::CKademlia::start();
+		theApp.emuledlg->ShowConnectionState();
+	}
 	if (!strIP.IsEmpty() && nPort)
 		Kademlia::CKademlia::bootstrap(strIP, nPort);
 }
 
 void CKademliaWnd::OnBnClickedFirewallcheckbutton()
 {
-	if(Kademlia::CKademlia::isRunning())
-	{
-		Kademlia::CKademlia::getPrefs()->setRecheckIP();
-	}
+	Kademlia::CKademlia::RecheckFirewalled();
 }
 
 void CKademliaWnd::OnBnConnect()
@@ -234,7 +239,8 @@ void CKademliaWnd::SetAllIcons()
 	((CStatic*)GetDlgItem(IDC_KADICO2))->SetIcon(icon_kadsea);
 }
 
-void CKademliaWnd::Localize() {
+void CKademliaWnd::Localize()
+{
 	m_ctrlBootstrap.SetText(GetResString(IDS_BOOTSTRAP));
 	//GetDlgItem(IDC_BSSTATIC)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->SetWindowText(GetResString(IDS_BOOTSTRAP));
@@ -248,7 +254,8 @@ void CKademliaWnd::Localize() {
 	SetDlgItemText(IDC_RADCLIENTS,GetResString(IDS_RADCLIENTS));
 
 	UpdateControlsState();
-	contactList->Localize();
+	m_contactHistogramCtrl->Localize();
+	m_contactListCtrl->Localize();
 	searchList->Localize();
 }
 
@@ -271,4 +278,44 @@ void CKademliaWnd::UpdateControlsState()
 		( IsDlgButtonChecked(IDC_RADCLIENTS)>0 /* && theApp.clientlist->GetClientCount()>0*/  )
 		)
 	);
+}
+
+UINT CKademliaWnd::GetContactCount() const
+{
+	return m_contactListCtrl->GetItemCount();
+}
+
+void CKademliaWnd::UpdateKadContactCount()
+{
+	m_contactListCtrl->UpdateKadContactCount();
+}
+
+void CKademliaWnd::ShowContacts()
+{
+	m_contactHistogramCtrl->ShowWindow(SW_SHOW);
+	m_contactListCtrl->Visable();
+}
+
+void CKademliaWnd::HideContacts()
+{
+	m_contactHistogramCtrl->ShowWindow(SW_HIDE);
+	m_contactListCtrl->Hide();
+}
+
+bool CKademliaWnd::ContactAdd(const Kademlia::CContact* contact)
+{
+	m_contactHistogramCtrl->ContactAdd(contact);
+	return m_contactListCtrl->ContactAdd(contact);
+}
+
+void CKademliaWnd::ContactRem(const Kademlia::CContact* contact)
+{
+	m_contactHistogramCtrl->ContactRem(contact);
+	m_contactListCtrl->ContactRem(contact);
+}
+
+void CKademliaWnd::ContactRef(const Kademlia::CContact* contact)
+{
+	m_contactHistogramCtrl->ContactRef(contact);
+	m_contactListCtrl->ContactRef(contact);
 }

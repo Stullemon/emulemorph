@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -17,7 +17,9 @@
 #include "stdafx.h"
 #include "SafeFile.h"
 #include "Packets.h"
+#include "StringConversion.h"
 #include "kademlia/utils/UInt128.h"
+#include <atlenc.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,17 +62,90 @@ void CFileDataIO::ReadHash16(uchar* pVal)
 	Read(pVal, 16);
 }
 
-CString CFileDataIO::ReadString()
+CString CFileDataIO::ReadString(bool bOptUTF8, UINT uRawSize)
+{
+#ifdef _UNICODE
+	const UINT uMaxShortRawSize = SHORT_RAW_ED2K_UTF8_STR;
+	if (uRawSize <= uMaxShortRawSize)
+	{
+		char acRaw[uMaxShortRawSize];
+		Read(acRaw, uRawSize);
+		if (uRawSize >= 3 && (UCHAR)acRaw[0] == 0xEFU && (UCHAR)acRaw[1] == 0xBBU && (UCHAR)acRaw[2] == 0xBFU)
+		{
+			WCHAR awc[uMaxShortRawSize];
+			int iChars = ByteStreamToWideChar(acRaw + 3, uRawSize - 3, awc, ARRSIZE(awc));
+			if (iChars >= 0)
+				return CStringW(awc, iChars);
+		}
+		else if (bOptUTF8)
+		{
+			WCHAR awc[uMaxShortRawSize];
+			//int iChars = ByteStreamToWideChar(acRaw, uRawSize, awc, ARRSIZE(awc));
+			int iChars = utf8towc(acRaw, uRawSize, awc, ARRSIZE(awc));
+			if (iChars >= 0)
+				return CStringW(awc, iChars);
+		}
+		return CStringW(acRaw, uRawSize); // use local codepage
+	}
+	else
+	{
+		Array<char> acRaw(uRawSize);
+		Read(acRaw, uRawSize);
+		if (uRawSize >= 3 && (UCHAR)acRaw[0] == 0xEFU && (UCHAR)acRaw[1] == 0xBBU && (UCHAR)acRaw[2] == 0xBFU)
+		{
+			Array<WCHAR> awc(uRawSize);
+			int iChars = ByteStreamToWideChar(acRaw + 3, uRawSize - 3, awc, uRawSize);
+			if (iChars >= 0)
+				return CStringW(awc, iChars);
+		}
+		else if (bOptUTF8)
+		{
+			Array<WCHAR> awc(uRawSize);
+			//int iChars = ByteStreamToWideChar(acRaw, uRawSize, awc, uRawSize);
+			int iChars = utf8towc(acRaw, uRawSize, awc, uRawSize);
+			if (iChars >= 0)
+				return CStringW(awc, iChars);
+		}
+		return CStringW(acRaw, uRawSize); // use local codepage
+	}
+#else
+	CStringA strA;
+	Read(strA.GetBuffer(uRawSize), uRawSize);
+	strA.ReleaseBuffer(uRawSize);
+	return strA;
+#endif
+}
+
+CString CFileDataIO::ReadString(bool bOptUTF8)
 {
 	UINT uLen = ReadUInt16();
-	CStringA str;
-	Read(str.GetBuffer(uLen), uLen);
-	str.ReleaseBuffer(uLen);
-#ifdef _UNICODE
-	return CString(str);
-#else
-	return str;
-#endif
+	return ReadString(bOptUTF8, uLen);
+}
+
+CStringW CFileDataIO::ReadStringUTF8()
+{
+	UINT uRawSize = ReadUInt16();
+	const UINT uMaxShortRawSize = SHORT_RAW_ED2K_UTF8_STR;
+	if (uRawSize <= uMaxShortRawSize)
+	{
+		char acRaw[uMaxShortRawSize];
+		Read(acRaw, uRawSize);
+		WCHAR awc[uMaxShortRawSize];
+		int iChars = ByteStreamToWideChar(acRaw, uRawSize, awc, ARRSIZE(awc));
+		if (iChars >= 0)
+			return CStringW(awc, iChars);
+		return CStringW(acRaw, uRawSize); // use local codepage
+	}
+	else
+	{
+		Array<char> acRaw(uRawSize);
+		Read(acRaw, uRawSize);
+		Array<WCHAR> awc(uRawSize);
+		int iChars = ByteStreamToWideChar(acRaw, uRawSize, awc, uRawSize);
+		if (iChars >= 0)
+			return CStringW(awc, iChars);
+		return CStringW(acRaw, uRawSize); // use local codepage;
+	}
 }
 
 void CFileDataIO::WriteUInt8(uint8 nVal)
@@ -98,14 +173,69 @@ void CFileDataIO::WriteHash16(const uchar* pVal)
 	Write(pVal, 16);
 }
 
-void CFileDataIO::WriteString(const CString& rstr, bool bOptUTF8)
+void CFileDataIO::WriteString(const CString& rstr, EUtf8Str eEncode)
 {
+#define	WRITE_STR_LEN(n)	WriteUInt16(n)
 #ifdef _UNICODE
+	if (eEncode == utf8strRaw)
+	{
+		CUnicodeToUTF8 utf8(rstr);
+		WRITE_STR_LEN(utf8.GetLength());
+		Write((LPCSTR)utf8, utf8.GetLength());
+	}
+	else if (eEncode == utf8strOptBOM)
+	{
+		if (NeedUTF8String(rstr))
+		{
+			CUnicodeToBOMUTF8 bomutf8(rstr);
+			WRITE_STR_LEN(bomutf8.GetLength());
+			Write((LPCSTR)bomutf8, bomutf8.GetLength());
+		}
+		else
+		{
+			CUnicodeToMultiByte mb(rstr);
+			WRITE_STR_LEN(mb.GetLength());
+			Write((LPCSTR)mb, mb.GetLength());
+		}
+	}
+	else
+	{
+		CUnicodeToMultiByte mb(rstr);
+		WRITE_STR_LEN(mb.GetLength());
+		Write((LPCSTR)mb, mb.GetLength());
+	}
 #else
-	UINT uLen = rstr.GetLength();
-	WriteUInt16(uLen);
-	Write((LPCSTR)rstr, uLen);
+	if (eEncode == utf8strRaw)
+	{
+		CStringW wstr(rstr);
+		CUnicodeToUTF8 utf8(wstr);
+		WRITE_STR_LEN(utf8.GetLength());
+		Write((LPCSTR)utf8, utf8.GetLength());
+	}
+	else if (eEncode == utf8strOptBOM)
+	{
+		CStringW wstr(rstr);
+		if (NeedUTF8String(wstr))
+		{
+			CUnicodeToBOMUTF8 bomutf8(wstr);
+			WRITE_STR_LEN(bomutf8.GetLength());
+			Write((LPCSTR)bomutf8, bomutf8.GetLength());
+		}
+		else
+		{
+			CUnicodeToMultiByte mb(wstr);
+			WRITE_STR_LEN(mb.GetLength());
+			Write((LPCSTR)mb, mb.GetLength());
+		}
+	}
+	else
+	{
+		UINT uLen = rstr.GetLength();
+		WRITE_STR_LEN(uLen);
+		Write((LPCSTR)rstr, uLen);
+	}
 #endif
+#undef WRITE_STR_LEN
 }
 
 void CFileDataIO::WriteString(LPCSTR psz)
@@ -115,6 +245,77 @@ void CFileDataIO::WriteString(LPCSTR psz)
 	Write(psz, uLen);
 }
 
+void CFileDataIO::WriteLongString(const CString& rstr, EUtf8Str eEncode)
+{
+#define	WRITE_STR_LEN(n)	WriteUInt32(n)
+#ifdef _UNICODE
+	if (eEncode == utf8strRaw)
+	{
+		CUnicodeToUTF8 utf8(rstr);
+		WRITE_STR_LEN(utf8.GetLength());
+		Write((LPCSTR)utf8, utf8.GetLength());
+	}
+	else if (eEncode == utf8strOptBOM)
+	{
+		if (NeedUTF8String(rstr))
+		{
+			CUnicodeToBOMUTF8 bomutf8(rstr);
+			WRITE_STR_LEN(bomutf8.GetLength());
+			Write((LPCSTR)bomutf8, bomutf8.GetLength());
+		}
+		else
+		{
+			CUnicodeToMultiByte mb(rstr);
+			WRITE_STR_LEN(mb.GetLength());
+			Write((LPCSTR)mb, mb.GetLength());
+		}
+	}
+	else
+	{
+		CUnicodeToMultiByte mb(rstr);
+		WRITE_STR_LEN(mb.GetLength());
+		Write((LPCSTR)mb, mb.GetLength());
+	}
+#else
+	if (eEncode == utf8strRaw)
+	{
+		CStringW wstr(rstr);
+		CUnicodeToUTF8 utf8(wstr);
+		WRITE_STR_LEN(utf8.GetLength());
+		Write((LPCSTR)utf8, utf8.GetLength());
+	}
+	else if (eEncode == utf8strOptBOM)
+	{
+		CStringW wstr(rstr);
+		if (NeedUTF8String(wstr))
+		{
+			CUnicodeToBOMUTF8 bomutf8(wstr);
+			WRITE_STR_LEN(bomutf8.GetLength());
+			Write((LPCSTR)bomutf8, bomutf8.GetLength());
+		}
+		else
+		{
+			CUnicodeToMultiByte mb(wstr);
+			WRITE_STR_LEN(mb.GetLength());
+			Write((LPCSTR)mb, mb.GetLength());
+		}
+	}
+	else
+	{
+		UINT uLen = rstr.GetLength();
+		WRITE_STR_LEN(uLen);
+		Write((LPCSTR)rstr, uLen);
+	}
+#endif
+#undef WRITE_STR_LEN
+}
+
+void CFileDataIO::WriteLongString(LPCSTR psz)
+{
+	UINT uLen = strlen(psz);
+	WriteUInt32(uLen);
+	Write(psz, uLen);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // CSafeFile
@@ -139,6 +340,10 @@ ULONGLONG CSafeFile::Seek(LONGLONG lOff, UINT nFrom)
 ULONGLONG CSafeFile::GetPosition() const
 {
 	return CFile::GetPosition();
+}
+
+ULONGLONG CSafeFile::GetLength() const {
+	return CFile::GetLength();
 }
 
 
@@ -275,6 +480,10 @@ ULONGLONG CSafeMemFile::GetPosition() const
 	return CMemFile::GetPosition();
 }
 
+ULONGLONG CSafeMemFile::GetLength() const {
+	return CMemFile::GetLength();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // CSafeBufferedFile
@@ -303,6 +512,10 @@ ULONGLONG CSafeBufferedFile::Seek(LONGLONG lOff, UINT nFrom)
 ULONGLONG CSafeBufferedFile::GetPosition() const
 {
 	return CStdioFile::GetPosition();
+}
+
+ULONGLONG CSafeBufferedFile::GetLength() const {
+	return CStdioFile::GetLength();
 }
 
 int CSafeBufferedFile::printf(LPCTSTR pszFmt, ...)

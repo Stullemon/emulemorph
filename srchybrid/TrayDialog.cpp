@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -123,6 +123,8 @@ void CTrayDialog::TraySetToolTip(LPCTSTR lpszToolTip){
 	_tcsncpy(m_nidIconData.szTip,lpszToolTip,ARRSIZE(m_nidIconData.szTip));
 	m_nidIconData.szTip[ARRSIZE(m_nidIconData.szTip)-1] = _T('\0');
 	m_nidIconData.uFlags |= NIF_TIP;
+
+	Shell_NotifyIcon(NIM_MODIFY,&m_nidIconData);
 }
 
 BOOL CTrayDialog::TrayShow(){
@@ -256,16 +258,16 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 	{
 		if ((nID & 0xFFF0) == SC_MINIMIZE)
 		{
-			if (TrayShow()) 
-				ShowWindow(SW_HIDE);
+			if (TrayShow())
+				ShowWindow(SW_HIDE);		
 		}
-		else 
+		else
 			CTrayDialogBase::OnSysCommand(nID, lParam);	
 	}
 	else if ((nID & 0xFFF0) == SC_MINIMIZETRAY)
 	{
-	    if (TrayShow()) 
-	        ShowWindow(SW_HIDE);
+		if (TrayShow())
+			ShowWindow(SW_HIDE);
 	}
 	else
 		CTrayDialogBase::OnSysCommand(nID, lParam);

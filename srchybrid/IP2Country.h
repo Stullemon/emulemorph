@@ -15,6 +15,8 @@ struct IPRange_Struct2{
 	~IPRange_Struct2() {  }
 };
 
+#define DFLT_IP2COUNTRY_FILENAME  _T("ip-to-country.csv")//Commander - Added: IP2Country auto-updating
+
 class CIP2Country: public CLoggable
 {
 	public:
@@ -46,6 +48,8 @@ class CIP2Country: public CLoggable
 		WORD	GetFlagResIDfromCountryCode(CString shortCountryName);
 
 		CImageList* GetFlagImageList() {return &CountryFlagImageList;}
+		void    UpdateIP2CountryURL();//Commander - Added: IP2Country auto-updating
+
 	private:
 
 		//check is program current running, if it's under init or shutdown, set to false

@@ -508,12 +508,6 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								Sbuffer = tempStr;
 							}
 							//EastShare END - Added by TAHO, Pay Back First
-
-							//Morph Start - added by AndCycle, show out keep full chunk transfer
-							if(client->GetQueueSessionUp() > 0){
-								Sbuffer.Append(_T(" F"));
-							}
-							//Morph End - added by AndCycle, show out keep full chunk transfer
 						}
 						break;
 					case 5:
@@ -633,9 +627,10 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END - Added by SiRoB, Friend Addon
+ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsBanned()) ? MF_ENABLED : MF_GRAYED), MP_UNBAN, GetResString(IDS_UNBAN));
-	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::getPrefs()->getLastContact())
+	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
@@ -718,9 +713,9 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 					CString fileList;
 					fileList += GetResString(IDS_LISTREQDL);
 					fileList += "\n--------------------------\n" ; 
-					if (theApp.downloadqueue->IsPartFile(client->reqfile))
+					if (theApp.downloadqueue->IsPartFile(client->GetRequestFile()))
 					{
-						fileList += client->reqfile->GetFileName(); 
+						fileList += client->GetRequestFile()->GetFileName(); 
 						for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
 						{
 							fileList += "\n" ; 
@@ -780,14 +775,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
-				return _tcsicmp(item1->GetUserName(), item2->GetUserName());
+				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
 			else if(item1->GetUserName())
 				return 1;
 			else
 				return -1;
 		case 100:
 			if(item2->GetUserName() && item1->GetUserName())
-				return _tcsicmp(item2->GetUserName(), item1->GetUserName());
+				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
 			else if(item2->GetUserName())
 				return 1;
 			else
@@ -797,7 +792,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return _tcsicmp(file1->GetFileName(), file2->GetFileName());
+				return CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
 			else if( file1 == NULL )
 				return 1;
 			else
@@ -807,7 +802,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return _tcsicmp(file2->GetFileName(), file1->GetFileName());
+				return CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
 			else if( file1 == NULL )
 				return 1;
 			else
@@ -952,9 +947,9 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return (item1->IsFriend() && !item2->IsFriend()) ? 1 : -1;
 		// EastShare - Added by Pretender, Friend Tab
                // Commander - Added: IP2Country column - Start
-                case 13:
+		case 13:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return _tcsicmp(item1->GetCountryName(true), item2->GetCountryName(true));
+				return CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
 				return 1;
 			else
@@ -962,7 +957,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 		case 113:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return _tcsicmp(item2->GetCountryName(true), item1->GetCountryName(true));
+				return CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
 			else if(item2->GetCountryName(true))
 				return 1;
 			else

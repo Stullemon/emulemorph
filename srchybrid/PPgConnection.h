@@ -34,4 +34,8 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBnClickedOpenports();
+	afx_msg void OnStartPortTest();
+	afx_msg void OnEnChangeTCP();
+	afx_msg void OnEnChangeUDP();
+	afx_msg void OnEnChangePorts(uint8 istcpport);
 };

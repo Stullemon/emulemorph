@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -29,6 +29,7 @@
 #include "PeerCacheSocket.h"
 #include "UploadBandwidthThrottler.h"
 #include "PeerCacheFinder.h"
+#include "UploadQueue.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -113,7 +114,7 @@ void CPeerCacheSocket::OnReceive(int nErrorCode)
 
 void CPeerCacheSocket::OnError(int nErrorCode)
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
 	CHttpClientReqSocket::OnError(nErrorCode);
 }
 
@@ -144,12 +145,12 @@ IMPLEMENT_DYNCREATE(CPeerCacheDownSocket, CPeerCacheSocket)
 CPeerCacheDownSocket::CPeerCacheDownSocket(CUpDownClient* pClient)
 	: CPeerCacheSocket(pClient)
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
 }
 
 CPeerCacheDownSocket::~CPeerCacheDownSocket()
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
 	DetachFromClient();
 }
 
@@ -164,8 +165,8 @@ void CPeerCacheDownSocket::DetachFromClient()
 
 void CPeerCacheDownSocket::OnClose(int nErrorCode)
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
-	
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
+
 	DisableDownloadLimit(); // receive pending data
 	CUpDownClient* pCurClient = GetClient();
 	if (pCurClient && pCurClient->m_pPCDownSocket != this)
@@ -218,12 +219,13 @@ IMPLEMENT_DYNCREATE(CPeerCacheUpSocket, CPeerCacheSocket)
 CPeerCacheUpSocket::CPeerCacheUpSocket(CUpDownClient* pClient)
 	: CPeerCacheSocket(pClient)
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
 }
 
 CPeerCacheUpSocket::~CPeerCacheUpSocket()
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
+    theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this);
 	DetachFromClient();
 }
 
@@ -231,20 +233,22 @@ void CPeerCacheUpSocket::DetachFromClient()
 {
 	if (GetClient())
 	{
-		if (GetClient()->m_pPCUpSocket == this)
+        if (GetClient()->m_pPCUpSocket == this) {
 			GetClient()->m_pPCUpSocket = NULL;
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList(this);
+        }
 	}
 }
 
 void CPeerCacheUpSocket::OnSend(int nErrorCode)
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
 	CPeerCacheSocket::OnSend(nErrorCode);
 }
 
 void CPeerCacheUpSocket::OnClose(int nErrorCode)
 {
-	Debug(_T("%08x %hs\n"), this, __FUNCTION__);
+	DEBUG_ONLY( Debug(_T("%08x %hs\n"), this, __FUNCTION__) );
 	CPeerCacheSocket::OnClose(nErrorCode);
 	if (GetClient())
 	{
@@ -316,6 +320,7 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 {
 	ASSERT( GetDownloadState() == DS_DOWNLOADING );
 	ASSERT( m_ePeerCacheDownState == PCDS_WAIT_CACHE_REPLY );
+
 	if (reqfile == NULL)
 		throw CString("Failed to process HTTP response - No 'reqfile' attached");
 	if (GetDownloadState() != DS_DOWNLOADING)
@@ -607,6 +612,8 @@ bool CUpDownClient::SendHttpBlockRequests()
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons( theApp.m_pPeerCache->GetCachePort() );
 	sockAddr.sin_addr.S_un.S_addr = theApp.m_pPeerCache->GetCacheIP();
+	//Try to always tell the socket to WaitForOnConnect before you call Connect.
+	m_pPCDownSocket->WaitForOnConnect();
 	m_pPCDownSocket->Connect((SOCKADDR*)&sockAddr, sizeof sockAddr);
 
 	POSITION pos = m_PendingBlocks_list.GetHeadPosition();
@@ -641,7 +648,6 @@ bool CUpDownClient::SendHttpBlockRequests()
 
 bool CUpDownClient::SendPeerCacheFileRequest()
 {
-	USES_CONVERSION;
 	if (GetDownloadState() == DS_ONQUEUE){
 		ASSERT( m_ePeerCacheDownState == PCDS_NONE );
 		ASSERT( m_pPCDownSocket == NULL );
@@ -658,7 +664,7 @@ bool CUpDownClient::SendPeerCacheFileRequest()
 		ASSERT(0);
 		return false;
 	}
-	AddDebugLogLine(false, _T("Sending PC-DL-Request. Client: %s"), DbgGetClientInfo());
+
 	m_uPeerCacheDownloadPushId = GetRandomUInt32();
 
 	CSafeMemFile data(128);
@@ -728,32 +734,32 @@ bool CUpDownClient::ProcessPeerCacheQuery(const char* packet, UINT size)
 	UINT uTags = dataRecv.ReadUInt8();
 	while (uTags--)
 	{
-		CTag tag(&dataRecv);
-		if (tag.tag.specialtag == PCTAG_CACHEIP && tag.IsInt())
+		CTag tag(&dataRecv, GetUnicodeSupport());
+		if (tag.GetNameID() == PCTAG_CACHEIP && tag.IsInt())
 		{
 			uCacheIP = tag.GetInt();
 			if (bDebug)
 				strInfo.AppendFormat(_T("  CacheIP=%s"), ipstr(uCacheIP));
 		}
-		else if (tag.tag.specialtag == PCTAG_CACHEPORT && tag.IsInt())
+		else if (tag.GetNameID() == PCTAG_CACHEPORT && tag.IsInt())
 		{
 			uCachePort = tag.GetInt();
 			if (bDebug)
 				strInfo.AppendFormat(_T("  CachePort=%u"), uCachePort);
 		}
-		else if (tag.tag.specialtag == PCTAG_PUSHID && tag.IsInt())
+		else if (tag.GetNameID() == PCTAG_PUSHID && tag.IsInt())
 		{
 			uPushId = tag.GetInt();
 			if (bDebug)
 				strInfo.AppendFormat(_T("  PushId=%u"), uPushId);
 		}
-		else if (tag.tag.specialtag == PCTAG_FILEID && tag.IsHash() && tag.GetHash() != NULL)
+		else if (tag.GetNameID() == PCTAG_FILEID && tag.IsHash() && tag.GetHash() != NULL)
 		{
 			md4cpy(aucFileHash, tag.GetHash());
 			if (bDebug)
 				strInfo.AppendFormat(_T("  FileId=%s"), md4str(aucFileHash));
 		}
-		else if (tag.tag.specialtag == PCTAG_PUBLICIP && tag.IsInt())
+		else if (tag.GetNameID() == PCTAG_PUBLICIP && tag.IsInt())
 		{
 			uRemoteIP = tag.GetInt();
 			if (bDebug)
@@ -775,18 +781,21 @@ bool CUpDownClient::ProcessPeerCacheQuery(const char* packet, UINT size)
 	}
 
 	if (uCacheIP == 0 || uCachePort == 0 || uPushId == 0 || isnulmd4(aucFileHash)){
-		theApp.AddDebugLogLine(false, _T("Invalid PeerCacheQuery; %s"), DbgGetClientInfo());
+		if (thePrefs.GetVerbose())
+			theApp.AddDebugLogLine(false, _T("Invalid PeerCacheQuery; %s"), DbgGetClientInfo());
 		return false;
 	}
 
 	CKnownFile* pUploadFile = theApp.sharedfiles->GetFileByID(aucFileHash);
 	if (pUploadFile == NULL){
-		theApp.AddDebugLogLine(false, _T("PeerCacheQuery reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
+		if (thePrefs.GetVerbose())
+			theApp.AddDebugLogLine(false, _T("PeerCacheQuery reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
 		return false;
 	}
 
 	if (m_pPCUpSocket != NULL)
 	{
+        SetPeerCacheUpState(PCUS_NONE);
 		m_pPCUpSocket->Safe_Delete();
 		ASSERT( m_pPCUpSocket == NULL );
 	}
@@ -798,6 +807,8 @@ bool CUpDownClient::ProcessPeerCacheQuery(const char* packet, UINT size)
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_port = htons(uCachePort);
 	sockAddr.sin_addr.S_un.S_addr = uCacheIP;
+	//Try to always tell the socket to WaitForOnConnect before you call Connect.
+	m_pPCUpSocket->WaitForOnConnect();
 	m_pPCUpSocket->Connect((SOCKADDR*)&sockAddr, sizeof sockAddr);
 
 	CStringA strPCRequest;
@@ -814,7 +825,7 @@ bool CUpDownClient::ProcessPeerCacheQuery(const char* packet, UINT size)
 	m_pPCUpSocket->SetHttpState(HttpStateRecvExpected);
 	m_bPeerCacheUpHit = false;
 	SetPeerCacheUpState(PCUS_WAIT_CACHE_REPLY);
-	theApp.uploadBandwidthThrottler->AddToStandardList(0, m_pPCUpSocket);
+	//theApp.uploadBandwidthThrottler->AddToStandardList(0, m_pPCUpSocket);
 
 	CSafeMemFile dataSend(128);
 	dataSend.WriteUInt8(PCPCK_VERSION);
@@ -862,7 +873,8 @@ bool CUpDownClient::ProcessPeerCacheAnswer(const char* packet, UINT size)
 	}
 	uint8 uPCOpcode = dataRecv.ReadUInt8();
 	if (uPCOpcode == PCOP_NONE){
-		theApp.AddDebugLogLine(false, _T("Client does not support PeerCache; %s"), DbgGetClientInfo());
+		if (thePrefs.GetVerbose())
+			theApp.AddDebugLogLine(false, _T("Client does not support PeerCache; %s"), DbgGetClientInfo());
 		return false;
 	}
 	if (uPCOpcode != PCOP_RES){
@@ -881,20 +893,20 @@ bool CUpDownClient::ProcessPeerCacheAnswer(const char* packet, UINT size)
 	UINT uTags = dataRecv.ReadUInt8();
 	while (uTags--)
 	{
-		CTag tag(&dataRecv);
-		if (tag.tag.specialtag == PCTAG_PUSHID && tag.IsInt())
+		CTag tag(&dataRecv, GetUnicodeSupport());
+		if (tag.GetNameID() == PCTAG_PUSHID && tag.IsInt())
 		{
 			uPushId = tag.GetInt();
 			if (bDebug)
 				strInfo.AppendFormat(_T("  PushId=%u"), uPushId);
 		}
-		else if (tag.tag.specialtag == PCTAG_PUBLICIP && tag.IsInt())
+		else if (tag.GetNameID() == PCTAG_PUBLICIP && tag.IsInt())
 		{
 			uRemoteIP = tag.GetInt();
 			if (bDebug)
 				strInfo.AppendFormat(_T("  RemoteIP=%s"), ipstr(uRemoteIP));
 		}
-		else if (tag.tag.specialtag == PCTAG_FILEID && tag.IsHash() && tag.GetHash() != NULL)
+		else if (tag.GetNameID() == PCTAG_FILEID && tag.IsHash() && tag.GetHash() != NULL)
 		{
 			md4cpy(aucFileHash, tag.GetHash());
 			if (bDebug)
@@ -916,12 +928,14 @@ bool CUpDownClient::ProcessPeerCacheAnswer(const char* packet, UINT size)
 	}
 
 	if (uPushId == 0 || uRemoteIP == 0 || isnulmd4(aucFileHash)){
-		theApp.AddDebugLogLine(false, _T("Invalid PeerCacheAnswer; %s"), DbgGetClientInfo());
+		if (thePrefs.GetVerbose())
+			theApp.AddDebugLogLine(false, _T("Invalid PeerCacheAnswer; %s"), DbgGetClientInfo());
 		return false;
 	}
 
 	if (md4cmp(aucFileHash, reqfile->GetFileHash()) != 0){
-		theApp.AddDebugLogLine(false, _T("PeerCacheAnswer reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
+		if (thePrefs.GetVerbose())
+			theApp.AddDebugLogLine(false, _T("PeerCacheAnswer reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
 		return false;
 	}
 
@@ -930,7 +944,7 @@ bool CUpDownClient::ProcessPeerCacheAnswer(const char* packet, UINT size)
 
 	if (!SendHttpBlockRequests())
 		return false;
-	
+
 	theApp.m_pPeerCache->DownloadAttemptStarted();
 	ASSERT( m_ePeerCacheDownState == PCDS_WAIT_CACHE_REPLY );
 	return true;
@@ -987,7 +1001,7 @@ bool CUpDownClient::ProcessPeerCacheAcknowledge(const char* packet, UINT size)
 bool CUpDownClient::IsUploadingToPeerCache() const
 {
 	// this function should not check any socket ptrs, as the according sockets may already be closed/deleted
-	return m_ePeerCacheUpState == PCUS_UPLOADING;
+    return m_ePeerCacheUpState == PCUS_UPLOADING;
 }
 
 bool CUpDownClient::IsDownloadingFromPeerCache() const
@@ -1006,7 +1020,8 @@ void CUpDownClient::OnPeerCacheDownSocketClosed(int nErrorCode)
 		&& m_ePeerCacheDownState == PCDS_DOWNLOADING
 		&& !m_PendingBlocks_list.IsEmpty())
 	{
-		AddDebugLogLine(DLP_HIGH, false, _T("PeerCache: Socket closed unexpedtedly, trying to reestablish connection %s"), DbgGetClientInfo());
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(DLP_HIGH, false, _T("PeerCache: Socket closed unexpedtedly, trying to reestablish connection %s"), DbgGetClientInfo());
 		theApp.m_pPeerCache->DownloadAttemptFailed();
 		TRACE("+++ Restarting PeerCache download - socket closed\n");
 		ASSERT( m_pPCDownSocket == NULL );
@@ -1023,7 +1038,8 @@ bool CUpDownClient::OnPeerCacheDownSocketTimeout()
 		&& m_ePeerCacheDownState == PCDS_DOWNLOADING
 		&& !m_PendingBlocks_list.IsEmpty())
 	{
-		AddDebugLogLine(DLP_HIGH, false, _T("PeerCache Error: Socket TimeOut, trying to reestablish connection"));
+		if (thePrefs.GetVerbose())
+			AddDebugLogLine(DLP_HIGH, false, _T("PeerCache Error: Socket TimeOut, trying to reestablish connection"));
 		theApp.m_pPeerCache->DownloadAttemptFailed();
 		TRACE("+++ Restarting PeerCache download - socket timeout\n");
 		if (m_pPCDownSocket)
@@ -1053,9 +1069,15 @@ void CUpDownClient::SetPeerCacheUpState(EPeerCacheUpState eState)
 {
 	if (m_ePeerCacheUpState != eState)
 	{
+		//if (thePrefs.GetVerbose())
+			//AddDebugLogLine(false, _T(" %s changed PeercacheState to %i"), DbgGetClientInfo(), eState);
+
 		m_ePeerCacheUpState = eState;
 		if (m_ePeerCacheUpState == PCUS_NONE)
 			m_bPeerCacheUpHit = false;
+
+        theApp.uploadqueue->ReSortUploadSlots(true);
+
 		UpdateDisplayedInfo();
 	}
 }

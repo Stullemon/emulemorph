@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -29,8 +29,10 @@ public:
     uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset();
     uint32 GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
 
+    uint32 GetStandardListSize() { return m_StandardOrder_list.GetSize(); };
+
     void AddToStandardList(uint32 index, ThrottledFileSocket* socket);
-    void RemoveFromStandardList(ThrottledFileSocket* socket);
+    bool RemoveFromStandardList(ThrottledFileSocket* socket);
 
     void QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent = false); // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledControlSocket* socket) { RemoveFromAllQueues(socket, true); }; // ZZ:UploadBandWithThrottler (UDP)
@@ -46,7 +48,7 @@ private:
     UINT RunInternal();
 
     void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
-    void RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
+    bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
 
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueue_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
     CTypedPtrList<CPtrList, ThrottledControlSocket*> m_ControlQueueFirst_list; // a queue for all the sockets that want to have Send() called on them. // ZZ:UploadBandWithThrottler (UDP)
@@ -62,9 +64,10 @@ private:
     CEvent* pauseEvent;
 
     uint64 m_SentBytesSinceLastCall;
-    uint64 m_SentBytesSinceLastCallExcludingOverhead;
+    uint64 m_SentBytesSinceLastCallOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots;
 
     uint32 m_allowedDataRate;
+
     bool doRun;
 };

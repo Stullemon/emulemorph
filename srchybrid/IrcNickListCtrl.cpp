@@ -649,7 +649,7 @@ BOOL CIrcNickListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 				//We have a nick and chan, send the command.
 				//We send our nick and ClientID to allow the other end to only accept links from friends..
 				CString send;
-				send.Format(_T("PRIVMSG %s :\001SENDLINK|%s|%s\001"), nick->nick, EncodeBase16((const unsigned char*)thePrefs.GetUserHash(), 16), m_pParent->GetSendFileString() );
+				send.Format(_T("PRIVMSG %s :\001SENDLINK|%s|%s\001"), nick->nick, md4str(thePrefs.GetUserHash()), m_pParent->GetSendFileString() );
 				m_pParent->m_pIrcMain->SendString(send);
 			}
 			return true;

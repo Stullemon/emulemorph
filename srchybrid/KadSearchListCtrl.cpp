@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -189,9 +189,9 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 	}
 
 	if(search->Stoping())
-		SetItemText(iItem,colStop,_T("Stopping"));
+		SetItemText(iItem,colStop,GetResString(IDS_KADSTATUS_STOPPING));
 	else
-		SetItemText(iItem,colStop,_T("Active"));
+		SetItemText(iItem,colStop,GetResString(IDS_KADSTATUS_ACTIVE));
 }
 
 void CKadSearchListCtrl::SearchAdd(const Kademlia::CSearch* search)

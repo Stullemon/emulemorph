@@ -69,6 +69,13 @@ void CStatisticsTree::Init()
 // magic fix...
 void CStatisticsTree::OnRButtonDown( UINT nFlags, CPoint point )
 {
+	UINT uHitFlags;
+	HTREEITEM hItem = HitTest(point, &uHitFlags);
+	if (hItem != NULL && (uHitFlags & TVHT_ONITEM))
+	{
+		Select(hItem, TVGN_CARET);
+		SetItemState(hItem, TVIS_SELECTED, TVIS_SELECTED);
+	}
 	return;
 }
 
@@ -164,11 +171,10 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 				AddLogLine(false, GetResString(IDS_STATS_NFORESET));
 				theApp.emuledlg->statisticswnd->ShowStatistics();
 
-				//MORPH - Removed by SiRoB, New Graph
-				/*
-				CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
+				CString myBuffer; 
+				myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(false));
 				GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
-				*/
+
 				break;
 			}
 		case MP_STATTREE_RESTORE:
@@ -180,11 +186,9 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 					AddLogLine(true, GetResString(IDS_ERR_NOSTATBKUP));
 				else {
 					AddLogLine(false, GetResString(IDS_STATS_NFOLOADEDBKUP));
-					//MORPH - Removed by SiRoB, New Graph
-					/*
-					CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(true));
+					CString myBuffer;
+					myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), thePrefs.GetStatsLastResetStr(false));
 					GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
-					*/
 				}
 
 				break;
@@ -329,35 +333,40 @@ CString CStatisticsTree::GetItemText(HTREEITEM theItem, int getPart)
 // It is recursive.
 CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theItemLevel, bool firstItem)
 {
-	CString		strBuffer, strItem;
-	HTREEITEM	hCurrent;
-	
-	strBuffer.Empty();
-	if (firstItem) strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%hs]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
-
-	if (theItem == NULL) {
-		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
+	HTREEITEM hCurrent;
+	if (theItem == NULL)
+	{
+		if (!onlyVisible)
+			theApp.emuledlg->statisticswnd->ShowStatistics(true);
 		hCurrent = GetRootItem(); // Copy All Vis or Copy All
 	}
-	else if (firstItem) {
-		if (ItemHasChildren(theItem)) hCurrent = theItem; // Copy Branch issued for item with children, use item.
-		else hCurrent = GetParentItem(theItem); // Copy Branch issued for item with no children, use parent.
-	}
-	else hCurrent = theItem; // This function has been recursed.
+	else
+		hCurrent = theItem;
+
+	CString	strBuffer;
+	if (firstItem)
+		strBuffer.Format(_T("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 
 	while (hCurrent != NULL)
 	{
-		if (IsBold(hCurrent)) strItem = _T("<b>") + GetItemText(hCurrent) + _T("</b>");
-		else strItem = GetItemText(hCurrent);
-		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("&nbsp;&nbsp;&nbsp;");
-		if (theItemLevel==0) strBuffer.Append(_T("\n"));
+		CString	strItem;
+		if (IsBold(hCurrent))
+			strItem = _T("<b>") + GetItemText(hCurrent) + _T("</b>");
+		else
+			strItem = GetItemText(hCurrent);
+		for (int i = 0; i < theItemLevel; i++)
+			strBuffer += _T("&nbsp;&nbsp;&nbsp;");
+		if (theItemLevel == 0)
+			strBuffer.Append(_T("\n"));
 		strBuffer += strItem + _T("<br>");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
-			strBuffer += (CString) GetHTML(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
+			strBuffer += GetHTML(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
-		if (firstItem && theItem != NULL) break; // Copy Selected Branch was used, so we don't want to copy all branches at this level.  Only the one that was selected.
+		if (firstItem && theItem != NULL)
+			break; // Copy Selected Branch was used, so we don't want to copy all branches at this level.  Only the one that was selected.
 	}
-	if (firstItem) strBuffer += _T("</font>");
+	if (firstItem)
+		strBuffer += _T("</font>");
 	return strBuffer;
 }
 
@@ -399,32 +408,37 @@ bool CStatisticsTree::CopyHTML(int copyMode)
 	return false;
 }
 
-// The plaintext alterego of GetHTML.  Simplenuff.
-// Oh yeah, the example/code this is based on was originally written by the enkeyDEV
-// crew.  This was the inspiration for GetHTML.
 CString CStatisticsTree::GetText(bool onlyVisible, HTREEITEM theItem, int theItemLevel, bool firstItem)
 {
-	CString		strBuffer;
-	HTREEITEM	hCurrent;
-	
-	strBuffer.Empty();
-	if (firstItem) strBuffer.Format(_T("eMule v%s %s [%hs]\r\n\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
-
-	if (theItem == NULL) hCurrent = GetRootItem(); // Copy All Vis or Copy All
-	else if (firstItem) {
-		if (ItemHasChildren(theItem)) hCurrent = theItem; // Copy Branch issued for item with children, use item.
-		else hCurrent = GetParentItem(theItem); // Copy Branch issued for item with no children, use parent.
+	bool bPrintHeader = firstItem;
+	HTREEITEM hCurrent;
+	if (theItem == NULL)
+	{
+		hCurrent = GetRootItem(); // Copy All Vis or Copy All
 	}
-	else hCurrent = theItem; // This function has been recursed.
+	else
+	{
+		if (bPrintHeader && (!ItemHasChildren(theItem) || !IsExpanded(theItem)))
+			bPrintHeader = false;
+		hCurrent = theItem;
+	}
+
+	CString	strBuffer;
+	if (bPrintHeader)
+		strBuffer.Format(_T("eMule v%s %s [%s]\r\n\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS) ,thePrefs.GetUserNick());
 
 	while (hCurrent != NULL)
 	{
-		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("   ");
-		strBuffer += GetItemText(hCurrent) + _T("\r\n");
+		for (int i = 0; i < theItemLevel; i++)
+			strBuffer += _T("   ");
+		strBuffer += GetItemText(hCurrent);
+		if (bPrintHeader || !firstItem)
+			strBuffer += _T("\r\n");
 		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
-			strBuffer += (CString) GetText(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
+			strBuffer += GetText(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
-		if (firstItem && theItem != NULL) break; // Copy Selected Branch was used, so we don't want to copy all branches at this level.  Only the one that was selected.
+		if (firstItem && theItem != NULL)
+			break; // Copy Selected Branch was used, so we don't want to copy all branches at this level.  Only the one that was selected.
 	}
 	return strBuffer;
 }
@@ -508,13 +522,13 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 
 	CFileDialog saveAsDlg (false, _T("html"), _T("*.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK) {
-		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%hs]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		theHTML.Format("<html>\r\n<header>\r\n<title>eMule v%s %s [%s]</title>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		theHTML += "<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n";
 		theHTML += "#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n";
 		theHTML += "<body id=\"bdy\">\r\n";
-		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%hs]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		theHTML.Format("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n", theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		theHTML += GetHTMLForExport(onlyvisible) + _T("</body></html>");
 
 		htmlFileName = saveAsDlg.GetPathName();

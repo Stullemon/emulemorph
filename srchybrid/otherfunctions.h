@@ -20,6 +20,7 @@ class CAbstractFile;
 class CKnownFile;
 struct Requested_Block_Struct;
 class CUpDownClient;
+class CAICHHash;
 
 #define ROUND(x) (floor((float)x+0.5f))
 
@@ -38,8 +39,16 @@ TCHAR *stristr(const TCHAR *str1, const TCHAR *str2);
 ///////////////////////////////////////////////////////////////////////////////
 // String conversion
 //
-CString CastItoXBytes(uint64 count);
-CString CastItoIShort(uint64 number);
+CString CastItoXBytes(uint16 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
+CString CastItoXBytes(uint32 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
+CString CastItoXBytes(uint64 count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
+CString CastItoXBytes(float count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
+CString CastItoXBytes(double count, bool isK = false, bool isPerSec = false, uint32 decimal = 2);
+CString CastItoIShort(uint16 count, bool isK = false, uint32 decimal = 2);
+CString CastItoIShort(uint32 count, bool isK = false, uint32 decimal = 2);
+CString CastItoIShort(uint64 count, bool isK = false, uint32 decimal = 2);
+CString CastItoIShort(float count, bool isK = false, uint32 decimal = 2);
+CString CastItoIShort(double count, bool isK = false, uint32 decimal = 2);
 CString CastSecondsToHM(sint32 seconds);
 CString	CastSecondsToLngHM(__int64 count);
 CString GetFormatedUInt(ULONG ulVal);
@@ -65,16 +74,15 @@ int wildcmp(char *wild, char *string);
 void HTMLParse(CString &buffer); // Added by N_OxYdE
 //MORPH END  - Added by SiRoB, XML News [O²]
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // URL conversion
 //
-void URLDecode(CString& result, const char* buff); // Make a malloc'd decoded strnig from an URL encoded string (with escaped spaces '%20' and  the like
-CString URLDecode(CString sIn);
-CString URLEncode(CString sIn);
+CString URLDecode(const CString& sIn);
+CString URLEncode(const CString& sIn);
 CString MakeStringEscaped(CString in);
-CString	StripInvalidFilenameChars(CString strText, bool bKeepSpaces = true);
-CString	CreateED2kLink(const CAbstractFile* f);
-CString CreateED2kHashsetLink(const CKnownFile* f);
+CString	StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces = true);
+CString	CreateED2kLink(const CAbstractFile* f, bool bEscapeLink = true);
 CString	CreateHTMLED2kLink(const CAbstractFile* f);
 
 
@@ -85,7 +93,8 @@ CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen);
 CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen);
 unsigned int DecodeLengthBase16(unsigned int base16Length);
 bool DecodeBase16(const TCHAR *base16Buffer, unsigned int base16BufLen, byte *buffer, unsigned int bufflen);
-
+uint32 DecodeBase32(LPCTSTR pszInput, uchar* paucOutput, uint32 nBufferLen);
+uint32 DecodeBase32(LPCTSTR pszInput, CAICHHash& Hash);
 
 ///////////////////////////////////////////////////////////////////////////////
 // File/Path string helpers
@@ -96,6 +105,7 @@ int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in,uint16 length);
 CString CleanupFilename(CString filename);
 bool ExpandEnvironmentStrings(CString& rstrStrings);
+int CompareLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -138,7 +148,7 @@ int GetSystemErrorString(DWORD dwError, CString &rstrError);
 int GetModuleErrorString(DWORD dwError, CString &rstrError, LPCTSTR pszModule);
 int GetErrorMessage(DWORD dwError, CString &rstrErrorMsg, DWORD dwFlags = 0);
 CString GetErrorMessage(DWORD dwError, DWORD dwFlags = 0);
-CString GetHexDump(const uint8* data, UINT size);
+CString DbgGetHexDump(const uint8* data, UINT size);
 void DbgSetThreadName(LPCSTR szThreadName, ...);
 void Debug(LPCTSTR pszFmtMsg, ...);
 void DebugHexDump(const uint8* data, UINT lenData);
@@ -168,6 +178,8 @@ bool HaveEd2kRegAccess();
 bool Ask4RegFix(bool checkOnly, bool dontAsk = false); // Barry - Allow forced update without prompt
 void BackupReg(void); // Barry - Store previous values
 void RevertReg(void); // Barry - Restore previous values
+void AddAutoStart();
+void RemAutoStart();
 
 int GetMaxWindowsTCPConnections();
 
@@ -253,10 +265,10 @@ __inline int CompareUnsigned64(uint64 uSize1, uint64 uSize2)
 	return 0;
 }
 
-__inline int CompareOptStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
+__inline int CompareOptLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 {
 	if (psz1 && psz2)
-		return _tcsicmp(psz1, psz2);
+		return CompareLocaleStringNoCase(psz1, psz2);
 	if (psz1)
 		return -1;
 	if (psz2)
@@ -280,8 +292,8 @@ enum EED2KFileType
 	ED2KFT_CDIMAGE
 };
 
-CStringA GetFileTypeByName(LPCTSTR pszFileName);
-CString GetFileTypeDisplayStrFromED2KFileType(LPCSTR pszED2KFileType);
+CString GetFileTypeByName(LPCTSTR pszFileName);
+CString GetFileTypeDisplayStrFromED2KFileType(LPCTSTR pszED2KFileType);
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
 
@@ -289,6 +301,7 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
 ///////////////////////////////////////////////////////////////////////////////
 // IP/UserID
 //
+void TriggerPortTest(uint16 tcp, uint16 udp);
 bool IsGoodIP(uint32 nIP, bool forceCheck = false);
 bool IsGoodIPPort(uint32 nIP, uint16 nPort);
 //No longer need seperate lowID checks as we now know the servers just give *.*.*.0 users a lowID

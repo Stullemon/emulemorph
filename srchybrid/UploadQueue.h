@@ -75,7 +75,7 @@ public:
 	uint32	GetFailedUpCount()						{return failedupcount;}
 	uint32	GetAverageUpTime();
 //	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
-	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false);
+	CUpDownClient* FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet = false, CUpDownClient* lowIdClientMustBeInSameOrBetterClassAsThisClient = NULL);
 	void	ReSortUploadSlots(bool force = false);
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
 	bool RightClientIsBetter(CUpDownClient* leftClient, uint32 leftScore, CUpDownClient* rightClient, uint32 rightScore);

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -29,6 +29,8 @@
 #include "HelpIDs.h"
 #include "Statistics.h"
 #include "Firewallopener.h"
+#include "ListenSocket.h"
+#include "ClientUDPSocket.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -54,11 +56,12 @@ void CPPgConnection::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
+	ON_BN_CLICKED(IDC_STARTTEST, OnStartPortTest)
 	ON_EN_CHANGE(IDC_DOWNLOAD_CAP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UDPDISABLE, OnEnChangeUDPDisable)
-	ON_EN_CHANGE(IDC_UDPPORT, OnEnChangeUDPDisable)
+	ON_EN_CHANGE(IDC_UDPPORT, OnEnChangeUDP)
 	ON_EN_CHANGE(IDC_UPLOAD_CAP, OnSettingsChange)
-	ON_EN_CHANGE(IDC_PORT, OnSettingsChange)
+	ON_EN_CHANGE(IDC_PORT, OnEnChangeTCP)
 	ON_EN_CHANGE(IDC_MAXCON, OnSettingsChange)
 	ON_EN_CHANGE(IDC_MAXSOURCEPERFILE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_AUTOCONNECT, OnSettingsChange)
@@ -69,13 +72,42 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	ON_BN_CLICKED(IDC_ULIMIT_LBL, OnLimiterChange)
 	ON_BN_CLICKED(IDC_DLIMIT_LBL, OnLimiterChange)
 	ON_WM_HSCROLL()
-	ON_BN_CLICKED(IDC_NETWORK_KADEMLIA, OnBnClickedNetworkKademlia)
+	ON_BN_CLICKED(IDC_NETWORK_KADEMLIA, OnSettingsChange)
 	ON_WM_HELPINFO()
 	ON_BN_CLICKED(IDC_OPENPORTS, OnBnClickedOpenports)
 END_MESSAGE_MAP()
 
 
 // CPPgConnection message handlers
+void CPPgConnection::OnEnChangeTCP(){
+	OnEnChangePorts(true);
+}
+
+void CPPgConnection::OnEnChangeUDP(){
+	OnEnChangePorts(false);
+}
+
+void CPPgConnection::OnEnChangePorts(uint8 istcpport){
+
+
+	// ports unchanged?
+	CString buffer;
+	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
+	uint16 tcp= _tstoi(buffer);
+	GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer);
+	uint16 udp= _tstoi(buffer);
+
+	GetDlgItem(IDC_STARTTEST)->EnableWindow( 
+		tcp==theApp.listensocket->GetConnectedPort() && 
+		udp==theApp.clientudp->GetConnectedPort() 
+	);
+
+
+	if (istcpport==0)
+		OnEnChangeUDPDisable();
+	else if (istcpport==1)
+		OnSettingsChange();
+}
 
 void CPPgConnection::OnEnChangeUDPDisable(){
 		if (guardian) return;
@@ -114,6 +146,8 @@ BOOL CPPgConnection::OnInitDialog()
 
 	LoadSettings();
 	Localize();
+
+	OnEnChangePorts(2);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -256,7 +290,10 @@ BOOL CPPgConnection::OnApply()
 		uint16 nNewPort = (_tstoi(buffer)) ? _tstoi(buffer) : 4662;
 		if (nNewPort != thePrefs.port){
 			thePrefs.port = nNewPort;
-			bRestartApp = true;
+			if (theApp.IsPortchangeAllowed())
+				theApp.listensocket->Rebind();
+			else
+				bRestartApp = true;
 		}
 	}
 	
@@ -272,7 +309,10 @@ BOOL CPPgConnection::OnApply()
 		uint16 nNewPort = (_tstoi(buffer) && !IsDlgButtonChecked(IDC_UDPDISABLE) ) ? _tstoi(buffer) : 0;
 		if (nNewPort != thePrefs.udpport){
 			thePrefs.udpport = nNewPort;
-			bRestartApp = true;
+			if (theApp.IsPortchangeAllowed())
+				theApp.clientudp->Rebind();
+			else 
+				bRestartApp = true;
 		}
 	}
 
@@ -297,8 +337,6 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetNetworkKademlia(true);
 	else
 		thePrefs.SetNetworkKademlia(false);
-
-	theApp.emuledlg->SetKadButtonState();
 
 	if(IsDlgButtonChecked(IDC_NETWORK_ED2K))
 		thePrefs.SetNetworkED2K(true);
@@ -351,7 +389,10 @@ BOOL CPPgConnection::OnApply()
 //	theApp.emuledlg->preferenceswnd->m_wndTweaks.LoadSettings();
 
 	if (bRestartApp)
-		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
+		AfxMessageBox(GetResString(IDS_NOPORTCHANGEPOSSIBLE));
+
+	OnEnChangePorts(2);
+
 	return CPropertyPage::OnApply();
 }
 
@@ -394,6 +435,7 @@ void CPPgConnection::Localize(void)
 		GetDlgItem(IDC_UDPDISABLE)->SetWindowText(GetResString(IDS_UDPDISABLED));
 
 		GetDlgItem(IDC_OPENPORTS)->SetWindowText(GetResString(IDS_FO_PREFBUTTON));
+		SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
 	}
 }
 
@@ -465,15 +507,6 @@ void CPPgConnection::OnLimiterChange() {
 	SetModified(TRUE);	
 }
 
-void CPPgConnection::OnBnClickedNetworkKademlia()
-{
-	if ( ((CButton*)GetDlgItem(IDC_NETWORK_KADEMLIA))->GetCheck() == BST_CHECKED){
-		if (AfxMessageBox(GetResString(IDS_KADALPHA),MB_OKCANCEL | MB_ICONINFORMATION,0) == IDCANCEL)
-			((CButton*)GetDlgItem(IDC_NETWORK_KADEMLIA))->SetCheck(BST_UNCHECKED);
-	}
-	OnSettingsChange();
-}
-
 void CPPgConnection::OnHelp()
 {
 	theApp.ShowHelp(eMule_FAQ_Preferences_Connection);
@@ -516,4 +549,17 @@ void CPPgConnection::OnBnClickedOpenports()
 	}
 	else
 		AfxMessageBox(GetResString(IDS_FO_PREF_FAILED), MB_ICONSTOP | MB_OK);
+}
+
+void CPPgConnection::OnStartPortTest() {
+
+	CString buffer;
+
+	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
+	uint16 tcp= _tstoi(buffer);
+
+	GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer);
+	uint16 udp= _tstoi(buffer);
+
+	TriggerPortTest(tcp,udp);
 }

@@ -34,8 +34,8 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNAMIC(CCommentDialogLst, CResizablePage) 
 
 BEGIN_MESSAGE_MAP(CCommentDialogLst, CResizablePage) 
-   ON_BN_CLICKED(IDCOK, OnBnClickedApply) 
-   ON_BN_CLICKED(IDCREF, OnBnClickedRefresh) 
+   ON_BN_CLICKED(IDOK, OnBnClickedApply) 
+   ON_BN_CLICKED(IDC_REFRESH, OnBnClickedRefresh) 
    ON_NOTIFY(NM_DBLCLK, IDC_LST, OnNMDblclkLst)
    ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP() 
@@ -75,7 +75,7 @@ BOOL CCommentDialogLst::OnInitDialog()
 	InitWindowStyles(this);
 
 	AddAnchor(IDC_LST,TOP_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDCREF,BOTTOM_RIGHT);
+	AddAnchor(IDC_REFRESH,BOTTOM_RIGHT);
 	AddAnchor(IDC_CMSTATUS,BOTTOM_LEFT);
 
 	pmyListCtrl.InsertColumn(0, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, 130, -1); 
@@ -95,7 +95,7 @@ BOOL CCommentDialogLst::OnInitDialog()
 
 void CCommentDialogLst::Localize(void)
 { 
-	GetDlgItem(IDCREF)->SetWindowText(GetResString(IDS_CMT_REFRESH)); 
+	GetDlgItem(IDC_REFRESH)->SetWindowText(GetResString(IDS_CMT_REFRESH)); 
 } 
 
 void CCommentDialogLst::CompleteList ()
@@ -106,14 +106,14 @@ void CCommentDialogLst::CompleteList ()
 	for (POSITION pos = m_file->srclist.GetHeadPosition(); pos != NULL; )
 	{ 
 		CUpDownClient* cur_src = m_file->srclist.GetNext(pos);
-		if (cur_src->GetFileRate()>0 || !cur_src->GetFileComment().IsEmpty())
+		if (cur_src->HasFileRating() || !cur_src->GetFileComment().IsEmpty())
 		{
 			pmyListCtrl.InsertItem(LVIF_TEXT|LVIF_PARAM,count,cur_src->GetUserName(),0,0,1,(LPARAM)cur_src);
 			pmyListCtrl.SetItemText(count, 1, cur_src->GetClientFilename()); 
-			pmyListCtrl.SetItemText(count, 2, GetRateString(cur_src->GetFileRate())); 
+			pmyListCtrl.SetItemText(count, 2, GetRateString(cur_src->GetFileRating())); 
 			pmyListCtrl.SetItemText(count, 3, cur_src->GetFileComment());
 			pmyListCtrl.SetItemText(count, 4, cur_src->GetClientSoftVer()); //Commander - Added: ClientSoftware Column
-                        pmyListCtrl.SetItemText(count, 5, cur_src->GetCountryName()); //Commander - Added: ClientCountry Column
+			pmyListCtrl.SetItemText(count, 5, cur_src->GetCountryName()); //Commander - Added: ClientCountry Column
 			count++;
 		} 
 	} 

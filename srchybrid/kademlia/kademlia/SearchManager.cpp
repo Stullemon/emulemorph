@@ -52,7 +52,10 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-LPCTSTR _aszInvKadKeywordChars = _T(" ()[]{}<>,._-!?");
+#define INV_KAD_KEYWORD_CHARS	" ()[]{}<>,._-!?:\\/"
+LPCSTR _aszInvKadKeywordCharsA = INV_KAD_KEYWORD_CHARS;
+LPCTSTR _aszInvKadKeywordChars = _T(INV_KAD_KEYWORD_CHARS);
+LPCWSTR _awszInvKadKeywordChars = L" ()[]{}<>,._-!?:\\/";
 
 ////////////////////////////////////////
 using namespace Kademlia;
@@ -60,11 +63,9 @@ using namespace Kademlia;
 
 uint32 CSearchManager::m_nextID = 0;
 SearchMap CSearchManager::m_searches;
-CCriticalSection CSearchManager::m_critical;
 
 void CSearchManager::stopSearch(uint32 searchID, bool delayDelete)
 {
-	m_critical.Lock();
 	try
 	{
 		SearchMap::iterator it = m_searches.begin(); 
@@ -89,17 +90,12 @@ void CSearchManager::stopSearch(uint32 searchID, bool delayDelete)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::stopSearch");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::stopSearch"));
 	}
-	m_critical.Unlock();
 }
 
 bool CSearchManager::isNodeSearch(const CUInt128 &target)
 {
-//  Timer should be the only thing that can delete these..
-//  Timer should be the only thing calling this...
-//  Therefore there shouldn't be a sync issue at first glance.
-//	m_critical.Lock();
 	try
 	{
 		SearchMap::iterator it = m_searches.begin(); 
@@ -118,15 +114,13 @@ bool CSearchManager::isNodeSearch(const CUInt128 &target)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::isNodeSearch");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::isNodeSearch"));
 	}
 	return false;
-//	m_critical.Unlock();
 }
 
 void CSearchManager::stopAllSearches(void)
 {
-	m_critical.Lock();
 	try
 	{
 		SearchMap::iterator it;
@@ -136,9 +130,8 @@ void CSearchManager::stopAllSearches(void)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::stopAllSearches");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::stopAllSearches"));
 	}
-	m_critical.Unlock();
 }
 
 bool CSearchManager::startSearch(CSearch* pSearch)
@@ -158,7 +151,7 @@ void CSearchManager::deleteSearch(CSearch* pSearch)
 	delete pSearch;
 }
 
-CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
+CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, bool bUnicode, LPCTSTR keyword1, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
 {
 	CSearch *s = new CSearch;
 	try
@@ -172,14 +165,22 @@ CSearch* CSearchManager::prepareFindKeywords(uint32 type, bool start, LPCTSTR ke
 			throw GetResString(IDS_KAD_SEARCH_KEYWORD_TOO_SHORT);
 		}
 
-		CString strKeyword(s->m_words.front());
-		CStringA strKeywordA(strKeyword);
-		CMD4::hash((byte*)(LPCSTR)strKeywordA, strKeywordA.GetLength(), &s->m_target);
+		CStringW wstrKeyword = s->m_words.front();
+		if (bUnicode)
+			KadGetKeywordHash(wstrKeyword, &s->m_target);
+		else
+		{
+			// backward compatibility: use local ACP encoding
+			// TODO: to be removed in some months (when majority of nodes are Unicode compatible)
+			CStringA strA(wstrKeyword);
+			Kademlia::CMD4::hash((byte*)(LPCSTR)strA, strA.GetLength(), &s->m_target);
+		}
+
 		if (alreadySearchingFor(s->m_target))
 		{
 			delete s;
 			CString strError;
-			strError.Format(GetResString(IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING), strKeyword);
+			strError.Format(GetResString(IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING), CString(wstrKeyword));
 			throw strError;
 		}
 
@@ -259,31 +260,24 @@ CSearch* CSearchManager::prepareFindFile(uint32 type, bool start, const CUInt128
 	} 
 	catch ( CIOException *ioe )
 	{
-		CKademlia::debugMsg("Exception in CSearchManager::prepareFindFile (IO error(%i))", ioe->m_cause);
+		AddDebugLogLine( false, _T("Exception in CSearchManager::prepareFindFile (IO error(%i))"), ioe->m_cause);
 		ioe->Delete();
 		delete s;
 		s = NULL;
 	}
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::prepareFindFile");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::prepareFindFile"));
 		delete s;
 		s = NULL;
 	}
 	return s;
 }
 
-// as long as this function is only called from the CTimer thread itself, there should be no
-// sync/deadlocks problems. if it is called from the emule thread it has to be changed in
-// the same way as findFile and findKeywords.
 void CSearchManager::findNode(const CUInt128 &id)
 {
 	if (alreadySearchingFor(id))
 		return;
-
-//	CString idStr;
-//	id.toHexString(&idStr);
-//	CKademlia::debugMsg("Find Node: %s", idStr);
 
 	try
 	{
@@ -297,7 +291,7 @@ void CSearchManager::findNode(const CUInt128 &id)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::findNode");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::findNode"));
 	}
 	return;
 }
@@ -306,10 +300,6 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 {
 	if (alreadySearchingFor(id))
 		return;
-
-//	CString idStr;
-//	id.toHexString(&idStr);
-//	CKademlia::debugMsg("Find Node: %s", idStr);
 
 	try
 	{
@@ -323,7 +313,7 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::findNodeComplete");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::findNodeComplete"));
 	}
 	return;
 }
@@ -331,16 +321,14 @@ void CSearchManager::findNodeComplete(const CUInt128 &id)
 bool CSearchManager::alreadySearchingFor(const CUInt128 &target)
 {
 	bool retVal = false;
-	m_critical.Lock();
 	try
 	{
 		retVal = (m_searches.count(target) > 0);
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::alreadySearchingFor");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::alreadySearchingFor"));
 	}
-	m_critical.Unlock();
 	return retVal;
 }
 
@@ -348,8 +336,8 @@ void CSearchManager::getWords(LPCTSTR str, WordList *words)
 {
 	LPCTSTR s = str;
 	int len = 0;
-	CString word;
-	CString wordtemp;
+	CStringW word;
+	CStringW wordtemp;
 	uint32 i;
 	while (_tcslen(s) > 0)
 	{
@@ -358,7 +346,7 @@ void CSearchManager::getWords(LPCTSTR str, WordList *words)
 		{
 			word = s;
 			word.Truncate(len);
-			word.MakeLower();
+			KadTagStrMakeLower(word);
 			for( i = 0; i < words->size(); i++)
 			{
 				wordtemp = words->front();
@@ -381,7 +369,6 @@ void CSearchManager::getWords(LPCTSTR str, WordList *words)
 void CSearchManager::jumpStart(void)
 {
 	time_t now = time(NULL);
-	m_critical.Lock();
 	try
 	{
 		SearchMap::iterator it = m_searches.begin(); 
@@ -426,6 +413,44 @@ void CSearchManager::jumpStart(void)
 					}
 					break;
 				}
+				case CSearch::FINDBUDDY:
+				{
+					if (it->second->m_created + SEARCHFINDBUDDY_LIFETIME < now)
+					{
+						delete it->second;
+						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHFINDBUDDY_TOTAL || it->second->m_created + SEARCHFINDBUDDY_LIFETIME - SEC(20) < now)
+					{
+						it->second->prepareToStop();
+						it++;
+					}
+					else
+					{
+						it->second->jumpStart();
+						it++;
+					}
+					break;
+				}
+				case CSearch::FINDSOURCE:
+				{
+					if (it->second->m_created + SEARCHFINDSOURCE_LIFETIME < now)
+					{
+						delete it->second;
+						it = m_searches.erase(it);
+					}
+					else if (it->second->getCount() > SEARCHFINDSOURCE_TOTAL || it->second->m_created + SEARCHFINDSOURCE_LIFETIME - SEC(20) < now)
+					{
+						it->second->prepareToStop();
+						it++;
+					}
+					else
+					{
+						it->second->jumpStart();
+						it++;
+					}
+					break;
+				}
 				case CSearch::NODE:
 				{
 					if (it->second->m_created + SEARCHNODE_LIFETIME < now)
@@ -445,10 +470,11 @@ void CSearchManager::jumpStart(void)
 					if (it->second->m_created + SEARCHNODE_LIFETIME < now)
 					{
 						CPrefs *prefs = CKademlia::getPrefs();
+						ASSERT(prefs != NULL);
 						if(prefs)
 							prefs->setPublish(true);
 						else
-							CKademlia::debugLine("No preference object found CSearchManager::jumpStart");
+							AddDebugLogLine(false, _T("No preference object found CSearchManager::jumpStart"));
 						delete it->second;
 						it = m_searches.erase(it);
 					}
@@ -458,7 +484,7 @@ void CSearchManager::jumpStart(void)
 						if(prefs)
 							prefs->setPublish(true);
 						else
-							CKademlia::debugLine("No preference object found CSearchManager::jumpStart");
+							AddDebugLogLine(false, _T("No preference object found CSearchManager::jumpStart"));
 						delete it->second;
 						it = m_searches.erase(it);
 					}
@@ -526,9 +552,8 @@ void CSearchManager::jumpStart(void)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::jumpStart");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::jumpStart"));
 	}
-	m_critical.Unlock();
 }
 
 void CSearchManager::updateStats(void)
@@ -536,7 +561,7 @@ void CSearchManager::updateStats(void)
 	uint8 m_totalFile = 0;
 	uint8 m_totalStoreSrc = 0;
 	uint8 m_totalStoreKey = 0;
-	m_critical.Lock();
+	uint8 m_totalSource = 0;
 	try
 	{
 		SearchMap::iterator it = m_searches.begin(); 
@@ -561,6 +586,12 @@ void CSearchManager::updateStats(void)
 					it++;
 					break;
 				}
+				case CSearch::FINDSOURCE:
+				{
+					m_totalSource++;
+					it++;
+					break;
+				}
 				default:
 					it++;
 					break;
@@ -569,22 +600,22 @@ void CSearchManager::updateStats(void)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::updateStats");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::updateStats"));
 	}
-	m_critical.Unlock();
 	CPrefs *prefs = CKademlia::getPrefs();
-	if(prefs != NULL)
+	ASSERT(prefs != NULL);
+	if(prefs)
 	{
 		prefs->setTotalFile(m_totalFile);
 		prefs->setTotalStoreSrc(m_totalStoreSrc);
 		prefs->setTotalStoreKey(m_totalStoreKey);
+		prefs->setTotalSource(m_totalSource);
 	}
 }
 
 void CSearchManager::processPublishResult(const CUInt128 &target)
 {
 	CSearch *s = NULL;
-	m_critical.Lock();
 	try
 	{
 		SearchMap::const_iterator it = m_searches.find(target);
@@ -593,13 +624,12 @@ void CSearchManager::processPublishResult(const CUInt128 &target)
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::processPublishResults");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::processPublishResults"));
 	}
-	m_critical.Unlock();
 
 	if (s == NULL)
 	{
-//		CKademlia::debugLine("Search either never existed or receiving late results (CSearchManager::processPublishResults)");
+//		AddDebugLogLine(false, _T("Search either never existed or receiving late results (CSearchManager::processPublishResults)"));
 		return;
 	}
 	s->m_count++;
@@ -609,7 +639,6 @@ void CSearchManager::processPublishResult(const CUInt128 &target)
 void CSearchManager::processResponse(const CUInt128 &target, uint32 fromIP, uint16 fromPort, ContactList *results)
 {
 	CSearch *s = NULL;
-	m_critical.Lock();
 	try
 	{
 		SearchMap::const_iterator it = m_searches.find(target);
@@ -618,13 +647,12 @@ void CSearchManager::processResponse(const CUInt128 &target, uint32 fromIP, uint
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::processResponse");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::processResponse"));
 	}
-	m_critical.Unlock();
 
 	if (s == NULL)
 	{
-//		CKademlia::debugLine("Search either never existed or receiving late results (CSearchManager::processResponse)");
+//		AddDebugLogLine(false, _T("Search either never existed or receiving late results (CSearchManager::processResponse)"));
 		ContactList::const_iterator it2;
 		for (it2 = results->begin(); it2 != results->end(); it2++)
 			delete (*it2);
@@ -638,7 +666,6 @@ void CSearchManager::processResponse(const CUInt128 &target, uint32 fromIP, uint
 void CSearchManager::processResult(const CUInt128 &target, uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)
 {
 	CSearch *s = NULL;
-	m_critical.Lock();
 	try
 	{
 		SearchMap::const_iterator it = m_searches.find(target);
@@ -647,13 +674,12 @@ void CSearchManager::processResult(const CUInt128 &target, uint32 fromIP, uint16
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in CSearchManager::processResult");
+		AddDebugLogLine(false, _T("Exception in CSearchManager::processResult"));
 	}
-	m_critical.Unlock();
 
 	if (s == NULL)
 	{
-//		CKademlia::debugLine("Search either never existed or receiving late results (CSearchManager::processResult)");
+//		AddDebugLogLine(false, _T("Search either never existed or receiving late results (CSearchManager::processResult)"));
 		TagList::const_iterator it;
 		for (it = info->begin(); it != info->end(); it++)
 			delete *it;

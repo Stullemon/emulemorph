@@ -421,7 +421,6 @@ BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT (NM_DBLCLK, OnNMLdblclk) //<-- mod bb 27.09.02 
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSCOLORCHANGE()
-	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 // CServerListCtrl message handlers
@@ -499,6 +498,8 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 {
    if (wParam==MP_REMOVEALL)
    { 
+		if (AfxMessageBox(_T("Do you really want to remove all servers?"), MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2) != IDYES)
+			return TRUE;
 	   if( theApp.serverconnect->IsConnecting() ){
 	       theApp.downloadqueue->StopUDPRequests(); 
 		   theApp.serverconnect->StopConnectionTry();
@@ -510,7 +511,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
        DeleteAllItems(); 
        ShowWindow(SW_SHOW);
 		ShowServerCount();
-       return true;
+		return TRUE;
    } 
 	else if (wParam == MP_FIND)
 	{
@@ -624,6 +625,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 					return TRUE;
 			}
+			case MP_COPYSELECTED:
 			case MP_GETED2KLINK: 
 			{ 
 					POSITION pos = GetFirstSelectedItemPosition();
@@ -949,23 +951,6 @@ void CServerListCtrl::ShowServerCount() {
 
 	counter.Format(_T(" (%i)"), GetItemCount());
 	theApp.emuledlg->serverwnd->GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST)+counter  );
-}
-
-void CServerListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
-	{
-		// Ctrl+C: Copy listview items to clipboard
-		SendMessage(WM_COMMAND, MP_GETED2KLINK);
-		return;
-	}
-	else if (nChar == 'V' && (GetKeyState(VK_CONTROL) & 0x8000))
-	{
-		// Ctrl+C: Copy listview items to clipboard
-		SendMessage(WM_COMMAND, MP_PASTE);
-		return;
-	}
-	CMuleListCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 //Commander - Added: CountryFlag - Start

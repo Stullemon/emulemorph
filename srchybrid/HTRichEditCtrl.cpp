@@ -428,7 +428,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 	CFileDialog dlg(FALSE, _T("log"), pszDefName ? pszDefName : (LPCTSTR)m_strTitle, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Log Files (*.log)|*.log||"), this, 0);
 	if (dlg.DoModal() == IDOK)
 	{
-		FILE* fp = fopen(dlg.GetPathName(), "wt");
+		FILE* fp = _tfsopen(dlg.GetPathName(), _T("wt"), _SH_DENYWR);
 		if (fp)
 		{
 			CString strText;

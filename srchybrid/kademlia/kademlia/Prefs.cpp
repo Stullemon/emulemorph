@@ -36,10 +36,12 @@ there client on the eMule forum..
 #include "../../opcodes.h"
 #include "../Routing/RoutingZone.h"
 #include "../kademlia/kademlia.h"
+#include "../kademlia/indexed.h"
 #include "preferences.h"
 #include "emule.h"
 #include "emuledlg.h"
 #include "SafeFile.h"
+#include "serverlist.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -56,7 +58,7 @@ CPrefs::CPrefs()
 {
 	CString filename = CMiscUtils::getAppDir();
 	filename.Append(CONFIGFOLDER);
-	filename.Append(_T("preferencesK.dat"));
+	filename.Append(_T("preferencesKad.dat"));
 	init(filename.GetBuffer(0));
 }
 
@@ -75,13 +77,18 @@ void CPrefs::init(LPCTSTR filename)
 	m_totalFile = 0;
 	m_totalStoreSrc = 0;
 	m_totalStoreKey = 0;
+	m_totalSource = 0;
 	m_Publish = false;
 	m_clientHash.setValue((uchar*)thePrefs.GetUserHash());
 	m_ip			= 0;
+	m_ipLast		= 0;
 	m_recheckip		= 0;
 	m_firewalled	= 0;
+	m_findBuddy		= false;
 	m_kademliaUsers	= 0;
+	m_kademliaFiles	= 0;
 	m_filename = filename;
+	m_lastFirewallState = true;
 	readFile();
 }
 
@@ -130,13 +137,54 @@ void CPrefs::writeFile(void)
 	}
 }
 
+bool CPrefs::hasLostConnection(void)
+{
+	if( m_lastContact )
+		return !((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
+	return false;
+}
+
+void CPrefs::setIPAddress(uint32 val)
+{
+	//This is our first check on connect, init our IP..
+	if( !val || !m_ipLast )
+	{
+		m_ip = val;
+		m_ipLast = val;
+	}
+	//If the last check matches this one, reset our current IP.
+	//If the last check does not match, wait for our next incoming IP.
+	//This happens for two reasons.. We just changed our IP, or a client responsed with a bad IP.
+	if( val == m_ipLast )
+		m_ip = val;
+	else
+		m_ipLast = val;
+}
+
 bool CPrefs::getLastContact(void)
 {
 	return ((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
 }
 
+bool CPrefs::getFirewalled(void)
+{
+	if( m_firewalled<2 )
+	{
+		//Not enough people have told us we are open but we may be doing a recheck
+		//at the moment which will give a false lowID.. Therefore we check to see
+		//if we are still rechecking and will report our last known state..
+		if(getRecheckIP())
+			return m_lastFirewallState;
+		return true;
+	}
+	//We had enough tell us we are not firewalled..
+	return false;
+}
 void CPrefs::setFirewalled(void)
 {
+	//Are are checking our firewall state.. Let keep a snapshot of our
+	//current state to prevent false reports during the recheck..
+	m_lastFirewallState = (m_firewalled<2);
 	m_firewalled = 0;
 	theApp.emuledlg->ShowConnectionState();
 }
@@ -145,4 +193,53 @@ void CPrefs::incFirewalled(void)
 {
 	m_firewalled++;
 	theApp.emuledlg->ShowConnectionState();
+}
+
+bool CPrefs::getFindBuddy(void)
+{
+	if( m_findBuddy )
+	{
+		m_findBuddy = false;
+		return true;
+	}
+	return false;
+}
+
+void CPrefs::setKademliaFiles(void)
+{
+	//There is no real way to know how many files are in the Kad network..
+	//So we first try to see how many files per user are in the ED2K network..
+	//If that fails, we use a set value based on previous tests..
+	uint32 nServerAverage = 0;
+	theApp.serverlist->GetAvgFile( nServerAverage );
+	ASSERT(Kademlia::CKademlia::getIndexed()!=NULL);
+	uint32 nKadAverage = Kademlia::CKademlia::getIndexed()->GetFileKeyCount();
+
+	#ifdef _DEBUG
+	CString method;
+	#endif
+	if( nServerAverage > nKadAverage )
+	{
+		#ifdef _DEBUG
+		method.Format(_T("Kad file estimate used Server avg(%u)"), nServerAverage);
+		#endif
+		nKadAverage = nServerAverage;
+	}
+	#ifdef _DEBUG
+	else
+	{
+		method.Format(_T("Kad file estimate used Kad avg(%u)"), nKadAverage);
+	}
+	#endif
+	if( nKadAverage < 108 )
+	{
+		#ifdef _DEBUG
+		method.Format(_T("Kad file estimate used default avg(108"));
+		#endif
+		nKadAverage = 108;
+	}
+	#ifdef _DEBUG
+	AddDebugLogLine(false, method);
+	#endif
+	m_kademliaFiles = nKadAverage*m_kademliaUsers;
 }

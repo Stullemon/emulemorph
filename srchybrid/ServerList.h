@@ -57,6 +57,7 @@ public:
 						  uint32& user, uint32& file, uint32& lowiduser, 
 						  uint32& totaluser, uint32& totalfile, 
 						  float& occ) const;
+	void		GetAvgFile( uint32& average ) const;
 	void		GetUserFileStatus(uint32& user, uint32& file) const;
 	
 	void		Sort();

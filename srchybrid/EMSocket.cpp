@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -438,12 +438,9 @@ void CEMSocket::OnReceive(int nErrorCode){
 }
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
-	//MORPH START - Added by SiRoB, Accumulate download limits [netfinity]
-	downloadLimit = +limit;
+	downloadLimit = limit;
 	downloadLimitEnable = true;	
-	if(downloadLimit > 5 * limit) // Allow a maximum of 0.5 sec to accumulate
-		downloadLimit = 5 * limit;
-	//MORPH START - Added by SiRoB, Accumulate download limits [netfinity]
+	
 	// CPU load improvement
 	if(limit > 0 && pendingOnReceive == true){
 		OnReceive(0);

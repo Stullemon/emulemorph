@@ -157,7 +157,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	InsertColumn(0,GetResString(IDS_DL_FILENAME),LVCFMT_LEFT,250);
 	InsertColumn(1,GetResString(IDS_DL_SIZE),LVCFMT_LEFT,70);
 	InsertColumn(2,GetResString(IDS_SEARCHAVAIL) + (thePrefs.IsExtControlsEnabled() ? _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')') : _T("")),LVCFMT_LEFT,50);
-	InsertColumn(3,GetResString(IDS_COMPLETE) + _T(" ") + GetResString(IDS_DL_SOURCES),LVCFMT_LEFT,50);
+	InsertColumn(3,GetResString(IDS_COMPLSOURCES),LVCFMT_LEFT,50);
 	InsertColumn(4,GetResString(IDS_TYPE),LVCFMT_LEFT,65);
 	InsertColumn(5,GetResString(IDS_FILEID),LVCFMT_LEFT,220);
 	InsertColumn(6,GetResString(IDS_ARTIST),LVCFMT_LEFT,100);
@@ -204,7 +204,7 @@ void CSearchListCtrl::Localize()
 			case 0: strRes = GetResString(IDS_DL_FILENAME); break;
 			case 1: strRes = GetResString(IDS_DL_SIZE); break;
 			case 2: strRes = GetResString(IDS_SEARCHAVAIL) + (thePrefs.IsExtControlsEnabled() ? _T(" (") + GetResString(IDS_DL_SOURCES) + _T(')') : _T("")); break;
-			case 3: strRes = GetResString(IDS_COMPLETE) + _T(" ") + GetResString(IDS_DL_SOURCES); break;
+			case 3: strRes = GetResString(IDS_COMPLSOURCES); break;
 			case 4: strRes = GetResString(IDS_TYPE); break;
 			case 5: strRes = GetResString(IDS_FILEID); break;
 			case 6: strRes = GetResString(IDS_ARTIST); break;
@@ -292,7 +292,7 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 
 	int itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),toshow->GetFileName(),0,0,0,(LPARAM)toshow);
 	
-	SetItemText(itemnr,1,CastItoXBytes(toshow->GetFileSize()));
+	SetItemText(itemnr,1,CastItoXBytes(toshow->GetFileSize(), false, false));
 	
 	CString strBuffer;
 	uint32 nSources = toshow->GetSourceCount();	
@@ -503,10 +503,9 @@ int CSearchListCtrl::CompareChild(const CSearchFile* item1, const CSearchFile* i
 {
 	switch(lParamSort){
 		case 0: //filename asc
-			return _tcsicmp(item1->GetFileName(),item2->GetFileName());
+			return CompareLocaleStringNoCase(item1->GetFileName(),item2->GetFileName());
 		case 100: //filename desc
-			return _tcsicmp(item2->GetFileName(),item1->GetFileName());
-
+			return CompareLocaleStringNoCase(item2->GetFileName(),item1->GetFileName());
 		default:
 			// always sort by descending availability
 			return CompareUnsigned(item2->GetIntTagValue(FT_SOURCES), item1->GetIntTagValue(FT_SOURCES));
@@ -517,9 +516,9 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 {
 	switch(lParamSort){
 		case 0: //filename asc
-			return _tcsicmp(item1->GetFileName(),item2->GetFileName());
+			return CompareLocaleStringNoCase(item1->GetFileName(),item2->GetFileName());
 		case 100: //filename desc
-			return _tcsicmp(item2->GetFileName(),item1->GetFileName());
+			return CompareLocaleStringNoCase(item2->GetFileName(),item1->GetFileName());
 
 		case 1: //size asc
 			return CompareUnsigned(item1->GetFileSize(), item2->GetFileSize());
@@ -551,19 +550,19 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 			return memcmp(item2->GetFileHash(),item1->GetFileHash(),16);
 
 		case 6:
-			return CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_ARTIST), item2->GetStrTagValue(FT_MEDIA_ARTIST));
+			return CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_ARTIST), item2->GetStrTagValue(FT_MEDIA_ARTIST));
 		case 106:
-			return -CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_ARTIST), item2->GetStrTagValue(FT_MEDIA_ARTIST));
+			return -CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_ARTIST), item2->GetStrTagValue(FT_MEDIA_ARTIST));
 
 		case 7:
-			return CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_ALBUM), item2->GetStrTagValue(FT_MEDIA_ALBUM));
+			return CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_ALBUM), item2->GetStrTagValue(FT_MEDIA_ALBUM));
 		case 107:
-			return -CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_ALBUM), item2->GetStrTagValue(FT_MEDIA_ALBUM));
+			return -CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_ALBUM), item2->GetStrTagValue(FT_MEDIA_ALBUM));
 
 		case 8:
-			return CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_TITLE), item2->GetStrTagValue(FT_MEDIA_TITLE));
+			return CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_TITLE), item2->GetStrTagValue(FT_MEDIA_TITLE));
 		case 108:
-			return -CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_TITLE), item2->GetStrTagValue(FT_MEDIA_TITLE));
+			return -CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_TITLE), item2->GetStrTagValue(FT_MEDIA_TITLE));
 
 		case 9:
 			return CompareUnsigned(item1->GetIntTagValue(FT_MEDIA_LENGTH), item2->GetIntTagValue(FT_MEDIA_LENGTH));
@@ -576,24 +575,25 @@ int CSearchListCtrl::Compare(const CSearchFile* item1, const CSearchFile* item2,
 			return -CompareUnsigned(item1->GetIntTagValue(FT_MEDIA_BITRATE), item2->GetIntTagValue(FT_MEDIA_BITRATE));
 
 		case 11:
-			return CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
+			return CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
 		case 111:
-			return -CompareOptStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
+			return -CompareOptLocaleStringNoCase(item1->GetStrTagValue(FT_MEDIA_CODEC), item2->GetStrTagValue(FT_MEDIA_CODEC));
 
 		case 12: //path asc
-			return CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
+			return CompareOptLocaleStringNoCase(item1->GetDirectory(), item2->GetDirectory());
 		case 112: //path desc
-			return -CompareOptStringNoCase(item1->GetDirectory(), item2->GetDirectory());
+			return -CompareOptLocaleStringNoCase(item1->GetDirectory(), item2->GetDirectory());
+
 		case 13:
 			return item1->GetKnownType() - item2->GetKnownType();
-		case 131:
+		case 113:
 			return -(item1->GetKnownType() - item2->GetKnownType());
 
 		//Morph Start - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
 		case 14:
-			return CompareOptStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
+			return CompareOptLocaleStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
 		case 114:
-			return -CompareOptStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
+			return -CompareOptLocaleStringNoCase(item1->GetFakeComment(), item2->GetFakeComment());
 		//Morph End - changed by AndCycle, FakeCheck, FakeReport, Auto-updating
 		default:
 			return 0;
@@ -818,12 +818,12 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				const CTag* tag = tags[i];
 				if (tag){
 					CString strTag;
-					switch (tag->tag.specialtag){
+					switch (tag->GetNameID()){
 						case FT_FILENAME:
 							strTag.Format(_T("%s: %s"), GetResString(IDS_SW_NAME), tag->GetStr());
 							break;
 						case FT_FILESIZE:
-							strTag.Format(_T("%s: %s"), GetResString(IDS_DL_SIZE), CastItoXBytes(tag->tag.intvalue));
+							strTag.Format(_T("%s: %s"), GetResString(IDS_DL_SIZE), CastItoXBytes(tag->GetInt(), false, false));
 							break;
 						case FT_FILETYPE:
 							strTag.Format(_T("%s: %s"), GetResString(IDS_TYPE), tag->GetStr());
@@ -832,24 +832,24 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 							strTag.Format(_T("%s: %s"), GetResString(IDS_SEARCHEXTENTION), tag->GetStr());
 							break;
 						case FT_SOURCES:
-							strTag.Format(_T("%s: %u"), GetResString(IDS_SEARCHAVAIL), tag->tag.intvalue);
+							strTag.Format(_T("%s: %u"), GetResString(IDS_SEARCHAVAIL), tag->GetInt());
 							break;
 						case 0x13: // remote client's upload file priority (tested with Hybrid 0.47)
-							if (tag->tag.intvalue == 0)
+							if (tag->GetInt() == 0)
 								strTag = GetResString(IDS_PRIORITY) + _T(": ") + GetResString(IDS_PRIONORMAL);
-							else if (tag->tag.intvalue == 2)
+							else if (tag->GetInt() == 2)
 								strTag = GetResString(IDS_PRIORITY) + _T(": ") + GetResString(IDS_PRIOHIGH);
-							else if (tag->tag.intvalue == -2)
+							else if (tag->GetInt() == -2)
 								strTag = GetResString(IDS_PRIORITY) + _T(": ") + GetResString(IDS_PRIOLOW);
 						#ifdef _DEBUG
 							else
-								strTag.Format(_T("%s: %d (***Unknown***)"), GetResString(IDS_PRIORITY), tag->tag.intvalue);
+								strTag.Format(_T("%s: %d (***Unknown***)"), GetResString(IDS_PRIORITY), tag->GetInt());
 						#endif
 							break;
 						default:{
 							bool bUnkTag = false;
-							if (tag->tag.tagname){
-								strTag.Format(_T("%s: "), tag->tag.tagname);
+							if (tag->GetName()){
+								strTag.Format(_T("%s: "), tag->GetName());
 								strTag = strTag.Left(1).MakeUpper() + strTag.Mid(1);
 							}
 							else{
@@ -860,36 +860,36 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 								}
 								else{
 								#ifdef _DEBUG
-									strTag.Format(_T("Unknown tag #%02X: "), tag->tag.specialtag);
+									strTag.Format(_T("Unknown tag #%02X: "), tag->GetNameID());
 								#else
 									bUnkTag = true;
 								#endif
 								}
 							}
 							if (!bUnkTag){
-								if (tag->tag.type == 2)
+								if (tag->IsStr())
 									strTag += tag->GetStr();
-								else if (tag->tag.type == 3){
-									if (tag->tag.specialtag == FT_MEDIA_LENGTH){
+								else if (tag->IsInt()){
+									if (tag->GetNameID() == FT_MEDIA_LENGTH){
 										CString strTemp;
-										SecToTimeLength(tag->tag.intvalue, strTemp);
+										SecToTimeLength(tag->GetInt(), strTemp);
 										strTag += strTemp;
 									}
 									else{
 										TCHAR szBuff[16];
-										_itot(tag->tag.intvalue, szBuff, 10);
+										_itot(tag->GetInt(), szBuff, 10);
 										strTag += szBuff;
 									}
 								}
-								else if (tag->tag.type == 4){
+								else if (tag->IsFloat()){
 									TCHAR szBuff[32];
-									_sntprintf(szBuff, ARRSIZE(szBuff), _T("%f"), tag->tag.floatvalue);
+									_sntprintf(szBuff, ARRSIZE(szBuff), _T("%f"), tag->GetFloat());
 									strTag += szBuff;
 								}
 								else{
 								#ifdef _DEBUG
 									CString strBuff;
-									strBuff.Format(_T("Unknown value type=#%02X"), tag->tag.type);
+									strBuff.Format(_T("Unknown value type=#%02X"), tag->GetType());
 									strTag += strBuff;
 								#else
 									strTag.Empty();
@@ -1468,7 +1468,7 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 				lpRect->left -= 22;
 				break;
 			case 1:			// file size
-				buffer = CastItoXBytes(src->GetFileSize());
+				buffer = CastItoXBytes(src->GetFileSize(), false, false);
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
 			case 2:{		// avail

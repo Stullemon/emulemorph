@@ -984,6 +984,16 @@ void CMuleListCtrl::OnKeyDown(UINT nChar,UINT nRepCnt,UINT nFlags){
 		PostMessage(WM_COMMAND, MPG_DELETE, 0);
 	else if (nChar==VK_F2)
 		PostMessage(WM_COMMAND, MPG_F2, 0);
+	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+C: Copy keycombo
+		SendMessage(WM_COMMAND, MP_COPYSELECTED);
+	}
+	if (nChar == 'V' && (GetKeyState(VK_CONTROL) & 0x8000))
+	{
+		// Ctrl+V: Paste keycombo
+		SendMessage(WM_COMMAND, MP_PASTE);
+	}
 	else if (m_bGeneralPurposeFind){
 		if (nChar == 'F' && (GetKeyState(VK_CONTROL) & 0x8000)){
 			// Ctrl+F: Search item

@@ -61,7 +61,8 @@ using namespace Kademlia;
 
 CContact::~CContact()
 {
-	theApp.emuledlg->kademliawnd->contactList->ContactRem(this);
+	if (m_guiRefs)
+		theApp.emuledlg->kademliawnd->ContactRem(this);
 }
 
 CContact::CContact()
@@ -74,6 +75,8 @@ CContact::CContact()
 	m_expires = 0;
 	m_madeContact = false;
 	m_lastTypeSet = time(NULL);
+	m_guiRefs = 0;
+	m_inUse = 0;
 }
 
 CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type)
@@ -81,7 +84,7 @@ CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 t
 	m_clientID = clientID;
 	CPrefs *prefs = CKademlia::getPrefs();
 	ASSERT(prefs != NULL); 
-	prefs->getClientID(&m_distance);
+	prefs->getKadID(&m_distance);
 	m_distance.xor(clientID);
 	m_ip = ip;
 	m_udpPort = udpPort;
@@ -90,6 +93,8 @@ CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 t
 	m_expires = 0;
 	m_madeContact = false;
 	m_lastTypeSet = time(NULL);
+	m_guiRefs = 0;
+	m_inUse = 0;
 }
 
 CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type, const CUInt128 &target)
@@ -104,25 +109,10 @@ CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 t
 	m_expires = 0;
 	m_madeContact = false;
 	m_lastTypeSet = time(NULL);
+	m_guiRefs = 0;
+	m_inUse = 0;
 }
 
-/*CContact::CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, byte type, uint16 tcpPort)
-{
-	m_clientID = clientID;
-	CPrefs *prefs = CKademlia::getPrefs();
-	ASSERT(prefs != NULL); 
-	prefs->getClientID(&m_distance);
-	m_distance.xor(clientID);
-	m_ip = ip;
-	m_tcpPort = tcpPort;
-	m_udpPort = udpPort;
-	m_type = type;
-	m_expires = 0;
-	m_madeContact = false;
-	m_lastTypeSet = time(NULL);
-//	Kademlia::CKademlia::reportContactAdd(this);
-}
-*/
 void CContact::getClientID(CUInt128 *id) const
 {
 	id->setValue(m_clientID);
@@ -138,7 +128,7 @@ void CContact::setClientID(const CUInt128 &clientID)
 	m_clientID = clientID;
 	CPrefs *prefs = CKademlia::getPrefs();
 	ASSERT(prefs != NULL); 
-	prefs->getClientID(&m_distance);
+	prefs->getKadID(&m_distance);
 	m_distance.xor(clientID);
 }
 
@@ -210,12 +200,9 @@ void CContact::setType(byte type)
 	}
 	if(type > 1 )
 	{
-		if( m_expires == 0 ) // Just in case..
-			m_expires = time(NULL) + MIN2S(3);
-		else if( m_type == 1 )
-			m_expires = time(NULL) + MIN2S(3);
-		m_type = 2; //Just in case in case again..
-		theApp.emuledlg->kademliawnd->contactList->ContactRef(this);
+		m_expires = time(NULL) + SEC(20);
+		m_type = 2; //Just in case..
+		theApp.emuledlg->kademliawnd->ContactRef(this);
 		return;
 	}
 	m_lastTypeSet = time(NULL);
@@ -223,8 +210,8 @@ void CContact::setType(byte type)
 	if( m_type == 0 )
 		m_expires = time(NULL) + HR2S(2);
 	else 
-		m_expires = time(NULL) + HR2S(1);
-	theApp.emuledlg->kademliawnd->contactList->ContactRef(this);
+		m_expires = time(NULL) + MIN2S(20);
+	theApp.emuledlg->kademliawnd->ContactRef(this);
 }
 
 bool CContact::madeContact(void) const

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 #include "KnownFile.h"
 #include "OtherFunctions.h"
 #include "Opcodes.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -33,8 +34,8 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNAMIC(CCommentDialog, CDialog)
 
 BEGIN_MESSAGE_MAP(CCommentDialog, CDialog)
-	ON_BN_CLICKED(IDCOK, OnBnClickedOk)
-	ON_BN_CLICKED(IDCCANCEL, OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_RESET, OnBnClickedReset)
 END_MESSAGE_MAP()
 
@@ -56,10 +57,15 @@ void CCommentDialog::DoDataExchange(CDataExchange* pDX)
 
 void CCommentDialog::OnBnClickedOk()
 {
-	CString SValue;
-	GetDlgItem(IDC_CMT_TEXT)->GetWindowText(SValue);
-	m_file->SetFileComment(SValue);
-	m_file->SetFileRate((uint8)m_ratebox.GetCurSel());
+	CString strComment;
+	GetDlgItem(IDC_CMT_TEXT)->GetWindowText(strComment);
+	if (!IsValidEd2kString(strComment)){
+		strComment.Empty();
+		SetDlgItemText(IDC_CMT_TEXT, strComment);
+		return;
+	}
+	m_file->SetFileComment(strComment);
+	m_file->SetFileRating((uint8)m_ratebox.GetCurSel());
 	CDialog::OnOK();
 }
 
@@ -87,7 +93,7 @@ BOOL CCommentDialog::OnInitDialog()
 
 void CCommentDialog::Localize(void)
 {
-	GetDlgItem(IDCCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
+	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	GetDlgItem(IDC_RESET)->SetWindowText(GetResString(IDS_PW_RESET));
 
 	GetDlgItem(IDC_CMT_LQUEST)->SetWindowText(GetResString(IDS_CMT_QUEST));
@@ -104,7 +110,7 @@ void CCommentDialog::Localize(void)
 	m_ratebox.AddString(GetResString(IDS_CMT_GOOD));
 	m_ratebox.AddString(GetResString(IDS_CMT_FAIR));
 	m_ratebox.AddString(GetResString(IDS_CMT_EXCELLENT));
-	if (m_ratebox.SetCurSel(m_file->GetFileRate()) == CB_ERR)
+	if (m_ratebox.SetCurSel(m_file->GetFileRating()) == CB_ERR)
 		m_ratebox.SetCurSel(0);
 
 	CString strTitle;

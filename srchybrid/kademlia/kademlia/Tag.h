@@ -29,15 +29,31 @@ there client on the eMule forum..
 */
 #pragma once
 #include <list>
+#include "opcodes.h"
+#include "OtherFunctions.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
 
-class CTagNameString : public CStringA
+class CUInt128;
+
+class CTagNameString : protected CStringA
 {
 public:
-	CTagNameString(){}
+	CTagNameString()
+	{
+	}
+
+	CTagNameString(LPCSTR psz)
+		: CStringA(psz)
+	{
+	}
+
+	CTagNameString(LPCSTR psz, int len)
+		: CStringA(psz, len)
+	{
+	}
 
 	// A tag name may include character values >= 0xD0 and therefor also >= 0xF0. to prevent those
 	// characters be interpreted as multi byte character sequences we have to sensure that a binary
@@ -67,7 +83,42 @@ public:
 		CStringA::operator=(pszSrc);
 		return *this;
 	}
+
+	operator PCXSTR() const throw()
+	{
+		return CStringA::operator PCXSTR();
+	}
+
+	XCHAR operator[]( int iChar ) const throw()
+	{
+		return CStringA::operator [](iChar);
+	}
+
+	PXSTR GetBuffer()
+	{
+		return CStringA::GetBuffer();
+	}
+
+	PXSTR GetBuffer(int nMinBufferLength)
+	{
+		return CStringA::GetBuffer(nMinBufferLength);
+	}
+
+	int GetLength() const throw()
+	{
+		return CStringA::GetLength();
+	}
 };
+
+
+//class CTagValueString : protected CStringW
+//{
+//public:
+//	CTagValueString(){}
+//};
+
+#define CTagValueString CStringW
+
 
 class CTag
 {
@@ -75,124 +126,209 @@ public:
 	byte	m_type;
 	CTagNameString m_name;
 
-	CTag(byte type, LPCSTR name) { m_type = type; m_name = name; }
+	CTag(byte type, LPCSTR name)
+		: m_name(name)
+	{
+		m_type = type;
+	}
 	virtual ~CTag() {}
 
-	bool IsStr()  const { return m_type == 2; }
-	bool IsNum()  const { return m_type == 3 || m_type == 8 || m_type == 9 || m_type == 5 || m_type == 4 || m_type == 0xFE; }
-	bool IsInt()  const { return m_type == 3 || m_type == 8 || m_type == 9 || m_type == 0xFE; }
-	bool IsFloat()const { return m_type == 4; }
+	bool IsStr()  const { return m_type == TAGTYPE_STRING; }
+	bool IsNum()  const { return m_type == TAGTYPE_UINT32 || m_type == TAGTYPE_UINT16 || m_type == TAGTYPE_UINT8 || m_type == TAGTYPE_BOOL || m_type == TAGTYPE_FLOAT32 || m_type == 0xFE; }
+	bool IsInt()  const { return m_type == TAGTYPE_UINT32 || m_type == TAGTYPE_UINT16 || m_type == TAGTYPE_UINT8 || m_type == 0xFE; }
+	bool IsFloat()const { return m_type == TAGTYPE_FLOAT32; }
+	bool IsBsob() const { return m_type == TAGTYPE_BSOB; }
+	bool IsHash() const { return m_type == TAGTYPE_HASH; }
 
-	virtual CString GetStr() const = 0;
-	virtual uint32 GetInt() const = 0;
-	virtual float GetFloat() const = 0;
+	virtual CTagValueString GetStr() const { ASSERT(0); return L""; }
+	virtual uint32 GetInt() const { ASSERT(0); return 0; }
+	virtual float GetFloat() const { ASSERT(0); return 0.0F; }
+	virtual const BYTE* GetBsob() const { ASSERT(0); return NULL; }
+	virtual uint8 GetBsobSize() const { ASSERT(0); return 0; }
+	virtual bool GetBool() const { ASSERT(0); return false; }
+	virtual const BYTE* GetHash() const { ASSERT(0); return NULL; }
 
 protected:
 	CTag() {}
 };
 
+
 class CTagUnk : public CTag
 {
 public:
-	CTagUnk(byte type, LPCSTR name) { m_type = type; m_name = name; }
-
-	virtual CString GetStr() const { return _T(""); }
-	virtual uint32 GetInt() const { return 0; }
-	virtual float GetFloat() const { return 0.0F; }
+	CTagUnk(byte type, LPCSTR name)
+		: CTag(type, name)
+	{ }
 };
+
 
 class CTagStr : public CTag
 {
 public:
-	CTagStr(LPCSTR name, LPCSTR value) { m_type = 0x02; m_name = name; m_value = value; }
-	CTagStr(LPCSTR name, LPCWSTR value) { m_type = 0x02; m_name = name; m_value = value; }
+	CTagStr(LPCSTR name, LPCWSTR value, int len)
+		: CTag(TAGTYPE_STRING, name)
+		, m_value(value, len)
+	{ }
 
-	virtual CString GetStr() const { return m_value; }
-	virtual uint32 GetInt() const { return _tstoi(m_value); }
-	virtual float GetFloat() const { return _tstof(m_value); }
+#ifndef _UNICODE
+	CTagStr(LPCSTR name, const CString& rstr)
+		: CTag(TAGTYPE_STRING, name)
+		, m_value(rstr)
+	{ }
+#endif
+
+	CTagStr(LPCSTR name, const CStringW& rstr)
+		: CTag(TAGTYPE_STRING, name)
+		, m_value(rstr)
+	{ }
+
+	virtual CTagValueString GetStr() const { return m_value; }
 
 protected:
-	CString m_value;
+	CTagValueString m_value;
 };
+
 
 class CTagUInt : public CTag
 {
 public:
-	CTagUInt(LPCSTR name, uint32 value) { m_type = 0xFE; m_name = name; m_value = value; }
+	CTagUInt(LPCSTR name, uint32 value)
+		: CTag(0xFE, name)
+		, m_value(value)
+	{ }
 
-	virtual CString GetStr() const { CString str; _ultot(m_value, str.GetBuffer(10), 10); return str; }
 	virtual uint32 GetInt() const { return m_value; }
-	virtual float GetFloat() const { return m_value; }
 
 protected:
 	uint32 m_value;
 };
+
 
 class CTagUInt32 : public CTag
 {
 public:
-	CTagUInt32(LPCSTR name, uint32 value) { m_type = 0x03; m_name = name; m_value = value; }
+	CTagUInt32(LPCSTR name, uint32 value)
+		: CTag(TAGTYPE_UINT32, name)
+		, m_value(value)
+	{ }
 
-	virtual CString GetStr() const { CString str; _ultot(m_value, str.GetBuffer(10), 10); return str; }
 	virtual uint32 GetInt() const { return m_value; }
-	virtual float GetFloat() const { return m_value; }
 
 protected:
 	uint32 m_value;
 };
 
+
 class CTagFloat : public CTag
 {
 public:
-	CTagFloat(LPCSTR name, float value) { m_type = 0x04; m_name = name; m_value = value; }
+	CTagFloat(LPCSTR name, float value)
+		: CTag(TAGTYPE_FLOAT32, name)
+		, m_value(value)
+	{ }
 
-	virtual CString GetStr() const { CString str; _ultot(m_value, str.GetBuffer(10), 10); return str; }
-	virtual uint32 GetInt() const { return m_value; }
 	virtual float GetFloat() const { return m_value; }
 
 protected:
 	float m_value;
 };
 
+
 class CTagBool : public CTag
 {
 public:
-	CTagBool(LPCSTR name, bool value) { m_type = 0x05; m_name = name; m_value = value; }
+	CTagBool(LPCSTR name, bool value)
+		: CTag(TAGTYPE_BOOL, name)
+		, m_value(value)
+	{ }
 
-	virtual CString GetStr() const { CString str; _ultot(m_value, str.GetBuffer(10), 10); return str; }
-	virtual uint32 GetInt() const { return m_value; }
-	virtual float GetFloat() const { return m_value; }
+	virtual bool GetBool() const { return m_value; }
 
 protected:
 	bool m_value;
 };
 
+
 class CTagUInt16 : public CTag
 {
 public:
-	CTagUInt16(LPCSTR name, uint16 value) { m_type = 0x08; m_name = name; m_value = value; }
+	CTagUInt16(LPCSTR name, uint16 value)
+		: CTag(TAGTYPE_UINT16, name)
+		, m_value(value)
+	{ }
 
-	virtual CString GetStr() const { CString str; _ultot(m_value, str.GetBuffer(10), 10); return str; }
 	virtual uint32 GetInt() const { return m_value; }
-	virtual float GetFloat() const { return m_value; }
 
 protected:
 	uint16 m_value;
 };
 
+
 class CTagUInt8 : public CTag
 {
 public:
-	CTagUInt8(LPCSTR name, uint8 value) { m_type = 0x09; m_name = name; m_value = value; }
+	CTagUInt8(LPCSTR name, uint8 value)
+		: CTag(TAGTYPE_UINT8, name)
+		, m_value(value)
+	{ }
 
-	virtual CString GetStr() const { CString str; _ultot(m_value, str.GetBuffer(10), 10); return str; }
 	virtual uint32 GetInt() const { return m_value; }
-	virtual float GetFloat() const { return m_value; }
 
 protected:
 	uint8 m_value;
 };
 
+
+class CTagBsob : public CTag
+{
+public:
+	CTagBsob(LPCSTR name, const BYTE* value, uint8 nSize)
+		: CTag(TAGTYPE_BSOB, name)
+	{
+		m_value = new BYTE[nSize];
+		memcpy(m_value, value, nSize);
+		m_size = nSize;
+	}
+
+	~CTagBsob()
+	{
+		delete[] m_value;
+	}
+
+	virtual const BYTE* GetBsob() const { return m_value; }
+	virtual uint8 GetBsobSize() const { return m_size; }
+
+protected:
+	BYTE* m_value;
+	uint8 m_size;
+};
+
+
+class CTagHash : public CTag
+{
+public:
+	CTagHash(LPCSTR name, const BYTE* value) 
+		: CTag(TAGTYPE_HASH, name)
+	{ 
+		m_value = new BYTE[16];
+		md4cpy(m_value, value);
+	}
+
+	~CTagHash()
+	{
+		delete[] m_value;
+	}
+
+	virtual const BYTE* GetHash() const { return m_value; }
+
+protected:
+	BYTE* m_value;
+};
+
 typedef std::list<CTag*> TagList;
 
+
 } // End namespace
+
+
+void KadTagStrMakeLower(CTagValueString& rstr);

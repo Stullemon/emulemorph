@@ -39,15 +39,17 @@ namespace Kademlia {
 class CFileIO : public CFile, public CDataIO
 {
 public:
-	void readArray(LPVOID lpResult, uint32 byteCount);
-	void writeArray(LPCVOID lpVal, uint32 byteCount);
+	virtual void readArray(LPVOID lpResult, uint32 byteCount);
+	virtual void writeArray(LPCVOID lpVal, uint32 byteCount);
+	virtual UINT getAvailable() const;
 };
 
 class CBufferedFileIO : public CStdioFile, public CDataIO
 {
 public:
-	void readArray(LPVOID lpResult, uint32 byteCount);
-	void writeArray(LPCVOID lpVal, uint32 byteCount);
+	virtual void readArray(LPVOID lpResult, uint32 byteCount);
+	virtual void writeArray(LPCVOID lpVal, uint32 byteCount);
+	virtual UINT getAvailable() const;
 };
 
 } // End namespace

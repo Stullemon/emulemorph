@@ -19,6 +19,7 @@ public:
 
 	void SetFile(const CAbstractFile* file) { m_file = file; }
 	void SetTagList(Kademlia::TagList* taglist);
+	CString GetTagNameByID(UINT id);
 
 // Dialog Data
 	enum { IDD = IDD_META_DATA };

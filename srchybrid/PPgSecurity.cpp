@@ -163,8 +163,25 @@ BOOL CPPgSecurity::OnApply()
 	thePrefs.m_bUseSecureIdent = IsDlgButtonChecked(IDC_USESECIDENT);
 	thePrefs.m_bRunAsUser = (uint8)IsDlgButtonChecked(IDC_RUNASUSER);
 
-	GetDlgItem(IDC_FILTER)->GetWindowText(thePrefs.messageFilter,511);
-	GetDlgItem(IDC_COMMENTFILTER)->GetWindowText(thePrefs.commentFilter,511);
+	GetDlgItem(IDC_FILTER)->GetWindowText(thePrefs.messageFilter,ARRSIZE(thePrefs.messageFilter));
+
+	CString strCommentFilters;
+	GetDlgItem(IDC_COMMENTFILTER)->GetWindowText(strCommentFilters);
+	strCommentFilters.MakeLower();
+	CString strNewCommentFilters;
+	int curPos = 0;
+	CString strFilter(strCommentFilters.Tokenize(_T("|"), curPos));
+	while (!strFilter.IsEmpty())
+	{
+		strFilter.Trim();
+		if (!strNewCommentFilters.IsEmpty())
+			strNewCommentFilters += _T('|');
+		strNewCommentFilters += strFilter;
+		strFilter = strCommentFilters.Tokenize(_T("|"), curPos);
+	}
+	thePrefs.commentFilter = strNewCommentFilters;
+	if (thePrefs.commentFilter != strCommentFilters)
+		SetDlgItemText(IDC_COMMENTFILTER, thePrefs.commentFilter);
 
 	LoadSettings();
 	SetModified(FALSE);

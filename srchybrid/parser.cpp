@@ -113,7 +113,7 @@ int yyerror(LPCTSTR errstr);
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
 
 typedef union YYSTYPE {
-	CString*		pstr;
+	CStringA*		pstr;
 	CSearchExpr*	pexpr;
 } YYSTYPE;
 /* Line 191 of yacc.c.  */

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,9 +18,7 @@
 #include "ResizableLib\ResizableDialog.h"
 #include "ChatSelector.h"
 #include "FriendListCtrl.h"
-//MORPH START - Added by SiRoB, Splitting Bar [O²]
 #include "SplitterControl.h"
-//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 
 class CChatWnd : public CResizableDialog
 {
@@ -59,20 +57,12 @@ protected:
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-
-	//MORPH START - Added by SiRoB, New friend message window [TPT]
 	afx_msg void OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickFrlist(NMHDR *pNMHDR, LRESULT *pResult);
-	//MORPH END   - Added by SiRoB, New friend message window [TPT]
-	
-	//MORPH START - Added by SiRoB, Splitting Bar [O²]
 	CSplitterControl m_wndSplitterchat; //bzubzusplitchat
 	void DoResize(int delta);
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-	//MORPH END - Added by SiRoB, Splitting Bar [O²]
 
 private:
-	//MORPH START - Added by SiRoB, New friend message window [TPT]
 	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
-	//MORPH END   - Added by SiRoB, New friend message window [TPT]
 };

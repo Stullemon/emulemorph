@@ -35,19 +35,30 @@ there client on the eMule forum..
 #include "../routing/Maps.h"
 #include "../utils/UInt128.h"
 #include "Entry.h"
+#include "Loggable.h"
 
 typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;
 
-struct Source{
+struct Source
+{
 	Kademlia::CUInt128 sourceID;
 	CKadEntryPtrList entryList;
 };
 
 typedef CMap<CCKey,const CCKey&,Source*,Source*> CSourceKeyMap;
 
-struct KeyHash{
+struct KeyHash
+{
 	Kademlia::CUInt128 keyID;
 	CSourceKeyMap m_Source_map;
+};
+
+typedef CTypedPtrList<CPtrList, Source*> CKadSourcePtrList;
+
+struct SrcHash
+{
+	Kademlia::CUInt128 keyID;
+	CKadSourcePtrList m_Source_map;
 };
 
 struct SSearchTerm
@@ -70,7 +81,7 @@ struct SSearchTerm
 	} type;
 	
 	Kademlia::CTag* tag;
-	CStringArray* astr;
+	CStringWArray* astr;
 
 	SSearchTerm* left;
 	SSearchTerm* right;
@@ -80,25 +91,29 @@ struct SSearchTerm
 namespace Kademlia {
 ////////////////////////////////////////
 
-class CIndexed
+class CIndexed: public CLoggable
 {
 
 public:
 	CIndexed();
 	~CIndexed();
 
-	bool AddKeyword(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, bool ignoreSize = false);
-	bool AddSources(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry);
+	bool AddKeyword(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
+	bool AddSources(const CUInt128& keyWordID, const CUInt128& sourceID, Kademlia::CEntry* entry, uint8& load);
+	bool AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademlia::CEntry* entry);
 	uint32 GetIndexedCount() {return m_Keyword_map.GetCount();}
 	void SendValidKeywordResult(const CUInt128& keyID, const SSearchTerm* pSearchTerms, uint32 ip, uint16 port);
 	void SendValidSourceResult(const CUInt128& keyID, uint32 ip, uint16 port);
+	void SendValidNoteResult(const CUInt128& keyID, const CUInt128& CheckID, uint32 ip, uint16 port);
 	uint32 m_totalIndexSource;
 	uint32 m_totalIndexKeyword;
+	uint32 GetFileKeyCount() {return m_Keyword_map.GetCount();}
 
 private:
 	time_t m_lastClean;
 	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Keyword_map;
-	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Sources_map;
+	CMap<CCKey,const CCKey&,SrcHash*,SrcHash*> m_Sources_map;
+	CMap<CCKey,const CCKey&,KeyHash*,KeyHash*> m_Notes_map;
 	static CString m_sfilename;
 	static CString m_kfilename;
 	void readFile(void);

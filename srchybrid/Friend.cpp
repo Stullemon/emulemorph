@@ -43,9 +43,7 @@ CFriend::CFriend(void)
 	md4cpy(m_abyUserhash, sm_abyNullHash);
 	m_dwHasHash = 0;
 
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	m_friendSlot = false;
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
 }
 
 //Added this to work with the IRC.. Probably a better way to do it.. But wanted this in the release..
@@ -65,14 +63,11 @@ CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedI
 	}
 	m_strName = pszName;
 	m_LinkedClient = 0;
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	m_friendSlot = false;
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
 }
 
 CFriend::CFriend(CUpDownClient* client){
 	ASSERT ( client );
-	//MORPH START - Modified by SiRoB, ZZ Upload System
 	m_dwLastSeen = time(NULL);
 	m_dwLastUsedIP = client->GetIP();
 	m_nLastUsedPort = client->GetUserPort();
@@ -80,18 +75,15 @@ CFriend::CFriend(CUpDownClient* client){
 	m_LinkedClient = NULL;
 	m_friendSlot = false;
 	SetLinkedClient(client);
-	//MORPH END - Modified by SiRoB, ZZ Upload System
 }
 
 CFriend::~CFriend(void)
 {
-	//MORPH START - Added by SiRoB, ZZ Upload System
 	if(m_LinkedClient != NULL) {
  	m_LinkedClient->SetFriendSlot(false);
 	m_LinkedClient->m_Friend = NULL;
 	m_LinkedClient = NULL;
 	}
-	//MORPH END - Added by SiRoB, ZZ Upload System
 }
 
 void CFriend::LoadFromFile(CFileDataIO* file)
@@ -105,8 +97,8 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 
 	UINT tagcount = file->ReadUInt32();
 	for (UINT j = 0; j < tagcount; j++){
-		CTag* newtag = new CTag(file);
-		switch(newtag->tag.specialtag){
+		CTag* newtag = new CTag(file, false);
+		switch (newtag->GetNameID()){
 			case FF_NAME:{
 				ASSERT( newtag->IsStr() );
 				if (newtag->IsStr()){
@@ -119,7 +111,8 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 			}
 			//MORPH START - Added by Yun.SF3, ZZ Upload System
 			case FF_FRIENDSLOT: {
-				m_friendSlot = (newtag->tag.intvalue == 1) ? true : false;
+				if (newtag->IsInt())
+					m_friendSlot = (newtag->GetInt() == 1) ? true : false;
 				break;
 			}
 			//MORPH END - Added by Yun.SF3, ZZ Upload System

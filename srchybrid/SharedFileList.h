@@ -49,7 +49,7 @@ public:
 	CKnownFile* GetFileByID(const uchar* filehash) const;
 	CKnownFile*	GetFileByIndex(int index);
 	bool	IsFilePtrInList(const CKnownFile* file) const;
-	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, UINT uEmuleVer = 0);
+	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, CUpDownClient* pClient = NULL);
 	uint64	GetDatasize(uint64 &pbytesLargest) const;
 	uint16	GetCount()	{return m_Files_map.GetCount(); }
 	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER: SafeHash

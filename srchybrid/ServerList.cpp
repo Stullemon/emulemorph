@@ -35,6 +35,7 @@
 #include "ServerWnd.h"
 
 #include "Fakecheck.h" //MORPH - Added by SiRoB
+#include "ip2country.h" //MORPH - Added by SiRoB
 #include "SharedFileList.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
@@ -137,7 +138,7 @@ bool CServerList::Init()
     
     //Commander - Added: IP2Country auto-updating - Start
 	if (thePrefs.IsAutoUPdateIP2CountryEnabled())
-	theApp.ipfilter->UpdateIP2CountryURL();
+	theApp.ip2country->UpdateIP2CountryURL();
 	//Commander - Added: IP2Country auto-updating - End
 
 	// ZZ:UploadSpeedSense -->
@@ -396,6 +397,34 @@ void CServerList::GetStatus(uint32& total, uint32& failed,
 	
 	if (maxuserknownmax > 0)
 		occ = (float)(totaluserknownmax * 100) / maxuserknownmax;
+}
+
+void CServerList::GetAvgFile(uint32& average) const
+{
+	//Since there is no real way to know how many files are in the kad network,
+	//I figure to try to use the ED2K network stats to find how many files the
+	//average user shares..
+	uint32 totaluser = 0;
+	uint32 totalfile = 0;
+	for (POSITION pos = list.GetHeadPosition(); pos != 0; ){
+		const CServer* curr = list.GetNext(pos);
+		//If this server has reported Users/Files and doesn't limit it's files too much
+		//use this in the calculation..
+		if( curr->GetUsers() && curr->GetFiles() && curr->GetSoftFiles() > 1000 )
+		{
+			totaluser += curr->GetUsers();
+			totalfile += curr->GetFiles();
+		}
+	}
+	//If the user count is a little low, don't send back a average..
+	//I added 50 to the count as many servers do not allow a large amount of files to be shared..
+	//Therefore the extimate here will be lower then the actual.
+	//I would love to add a way for the client to send some statistics back so we could see the real
+	//values here..
+	if ( totaluser > 500000 )
+		average = (totalfile/totaluser)+50;
+	else
+		average = 0;
 }
 
 void CServerList::GetUserFileStatus(uint32& user, uint32& file) const

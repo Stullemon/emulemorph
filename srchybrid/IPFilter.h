@@ -27,7 +27,6 @@ struct SIPFilter
 };
 
 #define	DFLT_IPFILTER_FILENAME	_T("ipfilter.dat")
-#define DFLT_IP2COUNTRY_FILENAME  _T("ip-to-country.csv")//Commander - Added: IP2Country auto-updating
 
 // 'CArray' would give us more cach hits, but would also be slow in array element creation 
 // (because of the implicit ctor in 'SIPFilter'
@@ -56,9 +55,7 @@ public:
 	LPCTSTR GetLastHit() const;
 
 	const CIPFilterArray& GetIPFilter() const;
-	void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
-	void    UpdateIP2CountryURL();//Commander - Added: IP2Country auto-updating
-
+		void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
 private:
 	const SIPFilter* m_pLastHit;
 	CIPFilterArray m_iplist;

@@ -18,14 +18,14 @@
 #include "MenuCmds.h"
 
 class CSafeMemFile;
-//MORPH - Removed by SiRoB, No Longer Needed
-//class CFileDataIO;	// SLUGFILLER: mergeKnown
 class CSearchFile;
 class CUpDownClient;
 class CServer;
 class CPartFile;
 class CSharedFileList;
 class CKnownFile;
+struct SUnresolvedHostname;
+
 namespace Kademlia 
 {
 	class CUInt128;
@@ -96,9 +96,9 @@ public:
 	CPartFile* GetFileByID(const uchar* filehash) const;
 	CPartFile* GetFileByIndex(int index) const;
 	CPartFile* GetFileByKadFileSearchID(uint32 ID) const;
+	void    StartNextFileIfPrefs(int cat);
 	// khaos::categorymod+
-	void	StartNextFile() { StartNextFile(-1); }
-	bool	StartNextFile(int cat,bool force=false);
+	bool	StartNextFile(int cat=-1,bool force=false);
 	void	StopPauseLastFile(int Mode = MP_PAUSE, int Category = -1);
 	uint16	GetMaxCatResumeOrder(uint8 iCategory = 0);
 	void	GetCategoryFileCounts(uint8 iCategory, int cntFiles[]);
@@ -111,23 +111,18 @@ public:
 
 	void	DisableAllA4AFAuto(void);
 
-	//MORPH - Removed by SiRoB, No longer needed
-	//// SLUGFILLER: mergeKnown - include part files in known.met
-	//void	SavePartFilesToKnown(CFileDataIO* file);
-	//uint32	GetPartFilesCount();
-	//// SLUGFILLER: mergeKnown
-
+	// sources
 	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
 	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
 	bool	IsInList(const CUpDownClient* client) const;
 
 	bool    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
-	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
+	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList = false);
 	bool	RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate = true);
 
 	// statistics
 	typedef struct{
-		int	a[19];
+		int	a[22];
 	} SDownloadStats;
 	void	GetDownloadStats(SDownloadStats& results);
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
@@ -159,7 +154,7 @@ public:
 	// searching in Kad
 	void	SetLastKademliaFileRequest()	{lastkademliafilerequest = ::GetTickCount();}
 	bool	DoKademliaFileRequest();
-	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
+	void	KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pkadID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint32 clientid);
 
 	// searching on global servers
 	void	StopUDPRequests();
@@ -172,15 +167,13 @@ public:
 	void	ExportPartMetFilesOverview() const;
 	void	OnConnectionState(bool bConnected);
 
+	void	AddToResolved( CPartFile* pFile, SUnresolvedHostname* pUH );
+
 	CServer* cur_udpserver;
-	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio
 	// khaos::kmod+ Advanced A4AF: Brute Force
 	CPartFile* forcea4af_file;
 	// khaos::kmod-
 
-	//MORPH START - Added by SiRoB, ZZ Ratio in Work
-	bool	IsZZRatioInWork() {return m_bIsZZRatioInWork;}
-	//MORPH START - Added by SiRoB, ZZ Ratio in Work
 protected:
 	bool	SendNextUDPPacket();
 	void	ProcessLocalRequests();
@@ -218,11 +211,11 @@ private:
 		uint32	datalen;
 		DWORD	timestamp;
 	};
-	//MORPH START - Removed by SiRoB, ZZ Upload System	
+	//MORPH START - Removed by SiRoB, sum datarate calculated for each file
 	/*
 	CList<TransferredData,TransferredData> avarage_dr_list;
 	*/
-	//MORPH END   - Removed by SiRoB, ZZ Upload System
+	//MORPH END   - Removed by SiRoB, sum datarate calculated for each file
 	
 	CSourceHostnameResolveWnd m_srcwnd;
 
@@ -234,8 +227,4 @@ private:
 
 	CTypedPtrList<CPtrList, CED2KFileLink*> m_ED2KLinkQueue;
 	// khaos::categorymod-
-
-	//MORPH START - Added by SiRoB, ZZ Ratio in Work
-	bool	m_bIsZZRatioInWork;
-	//MORPH START - Added by SiRoB, ZZ Ratio in Work
 };

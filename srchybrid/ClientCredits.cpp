@@ -121,15 +121,15 @@ void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
 	m_bCheckScoreRatio = true;//Morph - Added by AndCycle, reduce a little CPU usage for ratio count
 }
 
-uint64	CClientCredits::GetUploadedTotal(){
+uint64	CClientCredits::GetUploadedTotal() const{
 	return ( (uint64)m_pCredits->nUploadedHi<<32)+m_pCredits->nUploadedLo;
 }
 
-uint64	CClientCredits::GetDownloadedTotal(){
+uint64	CClientCredits::GetDownloadedTotal() const{
 	return ( (uint64)m_pCredits->nDownloadedHi<<32)+m_pCredits->nDownloadedLo;
 }
 
-float CClientCredits::GetScoreRatio(uint32 dwForIP)
+float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 {
 	// check the client ident status
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
@@ -257,7 +257,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 }
 
 //MORPH START - Added by IceCream, VQB: ownCredits
-float CClientCredits::GetMyScoreRatio(uint32 dwForIP)
+float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 {
 	// check the client ident status
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
@@ -714,7 +714,7 @@ bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verif
 	return true;
 }
 
-EIdentState	CClientCredits::GetCurrentIdentState(uint32 dwForIP){
+EIdentState	CClientCredits::GetCurrentIdentState(uint32 dwForIP) const{
 	if (IdentState != IS_IDENTIFIED)
 		return IdentState;
 	else{

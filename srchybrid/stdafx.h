@@ -40,9 +40,9 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 #include <afxole.h>			// MFC OLE support
 
-//<<< eWombat [WINSOCK2]
-#include "system\afxsock.h"		// MFC-Socket-Erweiterungen
-//>>> eWombat [WINSOCK2]
+#include <winsock2.h>
+#define _WINSOCKAPI_
+#include <afxsock.h>		// MFC support for Windows Sockets
 #include <afxdhtml.h>
 
 #include <afxmt.h>			// MFC Multithreaded Extensions (Syncronization Objects)
@@ -78,7 +78,9 @@
 
 #ifdef _UNICODE
 typedef	CArray<CStringA,CStringA> CStringAArray;
+typedef	CStringArray CStringWArray;
 #else
+typedef	CArray<CStringW,CStringW> CStringWArray;
 typedef	CStringArray CStringAArray;
 #endif
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -34,7 +34,7 @@
 ** Copyright, 2000, Samuel R. Blackburn
 **
 ** $Workfile: CBase64Coding.cpp $
-** $Revision: 1.8 $
+** $Revision: 1.9 $
 ** $Modtime: 5/12/00 3:39p $
 ** $Reuse Tracing Code: 1 $
 */
@@ -228,7 +228,7 @@ BOOL CBase64Coding::Encode( const char * source, int len, char * destination_str
 
 <H1>CBase64Coding</H1>
 
-$Revision: 1.8 $<BR><HR>
+$Revision: 1.9 $<BR><HR>
 
 <H2>Description</H2>
 

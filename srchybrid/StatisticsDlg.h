@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -17,11 +17,14 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "StatisticsTree.h"
-//MORPH START - Added by SiRoB, Splitting Bar [O²]
 #include "SplitterControl.h"
-//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 #include "OScopeCtrl.h"
 #include "ColorFrameCtrl.h"
+
+// NOTE: Do not set specific 'Nr. of sub client versions' per client type, current code contains too much hardcoded
+// references to deal with that.
+#define	MAX_CLIENTS_WITH_SUB_VERSION	4	// eMule, eDHyb, eD, aMule
+#define	MAX_SUB_CLIENT_VERSIONS			8
 
 class CStatisticsDlg : public CResizableDialog
 {
@@ -49,23 +52,14 @@ public:
 
 private:
     COScopeCtrl m_DownloadOMeter,m_UploadOMeter,m_Statistics;
-	CColorFrameCtrl m_Led1[ 3 ];
-	CColorFrameCtrl m_Led2[ 3 ];
-	CColorFrameCtrl m_Led3[ 4 ];
 
 	double m_dPlotDataMore[4];
 	uint32 m_ilastMaxConnReached;
 
-	uint32	cli_lastCount[5];
-	//	Tree ImageList (2-18-03)
+	uint32		cli_lastCount[MAX_CLIENTS_WITH_SUB_VERSION];
 	CImageList	imagelistStatTree;
-	//	Tree Font (2-24-03)
-	//CFont		fontStatTree;
-	//	Tree Declarations (2-10-03)
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	HTREEITEM	h_transfer, trans[3]; // Transfer Header and Items
 	HTREEITEM	h_upload, h_up_session, up_S[6], h_up_total, up_T[2]; // Uploads Session and Total Items and Headers
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	HTREEITEM	hup_scb, up_scb[7], hup_spb, up_spb[2], hup_ssb, up_ssb[2]; // Session Uploaded Byte Breakdowns
 	HTREEITEM	hup_tcb, up_tcb[7], hup_tpb, up_tpb[2], hup_tsb, up_tsb[2]; // Total Uploaded Byte Breakdowns
 	HTREEITEM	hup_soh, up_soh[4], hup_toh, up_toh[4]; // Upline Overhead
@@ -74,11 +68,15 @@ private:
 	HTREEITEM	hdown_scb, down_scb[8], hdown_spb, down_spb[2]; // Session Downloaded Byte Breakdowns
 	HTREEITEM	hdown_tcb, down_tcb[8], hdown_tpb, down_tpb[2]; // Total Downloaded Byte Breakdowns
 	HTREEITEM	hdown_soh, down_soh[4], hdown_toh, down_toh[4]; // Downline Overhead
-	HTREEITEM	down_ssessions[4], down_tsessions[4], down_sources[18]; // Breakdown of Download Sessions and Sources
+	HTREEITEM	down_ssessions[4], down_tsessions[4], down_sources[21]; // Breakdown of Download Sessions and Sources
 	HTREEITEM	h_connection, h_conn_session, h_conn_total; // Connection Section Headers
 	HTREEITEM	hconn_sg, conn_sg[5], hconn_su, conn_su[4], hconn_sd, conn_sd[4]; // Connection Session Section Headers and Items
 	HTREEITEM	hconn_tg, conn_tg[4], hconn_tu, conn_tu[3], hconn_td, conn_td[3]; // Connection Total Section Headers and Items
-	HTREEITEM	h_clients, cligen[7], hclisoft, clisoft[8], cli_versions[32], cli_other[4], hcliport, cliport[2]; // Clients Section //MORPH - Modified by IceCream, add one new section in cligen[6] for leecher
+	HTREEITEM	h_clients, cligen[6], hclisoft, clisoft[8];
+	HTREEITEM	cli_versions[MAX_CLIENTS_WITH_SUB_VERSION*MAX_SUB_CLIENT_VERSIONS];
+	HTREEITEM	cli_other[MAX_SUB_CLIENT_VERSIONS/2];
+	HTREEITEM	hclinet, clinet[4]; // Clients Section
+	HTREEITEM	hcliport, cliport[2]; // Clients Section
 	HTREEITEM	h_servers, srv[6], srv_w[3], hsrv_records, srv_r[3]; // Servers Section
 	HTREEITEM	h_shared, shar[4], hshar_records, shar_r[4]; // Shared Section
 	// The time/projections section.  Yes, it's huge.

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -765,7 +765,7 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 	SetDlgItemText(IDC_FORMAT, buffer);
 
 	if (uTotalFileSize)
-		SetDlgItemText(IDC_FILESIZE, CastItoXBytes(uTotalFileSize));
+		SetDlgItemText(IDC_FILESIZE, CastItoXBytes(uTotalFileSize, false, false));
 	if (ami.fVideoLengthSec)
 		SetDlgItemText(IDC_LENGTH, CastSecondsToHM(ami.fVideoLengthSec));
 	else if (ami.fAudioLengthSec)

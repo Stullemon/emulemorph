@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -21,11 +21,18 @@
 #include "CommentDialogLst.h"
 #include "MetaDataDlg.h"
 #include "MuleListCtrl.h"
+#include "ED2kLinkDlg.h"
 //class CMuleListCtrl;
 
 struct FCtrlItem_Struct{
    CString	filename;
    uint16	count;
+};
+
+enum EInvokePage{
+	INP_NONE = 0,
+	INP_COMMENTPAGE,
+	INP_LINKPAGE
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,18 +130,19 @@ class CFileDetailDialog : public CResizableSheet
 	DECLARE_DYNAMIC(CFileDetailDialog)
 
 public:
-	CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, bool bInvokeCommentsPage = false);
+	CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, EInvokePage eInvokePage = INP_NONE);
 	virtual ~CFileDetailDialog();
 
 protected:
-	bool m_bInvokeCommentsPage;
+	EInvokePage m_eInvokePage;
 	CPartFile*	m_file;
 	CSimpleArray<const CKnownFile*> m_aKnownFiles;
-	CFileDetailDialogInfo m_wndInfo;
-	CFileDetailDialogName m_wndName;
-	CFileInfoDialog m_wndVideo;
-	CCommentDialogLst m_wndComments;
-	CMetaDataDlg m_wndMetaData;
+	CFileDetailDialogInfo	m_wndInfo;
+	CFileDetailDialogName	m_wndName;
+	CFileInfoDialog			m_wndVideo;
+	CCommentDialogLst		m_wndComments;
+	CMetaDataDlg			m_wndMetaData;
+	CED2kLinkDlg			m_wndFileLink;
 
 	static LPCTSTR m_pPshStartPage;
 

@@ -54,6 +54,9 @@ there client on the eMule forum..
 #include "clientlist.h"
 #include "Statistics.h"
 #include "SafeFile.h"
+#include "updownclient.h"
+#include "listensocket.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -61,6 +64,9 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
+extern LPCSTR _aszInvKadKeywordCharsA;
+extern LPCWSTR _awszInvKadKeywordChars;
 
 ////////////////////////////////////////
 using namespace Kademlia;
@@ -70,7 +76,7 @@ void CKademliaUDPListener::bootstrap(LPCTSTR host, uint16 port)
 {
 	USES_CONVERSION;
 	uint32 retVal = 0;
-	if (_istalpha(host[0])) 
+	if (_istalpha((_TUCHAR)host[0])) 
 	{
 		hostent *hp = gethostbyname(T2CA(host));
 		if (hp == NULL) 
@@ -95,7 +101,7 @@ void CKademliaUDPListener::sendMyDetails(byte opcode, uint32 ip, uint16 port)
 {
 	ASSERT( CKademlia::getPrefs() != NULL );
 	CSafeMemFile bio(25);
-	bio.WriteUInt128(&CKademlia::getPrefs()->getClientID());
+	bio.WriteUInt128(&CKademlia::getPrefs()->getKadID());
 	bio.WriteUInt32(CKademlia::getPrefs()->getIPAddress());
 	bio.WriteUInt16(thePrefs.GetUDPPort());
 	bio.WriteUInt16(thePrefs.GetPort());
@@ -153,7 +159,7 @@ void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint3
 	const byte *packetData = data + 2;
 	uint32 lenPacket = lenData - 2;
 
-//	CKademlia::debugMsg("Processing UDP Packet from %s port %ld : opcode length %ld", ipstr(senderAddress->sin_addr), ntohs(senderAddress->sin_port), lenPacket);
+//	AddDebugLogLine( false, _T("Processing UDP Packet from %s port %ld : opcode length %ld", ipstr(senderAddress->sin_addr), ntohs(senderAddress->sin_port), lenPacket);
 //	CMiscUtils::debugHexDump(packetData, lenPacket);
 
 	switch (opcode)
@@ -208,6 +214,26 @@ void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint3
 				DebugRecv("KadPublishRes", ip, port);
 			processPublishResponse(packetData, lenPacket, ip, port);
 			break;
+		case KADEMLIA_SRC_NOTES_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadSearchNotesReq", ip, port);
+			processSearchNotesRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_SRC_NOTES_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadSearchNotesRes", ip, port);
+			processSearchNotesResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_PUB_NOTES_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadPublishNotesReq", ip, port);
+			processPublishNotesRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_PUB_NOTES_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadPublishNotesRes", ip, port);
+			processPublishNotesResponse(packetData, lenPacket, ip, port);
+			break;
 		case KADEMLIA_FIREWALLED_REQ:
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 				DebugRecv("KadFirewalledReq", ip, port);
@@ -222,6 +248,21 @@ void CKademliaUDPListener::processPacket(const byte* data, uint32 lenData, uint3
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 				DebugRecv("KadFirewalledAck", ip, port);
 			processFirewalledResponse2(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_FINDBUDDY_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadFindBuddyReq", ip, port);
+			processFindBuddyRequest(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_FINDBUDDY_RES:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadFindBuddyRes", ip, port);
+			processFindBuddyResponse(packetData, lenPacket, ip, port);
+			break;
+		case KADEMLIA_FINDSOURCE_REQ:
+			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugRecv("KadFindSourceReq", ip, port);
+			processFindSourceRequest(packetData, lenPacket, ip, port);
 			break;
 		default:
 		{
@@ -253,7 +294,7 @@ void CKademliaUDPListener::addContact( const byte *data, uint32 lenData, uint32 
 		contact->setIPAddress(ip);
 		contact->setUDPPort(port);
 		contact->setTCPPort(tport);
-		theApp.emuledlg->kademliawnd->contactList->ContactRef(contact);
+		theApp.emuledlg->kademliawnd->ContactRef(contact);
 	}
 	else
 	{
@@ -329,7 +370,7 @@ void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, uint
 		bio.WriteUInt16(contact->getTCPPort());
 		bio.WriteUInt8(contact->getType());
 	}
-	prefs->getClientID(&id);
+	prefs->getKadID(&id);
 	bio.WriteUInt128(&id);
 	bio.WriteUInt32(prefs->getIPAddress());
 	bio.WriteUInt16(thePrefs.GetUDPPort());
@@ -464,13 +505,13 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, uint3
 	//This is the target node trying to be found.
 	CUInt128 target;
 	bio.ReadUInt128(&target);
-	CUInt128 distance(prefs->getClientID());
+	CUInt128 distance(prefs->getKadID());
 	distance.xor(target);
 
 	//This makes sure we are not mistaken identify. Some client may have fresh installed and have a new hash.
 	CUInt128 check;
 	bio.ReadUInt128(&check);
-	if( prefs->getClientID().compareTo(check))
+	if( prefs->getKadID().compareTo(check))
 		return;
 
 	// Get required number closest to target
@@ -570,7 +611,7 @@ void CKademliaUDPListener::processKademliaResponse (const byte *packetData, uint
 	CSearchManager::processResponse(target, ip, port, results);
 }
 
-void Free(SSearchTerm* pSearchTerms)
+void CKademliaUDPListener::Free(SSearchTerm* pSearchTerms)
 {
 	if (pSearchTerms->left)
 		Free(pSearchTerms->left);
@@ -579,12 +620,12 @@ void Free(SSearchTerm* pSearchTerms)
 	delete pSearchTerms;
 }
 
-SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
+SSearchTerm* CKademliaUDPListener::CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 {
 	// the max. depth has to match our own limit for creating the search expression 
 	// (see also 'ParsedSearchExpression' and 'GetSearchPacket')
 	if (iLevel >= 24){
-		CKademlia::debugLine("***NOTE: Search expression tree exceeds depth limit!");
+		AddDebugLogLine(false, _T("***NOTE: Search expression tree exceeds depth limit!"));
 		return NULL;
 	}
 	iLevel++;
@@ -648,31 +689,28 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 			return pSearchTerm;
 		}
 		else{
-			CKademlia::debugMsg("*** Unknown boolean search operator 0x%02x (CreateSearchExpressionTree)", boolop);
+			AddDebugLogLine(false, _T("*** Unknown boolean search operator 0x%02x (CreateSearchExpressionTree)"), boolop);
 			return NULL;
 		}
 	}
 	else if (op == 0x01) // String
 	{
-		uint16 len = bio.ReadUInt16();
-		CStringA str;
-		bio.Read(str.GetBuffer(len), len);
-		str.ReleaseBuffer(len);
+		CTagValueString str(bio.ReadStringUTF8());
+
+		KadTagStrMakeLower(str); // make lowercase, the search code expects lower case strings!
+		TRACE(" \"%ls\"", str);
 
 		SSearchTerm* pSearchTerm = new SSearchTerm;
 		pSearchTerm->type = SSearchTerm::String;
-		pSearchTerm->astr = new CStringArray;
-
-		str.MakeLower(); // make lowercase, the search code expects lower case strings!
-		TRACE(" \"%s\"", str);
+		pSearchTerm->astr = new CStringWArray;
 
 		// pre-tokenize the string term
 		int iPosTok = 0;
-		CString strTok(str.Tokenize(" ()[]{}<>,._-!?", iPosTok));
+		CTagValueString strTok(str.Tokenize(_awszInvKadKeywordChars, iPosTok));
 		while (!strTok.IsEmpty())
 		{
 			pSearchTerm->astr->Add(strTok);
-			strTok = str.Tokenize(" ()[]{}<>,._-!?", iPosTok);
+			strTok = str.Tokenize(_awszInvKadKeywordChars, iPosTok);
 		}
 
 		return pSearchTerm;
@@ -680,11 +718,9 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 	else if (op == 0x02) // Meta tag
 	{
 		// read tag value
-		CStringA strValue;
-		uint16 lenValue = bio.ReadUInt16();
-		bio.Read(strValue.GetBuffer(lenValue), lenValue);
-		strValue.ReleaseBuffer(lenValue);
-		strValue.MakeLower(); // make lowercase, the search code expects lower case strings!
+		CTagValueString strValue(bio.ReadStringUTF8());
+
+		KadTagStrMakeLower(strValue); // make lowercase, the search code expects lower case strings!
 
 		// read tag name
 		CStringA strTagName;
@@ -696,9 +732,9 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		pSearchTerm->type = SSearchTerm::MetaTag;
 		pSearchTerm->tag = new Kademlia::CTagStr(strTagName, strValue);
 		if (lenTagName == 1)
-			TRACE(" Tag%02x=\"%s\"", strTagName[0], strValue);
+			TRACE(" Tag%02x=\"%ls\"", strTagName[0], strValue);
 		else
-			TRACE(" \"%s\"=\"%s\"", strTagName, strValue);
+			TRACE(" \"%s\"=\"%ls\"", strTagName, strValue);
 		return pSearchTerm;
 	}
 	else if (op == 0x03) // Min/Max
@@ -722,7 +758,7 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		// read integer operator
 		uint8 mmop = bio.ReadUInt8();
 		if (mmop >= ARRSIZE(_aOps)){
-			CKademlia::debugMsg("*** Unknown integer search op=0x%02x (CreateSearchExpressionTree)", mmop);
+			AddDebugLogLine(false, _T("*** Unknown integer search op=0x%02x (CreateSearchExpressionTree)"), mmop);
 			return NULL;
 		}
 
@@ -737,14 +773,14 @@ SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& bio, int iLevel)
 		pSearchTerm->tag = new Kademlia::CTagUInt32(strTagName, uValue);
 
 		if (lenTagName == 1)
-			TRACE(" Tag%02x%s%u", strTagName[0], _aOps[mmop].pszOp, uValue);
+			TRACE(" Tag%02x%s%u", (BYTE)strTagName[0], _aOps[mmop].pszOp, uValue);
 		else
 			TRACE(" \"%s\"%s%u", strTagName, _aOps[mmop].pszOp, uValue);
 
 		return pSearchTerm;
 	}
 	else{
-		CKademlia::debugMsg("*** Unknown search op=0x%02x (CreateSearchExpressionTree)", op);
+		AddDebugLogLine(false, _T("*** Unknown search op=0x%02x (CreateSearchExpressionTree)"), op);
 		return NULL;
 	}
 }
@@ -840,7 +876,12 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, uint32
 		bio.readUInt128(&answer);
 
 		// Get info about answer
-		TagList *tags = bio.readTagList();
+		// NOTE: this is the one and only place in Kad where we allow string conversion to local code page in
+		// case we did not receive an UTF8 string. this is for backward compatibility for search results which are 
+		// supposed to be 'viewed' by user only and not feed into the Kad engine again!
+		// If that tag list is once used for something else than for viewing, special care has to be taken for any
+		// string conversion!
+		TagList *tags = bio.readTagList(true/*bOptACP*/);
 		CSearchManager::processResult(target, ip, port, answer,tags);
 		count--;
 	}
@@ -864,12 +905,16 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 	CPrefs *prefs = CKademlia::getPrefs();
 	ASSERT(prefs != NULL); 
 
+	if( prefs->getFirewalled() )
+		//We are firewalled. We should not index this entry and give publisher a false report.
+		return;
+
 	CByteIO bio(packetData, lenPacket);
 	CUInt128 file;
 	bio.readUInt128(&file);
 
 	CUInt128 distance;
-	prefs->getClientID(&distance);
+	prefs->getKadID(&distance);
 	distance.xor(file);
 
 	if( thePrefs.FilterLANIPs() && distance.get32BitChunk(0) > SEARCHTOLERANCE)
@@ -877,9 +922,9 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 
 	bool bDbgInfo = thePrefs.GetDebugClientKadUDPLevel() > 0;
 	CString strInfo;
-	//TODO: Most li
 	uint16 count = bio.readUInt16();
 	bool flag = false;
+	uint8 load = 0;
 	while( count > 0 )
 	{
 		strInfo.Empty();
@@ -894,47 +939,78 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 			entry->udpport = port;
 			entry->keyID.setValue(file);
 			entry->sourceID.setValue(target);
-			//uint32 tags = bio.readUInt32LE();
 			uint32 tags = bio.readByte();
 			while(tags > 0)
 			{
 				CTag* tag = bio.readTag();
-				if (!tag->m_name.Compare(TAG_SOURCETYPE) && tag->m_type == 9)
+				if(tag)
 				{
-					if( entry->source == false )
+					if (!tag->m_name.Compare(TAG_SOURCETYPE) && tag->m_type == 9)
 					{
-						entry->taglist.push_back(new CTagUInt32(TAG_SOURCEIP, entry->ip));
-						entry->taglist.push_back(new CTagUInt16(TAG_SOURCEUPORT, entry->udpport));
+						if( entry->source == false )
+						{
+							entry->taglist.push_back(new CTagUInt32(TAG_SOURCEIP, entry->ip));
+							entry->taglist.push_back(new CTagUInt16(TAG_SOURCEUPORT, entry->udpport));
+						}
+						else
+						{
+							//More then one sourcetype tag found.
+							delete tag;
+						}
+						entry->source = true;
 					}
-					entry->source = true;
-				}
-				
-				if (!tag->m_name.Compare(TAG_NAME))
-				{
-					entry->fileName = tag->GetStr();
-					entry->fileName.MakeLower(); // make lowercase, the search code expects lower case strings!
-					if (bDbgInfo)
-						strInfo.AppendFormat(_T("  Name=\"%s\""), entry->fileName);
-					// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
-					entry->taglist.push_back(tag);
-				}
-				else if (!tag->m_name.Compare(TAG_SIZE))
-				{
-					entry->size = tag->GetInt();
-					if (bDbgInfo)
-						strInfo.AppendFormat(_T("  Size=%u"), entry->size);
-					// NOTE: always add the 'size' tag, even if it's stored separately in 'size'. the tag is still needed for answering search request
-					entry->taglist.push_back(tag);
-				}
-				else if (!tag->m_name.Compare(TAG_SOURCEPORT))
-				{
-					entry->tcpport = tag->GetInt();
-					entry->taglist.push_back(tag);
-				}
-				else
-				{
-					//TODO: Filter tags
-					entry->taglist.push_back(tag);
+					
+					if (!tag->m_name.Compare(TAG_NAME))
+					{
+						if ( entry->fileName.IsEmpty() )
+						{
+							entry->fileName = tag->GetStr();
+							KadTagStrMakeLower(entry->fileName); // make lowercase, the search code expects lower case strings!
+							if (bDbgInfo)
+								strInfo.AppendFormat(_T("  Name=\"%ls\""), entry->fileName);
+							// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
+							entry->taglist.push_back(tag);
+						}
+						else
+						{
+							//More then one Name tag found.
+							delete tag;
+						}
+					}
+					else if (!tag->m_name.Compare(TAG_SIZE))
+					{
+						if( entry->size == 0 )
+						{
+							entry->size = tag->GetInt();
+							if (bDbgInfo)
+								strInfo.AppendFormat(_T("  Size=%u"), entry->size);
+							// NOTE: always add the 'size' tag, even if it's stored separately in 'size'. the tag is still needed for answering search request
+							entry->taglist.push_back(tag);
+						}
+						else
+						{
+							//More then one size tag found
+							delete tag;
+						}
+					}
+					else if (!tag->m_name.Compare(TAG_SOURCEPORT))
+					{
+						if( entry->tcpport == 0 )
+						{
+							entry->tcpport = tag->GetInt();
+							entry->taglist.push_back(tag);
+						}
+						else
+						{
+							//More then one port tag found
+							delete tag;
+						}
+					}
+					else
+					{
+						//TODO: Filter tags
+						entry->taglist.push_back(tag);
+					}
 				}
 				tags--;
 			}
@@ -949,40 +1025,42 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, uint32
 
 		if( entry->source == true )
 		{
-			if( indexed->AddSources(file, target, entry ) )
+			if( indexed->AddSources(file, target, entry, load ) )
 				flag = true;
 			else
 			{
-				CKademlia::debugMsg("Source INDEX FULL %u (CKademliaUDPListener::processPublishRequest)", indexed->m_totalIndexSource);
 				delete entry;
 				entry = NULL;
 			}
 		}
 		else
 		{
-			if( entry->fileName.IsEmpty() || entry->size == 0 )
-			{
-				delete entry;
-				entry = NULL;
-				CKademlia::debugLine("Invalid entry CKademliaUDPListener::processPublishRequest");
-			}
-			else if( indexed->AddKeyword(file, target, entry, flag) )
+			if( indexed->AddKeyword(file, target, entry, load) )
 			{
 				//This makes sure we send a publish response.. This also makes sure we index all the files for this keyword.
 				flag = true;
 			}
 			else
 			{
-				//We already indexed the maximum number of files for this keyword. Do not send a publish result so they index it to someone else.
-//				return;
+				//We already indexed the maximum number of keywords.
+				//We do not index anymore but we still send a success..
+				//Reason: Because if a VERY busy node tells the publisher it failed,
+				//this busy node will spread to all the surrounding nodes causing popular
+				//keywords to be stored on MANY nodes..
+				//So, once we are full, we will periodically clean our list until we can
+				//begin storing again..
+				flag = true;
+				delete entry;
+				entry = NULL;
 			}
 		}
 		count--;
 	}	
 	if( flag )
 	{
-		CSafeMemFile bio2(16);
+		CSafeMemFile bio2(17);
 		bio2.WriteUInt128(&file);
+		bio2.WriteUInt8(load);
 		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			DebugSend("KadPublishRes", ip, port);
 
@@ -1011,6 +1089,164 @@ void CKademliaUDPListener::processPublishResponse (const byte *packetData, uint3
 	CUInt128 file;
 	bio.ReadUInt128(&file);
 	CSearchManager::processPublishResult(file);
+}
+
+//KADEMLIA_SRC_NOTES_REQ
+void CKademliaUDPListener::processSearchNotesRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 33){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CIndexed *indexed = CKademlia::getIndexed();
+	ASSERT(indexed != NULL); 
+
+	CSafeMemFile bio( packetData, lenPacket);
+	CUInt128 target;
+	bio.ReadUInt128(&target);
+	CUInt128 source;
+	bio.ReadUInt128(&source);
+
+	indexed->SendValidNoteResult(target, source, ip, port);
+}
+
+//KADEMLIA_SRC_NOTES_RES
+void CKademliaUDPListener::processSearchNotesResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 37){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
+
+	// What search does this relate to
+	CByteIO bio(packetData, lenPacket);
+	CUInt128 target;
+	bio.readUInt128(&target);
+
+	// How many results.. Not supported yet..
+	uint16 count = bio.readUInt16();
+	while( count > 0 )
+	{
+		// What is the answer
+		CUInt128 answer;
+		bio.readUInt128(&answer);
+
+		// Get info about answer
+		// NOTE: this is the one and only place in Kad where we allow string conversion to local code page in
+		// case we did not receive an UTF8 string. this is for backward compatibility for search results which are 
+		// supposed to be 'viewed' by user only and not feed into the Kad engine again!
+		// If that tag list is once used for something else than for viewing, special care has to be taken for any
+		// string conversion!
+		TagList *tags = bio.readTagList(true/*bOptACP*/);
+		CSearchManager::processResult(target, ip, port, answer,tags);
+		count--;
+	}
+}
+
+//KADEMLIA_PUB_NOTES_REQ
+void CKademliaUDPListener::processPublishNotesRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 37){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CIndexed *indexed = CKademlia::getIndexed();
+	ASSERT(indexed != NULL);
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+
+	if( prefs->getFirewalled() )
+		//We are firewalled. We should not index this entry and give publisher a false report.
+		return;
+
+	CByteIO bio(packetData, lenPacket);
+	CUInt128 target;
+	bio.readUInt128(&target);
+
+	CUInt128 distance;
+	prefs->getKadID(&distance);
+	distance.xor(target);
+
+	if( thePrefs.FilterLANIPs() && distance.get32BitChunk(0) > SEARCHTOLERANCE)
+		return;
+
+	bool bDbgInfo = thePrefs.GetDebugClientKadUDPLevel() > 0;
+
+	CUInt128 source;
+	bio.readUInt128(&source);
+
+	Kademlia::CEntry* entry = new Kademlia::CEntry();
+	try
+	{
+		entry->ip = ip;
+		entry->udpport = port;
+		entry->keyID.setValue(target);
+		entry->sourceID.setValue(source);
+		uint32 tags = bio.readByte();
+		bio.readTagList( &(entry->taglist) );
+		entry->source = false;
+	}
+	catch(...)
+	{
+		delete entry;
+		throw;
+	}
+
+	if( entry == NULL )
+	{
+		throw;
+	}
+	else if( entry->taglist.size() == 0 || entry->taglist.size() > 2)
+	{
+		delete entry;
+		throw;
+	}
+
+	if( indexed->AddNotes(target, source, entry ) )
+	{
+		CSafeMemFile bio2(16);
+		bio2.WriteUInt128(&target);
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KadPublishNotesRes", ip, port);
+
+		sendPacket( &bio2, KADEMLIA_PUB_NOTES_RES, ip, port);
+	}
+	else
+		delete entry;
+}
+
+//KADEMLIA_PUB_NOTES_ACK
+void CKademliaUDPListener::processPublishNotesResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 16){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+	//Used Pointers
+	CRoutingZone *routingZone = CKademlia::getRoutingZone();
+	ASSERT(routingZone != NULL); 
+
+	// Set contact to alive.
+	routingZone->setAlive(ip, port);
 }
 
 //KADEMLIA_FIREWALLED_REQ
@@ -1092,6 +1328,119 @@ void CKademliaUDPListener::processFirewalledResponse2 (const byte *packetData, u
 	routingZone->setAlive(ip, port);
 
 	prefs->incFirewalled();
+}
+
+//KADEMLIA_FINDBUDDY_REQ
+void CKademliaUDPListener::processFindBuddyRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 34){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL); 
+
+	if( prefs->getFirewalled() )
+		//We are firewalled but somehow we still got this packet.. Don't send a response..
+		return;
+
+	CSafeMemFile bio(packetData, lenPacket);
+	CUInt128 BuddyID;
+	bio.ReadUInt128(&BuddyID);
+	CUInt128 userID;
+	bio.ReadUInt128(&userID);
+	uint16 tcpport = bio.ReadUInt16();
+
+	CContact contact;
+	contact.setIPAddress(ip);
+	contact.setTCPPort(tcpport);
+	contact.setUDPPort(port);
+	contact.setClientID(userID);
+	theApp.clientlist->IncomingBuddy(&contact, &BuddyID);
+
+	CSafeMemFile bio2(34);
+	bio2.WriteUInt128(&BuddyID);
+	bio2.WriteUInt128(&prefs->getClientHash());
+	bio2.WriteUInt16(thePrefs.GetPort());
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KadFindBuddyRes", ip, port);
+
+	sendPacket(&bio2, KADEMLIA_FINDBUDDY_RES, ip, port);
+}
+
+//KADEMLIA_FINDBUDDY_RES
+void CKademliaUDPListener::processFindBuddyResponse (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 34){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL);
+
+	CSafeMemFile bio(packetData, lenPacket);
+	CUInt128 check;
+	bio.ReadUInt128(&check);
+	check.xor(CUInt128(true));
+	if( prefs->getKadID().compareTo(check))
+		return;
+	CUInt128 userID;
+	bio.ReadUInt128(&userID);
+	uint16 tcpport = bio.ReadUInt16();
+
+	CContact contact;
+	contact.setIPAddress(ip);
+	contact.setTCPPort(tcpport);
+	contact.setUDPPort(port);
+	contact.setClientID(userID);
+	theApp.clientlist->RequestBuddy(&contact);
+}
+
+//KADEMLIA_FINDSOURCE_REQ
+void CKademliaUDPListener::processFindSourceRequest (const byte *packetData, uint32 lenPacket, uint32 ip, uint16 port)
+{
+	// Verify packet is expected size
+	if (lenPacket < 34){
+		CString strError;
+		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), lenPacket, __FUNCTION__);
+		throw strError;
+	}
+
+	//Used Pointers
+	CPrefs *prefs = CKademlia::getPrefs();
+	ASSERT(prefs != NULL);
+
+	CUpDownClient* buddy = theApp.clientlist->GetBuddy();
+	if( buddy != NULL )
+	{
+		CSafeMemFile bio(packetData, lenPacket);
+		CUInt128 check;
+		bio.ReadUInt128(&check);
+		CUInt128 bud(buddy->GetBuddyID());
+		CUInt128 file;
+		bio.ReadUInt128(&file);
+		uint16 tcp = bio.ReadUInt16();
+		CSafeMemFile bio2(lenPacket+6);
+		bio2.WriteUInt128(&check);
+		bio2.WriteUInt128(&file);
+		bio2.WriteUInt32(ip);
+		bio2.WriteUInt16(tcp);
+		Packet* packet = new Packet(&bio2, OP_EMULEPROT, OP_CALLBACK);
+		if( buddy->socket )
+            buddy->socket->SendPacket(packet);
+		else
+			ASSERT(0);
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KadCallback", ip, port);
+	}
 }
 
 void CKademliaUDPListener::sendPacket(const byte *data, uint32 lenData, uint32 destinationHost, uint16 destinationPort)

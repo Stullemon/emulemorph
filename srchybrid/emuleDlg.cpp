@@ -1040,7 +1040,7 @@ void CemuleDlg::ShowPing() {
 			} else {
                 buffer.SetString(lastPing.state);
             }
-		} else if (thePrefs.IsSUCDoesWork()){
+		} else if (thePrefs.IsSUCDoesWork())
 			buffer.Format(_T("vur:%s r:%i"),CastItoXBytes(theApp.uploadqueue->GetMaxVUR(),false,true),theApp.uploadqueue->GetAvgRespondTime(0));
 		//MORPH END   - Changed by SiRoB, Related to SUC &  USS
 		statusbar->SetText(buffer,4,0);

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2004 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -54,8 +54,6 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 		memset(m_abyPartStatus, 1, m_nPartCount);
 		m_bCompleteSource = true;
 	}
-	else
-		ResetFileStatusInfo(); // TODO: this should be moved to 'CUpDownClient::SetRequestFile'
 }
 
 bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
@@ -202,6 +200,8 @@ bool CUrlClient::Connect()
 {
 	if (GetConnectIP() != 0 && GetConnectIP() != INADDR_NONE)
 		return CUpDownClient::Connect();
+	//Try to always tell the socket to WaitForOnConnect before you call Connect.
+	socket->WaitForOnConnect();
 	socket->Connect(m_strHost, m_nUserPort);
 	return true;
 }
@@ -231,13 +231,12 @@ bool CUrlClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	TRACE(_T("%hs: HttpState=%u, Reason=%s\n"), __FUNCTION__, s==NULL ? -1 : s->GetHttpState(), pszReason);
 	// TODO: This is a mess..
 	if (s && (s->GetHttpState() == HttpStateRecvExpected || s->GetHttpState() == HttpStateRecvBody))
-		m_dwLastAskedTime = 0;
+        m_fileReaskTimes.RemoveKey(reqfile); // ZZ:DownloadManager (one resk timestamp for each file)
 	return CUpDownClient::Disconnected(pszReason, bFromSocket);
 }
 
 bool CUrlClient::ProcessHttpDownResponse(const CStringAArray& astrHeaders)
 {
-	USES_CONVERSION;
 	if (reqfile == NULL)
 		throw CString("Failed to process received HTTP data block - No 'reqfile' attached");
 	if (astrHeaders.GetCount() == 0)
@@ -303,10 +302,10 @@ bool CUrlClient::ProcessHttpDownResponse(const CStringAArray& astrHeaders)
 		}
 		else if (bRedirection && strnicmp(rstrHdr, "Location:", 9) == 0)
 		{
-			CStringA strLocation = rstrHdr.Mid(9).Trim();
-			if (!SetUrl(A2CT(strLocation))){
+			CString strLocation(rstrHdr.Mid(9).Trim());
+			if (!SetUrl(strLocation)){
 				CString strError;
-				strError.Format(_T("Failed to process HTTP redirection URL \"%hs\""), strLocation);
+				strError.Format(_T("Failed to process HTTP redirection URL \"%s\""), strLocation);
 				throw strError;
 			}
 			bNewLocation = true;
@@ -397,7 +396,7 @@ void CUpDownClient::ProcessHttpBlockPacket(const BYTE* pucData, UINT uSize)
 			}
 
 			m_nLastBlockOffset = nStartPos;
-			uint32 lenWritten = reqfile->WriteToBuffer(uSize, pucData, nStartPos, nEndPos, cur_block->block);
+			uint32 lenWritten = reqfile->WriteToBuffer(uSize, pucData, nStartPos, nEndPos, cur_block->block, this);
 			if (lenWritten > 0)
 			{
 				m_nTransferedDown += lenWritten;

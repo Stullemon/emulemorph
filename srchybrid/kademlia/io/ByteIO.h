@@ -41,23 +41,32 @@ class CIOException;
 class CByteIO : public CDataIO
 {
 public:
-
-	CByteIO(byte *buffer, uint32 available) {m_bReadOnly = false; m_buffer = buffer; m_available = available; m_used = 0;}
-	CByteIO(const byte *buffer, uint32 available) {m_bReadOnly = true; m_buffer = (byte *)buffer; m_available = available; m_used = 0;}
+	CByteIO(byte* buffer, uint32 available)
+	{
+		m_bReadOnly = false; 
+		m_buffer = buffer; 
+		m_available = available; 
+		m_used = 0;
+	}
+	CByteIO(const byte* buffer, uint32 available)
+	{
+		m_bReadOnly = true; 
+		m_buffer = const_cast<byte*>(buffer);
+		m_available = available; 
+		m_used = 0;
+	}
 
 	void readArray(LPVOID lpResult, uint32 byteCount);
 	void writeArray(LPCVOID lpVal, uint32 byteCount);
 
-	uint32 getAvailable(void) {return m_available;}
+	UINT getAvailable() const { return m_available; }
 	void reset(void);
 
 private:
-
 	bool	m_bReadOnly;
-	byte	*m_buffer;
+	byte*	m_buffer;
 	uint32	m_available;
 	uint32	m_used;
-
 };
 
 } // End namespace

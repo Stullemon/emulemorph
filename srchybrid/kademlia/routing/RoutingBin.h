@@ -35,6 +35,7 @@ there client on the eMule forum..
 */
 #pragma once
 #include "Maps.h"
+#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -44,7 +45,7 @@ class CUInt128;
 class CRoutingZone;
 class CContact;
 
-class CRoutingBin
+class CRoutingBin: public CLoggable
 {
 	friend class CRoutingZone;
 
@@ -59,17 +60,16 @@ private:
 	void setAlive(uint32 ip, uint16 port);
 	void setTCPPort(uint32 ip, uint16 port, uint16 tcpPort);
 	void remove(CContact *contact);
-	bool contains(const CUInt128 &id);
 	CContact *getContact(const CUInt128 &id);
 	CContact *getOldest(void);
 
 	UINT getSize() const;
 	UINT getRemaining(void) const;
 	void getEntries(ContactList *result, bool emptyFirst = true);
-	int getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst = true);
+	int getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst = true, bool setInUse = false);
 
 	// Debug purposes.
-	void dumpContents(void);
+//	void dumpContents(void);
 
 	bool m_dontDeleteContacts;
 	ContactList m_entries;

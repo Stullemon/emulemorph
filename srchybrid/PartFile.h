@@ -15,8 +15,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "KnownFile.h"
-
-#define	PARTSIZE			9728000
+#include "DeadSourceList.h"
 
 // khaos::kmod+ Save/Load Sources
 #include "SourceSaver.h" //<<-- enkeyDEV(Ottavio84) -New SLS-
@@ -48,12 +47,16 @@ enum EPartFileStatus{
 #define	PARTMET_BAK_EXT	_T(".bak")
 #define	PARTMET_TMP_EXT	_T(".backup")
 
-#define STATES_COUNT		13
+#define STATES_COUNT		17
 
-#define PMT_UNKNOWN			0
-#define PMT_DEFAULTOLD		1
-#define PMT_SPLITTED		2
-#define PMT_NEWOLD			3
+enum EPartFileFormat{
+	PMT_UNKNOWN			= 0,
+	PMT_DEFAULTOLD,
+	PMT_SPLITTED,
+	PMT_NEWOLD,
+	PMT_SHAREAZA,
+	PMT_BADFORMAT	
+};
 
 #define	FILE_COMPLETION_THREAD_FAILED	0x0000
 #define	FILE_COMPLETION_THREAD_SUCCESS	0x0001
@@ -104,7 +107,6 @@ class CPartFile : public CKnownFile
 	DECLARE_DYNAMIC(CPartFile)
 
 	friend class CPartFileConvert;
-	friend class CPartHashThread;	// SLUGFILLER: SafeHash
 public:
 	CPartFile();
 	CPartFile(CSearchFile* searchresult);  //used when downloading a new file
@@ -142,17 +144,13 @@ public:
 	bool	CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam) {return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
 	bool	WriteToFile(FILE* file) { return false; }
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	uint32	Process(uint32 reducedownload, uint8 m_icounter, uint32 friendReduceddownload);
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
+	uint32	Process(uint32 reducedownload, uint8 m_icounter);
 	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
+//	uint8	ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename , bool getsizeonly);
+
 	bool	SavePartFile();
 	void	PartFileHashFinished(CKnownFile* result);
-	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
-	void	PartHashFinished(uint16 partnumber, bool corrupt);
-	bool	IsPartShareable(uint16 partnumber) const;
-	bool	IsRangeShareable(uint32 start, uint32 end) const;
-	// SLUGFILLER: SafeHash
+	bool	HashSinglePart(uint16 partnumber); // true = ok , false = corrupted
 	
 	void	AddGap(uint32 start, uint32 end);
 	void	FillGap(uint32 start, uint32 end);
@@ -185,7 +183,7 @@ public:
 	void	SetActive(bool bActive);
 	
 	uint8	GetDownPriority() const { return m_iDownPriority; }
-	void	SetDownPriority(uint8 iNewDownPriority);
+	void	SetDownPriority(uint8 iNewDownPriority, bool resort = true);
 	bool	IsAutoDownPriority(void) const { return m_bAutoDownPriority; }
 	void	SetAutoDownPriority(bool NewAutoDownPriority) { m_bAutoDownPriority = NewAutoDownPriority; }
 	void	UpdateAutoDownPriority();
@@ -203,17 +201,14 @@ public:
 	uint16	GetAvailableSrcCount() const;
 	//MORPH END   - Added by SiRoB, Source Counts Are Cached [Khaos]
 	bool	IsArchive(bool onlyPreviewable = false) const; // Barry - Also want to preview archives
+    bool    IsPreviewableFileType() const;
 	sint32	getTimeRemaining() const;
 	sint32	getTimeRemainingSimple() const;
 	uint32	GetDlActiveTime() const;
-	bool	IsMovie() const; //MORPH - Added by IceCream, added preview also for music files
-	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
-	bool	IsCDImage() const; //MORPH - Added by IceCream, for defeat 0-filler
-	bool	IsDocument() const; //MORPH - Added by IceCream, for defeat 0-filler
 
 	// Barry - Added as replacement for BlockReceived to buffer data before writing to disk
-	uint32	WriteToBuffer(uint32 transize, const BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block);
-	void	FlushBuffer(bool forcewait=false);
+	uint32	WriteToBuffer(uint32 transize, const BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block, const CUpDownClient* client);
+	void	FlushBuffer(bool forcewait=false, bool bForceICH = false, bool bNoAICH = false);
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
 	// 'Gaps' returned are really the filled areas, and guaranteed to be in order
 	void	GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) const;
@@ -225,7 +220,7 @@ public:
 	void	RemoveAllSources(bool bTryToSwap);
 
 	bool	CanOpenFile() const;
-	bool	CanPreviewFile() const;
+	bool	IsReadyForPreview() const;
 	bool	CanStopFile() const;
 	bool	CanPauseFile() const;
 	bool	CanResumeFile() const;
@@ -233,14 +228,14 @@ public:
 	void	OpenFile() const;
 	void	PreviewFile();
 	void	DeleteFile();
-	void	StopFile(bool bCancel = false);
-	void	PauseFile(bool bInsufficient = false);
+	void	StopFile(bool bCancel = false, bool resort = true);
+	void	PauseFile(bool bInsufficient = false, bool resort = true);
 	void	StopPausedFile();
-	void	ResumeFile();
+	void	ResumeFile(bool resort = true);
 	void	ResumeFileInsufficient();
 
 	virtual Packet* CreateSrcInfoPacket(CUpDownClient* forClient) const;
-	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion);
+	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, CUpDownClient* pClient = NULL);
 
 	uint16	GetAvailablePartCount() const { return availablePartsCount; }
 	void	UpdateAvailablePartsCount();
@@ -308,13 +303,15 @@ public:
 	void	FlushBuffersExceptionHandler(CFileException* error);
 	void	FlushBuffersExceptionHandler();
 
-	void	PerformFirstHash();		// SLUGFILLER: SafeHash
 	void	PerformFileCompleteEnd(DWORD dwResult);
 
 	void	SetFileOp(EPartFileOp eFileOp);
 	EPartFileOp GetFileOp() const { return m_eFileOp; }
 	void	SetFileOpProgress(UINT uProgress);
 	UINT	GetFileOpProgress() const { return m_uFileOpProgress; }
+
+	void	RequestAICHRecovery(uint16 nPart);
+	void	AICHRecoveryDataAvailable(uint16 nPart);
 
 	uint32	lastsearchtime;
 	uint32	lastsearchtimeKad;
@@ -325,6 +322,7 @@ public:
 	CFile	m_hpartfile;				// permanent opened handle to avoid write conflicts
 	CMutex 	m_FileCompleteMutex;		// Lord KiRon - Mutex for file completion
 	uint16	src_stats[4];
+	uint16  net_stats[3];
 	volatile bool m_bPreviewing;
 	volatile bool m_bRecoveringArchive; // Is archive recovery in progress
 	bool	m_bLocalSrcReqQueued;
@@ -332,6 +330,14 @@ public:
 	bool	hashsetneeded;
     bool    AllowSwapForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick > 30*1000; } // ZZ:DownloadManager
     void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
+
+	bool    GetPreviewPrio() const { return m_bpreviewprio; }
+	void    SetPreviewPrio(bool in) { m_bpreviewprio=in; }
+
+    static int RightFileHasHigherPrio(CPartFile* left, CPartFile* right);
+
+	CDeadSourceList	m_DeadSourceList;
+
 	// khaos::categorymod+
 	void	SetCatResumeOrder(uint16 order)	{ m_catResumeOrder = order; SavePartFile(); }
 	uint16	GetCatResumeOrder() const				{ return m_catResumeOrder; }
@@ -390,12 +396,6 @@ private:
 	CTypedPtrList<CPtrList, Gap_Struct*> gaplist;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> requestedblocks_list;
 	CArray<uint16,uint16> m_SrcpartFrequency;
-	// SLUGFILLER: SafeHash
-	CArray<bool,bool> m_PartsShareable;
-	uint16	m_PartsHashing;
-	CMutex	ICH_mut;	// ICH locks the file
-	CList<uint16,uint16>	m_ICHPartsComplete;
-	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<uint16,uint16>	corrupted_list;
 	uint32	m_ClientSrcAnswered;
@@ -421,6 +421,7 @@ private:
 	volatile EPartFileOp m_eFileOp;
 	volatile UINT m_uFileOpProgress;
 
+    uint32 m_random_update_wait;
 
 	BOOL 	PerformFileComplete(); // Lord KiRon
 	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
@@ -433,8 +434,8 @@ private:
 	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
 
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
+    bool m_bpreviewprio;
 
-	void	PharseICHResult();	// SLUGFILLER: SafeHash
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;
 	// khaos::categorymod-
@@ -462,25 +463,3 @@ private:
 	bool	lastbFlat;
 	//MORPH END - Added by SiRoB,  SharedStatusBar CPU Optimisation
 };
-
-
-// SLUGFILLER: SafeHash
-class CPartHashThread : public CWinThread
-{
-	DECLARE_DYNCREATE(CPartHashThread)
-protected:
-	CPartHashThread()	{}
-public:
-	virtual	BOOL	InitInstance() {return true;}
-	virtual int		Run();
-	uint16	SetFirstHash(CPartFile* pOwner);
-	void	SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused);
-private:
-	CPartFile*				m_pOwner;
-	bool					m_ICHused;
-	CString					directory;
-	CString					filename;
-	CArray<uint16,uint16>	m_PartsToHash;
-	CArray<uchar*,uchar*>	m_DesiredHashes;
-};
-// SLUGFILLER: SafeHash

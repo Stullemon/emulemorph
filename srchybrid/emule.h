@@ -24,6 +24,7 @@
 
 #define	DEFAULT_NICK		thePrefs.GetHomepageBaseURL()
 #define	DEFAULT_TCP_PORT	4662
+#define	DEFAULT_UDP_PORT	(DEFAULT_TCP_PORT+10)
 
 class CSearchList;
 class CUploadQueue;
@@ -93,17 +94,8 @@ public:
 	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CIP2Country*		ip2country; //EastShare - added by AndCycle, IP to Country
 
-	uint64				stat_sessionReceivedBytes;
-	uint64				stat_sessionSentBytes;
-	uint64				stat_sessionSentBytesToFriend; //MORPH - Added by Yun.SF3, ZZ Upload System
 
-	uint16				stat_reconnects;
-	DWORD				stat_transferStarttime;
-	DWORD				stat_serverConnectTime;
-	DWORD				stat_starttime;
 	HANDLE				m_hMutexOneInstance;
-	uint16				stat_filteredclients;
-	uint32				stat_leecherclients; //MORPH - Added by IceCream, Anti-leecher feature
 	int					m_iDfltImageListColorFlags;
 	DWORD				m_dwProductVersionMS;
 	DWORD				m_dwProductVersionLS;
@@ -139,17 +131,19 @@ public:
 	bool		IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen);
 
 	CString		CreateED2kSourceLink(const CAbstractFile* f);
-	CString		CreateED2kHostnameSourceLink(const CAbstractFile* f);
+//	CString		CreateED2kHostnameSourceLink(const CAbstractFile* f);
+	CString		CreateKadSourceLink(const CAbstractFile* f);
 
 	// clipboard (text)
 	bool		CopyTextToClipboard( CString strText );
 	CString		CopyTextFromClipboard();
 	void		OnlineSig();
 	void		UpdateReceivedBytes(uint32 bytesToAdd);
-	void		UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend = false); //MORPH - Added by Yun.SF3, ZZ Upload System
+	void		UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend = false);
 	int			GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength = -1);
 	HIMAGELIST	GetSystemImageList() { return m_hSystemImageList; }
 	CSize		GetSmallSytemIconSize() { return m_sizSmallSystemIcon; }
+	bool		IsPortchangeAllowed();
 	bool		IsConnected();
 	bool		IsFirewalled();
 	bool		DoCallback( CUpDownClient *client );
@@ -179,6 +173,8 @@ public:
     void			ClearLogQueue(bool bDebugPendingMsgs = false);
     // Elandal:ThreadSafeLogging <--
 
+	bool			DidWeAutoStart() { return m_bAutoStart; }
+
 protected:
 	bool ProcessCommandline();
 	void SetTimeOnTransfer();
@@ -202,9 +198,9 @@ protected:
     // Elandal:ThreadSafeLogging <--
 
 	uint32 m_dwPublicIP;
+	bool m_bAutoStart;
 public:
 	void OptimizerInfo(void); // Commander - Added: Optimizer [ePlus]
-	WSADATA				m_wsaData; //MORPH - Added by SiRoB, eWombat [WINSOCK2]
 };
 
 extern CemuleApp theApp;

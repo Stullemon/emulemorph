@@ -36,7 +36,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 #define	DFLT_MAXCONPERFIVE	20
-
+#define DFLT_MAXHALFOPEN 9
 
 ///////////////////////////////////////////////////////////////////////////////
 // CPPgTweaks dialog
@@ -57,6 +57,7 @@ CPPgTweaks::CPPgTweaks()
 	m_iFileBufferSize = 0;
 	m_iQueueSize = 0;
 	m_iMaxConnPerFive = 0;
+	m_iMaxHalfOpen = 0;
 	m_iAutoTakeEd2kLinks = 0;
 	m_iVerbose = 0;
 	m_iDebugSourceExchange = 0;
@@ -94,6 +95,7 @@ CPPgTweaks::CPPgTweaks()
 
 	m_bInitializedTreeOpts = false;
 	m_htiMaxCon5Sec = NULL;
+	m_htiMaxHalfOpen = NULL;
 	m_htiAutoTakeEd2kLinks = NULL;
 	m_htiVerboseGroup = NULL;
 	m_htiVerbose = NULL;
@@ -171,6 +173,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiMaxCon5Sec, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiMaxHalfOpen = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXHALFOPENCONS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
+		m_ctrlTreeOptions.AddEditBox(m_htiMaxHalfOpen, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiAutoTakeEd2kLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTOTAKEED2KLINKS), TVI_ROOT, m_iAutoTakeEd2kLinks);
 		m_htiFirewallStartup = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FO_PREF_STARTUP), TVI_ROOT, m_iFirewallStartup);
 
@@ -260,6 +264,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiMaxCon5Sec, m_iMaxConnPerFive);
 	DDV_MinMaxInt(pDX, m_iMaxConnPerFive, 1, INT_MAX);
+	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiMaxHalfOpen, m_iMaxHalfOpen);
+	DDV_MinMaxInt(pDX, m_iMaxHalfOpen, 1, INT_MAX);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_iAutoTakeEd2kLinks);
 	if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
 	if (m_htiDebug2Disk)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_iDebug2Disk);
@@ -335,6 +341,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgTweaks::OnInitDialog()
 {
 	m_iMaxConnPerFive = thePrefs.GetMaxConperFive();
+	m_iMaxHalfOpen = thePrefs.GetMaxHalfConnections();
 	m_iAutoTakeEd2kLinks = HaveEd2kRegAccess() ? thePrefs.AutoTakeED2KLinks() : 0;
 	if (thePrefs.GetEnableVerboseOptions())
 	{
@@ -416,6 +423,7 @@ BOOL CPPgTweaks::OnApply()
 
 	thePrefs.SetMaxConsPerFive(m_iMaxConnPerFive ? m_iMaxConnPerFive : DFLT_MAXCONPERFIVE);
 	theApp.scheduler->original_cons5s = thePrefs.GetMaxConperFive();
+	thePrefs.SetMaxHalfConnections(m_iMaxHalfOpen ? m_iMaxHalfOpen : DFLT_MAXHALFOPEN);
 
 	if (HaveEd2kRegAccess() && thePrefs.AutoTakeED2KLinks() != (bool)m_iAutoTakeEd2kLinks)
 	{
@@ -491,15 +499,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bOpenPortsOnStartUp = m_iFirewallStartup; 
 	thePrefs.m_bPeerCacheEnabled = !m_iDisablePeerCache;
 
-	/*Removed by SiRoB, Not needed while zz ratio present
-    // ZZ:UploadSpeedSense -->
-	if( !thePrefs.m_bDynUpEnabled && m_iDynUpEnabled )
-	{
-		AfxMessageBox(GetResString(IDS_USS_MIN), MB_ICONERROR);
-	}
-	if( m_iDynUpMinUpload < 10 )
-		m_iDynUpMinUpload = 10;
-	*/
+	// ZZ:UploadSpeedSense -->
     thePrefs.m_bDynUpEnabled = m_iDynUpEnabled;
     thePrefs.minupload = m_iDynUpMinUpload;
     thePrefs.m_iDynUpPingTolerance = m_iDynUpPingTolerance;
@@ -529,7 +529,7 @@ void CPPgTweaks::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	{
 		m_iFileBufferSize = ((CSliderCtrl*)pScrollBar)->GetPos() * 1024;
 	CString temp;
-		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize));
+		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
 		SetModified(TRUE);
 	}
@@ -551,6 +551,7 @@ void CPPgTweaks::Localize(void)
 		GetDlgItem(IDC_WARNING)->SetWindowText(GetResString(IDS_TWEAKS_WARNING));
 
 		if (m_htiMaxCon5Sec) m_ctrlTreeOptions.SetEditLabel(m_htiMaxCon5Sec, GetResString(IDS_MAXCON5SECLABEL));
+		if (m_htiMaxHalfOpen) m_ctrlTreeOptions.SetEditLabel(m_htiMaxHalfOpen, GetResString(IDS_MAXHALFOPENCONS));
 		if (m_htiAutoTakeEd2kLinks) m_ctrlTreeOptions.SetItemText(m_htiAutoTakeEd2kLinks, GetResString(IDS_AUTOTAKEED2KLINKS));
 		if (m_htiCreditSystem) m_ctrlTreeOptions.SetItemText(m_htiCreditSystem, GetResString(IDS_USECREDITSYSTEM));
 		if (m_htiLog2Disk) m_ctrlTreeOptions.SetItemText(m_htiLog2Disk, GetResString(IDS_LOG2DISK));
@@ -595,7 +596,7 @@ void CPPgTweaks::Localize(void)
         if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
 
         CString temp;
-		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize));
+		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
 		temp.Format(_T("%s: %s"), GetResString(IDS_QUEUESIZE), GetFormatedUInt(m_iQueueSize));
 		GetDlgItem(IDC_QUEUESIZE_STATIC)->SetWindowText(temp);
@@ -608,6 +609,7 @@ void CPPgTweaks::OnDestroy()
 	m_ctrlTreeOptions.DestroyWindow();
 	m_bInitializedTreeOpts = false;
 	m_htiMaxCon5Sec = NULL;
+	m_htiMaxHalfOpen = NULL;
 	m_htiAutoTakeEd2kLinks = NULL;
 	m_htiVerboseGroup = NULL;
 	m_htiVerbose = NULL;
@@ -668,6 +670,7 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 			BOOL bCheck;
 			if (m_ctrlTreeOptions.GetCheckBox(m_htiVerbose, bCheck))
 			{
+				if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, bCheck);
 				if (m_htiDebugSourceExchange)	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, bCheck);
 				if (m_htiLogBannedClients)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogBannedClients, bCheck);
 				if (m_htiLogRatingDescReceived) m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogRatingDescReceived, bCheck);
@@ -675,7 +678,7 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 				if (m_htiLogFilteredIPs)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFilteredIPs, bCheck);
 				if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
                 if (m_htiLogA4AF)			    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, bCheck); // ZZ:DownloadManager
-				if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, bCheck);
+				if (m_htiLogUlDlEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, bCheck);
 			}
 		}
 		SetModified();

@@ -13,16 +13,13 @@ public:
 	COScopeCtrl(int NTrends = 1);
 	
 	// Attributes
-	// -khaos--+++> Added parameters: bool bUseTrendRatio = true (AppendPoints and AppendEmptyPoints)
-	//				Added public function: SetTrendRatio
+	//  Added parameters: bool bUseTrendRatio = true (AppendPoints and AppendEmptyPoints)
+	//	Added public function: SetTrendRatio
 	void AppendPoints(double dNewPoint[], bool bInvalidate = true, bool bAdd2List = true, bool bUseTrendRatio = true);
 	void AppendEmptyPoints(double dNewPoint[], bool bInvalidate = true, bool bAdd2List = true, bool bUseTrendRatio = true);
 	void SetTrendRatio(int iTrend, unsigned int iRatio = 1);
-	// <-----khaos-
-	//MORPH START - Added by SiRoB, Legend Graph
 	void SetLegendLabel(CString string,int iTrend);
 	void SetBarsPlot(bool BarsPlot,int iTrend);
-	//MORPH END  - Added by SiRoB, Legend Graph
 	void SetRange(double dLower, double dUpper, int iTrend = 0);
 	void SetRanges(double dLower, double dUpper);
 	void SetXUnits(CString string, CString XMin = _T(""), CString XMax = _T(""));
@@ -82,17 +79,14 @@ public:
 		double dUpperLimit;         // upper bounds
 		double dRange;				// = UpperLimit - LowerLimit
 		double dVerticalFactor;
-		// -khaos--+++> Optional variable to set a ratio for a given "trend".
-		//				The purpose here is to better implement the customizable
-		//				active connections ratio, so that points are redrawn correctly
-		//				when the ratio is changed, rather than having all previous points
-		//				no longer match up with the new ratio.
+		// Optional variable to set a ratio for a given "trend".
+		// The purpose here is to better implement the customizable
+		// active connections ratio, so that points are redrawn correctly
+		// when the ratio is changed, rather than having all previous points
+		// no longer match up with the new ratio.
 		int		iTrendRatio;
-		// <-----khaos-
-		//MORPH START - Added by SiRoB
 		CString LegendLabel;
 		bool BarsPlot;
-		//MORPH END - Added by SiRoB
 		CList<double,double> lstPoints;
 	} PlotData_t;
 	

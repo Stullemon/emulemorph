@@ -32,6 +32,7 @@
 #include "Sockets.h"
 #include "MuleStatusBarCtrl.h"
 #include "HelpIDs.h"
+#include "NetworkInfoDlg.h"
 
 // Mighty Knife: Popup-Menu for editing news feeds
 #include "MenuCmds.h"
@@ -561,12 +562,19 @@ bool CServerWnd::AddServer(uint16 nPort, CString strIP, CString strName, bool bS
 		CServer* update = theApp.serverlist->GetServerByAddress(toadd->GetAddress(), toadd->GetPort());
 		if(update)
 		{
-			update->SetListName(toadd->GetListName());
-			serverlistctrl.RefreshServer(update);
+			static const TCHAR _aszServerPrefix[] = _T("Server");
+			if (_tcsnicmp(toadd->GetListName(), _aszServerPrefix, ARRSIZE(_aszServerPrefix)-1) != 0)
+			{
+				update->SetListName(toadd->GetListName());
+				serverlistctrl.RefreshServer(update);
+			}
+		}
+		else
+		{
+			if (bShowErrorMB)
+			AfxMessageBox(GetResString(IDS_SRV_NOTADDED));
 		}
 		delete toadd;
-		if (bShowErrorMB)
-		AfxMessageBox(GetResString(IDS_SRV_NOTADDED));
 		return false;
 	}
 	else
@@ -777,123 +785,11 @@ void CServerWnd::ToggleDebugWindow()
 	//MORPH END   - Changed by SiRoB, XML News [O²]
 }
 
-void CServerWnd::UpdateMyInfo() {
-	CString buffer;
-
+void CServerWnd::UpdateMyInfo()
+{
 	m_MyInfo.SetRedraw(FALSE);
 	m_MyInfo.SetWindowText(_T(""));
-
-	///////////////////////////////////////////////////////////////////////////
-	// ED2K
-	///////////////////////////////////////////////////////////////////////////
-	m_MyInfo.SetSelectionCharFormat(m_cfBold);
-	m_MyInfo << _T("eD2K ") << GetResString(IDS_NETWORK) << _T("\r\n");
-	m_MyInfo.SetSelectionCharFormat(m_cfDef);
-
-	m_MyInfo << GetResString(IDS_STATUS) << _T(":\t");
-	if (theApp.serverconnect->IsConnected())
-		m_MyInfo << GetResString(IDS_CONNECTED);
-	else if(theApp.serverconnect->IsConnecting())
-		m_MyInfo << GetResString(IDS_CONNECTING);
-	else 
-		m_MyInfo << GetResString(IDS_DISCONNECTED);
-	m_MyInfo << _T("\r\n");
-
-	if (theApp.serverconnect->IsConnected()){
-		m_MyInfo << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT);
-		if (theApp.serverconnect->IsLowID())
-			buffer = GetResString(IDS_UNKNOWN);
-		else
-			buffer.Format(_T("%s:%i"), ipstr(theApp.serverconnect->GetClientID()), thePrefs.GetPort());
-		m_MyInfo << _T("\t") << buffer << _T("\r\n");
-
-		m_MyInfo << GetResString(IDS_ID) << _T("\t");
-		if (theApp.serverconnect->IsConnected()){
-			buffer.Format(_T("%u"),theApp.serverconnect->GetClientID());
-			m_MyInfo << buffer;
-		}
-		m_MyInfo << _T("\r\n");
-
-		m_MyInfo << _T("\t");
-		if (theApp.serverconnect->IsLowID())
-			m_MyInfo << GetResString(IDS_IDLOW);
-		else
-			m_MyInfo << GetResString(IDS_IDHIGH);
-		m_MyInfo << _T("\r\n");
-
-		CServer* cur_server = theApp.serverconnect->GetCurrentServer();
-		CServer* srv = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
-		if (srv){
-			m_MyInfo << _T("\r\n");
-			m_MyInfo.SetSelectionCharFormat(m_cfBold);
-			m_MyInfo << _T("eD2K ") << GetResString(IDS_SERVER) << _T("\r\n");
-			m_MyInfo.SetSelectionCharFormat(m_cfDef);
-
-			m_MyInfo << GetResString(IDS_SW_NAME) << _T(":\t") << srv->GetListName() << _T("\r\n");
-			m_MyInfo << GetResString(IDS_DESCRIPTION) << _T(":\t") << srv->GetDescription() << _T("\r\n");
-			m_MyInfo << GetResString(IDS_IP) << _T(":\t") << srv->GetAddress() << _T(":") << srv->GetPort() << "\r\n";
-			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
-//			if (srv->GetConnPort() != srv->GetPort())  
-			m_MyInfo << GetResString(IDS_AUXPORTS) << _T(":\t") << srv->GetConnPort() << _T("\r\n"); 
-			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-			m_MyInfo << GetResString(IDS_VERSION) << _T(":\t") << srv->GetVersion() << _T("\r\n");
-			m_MyInfo << GetResString(IDS_UUSERS) << _T(":\t") << GetFormatedUInt(srv->GetUsers()) << _T("\r\n");
-			m_MyInfo << GetResString(IDS_PW_FILES) << _T(":\t") << GetFormatedUInt(srv->GetFiles()) << _T("\r\n");
-		}
-	}
-	m_MyInfo << _T("\r\n");
-
-	///////////////////////////////////////////////////////////////////////////
-	// Kademlia
-	///////////////////////////////////////////////////////////////////////////
-	m_MyInfo.SetSelectionCharFormat(m_cfBold);
-	m_MyInfo << GetResString(IDS_KADEMLIA) << _T(" ") << GetResString(IDS_NETWORK) << _T("\r\n");
-	m_MyInfo.SetSelectionCharFormat(m_cfDef);
-	
-	m_MyInfo << GetResString(IDS_STATUS) << _T(":\t");
-	if(Kademlia::CKademlia::isConnected()){
-		if(Kademlia::CKademlia::isFirewalled())
-			m_MyInfo << GetResString(IDS_FIREWALLED);
-		else
-			m_MyInfo << GetResString(IDS_KADOPEN);
-		m_MyInfo << _T("\r\n");
-
-		CString IP;
-		Kademlia::CMiscUtils::ipAddressToString(Kademlia::CKademlia::getPrefs()->getIPAddress(),&IP);
-		buffer.Format(_T("%s:%i"), IP, thePrefs.GetUDPPort());
-		m_MyInfo << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T("\t") << buffer << _T("\r\n");
-
-		buffer.Format(_T("%u"),Kademlia::CKademlia::getPrefs()->getIPAddress());
-		m_MyInfo << GetResString(IDS_ID) << _T("\t") << buffer << _T("\r\n");
-	}
-	else if (Kademlia::CKademlia::isRunning())
-		m_MyInfo << GetResString(IDS_CONNECTING) << _T("\r\n");
-	else
-		m_MyInfo << GetResString(IDS_DISCONNECTED) << _T("\r\n");
-	m_MyInfo << _T("\r\n");
-
-	///////////////////////////////////////////////////////////////////////////
-	// Web Interface
-	///////////////////////////////////////////////////////////////////////////
-	m_MyInfo.SetSelectionCharFormat(m_cfBold);
-	m_MyInfo << GetResString(IDS_WEBSRV) << _T("\r\n");
-	m_MyInfo.SetSelectionCharFormat(m_cfDef);
-	m_MyInfo << GetResString(IDS_STATUS) << _T(":\t");
-	m_MyInfo << (theApp.webserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << _T("\r\n");
-	if (thePrefs.GetWSIsEnabled()){
-		CString count;
-		count.Format(_T("%i %s"),theApp.webserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
-		m_MyInfo << _T("\t") << count << _T("\r\n");
-		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
-		m_MyInfo << _T("URL:\t") << _T("http://") << ipstr(nLocalIP) << _T(":") << thePrefs.GetWSPort() << _T("/\r\n");
-	}
-	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
-	m_MyInfo << _T("\r\n");
-	buffer.Format(_T("%s"),(LPCTSTR)(md4str((uchar*)thePrefs.GetUserHash())));
-	m_MyInfo << GetResString(IDS_CD_UHASH) << _T("\t") << buffer.Left (16) << _T("-");
-	m_MyInfo << _T("\r\n\t") << buffer.Mid (16,255);
-	//MORPH END   - Added by SiRoB, [end] Mighty Knife
-
+	CreateNetworkInfo(m_MyInfo, m_cfDef, m_cfBold);
 	m_MyInfo.SetRedraw(TRUE);
 	m_MyInfo.Invalidate();
 }
@@ -942,66 +838,10 @@ BOOL CServerWnd::SaveServerMetStrings()
 	return m_pacServerMetURL->SaveList(CString(thePrefs.GetConfigDir()) + _T("\\") SERVERMET_STRINGS_PROFILE);
 }
 
-void CServerWnd::ShowServerInfo() {
-	CString buffer;
-
-	CServer* cur_server = theApp.serverconnect ? theApp.serverconnect->GetCurrentServer() : NULL;
-	CServer* server = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
-
-	if (!theApp.serverconnect->IsConnected() || server==NULL)
-		buffer=GetResString(IDS_ERR_NOTCONNECTED);
-	else {
-		CString buffer2;
-		buffer2.Format(_T("%s:\n    %s\n\n"),GetResString(IDS_SL_SERVERNAME),server->GetListName());
-		buffer.Append(buffer2);
-
-		buffer2.Format(_T("%s:\n    %s\n\n"),GetResString(IDS_DESCRIPTION),server->GetDescription());
-		buffer.Append(buffer2);
-
-		buffer2.Format(_T("%s:\n    %s\n\n"),GetResString(IDS_VERSION),server->GetVersion() );
-		buffer.Append(buffer2);
-
-		if (thePrefs.IsExtControlsEnabled()){
-			buffer2.Format(_T("%s:\n    "), GetResString(IDS_SRV_TCPCOMPR));
-			if (server->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
-				buffer2 += GetResString(IDS_YES);
-			else
-				buffer2 += GetResString(IDS_NO);
-			buffer.Append(buffer2 + _T("\n\n"));
-		}
-		if (thePrefs.IsExtControlsEnabled()){
-			buffer2.Format(_T("%s:\n    "), GetResString(IDS_SRV_UDPSR));
-			if (server->GetUDPFlags() & SRV_UDPFLG_EXT_GETSOURCES)
-				buffer2 += GetResString(IDS_YES);
-			else
-				buffer2 += GetResString(IDS_NO);
-			buffer.Append(buffer2 + _T("\n\n"));
-
-			buffer2.Format(_T("%s:\n    "), GetResString(IDS_SRV_UDPFR));
-			if (server->GetUDPFlags() & SRV_UDPFLG_EXT_GETFILES)
-				buffer2 += GetResString(IDS_YES);
-			else
-				buffer2 += GetResString(IDS_NO);
-			buffer.Append(buffer2 + _T("\n\n"));
-		}
-
-		buffer2.Format(_T("%s%s:\n    %s:%u\n\n"),GetResString(IDS_CD_UIP),GetResString(IDS_PORT),server->GetFullIP(),server->GetPort() );
-		buffer.Append(buffer2);
-
-		buffer2.Format(_T("%s:\n    %u\n\n"),GetResString(IDS_PW_FILES),server->GetFiles());
-		buffer.Append(buffer2);
-
-		buffer2.Format(_T("%s:\n    %u / %u\n\n"),GetResString(IDS_SERVER_LIMITS),server->GetSoftFiles(),server->GetHardFiles());
-		buffer.Append(buffer2);
-
-		buffer2.Format(_T("%s:\n    %u / %u\n\n"),GetResString(IDS_UUSERS),server->GetUsers(),server->GetMaxUsers());
-		buffer.Append(buffer2);
-
-		buffer2.Format(_T("%s:\n    %u ms\n\n"),GetResString(IDS_PING),server->GetPing());
-		buffer.Append(buffer2);
-		
-	}
-	MessageBox(buffer, GetResString(IDS_SERVERINFO));
+void CServerWnd::ShowNetworkInfo()
+{
+	CNetworkInfoDlg dlg;
+	dlg.DoModal();
 }
 
 void CServerWnd::OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1053,21 +893,22 @@ void CServerWnd::SaveAllSettings()
 	SaveServerMetStrings();
 }
 
-void CServerWnd::OnDDClicked() {
-	
+void CServerWnd::OnDDClicked()
+{
 	CWnd* box=GetDlgItem(IDC_SERVERMETURL);
 	box->SetFocus();
 	box->SetWindowText(_T(""));
 	box->SendMessage(WM_KEYDOWN,VK_DOWN,0x00510001);
-	
 }
-void CServerWnd::ResetHistory() {
 
-	if (m_pacServerMetURL==NULL) return;
-
+void CServerWnd::ResetHistory()
+{
+	if (m_pacServerMetURL == NULL)
+		return;
 	GetDlgItem(IDC_SERVERMETURL)->SendMessage(WM_KEYDOWN, VK_ESCAPE, 0x00510001);
 		m_pacServerMetURL->Clear();
 }
+
 BOOL CServerWnd::OnHelpInfo(HELPINFO* pHelpInfo)
 {
 	theApp.ShowHelp(eMule_FAQ_Update_Server);

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 #include "kademlia/routing/contact.h"
 
 class CIni;
+class CKademliaWnd;
 
 class CKadContactListCtrl : public CMuleListCtrl
 {
@@ -28,19 +29,20 @@ public:
 	CKadContactListCtrl();
 	virtual ~CKadContactListCtrl();
 
-	void	ContactAdd(const Kademlia::CContact* contact);
-	void	ContactRem(const Kademlia::CContact* contact);
-	void	ContactRef(const Kademlia::CContact* contact);
-
-	void	Init();
-	void	Localize();
-	void	Hide() {ShowWindow(SW_HIDE);}
-	void	Visable() {ShowWindow(SW_SHOW);}
-	void	SaveAllSettings(CIni* ini);
-	void	UpdateKadContactCount();
-
 protected:
+	friend class CKademliaWnd;
 	CString m_strLVName;
+
+	bool ContactAdd(const Kademlia::CContact* contact);
+	void ContactRem(const Kademlia::CContact* contact);
+	void ContactRef(const Kademlia::CContact* contact);
+
+	void Init();
+	void Localize();
+	void Hide() {ShowWindow(SW_HIDE);}
+	void Visable() {ShowWindow(SW_SHOW);}
+	void SaveAllSettings(CIni* ini);
+	void UpdateKadContactCount();
 
 	void UpdateContact(int iItem, const Kademlia::CContact* contact, bool bLocalize = false);
 	void SetAllIcons();

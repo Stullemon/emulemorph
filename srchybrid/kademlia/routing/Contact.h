@@ -54,9 +54,9 @@ public:
 	CContact();
 	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type);
 	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, uint16 tcpPort, byte type, const CUInt128 &target);
-//	CContact(const CUInt128 &clientID, uint32 ip, uint16 udpPort, byte type, uint16 tcpPort);
 
 	void getClientID(CUInt128 *id) const;
+	CUInt128 getClientID() const {return m_clientID;}
 	void getClientID(CString *id) const;
 	void setClientID(const CUInt128 &clientID);
 
@@ -81,6 +81,13 @@ public:
 	bool madeContact(void) const;
 	void madeContact(bool val);
 
+	bool getGuiRefs(void) const { return m_guiRefs; }
+	void setGuiRefs(bool refs) { m_guiRefs = refs; }
+
+	bool inUse(void) {return (m_inUse>0);}
+	void incUse(void) {m_inUse++;}
+	void decUse(void) {if(m_inUse)m_inUse--;else ASSERT(0);}
+
 private:
 	CUInt128	m_clientID;
 	CUInt128	m_distance;
@@ -88,9 +95,11 @@ private:
 	uint16		m_tcpPort;
 	uint16		m_udpPort;
 	byte		m_type;
+	bool		m_madeContact;
+	bool		m_guiRefs;
 	time_t		m_lastTypeSet;
 	time_t		m_expires;
-	bool		m_madeContact;
+	uint32		m_inUse;
 };
 
 } // End namespace

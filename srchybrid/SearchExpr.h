@@ -7,19 +7,19 @@ enum ESearchOperators
 	SEARCHOP_NOT
 };
 
-#define	SEARCHOPTOK_AND	_T("\255AND")
-#define	SEARCHOPTOK_OR	_T("\255OR")
-#define	SEARCHOPTOK_NOT	_T("\255NOT")
+#define	SEARCHOPTOK_AND	"\255AND"
+#define	SEARCHOPTOK_OR	"\255OR"
+#define	SEARCHOPTOK_NOT	"\255NOT"
 
 class CSearchExpr
 {
 public:
 	CSearchExpr(){}
-	CSearchExpr(LPCTSTR pszString)
+	CSearchExpr(LPCSTR pszString)
 	{
 		Add(pszString);
 	}
-	CSearchExpr(const CString* pstrString)
+	CSearchExpr(const CStringA* pstrString)
 	{
 		Add(*pstrString);
 	}
@@ -33,11 +33,11 @@ public:
 		if (eOperator == SEARCHOP_NOT)
 			m_aExpr.Add(SEARCHOPTOK_NOT);
 	}
-	void Add(LPCTSTR pszString)
+	void Add(LPCSTR pszString)
 	{
 		m_aExpr.Add(pszString);
 	}
-	void Add(const CString* pstrString)
+	void Add(const CStringA* pstrString)
 	{
 		m_aExpr.Add(*pstrString);
 	}
@@ -45,12 +45,12 @@ public:
 	{
 		m_aExpr.Append(pexpr->m_aExpr);
 	}
-	void Concatenate(const CString* pstrString)
+	void Concatenate(const CStringA* pstrString)
 	{
 		ASSERT( m_aExpr.GetSize() == 1 );
-		m_aExpr[0] += _T(' ');
+		m_aExpr[0] += ' ';
 		m_aExpr[0] += *pstrString;
 	}
 	
-	CStringArray m_aExpr;
+	CStringAArray m_aExpr;
 };

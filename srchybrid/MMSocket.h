@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2003 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2003 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -183,5 +183,5 @@ private:
 #define MMT_PARTFILFE		0x01
 #define MMT_FINISHEDFILE	0x02
 
-#define MM_VERSION			0x08
-#define MM_STRVERSION		"0.8a"
+#define MM_VERSION			0x09
+#define MM_STRVERSION		"0.9a"

@@ -110,33 +110,33 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(_T("-"));
 
-	if (m_client->reqfile)
-		GetDlgItem(IDC_UPLOADING)->SetWindowText( m_client->reqfile->GetFileName()  );
+	if (m_client->GetRequestFile())
+		GetDlgItem(IDC_UPLOADING)->SetWindowText( m_client->GetRequestFile()->GetFileName()  );
 	else 
 		GetDlgItem(IDC_UPLOADING)->SetWindowText(_T("-"));
 
-	GetDlgItem(IDC_DDUP)->SetWindowText(CastItoXBytes(m_client->GetTransferedDown()));
+	GetDlgItem(IDC_DDUP)->SetWindowText(CastItoXBytes(m_client->GetTransferedDown(), false, false));
 
-	GetDlgItem(IDC_DDOWN)->SetWindowText(CastItoXBytes(m_client->GetTransferedUp()));
+	GetDlgItem(IDC_DDOWN)->SetWindowText(CastItoXBytes(m_client->GetTransferedUp(), false, false));
 
 	//wistily
 	/*
-	buffer.Format(_T("%.1f %s"),(float)m_client->GetDownloadDatarate()/1024,GetResString(IDS_KBYTESEC));
-	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
-	
-	buffer.Format(_T("%.1f %s"),(float)m_client->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
-	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
-	*/
-	buffer.Format(_T("%.1f %s"),(float)m_client->GetAvDownDatarate()/1024,GetResString(IDS_KBYTESEC));
+	buffer.Format(_T("%s"), CastItoXBytes(m_client->GetDownloadDatarate(), false, true));
 	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
 
-	buffer.Format(_T("%.1f %s"),(float)m_client->GetAvUpDatarate()/1024,GetResString(IDS_KBYTESEC));
+	buffer.Format(_T("%s"),CastItoXBytes(m_client->GetDatarate(), false, true));
+	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
+	*/
+	buffer.Format(_T("%s"), CastItoXBytes(m_client->GetAvDownDatarate(), false, true));
+	GetDlgItem(IDC_DAVUR)->SetWindowText(buffer);
+
+	buffer.Format(_T("%s"),CastItoXBytes(m_client->GetAvUpDatarate(), false, true));
 	GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
 	//wistily stop
 	
 	if (m_client->Credits()){
-		GetDlgItem(IDC_DUPTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetDownloadedTotal()));
-		GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetUploadedTotal()));
+		GetDlgItem(IDC_DUPTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetDownloadedTotal(), false, false));
+		GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText(CastItoXBytes(m_client->Credits()->GetUploadedTotal(), false, false));
 		buffer.Format(_T("%.1f  [%.1f]"),(float)m_client->Credits()->GetScoreRatio(m_client->GetIP()),(float)m_client->Credits()->GetMyScoreRatio(m_client->GetIP()));	// MORPH - Added by IceCream, VQB: ownCredits
 		GetDlgItem(IDC_DRATIO)->SetWindowText(buffer);
 		
@@ -183,6 +183,12 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DSCORE)->SetWindowText(_T("-"));
 
+	if (m_client->GetKadPort() )
+		buffer.Format( _T("%s"), GetResString(IDS_CONNECTED));
+	else
+		buffer.Format( _T("%s"), GetResString(IDS_DISCONNECTED));
+	GetDlgItem(IDC_CLIENTDETAIL_KADCON)->SetWindowText(buffer);
+	
 	// [MightyKnife] Private modification
 	#ifdef MIGHTY_TWEAKS
 	CString AddInfo;
@@ -244,6 +250,9 @@ void CClientDetailDialog::Localize(){
 	GetDlgItem(IDC_STATIC52)->SetWindowText(GetResString(IDS_CD_RATING));
 	GetDlgItem(IDC_STATIC53)->SetWindowText(GetResString(IDS_CD_USCORE));
 	GetDlgItem(IDC_STATIC133x)->SetWindowText(GetResString(IDS_CD_IDENT));
+	CString buffer;
+	buffer.Format(_T("%s:"), GetResString(IDS_KADEMLIA)); 
+	GetDlgItem(IDC_CLIENTDETAIL_KAD)->SetWindowText(buffer);
 
 	GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_FD_CLOSE));
 

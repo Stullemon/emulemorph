@@ -28,10 +28,12 @@
 #include "OtherFunctions.h"
 #include "SafeFile.h"
 #include "ClientList.h"
+#include "Listensocket.h"
 #include <zlib/zlib.h>
 #include "kademlia/kademlia/Kademlia.h"
 #include "kademlia/net/KademliaUDPListener.h"
 #include "kademlia/io/IOException.h"
+#include "IPFilter.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -45,6 +47,7 @@ static char THIS_FILE[]=__FILE__;
 CClientUDPSocket::CClientUDPSocket()
 {
 	m_bWouldBlock = false;
+	m_port=0;
 }
 
 CClientUDPSocket::~CClientUDPSocket()
@@ -71,7 +74,7 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 	SOCKADDR_IN sockAddr = {0};
 	int iSockAddrLen = sizeof sockAddr;
 	int length = ReceiveFrom(buffer, sizeof buffer, (SOCKADDR*)&sockAddr, &iSockAddrLen);
-	if (length >= 1 && !theApp.clientlist->IsBannedClient(sockAddr.sin_addr.S_un.S_addr))
+	if (length >= 1 && !(theApp.ipfilter->IsFiltered(sockAddr.sin_addr.S_un.S_addr) || theApp.clientlist->IsBannedClient(sockAddr.sin_addr.S_un.S_addr)))
     {
 		CString strError;
 		try
@@ -209,6 +212,34 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 {
 	switch(opcode)
 	{
+		case OP_REASKCALLBACKUDP:
+		{
+			theStats.AddDownDataOverheadOther(size);
+			CUpDownClient* buddy = theApp.clientlist->GetBuddy();
+			if( buddy )
+			{
+				if( size < 17 || buddy->socket == NULL )
+					break;
+				AddDebugLogLine(false, _T("Found buddy in OP_REASKCALLBACKUDP"));
+				uchar check[16];
+				memcpy(&check, packet, 16);
+				if( !memcmp(&check, buddy->GetBuddyID(), 16) )
+				{
+					AddDebugLogLine(false, _T("Match Hash - buddy in OP_REASKCALLBACKUDP"));
+					memcpy(packet+10, &ip, 4);
+					memcpy(packet+14, &port, 2);
+					Packet* response = new Packet(OP_EMULEPROT);
+					response->opcode = OP_REASKCALLBACKTCP;
+					response->pBuffer = new char[size];
+					memcpy(response->pBuffer, packet+10, size-10);
+					response->size = size-10;
+					buddy->socket->SendPacket(response);
+				}
+				else
+					AddDebugLogLine(false, _T("No Matched Hash - buddy in OP_REASKCALLBACKUDP"));
+			}
+			break;
+		}
 		case OP_REASKFILEPING:
 		{
 			theStats.AddDownDataOverheadFileRequest(size);
@@ -281,7 +312,7 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 				{
 					AddDebugLogLine(false, _T("Client UDP socket; ReaskFilePing; reqfile does not match"));
 					TRACE(_T("reqfile:         %s\n"), DbgGetFileInfo(reqfile->GetFileHash()));
-					TRACE(_T("sender->reqfile: %s\n"), sender->reqfile ? DbgGetFileInfo(sender->reqfile->GetFileHash()) : _T("(null)"));
+					TRACE(_T("sender->GetRequestFile(): %s\n"), sender->GetRequestFile() ? DbgGetFileInfo(sender->GetRequestFile()->GetFileHash()) : _T("(null)"));
 				}
 			}
 			else
@@ -326,7 +357,7 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 				CSafeMemFile data_in((BYTE*)packet,size);
 				if ( sender->GetUDPVersion() > 3 )
 				{
-					sender->ProcessFileStatus(true, &data_in, sender->reqfile);
+					sender->ProcessFileStatus(true, &data_in, sender->GetRequestFile());
 				}
 				uint16 nRank = data_in.ReadUInt16();
 				sender->SetRemoteQueueFull(false);
@@ -345,6 +376,16 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 				sender->UDPReaskFNF(); // may delete 'sender'!
 				sender = NULL;
 			}
+			break;
+		}
+		case OP_PORTTEST:
+		{
+			theStats.AddDownDataOverheadOther(size);
+			if (size==1)
+				if (packet[0]==0x12) {
+					bool ret=theApp.listensocket->SendPortTestReply('1',true);
+					theApp.AddDebugLogLine(true,_T("UDP Portcheck packet arrived - ACK sent back (status=%i)"),ret );
+				}
 			break;
 		}
 		default:
@@ -377,7 +418,7 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-SocketSentBytes CClientUDPSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket) { // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize){ // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();
@@ -452,8 +493,26 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 }
 
 bool CClientUDPSocket::Create(){
-	if (thePrefs.GetUDPPort())
-		return CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
-	else
-		return true;
+	bool ret=true;
+
+	if (thePrefs.GetUDPPort()) {
+		ret=CAsyncSocket::Create(thePrefs.GetUDPPort(),SOCK_DGRAM,FD_READ|FD_WRITE);
+		if (ret)
+			m_port=thePrefs.GetUDPPort();
+	}
+
+	if (ret)
+		m_port=thePrefs.GetUDPPort();
+
+	return ret;
+}
+
+bool CClientUDPSocket::Rebind(){
+	
+	if (thePrefs.GetUDPPort()==m_port)
+		return false;
+
+	Close();
+
+	return Create();
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -55,7 +55,7 @@ public:
 	~CUDPSocket();
 
 	bool	Create();
-    SocketSentBytes Send(uint32 maxNumberOfBytesToSend, uint32 minFragSize, bool onlyAllowedToSendControlPacket); // ZZ:UploadBandWithThrottler (UDP)
+    SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
 	void	SendPacket(Packet* packet,CServer* host);
 	void	DnsLookupDone(WPARAM wp, LPARAM lp);
 
@@ -72,8 +72,8 @@ private:
 	CUDPSocketWnd m_udpwnd;
 
 	void 	SendBuffer();
-	bool	ProcessPacket(uint8* packet, UINT size, UINT opcode, LPCTSTR host, uint16 nUDPPort);
-	void	ProcessPacketError(UINT size, UINT opcode, LPCTSTR host, uint16 nTCPPort, LPCTSTR pszError);
+	bool	ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort);
+	void	ProcessPacketError(UINT size, UINT opcode, uint32 nIP, uint16 nTCPPort, LPCTSTR pszError);
 
 	uint8*	m_sendbuffer;
 	uint32	m_sendblen;

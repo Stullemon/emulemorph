@@ -14,7 +14,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-
+#include "shahashset.h"
 class CSafeMemFile;
 
 struct SUnresolvedHostname
@@ -69,17 +69,21 @@ public:
 	CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* hash, const CStringArray& param, const TCHAR* sources);
 	virtual ~CED2KFileLink();
 	virtual LinkType GetKind() const;
-	virtual CED2KServerListLink* GetServerListLink();
-	virtual CED2KServerLink* GetServerLink();
-	virtual CED2KFileLink* GetFileLink();
-	virtual void GetLink(CString& lnk);
-	const TCHAR* GetName() const { return m_name; }
-	long GetSize() const { return _tstol(m_size); }
-	const uchar* GetHashKey() const { return m_hash;}
-	bool HasValidSources() const {return (SourcesList!=NULL); }
+	virtual CED2KServerListLink*	GetServerListLink();
+	virtual CED2KServerLink*		GetServerLink();
+	virtual CED2KFileLink*			GetFileLink();
+	virtual void					GetLink(CString& lnk);
+	
+	const TCHAR*		GetName() const			{ return m_name; }
+	const uchar*		GetHashKey() const		{ return m_hash;}
+	const CAICHHash&	GetAICHHash() const		{ return m_AICHHash;}
+	long	GetSize() const						{ return _tstol(m_size); }	
+	bool	HasValidSources() const				{ return (SourcesList!=NULL); }
+	bool	HasHostnameSources() const			{ return (!m_HostnameSourcesList.IsEmpty()); }
+	bool	HasValidAICHHash() const			{ return m_bAICHHashValid; }
+
 	CSafeMemFile* SourcesList;
 	CSafeMemFile* m_hashset;
-	bool HasHostnameSources() const {return (!m_HostnameSourcesList.IsEmpty()); }
 	CTypedPtrList<CPtrList, SUnresolvedHostname*> m_HostnameSourcesList;
 private:
 	CED2KFileLink(); // Not defined
@@ -87,7 +91,9 @@ private:
 	CED2KFileLink& operator=(const CED2KFileLink&); // Not defined
 	CString m_name;
 	CString m_size;
-	uchar m_hash[16];
+	uchar	m_hash[16];
+	bool	m_bAICHHashValid;
+	CAICHHash	m_AICHHash;
 };
 
 class CED2KServerListLink : public CED2KLink {

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -121,80 +121,65 @@ BOOL CMetaDataDlg::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-static const struct {
-	UINT uID;
-	LPCTSTR pszName;
-} _aTagNames[] =
-{
-	{ FT_FILENAME,			_T("Name") },
-	{ FT_FILESIZE,			_T("Size") },
-	{ FT_FILETYPE,			_T("Type") },
-	{ FT_FILEFORMAT,		_T("Format") },
-	{ 0x05,					_T("Collection") },
-	{ 0x06,					_T("Part path") },
-	{ 0x07,					_T("Part hash") },
-	{ FT_TRANSFERED,		_T("Transfered") },
-	{ FT_GAPSTART,			_T("Gap start") },
-	{ FT_GAPEND,			_T("Gap end") },
-	{ 0x0B,					_T("Description") },
-	{ 0x0C,					_T("Ping") },
-	{ 0x0D,					_T("Fail") },
-	{ 0x0E,					_T("Preference") },
-	{ 0x0F,					_T("Port") },
-	{ 0x10,					_T("IP") },
-	{ 0x11,					_T("Version") },
-	{ FT_PARTFILENAME,		_T("Temporary file") },
-	{ 0x13,					_T("Priority") },
-	{ FT_STATUS,			_T("Status") },
-	{ FT_SOURCES,			_T("Availability") },
-	//{ 0x16,				_T("QTime") },
-	{ 0x16,					_T("Permission") },	// though not (never) used, this will be found in almost all known.met files
-	{ 0x17,					_T("Parts") },
-	{ FT_COMPLETE_SOURCES,	_T("Complete sources") },
-	{ FT_MEDIA_ARTIST,		_T("Artist") },
-	{ FT_MEDIA_ALBUM,		_T("Album") },
-	{ FT_MEDIA_TITLE,		_T("Title") },
-	{ FT_MEDIA_LENGTH,		_T("Length") },
-	{ FT_MEDIA_BITRATE,		_T("Bitrate") },
-	{ FT_MEDIA_CODEC,		_T("Codec") },
-	{ 0xFA,					_T("Server port") },
-	{ 0xFB,					_T("Server IP") },
-	{ 0xFC,					_T("Source UDP port") },
-	{ 0xFD,					_T("Source TCP port") },
-	{ 0xFE,					_T("Source IP") },
-	{ 0xFF,					_T("Source type") }
-};
+
+CString GetTagNameByID(UINT id) {
+
+	switch(id) {
+		case FT_FILENAME : return GetResString(IDS_SW_NAME);
+		case FT_FILESIZE : return GetResString(IDS_DL_SIZE);
+		case FT_FILETYPE : return GetResString(IDS_TYPE);
+		case FT_FILEFORMAT : return GetResString(IDS_FORMAT);
+		case 0x05		 : return GetResString(IDS_META_COLLECTION);
+		case 0x06		 : return GetResString(IDS_META_PARTPATH);
+		case 0x07		 : return GetResString(IDS_META_PARTHASH);
+		case FT_TRANSFERED		 : return GetResString(IDS_DL_TRANSF);
+		case FT_GAPSTART		 : return GetResString(IDS_META_GAPSTART);
+		case FT_GAPEND		 : return GetResString(IDS_META_GAPEND);
+		case 0x0B		 : return GetResString(IDS_DESCRIPTION);
+		case 0x0C		 : return GetResString(IDS_PING);
+		case 0x0D		 : return GetResString(IDS_FAIL);
+		case 0x0E		 : return GetResString(IDS_META_PREFERENCES);
+		case 0x0F		 : return GetResString(IDS_PORT);
+		case 0x10		 : return GetResString(IDS_IP);
+		case 0x11		 : return GetResString(IDS_META_VERSION);
+		case FT_PARTFILENAME : return GetResString(IDS_META_TEMPFILE);
+		case 0x13		 : return GetResString(IDS_PRIORITY);
+		case FT_STATUS		 : return GetResString(IDS_STATUS);
+		case FT_SOURCES		 : return GetResString(IDS_SEARCHAVAIL);
+		case 0x16		 : return GetResString(IDS_PERMISSION);
+		case 0x17		 : return GetResString(IDS_FD_PARTS);
+		case FT_COMPLETE_SOURCES	: return GetResString(IDS_COMPLSOURCES);
+		case FT_MEDIA_ARTIST		 : return GetResString(IDS_ARTIST);
+		case FT_MEDIA_ALBUM		 : return GetResString(IDS_ALBUM);
+		case FT_MEDIA_TITLE		 : return GetResString(IDS_TITLE);
+		case FT_MEDIA_LENGTH		 : return GetResString(IDS_LENGTH);
+		case FT_MEDIA_BITRATE		 : return GetResString(IDS_BITRATE);
+		case FT_MEDIA_CODEC		 : return GetResString(IDS_CODEC);
+		case 0xFA		 : return GetResString(IDS_META_SERVERPORT);
+		case 0xFB		 : return GetResString(IDS_META_SERVERIP);
+		case 0xFC		 : return GetResString(IDS_META_SRCUDPPORT);
+		case 0xFD		 : return GetResString(IDS_META_SRCTCPPORT);
+		case 0xFE		 : return GetResString(IDS_META_SRCIP);
+		case 0xFF		 : return GetResString(IDS_META_SRCTYPE);
+	}
+
+	CString buffer;
+	buffer.Format(_T("Tag0x%02X"), id);
+	return buffer;
+}
 
 CString GetMetaTagName(UINT uTagID)
 {
-	CString strName;
-	for (int i = 0; i < ARRSIZE(_aTagNames); i++){
-		if (uTagID == _aTagNames[i].uID){
-			strName = _aTagNames[i].pszName;
-			break;
-		}
-	}
-	if (strName.IsEmpty())
-		strName.Format(_T("Tag0x%02X"), uTagID);
-	return strName;
+	return GetTagNameByID(uTagID);
 }
 
 CString GetName(const CTag* pTag)
 {
 	CString strName;
-	if (pTag->tag.specialtag)
-	{
-		for (int i = 0; i < ARRSIZE(_aTagNames); i++){
-			if (pTag->tag.specialtag == _aTagNames[i].uID){
-				strName = _aTagNames[i].pszName;
-				break;
-			}
-		}
-		if (strName.IsEmpty())
-			strName.Format(_T("Tag 0x%02X"), pTag->tag.specialtag);
-	}
+	if (pTag->GetNameID())
+		strName=GetTagNameByID(pTag->GetNameID());
 	else
-		strName = pTag->tag.tagname;
+		strName = pTag->GetName();
 	return strName;
 }
 
@@ -202,39 +187,31 @@ CString GetName(const Kademlia::CTag* pTag)
 {
 	CString strName;
 	if (pTag->m_name.GetLength() == 1)
-	{
-		for (int i = 0; i < ARRSIZE(_aTagNames); i++){
-			if ((BYTE)pTag->m_name[0] == _aTagNames[i].uID){
-				strName = _aTagNames[i].pszName;
-				break;
-			}
-		}
-		if (strName.IsEmpty())
-			strName.Format(_T("Tag 0x%02X"), (BYTE)pTag->m_name[0]);
-	}
+		strName=GetTagNameByID((BYTE)pTag->m_name[0]);
 	else
-		strName = pTag->m_name;
+		strName = (LPCSTR)pTag->m_name;
+
 	return strName;
 }
 
 CString GetValue(const CTag* pTag)
 {
 	CString strValue;
-	if (pTag->tag.type == 2)
+	if (pTag->IsStr())
 		strValue = pTag->GetStr();
-	else if (pTag->tag.type == 3)
+	else if (pTag->IsInt())
 	{
-		if (pTag->tag.specialtag == 0x10 || pTag->tag.specialtag >= 0xFA)
-			strValue.Format(_T("%u"), pTag->tag.intvalue);
-		else if (pTag->tag.specialtag == FT_MEDIA_LENGTH)
-			SecToTimeLength(pTag->tag.intvalue, strValue);
+		if (pTag->GetNameID() == 0x10 || pTag->GetNameID() >= 0xFA)
+			strValue.Format(_T("%u"), pTag->GetInt());
+		else if (pTag->GetNameID() == FT_MEDIA_LENGTH)
+			SecToTimeLength(pTag->GetInt(), strValue);
 		else
-			strValue = GetFormatedUInt(pTag->tag.intvalue);
+			strValue = GetFormatedUInt(pTag->GetInt());
 	}
-	else if (pTag->tag.type == 4)
-		strValue.Format(_T("%f"), pTag->tag.floatvalue);
+	else if (pTag->IsFloat())
+		strValue.Format(_T("%f"), pTag->GetFloat());
 	else
-		strValue.Format(_T("<Unknown value of type 0x%02X>"), pTag->tag.type);
+		strValue.Format(_T("<Unknown value of type 0x%02X>"), pTag->GetType());
 	return strValue;
 }
 
@@ -307,7 +284,7 @@ void CMetaDataDlg::InitTags()
 				lvi.mask = LVIF_TEXT;
 				lvi.iItem = iItem;
 
-				strBuff = GetType(pTag->tag.type);
+				strBuff = GetType(pTag->GetType());
 				lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
 				lvi.iSubItem = META_DATA_COL_TYPE;
 				m_tags.SetItem(&lvi);

@@ -42,11 +42,13 @@ public:
 	void	Localize();
 	void	ShowFilesCount();
 	void	ShowComments(CKnownFile* file);
+	void	SetAICHHashing(uint32 nVal)				{ nAICHHashing = nVal; } 
 
 protected:
 	CTitleMenu	m_SharedFilesMenu;
 	CMenu		m_PrioMenu;
 	bool		sortstat[4];
+	volatile uint32 nAICHHashing;
 	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
 	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
 	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System

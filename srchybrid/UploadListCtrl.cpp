@@ -31,8 +31,8 @@
 #include "ClientCredits.h"
 #include "ChatWnd.h"
 #include "kademlia/kademlia/Kademlia.h"
-#include "kademlia/kademlia/prefs.h"
-#include "Kademlia/net/KademliaUDPListener.h"
+#include "kademlia/net/KademliaUDPListener.h"
+#include "UploadQueue.h"
 
 #include "Opcodes.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
@@ -329,6 +329,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CFont *pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec = lpDrawItemStruct->rcItem;
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+    if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
+        dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
+    }
 
 	int iOldBkMode;
 	if (m_crWindowTextBk == CLR_NONE){
@@ -435,27 +438,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer = _T("?");
 					break;
 				case 2:
-					//MORPH START- Modified by SiRoB, ZZ Upload System
-					if(client->GetDatarate() >= 0 && client->socket != NULL) {
-						Sbuffer.Format(_T("%.1f %s"),(float)client->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
-					} else {
-						Sbuffer.Format(_T("?? %s"),GetResString(IDS_KBYTESEC));
-					}
-					//MORPH END - Modified by SiRoB, ZZ Upload System
+					Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
 					break;
 				case 3:
-					{
-						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
-						uint32 tempLastUploaded = client->GetQueueSessionUp() - client->GetSessionUp();
-						if(tempLastUploaded != 0){
-							Sbuffer.Format(_T("%s=%s+%s (%s-%s)"), CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()),CastItoXBytes(tempLastUploaded), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
-						}
-						else{
-							// PENDING: ZZ: Debug printout of current buffer size for socket
-							Sbuffer.Format(_T("%s (%s-%s)"), CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
-						}
-						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
-					}
+					Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false));
 					break;
 				case 4:
 					if (client->HasLowID())
@@ -467,11 +453,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					{//Morph - modified by AndCycle, upRemain
 						sint32 timeleft;
 						if(client->GetDatarate() == 0)	timeleft = -1;
-						else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
-						else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+						else if(client->IsMoreUpThanDown() && client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS)	timeleft = (float)(client->credits->GetDownloadedTotal() - client->credits->GetUploadedTotal())/client->GetDatarate();
+						else if(client->GetPowerShared() && client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
 						else if(file)
-							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/client->GetDatarate();
-							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/client->GetDatarate();
+							if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionPayloadUp())/client->GetDatarate();
+							else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionPayloadUp())/client->GetDatarate();
 						Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain
 					break;
@@ -498,9 +484,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				case 9: //LSD Total UP/DL
 					{
 						if (client->Credits()){
-							Sbuffer.Format( _T("%s/%s"),// %.1f",
-								CastItoXBytes((float)client->Credits()->GetUploadedTotal()),
-								CastItoXBytes((float)client->Credits()->GetDownloadedTotal()));
+							Sbuffer.Format( _T("%s/%s"),
+								CastItoXBytes(client->Credits()->GetUploadedTotal(),false,false),
+								CastItoXBytes(client->Credits()->GetDownloadedTotal(),false,false));
 							//(float)client->Credits()->GetScoreRatio() );
 
 						}
@@ -518,7 +504,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					{	
 						int qr = client->GetRemoteQueueRank();
 						if (client->GetDownloadDatarate() > 0){
-							Sbuffer.Format(_T("%.1f %s"),(float)client->GetDownloadDatarate()/1024, GetResString(IDS_KBYTESEC));
+							Sbuffer.Format(_T("%s"),CastItoXBytes(client->GetDownloadDatarate(),false,true));
 						}
 						else if (qr)
 								Sbuffer.Format(_T("QR: %u"),qr);
@@ -546,7 +532,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							if (client->Credits() && client->Credits()->GetDownloadedTotal() > client->Credits()->GetUploadedTotal())
 								Sbuffer.AppendFormat( _T("(%s)"),
 								CastItoXBytes((float)client->Credits()->GetDownloadedTotal()-
-											  (float)client->Credits()->GetUploadedTotal()));
+											  (float)client->Credits()->GetUploadedTotal(),false,false));
 						}
 						if (client->GetPowerShared())
 							Sbuffer.Append(_T(" PS"));
@@ -631,7 +617,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(15))
 		HideColumn (15);
 	// Commander - Added: IP2Country column - End
-	
+
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
@@ -684,7 +670,7 @@ void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	//MORPH END - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::getPrefs()->getLastContact())
+	if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
 		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	
 	//MORPH START - Added by Yun.SF3, List Requested Files
@@ -761,9 +747,9 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					CString fileList;
 					fileList += GetResString(IDS_LISTREQDL);
 					fileList += "\n--------------------------\n" ; 
-					if (theApp.downloadqueue->IsPartFile(client->reqfile))
+					if (theApp.downloadqueue->IsPartFile(client->GetRequestFile()))
 					{
-						fileList += client->reqfile->GetFileName(); 
+						fileList += client->GetRequestFile()->GetFileName(); 
 						for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
 						{
 							fileList += "\n" ; 
@@ -826,14 +812,14 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
-				return _tcsicmp(item1->GetUserName(), item2->GetUserName());
+				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
 			else if(item1->GetUserName())
 				return 1;
 			else
 				return -1;
 		case 100:
 			if(item1->GetUserName() && item2->GetUserName())
-				return _tcsicmp(item2->GetUserName(), item1->GetUserName());
+				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
 			else if(item2->GetUserName())
 				return 1;
 			else
@@ -842,7 +828,7 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return _tcsicmp(file1->GetFileName(), file2->GetFileName());
+				return CompareLocaleStringNoCase(file1->GetFileName(), file2->GetFileName());
 			else if( file1 == NULL )
 				return 1;
 			else
@@ -852,7 +838,7 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL))
-				return _tcsicmp(file2->GetFileName(), file1->GetFileName());
+				return CompareLocaleStringNoCase(file2->GetFileName(), file1->GetFileName());
 			else if( file1 == NULL )
 				return 1;
 			else
@@ -862,14 +848,10 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return CompareUnsigned(item1->GetDatarate(), item2->GetDatarate());
 		case 102:
 			return CompareUnsigned(item2->GetDatarate(), item1->GetDatarate());
-
-		//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 		case 3: 
-			return CompareUnsigned(item1->GetQueueSessionUp(), item2->GetQueueSessionUp());
+			return CompareUnsigned(item1->GetQueueSessionPayloadUp(), item2->GetQueueSessionPayloadUp());
 		case 103: 
-			return CompareUnsigned(item2->GetQueueSessionUp(), item1->GetQueueSessionUp());
-		//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
-
+			return CompareUnsigned(item2->GetQueueSessionPayloadUp(), item1->GetQueueSessionPayloadUp());
 		case 4: 
 			return item1->GetWaitTime() - item2->GetWaitTime();
 		case 104: 
@@ -929,7 +911,7 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
         // Commander - Added: IP2Country column - Start
         case 15:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return _tcsicmp(item1->GetCountryName(true), item2->GetCountryName(true));
+				return CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
 				return 1;
 			else
@@ -937,7 +919,7 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		
 		case 115:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return _tcsicmp(item2->GetCountryName(true), item1->GetCountryName(true));
+				return CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
 			else if(item2->GetCountryName(true))
 				return 1;
 			else
@@ -1047,8 +1029,8 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				info += GetResString(IDS_SF_REQUESTED) + _T(" ") + CString(file->GetFileName()) + _T("\n");
 				CString stat;
 				stat.Format(GetResString(IDS_FILESTATS_SESSION)+GetResString(IDS_FILESTATS_TOTAL),
-							file->statistic.GetAccepts(), file->statistic.GetRequests(), CastItoXBytes(file->statistic.GetTransferred()),
-							file->statistic.GetAllTimeAccepts(), file->statistic.GetAllTimeRequests(), CastItoXBytes(file->statistic.GetAllTimeTransferred()) );
+							file->statistic.GetAccepts(), file->statistic.GetRequests(), CastItoXBytes(file->statistic.GetTransferred(), false, false),
+							file->statistic.GetAllTimeAccepts(), file->statistic.GetAllTimeRequests(), CastItoXBytes(file->statistic.GetAllTimeTransferred(), false, false) );
 				info += stat;
 			}
 			else

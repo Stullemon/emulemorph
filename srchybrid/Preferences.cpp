@@ -154,7 +154,7 @@ struct Preferences_Import20b_Struct{
 CPreferences thePrefs;
 
 int		CPreferences::m_iDbgHeap;
-CHAR	CPreferences::nick[50];
+CString	CPreferences::strNick;
 uint16	CPreferences::minupload;
 uint16	CPreferences::maxupload;
 uint16	CPreferences::maxdownload;
@@ -162,6 +162,7 @@ uint16	CPreferences::port;
 uint16	CPreferences::udpport;
 uint16	CPreferences::nServerUDPPort;
 uint16	CPreferences::maxconnections;
+uint16	CPreferences::maxhalfconnections;
 uint8	CPreferences::reconnect;
 uint8	CPreferences::scorsystem;
 TCHAR	CPreferences::incomingdir[MAX_PATH];
@@ -335,6 +336,11 @@ EViewSharedFilesAccess CPreferences::m_iSeeShares;
 uint8	CPreferences::m_iToolDelayTime;
 uint8	CPreferences::bringtoforeground;
 uint8	CPreferences::splitterbarPosition;
+uint8	CPreferences::splitterbarPositionStat;
+uint8	CPreferences::splitterbarPositionStat_HL;
+uint8	CPreferences::splitterbarPositionStat_HR;
+uint16	CPreferences::splitterbarPositionFriend;
+uint16	CPreferences::splitterbarPositionIRC;
 uint8	CPreferences::m_uTransferWnd2;
 uint16	CPreferences::deadserverretries;
 DWORD	CPreferences::m_dwServerKeepAliveTimeout;
@@ -375,6 +381,7 @@ bool	CPreferences::smartidcheck;
 uint8	CPreferences::smartidstate;
 bool	CPreferences::safeServerConnect;
 bool	CPreferences::startMinimized;
+bool	CPreferences::m_bAutoStart;
 bool	CPreferences::m_bRestoreLastMainWndDlg;
 int		CPreferences::m_iLastMainWndDlgID;
 bool	CPreferences::m_bRestoreLastLogPane;
@@ -423,18 +430,18 @@ uint8	CPreferences::versioncheckdays;
 int	CPreferences::tableSortItemDownload[30];
 BOOL	CPreferences::tableSortAscendingDownload[30];
 // SLUGFILLER: DLsortFix
-int	CPreferences::tableSortItemUpload[15];
-BOOL	CPreferences::tableSortAscendingUpload[15];
-int	CPreferences::tableSortItemQueue[13];
-BOOL	CPreferences::tableSortAscendingQueue[13];
+int	CPreferences::tableSortItemUpload[16];
+BOOL	CPreferences::tableSortAscendingUpload[16];
+int	CPreferences::tableSortItemQueue[14];
+BOOL	CPreferences::tableSortAscendingQueue[14];
 int	CPreferences::tableSortItemSearch[15];
 BOOL	CPreferences::tableSortAscendingSearch[15];
 int	CPreferences::tableSortItemShared[22];
 BOOL	CPreferences::tableSortAscendingShared[22];
-int	CPreferences::tableSortItemServer[15];
-BOOL	CPreferences::tableSortAscendingServer[15];
-int	CPreferences::tableSortItemClientList[10];
-BOOL	CPreferences::tableSortAscendingClientList[10];
+int	CPreferences::tableSortItemServer[16];
+BOOL	CPreferences::tableSortAscendingServer[16];
+int	CPreferences::tableSortItemClientList[11];
+BOOL	CPreferences::tableSortAscendingClientList[11];
 // SLUGFILLER: multiSort
 int	CPreferences::tableSortItemFilenames[2];
 BOOL	CPreferences::tableSortAscendingFilenames[2];
@@ -464,7 +471,7 @@ int		CPreferences::m_iCommitFiles;
 uint16	CPreferences::maxmsgsessions;
 uint32	CPreferences::versioncheckLastAutomatic;
 TCHAR	CPreferences::messageFilter[512];
-TCHAR	CPreferences::commentFilter[512];
+CString	CPreferences::commentFilter;
 TCHAR	CPreferences::filenameCleanups[512];
 TCHAR	CPreferences::notifierConfiguration[510];
 TCHAR	CPreferences::datetimeformat[64];
@@ -687,14 +694,8 @@ uint16	CPreferences::m_nPeerCachePort;
 
 bool	CPreferences::m_bOpenPortsOnStartUp;
 uint8	CPreferences::m_byLogLevel;
+bool	CPreferences::m_bTrustEveryHash;
 
-//MORPH START - Added by SiRoB, Splitting Bar [O²]
-uint8	CPreferences::splitterbarPositionStat;
-uint8	CPreferences::splitterbarPositionStat_HL;
-uint8	CPreferences::splitterbarPositionStat_HR;
-uint16	CPreferences::splitterbarPositionFriend;
-uint16	CPreferences::splitterbarPositionIRC;
-//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 //MORPH START - Added by SiRoB, XML News [O²]
 CString	CPreferences::m_strFeedsDir;
 bool	CPreferences::enableNEWS;
@@ -793,7 +794,7 @@ void CPreferences::Init()
 				md4cpy(userhash, prefsImport20b->userhash);
 				memcpy(incomingdir, prefsImport20b->incomingdir, 510);
 				memcpy(tempdir, prefsImport20b->tempdir, 510);
-				_snprintf(nick, ARRSIZE(nick), "%s", prefsImport20b->nick);
+				strNick = prefsImport20b->nick;
 
 				totalDownloadedBytes=prefsImport20b->totalDownloadedBytes;
 				totalUploadedBytes=prefsImport20b->totalUploadedBytes;
@@ -808,7 +809,7 @@ void CPreferences::Init()
 				md4cpy(userhash, prefsImport20a->userhash);
 				memcpy(incomingdir, prefsImport20a->incomingdir, 510);
 				memcpy(tempdir, prefsImport20a->tempdir, 510);
-				_snprintf(nick, ARRSIZE(nick), "%s", prefsImport20a->nick);
+				strNick = prefsImport20a->nick;
 
 				totalDownloadedBytes=prefsImport20a->totalDownloaded;
 				totalUploadedBytes=prefsImport20a->totalUploaded;
@@ -827,7 +828,7 @@ void CPreferences::Init()
 					md4cpy(userhash, prefsImport19c->userhash);
 				memcpy(incomingdir, prefsImport19c->incomingdir, 510);
 				memcpy(tempdir, prefsImport19c->tempdir, 510);
-				_snprintf(nick, ARRSIZE(nick), "%s", prefsImport19c->nick);
+				strNick = prefsImport19c->nick;
 				delete prefsImport19c;
 			}
  		} else {
@@ -850,7 +851,8 @@ void CPreferences::Init()
 			if (PathCanonicalize(szFullPath, toadd))
 				toadd = szFullPath;
 
-			// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+			if (IsInstallationDirectory(toadd))
+				continue;
 
 			if (_taccess(toadd, 0) == 0){ // only add directories which still exist
 				if (toadd.Right(1) != _T('\\'))
@@ -943,7 +945,31 @@ void CPreferences::SetStandartValues()
 //	Save();
 }
 
-// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
+bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrName)
+{
+	if (CompareDirectories(rstrDirectory, GetTempDir()))
+		return false;
+
+
+	CString strNameLower(rstrName);
+	strNameLower.MakeLower();
+	strNameLower += _T("|"); // append an EOS character which we can query for
+	static const LPCTSTR _apszNotSharedExts[] = {
+		_T("%u.part") _T("%c"), 
+		_T("%u.part.met") _T("%c"), 
+		_T("%u.part.met") PARTMET_BAK_EXT _T("%c"), 
+		_T("%u.part.met") PARTMET_TMP_EXT _T("%c") 
+	};
+	for (int i = 0; i < ARRSIZE(_apszNotSharedExts); i++){
+		UINT uNum;
+		TCHAR iChar;
+		// "misuse" the 'scanf' function for a very simple pattern scanning.
+		if (_stscanf(strNameLower, _apszNotSharedExts[i], &uNum, &iChar) == 2 && iChar == _T('|'))
+			return true;
+	}
+
+	return false;
+}
 
 // SLUGFILLER: SafeHash
 bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rstrName)
@@ -992,32 +1018,22 @@ bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rst
 }
 // SLUGFILLER: SafeHash
 
-//MORPH - Added by SiRoB, ZZ Ratio
-bool CPreferences::IsZZRatioDoesWork(){
-	
-	if (theApp.downloadqueue->IsFilesPowershared())
-		return true;
-	if (theApp.friendlist->IsFriendSlot())
-		return true;
-	if (GetMaxUpload()<10)
-		return true;
-	return theStats.GetAvgUploadRate(0)<10;
-}
-//MORPH - Added by SiRoB, ZZ ratio
-
 uint16 CPreferences::GetMaxDownload(){
-	//dont be a Lam3r :)
-	//MORPH START - Added by SiRoB, ZZ Upload system
-	if (IsZZRatioDoesWork())
-		return maxdownload;
-	//MORPH END   - Added by SiRoB, ZZ Upload system
-	uint16 maxup=GetMaxUpload();
-	#ifdef MIGHTY_TWEAKS
-	return maxdownload;
-	#endif
-	if( maxup < 4 )
-		return (( (maxup < 10) && (maxup*3 < maxdownload) )? maxup*3 : maxdownload);
-	return (( (maxup < 10) && (maxup*4 < maxdownload) )? maxup*4 : maxdownload);
+    return GetMaxDownloadInBytesPerSec()/1024;
+}
+
+uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
+//dont be a Lam3r :)
+    uint64 maxup;
+    if(dynamic && thePrefs.IsDynUpEnabled() && theApp.uploadqueue->GetWaitingUserCount() != 0 && theApp.uploadqueue->GetDatarate() != 0) {
+        maxup = theApp.uploadqueue->GetDatarate();
+    } else {
+        maxup = GetMaxUpload()*1024;
+    }
+
+	if( maxup < 4*1024 )
+		return (( (maxup < 10*1024) && (maxup*3 < maxdownload*1024) )? maxup*3 : maxdownload*1024);
+	return (( (maxup < 10*1024) && (maxup*4 < maxdownload*1024) )? maxup*4 : maxdownload*1024);
 }
 
 // -khaos--+++> A whole bunch of methods!  Keep going until you reach the end tag.
@@ -1042,7 +1058,7 @@ void CPreferences::SaveStats(int bBackUp){
 	// We do NOT SET the values in prefs struct here.
 
     // Save Cum Down Data
-	ini.WriteUInt64(_T("TotalDownloadedBytes"), theApp.stat_sessionReceivedBytes + GetTotalDownloaded());
+	ini.WriteUInt64(_T("TotalDownloadedBytes"), theStats.sessionReceivedBytes + GetTotalDownloaded());
 	ini.WriteInt(_T("DownSuccessfulSessions"), cumDownSuccessfulSessions);
 	ini.WriteInt(_T("DownFailedSessions"), cumDownFailedSessions);
 	ini.WriteInt(_T("DownAvgTime"), (GetDownC_AvgTime() + GetDownS_AvgTime()) / 2);
@@ -1084,7 +1100,7 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(_T("DownOverheadKadPackets"), theStats.GetDownDataOverheadKadPackets() + GetDownOverheadKadPackets());
 
 	// Save Cumulative Upline Statistics
-	ini.WriteUInt64(_T("TotalUploadedBytes"), theApp.stat_sessionSentBytes + GetTotalUploaded());
+	ini.WriteUInt64(_T("TotalUploadedBytes"), theStats.sessionSentBytes + GetTotalUploaded());
 	ini.WriteInt(_T("UpSuccessfulSessions"), theApp.uploadqueue->GetSuccessfullUpCount() + GetUpSuccessfulSessions());
 	ini.WriteInt(_T("UpFailedSessions"), theApp.uploadqueue->GetFailedUpCount() + GetUpFailedSessions());
 	ini.WriteInt(_T("UpAvgTime"), (theApp.uploadqueue->GetAverageUpTime() + GetUpAvgTime())/2);
@@ -1156,10 +1172,10 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteFloat(_T("ConnMaxUpRate"), GetConnMaxUpRate());
 	
 	// Overall Run Time
-	ini.WriteInt(_T("ConnRunTime"), (GetTickCount() - theApp.stat_starttime)/1000 + GetConnRunTime());
+	ini.WriteInt(_T("ConnRunTime"), (GetTickCount() - theStats.starttime)/1000 + GetConnRunTime());
 	
 	// Number of Reconnects
-	ini.WriteInt(_T("ConnNumReconnects"), (theApp.stat_reconnects>0) ? (theApp.stat_reconnects - 1 + GetConnNumReconnects()) : GetConnNumReconnects());
+	ini.WriteInt(_T("ConnNumReconnects"), (theStats.reconnects>0) ? (theStats.reconnects - 1 + GetConnNumReconnects()) : GetConnNumReconnects());
 	
 	// Average Connections
 	if (theApp.serverconnect->IsConnected())
@@ -1275,8 +1291,9 @@ void CPreferences::SaveCompletedDownloadsStat(){
 	ini.WriteInt(_T("DownSessionCompletedFiles"),	GetDownSessionCompletedFiles());
 } // SaveCompletedDownloadsStat()
 
-void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, BOOL bFromPF, BOOL bUpDown, uint32 bytes, bool sentToFriend){
-
+void CPreferences::Add2SessionTransferData(uint8 uClientID, uint16 uClientPort, BOOL bFromPF, 
+										   BOOL bUpDown, uint32 bytes, bool sentToFriend)
+{
 	//	This function adds the transferred bytes to the appropriate variables,
 	//	as well as to the totals for all clients. - Khaos
 	//	PARAMETERS:
@@ -1972,16 +1989,15 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("DebugHeap"), m_iDbgHeap);
 #endif
 
-	ini.WriteString(_T("Nick"), A2CT(nick));
+	ini.WriteStringUTF8(_T("Nick"), strNick);
 	ini.WriteString(_T("IncomingDir"), incomingdir);
 	ini.WriteString(_T("TempDir"), tempdir);
 
-	// ZZ:UploadSpeedSense -->
-    ini.WriteInt(_T("MinUpload"), minupload);
-	// ZZ:UploadSpeedSense <--
+	ini.WriteInt(_T("MinUpload"), minupload);
 	ini.WriteInt(_T("MaxUpload"),maxupload);
 	ini.WriteInt(_T("MaxDownload"),maxdownload);
 	ini.WriteInt(_T("MaxConnections"),maxconnections);
+	ini.WriteInt(_T("MaxHalfConnections"),maxhalfconnections);
 	ini.WriteInt(_T("Port"),port);
 	ini.WriteInt(_T("UDPPort"),udpport);
 	ini.WriteInt(_T("ServerUDPPort"), nServerUDPPort);
@@ -1996,6 +2012,11 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("DeadServerRetry"),deadserverretries);
 	ini.WriteInt(_T("ServerKeepAliveTimeout"),m_dwServerKeepAliveTimeout);
 	ini.WriteInt(_T("SplitterbarPosition"),splitterbarPosition+2);
+	ini.WriteInt(_T("SplitterbarPositionStat"),splitterbarPositionStat+1,_T("eMule"));
+	ini.WriteInt(_T("SplitterbarPositionStat_HL"),splitterbarPositionStat_HL+1,_T("eMule"));
+	ini.WriteInt(_T("SplitterbarPositionStat_HR"),splitterbarPositionStat_HR+1,_T("eMule"));
+	ini.WriteInt(_T("SplitterbarPositionFriend"),splitterbarPositionFriend,_T("eMule"));
+	ini.WriteInt(_T("SplitterbarPositionIRC"),splitterbarPositionIRC+2,_T("eMule"));
 	ini.WriteInt(_T("TransferWnd2"),m_uTransferWnd2);
 	ini.WriteInt(_T("VariousStatisticsMaxValue"),statsMax);
 	ini.WriteInt(_T("StatsAverageMinutes"),statsAverageMinutes);
@@ -2004,7 +2025,6 @@ void CPreferences::SavePreferences()
 
 	ini.WriteBool(_T("Reconnect"),reconnect);
 	ini.WriteBool(_T("Scoresystem"),scorsystem);
-	ini.WriteBool(_T("ICH"),ICH);
 	ini.WriteBool(_T("Serverlist"),autoserverlist);
 	ini.WriteBool(_T("UpdateNotifyTestClient"),updatenotify);
 	ini.WriteBool(_T("MinToTray"),mintotray);
@@ -2021,6 +2041,7 @@ void CPreferences::SavePreferences()
     ini.WriteBool(_T("Autoconnect"),autoconnect);
 	ini.WriteBool(_T("OnlineSignature"),onlineSig);
 	ini.WriteBool(_T("StartupMinimized"),startMinimized);
+	ini.WriteBool(_T("AutoStart"),m_bAutoStart);
 	ini.WriteInt(_T("LastMainWndDlgID"),m_iLastMainWndDlgID);
 	ini.WriteInt(_T("LastLogPaneID"),m_iLastLogPaneID);
 	ini.WriteBool(_T("SafeServerConnect"),safeServerConnect);
@@ -2139,6 +2160,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("NetworkED2K"),networked2k);
 	ini.WriteBool(_T("AutoClearCompleted"),m_bRemoveFinishedDownloads);
 	ini.WriteBool(_T("TransflstRemainOrder"),m_bTransflstRemain);
+	ini.WriteBool(_T("UseSimpleTimeRemainingcomputation"),m_bUseOldTimeRemaining);
 
 	ini.WriteInt(_T("VersionCheckLastAutomatic"), versioncheckLastAutomatic);
 	ini.WriteInt(_T("FilterLevel"),filterlevel);
@@ -2285,7 +2307,7 @@ void CPreferences::SavePreferences()
 	for (int i=0;i<15;i++) {
 		buffer.Format(_T("0x%06x"),GetStatsColor(i));
 		buffer2.Format(_T("StatColor%i"),i);
-		ini.WriteString(buffer2,buffer);
+		ini.WriteString(buffer2,buffer,_T("Statistics") );
 	}
 
 
@@ -2468,13 +2490,6 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool("USSLog", m_bDynUpLog,"eMule");
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
-	//MORPH START - Added by SiRoB, Splitting Bar [O²]
-	ini.WriteInt("SplitterbarPositionStat",splitterbarPositionStat,"eMule");
-	ini.WriteInt("SplitterbarPositionStat_HL",splitterbarPositionStat_HL,"eMule");
-	ini.WriteInt("SplitterbarPositionStat_HR",splitterbarPositionStat_HR,"eMule");
-	ini.WriteInt("SplitterbarPositionFriend",splitterbarPositionFriend+2,"eMule");
-	ini.WriteInt("SplitterbarPositionIRC",splitterbarPositionIRC+2,"eMule");
-	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 
     ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
@@ -2620,8 +2635,8 @@ void CPreferences::LoadPreferences()
 	m_nWebMirrorAlertLevel = ini.GetInt(_T("WebMirrorAlertLevel"),0,_T("eMule"));
 	updatenotify=ini.GetBool(_T("UpdateNotifyTestClient"),true, _T("eMule"));
 	
-	SetUserNick(ini.GetString(_T("Nick"), DEFAULT_NICK));
-	if (nick[0] == '\0' || IsDefaultNick(A2CT(nick)))
+	SetUserNick(ini.GetStringUTF8(_T("Nick"), DEFAULT_NICK));
+	if (strNick.IsEmpty() || IsDefaultNick(strNick))
 		SetUserNick(DEFAULT_NICK);
 
 	_stprintf(buffer,_T("%sIncoming"),appdir);
@@ -2636,17 +2651,16 @@ void CPreferences::LoadPreferences()
 	if (maxGraphDownloadRate==0) maxGraphDownloadRate=96;
 	maxGraphUploadRate=ini.GetInt(_T("UploadCapacity"),16);
 	if (maxGraphUploadRate==0) maxGraphUploadRate=16;
-	// ZZ:UploadSpeedSense -->
     minupload=ini.GetInt(_T("MinUpload"), 1);
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	minupload = min(max(minupload,1),maxGraphUploadRate);
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
-	// ZZ:UploadSpeedSense <--
 	maxupload=ini.GetInt(_T("MaxUpload"),12);
 	if (maxupload>maxGraphUploadRate && maxupload!=UNLIMITED) maxupload=maxGraphUploadRate*.8;
 	maxdownload=ini.GetInt(_T("MaxDownload"),76);
 	if (maxdownload>maxGraphDownloadRate && maxdownload!=UNLIMITED) maxdownload=maxGraphDownloadRate*.8;
 	maxconnections=ini.GetInt(_T("MaxConnections"),GetRecommendedMaxConnections());
+	maxhalfconnections=ini.GetInt(_T("MaxHalfConnections"),9);
 	port=ini.GetInt(_T("Port"), DEFAULT_TCP_PORT);
 	udpport=ini.GetInt(_T("UDPPort"),port+10);
 	nServerUDPPort = ini.GetInt(_T("ServerUDPPort"), -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
@@ -2667,6 +2681,17 @@ void CPreferences::LoadPreferences()
 		splitterbarPosition = 9;
 	else if (splitterbarPosition > 93)
 		splitterbarPosition = 93;
+
+	splitterbarPositionStat=ini.GetInt(_T("SplitterbarPositionStat"),30);
+	splitterbarPositionStat_HL=ini.GetInt(_T("SplitterbarPositionStat_HL"),66);
+	splitterbarPositionStat_HR=ini.GetInt(_T("SplitterbarPositionStat_HR"),33);
+	if (splitterbarPositionStat_HR+1>=splitterbarPositionStat_HL){
+		splitterbarPositionStat_HL = 66;
+		splitterbarPositionStat_HR = 33;
+	}
+	splitterbarPositionFriend=ini.GetInt(_T("SplitterbarPositionFriend"),300);
+	splitterbarPositionIRC=ini.GetInt(_T("SplitterbarPositionIRC"),200);
+
 	m_uTransferWnd2 = ini.GetInt(_T("TransferWnd2"),DFLT_TRANSFER_WND2);
 
 	statsMax=ini.GetInt(_T("VariousStatisticsMaxValue"),100);
@@ -2695,6 +2720,7 @@ void CPreferences::LoadPreferences()
 
 	onlineSig=ini.GetBool(_T("OnlineSignature"),false);
 	startMinimized=ini.GetBool(_T("StartupMinimized"),false);
+	m_bAutoStart=ini.GetBool(_T("AutoStart"),false);
 	m_bRestoreLastMainWndDlg=ini.GetBool(_T("RestoreLastMainWndDlg"),false);
 	m_iLastMainWndDlgID=ini.GetInt(_T("LastMainWndDlgID"),0);
 	m_bRestoreLastLogPane=ini.GetBool(_T("RestoreLastLogPane"),false);
@@ -2872,7 +2898,8 @@ void CPreferences::LoadPreferences()
 	_stprintf(m_sTemplateFile,_T("%s"),ini.GetString(_T("WebTemplateFile"),_T("eMule.tmpl")));
 
 	_stprintf(messageFilter,_T("%s"),ini.GetString(_T("MessageFilter"),_T("Your client has an infinite queue")));
-	_stprintf(commentFilter,_T("%s"),ini.GetString(_T("CommentFilter"),_T("http://|www.")));
+	commentFilter = ini.GetString(_T("CommentFilter"),_T("http://|www."));
+	commentFilter.MakeLower();
 	_stprintf(filenameCleanups,_T("%s"),ini.GetString(_T("FilenameCleanups"),_T("http|www.|.com|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt")));
 	m_iExtractMetaData=ini.GetInt(_T("ExtractMetaData"),2); // 0=disable, 1=mp3+avi, 2=MediaDet
 	m_bAdjustNTFSDaylightFileTime=ini.GetBool(_T("AdjustNTFSDaylightFileTime"), true);
@@ -3029,17 +3056,6 @@ void CPreferences::LoadPreferences()
 	// khaos::accuratetimerem+
 	m_iTimeRemainingMode=ini.GetInt(_T("TimeRemainingMode"), 0);
 	// khaos::accuratetimerem-
-	//MORPH START - Added by SiRoB, Splitting Bar [O²]
-	splitterbarPositionStat=ini.GetInt(_T("SplitterbarPositionStat"),30);
-	splitterbarPositionStat_HL=ini.GetInt(_T("SplitterbarPositionStat_HL"),66);
-	splitterbarPositionStat_HR=ini.GetInt(_T("SplitterbarPositionStat_HR"),33);
-	if (splitterbarPositionStat_HR+1>=splitterbarPositionStat_HL){
-		splitterbarPositionStat_HL = 66;
-		splitterbarPositionStat_HR = 33;
-	}
-	splitterbarPositionFriend=ini.GetInt(_T("SplitterbarPositionFriend"),300);
-	splitterbarPositionIRC=ini.GetInt(_T("SplitterbarPositionIRC"),200);
-	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 	//MORPH START - Added by SiRoB, XML News [O²]
 	enableNEWS=ini.GetBool(_T("ShowNews"), 1);
 	//MORPH END   - Added by SiRoB, XML News [O²]
@@ -3192,19 +3208,15 @@ void CPreferences::LoadPreferences()
     m_bDynUpUseMillisecondPingTolerance = ini.GetBool(_T("USSUseMillisecondPingTolerance"), false);
     m_iDynUpPingTolerance = ini.GetInt(_T("USSPingTolerance"), 500, _T("eMule"));
 	m_iDynUpPingToleranceMilliseconds = ini.GetInt(_T("USSPingToleranceMilliseconds"), 200);
-	//MORPH - Removed by SiRoB, no need such control with the zz ratio
-	/*
-	if( minupload < 10 )
+	if( minupload < 1 )
 	{
-		if( m_bDynUpEnabled )
-			AfxMessageBox(GetResString(IDS_USS_MIN), MB_ICONERROR);
-		minupload = 10;
+		minupload = 1;
 	}
-	*/
 	m_iDynUpGoingUpDivider = ini.GetInt(_T("USSGoingUpDivider"), 1000, _T("eMule"));
     m_iDynUpGoingDownDivider = ini.GetInt(_T("USSGoingDownDivider"), 1000, _T("eMule"));
     m_iDynUpNumberOfPings = ini.GetInt(_T("USSNumberOfPings"), 1, _T("eMule"));
 	// ZZ:UploadSpeedSense <--
+
 	//MORPH START - Added by SiRoB,  USS log flag
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
 	//MORPH END   - Added by SiRoB,  USS log flag
@@ -3214,6 +3226,7 @@ void CPreferences::LoadPreferences()
 	m_bRunAsUser = ini.GetBool(_T("RunAsUnprivilegedUser"), false);
 	m_bOpenPortsOnStartUp = ini.GetBool(_T("OpenPortsOnStartUp"), false);
 	m_byLogLevel = ini.GetInt(_T("DebugLogLevel"), DLP_VERYLOW);
+	m_bTrustEveryHash = ini.GetBool(_T("AICHTrustEveryHash"), false);
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	_stprintf (m_sCommunityName,_T("%s"),ini.GetString (_T("CommunityName")));
@@ -3752,8 +3765,6 @@ bool CPreferences::MoveCat(UINT from, UINT to){
 	return true;
 }
 
-// SLUGFILLER: SafeHash remove - removed installation dir unsharing
-/*
 bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 {
 	CString strFullPath;
@@ -3774,11 +3785,11 @@ bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 
 	return false;
 }
-*/
 
 bool CPreferences::IsShareableDirectory(const CString& rstrDir)
 {
-	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+	if (IsInstallationDirectory(rstrDir))
+		return false;
 
 	CString strFullPath;
 	if (PathCanonicalize(strFullPath.GetBuffer(MAX_PATH), rstrDir))
@@ -3898,8 +3909,7 @@ bool CPreferences::IsDefaultNick(const CString strCheck){
 
 void CPreferences::SetUserNick(LPCTSTR pszNick)
 {
-	USES_CONVERSION;
-	_snprintf(nick, ARRSIZE(nick), "%s", T2CA(pszNick));
+	strNick = pszNick;
 }
 
 uint8 CPreferences::GetWebMirrorAlertLevel(){

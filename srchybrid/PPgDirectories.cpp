@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -110,13 +110,30 @@ BOOL CPPgDirectories::OnApply()
 
 	CString strIncomingDir;
 	GetDlgItemText(IDC_INCFILES, strIncomingDir);
-	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+	if (strIncomingDir.IsEmpty()){
+		strIncomingDir = thePrefs.GetAppDir() + _T("incoming");
+		SetDlgItemText(IDC_INCFILES, strIncomingDir);
+	}
+	if (thePrefs.IsInstallationDirectory(strIncomingDir)){
+		AfxMessageBox(GetResString(IDS_WRN_INCFILE_RESERVED));
+		return FALSE;
+	}
 	
 	CString strTempDir;
 	GetDlgItemText(IDC_TEMPFILES, strTempDir);
-	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+	if (strTempDir.IsEmpty()){
+		strTempDir = thePrefs.GetAppDir() + _T("temp");
+		SetDlgItemText(IDC_TEMPFILES, strTempDir);
+	}
+	if (thePrefs.IsInstallationDirectory(strTempDir)){
+		AfxMessageBox(GetResString(IDS_WRN_TEMPFILES_RESERVED));
+		return FALSE;
+	}
 
-	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+	if (CompareDirectories(strIncomingDir, strTempDir)==0){
+		AfxMessageBox(GetResString(IDS_WRN_INCTEMP_SAME));
+		return FALSE;
+	}
 
 	_sntprintf(thePrefs.incomingdir, ARRSIZE(thePrefs.incomingdir), _T("%s"), strIncomingDir);
 	MakeFoldername(thePrefs.incomingdir);
@@ -131,7 +148,14 @@ BOOL CPPgDirectories::OnApply()
 	for (int i = 0; i < m_ctlUncPaths.GetItemCount(); i++)
 		thePrefs.shareddir_list.AddTail(m_ctlUncPaths.GetItemText(i, 0));
 
-	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+	// check shared directories for reserved folder names
+	POSITION pos = thePrefs.shareddir_list.GetHeadPosition();
+	while (pos){
+		POSITION posLast = pos;
+		const CString& rstrDir = thePrefs.shareddir_list.GetNext(pos);
+		if (thePrefs.IsInstallationDirectory(rstrDir))
+			thePrefs.shareddir_list.RemoveAt(posLast);
+	}
 
 	theApp.emuledlg->sharedfileswnd->Reload();
 

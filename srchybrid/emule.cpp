@@ -31,6 +31,7 @@
 #include "Scheduler.h"
 #include "SearchList.h"
 #include "kademlia/kademlia/Kademlia.h"
+#include "kademlia/kademlia/Prefs.h"
 #include "kademlia/kademlia/Error.h"
 #include "kademlia/utils/UInt128.h"
 #include "PerfLog.h"
@@ -65,12 +66,14 @@
 #include "SearchDlg.h"
 #include "enbitmap.h"
 #include "FirewallOpener.h"
+#include "StringConversion.h"
 
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
 
 CLog theLog;
 CLog theVerboseLog;
+extern bool KadInitUnicode(HMODULE hInst);
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -78,6 +81,71 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
+///////////////////////////////////////////////////////////////////////////////
+// MSLU (Microsoft Layer for Unicode) support - UnicoWS
+// 
+#ifdef _UNICODE
+bool _bUsingUnicows = false;
+
+void ShowUnicowsError()
+{
+	// NOTE: Do *NOT* use any MFC nor W-functions here!
+	// NOTE: Do *NOT* use eMule's localization functions here!
+	MessageBoxA(NULL,
+				"This eMule version requires the \"Microsoft(R) Layer for Unicode(TM) on Windows(R) 95/98/ME Systems\".\r\n"
+				"\r\n"
+				"Download the MSLU package from Microsoft(R) here:\r\n"
+				"        http://www.microsoft.com/downloads/details.aspx?FamilyId=73BA7BD7-ED06-4F0D-80A4-2A7EEAEE17E2\r\n"
+				"or\r\n"
+				"        visit the eMule Project Download Page http://www.emule-project.net/home/perl/general.cgi?rm=download\r\n"
+				"or\r\n"
+				"        search the Microsoft(R) Download Center http://www.microsoft.com/downloads/ for \"MSLU\" or \"unicows\"."
+				"\r\n"
+				"\r\n"
+				"\r\n"
+				"After downloading the MSLU package, run the \"unicows.exe\" program and specify your eMule installation folder "
+				"where to place the extracted files from the package.\r\n"
+				"\r\n"
+				"Ensure that the file \"unicows.dll\" was placed in your eMule installation folder and start eMule again.",
+				"eMule",
+				MB_ICONSTOP | MB_SYSTEMMODAL | MB_SETFOREGROUND);
+}
+
+extern "C" HMODULE __stdcall ExplicitPreLoadUnicows()
+{
+#ifdef _AFXDLL
+	// UnicoWS support *requires* statically linked MFC and C-RTL.
+
+	// NOTE: Do *NOT* use any MFC nor W-functions here!
+	// NOTE: Do *NOT* use eMule's localization functions here!
+	MessageBoxA(NULL, 
+				"This eMule version (Unicode, MSLU, shared MFC) does not run with this version of Windows.", 
+				"eMule", 
+				MB_ICONSTOP | MB_SYSTEMMODAL | MB_SETFOREGROUND);
+	exit(1);
+#endif
+
+	// Pre-Load UnicoWS -- needed for proper initialization of MFC/C-RTL
+	HMODULE hModule = LoadLibraryA("unicows.dll");
+	if (hModule == NULL)
+	{
+		ShowUnicowsError();
+		exit(1);
+	}
+
+	_bUsingUnicows = true;
+	return hModule;
+}
+
+// NOTE: Do *NOT* change the name of this function. It *HAS* to be named "_PfnLoadUnicows" !
+extern "C" HMODULE (__stdcall *_PfnLoadUnicows)(void) = &ExplicitPreLoadUnicows;
+#endif //_UNICODE
+
+
+///////////////////////////////////////////////////////////////////////////////
+// C-RTL Memory Debug Support
+// 
 #ifdef _DEBUG
 static CMemoryState oldMemState, newMemState, diffMemState;
 
@@ -89,7 +157,8 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 // don't use a CString for that memory - it will not be available on application termination!
 #define APP_CRT_DEBUG_LOG_FILE _T("eMule CRT Debug Log.txt")
 static TCHAR _szCrtDebugReportFilePath[MAX_PATH] = APP_CRT_DEBUG_LOG_FILE;
-#endif
+#endif //_DEBUG
+
 
 struct SLogItem
 {
@@ -131,6 +200,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 {
 	srand(time(NULL));
 	m_dwPublicIP = 0;
+	m_bAutoStart = false;
 
 	m_ullComCtrlVer = MAKEDLLVERULL(4,0,0,0);
 	m_hSystemImageList = NULL;
@@ -195,44 +265,6 @@ void __cdecl __AfxSocketTerm()
 #error "You are using an MFC version which may require a special version of the above function!"
 #endif
 
-//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
-BOOL InitWinsock2(WSADATA *lpwsaData) 
-{  
-_AFX_SOCK_STATE* pState = _afxSockState.GetData();
-if (pState->m_pfnSockTerm == NULL)
-	{
-	// initialize Winsock library
-	WSADATA wsaData;
-	if (lpwsaData == NULL)
-		lpwsaData = &wsaData;
-	WORD wVersionRequested = MAKEWORD(2, 2);
-	int nResult = WSAStartup(wVersionRequested, lpwsaData);
-	if (nResult != 0)
-		return FALSE;
-	if (LOBYTE(lpwsaData->wVersion) != 2 || HIBYTE(lpwsaData->wVersion) != 2)
-		{
-		WSACleanup();
-		return FALSE;
-		}
-	// setup for termination of sockets
-	pState->m_pfnSockTerm = &AfxSocketTerm;
-	}
-#ifndef _AFXDLL
-	//BLOCK: setup maps and lists specific to socket state
-	{
-	_AFX_SOCK_THREAD_STATE* pState = _afxSockThreadState;
-	if (pState->m_pmapSocketHandle == NULL)
-		pState->m_pmapSocketHandle = new CMapPtrToPtr;
-	if (pState->m_pmapDeadSockets == NULL)
-		pState->m_pmapDeadSockets = new CMapPtrToPtr;
-	if (pState->m_plistSocketNotifications == NULL)
-		pState->m_plistSocketNotifications = new CPtrList;
-	}
-#endif
-return TRUE;
-}
-//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
-
 // CemuleApp Initialisierung
 
 BOOL CemuleApp::InitInstance()
@@ -296,18 +328,11 @@ BOOL CemuleApp::InitInstance()
 		m_iDfltImageListColorFlags = ILC_COLOR8;
 
 	CWinApp::InitInstance();
-	//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
-	memset(&m_wsaData,0,sizeof(WSADATA));
-	if (!InitWinsock2(&m_wsaData)) // <<< eWombat first try it with winsock2
-		{
-		memset(&m_wsaData,0,sizeof(WSADATA));
-		if (!AfxSocketInit(&m_wsaData)) // <<< eWombat then try it with old winsock
+	if (!AfxSocketInit())
 	{
 		AfxMessageBox(GetResString(IDS_SOCKETS_INIT_FAILED));
 		return FALSE;
 	}
-		}
-	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710
 	atexit(__AfxSocketTerm);
 #else
@@ -317,6 +342,11 @@ BOOL CemuleApp::InitInstance()
 	if (!AfxInitRichEdit2()){
 		if (!AfxInitRichEdit())
 			AfxMessageBox(_T("No Rich Edit control library found!")); // should never happen..
+	}
+
+	if (!KadInitUnicode(AfxGetInstanceHandle())){
+		AfxMessageBox(_T("Failed to load Unicode character tables for Kademlia!")); // should never happen..
+		return FALSE; // DO *NOT* START !!!
 	}
 
 	// create & initalize all the important stuff 
@@ -362,6 +392,11 @@ BOOL CemuleApp::InitInstance()
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
 		Ask4RegFix(false, true);
+
+	if( thePrefs.GetAutoStart() )
+		::AddAutoStart();
+	else
+		::RemAutoStart();
 
 	m_pFirewallOpener = new CFirewallOpener();
 	m_pFirewallOpener->Init(true); // we need to init it now (even if we may not use it yet) because of CoInitializeSecurity - which kinda ruins the sense of the class interface but ooohh well :P
@@ -412,19 +447,10 @@ BOOL CemuleApp::InitInstance()
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 
-	// reset statistic values
-	theApp.stat_sessionReceivedBytes=0;
-	theApp.stat_sessionSentBytes=0;
-	theApp.stat_sessionSentBytesToFriend = 0;
-	theApp.stat_reconnects=0;
-	theApp.stat_transferStarttime=0;
-	theApp.stat_serverConnectTime=0;
-	theApp.stat_filteredclients=0;
-	//MORPH START - Added by IceCream, Anti-leecher/Secure counter feature
-	theApp.stat_leecherclients=0; //Added by IceCream
-	//MORPH END   - Added by IceCream, Anti-leecher/Secure counter feature
 	thePerfLog.Startup();
 	dlg.DoModal();
+
+
 
 	// Barry - Restore old registry if required
 	if (thePrefs.AutoTakeED2KLinks())
@@ -505,6 +531,9 @@ bool CemuleApp::ProcessCommandline()
 #endif
 			if (_tcscmp(pszParam, _T("ignoreinstances")) == 0)
 				bIgnoreRunningInstances = true;
+
+			if (_tcscmp(pszParam, _T("AutoStart")) == 0)
+				m_bAutoStart = true;
 		}
 	}
 
@@ -616,23 +645,22 @@ BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
 
 void CemuleApp::UpdateReceivedBytes(uint32 bytesToAdd) {
 	SetTimeOnTransfer();
-	stat_sessionReceivedBytes+=bytesToAdd;
+	theStats.sessionReceivedBytes+=bytesToAdd;
 }
 
 void CemuleApp::UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend) {
 	SetTimeOnTransfer();
-
-	stat_sessionSentBytes += bytesToAdd;
+	theStats.sessionSentBytes+=bytesToAdd;
 
     if(sentToFriend == true) {
-	    stat_sessionSentBytesToFriend += bytesToAdd;
+	    theStats.sessionSentBytesToFriend += bytesToAdd;
     }
 }
 
 void CemuleApp::SetTimeOnTransfer() {
-	if (stat_transferStarttime>0) return;
+	if (theStats.transferStarttime>0) return;
 	
-	stat_transferStarttime=GetTickCount();
+	theStats.transferStarttime=GetTickCount();
 }
 
 CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
@@ -645,21 +673,39 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 
 	CString strLink;
 	strLink.Format(_T("ed2k://|file|%s|%u|%s|/|sources,%i.%i.%i.%i:%i|/"),
-		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
+		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
 		(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), thePrefs.GetPort() );
 	return strLink;
 }
-
+/*
 CString CemuleApp::CreateED2kHostnameSourceLink(const CAbstractFile* f)
 {
 	CString strLink;
 	strLink.Format(_T("ed2k://|file|%s|%u|%s|/|sources,%s:%i|/"),
-		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
+		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
 		thePrefs.GetYourHostname(), thePrefs.GetPort() );
+	return strLink;
+}
+*/
+
+CString CemuleApp::CreateKadSourceLink(const CAbstractFile* f)
+{
+	CString strLink;
+	ASSERT(Kademlia::CKademlia::getPrefs() != NULL);
+	if( theApp.clientlist->GetBuddy() && theApp.IsFirewalled() )
+	{
+		CString KadID;
+		Kademlia::CKademlia::getPrefs()->getKadID().xor(Kademlia::CUInt128(true)).toHexString(&KadID);
+		strLink.Format(_T("ed2k://|file|%s|%u|%s|/|kadsources,%s:%s|/"),
+			EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
+			f->GetFileSize(),
+			EncodeBase16(f->GetFileHash(),16),
+			md4str(thePrefs.GetUserHash()), KadID);
+	}
 	return strLink;
 }
 
@@ -706,21 +752,45 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 //TODO: Move to emule-window
 CString CemuleApp::CopyTextFromClipboard() 
 {
-	HGLOBAL	hglb; 
-	LPSTR  lptstr; 
-	CString	retstring;
-
+#ifdef _UNICODE
+	if (IsClipboardFormatAvailable(CF_UNICODETEXT))
+	{
+		if (OpenClipboard(NULL))
+		{
+			bool bResult = false;
+			CString strClipboard;
+			HGLOBAL hMem = GetClipboardData(CF_UNICODETEXT);
+			if (hMem)
+			{
+				LPCWSTR pwsz = (LPCWSTR)GlobalLock(hMem);
+				if (pwsz)
+				{
+					strClipboard = pwsz;
+					GlobalUnlock(hMem);
+					bResult = true;
+				}
+			}
+			CloseClipboard();
+			if (bResult)
+				return strClipboard;
+		}
+	}
+#endif
 	if (!IsClipboardFormatAvailable(CF_TEXT)) 
 		return _T(""); 
 	if (!OpenClipboard(NULL)) 
 		return _T("");
 
-	hglb = GetClipboardData(CF_TEXT); 
+	CString	retstring;
+	HGLOBAL	hglb = GetClipboardData(CF_TEXT);
 	if (hglb != NULL) 
 	{ 
-		lptstr = (LPSTR)GlobalLock(hglb); 
+		LPCSTR lptstr = (LPCSTR)GlobalLock(hglb);
 		if (lptstr != NULL)
+		{
 			retstring = lptstr;
+			GlobalUnlock(hglb);
+		}
 	} 
 	CloseClipboard();
 
@@ -758,7 +828,6 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 
 	try
 	{
-		USES_CONVERSION;
 		char buffer[20]; 
 		CStringA strBuff;
 		if (IsConnected()){ 
@@ -922,8 +991,11 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 
 bool CemuleApp::IsConnected()
 {
-	//Once we can handle lowID users in Kad, we remove the IsFirewalled!
-	return (theApp.serverconnect->IsConnected() || (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled()));
+	return (theApp.serverconnect->IsConnected() || Kademlia::CKademlia::isConnected());
+}
+
+bool CemuleApp::IsPortchangeAllowed() {
+	return ( theApp.clientlist->GetClientCount()==0 && !IsConnected() );
 }
 
 uint32 CemuleApp::GetID(){
@@ -932,13 +1004,15 @@ uint32 CemuleApp::GetID(){
 		ID = ntohl(Kademlia::CKademlia::getIPAddress());
 	else if( theApp.serverconnect->IsConnected() )
 		ID = theApp.serverconnect->GetClientID();
+	else if ( Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::isFirewalled() )
+		ID = 1;
 	else 
-		ID = 0; //Once we can handle lowID users in Kad, this may change.
+		ID = 0;
 	return ID;
 }
 
 uint32 CemuleApp::GetPublicIP() const {
-	if (m_dwPublicIP == 0 && Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled() )
+	if (m_dwPublicIP == 0 && Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getIPAddress() )
 		return ntohl(Kademlia::CKademlia::getIPAddress());
 	return m_dwPublicIP;
 }
@@ -949,7 +1023,8 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 		ASSERT ( m_pPeerCache );
 		if ( GetPublicIP() == 0)
 			AddDebugLogLine(DLP_VERYLOW, false, _T("My public IP Address is: %s"),ipstr(dwIP));
-		else if (Kademlia::CKademlia::isConnected() && !Kademlia::CKademlia::isFirewalled() && ntohl(Kademlia::CKademlia::getIPAddress()) != dwIP)
+		else if (Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::getPrefs() && Kademlia::CKademlia::getPrefs()->getIPAddress())
+			if(ntohl(Kademlia::CKademlia::getIPAddress()) != dwIP)
 			AddDebugLogLine(DLP_DEFAULT, false,  _T("Public IP Address reported from Kademlia (%s) differs from new found (%s)"),ipstr(ntohl(Kademlia::CKademlia::getIPAddress())),ipstr(dwIP));
 		m_pPeerCache->FoundMyPublicIPAddress(dwIP);	
 	}
@@ -990,6 +1065,7 @@ bool CemuleApp::DoCallback( CUpDownClient *client )
 					if(client->GetServerIP() == theApp.serverconnect->GetCurrentServer()->GetIP() && client->GetServerPort() == theApp.serverconnect->GetCurrentServer()->GetPort())
 					{
 						//Both Connected - Server lowID, Kad Open - Client on same server
+						//We prevent a callback to the server as this breaks the protocol and will get you banned.
 		return false;
 					}
 					else
@@ -1353,6 +1429,7 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
 					while (*pszText == ' ' || *pszText == '\t' || *pszText == '\r' || *pszText == '\n')
 						pszText++;
 					bFoundLink = (strncmp(pszText, pszLinkType, iLinkTypeLen) == 0);
+					GlobalUnlock(hText);
 				}
 			}
 			CloseClipboard();

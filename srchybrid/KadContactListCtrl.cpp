@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -164,14 +164,16 @@ void CKadContactListCtrl::UpdateKadContactCount()
 	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
 }
 
-void CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
+bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 {
+	bool bResult = false;
 	try
 	{
 		ASSERT( contact != NULL );
 		int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),NULL,0,0,0,(LPARAM)contact);
 		if (iItem >= 0)
 		{
+			bResult = true;
 	//		Trying to update all the columns causes one of the connection freezes in win98
 	//		ContactRef(contact);
 			// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
@@ -181,6 +183,7 @@ void CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 		}
 	}
 	catch(...){ASSERT(0);}
+	return bResult;
 }
 
 void CKadContactListCtrl::ContactRem(const Kademlia::CContact* contact)

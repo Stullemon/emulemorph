@@ -29,12 +29,13 @@ there client on the eMule forum..
 */
 #pragma once
 #include "../utils/UInt128.h"
+#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
 
-class CPrefs
+class CPrefs: public CLoggable
 {
 public:
 	
@@ -42,26 +43,28 @@ public:
 
 	~CPrefs(void);
 
-	void	getClientID(CUInt128 *id)		{id->setValue(m_clientID);}
-	void	getClientID(CString *id)		{m_clientID.toHexString(id);}
-	void	setClientID(const CUInt128 &id)	{m_clientID = id;}
-	CUInt128 getClientID(void)					{return m_clientID;}
+	void	getKadID(CUInt128 *id)		{id->setValue(m_clientID);}
+	void	getKadID(CString *id)		{m_clientID.toHexString(id);}
+	void	setKadID(const CUInt128 &id)	{m_clientID = id;}
+	CUInt128 getKadID(void)					{return m_clientID;}
 
-	void	getClientHash(CUInt128 *id)		{id->setValue(m_clientHash);}
-	void	getClientHash(CString *id)		{m_clientHash.toHexString(id);}
+	void	getClientHash(CUInt128 *id)	{id->setValue(m_clientHash);}
+	void	getClientHash(CString *id)	{m_clientHash.toHexString(id);}
 	void	setClientHash(const CUInt128 &id)	{m_clientHash = id;}
+	CUInt128 getClientHash(void)		{return m_clientHash;}
 
 	uint32	getIPAddress(void)				{return m_ip;}
-	void	setIPAddress(uint32 val)		{m_ip = val;}
+	void	setIPAddress(uint32 val);
 
 	bool	getRecheckIP(void)				{return (m_recheckip<4);}
-	void	setRecheckIP()					{m_recheckip = 0;setFirewalled();}
-	void	incRecheckIP()					{m_recheckip++;}
+	void	setRecheckIP(void)					{m_recheckip = 0;setFirewalled();}
+	void	incRecheckIP(void)					{m_recheckip++;}
 
 	bool	getLastContact(void);
 	void	setLastContact(void)			{m_lastContact = time(NULL);}
+	bool	hasLostConnection(void);
 
-	bool	getFirewalled(void)				{return (m_firewalled<1);}
+	bool	getFirewalled(void);
 	void	setFirewalled(void);
 	void	incFirewalled(void);
 
@@ -74,26 +77,40 @@ public:
 	uint8	getTotalStoreKey(void)			{return m_totalStoreKey;}
 	void	setTotalStoreKey(uint8 val)		{m_totalStoreKey = val;}
 
+	uint8	getTotalSource(void)			{return m_totalSource;}
+	void	setTotalSource(uint8 val)		{m_totalSource = val;}
+
 	uint32	getKademliaUsers(void)			{return m_kademliaUsers;}
 	void	setKademliaUsers(uint32 val)	{m_kademliaUsers = val;}
 
-	bool	getPublish(void)			{return m_Publish;}
-	void	setPublish(bool val)		{m_Publish = val;}
+	uint32	getKademliaFiles(void)			{return m_kademliaFiles;}
+	void	setKademliaFiles(void);
+
+	bool	getPublish(void)				{return m_Publish;}
+	void	setPublish(bool val)			{m_Publish = val;}
+
+	bool	getFindBuddy(void);
+	void	setFindBuddy( bool val = true)	{m_findBuddy = val;}
 
 private:
 	CString	m_filename;
 
+	time_t		m_lastContact;
 	CUInt128	m_clientID;
 	CUInt128	m_clientHash;
 	uint32		m_ip;
+	uint32		m_ipLast;
 	uint32		m_recheckip;
-	time_t		m_lastContact;
 	uint32		m_firewalled;
+	uint32		m_kademliaUsers;
+	uint32		m_kademliaFiles;
 	uint8		m_totalFile;
 	uint8		m_totalStoreSrc;
 	uint8		m_totalStoreKey;
-	uint32		m_kademliaUsers;
+	uint8		m_totalSource;
 	bool		m_Publish;
+	bool		m_findBuddy;
+	bool		m_lastFirewallState;
 
 	void init(LPCTSTR filename);
 	void reset(void);

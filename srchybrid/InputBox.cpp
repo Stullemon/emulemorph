@@ -26,9 +26,12 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-// InputBox dialog
-
 IMPLEMENT_DYNAMIC(InputBox, CDialog)
+
+BEGIN_MESSAGE_MAP(InputBox, CDialog)
+	ON_BN_CLICKED(IDC_CLEANFILENAME, OnCleanFilename)
+END_MESSAGE_MAP()
+
 InputBox::InputBox(CWnd* pParent /*=NULL*/)
 	: CDialog(InputBox::IDD, pParent)
 {
@@ -48,34 +51,16 @@ void InputBox::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 }
 
-BEGIN_MESSAGE_MAP(InputBox, CDialog)
-	ON_BN_CLICKED(IDC_CLEANFILENAME, OnCleanFilename)
-END_MESSAGE_MAP()
-
 void InputBox::OnOK()
 {
-	TCHAR buffer[510];
 	m_cancel=false;
-	//khaos +
-	CWnd* textBox;
-	if (!isNumber) textBox = GetDlgItem(IDC_TEXT);
-	else textBox = GetDlgItem(IDC_TEXTNUM);
-
-	if(textBox->GetWindowTextLength())
-	{ 
-		textBox->GetWindowText(buffer,510);
-		m_return.Format(_T("%s"),buffer);
-	}
+	//MORPH START - Added by SiRoB, categorymod
+	if (isNumber)
+		GetDlgItemText(IDC_TEXTNUM,m_return);
+	else
+	//MORPH END   - Added by SiRoB, categorymod
+		GetDlgItemText(IDC_TEXT,m_return);
 	CDialog::OnOK();
-	/*//original
-	if(GetDlgItem(IDC_TEXT)->GetWindowTextLength())
-	{ 
-		GetDlgItem(IDC_TEXT)->GetWindowText(buffer,510);
-		m_return.Format(_T("%s"),buffer);
-	}
-	CDialog::OnOK();
-	*/
-	//khaos -
 }
 
 
@@ -89,23 +74,15 @@ void InputBox::OnCancel()
 }
 // khaos::categorymod-
 
-void InputBox::SetLabels(CString title,CString label,CString defaultStr){
+void InputBox::SetLabels(CString title,CString label,CString defaultStr)
+{
 	m_label=label;
 	m_title=title;
 	m_default=defaultStr;
 }
 
-CString InputBox::GetInput(){
-	return m_return;
-}
-
-// khaos::categorymod+
-int InputBox::GetInputInt(){
-	return atoi(m_return);
-}
-// khaos::categorymod-
-
-BOOL InputBox::OnInitDialog(){
+BOOL InputBox::OnInitDialog()
+{
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
 
@@ -129,7 +106,8 @@ BOOL InputBox::OnInitDialog(){
 	return TRUE;
 }
 
-void InputBox::OnCleanFilename() {
+void InputBox::OnCleanFilename()
+{
 	CString filename;
 	GetDlgItem(IDC_TEXT)->GetWindowText(filename);
 	GetDlgItem(IDC_TEXT)->SetWindowText( CleanupFilename(filename) );

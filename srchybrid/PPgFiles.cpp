@@ -19,6 +19,8 @@
 #include "PPgFiles.h"
 #include "Inputbox.h"
 #include "OtherFunctions.h"
+#include "TransferWnd.h"
+#include "emuledlg.h"
 #include "Preferences.h"
 #include "HelpIDs.h"
 
@@ -48,7 +50,7 @@ BEGIN_MESSAGE_MAP(CPPgFiles, CPropertyPage)
 	ON_BN_CLICKED(IDC_SEESHARE1, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SEESHARE2, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SEESHARE3, OnSettingsChange)
-	ON_BN_CLICKED(IDC_ICH, OnSettingsChange)
+	ON_BN_CLICKED(IDC_PF_TIMECALC, OnSettingsChange)
 	ON_BN_CLICKED(IDC_UAP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_DAP, OnSettingsChange)
 	ON_BN_CLICKED(IDC_PREVIEWPRIO, OnSettingsChange)
@@ -92,10 +94,10 @@ void CPPgFiles::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_ADDNEWFILESPAUSED,0);
 	
-	if(thePrefs.ICH)
-		CheckDlgButton(IDC_ICH,1);
+	if(thePrefs.m_bUseOldTimeRemaining)
+		CheckDlgButton(IDC_PF_TIMECALC,0);
 	else
-		CheckDlgButton(IDC_ICH,0);
+		CheckDlgButton(IDC_PF_TIMECALC,1);
 
 	if(thePrefs.m_bpreviewprio)
 		CheckDlgButton(IDC_PREVIEWPRIO,1);
@@ -156,10 +158,15 @@ BOOL CPPgFiles::OnApply()
 	else
 		thePrefs.m_iSeeShares = vsfaNobody;
 
+    bool bOldPreviewPrio = thePrefs.m_bpreviewprio;
 	if(IsDlgButtonChecked(IDC_PREVIEWPRIO))
 		thePrefs.m_bpreviewprio = true;
 	else
 		thePrefs.m_bpreviewprio = false;
+
+    if(bOldPreviewPrio != thePrefs.m_bpreviewprio) {
+		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
+    }
 
 	if(IsDlgButtonChecked(IDC_DAP))
 		thePrefs.m_bDAP = true;
@@ -197,7 +204,7 @@ BOOL CPPgFiles::OnApply()
 	thePrefs.addnewfilespaused = (uint8)IsDlgButtonChecked(IDC_ADDNEWFILESPAUSED);
 	thePrefs.autofilenamecleanup=(uint8)IsDlgButtonChecked(IDC_FNCLEANUP);
 
-	thePrefs.ICH = (uint8)IsDlgButtonChecked(IDC_ICH);
+	thePrefs.m_bUseOldTimeRemaining = !IsDlgButtonChecked(IDC_PF_TIMECALC);
 
 	GetDlgItem(IDC_VIDEOPLAYER)->GetWindowText(buffer);
 	_sntprintf(thePrefs.VideoPlayer, ARRSIZE(thePrefs.VideoPlayer), _T("%s"), buffer);
@@ -215,8 +222,7 @@ void CPPgFiles::Localize(void)
 	if(m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_PW_FILES));
-		GetDlgItem(IDC_ICH_FRM)->SetWindowText(GetResString(IDS_PW_ICH));
-		GetDlgItem(IDC_ICH)->SetWindowText(GetResString(IDS_PW_FILE_ICH));
+		GetDlgItem(IDC_PF_TIMECALC)->SetWindowText(GetResString(IDS_PF_ADVANCEDCALC));
 		GetDlgItem(IDC_SEEMYSHARE_FRM)->SetWindowText(GetResString(IDS_PW_SHARE));
 		GetDlgItem(IDC_SEESHARE1)->SetWindowText(GetResString(IDS_PW_EVER));
 		GetDlgItem(IDC_SEESHARE2)->SetWindowText(GetResString(IDS_PW_FRIENDS));

@@ -29,34 +29,36 @@ there client on the eMule forum..
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
-	class CEntry
+
+class CEntry
+{
+public:
+	CEntry()
 	{
-	public:
-		CEntry()
-		{
-			ip = 0;
-			tcpport = 0;
-			udpport = 0;
-			(void)fileName;
-			size = 0;
-			lifetime = time(NULL);
-			source = false;
-		}
-		~CEntry()
-		{
-			TagList::const_iterator it;
-			for (it = taglist.begin(); it != taglist.end(); it++)
-				delete *it;
-		}
-		uint32 ip;
-		uint16 tcpport;
-		uint16 udpport;
-		CUInt128 keyID;
-		CUInt128 sourceID;
-		CString fileName; // NOTE: this always holds the string in LOWERCASE!!!
-		uint32	size;
-		TagList taglist;
-		time_t lifetime;
-		bool source;
-	};
+		ip = 0;
+		tcpport = 0;
+		udpport = 0;
+		(void)fileName;
+		size = 0;
+		lifetime = time(NULL);
+		source = false;
+	}
+	~CEntry()
+	{
+		TagList::const_iterator it;
+		for (it = taglist.begin(); it != taglist.end(); it++)
+			delete *it;
+	}
+	uint32 ip;
+	uint16 tcpport;
+	uint16 udpport;
+	CUInt128 keyID;
+	CUInt128 sourceID;
+	CTagValueString fileName; // NOTE: this always holds the string in LOWERCASE!!!
+	uint32	size;
+	TagList taglist;
+	time_t lifetime;
+	bool source;
+};
+
 }

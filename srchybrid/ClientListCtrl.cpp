@@ -380,7 +380,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				case 2:{
 					if(client->credits)
-						Sbuffer = CastItoXBytes(client->credits->GetUploadedTotal());
+						Sbuffer = CastItoXBytes(client->credits->GetUploadedTotal(), false, false);
 					else
 						Sbuffer.Empty();
 					break;
@@ -391,7 +391,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				case 4:{
 					if(client->credits)
-						Sbuffer = CastItoXBytes(client->credits->GetDownloadedTotal());
+						Sbuffer = CastItoXBytes(client->credits->GetDownloadedTotal(), false, false);
 					else
 						Sbuffer.Empty();
 					break;
@@ -444,13 +444,12 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				ShowColumn (8);
 		else HideColumn (8);
 	// [end] Mighty Knife
-*/
 
     // Commander - Added: IP2Country column - Start
 		if ((thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE) && !IsColumnHidden(10))
 			HideColumn (10);
     // Commander - Added: IP2Country column - End
-
+*/
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
@@ -587,9 +586,9 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
 					CString fileList;
 					fileList += GetResString(IDS_LISTREQDL);
 					fileList += _T("\n--------------------------\n"); 
-					if (theApp.downloadqueue->IsPartFile(client->reqfile))
+					if (theApp.downloadqueue->IsPartFile(client->GetRequestFile()))
 					{
-						fileList += client->reqfile->GetFileName(); 
+						fileList += client->GetRequestFile()->GetFileName(); 
 						for(POSITION pos = client->m_OtherRequests_list.GetHeadPosition();pos!=0;client->m_OtherRequests_list.GetNext(pos))
 						{
 							fileList += _T("\n") ; 
@@ -648,14 +647,14 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
-				return _tcsicmp(item1->GetUserName(), item2->GetUserName());
+				return CompareLocaleStringNoCase(item1->GetUserName(), item2->GetUserName());
 			else if(item1->GetUserName())
 				return 1;
 			else
 				return -1;
 		case 100:
 			if(item1->GetUserName() && item2->GetUserName())
-				return _tcsicmp(item2->GetUserName(), item1->GetUserName());
+				return CompareLocaleStringNoCase(item2->GetUserName(), item1->GetUserName());
 			else if(item2->GetUserName())
 				return 1;
 			else
@@ -771,7 +770,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
         // Commander - Added: IP2Country column - Start
         case 10:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return _tcsicmp(item1->GetCountryName(true), item2->GetCountryName(true));
+				return CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
 				return 1;
 			else
@@ -779,7 +778,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 		case 110:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
-				return _tcsicmp(item2->GetCountryName(true), item1->GetCountryName(true));
+				return CompareLocaleStringNoCase(item2->GetCountryName(true), item1->GetCountryName(true));
 			else if(item2->GetCountryName(true))
 				return 1;
 			else

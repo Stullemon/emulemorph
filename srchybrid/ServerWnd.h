@@ -52,7 +52,7 @@ public:
 	void UpdateLogTabSelection();
 	void SaveAllSettings();
 	BOOL SaveServerMetStrings();
-	void ShowServerInfo();
+	void ShowNetworkInfo();
 	void UpdateControlsState();
 	void ResetHistory();
 	void PasteServerFromClipboard();

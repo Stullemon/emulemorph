@@ -37,6 +37,9 @@
 #include "PartFile.h"
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
+#include "StringConversion.h"
+#include "ClientList.h"
+
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -54,22 +57,17 @@ typedef CSimpleArray<CKnownFile*> CSimpleKnownFileArray;
 class CPublishKeyword
 {
 public:
-	CPublishKeyword(const CString& rstrKeyword)
+	CPublishKeyword(const CStringW& rstrKeyword)
 	{
 		m_strKeyword = rstrKeyword;
 		ASSERT( rstrKeyword.GetLength() >= 3 );
-#ifdef _UNICODE
-		CStringA strA(rstrKeyword);
-		Kademlia::CMD4::hash((byte*)(LPCSTR)strA, strA.GetLength(), &m_nKadID);
-#else
-		Kademlia::CMD4::hash((byte*)(LPCSTR)rstrKeyword, rstrKeyword.GetLength(), &m_nKadID);
-#endif
+		KadGetKeywordHash(rstrKeyword, &m_nKadID);
 		SetNextPublishTime(0);
 		SetPublishedCount(0);
 	}
 
 	const Kademlia::CUInt128& GetKadID() const { return m_nKadID; }
-	const CString& GetKeyword() const { return m_strKeyword; }
+	const CStringW& GetKeyword() const { return m_strKeyword; }
 	int GetRefCount() const { return m_aFiles.GetSize(); }
 	const CSimpleKnownFileArray& GetReferences() const { return m_aFiles; }
 
@@ -117,7 +115,7 @@ public:
 	}
 
 protected:
-	CString m_strKeyword;
+	CStringW m_strKeyword;
 	Kademlia::CUInt128 m_nKadID;
 	UINT m_tNextPublishTime;
 	UINT m_uPublishedCount;
@@ -160,7 +158,7 @@ protected:
 	POSITION m_posNextKeyword;
 	UINT m_tNextPublishKeywordTime;
 
-	CPublishKeyword* FindKeyword(const CString& rstrKeyword, POSITION* ppos = NULL) const;
+	CPublishKeyword* FindKeyword(const CStringW& rstrKeyword, POSITION* ppos = NULL) const;
 };
 
 CPublishKeywordList::CPublishKeywordList()
@@ -190,7 +188,7 @@ void CPublishKeywordList::ResetNextKeyword()
 	m_posNextKeyword = m_lstKeywords.GetHeadPosition();
 }
 
-CPublishKeyword* CPublishKeywordList::FindKeyword(const CString& rstrKeyword, POSITION* ppos) const
+CPublishKeyword* CPublishKeywordList::FindKeyword(const CStringW& rstrKeyword, POSITION* ppos) const
 {
 	POSITION pos = m_lstKeywords.GetHeadPosition();
 	while (pos)
@@ -214,7 +212,7 @@ void CPublishKeywordList::AddKeywords(CKnownFile* pFile)
 	Kademlia::WordList::const_iterator it;
 	for (it = wordlist.begin(); it != wordlist.end(); it++)
 	{
-		const CString& strKeyword = *it;
+		const CStringW& strKeyword = *it;
 		CPublishKeyword* pPubKw = FindKeyword(strKeyword);
 		if (pPubKw == NULL)
 		{
@@ -233,7 +231,7 @@ void CPublishKeywordList::RemoveKeywords(CKnownFile* pFile)
 	Kademlia::WordList::const_iterator it;
 	for (it = wordlist.begin(); it != wordlist.end(); it++)
 	{
-		const CString& strKeyword = *it;
+		const CStringW& strKeyword = *it;
 		POSITION pos;
 		CPublishKeyword* pPubKw = FindKeyword(strKeyword, &pos);
 		if (pPubKw != NULL)
@@ -293,7 +291,7 @@ void CPublishKeywordList::Dump()
 	while (pos)
 	{
 		CPublishKeyword* pPubKw = m_lstKeywords.GetNext(pos);
-		TRACE(_T("%3u: %-10s  ref=%u  %s\n"), i, pPubKw->GetKeyword(), pPubKw->GetRefCount(), CastSecondsToHM(pPubKw->GetNextPublishTime()));
+		TRACE(_T("%3u: %-10ls  ref=%u  %s\n"), i, pPubKw->GetKeyword(), pPubKw->GetRefCount(), CastSecondsToHM(pPubKw->GetNextPublishTime()));
 		i++;
 	}
 }
@@ -315,10 +313,7 @@ CSharedFileList::CSharedFileList(CServerConnect* in_server)
 	m_lastPublishKadSrc = 0;
 	m_currFileKey = 0;
 	m_lastProcessPublishKadKeywordList = 0;
-	//Removed by SiRoB - Safehash	
-	/*
 	FindSharedFiles();
-	*/
 }
 
 CSharedFileList::~CSharedFileList(){
@@ -337,41 +332,38 @@ CSharedFileList::~CSharedFileList(){
 
 void CSharedFileList::FindSharedFiles()
 {
-	// SLUGFILLER: SafeHash remove - only called after the download queue is created
-	/*
-	POSITION pos = m_Files_map.GetStartPosition();
-	while (pos)
+	if (!m_Files_map.IsEmpty())
 	{
-		POSITION posLast = pos;
-		CCKey key;
-		CKnownFile* cur_file;
-		m_Files_map.GetNextAssoc(pos, key, cur_file);
-		if (cur_file->IsKindOf(RUNTIME_CLASS(CPartFile)) 
-			&& !theApp.downloadqueue->IsPartFile(cur_file) 
-				&& !theApp.knownfiles->IsFilePtrInList(cur_file)
-				&& _taccess(cur_file->GetFilePath(), 0) == 0)
-			continue;
-			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
-		m_Files_map.RemoveKey(key);
-	}
-	*/
-	
-	// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
-	// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
-	// They must not be deleted when the CRC32-Thread writes the CRC into the object !
-	CSingleLock sLockCRC32 (&FileListLockMutex,true);
-	// [end] Mighty Knife
-	
-	m_Files_map.RemoveAll();
+		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
+		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
+		// They must not be deleted when the CRC32-Thread writes the CRC into the object !
+		CSingleLock sLockCRC32 (&FileListLockMutex,true);
+		// [end] Mighty Knife
 
-	// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
-	sLockCRC32.Unlock ();
-	// [end] Mighty Knife
+		POSITION pos = m_Files_map.GetStartPosition();
+		while (pos)
+		{
+			POSITION posLast = pos;
+			CCKey key;
+			CKnownFile* cur_file;
+			m_Files_map.GetNextAssoc(pos, key, cur_file);
+			if (cur_file->IsKindOf(RUNTIME_CLASS(CPartFile)) 
+				&& !theApp.downloadqueue->IsPartFile(cur_file) 
+					&& !theApp.knownfiles->IsFilePtrInList(cur_file)
+					&& _taccess(cur_file->GetFilePath(), 0) == 0)
+				continue;
+			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
+			m_Files_map.RemoveKey(key);
+		}
+
+		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
+		sLockCRC32.Unlock ();
+		// [end] Mighty Knife
 	
-	ASSERT( theApp.downloadqueue );
-	if (theApp.downloadqueue)
-		theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
-	// SLUGFILLER: SafeHash remove - only called after the download queue is created
+		ASSERT( theApp.downloadqueue );
+		if (theApp.downloadqueue)
+			theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
+	}
 
 	// khaos::kmod+ Fix: Shared files loaded multiple times.
 	CStringList l_sAdded;
@@ -542,7 +534,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 		{
 			//not in knownfilelist - start adding thread to hash file if the hashing of this file isnt already waiting
 			// SLUGFILLER: SafeHash - don't double hash, MY way
-			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !theApp.downloadqueue->IsTempFile(rstrDirectory, ff.GetFileName()) && !thePrefs.IsConfigFile(rstrDirectory, ff.GetFileName())){
+			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !thePrefs.IsTempFile(rstrDirectory, ff.GetFileName())){
 			UnknownFile_Struct* tohash = new UnknownFile_Struct;
 				tohash->strDirectory = rstrDirectory;
 				tohash->strName = ff.GetFileName();
@@ -581,7 +573,7 @@ void CSharedFileList::RepublishFile(CKnownFile* pFile)
 
 bool CSharedFileList::AddFile(CKnownFile* pFile)
 {
-	ASSERT( pFile->GetHashCount() == pFile->GetED2KPartCount() ); // SLUGFILLER: SafeHash - use GetED2KPartCount
+	ASSERT( pFile->GetHashCount() == pFile->GetED2KPartHashCount() );
 	ASSERT( !pFile->IsKindOf(RUNTIME_CLASS(CPartFile)) || !STATIC_DOWNCAST(CPartFile, pFile)->hashsetneeded );
 
 	CCKey key(pFile->GetFileHash());
@@ -596,8 +588,6 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	}
 	// SLUGFILLER: mergeKnown
 	pFile->SetLastSeen();	// okay, we see it
-	//MORPH - Removed by SiRoB, No longer needed
-	//theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
 	// SLUGFILLER: mergeKnown
 	m_UnsharedFiles_map.RemoveKey(CSKey(pFile->GetFileHash()));	
 	m_Files_map.SetAt(key, pFile);
@@ -646,23 +636,18 @@ void CSharedFileList::RemoveFile(CKnownFile* pFile)
 
 void CSharedFileList::Reload()
 {
-	// SLUGFILLER: SafeHash - don't allow to be called until after the control is loaded
-	if (!output)
-		return;
-	// SLUGFILLER: SafeHash
 	m_keywords->RemoveAllKeywordReferences();	
 	FindSharedFiles();
 	m_keywords->PurgeUnreferencedKeywords();
-	// SLUGFILLER: SafeHash remove - check moved up
-	output->ShowFileList(this);
-	// SLUGFILLER: SafeHash
+	if (output)
+		output->ShowFileList(this);
 }
 
 void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl)
 {
 	output = in_ctrl;
 	output->ShowFileList(this);
-	Reload();		// SLUGFILLER: SafeHash - load shared files after everything
+	HashNextFile();		// SLUGFILLER: SafeHash - if hashing not yet started, start it now
 }
 
 uint8 GetRealPrio(uint8 in)
@@ -785,8 +770,10 @@ void CSharedFileList::ClearED2KPublishInfo(){
 }
 
 void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, 
-											  CServer* pServer, UINT uEmuleVer)
+											  CServer* pServer, CUpDownClient* pClient)
 {
+	UINT uEmuleVer = (pClient && pClient->IsEmuleClient()) ? pClient->GetVersion() : 0;
+
 	// NOTE: This function is used for creating the offered file packet for Servers _and_ for Clients..
 	files->WriteHash16(cur_file->GetFileHash());
 
@@ -837,13 +824,7 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 
 	CSimpleArray<CTag*> tags;
 
-#ifdef _UNICODE
-
-#else
-#define CTAG(n, s)	CTag(n, s)
-#endif
-
-	tags.Add(new CTAG(FT_FILENAME, cur_file->GetFileName()));
+	tags.Add(new CTag(FT_FILENAME, cur_file->GetFileName()));
 	tags.Add(new CTag(FT_FILESIZE,cur_file->GetFileSize()));
 
 	// NOTE: Archives and CD-Images are published with file type "Pro"
@@ -859,7 +840,7 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 			strExt = strExt.Mid(1);
 			if (!strExt.IsEmpty()){
 				strExt.MakeLower();
-				tags.Add(new CTAG(FT_FILEFORMAT, strExt)); // file extension without a "."
+				tags.Add(new CTag(FT_FILEFORMAT, strExt)); // file extension without a "."
 			}
 		}
 	}
@@ -893,26 +874,26 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 			if (pTag != NULL)
 			{
 				// skip string tags with empty string values
-				if (pTag->IsStr() && (pTag->tag.stringvalue == NULL || pTag->tag.stringvalue[0] == '\0'))
+				if (pTag->IsStr() && pTag->GetStr().IsEmpty())
 					continue;
 				
 				// skip integer tags with '0' values
-				if (pTag->IsInt() && pTag->tag.intvalue == 0)
+				if (pTag->IsInt() && pTag->GetInt() == 0)
 					continue;
 				
 				if (_aMetaTags[i].nED2KType == TAGTYPE_STRING && pTag->IsStr())
 				{
 					if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
-						tags.Add(new CTAG(_aMetaTags[i].nName, pTag->GetStr()));
+						tags.Add(new CTag(_aMetaTags[i].nName, pTag->GetStr()));
 					else
-						tags.Add(new CTAG(_aMetaTags[i].pszED2KName, pTag->GetStr()));
+						tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->GetStr()));
 				}
 				else if (_aMetaTags[i].nED2KType == TAGTYPE_UINT32 && pTag->IsInt())
 				{
 					if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
-						tags.Add(new CTag(_aMetaTags[i].nName, pTag->tag.intvalue));
+						tags.Add(new CTag(_aMetaTags[i].nName, pTag->GetInt()));
 					else
-					tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
+						tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->GetInt()));
 				}
 				else if (_aMetaTags[i].nName == FT_MEDIA_LENGTH && pTag->IsInt())
 				{
@@ -922,14 +903,14 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 						|| uEmuleVer >= MAKE_CLIENT_VERSION(0,42,4))
 					{
 						if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
-							tags.Add(new CTag(_aMetaTags[i].nName, pTag->tag.intvalue));
+							tags.Add(new CTag(_aMetaTags[i].nName, pTag->GetInt()));
 						else
-						tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->tag.intvalue));
+							tags.Add(new CTag(_aMetaTags[i].pszED2KName, pTag->GetInt()));
 					}
 					else
 					{
-						CStringA strValue;
-						SecToTimeLength(pTag->tag.intvalue, strValue);
+						CString strValue;
+						SecToTimeLength(pTag->GetInt(), strValue);
 						tags.Add(new CTag(_aMetaTags[i].pszED2KName, strValue));
 					}
 				}
@@ -939,15 +920,30 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 		}
 	}
 
+	EUtf8Str eStrEncode;
+#ifdef _UNICODE
+	if (pServer != NULL && (pServer->GetTCPFlags() & SRV_TCPFLG_UNICODE)){
+		// eserver doesn't properly support searching with ASCII-7 strings in BOM-UTF8 published strings
+		//eStrEncode = utf8strOptBOM;
+		eStrEncode = utf8strRaw;
+	}
+	else if (pClient && !pClient->GetUnicodeSupport())
+		eStrEncode = utf8strNone;
+	else
+		eStrEncode = utf8strRaw;
+#else
+	eStrEncode = utf8strNone;
+#endif
+
 	files->WriteUInt32(tags.GetSize());
 	for (int i = 0; i < tags.GetSize(); i++)
 	{
 		const CTag* pTag = tags[i];
 		//TRACE("  %s\n", pTag->GetFullInfo());
-		if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS))
-			pTag->WriteNewEd2kTag(files);
+		if (pServer && (pServer->GetTCPFlags() & SRV_TCPFLG_NEWTAGS) || (uEmuleVer >= MAKE_CLIENT_VERSION(0,42,7)))
+			pTag->WriteNewEd2kTag(files, eStrEncode);
 		else
-			pTag->WriteTagToFile(files);
+			pTag->WriteTagToFile(files, eStrEncode);
 		delete pTag;
 	}
 }
@@ -1006,9 +1002,10 @@ bool CSharedFileList::IsFilePtrInList(const CKnownFile* file) const
 
 void CSharedFileList::HashNextFile(){
 	// SLUGFILLER: SafeHash
-	if (!theApp.emuledlg || !theApp.emuledlg->IsRunning() || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
+	if (!theApp.emuledlg || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
 		return;
-	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
+	if (theApp.emuledlg && theApp.emuledlg->IsRunning())
+		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
 	if (!currentlyhashing_list.IsEmpty())	// one hash at a time
 		return;
 	// SLUGFILLER: SafeHash
@@ -1071,7 +1068,6 @@ void CSharedFileList::HashFailed(UnknownFile_Struct* hashed){
 			break;
 		}
 	}
-	ASSERT(0);
 	delete hashed;
 }
 // SLUGFILLER: SafeHash
@@ -1106,8 +1102,12 @@ int CAddFileThread::Run()
 	
 	CoInitialize(NULL);
 
-	// SLUGFILLER: SafeHash remove - locking code removed, unnececery
-	
+	// under very heavy load and slowly progressing
+	// potentially corrupted downloading part files. if all those hash threads would run concurrently, the io-system would be
+	// under very heavy load and slowly progressing
+	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
+	sLock1.Lock();
+
 	CString strFilePath;
 	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
 	strFilePath.ReleaseBuffer();
@@ -1143,7 +1143,7 @@ int CAddFileThread::Run()
 		delete newrecord;
 	}
 
-	// SLUGFILLER: SafeHash remove - locking code removed, unnececery
+	sLock1.Unlock();
 	CoUninitialize();
 
 	return 0;
@@ -1168,7 +1168,8 @@ void CSharedFileList::Publish()
 {
 	UINT tNow = time(NULL);
 
-	if( Kademlia::CKademlia::isConnected() && !theApp.IsFirewalled() && GetCount() && Kademlia::CKademlia::getPublish())
+	bool isFirewalled = theApp.IsFirewalled();
+	if( Kademlia::CKademlia::isConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == 2)) && GetCount() && Kademlia::CKademlia::getPublish())
 	{ 
 		if( Kademlia::CKademlia::getTotalStoreKey() < KADEMLIATOTALSTOREKEY)
 		{
@@ -1193,7 +1194,7 @@ void CSharedFileList::Publish()
 
 						if (tNextKwPublishTime == 0 || tNextKwPublishTime <= tNow)
 						{
-							DEBUG_ONLY( Debug(_T("pkwlst: %-18s  Refs=%3u  Published=%2u  NextPublish=%s  Publishing\n"), pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
+							DEBUG_ONLY( Debug(_T("pkwlst: %-18ls  Refs=%3u  Published=%2u  NextPublish=%s  Publishing\n"), pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
 
 							Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(Kademlia::CSearch::STOREKEYWORD, false, pPubKw->GetKadID());
 							if (pSearch)
@@ -1270,8 +1271,13 @@ void CSharedFileList::Publish()
 				CKnownFile* pCurKnownFile = GetFileByIndex(m_currFileSrc);
 				if(pCurKnownFile)
 				{
-					Kademlia::CUInt128 testID;
-					if (pCurKnownFile->PublishSrc(&testID))
+					//Only publish source if two conditions.
+					//1) We are not firewalled..
+					//2) We are firewalled, but it's a complete source..
+					//
+					//HighID users will find incomplete sources passively..
+					//If the overhead of lowID is not to high, maybe we can start publishing all lowID sources..
+					if (pCurKnownFile->PublishSrc() && (!theApp.IsFirewalled() || (theApp.IsFirewalled() && !pCurKnownFile->IsPartFile())))
 					{
 						Kademlia::CUInt128 kadFileID;
 						kadFileID.setValue(pCurKnownFile->GetFileHash());

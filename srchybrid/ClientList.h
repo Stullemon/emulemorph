@@ -16,11 +16,13 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "Loggable.h"
+#include "DeadSourceList.h"
 
 class CClientReqSocket;
 class CUpDownClient;
 namespace Kademlia{
 	class CContact;
+	class CUInt128;
 };
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
@@ -59,6 +61,7 @@ public:
 						  CMap<uint32, uint32, uint32, uint32>& clientVersionEDonkeyHybrid,
 						  CMap<uint32, uint32, uint32, uint32>& clientVersionEMule,
 						  CMap<uint32, uint32, uint32, uint32>& clientVersionAMule);
+	uint32	GetClientCount()	{ return list.GetCount();}
 	//MORPH START - Slugfiller: modid
 	void	GetModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
 	void	ReleaseModStatistics(CRBMap<uint16, CRBMap<CString, uint32>* > *clientMods);
@@ -77,7 +80,7 @@ public:
 
 	// banned clients
 	void	AddBannedClient(uint32 dwIP);
-	bool	IsBannedClient(uint32 dwIP) /*const*/;
+	bool	IsBannedClient(uint32 dwIP) const;
 	void	RemoveBannedClient(uint32 dwIP);
 	UINT	GetBannedCount() const		{return m_bannedList.GetCount(); }
 
@@ -90,7 +93,13 @@ public:
 
 	void	Process();
 	void	RequestTCP(Kademlia::CContact* contact);
-	void	RemoveTCP(CUpDownClient* torem);
+	void	RequestBuddy(Kademlia::CContact* contact);
+	void	IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID);
+	void	RemoveFromKadList(CUpDownClient* torem);
+	void	AddToKadList(CUpDownClient* toadd);
+	uint8	GetBuddyStatus() {return m_bHaveBuddy;}
+	void	DoCallBack( const uchar* hashid );
+	CUpDownClient* GetBuddy() {return m_pBuddy;}
 
 	bool	IsValidClient(CUpDownClient* tocheck);
 	void	Debug_SocketDeleted(CClientReqSocket* deleted);
@@ -100,6 +109,7 @@ public:
 	// ZZ:UploadSpeedSense <--
 
     void ProcessA4AFClients(); // ZZ:DownloadManager
+	CDeadSourceList	m_globDeadSourceList;
 
 protected:
 	void	CleanUpClientList();
@@ -111,9 +121,10 @@ private:
 	uint32	m_dwLastBannCleanUp;
 	uint32	m_dwLastTrackedCleanUp;
 	uint32 m_dwLastClientCleanUp;
-	CUpDownClientPtrList RequestTCPList;
+	uint8 m_bHaveBuddy;
+	CUpDownClientPtrList KadList;
 	CCriticalSection m_RequestTCPLock;
-
+	CUpDownClient* m_pBuddy;
 //EastShare Start - added by AndCycle, IP to Country
 public:
 	void ResetIP2Country();

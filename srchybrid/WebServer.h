@@ -211,6 +211,9 @@ private:
     static CString	_GetSearch(ThreadData Data);
 	static CString	_GetKadPage(ThreadData Data);
 
+    static CString  _GetRemoteLinkAddedOk(ThreadData Data);
+    static CString  _GetRemoteLinkAddedFailed(ThreadData Data);
+
 	static CString	_ParseURL(CString URL, CString fieldname); 
 	static CString	_ParseURLArray(CString URL, CString fieldname);
 	static void		_ConnectToServer(CString sIP, int nPort);

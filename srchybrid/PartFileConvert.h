@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@ public:
 	static void RemoveAllSuccJobs();
 	static void RemoveJob(ConvertJob* job);
 	static CString GetReturncodeText(int ret);
+	static void Localize();
 
 private:
 	CPartFileConvert(void); // Just use static recover method

@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#pragma comment(lib, "winmm.lib")
 #include <Mmsystem.h>
 #include "ircchanneltabctrl.h"
 #include "ircwnd.h"

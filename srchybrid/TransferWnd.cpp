@@ -140,7 +140,7 @@ BOOL CTransferWnd::OnInitDialog()
 	UpdateTabToolTips();
 	m_tooltipCats.SendMessage(TTM_SETMAXTIPWIDTH, 0, SHRT_MAX); // recognize \n chars!
 	m_tooltipCats.SetDelayTime(TTDT_AUTOPOP, 20000);
-	m_tooltipCats.SetDelayTime(TTDT_INITIAL, 0);
+	m_tooltipCats.SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
 	m_tooltipCats.Activate(TRUE);
 
 	UpdateListCount(m_uWnd2);
@@ -358,7 +358,7 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 					m_nLastCatTT=m_nDropIndex;
 				    if (m_nDropIndex!=-1)
 					    UpdateTabToolTips(m_nDropIndex);
-			    m_tooltipCats.Update();
+			    //m_tooltipCats.Update();
 				}
 			}
 	}
@@ -410,10 +410,17 @@ void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
 
 	CString buffer;
 	switch (m_uWnd2){
-		case 1:
-			buffer.Format(_T(" (%i)"), iCount == -1 ? uploadlistctrl.GetItemCount() : iCount);
-					GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS)+buffer);
-				break;
+        case 1: {
+            uint32 itemCount = iCount == -1 ? uploadlistctrl.GetItemCount() : iCount;
+            uint32 activeCount = theApp.uploadqueue->GetActiveUploadsCount();
+            if(activeCount >= itemCount) {
+                buffer.Format(_T(" (%i)"), itemCount);
+            } else {
+                buffer.Format(_T(" (%i/%i)"), activeCount, itemCount);
+            }
+			GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS)+buffer);
+			break;
+        }
 		case 2:
 			buffer.Format(_T(" (%i)"), iCount == -1 ? queuelistctrl.GetItemCount() : iCount);
 					GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_ONQUEUE)+buffer);
@@ -951,12 +958,10 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
 		}
-		//Commander - Fixed: Resume Next File - Start
 		case MP_CAT_RESUMENEXT: {
 			theApp.downloadqueue->StartNextFile(rightclickindex,true);
 			break;
 		}
-		//Commander - Fixed: Resume Next File - End
 
 // ZZ:DownloadManager -->
 		case MP_DOWNLOAD_ALPHABETICAL: {
@@ -1104,6 +1109,23 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 	newlabel.Replace(_T("&"),_T("&&"));
 	int count,dwl;
 
+// ZZ:DownloadManager -->
+    //CString prioStr;
+    //switch(thePrefs.GetCategory(index)->prio) {
+    //    case PR_LOW:
+    //        prioStr = _T(" ") + GetResString(IDS_PR_SHORT_LOW);
+    //        break;
+
+    //    case PR_HIGH:
+    //        prioStr = _T(" ") + GetResString(IDS_PR_SHORT_HIGH);
+    //        break;
+
+    //    default:
+    //        prioStr = _T("");
+    //        break;
+    //}
+// <-- ZZ:DownloadManager
+
 	if (thePrefs.ShowCatTabInfos()) {
 		CPartFile* cur_file;
 		count=dwl=0;
@@ -1116,7 +1138,13 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 		}
 		CString title=newlabel;
 		int compl= theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(index,count);
-		newlabel.Format(_T("%s (%i/%i)"),title,dwl,count);
+		newlabel.Format(_T("%s %i/%i"),title,dwl,count); // ZZ:DownloadManager
+		//newlabel.Format(_T("%s%s %i/%i"),title, prioStr,dwl,count); // ZZ:DownloadManager
+
+// ZZ:DownloadManager -->
+    //} else {
+    //    newlabel += prioStr;
+// <-- ZZ:DownloadManager
 	}
 
 	tabitem.pszText = newlabel.LockBuffer();
@@ -1294,8 +1322,8 @@ CString CTransferWnd::GetTabStatistic(uint8 tab) {
 		GetResString(IDS_DL_SPEED) ,speed,GetResString(IDS_KBYTESEC),
 
 
-		GetResString(IDS_DL_SIZE),CastItoXBytes(trsize),CastItoXBytes(size),
-		GetResString(IDS_ONDISK),CastItoXBytes(disksize)		);
+		GetResString(IDS_DL_SIZE),CastItoXBytes(trsize, false, false),CastItoXBytes(size, false, false),
+		GetResString(IDS_ONDISK),CastItoXBytes(disksize, false, false));
 	return title;
 }
 

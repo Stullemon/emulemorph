@@ -9,6 +9,7 @@
 #include "serverWnd.h"
 #include "Fakecheck.h"
 #include "IPFilter.h"
+#include "IP2Country.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -189,6 +190,6 @@ void CPPgMorph2::OnBnClickedUpdateipfurl()
 //Commander - Added: IP2Country Auto-updating - Start
 void CPPgMorph2::OnBnClickedUpdateipcurl()
 {
-	theApp.ipfilter->UpdateIP2CountryURL();
+	theApp.ip2country->UpdateIP2CountryURL();
 }
 //Commander - Added: IP2Country Auto-updating - End

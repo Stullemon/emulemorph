@@ -36,6 +36,7 @@ there client on the eMule forum..
 #pragma once
 #include "Maps.h"
 #include "../utils/UInt128.h"
+#include "Loggable.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -54,8 +55,9 @@ class CContact;
  * All key pseudoaddresses are relative to the center (self), which
  * is considered to be 000..000
  */
-class CRoutingZone : public CCriticalSection
+class CRoutingZone: public CLoggable
 {
+	friend CRoutingZone;
 public:
 
 	CRoutingZone();
@@ -67,12 +69,10 @@ public:
 	time_t m_nextSmallTimer;
 	bool onBigTimer(void);
 	void onSmallTimer(void);
-	uint32 estimateCount(void);
 
 	bool add(const CUInt128 &id, uint32 ip, uint16 port, uint16 tport, byte type);
 	void setAlive(uint32 ip, uint16 port);
 
-	bool contains(const CUInt128 &id) const;
 	CContact *getContact(const CUInt128 &id) const;
 	UINT getNumContacts(void) const;
 
@@ -80,18 +80,19 @@ public:
 	void getAllEntries(ContactList *result, bool emptyFirst = true);
 
 	// Returns the *maxRequired* tokens that are closest to the target within this zone's subtree.
-	int getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst = true) const;
+	int getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst = true, bool setInUse = false) const;
 
 	// Ideally: Returns all contacts that are in buckets of common range between us and the asker.
 	// In practice: returns the contacts from the top (2^{logBase+1}) buckets.
 	UINT getBootstrapContacts(ContactList *results, UINT maxRequired);
 
 	/** Debugging. */
-	void dumpContents(LPCTSTR prefix = NULL) const;
-	void selfTest(void);
+//	void dumpContents(LPCTSTR prefix = NULL) const;
+//	void selfTest(void);
 
-	uint64 getApproximateNodeCount(UINT ourLevel) const;
+//	uint64 getApproximateNodeCount(UINT ourLevel) const;
 
+	uint32 estimateCount();
 private:
 
 	CRoutingZone(CRoutingZone *super_zone, int level, const CUInt128 &zone_index);
@@ -114,8 +115,6 @@ private:
 
 	bool isLeaf(void) const;
 	bool canSplit(void) const;
-	bool areWeInFirstSubtreeOfEnoughSize(void) const;
-	void consolidate(void);
 
 	// Returns all contacts from this zone tree that are no deeper than *depth* from the current zone.
 	void topDepth(int depth, ContactList *result, bool emptyFirst = true);

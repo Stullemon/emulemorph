@@ -71,7 +71,7 @@ CRoutingBin::~CRoutingBin()
 	} 
 	catch (...) 
 	{
-		CKademlia::debugLine("Exception in ~CRoutingBin");
+		AddDebugLogLine(false, _T("Exception in ~CRoutingBin"));
 	}
 }
 
@@ -118,15 +118,7 @@ void CRoutingBin::setAlive(uint32 ip, uint16 port)
 		c = *it;
 		if ((ip == c->getIPAddress()) && (port == c->getUDPPort()))
 		{
-//			CString ipStr;
-//			c->getIPAddress(&ipStr);
-//			CKademlia::debugMsg("%s port %ld is alive.", ipStr, port);
 			c->madeContact(true);
-//			c->m_expires = time(NULL) + HOUR;
-
-			// Move to the end of the list - this is not thread save..
-//			remove(c);
-//			m_entries.push_back(c);
 			break;
 		}
 	}
@@ -144,13 +136,8 @@ void CRoutingBin::setTCPPort(uint32 ip, uint16 port, uint16 tcpPort)
 		c = *it;
 		if ((ip == c->getIPAddress()) && (port == c->getUDPPort()))
 		{
-//			CString ipStr;
-//			c->getIPAddress(&ipStr);
-//			CKademlia::debugMsg("%s port %ld is alive.", ipStr, port);
 			c->setTCPPort(tcpPort);
 			c->madeContact(true);
-//			c->m_expires = time(NULL) + HOUR;
-
 			// Move to the end of the list
 			remove(c);
 			m_entries.push_back(c);
@@ -162,21 +149,6 @@ void CRoutingBin::setTCPPort(uint32 ip, uint16 port, uint16 tcpPort)
 void CRoutingBin::remove(CContact *contact)
 {
 	m_entries.remove(contact);
-}
-
-bool CRoutingBin::contains(const CUInt128 &id) 
-{
-	bool retVal = false;
-	ContactList::const_iterator it;
-	for (it = m_entries.begin(); it != m_entries.end(); it++)
-	{
-		if (id == (*it)->m_clientID)
-		{
-			retVal = true;
-			break;
-		}
-	}
-	return retVal;
 }
 
 CContact *CRoutingBin::getContact(const CUInt128 &id) 
@@ -219,7 +191,7 @@ CContact *CRoutingBin::getOldest(void)
 	return NULL;
 }
 
-int CRoutingBin::getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst)
+int CRoutingBin::getClosestTo(int maxType, const CUInt128 &target, int maxRequired, ContactMap *result, bool emptyFirst, bool inUse)
 {
 	if (m_entries.size() == 0)
 		return 0;
@@ -236,6 +208,8 @@ int CRoutingBin::getClosestTo(int maxType, const CUInt128 &target, int maxRequir
 			CUInt128 distance((*it)->m_clientID);
 			distance.xor(target);
 			(*result)[distance] = *it;
+			if( inUse )
+				(*it)->incUse();
 			if (++count == maxRequired)
 				break;
 		}
@@ -243,6 +217,8 @@ int CRoutingBin::getClosestTo(int maxType, const CUInt128 &target, int maxRequir
 	return count;
 }
 
+/*
+//Keep just in case needed at sometime.
 void CRoutingBin::dumpContents(void)
 {
 	CString line;
@@ -261,3 +237,4 @@ void CRoutingBin::dumpContents(void)
 		OutputDebugString(line);
 	}
 }
+*/

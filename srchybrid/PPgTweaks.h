@@ -18,6 +18,7 @@ protected:
 	UINT m_iFileBufferSize;
 	UINT m_iQueueSize;
 	int m_iMaxConnPerFive;
+	int m_iMaxHalfOpen;
 	int m_iAutoTakeEd2kLinks;
 	int m_iVerbose;
 	int m_iDebugSourceExchange;
@@ -59,6 +60,7 @@ protected:
     CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiMaxCon5Sec;
+	HTREEITEM m_htiMaxHalfOpen;
 	HTREEITEM m_htiAutoTakeEd2kLinks;
 	HTREEITEM m_htiVerboseGroup;
 	HTREEITEM m_htiVerbose;

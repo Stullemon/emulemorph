@@ -48,7 +48,7 @@
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
 
 typedef union YYSTYPE {
-	CString*		pstr;
+	CStringA*		pstr;
 	CSearchExpr*	pexpr;
 } YYSTYPE;
 /* Line 1248 of yacc.c.  */

@@ -55,6 +55,11 @@ void CFileIO::writeArray(LPCVOID lpVal, uint32 byteCount)
 	Write(lpVal, byteCount);
 }
 
+UINT CFileIO::getAvailable() const
+{
+	return (UINT)(GetLength() - GetPosition());
+}
+
 void CBufferedFileIO::readArray(LPVOID lpResult, uint32 byteCount)
 {
 	uint32 test = Read(lpResult, byteCount);
@@ -65,4 +70,9 @@ void CBufferedFileIO::readArray(LPVOID lpResult, uint32 byteCount)
 void CBufferedFileIO::writeArray(LPCVOID lpVal, uint32 byteCount)
 {
 	Write(lpVal, byteCount);
+}
+
+UINT CBufferedFileIO::getAvailable() const
+{
+	return (UINT)(GetLength() - GetPosition());
 }

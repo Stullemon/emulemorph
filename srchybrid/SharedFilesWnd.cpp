@@ -35,7 +35,6 @@ IMPLEMENT_DYNAMIC(CSharedFilesWnd, CDialog)
 CSharedFilesWnd::CSharedFilesWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CSharedFilesWnd::IDD, pParent)
 {
-	md4clr(shownFileHash);
 	icon_files = NULL;
 }
 
@@ -110,8 +109,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 void CSharedFilesWnd::Reload()
 {
 	theApp.sharedfiles->Reload();
-	if (theApp.sharedfiles->GetFileByID(shownFileHash) == NULL)
-		ShowDetails(NULL);
+	ShowSelectedFilesSummary();
 }
 
 BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
@@ -132,81 +130,86 @@ void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 	// [end] MightyKnife
 }
 
-void CSharedFilesWnd::Check4StatUpdate(const CKnownFile* file)
-{
-	if (!md4cmp(file->GetFileHash(), shownFileHash))
-		ShowDetails(file);
-}
-
 void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	int iSel = sharedfilesctrl.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	if (iSel != -1) {
-		const CKnownFile* cur_file = (CKnownFile*)sharedfilesctrl.GetItemData(iSel);
-		ShowDetails(cur_file);
-	}
-	else
-		ShowDetails(NULL);
+	ShowSelectedFilesSummary();
 }
 
-void CSharedFilesWnd::ShowDetails(const CKnownFile* cur_file)
+void CSharedFilesWnd::ShowSelectedFilesSummary()
 {
-	if (cur_file)
+	const CKnownFile* pTheFile = NULL;
+	int iFiles = 0;
+	uint64 uTransfered = 0;
+	UINT uRequests = 0;
+	UINT uAccepted = 0;
+	uint64 uAllTimeTransfered = 0;
+	UINT uAllTimeRequests = 0;
+	UINT uAllTimeAccepted = 0;
+	POSITION pos = sharedfilesctrl.GetFirstSelectedItemPosition();
+	while (pos)
 	{
-		CString buffer;
+		int iItem = sharedfilesctrl.GetNextSelectedItem(pos);
+		const CKnownFile* pFile = (CKnownFile*)sharedfilesctrl.GetItemData(iItem);
+		iFiles++;
+		if (iFiles == 1)
+			pTheFile = pFile;
 
+		uTransfered += pFile->statistic.GetTransferred();
+		uRequests += pFile->statistic.GetRequests();
+		uAccepted += pFile->statistic.GetAccepts();
+
+		uAllTimeTransfered += pFile->statistic.GetAllTimeTransferred();
+		uAllTimeRequests += pFile->statistic.GetAllTimeRequests();
+		uAllTimeAccepted += pFile->statistic.GetAllTimeAccepts();
+	}
+
+	if (iFiles != 0)
+	{
 		pop_bartrans.SetRange32(0,theApp.knownfiles->transferred/1024);
-		pop_bartrans.SetPos(cur_file->statistic.GetTransferred()/1024);
+		pop_bartrans.SetPos(uTransfered/1024);
 		pop_bartrans.SetShowPercent();			
-		GetDlgItem(IDC_STRANSFERED)->SetWindowText(CastItoXBytes(cur_file->statistic.GetTransferred()));
+		SetDlgItemText(IDC_STRANSFERED, CastItoXBytes(uTransfered, false, false));
 
 		pop_bar.SetRange32(0,theApp.knownfiles->requested);
-		pop_bar.SetPos(cur_file->statistic.GetRequests());
+		pop_bar.SetPos(uRequests);
 		pop_bar.SetShowPercent();			
-		buffer.Format(_T("%u"),cur_file->statistic.GetRequests());
-		GetDlgItem(IDC_SREQUESTED)->SetWindowText(buffer);
+		SetDlgItemInt(IDC_SREQUESTED, uRequests, FALSE);
 
-		buffer.Format(_T("%u"),cur_file->statistic.GetAccepts());
 		pop_baraccept.SetRange32(0,theApp.knownfiles->accepted);
-		pop_baraccept.SetPos(cur_file->statistic.GetAccepts());
+		pop_baraccept.SetPos(uAccepted);
 		pop_baraccept.SetShowPercent();
-		GetDlgItem(IDC_SACCEPTED)->SetWindowText(buffer);
+		SetDlgItemInt(IDC_SACCEPTED, uAccepted, FALSE);
 
-		GetDlgItem(IDC_STRANSFERED2)->SetWindowText(CastItoXBytes(cur_file->statistic.GetAllTimeTransferred()));
+		SetDlgItemText(IDC_STRANSFERED2, CastItoXBytes(uAllTimeTransfered, false, false));
+		SetDlgItemInt(IDC_SREQUESTED2, uAllTimeRequests, FALSE);
+		SetDlgItemInt(IDC_SACCEPTED2, uAllTimeAccepted, FALSE);
 
-		buffer.Format(_T("%u"),cur_file->statistic.GetAllTimeRequests());
-		GetDlgItem(IDC_SREQUESTED2)->SetWindowText(buffer);
-
-		buffer.Format(_T("%u"),cur_file->statistic.GetAllTimeAccepts());
-		GetDlgItem(IDC_SACCEPTED2)->SetWindowText(buffer);
-
-		md4cpy(shownFileHash,cur_file->GetFileHash());
-
-		CString title=GetResString(IDS_SF_STATISTICS)+_T(" (")+ MakeStringEscaped(cur_file->GetFileName()) +_T(")");
-		m_ctrlStatisticsFrm.SetText(title);
+		CString str(GetResString(IDS_SF_STATISTICS));
+		if (iFiles == 1 && pTheFile != NULL)
+			str += _T(" (") + MakeStringEscaped(pTheFile->GetFileName()) +_T(")");
+		m_ctrlStatisticsFrm.SetText(str);
 	}
 	else
 	{
 		pop_bartrans.SetRange32(0, 100);
 		pop_bartrans.SetPos(0);
 		pop_bartrans.SetTextFormat(_T(""));
-		GetDlgItem(IDC_STRANSFERED)->SetWindowText(_T("-"));
+		SetDlgItemText(IDC_STRANSFERED, _T("-"));
 
 		pop_bar.SetRange32(0, 100);
 		pop_bar.SetPos(0);
 		pop_bar.SetTextFormat(_T(""));
-		GetDlgItem(IDC_SREQUESTED)->SetWindowText(_T("-"));
+		SetDlgItemText(IDC_SREQUESTED, _T("-"));
 
 		pop_baraccept.SetRange32(0, 100);
 		pop_baraccept.SetPos(0);
 		pop_baraccept.SetTextFormat(_T(""));
-		GetDlgItem(IDC_SACCEPTED)->SetWindowText(_T("-"));
+		SetDlgItemText(IDC_SACCEPTED, _T("-"));
 
-		GetDlgItem(IDC_STRANSFERED2)->SetWindowText(_T("-"));
-		GetDlgItem(IDC_SREQUESTED2)->SetWindowText(_T("-"));
-		GetDlgItem(IDC_SACCEPTED2)->SetWindowText(_T("-"));
+		SetDlgItemText(IDC_STRANSFERED2, _T("-"));
+		SetDlgItemText(IDC_SREQUESTED2, _T("-"));
+		SetDlgItemText(IDC_SACCEPTED2, _T("-"));
 
-		md4clr(shownFileHash);
 		m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS));
 	}
 }

@@ -35,6 +35,7 @@ struct SSearchParams
 		ulMinBitrate = 0;
 		ulMinLength = 0;
 		bMatchKeywords = false;
+		bUnicode = false;
 	}
 	DWORD dwSearchID;
 	bool bClientSharedFiles;
@@ -57,6 +58,7 @@ struct SSearchParams
 	CString strAlbum;
 	CString strArtist;
 	bool bMatchKeywords;
+	bool bUnicode;
 };
 
-bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams, bool bOptUTF8 = false);
+bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams);

@@ -6,7 +6,7 @@
 		Copyright (C) 2001-2002 Magomed G. Abdurakhmanov			
 
 ********************************************************************/
-//edited by (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//edited by (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //-> converted it to MFC
 //-> included colored keywords
 //-> fixed GPF bugs
@@ -128,7 +128,7 @@ protected:
 
 	void RemoveLastSign(CString& sLink);
 	void PrepareText(const CString& sText);
-	bool tspace(TCHAR c)						{return _istspace(c) || /*c < _T(' ') || */c == _T(';') || c == _T('!');}
+	bool tspace(TCHAR c)						{return _istspace((_TUCHAR)c) || /*c < _T(' ') || */c == _T(';') || c == _T('!');}
 
 };
 // --------------------------------------------------------------

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -331,7 +331,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 	//////////////////////////////////////////////////////////////////////////
 	CoInitialize(NULL);
 
-	try{
+	try
+	{
 		USES_CONVERSION;
 		bool isUseGzip = thePrefs.GetWebUseGzip();
 		CString Out = _T("");
@@ -340,6 +341,9 @@ void CWebServer::ProcessURL(ThreadData Data)
 		CString OutS = _T("");	// ServerStatus Templates
 		TCHAR *gzipOut = NULL;
 		long gzipLen=0;
+		
+		bool login=false;
+        bool justAddLink = false;
 		
 		CString HTTPProcessData = _T("");
 		CString HTTPTemp = _T("");
@@ -353,16 +357,24 @@ void CWebServer::ProcessURL(ThreadData Data)
 		if (_ParseURL(Data.sURL, _T("w")) == _T("password"))
 		{
 			CString test=MD5Sum(_ParseURL(Data.sURL, _T("p"))).GetHash();
-			bool login=false;
 			CString ip=ipstr(Data.inadr);
+
+            if (_ParseURL(Data.sURL, _T("c")) != _T("")) {
+                // just sent password to add link remotely. Don't start a session.
+                justAddLink = true;
+            }
 
 			if(MD5Sum(_ParseURL(Data.sURL, _T("p"))).GetHash() == thePrefs.GetWSPass())
 			{
-				Session ses;
-				ses.admin=true;
-				ses.startTime = CTime::GetCurrentTime();
-				ses.lSession = lSession = GetRandomUInt32();
-				pThis->m_Params.Sessions.Add(ses);
+	            if (!justAddLink) 
+	            {
+                    // user wants to login
+				    Session ses;
+				    ses.admin=true;
+				    ses.startTime = CTime::GetCurrentTime();
+				    ses.lSession = lSession = GetRandomUInt32();
+				    pThis->m_Params.Sessions.Add(ses);
+                }
 				theApp.emuledlg->serverwnd->UpdateMyInfo();
 				AddLogLine(true,GetResString(IDS_WEB_ADMINLOGIN)+_T(" (%s)"),ip);
 				login=true;
@@ -505,6 +517,10 @@ void CWebServer::ProcessURL(ThreadData Data)
 				}
 			}
 		}
+        else if(justAddLink && login)
+        {
+            Out += _GetRemoteLinkAddedOk(Data);
+        }
 		else 
 		{
 			isUseGzip = false;
@@ -525,6 +541,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 					pThis->m_Params.badlogins.Add(preventive);
 
 			}
+            else if(justAddLink)
+                Out += _GetRemoteLinkAddedFailed(Data);
 			else
 				Out += _GetLoginScreen(Data);
 		}
@@ -542,7 +560,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 			delete[] gzipOut;
 	}
 	catch(...){
-		TRACE("*** Unknown exception in CWebServer::ProcessURL\n");
+		AddDebugLogLine( DLP_VERYHIGH, false, _T("*** Unknown exception in CWebServer::ProcessURL\n") );
 		ASSERT(0);
 	}
 
@@ -1224,18 +1242,17 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	// Displaying
 	CString sDownList = _T("");
 	CString HTTPTemp;
+	CString label=_GetPlainResString(IDS_SW_LINK);
 
 	for(int i = 0; i < FilesArray.GetCount(); i++)
 	{
 		CString JSfileinfo=FilesArray[i].sFileInfo;
 		JSfileinfo.Replace(_T("\n"),_T("\\n"));
 		JSfileinfo.Replace(_T("\'"),_T("\\'"));			// [Thx2 Zune]
+		
 		CString sActions = _T("<acronym title=\"") + FilesArray[i].sFileStatus + _T("\"><a href=\"javascript:alert(\'")+ JSfileinfo + _T("')\"><img src=\"l_info.gif\" alt=\"") + FilesArray[i].sFileStatus + _T("\"></a></acronym> ");
 
-		CString sED2kLink;
-		sED2kLink.Format(_T("<acronym title=\"[Ed2klink]\"><a href=\"")+ FilesArray[i].sED2kLink +_T("\"><img src=\"l_ed2klink.gif\" alt=\"[Ed2klink]\"></a></acronym> "));
-		sED2kLink.Replace(_T("[Ed2klink]"), _GetPlainResString(IDS_SW_LINK));
-		sActions += sED2kLink;
+		sActions += _T("<acronym title=\"")+label+_T("\"><a href=\"")+ FilesArray[i].sED2kLink +_T("\"><img src=\"l_ed2klink.gif\" alt=\"")+label+_T("\"></a></acronym>");
 
 		bool bCanBeDeleted = true;
 		switch(FilesArray[i].nFileStatus)
@@ -1307,13 +1324,13 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 
 		fTotalSize += FilesArray[i].lFileSize;
 
-		HTTPProcessData.Replace(_T("[2]"), CastItoXBytes(FilesArray[i].lFileSize));
+		HTTPProcessData.Replace(_T("[2]"), CastItoXBytes(FilesArray[i].lFileSize, false, false));
 
 		if(FilesArray[i].lFileTransferred > 0)
 		{
 			fTotalTransferred += FilesArray[i].lFileTransferred;
 
-			HTTPProcessData.Replace(_T("[3]"), CastItoXBytes(FilesArray[i].lFileTransferred));
+			HTTPProcessData.Replace(_T("[3]"), CastItoXBytes(FilesArray[i].lFileTransferred, false, false));
 		}
 		else
 			HTTPProcessData.Replace(_T("[3]"), _T("-"));
@@ -1324,7 +1341,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 		{
 			fTotalSpeed += FilesArray[i].lFileSpeed;
 
-			HTTPTemp.Format(_T("%8.2f %s"), FilesArray[i].lFileSpeed/1024.0 ,_GetPlainResString(IDS_KBYTESEC) );
+			HTTPTemp.Format(_T("%s"), CastItoXBytes(FilesArray[i].lFileSpeed, false, true));
 			HTTPProcessData.Replace(_T("[4]"), HTTPTemp);
 		}
 		else
@@ -1363,12 +1380,12 @@ CString CWebServer::_GetTransferList(ThreadData Data)
     Out.Replace(_T("[PriorityDown]"), _GetPlainResString(IDS_PRIORITY_DOWN));
 	// Elandal: cast from float to integral type always drops fractions.
 	// avoids implicit cast warning
-	Out.Replace(_T("[TotalDownSize]"), CastItoXBytes((uint64)fTotalSize));
-	Out.Replace(_T("[TotalDownTransferred]"), CastItoXBytes((uint64)fTotalTransferred));
+	Out.Replace(_T("[TotalDownSize]"), CastItoXBytes(fTotalSize, false, false));
+	Out.Replace(_T("[TotalDownTransferred]"), CastItoXBytes(fTotalTransferred, false, false));
 
 	Out.Replace(_T("[ClearCompletedButton]"),(completedAv && IsSessionAdmin(Data,sSession))?pThis->m_Templates.sClearCompleted :_T(""));
 
-	HTTPTemp.Format(_T("%8.2f %s"), fTotalSpeed/1024.0,_GetPlainResString(IDS_KBYTESEC));
+	HTTPTemp.Format(_T("%s"), CastItoXBytes(fTotalSpeed, false, true));
 	Out.Replace(_T("[TotalDownSpeed]"), HTTPTemp);
 	OutE = pThis->m_Templates.sTransferUpLine;
 	
@@ -1398,11 +1415,11 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 		fTotalSize += cur_client->GetTransferedDown();
 		fTotalTransferred += cur_client->GetTransferedUp();
 		CString HTTPTemp;
-		HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(cur_client->GetTransferedDown()),CastItoXBytes(cur_client->GetTransferedUp()));
+		HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(cur_client->GetTransferedDown(), false, false),CastItoXBytes(cur_client->GetTransferedUp(), false, false));
 		HTTPProcessData.Replace(_T("[3]"), HTTPTemp);
 
 		fTotalSpeed += cur_client->GetDatarate();
-		HTTPTemp.Format(_T("%8.2f ") + _GetPlainResString(IDS_KBYTESEC), cur_client->GetDatarate()/1024.0);
+		HTTPTemp.Format(_T("%s"), CastItoXBytes(cur_client->GetDatarate(), false, true));
 		HTTPProcessData.Replace(_T("[4]"), HTTPTemp);
 
 		sUpList += HTTPProcessData;
@@ -1410,9 +1427,9 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	Out.Replace(_T("[UploadFilesList]"), sUpList);
 	// Elandal: cast from float to integral type always drops fractions.
 	// avoids implicit cast warning
-	HTTPTemp.Format(_T("%s / %s"), CastItoXBytes((uint64)fTotalSize), CastItoXBytes((uint64)fTotalTransferred));
+	HTTPTemp.Format(_T("%s / %s"), CastItoXBytes(fTotalSize, false, false), CastItoXBytes(fTotalTransferred, false, false));
 	Out.Replace(_T("[TotalUpTransferred]"), HTTPTemp);
-	HTTPTemp.Format(_T("%8.2f ") + _GetPlainResString(IDS_KBYTESEC), fTotalSpeed/1024.0);
+	HTTPTemp.Format(_T("%s"), CastItoXBytes(fTotalSpeed, false, true));
 	Out.Replace(_T("[TotalUpSpeed]"), HTTPTemp);
 
 	if(pThis->m_Params.bShowUploadQueue) 
@@ -1434,10 +1451,10 @@ CString CWebServer::_GetTransferList(ThreadData Data)
             TCHAR HTTPTempC[100] = _T("");
 			HTTPProcessData = OutE;
 			HTTPProcessData.Replace(_T("[UserName]"), _SpecialChars(cur_client->GetUserName()));
-			if (!cur_client->reqfile) continue;
-			CKnownFile* file = theApp.sharedfiles->GetFileByID(cur_client->reqfile->GetFileHash());
+			if (!cur_client->GetRequestFile()) continue;
+			CKnownFile* file = theApp.sharedfiles->GetFileByID(cur_client->GetRequestFile()->GetFileHash());
 			if (file)
-				HTTPProcessData.Replace(_T("[FileName]"), _SpecialChars(cur_client->reqfile->GetFileName()));
+				HTTPProcessData.Replace(_T("[FileName]"), _SpecialChars(cur_client->GetRequestFile()->GetFileName()));
 			else
 				HTTPProcessData.Replace(_T("[FileName]"), _T("?"));
 			_stprintf(HTTPTempC, _T("%i") , cur_client->GetScore(false));
@@ -1799,14 +1816,14 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 		else
 			HTTPProcessData.Replace(_T("[ShortFileName]"), _SpecialChars(SharedArray[i].sFileName));
 
-		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].lFileSize));
+		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].lFileSize, false, false));
 		HTTPProcessData.Replace(_T("[FileSize]"), CString(HTTPTempC));
 		HTTPProcessData.Replace(_T("[FileLink]"), SharedArray[i].sED2kLink);
 
-		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].nFileTransferred));
+		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].nFileTransferred, false, false));
 		HTTPProcessData.Replace(_T("[FileTransferred]"), CString(HTTPTempC));
 
-		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].nFileAllTimeTransferred));
+		_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].nFileAllTimeTransferred, false, false));
 		HTTPProcessData.Replace(_T("[FileAllTimeTransferred]"), CString(HTTPTempC));
 
 		_stprintf(HTTPTempC, _T("%i"), SharedArray[i].nFileRequests);
@@ -2251,8 +2268,6 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 
 	Out.Replace(_T("[NETWORKS]"), _GetPlainResString(IDS_NETWORK));
 
-	//if ( !Kademlia::CKademlia::isRunning() || theApp.kademlia->isConnected()) {}
-
 	Out.Replace(_T("[BOOTSTRAP]"), _GetPlainResString(IDS_BOOTSTRAP));
 	Out.Replace(_T("[BS_IP]"), _GetPlainResString(IDS_IP));
 	Out.Replace(_T("[BS_PORT]"), _GetPlainResString(IDS_PORT));
@@ -2297,6 +2312,43 @@ CString CWebServer::_GetLoginScreen(ThreadData Data)
 	Out.Replace(_T("[EnterPassword]"), _GetPlainResString(IDS_WEB_ENTER_PASSWORD));
 	Out.Replace(_T("[LoginNow]"), _GetPlainResString(IDS_WEB_LOGIN_NOW));
 	Out.Replace(_T("[WebControl]"), _GetPlainResString(IDS_WEB_CONTROL));
+
+	return Out;
+}
+
+CString CWebServer::_GetRemoteLinkAddedOk(ThreadData Data)
+{
+
+	CWebServer *pThis = (CWebServer *)Data.pThis;
+	if(pThis == NULL)
+		return _T("");
+
+	CString Out = _T("");
+
+    int cat=_tstoi(_ParseURL(Data.sURL,_T("cat")));
+	CString HTTPTemp = _ParseURL(Data.sURL, _T("c"));
+	theApp.AddEd2kLinksToDownload(HTTPTemp,cat);
+
+    Out += _T("<status result=\"OK\">");
+    Out += _T("<description>") + GetResString(IDS_WEB_REMOTE_LINK_ADDED) + _T("</description>");
+    Out += _T("<filename>") + HTTPTemp + _T("</filename>");
+    Out += _T("</status>");
+
+	return Out;
+}
+
+CString CWebServer::_GetRemoteLinkAddedFailed(ThreadData Data)
+{
+
+	CWebServer *pThis = (CWebServer *)Data.pThis;
+	if(pThis == NULL)
+		return _T("");
+
+	CString Out = _T("");
+
+    Out += _T("<status result=\"FAILED\" reason=\"WRONG_PASSWORD\">");
+    Out += _T("<description>") + GetResString(IDS_WEB_REMOTE_LINK_NOT_ADDED) + _T("</description>");
+    Out += _T("</status>");
 
 	return Out;
 }
@@ -2838,17 +2890,17 @@ CString CWebServer::GetUploadFileInfo(CUpDownClient* client)
 
 	// build info text and display it
 	sRet.Format(GetResString(IDS_USERINFO), client->GetUserName(), client->GetUserIDHybrid());
-	if (client->reqfile)
+	if (client->GetRequestFile())
 	{
-		sRet += GetResString(IDS_SF_REQUESTED) + CString(client->reqfile->GetFileName()) + _T("\n");
+		sRet += GetResString(IDS_SF_REQUESTED) + CString(client->GetRequestFile()->GetFileName()) + _T("\n");
 		CString stat;
 		stat.Format(GetResString(IDS_FILESTATS_SESSION)+GetResString(IDS_FILESTATS_TOTAL),
-			client->reqfile->statistic.GetAccepts(),
-			client->reqfile->statistic.GetRequests(),
-			CastItoXBytes(client->reqfile->statistic.GetTransferred()),
-			client->reqfile->statistic.GetAllTimeAccepts(),
-			client->reqfile->statistic.GetAllTimeRequests(),
-			CastItoXBytes(client->reqfile->statistic.GetAllTimeTransferred()) );
+			client->GetRequestFile()->statistic.GetAccepts(),
+			client->GetRequestFile()->statistic.GetRequests(),
+			CastItoXBytes(client->GetRequestFile()->statistic.GetTransferred(), false, false),
+			client->GetRequestFile()->statistic.GetAllTimeAccepts(),
+			client->GetRequestFile()->statistic.GetAllTimeRequests(),
+			CastItoXBytes(client->GetRequestFile()->statistic.GetAllTimeTransferred(), false, false));
 		sRet += stat;
 	}
 	else
@@ -2906,7 +2958,7 @@ CString	CWebServer::_GetKadPage(ThreadData Data)
 	if (thePrefs.GetNetworkKademlia()) {
 		CString buffer;
 			
-			buffer.Format(_T("%s: %i<br>"), GetResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->contactList->GetItemCount());
+			buffer.Format(_T("%s: %i<br>"), GetResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->GetContactCount());
 			info.Append(buffer);
 
 			buffer.Format(_T("%s: %i<br>"), GetResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->searchList->GetItemCount());

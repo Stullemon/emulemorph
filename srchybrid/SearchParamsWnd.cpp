@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@
 #include "CustomAutoComplete.h"
 #include "HelpIDs.h"
 #include "Opcodes.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -50,10 +51,6 @@ BEGIN_MESSAGE_MAP(CSearchParamsWnd, CDialogBar)
 	ON_BN_CLICKED(IDC_MORE, OnBnClickedMore)
 	ON_EN_CHANGE(IDC_SEARCHNAME, OnEnChangeName)
 	ON_CBN_SELCHANGE(IDC_TypeSearch, OnEnChangeName)
-	ON_EN_CHANGE(IDC_SEARCHAVAIL , OnEnChangeName)
-	ON_EN_CHANGE(IDC_SEARCHEXTENTION, OnEnChangeName)
-	ON_EN_CHANGE(IDC_SEARCHMINSIZE, OnEnChangeName)
-	ON_EN_CHANGE(IDC_SEARCHMAXSIZE, OnEnChangeName)
 	ON_BN_CLICKED(IDC_SEARCH_RESET, OnBnClickedSearchReset)
 	ON_BN_CLICKED(IDC_DD, OnDDClicked)
 	ON_CBN_SELCHANGE(IDC_COMBO1, OnCbnSelChangeMethod)
@@ -86,6 +83,7 @@ CSearchParamsWnd::CSearchParamsWnd()
 	m_rcStart.SetRectEmpty();
 	m_rcMore.SetRectEmpty();
 	m_rcCancel.SetRectEmpty();
+	m_rcUnicode.SetRectEmpty();
 }
 
 CSearchParamsWnd::~CSearchParamsWnd()
@@ -111,6 +109,7 @@ void CSearchParamsWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STARTS, m_ctlStart);
 	DDX_Control(pDX, IDC_CANCELS, m_ctlCancel);
 	DDX_Control(pDX, IDC_MORE, m_ctlMore);
+	DDX_Control(pDX, IDC_SEARCH_UNICODE, m_ctlUnicode);
 }
 
 LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
@@ -135,6 +134,9 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
 
 	m_ctlName.GetWindowRect(&m_rcName);
 	ScreenToClient(&m_rcName);
+
+	m_ctlUnicode.GetWindowRect(&m_rcUnicode);
+	ScreenToClient(&m_rcUnicode);
 
 	GetDlgItem(IDC_DD)->GetWindowRect(&m_rcDropDownArrow);
 	ScreenToClient(&m_rcDropDownArrow);
@@ -182,7 +184,6 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
 		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
 
 	m_ctlName.LimitText(MAX_SEARCH_EXPRESSION_LEN); // max. length of search expression
-
 	InitMethodsCtrl();
 	if (m_ctlMethod.SetCurSel(thePrefs.GetSearchMethod()) == CB_ERR)
 		m_ctlMethod.SetCurSel(SearchTypeEd2kServer);
@@ -339,6 +340,7 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 
 		GetDlgItem(IDC_MSTATIC3)->MoveWindow(rcClient.left + m_rcNameLbl.left, rcClient.top + m_rcNameLbl.top, m_rcNameLbl.Width(), m_rcNameLbl.Height());
 		m_ctlName.MoveWindow(rcClient.left + m_rcName.left, rcClient.top + m_rcName.top, m_rcName.Width(), m_rcName.Height());
+		m_ctlUnicode.MoveWindow(rcClient.left + m_rcUnicode.left, rcClient.top + m_rcUnicode.top, m_rcUnicode.Width(), m_rcUnicode.Height());
 		GetDlgItem(IDC_DD)->MoveWindow(rcClient.left + m_rcDropDownArrow.left, rcClient.top + m_rcDropDownArrow.top, m_rcDropDownArrow.Width(), m_rcDropDownArrow.Height());
 		GetDlgItem(IDC_MSTATIC7)->MoveWindow(rcClient.left + m_rcFileTypeLbl.left, rcClient.top + m_rcFileTypeLbl.top, m_rcFileTypeLbl.Width(), m_rcFileTypeLbl.Height());
 		m_ctlFileType.MoveWindow(rcClient.left + m_rcFileType.left, rcClient.top + m_rcFileType.top, m_rcFileType.Width(), m_rcFileType.Height());
@@ -377,13 +379,16 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 		CRect rcDropDownArrow;
 		GetDlgItem(IDC_DD)->GetWindowRect(&rcDropDownArrow);
 		ScreenToClient(&rcDropDownArrow);
-
 		int iNameWidth = rcClient.Width() - 4 - rcDropDownArrow.Width();
 		m_ctlName.MoveWindow(rcClient.left, y, iNameWidth, rcName.Height());
-
 		GetDlgItem(IDC_DD)->MoveWindow(rcClient.left + iNameWidth + 4, y, rcDropDownArrow.Width(), rcDropDownArrow.Height());
+		y += rcName.Height() + 2;
 
-		y += rcName.Height() + 8;
+		CRect rcUnicode;
+		m_ctlUnicode.GetWindowRect(&rcUnicode);
+		ScreenToClient(&rcUnicode);
+		m_ctlUnicode.MoveWindow(rcClient.left, y, rcClient.Width(), rcUnicode.Height());
+		y += rcUnicode.Height() + 8;
 
 		CRect rcFileTypeLbl;
 		GetDlgItem(IDC_MSTATIC7)->GetWindowRect(&rcFileTypeLbl);
@@ -511,6 +516,7 @@ void CSearchParamsWnd::Localize()
 	GetDlgItem(IDC_MSTATIC7)->SetWindowText(GetResString(IDS_TYPE));
 	GetDlgItem(IDC_SEARCH_RESET)->SetWindowText(GetResString(IDS_PW_RESET));
 	GetDlgItem(IDC_METH)->SetWindowText(GetResString(IDS_METHOD));
+	GetDlgItem(IDC_SEARCH_UNICODE)->SetWindowText(GetResString(IDS_SEARCH_UNICODE));
 
 	m_ctlStart.SetWindowText(GetResString(IDS_SW_START));
 	m_ctlCancel.SetWindowText(GetResString(IDS_CANCEL));
@@ -642,6 +648,7 @@ void CSearchParamsWnd::ResetHistory()
 void CSearchParamsWnd::OnCbnSelChangeMethod()
 {
 	UpdateControls();
+	OnEnChangeName();
 }
 
 void CSearchParamsWnd::OnCbnSelEndOkMethod()
@@ -671,6 +678,27 @@ void CSearchParamsWnd::SaveSettings()
 void CSearchParamsWnd::OnEnChangeName()
 {
 	m_ctlStart.EnableWindow(m_ctlName.GetWindowTextLength() > 0);
+
+	bool bOfferUnicode = false;
+#ifdef _UNICODE
+	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeFileDonkey)
+#else
+	if ((ESearchType)m_ctlMethod.GetCurSel() == SearchTypeKademlia)
+#endif
+	{
+		CString strExpr;
+		m_ctlName.GetWindowText(strExpr);
+		CStringW wstrExpr(strExpr);
+		for (int i = 0; i < wstrExpr.GetLength(); i++)
+		{
+			if (wstrExpr[i] >= 0x80)
+			{
+				bOfferUnicode = true;
+				break;
+			}
+		}
+	}
+	m_ctlUnicode.EnableWindow(bOfferUnicode);
 }
 
 void CSearchParamsWnd::OnBnClickedSearchReset()
@@ -771,6 +799,25 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	CString strExpression;
 	m_ctlName.GetWindowText(strExpression);
 	strExpression.Trim();
+	if (!IsValidEd2kString(strExpression)){
+		AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDCHAR), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
+		return NULL;
+	}
+
+#ifndef _UNICODE
+	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeKademlia)
+		m_ctlUnicode.SetCheck(0);
+#endif
+
+	bool bUnicode = m_ctlUnicode.IsWindowEnabled() && m_ctlUnicode.GetCheck();
+	if (!bUnicode)
+	{
+		CStringA strACP(strExpression);
+		if (!IsValidEd2kStringA(strACP)){
+			AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDCHAR), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
+			return NULL;
+		}
+	}
 
 	CStringA strFileType;
 	int iItem = m_ctlFileType.GetCurSel();
@@ -906,6 +953,7 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 		pParams->strArtist = m_ctlOpts.GetItemText(orArtist, 1);
 		pParams->strArtist.Trim();
 	}
+	pParams->bUnicode = bUnicode;
 
 	return pParams;
 }

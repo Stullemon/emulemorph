@@ -124,31 +124,33 @@ public:
 	CClientCredits(const uchar* key);
 	~CClientCredits();
 
-	const uchar* GetKey()					{return m_pCredits->abyKey;}
+	const uchar* GetKey() const					{return m_pCredits->abyKey;}
 	uchar*	GetSecureIdent()				{return m_abyPublicKey;}
-	uint8	GetSecIDKeyLen()				{return m_nPublicKeyLen;}
-	CreditStruct* GetDataStruct()			{return m_pCredits;}
-//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	uint8	GetSecIDKeyLen() const				{return m_nPublicKeyLen;}
+	CreditStruct* GetDataStruct() const		{return m_pCredits;}
+	void	ClearWaitStartTime();
+	//MORPH START - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	void    SaveUploadQueueWaitTime(int iKeepPct = 100);		// Moonlight: SUQWT
 	void	ClearUploadQueueWaitTime();							// Moonlight: SUQWT
-//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	void	ClearWaitStartTime();
+	//MORPH END - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	void	AddDownloaded(uint32 bytes, uint32 dwForIP);
 	void	AddUploaded(uint32 bytes, uint32 dwForIP);
-	uint64	GetUploadedTotal();
-	uint64	GetDownloadedTotal();
-	float	GetScoreRatio(uint32 dwForIP);
-	float	GetMyScoreRatio(uint32 dwForIP); //MORPH - Added by IceCream, VQB: ownCredits
+	uint64	GetUploadedTotal() const;
+	uint64	GetDownloadedTotal() const;
+	float	GetScoreRatio(uint32 dwForIP) /*const*/;
+	float	GetMyScoreRatio(uint32 dwForIP) const; //MORPH - Added by IceCream, VQB: ownCredits
 	void	SetLastSeen()					{m_pCredits->nLastSeen = time(NULL);}
 	bool	SetSecureIdent(uchar* pachIdent, uint8 nIdentLen); // Public key cannot change, use only if there is not public key yet
-//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	bool	IsActive(uint32 dwExpire);	// Moonlight: SUQWT, new function to determine if the record has expired.
-//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	uint32	m_dwCryptRndChallengeFor;
 	uint32	m_dwCryptRndChallengeFrom;
-	EIdentState	GetCurrentIdentState(uint32 dwForIP); // can be != IdentState
+	EIdentState	GetCurrentIdentState(uint32 dwForIP) const; // can be != IdentState
 	//EastShare START - Modified by TAHO, modified SUQWT
-	//uint32	GetSecureWaitStartTime(uint32 dwForIP);
+	/*
+	uint32	GetSecureWaitStartTime(uint32 dwForIP);
+	*/
 	sint64	GetSecureWaitStartTime(uint32 dwForIP);
 	//EastShare END - Modified by TAHO, modified SUQWT
 	void	SetSecWaitStartTime(uint32 dwForIP);
@@ -202,7 +204,7 @@ public:
 
 	CClientCredits* GetCredit(const uchar* key);
 	void	Process();
-	uint8	GetPubKeyLen()					{return m_nMyPublicKeyLen;}
+	uint8	GetPubKeyLen() const			{return m_nMyPublicKeyLen;}
 	byte*	GetPublicKey()					{return m_abyMyPublicKey;}
 	bool	CryptoAvailable();
 	bool	IsSaveUploadQueueWaitTime() { return m_bSaveUploadQueueWaitTime;}//MORPH - Added by AndCycle, Save Upload Queue Wait Time (SUQWT)

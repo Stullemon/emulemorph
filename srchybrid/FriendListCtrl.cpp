@@ -180,8 +180,6 @@ void CFriendListCtrl::RefreshFriend(const CFriend* pFriend)
 	int iItem = FindItem(&find);
 	if (iItem != -1)
 		UpdateFriend(iItem, pFriend);
-	else
-		ASSERT(0);
 }
 
 void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
@@ -291,9 +289,9 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				CString fileList;
 				fileList += GetResString(IDS_LISTREQDL);
 				fileList += "\n--------------------------\n" ; 
-				if (theApp.downloadqueue->IsPartFile(cur_friend->GetLinkedClient()->reqfile))
+				if (theApp.downloadqueue->IsPartFile(cur_friend->GetLinkedClient()->GetRequestFile()))
 				{
-					fileList += cur_friend->GetLinkedClient()->reqfile->GetFileName(); 
+					fileList += cur_friend->GetLinkedClient()->GetRequestFile()->GetFileName(); 
 					for(POSITION pos = cur_friend->GetLinkedClient()->m_OtherRequests_list.GetHeadPosition();pos!=0;cur_friend->GetLinkedClient()->m_OtherRequests_list.GetNext(pos))
 					{
 						fileList += "\n" ; 
@@ -410,7 +408,7 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	{
 		case 0:
 			//TODO avoid crash here in some case
-			iResult = _tcsicmp(item1->m_strName, item2->m_strName);
+			iResult = CompareLocaleStringNoCase(item1->m_strName, item2->m_strName);
 			break;
 		default:
 			return 0;

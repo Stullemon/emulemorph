@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding = "Windows-1252"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.00"
+	Version="7.10"
 	Name="emule"
 	ProjectGUID="{584EA69D-3443-4197-8994-364880FC1B9B}"
 	Keyword="MFCProj">
@@ -39,10 +39,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\Debug\ResizableLib.lib ADSIId.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\Debug\ResizableLib.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeForWindows98="0"
@@ -65,7 +65,13 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
 				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
@@ -106,9 +112,10 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Release\ResizableLib.lib ADSIId.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Release\ResizableLib.lib"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -133,7 +140,13 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
 				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
 			Name="Debug_Dump|Win32"
@@ -166,10 +179,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Debug\ResizableLib.lib ActiveDS.Lib ADSIId.lib"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\Debug\ResizableLib.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
@@ -191,6 +204,137 @@
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+<Configuration
+			Name="Unicode Debug|Win32"
+			OutputDirectory=".\DebugUnicode"
+			IntermediateDirectory=".\DebugUnicode"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			CharacterSet="1"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.bat;*.asm;$(TargetPath)">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="1"
+				StructMemberAlignment="4"
+				BufferSecurityCheck="TRUE"
+				EnableFunctionLevelLinking="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				UsePrecompiledHeader="3"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="3"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames=""
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"
+				OptimizeForWindows98="0"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="FALSE"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_UNICODE;UNICODE"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+		</Configuration>
+		<Configuration
+			Name="Unicode Release|Win32"
+			OutputDirectory=".\ReleaseUnicode"
+			IntermediateDirectory=".\ReleaseUnicode"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			CharacterSet="1"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.bat;*.asm;$(TargetPath)"
+			WholeProgramOptimization="TRUE">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1"
+				StringPooling="TRUE"
+				MinimalRebuild="FALSE"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="0"
+				StructMemberAlignment="4"
+				BufferSecurityCheck="TRUE"
+				EnableFunctionLevelLinking="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				UsePrecompiledHeader="3"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="3"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib ..\ResizableLib\ReleaseUnicode\ResizableLib.lib"
+				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				OptimizeForWindows98="0"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="FALSE"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;_UNICODE;UNICODE"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
 				Name="VCWebDeploymentTool"/>
 		</Configuration>
 	</Configurations>
@@ -198,6 +342,9 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
+			<File
+				RelativePath="AICHSyncThread.cpp">
+			</File>
 			<File
 				RelativePath="ArchiveRecovery.cpp">
 			</File>
@@ -226,6 +373,9 @@
 				RelativePath="ClientUDPSocket.cpp">
 			</File>
 			<File
+				RelativePath="DeadSourceList.cpp">
+			</File>
+			<File
 				RelativePath="DownloadClient.cpp">
 			</File>
 			<File
@@ -239,6 +389,9 @@
 			</File>
 			<File
 				RelativePath="Emule.cpp">
+			</File>
+			<File
+				RelativePath="fakecheck.cpp">
 			</File>
 			<File
 				RelativePath=".\FileProcessing.cpp">
@@ -265,13 +418,13 @@
 				RelativePath="I18n.cpp">
 			</File>
 			<File
+				RelativePath="Ini2.cpp">
+			</File>
+			<File
 				RelativePath=".\IP2Country.cpp">
 			</File>
 			<File
 				RelativePath="IPFilter.cpp">
-			</File>
-			<File
-				RelativePath="Ini2.cpp">
 			</File>
 			<File
 				RelativePath="KnownFile.cpp">
@@ -320,12 +473,62 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="OtherFunctions.cpp">
 			</File>
 			<File
 				RelativePath="Packets.cpp">
+			</File>
+			<File
+				RelativePath="Parser.cpp">
+			</File>
+			<File
+				RelativePath="Parser.y">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Performing Custom Build Step"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Performing Custom Build Step"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Dump|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Performing Custom Build Step"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Performing Custom Build Step"
+						CommandLine=""
+						Outputs=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Performing Custom Build Step"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="PartFile.cpp">
@@ -355,7 +558,57 @@
 				RelativePath="Quantize.cpp">
 			</File>
 			<File
+				RelativePath="SHA.cpp">
+			</File>
+			<File
+				RelativePath="SHAHashSet.cpp">
+			</File>
+			<File
 				RelativePath="SafeFile.cpp">
+			</File>
+			<File
+				RelativePath="Scanner.cpp">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Dump|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="Scanner.l">
+				<FileConfiguration
+					Name="Unicode Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Performing Custom Build Step"
+						CommandLine=""
+						Outputs=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="Scheduler.cpp">
@@ -407,6 +660,21 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unicode Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="StringConversion.cpp">
 			</File>
 			<File
 				RelativePath="TimeTick.cpp">
@@ -432,86 +700,63 @@
 			<File
 				RelativePath="ZIPFile.cpp">
 			</File>
-			<File
-				RelativePath="fakecheck.cpp">
-			</File>
 			<Filter
 				Name="Kademlia"
 				Filter="">
-				<Filter
-					Name="Utils"
-					Filter="">
-					<File
-						RelativePath="kademlia\utils\LittleEndian.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\utils\MD4.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\utils\MiscUtils.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\utils\ThreadName.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\utils\UInt128.cpp">
-					</File>
-				</Filter>
-				<Filter
-					Name="io"
-					Filter="">
-					<File
-						RelativePath="kademlia\io\ByteIO.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\io\DataIO.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\io\FileIO.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\io\IOException.cpp">
-					</File>
-				</Filter>
-				<Filter
-					Name="net"
-					Filter="">
-					<File
-						RelativePath="kademlia\net\KademliaUDPListener.cpp">
-					</File>
-				</Filter>
-				<Filter
-					Name="Kademlia"
-					Filter="">
-					<File
-						RelativePath="kademlia\kademlia\Indexed.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Kademlia.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Prefs.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Search.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\SearchManager.cpp">
-					</File>
-				</Filter>
-				<Filter
-					Name="Routing"
-					Filter="">
-					<File
-						RelativePath="kademlia\routing\Contact.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\routing\RoutingBin.cpp">
-					</File>
-					<File
-						RelativePath="kademlia\routing\RoutingZone.cpp">
-					</File>
-				</Filter>
+				<File
+					RelativePath="kademlia\io\ByteIO.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\routing\Contact.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\io\DataIO.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\io\FileIO.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\io\IOException.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Indexed.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Kademlia.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\net\KademliaUDPListener.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\utils\LittleEndian.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\utils\MD4.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\utils\MiscUtils.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Prefs.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\routing\RoutingBin.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\routing\RoutingZone.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Search.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\SearchManager.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\utils\ThreadName.cpp">
+				</File>
+				<File
+					RelativePath="kademlia\utils\UInt128.cpp">
+				</File>
 			</Filter>
 			<Filter
 				Name="SMIRC"
@@ -539,13 +784,16 @@
 					RelativePath="Optimizer\memcpy_amd.h">
 				</File>
 				<File
-					RelativePath="Optimizer\optimize.h">
+					RelativePath=".\Optimizer\optimize.h">
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
+			<File
+				RelativePath="AICHSyncThread.h">
+			</File>
 			<File
 				RelativePath="ArchiveRecovery.h">
 			</File>
@@ -574,6 +822,9 @@
 				RelativePath="ClientVersionInfo.h">
 			</File>
 			<File
+				RelativePath="DeadSourceList.h">
+			</File>
+			<File
 				RelativePath="DebugHelpers.h">
 			</File>
 			<File
@@ -590,6 +841,9 @@
 			</File>
 			<File
 				RelativePath="Exceptions.h">
+			</File>
+			<File
+				RelativePath="fakecheck.h">
 			</File>
 			<File
 				RelativePath=".\FileProcessing.h">
@@ -613,13 +867,13 @@
 				RelativePath="HttpClientReqSocket.h">
 			</File>
 			<File
+				RelativePath="Ini2.h">
+			</File>
+			<File
 				RelativePath=".\IP2Country.h">
 			</File>
 			<File
 				RelativePath="IPFilter.h">
-			</File>
-			<File
-				RelativePath="Ini2.h">
 			</File>
 			<File
 				RelativePath="KnownFile.h">
@@ -637,19 +891,19 @@
 				RelativePath="Loggable.h">
 			</File>
 			<File
+				RelativePath="MapKey.h">
+			</File>
+			<File
 				RelativePath="MD5Sum.h">
+			</File>
+			<File
+				RelativePath="Mdump.h">
 			</File>
 			<File
 				RelativePath="MMServer.h">
 			</File>
 			<File
 				RelativePath="MMSocket.h">
-			</File>
-			<File
-				RelativePath="MapKey.h">
-			</File>
-			<File
-				RelativePath="Mdump.h">
 			</File>
 			<File
 				RelativePath="Opcodes.h">
@@ -688,10 +942,24 @@
 				RelativePath="Preview.h">
 			</File>
 			<File
+				RelativePath="pugxml.h">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="Quantize.h">
 			</File>
 			<File
 				RelativePath="Resource.h">
+			</File>
+			<File
+				RelativePath="SHA.h">
+			</File>
+			<File
+				RelativePath="SHAHashSet.h">
 			</File>
 			<File
 				RelativePath="SafeFile.h">
@@ -733,6 +1001,9 @@
 				RelativePath="Stdafx.h">
 			</File>
 			<File
+				RelativePath="StringConversion.h">
+			</File>
+			<File
 				RelativePath="ThrottledSocket.h">
 			</File>
 			<File
@@ -768,109 +1039,78 @@
 			<File
 				RelativePath="ZIPFile.h">
 			</File>
-			<File
-				RelativePath="fakecheck.h">
-			</File>
-			<File
-				RelativePath="pugxml.h">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-			</File>
 			<Filter
 				Name="Kademlia"
 				Filter="">
-				<Filter
-					Name="utils"
-					Filter="">
-					<File
-						RelativePath="kademlia\utils\LittleEndian.h">
-					</File>
-					<File
-						RelativePath="kademlia\utils\MD4.h">
-					</File>
-					<File
-						RelativePath="kademlia\utils\MiscUtils.h">
-					</File>
-					<File
-						RelativePath="kademlia\utils\ThreadName.h">
-					</File>
-					<File
-						RelativePath="kademlia\utils\UInt128.h">
-					</File>
-				</Filter>
-				<Filter
-					Name="io"
-					Filter="">
-					<File
-						RelativePath="kademlia\io\ByteIO.h">
-					</File>
-					<File
-						RelativePath="kademlia\io\DataIO.h">
-					</File>
-					<File
-						RelativePath="kademlia\io\FileIO.h">
-					</File>
-					<File
-						RelativePath="kademlia\io\IOException.h">
-					</File>
-				</Filter>
-				<Filter
-					Name="net"
-					Filter="">
-					<File
-						RelativePath="kademlia\net\KademliaUDPListener.h">
-					</File>
-				</Filter>
-				<Filter
-					Name="Kademlia"
-					Filter="">
-					<File
-						RelativePath="kademlia\kademlia\Defines.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Entry.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Error.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Indexed.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Kademlia.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Prefs.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Search.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\SearchManager.h">
-					</File>
-					<File
-						RelativePath="kademlia\kademlia\Tag.h">
-					</File>
-				</Filter>
-				<Filter
-					Name="Routing"
-					Filter="">
-					<File
-						RelativePath="kademlia\routing\Contact.h">
-					</File>
-					<File
-						RelativePath="kademlia\routing\Maps.h">
-					</File>
-					<File
-						RelativePath="kademlia\routing\RoutingBin.h">
-					</File>
-					<File
-						RelativePath="kademlia\routing\RoutingZone.h">
-					</File>
-				</Filter>
+				<File
+					RelativePath="kademlia\io\ByteIO.h">
+				</File>
+				<File
+					RelativePath="kademlia\routing\Contact.h">
+				</File>
+				<File
+					RelativePath="kademlia\io\DataIO.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Defines.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Entry.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Error.h">
+				</File>
+				<File
+					RelativePath="kademlia\io\FileIO.h">
+				</File>
+				<File
+					RelativePath="kademlia\io\IOException.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Indexed.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Kademlia.h">
+				</File>
+				<File
+					RelativePath="kademlia\net\KademliaUDPListener.h">
+				</File>
+				<File
+					RelativePath="kademlia\utils\LittleEndian.h">
+				</File>
+				<File
+					RelativePath="kademlia\utils\MD4.h">
+				</File>
+				<File
+					RelativePath="kademlia\routing\Maps.h">
+				</File>
+				<File
+					RelativePath="kademlia\utils\MiscUtils.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Prefs.h">
+				</File>
+				<File
+					RelativePath="kademlia\routing\RoutingBin.h">
+				</File>
+				<File
+					RelativePath="kademlia\routing\RoutingZone.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Search.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\SearchManager.h">
+				</File>
+				<File
+					RelativePath="kademlia\kademlia\Tag.h">
+				</File>
+				<File
+					RelativePath="kademlia\utils\ThreadName.h">
+				</File>
+				<File
+					RelativePath="kademlia\utils\UInt128.h">
+				</File>
 			</Filter>
 			<Filter
 				Name="SMIRC"
@@ -894,6 +1134,9 @@
 			</File>
 			<File
 				RelativePath="AddFriend.cpp">
+			</File>
+			<File
+				RelativePath="AddSourceDlg.cpp">
 			</File>
 			<File
 				RelativePath="BarShader.cpp">
@@ -956,6 +1199,9 @@
 				RelativePath="DropTarget.cpp">
 			</File>
 			<File
+				RelativePath="ED2kLinkDlg.cpp">
+			</File>
+			<File
 				RelativePath="EditX.cpp">
 			</File>
 			<File
@@ -995,10 +1241,13 @@
 				RelativePath="InputBox.cpp">
 			</File>
 			<File
-				RelativePath="KCSideBannerWnd.cpp">
+				RelativePath="KadContactHistogramCtrl.cpp">
 			</File>
 			<File
 				RelativePath="KademliaWnd.cpp">
+			</File>
+			<File
+				RelativePath="KCSideBannerWnd.cpp">
 			</File>
 			<File
 				RelativePath="ListBoxST.cpp">
@@ -1032,6 +1281,9 @@
 			</File>
 			<File
 				RelativePath="MuleToolBarCtrl.cpp">
+			</File>
+			<File
+				RelativePath="NetworkInfoDlg.cpp">
 			</File>
 			<File
 				RelativePath="OScopeCtrl.cpp">
@@ -1097,12 +1349,6 @@
 				RelativePath="PShtWiz1.cpp">
 			</File>
 			<File
-				RelativePath="Parser.cpp">
-			</File>
-			<File
-				RelativePath="Parser.y">
-			</File>
-			<File
 				RelativePath="PreferencesDlg.cpp">
 			</File>
 			<File
@@ -1113,30 +1359,6 @@
 			</File>
 			<File
 				RelativePath="RichEditCtrlX.cpp">
-			</File>
-			<File
-				RelativePath="Scanner.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug_Dump|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="Scanner.l">
 			</File>
 			<File
 				RelativePath="SearchDlg.cpp">
@@ -1281,6 +1503,9 @@
 				RelativePath="AddFriend.h">
 			</File>
 			<File
+				RelativePath="AddSourceDlg.h">
+			</File>
+			<File
 				RelativePath="AfxBeginMsgMapTemplate.h">
 			</File>
 			<File
@@ -1347,6 +1572,9 @@
 				RelativePath="DropTarget.h">
 			</File>
 			<File
+				RelativePath="ED2kLinkDlg.h">
+			</File>
+			<File
 				RelativePath="EditX.h">
 			</File>
 			<File
@@ -1386,10 +1614,13 @@
 				RelativePath="InputBox.h">
 			</File>
 			<File
-				RelativePath="KCSideBannerWnd.h">
+				RelativePath="KadContactHistogramCtrl.h">
 			</File>
 			<File
 				RelativePath="KademliaWnd.h">
+			</File>
+			<File
+				RelativePath="KCSideBannerWnd.h">
 			</File>
 			<File
 				RelativePath="ListBoxST.h">
@@ -1426,6 +1657,9 @@
 			</File>
 			<File
 				RelativePath="MuleToolBarCtrl.h">
+			</File>
+			<File
+				RelativePath="NetworkInfoDlg.h">
 			</File>
 			<File
 				RelativePath="OScopeCtrl.h">
@@ -1648,6 +1882,54 @@
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest">
 			<File
+				RelativePath=".\res\About.jpg">
+			</File>
+			<File
+				RelativePath="res\back.ICO">
+			</File>
+			<File
+				RelativePath=".\res\backup.ico">
+			</File>
+			<File
+				RelativePath=".\res\Banner_Morph.jpg">
+			</File>
+			<File
+				RelativePath="res\bn_connect.ico">
+			</File>
+			<File
+				RelativePath="res\bn_disconnect.ico">
+			</File>
+			<File
+				RelativePath="res\bn_messages.ico">
+			</File>
+			<File
+				RelativePath="res\bn_statistics.ico">
+			</File>
+			<File
+				RelativePath="res\bn_stopcon.ico">
+			</File>
+			<File
+				RelativePath="res\cancel.ICO">
+			</File>
+			<File
+				RelativePath="res\chat.ico">
+			</File>
+			<File
+				RelativePath="res\client0.ICO">
+			</File>
+			<File
+				RelativePath="res\client1.ICO">
+			</File>
+			<File
+				RelativePath="res\client2.ICO">
+			</File>
+			<File
+				RelativePath="res\client3.ICO">
+			</File>
+			<File
+				RelativePath="res\client4.ICO">
+			</File>
+			<File
 				RelativePath="res\ClientaMule.ico">
 			</File>
 			<File
@@ -1664,6 +1946,15 @@
 			</File>
 			<File
 				RelativePath="res\ClientsOnQueue.ico">
+			</File>
+			<File
+				RelativePath="res\close.ico">
+			</File>
+			<File
+				RelativePath=".\res\community.ico">
+			</File>
+			<File
+				RelativePath="res\compatible.ICO">
 			</File>
 			<File
 				RelativePath="res\ConnectedHighHigh.ico">
@@ -1708,6 +1999,15 @@
 				RelativePath="res\Contact4.ico">
 			</File>
 			<File
+				RelativePath="res\convert.ico">
+			</File>
+			<File
+				RelativePath=".\res\CreditOvl.ico">
+			</File>
+			<File
+				RelativePath=".\res\CreditSecureOvl.ico">
+			</File>
+			<File
 				RelativePath="res\CumulativeStats.ico">
 			</File>
 			<File
@@ -1717,13 +2017,73 @@
 				RelativePath="res\Display.ico">
 			</File>
 			<File
+				RelativePath="res\down.bmp">
+			</File>
+			<File
+				RelativePath="res\down2x.bmp">
+			</File>
+			<File
 				RelativePath="res\Download.ico">
+			</File>
+			<File
+				RelativePath=".\res\EastShare.ico">
+			</File>
+			<File
+				RelativePath=".\res\eDonkey.ico">
+			</File>
+			<File
+				RelativePath="res\eDonkeyHybrid.ico">
+			</File>
+			<File
+				RelativePath="res\emule.manifest">
+			</File>
+			<File
+				RelativePath="emule.rc">
+			</File>
+			<File
+				RelativePath="res\emule.rc2">
+			</File>
+			<File
+				RelativePath=".\res\EQfile.ico">
 			</File>
 			<File
 				RelativePath="res\Filedonkey.ico">
 			</File>
 			<File
+				RelativePath="res\forward.ICO">
+			</File>
+			<File
 				RelativePath="res\Friend.ico">
+			</File>
+			<File
+				RelativePath=".\res\FriendOvl.ico">
+			</File>
+			<File
+				RelativePath="res\friends1.ico">
+			</File>
+			<File
+				RelativePath=".\res\friends1slot.ICO">
+			</File>
+			<File
+				RelativePath="res\friends2.ico">
+			</File>
+			<File
+				RelativePath=".\res\friends2slot.ICO">
+			</File>
+			<File
+				RelativePath="res\friends3.ICO">
+			</File>
+			<File
+				RelativePath=".\res\friends3slot.ICO">
+			</File>
+			<File
+				RelativePath=".\res\FriendSlotOvl.ico">
+			</File>
+			<File
+				RelativePath="res\global.ico">
+			</File>
+			<File
+				RelativePath="res\help.ico">
 			</File>
 			<File
 				RelativePath="res\IDI_TVI_DAY.ico">
@@ -1741,19 +2101,22 @@
 				RelativePath="res\IDI_TVI_YEAR.ico">
 			</File>
 			<File
+				RelativePath="res\inetdownload.avi">
+			</File>
+			<File
 				RelativePath="res\IPFilter.ico">
 			</File>
 			<File
 				RelativePath="res\IRC.ico">
 			</File>
 			<File
-				RelativePath="res\KADContactList.ico">
-			</File>
-			<File
 				RelativePath="res\Kad.ico">
 			</File>
 			<File
 				RelativePath="res\KadBootstrap.ico">
+			</File>
+			<File
+				RelativePath="res\KADContactList.ico">
 			</File>
 			<File
 				RelativePath="res\KadCurrentSearches.ico">
@@ -1777,13 +2140,70 @@
 				RelativePath="res\Log.ico">
 			</File>
 			<File
+				RelativePath="res\logo.jpg">
+			</File>
+			<File
+				RelativePath="res\message.ICO">
+			</File>
+			<File
+				RelativePath="res\mldonk.ico">
+			</File>
+			<File
+				RelativePath=".\res\Morph.ico">
+			</File>
+			<File
+				RelativePath=".\res\morph_banner.bmp">
+			</File>
+			<File
+				RelativePath="res\mpending.ICO">
+			</File>
+			<File
+				RelativePath="res\mule.ico">
+			</File>
+			<File
+				RelativePath="res\mule_Tr_grey.ico">
+			</File>
+			<File
+				RelativePath="res\mule_Tr_LowID.ico">
+			</File>
+			<File
+				RelativePath="res\mule_TrayIcon.ico">
+			</File>
+			<File
+				RelativePath="res\mule_wiz.gif">
+			</File>
+			<File
+				RelativePath="res\mule_wiz_hdr.gif">
+			</File>
+			<File
+				RelativePath="res\myinfo.ico">
+			</File>
+			<File
+				RelativePath="res\neutral.ico">
+			</File>
+			<File
 				RelativePath="res\NewServer.ico">
 			</File>
 			<File
 				RelativePath="res\NormalSearch.ico">
 			</File>
 			<File
-				RelativePath="res\PROVIDER.ICO">
+				RelativePath="res\plus.ICO">
+			</File>
+			<File
+				RelativePath="res\pluscompa.ICO">
+			</File>
+			<File
+				RelativePath="res\pluseDonkeyHybrid.ico">
+			</File>
+			<File
+				RelativePath="res\plusmldonk.ico">
+			</File>
+			<File
+				RelativePath="res\plusshareaza.ico">
+			</File>
+			<File
+				RelativePath="res\preferences.ico">
 			</File>
 			<File
 				RelativePath="res\Prefs_Connection.ico">
@@ -1819,10 +2239,34 @@
 				RelativePath="res\Prefs_tweak.ico">
 			</File>
 			<File
+				RelativePath="res\PROVIDER.ICO">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Excellent.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Fair.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Fake.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Good.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-NotRated.ico">
+			</File>
+			<File
+				RelativePath=".\res\Rating-Poor.ico">
+			</File>
+			<File
 				RelativePath="res\Rating.ico">
 			</File>
 			<File
 				RelativePath="res\Rating_bad.ico">
+			</File>
+			<File
+				RelativePath="res\search.ico">
 			</File>
 			<File
 				RelativePath="res\SearchGlobalActive.ico">
@@ -1846,6 +2290,9 @@
 				RelativePath="res\Security.ico">
 			</File>
 			<File
+				RelativePath="res\server.ico">
+			</File>
+			<File
 				RelativePath="res\ServerInfo.ico">
 			</File>
 			<File
@@ -1861,6 +2308,9 @@
 				RelativePath="res\Shareaza.ico">
 			</File>
 			<File
+				RelativePath="res\shared.ico">
+			</File>
+			<File
 				RelativePath="res\SharedFiles.ico">
 			</File>
 			<File
@@ -1870,184 +2320,7 @@
 				RelativePath="res\Stats_HD.ico">
 			</File>
 			<File
-				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
-			</File>
-			<File
-				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
-			</File>
-			<File
-				RelativePath="res\Up0down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up0down1.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down0.ico">
-			</File>
-			<File
-				RelativePath="res\Up1down1.ico">
-			</File>
-			<File
-				RelativePath="res\UpdateServers.ico">
-			</File>
-			<File
-				RelativePath="res\User.ico">
-			</File>
-			<File
-				RelativePath="res\WebServer.ico">
-			</File>
-			<File
-				RelativePath="res\back.ICO">
-			</File>
-			<File
-				RelativePath="res\bn_connect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_disconnect.ico">
-			</File>
-			<File
-				RelativePath="res\bn_messages.ico">
-			</File>
-			<File
-				RelativePath="res\bn_statistics.ico">
-			</File>
-			<File
-				RelativePath="res\bn_stopcon.ico">
-			</File>
-			<File
-				RelativePath="res\cancel.ICO">
-			</File>
-			<File
-				RelativePath="res\chat.ico">
-			</File>
-			<File
-				RelativePath="res\client0.ICO">
-			</File>
-			<File
-				RelativePath="res\client1.ICO">
-			</File>
-			<File
-				RelativePath="res\client2.ICO">
-			</File>
-			<File
-				RelativePath="res\client3.ICO">
-			</File>
-			<File
-				RelativePath="res\client4.ICO">
-			</File>
-			<File
-				RelativePath="res\close.ico">
-			</File>
-			<File
-				RelativePath="res\compatible.ICO">
-			</File>
-			<File
-				RelativePath="res\convert.ico">
-			</File>
-			<File
-				RelativePath="res\down.bmp">
-			</File>
-			<File
-				RelativePath="res\down2x.bmp">
-			</File>
-			<File
-				RelativePath="res\eDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\emule.manifest">
-			</File>
-			<File
-				RelativePath="emule.rc">
-			</File>
-			<File
-				RelativePath="res\emule.rc2">
-			</File>
-			<File
-				RelativePath="res\forward.ICO">
-			</File>
-			<File
-				RelativePath="res\friends1.ico">
-			</File>
-			<File
-				RelativePath="res\friends2.ico">
-			</File>
-			<File
-				RelativePath="res\friends3.ICO">
-			</File>
-			<File
-				RelativePath="res\global.ico">
-			</File>
-			<File
-				RelativePath="res\help.ico">
-			</File>
-			<File
-				RelativePath="res\inetdownload.avi">
-			</File>
-			<File
-				RelativePath="res\logo.jpg">
-			</File>
-			<File
-				RelativePath="res\message.ICO">
-			</File>
-			<File
-				RelativePath="res\mldonk.ico">
-			</File>
-			<File
-				RelativePath="res\mpending.ICO">
-			</File>
-			<File
-				RelativePath="res\mule.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_LowID.ico">
-			</File>
-			<File
-				RelativePath="res\mule_Tr_grey.ico">
-			</File>
-			<File
-				RelativePath="res\mule_TrayIcon.ico">
-			</File>
-			<File
-				RelativePath="res\mule_wiz.gif">
-			</File>
-			<File
-				RelativePath="res\mule_wiz_hdr.gif">
-			</File>
-			<File
-				RelativePath="res\myinfo.ico">
-			</File>
-			<File
-				RelativePath="res\neutral.ico">
-			</File>
-			<File
-				RelativePath="res\plus.ICO">
-			</File>
-			<File
-				RelativePath="res\pluscompa.ICO">
-			</File>
-			<File
-				RelativePath="res\pluseDonkeyHybrid.ico">
-			</File>
-			<File
-				RelativePath="res\plusmldonk.ico">
-			</File>
-			<File
-				RelativePath="res\plusshareaza.ico">
-			</File>
-			<File
-				RelativePath="res\preferences.ico">
-			</File>
-			<File
-				RelativePath="res\search.ico">
-			</File>
-			<File
-				RelativePath="res\server.ico">
-			</File>
-			<File
-				RelativePath="res\shared.ico">
+				RelativePath=".\res\suc.ico">
 			</File>
 			<File
 				RelativePath="res\systray_exit.ico">
@@ -2074,13 +2347,43 @@
 				RelativePath="res\transfer.ico">
 			</File>
 			<File
+				RelativePath="res\TRAYBUTTON_LUNA_BLUE.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_HOMESTEAD.BMP">
+			</File>
+			<File
+				RelativePath="res\TRAYBUTTON_LUNA_METALLIC.BMP">
+			</File>
+			<File
 				RelativePath="res\up.bmp">
+			</File>
+			<File
+				RelativePath="res\Up0down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up0down1.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down0.ico">
+			</File>
+			<File
+				RelativePath="res\Up1down1.ico">
 			</File>
 			<File
 				RelativePath="res\up2x.bmp">
 			</File>
 			<File
+				RelativePath="res\UpdateServers.ico">
+			</File>
+			<File
 				RelativePath="res\upload.ico">
+			</File>
+			<File
+				RelativePath="res\User.ico">
+			</File>
+			<File
+				RelativePath="res\WebServer.ico">
 			</File>
 		</Filter>
 		<Filter

@@ -34,7 +34,7 @@
 #include "Sockets.h"
 #include "OtherFunctions.h"
 #include "SafeFile.h"
-#include "downloadqueue.h"
+#include "DownloadQueue.h"
 #include "emuledlg.h"
 #include "TransferWnd.h"
 
@@ -52,8 +52,37 @@ CBarShader CUpDownClient::s_UpStatusBar(16);
 
 void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const
 {
-	const COLORREF crNeither = RGB(224, 224, 224);
-	const COLORREF crNextSending = RGB(255,208,0);
+	COLORREF crNeither;
+	COLORREF crNextSending;
+	COLORREF crBoth;
+	COLORREF crSending;
+	//MORPH START - Added by SiRoB, See chunk that we hide
+	COLORREF crHiddenPartBySOTN = RGB(192, 96, 255);
+	COLORREF crHiddenPartByHideOS = RGB(96, 192, 255);
+	//MORPH END   - Added by SiRoB, See chunk that we hide
+
+    if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
+       (GetUploadState() != US_UPLOADING && GetUploadState() != US_CONNECTING) ) {
+        crNeither = RGB(224, 224, 224);
+	    crNextSending = RGB(255,208,0);
+	    crBoth = bFlat ? RGB(0, 0, 0) : RGB(104, 104, 104);
+	    crSending = RGB(0, 150, 0);
+		//MORPH START - Added by SiRoB, See chunk that we hide
+		crHiddenPartBySOTN = RGB(192, 96, 255);
+		crHiddenPartByHideOS = RGB(96, 192, 255);
+		//MORPH END   - Added by SiRoB, See chunk that we hide
+
+    } else {
+        // grayed out
+        crNeither = RGB(248, 248, 248);
+	    crNextSending = RGB(255,244,191);
+	    crBoth = bFlat ? RGB(191, 191, 191) : RGB(191, 191, 191);
+	    crSending = RGB(191, 229, 191);
+		//MORPH START - Added by SiRoB, See chunk that we hide
+		crHiddenPartBySOTN = RGB(192, 96, 255);
+		crHiddenPartByHideOS = RGB(96, 192, 255);
+		//MORPH END   - Added by SiRoB, See chunk that we hide
+    }
 
 	// wistily: UpStatusFix
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
@@ -71,11 +100,6 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		s_UpStatusBar.Fill(crNeither); 
 		if (!onlygreyrect && m_abyUpPartStatus && currequpfile) { 
 			uint32 i;
-			//MORPH START - Added by SiRoB, See chunk that we hide
-			const COLORREF crHiddenPartBySOTN = RGB(192, 96, 255);
-			const COLORREF crHiddenPartByHideOS = RGB(96, 192, 255);
-			//MORPH END   - Added by SiRoB, See chunk that we hide
-			const COLORREF crBoth = bFlat ? RGB(0, 0, 0) : RGB(104, 104, 104);
 			for (i = 0;i < m_nUpPartCount;i++)
 				if(m_abyUpPartStatus[i])
 					s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crBoth);
@@ -108,7 +132,6 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
-			const COLORREF crSending = RGB(0, 150, 0);
 			for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;){
 				block = m_DoneBlocks_list.GetNext(pos);
 				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset + 1, crSending);
@@ -126,16 +149,92 @@ void CUpDownClient::SetUploadState(EUploadState news){
 	m_nUploadState = news;
 	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 }
+
 /**
-* Gets the current waiting score for this client, taking into consideration waiting
-* time, priority of requested file, and the client's credits.
+ * Gets the queue score multiplier for this client, taking into consideration client's credits
+ * and the requested file's priority.
 */
+double CUpDownClient::GetCombinedFilePrioAndCredit() {
+	if (credits == 0){
+		ASSERT ( IsKindOf(RUNTIME_CLASS(CUrlClient)) );
+		return 0;
+	}
+
+	//Morph Start - added by AndCycle, Equal Chance For Each File
+	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	if(currequpfile && thePrefs.IsEqualChanceEnable())
+		return currequpfile->statistic.GetEqualChanceValue();
+	//Morph End - added by AndCycle, Equal Chance For Each File
+
+    return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
+}
+
+/**
+* Gets the file multiplier for the file this client has requested.
+*/
+int CUpDownClient::GetFilePrioAsNumber() const {
+	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	if(!currequpfile)
+		return 0;
+
+	// TODO coded by tecxx & herbert, one yet unsolved problem here:
+	// sometimes a client asks for 2 files and there is no way to decide, which file the 
+	// client finally gets. so it could happen that he is queued first because of a 
+	// high prio file, but then asks for something completely different.
+	int filepriority = 10; // standard
+	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
+		switch(currequpfile->GetUpPriority()){
+		// --> Moonlight: SUQWT - Changed the priority distribution for a wider spread.
+			case PR_VERYHIGH:
+				filepriority = 27;  // 18, 50% boost    <-- SUQWT - original values commented.
+				break;
+			case PR_HIGH: 
+				filepriority = 12;  // 9, 33% boost
+				break; 
+			case PR_LOW: 
+				filepriority = 5;   // 6, 17% reduction
+				break; 
+			case PR_VERYLOW:
+				filepriority = 2;   // 2, no change
+				break;
+			case PR_NORMAL: 
+				default: 
+				filepriority = 8;   // 7, 14% boost
+			break; 
+		// <-- Moonlight: SUQWT
+		} 
+	}
+	else{
+	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		switch(currequpfile->GetUpPriority()){ 
+			case PR_VERYHIGH:
+				filepriority = 18;
+				break;
+			case PR_HIGH: 
+				filepriority = 9; 
+				break; 
+			case PR_LOW: 
+				filepriority = 6; 
+				break; 
+			case PR_VERYLOW:
+				filepriority = 2;
+				break;
+			case PR_NORMAL: 
+				default: 
+				filepriority = 7; 
+			break; 
+		} 
+	} 	//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	return filepriority;
+}
+
+/**
+ * Gets the current waiting score for this client, taking into consideration waiting
+ * time, priority of requested file, and the client's credits.
+ */
 uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasevalue) const
 {
-
-	DWORD curTick = ::GetTickCount();
-
-	//TODO: complete this (friends, uploadspeed, emuleuser etc etc)
 	if (!m_pszUsername)
 		return 0;
 
@@ -151,12 +250,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	// bad clients (see note in function)
 	if (credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY)
 		return 0;
-
-	//MORPH START - Added by IceCream, Anti-leecher feature
-	if (IsLeecher())
-		return 0;
-	//MORPH END   - Added by IceCream, Anti-leecher feature
-
 	// friend slot
 	if (IsFriend() && GetFriendSlot() && !HasLowID())
 		return 0x0FFFFFFF;
@@ -168,32 +261,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		return 0;
 	}
 
-	//MORPH - Changed by SiRoB, Upload ZZ System
-	/*
-	// TODO coded by tecxx & herbert, one yet unsolved problem here:
-	// sometimes a client asks for 2 files and there is no way to decide, which file the 
-	// client finally gets. so it could happen that he is queued first because of a 
-	// high prio file, but then asks for something completely different.
-	int filepriority = 10; // standard
-	switch(currequpfile->GetUpPriority()){
-		case PR_VERYHIGH:
-			filepriority = 18;
-			break;
-		case PR_HIGH: 
-			filepriority = 9; 
-			break; 
-		case PR_LOW: 
-			filepriority = 6; 
-			break; 
-		case PR_VERYLOW:
-			filepriority = 2;
-			break;
-		case PR_NORMAL: 
-			default: 
-			filepriority = 7; 
-		break; 
-	}
-	*/
 	int filepriority = GetFilePrioAsNumber();
 	
 	// calculate score, based on waitingtime and other factors
@@ -201,7 +268,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (onlybasevalue)
 		fBaseValue = 100;
 	else if (!isdownloading)
-		fBaseValue = (float)(curTick-GetWaitStartTime())/1000;
+		fBaseValue = (float)(::GetTickCount()-GetWaitStartTime())/1000;
 	else{
 		// we dont want one client to download forever
 		// the first 15 min downloadtime counts as 15 min waitingtime and you get a 15 min bonus while you are in the first 15 min :)
@@ -212,7 +279,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		// as queue turnover rate is faster than 49 days.
 		// ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"//original commented out
 //Morph End- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)		
-		fBaseValue += (float)(curTick - m_dwUploadTime > 900000)? 900000:1800000;
+		fBaseValue += (float)(::GetTickCount() - m_dwUploadTime > 900000)? 900000:1800000;
 		fBaseValue /= 1000;
 	}
 	if(thePrefs.UseCreditSystem())
@@ -249,95 +316,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		fBaseValue *= 0.5f;
 
 	return (uint32)fBaseValue;
-}
-
-//MORPH START - Added by Yun.SF3, ZZ Upload System
-/**
-* Gets the queue score multiplier for this client, taking into consideration client's credits
-* and the requested file's priority.
-*/
-double CUpDownClient::GetCombinedFilePrioAndCredit()
-{
-	ASSERT(credits != NULL);
-
-	CKnownFile* clientReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
-
-	if(clientReqFile){
-	
-		//Morph Start - added by AndCycle, Equal Chance For Each File
-		if(thePrefs.IsEqualChanceEnable()){
-			return clientReqFile->statistic.GetEqualChanceValue();
-		}
-		//Morph End - added by AndCycle, Equal Chance For Each File
-
-		return	(uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));//original
-	}
-	return 0;
-
-}
-
-
-/**
-* Gets the file multiplier for the file this client has requested.
-*/
-int CUpDownClient::GetFilePrioAsNumber() const
-{
-//MORPH START - Added by Yun.SF3, ZZ Upload System
-	// TODO coded by tecxx & herbert, one yet unsolved problem here:
-	// sometimes a client asks for 2 files and there is no way to decide, which file the 
-	// client finally gets. so it could happen that he is queued first because of a 
-	// high prio file, but then asks for something completely different.
-	int filepriority = 10; // standard
-	if(GetUploadFileID() != NULL){ 
-		if(theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL){ 
-			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-				switch(theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetUpPriority()){ 
-				//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				// --> Moonlight: SUQWT - Changed the priority distribution for a wider spread.
-					case PR_VERYHIGH:
-						filepriority = 27;  // 18, 50% boost    <-- SUQWT - original values commented.
-						break;
-					case PR_HIGH: 
-						filepriority = 12;  // 9, 33% boost
-						break; 
-					case PR_LOW: 
-						filepriority = 5;   // 6, 17% reduction
-						break; 
-					case PR_VERYLOW:
-						filepriority = 2;   // 2, no change
-						break;
-					case PR_NORMAL: 
-						default: 
-						filepriority = 8;   // 7, 14% boost
-					break; 
-				// <-- Moonlight: SUQWT
-				//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				} 
-			}
-			else{
-				switch(theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetUpPriority()){ 
-					case PR_VERYHIGH:
-						filepriority = 18;
-						break;
-					case PR_HIGH: 
-						filepriority = 9; 
-						break; 
-					case PR_LOW: 
-						filepriority = 6; 
-						break; 
-					case PR_VERYLOW:
-						filepriority = 2;
-						break;
-					case PR_NORMAL: 
-						default: 
-						filepriority = 7; 
-					break; 
-				} 
-			}
-		} 
-	} 
-//MORPH - Added by Yun.SF3, ZZ Upload System
-	return filepriority;
 }
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
@@ -454,7 +432,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			}
 			else{
 				togo = currentblock->EndOffset - currentblock->StartOffset;
-				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
+				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1))
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 			}
 
@@ -493,11 +471,14 @@ void CUpDownClient::CreateNextBlockPackage(){
 			SetUploadFileID(srcfile);
 
 			// check extention to decide whether to compress or not
-			CString ext=srcfile->GetFileName();ext.MakeLower();
-			int pos=ext.ReverseFind('.');
-			if (pos>-1) ext=ext.Mid(pos);
-			bool compFlag=(ext!=".zip" && ext!=".rar" && ext!=".ace" && ext!=".ogm" && ext!=".tar");//no need to try compressing tar compressed files... [Yun.SF3]
-			if (ext==".avi" && thePrefs.GetDontCompressAvi()) compFlag=false;
+			CString ext = srcfile->GetFileName();
+			ext.MakeLower();
+			int pos = ext.ReverseFind(_T('.'));
+			if (pos>-1)
+				ext = ext.Mid(pos);
+			bool compFlag = (ext!=_T(".zip") && ext!=_T(".rar") && ext!=_T(".ace") && ext!=_T(".ogm") && ext!=_T(".tar"));//no need to try compressing tar compressed files... [Yun.SF3]
+			if (ext==_T(".avi") && thePrefs.GetDontCompressAvi())
+				compFlag=false;
 
 			if (!IsUploadingToPeerCache() && m_byDataCompVer == 1 && compFlag)
 				CreatePackedPackets(filedata,togo,currentblock,bFromPF);
@@ -748,6 +729,16 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 
 	if(newreqfile == oldreqfile)
 		return;
+
+	// clear old status
+	if (m_abyUpPartStatus) 
+	{
+		delete[] m_abyUpPartStatus;
+		m_abyUpPartStatus = NULL;
+	}
+	m_nUpPartCount = 0;
+	m_nUpCompleteSourcesCount= 0;
+
 	if(newreqfile){
 		//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 		m_bPowerShared = newreqfile->GetPowerShared();
@@ -764,6 +755,13 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 
 void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 {
+    if(GetUploadState() != US_UPLOADING) {
+        if(thePrefs.GetLogUlDlEvents())
+            AddDebugLogLine(DLP_LOW, false, _T("UploadClient: Client tried to add req block when not in upload slot! Prevented req blocks from being added. %s"), DbgGetClientInfo());
+		delete reqblock;
+        return;
+    }
+
 	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos != 0; ){
 		const Requested_Block_Struct* cur_reqblock = m_DoneBlocks_list.GetNext(pos);
 		if (reqblock->StartOffset == cur_reqblock->StartOffset && reqblock->EndOffset == cur_reqblock->EndOffset){
@@ -778,8 +776,8 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 			return;
 		}
 	}
-	m_BlockRequests_queue.AddTail(reqblock);
 
+	m_BlockRequests_queue.AddTail(reqblock);
 }
 
 uint32 CUpDownClient::SendBlockData(){
@@ -789,8 +787,18 @@ uint32 CUpDownClient::SendBlockData(){
 	uint64 sentBytesPartFile = 0;
 	uint64 sentBytesPayload = 0;
 
-	if(socket || m_pPCUpSocket && IsUploadingToPeerCache()) {
-		CEMSocket* s = (m_pPCUpSocket && IsUploadingToPeerCache()) ? m_pPCUpSocket : socket;
+    if(GetFileUploadSocket() && (m_ePeerCacheUpState != PCUS_WAIT_CACHE_REPLY)) {
+		CEMSocket* s = GetFileUploadSocket();
+
+        if(m_pPCUpSocket && IsUploadingToPeerCache()) {
+            // Check if filedata has been sent via the normal socket since last call.
+            uint64 sentBytesCompleteFileNormalSocket = socket->GetSentBytesCompleteFileSinceLastCallAndReset();
+            uint64 sentBytesPartFileNormalSocket = socket->GetSentBytesPartFileSinceLastCallAndReset();
+
+			if(thePrefs.GetVerbose() && (sentBytesCompleteFileNormalSocket + sentBytesPartFileNormalSocket > 0)) {
+                AddDebugLogLine(false, _T("Sent file data via normal socket when in PC mode. Bytes: %I64i."), sentBytesCompleteFileNormalSocket + sentBytesPartFileNormalSocket);
+			}
+        }
 
 	    // Extended statistics information based on which client software and which port we sent this data to...
 	    // This also updates the grand total for sent bytes, etc.  And where this data came from.
@@ -805,50 +813,26 @@ uint32 CUpDownClient::SendBlockData(){
 		sentBytesPayload = s->GetSentPayloadSinceLastCallAndReset();
 		m_nCurQueueSessionPayloadUp += sentBytesPayload;
 
-		if(GetUploadState() == US_UPLOADING) {
-			bool useChunkLimit = false; // PENDING: Get from prefs, or enforce?
-
-			bool wasRemoved = false;
-			if(useChunkLimit == false && GetQueueSessionPayloadUp() > SESSIONMAXTRANS && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
-				m_dwLastCheckedForEvictTick = curTick;
-				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
-				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-				//reset
-				m_bPowerShared = false;
-				//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-			}
-
-			if(wasRemoved == false && GetQueueSessionPayloadUp()/SESSIONMAXTRANS > m_curSessionAmountNumber) {
-				// Should we end this upload?
-
-				//EastShare Start - added by AndCycle, Pay Back First
-				//check again does client satisfy the conditions
-				credits->InitPayBackFirstStatus();
-				//EastShare End - added by AndCycle, Pay Back First
-
-				// first clear the average speed, to show ?? as speed in upload slot display
-				m_AvarageUDR_list.RemoveAll();
-				sumavgUDR = 0;
-	
-				// Give clients in queue a chance to kick this client out.
-				// It will be kicked out only if queue contains a client
-				// of same/higher class as this client, and that new
-				// client must either be a high ID client, or a low ID
-				// client that is currently connected.
-				wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
-
-				if(!wasRemoved) {
-					// It wasn't removed, so it is allowed to pass into the next amount.
-					m_curSessionAmountNumber++;
-				}
-			}
-
-			if(wasRemoved == false) {
-				// read blocks from file and put on socket
-				CreateNextBlockPackage();
-			}
-		}
-	}
+        if(theApp.uploadqueue->CheckForTimeOver(this)) {
+            theApp.uploadqueue->RemoveFromUploadQueue(this, _T("Completed transfer"), true);
+			//OP_OUTOFPARTREQS will tell the downloading client to go back to OnQueue..
+			//The main reason for this is that if we put the client back on queue and it goes
+			//back to the upload before the socket times out... We get a situation where the
+			//downloader things it already send the requested blocks and the uploader thinks
+			//the downloader didn't send any reqeust blocks. Then the connection times out..
+			//I did some tests with eDonkey also and it seems to work well with them also..
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__OutOfPartReqs", this);
+			Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
+			theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
+			socket->SendPacket(pCancelTransferPacket,true,true);
+            theApp.uploadqueue->AddClientToQueue(this,true);
+        } 
+		else {
+            // read blocks from file and put on socket
+            CreateNextBlockPackage();
+        }
+    }
 
 	//MORPH START - Modified by SiRoB, Better Upload rate calcul
 	if(sentBytesCompleteFile + sentBytesPartFile > 0) {
@@ -891,6 +875,9 @@ uint32 CUpDownClient::SendBlockData(){
 	return sentBytesCompleteFile + sentBytesPartFile;
 }
 
+/**
+ * See description for CEMSocket::TruncateQueues().
+ */
 void CUpDownClient::FlushSendBlocks(){ // call this when you stop upload, or the socket might be not able to send
 	if (socket)      //socket may be NULL...
 		socket->TruncateQueues();
@@ -951,19 +938,14 @@ void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
 		return;
 	m_bCommentDirty = false;
 
-	uint8 rating = file->GetFileRate();
-	CStringA desc(file->GetFileComment());
-	if(file->GetFileRate() == 0 && desc.IsEmpty())
+	uint8 rating = file->GetFileRating();
+	const CString& desc = file->GetFileComment();
+	if (file->GetFileRating() == 0 && desc.IsEmpty())
 		return;
 
 	CSafeMemFile data(256);
 	data.WriteUInt8(rating);
-	int length=desc.GetLength();
-	if (length > MAXFILECOMMENTLEN)
-		length = MAXFILECOMMENTLEN;
-	data.WriteUInt32(length);
-	if (length>0)
-		data.Write(desc, length);
+	data.WriteLongString(desc, GetUnicodeSupport());
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__FileDesc", this, (char*)file->GetFileHash());
 	Packet *packet = new Packet(&data,OP_EMULEPROT);
@@ -1014,7 +996,6 @@ void  CUpDownClient::UnBan()
 	}
 }
 
-// Moonlight: SUQWT - Reset the wait time on ban, do not give time credit for banned clients queue time!//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CUpDownClient::Ban(LPCTSTR pszReason)
 {
 	theApp.clientlist->AddTrackClient(this);
@@ -1041,22 +1022,33 @@ void CUpDownClient::Ban(LPCTSTR pszReason)
 	SetUploadState(US_BANNED);
 	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
-
+	if (socket != NULL && socket->IsConnected())
+		socket->ShutDown(SD_RECEIVE); // let the socket timeout, since we dont want to risk to delete the client right now. This isnt acutally perfect, could be changed later
 }
 
 //MORPH START - Added by IceCream, Anti-leecher feature
-void CUpDownClient::BanLeecher(int log_message){
+void CUpDownClient::BanLeecher(LPCTSTR pszReason){
 	theApp.clientlist->AddTrackClient(this);
+	// EastShare START - Modified by TAHO, modified SUQWT
+	//if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) {
+		ClearWaitStartTime();
+		if (credits != NULL){
+			credits->ClearUploadQueueWaitTime();
+		}
+	}
+	// EastShare END - Modified by TAHO, modified SUQWT
 	if (!m_bLeecher){
-		theApp.stat_leecherclients++;
+		theStats.leecherclients++;
 		m_bLeecher = true;
+		theApp.emuledlg->AddDebugLogLine(false,GetResString(IDS_ANTILEECHERLOG) + _T(" (%s)"),DbgGetClientInfo(),pszReason==NULL ? _T("No Reason") : pszReason);
 	}
 	theApp.clientlist->AddBannedClient( GetIP() );
 	SetUploadState(US_BANNED);
 	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
-	if (log_message)
-		theApp.emuledlg->AddDebugLogLine(false,GetResString(IDS_ANTILEECHERLOG),GetUserName());
+	if (socket != NULL && socket->IsConnected())
+		socket->ShutDown(SD_RECEIVE); // let the socket timeout, since we dont want to risk to delete the client right now. This isnt acutally perfect, could be changed later
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
 
@@ -1122,6 +1114,21 @@ bool CUpDownClient::GetFriendSlot() const
 	}
 	return m_bFriendSlot;
 }
+
+CEMSocket* CUpDownClient::GetFileUploadSocket(bool log) {
+    if(m_pPCUpSocket && (IsUploadingToPeerCache() || m_ePeerCacheUpState == PCUS_WAIT_CACHE_REPLY)) {
+        if(thePrefs.GetVerbose() && log)
+            AddDebugLogLine(false, _T("%s got peercache socket."), DbgGetClientInfo());
+
+        return m_pPCUpSocket;
+    } else {
+        if(thePrefs.GetVerbose() && log)
+            AddDebugLogLine(false, _T("%s got normal socket."), DbgGetClientInfo());
+
+        return socket;
+    }
+}
+
 /* Name:     IsCommunity
    Function: Test if client is community member
    Return:   true  - if one of the community tags occur in the name of the actual client
