@@ -549,8 +549,16 @@ UINT UploadBandwidthThrottler::RunInternal() {
             for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
 				bool isFocused = ClientDataRate[classID] == 0;
-				if(isFocused == false && maxSlot[classID]>0 && (maxSlot[LAST_CLASS]>0 || classID==LAST_CLASS))
-					maxSlot[classID] = maxSlot[classID]-1;
+				if (!isFocused) {
+					if (allowedDataRateClass[classID] > 0){
+						if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
+							maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
+						}
+						if(lastpos+maxSlot[classID] > m_highestNumberOfFullyActivatedSlots) {
+							m_highestNumberOfFullyActivatedSlots = lastpos+maxSlot[classID];
+            			}
+					}
+				}
 				for(uint32 maxCounter = lastpos; maxCounter < lastpos+(isFocused?slotCounterClass[classID]:maxSlot[classID]) && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					if(isFocused == false)
 					{
@@ -607,8 +615,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						spentBytesClass[classID] += lastSpentBytes;
 						if (classID < LAST_CLASS) spentBytesClass[LAST_CLASS] += lastSpentBytes;
 						spentOverheadClass[classID] += socketSentBytes.sentBytesControlPackets;
-						if(slotCounter+1 > m_highestNumberOfFullyActivatedSlots && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/)) {
-							m_highestNumberOfFullyActivatedSlots = slotCounter+1;
+						if(slotCounter+2 > m_highestNumberOfFullyActivatedSlots && (lastSpentBytes < bytesToSpendTemp || lastSpentBytes >= doubleSendSize)) { // || lastSpentBytes > 0 && spentBytes == bytesToSpend /*|| slotCounter+1 == (uint32)m_StandardOrder_list.GetSize())*/)) {
+							m_highestNumberOfFullyActivatedSlots = slotCounter+2;
 						}
 					} else {
 						theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (fully activated)! Prevented usage. Index: %i Size: %i"), slotCounter, m_StandardOrder_list.GetSize());

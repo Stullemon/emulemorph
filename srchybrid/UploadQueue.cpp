@@ -885,9 +885,9 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
 		}
 	}
 
-    uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
+    //uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
     uint32 iCount = (uint32)uploadinglist.GetSize();
-	if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall + wantedNumberOfTrickles > iCount) {
+	if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+ wantedNumberOfTrickles*/ > iCount) {
         // uploadThrottler requests another slot. If throttler says it needs another slot, we will allow more slots
         // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
         if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
