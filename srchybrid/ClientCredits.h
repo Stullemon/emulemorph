@@ -174,6 +174,8 @@ private:
 
 	bool			m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	void			TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+
+	bool			m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 };
 
 class CClientCreditsList: public CLoggable

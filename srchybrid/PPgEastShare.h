@@ -32,6 +32,9 @@ protected:
 	int m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	HTREEITEM m_htiOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 
+	int m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	HTREEITEM m_htiSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 	CreditSystemSelection m_iCreditSystem;
 	HTREEITEM m_htiCreditSystem;

@@ -3749,6 +3749,7 @@ BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "check file availability before starting download"
     IDS_DL_FORCE            "Force Download"
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Save Upload Queue Wait Time"
 END
 
 STRINGTABLE 

@@ -50,6 +50,8 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+
+	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 }
 
 CClientCredits::CClientCredits(const uchar* key)
@@ -68,6 +70,8 @@ CClientCredits::CClientCredits(const uchar* key)
 	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
+
+	m_bSaveUploadQueueWaitTime = theApp.glob_prefs->SaveUploadQueueWaitTime();//Morph - added by AndCycle, Save Upload Queue Wait Time (SUQWT)
 }
 
 CClientCredits::~CClientCredits()
@@ -373,6 +377,7 @@ void CClientCreditsList::LoadList()
 	CSafeBufferedFile	strFile, strSUQWTv2File;
 	
 	bool	successOpenStrFile, successOpenStrSUQWTv2File;
+	bool	useStrFile = false, useStrSUQWTv2File = false;
 	bool	haveTrouble = false;
 
 	//check credits.met.SUQWTv2.met status
@@ -422,10 +427,12 @@ void CClientCreditsList::LoadList()
 		if(strFileStatus.m_mtime > strSUQWTv2FileStatus.m_mtime){
 			//if original credits.met newer, take it
 			file.Open(strFileName, iOpenFlags, &fexp);
+			useStrFile = true;
 			AddLogLine(false, "Original %s newer, load it instead of %s." , strFileName, strSUQWTv2FileName);
 		}else{
 			//if SUQWTv2 newer, take it
 			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
+			useStrSUQWTv2File = true;
 			AddLogLine(false, "Load %s", strSUQWTv2FileName);
 		}
 	}
@@ -447,15 +454,22 @@ void CClientCreditsList::LoadList()
 
 		if(haveTrouble)	return;//if there're trouble, don't load credits??
 
-		if(successOpenStrFile){
-			file.Open(strFileName, iOpenFlags, &fexp);
-			AddLogLine(false, "Load %s", strFileName);
-		}
 		if(successOpenStrSUQWTv2File){
 			file.Open(strSUQWTv2FileName, iOpenFlags, &fexp);
+			useStrSUQWTv2File = true;
 			AddLogLine(false, "Load %s", strSUQWTv2FileName);
 		}
+		else if(successOpenStrFile){
+			file.Open(strFileName, iOpenFlags, &fexp);
+			useStrFile = true;
+			AddLogLine(false, "Load %s", strFileName);
+		}
+		
 	}
+
+	strFile.Close();
+	strSUQWTv2File.Close();
+
 
 
 //original commented out
@@ -497,103 +511,55 @@ void CClientCreditsList::LoadList()
 		}
 		*/
 		//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		if(successOpenStrFile){//Morph - added by AndCycle, before backup check file first
-			// everything is ok, lets see if the backup exist...
-			CString strBakFileName;
-			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());
+//Morph - commented out by AndCycle, the official backup cause problem here...
+/*
+		// everything is ok, lets see if the backup exist...
+		CString strBakFileName;
+		strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".BAK"), m_pAppPrefs->GetConfigDir());
 			
-			DWORD dwBakFileSize = 0;
-			BOOL bCreateBackup = TRUE;
+		DWORD dwBakFileSize = 0;
+		BOOL bCreateBackup = TRUE;
 
-			HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+		HANDLE hBakFile = ::CreateFile(strBakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
 											OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hBakFile != INVALID_HANDLE_VALUE)
+		if (hBakFile != INVALID_HANDLE_VALUE)
+		{
+			// Ok, the backup exist, get the size
+			dwBakFileSize = ::GetFileSize(hBakFile, NULL); //debug
+			if (dwBakFileSize > (DWORD)file.GetLength())
 			{
-				// Ok, the backup exist, get the size
-				dwBakFileSize = ::GetFileSize(hBakFile, NULL); //debug
-				if (dwBakFileSize > (DWORD)file.GetLength())
-				{
-					// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
-					bCreateBackup = FALSE;
-				}
-				//else: backup is smaller or the same size as org. file, proceed with copying of file
-				::CloseHandle(hBakFile);
+				// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
+				bCreateBackup = FALSE;
 			}
-			//else: the backup doesn't exist, create it
+			//else: backup is smaller or the same size as org. file, proceed with copying of file
+			::CloseHandle(hBakFile);
+		}
+		//else: the backup doesn't exist, create it
 
-			if (bCreateBackup)
-			{
-				file.Close(); // close the file before copying
+		if (bCreateBackup)
+		{
+			file.Close(); // close the file before copying
 
-				if (!::CopyFile(strFileName, strBakFileName, FALSE))
-					AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
+			if (!::CopyFile(strFileName, strBakFileName, FALSE))
+				AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
 
-				// reopen file
-				CFileException fexp;
-				if (!file.Open(strFileName, iOpenFlags, &fexp)){
-					CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-					TCHAR szError[MAX_CFEXP_ERRORMSG];
-					if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-						strError += _T(" - ");
-						strError += szError;
-					}
-					AddLogLine(true, _T("%s"), strError);
-					return;
+			// reopen file
+			CFileException fexp;
+			if (!file.Open(strFileName, iOpenFlags, &fexp)){
+				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+				TCHAR szError[MAX_CFEXP_ERRORMSG];
+				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+					strError += _T(" - ");
+					strError += szError;
 				}
-				setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-				file.Seek(1, CFile::begin); //set filepointer behind file version byte
+				AddLogLine(true, _T("%s"), strError);
+				return;
 			}
-		}//Morph - added by AndCycle, before backup check file first
-//Morph Start - added by AndCycle, separate the .bak for SUQWT
-		if(successOpenStrSUQWTv2File){//Morph - added by AndCycle, before backup check file first
-			// everything is ok, lets see if the backup exist...
-			CString strSUQWTv2BakFileName;
-			strSUQWTv2BakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.BAK"), m_pAppPrefs->GetConfigDir());
-			
-			DWORD dwSUQWTv2BakFileSize = 0;
-			BOOL bCreateBackupSUQWTv2 = TRUE;
+			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+			file.Seek(1, CFile::begin); //set filepointer behind file version byte
 
-			HANDLE hSUQWTv2BakFile = ::CreateFile(strSUQWTv2BakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
-											OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-			if (hSUQWTv2BakFile != INVALID_HANDLE_VALUE)
-			{
-				// Ok, the backup exist, get the size
-				dwSUQWTv2BakFileSize = ::GetFileSize(hSUQWTv2BakFile, NULL); //debug
-				if (dwSUQWTv2BakFileSize > (DWORD)file.GetLength())
-				{
-					// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
-					bCreateBackupSUQWTv2 = FALSE;
-				}
-				//else: backup is smaller or the same size as org. file, proceed with copying of file
-				::CloseHandle(hSUQWTv2BakFile);
-			}
-			//else: the backup doesn't exist, create it
-
-			if (bCreateBackupSUQWTv2)
-			{
-				file.Close(); // close the file before copying
-
-				if (!::CopyFile(strSUQWTv2FileName, strSUQWTv2BakFileName, FALSE))
-					AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
-
-				// reopen file
-				CFileException fexp;
-				if (!file.Open(strFileName+".SUQWTv2.met", iOpenFlags, &fexp)){
-					CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
-					TCHAR szError[MAX_CFEXP_ERRORMSG];
-					if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
-						strError += _T(" - ");
-						strError += szError;
-					}
-					AddLogLine(true, _T("%s"), strError);
-					return;
-				}
-				setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-				file.Seek(1, CFile::begin); //set filepointer behind file version byte
-			}
-		}//Morph - added by AndCycle, before backup check file first
-//Morph End - added by AndCycle, separate the .bak for SUQWT
-
+		}
+*/
 		uint32 count;
 		file.Read(&count, 4);
 		m_mapClients.InitHashTable(count+5000); // TODO: should be prime number... and 20% larger
@@ -1068,8 +1034,12 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 				}
 				//if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
 					AddDebugLogLine(false,"Warning: WaitTime resetted due to Invalid Ident for Userhash %s",buffer.GetBuffer());*/
-				m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-				//m_dwUnSecureWaitTime = ::GetTickCount();//original commented out
+				if(m_bSaveUploadQueueWaitTime){
+					m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime;	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+				}
+				else{
+					m_dwUnSecureWaitTime = ::GetTickCount();//original
+				}
 				m_dwWaitTimeIP = dwForIP;
 				return m_dwUnSecureWaitTime;
 			}	
@@ -1082,8 +1052,14 @@ uint32 CClientCredits::GetSecureWaitStartTime(uint32 dwForIP){
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Save the wait times.
 void CClientCredits::SaveUploadQueueWaitTime() {
-	if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = GetTickCount() - m_dwUnSecureWaitTime;
-	if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = GetTickCount() - m_dwSecureWaitTime;
+	if(m_bSaveUploadQueueWaitTime){
+		if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime = GetTickCount() - m_dwUnSecureWaitTime;
+		if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime = GetTickCount() - m_dwSecureWaitTime;
+	}
+	else{
+		if (m_dwUnSecureWaitTime) m_pCredits->nUnSecuredWaitTime += GetTickCount() - m_dwUnSecureWaitTime;
+		if (m_dwSecureWaitTime) m_pCredits->nSecuredWaitTime += GetTickCount() - m_dwSecureWaitTime;
+	}
 	SetSecWaitStartTime(m_dwWaitTimeIP);
 }
 
@@ -1096,13 +1072,15 @@ void CClientCredits::ClearUploadQueueWaitTime() {
 // Moonlight: SUQWT: Adjust to take previous wait time into account.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCredits::SetSecWaitStartTime(uint32 dwForIP){
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime - 1;	// Moonlight: SUQWT
-	m_dwSecureWaitTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime - 1;		// Moonlight: SUQWT
-	//original commented out
-	/*
-	m_dwUnSecureWaitTime = ::GetTickCount()-1;
-	m_dwSecureWaitTime = ::GetTickCount()-1;
-	*/
+	if(m_bSaveUploadQueueWaitTime){
+		m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime - 1;	// Moonlight: SUQWT
+		m_dwSecureWaitTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime - 1;		// Moonlight: SUQWT
+	}
+	else{
+		//original
+		m_dwUnSecureWaitTime = ::GetTickCount()-1;
+		m_dwSecureWaitTime = ::GetTickCount()-1;
+	}
 	//Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	m_dwWaitTimeIP = dwForIP;
 }
