@@ -2,10 +2,13 @@
 Changelog for eMule 0.45b MorphXT v6.3
 --------------------------------------
 FIXED  : USC: slot datarate limit was not respected [SiRoB]
+FIXED  : Prevent invalide parameter preferency message box due to other mod usage [SiRoB]
+FIXED  : USS udp ping switcher take long time to establish due to icmp udp alternate [SiRoB]
 
 CHANGED: Updated Webcache to 1.9a beta3 [SiRoB]
 CHANGED: Updated Anti-Leecher ban MorphXT+ and eChanblard v7.0 [SiRoB]
 CHANGED: Updated SNAFU [SiRoB]
+CHANGED: When SUWQT is disable suwqt file is no more updated [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.2
