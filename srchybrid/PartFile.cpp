@@ -266,9 +266,6 @@ CPartFile::~CPartFile(){
 	m_SrcpartFrequency.RemoveAll();
 	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;gaplist.GetNext(pos))
 		delete gaplist.GetAt(pos);
-	//MORPH START - Added by SiRoB, Reduce SharedStatusBar CPU consumption
-	if(m_pbitmapOldSharedStatusBar != NULL) m_dcSharedStatusBar.SelectObject(m_pbitmapOldSharedStatusBar);
-	//MORPH END - Added by SiRoB, Reduce SharedStatusBar CPU consumption
 }
 
 void CPartFile::CreatePartFile(){

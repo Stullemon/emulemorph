@@ -335,9 +335,7 @@ private:
 	//MORPH END   - Added by IceCream, Complete source feature v0.07a zegzav
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;
-	CDC 	m_dcSharedStatusBar;
 	CBitmap m_bitmapSharedStatusBar;
-	CBitmap *m_pbitmapOldSharedStatusBar;
 	int		lastSize;
 	bool	lastonlygreyrect;
 	bool	lastbFlat;
