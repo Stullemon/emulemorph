@@ -735,7 +735,12 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				str.AppendFormat("Cache-Control: no-transform\r\n");
 				str.AppendFormat("Expires: Mon, 03 Sep 2007 01:23:45 GMT\r\n" ); // rolled-back to 1.1b code (possible bug w/soothsayers' proxy)
 				str.AppendFormat("Connection: keep-alive\r\nProxy-Connection: keep-alive\r\n");
+				//MORPH START - Changed by SiRoB, ModID
+				/*
 				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(MOD_VERSION));
+				*/
+				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+				//MORPH END   - Changed by SiRoB, ModID
 				str.AppendFormat("\r\n");
 				dataHttp.Write((LPCSTR)str, str.GetLength());
 				theStats.AddUpDataOverheadFileRequest(dataHttp.GetLength());
