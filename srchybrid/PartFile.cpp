@@ -302,7 +302,8 @@ void CPartFile::CreatePartFile(){
 
 	m_SrcpartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
-		m_SrcpartFrequency.Add(0);
+		//m_SrcpartFrequency.Add(0);//original
+		m_SrcpartFrequency[i] = 0;//Morph - modified by AndCycle, Error in m_SrcpartFrequency sizing(rayita)
 	paused = false;
 
 	if (theApp.glob_prefs->AutoFilenameCleanup())
@@ -637,7 +638,8 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 
 	theApp.sharedfiles->filelist->FilterDuplicateKnownFiles(this);	// SLUGFILLER: mergeKnown - load statistics
 
-	m_SrcpartFrequency.SetSize(GetPartCount());
+	//m_SrcpartFrequency.SetSize(GetPartCount());//original
+	m_SrcpartFrequency[i] = 0;//Morph - modified by AndCycle, Error in m_SrcpartFrequency sizing(rayita)
 	for (uint32 i = 0; i != GetPartCount();i++)
 		m_SrcpartFrequency.Add(0);
 	SetStatus(PS_EMPTY);
