@@ -133,7 +133,7 @@ protected:
 	void DoResize_V(int delta);
 	void DoResize_HL(int delta);
 	void DoResize_HR(int delta);
-	void initCSize(uint8 x, uint8 y, uint8 z);
+	void initCSize();
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 };

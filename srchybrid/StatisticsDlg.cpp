@@ -387,7 +387,7 @@ void CStatisticsDlg::initCSize()
 void CStatisticsDlg::DoResize_HL(int delta)
 {
 	if(!delta) return;
-	m_DownloadOMeter.Invalidate();
+	m_DownloadOMeter.InvalidateCtrl(true);
 	CSplitterControl::ChangeHeight(&m_UploadOMeter, delta , CW_TOPALIGN);
 	CSplitterControl::ChangeHeight(&m_Statistics, -delta, CW_BOTTOMALIGN);
 
@@ -414,7 +414,7 @@ void CStatisticsDlg::DoResize_HR(int delta)
 	if(!delta) return;
 	CSplitterControl::ChangeHeight(&m_DownloadOMeter, delta , CW_TOPALIGN);
 	CSplitterControl::ChangeHeight(&m_UploadOMeter, -delta, CW_BOTTOMALIGN);
-	m_Statistics.Invalidate();
+	m_Statistics.InvalidateCtrl(true);
 	CRect rcW;
  
 	GetWindowRect(rcW);
