@@ -2300,7 +2300,11 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("UploadCapacity"),maxGraphUploadRate);
 	ini.WriteInt(_T("DeadServerRetry"),deadserverretries);
 	ini.WriteInt(_T("ServerKeepAliveTimeout"),m_dwServerKeepAliveTimeout);
-	ini.WriteInt(_T("SplitterbarPosition"),splitterbarPosition+2);
+	// Mighty Knife: What's the reason for this line ?!?!?
+	// Why is 2 added here ?!?
+	// ini.WriteInt(_T("SplitterbarPosition"),splitterbarPosition+2);
+	ini.WriteInt(_T("SplitterbarPosition"),splitterbarPosition);
+	// [end] Mighty Knife
 	ini.WriteInt(_T("SplitterbarPositionStat"),splitterbarPositionStat+1,_T("eMule"));
 	ini.WriteInt(_T("SplitterbarPositionStat_HL"),splitterbarPositionStat_HL+1,_T("eMule"));
 	ini.WriteInt(_T("SplitterbarPositionStat_HR"),splitterbarPositionStat_HR+1,_T("eMule"));
