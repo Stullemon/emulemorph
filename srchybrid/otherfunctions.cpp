@@ -2799,6 +2799,7 @@ long FileSize(LPCTSTR fileName){
 //Morph Start - added by AndCycle, minor tweak - prime
 int getPrime(int lower_bound)
 {
+	/*
 	std::list<int> prime_no_list;
 	prime_no_list.push_back(2);
 
@@ -2815,5 +2816,19 @@ int getPrime(int lower_bound)
 		}
 	}
 	return prime_no_list.back();
+	*/
+	int cur_no = lower_bound-1;
+	bool prime = false;
+	while(!prime){
+		cur_no++;
+		prime = true;
+		for(int cur_i = 2,end = (int)sqrt((double)cur_no);cur_i<=end;cur_i++){
+			if(cur_no%cur_i==0){
+				prime = false;
+				break;
+			}
+		}
+	}
+	return cur_no;
 }
 //Morph End - added by AndCycle, minor tweak - prime
