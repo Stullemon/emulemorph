@@ -245,16 +245,15 @@ void LastCommonRouteFinder::SetPrefs(bool pEnabled, uint32 pCurUpload, uint32 pM
         m_upload = maxUpload;
     }
 
-    uploadLocker.Unlock();
-    //MORPH START - Added by SiRoB, Upload Splitting Class
-	ClassUploadLocker.Lock();
+	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_iMinDataRateFriend=minDataRateFriend;
 	m_iMinDataRatePowerShare=minDataRatePowerShare;
 	m_iMaxClientDataRateFriend=maxClientDataRateFriend;
 	m_iMaxClientDataRatePowerShare=maxClientDataRatePowerShare;
 	m_iMaxClientDataRate=maxClientDataRate;
-	ClassUploadLocker.Unlock();
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
+    uploadLocker.Unlock();
 	
 	prefsLocker.Unlock();
 
@@ -276,13 +275,14 @@ uint32 LastCommonRouteFinder::GetUpload() {
 }
 //MORPH START - Added by SiRoB, Upload Splitting Class
 void LastCommonRouteFinder::GetClassByteToSend(uint32* AllowedDataRate,uint32* ClientDataRate) {
-    ClassUploadLocker.Lock();
+    uploadLocker.Lock();
     *AllowedDataRate = m_iMinDataRateFriend;
 	*++AllowedDataRate = m_iMinDataRatePowerShare;
+	*++AllowedDataRate =  m_upload;
 	*ClientDataRate = m_iMaxClientDataRateFriend;
 	*++ClientDataRate = m_iMaxClientDataRatePowerShare;
 	*++ClientDataRate = m_iMaxClientDataRate;
-    ClassUploadLocker.Unlock();
+    uploadLocker.Unlock();
 }
 //MORPH END   - Added by SiRoB, Upload Splitting Class
 void LastCommonRouteFinder::SetUpload(uint32 newValue) {

@@ -101,7 +101,6 @@ private:
 	bool m_bIsUSSLog;
 	//MORPH END   - Added by SiRoB, Log Flag to trace or not the USS activities
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	CCriticalSection ClassUploadLocker;
 	uint32 m_iMinDataRateFriend;
 	uint32 m_iMinDataRatePowerShare;
 	uint32 m_iMaxClientDataRateFriend;
