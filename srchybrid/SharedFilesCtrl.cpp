@@ -1469,7 +1469,9 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 	// Split the old filename to name and extension
 	CString fn = f->GetFileName ();
 	// test if the file name already contained the CRC tag
-	if(fn.MakeUpper().Find(f->GetLastCalculatedCRC32()) != -1){
+	CString fnup = fn;
+	fnup.MakeUpper();
+	if(fnup.Find(f->GetLastCalculatedCRC32()) != -1){
 		theApp.AddLogLine (false, "File '%s' already contained the correct CRC tag, won't rename", fn);
 		return 0;
 	}
