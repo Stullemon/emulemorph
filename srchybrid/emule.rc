@@ -5237,9 +5237,9 @@ BEGIN
     IDS_DONTREMOVESPARETRICKLESLOT "Don't remove spare trickle slot"
     IDS_MINDATARATEFRIEND   "Global datarate (Default 0kB/s=unlimited)"
     IDS_MINDATARATEPOWERSHARE "Global datarate (Default 0kB/s=unlimited)"
-    IDS_MAXCLIENTDATARATEFRIEND "Client datarate (Default 0kB/s=focused)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Client datarate (Default 0kB/s=focused)"
-    IDS_MAXCLIENTDATARATE   "Client datarate (Default 0kB/s=focused)"
+    IDS_MAXCLIENTDATARATEFRIEND "Max client datarate (0kB/s=unlimited)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s=unlimited)"
+    IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s=unlimited)"
 END
 
 STRINGTABLE 
