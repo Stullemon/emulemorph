@@ -573,10 +573,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 						if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
 							maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
 						}
-						if(maxSlot[classID] > m_highestNumberOfFullyActivatedSlotsClass[classID]) {
-							m_highestNumberOfFullyActivatedSlotsClass[classID] = maxSlot[classID];
-            			}
 					}
+					if(maxSlot[classID] > m_highestNumberOfFullyActivatedSlotsClass[classID]) {
+						m_highestNumberOfFullyActivatedSlotsClass[classID] = maxSlot[classID];
+            		}
 				}
 				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:maxSlot[classID]) && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					if(isFocused == false)
