@@ -553,7 +553,6 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 {
 	bool bAdded = false;
 	RemoveFromHashing(toadd);	// SLUGFILLER: SafeHash - hashed ok, remove from list, in case it was on the list
-	toadd->SetLastSeen();	// SLUGFILLER: mergeKnown - okay, we see it
 	// SLUGFILLER: mergeKnown - check for duplicates
 	CKnownFile* other = GetFileByID(toadd->GetFileHash());
 	if (other && other != toadd){

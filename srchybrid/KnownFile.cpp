@@ -408,7 +408,7 @@ CKnownFile::CKnownFile()
 	m_nCompleteSourcesCount = 1;
 	m_nCompleteSourcesCountLo = 1;
 	m_nCompleteSourcesCountHi = 1;
-	lastseen = NULL;	// SLUGFILLER: mergeKnown
+	
 	m_uMetaDataVer = 0;
 	//MORPH START - Added by SiRoB, Show Permission
 	m_iPermissions = -1;
@@ -1129,14 +1129,6 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			//MORPH END  - Added by SiRoB, Show Permission
-			// SLUGFILLER: mergeKnown
-			case FT_LASTSEENCOMPLETE:{
-				if (newtag->tag.type == 3)
-					lastseen = newtag->tag.intvalue;
-				delete newtag;
-				break;
-			}
-			// SLUGFILLER: mergeKnown
 			case FT_KADLASTPUBLISHKEY:
 				// SLUGFILLER: SafeHash - tag-type verification
 				if (newtag->tag.type != 3) {
@@ -1266,7 +1258,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	for (UINT i = 0; i < parts; i++)
 		file->WriteHash16(hashlist[i]);
 	//tags
-	const int iFixedTags = 11 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO] // SLUGFILLER: mergeKnown (+1)
+	const int iFixedTags = 10 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO]
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
 	// a bug in the meta tag reading+writing code. To achive maximum backward 
@@ -1352,11 +1344,6 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	lastUsedTag.WriteTagToFile(file);
 	//EastShare END - Added by TAHO, .met file control
 
-	// SLUGFILLER: mergeKnown
-	CTag lsctag(FT_LASTSEENCOMPLETE,lastseen);
-	lsctag.WriteTagToFile(file);
-	// SLUGFILLER: mergeKnown
-	
 	//MORPH START - Added by SiRoB, HIDEOS
 	if (GetHideOS()>=0){
 		CTag hideostag(FT_HIDEOS, GetHideOS());
