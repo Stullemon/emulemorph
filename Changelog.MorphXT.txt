@@ -3,10 +3,18 @@ Changelog for eMule 0.44d MorphXT v5.1x
 --------------------------------------
 MERGED : Some merge from emulEspana arround randomport and folder icone [SiRoB]
 
-FIXED  : Don't add client not accepted by trytoconnect to avoid failed upload [SiRoB]
+FIXED  : some column sort have been corrected [SiRoB]
+FIXED  : Download failed introduced in the previous version [SiRoB]
+
+REMOVED: Itsonlyme UDPCacheSearch [SiRoB]
 
 CHANGED: USC: Global Upload Limit are now respected [SiRoB]
 CHANGED: New Morph Version Check use Officiel setting now [SiRoB]
+CHANGED: Now Country Flag  are displayed in a separated column [SiRoB]
+
+ADDED  : Don't add client in uploadinglist not accepted by trytoconnect to avoid failed upload (banned,filtered) [SiRoB]
+ADDED  : Intermediate temp var for file datarate to avoid 0kb/s display when GUI refresh the file item [SiRoB]
+ADDED  : Country column in download window [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44d MorphXT v5.11
