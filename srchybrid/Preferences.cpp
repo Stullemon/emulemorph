@@ -1268,7 +1268,7 @@ uint8 CPreferences::IsZZRatioDoesWork(){
 	uint8 ret = 0;
 	if (theApp.downloadqueue->IsFilesPowershared())
 		ret |= 1;
-	if (theApp.friendlist->IsFriendSlot())
+	if (theApp.friendlist->IsFriendSlot() && (thePrefs.GetGlobalDataRateFriend() > 3*1024 || thePrefs.GetGlobalDataRateFriend() == 0))
 		ret |= 2;
 	if (GetMaxUpload()<10)
 		ret |= 4;
@@ -3422,7 +3422,7 @@ void CPreferences::LoadPreferences()
 	//EastShare - added by AndCycle, IP to Country
 	
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),0);
+	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
 	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
 	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
 	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);

@@ -120,7 +120,7 @@ CString CMuleStatusBarCtrl::GetPaneToolTipText(EStatusBarPane iPane) const
 			strText.Format(_T("zzRatio %s:"),(ActivatedRatioReason)?_T("is activated"):_T("isn't activated"));
 			strText.AppendFormat(_T("\n\r\x2022 1/3 Ratio reached: %s"),(theApp.downloadqueue->IsZZRatioInWork())?_T("Yes"):_T("No"));
 			strText.AppendFormat(_T("\n\r\x2022 PowerSharing incomplet file: %s"),(ActivatedRatioReason & 1)?_T("Yes"):_T("No"));
-			strText.AppendFormat(_T("\n\r\x2022 Using friend slot: %s"),(ActivatedRatioReason & 2)?_T("Yes"):_T("No"));
+			strText.AppendFormat(_T("\n\r\x2022 Using friend slot and globaldatarate>3KB/s: %s"),(ActivatedRatioReason & 2)?_T("Yes"):_T("No"));
 			strText.AppendFormat(_T("\n\r\x2022 Upload limit under 10KB/s: %s"),(ActivatedRatioReason & 4)?_T("Yes"):_T("No"));
 			strText.AppendFormat(_T("\n\r\x2022 Average upload under 10KB/s: %s"),(ActivatedRatioReason & 8)?_T("Yes"):_T("No"));
 			break;
