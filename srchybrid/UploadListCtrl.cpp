@@ -552,8 +552,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else if (client->GetPowerShared())	Sbuffer.Append(" PS");
 
 						CString tempFilePrio;
-
-						switch (file->GetUpPriority()) {
+						if (file)
+						{
+							switch (file->GetUpPriority()) {
 								case PR_VERYLOW : {
 									tempFilePrio = GetResString(IDS_PRIOVERYLOW);
 									break; }
@@ -580,6 +581,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 									break; }
 								default:
 									tempFilePrio.Empty();
+							}
 						}
 						Sbuffer.Append(" " + tempFilePrio);
 					}

@@ -1,10 +1,18 @@
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v2.10
 --------------------------------------
+FIXED: Crash when removed a file that is uploaded to an other client [SiRoB]
+
+--------------------------------------
+Changelog for eMule 0.42g MorphXT v2.10
+--------------------------------------
 FIXED  : Completed files aren't well identified by the select view filter [SiRoB]
 FIXED  : The right statusbar containing some random text when no use of dynamic upload [SiRoB]
 FIXED  : Cancel selective category dialog don't abort download from search result [SiRoB]
+FIXED  : Slective Chunk used only the default setting and not the per file setting [SiRoB]
 CHANGED: Changed the way to use the selective category, when we use it but the tab in search or PastEd2kLink dialog are used we bypass it [SiRoB]
+CHANGED: Updated zz Upload system (big Thanks) [SiRoB]
+CHANGED: Some code rewrite [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.42g MorphXT v2.9
