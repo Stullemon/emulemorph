@@ -863,8 +863,8 @@ uint32 CUpDownClient::SendBlockData(){
 			
 	// remove to old values in list
 	while (m_AvarageUDR_list.GetCount() > 0)
-		if (m_AvarageUDR_list.GetCount() > (uint32)(60000 / (1 + curTick - m_AvarageUDR_list.GetHead().timestamp)) ||
-			(uint32)(curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
+		if (m_AvarageUDR_list.GetCount() > (60000 / (1 + curTick - m_AvarageUDR_list.GetHead().timestamp)) ||
+			(curTick - m_AvarageUDR_list.GetHead().timestamp) > 30000) {
 			// keep sum of all values in list up to date
 			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else

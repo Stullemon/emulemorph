@@ -2045,7 +2045,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				}
 				cli_lastCount[0] = verCount;
 
-				theApp.clientlist->ReleaseModStatistics(&clientMods);	//MORPH - Added by SiRoB - Slugfiller: modid
+				theApp.clientlist->ReleaseModStatistics(&clientMods);	//MORPH - Added by SiRoB, Slugfiller: modid
 			} // - End Clients -> Client Software -> eMule Section
 
 			// CLIENTS -> CLIENT SOFTWARE -> XMULE SECTION

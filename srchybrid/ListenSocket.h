@@ -32,7 +32,6 @@ public:
 	void	Safe_Delete();
 	
 	bool	Create();
-	void	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0); //MORPH - Added by SiRoB, zz Upload system
 	//MORPH - Changed by SiRoB, zz Upload system
 	/*
     virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
