@@ -408,6 +408,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	uint32 ClientDataRate[NB_SPLITTING_CLASS];
 	memset(ClientDataRate,0,sizeof(ClientDataRate));
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+/*Moved to Downloadqueue::Process() to avoid locking main thread
 		//MORPH START - Added by SiRoB, WebCache 1.2f
 		if (thePrefs.expectingWebCachePing && (::GetTickCount() - thePrefs.WebCachePingSendTime > SEC2MS(30)))
 		{
@@ -418,6 +419,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			theApp.QueueLogLine(false, _T("Proxy configuration Test Failed please review your proxy-settings. Webcache downloads have been deactivated until emule is restarted."));
 		}
 		//MORPH - Added by SiRoB, WebCache 1.2f
+*/
     DWORD lastTickReachedBandwidth = ::GetTickCount();
 
     while(doRun) {
