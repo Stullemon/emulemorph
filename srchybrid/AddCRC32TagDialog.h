@@ -38,10 +38,14 @@ protected:
 	CString m_CRC32Prefix;
 	CString m_CRC32Suffix;
 	bool    m_DontAddCRC32;
+	bool    m_CRC32ForceUppercase;
+	bool    m_CRC32ForceAdding;
 public:
 	CString GetCRC32Prefix () { return m_CRC32Prefix; }
 	CString GetCRC32Suffix () { return m_CRC32Suffix; }
 	bool	GetDontAddCRC32 () { return m_DontAddCRC32; }
+	bool	GetCRC32ForceUppercase () { return m_CRC32ForceUppercase; }
+	bool	GetCRC32ForceAdding () { return m_CRC32ForceAdding; }
 private:
 };
 
@@ -51,9 +55,13 @@ public:
 	CString m_FilenamePrefix;
 	CString m_FilenameSuffix;
 	bool m_DontAddCRCAndSuffix;
+	bool m_CRC32ForceUppercase;
+	bool m_CRC32ForceAdding;
 
-	CCRC32RenameWorker() { m_DontAddCRCAndSuffix=false; }
+	CCRC32RenameWorker() { m_DontAddCRCAndSuffix=false; m_CRC32ForceUppercase = false; }
 	virtual void SetDontAddCRCAndSuffix (bool _b) { m_DontAddCRCAndSuffix = _b; }
+	virtual void SetCRC32ForceUppercase (bool _b) { m_CRC32ForceUppercase = _b; }
+	virtual void SetCRC32ForceAdding (bool _b) { m_CRC32ForceAdding = _b; }
 	virtual void SetFilenamePrefix (CString _s) { m_FilenamePrefix = _s; }
 	virtual void SetFilenameSuffix (CString _s) { m_FilenameSuffix = _s; }
 	virtual void Run ();

@@ -1548,6 +1548,8 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							worker->SetFilenamePrefix (AddCRCDialog.GetCRC32Prefix ());
 							worker->SetFilenameSuffix (AddCRCDialog.GetCRC32Suffix ());
 							worker->SetDontAddCRCAndSuffix (AddCRCDialog.GetDontAddCRC32 ());
+							worker->SetCRC32ForceUppercase (AddCRCDialog.GetCRC32ForceUppercase ());
+							worker->SetCRC32ForceAdding (AddCRCDialog.GetCRC32ForceAdding ());
 							m_FileProcessingThread.AddFileProcessingWorker (worker);
 
 							// next file
@@ -1690,27 +1692,48 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		return 0;
 	}
 
+	// Declare the variables we'll need
+	CString p3,p4;
+	CString NewFn;
+
 	// Split the old filename to name and extension
 	CString fn = f->GetFileName ();
 	// test if the file name already contained the CRC tag
 	CString fnup = fn;
 	fnup.MakeUpper();
-	if(f->IsCRC32Calculated() && (fnup.Find(f->GetLastCalculatedCRC32()) != -1)){
-		theApp.AddLogLine (false, _T("File '%s' already containes the correct CRC32 tag, won't be renamed."), fn);
-		return 0;
-	}
-	CString p3,p4;
-	_splitpath (fn,NULL,NULL,p3.GetBuffer (MAX_PATH),p4.GetBuffer (MAX_PATH));
-	p3.ReleaseBuffer();
-	p4.ReleaseBuffer();
+	if( f->IsCRC32Calculated() && 
+		(fnup.Find(f->GetLastCalculatedCRC32()) != -1) &&
+		(!worker->m_CRC32ForceAdding) ){
+		// Ok, the filename already contains the CRC. Normally we won't rename it, except for
+		// we have to make sure it's uppercase
+		if ((!worker->m_CRC32ForceUppercase) || (fn.Find(f->GetLastCalculatedCRC32()) != -1)) {
+			theApp.AddLogLine (false, _T("File '%s' already containes the correct CRC32 tag, won't be renamed."), fn);
+			return 0;
+		} else {
+			// This file contains a valid CRC, but not in uppercase - replace it!
+			int i=fnup.Find(f->GetLastCalculatedCRC32());
+			NewFn = fn;
+			LPTSTR FnBuf = NewFn.GetBuffer();
+			p3 = f->GetLastCalculatedCRC32();
+			LPTSTR CRCBuf = p3.GetBuffer();
+			memcpy (FnBuf+i,CRCBuf,p3.GetLength());
+			p3.ReleaseBuffer ();
+			NewFn.ReleaseBuffer ();
+		}
+	} else {
+		// We have to add the CRC32/Releaser tag to the filename.
+		_splitpath (fn,NULL,NULL,p3.GetBuffer (MAX_PATH),p4.GetBuffer (MAX_PATH));
+		p3.ReleaseBuffer();
+		p4.ReleaseBuffer();
 
-	// Create the new filename
-	CString NewFn = p3;
-	NewFn = NewFn + worker->m_FilenamePrefix;
-	if (!worker->m_DontAddCRCAndSuffix) {
-		NewFn = NewFn + f->GetLastCalculatedCRC32 () + worker->m_FilenameSuffix;
+		// Create the new filename
+		NewFn = p3;
+		NewFn = NewFn + worker->m_FilenamePrefix;
+		if (!worker->m_DontAddCRCAndSuffix) {
+			NewFn = NewFn + f->GetLastCalculatedCRC32 () + worker->m_FilenameSuffix;
+		}
+		NewFn = NewFn + p4;
 	}
-	NewFn = NewFn + p4;
 
 	theApp.AddLogLine (false,_T("File '%s' will be renamed to '%s'..."),fn,NewFn);
 

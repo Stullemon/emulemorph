@@ -2398,7 +2398,10 @@
 #define IDC_SOLIDGRAPH                  5001
 #define IDS_SOLIDGRAPH                  5001
 #define IDS_POWERSHARE_LIMITED          5002
+#define IDC_CRCFORCEUPPERCASE           5002
 #define IDS_POWERSHARE_LIMIT            5003
+#define IDC_FORCEADDING                 5003
+#define IDC_CRCFORCEADDING              5003
 #define IDS_STRING1353                  5004
 #define IDS_CHAT_DOWNLOADED             5004
 #define IDS_CHAT_UPLOADED               5005
@@ -2458,7 +2461,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        5005
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         5002
+#define _APS_NEXT_CONTROL_VALUE         5004
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

@@ -674,6 +674,8 @@ public:
 
 	// Mighty Knife: CRC32-Tag - not accessible in preferences dialog !
 	static bool		m_bDontAddCRCToFilename;
+	static bool		m_bCRC32ForceUppercase;
+	static bool		m_bCRC32ForceAdding;
 	static char		m_sCRC32Prefix [256];
 	static char		m_sCRC32Suffix [256];
 	// [end] Mighty Knife
@@ -1513,6 +1515,10 @@ public:
 	// Mighty Knife: CRC32-Tag - not accessible in preferences dialog !
 	static	bool    GetDontAddCRCToFilename ()				{ return m_bDontAddCRCToFilename; }
 	static	void	SetDontAddCRCToFilename (bool _b)		{ m_bDontAddCRCToFilename = _b; }
+	static	bool    GetCRC32ForceUppercase ()				{ return m_bCRC32ForceUppercase; }
+	static	void	SetCRC32ForceUppercase (bool _b)		{ m_bCRC32ForceUppercase = _b; }
+	static	bool    GetCRC32ForceAdding ()					{ return m_bCRC32ForceAdding; }
+	static	void	SetCRC32ForceAdding (bool _b)			{ m_bCRC32ForceAdding = _b; }
 	static	CString GetCRC32Prefix ()						{ return m_sCRC32Prefix; }
 	static	void	SetCRC32Prefix (CString _s)				{ sprintf (m_sCRC32Prefix,"%s",_s); }
 	static	CString GetCRC32Suffix ()						{ return m_sCRC32Suffix; }

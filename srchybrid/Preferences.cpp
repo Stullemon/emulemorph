@@ -605,6 +605,8 @@ bool	CPreferences::m_bLogFriendlistActivities;
 
 // Mighty Knife: CRC32-Tag - not accessible in preferences dialog !
 bool	CPreferences::m_bDontAddCRCToFilename;
+bool	CPreferences::m_bCRC32ForceUppercase;
+bool	CPreferences::m_bCRC32ForceAdding;
 char	CPreferences::m_sCRC32Prefix [256];
 char	CPreferences::m_sCRC32Suffix [256];
 // [end] Mighty Knife
@@ -2397,6 +2399,8 @@ void CPreferences::SavePreferences()
 
 	// Mighty Knife: CRC32-Tag
 	ini.WriteBool ("DontAddCRC32ToFilename",m_bDontAddCRCToFilename,"eMule");
+	ini.WriteBool ("ForceCRC32Uppercase",m_bCRC32ForceUppercase,"eMule");
+	ini.WriteBool ("ForceCRC32Adding",m_bCRC32ForceAdding,"eMule");
 	CString temp;
 	// Encapsule these strings by "" because space characters are allowed at the
 	// beginning/end of the prefix/suffix !
@@ -3132,6 +3136,8 @@ void CPreferences::LoadPreferences()
 
 	// Mighty Knife: CRC32-Tag
 	SetDontAddCRCToFilename (ini.GetBool (_T("DontAddCRC32ToFilename"),false));
+	SetCRC32ForceUppercase (ini.GetBool (_T("ForceCRC32Uppercase"),false));
+	SetCRC32ForceAdding (ini.GetBool (_T("ForceCRC32Adding"),false));
 	// From the prefix/suffix delete the leading/trailing "".
 	SetCRC32Prefix (ini.GetString(_T("LastCRC32Prefix"),"\" [\"").Trim ("\""));
 	SetCRC32Suffix (ini.GetString("LastCRC32Suffix","\"]\"").Trim ("\""));

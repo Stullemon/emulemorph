@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutre resources
+// Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -856,8 +856,8 @@ BEGIN
     CONTROL         "Advanced Filter Mask (Separator: | )",IDC_CHECK_MASK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,255,256,8
     CONTROL         "Don't resume paused file",
-                    IDC_CHECK_RESUMEFILEONLYINSAMECAT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,22,107,256,8
+                    IDC_CHECK_RESUMEFILEONLYINSAMECAT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,22,107,256,8
 END
 
 IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 241
@@ -1574,22 +1574,28 @@ BEGIN
     LTEXT           "Static",IDC_WARNINGEASTSHARE,7,7,213,39
 END
 
-IDD_ADDCRC32TAG DIALOGEX 0, 0, 250, 97
+IDD_ADDCRC32TAG DIALOGEX 0, 0, 280, 119
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION
 CAPTION "CRC32 to filename"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Prefix to add at the end of the filename before the CRC32:",
-                    IDC_IBLABEL,2,2,245,11
-    EDITTEXT        IDC_CRC32PREFIX,2,14,245,12,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,143,76,50,14,BS_FLAT
-    PUSHBUTTON      "Cancel",IDCANCEL,197,76,50,14,BS_FLAT
-    EDITTEXT        IDC_CRC32SUFFIX,2,44,245,12,ES_AUTOHSCROLL
+                    IDC_IBLABEL,2,2,275,11
+    EDITTEXT        IDC_CRC32PREFIX,2,14,275,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,173,98,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDCANCEL,227,98,50,14,BS_FLAT
+    EDITTEXT        IDC_CRC32SUFFIX,2,44,275,12,ES_AUTOHSCROLL
     LTEXT           "Suffix to add the end of the filename after the CRC32:",
-                    IDC_STATIC,2,33,245,9
-    CONTROL         "Don't add CRC32/Suffix to filename, only add prefix as static text",
+                    IDC_STATIC,2,33,275,9
+    CONTROL         "Don't add CRC32/Suffix to filename, only add prefix as static text.",
                     IDC_DONTADDCRC,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,2,61,245,10
+                    WS_TABSTOP,2,82,275,10
+    CONTROL         "If filename already contains a valid CRC32, convert it to uppercase.",
+                    IDC_CRCFORCEUPPERCASE,"Button",BS_AUTOCHECKBOX | BS_TOP | 
+                    BS_FLAT | WS_TABSTOP,2,72,275,10
+    CONTROL         "Add CRC32/Tag to filename even if the filename already contains a valid CRC32",
+                    IDC_CRCFORCEADDING,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,2,62,275,10
 END
 
 IDD_MASSRENAME DIALOGEX 0, 0, 377, 258
@@ -1921,7 +1927,6 @@ BEGIN
         RIGHTMARGIN, 357
         VERTGUIDE, 302
         TOPMARGIN, 7
-        BOTTOMMARGIN, 154
     END
 
     IDD_COMMENTLST, DIALOG
@@ -2219,9 +2224,9 @@ BEGIN
     IDD_ADDCRC32TAG, DIALOG
     BEGIN
         LEFTMARGIN, 2
-        RIGHTMARGIN, 247
+        RIGHTMARGIN, 277
         TOPMARGIN, 1
-        BOTTOMMARGIN, 90
+        BOTTOMMARGIN, 112
     END
 
     IDD_MASSRENAME, DIALOG
@@ -2484,12 +2489,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutre resources
+#endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Anglais (États-Unis) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -3317,16 +3322,30 @@ BEGIN
     IDS_IRC_PRIVATECHANSTART "* Private chat session started"
     IDS_IRC_SLAPMSG         "* %s slaps %s around with a large Babelfish!"
     IDS_IRC_PRIVMESSAGE     "Private Message"
-    IDS_SOURCESWAPBLOCKED   "Swap blocked"
-    IDS_A4AF_CHECK_THIS_NOW "Check this source now (debug)"
     IDS_SOURCEEXCHANGESWAP  "Temporary Source Exchange Swap"
-    IDS_PR_SHORT_HIGH       "[Hi]"
     IDS_PR_SHORT_LOW        "[Lo]"
     IDS_IRC_KICK            "Kick"
     IDS_IRC_SLAP            "Slap"
     IDS_IRC_JOIN            "Join"
     IDS_IRC_CHANNELLIST     "Channel list"
     IDS_IRC_CONNECT         "Connect"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FO_PREF_EXISTED     "eMule detected existing rules for the selected ports, which were not overwritten or replaced. Missing rules have been added successfully.\nPlease note that third-party desktopfirewalls and routers are not affected by this!"
+    IDS_FO_PREF_FAILED      "Failed to configure the internal WinXP firewall for the selected ports!"
+    IDS_FO_PREF_STARTUP     "Open/close ports on WinXP firewall when starting/exiting eMule"
+    IDS_LOG_LEVEL           "Log level"
+    IDS_DISABLEPEERACHE     "Disable downloading from PeerCache"
+    IDS_NEWMSG              "New Message from '%s' (IP:%s)"
+    IDS_PREF_STARTNEXTFILECATONLY "only in same category"
+    IDS_LOG_ULDL_EVENTS     "Log upload/download events"
+    IDS_PEERCACHE_ENABLED   "Your ISP supports the PeerCache technology, enabling cache downloads!"
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Allow user to add you as a friend."
+    IDS_SOURCESWAPBLOCKED   "Swap blocked"
+    IDS_A4AF_CHECK_THIS_NOW "Check this source now (debug)"
+    IDS_PR_SHORT_HIGH       "[Hi]"
 END
 
 STRINGTABLE 
@@ -4134,20 +4153,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FO_PREF_EXISTED     "eMule detected existing rules for the selected ports, which were not overwritten or replaced. Missing rules have been added successfully.\nPlease note that third-party desktopfirewalls and routers are not affected by this!"
-    IDS_FO_PREF_FAILED      "Failed to configure the internal WinXP firewall for the selected ports!"
-    IDS_FO_PREF_STARTUP     "Open/close ports on WinXP firewall when starting/exiting eMule"
-    IDS_LOG_LEVEL           "Log level"
-    IDS_DISABLEPEERACHE     "Disable downloading from PeerCache"
-    IDS_NEWMSG              "New Message from '%s' (IP:%s)"
-    IDS_PREF_STARTNEXTFILECATONLY "only in same category"
-    IDS_LOG_ULDL_EVENTS     "Log upload/download events"
-    IDS_PEERCACHE_ENABLED   "Your ISP supports the PeerCache technology, enabling cache downloads!"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Allow user to add you as a friend."
-END
-
-STRINGTABLE 
-BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
                             "check file availability before starting download"
     IDS_DL_FORCE            "Force Download"
@@ -4576,7 +4581,7 @@ BEGIN
     IDS_CHAT_NAME           "Name:"
 END
 
-#endif    // Anglais (États-Unis) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

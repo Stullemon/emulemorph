@@ -61,6 +61,13 @@ void AddCRC32InputBox::OnOK()
 	thePrefs.SetCRC32Suffix (m_CRC32Suffix);
 	m_DontAddCRC32 = (bool)IsDlgButtonChecked(IDC_DONTADDCRC);
 	thePrefs.SetDontAddCRCToFilename (m_DontAddCRC32);
+
+	m_CRC32ForceUppercase = (bool)IsDlgButtonChecked(IDC_CRCFORCEUPPERCASE);
+	thePrefs.SetCRC32ForceUppercase (m_CRC32ForceUppercase);
+
+	m_CRC32ForceAdding = (bool)IsDlgButtonChecked(IDC_CRCFORCEADDING);
+	thePrefs.SetCRC32ForceAdding (m_CRC32ForceAdding);
+
 	CDialog::OnOK();
 }
 
@@ -75,6 +82,8 @@ BOOL AddCRC32InputBox::OnInitDialog(){
 	InitWindowStyles(this);
 
 	CheckDlgButton(IDC_DONTADDCRC,thePrefs.GetDontAddCRCToFilename() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CRCFORCEUPPERCASE,thePrefs.GetCRC32ForceUppercase() ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CRCFORCEADDING,thePrefs.GetCRC32ForceAdding() ? BST_CHECKED : BST_UNCHECKED);
 	GetDlgItem(IDC_CRC32PREFIX)->SetWindowText (thePrefs.GetCRC32Prefix ());
 	GetDlgItem(IDC_CRC32SUFFIX)->SetWindowText (thePrefs.GetCRC32Suffix ());
 
