@@ -194,7 +194,7 @@ BEGIN
     IDS_WAITING             "Warte"
     IDS_HASHING             "Überprüfe"
     IDS_COMPLETING          "Wird beendet"
-    IDS_COMPLETE            "Vollständig"
+    IDS_COMPLETE            "Vollständig / complete"
     IDS_PAUSED              "Angehalten"
     IDS_ERRORLIKE           "Fehlerhaft"
     IDS_ASSIGNED2K          "ed2k-Links sind momentan nicht eMule zugewiesen. Möchten Sie eMule nun die ed2k-Links zuweisen? (empfohlen)"
@@ -1152,7 +1152,7 @@ BEGIN
     IDS_FIRSTCREDITSYSTEM   "Soll eMule Nutzer belohnen, die zu Dir hochladen?\r\rDies ist das bekannte Kreditsystem (Credit System). Diese Option hilft gegen Leecher vorzugehen. Wenn du viel released, kann diese Option solange deaktiviert werden.\r\r(Standard: Ja)"
     IDS_FIRSTFULLCHUNK      "Soll versucht werden, komplette Chunks hochzuladen?\r\rDies gibt eMule eine bessere Chance, Chunks zu komplettieren. Wird diese Option deaktiviert, wird die Warteschlange schneller durchlaufen. Wenn du viel released, sollte diese Option aktiviert sein.\r(Standard: Ja)"
     IDS_FIRSTSAFECON        "Soll eMule beim Verbinden zum Server ""Sicheres Verbinden"" aktivieren?\r\rWird diese Option deaktiviert, kann eMule etwas schneller zu Servern Verbindung aufnehmen, aber kann auch mehr falsche niedrige IDs hervorrufen.\r(Standard: Nein)"
-    IDS_FIRSTRUNASSIST      "Möchtest Du den Setup-Assistenten starten?"
+    IDS_FIRSTRUNASSIST      "Setup-Assistenten starten?"
     IDS_FIRSTAUTOCON        "Soll eMule sich beim Programmstart mit einem Server verbinden?\r\r(Standard: Nein)"
     IDS_FIRSTCOMPLETE       "Der Startassistent wurde nun durchgeführt.\r\rAlle diese Einstellungen und mehr können geändert werden, klicke dazu auf das Einstellungen-Symbol oben rechts in der Toolbar. Für Erklärungen und weitere Informationen schaue in die Hilfe, durch drücken der F1-Taste!"
 END
@@ -1238,7 +1238,7 @@ BEGIN
     IDS_PROXY_AUTH          "Authentifizierung aktivieren"
     IDS_AUTH                "Authentifizierung"
     IDS_SHOWCATINFO         "Zeige Downloadinformation in Kategorie-Reitern"
-    IDS_SW_SEARCHINGINFO    "Die Suche wurde gestartet. Frage die Resultate in einem Moment ab!"
+    IDS_SW_SEARCHINGINFO    "Die Suche wurde gestartet. Resultate können in einem Moment abgefragt werden."
     IDS_LOGENTRY            "Log"
 END
 
@@ -1249,7 +1249,7 @@ BEGIN
     IDS_AUTOSCROLL          "Autoscroll"
     IDS_WIZ1_WELCOME_TITLE  "Willkommen zu eMule"
     IDS_WIZ1_WELCOME_ACTIONS 
-                            "Dieser Assistent leitet Dich durch die ersten Schritte der Einrichtung von eMule."
+                            "Dieser Assistent leitet durch die ersten Schritte der Einrichtung von eMule."
     IDS_WIZ1_WELCOME_BTN_HINT "Klicke ''Weiter''  um fortzufahren"
     IDS_WIZ1_END_TITLE      "Den Assistenten fertigstellen"
     IDS_WIZ1                "eMule - Erst-Start-Assistent"
@@ -1274,8 +1274,8 @@ BEGIN
     IDS_HM_LINKFAQ          "eMule FAQ"
     IDS_HM_LINKVC           "eMule Versionsüberprüfung"
     IDS_DEBUG_SOURCE_EXCHANGE "Quellenaustausch-Meldungen protokollieren"
-    IDS_SHAREDREQ1          "Benutzer %s (%u) hat deine Liste freigegebener Verzeichnisse angefragt -> %s"
-    IDS_SHAREDREQ2          "Benutzer %s (%u) hat deine Liste freigegebener Dateien für das Verzeichnis '%s' angefragt -> %s"
+    IDS_SHAREDREQ1          "Benutzer %s (%u) hat die Liste freigegebener Verzeichnisse angefragt -> %s"
+    IDS_SHAREDREQ2          "Benutzer %s (%u) hat die Liste freigegebener Dateien für das Verzeichnis '%s' angefragt -> %s"
     IDS_SHAREDANSW          "Benutzer %s (%u) hat das Verzeichnis '%s' freigegeben"
     IDS_SHAREDANSW2         "Benutzer %s (%u) hat eine nicht angefragte Liste freigegebener Verzeichnisse gesendet - wird ignoriert"
     IDS_SHAREDINFO1         "Benutzer %s (%u) hat die Liste freigegebener Dateien für das Verzeichnis '%s' gesendet"
@@ -1824,7 +1824,7 @@ BEGIN
     IDS_DATEFILENAMELOG     "Schreibe Datum in den Namen der Log-Datei"
     IDS_ECFEF               "Gleiche Chance für jede Datei"
     IDS_ALL_TIME            "Gesamt-Zeit"
-    IDS_COPYFEEDBACK        "Kopiere Rückmeldung in Zwischenablage"
+    IDS_COPYFEEDBACK        "Kopiere Rückmeldung in Zwischenablage (de)"
     IDS_ANTILEECHERLOG      "Anti-Leechermods: Client %s benutzt den Mod %s : wird gebannt, wegen Benutzung eines Leecher-Mods"
 END
 
@@ -1945,7 +1945,7 @@ BEGIN
     IDS_CAT_SELDLGTXT       "Auswahl der Kategorie von der Liste oder Eingabe eines Namen für ein neue Kategorie:"
     IDS_CAT_SELDLGCAP       "Kategorien-Auswahl"
     IDS_CAT_SHOWCATNAME     "Vollen Kategorie-Namen im Karteireiter anzeigen"
-    IDS_CAT_SHOWSELCATDLG   "Anzeige 'Kategorien-Auswahl-Dialog'"
+    IDS_CAT_SHOWSELCATDLG   "Zeige 'Kategorien-Auswahl-Dialog' an"
     IDS_CAT_USEACTIVE       "Neue Downloads der gerade angezeigten Kategorie zuordnen"
     IDS_CAT_AUTORESUMEORD   "Wert automatisch erhöhen und eine gleichmäßige Priorität zuweisen"
     IDS_CAT_SMALLFILEDLPUSH "Kleine Dateien (< 150 KB) zuerst laden"
@@ -1954,7 +1954,7 @@ BEGIN
     IDS_A4AF_STACK          "gestapelte Quellenvergabe"
     IDS_A4AF_DISABLED       "Deaktiviert"
     IDS_A4AF_ADVMODE        "Erweiterte A4AF-Verarbeitung"
-    IDS_CAT_STARTFILESONADD "Starte # Dateien,  wenn sie zu einer neuen Kategorie hinzugefügt werd"
+    IDS_CAT_STARTFILESONADD "Starte # Dateien,  wenn sie zu einer neuen Kategorie hinzugefügt werden"
 END
 
 STRINGTABLE 
@@ -2021,7 +2021,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FEEDBACK_TRANSFERED "Übertragen: %s (%s)"
+    IDS_FEEDBACK_Transferred "Übertragen: %s (%s)"
     IDS_FEEDBACK_REQUESTED  "Angefragt: %i (%i)"
     IDS_FEEDBACK_ACCEPTED   "Akzeptierte Anfragen: %i (%i)"
     IDS_FEEDBACK_FROM       "Feedback von %s zu [%s]"
@@ -2037,7 +2037,7 @@ BEGIN
     IDS_FEEDBACK_AVAILABLE  "Verfügbare Quellen: %i"
     IDS_FEEDBACK_NONEEDPART "Quellen ohne benötigte Teile: %i"
     IDS_FEEDBACK_COMPLETE   "geschätzte vollständige Quellen: %i"
-    IDS_COPYFEEDBACK_US     "Rückmeldung in die Zwischenablage kopieren"
+    IDS_COPYFEEDBACK_US     "Kopiere Rückmeldung in Zwischenablage (en)"
     IDS_UPDATEFAKES         "Update"
     IDS_FAKECHECKUPERROR    "Fehler beim Aktualisieren der FakeCheck-Liste"
     IDS_HTTP_FAKECHECKCAPTION "Aktualisierung der Fake-Liste"
@@ -2209,20 +2209,9 @@ STRINGTABLE
 BEGIN
     IDS_BACKUP_AUTOBACKUP   "Backup beim Beenden"
     IDS_BACKUP_NOTE         "   "
-    IDS_BACKUP_BACKUPNOW    "Backup jetzt"
+    IDS_BACKUP_BACKUPNOW    "Sofortbackup"
     IDS_BACKUP_MESSAGE      "Hinweis: Im Emule-Programmverzeichnis wird ein Ordner ""Backup"" zum Speichern einer Sicherheitskopie angelegt."
     IDS_BACKUP_AUTOBACKUP2  "Doppel-Backup"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_MORPH2_FILE         "Datei"
-    IDS_MORPH2_SECURITY     "Sicherheit"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_MORPH2_SERVER       "Server"
 END
 
 STRINGTABLE 
@@ -2267,8 +2256,8 @@ BEGIN
     IDS_INVMODE_GROUP       "Unsichtbar-Modus"
     IDS_INVMODE             "MorphXT Unsichtbar machen"
     IDS_INVMODE_HOTKEY      "Hotkey für's Zurückholen auswählen"
-    IDS_INVMODE_MODKEY      "Modifier Keys:"
-    IDS_INVMODE_VKEY        "Key:"
+    IDS_INVMODE_MODKEY      "Umschalt-Tasten:"
+    IDS_INVMODE_VKEY        "Taste:"
     IDS_FPU_ACTIVE          "FPU Optimierung aktiv"
     IDS_MMX_ACTIVE          "MMX Optimierung aktiv"
     IDS_AMD_ACTIVE          "AMD Optimierung aktiv"
@@ -2473,6 +2462,17 @@ BEGIN
     IDS_SELSKINPROFILEDIR   "Skinverzeichnis auswählen"
     IDS_ASKDLINCOMPLETE     "Eventuell unvollständig:\r\n\r\n%s\r\n\r\nDiese Datei scheint im Netzwerk nicht vollständig vorhanden zu sein, ein Erfolg ist daher zweifelhaft! Soll sie trotzdem geladen werden?"
     IDS_DEADSOURCES         "tote Quellen"
+    IDS_SHORTTAGS           "kurze Tags"
+    IDS_THELOAD             "Lade"
+    IDS_PACKSENT            "Pakete gesendet"
+    IDS_RESPONSES           "Antworten"
+    IDS_EXTRACT_META_DATA   "Extrahiere Metadaten"
+    IDS_META_DATA_MEDIADET  "DirectShow (für alle anderen Audio/Video Dateien)"
+    IDS_META_DATA_ID3LIB    "ID3 Library (nur für MPEG Audiodateien)"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_RESET               "Reset"
     IDS_SPREADBAR           "Verteilungsbalken"
     IDS_SPREADBAR_DEFAULT_CHECKBOX 
@@ -2539,7 +2539,6 @@ BEGIN
     IDS_IPFILTER_SAVERR     "IP-Filter speichern fehlgeschlagen in Datei ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Nicht verfügbar"
     IDS_IPFILTER_DLVERSION  "Downloade IP-Filter Versionsdatei"
-    IDS_IPFILTER_DLFILE     "Downloade IP-Filter Datei"
     IDS_LOG_ERRDWN          "Downloadfehler %s"
 END
 
@@ -2567,9 +2566,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_IPFILTER_DLFAIL "IP-Filter Download fehlgeschlagen"
-    IDS_LOG_IPFILTER_ERR1   "Konnte IP-Filter Datei nicht aus ZIP-Datei lesen ""%s""."
-    IDS_LOG_IPFILTER_ERR2   "Geladene IP-Filter Datei ""%s"" ist eine ZIP-Datei mit unerwartetem Inhalt."
     IDS_DOWNFAKECHECKVER    "Downloade Fake Check Versionsdatei"
     IDS_DOWNFAKECHECKFILE   "Downloade Fake Check file"
     IDS_FC_LOADED           "%i Fake Check Referenz geladen"
@@ -2613,9 +2609,11 @@ BEGIN
     IDS_IP2COUNTRY_NALONG   "Nicht verfügbar"
     IDS_IP2COUNTRY_NASHORT  "N/V"
     IDS_SOURCE_LOADER_SAVER "SLS"
-    IDS_SHORTTAGS           "kurze Tags"
     IDS_NEWFRIEND           "Neuer Freund:"
     IDS_REMOVEDFRIEND       "gelöschter Freund:"
+    IDS_FRIENDNAME_CHANGED1 "Freund hat Namen geändert: '%s'->'%s', ip %i.%i.%i.%i:%i, Hash %s"
+    IDS_FRIENDNAME_CHANGED2 "Freund hat Namen geändert: '%s'->'%s', Hash %s"
+    IDS_FAILEDTOLOAD        "Laden fehlgeschlagen"
 END
 
 STRINGTABLE 
@@ -2646,6 +2644,55 @@ BEGIN
     IDS_SCHED_UPDATE_FAKES_LOG "Zeitgesteuertes FAKES.DAT-Update gestartet"
     IDS_SCHED_UPDATE_WARNING 
                             "Bitte die Zeitgesteuerten Updates nicht zu häufig festlegen, um Traffic zu sparen!\r\nEinmal pro Woche sollte reichen!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COMCTRL32_DLL_TOOOLD 
+                            "Windows Common Controls library (COMCTL32.DLL) ist zu alt!\r\n\r\neMule fand eine Version der (COMCTL32.DLL)"" vor die zu alt ist um mit eMule problemlos zu funktionieren. Um die volle Funktionalität zu gewährleisten, empfehlen wir die ""Windows Common Controls library (COMCTL32.DLL)"" mindestens auf Version 5.8 zu aktualisieren.\r\n\r\nDas Update der ""Windows Common Controls library (COMCTL32.DLL)"" steht zum Download bereit beim Microsoft (R) Download Center. Soll die entsprechende URL aufgerufen werden?"
+    IDS_ASREGEXPR           "Als Regulären Ausdruck"
+    IDS_STATIC_REGEXP       "Regulärer Ausdruck für Ansichtsfilter:"
+    IDS_CARE4ALL            "Evaluiere alle Dateien"
+    IDS_REGEXPRESSION       "Regulärer Ausdruck"
+    IDS_SEARCHKAD           "Kad-Suche"
+    IDS_DWL_IPFILTERFILE    "Downloade IP-Filter Datei"
+    IDS_DWLIPFILTERFAILED   "IP-Filter Download fehlgeschlagen"
+    IDS_FINDBUDDY           "Finde Buddy"
+    IDS_ERR_IPFILTERZIPEXTR "Konnte IP-Filter Datei nicht aus dem ZIP file ""%s"" extrahieren."
+    IDS_ERR_IPFILTERCONTENTERR 
+                            "Geladene IP-Filter Datei ""%s"" ist eine ZIP Datei mit unerwartetem Inhalt."
+    IDS_STORENOTES          "Speichere Notizen"
+    IDS_NOTES               "Notizen"
+    IDS_KADSEARCHALREADY    "Es ist gerade eine Suche in Arbeit. Bitte später nochmals versuchen."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
+                            "Import abgebrochen: Datei bereits vollständig."
+    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
+                            "Import abgebrochen: Hash nicht vollständig %s (%i Hashes für %i Teile)."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 
+                            "Import abgebrochen: konnte %s nicht öffnen."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART 
+                            "Importiere %i Teile (von 0 bis %i) nach %s."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
+                            "Teil %i: übersprungen, bereits vollständig."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Teil %i: importiert."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD 
+                            "Teil %i: importiert für ICH handling."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
+                            "Teil %i: übersprungen, stimmt nicht überein mit teilweise vollständigem Block"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
+                            "%i fehlerhafte Teile  importiert üor A/ICH. Neuer Hash wird erstellt."
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
+                            "Es ist bereits ein anderer Import in Arbeit. Bitte warten bis dieser beendet ist."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH 
+                            "Import beendet. %i Teile wurden nach %s importiert."
 END
 
 #endif    // Deutsch (Deutschland) resources
