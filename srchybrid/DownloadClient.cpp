@@ -533,29 +533,15 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	// NOTE: This function is invoked from TCP and UDP socket!
 	if (!bUdpPacket)
 	{
-		if (!bPartsNeeded)
-			SetDownloadState(DS_NONEEDEDPARTS);
-		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
-		else if (reqfile->hashsetneeded)
+		// SLUGFILLER: SafeHash - request hashset first, check needed parts later
+		if (reqfile->hashsetneeded)
 		{
 			RequestHashset();	// SLUGFILLER: SafeHash
-			/*
-			if (socket)
-			{
-				if (thePrefs.GetDebugClientTCPLevel() > 0)
-					DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
-			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-			md4cpy(packet->pBuffer,reqfile->GetFileHash());
-			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-			socket->SendPacket(packet, true, true);
-			SetDownloadState(DS_REQHASHSET);
-			m_fHashsetRequesting = 1;
-			reqfile->hashsetneeded = false;
-			}
-			else
-				ASSERT(0);
-			*/
 		}
+		else if (!bPartsNeeded)
+			SetDownloadState(DS_NONEEDEDPARTS);
+		// SLUGFILLER: SafeHash
+		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
 		else
 		{
 			SendStartupLoadReq();
@@ -658,12 +644,12 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			m_nDownDatarate = 0;
 			if (nNewState == DS_NONE){
 				
-				//MORPH START - Added by SiRoB, See A4AF PartStatus
+				//MORPH START - Removed by SiRoB, See A4AF PartStatus
 				/*
 				if (m_abyPartStatus)
 					delete[] m_abyPartStatus;
 				*/
-				//MORPH   END - Added by SiRoB, See A4AF PartStatus
+				//MORPH   END - Removed by SiRoB, See A4AF PartStatus
 				m_abyPartStatus = NULL;
 				m_nPartCount = 0;
 			}
@@ -737,7 +723,7 @@ void CUpDownClient::SendBlockRequests(){
 			socket->SendPacket(packet,true,true);
 			SetSentCancelTransfer(1);
 		}
-		SetDownloadState(DS_NONEEDEDPARTS);
+		SetDownloadState(DS_ONQUEUE);	// SLUGFILLER: noNeededRequeue
 		return;
 	}
 	const int iPacketSize = 16+(3*4)+(3*4); // 40
@@ -928,8 +914,8 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 							}
 
 							// Log
-							theApp.emuledlg->AddLogLine(true,  _T("Received suspicious block: file '%s', part %i, block %i, blocksize %i, comp. blocksize %i, comp. factor %0.1f)"), reqfile->GetFileName(), cur_block->block->StartOffset/PARTSIZE, cur_block->block->StartOffset/EMBLOCKSIZE, lenUnzipped, nBlockSize, lenUnzipped/nBlockSize);
-							theApp.emuledlg->AddLogLine(false, _T("Username '%s' (IP %s:%i), hash %s"), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash);
+							AddLogLine(true,  _T("Received suspicious block: file '%s', part %i, block %i, blocksize %i, comp. blocksize %i, comp. factor %0.1f)"), reqfile->GetFileName(), cur_block->block->StartOffset/PARTSIZE, cur_block->block->StartOffset/EMBLOCKSIZE, lenUnzipped, nBlockSize, lenUnzipped/nBlockSize);
+							AddLogLine(false, _T("Username '%s' (IP %s:%i), hash %s"), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash);
 
 							// Ban => serious error (Attack?)
 							if(lenUnzipped > 4*nBlockSize && reqfile->IsArchive() == true){
@@ -941,7 +927,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 							lenWritten = 0;
 							lenUnzipped = 0; // skip writting
 							reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
-							theApp.emuledlg->AddLogLine(false, _T("Block dropped"));
+							AddLogLine(false, _T("Block dropped"));
 						}
 					}
 					//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
@@ -1007,7 +993,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 							userHash += buffer;
 						}
 						// Ban => serious error (Attack?)
-						theApp.emuledlg->AddLogLine(false, _T(GetResString(IDS_CORRUPTDATASENT)), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash, GetClientSoftVer()); //MORPH - Modified by IceCream
+						AddLogLine(false, _T(GetResString(IDS_CORRUPTDATASENT)), m_pszUsername, ipstr(GetConnectIP()), GetUserPort(), userHash, GetClientSoftVer()); //MORPH - Modified by IceCream
 						theApp.ipfilter->AddIPRange(GetIP(), GetIP(), 1, _T("Temporary"));
 						SetDownloadState(DS_ERROR);
 					}
@@ -1321,13 +1307,20 @@ void CUpDownClient::UDPReaskForDownload()
 
 // SLUGFILLER: SafeHash
 void CUpDownClient::RequestHashset(){
-	Packet* packet = new Packet(OP_HASHSETREQUEST,16);
-	md4cpy(packet->pBuffer,reqfile->GetFileHash());
-	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-	socket->SendPacket(packet, true, true);
-	SetDownloadState(DS_REQHASHSET);
-	m_fHashsetRequesting = 1;
-	reqfile->hashsetneeded = false;
+	if (socket)
+	{
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__HashSetRequest", this, (char*)reqfile->GetFileHash());
+			Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+			md4cpy(packet->pBuffer,reqfile->GetFileHash());
+			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+			socket->SendPacket(packet, true, true);
+			SetDownloadState(DS_REQHASHSET);
+			m_fHashsetRequesting = 1;
+			reqfile->hashsetneeded = false;
+	}
+	else
+		ASSERT(0);
 }
 // SLUGFILLER: SafeHash
 
