@@ -105,7 +105,7 @@ struct Category_Struct{
 	// khaos::kmod+ Category Advanced A4AF Mode
 	// 0 = Default, 1 = Balancing, 2 = Stacking
 	uint8	iAdvA4AFMode;
-	bool	bDontResumePausedFile; //MORPH - Added by SiRoB, Don't resume paused file
+	bool	bResumeFileOnlyInSameCat; //MORPH - Added by SiRoB, Resume file only in the same category
 	// View Filter Struct
 	CategoryViewFilter_Struct viewfilters;
 	CategorySelectionCriteria_Struct selectioncriteria;

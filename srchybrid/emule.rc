@@ -853,7 +853,7 @@ BEGIN
     CONTROL         "Advanced Filter Mask (Separator: | )",IDC_CHECK_MASK,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,255,256,8
     CONTROL         "Don't resume paused file",
-                    IDC_CHECK_DONTRESUMEPAUSEDFILE,"Button",BS_AUTOCHECKBOX | 
+                    IDC_CHECK_RESUMEFILEONLYINSAMECAT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,22,107,256,8
 END
 
@@ -4255,8 +4255,8 @@ BEGIN
     IDS_SLS_USESLS          "Enable saving and loading of sources"
     IDS_CAT_MERGE           "Merge category"
     IDS_CAT_GROUP           "Group"
-    IDS_CAT_DONTRESUMEPAUSEDFILE
-                            "Don't resume paused file"
+    IDS_CAT_RESUMEFILEONLYINSAMECAT 
+                            "Resume paused file only in the same category"
     IDS_A4AF_FORCEALL       "Get all A4AF"
     IDS_A4AF_FLAGS          "Advanced A4AF flags"
     IDS_A4AF_ONFLAG         "Force A4AF On"

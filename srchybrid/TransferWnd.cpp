@@ -1119,7 +1119,7 @@ int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newc
 	newcat->viewfilters.sAdvancedFilterMask = "";
 	newcat->selectioncriteria.bAdvancedFilterMask = true;
 	newcat->selectioncriteria.bFileSize = true;
-	newcat->bDontResumePausedFile = false;	//MORPH - Added by SiRoB, Don't resume paused file
+	newcat->bResumeFileOnlyInSameCat = false;	//MORPH - Added by SiRoB, Resume file only in the same category
 	// khaos::categorymod-
 	int index=thePrefs.AddCat(newcat);
 	

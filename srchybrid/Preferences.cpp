@@ -2516,7 +2516,7 @@ void CPreferences::SaveCats(){
 		catini.WriteBool("scFileSize", catMap.GetAt(ix)->selectioncriteria.bFileSize, ixStr);
 		catini.WriteBool("scAdvancedFilterMask", catMap.GetAt(ix)->selectioncriteria.bAdvancedFilterMask, ixStr);
 		// khaos::categorymod-
-		catini.WriteBool("DontResumePausedFile", catMap.GetAt(ix)->bDontResumePausedFile, ixStr); //MORPH - Added by SiRoB, Don't resume paused file
+		catini.WriteBool("ResumeFileOnlyInSameCat", catMap.GetAt(ix)->bResumeFileOnlyInSameCat, ixStr); //MORPH - Added by SiRoB, Resume file only in the same category
 	}
 }
 
@@ -3269,7 +3269,7 @@ void CPreferences::LoadCats() {
 		defcat->viewfilters.sAdvancedFilterMask = "";
 		defcat->selectioncriteria.bAdvancedFilterMask = true;
 		defcat->selectioncriteria.bFileSize = true;
-		defcat->bDontResumePausedFile = false; //MORPH - Added by SiRoB, Don't resume paused file
+		defcat->bResumeFileOnlyInSameCat = false; //MORPH - Added by SiRoB, Resume file only in the same category
 		AddCat(defcat);
 		if (bSkipLoad)
 		{
@@ -3328,7 +3328,7 @@ void CPreferences::LoadCats() {
 		// Load Selection Criteria
 		newcat->selectioncriteria.bFileSize = catini.GetBool("scFileSize", true);
 		newcat->selectioncriteria.bAdvancedFilterMask = catini.GetBool("scAdvancedFilterMask", true);
-		newcat->bDontResumePausedFile = catini.GetBool("DontResumePausedFile", false); //MORPH - Added by SiRoB, Don't resume paused file
+		newcat->bResumeFileOnlyInSameCat = catini.GetBool("ResumeFileOnlyInSameCat", false); //MORPH - Added by SiRoB, Resume file only in the same category
 		AddCat(newcat);
 		if (!PathFileExists(newcat->incomingpath)) ::CreateDirectory(newcat->incomingpath, 0);
 	}
