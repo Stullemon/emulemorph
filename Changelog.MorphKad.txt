@@ -1,7 +1,6 @@
 ----------------------------------------
 Changelog for eMule 0.40f26 MorphKad 0.7
 ----------------------------------------
-ADDED: Only download complete files v2.1 (shadow)[AndCycle]
 ADDED: PreferShareAll option (SlugFiller) [AndCycle]
 ADDED: options to set expired time of  known files [TAHO]
 ADDED: Option to use max-ping-value instead of tolerance in USS [TAHO]

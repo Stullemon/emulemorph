@@ -372,10 +372,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_ACCEPTUPLOADREQ:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-				//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-					//if (client->reqfile && !client->reqfile->IsStopped() && 
-					if (client->reqfile && !client->reqfile->IsStopped() && client->reqfile->lastseencomplete!=NULL /*shadow#(onlydownloadcompletefiles)*/ &&
-				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+					if (client->reqfile && !client->reqfile->IsStopped() && 
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						if (client->GetDownloadState() == DS_ONQUEUE){
 							client->SetDownloadState(DS_DOWNLOADING);
@@ -544,16 +541,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_SENDINGPART:{
 //					theApp.downloadqueue->AddDownDataOverheadOther(0, 24);
-					//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-					//if (client->reqfile && !client->reqfile->IsStopped() && 
-					if (client->reqfile && !client->reqfile->IsStopped() && client->reqfile->lastseencomplete!=NULL /*shadow#(onlydownloadcompletefiles)*/ &&
-					//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+					if (client->reqfile && !client->reqfile->IsStopped() && 
 					(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						client->ProcessBlockPacket(packet,size);
-						//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || client->reqfile->lastseencomplete==NULL){
-						//if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
-						//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)		
+						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
 							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
 							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 							client->socket->SendPacket(packet,true,true);
