@@ -387,6 +387,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					dc->SetTextColor((COLORREF)RGB(0,175,0));
 				else if (Perm == PERM_FRIENDS)
 					dc->SetTextColor((COLORREF)RGB(208,128,0));
+				// Mighty Knife: Community visible filelist
+				else if (Perm == PERM_COMMUNITY)
+					dc->SetTextColor((COLORREF)RGB(240,0,128));
+				// [end] Mighty Knife
 				else if (Perm == PERM_ALL)
 					dc->SetTextColor((COLORREF)RGB(240,0,0));
 				// xMule_MOD: showSharePermissions
@@ -535,6 +539,11 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							case PERM_FRIENDS: 
 								buffer = GetResString(IDS_FSTATUS_FRIENDSONLY); 
 								break;
+							// Mighty Knife: Community visible filelist
+							case PERM_COMMUNITY: 
+								buffer = "Community"; 
+								break;
+							// [end] Mighty Knife
 							default: 
 								buffer = "?";
 								break;
@@ -739,6 +748,10 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			uCurPermMenuItem = MP_PERMALL;
 		else if (pFile->GetPermissions() == PERM_FRIENDS)
 			uCurPermMenuItem = MP_PERMFRIENDS;
+		// Mighty Knife: Community visible filelist
+		else if (pFile->GetPermissions() == PERM_COMMUNITY)
+			uCurPermMenuItem = MP_PERMCOMMUNITY;
+		// [end] Mighty Knife
 		else if (pFile->GetPermissions() == PERM_NOONE)
 			uCurPermMenuItem = MP_PERMNONE;
 		else
@@ -851,12 +864,19 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		case PERM_NOONE:
 			buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
 			break;
+		// Mighty Knife: Community visible filelist
+		case PERM_COMMUNITY:
+			buffer.Format(" (%s)","Community");
+			break;
+		// [end] Mighty Knife
 		default:
 			buffer = " (?)";
 			break;
 	}
 	m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
-	m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMNONE, uPermMenuItem, 0);
+	// Mighty Knife: Community visible filelist
+	m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMCOMMUNITY, uPermMenuItem, 0);
+	// [end] Mighty Knife
 	//MORPH END   - Added by SiRoB, Show Share Permissions
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
@@ -1165,6 +1185,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_PERMDEFAULT:
 			case MP_PERMNONE:
 			case MP_PERMFRIENDS:
+			// Mighty Knife: Community visible filelist
+			case MP_PERMCOMMUNITY:
+			// [end] Mighty Knife
 			case MP_PERMALL: {
 				POSITION pos = selectedList.GetHeadPosition();
 				while (pos != NULL)
@@ -1184,6 +1207,12 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							file->SetPermissions(PERM_FRIENDS);
 							UpdateFile(file);
 							break;
+						// Mighty Knife: Community visible filelist
+						case MP_PERMCOMMUNITY:
+							file->SetPermissions(PERM_COMMUNITY);
+							UpdateFile(file);
+							break;
+						// [end] Mighty Knife
 						default : // case MP_PERMALL:
 							file->SetPermissions(PERM_ALL);
 							UpdateFile(file);
@@ -1570,6 +1599,9 @@ void CSharedFilesCtrl::CreateMenues()
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
+	// Mighty Knife: Community visible filelist
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,"Community");
+	// [end] Mighty Knife
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
 	//MORPH END   - Added by SiRoB, Show Permissions
 

@@ -28,6 +28,9 @@
 #define MP_PERMALL				10166
 #define MP_PERMFRIENDS			10167
 #define MP_PERMNONE				10168
+// Mighty Knife: Community visible filelist
+#define MP_PERMCOMMUNITY		10169
+// [end] Mighty Knife
 //MORPH END   - Added by SiRoB, Keep Permission flag
 //MORPH START - Added by SiRoB, HIDEOS
 #define MP_HIDEOS               10170

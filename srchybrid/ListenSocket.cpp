@@ -719,9 +719,12 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// only show the files that you agree to show (because sometimes people would like to show
 							// most of their files but hesitate to show a few ones (for some reasons :))
 							uint8 Perm = cur_file->GetPermissions()>=0?cur_file->GetPermissions():theApp.glob_prefs->GetPermissions();
+							// Mighty Knife: Community visible filelist
 							if ( (Perm == PERM_ALL)
-								|| ((Perm == PERM_FRIENDS) && client->IsFriend()) )
+								|| ((Perm == PERM_FRIENDS) && client->IsFriend())
+								|| ((Perm == PERM_COMMUNITY) && (client->IsCommunity()) || client->IsFriend()) )
 								list.AddTail((void*&)cur_file);
+							// [end] Mighty Knife
 							// xMule_MOD: showSharePermissions
 						}
 						AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_ACCEPTED) );
@@ -831,9 +834,12 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// xMule_MOD: showSharePermissions - don't send dir names that are empty
 							// due to file browse permissions
 							uint8 Perm = cur_file->GetPermissions()>=0?cur_file->GetPermissions():theApp.glob_prefs->GetPermissions();
+							// Mighty Knife: Community visible filelist
 							if ( Perm == PERM_NOONE 
+								|| (Perm == PERM_COMMUNITY && !(client->IsCommunity() || client->IsFriend()) ) 
 								|| (Perm == PERM_FRIENDS && !client->IsFriend()) )
 								continue;
+							// [end] Mighty Knife
 							// xMule_MOD: showSharePermissions
 							CString path = cur_file->GetPath();
 							path.MakeLower();
@@ -900,10 +906,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// only show the files that you agree to show (because sometimes people would like to show
 							// most of their files but hesitate to show a few ones (for some reasons :))
 							uint8 Perm = cur_file->GetPermissions()>=0?cur_file->GetPermissions():theApp.glob_prefs->GetPermissions();
+							// Migty Knife: Community visible filelist
 							if ( strReqDir.CompareNoCase(strSharedFileDir) == 0 &&
 								( (Perm==PERM_ALL)
+								|| ((Perm==PERM_COMMUNITY) && (client->IsCommunity() || client->IsFriend()) )
 								|| ((Perm==PERM_FRIENDS) && client->IsFriend()) ) )
                                 list.AddTail(cur_file);
+							// [end] Mighty Knife
 							// xMule_MOD: showSharePermissions
                         }
  
