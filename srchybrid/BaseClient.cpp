@@ -1564,7 +1564,7 @@ void CUpDownClient::ReGetClientSoft()
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 			//MORPH START - Added by SiRoB, MODSTRING
-			if(m_strModVersion.IsEmpty())
+			if(!m_strModVersion.IsEmpty())
 				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
 			//MORPH END   - Added by SiRoB, MODSTRING
 		}
@@ -1623,7 +1623,7 @@ void CUpDownClient::ReGetClientSoft()
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 			//MORPH START - Added by SiRoB, MODSTRING
-			if(m_strModVersion.IsEmpty())
+			if(!m_strModVersion.IsEmpty())
 				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
 			//MORPH END   - Added by SiRoB, MODSTRING
 		}
@@ -1640,7 +1640,7 @@ void CUpDownClient::ReGetClientSoft()
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 			//MORPH START - Added by SiRoB, MODSTRING
-			if(m_strModVersion.IsEmpty())
+			if(!m_strModVersion.IsEmpty())
 				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
 			//MORPH END   - Added by SiRoB, MODSTRING
 		}
@@ -1657,7 +1657,7 @@ void CUpDownClient::ReGetClientSoft()
 			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 			m_strClientSoftware.ReleaseBuffer(iLen);
 			//MORPH START - Added by SiRoB, MODSTRING
-			if(m_strModVersion.IsEmpty())
+			if(!m_strModVersion.IsEmpty())
 				m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
 			//MORPH END   - Added by SiRoB, MODSTRING
 		}
@@ -1673,7 +1673,7 @@ void CUpDownClient::ReGetClientSoft()
 		memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
 		m_strClientSoftware.ReleaseBuffer(iLen);
 		//MORPH START - Added by SiRoB, MODSTRING
-		if(m_strModVersion.IsEmpty())
+		if(!m_strModVersion.IsEmpty())
 			m_strClientSoftware.Append(_T(" [") + m_strModVersion + _T("]"));
 		//MORPH END   - Added by SiRoB, MODSTRING
 	}
