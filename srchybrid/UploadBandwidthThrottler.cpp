@@ -404,11 +404,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	memzero(rememberedSlotCounterClass,sizeof(rememberedSlotCounterClass));
 	uint32 ClientDataRate[NB_SPLITTING_CLASS];
 	memzero(ClientDataRate,sizeof(ClientDataRate));
-	DWORD lastTickNotReachedBandwidth[NB_SPLITTING_CLASS];
-	memset(lastTickNotReachedBandwidth,::GetTickCount(),sizeof(lastTickNotReachedBandwidth));
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
-    DWORD lastTickReachedBandwidth[NB_SPLITTING_CLASS];
-	memset(lastTickReachedBandwidth,::GetTickCount(),sizeof(lastTickReachedBandwidth));
 
     while(doRun) {
 /*Moved to Downloadqueue::Process() to avoid locking main thread
@@ -675,7 +671,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{
 				sumofclientinclass += slotCounterClass[classID];
-				if (allowedDataRateClass[classID]==0 && sumofclientinclass==m_StandardOrder_list.GetSize())
+				if ((allowedDataRateClass[classID] == 0 || allowedDataRateClass[classID] > allowedDataRateClass[LAST_CLASS]) && realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
 					realBytesToSpend = realBytesToSpendClass[LAST_CLASS];
 				else
 					realBytesToSpend = realBytesToSpendClass[classID];
@@ -688,6 +684,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
            		}
        			realBytesToSpendClass[classID] = realBytesToSpend;
 			}
+			for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
+			{
+				if (m_highestNumberOfFullyActivatedSlots[classID] > 0 && m_highestNumberOfFullyActivatedSlots[classID] > m_highestNumberOfFullyActivatedSlots[LAST_CLASS])
+					m_highestNumberOfFullyActivatedSlots[classID] = m_highestNumberOfFullyActivatedSlots[LAST_CLASS];
+			}	
 			//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
        		m_SentBytesSinceLastCall += spentBytesClass[LAST_CLASS];
