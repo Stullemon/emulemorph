@@ -309,7 +309,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
-	bool	rightGetQueueFile;
+	bool	rightGetQueueFile = false;
 	CKnownFile* rightReqFile;
 	CKnownFile* leftReqFile;
 
