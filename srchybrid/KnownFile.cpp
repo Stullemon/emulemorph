@@ -1995,9 +1995,11 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	CArray<bool, bool> partsavail;
 	bool usepartsavail = false;
 
+	partspread.SetSize(parts);
+	partsavail.SetSize(parts);
 	for (i = 0; i < parts; i++) {
-		partspread.Add(0);
-		partsavail.Add(true);
+		partspread[i] = 0;
+		partsavail[i] = true;
 	}
 
 	if(statistic.spreadlist.IsEmpty())
@@ -2024,9 +2026,10 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	min = count;
 	statistic.spreadlist.GetNext(pos);
 	while (pos && last < parts){
-		uint32 next = statistic.spreadlist.GetKeyAt(pos)/PARTSIZE;
-		if (next > parts)
-			next = parts;
+		uint32 next = statistic.spreadlist.GetKeyAt(pos);
+		if (next >= GetFileSize())
+			break;
+		next /= PARTSIZE;
 		while (last < next) {
 			partspread[last] = count;
 			last++;
@@ -2048,7 +2051,10 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 			statistic.spreadlist.GetNext(pos);
 			if (!pos)
 				break;
-			next = statistic.spreadlist.GetKeyAt(pos)/PARTSIZE;
+			next = statistic.spreadlist.GetKeyAt(pos);
+			if (next >= GetFileSize())
+				break;
+			next /= PARTSIZE;
 		}
 		last++;
 	}
@@ -2104,17 +2110,16 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	}
 
 	if (resetSentCount) {
-		m_PartSentCount.RemoveAll();
 		min = 0;
 		mincount = 0;
+		m_PartSentCount.SetSize(parts);
 		for (i = 0; i < parts; i++){
-			m_PartSentCount.Add(partspread[i]);
+			m_PartSentCount[i] = partspread[i];
 			if (partsavail[i] && !partspread[i])
 				mincount++;
 		}
 		if (!mincount)
 		  return parts; // We're a no-needed source already
-
 	}
 
 	mincount = (rand() % mincount) + 1;

@@ -253,12 +253,10 @@ protected:
 	void	CreateHashFromFile(CFile* file, int Length, uchar* Output)	{CreateHashFromInput(0,file,Length,Output,0);}
 	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output)	{CreateHashFromInput(0,0,Length,Output,in_string);}
 	void	LoadComment();//comment
+	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;
 	CString	m_strDirectory;
 	CString m_strFilePath;
-	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
-	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 
 private:
 	void	CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar* Output, uchar* = 0);

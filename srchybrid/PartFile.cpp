@@ -1400,7 +1400,7 @@ void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat){
 	//MORPH END   - Added by IceCream--- :xrmb ---
 }
 
-void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client){
+void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client){	// SLUGFILLER: hideOS
 	// SLUGFILLER: hideOS
 	CArray<uint32, uint32> partspread;
 	uint16 parts;
@@ -1409,8 +1409,9 @@ void CPartFile::WritePartStatus(CFile* file, CUpDownClient* client){
 		parts = CalcPartSpread(partspread, client);
 	} else {	// simpler to set as 0 than to create another loop...
 		parts = GetED2KPartCount();
+		partspread.SetSize(parts);
 		for (uint16 i = 0; i < parts; i++)
-			partspread.Add(0);
+			partspread[i] = 0;
 		hideOS = 1;
 	}
 	file->Write(&parts,2);
