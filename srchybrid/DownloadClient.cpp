@@ -370,7 +370,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 	uint8* thisStatus;
 	m_PartStatus_list.Lookup(reqfile, thisStatus);
 	if (thisStatus){
-		delete[] m_abyPartStatus;
+		delete[] thisStatus;
 		if (thisStatus==m_abyPartStatus)
 			m_abyPartStatus = NULL;
 	}
