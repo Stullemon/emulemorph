@@ -501,12 +501,11 @@
 #define	MP_FORCEA4AFONFLAG		10351
 #define MP_FORCEA4AFOFFFLAG		10352
 
+// 10353 to 10355 reserved for A4AF menu items.
+#define MP_CAT_A4AF			10353
+// khaos::categorymod-
 
 #define MP_GETHOSTNAMESOURCEED2KLINK	10361	// itsonlyme: hostnameSource
-
-// 10362 to 10364 reserved for A4AF menu items.
-#define MP_CAT_A4AF				10362
-// khaos::categorymod-
 
 // quick-speed changer
 #define MP_QS_U10				10501
