@@ -171,8 +171,10 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 	// Not interested in responses for FIND_NODE, will be added to contacts by udp listener
 	if (m_type == NODE)
 	{
+		m_count++;
 		m_possible.clear();
 		delete results;
+		CKademlia::reportSearchRef(this);
 		return;
 	}
 
@@ -259,8 +261,14 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 				CString dist;
 				fromDistance.toBinaryString(&dist);
 
+				// We don't want anything from these people, so just increment the counter.
+				if( m_type == NODECOMPLETE )
+				{
+					m_count++;
+					CKademlia::reportSearchRef(this);
+				}
 				// Ask 'from' for the file if closest
-				if (!returnedCloser && dist.Left(5) == "00000" && m_type != NODECOMPLETE){
+				else if (!returnedCloser && dist.Left(5) == "00000"){
 					switch(m_type){
 						case FILE:
 						case KEYWORD:
@@ -281,7 +289,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 							CKnownFile* file = sharedFileList->GetFileByID(fileid);
 							if( file ){
 								m_fileName = file->GetFileName();
-								file->SetPublishedKad();
+								file->SetPublishedKadSrc();
 //								m_count++;
 								CUInt128 id;
 								CPrefs *prefs = CKademlia::getPrefs();
@@ -309,7 +317,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 						case STOREKEYWORD:
 						{
 							CString fileID;
-							this->m_keywordPublish.toHexString(&fileID);
+							m_keywordPublish.toHexString(&fileID);
 							uchar fileid[16];
 							DecodeBase16(fileID.GetBuffer(),fileID.GetLength(),fileid);
 							::CSharedFileList *sharedFileList = CKademlia::getSharedFileList();
@@ -317,7 +325,7 @@ void CSearch::processResponse(const CUInt128 &target, uint32 fromIP, uint16 from
 							CKnownFile* file = sharedFileList->GetFileByID(fileid);
 							if( file ){
 								m_fileName = file->GetFileName();
-								file->SetPublishedKad();
+								file->SetPublishedKadKey();
 //								m_count++;
 
 								TagList taglist;

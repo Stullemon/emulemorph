@@ -41,7 +41,8 @@ struct Status{
 	bool	m_connected;
 	bool	m_firewalled;
 	uint8	m_totalFile;
-	uint8	m_totalStore;
+	uint8	m_totalStoreSrc;
+	uint8	m_totalStoreKey;
 	uint32	m_kademliaUsers;
 };
 
@@ -102,8 +103,11 @@ public:
 	uint8	getTotalFile(void)				{return m_totalFile;}
 	void	setTotalFile(const uint8 val)	{m_totalFile = val;}
 
-	uint8	getTotalStore(void)				{return m_totalStore;}
-	void	setTotalStore(const uint8 val)	{m_totalStore = val;}
+	uint8	getTotalStoreSrc(void)				{return m_totalStoreSrc;}
+	void	setTotalStoreSrc(const uint8 val)	{m_totalStoreSrc = val;}
+
+	uint8	getTotalStoreKey(void)				{return m_totalStoreKey;}
+	void	setTotalStoreKey(const uint8 val)	{m_totalStoreKey = val;}
 
 	uint32	getKademliaUsers(void)			{return m_kademliaUsers;}
 	void	setKademliaUsers(const uint32 val){m_kademliaUsers = val;}
@@ -141,7 +145,8 @@ private:
 	time_t		m_lastContact;
 	uint32		m_firewalled;
 	uint8		m_totalFile;
-	uint8		m_totalStore;
+	uint8		m_totalStoreSrc;
+	uint8		m_totalStoreKey;
 	uint32		m_kademliaUsers;
 
 	void init(LPCSTR filename);

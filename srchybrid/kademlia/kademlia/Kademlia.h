@@ -81,7 +81,7 @@ public:
 	static void start(void);
 	static void start(CPrefs *prefs);
 	static void start(byte *clientID, uint16 tcpPort, uint16 udpPort);
-	static void stop(void);
+	static void stop(bool bAppShutdown);
  
 	static void setLogCallback			(KADEMLIA_LOG_CALLBACK   callback)			{m_logCallback = callback;}
 	static void setDebugCallback		(KADEMLIA_DEBUG_CALLBACK callback)			{m_debugCallback = callback;}

@@ -418,6 +418,32 @@ void CSearchManager::getWords(LPCSTR str, WordList *words)
 	}
 }
 
+// This may not be used and needs removed.
+void CSearchManager::getWordsValid(LPCSTR str, WordList *words)
+{
+	LPSTR s = (LPSTR)str;
+	int len;
+	CString word;
+	while (strlen(s) > 0)
+	{
+		len = (int)strcspn(s, " ()[]{}<>,._-!?");
+		if (len > 2)
+		{
+			word = s;
+			word.Truncate(len);
+			word.MakeLower();
+			words->push_back(word);
+		}
+		if (len < (int)strlen(s))
+			len++;
+		s += len;
+	}
+	if(words->size() > 1 && len == 3)
+	{
+		words->pop_back();
+	}
+}
+
 void CSearchManager::jumpStart(void)
 {
 	time_t now = time(NULL);
@@ -444,7 +470,7 @@ void CSearchManager::jumpStart(void)
 				}
 				case CSearch::KEYWORD:
 				{
-					if ((it->second->m_created + SEARCHKEYWORD_LIFETIME < now)||(it->second->getCount() > SEARCHKEYWORD_TOTAL))
+					if ((it->second->m_created + SEARCHKEYWORD_LIFETIME < now) ||(it->second->getCount() > SEARCHKEYWORD_TOTAL))
 					{
 						delete it->second;
 						it = m_searches.erase(it);
@@ -457,9 +483,27 @@ void CSearchManager::jumpStart(void)
 					break;
 				}
 				case CSearch::NODE:
+				{
+					if (it->second->m_created + SEARCHNODE_LIFETIME < now)
+					{
+						delete it->second;
+						it = m_searches.erase(it);
+					}
+					else
+					{
+						it->second->jumpStart();
+						it++;
+					}
+					break;
+				}
 				case CSearch::NODECOMPLETE:
 				{
 					if (it->second->m_created + SEARCHNODE_LIFETIME < now)
+					{
+						delete it->second;
+						it = m_searches.erase(it);
+					}
+					else if ((it->second->m_created + SEARCHNODECOMP_LIFETIME < now) && (it->second->getCount() > SEARCHNODECOMP_TOTAL))
 					{
 						delete it->second;
 						it = m_searches.erase(it);
@@ -522,7 +566,8 @@ void CSearchManager::jumpStart(void)
 void CSearchManager::updateStats(void)
 {
 	uint8 m_totalFile = 0;
-	uint8 m_totalStore = 0;
+	uint8 m_totalStoreSrc = 0;
+	uint8 m_totalStoreKey = 0;
 	m_critical.Lock();
 	try
 	{
@@ -537,9 +582,14 @@ void CSearchManager::updateStats(void)
 					break;
 				}
 				case CSearch::STOREFILE:
+				{
+					m_totalStoreSrc++;
+					it++;
+					break;
+				}
 				case CSearch::STOREKEYWORD:
 				{
-					m_totalStore++;
+					m_totalStoreKey++;
 					it++;
 					break;
 				}
@@ -554,7 +604,8 @@ void CSearchManager::updateStats(void)
 	if(prefs != NULL)
 	{
 		prefs->setTotalFile(m_totalFile);
-		prefs->setTotalStore(m_totalStore);
+		prefs->setTotalStoreSrc(m_totalStoreSrc);
+		prefs->setTotalStoreKey(m_totalStoreKey);
 	}
 }
 

@@ -118,7 +118,8 @@ void CPrefs::setDefaults(void)
 	m_recheckip = 0;
 	m_firewalled = 0;
 	m_totalFile = 0;
-	m_totalStore = 0;
+	m_totalStoreSrc = 0;
+	m_totalStoreKey = 0;
 }
 
 void CPrefs::reset(void)
@@ -286,7 +287,8 @@ Status* CPrefs::getStatus(bool closing){
 	status->m_udpport = getUDPPort();
 	status->m_tcpport = getTCPPort();
 	status->m_totalFile = getTotalFile();
-	status->m_totalStore = getTotalStore();
+	status->m_totalStoreSrc = getTotalStoreSrc();
+	status->m_totalStoreKey = getTotalStoreKey();
 	status->m_kademliaUsers = getKademliaUsers();
 	return status;
 }

@@ -119,14 +119,15 @@ void CKademlia::start(CPrefs *prefs)
 	}
 }
 
-void CKademlia::stop(void)
+void CKademlia::stop(bool bAppShutdown)
 {
 	debugMsg("Stopping Kademlia");
 
-	CTimer::stop();
+	CTimer::stop(bAppShutdown);
 	CSearchManager::stopAllSearches();
 	try
 	{
+		instance->m_udpListener->stop(bAppShutdown);
 		delete instance->m_udpListener;
 	}catch(...){ASSERT(0);}
 	try

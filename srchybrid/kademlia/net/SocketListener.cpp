@@ -61,11 +61,20 @@ CSocketListener::CSocketListener()
 		}
 		m_bSocketInit = true;
 	}
+
+	m_port = 0;
+	m_type = 0;
+	m_hSocket = NULL;
+	m_bRunning = false;
+	m_hThread = NULL;
+	m_hStopEvent = NULL;
 }
 
 CSocketListener::~CSocketListener()
 {
-	stop();
+	// do not call the 'stop' function in the dtor!
+	ASSERT( !m_bRunning );
+	stop(false);
 }
 
 int CSocketListener::start(uint16 nSocketPort, int nSocketType)
@@ -136,7 +145,7 @@ int CSocketListener::start(uint16 nSocketPort, int nSocketType)
 	return retVal;
 }
 
-void CSocketListener::stop(void)
+void CSocketListener::stop(bool bAppShutdown)
 {
 	if (!m_bRunning)
 		return;
@@ -147,7 +156,49 @@ void CSocketListener::stop(void)
 	// Wait for the thread to finish
 	if (m_hThread != NULL) 
 	{
-		WaitForSingleObject(m_hThread, INFINITE);
+		if (bAppShutdown)
+		{
+			// NOTE: This code is to be invoked from within the main thread *only*!
+			bool bQuit = false;
+			while (!bQuit)
+			{
+				const int iNumEvents = 1;
+				DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_hThread, FALSE, INFINITE, QS_ALLINPUT);
+				if (dwEvent == -1)
+				{
+					TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
+					ASSERT(0);
+				}
+				else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
+				{
+					CWinThread *pThread = AfxGetThread();
+					MSG* pMsg = AfxGetCurrentMessage();
+					while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
+					{
+						TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
+						// pump message, but quit on WM_QUIT
+						if (!pThread->PumpMessage()) {
+							AfxPostQuitMessage(0);
+							bQuit = true;
+							break;
+						}
+					}
+				}
+				else if (dwEvent == WAIT_OBJECT_0 + 0)
+				{
+					// thread has finished
+					break;
+				}
+				else
+				{
+					ASSERT(0);
+				}
+			}
+		}
+		else
+		{
+			WaitForSingleObject(m_hThread, INFINITE);
+		}
 		CloseHandle(m_hThread);
 	}
 	if (m_hStopEvent != NULL)

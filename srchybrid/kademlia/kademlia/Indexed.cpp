@@ -281,9 +281,9 @@ bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourc
 			Source* toaddS = new Source;
 			toaddS->sourceID.setValue(sourceID);
 			Kademlia::CEntry* toaddN = entry;
-			toaddS->entryList.AddTail(toaddN);
-			toaddH->sourceList.AddTail(toaddS);
-			keywordHashList.AddTail(toaddH);
+			toaddS->entryList.AddHead(toaddN);
+			toaddH->sourceList.AddHead(toaddS);
+			keywordHashList.AddHead(toaddH);
 			return true;
 		}
 		for(POSITION pos = keywordHashList.GetHeadPosition(); pos != NULL; )
@@ -304,7 +304,7 @@ bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourc
 								{
 									currSource->entryList.RemoveAt(pos6);
 									delete currName;
-									currSource->entryList.AddTail(entry);
+									currSource->entryList.AddHead(entry);
 									return false;
 								}
 							}
@@ -314,22 +314,31 @@ bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourc
 								{
 									currSource->entryList.RemoveAt(pos6);
 									delete currName;
-									currSource->entryList.AddTail(entry);
+									currSource->entryList.AddHead(entry);
 									return false;
 								}
 							}
 						}
-						//New fileName
-						Kademlia::CEntry* toadd = entry;
-						currSource->entryList.AddTail(toadd);
-						return true;
+						//New entry
+						if(entry->source)
+						{
+							if( currSource->entryList.GetCount() > 50 )
+							{
+								Kademlia::CEntry* toremove = currSource->entryList.GetTail();
+								currSource->entryList.RemoveTail();
+								delete toremove;
+							}
+							Kademlia::CEntry* toadd = entry;
+							currSource->entryList.AddHead(toadd);
+							return true;
+						}
 					}
 				}
 				Source* toaddS = new Source;
 				toaddS->sourceID.setValue(sourceID);
 				Kademlia::CEntry* toaddN = entry;
-				toaddS->entryList.AddTail(toaddN);
-				currKeywordHash->sourceList.AddTail(toaddS);
+				toaddS->entryList.AddHead(toaddN);
+				currKeywordHash->sourceList.AddHead(toaddS);
 				return true;
 				//New Source
 			}
@@ -339,9 +348,9 @@ bool CIndexed::IndexedAdd(Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourc
 		Source* toaddS = new Source;
 		toaddS->sourceID.setValue(sourceID);
 		Kademlia::CEntry* toaddN = entry;
-		toaddS->entryList.AddTail(toaddN);
-		toaddH->sourceList.AddTail(toaddS);
-		keywordHashList.AddTail(toaddH);
+		toaddS->entryList.AddHead(toaddN);
+		toaddH->sourceList.AddHead(toaddS);
+		keywordHashList.AddHead(toaddH);
 		return true;
 		//This is a new key!
 	} catch(...){ASSERT(0);}

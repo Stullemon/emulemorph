@@ -50,7 +50,7 @@ class CTimer
 public:
 	
 	static void start(void);
-	static void stop(void);
+	static void stop(bool bAppShutdown);
 
 	static void addEvent(CRoutingZone *zone);
 	static void removeEvent(CRoutingZone *zone);

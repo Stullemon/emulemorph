@@ -44,7 +44,7 @@ public:
 
 	virtual ~CSocketListener();
 
-	void stop(void);
+	void stop(bool bAppShutdown);
 	bool isRunning(void) {return m_bRunning;}
 
 	virtual int start(uint16 port) = 0;

@@ -89,6 +89,7 @@ public:
 	static void processPublishResult(const CUInt128 &target);
 
 	static void getWords(LPCSTR str, WordList *words);
+	static void getWordsValid(LPCSTR str, WordList *words);
 
 	static void updateStats(void);
 
