@@ -57,8 +57,8 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crBoth;
 	COLORREF crSending;
 	//MORPH START - Added by SiRoB, See chunk that we hide
-	COLORREF crHiddenPartBySOTN = RGB(192, 96, 255);
-	COLORREF crHiddenPartByHideOS = RGB(96, 192, 255);
+	COLORREF crHiddenPartBySOTN;
+	COLORREF crHiddenPartByHideOS;
 	//MORPH END   - Added by SiRoB, See chunk that we hide
 
     if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount() ||
@@ -79,8 +79,8 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	    crBoth = bFlat ? RGB(191, 191, 191) : RGB(191, 191, 191);
 	    crSending = RGB(191, 229, 191);
 		//MORPH START - Added by SiRoB, See chunk that we hide
-		crHiddenPartBySOTN = RGB(192, 96, 255);
-		crHiddenPartByHideOS = RGB(96, 192, 255);
+		crHiddenPartBySOTN = RGB(224, 128, 255);
+		crHiddenPartByHideOS = RGB(128, 224, 255);
 		//MORPH END   - Added by SiRoB, See chunk that we hide
     }
 
