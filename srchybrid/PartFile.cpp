@@ -2514,7 +2514,7 @@ void CPartFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200,  (m_nCompleteSourcesCountHi==1 || m_nVirtualCompleteSourcesCount==1) || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, (lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo(true);
@@ -4880,7 +4880,10 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 		return false;
 	if (!curCat->viewfilters.sAdvancedFilterMask.IsEmpty() && !theApp.downloadqueue->ApplyFilterMask(GetFileName(), inCategory))
 		return false;
-
+	//MORPH START - Added by SiRoB, Seen Complet filter
+	if (!curCat->viewfilters.bSeenComplet && lastseencomplete!=NULL)
+		return false;
+	//MORPH END   - Added by SiRoB, Seen Complet filter
 	return true;
 }
 // khaos::categorymod-
