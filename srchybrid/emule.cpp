@@ -1566,7 +1566,8 @@ void CemuleApp::OptimizerInfo(void)
 if (!emuledlg)
 	return;
 	AddLogLine(false,_T("********Optimizer********"));
-	AddLogLine(false,_T("%s"),cpu.GetExtendedProcessorName());
+	USES_CONVERSION;
+	AddLogLine(false,_T("%s"),A2CT(cpu.GetExtendedProcessorName()));
 	switch (get_cpu_type())
 	{
 		case 1:
