@@ -2037,7 +2037,7 @@ void CPartFile::NewSrcPartsInfo(){
 			m_nVirtualCompleteSourcesCountMin = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nVirtualCompleteSourcesCountMax<21)?true:(m_nVirtualCompleteSourcesCountMin==0), m_nVirtualCompleteSourcesCountMin==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCountMin>0)); //changed (temporaly perhaps) [Yun.SF3]
+	UpdatePowerShareLimit(m_nVirtualCompleteSourcesCountMin<10, m_nVirtualCompleteSourcesCountMin==1); //changed (temporaly perhaps) [Yun.SF3]
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo();
