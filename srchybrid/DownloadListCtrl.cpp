@@ -534,7 +534,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			int iImage = theApp.GetFileTypeSystemImageIdx(lpPartFile->GetFileName());
 			if (theApp.GetSystemImageList() != NULL)
 				::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), rcDraw.left, rcDraw.top, ILD_NORMAL|ILD_TRANSPARENT);
-			rcDraw.left += theApp.GetSmallSytemIconSize().cx+3;
+			rcDraw.left += theApp.GetSmallSytemIconSize().cx;
 			if ( thePrefs.ShowRatingIndicator() && (lpPartFile->HasComment() || lpPartFile->HasRating())){
  				//MORPH START - Modified by SiRoB, eMule plus rating icon
 				/*
@@ -544,7 +544,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 				m_ImageList.Draw(dc, lpPartFile->GetRating()+21, rcDraw.TopLeft(), ILD_NORMAL);
  				//MORPH END   - Modified by SiRoB, eMule plus rating icon
 			}
-			rcDraw.left += 3+8; //MORPH - Changed by SiRoB, to keep alignement (blank space when no comment or rating )
+			rcDraw.left += 14/*3+8+3*/; //MORPH - Changed by SiRoB, to keep alignement (blank space when no comment or rating )
 			dc->DrawText(lpPartFile->GetFileName(), lpPartFile->GetFileName().GetLength(),&rcDraw, DLC_DT_TEXT);
 			break;
 		}
