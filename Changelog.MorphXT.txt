@@ -22,12 +22,13 @@ CHANGED: Turning back HideOS available on partfile [SiRoB]
 ADDED  : Some missing icone in popup menu [SiRoB/Commander]
 ADDED  : a Flag on the clientdetail window [Commander/SiRoB]
 ADDED  : Draw date and time log in default color [SiRoB]
-ADDED  : Resend FilePartstatus when client added in uploadinglist from Pawcio [SiRoB]
+ADDED  : Resend FilePartstatus in some circonstance from Pawcio [SiRoB]
 
 TWEAKED: USC: Reviewed to open less slot [SiRoB]
 TWEAKED: SOTN: Revelate to a client only the rarest part with the equal min availability [SiRoB]
 TWEAKED: SOTN: Allready Requested part in uploadinglist are now taken into account [SiRoB]
 TWEAKED: Reviewed auto Powershare [SIRoB]
+TWEAKED: Changed the way to refresh UploadDatarate (call once in the process) [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.7
