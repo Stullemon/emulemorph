@@ -208,8 +208,10 @@ BOOL CPPgGeneral::OnApply()
 {
 	//Commander - Added: Invisible Mode [TPT] - Start
 	CString sKey;
-	((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetLBText(((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetCurSel(), sKey);
-	if (IsDlgButtonChecked(IDC_INVISIBLE_MODE))
+	int cur_sel = ((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetCurSel();
+	if (cur_sel>0)
+		((CComboBox*)GetDlgItem(IDC_INVISIBLE_MODE_SELECT_COMBO))->GetLBText(cur_sel, sKey);
+	if (IsDlgButtonChecked(IDC_INVISIBLE_MODE) && cur_sel>0)
 		thePrefs.SetInvisibleMode(true,m_iActualKeyModifier,sKey[0]);
 	else
 		thePrefs.SetInvisibleMode(false,m_iActualKeyModifier,sKey[0]);
