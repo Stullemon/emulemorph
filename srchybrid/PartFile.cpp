@@ -2711,6 +2711,9 @@ void CPartFile::UpdatePartsInfo()
 	CArray<uint16,uint16> count;
 	if (flag)
 		count.SetSize(0, srclist.GetSize());
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	bool bCompleteSourcesCountInfoReceived=false;
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	for (POSITION pos = srclist.GetHeadPosition(); pos != 0; )
 	{
 		CUpDownClient* cur_src = srclist.GetNext(pos);
@@ -2725,6 +2728,10 @@ void CPartFile::UpdatePartsInfo()
 			{
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			}
+			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+			if (cur_src->GetUpCompleteSourcesCount()>0)
+				bCompleteSourcesCountInfoReceived = true;
+			//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 		}
 	}
 
@@ -2814,7 +2821,7 @@ void CPartFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, (lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, bCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi==1) || m_nVirtualCompleteSourcesCount==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0)),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	UpdateDisplayedInfo();
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
@@ -2930,7 +2937,13 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Str
 				if (part_idx == 0 || part_idx == (GetPartCount() - 1))		first_last_mod = 2;
 				else if (part_idx == 1 || part_idx == (GetPartCount() - 2))	first_last_mod = 1;
 				else														first_last_mod = 0;
+				//MORPH START - Changed by SiRoB, Preview like in 0.44b
+                /*
 				if (!thePrefs.GetPreviewPrio())								first_last_mod = 0;
+				*/
+				const bool isPreviewEnable = (thePrefs.GetPreviewPrio() || thePrefs.IsExtControlsEnabled() && GetPreviewPrio()) && IsPreviewableFileType();
+				if (!isPreviewEnable)								first_last_mod = 0;
+				//MORPH END   - Changed by SiRoB, Preview like in 0.44b
 			}
 			size2transfer = GetPartSizeToDownload(part_idx);
 
