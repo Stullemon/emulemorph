@@ -2062,7 +2062,7 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	// SLUGFILLER: hideOS
 	CArray<uint32, uint32> partspread;
 	UINT parts;
-	uint8 hideOS = HideOSInWork();
+	uint8 hideOS = 0;//HideOSInWork();
 	if (hideOS && client) {
 		parts = CalcPartSpread(partspread, client);
 	} else {	// simpler to set as 0 than to create another loop...
