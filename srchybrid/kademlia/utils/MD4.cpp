@@ -30,7 +30,8 @@ there client on the eMule forum..
 
 #include "stdafx.h"
 #include "MD4.h"
-#include <memory.h>
+//MORPH - Removed by SiRoB, Optimizer
+//#include <memory.h>
 #include <stdio.h>
 #include "UInt128.h"
 
