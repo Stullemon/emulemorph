@@ -2500,7 +2500,12 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 						break;//shadow#(onlydownloadcompletefiles)
 					//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 					//Give up to 1 min for UDP to respond.. If we are within on min on TCP, do not try..
+					//MORPH - Changed by SiRoB, Reask -Patch-
+					/*
 					if (theApp.IsConnected() && cur_src->GetTimeUntilReask() < MIN2MS(2) && cur_src->GetTimeUntilReask() > SEC2MS(1) && ::GetTickCount()-cur_src->getLastTriedToConnectTime() > 20*60*1000) // ZZ:DownloadManager (one resk timestamp for each file)
+					*/
+					if (theApp.IsConnected() && cur_src->GetTimeUntilReask() < MIN2MS(2) && cur_src->GetTimeUntilReask() > SEC2MS(1) && (!cur_src->getLastTriedToConnectTime() || ::GetTickCount()-cur_src->getLastTriedToConnectTime() > 20*60*1000)) // ZZ:DownloadManager (one resk timestamp for each file)
+					//MORPH - Changed by SiRoB, Reask -Patch-
 						cur_src->UDPReaskForDownload();
 				}
 				case DS_CONNECTING:
@@ -2511,7 +2516,12 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				case DS_WAITCALLBACKKAD:
 				{
 					cur_src->dwStartDLTime = 0; //SLAHAM: ADDED Show Downloading Time
+					//MORPH - Changed by SiRoB, Reask -Patch-
+					/*
 					if (theApp.IsConnected() && cur_src->GetTimeUntilReask() == 0 && ::GetTickCount()-cur_src->getLastTriedToConnectTime() > 20*60*1000) // ZZ:DownloadManager (one resk timestamp for each file)
+					*/
+					if (theApp.IsConnected() && cur_src->GetTimeUntilReask() == 0 && (!cur_src->getLastTriedToConnectTime() || ::GetTickCount()-cur_src->getLastTriedToConnectTime() > 20*60*1000)) // ZZ:DownloadManager (one resk timestamp for each file)
+					//MORPH - Changed by SiRoB, Reask -Patch-
 					{
 						if(!cur_src->AskForDownload()) // NOTE: This may *delete* the client!!
 							break; //I left this break here just as a reminder just in case re rearange things..
