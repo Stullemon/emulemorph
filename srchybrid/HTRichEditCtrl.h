@@ -35,7 +35,7 @@ public:
 	CFont* GetFont() const;
 
 	//MORPH START - Added by SiRoB, XML News [O²]
-	void CHTRichEditCtrl::ScrollToFirstLine(); // Added by N_OxYdE
+	void ScrollToFirstLine(); // Added by N_OxYdE
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
 protected:

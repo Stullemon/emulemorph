@@ -20,7 +20,7 @@ enum EDebugLogPriority{
 #define	LOG_DEFAULT		0x00
 #define	LOG_DEBUG		0x10
 #define	LOG_STATUSBAR	0x20
-#define	LOG_MORPH		0x30
+#define	LOG_MORPH		0x40
 
 void Log(LPCTSTR pszLine, ...);
 void LogError(LPCTSTR pszLine, ...);

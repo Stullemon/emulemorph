@@ -2720,6 +2720,7 @@ void CemuleDlg::ApplyLogFont(LPLOGFONT plf)
 		thePrefs.SetLogFont(plf);
 		serverwnd->logbox->SetFont(&theApp.m_fontLog);
 		serverwnd->debuglog->SetFont(&theApp.m_fontLog);
+		serverwnd->morphlog->SetFont(&theApp.m_fontLog);
 	}
 }
 

@@ -220,7 +220,7 @@ BOOL CServerWnd::OnInitDialog()
 		morphlog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		morphlog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 		if (theApp.m_fontLog.m_hObject)
-			debuglog->SetFont(&theApp.m_fontLog);
+			morphlog->SetFont(&theApp.m_fontLog);
 		morphlog->ApplySkin();
 		morphlog->SetTitle(GetResString(IDS_MORPH_LOG));
 		morphlog->SetAutoURLDetect(FALSE);
