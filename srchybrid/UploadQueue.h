@@ -87,7 +87,6 @@ public:
 
 	//Morph - added by AndCycle, separate special prio compare
 	int	RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient, bool checkforaddinuploadinglist = false);  //MORPH - Changed by SiRoB, Upload Splitting Class
-	bool isUnlimitedClass(uint32 classID);  //MORPH - Added by SiRoB, Upload Splitting Class
 	
 protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);

@@ -606,6 +606,7 @@ public:
 
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() const { return m_slotNumber; }
+	uint32 GetClassID() const {return m_classID;} //MORPH - Added by SiRoB, UPload Splitting Class
 	//MORPH - Changed by SiRoB, WebCache Fix
 	/*
 	CEMSocket* GetFileUploadSocket(bool log = false);
@@ -903,6 +904,8 @@ protected:
 	uint16		m_nUpCompleteSourcesCount;
 	uchar		requpfileid[16];
     uint32      m_slotNumber;
+	uint32		m_classID; //MORPH - Added by SiRoB, UPload Splitting Class
+	
 	bool		m_bPendingUploadingConnection; //MORPH - Added by SiRoB,
     DWORD       m_dwLastCheckedForEvictTick;
 

@@ -497,39 +497,23 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		newclient->SetSlotNumber(posCounter+1);
 		uploadinglist.InsertBefore(insertPosition, newclient);
 		//MORPH START - Added by SiRoB, Upload Splitting Class
-		if (newclient->IsFriend() && newclient->GetFriendSlot()){
+		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),0);
-			if (posCounter+1>m_aiSlotCounter[0])
-				m_aiSlotCounter[0] = posCounter+1;
-		}else if (newclient->IsPBForPS()){
+		else if (newclient->IsPBForPS())
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket(),1);
-			if (posCounter+1>m_aiSlotCounter[1])
-				m_aiSlotCounter[1] = posCounter+1;
-		}else{
+		else
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 			theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
-			if (posCounter+1>m_aiSlotCounter[LAST_CLASS])
-				m_aiSlotCounter[LAST_CLASS] = posCounter+1;
-		}
-	}	else{
+	}else{
 		// Add it last
 		//MORPH START - Added by SiRoB, Upload Splitting Class
-		if (newclient->IsFriend() && newclient->GetFriendSlot()){
+		if (newclient->IsFriend() && newclient->GetFriendSlot())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),0);
-			if (uploadinglist.GetCount()+1>(INT_PTR)m_aiSlotCounter[0])
-				m_aiSlotCounter[0] = uploadinglist.GetCount()+1;
-		}else if (newclient->IsPBForPS()){
+		else if (newclient->IsPBForPS())
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),1);
-			if (uploadinglist.GetCount()+1>(INT_PTR)m_aiSlotCounter[1])
-				m_aiSlotCounter[1] = uploadinglist.GetCount()+1;
-		}else{
+		else
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 			theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
-		//MORPH START - Added by SiRoB, Upload Splitting Class
-			if (uploadinglist.GetCount()+1>(INT_PTR)m_aiSlotCounter[LAST_CLASS])
-				m_aiSlotCounter[LAST_CLASS] = uploadinglist.GetCount()+1;
-		}
-		//MORPH END   - Addded by SiRoB, Upload Splitting Class
 		uploadinglist.AddTail(newclient);
 		newclient->SetSlotNumber(uploadinglist.GetCount());
 	}
@@ -754,6 +738,32 @@ void CUploadQueue::Process() {
 
 	UpdateActiveClientsInfo(curTick);
 
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate));
+	memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
+	if (m_nLastStartUpload + 5000 < curTick){
+		POSITION pos2 = uploadinglist.GetHeadPosition();
+		while(pos2 != NULL){
+			// Get the client. Note! Also updates pos as a side effect.
+			CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
+			uint32 classID = cur_client->GetClassID();
+			uint32 maxdatarate = thePrefs.GetMaxClientDataRate();
+			switch (classID){
+				case 0: maxdatarate = thePrefs.GetMaxClientDataRateFriend();break;
+				case 1: maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();break;
+				default: maxdatarate = thePrefs.GetMaxClientDataRate();break;
+			}
+			if (maxdatarate > 0 && cur_client->GetDatarate()*10 >= 11*maxdatarate)
+				m_abOnClientOverHideClientDatarate[classID] = true;
+			for (uint32 i = 0; i <= classID; i++)
+				++m_aiSlotCounter[i];
+		}
+	}
+	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
+		m_abAddClientOfThisClass[classID] = m_abOnClientOverHideClientDatarate[classID] || //one client in class reached max upload limit
+											m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]; //Upload Throttler want new slot
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
+
     CheckForHighPrioClient();
 	
 	//MORPH START - Changed vy SiRoB, cache (uint32)uploadinglist.GetCount()
@@ -806,11 +816,6 @@ void CUploadQueue::Process() {
 		AddUpNextClient();
 	}
 
-	//MOPRH START - Added by SiRoB, Upload Splitting Class
-	memzero(m_abAddClientOfThisClass,sizeof(m_abAddClientOfThisClass)); 
-	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate)); 
-	//MOPRH END   - Added by SiRoB, Upload Splitting Class
-
 	// The loop that feeds the upload slots with data.
 	POSITION pos = uploadinglist.GetHeadPosition();
 	while(pos != NULL){
@@ -838,33 +843,13 @@ void CUploadQueue::Process() {
 			*/
 			wasRemoved = cur_client->SendBlockData();
 			//MORPH END   - Changed by SiRoB, Uploadinglist -Fix-
-			//MORPH START - Added by SiRoB, Upload Splitting Class
-			if (m_nLastStartUpload + 5000 < curTick){
-				 uint32 maxdatarate = thePrefs.GetMaxClientDataRate();
-				int classID = 2;
-				if (cur_client->IsFriend() && cur_client->GetFriendSlot()){
-					maxdatarate = thePrefs.GetMaxClientDataRateFriend();
-					classID = 0;
-				}else if (cur_client->IsPBForPS()){
-					maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();
-					classID = 1;
-				}
-				if (maxdatarate > 0 && cur_client->GetDatarate()*10 >= 11*maxdatarate)
-					m_abOnClientOverHideClientDatarate[classID] = true;
-			}
-			//MORPH END   - Added by SiRoB, Upload Splitting Class
 		}
 		//MORPH START - Added by SiRoB, Uploadinglist -Fix-
 		if (wasRemoved)
 			pos = uploadinglist.GetHeadPosition();
 		//MORPH END   - Added by SiRoB, Uploadinglist -Fix-
 	}
-	
-	//MORPH START - Added by SiRoB, Upload Splitting Class
-	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-		if (isUnlimitedClass(classID) || m_abOnClientOverHideClientDatarate[classID] || (uploadinglist.GetCount() == 0))
-			m_abAddClientOfThisClass[classID] = true;
-	//MORPH END   - Added by SiRoB, Upload Splitting Class
+		
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
 	if (sentBytes>0) {
@@ -949,16 +934,8 @@ bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
     }
 	*/
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
-	{
-		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]){
-			if(classID==LAST_CLASS && thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
-				DebugLog(LOG_USC, _T("USC: Added new slot since throttler needs it for class %i. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i m_aiSlotCounter[classID]: %i tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
-			return m_abAddClientOfThisClass[classID] = true;
-		}
-		else if (m_abOnClientOverHideClientDatarate[classID] == true){
+		if (m_abAddClientOfThisClass[classID])
 			return true;
-		}
-	}
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
     //nope
 	return false;
@@ -1778,14 +1755,3 @@ uint32	CUploadQueue::GetMaxVUR()
 	return min(max(MaxVUR,(uint32)1024*thePrefs.GetMinUpload()),(uint32)1024*thePrefs.GetMaxUpload());
 }
 //MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-
-bool CUploadQueue::isUnlimitedClass(uint32 classID){
-	bool bunlimited = false;
-	switch (classID){
-		case 0:	bunlimited = thePrefs.GetGlobalDataRateFriend() == 0;break;
-		case 1:	bunlimited = thePrefs.GetGlobalDataRatePowerShare() == 0;break;
-		default: bunlimited = thePrefs.GetMaxUpload() == UNLIMITED;break;
-	}
-	return bunlimited;
-}
-	
