@@ -350,6 +350,7 @@ public:
 	int		GetSelectiveChunk() const {return m_iSelectiveChunk;}
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, Avoid misusing of hideOS
+	void	SetHideOSAuthorized(bool newValue) {m_bHideOSAuthorized = newValue;}
 	uint8	HideOSInWork() const;
 	//MORPH END   - Added by SiRoB, Avoid misusing of hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea

@@ -2924,7 +2924,7 @@ void CPartFile::UpdatePartsInfo()
 	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, iCompleteSourcesCountInfoReceived && ((lastseencomplete!=NULL && m_nCompleteSourcesCountHi<=1) || m_nVirtualCompleteSourcesCount==1),m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Avoid misusing of HideOS
-	m_bHideOSAuthorized = m_nVirtualCompleteSourcesCount<=1;
+	SetHideOSAuthorized(m_nVirtualCompleteSourcesCount<=1);
 	//MORPH END   - Added by SiRoB, Avoid misusing of HideOS
 	UpdateDisplayedInfo();
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
