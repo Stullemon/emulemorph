@@ -47,7 +47,7 @@ END
 IDD_FILEDETAILS_NAME DIALOGEX 0, 0, 312, 214
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "File Name"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Sources Names",IDC_FD_SN,7,7,298,142,BS_FLAT
     CONTROL         "",IDC_LISTCTRLFILENAMES,"SysListView32",LVS_REPORT | 
@@ -251,7 +251,7 @@ IDD_PPG_STATS DIALOGEX 0, 0, 229, 222
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
     WS_VISIBLE | WS_CAPTION
 CAPTION "Statistics"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Graphs",IDC_GRAPHS,4,7,220,149
     LTEXT           "Update Interval",IDC_SLIDERINFO,13,17,187,10
@@ -289,7 +289,7 @@ IDD_PPG_PROXY DIALOGEX 0, 0, 228, 239
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Dialog"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Settings",IDC_AUTH_LBL2,11,6,202,89
     CONTROL         "Enable Proxy",IDC_ENABLEPROXY,"Button",BS_AUTOCHECKBOX | 
@@ -317,7 +317,7 @@ IDD_PPG_SERVER DIALOGEX 0, 0, 225, 225
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Server"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Remove dead server after",IDC_REMOVEDEAD,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,7,105,10
@@ -351,7 +351,7 @@ IDD_PPG_GENERAL DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "General"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_NICK,10,21,97,12,ES_AUTOHSCROLL
     COMBOBOX        IDC_LANGS,121,21,95,75,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -388,7 +388,7 @@ IDD_PPG_FILES DIALOGEX 0, 0, 229, 243
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Files"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "See my share:",IDC_SEEMYSHARE_FRM,7,7,215,26,BS_FLAT
     CONTROL         "Everybody",IDC_SEESHARE1,"Button",BS_AUTORADIOBUTTON | 
@@ -438,7 +438,7 @@ IDD_PPG_DIRECTORIES DIALOGEX 0, 0, 230, 246
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Directories"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_INCFILES,14,19,145,12,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse",IDC_SELINCDIR,166,18,50,14,BS_FLAT
@@ -462,7 +462,7 @@ IDD_PPG_CONNECTION DIALOGEX 0, 0, 230, 244
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Connection"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_DOWNLOAD_CAP,14,33,45,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
@@ -592,7 +592,7 @@ IDD_PPG_NOTIFY DIALOGEX 0, 0, 229, 218
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Notifications"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Pop up message",IDC_TASKBARNOTIFIER,7,7,215,165,BS_FLAT
     CONTROL         "Use sound",IDC_CB_TBN_USESOUND,"Button",BS_AUTOCHECKBOX | 
@@ -622,7 +622,7 @@ IDD_PPG_IRC DIALOGEX 0, 0, 229, 239
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "IRC"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_IRC_SERVER_BOX,25,16,191,12,ES_AUTOHSCROLL
     EDITTEXT        IDC_IRC_NICK_BOX,25,43,191,12,ES_AUTOHSCROLL
@@ -704,7 +704,7 @@ END
 IDD_FILEINFO DIALOGEX 0, 0, 312, 251
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "File &Info"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Round Bitrate",IDC_ROUNDBIT,"Button",BS_AUTOCHECKBOX | 
                     BS_LEFTTEXT | BS_FLAT | WS_TABSTOP,164,82,109,9
@@ -759,7 +759,7 @@ IDD_PPG_TWEAKS DIALOGEX 0, 0, 227, 246
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Tweaks"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     LTEXT           "Static",IDC_WARNING,7,7,213,39
     CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
@@ -821,7 +821,7 @@ IDD_COMMENTLST DIALOGEX 0, 0, 408, 137
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | 
     WS_THICKFRAME
 CAPTION "Dialog"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_LST,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,4,7,398,109
@@ -892,7 +892,7 @@ IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Display"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "3D Depth:",IDC_3DDEP,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,7,14,93,9
@@ -941,7 +941,7 @@ IDD_PPG_SECURITY DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Security"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "IP Filter",IDC_STATIC_IPFILTER,7,7,216,49,BS_FLAT
     LTEXT           "Filterlevel:",IDC_STATIC_FILTERLEVEL,14,20,54,11
@@ -1005,7 +1005,7 @@ IDD_PPG_WEBSRV DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Werb Server"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "General",IDC_STATIC_GENERAL,7,7,216,78
     CONTROL         "Check1",IDC_WSENABLED,"Button",BS_AUTOCHECKBOX | 
@@ -1043,7 +1043,7 @@ IDD_PPG_SCHEDULER DIALOGEX 0, 0, 230, 241
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Scheduler"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Enable",IDC_ENABLE,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,12,6,90,12
@@ -1077,7 +1077,7 @@ END
 IDD_WIZ1_WELCOME DIALOGEX 0, 0, 317, 193
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Welcome"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     LTEXT           "Welcome to eMule",IDC_WIZ1_TITLE,115,7,195,24
     LTEXT           "This wizard will guide you...",IDC_WIZ1_ACTIONS,115,40,
@@ -1089,7 +1089,7 @@ END
 IDD_WIZ1_GENERAL DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "General"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     EDITTEXT        IDC_NICK,1,12,148,14,ES_AUTOHSCROLL
     LTEXT           "Username:",IDC_NICK_FRM,1,1,148,8
@@ -1098,7 +1098,7 @@ END
 IDD_WIZ1_DL_PRIO DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Download Priority"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Do you want eMule to manage your download priorities?\n\nTurning this on will allow eMule to make sure downloads with a lot of sources do not interfere with downloads that have few sources...",
                     IDC_DAP,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
@@ -1108,7 +1108,7 @@ END
 IDD_WIZ1_UL_PRIO DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Upload Priority"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Do you want eMule to manage your upload priorities?\n\nTurning this on will allow eMule to boost rare files meaning popular files will be harder for other people to get.\nTurning this off...",
                     IDC_UAP,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | 
@@ -1118,7 +1118,7 @@ END
 IDD_WIZ1_UPLOAD DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Upload Settings"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Do you want to upload full chunks?\n\nUsing full chunk gives the client a better chance to complete a chunk. Turning this off will help rotate your queue faster. If you are a dedicated releaser, you will want to turn this on.",
                     IDC_FULLCHUNKTRANS,"Button",BS_AUTOCHECKBOX | 
@@ -1128,7 +1128,7 @@ END
 IDD_WIZ1_SERVER DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Server Settings"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "Do you want eMule to connect using Safe Connect?\n\nTurning this feature off allows eMule to connect to servers a little faster, but can cause you to get more false lowID connects.",
                     IDC_SAFESERVERCONNECT,"Button",BS_AUTOCHECKBOX | 
@@ -1148,7 +1148,7 @@ END
 IDD_WIZ1_END DIALOGEX 0, 0, 317, 193
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Finish"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     LTEXT           "Completing the Wizard",IDC_WIZ1_TITLE,115,7,195,24
     LTEXT           "You have finished the eMule First Run Time Wizard.\n\nHappy sharing!",
@@ -1247,7 +1247,7 @@ END
 IDD_META_DATA DIALOGEX 0, 0, 408, 130
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Meta Data"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_TAGS,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | 
                     LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,4,7,398,109
@@ -1257,7 +1257,7 @@ END
 IDD_FILEDETAILS_INFO DIALOGEX 0, 0, 312, 251
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "File Details"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "General",IDC_FD_X0,7,2,298,91,BS_FLAT
     LTEXT           "Full Name:",IDC_FD_X1,17,12,50,8
@@ -1333,7 +1333,7 @@ END
 IDD_MULETRAYDLG DIALOGEX 0, 0, 179, 180
 STYLE DS_SYSMODAL | DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | WS_POPUP
 EXSTYLE WS_EX_TOPMOST | WS_EX_TOOLWINDOW
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     LTEXT           "Speed",IDC_SPEED,17,0,161,14,NOT WS_VISIBLE | WS_BORDER
     LTEXT           "All to max",IDC_TOMAX,17,50,161,14,NOT WS_VISIBLE | 
@@ -1380,7 +1380,7 @@ IDD_PPG_MORPH DIALOGEX 0, 0, 230, 247
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Morph"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
                     WS_BORDER | WS_TABSTOP,7,46,216,194
@@ -1420,7 +1420,7 @@ IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Backup"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Select File Types to Backup",IDC_STATIC,7,7,213,91,
                     BS_FLAT
@@ -1452,7 +1452,7 @@ IDD_PPG_EASTSHARE DIALOGEX 0, 0, 230, 247
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "EastShare"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_EASTSHARE_OPTS,"SysTreeView32",
                     TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,
@@ -2284,7 +2284,7 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -3802,6 +3802,14 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_AUTO_CLEAR_COMPLETE "Auto Clear Complete"
+    IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
+                            "check file availability before starting download"
+    IDS_DL_FORCE            "Force Download"
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Save Upload Queue Wait Time"
+    IDS_DATEFILENAMELOG     "Log File Name in date "
+    IDS_ECFEF               "Equal Chance For Each File"
+    IDS_ALL_TIME            "All Time"
     IDS_COPYFEEDBACK        "Copy feedback to clipboard"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Client %s has been temporary banned because of suspicious leech action"
 END
@@ -4083,7 +4091,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_REMULNOREASON       "No reason given."
     IDS_REMULSUCCESS        "Successful completion of upload."
     IDS_REMULHIGHERPRIO     "Ended upload to make room for higher prio client."
     IDS_REMULMANYSLOTS      "Too many upload slots opened."
@@ -4146,7 +4153,6 @@ BEGIN
     IDS_CREDIT_SYSTEM       "Credit System"
     IDS_OFFICIAL_CREDIT     "Official Credit"
     IDS_LOVELACE_CREDIT     "lovelace Credit"
-    IDS_PAWCIO_CREDIT       "Pawcio Credit"
     IDS_RATIO_CREDIT        "Ratio Credit"
     IDS_EASTSHARE_CREDIT    "EastShare Credit"
     IDS_PREFER_SHARE_ALL    "Prefer Share All"
@@ -4154,19 +4160,10 @@ BEGIN
     IDS_EXPIRED_CLIENTS     "Expired time of clients (day) (0 = Disabled)"
     IDS_EXPIRED_KNOWN       "Expired time of known files (day) (0 = Disabled)"
     IDS_DELETEFILE          "Delete File"
+    IDS_PAWCIO_CREDIT       "Pawcio Credit"
 END
-STRINGTABLE 
-BEGIN
-    IDS_AUTO_CLEAR_COMPLETE "Auto Clear Complete"
-    IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
-                            "check file availability before starting download"
-    IDS_DL_FORCE            "Force Download"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Save Upload Queue Wait Time"
-    IDS_DATEFILENAMELOG     "Log File Name in date "
-    IDS_ECFEF               "Equal Chance For Each File"
-    IDS_ALL_TIME            "All Time"
-END
-#endif    // 英文 (美國) resources
+
+#endif    // Anglais (尒ats-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

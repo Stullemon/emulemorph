@@ -499,7 +499,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_CANCELTRANSFER:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-					if(theApp.uploadqueue->RemoveFromUploadQueue(client,"OP_CANCELTRANSFER"))
+					//MORPH - Changed by SiRoB, Due to ZZ Upload System
+					//if(theApp.uploadqueue->RemoveFromUploadQueue(client,false))
+					if(theApp.uploadqueue->RemoveFromUploadQueue(client))
 						AddDebugLogLine(false, "%s: Upload session ended due canceled transfer.", client->GetUserName());
 					client->SetUploadFileID(NULL);
 					break;

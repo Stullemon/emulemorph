@@ -29,7 +29,7 @@ public:
 	void	Process();
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
-	bool	RemoveFromUploadQueue(CUpDownClient* client, CString reason, bool updatewindow = true, bool earlyabort = false);
+	bool	RemoveFromUploadQueue(CUpDownClient* client, CString reason = NULL, bool updatewindow = true, bool earlyabort = false);
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
