@@ -286,9 +286,14 @@ void CServerList::ServerStats()
 			if( ping_server == test )
 				return;
 		}
-		if (ping_server->GetFailedCount() >= thePrefs.GetDeadserverRetries()){
-			theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(ping_server);
-			return;
+		if ( (ping_server->GetFailedCount() >= thePrefs.GetDeadserverRetries())) {
+			// Mighty Knife: Static server handling
+			// Static servers can be prevented from being removed from the list.
+			if ((!ping_server->IsStaticMember()) || (!thePrefs.GetDontRemoveStaticServers())) {
+				theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(ping_server);
+				return;
+			}
+			// [end] Mighty Knife
 		}
 		Packet* packet = new Packet( OP_GLOBSERVSTATREQ, 4 );
 		srand(tNow);

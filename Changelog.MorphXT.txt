@@ -12,6 +12,7 @@ CHANGED: Include/exclude successful/failed WC-Download sessions in/from download
 CHANGED: TextColor in DownloadClientsList no longer dark-red -> set default color [Commander]
 
 ADDED  : failed WC-Downloads (number) and percentage of all WC-Download sessions [Commander]
+ADDED  : Option to prevent EMule from removing static servers automatically in runtime [MightyKnife]
 
 TWEAKED: USC: Fully splittable upload bandwidth [SiRoB]
 

@@ -5112,6 +5112,7 @@ STRINGTABLE
 BEGIN
     IDS_MORPH_RFHA          "Report file hashing activities"
     IDS_MORPH_RAIF          "Report activities in friendlist"
+	IDS_MORPH_KSSERV		"Don't remove static servers from serverlist in runtime"
 END
 
 STRINGTABLE 

@@ -2838,6 +2838,7 @@
 #define IDS_MORPH2_SECURITY             51524
 #define IDS_MORPH_RFHA                  51541
 #define IDS_MORPH_RAIF                  51542
+#define IDS_MORPH_KSSERV				51543
 #define IDS_WEBSERVER_LINK              51561
 #define IDS_CCRC32                      51562
 #define IDS_ARTCTF                      51563

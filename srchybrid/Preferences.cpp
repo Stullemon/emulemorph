@@ -694,6 +694,10 @@ CString  CPreferences::m_SimpleCleanupSearchChars;
 CString  CPreferences::m_SimpleCleanupReplaceChars;
 // [end] Mighty Knife
 
+// Mighty Knife: Static server handling
+bool	CPreferences::m_bDontRemoveStaticServers;
+// [end] Mighty Knife
+
 //MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 bool	CPreferences::m_bSUCEnabled;
 uint16	CPreferences::m_iSUCHigh;
@@ -2853,6 +2857,10 @@ void CPreferences::SavePreferences()
 	ini.WriteString (_T("SimpleCleanupReplaceChars"),CString ('\"')+m_SimpleCleanupReplaceChars+'\"');
 	// [end] Mighty Knife
 
+	// Mighty Knife: Static server handling
+	ini.WriteBool (_T("DontRemoveStaticServers"),m_bDontRemoveStaticServers,_T("eMule"));
+	// [end] Mighty Knife
+
 	ini.WriteBool(_T("SolidGraph"), m_bSolidGraph,_T("eMule")); //MORPH - Added by SiRoB, New Graph
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool(_T("USSLog"), m_bDynUpLog,_T("eMule"));
@@ -3706,6 +3714,10 @@ void CPreferences::LoadPreferences()
 								 _T("\"\xE4\";\"\xF6\";\"\xFC\";\"\xC4\";\"\xD6\";\"\xDC\";\"\xDF\"")));/*ISO 8859-4*/
 	SetSimpleCleanupReplaceChars (ini.GetString (_T("SimpleCleanupReplaceChars"),
 								 _T("\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\"")));
+	// [end] Mighty Knife
+
+	// Mighty Knife: Static server handling
+	SetDontRemoveStaticServers (ini.GetBool (_T("DontRemoveStaticServers"),false));
 	// [end] Mighty Knife
 
 	///////////////////////////////////////////////////////////////////////////

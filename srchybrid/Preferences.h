@@ -745,6 +745,10 @@ public:
 	static CString  m_SimpleCleanupReplaceChars;
 	// [end] Mighty Knife
 
+	// Mighty Knife: Static server handling
+	static bool		m_bDontRemoveStaticServers;
+	// [end] Mighty Knife
+
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	static bool		m_bSUCEnabled;
 	static uint16		m_iSUCHigh;
@@ -1790,6 +1794,11 @@ public:
 	static	CString	GetSimpleCleanupSearchChars ()			  { return m_SimpleCleanupSearchChars; }
 	static	void	SetSimpleCleanupReplaceChars (CString _s) { m_SimpleCleanupReplaceChars = _s; }
 	static	CString	GetSimpleCleanupReplaceChars ()			  { return m_SimpleCleanupReplaceChars; }
+	// [end] Mighty Knife
+
+	// Mighty Knife: Static server handling
+	static	bool    GetDontRemoveStaticServers ()			  { return m_bDontRemoveStaticServers; }
+	static	void	SetDontRemoveStaticServers (bool _b)	  { m_bDontRemoveStaticServers = _b; }
 	// [end] Mighty Knife
 
 	static bool	IsAutoUPdateIPFilterEnabled()		{ return AutoUpdateIPFilter; } //MORPH START added by Yun.SF3: Ipfilter.dat update

@@ -248,8 +248,13 @@ void CServerListCtrl::RemoveAllDeadServers()
 	for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
 		CServer* cur_server = server_list->list.GetAt(pos); 
 		if (cur_server->GetFailedCount() >= thePrefs.GetDeadserverRetries()){
-			RemoveServer(cur_server);
-			pos = server_list->list.GetHeadPosition();
+			// Mighty Knife: Static server handling
+			// Static servers can be prevented from being removed from the list.
+			if ((!cur_server->IsStaticMember()) || (!thePrefs.GetDontRemoveStaticServers())) {
+				RemoveServer(cur_server);
+				pos = server_list->list.GetHeadPosition();
+			}
+			// [end] Mighty Knife
 		}
 	}
    ShowWindow(SW_SHOW); 
