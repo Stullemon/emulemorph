@@ -2718,6 +2718,7 @@ CString CastItoUIXBytes(uint32 count)
 //MORPH START - Added by SiRoB, XML News [O²]
 void HTMLParse(CString &buffer)
 {
+	//ISO 8859-1 entity for XML? I don't know :X, AndCycle
 	buffer.Replace(_T("&amp;"),_T("&"));
 	buffer.Replace(_T("&#34;"),_T("\""));
 	buffer.Replace(_T("&quot;"),_T("\""));
@@ -2727,10 +2728,10 @@ void HTMLParse(CString &buffer)
 	buffer.Replace(_T("&#lt;"),_T("<"));
 	buffer.Replace(_T("&#62;"),_T(">"));
 	buffer.Replace(_T("&#gt;"),_T(">"));
-	buffer.Replace(_T("&ccedil;"),_T("ç"));
-	buffer.Replace(_T("&eacute;"),_T("é"));
-	buffer.Replace(_T("&egrave;"),_T("è"));
-	buffer.Replace(_T("&agrave;"),_T("à"));
+	buffer.Replace(_T("&ccedil;"),_T("\xE7"));
+	buffer.Replace(_T("&eacute;"),_T("\xE9"));
+	buffer.Replace(_T("&egrave;"),_T("\xE8"));
+	buffer.Replace(_T("&agrave;"),_T("\xE0"));
 	if (buffer.Left(4) == "<br>")
 		buffer.Right(buffer.GetLength()-4);
 	if (buffer.Right(4) == "<br>")

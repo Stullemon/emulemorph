@@ -233,8 +233,8 @@ CString SimpleCleanupFilename (CString _filename, int _options,
 
   // Correct apostrophes
   if ((_options & SCO_REPLACEAPOSTROPHE) != 0) {
-	  ReplaceChars (name,_T("´"),_T("'"),false);
-	  ReplaceChars (ext,_T("´"),_T("'"),false);
+	  ReplaceChars (name,_T("\xB4"),_T("'"),false);
+	  ReplaceChars (ext,_T("\xB4"),_T("'"),false);
 	  ReplaceChars (name,_T("`"),_T("'"),false);
 	  ReplaceChars (ext,_T("`"),_T("'"),false);
   }

@@ -3324,7 +3324,7 @@ void CPreferences::LoadPreferences()
 	// Every "str" in SimpleCleanupSearchChars corresponds to a "str"
 	// in SimpleCleanupReplaceChars at the same position.
 	SetSimpleCleanupSearchChars (ini.GetString (_T("SimpleCleanupSearchChars"),
-								 _T("\"ä\";\"ö\";\"ü\";\"Ä\";\"Ö\";\"Ü\";\"ß\"")));
+								 _T("\"\xE4\";\"\xF6\";\"\xFC\";\"\xC4\";\"\xD6\";\"\xDC\";\"\xDF\"")));/*ISO 8859-4*/
 	SetSimpleCleanupReplaceChars (ini.GetString (_T("SimpleCleanupReplaceChars"),
 								 _T("\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\"")));
 	// [end] Mighty Knife
