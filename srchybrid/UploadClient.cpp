@@ -122,43 +122,60 @@ void CUpDownClient::SetUploadState(EUploadState news){
  * Gets the queue score multiplier for this client, taking into consideration client's credits
  * and the requested file's priority.
  */
-float CUpDownClient::GetCombinedFilePrioAndCredit() {
+double CUpDownClient::GetCombinedFilePrioAndCredit() {
 	ASSERT(credits != NULL);
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
-	CKnownFile* clientReqFile;
+	CKnownFile* clientReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 
-	if(theApp.glob_prefs->GetEqualChanceForEachFileMode() == ECFEF_DISABLE){
-		return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));//original
-	}
-	else if((clientReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID()))){
+	if(clientReqFile){
 		
 		switch(theApp.glob_prefs->GetEqualChanceForEachFileMode()){
 
 			case ECFEF_ACCEPTED:{
-				return (float)clientReqFile->statistic.GetAccepts();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					return	(float)clientReqFile->statistic.GetAllTimeAccepts();
+				}
+				else{
+					return	(float)clientReqFile->statistic.GetAccepts();
+				}
 			}break;
 
 			case ECFEF_ACCEPTED_COMPLETE:{
-				return	(float)clientReqFile->statistic.GetAccepts()/clientReqFile->GetPartCount();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					return	(float)clientReqFile->statistic.GetAllTimeAccepts()/clientReqFile->GetPartCount();
+				}
+				else{
+					return	(float)clientReqFile->statistic.GetAccepts()/clientReqFile->GetPartCount();
+				}
 			}break;
 
 			case ECFEF_TRANSFERRED:{
-				return	(float)clientReqFile->statistic.GetTransferred();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					return	(double)clientReqFile->statistic.GetAllTimeTransferred();
+				}
+				else{
+					return	(double)clientReqFile->statistic.GetTransferred();
+				}
 			}break;
 
 			case ECFEF_TRANSFERRED_COMPLETE:{
-				return	(float)clientReqFile->statistic.GetTransferred()/clientReqFile->GetFileSize();
+				if(theApp.glob_prefs->IsECFEFallTime()){
+					return	(double)clientReqFile->statistic.GetAllTimeTransferred()/clientReqFile->GetFileSize();
+				}
+				else{
+					return	(double)clientReqFile->statistic.GetTransferred()/clientReqFile->GetFileSize();
+				}
 			}break;
 
 			default:{
-				return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));//original
+				return	(uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));//original
 			}break;
 		}
 	}
+	return 0;
 //Morph End - added by AndCycle, Equal Chance For Each File
 
-	return (uint32)(10.0f*credits->GetScoreRatio(GetIP())*float(GetFilePrioAsNumber()));
 }
 
 

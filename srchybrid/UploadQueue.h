@@ -126,7 +126,7 @@ protected:
 private:
     void InsertInUploadingList(CUpDownClient* newclient);
     void RemoveLowestFromWaitinglist();
-    float GetAverageCombinedFilePrioAndCredit();
+    double GetAverageCombinedFilePrioAndCredit();
     uint32 GetWantedNumberOfTrickleUploads();
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
@@ -183,7 +183,7 @@ private:
 	DWORD   m_dwLastCheckedForHighPrioClient;
 
 	DWORD   m_dwLastCalculatedAverageCombinedFilePrioAndCredit;
-	float   m_fAverageCombinedFilePrioAndCredit;
+	double	m_fAverageCombinedFilePrioAndCredit;
 
 	uint64	m_avarage_dr_sum;
 	DWORD   m_dwLastResortedUploadSlots;

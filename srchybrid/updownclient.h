@@ -269,9 +269,9 @@ public:
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
-	bool            GetPowerShared();
-	void            ClearUploadDoneBlocks();
-	float           GetCombinedFilePrioAndCredit();
+	bool			GetPowerShared();
+	void			ClearUploadDoneBlocks();
+	double			GetCombinedFilePrioAndCredit();
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
 
 	//download
