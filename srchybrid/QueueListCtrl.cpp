@@ -895,10 +895,35 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetLastUpRequest() - item1->GetLastUpRequest();
 		
 		case 7: 
-			return item1->GetWaitStartTime() - item2->GetWaitStartTime();
+			//EastShare START - Modified by TAHO, modified SUQWT
+			//return item1->GetWaitStartTime() - item2->GetWaitStartTime();
+			{
+				sint64 time1 = item1->GetWaitStartTime();
+				sint64 time2 = item2->GetWaitStartTime();
+				if ( time1 == time2 ) {
+					return 0;
+				} else if ( time1 > time2 ) {
+					return 1;
+				} else {
+					return -1;
+				}
+			}
+			//EastShare END - Modified by TAHO, modified SUQWT
 		case 107: 
-			return item2->GetWaitStartTime() - item1->GetWaitStartTime();
-		
+			//EastShare START - Modified by TAHO, modified SUQWT
+			//return item2->GetWaitStartTime() - item1->GetWaitStartTime();
+			{
+				sint64 time1 = item1->GetWaitStartTime();
+				sint64 time2 = item2->GetWaitStartTime();
+				if ( time1 == time2 ) {
+					return 0;
+				} else if ( time1 < time2 ) {
+					return 1;
+				} else {
+					return -1;
+				}
+			}
+			//EastShare END - Modified by TAHO, modified SUQWT
 		case 8: 
 			return item1->IsBanned() - item2->IsBanned();
 		case 108: 

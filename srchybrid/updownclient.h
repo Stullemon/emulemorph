@@ -463,7 +463,7 @@ public:
 						return (EUploadState)m_nUploadState;
 					}
 	void			SetUploadState(EUploadState news);
-
+	//EastShare START - Modified by TAHO, modified SUQWT
 	//uint32			GetWaitStartTime() const;
 	sint64			GetWaitStartTime() const;
 	//EastShare END - Modified by TAHO, modified SUQWT

@@ -1085,7 +1085,7 @@ sint64 CUpDownClient::GetWaitStartTime() const
 //		&& IsDownloading()){
 	if (IsDownloading() && (dwResult > m_dwUploadTime)) {
 //MORPH END - Changed by SiRoB, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
+//EastShare END - Modified by TAHO, modified SUQWT
 	//this happens only if two clients with invalid securehash are in the queue - if at all
 			dwResult = m_dwUploadTime-1;
 

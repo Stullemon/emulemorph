@@ -169,10 +169,15 @@ private:
 	uint8			m_nPublicKeyLen;
 	uint32			m_dwIdentIP;
 	uint32			m_dwWaitTime;
-	uint32			m_dwSecureWaitTime;
-	uint32			m_dwUnSecureWaitTime;
-	uint32			m_dwWaitTimeIP;			   // client IP assigned to the waittime
-// EastShare - added by TAHO, modified SUQWT
+        //Commander - Changed: SUQWT - Start
+	//EastShare START - Modified by TAHO, modified SUQWT
+	//uint32		m_dwSecureWaitTime;
+	//uint32		m_dwUnSecureWaitTime;
+	sint64			m_dwSecureWaitTime;
+	sint64			m_dwUnSecureWaitTime;
+        // EastShare - added by TAHO, modified SUQWT
+        //Commander - Changed: SUQWT - End
+        uint32			m_dwWaitTimeIP;	
 	bool			m_bCheckScoreRatio;
 	float			m_fLastScoreRatio;
 	int /*CreditSystemSelection*/	m_cssCurrentCreditSystem;
