@@ -579,7 +579,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
 				bool isFocused = ClientDataRate[classID] == 0;
-				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:min(maxSlot[classID],slotCounterClass[classID])) && bytesToSpendClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && max(spentBytesClass[LAST_CLASS],spentBytesClass[classID]) < (uint64)min(bytesToSpendClass[LAST_CLASS],bytesToSpendClass[classID]); maxCounter++) {
+				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:min(maxSlot[classID],slotCounterClass[classID])) && bytesToSpendClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS] && spentBytesClass[classID] < (uint64)bytesToSpendClass[classID]; maxCounter++) {
 					if(isFocused == false)
 					{
 						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID] ||
@@ -589,7 +589,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(lastpos+(isFocused?maxCounter:rememberedSlotCounterClass[classID]));
 					if(socket != NULL) {
-						uint32 bytesToSpendTemp = min(bytesToSpendClass[LAST_CLASS],bytesToSpendClass[classID])-max(spentBytesClass[LAST_CLASS],spentBytesClass[classID]);
+						uint32 bytesToSpendTemp = bytesToSpendClass[classID]-spentBytesClass[classID];
 						if(!isFocused) bytesToSpendTemp = min(doubleSendSize,bytesToSpendTemp);
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
@@ -618,10 +618,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
-				for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && bytesToSpendClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && max(spentBytesClass[LAST_CLASS],spentBytesClass[classID]) < (uint64)min(bytesToSpendClass[LAST_CLASS],bytesToSpendClass[classID]); slotCounter++) {
+				for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && bytesToSpendClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS] && spentBytesClass[classID] < (uint64)bytesToSpendClass[classID]; slotCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(lastpos+slotCounter);
 					if(socket != NULL) {
-						uint32 bytesToSpendTemp = min(bytesToSpendClass[classID],bytesToSpendClass[classID])-spentBytesClass[classID];
+						uint32 bytesToSpendTemp = bytesToSpendClass[classID]-spentBytesClass[classID];
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 
