@@ -520,7 +520,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				    SocketSentBytes socketSentBytes = socket->SendControlData(bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS], minFragSize);
                     uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
          	       	spentBytesClass[LAST_CLASS] += lastSpentBytes;
-         	       spentOverheadClass[LAST_CLASS] += socketSentBytes.sentBytesControlPackets;
+					spentOverheadClass[LAST_CLASS] += socketSentBytes.sentBytesControlPackets;
          	 	  }
        	   }
 			//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -563,23 +563,22 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			//MORPH START - Added by SiRoB, Upload Splitting Class
 			uint32 maxSlot[NB_SPLITTING_CLASS];
 			memcpy(maxSlot,slotCounterClass,sizeof(slotCounterClass));
-            for(uint32 classID = 0; classID < NB_SPLITTING_CLASS;classID++)
-			{
-				if (ClientDataRate[classID]) {
-					if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
-						maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
-					}
-					if(maxSlot[classID] > m_highestNumberOfFullyActivatedSlotsClass[classID]) {
-					    m_highestNumberOfFullyActivatedSlotsClass[classID] = maxSlot[classID];
-            		}
-				}
-			}
 
 			uint32 lastpos = 0;
             for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
 				bool isFocused = ClientDataRate[classID] == 0;
-				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:min(maxSlot[classID],slotCounterClass[classID])) && slotCounterClass[classID] > 0 && bytesToSpendClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)min(bytesToSpendClass[classID],bytesToSpendClass[LAST_CLASS]); maxCounter++) {
+				if (!isFocused) {
+					if (allowedDataRateClass[classID] > 0){
+						if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
+							maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
+						}
+						if(maxSlot[classID] > m_highestNumberOfFullyActivatedSlotsClass[classID]) {
+							m_highestNumberOfFullyActivatedSlotsClass[classID] = maxSlot[classID];
+            			}
+					}
+				}
+				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:maxSlot[classID]) && slotCounterClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					if(isFocused == false)
 					{
 						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID] ||
@@ -589,7 +588,13 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(lastpos+(isFocused?maxCounter:rememberedSlotCounterClass[classID]));
 					if(socket != NULL) {
-						uint32 bytesToSpendTemp = min(bytesToSpendClass[classID],bytesToSpendClass[LAST_CLASS])-spentBytesClass[LAST_CLASS];
+						uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
+						if(allowedDataRateClass[classID]){
+							if(bytesToSpendClass[classID] > 0 && spentBytesClass[classID] < (uint64)bytesToSpendClass[classID])
+								bytesToSpendTemp = min(bytesToSpendClass[classID]-spentBytesClass[classID],bytesToSpendTemp);
+							else
+								break;
+						}
 						if(!isFocused) bytesToSpendTemp = min(doubleSendSize,bytesToSpendTemp);
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
@@ -618,10 +623,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
-				for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && slotCounterClass[classID] > 0 && bytesToSpendClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)min(bytesToSpendClass[classID],bytesToSpendClass[LAST_CLASS]); slotCounter++) {
+				for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && slotCounterClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(lastpos+slotCounter);
 					if(socket != NULL) {
-						uint32 bytesToSpendTemp = min(bytesToSpendClass[classID],bytesToSpendClass[LAST_CLASS])-spentBytesClass[LAST_CLASS];
+						uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 
@@ -637,6 +642,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 				lastpos += slotCounterClass[classID];
 				realBytesToSpendClass[classID] -= spentBytesClass[classID]*1000;
+				if (classID < LAST_CLASS) realBytesToSpendClass[LAST_CLASS] -= spentBytesClass[classID]*1000;
 			}
 
 			//MORPH START - Added by SiRoB, Upload Splitting Class

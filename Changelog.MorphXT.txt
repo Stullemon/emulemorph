@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.44b MorphXT v5.6
+--------------------------------------
+FIXED  : Fixed Upload Splitting Class Porwershare and Friend slot don't override datarate limit anymore [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.44b MorphXT v5.5
 --------------------------------------
 FIXED  : Fixed Upload Splitting Class [SiRoB]
