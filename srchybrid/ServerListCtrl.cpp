@@ -1123,10 +1123,14 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						}
 				//Commander - Lowid Column
 				case 13:{
-					if (server->GetLowIDUsers())
-						Sbuffer.Format(_T("%i"), CastItoIShort(server->GetLowIDUsers()));
-					else
+					if (server->GetLowIDUsers()){
+						CString tempStr2;
+						tempStr2.Format("%s", CastItoIShort(server->GetLowIDUsers()));
+						Sbuffer = tempStr2;
+					}
+					else{
 						Sbuffer = "";
+					}
 					break;
 						}
 
@@ -1141,9 +1145,9 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				//Commander - Country Column
 				case 15:{
 					if(server->GetCountryName()){
-						CString tempStr2;
-						tempStr2.Format("%s", server->GetCountryName());
-						Sbuffer = tempStr2;
+						CString tempStr3;
+						tempStr3.Format("%s", server->GetCountryName());
+						Sbuffer = tempStr3;
 					}
 					else{
                         Sbuffer = "";
