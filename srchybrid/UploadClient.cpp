@@ -480,7 +480,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			}
 			else{
 				togo = currentblock->EndOffset - currentblock->StartOffset;
-				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precausion
+				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 			}
 
