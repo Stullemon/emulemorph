@@ -56,11 +56,13 @@
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
-			CharacterSet="2">
+			CharacterSet="2"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="1"
+				GlobalOptimizations="FALSE"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
@@ -105,83 +107,80 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
-				RelativePath="adler32.c">
+				RelativePath=".\adler32.c">
 			</File>
 			<File
-				RelativePath="compress.c">
+				RelativePath=".\compress.c">
 			</File>
 			<File
-				RelativePath="crc32.c">
+				RelativePath=".\crc32.c">
 			</File>
 			<File
-				RelativePath="deflate.c">
+				RelativePath=".\deflate.c">
 			</File>
 			<File
-				RelativePath="gzio.c">
+				RelativePath=".\gzio.c">
 			</File>
 			<File
-				RelativePath="infblock.c">
+				RelativePath=".\infback.c">
 			</File>
 			<File
-				RelativePath="infcodes.c">
+				RelativePath=".\inffast.c">
 			</File>
 			<File
-				RelativePath="inffast.c">
+				RelativePath=".\inflate.c">
 			</File>
 			<File
-				RelativePath="inflate.c">
+				RelativePath=".\inftrees.c">
 			</File>
 			<File
-				RelativePath="inftrees.c">
+				RelativePath=".\minigzip.c">
 			</File>
 			<File
-				RelativePath="infutil.c">
+				RelativePath=".\trees.c">
 			</File>
 			<File
-				RelativePath="trees.c">
+				RelativePath=".\uncompr.c">
 			</File>
 			<File
-				RelativePath="uncompr.c">
-			</File>
-			<File
-				RelativePath="zutil.c">
+				RelativePath=".\zutil.c">
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
-				RelativePath="deflate.h">
+				RelativePath=".\crc32.h">
 			</File>
 			<File
-				RelativePath="infblock.h">
+				RelativePath=".\deflate.h">
 			</File>
 			<File
-				RelativePath="infcodes.h">
+				RelativePath=".\inffast.h">
 			</File>
 			<File
-				RelativePath="inffast.h">
+				RelativePath=".\inffixed.h">
 			</File>
 			<File
-				RelativePath="inffixed.h">
+				RelativePath=".\inflate.h">
 			</File>
 			<File
-				RelativePath="inftrees.h">
+				RelativePath=".\inftrees.h">
 			</File>
 			<File
-				RelativePath="infutil.h">
+				RelativePath=".\trees.h">
 			</File>
 			<File
-				RelativePath="trees.h">
+				RelativePath=".\zconf.h">
 			</File>
 			<File
-				RelativePath="zconf.h">
+				RelativePath=".\zconf.in.h">
 			</File>
 			<File
-				RelativePath="zlib.h">
+				RelativePath=".\zlib.h">
 			</File>
 			<File
-				RelativePath="zutil.h">
+				RelativePath=".\zutil.h">
 			</File>
 		</Filter>
 		<Filter
