@@ -69,36 +69,29 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 		s_UpStatusBar.SetHeight(rect->bottom - rect->top); 
 		s_UpStatusBar.SetWidth(rect->right - rect->left); 
 		s_UpStatusBar.Fill(crNeither); 
-		//MORPH START - Changed by SiRoB, Show Hidden part
 		if (!onlygreyrect && m_abyUpPartStatus && currequpfile) { 
-			bool isHiddenPart = !currequpfile->m_AvailPartFrequency.IsEmpty() && !currequpfile->IsPartFile() && ((currequpfile->GetShareOnlyTheNeed()>=0)?currequpfile->GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())>0;
-			if (isHiddenPart) {
-				bool partsneeded = false;
-				UINT i;
-				for (i = 0; i < m_nUpPartCount; i++)
-					if (currequpfile->m_AvailPartFrequency[i] <= 2 && !m_abyUpPartStatus[i])
-						partsneeded = true;
-				for (i; i < currequpfile->GetED2KPartCount(); i++)
-					if (currequpfile->m_AvailPartFrequency[i] <= 2)
-						partsneeded = true;
-				isHiddenPart &= partsneeded;
-			}
 			uint32 i;
-			const COLORREF crHiddenPart = RGB(192, 100, 255);
+			//MORPH START - Added by SiRoB, See chunk that we hide
+			const COLORREF crHiddenPartBySOTN = RGB(192, 96, 255);
+			const COLORREF crHiddenPartByHideOS = RGB(96, 192, 255);
+			//MORPH END   - Added by SiRoB, See chunk that we hide
 			const COLORREF crBoth = bFlat ? RGB(0, 0, 0) : RGB(104, 104, 104);
 			for (i = 0;i < m_nUpPartCount;i++)
 				if(m_abyUpPartStatus[i])
 					s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crBoth);
-			//MORPH START - Added by SiRoB, Show Hidden part
-				else if (isHiddenPart && currequpfile->m_AvailPartFrequency[i]>2)
-					s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crHiddenPart);
-			if (isHiddenPart)
-				for (i;i < currequpfile->GetED2KPartCount();i++)
-					if (currequpfile->m_AvailPartFrequency[i]>2)
-						s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),crHiddenPart);
-			//MORPH END   - Added by SiRoB, Show Hidden part	
+			//MORPH START - Added by SiRoB, See chunk that we hide
+				else if (m_abyUpPartStatusHidden)
+					if (m_abyUpPartStatusHidden[i])
+						s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
+			//MORPH END   - Added by SiRoB, See chunk that we hide
+			for (i;i < currequpfile->GetED2KPartCount();i++)
+			//MORPH START - Added by SiRoB, See chunk that we hide
+				 if (m_abyUpPartStatusHidden)
+					if (m_abyUpPartStatusHidden[i])
+						s_UpStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),m_bUpPartStatusHiddenBySOTN?crHiddenPartBySOTN:crHiddenPartByHideOS);
+			//MORPH END   - Added by SiRoB, See chunk that we hide
+			
 		}
-		//MORPH END   - Changed by SiRoB, Show Hidden part
 	    const Requested_Block_Struct* block;
 		if (!m_BlockRequests_queue.IsEmpty()){
 			block = m_BlockRequests_queue.GetHead();
@@ -561,6 +554,13 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 		delete[] m_abyUpPartStatus;
 		m_abyUpPartStatus = NULL;	// added by jicxicmic
 	}
+	//MORPH START - Added by SiRoB, See chunk that we hide
+	if (m_abyUpPartStatusHidden)
+	{
+		delete[] m_abyUpPartStatusHidden;
+		m_abyUpPartStatusHidden = NULL;
+	}
+	//MORPH END   - Added by SiRoB, See chunk that we hide
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 	if( GetExtendedRequestsVersion() == 0 )

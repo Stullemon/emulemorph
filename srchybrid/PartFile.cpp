@@ -1976,14 +1976,32 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 		hideOS = 1;
 	}
 	// SLUGFILLER: hideOS
+	//MORPH START - Added by SiRoB, See chunk that we hide by HideOS feature
+	if (hideOS && client){
+		if (client->m_abyUpPartStatusHidden){
+			delete[] client->m_abyUpPartStatusHidden;
+			client->m_abyUpPartStatusHidden = NULL;
+		}
+		client->m_bUpPartStatusHiddenBySOTN = false;
+		client->m_abyUpPartStatusHidden = new uint8[parts];
+		memset(client->m_abyUpPartStatusHidden,0,parts);
+	}
+	//MORPH END   - Added by SiRoB, See chunk that we hide by HideOS feature
+
 	file->WriteUInt16(parts);
 	UINT done = 0;
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0; i < 8; i++){
 			if (partspread[done] < hideOS)	// SLUGFILLER: hideOS
+			{//MORPH - Added by SiRoB, See chunk that we hide
 				if (IsPartShareable(done))	// SLUGFILLER: SafeHash
 					towrite |= (1<<i);
+			//MORPH START - Added by SiRoB, See chunk that we hide
+			}else
+				if (hideOS && client)
+					client->m_abyUpPartStatusHidden[done] = true;
+			//MORPH END   - Added by SiRoB, See chunk that we hide
 			done++;
 			if (done == parts)
 				break;
@@ -1996,12 +2014,8 @@ void CPartFile::WriteCompleteSourcesCount(CSafeMemFile* file) const
 {
 	file->WriteUInt16(m_nCompleteSourcesCount);
 }
-uint16 CPartFile::GetAvailableSrcCount() const
-{
-	return m_anStates[DS_ONQUEUE]+m_anStates[DS_DOWNLOADING];
-}
 
-//MORPH START - Changed by SiRoB, Those values are now cached.
+//MORPH START - Changed by SiRoB, Source Counts Are Cached [Khaos]
 /*
 int CPartFile::GetValidSourcesCount() const
 {
@@ -2033,7 +2047,11 @@ uint16 CPartFile::GetNotCurrentSourcesCount() const
 {
 	return srclist.GetCount() - m_anStates[DS_DOWNLOADING] - m_anStates[DS_ONQUEUE];
 }
-//MORPH END - Changed by SiRoB, Those values are now cached
+uint16 CPartFile::GetAvailableSrcCount() const
+{
+	return m_anStates[DS_ONQUEUE]+m_anStates[DS_DOWNLOADING];
+}
+//MORPH END - Changed by SiRoB, Source Counts Are Cached [Khaos]
 
 //MORPH START - Added by IceCream, SLUGFILLER: checkDiskspace
 uint32 CPartFile::GetNeededSpace() const
@@ -4599,31 +4617,13 @@ void CPartFile::CharFillRange(CString* buffer,uint32 start, uint32 end, char col
 void CPartFile::SetCategory(uint8 cat, bool setprio)
 {
 	m_category=cat;
-	
+
+// ZZ:DownloadManager -->
 	// set new prio
-	if (setprio && IsPartFile()){
-		switch (thePrefs.GetCategory(GetCategory())->prio) {
-		case 0:
-			break;
-		case 1:
-			SetAutoDownPriority(false); 
-			SetDownPriority(PR_LOW);
-			break;
-		case 2:
-			SetAutoDownPriority(false);
-			SetDownPriority(PR_NORMAL);
-			break;
-		case 3:
-			SetAutoDownPriority(false);
-			SetDownPriority(PR_HIGH);
-			break;
-		case 4:
-			SetAutoDownPriority(true);
-			SetDownPriority(PR_HIGH);
-			break;
-		}
+	if (IsPartFile()){
 		SavePartFile();
 	}
+// <-- ZZ:DownloadManager
 }
 
 void CPartFile::SetStatus(EPartFileStatus in)

@@ -2514,7 +2514,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 
 bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 	uint8 hideOS = (GetHideOS()>=0)?GetHideOS():thePrefs.GetHideOvershares();
-
+	
 	if (!hideOS)
 		return FALSE;
 	CArray<uint32, uint32> partspread;
@@ -2528,14 +2528,33 @@ bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
 			max = partspread[i];
 	if (max < hideOS)
 		return FALSE;
+	//MORPH START - Added by SiRoB, See chunk that we hide
+	bool revelatleastonechunk = false;
+	if (client->m_abyUpPartStatusHidden){
+		delete[] client->m_abyUpPartStatusHidden;
+		client->m_abyUpPartStatusHidden = NULL;
+	}
+	client->m_abyUpPartStatusHidden = new uint8[parts];
+	client->m_bUpPartStatusHiddenBySOTN = false;
+	memset(client->m_abyUpPartStatusHidden,0,parts);
+	for (UINT i = 0; i < parts; i++)
+		if (partspread[i] < hideOS && client->IsPartAvailable(i)==false)
+			revelatleastonechunk = true;
+	if (revelatleastonechunk==false)
+		return false;
+	//MORPH END   - Added by SiRoB, See chunk that we hide
 
 	file->WriteUInt16(parts);
 	UINT done = 0;
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (partspread[done] < hideOS)
+			if (partspread[i] < hideOS)
 				towrite |= (1<<i);
+			//MORPH START - Added by SiRoB, See chunk that we hide
+			else
+				client->m_abyUpPartStatusHidden[i] = true;
+			//MORPH END   - Added by SiRoB, See chunk that we hide
 			done++;
 			if (done == parts)
 				break;
@@ -2553,21 +2572,30 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file, CUpDownClient* client)
 	if (((GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed())==0)
 		return false;
 	UINT parts = GetED2KPartCount();
-	bool partsneeded = false;
-	if (client->m_abyUpPartStatus && !m_AvailPartFrequency.IsEmpty())
+	if (client->m_abyUpPartStatusHidden){
+		delete[] client->m_abyUpPartStatusHidden;
+		client->m_abyUpPartStatusHidden = NULL;
+	}
+	client->m_bUpPartStatusHiddenBySOTN = true;
+	client->m_abyUpPartStatusHidden = new uint8[parts];
+	memset(client->m_abyUpPartStatusHidden,0,parts);
+	
+	bool revelatleastonechunk = false;
+	if (!m_AvailPartFrequency.IsEmpty())
 		for (UINT i = 0; i < parts; i++)
-			if (m_AvailPartFrequency[i] <= 2 && !client->IsPartAvailable(i))
-				partsneeded = true;
-	if (!partsneeded)
+			if (!client->IsPartAvailable(i) && m_AvailPartFrequency[i] <= 2)
+				revelatleastonechunk = true;
+	if (revelatleastonechunk==false)
 		return false;
-
 	UINT done = 0;
 	file->WriteUInt16(parts);
 	while (done != parts){
 		uint8 towrite = 0;
 		for (UINT i = 0;i < 8;i++){
-			if (m_AvailPartFrequency[done] <= 2)
+			if (m_AvailPartFrequency[i] <= 2)
 				towrite |= (1<<i);
+			else
+				client->m_abyUpPartStatusHidden[i] = true;
 			done++;
 			if (done == parts)
 				break;

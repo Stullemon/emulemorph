@@ -190,10 +190,6 @@ public:
 	void	SetAutoDownPriority(bool NewAutoDownPriority) { m_bAutoDownPriority = NewAutoDownPriority; }
 	void	UpdateAutoDownPriority();
 
-	// khaos::kmod+ Source Counts Are Cached
-	uint16	GetAvailableSrcCount() const;
-	// khaos::kmod-
-	
 	uint16	GetSourceCount() const	{ return srclist.GetCount(); }
 	uint16	GetSrcA4AFCount() const { return A4AFsrclist.GetCount(); }
 	uint16  GetSrcStatisticsValue(EDownloadState nDLState) const;
@@ -203,6 +199,9 @@ public:
 	float	GetPercentCompleted() const { return percentcompleted; }
 	uint16  GetNotCurrentSourcesCount() const;
 	int		GetValidSourcesCount() const;
+	//MORPH START - Added by SiRoB, Source Counts Are Cached [Khaos]
+	uint16	GetAvailableSrcCount() const;
+	//MORPH END   - Added by SiRoB, Source Counts Are Cached [Khaos]
 	bool	IsArchive(bool onlyPreviewable = false) const; // Barry - Also want to preview archives
 	sint32	getTimeRemaining() const;
 	sint32	getTimeRemainingSimple() const;

@@ -860,6 +860,8 @@ public:
 	uint32			compressiongain; /// Add show compression
 	uint32			notcompressed; // Add show compression
 	uint8*			m_abyUpPartStatus;
+	uint8*			m_abyUpPartStatusHidden; //MORPH - Added by SiRoB, See chunk that we hide
+	bool			m_bUpPartStatusHiddenBySOTN; //MORPH - Added by SiRoB, See chunk that we hide
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherRequests_list;
 	CTypedPtrList<CPtrList, CPartFile*> m_OtherNoNeeded_list;
 	uint16			m_lastPartAsked;

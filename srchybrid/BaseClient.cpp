@@ -135,6 +135,7 @@ void CUpDownClient::Init()
 	m_nUpPartCount = 0;
 	m_abyPartStatus = 0;
 	m_abyUpPartStatus = 0;
+	m_abyUpPartStatusHidden = 0; //MORPH - Added by SiRoB, See chunk that we hide
 	m_dwLastAskedTime = 0;
 	m_nDownloadState = DS_NONE;
 	m_dwUploadTime = 0;
@@ -279,6 +280,10 @@ CUpDownClient::~CUpDownClient(){
 		free(m_pszUsername);
 	delete[] m_abyPartStatus;
 	delete[] m_abyUpPartStatus;
+	//MORPH START - Added by SiRoB, See chunk that we hide
+	if (m_abyUpPartStatusHidden)
+		delete[] m_abyUpPartStatusHidden;
+	//MORPH END   - Added by SiRoB, See chunk that we hide
 	ClearUploadBlockRequests();
 
 	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;)
