@@ -28,19 +28,19 @@ LANGUAGE LANG_DUTCH, SUBLANG_DUTCH
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "nl_NL.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "#include ""..\\resource.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "#include ""..\\version.h""\r\n"
     "#include ""lang.rc2""\r\n"
@@ -55,7 +55,7 @@ END
 // String Table
 //
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_SOCKETS_INIT_FAILED "Fout bij het initialiseren van de Windows sockets."
     IDS_ABOUTBOX            "&Over eMule..."
@@ -65,24 +65,24 @@ BEGIN
     IDS_HTTPDOWNLOAD_RESOLVED_NAME "Gevonden naam %s"
     IDS_HTTPDOWNLOAD_CONNECTING "Bezig te verbinden met %s"
     IDS_HTTPDOWNLOAD_REDIRECTING "Herleid naar %s"
-    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Ophalen bestandsinformatie"
-    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR
-                            "Er is een fout opgetreden met de volgende url: %s"
-    IDS_HTTPDOWNLOAD_GENERIC_ERROR
-                            "Er is een fout opgetreden bij het ophalen van het bestand, Fout:%s"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER
+    IDS_HTTPDOWNLOAD_GETTING_FILE_INFORMATION "Ophalen bestandsinformatie"
+    IDS_HTTPDOWNLOAD_FAIL_PARSE_ERROR 
+                            "Er is een fout opgetreden met de volgende url: %s"
+    IDS_HTTPDOWNLOAD_GENERIC_ERROR 
+                            "Er is een fout opgetreden bij het ophalen van het bestand, Fout:%s"
+    IDS_HTTPDOWNLOAD_FAIL_CONNECT_SERVER 
                             "Er is een fout opgetreden met de verbinding naar de server, Fout:%s"
-    IDS_HTTPDOWNLOAD_INVALID_SERVER_RESPONSE
+    IDS_HTTPDOWNLOAD_INVALID_SERVER_RESPONSE 
                             "Ongeldig antwoord verkregen van de server"
-    IDS_HTTPDOWNLOAD_INVALID_HTTP_RESPONSE
+    IDS_HTTPDOWNLOAD_INVALID_HTTP_RESPONSE 
                             "Ongeldig HTTP antwoord verkregen van de server"
-    IDS_HTTPDOWNLOAD_ERROR_READFILE
+    IDS_HTTPDOWNLOAD_ERROR_READFILE 
                             "Er is een fout opgetreden bij het downloaden van het bestand, Fout:%s"
-    IDS_HTTPDOWNLOAD_PERCENTAGE "Bijwerken servers: %s% van %s compleet"
+    IDS_HTTPDOWNLOAD_PERCENTAGE "Bijwerken servers: %s%% van %s compleet"
     IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Ophalen van het bestand"
     IDS_HTTPDOWNLOAD_OF     "%s van %s"
     IDS_HTTPDOWNLOAD_SECONDS "%s sec"
@@ -91,24 +91,35 @@ BEGIN
     IDS_HTTPDOWNLOAD_BYTES  "%s Bytes"
     IDS_HTTPDOWNLOAD_KILOBYTES "%s KB"
     IDS_CANCEL              "Afbreken"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_HTTPDOWNLOAD_MEGABYTES "%s MB"
     IDS_HTTP_CAPTION        "Bijwerken serverlijst"
     IDS_HTTPDOWNLOAD_TIMELEFT "%s (%s gekopieerd)"
-END
-
-STRINGTABLE
-BEGIN
     IDS_HTTPDOWNLOAD_BYTESPERSECOND "%s Bytes/Sec"
+    IDS_HSAV                "Hashset available"
     IDS_HTTPDOWNLOAD_KILOBYTESPERSECOND "%s KB/Sec"
-    IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE
+    IDS_FD_CORR             "Corrupted"
+    IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE 
                             "Het bestand '%s' bestaat al.\nWilt u het vervangen?"
-    IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN
+    IDS_FD_RECOV            "Recovered"
+    IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN 
                             "Er is een fout opgetreden bij het openen van het bestand voor bestandsoverdracht, Fout:%s"
     IDS_HTTPDOWNLOAD_ABORTING_TRANSFER "Overdracht afgebroken"
+    IDS_FD_COMPR            "Compression"
+    IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
     IDS_MAIN_READY          "eMule Versie %s klaar"
+    IDS_WIZARD_ED2K         "ED2k Settings"
+    IDS_SEL_SKIN            "Select Skin..."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_MAIN_SOCKETERROR    "Fatale fout: Kan geen socket openen voor poort %i"
     IDS_MAIN_BTN_DISCONNECT "Verbreek Ver&binding"
-    IDS_MAIN_BTN_DISCONNECT_TOOLTIP
+    IDS_MAIN_BTN_DISCONNECT_TOOLTIP 
                             "Verbreek verbinding voor de huidige server"
     IDS_ERR_WRONGFILEID     "Ongeldige bestandsidentificatie verzonden"
     IDS_ERR_BADHASHSET      "Corrupte of foutieve hashset ontvangen"
@@ -117,11 +128,39 @@ BEGIN
     IDS_ERR_BADED2KLINK     "Geen geldige ed2k verwijzing"
     IDS_ERR_NOSLLINK        "Geen ED2K server of bestandsverwijzing"
     IDS_ERR_WRONGPACKAGESIZE "Ongeldige OP_FILEREQUEST pakket grootte"
+    IDS_ERR_WRONGHPACKAGESIZE "Ongeldige OP_HASHSETREQUEST pakket grootte"
+    IDS_ERR_BADCLIENTACTION "Een gebruiker veroorzaakt een fout danwel een andere ongeldige handeling: %s. Verbinding met de gebruiker wordt verbroken!"
+    IDS_ERR_UNKNOWNCLIENTACTION 
+                            "Onbekende gebruiker verstuurd een extended protocol pakket"
+    IDS_ERR_OPENMET         "Fout: onmogelijk om part.met bestand te openen! (%s => %s)"
+    IDS_ERR_BADMETVERSION   "Fout: ongeldige part.met bestandsversie! (%s => %s)"
+    IDS_ERR_BADGAP          "Ongeldige Gap-Tag in part.met bestand"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_ERR_EMPTYADRESSESDAT_TITLE "Onmogelijk om de serverlijst op te halen"
+    IDS_ERR_BADSERVERMETVERSION 
+                            "Foutieve versie indicatie in server.met (0x%X)!"
+    IDS_SERVERSFOUND        "%i servers in server.met gevonden"
+    IDS_SERVERSADDED        "%d servers toegevoegd, %d verwijderd"
+    IDS_ERR_BADSERVERLIST   "Fout: het bestand server.met is corrupt, onmogelijk om de serverlijst te laden"
+    IDS_ERR_FILEERROR_SERVERMET 
+                            "Onverwachtse fout bij het lezen van server.met: %s, onmogelijk om de serverlijst te laden"
+    IDS_ERR_SAVESERVERMET   "Fout bij het bewaren van het bestand server.met!"
+    IDS_PASSIVE             "Passive"
+    IDS_MAIN_CONNECTEDTO    "Verbinding gemaakt met:"
+    IDS_MAIN_BTN_CANCEL     "&Afbreken"
+    IDS_AVAIL               "Delen: %d , beschikbaar: %d (%.1f%%)\n\n"
+    IDS_TYPE                "Type"
+    IDS_FILEID              "Bestandsidentificatie"
+    IDS_FILE                "Bestand"
+    IDS_DOWNLOAD            "Ontvangst"
     IDS_SL_SERVERNAME       "Server naam"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IP                  "IP"
     IDS_DESCRIPTION         "Beschrijving"
     IDS_PING                "Ping"
@@ -137,34 +176,34 @@ BEGIN
     IDS_DISCONNECTED        "Verbinding verbroken"
     IDS_USERS               "Gebruikers: %i"
     IDS_UPDOWN              "Up: %.1f(%.1f) | Down: %.1f(%.1f)"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_ASSIGNED2K          "eMule is niet verbonden met ED2K links. Wilt u nu eMule verbinden met ED2K links (aanbevolen) ?"
-    IDS_ERR_EMPTYADRESSESDAT
-                            "Geen serverlijst adres gevonden in 'adresses.dat'. Geef aub een geldig serverlijst adres op in dit bestand om uw serverlijst automatisch te kunnen bijwerken"
-    IDS_ERR_EMPTYADRESSESDAT_TITLE "Onmogelijk om de serverlijst op te halen"
-    IDS_ERR_BADSERVERMETVERSION
-                            "Foutieve versie indicatie in server.met (0x%X)!"
-    IDS_SERVERSFOUND        "%i servers in server.met gevonden"
-    IDS_SERVERSADDED        "%d servers toegevoegd, %d verwijderd"
-    IDS_ERR_BADSERVERLIST   "Fout: het bestand server.met is corrupt, onmogelijk om de serverlijst te laden"
-    IDS_ERR_FILEERROR_SERVERMET
-                            "Onverwachtse fout bij het lezen van server.met: %s, onmogelijk om de serverlijst te laden"
-    IDS_ERR_SAVESERVERMET   "Fout bij het bewaren van het bestand server.met!"
-    IDS_MAIN_CONNECTEDTO    "Verbinding gemaakt met:"
-    IDS_MAIN_BTN_CANCEL     "&Afbreken"
-    IDS_AVAIL               "Delen: %d , beschikbaar: %d (%.1f%%)\n\n"
-    IDS_TYPE                "Type"
-    IDS_FILEID              "Bestandsidentificatie"
-    IDS_FILE                "Bestand"
-    IDS_DOWNLOAD            "Ontvangst"
-END
-
-STRINGTABLE
-BEGIN
     IDS_CONNECTED           "Verbonden"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_WRITEERROR      "Onverwachtse bestandsfout bij het schrijven van %s : %s"
+    IDS_ERR_COMPLETIONFAILED 
+                            "Onverwachtse bestandsfout bij het afronden van %s. Bestand gepauseerd, herstart eMule voor een nieuwe afrondingspoging"
+    IDS_ERR_DELETEFAILED    "Fout bij het verwijderen van %s, u zult dit handmatig moeten doen"
+    IDS_DOWNLOADDONE        "Klaar met het overhalen van %s :-)"
+    IDS_ERR_DELETE          "Kon %s niet verwijderen"
+    IDS_ERR_HASHERRORWARNING 
+                            "Waarschuwing: Onmogelijk het overgehaalde bestandsdeel te hashen - hashset is incompleet (%s)"
+    IDS_ERR_INCOMPLETEHASH  "Fout: Onmogelijk het overgehaalde bestandsdeel te hashen - hashset is incompleet (%s). Dit zou nooit mogen voorkomen"
+    IDS_DOWNLOADING         "Overhalen"
+    IDS_WAITING             "Wachten"
+    IDS_HASHING             "Hashing"
+    IDS_COMPLETING          "Afronding"
+    IDS_COMPLETE            "Afgerond"
+    IDS_PAUSED              "Gepauzeerd"
+    IDS_ERRORLIKE           "Foutief"
+    IDS_ASSIGNED2K          "eMule is niet verbonden met ED2K links. Wilt u nu eMule verbinden met ED2K links (aanbevolen) ?"
+    IDS_ERR_EMPTYADRESSESDAT 
+                            "Geen serverlijst adres gevonden in 'adresses.dat'. Geef aub een geldig serverlijst adres op in dit bestand om uw serverlijst automatisch te kunnen bijwerken"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_LINKNOTADDED        "Kon de verwijzing niet toevoegen"
     IDS_MAIN_EXIT           "Weet u zeker dat u eMule wilt afsluiten?"
     IDS_MAIN_EXITTITLE      "Bevestig afsluiten"
@@ -180,11 +219,11 @@ BEGIN
     IDS_VIEW1               "Bekijk "
     IDS_VIEW2               " (niet gedeeld)"
     IDS_PRIOLOW             "Laag"
+    IDS_PRIONORMAL          "Normaal"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_PRIONORMAL          "Normaal"
     IDS_PRIOHIGH            "Hoog"
     IDS_DOWNLOADMENUTITLE   "Ontvangsten"
     IDS_PRIORITY            "Prioriteit"
@@ -200,11 +239,11 @@ BEGIN
     IDS_SHOWDETAILS         "Toon &Gegevens"
     IDS_SEND_MSG            "Verstuur &Bericht"
     IDS_ASKING              "Vragen"
+    IDS_CONNVIASERVER       "Verbind via server"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_CONNVIASERVER       "Verbind via server"
     IDS_ONQUEUE             "Op de wachtlijst"
     IDS_TRANSFERRING        "Ontvangst"
     IDS_RECHASHSET          "Ontvangst hashset"
@@ -220,11 +259,11 @@ BEGIN
     IDS_SELECTTEMPDIR       "Kies een map voor tijdelijke bestanden"
     IDS_DL_FILENAME         "Bestandsnaam"
     IDS_DL_SIZE             "Grootte"
+    IDS_DL_TRANSF           "Ontvangen"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_DL_TRANSF           "Ontvangen"
     IDS_DL_SPEED            "Snelheid"
     IDS_DL_PROGRESS         "Voortgang"
     IDS_DL_SOURCES          "Bronnen"
@@ -238,12 +277,12 @@ BEGIN
     IDS_CLIENTS             "Gebruiker ID"
     IDS_SEARCH_ANY          "Alles"
     IDS_SEARCH_AUDIO        "Muziek"
-    IDS_SEARCH_PICS         "Plaatjes"
-    IDS_SEARCH_PRG          "Programmas"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_SEARCH_PICS         "Plaatjes"
+    IDS_SEARCH_PRG          "Programmas"
     IDS_SEARCH_VIDEO        "Videos"
     IDS_SEARCH_CDIMG        "CD-Images"
     IDS_SEARCH_ARC          "Archieven"
@@ -258,22 +297,29 @@ BEGIN
     IDS_SRV_READD           "Server was gemarkeerd als dood, hij is opnieuw toegevoegd!"
     IDS_SRV_NOURLAV         "Geen URL beschikbaar."
     IDS_INVALIDURL          "Ongeldige URL"
-    IDS_ERR_FAILEDDOWNLOADMET
-                            "De ontvangst van de serverlijst via %s is mislukt"
-    IDS_PERMISSION          "Toestemming"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_ERR_FAILEDDOWNLOADMET 
+                            "De ontvangst van de serverlijst via %s is mislukt"
+    IDS_PERMISSION          "Toestemming"
     IDS_SHAREDFILES         "Gedeelde Bestanden"
     IDS_PRIOVERYLOW         "Zeer laag"
     IDS_PRIORELEASE         "Vrijgemaakt (Release)"
     IDS_FSTATUS_LOCKED      "Vastgezet"
+    IDS_KADALPHA            "Kademlia is still in an early development stage. We recommend to enabled it only if you are interested in testing it"
     IDS_FSTATUS_FRIENDSONLY "Alleen Vrienden"
     IDS_FSTATUS_PUBLIC      "Publiek"
+    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
     IDS_PRIOHIGHEST         "Hoogste"
+    IDS_AVAILABLE           "available"
     IDS_ERR_NOPRIMCHANGE    "U kunt geen toestemmingen veranderen terwijl een bestand wordt overgehaald!"
     IDS_HIDDEN              "Verborgen"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_FSTAT_TRANSFER      "Overdracht"
     IDS_FSTAT_CONNECTION    "Verbinding"
     IDS_FSTAT_CLIENTS       "Gebruikers"
@@ -281,10 +327,6 @@ BEGIN
     IDS_FSTAT_WAITING       "Wachten..."
     IDS_TIME                "Tijd"
     IDS_STATS_DDATA         "Ontvangen bestandsdelen: %s"
-END
-
-STRINGTABLE
-BEGIN
     IDS_STATS_UDATA         "Verstuurde bestandsdelen (Sessie): %s"
     IDS_STATS_AVGDL         "Gemiddeld Ontvangstratio (Sessie): %.2f kB/s"
     IDS_STATS_AVGUL         "Gemiddeld Verzendratio (Sessie): %.2f kB/s"
@@ -294,6 +336,10 @@ BEGIN
     IDS_STATS_WAITINGUSERS  "In wachtlijst: %i"
     IDS_STATS_RECONNECTS    "Herstelde verbindingen: %i"
     IDS_STATS_WAITTRANSF    "Wacht op overdracht..."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_WAITCONN      "Wacht op verbinding..."
     IDS_STATS_CONNECTEDSINCE "Verbonden met de server sinds: %s"
     IDS_STATS_RATIO         "UL:DL Ratio:"
@@ -301,10 +347,6 @@ BEGIN
     IDS_STATS_TOTAL         "Totaal: %i"
     IDS_STATS_WORKING       "Werkend: %i"
     IDS_STATS_DEAD          "Dood/Verwijderd: %i"
-END
-
-STRINGTABLE
-BEGIN
     IDS_DISABLED            "Uitgeschakeld"
     IDS_STOPPED             "Gestopt"
     IDS_STATS_UPDATELABEL   "Verversings vertraging: %i sec"
@@ -314,6 +356,10 @@ BEGIN
     IDS_ASKEDFAF            "\nVraagt om een ander bestand"
     IDS_WAITED              "Gewacht"
     IDS_ERR_LOADCREDITFILE  "Onmogelijk om het kredietbestand te laden, een nieuw bestand wordt aangemaakt"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ERR_CREDITFILEOLD   "Kredietbestand is verouderd en wordt vervangen"
     IDS_CREDITFILELOADED    "Kredietbestand geladen, %u bekende gebruikers"
     IDS_CREDITFILECORRUPT   "Fout: het kredietbestand is corrupt en wordt vervangen!"
@@ -321,20 +367,20 @@ BEGIN
     IDS_ERR_FAILED_CREDITSAVE "Kon het kredietbestand niet opslaan"
     IDS_NOPARTSFOUND        "Geen bestandsdelen gevonden"
     IDS_FOUNDPARTS          "%i bestandsdelen gevonden"
-END
-
-STRINGTABLE
-BEGIN
     IDS_NEWDOWNLOAD         "Ophalen %s"
     IDS_ERR_ALREADY_DOWNLOADING "Het bestand wordt al opgehaald %s"
     IDS_ERR_ALREADY_DOWNLOADED "Het bestand is al opgehaald %s"
     IDS_ERR_SERVERMET_BAD   "Fout: het bestand known.met is corrupt, onmogelijk om het bestand te openen"
-    IDS_ERR_SERVERMET_UNKNOWN
+    IDS_ERR_SERVERMET_UNKNOWN 
                             "Onverwachtse bestandsfout bij het lezen van known.met: %s, onmogelijk om het bestand te openen"
     IDS_ERR_CONNECTIONERROR "Fout bij het verbinden met %s (%s:%i): %s"
     IDS_ERR_SOCKET          "Fout in serversocket: %s (%s:%i): %s"
     IDS_SHAREDFOUND         "%i bekende gedeelde bestanden gevonden"
     IDS_SHAREDFOUNDHASHING  "%i bekende gedeelde bestanden gevonden, %i nieuwe bestanden worden gehashed"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ERR_UDPEXT          "Fout bij het behandelen van een inkomend uitgebreid UDP Pakket"
     IDS_ERR_INCOMPLETEBLOCK "Gevraagd om een incompleet deel "
     IDS_ERR_OPEN            "Onmogelijk om het gevraagde bestand te openen"
@@ -342,63 +388,40 @@ BEGIN
     IDS_ERR_REQ_FNF         "Gevraagde bestand niet gevonden"
     IDS_CLIENTBLOCKED       "Gebruiker '%s' lijkt een aggressieve gebruiker te zijn en is verbannen uit de overdrachtslijst"
     IDS_LUSERS              "Gebruikers"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_ERR_WRONGHPACKAGESIZE "Ongeldige OP_HASHSETREQUEST pakket grootte"
-    IDS_ERR_BADCLIENTACTION "Een gebruiker veroorzaakt een fout danwel een andere ongeldige handeling: %s. Verbinding met de gebruiker wordt verbroken!"
-    IDS_ERR_UNKNOWNCLIENTACTION
-                            "Onbekende gebruiker verstuurd een extended protocol pakket"
-    IDS_ERR_OPENMET         "Fout: onmogelijk om part.met bestand te openen! (%s => %s)"
-    IDS_ERR_BADMETVERSION   "Fout: ongeldige part.met bestandsversie! (%s => %s)"
-    IDS_ERR_BADGAP          "Ongeldige Gap-Tag in part.met bestand"
-    IDS_ERR_METCORRUPT      "Fout: %s (%s) is corrupt, onmogelijk het bestand te laden"
-    IDS_ERR_FILEERROR       "Onverwachtse bestandsfout bij het lezen %s (%s): %s"
-    IDS_ERR_FILEOPEN        "Onmogelijk om %s (%s) te openen"
-    IDS_ERR_REHASH          "Waarschuwing: %s is mogelijk corrupt, de reeds overgehaalde bestandsdelen worden opnieuw gehashed"
-    IDS_ERR_PART_FNF        ".part bestand niet gevonden"
-    IDS_ERR_OPENMETFILE     "Onmogelijk om het bestand part.met te openen"
-    IDS_ERR_SAVEMET         "FOUT bij het opslaan van bestandsdeel: %s (%s)"
-    IDS_ERR_FOUNDCORRUPTION "Corrupt bestandsdeel (%i) in %s gevonden"
-    IDS_HASHINGDONE         "Opnieuw hashen van %s is afgerond, het bestand lijkt in orde"
-    IDS_ERR_PARTCORRUPT     "Overgehaald bestandsdeel %i is corrupt :(  (%s)"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_ICHWORKED           "ICH: Hersteld corrupt bestandsdeel %i  (%s)"
-    IDS_ERR_OUTOFSPACE      "U heeft onvoldoende schijfruimte om een bestand over te halen %s!"
-    IDS_ERR_WRITEERROR      "Onverwachtse bestandsfout bij het schrijven van %s : %s"
-    IDS_ERR_COMPLETIONFAILED
-                            "Onverwachtse bestandsfout bij het afronden van %s. Bestand gepauseerd, herstart eMule voor een nieuwe afrondingspoging"
-    IDS_ERR_DELETEFAILED    "Fout bij het verwijderen van %s, u zult dit handmatig moeten doen"
-    IDS_DOWNLOADDONE        "Klaar met het overhalen van %s :-)"
-    IDS_ERR_DELETE          "Kon %s niet verwijderen"
-    IDS_ERR_HASHERRORWARNING
-                            "Waarschuwing: Onmogelijk het overgehaalde bestandsdeel te hashen - hashset is incompleet (%s)"
-    IDS_ERR_INCOMPLETEHASH  "Fout: Onmogelijk het overgehaalde bestandsdeel te hashen - hashset is incompleet (%s). Dit zou nooit mogen voorkomen"
-    IDS_DOWNLOADING         "Overhalen"
-    IDS_WAITING             "Wachten"
-    IDS_HASHING             "Hashing"
-    IDS_COMPLETING          "Afronding"
-    IDS_COMPLETE            "Afgerond"
-    IDS_PAUSED              "Gepauzeerd"
-    IDS_ERRORLIKE           "Foutief"
-END
-
-STRINGTABLE
-BEGIN
     IDS_LFILES              "Bestanden"
     IDS_DESC                "Beschrijving: %s"
     IDS_PORT                "Poort"
-    IDS_ERR_NOVALIDSERVERSFOUND
+    IDS_ERR_NOVALIDSERVERSFOUND 
                             "Geen geldige servers voor verbinding gevonden in de serverlijst"
     IDS_CONNECTEDTOREQ      "Verbonden met %s (%s:%i), versturen aanlogverzoek"
     IDS_ERR_FATAL           "Fatale fout bij het maken van een verbinding. De Internet verbinding kan verbroken zijn"
     IDS_ERR_LOSTC           "Verbinding verloren met %s (%s:%i)"
     IDS_ERR_DEAD            "%s (%s:%i) schijnt dood te zijn."
     IDS_ERR_FULL            "%s (%s:%i) schijnt volledig bezet te zijn"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_METCORRUPT      "Fout: %s (%s) is corrupt, onmogelijk het bestand te laden"
+    IDS_ERR_FILEERROR       "Onverwachtse bestandsfout bij het lezen %s (%s): %s"
+    IDS_ERR_FILEOPEN        "Onmogelijk om %s (%s) te openen"
+    IDS_SEL_SKINDIR         "Select Skin Directory..."
+    IDS_ERR_REHASH          "Waarschuwing: %s is mogelijk corrupt, de reeds overgehaalde bestandsdelen worden opnieuw gehashed"
+    IDS_SKIN_PROF           "Skin Profiles"
+    IDS_ERR_PART_FNF        ".part bestand niet gevonden"
+    IDS_ERR_OPENMETFILE     "Onmogelijk om het bestand part.met te openen"
+    IDS_KADOPEN             "Open"
+    IDS_ERR_SAVEMET         "FOUT bij het opslaan van bestandsdeel: %s (%s)"
+    IDS_ERR_FOUNDCORRUPTION "Corrupt bestandsdeel (%i) in %s gevonden"
+    IDS_HASHINGDONE         "Opnieuw hashen van %s is afgerond, het bestand lijkt in orde"
+    IDS_ERR_PARTCORRUPT     "Overgehaald bestandsdeel %i is corrupt :(  (%s)"
+    IDS_ICHWORKED           "ICH: Hersteld corrupt bestandsdeel %i  (%s)"
+    IDS_ERR_OUTOFSPACE      "U heeft onvoldoende schijfruimte om een bestand over te halen %s!"
+    IDS_SE                  "Source Exchange"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ERR_NOSERVERSC      "Geen geldige servers voor verbinding gevonden in de serverlijst"
     IDS_CONNECTEDTO         "Verbinding tot stand gebracht met: %s"
     IDS_DL_PREVIEW          "Bekijken"
@@ -406,10 +429,6 @@ BEGIN
     IDS_VIEWUPLOADS         "Toon Verzendingen"
     IDS_TW_UPLOADS          "Verzendingen"
     IDS_TW_DOWNLOADS        "Ontvangsten"
-END
-
-STRINGTABLE
-BEGIN
     IDS_TW_QUEUE            "Gebruikers in de wachtlijst:"
     IDS_SW_SEARCHBOX        "Zoek"
     IDS_SW_NAME             "Naam"
@@ -419,6 +438,10 @@ BEGIN
     IDS_SW_LINK             "ED2K Verwijzing"
     IDS_SW_START            "Start"
     IDS_SCHEDULER           "Planner"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IRC                 "IRC"
     IDS_SW_RESULT           "Zoekresultaten"
     IDS_SW_DOWNLOAD         "Ophalen selectie"
@@ -426,10 +449,22 @@ BEGIN
     IDS_SV_SERVERINFO       "Serverinfo"
     IDS_SV_LOG              "Log"
     IDS_SV_NEWSERVER        "Nieuwe Server"
+    IDS_SV_ADDRESS          "IP of Adres"
+    IDS_SV_PORT             "Poort"
+    IDS_SV_ADD              "Toevoegen"
+    IDS_SV_MET              "Ververs SERVER.MET via URL"
+    IDS_SV_UPDATE           "Ververs"
+    IDS_SF_FILES            "Gedeelde bestanden"
+    IDS_SF_STATISTICS       "Statistieken"
+    IDS_SF_RELOAD           "Herlaad"
+    IDS_SF_CURRENT          "Huidige sessie"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_PRIORITY_UP         "Verhoog Prioriteit"
+    IDS_PRIORITY_DOWN       "Verlaag Prioriteit"
+    IDS_SPEED_LIMITS        "Snelheids Limieten"
     IDS_CAPACITY_LIMITS     "Bandbreedte Limieten"
     IDS_ADMIN               "Administrator"
     IDS_ACCESSDENIED        "Toegang geweigerd!"
@@ -442,23 +477,30 @@ BEGIN
     IDS_SETUPSPEED          "zet verzendlimiet"
     IDS_SETDOWNSPEED        "zet ontvangstlimiet"
     IDS_DAYLY               "dagelijks"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_DAY_MO_FR           "Maa-Vrij"
     IDS_DAY_SA_SO           "Zat-Zon"
     IDS_MO                  "Maandag"
     IDS_DI                  "Dinsdag"
+    IDS_MI                  "Woensdag"
+    IDS_DO                  "Donderdag"
+    IDS_FR                  "Vrijdag"
+    IDS_SA                  "Zaterdag"
+    IDS_SO                  "Zondag"
+    IDS_WEB_ADMINLOGIN      "Webserver-Admin-Inloggen"
+    IDS_WEB_GUESTLOGIN      "Webserver-Gast-Inloggen"
+    IDS_WEB_SESSIONEND      "Webserver: Uitloggen"
+    IDS_DETAILS             "Details"
+    IDS_ACTION              "Actie"
+    IDS_REMOVE              "Verwijder"
+    IDS_NEW                 "Nieuw"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_SV_ADDRESS          "IP of Adres"
-    IDS_SV_PORT             "Poort"
-    IDS_SV_ADD              "Toevoegen"
-    IDS_SV_MET              "Ververs SERVER.MET via URL"
-    IDS_SV_UPDATE           "Ververs"
-    IDS_SF_FILES            "Gedeelde bestanden"
-    IDS_SF_STATISTICS       "Statistieken"
-    IDS_SF_RELOAD           "Herlaad"
-    IDS_SF_CURRENT          "Huidige sessie"
     IDS_SF_TOTAL            "Totaal"
     IDS_SF_TRANS            "Verstuurd:"
     IDS_SF_ACCEPTED         "Geaccept. verzendingen:"
@@ -466,10 +508,6 @@ BEGIN
     IDS_ST_DOWNLOAD         "Ontvangstsnelheid"
     IDS_ST_UPLOAD           "Verzendsnelheid"
     IDS_ST_CURRENT          "Huidig"
-END
-
-STRINGTABLE
-BEGIN
     IDS_ST_SESSION          "Sessie gemiddeld"
     IDS_ST_ACTIVED          "Actieve ontvangsten"
     IDS_ST_ACTIVEU          "Actieve verzendingen"
@@ -479,6 +517,10 @@ BEGIN
     IDS_CW_SEND             "Verstuur"
     IDS_CW_CLOSE            "Sluit"
     IDS_PW_GENERAL          "Algemeen"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_DIR              "Mappen"
     IDS_PW_NICK             "Schuilnaam"
     IDS_PW_INCOMING         "Inkomende bestanden"
@@ -486,10 +528,6 @@ BEGIN
     IDS_PW_BROWSE           "Bladeren"
     IDS_PW_SHARED           "Gedeelde mappen"
     IDS_PW_CONNECTION       "Verbinding"
-END
-
-STRINGTABLE
-BEGIN
     IDS_PW_DOWNC            "Ontvangst capaciteit"
     IDS_PW_DOWNL            "Ontvangst limiet"
     IDS_PW_UPC              "Verzend capaciteit"
@@ -499,6 +537,10 @@ BEGIN
     IDS_PW_AUTOCON          "Automatisch verbinden bij opstarten"
     IDS_PW_RECON            "Herstel verloren verbinding"
     IDS_PW_SERVER           "Server"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_RDEAD            "Verwijder dode server na"
     IDS_PW_RETRIES          "Pogingen"
     IDS_PW_SCORE            "Gebruik het prioriteits systeem"
@@ -506,10 +548,6 @@ BEGIN
     IDS_PW_UCC              "Ververs de serverlijst als een gebruiker verbind"
     IDS_PW_FILTER           "Filter altijd op slechte IPs"
     IDS_PW_USS              "Ververs serverlijst automatisch bij opstarten"
-END
-
-STRINGTABLE
-BEGIN
     IDS_PW_MISC             "Diversen"
     IDS_PW_TRAY             "Minimali&seer naar trayicoon"
     IDS_PW_BEEP             "Geluid bij fouten"
@@ -519,6 +557,10 @@ BEGIN
     IDS_PW_TOOL             "Tooltip vertragingstijd (seconden)"
     IDS_PW_FRONT            "Breng naar voren bij klik op verwijzing"
     IDS_PW_LANG             "Taal"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_FILES            "Bestanden"
     IDS_PW_ICH              "&Intelligente Corruptie Afhandeling"
     IDS_PW_SHARE            "Toon gedeelde bestanden aan"
@@ -526,10 +568,6 @@ BEGIN
     IDS_PW_FRIENDS          "Vrienden"
     IDS_PW_NOONE            "Niemand"
     IDS_PW_RESET            "Origineel"
-END
-
-STRINGTABLE
-BEGIN
     IDS_PW_APPLY            "Bevestig"
     IDS_EM_TRANS            "Overdrachten"
     IDS_EM_SERVER           "Servers"
@@ -539,6 +577,10 @@ BEGIN
     IDS_EM_STATISTIC        "Statistieken"
     IDS_EM_PREFS            "Voorkeuren"
     IDS_MB_LANGUAGEINFO     "Een standaard taal is geselecteerd. U kunt de taal ten allen tijde wijzigen via de Voorkeuren-knop."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_FD_GENERAL          "Algemeen"
     IDS_FD_NAME             "Volledige naam:"
     IDS_FD_MET              "Met-Bestand:"
@@ -546,12 +588,8 @@ BEGIN
     IDS_FD_SIZE             "Bestandsgrootte:"
     IDS_FD_STATUS           "Status Deelbestand:"
     IDS_FD_TRANSFER         "Overdracht"
-END
-
-STRINGTABLE
-BEGIN
     IDS_FD_SOURCES          "Gevonden Bronnen:"
-    IDS_FD_PARTS	    "Parts:"
+    IDS_FD_PARTS            "Parts:"
     IDS_FD_TRANS            "Verstuurd:"
     IDS_FD_DATARATE         "Snelheid:"
     IDS_FD_TRANSI           "Overdracht:"
@@ -559,6 +597,10 @@ BEGIN
     IDS_FD_CLOSE            "Sluit"
     IDS_FD_TITLE            "Bestandsgegevens"
     IDS_CD_GENERAL          "Algemeen"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CD_UNAME            "Gebruikersnaam:"
     IDS_CD_UHASH            "Gebruikers hash:"
     IDS_CD_CSOFT            "Client software:"
@@ -566,10 +608,6 @@ BEGIN
     IDS_CD_SIP              "Server IP:"
     IDS_CD_VERSION          "Client versie:"
     IDS_CD_UID              "ID:"
-END
-
-STRINGTABLE
-BEGIN
     IDS_CD_SNAME            "Server naam:"
     IDS_CD_CDOWN            "Huidige download:"
     IDS_CD_DOWN             "Opgehaald (deze sessie):"
@@ -579,6 +617,10 @@ BEGIN
     IDS_CD_AUP              "Gemiddeld verstuurd:"
     IDS_CD_TUP              "Totaal verstuurd:"
     IDS_CD_TRANS            "Overdracht"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CD_SCORES           "Score"
     IDS_CD_MOD              "DL/UP verhouding:"
     IDS_CD_RATING           "Beoordeling (totaal):"
@@ -586,10 +628,6 @@ BEGIN
     IDS_CD_TITLE            "Client Details"
     IDS_EMULEW              "Klik"
     IDS_EMULEW2             "Kijken of er een nieuwe versie beschikbaar is"
-END
-
-STRINGTABLE
-BEGIN
     IDS_EMULEW3             "hier"
     IDS_PW_MAXSOURCES       "Max bronnen per bestand"
     IDS_SHAREDFILESCOUNT    "Aantal gedeelde bestanden: %i"
@@ -599,6 +637,10 @@ BEGIN
     IDS_ERR_NOHELLO         "Vraagt om iets zonder boppers te zeggen"
     IDS_ERR_INVALIDPACKAGE  "Ongeldig of corrupt pakket ontvangen"
     IDS_ERR_CLIENTERROR     "Gebruiker '%s' (IP:%s) veroorzaakt een fout: %s. Verbinding met gebruiker wordt verbroken!"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ERR_BADSIZE         "Ongeldige grootte (OP_QUEUERANKING)"
     IDS_ERR_BADCLIENT2      "Gebruiker '%s' (IP:%s) veroorzaakt een fout: %u. Verbinding met gebruiker wordt verbroken!"
     IDS_ERR_NOTAFILELINK    "Geen bestandsverwijzing"
@@ -606,10 +648,6 @@ BEGIN
     IDS_ERR_UDP_MISCONF     "Fout bij het behandelen van een inkomend UDP Pakket (Waarschijnlijk foutief geconfigureerde server)"
     IDS_CHAT_START          "*** Chat Sessie Start : "
     IDS_FILEPRIO            "Bestands prioriteit"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SCORE               "Score"
     IDS_ASKED               "Gevraagd"
     IDS_LASTSEEN            "Laatst gezien"
@@ -619,6 +657,10 @@ BEGIN
     IDS_UFAILED             "Gefaald"
     IDS_OPENFILE            "Open bestand"
     IDS_DATE                "Datum"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PARTINFOS           "Deel-Bestandsnaam:"
     IDS_PARTINFOS2          "Ontvangsten (van %d bronnen)"
     IDS_USERID              "Gebruikers ID"
@@ -626,10 +668,6 @@ BEGIN
     IDS_SERVER              "Server"
     IDS_SOURCEINFO          "Gevraagde delen: %dx - Beschikbare delen: %d"
     IDS_CLIENTSOURCENAME    "\nBestandsnaam gebruiker: "
-END
-
-STRINGTABLE
-BEGIN
     IDS_USERINFO            "Schuilnaam: %s\n"
     IDS_FILESTATS_SESSION   "Bestandsinformatie voor deze sessie: goedgekeurd %d van %d verzoeken, %s overgedragen\n"
     IDS_FILESTATS_TOTAL     "Bestandsinformatie voor alle sessies: goedgekeurd %d van %d verzoeken, %s overgedragen"
@@ -639,6 +677,10 @@ BEGIN
     IDS_SF_REQUESTS         "Verzoeken"
     IDS_SF_ACCEPTS          "Geaccepteerde verzoeken"
     IDS_SF_TRANSFERRED      "Overgedragen data"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_REMOVESEARCHSTRING  "Verwijder geselecteerde zoekopdracht(en)"
     IDS_REMOVESELECTED      "Verwijder het geselecteerde"
     IDS_REMOVEALLSEARCH     "Verwijder alles"
@@ -646,10 +688,6 @@ BEGIN
     IDS_SF_FAIL             "Onbereikbare servers"
     IDS_SF_WUSER            "Gebruikers op werkende servers"
     IDS_SF_WFILE            "Bestanden op werkende servers"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SF_USER             "Totaal gebruikers"
     IDS_SF_FILE             "Totaal bestanden"
     IDS_UPLOADTIME          "Verzendingstijd"
@@ -659,6 +697,10 @@ BEGIN
     IDS_UNBAN               "Ban opgeheven"
     IDS_SF_WORKING          "Werkende servers"
     IDS_ADDTOSTATIC         "Toevoegen aan vaste serverlijst"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ADDED2SSF           "Toegevoegd aan vaste serverlijst"
     IDS_STATICSERVER        "Vast"
     IDS_ERROR_SSF           "Onmogelijk om staticservers.dat te openen"
@@ -666,10 +708,6 @@ BEGIN
     IDS_SF_ACTIVECON        "Actieve verbindingen (geschat)"
     IDS_SF_MAXCONLIMITREACHED "Max verbindingslimiet bereikt"
     IDS_SF_AVGCON           "Gemiddelde verbindingen (geschat)"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SF_PEAKCON          "Top aantal verbindingen (geschat)"
     IDS_ST_ACTIVEC          "Actieve verbindingen"
     IDS_NETWORK             "Netwerk"
@@ -679,6 +717,10 @@ BEGIN
     IDS_BYTES               "Bytes"
     IDS_KBYTES              "KB"
     IDS_MBYTES              "MB"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_GBYTES              "GB"
     IDS_TBYTES              "TB"
     IDS_SECS                "sec."
@@ -686,17 +728,19 @@ BEGIN
     IDS_HOURS               "h"
     IDS_DAYS                "D"
     IDS_ED2KLINKFIX         "ED2K Verwijzingen"
-END
-
-STRINGTABLE
-BEGIN
     IDS_RECONNECT           "Nieuwe automatische verbindingspoging met de server in %d seconden"
     IDS_SERVERADDED         "Server toegevoegd: %s"
+    IDS_IRC_IGNOREJOINMESSAGE "Ignore Join info messages"
     IDS_STATS_SUCCUPCOUNT   "Totaal aan succesvolle verzendings sessies: %i (%.2f%%)"
+    IDS_IRC_IGNOREPARTMESSAGE "Ignore Part info messages"
     IDS_STATS_FAILUPCOUNT   "Totaal aan mislukte verzendings sessies: %i (%.2f%%)"
     IDS_STATS_AVEUPTIME     "Gemiddelde Verzendingstijd: %s"
     IDS_SEARCHMINSIZE       "Min. grootte"
     IDS_SEARCHMAXSIZE       "Max. grootte"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PREF_ONLINESIG      "Activeer Online-Signatuur"
     IDS_ERROR_SAVEFILE      "Fout bij het opslaan"
     IDS_REQ_SHAREDFILES     "Gebruiker %s (%u) vraagt om je gedeelde bestandenlijst -> %s"
@@ -704,12 +748,18 @@ BEGIN
     IDS_DENIED              "Afgewezen"
     IDS_PW_CON_DOWNLBL      "Ontvangen"
     IDS_PW_CON_UPLBL        "Verzenden"
-    IDS_PW_AUTOCONNECTSTATICONLY
+    IDS_PW_AUTOCONNECTSTATICONLY 
                             "Alleen automatisch verbinden met vaste servers"
     IDS_PW_CON_LIMITFRM     "Limieten"
+    IDS_PW_FILE_ICH         "I.C.H actief"
+    IDS_STATS_AVGLABEL      "Gemiddelde grafiektijd: %i mins"
+    IDS_GRAPHS              "Grafieken"
+    IDS_STREE               "Statistiek Totaaloverzicht"
+    IDS_IRC_IGNOREQUITMESSAGE "Ignore Quit info messages"
+    IDS_STATSSETUPINFO      "Instellingen Statistieken"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_DOWNLOADMOVIECHUNKS "Ophalen eerste/laatste filmdeel als eerste"
     IDS_UPDATEQUEUE         "Wachtrij lijst niet in realtime aanpassen"
@@ -720,7 +770,7 @@ BEGIN
     IDS_RECOVERY_FAILED     "Archief kon niet worden hersteld."
     IDS_STARTNEXTFILE       "Start volgend gepauzeerde bestand als een bestand is afgerond"
     IDS_FULLCHUNKTRANS      "Probeer volledige chunks over te dragen bij alle verzendingen"
-    IDS_MANUALSERVERHIGHPRIO
+    IDS_MANUALSERVERHIGHPRIO 
                             "Geef handmatig toegevoegde servers Hoge Prioriteit"
     IDS_VERBOSE             "Uitgebreid (met extra programma informatie)"
     IDS_FLAT                "plat"
@@ -730,13 +780,8 @@ BEGIN
     IDS_SEARCHAVAIL         "Beschikbaarheid"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_PW_FILE_ICH         "I.C.H actief"
-    IDS_STATS_AVGLABEL      "Gemiddelde grafiektijd: %i mins"
-    IDS_GRAPHS              "Grafieken"
-    IDS_STREE               "Statistiek Totaaloverzicht"
-    IDS_STATSSETUPINFO      "Instellingen Statistieken"
     IDS_HARDLIMIT           "Harde Limiet"
     IDS_COL_MORECOLORS      "meer..."
     IDS_KBYTESEC            "kB/s"
@@ -748,15 +793,15 @@ BEGIN
     IDS_PW_TBN_ONLOG        "Nieuwe toevoeging in de log"
     IDS_PW_TBN_ONCHAT       "Starten van nieuwe chat sessie"
     IDS_PW_TBN_POP_ALWAYS   "Er is een nieuw chat bericht"
-END
-
-STRINGTABLE
-BEGIN
     IDS_PW_TBN_ONDOWNLOAD   "Een ontvangst is afgerond"
     IDS_PW_EKDEV_OPTIONS    "Berichten"
     IDS_PW_TASKBARNOTIFIER  "Berichten Popup"
     IDS_PW_TBN_OPTIONS      "Toon Popup bij"
     IDS_TBN_NEWCHATMSG      "Bericht van"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_CON_CAPFRM       "Capaciteit"
     IDS_IRC_STATUSLOG       "Status Log"
     IDS_IRC_STATUS          "Status"
@@ -768,15 +813,15 @@ BEGIN
     IDS_IRC_VOICE           "Stemgeluid"
     IDS_IRC_HALFOP          "HalfOp"
     IDS_IRC_DEHALFOP        "DeHalfOp"
-END
-
-STRINGTABLE
-BEGIN
     IDS_IRC_KICK            "Er uit knikkeren"
     IDS_IRC_SLAP            "Slap"
     IDS_IRC_JOIN            "Toetreden"
     IDS_IRC_CHANNELLIST     "Kanalen lijst"
     IDS_IRC_CONNECT         "Verbind"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IRC_DISCONNECT      "Verbreek verbinding"
     IDS_IRC_HASJOINED       "* %s is toegetreden tot %s"
     IDS_IRC_HASPARTED       "* %s verliet %s (%s)"
@@ -788,15 +833,15 @@ BEGIN
     IDS_IRC_SETSMODE        "* %s zet modus: %s %s"
     IDS_IRC_NOTSUPPORTED    "** Sommige gezette modussen worden nog niet ondersteund. Het kan zijn dat u het kanaal moet verlaten en weer binnenkomen voor een update van de schuilnamen lijst.."
     IDS_IRC_CHANNEL         "Kanaal"
-END
-
-STRINGTABLE
-BEGIN
     IDS_IRC_NICK            "Schuilnaam"
     IDS_IRC_SEND            "Versturen"
     IDS_IRC_NAME            "Naam"
     IDS_IRC_SLAPMSGSEND     "PRIVMSG %s :\001ACTION slaps %s around with a large Babelfish!\001"
     IDS_IRC_ADDTIMESTAMP    "Voeg tijdsaanduiding toe aan berichten."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IRC_USEFILTER       "Gebruik Kanalenlijst Filter"
     IDS_IRC_PERFORM         "Uitvoeren"
     IDS_IRC_USEPERFORM      "Gebruik de Uitvoeren regel bij het verbinden."
@@ -808,13 +853,15 @@ BEGIN
     IDS_CLEANUP             "Opschonen"
     IDS_RENAME              "Hernoemen"
     IDS_IRC_ADDLINKTOIRC    "Voeg dit toe aan het IRC klembord om naar vrienden te sturen."
-END
-
-STRINGTABLE
-BEGIN
     IDS_IRC_SENDLINK        "Stuur dit naar vriend: "
     IDS_IRC_RECIEVEDLINK    "%s stuurde (%s) om automatisch gestart te worden."
     IDS_IRC_ACCEPTLINKS     "Accepteer ED2K links binnen IRC. (Voorzichtig!)"
+    IDS_SHARED              "Shared"
+    IDS_DOWNLOADED          "Downloaded"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SOURCENAMES         "Bron namen"
     IDS_PREF_STARTMIN       "Start geminimaliseerd"
     IDS_PS_TBN_IMPORTANT    "Urgent: Uw schijfruimte is vol, Verbinding met de server is verloren"
@@ -828,13 +875,13 @@ BEGIN
     IDS_SP_UL2              "Verzendings tijdsduur-gemiddeld"
     IDS_SP_UL3              "Verzendings sessie-gemiddeld"
     IDS_SP_ACTCON           "Actieve verbindingen"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SP_ACTDL            "Actieve ontvangsten"
     IDS_SP_ACTUL            "Actieve verzendingen"
     IDS_PW_TIT_UP           "Instellen Verzendingssnelheid limiet"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_TIT_DOWN         "Instellen Ontvangstsnelheid limiet"
     IDS_PW_UNLIMITED        "Onbeperkt"
     IDS_PW_MINREC           "Aanbevolen minimum\t%i "
@@ -843,18 +890,19 @@ BEGIN
     IDS_IRC_IGNOREINFOMESSAGE "Negeer info bericht."
     IDS_CONNECTIONLOST      "Verbinding verloren"
     IDS_WIZ_OS_FRAME        "Besturingssysteem"
-    IDS_WIZ_CONCURENTDOWN_FRAME
+    IDS_WIZ_CONCURENTDOWN_FRAME 
                             "Hoeveel ontvangsten heeft u meestal tegelijkertijd lopen?"
+    IDS_HASHINGFILE         "Hashing file:"
     IDS_WIZ_CUSTOM_FRAME    "Hier uw resultaten na het testen van de verbindingssnelheid."
     IDS_WIZ_HOTBUTTON_FRAME "Voorinstellings knoppen"
     IDS_WIZ_TRUEUPLOAD_TEXT "Ware Verzendings bandbreedte"
     IDS_WIZ_TRUEDOWNLOAD_TEXT "Ware Ontvangst bandbreedte"
-END
-
-STRINGTABLE
-BEGIN
     IDS_FRIENDLIST          "Vrienden"
     IDS_CHATDISCONNECTED    "*** Verbinding verbroken"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_WIZARD              "Wizard"
     IDS_ADDFRIEND           "Voeg toe aan Vrienden"
     IDS_REMOVEFRIEND        "Verwijder Vriend"
@@ -869,12 +917,12 @@ BEGIN
     IDS_WIDTH               "Breedte"
     IDS_FPS                 "Fps"
     IDS_CHANNELS            "Kanalen"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SAMPLERATE          "Samplerate"
     IDS_ROUNDBITRATE        "Ronde Bitrate"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_HEIGHT              "Hoogte"
     IDS_SHAREDFILES_FAILED  "Niet mogelijk om gedeelde bestanden op te halen van '%s'"
     IDS_SHAREDFILES_REQUEST "Vraag gedeelde bestanden van '%s'"
@@ -889,18 +937,19 @@ BEGIN
     IDS_UNIT                "Eenheid:"
     IDS_WIZARD_CUSTOM       "Aangepast"
     IDS_WIZARD_ENTERBELOW   "(beneden invoeren!)"
+    IDS_STATS_MAXAVGDL      "Max Gemiddeld Ontvangstratio (Sessie): %.2f kB/s"
+    IDS_USS_MIN             "Warning: USS currently does not support upload speeds less then 10K. If you know your connection is not able to handle this, please disable USS."
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_STATS_MAXAVGDL      "Max Gemiddeld Ontvangstratio (Sessie): %.2f kB/s"
     IDS_STATS_MAXDL         "Max Ontvangstratio (Sessie): %.2f kB/s"
     IDS_PW_FASTSRVCON       "Snel met de server verbinden"
     IDS_SOURCELINKFAILED    "U heeft een Hoge ID nodig voor het creëeren van een geldige bronverwijzing"
     IDS_CREATESOURCELINK    "Kopieer ED2k link naar klembord (bron)"
     IDS_ERR_LOADSERVERMET   "Onmogelijk om het bestand server.met te laden!"
     IDS_ERR_CORRUPTCOMPRPKG "Corrupt gecomprimeerd pakket voor %s ontvangen (fout %i)"
-    IDS_ERR_EMFRIENDSINVALID
+    IDS_ERR_EMFRIENDSINVALID 
                             "Het bestand emfriends.met is ongeldig of corrupt!"
     IDS_ERR_READEMFRIENDS   "Onbekende fout bij het lezen van emfriends.met: %s"
     IDS_ERR_KNOWNSERVERINFOREC "Onbekende server info ontvangen!"
@@ -912,7 +961,7 @@ BEGIN
     IDS_PRIOAUTO            "Auto"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_PRIOAUTONORMAL      "Auto [Normaal]"
     IDS_PRIOAUTOHIGH        "Auto [Hoog]"
@@ -932,7 +981,7 @@ BEGIN
     IDS_PAF_MOREINFO        "Extra Informatie"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_ERR_NOVALIDFRIENDINFO "U moet een geldig IP en poort nummer invullen!"
     IDS_ADD                 "Voeg toe"
@@ -952,7 +1001,7 @@ BEGIN
     IDS_CMT_RATEHELP        "Kies bestandsbeoordeling of informeer andere gebruikers als het ongeldig is"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_CMT_FAKE            "Ongeldig / Corrupt / Nep"
     IDS_CMT_POOR            "Slecht"
@@ -972,7 +1021,7 @@ BEGIN
     IDS_ADDNEWFILESPAUSED   "Voeg te ontvangen bestanden toe in Gepauzeerde modus"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_FD_STATS            "Verloren door corruptie: %s      Gewonnen door compressie: %s\nChunks gerepareerd door I.C.H.: %i"
     IDS_ERR_NOHELP          "Help-bestand niet gevonden.\n Bezoek onze homepage om het nieuwste help-bestand op te halen! (download sectie)"
@@ -989,11 +1038,11 @@ BEGIN
     IDS_NEWVERSIONAVL       "Een nieuwe eMule versie is beschikbaar! Kijk op de Project Homepage voor meer informatie."
     IDS_NEWVERSIONAVLPOPUP  "Een nieuwe eMule versie is beschikbaar. Klik hier voor informatie over de nieuwe versie!"
     IDS_NEWVERSIONFAILED    "Onmogelijk te controleren of er een nieuwe versie is."
-    IDS_CB_TBN_ONNEWVERSION "Nieuwe eMule-versie gevonden"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_CB_TBN_ONNEWVERSION "Nieuwe eMule-versie gevonden"
     IDS_NONEWERVERSION      "Geen nieuwe eMule-versie gevonden."
     IDS_VERSIONCHECK        "&Versie controle"
     IDS_VISITVERSIONCHECK   "\n\nWilt u nu de Informatiepagina bezoeken?"
@@ -1009,12 +1058,12 @@ BEGIN
     IDS_FROVERHEAD          "Bestandsverzoeken overhead (Pakketten): %s (%s)"
     IDS_SSOVERHEAD          "Bronuitwisselings overhead (Pakketten): %s (%s)"
     IDS_SOVERHEAD           "Server overhead (pakketten): %s (%s)"
-    IDS_ERR_FILECOMPLETIONTHREAD
-                            "Fout bij creëeren thread voor bestandsafronding"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_ERR_FILECOMPLETIONTHREAD 
+                            "Fout bij creëeren thread voor bestandsafronding"
     IDS_FILEBUFFERSIZE      "Bestandsbuffer grootte"
     IDS_QUEUESIZE           "Wachtrij grootte"
     IDS_DAYS2               "dagen"
@@ -1029,12 +1078,12 @@ BEGIN
     IDS_TBN_NOMESSAGEHISTORY "Geen vorige berichten!"
     IDS_PW_DAP              "Voeg nieuwe ontvangsten toe met auto-prioriteit"
     IDS_FD_LASTCHANGE       "Laatste Ontvangst:"
-    IDS_STATS_RUNTIME       "Runtime"
-    IDS_ALL                 "alle"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_STATS_RUNTIME       "Runtime"
+    IDS_ALL                 "alle"
     IDS_CAT_ADD             "Toevoegen categorie"
     IDS_CAT_EDIT            "Bewerk categorie"
     IDS_CAT_REMOVE          "Verwijder categorie"
@@ -1049,12 +1098,12 @@ BEGIN
     IDS_ALLOTHERS           "niet-gecatelogiseerd"
     IDS_TOCAT               "Koppel aan categorie"
     IDS_CAT_UNASSIGN        "(ontkoppelen)"
-    IDS_ADDDOWNLOADSFROMCB  "Voeg deze ED2k-bestandsverwijzingen toe aan Overdrachten?\n"
-    IDS_ADDDOWNLOADSFROMCBTITLE "ED2k-bestandsverwijzing op het klembord"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_ADDDOWNLOADSFROMCB  "Voeg deze ED2k-bestandsverwijzingen toe aan Overdrachten?\n"
+    IDS_ADDDOWNLOADSFROMCBTITLE "ED2k-bestandsverwijzing op het klembord"
     IDS_PF_WATCHCB          "Bekijk klembord voor ED2k-bestandsverwijzingen"
     IDS_SECURITY            "Veiligheid"
     IDS_IPFILTERLOADED      "%i IP-filters geladen"
@@ -1069,12 +1118,12 @@ BEGIN
     IDS_CL_TRANSFUP         "Overgedragen Verz"
     IDS_CL_DOWNLSTATUS      "Ontvangst Status"
     IDS_CL_TRANSFDOWN       "Overgedragen Ontv"
-    IDS_CL_PENDING          "Wachtend"
-    IDS_CL_LOW2LOW          "Laag naar Laag IP"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_CL_PENDING          "Wachtend"
+    IDS_CL_LOW2LOW          "Laag naar Laag IP"
     IDS_ERROR               "Fout"
     IDS_OPENINC             "&Open Ontvangsten map"
     IDS_HOTMENU             "Hotmenu"
@@ -1089,12 +1138,12 @@ BEGIN
     IDS_FIRSTRUNASSIST      "Wilt u bij de eerste installatie de Instellingen-wizard gebruiken?"
     IDS_FIRSTAUTOCON        "Wilt u eMule bij het opstarten automatisch laten verbinden?\r\r(Standaard is Nee)"
     IDS_FIRSTCOMPLETE       "U heeft de Instellingen-Wizard afgerond.\r\rAll these settings and more can be changed by clicking the preferences icon. For explainations and support check out the help by pressing F1 in eMule!"
-    IDS_ENTERUSERNAME       "Vul aub. uw gebruikersnaam in:"
-    IDS_STATIC_CPUMEM       "Bewaar CPU- && geheugen gebruik"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_ENTERUSERNAME       "Vul aub. uw gebruikersnaam in:"
+    IDS_STATIC_CPUMEM       "Bewaar CPU- && geheugen gebruik"
     IDS_LOG2DISK            "Save log to disk"
     IDS_EDITCAT             "Bewerk Categorie-Instellingen"
     IDS_PW_WS               "Web Server"
@@ -1102,20 +1151,20 @@ BEGIN
     IDS_WEB_LOGIN           "Inloggen"
     IDS_WEB_ENTER_PASSWORD  "Geef uw wachtwoord hier"
     IDS_WEB_LOGIN_NOW       "Nu inloggen"
-    IDS_WEB_CONFIRM_REMOVE_SERVER
+    IDS_WEB_CONFIRM_REMOVE_SERVER 
                             "Weet u zeker dat u deze server van de lijst wilt verwijderen?"
     IDS_WEB_CONTROL         "Web Control Panel"
     IDS_WEB_LOGOUT          "Uitloggen"
     IDS_WEB_ACTIONS         "Acties"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_WEB_SHOW_UPLOAD_QUEUE "Toon Wachtrij"
     IDS_WEB_HIDE_UPLOAD_QUEUE "Verberg Wachtrij"
     IDS_WEB_GZIP_COMPRESSION "Gzip Compressie"
-END
-
-STRINGTABLE
-BEGIN
     IDS_WEB_GZIP_COMMENT    "Bewaar dataverkeer, speciaal voor graphics."
-    IDS_WEB_UPLOAD_QUEUE_COMMENT
+    IDS_WEB_UPLOAD_QUEUE_COMMENT 
                             "Activeer of deactiveer het tonen van de wachtrij op de overdrachten pagina."
     IDS_WEB_REFRESH_TIME    "Verversingstijd Paginas"
     IDS_WEB_REFRESH_COMMENT "Tijd in seconden (nul=gedeactiveerd):"
@@ -1128,33 +1177,14 @@ BEGIN
     IDS_WEB_CONLIMITS       "Verbindings Limieten"
     IDS_INFLST_USER_TOTALDOWNLOAD "Ontvangen totaal"
     IDS_INFLST_USER_TOTALUPLOAD "Verzonden totaal"
-    IDS_PRIORITY_UP         "Verhoog Prioriteit"
-    IDS_PRIORITY_DOWN       "Verlaag Prioriteit"
-    IDS_SPEED_LIMITS        "Snelheids Limieten"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
-    IDS_MI                  "Woensdag"
-    IDS_DO                  "Donderdag"
-    IDS_FR                  "Vrijdag"
-    IDS_SA                  "Zaterdag"
-    IDS_SO                  "Zondag"
-    IDS_WEB_ADMINLOGIN      "Webserver-Admin-Inloggen"
-    IDS_WEB_GUESTLOGIN      "Webserver-Gast-Inloggen"
-    IDS_WEB_SESSIONEND      "Webserver: Uitloggen"
-    IDS_DETAILS             "Details"
-    IDS_ACTION              "Actie"
-    IDS_REMOVE              "Verwijder"
-    IDS_NEW                 "Nieuw"
     IDS_WEB_BADLOGINATTEMPT "Webserver: Mislukte Inlog poging"
     IDS_ERR_TOOLARGEFILE    "Bestand is groter dan ondersteund door het eDonkey protocol (>=4GB)"
     IDS_MSGONLYFRIENDS      "Accepteer alleen van vrienden"
     IDS_MSGONLYSEC          "Accepteer alleen van geldige gebruikers"
-END
-
-STRINGTABLE
-BEGIN
     IDS_DAY_MO_SA           "Maa-Zat"
     IDS_LIMITSOURCES        "Limiet bronnen"
     IDS_LIMITCONS5SEC       "Limiet verbindien/5sec"
@@ -1167,14 +1197,14 @@ BEGIN
     IDS_SCHED_ENTERVAL      "Vul de nieuwe waarde in aub.:"
     IDS_SCHED_ACTCONFIG     "Configureer Actie"
     IDS_SELECTCAT           "Selecteer categorie"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ALLUNASSIGNED       "geen van allen toegewezen"
     IDS_ACTSESSIONS         "actieve sessie(s)"
     IDS_WEBSRV              "WebInterface"
     IDS_SW_REFETCHRES       "Opnieuw zoeken"
-END
-
-STRINGTABLE
-BEGIN
     IDS_FILEHASH            "Bestands Hash"
     IDS_GLOBALSEARCH2       "Globaal Zoeken"
     IDS_PW_PROXY            "Proxy"
@@ -1187,15 +1217,15 @@ BEGIN
     IDS_SHOWCATINFO         "Toon ontvangstinfo in categorien tabs"
     IDS_SW_SEARCHINGINFO    "Bezig met zoeken. FF dimmen aub.!"
     IDS_LOGENTRY            "Log regel"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_COPY                "Kopieren"
     IDS_SELECTALL           "Selecteer Alles"
     IDS_AUTOSCROLL          "Autoscroll"
     IDS_WIZ1_WELCOME_TITLE  "Welkom bij eMule"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_WIZ1_WELCOME_ACTIONS
+    IDS_WIZ1_WELCOME_ACTIONS 
                             "Deze wizard begeleidt u bij de eerste stappen voor de configuratie van eMule."
     IDS_WIZ1_WELCOME_BTN_HINT "Om verder te gaan klik Next."
     IDS_WIZ1_END_TITLE      "Afronden van de Wizard"
@@ -1208,14 +1238,14 @@ BEGIN
     IDS_PREF_STARTNEXTFILECAT "prefereer dezelfde categorie"
     IDS_REPAINTGRAPHS       "Statistiek grafieken niet opnieuw tekenen bij aanpassen grootte venster"
     IDS_SOFTFILES           "Zachte Bestandslimiet"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_HARDFILES           "Harde Bestandslimiet"
     IDS_FILTER              "Filter"
     IDS_LINKS               "Links"
     IDS_HM_SCHED_ON         "Schakel Planner In"
-END
-
-STRINGTABLE
-BEGIN
     IDS_HM_SCHED_OFF        "Schakel Planner Uit"
     IDS_HM_LINKHP           "eMule Homepage"
     IDS_HM_LINKFAQ          "eMule FAQ"
@@ -1228,14 +1258,14 @@ BEGIN
     IDS_SHAREDINFO1         "Gebruiker %s (%u) verstuurt een lijst van gedeelde bestanden voor de map '%s'"
     IDS_SHAREDINFO2         "Gebruiker %s (%u) is klaar met het zenden van de lijst met gedeelde bestanden"
     IDS_SHAREDANSW3         "Gebruiker %s (%u) verstuurt een niet gevraagde lijst van gedeelde bestanden voor map '%s' - genegeerd"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SHAREDREQDENIED     "Gebruiker %s (%u) verbied de toegang tot de lijst van gedeelde mappen/bestanden"
     IDS_AUTOCLEANUPFN       "Opschonen bestandsnaam"
     IDS_ONNEWDOWNLOAD       "Initialisering"
     IDS_FILTERFILENAMEWORD  "Voer woorden om te filteren in gescheiden door |"
-END
-
-STRINGTABLE
-BEGIN
     IDS_FNFILTERTITLE       "Wijzig bestands woordenfilter voor opschonen namen"
     IDS_CHANGECATVIEW       "Verander scheidingsteken"
     IDS_STATUS_NOTCOMPLETED "Incompleet"
@@ -1248,14 +1278,14 @@ BEGIN
     IDS_STATS_SVRECUSERS    "Max. Gebruikers Online"
     IDS_SEARCH_TEXT         "Zoek naar"
     IDS_STATS_SVRECFILES    "Max. Bestanden Beschikbaar"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_SHRECNUM      "Max. Bestanden ooit Gedeeld"
     IDS_SEARCH_COLUMN       "Zoek in kolom"
     IDS_STATS_SHRECSIZE     "Grootste Hoeveelheid Gedeeld"
     IDS_STATS_SHRECASIZE    "Grootste Gemiddelde Bestandsgrootte"
-END
-
-STRINGTABLE
-BEGIN
     IDS_STATS_MYRUNTIME     "Totale Tijd eMule Actief: %s"
     IDS_STATS_SESSION       "Sessie"
     IDS_STATS_SRATIO        "Sessie UL:DL Ratio:"
@@ -1268,14 +1298,14 @@ BEGIN
     IDS_STATS_SDLSES        "Succesvolle Ontvangst Sessies"
     IDS_STATS_FDLSES        "Mislukte Ontvangst Sessies"
     IDS_STATS_AVGDATADLSES  "Gemiddelde Ontvangsten per Sessie"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_ULSES         "Verzendings Sessies"
     IDS_STATS_GAINCOMP      "Gewonnen door Compressie: %s"
     IDS_STATS_LOSTCORRUPT   "Verloren door Corruptie: %s"
     IDS_STATS_AVGDATAULSES  "Gemiddelde Verzendingen Per Sessie"
-END
-
-STRINGTABLE
-BEGIN
     IDS_STATS_ICHSAVED      "Bestandsdelen Gered door I.C.H: %u"
     IDS_STATS_MBRESET_TXT   "Weet u zeker dat u uw gezamelijke statistieken wilt resetten?\n\nMocht u van gedachten veranderen dan kunt u deze actie ongedaan maken door te klikken op de 'Herstel Stats' knop."
     IDS_STATS_MBRESET_CAP   "Bevestig Reset"
@@ -1288,14 +1318,14 @@ BEGIN
     IDS_STATS_BNRESTORE     "Herstel Statistieken"
     IDS_CONNECTIONSTATISTICS "Verbindings Statistieken"
     IDS_PPGSTATS_YSCALE     "Verbindings Statistieken Y-As Schaal:"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PPGSTATS_ACRATIO    "Actieve Verbindings Ratio:"
     IDS_STATS_PROBLEMATIC   "Problematisch"
     IDS_LONGHRS             "Uren"
     IDS_STATS_LARGESTFILE   "Grootste Gedeelde Bestand"
-END
-
-STRINGTABLE
-BEGIN
     IDS_CLIENTSOFTWARE      "Gebruikers Software"
     IDS_STATS_DSPF          "Deelbestand"
     IDS_STATS_DATASOURCE    "Data Bron"
@@ -1308,14 +1338,14 @@ BEGIN
     IDS_STATS_MAXAVGUL      "Max Gemid. Verzendingssnelheid"
     IDS_STATS_MAXUL         "Max Verzendingssnelheid"
     IDS_STATS_AVGDLTIME     "Gemid. Ontvangst Tijd"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_OLDCLIENTS    "Oud"
     IDS_STATS_PRTDEF        "Standaard"
     IDS_STATS_PRTOTHER      "Andere"
     IDS_STATS_MNUTREETITLE  "Statistieken Boom"
-END
-
-STRINGTABLE
-BEGIN
     IDS_STATS_MNUTREECPYSEL "Kopieer Geselecteerde tak"
     IDS_STATS_MNUTREECPYALL "Kopieer alle Statistieken"
     IDS_STATS_MNUTREEHTML   "HTML Mogelijkheden"
@@ -1328,14 +1358,14 @@ BEGIN
     IDS_STATS_LASTRESETSTATIC "Laatste reset statistieken: %s"
     IDS_STATS_MONTHLY       "Maandelijks"
     IDS_STATS_YEARLY        "Jaarlijks"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_TIMESTATS     "Tijd Statistieken"
     IDS_STATS_AVGANDPROJ    "Geprojecteerde Gemiddelden"
     IDS_STATS_TIMESINCERESET "Tijd sinds laatste reset: %s"
     IDS_CRYPT_INITFAILED    "Fout bij initialiseren cryptokeys - Beveiligde Identificatie gedeactiveerd"
-END
-
-STRINGTABLE
-BEGIN
     IDS_CD_IDENT            "Identificatie:"
     IDS_IDENTOK             "Succesvol"
     IDS_IDENTFAILED         "Ongeldig"
@@ -1348,14 +1378,14 @@ BEGIN
     IDS_UNCFOLDERS          "UNC Mappen"
     IDS_USESECIDENT         "Gebruik Beveiligde Identificatie"
     IDS_ADVSPAMFILTER       "Uitgebreid Spamfilter"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_STATS_SECUREIDENT   "Beveiligde Identificatie (OK : Gefaald )"
     IDS_ONDISK              "Grootte op schijf: "
     IDS_CLIENTCOL           "Waarschuwing: Gelijke gebruiker gevonden bij een andere huidig verbonden gebruiker: %s (%s) en %s (%s)"
     IDS_SEARCH_UNTERMSTRING "Niet-afgesloten string"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SEARCH_GENERALERROR "Algemene Fout"
     IDS_SEARCH_MISSINGORRIGHT "Missend rechter gedeelte voor OR operator"
     IDS_SEARCH_MISSINGNOTRIGHT "Missend rechter gedeelte voor NOT operator"
@@ -1366,17 +1396,17 @@ BEGIN
     IDS_SEARCH_MISSINGNOTLEFT "Missend linker gedeelte voor NOT operator"
     IDS_SEARCH_EXPRERROR    "Fout bij het uitvoeren van de zoekexpressie"
     IDS_SEARCH_TOOCOMPLEX   "Expressie is te complex"
-    IDS_SEARCH_INVALIDMINMAX
+    IDS_SEARCH_INVALIDMINMAX 
                             "Ongeldige eenheden voor Min/Max bestandsgrootte opgegeven"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_VERSION             "Versie"
     IDS_ALL_A4AF_TO_THIS    "Verplaats nu alle bronnen naar dit bestand"
     IDS_ALL_A4AF_TO_OTHER   "Verplaats nu alle bronnen naar een willekeurig ander bestand"
     IDS_ALL_A4AF_AUTO       "Verplaats automatisch alle (A4AF) bronnen naar dit bestand"
     IDS_SWAP_A4AF_TO_THIS   "Verplaats bron nu naar dit bestand"
-END
-
-STRINGTABLE
-BEGIN
     IDS_SWAP_A4AF_TO_OTHER  "Verplaats bron nu naar een willekeurig ander bestand"
     IDS_A4AF                "Bron afhandeling (A4AF)"
     IDS_MOBILEMULE          "MobileMule"
@@ -1387,19 +1417,19 @@ BEGIN
     IDS_TREEOPTIONS_FALSE   "Onwaar"
     IDS_TREEOPTIONS_OK      "OK"
     IDS_HYPERTEXT_FONT_HINT "Font voor Server-, Berichten- en IRC-Venster"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SELECT_FONT         "Selecteer font"
     IDS_SERVER_LIMITS       "Zachte- / Harde-Bestandslimiet"
     IDS_SERVERINFO          "Server Informatie"
     IDS_KBITSSEC            "kBits/sec"
     IDS_KBYTESSEC           "kBytes/sec"
     IDS_ERR_CREATE_DIR      "Kan %s map niet aanmaken ""%s"" - %s"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_WRN_INCFILE_RESERVED
+    IDS_WRN_INCFILE_RESERVED 
                             "De Ontvangsten map mag niet toegekend worden aan een eMule installatie map."
-    IDS_WRN_TEMPFILES_RESERVED
+    IDS_WRN_TEMPFILES_RESERVED 
                             "De Tijdelijke Bestanden map mag niet toegekend worden aan een eMule installatie map."
     IDS_WRN_INCTEMP_SAME    "Ontvangsten map en Tijdelijke Bestanden map mogen niet hetzelfde zijn."
     IDS_MMFAILED            "Fout bij het creeeren van een socket voor MobileMule!"
@@ -1409,17 +1439,17 @@ BEGIN
     IDS_ARTIST              "Artiest"
     IDS_ALBUM               "Album"
     IDS_MMGUIDELINK         "MobileMule Handleiding"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CD_UPLOADREQ        "Gevraagde Verzending:"
-    IDS_SETTINGCHANGED_RESTART
+    IDS_SETTINGCHANGED_RESTART 
                             "Herstart eMule om de gewijzigde instellingen te activeren!"
     IDS_CREDITSEXPIRED      ", %i gebruikers verwijderd (niet gezien sinds 5 maanden)"
     IDS_SOURCESINFO         "%i  (Bruikbaar: %i, NNP: %i, A4AF: %i)"
     IDS_SHOW_META_DATA      "Toon &Meta Data..."
     IDS_META_DATA           "Meta Data"
-END
-
-STRINGTABLE
-BEGIN
     IDS_TIMEBEFORE          "(%s geleden)"
     IDS_FD_TIMEDATE         "Datums"
     IDS_FILEINFORMATION     "Informatie Bestand"
@@ -1430,16 +1460,16 @@ BEGIN
     IDS_COMPLSOURCES        "Volledige Bronnen"
     IDS_CHECKNOENDTIME      "Geen eind tijd"
     IDS_FD_DOWNLOADSTARTED  "Ontvangst toegevoegd:"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_MATCH_KEYWORDS      "Gelijke sleutelwoorden"
     IDS_FAILEDREOPEN        "Fatale fout: Onmogelijk om deelbestand te heropenen '%s' (%s)!"
     IDS_ERR_PREVIEWALREADY  "Er is al een preview verzoek gedaan vanaf deze gebruiker"
     IDS_ERR_PREVIEWFAILED   "Preview via gebruiker '%s' mislukt"
     IDS_DWTOT               "Schijfruimte"
     IDS_DWTOT_NR            "Aantal Ontvangsten: %d"
-END
-
-STRINGTABLE
-BEGIN
     IDS_DWTOT_TSD           "Totale grootte Ontvangsten: %s"
     IDS_DWTOT_TCS           "Totaal Afgerond: %s (%.0f%%)"
     IDS_DWTOT_TSL           "Totale omvang nog te verzenden: %s"
@@ -1450,16 +1480,16 @@ BEGIN
     IDS_MORE                "&Meer"
     IDS_TOOLS               "W&erktuigen"
     IDS_ERR_JIGLENEEDSTYPE  "Als u de Jigle database wilt doorzoeken zonder een bestandstype te specificeren moet u tenminste een bestandsextentie opgeven !"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CREATEHOSTNAMESRCLINK "Kopieer eD2K Link naar Klembord (Hostnaam)"
     IDS_HASHINGFILESCOUNT   " (%u hashing)"
     IDS_CHECKDISKSPACE      "Controleer Schijfruimte"
     IDS_YOURHOSTNAME        "Hostnaam voor eigen eD2K links"
     IDS_INSUFFICIENT        "Onvoldoende schijfruimte"
     IDS_MINFREEDISKSPACE    "Min. vrije schijfruimte [MB]"
-END
-
-STRINGTABLE
-BEGIN
     IDS_WARNING             "Waarschuwing"
     IDS_IMPORTSPLPF         "Importeer deelbestanden (eM, eD, ON)"
     IDS_IMP_STEPREADPF      "Lezen deelbestanden map"
@@ -1470,16 +1500,16 @@ BEGIN
     IDS_IMP_IOERROR         "Bestandsfout bij converteren deelbestand"
     IDS_IMP_GETPFINFO       "Ophalen bron deelbestand informatie"
     IDS_IMP_ADDDWL          "Toevoegen ontvangst en opslaan nieuwe deelbestand"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_IMP_FETCHSTATUS     "Opvragen status..."
     IDS_IMP_INPROGR         "In uitvoering"
     IDS_IMP_ERR_DISKSP      "Fout: Schijf is vol"
     IDS_IMP_ERR_PARTMETIO   "Fout: Deelbestand niet gevonden"
     IDS_IMP_ERR_IO          "Fout: IO Fout!"
     IDS_IMP_ERR_FAILED      "Fout: Gefaald!"
-END
-
-STRINGTABLE
-BEGIN
     IDS_IMP_STATUSQUEUED    "In wachtrij"
     IDS_IMP_ALRDWL          "Wordt al opgehaald"
     IDS_IMP_ADDBTN          "&Toevoegen imports"
@@ -1490,33 +1520,50 @@ BEGIN
     IDS_IMP_SIZE            "%s (Schijf:%s)"
     IDS_IMP_STATUS          "Importeren van %s: %s"
     IDS_DYNUPENABLED        "Zoek automatisch limiet voor beste verzendingssnelheid"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_DYNUP_PINGTOLERANCE "Ping tolerantie (% van laagste ping)"
     IDS_DYNUP_GOINGUPDIVIDER "Opgaande vertraging"
     IDS_DYNUP_GOINGDOWNDIVIDER "Neergaande vertraging"
     IDS_DYNUP_NUMBEROFPINGS "Maximum aantal pings"
     IDS_DYNUP_MINUPLOAD     "Laagst toegestane verzendingssnelheid"
     IDS_ESTTIMELEFT         "Geschatte tijd over:"
-END
-
-STRINGTABLE
-BEGIN
     IDS_TRANSFER_RATE_LABEL "Overdrachtssnelheid:"
     IDS_SAVELOG             "Bewaar log"
     IDS_CMT_COPYCLIPBOARD   "Kopieer commentaar naar klembord"
     IDS_ASKDOWNLOADLANG     "De geselecteerde taal is niet geinstalleerd. Wilt u het via eMule ophalen van emule-project.net?"
     IDS_ASKDOWNLOADLANGCAP  "Ophalen taalbestanden"
-    IDS_ERR_FAILEDDOWNLOADLANG
+    IDS_ERR_FAILEDDOWNLOADLANG 
                             "Fout bij het ophalen en installeren van de geselecteerde taal dll van %s!"
     IDS_ERR_BADFOLDER       "Ongeldige map.\nMap kan niet worden aangemaakt. Controleer aub. naam en plaats."
+    IDS_AUTOREMOVEFD        "Automatisch verwijderen afgeronde ontvangsten"
+    IDS_MM_BLOCK            "3 foutieve logins voor MobileMule gelogd - elke volgende poging is geblokkeerd voor 10 min!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MM_NEWUSER          "Nieuwe gebruiker succesvol ingelogd op de MobileMule-Server"
+    IDS_RADCLIENTS          "van bekende gebruikers"
+    IDS_KADUDPPORTERR       "Kads UDP poort heeft een conflict met of eMule's Ext UDP poort of eMule's Server UDP poort. De poort is veranderd naar %u."
     IDS_CONFIRM_FILEDELETE  "Do you really want to remove all selected files from disk?"
     IDS_OPENFOLDER          "Open folder"
     IDS_DELETE              "Delete from disk"
-    IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
-    IDS_WIZARD_ED2K         "ED2k Settings"
+    IDS_BOOTSTRAP           "Bootstrap"
+    IDS_VIAED2KSQ           "Via ED2K Server/Wachtrij"
+    IDS_EM_KADEMLIA         "&Kad"
+    IDS_VIAKAD              "Via Kad"
+    IDS_VIASE               "Via Bron Uitwisseling"
+    IDS_SELECTTOOLBARBITMAP "Selecteer Bitmap voor Toolbar"
+    IDS_SELECTTOOLBARBITMAPDIR "Selecteer Bitmap map"
+    IDS_TOOLBARSKINS        "Toolbar skins"
+    IDS_NOTEXTLABELS        "Geen labels"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_KAD_NODE            "Node Opzoeken (%i:%i)"
     IDS_KAD_STOREFILE       "Bewaar Bestand (%i:%i)"
     IDS_KAD_STOREKW         "Bewaar sleutelwoord (%i:%i)"
     IDS_KAD_UNKNOWN         "Onbekend (%i:%i)"
@@ -1525,17 +1572,20 @@ BEGIN
     IDS_SRV_UDPSR           "Uitgebreid UDP protocol voor bron-verzoeken"
     IDS_SRV_UDPFR           "Uitgebreid UDP protocol voor bestands-verzoeken"
     IDS_EM_HELP             "&Help"
-    IDS_WRN_FRIENDDUPLIPPORT
+    IDS_WRN_FRIENDDUPLIPPORT 
                             "Vriend niet toegevoegd.\r\n\r\nEr is al een vriend met hetzelfde IP adres en poort beschikbaar."
     IDS_DYNUP               "Verzendingssnelheid Sensor"
-    IDS_FD_RECOV            "Recovered"
-    IDS_FD_COMPR            "Compression"
-    IDS_HSAV                "Hashset available"
-    IDS_FD_CORR             "Corrupted"
+    IDS_KADOVERHEAD         "Kad Overhead (Packets): %s (%s)"
+    IDS_FIND                "Find..."
+    IDS_LOG_BANNED_CLIENTS  "Log banned clients"
+    IDS_LOG_RATING_RECV     "Log received file descriptions and ratings"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
+    IDS_TEXTLABELSONRIGHT   "Rechts van het icoon"
+    IDS_TEXTLABELS          "Tekst labels"
+    IDS_ENABLETEXTLABELS    "Onder het icoon"
     IDS_CUSTOMIZETOOLBAR    "Aanpassen Toolbar"
     IDS_KAD_RECHECKFW       "Hertesten Firewall"
     IDS_SHAREDTITLE         "Gedeeld ED2K|Kad"
@@ -1548,46 +1598,13 @@ BEGIN
     IDS_NUMBER              "Aantal"
     IDS_KAD_SEARCHSRC       "Zoek Bronnen (%i:%i)"
     IDS_KAD_SEARCHKW        "Zoek Sleutelwoorden (%i:%i)"
-    IDS_KAD_NODE            "Node Opzoeken (%i:%i)"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_BOOTSTRAP           "Bootstrap"
-    IDS_VIAED2KSQ           "Via ED2K Server/Wachtrij"
-    IDS_EM_KADEMLIA         "&Kad"
-    IDS_VIAKAD              "Via Kad"
-    IDS_VIASE               "Via Bron Uitwisseling"
-    IDS_SELECTTOOLBARBITMAP "Selecteer Bitmap voor Toolbar"
-    IDS_SELECTTOOLBARBITMAPDIR "Selecteer Bitmap map"
-    IDS_TOOLBARSKINS        "Toolbar skins"
-    IDS_NOTEXTLABELS        "Geen labels"
-    IDS_TEXTLABELSONRIGHT   "Rechts van het icoon"
-    IDS_TEXTLABELS          "Tekst labels"
-    IDS_ENABLETEXTLABELS    "Onder het icoon"
-    IDS_AUTOREMOVEFD        "Automatisch verwijderen afgeronde ontvangsten"
-    IDS_MM_BLOCK            "3 foutieve logins voor MobileMule gelogd - elke volgende poging is geblokkeerd voor 10 min!"
-    IDS_MM_NEWUSER          "Nieuwe gebruiker succesvol ingelogd op de MobileMule-Server"
-    IDS_RADCLIENTS          "van bekende gebruikers"
-    IDS_KADUDPPORTERR       "Kads UDP poort heeft een conflict met of eMule's Ext UDP poort of eMule's Server UDP poort. De poort is veranderd naar %u."
-    IDS_KADOVERHEAD         "Kad Overhead (Packets): %s (%s)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SEL_SKIN            "Select Skin..."
-    IDS_SEL_SKINDIR         "Select Skin Directory..."
-    IDS_SKIN_PROF           "Skin Profiles"
-    IDS_KADOPEN             "Open"
-    IDS_PASSIVE             "Passive"
-    IDS_SE                  "Source Exchange"
-	IDS_LOG_BANNED_CLIENTS	"Log banned clients"
-	IDS_LOG_RATING_RECV     "Log received file descriptions and ratings"
-	IDS_LOG_FILTERED_IPS	"Log filtered and/or ignored IPs"
-	IDS_LOG_FILE_SAVING		"Log file save actions"
-	IDS_FIND				"Find..."
-    IDS_ERR_RENAMESF        "Failed to rename\r\n    ""%s""\r\nto\r\n    ""%s""\r\n\r\n%hs"
     IDS_LOG_SECURE_IDENT    "Log secure ident"
+    IDS_LOG_FILTERED_IPS    "Log filtered and/or ignored IPs"
+    IDS_LOG_FILE_SAVING     "Log file save actions"
     IDS_IPFILTERFILES       "All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"
     IDS_DELETEIPFILTERS     "Do you really want to delete the selected IP filters?"
     IDS_TOTAL_IPFILTER_LABEL "Total IP filters:"
@@ -1603,6 +1620,13 @@ BEGIN
     IDS_IP_RULES            "IP Filters:"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_ERR_NOTCONNECTEDKAD "You are currently not connected to the Kad Network!"
+    IDS_IRC_NOSFS           "No Shared Files Selected"
+    IDS_IRC_IGNOREMISCMESSAGE "Ignore Misc info messages"
+    IDS_KNOWN               "Known"
+END
 STRINGTABLE 
 BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES 
