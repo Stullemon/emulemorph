@@ -107,9 +107,6 @@ public:
 	uint64	GetUpDataOverheadKadPackets()				{return m_nUpDataOverheadKadPackets;}
 	uint64	GetUpDataOverheadOtherPackets()				{return m_nUpDataOverheadOtherPackets;}
 
-	//MORPH START - Added by SiRoB, 
-	uint32	GetMaxFriendByteToSend();  //MORPH - Added by SiRoB, Upload Splitting Class
-
 public:
 	//	Cumulative Stats
 	static float	maxDown;
