@@ -50,14 +50,3 @@
 ****************************************************************************/
 void gena_process_notification_event( INOUT SOCKINFO *info,
 				      IN http_message_t* request );
-
-
-// Multicast Gena Notification functions and globals
-
-void
-readFromGenaEventSocket( SOCKET socket );
-
-int
-genaSetupMulticastSocket( char * addr );
-
-extern int gGenaSock;

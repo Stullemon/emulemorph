@@ -46,14 +46,13 @@
 #include "ThreadPool.h"
 #include "miniserver.h"
 
-#ifdef _WIN32
-#include <winsock2.h>
-#include <Ws2tcpip.h>
-#endif
-
 #include "upnpapi.h"
 #include "httpparser.h"
 #include "httpreadwrite.h"
+
+#ifdef _WIN32
+#include "ws2tcpip.h"
+#endif
 
 #define MAX_TIME_TOREAD  45
 
@@ -263,7 +262,6 @@ CLIENTONLY( SOCKET gSsdpReqSocket = 0;
                                      UDNstr, SInfo->DescURL, Exp );
             } else              // AdFlag == -1
             {
-		//printf("performing device shutdown\n");
                 DeviceShutdown( devType, i == 0, UDNstr,
                                 SERVER, SInfo->DescURL, Exp );
             }
@@ -469,6 +467,7 @@ CLIENTONLY( SOCKET gSsdpReqSocket = 0;
 int
 Make_Socket_NoBlocking( int sock )
 {
+
     int val;
 
 #ifndef _WIN32
@@ -798,6 +797,7 @@ ssdp_event_handler_thread( void *the_data )
                                             FALSE, NULL );
              );
     } else {
+
         DEVICEONLY( ssdp_handle_device_request( hmsg, &data->dest_addr );
              );
     }

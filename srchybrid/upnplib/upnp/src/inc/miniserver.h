@@ -43,9 +43,6 @@ typedef struct MServerSockArray {
   int miniServerStopSock; //socket for stopping miniserver 
   int ssdpSock; //socket for incoming advertisments and search requests
 
-  // set up a special socket for receiving GENA multicast notifications
-  int genaEventSock; // socket for incoming gena events
-    
   int stopPort;
   int miniServerPort;
 

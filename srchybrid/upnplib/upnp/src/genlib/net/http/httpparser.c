@@ -44,12 +44,8 @@
 #include "statcodes.h"
 #include "unixutil.h"
 
-// Content Type Header
-const char *ClientContentTypeHeader =
-    "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n";
-
-
 // entity positions
+
 #define NUM_HTTP_METHODS 9
 static str_int_entry Http_Method_Table[NUM_HTTP_METHODS] = {
     {"GET", HTTPMETHOD_GET},

@@ -70,9 +70,12 @@
 #include "statcodes.h"
 #include "upnp.h"
 #include "upnpapi.h"
-#include "gena_ctrlpt.h"
 
-#define APPLICATION_LISTENING_PORT 0 //49152
+#ifdef _WIN32
+#define EADDRINUSE WSAEADDRINUSE
+#endif
+
+#define APPLICATION_LISTENING_PORT 0 //Old 49152, New 0 for random port
 
 struct mserv_request_t {
     int connfd;                 // connection handle
@@ -410,12 +413,6 @@ RunMiniServer( MiniServerSockArray * miniSock )
       connectHnd;
     SOCKET miniServStopSock;
     SOCKET ssdpSock;
-// MTY!!!
-// note that this socket will not be available when this
-// is called, and will need to be added into the select
-// set later
-    SOCKET genaEventSock;
-
 
     CLIENTONLY( SOCKET ssdpReqSock;
          )
@@ -425,26 +422,11 @@ RunMiniServer( MiniServerSockArray * miniSock )
     unsigned int maxMiniSock;
     int byteReceived;
     char requestBuf[256];
-    struct timeval aTime;
-    struct timeval * timePtr;
-#ifdef _WIN32
-    int retVal;
-#endif
-    int genaSocketSet = 0;
-#ifdef _WIN32
-    FILE * outFile;
-#endif
-
-    aTime.tv_sec = 1;
-    aTime.tv_usec = 0;
-    timePtr = 0;
 
     miniServSock = miniSock->miniServerSock;
     miniServStopSock = miniSock->miniServerStopSock;
 
     ssdpSock = miniSock->ssdpSock;
-
-    genaEventSock = miniSock->genaEventSock;
 
     CLIENTONLY( ssdpReqSock = miniSock->ssdpReqSock;
          );
@@ -459,7 +441,6 @@ RunMiniServer( MiniServerSockArray * miniSock )
     ++maxMiniSock;
 
     while( TRUE ) {
-
         FD_ZERO( &rdSet );
         FD_ZERO( &expSet );
 
@@ -468,51 +449,14 @@ RunMiniServer( MiniServerSockArray * miniSock )
         FD_SET( miniServSock, &rdSet );
         FD_SET( miniServStopSock, &rdSet );
         FD_SET( ssdpSock, &rdSet );
-	// MTY!!!
-	// check if the gena socket is available now
-	// if it is, add it to the set and change the maxMiniSock
-	// value
-
-	if (!genaSocketSet) {
-	    if (gGenaSock != UPNP_INVALID_SOCKET) {
-
-		genaEventSock = gGenaSock;
-		maxMiniSock = max(maxMiniSock, genaEventSock);
-		genaSocketSet = 1;
-		FD_SET( genaEventSock, &rdSet );
-	    }
-	} else {
-	    FD_SET( genaEventSock, &rdSet );
-	}
         CLIENTONLY( FD_SET( ssdpReqSock, &rdSet ) );
 
-#ifdef _WIN32
-	if (gGenaSock == UPNP_INVALID_SOCKET) {
-	    timePtr = &aTime;
-	} else {
-	    timePtr = 0;
-	}
-
-        if( select( maxMiniSock, &rdSet, NULL, &expSet, timePtr ) ==
-            UPNP_SOCKETERROR ) {
-#else
         if( select( maxMiniSock, &rdSet, NULL, &expSet, NULL ) ==
             UPNP_SOCKETERROR ) {
-#endif
-#ifdef _WIN32
-			retVal = WSAGetLastError();
-#endif
-#ifdef _WIN32
-            DBGONLY( UpnpPrintf
-                     ( UPNP_CRITICAL, SSDP, __FILE__, __LINE__,
-                       "Error (%d) in select call !!!\n", retVal );
-                 )
-#else
             DBGONLY( UpnpPrintf
                      ( UPNP_CRITICAL, SSDP, __FILE__, __LINE__,
                        "Error in select call !!!\n" );
                  )
-#endif
                 continue;
         } else {
 
@@ -540,13 +484,6 @@ RunMiniServer( MiniServerSockArray * miniSock )
                 if( FD_ISSET( ssdpSock, &rdSet ) ) {
                     readFromSSDPSocket( ssdpSock );
                 }
-
-	    // MTY!!!
-	    if (genaSocketSet) {
-		if (FD_ISSET( genaEventSock, &rdSet )) {
-		    readFromGenaEventSocket( genaEventSock );
-		}
-	    }
 
             if( FD_ISSET( miniServStopSock, &rdSet ) ) {
 
@@ -585,11 +522,6 @@ RunMiniServer( MiniServerSockArray * miniSock )
     UpnpCloseSocket( miniServStopSock );
     shutdown( ssdpSock, SD_BOTH );
     UpnpCloseSocket( ssdpSock );
-    // MTY!!!
-    if (genaSocketSet) {
-	shutdown( genaEventSock, SD_BOTH );
-	UpnpCloseSocket( genaEventSock );
-    }
     CLIENTONLY( shutdown( ssdpReqSock, SD_BOTH ) );
     CLIENTONLY( UpnpCloseSocket( ssdpReqSock ) );
 
@@ -661,8 +593,6 @@ get_port( int sockfd )
 *		
 *	Note :
 ************************************************************************/
-//#define  GENA_IP   "239.255.255.250"
-//#define GENA_PORT 1901
 int
 get_miniserver_sockets( MiniServerSockArray * out,
                         unsigned short listen_port )
@@ -675,55 +605,6 @@ get_miniserver_sockets( MiniServerSockArray * out,
     int sockError = UPNP_E_SUCCESS;
     int errCode = 0;
     SOCKET miniServerStopSock;
-
-    // MTY!!!
-/*
-    
-    SOCKET genaEventSock;
-    struct sockaddr_in genaAddr;
-    struct ip_mreq genaMcastAddr;
-    u_char ttl = 4;
-    int option = 1;
-
-    if( ( genaEventSock = socket( AF_INET, SOCK_DGRAM, 0 ) )
-	== UPNP_INVALID_SOCKET ) {
-	return UPNP_E_OUTOF_SOCKET;
-    }
-
-    memset( ( void * )&genaAddr, 0, sizeof( struct sockaddr_in ) );
-    genaAddr.sin_family = AF_INET;
-    //  genaAddr.sin_addr.s_addr = inet_addr(LOCAL_HOST);
-    genaAddr.sin_addr.s_addr = htonl( INADDR_ANY );
-    genaAddr.sin_port = htons( GENA_PORT );
-    if( bind
-        ( genaEventSock, ( struct sockaddr * )&genaAddr,
-          sizeof( genaAddr ) ) != 0 ) {
-	  shutdown( genaEventSock, SD_BOTH );
-	  UpnpCloseSocket( genaEventSock );
-	  return UPNP_E_SOCKET_BIND;
-    }
-
-    memset( ( void * )&genaMcastAddr, 0, sizeof( struct ip_mreq ) );
-    genaMcastAddr.imr_interface.s_addr = htonl( INADDR_ANY );
-    genaMcastAddr.imr_multiaddr.s_addr = inet_addr( GENA_IP );
-    if( setsockopt( genaEventSock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                    ( char * )&genaMcastAddr,
-                    sizeof( struct ip_mreq ) ) != 0 ) {
-		    shutdown( genaEventSock, SD_BOTH );
-		    UpnpCloseSocket( genaEventSock );
-		    return UPNP_E_SOCKET_ERROR;
-    }
-    // result is not checked becuase it will fail in WinMe and Win9x.
-    setsockopt( genaEventSock, IPPROTO_IP,
-                IP_MULTICAST_TTL, &ttl, sizeof( ttl ) );
-    if( setsockopt( genaEventSock, SOL_SOCKET, SO_BROADCAST,
-                    ( char * )&option, sizeof( option ) ) != 0 ) {
-		    shutdown( genaEventSock, SD_BOTH );
-		    UpnpCloseSocket( genaEventSock );
-		    return UPNP_E_NETWORK_ERROR;
-    }
-    out->genaEventSock = genaEventSock;
-*/
     
     listenfd = socket( AF_INET, SOCK_STREAM, 0 );
     if( listenfd == UPNP_INVALID_SOCKET || listenfd == 0) {
@@ -777,11 +658,8 @@ get_miniserver_sockets( MiniServerSockArray * out,
                               sizeof( struct sockaddr_in )
                  );
             if( sockError == UPNP_SOCKETERROR ) {
-#ifndef _WIN32
                 if( errno == EADDRINUSE )
                     errCode = 1;
-#endif
-				printf("Socket error in miniserver line 780\n");
             } else
                 errCode = 0;
 

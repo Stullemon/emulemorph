@@ -41,10 +41,6 @@
 #include "statcodes.h"
 #include "httpparser.h"
 #include "httpreadwrite.h"
-#ifdef _WIN32
-#include <winsock2.h>
-#include <Ws2tcpip.h>
-#endif
 
 #include "unixutil.h"
 
@@ -173,20 +169,6 @@ free_notify_struct( IN notify_thread_struct * input )
     free( input );
 }
 
-static void
-free_notifyMulticast_struct( IN notify_thread_struct * input )
-{
-    ( *input->reference_count )--;
-    if( ( *input->reference_count ) == 0 ) {
-        free( input->headers );
-        ixmlFreeDOMString( input->propertySet );
-//        free( input->servId );
-        free( input->UDN );
-        free( input->reference_count );
-    }
-    free( input );
-}
-
 /****************************************************************************
 *	Function :	notify_send_and_recv
 *
@@ -258,7 +240,6 @@ notify_send_and_recv( IN uri_type * destination_url,
         return ret_code;
     }
 
-
     if( ( ret_code = http_RecvMessage( &info, response,
                                        HTTPMETHOD_NOTIFY, &timeout,
                                        &err_code ) ) != 0 ) {
@@ -274,95 +255,6 @@ notify_send_and_recv( IN uri_type * destination_url,
     membuffer_destroy( &start_msg );
 
     return UPNP_E_SUCCESS;
-}
-
-/************************************************************************
-* Function : GenaBroadcastNotifyHandler
-*																	
-* Parameters:														
-*		IN struct sockaddr_in * DestAddr: Ip address, to send the reply.
-*		IN int NumPacket: Number of packet to be sent.
-*		IN char **RqPacket:Number of packet to be sent.
-*
-* Description:														
-*	This function works as a request handler which passes the HTTP 
-*	request string to multicast channel
-*
-* 
-*
-* Returns: void *
-*	1 if successful else appropriate error
-***************************************************************************/
-#define  GENA_IP   "239.255.255.250"
-#define GENA_PORT 1901
-int
-GenaBroadcastNotifyHandler( IN char *RqPacket )
-{
-    // need to know destination address
-    // need to have the packet to send out
-
-/*#ifdef _WIN32
-    struct ip_mreq genaMcastAddr;
-    int option = 1;
-#endif*/
-    struct sockaddr_in DestAddr;
-    SOCKET ReplySock;
-    int socklen = sizeof( struct sockaddr_in );
-    unsigned long replyAddr = inet_addr( LOCAL_HOST );
-    int ttl = 4;                //a/c to UPNP Spec
-    int rc;
-    int retVal = UPNP_E_SUCCESS;
-
-    DestAddr.sin_family = AF_INET;
-    DestAddr.sin_addr.s_addr = inet_addr( GENA_IP );
-    DestAddr.sin_port = htons( GENA_PORT );
-
-    ReplySock = socket( AF_INET, SOCK_DGRAM, 0 );
-    if( ReplySock == UPNP_INVALID_SOCKET ) {
-        return UPNP_E_OUTOF_SOCKET;
-    }
-
-//#ifndef _WIN32
-    setsockopt( ReplySock, IPPROTO_IP, IP_MULTICAST_IF,
-                ( char * )&replyAddr, sizeof( replyAddr ) );
-    setsockopt( ReplySock, IPPROTO_IP, IP_MULTICAST_TTL,
-                ( char * )&ttl, sizeof( int ) );
-/*#else
-	memset( ( void * )&genaMcastAddr, 0, sizeof( struct ip_mreq ) );
-    genaMcastAddr.imr_interface.s_addr = htonl( INADDR_ANY );
-    genaMcastAddr.imr_multiaddr.s_addr = inet_addr( LOCAL_HOST );
-    if( setsockopt( ReplySock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                    ( char * )&genaMcastAddr,
-                    sizeof( struct ip_mreq ) ) != 0 ) {
-		    shutdown( ReplySock, SD_BOTH );
-		    UpnpCloseSocket( ReplySock );
-			printf("Socket Error\n");
-		    return UPNP_E_SOCKET_ERROR;
-    }
-    // result is not checked becuase it will fail in WinMe and Win9x.
-    setsockopt( ReplySock, IPPROTO_IP,
-                IP_MULTICAST_TTL, &ttl, sizeof( ttl ) );
-    if( setsockopt( ReplySock, SOL_SOCKET, SO_BROADCAST,
-                    ( const char * )&option, sizeof( option ) ) != 0 ) {
-		    shutdown( ReplySock, SD_BOTH );
-		    UpnpCloseSocket( ReplySock );
-		    return UPNP_E_NETWORK_ERROR;
-    }
-#endif*/
-
-
-    rc = sendto( ReplySock, RqPacket ,
-		 strlen( RqPacket ),
-		 0, ( struct sockaddr * )&DestAddr, socklen );
-
-    if (rc < strlen(RqPacket)) {
-	printf("sendto failed, rc = %d\n", rc);
-	retVal = UPNP_E_SUCCESS;
-    }
-	
-    shutdown( ReplySock, SD_BOTH );
-    UpnpCloseSocket( ReplySock );
-    return retVal;
 }
 
 /****************************************************************************
@@ -395,7 +287,7 @@ genaNotify( IN char *headers,
     int i;
     membuffer mid_msg;
     membuffer endmsg;
-    uri_type * url;
+    uri_type *url;
     http_parser_t response;
     int return_code = -1;
 
@@ -414,14 +306,6 @@ genaNotify( IN char *headers,
     // send a notify to each url until one goes thru
     for( i = 0; i < sub->DeliveryURLs.size; i++ ) {
         url = &sub->DeliveryURLs.parsedURLs[i];
-
-	// MTY !!!
-/*
-	printf("a URL:\n\t%d\n\t%s\n\t%d\n\t%s\n\t%s\n\t%d\n", url->type, 
-	       url->scheme, url->path_type,
-	       url->pathquery, url->fragment,
-	       url->hostport.IPv4address);
-*/
 
         if( ( return_code = notify_send_and_recv( url,
                                                   &mid_msg, propertySet,
@@ -543,92 +427,6 @@ genaNotifyThread( IN void *input )
 
     free_notify_struct( in );
     HandleUnlock(  );
-}
-
-/****************************************************************************
-*	Function :	genaNotifyBroadcastThread
-*
-*	Parameters :
-*			IN void * input : notify thread structure containing all the 
-*								headers and property set info
-*
-*	Description :	Thread job to broadcast Notifies to all control points.
-*
-*	Return : void
-*
-*	Note : calls the genaNotify to do the actual work
-****************************************************************************/
-static void
-genaNotifyBroadcastThread( IN void *input )
-{
-
-
-    notify_thread_struct *in = ( notify_thread_struct * ) input;
-    int return_code;
-//    ThreadPoolJob job;
-    char msgBuf[2000];
-    uri_type url;
-    membuffer mid_msg;
-    membuffer start_msg;
-    membuffer endmsg;
-
-	//printf("genaNotifyBroadcastThread\n");
-
-	membuffer_init( &mid_msg );
-    membuffer_init( &start_msg );
-
-
-    // make 'end' msg (the part that won't vary with the destination)
-    endmsg.size_inc = 30;
-    if( http_MakeMessage( &mid_msg, 1, 1,
-                          "s" "ssc" "sdcc",
-                          in->headers,
-                          "SID: ", "0",
-                          "SEQ: ", "0" ) != 0 ) {
-        membuffer_destroy( &mid_msg );
-        return UPNP_E_OUTOF_MEMORY;
-    }
-
-
-    url.type = 0;
-    url.scheme.buff = "http";
-    url.scheme.size = strlen(url.scheme.buff);
-    url.path_type = 4;
-    url.pathquery.buff = 0;
-    url.pathquery.size = 0;
-    url.fragment.buff = 0;
-    url.fragment.size = 0;
-    url.hostport.text.buff = "192.168.1.204:49152";
-    url.hostport.text.size = strlen(url.hostport.text.buff);
-    
-
-    if( http_MakeMessage( &start_msg, 1, 1,
-                          "q" "s",
-                          HTTPMETHOD_NOTIFY, &url, mid_msg.buf ) != 0 ) {
-	membuffer_destroy( &start_msg );
-	membuffer_destroy( &mid_msg );
-	return UPNP_E_OUTOF_MEMORY;
-    }
-
-
-    msgBuf[0] = 0;
-    strcat(msgBuf, start_msg.buf);
-
-    membuffer_destroy( &mid_msg );
-    membuffer_destroy( &start_msg );
-
-//    strcat(msgBuf, in->headers);
-    strcat(msgBuf, "\n");
-    strcat(msgBuf, in->propertySet);
-
-
-
-    //send the notify
-    return_code = GenaBroadcastNotifyHandler( msgBuf );
-
-
-    free_notifyMulticast_struct( in );
-
 }
 
 /****************************************************************************
@@ -755,8 +553,8 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
                          "GENERATED PROPERY SET IN INIT NOTIFY: \n'%s'\n",
                          propertySet ) );
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -771,7 +569,7 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: "
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: "
              "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
@@ -798,7 +596,6 @@ genaInitNotify( IN UpnpDevice_Handle device_handle,
                    thread_struct );
         TPJobSetFreeFunction( &job, ( free_routine ) free_notify_struct );
         TPJobSetPriority( &job, MED_PRIORITY );
-
 
         if( ( return_code =
               ThreadPoolAdd( &gSendThreadPool, &job, NULL ) ) != 0 ) {
@@ -942,8 +739,8 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
                          "GENERATED PROPERY SET IN INIT EXT NOTIFY: %s",
                          propertySet ) );
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -957,7 +754,7 @@ genaInitNotifyExt( IN UpnpDevice_Handle device_handle,
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: "
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: "
              "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
@@ -1079,8 +876,8 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
         return UPNP_E_INVALID_PARAM;
     }
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -1094,7 +891,7 @@ genaNotifyAllExt( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: "
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: "
              "%d\r\nNT: upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
@@ -1241,8 +1038,8 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
         return return_code;
     }
 
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
+    headers_size = strlen( "Content-Type text/xml\r\n" ) +
+        strlen( "Content-Length: \r\n" ) + MAX_CONTENT_LENGTH +
         strlen( "NT: upnp:event\r\n" ) +
         strlen( "NTS: upnp:propchange\r\n" ) + 1;
 
@@ -1256,7 +1053,7 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
     }
     //changed to add null terminator at end of content
     //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: %d\r\nNT:"
+    sprintf( headers, "Content-Type: text/xml\r\nContent-Length: %d\r\nNT:"
              " upnp:event\r\nNTS: upnp:propchange\r\n",
              strlen( propertySet ) + 1 );
 
@@ -1322,134 +1119,6 @@ genaNotifyAll( IN UpnpDevice_Handle device_handle,
         free( UDN_copy );
         free( servId_copy );
     }
-    HandleUnlock(  );
-
-    return return_code;
-}
-
-/****************************************************************************
-*	Function :	genaNotifyBroadcast
-*
-*	Parameters :
-*		IN UpnpDevice_Handle device_handle : Device handle
-*		IN char *UDN :	Device udn
-*		IN char *servId :	Service ID
-*	    IN char **VarNames : array of varible names
-*	    IN char **VarValues :	array of variable values
-*		IN int var_count	 :	number of variables
-*
-*	Description : 	This function broadcasts a notification 
-*
-*	Return :	int
-*
-****************************************************************************/
-int
-genaNotifyBroadcast( IN UpnpDevice_Handle device_handle,
-               IN char *UDN,
-               IN char *servId,
-               IN char **VarNames,
-               IN char **VarValues,
-               IN int var_count )
-{
-    char *headers = NULL;
-    char *propertySet = NULL;
-    int headers_size;
-    int return_code = GENA_SUCCESS;
-    char *UDN_copy = NULL;
-    int *reference_count = NULL;
-//    struct Handle_Info *handle_info;
-    ThreadPoolJob job;
-
-    notify_thread_struct *thread_struct = NULL;
-
-    reference_count = ( int * )malloc( sizeof( int ) );
-
-    if( reference_count == NULL ) {
-        return UPNP_E_OUTOF_MEMORY;
-    }
-
-    ( *reference_count = 0 );
-
-    UDN_copy = ( char * )malloc( strlen( UDN ) + 1 );
-
-    if( UDN_copy == NULL ) {
-        free( reference_count );
-        return UPNP_E_OUTOF_MEMORY;
-    }
-
-    strcpy( UDN_copy, UDN );
-
-    if( ( return_code = GeneratePropertySet( VarNames, VarValues,
-                                             var_count,
-                                             &propertySet ) ) !=
-        XML_SUCCESS ) {
-        free( UDN_copy );
-        free( reference_count );
-        return return_code;
-    }
-
-    headers_size = strlen( "CONTENT-TYPE text/xml\r\n" ) +
-        strlen( "CONTENT-LENGTH: \r\n" ) + MAX_CONTENT_LENGTH +
-        strlen( "NT: \r\n" ) + strlen(UDN) +
-        strlen( "NTS: \r\n" ) + strlen(servId) + 1;
-
-    headers = ( char * )malloc( headers_size );
-    if( headers == NULL ) {
-        free( UDN_copy );
-        ixmlFreeDOMString( propertySet );
-        free( reference_count );
-        return UPNP_E_OUTOF_MEMORY;
-    }
-    //changed to add null terminator at end of content
-    //content length = (length in bytes of property set) + null char
-    sprintf( headers, "CONTENT-TYPE: text/xml\r\nCONTENT-LENGTH: %d\r\nNT:"
-             " %s\r\nNTS: %s\r\n",
-             strlen( propertySet ) + 1, UDN, servId );
-
-    HandleLock(  );
-
-    thread_struct =
-	( notify_thread_struct * )
-	malloc( sizeof( notify_thread_struct ) );
-    if( thread_struct == NULL ) {
-	return_code = UPNP_E_OUTOF_MEMORY;
-    }
-    thread_struct->reference_count = reference_count;
-    thread_struct->UDN = UDN_copy;
-    thread_struct->headers = headers;
-    thread_struct->propertySet = propertySet;
-
-/*
-    TPJobInit( &job, ( start_routine ) genaNotifyBroadcastThread,
-	       thread_struct );
-    TPJobSetFreeFunction( &job,
-			  ( free_routine )
-			  free_notifyMulticast_struct );
-    TPJobSetPriority( &job, MED_PRIORITY );
-
-
-    if( ( return_code =
-	  ThreadPoolAdd( &gSendThreadPool, &job, NULL ) )
-	!= 0 ) {
-	if( return_code == EOUTOFMEM ) {
-	    return_code = UPNP_E_OUTOF_MEMORY;
-	}
-    } else {
-*/
-    genaNotifyBroadcastThread( thread_struct );
-    *reference_count = 1;
-    return_code = UPNP_E_SUCCESS;
-//    }
-/*
-    if( ( *reference_count ) == 0 ) {
-	*/
-        free( reference_count );
-        free( headers );
-        ixmlFreeDOMString( propertySet );
-        free( UDN_copy );
-		/*
-    }
-*/
     HandleUnlock(  );
 
     return return_code;

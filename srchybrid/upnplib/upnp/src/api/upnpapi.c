@@ -60,7 +60,6 @@
 //************************************
 //Needed for GENA
 #include "gena.h"
-#include "gena_device.h"
 #include "service_table.h"
 #include "miniserver.h"
 //*******************************************
@@ -148,7 +147,7 @@ CLIENTONLY( ithread_mutex_t GlobalClientSubscribeMutex;
  *      UPNP_E_INIT_FAILED if Initialization fails.
  *      UPNP_E_INIT if UPnP is already initialized
  *****************************************************************************/
-int UpnpInit( IN const char *HostIP,
+     int UpnpInit( IN const char *HostIP,
                    IN unsigned short DestPort )
 {
     int retVal = 0;
@@ -1873,52 +1872,6 @@ UpnpSubscribe( IN UpnpClient_Handle Hnd,
         return RetVal;
 
 }  /****************** End of UpnpSubscribe  *********************/
-
-
-// MULTICAST
-/**************************************************************************
- * Function: UpnpRegisterMulticast 
- *
- *  Parameters:	
- *		IN UpnpClient_Handle Hnd: The handle of the control point.
- *              IN char * addr: 192.168.1.3:19 for example
- *
- *  Description:
- *      This function registers a control point to receive event
- *  notifications via udn multicast from all devices.  This operation is synchronous
- *
- *  Return Values: int
- *      UPNP_E_SUCCESS if successful else sends appropriate error.
- ***************************************************************************/
-int
-UpnpRegisterMulticast( IN UpnpClient_Handle Hnd,
-		       char * addr )
-{
-    struct Handle_Info *SInfo = NULL;
-    int RetVal;
-
-    if( UpnpSdkInit != 1 ) {
-        return UPNP_E_FINISH;
-    }
-
-
-    HandleLock(  );
-
-    if( GetHandleInfo( Hnd, &SInfo ) != HND_CLIENT ) {
-        HandleUnlock(  );
-        return UPNP_E_INVALID_HANDLE;
-    }
-
-    HandleUnlock(  );
-    RetVal = genaRegisterMulticast( Hnd, addr);
-
-    DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
-                         "Exiting UpnpSubscribe \n" );
-         )
-
-        return RetVal;
-
-}  /****************** End of UpnpSubscribe  *********************/
 #endif // INCLUDE_CLIENT_APIS
 
 #ifdef INCLUDE_CLIENT_APIS
@@ -2207,89 +2160,6 @@ UpnpRenewSubscriptionAsync( IN UpnpClient_Handle Hnd,
 #endif // INCLUDE_CLIENT_APIS
 
 #ifdef INCLUDE_DEVICE_APIS
-
-// MULTICAST
-/**************************************************************************
- * Function: UpnpNotifyBroadcast 
- *
- *  Parameters:	
- *		IN UpnpDevice_Handle   :The handle to the device sending the event.
- *		IN const char *DevID   :The device ID of the subdevice of the 
- *                              service generating the event. 
- *		IN const char *ServID  :The unique identifier of the service 
- *                              generating the event. 
- *		IN const char **VarName:Pointer to an array of variables that 
- *                              have changed. 
- *		IN const char **NewVal :Pointer to an array of new values for 
- *                              those variables. 
- *		IN int cVariables      :The count of variables included in this 
- *                              notification. 
- *
- *  Description:
- *      This function sends out an event change notification to all
- *  control points that are listening for it.  This function is
- *  synchronous and generates no callbacks.  
- *
- *  Return Values: int
- *      UPNP_E_SUCCESS if successful else sends appropriate error.
- ***************************************************************************/
-int
-UpnpNotifyBroadcast( IN UpnpDevice_Handle Hnd,
-            IN const char *DevID_const,
-            IN const char *ServName_const,
-            IN const char **VarName_const,
-            IN const char **NewVal_const,
-            IN int cVariables )
-{
-
-    struct Handle_Info *SInfo = NULL;
-    int retVal;
-    char *DevID = ( char * )DevID_const;
-    char *ServName = ( char * )ServName_const;
-    char **VarName = ( char ** )VarName_const;
-    char **NewVal = ( char ** )NewVal_const;
-
-
-
-    if( UpnpSdkInit != 1 ) {
-        return UPNP_E_FINISH;
-    }
-
-    DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
-                         "Inside UpnpNotify \n" );
-         )
-
-        HandleLock(  );
-    if( GetHandleInfo( Hnd, &SInfo ) != HND_DEVICE ) {
-        HandleUnlock(  );
-        return UPNP_E_INVALID_HANDLE;
-    }
-    if( DevID == NULL ) {
-        HandleUnlock(  );
-        return UPNP_E_INVALID_PARAM;
-    }
-    if( ServName == NULL ) {
-        HandleUnlock(  );
-        return UPNP_E_INVALID_PARAM;
-    }
-    if( VarName == NULL || NewVal == NULL || cVariables < 0 ) {
-        HandleUnlock(  );
-        return UPNP_E_INVALID_PARAM;
-    }
-
-    HandleUnlock(  );
-
-
-    retVal =
-        genaNotifyBroadcast( Hnd, DevID, ServName, VarName, NewVal, cVariables );
-
-    DBGONLY( UpnpPrintf( UPNP_ALL, API, __FILE__, __LINE__,
-                         "Exiting UpnpNotify \n" );
-         )
-
-        return retVal;
-
-} /****************** End of UpnpNotifyBroadcast *********************/
 
 /**************************************************************************
  * Function: UpnpNotify 
@@ -3398,6 +3268,11 @@ UpnpDownloadXmlDoc( const char *url,
             return ret_code;
     }
 
+	/* MoNKi: Do not check this, some routers (Linksys WRT54GS) sends
+	   "CONTENT-TYPE: application/octet-stream". If the data sended is not
+	   an xml file, ixmlParseBufferEx will fail and the function will return
+	   UPNP_E_INVALID_DESC too.
+
     if( strncasecmp( content_type, "text/xml", strlen( "text/xml" ) ) ) {
         free( xml_buf );
         DBGONLY( UpnpPrintf( UPNP_CRITICAL, API, __FILE__, __LINE__,
@@ -3405,6 +3280,7 @@ UpnpDownloadXmlDoc( const char *url,
              )
             return UPNP_E_INVALID_DESC;
     }
+	*/
 
     ret_code = ixmlParseBufferEx( xml_buf, xmlDoc );
     free( xml_buf );
@@ -4388,16 +4264,5 @@ UpnpSetContentLength( IN UpnpClient_Handle Hnd,
     return errCode;
 
 }
-
-#ifndef _WIN32
-int UpnpSetAlias( IN const char *alias_name,
-                      IN const char *alias_content,
-                      IN size_t alias_content_length,
-		  IN time_t last_modified )
-{
-    return web_server_set_alias(alias_name, alias_content,
-				alias_content_length, last_modified);
-}
-#endif
 
 /*********************** END OF FILE upnpapi.c :) ************************/

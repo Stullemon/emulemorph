@@ -1,11 +1,11 @@
 Linux* SDK for UPnP* Devices (libupnp)
-Version 1.2.1
+Version 1.2.1a
 Release Notes
 
 Copyright (c) 2000-2003 Intel Corporation - All Rights Reserved.
 See LICENSE for details.
 
-January 2003
+November 2003
 
 This file contains information about the above product in the following 
 sections: 
@@ -242,7 +242,7 @@ from where it was placed and remove the directory containing the headers.
 6) Product Release Notes
 -------------------------------------------
 
-The SDK for UPnP Devices v1.2.1 has these known issues:
+The SDK for UPnP Devices v1.2.1a has these known issues:
 
 - The UPnP library may not work with older versions of gcc and libstdc++, 
   causing a segmentation fault when the library loads.  It is recommended
@@ -254,6 +254,11 @@ The SDK for UPnP Devices v1.2.1 has these known issues:
 
 7) New Features
 -------------------------------------------
+
+Changes to the SDK for UPnP Devices version 1.2.1a:
+
+- Changes the NAME_SIZE constant used for URL buffers to 256 bytes to 
+  accomodate longer URLs.
 
 Changes to the SDK for UPnP Devices version 1.2.1:
  

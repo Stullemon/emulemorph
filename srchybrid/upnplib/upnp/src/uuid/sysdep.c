@@ -135,8 +135,8 @@ get_system_time( uuid_time_t * uuid_time )
 	struct _timeb timeStruct;
 
 	_ftime( &timeStruct);
-    *uuid_time = ( timeStruct.time * 10000000 ) + ( timeStruct.millitm * 10000 ) +
-        I64( 0x01B21DD213814000 );
+    *uuid_time = (uuid_time_t)(( timeStruct.time * 10000000 ) + ( timeStruct.millitm * 10000 ) +
+        I64( 0x01B21DD213814000 ));
 #else
     struct timeval tp;
 

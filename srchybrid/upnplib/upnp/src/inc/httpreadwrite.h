@@ -418,7 +418,7 @@ int http_SendStatusResponse( IN SOCKINFO *info, IN int http_status_code,
 *		't':	arg = time_t * gmt_time	// appends time in RFC 1123 fmt
 *		'D':	(no args) appends HTTP DATE: header
 *		'S':	(no args) appends HTTP SERVER: header
-*		'U':	(no args) appends HTTP USER-AGENT: header
+*		'U':	(no args) appends HTTP User-Agent: header
 *		'C':	(no args) appends a HTTP CONNECTION: close header 
 *				depending on major,minor version
 *		'N':	arg1 = int content_length	// content-length header
@@ -510,8 +510,8 @@ int http_OpenHttpGetEx(IN const char *url_str,
 *		system
 *
 *	Return :	int;
-*				Number of characters (without '\0') copied to info.
-				If buffSize = 0, returns needed buffer size (including '\0')
+*				Number of characters (without '\0') copied to info;
+				If buffSize = 0, returns needed buffer size (including '\0');
 *
 *	Note :
 ************************************************************************/

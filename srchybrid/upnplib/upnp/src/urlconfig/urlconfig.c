@@ -367,9 +367,6 @@ config_description_doc( INOUT IXML_Document * doc,
 *
 *	Note :
 ************************************************************************/
-#ifndef _WIN32
-#define XML_DOC_HEADER "<?xml version=\"1.0\"?>"
-#endif
 int
 configure_urlbase( INOUT IXML_Document * doc,
                    IN const struct sockaddr_in *serverAddr,
@@ -380,9 +377,6 @@ configure_urlbase( INOUT IXML_Document * doc,
     char *root_path = NULL;
     char *new_alias = NULL;
     char *xml_str = NULL;
-#ifndef _WIN32
-    char *aStr = NULL;
-#endif
     int err_code;
     char ipaddr_port[LINE_SIZE];
 
@@ -412,33 +406,15 @@ configure_urlbase( INOUT IXML_Document * doc,
         goto error_handler;
     }
 
-#ifndef _WIN32
-    // need to prepend the xml header
-    aStr = (char *) malloc(strlen(xml_str) + strlen(XML_DOC_HEADER) + 1);
-    strcpy(aStr, XML_DOC_HEADER);
-    strcat(aStr, xml_str);
-    ixmlFreeDOMString(xml_str);
-#endif
-
     DBGONLY( UpnpPrintf( UPNP_INFO, API, __FILE__, __LINE__,
                          "desc url: %s\n", docURL );
          )
-#ifndef _WIN32
-        DBGONLY( UpnpPrintf( UPNP_INFO, API, __FILE__, __LINE__,
-                             "doc = %s\n", aStr );
-	    )
-#else
         DBGONLY( UpnpPrintf( UPNP_INFO, API, __FILE__, __LINE__,
                              "doc = %s\n", xml_str );
          )
-#endif
         // store in web server
         err_code =
-#ifndef _WIN32
-        web_server_set_alias( new_alias, aStr, strlen( aStr ),
-#else
         web_server_set_alias( new_alias, xml_str, strlen( xml_str ),
-#endif
                               last_modified );
 
   error_handler:
@@ -446,11 +422,7 @@ configure_urlbase( INOUT IXML_Document * doc,
     free( new_alias );
 
     if( err_code != UPNP_E_SUCCESS ) {
-#ifndef _WIN32
-        ixmlFreeDOMString( aStr );
-#else
         ixmlFreeDOMString( xml_str );
-#endif
     }
     return err_code;
 }

@@ -191,9 +191,7 @@ CLIENTONLY( int copy_client_subscription( client_subscription * in,
             client_subscription *
             GetClientSubActualSID( client_subscription * head,
                                    token * sid ) {
-
             client_subscription * next = head; while( next ) {
-
 
 		if( !memcmp( next->ActualSID, sid->buff, sid->size ) )
 		    break;
@@ -203,33 +201,4 @@ CLIENTONLY( int copy_client_subscription( client_subscription * in,
             }
             return next;}
 
-/************************************************************************
-*	Function :	GetClientSubEventURL
-*
-*	Parameters :
-*		client_subscription *head ;	Head of the subscription list		
-*		token * sid ;				Subscription ID to be matched
-*
-*	Description :	Returns the client subscription from the client 
-*		subscription table that has the matching token * sid buffer
-*		value.
-*
-*	Return : client_subscription * ; The matching subscription
-*
-*	Note :
-************************************************************************/
-            client_subscription *
-            GetClientSubEventURL( client_subscription * head,
-                                   char * eventURL ) {
-
-            client_subscription * next = head; while( next ) {
-
-
-		if( !memcmp( next->EventURL, eventURL, strlen(eventURL) ) )
-		    break;
-		else
-		{
-		    next = next->next;}
-            }
-            return next;}
  )

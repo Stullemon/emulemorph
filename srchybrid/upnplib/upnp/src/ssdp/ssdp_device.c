@@ -190,26 +190,6 @@ ssdp_handle_device_request( IN http_message_t * hmsg,
                          SHORT_TERM, NULL );
 }
 
-#ifdef _WIN32
-static
-void _genaGetIP(char * addr, char * ipAddr, int * portAddr)
-{
-    int curChar;
-    char * charPtr;
-    char buf[80];
-
-    curChar = 0;
-    while (addr[curChar] != ':') {
-	curChar++;
-    }
-    strncpy(ipAddr, addr, curChar);
-    ipAddr[curChar] = 0;
-    charPtr = addr + curChar + 1;
-    strcpy(buf, charPtr);
-    *portAddr = atoi(buf);
-}
-#endif
-
 /************************************************************************
 * Function : NewRequestHandler									
 *																	
@@ -230,15 +210,10 @@ NewRequestHandler( IN struct sockaddr_in *DestAddr,
                    IN int NumPacket,
                    IN char **RqPacket )
 {
-/*#ifdef _WIN32
-    struct ip_mreq genaMcastAddr;
-    int option = 1;
-	//char ipAddr[80];
-    //int portAddr;
-#endif*/
     int socklen = sizeof( struct sockaddr_in );
 	SOCKET ReplySock;
-    int NumCopy, Index;
+    int NumCopy,
+      Index;
     unsigned long replyAddr = inet_addr( LOCAL_HOST );
     int ttl = 4;                //a/c to UPNP Spec
 
@@ -251,32 +226,10 @@ NewRequestHandler( IN struct sockaddr_in *DestAddr,
         return UPNP_E_OUTOF_SOCKET;
     }
 
-/*#ifdef _WIN32
-	memset( ( void * )&genaMcastAddr, 0, sizeof( struct ip_mreq ) );
-    genaMcastAddr.imr_interface.s_addr = htonl( INADDR_ANY );
-    genaMcastAddr.imr_multiaddr.s_addr = inet_addr( LOCAL_HOST );
-    if( setsockopt( ReplySock, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                    ( char * )&genaMcastAddr,
-                    sizeof( struct ip_mreq ) ) != 0 ) {
-		    shutdown( ReplySock, SD_BOTH );
-		    UpnpCloseSocket( ReplySock );
-		    return UPNP_E_SOCKET_ERROR;
-    }
-    // result is not checked becuase it will fail in WinMe and Win9x.
-    setsockopt( ReplySock, IPPROTO_IP,
-                IP_MULTICAST_TTL, &ttl, sizeof( ttl ) );
-    if( setsockopt( ReplySock, SOL_SOCKET, SO_BROADCAST,
-                    ( const char * )&option, sizeof( option ) ) != 0 ) {
-		    shutdown( ReplySock, SD_BOTH );
-		    UpnpCloseSocket( ReplySock );
-		    return UPNP_E_NETWORK_ERROR;
-    }
-#else*/
     setsockopt( ReplySock, IPPROTO_IP, IP_MULTICAST_IF,
                 ( char * )&replyAddr, sizeof( replyAddr ) );
     setsockopt( ReplySock, IPPROTO_IP, IP_MULTICAST_TTL,
                 ( char * )&ttl, sizeof( int ) );
-//#endif
 
     for( Index = 0; Index < NumPacket; Index++ ) {
         int rc;
@@ -344,8 +297,8 @@ CreateServicePacket( IN int msg_type,
         ret_code = http_MakeMessage( &buf, 1, 1,
                                      "R" "sdc" "D" "s" "ssc" "S" "ssc"
                                      "ssc" "c", HTTP_OK,
-                                     "CACHE-CONTROL: max-age=", duration,
-                                     "EXT:\r\n", "LOCATION: ", location,
+                                     "Cache-Control: max-age=", duration,
+                                     "Ext:\r\n", "Location: ", location,
                                      "ST: ", nt, "USN: ", usn );
         if( ret_code != 0 ) {
             return;
@@ -365,9 +318,9 @@ CreateServicePacket( IN int msg_type,
         ret_code = http_MakeMessage( &buf, 1, 1,
                                      "Q" "sssdc" "sdc" "ssc" "ssc" "ssc"
                                      "S" "ssc" "c", HTTPMETHOD_NOTIFY, "*",
-                                     1, "HOST: ", SSDP_IP, ":", SSDP_PORT,
-                                     "CACHE-CONTROL: max-age=", duration,
-                                     "LOCATION: ", location, "NT: ", nt,
+                                     1, "Host: ", SSDP_IP, ":", SSDP_PORT,
+                                     "Cache-Control: max-age=", duration,
+                                     "Location: ", location, "NT: ", nt,
                                      "NTS: ", nts, "USN: ", usn );
         if( ret_code != 0 ) {
             return;
@@ -415,7 +368,6 @@ DeviceAdvertisement( IN char *DevType,
     char Mil_Usn[LINE_SIZE];
     char *msgs[3];
     int ret_code;
-
 
     DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
                          "In function SendDeviceAdvertisemenrt\n" );

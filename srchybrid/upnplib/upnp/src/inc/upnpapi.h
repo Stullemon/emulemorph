@@ -71,21 +71,13 @@ struct Handle_Info
     Upnp_FunPtr  Callback; // Callback function pointer.
     char * Cookie;
 
-#ifndef _WIN32
-    DEVICEONLY(char  DescURL[LINE_SIZE];)   // URL for the use of SSDP
-#else
-    // get rid of DEVICEONLY for windows
-    char  DescURL[LINE_SIZE];   // URL for the use of SSDP
-#endif
+    //DEVICEONLY(char  DescURL[LINE_SIZE];)   // URL for the use of SSDP
+    char  DescURL[LINE_SIZE];               // URL for the use of SSDP
     DEVICEONLY(char  DescXML[LINE_SIZE];)   // XML file path for device 
                                             //description
 
-#ifndef _WIN32
-    DEVICEONLY(int MaxAge;)                 // Advertisement timeout
-#else
-    // get rid of DEVICEONLY for windows
-    int MaxAge;                 // Advertisement timeout
-#endif
+    //DEVICEONLY(int MaxAge;)                 // Advertisement timeout
+    int MaxAge;                             // Advertisement timeout
     DEVICEONLY(IXML_Document *DescDocument;)     // Description parsed in 
                                             //terms of DOM document 
     DEVICEONLY(IXML_NodeList *DeviceList;)       // List of devices in the 

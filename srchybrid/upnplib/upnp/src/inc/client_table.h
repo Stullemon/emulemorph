@@ -157,25 +157,6 @@ client_subscription * GetClientSubClientSID(client_subscription *head
 ************************************************************************/
 client_subscription * GetClientSubActualSID(client_subscription *head
 						     , token * sid);
-
-// added event subscription URL for a client for multicast
-/************************************************************************
-*	Function :	GetClientSubEventURL
-*
-*	Parameters :
-*		client_subscription *head ;	Head of the subscription list		
-*		char * eventURL ;				event url to be matched
-*
-*	Description :	Returns the client subscription from the client 
-*		subscription table that has the matching url
-*		value.
-*
-*	Return : client_subscription * ; The matching subscription
-*
-*	Note :
-************************************************************************/
-client_subscription * GetClientSubEventURL(client_subscription *head
-						     , char * eventURL);
 )
 
 #ifdef __cplusplus

@@ -49,7 +49,7 @@ CC=insure
 endif
 
 UPNP_INC_DIR = -I../../inc -I../../../inc -I ../../../../threadutil/src/win32 \
-	-I ../../../../threadutil/inc -I ../../../../ixml/inc
+	-I ../../../../threadutil/src -I ../../../../ixml/inc
 
 
 CFLAGS += -fPIC -Wall -c $(UPNP_INC_DIR) 
@@ -73,7 +73,7 @@ UPNP_LIB_DIR = ../../lib/debug/$(DIR_PATH)
 else
 OBJ_DIR = obj/$(DIR_PATH)
 UPNP_LIB_DIR = ../../lib/$(DIR_PATH)
-CFLAGS += -Os -D_REENTRANT -DNO_DEBUG -DNDEBUG -g
+CFLAGS += -Os -D_REENTRANT -DNO_DEBUG -DNDEBUG
 endif
 
 TARGET_OUTPUT = $(UPNP_LIB_DIR)client_table.o

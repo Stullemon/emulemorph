@@ -495,9 +495,9 @@ parse_port( int max,
             unsigned short *out )
 {
 
-    char *finger = port; // current location
+    char *finger = port;
     char *max_ptr = finger + max;
-    unsigned short temp = 0; // area where port string is converted to integer
+    unsigned short temp = 0;
 
     while( ( finger < max_ptr ) && ( isdigit( *finger ) ) ) {
         temp = temp * 10;
@@ -506,7 +506,7 @@ parse_port( int max,
     }
 
     *out = htons( temp );
-    return finger - port; // return the number of bytes parsed
+    return finger - port;
 }
 
 #ifdef _WIN32
@@ -557,8 +557,10 @@ parse_hostport( char *in,
     int begin_port;
     int hostport_size = 0;
     int host_size = 0;
-    struct hostent h_buf;
+#ifndef _WIN32
+	struct hostent h_buf;
     char temp_hostbyname_buff[BUFFER_SIZE];
+#endif
     struct hostent *h = NULL;
     int errcode = 0;
     char *temp_host_name = NULL;

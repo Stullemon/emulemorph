@@ -169,34 +169,6 @@ CLIENTONLY(
 				Upnp_SID  out_sid );)
 
 
-// MULTICAST
-/************************************************************************
-* Function : genaRegisterMulticast
-*																	
-* Parameters:														
-*	IN UpnpClient_Handle client_handle: 
-*	IN char * PublisherURL: NULL Terminated, of the form : 
-*						"http://134.134.156.80:4000/RedBulb/Event"
-*	INOUT int * TimeOut: requested Duration, if -1, then "infinite".
-*						in the OUT case: actual Duration granted 
-*						by Service, -1 for infinite
-*	OUT Upnp_SID out_sid:sid of subscription, memory passed in by caller
-*
-* Description:														
-*	This function subscribes to a PublisherURL ( also mentioned as EventURL
-*	some places). It sends SUBSCRIBE http request to service processes 
-*	request. Finally adds a Subscription to 
-*	the clients subscription list, if service responds with OK
-*
-* Returns: int
-*	return UPNP_E_SUCCESS if service response is OK else 
-*	returns appropriate error
-***************************************************************************/
-CLIENTONLY(
-	EXTERN_C int genaRegisterMulticast(UpnpClient_Handle client_handle,
-					   char * );)
-
-
 /************************************************************************
 * Function : genaUnSubscribe
 *																	
@@ -399,3 +371,12 @@ void error_respond( IN SOCKINFO *info, IN int error_code,
 
 
 #endif // GENA
+
+
+
+
+
+
+
+
+

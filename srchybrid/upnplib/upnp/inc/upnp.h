@@ -595,15 +595,7 @@ enum Upnp_EventType_e {
    *  The {\bf Event} parameter is a {\bf Upnp_Event_Subscribe}
    *  structure. The subscription is no longer valid. */
   
-  UPNP_EVENT_SUBSCRIPTION_EXPIRED,
-
-  /// MULTICAST
-  /** Received by a control point when an event arrives via udn
-   *  multicast.  The {\bf
-   *  Event} parameter contains a {\bf Upnp_EventBroadcast} structure
-   *  with the information about the event.  */
-
-  UPNP_EVENT_BROADCAST_RECEIVED
+  UPNP_EVENT_SUBSCRIPTION_EXPIRED
 
 };
 
@@ -615,8 +607,6 @@ typedef enum Upnp_EventType_e Upnp_EventType;
   */
     
 typedef char Upnp_SID[44];
-// MULTICAST!!!
-typedef char Upnp_NotId[256];
 
 /** @name Upnp_SType
     @memo Represents the different types of searches that
@@ -780,21 +770,6 @@ struct Upnp_Event
 
   /** The event sequence number. */
   int EventKey;
-
-  /** The DOM tree representing the changes generating the event. */
-  IXML_Document *ChangedVariables;
-
-};
-
-
-// MULTICAST!!!
-struct Upnp_BroadcastEvent
-{
-    // notification type (deviceID)
-    Upnp_NotId  NotificationType;
-
-    // notification subtype (serviceID)
-    Upnp_NotId NotificationSubtype;
 
   /** The DOM tree representing the changes generating the event. */
   IXML_Document *ChangedVariables;
@@ -1761,16 +1736,6 @@ EXPORT_SPEC int UpnpAcceptSubscriptionExt(
                                    registered control point. */
     );
 
-
-// send upnp notification via multicast
-EXPORT_SPEC int
-UpnpNotifyBroadcast( IN UpnpDevice_Handle Hnd,
-            IN const char *DevID_const,
-            IN const char *ServName_const,
-            IN const char **VarName_const,
-            IN const char **NewVal_const,
-		     IN int cVariables );
-
 /** {\bf UpnpNotify} sends out an event change notification to all
  *  control points subscribed to a particular service.  This function is
  *  synchronous and generates no callbacks.
@@ -2028,26 +1993,6 @@ EXPORT_SPEC int UpnpSubscribe(
                                      service. */
     OUT Upnp_SID SubsId          /** Pointer to a variable to receive the 
                                      subscription ID (SID). */
-    );
-
-// MULTICAST!!!
-/** {\bf UpnpRegisterMulticast} registers a control point to receive event
- *  notifications via udn broadcast from all devices.  This operation is synchronous.
- *
- *  @return [int] An integer representing one of the following:
- *    \begin{itemize}
- *      \item {\tt UPNP_E_SUCCESS}: The operation completed successfully.
- *      \item {\tt UPNP_E_INVALID_HANDLE}: The handle is not a valid control 
- *              point handle.
- *      \item {\tt UPNP_E_OUTOF_MEMORY}: Insufficient resources exist to 
- *              complete this operation.
- *    \end{itemize}
- */
-
-EXPORT_SPEC int UpnpRegisterMulticast(
-    IN UpnpClient_Handle Hnd,    /** The handle of the control point. */
-    char * addr // dotted quad : port number e.g. 192.168.1.2:1940
-
     );
 
 /** {\bf UpnpSubscribeAsync} performs the same operation as
@@ -2663,18 +2608,6 @@ EXPORT_SPEC void UpnpFree(
     IN void *item /* The item to free. */
     );
 
-
-// new utility functions; UpnpSetAlias sets up a new alias
-// for web content, getlocalhostname existed, but we're making
-// it externally visible
-
-EXPORT_SPEC int UpnpSetAlias( IN const char *alias_name,
-                      IN const char *alias_content,
-                      IN size_t alias_content_length,
-		  IN time_t last_modified );
-
-EXPORT_SPEC int getlocalhostname(OUT char *out);
-
 //@} // Web Server API
 
 #ifdef __cplusplus
@@ -2684,3 +2617,4 @@ EXPORT_SPEC int getlocalhostname(OUT char *out);
 //@} The API
 
 #endif
+

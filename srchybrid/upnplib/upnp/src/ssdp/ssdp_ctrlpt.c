@@ -408,12 +408,12 @@ CreateClientRequestPacket( IN char *RqstBuf,
     strcpy( RqstBuf, "M-SEARCH * HTTP/1.1\r\n" );
 
     Port = SSDP_PORT;
-    strcpy( TempBuf, "HOST: " );    //Added space NK.
+    strcpy( TempBuf, "Host: " );    //Added space NK.
     strcat( TempBuf, SSDP_IP );
     sprintf( TempBuf, "%s:%d\r\n", TempBuf, Port );
     strcat( RqstBuf, TempBuf );
 
-    strcat( RqstBuf, "MAN: \"ssdp:discover\"\r\n" );
+    strcat( RqstBuf, "Man: \"ssdp:discover\"\r\n" );
 
     if( Mx > 0 ) {
         sprintf( TempBuf, "MX: %d\r\n", Mx );
@@ -537,11 +537,7 @@ SearchByTarget( IN int Mx,
     if( ReqBuf == NULL )
         return UPNP_E_OUTOF_MEMORY;
 
-    DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
-                         ">>> SSDP SEND >>>\n%s\n", ReqBuf );
-         )
-
-        timeTillRead = Mx;
+    timeTillRead = Mx;
 
     if( timeTillRead < MIN_SEARCH_TIME ) {
         timeTillRead = MIN_SEARCH_TIME;
@@ -550,6 +546,11 @@ SearchByTarget( IN int Mx,
     }
 
     CreateClientRequestPacket( ReqBuf, timeTillRead, St );
+
+    DBGONLY( UpnpPrintf( UPNP_INFO, SSDP, __FILE__, __LINE__,
+                         ">>> SSDP SEND >>>\n%s\n", ReqBuf );
+         )
+
     memset( ( char * )&destAddr, 0, sizeof( struct sockaddr_in ) );
 
     destAddr.sin_family = AF_INET;

@@ -113,7 +113,7 @@ upnp:
 	@if [ ! -d $(OUTPATH) ]; then mkdir -p $(OUTPATH); fi
 	@if [ ! -d src/lib ]; then mkdir src/lib; fi
 	@$(MAKE) DEBUG=$(DEBUG) all -C $(IXML_DIR)
-#	@cp $(IXML_DIR)/inc/*.h ./inc
+	@cp $(IXML_DIR)/inc/*.h ./inc
 
 ifeq ($(DEBUG),1)
 	@if [ -f $(IXML_DIR)/bin/debug/$(DIR_PATH)libixml.so ]; then \
@@ -126,7 +126,7 @@ else
         fi
 endif
 	@$(MAKE) all DEBUG=$(DEBUG) all -C $(THREADUTIL_DIR)
-#	@cp $(THREADUTIL_DIR)/inc/*.h ./inc
+	@cp $(THREADUTIL_DIR)/inc/*.h ./inc
 
 ifeq ($(DEBUG),1)
 	@if [ -f $(THREADUTIL_DIR)/bin/debug/$(DIR_PATH)libthreadutil_dbg.so ]; then \

@@ -168,8 +168,7 @@ CloseLog(  )
 *	is coming
 * Returns: void
 ***************************************************************************/
-DBGONLY( 
-void UpnpPrintf( IN Dbg_Level DLevel,
+DBGONLY( void UpnpPrintf( IN Dbg_Level DLevel,
                           IN Dbg_Module Module,
                           IN char *DbgFileName,
                           IN int DbgLineNo,

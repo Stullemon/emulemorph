@@ -343,7 +343,7 @@ UpnpMakeAction( char *ActionName,
                 char *Arg,
                 ... )
 {
-    va_list ArgList;
+    va_list ArgList = NULL;
     IXML_Document *out = NULL;
 
     if( NumArg > 0 ) {

@@ -29,6 +29,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
+const char *ContentTypeHeader =
+    "Content-Type: text/xml; charset=\"utf-8\"\r\n";
+
 #ifdef INCLUDE_DEVICE_APIS
 #if EXCLUDE_SOAP == 0
 
@@ -62,9 +65,6 @@ static const char *Soap_Invalid_Action = "Invalid Action";
 //static const char* Soap_Invalid_Args = "Invalid Args";
 static const char *Soap_Action_Failed = "Action Failed";
 static const char *Soap_Invalid_Var = "Invalid Var";
-
-const char *ContentTypeHeader =
-    "CONTENT-TYPE: text/xml; charset=\"utf-8\"\n";
 
 /****************************************************************************
 *	Function :	get_request_type
@@ -116,7 +116,7 @@ get_request_type( IN http_message_t * request,
                                 ns_value.buf, ns_value.length )
               == UPNP_E_OUTOF_MEMORY ) ||
             ( membuffer_append_str( &soap_action_name,
-                                    "-SOAPACTION" ) ==
+                                    "-SOAPAction" ) ==
               UPNP_E_OUTOF_MEMORY )
              ) {
             membuffer_destroy( &soap_action_name );
@@ -188,8 +188,9 @@ send_error_response( IN SOCKINFO * info,
     int major,
       minor;
     const char *start_body =
-        "<s:Envelope\n"
-        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"\n"
+		"<?xml version=\"1.0\"?>\n"
+        "<s:Envelope "
+        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
         "<s:Body>\n"
         "<s:Fault>\n"
@@ -226,7 +227,7 @@ send_error_response( IN SOCKINFO * info,
                           500,
                           content_length,
                           ContentTypeHeader,
-                          "EXT:\r\n",
+                          "Ext:\r\n",
                           start_body, err_code_str, mid_body, err_msg,
                           end_body ) != 0 ) {
         membuffer_destroy( &headers );
@@ -263,8 +264,9 @@ send_var_query_response( IN SOCKINFO * info,
     int major,
       minor;
     const char *start_body =
-        "<s:Envelope\n"
-        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"\n"
+		"<?xml version=\"1.0\"?>\n"
+        "<s:Envelope "
+        "xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
         "<s:Body>\n"
         "<u:QueryStateVariableResponse "
@@ -290,7 +292,7 @@ send_var_query_response( IN SOCKINFO * info,
                           HTTP_OK,
                           content_length,
                           ContentTypeHeader,
-                          "EXT:\r\n",
+                          "Ext:\r\n",
                           start_body, var_value, end_body ) != 0 ) {
         membuffer_destroy( &response );
         return;                 // out of mem
@@ -705,7 +707,7 @@ send_action_response( IN SOCKINFO * info,
 
     // make headers
     if( http_MakeMessage( &headers, major, minor, "RNsDsSc", HTTP_OK,   // status code
-                          content_length, ContentTypeHeader, "EXT:\n" // EXT header
+                          content_length, ContentTypeHeader, "Ext:\r\n" // EXT header
          ) != 0 ) {
         goto error_handler;
     }

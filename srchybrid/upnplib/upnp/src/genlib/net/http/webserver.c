@@ -182,14 +182,7 @@ static const char *gEncodedMediaTypes =
 /***********************************************************************/
 static struct document_type_t gMediaTypeList[NUM_MEDIA_TYPES];
 membuffer gDocumentRootDir;     // a local dir which serves as webserver root
-#ifdef _ALIASDOC
 static struct xml_alias_t gAliasDoc;    // XML document
-#else _ALIASDOC
-// need a dictionary of these things
-#define NUM_ALIASES 10
-static struct xml_alias_t gAliasDict[NUM_ALIASES];
-static int numAliasDictEntries = 0;
-#endif
 static ithread_mutex_t gWebMutex;
 extern str_int_entry Http_Header_Names[NUM_HTTP_HEADER_NAMES];
 
@@ -354,26 +347,12 @@ get_content_type( IN const char *filename,
 static XINLINE void
 glob_alias_init( void )
 {
-#ifndef _ALIASDOC    
-    int i;
-    struct xml_alias_t *alias = 0;
-#else
     struct xml_alias_t *alias = &gAliasDoc;
-
-#endif
-
-#ifndef _ALIASDOC  
-    for (i = 0; i < NUM_ALIASES; i++ ) {
-	alias = &(gAliasDict[i]);
-#endif
 
 	membuffer_init( &alias->doc );
 	membuffer_init( &alias->name );
 	alias->ct = NULL;
 	alias->last_modified = 0;
-#ifndef _ALIASDOC    
-    }
-#endif
 }
 
 /************************************************************************
@@ -392,7 +371,7 @@ is_valid_alias( IN const struct xml_alias_t *alias )
 {
     return alias->doc.buf != NULL;
 }
-#ifdef _ALIASDOC
+
 /************************************************************************
 * Function: alias_grab													
 *																		
@@ -417,7 +396,7 @@ alias_grab( OUT struct xml_alias_t *alias )
 
     ithread_mutex_unlock( &gWebMutex );
 }
-#endif
+
 /************************************************************************
 * Function: alias_release												
 *																		
@@ -480,9 +459,7 @@ web_server_set_alias( IN const char *alias_name,
     int ret_code;
     struct xml_alias_t alias;
 
-#ifdef _ALIASDOC
     alias_release( &gAliasDoc );
-#endif
 
     if( alias_name == NULL ) {
         // don't serve aliased doc anymore
@@ -519,12 +496,7 @@ web_server_set_alias( IN const char *alias_name,
 
         // save in module var
         ithread_mutex_lock( &gWebMutex );
-#ifdef _ALIASDOC
 	gAliasDoc = alias;
-#else
-	memcpy( &(gAliasDict[numAliasDictEntries]), &alias, sizeof( struct xml_alias_t ) );
-	numAliasDictEntries++;
-#endif
         ithread_mutex_unlock( &gWebMutex );
 
         return 0;
@@ -595,13 +567,11 @@ web_server_destroy( void )
 
     if( bWebServerState == WEB_SERVER_ENABLED ) {
         membuffer_destroy( &gDocumentRootDir );
-#ifdef _ALIASDOC
         alias_release( &gAliasDoc );
 
         ithread_mutex_lock( &gWebMutex );
         memset( &gAliasDoc, 0, sizeof( struct xml_alias_t ) );
         ithread_mutex_unlock( &gWebMutex );
-#endif
 
         ret = ithread_mutex_destroy( &gWebMutex );
         assert( ret == 0 );
@@ -714,51 +684,6 @@ web_server_set_root_dir( IN const char *root_dir )
 
     return 0;
 }
-
-#ifndef _ALIASDOC
-/************************************************************************
- * Function: getAliasFromDict(
-*									
-* Parameters:															
-*	IN const char* request_file ; request file passed in to be compared with
-*	OUT struct xml_alias_t* alias ; xml alias object which has a file name 
-*		stored
-*   OUT struct File_Info * info	 ; File information object which will be 
-*		filled up if the file comparison succeeds										
-*							
-* Description: Compare the files names between the one on the XML alias 
-*	the one passed in as the input parameter. If equal extract file 
-*	information
-*
-* Returns:																
-*	TRUE - On Success													
-*	FALSE if request is not an alias									
-************************************************************************/
-static xboolean
-getAliasFromDict(IN const char *request_file,
-		 OUT struct xml_alias_t *alias,
-		 OUT struct File_Info *info )
-{
-    int i;
-    // traverse dictionary looking for the alias
-    ithread_mutex_lock( &gWebMutex );
-    for (i = 0; i < numAliasDictEntries; i++) {
-	if (strcmp(gAliasDict[i].name.buf, request_file) == 0) {
-	    memcpy( alias, &(gAliasDict[i]), sizeof( struct xml_alias_t ) );
-	    (*(alias->ct))++;
-	    // fill up info
-	    info->file_length = alias->doc.length;
-	    info->is_readable = TRUE;
-	    info->is_directory = FALSE;
-	    info->last_modified = alias->last_modified;
-	    ithread_mutex_unlock( &gWebMutex );
-	    return TRUE;
-	}
-    }
-    ithread_mutex_unlock( &gWebMutex );
-    return FALSE;
-}
-#endif
 
 /************************************************************************
 * Function: get_alias													
@@ -1321,7 +1246,6 @@ process_request( IN http_message_t * req,
         goto error_handler;
     }
 
-
     if( isFileInVirtualDir( request_doc ) ) {
         using_virtual_dir = TRUE;
         RespInstr->IsVirtualFile = 1;
@@ -1333,26 +1257,19 @@ process_request( IN http_message_t * req,
         //
         // try using alias
         //
-#ifdef _ALIASDOC
         if( is_valid_alias( &gAliasDoc ) ) {
             alias_grab( alias );
             alias_grabbed = TRUE;
 
             using_alias = get_alias( request_doc, alias, &finfo );
-#else
-            using_alias = getAliasFromDict( request_doc, alias, &finfo );
-#endif
             if( using_alias == TRUE ) {
-		alias_grabbed = TRUE;
                 finfo.content_type = ixmlCloneDOMString( "text/xml" );
 
                 if( finfo.content_type == NULL ) {
                     goto error_handler;
                 }
             }
-#ifdef _ALIASDOC
         }
-#endif
     }
 
     if( using_virtual_dir ) {

@@ -50,7 +50,7 @@ endif
 
 
 UPNP_INC_DIR = -I../../inc -I../../../inc -I ../../../../threadutil/src/win32 \
-	-I ../../../../threadutil/inc -I ../../../../ixml/inc
+	-I ../../../../threadutil/src -I ../../../../ixml/inc
 
 CFLAGS += -fPIC -Wall -c -D_REENTRANT $(UPNP_INC_DIR) 
 
@@ -60,7 +60,7 @@ CFLAGS += -g -O -DDEBUG
 OBJ_DIR = obj/debug/$(DIR_PATH)
 UPNP_LIB_DIR = ../../lib/debug/$(DIR_PATH)
 else
-CFLAGS += -Os  -DNO_DEBUG -DNDEBUG -g
+CFLAGS += -Os  -DNO_DEBUG -DNDEBUG
 OBJ_DIR = obj/$(DIR_PATH)
 UPNP_LIB_DIR = ../../lib/$(DIR_PATH)
 endif

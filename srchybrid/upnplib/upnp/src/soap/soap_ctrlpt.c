@@ -58,8 +58,6 @@
 #define SOAP_ACTION_RESP_ERROR  3
 #define SOAP_VAR_RESP_ERROR   4
 
-
-
 /****************************************************************************
 *	Function :	dom_cmp_name
 *
@@ -316,7 +314,7 @@ add_man_header( INOUT membuffer * headers )
         return UPNP_E_OUTOF_MEMORY;
     }
 
-    soap_action_hdr = strstr( headers->buf, "SOAPACTION:" );
+    soap_action_hdr = strstr( headers->buf, "SOAPAction:" );
     assert( soap_action_hdr != NULL );  // can't fail
 
     // insert MAN header
@@ -604,7 +602,8 @@ SoapSendAction( IN char *action_url,
     xboolean got_response = FALSE;
 
     char *xml_start =
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"\n"
+        "<?xml version=\"1.0\"?>\n"
+		"<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
         "<s:Body>";
     char *xml_end = "</s:Body>\n" "</s:Envelope>\n";
@@ -651,10 +650,14 @@ SoapSendAction( IN char *action_url,
 
     // make request msg
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "q" "N" "s" "sssbs" "U" "c" "bbb", SOAPMETHOD_POST, &url, xml_start_len + action_str_len + xml_end_len,   // content-length
+    if( http_MakeMessage( &request, 1, 1, "Q" "s" "sssbs" "U" "H" "N" "C" "s" "c" "bbb",
+                          SOAPMETHOD_POST, url.pathquery.buff, url.pathquery.size,
                           ContentTypeHeader,
-                          "SOAPACTION: \"", service_type, "#", name.buf,
-                          name.length, "\"\r\n", xml_start, xml_start_len,
+                          "SOAPAction: \"", service_type, "#", name.buf, name.length, "\"\r\n",
+						  &url,
+						  xml_start_len + action_str_len + xml_end_len,   // content-length
+						  "Cache-Control: no-cache\r\nPragma: no-cache\r\n",
+						  xml_start, xml_start_len,
                           action_str, action_str_len, xml_end,
                           xml_end_len ) != 0 ) {
         goto error_handler;
@@ -737,7 +740,8 @@ SoapSendActionEx( IN char *action_url,
     xboolean got_response = FALSE;
 
     char *xml_start =
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"\n"
+		"<?xml version=\"1.0\"?>\n"
+        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n";
     char *xml_body_start = "<s:Body>";
     char *xml_end = "</s:Body>\n" "</s:Envelope>\n";
@@ -800,10 +804,13 @@ SoapSendActionEx( IN char *action_url,
 
     // make request msg
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "q" "N" "s" "sssbs" "U" "c" "bbbbbbb", SOAPMETHOD_POST, &url, xml_start_len + xml_header_start_len + xml_header_str_len + xml_header_end_len + xml_body_start_len + action_str_len + xml_end_len, // content-length
+    if( http_MakeMessage( &request, 1, 1, "Q" "s" "sssbs" "U" "H" "N" "C" "s" "c" "bbbbbbb",
+                          SOAPMETHOD_POST, url.pathquery.buff, url.pathquery.size,
                           ContentTypeHeader,
-                          "SOAPACTION: \"", service_type, "#", name.buf,
-                          name.length, "\"\r\n",
+                          "SOAPAction: \"", service_type, "#", name.buf, name.length, "\"\r\n",
+						  &url,
+						  xml_start_len + xml_header_start_len + xml_header_str_len + xml_header_end_len + xml_body_start_len + action_str_len + xml_end_len,   // content-length
+						  "Cache-Control: no-cache\r\nPragma: no-cache\r\n",
                           xml_start, xml_start_len,
                           xml_header_start, xml_header_start_len,
                           xml_header_str, xml_header_str_len,
@@ -882,7 +889,8 @@ SoapGetServiceVarStatus( IN char *action_url,
     int upnp_error_code;
 
     char *xml_start =
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"\n"
+		"<?xml version=\"1.0\"?>\n"
+        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" "
         "s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
         "<s:Body>\n"
         "<u:QueryStateVariable xmlns:u=\"urn:schemas-upnp-org:control-1-0\">\n"
@@ -901,12 +909,16 @@ SoapGetServiceVarStatus( IN char *action_url,
     }
     // make headers
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "Q" "sbc" "N" "s" "s" "U" "c" "sss", SOAPMETHOD_POST, path.buf, path.length, "HOST: ", host.buf, host.length, strlen( xml_start ) + strlen( var_name ) + strlen( xml_end ),   // content-length
+    if( http_MakeMessage( &request, 1, 1, "Q" "s" "s" "U" "sbc" "N" "C" "s" "c" "sss",
+                          SOAPMETHOD_POST, url.pathquery.buff, url.pathquery.size,
                           ContentTypeHeader,
-                          "SOAPACTION: \"urn:schemas"
+                          "SOAPAction: \"urn:schemas"
                           "-upnp-org:control-1-0#QueryStateVariable\"\r\n",
-                          xml_start, var_name, xml_end ) != 0 ) {
-        return UPNP_E_OUTOF_MEMORY;
+						  "Host: ", host.buf, host.length,
+						  strlen( xml_start ) + strlen( var_name ) + strlen( xml_end ),   // content-length
+						  "Cache-Control: no-cache\r\nPragma: no-cache\r\n",
+						  xml_start, var_name, xml_end ) != 0 ) {
+	    return UPNP_E_OUTOF_MEMORY;
     }
     // send msg and get reply
     ret_code = soap_request_and_response( &request, &url, &response );

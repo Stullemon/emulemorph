@@ -51,7 +51,7 @@ CFLAGS += -fPIC -Wall
 
 INCLUDES = -I ../../inc -I ../inc \
 	-I ../../../ixml/inc -I ../../../threadutil/src/win32 \
-	-I ../../../threadutil/inc 
+	-I ../../../threadutil/src 
 
 ifeq ($(EMACS),1)
 NOCOLOR  = export TERM=dumb;
@@ -64,7 +64,7 @@ CFLAGS += -g -O -DDEBUG
 OBJ_DIR = obj/debug/$(DIR_PATH)
 UPNP_LIB_DIR = ../lib/debug/$(DIR_PATH)
 else
-CFLAGS += -Os -DNDEBUG -g
+CFLAGS += -Os -DNDEBUG
 OBJ_DIR = obj/$(DIR_PATH)
 UPNP_LIB_DIR = ../lib/$(DIR_PATH)
 endif

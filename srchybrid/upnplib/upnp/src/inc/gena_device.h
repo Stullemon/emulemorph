@@ -86,17 +86,3 @@ void gena_process_subscription_renewal_request( IN SOCKINFO *info,
 ****************************************************************************/
 void gena_process_unsubscribe_request(	IN SOCKINFO *info,
 					IN http_message_t* request );
-
-
-// use Multicast to send a gena Notify
-// has much better performance than acknowledged notification,
-// but probably much poorer reliability
-int
-genaNotifyBroadcast( IN UpnpDevice_Handle device_handle,
-               IN char *UDN,
-               IN char *servId,
-               IN char **VarNames,
-               IN char **VarValues,
-		     IN int var_count );
-
-int GenaBroadcastNotifyHandler( IN char *RqPacket );

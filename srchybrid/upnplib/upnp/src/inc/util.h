@@ -145,8 +145,7 @@ void linecopylen( OUT char dest[LINE_SIZE], IN const char* src, IN size_t srclen
 #ifndef _WIN32
 #define		XINLINE inline
 #else
-// get rid of inline for debugging
-#define		XINLINE
+#define		XINLINE __inline
 #endif
 
 #endif // __cplusplus

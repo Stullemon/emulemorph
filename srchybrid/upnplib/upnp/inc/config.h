@@ -293,7 +293,7 @@
 // Do not change, Internal purpose only!!! 
 
 // normally, this should be 0; adds extra seconds to delay
-#define MINIMUM_DELAY 0
+#define MINIMUM_DELAY 10
 
 /** @name DBGONLY
           The {\bf DBGONLY} macro allows code to be marked so that it 
