@@ -28,6 +28,16 @@
 class CHTRichEditCtrl;
 class CCustomAutoComplete;
 
+// Mighty Knife: News feeds
+// grrr, why is this d*mn "pug" implementation completely contained in a
+// .h-file and not splitted in a .h/.cpp pair... 
+// therefore we mustn't include the .h-file here, otherwise there will be linker
+// errors :(
+namespace pug {
+	class xml_node;
+}
+// [end] Mighty Knife
+
 class CServerWnd : public CResizableDialog, public CLoggable
 {
 	DECLARE_DYNAMIC(CServerWnd)
@@ -51,6 +61,7 @@ public:
 	//MORPH START - Added by SiRoB, XML News [O²]
 	void ListFeeds();
 	void DownloadFeed();
+	void ParseNewsNode(pug::xml_node _node, CString _xmlbuffer);
 	void ParseNewsFile(CString strTempFilename);
 	void OnFeedListSelChange();
 	CArray<CString> aFeedUrls;

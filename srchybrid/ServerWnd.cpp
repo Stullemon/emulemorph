@@ -1121,6 +1121,59 @@ void CServerWnd::DownloadFeed()
 	ParseNewsFile(strTempFilename);
 }
 
+// Parses a node of the news file.
+// Add all "item" nodes to the news messagebox of the server window.
+// Don't add the message _xmlbuffer - that was already added since it
+// represents the description of the news page itself.
+void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
+	CString sbuffer;
+	CString sxmlbuffer;
+	using namespace pug;
+	xml_node_list item;
+	for(xml_node::child_iterator i = _node.children_begin(); i < _node.children_end(); ++i) {
+		CString c = CString(i->name());
+		if (CString(i->name()) == CString("item")) {
+			aXMLUrls.Add(i->first_element_by_path("./link").child(0).value());
+			sbuffer = i->first_element_by_path("./title").child(0).value();
+			HTMLParse(sbuffer);
+			newsmsgbox->AppendText("\n• ");
+			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+			aXMLNames.Add(sbuffer);
+			if (!i->first_element_by_path("./author").child(0).empty())
+			{
+				sxmlbuffer = i->first_element_by_path("./author").child(0).value();
+				newsmsgbox->AppendText(CString(" - Par: ")+sxmlbuffer);
+			}
+			CString buffer = i->first_element_by_path("./description").child(0).value();
+			HTMLParse(buffer);
+			if (buffer != _xmlbuffer && !buffer.IsEmpty())
+			{
+				if (sxmlbuffer.IsEmpty())
+					newsmsgbox->AppendText("\n");
+				int index = 0;
+				while (buffer.Find("<a href=\"") != -1)
+				{
+					index = buffer.Find("<a href=\"");
+					newsmsgbox->AppendText(buffer.Left(index));
+					buffer = buffer.Mid(index+9);
+					index = buffer.Find("\"");
+					sbuffer = buffer.Left(index);
+					aXMLUrls.Add(sbuffer);
+					buffer = buffer.Mid(index+1);
+					index = buffer.Find(">");
+					buffer = buffer.Mid(index+1);
+					index = buffer.Find("</a>");
+					sbuffer = buffer.Left(index);
+					aXMLNames.Add(sbuffer);
+					newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
+					buffer = buffer.Mid(index+4);
+				}
+				newsmsgbox->AppendText(buffer+"\n");
+			}
+		}
+	}
+}
+
 void CServerWnd::ParseNewsFile(CString strTempFilename)
 {
 	CString sbuffer;
@@ -1128,80 +1181,60 @@ void CServerWnd::ParseNewsFile(CString strTempFilename)
 	aXMLUrls.RemoveAll();
 	aXMLNames.RemoveAll();
 
+	// Look if the news file exists in the "feed" subdirectory
 	if (!PathFileExists(strTempFilename)){
 		StatusSelector.SetCurSel(2);
 		UpdateLogTabSelection();
 		return;
 	}
 
+	// Generate an XML parser. THat thing can be found in the "pugxml" library.
+	// It uses the namespace "pug".
 	using namespace pug;
 	xml_parser* xml = new xml_parser();
+
+	// Load and parse the XML file
 	xml->parse_file(strTempFilename);
+
+	// Create two XML nodes. One node represents the root and one represets
+	// the "channel" section in the file.
 	xml_node itelem;
-	if (!xml->document().first_element_by_path("./rss").empty())
+	xml_node itelemroot;
+	if (!xml->document().first_element_by_path("./rss").empty()) {
+		itelemroot = xml->document().first_element_by_path("./rss");
 		itelem = xml->document().first_element_by_path("./rss/channel");
-	else if (!xml->document().first_element_by_path("./rdf:RDF").empty())
+	} else if (!xml->document().first_element_by_path("./rdf:RDF").empty()) {
+		itelemroot = xml->document().first_element_by_path("./rdf:RDF");
 		itelem = xml->document().first_element_by_path("./rdf:RDF/channel");
-	else
-	{
+	} else {
 		delete xml;
 		return;
 	}
-	if(!itelem.empty())
-	{
+
+	// We'll only continue if we find the "channel" section.
+	if(!itelem.empty()) {
+		// Add the data in this section to the News box. 
+		// It represents the title of the news channel and so on...
 		aXMLUrls.Add(itelem.first_element_by_path("./link").child(0).value());
 		sbuffer = itelem.first_element_by_path("./title").child(0).value();
 		HTMLParse(sbuffer);
 		sbuffer.Replace("'","`");
 		newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 		aXMLNames.Add(sbuffer);
+		// The xmlbuffer stores the description of the newsfile itself.
+		// We pass this to ParseNewsNode to prevent this description to be
+		// added twice: Some news pages put the most important message
+		// in both the page description and the first item.
 		CString xmlbuffer = itelem.first_element_by_path("./description").child(0).value();
 		HTMLParse(xmlbuffer);
 		newsmsgbox->AddEntry(CString("\n	")+xmlbuffer);
-		CString sxmlbuffer;
-		xml_node_list item;
-		for(xml_node::child_iterator i = itelem.children_begin(); i < itelem.children_end(); ++i)
-			if (CString(i->name()) == CString("item"))
-			{
-				aXMLUrls.Add(i->first_element_by_path("./link").child(0).value());
-				sbuffer = i->first_element_by_path("./title").child(0).value();
-				HTMLParse(sbuffer);
-				newsmsgbox->AppendText("\n• ");
-				newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
-				aXMLNames.Add(sbuffer);
-				if (!i->first_element_by_path("./author").child(0).empty())
-				{
-					sxmlbuffer = i->first_element_by_path("./author").child(0).value();
-					newsmsgbox->AppendText(CString(" - Par: ")+sxmlbuffer);
-				}
-				CString buffer = i->first_element_by_path("./description").child(0).value();
-				HTMLParse(buffer);
-				if (buffer != xmlbuffer && !buffer.IsEmpty())
-				{
-					if (sxmlbuffer.IsEmpty())
-						newsmsgbox->AppendText("\n");
-					int index = 0;
-					while (buffer.Find("<a href=\"") != -1)
-					{
-						index = buffer.Find("<a href=\"");
-						newsmsgbox->AppendText(buffer.Left(index));
-						buffer = buffer.Mid(index+9);
-						index = buffer.Find("\"");
-						sbuffer = buffer.Left(index);
-						aXMLUrls.Add(sbuffer);
-						buffer = buffer.Mid(index+1);
-						index = buffer.Find(">");
-						buffer = buffer.Mid(index+1);
-						index = buffer.Find("</a>");
-						sbuffer = buffer.Left(index);
-						aXMLNames.Add(sbuffer);
-						newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
-						buffer = buffer.Mid(index+4);
-					}
-					newsmsgbox->AppendText(buffer+"\n");
-				}
-			}
-	newsmsgbox->AppendText("\n");
+		// News-items can be found either in the "channel"-node...
+		ParseNewsNode (itelem, xmlbuffer);
+		// ...and in the root node of the xml file. 
+		ParseNewsNode (itelemroot, xmlbuffer);
+		// On which node they can fe found depends on the one who generates 
+		// the XML file.
+		newsmsgbox->AppendText("\n");
 	}
 	delete xml;
 	newsmsgbox->ScrollToFirstLine();
