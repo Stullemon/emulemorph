@@ -1241,7 +1241,8 @@ void CUpDownClient::CheckDownloadTimeout()
 			OnPeerCacheDownSocketTimeout();
 		}
 	}
-	else
+	//MORPH START - Removed by SiRoB, tempory patch [cmgrr]
+	/*else
 	{
 		if ((::GetTickCount() - m_dwLastBlockReceived) > DOWNLOADTIMEOUT)
 		{
@@ -1254,7 +1255,8 @@ void CUpDownClient::CheckDownloadTimeout()
 			}
 			SetDownloadState(DS_ONQUEUE);
 		}
-	}
+	}*/
+	//MORPH END   - Removed by SiRoB, tempory patch [cmgrr]
 }
 
 UINT CUpDownClient::GetAvailablePartCount() const
