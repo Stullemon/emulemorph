@@ -1062,7 +1062,10 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			totaluploadtime += tempUpStartTimeDelay/1000;
 			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
-				if(client->GetSessionUp() < SESSIONAMOUNT){
+				if(earlyabort == true){
+					client->Credits()->SaveUploadQueueWaitTime();
+				}
+				else if(client->GetSessionUp() < SESSIONAMOUNT){
 					int keeppct = ((100 * client->GetSessionUp())/SESSIONAMOUNT) - 10;// At least 10% time credit 'penalty'
 					if (keeppct < 0)    keeppct = 0;
 					client->Credits()->SaveUploadQueueWaitTime(keeppct);
