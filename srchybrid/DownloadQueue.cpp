@@ -2222,8 +2222,8 @@ void CDownloadQueue::OnConnectionState(bool bConnected)
 //MORPH START - Added by SiRoB, ZZ Ratio
 bool CDownloadQueue::IsFilesPowershared()
 {
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
-		CPartFile* cur_file =  filelist.GetAt(pos);
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+		CPartFile* cur_file =  filelist.GetNext(pos);
 		if (cur_file->IsPartFile() && cur_file->GetPowerSharedMode()==1)
 			return true;
 	}
