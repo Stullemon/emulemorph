@@ -17,6 +17,7 @@
 #pragma once
 #include "Loggable.h"
 
+class CPartFile; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 class CPreferences;
 class CServer;
 
@@ -45,6 +46,9 @@ public:
 	CServer*	GetServerAt(uint32 pos) const { return list.GetAt(list.FindIndex(pos)); }
 	uint32		GetServerCount() const { return list.GetCount(); }
 	CServer*	GetNextServer(const CServer* lastserver) const; // slow
+	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
+	CServer*	GetNextServer(CServer* lastserver, CPartFile *file);	// itsonlyme: cacheUDPsearchResults
+	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 	CServer*	GetServerByAddress(LPCTSTR address, uint16 port) const;
 	CServer*	GetServerByIP(uint32 nIP) const;
 	CServer*	GetServerByIP(uint32 nIP, uint16 nPort) const;

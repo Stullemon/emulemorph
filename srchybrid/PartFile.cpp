@@ -51,6 +51,7 @@
 #include "TransferWnd.h"
 #include "TaskbarNotifier.h"
 #endif
+#include "ServerList.h" //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -2150,6 +2151,39 @@ void CPartFile::AddSources(CMemFile* sources,uint32 serverip, uint16 serverport)
 	if ( theApp.glob_prefs->GetDebugSourceExchange() )
 		AddDebugLogLine(false,"RCV: %i sources from server, %i low id dropped, %i possible sources File(%s)",count,debug_lowiddropped,debug_possiblesources, GetFileName());
 }
+
+//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
+// itsonlyme: cacheUDPsearchResults
+CServer *CPartFile::GetNextAvailServer()
+{
+	if (m_preferredServers.IsEmpty()) 
+		return NULL;
+
+	POSITION pos = m_preferredServers.GetHeadPosition();
+	SServer aServer = m_preferredServers.GetValueAt(pos);
+	m_preferredServers.RemoveAt(pos);
+
+
+	CServer *nextServer = theApp.serverlist->GetServerByIP(aServer.m_nIP, aServer.m_nPort);
+	if (!nextServer) 
+		return NULL;
+
+	CString tracemsg;
+	tracemsg.Format("GetNextAvailServer returned %s:%i server with %i sources for %s", nextServer->GetAddress(), nextServer->GetPort(), aServer.m_uAvail, this->m_strFileName);
+	TRACE(tracemsg);
+	AddDebugLogLine(false, tracemsg);
+
+	return nextServer;
+}
+
+void CPartFile::AddAvailServer(SServer server)
+{
+	m_preferredServers.Insert(server.m_uAvail, server);
+	while (m_preferredServers.GetCount() > MAX_PREF_SERVERS)
+		m_preferredServers.RemoveAt(m_preferredServers.GetHeadPosition());
+}
+// itsonlyme: cacheUDPsearchResults
+//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 // SLUGFILLER: heapsortCompletesrc
 static void HeapSort(CArray<uint16,uint16> &count, int32 first, int32 last){

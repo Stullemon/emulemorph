@@ -16,6 +16,8 @@
 #pragma once
 #include "KnownFile.h"
 
+class CServer; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
+
 #define	PARTSIZE			9728000
 
 // khaos::kmod+ Save/Load Sources
@@ -47,6 +49,10 @@
 #define	PARTMET_TMP_EXT	_T(".backup")
 
 #define STATES_COUNT		13
+
+//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
+#define MAX_PREF_SERVERS	10	// itsonlyme: cacheUDPsearchResults
+//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 #define PMT_UNKNOWN			0
 #define PMT_DEFAULTOLD		1
@@ -256,6 +262,28 @@ public:
 	uint8*	MMCreatePartStatus();
 	
 	void	PerformFirstHash();		// SLUGFILLER: SafeHash	
+
+	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
+	// itsonlyme: cacheUDPsearchResults
+	struct SServer {
+		SServer() {
+			m_nIP = m_nPort = 0;
+			m_uAvail = 0;
+		}
+		SServer(uint32 nIP, UINT nPort) {
+			m_nIP = nIP;
+			m_nPort = nPort;
+			m_uAvail = 0;
+		}
+		uint32 m_nIP;
+		uint16 m_nPort;
+		UINT   m_uAvail;
+	};
+	void	AddAvailServer(SServer server);
+	CServer*	GetNextAvailServer();
+	// itsonlyme: cacheUDPsearchResults
+	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
+
 	//preview
 	virtual bool GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender);
 	virtual void GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
@@ -371,6 +399,10 @@ private:
 	BOOL 	PerformFileComplete(); // Lord KiRon
 	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
 	static UINT AFX_CDECL AllocateSpaceThread(LPVOID lpParam);
+
+	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
+	CRBMultiMap<UINT, SServer>	m_preferredServers;	// itsonlyme: cacheUDPsearchResults
+	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
 	// khaos::categorymod+
