@@ -371,11 +371,10 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				if ( link.IsEmpty() )
 					break;
 
-				CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(link);
-				_ASSERT(pLink);
-				if (pLink) //Added by SiRoB, HotFix
-				{
-					if ( pLink->GetKind() == CED2KLink::kFriend )
+				try{
+					CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(link);
+				
+					if (pLink && pLink->GetKind() == CED2KLink::kFriend )
 					{
 						// Better with dynamic_cast, but no RTTI enabled in the project
 						CED2KFriendLink* pFriendLink = static_cast<CED2KFriendLink*>(pLink);
@@ -391,6 +390,9 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							AddLogLine(true, msg);
 						}
 					}
+				}
+				catch(CString strError){
+					AfxMessageBox(strError);
 				}
 			}
 			break;
