@@ -258,13 +258,13 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 		if ((nID & 0xFFF0) == SC_MINIMIZE)
 		{
 		//Commander - Modified: Invisible Mode [TPT] - Start
-			if (!thePrefs.GetInvisibleMode())
-			{
-			if (TrayShow())
-				ShowWindow(SW_HIDE);		
-		}
-		else
-				ShowWindow(SW_HIDE);		
+	        if (!thePrefs.GetInvisibleMode())
+                  {
+				if (TrayShow()) 
+				ShowWindow(SW_HIDE);
+			}
+			else 
+                ShowWindow(SW_HIDE);	
 		//Commander - Modified: Invisible Mode [TPT] - End
 		}
 		else
@@ -272,14 +272,14 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam){
 	}
 	else if ((nID & 0xFFF0) == SC_MINIMIZETRAY)
 	{
-	///Commander - Modified: Invisible Mode [TPT] - Start
-		if (!thePrefs.GetInvisibleMode())
-		{
-		if (TrayShow())
-			ShowWindow(SW_HIDE);
-	}
-	else
-			ShowWindow(SW_HIDE);
+	//Commander - Modified: Invisible Mode [TPT] - Start
+	if (!thePrefs.GetInvisibleMode())
+          {
+	    if (TrayShow()) 
+	        ShowWindow(SW_HIDE);
+			}
+		else 
+            ShowWindow(SW_HIDE);
 	//Commander - Modified: Invisible Mode [TPT] - End
 	}
 	else
