@@ -237,7 +237,7 @@ CUpDownClient::~CUpDownClient(){
 	if (m_Friend){
 		//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 		m_Friend->SetLinkedClient(NULL);
-		theApp.friendlist->RefreshFriend(m_Friend);
+		//theApp.friendlist->RefreshFriend(m_Friend);
 		//m_Friend = NULL;
 		//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	}
