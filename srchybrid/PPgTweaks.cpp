@@ -346,6 +346,9 @@ BOOL CPPgTweaks::OnInitDialog()
 		m_iLogSecureIdent = thePrefs.m_bLogSecureIdent;					// do *not* use the according 'Get...' function here!
 		m_iLogFilteredIPs = thePrefs.m_bLogFilteredIPs;					// do *not* use the according 'Get...' function here!
 		m_iLogFileSaving = thePrefs.m_bLogFileSaving;					// do *not* use the according 'Get...' function here!
+        m_iLogA4AF = thePrefs.m_bLogA4AF;                   		    // do *not* use the according 'Get...' function here! // ZZ:DownloadManager
+		m_iLogUlDlEvents = thePrefs.m_bLogUlDlEvents;
+		m_iLogLevel = 5 - thePrefs.m_byLogLevel;
 	}
 	m_iLog2Disk = thePrefs.log2disk;
 	m_iDateFileNameLog = thePrefs.m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
@@ -381,7 +384,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetPos(m_iFileBufferSize/1024);
 
 	m_iQueueSize = thePrefs.m_iQueueSize;
-	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetRange(20,100,true);
+	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetRange(20, 100, TRUE);
 	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetPos(m_iQueueSize/100);
 
 	Localize();

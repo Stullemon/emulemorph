@@ -150,7 +150,7 @@ struct Preferences_Import20b_Struct{
 CPreferences thePrefs;
 
 int		CPreferences::m_iDbgHeap;
-char	CPreferences::nick[50];
+CHAR	CPreferences::nick[50];
 uint16	CPreferences::minupload;
 uint16	CPreferences::maxupload;
 uint16	CPreferences::maxdownload;
@@ -3095,7 +3095,9 @@ void CPreferences::LoadPreferences()
 		statsAverageMinutes = 5;
 
 	// ZZ:UploadSpeedSense -->
-    m_bDynUpEnabled = ini.GetBool(_T("USSEnabled"), false, _T("eMule"));
+	//MORPH START - Added by SiRoB,  Morph parameter transfer (USS)
+	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool(_T("USSEnabled"), false, _T("eMule"));
+	//MORPH END   - Added by SiRoB,  Morph parameter transfer (USS)
     m_bDynUpUseMillisecondPingTolerance = ini.GetBool(_T("USSUseMillisecondPingTolerance"), false);
     m_iDynUpPingTolerance = ini.GetInt(_T("USSPingTolerance"), 500, _T("eMule"));
 	m_iDynUpPingToleranceMilliseconds = ini.GetInt(_T("USSPingToleranceMilliseconds"), 200);
@@ -3112,26 +3114,15 @@ void CPreferences::LoadPreferences()
     m_iDynUpGoingDownDivider = ini.GetInt(_T("USSGoingDownDivider"), 1000, _T("eMule"));
     m_iDynUpNumberOfPings = ini.GetInt(_T("USSNumberOfPings"), 1, _T("eMule"));
 	// ZZ:UploadSpeedSense <--
+	//MORPH START - Added by SiRoB,  USS log flag
+	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
+	//MORPH END   - Added by SiRoB,  USS log flag
 
     m_bA4AFSaveCpu = ini.GetBool(_T("A4AFSaveCpu"), false, _T("eMule")); // ZZ:DownloadManager
 
 	m_bRunAsUser = ini.GetBool(_T("RunAsUnprivilegedUser"), false);
 	m_bOpenPortsOnStartUp = ini.GetBool(_T("OpenPortsOnStartUp"), false);
 	m_byLogLevel = ini.GetInt(_T("DebugLogLevel"), DLP_VERYLOW);
-
-	//MORPH START - Added by SiRoB,  Morph parameter transfer (USS)
-	if (!m_bSUCEnabled) m_bDynUpEnabled = ini.GetBool(_T("DynUpEnabled"), m_bDynUpEnabled);
-	m_bDynUpUseMillisecondPingTolerance = ini.GetBool(_T("IsUSSLimit"), m_bDynUpUseMillisecondPingTolerance ); // EastShare - Added by TAHO, does USS limit
-	m_iDynUpPingToleranceMilliseconds = ini.GetInt(_T("USSPingLimit"), m_iDynUpPingToleranceMilliseconds ); // EastShare - Added by TAHO, USS limit
-	m_iDynUpPingTolerance = ini.GetInt(_T("DynUpPingTolerance"), m_iDynUpPingTolerance);
-	m_iDynUpGoingUpDivider = ini.GetInt(_T("DynUpGoingUpDivider"), m_iDynUpGoingUpDivider );
-	m_iDynUpGoingDownDivider = ini.GetInt(_T("DynUpGoingDownDivider"), m_iDynUpGoingDownDivider);
-	m_iDynUpNumberOfPings = ini.GetInt(_T("DynUpNumberOfPings"), m_iDynUpNumberOfPings);
-	//MORPH END   - Added by SiRoB,  Morph parameter transfer (USS)
-
-	//MORPH START - Added by SiRoB,  USS log flag
-	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
-	//MORPH END   - Added by SiRoB,  USS log flag
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
 	_stprintf (m_sCommunityName,_T("%s"),ini.GetString (_T("CommunityName")));
