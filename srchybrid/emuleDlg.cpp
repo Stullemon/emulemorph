@@ -988,7 +988,7 @@ void CemuleDlg::ShowUserCount(){
 	totaluser = totalfile = 0;
 	theApp.serverlist->GetUserFileStatus( totaluser, totalfile );
 	CString buffer;
-	buffer.Format(_T("%s:%s(%s)|%s:%s(%s)"), GetResString(IDS_UUSERS), CastItoIShort(totaluser, false, 1), CastItoIShort(Kademlia::CKademlia::getKademliaUsers(), false, 1), GetResString(IDS_FILES), CastItoIShort(totalfile, false, 1), CastItoIShort(Kademlia::CKademlia::getKademliaFiles(), false, 1));
+	buffer.Format(_T("%s: %s (%s) | %s: %s (%s)"), GetResString(IDS_UUSERS), CastItoIShort(totaluser, false, 1), CastItoIShort(Kademlia::CKademlia::getKademliaUsers(), false, 1), GetResString(IDS_FILES), CastItoIShort(totalfile, false, 1), CastItoIShort(Kademlia::CKademlia::getKademliaFiles(), false, 1));
 	statusbar->SetText(buffer, SBarUsers, 0);
 }
 
@@ -1181,8 +1181,8 @@ void CemuleDlg::SetStatusBarPartsSize()
 	}
 	int aiWidths[5] =
 	{
-		rect.right - 525 - ussShift,
-		rect.right - 315 - ussShift,
+		rect.right - 585 - ussShift,   //CHANGED by FrankyFive
+		rect.right - 325 - ussShift,   //CHANGED by FrankyFive
 		rect.right - 115 - ussShift,
 		rect.right - 25 - ussShift,
 		-1
