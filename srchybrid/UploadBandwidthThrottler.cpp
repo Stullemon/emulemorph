@@ -552,7 +552,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				if (!isFocused) {
 					if (allowedDataRateClass[classID] > 0){
 						if (maxSlot[classID] > 0 && allowedDataRateClass[classID]/maxSlot[classID] < ClientDataRate[classID]) {
-							maxSlot[classID] = allowedDataRateClass[classID]/ClientDataRate[classID];
+							maxSlot[classID] = 1+allowedDataRateClass[classID]/ClientDataRate[classID];
 						}
 						if(lastpos+maxSlot[classID] > m_highestNumberOfFullyActivatedSlots) {
 							m_highestNumberOfFullyActivatedSlots = lastpos+maxSlot[classID];
