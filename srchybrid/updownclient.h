@@ -916,7 +916,6 @@ private:
 
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bIsMorph; //MORPH - Added by SiRoB, Is Morph client?
-	bool	m_bIsEastShare; // EastShare - Added by Pretender, Is EastShare Cilent?
 
 	//upload
 	//MORPH START - Added by SiRoB, ZZ Upload System
