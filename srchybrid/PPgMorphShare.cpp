@@ -113,7 +113,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		// [end] Mighty Knife
 		//MORPH END   - Added by SiRoB, Show Permission
 
-		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgDisp, TVI_ROOT);
+		m_htiDisplay = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PW_DISPLAY), iImgPerm, TVI_ROOT);
 		m_htiFolderIcons = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FOLDERICONS),m_htiDisplay, m_iFolderIcons);
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
@@ -142,7 +142,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//MORPH START - Added by SiRoB, Show Permission
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
 	//MORPH END   - Added by SiRoB, Show Permission
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplay, m_iFolderIcons);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_iFolderIcons);
 }
 
 
