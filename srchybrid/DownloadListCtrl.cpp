@@ -461,13 +461,14 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 			if((lpPartFile->GetTransferingSrcCount()) && (nColumn))
 				dc->SetTextColor(RGB(192,0,0));
 		//MORPH END   - Added by IceCream, show download in red
-
+		//MORPH START - Moved by SiRoB, Due to Don't draw hidden Rect
+		if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
+				dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
+		//MORPH END   - Moved by SiRoB, Due to Don't draw hidden Rect
 		switch(nColumn)
 		{
 		case 0:{		// file name
-			if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
-				dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
-
+			
 			//MORPH START - Added by IceCream, eMule Plus rating icons
 			int iImage = theApp.GetFileTypeSystemImageIdx(lpPartFile->GetFileName());
 			if (theApp.GetSystemImageList() != NULL)
