@@ -546,8 +546,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			memcpy(maxSlot,slotCounterClass,sizeof(slotCounterClass));
 
 			uint32 lastpos = 0;
-            for(uint32 classID=0;classID<NB_SPLITTING_CLASS && slotCounterClass[classID];classID++)
+            for(uint32 classID=0;classID<NB_SPLITTING_CLASS;classID++)
 			{
+				if (slotCounterClass[classID]==0) continue;
 				bool isFocused = ClientDataRate[classID] == 0;
 				if (!isFocused) {
 					if (allowedDataRateClass[classID] > 0){
