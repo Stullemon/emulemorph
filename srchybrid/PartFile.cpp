@@ -2948,7 +2948,11 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Str
 	if (min_src <= CM_SPREAD_MINSRC)		m_ics_filemode = CM_RELEASE_MODE;
 	else if (min_src <= CM_SHARE_MINSRC)	m_ics_filemode = CM_SPREAD_MODE;
 	else									m_ics_filemode = CM_SHARE_MODE;
-
+	//MORPH START - Changed by SiRoB, Enable Preview for release file
+	if(thePrefs.IsExtControlsEnabled() && GetPreviewPrio())
+		m_ics_filemode = CM_SHARE_MODE;
+	//MORPH END   - Changed by SiRoB, Enable Preview for release file
+			
 	// Chunk list ordered by preference
 
 	CList<uint16,uint16> chunk_list;
@@ -2985,12 +2989,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Str
 				complete_src = m_SrcpartFrequency.GetCount() > part_idx ? m_SrcpartFrequency[part_idx] : 0;
 				incomplete_src = m_SrcIncPartFrequency.GetCount() > part_idx ? m_SrcIncPartFrequency[part_idx] : 0;
 			}
-			//MORPH START - Changed by SiRoB, Enable Preview for release file
-			/*
 			if (m_ics_filemode != CM_RELEASE_MODE)
-			*/
-			if (m_ics_filemode != CM_RELEASE_MODE || thePrefs.IsExtControlsEnabled() && GetPreviewPrio())
-			//MORPH END   - Changed by SiRoB, Enable Preview for release file
 			{
 				if (part_idx == 0 || part_idx == (GetPartCount() - 1))		first_last_mod = 2;
 				else if (part_idx == 1 || part_idx == (GetPartCount() - 2))	first_last_mod = 1;
