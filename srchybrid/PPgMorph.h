@@ -134,6 +134,11 @@ protected:
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	HTREEITEM m_htiDaylightSavingPatch;
+	int m_iDaylightSavingPatch;
+	// #endif
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);

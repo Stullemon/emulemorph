@@ -852,6 +852,18 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			time_t fdate = safe_mktime(filestatus.m_mtime.GetLocalTm());
 			if (fdate == -1)
 				AddDebugLogLine(false, "Failed to convert file date of %s (%s)", filestatus.m_szFullName, GetFileName());
+
+// #ifdef MIGHTY_SUMMERTIME
+			// Mighty Knife: try to correct the daylight saving bug.
+			// Very special. Never activate this in a release version !!!
+			if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+				if (fdate != -1) {
+					CorrectLocalFileTime (m_hpartfile.GetFilePath(),fdate);
+				}
+			}
+			// [end] Mighty Knife
+// #endif
+
 			if (date != fdate){
 				AddLogLine(false, GetResString(IDS_ERR_REHASH), m_fullname, GetFileName());
 				// rehash
@@ -923,12 +935,46 @@ bool CPartFile::SavePartFile(){
 		date = safe_mktime(lwtime.GetLocalTm());
 		if (date == -1)
 			AddDebugLogLine(false, "Failed to convert file date of %s (%s)", m_partmetfilename, GetFileName());
+		
+		// Mighty Knife: try to correct the daylight saving bug.
+		// Very special. Never activate this in a release version !!!
+//		#ifdef MIGHTY_SUMMERTIME
+
+		// HINT TO THE MAIN DEVELOPER FOR CLEANUP
+		// --------------------------------------
+		// Please change the data type of CKnownFile::date from "uint32" to "time_t"
+		// (and with that also the return value of "CKnownFile::GetFileDate").
+		// Otherwise such if-clauses like the above "if (date == -1)" would make no sense !
+		// Since the data types are almost identical (apart from the sign) this should
+		// make neighter a big deal, nor a any difference.
+
+		if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+			if (date != -1) {
+				time_t fdate = date;
+				CorrectLocalFileTime (ff.GetFilePath(),fdate);
+				date = fdate;
+			}
+		}
+//		#endif
+		// [end] Mighty Knife
+
 	}	// SLUGFILLER: SafeHash
 	ff.Close();
 	uint32 lsc = safe_mktime(lastseencomplete.GetLocalTm());
 
 	CString strTmpFile(m_fullname);
 	strTmpFile += PARTMET_TMP_EXT;
+
+	// Mighty Knife: try to correct the daylight saving bug.
+	// Very special. Never activate this in a release version !!!
+//	#ifdef MIGHTY_SUMMERTIME
+	if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+		time_t lsctmp = lsc;
+		CorrectLocalFileTime (strTmpFile,lsctmp);
+		lsc = lsctmp;
+	}
+//	#endif
+	// [end] Mighty Knife
 
 	// save file data to part.met file
 	CSafeBufferedFile file;
@@ -2429,8 +2475,32 @@ BOOL CPartFile::PerformFileComplete()
 	// because of different file date!
 	ASSERT( m_hpartfile.m_hFile == INVALID_HANDLE_VALUE ); // the file must be closed/commited!
 	struct _stat st;
-	if (_stat(strNewname, &st) == 0)
+
+	// Mighty Knife: slightly different code to allow the below define to become active
+	if (_stat(strNewname, &st) == 0) {
 		date = st.st_mtime;
+// #ifdef MIGHTY_SUMMERTIME
+		// Mighty Knife: try to correct the daylight saving bug.
+		// Very special. Never activate this in a release version !!!
+
+		// HINT TO THE MAIN DEVELOPERS FOR CLEANUP
+		// ---------------------------------------
+		// Please change the data type of CKnownFile::date from "uint32" to "time_t"
+		// (and with that also the return value of "CKnownFile::GetFileDate").
+		// Since the data types are almost identical (apart from the sign) this should
+		// make neighter a big deal, nor a any difference.
+		//
+		// Normalize time stamp
+		if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+			time_t fdate2 = date;
+			CorrectLocalFileTime (strNewname,fdate2);
+			date = fdate2;
+		}
+		// [end] Mighty Knife summertime
+// #endif
+
+	}
+	// [end] Migthy Knife
 
 	// remove part.met file
 	if (remove(m_fullname))

@@ -1630,6 +1630,11 @@ void CPreferences::SavePreferences(){
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	ini.WriteInt("MaxConnectionsSwitchBorder",prefs->maxconnectionsswitchborder);//MORPH - Added by Yun.SF3, Auto DynUp changing
 
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	ini.WriteBool("DaylightSavingPatchEnabled",prefs->m_iDaylightSavingPatch);
+	// #endif
+
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
 	ini.WriteBool("AutoBackup",prefs->autobackup);
 	ini.WriteBool("AutoBackup2",prefs->autobackup2);
@@ -2046,6 +2051,11 @@ void CPreferences::LoadPreferences(){
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	prefs->maxconnectionsswitchborder = ini.GetInt("MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	prefs->maxconnectionsswitchborder = min(max(prefs->maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
+
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	prefs->m_iDaylightSavingPatch = ini.GetBool("DaylightSavingPatchEnabled",false);
+	// #endif
 
 	//EastShare Start - PreferShareAll by AndCycle
 	prefs->shareall=ini.GetBool("ShareAll",true);	// SLUGFILLER: preferShareAll

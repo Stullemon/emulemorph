@@ -143,6 +143,10 @@ enum EqualChanceForEachFileSelection{
 
 #pragma pack(1)
 struct Preferences_Struct{
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	bool    m_iDaylightSavingPatch;
+	// #endif
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	bool	enableZeroFilledTest;  // -Defeat 0-filled Part Senders- (Idea of xrmb)
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
@@ -785,6 +789,12 @@ public:
 	int		GetEnableHighProcess()					{ return enableHighProcess; }
 	void	SetEnableHighProcess(bool enablehigh);
 	//MORPH END   - Added by IceCream, high process priority
+
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	int8	GetDaylightSavingPatch()			 { return prefs->m_iDaylightSavingPatch; }
+	void	SetDaylightSavingPatch(int settings) { prefs->m_iDaylightSavingPatch= settings; }
+	// #endif
 
 	bool	GetEnableAntiCreditHack()					{ return prefs->enableAntiCreditHack; }//MORPH - Added by IceCream, enable AntiCreditHack
 

@@ -761,6 +761,30 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 	date = fileinfo.st_mtime;
 	
 	fclose(file);
+
+	// Mighty Knife: try to correct the daylight saving bug.
+	// Very special. Never activate this in a release version !!!
+//	#ifdef MIGHTY_SUMMERTIME
+	if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+		CFileFind ff;
+		if (ff.FindFile(CString (in_directory)+"\\"+CString (in_filename),0)) {
+			ff.FindNextFile ();
+			CTime lwtime;
+			if (!ff.GetLastWriteTime(lwtime))
+				theApp.emuledlg->AddDebugLogLine(false, "Failed to get file date of %s - %s", ff.GetFileName(), GetErrorMessage(GetLastError()));
+			time_t fdate = mktime(lwtime.GetLocalTm());
+			if (fdate == -1)
+				theApp.emuledlg->AddDebugLogLine(false, "Failed to convert file date of %s", ff.GetFileName());
+			if (fdate != -1) {
+				CorrectLocalFileTime (CString (in_directory)+"\\"+CString (in_filename),fdate);
+				date = fdate;
+			}
+		}
+		ff.Close ();
+	}
+//	#endif
+	// [end] Mighty Knife
+
 	file = NULL;
 
 	// Add filetags
@@ -832,7 +856,9 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 	// PARTSIZE*2+1    3               3               3
 
 	if (nFileSize == 0){
-		ASSERT(0);
+// Mighty Knife: No Assert here; function works !
+//		ASSERT(0);
+// [end] Mighty Knife
 		m_iPartCount = 0;
 		m_iED2KPartCount = 0;
 		// SLUGFILLER: SafeHash remove - removed unnececery hash counter
@@ -999,7 +1025,9 @@ bool CKnownFile::LoadTagsFromFile(CFile* file)
 				break;
 			default:
 				//MORPH START - Changed by SiRoB, SLUGFILLER: Spreadbars
-				if((!newtag->tag.specialtag) && newtag->tag.type == 3){
+				// Mighty Knife: Take care of corrupted tags !!!
+				if((!newtag->tag.specialtag) && (newtag->tag.type == 3) && (newtag->tag.tagname)){
+				// [end] Mighty Knife
 					if (newtag->tag.tagname[0] == FT_SPREADSTART){
 						uint16 spreadkey = atoi(&newtag->tag.tagname[1]);
 						spread_start_map.SetAt(spreadkey, newtag->tag.intvalue);

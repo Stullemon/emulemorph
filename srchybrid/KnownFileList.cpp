@@ -206,8 +206,21 @@ CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename,uint32 in_date,uint32
 {
 	for (int i = 0;i < GetCount();i++){
 		CKnownFile* cur_file = ElementAt(i);
-		if (cur_file->GetFileDate() == in_date && cur_file->GetFileSize() == in_size && (!_tcscmp(filename,cur_file->GetFileName())))
-			return cur_file;
+//#ifdef MIGHTY_SUMMERTIME
+		// Mighty Knife: try to correct the daylight saving bug.
+		// Very special. Never activate this in a release version !!!
+
+		// If theApp.importknowndates has set bit 1, found files are reported even if the
+		// date does not match. The caller can then retrieve the correct date
+		// from the file directly and save it to known.met.
+		if (cur_file->GetFileSize() == in_size && (!strcmp(filename,cur_file->GetFileName())))
+			if ((cur_file->GetFileDate() == in_date)) // importing disabled at the moment
+				return ElementAt(i);
+//#else
+//		if (cur_file->GetFileDate() == in_date && cur_file->GetFileSize() == in_size && (!_tcscmp(filename,cur_file->GetFileName())))
+//			return cur_file;
+//#endif
+		// [end] Mighty Knife
 	}
 	return 0;
 }

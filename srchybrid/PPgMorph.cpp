@@ -263,6 +263,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
 
+		// #ifdef MIGHTY_SUMMERTIME
+		// Mighty Knife: daylight saving patch
+		m_htiDaylightSavingPatch = m_ctrlTreeOptions.InsertCheckBox("Enable daylight saving patch (Warning: will eventually rehash your files! Please restart EMule!)", TVI_ROOT, m_iDaylightSavingPatch);
+		// #endif
+
 		m_ctrlTreeOptions.Expand(m_htiDM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
@@ -331,6 +336,11 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_iHighProcess); //MORPH - Added by IceCream, high process priority 
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDaylightSavingPatch, m_iDaylightSavingPatch); 
+	m_iDaylightSavingPatch;
+	// #endif
 }
 
 
@@ -389,6 +399,11 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iHighProcess = app_prefs->GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
 	
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	m_iDaylightSavingPatch = app_prefs->GetDaylightSavingPatch();
+	// #endif
+
 	CPropertyPage::OnInitDialog();
 	Localize();
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -466,6 +481,11 @@ BOOL CPPgMorph::OnApply()
 	//MORPH START - Added by IceCream, high process priority
 	app_prefs->SetEnableHighProcess(m_iHighProcess);
 	//MORPH END   - Added by IceCream, high process priority
+
+	// #ifdef MIGHTY_SUMMERTIME
+	// Mighty Knife: daylight saving patch
+	app_prefs->SetDaylightSavingPatch(m_iDaylightSavingPatch);
+	// #endif
 
 	SetModified(FALSE);
 

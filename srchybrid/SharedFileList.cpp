@@ -426,6 +426,28 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 		if (fdate == -1)
 			AddDebugLogLine(false, "Failed to convert file date of %s", ff.GetFilePath());
 
+		// Mighty Knife: try to correct the daylight saving bug.
+		// Very special. Never activate this in a release version !!!
+//		#ifdef MIGHTY_SUMMERTIME
+
+		// HINT TO THE MAIN DEVELOPERS FOR CLEANUP
+		// ---------------------------------------
+		// Please change the data type of CKnownFile::date from "uint32" to "time_t"
+		// (and with that also the return value of "CKnownFile::GetFileDate").
+		// Otherwise such if-clauses like the above "if (date == -1)" would make no sense !
+		// Since the data types are almost identical (apart from the sign) this should
+		// make neighter a big deal, nor a any difference.
+
+		if (theApp.glob_prefs->GetDaylightSavingPatch ()) {
+			if (fdate != -1) {
+				time_t fdate2 = fdate;
+				CorrectLocalFileTime (ff.GetFilePath(),fdate2);
+				fdate = fdate2;
+			}
+		}
+//		#endif
+		// [end] Mighty Knife
+
 		CKnownFile* toadd = theApp.knownfiles->FindKnownFile(ff.GetFileName().GetBuffer(),fdate,(uint32)ff.GetLength());
 		if (toadd){
 			toadd->SetPath(rstrDirectory);

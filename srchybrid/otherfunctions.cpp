@@ -2007,3 +2007,140 @@ CString CastItoUIXBytes(uint32 count)
 }
 // khaos::categorymod-
 // khaos::kmod-
+
+// Mighty Knife: try to correct the daylight saving bug.
+// Very special. Never activate this in a release version until totally tested !
+// #ifdef MIGHTY_SUMMERTIME
+
+/* Name:     ExtractFileVolume
+   Function: Extracts the volume path from a filename/-path. The filepath can be
+			 a local path or a network path to a directory or to a file.
+   Return:   The volume path where the file resists in.
+			 "", if the given _FilePath doesn't point to a file or directory.
+   Example:  _FilePath="C:\abc\def\ghi.txt"           -> "C:\"
+             _FilePath="\\abc-server\def\ghi\jkl.txt" -> "\\abc-server\def\"
+			 _FilePath="\\abc-server\def"             -> "\\abc-server\def\"
+   Remarks:  The return value is accepted by "GetVolumeInformation" to detect the file
+			 system type. Therefore the last character of the string is always a "\".
+			 The function doesn't check whether the file/directory really exists;
+			 it only extracts the volume in the path. Therefore _FilePath has to be
+			 a fully qualified path to a file/directory and not only a part of a path;
+			 i.e. ".\abc\def.txt" is not allowed and will return "" !
+*/
+CString ExtractFileVolume (CString _FilePath) {
+	CString dir = "";
+	// Check whether the file is on a network or not
+	if (_FilePath.Mid (0,2)=="\\\\") {
+		int i = 2;
+		// Jump over the first two strings to the third "\". The first string
+		// is the server name, the second one is the name of the network share
+		_FilePath.Tokenize ("\\",i);
+		_FilePath.Tokenize ("\\",i);
+		// If there's no network share the _FilePath is invalid, so return directly
+		// with the empty string >dir<
+		if (i==-1) return dir;
+		// i is on the third "\" or behind the last character of the string.
+		// In any case the first i characters are the volume of the file. We don't know
+		// if there's a "\" at the end of the string so we make sure, there's none and
+		// add it later.
+		// In fact if _FilePath points to a file, there is a "\", but if ot only points
+		// to a network share, there's no "\".
+		dir = _FilePath.Mid (0,i-1);
+	} else if ((_FilePath.GetLength() > 1) && (_FilePath [1] == ':')) {
+		// We have a local Windows drive. Copy only the drive letter. Omit the
+		// closing "\" if there is one.
+		dir = _FilePath.Mid (0,2);
+	} else return ""; // invalid _FilePath - return "" directly.
+	// Add a "\" to the end of the string because there's surely none.
+	dir = dir + "\\";
+	// That's it
+	return dir;
+}
+
+/* Name:     GetFileVolumeString
+   Function: Tries to get the volume information string of the drive where
+			 the file/directory _FilePath resists in.
+   Return:   The volume string. This could be for example:
+			 "NTFS"    - _FilePath points to an NTFS drive
+			 "FAT"	   - _FilePath points to an FAT drive
+			 "FAT32"   - _FilePath points to an FAT32 drive
+			 and so on.
+   Remarks:  The return value is "" if the volume information string couldn't be retrieved.
+*/
+CString GetFileVolumeString (CString _FilePath) {
+	// The routine is implemented simply by using the "GetVolumeInformation" function
+	// of windows, but with some overhead for catching errors.
+	DWORD MCLEN;
+	DWORD FSFLAGS;
+	// FSName will get the file information string
+	char FSName [128];
+	FSName [0] = '\0';
+	// Use ExtractFileVolume to get the volume of the file/directory
+	CString dir = ExtractFileVolume (_FilePath);
+	// If it's empty, we have an error, i.e. the _FilePath is invalid. So return directly
+	if (dir == "") return "";
+	// Try to get the volume information string:
+	if (GetVolumeInformation(dir,NULL,0,NULL,&MCLEN,&FSFLAGS,FSName,128)) {
+		// Yessss, we got it. Pass it to the caller
+		return CString (FSName);
+	} else {
+		// an error; perhaps a network drive that doesn't support this function
+		return "";
+	}
+}
+
+/* Name:     IsDaylightActive
+   Function: Tries to figure out if daylight saving time is active
+   Return:   true  - if daylight saving time is active; _DaylightBias will be the time
+					 between daylight and non-daylight in minutes - usually 60 for one hour.
+			 false - otherwise; _DaylightBias is undefined
+   Remarks:  -
+*/
+bool    IsDaylightActive (LONG& _DaylightBias) {
+	TIME_ZONE_INFORMATION tzinfo;
+	if (GetTimeZoneInformation (&tzinfo)==TIME_ZONE_ID_DAYLIGHT) {
+		_DaylightBias = -tzinfo.DaylightBias;
+		return true;
+	} else return false;
+}
+
+/* Name:     CorrectLocalFileTime
+   Function: This function tries to correct the local file time of the given _Filename.
+			 If the file resists on a FAT(32) or unknown file system, _fdate is not changed.
+			 If the file is on an NTFS drive and daylight is active, _fdate is corrected
+			 by the daylight saving time length of the system.
+   Return:   true  - if daylight correction was performed; _fdate will receive the
+					 corrected file date
+			 false - if no daylight correction was performed (there was an error or
+					 no correction was necessary); _fdate is not touched.
+   Remarks:  -
+*/
+bool	CorrectLocalFileTime (CString _Filename, time_t& _fdate) {
+	// First convert the time to GMT:
+	time_t ttmp = _fdate;
+	tm* ttmp2 = gmtime (&ttmp);
+	if (ttmp2 == NULL) return false; // small hotfix against an unhandled exception
+	_fdate = mktime (ttmp2);
+	// The time correction will only take place if the file is on an NTFS volume and
+	// daylight saving time is active, so test for it:
+	LONG DaylightBias;
+	if (IsDaylightActive (DaylightBias) &&
+		(GetFileVolumeString (_Filename).Mid (0,4)=="NTFS")) {
+		// The line above is usable if the problem only occurs with NTFS partitions.
+		// I don't know exactly which type of partition os the problem, FAT or NTFS.
+		// If the FAT partitions are the problem, that means if UNIX or other partitions
+		// would be treated the same way like NTFS, it would probably be better to use
+		// the following line instead of the above:
+//	if (IsDaylightActive (DaylightBias) &&
+//		(GetFileVolumeString (_Filename).Mid (0,3)!="FAT")) {
+
+		// Subtract the bias.
+		// we only test here the first 4 characters, because perhaps in future versions
+		// of NTFS the string could be replaced by "NTFS6" or something like that...
+		_fdate -= DaylightBias*60; // _fdate is working in seconds, DaylightBias in minutes !
+		return true;
+	}
+	return false;
+}
+
+// #endif
