@@ -28,6 +28,10 @@
 #include "friend.h"
 #include "ClientCredits.h"
 #include "IP2Country.h" //Commander - Added: IP2Country
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+#include "HttpDownloadDlg.h"
+#include "ED2KLink.h"
+// End -Friend eLinks-
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -55,6 +59,9 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_WM_HELPINFO()
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_LIST2, OnLvnItemActivateFrlist)
 	ON_NOTIFY(NM_CLICK, IDC_LIST2, OnNMClickFrlist)
+    // emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+	ON_BN_CLICKED(IDC_BTN_MENU, OnBnClickedBnmenu)
+    // End -Friend eLinks-
 END_MESSAGE_MAP()
 
 CChatWnd::CChatWnd(CWnd* pParent /*=NULL*/)
@@ -197,6 +204,13 @@ BOOL CChatWnd::OnInitDialog()
 	inputtext.SetLimitText(MAX_CLIENT_MSG_LEN);
 	chatselector.Init();
 	m_FriendListCtrl.Init();
+        // emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+	if ( theApp.emuledlg->m_fontMarlett.m_hObject )
+	{
+		GetDlgItem(IDC_BTN_MENU)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_BTN_MENU)->SetWindowText(_T("6")); // show a down-arrow
+	}
+	// End -Friend eLinks-
 	SetAllIcons();
 
 	CRect rcSpl;
@@ -476,6 +490,28 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 				chatselector.EndSession(ci->client);
 			break;
 		}
+		// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+		case MP_GETFRIENDED2KLINK:
+			{
+				CString sLink;
+				CED2KFriendLink myLink(CPreferences::GetUserNick(), CPreferences::GetUserHash());
+				myLink.GetLink(sLink);
+				theApp.CopyTextToClipboard(sLink);
+			}
+			break;
+		case MP_GETHTMLFRIENDED2KLINK:
+			{
+				CString sLink;
+				CED2KFriendLink myLink(CPreferences::GetUserNick(), CPreferences::GetUserHash());
+				myLink.GetLink(sLink);
+				sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(CPreferences::GetUserNick(), true) + _T("</a>");
+				theApp.CopyTextToClipboard(sLink);
+			}
+			break;
+		
+		default:
+			return CResizableDialog::OnCommand(wParam, lParam);
+		// End -Friend eLinks-
 	}
 	return TRUE;
 }
@@ -506,3 +542,48 @@ BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
 	theApp.ShowHelp(eMule_FAQ_Friends);
 	return TRUE;
 }
+
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+bool CChatWnd::UpdateEmfriendsMetFromURL(const CString& strURL)
+{
+	if ( strURL.IsEmpty() || strURL.Find(_T("://")) == -1 )	// not a valid URL
+	{
+		theApp.AddLogLine(true, GetResString(IDS_INVALIDURL));
+		return false;
+	}
+
+	CString strTempFilename;
+	strTempFilename.Format(_T("%stemp-%d-emfriends.met"), thePrefs.GetConfigDir(), ::GetTickCount());
+
+	// step2 - try to download emfriends.met
+	CHttpDownloadDlg dlgDownload;
+	dlgDownload.m_sURLToDownload = strURL;
+	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	if ( dlgDownload.DoModal() != IDOK )
+	{
+		theApp.AddLogLine(true, GetResString(IDS_ERR_FAILEDDOWNLOADEMFRIENDS), strURL);
+		return false;
+	}
+
+	// step3 - add content of emfriends.met to friendlist
+	m_FriendListCtrl.AddEmfriendsMetToList(strTempFilename);
+
+	_tremove(strTempFilename);
+	return true;
+}
+
+void CChatWnd::OnBnClickedBnmenu()
+{
+	CTitleMenu tmColumnMenu;
+	VERIFY ( tmColumnMenu.CreatePopupMenu() );
+	tmColumnMenu.AddMenuTitle(GetResString(IDS_FRIENDLINKMENUTITLE));
+
+	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETFRIENDED2KLINK, GetResString(IDS_GETMYFRIENDED2KLINK)) );
+	VERIFY ( tmColumnMenu.AppendMenu(MF_STRING, MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETMYHTMLFRIENDED2KLINK)) );
+	RECT rectBtn;
+	GetDlgItem(IDC_BTN_MENU)->GetWindowRect(&rectBtn);
+
+	tmColumnMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rectBtn.right, rectBtn.bottom, this);
+	VERIFY( tmColumnMenu.DestroyMenu() );
+}
+// End -Friend eLinks-

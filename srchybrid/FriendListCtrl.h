@@ -49,4 +49,9 @@ protected:
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
+
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+public:
+	bool	AddEmfriendsMetToList(const CString& strFile);
+// End -Friend eLinks-
 };

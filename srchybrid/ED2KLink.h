@@ -31,7 +31,13 @@ struct SUnresolvedHostname
 class CED2KLink {
 public:
 	static CED2KLink* CreateLinkFromUrl(  const TCHAR * url);
+	// emulEspaña: Modified by Announ [Announ: -Friend eLinks-]
+	/*
 	typedef enum { kServerList, kServer , kFile , kInvalid } LinkType;
+	*/
+	typedef enum { kServerList, kServer , kFile , kFriend, kFriendList, kInvalid } LinkType;
+	// End -Friend eLinks-
+
 	virtual LinkType GetKind() const =0;
 	virtual void GetLink(CString& lnk) =0;
 	virtual class CED2KServerListLink* GetServerListLink() =0;
@@ -112,3 +118,46 @@ private:
 	CED2KServerListLink& operator=(const CED2KFileLink&); // Not defined
 	CString m_address;
 };
+
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+class CED2KFriendLink : public CED2KLink
+{
+public:
+	CED2KFriendLink(LPCTSTR userName, LPCTSTR userHash);
+	CED2KFriendLink(LPCTSTR userName, uchar userHash[]);
+	virtual ~CED2KFriendLink()	{ }
+
+	// Inherited pure virtual functions
+	virtual LinkType	GetKind() const					{ return kFriend; }
+	virtual CED2KServerListLink*	GetServerListLink()	{ return NULL; }
+	virtual CED2KServerLink*		GetServerLink()		{ return NULL; }
+	virtual CED2KFileLink*			GetFileLink()		{ return NULL; }
+	virtual void	GetLink(CString& lnk);
+
+	CString	GetUserName() const						{ return m_sUserName; }
+	void	GetUserHash(uchar userHash[]) const		{ memcpy(userHash, m_hash, 16*sizeof(uchar)); }
+
+private:
+	CString	m_sUserName;
+	uchar	m_hash[16];
+};
+
+class CED2KFriendListLink : public CED2KLink
+{
+public:
+	CED2KFriendListLink(LPCTSTR address);
+	virtual ~CED2KFriendListLink()	{ }
+
+	// Inherited pure virtual functions
+	virtual LinkType	GetKind() const					{ return kFriendList; }
+	virtual CED2KServerListLink*	GetServerListLink()	{ return NULL; }
+	virtual CED2KServerLink*		GetServerLink()		{ return NULL; }
+	virtual CED2KFileLink*			GetFileLink()		{ return NULL; }
+	virtual void	GetLink(CString& lnk);
+
+	CString	GetAddress() const		{ return m_address; }
+
+private:
+	CString	m_address;
+};
+// End -Friend eLinks-

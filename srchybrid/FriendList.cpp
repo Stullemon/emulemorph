@@ -306,3 +306,73 @@ bool CFriendList::IsFriendSlot(){
 	return false;
 }
 //MORPH - Added by SiRoB, There is one slot friend or more
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+bool CFriendList::IsAlreadyFriend(uchar userHash[]) const
+{
+	CFriend* cur_friend;
+
+	POSITION pos = m_listFriends.GetHeadPosition();
+	while ( pos != NULL )
+	{
+		cur_friend = m_listFriends.GetNext(pos);
+		if ( memcmp(cur_friend->m_abyUserhash, userHash, 16*sizeof(uchar)) == 0 )
+			return true;
+	}
+	return false;
+}
+
+bool CFriendList::AddEmfriendsMetToList(const CString& strFile)
+{
+	CSafeBufferedFile file;
+	CFileException fexp;
+	if ( !file.Open(strFile, CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary, &fexp) )
+	{
+		if ( fexp.m_cause != CFileException::fileNotFound )
+		{
+			CString strError(GetResString(IDS_ERR_READEMFRIENDS));
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if ( fexp.GetErrorMessage(szError,MAX_CFEXP_ERRORMSG) )
+			{
+				strError += _T(" - ");
+				strError += szError;
+			}
+			AddLogLine(true, _T("%s"), strError);
+		}
+		return false;
+	}
+
+	try
+	{
+		uint8 header = file.ReadUInt8();
+		if ( header != MET_HEADER )
+		{
+			file.Close();
+			return false;
+		}
+		UINT nRecordsNumber = file.ReadUInt32();
+		for (UINT i = 0; i < nRecordsNumber; i++)
+		{
+			CFriend* Record =  new CFriend();
+			Record->LoadFromFile(&file);
+			if ( !IsAlreadyFriend(Record->m_abyUserhash) )
+				m_listFriends.AddTail(Record);
+		}
+		file.Close();
+	}
+	catch ( CFileException* error )
+	{
+		if ( error->m_cause == CFileException::endOfFile )
+			AddLogLine(true,GetResString(IDS_ERR_EMFRIENDSINVALID));
+		else
+		{
+			TCHAR buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer, MAX_CFEXP_ERRORMSG);
+			AddLogLine(true, GetResString(IDS_ERR_READEMFRIENDS), buffer);
+		}
+		error->Delete();
+		return false;
+	}
+
+	return true;
+}
+// End -Friend eLinks-

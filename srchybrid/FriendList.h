@@ -52,4 +52,10 @@ private:
 	CTypedPtrList<CPtrList, CFriend*>	m_listFriends;
 	CFriendListCtrl*					m_wndOutput;
 	uint32								m_nLastSaved;
+
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+public:
+	bool		IsAlreadyFriend(uchar userHash[]) const;
+	bool		AddEmfriendsMetToList(const CString& strFile);
+// End -Friend eLinks-
 };

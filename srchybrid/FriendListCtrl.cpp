@@ -31,6 +31,9 @@
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "SharedFileList.h" //MORPH - Added by SiRoB
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+#include "ED2KLink.h"
+// End -Friend eLinks-
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -65,6 +68,9 @@ END_MESSAGE_MAP()
 void CFriendListCtrl::Init()
 {
 	SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+	ModifyStyle(LVS_SINGLESEL,0);
+	// End -Friend eLinks-
 
 	RECT rcWindow;
 	GetWindowRect(&rcWindow);
@@ -182,6 +188,8 @@ void CFriendListCtrl::RefreshFriend(const CFriend* pFriend)
 		UpdateFriend(iItem, pFriend);
 }
 
+// emulEspaña: Modified by Announ [Announ: -Friend eLinks-]
+
 void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	CTitleMenu ClientMenu;
@@ -206,8 +214,15 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.EnableMenuItem(MP_FRIENDSLOT, (cur_friend)?MF_ENABLED : MF_GRAYED);
 	ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend && cur_friend->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
 	*/
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
 	//MORPH END   - Modified by SiRoB, Friend Slot
+
+	ClientMenu.AppendMenu(MF_SEPARATOR);
+    ClientMenu.AppendMenu(MF_STRING | (theApp.IsEd2kFriendLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETFRIENDED2KLINK, GetResString(IDS_GETFRIENDED2KLINK));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETHTMLFRIENDED2KLINK));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_SEPARATOR);
+
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING,MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
 	//MORPH END   - Added by SiRoB, Friend Addon
@@ -219,6 +234,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
+// End -Friend eLinks-
 
 BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 {
@@ -336,9 +352,75 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			//MORPH END   - Added by SiRoB, Friend Addon
 			break;
 		}
+
+		case MP_PASTE:
+			{
+				CString link = theApp.CopyTextFromClipboard();
+				link.Trim();
+				if ( link.IsEmpty() )
+					break;
+
+				CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(link);
+				_ASSERT(pLink);
+				if ( pLink->GetKind() == CED2KLink::kFriend )
+				{
+					// Better with dynamic_cast, but no RTTI enabled in the project
+					CED2KFriendLink* pFriendLink = static_cast<CED2KFriendLink*>(pLink);
+					uchar userHash[16];
+					pFriendLink->GetUserHash(userHash);
+
+					if ( ! theApp.friendlist->IsAlreadyFriend(userHash) )
+						theApp.friendlist->AddFriend(userHash, 0U, 0U, 0U, 0U, pFriendLink->GetUserName(), 1U);
+					else
+					{
+						CString msg;
+						msg.Format(GetResString(IDS_USER_ALREADY_FRIEND), pFriendLink->GetUserName());
+						theApp.AddLogLine(true, msg);
+					}
+				}
+			}
+			break;
+
+        case MP_GETFRIENDED2KLINK:
+		{
+			CString sCompleteLink;
+				if ( cur_friend && cur_friend->m_dwHasHash )
+				{
+					CString sLink;
+					CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
+					friendLink.GetLink(sLink);
+					if ( !sCompleteLink.IsEmpty() )
+						sCompleteLink.Append(_T("\r\n"));
+					sCompleteLink.Append(sLink);
+				}
+			
+			if ( !sCompleteLink.IsEmpty() )
+				theApp.CopyTextToClipboard(sCompleteLink);
+		}
+		break;
+	case MP_GETHTMLFRIENDED2KLINK:
+		{
+			CString sCompleteLink;
+			
+				if ( cur_friend && cur_friend->m_dwHasHash )
+				{
+					CString sLink;
+					CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
+					friendLink.GetLink(sLink);
+					sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(cur_friend->m_strName, true) + _T("</a>");
+					if ( !sCompleteLink.IsEmpty() )
+						sCompleteLink.Append(_T("\r\n"));
+					sCompleteLink.Append(sLink);
+				}
+			
+			if ( !sCompleteLink.IsEmpty() )
+				theApp.CopyTextToClipboard(sCompleteLink);
+		}
+		break;
 	}
 	return true;
 }
+// End -Friend eLinks-
 
 void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -423,3 +505,14 @@ void CFriendListCtrl::UpdateList()
 	theApp.emuledlg->chatwnd->UpdateFriendlistCount(theApp.friendlist->GetCount());
 	SortItems(SortProc, MAKELONG(GetSortItem(), (GetSortAscending() ? 0 : 0x0001)));
 }
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+bool CFriendListCtrl::AddEmfriendsMetToList(const CString& strFile)
+{
+	ShowWindow(SW_HIDE);
+	bool ret = theApp.friendlist->AddEmfriendsMetToList(strFile);
+	theApp.friendlist->ShowFriends();
+	UpdateList();
+	ShowWindow(SW_SHOW);
+	return ret;
+}
+// End -Friend eLinks-

@@ -192,8 +192,9 @@ BEGIN
                     WS_GROUP,157,6,236,8
     ICON            "",IDC_MESSAGEICON,144,4,20,20
     CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,18,6,93,8
-    ICON            "",IDC_FRIENDSICON,5,5,20,20
+                    WS_GROUP,34,6,90,8
+    ICON            "",IDC_FRIENDSICON,21,5,21,20
+    PUSHBUTTON      "v",IDC_BTN_MENU,5,3,14,13,BS_NOTIFY | BS_FLAT
     GROUPBOX        "Info",IDC_FRIENDS_MSG,5,195,132,89
     LTEXT           "Userhash:",IDC_FRIENDS_USERHASH,10,216,61,8
     LTEXT           "Client:",IDC_FRIENDS_CLIENT,10,227,61,8
@@ -5064,6 +5065,10 @@ BEGIN
     IDS_WAP_BASICDATA       "Basic Data"
     IDS_WAP_REFRESH         "Refresh Page"
     IDS_WAP_SORTBY          "Sort By"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CHECK_DYNDNS_ENABLED "Enable DynDNS"
     IDS_STATIC_DYNDNS_USERNAME "Username"
     IDS_STATIC_DYNDNS_PASSWORD "Password"
@@ -5077,6 +5082,18 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv on startup"
     IDS_UPDATEIPCURL        "Update"
     IDS_URL_FOR_UPDATING_IP2COUNTRY_VERFILE "Version-File-URL for updating"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_USER_ALREADY_FRIEND "User ""%s"" is already in your friend list"
+    IDS_GETFRIENDED2KLINK   "Copy eD2K link to clipboard"
+    IDS_GETHTMLFRIENDED2KLINK "Copy eD2K link to clipboard (HTML)"
+    IDS_ERR_FAILEDDOWNLOADEMFRIENDS 
+                            "Failed to download the friendlist from %s"
+    IDS_GETMYFRIENDED2KLINK "Copy my eD2K link to clipboard"
+    IDS_GETMYHTMLFRIENDED2KLINK "Copy my eD2K link to clipboard (HTML)"
+    IDS_FRIENDLINKMENUTITLE "Copy self eLink"
 END
 
 #endif    // Englisch (USA) resources

@@ -1627,3 +1627,12 @@ void CemuleApp::RemoveIncomingFolderIcon(){
 	desktopIni.DeleteKey(_T("IconIndex"));
 }
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End
+
+// Added by Announ [Announ: -Friend eLinks-]
+
+bool CemuleApp::IsEd2kFriendLinkInClipboard()
+{
+	static const CHAR _szEd2kFriendLink[] = "ed2k://|friend|";
+	return IsEd2kLinkInClipboard(_szEd2kFriendLink, ARRSIZE(_szEd2kFriendLink)-1);
+}
+// End -Friend eLinks-

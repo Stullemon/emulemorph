@@ -89,6 +89,9 @@
 
 #include "fakecheck.h" //MORPH - Added by SiRoB
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
+// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+#include "Friend.h"
+// End -Friend eLinks-
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -1220,6 +1223,34 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 					AddLogLine(true,GetResString(IDS_SERVERADDED), pSrv->GetListName());
 			}
 			break;
+		// emulEspaña: Added by Announ [Announ: -Friend eLinks-]
+		case CED2KLink::kFriend:
+			{
+				// Better with dynamic_cast, but no RTTI enabled in the project
+				CED2KFriendLink* pFriendLink = static_cast<CED2KFriendLink*>(pLink);
+				uchar userHash[16];
+				pFriendLink->GetUserHash(userHash);
+
+				if ( ! theApp.friendlist->IsAlreadyFriend(userHash) )
+					theApp.friendlist->AddFriend(userHash, 0U, 0U, 0U, 0U, pFriendLink->GetUserName(), 1U);
+				else
+				{
+					CString msg;
+					msg.Format(GetResString(IDS_USER_ALREADY_FRIEND), pFriendLink->GetUserName());
+					theApp.AddLogLine(true, msg);
+				}
+			}
+			break;
+		case CED2KLink::kFriendList:
+			{
+				// Better with dynamic_cast, but no RTTI enabled in the project
+				CED2KFriendListLink* pFrndLstLink = static_cast<CED2KFriendListLink*>(pLink);
+				CString sAddress = pFrndLstLink->GetAddress(); 
+				if ( !sAddress.IsEmpty() )
+					chatwnd->UpdateEmfriendsMetFromURL(sAddress);
+			}
+			break;
+		// End -Friend eLinks-
 		default:
 			break;
 		}
