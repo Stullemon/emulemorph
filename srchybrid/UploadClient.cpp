@@ -721,6 +721,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				str.AppendFormat("Content-Length: %u\r\n", currentblock->EndOffset - currentblock->StartOffset);
 				str.AppendFormat("Cache-Control: public\r\n");
 //				str.AppendFormat("Cache-Control: max-age=864000\r\n"); // overrides expires header in HTTP/1.1
+				str.AppendFormat("Cache-Control: no-transform\r\n");
 				str.AppendFormat("Expires: Mon, 03 Sep 2007 01:23:45 GMT\r\n" ); // rolled-back to 1.1b code (possible bug w/soothsayers' proxy)
 				str.AppendFormat("Connection: keep-alive\r\nProxy-Connection: keep-alive\r\n");
 				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(MOD_VERSION));
@@ -1262,7 +1263,7 @@ bool CUpDownClient::GetFriendSlot() const
 	return m_bFriendSlot;
 }
 
-CEMSocket* CUpDownClient::GetFileUploadSocket(bool log) {
+CClientReqSocket* CUpDownClient::GetFileUploadSocket(bool log) {
     if(m_pPCUpSocket && (IsUploadingToPeerCache() || m_ePeerCacheUpState == PCUS_WAIT_CACHE_REPLY)) {
         if(thePrefs.GetVerbose() && log)
             AddDebugLogLine(false, _T("%s got peercache socket."), DbgGetClientInfo());
@@ -1270,15 +1271,14 @@ CEMSocket* CUpDownClient::GetFileUploadSocket(bool log) {
         return m_pPCUpSocket;
     }
 // MORPH START - Modified by Commander, WebCache 1.2e
-	else if( m_pWCUpSocket && IsUploadingToWebCache()) // Superlexx - webcache - 0.44a port attempt
-	{
+    else if(m_pWCUpSocket && IsUploadingToWebCache()) {
         if(thePrefs.GetVerbose() && log)
             AddDebugLogLine(false, _T("%s got webcache socket."), DbgGetClientInfo());
 
         return m_pWCUpSocket;
 }
-	else
-	{
+	// <-- WebCache
+	else {
         if(thePrefs.GetVerbose() && log)
             AddDebugLogLine(false, _T("%s got normal socket."), DbgGetClientInfo());
         return socket;
