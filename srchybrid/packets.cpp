@@ -70,7 +70,7 @@ Packet::Packet(char* header){
 // -khaos--+++> Slightly modified for our stats uses...
 Packet::Packet(char* pPacketPart, uint32 nSize, bool bFromPF){
 	m_bFromPF = bFromPF;
-	m_bSplitted = false; // true
+	m_bSplitted = true; //false; // true //Changed by SiRoB
 	m_bPacked = false;
 	m_bLastSplitted = false;
 	tempbuffer = 0;
