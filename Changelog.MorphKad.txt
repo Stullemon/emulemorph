@@ -18,6 +18,7 @@ ADDED: AutoClearComplete (NoamSon) [AndCycle]
 FIXED: Small bug, eMule allows to open unfinished files (NoamSon) [AndCycle]
 FIXED: Double click unfinished files in SharedFile window display FileDetail [SiRoB]
 FIXED: Some change related to start crashing when a known.met file is corrupted [SiRoB]
+FIXED: FakeCheck now worked in search windows [SiRoB]
 TWEAKED: PowerShare Limit more occurate [SiRoB]
 
 ----------------------------------------
