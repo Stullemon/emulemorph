@@ -1121,9 +1121,9 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
 			#ifdef _UNICODE
-				TCHAR symbol[4] = _T("\n\x25BA ");
+				TCHAR symbol[4] = _T("\n\x25E6 ");
 			#else
-				TCHAR symbol[2] = "> ";
+				TCHAR symbol[2] = "o ";
 			#endif
 			newsmsgbox->AppendText(symbol);
 			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);

@@ -782,10 +782,20 @@ void CSearchListCtrl::CreateMenues()
 
 	m_SearchFileMenu.CreatePopupMenu();
 	m_SearchFileMenu.AddMenuTitle(GetResString(IDS_FILE), true);
+	//MORPH START - Changed by SiRoB, Put an other icon
+	/*
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DOWNLOAD), _T("RESUME"));
+	*/
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DOWNLOAD), _T("FILEDOWNLOAD"));
+	//MORPH END   - Changed by SiRoB, Put an other icon
 
 	if (thePrefs.IsExtControlsEnabled())
+		//MORPH START - Changed by SiRoB, Put an other icon
+		/*
 		m_SearchFileMenu.AppendMenu(MF_STRING, MP_RESUMEPAUSED, GetResString(IDS_DOWNLOAD) + _T(" (") + GetResString(IDS_PAUSED) + _T(")"));
+		*/
+		m_SearchFileMenu.AppendMenu(MF_STRING, MP_RESUMEPAUSED, GetResString(IDS_DOWNLOAD) + _T(" (") + GetResString(IDS_PAUSED) + _T(")"), _T("FILEDOWNLOADPAUSED"));
+		//MORPH END   - Changed by SiRoB, Put an other icon
 
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
 	if (thePrefs.IsExtControlsEnabled())
