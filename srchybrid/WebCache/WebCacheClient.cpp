@@ -712,8 +712,11 @@ UINT CUpDownClient::ProcessWebCacheUpHttpRequest(const CStringAArray& astrHeader
 		DebugHttpHeaders(astrHeaders);
 		return HTTP_STATUS_NOT_FOUND;
 	}
-
+	//MORPH - Changed by SiRoB, WebCache Fix
+	/*
 	if (dwRangeEnd <= dwRangeStart){ // && dwRangeEnd-dwRangeStart <= MAX_WEBCACHE_BLOCK_SIZE ???
+	*/
+	if (dwRangeEnd < dwRangeStart){
 		DebugHttpHeaders(astrHeaders);
 		TRACE(_T("*** Bad range in URL %s\n"), szUrl);
 		return HTTP_STATUS_INV_RANGE;
@@ -991,7 +994,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 			data.Write( Crypt.remoteKey, WC_KEYLENGTH );
 			// Superlexx end
 
-			//MORPH START - Changed by SiRoB, temp patch to not send by udp if disabled
+			//MORPH START - Changed by SiRoB, WebCache Fix: temp patch to not send by udp if disabled
 			/*
 			if( cur_client->SupportsWebCacheUDP() && !cur_client->HasLowID() )
 			*/
