@@ -4,6 +4,7 @@ Changelog for eMule 0.41b29 MorphXT v1.5
 FIXED  : Several bugfix and update (A4AF and others) [SiRoB/AndClyve]
 
 ADDED  : Mass-Rename. Rename multiple files at once in a text field or with a file mask. Select some files in the shared files list, right-click and choose 'Mass rename...'. [MightyKnife]
+FIXED  : When adding CRC32 tag to a filename, the tag suffix could not be changed. [MightyKnife]
 ADDED  : Friend Slot Advanced Management, addon for a fast access to them inspired from KTS and Xman [SiRoB]
 
 ---------------------------------------- 
@@ -15,16 +16,11 @@ FIXED  : When using the SmartA4AFSwapping the requested download list is not wel
 FIXED  : Popup Category causing crash when NULL is returned by GetCategory() [SiRoB]
 FIXED  : Set the minupload and not the maxupload by using the minupload's textbox in the popup systray [SiRoB]
 FIXED  : The high cpu usage should be out caused by checking every time if we need to remove (from the upload list) or not a client geting more than 10Mo [SiRoB]
-ADDED  : Patch against daylight saving bug. Prevents EMule from rehashing all known files after 6 months when daylight saving comes into effect.
-         Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
-ADDED  : Limited community support with community tags: Community icon, Columns for community affiliation in up-/client-/queuelist, Shared files visible for community.
-         (Of course no change of client rating in upload queue) [MightyKnife]
+ADDED  : Patch against daylight saving bug. Prevents EMule from rehashing all known files after 6 months when daylight saving comes into effect. Can be activated in Morph Preferences. EMule needs to be restarted because it must eventually rehash all files (but only once and then no more)! [MightyKnife]
+ADDED  : Limited community support with community tags: Community icon, Columns for community affiliation in up-/client-/queuelist, Shared files visible for community. (Of course no change of client rating in upload queue) [MightyKnife]
 ADDED  : Report hashing files activities [MightyKnife]
 ADDED  : Report activities in friendlist [MightyKnife]
-ADDED  : CRC32 calculation/testing for files. Right click on a file in the shared files list lets you calculate the CRC32 for the file.
-         Furthermore a releaser tag can be added (together with the CRC) to the filename (of course for multiple files at once, too).
-         The calculated CRC is shown in a column on the right - together with an info whether the calculated CRC was found in 
-         the filename. (Hint: The calculated CRC32 will not be stored in known.met) [MightyKnife]
+ADDED  : CRC32 calculation/testing for files. Right click on a file in the shared files list lets you calculate the CRC32 for the file. Furthermore a releaser tag can be added (together with the CRC) to the filename (of course for multiple files at once, too). The calculated CRC is shown in a column on the right - together with an info whether the calculated CRC was found in the filename. (Hint: The calculated CRC32 will not be stored in known.met) [MightyKnife]
 ADDED  : searchCatch and cacheUDPsearchResults from [SlugFiller-itsonlyme]
 
 ---------------------------------------- 
