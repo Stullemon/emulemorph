@@ -1,13 +1,10 @@
 --------------------------------------
-Changelog for eMule 0.44b MorphXT v5.x
---------------------------------------
-
---------------------------------------
-|NOTE:     MERGE IN PROGRESS!        |
+Changelog for eMule 0.44b MorphXT v5.0
 --------------------------------------
 
 MERGED : Code merged to 0.44a [SiRoB]
 MERGED : Code merged to 0.44b [SiRoB]
+MERGED : UNICODE related [AndCycle/Commander/SiRoB]
 
 FIXED  : Resource ID's several times [SiRoB]
 FIXED  : Minor gui display bug arround the category priority [SiRoB]
@@ -20,6 +17,7 @@ CHANGED: Removed the "..." and changed the tree in Morph preferency to [+] [SiRo
 CHANGED: Make one menu for CRC32 related function [SiRoB]
 CHANGED: Anti-Leecher Mecanisme by adding the reason of detection in log [SiRoB]
 CHANGED: Percentage aspect on download progress bar [SiRoB]
+CHANGED: You can use HideOS only if you are the complete source [SiRoB]
 
 ADDED  : Recalculate CRC32. Can be used to force eMule to generate the CRC32 of a file again - i.e. to check the correctness of a file after moving it to another hard disc. [MightyKnife]
 ADDED  : CRC32 Localize [SiRoB]
@@ -32,12 +30,11 @@ ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
 ADDED  : Intelligent Chunk Selection from stormit & pawcio by enkeyDEV [AndCycle]
 ADDED  : Option to stop removing trickle client from uploading [AndCycle]
 ADDED  : Adding UPNP,RandomPort,Inproved ICF from emulEspaña [SiRoB]
-ADDED  : Itsonlyme modname [SiRoB]
+ADDED  : Itsonlyme -modname- [SiRoB]
+ADDED  : Adding partial SNAFU code from eWombat [SiRoB]
 
 TODO   : DynIP [Commander]
 TODO   : CPU Usage and progressbar [Commander]
-TODO   : Review HideOS and selective chunk sharing [SiRoB]
-TODO   : Tweak removing behavior for trickle slot, does remove trickle client really need? [AndCycle]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
