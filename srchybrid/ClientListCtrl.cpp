@@ -120,7 +120,7 @@ void CClientListCtrl::SetAllIcons()
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 
 	//Morph Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->LoadCountryFlagLib()){
+	if(theApp.ip2country->LoadedCountryFlag()){
 		for(int count = 0; count < theApp.ip2country->GetCountryFlagAmount(); count++){
 			imagelist.Add(theApp.ip2country->GetCountryFlagByIndex(count));
 		}
