@@ -12,7 +12,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral resources
+// Neutre resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
@@ -2909,12 +2909,12 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Neutral resources
+#endif    // Neutre resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
@@ -5372,6 +5372,7 @@ BEGIN
     IDS_WC_TEST             "Test webcache configuration. Might take up to 30 Seconds"
     IDS_WC_HIDE_ADV         "Hide advanced controls"
     IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
+    IDS_WC_SOURCES          "Webcache Sources"
 END
 
 STRINGTABLE 
@@ -5402,7 +5403,7 @@ BEGIN
     IDS_CRC_SUFFIX          "Suffix to add at the end of the filename after the CRC32:"
 END
 
-#endif    // Englisch (USA) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
