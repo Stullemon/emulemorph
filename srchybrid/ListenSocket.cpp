@@ -2556,7 +2556,7 @@ bool CListenSocket::StartListening(){
 void CListenSocket::ReStartListening(){
 	bListening = true;
 	if (m_nPendingConnections){
-		//m_nPendingConnections--;
+		m_nPendingConnections--;
 		OnAccept(0);
 	}
 }
