@@ -1,4 +1,13 @@
 --------------------------------------
+Changelog for eMule 0.45b MorphXT v6.3
+--------------------------------------
+FIXED  : USC: slot datarate limit was not respected [SiRoB]
+
+CHANGED: Updated Webcache to 1.9a beta3 [SiRoB]
+CHANGED: Updated Anti-Leecher ban MorphXT+ and eChanblard v7.0 [SiRoB]
+CHANGED: Updated SNAFU [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.45b MorphXT v6.2
 --------------------------------------
 FIXED  : Identified a very old bug that make crash morph in particular waiting-queue configuration [SiRoB]
