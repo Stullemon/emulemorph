@@ -139,4 +139,9 @@ protected:
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
+protected:
+	int			m_iLogUPnP;
+	HTREEITEM	m_htiLogUPnP;
+	// End -UPnPNAT Support-
 };

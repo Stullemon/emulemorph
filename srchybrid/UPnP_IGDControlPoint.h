@@ -55,7 +55,9 @@ public:
 		CString				ServiceType;
 		STR_LIST			Vars;
 		CString				EventURL;
+		Upnp_SID			SubscriptionID;
 		CString				ControlURL;
+		int					Connected;	//-1 not initialized, 0 false, 1 true
 	};
 
 	typedef struct UPNP_DEVICE{
@@ -103,6 +105,8 @@ public:
 		CString description;			// Port mapping description
 	};
 
+	typedef CList<UPNPNAT_MAPPING, UPNPNAT_MAPPING> MAPPING_LIST;
+
 	UPNPNAT_RETURN	AddPortMapping(UPNPNAT_MAPPING *mapping);
 	UPNPNAT_RETURN	DeletePortMapping(UPNPNAT_MAPPING mapping, bool removeFromList = true);
 	bool			RemoveAllMappings();
@@ -133,7 +137,7 @@ private:
 	static int m_nInstances;
 	// End Singleton
 
-	static CList<UPNPNAT_MAPPING, UPNPNAT_MAPPING> m_Mappings;
+	static MAPPING_LIST m_Mappings;
 	static CCriticalSection m_MappingsLock;
 
 	static UpnpClient_Handle m_ctrlPoint;
@@ -141,6 +145,8 @@ private:
 
 	static DEVICE_LIST m_devices;
 	static CCriticalSection m_devListLock;
+
+	static SERVICE_LIST m_knownServices;
 
 	static UINT TimerThreadFunc( LPVOID pParam );
 
@@ -161,15 +167,17 @@ private:
 	static void				RemoveDevice( UPNP_DEVICE *dev );
 	static void				CheckTimeouts();
 
-	static UPNPNAT_RETURN	AddPortMappingToService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping);
+	static UPNPNAT_RETURN	AddPortMappingToService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, bool bIsUpdating = false);
 	static UPNPNAT_RETURN	DeletePortMappingFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping);
-	static UPNPNAT_RETURN	GetSpecificPortMappingEntryFromService(CUPnP_IGDControlPoint::UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, UPNPNAT_FULLMAPPING *fullMapping, bool bLog = true);
+	static UPNPNAT_RETURN	GetSpecificPortMappingEntryFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, UPNPNAT_FULLMAPPING *fullMapping, bool bLog = true);
+	static bool				IsServiceConnected(UPNP_SERVICE *srv);
+	static void				OnEventReceived(Upnp_SID sid, int evntkey, IXML_Document * changes );
 
 	static void				InitLocalIP();
 	static CString			GetLocalIPStr();
 	static WORD				GetLocalIP();
 	static bool				IsLANIP(WORD nIP);
-	static bool				UpdateAllMappings( bool bLockDeviceList = true );
+	static bool				UpdateAllMappings( bool bLockDeviceList = true, bool bUpdating = true );
 };
 
 #endif //__CUPNP_IGDCONTROLPOINT_H__

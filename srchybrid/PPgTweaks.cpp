@@ -119,7 +119,6 @@ CPPgTweaks::CPPgTweaks()
 	//MORPH START - Added by SiRoB, WebCache 1.2f
 	m_htiLogWebCacheEvents = NULL; //jp log webcache events
 	m_htiLogICHEvents = NULL; //JP log ICH events
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	m_htiCreditSystem = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
@@ -158,6 +157,11 @@ CPPgTweaks::CPPgTweaks()
     m_htiA4AFSaveCpu = NULL;
 	m_htiLogA4AF = NULL;
 	m_htiExtractMetaData = NULL;
+
+	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+	m_iLogUPnP = 0;
+	m_htiLogUPnP = NULL;
+	// End emulEspaña
 }
 
 CPPgTweaks::~CPPgTweaks()
@@ -310,6 +314,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_htiLogWebCacheEvents)		DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogWebCacheEvents, m_iLogWebCacheEvents);//jp log webcache events
 	if (m_htiLogICHEvents)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogICHEvents, m_iLogICHEvents);//JP log ICH events
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
+	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+	if (m_htiLogUPnP)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLogUPnP, m_iLogUPnP);
+	// End emulEspaña
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	/*
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
@@ -406,6 +413,10 @@ BOOL CPPgTweaks::OnInitDialog()
 		m_iLogWebCacheEvents = thePrefs.m_bLogWebCacheEvents;//JP log webcache events
 		m_iLogICHEvents = thePrefs.m_bLogICHEvents;//JP log ICH events
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
+		// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+		m_iLogUPnP = thePrefs.GetUPnPVerboseLog();
+		// End emulEspaña
+
 		m_iLogLevel = 5 - thePrefs.m_byLogLevel;
 	}
 	m_iLog2Disk = thePrefs.log2disk;
@@ -542,6 +553,11 @@ BOOL CPPgTweaks::OnApply()
 		thePrefs.m_bLogWebCacheEvents = m_iLogWebCacheEvents;//JP log webcache events
 		thePrefs.m_bLogICHEvents = m_iLogICHEvents;//JP log ICH events
 		//MORPH END   - Added by SiRoB, WebCache 1.2f
+
+		// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
+		thePrefs.SetUPnPVerboseLog((bool)m_iLogUPnP);
+		// End emulEspaña
+
 		thePrefs.m_byLogLevel = 5 - m_iLogLevel;
 
 		thePrefs.m_bVerbose = m_iVerbose; // store after related options were stored!

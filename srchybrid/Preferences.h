@@ -795,6 +795,8 @@ public:
 	static uint16	m_iUPnPUDPExternal;
 	static uint16	m_iUPnPTCPInternal;
 	static uint16	m_iUPnPUDPInternal;
+	static bool		m_bUPnPVerboseLog;
+	static uint16	m_iUPnPPort;
 	//static bool		m_bUPnPTryRandom;
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
@@ -1922,6 +1924,10 @@ public:
 	static	uint16	GetUPnPTCPInternal()				{ return m_iUPnPTCPInternal; }
 	static	void	SetUPnPUDPInternal(uint16 port)		{ m_iUPnPUDPInternal = port; }
 	static	uint16	GetUPnPUDPInternal()				{ return m_iUPnPUDPInternal; }
+	static	void	SetUPnPVerboseLog(bool on)			{ m_bUPnPVerboseLog = on; }
+	static	bool	GetUPnPVerboseLog()					{ return m_bUPnPVerboseLog; }
+	static	void	SetUPnPPort(uint16 port)			{ m_iUPnPUDPInternal = m_iUPnPPort; }
+	static	uint16	GetUPnPPort()						{ return m_iUPnPPort; }
 	//MORPH END   - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB [MoNKi: -Random Ports-]

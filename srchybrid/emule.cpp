@@ -515,6 +515,11 @@ BOOL CemuleApp::InitInstance()
 		}
 	}
 
+	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
+	if(m_UPnPNat != NULL && thePrefs.GetUPnPNat())
+		m_UPnPNat->Init();
+	// End emulEspaña
+
 	//MORPH START - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
     lastCommonRouteFinder = new LastCommonRouteFinder();
 	uploadBandwidthThrottler = new UploadBandwidthThrottler();

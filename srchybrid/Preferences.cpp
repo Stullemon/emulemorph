@@ -772,6 +772,8 @@ bool	CPreferences::enableNEWS;
 	uint16	CPreferences::m_iUPnPUDPExternal;
 	uint16	CPreferences::m_iUPnPTCPInternal;
 	uint16	CPreferences::m_iUPnPUDPInternal;
+	bool	CPreferences::m_bUPnPVerboseLog;
+	uint16	CPreferences::m_iUPnPPort;
 	//bool	CPreferences::m_bUPnPTryRandom;
 	// End MoNKi
 //MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
@@ -2735,6 +2737,8 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
 	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb, _T("eMule"));
+	ini.WriteBool(_T("UPnPVerbose"), m_bUPnPVerboseLog, _T("eMule"));
+	ini.WriteInt(_T("UPnPPort"), m_iUPnPPort, _T("eMule"));
 	//ini.WriteBool(_T("UPnPNAT_TryRandom"), m_bUPnPTryRandom, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
@@ -3823,6 +3827,8 @@ void CPreferences::LoadPreferences()
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));
 	m_bUPnPNatWeb = ini.GetBool(_T("UPnPNAT_Web"), false, _T("eMule"));
+	m_bUPnPVerboseLog = ini.GetBool(_T("UPnPVerbose"), true, _T("eMule"));
+	m_iUPnPPort = ini.GetInt(_T("UPnPPort"), 0, _T("eMule"));
 	//m_bUPnPTryRandom = ini.GetBool(_T("UPnPNAT_TryRandom"), true, _T("eMule"));
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
