@@ -469,9 +469,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 2:
 						Sbuffer.Format(_T("%s"), CastItoXBytes(client->GetDatarate(), false, true));
-						//MORPH START - Added by SIRoB, Right Justify and AverageDatarate display
+						//MORPH START - Added by SIRoB, Right Justify
 						dcdttext |= DT_RIGHT;
-						//MORPH END   - Added by SIRoB, Right Justify and AverageDatarate display
+						//MORPH END   - Added by SIRoB, Right Justify
 						break;
 					case 3:
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
@@ -492,19 +492,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							Sbuffer = CastSecondsToHM((client->GetWaitTime())/1000);
 						break;
 					case 5:
-						{//Morph - modified by AndCycle, upRemain
-							sint32 timeleft;
-							uint32 UpDatarate = client->GetDatarate();
-							// Mighty Knife: Check for credits!=NULL
-							if ((UpDatarate == 0) || (client->Credits()==NULL)) timeleft = -1;
-							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->Credits()->GetDownloadedTotal() - client->Credits()->GetUploadedTotal())/UpDatarate;
-							// [end] Mighty Knife
-							else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
-							else if(file)
-								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate;
-								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
-							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
-						}//Morph - modified by AndCycle, upRemain
+						Sbuffer.Format(_T("%s"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000));
 						break;
 					case 6:
 						Sbuffer = client->GetUploadStateDisplayString();
@@ -567,54 +555,51 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						Sbuffer.Format(_T("%i"), client->GetSlotNumber());
 						//MORPH START - Added by SiRoB, Upload Bandwidth Splited by class
 						if (client->IsFriend() && client->GetFriendSlot()){
-							Sbuffer.Append(_T(" FS"));
+							Sbuffer.Append(_T(",FS"));
 						}
 						//Morph - modified by AndCycle, take PayBackFirst have same class with PowerShare
-						else if (client->IsPBForPS()){
-							if (client->IsMoreUpThanDown())
+						if (file){
+							if (client->IsMoreUpThanDown(file))
 							{
-								Sbuffer.Append(_T(" PBF"));
+								Sbuffer.Append(_T(",PBF"));
 								if (client->Credits() && client->Credits()->GetDownloadedTotal() > client->Credits()->GetUploadedTotal())
 									Sbuffer.AppendFormat( _T("(%s)"),
 									CastItoXBytes((float)client->Credits()->GetDownloadedTotal()-
 												(float)client->Credits()->GetUploadedTotal(),false,false));
 							}
-							if (client->GetPowerShared())
-								Sbuffer.Append(_T(" PS"));
+							if (client->GetPowerShared(file))
+								Sbuffer.Append(_T(",PS"));
 
 							CString tempFilePrio;
-							if (file)
-							{
-								switch (file->GetUpPriority()) {
-									case PR_VERYLOW : {
-										tempFilePrio = GetResString(IDS_PRIOVERYLOW);
-										break; }
-									case PR_LOW : {
-										if( file->IsAutoUpPriority() )
-											tempFilePrio = GetResString(IDS_PRIOAUTOLOW);
-										else
-											tempFilePrio = GetResString(IDS_PRIOLOW);
-										break; }
-									case PR_NORMAL : {
-										if( file->IsAutoUpPriority() )
-											tempFilePrio = GetResString(IDS_PRIOAUTONORMAL);
-										else
-											tempFilePrio = GetResString(IDS_PRIONORMAL);
-										break; }
-									case PR_HIGH : {
-										if( file->IsAutoUpPriority() )
-											tempFilePrio = GetResString(IDS_PRIOAUTOHIGH);
-										else
-											tempFilePrio = GetResString(IDS_PRIOHIGH);
-										break; }
-									case PR_VERYHIGH : {
-										tempFilePrio = GetResString(IDS_PRIORELEASE);
-										break; }
-									default:
-										tempFilePrio.Empty();
-								}
+							switch (file->GetUpPriority()) {
+								case PR_VERYLOW : {
+									tempFilePrio = GetResString(IDS_PRIOVERYLOW);
+									break; }
+								case PR_LOW : {
+									if( file->IsAutoUpPriority() )
+										tempFilePrio = GetResString(IDS_PRIOAUTOLOW);
+									else
+										tempFilePrio = GetResString(IDS_PRIOLOW);
+									break; }
+								case PR_NORMAL : {
+									if( file->IsAutoUpPriority() )
+										tempFilePrio = GetResString(IDS_PRIOAUTONORMAL);
+									else
+										tempFilePrio = GetResString(IDS_PRIONORMAL);
+									break; }
+								case PR_HIGH : {
+									if( file->IsAutoUpPriority() )
+										tempFilePrio = GetResString(IDS_PRIOAUTOHIGH);
+									else
+										tempFilePrio = GetResString(IDS_PRIOHIGH);
+									break; }
+								case PR_VERYHIGH : {
+									tempFilePrio = GetResString(IDS_PRIORELEASE);
+									break; }
+								default:
+									tempFilePrio.Empty();
 							}
-							Sbuffer.Append(_T(" ") + tempFilePrio);
+							Sbuffer.Append(_T(",") + tempFilePrio);
 						}
 						//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
 					}break;

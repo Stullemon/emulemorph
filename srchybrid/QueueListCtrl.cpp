@@ -495,7 +495,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 							//Morph Start - added by AndCycle, Equal Chance For Each File
 							if(thePrefs.IsEqualChanceEnable()){
-								if(file->GetPowerShared()){//keep file prio at PS
+								if(client->GetPowerShared(file)){
 									Sbuffer.Append(_T(" "));
 									Sbuffer.Append(file->statistic.GetEqualChanceValueString());
 								}
@@ -506,9 +506,9 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							//Morph End - added by AndCycle, Equal Chance For Each File
 
 							//MORPH START - Added by SiRoB, ZZ Upload System
-							if(client->GetPowerShared()) {
+							if(client->GetPowerShared(file)) {
 								CString tempString = GetResString(IDS_POWERSHARE_PREFIX);
-								tempString.Append(_T(" "));
+								tempString.Append(_T(","));
 								tempString.Append(Sbuffer);
 								Sbuffer.Empty(); //MORPH - HotFix by SiRoB, ZZ Upload System
 								Sbuffer = tempString;
@@ -523,16 +523,16 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					case 4:{
 							if (client->HasLowID()){
-						if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
-							Sbuffer.Format(GetResString(IDS_UP_LOWID_AWAITED),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
+								if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
+									Sbuffer.Format(GetResString(IDS_UP_LOWID_AWAITED),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 								else
 									Sbuffer.Format(GetResString(IDS_UP_LOWID2),client->GetScore(false));
-							}
+								}
 							else
 								Sbuffer.Format(_T("%i"),client->GetScore(false));
 
 							//EastShare START - Added by TAHO, Pay Back First
-							if(client->IsMoreUpThanDown()) {
+							if(file && client->IsMoreUpThanDown(file)) {
 								CString tempStr;
 								tempStr.Format(_T("%s %s"), _T("PBF"), Sbuffer);
 								Sbuffer = tempStr;
@@ -833,10 +833,10 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
 			if( (file1 != NULL) && (file2 != NULL)){
 				//only file priority
-				if (item1->GetPowerShared()) result ++;
- 				if (item2->GetPowerShared()) result --;
+				if (item1->GetPowerShared(file1)) result ++;
+ 				if (item2->GetPowerShared(file2)) result --;
 				//Morph Start - added by AndCycle, Equal Chance For Each File
-				if(result == 0 && (!thePrefs.IsEqualChanceEnable() || (item1->GetPowerShared() == true && item2->GetPowerShared() == true)))
+				if(result == 0 && (!thePrefs.IsEqualChanceEnable() || (item1->GetPowerShared(file1) && item2->GetPowerShared(file2))))
 					result = ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
 				if (result == 0 && file1 != file2 && thePrefs.IsEqualChanceEnable()){
 					result =

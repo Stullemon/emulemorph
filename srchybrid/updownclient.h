@@ -711,9 +711,11 @@ public:
 
 	//EastShare Start - Added by AndCycle, PayBackFirst
 	bool	IsMoreUpThanDown() const;
+	bool	IsMoreUpThanDown(CKnownFile* file) const; //MORPH - Added by SiRoB, Code Optimization
 	//EastShare End - Added by AndCycle, PayBackFirst
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 	bool			GetPowerShared() const;
+	bool			GetPowerShared(CKnownFile* file) const;  //MORPH - Added by SiRoB, Code Optimization
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
 	//MORPH START - Added by SiRoB, Show client Requested file
 	void			ShowRequestedFiles();

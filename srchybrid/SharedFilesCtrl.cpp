@@ -2106,9 +2106,9 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 
 		case 3: //prio asc
 			//MORPH START - Changed by SiRoB, Powerstate in prio colums
-			if (item1->GetPowerShared() == false && item2->GetPowerShared() == true)
+			if (!item1->GetPowerShared() && item2->GetPowerShared())
 				return -1;			
-			else if (item1->GetPowerShared() == true && item2->GetPowerShared() == false)
+			else if (item1->GetPowerShared() && !item2->GetPowerShared())
 				return 1;
 			else			
 				if(item1->GetUpPriority() == PR_VERYLOW && item2->GetUpPriority() != PR_VERYLOW)
@@ -2120,9 +2120,9 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			//MORPH END   - Changed by SiRoB, Powerstate in prio colums
 		case 33: //prio desc
 			//MORPH START - Changed by SiRoB, Powerstate in prio colums
-			if (item2->GetPowerShared() == false && item1->GetPowerShared() == true)
+			if (!item2->GetPowerShared() && item1->GetPowerShared())
 				return -1;			
-			else if (item2->GetPowerShared() == true && item1->GetPowerShared() == false)
+			else if (item2->GetPowerShared() && !item1->GetPowerShared())
 				return 1;
 			else		
 				if(item2->GetUpPriority() == PR_VERYLOW && item1->GetUpPriority() != PR_VERYLOW )
@@ -2175,59 +2175,55 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 		//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by SiRoB, ZZ Upload System
 		case 13:
-			if (item1->GetPowerShared() == false && item2->GetPowerShared() == true)
+			if (!item1->GetPowerShared() && item2->GetPowerShared())
 				return -1;
-			else if (item1->GetPowerShared() == true && item2->GetPowerShared() == false)
+			else if (item1->GetPowerShared() && !item2->GetPowerShared())
 				return 1;
 			else
 				if (item1->GetPowerSharedMode() != item2->GetPowerSharedMode())
 					return item1->GetPowerSharedMode() - item2->GetPowerSharedMode();
 				else
-					if (item1->GetPowerShareAuthorized() == false && item2->GetPowerShareAuthorized() == true)
+					if (!item1->GetPowerShareAuthorized() && item2->GetPowerShareAuthorized())
 						return -1;
-					else if (item1->GetPowerShareAuthorized() == true && item2->GetPowerShareAuthorized() == false)
+					else if (item1->GetPowerShareAuthorized() && !item2->GetPowerShareAuthorized())
 						return 1;
 					else
-						if (item1->GetPowerShareAuto() == false && item2->GetPowerShareAuto() == true)
+						if (!item1->GetPowerShareAuto() && item2->GetPowerShareAuto())
 							return -1;
-						else if (item1->GetPowerShareAuto() == true && item2->GetPowerShareAuto() == false)
+						else if (item1->GetPowerShareAuto() && !item2->GetPowerShareAuto())
 							return 1;
 						else
 							//MORPH START - Added by SiRoB, POWERSHARE Limit
-							if (item1->GetPowerShareLimited() == false && item2->GetPowerShareLimited() == true)
+							if (!item1->GetPowerShareLimited() && item2->GetPowerShareLimited())
 								return -1;
-							else if (item1->GetPowerShareLimited() == true && item2->GetPowerShareLimited() == false)
+							else if (item1->GetPowerShareLimited() && !item2->GetPowerShareLimited())
 								return 1;
 							else
 							//MORPH END   - Added by SiRoB, POWERSHARE Limit
 								return 0;
 		case 43:
-			if (item2->GetPowerShared() == false && item1->GetPowerShared() == true)
+			if (!item2->GetPowerShared() && item1->GetPowerShared())
 				return -1;
-			else if (item2->GetPowerShared() == true && item1->GetPowerShared() == false)
+			else if (item2->GetPowerShared() && !item1->GetPowerShared())
 				return 1;
 			else
-				if (item2->GetPowerSharedMode() == 0 && item1->GetPowerSharedMode() != 0)
-					return -1;
-				else if (item2->GetPowerSharedMode() == 1 && item1->GetPowerSharedMode() != 1)
-					return 1;
-				else if (item2->GetPowerSharedMode() == 2 && item1->GetPowerSharedMode() != 2)
-					return 1-item1->GetPowerSharedMode();
+				if (item1->GetPowerSharedMode() != item2->GetPowerSharedMode())
+					return item2->GetPowerSharedMode() - item1->GetPowerSharedMode();
 				else
-					if (item2->GetPowerShareAuthorized() == false && item1->GetPowerShareAuthorized() == true)
+					if (!item2->GetPowerShareAuthorized() && item1->GetPowerShareAuthorized())
 						return -1;
-					else if (item2->GetPowerShareAuthorized() == true && item1->GetPowerShareAuthorized() == false)
+					else if (item2->GetPowerShareAuthorized() && !item1->GetPowerShareAuthorized())
 						return 1;
 					else
-						if (item2->GetPowerShareAuto() == false && item1->GetPowerShareAuto() == true)
+						if (!item2->GetPowerShareAuto() && item1->GetPowerShareAuto())
 							return -1;
-						else if (item2->GetPowerShareAuto() == true && item1->GetPowerShareAuto() == false)
+						else if (item2->GetPowerShareAuto() && !item1->GetPowerShareAuto())
 							return 1;
 						else
 							//MORPH START - Added by SiRoB, POWERSHARE Limit
-							if (item2->GetPowerShareLimited() == false && item1->GetPowerShareLimited() == true)
+							if (!item2->GetPowerShareLimited() && item1->GetPowerShareLimited())
 								return -1;
-							else if (item2->GetPowerShareLimited() == true && item1->GetPowerShareLimited() == false)
+							else if (item2->GetPowerShareLimited() && !item1->GetPowerShareLimited())
 								return 1;
 							else
 							//MORPH END   - Added by SiRoB, POWERSHARE Limit

@@ -91,12 +91,12 @@ CClientCredits::~CClientCredits()
 }
 
 void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
-	//MORPH START - Changed by SIRoB, Optimization 
+	//MORPH START - Changed by SIRoB, Code Optimization 
 	/*
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 	*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
-	//MORPH END   - Changed by SIRoB, Optimization 
+	//MORPH END   - Changed by SIRoB, Code Optimization 
 		return;
 	}
 	//encode
@@ -114,12 +114,12 @@ void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
 }
 
 void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
-	//MORPH START - Changed by SIRoB, Optimization 
+	//MORPH START - Changed by SIRoB, Code Optimization 
 	/*
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 	*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
-	//MORPH END   - Changed by SIRoB, Optimization 
+	//MORPH END   - Changed by SIRoB, Code Optimization 
 		return;
 	}
 	//encode
@@ -147,12 +147,12 @@ uint64	CClientCredits::GetDownloadedTotal() const{
 float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 {
 	// check the client ident status
-	//MORPH START - Changed by SIRoB, Optimization 
+	//MORPH START - Changed by SIRoB, Code Optimization 
 	/*
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 	*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
-	//MORPH END   - Changed by SIRoB, Optimization 
+	//MORPH END   - Changed by SIRoB, Code Optimization 
 		// bad guy - no credits for you
 		return 1;
 	}
@@ -278,12 +278,12 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 {
 	// check the client ident status
-	//MORPH START - Changed by SIRoB, Optimization 
+	//MORPH START - Changed by SIRoB, Code Optimization 
 	/*
 	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED  || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
 	*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && GetCurrentIdentState(dwForIP) != IS_IDBADGUY && theApp.clientcredits->CryptoAvailable() ){
-	//MORPH END   - Changed by SIRoB, Optimization 
+	//MORPH END   - Changed by SIRoB, Code Optimization 
 		// bad guy - no credits for... me?
 		return 1;
 	}

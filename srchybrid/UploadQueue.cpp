@@ -330,7 +330,7 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 		if (rightClient->IsPBForPS()){
 			++retvalue;
 			//Morph - added by AndCyle, selective PS internal Prio
-			if(thePrefs.IsPSinternalPrioEnable() && retvalue == 0)
+			if(retvalue == 0 && thePrefs.IsPSinternalPrioEnable())
 				retvalue = rightClient->GetFilePrioAsNumber() - leftClient->GetFilePrioAsNumber();
 			//Morph - added by AndCyle, selective PS internal Prio
 		}
