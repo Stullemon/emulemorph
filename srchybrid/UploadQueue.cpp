@@ -134,7 +134,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	
     if(newclient != NULL && // Only remove the client if there's someone to replace it
-		RightClientIsSuperior(client, newclient, onlyCheckForRemove) >= 0
+		RightClientIsSuperior(client, newclient) >= 0
       ){
 
         // Remove client from ul list to make room for higher/same prio client
@@ -241,14 +241,8 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 	if(
 		(leftClient != NULL &&
 			(
-				(iSuperior = RightClientIsSuperior(leftClient, rightClient, checkforaddinuploadinglist)) > 0 || //MORPH - Changed by SiRoB, Upload Splitting Class
+				(iSuperior = RightClientIsSuperior(leftClient, rightClient)) > 0 || //MORPH - Changed by SiRoB, Upload Splitting Class
 				iSuperior == 0 &&
-				//MORPH START - Added by SiRoB, Upload Splitting Class
-				(!checkforaddinuploadinglist ||
-				 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS] ||
-				 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
-				 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0]) &&
-				//MORPH END  - Added by SiRoB, Upload Splitting Class
 				(//Morph - added by AndCycle, Equal Chance For Each File
 					leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
 					leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
@@ -268,16 +262,18 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 					)
 				)
 			) ||
-			leftClient == NULL &&  // there's no old client to compare with, so rightClient is better (than null)
-			 //MORPH START - Added by SiRoB, Upload Splitting Class
-			 (!checkforaddinuploadinglist ||
-			 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS] ||
-			 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
-			 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0])
-			 //MORPH END   - Added by SiRoB, Upload Splitting Class
+			leftClient == NULL  // there's no old client to compare with, so rightClient is better (than null)
 		) &&
 		(!rightClient->IsBanned()) && // don't allow banned client to be best
 		IsDownloading(rightClient) == false // don't allow downloading clients to be best
+		//MORPH START - Added by SiRoB, Upload Splitting Class
+		&&
+		(!checkforaddinuploadinglist ||
+		 !(rightClient->IsFriend() && rightClient->GetFriendSlot()) && !rightClient->IsPBForPS() && m_abAddClientOfThisClass[LAST_CLASS] ||
+		 rightClient->IsPBForPS() && m_abAddClientOfThisClass[1] ||
+		 rightClient->IsFriend() && rightClient->GetFriendSlot() && m_abAddClientOfThisClass[0]
+		)
+		//MORPH END  - Added by SiRoB, Upload Splitting Class
 	) {
 		return true;
 	} else {
@@ -287,7 +283,7 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 }
 
 //Morph Start - added by AndCycle, separate special prio compare
-int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient, bool checkforaddinuploadinglist) //MORPH - Changed by SiRoB, Upload Splitting Class
+int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient* rightClient)
 {
 	//MORPH - Removed by SiRoB, After checking the code seems to be not needed
 	/*
@@ -326,21 +322,17 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 	return 0;
 	*/
 	int retvalue = 0;
-	if (checkforaddinuploadinglist == false || m_abAddClientOfThisClass[0] == true){ //MORPH - Added by SiRoB, Upload Splitting Class
-		if(leftClient->IsFriend() && leftClient->GetFriendSlot()) --retvalue;
-		if(rightClient->IsFriend() && rightClient->GetFriendSlot()) ++retvalue;
-	}
-	if (checkforaddinuploadinglist == false || m_abAddClientOfThisClass[1] == true){ //MORPH - Added by SiRoB, Upload Splitting Class
-		if(retvalue==0)
-		{
-			if (leftClient->IsPBForPS()) --retvalue;
-			if (rightClient->IsPBForPS()){
-				++retvalue;
-				//Morph - added by AndCyle, selective PS internal Prio
-				if(thePrefs.IsPSinternalPrioEnable() && retvalue == 0)
-					retvalue = rightClient->GetFilePrioAsNumber() - leftClient->GetFilePrioAsNumber();
-				//Morph - added by AndCyle, selective PS internal Prio
-			}
+	if(leftClient->IsFriend() && leftClient->GetFriendSlot()) --retvalue;
+	if(rightClient->IsFriend() && rightClient->GetFriendSlot()) ++retvalue;
+	if(retvalue==0)
+	{
+		if (leftClient->IsPBForPS()) --retvalue;
+		if (rightClient->IsPBForPS()){
+			++retvalue;
+			//Morph - added by AndCyle, selective PS internal Prio
+			if(thePrefs.IsPSinternalPrioEnable() && retvalue == 0)
+				retvalue = rightClient->GetFilePrioAsNumber() - leftClient->GetFilePrioAsNumber();
+			//Morph - added by AndCyle, selective PS internal Prio
 		}
 	}
 	return retvalue;
@@ -430,7 +422,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 	if (bestlowscore > bestscore && lowclient && allowLowIdAddNextConnectToBeSet)
 	{
 		if(lowIdClientMustBeInSameOrBetterClassAsThisClient == NULL ||
-			RightClientIsSuperior(lowIdClientMustBeInSameOrBetterClassAsThisClient, newclient, checkforaddinuploadinglist) >= 0 //MORPH - Changed by SiRoB, Upload Splitting Class
+			RightClientIsSuperior(lowIdClientMustBeInSameOrBetterClassAsThisClient, newclient) >= 0
 		){
 			DWORD connectTick = ::GetTickCount();
               if(connectTick == 0) connectTick = 1;
@@ -565,7 +557,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
                     }
 					if(lastClient != NULL) {
 
-						if (RightClientIsSuperior(lastClient, newclient, true) > 0) { //MORPH - Changed by SiRoB, Upload Splitting Class
+						if (RightClientIsSuperior(lastClient, newclient) > 0) {
 
 							//AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
 							// Remove last client from ul list to make room for higher prio client
@@ -627,16 +619,8 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
 		newclient->SetUploadState(US_CONNECTING);
-		bool accepted = true; //MORPH - Added by SiRoB, Don't add client not accepted by trytoconnect
-		if (!newclient->TryToConnect(true,0,accepted))
+		if (!newclient->TryToConnect(true))
 			return false;
-		//MORPH START - Added by SiRoB, Don't add client not accepted by trytoconnect
-		if (!accepted)
-		{
-			newclient->SetUploadState(US_NONE);		
-			return false;
-		}
-		//MORPH END   - Added by SiRoB, Don't add client not accepted by trytoconnect
 		if (!newclient->socket) // Pawcio: BC
 		{
 			LogWarning(false,_T("---- Trying to add new client in queue with NULL SOCKET: %s"),newclient->DbgGetClientInfo());
@@ -1295,6 +1279,12 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 
 			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 
+			//MORPH START - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
+			theApp.clientlist->AddTrackClient(client); // Keep track of this client
+			client->SetUploadState(US_NONE);
+			client->ClearUploadBlockRequests();
+			//MORPH END   - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
+			
 			if(requestedFile != NULL) {
 			    //MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
 				if(requestedFile->IsPartFile())
@@ -1304,18 +1294,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 					requestedFile->UpdatePartsInfo();
 			}
 
-			theApp.clientlist->AddTrackClient(client); // Keep track of this client
-			client->SetUploadState(US_NONE);
-			client->ClearUploadBlockRequests();
-		
-	        m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
-			//MORPH START - Changed by SiRoB, Upload Splitting Class
-			for (uint32 classID = client->GetClassID(); classID < NB_SPLITTING_CLASS; classID++){
-				--m_aiSlotCounter[classID];
-				m_abAddClientOfThisClass[classID] = m_abOnClientOverHideClientDatarate[classID] || //one client in class reached max upload limit
-													m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]>m_aiSlotCounter[classID]; //Upload Throttler want new slot
-			}
-			//MORPH END   - Changed by SiRoB, Upload Splitting Class
+			m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 			//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			// EastShare START - Marked by TAHO, modified SUQWT
 
