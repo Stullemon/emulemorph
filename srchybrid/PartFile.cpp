@@ -2028,8 +2028,8 @@ void CPartFile::NewSrcPartsInfo(){
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	uint16 VirtualCompleteSourcesCountMin = (uint16)-1;
-	uint16 VirtualCompleteSourcesCountMax = 0;
+	VirtualCompleteSourcesCountMin = (uint16)-1;
+	VirtualCompleteSourcesCountMax = 0;
 	for (uint16 i = 0; i < partcount; i++){
 		if(m_SrcpartFrequency[i] > VirtualCompleteSourcesCountMax)
 			VirtualCompleteSourcesCountMax = m_SrcpartFrequency[i];
