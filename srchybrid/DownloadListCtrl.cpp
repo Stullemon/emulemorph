@@ -562,6 +562,10 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 		if(thePrefs.GetEnableDownloadInRed() && lpPartFile->GetTransferringSrcCount())
 			dc->SetTextColor(RGB(192,0,0));
 		//MORPH END   - Added by IceCream, show download in red
+		//MORPH START - Added by FrankyFive, show paused files in gray
+		if(lpPartFile->GetStatus() == PS_PAUSED)
+			COLORREF oldclr = dc->SetTextColor(RGB(128,128,128));
+        //MORPH END   - Added by FrankyFive, show paused files in gray
 
 		switch(nColumn)
 		{
