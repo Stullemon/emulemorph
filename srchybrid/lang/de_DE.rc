@@ -351,7 +351,7 @@ BEGIN
     IDS_STATS_TOTAL         "Insgesamt: %i"
     IDS_STATS_WORKING       "Funktionierend: %i"
     IDS_STATS_DEAD          "Tot/gelöscht: %i"
-    IDS_DISABLED            "ausgeschaltet"
+    IDS_DISABLED            "Deaktiviert"
     IDS_STOPPED             "Gestoppt"
     IDS_STATS_UPDATELABEL   "Update Verzögerung: %i sec"
     IDS_QUEUECOUNT          "%u (%u verbannt)"
@@ -746,7 +746,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PREF_ONLINESIG      "Online-Signatur erstellen"
+    IDS_PREF_ONLINESIG      "Online-Signatur verwenden"
     IDS_ERROR_SAVEFILE      "Fehler beim Speichern"
     IDS_REQ_SHAREDFILES     "Benutzer %s (%u) hat deine Liste freigegebener Dateien angefragt -> %s"
     IDS_ACCEPTED            "akzeptiert"
@@ -938,7 +938,7 @@ BEGIN
     IDS_FRIENDSLOT          "Freund-Uploadplatz aufbauen"
     IDS_FRIENDDETAIL        "(Freund-Uploadplatz)"
     IDS_ASCWOP_PROXYSUPPORT "automatisches Serververbinden ohne Proxy"
-    IDS_UDPDISABLED         "deaktiviert"
+    IDS_UDPDISABLED         "Deaktiviert"
     IDS_CTINFO              "Wähle Deine Internetverbindung aus:"
     IDS_WIZ_CTFRAME         "Internetanbindung"
     IDS_CONCURDWL           "gleichzeitige Downloads"
@@ -1160,7 +1160,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ENTERUSERNAME       "Bitte gib Deinen Benutzernamen an:"
+    IDS_ENTERUSERNAME       "Bitte gib einen Benutzernamen an:"
     IDS_STATIC_CPUMEM       "CPU- && Speicher schonen"
     IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
                             "Schlüsselwort zu kurz.\r\n\r\nDie Schlüsselwörter in Kademlia Suchausdrücken müssen mindestens 3 Zeichen lang sein."
@@ -1238,8 +1238,8 @@ BEGIN
     IDS_PROXY_PORT          "Proxy-Port:"
     IDS_PROXY_AUTH          "Authentifizierung aktivieren"
     IDS_AUTH                "Authentifizierung"
-    IDS_SHOWCATINFO         "Zeige Downloadinformation in den Kategorie-Reitern"
-    IDS_SW_SEARCHINGINFO    "Die Suche wurde gestartet. Fragen sie die Resultate in einem Moment ab!"
+    IDS_SHOWCATINFO         "Zeige Downloadinformation in Kategorie-Reitern"
+    IDS_SW_SEARCHINGINFO    "Die Suche wurde gestartet. Frage die Resultate in einem Moment ab!"
     IDS_LOGENTRY            "Log"
 END
 
@@ -1255,7 +1255,7 @@ BEGIN
     IDS_WIZ1_END_TITLE      "Den Assistenten fertigstellen"
     IDS_WIZ1                "eMule - Erst-Start-Assistent"
     IDS_WIZ1_END_BTN_HINT   "Klicke Beenden, um den Assistenten zu schließen."
-    IDS_WIZ1_UPLOAD_SUBTITLE "voller Chunk Transfer"
+    IDS_WIZ1_UPLOAD_SUBTITLE "ganze Chunks übertragen"
     IDS_DL_RESUMENEXT       "nächste pausierte Datei fortsetzen"
     IDS_DONTCHANGE          "nicht ändern"
     IDS_STARTPRIO           "Priorität dieser Kategorie"
@@ -1274,7 +1274,7 @@ BEGIN
     IDS_HM_LINKHP           "eMule Homepage"
     IDS_HM_LINKFAQ          "eMule FAQ"
     IDS_HM_LINKVC           "eMule Versionsüberprüfung"
-    IDS_DEBUG_SOURCE_EXCHANGE "Quellenaustausch-Meldungen anzeigen"
+    IDS_DEBUG_SOURCE_EXCHANGE "Quellenaustausch-Meldungen protokollieren"
     IDS_SHAREDREQ1          "Benutzer %s (%u) hat deine Liste freigegebener Verzeichnisse angefragt -> %s"
     IDS_SHAREDREQ2          "Benutzer %s (%u) hat deine Liste freigegebener Dateien für das Verzeichnis '%s' angefragt -> %s"
     IDS_SHAREDANSW          "Benutzer %s (%u) hat das Verzeichnis '%s' freigegeben"
@@ -1586,8 +1586,8 @@ BEGIN
     IDS_DYNUP               "Upload SpeedSense"
     IDS_KADOVERHEAD         "Kademlia Overhead (Pakete): %s (%s)"
     IDS_FIND                "Suche..."
-    IDS_LOG_BANNED_CLIENTS  "Logge gebannte Clients"
-    IDS_LOG_RATING_RECV     "Logge empfangene Dateibeschreibungen/Bewertungen"
+    IDS_LOG_BANNED_CLIENTS  "Protokolliere gebannte Clients"
+    IDS_LOG_RATING_RECV     "Protokolliere empfangene Dateibeschreibungen/Bewertungen"
 END
 
 STRINGTABLE 
@@ -1632,9 +1632,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_SECURE_IDENT    "Logge sichere Identifizierung"
-    IDS_LOG_FILTERED_IPS    "Logge gefilterte/ignorierte IPs"
-    IDS_LOG_FILE_SAVING     "Logge Dateispeicher-Aktionen"
+    IDS_LOG_SECURE_IDENT    "Protokolliere sichere Identifizierung"
+    IDS_LOG_FILTERED_IPS    "Protokolliere gefilterte/ignorierte IPs"
+    IDS_LOG_FILE_SAVING     "Protokolliere Dateispeicher-Aktionen"
     IDS_IPFILTERFILES       "Alle IP Filter Dateien (*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt)|*ipfilter.dat;*ip.prefix;*.p2p;*.p2p.txt|eMule IP Filter Dateien (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Dateien (*.p2p;*.p2p.txt)|*.p2p;*.p2p.txt|Text Dateien (*.txt)|*.txt|Alle Dateien (*.*)|*.*||"
     IDS_DELETEIPFILTERS     "Sollen die markierten IP Filter gelöscht werden?"
     IDS_TOTAL_IPFILTER_LABEL "IP Filter gesamt:"
@@ -1660,7 +1660,7 @@ BEGIN
     IDS_RAU_RUNNING         "eMule läuft als unpriviligierter Benutzer ""%s"""
     IDS_RAU_FAILED          "eMule konnte nicht als unpriviligierter Benutzer ""eMule_Secure"" gestartet werden. Die Rechte des gegenwärtigen Benutzers (""%S"") werden beibehalten."
     IDS_KADCONTACTSREAD     "%ld Kontakte aus Datei eingelesen."
-    IDS_ERR_KADCONTACTS     "Keine Kademlia Kontakte gefunden. Bitte Bootstrappe oder downloade eine nodes.dat -Datei!"
+    IDS_ERR_KADCONTACTS     "Keine Kademlia Kontakte gefunden. Bitte Bootstrappen oder lade eine nodes.dat -Datei!"
     IDS_METATAGS            "Meta Tag Anzahl:"
     IDS_FILEFORMAT          "Dateiformat"
     IDS_UDPREASKS           "UDP Datei-Neuanfragen"
@@ -1672,7 +1672,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_A4AF            "Logge A4AF Aktionen"
+    IDS_LOG_A4AF            "Protokolliere A4AF Aktionen"
     IDS_A4AF_SAVE_CPU       "A4AF-Prüfungen deaktivieren (CPU schonen)"
     IDS_SEARCH_DOC          "Dokument"
     IDS_INSTALL_SKIN        "Installiere eMule Skin"
@@ -1701,7 +1701,7 @@ BEGIN
     IDS_DISABLEPEERACHE     "Download von PeerCache deaktivieren"
     IDS_NEWMSG              "neue Nachricht von '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "nur aus gleicher Kategorie"
-    IDS_LOG_ULDL_EVENTS     "Logge Upload/Download Ereignisse"
+    IDS_LOG_ULDL_EVENTS     "Protokolliere Upload/Download Ereignisse"
     IDS_PEERCACHE_ENABLED   "Dein ISP unterstützt die PeerCache Technologie. Cache Downloads aktiviert."
     IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
                             "Erlaube dem Benutzer, dich als Freund aufzunehmen."
@@ -1831,12 +1831,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UNASSIGN            "freigeben"
     IDS_DOWNLOAD_IN_RED     "Ladende Dateien in roter Schrift anzeigen"
     IDS_UPSLOTNUMBER        "Slot Nr."
     IDS_STATS_LEECHERCLIENTS "Leecher: %u"
     IDS_WARNINGMORPH        "Warnung: Ändere diese Einstellungen nicht, es sei denn Du \nweißt , was du tust. eMule läuft auch gut, ohne irgendwelche dieser Einstellungen \nzu verändern!"
-    IDS_DM                  "Download Management"
+    IDS_DM                  "Download-Management"
     IDS_SCC                 "Intelligente Kategorie-Steuerung (SCC)"
     IDS_SAC                 "Intelligente A4AF-Steuerung (SAC)"
 END
@@ -1858,7 +1857,7 @@ BEGIN
     IDS_SF_TURN_PART        "Datei UL (Teil)"
     IDS_SF_TURN_SIMPLE      "Datei UL (einfach)"
     IDS_SF_FULLUPLOAD       "Datei UL (voll)"
-    IDS_UM                  "Upload Management"
+    IDS_UM                  "Upload-Management"
     IDS_ANTI_LEECHER        "Aktiviere Anti-Leecher Funktionen"
     IDS_PROGRESS_PERCENT    "Zeige Prozent in Fortschrittsbalken"
     IDS_DOWNLOAD_IN_BOLD    "Ladende Dateien  in fetter Schrift anzeigen"
@@ -1877,7 +1876,7 @@ BEGIN
     IDS_POWERSHARE_AUTO_LABEL "Auto"
     IDS_POWERSHARE_AUTO     "Auto"
     IDS_DYNUPLOAD           "Dynamic Upload"
-    IDS_HIDEOVERSHARES      "Overshares vor verbergen der Chunks (0 = Disabled)"
+    IDS_HIDEOVERSHARES      "Overshares vor Verbergen der Chunks (0 = Deaktiviert)"
 END
 
 STRINGTABLE 
@@ -1927,16 +1926,15 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ABORT               "Abbruch?"
-    IDS_MINUPLOAD_SHORT     "Min. Up"
+    IDS_MINUPLOAD_SHORT     "Min.Up"
     IDS_SUC                 "Smart Upload Control (SUC)"
-    IDS_SUC_ENABLED         "Enable"
-    IDS_MINUPLOAD           "Minimum upload limit"
-    IDS_SUC_HIGH            "High pass (default %i)"
-    IDS_SUC_LOW             "Low pass (default %i)"
-    IDS_SUC_PITCH           "Pitch (default %i)"
-    IDS_SUC_DRIFT           "Drift (default %i)"
-    IDS_SHOWSECUREDCONNECTION "Anzeige Sicherer Clients Verbindungen"
-    IDS_ZERO_FILLED_TEST    "Sender von mit Nullen gefüllten Teilen abwehren"
+    IDS_SUC_ENABLED         "Aktivieren"
+    IDS_MINUPLOAD           "Mindest-Upload"
+    IDS_SUC_HIGH            "High Pass (Standard %i)"
+    IDS_SUC_LOW             "Low Pass (Standard %i)"
+    IDS_SUC_PITCH           "Pitch (Standard %i)"
+    IDS_SUC_DRIFT           "Drift (Standard %i)"
+    IDS_SHOWSECUREDCONNECTION "Anzeige sicherer Clients Verbindungen"
     IDS_SUC_LOG             "Anzeige der SUC-Aktivitäten im Debug Log"
     IDS_A4AF_SHOWDEBUG      "Anzeige der A4AF-Aktivitäten im Debug Log"
 END
@@ -1947,15 +1945,15 @@ BEGIN
     IDS_CAT_HIDEPAUSED      "pausierte Dateien verbergen"
     IDS_CAT_SELDLGTXT       "Auswahl der Kategorie von der Liste oder Eingabe eines Namen für ein neue Kategorie:"
     IDS_CAT_SELDLGCAP       "Kategorien-Auswahl"
-    IDS_CAT_SHOWCATNAME     "Anzeige des vollen Kategorien-Namens im Karteireiter"
+    IDS_CAT_SHOWCATNAME     "Vollen Kategorie-Namen im Karteireiter anzeigen"
     IDS_CAT_SHOWSELCATDLG   "Anzeige 'Kategorien-Auswahl-Dialog'"
-    IDS_CAT_USEACTIVE       "Neue Downloads werden der gerade angezeigten Kategorie zugeordnet"
+    IDS_CAT_USEACTIVE       "Neue Downloads der gerade angezeigten Kategorie zuordnen"
     IDS_CAT_AUTORESUMEORD   "Wert automatisch erhöhen und eine gleichmäßige Priorität zuweisen"
-    IDS_CAT_SMALLFILEDLPUSH "Kleine Dateien (< 150KB) zuerst Laden"
+    IDS_CAT_SMALLFILEDLPUSH "Kleine Dateien (< 150KB) zuerst laden"
     IDS_A4AF_SMARTSWAP      "intelligente A4AF Steuerung"
     IDS_A4AF_BALANCE        "gleichmäßige Quellenvergabe"
     IDS_A4AF_STACK          "gestapelte Quellenvergabe"
-    IDS_A4AF_DISABLED       "deaktiviert"
+    IDS_A4AF_DISABLED       "Deaktiviert"
     IDS_A4AF_ADVMODE        "Erweiterte A4AF-Verarbeitung"
     IDS_CAT_STARTFILESONADD "Starte # Dateien,  wenn sie zu einer neuen Kategorie hinzugefügt werd"
 END
@@ -1984,7 +1982,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEIPFILTER      "Aktualisiere IPFilter.dat"
+    IDS_UPDATEIPFILTER      "Update"
     IDS_UPDATEIPFILTERONSTART "Aktualisiere IPFilter bei Programmstart"
     IDS_UPDATEIPFILTERERROR "Fehler beim Aktualisieren der IPFilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Aktualisierung IPFilter.dat"
@@ -2041,7 +2039,7 @@ BEGIN
     IDS_FEEDBACK_NONEEDPART "Quellen ohne benötigte Teile: %i"
     IDS_FEEDBACK_COMPLETE   "geschätzte vollständige Quellen: %i"
     IDS_COPYFEEDBACK_US     "Rückmeldung in die Zwischenablage kopieren"
-    IDS_UPDATEFAKES         "Update Fakeliste"
+    IDS_UPDATEFAKES         "Update"
     IDS_FAKECHECKUPERROR    "Fehler beim Aktualisieren der FakeCheck-Liste"
     IDS_HTTP_FAKECHECKCAPTION "Aktualisierung der Fake-Liste"
     IDS_UPDATEFAKECHECKONSTART "Aktualisiere Fake-Liste bei Programmstart"
@@ -2055,7 +2053,7 @@ STRINGTABLE
 BEGIN
     IDS_USS                 "Upload Speed Sense (USS)"
     IDS_USS_ENABLED         "Aktivieren"
-    IDS_USS_LOG             "Aktivitäten in Debug-Log anzeigen:"
+    IDS_USS_LOG             "Aktivitäten in Debug-Log protokollieren"
     IDS_USS_PINGTOLERANCE   "Ping Toleranz (in %%) (Standard %i)"
     IDS_USS_GOINGUPDIVIDER  "Erhöhungs-Geschw (Standard %i)"
     IDS_USS_GOINGDOWNDIVIDER "Absenk-Geschw. (Standard %i)"
@@ -2133,18 +2131,21 @@ BEGIN
     IDS_SWITCHSUC           "Schalte Dynamisches Upload System auf SUC um"
     IDS_SWITCHDYNUP         "Schalte Dynamisches Upload System auf USS um"
     IDS_AUTODYNUPSWITCHING  "Dynamisches Upload-System: automatische Umschaltung"
-    IDS_MAXCONNECTIONSSWITCHBORDER "Umschaltgrenze"
+    IDS_MAXCONNECTIONSSWITCHBORDER "Umschaltgrenze (aktive Verbindungen)"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_SELECTIVESHARE      "Selektives Chunk-Sharing"
+    IDS_SCHED_BACKUP        "Backup CONFIG-Ordner"
+    IDS_SCHED_UPDATE_IPCONFIG "Update IPFILTER.DAT"
+    IDS_SCHED_UPDATE_FAKES  "Update FAKES.DAT"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_BACKUP              "Backup"
-    IDS_USS_MAXPING         "Max ping Wert (ms) (Default %i)"
+    IDS_USS_MAXPING         "Max ping Wert (ms) (Standard %i)"
     IDS_PAYBACKFIRST        "zuerst zurückgeben"
     IDS_USS_USEMAXPING      "Benutze max. Ping"
     IDS_CREDIT_SYSTEM       "Credit System"
@@ -2152,9 +2153,9 @@ BEGIN
     IDS_LOVELACE_CREDIT     "lovelace Credit"
     IDS_RATIO_CREDIT        "Ratio Credit"
     IDS_EASTSHARE_CREDIT    "EastShare Credit"
-    IDS_PREFER_SHARE_ALL    "Bevorzuge kompletten Share"
-    IDS_MET_FILE_CONTROL    ".met Datei Kontrolle (VORSICHT beim Ändern !!)"
-    IDS_EXPIRED_KNOWN       "Zeit zum Ablaufen der bekannten Dateien  (Tage) (0 = Default)"
+    IDS_PREFER_SHARE_ALL    "Bevorzuge Server die kompletten Share indexieren"
+    IDS_MET_FILE_CONTROL    "known.met Datei Kontrolle (VORSICHT beim Ändern !!)"
+    IDS_EXPIRED_KNOWN       "Tage, nach denen bekannte Datei vergessen wird (0 = Standard)"
     IDS_DELETEFILE          "Datei Löschen"
     IDS_PAWCIO_CREDIT       "Pawcio Credits"
 END
@@ -2162,7 +2163,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_HIDEOS              "Hide Over Share"
-    IDS_SHAREONLYTHENEED    "Share nur das benötigte"
+    IDS_SHAREONLYTHENEED    "Share nur das Benötigte"
     IDS_SFM                 "Shared File Management"
     IDS_IP2COUNTRY          "IP2Country"
 END
@@ -2182,7 +2183,7 @@ BEGIN
     IDS_COUNTRYNAME_SHOWFLAG "Flagge anzeigen"
     IDS_REMOVEALLFRIENDSLOT "Alle Friendslots entfernen"
     IDS_INFINITEQUEUE       "Unbegrenzte Warteschlange"
-    IDS_PAYBACKFIRSTLIMIT   "Übertragung vor Auslösung (Default 10MB)"
+    IDS_PAYBACKFIRSTLIMIT   "Übertragung vor Auslösen (Standard 10MB)"
     IDS_ENABLE_CHUNKDOTS    "Chunks mit Punkten anzeigen"
     IDS_COMMUNITY           "Community"
     IDS_COMMUNITYTAG        "Community Tags (getrennt  durch '|')"
@@ -2216,7 +2217,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_URL_FOR_UPDATING2   "URL für Update"
     IDS_MORPH2_FILE         "Datei"
     IDS_MORPH2_SECURITY     "Sicherheit"
 END
@@ -2228,8 +2228,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MORPH_RFHA          "Datei hashing Aktivität anzeigen"
-    IDS_MORPH_RAIF          "Zeige Aktivitäten in Freundesliste an"
+    IDS_MORPH_RFHA          "Datei-Hashing-Aktivität protokollieren"
+    IDS_MORPH_RAIF          "Aktivitäten in Freundesliste protokollieren"
+    IDS_MORPH_KSSERV        "Feste Server nicht während der Laufzeit entfernen"
 END
 
 STRINGTABLE 
@@ -2356,7 +2357,7 @@ STRINGTABLE
 BEGIN
     IDS_UPNPNAT             "Aktiviere UPnP auf %s"
     IDS_UPNPNATEMULE        "eMule ports"
-    IDS_UPNPNATTRYRANDOM    "Versuche externe Zufalls-Ports wenn in Gebrauch"
+    IDS_UPNPNATTRYRANDOM    "Versuche externe Zufalls-Ports in diesem Fall"
     IDS_RANDOMPORTS         "Zufalls-Ports"
     IDS_MINPORT             "Min Port"
     IDS_MAXPORT             "Max Port"
@@ -2420,6 +2421,8 @@ BEGIN
     IDS_CLIENTQUEUEPROGRESSBAR 
                             "Zeige Fortschrittsbalken der Client-Warteliste an"
     IDS_WEBCACHE_NOSUPPORT  "nicht unterstützt"
+    IDS_STATS_SUCCESSFULLWC "Erfolgreiche WC-DL/WC-Anforderungen:"
+    IDS_STATS_FAILEDWC      "Fehlgeschlagene WC-DL/WC-Anforderungen:"
 END
 
 STRINGTABLE 
@@ -2464,7 +2467,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SPARSEPARTFILES     "Neue .part Dateien platzsparend speichern (nur NTFS)"
+    IDS_SPARSEPARTFILES     "Neue .part Dateien als ""sparse-file"" speichern (nur NTFS)"
     IDS_ASPECTRATIO         "Seitenverhältnis"
     IDS_NEGATEFILTER        "Filter umkehren"
     IDS_SEENCOMPL           "komplett gesehen"
@@ -2479,7 +2482,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEBCACHE_ISP        "ISP Proxyserver Einstellungen"
+    IDS_WEBCACHE_ISP        "ISP-Proxyserver-Einstellungen"
     IDS_WC_PORT             "Port:"
     IDS_WC_ADDRESS          "Addresse:"
     IDS_WC_CONTROLS         "Webcache Einstellungen"
@@ -2490,13 +2493,13 @@ STRINGTABLE
 BEGIN
     IDS_WC_WRONGPORT        "Webcache Download deaktiviert: Nur Transfers über die Ports 21, 70, 80, 210, 443, 563 und im Bereich von 1025 bis 65535 werden gecached. Bitte einen dieser Ports einstellen, um Webcache nutzen zu können."
     IDS_WC_AUTO             "Webcache automatisch erkennen"
-    IDS_WC_NRBLOCKS         "Anzahl der zu downloadenden Blocks bis zum Reconnect zum Proxy (Dies hilft in einigen Fällen bei Verbindungsabbrüchen)."
+    IDS_WC_NRBLOCKS         "Zu ladende Blocks bis zum Proxy-Reconnect (Nur bei Verbindungsabbrüchen)"
     IDS_WC_BLOCK            "180k-Blocks"
-    IDS_WC_TIMEOUT          "Extra lange Timeouts für Webcache Verbindungen."
-    IDS_WC_LOCAL            "Dieser WC cachet nicht innerhalb desselben ISP's"
+    IDS_WC_TIMEOUT          "Extralange Timeouts für Webcache Verbindungen."
+    IDS_WC_LOCAL            "Dieser WC cachet nicht innerhalb desselben ISPs"
     IDS_WC_SUBMIT_EMAIL     "Diese Einstellungen per E-Mail einsenden"
     IDS_WC_LINK             "Link: "
-    IDS_WC_PERSISTENT       "Anhaltende Verbindungen für Proxy Downloads"
+    IDS_WC_PERSISTENT       "Persistente Verbindungen für Proxy Downloads"
     IDS_WC_ADVANCED         "detaillierte Einstellungen"
     IDS_WC_TEST             "Webcache-Konfiguration testen. Kann bis 30 Sek. dauern."
     IDS_WC_HIDE_ADV         "einfache Einstellungen"
@@ -2516,7 +2519,7 @@ BEGIN
     IDS_CRC_CALCULATED      "berechnete CRC32"
     IDS_CRC_CHECKOK         "CRC32-Prüfung ok"
     IDS_CRC_FORCEADDING     "CRC32-Tag an Dateinamen anhängen auch wenn schon eines existiert"
-    IDS_CRC_FORCEUPPERCASE  "Wenn Dateiname schon CRC32-Tag enthält, in Großschrift umwandeln"
+    IDS_CRC_FORCEUPPERCASE  "Wenn Dateiname schon CRC32-Tag enthält, in Großbuchstaben ändern"
     IDS_CRC_DONTADDCRC      "CRC32/Suffix nicht hinzufügen, nur Präfix als statischen Text."
     IDS_CRC_PREFIX          "Präfix vor CRC32-Prüfsumme:"
 END
@@ -2524,6 +2527,21 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Suffix nach CRC32-Prüfsumme:"
+    IDS_COUNTWCSESSIONSTATS "zähle WC-Sessions zu Session-Stats"
+    IDS_WEBCACHE_NOPROXY    "kein Proxy gesetzt"
+    IDS_CD_WCSUCCFAIL       "Erfolgreich/Angefordert:"
+    IDS_CD_WCTRUSTSENDER    "Verifizierter OHCB-Sender:"
+    IDS_WCDOWNL             "ohne Funktion"
+    IDS_WC_REQ_SUCC         "WC Erf./Angef.:"
+    IDS_WC_DOWNLOADED       "WC-Download:"
+    IDS_CRC32_TITLE         "CRC32 zum Dateinamen"
+    IDS_LOG_IPFILTER_LOADED "Geladene IP-Filter von ""%s"" in %ums"
+    IDS_LOG_IPFILTER_INFO   "Gelesene Zeilen:%u  gefundene IP-Bereiche:%u  Doppelt:%u  Hinzugefügt:%u"
+    IDS_IPFILTER_SAVERR     "IP-Filter speichern fehlgeschlagen in Datei ""%s"" - %hs"
+    IDS_IPFILTER_NOTAVAIL   "Nicht verfügbar"
+    IDS_IPFILTER_DLVERSION  "Downloade IP-Filter Versionsdatei"
+    IDS_IPFILTER_DLFILE     "Downloade IP-Filter Datei"
+    IDS_LOG_ERRDWN          "Downloadfehler %s"
 END
 
 STRINGTABLE 
@@ -2544,8 +2562,91 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOG_WCEVENTS        "WebCache-Ereignisse loggen"
-    IDS_LOG_IACH            "IACH-Ereignisse loggen"
+    IDS_LOG_WCEVENTS        "WebCache-Ereignisse protokollieren"
+    IDS_LOG_IACH            "IACH-Ereignisse protokollieren"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_IPFILTER_DLFAIL "IP-Filter Download fehlgeschlagen"
+    IDS_LOG_IPFILTER_ERR1   "Konnte IP-Filter Datei nicht aus ZIP-Datei lesen ""%s""."
+    IDS_LOG_IPFILTER_ERR2   "Geladene IP-Filter Datei ""%s"" ist eine ZIP-Datei mit unerwartetem Inhalt."
+    IDS_DOWNFAKECHECKVER    "Downloade Fake Check Versionsdatei"
+    IDS_DOWNFAKECHECKFILE   "Downloade Fake Check file"
+    IDS_FC_LOADED           "%i Fake Check Referenz geladen"
+    IDS_LOG_FC_LOADED       "Fake Check geladen von ""%s"" in %ums"
+    IDS_LOG_FC_INFO         "Fake Referenz gefunden:%u  Doppelt:%u  Hinzugefügt:%u"
+    IDS_LOG_FC_ERR1         "Konnte Fake Check Datei nicht aus ZIP-Datei lesen ""%s""."
+    IDS_LOG_FC_ERR2         "Geladene Fake Check Datei ""%s"" ist eine ZIP-Datei mit unerwartetem Inhalt."
+    IDS_MASSRENAME_TITLE    "Mehrfach-Umbenennung"
+    IDS_LOG_CRC32_WRN1      "Achtung: Eine Datei für die eine CRC32-Checksumme berechnet werden sollte, ist nicht mehr im Share. Berechnung Abgebrochen."
+    IDS_LOG_CRC32_WRN2      "Achtung: Datei '%s' ist nicht mehr im Share. CRC32-Berechnung abgebrochen."
+    IDS_LOG_CRC32_WRN3      "Achtung: Kann Datei '%s' nicht zur CRC32-Berechnung öffnen. Übergehe Datei."
+    IDS_LOG_CRC32_SKIP1     "CRC32-Berechnung von Datei '%s' übergangen - bereits berechnet."
+    IDS_LOG_CRC32_SKIP2     "Kann CRC32-Prüfsumme von Datei '%s' nicht berechnen; Datei noch nicht vollständig."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_CRC32_CALC      "Berechne CRC32 von Datei '%s'..."
+    IDS_LOG_CRC32_ADORT     "CRC32-Berechnung abgebrochen."
+    IDS_LOG_CRC32_COMPLETED "CRC-Berechnung von Datei '%s' beendet. CRC-Prüfsumme: %s"
+    IDS_IP2COUNTRY_MSG1     "IP2Country nutzt die IP-to-Country Datenbank von WebHosting."
+    IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), verfügbar bei http://ip-to-country.webhosting.info."
+    IDS_IP2COUNTRY_LOADED   "IP2Country geladen"
+    IDS_IP2COUNTRY_UNLOADED "IP2Country entladen"
+    IDS_IP2COUNTRY_ERROR1   "Fehler in Zeile: %i"
+    IDS_IP2COUNTRY_ERROR2   "möglicher Fehler in"
+    IDS_IP2COUNTRY_ERROR3   "Fehler beim laden"
+    IDS_IP2COUNTRY_ERROR4   "CountryFlag deaktiviert, laden fehlgeschlagen"
+    IDS_IP2COUNTRY_ERROR5   "Fehlerhafte resID, die flags.DLL sollte vielleicht aktualisiert werden."
+    IDS_IP2COUNTRY_ERROR6   "IP to Country-Datei Download fehlgeschlagen"
+    IDS_IP2COUNTRY_ERROR7   "Konnte IP to Country Datei nicht aus der geladenen IP to Country ZIP Datei extrahieren""%s""."
+    IDS_IP2COUNTRY_ERROR8   "geladene IP to Country Datei ""%s"" ist eine ZIP-Datei mit unerwartetem Inhalt."
+    IDS_IP2COUNTRY_LOADED2  "IP2Country geladen von ""%s"" in %ums"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UPNP                "Universal Plug & Play (UPnP)"
+    IDS_UP_LOWID2           "%i LowID"
+    IDS_UP_LOWID_AWAITED    "%i **** Warte auf Reconnect %s"
+    IDS_IP2COUNTRY_NALONG   "Nicht verfügbar"
+    IDS_IP2COUNTRY_NASHORT  "N/V"
+    IDS_SOURCE_LOADER_SAVER "SLS"
+    IDS_SHORTTAGS           "kurze Tags"
+    IDS_NEWFRIEND           "Neuer Freund:"
+    IDS_REMOVEDFRIEND       "gelöschter Freund:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IP2COUNTRY_INFO     "gelesene Linien:%u  gefundene IPCountry bereiche:%u  Doppelt:%u  Hinzugefügt:%u"
+    IDS_IP2COUNTRY_FLAGLOAD "Länderflaggen wurden geladen"
+    IDS_IP2COUNTRY_FILELOAD "IP2Countryfile wurde entladen"
+    IDS_IP2COUNTRY_FLAGUNLD "Länderflaggen wurden entladen"
+    IDS_IP2COUNTRY_VERFILE  "Downloade IP2Country Versionsdatei"
+    IDS_IP2COUNTRY_DWNFILE  "Downloade IP2Country Datei"
+    IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv entladen wegen laufendem Update"
+    IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv geladen nach erfolgreichem Update"
+    IDS_HASHING_COMPLETED   "Hashen der Datei '%s' beendet."
+    IDS_HASHING_COMPLETED2  "Hashen von neuen Dateien beendet."
+    IDS_HASHING_NEWFILE     "Neue Datei: '%s'"
+    IDS_SUQWT_LOAD          "Lade %s"
+    IDS_VERBOSE_TITLE       "Ausführlich"
+    IDS_CAT_TOTAL           "Total"
+    IDS_UP_LOWID            "%s LowID"
+    IDS_UP_LOWID_DELAYED    "%s LowID delayed %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SCHED_BACKUP_LOG    "Zeitgesteuertes Backup gestartet"
+    IDS_SCHED_UPDATE_IPCONFIG_LOG 
+                            "Zeitgesteuertes IPFILTER.DAT-Update gestartet"
+    IDS_SCHED_UPDATE_FAKES_LOG "Zeitgesteuertes FAKES.DAT-Update gestartet"
+    IDS_SCHED_UPDATE_WARNING 
+                            "Bitte die Zeitgesteuerten Updates nicht zu häufig festlegen, um Traffic zu sparen!\r\nEinmal pro Woche sollte reichen!"
 END
 
 #endif    // Deutsch (Deutschland) resources

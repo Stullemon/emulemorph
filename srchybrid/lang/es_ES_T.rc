@@ -1853,7 +1853,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UNASSIGN            "Desasginar"
     IDS_DOWNLOAD_IN_RED     "Mostrar en Rojo archivos descargandose"
     IDS_UPSLOTNUMBER        "Slot #"
     IDS_STATS_LEECHERCLIENTS "Leechers: %u"
@@ -1958,7 +1957,6 @@ BEGIN
     IDS_SUC_PITCH           "Pitch (por defecto %i)"
     IDS_SUC_DRIFT           "Drift (por defecto %i)"
     IDS_SHOWSECUREDCONNECTION "Mostrar conexión de usuario seguro"
-    IDS_ZERO_FILLED_TEST    "Eliminar a los que envian trozos con todo ceros"
     IDS_SUC_LOG             "Mostrar actividad en el log del debug"
     IDS_A4AF_SHOWDEBUG      "Mostrar actividad en el log del debug"
 END
@@ -2006,7 +2004,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEIPFILTER      "Actualizar IPFilter.dat"
+    IDS_UPDATEIPFILTER      "Actualizar"
     IDS_UPDATEIPFILTERONSTART "Actualizar IPFilter.dat al iniciar"
     IDS_UPDATEIPFILTERERROR "Error actualizando IPFilter.dat"
     IDS_HTTP_IPFILTERCAPTION "Actualizando IPFilter.dat"
@@ -2063,7 +2061,7 @@ BEGIN
     IDS_FEEDBACK_NONEEDPART "Fuentes sin partes que necesites: %i"
     IDS_FEEDBACK_COMPLETE   "Fuentes Completas Estimadas: %i"
     IDS_COPYFEEDBACK_US     "Copiar Información al Portapapeles (US)"
-    IDS_UPDATEFAKES         "Actualizar lista de fakes"
+    IDS_UPDATEFAKES         "Actualizar"
     IDS_FAKECHECKUPERROR    "Error al actualizar la lista de fakes"
     IDS_HTTP_FAKECHECKCAPTION "Actualizando lista de fakes"
     IDS_UPDATEFAKECHECKONSTART "Actualizar lista de fakes al inicio"
@@ -2161,6 +2159,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SELECTIVESHARE      "Compartición de Trozos Selectivo"
+    IDS_SCHED_BACKUP        "Backup carpeta CONFIG"
+    IDS_SCHED_UPDATE_IPCONFIG "Actualizar archivo IPFILTER.DAT"
+    IDS_SCHED_UPDATE_FAKES  "Actualizar archivo FAKES.DAT"
 END
 
 STRINGTABLE 
@@ -2238,7 +2239,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_URL_FOR_UPDATING2   "URL para Actualizaciones"
     IDS_MORPH2_FILE         "Archivo"
     IDS_MORPH2_SECURITY     "Seguridad"
 END
@@ -2252,6 +2252,7 @@ STRINGTABLE
 BEGIN
     IDS_MORPH_RFHA          "Informar de Actividades de Hashing"
     IDS_MORPH_RAIF          "Informar de Actividades en la lista de amigos"
+    IDS_MORPH_KSSERV        "No eliminar servidores estáticos de la lista de servidores durante la ejecución"
 END
 
 STRINGTABLE 
@@ -2449,6 +2450,8 @@ BEGIN
     IDS_UPDATEIPCURL        "Actualizar"
     IDS_CLIENTQUEUEPROGRESSBAR "Ver progreso de la lista de espera del usuario"
     IDS_WEBCACHE_NOSUPPORT  "no suportado"
+    IDS_STATS_SUCCESSFULLWC "Descargas-WebCaché/Peticiones-WebCaché con éxito:"
+    IDS_STATS_FAILEDWC      "Descargas-WebCaché/Peticiones-WebCaché fallados:"
 END
 
 STRINGTABLE 
@@ -2542,6 +2545,102 @@ STRINGTABLE
 BEGIN
     IDS_CRC_SUFFIX          "Sufijo a añadir al final del nombre de archivo después del CRC32:"
     IDS_COUNTWCSESSIONSTATS "Contar Sesiones-WebCaché en estadísticas de sesión"
+    IDS_WEBCACHE_NOPROXY    "falta poner el proxy"
+    IDS_CD_WCSUCCFAIL       "Éxitos/Peticiones:"
+    IDS_CD_WCTRUSTSENDER    "Envía OHCB de confianza:"
+    IDS_WCDOWNL             "todavía no funciona"
+    IDS_WC_REQ_SUCC         "WC Éx/Pet:"
+    IDS_WC_DOWNLOADED       "WC-Descarga:"
+    IDS_CRC32_TITLE         "CRC32 a nombrearchivo"
+    IDS_LOG_IPFILTER_LOADED "Cargados filtros de IP de ""%s"" en %ums"
+    IDS_LOG_IPFILTER_INFO   "Líneas analizadas:%u  Encontrados rangos de IP:%u  Duplicados:%u  Combinados:%u"
+    IDS_IPFILTER_SAVERR     "No pudo guardar el filtro de IP al archivo ""%s"" - %hs"
+    IDS_IPFILTER_NOTAVAIL   "No disponible"
+    IDS_IPFILTER_DLVERSION  "Descargando versión de archivo de filtro de IPs"
+    IDS_IPFILTER_DLFILE     "Descargando archivo de filtro de IPs"
+    IDS_LOG_ERRDWN          "Error en la descarga %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_IPFILTER_DLFAIL "Descarga de filtro de IP fallada"
+    IDS_LOG_IPFILTER_ERR1   "No se pudo extraer el archivo de filtro de IPs del ZIP descargado (""%s"")."
+    IDS_LOG_IPFILTER_ERR2   "El archivo de filtro de IPs ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
+    IDS_DOWNFAKECHECKVER    "Descargando la versión de archivo de comprobador de Fakes"
+    IDS_DOWNFAKECHECKFILE   "Descargando el comprobador de Fakes"
+    IDS_FC_LOADED           "El comprobador de Fakes %i ha sido cargado correctamente"
+    IDS_LOG_FC_LOADED       "Cargado comprobador de Fakes de ""%s"" en %ums"
+    IDS_LOG_FC_INFO         "Encontrada Referencia de Fake:%u  Duplicado:%u  Combinado:%u"
+    IDS_LOG_FC_ERR1         "No se pudo extraer el archivo de comprobador de Fakes del ZIP descargado (""%s"")."
+    IDS_LOG_FC_ERR2         "El archivo de comprobado de Fakes ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
+    IDS_MASSRENAME_TITLE    "Renombrar-Masivo"
+    IDS_LOG_CRC32_WRN1      "Alerta: Un archivo con el que el CRC32 debería ser calculado ya no está siendo compartido. Paso de hacer el cálculo."
+    IDS_LOG_CRC32_WRN2      "Alerta: El archivo '%s' ya no está siendo compartido. Por eso no he hecho el cálculo de CRC32."
+    IDS_LOG_CRC32_WRN3      "Alerta: No puedo abrir el archivo '%s' para poder calcular el CRC32. Paso de ese archivo."
+    IDS_LOG_CRC32_SKIP1     "El cálculo del CRC32 del archivo '%s' no ha sido realizado - es que ya lo hice antes."
+    IDS_LOG_CRC32_SKIP2     "No puedo calcular el CRC32 del archivo '%s'; el archivo es sólo parte de un archivo, no uno completo!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_LOG_CRC32_CALC      "Calculando el CRC32 del archivo '%s'..."
+    IDS_LOG_CRC32_ADORT     "Se canceló el cálculo del CRC32."
+    IDS_LOG_CRC32_COMPLETED "El cálculo del CRC32 del archivo '%s' ha sido completado. CRC del Archivo: %s"
+    IDS_IP2COUNTRY_MSG1     "IP2Country utiliza la base de datos IP-to-Country proporcionado por WebHosting."
+    IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), disponible en http://ip-to-country.webhosting.info."
+    IDS_IP2COUNTRY_LOADED   "IP2Country cargado"
+    IDS_IP2COUNTRY_UNLOADED "IP2Country descargado"
+    IDS_IP2COUNTRY_ERROR1   "línea de error número : %i"
+    IDS_IP2COUNTRY_ERROR2   "posible línea de error"
+    IDS_IP2COUNTRY_ERROR3   "No pudo cargar"
+    IDS_IP2COUNTRY_ERROR4   "Bandera Desactivada, no se pudo cargar"
+    IDS_IP2COUNTRY_ERROR5   "resID no válido, puede que necesites actualizar la bandera del icono del Dll,"
+    IDS_IP2COUNTRY_ERROR6   "Falló la descarga del archivo de IP to Country"
+    IDS_IP2COUNTRY_ERROR7   "No se pudo extraer el archivo IP to Country del ZIP descargado (""%s"")."
+    IDS_IP2COUNTRY_ERROR8   "El archivo IP to Country ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
+    IDS_IP2COUNTRY_LOADED2  "Cargado el IP2Country de ""%s"" en %ums"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UPNP                "Plug & Play Universal (UPnP)"
+    IDS_UP_LOWID2           "%i LowID"
+    IDS_UP_LOWID_AWAITED    "%i **** Esperó Reconexión %s"
+    IDS_IP2COUNTRY_NALONG   "No Aplicable"
+    IDS_IP2COUNTRY_NASHORT  "N/A"
+    IDS_SOURCE_LOADER_SAVER "SLS"
+    IDS_SHORTTAGS           "Short tags"
+    IDS_NEWFRIEND           "Nuevo amigo:"
+    IDS_REMOVEDFRIEND       "Paso de este chaval:"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IP2COUNTRY_INFO     "Líneas analizadas:%u  Se encontró rangos de IPCountry:%u  Duplicados:%u  Combinados:%u"
+    IDS_IP2COUNTRY_FLAGLOAD "Banderas Cargadas"
+    IDS_IP2COUNTRY_FILELOAD "Archivo IP2Country descargado"
+    IDS_IP2COUNTRY_FLAGUNLD "IP2Country descargado"
+    IDS_IP2COUNTRY_VERFILE  "Descargando versión de archivo IP2Country"
+    IDS_IP2COUNTRY_DWNFILE  "Descargando archivo IP2Country"
+    IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv descargado debido a actualización en proceso"
+    IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv cargado despues de haberse actualizado con éxito"
+    IDS_HASHING_COMPLETED   "Completado el hashing del archivo '%s'."
+    IDS_HASHING_COMPLETED2  "Hashing de nuevos archivos completado."
+    IDS_HASHING_NEWFILE     "Archivo nuevo: '%s'"
+    IDS_SUQWT_LOAD          "Cargar %s"
+    IDS_VERBOSE_TITLE       "Verbose"
+    IDS_CAT_TOTAL           "Total"
+    IDS_UP_LOWID            "%s LowID"
+    IDS_UP_LOWID_DELAYED    "%s LowID retrasado %s"
+END
+    
+STRINGTABLE 
+BEGIN
+    IDS_SCHED_BACKUP_LOG    "Iniciado backup programado."
+    IDS_SCHED_UPDATE_IPCONFIG_LOG "Actualización del IPFILTER.DAT programada iniciada."
+    IDS_SCHED_UPDATE_FAKES_LOG "Actualización del FAKES.DAT programada iniciada."
+    IDS_SCHED_UPDATE_WARNING 
+                            "No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana y vas que chutas!"
 END
 
 #endif    // Spanish (Castilian) resources
