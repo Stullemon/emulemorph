@@ -1182,6 +1182,7 @@
 #define IDS_ONLY_DOWNLOAD_COMPLETE_FILES 1226
 #define IDS_DL_FORCE                    1227
 #define IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 1228
+#define IDS_DATEFILENAMELOG             1229
 #define IDS_BOOTSTRAP                   1300
 #define IDS_VIAED2KSQ                   1301
 #define IDS_EM_KADEMLIA                 1302

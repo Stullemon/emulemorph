@@ -602,7 +602,14 @@ void CemuleDlg::AddLogText(bool addtostatusbar,const CString& txt, bool bDebug) 
 		serverwnd.debuglog.AddEntry(temp);
 	
 	if (theApp.glob_prefs->Debug2Disk()) {
-		CString logfile = theApp.glob_prefs->GetAppDir() + CString("eMule_Verbose.log");
+		CString logfile;
+
+		if(theApp.glob_prefs->DateFileNameLog()){//Morph - added by AndCycle, Date File Name Log
+			logfile.Format(_T("%s")_T("%s")_T("%s")_T("%s"), theApp.glob_prefs->GetAppDir(), "eMule_Verbose.", nowT.Format("%Y%m%d"), ".log");
+		}
+		else{
+			/*CString*/ logfile = theApp.glob_prefs->GetAppDir() + CString("eMule_Verbose.log");//original
+		}
 		FILE* file = fopen(logfile , "a");
 		if (file){
 			fputs(temp, file);
@@ -616,7 +623,14 @@ void CemuleDlg::AddLogText(bool addtostatusbar,const CString& txt, bool bDebug) 
 		if (ready)
 			ShowNotifier(txt, TBN_LOG, false);
 		if (theApp.glob_prefs->Log2Disk()) {
-			CString logfile = theApp.glob_prefs->GetAppDir() + CString("eMule.log");
+			CString logfile;
+
+			if(theApp.glob_prefs->DateFileNameLog()){//Morph - added by AndCycle, Date File Name Log
+				logfile.Format(_T("%s")_T("%s")_T("%s")_T("%s"), theApp.glob_prefs->GetAppDir(), "eMule.", nowT.Format("%Y%m%d"), ".log");
+			}
+			else{
+				/*CString*/ logfile = theApp.glob_prefs->GetAppDir() + CString("eMule.log");//original
+			}
 			FILE* file = fopen(logfile , "a");
 			if (file){
 				fputs(temp, file);

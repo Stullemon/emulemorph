@@ -488,6 +488,7 @@ struct Preferences_Struct{
 
 	bool	log2disk;
 	bool	debug2disk;
+	bool	DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	int		iMaxLogBuff;
 	bool	scheduler;
 	bool	dontcompressavi;
@@ -1262,6 +1263,7 @@ public:
 
 	bool	Log2Disk()	{ return prefs->log2disk;}
 	bool	Debug2Disk()	{ return prefs->debug2disk;}
+	bool	DateFileNameLog()	{ return prefs->DateFileNameLog;}//Morph - added by AndCycle, Date File Name Log
 	int		GetMaxLogBuff() { return prefs->iMaxLogBuff;}
 
 	// WebServer

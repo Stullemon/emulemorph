@@ -30,6 +30,7 @@ protected:
 	int m_iCreditSystem;
 	int m_iLog2Disk;
 	int m_iDebug2Disk;
+	int m_iDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	int m_iCommitFiles;
 	int m_iFilterLANIPs;
 	int m_iExtControls;
@@ -49,6 +50,7 @@ protected:
 	HTREEITEM m_htiSaveLogs;
 	HTREEITEM m_htiLog2Disk;
 	HTREEITEM m_htiDebug2Disk;
+	HTREEITEM m_htiDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	HTREEITEM m_htiCommit;
 	HTREEITEM m_htiCommitNever;
 	HTREEITEM m_htiCommitOnShutdown;

@@ -42,6 +42,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
+	m_htiDateFileNameLog = NULL;//Morph - added by AndCycle, Date File Name Log
 	m_htiCommit = NULL;
 	m_htiCommitNever = NULL;
 	m_htiCommitOnShutdown = NULL;
@@ -93,6 +94,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiSaveLogs = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_LOG2DISKFRAME), iImgLog, TVI_ROOT);
 		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), m_htiSaveLogs, m_iLog2Disk);
 		m_htiDebug2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG2DISK), m_htiSaveLogs, m_iDebug2Disk);
+		m_htiDateFileNameLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DATEFILENAMELOG), m_htiSaveLogs, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 
 		m_htiCommit = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_COMMITFILES), iImgBackup, TVI_ROOT);
 		m_htiCommitNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiCommit, m_iCommitFiles == 0);
@@ -125,6 +127,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_iLog2Disk);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_iDebug2Disk);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDateFileNameLog, m_iDateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_iFilterLANIPs);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtControls, m_iExtControls);
@@ -144,6 +147,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iDebugSecuredConnection = app_prefs->prefs->m_bDebugSecuredConnection;  //MORPH - Added by SiRoB, Debug Log option for Secured Connection
 	m_iLog2Disk = app_prefs->prefs->log2disk;
 	m_iDebug2Disk = app_prefs->prefs->debug2disk;
+	m_iDateFileNameLog = app_prefs->prefs->DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	m_iCreditSystem = app_prefs->prefs->m_bCreditSystem;
 	m_iCommitFiles = app_prefs->prefs->m_iCommitFiles;
 	m_iFilterLANIPs = app_prefs->prefs->filterBadIP;
@@ -201,6 +205,7 @@ BOOL CPPgTweaks::OnApply()
 	app_prefs->prefs->m_bCreditSystem = m_iCreditSystem;
 	app_prefs->prefs->log2disk = m_iLog2Disk;
 	app_prefs->prefs->debug2disk = m_iDebug2Disk;
+	app_prefs->prefs->DateFileNameLog = m_iDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	app_prefs->prefs->m_iCommitFiles = m_iCommitFiles;
 	app_prefs->prefs->filterBadIP = m_iFilterLANIPs;
 	app_prefs->prefs->m_iFileBufferSize = m_iFileBufferSize;
@@ -294,6 +299,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
 	m_htiDebug2Disk = NULL;
+	m_htiDateFileNameLog = NULL;//Morph - added by AndCycle, Date File Name Log
 	m_htiCommit = NULL;
 	m_htiCommitNever = NULL;
 	m_htiCommitOnShutdown = NULL;

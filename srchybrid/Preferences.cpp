@@ -1493,6 +1493,7 @@ void CPreferences::SavePreferences(){
 
 	ini.WriteBool("SaveLogToDisk",prefs->log2disk);
 	ini.WriteBool("SaveDebugToDisk",prefs->debug2disk);
+	ini.WriteBool("DateFileNameLog", prefs->DateFileNameLog);//Morph - added by AndCycle, Date File Name Log
 	ini.WriteBool("EnableScheduler",prefs->scheduler);
 	ini.WriteBool("MessagesFromFriendsOnly",prefs->msgonlyfriends);
 	ini.WriteBool("MessageFromValidSourcesOnly",prefs->msgsecure);
@@ -2020,6 +2021,7 @@ void CPreferences::LoadPreferences(){
 
 	prefs->log2disk=ini.GetBool("SaveLogToDisk",false);
 	prefs->debug2disk=ini.GetBool("SaveDebugToDisk",false);
+	prefs->DateFileNameLog=ini.GetBool("DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
 	prefs->iMaxLogBuff = ini.GetInt("MaxLogBuff",64) * 1024;
 	prefs->showCatTabInfos=ini.GetBool("ShowInfoOnCatTabs",false);
 	prefs->resumeSameCat=ini.GetBool("ResumeNextFromSameCat",false);
