@@ -155,7 +155,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 			}
 			// end new creditsystem by [lovelace]
 		}break;
-
+/*
 		//Ratio mod Credit
 		case CS_RATIO: 
 		{
@@ -192,7 +192,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 					result = 1.01f;
 			}
 		}break;
-
+*/
 		//EastShare Start - added by AndCycle, Pawcio credit
 		case CS_PAWCIO:{	
 			//Pawcio: Credits

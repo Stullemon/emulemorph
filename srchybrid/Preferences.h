@@ -118,7 +118,7 @@ enum CreditSystemSelection {
 	//becareful the sort order for the damn radio button in PPgEastShare.cpp
 	CS_OFFICIAL = 0,	
 	CS_LOVELACE,
-	CS_RATIO,
+//	CS_RATIO,
 	CS_PAWCIO,
 	CS_EASTSHARE
 };

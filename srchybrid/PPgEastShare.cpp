@@ -71,7 +71,7 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		//EastShare Start - CreditSystemSelection
 		m_htiOfficialCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_OFFICIAL_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_OFFICIAL);
 		m_htiLovelaceCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_LOVELACE_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_LOVELACE);
-		m_htiRatioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_RATIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_RATIO);
+//		m_htiRatioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_RATIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_RATIO);
 		m_htiPawcioCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PAWCIO_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_PAWCIO);
 //		m_htiBoostLess = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_BOOST_LESS), m_htiCreditSystem, m_iCreditSystem == CS_BOOST_LESS);
 		m_htiESCredit = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_EASTSHARE_CREDIT), m_htiCreditSystem, m_iCreditSystem == CS_EASTSHARE);
