@@ -420,12 +420,7 @@ BOOL CemuleApp::InitInstance()
 		theApp.AddIncomingFolderIcon();
 		theApp.AddTempFolderIcon();
 	}
-	else
-	{
-		theApp.RemoveIncomingFolderIcon();
-		theApp.RemoveTempFolderIcon();
-	}
-    //MORPH END   - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
+	//MORPH END   - Added by Commander, Custom incoming / temp folder icon [emulEspaña]
 
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
