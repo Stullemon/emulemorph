@@ -389,7 +389,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 				// and it is more worthy
 				bestscore = cur_score;
 				toadd = pos2;
-				newclient = waitinglist.GetAt(toadd);
+				newclient = cur_client;
 			}
 			else if(allowLowIdAddNextConnectToBeSet && !cur_client->m_bAddNextConnect)
 			{
@@ -401,7 +401,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 					// it is more worthy, keep it
 					bestlowscore = cur_score;
 					toaddlow = pos2;
-					lowclient = waitinglist.GetAt(toaddlow);
+					lowclient = cur_client;
 				}
 			}
 		} else {
