@@ -373,8 +373,8 @@ CKnownFile::CKnownFile()
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
 	m_bPowerShareAuthorized = true;
 	m_bPowerShareAuto = false;
-	m_nVirtualCompleteSourcesCountMin = 1;
-	m_nVirtualCompleteSourcesCountMax = 1;
+	m_nVirtualCompleteSourcesCountMin = 0;
+	m_nVirtualCompleteSourcesCountMax = 0;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powershare
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 	InChangedSharedStatusBar = false;
