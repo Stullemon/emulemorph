@@ -66,7 +66,7 @@ BEGIN_MESSAGE_MAP(CPPgWebcachesettings, CPropertyPage)
 	ON_BN_CLICKED(IDC_EXTRATIMEOUT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LOCALTRAFFIC, OnSettingsChange)
 	ON_BN_CLICKED(IDC_PERSISTENT_PROXY_CONNS, OnSettingsChange)
-	ON_BN_CLICKED(IDC_ADVANCEDCONTROLS, OnBnClickedAdvancedcontrols)
+	ON_BN_CLICKED(IDC_STATIC_CONTROLS, OnBnClickedAdvancedcontrols)
 	ON_BN_CLICKED(IDC_TestProxy, OnBnClickedTestProxy)//JP TMP
 	ON_WM_HSCROLL()
 	ON_WM_HELPINFO()
@@ -127,8 +127,8 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 				+ _T("%0D%0A%0D%0AISP%3A%20PLEASE%20ADD%20YOUR%20ISP%20NAME%20AND%20COUNTRY%20HERE%0D%0ACOMMENTS%3A%20PLEASE%20ADD%20ANY%20COMMENTS%20YOU%20MIGHT%20HAVE%20HERE");
 	if (!bCreated){
 		bCreated = true;
-		m_wndSubmitWebcacheLink.AppendText(_T("email Link: "));
-		m_wndSubmitWebcacheLink.AppendHyperLink(_T("Submit these settings via email"),0,hyperlink,0,0);
+		m_wndSubmitWebcacheLink.AppendText(_T("email ") + GetResString(IDS_WC_LINK));
+		m_wndSubmitWebcacheLink.AppendHyperLink(GetResString(IDS_WC_SUBMIT_EMAIL),0,hyperlink,0,0);
 	}
 
 // Create website-proxy-submission link
@@ -140,29 +140,29 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 	m_wndSubmitWebcacheLink2.SetFont(GetFont());
 	if (!bCreated2){
 		bCreated2 = true;
-		m_wndSubmitWebcacheLink2.AppendText(_T("Link: "));
-		m_wndSubmitWebcacheLink2.AppendHyperLink(_T("Submit webcache info via webform"),0,CString(_T("http://ispcachingforemule.de.vu/submitproxy.html")),0,0);
+		m_wndSubmitWebcacheLink2.AppendText(GetResString(IDS_WC_LINK));
+		m_wndSubmitWebcacheLink2.AppendHyperLink(GetResString(IDS_WC_SUBMIT_WEB),0,CString(_T("http://ispcachingforemule.de.vu/submitproxy.html")),0,0);
 	}
 
 	//JP hide advanced settings
 	if (showadvanced)
 	{
-		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(_T("hide advanced controls"));
+		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(GetResString(IDS_WC_HIDE_ADV));
 		GetDlgItem(IDC_EXTRATIMEOUT)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_LOCALTRAFFIC)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_BLOCKS)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_BLOCKSTEXT)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_BLOCKSTEXT2)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_SHOW);
 		GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_SHOW);
 	}
 	else
 	{
-		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(_T("show advanced controls"));
+		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(GetResString(IDS_WC_ADVANCED));
 	GetDlgItem(IDC_EXTRATIMEOUT)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_LOCALTRAFFIC)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_BLOCKS)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_BLOCKSTEXT)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_BLOCKSTEXT2)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_HIDE);
 	}
 
@@ -351,6 +351,22 @@ void CPPgWebcachesettings::Localize(void)
 		//JP just an example of how it is done GetDlgItem(IDC_CAPACITIES_FRM)->SetWindowText(GetResString(IDS_PW_CON_CAPFRM));
 
 	//}
+	if (m_hWnd){
+		GetDlgItem(IDC_Webcache)->SetWindowText( GetResString(IDS_WEBCACHE_ISP) );
+		GetDlgItem(IDC_STATIC_PORT)->SetWindowText( GetResString(IDS_WC_PORT) );
+		GetDlgItem(IDC_STATIC_ADDRESS)->SetWindowText( GetResString(IDS_WC_ADDRESS) );
+		GetDlgItem(IDC_STATIC_CONTROLS)->SetWindowText( GetResString(IDS_WC_CONTROLS) );
+		GetDlgItem(IDC_Activatewebcachedownloads)->SetWindowText( GetResString(IDS_WC_ENABLE) );
+		GetDlgItem(IDC_WrongPortWarning)->SetWindowText( GetResString(IDS_WC_WRONGPORT) );
+		GetDlgItem(IDC_DETECTWEBCACHE)->SetWindowText( GetResString(IDS_WC_AUTO) );
+		GetDlgItem(IDC_STATIC_NRBLOCKS)->SetWindowText( GetResString(IDS_WC_NRBLOCKS) );
+		GetDlgItem(IDC_STATIC_BLOCKS)->SetWindowText( GetResString(IDS_WC_BLOCK) );
+		GetDlgItem(IDC_EXTRATIMEOUT)->SetWindowText( GetResString(IDS_WC_TIMEOUT) );
+		GetDlgItem(IDC_LOCALTRAFFIC)->SetWindowText( GetResString(IDS_WC_LOCAL) );
+		GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->SetWindowText( GetResString(IDS_WC_PERSISTENT) );
+		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText( GetResString(IDS_WC_ADVANCED) );
+		GetDlgItem(IDC_TestProxy)->SetWindowText( GetResString(IDS_WC_TEST) );
+	}
 }
 void CPPgWebcachesettings::OnBnClickedDetectWebCache()
 {
@@ -445,22 +461,22 @@ void CPPgWebcachesettings::OnBnClickedAdvancedcontrols(){
 showadvanced = !showadvanced;
 if (showadvanced)
 {
-	GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(_T("hide advanced controls"));
+	GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(GetResString(IDS_WC_HIDE_ADV));
 	GetDlgItem(IDC_EXTRATIMEOUT)->ShowWindow(SW_SHOW);
 	GetDlgItem(IDC_LOCALTRAFFIC)->ShowWindow(SW_SHOW);
 	GetDlgItem(IDC_BLOCKS)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_BLOCKSTEXT)->ShowWindow(SW_SHOW);
-	GetDlgItem(IDC_BLOCKSTEXT2)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_SHOW);
 	GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_SHOW);
 }
 else
 {
-	GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(_T("show advanced controls"));
+	GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText(GetResString(IDS_WC_ADVANCED));
 	GetDlgItem(IDC_EXTRATIMEOUT)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_LOCALTRAFFIC)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_BLOCKS)->ShowWindow(SW_HIDE);
-	GetDlgItem(IDC_BLOCKSTEXT)->ShowWindow(SW_HIDE);
-	GetDlgItem(IDC_BLOCKSTEXT2)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_STATIC_NRBLOCKS)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_STATIC_BLOCKS)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->ShowWindow(SW_HIDE);
 }
 }
