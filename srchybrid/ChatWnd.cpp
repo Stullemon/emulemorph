@@ -177,15 +177,15 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	{   
 		if(theApp.ip2country->IsIP2Country())
 		{
-			GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(pFriend->GetLinkedClient()->GetCountryName(true));
+			GetDlgItem(IDC_FRIENDS_COUNTRY_EDIT)->SetWindowText(pFriend->GetLinkedClient()->GetCountryName(true));
 		}
 		else {
-			GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_DISABLED));
+			GetDlgItem(IDC_FRIENDS_COUNTRY_EDIT)->SetWindowText(GetResString(IDS_DISABLED));
 		}
 		
 	}
 	else
-		GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText("?");
+		GetDlgItem(IDC_FRIENDS_COUNTRY_EDIT)->SetWindowText("?");
 	//Commander - Added: IP2Country - End
 	}
 }
@@ -235,7 +235,7 @@ BOOL CChatWnd::OnInitDialog()
 	AddAnchor(IDC_FRIENDS_UPLOADED, BOTTOM_LEFT);
 	AddAnchor(IDC_FRIENDS_DOWNLOADED, BOTTOM_LEFT);
 	//Commander - Added: IP2Country - Start
-	AddAnchor(IDC_FRIENDS_COUNTRY,CSize(0,100));
+	AddAnchor(IDC_FRIENDS_COUNTRY, BOTTOM_LEFT);
     //Commander - Added: IP2Country - End
 
 	Localize();
