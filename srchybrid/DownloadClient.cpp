@@ -889,7 +889,10 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 					//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 					if((thePrefs.GetEnableZeroFilledTest() == true) && (reqfile->IsCDImage() == false) && (reqfile->IsArchive() == false) && (reqfile->IsDocument() == false)){
 						// Check the compression factor
-						if(lenUnzipped > 25*nBlockSize){
+						//EastShare START - Modified by TAHO, modified 0-filled Part Error
+						//if(lenUnzipped > 25*nBlockSize){
+						if(lenUnzipped > 25*nBlockSize 
+							&& (reqfile->GetFileSize()/EMBLOCKSIZE) > (cur_block->block->StartOffset/EMBLOCKSIZE + 3)){
 
 							// Format User hash
 							CString userHash;
