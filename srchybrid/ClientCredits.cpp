@@ -1000,13 +1000,15 @@ void CClientCredits::ClearWaitStartTime(){
 void CClientCredits::InitPayBackFirstStatus(){
 	if (GetDownloadedTotal() >= SESSIONAMOUNT)
 		m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal();
+	else 
+		m_bPayBackFirst = false;
 
 }
 void CClientCredits::TestPayBackFirstStatus(){
 
 	if (GetDownloadedTotal() >= SESSIONAMOUNT)
 		m_bPayBackFirst = GetDownloadedTotal() >= GetUploadedTotal();
-
-
+	else 
+		m_bPayBackFirst = false;
 }
 //EastShare End - added by AndCycle, Pay Back First
