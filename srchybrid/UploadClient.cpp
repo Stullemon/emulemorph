@@ -276,7 +276,7 @@ bool CUpDownClient::MoreUpThanDown(){
 			return chkPayBackFirstTag();
 		}
 	}else{
-		setPayBackFirstTag(credits->GetDownloadedTotal() > credits->GetUploadedTotal());
+		setPayBackFirstTag(credits->GetDownloadedTotal() > credits->GetUploadedTotal() && credits->GetDownloadedTotal() > 1048578);
 	}
 
 	return chkPayBackFirstTag();
