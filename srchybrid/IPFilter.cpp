@@ -236,7 +236,7 @@ void CIPFilter::SaveToDefaultFile()
 			if (_ftprintf(fp, _T("%-15s - %-15s , %3u , %s\n"), szStart, szEnd, flt->level, flt->desc) == 0 || ferror(fp))
 			{
 				CString strError;
-				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
+				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
 				throw strError;
 			}
 		}
@@ -245,7 +245,7 @@ void CIPFilter::SaveToDefaultFile()
 	else
 	{
 		CString strError;
-		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
+		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
 		throw strError;
 	}
 }
