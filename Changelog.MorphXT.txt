@@ -7,12 +7,16 @@ FIXED  : some column sort have been corrected [SiRoB]
 FIXED  : Download failed since 5.8 (webcache related) [SiRoB]
 FIXED  : Refresh manual powershare state display [SiRoB]
 FIXED  : Corrected Start Next paused file (per category) when the global pref one is unchecked [SiRoB]
+FIXED  : Open Folder on FileContext Menu [Commander]
+FIXED  : Open correct Folder on SharedFilesList [Commander]
+FIXED  : ProxyClient handling in new DownloadClientsList and in general [Commander]
 
 REMOVED: Itsonlyme UDPCacheSearch [SiRoB]
 
 CHANGED: USC: Global Upload Limit are now respected [SiRoB]
 CHANGED: New Morph Version Check use Official setting now [SiRoB]
 CHANGED: Now Country Flag  are displayed in a separated column [SiRoB]
+CHANGED: Open Folder on SharedFilesList enabled for PartFiles (TempFolder will be opened) [Commander]
 
 ADDED  : Don't add client in uploadinglist not accepted by trytoconnect to avoid failed upload (banned,filtered) [SiRoB]
 ADDED  : Intermediate temp var for file datarate to avoid 0kb/s display when GUI refresh the file item [SiRoB]
