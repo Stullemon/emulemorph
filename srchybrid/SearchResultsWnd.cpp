@@ -339,9 +339,9 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 	// khaos::categorymod+ Category selection stuff...
 	if (!pos) return; // No point in asking for a category if there are no selected files to download.
 
-	int useCat;
+	int useCat = m_cattabs.GetCurSel();
 	bool	bCreatedNewCat = false;
-	if (m_cattabs.GetCurSel()==-1 && thePrefs.SelectCatForNewDL())
+	if (useCat==-1 && thePrefs.SelectCatForNewDL())
 	{
 		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
 		getCatDlg->DoModal();
@@ -367,7 +367,7 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 		{
 			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(index);
 			// khaos::categorymod+ m_cattabs is obsolete.
-			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && m_cattabs.GetCurSel()==-1)
+			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && useCat==-1)
 			{
 				useCat = theApp.downloadqueue->GetAutoCat(CString(cur_file->GetFileName()), (ULONG)cur_file->GetFileSize());
 				if (!useCat && thePrefs.UseActiveCatForLinks())
