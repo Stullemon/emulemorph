@@ -9,6 +9,9 @@ ADDED  : Mass-Rename: Insert-text-column-from-clipboard; pastes the clipboard da
 ADDED  : IP2Country columns to upload,queue,client and serverlist [Commander]
 ADDED  : Country and Clientsoftware columns to the commentlist [Commander]
 ADDED  : Show Client Percentage in the downloadlist [Commander]
+CHANGED: Invisible Mode [Commander]
+ADDED  : Dynamic Invisible Mode [Commander]
+TODO   : OnClick [HotKey] -> move to invisible mode, OnCLick [HotKey] -> move out of invisible mode [Commander]
 
 --------------------------------------
 Changelog for eMule 0.43b MorphXT v4.0
