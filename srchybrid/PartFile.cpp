@@ -4500,7 +4500,7 @@ int CPartFile::GetRating(){
 		{
 			num++;
 			//Cax2 - bugfix: for some ?%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
-			//the reason is for compatibility for eMulePlus icon
+			//the reason is for compatibility with official rating sort order
 			if (fRate==3 || fRate==4) fRate=(fRate==3)?4:3;
 			tot+=fRate;  
 		}
@@ -4509,7 +4509,7 @@ int CPartFile::GetRating(){
 	{
 		num=(float)tot/num+.5; //Cax2 - get the average of all the ratings
 		//Cax2 - bugfix: for some ?%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
-		//the reason is for compatibility for eMulePlus icon
+		//the reason is for compatibility with official rating sort order
 		if (num==3 || num==4) num=(num==3)?4:3;
 	}
     return num; //Cax2 - if no ratings found, will return 0!
