@@ -1200,15 +1200,15 @@ BEGIN
     LTEXT           "Static",IDC_DNAME,84,14,224,8
     LTEXT           "Userhash:",IDC_STATIC32,19,25,59,8
     LTEXT           "Static",IDC_DHASH,84,25,131,8
-    LTEXT           "Static",IDC_DID,231,25,84,8,0,WS_EX_TRANSPARENT
+    CTEXT           "Static",IDC_DID,215,25,96,8,0,WS_EX_TRANSPARENT
     LTEXT           "Clientsoftware:",IDC_STATIC33,19,36,63,8
     LTEXT           "Static",IDC_DSOFT,84,36,227,8
     LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8
     LTEXT           "Static",IDC_DSIP,84,47,54,8
-    LTEXT           "Servername:",IDC_STATIC38,141,47,69,8
+    LTEXT           "Servername:",IDC_STATIC38,164,47,52,8
     LTEXT           "Static",IDC_DSNAME,215,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8
-    LTEXT           "Static",IDC_CDIDENT,84,58,172,8
+    LTEXT           "Static",IDC_CDIDENT,84,58,79,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,81,308,71,BS_FLAT
     LTEXT           "Currently downloading:",IDC_STATIC41,19,91,86,8
     LTEXT           "Static",IDC_DDOWNLOADING,110,91,202,8
