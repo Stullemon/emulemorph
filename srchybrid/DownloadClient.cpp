@@ -447,12 +447,12 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 }
 
 bool CUpDownClient::AddRequestForAnotherFile(CPartFile* file){
-	for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition();pos != 0;m_OtherNoNeeded_list.GetNext(pos)){
-		if (m_OtherNoNeeded_list.GetAt(pos) == file)
+	for (POSITION pos = m_OtherNoNeeded_list.GetHeadPosition();pos != 0;){
+		if (m_OtherNoNeeded_list.GetNext(pos) == file)
 			return false;
 	}
-	for (POSITION pos = m_OtherRequests_list.GetHeadPosition();pos != 0;m_OtherRequests_list.GetNext(pos)){
-		if (m_OtherRequests_list.GetAt(pos) == file)
+	for (POSITION pos = m_OtherRequests_list.GetHeadPosition();pos != 0;){
+		if (m_OtherRequests_list.GetNext(pos) == file)
 			return false;
 	}
 	m_OtherRequests_list.AddTail(file);
