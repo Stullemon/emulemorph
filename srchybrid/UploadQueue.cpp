@@ -1612,10 +1612,7 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads() {
 //        minNumber = 1;
 //    }
 //	return max(((uint32)uploadinglist.GetCount())*0.2, minNumber);
-	if (thePrefs.GetMaxClientDataRate() > 0)
-		return 0;
-	else
-		return 1;
+	return 1;
 }
 
 /**
