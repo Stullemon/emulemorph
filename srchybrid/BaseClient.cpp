@@ -415,16 +415,6 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			old_m_strClientSoftware = m_strClientSoftware;
 			return _T("Bad MODSTRING detected");
 		}
-		if (_tcsnicmp(m_strModVersion, _T(" "),1)==0)
-		{
-			old_m_strClientSoftware = m_strClientSoftware;
-			return _T("MODSTRING begining by a space detected");
-		}
-		if (m_strModVersion.GetLength()>20)
-		{
-			old_m_strClientSoftware = m_strClientSoftware;
-			return _T("MODSTRING lenght>20 detected");
-		}
 	}
 	else if (old_m_pszUsername != m_pszUsername)
 	{
