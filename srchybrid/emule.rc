@@ -2299,7 +2299,9 @@ EQFILE                  ICON                    "res\\EQfile.ico"
 COMMUNITY               ICON                    "res\\community.ico"
 CLIENTFRIENDOVL         ICON                    "res\\friendovl.ico"
 CLIENTFRIENDSLOTOVL     ICON                    "res\\friendslotovl.ico"
-
+FRIENDNOCLIENTSLOT      ICON                    "res\\friends1slot.ico"
+FRIENDWITHCLIENTSLOT    ICON                    "res\\friends2slot.ico"
+FRIENDCONNECTEDSLOT     ICON                    "res\\friends3slot.ICO"
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
@@ -2471,7 +2473,6 @@ BEGIN
     IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
     IDS_MAIN_READY          "eMule Version %s ready"
     IDS_WIZARD_ED2K         "ED2k Settings"
-    IDS_MULTIPLEINSTANCE    "Multiple Instances (requires restart)"
 END
 
 STRINGTABLE 
@@ -2797,7 +2798,6 @@ BEGIN
     IDS_ERR_METCORRUPT      "Error: %s (%s) is corrupt, unable to load file"
     IDS_ERR_FILEERROR       "Unexpected file error while reading %s (%s): %s"
     IDS_ERR_FILEOPEN        "Failed to open %s (%s)"
-    IDS_INFINITEQUEUE       "Infinite Queue"
     IDS_ERR_REHASH          "Warning: %s might be corrupted, performing rehash of completed parts"
     IDS_ERR_PART_FNF        ".part file not found"
     IDS_ERR_OPENMETFILE     "Failed to open part.met file"
@@ -4273,7 +4273,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SELECTIVESHARE      "Selective chunk sharing"
-    IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
 END
 
 STRINGTABLE 
@@ -4310,6 +4309,21 @@ BEGIN
     IDS_COUNTRYNAME_MID     "Display 3 letters"
     IDS_COUNTRYNAME_LONG    "Display full name"
     IDS_COUNTRYNAME_SHOWFLAG "ShowFlag"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_REMOVEALLFRIENDSLOT "Remove All Friend Slot"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MULTIPLEINSTANCE    "Multiple Instances (requires restart)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_INFINITEQUEUE       "Infinite Queue"
 END
 
 #endif    // 英文 (美國) resources
