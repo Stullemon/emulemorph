@@ -568,17 +568,19 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 		m_byInfopacketsReceived |= IP_EMULEPROTPACK;
 	}	
 	//MORPH START - Added by SiRoB, Anti-leecher feature
-	bool bLeecher = false;
-	if(theApp.glob_prefs->GetEnableAntiCreditHack())
-		if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, theApp.glob_prefs->GetUserHash(), 16)==0)
-			bLeecher = true;
-	if(theApp.glob_prefs->GetEnableAntiLeecher())
-		if(TestLeecher())
-			bLeecher = true;
-	if(bLeecher)
-		BanLeecher(!IsBanned());
-	else
-		m_bLeecher = false;
+	if (bIsMule){
+		bool bLeecher = false;
+		if(theApp.glob_prefs->GetEnableAntiCreditHack())
+			if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, theApp.glob_prefs->GetUserHash(), 16)==0)
+				bLeecher = true;
+		if(theApp.glob_prefs->GetEnableAntiLeecher())
+			if(TestLeecher())
+				bLeecher = true;
+		if(bLeecher)
+			BanLeecher(!IsBanned());
+		else
+			m_bLeecher = false;
+	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	return bIsMule;
 }
@@ -890,8 +892,6 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 				);
 	tagMuleVersion.WriteTagToFile(data);
 
-//EastShare - commented out by AndCycle, just keep the rule until Kad is ready to go.
-/*
 	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 	//MORPH START - Added by SiRoB, Anti-leecher feature
 	if (StrStrI(m_clientModString,"Mison")||StrStrI(m_clientModString,"eVort")||StrStrI(m_clientModString,"booster")||IsLeecher())
@@ -906,7 +906,6 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	}
 	//MORPH END   - Added by SiRoB, Anti-leecher feature
 	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-*/	
 
 	uint32 dwIP;
 	if (theApp.serverconnect->IsConnected()){
