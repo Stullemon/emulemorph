@@ -487,7 +487,7 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		}
 
 		// add it at found pos
-		newclient->SetSlotNumber(posCounter);
+		newclient->SetSlotNumber(posCounter+1);
 		uploadinglist.InsertBefore(insertPosition, newclient);
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		if (newclient->IsFriend() && newclient->GetFriendSlot())
