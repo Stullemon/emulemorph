@@ -5083,6 +5083,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_VISITMVERSIONCHECK  "\n\nDo you want to visit the Morph web site?"
     IDS_MVERSIONCHECK       "&Versioncheck (Morph)"
     IDS_NONEWMVERVERSION    "No new eMule Morph version detected."
     IDS_NEWMVERSIONAVL      "A new version of eMule Morph is available! Check the project-homepage for more information."

@@ -2592,6 +2592,8 @@
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
 #define IDS_PW_STARTUPSOUND             5047
+#define IDS_MVISITVERSIONCHECK          5111
+#define IDS_VISITMVERSIONCHECK          5111
 #define IDS_MVERSIONCHECK               5112
 #define IDS_NONEWMVERVERSION            5113
 #define IDS_NEWMVERSIONAVL              5114
