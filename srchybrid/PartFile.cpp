@@ -2029,7 +2029,11 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 					lastChunk=true;
 				}
 
+				//MORPH - Changed by SiRoB, SafeHash
+				/*
 				if(IsComplete(i*PARTSIZE, end))
+				*/
+				if(IsRangeShareable(i*PARTSIZE, end))
 				{
 					completedParts++;
 
@@ -2040,7 +2044,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 				}
 			}
 		
-			completedsize = m_nFileSize - allgaps - 1;
+			completedsize = completedParts*PARTSIZE; //m_nFileSize - allgaps - 1;
 
 			percentcompleted = (float)completedsize/m_nFileSize*100;
 			percentconfirmed = (float)confirmedsize/m_nFileSize*100;
