@@ -935,10 +935,21 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 			break;
 
 		case 2:// transfered
+			//MORPH START - Changed by SiRoB, Download/Upload
+			/*
 			if ( !IsColumnHidden(3)) {
 				dc->DrawText("",0,lpRect, DLC_DT_TEXT);
 				break;
 			}
+			*/
+			if(lpUpDownClient->Credits() && (lpUpDownClient->Credits()->GetUploadedTotal() || lpUpDownClient->Credits()->GetDownloadedTotal())){
+				buffer.Format( "%s/%s",
+				CastItoXBytes((float)lpUpDownClient->Credits()->GetDownloadedTotal()),
+				CastItoXBytes((float)lpUpDownClient->Credits()->GetUploadedTotal()));
+				dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
+			}
+			break;
+			//MORPH END  - Changed by SiRoB, Upload/Download
 		case 3:// completed
 			if (lpCtrlItem->type == AVAILABLE_SOURCE && lpUpDownClient->GetTransferedDown()) {
 				buffer = CastItoXBytes(lpUpDownClient->GetTransferedDown());
@@ -1053,7 +1064,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 						if( lpUpDownClient->IsRemoteQueueFull() )
 							buffer = GetResString(IDS_QUEUEFULL);
 						else
-							buffer = GetResString(IDS_ONQUEUE);
+								buffer = GetResString(IDS_ONQUEUE);
 						break;
 					case DS_DOWNLOADING:
 						buffer = GetResString(IDS_TRANSFERRING);
@@ -2653,6 +2664,13 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 	case 1: //size but we use status asc
 		return client1->GetSourceFrom() - client2->GetSourceFrom();
 	case 2://transfered asc
+		//MORPH START - Added By SiRoB, Download/Upload
+		if (!client1->Credits())
+			return 1;
+		else if (!client2->Credits())
+			return -1;
+		return client2->Credits()->GetDownloadedTotal() - client1->Credits()->GetDownloadedTotal();
+		//MORPH END - Added By SiRoB, Download/Upload
 	case 3://completed asc
 		return CompareUnsigned(client1->GetTransferedDown(), client2->GetTransferedDown());
 	case 4: //speed asc
