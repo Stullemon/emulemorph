@@ -1,4 +1,4 @@
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "Loggable.h"
-#include "MenuCmds.h"
+#include "MenuCmds.h" //Morph
 
 class CSafeMemFile;
 class CSearchFile;
@@ -66,6 +66,7 @@ class CDownloadQueue: public CLoggable
 {
 	friend class CAddFileThread;
 	friend class CServerSocket;
+
 public:
 	CDownloadQueue(CSharedFileList* in_sharedfilelist);
 	~CDownloadQueue();

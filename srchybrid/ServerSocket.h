@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -37,9 +37,11 @@ protected:
 	void	OnReceive(int nErrorCode);
 	void	OnError(int nErrorCode);
 	bool	PacketReceived(Packet* packet);
+
 private:
 	bool	ProcessPacket(char* packet, uint32 size, uint8 opcode);
 	void	SetConnectionState(sint8 newstate);
+
 	CServerConnect*	serverconnect; 
 	sint8	connectionstate;
 	CServer* cur_server; // holds a copy of a CServer from the CServerList

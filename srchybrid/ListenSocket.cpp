@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -334,12 +334,11 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					// send a response packet with standart informations
 					if (client->GetHashType() == SO_EMULE && !bIsMuleHello)
 						client->SendMuleInfoPacket(false);
-
 					client->SendHelloAnswer();
 					if (client)
 						client->ConnectionEstablished();
-					// start secure identification, if
-					//	- we have received eMule-OP_HELLO (new eMule)
+
+					// TODO: How does ConnectionEstablished() delete this client object????
 					ASSERT( client );
 					if(client)
 					{
@@ -579,6 +578,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					theStats.AddDownDataOverheadFileRequest(size);
 
 					CSafeMemFile data((BYTE*)packet,size);
+
 					uchar reqfilehash[16];
 					data.ReadHash16(reqfilehash);
 
@@ -831,12 +831,14 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_Message", client);
 					theStats.AddDownDataOverheadOther(size);
+					
 					if (size < 2)
 						throw CString(_T("invalid message packet"));
 					CSafeMemFile data((BYTE*)packet, size);
 					UINT length = data.ReadUInt16();
 					if (length+2 != size)
 						throw CString(_T("invalid message packet"));
+					
 					//filter me?
 					//MORPH START - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
 					/*
@@ -875,7 +877,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_AskSharedFiles", client);
 					theStats.AddDownDataOverheadOther(size);
-					// IP banned, no answer for this request
+
 
 					CPtrList list;
 					if (thePrefs.CanSeeShares()==vsfaEverybody || (thePrefs.CanSeeShares()==vsfaFriends && client->IsFriend()))
@@ -938,6 +940,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
                     theStats.AddDownDataOverheadOther(size);
 					ASSERT( size == 0 );
 					
+
                     if (thePrefs.CanSeeShares()==vsfaEverybody || (thePrefs.CanSeeShares()==vsfaFriends && client->IsFriend()))
 					{
 						AddLogLine(true,GetResString(IDS_SHAREDREQ1),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_ACCEPTED) );
@@ -953,7 +956,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
                             strDir = thePrefs.shareddir_list.GetNext(pos);
                             PathRemoveBackslash(strDir.GetBuffer());
                             strDir.ReleaseBuffer();
-							
 							bool bFoundFolder=false;
 							for (int i = 0; i < arFolders.GetCount(); i++)
 							{
@@ -973,7 +975,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 							strDir = thePrefs.GetCategory(iCat)->incomingpath;
 							PathRemoveBackslash(strDir.GetBuffer());
 							strDir.ReleaseBuffer();
-							
 							bool bFoundFolder=false;
 							for (int i = 0; i < arFolders.GetCount(); i++)
 							{
@@ -1060,7 +1061,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_AskSharedFilesInDirectory", client);
                     theStats.AddDownDataOverheadOther(size);
-					// IP banned, no answer for this request
+
 
                     CSafeMemFile data((uchar*)packet, size);
                     CString strReqDir = data.ReadString(client->GetUnicodeSupport());
@@ -1070,7 +1071,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					{
 						AddLogLine(true,GetResString(IDS_SHAREDREQ2),client->GetUserName(),client->GetUserIDHybrid(),strReqDir,GetResString(IDS_ACCEPTED) );
                         ASSERT( data.GetPosition() == data.GetLength() );
- 
                         CTypedPtrList<CPtrList, CKnownFile*> list;
 						if (strReqDir == OP_INCOMPLETE_SHARED_FILES)
 						{
@@ -1212,7 +1212,6 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					client->SetFileListRequested(0);
                     break;
                 }
-
 				default:
 					theStats.AddDownDataOverheadOther(size);
 					PacketToDebugLogLine(_T("eDonkey"), packet, size, opcode, DLP_LOW);
@@ -1408,7 +1407,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 //									else
 //									{
 //										if (thePrefs.GetVerbose())
-//											AddDebugLogLine(false, "RCV: Source Request to fast. (This is testing the new timers to see how much older client will not receive this)");
+//											AddDebugLogLine(false, _T("RCV: Source Request to fast. (This is testing the new timers to see how much older client will not receive this)"));
 //									}
 								}
 								break;
@@ -2241,7 +2240,7 @@ SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytes
     return returnStatus;
 }
 
-// CListenSocket
+// ZZ is this needed?
 void CClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
 	ResetTimeOutTimer();
 	CEMSocket::SendPacket(packet,delpacket,controlpacket, actualPayloadSize);
@@ -2421,7 +2420,7 @@ void CListenSocket::OnAccept(int nErrorCode){
 				newclient->GetPeerName((SOCKADDR*)&SockAddr, &iSockAddrLen);
 				AddDebugLogLine(false, _T("***NOTE: SockAddr.sin_addr.S_un.S_addr == 0;  GetPeerName returned %s"), ipstr(SockAddr.sin_addr.S_un.S_addr));
 		}
-//		if (TooManySockets(true) && !theApp.serverconnect->IsConnecting())
+
 			ASSERT( SockAddr.sin_addr.S_un.S_addr != 0 && SockAddr.sin_addr.S_un.S_addr != INADDR_NONE );
 
 			if (theApp.ipfilter->IsFiltered(SockAddr.sin_addr.S_un.S_addr)){
@@ -2440,7 +2439,7 @@ void CListenSocket::OnAccept(int nErrorCode){
 				newclient->Safe_Delete();
 				continue;
 			}
-//			StopListening();
+
 			newclient->AsyncSelect(FD_WRITE|FD_READ|FD_CLOSE);
 			newclient->OnInit();
 		}

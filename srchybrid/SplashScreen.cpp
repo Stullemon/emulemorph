@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -101,7 +101,6 @@ void CSplashScreen::OnPaint()
 			BITMAP BM;
 			m_imgSplash.GetBitmap(&BM);
 			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, SRCCOPY);
-			
 			if (pOldBM)
 				dcMem.SelectObject(pOldBM);
 			CRect rc(0, BM.bmHeight * 0.95, BM.bmWidth, BM.bmHeight);//Commander - Changed
@@ -111,7 +110,7 @@ void CSplashScreen::OnPaint()
 			LOGFONT lf = {0};
 			lf.lfHeight = 14;
 			lf.lfWeight = FW_BOLD;
-			lf.lfQuality = NONANTIALIASED_QUALITY;
+			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
 			_tcscpy(lf.lfFaceName, _T("Arial"));
 			COLORREF oldclr = dc.SetTextColor(RGB(255,255,255));//Commander: Set white text color
 			int iOMode = dc.SetBkMode(TRANSPARENT);//Commander: Make bg transparent

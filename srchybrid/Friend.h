@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -32,6 +32,7 @@ public:
 	CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
             uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash);
 	~CFriend();
+
 	uchar	m_abyUserhash[16];
 	uint32	m_dwLastSeen;
 	uint32	m_dwLastUsedIP;
@@ -47,6 +48,7 @@ public:
 	void	WriteToFile(CFileDataIO* file);
 
 	static const char sm_abyNullHash[16];
+
 	void SetFriendSlot(bool newValue);
 	bool GetFriendSlot() const;
 private:

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -430,7 +430,7 @@ BOOL CPPgTweaks::OnInitDialog()
 
 BOOL CPPgTweaks::OnKillActive()
 {
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// if prop page is closed by pressing ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
 	return CPropertyPage::OnKillActive();
@@ -438,7 +438,7 @@ BOOL CPPgTweaks::OnKillActive()
 
 BOOL CPPgTweaks::OnApply()
 {
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// if prop page is closed by pressing ENTER we have to explicitly commit any possibly pending
 	// data from an open edit control
 	m_ctrlTreeOptions.HandleChildControlLosingFocus();
 

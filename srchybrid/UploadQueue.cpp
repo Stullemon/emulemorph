@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -61,7 +61,7 @@ static UINT _uSaveStatistics = 0;
 static uint32 igraph, istats, iupdateconnstats;
 // <-----khaos-
 
-//TODO rewrite the whole networkcode, use overlapped sockets
+//TODO rewrite the whole networkcode, use overlapped sockets.. sure....
 
 CUploadQueue::CUploadQueue()
 {

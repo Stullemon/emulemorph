@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -65,7 +65,6 @@ public:
 	}
 
 	void	MergeFileStats( CFileStatistic* toMerge );
-
 	void	AddRequest();
 	void	AddAccepted();
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
@@ -488,3 +487,4 @@ private:
 }
 
 static void MD4Transform(uint32 Hash[4], uint32 x[16]);
+

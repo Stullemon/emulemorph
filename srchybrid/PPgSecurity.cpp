@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -125,7 +125,6 @@ BOOL CPPgSecurity::OnInitDialog()
 	//MORPH END   - Added by SiRoB, Allways use securedid
 	LoadSettings();
 	Localize();
-
 
 	if (thePrefs.GetUseAutocompletion()){
 		if (!m_pacIPFilterURL) {
@@ -271,11 +270,11 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 					zfile = NULL;
 
 					if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
+						TRACE("*** Error: Failed to remove default IP filter file \"%s\" - %s\n", theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
 					if (_trename(szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
-						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), _tcserror(errno));
+						TRACE("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %s\n", szTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
 					if (_tremove(szTempFilePath) != 0)
-						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, _tcserror(errno));
+						TRACE("*** Error: Failed to remove temporary IP filter file \"%s\" - %s\n", szTempFilePath, strerror(errno));
 					bUnzipped = true;
 				}
 				else
@@ -292,9 +291,6 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 			_tremove(theApp.ipfilter->GetDefaultFilePath());
 			_trename(szTempFilePath, theApp.ipfilter->GetDefaultFilePath());
 		}
-
-		if (m_pacIPFilterURL && m_pacIPFilterURL->IsBound())
-			m_pacIPFilterURL->AddItem(url,0);
 	}
 	OnReloadIPFilter();
 }

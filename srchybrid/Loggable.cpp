@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -225,6 +225,29 @@ bool CLog::Open()
 		{
 			// write Unicode byte-order mark 0xFEFF
 			fputwc(0xFEFF, m_fp);
+		}
+		else if (m_uBytesWritten >= sizeof(WORD))
+		{
+			// check for Unicode byte-order mark 0xFEFF
+			WORD wBOM;
+			if (fread(&wBOM, sizeof(wBOM), 1, m_fp) == 1)
+			{
+				if (wBOM == 0xFEFF)
+				{
+					// log file already in Unicode format
+					fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
+				}
+				else
+				{
+					ASSERT( !m_bInOpenCall );
+					if (!m_bInOpenCall) // just for safety
+					{
+						m_bInOpenCall = true;
+						StartNewLogFile();
+						m_bInOpenCall = false;
+					}
+				}
+			}
 		}
 #endif
 	}

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -693,6 +693,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse)
 		delete toadd;
 		return false;
 	}
+
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
 	{
 		CSearchFile* cur_file = list.GetNext(pos);

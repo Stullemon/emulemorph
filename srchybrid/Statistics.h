@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -107,7 +107,8 @@ public:
 	uint64	GetUpDataOverheadKadPackets()				{return m_nUpDataOverheadKadPackets;}
 	uint64	GetUpDataOverheadOtherPackets()				{return m_nUpDataOverheadOtherPackets;}
 
-    uint64  GetTotalCompletedBytes() { return m_nTotalCompletedBytes; }
+	//Morph - start
+	uint64  GetTotalCompletedBytes() { return m_nTotalCompletedBytes; }
     void    IncTotalCompletedBytes(uint64 toAdd) { m_nTotalCompletedBytes += toAdd; }
     void    DecTotalCompletedBytes(uint64 toDec) {
         if(m_nTotalCompletedBytes > toDec)
@@ -115,6 +116,7 @@ public:
         else
             m_nTotalCompletedBytes = 0;
     }
+	//Morph - end
 
 public:
 	//	Cumulative Stats
@@ -192,7 +194,7 @@ private:
 	CList<TransferredData,TransferredData>	m_AvarageDDRO_list;
 	CList<TransferredData,TransferredData>	m_AvarageUDRO_list;
 
-    uint64  m_nTotalCompletedBytes;
+	uint64  m_nTotalCompletedBytes;//Morph
 };
 
 extern CStatistics theStats;

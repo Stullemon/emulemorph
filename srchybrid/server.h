@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -64,6 +64,7 @@ public:
 	const CString& GetDynIP() const					{return m_strDynIP;}
 	bool	HasDynIP() const						{return !m_strDynIP.IsEmpty();}
 	void	SetDynIP(LPCTSTR newdynip);
+
 	LPCTSTR	GetFullIP() const						{return ipfull;}
 	LPCTSTR	GetAddress() const;
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
@@ -92,10 +93,13 @@ public:
 	uint32	GetFailedCount() const					{return failedcount;}
 	void	AddFailedCount()						{failedcount++;} 
 	void	ResetFailedCount()						{failedcount = 0;} 
+
 	uint32	GetLastPingedTime() const				{return lastpingedtime;}
 	void	SetLastPingedTime(uint32 in_lastpingedtime)	{lastpingedtime = in_lastpingedtime;}
+
 	uint32	GetLastPinged() const					{return lastpinged;}
 	void	SetLastPinged(uint32 in_lastpinged)		{lastpinged = in_lastpinged;}
+
 	uint8	GetLastDescPingedCount() const			{return lastdescpingedcout;}
 	void	SetLastDescPingedCount(bool reset);
 
@@ -104,12 +108,16 @@ public:
 
 	uint32	GetChallenge() const					{return challenge;}
 	void	SetChallenge(uint32 in_challenge)		{challenge = in_challenge;}
+
 	uint32	GetDescReqChallenge() const				{return m_uDescReqChallenge;}
 	void	SetDescReqChallenge(uint32 uDescReqChallenge) {m_uDescReqChallenge = uDescReqChallenge;}
+
 	uint32	GetSoftFiles() const					{return softfiles;}
 	void	SetSoftFiles(uint32 in_softfiles)		{softfiles = in_softfiles;}
+
 	uint32	GetHardFiles() const					{return hardfiles;}
 	void	SetHardFiles(uint32 in_hardfiles)		{hardfiles = in_hardfiles;}
+
 	const CString& GetVersion() const				{return m_strVersion;}
 	void	SetVersion(LPCTSTR pszVersion)			{m_strVersion = pszVersion;}
 

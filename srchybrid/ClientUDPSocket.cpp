@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -438,6 +438,7 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 			char* sendbuffer = new char[cur_packet->packet->size+2];
 			memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
+
 			if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort)){
                 sentBytes += cur_packet->packet->size+2; // ZZ:UploadBandWithThrottler (UDP)
 

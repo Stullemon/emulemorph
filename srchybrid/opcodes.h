@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -473,7 +473,7 @@
 #define CT_EMULE_RESERVED12		0xfe
 #define CT_EMULE_RESERVED13		0xff
 
-
+// values for CT_SERVER_FLAGS (server capabilities)
 #define SRVCAP_ZLIB				0x01
 #define SRVCAP_IP_IN_LOGIN		0x02
 #define SRVCAP_AUXPORT			0x04

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -470,13 +470,11 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	if(item1->GetListParent()==NULL && item2->GetListParent()!= NULL) {
 		if(item1 == item2->GetListParent())
 			return -1;
-
 		comp = Compare(item1, item2->m_list_parent, lParamSort) * sortMod;
 	}
 	else if (item2->GetListParent()==NULL && item1->GetListParent()!=NULL){
 		if(item1->m_list_parent == item2)
 			return 1;
-
 		comp = Compare(item1->GetListParent(), item2, lParamSort) * sortMod;
 	}
 	else if (item1->GetListParent()==NULL){
@@ -997,7 +995,6 @@ void CSearchListCtrl::ExpandCollapseItem(int item)
 	if (searchfile->GetListParent() != NULL)
 	{
 		searchfile=searchfile->GetListParent();
-		
  		LVFINDINFO find;
 		find.flags = LVFI_PARAM;
 		find.lParam = (LPARAM)searchfile;
@@ -1182,7 +1179,6 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	{
 		for(int iCurrent = 0; iCurrent < iCount; iCurrent++)
 		{
-
 			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 			if (!IsColumnHidden(iColumn))
 			{

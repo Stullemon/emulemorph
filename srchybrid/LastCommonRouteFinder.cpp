@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -162,7 +162,6 @@ bool LastCommonRouteFinder::AddHostsToCheck(CUpDownClientPtrList &list) {
         return true; // allready got enough hosts, don't need more
     }
 }
-
 
 CurrentPingStruct LastCommonRouteFinder::GetCurrentPing() {
     CurrentPingStruct returnVal;
@@ -895,9 +894,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                         upload = maxUpload;
                     }
                     prefsLocker.Unlock();
-
                     SetUpload(upload);
-
                     if(m_enabled == false) {
                         enabled = false;
                     }

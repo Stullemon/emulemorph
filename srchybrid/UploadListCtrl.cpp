@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -336,7 +336,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 	else
 		odc->SetBkColor(GetBkColor());
-
 	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont *pOldFont = dc.SelectObject(GetFont());
@@ -629,7 +628,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					// Commander - Added: IP2Country column - End	
 				}
-		
 				if( iColumn != 7 && iColumn != 0 )
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 			} //MORPH - Added by SiRoB, Don't draw hidden columns
@@ -981,7 +979,6 @@ void CUploadListCtrl::ShowSelectedUserDetails()
 	SetSelectionMark(it);   // display selection mark correctly! 
 
 	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
-
 	if (client){
 		CClientDetailDialog dialog(client);
 		dialog.DoModal();

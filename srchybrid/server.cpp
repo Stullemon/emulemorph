@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -87,7 +87,6 @@ CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 	m_structServerCountry = theApp.ip2country->GetCountryFromIP(ip); //EastShare - added by AndCycle, IP to Country
 }
 
-// copy constructor
 CServer::CServer(const CServer* pOld)
 {
 	port = pOld->port;

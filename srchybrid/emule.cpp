@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -98,8 +98,6 @@ static char THIS_FILE[]=__FILE__;
 HMODULE g_hUnicoWS = NULL;
 bool g_bUnicoWS = false;
 #ifdef _UNICODE
-bool _bUsingUnicows = false;
-
 void ShowUnicowsError()
 {
 	// NOTE: Do *NOT* use any MFC nor W-functions here!
@@ -328,9 +326,7 @@ BOOL CemuleApp::InitInstance()
 		return false;
 
 	extern bool CheckThreadLocale();
-#ifdef _UNICODE
 	if (!CheckThreadLocale())
-#endif
 		return false;
 
 	// InitCommonControls() ist für Windows XP erforderlich, wenn ein Anwendungsmanifest
@@ -354,6 +350,7 @@ BOOL CemuleApp::InitInstance()
 		m_iDfltImageListColorFlags = ILC_COLOR8;
 
 	CWinApp::InitInstance();
+
 	if (!AfxSocketInit())
 	{
 		AfxMessageBox(GetResString(IDS_SOCKETS_INIT_FAILED));
@@ -737,7 +734,7 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 			hGlobalT = NULL;
 		}
 	}
-	//allocate global memory & lock it
+
 #ifdef _UNICODE
 	CStringA strTextA(strText);
 	HGLOBAL hGlobalA = GlobalAlloc(GHND | GMEM_SHARE, (strTextA.GetLength() + 1) * sizeof(CHAR));
@@ -1103,7 +1100,6 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 		AddDebugLogLine(DLP_VERYLOW, false, _T("Deleted public IP"));
 	
 	m_dwPublicIP = dwIP;
-
 }
 
 
@@ -1418,7 +1414,7 @@ void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
 				}
 				else
 				{
-					delete pLink; // [i_a] memleak
+					delete pLink;
 					throw CString(_T("bad link"));
 				}
 				delete pLink;

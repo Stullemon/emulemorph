@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -452,7 +452,7 @@ void CPartFile::CreatePartFile()
 			m_tCreated = fileinfo.st_ctime;
 		}
 		else
-			AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), partfull, _tcserror(errno));
+			AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), partfull, strerror(errno));
 	}
 	m_dwFileAttributes = GetFileAttributes(partfull);
 	if (m_dwFileAttributes == INVALID_FILE_ATTRIBUTES)
@@ -516,6 +516,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 
 	try{
 		version = metFile.ReadUInt8();
+		
 		if (version != PARTFILE_VERSION && version!= PARTFILE_SPLITTEDVERSION ){
 			metFile.Close();
 			//if (version==83) {				return ImportShareazaTempfile(in_directory, in_filename,getsizeonly);}
@@ -951,7 +952,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		// SLUGFILLER: SafeHash
 	}
 
-	//check if this is a backup
+	// verify corrupted parts list
 	POSITION posCorruptedPart = corrupted_list.GetHeadPosition();
 	while (posCorruptedPart)
 	{
@@ -987,7 +988,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		m_tCreated = fileinfo.st_ctime;
 	}
 	else
-		AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), searchpath, _tcserror(errno));
+		AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %hs"), searchpath, strerror(errno));
 
 	try{
 		SetFilePath(searchpath);
@@ -1158,7 +1159,7 @@ bool CPartFile::SavePartFile()
 		file.WriteUInt16(parts);
 		for (UINT x = 0; x < parts; x++)
 			file.WriteHash16(hashlist[x]);
-		//tags
+
 		UINT uTagCount = 0;
 		ULONG uTagCountFilePos = (ULONG)file.GetPosition();
 		file.WriteUInt32(uTagCount);
@@ -1420,18 +1421,18 @@ bool CPartFile::SavePartFile()
 	// after successfully writing the temporary part.met file...
 	if (_tremove(m_fullname) != 0 && errno != ENOENT){
 		if (thePrefs.GetVerbose())
-		AddDebugLogLine(false, _T("Failed to remove \"%s\" - %s"), m_fullname, _tcserror(errno));
+			AddDebugLogLine(false, _T("Failed to remove \"%s\" - %s"), m_fullname, strerror(errno));
 	}
 
 	if (_trename(strTmpFile, m_fullname) != 0){
 		int iErrno = errno;
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, _tcserror(iErrno));
+			AddDebugLogLine(false, _T("Failed to move temporary part.met file \"%s\" to \"%s\" - %s"), strTmpFile, m_fullname, strerror(iErrno));
 
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_SAVEMET), m_partmetfilename, GetFileName());
 		strError += _T(" - ");
-		strError += _tcserror(iErrno);
+		strError += strerror(iErrno);
 		AddLogLine(false, _T("%s"), strError);
 		return false;
 	}
@@ -2172,14 +2173,14 @@ uint16 CPartFile::GetAvailableSrcCount() const
 }
 //MORPH END - Changed by SiRoB, Source Counts Are Cached [Khaos]
 
-//MORPH START - Added by IceCream, SLUGFILLER: checkDiskspace
+// SLUGFILLER: checkDiskspace
 uint32 CPartFile::GetNeededSpace() const
 {
 	if (m_hpartfile.GetLength() > GetFileSize())
 		return 0;	// Shouldn't happen, but just in case
 	return GetFileSize()-m_hpartfile.GetLength();
 }
-//MORPH END   - Added by IceCream, SLUGFILLER: checkDiskspace
+// SLUGFILLER: checkDiskspace
 
 EPartFileStatus CPartFile::GetStatus(bool ignorepause) const
 {
@@ -2357,7 +2358,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 				}
 				case DS_NONEEDEDPARTS:
 				{
-					// we try to purge noneeded source, even without reaching the limit
+					// To Mods, please stop instantly removing these sources..
 					// This causes sources to pop in and out creating extra overhead!
 					if( (dwCurTick - lastpurgetime) > SEC2MS(40) ){
 						lastpurgetime = dwCurTick;
@@ -2474,12 +2475,11 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	}
 
 	return datarate;
-	
 }
 
 bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped, bool Ed2kID)
 {
-	// MOD Note: Do not change this part - Merkur
+	//The incoming ID could have the userid in the Hyrbid format.. 
 	uint32 hybridID = 0;
 	if( Ed2kID )
 		hybridID = ntohl(userid);
@@ -3110,9 +3110,7 @@ void CPartFile::CompleteFile(bool bIsHashingDone)
 		StopFile();
 		SetStatus(PS_COMPLETING);
 		m_is_A4AF_auto=false;
-
 		CWinThread *pThread = AfxBeginThread(CompleteThreadProc, this, THREAD_PRIORITY_BELOW_NORMAL, 0, CREATE_SUSPENDED); // Lord KiRon - using threads for file completion
-		
 		if (pThread){
 			SetFileOp(PFOP_COPYING);
 			SetFileOpProgress(0);
@@ -3143,7 +3141,7 @@ UINT CPartFile::CompleteThreadProc(LPVOID pvParams)
 
 void UncompressFile(LPCTSTR pszFilePath, CPartFile* pPartFile)
 {
-	// check, if it's a comressed file
+	// check, if it's a compressed file
 	DWORD dwAttr = GetFileAttributes(pszFilePath);
 	if (dwAttr == INVALID_FILE_ATTRIBUTES || (dwAttr & FILE_ATTRIBUTE_COMPRESSED) == 0)
 		return;
@@ -3229,7 +3227,7 @@ DWORD MoveCompletedPartFile(LPCTSTR pszPartFilePath, LPCTSTR pszNewPartFilePath,
 }
 
 // Lord KiRon - using threads for file completion
-// NOTE: This function is executed within a seperate thread, do *NOT* use an lists/queues of the main thread without
+// NOTE: This function is executed within a seperate thread, do *NOT* use any lists/queues of the main thread without
 // synchronization. Even the access to couple of members of the CPartFile (e.g. filename) would need to be properly
 // synchronization to achive full multi threading compliance.
 BOOL CPartFile::PerformFileComplete() 
@@ -3371,7 +3369,7 @@ BOOL CPartFile::PerformFileComplete()
 	SetStatus(PS_COMPLETE);
 	paused = false;
 	SetFileOp(PFOP_NONE);
-	// paused = false; // khaos::kmod+ No longer necessary.
+
 // explicitly unlock the file before posting something to the main thread.
 	sLock.Unlock();
 
@@ -3393,7 +3391,6 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile(this);
 		else
 			UpdateDisplayedInfo(true);
-
 		theApp.emuledlg->transferwnd->downloadlistctrl.ShowFilesCount();
 
 		thePrefs.Add2DownCompletedFiles();
@@ -3404,7 +3401,7 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 		// the chance to clean any available meta data tags and provide only tags which were determined by us.
 		UpdateMetaDataTags();
 
-		//UpdatePartsInfo();
+		// republish that file to the ed2k-server to update the 'FT_COMPLETE_SOURCES' counter on the server.
 		theApp.sharedfiles->RepublishFile(this);
 
 		// give visual response
@@ -3495,7 +3492,7 @@ void CPartFile::DeleteFile(){
 	// khaos::kmod-
 	CString partfilename(RemoveFileExtension(m_fullname));
 	if (_tremove(partfilename))
-		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(_tcserror(errno)),partfilename);
+		AddLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + CString(strerror(errno)),partfilename);
 
 	CString BAKName(m_fullname);
 	BAKName.Append(PARTMET_BAK_EXT);
@@ -3783,19 +3780,21 @@ CString CPartFile::getPartfileStatus() const
 
 		case PS_COMPLETE:
 			return GetResString(IDS_COMPLETE);
+
 		case PS_PAUSED:
 			if (stopped)
 				return GetResString(IDS_STOPPED);
 			return GetResString(IDS_PAUSED);
-		// SLUGFILLER: checkDiskspace
+
 		case PS_INSUFFICIENT:
 			return GetResString(IDS_INSUFFICIENT);
-		// SLUGFILLER: checkDiskspace
+
 		case PS_ERROR:
 			if (m_bCompletionError)
 				return GetResString(IDS_INSUFFICIENT);
 			return GetResString(IDS_ERRORLIKE);
 	}
+
 	if(GetSrcStatisticsValue(DS_DOWNLOADING) > 0)
 		return GetResString(IDS_DOWNLOADING);
 	else
@@ -4364,7 +4363,7 @@ uint32 CPartFile::WriteToBuffer(uint32 transize, const BYTE *data, uint32 start,
 		return 0;
 	}
 
-
+	// Create copy of data as new buffer
 	BYTE *buffer = new BYTE[lenData];
 	memcpy(buffer, data, lenData);
 
@@ -4433,7 +4432,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool bNoAICH)
 	}
 
 	//if (thePrefs.GetVerbose())
-//	AddDebugLogLine(false, "Flushing file %s - buffer size = %ld bytes (%ld queued items) transfered = %ld [time = %ld]\n", GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), transfered, m_nLastBufferFlushTime);
+	//	AddDebugLogLine(false, _T("Flushing file %s - buffer size = %ld bytes (%ld queued items) transfered = %ld [time = %ld]\n"), GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), transfered, m_nLastBufferFlushTime);
 
 	uint32 partCount = GetPartCount();
 	bool *changedPart = new bool[partCount];
@@ -4802,6 +4801,9 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 // 'Gaps' returned are really the filled areas, and guaranteed to be in order
 void CPartFile::GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) const
 {
+	if (gaplist.GetHeadPosition() == NULL)
+		return;
+
 	Gap_Struct *gap;
 	Gap_Struct *best=NULL;
 	POSITION pos;
@@ -5112,7 +5114,8 @@ struct Chunk {
 
 bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, 
 									Requested_Block_Struct** newblocks, 
-									  uint16* count)
+									  uint16* count) /*const*/
+/*
 {
 	// The purpose of this function is to return a list of blocks (~180KB) to
 	// download. To avoid a prematurely stop of the downloading, all blocks that 
@@ -5210,7 +5213,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 					}
 				}
 
-				// Check if any bloks(s) could be downloaded
+				// Check if any block(s) could be downloaded
 				if(chunksList.IsEmpty() == TRUE){
 					break; // Exit main loop while()
 				}

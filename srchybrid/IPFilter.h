@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -53,9 +53,8 @@ public:
 	bool IsFiltered(uint32 IP) /*const*/;
 	bool IsFiltered(uint32 IP, UINT level) /*const*/;
 	LPCTSTR GetLastHit() const;
-
 	const CIPFilterArray& GetIPFilter() const;
-		void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
+	void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
 private:
 	const SIPFilter* m_pLastHit;
 	CIPFilterArray m_iplist;

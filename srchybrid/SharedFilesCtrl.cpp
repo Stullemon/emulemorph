@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -835,7 +835,6 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			pSingleSelFile = NULL;
 
 		int iCurCompleteFile = pFile->IsPartFile() ? 0 : 1;
-
 		if (bFirstItem)
 			iCompleteFileSelected = iCurCompleteFile;
 		else if (iCompleteFileSelected != iCurCompleteFile)
@@ -2187,7 +2186,6 @@ void CSharedFilesCtrl::CreateMenues()
 	
 	if (m_SharedFilesMenu) VERIFY( m_SharedFilesMenu.DestroyMenu() );
 
-	// add priority switcher
 	m_PrioMenu.CreateMenu();
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOVERYLOW,GetResString(IDS_PRIOVERYLOW));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOLOW,GetResString(IDS_PRIOLOW));
@@ -2300,6 +2298,7 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 	
 #endif
 
+	
 	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 }
@@ -2346,6 +2345,7 @@ void CSharedFilesCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 	*pResult = 0;
 }
+
 void CSharedFilesCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	if (nChar == 'C' && (GetKeyState(VK_CONTROL) & 0x8000))

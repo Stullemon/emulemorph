@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -65,6 +65,7 @@ CDownloadQueue::CDownloadQueue(CSharedFileList* in_sharedfilelist)
 	m_nFailedUDPFileReasks = 0;
 	m_dwNextTCPSrcReq = 0;
 	m_cRequestsSentToServer = 0;
+
     m_dwLastA4AFtime = 0; // ZZ:DownloadManager
 	// khaos::categorymod+
 	m_iLastLinkQueuedTick = 0;
@@ -2287,6 +2288,7 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 		(void)_tremove(file.GetFilePath());
 	}
 }
+
 void CDownloadQueue::OnConnectionState(bool bConnected)
 {
 	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )

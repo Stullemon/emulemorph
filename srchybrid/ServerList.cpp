@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -147,6 +147,7 @@ bool CServerList::Init()
 
 	return bRes;
 }
+
 bool CServerList::AddServermetToList(const CString& strFile, bool merge) 
 {
 	if (!merge)
@@ -665,6 +666,7 @@ bool CServerList::SaveServermetToFile()
 		for (UINT j = 0; j < fservercount; j++)
 		{
 			const CServer* nextserver = GetServerAt(j);
+
 			servermet.WriteUInt32(nextserver->GetIP());
 			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 			/*
@@ -767,7 +769,7 @@ bool CServerList::SaveServermetToFile()
 				hardfiles.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
-			// as long as we don't receive an integer version tag from the local server (TCP) we store it as string
+			
 			if (!nextserver->GetVersion().IsEmpty()){
 				// as long as we don't receive an integer version tag from the local server (TCP) we store it as string
 				CTag version(ST_VERSION, nextserver->GetVersion());

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -276,7 +276,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		ASSERT ( IsKindOf(RUNTIME_CLASS(CUrlClient)) );
 		return 0;
 	}
-
 	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
 	if(!currequpfile)
 		return 0;
@@ -320,34 +319,12 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	{
 		float modif = credits->GetScoreRatio(GetIP());
 		fBaseValue *= modif;
-		if(!m_bySupportSecIdent){
-			switch(thePrefs.GetCreditSystem()){
-				case CS_OFFICIAL:
-					break;
-				case CS_PAWCIO:
-					if(modif == 1)
-						fBaseValue *= 0.95f;
-					break;
-				case CS_LOVELACE:
-					//I think lovelace give enough punishment
-				case CS_EASTSHARE:
-					//this also punish those no credit client, so no need for more punishment
-				default:
-					break;
-			}
-		}
 	}
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
-	if (!isdownloading && !onlybasevalue){
-		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
-			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
-				return 0;
-		}
-	}
+
 	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
 		fBaseValue *= 0.5f;
-
 	return (uint32)fBaseValue;
 }
 
@@ -693,7 +670,6 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 			Packet* packet = new Packet(OP_SENDINGPART,nPacketSize+24, OP_EDONKEYPROT, bFromPF);
 			md4cpy(&packet->pBuffer[0],GetUploadFileID());
 			PokeUInt32(&packet->pBuffer[16], statpos);
-		
 			PokeUInt32(&packet->pBuffer[20], endpos);
 		
 			memfile.Read(&packet->pBuffer[24],nPacketSize);
@@ -1175,7 +1151,6 @@ void CUpDownClient::ClearWaitStartTime(){
 	}
 	credits->ClearWaitStartTime();
 }
-
 
 bool CUpDownClient::GetFriendSlot() const
 {

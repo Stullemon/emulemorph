@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -39,7 +39,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CServerListCtrl, CMuleListCtrl)
-// CServerListCtrl
+
 BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMLdblclk)
@@ -298,11 +298,7 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	else temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
 	SetItemText(itemnr, 1, temp);
-
-	//Servername
 	SetItemText(itemnr,0,server->GetListName());
-	
-    //Description
 	SetItemText(itemnr,2,server->GetDescription());
 
 	// Ping

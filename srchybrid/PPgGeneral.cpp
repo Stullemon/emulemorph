@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -42,6 +42,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgGeneral, CPropertyPage)
+
 CPPgGeneral::CPPgGeneral()
 	: CPropertyPage(CPPgGeneral::IDD)
 {
@@ -56,7 +57,6 @@ void CPPgGeneral::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LANGS, m_language);
 }
-
 
 BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_STARTMIN, OnSettingsChange)

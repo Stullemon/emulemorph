@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1197,6 +1197,7 @@ public:
 	static	void	SetSplitterbarPosition(uint8 pos)	{splitterbarPosition=pos;}
 	static	uint8	GetTransferWnd2()					{return m_uTransferWnd2;}
 	static	void	SetTransferWnd2(uint8 uWnd2)		{m_uTransferWnd2 = uWnd2;}
+	//MORPH START - Added by SiRoB, Splitting Bar [O²]
 	static	uint8   GetSplitterbarPositionStat()	{return splitterbarPositionStat;}
 	static	void	SetSplitterbarPositionStat(uint8 pos) {splitterbarPositionStat=pos;}
 	static	uint8   GetSplitterbarPositionStat_HL()	{return splitterbarPositionStat_HL;}
@@ -1207,6 +1208,7 @@ public:
 	static	void	SetSplitterbarPositionFriend(uint16 pos) {splitterbarPositionFriend=pos;}
 	static	uint16  GetSplitterbarPositionIRC()	{return splitterbarPositionIRC;}
 	static	void	SetSplitterbarPositionIRC(uint16 pos) {splitterbarPositionIRC=pos;}
+	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
 	// -khaos--+++> Changed datatype to avoid overflows
 	static	uint16	GetStatsMax()						{return statsMax;}
 	// <-----khaos-

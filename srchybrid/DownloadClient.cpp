@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -259,6 +259,7 @@ bool CUpDownClient::AskForDownload()
 			SetDownloadState(DS_TOOMANYCONNS);
 		return true;
 	}
+
 	if (m_bUDPPending)
 	{
 		m_nFailedUDPPackets++;
@@ -435,6 +436,7 @@ void CUpDownClient::SendFileRequest()
 	}
     SetLastAskedTime(); // ZZ:DownloadManager
 }
+
 void CUpDownClient::SendStartupLoadReq()
 {
 	if (socket==NULL || reqfile==NULL)
@@ -655,7 +657,6 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		delete[] psz;
 	}
 	
-	
 	UpdateDisplayedInfo();
 	reqfile->UpdateAvailablePartsCount();
     
@@ -836,7 +837,6 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			}
 		}
 
-	
 		if (m_nDownloadState == DS_DOWNLOADING ){
 
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
@@ -1968,7 +1968,7 @@ bool CUpDownClient::SwapToAnotherFile(LPCTSTR reason, bool bIgnoreNoNeeded, bool
 
 	return false;
 }
-
+// <-- ZZ:DownloadManager
 
 bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR reason) // ZZ:DownloadManager
 {
@@ -2113,7 +2113,6 @@ bool CUpDownClient::IsValidSource() const
 	}
 	return valid;
 }
-
 
 void CUpDownClient::StartDownload()
 {

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -54,7 +54,6 @@ UploadBandwidthThrottler::UploadBandwidthThrottler(void) {
  */
 UploadBandwidthThrottler::~UploadBandwidthThrottler(void) {
     EndThread();
-    
     delete threadEndedEvent;
 	delete pauseEvent;
 }
@@ -147,6 +146,7 @@ uint32 UploadBandwidthThrottler::GetHighestNumberOfFullyActivatedSlotsSinceLastC
 void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSocket* socket, uint32 classID) {
     if(socket != NULL) {
         sendLocker.Lock();
+
 		RemoveFromStandardListNoLock(socket);
 		switch (classID)
 		{
@@ -276,7 +276,6 @@ int UploadBandwidthThrottler::RemoveFromStandardListNoLock(ThrottledFileSocket* 
 void UploadBandwidthThrottler::QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent) {
 	// Get critical section
     tempQueueLocker.Lock();
-
 
     if(doRun) {
         if(hasSent) {
@@ -471,6 +470,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             } else {
                 // sleep for just as long as we need to get back to having one byte to send
             sleepTime = max((uint32)ceil((double)(-realBytesToSpend + 1000)/allowedDataRate), TIME_BETWEEN_UPLOAD_LOOPS);
+
         }
 
         if(timeSinceLastLoop < sleepTime) {
@@ -482,6 +482,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 		// Calculate how many bytes we can spend
         sint64 bytesToSpend = 0;
+
 		if(allowedDataRate != 0 && allowedDataRate != _UI32_MAX) {
             // prevent overflow
             if(timeSinceLastLoop == 0) {
@@ -532,6 +533,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	uint64 spentOverhead = 0;
 
         	tempQueueLocker.Lock();
+    
 	        // are there any sockets in m_TempControlQueue_list? Move them to normal m_ControlQueue_list;
             while(!m_TempControlQueueFirst_list.IsEmpty()) {
                 ThrottledControlSocket* moveSocket = m_TempControlQueueFirst_list.RemoveHead();
@@ -541,6 +543,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
                 ThrottledControlSocket* moveSocket = m_TempControlQueue_list.RemoveHead();
         	    m_ControlQueue_list.AddTail(moveSocket);
         	}
+    
        		tempQueueLocker.Unlock();
         
             sendLocker.Lock();
@@ -548,6 +551,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         	// Send any queued up control packets first
             while(bytesToSpend > 0 && spentBytes <  (uint64)bytesToSpend && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
                 ThrottledControlSocket* socket = NULL;
+    
                 if(!m_ControlQueueFirst_list.IsEmpty()) {
                     socket = m_ControlQueueFirst_list.RemoveHead();
                 } else if(!m_ControlQueue_list.IsEmpty()) {
@@ -759,4 +763,3 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
     return 0;
 }
-

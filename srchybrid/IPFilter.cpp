@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 #include "IPFilter.h"
 #include "otherfunctions.h"
 #include "Preferences.h"
-#include "emuleDlg.h"
+#include "emuledlg.h"
 #include "HttpDownloadDlg.h"//MORPH START added by Yun.SF3: Ipfilter.dat update
 #include "ZipFile.h"//MORPH - Added by SiRoB, ZIP File download decompress
 
@@ -87,6 +87,7 @@ int CIPFilter::LoadFromDefaultFile(bool bShowResponse)
 	RemoveAllIPFilters();
 	return AddFromFile(GetDefaultFilePath(), bShowResponse);
 }
+
 int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 {
 	FILE* readFile = _tfsopen(pszFilePath, _T("r"), _SH_DENYWR);
@@ -235,7 +236,7 @@ void CIPFilter::SaveToDefaultFile()
 			if (_ftprintf(fp, _T("%-15s - %-15s , %3u , %s\n"), szStart, szEnd, flt->level, flt->desc) == 0 || ferror(fp))
 			{
 				CString strError;
-				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
+				strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
 				throw strError;
 			}
 		}
@@ -244,7 +245,7 @@ void CIPFilter::SaveToDefaultFile()
 	else
 	{
 		CString strError;
-		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, _tcserror(errno));
+		strError.Format(_T("Failed to save IP filter to file \"%s\" - %hs"), strFilePath, strerror(errno));
 		throw strError;
 	}
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -139,6 +139,7 @@ public:
 	// clipboard (text)
 	bool		CopyTextToClipboard( CString strText );
 	CString		CopyTextFromClipboard();
+
 	void		OnlineSig();
 	void		UpdateReceivedBytes(uint32 bytesToAdd);
 	void		UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend = false);

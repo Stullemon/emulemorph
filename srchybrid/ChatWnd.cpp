@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -92,7 +92,6 @@ void CChatWnd::OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	if (m_FriendListCtrl.GetSelectionMark() != (-1) ) {
 		CFriend* mFriend = (CFriend*)m_FriendListCtrl.GetItemData(m_FriendListCtrl.GetSelectionMark());
-
 		ShowFriendMsgDetails(mFriend);
 	}
 }
@@ -135,7 +134,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	// Client
 	if (pFriend->GetLinkedClient())
 	{
-		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->GetClientSoftVer());
+		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer());
 	}
 	else
 		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
@@ -228,7 +227,6 @@ BOOL CChatWnd::OnInitDialog()
 	rcSpl.right = rcSpl.left + SPLITTER_WIDTH;
 	m_wndSplitterchat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_FRIEND);
 
-
 	int PosStatVinit = rcSpl.left;
 	int PosStatVnew = thePrefs.GetSplitterbarPositionFriend();
 	int max = SPLITTER_RANGE_HEIGHT;
@@ -261,7 +259,6 @@ BOOL CChatWnd::OnInitDialog()
 
 void CChatWnd::DoResize(int delta)
 {
-
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_LIST2), delta);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_FRIENDS_MSG), delta);
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_FRIENDS_NAME_EDIT), delta);
@@ -279,7 +276,6 @@ void CChatWnd::DoResize(int delta)
 	CSplitterControl::ChangePos(GetDlgItem(IDC_MESSAGEICON), -delta, 0);
 
 	CRect rcW;
-
 	GetWindowRect(rcW);
 	ScreenToClient(rcW);
 

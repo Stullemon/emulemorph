@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -216,7 +216,6 @@ CemuleDlg::~CemuleDlg()
 	delete toolbar;
 	delete statusbar;
 	delete m_wndTaskbarNotifier;
-
 	delete m_pDropTarget;
 }
 
@@ -1481,7 +1480,7 @@ void CemuleDlg::OnClose()
 
 	Kademlia::CKademlia::stop();
 
-	// saving data & stuff
+	// try to wait untill the hashing thread notices that we are shutting down
 	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
 	sLock1.Lock(2000);
 
@@ -1529,7 +1528,6 @@ void CemuleDlg::OnClose()
 	
 	CPartFileConvert::CloseGUI();
 	CPartFileConvert::RemoveAllJobs();
-
 
 	theApp.uploadBandwidthThrottler->EndThread();
 	// ZZ:UploadSpeedSense -->
@@ -1653,7 +1651,7 @@ void CemuleDlg::AddSpeedSelectorSys(CMenu* addToMenu)
 	ASSERT( m_menuUploadCtrl.m_hMenu == NULL );
 	if (m_menuUploadCtrl.CreateMenu())
 	{
-		//trayUploadPopup.AddMenuTitle(GetResString(IDS_PW_TIT_UP));
+		//m_menuUploadCtrl.AddMenuTitle(GetResString(IDS_PW_TIT_UP));
 		text.Format(_T("20%%\t%i %s"),  (uint16)(thePrefs.GetMaxGraphUploadRate()*0.2),GetResString(IDS_KBYTESEC));	m_menuUploadCtrl.AppendMenu(MF_STRING, MP_QS_U20,  text);
 		text.Format(_T("40%%\t%i %s"),  (uint16)(thePrefs.GetMaxGraphUploadRate()*0.4),GetResString(IDS_KBYTESEC));	m_menuUploadCtrl.AppendMenu(MF_STRING, MP_QS_U40,  text);
 		text.Format(_T("60%%\t%i %s"),  (uint16)(thePrefs.GetMaxGraphUploadRate()*0.6),GetResString(IDS_KBYTESEC));	m_menuUploadCtrl.AppendMenu(MF_STRING, MP_QS_U60,  text);
@@ -1685,7 +1683,7 @@ void CemuleDlg::AddSpeedSelectorSys(CMenu* addToMenu)
 		//m_menuDownloadCtrl.AppendMenu(MF_SEPARATOR);
 		//m_menuDownloadCtrl.AppendMenu(MF_STRING, MP_QS_DC, GetResString(IDS_PW_UNLIMITED));
 
-	// Show UploadPopup Menu
+		// Show DownloadPopup Menu
 		text.Format(_T("%s:"), GetResString(IDS_PW_DOWNL));
 		addToMenu->AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_menuDownloadCtrl.m_hMenu, text);
 	}
@@ -1693,7 +1691,6 @@ void CemuleDlg::AddSpeedSelectorSys(CMenu* addToMenu)
 	addToMenu->AppendMenu(MF_STRING, MP_CONNECT, GetResString(IDS_MAIN_BTN_CONNECT));
 	addToMenu->AppendMenu(MF_STRING, MP_DISCONNECT, GetResString(IDS_MAIN_BTN_DISCONNECT)); 
 }
-
 
 void CemuleDlg::StartConnection(){
 	if (!Kademlia::CKademlia::isRunning() && !theApp.serverconnect->IsConnecting()){
@@ -1740,6 +1737,7 @@ void CemuleDlg::RestoreWindow()
 
 void CemuleDlg::UpdateTrayIcon(int procent)
 {
+	// compute an id of the icon to be generated
 	uint8 m_newiconinfo=(procent>0)?(16-((procent*15/100)+1)):0;
 
 	if (theApp.IsConnected()){
@@ -1812,7 +1810,7 @@ void CemuleDlg::OnShowWindow( BOOL bShow, UINT nStatus) {
 	if (IsRunning())
 		ShowTransferRate(true);
 }
-//START - enkeyDEV(kei-kun) -TaskbarNotifier-
+
 void CemuleDlg::ShowNotifier(CString Text, int MsgType, LPCTSTR pszLink, bool bForceSoundOFF)
 {
 	if (!notifierenabled)
@@ -1919,6 +1917,7 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 			RestoreWindow();
 			SetActiveDialog(chatwnd);
 			break;
+
 		case TBN_DLOAD:
 			// if we had a link and opened the downloaded file and if we currently in traybar, dont restore the app window
 			if (lParam==0 || !TrayIsVisible())
@@ -1932,10 +1931,12 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 			RestoreWindow();
 			SetActiveDialog(transferwnd);
 			break;
+
 		case TBN_IMPORTANTEVENT:
 			RestoreWindow();
 			SetActiveDialog(serverwnd);	
 			break;
+
 		case TBN_LOG:
 			RestoreWindow();
 			SetActiveDialog(serverwnd);	
@@ -1952,7 +1953,6 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 	}
     return 0;
 }
-//END - enkeyDEV(kei-kun) -TaskbarNotifier-
 
 void CemuleDlg::OnSysColorChange()
 {
@@ -2125,6 +2125,7 @@ int CemuleDlg::GetRecMaxUpload() {
 	if (thePrefs.GetMaxGraphUploadRate()<7) return 0;
 	if (thePrefs.GetMaxGraphUploadRate()<15) return thePrefs.GetMaxGraphUploadRate()-3;
 	return (thePrefs.GetMaxGraphUploadRate()-4);
+
 }
 
 BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -2461,10 +2462,10 @@ void FlatWindowStyles(CWnd* pWnd)
 	if (::GetClassNameA(*pWnd, szClassName, ARRSIZE(szClassName)))
 	{
 		bool bButton = (__ascii_stricmp(szClassName, "Button") == 0);
+
 //		if (   !bButton
-//			//|| (_tcsicmp(szClassName, _T("SysListView32")) == 0 && (pWnd->GetStyle() & WS_BORDER) == 0)
-//			|| _tcsnicmp(szClassName, _T("RichEdit20"), 10) == 0
-//			|| _tcsicmp(szClassName, _T("msctls_trackbar32")) == 0
+//			//|| (__ascii_stricmp(szClassName, "SysListView32") == 0 && (pWnd->GetStyle() & WS_BORDER) == 0)
+//			|| __ascii_stricmp(szClassName, "msctls_trackbar32") == 0
 //			)
 //		{
 //			pWnd->ModifyStyleEx(WS_EX_CLIENTEDGE, WS_EX_STATICEDGE);
@@ -2693,7 +2694,6 @@ void CemuleDlg::HtmlHelp(DWORD_PTR dwData, UINT nCmd)
 		}
 	}
 }
-
 
 LRESULT CemuleDlg::OnPeerCacheResponse(WPARAM wParam, LPARAM lParam)
 {

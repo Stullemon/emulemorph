@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -33,7 +33,7 @@
 #include "MuleStatusBarCtrl.h"
 #include "HelpIDs.h"
 #include "NetworkInfoDlg.h"
-#include <share.h>
+#include <share.h> //Morph
 // Mighty Knife: Popup-Menu for editing news feeds
 #include "MenuCmds.h"
 #include "InputBox.h"
@@ -293,7 +293,7 @@ BOOL CServerWnd::OnInitDialog()
 	InitWindowStyles(this);
 
 	//MORPH START - Added by SiRoB, XML News [O²]
-	ListFeeds(); // Added by O²: XML News
+	ListFeeds(); // Added by O? XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	return true;
 }
@@ -310,7 +310,7 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TAB3, StatusSelector);
 	DDX_Control(pDX, IDC_MYINFOLIST, m_MyInfo);
 	//MORPH START - Added by SiRoB, XML News [O²]
-	DDX_Control(pDX, IDC_FEEDLIST, m_feedlist); // Added by O²: XML News
+	DDX_Control(pDX, IDC_FEEDLIST, m_feedlist); // Added by O? XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
 }
 
@@ -329,7 +329,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 	CString strTempFilename;
 	strTempFilename.Format(_T("%stemp-%d-server.met"), thePrefs.GetConfigDir(), ::GetTickCount());
 
-	// step2 - try to download server.met
+	// try to download server.met
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_sURLToDownload = strURL;
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
@@ -339,7 +339,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 		return false;
 	}
 
-	// step3 - add content of server.met to serverlist
+	// add content of server.met to serverlist
 	serverlistctrl.Hide();
 	serverlistctrl.AddServermetToList(strTempFilename);
 	serverlistctrl.Visable();
@@ -394,7 +394,7 @@ void CServerWnd::Localize()
 	    m_ctrlMyInfo.SetText(GetResString(IDS_MYINFO));
 
     	//MORPH START - Added by SiRoB, XML News [O²]
-		GetDlgItem(IDC_FEEDUPDATE)->SetWindowText(GetResString(IDS_SF_RELOAD)); // Added by O²: XML News
+		GetDlgItem(IDC_FEEDUPDATE)->SetWindowText(GetResString(IDS_SF_RELOAD)); // Added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
 
 		// Mighty Knife: Popup-Menu for editing news feeds
@@ -674,7 +674,7 @@ void CServerWnd::UpdateLogTabSelection()
 		servermsgbox->ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
-		newsmsgbox->ShowWindow(SW_HIDE); // added by O²: XML News
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		debuglog.ShowWindow(SW_SHOW);
 		StatusSelector.HighlightItem(cur_sel, FALSE);
@@ -684,7 +684,7 @@ void CServerWnd::UpdateLogTabSelection()
 		debuglog.ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
-		newsmsgbox->ShowWindow(SW_HIDE); // added by O²: XML News
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		logbox.ShowWindow(SW_SHOW);
 		StatusSelector.HighlightItem(cur_sel, FALSE);
@@ -694,7 +694,7 @@ void CServerWnd::UpdateLogTabSelection()
 		debuglog.ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
-		newsmsgbox->ShowWindow(SW_HIDE); // added by O²: XML News
+		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
 		servermsgbox->ShowWindow(SW_SHOW);
 		servermsgbox->Invalidate();
@@ -707,9 +707,9 @@ void CServerWnd::UpdateLogTabSelection()
 	{
 		debuglog.ShowWindow(SW_HIDE);
 		logbox.ShowWindow(SW_HIDE);
-		// eMule O²
-		newsmsgbox->ShowWindow(SW_SHOW); // added by O²: XML News
-		// END eMule O²
+		// eMule O?
+		newsmsgbox->ShowWindow(SW_SHOW); // added by O? XML News
+		// END eMule O?
 		servermsgbox->ShowWindow(SW_HIDE);
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
@@ -749,8 +749,8 @@ void CServerWnd::ToggleDebugWindow()
 	if( (cur_sel == 2) || (cur_sel == 3) ){
 		// StatusSelector.SetCurSel(2);
 		StatusSelector.SetCurSel(1);
-		// END Added by O²: XML News
-		// END eMule O²
+		// END Added by O? XML News
+		// END eMule O?
 		StatusSelector.SetFocus();
 	}
 	servermsgbox->ShowWindow(SW_HIDE);
@@ -1084,7 +1084,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			aXMLUrls.Add(i->first_element_by_path(_T("./link")).child(0).value());
 			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
-			newsmsgbox->AppendText(_T("\n• "));
+			newsmsgbox->AppendText(_T("\n?"));
 			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 			aXMLNames.Add(sbuffer);
 			if (!i->first_element_by_path(_T("./author")).child(0).empty())

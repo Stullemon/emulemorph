@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,6 +14,7 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 #include "stdafx.h"
 #include <io.h>
 #include <share.h>
@@ -215,7 +216,6 @@ INT 	CPreferences::clientListColumnOrder[11]; /*8+1 Community+ 1 friend+1 Countr
 uint16	CPreferences::FilenamesListColumnWidths[2];
 BOOL	CPreferences::FilenamesListColumnHidden[2];
 INT		CPreferences::FilenamesListColumnOrder[2];
-
 DWORD	CPreferences::statcolors[15];
 uint8	CPreferences::splashscreen;
 uint8	CPreferences::startupsound;//Commander - Added: Enable/Disable Startupsound
@@ -847,8 +847,6 @@ void CPreferences::Init()
 
 		// import old pref-files
 		if (prefsExt->version<20) {
-
-
 			if (prefsExt->version>17) {// v0.20b+
 				Preferences_Import20b_Struct* prefsImport20b;
 				prefsImport20b=new Preferences_Import20b_Struct;
@@ -1015,7 +1013,7 @@ bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrN
 	if (CompareDirectories(rstrDirectory, GetTempDir()))
 		return false;
 
-
+	// do not share a file from the temp directory, if it matches one of the following patterns
 	CString strNameLower(rstrName);
 	strNameLower.MakeLower();
 	strNameLower += _T("|"); // append an EOS character which we can query for
@@ -1775,7 +1773,7 @@ bool CPreferences::LoadStats(int loadBackUp)
 	return true;
 }
 
-// This formats the UCT long value that is saved for stat_datetimeLastReset
+// This formats the UTC long value that is saved for stat_datetimeLastReset
 // If this value is 0 (Never reset), then it returns Unknown.
 CString CPreferences::GetStatsLastResetStr(bool formatLong)
 {
@@ -2414,6 +2412,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("PageRefreshTime"), m_nWebPageRefresh);
 	ini.WriteBool(_T("UseLowRightsUser"), m_bWebLowEnabled);
 
+
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
 	//
@@ -2749,7 +2748,7 @@ void CPreferences::LoadPreferences()
 //			CFile file;
 //			CFileFind findNewName;
 //			CString strNewName;
-//			strNewName.Format("%spreferences.ini.old", configdir);
+//			strNewName.Format(_T("%spreferences.ini.old"), configdir);
 //	
 //			if (findNewName.FindFile(strNewName))
 //				file.Remove(strNewName);
@@ -2759,6 +2758,7 @@ void CPreferences::LoadPreferences()
 //			// -khaos--+++> Set this to 2 so that LoadStats will load 'em from ini.old
 //			loadstatsFromOld = 2;
 //			// <-----khaos-
+//		}
 	}
 	CIni ini(strFileName, _T("eMule"));
 	//--- end Ozon :)
@@ -2818,7 +2818,6 @@ void CPreferences::LoadPreferences()
 		splitterbarPosition = 9;
 	else if (splitterbarPosition > 93)
 		splitterbarPosition = 93;
-
 	splitterbarPositionStat=ini.GetInt(_T("SplitterbarPositionStat"),30);
 	splitterbarPositionStat_HL=ini.GetInt(_T("SplitterbarPositionStat_HL"),66);
 	splitterbarPositionStat_HR=ini.GetInt(_T("SplitterbarPositionStat_HR"),33);
@@ -4108,7 +4107,7 @@ void CPreferences::SetUserNick(LPCTSTR pszNick)
 uint8 CPreferences::GetWebMirrorAlertLevel(){
 	// Known upcoming DDoS Attacks
 	if (m_nWebMirrorAlertLevel == 0){
-		//somefool.q 7th - 12th march on www.emule-project.net, mirrorlevel 1
+		// no threats known at this time
 	}
 	// end
 	if (UpdateNotify())

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -440,7 +440,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 			fwrite(strText, sizeof(TCHAR), strText.GetLength(), fp);
 			if (ferror(fp)){
 				CString strError;
-				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
+				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
 				AfxMessageBox(strError, MB_ICONERROR);
 			}
 			else
@@ -449,7 +449,7 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 		}
 		else{
 			CString strError;
-			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), _tcserror(errno));
+			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
 			AfxMessageBox(strError, MB_ICONERROR);
 		}
 	}

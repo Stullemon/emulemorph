@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -63,6 +63,7 @@ void CBarShader::BuildModifiers() {
 
 	if (!m_bIsPreview) 
 		m_used3dlevel=thePrefs.Get3DDepth();
+
 	// Barry - New property page slider to control depth of gradient
 
 	// Depth must be at least 2

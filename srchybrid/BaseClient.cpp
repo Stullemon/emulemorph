@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -68,6 +68,7 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+
 IMPLEMENT_DYNAMIC(CClientException, CException)
 IMPLEMENT_DYNAMIC(CUpDownClient, CObject)
 
@@ -87,13 +88,13 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 	Init();
 	m_nUserPort = in_port;
 	//If this is a ED2K source, check if it's a lowID.. If not, convert it to a HyrbidID.
-	//TODO: Find out how Servers deal with these IP addresses ending with .0 and see what is the lowest we can put here to catch some of them.
+	//Else, it's already in hybrid form.
 	if(ed2kID && !IsLowID(in_userid))
 		m_nUserIDHybrid = ntohl(in_userid);
 	else
 		m_nUserIDHybrid = in_userid;
 
-	//If create the FullIP address depending on source type.
+	//If highID and ED2K source, incoming ID and IP are equal..
 	//If highID and Kad source, incoming IP needs ntohl for the IP
 	if (!HasLowID() && ed2kID)
 		m_nConnectIP = in_userid;
@@ -276,6 +277,7 @@ CUpDownClient::~CUpDownClient(){
 		m_fAICHRequested = FALSE;
 		CAICHHashSet::ClientAICHRequestFailed(this);
 	}
+
 	theApp.clientlist->RemoveClient(this, _T("Destructing client object"));
 	if (m_Friend){
 		m_Friend->SetLinkedClient(NULL);
@@ -589,17 +591,17 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strHelloInfo.AppendFormat(_T("\n  BuddyIP=%u"), m_nBuddyIP);
 				break;
 			case CT_EMULE_MISCOPTIONS1:
-				//  4 --Reserved for future use--
+				//  3 AICH Version (0 = not supported)
+				//  1 Unicode
 				//  4 UDP version
 				//  4 Data compression version
 				//  4 Secure Ident
 				//  4 Source Exchange
 				//  4 Ext. Requests
 				//  4 Comments
-				//	1 --Reserved for future use--
+				//	1 PeerChache supported
 				//	1 No 'View Shared Files' supported
 				//	1 MultiPacket
-				//  1 Preview
 				//  1 Preview
 				m_fSupportsAICH			= (temptag.GetInt() >> (4*7+1)) & 0x07;
 				m_bUnicodeSupport		= (temptag.GetInt() >> 4*7) & 0x01;
@@ -626,7 +628,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//  7 Mjr Version (Doesn't really matter..)
 				//  7 Min Version (Only need 0-99)
 				//  3 Upd Version (Only need 0-5)
-				//  7 Bld Version (Only need 0-99)
+				//  7 Bld Version (Only need 0-99) -- currently not used
 				m_byCompatibleClient = (temptag.GetInt() >> 24);
 				m_nClientVersion = temptag.GetInt() & 0x00ffffff;
 				m_byEmuleVersion = 0x99;
@@ -703,7 +705,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 			delete addsrv;
 	}
 
-	//Because most sources are from ED2K, I removed the m_nUserIDHybrid != m_dwUserIP check since this will trigger 90% of the time anyway.
+	//(a)If this is a highID user, store the ID in the Hybrid format.
 	//(b)Some older clients will not send a ID, these client are HighID users that are not connected to a server.
 	//(c)Kad users with a *.*.*.0 IPs will look like a lowID user they are actually a highID user.. They can be detected easily
 	//because they will send a ID that is the same as their IP..
@@ -736,7 +738,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		SetFriendSlot(false);
 	}
 
-	// We want to educate Users of major comercial GPL breaking mods by telling them about the effects
+	// check for known major gpl breaker
 	CString strBuffer = m_pszUsername;
 	strBuffer.MakeUpper();
 	strBuffer.Remove(_T(' '));
@@ -1030,6 +1032,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	if (bDbgInfo && data.GetPosition() < data.GetLength()){
 		m_strMuleInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), data.GetLength() - data.GetPosition());
 	}
+
 	ReGetClientSoft();
 	m_byInfopacketsReceived |= IP_EMULEPROTPACK;
 
@@ -1074,6 +1077,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	data->WriteUInt16(thePrefs.GetPort());
 
 	uint32 tagcount = 5;
+
 	if( m_nBuddyIP && m_nBuddyPort )
 		tagcount += 2;
 
@@ -1784,10 +1788,11 @@ void CUpDownClient::ReGetClientSoft()
 	if (m_bIsHybrid){
 		m_clientSoft = SO_EDONKEYHYBRID;
 		// seen:
-		// 105010	50.10
-		// 10501	50.1
-		// 1051		51.0
-		// 501		50.1
+		// 105010	0.50.10
+		// 10501	0.50.1
+		// 1051		0.51.0
+		// 1000		1.0
+		// 501		0.50.1
 
 		UINT nClientMajVersion;
 		UINT nClientMinVersion;
@@ -1980,7 +1985,7 @@ void CUpDownClient::SetBuddyID(const uchar* pucBuddyID)
 }
 
 void CUpDownClient::SendPublicKeyPacket(){
-	///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "sending public key to '%s'", GetUserName()));
+	///* delete this line later*/ AddDebugLogLine(false, _T("sending public key to '%s'"), GetUserName()));
 	// send our public key to the client who requested it
 	if (socket == NULL || credits == NULL || m_SecureIdentState != IS_KEYANDSIGNEEDED){
 		ASSERT ( false );
@@ -2010,7 +2015,7 @@ void CUpDownClient::SendSignaturePacket(){
 		return;
 	if (credits->GetSecIDKeyLen() == 0)
 		return; // We don't have his public key yet, will be back here later
-		///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "sending signature key to '%s'", GetUserName()));
+		///* delete this line later*/ AddDebugLogLine(false, _T("sending signature key to '%s'"), GetUserName()));
 	// do we have a challenge value received (actually we should if we are in this function)
 	if (credits->m_dwCryptRndChallengeFrom == 0){
 		if (thePrefs.GetLogSecureIdent())
@@ -2060,7 +2065,7 @@ void CUpDownClient::SendSignaturePacket(){
 void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 	theApp.clientlist->AddTrackClient(this);
 
-	///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "recieving public key from '%s'", GetUserName()));
+	///* delete this line later*/ AddDebugLogLine(false, _T("recieving public key from '%s'"), GetUserName()));
 	if (socket == NULL || credits == NULL || pachPacket[0] != nSize-1
 		|| nSize == 0 || nSize > 250){
 		ASSERT ( false );
@@ -2089,7 +2094,7 @@ void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 }
 
 void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
-	///* delete this line later*/ DEBUG_ONLY(AddDebugLogLine(false, "receiving signature from '%s'", GetUserName()));
+	///* delete this line later*/ AddDebugLogLine(false, _T("receiving signature from '%s'"), GetUserName()));
 	// here we spread the good guys from the bad ones ;)
 
 	if (socket == NULL || credits == NULL || nSize == 0 || nSize > 250){
@@ -2137,7 +2142,7 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 	if (theApp.clientcredits->VerifyIdent(credits, pachPacket+1, pachPacket[0], GetIP(), byChaIPKind ) ){
 		// result is saved in function abouve
 		//if (thePrefs.GetLogSecureIdent())
-		//AddDebugLogLine(false, "'%s' has passed the secure identification, V2 State: %i", GetUserName(), byChaIPKind);
+		//	AddDebugLogLine(false, _T("'%s' has passed the secure identification, V2 State: %i"), GetUserName(), byChaIPKind);
 	}
 	else
 	{
@@ -2159,7 +2164,7 @@ void CUpDownClient::SendSecIdentStatePacket(){
 		}
 		if (nValue == 0){
 			//if (thePrefs.GetLogSecureIdent())
-			//DEBUG_ONLY(AddDebugLogLine(false, "Not sending SecIdentState Packet, because State is Zero"));
+			//	AddDebugLogLine(false, _T("Not sending SecIdentState Packet, because State is Zero"));
 			return;
 		}
 		// crypt: send random data to sign
@@ -2339,6 +2344,7 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		//already deleted
 		return;
 	}
+
 	BYTE* pBuffer = NULL;
 	try{
 	for (int i = 0; i != nCount; i++){
@@ -2361,7 +2367,6 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		throw;
 	}
 	(new PreviewDlg())->SetFile(sfile);
-
 }
 
 // sends a packet, if needed it will establish a connection before

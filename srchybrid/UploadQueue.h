@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -114,7 +114,6 @@ private:
 		uint32	datalen;
 		DWORD	timestamp;
 	};
-
 	CList<uint64,uint64> avarage_dr_list;
     CList<uint64,uint64> avarage_friend_dr_list;
 	CList<DWORD,DWORD> avarage_tick_list;

@@ -27,4 +27,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityAddIns) = postSolution
 	EndGlobalSection
+	GlobalSection(DevPartner Solution Properties) = postSolution
+	EndGlobalSection
+	GlobalSection(DevPartner) = postSolution
+	EndGlobalSection
 EndGlobal

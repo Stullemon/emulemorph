@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -445,6 +445,7 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 		int index = searchlistctrl.GetNextSelectedItem(pos); 
 		if (index > -1)
 		{
+			// get selected listview item (may be a child item from an expanded search result)
 			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(index);
 			// khaos::categorymod+ m_cattabs is obsolete.
 			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && useCat==-1)
@@ -918,8 +919,8 @@ bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams)
 		    throw new CMsgBoxException(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_GENERALERROR), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 	    }
 	}
-
-	// get total nr. of search terms
+	//TRACE(_T("Parsed search expr:\n"));
+	//for (int i = 0; i < _SearchExpr.m_aExpr.GetCount(); i++){
 	//	TRACE(_T("%s"), _SearchExpr.m_aExpr[i]);
 	//	TRACE(_T("  %s\n"), DbgGetHexDump((uchar*)(LPCTSTR)_SearchExpr.m_aExpr[i], _SearchExpr.m_aExpr[i].GetLength()*sizeof(TCHAR)));
 	//}
@@ -1524,6 +1525,7 @@ LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wparam, LPARAM lparam)
 	}
 	return TRUE;
 }
+
 void CSearchResultsWnd::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();

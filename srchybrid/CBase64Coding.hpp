@@ -15,7 +15,7 @@
 ** Copyright, 2000, Samuel R. Blackburn
 **
 ** $Workfile: CBase64Coding.hpp $
-** $Revision: 1.8 $
+** $Revision: 1.9 $
 ** $Modtime: 1/04/00 4:39a $
 */
 

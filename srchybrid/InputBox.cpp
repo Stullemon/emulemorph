@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -102,7 +102,6 @@ BOOL InputBox::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	SetDlgItemText(IDC_CLEANFILENAME,GetResString(IDS_CLEANUP));
 	GetDlgItem(IDC_CLEANFILENAME)->ShowWindow( m_bFilenameMode?SW_NORMAL:SW_HIDE);
-
 	return TRUE;
 }
 

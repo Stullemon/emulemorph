@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -407,7 +407,6 @@ public:
 					}
 	void			RequestSharedFileList();
 	void			ProcessSharedFileList(char* pachPacket, uint32 nSize, LPCTSTR pszDirectory = NULL);
-
 	void			ClearHelloProperties();
 	bool			ProcessHelloAnswer(char* pachPacket, uint32 nSize);
 	bool			ProcessHelloPacket(char* pachPacket, uint32 nSize);
@@ -537,7 +536,6 @@ public:
 						return m_nUpDatarate;
 					}
 	uint32			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
-
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
 	void			CreateNextBlockPackage();
 	uint32			GetUpStartTimeDelay() const
@@ -548,7 +546,6 @@ public:
 					{
 						m_dwUploadTime = ::GetTickCount();
 					}
-	
 	void			SendHashsetPacket(char* forfileid);
 	const uchar*	GetUploadFileID() const	
 					{
@@ -556,12 +553,10 @@ public:
 					}
 	void			SetUploadFileID(CKnownFile* newreqfile);
 	uint32			SendBlockData();
-
 	void			ClearUploadBlockRequests();
 	void			SendRankingInfo();
 	void			SendCommentInfo(/*const*/ CKnownFile *file);
 	void			AddRequestCount(const uchar* fileid);
-
 	void			UnBan();
 	void			Ban(LPCTSTR pszReason = NULL);
 	void			BanLeecher(LPCTSTR pszReason = NULL); //MORPH - Added by IceCream, Anti-leecher feature
@@ -579,7 +574,6 @@ public:
 						m_cAsked = m_cInAsked;
 					}
 	void			FlushSendBlocks();			// call this when you stop upload, or the socket might be not able to send
-
 	uint32			GetLastUpRequest() const
 					{
 						return m_dwLastUpRequest;
@@ -744,7 +738,6 @@ public:
     bool            IsSourceRequestAllowed(CPartFile* partfile, bool sourceExchangeCheck = false) const; // ZZ:DownloadManager
 
 	bool			IsValidSource() const;
-
 	ESourceFrom		GetSourceFrom() const
 					{
 						return (ESourceFrom)m_nSourceFrom;
@@ -761,7 +754,6 @@ public:
 						m_dwDownStartTime = 0;
 						return ::GetTickCount() - myTime;
 					}
-
 	bool			GetTransferredDownMini() const
 					{
 						return m_bTransferredDownMini;
@@ -812,7 +804,7 @@ public:
 					{
 						m_nKadState = nNewS;
 					}
-	//File Comment 
+
 	//File Comment
 	bool			HasFileComment() const						{ return !m_strFileComment.IsEmpty(); }
     const CString&	GetFileComment() const						{ return m_strFileComment; } 
@@ -902,7 +894,7 @@ public:
     const bool      IsInNoNeededList(const CPartFile* fileToCheck) const;
 
     const bool      SwapToRightFile(CPartFile* SwapTo, CPartFile* cur_file, bool ignoreSuspensions, bool SwapToIsNNPFile, bool isNNPFile, bool& wasSkippedDueToSourceExchange, bool doAgressiveSwapping = false, bool debug = false);
-// <-- ZZ:DownloadManager
+
     const DWORD     getLastTriedToConnectTime() { return m_dwLastTriedToConnect; }
 // <-- ZZ:DownloadManager
 #ifdef _DEBUG
@@ -910,7 +902,6 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
-
 	CClientReqSocket* socket;
 	CClientCredits*	credits;
 	CFriend*		m_Friend;
@@ -1154,6 +1145,7 @@ protected:
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;
+
 	CString m_strHelloInfo;
 	CString m_strMuleInfo;
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -560,7 +560,7 @@ void CClientList::Process(){
 			AddDebugLogLine(false, _T("...done, %i clients left on list"), m_trackedClientsList.GetCount());
 	}
 
-	//We need to try to connect to the clients in RequestTCPList
+	//We need to try to connect to the clients in KadList
 	//If connected, remove them from the list and send a message back to Kad so we can send a ACK.
 	//If we don't connect, we need to remove the client..
 	//The sockets timeout should delete this object.
@@ -606,7 +606,7 @@ void CClientList::Process(){
 				}
 				else if( m_bHaveBuddy == 2 )
 					cur_client->SetKadState(KS_NONE);
-				//a client lowID client wanting to be in the Kad network
+				//a potential buddy client wanting to let me in the Kad network
 				break;
 			case KS_CONNECTING_BUDDY:
 				if( m_bHaveBuddy == 2 )
@@ -615,7 +615,7 @@ void CClientList::Process(){
 					buddy = true;
 				break;
 			case KS_CONNECTED_BUDDY:
-				//a client lowID client wanting to be in the Kad network
+				//a potential connected buddy client wanting to me in the Kad network
 				//Not working at the moment so just set to none..
 				buddy = true;
 				if( m_bHaveBuddy != 2 )
@@ -684,7 +684,7 @@ bool CClientList::IsValidClient(CUpDownClient* tocheck)
 void CClientList::RequestTCP(Kademlia::CContact* contact)
 {
 	uint32 nContactIP = ntohl(contact->getIPAddress());
-	//If eMule already knows this client, abort this.. It could cause conflicts.
+	// don't connect ourself
 	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->getTCPPort())
 		return;
 

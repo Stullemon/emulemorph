@@ -1,4 +1,4 @@
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -246,7 +246,6 @@ public:
 
 	uint64	GetLostDueToCorruption() const { return m_iLostDueToCorruption; }
 	uint64	GetGainDueToCompression() const { return m_iGainDueToCompression; }
-
 	uint32	TotalPacketsSavedDueToICH() const	{return m_iTotalPacketsSavedDueToICH;}
 
 	bool	HasComment() const { return hasComment; }

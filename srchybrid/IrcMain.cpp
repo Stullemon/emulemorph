@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,7 +18,6 @@
 //A lot of documentation for the IRC protocol within this code came
 //directly from http://www.irchelp.org/irchelp/rfc/rfc2812.txt
 //Much of it may never be used, but it's here just in case..
-
 #include "stdafx.h"
 #include <Mmsystem.h>
 #include "emule.h"

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -181,6 +181,7 @@ bool CFriend::GetFriendSlot() const {
         return m_friendSlot;
     }
 }
+
 void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 	if(linkedClient != m_LinkedClient) {
     	if(linkedClient != NULL) {
@@ -207,7 +208,9 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 			m_LinkedClient->SetFriendSlot(false);
 			m_LinkedClient->m_Friend = NULL;
 		}
+
 		m_LinkedClient = linkedClient;
 	}
+
     theApp.friendlist->RefreshFriend(this);
 }

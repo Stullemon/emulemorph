@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -89,6 +89,7 @@ BOOL CTransferWnd::OnInitDialog()
 	ShowWnd2(m_uWnd2);
 
 	SetAllIcons();
+
     Localize(); // i_a 
 
 	m_uplBtn.SetAlign(CButtonST::ST_ALIGN_HORIZ);
@@ -570,7 +571,6 @@ void CTransferWnd::Localize()
 	GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_DOWNLOADS));
 	GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
 	GetDlgItem(IDC_TSTATIC1)->SetWindowText(GetResString(IDS_TW_QUEUE));
-
 	GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->SetWindowText(GetResString(IDS_SV_UPDATE));
 
 	// khaos::categorymod+ Rebuild menus...
@@ -991,8 +991,8 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
 		}
-		case MP_CAT_RESUMENEXT: {
-			theApp.downloadqueue->StartNextFile(rightclickindex,true);
+		case MP_RESUMENEXT: {
+			theApp.downloadqueue->StartNextFile(rightclickindex,false);
 			break;
 		}
 
@@ -1234,15 +1234,14 @@ int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newc
 	newcat->bResumeFileOnlyInSameCat = false;	//MORPH - Added by SiRoB, Resume file only in the same category
 	// khaos::categorymod-
 	int index=thePrefs.AddCat(newcat);
-	
 	if (addTab) m_dlTab.InsertItem(index,newtitle);
-
 	VerifyCatTabSize();
 
 	return index;
 }
 
 int CTransferWnd::GetTabUnderMouse(CPoint* point) {
+
 		TCHITTESTINFO hitinfo;
 		CRect rect;
 		m_dlTab.GetWindowRect(&rect);
@@ -1255,6 +1254,7 @@ int CTransferWnd::GetTabUnderMouse(CPoint* point) {
 
 		// Find the destination tab...
 		unsigned int nTab = m_dlTab.HitTest( &hitinfo );
+
 		if( hitinfo.flags != TCHT_NOWHERE )
 			return nTab;
 		else return -1;
@@ -1416,7 +1416,6 @@ void CTransferWnd::VerifyCatTabSize() {
 	right=wpTabWinPos.rcNormalPosition.right;
 
 	m_dlTab.GetWindowPlacement(&wpTabWinPos);
-
 	if (wpTabWinPos.rcNormalPosition.right<0) return;
 
 	wpTabWinPos.rcNormalPosition.right=right;
@@ -1428,7 +1427,6 @@ void CTransferWnd::VerifyCatTabSize() {
 	wpTabWinPos.rcNormalPosition.left=left;
 
 			RemoveAnchor(m_dlTab);
-
 			m_dlTab.SetWindowPlacement(&wpTabWinPos);
 			AddAnchor(m_dlTab,TOP_RIGHT);
 }

@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002-2004 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -594,7 +594,7 @@ void CKnownFile::UpdatePartsInfo()
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
 		CUpDownClient* cur_src = m_ClientUploadList.GetNext(pos);
-		//This could be a partfile that just completed.. Maybe of these clients will not have this information.
+		//This could be a partfile that just completed.. Many of these clients will not have this information.
 		if(cur_src->m_abyUpPartStatus && cur_src->GetUpPartCount() == partcount )
 		{
 			for (uint16 i = 0; i < partcount; i++)
@@ -759,7 +759,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	SetFilePath(strFilePath);
 	FILE* file = _tfsopen(strFilePath, _T("rbS"), _SH_DENYNO); // can not use _SH_DENYWR because we may access a completing part file
 	if (!file){
-		theApp.QueueLogLine(false, GetResString(IDS_ERR_FILEOPEN) + _T(" - %hs"), strFilePath, _T(""), _tcserror(errno));
+		theApp.QueueLogLine(false, GetResString(IDS_ERR_FILEOPEN) + _T(" - %hs"), strFilePath, _T(""), strerror(errno));
 		return false;
 	}
 
@@ -790,7 +790,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 			delete[] newhash;
 			return false;
 		}
-		// SLUGFILLER: SafeHash
+
 		hashlist.Add(newhash);
 		togo -= PARTSIZE;
 		hashcount++;
@@ -884,7 +884,7 @@ bool CKnownFile::CreateAICHHashSetOnly()
 	m_pAICHHashSet->FreeHashSet();
 	FILE* file = _tfsopen(GetFilePath(), _T("rbS"), _SH_DENYNO); // can not use _SH_DENYWR because we may access a completing part file
 	if (!file){
-		theApp.QueueLogLine(false, GetResString(IDS_ERR_FILEOPEN) + _T(" - %hs"), GetFilePath(), _T(""), _tcserror(errno));
+		theApp.QueueLogLine(false, GetResString(IDS_ERR_FILEOPEN) + _T(" - %hs"), GetFilePath(), _T(""), strerror(errno));
 		return false;
 	}
 	// we are reading the file data later in 8K blocks, adjust the internal file stream buffer accordingly
@@ -992,9 +992,7 @@ void CKnownFile::SetFileSize(uint32 nFileSize)
 	// PARTSIZE*2+1    3               3               3
 
 	if (nFileSize == 0){
-// Mighty Knife: No Assert here; function works !
-//		ASSERT(0);
-// [end] Mighty Knife
+		ASSERT(0);
 		m_iPartCount = 0;
 		m_iED2KPartCount = 0;
 		m_iED2KPartHashCount = 0;
@@ -1368,7 +1366,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	file->WriteUInt16(parts);
 	for (UINT i = 0; i < parts; i++)
 		file->WriteHash16(hashlist[i]);
-	//tags
+
 	uint32 uTagCount = 0;
 	ULONG uTagCountFilePos = (ULONG)file->GetPosition();
 	file->WriteUInt32(uTagCount);
@@ -1904,6 +1902,7 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 
 		bool bNeeded = false;
 		uint8* rcvstatus = forClient->GetUpPartStatus();
+
 		if( rcvstatus )
 		{
 			uint8* srcstatus = cur_src->GetUpPartStatus();
@@ -2029,7 +2028,7 @@ uint8 CKnownFile::GetFileRating() /*const*/
 		LoadComment();
 	return m_uRating;
 }
-// For File rate 
+
 void CKnownFile::SetFileRating(uint8 uRating)
 {
 	if (m_uRating != uRating)

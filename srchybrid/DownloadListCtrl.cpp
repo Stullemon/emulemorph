@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1160,7 +1160,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 	CMemDC dc(odc,&lpDrawItemStruct->rcItem);
 	CFont *pOldFont;
-	if (m_fontBold.m_hObject && thePrefs.GetShowActiveDownloadsBold()){
+	if (m_fontBold.m_hObject){
 		if (content->type == FILE_TYPE){
 			if (((const CPartFile*)content->value)->GetTransferingSrcCount())
 				pOldFont = dc->SelectObject(&m_fontBold);
@@ -1211,7 +1211,6 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 			int cx = CListCtrl::GetColumnWidth(iColumn);
-			
 			if(iColumn == 5) {
 				int iNextLeft = cur_rec.left + cx;
 				//set up tree vars
@@ -1651,7 +1650,6 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			
 			int total;
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
-
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_A4AFMenu.m_hMenu, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
 			m_A4AFMenu.CheckMenuItem(MP_ALL_A4AF_AUTO, (iSelectedItems == 1 && iFilesNotDone == 1 && iFilesA4AFAuto == 1) ? MF_CHECKED : MF_UNCHECKED);
 			if (thePrefs.IsExtControlsEnabled())
@@ -2486,7 +2484,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				ClearCompleted();
 				break;
 		}
-
 	}
 
 	return TRUE;
@@ -2527,6 +2524,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
         SetSortArrow(sortItem, sortAscending?arrowDoubleUp : arrowDoubleDown);
 		adder=81;
 	}
+
 
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder);
 	*/
@@ -2581,7 +2579,6 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 
 	return sortMod * comp;
 }
-
 
 void CDownloadListCtrl::ClearCompleted(bool ignorecats){
 	// Search for completed file(s)

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -820,6 +820,7 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 	}
 	files->WriteUInt32(nClientID);
 	files->WriteUInt16(nClientPort);
+	//TRACE("Publishing file: Hash=%s  ClientIP=%s  ClientPort=%u\n", md4str(cur_file->GetFileHash()), ipstr(nClientID), nClientPort);
 
 	CSimpleArray<CTag*> tags;
 
@@ -982,6 +983,7 @@ CKnownFile* CSharedFileList::GetFileByID(const uchar* hash) const
 	return NULL;
 }
 
+
 bool CSharedFileList::IsFilePtrInList(const CKnownFile* file) const
 {
 	if (file)
@@ -1024,7 +1026,7 @@ void CSharedFileList::HashNextFile(){
 	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 	addfilethread->SetValues(this,nextfile->strDirectory,nextfile->strName);
 	addfilethread->ResumeThread();
-	// SLUGFILLER: SafeHash remove - nextfile deleting handled elsewhere
+	// SLUGFILLER: SafeHash - nextfile deleting handled elsewhere
 	//delete nextfile;
 }
 
@@ -1101,7 +1103,7 @@ int CAddFileThread::Run()
 	
 	CoInitialize(NULL);
 
-	// under very heavy load and slowly progressing
+	// locking that hashing thread is needed because we may create a couple of those threads at startup when rehashing
 	// potentially corrupted downloading part files. if all those hash threads would run concurrently, the io-system would be
 	// under very heavy load and slowly progressing
 	CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time

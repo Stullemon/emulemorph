@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -83,7 +83,7 @@ BOOL CCommentDialogLst::OnInitDialog()
 	pmyListCtrl.InsertColumn(2, GetResString(IDS_QL_RATING), LVCFMT_LEFT, 80, 1); 
 	pmyListCtrl.InsertColumn(3, GetResString(IDS_COMMENT), LVCFMT_LEFT, 340, 1); 
 	pmyListCtrl.InsertColumn(4, GetResString(IDS_CLIENTSOFTWARE), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientSoftware Column
-        pmyListCtrl.InsertColumn(5, GetResString(IDS_COUNTRY), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientCountry Column
+	pmyListCtrl.InsertColumn(5, GetResString(IDS_COUNTRY), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientCountry Column
 
 	pmyListCtrl.SetExtendedStyle(LVS_EX_FULLROWSELECT); //NoamSon: CopyComments
 

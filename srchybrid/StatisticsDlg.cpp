@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -459,7 +459,6 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 
 			ScreenToClient(rctree);
   
-
 			if (rcW.Width()>0) 
 			{
 				rcSpl.left=rctree.right+1;
@@ -538,7 +537,6 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 			CRect rcW;
 			GetWindowRect(rcW);
 			ScreenToClient(rcW);
-
 			if (m_wndSplitterstat && rcW.Width()>0) Invalidate();
 			if (m_wndSplitterstat_HL && rcW.Height()>0) Invalidate();
 			if (m_wndSplitterstat_HR && rcW.Height()>0) Invalidate();
@@ -606,11 +604,8 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 			}
 		break;
 		}
-
 }
-
 return CResizableDialog::DefWindowProc(message, wParam, lParam);
-
 }
 
 void CStatisticsDlg::RepaintMeters() 
@@ -682,7 +677,6 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	//float uploadtonetworkrate, float uploadrateControlPackets
 	// current rate (overhead excluded)
 	m_dPlotDataUp[3]=uploadrate-(float)(theStats.GetUpDatarateOverhead())/1024;
-	// current rate to network (friends excluded)
 	//TODO: TESTING!
 	// current rate to friends
 	m_dPlotDataUp[4]=uploadrate-(float)(theApp.uploadqueue->GetToNetworkDatarate())/1024;
@@ -776,6 +770,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			cbuffer.Format(_T("%s %s"), GetResString(IDS_STATS_FRATIO), GetResString(IDS_FSTAT_WAITING)); // Localize
 			stattree.SetItemText(trans[1], cbuffer);
 		}
+
 		if ( (thePrefs.GetTotalDownloaded()>0 && thePrefs.GetTotalUploaded()>0) || (theStats.sessionReceivedBytes>0 && theStats.sessionSentBytes>0) ) 
 		{
 			// Cumulative
@@ -2371,12 +2366,12 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 	} // - END TIME STATISTICS SECTION
 	
 	
-	
-	// CLIENTS SECTION		[Original idea and code by xrmb]
+	// CLIENTS SECTION
 	//						Note:	This section now has dynamic tree items.  This technique
 	//								may appear in other areas, however, there is usually an
 	//								advantage to displaying 0 datems.  Here, with the ver-
 	//								sions being displayed the way they are, it makes sense.
+	//								Who wants to stare at totally blank tree items?  ;)
 	if (forceUpdate || stattree.IsExpanded(h_clients)) 
 	{
 		CMap<uint32, uint32, uint32, uint32>	clientVersionEDonkey;
@@ -2416,7 +2411,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			cbuffer.Format(_T("eM Compat: %i (%1.1f%%)"),	myStats[ 5],(double)100*myStats[ 5]/totalclient);stattree.SetItemText(clisoft[6], cbuffer);
 			cbuffer.Format(GetResString(IDS_STATS_UNKNOWNCLIENT)+_T(" (%1.1f%%)"),myStats[0] , (double)100*myStats[0]/totalclient);stattree.SetItemText(clisoft[7], cbuffer);
 
-			// CLIENTS -> CLIENT SOFTWARE SECTION
+			// CLIENTS -> CLIENT SOFTWARE -> EMULE SECTION
 			if (forceUpdate || stattree.IsExpanded(clisoft[0]) || cli_lastCount[0] == 0) 
 			{
 				uint32 verCount = 0;
@@ -2711,12 +2706,12 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			} // End Clients -> Client Software -> eDonkey Section
 
 
-			// CLIENTS -> CLIENT SOFTWARE -> XMULE SECTION
+			// CLIENTS -> CLIENT SOFTWARE -> AMULE SECTION
 			if (forceUpdate || stattree.IsExpanded(clisoft[3]) || cli_lastCount[3] == 0) 
 			{
 				uint32 verCount = 0;
 				
-				//--- find top 4 xMule client versions ---
+				//--- find top 4 client versions ---
 				uint32	currtop = 0;
 				uint32	lasttop = 0xFFFFFFFF;
 				uint32	totalOther = 0;
@@ -2792,7 +2787,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			} // End Clients -> Client Software -> aMule Section
 
 		} // - End Clients -> Client Software Section
-		// CLIENTS -> PORT SECTION
+		// CLIENTS -> NETWORK SECTION
 		if (forceUpdate || stattree.IsExpanded(hclinet)) 
 		{
 			cbuffer.Format( _T("eD2K: %u (%.1f%%)") , myStats[15], totalclient ? (myStats[15] * 100.0 / totalclient) : 0.0 );
@@ -3014,7 +3009,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 	stattree.SetRedraw(true);
 
 } // ShowStatistics(bool forceRedraw = false){}
-
 
 void CStatisticsDlg::UpdateConnectionsGraph()
 {
@@ -3264,7 +3258,6 @@ void CStatisticsDlg::CreateMyTree()
 		for(int i = 0; i<4; i++)
 			time_aap_down_oh[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down[x][6]);
 			}
-
 	h_clients = stattree.InsertItem(GetResString(IDS_CLIENTS),3,3);							// Clients Section
 	cligen[5] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 		hclisoft = stattree.InsertItem(GetResString(IDS_CLIENTSOFTWARE),h_clients);				// Client Software Section
@@ -3311,7 +3304,8 @@ void CStatisticsDlg::CreateMyTree()
 	stattree.SetItemState(htime_t, TVIS_BOLD, TVIS_BOLD);
 	stattree.SetItemState(htime_aap, TVIS_BOLD, TVIS_BOLD);
 	stattree.SetItemState(h_total_downloads, TVIS_BOLD, TVIS_BOLD);
-	for(int i = 0; i<3; i++) {
+	for(int i = 0; i<3; i++) 
+	{
 		stattree.SetItemState(time_aaph[i], TVIS_BOLD, TVIS_BOLD);
 		stattree.SetItemState(time_aap_hup[i], TVIS_BOLD, TVIS_BOLD);
 		stattree.SetItemState(time_aap_hdown[i], TVIS_BOLD, TVIS_BOLD);

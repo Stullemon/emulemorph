@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -143,7 +143,6 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 
 				// 16.40 servers do not send separate OP_SERVERMESSAGE packets for each line;
 				// instead of this they are sending all text lines with one OP_SERVERMESSAGE packet.
-				USES_CONVERSION;
 				int iPos = 0;
 				CString message = strMessages.Tokenize(_T("\r\n"), iPos);
 				while (!message.IsEmpty())
