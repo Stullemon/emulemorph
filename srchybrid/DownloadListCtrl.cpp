@@ -954,6 +954,14 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				cur_rec.left += 20;
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
+				//Morph Start - added by AndCycle, IP to Country
+				if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(16)){
+					POINT point3= {cur_rec.left,cur_rec.top+1};
+					theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+					cur_rec.left+=20;
+				}
+				//Morph End - added by AndCycle, IP to Country
+
 				if (!lpUpDownClient->GetUserName())
 					buffer = "?";
 				else

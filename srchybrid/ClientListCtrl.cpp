@@ -383,9 +383,24 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else
 							Sbuffer = client->GetUserName();
 
+						//Commander: There is a column now to show the country name
+						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(10)){
+							cur_rec.left+=20;
+							POINT point2= {cur_rec.left,cur_rec.top+1};
+							int index = client->GetCountryFlagIndex();
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						}
+						//EastShare End - added by AndCycle, IP to Country
+
 						cur_rec.left +=20;
 						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
 						cur_rec.left -=20;
+
+						//EastShare Start - added by AndCycle, IP to Country
+						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(10)){
+							cur_rec.left-=20;
+						}
+						//EastShare End - added by AndCycle, IP to Country
 
 						break;
 					}
