@@ -1204,14 +1204,15 @@ void CUpDownClient::ConnectionEstablished(){
 
 void CUpDownClient::ReGetClientSoft()
 {
-	if (m_pszUsername == NULL){
-		m_clientSoft = SO_UNKNOWN;
-		return;
-	}
 	//MORPH START - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientSoftVer());
 	//MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 
+	if (m_pszUsername == NULL){
+		m_clientSoft = SO_UNKNOWN;
+		return;
+	}
+	
 	int iHashType = GetHashType();
 	if (iHashType == SO_EMULE){
 		LPCTSTR pszSoftware;
