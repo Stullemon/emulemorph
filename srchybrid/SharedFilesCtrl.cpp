@@ -694,7 +694,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if (hideOSInWork>0)
 							buffer.AppendFormat(_T("%i"), hideOSInWork);
 						//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-						else if(file->GetSpreadbarSetStatus() == 0 || (file->GetSpreadbarSetStatus() == -1 && thePrefs.GetSparsePartFiles() == 0))
+						else if(file->GetSpreadbarSetStatus() == 0 || (file->GetSpreadbarSetStatus() == -1 && thePrefs.GetSpreadbarSetStatus() == 0))
 							buffer.AppendFormat(_T("%s"), GetResString(IDS_SPREADBAR) + _T(" ") + GetResString(IDS_DISABLED));
 						//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 						else
