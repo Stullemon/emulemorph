@@ -665,7 +665,16 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 
 	if (selectedCount>0){
-		CKnownFile* file = (CKnownFile*)GetItemData(iSel);
+		// itsonlyme: selFix
+		CArray<CKnownFile*> arraySelFiles;
+		POSITION pos = GetFirstSelectedItemPosition();
+		while (pos != NULL)
+		{
+			int iSel = GetNextSelectedItem(pos);
+			arraySelFiles.Add((CKnownFile*)GetItemData(iSel));
+		}
+		CKnownFile* file = arraySelFiles[0];
+		// itsonlyme: selFix
 		if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+256) {
 			RunURL(file, theApp.webservices.GetAt(wParam-MP_WEBURL) );
 		}
@@ -680,10 +689,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				if(selectedCount > 1)
 				{
 					CString str;
-					POSITION pos = this->GetFirstSelectedItemPosition();
-					while( pos != NULL )
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
-						file = (CKnownFile*)this->GetItemData(GetNextSelectedItem(pos));
+						file = arraySelFiles[i];	// itsonlyme: selFix
 						str.Append(theApp.CreateED2kLink(file) + "\n"); 
 					}
 
@@ -699,10 +707,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				if(selectedCount > 1)
 				{
 					CString str;
-					POSITION pos = this->GetFirstSelectedItemPosition();
-					while( pos != NULL )
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
-						file = (CKnownFile*)this->GetItemData(GetNextSelectedItem(pos));
+						file = arraySelFiles[i];	// itsonlyme: selFix
 						str += theApp.CreateHTMLED2kLink(file) + "\n"; 
 					}
 					theApp.CopyTextToClipboard(str);
@@ -717,10 +724,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				if(selectedCount > 1)
 				{
 					CString str;
-					POSITION pos = this->GetFirstSelectedItemPosition();
-					while( pos != NULL )
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
-						file = (CKnownFile*)this->GetItemData(GetNextSelectedItem(pos));
+						file = arraySelFiles[i];	// itsonlyme: selFix
 						str += theApp.CreateED2kSourceLink(file) + "\n"; 
 					}
 					theApp.CopyTextToClipboard(str);
@@ -745,10 +751,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				if(selectedCount > 1)
 				{
 					CString str;
-					POSITION pos = this->GetFirstSelectedItemPosition();
-					while( pos != NULL )
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
-						file = (CKnownFile*)this->GetItemData(GetNextSelectedItem(pos));
+						file = arraySelFiles[i];	// itsonlyme: selFix
 						str += theApp.CreateED2kHostnameSourceLink(file) + "\n"; 
 					}
 					theApp.CopyTextToClipboard(str);
@@ -767,10 +772,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					if(selectedCount > 1)
 					{
 						//CString str;
-						POSITION pos = this->GetFirstSelectedItemPosition();
-						while( pos != NULL )
+						for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 						{
-							file = (CKnownFile*)this->GetItemData(GetNextSelectedItem(pos));
+							file = arraySelFiles[i];	// itsonlyme: selFix
 							//str.Append(theApp.CreateED2kLink(file) + "\n"); 
 						}
 
@@ -818,11 +822,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_PRIOVERYHIGH:
 			case MP_PRIOAUTO:
 				{
-					POSITION pos = this->GetFirstSelectedItemPosition();
-					while( pos != NULL )
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
-						int iSel=this->GetNextSelectedItem(pos);
-						file = (CKnownFile*)this->GetItemData(iSel);
+						file = arraySelFiles[i];
 						switch (wParam) {
 							case MP_PRIOVERYLOW:
 								{	file->SetAutoUpPriority(false);file->SetUpPriority(PR_VERYLOW);SetItemText(iSel,3,GetResString(IDS_PRIOVERYLOW ));break;	}
@@ -846,11 +848,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 			case MP_POWERSHARE_AUTO:
 			{
-				POSITION pos = this->GetFirstSelectedItemPosition();
-				while( pos != NULL )
+				for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 				{
-					int iSel=this->GetNextSelectedItem(pos);
-					file = (CKnownFile*)this->GetItemData(iSel);
+					file = arraySelFiles[i];	// itsonlyme: selFix
 					switch (wParam) {
 						case MP_POWERSHARE_ON:
 							{	file->SetPowerShared(1);UpdateFile(file);break;	}
@@ -866,10 +866,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			//MORPH END   - Added by SiRoB, ZZ Upload System
 			case MP_PERMNONE:
 				{
-				POSITION pos = this->GetFirstSelectedItemPosition();
-				while( pos != NULL ) {
-					int iSel=this->GetNextSelectedItem(pos);
-					file = (CKnownFile*)this->GetItemData(iSel);
+				for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
+				{
+					file = arraySelFiles[i];	// itsonlyme: selFix
 
 					if (((CPartFile*)file)->IsPartFile())
 						AddLogLine(true,GetResString(IDS_ERR_NOPRIMCHANGE));
@@ -883,10 +882,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 			case MP_PERMFRIENDS:
 				{
-					POSITION pos = this->GetFirstSelectedItemPosition();
-					while( pos != NULL ) {
-						int iSel=this->GetNextSelectedItem(pos);
-						file = (CKnownFile*)this->GetItemData(iSel);
+					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
+					{
+						file = arraySelFiles[i];	// itsonlyme: selFix
 
 						if (((CPartFile*)file)->IsPartFile())
 							AddLogLine(true,GetResString(IDS_ERR_NOPRIMCHANGE));
@@ -900,10 +898,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 			case MP_PERMALL:
 				{
-				POSITION pos = this->GetFirstSelectedItemPosition();
-				while( pos != NULL ) {
-					int iSel=this->GetNextSelectedItem(pos);
-					file = (CKnownFile*)this->GetItemData(iSel);				
+				for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
+				{
+					file = arraySelFiles[i];	// itsonlyme: selFix
 					file->SetPermissions(PERM_ALL);SetItemText(iSel,4,GetResString(IDS_FSTATUS_PUBLIC));
 				}
 				break;

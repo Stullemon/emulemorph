@@ -1631,9 +1631,13 @@ void CDownloadQueue::ResetCatParts(int cat, uint8 useCat)
 // khaos::categorymod-
 
 void CDownloadQueue::SetCatPrio(int cat, uint8 newprio){
+	// itsonlyme: selFix
+	CArray<CPartFile*> filesList;
 	CPartFile* cur_file;
-	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
-		cur_file = filelist.GetAt(pos);
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos))
+		filesList.Add(filelist.GetAt(pos));
+	for (int i = 0; i < filesList.GetSize(); i++){
+		cur_file = filesList[i];
 		if (cat==0 || cur_file->GetCategory()==cat)
 			if (newprio==PR_AUTO) {
 				cur_file->SetAutoDownPriority(true);
@@ -1644,6 +1648,7 @@ void CDownloadQueue::SetCatPrio(int cat, uint8 newprio){
 				cur_file->SetDownPriority(newprio);
 			}
 	}
+	// itsonlyme: selFix
 }
 
 void CDownloadQueue::SetCatStatus(int cat, int newstatus){
