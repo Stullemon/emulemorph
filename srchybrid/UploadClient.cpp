@@ -489,7 +489,12 @@ void CUpDownClient::CreateNextBlockPackage(){
 			}
 			else{
 				togo = currentblock->EndOffset - currentblock->StartOffset;
+				//MORPH START - Changed by SiRoB, SLUGFILLER: SafeHash
+				/*
 				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1))
+				*/
+				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precaution
+				//MORPH END  - Changed by SiRoB, SLUGFILLER: SafeHash
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 			}
 
@@ -648,11 +653,6 @@ void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 			SetUpCompleteSourcesCount(nCompleteCountNew);
 			if (nCompleteCountLast != nCompleteCountNew)
 		{
-				//MORPH START - Added by SiRoB, -Fix-
-				if(tempreqfile->IsPartFile())
-					((CPartFile*)tempreqfile)->UpdatePartsInfo();
-				else
-				//MORPH END   - Added by SiRoB, -Fix-
 					tempreqfile->UpdatePartsInfo();
 			}
 		}
