@@ -329,7 +329,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         } else if(minFragSize > 1440) {
             minFragSize = 1440;
         }
-		minFragSize = 2500;
+		minFragSize = 1420;
 
         const DWORD thisLoopTick = ::GetTickCount();
         timeSinceLastLoop = thisLoopTick - lastLoopTick;
