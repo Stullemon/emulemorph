@@ -1388,7 +1388,7 @@ LOC_PCDATA: //'>...<'
 //<param name="tempsize">Temporary read buffer size.</param>
 //<returns>Success if file at 'path' was opened and bytes were read into memory.</returns>
 //<remarks>Memory is allocated at '*buffer'. Free with 'free'.</remarks>
-inline static bool load_file(const TCHAR* path,TCHAR** buffer,unsigned long* size,unsigned long tempsize = 8192)
+inline static bool load_file(const TCHAR* path,TCHAR** buffer,unsigned long* size,unsigned long tempsize = 40960)
 {
 	if(!path || !buffer || !size) return false;
 	*size = 0;
