@@ -795,25 +795,29 @@ void COScopeCtrl::DrawPoint()
 				prevY = m_rectPlot.bottom - 
 				(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			}
-			m_dcPlot.MoveTo(prevX - 1, prevY);
+			if(!m_PlotData[iTrend].BarsPlot)
+				m_dcPlot.MoveTo(prevX - 1, prevY);
 			// draw to the current point
 			currX = m_rectPlot.right;
 			currY = m_rectPlot.bottom -
 				(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
 			m_PlotData[iTrend].nPrevY = currY;
-			/*
-			if(abs(prevX - currX) > abs(prevY - currY))
-			{
-				currX += prevX - currX>0 ? -1 : 1;
+			if(m_PlotData[iTrend].BarsPlot)
+				m_dcPlot.MoveTo(currX - 1, m_rectPlot.bottom);
+			else
+			{	if(abs(prevX - currX) > abs(prevY - currY))
+				{
+					currX += prevX - currX>0 ? -1 : 1;
+				}
+				else 
+				{
+					currY += prevY - currY>0 ? -1 : 1;
+				}
 			}
-			else 
-			{
-				currY += prevY - currY>0 ? -1 : 1;
-			}
-			*/
 			m_dcPlot.LineTo(currX - 1, currY);
-			if(drawBars || m_PlotData[iTrend].BarsPlot)
-				m_dcPlot.LineTo(currX - 1, m_rectPlot.bottom);
+			//if(drawBars) || m_PlotData[iTrend].BarsPlot)
+			//	m_dcPlot.LineTo(currX - 1, m_rectPlot.bottom);
+			
 			// m_dcPlot.Rectangle(currX-1,currY,currX-1,m_rectPlot.bottom);
 			
 			// restore the pen 
