@@ -199,6 +199,14 @@ BOOL CTransferWnd::OnInitDialog()
 
 // khaos::categorymod+
 	// show & cat-tabs
+	/*
+	_stprintf(thePrefs.GetCategory(0)->title, _T("%s"), GetCatTitle(thePrefs.GetCategory(0)->filter));
+	_stprintf(thePrefs.GetCategory(0)->incomingpath, _T("%s"), thePrefs.GetIncomingDir());
+	thePrefs.GetCategory(0)->care4all=true;
+
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+		m_dlTab.InsertItem(ix,thePrefs.GetCategory(ix)->title );
+	*/
 	for (int ix=0; ix < thePrefs.GetCatCount(); ix++)
 	{
 		Category_Struct* curCat = thePrefs.GetCategory(ix);
@@ -222,6 +230,9 @@ BOOL CTransferWnd::OnInitDialog()
 
 	UpdateListCount(m_uWnd2);
 	// Mighty Knife: Force category tab verification even if window is not visible
+	/*
+	VerifyCatTabSize();
+	*/
 	VerifyCatTabSize(true);
 	// [end] Mighty Knife
 	//Commander - Added: ClientQueueProgressBar - Start
@@ -302,7 +313,6 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 /*
 void CTransferWnd::SetInitLayout() {
 		CRect rcDown,rcSpl,rcW;
-		CWnd* pWnd;
 
 		GetWindowRect(rcW);
 		ScreenToClient(rcW);
@@ -502,6 +512,26 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 	if (pMsg->message==WM_MBUTTONUP) {
 		if (downloadlistactive)
 			downloadlistctrl.ShowSelectedFileDetails();
+		//MORPH START - Added by SiRoB, DownloadClientCtrl
+		else if (showlist != IDC_DOWNLOADLIST + IDC_UPLOADLIST)
+			switch(showlist){
+				case IDC_DOWNLOADLIST:
+					downloadlistctrl.ShowSelectedFileDetails();
+					break;
+				case IDC_UPLOADLIST:
+					uploadlistctrl.ShowSelectedUserDetails();
+					break;
+				case IDC_QUEUELIST:
+					queuelistctrl.ShowSelectedUserDetails();
+					break;
+				case IDC_CLIENTLIST:
+					clientlistctrl.ShowSelectedUserDetails();
+					break;
+				case IDC_DOWNLOADCLIENTS:
+					downloadclientsctrl.ShowSelectedUserDetails();
+					break;
+			}
+		//MORPH END   - Added by SiRoB, DownloadClientsCtrl
 		else {
 			switch (m_uWnd2){
 				case 2:
@@ -510,9 +540,14 @@ BOOL CTransferWnd::PreTranslateMessage(MSG* pMsg)
 				case 1:
 					uploadlistctrl.ShowSelectedUserDetails();
 					break;
-				case 0:
+				case 3: //MORPH - Changed by SiRoB, -Fix-
 					clientlistctrl.ShowSelectedUserDetails();
 					break;
+				//MORPH START - Added by SiRoB, DownloadClientsCtrl
+				case 0:
+					downloadclientsctrl.ShowSelectedUserDetails();
+					break;
+				//MORPH END   - Added by SiRoB, DownloadClientsCtrl
 			}
 		}
 		return TRUE;
