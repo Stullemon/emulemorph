@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.43b MorphXT v4.x
+--------------------------------------
+FIXED  : Resource ID [SiRoB]
+FIXED  : minor gui display bug arround the category priority [SiRoB]
+
+--------------------------------------
 Changelog for eMule 0.43b MorphXT v4.1
 --------------------------------------
 FIXED  : Systray exit [SiRoB]
