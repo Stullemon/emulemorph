@@ -2802,26 +2802,21 @@ uint32 getPrime(uint32 lower_bound)
 	std::list<uint32> prime_no_list;
 	prime_no_list.push_back(3);
 
-	bool isPrime;
-	for(uint32 cur_no = 5; !(cur_no > lower_bound && isPrime); cur_no = cur_no+2){
-		isPrime = true;
-		for(std::list<uint32>::iterator cur_pos=prime_no_list.begin(); cur_pos!=prime_no_list.end(); cur_pos++){
-			if(cur_no%(*cur_pos) == 0){
-			    isPrime = false;
-			    break;
-			}	
+	uint32 cur_no = 3;
+	while(true){
+		cur_no = cur_no+2;
+		try{
+			std::list<uint32>::iterator cur_pos = prime_no_list.begin();
+			while(cur_pos != prime_no_list.end()){
+				if(cur_no%(*cur_pos) == 0) throw 1;
+				cur_pos++;
+			}
 		}
-		if(isPrime){
-			prime_no_list.push_back(cur_no);
+		catch(...){
+			continue;
 		}
+		if(cur_no > lower_bound) return cur_no;
+		prime_no_list.push_back(cur_no);
 	}
-
-	/*
-	for(list<int>::iterator cur_pos=prime_no_list.begin(); cur_pos!=prime_no_list.end(); cur_pos++){
-		cout<<(*cur_pos)<<endl;
-	}
-	*/
-
-	return prime_no_list.back();
 }
 //Morph End - added by AndCycle, minor tweak - prime
