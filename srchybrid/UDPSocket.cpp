@@ -66,9 +66,19 @@ CUDPSocket::~CUDPSocket(){
 		delete m_cur_server;
 	if (m_sendbuffer)
 		delete[] m_sendbuffer;
-	POSITION pos = controlpacket_queue.GetHeadPosition();
-	while (pos)
-		delete controlpacket_queue.GetNext(pos);
+	//original commented start
+	//POSITION pos = controlpacket_queue.GetHeadPosition();
+	//while (pos)
+	//	delete controlpacket_queue.GetNext(pos);
+	//original commented end
+	//EastShare Start - added by AndCycle, [patch] CUDPSocket memory leak, CUDPSocket incorrect destructor (rayita)
+    while (!controlpacket_queue.IsEmpty())
+    {
+        SServerUDPPacket* cur_pack = controlpacket_queue.RemoveHead();
+        delete cur_pack->packet;
+        delete cur_pack;
+    }
+	//EastShare End - added by AndCycle, [patch] CUDPSocket memory leak, CUDPSocket incorrect destructor (rayita)
 	m_udpwnd.DestroyWindow();
 }
 
@@ -467,7 +477,8 @@ void CUDPSocket::SendBuffer(){
 		}
 		else{
 			// on success or error, delete the packet
-			delete m_sendbuffer;
+			//delete m_sendbuffer;//original commented
+			delete[] m_sendbuffer;//EastShare - Added by AndCycle, [patch]CUDPSocket memory leak(Xman1)
 		}
 		m_sendbuffer = NULL;
 		m_sendblen = 0;
