@@ -206,17 +206,6 @@ void CDownloadQueue::AddSearchToDownload(CSearchFile* toadd,uint8 paused,uint8 c
 			break;
 		}
 	}
-	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-	// itsonlyme: cacheUDPsearchResults
-	const CSimpleArray<CSearchFile::SServer>& aServers = toadd->GetServers();
-	for (int i = 0; i < aServers.GetSize(); i++){
-		CPartFile::SServer tmpServer(aServers[i].m_nIP, aServers[i].m_nPort);
-		tmpServer.m_uAvail = aServers[i].m_uAvail;
-		newfile->AddAvailServer(tmpServer);
-		AddDebugLogLine(false, _T("Caching server with %i sources for %s"), aServers[i].m_uAvail, newfile->GetFileName());
-	}
-	// itsonlyme: cacheUDPsearchResults
-	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 }
 
 // New Param: uint16 useOrder (Def: 0)
@@ -1410,12 +1399,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 						}
 
 						// get next server to ask
-						//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
-						/*
 						cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver);
-						*/
-						cur_udpserver = theApp.serverlist->GetNextServer(cur_udpserver, lastfile);	// itsonlyme: cacheUDPsearchResults
-						//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
 						m_cRequestsSentToServer = 0;
 						if (cur_udpserver == NULL)
 						{
