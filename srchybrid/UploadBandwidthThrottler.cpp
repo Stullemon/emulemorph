@@ -578,7 +578,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
             			}
 					}
 				}
-				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:maxSlot[classID]) && slotCounterClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
+				for(uint32 maxCounter = 0; maxCounter < (isFocused?slotCounterClass[classID]:maxSlot[classID]) && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; maxCounter++) {
 					if(isFocused == false)
 					{
 						if(rememberedSlotCounterClass[classID] >= slotCounterClass[classID] ||
@@ -623,7 +623,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			lastpos = 0;
             for(uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
 			{	
-				for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && slotCounterClass[classID] > 0 && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
+				for(uint32 slotCounter = 0; slotCounter < slotCounterClass[classID] && bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] < (uint64)bytesToSpendClass[LAST_CLASS]; slotCounter++) {
 					ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(lastpos+slotCounter);
 					if(socket != NULL) {
 						uint32 bytesToSpendTemp = bytesToSpendClass[LAST_CLASS]-spentBytesClass[LAST_CLASS];
@@ -650,12 +650,12 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			{
 				if (allowedDataRateClass[classID])
 				{
-					if(realBytesToSpendClass[classID] < -(((sint64)slotCounterClass[classID]+1)*minFragSize)*1000) {
-	           			sint64 newRealBytesToSpend = -(((sint64)slotCounterClass[classID]+1)*minFragSize)*1000;
+					if(realBytesToSpendClass[classID] < -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000) {
+	           			sint64 newRealBytesToSpend = -(((sint64)((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])+1)*minFragSize)*1000;
 	           			realBytesToSpendClass[classID] = newRealBytesToSpend;
 	           		    templastTickReachedBandwidth = thisLoopTick;
 	       			} else {
-	           		    uint64 bandwidthSavedTolerance = slotCounterClass[classID]*512*1000;
+	           		    uint64 bandwidthSavedTolerance = ((classID==LAST_CLASS)?m_StandardOrder_list.GetSize():slotCounterClass[classID])*512*1000;
 	           		    if(realBytesToSpendClass[classID] > 0 && (uint64)realBytesToSpendClass[classID] > 999+bandwidthSavedTolerance) {
 					        sint64 newRealBytesToSpend = 999+bandwidthSavedTolerance;
 					        //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler::RunInternal(): Too high saved bytesToSpend. Limiting value. Old value: %I64i New value: %I64i"), realBytesToSpend, newRealBytesToSpend);
