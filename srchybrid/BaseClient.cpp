@@ -189,20 +189,14 @@ void CUpDownClient::Init()
 		SOCKADDR_IN sockAddr = {0};
 		int nSockAddrLen = sizeof(sockAddr);
 		socket->GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
-		//EastShare Start - added by AndCycle, IP to Country
-		/*
 		SetIP(sockAddr.sin_addr.S_un.S_addr);
-		*/
-		uint32 tempUserIP = sockAddr.sin_addr.S_un.S_addr;		
-		if(GetIP() != tempUserIP){
-			m_structUserCountry = theApp.ip2country->GetCountryFromIP(tempUserIP);
-		}
-		SetIP(tempUserIP);
-		//EastShare End - added by AndCycle, IP to Country
 	}
 	else{
 		SetIP(0);
 	}
+	//EastShare Start - added by AndCycle, IP to Country
+	m_structUserCountry = theApp.ip2country->GetCountryFromIP(GetIP());
+	//EastShare End - added by AndCycle, IP to Country
 	m_fHashsetRequesting = 0;
 	m_fSharedDirectories = 0;
 	m_fSentCancelTransfer = 0;
@@ -699,12 +693,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	socket->GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
 	SetIP(sockAddr.sin_addr.S_un.S_addr);
 	//EastShare Start - added by AndCycle, IP to Country
-	if(theApp.ip2country->IsIP2Country()){
-		 // Superlexx
-		if (m_structUserCountry == theApp.ip2country->GetDefaultIP2Country()){
-			m_structUserCountry = theApp.ip2country->GetCountryFromIP(GetIP());
-		}
-	}
+	m_structUserCountry = theApp.ip2country->GetCountryFromIP(GetIP());
 	//EastShare End - added by AndCycle, IP to Country
 
 	if (thePrefs.AddServersFromClient() && m_dwServerIP && m_nServerPort){
@@ -2884,7 +2873,7 @@ switch(tag->GetNameID())
 }
 void CUpDownClient::ProcessUnknownInfoTag(CTag *tag)
 {
-if (!thePrefs.GetEnableAntiLeecher())
+if (!thePrefs.GetEnableAntiLeecher() || IsLeecher())
 	return;
 LPCTSTR strSnafuTag=NULL;
 switch(tag->GetNameID())
