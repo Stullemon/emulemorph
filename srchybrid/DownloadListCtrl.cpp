@@ -1669,14 +1669,14 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					{
 						SetRedraw(false);
 						while(!selectedList.IsEmpty()) {
-							selectedList.GetHead()->lastseencomplete = 1025992800;
+							selectedList.GetHead()->lastseencomplete = CTime::GetCurrentTime();
 							selectedList.GetHead()->SavePartFile();
 							selectedList.RemoveHead();
 						}
 						SetRedraw(true);
 						break;
 					}
-					file->lastseencomplete = 1025992800;
+					file->lastseencomplete = CTime::GetCurrentTime();
 					file->SavePartFile();
 					break;//shadow#(onlydownloadcompletefiles)-end
 				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)

@@ -4403,7 +4403,7 @@ bool	CPartFile::notSeenCompleteSource(){
 	else if(lastseencomplete == NULL){
 		return true;
 	}
-	else if(CTime::GetCurrentTime() - lastseencomplete > 604800){
+	else if(CTime::GetCurrentTime() - lastseencomplete > 1209600){//14 days, no complete source...
 		return true;
 	}
 	return false;
