@@ -1046,7 +1046,29 @@ void CServerWnd::DownloadAllFeeds()
 			return;
 		}
 		_tremove(szFilePath);
-		_trename(szTempFilePath,szFilePath);
+	//Morph Start - added by AndCycle, XML news unicode hack
+#ifdef _UNICODE
+	FILE *tempFP = _tfopen(szTempFilePath, _T("r"));
+	FILE *targetFP = _tfopen(szFilePath, _T("wb"));
+
+	fputwc(0xFEFF, targetFP);
+
+	while(!feof(tempFP)){
+		TCHAR temp[1024];
+		_fgetts(temp, 1023, tempFP);
+
+		//_fputts(tempA2T, targetFP);
+		fwrite(temp, 1, _tcslen(temp)*sizeof(TCHAR), targetFP);
+	}
+
+	fclose(tempFP);
+	fclose(targetFP);
+
+	_tremove(szTempFilePath);
+#elif
+	_trename(szTempFilePath, szFilePath);
+#endif
+	//Morph End - added by AndCycle, XML news unicode hack
 		// Parse it
 		ParseNewsFile(szFilePath);
 	}
