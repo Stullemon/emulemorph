@@ -1,4 +1,4 @@
-// $Id: io_decorators.cpp,v 1.1 2003-10-12 18:54:15 sirob Exp $
+// $Id: io_decorators.cpp,v 1.2 2004-12-29 23:11:19 sirob Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -203,10 +203,12 @@ io::CompressedReader::CompressedReader(ID3_Reader& reader, size_type newSize)
   
   BString binary = readBinary(reader, oldSize);
   
-  ::uncompress(_uncompressed,
+  int dwResult = ::uncompress(_uncompressed,
                reinterpret_cast<luint*>(&newSize),
                reinterpret_cast<const uchar*>(binary.data()),
                oldSize);
+  if (dwResult != Z_OK)
+	  newSize = 0;
   this->setBuffer(_uncompressed, newSize);
 }
 

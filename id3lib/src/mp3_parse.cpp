@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Id: mp3_parse.cpp,v 1.1 2003-10-12 18:54:15 sirob Exp $
+// $Id: mp3_parse.cpp,v 1.2 2004-12-29 23:11:19 sirob Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 2002, Thijmen Klok (thijmen@id3lib.org)
@@ -465,7 +465,7 @@ bool Mp3Info::Parse(ID3_Reader& reader, size_t mp3size)
   // from http://www.xingtech.com/developer/mp3/
 
   const size_t VBR_HEADER_MIN_SIZE = 8;     // "xing" + flags are fixed
-  const size_t VBR_HEADER_MAX_SIZE = 116;   // frames, bytes, toc and scale are optional
+  const size_t VBR_HEADER_MAX_SIZE = 120;   // frames, bytes, toc and scale are optional
 
   if (mp3size >= vbr_header_offest + VBR_HEADER_MIN_SIZE) 
   {

@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="id3lib"
-	ProjectGUID="{3A326CFF-08E8-40FE-BCB5-F1615E8C1140}"
+	ProjectGUID="{4AACBF8D-B90F-41AD-A5BE-D5E557C668E3}"
 	SccProjectName=""
 	SccLocalPath="Desktop">
 	<Platforms>
@@ -16,13 +16,13 @@
 			OutputDirectory=".\Debug"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="4"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\,..\,..\include,..\include\id3,..\zlib\include"
+				AdditionalIncludeDirectories=".\;..\;..\include;..\include\id3;..\..\zlib"
 				PreprocessorDefinitions="_DEBUG,WIN32,_LIB,_WINDOWS,HAVE_CONFIG_H,ID3LIB_LINKOPTION=1"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -34,7 +34,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="1"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -68,28 +68,18 @@
 			OutputDirectory=".\Release"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="4"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="TRUE"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="FALSE"
-				OptimizeForProcessor="0"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories=".\,..\,..\include,..\include\id3,..\zlib\include"
+				AdditionalIncludeDirectories=".\;..\;..\include;..\include\id3;..\..\zlib"
 				PreprocessorDefinitions="NDEBUG,WIN32,_LIB,_WINDOWS,HAVE_CONFIG_H,ID3LIB_LINKOPTION=1"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\Release/id3lib.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
@@ -101,10 +91,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalOptions="/LTCG"
 				OutputFile=".\id3lib.lib"
-				SuppressStartupBanner="TRUE"
-				IgnoreAllDefaultLibraries="FALSE"/>
+				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

@@ -1,4 +1,4 @@
-// $Id: frame_parse.cpp,v 1.1 2003-10-12 18:54:15 sirob Exp $
+// $Id: frame_parse.cpp,v 1.2 2004-12-29 23:11:19 sirob Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -139,6 +139,11 @@ bool ID3_FrameImpl::Parse(ID3_Reader& reader)
   if (_hdr.GetCompression())
   {
     origSize = io::readBENumber(reader, sizeof(uint32));
+	// allocate 2MB instead 4GB max in the decompressor later on (TODO decompressor should actually do the sanitycheck)
+	if (origSize > 2 * 1024 * 1024){
+		ID3D_WARNING( "ID3_FrameImpl::Parse(): _hdr.GetCompression() exeeds sanity limit" );
+		return false;
+	}
     ID3D_NOTICE( "ID3_FrameImpl::Parse(): frame is compressed, origSize = " << origSize );
   }
 

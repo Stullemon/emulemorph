@@ -1,4 +1,4 @@
-// $Id: tag.cpp,v 1.1 2003-10-12 18:54:15 sirob Exp $
+// $Id: tag.cpp,v 1.2 2004-12-29 23:11:19 sirob Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -271,7 +271,7 @@ using namespace dami;
  ** formatted 'CDM' frames from the unreleased ID3v2 2.01 draft specification.
  **
  ** \author Dirk Mahoney
- ** \version $Id: tag.cpp,v 1.1 2003-10-12 18:54:15 sirob Exp $
+ ** \version $Id: tag.cpp,v 1.2 2004-12-29 23:11:19 sirob Exp $
  ** \sa ID3_Frame
  ** \sa ID3_Field
  ** \sa ID3_Err
