@@ -1484,7 +1484,9 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 				//MORPH START - Added by SiRoB, showSharePermissions
 				UINT uCurPermMenuItem = 0;
-				if (pFile->GetPermissions()==PERM_ALL)
+				if (pFile->GetPermissions()==-1)
+					uCurPermMenuItem = MP_PERMDEFAULT;
+				else if (pFile->GetPermissions()==PERM_ALL)
 					uCurPermMenuItem = MP_PERMALL;
 				else if (pFile->GetPermissions() == PERM_FRIENDS)
 					uCurPermMenuItem = MP_PERMFRIENDS;
@@ -1548,7 +1550,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			//MORPH START - Added by SiRoB, xMule_MOD: showSharePermissions
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-			m_PermMenu.CheckMenuRadioItem(MP_PERMALL, MP_PERMNONE, uPermMenuItem, 0);
+			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMNONE, uPermMenuItem, 0);
 			//MORPH END   - Added by SiRoB, xMule_MOD: showSharePermissions
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
@@ -1954,6 +1956,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					ShowFileDialog(NULL, true);
 					break;
 				// xMule_MOD: showSharePermissions
+				case MP_PERMDEFAULT:
 				case MP_PERMNONE:
 				case MP_PERMFRIENDS:
 				case MP_PERMALL: {
@@ -1961,6 +1964,9 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						CPartFile *file = selectedList.GetHead();
 						switch (wParam)
 						{
+							case MP_PERMDEFAULT:
+								file->SetPermissions(-1);
+								break;
 							case MP_PERMNONE:
 								file->SetPermissions(PERM_NOONE);
 								break;
@@ -2670,9 +2676,17 @@ void CDownloadListCtrl::CreateMenues() {
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_THIS, GetResString(IDS_ALL_A4AF_TO_THIS)); // sivka [Tarod]
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_TO_OTHER, GetResString(IDS_ALL_A4AF_TO_OTHER)); // sivka
 	m_A4AFMenu.AppendMenu(MF_STRING, MP_ALL_A4AF_AUTO, GetResString(IDS_ALL_A4AF_AUTO)); // sivka [Tarod]
-
+	
+	CString buffer;
 	// xMule_MOD: showSharePermissions
 	m_PermMenu.CreateMenu();
+	switch (theApp.glob_prefs->GetPermissions()){
+		case PERM_ALL: buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
+		case PERM_FRIENDS: buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
+		case PERM_NOONE: buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
+		default: buffer = " (?)";
+	}
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT) + buffer);
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));

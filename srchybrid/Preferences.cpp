@@ -1446,6 +1446,9 @@ void CPreferences::SavePreferences(){
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	ini.WriteBool("ShareOnlyTheNeed",prefs->ShareOnlyTheNeed);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, Show Permissions
+	ini.WriteBool("ShowSharePermissions",prefs->permissions);
+	//MORPH END   - Added by SiRoB, Show Permissions
 	ini.WriteBool("Reconnect",prefs->reconnect);
 	ini.WriteBool("Scoresystem",prefs->scorsystem);
 	ini.WriteBool("ICH",prefs->ICH);
@@ -1979,7 +1982,9 @@ void CPreferences::LoadPreferences(){
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	prefs->ShareOnlyTheNeed=ini.GetInt("ShareOnlyTheNeed",0);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
-	
+	//MORPH START - Added by SiRoB, Show Permissions
+	prefs->permissions=ini.GetInt("ShowSharePermissions",0);
+	//MORPH END   - Added by SiRoB, Show Permissions
 	//EastShare - Added by Pretender, TBH-AutoBackup
 	prefs->autobackup = ini.GetBool("AutoBackup",true);
 	prefs->autobackup2 = ini.GetBool("AutoBackup2",true);

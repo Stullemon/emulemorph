@@ -715,8 +715,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// xMule_MOD: showSharePermissions
 							// only show the files that you agree to show (because sometimes people would like to show
 							// most of their files but hesitate to show a few ones (for some reasons :))
-							if ( (cur_file->GetPermissions()==PERM_ALL)
-								|| ((cur_file->GetPermissions()==PERM_FRIENDS) && client->IsFriend()) )
+							uint8 Perm = cur_file->GetPermissions()>=0?cur_file->GetPermissions():theApp.glob_prefs->GetPermissions();
+							if ( (Perm == PERM_ALL)
+								|| ((Perm == PERM_FRIENDS) && client->IsFriend()) )
 								list.AddTail((void*&)cur_file);
 							// xMule_MOD: showSharePermissions
 						}
@@ -826,8 +827,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							theApp.sharedfiles->m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
 							// xMule_MOD: showSharePermissions - don't send dir names that are empty
 							// due to file browse permissions
-							if ( cur_file->GetPermissions() == PERM_NOONE 
-								|| (cur_file->GetPermissions() == PERM_FRIENDS && !client->IsFriend()) )
+							uint8 Perm = cur_file->GetPermissions()>=0?cur_file->GetPermissions():theApp.glob_prefs->GetPermissions();
+							if ( Perm == PERM_NOONE 
+								|| (Perm == PERM_FRIENDS && !client->IsFriend()) )
 								continue;
 							// xMule_MOD: showSharePermissions
 							CString path = cur_file->GetPath();
@@ -894,9 +896,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// xMule_MOD: showSharePermissions
 							// only show the files that you agree to show (because sometimes people would like to show
 							// most of their files but hesitate to show a few ones (for some reasons :))
+							uint8 Perm = cur_file->GetPermissions()>=0?cur_file->GetPermissions():theApp.glob_prefs->GetPermissions();
 							if ( strReqDir.CompareNoCase(strSharedFileDir) == 0 &&
-								( (cur_file->GetPermissions()==PERM_ALL)
-								|| ((cur_file->GetPermissions()==PERM_FRIENDS) && client->IsFriend()) ) )
+								( (Perm==PERM_ALL)
+								|| ((Perm==PERM_FRIENDS) && client->IsFriend()) ) )
                                 list.AddTail(cur_file);
 							// xMule_MOD: showSharePermissions
                         }

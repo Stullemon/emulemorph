@@ -23,6 +23,12 @@
 #define MP_POWERSHARE_ON        10162
 #define MP_POWERSHARE_AUTO      10163
 //MORPH END   - Added by SiRoB, ZZ Upload System
+//MORPH START - Added by SiRoB, Keep Permission flag
+#define MP_PERMDEFAULT			10165
+#define MP_PERMALL				10166
+#define MP_PERMFRIENDS			10167
+#define MP_PERMNONE				10168
+//MORPH END   - Added by SiRoB, Keep Permission flag
 //MORPH START - Added by SiRoB, HIDEOS
 #define MP_HIDEOS               10170
 #define MP_HIDEOS_0             10171
@@ -103,9 +109,6 @@
 #define MP_GETHTMLED2KLINK		10306
 #define	MP_GETSOURCEED2KLINK	10299
 #define MP_METINFO				10307
-#define MP_PERMALL				10308
-#define MP_PERMFRIENDS			10309
-#define MP_PERMNONE				10310
 #define MP_CONNECTTO			10311
 #define MP_REMOVE				10312
 #define MP_REMOVEALL			10313

@@ -192,10 +192,7 @@ public:
 	void	AddQueuedCount()			{m_iQueuedCount++; UpdateAutoUpPriority();}
 	void	SubQueuedCount()			{if( m_iQueuedCount != 0 ) m_iQueuedCount--; UpdateAutoUpPriority();}
 	uint32	GetQueuedCount()			{return m_iQueuedCount; /*call func after 'return'!? what's the ident here?*/ /*UpdateAutoUpPriority();*/}
-	// shared file view permissions (all, only friends, no one)
-	uint8	GetPermissions(void) const	{ return m_iPermissions; };
-	void	SetPermissions(uint8 iNewPermissions);
-
+	
 	bool	LoadHashsetFromFile(CFile* file, bool checkhash);
 
 	bool	HideOvershares(CFile* file, CUpDownClient* client);	// SLUGFILLER: hideOS
@@ -266,7 +263,11 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
+	//MORPH START - Added by SiRoB, Show Permissions
+	// shared file view permissions (all, only friends, no one)
+	int		GetPermissions(void) const	{ return m_iPermissions; };
+	void	SetPermissions(int iNewPermissions);
+	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 	void    SetPowerShared(int newValue) {m_powershared = newValue;};
 	bool    GetPowerShared() const {return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized;}
@@ -311,7 +312,6 @@ private:
 	uint16  m_iED2KPartCount;
 	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	uint8	m_iUpPriority;
-	uint8	m_iPermissions; //MORPH - Added by SiRoB, Keep permission flag
 	bool	m_bAutoUpPriority;
 	bool	m_bCommentLoaded;
 	bool	m_PublishedED2K;
@@ -330,6 +330,10 @@ private:
 	bool	lastonlygreyrect;
 	bool	lastbFlat;
 	//MORPH END - Added by SiRoB,  SharedStatusBar CPU Optimisation
+	
+	//MORPH START - Added by SiRoB, Show Permission
+	int		m_iPermissions;
+	//MORPH END   - Added by SiRoB, Show Permission
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	int		m_iHideOS;

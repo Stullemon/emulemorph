@@ -959,7 +959,7 @@ bool CPartFile::SavePartFile(){
 		for (int x = 0; x != parts; x++)
 			file.Write(hashlist[x],16);
 		//tags
-		uint32 tagcount = 9/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +1/*showSharePermissions*/+(gaplist.GetCount()*2);
+		uint32 tagcount = 9/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +(gaplist.GetCount()*2);
 		// Float meta tags are currently not written. All older eMule versions < 0.28b have 
 		// a bug in the meta tag reading+writing code. To achive maximum backward 
 		// compatibility for met files with older eMule versions we just don't write float 
@@ -973,12 +973,16 @@ bool CPartFile::SavePartFile(){
 			if (taglist[j]->tag.type == 2 || taglist[j]->tag.type == 3)
 				tagcount++;
 		}
+		
+		//MORPH START - Added by SiRoB, Show Permissions
+		if (GetPermissions()>=0) tagcount ++;
+		//MORPH END   - Added by SiRoB, Show Permissions
 		//MORPH START - Added by SiRoB, HIDEOS
-		tagcount += GetHideOS()>=0?1:0;
-		tagcount += GetSelectiveChunk()>=0?1:0;
+		if (GetHideOS()>=0) tagcount ++;
+		if (GetSelectiveChunk()>=0) tagcount ++;
 		//MORPH END   - Added by SiRoB, HIDEOS
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-		tagcount += GetShareOnlyTheNeed()>=0?1:0;
+		if (GetShareOnlyTheNeed()>=0) tagcount ++;
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 		file.Write(&tagcount,4);
 
@@ -1011,11 +1015,13 @@ bool CPartFile::SavePartFile(){
 		CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, GetLastPublishTimeKadSrc());
 		kadLastPubSrc.WriteTagToFile(&file);
 
+		//MORPH START - Added by SiRoB, Show Permissions
 		// xMule_MOD: showSharePermissions - save permissions
-		CTag permtag(FT_PERMISSIONS, GetPermissions());
-		permtag.WriteTagToFile(&file);
-		// xMule_MOD: showSharePermissions
-
+		if (GetPermissions()>=0){
+			CTag permtag(FT_PERMISSIONS, GetPermissions());
+			permtag.WriteTagToFile(&file);
+		}
+		//MORPH START - Added by SiRoB, Show Permissions
 		//MORPH START - Added by SiRoB, HIDEOS
 		if (GetHideOS()>=0){
 			CTag hideostag(FT_HIDEOS, GetHideOS());

@@ -44,6 +44,7 @@ protected:
 	int m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	int m_iSelectiveShare;  //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	int m_iPermissions; //MORPH - Added by SiRoB, Show Permissions
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	int m_iShowCatNames;
 	int m_iSelectCat;
@@ -66,6 +67,7 @@ protected:
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiDM;
 	HTREEITEM m_htiUM;
+	HTREEITEM m_htiSFM;
 	HTREEITEM m_htiDYNUP;
 	HTREEITEM m_htiDynUpOFF;
 	HTREEITEM m_htiDynUpSUC;
@@ -94,6 +96,13 @@ protected:
 	HTREEITEM m_htiHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	HTREEITEM m_htiShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, Show Permission
+	HTREEITEM m_htiPermissions;
+	HTREEITEM m_htiPermAll;
+	HTREEITEM m_htiPermFriend;
+	HTREEITEM m_htiPermNone;
+	//MORPH END   - Added by SiRoB, Show Permission
+	
 	HTREEITEM m_htiSCC;
 	HTREEITEM m_htiSAC;
 	HTREEITEM m_htiDisp;

@@ -63,6 +63,12 @@ CPPgMorph::CPPgMorph()
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, Show Permission
+	m_htiPermissions = NULL;
+	m_htiPermAll = NULL;
+	m_htiPermFriend = NULL;
+	m_htiPermNone = NULL;
+	//MORPH END   - Added by SiRoB, Show Permission
 	m_htiSCC = NULL;
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	m_htiShowCatNames = NULL;
@@ -104,6 +110,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		int iImgSUC = 8; // default icon
 		int iImgUSS = 8;
 		int iImgDM = 8;
+		int iImgSFM = 8;
+		int iImgPerm = 8;
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		int iImgSCC = 8;
 		int iImgSAC = 8;
@@ -117,10 +125,14 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			iImgUM = piml->Add(CTempIconLoader("UPLOAD"));
 			iImgDYNUP = piml->Add(CTempIconLoader("SUC"));
 			iImgDM = piml->Add(CTempIconLoader("SEARCHDIRECTDOWNLOAD"));
+			iImgSFM = piml->Add(CTempIconLoader("SHAREDFILES"));
 			//MORPH START - Added by SiRoB, khaos::categorymod+
 			iImgSCC = piml->Add(CTempIconLoader("PREF_FOLDERS"));
 			iImgSAC = piml->Add(CTempIconLoader("ClientCompatible"));
 			iImgA4AF = piml->Add(CTempIconLoader("SERVERLIST"));
+			//MORPH START - Added by SiRoB, Show Permissions
+			iImgPerm = piml->Add(CTempIconLoader("ClientCompatible"));
+			//MORPH END   - Added by SiRoB, Show Permissions
 			// khaos::accuratetimerem+
 			iImgTimeRem = piml->Add(CTempIconLoader("PREF_SCHEDULER"));
 			// khaos::accuratetimerem-
@@ -233,17 +245,24 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiHideOS, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiSelectiveShare = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SELECTIVESHARE), m_htiHideOS, m_iSelectiveShare);
 		//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+		m_htiSFM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SFM), iImgSFM, TVI_ROOT);
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-		m_htiShareOnlyTheNeed = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SHAREONLYTHENEEDDEFAULT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
+		m_htiShareOnlyTheNeed = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SHAREONLYTHENEEDDEFAULT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSFM);
 		m_ctrlTreeOptions.AddEditBox(m_htiShareOnlyTheNeed, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
-
+		//MORPH START - Added by SiRoB, Show Permission
+		m_htiPermissions = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PERMISSION), iImgPerm, m_htiSFM);
+		m_htiPermAll = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_PUBLIC), m_htiPermissions, m_iPermissions == 0);
+		m_htiPermFriend = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_FRIENDSONLY), m_htiPermissions, m_iPermissions == 1);
+		m_htiPermNone = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_HIDDEN), m_htiPermissions, m_iPermissions == 2);
+		//MORPH END   - Added by SiRoB, Show Permission
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
 
 		m_ctrlTreeOptions.Expand(m_htiDM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUM, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiHideOS, TVE_EXPAND);
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
 		m_bInitializedTreeOpts = true;
@@ -288,7 +307,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiShareOnlyTheNeed, m_iShareOnlyTheNeed);
 	DDV_MinMaxInt(pDX, m_iShareOnlyTheNeed, 0, INT_MAX);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
-
+	//MORPH START - Added by SiRoB, Show Permission
+	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
+	//MORPH END   - Added by SiRoB, Show Permission
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiResumeFileInNewCat, m_iResumeFileInNewCat);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowCatNames, m_iShowCatNames);
@@ -342,6 +363,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iHideOS = app_prefs->prefs->hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iSelectiveShare = app_prefs->prefs->selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = app_prefs->prefs->ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	m_iPermissions = app_prefs->prefs->permissions; //MORPH - Added by SiRoB, Show Permission
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	m_iShowCatNames = app_prefs->ShowCatNameInDownList();
 	m_iSelectCat = app_prefs->SelectCatForNewDL();
@@ -415,6 +437,7 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->prefs->hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	app_prefs->prefs->selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	app_prefs->prefs->ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	app_prefs->prefs->permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 
@@ -511,6 +534,12 @@ void CPPgMorph::Localize(void)
 		if (m_htiHideOS) m_ctrlTreeOptions.SetEditLabel(m_htiHideOS, GetResString(IDS_HIDEOVERSHARES));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiSelectiveShare) m_ctrlTreeOptions.SetItemText(m_htiSelectiveShare, GetResString(IDS_SELECTIVESHARE));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiShareOnlyTheNeed) m_ctrlTreeOptions.SetEditLabel(m_htiShareOnlyTheNeed, GetResString(IDS_SHAREONLYTHENEEDDEFAULT));//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+		//MORPH START - Added by SiRoB, Show Permission
+		if (m_htiPermissions) m_ctrlTreeOptions.SetItemText(m_htiPermissions, GetResString(IDS_PERMISSION));
+		if (m_htiPermAll) m_ctrlTreeOptions.SetItemText(m_htiPermAll, GetResString(IDS_FSTATUS_PUBLIC));
+		if (m_htiPermFriend) m_ctrlTreeOptions.SetItemText(m_htiPermFriend, GetResString(IDS_FSTATUS_FRIENDSONLY));
+		if (m_htiPermNone) m_ctrlTreeOptions.SetItemText(m_htiPermNone, GetResString(IDS_HIDDEN));
+		//MORPH END   - Added by SiRoB, Show Permission
 		//MORPH START - Added by SiRoB, khaos::categorymod+
 		if (m_htiShowCatNames) m_ctrlTreeOptions.SetItemText(m_htiShowCatNames, GetResString(IDS_CAT_SHOWCATNAME));
 		if (m_htiSelectCat) m_ctrlTreeOptions.SetItemText(m_htiSelectCat, GetResString(IDS_CAT_SHOWSELCATDLG));
@@ -602,6 +631,12 @@ void CPPgMorph::OnDestroy()
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, Show Permission
+	m_htiPermissions = NULL;
+	m_htiPermAll = NULL;
+	m_htiPermFriend = NULL;
+	m_htiPermNone = NULL;
+	//MORPH END   - Added by SiRoB, Show Permission
 	CPropertyPage::OnDestroy();
 }
 LRESULT CPPgMorph::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)

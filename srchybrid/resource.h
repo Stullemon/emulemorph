@@ -1846,6 +1846,7 @@
 #define IDS_SWITCHDYNUP                 3469
 #define IDS_AUTODYNUPSWITCHING          3470
 #define IDS_MAXCONNECTIONSSWITCHBORDER  3471
+#define IDS_AUTO_CLEAR_COMPLETE         3525
 #define IDS_ONLY_DOWNLOAD_COMPLETE_FILES 3526
 #define IDS_DL_FORCE                    3527
 #define IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 3528
@@ -2224,6 +2225,7 @@
 #define IDC_UPDATE_URL_IPFILTER         4866
 #define IDS_SHAREONLYTHENEEDDEFAULT     4866
 #define IDC_UPDATEFAKES                 4867
+#define IDS_SFM                         4867
 #define IDC_UPDATEIPFURL                4868
 #define IDC_CHECK_FS                    4869
 #define IDC_CHECK_MASK                  4870

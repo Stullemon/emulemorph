@@ -4222,6 +4222,7 @@ BEGIN
     IDS_HIDEOS              "Hide Over Share"
     IDS_SHAREONLYTHENEED    "Share Only The Need"
     IDS_SHAREONLYTHENEEDDEFAULT "Share Only The Need (0 = Disabled)"
+    IDS_SFM                 "Shared File Management"
 END
 
 #endif    // 英文 (美國) resources

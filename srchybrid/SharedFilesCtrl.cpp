@@ -379,9 +379,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				//MORPH - Moved by SiRoB, due to the draw system change on hidden rect
 				// xMule_MOD: showSharePermissions, modified by itsonlyme
 				// display not finished files in navy, blocked files in red and friend-only files in orange
-				if (file->GetPermissions() == PERM_NOONE)
+				uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():theApp.glob_prefs->GetPermissions();
+				if (Perm == PERM_NOONE)
 					dc->SetTextColor((COLORREF)RGB(240,0,0));
-				else if (file->GetPermissions() == PERM_FRIENDS)
+				else if (Perm == PERM_FRIENDS)
 					dc->SetTextColor((COLORREF)RGB(208,128,0));
 				else if (file->IsPartFile())
 					dc->SetTextColor((COLORREF)RGB(0,0,192));
@@ -407,6 +408,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						}
 						cur_rec.left+=9; //Modified by IceCream, eMule plus rating icon
 						//MORPH END   - Added by IceCream, SLUGFILLER: showComments
+						//MORPH START - Added by SiRoB, Show Permission
+						if (file->IsPartFile())
+							dc->SetTextColor((COLORREF)RGB(0,0,192));
+						//MORPH END   - Added by SiRoB, Show Permission
 						break;
 					}
 					case 1:
@@ -517,10 +522,14 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					}
 					//MORPH START - Added by SiRoB, Keep Permission flag
-					case 12:
+					case 12:{
 						// xMule_MOD: showSharePermissions
-						switch (file->GetPermissions())
+						uint8 Perm = file->GetPermissions()>=0?file->GetPermissions():theApp.glob_prefs->GetPermissions();
+						switch (Perm)
 						{
+							case PERM_ALL:
+								buffer = GetResString(IDS_FSTATUS_PUBLIC);
+								break;
 							case PERM_NOONE: 
 								buffer = GetResString(IDS_HIDDEN); 
 								break;
@@ -528,11 +537,12 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								buffer = GetResString(IDS_FSTATUS_FRIENDSONLY); 
 								break;
 							default: 
-								buffer = GetResString(IDS_FSTATUS_PUBLIC);
+								buffer = "?";
 								break;
 						}
 						// xMule_MOD: showSharePermissions
 						break;
+					}
 					//MORPH END   - Added by SiRoB, Keep Permission flag
 					//MORPH START - Added by SiRoB, ZZ Upload System
 					case 13:{
@@ -724,7 +734,9 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 		//MORPH START - Added by SiRoB, showSharePermissions
 		UINT uCurPermMenuItem = 0;
-		if (pFile->GetPermissions()==PERM_ALL)
+		if (pFile->GetPermissions()==-1)
+			uCurPermMenuItem = MP_PERMDEFAULT;
+		else if (pFile->GetPermissions()==PERM_ALL)
 			uCurPermMenuItem = MP_PERMALL;
 		else if (pFile->GetPermissions() == PERM_FRIENDS)
 			uCurPermMenuItem = MP_PERMFRIENDS;
@@ -820,7 +832,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	//MORPH START - Added by SiRoB, Keep Permission flag
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_PermMenu.CheckMenuRadioItem(MP_PERMALL,MP_PERMNONE, uPermMenuItem, 0);
+	m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMNONE, uPermMenuItem, 0);
 	//MORPH END   - Added by SiRoB, Keep Permission flag
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
@@ -1126,6 +1138,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			//MORPH END   - Added by SiRoB, ZZ Upload System
 			// xMule_MOD: showSharePermissions
 			// with itsonlyme's sorting fix
+			case MP_PERMDEFAULT:
 			case MP_PERMNONE:
 			case MP_PERMFRIENDS:
 			case MP_PERMALL: {
@@ -1135,6 +1148,10 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					file = selectedList.GetNext(pos);
 					switch (wParam)
 					{
+						case MP_PERMDEFAULT:
+							file->SetPermissions(-1);
+							UpdateFile(file);
+							break;
 						case MP_PERMNONE:
 							file->SetPermissions(PERM_NOONE);
 							UpdateFile(file);
@@ -1524,13 +1541,29 @@ void CSharedFilesCtrl::CreateMenues()
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOVERYHIGH, GetResString(IDS_PRIORELEASE));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOAUTO, GetResString(IDS_PRIOAUTO));//UAP
 
-	//MOPRH START - Added by SiRoB, Keep permission flag
+	CString buffer;
+	//MORPH START - Added by SiRoB, Show Permissions
 	// add permission switcher
 	m_PermMenu.CreateMenu();
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));	// xMule_MOD: showSharePermissions
+	switch (theApp.glob_prefs->GetPermissions()){
+		case PERM_ALL:
+			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_PUBLIC));
+			break;
+		case PERM_FRIENDS:
+			buffer.Format(" (%s)",GetResString(IDS_FSTATUS_FRIENDSONLY));
+			break;
+		case PERM_NOONE:
+			buffer.Format(" (%s)",GetResString(IDS_HIDDEN));
+			break;
+		default:
+			buffer = " (?)";
+			break;
+	}
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT) + buffer);
+	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_FSTATUS_PUBLIC));
-	//MOPRH END   - Added by SiRoB, Keep permission flag
+	//MORPH END   - Added by SiRoB, Show Permissions
 
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	// add powershare switcher
@@ -1544,7 +1577,11 @@ void CSharedFilesCtrl::CreateMenues()
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_HideOSMenu.CreateMenu();
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS, GetResString(IDS_DEFAULT));
+	if (theApp.glob_prefs->GetHideOvershares()==0)
+		buffer.Format(" (%s)",GetResString(IDS_DISABLED));
+	else
+		buffer.Format(" (%u)",theApp.glob_prefs->GetHideOvershares());
+	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS, GetResString(IDS_DEFAULT) + buffer);
 	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_0, GetResString(IDS_DISABLED));
 	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_1, "1");
 	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_2, "2");
@@ -1552,13 +1589,15 @@ void CSharedFilesCtrl::CreateMenues()
 	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_4, "4");
 	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_5, "5");
 	m_SelectiveChunkMenu.CreateMenu();
-	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK,	GetResString(IDS_DEFAULT));
+	buffer.Format(" (%s)",theApp.glob_prefs->IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK,	GetResString(IDS_DEFAULT) + buffer);
 	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_0,	GetResString(IDS_DISABLED));
 	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_1,	GetResString(IDS_ENABLED));
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	m_ShareOnlyTheNeedMenu.CreateMenu();
-	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED,	GetResString(IDS_DEFAULT));
+	buffer.Format(" (%s)",theApp.glob_prefs->GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED,	GetResString(IDS_DEFAULT) + buffer);
 	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_0,	GetResString(IDS_DISABLED));
 	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_1,	GetResString(IDS_ENABLED));
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED

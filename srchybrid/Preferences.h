@@ -443,10 +443,15 @@ struct Preferences_Struct{
 	uint8	hideOS;
 	uint8	selectiveShare;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	uint8	ShareOnlyTheNeed;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-
+	
+	//MORPH START - Added by SiRoB, Show Permissions
+	uint8	permissions;
+	//MORPH END   - Added by SiRoB, Show Permissions
+	
 	//EastShare Start - PreferShareAll by AndCycle
 	bool	shareall;	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
@@ -1274,7 +1279,9 @@ public:
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	uint8	GetShareOnlyTheNeed()	{return prefs->ShareOnlyTheNeed;}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-
+	//MORPH START - Added by SiRoB, Show Permissions
+	uint8	GetPermissions()	{return prefs->permissions;}
+	//MORPH END   - Added by SiRoB, Show Permissions
 	//EastShare Start - PreferShareAll by AndCycle
 	bool	ShareAll()			{return prefs->shareall;}	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle

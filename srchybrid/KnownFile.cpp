@@ -366,7 +366,6 @@ CKnownFile::CKnownFile()
 		m_bAutoUpPriority = false;
 	}
 	m_iQueuedCount = 0;
-	m_iPermissions = PERM_ALL; //MORPH - Added by SiRoB, Keep permission flag
 	statistic.fileParent = this;
 	m_bCommentLoaded = false;
 	(void)m_strComment;
@@ -379,6 +378,9 @@ CKnownFile::CKnownFile()
 	m_nCompleteSourcesCountLo = 1;
 	m_nCompleteSourcesCountHi = 1;
 	m_uMetaDataVer = 0;
+	//MORPH START - Added by SiRoB, Show Permission
+	m_iPermissions = -1;
+	//MORPH END   - Added by SiRoB, Show Permission
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_iHideOS = -1;
 	m_iSelectiveChunk = -1;
@@ -983,14 +985,15 @@ bool CKnownFile::LoadTagsFromFile(CFile* file)
 				break;
 			}
 			// EastShare END - Added by TAHO, .met file control
-			//MORPH - Added by SiRoB, Keep permission flag
+			//MORPH START - Added by SiRoB, Show Permission
 			case FT_PERMISSIONS:{
 				m_iPermissions = newtag->tag.intvalue;
 				if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE)
-					m_iPermissions = PERM_ALL;
+					m_iPermissions = -1;
 				delete newtag;
 				break;
 			}
+			//MORPH END  - Added by SiRoB, Show Permission
 			case FT_KADLASTPUBLISHKEY:
 				delete newtag;
 				break;
@@ -1112,7 +1115,7 @@ bool CKnownFile::WriteToFile(CFile* file){
 	for (int i = 0; i < parts; i++)
 		file->Write(hashlist[i],16);
 	//tags
-	const int iFixedTags = 11 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 PERMISSION+1 ZZ +1 EastShare - met control, known files expire tag[TAHO]
+	const int iFixedTags = 10 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO]
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
 	// a bug in the meta tag reading+writing code. To achive maximum backward 
@@ -1132,12 +1135,15 @@ bool CKnownFile::WriteToFile(CFile* file){
 		if (statistic.spreadlist.GetValueAt(pos))
 			tagcount += 3;
 	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
+	//MORPH START - Added by SiRoB, Show Permissions
+	if (GetPermissions()>=0) tagcount++;
+	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Added by SiRoB, HIDEOS
-	tagcount += GetHideOS()>=0?1:0;
-	tagcount += GetSelectiveChunk()>=0?1:0;
+	if (GetHideOS()>=0) tagcount++;
+	if (GetSelectiveChunk()>=0) tagcount++;
 	//MORPH END   - Added by SiRoB, HIDEOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	tagcount += GetShareOnlyTheNeed()>=0?1:0;
+	if (GetShareOnlyTheNeed()>=0) tagcount++;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	
 	// standard tags
@@ -1181,10 +1187,12 @@ bool CKnownFile::WriteToFile(CFile* file){
 		CTag tagFlags(FT_FLAGS, uFlags);
 		tagFlags.WriteTagToFile(file);
 	}
-	//MOPRH START - Added by SiRoB, Keep permission flag
-	CTag permtag(FT_PERMISSIONS, m_iPermissions);
-	permtag.WriteTagToFile(file);
-	//MOPRH END   - Added by SiRoB, Keep permission flag
+	//MOPRH START - Added by SiRoB, Show Permissions
+	if (GetPermissions()>=0){
+		CTag permtag(FT_PERMISSIONS, GetPermissions());
+		permtag.WriteTagToFile(file);
+	}
+	//MOPRH END   - Added by SiRoB, Show Permissions
 
 	//EastShare START - Added by TAHO, .met file control
 	uint32 value;
@@ -1686,7 +1694,7 @@ void CKnownFile::SetUpPriority(uint8 iNewUpPriority, bool bSave)
 }
 
 //MOPRH - Added by SiRoB, Keep Permission flag
-void CKnownFile::SetPermissions(uint8 iNewPermissions)
+void CKnownFile::SetPermissions(int iNewPermissions)
 {
 	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
 	m_iPermissions = iNewPermissions;
