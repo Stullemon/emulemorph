@@ -951,10 +951,12 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			theApp.downloadqueue->SetCatStatus(rightclickindex,MP_RESUME);
 			break;
 		}
-		case MP_RESUMENEXT: {
+		//Commander - Fixed: Resume Next File - Start
+		case MP_CAT_RESUMENEXT: {
 			theApp.downloadqueue->StartNextFile(rightclickindex,true);
 			break;
 		}
+		//Commander - Fixed: Resume Next File - End
 
 // ZZ:DownloadManager -->
 		case MP_DOWNLOAD_ALPHABETICAL: {
