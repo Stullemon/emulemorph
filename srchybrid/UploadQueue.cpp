@@ -1005,7 +1005,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			if (updatewindow)
 				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
 	        
-			if(reason)
+			if(!reason.IsEmpty())
 				AddDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
 			uploadinglist.RemoveAt(pos);
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
