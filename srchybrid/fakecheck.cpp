@@ -95,7 +95,7 @@ void CFakecheck::RemoveAllFakes(){
 }
 
 CString CFakecheck::IsFake(CString Hash2test, uint32 lenght){
-	if (Fakelist.size()==0) return ""; //MORPH - Modified by IceCream, return a CString
+	if (Fakelist.size()==0) return "Fakelist.size()==0"; //MORPH - Modified by IceCream, return a CString
 	Fakes_Struct* search;
 	
 	map<CString, Fakes_Struct*>::const_iterator it=Fakelist.upper_bound(Hash2test);
@@ -104,12 +104,12 @@ CString CFakecheck::IsFake(CString Hash2test, uint32 lenght){
 		search=(*it).second;
 		if (search->Hash == Hash2test && search->Lenght == lenght) {
 			lasthit=search->RealTitle;
-			return lasthit;
+			return lasthit + "lasthit";
 		} else
 			return "OK";
 		it--;
 	} while (it!=Fakelist.begin());
-	return ""; //MORPH - Modified by IceCream, return a CString
+	return "Error"; //MORPH - Modified by IceCream, return a CString
 }
 bool CFakecheck::DownloadFakeList(){
 	char buffer[5];

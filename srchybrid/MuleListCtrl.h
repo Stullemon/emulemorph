@@ -131,7 +131,7 @@ protected:
 
 	CString          m_Name;
 	PFNLVCOMPARE     m_SortProc;
-	DWORD            m_dwParamSort;
+	CList<DWORD>     m_dwParamSort;	// SLUGFILLER: multiSort
 	COLORREF         m_crWindow;
 	COLORREF         m_crWindowText;
 	COLORREF         m_crHighlight;
@@ -184,4 +184,23 @@ private:
 			m_Params.SetAt(pos, lParam = CListCtrl::GetItemData(iPos));
 		return lParam;
 	}
+	// SLUGFILLER: multiSort
+	int MultiSortProc(LPARAM lParam1, LPARAM lParam2) {
+		int ret;
+		int dwParamSort;
+
+		POSITION pos = m_dwParamSort.GetHeadPosition();
+		while (pos != NULL)
+		{
+			// get layout info
+			dwParamSort = m_dwParamSort.GetNext(pos);
+
+			ret = m_SortProc(lParam1, lParam2, dwParamSort);
+			if (ret)
+				return ret;
+		}
+
+		return 0;
+	}
+	// SLUGFILLER: multiSort
 };

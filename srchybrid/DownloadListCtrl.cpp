@@ -143,14 +143,16 @@ void CDownloadListCtrl::Init(){
 	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableDownload);
 	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableDownload);
 	SetSortArrow(sortItem, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	SortItems(SortProc, theApp.glob_prefs->GetColumnMultiSortItem(CPreferences::tableDownload));
-	// SLUGFILLER: DLsortFix - uses multi-sort for fall-back // Athlazan
-	// Gnaddelwarz: 0xFFFF => saved from preferences //Athlazan <<<
-	SortItems(SortProc, sortItem + (sortAscending ? 0:100)); // fixed by sivka 10->100
+	SortItems(SortProc, 0xFFFF);	// SLUGFILLER: DLsortFix - uses multi-sort for fall-back
+	// SLUGFILLER: multiSort - load multiple params
+	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableDownload); i > 0; ) {
+		i--;
+		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableDownload, i);
+		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableDownload, i);
+		SortItems(SortProc, sortItem + (sortAscending ? 0:100));	// SLUGFILLER: DLsortFix
+	}
+	// SLUGFILLER: multiSort
 }
-	//MORPH END - Added by Yun.SF3, Multisorting
 
 void CDownloadListCtrl::Localize() {
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
@@ -2108,25 +2110,17 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int oldSortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableDownload); //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableDownload);
+	int userSort = (GetAsyncKeyState(VK_CONTROL) < 0) ? 0x8000:0;	// SLUGFILLER: DLsortFix - Ctrl sorts sources only
 	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableDownload);
-	bool sortAscending = (oldSortItem != pNMListView->iSubItem) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename [Philek] // Athlazan //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	bool sortAscending = (sortItem != pNMListView->iSubItem + userSort) ? (pNMListView->iSubItem == 0) : !m_oldSortAscending;	// SLUGFILLER: DLsortFix - descending by default for all but filename/username
 	// Item is column clicked
-	int sortItem = pNMListView->iSubItem; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix
 	// Save new preferences
 	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableDownload, sortItem);
 	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableDownload, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	if(oldSortItem != sortItem) {
-		theApp.glob_prefs->SetColumnMultiSortItem(CPreferences::tableDownload,
-			oldSortItem + (m_oldSortAscending ? 0 : 100));
-	} //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
 	// Sort table
+	if (sortItem < 0x8000)	// SLUGFILLER: DLsortFix - Don't set arrow for source-only sorting(TODO: Seperate arrow?)
 	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 
@@ -2138,7 +2132,7 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 	CtrlItem_Struct* item2 = (CtrlItem_Struct*)lParam2;
 
 	int sortMod = 1;
-	if(lParamSort >= 100) {
+	if((lParamSort != 0xFFFF) && (lParamSort & 0x7FFF) >= 100) {	// SLUGFILLER: DLsortFix
 		sortMod = -1;
 		lParamSort -= 100;
 	}
@@ -2212,9 +2206,13 @@ void CDownloadListCtrl::OnListModified(NMHDR *pNMHDR, LRESULT *pResult) {
 }
 
 int CDownloadListCtrl::Compare(CPartFile* file1, CPartFile* file2, LPARAM lParamSort) {
+	// SLUGFILLER: DLsortFix
+	if ((lParamSort & 0x8000) && (lParamSort != 0xFFFF))
+		return 0;
+	// SLUGFILLER: DLsortFix
 	switch(lParamSort){
 	case 0: //filename asc
-		return _tcsicmp(file1->GetFileName(),file2->GetFileName());
+		return file1->GetFileName().CompareNoCase(file2->GetFileName());	// SLUGFILLER: DLsortFix - Using CStrings
 	case 1: //size asc
 		return CompareUnsigned(file1->GetFileSize(), file2->GetFileSize());
 	case 2: //transfered asc
@@ -2309,14 +2307,18 @@ int CDownloadListCtrl::Compare(CPartFile* file1, CPartFile* file2, LPARAM lParam
 	// khaos::categorymod-
 	//MORPH START - Added by IceCream, SLUGFILLER: DLsortFix
 	case 0xFFFF:
-		return _tcsicmp(file1->GetPartMetFileName(), file2->GetPartMetFileName());
-	//MORPH END   - Added by IceCream, SLUGFILLER: DLsortFix
+		return file1->GetPartMetFileName().CompareNoCase(file2->GetPartMetFileName());
+	// SLUGFILLER: DLsortFix
 	default:
 		return 0;
 	}
 }
 
 int CDownloadListCtrl::Compare(CUpDownClient *client1, CUpDownClient *client2, LPARAM lParamSort, int sortMod) {
+	// SLUGFILLER: DLsortFix
+	if (lParamSort != 0xFFFF)
+		lParamSort &= 0x7FFF;
+	// SLUGFILLER: DLsortFix
 	switch(lParamSort){
 	case 0: //name asc
 		if(client1->GetUserName() == client2->GetUserName())
@@ -2327,7 +2329,7 @@ int CDownloadListCtrl::Compare(CUpDownClient *client1, CUpDownClient *client2, L
 			return -1;
 		return _tcsicmp(client1->GetUserName(),client2->GetUserName());
 	case 1: //size but we use status asc
-		return client2->GetDownloadState() - client1->GetDownloadState();	//MORPH - Added by IceCream, SLUGFILLER: DLsortFix - better status(downloading, on queue)<->bigger file
+		return CompareUnsigned(client2->GetDownloadState(), client1->GetDownloadState());	// SLUGFILLER: DLsortFix - better status(downloading, on queue)<->bigger file
 	case 2://transfered asc
 	case 3://completed asc
 		return CompareUnsigned(client1->GetTransferedDown(), client2->GetTransferedDown());
@@ -2354,7 +2356,7 @@ int CDownloadListCtrl::Compare(CUpDownClient *client1, CUpDownClient *client2, L
 		if ( client1->GetDownloadState() == DS_DOWNLOADING ){
 			if ( client2->GetDownloadState() != DS_DOWNLOADING )
 				return 1;
-				return CompareUnsigned(client2->GetDownloadDatarate(), client1->GetDownloadDatarate());
+			return CompareUnsigned(client1->GetDownloadDatarate(), client2->GetDownloadDatarate());
 		}
 		else if (client2->GetDownloadState() == DS_DOWNLOADING)
 			return -1;

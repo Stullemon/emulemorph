@@ -47,7 +47,7 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNAMIC(CMuleListCtrl, CListCtrl)
 CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
 	m_SortProc = pfnCompare;
-	m_dwParamSort = dwParamSort;
+	m_dwParamSort.AddHead(dwParamSort);	// SLUGFILLER: multiSort
 
 	m_bCustomDraw = false;
 	m_iCurrentSortItem = -1;
@@ -447,7 +447,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 	if(notFirst) {
 		int iNewIndex = iItem - 1;
 		POSITION pos = m_Params.FindIndex(iNewIndex);
-		int iResult = m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort);
+		int iResult = MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 		if(iResult < 0) {
 			POSITION posPrev = pos;
 			int iDist = iNewIndex / 2;
@@ -455,7 +455,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 				for(int i = 0; i < iDist; i++)
 					m_Params.GetPrev(posPrev);
 
-				if(m_SortProc(dwpItemData, GetParamAt(posPrev, iNewIndex - iDist), m_dwParamSort) < 0) {
+				if(MultiSortProc(dwpItemData, GetParamAt(posPrev, iNewIndex - iDist)) < 0) {	// SLUGFILLER: multiSort
 					iNewIndex = iNewIndex - iDist;
 					pos = posPrev;
 				} else {
@@ -465,7 +465,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 			}
 			while(--iNewIndex >= 0) {
 				m_Params.GetPrev(pos);
-				if(m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort) >= 0)
+				if(MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex)) >= 0)	// SLUGFILLER: multiSort
 					break;
 			}
 			MoveItem(iItem, iNewIndex + 1);
@@ -476,7 +476,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 	if(notLast) {
 		int iNewIndex = iItem + 1;
 		POSITION pos = m_Params.FindIndex(iNewIndex);
-		int iResult = m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort);
+		int iResult = MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 		if(iResult > 0) {
 			POSITION posNext = pos;
 			int iDist = (GetItemCount() - iNewIndex) / 2;
@@ -484,7 +484,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 				for(int i = 0; i < iDist; i++)
 					m_Params.GetNext(posNext);
 
-				if(m_SortProc(dwpItemData, GetParamAt(posNext, iNewIndex + iDist), m_dwParamSort) > 0) {
+				if(MultiSortProc(dwpItemData, GetParamAt(posNext, iNewIndex + iDist)) > 0) {	// SLUGFILLER: multiSort
 					iNewIndex = iNewIndex + iDist;
 					pos = posNext;
 				} else {
@@ -494,7 +494,7 @@ int CMuleListCtrl::UpdateLocation(int iItem) {
 			}
 			while(++iNewIndex < iItemCount) {
 				m_Params.GetNext(pos);
-				if(m_SortProc(dwpItemData, GetParamAt(pos, iNewIndex), m_dwParamSort) <= 0)
+				if(MultiSortProc(dwpItemData, GetParamAt(pos, iNewIndex)) <= 0)	// SLUGFILLER: multiSort
 					break;
 			}
 			MoveItem(iItem, iNewIndex);
@@ -692,7 +692,17 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 	case LVM_SORTITEMS:
 		//book keeping...
 
-		m_dwParamSort = (LPARAM)wParam;
+		// SLUGFILLER: multiSort
+		if (m_SortProc == (PFNLVCOMPARE)lParam) {
+			if (m_dwParamSort.Find((LPARAM)wParam) != NULL)
+				m_dwParamSort.RemoveAt(m_dwParamSort.Find((LPARAM)wParam));
+		}
+		else {
+			while (!m_dwParamSort.IsEmpty())
+				m_dwParamSort.RemoveHead();
+		}
+		m_dwParamSort.AddHead((LPARAM)wParam);
+		// SLUGFILLER: multiSort
 		m_SortProc = (PFNLVCOMPARE)lParam;
 		for(POSITION pos = m_Params.GetHeadPosition(); pos != NULL; m_Params.GetNext(pos))
 			m_Params.SetAt(pos, MLC_MAGIC);
@@ -726,7 +736,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 			if(notFirst) {
 				int iNewIndex = iItem - 1;
 				POSITION pos = m_Params.FindIndex(iNewIndex);
-				int iResult = m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort);
+				int iResult = MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 				if(iResult < 0) {
 					POSITION posPrev = pos;
 					int iDist = iNewIndex / 2;
@@ -734,7 +744,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 						for(int i = 0; i < iDist; i++)
 							m_Params.GetPrev(posPrev);
 
-						if(m_SortProc(pItem->lParam, GetParamAt(posPrev, iNewIndex - iDist), m_dwParamSort) < 0) {
+						if(MultiSortProc(pItem->lParam, GetParamAt(posPrev, iNewIndex - iDist)) < 0) {	// SLUGFILLER: multiSort
 							iNewIndex = iNewIndex - iDist;
 							pos = posPrev;
 						} else {
@@ -744,7 +754,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 					}
 					while(--iNewIndex >= 0) {
 						m_Params.GetPrev(pos);
-						if(m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort) >= 0)
+						if(MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex)) >= 0)	// SLUGFILLER: multiSort
 							break;
 					}
 					pItem->iItem = iNewIndex + 1;
@@ -755,7 +765,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 			if(notLast) {
 				int iNewIndex = iItem;
 				POSITION pos = m_Params.FindIndex(iNewIndex);
-				int iResult = m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort);
+				int iResult = MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex));	// SLUGFILLER: multiSort
 				if(iResult > 0) {
 					POSITION posNext = pos;
 					int iDist = (GetItemCount() - iNewIndex) / 2;
@@ -763,7 +773,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 						for(int i = 0; i < iDist; i++)
 							m_Params.GetNext(posNext);
 
-						if(m_SortProc(pItem->lParam, GetParamAt(posNext, iNewIndex + iDist), m_dwParamSort) > 0) {
+						if(MultiSortProc(pItem->lParam, GetParamAt(posNext, iNewIndex + iDist)) > 0) {	// SLUGFILLER: multiSort
 							iNewIndex = iNewIndex + iDist;
 							pos = posNext;
 						} else {
@@ -773,7 +783,7 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 					}
 					while(++iNewIndex < iItemCount) {
 						m_Params.GetNext(pos);
-						if(m_SortProc(pItem->lParam, GetParamAt(pos, iNewIndex), m_dwParamSort) <= 0)
+						if(MultiSortProc(pItem->lParam, GetParamAt(pos, iNewIndex)) <= 0)	// SLUGFILLER: multiSort
 							break;
 					}
 					pItem->iItem = iNewIndex;

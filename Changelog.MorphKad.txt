@@ -2,6 +2,7 @@
 Changelog for eMule 0.40e21 MorphKad 0.5
 ----------------------------------------
 FIXED: Added initialisation of clientmodstring to avoid some strange client software version [SiRoB]
+UPDATED: MultiSorting from SlugFiller [Yun.SF3]
 
 ----------------------------------------
 Changelog for eMule 0.40e21 MorphKad 0.4

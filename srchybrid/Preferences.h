@@ -416,31 +416,32 @@ struct Preferences_Struct{
 	int8	versioncheckdays;
 
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
-	int		tableSortItemDownload;
-	int		tableSortItemUpload;
-	int		tableSortItemQueue;
-	int		tableSortItemSearch;
-	int		tableSortItemShared;
-	int		tableSortItemServer;
-	int		tableSortItemClientList;
-	bool	tableSortAscendingDownload;
-	bool	tableSortAscendingUpload;
-	bool	tableSortAscendingQueue;
-	bool	tableSortAscendingSearch;
-	bool	tableSortAscendingShared;
-	bool	tableSortAscendingServer;
-	bool	tableSortAscendingClientList;
-
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	int		tableMultiSortItemDownload;
-	int		tableMultiSortItemUpload;
-	int		tableMultiSortItemQueue;
-	int		tableMultiSortItemSearch;
-	int		tableMultiSortItemShared;
-	int		tableMultiSortItemServer;
-	int		tableMultiSortItemClientList; //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
+	// SLUGFILLER: multiSort - save multiple params
+	// SLUGFILLER: DLsortFix - double, for client-only sorting
+	int		tableSortItemDownload[26];
+	BOOL	tableSortAscendingDownload[26];
+	// SLUGFILLER: DLsortFix
+	// itsonlyme: clientSoft +1
+	// SLUGFILLER: upRemain +1
+	// SLUGFILLER: BandwidthThrottler +1
+	int		tableSortItemUpload[11];
+	BOOL	tableSortAscendingUpload[11];
+	// SLUGFILLER: BandwidthThrottler
+	// SLUGFILLER: upRemain
+	int		tableSortItemQueue[11];
+	BOOL	tableSortAscendingQueue[11];
+	// itsonlyme: clientSoft
+	int		tableSortItemSearch[11];
+	BOOL	tableSortAscendingSearch[11];
+	// SLUGFILLER: Spreadbars (+4)
+	int		tableSortItemShared[16];
+	BOOL	tableSortAscendingShared[16];
+	// SLUGFILLER: Spreadbars
+	int		tableSortItemServer[13];
+	BOOL	tableSortAscendingServer[13];
+	int		tableSortItemClientList[8];
+	BOOL	tableSortAscendingClientList[8];
+	// SLUGFILLER: multiSort
 
 	bool	showRatesInTitle;
 
@@ -1019,16 +1020,13 @@ public:
 	void	SetColumnOrder (Table t, INT *piOrder);
 
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
-	int		GetColumnSortItem (Table t) const;
-	bool	GetColumnSortAscending (Table t) const;
+	// SLUGFILLER: multiSort
+	int		GetColumnSortItem (Table t, int column = 0) const;
+	bool	GetColumnSortAscending (Table t, int column = 0) const;
+	int		GetColumnSortCount(Table t) const;
+	// SLUGFILLER: multiSort
 	void	SetColumnSortItem (Table t, int sortItem);
 	void	SetColumnSortAscending (Table t, bool sortAscending);
-
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	int		GetColumnMultiSortItem (Table t) const;
-	void	SetColumnMultiSortItem (Table t, int sortItem); //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
 
 	WORD	GetLanguageID() const;
 	void	SetLanguageID(WORD lid);

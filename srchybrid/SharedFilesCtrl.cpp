@@ -170,11 +170,14 @@ void CSharedFilesCtrl::Init(){
 	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared);
 	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared);
 	SetSortArrow(sortItem, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan
-	SortItems(SortProc, theApp.glob_prefs->GetColumnMultiSortItem(CPreferences::tableShared)); //Athlazan
-	//MORPH END - Added by Yun.SF3, Multisorting
+	// SLUGFILLER: multiSort - load multiple params
+	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableShared); i > 0; ) {
+		i--;
+		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared, i);
+		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared, i);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:20));
+}
+	// SLUGFILLER: multiSort
 }
 
 void CSharedFilesCtrl::Localize() {
@@ -862,26 +865,16 @@ void CSharedFilesCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int oldSortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared); //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableShared);
 	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableShared);
-	bool sortAscending = (oldSortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 
 	// Item is column clicked
-	int sortItem = pNMListView->iSubItem; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	sortItem = pNMListView->iSubItem;
 
 	// Save new preferences
 	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableShared, sortItem);
 	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableShared, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan
-	if(oldSortItem != sortItem) {
-		theApp.glob_prefs->SetColumnMultiSortItem(CPreferences::tableDownload,
-			oldSortItem + (m_oldSortAscending ? 0 : 20));
-	} //Athlazan
-	//MORPH END - Added by Yun.SF3, Multisorting
 
 	// Ornis 4-way-sorting
 	int adder=0;

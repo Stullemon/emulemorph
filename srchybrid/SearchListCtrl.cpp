@@ -169,11 +169,14 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	if (sortItem != -1){// don't force a sorting if '-1' is specified, so we can better see how the search results are arriving
 		bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch);
 		SetSortArrow(sortItem, sortAscending);
-		//MORPH START - Added by Yun.SF3, Multisorting
-		// Gnaddelwarz: save last Multisort-Parameter //Athlazan
-		SortItems(SortProc, theApp.glob_prefs->GetColumnMultiSortItem(CPreferences::tableSearch)); //Athlazan
-		//MORPH END - Added by Yun.SF3, Multisorting
+		// SLUGFILLER: multiSort - load multiple params
+		for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableSearch); i > 0; ) {
+			i--;
+			sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch, i);
+			sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch, i);
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+	}
+		// SLUGFILLER: multiSort
 	}
 }
 
@@ -414,27 +417,12 @@ void CSearchListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int oldSortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch); //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableSearch);
 	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableSearch);
-	bool sortAscending = (oldSortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 
 	// Item is column clicked
-	int sortItem = pNMListView->iSubItem; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
-
-	// Save new preferences
-	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableSearch, sortItem);
-	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableSearch, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	if(oldSortItem != sortItem) {
-		theApp.glob_prefs->SetColumnMultiSortItem(CPreferences::tableSearch,
-			oldSortItem + (m_oldSortAscending ? 0 : 10));
-	} //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
-
+	sortItem = pNMListView->iSubItem;
 
 	// Save new preferences
 	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableSearch, sortItem);

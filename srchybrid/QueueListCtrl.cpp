@@ -87,11 +87,14 @@ void CQueueListCtrl::Init(){
 	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue);
 	bool sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue);
 	SetSortArrow(sortItem, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan
-	SortItems(SortProc, theApp.glob_prefs->GetColumnMultiSortItem(CPreferences::tableQueue)); //Athlazan
-	//MORPH END - Added by Yun.SF3, Multisorting
+	// SLUGFILLER: multiSort - load multiple params
+	for (int i = theApp.glob_prefs->GetColumnSortCount(CPreferences::tableQueue); i > 0; ) {
+		i--;
+		sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue, i);
+		sortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue, i);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
+}
+	// SLUGFILLER: multiSort
 }
 
 CQueueListCtrl::~CQueueListCtrl()
@@ -528,24 +531,14 @@ void CQueueListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Barry - Store sort order in preferences
 	// Determine ascending based on whether already sorted on this column
-	int oldSortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue); //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableQueue);
 	bool m_oldSortAscending = theApp.glob_prefs->GetColumnSortAscending(CPreferences::tableQueue);
-	bool sortAscending = (oldSortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	bool sortAscending = (sortItem != pNMListView->iSubItem) ? true : !m_oldSortAscending;
 	// Item is column clicked
-	int sortItem = pNMListView->iSubItem; //Athlazan	//MORPH START - Added by Yun.SF3, Multisorting
-
+	sortItem = pNMListView->iSubItem;
 	// Save new preferences
 	theApp.glob_prefs->SetColumnSortItem(CPreferences::tableQueue, sortItem);
 	theApp.glob_prefs->SetColumnSortAscending(CPreferences::tableQueue, sortAscending);
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	if(oldSortItem != sortItem) {
-		theApp.glob_prefs->SetColumnMultiSortItem(CPreferences::tableQueue,
-			oldSortItem + (m_oldSortAscending ? 0 : 100));
-	} //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
 	// Sort table
 	SetSortArrow(sortItem, sortAscending);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));

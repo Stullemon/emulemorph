@@ -1579,32 +1579,37 @@ void CPreferences::SavePreferences(){
 		ELEMENT_COUNT(prefs->clientListColumnOrder), "ClientListColumnOrder");
 
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
-	ini.WriteInt("TableSortItemDownload", prefs->tableSortItemDownload);
-	ini.WriteInt("TableSortItemUpload", prefs->tableSortItemUpload);
-	ini.WriteInt("TableSortItemQueue", prefs->tableSortItemQueue);
-	ini.WriteInt("TableSortItemSearch", prefs->tableSortItemSearch);
-	ini.WriteInt("TableSortItemShared", prefs->tableSortItemShared);
-	ini.WriteInt("TableSortItemServer", prefs->tableSortItemServer);
-	ini.WriteInt("TableSortItemClientList", prefs->tableSortItemClientList);
-	ini.WriteBool("TableSortAscendingDownload", prefs->tableSortAscendingDownload);
-	ini.WriteBool("TableSortAscendingUpload", prefs->tableSortAscendingUpload);
-	ini.WriteBool("TableSortAscendingQueue", prefs->tableSortAscendingQueue);
-	ini.WriteBool("TableSortAscendingSearch", prefs->tableSortAscendingSearch);
-	ini.WriteBool("TableSortAscendingShared", prefs->tableSortAscendingShared);
-	ini.WriteBool("TableSortAscendingServer", prefs->tableSortAscendingServer);
-	ini.WriteBool("TableSortAscendingClientList", prefs->tableSortAscendingClientList);
+	// SLUGFILLER: multiSort - save multiple params
+	ini.SerGet(false, prefs->tableSortItemDownload,
+		GetColumnSortCount(tableDownload), "TableSortItemDownload");
+	ini.SerGet(false, prefs->tableSortItemUpload,
+		GetColumnSortCount(tableUpload), "TableSortItemUpload");
+	ini.SerGet(false, prefs->tableSortItemQueue,
+		GetColumnSortCount(tableQueue), "TableSortItemQueue");
+	ini.SerGet(false, prefs->tableSortItemSearch,
+		GetColumnSortCount(tableSearch), "TableSortItemSearch");
+	ini.SerGet(false, prefs->tableSortItemShared,
+		GetColumnSortCount(tableShared), "TableSortItemShared");
+	ini.SerGet(false, prefs->tableSortItemServer,
+		GetColumnSortCount(tableServer), "TableSortItemServer");
+	ini.SerGet(false, prefs->tableSortItemClientList,
+		GetColumnSortCount(tableClientList), "TableSortItemClientList");
+	ini.SerGet(false, prefs->tableSortAscendingDownload,
+		GetColumnSortCount(tableDownload), "TableSortAscendingDownload");
+	ini.SerGet(false, prefs->tableSortAscendingUpload,
+		GetColumnSortCount(tableUpload), "TableSortAscendingUpload");
+	ini.SerGet(false, prefs->tableSortAscendingQueue,
+		GetColumnSortCount(tableQueue), "TableSortAscendingQueue");
+	ini.SerGet(false, prefs->tableSortAscendingSearch,
+		GetColumnSortCount(tableSearch), "TableSortAscendingSearch");
+	ini.SerGet(false, prefs->tableSortAscendingShared,
+		GetColumnSortCount(tableShared), "TableSortAscendingShared");
+	ini.SerGet(false, prefs->tableSortAscendingServer,
+		GetColumnSortCount(tableServer), "TableSortAscendingServer");
+	ini.SerGet(false, prefs->tableSortAscendingClientList,
+		GetColumnSortCount(tableClientList), "TableSortAscendingClientList");
+	// SLUGFILLER: multiSort
 	ini.WriteBinary("HyperTextFont", (LPBYTE)&prefs->m_lfHyperText, sizeof prefs->m_lfHyperText);
-
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	ini.WriteInt("TableMultiSortItemDownload", prefs->tableMultiSortItemDownload);
-	ini.WriteInt("TableMultiSortItemUpload", prefs->tableMultiSortItemUpload);
-	ini.WriteInt("TableMultiSortItemQueue", prefs->tableMultiSortItemQueue);
-	ini.WriteInt("TableMultiSortItemSearch", prefs->tableMultiSortItemSearch);
-	ini.WriteInt("TableMultiSortItemShared", prefs->tableMultiSortItemShared);
-	ini.WriteInt("TableMultiSortItemServer", prefs->tableMultiSortItemServer);
-	ini.WriteInt("TableMultiSortItemClientList", prefs->tableMultiSortItemClientList); //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
 
 	// deadlake PROXYSUPPORT
 	ini.WriteBool("ProxyEnablePassword",prefs->proxy.EnablePassword,"Proxy");
@@ -2082,20 +2087,65 @@ void CPreferences::LoadPreferences(){
 		ELEMENT_COUNT(prefs->clientListColumnOrder), "ClientListColumnOrder");
 
 	// Barry - Provide a mechanism for all tables to store/retrieve sort order
-	prefs->tableSortItemDownload = ini.GetInt("TableSortItemDownload", 0);
-	prefs->tableSortItemUpload = ini.GetInt("TableSortItemUpload", 0);
-	prefs->tableSortItemQueue = ini.GetInt("TableSortItemQueue", 0);
-	prefs->tableSortItemSearch = ini.GetInt("TableSortItemSearch", 0);
-	prefs->tableSortItemShared = ini.GetInt("TableSortItemShared", 0);
-	prefs->tableSortItemServer = ini.GetInt("TableSortItemServer", 0);
-	prefs->tableSortItemClientList = ini.GetInt("TableSortItemClientList", 0);
-	prefs->tableSortAscendingDownload = ini.GetBool("TableSortAscendingDownload", true);
-	prefs->tableSortAscendingUpload = ini.GetBool("TableSortAscendingUpload", true);
-	prefs->tableSortAscendingQueue = ini.GetBool("TableSortAscendingQueue", true);
-	prefs->tableSortAscendingSearch = ini.GetBool("TableSortAscendingSearch", true);
-	prefs->tableSortAscendingShared = ini.GetBool("TableSortAscendingShared", true);
-	prefs->tableSortAscendingServer = ini.GetBool("TableSortAscendingServer", true);
-	prefs->tableSortAscendingClientList = ini.GetBool("TableSortAscendingClientList", true);
+	// SLUGFILLER: multiSort - load multiple params
+	ini.SerGet(true, prefs->tableSortItemDownload,
+		ELEMENT_COUNT(prefs->tableSortItemDownload), "TableSortItemDownload", NULL, -1);
+	ini.SerGet(true, prefs->tableSortItemUpload,
+		ELEMENT_COUNT(prefs->tableSortItemUpload), "TableSortItemUpload", NULL, -1);
+	ini.SerGet(true, prefs->tableSortItemQueue,
+		ELEMENT_COUNT(prefs->tableSortItemQueue), "TableSortItemQueue", NULL, -1);
+	ini.SerGet(true, prefs->tableSortItemSearch,
+		ELEMENT_COUNT(prefs->tableSortItemSearch), "TableSortItemSearch", NULL, -1);
+	ini.SerGet(true, prefs->tableSortItemShared,
+		ELEMENT_COUNT(prefs->tableSortItemShared), "TableSortItemShared", NULL, -1);
+	ini.SerGet(true, prefs->tableSortItemServer,
+		ELEMENT_COUNT(prefs->tableSortItemServer), "TableSortItemServer", NULL, -1);
+	ini.SerGet(true, prefs->tableSortItemClientList,
+		ELEMENT_COUNT(prefs->tableSortItemClientList), "TableSortItemClientList", NULL, -1);
+	ini.SerGet(true, prefs->tableSortAscendingDownload,
+		ELEMENT_COUNT(prefs->tableSortAscendingDownload), "TableSortAscendingDownload");
+	ini.SerGet(true, prefs->tableSortAscendingUpload,
+		ELEMENT_COUNT(prefs->tableSortAscendingUpload), "TableSortAscendingUpload");
+	ini.SerGet(true, prefs->tableSortAscendingQueue,
+		ELEMENT_COUNT(prefs->tableSortAscendingQueue), "TableSortAscendingQueue");
+	ini.SerGet(true, prefs->tableSortAscendingSearch,
+		ELEMENT_COUNT(prefs->tableSortAscendingSearch), "TableSortAscendingSearch");
+	ini.SerGet(true, prefs->tableSortAscendingShared,
+		ELEMENT_COUNT(prefs->tableSortAscendingShared), "TableSortAscendingShared");
+	ini.SerGet(true, prefs->tableSortAscendingServer,
+		ELEMENT_COUNT(prefs->tableSortAscendingServer), "TableSortAscendingServer");
+	ini.SerGet(true, prefs->tableSortAscendingClientList,
+		ELEMENT_COUNT(prefs->tableSortAscendingClientList), "TableSortAscendingClientList");
+	// topmost must be valid
+	if (prefs->tableSortItemDownload[0] == -1) {
+		prefs->tableSortItemDownload[0] = 0;
+		prefs->tableSortAscendingDownload[0] = true;
+	}
+	if (prefs->tableSortItemUpload[0] == -1) {
+		prefs->tableSortItemUpload[0] = 0;
+		prefs->tableSortAscendingUpload[0] = true;
+	}
+	if (prefs->tableSortItemQueue[0] == -1) {
+		prefs->tableSortItemQueue[0] = 0;
+		prefs->tableSortAscendingQueue[0] = true;
+	}
+	if (prefs->tableSortItemSearch[0] == -1) {
+		prefs->tableSortItemSearch[0] = 0;
+		prefs->tableSortAscendingSearch[0] = true;
+	}
+	if (prefs->tableSortItemShared[0] == -1) {
+		prefs->tableSortItemShared[0] = 0;
+		prefs->tableSortAscendingShared[0] = true;
+	}
+	if (prefs->tableSortItemServer[0] == -1) {
+		prefs->tableSortItemServer[0] = 0;
+		prefs->tableSortAscendingServer[0] = true;
+	}
+	if (prefs->tableSortItemClientList[0] == -1) {
+		prefs->tableSortItemClientList[0] = 0;
+		prefs->tableSortAscendingClientList[0] = true;
+	}
+	// SLUGFILLER: multiSort
 
 	LPBYTE pData = NULL;
 	UINT uSize = sizeof prefs->m_lfHyperText;
@@ -2104,17 +2154,6 @@ void CPreferences::LoadPreferences(){
 	else
 		memset(&prefs->m_lfHyperText, 0, sizeof prefs->m_lfHyperText);
 	delete[] pData;
-
-	//MORPH START - Added by Yun.SF3, Multisorting
-	// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-	prefs->tableMultiSortItemDownload = ini.GetInt("TableMultiSortItemDownload", 0);
-	prefs->tableMultiSortItemUpload = ini.GetInt("TableMultiSortItemUpload", 0);
-	prefs->tableMultiSortItemQueue = ini.GetInt("TableMultiSortItemQueue", 0);
-	prefs->tableMultiSortItemSearch = ini.GetInt("TableMultiSortItemSearch", 0);
-	prefs->tableMultiSortItemShared = ini.GetInt("TableMultiSortItemShared", 0);
-	prefs->tableMultiSortItemServer = ini.GetInt("TableMultiSortItemServer", 0);
-	prefs->tableMultiSortItemClientList = ini.GetInt("TableMultiSortItemClientList", 0); //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
 
 	if (prefs->statsAverageMinutes<1) prefs->statsAverageMinutes=5;
 
@@ -2326,76 +2365,193 @@ uint16 CPreferences::GetDefaultMaxConperFive(){
 }
 
 // Barry - Provide a mechanism for all tables to store/retrieve sort order
-int CPreferences::GetColumnSortItem(Table t) const
+int CPreferences::GetColumnSortItem(Table t, int column) const	// SLUGFILLER: multiSort
 {
 	switch(t) 
 	{
 		case tableDownload:
-			return prefs->tableSortItemDownload;
+			return prefs->tableSortItemDownload[column];	// SLUGFILLER: multiSort
 		case tableUpload:
-			return prefs->tableSortItemUpload;
+			return prefs->tableSortItemUpload[column];	// SLUGFILLER: multiSort
 		case tableQueue:
-			return prefs->tableSortItemQueue;
+			return prefs->tableSortItemQueue[column];	// SLUGFILLER: multiSort
 		case tableSearch:
-			return prefs->tableSortItemSearch;
+			return prefs->tableSortItemSearch[column];	// SLUGFILLER: multiSort
 		case tableShared:
-			return prefs->tableSortItemShared;
+			return prefs->tableSortItemShared[column];	// SLUGFILLER: multiSort
 		case tableServer:
-			return prefs->tableSortItemServer;
+			return prefs->tableSortItemServer[column];	// SLUGFILLER: multiSort
 		case tableClientList:
-			return prefs->tableSortItemClientList;
+			return prefs->tableSortItemClientList[column];	// SLUGFILLER: multiSort
 	}
 	return 0;
 }
 
 // Barry - Provide a mechanism for all tables to store/retrieve sort order
-bool CPreferences::GetColumnSortAscending(Table t) const
+bool CPreferences::GetColumnSortAscending(Table t, int column) const	// SLUGFILLER: multiSort
 {
 	switch(t) 
 	{
 		case tableDownload:
-			return prefs->tableSortAscendingDownload;
+			return prefs->tableSortAscendingDownload[column];	// SLUGFILLER: multiSort
 		case tableUpload:
-			return prefs->tableSortAscendingUpload;
+			return prefs->tableSortAscendingUpload[column];	// SLUGFILLER: multiSort
 		case tableQueue:
-			return prefs->tableSortAscendingQueue;
+			return prefs->tableSortAscendingQueue[column];	// SLUGFILLER: multiSort
 		case tableSearch:
-			return prefs->tableSortAscendingSearch;
+			return prefs->tableSortAscendingSearch[column];	// SLUGFILLER: multiSort
 		case tableShared:
-			return prefs->tableSortAscendingShared;
+			return prefs->tableSortAscendingShared[column];	// SLUGFILLER: multiSort
 		case tableServer:
-			return prefs->tableSortAscendingServer;
+			return prefs->tableSortAscendingServer[column];	// SLUGFILLER: multiSort
 		case tableClientList:
-			return prefs->tableSortAscendingClientList;
+			return prefs->tableSortAscendingClientList[column];	// SLUGFILLER: multiSort
 	}
 	return true;
 }
 
+// SLUGFILLER: multiSort
+int CPreferences::GetColumnSortCount(Table t) const
+{
+	int i;
+	switch(t)
+	{
+		case tableDownload:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemDownload); i++)
+				if (prefs->tableSortItemDownload[i] == -1)
+					break;
+			return i;
+		case tableUpload:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemUpload); i++)
+				if (prefs->tableSortItemUpload[i] == -1)
+					break;
+			return i;
+		case tableQueue:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemQueue); i++)
+				if (prefs->tableSortItemQueue[i] == -1)
+					break;
+			return i;
+		case tableSearch:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemSearch); i++)
+				if (prefs->tableSortItemSearch[i] == -1)
+					break;
+			return i;
+		case tableShared:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemShared); i++)
+				if (prefs->tableSortItemShared[i] == -1)
+					break;
+			return i;
+		case tableServer:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemServer); i++)
+				if (prefs->tableSortItemServer[i] == -1)
+					break;
+			return i;
+		case tableClientList:
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemClientList); i++)
+				if (prefs->tableSortItemClientList[i] == -1)
+					break;
+			return i;
+	}
+	return 0;
+}
+// SLUGFILLER: multiSort
+
 // Barry - Provide a mechanism for all tables to store/retrieve sort order
 void CPreferences::SetColumnSortItem(Table t, int sortItem)
 {
+	int i;	// SLUGFILLER: multiSort - roll params
 	switch(t) 
 	{
 		case tableDownload:
-			prefs->tableSortItemDownload = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemDownload)-1; i++)
+				if (prefs->tableSortItemDownload[i] == sortItem ||
+					prefs->tableSortItemDownload[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemDownload[i] = prefs->tableSortItemDownload[i-1];
+				prefs->tableSortAscendingDownload[i] = prefs->tableSortAscendingDownload[i-1];
+			}
+			prefs->tableSortItemDownload[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 		case tableUpload:
-			prefs->tableSortItemUpload = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemUpload)-1; i++)
+				if (prefs->tableSortItemUpload[i] == sortItem ||
+					prefs->tableSortItemUpload[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemUpload[i] = prefs->tableSortItemUpload[i-1];
+				prefs->tableSortAscendingUpload[i] = prefs->tableSortAscendingUpload[i-1];
+			}
+			prefs->tableSortItemUpload[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 		case tableQueue:
-			prefs->tableSortItemQueue = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemQueue)-1; i++)
+				if (prefs->tableSortItemQueue[i] == sortItem ||
+					prefs->tableSortItemQueue[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemQueue[i] = prefs->tableSortItemQueue[i-1];
+				prefs->tableSortAscendingQueue[i] = prefs->tableSortAscendingQueue[i-1];
+			}
+			prefs->tableSortItemQueue[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 		case tableSearch:
-			prefs->tableSortItemSearch = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemSearch)-1; i++)
+				if (prefs->tableSortItemSearch[i] == sortItem ||
+					prefs->tableSortItemSearch[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemSearch[i] = prefs->tableSortItemSearch[i-1];
+				prefs->tableSortAscendingSearch[i] = prefs->tableSortAscendingSearch[i-1];
+			}
+			prefs->tableSortItemSearch[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 		case tableShared:
-			prefs->tableSortItemShared = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemShared)-1; i++)
+				if (prefs->tableSortItemShared[i] == sortItem ||
+					prefs->tableSortItemShared[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemShared[i] = prefs->tableSortItemShared[i-1];
+				prefs->tableSortAscendingShared[i] = prefs->tableSortAscendingShared[i-1];
+			}
+			prefs->tableSortItemShared[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 		case tableServer:
-			prefs->tableSortItemServer = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemServer)-1; i++)
+				if (prefs->tableSortItemServer[i] == sortItem ||
+					prefs->tableSortItemServer[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemServer[i] = prefs->tableSortItemServer[i-1];
+				prefs->tableSortAscendingServer[i] = prefs->tableSortAscendingServer[i-1];
+			}
+			prefs->tableSortItemServer[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 		case tableClientList:
-			prefs->tableSortItemClientList = sortItem;
+			// SLUGFILLER: multiSort - roll params
+			for (i = 0; i < ELEMENT_COUNT(prefs->tableSortItemClientList)-1; i++)
+				if (prefs->tableSortItemClientList[i] == sortItem ||
+					prefs->tableSortItemClientList[i] == -1)
+					break;
+			for (; i > 0; i--) {
+				prefs->tableSortItemClientList[i] = prefs->tableSortItemClientList[i-1];
+				prefs->tableSortAscendingClientList[i] = prefs->tableSortAscendingClientList[i-1];
+			}
+			prefs->tableSortItemClientList[0] = sortItem;
+			// SLUGFILLER: multiSort
 			break;
 	}
 }
@@ -2406,25 +2562,25 @@ void CPreferences::SetColumnSortAscending(Table t, bool sortAscending)
 	switch(t) 
 	{
 		case tableDownload:
-			prefs->tableSortAscendingDownload = sortAscending;
+			prefs->tableSortAscendingDownload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableUpload:
-			prefs->tableSortAscendingUpload = sortAscending;
+			prefs->tableSortAscendingUpload[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableQueue:
-			prefs->tableSortAscendingQueue = sortAscending;
+			prefs->tableSortAscendingQueue[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableSearch:
-			prefs->tableSortAscendingSearch = sortAscending;
+			prefs->tableSortAscendingSearch[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableShared:
-			prefs->tableSortAscendingShared = sortAscending;
+			prefs->tableSortAscendingShared[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableServer:
-			prefs->tableSortAscendingServer = sortAscending;
+			prefs->tableSortAscendingServer[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 		case tableClientList:
-			prefs->tableSortAscendingClientList = sortAscending;
+			prefs->tableSortAscendingClientList[0] = sortAscending;	// SLUGFILLER: multiSort - change for newest param only
 			break;
 	}
 }
@@ -2496,60 +2652,6 @@ bool CPreferences::IsShareableDirectory(const CString& rstrDir) const
 
 	return true;
 }
-
-	//MORPH START - Added by Yun.SF3, Multisorting
-// Gnaddelwarz: save last Multisort-Parameter //Athlazan >>>
-int CPreferences::GetColumnMultiSortItem(Table t) const
-{
-	switch(t) 
-	{
-		case tableDownload:
-			return prefs->tableMultiSortItemDownload;
-		case tableUpload:
-			return prefs->tableMultiSortItemUpload;
-		case tableQueue:
-			return prefs->tableMultiSortItemQueue;
-		case tableSearch:
-			return prefs->tableMultiSortItemSearch;
-		case tableShared:
-			return prefs->tableMultiSortItemShared;
-		case tableServer:
-			return prefs->tableMultiSortItemServer;
-		case tableClientList:
-			return prefs->tableMultiSortItemClientList;
-	}
-	return 0;
-}
-
-// Gnaddelwarz: save last Multisort-Parameter
-void CPreferences::SetColumnMultiSortItem(Table t, int sortItem)
-{
-	switch(t) 
-	{
-		case tableDownload:
-			prefs->tableMultiSortItemDownload = sortItem;
-			break;
-		case tableUpload:
-			prefs->tableMultiSortItemUpload = sortItem;
-			break;
-		case tableQueue:
-			prefs->tableMultiSortItemQueue = sortItem;
-			break;
-		case tableSearch:
-			prefs->tableMultiSortItemSearch = sortItem;
-			break;
-		case tableShared:
-			prefs->tableMultiSortItemShared = sortItem;
-			break;
-		case tableServer:
-			prefs->tableMultiSortItemServer = sortItem;
-			break;
-		case tableClientList:
-			prefs->tableMultiSortItemClientList = sortItem;
-			break;
-	}
-} //Athlazan <<<
-	//MORPH END - Added by Yun.SF3, Multisorting
 
 //MORPH START - Added by IceCream, high process priority
 void CPreferences::SetEnableHighProcess(bool enablehigh) 			
