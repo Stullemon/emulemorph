@@ -2539,6 +2539,7 @@
 #define IDS_REPLACEBYCHAR               5415
 #define IDS_SC_HEADLINE                 5416
 #define IDS_BANNER                      5417
+#define IDS_DOWNLOADALLFEEDS            5418
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125

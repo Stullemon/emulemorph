@@ -227,6 +227,7 @@ BOOL CServerWnd::OnInitDialog()
 	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEFEED,GetResString (IDS_FEEDDELETE));
 	m_FeedsMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEALLFEEDS,GetResString (IDS_FEEDDELETEALL));
+    m_FeedsMenu.AppendMenu(MF_STRING,MP_DOWNLOADALLFEEDS,GetResString (IDS_DOWNLOADALLFEEDS)); //Commander - Added: Update All Feeds at once
 	// [end] Mighty Knife
 
 	if (servermsgbox->m_hWnd)
@@ -1154,6 +1155,39 @@ void CServerWnd::DownloadFeed()
 	ParseNewsFile(strTempFilename);
 }
 
+//Commander - Added: Update All Feeds at once - Start
+void CServerWnd::DownloadAllFeeds()
+{   
+	int itemcount = m_feedlist.GetCount();
+	for(int i=0;i<itemcount;i++){
+		CString sbuffer;
+		if (i==CB_ERR) return;
+		CString strURL = aFeedUrls.GetAt(i);
+		CString strTempFilename; 
+		strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),i);
+		FILE* readFile = fopen(strTempFilename, "r");
+		if (readFile!=NULL)
+		{
+			fclose(readFile);
+			remove(strTempFilename);
+		}
+		readFile = fopen(strTempFilename, "r");
+		// Start the download dialog and retrieve the file
+		CHttpDownloadDlg dlgDownload;
+		dlgDownload.m_strTitle = _T("Download RSS feed file");
+		dlgDownload.m_sURLToDownload = strURL;
+		dlgDownload.m_sFileToDownloadInto = strTempFilename;
+		if (dlgDownload.DoModal() != IDOK)
+		{
+			theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
+			return;
+		}
+		// Parse it
+		ParseNewsFile(strTempFilename);
+	}
+}
+//Commander - Added: Update All Feeds at once - End
+
 // Parses a node of the news file.
 // Add all "item" nodes to the news messagebox of the server window.
 // Don't add the message _xmlbuffer - that was already added since it
@@ -1450,6 +1484,13 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 			ListFeeds ();
 			return true;
 		} break;
+        //Commander - Added: Update All Feeds at once - Start
+		case MP_DOWNLOADALLFEEDS: {
+			theApp.emuledlg->serverwnd->DownloadAllFeeds();
+			return true;
+		} break;
+        //Commander - Added: Update All Feeds at once - End
+
 		default: return CResizableDialog::OnCommand (wParam, lParam);
 	}
 	return true;

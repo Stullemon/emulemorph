@@ -185,6 +185,8 @@
 #define MP_DELETEALLFEEDS		10393
 // [end] Mighty Knife
 
+#define MP_DOWNLOADALLFEEDS		10394 //Commander - Added: Update All Feeds at once
+
 // quick-speed changer
 #define MP_QS_U10				10501
 #define MP_QS_U20				10502

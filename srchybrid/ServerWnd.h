@@ -61,6 +61,7 @@ public:
 	//MORPH START - Added by SiRoB, XML News [O²]
 	void ListFeeds();
 	void DownloadFeed();
+	void DownloadAllFeeds(); //Commander - Added: Update All Feeds at once
 	void ParseNewsNode(pug::xml_node _node, CString _xmlbuffer);
 	void ParseNewsFile(CString strTempFilename);
 	void OnFeedListSelChange();

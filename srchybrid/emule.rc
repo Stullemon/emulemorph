@@ -1534,7 +1534,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Update fakelist on startup",IDC_UPDATEFAKELISTSTART,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,16,
-                    196,8
+                    210,8
     PUSHBUTTON      "Update fakelist",IDC_UPDATEFAKES,135,53,81,14,BS_FLAT
     EDITTEXT        IDC_UPDATE_URL_FAKELIST,14,39,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING,14,28,203,8,0,
@@ -1543,7 +1543,7 @@ BEGIN
                     BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,87,
-                    202,10
+                    210,10
     EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,202,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,202,8,0,
                     WS_EX_TRANSPARENT
@@ -1553,7 +1553,7 @@ BEGIN
                     BS_FLAT
     CONTROL         "Update Ip-to-country.csv on startup",
                     IDC_AUTOUPIP2COUNTRY,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,159,202,10
+                    WS_TABSTOP,14,159,210,10
     EDITTEXT        IDC_UPDATE_URL_IP2COUNTRY,14,182,202,12,ES_AUTOHSCROLL
     LTEXT           "File-URL for updating",IDC_URL_FOR_UPDATING3,14,171,202,
                     8,0,WS_EX_TRANSPARENT
@@ -1568,8 +1568,7 @@ BEGIN
 END
 
 IDD_PPG_BACKUP DIALOGEX 0, 0, 227, 225
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Backup"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
@@ -1581,15 +1580,15 @@ BEGIN
     LTEXT           "A Directory named ""Backup"" will be created  under your eMule Application directory to store Backups",
                     IDC_BACKUP_MESSAGE,10,172,205,21
     CONTROL         "*.dat",IDC_DAT,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,22,33,10
+                    WS_TABSTOP,14,22,74,10
     CONTROL         "*.met",IDC_MET,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,37,35,10
+                    WS_TABSTOP,14,37,74,10
     CONTROL         "*.ini",IDC_INI,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,52,29,10
+                    WS_TABSTOP,14,52,74,10
     CONTROL         "*.part",IDC_PART,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,14,67,36,10
+                    WS_TABSTOP,14,67,74,10
     CONTROL         "*.part.met",IDC_PARTMET,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,14,82,51,10
+                    BS_FLAT | WS_TABSTOP,14,82,74,10
     DEFPUSHBUTTON   "Select All",IDC_SELECTALL,169,55,44,14,BS_FLAT
     PUSHBUTTON      "Backup Now",IDC_BACKUPNOW,169,78,44,14,BS_FLAT | 
                     WS_DISABLED
@@ -2285,6 +2284,11 @@ BEGIN
         RIGHTMARGIN, 224
         VERTGUIDE, 14
         VERTGUIDE, 216
+    END
+
+    IDD_PPG_BACKUP, DIALOG
+    BEGIN
+        VERTGUIDE, 88
     END
 
     IDD_PPG_EASTSHARE, DIALOG
@@ -4762,6 +4766,7 @@ BEGIN
     IDS_REPLACEBYCHAR       "Replace by"
     IDS_SC_HEADLINE         "Simple cleanup"
     IDS_BANNER              "Show sidebanner"
+    IDS_DOWNLOADALLFEEDS    "Update all"
 END
 
 #endif    // Englisch (USA) resources
