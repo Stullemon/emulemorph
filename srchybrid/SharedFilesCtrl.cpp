@@ -735,7 +735,9 @@ BEGIN_MESSAGE_MAP(CSharedFilesCtrl, CMuleListCtrl)
 	// [end] Mighty Knife
 END_MESSAGE_MAP()
 
+
 // CSharedFilesCtrl message handlers
+
 void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 		// get merged settings
@@ -1031,12 +1033,13 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				theApp.CopyTextToClipboard(str);
 				break;
 			}
+			// file operations
 			case MP_OPEN:
 				if (file && !file->IsPartFile())
 				OpenFile(file);
 				break; 
 			case MP_OPENFOLDER:
-				if (file){
+				if (file && !file->IsPartFile()){
 					CString path = file->GetPath();
 					int bspos = path.ReverseFind(_T('\\'));
 					ShellExecute(NULL, _T("open"), path.Left(bspos), NULL, NULL, SW_SHOW);
@@ -1993,7 +1996,6 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_GETHOSTNAMESOURCEED2KLINK, GetResString(IDS_CREATEHOSTNAMESRCLINK));	// itsonlyme: hostnameSource
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	
-	//This menu option is is for testing..
 	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 }

@@ -154,12 +154,30 @@ void CKnownFileList::Save()
 		file.WriteUInt8(MET_HEADER);
 
 		UINT nRecordsNumber = m_Files_map.GetCount();
-		// SLUGFILLER: mergeKnown - add part files count
-		UINT nRecordsNumberWithPartFiles = nRecordsNumber + theApp.downloadqueue->GetPartFilesCount();
-		file.WriteUInt32(nRecordsNumberWithPartFiles);
 		// SLUGFILLER: mergeKnown
+		// clean-up
 		POSITION pos = m_Files_map.GetStartPosition();
-		while( pos != NULL )
+		const uint32 dwExpired = time(NULL) - 12960000;	// today - 150 day
+		while( pos != NULL) {
+			CKnownFile* pFile;
+			CCKey key;
+			m_Files_map.GetNextAssoc( pos, key, pFile );
+			if (pFile->GetLastSeen() < dwExpired) {
+				if (theApp.sharedfiles->GetFileByID(pFile->GetFileHash()) != pFile) {
+					delete(pFile);
+					m_Files_map.RemoveKey(key);
+					nRecordsNumber--;
+					continue;
+				} else
+					pFile->SetLastSeen();	// eMule was actually online 150 days straight!
+			}
+		}
+		// add part files count
+		uint32 RecordsNumberWithPartFiles = nRecordsNumber + theApp.downloadqueue->GetPartFilesCount();
+		file.WriteUInt32(RecordsNumberWithPartFiles);
+		// SLUGFILLER: mergeKnown		
+		pos = m_Files_map.GetStartPosition();//Morph - modified by Andcycle, modify for mergeKnown clean-up
+		while( pos != NULL)
 		{
 			CKnownFile* pFile;
 			CCKey key;
@@ -302,3 +320,22 @@ bool CKnownFileList::IsFilePtrInList(const CKnownFile* file) const
 	}
 	return false;
 }
+
+// SLUGFILLER: mergeKnown
+void CKnownFileList::RemoveFile(CKnownFile* toremove){
+	CCKey key(toremove->GetFileHash());
+	CKnownFile* pFileInMap;
+	if(m_Files_map.Lookup(key, pFileInMap)) {
+		m_Files_map.RemoveKey(key);
+	}
+}
+
+void CKnownFileList::FilterDuplicateKnownFiles(CKnownFile* original){
+	CCKey key(original->GetFileHash());
+	CKnownFile* pFileInMap;
+	if(m_Files_map.Lookup(key, pFileInMap)) {
+		original->statistic.Merge(&pFileInMap->statistic);
+		m_Files_map.RemoveKey(key);
+	}
+}
+// SLUGFILLER: mergeKnown

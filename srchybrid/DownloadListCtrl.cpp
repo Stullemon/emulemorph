@@ -128,6 +128,7 @@ void CDownloadListCtrl::Init()
 	Localize();
 	LoadSettings(CPreferences::tableDownload);
 	curTab=0;
+
 	// Barry - Use preferred sort order from preferences
 	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
 	/*
@@ -1565,7 +1566,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			else if (!thePrefs.IsDoubleClickEnabled() && bDetailsEnabled)
 				m_FileMenu.SetDefaultItem(MP_METINFO);
 			else
-				m_FileMenu.SetDefaultItem(-1);
+				m_FileMenu.SetDefaultItem((UINT)-1);
 			m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
 
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
@@ -1767,7 +1768,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			} 
 
 			CPartFile* file = (CPartFile*)content->value;
-			
 			switch (wParam)
 			{
 				case MPG_DELETE:
@@ -1788,7 +1788,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 									fileList.Append(_T("\n") + CString(cur_file->GetFileName()));
 							} 
 						}
-
 						CString quest;
 						if (selectedCount==1)
 							quest=GetResString(IDS_Q_CANCELDL2);
@@ -1937,7 +1936,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 								}
 							}
 						}
-
 					}
 					SetRedraw(true);
 					UpdateItem(file);						
@@ -1947,7 +1945,6 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					break;
 				case MP_ALL_A4AF_TO_OTHER:
 					SetRedraw(false);
-
 					if (selectedCount == 1 && (file->GetStatus(false) == PS_READY || file->GetStatus(false) == PS_EMPTY))
 					{
 						theApp.downloadqueue->DisableAllA4AFAuto();
@@ -2413,6 +2410,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	/*
 	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownload);
 	bool m_oldSortAscending = thePrefs.GetColumnSortAscending(CPreferences::tableDownload);
+
 	if (sortItem==9) {
 		m_bRemainSort=(sortItem != pNMListView->iSubItem) ? false : (m_oldSortAscending?m_bRemainSort:!m_bRemainSort);
 	}
@@ -2427,6 +2425,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	thePrefs.SetColumnSortAscending(CPreferences::tableDownload, sortAscending);
 	thePrefs.TransferlistRemainSortStyle(m_bRemainSort);
 
+	// Sort table
 	uint8 adder=0;
 	if (sortItem!=9 || !m_bRemainSort)
 	SetSortArrow(sortItem, sortAscending);
@@ -2491,6 +2490,7 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 			return sortMod * comp;
 		if (item1->type != item2->type)
 			return item1->type - item2->type;
+
 		CUpDownClient* client1 = (CUpDownClient*)item1->value;
 		CUpDownClient* client2 = (CUpDownClient*)item2->value;
 		comp = Compare(client1, client2, lParamSort,sortMod);
@@ -2908,7 +2908,6 @@ void CDownloadListCtrl::ShowSelectedFileDetails()
 	SetSelectionMark(it);   // display selection mark correctly! 
 
 	CtrlItem_Struct* content = (CtrlItem_Struct*)this->GetItemData(GetSelectionMark());
-
 	if (content->type == FILE_TYPE){
 		CPartFile* file = (CPartFile*)content->value;
 

@@ -86,7 +86,6 @@ protected:
 	void GetChatSize(CRect& rcChat);
 
 private:
-	//CImageList m_imagelist; // as long we use the 'CCloseableTabCtrl' we can't use icons..
 	UINT_PTR m_Timer;
 	bool m_blinkstate;
 	bool m_lastemptyicon;

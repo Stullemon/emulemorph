@@ -334,7 +334,23 @@ CSharedFileList::~CSharedFileList(){
 void CSharedFileList::FindSharedFiles()
 {
 	// SLUGFILLER: SafeHash remove - only called after the download queue is created
-		CSingleLock sLock1(&list_mut,true); // list thread safe
+
+		//Morph - ??? by AndCycle, could someone tell me why this part be commentted?
+		/*
+		POSITION pos = m_Files_map.GetStartPosition();
+		while (pos)
+		{
+			POSITION posLast = pos;
+			CCKey key;
+			CKnownFile* cur_file;
+			m_Files_map.GetNextAssoc(pos, key, cur_file);
+			if (cur_file->IsKindOf(RUNTIME_CLASS(CPartFile)) 
+				&& !theApp.downloadqueue->IsPartFile(cur_file) 
+				&& !theApp.knownfiles->IsFilePtrInList(cur_file))
+				continue;
+			m_Files_map.RemoveKey(key);
+		}
+		*/
 		
 		// Mighty Knife: CRC32-Tag - Public method to lock the filelist 
 		// Reason: KnownFile-Objects are deleted only in the following RemoveAll-Command !
@@ -348,8 +364,6 @@ void CSharedFileList::FindSharedFiles()
 		sLockCRC32.Unlock ();
 		// [end] Mighty Knife
 		
-		//m_keywords->RemoveAllKeywords();
-		sLock1.Unlock();
 		ASSERT( theApp.downloadqueue );
 		if (theApp.downloadqueue)
 			theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
@@ -514,7 +528,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 			{
 				toadd->SetPath(rstrDirectory);
 				toadd->SetFilePath(ff.GetFilePath());
-				AddFile(toadd);
+				SafeAddKFile(toadd, true);	// SLUGFILLER: mergeKnown - no unmanagad adds
 			}
 		}
 		else
@@ -539,6 +553,28 @@ bool CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd)
 {
 	bool bAdded = false;
 	RemoveFromHashing(toadd);	// SLUGFILLER: SafeHash - hashed ok, remove from list, in case it was on the list
+	toadd->SetLastSeen();	// SLUGFILLER: mergeKnown - okay, we see it
+	// SLUGFILLER: mergeKnown - check for duplicates
+	CKnownFile* other = GetFileByID(toadd->GetFileHash());
+	if (other && other != toadd){
+		if (other->IsPartFile()){
+			if (!toadd->IsPartFile()){	// fail-safe, two part files shouldn't have the same hash
+				other->statistic.Merge(&toadd->statistic);
+				if (!bOnlyAdd && output)
+					output->UpdateFile(other);
+				theApp.knownfiles->RemoveFile(toadd);
+				delete toadd;
+			}
+		}
+		else {
+			toadd->statistic.Merge(&other->statistic);
+			RemoveFile(other);
+			theApp.knownfiles->RemoveFile(other);
+			delete other;
+		}
+	}
+	theApp.knownfiles->FilterDuplicateKnownFiles(toadd);
+	// SLUGFILLER: mergeKnown
 	bAdded = AddFile(toadd);
 	if (bOnlyAdd)
 		return bAdded;
@@ -597,7 +633,8 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 
 void CSharedFileList::RemoveFile(CKnownFile* pFile)
 {
-	output->RemoveFile(pFile);
+	if (output)	// SLUGFILLER: mergeKnown - prevent crash in case of no output
+		output->RemoveFile(pFile);
 	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
 	m_keywords->RemoveKeywords(pFile);
 	pFile->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
@@ -907,10 +944,9 @@ bool CSharedFileList::IsFilePtrInList(const CKnownFile* file) const
 
 void CSharedFileList::HashNextFile(){
 	// SLUGFILLER: SafeHash
-	if (!theApp.emuledlg || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
+	if (!theApp.emuledlg || !theApp.emuledlg->IsRunning() || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
 		return;
-	if (theApp.emuledlg && theApp.emuledlg->IsRunning())
-		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
+	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
 	if (!currentlyhashing_list.IsEmpty())	// one hash at a time
 		return;
 	// SLUGFILLER: SafeHash
@@ -1026,7 +1062,6 @@ int CAddFileThread::Run()
 	// SLUGFILLER: SafeHash remove - locking code removed, unnececery
 	CoUninitialize();
 
-	AfxEndThread(0,true);
 	return 0;
 }
 

@@ -134,13 +134,12 @@ char *aszSendEchoErr[] = {
 };
 
 Pinger::Pinger() {
-    WSADATA wsaData;
-
-    int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (nRet) {
-        theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSPINGERWSASFAI), nRet);
-        return;
-    }
+//    WSADATA wsaData;
+//    int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
+//    if (nRet) {
+//        theApp.emuledlg->QueueDebugLogLine(false,"Pinger: WSAStartup() failed, err: %d\n", nRet);
+//        return;
+//    }
 
     // Open ICMP.DLL
     hICMP_DLL = LoadLibrary("ICMP.DLL");
@@ -189,7 +188,7 @@ Pinger::~Pinger() {
     // Shut down...
     FreeLibrary(hICMP_DLL);
 
-    WSACleanup();
+//    VERIFY( WSACleanup() == 0 );
 }
 
 PingStatus Pinger::Ping(uint32 lAddr, uint32 ttl, bool doLog) {

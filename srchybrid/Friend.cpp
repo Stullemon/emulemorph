@@ -111,6 +111,10 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 		CTag* newtag = new CTag(file);
 		switch(newtag->tag.specialtag){
 			case FF_NAME:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 2)
+					break;
+				// SLUGFILLER: SafeHash
 				m_strName = newtag->tag.stringvalue;
 				break;
 			}

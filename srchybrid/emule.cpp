@@ -271,12 +271,12 @@ BOOL CemuleApp::InitInstance()
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
 		Ask4RegFix(false, true);
-	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
-	lastCommonRouteFinder = new LastCommonRouteFinder();
-	//MORPH END - Added by SiRoB, ZZ Upload system (USS)
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
+
+	//MORPH START - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
+    lastCommonRouteFinder = new LastCommonRouteFinder();
 	uploadBandwidthThrottler = new UploadBandwidthThrottler();
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
+	//MORPH END - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
+
 	clientlist = new CClientList();
 	friendlist = new CFriendList();
 	searchlist = new CSearchList();
@@ -365,6 +365,11 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 }
 #endif
 
+// Elandal: multipleInstance
+typedef UINT WINAPI GetWindowModuleFileName(IN HWND hwnd, OUT LPSTR pszFileName, IN UINT cchFileNameMax);
+static GetWindowModuleFileName* lpfnGetWindowModuleFileName;
+// Elandal: multipleInstance
+
 bool CemuleApp::ProcessCommandline()
 {
 	bool bIgnoreRunningInstances = (GetProfileInt(_T("eMule"), _T("IgnoreInstances"), 0) != 0);
@@ -385,14 +390,41 @@ bool CemuleApp::ProcessCommandline()
 	CCommandLineInfo cmdInfo;
     ParseCommandLine(cmdInfo);
     
-	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, EMULE_GUID);
+	// Elandal: multipleInstance
+	char buffer[490];
+	memset(buffer, 0, 490);
+	GetModuleFileName(NULL, buffer, 490);
+	LPTSTR pszFileName = _tcsrchr(buffer, '\\') + 1;
+	*pszFileName = '\0';
+
+	while((pszFileName = _tcschr(buffer, '\\')) != NULL)
+		*pszFileName = '/';
+
+	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, CString(EMULE_GUID)+'/'+buffer);
+
+	lpfnGetWindowModuleFileName = NULL;
+	HMODULE hUser32_DLL = LoadLibrary("USER32.DLL");
+	if (hUser32_DLL) {
+	#ifdef UNICODE
+		lpfnGetWindowModuleFileName = (GetWindowModuleFileName*)GetProcAddress(hUser32_DLL,"GetWindowModuleFileNameW");
+	#else
+		lpfnGetWindowModuleFileName = (GetWindowModuleFileName*)GetProcAddress(hUser32_DLL,"GetWindowModuleFileNameA");
+	#endif
+	}
+	else
+		theApp.emuledlg->AddDebugLogLine(false,"LoadLibrary() failed: Unable to locate USER32.DLL!");
+	// Elandal: multipleInstance
 
 	HWND maininst = NULL;
+	LPARAM params[2] = {(LPARAM)&maininst, (LPARAM)&buffer};	// Elandal: multipleInstance
 	bool bAlreadyRunning = false;
 	if (!bIgnoreRunningInstances){
 		bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
-    	if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
+		if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&params);	// Elandal: multipleInstance
 	}
+	// Elandal: multipleInstance
+	FreeLibrary(hUser32_DLL);
+	// Elandal: multipleInstance
 
     if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen) {
 		CString command = cmdInfo.m_strFileName;
@@ -420,12 +452,34 @@ bool CemuleApp::ProcessCommandline()
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
+	// Elandal: multipleInstance
+	LPARAM *params = (LPARAM*)lParam;
+	if (lpfnGetWindowModuleFileName) {
+		//get other application's directory
+		char buffer[490];
+		memset(buffer, 0, 490);
+		lpfnGetWindowModuleFileName(hWnd, buffer, 490);
+		LPTSTR pszFileName = _tcsrchr(buffer, '\\');
+		if (pszFileName)
+			pszFileName++;
+		else
+			return TRUE;
+		*pszFileName = '\0';
+
+		while((pszFileName = _tcschr(buffer, '\\')) != NULL)
+			*pszFileName = '/';
+
+		char *dir = (char*)params[1];
+		if (_tcscmp(buffer, dir))	// Limit to eMules from the same directory
+			return TRUE;
+	}
+	// Elandal: multipleInstance
 	DWORD dwMsgResult;
 	LRESULT res = ::SendMessageTimeout(hWnd,UWM_ARE_YOU_EMULE,0, 0,SMTO_BLOCK |SMTO_ABORTIFHUNG,10000,&dwMsgResult);
 	if(res == 0)
 		return TRUE;
 	if(dwMsgResult == UWM_ARE_YOU_EMULE){ 
-		HWND * target = (HWND *)lParam;
+		HWND * target = (HWND *)params[0];	// Elandal: multipleInstance
 		*target = hWnd;
 		return FALSE; 
 	} 
@@ -483,7 +537,6 @@ CString CemuleApp::CreateED2kHostnameSourceLink(const CAbstractFile* f)
 		thePrefs.GetYourHostname(), thePrefs.GetPort() );
 	return strLink;
 }
-// itsonlyme: hostnameSource
 
 //TODO: Move to emule-window
 bool CemuleApp::CopyTextToClipboard( CString strText )
@@ -874,7 +927,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			else
 			{
 				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
-				// scheme 'Windows-Standard (extragro?' -> always try to use 'LoadImage'!
+				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
 				//
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!

@@ -1,3 +1,9 @@
+--------------------------------------
+Changelog for eMule 0.42d MorphXT v2.x
+--------------------------------------
+CHANGED : MultipleInstance from SF-IOM mod
+CHANGED : update SafeHash and mergeKnown code from SF-IOM mod, partial changed mergeKnown code to adapt 0.42 code
+
 --------------------------------------   
 Changelog for eMule 0.42d MorphXT v2.1
 --------------------------------------   

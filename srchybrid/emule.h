@@ -59,8 +59,11 @@ class CemuleApp : public CWinApp, public CLoggable
 {
 public:
 	CemuleApp(LPCTSTR lpszAppName = NULL);
-	UploadBandwidthThrottler* uploadBandwidthThrottler; //MORPH - Added by Yun.SF3, ZZ Upload System
-	LastCommonRouteFinder*    lastCommonRouteFinder; //MORPH - Added by SiRoB, ZZ Upload system (USS)
+
+	//MORPH - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
+	UploadBandwidthThrottler* uploadBandwidthThrottler; 
+	LastCommonRouteFinder*    lastCommonRouteFinder; 
+	//MORPH - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
 	CemuleDlg*			emuledlg;
 	CClientList*		clientlist;
 	CKnownFileList*		knownfiles;

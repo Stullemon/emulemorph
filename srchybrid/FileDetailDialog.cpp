@@ -293,7 +293,7 @@ void CFileDetailDialogInfo::RefreshData()
 		uCompression += (*m_paFiles)[i]->GetGainDueToCompression();
 		uDataRate += (*m_paFiles)[i]->GetDatarate();
 		uCompleted += (*m_paFiles)[i]->GetCompletedSize();
-		iHashsetAvailable += ((*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartCount()) ? 1 : 0;
+		iHashsetAvailable += ((*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartCount()) ? 1 : 0;//Morph - changed for SafeHash
 
 		if ((*m_paFiles)[i]->IsPartFile())
 		{

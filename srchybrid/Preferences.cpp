@@ -759,8 +759,7 @@ void CPreferences::Init()
 			if (PathCanonicalize(szFullPath, toadd))
 				toadd = szFullPath;
 
-			if (IsInstallationDirectory(toadd))
-				continue;
+			// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 			if (_taccess(toadd, 0) == 0){ // only add directories which still exist
 				if (toadd.Right(1) != _T('\\'))
@@ -853,31 +852,7 @@ void CPreferences::SetStandartValues()
 //	Save();
 }
 
-bool CPreferences::IsTempFile(const CString& rstrDirectory, const CString& rstrName)
-{
-	if (CompareDirectories(rstrDirectory, GetTempDir()))
-		return false;
-
-	// do not share a file from the temp directory, if it matches one of the following patterns
-	CString strNameLower(rstrName);
-	strNameLower.MakeLower();
-	strNameLower += _T("|"); // append an EOS character which we can query for
-	static const LPCTSTR _apszNotSharedExts[] = {
-		_T("%u.part") _T("%c"), 
-		_T("%u.part.met") _T("%c"), 
-		_T("%u.part.met") PARTMET_BAK_EXT _T("%c"), 
-		_T("%u.part.met") PARTMET_TMP_EXT _T("%c") 
-	};
-	for (int i = 0; i < ARRSIZE(_apszNotSharedExts); i++){
-		UINT uNum;
-		TCHAR iChar;
-		// "misuse" the 'scanf' function for a very simple pattern scanning.
-		if (_stscanf(strNameLower, _apszNotSharedExts[i], &uNum, &iChar) == 2 && iChar == _T('|'))
-			return true;
-	}
-
-	return false;
-}
+// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
 
 // SLUGFILLER: SafeHash
 bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rstrName)
@@ -3539,6 +3514,8 @@ bool CPreferences::MoveCat(UINT from, UINT to){
 	return true;
 }
 
+// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+/*
 bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 {
 	CString strFullPath;
@@ -3559,11 +3536,11 @@ bool CPreferences::IsInstallationDirectory(const CString& rstrDir)
 
 	return false;
 }
+*/
 
 bool CPreferences::IsShareableDirectory(const CString& rstrDir)
 {
-	if (IsInstallationDirectory(rstrDir))
-		return false;
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 	CString strFullPath;
 	if (PathCanonicalize(strFullPath.GetBuffer(MAX_PATH), rstrDir))

@@ -218,7 +218,7 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 				if (thePrefs.GetDebugClientUDPLevel() > 0)
 					DebugRecv("OP_ReaskFilePing", sender, (char*)reqfilehash, ip);
 
-				//Make sure we are still thinking about the same file.
+				//Make sure we are still thinking about the same file
 				if (md4cmp(reqfilehash, sender->GetUploadFileID()) == 0)
 				{
 					sender->AddAskedCount();

@@ -322,7 +322,7 @@ void CUpDownClient::SendFileRequest()
 	socket->SendPacket(packet, true);
 
 	// 26-Jul-2003: removed requesting the file status for files <= PARTSIZE for better compatibility with ed2k protocol (eDonkeyHybrid).
-	// if the remote client answers the OP_FILEREQUEST with OP_FILEREQANSWER the file is shared by the remote client. if we
+	// if the remote client answers the OP_REQUESTFILENAME with OP_REQFILENAMEANSWER the file is shared by the remote client. if we
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 		if (reqfile->GetPartCount() > 1)
 		{
@@ -389,7 +389,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (ProcessFileInfo; reqfile!=file)");
 	m_strClientFilename = data->ReadString();
 	// 26-Jul-2003: removed requesting the file status for files <= PARTSIZE for better compatibility with ed2k protocol (eDonkeyHybrid).
-	// if the remote client answers the OP_FILEREQUEST with OP_FILEREQANSWER the file is shared by the remote client. if we
+	// if the remote client answers the OP_REQUESTFILENAME with OP_REQFILENAMEANSWER the file is shared by the remote client. if we
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1)
 	{
@@ -431,6 +431,8 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		// even if the file is <= PARTSIZE, we _may_ need the hashset for that file (if the file size == PARTSIZE)
 		if (reqfile->hashsetneeded)
 		{
+			RequestHashset();	// SLUGFILLER: SafeHash
+			/*
 			if (socket)
 			{
 				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
@@ -443,6 +445,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			}
 			else
 				ASSERT(0);
+			*/
 		}
 		else
 		{
@@ -552,6 +555,8 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		//If we are using the eMule filerequest packets, this is taken care of in the Multipacket!
 		else if (reqfile->hashsetneeded)
 		{
+			RequestHashset();	// SLUGFILLER: SafeHash
+			/*
 			if (socket)
 			{
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -566,6 +571,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 			}
 			else
 				ASSERT(0);
+			*/
 		}
 		else
 		{
@@ -636,6 +642,14 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			}
 		}
 
+	
+		// SLUGFILLER: SafeHash
+		if (reqfile && m_nDownloadState == DS_REQHASHSET && nNewState != DS_REQHASHSET)
+			reqfile->hashsetneeded = false;
+		if (nNewState == DS_REQHASHSET)
+			m_dwRequestedHashset = GetTickCount();
+		// SLUGFILLER: SafeHash
+
 		if (m_nDownloadState == DS_DOWNLOADING ){
 
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
@@ -692,6 +706,7 @@ void CUpDownClient::ProcessHashSet(char* packet,uint32 size){
 	CSafeMemFile data((BYTE*)packet,size);
 	if (reqfile->LoadHashsetFromFile(&data,true)){
 		m_fHashsetRequesting = 0;
+		m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 		reqfile->PerformFirstHash();		// SLUGFILLER: SafeHash - Rehash
 	}
 	else{
@@ -1170,6 +1185,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 		err = Z_DATA_ERROR;
 		ASSERT(0);
 	}
+
   	return err;
 }
 
@@ -1303,6 +1319,18 @@ void CUpDownClient::UDPReaskForDownload()
 		theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
 	}
 }
+
+// SLUGFILLER: SafeHash
+void CUpDownClient::RequestHashset(){
+	Packet* packet = new Packet(OP_HASHSETREQUEST,16);
+	md4cpy(packet->pBuffer,reqfile->GetFileHash());
+	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+	socket->SendPacket(packet, true, true);
+	SetDownloadState(DS_REQHASHSET);
+	m_fHashsetRequesting = 1;
+	reqfile->hashsetneeded = false;
+}
+// SLUGFILLER: SafeHash
 
 // Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
 //MORPH START - Changed by SiRoB, Advanced A4AF derivated from Khaos
@@ -1474,6 +1502,7 @@ bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensio
 	}
 
 	if (SwapTo){
+		//if (thePrefs.GetVerbose())
 		//AddDebugLogLine(false, "Swapped source '%s'; Status %i; Remove %s to %s", this->GetUserName(), this->GetDownloadState(), (bRemoveCompletely ? "Yes" : "No" ), SwapTo->GetFileName());		
 		//MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos
 		//if (DoSwap(SwapTo,bRemoveCompletely)){		

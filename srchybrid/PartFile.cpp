@@ -516,6 +516,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			if (!getsizeonly || (getsizeonly && (newtag->tag.specialtag==FT_FILESIZE || newtag->tag.specialtag==FT_FILENAME))){
 				switch(newtag->tag.specialtag){
 					case FT_FILENAME:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 2) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						if (newtag->tag.stringvalue == NULL) {
 							AddLogLine(true, GetResString(IDS_ERR_METCORRUPT), m_partmetfilename, GetFileName());
 							delete newtag;
@@ -532,27 +538,57 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						break;
 					}
 					case FT_FILESIZE:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						SetFileSize(newtag->tag.intvalue);
 						delete newtag;
 						break;
 					}
 					case FT_TRANSFERED:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						transfered = newtag->tag.intvalue;
 						delete newtag;
 						break;
 					}
 					case FT_FILETYPE:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 2) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						SetFileType(newtag->tag.stringvalue);
 						delete newtag;
 						break;
 					}
 					case FT_CATEGORY:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_category = newtag->tag.intvalue;
 						delete newtag;
 						break;
 					}
 					case FT_DLPRIORITY:{
 						if (!isnewstyle){
+							// SLUGFILLER: SafeHash - tag-type verification
+							if (newtag->tag.type != 3) {
+								taglist.Add(newtag);
+								break;
+							}
+							// SLUGFILLER: SafeHash
 							m_iDownPriority = newtag->tag.intvalue;
 							if( m_iDownPriority == PR_AUTO ){
 								m_iDownPriority = PR_HIGH;
@@ -568,6 +604,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						break;
 					}
 					case FT_STATUS:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						paused = newtag->tag.intvalue;
 						stopped=paused;
 						delete newtag;
@@ -575,6 +617,12 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					}
 					case FT_ULPRIORITY:{
 						if (!isnewstyle){
+							// SLUGFILLER: SafeHash - tag-type verification
+							if (newtag->tag.type != 3) {
+								taglist.Add(newtag);
+								break;
+							}
+							// SLUGFILLER: SafeHash
 							int iUpPriority = newtag->tag.intvalue;
 							if( iUpPriority == PR_AUTO ){
 								SetUpPriority(PR_HIGH, false);
@@ -591,12 +639,24 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						break;
 					}
 					case FT_KADLASTPUBLISHSRC:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						SetLastPublishTimeKadSrc(newtag->tag.intvalue);
 						delete newtag;
 						break;
 					}
 					// xMule_MOD: showSharePermissions - load permissions
 					case FT_PERMISSIONS: {
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						SetPermissions(newtag->tag.intvalue);
 						delete newtag;
 						break;
@@ -604,11 +664,23 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					// xMule_MOD: showSharePermissions
 					// khaos::categorymod+
 					case FT_CATRESUMEORDER:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_catResumeOrder = newtag->tag.intvalue;
 						delete newtag;
 						break;
 					}
 					case FT_CATFILEGROUP:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_catFileGroup = newtag->tag.intvalue;
 						delete newtag;
 						break;
@@ -616,11 +688,23 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					// khaos::categorymod-
 					// khaos::compcorruptfix+
 					case FT_COMPRESSIONBYTES:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_iGainDueToCompression = newtag->tag.intvalue;
 						delete newtag;
 						break;
 					}
 					case FT_CORRUPTIONBYTES:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_iLostDueToCorruption = newtag->tag.intvalue;
 						delete newtag;
 						break;
@@ -628,11 +712,23 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					// khaos::compcorruptfix-
 					// khaos::kmod+
 					case FT_A4AFON:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_bForceAllA4AF = (newtag->tag.intvalue == 1) ? true : false;
 						delete newtag;
 						break;
 					}
 					case FT_A4AFOFF:{
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						m_bForceA4AFOff = (newtag->tag.intvalue == 1) ? true : false;
 						delete newtag;
 						break;
@@ -640,10 +736,16 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					// khaos::kmod-
 					// old tags: as long as they are not needed, take the chance to purge them
 					case FT_KADLASTPUBLISHKEY:
+						// SLUGFILLER: SafeHash - tag-type verification
+						if (newtag->tag.type != 3) {
+							taglist.Add(newtag);
+							break;
+						}
+						// SLUGFILLER: SafeHash
 						delete newtag;
 						break;
 					default:{
-					    	// Start Changes by Slugfiller for better exception handling
+					    // Start Changes by Slugfiller for better exception handling
 						if ((!newtag->tag.specialtag) &&
 							 (newtag->tag.tagname[0] == FT_GAPSTART ||
 							newtag->tag.tagname[0] == FT_GAPEND)){
@@ -798,6 +900,8 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			m_hpartfile.SetLength(m_nFileSize);
 		}
 		// SLUGFILLER: SafeHash
+
+		theApp.knownfiles->FilterDuplicateKnownFiles(this);	// SLUGFILLER: mergeKnown - load statistics
 
 		// SLUGFILLER: SafeHash - ignore loaded hash for 1-chunk files
 		if (GetED2KPartCount() <= 1) {
@@ -1841,6 +1945,18 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 
 			ASSERT( nCountForState < sizeof(m_anStates)/sizeof(m_anStates[0]) );
 			m_anStates[nCountForState]++;
+			
+			// SLUGFILLER: SafeHash
+			if (hashsetneeded) {
+				switch (cur_src->GetDownloadState()){
+				case DS_NONEEDEDPARTS:
+				case DS_ONQUEUE:
+					if (!cur_src->GetRequestedHashset())
+						cur_src->RequestHashset();
+					break;
+				}
+			}
+			// SLUGFILLER: SafeHash
 
 			DWORD dwLastCheck = dwCurTick - cur_src->GetLastAskedTime();
 
@@ -1985,6 +2101,12 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 					}
 					break;
 				}
+				// SLUGFILLER: SafeHash
+				case DS_REQHASHSET:
+					if (!cur_src->GetRequestedHashset() || dwCurTick - cur_src->GetRequestedHashset() > CONNECTION_TIMEOUT)	// timeout for hashset request
+						cur_src->SendStartupLoadReq();	// this will set the client's status to on-queue
+					break;
+				// SLUGFILLER: SafeHash			
 			}
 		}
 
@@ -2071,6 +2193,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	}
 
 	return datarate;
+	
 }
 
 bool CPartFile::CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, UINT* pdebug_lowiddropped)
@@ -2180,6 +2303,7 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 			}
 		}
 
+		// additionally check for LowID and own IP
 		if (!CanAddSource(userid, port, serverip, serverport, &debug_lowiddropped))
 		{
 			if (thePrefs.GetLogFilteredIPs())
@@ -2366,7 +2490,7 @@ void CPartFile::UpdatePartsInfo()
 	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(m_nVirtualCompleteSourcesCount<11), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0) || m_nVirtualCompleteSourcesCount==1);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	UpdateDisplayedInfo();
+	UpdateDisplayedInfo(true);
 	//MORPH END   - Added by Yun.SF3, ZZ Upload System
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	InChangedSharedStatusBar = false;
@@ -2474,6 +2598,9 @@ void UncompressFile(LPCTSTR pszFilePath)
 }
 
 // Lord KiRon - using threads for file completion
+// NOTE: This function is executed within a seperate thread, do *NOT* use an lists/queues of the main thread without
+// synchronization. Even the access to couple of members of the CPartFile (e.g. filename) would need to be properly
+// synchronization to achive full multi threading compliance.
 BOOL CPartFile::PerformFileComplete() 
 {
 	// If that function is invoked from within the file completion thread, it's ok if we wait (and block) the thread.
@@ -2485,6 +2612,7 @@ BOOL CPartFile::PerformFileComplete()
 
 	CString strNewname;
 	CString indir;
+
 	if (PathFileExists( thePrefs.GetCategory(GetCategory())->incomingpath)) {
 		indir=thePrefs.GetCategory(GetCategory())->incomingpath;
 		strNewname.Format("%s\\%s",indir,newfilename);
@@ -2602,7 +2730,7 @@ BOOL CPartFile::PerformFileComplete()
 	if (_taccess(BAKName, 0) == 0 && !::DeleteFile(BAKName))
 		theApp.emuledlg->QueueLogLine(true,GetResString(IDS_ERR_DELETE) + _T(" - ") + GetErrorMessage(GetLastError()), BAKName);
 
-	// initialize 'this' part file for being a 'complete' file
+	// initialize 'this' part file for being a 'complete' file, this is to be done *before* releasing the file mutex.
 	m_fullname = strNewname;
 	SetPath(indir);
 	SetFilePath(m_fullname);
@@ -2617,7 +2745,7 @@ BOOL CPartFile::PerformFileComplete()
 	return TRUE;
 }
 
-// 'End' of file completion, to void multi threading synchronization problems, this is to be invoked from within the
+// 'End' of file completion, to avoid multi threading synchronization problems, this is to be invoked from within the
 // main thread!
 void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 {
@@ -2644,6 +2772,7 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 			theApp.emuledlg->transferwnd->downloadlistctrl.RemoveFile(this);
 		else
 			UpdateDisplayedInfo(true);
+
 		theApp.emuledlg->transferwnd->downloadlistctrl.ShowFilesCount();
 
 		// -khaos--+++> Extended Statistics Added 2-10-03
@@ -3103,7 +3232,6 @@ void CPartFile::PreviewFile(){
 		return;
 	}
 
-
 	if (thePrefs.IsMoviePreviewBackup()){
 		m_bPreviewing = true;
 		CPreviewThread* pThread = (CPreviewThread*) AfxBeginThread(RUNTIME_CLASS(CPreviewThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
@@ -3279,8 +3407,7 @@ Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 					}
 				}
 				else{
-					// if we don't know the need parts for this client, return any source
-					// currently a client sends it's file status only after it has at least one complete part,
+					// We know this client is valid. But don't know the part count status.. So, currently we just send them.
 					for (int x = 0; x < GetPartCount(); x++){
 						if (srcstatus[x]){
 							bNeeded = true;
@@ -3319,7 +3446,7 @@ Packet* CPartFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 
 	Packet* result = new Packet(&data, OP_EMULEPROT);
 	result->opcode = OP_ANSWERSOURCES;
-	// 16+2+501*(4+2+4+2+16) = 15048 bytes max.
+	// 16+2+501*(4+2+4+2+16) = 14046 bytes max.
 	if ( result->size > 354 )
 		result->PackPacket();
 	if ( thePrefs.GetDebugSourceExchange() )
@@ -3429,13 +3556,6 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 sourceexchangevers
 			{
 				if (thePrefs.GetLogFilteredIPs())
 					AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange"), inet_ntoa(*(in_addr*)&dwID));
-				continue;
-			}
-			else if (theApp.serverconnect->GetClientID() == dwID){
-#ifdef _DEBUG
-				// bluecow - please do not remove this in the debug version - i need this for testing.
-				if (theApp.serverconnect->IsLowID() || thePrefs.GetPort() == nPort)
-#endif
 				continue;
 			}
 		}
@@ -3598,6 +3718,7 @@ void CPartFile::FlushBuffer(bool forcewait)
 		m_iAllocinfo=0;
 	}
 
+	//if (thePrefs.GetVerbose())
 //	AddDebugLogLine(false, "Flushing file %s - buffer size = %ld bytes (%ld queued items) transfered = %ld [time = %ld]\n", GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), transfered, m_nLastBufferFlushTime);
 
 	uint32 partCount = GetPartCount();
@@ -3610,6 +3731,7 @@ void CPartFile::FlushBuffer(bool forcewait)
 	// Remember which parts need to be checked at the end of the flush
 	for (int partNumber=0; (uint32)partNumber<partCount; partNumber++)
 		changedPart[partNumber] = false;
+
 	try
 	{
 		bool bCheckDiskspace = thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0;
@@ -3893,10 +4015,12 @@ UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 	{
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)myfile,(LPARAM)error) );
 		myfile->m_AllocateThread=NULL;
+
 		return 1;
 	}
 	catch(...)
 	{
+
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)myfile,0) );
 		myfile->m_AllocateThread=NULL;
 		return 2;

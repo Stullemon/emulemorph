@@ -14,6 +14,7 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 #pragma once
 #include "TrayDialog.h"
 #include "MeterIcon.h"
@@ -156,10 +157,10 @@ protected:
 	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileHashed(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnHashFailed(WPARAM wParam,LPARAM lParam);
-	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnPartHashedOK(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam);
 	// SLUGFILLER: SafeHash
+	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnFileCompleted(WPARAM wParam,LPARAM lParam);
 
 	//Framegrabbing

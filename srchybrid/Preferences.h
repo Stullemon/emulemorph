@@ -725,10 +725,10 @@ public:
 	static	const CString& GetConfigDir()			{return configdir;}
 	static	const CString& GetWebServerDir()		{return m_strWebServerDir;}
 
-	static	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName);
+	// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
 	static	bool	IsConfigFile(const CString& rstrDirectory, const CString& rstrName);
 	static	bool	IsShareableDirectory(const CString& rstrDirectory);
-	static	bool	IsInstallationDirectory(const CString& rstrDir);
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
 	static	bool	Save();
 	static	void	SaveCats();

@@ -56,6 +56,7 @@ public:
 	float	GetSpreadSortValue() /*const*/;
 	float	GetFullSpreadCount() /*const*/;
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
+	void	Merge(CFileStatistic *other);	// SLUGFILLER: mergeKnown
 	uint16	GetRequests() const				{return requested;}
 	uint16	GetAccepts() const				{return accepted;}
 	uint64	GetTransferred() const			{return transferred;}
@@ -214,6 +215,11 @@ public:
 
 	bool	GetPublishedED2K() const { return m_PublishedED2K; }
 	void	SetPublishedED2K( bool val );
+	
+	// SLUGFILLER: mergeKnown
+	void	SetLastSeen()	{lastseen = time(NULL);}
+	uint32	GetLastSeen()	{return lastseen;}
+	// SLUGFILLER: mergeKnown
 
 	uint32	GetKadFileSearchID() const { return kadFileSearchID; }
 	void	SetKadFileSearchID( uint32 id )	{kadFileSearchID = id;} //Don't use this unless you know what your are DOING!! (Hopefully I do.. :)
@@ -324,6 +330,7 @@ private:
 	bool	m_bAutoUpPriority;
 	bool	m_bCommentLoaded;
 	bool	m_PublishedED2K;
+	uint32	lastseen;	// SLUGFILLER: mergeKnown
 	uint32	kadFileSearchID;
 	uint32	m_lastPublishTimeKadSrc;
 	uint32	m_PublishedKadSrc;

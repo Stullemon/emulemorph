@@ -108,7 +108,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
 			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
 		}
-		//for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
+
         // Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
         /*uint32 total = 0;
 		for(POSITION pos = m_DoneBlocks_list.GetHeadPosition(); pos!=0; ){
@@ -467,7 +467,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 			}
 			else{
 				togo = currentblock->EndOffset - currentblock->StartOffset;
-				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1))
+				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precausion
 					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
 			}
 
@@ -841,7 +841,7 @@ uint32 CUpDownClient::SendBlockData(){
 	}
 
 	if(sentBytesCompleteFile + sentBytesPartFile > 0 ||
-		m_AvarageUDR_list.GetCount() == 0 || (::GetTickCount() - m_AvarageUDR_list.GetTail().timestamp) > 1*1000) {
+        m_AvarageUDR_list.GetCount() == 0 || (curTick - m_AvarageUDR_list.GetTail().timestamp) > 1*1000) {
 		// Store how much data we've transfered this round,
 		// to be able to calculate average speed later
 		// keep sum of all values in list up to date
@@ -851,17 +851,17 @@ uint32 CUpDownClient::SendBlockData(){
 	}
 			
 	// remove to old values in list
-	while (m_AvarageUDR_list.GetCount() > 0 && (::GetTickCount() - m_AvarageUDR_list.GetHead().timestamp) > 10*1000) {
+    while (m_AvarageUDR_list.GetCount() > 0 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > 10*1000) {
 		// keep sum of all values in list up to date
 		sumavgUDR -= m_AvarageUDR_list.RemoveHead().datalen;
 	}
 
 	// Calculate average speed for this slot
-	if(m_AvarageUDR_list.GetCount() > 0 && (::GetTickCount() - m_AvarageUDR_list.GetHead().timestamp) > 0 && GetUpStartTimeDelay() > 2*1000) {
-		m_nUpDatarate = (sumavgUDR*1000) / (::GetTickCount()-m_AvarageUDR_list.GetHead().timestamp);
+    if(m_AvarageUDR_list.GetCount() > 0 && (curTick - m_AvarageUDR_list.GetHead().timestamp) > 0 && GetUpStartTimeDelay() > 2*1000) {
+        m_nUpDatarate = (sumavgUDR*1000) / (curTick-m_AvarageUDR_list.GetHead().timestamp);
 	} else {
 		// not enough values to calculate trustworthy speed. Use -1 to tell this
-		m_nUpDatarate = -1;
+        m_nUpDatarate = 0; //-1;
 	}
 
 	// Check if it's time to update the display.
@@ -1082,6 +1082,7 @@ void CUpDownClient::ClearWaitStartTime(){
 	}
 	credits->ClearWaitStartTime();
 }
+
 
 bool CUpDownClient::GetFriendSlot() const
 {

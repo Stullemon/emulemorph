@@ -963,8 +963,7 @@ CPartFile* CDownloadQueue::GetFileByIndex(int index) const
 	POSITION pos = filelist.FindIndex(index);
 	if (pos)
 		return filelist.GetAt(pos);
-	else
-		return NULL;
+	return NULL;
 }
 
 CPartFile* CDownloadQueue::GetFileByID(const uchar* filehash) const
@@ -1087,6 +1086,9 @@ void CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 		source->reqfile = sender;
 	}
 	else{
+		// here we know that the client instance 'source' is a new created client instance (see callers) 
+		// which is therefor not already in the clientlist, we can avoid the check for duplicate client list entries 
+		// when adding this client
 		theApp.clientlist->AddClient(source,true);
 	}
 	
@@ -1228,6 +1230,7 @@ void CDownloadQueue::RemoveFile(CPartFile* toremove)
 	}
 	SortByPriority();
 	CheckDiskspace();	// SLUGFILLER: checkDiskspace
+	ExportPartMetFilesOverview();
 }
 
 void CDownloadQueue::DeleteAll(){

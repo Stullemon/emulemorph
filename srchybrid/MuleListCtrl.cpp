@@ -1321,7 +1321,6 @@ void CMuleListCtrl::DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BO
 	while ( iDirection ? iItem < iNumItems : iItem >= 0 )
 	{
 		CString strItemText(GetItemText(iItem, m_iFindColumn));
-		//TRACE("iItem=%d  szText=%s\n", iItem, strItemText);
 		if (!strItemText.IsEmpty())
 		{
 			if ( m_bFindMatchCase
@@ -1358,14 +1357,10 @@ void CMuleListCtrl::OnFindStart()
 	CListViewSearchDlg dlg;
 	dlg.m_pListView = this;
 	dlg.m_strFindText = m_strFindText;
-	//dlg.m_bMatchCase = m_bFindMatchCase;
-	//dlg.m_iSearchDirection = m_iFindDirection;
 	dlg.m_iSearchColumn = m_iFindColumn;
 	if (dlg.DoModal() != IDOK || dlg.m_strFindText.IsEmpty())
 		return;
 	m_strFindText = dlg.m_strFindText;
-	//m_bFindMatchCase = dlg.m_bMatchCase;
-	//m_iFindDirection = dlg.m_iSearchDirection;
 	m_iFindColumn = dlg.m_iSearchColumn;
 
 	DoFindNext(TRUE/*bShowError*/);

@@ -402,17 +402,22 @@
 #define ET_FEATURES				0x27
 #define ET_MOD_VERSION 			0x55
 
-// GUI-Protocol TCP (ed2k_gui + java_gui)
+// KADEMLIA (opcodes) (udp)
 #define KADEMLIA_BOOTSTRAP_REQ	0x00	// <PEER (sender) [25]>
 #define KADEMLIA_BOOTSTRAP_RES	0x08	// <CNT [2]> <PEER [25]>*(CNT)
+
 #define KADEMLIA_HELLO_REQ	 	0x10	// <PEER (sender) [25]>
 #define KADEMLIA_HELLO_RES     	0x18	// <PEER (reciever) [25]>
+
 #define KADEMLIA_REQ		   	0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (reciever) 16>
 #define KADEMLIA_RES			0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
+
 #define KADEMLIA_SEARCH_REQ		0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
 #define KADEMLIA_SEARCH_RES		0x38	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+
 #define KADEMLIA_PUBLISH_REQ	0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 #define KADEMLIA_PUBLISH_RES	0x48	// <HASH (key) [16]>
+
 #define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
 #define KADEMLIA_BUDDY_REQ		0x51	// <TCPPORT (sender) [2]>
 #define KADEMLIA_BUDDY_CON		0x52	//

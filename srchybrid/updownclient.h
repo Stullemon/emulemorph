@@ -539,6 +539,7 @@ public:
 					{
 						return m_dwLastAskedTime;
 					}
+	uint32			GetRequestedHashset()	{return m_dwRequestedHashset;}	// SLUGFILLER: SafeHash
 	bool			IsPartAvailable(uint16 iPart) const
 					{
 						return	( (iPart >= m_nPartCount) || (!m_abyPartStatus) )? 0:m_abyPartStatus[iPart];
@@ -609,6 +610,7 @@ public:
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();
+	void			RequestHashset();	// SLUGFILLER: SafeHash
 	bool			IsSourceRequestAllowed() const;
 	bool			IsValidSource() const;
 
@@ -948,6 +950,7 @@ private:
 	uint32		m_cDownAsked;
 	uint8*		m_abyPartStatus;
 	uint32		m_dwLastAskedTime;
+	uint32		m_dwRequestedHashset;	// SLUGFILLER: SafeHash
 	CString		m_strClientFilename;
 	uint32		m_nTransferedDown;
 	// -khaos--+++> Download Session Stats

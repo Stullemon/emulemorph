@@ -195,6 +195,7 @@ void CUpDownClient::Init()
 		m_nConnectIP = 0;
 	}
 	m_fHashsetRequesting = 0;
+	m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 	m_fSharedDirectories = 0;
 	m_fSentCancelTransfer = 0;
 	m_nClientVersion = 0;
@@ -217,7 +218,6 @@ void CUpDownClient::Init()
 	m_lastRefreshedULDisplay = ::GetTickCount();
 	m_bGPLEvildoer = false;
 	m_bHelloAnswerPending = false;
-
 	m_fNoViewSharedFiles = 0;
 	m_bMultiPacket = 0;
 	md4clr(requpfileid);
@@ -518,14 +518,17 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				dwEmuleTags |= 1;
 				break;
 			case CT_EMULE_MISCOPTIONS1:
-				//  4 Reserved for future use
+				//  4 --Reserved for future use--
 				//  4 UDP version
 				//  4 Data compression version
 				//  4 Secure Ident
 				//  4 Source Exchange
 				//  4 Ext. Requests
 				//  4 Comments
-				//  4 Preview
+				//	1 --Reserved for future use--
+				//	1 No 'View Shared Files' supported
+				//	1 MultiPacket
+				//  1 Preview
 				m_byUDPVer				= (temptag.tag.intvalue >> 4*6) & 0x0f;
 				m_byDataCompVer			= (temptag.tag.intvalue >> 4*5) & 0x0f;
 				m_bySupportSecIdent		= (temptag.tag.intvalue >> 4*4) & 0x0f;
@@ -614,10 +617,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		addhost.S_un.S_addr = m_dwServerIP;
 		CServer* addsrv = new CServer(m_nServerPort, inet_ntoa(addhost));
 		addsrv->SetListName(addsrv->GetAddress());
-
 		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(addsrv, true))
 			delete addsrv;
 	}
+
 	//Because most sources are from ED2K, I removed the m_nUserIDHybrid != m_dwUserIP check since this will trigger 90% of the time anyway.
 	if(!HasLowID() || m_nUserIDHybrid == 0) 
 		m_nUserIDHybrid = ntohl(m_dwUserIP);
@@ -691,6 +694,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	{
 		Kademlia::CKademlia::getUDPListener()->bootstrap(ntohl(GetIP()), GetKadPort());
 	}
+
 	return bIsMule;
 }
 
@@ -909,7 +913,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 					m_strMuleInfo.AppendFormat("  ***EmuleUnkTag: 0x%02x=%u", temptag.tag.specialtag, (UINT)temptag.tag.intvalue);
 		}
 	}
-
 	if( m_byDataCompVer == 0 ){
 		m_bySourceExchangeVer = 0;
 		m_byExtendedRequestsVer = 0;
@@ -1007,6 +1010,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	const UINT uMultiPacket			= 1;
 	const UINT uSupportPreview		= (thePrefs.CanSeeShares() != vsfaNobody) ? 1 : 0; // set 'Preview supported' only if 'View Shared Files' allowed
 	CTag tagMisOptions(CT_EMULE_MISCOPTIONS1, 
+//				(						<< 4*7) |
 				(uUdpVer				<< 4*6) |
 				(uDataCompVer			<< 4*5) |
 				(uSupportSecIdent		<< 4*4) |
@@ -1136,6 +1140,7 @@ bool CUpDownClient::Disconnected(CString strReason, bool bFromSocket){
 		}
 	}	
 
+
 	// The remote client does not have to answer with OP_HASHSETANSWER *immediatly* 
 	// after we've sent OP_HASHSETREQUEST. It may occure that a (buggy) remote client 
 	// is sending use another OP_FILESTATUS which would let us change to DL-state to DS_ONQUEUE.
@@ -1189,6 +1194,7 @@ bool CUpDownClient::Disconnected(CString strReason, bool bFromSocket){
 	if (m_Friend)
 		theApp.friendlist->RefreshFriend(m_Friend);
 	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+
 	if (bDelete){
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug("--- Deleted client            %s; Reason=%s\n", DbgGetClientInfo(true), strReason);
@@ -1198,6 +1204,7 @@ bool CUpDownClient::Disconnected(CString strReason, bool bFromSocket){
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug("--- Disconnected client       %s; Reason=%s\n", DbgGetClientInfo(true), strReason);
 		m_fHashsetRequesting = 0;
+		m_dwRequestedHashset = 0;	// SLUGFILLER: SafeHash
 		SetSentCancelTransfer(0);
 		m_bHelloAnswerPending = false;
 		return false;
@@ -1302,8 +1309,10 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon)
 				}
 				return true;
 			}
-			else{
-				if (GetDownloadState() == DS_WAITCALLBACK){
+			else
+			{
+				if (GetDownloadState() == DS_WAITCALLBACK)
+				{
 					m_bReaskPending = true;
 					SetDownloadState(DS_ONQUEUE);
 				}
@@ -1321,7 +1330,6 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon)
 		if (!SendHelloPacket())
 			return false; // client was deleted!
 	}
-
 	return true;
 }
 
@@ -1338,6 +1346,7 @@ void CUpDownClient::ConnectionEstablished()
 			SetKadState(KS_CONNECTED_BUDDY);
 			break;
 	}
+
 	if (GetChatState() == MS_CONNECTING || GetChatState() == MS_CHATTING)
 		theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this,true);
 
@@ -1769,6 +1778,7 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 			AddDebugLogLine(false, "received multiple signatures from one client");
 		return;
 	}
+	
 	// also make sure this client has a public key
 	if (credits->GetSecIDKeyLen() == 0)
 	{
@@ -1776,6 +1786,7 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 			AddDebugLogLine(false, "received signature for client without public key");
 		return;
 	}
+	
 	// and one more check: did we ask for a signature and sent a challange packet?
 	if (credits->m_dwCryptRndChallengeFor == 0)
 	{
@@ -1786,6 +1797,7 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 
 	if (theApp.clientcredits->VerifyIdent(credits, pachPacket+1, pachPacket[0], GetIP(), byChaIPKind ) ){
 		// result is saved in function abouve
+		//if (thePrefs.GetLogSecureIdent())
 		//AddDebugLogLine(false, "'%s' has passed the secure identification, V2 State: %i", GetUserName(), byChaIPKind);
 	}
 	else
@@ -1807,13 +1819,13 @@ void CUpDownClient::SendSecIdentStatePacket(){
 				nValue = IS_SIGNATURENEEDED;
 		}
 		if (nValue == 0){
+			//if (thePrefs.GetLogSecureIdent())
 			//DEBUG_ONLY(AddDebugLogLine(false, "Not sending SecIdentState Packet, because State is Zero"));
 			return;
 		}
 		// crypt: send random data to sign
 		uint32 dwRandom = rand()+1;
 		credits->m_dwCryptRndChallengeFor = dwRandom;
-		//DEBUG_ONLY(AddDebugLogLine(false, "sending SecIdentState Packet, state: %i (to '%s')", nValue, GetUserName() ));
 		Packet* packet = new Packet(OP_SECIDENTSTATE,5,OP_EMULEPROT);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 		packet->pBuffer[0] = nValue;
@@ -1992,6 +2004,7 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		throw;
 	}
 	(new PreviewDlg())->SetFile(sfile);
+
 }
 
 // sends a packet, if needed it will establish a connection before

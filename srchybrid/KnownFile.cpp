@@ -323,6 +323,33 @@ float CFileStatistic::GetFullSpreadCount() /*const*/
 }
 //MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
 
+// SLUGFILLER: mergeKnown
+void CFileStatistic::Merge(CFileStatistic* other){
+	transferred += other->transferred;
+	requested += other->requested;
+	accepted += other->accepted;
+	alltimetransferred += other->alltimetransferred;
+	alltimerequested += other->alltimerequested;
+	alltimeaccepted += other->alltimeaccepted;
+	// SLUGFILLER: Spreadbars
+	if (!other->spreadlist.IsEmpty()) {
+		POSITION pos = other->spreadlist.GetHeadPosition();
+		uint32 start = other->spreadlist.GetKeyAt(pos);
+		uint32 count = other->spreadlist.GetValueAt(pos);
+		other->spreadlist.GetNext(pos);
+		while (pos){
+			uint32 end = other->spreadlist.GetKeyAt(pos);
+			if (count)
+				AddBlockTransferred(start, end, count);
+			start = end;
+			count = other->spreadlist.GetValueAt(pos);
+			other->spreadlist.GetNext(pos);
+		}
+	}
+	// SLUGFILLER: Spreadbars
+}
+// SLUGFILLER: mergeKnown
+
 IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
 
 CAbstractFile::CAbstractFile()
@@ -379,6 +406,7 @@ CKnownFile::CKnownFile()
 	m_nCompleteSourcesCount = 1;
 	m_nCompleteSourcesCountLo = 1;
 	m_nCompleteSourcesCountHi = 1;
+	lastseen = NULL;	// SLUGFILLER: mergeKnown
 	m_uMetaDataVer = 0;
 	//MORPH START - Added by SiRoB, Show Permission
 	m_iPermissions = -1;
@@ -941,11 +969,28 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 		CTag* newtag = new CTag(file);
 		switch(newtag->tag.specialtag){
 			case FT_FILENAME:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 2) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				SetFileName(newtag->tag.stringvalue);
 				delete newtag;
 				break;
 			}
 			case FT_FILESIZE:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// error checking, don't allow 0-sized files
+				if (!newtag->tag.intvalue) {
+					delete newtag;
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				SetFileSize(newtag->tag.intvalue);
 				m_AvailPartFrequency.SetSize(GetPartCount());
 				for (uint32 i = 0; i < GetPartCount();i++)
@@ -954,11 +999,23 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			case FT_ATTRANSFERED:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				statistic.alltimetransferred = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
 			case FT_ATTRANSFEREDHI:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				uint32 hi,low;
 				low=statistic.alltimetransferred;
 				hi = newtag->tag.intvalue;
@@ -970,16 +1027,35 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			case FT_ATREQUESTED:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				statistic.alltimerequested = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
  			case FT_ATACCEPTED:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				statistic.alltimeaccepted = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
 			case FT_ULPRIORITY:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
+				uint8 autoprio = PR_AUTO;
 				m_iUpPriority = newtag->tag.intvalue;
 				if( m_iUpPriority == PR_AUTO ){
 					m_iUpPriority = PR_HIGH;
@@ -994,11 +1070,23 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			case FT_KADLASTPUBLISHSRC:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				m_lastPublishTimeKadSrc = newtag->tag.intvalue;
 				delete newtag;
 				break;
 			}
 			case FT_FLAGS:
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				// Misc. Flags
 				// ------------------------------------------------------------------------------
 				// Bits  3-0: Meta data version
@@ -1011,6 +1099,12 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 			// old tags: as long as they are not needed, take the chance to purge them
 			// EastShare START - Added by TAHO, .met file control
 			case FT_LASTUSED:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				statistic.SetLastUsed(newtag->tag.intvalue);
 				delete newtag;
 				break;
@@ -1018,6 +1112,12 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 			// EastShare END - Added by TAHO, .met file control
 			//MORPH START - Added by SiRoB, Show Permission
 			case FT_PERMISSIONS:{
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				m_iPermissions = newtag->tag.intvalue;
 				// Mighty Knife: Community visible filelist
 				if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE && m_iPermissions != PERM_COMMUNITY)
@@ -1027,7 +1127,21 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				break;
 			}
 			//MORPH END  - Added by SiRoB, Show Permission
+			// SLUGFILLER: mergeKnown
+			case FT_LASTSEENCOMPLETE:{
+				if (newtag->tag.type == 3)
+					lastseen = newtag->tag.intvalue;
+				delete newtag;
+				break;
+			}
+			// SLUGFILLER: mergeKnown
 			case FT_KADLASTPUBLISHKEY:
+				// SLUGFILLER: SafeHash - tag-type verification
+				if (newtag->tag.type != 3) {
+					taglist.Add(newtag);
+					break;
+				}
+				// SLUGFILLER: SafeHash
 				delete newtag;
 				break;
 			default:
@@ -1112,7 +1226,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 	if (m_uMetaDataVer == 0)
 		RemoveMetaDataTags();
 
-	return true;
+	return m_nFileSize;	// SLUGFILLER: SafeHash - error checking, don't allow 0-sized files
 }
 
 bool CKnownFile::LoadDateFromFile(CFileDataIO* file){
@@ -1150,7 +1264,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	for (UINT i = 0; i < parts; i++)
 		file->WriteHash16(hashlist[i]);
 	//tags
-	const int iFixedTags = 10 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO]
+	const int iFixedTags = 11 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO] // SLUGFILLER: mergeKnown (+1)
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
 	// a bug in the meta tag reading+writing code. To achive maximum backward 
@@ -1182,7 +1296,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	
 	// standard tags
-	file->Write(&tagcount, 4);
+	file->WriteUInt32(tagcount);
 	
 	CTag nametag(FT_FILENAME, GetFileName());
 	nametag.WriteTagToFile(file);
@@ -1236,6 +1350,11 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	lastUsedTag.WriteTagToFile(file);
 	//EastShare END - Added by TAHO, .met file control
 
+	// SLUGFILLER: mergeKnown
+	CTag lsctag(FT_LASTSEENCOMPLETE,lastseen);
+	lsctag.WriteTagToFile(file);
+	// SLUGFILLER: mergeKnown
+	
 	//MORPH START - Added by SiRoB, HIDEOS
 	if (GetHideOS()>=0){
 		CTag hideostag(FT_HIDEOS, GetHideOS());
@@ -1649,7 +1768,6 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient) const
 		AddDebugLogLine( false, "Send:Source User(%s) File(%s) Count(%i)", forClient->GetUserName(), GetFileName(), nCount );
 	return result;
 }
-
 
 //For File Comment // 
 void CKnownFile::LoadComment(){ 

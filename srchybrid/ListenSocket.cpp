@@ -1807,7 +1807,7 @@ CListenSocket::CListenSocket()
 	totalconnectionchecks = 0;
 	averageconnections = 0.0;
 	activeconnections = 0;
-	per5average = 0;
+	per5average = 0; //MORPH - Added by Yun.SF3, Auto DynUp changing
 }
 
 CListenSocket::~CListenSocket(){
@@ -1867,8 +1867,10 @@ void CListenSocket::Process(){
 	POSITION pos2;
 	m_OpenSocketsInterval = 0;
 	opensockets = 0;
+	//MORPH START - Added by Yun.SF3, Auto DynUp changing
 	if (per5average)
 		per5average /= 2;
+	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 	for(POSITION pos1 = socket_list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 		socket_list.GetNext(pos1);
 		CClientReqSocket* cur_sock = socket_list.GetAt(pos2);
@@ -1930,7 +1932,9 @@ void CListenSocket::KillAllSockets(){
 }
 
 void CListenSocket::AddConnection(){
+	//MORPH START - Added by Yun.SF3, Auto DynUp changing
 	per5average++;
+	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 	m_OpenSocketsInterval++;
 	opensockets++;
 //MORPH START - Added by Yun.SF3, Auto DynUp changing

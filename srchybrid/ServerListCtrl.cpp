@@ -80,6 +80,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
+	ShowServerCount();
 
 	return true;
 } 
@@ -522,7 +523,6 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				}
 					return TRUE;
 			}
-			// Remove Static Servers [Barry]
 			case MP_REMOVEFROMSTATIC:
 				{
 				POSITION pos=GetFirstSelectedItemPosition();
@@ -541,8 +541,6 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				while( pos != NULL ){
 						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					change->SetPreference( SRV_PR_LOW);
-//					if (change->IsStaticMember())
-//						StaticServerFileAppend(change); //Why are you adding to static when changing prioity? If I want it static I set it static.. I set server to LOW because I HATE this server, not because I like it!!!
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 					return TRUE;
@@ -553,8 +551,6 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				while( pos != NULL ){
 						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					change->SetPreference( SRV_PR_NORMAL );
-//					if (change->IsStaticMember())
-//						StaticServerFileAppend(change);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 					return TRUE;
@@ -565,8 +561,6 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 				while( pos != NULL ){
 						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					change->SetPreference( SRV_PR_HIGH );
-//					if (change->IsStaticMember())
-//						StaticServerFileAppend(change);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 					return TRUE;

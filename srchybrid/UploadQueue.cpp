@@ -843,7 +843,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		waitinglist.GetNext(pos1);
 		CUpDownClient* cur_client = waitinglist.GetAt(pos2);
 		if (cur_client == client)
-		{	//already on queue
+		{	
+			//already on queue
 			// VQB LowID Slot Patch, enhanced in ZZUL
 			if (addInFirstPlace == false && client->HasLowID() && client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount()))
 			{
@@ -1127,8 +1128,6 @@ void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){
 void CUploadQueue::UpdateMaxClientScore()
 {
 	m_imaxscore=0;
-	uint32 score;
-
 	for(POSITION pos = waitinglist.GetHeadPosition(); pos != 0; ) {
 		uint32 score = waitinglist.GetNext(pos)->GetScore(true, false);
 		if(score > m_imaxscore )
@@ -1143,9 +1142,7 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 		return true;
 	}
 
-
 	if (!thePrefs.TransferFullChunks()){
-
 		// Cache current client score
 		const uint32 score = client->GetScore(true, true);
 

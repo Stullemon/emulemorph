@@ -95,6 +95,7 @@ struct SLogItem
 
 BOOL (WINAPI *_TransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT)= NULL;
 const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(_T(EMULE_GUID));
+
 // CemuleDlg Dialog
 
 CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
@@ -245,7 +246,6 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_PARTHASHEDCORRUPT,OnPartHashedCorrupt)
 	// SLUGFILLER: SafeHash
 
-	// Framegrabbing
 	ON_MESSAGE(TM_FRAMEGRABFINISHED,OnFrameGrabFinished)
 	ON_MESSAGE(TM_FILEALLOCEXC, OnFileAllocExc)
 	ON_MESSAGE(TM_FILECOMPLETED, OnFileCompleted)
@@ -487,6 +487,7 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 		AddLogLine(true,GetResString(IDS_NEWVERSIONFAILED));
 	}
 }
+
 
 void CALLBACK CemuleDlg::StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime)
 {
@@ -913,26 +914,20 @@ void CemuleDlg::ShowConnectionState()
 	
 	CString status;
 
-	//MORPH - Changed by SiRoB, Don't know why but arceling reporting
-	/*
 	if(theApp.serverconnect->IsConnected())
-		status = "ED2K:"+GetResString(IDS_CONNECTED);
+		status = "eD2K:"+GetResString(IDS_CONNECTED);
 	else if (theApp.serverconnect->IsConnecting())
-		status = "ED2K:"+GetResString(IDS_CONNECTING);
+		status = "eD2K:"+GetResString(IDS_CONNECTING);
 	else
-		status = "ED2K:"+GetResString(IDS_NOTCONNECTED);
-	*/
-	if(theApp.serverconnect->IsConnected())
-		status = "ED2K";
-	else if (theApp.serverconnect->IsConnecting())
-		status = "ed2k";
-	else
-		status = "";
+		status = "eD2K:"+GetResString(IDS_NOTCONNECTED);
 
+	//Most likley needs a rewrite
 	if(Kademlia::CKademlia::isConnected())
-		status += status.IsEmpty()?"KAD":" | KAD";
+		status += "|Kad:"+GetResString(IDS_CONNECTED);
 	else if (Kademlia::CKademlia::isRunning())
-		status += status.IsEmpty()?"kad":" | kad";
+		status += "|Kad:"+GetResString(IDS_CONNECTING);
+	else
+		status += "|Kad:"+GetResString(IDS_NOTCONNECTED);
 
 	statusbar->SetTipText(3,status);
 	statusbar->SetText(status,3,0);
@@ -1374,6 +1369,7 @@ LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam){
 	return 0;
 }
 // SLUGFILLER: SafeHash
+
 LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 {
 	if (lParam==0)
@@ -1549,7 +1545,6 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 		thePrefs.GetMaxGraphDownloadRate(),
 		thePrefs.GetMaxUpload(),
 		thePrefs.GetMaxDownload());
-	
 	if(m_pSystrayDlg)
 	{
 		UINT nResult = m_pSystrayDlg->DoModal();
@@ -1735,7 +1730,6 @@ void CemuleDlg::ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF)
 	LPCTSTR pszSoundEvent = NULL;
 	int iSoundPrio = 0;
 	bool ShowIt = false;
-
 	switch(MsgType) {
 		case TBN_CHAT:
             if (thePrefs.GetUseChatNotifier()) {
@@ -1817,7 +1811,6 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM wParam,LPARAM lParam)
 	case TBN_DLOADADDED:
 		RestoreWindow();
 		SetActiveDialog(transferwnd);
-	//	{TODO: aprire la cartella incoming?}
 		break;
 	case TBN_IMPORTANTEVENT:
 		RestoreWindow();
@@ -2158,6 +2151,7 @@ void CemuleDlg::ShowToolPopup(bool toolsonly)
 		menu.AppendMenu(MF_STRING,MP_HM_HELP, GetResString(IDS_EM_HELP));
 		menu.AppendMenu(MF_SEPARATOR);
 	}
+
 	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC));
 	menu.AppendMenu(MF_STRING,MP_HM_CONVERTPF, GetResString(IDS_IMPORTSPLPF));
 	menu.AppendMenu(MF_STRING,MP_HM_1STSWIZARD, GetResString(IDS_WIZ1));

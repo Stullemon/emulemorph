@@ -25,6 +25,7 @@ class CUploadQueue: public CLoggable
 public:
 	CUploadQueue();
 	~CUploadQueue();
+
 	void	Process();
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
@@ -83,7 +84,7 @@ public:
 	uint32	GetSuccessfullUpCount()					{return successfullupcount;}
 	uint32	GetFailedUpCount()						{return failedupcount;}
 	uint32	GetAverageUpTime();
-	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
+//	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
 	//MORPH START - Changed by SiRoB, ZZ Upload system 20030818-1923
 	void	AddUpDataOverheadSourceExchange(uint32 data)	{ /*m_nUpDataRateMSOverhead += data;*/
 															  m_nUpDataOverheadSourceExchange += data;

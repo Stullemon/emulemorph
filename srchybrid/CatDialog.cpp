@@ -210,10 +210,13 @@ void CCatDialog::OnBnClickedOk()
 	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->comment, ARRSIZE(m_myCat->comment));
 
 	MakeFoldername(m_myCat->incomingpath);
+	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
+	/*
 	if (!thePrefs.IsShareableDirectory(m_myCat->incomingpath)){
 		_snprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), "%s", thePrefs.GetIncomingDir());
 		MakeFoldername(m_myCat->incomingpath);
 	}
+	*/
 
 	if (!PathFileExists(m_myCat->incomingpath)){
 		if (!::CreateDirectory(m_myCat->incomingpath, 0)){

@@ -122,6 +122,7 @@ private:
 	LPSTR m_pszDirectory;
 	LPSTR m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 
+	// GUI helpers
 	bool		 m_bPreviewPossible;
 	bool		 m_list_bExpanded;
 	uint16		 m_list_childcount;
