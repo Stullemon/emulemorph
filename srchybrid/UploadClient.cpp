@@ -379,7 +379,9 @@ double CUpDownClient::GetEqualChanceValue() const
 //Morph Start - added by AndCycle, Pay Back First
 bool CUpDownClient::IsMoreUpThanDown() const{
 	if(!IsSecure()) return false;
-	return thePrefs.IsPayBackFirst() ? credits->GetPayBackFirstStatus() : false ;
+	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
+	if (currentReqFile == NULL) return false;
+	return (thePrefs.IsPayBackFirst() && currentReqFile->IsPartFile()==false) ? credits->GetPayBackFirstStatus() : false ;
 }
 //Morph End - added by AndCycle, Pay Back First
 

@@ -912,7 +912,7 @@ bool CPreferences::IsZZRatioDoesWork(){
 	
 	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
-	if (thePrefs.GetPayBackFirstLimit() < 10)
+	if (theApp.stat_sessionSentBytesToFriend > 0)
 		return true;
 	return theApp.statistics->GetAvgUploadRate(0)<10.240;
 }
