@@ -291,6 +291,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiLogFriendlistActivities = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPH_RAIF), TVI_ROOT, m_bLogFriendlistActivities);
 		// [end] Mighty Knife
 
+		// Mighty Knife: Static server handling
+		m_htiDontRemoveStaticServers = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPH_KSSERV), TVI_ROOT, m_bDontRemoveStaticServers);
+		// [end] Mighty Knife
+
 		m_ctrlTreeOptions.Expand(m_htiDM, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUM, TVE_EXPAND);
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
@@ -365,6 +369,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiLogFriendlistActivities, m_bLogFriendlistActivities); 
 	// [end] Mighty Knife
 
+	// Mighty Knife: Static server handling
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveStaticServers, m_bDontRemoveStaticServers); 
+	// [end] Mighty Knife
 }
 
 
@@ -441,6 +448,10 @@ BOOL CPPgMorph::OnInitDialog()
 	// Mighty Knife: Report hashing files, Log friendlist activities
 	m_bReportHashingFiles = thePrefs.GetReportHashingFiles ();
 	m_bLogFriendlistActivities = thePrefs.GetLogFriendlistActivities ();
+	// [end] Mighty Knife
+
+	// Mighty Knife: Static server handling
+	m_bDontRemoveStaticServers = thePrefs.GetDontRemoveStaticServers ();
 	// [end] Mighty Knife
 
 	CPropertyPage::OnInitDialog();
@@ -535,6 +546,10 @@ BOOL CPPgMorph::OnApply()
 	// Mighty Knife: Report hashing files, Log friendlist activities
 	thePrefs.SetReportHashingFiles (m_bReportHashingFiles);
 	thePrefs.SetLogFriendlistActivities (m_bLogFriendlistActivities);
+	// [end] Mighty Knife
+
+	// Mighty Knife: Static server handling
+	thePrefs.SetDontRemoveStaticServers (m_bDontRemoveStaticServers);
 	// [end] Mighty Knife
 
 	theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler

@@ -149,6 +149,11 @@ protected:
 	HTREEITEM m_htiLogFriendlistActivities;
 	// [end] Mighty Knife
 
+	// Mighty Knife: Static server handling
+	BOOL	  m_bDontRemoveStaticServers;
+	HTREEITEM m_htiDontRemoveStaticServers;
+	// [end] Mighty Knife
+
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
