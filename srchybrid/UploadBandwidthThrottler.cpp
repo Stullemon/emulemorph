@@ -54,6 +54,7 @@ UploadBandwidthThrottler::~UploadBandwidthThrottler(void) {
     EndThread();
     
     delete threadEndedEvent;
+	delete pauseEvent; //MORPH - Added by SiRoB
 }
 
 void UploadBandwidthThrottler::SetAllowedDataRate(uint32 newValue) {
@@ -355,7 +356,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
         // Get current speed from UploadSpeedSense
         allowedDataRate = theApp.lastCommonRouteFinder->GetUpload();
 
-        uint32 minFragSize = 1420;
+        uint32 minFragSize = 1300;
         if(allowedDataRate < 6*1024) {
             minFragSize = 536;
         }
