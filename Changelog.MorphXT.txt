@@ -26,6 +26,7 @@ ADDED  : CRC32 Localize [SiRoB]
 ADDED  : ClientQueueProgressBar [Commander/SiRoB] (Idea by Roman2k)
 ADDED  : Blinking Tray On Message Recieve from emulEspaña [Commander]
 ADDED  : Preferency dialog use eMule Plus Group system [SiRoB]
+ADDED  : Intelligent Chunk Selection from stormit & pawcio by enkeyDEV [AndCycle]
 
 REMOVED: Ratio no longer present use official way (Friend still have ratio limiter) [SiRoB]
 
@@ -86,7 +87,7 @@ ADDED  : OnClick [HotKey] -> move to invisible mode, OnClick [HotKey] -> move ou
 ADDED  : RSS news feeds can be added/modified/deleted via a button/menu in the server window [MightyKnife]
 ADDED  : DownloadAllFeedsAtOnce [Commander/MightyKnife]
 
-TWEAKED: Mass-Rename Simple-Cleanup is now configurable. Remove '.', '_' characters, Replace "´","`" characters, arbitrary Search and Replace, convert hexadecimal numbers '%xx' to characters, convert (german and other) umlauts to standard characters. [MightyKnife]
+TWEAKED: Mass-Rename Simple-Cleanup is now configurable. Remove '.', '_' characters, Replace "?,"`" characters, arbitrary Search and Replace, convert hexadecimal numbers '%xx' to characters, convert (german and other) umlauts to standard characters. [MightyKnife]
 TWEAKED: Mass-Rename SimpleCleanup tweaked [MightyKnife]
 TWEAKED: IP2Country Autoupdate [Commander]
 TWEAKED: Version Saving of Autoupdates [Commander]

@@ -228,6 +228,9 @@
 #define OP_PUBLICKEY			0x85	// <len 1><pubkey len>
 #define OP_SIGNATURE			0x86	// v1: <len 1><signature len>  v2:<len 1><signature len><sigIPused 1>
 #define OP_SECIDENTSTATE		0x87	// <state 1><rndchallenge 4>
+
+#define OP_FILEINCSTATUS		0x8e	// enkeyDEV: ICS - Incomplete part packet (like OP_FILESTATUS) //Morph - added by AndCycle, ICS
+
 #define OP_REQUESTPREVIEW		0x90	// <HASH 16>
 #define OP_PREVIEWANSWER		0x91	// <HASH 16><frames 1>{frames * <len 4><frame len>}
 #define OP_MULTIPACKET			0x92
@@ -488,6 +491,7 @@
 #define ET_COMPATIBLECLIENT		0x26
 #define ET_FEATURES				0x27
 #define ET_MOD_VERSION			CT_MOD_VERSION
+#define ET_INCOMPLETEPARTS		0x3D // enkeyDEV: ICS //Morph - added by AndCycle, ICS
 
 
 #define	PCPCK_VERSION			0x01

@@ -679,6 +679,7 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 				if (m_htiLogFileSaving)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogFileSaving, bCheck);
                 if (m_htiLogA4AF)			    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogA4AF, bCheck); // ZZ:DownloadManager
 				if (m_htiLogUlDlEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUlDlEvents, bCheck);
+				if (m_htiDateFileNameLog)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDateFileNameLog, bCheck);//Morph - added by AndCycle, Date File Name Log
 			}
 		}
 		SetModified();

@@ -289,6 +289,10 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 						sender->SetUpCompleteSourcesCount(nCompleteCountNew);
 						if (nCompleteCountLast != nCompleteCountNew)
 						{
+							//Morph Start - added by AndCycle, ICS
+							if(reqfile->IsPartFile()) //  enkeyDEV: ICS
+								((CPartFile*)reqfile)->NewSrcIncPartsInfo();
+							//Morph End - added by AndCycle, ICS
 							reqfile->UpdatePartsInfo();
 						}
 					}

@@ -1117,6 +1117,7 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 				if ( bDoStatsUpdate ){
 					cur_file->RemoveDownloadingSource(toremove);
 					cur_file->UpdatePartsInfo();
+					cur_file->NewSrcIncPartsInfo(); // enkeyDEV: ICS //Morph - added by AndCycle, ICS
 				}
 				break;
 			}

@@ -309,6 +309,7 @@ void CPartFile::Init(){
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB,  SharedStatusBar CPU Optimisation
+	m_ics_filemode = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
 }
 
 
@@ -463,6 +464,13 @@ void CPartFile::CreatePartFile()
 	m_SrcpartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
 		m_SrcpartFrequency[i] = 0;
+	//Morph Start - added by AndCycle, ICS
+	// enkeyDEV: ICS
+	m_SrcIncPartFrequency.SetSize(GetPartCount());
+	for (uint32 i = 0; i < GetPartCount();i++)
+		m_SrcIncPartFrequency.Add(0);
+	// enkeyDEV: ICS
+	//Morph End - added by AndCycle, ICS
 	paused = false;
 
 	if (thePrefs.AutoFilenameCleanup())
@@ -1000,6 +1008,13 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 		m_SrcpartFrequency.SetSize(GetPartCount());
 		for (uint32 i = 0; i != GetPartCount();i++)
 			m_SrcpartFrequency[i] = 0;
+		//Morph Start - added by AndCycle, ICS
+		// enkeyDEV: ICS
+		m_SrcIncPartFrequency.SetSize(GetPartCount());
+		for (uint32 i = 0; i < GetPartCount();i++)
+			m_SrcIncPartFrequency.Add(0);
+		// enkeyDEV: ICS
+		//Morph End - added by AndCycle, ICS
 		SetStatus(PS_EMPTY);
 		// check hashcount, filesatus etc
 		if (GetHashCount() != GetED2KPartHashCount()){
@@ -2092,6 +2107,28 @@ void CPartFile::WritePartStatus(CSafeMemFile* file, CUpDownClient* client) /*con
 	}
 }
 
+//Morph Start - added by AndCycle, ICS
+// enkeyDEV: ICS
+void CPartFile::WriteIncPartStatus(CSafeMemFile* file){
+	uint16 parts = GetPartCount();
+	file->WriteUInt16(parts);
+	uint16 done = 0;
+	while (done != parts){
+		uint8 towrite = 0;
+		for (uint32 i = 0;i != 8;i++){
+			if (!IsPureGap(done*PARTSIZE,((done+1)*PARTSIZE)-1))
+				towrite |= (1<<i);
+			done++;
+			if (done == parts)
+				break;
+		}
+		file->WriteUInt8(towrite);
+	}
+}
+
+// <--- enkeyDEV: ICS
+//Morph End - added by AndCycle, ICS
+
 void CPartFile::WriteCompleteSourcesCount(CSafeMemFile* file) const
 {
 	file->WriteUInt16(m_nCompleteSourcesCount);
@@ -2781,6 +2818,229 @@ void CPartFile::UpdatePartsInfo()
 	//MORPH END   - Added by SiRoB,  SharedStatusBar CPU Optimisation
 }
 
+//Morph Start - added by AndCycle, ICS
+// enkeyDEV: ICS - Intelligent Chunk Selection
+
+void CPartFile::NewSrcIncPartsInfo()
+{
+	uint16 partcount = GetPartCount();
+
+	if (m_SrcIncPartFrequency.GetSize() < partcount)
+		m_SrcIncPartFrequency.SetSize(partcount);
+
+	for(int i = 0; i < partcount; i++)
+		m_SrcIncPartFrequency[i] = 0;
+
+	CUpDownClient* cur_src;
+
+	for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;){
+		cur_src = srclist.GetNext(pos);
+		for (int i = 0; i < partcount; i++){
+			if (cur_src->IsIncPartAvailable(i))
+				m_SrcIncPartFrequency[i] +=1;
+		}
+	}
+	//UpdateDisplayedInfo(); // Not displayed
+}
+
+uint32 CPartFile::GetPartSizeToDownload(uint16 partNumber)
+{
+	Gap_Struct *currentGap;
+	uint32 total, gap_start, gap_end, partStart, partEnd;
+
+	total = 0;
+	partStart = (PARTSIZE * partNumber);
+	partEnd = min(partStart + PARTSIZE, GetFileSize());
+
+	for (POSITION pos = gaplist.GetHeadPosition(); pos != 0; gaplist.GetNext(pos))
+	{
+		currentGap = gaplist.GetAt(pos);
+
+		if ((currentGap->start < partEnd) && (currentGap->end >= partStart))
+		{
+			gap_start = max(currentGap->start, partStart);
+			gap_end = min(currentGap->end + 1, partEnd);
+			total += (gap_end - gap_start); // I'm not sure this works: do gaps overlap?
+		}
+	}
+
+	return min(total, partEnd - partStart); // This to limit errors: see note above
+}
+
+#define	CM_RELEASE_MODE			1
+#define	CM_SPREAD_MODE			2
+#define	CM_SHARE_MODE			3
+
+#define	CM_SPREAD_MINSRC		10
+#define	CM_SHARE_MINSRC			25
+#define CM_MAX_SRC_CHUNK		3
+
+bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count)
+{
+	if (!(*count)) return false;					// added as in 29a
+	if (!(sender->GetPartStatus())) return false;	// added as in 29a
+
+	// Select mode: RELEASE, SPREAD or SHARE
+
+	uint16	part_idx;
+	uint16	min_src = 0xFFFF;
+
+	if (m_SrcpartFrequency.GetCount() < GetPartCount())
+		min_src = 0;
+	else
+		for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
+			if (m_SrcpartFrequency[part_idx] < min_src)
+				min_src = m_SrcpartFrequency[part_idx];
+
+	if (min_src <= CM_SPREAD_MINSRC)		m_ics_filemode = CM_RELEASE_MODE;
+	else if (min_src <= CM_SHARE_MINSRC)	m_ics_filemode = CM_SPREAD_MODE;
+	else									m_ics_filemode = CM_SHARE_MODE;
+
+	// Chunk list ordered by preference
+
+	CList<uint16,uint16> chunk_list;
+	CList<uint32,uint32> chunk_pref;
+	uint32 c_pref;
+	uint32 complete_src;
+	uint32 incomplete_src;
+	uint32 first_last_mod;
+	uint32 size2transfer;
+	uint16* partsDownloading = CalcDownloadingParts(sender); //Pawcio for enkeyDEV -ICS-
+
+	for (part_idx = 0; part_idx < GetPartCount(); ++part_idx)
+	{
+		if (sender->IsPartAvailable(part_idx) && GetNextEmptyBlockInPart(part_idx, 0))
+		{
+			complete_src = 0;
+			incomplete_src = 0;
+			first_last_mod = 0;
+
+			// Chunk priority modifiers
+			if (m_ics_filemode != CM_SHARE_MODE)
+			{
+				complete_src = m_SrcpartFrequency.GetCount() > part_idx ? m_SrcpartFrequency[part_idx] : 0;
+				incomplete_src = m_SrcIncPartFrequency.GetCount() > part_idx ? m_SrcIncPartFrequency[part_idx] : 0;
+			}
+			if (m_ics_filemode != CM_RELEASE_MODE)
+			{
+				if (part_idx == 0 || part_idx == (GetPartCount() - 1))		first_last_mod = 2;
+				else if (part_idx == 1 || part_idx == (GetPartCount() - 2))	first_last_mod = 1;
+				else														first_last_mod = 0;
+				if (!thePrefs.GetPreviewPrio())								first_last_mod = 0;
+			}
+			size2transfer = GetPartSizeToDownload(part_idx);
+
+			size2transfer = min(((size2transfer + (partsDownloading ? PARTSIZE * partsDownloading[part_idx] / CM_MAX_SRC_CHUNK : 0) + 0xff) >> 8), 0xFFFF);
+
+			switch (m_ics_filemode)
+			{
+			case CM_RELEASE_MODE:
+				complete_src = min(complete_src, 0xFF);
+				incomplete_src = min(incomplete_src, 0xFF);
+				c_pref = size2transfer | (incomplete_src << 16) | (complete_src << 24);
+				break;
+			case CM_SPREAD_MODE:
+				complete_src = min(complete_src, 0xFF);
+				incomplete_src = min(incomplete_src, 0x3F);
+				c_pref = first_last_mod | (incomplete_src << 2) | (complete_src << 8) | (size2transfer << 16);
+				break;
+			case CM_SHARE_MODE:
+				c_pref = first_last_mod | (size2transfer << 16);
+				break;
+			}
+
+			if (partsDownloading && partsDownloading[part_idx] >= ceil((float)size2transfer * CM_MAX_SRC_CHUNK / (float)PARTSIZE)) //Pawcio for enkeyDEV -ICS-
+				c_pref |= 0xFF000000;
+			// Ordered insertion
+
+			POSITION c_ins_point = chunk_list.GetHeadPosition();
+			POSITION p_ins_point = chunk_pref.GetHeadPosition();
+
+			while (c_ins_point && p_ins_point && chunk_pref.GetAt(p_ins_point) < c_pref)
+			{
+				chunk_list.GetNext(c_ins_point);
+				chunk_pref.GetNext(p_ins_point);
+			}
+
+			if (c_ins_point)
+			{
+				int eq_count = 0;
+				POSITION p_eq_point = p_ins_point;
+				while (p_eq_point != 0 && chunk_pref.GetAt(p_eq_point) == c_pref)
+				{
+					++eq_count;
+					chunk_pref.GetNext(p_eq_point);
+				}
+				if (eq_count) // insert in random position
+				{
+					uint16 randomness = (uint16)floor(((float)rand()/RAND_MAX)*eq_count);
+					while (randomness)
+					{
+						chunk_list.GetNext(c_ins_point);
+						chunk_pref.GetNext(p_ins_point);
+						--randomness;
+					}
+				}
+
+			} // END if c_ins_point
+
+			if (c_ins_point) // null ptr would add to head, I need to add to tail
+			{
+				chunk_list.InsertBefore(c_ins_point, part_idx);
+				chunk_pref.InsertBefore(p_ins_point, c_pref);
+			}
+			else
+			{
+				chunk_list.AddTail(part_idx);
+				chunk_pref.AddTail(c_pref);
+			}
+
+		} // END if part downloadable
+	} // END for every chunk
+
+	if (partsDownloading)
+		delete partsDownloading; //Pawcio for enkeyDEV -ICS-
+
+	//Pawcio for enkeyDEV -ICS-
+	if(sender->m_lastPartAsked != 0xffff && sender->IsPartAvailable(sender->m_lastPartAsked) && GetNextEmptyBlockInPart(sender->m_lastPartAsked, 0)){
+		chunk_list.AddHead(sender->m_lastPartAsked);
+		chunk_pref.AddHead((uint32) 0);
+	} 
+	else {
+		sender->m_lastPartAsked = 0xffff;
+	}
+
+	uint16 requestedCount = *count;
+	uint16 newblockcount = 0;
+	*count = 0;
+
+	if (chunk_list.IsEmpty()) return false;
+
+	Requested_Block_Struct* block = new Requested_Block_Struct;
+	for (POSITION scan_chunks = chunk_list.GetHeadPosition(); scan_chunks; chunk_list.GetNext(scan_chunks))
+	{
+		sender->m_lastPartAsked = chunk_list.GetAt(scan_chunks);
+		while(GetNextEmptyBlockInPart(chunk_list.GetAt(scan_chunks),block))
+		{
+			requestedblocks_list.AddTail(block);
+			newblocks[newblockcount] = block;
+			newblockcount++;
+			*count = newblockcount;
+			if (newblockcount == requestedCount)
+				return true;
+			block = new Requested_Block_Struct;
+		}
+	}
+	delete block;
+
+	if (!(*count)) return false; // useless, just to be sure
+	return true;
+}
+
+// <--- enkeyDEV: ICS - Intelligent Chunk Selection
+//Morph End - added by AndCycle, ICS
+
+
 bool  CPartFile::RemoveBlockFromList(uint32 start,uint32 end)
 {
 	bool bResult = false;
@@ -3156,6 +3416,7 @@ void  CPartFile::RemoveAllSources(bool bTryToSwap){
 			theApp.downloadqueue->RemoveSource(srclist.GetAt(pos2), false);
 	}
 	UpdatePartsInfo();
+	NewSrcIncPartsInfo(); // enkeyDEV: ICS //Morph - added by AndCycle, ICS
 	UpdateAvailablePartsCount();
 
 	//[enkeyDEV(Ottavio84) -A4AF-]
@@ -4817,6 +5078,8 @@ uint16 CPartFile::GetTransferingSrcCount() const
 	return GetSrcStatisticsValue(DS_DOWNLOADING);
 }
 
+//Morph Start - removed by AndCycle, ICS
+/* // enkeyDev: ICS
 // [Maella -Enhanced Chunk Selection- (based on jicxicmic)]
 
 #pragma pack(1)
@@ -4831,7 +5094,7 @@ struct Chunk {
 
 bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender, 
 									Requested_Block_Struct** newblocks, 
-									  uint16* count) /*const*/
+									  uint16* count)
 {
 	// The purpose of this function is to return a list of blocks (~180KB) to
 	// download. To avoid a prematurely stop of the downloading, all blocks that 
@@ -5092,7 +5355,8 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	return (newBlockCount > 0);
 }
 // Maella end
-
+*/ // enkeyDev: ICS
+//Morph End - removed by AndCycle, ICS
 
 CString CPartFile::GetInfoSummary(CPartFile* partfile) const
 {
@@ -5610,6 +5874,31 @@ void CPartFile::AICHRecoveryDataAvailable(uint16 nPart){
 
 }
 
+//Morph Start - added by AndCycle, ICS
+// Pawcio for enkeyDev: ICS
+uint16* CPartFile::CalcDownloadingParts(CUpDownClient* client){	//<<-- Pawcio for enkeyDEV -ICS-
+	if (!client)
+		return NULL;
+
+	uint16  partsCount = GetPartCount();
+	if (!partsCount)
+		return NULL;
+
+	uint16* partsDownloading = new uint16[partsCount];
+	memset(partsDownloading, 0, partsCount * sizeof(uint16));
+
+	CUpDownClient* cur_client;
+	POSITION pos = m_downloadingSourceList.GetHeadPosition();
+	while (pos){
+		cur_client = m_downloadingSourceList.GetNext(pos);
+		uint16 clientPart = cur_client->m_lastPartAsked;
+		if (cur_client != client && cur_client->GetRequestFile() && !md4cmp(cur_client->GetRequestFile()->GetFileHash(), GetFileHash()) && clientPart < partsCount && cur_client->GetDownloadDatarate() > 150)
+			partsDownloading[clientPart]++;
+	}
+	return partsDownloading;
+}
+// <--- enkeyDev: ICS
+//Morph End - added by AndCycle, ICS
 
 //MORPH START - Added by IceCream, eMule Plus rating icons
 int CPartFile::GetRating(){  

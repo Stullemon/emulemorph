@@ -260,6 +260,12 @@ void CUpDownClient::Init()
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session
+	//Morph Start - added by AndCycle, ICS
+	// enkeyDev: ICS
+	m_abyIncPartStatus = 0;
+	m_incompletepartVer = 0;
+	// <--- enkeyDev: ICS
+	//Morph End - added by AndCycle, ICS
 }
 
 CUpDownClient::~CUpDownClient(){
@@ -286,6 +292,15 @@ CUpDownClient::~CUpDownClient(){
 		if (curPS != m_abyPartStatus)
 			delete[] curPS;
 	}
+	//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+	pos = m_IncPartStatus_list.GetStartPosition();
+	while (pos)
+	{
+		m_IncPartStatus_list.GetNextAssoc(pos, curFile, curPS);
+		if (curPS != m_abyIncPartStatus)
+			delete[] curPS;
+	}
+	//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
 	//MORPH END   - Added by SiRoB, See A4AF PartStatus
 
 	if (m_pPCDownSocket){
@@ -306,6 +321,12 @@ CUpDownClient::~CUpDownClient(){
 		delete[] m_abyUpPartStatus;
 		m_abyUpPartStatus = NULL;
 	}
+	//Morph Start - added by AndCycle, ICS
+	// enkeyDev: ICS
+	if (m_abyIncPartStatus)
+		delete[] m_abyIncPartStatus;
+	// <--- enkeyDev: ICS
+	//Morph End - added by AndCycle, ICS
 	//MORPH START - Added by SiRoB, See chunk that we hide
 	if (m_abyUpPartStatusHidden){
 		delete[] m_abyUpPartStatusHidden;
@@ -449,6 +470,7 @@ void CUpDownClient::ClearHelloProperties()
 	//MOPRH START - Added by SiRoB, Is Morph Client?
 	m_bIsMorph = false;
 	//MOPRH END   - Added by SiRoB, Is Morph Client?
+	m_incompletepartVer = 0; // enkeyDev: ICS //Morph - added by AndCycle, ICS
 }
 
 bool CUpDownClient::ProcessHelloPacket(char* pachPacket, uint32 nSize){
@@ -607,6 +629,13 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ClientVer=%u.%u.%u.%u  Comptbl=%u"), (m_nClientVersion >> 17) & 0x7f, (m_nClientVersion >> 10) & 0x7f, (m_nClientVersion >> 7) & 0x07, m_nClientVersion & 0x7f, m_byCompatibleClient);
 				break;
+			//Morph Start - added by AndCycle, ICS
+			// enkeyDEV: ICS
+			case ET_INCOMPLETEPARTS:
+				m_incompletepartVer = temptag.GetInt();
+				break;
+			// <--- enkeyDEV: ICS
+			//Morph End - added by AndCycle, ICS
 			default:
 				if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
@@ -798,7 +827,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
 	if (bSendModVersion)
-		data.WriteUInt32(8/*7 OFFICIAL+1 ET_MOD_VERSION*/); // nr. of tags
+		data.WriteUInt32(7/*7 OFFICIAL*/+1/*ET_MOD_VERSION*/+1/*enkeyDev: ICS*/); // nr. of tags
 	else
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		data.WriteUInt32(7); // nr. of tags
@@ -831,6 +860,12 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 			tag8.WriteTagToFile(&data);
 		}
 		//MORPH END   - Added by IceCream, Anti-leecher feature
+		//Morph Start - added by AndCycle, ICS
+		// enkeyDev: ICS
+		CTag tag9(ET_INCOMPLETEPARTS,1);
+		tag9.WriteTagToFile(&data);
+		// <--- enkeyDev: ICS
+		//Morph End - added by AndCycle, ICS
 	}  //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	Packet* packet = new Packet(&data,OP_EMULEPROT);
 	if (!bAnswer)
@@ -882,6 +917,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		return;
 	}
 	m_bEmuleProtocol = true;
+	m_incompletepartVer = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
 
 	uint32 tagcount = data.ReadUInt32();
 	if (bDbgInfo)
@@ -963,6 +999,13 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 					m_strMuleInfo.AppendFormat(_T("\n  ModID=%s"), m_strModVersion);
 				CheckForGPLEvilDoer();
 				break;
+			//Morph Start - added by AndCycle, ICS
+			// enkeyDEV: ICS
+			case ET_INCOMPLETEPARTS:
+				m_incompletepartVer = temptag.GetInt();
+				break;
+			// <--- enkeyDEV: ICS
+			//Morph End - added by AndCycle, ICS
 			default:
 				if (bDbgInfo)
 					m_strMuleInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
@@ -973,6 +1016,7 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 		m_byExtendedRequestsVer = 0;
 		m_byAcceptCommentVer = 0;
 		m_nUDPPort = 0;
+		m_incompletepartVer = 0;	// enkeyDEV: ICS //Morph - added by AndCycle, ICS
 	}
 	if (bDbgInfo && data.GetPosition() < data.GetLength()){
 		m_strMuleInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), data.GetLength() - data.GetPosition());
@@ -1026,7 +1070,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
-	if (bSendModVersion) ++tagcount;
+	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 
 	data->WriteUInt32(tagcount);
@@ -1117,6 +1161,12 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		}
 		//MORPH END   - Added by SiRoB, Anti-leecher feature
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+		//Morph Start - added by AndCycle, ICS
+		// enkeyDev: ICS
+		CTag tagIncompleteParts(ET_INCOMPLETEPARTS,1);
+		tagIncompleteParts.WriteTagToFile(data);
+		// <--- enkeyDev: ICS
+		//Morph End - added by AndCycle, ICS
 	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	uint32 dwIP;
 	uint16 nPort;
@@ -2161,6 +2211,19 @@ void CUpDownClient::ResetFileStatusInfo()
 	*/
 	m_abyPartStatus = NULL;
 	//MORPH END   - Changed by SiRoB, See A4AF PartStatus
+	//Morph Start - added by AndCycle, ICS
+	// enkeyDev: ICS
+	//MORPH START - Added by AndCycle, ICS, See A4AF PartStatus
+	/*
+	if (m_abyIncPartStatus){
+		delete[] m_abyIncPartStatus;
+		m_abyIncPartStatus = NULL;
+	}
+	*/
+	//MORPH END - Added by AndCycle, ICS, See A4AF PartStatus
+	m_abyIncPartStatus = NULL;
+	// <--- enkeyDev: ICS
+	//Morph End - added by AndCycle, ICS
 	m_iDifferenceQueueRank = 0;	//Morph - added by AndCycle, DiffQR
 	m_nRemoteQueueRank = 0;
 	m_nPartCount = 0;

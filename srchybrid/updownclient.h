@@ -923,6 +923,15 @@ public:
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue() const;
 
+	//Morph Start - added by AndCycle, ICS
+	// enkeyDEV: ICS
+	void	ProcessFileIncStatus(CSafeMemFile* data,uint32 size, bool readHash = false);
+	uint32	GetIncompletePartVersion()	{return m_incompletepartVer;}
+	bool	IsIncPartAvailable(uint16 iPart)	{return	( (iPart >= m_nPartCount) || (!m_abyIncPartStatus) )? 0:m_abyIncPartStatus[iPart];}
+	bool	IsPendingListEmpty()      {return m_PendingBlocks_list.IsEmpty();}
+	// <--- enkeyDEV: ICS
+	//Morph End - added by AndCycle, ICS
+
 	//wistily start
 	void  Add2DownTotalTime(uint32 length){m_nDownTotalTime += length;}//wistily
 	void  Add2UpTotalTime(uint32 length){m_nUpTotalTime += length;}//wistily
@@ -1134,6 +1143,7 @@ protected:
 
 	//MORPH START - Added by SiRoB, m_PartStatus_list
 	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
+	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, See A4AF PartStatus
 	//MORPH END   - Added by SiRoB, m_PartStatus_list
 	uint32 m_nDownTotalTime;// wistily total lenght of this client's downloads during this session in ms
 	uint32 m_nUpTotalTime;//wistily total lenght of this client's uploads during this session in ms
@@ -1146,5 +1156,13 @@ public:
 private:
 	struct	IPRange_Struct2* m_structUserCountry; //EastShare - added by AndCycle, IP to Country
 //EastShare End - added by AndCycle, IP to Country
+
+//Morph Start - added by AndCycle, ICS
+	// enkeyDEV: ICS
+	uint32	m_incompletepartVer;
+	uint8*	m_abyIncPartStatus;
+	// <--- enkeyDEV: ICS
+//Morph End - added by AndCycle, ICS
+
 };
 //#pragma pack()

@@ -445,6 +445,23 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 							DebugSend("OP__FileStatus", client, (char*)reqfile->GetFileHash());
 						theStats.AddUpDataOverheadFileRequest(packet->size);
 						SendPacket(packet,true);
+						//Morph Start - added by AndCycle, ICS
+					    // enkeyDEV: ICS - Send incomplete parts
+					    if (client->GetIncompletePartVersion())
+					    {
+						    CSafeMemFile data(16+16);
+						    data.WriteHash16(reqfile->GetFileHash());
+						    if (reqfile->IsPartFile())
+							    ((CPartFile*)reqfile)->WriteIncPartStatus(&data);
+						    else
+							    data.WriteUInt16(0);
+						    Packet* packet = new Packet(&data, OP_EMULEPROT);
+						    packet->opcode = OP_FILEINCSTATUS;
+						    theStats.AddUpDataOverheadFileRequest(packet->size);
+						    SendPacket(packet,true);
+					    }
+					    // <--- enkeyDEV: ICS
+					    //Morph End - added by AndCycle, ICS
 						break;
 					}
 					throw GetResString(IDS_ERR_WRONGPACKAGESIZE);
@@ -1334,6 +1351,20 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								else if (!reqfile->ShareOnlyTheNeed(&data_out, client)) //wistily SOTN
 									if (!reqfile->HideOvershares(&data_out, client))	//Slugfiller: HideOS
 										data_out.WriteUInt16(0);
+								
+								//Morph Start - added by AndCycle, ICS
+								// enkeyDev: ICS - Send incomplete parts
+								if (client->GetIncompletePartVersion())
+								{
+									data_out.WriteUInt8(OP_FILEINCSTATUS);
+									if (reqfile->IsPartFile())
+										((CPartFile*)reqfile)->WriteIncPartStatus(&data_out);
+									else
+										data_out.WriteUInt16(0);
+								}
+								// <--- enkeyDev: ICS
+								//Morph End - added by AndCycle, ICS
+										
 								break;
 							}
 							//We still send the source packet seperately.. 
@@ -1446,6 +1477,16 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								client->ProcessAICHFileHash(&data_in, reqfile);
 								break;
 							}
+							//Morph Start - added by AndCycle, ICS
+							// enkeyDEV: ICS
+							case OP_FILEINCSTATUS:
+							{
+								theStats.AddDownDataOverheadFileRequest(size);
+								client->ProcessFileIncStatus(&data_in,size);
+								break;
+							}
+							// <--- enkeyDEV: ICS
+							//Morph End - added by AndCycle, ICS
 							default:
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
 									Debug(_T("***NOTE: Invalid sub opcode 0x%02x with OP_MultiPacketAns received; %s"), opcode_in, client->DbgGetClientInfo());
@@ -1911,6 +1952,17 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 					}
 					break;
 				}
+				//Morph Start - added by AndCycle, ICS
+			    // enkeyDEV: ICS
+			    case OP_FILEINCSTATUS:{
+				    CSafeMemFile data((BYTE*)packet,size);
+				    theStats.AddDownDataOverheadFileRequest(size);
+				    client->ProcessFileIncStatus(&data,size,true);
+				    break;
+			    }
+			    // <--- enkeyDEV: ICS
+			    //Morph End - added by AndCycle, ICS
+
 				default:
 					theStats.AddDownDataOverheadOther(uRawSize);
 					PacketToDebugLogLine(_T("eMule"), packet, size, opcode, DLP_DEFAULT);

@@ -337,6 +337,14 @@ public:
     static int RightFileHasHigherPrio(CPartFile* left, CPartFile* right);
 
 	CDeadSourceList	m_DeadSourceList;
+	//Morph Start - added by AndCycle, ICS
+	// enkeyDev: ICS
+	uint16* CalcDownloadingParts(CUpDownClient* client); // Pawcio for enkeyDEV: ICS
+	void	WriteIncPartStatus(CSafeMemFile* file);
+    void    NewSrcIncPartsInfo();
+	uint32	GetPartSizeToDownload(uint16 partNumber);
+	// <--- enkeyDev: ICS
+	//Morph End - added by AndCycle, ICS
 
 	// khaos::categorymod+
 	void	SetCatResumeOrder(uint16 order)	{ m_catResumeOrder = order; SavePartFile(); }
@@ -462,4 +470,12 @@ private:
 	bool	lastonlygreyrect;
 	bool	lastbFlat;
 	//MORPH END - Added by SiRoB,  SharedStatusBar CPU Optimisation
+
+	//Morph Start - added by AndCycle, ICS
+    // enkeyDev: ICS
+    CArray<uint16,uint16> m_SrcIncPartFrequency;
+    int     m_ics_filemode;
+    // <--- enkeyDev: ICS
+    //Morph End - added by AndCycle, ICS
+
 };
