@@ -903,7 +903,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	data.WriteUInt8(theApp.m_uCurVersionShort);
 	data.WriteUInt8(EMULE_PROTOCOL);
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
+	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion)
 		data.WriteUInt32(7/*7 OFFICIAL*/+1/*ET_MOD_VERSION*/+1/*enkeyDev: ICS*/); // nr. of tags
 	else
@@ -928,16 +928,8 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	CTag tag7(ET_FEATURES, dwTagValue);
 	tag7.WriteTagToFile(&data);
 	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-		//MORPH START - Added by IceCream, Anti-leecher feature
-		if (IsLeecher()){
-			CTag tag8(ET_MOD_VERSION, m_strModVersion);
-			tag8.WriteTagToFile(&data);
-		}
-		else{
-			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
-			tag8.WriteTagToFile(&data);
-		}
-		//MORPH END   - Added by IceCream, Anti-leecher feature
+		CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
+		tag8.WriteTagToFile(&data);
 		//Morph Start - added by AndCycle, ICS
 		// enkeyDev: ICS
 		CTag tag9(ET_INCOMPLETEPARTS,1);
@@ -1156,7 +1148,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		tagcount += 2;
 
 	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
+	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	if (bSendModVersion || m_clientSoft == SO_LPHANT) tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
@@ -1238,17 +1230,9 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	if (bSendModVersion) { //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-		//MORPH START - Added by SiRoB, Anti-leecher feature
-		if (IsLeecher()){
-			CTag tagMODVersion(ET_MOD_VERSION, m_strModVersion);
-			tagMODVersion.WriteTagToFile(data);
-		}
-		else{
-			CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
-			tagMODVersion.WriteTagToFile(data);
-		}
-		//MORPH END   - Added by SiRoB, Anti-leecher feature
-    	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+		CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
+		tagMODVersion.WriteTagToFile(data);
+		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 
 		//Morph Start - added by AndCycle, ICS
 		// enkeyDev: ICS
@@ -2379,6 +2363,10 @@ void CUpDownClient::ResetFileStatusInfo()
 		delete m_pReqFileAICHHash;
 		m_pReqFileAICHHash = NULL;
 	}
+
+	//MORPH START - Added by SiRoB, HotFix Due Complete Source Feature
+	m_nUpCompleteSourcesCount = 0;
+	//MORPH END   - Added by SiRoB, HotFix Due Complete Source Feature
 }
 
 bool CUpDownClient::IsBanned() const
