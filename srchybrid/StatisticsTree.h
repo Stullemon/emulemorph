@@ -24,13 +24,8 @@
 	This allows us to easily code complicated parsing features
 	and a context menu.
 */
-
 #pragma once
-#include "afxdlgs.h"
-#include "otherfunctions.h"
-#include "titlemenu.h"
-#include "loggable.h"
-using namespace std;
+#include "TitleMenu.h"
 
 // -khaos--+++> Items for our stat's tree context menu.
 #define	MP_STATTREE_RESET		10950
@@ -51,7 +46,6 @@ using namespace std;
 #define	GET_VALUE				1
 // <-----khaos--
 
-// CStatisticsTree Tree Control
 class CStatisticsTree : public CTreeCtrl, public CLoggable
 {
 	DECLARE_DYNAMIC(CStatisticsTree)

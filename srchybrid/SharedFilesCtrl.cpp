@@ -21,12 +21,22 @@
 
 #include "stdafx.h"
 #include "emule.h"
+#include "emuledlg.h"
 #include "SharedFilesCtrl.h"
-#include "otherfunctions.h"
+#include "OtherFunctions.h"
 #include "CommentDialog.h"
 #include "FileInfoDialog.h"
 #include "MetaDataDlg.h"
 #include "ResizableLib/ResizableSheet.h"
+#include "KnownFile.h"
+#include "MapKey.h"
+#include "SharedFileList.h"
+#include "MemDC.h"
+#include "PartFile.h"
+#include "MenuCmds.h"
+#include "IrcWnd.h"
+#include "SharedFilesWnd.h"
+#include "Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -115,7 +125,7 @@ BOOL CSharedFileDetailsSheet::OnInitDialog()
 IMPLEMENT_DYNAMIC(CSharedFilesCtrl, CMuleListCtrl)
 CSharedFilesCtrl::CSharedFilesCtrl() {
    sflist = 0;                // i_a 
-   MEMSET(&sortstat, 0, sizeof(sortstat));  // i_a 
+   memset(&sortstat, 0, sizeof(sortstat));  // i_a 
 }
 
 CSharedFilesCtrl::~CSharedFilesCtrl(){
@@ -314,8 +324,16 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
-	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
 
 	CString buffer;
 
@@ -485,7 +503,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						}
 						//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 						CString buffer2;
-						buffer2.Format(" (%u - %u)",file->m_nVirtualCompleteSourcesCountMin, file->m_nVirtualCompleteSourcesCountMax);
+						buffer2.Format(" (%u)",file->m_nVirtualCompleteSourcesCount);
 						buffer.Append(buffer2);
 						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 						break;
@@ -498,11 +516,6 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 							buffer = GetResString(IDS_NO);
 						buffer += "|";
 						if( (uint32)time(NULL)-file->GetLastPublishTimeKadSrc() < KADEMLIAREPUBLISHTIME )
-							buffer += GetResString(IDS_YES);
-						else
-							buffer += GetResString(IDS_NO);
-						buffer +="-";
-						if( (uint32)time(NULL)-file->GetLastPublishTimeKadKey() < KADEMLIAREPUBLISHTIME )
 							buffer += GetResString(IDS_YES);
 						else
 							buffer += GetResString(IDS_NO);
@@ -569,7 +582,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		RECT outline_rec;
-		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 		outline_rec.top--;
 		outline_rec.bottom++;
 		dc->FrameRect(&outline_rec, &CBrush(m_crWindow));
@@ -578,11 +591,20 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		outline_rec.left++;
 		outline_rec.right--;
 
+		if (lpDrawItemStruct->itemID > 0 && GetItemState(lpDrawItemStruct->itemID - 1, LVIS_SELECTED))
+			outline_rec.top--;
+
+		if (lpDrawItemStruct->itemID + 1 < (UINT)GetItemCount() && GetItemState(lpDrawItemStruct->itemID + 1, LVIS_SELECTED))
+			outline_rec.bottom++;
+
 		if(bCtrlFocused)
 			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
 		else
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
+	
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
 }
@@ -677,7 +699,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		m_SharedFilesMenu.EnableMenuItem(MP_GETHOSTNAMESOURCEED2KLINK, MF_GRAYED);
 	// itsonlyme: hostnameSource
 
-	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, file && theApp.emuledlg->ircwnd.IsConnected() ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, file && theApp.emuledlg->ircwnd->IsConnected() ? MF_ENABLED : MF_GRAYED);
 
 	int counter;
 	CMenu Web;
@@ -686,6 +708,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	UINT flag2 = ((counter == 0) || !file) ? MF_GRAYED : MF_STRING;
 	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)Web.m_hMenu, GetResString(IDS_WEBSERVICES));
 
+	GetPopupMenuPos(*this, point);
 	m_SharedFilesMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
 
 	m_SharedFilesMenu.RemoveMenu(m_SharedFilesMenu.GetMenuItemCount()-1,MF_BYPOSITION);
@@ -715,7 +738,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		switch (wParam){
 			case Irc_SetSendLink:
 			{
-				theApp.emuledlg->ircwnd.SetSendFileString(theApp.CreateED2kLink(file));
+				theApp.emuledlg->ircwnd->SetSendFileString(CreateED2kLink(file));
 				break;
 			}
 			case MP_GETED2KLINK:{
@@ -725,33 +748,31 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
 						file = arraySelFiles[i];	// itsonlyme: selFix
-						str.Append(theApp.CreateED2kLink(file) + "\n"); 
+						str.Append(CreateED2kLink(file) + "\n"); 
 					}
 
 					theApp.CopyTextToClipboard(str);
 					//AfxMessageBox(GetResString(IDS_COPIED2CB) + str);
 					break; 
 				}
-				theApp.CopyTextToClipboard(theApp.CreateED2kLink(file));
+				theApp.CopyTextToClipboard(CreateED2kLink(file));
 				break;
 			}
 			case MP_GETHTMLED2KLINK:
-			{
 				if(selectedCount > 1)
 				{
 					CString str;
 					for (int i = 0; i < arraySelFiles.GetSize(); i++)	// itsonlyme: selFix
 					{
 						file = arraySelFiles[i];	// itsonlyme: selFix
-						str += theApp.CreateHTMLED2kLink(file) + "\n"; 
+						str += CreateHTMLED2kLink(file) + "\n"; 
 					}
 					theApp.CopyTextToClipboard(str);
 					//AfxMessageBox(GetResString(IDS_COPIED2CB) + str);
 					break; 
 				} 
-				theApp.CopyTextToClipboard(theApp.CreateHTMLED2kLink(file));
+				theApp.CopyTextToClipboard(CreateHTMLED2kLink(file));
 				break;
-			}
 			case MP_GETSOURCEED2KLINK:
 			{
 				if(selectedCount > 1)
@@ -816,7 +837,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						break; 
 					}
 					//theApp.CopyTextToClipboard(theApp.CreateED2kLink(file));
-					ShellExecute(NULL, NULL, "http://edonkeyfakes.ath.cx/report/index.php?link2="+theApp.CreateED2kLink(file), NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
+					ShellExecute(NULL, NULL, "http://edonkeyfakes.ath.cx/report/index.php?link2="+CreateED2kLink(file), NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
 					break;
 				}
 			//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -1148,7 +1169,7 @@ void CSharedFilesCtrl::UpdateFile(CKnownFile* toupdate){
 	sint16 result = FindItem(&find);
 	if (result != -1) {
 		Update(result) ;   // Added by Tarod to real time refresh - DonGato - 11/11/2002
-		theApp.emuledlg->sharedfileswnd.Check4StatUpdate(toupdate);
+		theApp.emuledlg->sharedfileswnd->Check4StatUpdate(toupdate);
 	}
 }
 
@@ -1160,7 +1181,7 @@ void CSharedFilesCtrl::ShowFilesCount() {
 	else
 		counter.Format(_T(" (%i)"), theApp.sharedfiles->GetCount());
 	// SLUGFILLER: SafeHash
-	theApp.emuledlg->sharedfileswnd.GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES)+counter  );
+	theApp.emuledlg->sharedfileswnd->GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES)+counter  );
 }
 
 void CSharedFilesCtrl::OpenFile(CKnownFile* file){
@@ -1253,10 +1274,8 @@ void CSharedFilesCtrl::CreateMenues() {
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	
 	//This menu option is is for testing..
-	if(theApp.emuledlg->ircwnd.IsConnected()){
-		m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC));
-		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
-	}
+	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 }
 
 void CSharedFilesCtrl::ShowComments(int index) {

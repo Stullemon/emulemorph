@@ -23,6 +23,8 @@
 #include "AddFriend.h"
 #include "Friend.h"
 #include "otherfunctions.h"
+#include "FriendList.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

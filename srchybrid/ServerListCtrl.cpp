@@ -22,6 +22,15 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "ServerListCtrl.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "DownloadQueue.h"
+#include "ServerList.h"
+#include "Server.h"
+#include "Sockets.h"
+#include "MenuCmds.h"
+#include "ServerWnd.h"
+#include "IrcWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -32,7 +41,7 @@ static char THIS_FILE[]=__FILE__;
 
 // CServerListCtrl
 
-IMPLEMENT_DYNAMIC(CServerListCtrl, CMuleListCtrl/*CTreeCtrl*/)
+IMPLEMENT_DYNAMIC(CServerListCtrl, CMuleListCtrl)
 CServerListCtrl::CServerListCtrl() {
 	server_list = 0; // i_a 
 	SetGeneralPurposeFind(true);
@@ -58,6 +67,7 @@ bool CServerListCtrl::Init(CServerList* in_list)
 	InsertColumn(11,GetResString(IDS_HARDFILES),	LVCFMT_RIGHT, 50);
 	InsertColumn(12,GetResString(IDS_VERSION),LVCFMT_LEFT, 50);
 
+	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableServer);
 
@@ -80,7 +90,13 @@ bool CServerListCtrl::Init(CServerList* in_list)
 CServerListCtrl::~CServerListCtrl() {
 }
 
-void CServerListCtrl::Localize()
+void CServerListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CServerListCtrl::SetAllIcons()
 {
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -89,7 +105,10 @@ void CServerListCtrl::Localize()
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
 		ImageList_Destroy(himl);
+}
 
+void CServerListCtrl::Localize()
+{
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -217,93 +236,101 @@ bool CServerListCtrl::AddServer(CServer* toadd,bool bAddToList){
 }
 
 
-void CServerListCtrl::RefreshServer( CServer* server ){
-
-	if (!theApp.emuledlg->IsRunning()) return;
+void CServerListCtrl::RefreshServer(CServer* server)
+{
+	if (!server || !theApp.emuledlg->IsRunning())
+		return;
 
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)server;
-	sint32 itemnr = FindItem(&find);
-	if (itemnr == (-1))
-		return;
-	if( !server )
+	int itemnr = FindItem(&find);
+	if (itemnr == -1)
 		return;
 
-	if (theApp.serverconnect->IsConnected() && 
-		theApp.serverconnect->GetCurrentServer()->GetPort() ==server->GetPort() &&
-		strcmp(theApp.serverconnect->GetCurrentServer()->GetAddress(),server->GetAddress())==0
-		)
+	CServer* cur_srv;
+	if (theApp.serverconnect->IsConnected()
+		&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
+		&& cur_srv->GetPort() == server->GetPort()
+		&& stricmp(cur_srv->GetAddress(), server->GetAddress()) == 0)
 		SetItemState(itemnr,LVIS_GLOW,LVIS_GLOW);
-	else SetItemState(itemnr,0,LVIS_GLOW);
+	else
+		SetItemState(itemnr, 0, LVIS_GLOW);
 
 	CString temp;
-	temp.Format( "%s : %i",server->GetAddress(),server->GetPort());
-
-	SetItemText(itemnr,1,(LPCTSTR)temp);
+	temp.Format(_T("%s : %i"), server->GetAddress(), server->GetPort());
+	SetItemText(itemnr, 1, temp);
 	SetItemText(itemnr,0,server->GetListName()?(LPCTSTR)server->GetListName():_T(""));
 	SetItemText(itemnr,2,server->GetDescription()?(LPCTSTR)server->GetDescription():_T(""));
+
+	// Ping
 	if(server->GetPing()){
-		temp.Format( "%i",server->GetPing()); 
-		SetItemText(itemnr,3,(LPCTSTR)temp);
+		temp.Format(_T("%i"), server->GetPing());
+		SetItemText(itemnr, 3, temp);
 	}
 	else
 		SetItemText(itemnr,3,_T(""));
+
+	// Users
 	if(server->GetUsers()){
-		temp.Format( "%i",server->GetUsers());
-		SetItemText(itemnr,4,(LPCTSTR)temp);
+		temp.Format(_T("%i"), server->GetUsers());
+		SetItemText(itemnr, 4, temp);
 	}
 	else
 		SetItemText(itemnr,4,_T(""));
 
+	// Max Users
 	if(server->GetMaxUsers()){
-		temp.Format( "%i",server->GetMaxUsers()); 
-		SetItemText(itemnr,5,(LPCTSTR)temp);
+		temp.Format(_T("%i"), server->GetMaxUsers());
+		SetItemText(itemnr, 5, temp);
 	}
 	else
 		SetItemText(itemnr,5,_T(""));
 
+	// Files
 	if(server->GetFiles()){
-		temp.Format( "%i",server->GetFiles()); 
-		SetItemText(itemnr,6,(LPCTSTR)temp);
+		temp.Format(_T("%i"), server->GetFiles());
+		SetItemText(itemnr, 6, temp);
 	}
 	else
 		SetItemText(itemnr,6,_T(""));
+
 	switch(server->GetPreferences()){
-		case SRV_PR_LOW:
-			temp.Format(GetResString(IDS_PRIOLOW));
-			SetItemText(itemnr,7,(LPCTSTR)temp);
-			break;
-		case SRV_PR_NORMAL:
-			temp.Format(GetResString(IDS_PRIONORMAL));
-			SetItemText(itemnr,7,(LPCTSTR)temp);
-			break;
-		case SRV_PR_HIGH:
-			temp.Format(GetResString(IDS_PRIOHIGH));
-			SetItemText(itemnr,7,(LPCTSTR)temp);
-			break;
-		default:
-			temp.Format( GetResString(IDS_PRIONOPREF));
-			SetItemText(itemnr,7,(LPCTSTR)temp);
+	case SRV_PR_LOW:
+		SetItemText(itemnr, 7, GetResString(IDS_PRIOLOW));
+		break;
+	case SRV_PR_NORMAL:
+		SetItemText(itemnr, 7, GetResString(IDS_PRIONORMAL));
+		break;
+	case SRV_PR_HIGH:
+		SetItemText(itemnr, 7, GetResString(IDS_PRIOHIGH));
+		break;
+	default:
+		SetItemText(itemnr, 7, GetResString(IDS_PRIONOPREF));
 	}
-	temp.Format( "%i",server->GetFailedCount()); 
-	SetItemText(itemnr,8,(LPCTSTR)temp);
 	
+	// Failed Count
+	temp.Format(_T("%i"), server->GetFailedCount());
+	SetItemText(itemnr, 8, temp);
+
+	// Static server
 	if (server->IsStaticMember())
 		SetItemText(itemnr,9,GetResString(IDS_YES)); 
 	else
 		SetItemText(itemnr,9,GetResString(IDS_NO));
 
+	// Soft Files
 	if(server->GetSoftFiles()){
-		temp.Format( "%i",server->GetSoftFiles()); 
-		SetItemText(itemnr,10,(LPCTSTR)temp);
+		temp.Format(_T("%i"), server->GetSoftFiles());
+		SetItemText(itemnr, 10, temp);
 	}
 	else
 		SetItemText(itemnr,10,_T(""));
 
+	// Hard Files
 	if(server->GetHardFiles()){
-		temp.Format( "%i",server->GetHardFiles()); 
-		SetItemText(itemnr,11,(LPCTSTR)temp);
+		temp.Format(_T("%i"), server->GetHardFiles());
+		SetItemText(itemnr, 11, temp);
 	}
 	else
 		SetItemText(itemnr,11,_T(""));
@@ -326,10 +353,11 @@ void CServerListCtrl::RefreshServer( CServer* server ){
 	SetItemText(itemnr,12,temp);
 }
 
-BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl/*CTreeCtrl*/) 
-   ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick) 
-   ON_NOTIFY_REFLECT (NM_DBLCLK, OnNMLdblclk) //<-- mod bb 27.09.02 
-   ON_WM_CONTEXTMENU()
+BEGIN_MESSAGE_MAP(CServerListCtrl, CMuleListCtrl) 
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick) 
+	ON_NOTIFY_REFLECT (NM_DBLCLK, OnNMLdblclk) //<-- mod bb 27.09.02 
+	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 // CServerListCtrl message handlers
@@ -387,6 +415,7 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 //   m_ServerMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC)); 
 
    m_ServerMenu.SetDefaultItem(MP_CONNECTTO);
+	GetPopupMenuPos(*this, point);
    m_ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this); 
 
    VERIFY( m_ServerPrioMenu.DestroyMenu() );
@@ -461,7 +490,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					if (!StaticServerFileAppend(change))
 						return false;
 					change->SetIsStaticMember(true);
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(change);
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 				break;
 			}
@@ -474,7 +503,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					if (!StaticServerFileRemove(change))
 						return false;
 					change->SetIsStaticMember(false);
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(change);
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 				break;
 			}
@@ -486,7 +515,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					change->SetPreference( SRV_PR_LOW);
 //					if (change->IsStaticMember())
 //						StaticServerFileAppend(change); //Why are you adding to static when changing prioity? If I want it static I set it static.. I set server to LOW because I HATE this server, not because I like it!!!
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(change);
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 				break;
 			}
@@ -498,7 +527,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					change->SetPreference( SRV_PR_NORMAL );
 //					if (change->IsStaticMember())
 //						StaticServerFileAppend(change);
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(change);
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 				break;
 			}
@@ -510,7 +539,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					change->SetPreference( SRV_PR_HIGH );
 //					if (change->IsStaticMember())
 //						StaticServerFileAppend(change);
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(change);
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
 				break;
 			}
@@ -537,7 +566,7 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					if (link.GetLength()>0) buffer="\n"+buffer;
 					link += buffer; 
 				} 
-				theApp.emuledlg->ircwnd.SetSendFileString(link);
+				theApp.emuledlg->ircwnd->SetSendFileString(link);
 				break;
 			}
 
@@ -828,13 +857,14 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 		{
 			AddLogLine(false, "'%s:%i,%s' %s", server->GetAddress(), server->GetPort(), server->GetListName(), GetResString(IDS_ADDED2SSF));
 			server->SetIsStaticMember(true);
-			theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(server);
+			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(server);
 		}
 
 		fclose(staticservers);
 	}
 	catch (...)
 	{
+		ASSERT(0);
 		return false;
 	}
 	return true;
@@ -903,6 +933,7 @@ bool CServerListCtrl::StaticServerFileRemove(CServer *server)
 	}
 	catch (...)
 	{
+		ASSERT(0);
 		return false;
 	}
 	return true;
@@ -912,5 +943,5 @@ void CServerListCtrl::ShowFilesCount() {
 	CString counter;
 
 	counter.Format(" (%i)", GetItemCount());
-	theApp.emuledlg->serverwnd.GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST)+counter  );
+	theApp.emuledlg->serverwnd->GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST)+counter  );
 }

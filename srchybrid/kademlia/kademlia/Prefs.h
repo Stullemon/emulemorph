@@ -27,11 +27,7 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "../../stdafx.h"
-#include "../../Types.h"
 #include "../utils/UInt128.h"
 
 struct Status{
@@ -90,10 +86,10 @@ public:
 	void	setUDPPort(const uint16 val)	{m_udpPort = val;}
 
 	bool	getRecheckIP(void)				{return (m_recheckip<4);}
-	void	setRecheckIP()					{m_recheckip = 0;}
+	void	setRecheckIP()					{m_recheckip = 0;setFirewalled();}
 	void	incRecheckIP()					{m_recheckip++;}
 
-	bool	getLastContact(void)			{return ((time(NULL) - m_lastContact) < 120);}
+	bool	getLastContact(void);
 	void	setLastContact(void)			{m_lastContact = time(NULL);}
 
 	bool	getFirewalled(void)				{return (m_firewalled<1);}

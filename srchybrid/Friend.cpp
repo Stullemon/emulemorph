@@ -14,11 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "friend.h"
-#include "packets.h"
-#include "emule.h"
+#include "stdafx.h"
+#include "Friend.h"
+#include "OtherFunctions.h"
+#include "UpDownClient.h"
+#include "Packets.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -40,9 +40,9 @@ CFriend::CFriend(void)
 	md4cpy(m_abyUserhash, sm_abyNullHash);
 	m_dwHasHash = 0;
 
-//MORPH START - Added by Yun.SF3, ZZ Upload System
-m_friendSlot = false;
-//MORPH END - Added by Yun.SF3, ZZ Upload System
+	//MORPH START - Added by Yun.SF3, ZZ Upload System
+	m_friendSlot = false;
+	//MORPH END - Added by Yun.SF3, ZZ Upload System
 }
 
 //Added this to work with the IRC.. Probably a better way to do it.. But wanted this in the release..
@@ -62,9 +62,9 @@ CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedI
 	}
 	m_strName = pszName;
 	m_LinkedClient = 0;
-//MORPH START - Added by Yun.SF3, ZZ Upload System
+	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	m_friendSlot = false;
-//MORPH END - Added by Yun.SF3, ZZ Upload System
+	//MORPH END - Added by Yun.SF3, ZZ Upload System
 }
 
 CFriend::CFriend(CUpDownClient* client){
@@ -205,7 +205,5 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 		}
 		m_LinkedClient = linkedClient;
 	}
-    theApp.friendlist->RefreshFriend(this);
 };
 //MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-

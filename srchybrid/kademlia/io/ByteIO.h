@@ -31,7 +31,6 @@ there client on the eMule forum..
 #pragma once
 
 #include "DataIO.h"
-#include "../../Types.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -43,19 +42,21 @@ class CByteIO : public CDataIO
 {
 public:
 
-	CByteIO(byte *buffer, uint32 available) {m_bReadOnly = false; m_buffer = buffer; m_available = available;}
-	CByteIO(const byte *buffer, uint32 available) {m_bReadOnly = true; m_buffer = (byte *)buffer; m_available = available;}
+	CByteIO(byte *buffer, uint32 available) {m_bReadOnly = false; m_buffer = buffer; m_available = available; m_used = 0;}
+	CByteIO(const byte *buffer, uint32 available) {m_bReadOnly = true; m_buffer = (byte *)buffer; m_available = available; m_used = 0;}
 
 	void readArray(LPVOID lpResult, const uint32 byteCount);
 	void writeArray(LPCVOID lpVal, const uint32 byteCount);
 
 	uint32 getAvailable(void) {return m_available;}
+	void reset(void);
 
 private:
 
 	bool	m_bReadOnly;
 	byte	*m_buffer;
 	uint32	m_available;
+	uint32	m_used;
 
 };
 

@@ -1,10 +1,5 @@
 #pragma once
-
-#include "preferences.h"
-#include "afxwin.h"
 #include "loggable.h"
-
-// CPPgDisplay dialog
 
 class CPPgSecurity : public CPropertyPage, public CLoggable
 {

@@ -1,9 +1,6 @@
-
 #pragma once
-#include "DialogMinTrayBtn.h" // #zegzav
+#include "DialogMinTrayBtn.h"
 #include "ResizableLib\ResizableDialog.h"
-#include "types.h"
-
 
 class CTrayDialog : public CDialogMinTrayBtn<CResizableDialog>{
 	// Construction

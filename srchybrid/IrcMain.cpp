@@ -1,3 +1,6 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
 //as published by the Free Software Foundation; either
@@ -11,11 +14,22 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "ircmain.h"
+#include "stdafx.h"
 #include "emule.h"
+#include "IRCMain.h"
+#include "OtherFunctions.h"
 #include "ED2KLink.h"
+#include "DownloadQueue.h"
+#include "Server.h"
+#include "IRCSocket.h"
+#include "MenuCmds.h"
+#include "Sockets.h"
+#include "FriendList.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "ServerWnd.h"
+#include "IRCWnd.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -73,7 +87,7 @@ void CIrcMain::ProcessLink( CString ed2kLink ) {
 				_ASSERT( pListLink !=0 ); 
 				CString strAddress = pListLink->GetAddress(); 
 				if(strAddress.GetLength() != 0)
-					theApp.emuledlg->serverwnd.UpdateServerMetFromURL(strAddress);
+					theApp.emuledlg->serverwnd->UpdateServerMetFromURL(strAddress);
 			}
 			break;
 		case CED2KLink::kServer:
@@ -92,7 +106,7 @@ void CIrcMain::ProcessLink( CString ed2kLink ) {
 				if( theApp.glob_prefs->GetManualHighPrio() )
 					pSrv->SetPreference(SRV_PR_HIGH);
 
-				if (!theApp.emuledlg->serverwnd.serverlistctrl.AddServer(pSrv,true)) 
+				if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(pSrv,true)) 
 					delete pSrv; 
 				else
 					AddLogLine(true,GetResString(IDS_SERVERADDED), pSrv->GetListName());
@@ -103,8 +117,8 @@ void CIrcMain::ProcessLink( CString ed2kLink ) {
 		}
 		delete pLink;
 	} catch(...) {
-		OUTPUT_DEBUG_TRACE();
 		AddLogLine(true, GetResString(IDS_LINKNOTADDED));
+		ASSERT(0);
 	}
 }
 
@@ -283,11 +297,11 @@ void CIrcMain::ParseMessage( CString rawMessage ){
 					index1 = message.Find( ':', index2+1);
 					if( index1 == -1 || index2 >= index1 )
 						return;
-					uint32 newClientServerIP = atoi(message.Mid( index2 + 1, index1 - index2 -1));
+					//uint32 newClientServerIP = atoi(message.Mid( index2 + 1, index1 - index2 -1));
 					index2 = message.Find( '|', index1+1);
 					if( index2 == -1 || index1 >= index2 )
 						return;
-					uint16 newClientServerPort = atoi(message.Mid( index1 + 1, index2 - index1 -1));
+					//uint16 newClientServerPort = atoi(message.Mid( index1 + 1, index2 - index1 -1));
 					index1 = message.Find( '|', index2+1);
 					if( index1 == -1 || index2 >= index1 )
 						return;
@@ -448,47 +462,69 @@ void CIrcMain::SendLogin(){
 	ircsocket->SendString(temp);
 }
 
-void CIrcMain::ParsePerform(){
-	CString rawPerform = "";
-	if(theApp.glob_prefs->GetIrcHelpChannel())
-		rawPerform = "/" + GetResString(IDS_IRC_HELPCHANNELPERFORM) + "|";
-	if(theApp.glob_prefs->GetIrcUsePerform())
-		rawPerform += theApp.glob_prefs->GetIrcPerformString();
-	if(rawPerform == "" )
-		return;
-	int index = 0;
-	CString nextPerform;
-	while( rawPerform.Find('|') != -1 ){
-		index = rawPerform.Find( '|' );
-		nextPerform = rawPerform.Left( index );
-		nextPerform.TrimLeft( ' ' );
-		if( nextPerform.Left(1) == '/' )
-			nextPerform = nextPerform.Mid(1);
-		if (nextPerform.Left(3) == "msg")
-			nextPerform = CString("PRIVMSG") + nextPerform.Mid(3);
-		if( (nextPerform.Left(16)).CompareNoCase( "PRIVMSG nickserv"  )== 0){
-			nextPerform = CString("ns") + nextPerform.Mid(16);
+void CIrcMain::ParsePerform()
+{
+	//We need to do the perform first and seperate from the help option.
+	//This allows you to do all your passwords and stuff before joining the
+	//help channel and to keep both options from interfering with each other.
+	if (theApp.glob_prefs->GetIrcUsePerform())
+	{
+		CString strUserPerform = theApp.glob_prefs->GetIrcPerformString();
+		strUserPerform.Trim();
+		if (!strUserPerform.IsEmpty())
+		{
+			int iPos = 0;
+			CString str = strUserPerform.Tokenize(_T("|"), iPos);
+			str.Trim();
+			while (!str.IsEmpty())
+			{
+				if (str.Left(1) == _T('/'))
+					str = str.Mid(1);
+				if (str.Left(3) == _T("msg"))
+					str = _T("PRIVMSG") + str.Mid(3);
+				if (str.Left(16).CompareNoCase(_T("PRIVMSG nickserv")) == 0)
+					str = _T("ns") + str.Mid(16);
+				if (str.Left(16).CompareNoCase(_T("PRIVMSG chanserv")) == 0)
+					str = _T("cs") + str.Mid(16);
+				ircsocket->SendString(str);
+				str = strUserPerform.Tokenize(_T("|"), iPos);
+				str.Trim();
+			}
 		}
-		if( (nextPerform.Left(16)).CompareNoCase( "PRIVMSG chanserv" )== 0){
-			nextPerform = CString("cs") + nextPerform.Mid(16);
-		}
-		ircsocket->SendString( nextPerform );
-		rawPerform = rawPerform.Mid( index+1 );
 	}
-	if( !rawPerform.IsEmpty() ){
-		rawPerform.TrimLeft( ' ' );
-		if( rawPerform.Left(1) == '/' )
-			rawPerform = rawPerform.Mid(1);
-		if (rawPerform.Left(3) == "msg")
-			rawPerform = CString("PRIVMSG") + rawPerform.Mid(3);
-		if( (rawPerform.Left(16)).CompareNoCase( "PRIVMSG nickserv"  )== 0){
-			rawPerform = CString("ns") + rawPerform.Mid(16);
+
+
+	if (theApp.glob_prefs->GetIrcHelpChannel())
+	{
+		// NOTE: putting this IRC command string into the language resource file is not a good idea. most 
+		// translators do not know that this resource string does NOT have to be translated.
+
+		// Well, I meant to make this option a static perform string within the language so the default help could
+		// be change to what ever channel by just changing the language.. I will just have to check these strings
+		// before release.
+		// This also allows the help string to do more then join one channel. It could add other features later.
+		CString strJoinHelpChannel = GetResString(IDS_IRC_HELPCHANNELPERFORM);
+		strJoinHelpChannel.Trim();
+		if (!strJoinHelpChannel.IsEmpty())
+		{
+			int iPos = 0;
+			CString str = strJoinHelpChannel.Tokenize(_T("|"), iPos);
+			str.Trim();
+			while (!str.IsEmpty())
+			{
+				if (str.Left(1) == _T('/'))
+					str = str.Mid(1);
+				if (str.Left(3) == _T("msg"))
+					str = _T("PRIVMSG") + str.Mid(3);
+				if (str.Left(16).CompareNoCase(_T("PRIVMSG nickserv")) == 0)
+					str = _T("ns") + str.Mid(16);
+				if (str.Left(16).CompareNoCase(_T("PRIVMSG chanserv")) == 0)
+					str = _T("cs") + str.Mid(16);
+				ircsocket->SendString(str);
+				str = strJoinHelpChannel.Tokenize(_T("|"), iPos);
+				str.Trim();
+			}
 		}
-		if( (rawPerform.Left(16)).CompareNoCase( "PRIVMSG chanserv" )== 0){
-			rawPerform = CString("cs") + rawPerform.Mid(16);
-		}
-		if( !rawPerform.IsEmpty() )
-			ircsocket->SendString( rawPerform );
 	}
 }
 

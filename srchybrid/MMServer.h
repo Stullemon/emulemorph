@@ -14,14 +14,18 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#include "types.h"
-#include "mmsocket.h"
-#include "partfile.h"
-#include "knownfile.h"
-#include "loggable.h"
-#include "CxImage/xImage.h"
-
 #pragma once
+#include "Loggable.h"
+
+class CMMSocket;
+class CMMData;
+class CMMPacket;
+class CListenMMSocket;
+class CSearchFile;
+class CxImage;
+class CKnownFile;
+class CPartFile;
+
 #define  MMS_BLOCKTIME	600000	
 #define  MMS_SEARCHID	500
 
@@ -43,12 +47,14 @@ public:
 	void	ProcessSearchRequest(CMMData* data, CMMSocket* sender);
 	void	ProcessPreviewRequest(CMMData* data, CMMSocket* sender);
 	void	ProcessDownloadRequest(CMMData* data, CMMSocket* sender);
+	void	ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender);
 	void	ProcessFinishedListRequest(CMMSocket* sender);
 	// other
 	void	SearchFinished(bool bTimeOut);
 	void	PreviewFinished(CxImage** imgFrames, uint8 nCount);
 	void	Process();
 	void	AddFinishedFile(CKnownFile* file)	{m_SentFinishedList.Add(file);}
+	CString GetContentType();
 
 	UINT_PTR h_timer;
 	uint8	m_byPendingCommand;
@@ -68,4 +74,5 @@ private:
 	CArray<CKnownFile*,CKnownFile*>		m_SentFinishedList;
 	uint8				m_cPWFailed;
 	uint32				m_dwBlocked;
+	bool				m_bUseFakeContent;
 };

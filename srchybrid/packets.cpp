@@ -14,15 +14,32 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
-#include "otherfunctions.h"
-#include "packets.h"
+#include <zlib/zlib.h>
+#include "Packets.h"
+#include "OtherFunctions.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+
+#pragma pack(1)
+struct Header_Struct{
+	int8	eDonkeyID;
+	int32	packetlength;
+	int8	command;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct UDP_Header_Struct{
+	int8	eDonkeyID;
+	int8	command;
+};
+#pragma pack()
 
 
 Packet::Packet(uint8 protocol){
@@ -49,19 +66,18 @@ Packet::Packet(char* header){
 	prot = head->eDonkeyID;
 }
 
-//MOPRH START - Removed by SiRoB, ZZ Upload System 20030807-1911
-//// -khaos--+++> Slightly modified for our stats uses...
-//Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// only used for splitted packets!
-//	m_bFromPF = bFromPF;
-//	m_bSplitted = true;
-//	m_bPacked = false;
-//	m_bLastSplitted = bLast;
-//	tempbuffer = 0;
-//	pBuffer = 0;
-//	completebuffer = pPacketPart;
-//	size = nSize-6;
-//}
-//MOPRH END   - Removed by SiRoB, ZZ Upload System 20030807-1911
+
+// -khaos--+++> Slightly modified for our stats uses...
+Packet::Packet(char* pPacketPart, uint32 nSize ,bool bLast, bool bFromPF){// only used for splitted packets!
+	m_bFromPF = bFromPF;
+	m_bSplitted = true;
+	m_bPacked = false;
+	m_bLastSplitted = bLast;
+	tempbuffer = 0;
+	pBuffer = 0;
+	completebuffer = pPacketPart;
+	size = nSize-6;
+}
 
 // -khaos--+++> Slightly modified for our stats uses...
 //				If m_bFromPF = true then packet was formed from a partfile
@@ -76,7 +92,7 @@ Packet::Packet(int8 in_opcode,uint32 in_size,uint8 protocol,bool bFromPF){
 	if (in_size){
 		completebuffer = new char[in_size+10];
 		pBuffer = completebuffer+6;
-		MEMSET(completebuffer,0,in_size+10);
+		memset(completebuffer,0,in_size+10);
 	}
 	else{
 		pBuffer = 0;
@@ -95,7 +111,7 @@ Packet::Packet(CMemFile* datafile,uint8 protocol){
 	completebuffer = new char[datafile->GetLength()+10];
 	pBuffer = completebuffer+6;
 	BYTE* tmp = datafile->Detach();;
-	MEMCOPY(pBuffer,tmp,size);
+	memcpy(pBuffer,tmp,size);
 	free(tmp);
 	tempbuffer = 0;
 	prot = protocol;
@@ -113,7 +129,7 @@ Packet::~Packet(){
 char* Packet::GetPacket(){
 	if (completebuffer){
 		if (!m_bSplitted)
-			MEMCOPY(completebuffer,GetHeader(),6);
+			memcpy(completebuffer,GetHeader(),6);
 		return completebuffer;
 	}
 	else{
@@ -122,8 +138,8 @@ char* Packet::GetPacket(){
 			tempbuffer = NULL; // 'new' may throw an exception
 		}
 		tempbuffer = new char[size+10];
-		MEMCOPY(tempbuffer,GetHeader(),6);
-		MEMCOPY(tempbuffer+6,pBuffer,size);
+		memcpy(tempbuffer,GetHeader(),6);
+		memcpy(tempbuffer+6,pBuffer,size);
 
 		return tempbuffer;
 	}
@@ -132,7 +148,7 @@ char* Packet::GetPacket(){
 char* Packet::DetachPacket(){
 	if (completebuffer){
 		if (!m_bSplitted)
-			MEMCOPY(completebuffer,GetHeader(),6);
+			memcpy(completebuffer,GetHeader(),6);
 		char* result = completebuffer;
 		completebuffer = 0;
 		pBuffer = 0;
@@ -144,8 +160,8 @@ char* Packet::DetachPacket(){
 			tempbuffer = NULL; // 'new' may throw an exception
 		}
 		tempbuffer = new char[size+10];
-		MEMCOPY(tempbuffer,GetHeader(),6);
-		MEMCOPY(tempbuffer+6,pBuffer,size);
+		memcpy(tempbuffer,GetHeader(),6);
+		memcpy(tempbuffer+6,pBuffer,size);
 		char* result = tempbuffer;
 		tempbuffer = 0;
 		return result;
@@ -163,7 +179,7 @@ char* Packet::GetHeader(){
 
 char* Packet::GetUDPHeader(){
 	ASSERT ( !m_bSplitted );
-	MEMSET(head,0,6);
+	memset(head,0,6);
 	UDP_Header_Struct* header = (UDP_Header_Struct*) head;
 	header->command = opcode;
 	header->eDonkeyID =  prot;
@@ -180,7 +196,7 @@ void Packet::PackPacket(){
 		return;
 	}
 	prot = OP_PACKEDPROT;
-	MEMCOPY(pBuffer,output,newsize);
+	memcpy(pBuffer,output,newsize);
 	//MORPH START - Added by IceCream, Hotfix by MKThunderStorm about the source exchange compression
 	size = newsize;
 	//MORPH END   - Added by IceCream, Hotfix by MKThunderStorm about the source exchange compression
@@ -411,7 +427,7 @@ CString CTag::GetFullInfo() const
 	}
 	else if (tag.type == 4){
 		TCHAR szBuff[16];
-		_sntprintf(szBuff, ELEMENT_COUNT(szBuff), _T("%f"), tag.floatvalue);
+		_sntprintf(szBuff, ARRSIZE(szBuff), _T("%f"), tag.floatvalue);
 		strTag += szBuff;
 	}
 	else{

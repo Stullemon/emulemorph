@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "emule.h"
+#include "emuledlg.h"
 #include "SearchDlg.h"
 #include "SearchList.h"
 #include "JigleSearch.h"
 #include "soapH.h"
 #include "soapJigleService-1.0.nsmap"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,7 +46,7 @@ bool CSearchDlg::DoNewJigleSearch(SSearchParams* pParams)
 	//	*) a file type (TYPECODE_xxx)
 	//	--or--
 	//	*) a file extension
-	if (GetResString(IDS_SEARCH_ANY) == pParams->strFileType && pParams->strExtension.IsEmpty()){
+	if ((GetResString(IDS_SEARCH_ANY) == pParams->strFileType) && pParams->strExtension.IsEmpty()){
 		AfxMessageBox(_T("If you want to search the Jigle database without specifying a file type, you have to specify at least a file extension!"));
 		GetDlgItem(IDC_EDITSEARCHEXTENSION)->SetFocus();
 		return false;

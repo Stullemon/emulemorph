@@ -201,7 +201,7 @@ void CKademliaUDPListener::processPacket( byte *data, uint32 lenData, const sock
 				CKademlia::debugMsg("Unhandled UDP OpCode 0x%02X (%u)", opcode, ntohl(senderAddress->sin_addr.s_addr));
 				CKademlia::debugMsg("*************************");
 		}
-	} catch (...) {TRACE("Exception is Kademlia Process Packet\n");}
+	} catch (...) {TRACE("Exception is Kad Process Packet\n");}
 }
 
 void CKademliaUDPListener::addContact(const byte *data, const uint32 lenData, const uint32 ip, const uint16 port, uint16 tport)
@@ -262,7 +262,7 @@ void CKademliaUDPListener::addContacts(const byte *data, const uint32 lenData, c
 				routingZone->add(id, ip, port, tport, type);
 			}
 		}
-	} catch (...) {TRACE("Exception in Kademlia Add Contacts\n");}
+	} catch (...) {TRACE("Exception in Kad Add Contacts\n");}
 }
 
 //KADEMLIA_BOOTSTRAP_REQ
@@ -324,7 +324,7 @@ void CKademliaUDPListener::processBootstrapRequest (const byte *packetData, cons
 
 		// Finished with memory
 		delete [] response;
-	} catch (...) {TRACE("Exception in Kademlia Bootstrap Requests\n");}
+	} catch (...) {TRACE("Exception in Kad Bootstrap Requests\n");}
 }
 
 //KADEMLIA_BOOTSTRAP_RES
@@ -355,7 +355,7 @@ void CKademliaUDPListener::processBootstrapResponse (const byte *packetData, con
 		// Send sender to alive.
 		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 
-	} catch (...) {TRACE("Exception in Kademlia Bootstrap Response\n");}
+	} catch (...) {TRACE("Exception in Kad Bootstrap Response\n");}
 }
 
 //KADEMLIA_HELLO_REQ
@@ -383,7 +383,7 @@ void CKademliaUDPListener::processHelloRequest (const byte *packetData, const ui
 			// Check if firewalled
 			firewalledCheck(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 		}	
-	} catch (...) {TRACE("Exception in Kademlia Hello Requests\n");}
+	} catch (...) {TRACE("Exception in Kad Hello Requests\n");}
 }
 
 //KADEMLIA_HELLO_RES
@@ -399,8 +399,6 @@ void CKademliaUDPListener::processHelloResponse (const byte *packetData, const u
 		//Used Pointers
 		CRoutingZone *routingZone = CKademlia::getRoutingZone();
 		ASSERT(routingZone != NULL); 
-		CPrefs *prefs = CKademlia::getPrefs();
-		ASSERT(prefs != NULL); 
 	
 		// Add or Update contact.
 		addContact(packetData, lenPacket, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
@@ -408,7 +406,7 @@ void CKademliaUDPListener::processHelloResponse (const byte *packetData, const u
 		// Set contact to alive.
 		routingZone->setAlive(ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 	
-	} catch (...) {TRACE("Exception in Kademlia Hello Response\n");}
+	} catch (...) {TRACE("Exception in Kad Hello Response\n");}
 }
 //KADEMLIA_REQ
 void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const uint32 lenPacket, const sockaddr_in *senderAddress)
@@ -417,8 +415,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const
 	{
 		// Verify packet is expected size
 		if (lenPacket != 33){
-			ASSERT(0);
-			return;
+		return;
 		}
 
 		//Used Pointers
@@ -476,7 +473,7 @@ void CKademliaUDPListener::processKademliaRequest (const byte *packetData, const
 //		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
 		sendPacket(response, lenResponse, ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
 
-	} catch (...) {TRACE("Exception in Kademlia Request\n");}
+	} catch (...) {TRACE("Exception in Kad Request\n");}
 }
 
 //KADEMLIA_RES
@@ -719,7 +716,7 @@ void CKademliaUDPListener::processSearchRequest (const byte *packetData, const u
 			indexed->SendValidResult(target, pSearchTerms, senderAddress, false ); 
 			Free(pSearchTerms);
 		}
-	} catch (...) {TRACE("Exception in Kademlia Search Request\n");}
+	} catch (...) {TRACE("Exception in Kad Search Request\n");}
 }
 
 //KADEMLIA_SEARCH_RES
@@ -761,7 +758,7 @@ void CKademliaUDPListener::processSearchResponse (const byte *packetData, const 
 											tags);
 			count--;
 		}
-	} catch (...) {TRACE("Exception in Kademlia Search Response\n");}
+	} catch (...) {TRACE("Exception in Kad Search Response\n");}
 }
 
 //KADEMLIA_PUBLISH_REQ
@@ -796,6 +793,7 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 			return;
 		// How many results.. Not supported yet..
 		uint16 count = bio.readUInt16();
+		bool flag = false;
 		while( count > 0 )
 		{
 			CUInt128 target;
@@ -845,22 +843,35 @@ void CKademliaUDPListener::processPublishRequest (const byte *packetData, const 
 			if( !entry->source && (entry->fileName == "" || entry->size == 0 ))
 			{
 				delete entry;
+				entry = NULL;
 				TRACE("Invalid entry\n");
 			}
 			else
 			{
-				indexed->IndexedAdd(file, target, entry);
+				if(	indexed->IndexedAdd(file, target, entry) )
+				{
+					flag = true;
+				}
+				else
+				{
+					TRACE("INDEX FULL Source %u Keyword %u\n", indexed->m_totalIndexSource, indexed->m_totalIndexKeyword);
+					delete entry;
+					entry = NULL;
+				}
 			}
 			count--;
 		}	
 //		CKademlia::debugMsg("Sent UDP OpCode KADEMLIA_PUBLISH_RES (%u)", ntohl(senderAddress->sin_addr.s_addr));
-		byte response[18];
-		CByteIO bio2(response, sizeof(response));
-		bio2.writeByte(OP_KADEMLIAHEADER);
-		bio2.writeByte(KADEMLIA_PUBLISH_RES);
-		bio2.writeUInt128(file);
-		sendPacket(response, sizeof(response), ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port)) ;
-	} catch (...) {TRACE("Exception in Kademlia Publish Request\n");}
+		if( flag )
+		{
+			byte response[18];
+			CByteIO bio2(response, sizeof(response));
+			bio2.writeByte(OP_KADEMLIAHEADER);
+			bio2.writeByte(KADEMLIA_PUBLISH_RES);
+			bio2.writeUInt128(file);
+			sendPacket(response, sizeof(response), ntohl(senderAddress->sin_addr.s_addr), ntohs(senderAddress->sin_port));
+		}
+	} catch (...) {TRACE("Exception in Kad Publish Request\n");}
 }
 
 //KADEMLIA_PUBLISH_ACK
@@ -942,7 +953,7 @@ void CKademliaUDPListener::processFirewalledResponse (const byte *packetData, co
 		prefs->setIPAddress(ip);
 		CString ipStr;
 		CMiscUtils::ipAddressToString(ip, &ipStr);
-	} catch (...) {TRACE("Exception in Kademlia Firewall Response\n");}
+	} catch (...) {TRACE("Exception in Kad Firewall Response\n");}
 }
 
 //KADEMLIA_FIREWALLED_ACK

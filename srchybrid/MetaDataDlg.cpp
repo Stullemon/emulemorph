@@ -1,9 +1,29 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "kademlia/kademlia/tag.h"
 #include "MetaDataDlg.h"
 #include "OtherFunctions.h"
 #include "Ini2.h"
-#include "kademlia/kademlia/tag.h"
+#include "Preferences.h"
+#include "MenuCmds.h"
+#include "Packets.h"
+#include "KnownFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -422,23 +442,7 @@ void CMetaDataDlg::OnContextMenu(CWnd * /*pWnd*/, CPoint point)
 	}
 
 	if (m_pMenuTags != NULL){
-		if (point.x == -1 && point.y == -1){
-			int iIdxItem = m_tags.GetNextItem(-1, LVNI_SELECTED | LVNI_FOCUSED);
-			if (iIdxItem != -1){
-				RECT rc;
-				if (m_tags.GetItemRect(iIdxItem, &rc, LVIR_BOUNDS)){
-					point.x = rc.left + m_tags.GetColumnWidth(0) / 2;
-					point.y = rc.top + (rc.bottom - rc.top) / 2;
-					ClientToScreen(&point);
-				}
-			}
-			else{
-				point.x = 16;
-				point.y = 32;
-				ClientToScreen(&point);
-			}
-		}
-
+		GetPopupMenuPos(m_tags, point);
 		m_pMenuTags->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RIGHTBUTTON, point.x, point.y, this);
 	}
 }

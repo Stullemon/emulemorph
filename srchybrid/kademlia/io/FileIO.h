@@ -30,9 +30,6 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "../../stdafx.h"
-#include "../../Types.h"
-
 #include "DataIO.h"
 
 ////////////////////////////////////////

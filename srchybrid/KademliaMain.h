@@ -1,28 +1,29 @@
 #pragma once
-#include "kademlia/kademlia/prefs.h"
-#include "Kademlia/routing/timer.h"
 #include "loggable.h"
+
+struct Status;
 
 class CKademliaMain : public CLoggable
 {
+	friend UINT AFX_CDECL KadStopFunc(LPVOID pvParams);
 public:
 	CKademliaMain(void);
 	~CKademliaMain(void);
 
 	void	setStatus(Status* val);
-	Status*	getStatus(void)			{return status;}
-	bool	isConnected(void)		{return status->m_connected;}
-	bool	isFirewalled(void)		{return status->m_firewalled;}
+	Status*	getStatus();
+	bool	isConnected();
+	bool	isFirewalled();
 	void	Connect();
 	void	DisConnect();
 	DWORD	GetThreadID();
 	void Bootstrap(CString ip,uint16 port);
 	void Bootstrap(uint32 ip,uint16 port);
 
-	uint32	getIP(void)				{return status->m_ip;}
-	uint16	getUdpPort(void)		{return status->m_udpport;}
-	uint16	getTcpPort(void)		{return status->m_tcpport;}
+	uint32	getIP();
+	uint16	getUdpPort();
+	uint16	getTcpPort();
 private:
 	//Most likely delete these and only keep the Status Object..
-	Status* status;
+	Status* m_status;
 };

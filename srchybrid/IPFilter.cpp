@@ -14,13 +14,13 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "IPFilter.h"
+#include "stdafx.h"
 #include "emule.h"
+#include "IPFilter.h"
 #include "otherfunctions.h"
+#include "Preferences.h"
 #include "HttpDownloadDlg.h"//MORPH START added by Yun.SF3: Ipfilter.dat update
-
+#include "emuleDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -144,7 +144,7 @@ void CIPFilter::SaveToFile(){
 void CIPFilter::RemoveAllIPs(){
 	IPRange_Struct* search;
 	
-	map<uint32, IPRange_Struct*>::const_iterator it;
+	std::map<uint32, IPRange_Struct*>::const_iterator it;
 	for ( it = iplist.begin(); it != iplist.end(); ++it ) {
 		search=(*it).second;
 		delete search;
@@ -163,7 +163,7 @@ bool CIPFilter::IsFiltered(uint32 IP2test,int level){
 	IPRange_Struct* search;
 	IP2test=htonl(IP2test);
 
-	map<uint32, IPRange_Struct*>::const_iterator it=iplist.upper_bound(IP2test);
+	std::map<uint32, IPRange_Struct*>::const_iterator it=iplist.upper_bound(IP2test);
 	it--;
 	do {
 		search=(*it).second;

@@ -1,11 +1,7 @@
 #if !defined(AFX_ICONSTATIC_H__DE300890_E0CF_11D6_B83F_00010207827B__INCLUDED_)
 #define AFX_ICONSTATIC_H__DE300890_E0CF_11D6_B83F_00010207827B__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// IconStatic.h : Header-Datei
-//
 
 /////////////////////////////////////////////////////////////////////////////
 // Fenster CIconStatic 

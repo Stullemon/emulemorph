@@ -14,22 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
-
-#include "types.h"
 #include "opcodes.h"
-#include "otherstructs.h"
-#include <zlib/zlib.h>
 
-//			CLIENT TO SERVER
-
-
-
-//			PACKET CLASS
-// TODO some parts could need some work to make it more efficient
-class Packet {
+class Packet
+{
 public:
 	Packet(uint8 protocol = OP_EDONKEYPROT);
 	Packet(char* header); // only used for receiving packets
@@ -37,9 +26,7 @@ public:
 	Packet(CMemFile* datafile,uint8 protocol = OP_EDONKEYPROT);
 	// -khaos--+++> For use in upload statistics... Optional var, shouldn't affect anything.
 	Packet(int8 in_opcode,int32 in_size,uint8 protocol = OP_EDONKEYPROT,bool bFromPF = true);
-//MOPRH START - Removed by SiRoB, ZZ Upload System 20030807-1911
-//	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPF = true); // only used for splitted packets!
-//MOPRH END   - Removed by SiRoB, ZZ Upload System 20030807-1911
+	Packet(char* pPacketPart,uint32 nSize,bool bLast,bool bFromPF = true); // only used for splitted packets!
 	// <-----khaos-
 	~Packet();
 	char*	GetHeader();
@@ -47,10 +34,8 @@ public:
 	char*	GetPacket();
 	char*	DetachPacket();
 	uint32	GetRealPacketSize()		{return size+6;}
-//MOPRH START - Removed by SiRoB, ZZ Upload System 20030807-1911
-//	bool	IsSplitted()			{return m_bSplitted;}
-//	bool	IsLastSplitted()		{return m_bLastSplitted;}
-//MOPRH END   - Removed by SiRoB, ZZ Upload System 20030807-1911
+	bool	IsSplitted()			{return m_bSplitted;}
+	bool	IsLastSplitted()		{return m_bLastSplitted;}
 	void	PackPacket();
 	bool	UnPackPacket(UINT uMaxDecompressedSize = 50000);
 	char*	pBuffer;

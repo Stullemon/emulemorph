@@ -14,21 +14,15 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
-#include "serverlistctrl.h"
-#include "afxwin.h"
 #include "ResizableLib\ResizableDialog.h"
-#include "HyperTextCtrl.h"
-#include "iconstatic.h"
-#include "afxcmn.h"
+#include "ServerListCtrl.h"
 #include "LogEditCtrl.h"
-#include "CustomAutoComplete.h"
+#include "IconStatic.h"
+#include "RichEditCtrlX.h"
 
 class CHTRichEditCtrl;
-
-// CServerWnd dialog
+class CCustomAutoComplete;
 
 class CServerWnd : public CResizableDialog
 {
@@ -49,6 +43,8 @@ public:
 	enum { IDD = IDD_SERVER };
 	CServerListCtrl serverlistctrl;
 protected:
+	void SetAllIcons();
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -64,8 +60,10 @@ public:
 	afx_msg void OnTcnSelchangeTab3(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 	CTabCtrl StatusSelector;
 	void UpdateControlsState();
+
 private:
 	CIconStatic m_ctrlNewServerFrm;
 	CIconStatic m_ctrlUpdateServerFrm;
@@ -73,10 +71,10 @@ private:
 	CImageList imagelist;
 	HICON icon_srvlist;
 	bool	debug;
-	CMuleListCtrl* MyInfoList;
+	CRichEditCtrlX m_MyInfo;
+	CHARFORMAT m_cfDef;
+	CHARFORMAT m_cfBold;
 	CCustomAutoComplete* m_pacServerMetURL;
 	CString m_strClickNewVersion;
 	LCID m_uLangID;
-public:
-	afx_msg void OnSysColorChange();
 };

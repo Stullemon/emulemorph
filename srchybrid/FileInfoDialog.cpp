@@ -1,5 +1,5 @@
 //this file is part of eMule
-// added by quekky
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,54 +14,35 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// FileInfoDialog.cpp : implementation file
-
 #include "stdafx.h"
 #include "eMule.h"
 #include "FileInfoDialog.h"
+#include "OtherFunctions.h"
+#include "PartFile.h"
 
 // id3lib
 #define _SIZED_TYPES_H_ // ugly, ugly.. TODO change *our* types.h!!!!
 #include <id3/tag.h>
 #include <id3/misc_support.h>
 
-// Video for Windows API
-// Those defines are for 'mmreg.h' which is included by 'vfw.h'
-#define NOMMIDS		 // Multimedia IDs are not defined
-#define NONEWWAVE	   // No new waveform types are defined except WAVEFORMATEX
-#define NONEWRIFF	 // No new RIFF forms are defined
-#define NOJPEGDIB	 // No JPEG DIB definitions
-#define NONEWIC		 // No new Image Compressor types are defined
-#define NOBITMAP	 // No extended bitmap info header definition
-// Those defines are for 'vfw.h'
-#define NOCOMPMAN
-#define NODRAWDIB
-#define NOVIDEO
-#define NOAVIFMT
-#define NOMMREG
-//#define NOAVIFILE
-#define NOMCIWND
-#define NOAVICAP
-#define NOMSACM
-#define MMNOMMIO
-#include <vfw.h>
-
 // DirectShow MediaDet
 #include <strmif.h>
-#include <uuids.h>
+//#include <uuids.h>
+#define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+        EXTERN_C const GUID DECLSPEC_SELECTANY name \
+                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+_DEFINE_GUID(MEDIATYPE_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+_DEFINE_GUID(MEDIATYPE_Audio, 0x73647561, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+_DEFINE_GUID(FORMAT_VideoInfo,0x05589f80, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
+_DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 #include <qedit.h>
-//#include <amvideo.h>
 typedef struct tagVIDEOINFOHEADER {
-
     RECT            rcSource;          // The bit we really want to use
     RECT            rcTarget;          // Where the video should go
     DWORD           dwBitRate;         // Approximate bit data rate
     DWORD           dwBitErrorRate;    // Bit error rate for this stream
     REFERENCE_TIME  AvgTimePerFrame;   // Average time per frame (100ns units)
-
     BITMAPINFOHEADER bmiHeader;
-
 } VIDEOINFOHEADER;
 
 #ifdef _DEBUG
@@ -70,45 +51,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-extern void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
-extern int GetStreamFormat(const PAVISTREAM pAviStrm, long &rlStrmFmtSize, LPVOID &rpStrmFmt);
-
-
-/////////////////////////////////////////////////////////////////////////////
-// CRichEditCtrlX
-
-BEGIN_MESSAGE_MAP(CRichEditCtrlX, CRichEditCtrl)
-	ON_WM_GETDLGCODE()
-	ON_NOTIFY_REFLECT_EX(EN_LINK, OnEnLink)
-END_MESSAGE_MAP()
-
-UINT CRichEditCtrlX::OnGetDlgCode() 
-{
-	// Avoid that the edit control will select the entire contents, if the
-	// focus is moved via tab into the edit control
-	//
-	// DLGC_WANTALLKEYS is needed, if the control is within a wizard property
-	// page and the user presses the Enter key to invoke the default button of the property sheet!
-	return CRichEditCtrl::OnGetDlgCode() & ~(DLGC_HASSETSEL | DLGC_WANTALLKEYS);
-}
-
-BOOL CRichEditCtrlX::OnEnLink(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	BOOL bMsgHandled = FALSE;
-	*pResult = 0;
-	ENLINK* pEnLink = reinterpret_cast<ENLINK *>(pNMHDR);
-	if (pEnLink && pEnLink->msg == WM_LBUTTONDOWN)
-	{
-		CString strUrl;
-		GetTextRange(pEnLink->chrg.cpMin, pEnLink->chrg.cpMax, strUrl);
-
-		ShellExecute(NULL, NULL, strUrl, NULL, NULL, SW_SHOWDEFAULT);
-		*pResult = 1;
-		bMsgHandled = TRUE; // do not route this message to any parent
-	}
-	return bMsgHandled;
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CFileInfoDialog dialog
@@ -127,9 +69,9 @@ CFileInfoDialog::CFileInfoDialog()
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_bAudioRoundBitrate = FALSE;
 	m_lAudioBitrate = 0;
-	MEMSET(&m_cfDef, 0, sizeof m_cfDef);
-	MEMSET(&m_cfBold, 0, sizeof m_cfBold);
-	MEMSET(&m_cfRed, 0, sizeof m_cfRed);
+	memset(&m_cfDef, 0, sizeof m_cfDef);
+	memset(&m_cfBold, 0, sizeof m_cfBold);
+	memset(&m_cfRed, 0, sizeof m_cfRed);
 }
 
 CFileInfoDialog::~CFileInfoDialog()
@@ -142,6 +84,7 @@ BOOL CFileInfoDialog::OnInitDialog()
 	InitWindowStyles(this);
 	AddAnchor(IDC_FULL_FILE_INFO, TOP_LEFT, BOTTOM_RIGHT);
 
+	m_fi.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 	m_fi.SetAutoURLDetect();
 	m_fi.SetEventMask(m_fi.GetEventMask() | ENM_LINK);
 
@@ -492,7 +435,6 @@ void CFileInfoDialog::RefreshData()
 		}
 	}
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		error->Delete();	//memleak fix
 	}
 
@@ -514,7 +456,7 @@ void CFileInfoDialog::RefreshData()
 	{
 		try{
 			ID3_Tag myTag;
-			myTag.Link(m_file->GetFilePath(), ID3TT_ALL);
+			myTag.Link(m_file->GetFilePath());
 
 			const Mp3_Headerinfo* mp3info;
 			mp3info = myTag.GetMp3HeaderInfo();
@@ -794,9 +736,9 @@ void CFileInfoDialog::RefreshData()
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION), 
 					*sLang = ID3_GetString(frame, ID3FN_LANGUAGE);
 					size_t
-					nTimestamp = frame->GetField(ID3FN_TIMESTAMPFORMAT)->Get(),
+					//nTimestamp = frame->GetField(ID3FN_TIMESTAMPFORMAT)->Get(),
 					nRating = frame->GetField(ID3FN_CONTENTTYPE)->Get();
-					const char* format = (2 == nTimestamp) ? "ms" : "frames";
+					//const char* format = (2 == nTimestamp) ? "ms" : "frames";
 					m_fi << "(" << sDesc << ")[" << sLang << "]: ";
 					switch (nRating)
 					{
@@ -900,7 +842,7 @@ void CFileInfoDialog::RefreshData()
 													else if (pVIH->bmiHeader.biCompression == BI_BITFIELDS)
 														strCodec = "BITFIELDS";
 													else{
-														MEMCOPY(strCodec.GetBuffer(4), &pVIH->bmiHeader.biCompression, 4);
+														memcpy(strCodec.GetBuffer(4), &pVIH->bmiHeader.biCompression, 4);
 														strCodec.ReleaseBuffer(4);
 														strCodec.MakeUpper();
 													}

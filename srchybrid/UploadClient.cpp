@@ -14,15 +14,27 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#include "emule.h"
 #include <zlib/zlib.h>
 #include "UpDownClient.h"
-#include "opcodes.h"
-#include "packets.h"
-#include "emule.h"
-#include "uploadqueue.h"
-#include "otherstructs.h"
+#include "Opcodes.h"
+#include "Packets.h"
+#include "UploadQueue.h"
+#include "ClientList.h"
+#include "ClientUDPSocket.h"
+#include "SharedFileList.h"
+#include "PartFile.h"
+#include "ClientCredits.h"
+#include "ListenSocket.h"
+#include "Sockets.h"
+#include "OtherFunctions.h"
+#include "SafeFile.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "TransferWnd.h"
+#endif
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -41,32 +53,32 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	COLORREF crClientOnly; 
 	COLORREF crSending;
 	COLORREF crNextSending;
+    COLORREF crBuffer;
 
 	if(bFlat) { 
 		crBoth = RGB(0, 0, 0);
-		crNeither = RGB(224, 224, 224);
-		crClientOnly = RGB(0, 220, 255);
-		crSending = RGB(0,150,0);
-		crNextSending = RGB(255,208,0);
 	} else { 
 		crBoth = RGB(104, 104, 104);
-		crNeither = RGB(224, 224, 224);
-		crClientOnly = RGB(0, 220, 255);
-		crSending = RGB(0, 150, 0);
-		crNextSending = RGB(255,208,0);
 	} 
+
+	crNeither = RGB(224, 224, 224);
+	crClientOnly = RGB(0, 220, 255);
+	crSending = RGB(0, 150, 0);
+	crNextSending = RGB(255,208,0);
+	crBuffer = RGB(255, 100, 100);
+
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030724-0336
 	uint16 partCount = 0;
 
 	if(m_nUpPartCount > 0) {
 		partCount = m_nUpPartCount;
 	} else if(GetUploadFileID() != NULL) {
-        CKnownFile* knownFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
-        if(knownFile != NULL) {
-            partCount = knownFile->GetPartCount();
-        } else {
-            partCount = 0;
-        }
+        	CKnownFile* knownFile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
+        	if(knownFile != NULL) {
+		partCount = knownFile->GetPartCount();
+        	} else {
+            		partCount = 0;
+        	}
 	}
 
 	if(partCount > 0) {
@@ -94,17 +106,46 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 				s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
 			}
 		}
+    // PENDING: this is currently commented so that a yellow block is only shown for the next
+    //          requested package. I would like for this to be commented the next test release.
+    //          When we have confirmed that sockets no longer just stop requesting blocks,
+    //          the code can be restored. /zz
+	//if (!m_DoneBlocks_list.IsEmpty()){
+	//	block = m_DoneBlocks_list.GetTail();
+	//	if(block){
+	//		uint32 start = block->StartOffset/PARTSIZE;
+	//		s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
+	//	}
+	//}
 		if (!m_DoneBlocks_list.IsEmpty()){
-			block = m_DoneBlocks_list.GetTail();
-			if(block){
-				uint32 start = block->StartOffset/PARTSIZE;
-				s_UpStatusBar.FillRange(start*PARTSIZE, (start+1)*PARTSIZE, crNextSending);
-			}
-		}
-		if (!m_DoneBlocks_list.IsEmpty()){
+		//for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
+		//	Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
+		//	s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+		//}
+
+        // Also show what data is buffered (with color crBuffer) this is mostly a temporary feedback for debugging purposes. Could be removed for final.
+        uint32 total = 0;
+
 			for(POSITION pos=m_DoneBlocks_list.GetHeadPosition();pos!=0;m_DoneBlocks_list.GetNext(pos)){
 				Requested_Block_Struct* block = m_DoneBlocks_list.GetAt(pos);
+
+            if(total + (block->EndOffset-block->StartOffset) < GetQueueSessionPayloadUp()) {
+                // block is sent
 				s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crSending);
+                total += block->EndOffset-block->StartOffset;
+            } else if(total < GetQueueSessionPayloadUp()) {
+                // block partly sent, partly in buffer
+                total += block->EndOffset-block->StartOffset;
+                uint32 rest = total - GetQueueSessionPayloadUp();
+                uint32 newEnd = block->EndOffset-rest;
+
+    			s_UpStatusBar.FillRange(block->StartOffset, newEnd, crSending);
+    			s_UpStatusBar.FillRange(newEnd, block->EndOffset, crBuffer);
+            } else {
+                // entire block is still in buffer
+                total += block->EndOffset-block->StartOffset;
+    			s_UpStatusBar.FillRange(block->StartOffset, block->EndOffset, crBuffer);
+            }
 			}
 		}
 		s_UpStatusBar.Draw(dc, rect->left, rect->top, bFlat); 
@@ -114,7 +155,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 
 void CUpDownClient::SetUploadState(EUploadState news){
 	m_nUploadState = news;
-	theApp.emuledlg->transferwnd.clientlistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 }
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
@@ -363,62 +404,6 @@ bool CUpDownClient::GetPowerShared() {
 }
 //MORPH END - Added by Yun.SF3, ZZ Upload System
 
-// Checks if it is next requested block from another chunk of the actual file or from another file 
-// 
-// [Returns] 
-//   true : Next requested block is from another different chunk or file than last downloaded block 
-//   false: Next requested block is from same chunk that last downloaded block 
-bool CUpDownClient::IsDifferentPartBlock(bool startNextChunk)
-{ 
-	Requested_Block_Struct* lastBlock;
-	Requested_Block_Struct* currBlock;
-	uint32 lastDone = 0;
-	uint32 currRequested = 0;
-	
-	bool different = false;
-	
-	try {
-		if(!m_BlockRequests_queue.IsEmpty()) {
-			currBlock = (Requested_Block_Struct*)m_BlockRequests_queue.GetHead(); 
-			currRequested = currBlock->StartOffset / PARTSIZE; 
-
-			if(m_currentPartNumberIsKnown == false || startNextChunk && currRequested != m_currentPartNumber) {
-				m_currentPartNumberIsKnown = true;
-				m_currentPartNumber = currRequested;
-			}
-		}
-
-		// Check if we have good lists and proceed to check for different chunks
-		if (!m_BlockRequests_queue.IsEmpty() && !m_DoneBlocks_list.IsEmpty()) {
-			// Calculate corresponding parts to blocks
-			lastBlock = (Requested_Block_Struct*)m_DoneBlocks_list.GetTail();
-			lastDone = lastBlock->StartOffset / PARTSIZE;
-             
-			// Test is we are asking same file and same part
-			if ( lastDone != currRequested)
-			{ 
-				different = true;
-				//theApp.emuledlg->AddDebugLogLine(false, "%s: Upload session ended due to new chunk.", this->GetUserName()); //MORPH - Added by Yun.SF3, ZZ Upload System
-
-			}
-			if (md4cmp(lastBlock->FileID, currBlock->FileID) != 0)
-			{ 
-				different = true;
-				//AddDebugLogLine(false, "%s: Upload session ended due to different file.", this->GetUserName()); //MORPH - Added by Yun.SF3, ZZ Upload System
-
-			}
-		} 
-   	}
-   	catch(...)
-   	{ 
-			AddDebugLogLine(false, "%s: Upload session ended due to error.", this->GetUserName());
-      		different = true; 
-   	} 
-//	theApp.emuledlg->AddDebugLogLine(false, "Debug: User %s, last_done_part (%u) %s (%u) next_requested_part, sent %u Kbs.", GetUserName(), last_done_part, different_part? "!=": "==", next_requested_part, this->GetTransferedUp() / 1024); 
-
-	return different; 
-}
-
 class CSyncHelper
 {
 public:
@@ -434,18 +419,11 @@ public:
 	CSyncObject* m_pObject;
 };
 
-void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
-//MORPH START - Added by SiRoB, ZZ Upload System
-	bool useChunkLimit = false;
-	// time critical
-	// check if we should kick this client
-	// Note: Full chunk transfers really should be enforced, not an option
-
-    if(m_BlockRequests_queue.IsEmpty() ||
-       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 512*1024) {
-        // There are no new blocks requested, but we will happily transfer more
-        // if the client just requests something
-        return;
+void CUpDownClient::CreateNextBlockPackage(){
+    // See if we can do an early return. There may be no new blocks to load from disk and add to buffer, or buffer may be large enough allready.
+    if(m_BlockRequests_queue.IsEmpty() || // There are no new blocks requested
+       m_addedPayloadQueueSession > GetQueueSessionPayloadUp() && m_addedPayloadQueueSession-GetQueueSessionPayloadUp() > 50*1024) { // the buffered data is large enough allready (at least 0.2 MBytes there)
+          return;
 	}
 
 	CFile file;
@@ -456,14 +434,11 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
 	// <-----khaos-
 	CSyncHelper lockFile;
 	try{
-		bool firstLoop = true;
-
-		// repeat as long as next requested block is in the same chunk as previous blocks
-		// and as long as there is a next requested block
+        // Buffer new data if current buffer is less than 1 MBytes
         while (!m_BlockRequests_queue.IsEmpty() &&
-               (m_addedPayloadQueueSession < GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 1*1024*1024)) {
-			firstLoop = false;
-			Requested_Block_Struct* currentblock = m_BlockRequests_queue.RemoveHead();
+               (m_addedPayloadQueueSession <= GetQueueSessionPayloadUp() || m_addedPayloadQueueSession-GetQueueSessionPayloadUp() < 100*1024)) {
+
+			Requested_Block_Struct* currentblock = m_BlockRequests_queue.GetHead();
 			CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(currentblock->FileID);
 			if (!srcfile)
 				throw GetResString(IDS_ERR_REQ_FNF);
@@ -487,67 +462,17 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
 			}
 		
             uint32 togo;
-
-            // Everyone are limited to a single chunk (the client may be allowed to stay connected pass
-            // a single chunk, but that is decided at another place. From there parameter startNextChunk may
-            // may be passed as true, to allow jump into next chunk).
-
-            if(currentblock->EndOffset > srcfile->GetFileSize()) {
-                currentblock->EndOffset = srcfile->GetFileSize();
+			if (currentblock->StartOffset > currentblock->EndOffset){
+				togo = currentblock->EndOffset + (srcfile->GetFileSize() - currentblock->StartOffset);
+            }
+			else{
+				togo = currentblock->EndOffset - currentblock->StartOffset;
+				if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsComplete(currentblock->StartOffset,currentblock->EndOffset-1))
+					throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
             }
 
-            uint32 newEndOffset;
-            
-            // prevent overflow
-            if(_UI32_MAX-currentblock->StartOffset > 1*1024*1024) {
-                newEndOffset = currentblock->StartOffset + 1*1024*1024;
-            } else {
-                newEndOffset = _UI32_MAX;
-            }
-
-            if(newEndOffset > srcfile->GetFileSize()) {
-                newEndOffset = srcfile->GetFileSize();
-            }
-
-            if(currentblock->StartOffset < currentblock->EndOffset && newEndOffset > currentblock->EndOffset) {
-                newEndOffset = currentblock->EndOffset;
-            }
-
-            // Check that StartOffset and EndOffset is in the same chunk
-            if(currentblock->EndOffset > newEndOffset || currentblock->EndOffset < currentblock->StartOffset) {
-                // The EndOffset goes into the next chunk. Split this request in two parts.
-                // Set the current block's EndOffSet to the end of the chunk that StartOffset is in.
-                // The part of the request that is after the chunk end, is inserted into a new block
-                // and that block is put back on the block request queue. It will be worked off the
-                // next call, unless the client is kicked due to reached chunk end.
-
-                // PENDING: This limiting need to be checked carefully, to see that it is really possible
-                //          to get a full chunk! Can the limiting below be confirmed?
-
-                // create the "rest block"
-                Requested_Block_Struct* tempblock = new Requested_Block_Struct;
-                if(newEndOffset < srcfile->GetFileSize()) {
-                    // it was not a wraparound request
-                    tempblock->StartOffset = newEndOffset;
-                } else {
-                    // it was a wraparound request
-                    tempblock->StartOffset = 0;
-                }
-                tempblock->EndOffset = currentblock->EndOffset;
-                md4cpy(&tempblock->FileID,&currentblock->FileID);
-
-                m_BlockRequests_queue.AddHead(tempblock);
-
-                // shorten the current block
-                currentblock->EndOffset = newEndOffset;
-            }
-
-			// This can no longer be a wrapped around request, since it has been limited to
-			// a single chunk.
-			togo = currentblock->EndOffset - currentblock->StartOffset;
-
-			if (srcfile->IsPartFile() && !((CPartFile*)srcfile)->IsRangeShareable(currentblock->StartOffset,currentblock->EndOffset-1))	// SLUGFILLER: SafeHash - final safety precausion
-				throw GetResString(IDS_ERR_INCOMPLETEBLOCK);
+			if( togo > EMBLOCKSIZE*3 )
+				throw GetResString(IDS_ERR_LARGEREQBLOCK);
 
 			if (!srcfile->IsPartFile()){
 				// -khaos--+++> This is not a part file...
@@ -575,8 +500,10 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
 					partfile->m_hpartfile.Read(filedata + done,togo-done);
 				}
 			}
-			if (lockFile.m_pObject)
+			if (lockFile.m_pObject){
 				lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
+				lockFile.m_pObject = NULL;
+			}
 
 			SetUploadFileID(currentblock->FileID);
 
@@ -600,13 +527,13 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
 			srcfile->statistic.AddTransferred(currentblock->StartOffset, togo);
 			//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
 			m_addedPayloadQueueSession += togo;
-			m_DoneBlocks_list.AddTail(currentblock);
+
+			m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 			delete[] filedata;
 			filedata = 0;
 		}
 	}
 	catch(CString error){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED),GetUserName(),error.GetBuffer());
 		theApp.uploadqueue->RemoveFromUploadQueue(this, "Client error: " + error);
 		SetUploadFileID(NULL);
@@ -626,7 +553,7 @@ void CUpDownClient::CreateNextBlockPackage(bool startNextChunk){
 		return;
 	}
 //	AddDebugLogLine(false,"Debug: Packet done. Size: %i",blockpack->GetLength());
-	return;
+	//return true;
 }
 
 
@@ -648,7 +575,7 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 	if (!nED2KUpPartCount){
 		m_nUpPartCount = tempreqfile->GetPartCount();
 		m_abyUpPartStatus = new uint8[m_nUpPartCount];
-		MEMSET(m_abyUpPartStatus,0,m_nUpPartCount);
+		memset(m_abyUpPartStatus,0,m_nUpPartCount);
 	}
 
 	else{
@@ -672,7 +599,7 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 					break;
 			}
 		}
-		if (/*(GetExtendedRequestsVersion() > 1) && */(data.GetLength() - data.GetPosition() > 1))
+		if ((GetExtendedRequestsVersion() > 1) && (data.GetLength() - data.GetPosition() > 1))
 		{
 			uint16 nCount;
 			data.Read(&nCount,2);
@@ -687,7 +614,7 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 		((CPartFile*)tempreqfile)->NewSrcPartsInfo();
 	//MORPH END   - Changed by SiRoB, HotFix Due to Complete Source Feature
 	
-	theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 }
 
 
@@ -712,9 +639,9 @@ uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bl
 		// <-----khaos-
 		md4cpy(&packet->pBuffer[0],GetUploadFileID());
 		uint32 statpos = (currentblock->EndOffset - togo) - nPacketSize;
-		MEMCOPY(&packet->pBuffer[16],&statpos,4);
+		memcpy(&packet->pBuffer[16],&statpos,4);
 		uint32 endpos = (currentblock->EndOffset - togo);
-		MEMCOPY(&packet->pBuffer[20],&endpos,4);
+		memcpy(&packet->pBuffer[20],&endpos,4);
 		memfile.Read(&packet->pBuffer[24],nPacketSize);
 		//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 		//m_BlockSend_queue.AddTail(packet);
@@ -774,8 +701,8 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 		// <-----khaos-
 		md4cpy(&packet->pBuffer[0],GetUploadFileID());
 		uint32 statpos = currentblock->StartOffset;
-		MEMCOPY(&packet->pBuffer[16],&statpos,4);
-		MEMCOPY(&packet->pBuffer[20],&newsize,4);
+		memcpy(&packet->pBuffer[16],&statpos,4);
+		memcpy(&packet->pBuffer[20],&newsize,4);
 		memfile.Read(&packet->pBuffer[24],nPacketSize);
 		//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 		//m_BlockSend_queue.AddTail(packet);
@@ -865,9 +792,9 @@ uint32 CUpDownClient::SendBlockData(){
 		if (theApp.glob_prefs->IsBoostLess()){
 			CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);//check this if download completion problems occurs [Yun.SF3]
 			if(!currequpfile->IsPartFile())
-				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,currequpfile->m_nVirtualCompleteSourcesCountMin), GetIP());
+				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,currequpfile->m_nVirtualCompleteSourcesCount), GetIP());
 			else
-				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,((CPartFile*)currequpfile)->m_nVirtualCompleteSourcesCountMin), GetIP());
+				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,((CPartFile*)currequpfile)->m_nVirtualCompleteSourcesCount), GetIP());
 		}else
 			credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
 //Give more credits to rare files uploaders [Yun.SF3]
@@ -938,8 +865,8 @@ uint32 CUpDownClient::SendBlockData(){
     // Check if it's time to update the display.
     if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
         // Update display
-        theApp.emuledlg->transferwnd.uploadlistctrl.RefreshClient(this);
-        theApp.emuledlg->transferwnd.clientlistctrl.RefreshClient(this);
+        theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
+        theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
         m_lastRefreshedULDisplay = curTick;
     }
 	
@@ -999,8 +926,8 @@ void CUpDownClient::SendRankingInfo(){
 	if (!nRank)
 		return;
 	Packet* packet = new Packet(OP_QUEUERANKING,12,OP_EMULEPROT);
-	MEMSET(packet->pBuffer,0,12);
-	MEMCOPY(packet->pBuffer+0,&nRank,2);
+	memset(packet->pBuffer,0,12);
+	memcpy(packet->pBuffer+0,&nRank,2);
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 	socket->SendPacket(packet,true,true);
 }
@@ -1049,7 +976,7 @@ void  CUpDownClient::AddRequestCount(uchar* fileid){
 		}
 	}
 	Requested_File_Struct* new_struct = new Requested_File_Struct;
-	MEMSET(new_struct,0,sizeof(Requested_File_Struct));
+	memset(new_struct,0,sizeof(Requested_File_Struct));
 	md4cpy(new_struct->fileid,fileid);
 	new_struct->lastasked = ::GetTickCount();
 	m_RequestedFiles_list.AddHead(new_struct);
@@ -1060,13 +987,13 @@ void  CUpDownClient::UnBan(){
 	theApp.clientlist->RemoveBannedClient( GetIP() );
 	SetUploadState(US_NONE);
 	ClearWaitStartTime();
-	theApp.emuledlg->transferwnd.ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
+	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
 	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;m_RequestedFiles_list.GetNext(pos)){
 		Requested_File_Struct* cur_struct = m_RequestedFiles_list.GetAt(pos);
 		cur_struct->badrequests = 0;
 		cur_struct->lastasked = 0;	
 	}
-//	theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(this, true, true);
+//	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this, true, true);
 }
 
 // Moonlight: SUQWT - Reset the wait time on ban, do not give time credit for banned clients queue time!//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -1082,8 +1009,9 @@ void CUpDownClient::Ban(){
 #endif
 	theApp.clientlist->AddBannedClient( GetIP() );
 	//theApp.uploadqueue->UpdateBanCount();
-	theApp.emuledlg->transferwnd.ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
-	theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(this);
+	SetUploadState(US_BANNED);
+	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
+	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 
 }
 
@@ -1096,8 +1024,8 @@ void CUpDownClient::BanLeecher(int log_message){
 	}
 	theApp.clientlist->AddBannedClient( GetIP() );
 	SetUploadState(US_BANNED);
-	theApp.emuledlg->transferwnd.ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
-	theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
+	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 	if (log_message)
 		theApp.emuledlg->AddDebugLogLine(false,GetResString(IDS_ANTILEECHERLOG),GetUserName());
 }
@@ -1110,7 +1038,7 @@ void CUpDownClient::UDPFileReasked(){
 	SetLastL2HACExecution(); //<<-- enkeyDEV(th1) -L2HAC-
 	uint16 nRank = theApp.uploadqueue->GetWaitingPosition(this);
 	Packet* response = new Packet(OP_REASKACK,2,OP_EMULEPROT);
-	MEMCOPY(response->pBuffer,&nRank,2);
+	memcpy(response->pBuffer,&nRank,2);
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 	theApp.clientudp->SendPacket(response,GetIP(),GetUDPPort());
 }

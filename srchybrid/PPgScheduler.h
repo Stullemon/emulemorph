@@ -1,10 +1,5 @@
 #pragma once
 
-// CPPgScheduler dialog
-
-#include "preferences.h"
-#include "Scheduler.h"
-
 class CPPgScheduler : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgScheduler)

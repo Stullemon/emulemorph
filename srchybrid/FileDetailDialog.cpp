@@ -24,6 +24,12 @@
 #include "FileInfoDialog.h"
 #include "FileDetailDialog.h"
 #include "Ini2.h"
+#include "Preferences.h"
+#include "UpDownClient.h"
+#include "TitleMenu.h"
+#include "MenuCmds.h"
+#include "PartFile.h"
+#include "DownloadQueue.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -152,7 +158,7 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 
 	Localize();
 	RefreshData();
-	VERIFY( (m_timer = SetTimer(301, 5000, 0)) );
+	VERIFY( (m_timer = SetTimer(301, 5000, 0)) != NULL );
 
 	return true;
 }
@@ -205,28 +211,39 @@ void CFileDetailDialogInfo::RefreshData()
 	bufferS.Format(GetResString(IDS_AVAIL),m_file->GetPartCount(),m_file->GetAvailablePartCount(),(float) ((m_file->GetAvailablePartCount()*100)/ m_file->GetPartCount()));
 	GetDlgItem(IDC_PARTAVAILABLE)->SetWindowText(bufferS);
 
-	if (m_file->lastseencomplete==NULL) bufferS.Format(GetResString(IDS_UNKNOWN).MakeLower()); else
-		bufferS.Format( "%s   "+GetResString(IDS_TIMEBEFORE),m_file->lastseencomplete.Format( theApp.glob_prefs->GetDateTimeFormat()),
-		CastSecondsToLngHM( time(NULL)- mktime(m_file->lastseencomplete.GetLocalTm()))
-		);
+	struct tm* ptimLastSeenComplete = m_file->lastseencomplete.GetLocalTm();
+	if (m_file->lastseencomplete == NULL || ptimLastSeenComplete == NULL)
+		bufferS.Format(GetResString(IDS_UNKNOWN));
+	else{
+		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
+				m_file->lastseencomplete.Format(theApp.glob_prefs->GetDateTimeFormat()),
+				CastSecondsToLngHM(time(NULL) - safe_mktime(ptimLastSeenComplete)));
+	}
 	GetDlgItem(IDC_LASTSEENCOMPL)->SetWindowText(bufferS);
 
-	if (m_file->GetFileDate()!=NULL&& m_file->GetRealFileSize()>0) 
-		bufferS.Format( "%s   "+GetResString(IDS_TIMEBEFORE),m_file->GetCFileDate().Format( theApp.glob_prefs->GetDateTimeFormat()),
+	if (m_file->GetFileDate() != NULL && m_file->GetRealFileSize() > 0){
+		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
+				m_file->GetCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
 			CastSecondsToLngHM(time(NULL)- m_file->GetFileDate()));
-		else bufferS=GetResString(IDS_UNKNOWN);
+	}
+	else
+		bufferS=GetResString(IDS_UNKNOWN);
 	GetDlgItem(IDC_LASTRECEIVED)->SetWindowText(bufferS);
 
-	if (m_file->IsPartFile()) bufferS.Format("(%s %s)",GetResString(IDS_ONDISK),CastItoXBytes(m_file->GetRealFileSize()));
-		else bufferS="";
+	if (m_file->IsPartFile())
+		bufferS.Format(_T("(%s %s)"), GetResString(IDS_ONDISK), CastItoXBytes(m_file->GetRealFileSize()));
+	else
+		bufferS.Empty();
 	GetDlgItem(IDC_FSIZE2)->SetWindowText(bufferS );
 
 	if (m_file->GetCrFileDate()!=NULL) {
-		uint32 fromtime=(m_file->GetStatus()!=PS_COMPLETE)?time(NULL):m_file->GetFileDate();
-		bufferS.Format( "%s   "+GetResString(IDS_TIMEBEFORE),m_file->GetCrCFileDate().Format( theApp.glob_prefs->GetDateTimeFormat()),
+		time_t fromtime = (m_file->GetStatus() != PS_COMPLETE) ? time(NULL) : m_file->GetFileDate();
+		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
+				m_file->GetCrCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
 			CastSecondsToLngHM(fromtime - m_file->GetCrFileDate()));
 	}
-	else bufferS=GetResString(IDS_UNKNOWN);
+	else
+		bufferS = GetResString(IDS_UNKNOWN);
 	GetDlgItem(IDC_FILECREATED)->SetWindowText(bufferS);
 }
 
@@ -285,7 +302,7 @@ CFileDetailDialogName::CFileDetailDialogName()
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_timer = 0;
-	MEMSET(m_aiColWidths, 0, sizeof m_aiColWidths);
+	memset(m_aiColWidths, 0, sizeof m_aiColWidths);
 }
 
 CFileDetailDialogName::~CFileDetailDialogName()
@@ -324,7 +341,7 @@ BOOL CFileDetailDialogName::OnInitDialog()
 
 	Localize();
 	RefreshData();
-	VERIFY( (m_timer = SetTimer(301, 5000, 0)) );
+	VERIFY( (m_timer = SetTimer(301, 5000, 0)) != NULL );
 
 	return true;
 }
@@ -388,34 +405,31 @@ void CFileDetailDialogName::FillSourcenameList()
 	}
 
 	// update
-	for (int sl=0;sl<SOURCESSLOTS;sl++)
-	{
-		for (POSITION pos = m_file->srclists[sl].GetHeadPosition(); pos != NULL; )
-		{ 
-			CUpDownClient* cur_src = m_file->srclists[sl].GetNext(pos); 
-			if (cur_src->reqfile!=m_file || cur_src->GetClientFilename().GetLength()==0)
-				continue;
+	for (POSITION pos = m_file->srclist.GetHeadPosition(); pos != NULL; )
+	{ 
+		CUpDownClient* cur_src = m_file->srclist.GetNext(pos); 
+		if (cur_src->reqfile!=m_file || cur_src->GetClientFilename().GetLength()==0)
+			continue;
 
-			info.psz = cur_src->GetClientFilename(); 
-			if ((itempos=pmyListCtrl->FindItem(&info, -1)) == -1)
-			{ 
-				pmyListCtrl->InsertItem(0, cur_src->GetClientFilename()); 
-				pmyListCtrl->SetItemText(0, 1, "1"); 
-				pmyListCtrl->SetItemData(0, 1); 
-			}
-			else
-			{ 
-				namecount = atoi(pmyListCtrl->GetItemText(itempos, 1))+1; 
-				CString nameCountStr; 
-				nameCountStr.Format("%i", namecount); 
-				pmyListCtrl->SetItemText(itempos, 1, nameCountStr.GetString()); 
-				pmyListCtrl->SetItemData(itempos, namecount); 
-			} 
-			pmyListCtrl->SortItems(CompareListNameItems, 11); 
-			m_SortAscending[0] =true;
-			m_SortAscending[1] =false;
+		info.psz = cur_src->GetClientFilename(); 
+		if ((itempos=pmyListCtrl->FindItem(&info, -1)) == -1)
+		{ 
+			pmyListCtrl->InsertItem(0, cur_src->GetClientFilename()); 
+			pmyListCtrl->SetItemText(0, 1, "1"); 
+			pmyListCtrl->SetItemData(0, 1); 
+		}
+		else
+		{ 
+			namecount = atoi(pmyListCtrl->GetItemText(itempos, 1))+1; 
+			CString nameCountStr; 
+			nameCountStr.Format("%i", namecount); 
+			pmyListCtrl->SetItemText(itempos, 1, nameCountStr.GetString()); 
+			pmyListCtrl->SetItemData(itempos, namecount); 
 		} 
-	}
+		pmyListCtrl->SortItems(CompareListNameItems, 11); 
+		m_SortAscending[0] =true;
+		m_SortAscending[1] =false;
+	} 
 
 	// remove 0'er
 	for (int i=0;i<pmyListCtrl->GetItemCount();i++)

@@ -27,15 +27,9 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-
 #include <list>
 #include <vector>
-#include "types.h"
-
-//namespace HyperTextControl 
-//{
 
 #define HTC_WORDWRAP			1	// word wrap text
 #define HTC_AUTO_SCROLL_BARS	2	// auto hide scroll bars

@@ -1,8 +1,7 @@
-// OScopeCtrl.h : header file
-//
-
 #ifndef __OScopeCtrl_H__
 #define __OScopeCtrl_H__
+
+#pragma once
 
 /////////////////////////////////////////////////////////////////////////////
 // COScopeCtrl window

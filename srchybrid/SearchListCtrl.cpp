@@ -21,14 +21,23 @@
 
 #include "stdafx.h"
 #include "emule.h"
-#include "SearchDlg.h"
-#include "SearchListCtrl.h"
-#include "otherfunctions.h"
-#include "SearchList.h"
-#include "MetaDataDlg.h"
 #include "ResizableLib/ResizableSheet.h"
+#include "SearchList.h"
+#include "emuledlg.h"
+#include "MetaDataDlg.h"
+#include "SearchDlg.h"
 #include "PreviewDlg.h"
-
+#include "UpDownClient.h"
+#include "ClientList.h"
+#include "MemDC.h"
+#include "SharedFileList.h"
+#include "DownloadQueue.h"
+#include "PartFile.h"
+#include "KnownFileList.h"
+#include "MenuCmds.h"
+#include "OtherFunctions.h"
+#include "Opcodes.h"
+#include "Packets.h"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 #ifdef _DEBUG
@@ -158,7 +167,7 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	InsertColumn(9,GetResString(IDS_BITRATE),LVCFMT_LEFT,50);
 	InsertColumn(10,GetResString(IDS_CODEC),LVCFMT_LEFT,50);
 	InsertColumn(11,GetResString(IDS_CHECKFAKE),LVCFMT_LEFT,220); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	m_iColumns = 11+1/*FakeCheck*/; // NOTE: One column is created dynamically as needed!
+	m_iColumns = 12/*11 Official+1 FakeCheck*/; // NOTE: One column is created dynamically as needed!
 
 	CreateMenues();
 
@@ -363,7 +372,7 @@ void CSearchListCtrl::UpdateSources(CSearchFile* toupdate){
 			_itot(toupdate->GetSourceCount(),buffer,10);
 		SetItemText(index,2,buffer);
 
-		uint16 maxhitsname=-1;
+		uint16 maxhitsname = (uint16)-1;
 		bool change=false;
 		CString strFileName = toupdate->GetFileName();
 		// update expanded childs
@@ -567,6 +576,9 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	UINT flag = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 
+	if (theApp.glob_prefs->IsExtControlsEnabled())
+		m_SearchFileMenu.EnableMenuItem(MP_RESUMEPAUSED,flag);
+
 	m_SearchFileMenu.EnableMenuItem(MP_RESUME,flag);
 	m_SearchFileMenu.EnableMenuItem(MP_DETAIL,flag);
 	m_SearchFileMenu.EnableMenuItem(MP_GETED2KLINK,flag);
@@ -589,6 +601,9 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	
 	m_SearchFileMenu.AppendMenu(flag2|MF_POPUP,(UINT_PTR)m_Web.m_hMenu, GetResString(IDS_WEBSERVICES) );
 	
+	m_SearchFileMenu.SetDefaultItem( ( !theApp.glob_prefs->AddNewFilesPaused() || !theApp.glob_prefs->IsExtControlsEnabled() )?MP_RESUME:MP_RESUMEPAUSED);
+
+	GetPopupMenuPos(*this, point);
 	m_SearchFileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
 	m_SearchFileMenu.RemoveMenu(m_SearchFileMenu.GetMenuItemCount()-1,MF_BYPOSITION);
 	VERIFY( m_Web.DestroyMenu() );
@@ -609,40 +624,45 @@ BOOL CSearchListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 		switch (wParam){
 			case MP_GETED2KLINK:
 				{
+					CWaitCursor curWait;
 					CString clpbrd;
 					POSITION pos=this->GetFirstSelectedItemPosition();
 					while (pos!=NULL) 
 					{
 						item = this->GetNextSelectedItem(pos); 
-						clpbrd+=theApp.CreateED2kLink((CSearchFile*)this->GetItemData(item))+"\n";
+						clpbrd += CreateED2kLink((CSearchFile*)this->GetItemData(item))+"\n";
 					}
 					theApp.CopyTextToClipboard(clpbrd);
 					break;
 				}
 			case MP_GETHTMLED2KLINK:
 				{
+					CWaitCursor curWait;
 					CString clpbrd;
 					POSITION pos=this->GetFirstSelectedItemPosition();
 					while (pos!=NULL) 
 					{
 						item = this->GetNextSelectedItem(pos); 
-						clpbrd+=theApp.CreateHTMLED2kLink((CSearchFile*)this->GetItemData(item))+"\n";
+						clpbrd += CreateHTMLED2kLink((CSearchFile*)this->GetItemData(item))+"\n";
 					}
 					theApp.CopyTextToClipboard(clpbrd);
 					break;
 				}
+			case MP_RESUMEPAUSED:
 			case MP_RESUME:
 				{
-					theApp.emuledlg->searchwnd->OnBnClickedSdownload();
+					theApp.emuledlg->searchwnd->DownloadSelected(wParam==MP_RESUMEPAUSED);
 					break;
 				}
 			case MP_REMOVEALL:
 				{
+					CWaitCursor curWait;
 					theApp.emuledlg->searchwnd->DeleteAllSearchs();
 					break;
 				}
 			case MP_REMOVESELECTED:
 				{
+					CWaitCursor curWait;
 					SetRedraw(false);
 					POSITION pos;
 					while (GetFirstSelectedItemPosition()!=NULL) 
@@ -703,6 +723,10 @@ void CSearchListCtrl::CreateMenues() {
 	m_SearchFileMenu.CreatePopupMenu();
 	m_SearchFileMenu.AddMenuTitle(GetResString(IDS_FILE));
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DOWNLOAD));
+
+	if (theApp.glob_prefs->IsExtControlsEnabled())
+		m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUMEPAUSED, GetResString(IDS_DOWNLOAD)+" ("+GetResString(IDS_PAUSED)+")");
+
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW));
 	if (theApp.glob_prefs->IsExtControlsEnabled())
 		m_SearchFileMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
@@ -713,7 +737,6 @@ void CSearchListCtrl::CreateMenues() {
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVESELECTED, GetResString(IDS_REMOVESELECTED));
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_REMOVESEARCHSTRING));
 	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALLSEARCH));
-	m_SearchFileMenu.SetDefaultItem(MP_RESUME);
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
 
 }
@@ -814,7 +837,7 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 								}
 								else if (tag->tag.type == 4){
 									TCHAR szBuff[32];
-									_sntprintf(szBuff, ELEMENT_COUNT(szBuff), _T("%f"), tag->tag.floatvalue);
+									_sntprintf(szBuff, ARRSIZE(szBuff), _T("%f"), tag->tag.floatvalue);
 									strTag += szBuff;
 								}
 								else{
@@ -1010,6 +1033,14 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	CFont *pOldFont = dc->SelectObject(GetFont());
 	COLORREF crOldTextColor = dc->SetTextColor(m_crWindowText);
 
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
+
 	BOOL notLast = lpDrawItemStruct->itemID + 1 != GetItemCount();
 	BOOL notFirst = lpDrawItemStruct->itemID != 0;
 	int tree_start=0;
@@ -1078,7 +1109,6 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 				DrawSourceChild(dc, 0, &cur_rec, content);
 				cur_rec.left = iNextLeft;
 			} else {
-				int iNext = pHeaderCtrl->OrderToIndex(iCurrent + 1);
 				cur_rec.right += cx;
 				DrawSourceChild(dc, iColumn, &cur_rec, content);
 				cur_rec.left += cx;
@@ -1091,7 +1121,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		(lpDrawItemStruct->itemState & ODS_SELECTED) &&
 		(content->GetListParent()==NULL)) {
 		RECT outline_rec;
-		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -1207,6 +1237,8 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	}
 
 	//put the original objects back
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
 	dc->SelectObject(pOldFont);
 	dc->SetTextColor(crOldTextColor);
 }

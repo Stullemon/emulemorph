@@ -20,26 +20,50 @@
 #endif
 
 #include "stdafx.h"
+#include <locale.h>
 #include "emule.h"
 #include "version.h"
-#include "emuleDlg.h"
-#include "SearchDlg.h"
 #include "opcodes.h"
 #ifdef _DUMP
 #include "mdump.h"
 #endif
 #include "Scheduler.h"
-#include "Webserver.h"
 #include "SearchList.h"
 #include "kademlia/kademlia/Kademlia.h"
 #include "kademlia/kademlia/Error.h"
+#include "kademlia/utils/UInt128.h"
+#include "PerfLog.h"
 #include <..\src\mfc\sockimpl.h>
 #include <..\src\mfc\afximpl.h>
 #include "KademliaMain.h"
-
-//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 #include "LastCommonRouteFinder.h"
-//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+#include "UploadBandwidthThrottler.h"
+#include "ClientList.h"
+#include "FriendList.h"
+#include "ClientUDPSocket.h"
+#include "DownloadQueue.h"
+#include "IPFilter.h"
+#include "MMServer.h"
+#include "Statistics.h"
+#include "OtherFunctions.h"
+#include "WebServer.h"
+#include "UploadQueue.h"
+#include "SharedFileList.h"
+#include "ServerList.h"
+#include "Sockets.h"
+#include "ListenSocket.h"
+#include "ClientCredits.h"
+#include "KnownFileList.h"
+#include "Server.h"
+#ifndef _CONSOLE
+#include "emuleDlg.h"
+#include "SearchDlg.h"
+#endif
+#include "fakecheck.h" //MORPH - Added by SiRoB
+
+CLog theLog;
+CLog theVerboseLog;
+int _iDbgHeap = 1;
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -156,6 +180,15 @@ void __cdecl __AfxSocketTerm()
 
 BOOL CemuleApp::InitInstance()
 {
+	TCHAR szAppDir[MAX_PATH];
+	VERIFY( GetModuleFileName(m_hInstance, szAppDir, ARRSIZE(szAppDir)) );
+	VERIFY( PathRemoveFileSpec(szAppDir) );
+	TCHAR szPrefFilePath[MAX_PATH];
+	PathCombine(szPrefFilePath, szAppDir, CONFIGFOLDER _T("preferences.ini"));
+	if (m_pszProfileName)
+		free((void*)m_pszProfileName);
+	m_pszProfileName = _tcsdup(szPrefFilePath);
+
 #ifdef _DEBUG
 	oldMemState.Checkpoint();
 	// Installing that memory debug code works fine in Debug builds when running within VS Debugger,
@@ -223,6 +256,22 @@ BOOL CemuleApp::InitInstance()
 #ifdef _DEBUG
 	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), "%s\\%s", glob_prefs->GetAppDir(), APP_CRT_DEBUG_LOG_FILE);
 #endif
+	//Morph START - Added by SiRoB, AndCycle, Date File Name Log
+	if(theApp.glob_prefs->DateFileNameLog()){
+		CTime nowT=CTime::GetCurrentTime();
+		VERIFY( theLog.SetFilePath(glob_prefs->GetAppDir()+ _T("eMule.") + nowT.Format("%Y%m%d") + _T(".log")));
+		VERIFY( theVerboseLog.SetFilePath(glob_prefs->GetAppDir()+ _T("eMule_Verbose.") + nowT.Format("%Y%m%d") + _T(".log")));
+	}else{
+	//Morph END   - Added by SiRoB, AndCycle, Date File Name Log
+		VERIFY( theLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule.log")) );
+		VERIFY( theVerboseLog.SetFilePath(glob_prefs->GetAppDir() + _T("eMule_Verbose.log")) );
+	}//Morph - Added by SiRoB, AndCycle, Date File Name Log
+	theLog.SetMaxFileSize(glob_prefs->GetMaxLogFileSize());
+	theVerboseLog.SetMaxFileSize(glob_prefs->GetMaxLogFileSize());
+	if (glob_prefs->Log2Disk())
+		theLog.Open();
+	if (glob_prefs->Debug2Disk())
+		theVerboseLog.Open();
 
 	CemuleDlg dlg;
 	emuledlg = &dlg;
@@ -247,7 +296,7 @@ BOOL CemuleApp::InitInstance()
 	//EastShare END - Added by TAHO, .met files control
 	serverlist = new CServerList(glob_prefs);
 	serverconnect = new CServerConnect(serverlist,theApp.glob_prefs);
-	sharedfiles = new CSharedFileList(glob_prefs,serverconnect,knownfiles);
+	sharedfiles = new CSharedFileList(glob_prefs,serverconnect);
 	listensocket = new CListenSocket(glob_prefs);
 	clientudp	= new CClientUDPSocket();
 	clientcredits = new CClientCreditsList(glob_prefs);
@@ -257,6 +306,7 @@ BOOL CemuleApp::InitInstance()
 	webserver = new CWebServer(); // Webserver [kuchin]
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
+	statistics = new CStatistics();
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	
 	// reset statistic values
@@ -265,8 +315,6 @@ BOOL CemuleApp::InitInstance()
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	theApp.stat_sessionSentBytesToFriend = 0;
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
-
-
 	theApp.stat_reconnects=0;
 	theApp.stat_transferStarttime=0;
 	theApp.stat_serverConnectTime=0;
@@ -274,6 +322,7 @@ BOOL CemuleApp::InitInstance()
 	//MORPH START - Added by IceCream, Anti-leecher/Secure counter feature
 	theApp.stat_leecherclients=0; //Added by IceCream
 	//MORPH END   - Added by IceCream, Anti-leecher/Secure counter feature
+	thePerfLog.Startup();
 
 #ifdef _DEBUG
 	Kademlia::CKademlia::setErrorCallback			(myErrHandler);
@@ -291,7 +340,7 @@ BOOL CemuleApp::InitInstance()
 	Kademlia::CKademlia::setOverheadSendCallback	(KademliaOverheadSendCallback);
 	Kademlia::CKademlia::setOverheadRecvCallback	(KademliaOverheadRecvCallback);
 
-	INT_PTR nResponse = dlg.DoModal();
+	dlg.DoModal();
 
 	::CloseHandle(m_hMutexOneInstance);
 #ifdef _DEBUG
@@ -347,11 +396,7 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 
 bool CemuleApp::ProcessCommandline()
 {
-#ifdef _DEBUG
-	bool bIgnoreRunningInstances = true;
-#else
-	bool bIgnoreRunningInstances = false;
-#endif
+	bool bIgnoreRunningInstances = (GetProfileInt(_T("eMule"), _T("IgnoreInstances"), 0) != 0);
 
 	for (int i = 1; i < __argc; i++){
 		LPCTSTR pszParam = __targv[i];
@@ -401,7 +446,7 @@ bool CemuleApp::ProcessCommandline()
 		}
     }
     // khaos::removed: return (maininst || bAlreadyRunning);
-	return false; // khaos::multiple_instances
+	return false || strlen(MOD_VERSION)>12; // khaos::multiple_instances
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
@@ -441,49 +486,13 @@ void CemuleApp::SetTimeOnTransfer() {
 	stat_transferStarttime=GetTickCount();
 }
 
-CString CemuleApp::StripInvalidFilenameChars(CString strText, bool bKeepSpaces)
-{
-	LPTSTR pszBuffer = strText.GetBuffer();
-	LPTSTR pszSource = pszBuffer;
-	LPTSTR pszDest = pszBuffer;
-
-	while (*pszSource != '\0')
-	{
-		if (!((*pszSource <= 31 && *pszSource >= 0)	|| // lots of invalid chars for filenames in windows :=)
-			*pszSource == '\"' || *pszSource == '*' || *pszSource == '<'  || *pszSource == '>' ||
-			*pszSource == '?'  || *pszSource == '|' || *pszSource == '\\' || *pszSource == '/' || 
-			*pszSource == ':') )
-		{
-			if (!bKeepSpaces && *pszSource == ' ')
-				*pszDest = '.';
-			*pszDest = *pszSource;
-			pszDest++;
-		}
-		pszSource++;
-	}
-	*pszDest = '\0';
-	strText.ReleaseBuffer();
-	return strText;
-}
-
-CString CemuleApp::CreateED2kLink( CAbstractFile* f )
-{
-	CString strLink;
-	strLink.Format("ed2k://|file|%s|%u|%s|/",
-		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
-		f->GetFileSize(),
-		EncodeBase16(f->GetFileHash(),16)
-		);
-	return strLink;
-}
-
 CString CemuleApp::CreateED2kSourceLink( CAbstractFile* f )
 {
-	if (!theApp.IsConnected() || theApp.IsFirewalled()){
+	if (!IsConnected() || IsFirewalled()){
 		AddLogLine(true,GetResString(IDS_SOURCELINKFAILED));
 		return CString("");
 	}
-	uint32 dwID = theApp.GetID();
+	uint32 dwID = GetID();
 
 	CString strLink;
 	strLink.Format("ed2k://|file|%s|%u|%s|/|sources,%i.%i.%i.%i:%i|/",
@@ -506,12 +515,6 @@ CString CemuleApp::CreateED2kHostnameSourceLink( CAbstractFile* f )
 	return strLink;
 }
 // itsonlyme: hostnameSource
-
-CString CemuleApp::CreateHTMLED2kLink( CAbstractFile* f )
-{
-	CString strCode = "<a href=\"" + CreateED2kLink(f) + "\">" + StripInvalidFilenameChars(f->GetFileName(), true) + "</a>";
-	return strCode;
-}
 
 bool CemuleApp::CopyTextToClipboard( CString strText )
 {
@@ -539,7 +542,7 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 		CloseClipboard();
 	}
 	if (bResult)
-		theApp.emuledlg->searchwnd->IgnoreClipBoardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+		emuledlg->searchwnd->IgnoreClipBoardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
 	else
 		GlobalFree(hGlobal);
 	return bResult;
@@ -560,7 +563,8 @@ CString CemuleApp::CopyTextFromClipboard()
 	if (hglb != NULL) 
 	{ 
 		lptstr = (LPTSTR)GlobalLock(hglb); 
-		if (lptstr != NULL) retstring = lptstr;
+		if (lptstr != NULL)
+			retstring = lptstr;
 	} 
 	CloseClipboard();
 	
@@ -699,7 +703,7 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 }
 
 bool CemuleApp::IsConnected(){
-	return (theApp.serverconnect->IsConnected() || (theApp.kademlia->isConnected() && !theApp.kademlia->isFirewalled())); //Once we can handle lowID users in ON, we remove the IsFirewalled!
+	return (theApp.serverconnect->IsConnected() || (theApp.kademlia->isConnected() && !theApp.kademlia->isFirewalled())); //Once we can handle lowID users in Kad, we remove the IsFirewalled!
 }
 
 uint32 CemuleApp::GetID(){
@@ -709,7 +713,7 @@ uint32 CemuleApp::GetID(){
 	else if( theApp.serverconnect->IsConnected() )
 		ID = theApp.serverconnect->GetClientID();
 	else 
-		ID = 0; //Once we can handle lowID users in ON, this may change.
+		ID = 0; //Once we can handle lowID users in Kad, this may change.
 	return ID;
 }
 
@@ -869,7 +873,7 @@ void CALLBACK KademliaSearchAddCallback(Kademlia::CSearch* search)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_SEARCHADD, 0, (LPARAM)search);
 }
 
@@ -882,7 +886,7 @@ void CALLBACK KademliaSearchRemCallback(Kademlia::CSearch* search)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_SEARCHREM, 0, (LPARAM)search);
 }
 
@@ -895,7 +899,7 @@ void CALLBACK KademliaSearchRefCallback(Kademlia::CSearch* search)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_SEARCHREF, 0, (LPARAM)search);
 }
 
@@ -908,7 +912,7 @@ void CALLBACK KademliaContactAddCallback(Kademlia::CContact* contact)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_CONTACTADD, 0, (LPARAM)contact);
 }
 
@@ -921,7 +925,7 @@ void CALLBACK KademliaContactRemCallback(Kademlia::CContact* contact)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_CONTACTREM, 0, (LPARAM)contact);
 }
 
@@ -934,7 +938,7 @@ void CALLBACK KademliaContactRefCallback(Kademlia::CContact* contact)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_CONTACTREF, 0, (LPARAM)contact);
 }
 
@@ -947,7 +951,7 @@ void CALLBACK KademliaResultFileCallback(uint32 searchID, Kademlia::CUInt128 con
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	KADFILERESULT kadfr;
 	kadfr.searchID = searchID;
 	kadfr.pcontactID = &contactID;
@@ -969,7 +973,7 @@ void CALLBACK KademliaResultKeywordCallback(uint32 searchID, Kademlia::CUInt128 
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	va_list args;
 	va_start(args, numProperties);
 	KADKEYWORDRESULT kadkwr;
@@ -994,7 +998,7 @@ void CALLBACK KademliaRequestTCPCallback(Kademlia::CContact* contact)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_REQUESTTCP, 0, (LPARAM)contact);
 }
 
@@ -1007,7 +1011,7 @@ void CALLBACK KademliaUpdateStatusCallback(Status* status)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_UPDATESTATUS, 0, (LPARAM)status);
 }
 
@@ -1020,7 +1024,7 @@ void CALLBACK KademliaOverheadSendCallback(uint32 size)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_OVERHEADSEND, 0, (LPARAM)size);
 }
 
@@ -1033,6 +1037,6 @@ void CALLBACK KademliaOverheadRecvCallback(uint32 size)
 			return;
 		}
 	}
-	catch(...){ return; }
+	catch(...){ ASSERT(0); return; }
 	theApp.emuledlg->SendMessage(WM_KAD_OVERHEADRECV, 0, (LPARAM)size);
 }

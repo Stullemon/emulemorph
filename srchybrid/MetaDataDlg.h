@@ -1,9 +1,10 @@
 #pragma once
-
 #include "ResizableLib/ResizablePage.h"
+#include <list>
 
 class CAbstractFile;
 namespace Kademlia {
+class CTag;
 typedef std::list<CTag*> TagList;
 };
 

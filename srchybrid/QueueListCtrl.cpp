@@ -21,11 +21,24 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "QueueListCtrl.h"
-#include "otherfunctions.h"
-#include "opcodes.h"
+#include "OtherFunctions.h"
+#include "MenuCmds.h"
 #include "ClientDetailDialog.h"
 #include "Exceptions.h"
 #include "KademliaWnd.h"
+#include "emuledlg.h"
+#include "KademliaMain.h"
+#include "FriendList.h"
+#include "UploadQueue.h"
+#include "UpDownClient.h"
+#include "TransferWnd.h"
+#include "MemDC.h"
+#include "SharedFileList.h"
+#include "ClientCredits.h"
+#include "PartFile.h"
+#include "ChatWnd.h"
+
+#include "DownloadQueue.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -40,7 +53,7 @@ IMPLEMENT_DYNAMIC(CQueueListCtrl, CMuleListCtrl)
 CQueueListCtrl::CQueueListCtrl(){
 
 	// Barry - Refresh the queue every 10 secs
-	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 10000, QueueUpdateTimer)) );
+	VERIFY( (m_hTimer = ::SetTimer(NULL, NULL, 10000, QueueUpdateTimer)) != NULL );
 	if (!m_hTimer)
 		AddDebugLogLine(true,_T("Failed to create 'queue list control' timer - %s"),GetErrorMessage(GetLastError()));
 }
@@ -68,6 +81,7 @@ void CQueueListCtrl::Init()
 	InsertColumn(10,GetResString(IDS_CLIENTSOFTWARE),LVCFMT_LEFT,100,10);
 	//MORPH END - Added by SiRoB, Client Software
 	
+	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableQueue);
 	// Barry - Use preferred sort order from preferences
@@ -91,10 +105,18 @@ CQueueListCtrl::~CQueueListCtrl()
 	{
 		if (m_hTimer)
 			::KillTimer(NULL, m_hTimer);
-	} catch (...) {}
+	}
+	catch(...){
+		ASSERT(0);
+	}
 }
 
-void CQueueListCtrl::Localize()
+void CQueueListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+void CQueueListCtrl::SetAllIcons()
 {
 	imagelist.DeleteImageList();
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -117,7 +139,11 @@ void CQueueListCtrl::Localize()
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
 	//MORPH END   - Added by SiRoB, More client icone & Credit overlay icon
-	
+
+}
+
+void CQueueListCtrl::Localize()
+{
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -175,12 +201,12 @@ void CQueueListCtrl::Localize()
 		pHeaderCtrl->SetItem(9, &hdi);
 		strRes.ReleaseBuffer();
 		
-		//MORPH START - Modified by SiRoB, Client Software
+		//MORPH START - Added by SiRoB, Client Software
 		strRes = GetResString(IDS_CLIENTSOFTWARE);
 		hdi.pszText = strRes.GetBuffer();
 		pHeaderCtrl->SetItem(10, &hdi);
 		strRes.ReleaseBuffer();
-		//MORPH END - Modified by SiRoB, Client Software
+		//MORPH END - Added by SiRoB, Client Software
 	}
 }
 
@@ -211,7 +237,7 @@ void CQueueListCtrl::AddClient(CUpDownClient* client, bool resetclient){
 	uint32 itemnr = GetItemCount();
 	itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,LPSTR_TEXTCALLBACK,0,0,1,(LPARAM)client);
 	RefreshClient(client);
-	theApp.emuledlg->transferwnd.UpdateListCount(2);
+	theApp.emuledlg->transferwnd->UpdateListCount(2);
 }
 
 void CQueueListCtrl::RemoveClient(CUpDownClient* client){
@@ -222,7 +248,7 @@ void CQueueListCtrl::RemoveClient(CUpDownClient* client){
 	sint32 result = FindItem(&find);
 	if (result != (-1) )
 		DeleteItem(result);
-	theApp.emuledlg->transferwnd.UpdateListCount(2);
+	theApp.emuledlg->transferwnd->UpdateListCount(2);
 }
 
 void CQueueListCtrl::RefreshClient(CUpDownClient* client){
@@ -263,8 +289,17 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
-	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
+
 	CString Sbuffer;
 
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
@@ -277,33 +312,31 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
 		if( !IsColumnHidden(iColumn) ){
 			cur_rec.right += GetColumnWidth(iColumn);
-			//MORPH START - Added by SiRoB, Don't draw hidden colums
+			//MORPH START - Added by SiRoB, Don't draw hidden Rect
 			CRect Rect;
 			this->GetClientRect(Rect);
-			if ((Rect.left<=cur_rec.right && cur_rec.right<=Rect.right)
-				||(Rect.left<=cur_rec.left && cur_rec.left<=Rect.right)
-				||(Rect.left>=cur_rec.left && cur_rec.right>=Rect.right)){
-			//MORPH END   - Added by SiRoB, Don't draw hidden colums
+			Rect.IntersectRect(Rect,&cur_rec);
+			if (!Rect.IsRectEmpty()){
+			//MORPH END   - Added by SiRoB, Don't draw hidden Rect
+	
 				switch(iColumn){
 					case 0:{
 						//MORPH START - Modified by SiRoB, More client & Credit overlay icon
 						uint8 image;
 						if (client->IsFriend())
 							image = 2;
-						else{
-							if (client->GetClientSoft() == SO_MLDONKEY )
-								image = 3;
-							else if (client->GetClientSoft() == SO_EDONKEYHYBRID )
-								image = 4;
-							else if (client->GetClientSoft() == SO_SHAREAZA )
-								image = 5;
-							else if (client->GetClientSoft() == SO_EDONKEY )
-								image = 6;
-							else if (client->ExtProtocolAvailable())
-								image = (client->IsMorph())?7:1;
-							else
-								image = 0;
-						}
+						else if (client->GetClientSoft() == SO_EDONKEYHYBRID)
+							image = 4;
+						else if (client->GetClientSoft() == SO_MLDONKEY)
+							image = 3;
+						else if (client->GetClientSoft() == SO_SHAREAZA)
+							image = 5;
+						else if (client->GetClientSoft() == SO_EDONKEY)
+							image = 6;
+						else if (client->ExtProtocolAvailable())
+							image = (client->IsMorph())?7:1;
+						else
+							image = 0;
 						//MORPH END   - Modified by SiRoB, More Icons
 						POINT point = {cur_rec.left, cur_rec.top+1};
 						//MORPH START - Modified by SiRoB, leecher icon
@@ -483,7 +516,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						break;
 					//MORPH START - Modified by SiRoB, Client Software
 					case 10:
-						Sbuffer = client->GetClientVerString();
+						Sbuffer = client->GetClientSoftVer();
 						break;
 					//MORPH END - Modified by SiRoB, Client Software
 				}
@@ -499,7 +532,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		RECT outline_rec;
-		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -514,19 +547,24 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 		else
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
+	
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
 }
 
 BEGIN_MESSAGE_MAP(CQueueListCtrl, CMuleListCtrl)
 	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
 END_MESSAGE_MAP()
 
 // CQueueListCtrl message handlers
-void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
+void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
 	CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
@@ -545,7 +583,7 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
-	
+	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -558,7 +596,7 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				client->RequestSharedFileList();
 				break;
 			case MP_MESSAGE:{
-				theApp.emuledlg->chatwnd.StartSession(client);
+				theApp.emuledlg->chatwnd->StartSession(client);
 				break;
 			}
 			case MP_ADDFRIEND:{
@@ -597,6 +635,11 @@ BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 						{
 							fileList += "\n" ; 
 							fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
+						}
+						for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
+						{
+							fileList += "\n" ;
+							fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
 						}
 					}
 					else
@@ -953,9 +996,9 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 			return item2->GetUpPartCount() - item1->GetUpPartCount();
 		//MORPH START - Modified by SiRoB, Client Software
 		case 10:
-			return item2->GetClientVerString().CompareNoCase(item1->GetClientVerString());
+			return item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
 		case 110:
-			return item1->GetClientVerString().CompareNoCase(item2->GetClientVerString());
+			return item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
 		//MORPH END - Modified by SiRoB, Client Software
 
 		default:
@@ -971,14 +1014,14 @@ void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEve
 	{
 		if (   !theApp.emuledlg->IsRunning() // Don't do anything if the app is shutting down - can cause unhandled exceptions
 			|| !theApp.glob_prefs->GetUpdateQueueList()
-			|| theApp.emuledlg->activewnd != &(theApp.emuledlg->transferwnd)
-			|| !theApp.emuledlg->transferwnd.queuelistctrl.IsWindowVisible() )
+			|| theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd
+			|| !theApp.emuledlg->transferwnd->queuelistctrl.IsWindowVisible() )
 			return;
 
 		CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
 		while( update )
 		{
-			theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(update);
+			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(update);
 			update = theApp.uploadqueue->GetNextClient(update);
 		}
 	}

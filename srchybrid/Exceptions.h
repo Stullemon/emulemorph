@@ -10,6 +10,7 @@
 	catch(...){ \
 		if (theApp.emuledlg) \
 			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown exception in ") fname); \
+		ASSERT(0); \
 	}
 #endif
 

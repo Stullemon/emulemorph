@@ -27,16 +27,11 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "../../stdafx.h"
 #include <map>
 #include <list>
-#include "../../Types.h"
 #include "../utils/UInt128.h"
 #include "../routing/Maps.h"
-#include "../io/DataIO.h"
 
 
 ////////////////////////////////////////
@@ -46,6 +41,8 @@ namespace Kademlia {
 class CSearch;
 class CRoutingZone;
 class CTimer;
+class CTag;
+typedef std::list<CTag*> TagList;
 
 // If type is unknown it will be an empty string
 // If there are any properties about the file to report, there will follow LPCSTR key/value pairs.
@@ -89,7 +86,6 @@ public:
 	static void processPublishResult(const CUInt128 &target);
 
 	static void getWords(LPCSTR str, WordList *words);
-	static void getWordsValid(LPCSTR str, WordList *words);
 
 	static void updateStats(void);
 

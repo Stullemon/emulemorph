@@ -1,9 +1,7 @@
-
-// ColorFrameCtrl.h : header file
-//
-
 #ifndef __ColorFrameCtrl_H__
 #define __ColorFrameCtrl_H__
+
+#pragma once
 
 /////////////////////////////////////////////////////////////////////////////
 // CColorFrameCtrl window

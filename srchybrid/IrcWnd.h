@@ -1,58 +1,75 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
-#include "afxcmn.h"
-#include "afxwin.h"
-#include "resource.h"
-#include "ircmain.h"
-#include "hypertextctrl.h"
 #include "MuleListCtrl.h"
-#include "ClosableTabCtrl.h"
 
+class CIrcMain;
+struct ChannelList;
+struct Channel;
+struct Nick;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CIrcNickListCtrl
+
+class CIrcNickListCtrl : public CMuleListCtrl
+{
+	DECLARE_DYNAMIC(CIrcNickListCtrl)
+
+public:
+	CIrcNickListCtrl();
+
+protected:
+	friend class CIrcWnd;
+
+	CIrcWnd* m_pParent;
+	bool m_asc_sort[2];
+
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CIrcChannelListCtrl
+
+class CIrcChannelListCtrl : public CMuleListCtrl
+{
+	DECLARE_DYNAMIC(CIrcChannelListCtrl)
+
+public:
+	CIrcChannelListCtrl();
+
+protected:
+	friend class CIrcWnd;
+
+	CIrcWnd* m_pParent;
+	bool m_asc_sort[3];
+
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
 // CIrcWnd dialog
-#pragma pack(1) //???
-struct ChannelList{
-	CString name;
-	CString users;
-	CString desc;
-};
-#pragma pack()
-
-#pragma pack(1)
-struct Channel{
-	CString	name;
-	CPreparedHyperText log;
-	CString title;
-	CPtrList nicks;
-	uint8 type;
-	CStringArray history;
-	uint16 history_pos;
-	// Type is mainly so that we can use this for IRC and the eMule Messages..
-	// 1-Status, 2-Channel list, 4-Channel, 5-Private Channel, 6-eMule Message(Add later)
-};
-#pragma pack()
-
-#pragma pack(1)
-struct Nick{
-	CString nick;
-	CString op;
-	CString hop;
-	CString voice;
-	CString uop;
-	CString owner;
-	CString protect;
-};
-#pragma pack()
 
 class CIrcWnd : public CResizableDialog
 {
-
 	DECLARE_DYNAMIC(CIrcWnd)
 
 //IrcWnd
 public:
-
 	CIrcWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CIrcWnd();
+
 	void		Localize();
 	void		UpdateNickCount();
 	bool		GetLoggedIn()				{return m_bLoggedIn;}
@@ -63,24 +80,29 @@ public:
 	void		UpdateFonts(CFont* pFont);
 // Dialog Data
 	enum { IDD = IDD_IRC };
+
 protected:
+	void SetAllIcons();
 	virtual BOOL	OnInitDialog();
 	virtual void	OnSize(UINT nType, int cx, int cy);
 	virtual int		OnCreate(LPCREATESTRUCT lpCreateStruct);
 	virtual void	DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL	OnCommand(WPARAM wParam,LPARAM lParam );
 	virtual BOOL	PreTranslateMessage(MSG* pMsg);
+	afx_msg void	OnSysColorChange();
 	afx_msg void	OnBnClickedBnIrcconnect();
 	afx_msg void	OnBnClickedClosechat(int nItem=-1);
 	afx_msg void	OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void	OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	DECLARE_MESSAGE_MAP()
+
 private:
-	CImageList		imagelist;
-	bool			asc_sort[8];	 
+	CImageList		m_imagelist;
 	CIrcMain*		m_pIrcMain;
-	CClosableTabCtrl		channelselect;
+	CTabCtrl		channelselect;
 	CString			m_sSendString;
-	bool			m_bConnected;	
+	bool			m_bConnected;
 	bool			m_bLoggedIn;
 	Channel*		m_pCurrentChannel;
 
@@ -89,13 +111,8 @@ public:
 	void		ResetServerChannelList();
 	void		AddChannelToList( CString name, CString user, CString description );
 	void		ScrollHistory(bool down);
-protected:
-	static	int		CALLBACK SortProcChanL(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	afx_msg	void	OnColumnClickChanL( NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg	void	OnNMRclickChanL(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void	OnNMDblclkserverChannelList(NMHDR *pNMHDR, LRESULT *pResult);
 private:
-	CMuleListCtrl	serverChannelList;
+	CIrcChannelListCtrl serverChannelList;
 	CPtrList		channelLPtrList;
 
 //Nick List
@@ -111,14 +128,8 @@ public:
 	void		ParseChangeMode( CString channel, CString changer, CString commands, CString names );
 	void		ChangeAllNick( CString oldnick, CString newnick );
 //	void		SetNick( CString in_nick );
-protected:
-	static	int		CALLBACK SortProcNick(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	afx_msg	void	OnColumnClickNick( NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg	void	OnNMRclickNick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void	OnNMDblclkNickList(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void	OnNMClickNicklist(NMHDR *pNMHDR, LRESULT *pResult);
 private:
-	CMuleListCtrl	nickList;
+	CIrcNickListCtrl nickList;
 
 //Messages
 public:
@@ -133,11 +144,8 @@ public:
 	void		SetActivity( CString channel, bool flag);
 	void		SendString( CString send );
 protected:
-//	afx_msg	void	OnNMRclickStatusWindow(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void	OnBnClickedChatsend();
-	LRESULT		OnCloseTab(WPARAM wparam, LPARAM lparam);
+	afx_msg void OnBnClickedChatsend();
 private:
-	CHyperTextCtrl	statusWindow;
 	CEdit			titleWindow;
 	CEdit			inputWindow;
 

@@ -14,21 +14,10 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// Client to Server communication
-
 #pragma once
+#include "EMSocket.h"
 
-#include "types.h"
-#include "server.h"
-#include "packets.h"
-#include "Preferences.h"
-#include "sockets.h"
-#include "preferences.h"
-#include "emsocket.h"
-#include "AsyncProxySocketLayer.h" // deadlake PROXYSUPPORT
-#include "ServerWnd.h"
-#include "StatisticsDlg.h"
+class CServer;
 
 class CServerSocket : public CEMSocket
 {

@@ -14,13 +14,15 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// ChatWnd.cpp : implementation file
-//
 #include "stdafx.h"
 #include "emule.h"
 #include "ChatWnd.h"
-#include "HyperTextCtrl.h"
+#include "HTRichEditCtrl.h"
+#include "FriendList.h"
+#include "emuledlg.h"
+#include "UpDownClient.h"
+#include "OtherFunctions.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,6 +62,7 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_WM_SHOWWINDOW()
 	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
 	ON_WM_SYSCOLORCHANGE()
+    ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 // CChatWnd message handlers
@@ -75,6 +78,7 @@ BOOL CChatWnd::OnInitDialog()
 	AddAnchor(IDC_LIST2,TOP_LEFT,BOTTOM_LEFT);
 	AddAnchor(IDC_FRIENDS_LBL,TOP_LEFT);
 
+	SetAllIcons();
 	Localize();
 	theApp.friendlist->ShowFriends();
 
@@ -98,7 +102,7 @@ BOOL CChatWnd::PreTranslateMessage(MSG* pMsg)
 	return CResizableDialog::PreTranslateMessage(pMsg);
 }
 
-void CChatWnd::Localize()
+void CChatWnd::SetAllIcons()
 {
 	InitWindowStyles(this);
 
@@ -110,21 +114,23 @@ void CChatWnd::Localize()
 	icon_msg = theApp.LoadIcon("Message", 16, 16);
 	((CStatic*)GetDlgItem(IDC_MESSAGEICON))->SetIcon(icon_msg);
 	((CStatic*)GetDlgItem(IDC_FRIENDSICON))->SetIcon(icon_friend);
+}
 
+void CChatWnd::Localize()
+{
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(GetResString(IDS_CW_FRIENDS));
 	GetDlgItem(IDC_MESSAGES_LBL)->SetWindowText(GetResString(IDS_CW_MESSAGES));
 	chatselector.Localize();
 	m_FriendListCtrl.Localize();
 }
 
-LRESULT CChatWnd::OnCloseTab(WPARAM wparam, LPARAM lparam) {
-	TCITEM item;
+LRESULT CChatWnd::OnCloseTab(WPARAM wparam, LPARAM lparam)
+{
+	TCITEM item = {0};
 	item.mask = TCIF_PARAM;
-	chatselector.GetItem((int)wparam,&item);
-	
-	chatselector.EndSession(((CChatItem*)item.lParam)->client);
-
-	return true;
+	if (chatselector.GetItem((int)wparam, &item))
+		chatselector.EndSession(((CChatItem*)item.lParam)->client);
+	return TRUE;
 }
 
 void CChatWnd::ScrollHistory(bool down) {
@@ -134,7 +140,6 @@ void CChatWnd::ScrollHistory(bool down) {
 	if (ci==NULL) return;
 
 	if ( (ci->history_pos==0 && !down) || (ci->history_pos==ci->history.GetCount() && down)) return;
-	
 	
 	if (down) ++ci->history_pos; else --ci->history_pos;
 
@@ -146,6 +151,32 @@ void CChatWnd::ScrollHistory(bool down) {
 
 void CChatWnd::OnSysColorChange()
 {
-	Localize();
 	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
+}
+
+BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam){ 
+		case MP_REMOVE:{
+			const CChatItem* ci = chatselector.GetCurrentChatItem();
+			if (ci)
+				chatselector.EndSession(ci->client);
+			break;
+		}
+	}
+	return TRUE;
+}
+
+void CChatWnd::OnContextMenu(CWnd* pWnd, CPoint point)
+{ 
+	if (!chatselector.GetCurrentChatItem())
+		return;
+
+	CTitleMenu ChatMenu;
+	ChatMenu.CreatePopupMenu(); 
+	ChatMenu.AddMenuTitle(GetResString(IDS_CW_MESSAGES));
+	ChatMenu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
+	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+ 	VERIFY( ChatMenu.DestroyMenu() );
 }

@@ -16,13 +16,14 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-
-#include "types.h"
-#include "preferences.h"
-#include "mapkey.h"
-#include "loggable.h"
-
+#include "MapKey.h"
+#include "Loggable.h"
+#pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/rsa.h>
+#pragma warning(default:4516)
+
+class CPreferences;
+
 #define	 MAXPUBKEYSIZE		80
 
 #define CRYPT_CIP_REMOTECLIENT	10

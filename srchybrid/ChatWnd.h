@@ -14,14 +14,10 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "afxdlgs.h"
-#include "HyperTextCtrl.h"
-#include "chatselector.h"
 #include "ResizableLib\ResizableDialog.h"
-#include "friendlistctrl.h"
-// CChatWnd dialog
+#include "ChatSelector.h"
+#include "FriendListCtrl.h"
 
 class CChatWnd : public CResizableDialog
 {
@@ -36,17 +32,25 @@ public:
 	enum { IDD = IDD_CHAT };
 	void StartSession(CUpDownClient* client);
 	void Localize();
+
 	CFriendListCtrl m_FriendListCtrl;
+
 protected:
-	CEdit	inputtext;
-	LRESULT		OnCloseTab(WPARAM wparam, LPARAM lparam);
+	CEdit inputtext;
+
+	void SetAllIcons();
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
 	virtual BOOL OnInitDialog(); 
-	void	OnShowWindow(BOOL bShow,UINT nStatus);
-	virtual BOOL	PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnSysColorChange();
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
+
 private:
 	HICON icon_friend,icon_msg;
-public:
-	afx_msg void OnSysColorChange();
 };

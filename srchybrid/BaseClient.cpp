@@ -14,16 +14,41 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "updownclient.h"
+#include "stdafx.h"
+#ifdef _DEBUG
+#include "DebugHelpers.h"
+#endif
 #include "emule.h"
-#include "uploadqueue.h"
+#include "UpDownClient.h"
+#include "FriendList.h"
 #include "Clientlist.h"
+#include "OtherFunctions.h"
+#include "PartFile.h"
+#include "ListenSocket.h"
+#include "Friend.h"
+#include <zlib/zlib.h>
+#include "Packets.h"
+#include "Opcodes.h"
+#include "SafeFile.h"
+#include "Preferences.h"
+#include "Server.h"
+#include "ClientCredits.h"
+#include "IPFilter.h"
+#include "UploadQueue.h"
+#include "KademliaMain.h"
+#include "Version.h"
+#include "Sockets.h"
+#include "DownloadQueue.h"
 #include "SearchList.h"
-#include "PreviewDlg.h"
+#include "SharedFileList.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "ServerWnd.h"
+#include "TransferWnd.h"
+#include "ChatWnd.h"
 #include "CxImage/xImage.h"
-#include "version.h"
+#include "PreviewDlg.h"
+#endif
 #include "FunnyNick.h" //MORPH - Added by IceCream, xrmb FunnyNick
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -41,7 +66,7 @@ CUpDownClient::CUpDownClient(CClientReqSocket* sender){
 	Init();
 
 	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	theApp.clientlist->AddClientType(GetClientSoft(), GetClientVerString());
+	theApp.clientlist->AddClientType(GetClientSoft(), GetClientSoftVer());
 	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 }
 
@@ -57,7 +82,7 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 		m_nUserIDHybrid = ntohl(in_userid);
 	else
 		m_nUserIDHybrid = in_userid;
-	sourcesslot=m_nUserIDHybrid%SOURCESSLOTS;
+
 	//If create the FullIP address depending on source type.
 	if (!HasLowID() && ed2kID){
 		sprintf(m_szFullUserIP,"%i.%i.%i.%i",(uint8)in_userid,(uint8)(in_userid>>8),(uint8)(in_userid>>16),(uint8)(in_userid>>24));
@@ -69,11 +94,10 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 	m_dwServerIP = in_serverip;
 	m_nServerPort = in_serverport;
 	reqfile = in_reqfile;
-	ReGetClientSoft();
 }
 
 void CUpDownClient::Init(){
-	MEMSET(m_szFullUserIP,0,21);
+	m_szFullUserIP[0] = '\0';
 	credits = 0;
 	sumavgDDR = 0; // By BadWolf - Accurate Speed Measurement
 	sumavgUDR = 0; // by BadWolf - Accurate Speed Measurement
@@ -137,7 +161,7 @@ void CUpDownClient::Init(){
 	m_dwLastSourceAnswer = 0;
 	m_dwLastAskedForSources = 0;
 	m_byCompatibleClient = 0;
-	m_bySourceFrom = 0;
+	m_nSourceFrom = SF_SERVER;
 	m_bIsHybrid = false;
 	m_bIsML=false;
 	//MOPRH START - Added by SiRoB, Is Morph Client?
@@ -156,20 +180,17 @@ void CUpDownClient::Init(){
 	md4clr(m_achUserHash);
 	if (socket){
 		SOCKADDR_IN sockAddr;
-		MEMSET(&sockAddr, 0, sizeof(sockAddr));
+		memset(&sockAddr, 0, sizeof(sockAddr));
 		uint32 nSockAddrLen = sizeof(sockAddr);
 		socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 		m_dwUserIP = sockAddr.sin_addr.S_un.S_addr;
 		strcpy(m_szFullUserIP,inet_ntoa(sockAddr.sin_addr));
 	}
-	sourcesslot=0;
 	m_fHashsetRequesting = 0;
 	m_fSharedDirectories = 0;
+	m_fSentCancelTransfer = 0;
 	md4clr(requpfileid);
 	m_nClientVersion = 0;
-	m_nClientMajVersion = 0;
-	m_nClientMinVersion = 0;
-	m_nClientUpVersion = 0;
 	m_lastRefreshedDLDisplay = 0;
 	ResetCompressionGain();
 	m_dwDownStartTime = 0;
@@ -187,7 +208,10 @@ void CUpDownClient::Init(){
 	m_bSupportsPreview = false;
 	m_bPreviewReqPending = false;
 	m_bPreviewAnsPending = false;
-	m_bGPLEvildoer = false;
+	m_bTransferredDownMini = false;
+	m_addedPayloadQueueSession = 0;
+	m_nCurQueueSessionPayloadUp = 0; // PENDING: Is this necessary? ResetSessionUp()...
+	m_lastRefreshedULDisplay = ::GetTickCount();
 	m_last_l2hac_exec = 0;				//<<--enkeyDEV(th1) -L2HAC-
 	m_L2HAC_time = 0;					//<<--enkeyDEV(th1) -L2HAC-
 	m_l2hac_enabled = false;			//<<--enkeyDEV(th1) -L2HAC- lowid side
@@ -198,12 +222,8 @@ void CUpDownClient::Init(){
 	m_iLastForceA4AFAttempt = 0;
 	// khaos::kmod-
 	//MORPH START - Added by SiRoB, ZZ Upload System
-	m_random_update_wait = (uint32)(rand()/(RAND_MAX/1000));
-	//m_bHasPriorPart = false;
-	//m_iPriorPartNumber = 0;
-	m_currentPartNumberIsKnown = false;
 	m_dwLastCheckedForEvictTick = 0;
-    	m_addedPayloadQueueSession = 0;
+    	//m_addedPayloadQueueSession = 0;
 	//MORPH END   - Added by SiRoB, ZZ Upload System
 	//MORPH STRAT - Added by SiRoB, Better Download rate calcul
 	m_AvarageDDRlastRemovedHeadTimestamp = 0;
@@ -215,13 +235,13 @@ void CUpDownClient::Init(){
 
 CUpDownClient::~CUpDownClient(){
 	//MORPH START - Added by IceCream, Maella -Support for tag ET_MOD_VERSION 
-	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientVerString());
+	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientSoftVer());
 	//MORPH END  - Added by IceCream, Maella -Support for tag ET_MOD_VERSION 
-	theApp.clientlist->RemoveClient(this, "Destructing client object");
+	theApp.clientlist->RemoveClient(this);
 	if (m_Friend){
 		//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 		m_Friend->SetLinkedClient(NULL);
-		//theApp.friendlist->RefreshFriend(m_Friend);
+		theApp.friendlist->RefreshFriend(m_Friend);
 		//m_Friend = NULL;
 		//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	}
@@ -251,14 +271,14 @@ CUpDownClient::~CUpDownClient(){
 		delete[] m_abyUpPartStatus;
 	ClearUploadBlockRequests();
 
-	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;m_DownloadBlocks_list.GetNext(pos))
-		delete m_DownloadBlocks_list.GetAt(pos);
+	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;)
+		delete m_DownloadBlocks_list.GetNext(pos);
 	m_DownloadBlocks_list.RemoveAll();
-	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;m_RequestedFiles_list.GetNext(pos))
-		delete m_RequestedFiles_list.GetAt(pos);
+	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;)
+		delete m_RequestedFiles_list.GetNext(pos);
 	m_RequestedFiles_list.RemoveAll();
-	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition();pos != 0;m_PendingBlocks_list.GetNext(pos)){
-		Pending_Block_Struct *pending = m_PendingBlocks_list.GetAt(pos);
+	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition();pos != 0;){
+		Pending_Block_Struct *pending = m_PendingBlocks_list.GetNext(pos);
 		delete pending->block;
 		// Not always allocated
 		if (pending->zStream){
@@ -284,11 +304,11 @@ CUpDownClient::~CUpDownClient(){
 
 //MORPH START - Added by IceCream, Anti-leecher feature
 bool CUpDownClient::TestLeecher(){
-	if ((old_m_pszUsername == m_pszUsername) && (old_m_clientVerString == m_clientVerString))
+	if ((old_m_pszUsername == m_pszUsername) && (old_m_strClientSoftware == m_strClientSoftware))
 		return IsLeecher();
 
 	old_m_pszUsername = m_pszUsername;
-	old_m_clientVerString = m_clientVerString;
+	old_m_strClientSoftware = m_strClientSoftware;
 
 	if (StrStrI(m_pszUsername,"$GAM3R$")||
 	StrStrI(m_pszUsername,"G@m3r")||
@@ -341,12 +361,12 @@ bool CUpDownClient::TestLeecher(){
 	StrStrI(m_pszUsername,"emule-element")||
 	StrStrI(m_clientModString,"Element")|| 
 	StrStrI(m_clientModString,"§¯Å]")|| 
-	(StrStrI(m_clientModString,"EastShare") && StrStrI(m_clientVerString,"0.29"))||
+	(StrStrI(m_clientModString,"EastShare") && StrStrI(m_strClientSoftware,"0.29"))||
 	// EastShare END - Added by TAHO, Pretender
 	(StrStrI(m_pszUsername,"emule") && StrStrI(m_pszUsername,"booster"))||
-	(StrStrI(m_clientModString,"LSD.7c") && !StrStrI(m_clientVerString,"27"))||
+	(StrStrI(m_clientModString,"LSD.7c") && !StrStrI(m_strClientSoftware,"27"))||
 	(StrStrI(m_clientModString,"Morph") && StrStrI(m_clientModString,"Max"))||
-	((m_clientModString.IsEmpty() == false) && (StrStrI(m_clientVerString,"edonkey")))||
+	((m_clientModString.IsEmpty() == false) && (StrStrI(m_strClientSoftware,"edonkey")))||
 	((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51))) //LSD, edonkey user with eMule property
 	{
 		return true;
@@ -369,9 +389,6 @@ void CUpDownClient::ClearHelloProperties()
 	m_bySupportSecIdent = 0;
 	m_bSupportsPreview = false;
 	m_nClientVersion = 0;
-	m_nClientMajVersion = 0;
-	m_nClientMinVersion = 0;
-	m_nClientUpVersion = 0;
 	m_fSharedDirectories = 0;
 
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
@@ -507,7 +524,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 	// tecxx 1609 2002 - add client's servet to serverlist (Moved to uploadqueue.cpp)
 
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr, 0, sizeof(sockAddr));
+	memset(&sockAddr, 0, sizeof(sockAddr));
 	uint32 nSockAddrLen = sizeof(sockAddr);
 	socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 	
@@ -521,15 +538,13 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 		CServer* addsrv = new CServer(m_nServerPort, inet_ntoa(addhost));
 		addsrv->SetListName(addsrv->GetAddress());
 
-		if (!theApp.emuledlg->serverwnd.serverlistctrl.AddServer(addsrv, true))
+		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(addsrv, true))
 			delete addsrv;
 	}
 	//Because most sources are from ED2K, I removed the m_nUserIDHybrid != m_dwUserIP check since this will trigger 90% of the time anyway.
 	if(!HasLowID() || m_nUserIDHybrid == 0) 
 		m_nUserIDHybrid = ntohl(m_dwUserIP);
-	uchar key[16];
-	md4cpy(key,m_achUserHash);
-	CClientCredits* pFoundCredits = theApp.clientcredits->GetCredit(key);
+	CClientCredits* pFoundCredits = theApp.clientcredits->GetCredit((uchar*)m_achUserHash);
 	if (credits == NULL){
 		credits = pFoundCredits;
 		if (!theApp.clientlist->ComparePriorUserhash(m_dwUserIP, m_nUserPort, pFoundCredits)){
@@ -544,28 +559,19 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data){
 		Ban();
 	}
 
-	if ((m_Friend = theApp.friendlist->SearchFriend(key, m_dwUserIP, m_nUserPort)) != NULL){
+	if ((m_Friend = theApp.friendlist->SearchFriend((uchar*)m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
 		// Link the friend to that client
 		//MORPH START - Added by Yun.SF3, ZZ Upload System
 		m_Friend->SetLinkedClient(this);
+		theApp.friendlist->RefreshFriend(m_Friend);
 		//MORPH END - Added by Yun.SF3, ZZ Upload System
 	}
 	else{
 		// avoid that an unwanted client instance keeps a friend slot
 		SetFriendSlot(false);
 	}
-
-	// We want to educate Users of major comercial GPL breaking mods by telling them about the effects
-	// check for known advertising in usernames
-	// the primary aim is not to technical block those but to make users use a GPL-conform version
-	CString strBuffer = m_pszUsername;
-	strBuffer.MakeUpper();
-	strBuffer.Remove(' ');
-	if (strBuffer.Find("EMULE-CLIENT") != -1 || strBuffer.Find("POWERMULE") != -1){
-		m_bGPLEvildoer = true;  
-	}
-
 	ReGetClientSoft();
+
 	m_byInfopacketsReceived |= IP_EDONKEYPROTPACK;
 	// check if at least CT_EMULEVERSION was received, all other tags are optional
 	bool bIsMule = (dwEmuleTags & 0x04) == 0x04;
@@ -597,12 +603,12 @@ void CUpDownClient::SendHelloPacket(){
 
 	// if IP is filtered, dont greet him but disconnect...
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr, 0, sizeof(sockAddr));
+	memset(&sockAddr, 0, sizeof(sockAddr));
 	uint32 nSockAddrLen = sizeof(sockAddr);
 	socket->GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 	if ( theApp.ipfilter->IsFiltered(sockAddr.sin_addr.S_un.S_addr)) {
-		AddDebugLogLine(true,GetResString(IDS_IPFILTERED),GetFullIP(),theApp.ipfilter->GetLastHit());
-		if(Disconnected(GetResString(IDS_IPISFILTERED)+ " 1")){
+		AddDebugLogLine(true,GetResString(IDS_IPFILTERED),inet_ntoa(sockAddr.sin_addr),theApp.ipfilter->GetLastHit());
+		if(Disconnected()){
 			delete this;
 		}
 		theApp.stat_filteredclients++;
@@ -631,10 +637,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	data.Write(&version,1);
 	uint8 protversion = EMULE_PROTOCOL;
 	data.Write(&protversion,1);
-	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	//uint32 tagcount = 8; //+1;
-	//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	uint32 tagcount = 9; //+1;//<<--enkeyDEV(th1) -L2HAC- tag
+	uint32 tagcount = 9/*7 OFFICIAL+1 ET_MOD_VERSION+1 -L2HAC-*/;
 	data.Write(&tagcount,4);
 	CTag tag(ET_COMPRESSION,1);
 	tag.WriteTagToFile(&data);
@@ -830,11 +833,8 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	uint32 tagcount = 6/*5*/;//MORPH - Changed by SiRoB, MOD_VERSION tag
 	data->Write(&tagcount,4);
 	char* strUsedName;
-	if (m_bGPLEvildoer) // try to make the user of GPL-breaking clients read our info-site without spamming them in any way
-		strUsedName = "Lies Mich! http://ReadMe.emule-project.net <- Please use a GPL-conform version";	
-	// eD2K Name
 	//MORPH START - Added by IceCream, Anti-leecher feature
-	else if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
+	if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
 	{
 		strUsedName = m_pszUsername;
 	}
@@ -863,11 +863,11 @@ void CUpDownClient::SendHelloTypePacket(CMemFile* data)
 	// eMule Misc. Options #1
 	const UINT uUdpVer				= 3;
 	const UINT uDataCompVer			= 1;
-	const UINT uSupportSecIdent		= 3;
+	const UINT uSupportSecIdent		= theApp.clientcredits->CryptoAvailable() ? 3 : 0;
 	const UINT uSourceExchangeVer	= 3;
 	const UINT uExtendedRequestsVer	= 2;
 	const UINT uAcceptCommentVer	= 1;
-	const UINT uSupportsPreview		= 1;
+	const UINT uSupportsPreview		= theApp.glob_prefs->IsPreviewEnabled() ? 1 : 0;
 	CTag tagMisOptions(CT_EMULE_MISCOPTIONS1, 
 				(uUdpVer				<< 4*6) |
 				(uDataCompVer			<< 4*5) |
@@ -957,14 +957,13 @@ void CUpDownClient::ProcessMuleCommentPacket(char* pachPacket, uint32 nSize){
 					}
 				}
 			}
-			if (reqfile->HasRating() || reqfile->HasComment()) theApp.emuledlg->transferwnd.downloadlistctrl.UpdateItem(reqfile);
+			if (reqfile->HasRating() || reqfile->HasComment())
+				theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(reqfile);
 		}
 	}
 }
 
-//MORPH START - Changed by SiRoB, ZZ UPload system
-bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
-//MORPH END   - Changed by SiRoB, ZZ UPload system
+bool CUpDownClient::Disconnected(bool bFromSocket){
 	//If this is a KAD client object, just delete it!
 	if(this->GetKadIPCheckState() != KS_NONE){
 		return true;
@@ -975,9 +974,7 @@ bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
 	ASSERT(theApp.clientlist->IsValidClient(this));
 
 	if (GetUploadState() == US_UPLOADING)
-		//MORPH START - Changed by SiRoB, ZZ UPload system 20030818-1923
-		theApp.uploadqueue->RemoveFromUploadQueue(this, reason);
-		//MORPH END   - Changed by SiRoB, ZZ UPload system 20030818-1923
+		theApp.uploadqueue->RemoveFromUploadQueue(this,"Client Disconnected");
 	if (m_BlockSend_queue.GetCount() > 0) {
 		// Although this should not happen, it happens sometimes. The problem we may run into here is as follows:
 		//
@@ -993,14 +990,6 @@ bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
 		ClearUploadBlockRequests();
 	}
 	if (GetDownloadState() == DS_DOWNLOADING){
-		//MORPH START - Added by SiRoB, ZZ UPload system 20030818-1923
-        	if(!reason || reason.Compare("") == 0) {
-            		CString temp = GetResString(IDS_REMULNOREASON);
-            		reason = temp;
-        	}
-        	AddDebugLogLine(false,GetResString(IDS_DWLSESSIONENDED), GetUserName(), reason);
-		//MORPH END - Added by SiRoB, ZZ UPload system 20030818-1923
-		
 		SetDownloadState(DS_ONQUEUE);
 	}
 	else if(GetDownloadState() == DS_CONNECTED){
@@ -1053,9 +1042,9 @@ bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
 
 	if (GetChatState() != MS_NONE){
 		bDelete = false;
-		theApp.emuledlg->chatwnd.chatselector.ConnectingResult(this,false);
+		theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this,false);
 	}
-	if (!m_FromSocket && socket){
+	if (!bFromSocket && socket){
 		ASSERT (theApp.listensocket->IsValidSocket(socket));
 		socket->Safe_Delete();
 	}
@@ -1066,21 +1055,20 @@ bool CUpDownClient::Disconnected(CString reason, bool m_FromSocket){
 	}
  	if (m_Friend)
 		theApp.friendlist->RefreshFriend(m_Friend);
-	theApp.emuledlg->transferwnd.clientlistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 	if (bDelete){
 		return true;
 	}
 	else{
 		m_fHashsetRequesting = 0;
+		SetSentCancelTransfer(0);
 		return false;
 	}
 }
 
 bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 	if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected())){
-		//MORPH START - Changed by SiRoB, ZZ UPload system
-		if(Disconnected("Failed to connect. Too many sockets.")){
-		//MORPH END   - Changed by SiRoB, ZZ UPload system
+		if(Disconnected()){
 			delete this;
 			return false;
 		}
@@ -1095,14 +1083,12 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 			reqfile->hashsetneeded = true;
 		}
 		if (GetUploadState() == US_CONNECTING){
-			//MORPH START - Changed by SiRoB, ZZ UPload system
-			if(Disconnected("Failed to connect. Can not connect from low ID to another client with low ID.")){
-			//MORPH END   - Changed by SiRoB, ZZ UPload system
+			if(Disconnected()){
 				delete this;
+				return false;
 			}
 		}
-		//Never connect lowID to lowID
-		return false;
+		return true;
 	}
 
 	if (!socket){
@@ -1129,9 +1115,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 		if (GetDownloadState() == DS_CONNECTING)
 			SetDownloadState(DS_WAITCALLBACK);
 		if (GetUploadState() == US_CONNECTING){
-			//MORPH START - Changed by SiRoB, ZZ UPload system
-			if(Disconnected("Failed to connect. 1")){
-			//MORPH END   - Changed by SiRoB, ZZ UPload system
+			if(Disconnected()){
 				delete this;
 				return false;
 			}
@@ -1140,7 +1124,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 
 		if (theApp.serverconnect->IsLocalServer(m_dwServerIP,m_nServerPort)){
 			Packet* packet = new Packet(OP_CALLBACKREQUEST,4);
-			MEMCOPY(packet->pBuffer,&m_nUserIDHybrid,4);
+			memcpy(packet->pBuffer,&m_nUserIDHybrid,4);
 			if (theApp.glob_prefs->GetDebugServerTCP())
 				Debug(">>> Sending OP__CallbackRequest\n");
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
@@ -1149,9 +1133,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon){
 		else{
 			if (GetUploadState() == US_NONE && (!GetRemoteQueueRank() || m_bReaskPending) ){
 				theApp.downloadqueue->RemoveSource(this);
-				//MORPH START - Changed by SiRoB, ZZ UPload system 20030818-1923
-				if(Disconnected("Failed to connect. 2")){
-				//MORPH END   - Changed by SiRoB, ZZ UPload system 20030818-1923
+				if(Disconnected()){
 					delete this;
 					return false;
 				}
@@ -1181,8 +1163,8 @@ void CUpDownClient::ConnectionEstablished(){
 		this->SetKadIPCHeckState(KS_CONNECTED);
 		return; //Return because this object is not within the general population of client objects
 	}
-	if (GetChatState() == MS_CONNECTING)
-		theApp.emuledlg->chatwnd.chatselector.ConnectingResult(this,true);
+	if (GetChatState() == MS_CONNECTING || GetChatState() == MS_CHATTING)
+		theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this,true);
 	switch(GetDownloadState()){
 		case DS_CONNECTING:
 		case DS_WAITCALLBACK:
@@ -1219,119 +1201,170 @@ void CUpDownClient::ConnectionEstablished(){
 
 
 void CUpDownClient::ReGetClientSoft(){
-	// Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientVerString());
-	// Maella end
-
-	int iHashType = GetHashType();
 	if(m_pszUsername == NULL){
 		m_clientSoft = SO_UNKNOWN;
+		return;
 	}
-	else if(iHashType == SO_OLDEMULE){
-		m_clientSoft = SO_OLDEMULE;
-	}
-	else if(iHashType == SO_EMULE){
-		if( m_byEmuleVersion != 0x99 )
-		{
-			m_nClientMajVersion = 0;
-			m_nClientMinVersion = (m_byEmuleVersion >> 4)*10 + (m_byEmuleVersion & 0x0f);
-			m_nClientUpVersion = 0;
-			m_nClientVersion = m_nClientMinVersion*10*100;
-		}
-		else
-		{
-			m_nClientMajVersion   = (m_nClientVersion >> 17) & 0x7f;
-			m_nClientMinVersion   = (m_nClientVersion >> 10) & 0x7f;
-			m_nClientUpVersion    = (m_nClientVersion >>  7) & 0x07;
-		}
+	//MORPH START - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
+	theApp.clientlist->RemoveClientType(GetClientSoft(), GetClientSoftVer());
+	//MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
+
+	int iHashType = GetHashType();
+	if(iHashType == SO_EMULE){
+		LPCTSTR pszSoftware;
 		switch(m_byCompatibleClient){
 			case SO_CDONKEY:
 				m_clientSoft = SO_CDONKEY;
+				pszSoftware = _T("cDonkey");
 				break;
 			case SO_XMULE:
 				m_clientSoft = SO_XMULE;
+				pszSoftware = _T("xMule");
 				break;
 			case SO_SHAREAZA:
 				m_clientSoft = SO_SHAREAZA;
+				pszSoftware = _T("Shareaza");
 				break;
 			default:
-				if (m_bIsML)
+				if (m_bIsML){
 					m_clientSoft = SO_MLDONKEY;
-				else if (m_bIsHybrid)
+					pszSoftware = _T("MLdonkey");
+				}
+				else if (m_bIsHybrid){
 					m_clientSoft = SO_EDONKEYHYBRID;
-				else
+					pszSoftware = _T("eDonkeyHybrid");
+				}
+				else{
 					m_clientSoft = SO_EMULE;
+					pszSoftware = _T("eMule");
+				}
 		}
-	//	return;
-	}
-	else if (m_bIsML || iHashType == SO_MLDONKEY) {
-		m_clientSoft= SO_MLDONKEY;
-	}
-	else if( m_bIsHybrid ) {
-		m_clientSoft=SO_EDONKEYHYBRID;
-	}
-	else {
-		m_clientSoft=SO_EDONKEY;
-}
 
-	// Format name of client
-	switch(GetClientSoft()){
-		case SO_EDONKEY:
-			m_clientVerString.Format(_T("eDonkey v%u"),GetVersion());
-			break;
-		case SO_EDONKEYHYBRID:
-			m_clientVerString.Format(_T("eDonkeyHybrid v%u"),GetVersion());
-			break;
-		case SO_EMULE:
-			if(GetMuleVersion() == 0x99)
-				m_clientVerString.Format(_T("eMule v%u.%u%c"), GetMajVersion(), GetMinVersion(), _T('a') + GetUpVersion());
-			else
-				m_clientVerString.Format(_T("eMule v%u.%u"), GetMajVersion(), GetMinVersion());
-			break;
-		case SO_OLDEMULE:
-			if(GetMuleVersion() == 0x99)
-				m_clientVerString.Format(_T("old eMule v%u.%u%c"), GetMajVersion(), GetMinVersion(), _T('a') + GetUpVersion());
-			else
-				m_clientVerString.Format(_T("old eMule v%u.%u"), GetMajVersion(), GetMinVersion());
-			break;
-		case SO_CDONKEY:
-			if(GetMuleVersion() == 0x99)
-				m_clientVerString.Format(_T("cDonkey v%u.%u%c"), GetMajVersion(), GetMinVersion(), _T('a') + GetUpVersion());
-			else
-				m_clientVerString.Format(_T("cDonkey v%u.%u"), GetMajVersion(), GetMinVersion());
-			break;
-		case SO_XMULE:
-			if(GetMuleVersion() == 0x99)
-				m_clientVerString.Format(_T("lMule v%u.%u%c"), GetMajVersion(), GetMinVersion(), _T('a') + GetUpVersion());
-			else
-				m_clientVerString.Format(_T("lMule v%u.%u"), GetMajVersion(), GetMinVersion());
-			break;
-		case SO_SHAREAZA:
-			if(GetMuleVersion() == 0x99)
-				m_clientVerString.Format(_T("Shareaza v%u.%u%c"), GetMajVersion(), GetMinVersion(), _T('a') + GetUpVersion());
-			else
-				m_clientVerString.Format(_T("Shareaza v%u.%u"), GetMajVersion(), GetMinVersion());
-			break;
-		case SO_MLDONKEY:
-			if(GetMuleVersion() == 0x99)
-				m_clientVerString.Format(_T("MlDonkey v%u.%u%c"), GetMajVersion(), GetMinVersion(), _T('a') + GetUpVersion());
-			else
-				m_clientVerString.Format(_T("MlDonkey v%u.%u"), GetMajVersion(), GetMinVersion());
-			break;
-		default:
-			m_clientVerString = GetResString(IDS_UNKNOWN);
+		int iLen;
+		TCHAR szSoftware[128];
+		if (m_byEmuleVersion == 0){
+			m_nClientVersion = 0;
+			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s"), pszSoftware);
+		}
+		else if (m_byEmuleVersion != 0x99){
+			UINT nClientMinVersion = (m_byEmuleVersion >> 4)*10 + (m_byEmuleVersion & 0x0f);
+			m_nClientVersion = nClientMinVersion*100*10;
+			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v0.%u"), pszSoftware, nClientMinVersion);
+		}
+		else{
+			UINT nClientMajVersion = (m_nClientVersion >> 17) & 0x7f;
+			UINT nClientMinVersion = (m_nClientVersion >> 10) & 0x7f;
+			UINT nClientUpVersion  = (m_nClientVersion >>  7) & 0x07;
+			m_nClientVersion = nClientMajVersion*100*10*100 + nClientMinVersion*100*10 + nClientUpVersion*100;
+			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("%s v%u.%u%c"), pszSoftware, nClientMajVersion, nClientMinVersion, _T('a') + nClientUpVersion);
+		}
+		if (iLen > 0){
+			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
+			m_strClientSoftware.ReleaseBuffer(iLen);
+		}
+		goto suite;//return; //MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 	}
+	if (m_bIsHybrid){
+		m_clientSoft=SO_EDONKEYHYBRID;
+		// seen:
+		// 105010	50.10
+		// 10501	50.1
+		// 1051		51.0
+		// 501		50.1
+
+		UINT nClientMajVersion;
+		UINT nClientMinVersion;
+		UINT nClientUpVersion;
+		if (m_nClientVersion > 100000){
+			UINT uMaj = m_nClientVersion/100000;
+			nClientMajVersion = uMaj - 1;
+			nClientMinVersion = (m_nClientVersion - uMaj*100000) / 100;
+			nClientUpVersion = m_nClientVersion % 100;
+		}
+		else if (m_nClientVersion > 10000){
+			UINT uMaj = m_nClientVersion/10000;
+			nClientMajVersion = uMaj - 1;
+			nClientMinVersion = (m_nClientVersion - uMaj*10000) / 10;
+			nClientUpVersion = m_nClientVersion % 10;
+		}
+		else if (m_nClientVersion > 1000){
+			UINT uMaj = m_nClientVersion/1000;
+			nClientMajVersion = uMaj - 1;
+			nClientMinVersion = m_nClientVersion - uMaj*1000;
+			nClientUpVersion = 0;
+		}
+		else if (m_nClientVersion > 100){
+			UINT uMin = m_nClientVersion/10;
+			nClientMajVersion = 0;
+			nClientMinVersion = uMin;
+			nClientUpVersion = m_nClientVersion - uMin*10;
+		}
+		else {
+			nClientMajVersion = 0;
+			nClientMinVersion = m_nClientVersion;
+			nClientUpVersion = 0;
+		}
+		m_nClientVersion = nClientMajVersion*100*10*100 + nClientMinVersion*100*10 + nClientUpVersion*100;
+		
+		int iLen;
+		TCHAR szSoftware[128];
+		if (nClientUpVersion)
+			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("eDonkeyHybrid v%u.%u.%u"), nClientMajVersion, nClientMinVersion, nClientUpVersion);
+		else
+			iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("eDonkeyHybrid v%u.%u"), nClientMajVersion, nClientMinVersion);
+		if (iLen > 0){
+			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
+			m_strClientSoftware.ReleaseBuffer(iLen);
+		}
+		goto suite;//return; //MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
+	}
+
+	if (m_bIsML || iHashType == SO_MLDONKEY){
+		m_clientSoft = SO_MLDONKEY;
+		UINT nClientMinVersion = m_nClientVersion;
+		m_nClientVersion = nClientMinVersion*100*10;
+		TCHAR szSoftware[128];
+		int iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("MLdonkey v0.%u"), nClientMinVersion);
+		if (iLen > 0){
+			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
+			m_strClientSoftware.ReleaseBuffer(iLen);
+		}
+		goto suite;//return; //MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
+	}
+
+	if (iHashType == SO_OLDEMULE){
+		m_clientSoft = SO_OLDEMULE;
+		UINT nClientMinVersion = m_nClientVersion;
+		m_nClientVersion = nClientMinVersion*100*10;
+		TCHAR szSoftware[128];
+		int iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("Old eMule v0.%u"), nClientMinVersion);
+		if (iLen > 0){
+			memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
+			m_strClientSoftware.ReleaseBuffer(iLen);
+		}
+		goto suite;//return; //MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
+	}
+
+	m_clientSoft = SO_EDONKEY;
+	UINT nClientMinVersion = m_nClientVersion;
+	m_nClientVersion = nClientMinVersion*100*10;
+	TCHAR szSoftware[128];
+	int iLen = _sntprintf(szSoftware, ARRSIZE(szSoftware), _T("eDonkey v0.%u"), nClientMinVersion);
+	if (iLen > 0){
+		memcpy(m_strClientSoftware.GetBuffer(iLen), szSoftware, iLen*sizeof(TCHAR));
+		m_strClientSoftware.ReleaseBuffer(iLen);
+	}
+//MORPH START - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
+suite:
 	if(m_clientModString.IsEmpty() == false){
-		m_clientVerString += _T(" [");
-		m_clientVerString += m_clientModString;
-		m_clientVerString += _T("]");
+		m_strClientSoftware += _T(" [");
+		m_strClientSoftware += m_clientModString;
+		m_strClientSoftware += _T("]");
 	}	
 
-	// Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	theApp.clientlist->AddClientType(GetClientSoft(), GetClientVerString());
-	// Maella end
+	theApp.clientlist->AddClientType(GetClientSoft(), GetClientSoftVer());
+//MORPH END   - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- Maella idea
 }
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 
 int CUpDownClient::GetHashType()
 {
@@ -1391,7 +1424,7 @@ void CUpDownClient::SendPublicKeyPacket(){
 
     Packet* packet = new Packet(OP_PUBLICKEY,theApp.clientcredits->GetPubKeyLen() + 1,OP_EMULEPROT);
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-	MEMCOPY(packet->pBuffer+1,theApp.clientcredits->GetPublicKey(), theApp.clientcredits->GetPubKeyLen());
+	memcpy(packet->pBuffer+1,theApp.clientcredits->GetPublicKey(), theApp.clientcredits->GetPubKeyLen());
 	packet->pBuffer[0] = theApp.clientcredits->GetPubKeyLen();
 	socket->SendPacket(packet,true,true);
 	m_SecureIdentState = IS_SIGNATURENEEDED;
@@ -1444,7 +1477,7 @@ void CUpDownClient::SendSignaturePacket(){
 	}
 	Packet* packet = new Packet(OP_SIGNATURE,siglen + 1+ ( (bUseV2)? 1:0 ),OP_EMULEPROT);
 	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-	MEMCOPY(packet->pBuffer+1,achBuffer, siglen);
+	memcpy(packet->pBuffer+1,achBuffer, siglen);
 	packet->pBuffer[0] = siglen;
 	if (bUseV2)
 		packet->pBuffer[1+siglen] = byChaIPKind;
@@ -1471,13 +1504,11 @@ void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 		}
 		else if(m_SecureIdentState == IS_KEYANDSIGNEEDED){
 			// something is wrong
-			if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-				AddDebugLogLine(false, "Invalid State error: IS_KEYANDSIGNEEDED in ProcessPublicKeyPacket");
+			AddDebugLogLine(false, "Invalid State error: IS_KEYANDSIGNEEDED in ProcessPublicKeyPacket");
 		}
 	}
 	else{
-		if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-			AddDebugLogLine(false, "Failed to use new received public key");
+		AddDebugLogLine(false, "Failed to use new received public key");
 	}
 }
 
@@ -1504,8 +1535,7 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 	
 	// we accept only one signature per IP, to avoid floods which need a lot cpu time for cryptfunctions
 	if (m_dwLastSignatureIP == GetIP()){
-		if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-			AddDebugLogLine(false, "received multiple signatures from one client");
+		AddDebugLogLine(false, "received multiple signatures from one client");
 		return;
 	}
 	// also make sure this client has a public key
@@ -1521,12 +1551,10 @@ void CUpDownClient::ProcessSignaturePacket(uchar* pachPacket, uint32 nSize){
 
 	if (theApp.clientcredits->VerifyIdent(credits, pachPacket+1, pachPacket[0], GetIP(), byChaIPKind ) ){
 		// result is saved in function abouve
-		if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-			AddDebugLogLine(false, "'%s' has passed the secure identification, V2 State: %i", GetUserName(), byChaIPKind);
+		//AddDebugLogLine(false, "'%s' has passed the secure identification, V2 State: %i", GetUserName(), byChaIPKind);
 	}
 	else
-		if (theApp.glob_prefs->GetDebugSecuredConnection()) //MORPH - Added by SiRoB, Debug Log Option for Secured Connection
-			AddDebugLogLine(false, "'%s' has failed the secure identification, V2 State: %i", GetUserName(), byChaIPKind);
+		AddDebugLogLine(false, "'%s' has failed the secure identification, V2 State: %i", GetUserName(), byChaIPKind);
 	m_dwLastSignatureIP = GetIP(); 
 }
 
@@ -1551,7 +1579,7 @@ void CUpDownClient::SendSecIdentStatePacket(){
 		Packet* packet = new Packet(OP_SECIDENTSTATE,5,OP_EMULEPROT);
 		theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
 		packet->pBuffer[0] = nValue;
-		MEMCOPY(packet->pBuffer+1,&dwRandom, sizeof(dwRandom));
+		memcpy(packet->pBuffer+1,&dwRandom, sizeof(dwRandom));
 		socket->SendPacket(packet,true,true);
 	}
 	else
@@ -1577,7 +1605,7 @@ void CUpDownClient::ProcessSecIdentStatePacket(uchar* pachPacket, uint32 nSize){
 				break;
 		}
 	uint32 dwRandom;
-	MEMCOPY(&dwRandom, pachPacket+1,4);
+	memcpy(&dwRandom, pachPacket+1,4);
 	credits->m_dwCryptRndChallengeFrom = dwRandom;
 	//DEBUG_ONLY(theApp.emuledlg->AddDebugLogLine(false, "recieved SecIdentState Packet, state: %i", pachPacket[0]));
 }
@@ -1618,7 +1646,7 @@ void CUpDownClient::SendPreviewRequest(CAbstractFile* pForFile){
 	if (!m_bPreviewReqPending){
 		m_bPreviewReqPending = true;
 		Packet* packet = new Packet(OP_REQUESTPREVIEW,16,OP_EMULEPROT);
-		MEMCOPY(packet->pBuffer,pForFile->GetFileHash(),16);
+		memcpy(packet->pBuffer,pForFile->GetFileHash(),16);
 		SafeSendPacket(packet);
 	}
 	else{
@@ -1727,3 +1755,144 @@ bool CUpDownClient::SafeSendPacket(Packet* packet){
 		return TryToConnect(true);
 	}
 }
+
+bool CUpDownClient::HasLowID()
+{
+	return IsLowIDHybrid(m_nUserIDHybrid);
+}
+
+#ifdef _DEBUG
+void CUpDownClient::AssertValid() const
+{
+	CObject::AssertValid();
+
+	CHECK_OBJ(socket);
+	CHECK_PTR(credits);
+	CHECK_PTR(m_Friend);
+	CHECK_OBJ(reqfile);
+	(void)compressiongain;
+	(void)notcompressed;
+	(void)m_abyUpPartStatus;
+	(void)m_nSumForAvgUpDataRate;
+	m_OtherRequests_list.AssertValid();
+	m_OtherNoNeeded_list.AssertValid();
+	(void)m_lastPartAsked;
+	CHECK_BOOL(m_bAddNextConnect);
+	CHECK_BOOL(m_bIsSpammer);
+	(void)m_cMessagesReceived;
+	(void)m_cMessagesSend;
+	CHECK_BOOL(m_bMsgFiltered);
+	(void)m_dwUserIP;
+	(void)m_dwServerIP;
+	(void)m_nUserIDHybrid;
+	(void)m_nUserPort;
+	(void)m_nServerPort;
+	(void)m_nClientVersion;
+	(void)m_nUpDatarate;
+	(void)dataratems;
+	(void)m_cSendblock;
+	(void)m_byEmuleVersion;
+	(void)m_byDataCompVer;
+	CHECK_BOOL(m_bEmuleProtocol);
+	CHECK_BOOL(m_bIsHybrid);
+	(void)m_pszUsername;
+	(void)m_szFullUserIP;
+	(void)m_achUserHash;
+	(void)m_nUDPPort;
+	(void)m_nKadPort;
+	(void)m_byUDPVer;
+	(void)m_bySourceExchangeVer;
+	(void)m_byAcceptCommentVer;
+	(void)m_byExtendedRequestsVer;
+	(void)m_cFailed;
+	CHECK_BOOL(m_bFriendSlot);
+	CHECK_BOOL(m_bCommentDirty);
+	CHECK_BOOL(m_bIsML);
+	ASSERT( m_clientSoft >= SO_EMULE && m_clientSoft <= SO_SHAREAZA ||  m_clientSoft >= SO_EDONKEYHYBRID && m_clientSoft <= SO_UNKNOWN );
+	(void)m_strClientSoftware;
+	(void)m_dwLastSourceRequest;
+	(void)m_dwLastSourceAnswer;
+	(void)m_dwLastAskedForSources;
+    (void)m_iFileListRequested;
+	(void)m_byCompatibleClient;
+	CHECK_BOOL(m_bSupportsPreview);
+	CHECK_BOOL(m_bPreviewReqPending);
+	CHECK_BOOL(m_bPreviewAnsPending);
+	m_WaitingPackets_list.AssertValid();
+	m_DontSwap_list.AssertValid();
+	(void)m_lastRefreshedDLDisplay;
+	ASSERT( m_SecureIdentState >= IS_UNAVAILABLE && m_SecureIdentState <= IS_KEYANDSIGNEEDED );
+	(void)m_dwLastSignatureIP;
+	ASSERT( (m_byInfopacketsReceived & ~IP_BOTH) == 0 );
+	(void)m_bySupportSecIdent;
+	(void)m_nTransferedUp;
+	ASSERT( m_nUploadState >= US_UPLOADING && m_nUploadState <= US_NONE );
+	(void)m_dwUploadTime;
+	(void)m_nMaxSendAllowed;
+	(void)m_nAvUpDatarate;
+	(void)m_cAsked;
+	(void)m_dwLastUpRequest;
+	(void)m_nCurSessionUp;
+    (void)m_nCurQueueSessionPayloadUp;
+    (void)m_addedPayloadQueueSession;
+	(void)m_nUpPartCount;
+	(void)m_nUpCompleteSourcesCount;
+	(void)s_UpStatusBar;
+	(void)requpfileid;
+    (void)m_lastRefreshedULDisplay;
+	m_AvarageUDR_list.AssertValid();
+	m_BlockSend_queue.AssertValid();
+	m_BlockRequests_queue.AssertValid();
+	m_DoneBlocks_list.AssertValid();
+	m_RequestedFiles_list.AssertValid();
+	ASSERT( m_nDownloadState >= DS_DOWNLOADING && m_nDownloadState <= DS_NONE );
+	(void)m_cDownAsked;
+	(void)m_abyPartStatus;
+	(void)m_dwLastAskedTime;
+	(void)m_strClientFilename;
+	(void)m_nTransferedDown;
+	(void)m_dwDownStartTime;
+	(void)m_nLastBlockOffset;
+	(void)m_nDownDatarate;
+	(void)m_nDownDataRateMS;
+	(void)m_nAvDownDatarate;
+	(void)m_nSumForAvgDownDataRate;
+	(void)m_cShowDR;
+	(void)m_nRemoteQueueRank;
+	(void)m_dwLastBlockReceived;
+	(void)m_nPartCount;
+	ASSERT( m_nSourceFrom >= SF_SERVER && m_nSourceFrom <= SF_PASSIVE );
+	CHECK_BOOL(m_bRemoteQueueFull);
+	CHECK_BOOL(usedcompressiondown);
+	CHECK_BOOL(m_bCompleteSource);
+	CHECK_BOOL(m_bReaskPending);
+	CHECK_BOOL(m_bUDPPending);
+	CHECK_BOOL(m_bTransferredDownMini);
+	CHECK_BOOL(m_bUsedComprUp);
+	ASSERT( m_nKadIPCheckState >= KS_NONE && m_nKadIPCheckState <= KS_CONNECTED );
+	m_AvarageDDR_list.AssertValid();
+	(void)sumavgDDR;
+	(void)sumavgUDR;
+	m_PendingBlocks_list.AssertValid();
+	m_DownloadBlocks_list.AssertValid();
+	(void)s_StatusBar;
+	ASSERT( m_nChatstate >= MS_NONE && m_nChatstate <= MS_UNABLETOCONNECT );
+	(void)m_strComment;
+	(void)m_iRate; 
+#undef CHECK_PTR
+#undef CHECK_BOOL
+}
+#endif
+
+#ifdef _DEBUG
+void CUpDownClient::Dump(CDumpContext& dc) const
+{
+	CObject::Dump(dc);
+}
+#endif
+//MORPH START - Moved by SiRoB, <<-- enkeyDEV(th1) -L2HAC-
+uint32	CUpDownClient::GetL2HACTime()
+{
+	return m_L2HAC_time ? (m_L2HAC_time - L2HAC_CALLBACK_PRECEDE) : 0;
+}
+//MORPH END   - Moved by SiRoB, <<-- enkeyDEV(th1) -L2HAC-

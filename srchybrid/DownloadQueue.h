@@ -13,15 +13,18 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "StdAfx.h"
-#include "partfile.h"
-#include "opcodes.h"
-#include "types.h"
-#include "sharedfilelist.h"
-#include "preferences.h"
-#include "loggable.h"
+#include "Loggable.h"
+#include "MenuCmds.h"
+
+class CSafeMemFile;
+class CSearchFile;
+class CUpDownClient;
+class CServer;
+class CPartFile;
+class CPreferences;
+class CSharedFileList;
+
 // khaos::categorymod+
 #include "SelCategoryDlg.h"
 // khaos::categorymod-
@@ -62,8 +65,8 @@ public:
 	void	Process();
 	void	Init();
 	// khaos::categorymod+ Modified these three functions by adding and in some cases removing params.
-	void	AddSearchToDownload(CSearchFile* toadd, uint8 cat = 0, uint16 useOrder = 0);
-	void	AddSearchToDownload(CString link, uint8 cat = 0, uint16 useOrder = 0);
+	void	AddSearchToDownload(CSearchFile* toadd,uint8 paused=2,uint8 cat=0, uint16 useOrder = 0);
+	void	AddSearchToDownload(CString link,uint8 paused=2, uint8 cat=0, uint16 useOrder = 0);
 	void	AddFileLinkToDownload(class CED2KFileLink* pLink, bool AllocatedLink = false, bool SkipQueue = false);
 	// khaos::categorymod-
 	bool	IsFileExisting(const uchar* fileid);
@@ -73,27 +76,35 @@ public:
 	CPartFile*	GetFileByIndex(int index);
 	CPartFile*	GetFileByKadFileSearchID(uint32 ID );
 	void    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
-	void    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
+	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source);
 	bool	RemoveSource(CUpDownClient* toremove, bool updatewindow = true, bool bDoStatsUpdate = true); // delete later ->{ return RemoveSource(toremove,NULL,updatewindow);}
 	void	DeleteAll();
 	void	RemoveFile(CPartFile* toremove);
 	uint32	GetDatarate()			{return datarate;}
 	void	SortByPriority();
-	void	CheckDiskspace();	// SLUGFILLER: checkDiskspace
+	void	CheckDiskspace(bool bNotEnoughSpaceLeft = false); // SLUGFILLER: checkDiskspace
+	void	CheckDiskspaceTimed();
 	void	StopUDPRequests();
 	CServer*	cur_udpserver;
 	void	GetDownloadStats(int results[]);
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
 	void	AddPartFilesToShare();
+
 	// SLUGFILLER: mergeKnown - include part files in known.met
 	void	SavePartFilesToKnown(CFile* file);
 	uint32	GetPartFilesCount();
 	// SLUGFILLER: mergeKnown
-	void	AddDownload(CPartFile* newfile);
+
+	void	AddDownload(CPartFile* newfile, bool paused);
+	CUpDownClient* GetDownloadClientByIP(uint32 dwIP);
 	CUpDownClient* GetDownloadClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
-	void	UpdateDisplayedInfo(boolean force=false);
+	//void	UpdateDisplayedInfo(boolean force=false);
+	
 	// khaos::categorymod+
-	bool	StartNextFile(int Category = -1, bool forceResume = false);
+	//void	StartNextFile()									{ StartNextFile(-1); }
+	//void	StartNextFile(int cat);	
+	
+	bool	StartNextFile(int Category = -1);
 	void	StopPauseLastFile(int Mode = MP_PAUSE, int Category = -1);
 	uint16	GetMaxCatResumeOrder(uint8 iCategory = 0);
 	void	GetCategoryFileCounts(uint8 iCategory, int cntFiles[]);
@@ -126,20 +137,26 @@ public:
 	uint64	GetDownDataOverheadOtherPackets()			{return m_nDownDataOverheadOtherPackets;}
 	void	CompDownDatarateOverhead();
 	int		GetFileCount()						{return filelist.GetCount();}
+	// khaos::categorymod+	
 	void	ResetCatParts(int cat, uint8 useCat = 0);
+	// khaos::categorymod-
 	void	SavePartFiles(bool del = false);	// InterCeptor
 	void	SetCatPrio(int cat, uint8 newprio);
 	void	SetCatStatus(int cat, int newstatus);
 	void	MoveCat(uint8 from, uint8 to);
-	uint16	GetDownloadingFileCount();
+	UINT	GetDownloadingFileCount() const;
 	uint16	GetPausedFileCount();
 	void	DisableAllA4AFAuto(void);
 	//MORPH START - Removed by SiRoB, Due to Khaos Categorie
 	//void	SetAutoCat(CPartFile* newfile);
 	//MORPH END   - Removed by SiRoB, Due to Khaos Categorie
 	void	SendLocalSrcRequest(CPartFile* sender);
+	void	RemoveLocalServerRequest(CPartFile* pFile);
+	void	ResetLocalServerRequests();
+	bool 	IsInList(const CUpDownClient* client) const;
 	void	SetLastKademliaFileRequest()	{lastkademliafilerequest = ::GetTickCount();}
-	bool	DoKademliaFileRequest()	{return ((::GetTickCount() - lastkademliafilerequest) > KADEMLIAASKTIME);}
+	bool	DoKademliaFileRequest();
+
 	void	UpdatePNRFile(CPartFile * ppfUpdate = NULL);							//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 	void	BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cchBuffMax);	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 
@@ -151,7 +168,7 @@ protected:
 	bool	SendNextUDPPacket();
 	void	ProcessLocalRequests();
 	int		GetMaxFilesPerUDPServerPacket() const;
-	bool	SendGlobGetSourcesUDPPacket(CSafeMemFile& data);
+	bool	SendGlobGetSourcesUDPPacket(CSafeMemFile* data);
 
 private:
 	// SLUGFILLER: checkDiskspace
@@ -189,11 +206,19 @@ private:
 	uint64		m_nDownDataOverheadOtherPackets;
 
 	// By BadWolf - Accurate Speed Measurement
-	//CList<TransferredData,TransferredData> avarage_dr_list; //MORPH - Added by Yun.SF3, ZZ Upload System
-
+	//MORPH START - Removed by SiRoB, ZZ Upload System	
+	typedef struct TransferredData {
+		uint32	datalen;
+		DWORD	timestamp;
+	};
+	//CList<TransferredData,TransferredData> avarage_dr_list;*/
+	//MORPH END   - Removed by SiRoB, ZZ Upload System
 	CList<TransferredData,TransferredData>	m_AvarageDDRO_list;
 	uint32 sumavgDDRO;
 	// END By BadWolf - Accurate Speed Measurement
+
+	//DWORD m_lastRefreshedDLDisplay;
+	CSourceHostnameResolveWnd m_srcwnd;		// SLUGFILLER: hostnameSources
 
 	// khaos::categorymod+ For queuing ED2K link additions.
 	bool		m_bBusyPurgingLinks;
@@ -202,10 +227,4 @@ private:
 
 	CTypedPtrList<CPtrList, CED2KFileLink*> m_ED2KLinkQueue;
 	// khaos::categorymod-
-
-	DWORD m_lastRefreshedDLDisplay;
-	CSourceHostnameResolveWnd m_srcwnd;		// SLUGFILLER: hostnameSources
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	uint32 m_random_update_wait;
-	//MORPH END   - Added by Yun.SF3, ZZ Upload System
 };

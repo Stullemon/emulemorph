@@ -1,7 +1,7 @@
 #pragma once
+#include "Loggable.h"
 #include "Preferences.h"
 #include "resource.h"
-#include "loggable.h"
 
 class CIni;
 
@@ -124,7 +124,7 @@ protected:
 	// Moves the item in list and returns the new index
 	int          MoveItem(int iOldIndex, int iNewIndex);
 	// Update the colors
-	void         SetColors();
+	void         SetColors(LPCTSTR pszLvKey = NULL);
 	DWORD        SetExtendedStyle(DWORD dwNewStyle) {
 		return CListCtrl::SetExtendedStyle(dwNewStyle | LVS_EX_HEADERDRAGDROP);
 	}
@@ -134,6 +134,7 @@ protected:
 	CList<DWORD>     m_dwParamSort;	// SLUGFILLER: multiSort
 	COLORREF         m_crWindow;
 	COLORREF         m_crWindowText;
+	COLORREF         m_crWindowTextBk;
 	COLORREF         m_crHighlight;
 	COLORREF		 m_crGlow;
 	COLORREF         m_crFocusLine;
@@ -205,3 +206,5 @@ private:
 	}
 	// SLUGFILLER: multiSort
 };
+
+void GetContextMenuPosition(CListCtrl& lv, CPoint& point);

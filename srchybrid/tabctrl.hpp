@@ -3,20 +3,7 @@
 
 #pragma once
 
-#include <afxwin.h>
-#include <afxcmn.h>
-#include <windows.h>
-
 #define NM_TABMOVED WM_USER+0x101+0x12
-
-// Standard C++ includes
-#include <vector>
-
-/************************************************
-*
-*                   TAB CONTROL
-*
-************************************************/
 
 class TabControl: public CTabCtrl
 {

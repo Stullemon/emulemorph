@@ -14,19 +14,23 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-
-#include "StdAfx.h"
-#include "clientcredits.h"
-#include "opcodes.h"
-#include "emule.h"
-#include "safefile.h"
+#include "stdafx.h"
 #include <math.h>
+#include "emule.h"
+#include "ClientCredits.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "SafeFile.h"
+#include "Opcodes.h"
+#include "Sockets.h"
 #include <crypto51/base64.h>
 #include <crypto51/osrng.h>
 #include <crypto51/files.h>
 #include <crypto51/sha.h>
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -56,7 +60,7 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 CClientCredits::CClientCredits(const uchar* key)
 {
 	m_pCredits = new CreditStruct;
-	MEMSET(m_pCredits, 0, sizeof(CreditStruct));
+	memset(m_pCredits, 0, sizeof(CreditStruct));
 	md4cpy(m_pCredits->abyKey, key);
 	InitalizeIdent();
 	m_dwUnSecureWaitTime = ::GetTickCount();
@@ -424,7 +428,7 @@ void CClientCreditsList::LoadList()
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 				strError += _T(" - ");
 				strError += szError;
 			}
@@ -491,7 +495,7 @@ void CClientCreditsList::LoadList()
 			if (!file.Open(strFileName, iOpenFlags, &fexp)){
 				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 				TCHAR szError[MAX_CFEXP_ERRORMSG];
-				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+				if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 					strError += _T(" - ");
 					strError += szError;
 				}
@@ -514,7 +518,7 @@ void CClientCreditsList::LoadList()
 		for (uint32 i = 0; i < count; i++){
 			newcstruct = new CreditStruct;//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			//CreditStruct* newcstruct = new CreditStruct;//original commented out
-			MEMSET(newcstruct, 0, sizeof(CreditStruct));
+			memset(newcstruct, 0, sizeof(CreditStruct));
 //Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		// --> Moonlight: SUQWT - import 0.30c and 30c-SUQWTv1 structures.
 			if (version == CREDITFILE_VERSION)
@@ -553,7 +557,6 @@ void CClientCreditsList::LoadList()
 
 	}
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		if (error->m_cause == CFileException::endOfFile)
 			AddLogLine(true, GetResString(IDS_CREDITFILECORRUPT));
 		else{
@@ -577,7 +580,7 @@ void CClientCreditsList::SaveList()
 	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -590,7 +593,7 @@ void CClientCreditsList::SaveList()
 	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -615,7 +618,7 @@ void CClientCreditsList::SaveList()
 		if (cur_credit->IsActive(dwExpired))	// Moonlight: SUQWT - Also save records if there is wait time.
 		{
 			if (theApp.clientcredits->IsSaveUploadQueueWaitTime()) cur_credit->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
-			MEMCOPY(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
 			fileBack.Write(((uint8*)cur_credit->GetDataStruct()) + 8, sizeof(CreditStruct_30c));	// Moonlight: SUQWT - Save 0.30c CreditStruct
 			count++; 
 		}
@@ -624,7 +627,7 @@ void CClientCreditsList::SaveList()
 		m_mapClients.GetNextAssoc(pos, tempkey, cur_credit);
 		if (cur_credit->GetUploadedTotal() || cur_credit->GetDownloadedTotal())
 		{
-			MEMCOPY(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
+			memcpy(pBuffer+(count*sizeof(CreditStruct)), cur_credit->GetDataStruct(), sizeof(CreditStruct));
 			count++; 
 		}
 		*/
@@ -651,7 +654,7 @@ void CClientCreditsList::SaveList()
 	catch(CFileException* error){
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (error->GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (error->GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -682,13 +685,13 @@ void CClientCreditsList::Process()
 
 void CClientCredits::InitalizeIdent(){
 	if (m_pCredits->nKeySize == 0 ){
-		MEMSET(m_abyPublicKey,0,80); // for debugging
+		memset(m_abyPublicKey,0,80); // for debugging
 		m_nPublicKeyLen = 0;
 		IdentState = IS_NOTAVAILABLE;
 	}
 	else{
 		m_nPublicKeyLen = m_pCredits->nKeySize;
-		MEMCOPY(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
+		memcpy(m_abyPublicKey, m_pCredits->abySecureIdent, m_nPublicKeyLen);
 		IdentState = IS_IDNEEDED;
 	}
 	m_dwCryptRndChallengeFor = 0;
@@ -701,7 +704,7 @@ void CClientCredits::Verified(uint32 dwForIP){
 	// client was verified, copy the keyto store him if not done already
 	if (m_pCredits->nKeySize == 0){
 		m_pCredits->nKeySize = m_nPublicKeyLen; 
-		MEMCOPY(m_pCredits->abySecureIdent, m_abyPublicKey, m_nPublicKeyLen);
+		memcpy(m_pCredits->abySecureIdent, m_abyPublicKey, m_nPublicKeyLen);
 		if (GetDownloadedTotal() > 0){
 			// for security reason, we have to delete all prior credits here
 			m_pCredits->nDownloadedHi = 0;
@@ -717,7 +720,7 @@ void CClientCredits::Verified(uint32 dwForIP){
 bool CClientCredits::SetSecureIdent(uchar* pachIdent, uint8 nIdentLen){ // verified Public key cannot change, use only if there is not public key yet
 	if (MAXPUBKEYSIZE < nIdentLen || m_pCredits->nKeySize != 0 )
 		return false;
-	MEMCOPY(m_abyPublicKey,pachIdent, nIdentLen);
+	memcpy(m_abyPublicKey,pachIdent, nIdentLen);
 	m_nPublicKeyLen = nIdentLen;
 	IdentState = IS_IDNEEDED;
 	return true;
@@ -740,7 +743,7 @@ using namespace CryptoPP;
 
 void CClientCreditsList::InitalizeCrypting(){
 	m_nMyPublicKeyLen = 0;
-	MEMSET(m_abyMyPublicKey,0,80); // not really needed; better for debugging tho
+	memset(m_abyMyPublicKey,0,80); // not really needed; better for debugging tho
 	m_pSignkey = NULL;
 	if (!m_pAppPrefs->IsSecureIdentEnabled())
 		return;
@@ -778,6 +781,7 @@ void CClientCreditsList::InitalizeCrypting(){
 			m_pSignkey = NULL;
 		}
 		AddLogLine(false, GetResString(IDS_CRYPT_INITFAILED));
+		ASSERT(0);
 	}
 	//Debug_CheckCrypting();
 }
@@ -820,16 +824,16 @@ uint8 CClientCreditsList::CreateSignature(CClientCredits* pTarget, uchar* pachOu
 		AutoSeededRandomPool rng;
 		byte abyBuffer[MAXPUBKEYSIZE+9];
 		uint32 keylen = pTarget->GetSecIDKeyLen();
-		MEMCOPY(abyBuffer,pTarget->GetSecureIdent(),keylen);
+		memcpy(abyBuffer,pTarget->GetSecureIdent(),keylen);
 		// 4 additional bytes random data send from this client
 		uint32 challenge = pTarget->m_dwCryptRndChallengeFrom;
 		ASSERT ( challenge != 0 );
-		MEMCOPY(abyBuffer+keylen,&challenge,4);
+		memcpy(abyBuffer+keylen,&challenge,4);
 		uint16 ChIpLen = 0;
 		if ( byChaIPKind != 0){
 			ChIpLen = 5;
-			MEMCOPY(abyBuffer+keylen+4,&ChallengeIP,4);
-			MEMCOPY(abyBuffer+keylen+4+4,&byChaIPKind,1);
+			memcpy(abyBuffer+keylen+4,&ChallengeIP,4);
+			memcpy(abyBuffer+keylen+4+4,&byChaIPKind,1);
 		}
 		sigkey->SignMessage(rng, abyBuffer ,keylen+4+ChIpLen , sbbSignature.begin());
 		ArraySink asink(pachOutput, nMaxSize);
@@ -857,10 +861,11 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(ss_Pubkey);
 		// 4 additional bytes random data send from this client +5 bytes v2
 		byte abyBuffer[MAXPUBKEYSIZE+9];
-		MEMCOPY(abyBuffer,m_abyMyPublicKey,m_nMyPublicKeyLen);
+		memcpy(abyBuffer,m_abyMyPublicKey,m_nMyPublicKeyLen);
 		uint32 challenge = pTarget->m_dwCryptRndChallengeFor;
 		ASSERT ( challenge != 0 );
-		MEMCOPY(abyBuffer+m_nMyPublicKeyLen,&challenge,4);
+		memcpy(abyBuffer+m_nMyPublicKeyLen,&challenge,4);
+		
 		// v2 security improvments (not supported by 29b, not used as default by 29c)
 		uint8 nChIpSize = 0;
 		if (byChaIPKind != 0){
@@ -882,8 +887,8 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 					ChallengeIP = 0;
 					break;
 			}
-			MEMCOPY(abyBuffer+m_nMyPublicKeyLen+4,&ChallengeIP,4);
-			MEMCOPY(abyBuffer+m_nMyPublicKeyLen+4+4,&byChaIPKind,1);
+			memcpy(abyBuffer+m_nMyPublicKeyLen+4,&ChallengeIP,4);
+			memcpy(abyBuffer+m_nMyPublicKeyLen+4+4,&byChaIPKind,1);
 		}
 		//v2 end
 
@@ -891,6 +896,7 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 	}
 	catch(...)
 	{
+		ASSERT(0);
 		bResult = false;
 	}
 	if (!bResult){
@@ -924,19 +930,19 @@ bool CClientCreditsList::Debug_CheckCrypting(){
 	uint32 challenge = rand();
 	// create fake client which pretends to be this emule
 	CreditStruct* newcstruct = new CreditStruct;
-	MEMSET(newcstruct, 0, sizeof(CreditStruct));
+	memset(newcstruct, 0, sizeof(CreditStruct));
 	CClientCredits* newcredits = new CClientCredits(newcstruct);
 	newcredits->SetSecureIdent(m_abyMyPublicKey,m_nMyPublicKeyLen);
 	newcredits->m_dwCryptRndChallengeFrom = challenge;
 	// create signature with fake priv key
 	uchar pachSignature[200];
-	MEMSET(pachSignature,200,0);
+	memset(pachSignature,200,0);
 	uint8 sigsize = CreateSignature(newcredits,pachSignature,200,0,false, &priv);
 
 
 	// next fake client uses the random created public key
 	CreditStruct* newcstruct2 = new CreditStruct;
-	MEMSET(newcstruct2, 0, sizeof(CreditStruct));
+	memset(newcstruct2, 0, sizeof(CreditStruct));
 	CClientCredits* newcredits2 = new CClientCredits(newcstruct2);
 	newcredits2->m_dwCryptRndChallengeFor = challenge;
 

@@ -24,13 +24,21 @@
 	This allows us to easily code complicated parsing features
 	and a context menu.
 */
-
 #include "stdafx.h"
 #include "emule.h"
 #include "StatisticsTree.h"
 #include "StatisticsDlg.h"
-#include "uploadqueue.h"
-#include <time.h>
+#include "UploadQueue.h"
+#include "emuledlg.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 IMPLEMENT_DYNAMIC(CStatisticsTree, CTreeCtrl)
 
@@ -72,7 +80,7 @@ void CStatisticsTree::OnContextMenu( CWnd* pWnd, CPoint point )
 
 void CStatisticsTree::OnLButtonUp( UINT nFlags, CPoint point )
 {
-	theApp.emuledlg->statisticswnd.ShowStatistics();
+	theApp.emuledlg->statisticswnd->ShowStatistics();
 	CTreeCtrl::OnLButtonUp(nFlags, point);
 }
 
@@ -112,7 +120,7 @@ void CStatisticsTree::DoMenu(CPoint doWhere, UINT nFlags)
 
 	myBuffer.Format("%sstatbkup.ini",theApp.glob_prefs->GetConfigDir());
 	if (!findBackUp.FindFile(myBuffer)) myFlags = MF_GRAYED;
-	else myFlags = MF_STRING;
+		else myFlags = MF_STRING;
 
 	mnuContext.CreatePopupMenu();
 	mnuContext.AddMenuTitle(GetResString(IDS_STATS_MNUTREETITLE));
@@ -137,6 +145,7 @@ void CStatisticsTree::DoMenu(CPoint doWhere, UINT nFlags)
 	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLEXPORT, GetResString(IDS_STATS_EXPORT2HTML));
 	mnuContext.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)mnuHTML.m_hMenu, GetResString(IDS_STATS_MNUTREEHTML));
 
+	GetPopupMenuPos(*this, doWhere);
 	mnuContext.TrackPopupMenu(nFlags, doWhere.x, doWhere.y, this);
 
 	VERIFY( mnuHTML.DestroyMenu() );
@@ -154,7 +163,7 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 
 				theApp.glob_prefs->ResetCumulativeStatistics();
 				AddLogLine(false, GetResString(IDS_STATS_NFORESET));
-				theApp.emuledlg->statisticswnd.ShowStatistics();
+				theApp.emuledlg->statisticswnd->ShowStatistics();
 
 				CString myBuffer; myBuffer.Format(GetResString(IDS_STATS_LASTRESETSTATIC), theApp.glob_prefs->GetStatsLastResetStr(true));
 				GetParent()->GetDlgItem(IDC_STATIC_LASTRESET)->SetWindowText(myBuffer);
@@ -224,7 +233,7 @@ lblSaveExpanded:
 
 // If the item is bold it returns true, otherwise
 // false.  Very straightforward.
-// EX: if(IsBold(myTreeItem)) MessageBox("It's bold.");
+// EX: if(IsBold(myTreeItem)) AfxMessageBox("It's bold.");
 bool CStatisticsTree::IsBold(HTREEITEM theItem)
 {
 	UINT stateBold = GetItemState(theItem, TVIS_BOLD);
@@ -233,7 +242,7 @@ bool CStatisticsTree::IsBold(HTREEITEM theItem)
 
 // If the item is expanded it returns true, otherwise
 // false.  Very straightforward.
-// EX: if(IsExpanded(myTreeItem)) MessageBox("It's expanded.");
+// EX: if(IsExpanded(myTreeItem)) AfxMessageBox("It's expanded.");
 bool CStatisticsTree::IsExpanded(HTREEITEM theItem)
 {
 	UINT stateExpanded = GetItemState(theItem, TVIS_EXPANDED);
@@ -247,7 +256,7 @@ bool CStatisticsTree::IsExpanded(HTREEITEM theItem)
 // boolean result that tells us whether the checked state is
 // true or not.  This is currently unused, but may come in handy
 // for states other than bold and expanded.
-// EX:  if(CheckState(myTreeItem, TVIS_BOLD)) MessageBox("It's bold.");
+// EX:  if(CheckState(myTreeItem, TVIS_BOLD)) AfxMessageBox("It's bold.");
 bool CStatisticsTree::CheckState(HTREEITEM hItem, UINT state)
 {
 	UINT stateGeneric = GetItemState(hItem, state);
@@ -283,7 +292,7 @@ CString CStatisticsTree::GetItemText(HTREEITEM theItem)
 // HTREEITEM hMyItem = treeCtrl.InsertItem("Title: 5", hMyParent);
 // CString strTitle = treeCtrl.GetItemText(hMyItem, GET_TITLE);
 // CString strValue = treeCtrl.GetItemText(hMyItem, GET_VALUE);
-// MessageBox("The title is: " + strTitle + "\nThe value is: " + strValue);
+// AfxMessageBox("The title is: " + strTitle + "\nThe value is: " + strValue);
 CString CStatisticsTree::GetItemText(HTREEITEM theItem, int getPart)
 {
 	if (theItem == NULL)
@@ -323,7 +332,7 @@ CString CStatisticsTree::GetHTML(bool onlyVisible, HTREEITEM theItem, int theIte
 	if (firstItem) strBuffer.Format("<font face=\"Verdana,Courier New,Helvetica\" size=\"2\">\r\n<b>eMule v%s %s [%s]</b>\r\n<br><br>\r\n", theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), theApp.glob_prefs->GetUserNick());
 
 	if (theItem == NULL) {
-		if (!onlyVisible) theApp.emuledlg->statisticswnd.ShowStatistics(true);
+		if (!onlyVisible) theApp.emuledlg->statisticswnd->ShowStatistics(true);
 		hCurrent = GetRootItem(); // Copy All Vis or Copy All
 	}
 	else if (firstItem) {
@@ -490,7 +499,7 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 	CFile htmlFile;
 	CString htmlFileName, theHTML;
 
-	theApp.emuledlg->statisticswnd.ShowStatistics(!onlyvisible);
+	theApp.emuledlg->statisticswnd->ShowStatistics(!onlyvisible);
 
 	CFileDialog saveAsDlg (false, "html", "*.html", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, "HTML Files (*.html)|*.html|All Files (*.*)|*.*||", this, 0);
 	if (saveAsDlg.DoModal() == IDOK) {

@@ -30,8 +30,6 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "../../stdafx.h"
-
 #ifndef byte
 typedef unsigned char byte;
 #endif

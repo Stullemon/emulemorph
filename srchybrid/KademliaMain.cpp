@@ -1,54 +1,84 @@
-#include "StdAfx.h"
-#include "KademliaMain.h"
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#include "stdafx.h"
 #include "emule.h"
+#include "KademliaMain.h"
+#include "Kademlia/Kademlia/kademlia.h"
+#include "Kademlia/net/kademliaudplistener.h"
+#include "Kademlia/Kademlia/prefs.h"
+#include "Kademlia/routing/timer.h"
+#include "OtherFunctions.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "MuleToolbarCtrl.h"
 #include "KademliaWnd.h"
 #include "KadContactListCtrl.h"
 #include "KadSearchListCtrl.h"
-#include "Kademlia/Kademlia/kademlia.h"
-#include "Kademlia/net/kademliaudplistener.h"
+#endif
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 CKademliaMain::CKademliaMain(void)
 {
-	status = new Status();
-	status->m_connected = false;
-	status->m_firewalled = true;
-	status->m_ip = 0;
-	status->m_tcpport = 0;
-	status->m_totalFile = 0;
-	status->m_totalStoreSrc = 0;
-	status->m_totalStoreKey = 0;
-	status->m_udpport = 0;
-	status->m_kademliaUsers = 0;
+	m_status = new Status();
+	m_status->m_connected = false;
+	m_status->m_firewalled = true;
+	m_status->m_ip = 0;
+	m_status->m_tcpport = 0;
+	m_status->m_totalFile = 0;
+	m_status->m_totalStoreSrc = 0;
+	m_status->m_totalStoreKey = 0;
+	m_status->m_udpport = 0;
+	m_status->m_kademliaUsers = 0;
 }
 
 CKademliaMain::~CKademliaMain(void)
 {
-	delete status;
+	delete m_status;
 }
 
 void CKademliaMain::setStatus(Status* val)
 {
-	if( val && (status->m_firewalled != val->m_firewalled || status->m_ip != val->m_ip || status->m_udpport != val->m_udpport || status->m_tcpport != val->m_tcpport)){
-		delete status;
-		status = val;
+	if( val && (m_status->m_firewalled != val->m_firewalled || m_status->m_ip != val->m_ip || m_status->m_udpport != val->m_udpport || m_status->m_tcpport != val->m_tcpport)){
+		delete m_status;
+		m_status = val;
 		theApp.emuledlg->ShowConnectionState();
 		theApp.emuledlg->ShowUserCount();
 	}
-	else if (status->m_connected != val->m_connected){
-		delete status;
-		status = val;
+	else if (m_status->m_connected != val->m_connected){
+		delete m_status;
+		m_status = val;
 		theApp.emuledlg->ShowConnectionState();
 		theApp.emuledlg->ShowUserCount();
-		if(status->m_connected)
+		if(m_status->m_connected)
 			AddLogLine(true, "Kademlia %s", GetResString(IDS_CONNECTED));
 		else
 			AddLogLine(true, "Kademlia %s", GetResString(IDS_DISCONNECTED));
 	}
 	else{
-		status->m_kademliaUsers = val->m_kademliaUsers;
-		status->m_totalFile = val->m_totalFile;
-		status->m_totalStoreSrc = val->m_totalStoreSrc;
-		status->m_totalStoreKey = val->m_totalStoreKey;
+		m_status->m_kademliaUsers = val->m_kademliaUsers;
+		m_status->m_totalFile = val->m_totalFile;
+		m_status->m_totalStoreSrc = val->m_totalStoreSrc;
+		m_status->m_totalStoreKey = val->m_totalStoreKey;
 		theApp.emuledlg->ShowUserCount();
 		delete val;
 	}
@@ -76,9 +106,19 @@ void CKademliaMain::Connect(){
 	}
 }
 
+struct SKadStopParams
+{
+	DWORD dwFlags;
+	CKademliaMain* pKadMain;
+};
+
 UINT AFX_CDECL KadStopFunc(LPVOID pvParams)
 {
-	DWORD dwFlags = (DWORD)pvParams;
+	DWORD dwFlags = ((SKadStopParams*)pvParams)->dwFlags;
+	CKademliaMain* pKadMain = ((SKadStopParams*)pvParams)->pKadMain;
+	delete (SKadStopParams*)pvParams;
+	pvParams = NULL;
+
 	Kademlia::CKademlia::stop(FALSE);
 	// if that thread was started during application shutdown, the 'theApp.emuledlg' may get
 	// deleted while this thread is still running.
@@ -86,8 +126,11 @@ UINT AFX_CDECL KadStopFunc(LPVOID pvParams)
 		theApp.emuledlg->kademliawnd->contactList->Visable();
 		theApp.emuledlg->kademliawnd->searchList->Visable();
 		theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONNECT)->EnableWindow(true);
-		theApp.emuledlg->toolbar.EnableButton(IDC_TOOLBARBUTTON+0);
+		theApp.emuledlg->toolbar->EnableButton(IDC_TOOLBARBUTTON+0);
 		//TODO: Test this alot.. The connect button may still get confused which state it should be in.
+		pKadMain->m_status->m_connected = false;
+		pKadMain->m_status->m_firewalled = true;
+		pKadMain->m_status->m_kademliaUsers = 0;
 		theApp.emuledlg->ShowConnectionState();
 	}
 	return 0;
@@ -96,20 +139,24 @@ UINT AFX_CDECL KadStopFunc(LPVOID pvParams)
 void CKademliaMain::DisConnect(){
 	if(Kademlia::CTimer::getThreadID()){
 		if (theApp.emuledlg->IsRunning()){
-			theApp.emuledlg->toolbar.EnableButton(IDC_TOOLBARBUTTON+0, false);
+			theApp.emuledlg->toolbar->EnableButton(IDC_TOOLBARBUTTON+0, false);
 			theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONNECT)->EnableWindow(false);
 			theApp.emuledlg->kademliawnd->contactList->Hide();
 			theApp.emuledlg->kademliawnd->searchList->Hide();
 		}
 
 		if (theApp.emuledlg->IsRunning()){
-			CWinThread* pKadStopThread = new CWinThread(KadStopFunc, (LPVOID)(theApp.emuledlg->IsRunning() ? 1 : 0));
+			SKadStopParams* pStopParams = new SKadStopParams;
+			pStopParams->dwFlags = theApp.emuledlg->IsRunning() ? 1 : 0;
+			pStopParams->pKadMain = this;
+			CWinThread* pKadStopThread = new CWinThread(KadStopFunc, (LPVOID)pStopParams);
 			if (!pKadStopThread->CreateThread()){
 				delete pKadStopThread;
+				delete pStopParams;
 				theApp.emuledlg->kademliawnd->contactList->Visable();
 				theApp.emuledlg->kademliawnd->searchList->Visable();
 				theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONNECT)->EnableWindow(true);
-				theApp.emuledlg->toolbar.EnableButton(IDC_TOOLBARBUTTON+0);
+				theApp.emuledlg->toolbar->EnableButton(IDC_TOOLBARBUTTON+0);
 				theApp.emuledlg->ShowConnectionState();
 				ASSERT(0);
 				return;
@@ -131,9 +178,9 @@ void CKademliaMain::DisConnect(){
 	}
 	//Please leave this in a bit for testing to see if it does lockup.. 
 	if(Kademlia::CTimer::getThreadID()){}
-	status->m_connected = false;
-	status->m_firewalled = true;
-	status->m_kademliaUsers = 0;
+	m_status->m_connected = false;
+	m_status->m_firewalled = true;
+	m_status->m_kademliaUsers = 0;
 	theApp.emuledlg->ShowConnectionState();
 }
 
@@ -143,4 +190,34 @@ void CKademliaMain::Bootstrap(CString ip,uint16 port) {
 
 void CKademliaMain::Bootstrap(uint32 ip,uint16 port) {
 	Kademlia::CKademlia::getUDPListener()->bootstrap(ip,port);
+}
+
+Status*	CKademliaMain::getStatus()
+{
+	return m_status;
+}
+
+bool CKademliaMain::isConnected()
+{
+	return m_status->m_connected;
+}
+
+bool CKademliaMain::isFirewalled()
+{
+	return m_status->m_firewalled;
+}
+
+uint32 CKademliaMain::getIP()
+{
+	return m_status->m_ip;
+}
+
+uint16 CKademliaMain::getUdpPort()
+{
+	return m_status->m_udpport;
+}
+
+uint16 CKademliaMain::getTcpPort()
+{
+	return m_status->m_tcpport;
 }

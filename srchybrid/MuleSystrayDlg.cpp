@@ -4,6 +4,11 @@
 #include "stdafx.h"
 #include "MuleSystrayDlg.h"
 #include "emule.h"
+#include "Opcodes.h"
+#include "Sockets.h"
+#include "kademliaMain.h"
+#include "preferences.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -138,14 +143,14 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlSpeed.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_SPEED);
 		m_ctrlSpeed.m_nBtnID = IDC_SPEED;
 		//p->GetWindowText(m_ctrlSpeed.m_strText);
-		if (theApp.serverconnect->IsConnected())
+		
+		if (theApp.IsConnected())
 		{
-			buffer.Format("%u",theApp.serverconnect->GetClientID());
-			if (theApp.serverconnect->IsLowID()) buffer2 = GetResString(IDS_IDLOW);
-			else buffer2 = GetResString(IDS_IDHIGH);
-			m_ctrlSpeed.m_strText = (buffer + " [" + buffer2 + "]");
+			if (theApp.serverconnect->IsConnected()) buffer = _T("ED2K");
+			if (theApp.kademlia->isConnected()) buffer2 = _T("KAD");
+			m_ctrlSpeed.m_strText = (GetResString(IDS_CONNECTED) + " [" + buffer + "|" + buffer2 + "]");
 		} else
-			m_ctrlSpeed.m_strText = ("Not Connected");
+			m_ctrlSpeed.m_strText = (GetResString(IDS_NOTCONNECTED));
 
 		m_ctrlSpeed.m_bUseIcon = true;
 		m_ctrlSpeed.m_sIcon.cx = 16;
@@ -212,7 +217,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlConnect.Create(NULL, NULL, WS_CHILD|WS_VISIBLE, r, this, IDC_CONNECT);
 		m_ctrlConnect.m_nBtnID = IDC_CONNECT;
 		//p->GetWindowText(m_ctrlConnect.m_strText);
-		m_ctrlConnect.m_strText = GetResString(IDS_CONNECTTOANYSERVER);
+		m_ctrlConnect.m_strText = GetResString(IDS_MAIN_BTN_CONNECT);
 
 		m_ctrlConnect.m_bUseIcon = true;
 		m_ctrlConnect.m_sIcon.cx = 16;

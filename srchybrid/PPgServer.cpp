@@ -1,9 +1,24 @@
-// PPgServer.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgServer.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -11,8 +26,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-// CPPgServer dialog
 
 IMPLEMENT_DYNAMIC(CPPgServer, CPropertyPage)
 CPPgServer::CPPgServer()
@@ -160,7 +173,8 @@ BOOL CPPgServer::OnApply()
 	app_prefs->prefs->addserversfromclient = (int8)IsDlgButtonChecked(IDC_UPDATESERVERCLIENT);
 	// Barry
 	app_prefs->prefs->autoconnectstaticonly = (int8)IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY);
-	//	app_prefs->Save();
+	
+//	app_prefs->Save();
 	LoadSettings();
 
 	SetModified();
@@ -183,6 +197,7 @@ void CPPgServer::Localize(void)
 		GetDlgItem(IDC_SCORE)->SetWindowText(GetResString(IDS_PW_SCORE));
 		GetDlgItem(IDC_MANUALSERVERHIGHPRIO)->SetWindowText(GetResString(IDS_MANUALSERVERHIGHPRIO));
 		GetDlgItem(IDC_EDITADR)->SetWindowText(GetResString(IDS_EDITLIST));
+		
 		// Barry
 		GetDlgItem(IDC_AUTOCONNECTSTATICONLY)->SetWindowText(GetResString(IDS_PW_AUTOCONNECTSTATICONLY));
 	}

@@ -27,14 +27,10 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
 
-#include "../../stdafx.h"
-#include "../../Types.h"
-#include "indexed.h"
-#include "prefs.h"
 class CSharedFileList;
+struct Status;
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -47,6 +43,7 @@ class CKademliaError;
 class CSearch;
 class CContact;
 class CIndexed;
+class CEntry;
 
 #define KADEMLIA_VERSION 0.1
 
@@ -59,9 +56,9 @@ typedef void (CALLBACK *KADEMLIA_SEARCHREF_CALLBACK)		(CSearch *lpSearch);
 typedef void (CALLBACK *KADEMLIA_CONTACTADD_CALLBACK)		(CContact *lpSearch);
 typedef void (CALLBACK *KADEMLIA_CONTACTREM_CALLBACK)		(CContact *lpSearch);
 typedef void (CALLBACK *KADEMLIA_CONTACTREF_CALLBACK)		(CContact *lpSearch);
-typedef void (CALLBACK *KADEMLIA_INDEXEDADD_CALLBACK)		(Kademlia::CEntry *lpSearch);
-typedef void (CALLBACK *KADEMLIA_INDEXEDREM_CALLBACK)		(Kademlia::CEntry *lpSearch);
-typedef void (CALLBACK *KADEMLIA_INDEXEDREF_CALLBACK)		(Kademlia::CEntry *lpSearch);
+typedef void (CALLBACK *KADEMLIA_INDEXEDADD_CALLBACK)		(CEntry *lpSearch);
+typedef void (CALLBACK *KADEMLIA_INDEXEDREM_CALLBACK)		(CEntry *lpSearch);
+typedef void (CALLBACK *KADEMLIA_INDEXEDREF_CALLBACK)		(CEntry *lpSearch);
 typedef void (CALLBACK *KADEMLIA_REQUESTTCP_CALLBACK)		(CContact *lpContact);
 typedef void (CALLBACK *KADEMLIA_UPDATESTATUS_CALLBACK)		(Status *lpContact);
 typedef void (CALLBACK *KADEMLIA_OVERHEADSEND_CALLBACK)		(uint32 size);
@@ -109,7 +106,7 @@ public:
 	static void reportContactRem	(CContact* contact);
 	static void reportContactRef	(CContact* contact);
 	static void reportRequestTcp	(CContact* contact);
-	static void reportUpdateStatus	(Status* status);
+	static void reportUpdateStatus	(::Status* status);
 	static void reportOverheadSend	(uint32 size);
 	static void reportOverheadRecv	(uint32 size);
 

@@ -1,17 +1,9 @@
-// Apfelteig Patch :-)
-
 #pragma once
-
-#include "preferences.h"
-#include "afxwin.h"
 #include "HypertextCtrl.h"
 #include "loggable.h"
 
-// CPPgWebServer dialog
-
 class CPPgWebServer : public CPropertyPage, public CLoggable
 {
-
 	DECLARE_DYNAMIC(CPPgWebServer)
 
 public:

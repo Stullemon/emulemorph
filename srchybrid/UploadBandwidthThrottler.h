@@ -17,8 +17,7 @@
 
 #pragma once
 
-#include "afxtempl.h"
-#include "EMSocket.h"
+class CEMSocket;
 
 class UploadBandwidthThrottler :
     public CWinThread 
@@ -55,11 +54,11 @@ private:
     CCriticalSection tempQueueLocker;
 
     CEvent* threadEndedEvent;
-    bool doRun;
 
     uint64 m_SentBytesSinceLastCall;
     uint64 m_SentBytesSinceLastCallExcludingOverhead;
     uint32 m_highestNumberOfFullyActivatedSlots;
 
     uint32 m_allowedDataRate;
+    bool doRun;
 };

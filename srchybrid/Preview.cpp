@@ -14,13 +14,12 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// Preview.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "Preview.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "PartFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -82,7 +81,7 @@ BOOL CPreviewThread::Run(){
 		m_pPartfile->m_bPreviewing = false;
 
 		SHELLEXECUTEINFO SE;
-		MEMSET(&SE,0,sizeof(SE));
+		memset(&SE,0,sizeof(SE));
 		SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
 		SE.lpVerb = "open";
 		
@@ -109,7 +108,6 @@ BOOL CPreviewThread::Run(){
 		CFile::Remove(strPreviewName.GetBuffer());
 	}	
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		m_pPartfile->m_bPreviewing = false;
 		if (srcFile->m_hFile != INVALID_HANDLE_VALUE)
 			srcFile->Close();

@@ -19,7 +19,7 @@
 
 #include "ColorButton.h"
 
-// CCatDialog dialog
+struct Category_Struct;
 
 class CCatDialog : public CDialog
 {

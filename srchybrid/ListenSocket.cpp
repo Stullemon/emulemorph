@@ -18,14 +18,30 @@
 //
 
 #include "stdafx.h"
+#include "DebugHelpers.h"
 #include "emule.h"
 #include "ListenSocket.h"
 #include "opcodes.h"
-#include "KnownFile.h"
-#include "sharedfilelist.h"
-#include "uploadqueue.h"
-#include "updownclient.h"
-#include "clientlist.h"
+#include "UpDownClient.h"
+#include "ClientList.h"
+#include "OtherFunctions.h"
+#include "DownloadQueue.h"
+#include "IPFilter.h"
+#include "SharedFileList.h"
+#include "PartFile.h"
+#include "SafeFile.h"
+#include "Packets.h"
+#include "UploadQueue.h"
+#include "ServerList.h"
+#include "Server.h"
+#include "Sockets.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "TransferWnd.h"
+#include "ClientListCtrl.h"
+#include "ChatWnd.h"
+#endif
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -57,53 +73,34 @@ CClientReqSocket::~CClientReqSocket(){
 
 void CClientReqSocket::ResetTimeOutTimer(){
 	timeout_timer = ::GetTickCount();
-};
+}
 
-bool CClientReqSocket::CheckTimeOut(){
-	if(client && client->GetChatState()!=MS_NONE){
-		if (::GetTickCount() - timeout_timer > CONNECTION_TIMEOUT*2){
-			timeout_timer = ::GetTickCount();
-			//MORPH START - Added by SiRoB, ZZ Upload System,  Kademlia 40c13
-			Disconnect(GetResString(IDS_CNXTIMEOUT) + " 2");
-			//MORPH END   - Added by SiRoB, ZZ Upload System,  Kademlia 40c13
-			return true;
-		}
-	}
-	else{
-		if (::GetTickCount() - timeout_timer > CONNECTION_TIMEOUT){
-			timeout_timer = ::GetTickCount();
-			//MORPH START - Added by SiRoB, ZZ Upload System,  Kademlia 40c13
-			Disconnect(GetResString(IDS_CNXTIMEOUT)+ " 1");
-			//MORPH END   - Added by SiRoB, ZZ Upload System,  Kademlia 40c13
-			return true;
-		}
+bool CClientReqSocket::CheckTimeOut()
+{
+	UINT uTimeout = CONNECTION_TIMEOUT;
+	if (client && client->GetChatState()!=MS_NONE)
+		uTimeout += CONNECTION_TIMEOUT;
+	if (::GetTickCount() - timeout_timer > uTimeout){
+		timeout_timer = ::GetTickCount();
+		Disconnect();
+		return true;
 	}
 	return false;
-};
+}
 
 void CClientReqSocket::OnClose(int nErrorCode){
 	ASSERT (theApp.listensocket->IsValidSocket(this));
 	CEMSocket::OnClose(nErrorCode);
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	Disconnect("OnClose()");
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
-};
+	Disconnect();
+}
 
-//MORPH START - Added by SiRoB, ZZ Upload System, Kademlia 40c13
-void CClientReqSocket::Disconnect(CString reason){
-    if(reason) {
-        reason.Insert(0, GetResString(IDS_SKTDISREASON));
-    } else {
-        CString temp = GetResString(IDS_SKTDISUNKREASON);
-        reason = temp;
-    }
-
-	AsyncSelect(0);
+void CClientReqSocket::Disconnect(){
+    AsyncSelect(0);
 	byConnected = ES_DISCONNECTED;
 	if (!client)
 		Safe_Delete();
 	else
-		if(client->Disconnected(reason,true)){
+		if(client->Disconnected(true)){
 			CUpDownClient* temp = client;
 			client->socket = NULL;
 			client = NULL;
@@ -115,7 +112,6 @@ void CClientReqSocket::Disconnect(CString reason){
 			Safe_Delete();
 		}
 };
-//MORPH END   - Added by SiRoB, ZZ Upload System,  Kademlia 40c13
 
 void CClientReqSocket::Delete_Timed(){
 // it seems that MFC Sockets call socketfunctions after they are deleted, even if the socket is closed
@@ -160,7 +156,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 
 					if (client){
 						client->ConnectionEstablished();
-						theApp.emuledlg->transferwnd.clientlistctrl.RefreshClient(client);
+						theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
 					}
 					break;
 				}
@@ -192,15 +188,8 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (bNewClient){
 							delete client;
 							client = NULL;
-							//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-							Disconnect(GetResString(IDS_IPISFILTERED));
-							//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 						}
-						else{
-							//MORPH START - Added by SiRoB, ZZ Upload System, Kademlia 40c13
-							Disconnect(GetResString(IDS_IPISFILTERED)+" 2");
-							//MORPH END   - Added by SiRoB, ZZ Upload System, Kademlia 40c13
-						}
+						Disconnect();
 						break;
 					}
 
@@ -218,7 +207,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						client->SetCommentDirty();
 					}
 					
-					theApp.emuledlg->transferwnd.clientlistctrl.RefreshClient(client);
+					theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
 
 					// send a response packet with standart informations
 					if (client->GetHashType() == SO_EMULE && !bIsMuleHello)
@@ -377,6 +366,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					if (client->reqfile && !client->reqfile->IsStopped() && (!client->reqfile->notSeenCompleteSource()) /*shadow#(onlydownloadcompletefiles)*/ &&
 				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
+						client->SetSentCancelTransfer(0);
 						if (client->GetDownloadState() == DS_ONQUEUE){
 							client->SetDownloadState(DS_DOWNLOADING);
 							// -khaos--+++> Set our bool to false.  When (if) we receive a block from this client, it will be set to true.
@@ -392,9 +382,12 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						}
 					}
 					else{
-						Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-						theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-						client->socket->SendPacket(packet,true,true);
+						if (!client->GetSentCancelTransfer()){
+							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+							client->socket->SendPacket(packet,true,true);
+							client->SetSentCancelTransfer(1);
+						}
 						client->SetDownloadState((client->reqfile==NULL || client->reqfile->IsStopped()) ? DS_NONE : DS_ONQUEUE);
 					}
 					break;
@@ -509,23 +502,16 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_CANCELTRANSFER:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-					theApp.uploadqueue->RemoveFromUploadQueue(client,false);
-					//MORPH START - Changed by SiRoB, ZZ Patch
-					uint32 ip = client->GetIP();
-					uchar tempfileid[16];
-					md4clr(tempfileid);
-					if(md4cmp(client->GetUploadFileID(), tempfileid) != 0) { // to prevent spam in log from broken client
-					AddDebugLogLine(false, "%s: Upload session ended due canceled transfer. %s %s:%i", client->GetUserName(), md4str(client->GetUploadFileID()), inet_ntoa(*(in_addr*)&ip), client->GetUserPort());
+					if(theApp.uploadqueue->RemoveFromUploadQueue(client,"OP_CANCELTRANSFER",false))
+						AddDebugLogLine(false, "%s: Upload session ended due canceled transfer.", client->GetUserName());
 					client->SetUploadFileID(NULL);
-					}
-					//MORPH END - Changed by SiRoB, ZZ Patch
 					break;
 				}
 				case OP_END_OF_DOWNLOAD:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 					if (size>=16 && !md4cmp(client->GetUploadFileID(),packet)){
 						theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULUSEREND));
-						AddDebugLogLine(false, GetResString(IDS_ULENDENDTRANS), client->GetUserName());
+							AddDebugLogLine(false, GetResString(IDS_ULENDENDTRANS), client->GetUserName());
 						client->SetUploadFileID(NULL);
 					}
 					break;
@@ -554,16 +540,22 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || client->reqfile->notSeenCompleteSource()){
 						//if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
 						//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)		
-							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-							client->socket->SendPacket(packet,true,true);
+							if (!client->GetSentCancelTransfer()){
+								Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+								theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+								client->socket->SendPacket(packet,true,true);
+								client->SetSentCancelTransfer(1);
+							}
 							client->SetDownloadState(client->reqfile->IsStopped() ? DS_NONE : DS_ONQUEUE);
 						}
 					}
 					else{
-						Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-						theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-						client->socket->SendPacket(packet,true,true);
+						if (!client->GetSentCancelTransfer()){
+							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+							client->socket->SendPacket(packet,true,true);
+							client->SetSentCancelTransfer(1);
+						}
 						client->SetDownloadState((client->reqfile==NULL || client->reqfile->IsStopped()) ? DS_NONE : DS_ONQUEUE);
 					}
 					break;
@@ -647,7 +639,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							client->SetServerPort(pNewServer->GetPort());
 						}
 					}
-					else if (ntohl(nNewUserID) == client->GetIP()){ // client changed server and gots a HighID(IP)
+					else if (nNewUserID == client->GetIP()){ // client changed server and gots a HighID(IP)
 						client->SetUserIDHybrid(ntohl(nNewUserID));
 						CServer* pNewServer = theApp.serverlist->GetServerByIP(nNewServerIP);
 						if (pNewServer != NULL){
@@ -667,7 +659,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					if (size < 2)
 						throw CString(_T("invalid message packet"));
 					uint16 length;
-					MEMCOPY(&length,packet,2);
+					memcpy(&length,packet,2);
 					if ((UINT)(length+2) != size)
 						throw CString(_T("invalid message packet"));
 
@@ -681,9 +673,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						break;
 					}
 					char* message = new char[length+1];
-					MEMCOPY(message,packet+2,length);
+					memcpy(message,packet+2,length);
 					message[length] = '\0';
-					theApp.emuledlg->chatwnd.chatselector.ProcessMessage(client,message);
+					theApp.emuledlg->chatwnd->chatselector.ProcessMessage(client,message);
 					delete[] message;
 					break;
 				}
@@ -712,7 +704,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 							// xMule_MOD: showSharePermissions
 						}
 						AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_ACCEPTED) );
-					} else AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_DENIED) );
+					}
+					else{
+						AddLogLine(true,GetResString(IDS_REQ_SHAREDFILES),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_DENIED) );
+					}
 
 					// now create the memfile for the packet
 					uint32 iTotalCount = list.GetCount();
@@ -982,27 +977,22 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 			}
 		}
 		catch(CFileException* error){
-			OUTPUT_DEBUG_TRACE();
 			error->Delete();	//mf
 			throw GetResString(IDS_ERR_INVALIDPACKAGE);
 		}
 		catch(CMemoryException* error){
-			OUTPUT_DEBUG_TRACE();
 			error->Delete();
 			throw CString(_T("Memory exception"));
 		}
 	}
 	catch(CString error){
-		OUTPUT_DEBUG_TRACE();
 		if (client){
 			client->SetDownloadState(DS_ERROR);	
 			AddDebugLogLine(false,GetResString(IDS_ERR_CLIENTERROR),client->GetUserName(),client->GetFullIP(),error.GetBuffer());
 		}
 		else
 			AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENTACTION),error.GetBuffer());
-		//MORPH START - Added by SiRoB, ZZ Upload system 200308181923
-		Disconnect(GetResString(IDS_ERRORPROCESSING) + error);
-		//MORPH END   - Added by SiRoB, ZZ Upload system 200308181923
+		Disconnect();
 		return false;
 	}
 	return true;
@@ -1015,6 +1005,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 				//theApp.downloadqueue->AddDownDataOverheadOther(size);
 				throw GetResString(IDS_ERR_UNKNOWNCLIENTACTION);
 			}
+			if (_iDbgHeap >= 2)
+				ASSERT_VALID(client);
 			switch(opcode){
 				case OP_EMULEINFO:{
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
@@ -1065,16 +1057,22 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						client->ProcessBlockPacket(packet,size,true);
 						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
-							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-							client->socket->SendPacket(packet,true,true);
+							if (!client->GetSentCancelTransfer()){
+								Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+								theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+								client->socket->SendPacket(packet,true,true);
+								client->SetSentCancelTransfer(1);
+							}
 							client->SetDownloadState(client->reqfile->IsStopped() ? DS_NONE : DS_ONQUEUE);
 						}
 					}
 					else{
-						Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-						theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
-						client->socket->SendPacket(packet,true,true);
+						if (!client->GetSentCancelTransfer()){
+							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+							client->socket->SendPacket(packet,true,true);
+							client->SetSentCancelTransfer(1);
+						}
 						client->SetDownloadState((client->reqfile==NULL || client->reqfile->IsStopped()) ? DS_NONE : DS_ONQUEUE);
 					}
 					break;
@@ -1084,7 +1082,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					if (size != 12)
 						throw GetResString(IDS_ERR_BADSIZE);
 					uint16 newrank;
-					MEMCOPY(&newrank,packet+0,2);
+					memcpy(&newrank,packet+0,2);
 					client->SetRemoteQueueFull(false);
 					client->SetRemoteQueueRank(newrank);
 					break;
@@ -1106,9 +1104,9 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 		
 							if( 
 								//if not complete and file is rare, allow once every 10 minutes
-								( file->IsPartFile() &&
-								((CPartFile*)file)->GetSourceCount() <= RARE_FILE * 2 &&
-								(bNeverAskedBefore || dwTimePassed > SOURCECLIENTREASK)
+								(    file->IsPartFile()
+								  && (bNeverAskedBefore || dwTimePassed > SOURCECLIENTREASK)
+								  && ((CPartFile*)file)->GetSourceCount() <= RARE_FILE * 2
 								) ||
 								//OR if file is not rare or if file is complete, allow every 90 minutes
 								( (bNeverAskedBefore || dwTimePassed > SOURCECLIENTREASK * MINCOMMONPENALTY) )
@@ -1180,41 +1178,35 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 			}
 		}
 		catch(CFileException* error){
-			OUTPUT_DEBUG_TRACE();
 			error->Delete();
 			throw GetResString(IDS_ERR_INVALIDPACKAGE);
 		}
 		catch(CMemoryException* error){
-			OUTPUT_DEBUG_TRACE();
 			error->Delete();
 			throw CString(_T("Memory exception"));
 		}
 	}
 	catch(CString error){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENTACTION),error.GetBuffer());
 		if (client)
 			client->SetDownloadState(DS_ERROR);
-		//MORPH START - Added by SiRoB, ZZ Upload system 200308181923
-		Disconnect("ProcessExtPacket error. " + error);
-		//MORPH END   - Added by SiRoB, ZZ Upload system 200308181923
+		Disconnect();
 		return false;
 	}
 	return true;
 }
 
-void CClientReqSocket::PacketToDebugLogLine(const char* protocol, const char* packet, uint32 size, UINT opcode) const {
+void CClientReqSocket::PacketToDebugLogLine(LPCTSTR protocol, const char* packet, uint32 size, UINT opcode) const {
 	CString buffer; 
-	buffer.Format(_T("unknown %s opcode: 0x%02x, size=%u"), protocol, opcode, size);
-	buffer += ", data=[";
-	uint32 i = 0;
-	for(; i < size && i < 50; i++){
-		char temp[3];
-		sprintf(temp,"%02x",(uint8)packet[i]);
+	buffer.Format(_T("unknown %s protocol opcode: 0x%02x, size=%u, data=["), protocol, opcode, size);
+	for (uint32 i = 0; i < size && i < 50; i++){
+		if (i > 0)
+			buffer += _T(' ');
+		TCHAR temp[3];
+		_stprintf(temp, _T("%02x"), (uint8)packet[i]);
 		buffer += temp;
-		buffer += " ";
 	}
-	buffer += (const char*)((i == size) ? "]" : "..]");
+	buffer += (i == size) ? _T("]") : _T("..]");
 	AddDebugLogLine(false, buffer); 
 }
 
@@ -1234,11 +1226,7 @@ void CClientReqSocket::OnError(int nErrorCode){
 		AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENT2),client->GetUserName(),client->GetFullIP(),nErrorCode);
 	else
 		AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENTACTION),GetErrorMessage(nErrorCode));
-	//MORPH START - Added by SiRoB, ZZ Upload system 200308181923
-	CString reason;
-	reason.Format("OnError. error code: %i", nErrorCode);
-	Disconnect(reason);
-	//MORPH END   - Added by SiRoB, ZZ Upload system 200308181923
+	Disconnect();
 }
 
 void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
@@ -1252,7 +1240,7 @@ void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
 			case OP_PACKEDPROT:
 				if (!packet->UnPackPacket()){
 					SOCKADDR_IN sockAddr;
-					MEMSET(&sockAddr, 0, sizeof(sockAddr));
+					memset(&sockAddr, 0, sizeof(sockAddr));
 					int nSockAddrLen = sizeof(sockAddr);
 					GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
 					AddDebugLogLine(false,_T("Failed to decompress client TCP packet; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet->prot, packet->opcode, packet->size);
@@ -1263,23 +1251,20 @@ void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
 				break;
 		    default:{
 			    SOCKADDR_IN sockAddr;
-			    MEMSET(&sockAddr, 0, sizeof(sockAddr));
+			    memset(&sockAddr, 0, sizeof(sockAddr));
 			    int nSockAddrLen = sizeof(sockAddr);
 			    GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
 			    AddDebugLogLine(false,_T("Received unknown client TCP packet; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet->prot, packet->opcode, packet->size);
 				if (client)
 					client->SetDownloadState(DS_ERROR);
-				//MORPH START - Added by SiRoB, ZZ Upload system 200308181923
-				Disconnect("Unknown TCP packet");
-				//MORPH END   - Added by SiRoB, ZZ Upload system 200308181923
+				Disconnect();
 		    }
 		}
 #ifndef _DEBUG
 	}
 	catch(...){
-		OUTPUT_DEBUG_TRACE();
 		SOCKADDR_IN sockAddr;
-		MEMSET(&sockAddr, 0, sizeof(sockAddr));
+		memset(&sockAddr, 0, sizeof(sockAddr));
 		int nSockAddrLen = sizeof(sockAddr);
 		GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
 		AddDebugLogLine(false,_T("Unknown exception in CClientReqSocket::PacketReceived; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet?packet->prot:0, packet?packet->opcode:0, packet?packet->size:0);
@@ -1312,13 +1297,18 @@ int FilterSE(DWORD dwExCode, LPEXCEPTION_POINTERS pExPtrs)
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
-void CClientReqSocket::PacketReceived(Packet* packet){
+void CClientReqSocket::PacketReceived(Packet* packet)
+{
+#ifndef _DEBUG
 	// this function is only here to get a chance of determining the crash address via SEH
 	__try{
 		PacketReceivedCppEx(packet);
 	}
 	__except(FilterSE(GetExceptionCode(), GetExceptionInformation())){
 	}
+#else
+	PacketReceivedCppEx(packet);
+#endif
 }
 
 void CClientReqSocket::OnReceive(int nErrorCode){
@@ -1332,13 +1322,6 @@ bool CClientReqSocket::Create(){
 	OnInit();
 	return result;
 }
-
-//MORPH START - Changed by SiRoB, Due to ZZ Upload System
-bool CClientReqSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket,uint32 actualPayloadSize){
-	ResetTimeOutTimer();
-	return CEMSocket::SendPacket(packet,delpacket,controlpacket,actualPayloadSize);
-}
-//MORPH END   - Changed by SiRoB, Due to ZZ Upload System
 
 //MORPH START - Added by SiRoB, ZZ Upload system 20030824-2238
 SocketSentBytes CClientReqSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket) {
@@ -1354,12 +1337,19 @@ SocketSentBytes CClientReqSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyA
 
 // CListenSocket
 // CListenSocket member functions
-CListenSocket::CListenSocket(CPreferences* in_prefs){
+CListenSocket::CListenSocket(CPreferences* in_prefs)
+{
+	bListening = false;
 	app_prefs = in_prefs;
 	opensockets = 0;
 	maxconnectionreached = 0;
 	m_OpenSocketsInterval = 0;
 	m_nPeningConnections = 0;
+	memset(m_ConnectionStates, 0, sizeof m_ConnectionStates);
+	peakconnections = 0;
+	totalconnectionchecks = 0;
+	averageconnections = 0.0;
+	activeconnections = 0;
 	per5average = 0;
 }
 
@@ -1427,39 +1417,26 @@ void CListenSocket::Process(){
 		CClientReqSocket* cur_sock = socket_list.GetAt(pos2);
 		opensockets++;
 
-	   if (cur_sock->deletethis){
-		   if (cur_sock->m_SocketData.hSocket != INVALID_SOCKET){ // deadlake PROXYSUPPORT - changed to AsyncSocketEx
-				cur_sock->Close();
-		   }
-		   else{
-			   cur_sock->Delete_Timed();;
-		   }
-	   }
-	   else
-			socket_list.GetAt( pos2 )->CheckTimeOut();
-   }
+		if (cur_sock->deletethis){
+			if (cur_sock->m_SocketData.hSocket != INVALID_SOCKET){ // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+				cur_sock->Close();			// calls 'closesocket'
+			}
+			else{
+				cur_sock->Delete_Timed();	// may delete 'cur_sock'
+			}
+		}
+		else{
+			cur_sock->CheckTimeOut();		// may call 'shutdown'
+		}
+	}
    if ( (GetOpenSockets()+5 < app_prefs->GetMaxConnections() || theApp.serverconnect->IsConnecting()) && !bListening)
 	   ReStartListening();
-
-/*/MORPH START - Added by Yun.SF3, Auto DynUp changing
-   if (theApp.glob_prefs->IsAutoDynUpSwitching())
-   {
-	   if (GetOpenSockets() >= theApp.glob_prefs->MaxConnectionsSwitchBorder() + 50 && !theApp.glob_prefs->IsSUCEnabled())
-		   SwitchSUC(true);
-	   else if (GetOpenSockets() < theApp.glob_prefs->MaxConnectionsSwitchBorder() - 50 && !theApp.glob_prefs->IsDynUpEnabled())
-		   SwitchSUC(false);
-   }
-//MORPH END - Added by Yun.SF3, Auto DynUp changing
-*/
 }
 
 void CListenSocket::RecalculateStats(){
-	MEMSET(m_ConnectionStates,0,6);
-	POSITION pos1,pos2;
-	for(pos1 = socket_list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
-		socket_list.GetNext(pos1);
-		CClientReqSocket* cur_sock = socket_list.GetAt(pos2);
-		switch (cur_sock->GetConState()){
+	memset(m_ConnectionStates,0,sizeof m_ConnectionStates);
+	for (POSITION pos = socket_list.GetHeadPosition(); pos != NULL; ){
+		switch (socket_list.GetNext(pos)->GetConState()){
 			case ES_DISCONNECTED:
 				m_ConnectionStates[0]++;
 				break;
@@ -1478,11 +1455,10 @@ void CListenSocket::AddSocket(CClientReqSocket* toadd){
 }
 
 void CListenSocket::RemoveSocket(CClientReqSocket* todel){
-	POSITION pos2,pos1;
-	for(pos1 = socket_list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
-       socket_list.GetNext(pos1);
-	   if ( socket_list.GetAt(pos2) == todel )
-			socket_list.RemoveAt(pos2);
+	for (POSITION pos = socket_list.GetHeadPosition(); pos != NULL; ){
+		POSITION posLast = pos;
+		if ( socket_list.GetNext(pos) == todel )
+			socket_list.RemoveAt(posLast);
    }
 }
 
@@ -1510,7 +1486,8 @@ void CListenSocket::AddConnection(){
 }
 
 bool CListenSocket::TooManySockets(bool bIgnoreInterval){
-	if (GetOpenSockets() > app_prefs->GetMaxConnections() || (m_OpenSocketsInterval > (theApp.glob_prefs->GetMaxConperFive()*theApp.emuledlg->statisticswnd.GetMaxConperFiveModifier()) && !bIgnoreInterval) ){
+	if (GetOpenSockets() > app_prefs->GetMaxConnections() 
+		|| (m_OpenSocketsInterval > (theApp.glob_prefs->GetMaxConperFive()*GetMaxConperFiveModifier()) && !bIgnoreInterval) ){
 		return true;
 	}
 	else
@@ -1521,18 +1498,51 @@ bool CListenSocket::IsValidSocket(CClientReqSocket* totest){
 	return socket_list.Find(totest);
 }
 
+#ifdef _DEBUG
 void CListenSocket::Debug_ClientDeleted(CUpDownClient* deleted){
-	POSITION pos1, pos2;
-	for (pos1 = socket_list.GetHeadPosition();( pos2 = pos1 ) != NULL;){
-		socket_list.GetNext(pos1);
-		CClientReqSocket* cur_sock = socket_list.GetAt(pos2);
+	for (POSITION pos = socket_list.GetHeadPosition(); pos != NULL;){
+		CClientReqSocket* cur_sock = socket_list.GetNext(pos);
 		if (!AfxIsValidAddress(cur_sock, sizeof(CClientReqSocket))) {
 			AfxDebugBreak(); 
 		}
+		if (_iDbgHeap >= 2)
+			ASSERT_VALID(cur_sock);
 		if (cur_sock->client == deleted){
 			AfxDebugBreak();
 		}
 	}
+}
+#endif
+
+void CListenSocket::UpdateConnectionsStatus()
+{
+	activeconnections = GetOpenSockets();
+	if( peakconnections < activeconnections )
+		peakconnections = activeconnections;
+	// -khaos--+++>
+	if (peakconnections>theApp.glob_prefs->GetConnPeakConnections())
+		theApp.glob_prefs->Add2ConnPeakConnections(peakconnections);
+	// <-----khaos-
+	if( theApp.IsConnected() ){
+		totalconnectionchecks++;
+		float percent;
+		percent = (float)(totalconnectionchecks-1)/(float)totalconnectionchecks;
+		if( percent > .99f )
+			percent = .99f;
+		averageconnections = (averageconnections*percent) + (float)activeconnections*(1.0f-percent);
+	}
+}
+
+float CListenSocket::GetMaxConperFiveModifier(){
+	//This is a alpha test.. Will clean up for b version.
+	float SpikeSize = GetOpenSockets() - averageconnections ;
+	if ( SpikeSize < 1 )
+		return 1;
+	float SpikeTolerance = 25.0f*(float)theApp.glob_prefs->GetMaxConperFive()/10.0f;
+	if ( SpikeSize > SpikeTolerance )
+		return 0;
+	float Modifier = (1.0f-(SpikeSize/SpikeTolerance));
+	return Modifier;
 }
 
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

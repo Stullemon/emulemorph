@@ -27,20 +27,19 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "Search.h"
-
-#include "../../Types.h"
-
 #include "SearchManager.h"
 #include "../routing/Maps.h"
 #include "../utils/UInt128.h"
+#include "../io/ByteIO.h"
+
+class CKnownFile;
 
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
+
+typedef std::list<CTag*> TagList;
 
 class CSearch
 {
@@ -53,9 +52,18 @@ public:
 	uint32 getCount() {return m_count;}
 	uint32 getKeywordCount() {return m_keywordcount;}
 	void setKeywordCount(uint32 val) {m_keywordcount = val;}
-	CUInt128	m_keywordPublish; //Need to make this private...
+	CUInt128 m_keywordPublish; //Need to make this private...
+	byte packet1[1024*50];
+	byte packet2[1024*50];
+	byte packet3[1024*50];
+	CByteIO *bio1;
+	CByteIO *bio2;
+	CByteIO *bio3;
 	CString getFileName(void) {return m_fileName;}
 	CUInt128 getTarget(void) {return m_target;}
+	void addFileID(const CUInt128& id);
+	void PreparePacket(void);
+	void PreparePacketForTags( CByteIO* packet, CKnownFile* file );
 
 	enum
 	{
@@ -93,6 +101,7 @@ private:
 	uint32		m_lenSearchTerms;
 	WordList	m_words;
 	CString		m_fileName;
+	UIntList	m_fileIDs;
 
 	ContactMap	m_possible;
 	ContactMap	m_tried;

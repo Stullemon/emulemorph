@@ -22,29 +22,7 @@
 #endif
 
 #include "resource.h"
-#include "emuleDlg.h"
-#include "knownfilelist.h"
-#include "preferences.h"
-#include "sockets.h"
-#include "serverlist.h"
-#include "sharedfilelist.h"
-#include "listensocket.h"
-#include "uploadqueue.h"
-#include "downloadqueue.h"
-#include "clientlist.h"
-#include "clientcredits.h"
-#include "friendlist.h"
-#include "clientudpsocket.h"
-#include "IPFilter.h"
-#include <afxmt.h>
-#include "Webserver.h"
-#include "mmserver.h"
-#include "KademliaMain.h"
 #include "loggable.h"
-#include "UploadBandwidthThrottler.h" //MORPH - Added by Yun.SF3, ZZ Upload System
-#include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB, ZZ Upload system (USS)
-#include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
-#include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 
 #define MAX_NICK_LENGTH 49 // max. length of nick without trailing NUL char
 
@@ -53,6 +31,26 @@ class CUploadQueue;
 class CListenSocket;
 class CDownloadQueue;
 class CScheduler;
+class UploadBandwidthThrottler;
+class LastCommonRouteFinder;
+class CKademliaMain;
+class CemuleDlg;
+class CClientList;
+class CKnownFileList;
+class CPreferences;
+class CServerConnect;
+class CServerList;
+class CSharedFileList;
+class CClientCreditsList;
+class CFriendList;
+class CClientUDPSocket;
+class CIPFilter;
+class CWebServer;
+class CMMServer;
+class CStatistics;
+class CAbstractFile;
+class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
+#include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 
 enum AppState{
 	APP_STATE_RUNNING=0,
@@ -81,14 +79,11 @@ public:
 	CClientCreditsList*	clientcredits;
 	CFriendList*		friendlist;
 	CClientUDPSocket*	clientudp;
-	CMutex				hashing_mut;
-	virtual BOOL		InitInstance();
-	CString*			pendinglink;
-	tagCOPYDATASTRUCT  sendstruct; //added by Cax2 28/10/02 
 	CIPFilter*			ipfilter;
-	CWebServer*			webserver; // Webserver [kuchin]
+	CWebServer*			webserver;
 	CScheduler*			scheduler;
 	CMMServer*			mmserver;
+	CStatistics*		statistics;
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup
 
@@ -103,20 +98,24 @@ public:
 	HANDLE				m_hMutexOneInstance;
 	uint16				stat_filteredclients;
 	uint32				stat_leecherclients; //MORPH - Added by IceCream, Anti-leecher feature
-	ULONGLONG			m_ullComCtrlVer;
 	int					m_iDfltImageListColorFlags;
 	DWORD				m_dwProductVersionMS;
 	DWORD				m_dwProductVersionLS;
 	CString				m_strCurVersionLong;
 	UINT				m_uCurVersionShort;
 	UINT				m_uCurVersionCheck;
+	ULONGLONG			m_ullComCtrlVer;
 
 	CArray<CString,CString> webservices;
 	AppState	m_app_state; // defines application state for shutdown 
+	CMutex				hashing_mut;
+	CString*			pendinglink;
+	tagCOPYDATASTRUCT	sendstruct;
+
 // Implementierung
+	virtual BOOL InitInstance();
+
 	// ed2k link functions
-	CString		StripInvalidFilenameChars(CString strText, bool bKeepSpaces = true);
-	CString		CreateED2kLink( CAbstractFile* f );
 	CString		CreateED2kSourceLink( CAbstractFile* f );
 	CString		CreateED2kHostnameSourceLink( CAbstractFile* f );	// itsonlyme: hostnameSource
 	CString		CreateHTMLED2kLink( CAbstractFile* f );
@@ -138,12 +137,13 @@ public:
 	HICON		LoadIcon(UINT nIDResource) const;
 	void		ApplySkin(LPCTSTR pszSkinProfile);
 
-	DECLARE_MESSAGE_MAP()
 protected:
 	bool ProcessCommandline();
 	void SetTimeOnTransfer();
 	static BOOL CALLBACK SearchEmuleWindow(HWND hWnd, LPARAM lParam);
-	void OnHelp();
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnHelp();
 
 	HIMAGELIST m_hSystemImageList;
 	CMapStringToPtr m_aExtToSysImgIdx;
@@ -169,3 +169,6 @@ public:
 protected:
 	HICON m_hIcon;
 };
+
+extern CLog theLog;
+extern CLog theVerboseLog;

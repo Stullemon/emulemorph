@@ -22,9 +22,23 @@
 #include "emule.h"
 #include "ClientListCtrl.h"
 #include "otherfunctions.h"
-#include "opcodes.h"
+#include "MenuCmds.h"
 #include "ClientDetailDialog.h"
 #include "KademliaWnd.h"
+#include "ClientList.h"
+#include "emuledlg.h"
+#include "KademliaMain.h"
+#include "FriendList.h"
+#include "TransferWnd.h"
+#include "MemDC.h"
+#include "UpDownClient.h"
+#include "ClientCredits.h"
+#include "ListenSocket.h"
+#include "ChatWnd.h"
+#include "DownloadQueue.h" //MORPH - Added by SiRoB
+#include "KnownFile.h" //MORPH - Added by SiRoB
+#include "PartFile.h" //MORPH - Added by SiRoB
+#include "sharedfilelist.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -58,6 +72,8 @@ void CClientListCtrl::Init()
 	InsertColumn(6,GetResString(IDS_CONNECTED),LVCFMT_LEFT,150,6);
 	coltemp=GetResString(IDS_CD_UHASH);coltemp.Remove(':');
 	InsertColumn(7,coltemp,LVCFMT_LEFT,150,7);
+	
+	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableClientList);
 	int sortItem = theApp.glob_prefs->GetColumnSortItem(CPreferences::tableClientList);
@@ -76,8 +92,13 @@ void CClientListCtrl::Init()
 CClientListCtrl::~CClientListCtrl()
 {
 }
+void CClientListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
 
-void CClientListCtrl::Localize()
+void CClientListCtrl::SetAllIcons()
 {
 	imagelist.DeleteImageList();
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -98,6 +119,10 @@ void CClientListCtrl::Localize()
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
 	//MORPH END   - Added by SiRoB, More client icon & Credit ovelay icon
 
+}
+
+void CClientListCtrl::Localize()
+{
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -157,7 +182,7 @@ void CClientListCtrl::ShowKnownClients(){
 		RefreshClient( cur_client );
 		i++; 
 	}
-	theApp.emuledlg->transferwnd.UpdateListCount(3);
+	theApp.emuledlg->transferwnd->UpdateListCount(3);
 }
 
 void CClientListCtrl::AddClient(CUpDownClient* client){
@@ -172,7 +197,7 @@ void CClientListCtrl::AddClient(CUpDownClient* client){
 		itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,LPSTR_TEXTCALLBACK,0,0,1,(LPARAM)client);
 		RefreshClient(client);
 	}
-	theApp.emuledlg->transferwnd.UpdateListCount(3);
+	theApp.emuledlg->transferwnd->UpdateListCount(3);
 }
 
 void CClientListCtrl::RemoveClient(CUpDownClient* client){
@@ -186,7 +211,7 @@ void CClientListCtrl::RemoveClient(CUpDownClient* client){
 		if (result != (-1) )
 			DeleteItem(result);
 	}
-	theApp.emuledlg->transferwnd.UpdateListCount(3);
+	theApp.emuledlg->transferwnd->UpdateListCount(3);
 }
 
 void CClientListCtrl::RefreshClient(CUpDownClient* client){
@@ -227,8 +252,16 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
-	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
 
 	CString Sbuffer;
 
@@ -243,32 +276,25 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 			cur_rec.right += GetColumnWidth(iColumn);
 			switch(iColumn){
 				case 0:{
-					//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
 					uint8 image;
 					if (client->IsFriend())
 						image = 2;
-					else{
-						if (client->GetClientSoft() == SO_MLDONKEY ){
-							image = 3;
-						}
-						else if (client->GetClientSoft() == SO_EDONKEYHYBRID ){
-							image = 4;
-						}
-						else if (client->GetClientSoft() == SO_SHAREAZA ){
-							image = 5;
-						}
-						else if (client->GetClientSoft() == SO_EDONKEY ){
-							image = 6;
-						}
-						else if (client->ExtProtocolAvailable()){
-							image = (client->IsMorph())?7:1;
-						}
-						else{
-							image = 0;
-						}
-					}
+					else if (client->GetClientSoft() == SO_EDONKEYHYBRID)
+						image = 4;
+					else if (client->GetClientSoft() == SO_MLDONKEY)
+						image = 3;
+					else if (client->GetClientSoft() == SO_SHAREAZA)
+						image = 5;
+					else if (client->ExtProtocolAvailable())
+					//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
+						image = (client->IsMorph())?7:1;
+					else if (client->GetClientSoft() == SO_EDONKEY)
+						image = 6;
+					else
+						image = 0;
+						
 					POINT point = {cur_rec.left, cur_rec.top+1};
-					imagelist.DrawIndirect(dc,image, point, CSize(16,16), CPoint(0,0), ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0), 0, odc->GetBkColor());
+					imagelist.Draw(dc,image, point, ILD_NORMAL | ((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? INDEXTOOVERLAYMASK(1) : 0));
 					//MORPH END - Modified by SiRoB, More client icon
 					if (client->GetUserName()==NULL)
 						Sbuffer.Format("(%s)", GetResString(IDS_UNKNOWN));
@@ -362,10 +388,10 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					break;
 				}
 				case 5:{
-					//MORPH START - Added by IceCream, Maella -Support for tag ET_MOD_VERSION
-					Sbuffer = client->GetClientVerString();
+					Sbuffer = client->GetClientSoftVer();
+					if (Sbuffer.IsEmpty())
+						Sbuffer = GetResString(IDS_UNKNOWN);
 					break;
-					//MORPH START - Added by IceCream, Maella -Support for tag ET_MOD_VERSION
 				}
 				case 6:{
 					if(client->socket){
@@ -390,7 +416,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		RECT outline_rec;
-		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -406,12 +432,15 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
 
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
 }
 
 BEGIN_MESSAGE_MAP(CClientListCtrl, CMuleListCtrl)
 	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
@@ -439,6 +468,7 @@ void CClientListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
 
+	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -451,7 +481,7 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				client->RequestSharedFileList();
 				break;
 			case MP_MESSAGE:{
-				theApp.emuledlg->chatwnd.StartSession(client);
+				theApp.emuledlg->chatwnd->StartSession(client);
 				break;
 			}
 			case MP_ADDFRIEND:{
@@ -490,6 +520,11 @@ BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 						{
 							fileList += "\n" ; 
 							fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
+						}
+						for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
+						{
+							fileList += "\n" ;
+							fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
 						}
 					}
 					else
@@ -608,10 +643,9 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				return -1;
 		//MORPH START - Added by IceCream, ET_MOD_VERSION
 		case 5:
-		
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item2->GetClientVerString(), item1->GetClientVerString());
+					return strcmpi(item2->GetClientSoftVer(), item1->GetClientSoftVer());
 				}
 				else {
 					return item2->GetVersion() - item1->GetVersion();
@@ -621,7 +655,7 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		case 105:
 			if(item1->GetClientSoft() == item2->GetClientSoft())
 				if(item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
-					return strcmpi(item1->GetClientVerString(), item2->GetClientVerString());
+					return strcmpi(item1->GetClientSoftVer(), item2->GetClientSoftVer());
 				}
 				else {
 					return item1->GetVersion() - item2->GetVersion();

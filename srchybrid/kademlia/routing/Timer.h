@@ -27,10 +27,7 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "../../stdafx.h"
 #include <map>
 
 
@@ -61,7 +58,7 @@ private:
 
 	CTimer();
 
-	static HANDLE	m_hThread;
+	static CWinThread* m_pThread;
 	static DWORD	m_dwThreadID;
 	static HANDLE	m_hStopEvent;
 	static EventMap	m_events;
@@ -71,8 +68,7 @@ private:
 	static time_t	m_statusUpdate;
 	static time_t	m_bigTimer;
 
-	static DWORD WINAPI timer(LPVOID lpParam);
-
+	static UINT AFX_CDECL timer(LPVOID lpParam);
 };
 
 } // End namespace

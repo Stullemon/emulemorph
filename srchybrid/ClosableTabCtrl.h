@@ -1,10 +1,7 @@
 #pragma once
-#include "afxcmn.h"
 #include "loggable.h"
 
 #define WM_CLOSETAB		(WM_USER + 0x101)
-
-// CClosableTabCtrl
 
 class CClosableTabCtrl : public CTabCtrl, public CLoggable
 {
@@ -15,17 +12,15 @@ public:
 	virtual ~CClosableTabCtrl();
 
 protected:
-	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-protected:
+	CImageList m_ImgLst;
+
+	void SetAllIcons();
+
 	virtual void PreSubclassWindow();
-public:
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-private:
-	CImageList m_pImgLst;
-public:
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnSysColorChange();
 };
-
-

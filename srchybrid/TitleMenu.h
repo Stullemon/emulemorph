@@ -3,8 +3,6 @@
 // Author: Arthur Westerman
 // Bug reports by : Brian Pearson 
 //////////////////////////////////////////////////////////////////////
-
-
 #pragma once
 
 class CTitleMenu : public CMenu
@@ -40,10 +38,8 @@ protected:
 						CONST PVOID pMesh,
 						DWORD dwNumMesh,
 						DWORD dwMode);
-	
 
-
-// Implementation
+	// Implementation
 public:
 	void SetColor(long cl) {clLeft=cl;};
 	void SetGradientColor(long cl) {clRight=cl;};
@@ -59,10 +55,4 @@ public:
 	virtual ~CTitleMenu();
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
-
-private:
-
- 
 };
-
-

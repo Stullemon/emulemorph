@@ -22,21 +22,15 @@
 //   ini.SER_ARRD(bFromIni,m_arValue,MAX_AR,10); 
 //   ini.SER_ARRD(bFromIni,m_ar3D,3,5); 
 //}
-
-
 #if !defined(AFX_INI_H__EEBAF800_182A_11D3_B51F_00104B4A13B4__INCLUDED_)
 #define AFX_INI_H__EEBAF800_182A_11D3_B51F_00104B4A13B4__INCLUDED_
 
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
-
 
 #define SER_GET(bGet,value) SerGet(bGet,value,#value)
 #define SER_ARR(bGet,value,n) SerGet(bGet,value,n,#value)
 #define SER_GETD(bGet,value,default) SerGet(bGet,value,#value,NULL,default)
 #define SER_ARRD(bGet,value,n,default) SerGet(bGet,value,n,#value,default)
-
 
 class CIni  
 {

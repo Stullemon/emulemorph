@@ -91,7 +91,6 @@ CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPo
 CContact::CContact(const CUInt128 &clientID, const uint32 ip, const uint16 udpPort, const uint16 tcpPort, const byte type, const CUInt128 &target)
 {
 	m_clientID = clientID;
-	CPrefs *prefs = CKademlia::getPrefs();
 	m_distance.setValue(target);
 	m_distance.xor(clientID);
 	m_ip = ip;

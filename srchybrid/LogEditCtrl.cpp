@@ -1,6 +1,25 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "LogEditCtrl.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -24,6 +43,7 @@ CLogEditCtrl::CLogEditCtrl(){
 	m_bAutoScroll = true;
 	m_bNoPaint = false;
 	m_bEnErrSpace = false;
+	m_iMaxLogBuff = 0;
 }
 
 CLogEditCtrl::~CLogEditCtrl(){
@@ -38,22 +58,30 @@ void CLogEditCtrl::Init(LPCTSTR pszTitle)
 	GetClassName(*this, szClassName, ARRSIZE(szClassName));
 	m_bRichEdit = _tcsicmp(szClassName, _T("EDIT")) != 0;
 
+	SetTitle(pszTitle);
+
 	m_LogMenu.CreatePopupMenu();
 	m_LogMenu.AddMenuTitle(GetResString(IDS_LOGENTRY));
-	m_LogMenu.AppendMenu(MF_STRING,MP_COPYSELECTED, GetResString(IDS_COPY));
+	m_LogMenu.AppendMenu(MF_STRING, MP_COPYSELECTED, GetResString(IDS_COPY));
 	m_LogMenu.AppendMenu(MF_SEPARATOR);
-	m_LogMenu.AppendMenu(MF_STRING,MP_SELECTALL, GetResString(IDS_SELECTALL));
-	m_LogMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_PW_RESET));
+	m_LogMenu.AppendMenu(MF_STRING, MP_SELECTALL, GetResString(IDS_SELECTALL));
+	m_LogMenu.AppendMenu(MF_STRING, MP_REMOVEALL, GetResString(IDS_PW_RESET));
+	m_LogMenu.AppendMenu(MF_STRING, MP_SAVELOG, GetResString(IDS_SAVELOG) + _T("..."));
 	m_LogMenu.AppendMenu(MF_SEPARATOR);
-	m_LogMenu.AppendMenu(MF_STRING,MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
+	m_LogMenu.AppendMenu(MF_STRING, MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
 
 	VERIFY( SendMessage(EM_SETUNDOLIMIT, 0, 0) == 0 );
 	int iMaxLogBuff = theApp.glob_prefs->GetMaxLogBuff();
 	if (afxData.bWin95)
-		LimitText(iMaxLogBuff > 0xFFFF ? 0xFFFF : iMaxLogBuff);
+		LimitText(m_iMaxLogBuff = (iMaxLogBuff > 0xFFFF ? 0xFFFF : iMaxLogBuff));
 	else
-		LimitText(iMaxLogBuff ? iMaxLogBuff : 128*1024);
+		LimitText(m_iMaxLogBuff = (iMaxLogBuff ? iMaxLogBuff : 128*1024));
 	FlushBuffer();
+}
+
+void CLogEditCtrl::SetTitle(LPCTSTR pszTitle)
+{
+	m_strTitle = pszTitle;
 }
 
 LRESULT CLogEditCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
@@ -73,7 +101,7 @@ void CLogEditCtrl::FlushBuffer()
 {
 	if (m_astrBuff.GetSize() > 0){ // flush buffer
 		for (int i = 0; i < m_astrBuff.GetSize(); i++)
-			AddLine(m_astrBuff[i]);
+			AddLine(m_astrBuff[i], m_astrBuff[i].GetLength());
 		m_astrBuff.RemoveAll();
 	}
 }
@@ -87,16 +115,28 @@ void CLogEditCtrl::AddEntry(LPCTSTR pszMsg)
 	}
 	else{
 		FlushBuffer();
-		AddLine(strLine);
+		AddLine(strLine, strLine.GetLength());
+	}
+}
+
+void CLogEditCtrl::Add(LPCTSTR pszMsg, int iLen)
+{
+	if (m_hWnd == NULL){
+		CString strLine(pszMsg);
+		m_astrBuff.Add(strLine);
+	}
+	else{
+		FlushBuffer();
+		AddLine(pszMsg, iLen);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // This function is based on Daniel Lohmann's article "CEditLog - fast logging
 // into an edit control with cout" at http://www.codeproject.com
-void CLogEditCtrl::AddLine(LPCTSTR pszMsg)
+void CLogEditCtrl::AddLine(LPCTSTR pszMsg, int iLen)
 {
-	int iMsgLen = _tcslen(pszMsg);
+	int iMsgLen = (iLen == -1) ? _tcslen(pszMsg) : iLen;
 	if (iMsgLen == 0)
 		return;
 #ifdef _DEBUG
@@ -107,9 +147,9 @@ void CLogEditCtrl::AddLine(LPCTSTR pszMsg)
 	// Get Edit contents dimensions and cursor position
 	int iStartChar, iEndChar;
 	GetSel(iStartChar, iEndChar);
-	int iSize = GetWindowTextLength();
+	int iWndTxtLen = GetWindowTextLength();
 
-	if (iStartChar == iSize && iSize == iEndChar)
+	if (iStartChar == iWndTxtLen && iWndTxtLen == iEndChar)
 	{
 		// The cursor resides at the end of text
 		SCROLLINFO si;
@@ -118,7 +158,7 @@ void CLogEditCtrl::AddLine(LPCTSTR pszMsg)
 		if (m_bAutoScroll && GetScrollInfo(SB_VERT, &si) && si.nPos >= (int)(si.nMax - si.nPage + 1))
 		{
 			// Not scrolled away
-			SafeAddLine(iSize, pszMsg, iStartChar, iEndChar);
+			SafeAddLine(iWndTxtLen, iMsgLen, pszMsg, iStartChar, iEndChar);
 			if (m_bAutoScroll && !IsWindowVisible())
 				ScrollToLastLine();
 		}
@@ -135,7 +175,7 @@ void CLogEditCtrl::AddLine(LPCTSTR pszMsg)
 		
 			// Select at the end of text and replace the selection
 			// This is a very fast way to add text to an edit control
-			SafeAddLine(iSize, pszMsg, iStartChar, iEndChar);
+			SafeAddLine(iWndTxtLen, iMsgLen, pszMsg, iStartChar, iEndChar);
 			SetSel(iStartChar, iEndChar, TRUE); // Restore our previous selection
 
 			if (!m_bAutoScroll)
@@ -191,7 +231,7 @@ void CLogEditCtrl::AddLine(LPCTSTR pszMsg)
 		
 		// Select at the end of text and replace the selection
 		// This is a very fast way to add text to an edit control
-		SafeAddLine(iSize, pszMsg, iStartChar, iEndChar);
+		SafeAddLine(iWndTxtLen, iMsgLen, pszMsg, iStartChar, iEndChar);
 		SetSel(iStartChar, iEndChar, TRUE); // Restore our previous selection
 
 		if (!m_bAutoScroll)
@@ -225,14 +265,72 @@ void CLogEditCtrl::ScrollToLastLine()
 	LineScroll(GetLineCount());
 }
 
-void CLogEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, int& iStartChar, int& iEndChar)
+void CLogEditCtrl::SafeAddLine(int nPos, int iLineLen, LPCTSTR pszLine, int& iStartChar, int& iEndChar)
 {
+	bool bOldNoPaint = false;
+	BOOL bIsVisible = false;
+	bool bRestorePaintFlag = false;
+
+	// try to determine if the current log line will exceed the limit of the edit control and free
+	// up enough space to add it. if it would be done afterwards (because of EN_ERRSPACE) it may cost
+	// noticeable more CPU cycles.
+	int iTextLen = nPos; // 'nPos' already holds the current window text length
+	if (iTextLen + iLineLen > m_iMaxLogBuff)
+	{
+		// delete the 1st 10 lines; freeing up only 1 or 2 lines is still not enough (peformance problem)
+		int iLine0Len = 0;
+		for (int i = 0; i < 10; i++){
+			int iLineLen = LineLength(iLine0Len);
+			if (iLineLen == 0)
+				break;
+			iLine0Len += iLineLen + 2;
+		}
+
+		bOldNoPaint = m_bNoPaint;
+		m_bNoPaint = true;
+		bRestorePaintFlag = true;
+		bIsVisible = IsWindowVisible();
+		if (bIsVisible)
+			SetRedraw(FALSE);
+
+		SetSel(0, iLine0Len, TRUE);
+		ReplaceSel(_T(""));
+
+		// update any possible available selection
+		iStartChar -= iLine0Len;
+		if (iStartChar < 0)
+			iStartChar = 0;
+		iEndChar -= iLine0Len;
+		if (iEndChar < 0)
+			iEndChar = 0;
+
+		nPos -= iLine0Len;
+		if (nPos < 0)
+			nPos = 0;
+	}
+
 	m_bEnErrSpace = false;
 	SetSel(nPos, nPos, TRUE);
 	ReplaceSel(pszLine);
 
+	if (bRestorePaintFlag)
+	{
+		m_bNoPaint = bOldNoPaint;
+		if (bIsVisible && !m_bNoPaint){
+			SetRedraw();
+			if (m_bRichEdit)
+				Invalidate();
+		}
+	}
+
 	if (m_bEnErrSpace)
 	{
+		// following code works properly, but there is a performance problem. if the control 
+		// starts to rotate the text and if there is much to log, CPU usage hits the roof.
+		// to get around this, we try to free the needed space for the current line (and more)
+		// before adding the line (see code above). actually, the following code should not be
+		// executed any longer, but is kept for fail safe handling.
+
 		bool bOldNoPaint = m_bNoPaint;
 		m_bNoPaint = true;
 		BOOL bIsVisible = IsWindowVisible();
@@ -299,7 +397,13 @@ void CLogEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
 	m_LogMenu.EnableMenuItem(MP_COPYSELECTED, iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED);
 	m_LogMenu.EnableMenuItem(MP_REMOVEALL, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
 	m_LogMenu.EnableMenuItem(MP_SELECTALL, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
+	m_LogMenu.EnableMenuItem(MP_SAVELOG, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
 	m_LogMenu.CheckMenuItem(MP_AUTOSCROLL, m_bAutoScroll ? MF_CHECKED : MF_UNCHECKED);
+	if (point.x == -1 && point.y == -1){
+		point.x = 16;
+		point.y = 32;
+		ClientToScreen(&point);
+	}
 	m_LogMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -314,11 +418,44 @@ BOOL CLogEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam){
 	case MP_REMOVEALL:
 		Reset();
 		break;
+	case MP_SAVELOG:
+		SaveLog();
+		break;
 	case MP_AUTOSCROLL:
 		m_bAutoScroll = !m_bAutoScroll;
 		break;
 	}
 	return TRUE;
+}
+
+bool CLogEditCtrl::SaveLog(LPCTSTR pszDefName)
+{
+	bool bResult = false;
+	CFileDialog dlg(FALSE, _T("log"), pszDefName ? pszDefName : (LPCTSTR)m_strTitle, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Log Files (*.log)|*.log||"), this, 0);
+	if (dlg.DoModal() == IDOK)
+	{
+		FILE* fp = fopen(dlg.GetPathName(), "wt");
+		if (fp)
+		{
+			CString strText;
+			GetWindowText(strText);
+			fwrite(strText, strText.GetLength(), 1, fp);
+			if (ferror(fp)){
+				CString strError;
+				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+				AfxMessageBox(strError, MB_ICONERROR);
+			}
+			else
+				bResult = true;
+			fclose(fp);
+		}
+		else{
+			CString strError;
+			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+			AfxMessageBox(strError, MB_ICONERROR);
+		}
+	}
+	return bResult;
 }
 
 CString CLogEditCtrl::GetLastLogEntry(){

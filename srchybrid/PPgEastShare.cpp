@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgEastShare.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -185,8 +186,8 @@ BOOL CPPgEastShare::OnApply()
 	if((bool)m_bSaveUploadQueueWaitTime != app_prefs->prefs->m_bSaveUploadQueueWaitTime)	bRestartApp = true;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	app_prefs->prefs->m_bSaveUploadQueueWaitTime = m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
-/*	theApp.emuledlg->serverwnd.ToggleDebugWindow();
-	theApp.emuledlg->serverwnd.UpdateLogTabSelection(); */
+/*	theApp.emuledlg->serverwnd->ToggleDebugWindow();
+	theApp.emuledlg->serverwnd->UpdateLogTabSelection(); */
 
 
 	app_prefs->prefs->creditSystemMode = m_iCreditSystem; //EastShare - Added by linekin , CreditSystem 

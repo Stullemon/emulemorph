@@ -55,7 +55,6 @@ CPreferencesDlg::CPreferencesDlg(){
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	m_nActiveWnd = 0;
 	m_iPrevPage = -1;
-	isEnlarged = false; // EastShare, Added by TAHO, enlarge Windows
 }
 
 CPreferencesDlg::~CPreferencesDlg()
@@ -73,7 +72,6 @@ void CPreferencesDlg::OnDestroy()
 	CPropertySheet::OnDestroy();
 	app_prefs->Save();
 	m_nActiveWnd = GetActiveIndex();
-	isEnlarged = false; // EastShare, Added by TAHO, enlarge Windows
 }
 
 BOOL CPreferencesDlg::OnInitDialog()
@@ -95,7 +93,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 	m_listbox.GetText(curSel,currenttext);
 	m_groupbox.SetWindowText(currenttext);
 	m_iPrevPage = curSel;
-	isEnlarged = false; // EastShare , Added by TAHO, enlarge Windows
 	return bResult;
 }
 
@@ -218,11 +215,7 @@ void CPreferencesDlg::Localize()
 		yoffset=-rectOld.Height();
 	}
 	GetWindowRect(rectOld);
-	// EastShare START - Modified by TAHO, enlarge Preferences Windows
-	int offset2 = (isEnlarged) ? 0 : 30;
-	int offset3 = (isEnlarged) ? 0 : 38;
-	//SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
-	SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset+offset2,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
+	SetWindowPos(NULL,0,0,rectOld.Width()+xoffset,rectOld.Height()+yoffset,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
 	tab->GetWindowRect (rectOld);
 	ScreenToClient (rectOld);
 	tab->SetWindowPos(NULL,rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
@@ -232,26 +225,21 @@ void CPreferencesDlg::Localize()
 	activepage->SetWindowPos(NULL,rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 	activepage->GetWindowRect(rectOld);
 	ScreenToClient (rectOld);
-	//m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
-	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10+offset2,SWP_NOZORDER|SWP_NOACTIVATE);
+	m_groupbox.SetWindowPos(NULL,rectOld.left,2,rectOld.Width()+4,rectOld.Height()+10,SWP_NOZORDER|SWP_NOACTIVATE);
 	m_groupbox.GetWindowRect(rectOld);
 	ScreenToClient(rectOld);
-	//m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
-	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4+offset3,SWP_NOZORDER|SWP_NOACTIVATE);	// EastShare END - Modified by TAHO, enlarge Preferences Windows
+	m_listbox.SetWindowPos(NULL,6,rectOld.top+5,width,rectOld.Height()-4,SWP_NOZORDER|SWP_NOACTIVATE);
 	int _PropSheetButtons[] = {IDOK, IDCANCEL, ID_APPLY_NOW, IDHELP };
 	CWnd* PropSheetButton;
 	for (int i = 0; i < sizeof (_PropSheetButtons) / sizeof(_PropSheetButtons[0]); i++)
 	{
-		if (PropSheetButton=GetDlgItem(_PropSheetButtons[i]))
+		if ((PropSheetButton = GetDlgItem(_PropSheetButtons[i])) != NULL)
 		{
 			PropSheetButton->GetWindowRect (rectOld);
 			ScreenToClient (rectOld);
-			//PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
-			PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset+offset2,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
+			PropSheetButton->SetWindowPos (NULL, rectOld.left+xoffset,rectOld.top+yoffset,0,0,SWP_NOSIZE|SWP_NOZORDER|SWP_NOACTIVATE);
 		}
 	}
-	isEnlarged = true;
-	// EastShare END - Modified by TAHO, enlarge Preferences Windows
 	tab->ShowWindow(SW_HIDE);
 	m_listbox.SetCurSel(GetActiveIndex());		
 	CenterWindow();

@@ -39,6 +39,7 @@ there client on the eMule forum..
 #include "NetException.h"
 #include "OtherFunctions.h"
 #include "../../OpCodes.h"
+#include <zlib/zlib.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -125,14 +126,12 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 		uint32 lenPacket;
 		sockaddr_in senderAddress;
 		int lenAddress = sizeof(senderAddress);
-		MEMSET(&senderAddress, 0, lenAddress);
+		memset(&senderAddress, 0, lenAddress);
 		int err;
 		uint32 delay = 100;
 		uint32 sendQueueSize = 0;
-		while (true)
+		for (;;)
 		{
-			// Send any outgoing data
-			//m_critical.Lock();
 			try
 			{
 				m_critical.Lock(); // only lock the 'm_sendQueue'
@@ -193,8 +192,6 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 					if (lenPacket != SOCKET_ERROR)
 					{
 						lenPacket = recvfrom(m_hSocket, (char*)buffer, lenBuf, 0, (sockaddr*)&senderAddress, &lenAddress);
-						//processPacket(buffer, lenPacket, &senderAddress);
-
 						if ((int)lenPacket > 1)
 						{
 							// If we don't know the opcode, we could save some CPU cycles with ignoring that packet
@@ -208,10 +205,6 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 								{
 									unpack[0] = OP_KADEMLIAHEADER;
 									unpack[1] = buffer[1];
-
-//									delete[] buffer;
-//									buffer = NULL;
-
 									CKademlia::reportOverheadRecv(lenPacket);
 									processPacket(unpack, unpackedsize+2, &senderAddress);
 								}
@@ -230,7 +223,6 @@ DWORD CUDPSocketListener::listeningImpl(LPVOID lpParam)
 					}
 				}
 			} catch (...) {}
-			//m_critical.Unlock();
 
 			// Is the thread supposed to finish
 			if (WaitForSingleObject(hStopEvent, 100) == WAIT_OBJECT_0)
@@ -264,40 +256,41 @@ void CUDPSocketListener::sendPacket(byte *data, uint32 lenData, const uint32 des
 	{
 		return;
 	}
+	uLongf newsize = lenData+300;
+	BYTE* output = new BYTE[newsize];
 	if( lenData > 200 )
 	{
-		uLongf newsize = lenData+300;
-		BYTE* output = new BYTE[newsize];
 		uint32 lenRawData = lenData-2;
-		uint16 result = compress2(output,&newsize,(BYTE*)data+2,lenRawData,Z_BEST_COMPRESSION);
+		uint16 result = compress2(output+2,&newsize,(BYTE*)data+2,lenRawData,Z_BEST_COMPRESSION);
 		if (result != Z_OK || lenRawData <= newsize)
 		{
 			if (result != Z_OK)
 			{
 				TRACE("Error: Failed to compress Kademlia packet\n");
 			}
-			delete[] output;
+			memcpy(output, data, lenData);
 		}
 		else
 		{
-			data[0] = OP_KADEMLIAPACKEDPROT; // change protocol code to indicate compression
-			(void)data[1];					 // leave the packet opcode unchanged
-			memcpy(data+2, output, newsize);
+			output[0] = OP_KADEMLIAPACKEDPROT;	// change protocol code to indicate compression
+			output[1] = data[1];				// leave the packet opcode unchanged
 			lenData = newsize+2;
-			delete[] output;
 		}
+	}
+	else
+	{
+		memcpy(output, data, lenData);
 	}
 	CKademlia::reportOverheadSend(lenData);
 	try
 	{
 		WaitingUDPData *w = new WaitingUDPData;
 		w->addr = new sockaddr_in;
-		MEMSET(w->addr, 0, sizeof(w->addr));
+		memset(w->addr, 0, sizeof(w->addr));
 		w->addr->sin_family = AF_INET;
 		w->addr->sin_addr.s_addr = htonl(destinationHost);
 		w->addr->sin_port = htons(destinationPort);
-		w->data = new byte[lenData];
-		memcpy(w->data, data, lenData);
+		w->data = output;
 		w->lenData = lenData;
 		m_critical.Lock();
 		try

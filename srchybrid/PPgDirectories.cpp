@@ -6,6 +6,8 @@
 #include "PPgDirectories.h"
 #include "otherfunctions.h"
 #include "InputBox.h"
+#include "SharedFileList.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -14,15 +14,16 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-// FriendListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "KademliaWnd.h"
 #include "KadSearchListCtrl.h"
 #include "KadContactListCtrl.h"
 #include "Ini2.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "DownloadQueue.h"
+#include "PartFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,8 +45,7 @@ enum ECols
 IMPLEMENT_DYNAMIC(CKadSearchListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CKadSearchListCtrl, CMuleListCtrl)
-	ON_NOTIFY_REFLECT (NM_RCLICK, OnNMRclick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
+	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 END_MESSAGE_MAP()
 
@@ -67,6 +67,7 @@ void CKadSearchListCtrl::Init()
 	InsertColumn(colKey, GetResString(IDS_KEY) ,LVCFMT_LEFT,50);
 	InsertColumn(colType, GetResString(IDS_TYPE) ,LVCFMT_LEFT,100);
 	InsertColumn(colName, GetResString(IDS_SW_NAME) ,LVCFMT_LEFT,100);
+	SetAllIcons();
 	Localize();
 
 	CString strIniFile;
@@ -86,7 +87,13 @@ void CKadSearchListCtrl::SaveAllSettings(CIni* ini)
 	ini->WriteInt(m_strLVName + "SortAscending", GetSortAscending());
 }
 
-void CKadSearchListCtrl::Localize()
+void CKadSearchListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CKadSearchListCtrl::SetAllIcons()
 {
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -100,6 +107,10 @@ void CKadSearchListCtrl::Localize()
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
 		ImageList_Destroy(himl);
+}
+
+void CKadSearchListCtrl::Localize()
+{
 }
 
 void CKadSearchListCtrl::SearchAdd(Kademlia::CSearch* search)
@@ -190,16 +201,8 @@ void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
 	catch(...){ASSERT(0);}
 }
 
-void CKadSearchListCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult){	
-	*pResult = 0;
-}
-
 BOOL CKadSearchListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 	return true;
-}
-
-void CKadSearchListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
-	*pResult = 0;
 }
 
 void CKadSearchListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)

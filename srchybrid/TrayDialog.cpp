@@ -1,8 +1,23 @@
-// TrayDialog.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "TrayDialog.h"
+#include "emuledlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -78,62 +93,29 @@ BOOL CTrayDialog::TrayIsVisible(){
 	return m_bTrayIconVisible;
 }
 
-void CTrayDialog::TraySetIcon(HICON hIcon, bool bDelete){ // #zegzav (modified)
-
+void CTrayDialog::TraySetIcon(HICON hIcon, bool bDelete)
+{
 	ASSERT(hIcon); 
 	if (hIcon){
-		// DestroyIcon(m_nidIconData.hIcon);        // #zegzav (modified)
-		ASSERT(m_hPrevIconDelete == NULL);
+		//ASSERT(m_hPrevIconDelete == NULL);
 		if (m_bCurIconDelete){
 			ASSERT( m_nidIconData.hIcon != NULL && (m_nidIconData.uFlags & NIF_ICON) );
 			m_hPrevIconDelete = m_nidIconData.hIcon;
 		}
 		m_bCurIconDelete = bDelete;
-		// #zegzav (added) - END
 		m_nidIconData.hIcon = hIcon;
 		m_nidIconData.uFlags |= NIF_ICON;
 	}
 }
 
-void CTrayDialog::TraySetIcon(UINT nResourceID, bool bDelete){
-
-	ASSERT(nResourceID>0);
-	HICON hIcon = AfxGetApp()->LoadIcon(nResourceID);
-	if(hIcon)
-	{
-		// DestroyIcon(m_nidIconData.hIcon);        // #zegzav (modified)
-		ASSERT(m_hPrevIconDelete == NULL);
-		if (m_bCurIconDelete){
-			ASSERT( m_nidIconData.hIcon != NULL && (m_nidIconData.uFlags & NIF_ICON) );
-			m_hPrevIconDelete = m_nidIconData.hIcon;
-		}
-		m_bCurIconDelete = bDelete;
-		// #zegzav (added) - END    
-		m_nidIconData.hIcon = hIcon;
-		m_nidIconData.uFlags |= NIF_ICON;
-	}
-	else
-		ASSERT(0);
+void CTrayDialog::TraySetIcon(UINT nResourceID, bool bDelete)
+{
+	TraySetIcon(AfxGetApp()->LoadIcon(nResourceID));
 }
 
-void CTrayDialog::TraySetIcon(LPCTSTR lpszResourceName, bool bDelete){
-
-	HICON hIcon = AfxGetApp()->LoadIcon(lpszResourceName);
-	if(hIcon)
-	{
-		// DestroyIcon(m_nidIconData.hIcon);        // #zegzav (modified)
-		ASSERT(m_hPrevIconDelete == NULL);
-		if (m_bCurIconDelete){
-			ASSERT( m_nidIconData.hIcon != NULL && (m_nidIconData.uFlags & NIF_ICON) );
-			m_hPrevIconDelete = m_nidIconData.hIcon;
-		}
-		m_bCurIconDelete = bDelete;
-		// #zegzav (added) - END
-		m_nidIconData.hIcon = hIcon;
-		m_nidIconData.uFlags |= NIF_ICON;
-	}
-	else
-		ASSERT(0);
+void CTrayDialog::TraySetIcon(LPCTSTR lpszResourceName, bool bDelete)
+{
+	TraySetIcon(AfxGetApp()->LoadIcon(lpszResourceName));
 }
 
 void CTrayDialog::TraySetToolTip(LPCTSTR lpszToolTip){
@@ -178,13 +160,10 @@ BOOL CTrayDialog::TrayUpdate(){
     if(m_bTrayIconVisible)
     {
         bSuccess = Shell_NotifyIcon(NIM_MODIFY,&m_nidIconData);
-		// MORPH START - Added by IceCream, Hotfix by bluecow to avoid some tray icon crash-problem
-		//ASSERT( bSuccess );
         if (!bSuccess){
-            ASSERT(0);
+			//ASSERT(0);
             return FALSE; // don't delete 'm_hPrevIconDelete' because it's still attached to the tray
         }
-		// MORPH END   - Added by IceCream, Hotfix by bluecow to avoid some tray icon crash-problem
     }
     else
     {

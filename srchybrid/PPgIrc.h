@@ -1,9 +1,5 @@
 #pragma once
 
-// CPPgIRC dialog
-
-#include "preferences.h"
-
 class CPPgIRC : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgIRC)

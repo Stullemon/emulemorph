@@ -66,7 +66,8 @@ CSocketListener::CSocketListener()
 	m_type = 0;
 	m_hSocket = NULL;
 	m_bRunning = false;
-	m_hThread = NULL;
+	//m_hThread = NULL;
+	m_pThread = NULL;
 	m_hStopEvent = NULL;
 }
 
@@ -103,18 +104,14 @@ int CSocketListener::start(uint16 nSocketPort, int nSocketType)
 		m_hStopEvent = tp.hStopEvent;
 
 		// Create a new thread for the listener
-		DWORD dwThreadId;
-		m_hThread = CreateThread(	NULL,				// no security attributes 
-									0,					// use default stack size  
-									listening,				// thread function 
-									&tp,				// argument to thread function 
-									0,					// use default creation flags 
-									&dwThreadId);		// returns the thread identifier 
-
-		// Check the return value for success. 
-		if (m_hThread == NULL) 
+		ASSERT( m_pThread == NULL );
+		m_pThread = new CWinThread(listening, (LPVOID)&tp);
+		m_pThread->m_bAutoDelete = FALSE;
+		if (!m_pThread->CreateThread())
 		{
 			CKademlia::logMsg("CSocketListener::start() - Could not create thread");
+			delete m_pThread;
+			m_pThread = NULL;
 			throw new CNetException(ERR_CREATE_THREAD_FAILED);
 		}
 
@@ -154,52 +151,56 @@ void CSocketListener::stop(bool bAppShutdown)
 		SetEvent(m_hStopEvent);
 
 	// Wait for the thread to finish
-	if (m_hThread != NULL) 
+	if (m_pThread != NULL) 
 	{
-		if (bAppShutdown)
+		if (m_pThread->m_hThread != NULL)
 		{
-			// NOTE: This code is to be invoked from within the main thread *only*!
-			bool bQuit = false;
-			while (!bQuit)
+			if (bAppShutdown)
 			{
-				const int iNumEvents = 1;
-				DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_hThread, FALSE, INFINITE, QS_ALLINPUT);
-				if (dwEvent == -1)
+				// NOTE: This code is to be invoked from within the main thread *only*!
+				bool bQuit = false;
+				while (!bQuit)
 				{
-					TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
-					ASSERT(0);
-				}
-				else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
-				{
-					CWinThread *pThread = AfxGetThread();
-					MSG* pMsg = AfxGetCurrentMessage();
-					while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
+					const int iNumEvents = 1;
+					DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_pThread->m_hThread, FALSE, INFINITE, QS_ALLINPUT);
+					if (dwEvent == -1)
 					{
-						TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
-						// pump message, but quit on WM_QUIT
-						if (!pThread->PumpMessage()) {
-							AfxPostQuitMessage(0);
-							bQuit = true;
-							break;
+						TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
+						ASSERT(0);
+					}
+					else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
+					{
+						CWinThread *pThread = AfxGetThread();
+						MSG* pMsg = AfxGetCurrentMessage();
+						while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
+						{
+							TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
+							// pump message, but quit on WM_QUIT
+							if (!pThread->PumpMessage()) {
+								AfxPostQuitMessage(0);
+								bQuit = true;
+								break;
+							}
 						}
 					}
-				}
-				else if (dwEvent == WAIT_OBJECT_0 + 0)
-				{
-					// thread has finished
-					break;
-				}
-				else
-				{
-					ASSERT(0);
+					else if (dwEvent == WAIT_OBJECT_0 + 0)
+					{
+						// thread has finished
+						break;
+					}
+					else
+					{
+						ASSERT(0);
+					}
 				}
 			}
+			else
+			{
+				WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+			}
 		}
-		else
-		{
-			WaitForSingleObject(m_hThread, INFINITE);
-		}
-		CloseHandle(m_hThread);
+		delete m_pThread;
+		m_pThread = NULL;
 	}
 	if (m_hStopEvent != NULL)
 	{
@@ -210,7 +211,7 @@ void CSocketListener::stop(bool bAppShutdown)
 	m_bRunning = false;
 }
 
-DWORD WINAPI CSocketListener::listening(LPVOID lpParam)
+UINT AFX_CDECL CSocketListener::listening(LPVOID lpParam)
 {
 	return ((SocketListenerThreadParam *)lpParam)->listener->listeningImpl(lpParam);
 }
@@ -225,7 +226,7 @@ bool CSocketListener::create(uint16 nSocketPort, int nSocketType)
 	}
 	
 	sockaddr_in addr;
-	MEMSET(&addr, 0, sizeof(addr));
+	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	addr.sin_port = htons(nSocketPort);
@@ -243,7 +244,6 @@ uint32 CSocketListener::nameToIP(LPCSTR host)
 	uint32 retVal = 0;
 	try
 	{
-		char *ip = (char*)host;
 		if (isalpha(host[0])) 
 		{
 			hostent *hp = gethostbyname(host);

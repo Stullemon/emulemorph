@@ -14,11 +14,20 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "emule.h"
-#include "friendlist.h"
+#include "stdafx.h"
 #include <io.h>
+#include "emule.h"
+#include "FriendList.h"
+#include "UpDownClient.h"
+#include "Friend.h"
+#include "Preferences.h"
+#include "SafeFile.h"
+#include "OtherFunctions.h"
+#include "opcodes.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "FriendListCtrl.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -76,7 +85,6 @@ bool CFriendList::LoadList(){
 		file.Close();
 	}
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		if (error->m_cause == CFileException::endOfFile)
 			AddLogLine(true,GetResString(IDS_ERR_EMFRIENDSINVALID));
 		else{
@@ -128,7 +136,7 @@ void CFriendList::SaveList(){
 	catch(CFileException* error){
 		CString strError(_T("Failed to save ") EMFRIENDS_MET_FILENAME _T(" file"));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (error->GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (error->GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -177,6 +185,9 @@ void CFriendList::ShowFriends() const {
 //You can add a friend without a IP to allow the IRC to trade links with lowID users.
 bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedIP, uint32 nLastUsedPort, 
 							uint32 dwLastChatted, LPCTSTR pszName, uint32 dwHasHash){
+	// client must have an IP (HighID) or a hash
+	if (IsLowIDED2K(dwLastUsedIP) && dwHasHash==0)
+		return false;
 	if( dwLastUsedIP && IsAlreadyFriend(dwLastUsedIP, nLastUsedPort))
 		return false;
 	CFriend* Record = new CFriend( abyUserhash, dwLastSeen, dwLastUsedIP, nLastUsedPort, dwLastChatted, pszName, dwHasHash );
@@ -199,6 +210,9 @@ bool CFriendList::IsAlreadyFriend( uint32 dwLastUsedIP, uint32 nLastUsedPort ) c
 
 bool CFriendList::AddFriend(CUpDownClient* toadd){
 	if (toadd->IsFriend())
+		return false;
+	// client must have an IP (HighID) or a hash
+	if (toadd->HasLowID() && !toadd->HasValidHash())
 		return false;
 	CFriend* NewFriend = new CFriend(toadd);
 	toadd->m_Friend = NewFriend;

@@ -1,14 +1,7 @@
-// CreditsThread.h: interface for the CCreditsThread class.
-//
-//////////////////////////////////////////////////////////////////////
-
 #if !defined(AFX_CREDITSTHREAD_H__6AF70D43_0818_11D4_8541_A7287FA48D3D__INCLUDED_)
 #define AFX_CREDITSTHREAD_H__6AF70D43_0818_11D4_8541_A7287FA48D3D__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 #include "GDIThread.h"
 
 class CCreditsThread : public CGDIThread

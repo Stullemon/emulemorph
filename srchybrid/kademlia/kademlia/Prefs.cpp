@@ -292,3 +292,8 @@ Status* CPrefs::getStatus(bool closing){
 	status->m_kademliaUsers = getKademliaUsers();
 	return status;
 }
+
+bool CPrefs::getLastContact(void)
+{
+	return ((time(NULL) - m_lastContact) < KADEMLIADISCONNECTDELAY);
+}

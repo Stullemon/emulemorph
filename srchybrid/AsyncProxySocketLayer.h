@@ -118,10 +118,7 @@ Version history
 #if !defined(AFX_ASYNCPROXYSOCKETLAYER_H__6B19D281_F1D0_4EF2_984A_31639A038AE5__INCLUDED_)
 #define AFX_ASYNCPROXYSOCKETLAYER_H__6B19D281_F1D0_4EF2_984A_31639A038AE5__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 #include "AsyncSocketExLayer.h"
 
 class CAsyncProxySocketLayer : public CAsyncSocketExLayer

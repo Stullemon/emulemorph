@@ -9,8 +9,6 @@
 #include "PPgNotify.h"
 #include "PPgIRC.h"
 #include "PPgTweaks.h"
-#include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
-#include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgDisplay.h"
 #include "PPgSecurity.h"
 #include "PPgWebServer.h"
@@ -18,6 +16,8 @@
 #include "PPgProxy.h"
 #include "otherfunctions.h"
 #include "ListBoxST.h"
+#include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
+#include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
 #include "PPgEastShare.h" //EastShare - Added by Pretender, TBH-AutoBackup
 
@@ -31,13 +31,6 @@ public:
 	CPreferencesDlg();
 	virtual ~CPreferencesDlg();
 	
-private:
-	bool isEnlarged; // EastShare, Added by TAHO, enlarge Windows
-
-protected:
-	UINT m_nActiveWnd;
-	DECLARE_MESSAGE_MAP()
-public:
 	CPPgGeneral		m_wndGeneral;
 	CPPgConnection	m_wndConnection;
 	CPPgServer		m_wndServer;
@@ -63,6 +56,7 @@ public:
 	CImageList		ImageList;
 	int				m_iPrevPage;
 
+	void Localize();
 	void SetPrefs(CPreferences* in_prefs)
 	{
 		app_prefs = in_prefs;
@@ -78,15 +72,20 @@ public:
 		m_wndTweaks.SetPrefs(in_prefs);
 		m_wndSecurity.SetPrefs(in_prefs);
 		m_wndWebServer.SetPrefs(in_prefs);
-		m_wndMorph.SetPrefs(in_prefs); //MORPH - Added by IceCream, Morph Prefs
-		m_wndMorph2.SetPrefs(in_prefs);	//MORPH - Added by SiRoB, Morph Prefs
 		m_wndScheduler.SetPrefs(in_prefs);
 		m_wndProxy.SetPrefs(in_prefs);
+		m_wndMorph.SetPrefs(in_prefs); //MORPH - Added by IceCream, Morph Prefs
+		m_wndMorph2.SetPrefs(in_prefs);	//MORPH - Added by SiRoB, Morph Prefs
 		m_wndEastShare.SetPrefs(in_prefs);	//EastShare - Added by Pretender, ES Prefs
 	}
+
+protected:
+	UINT m_nActiveWnd;
+
+	virtual BOOL OnInitDialog();
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
 	afx_msg void OnSelChanged();
-	virtual BOOL OnInitDialog();
-	void Localize();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

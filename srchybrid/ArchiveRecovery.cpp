@@ -1,6 +1,12 @@
 
 #include "stdafx.h"
+#include "emule.h"
 #include "ArchiveRecovery.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "PartFile.h"
+#include <zlib/zlib.h>
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -95,7 +101,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 			if (preview)
 			{
 				SHELLEXECUTEINFO SE;
-				MEMSET(&SE,0,sizeof(SE));
+				memset(&SE,0,sizeof(SE));
 				SE.fMask = SEE_MASK_NOCLOSEPROCESS ;
 				SE.lpVerb = "open";
 				SE.lpFile = outputFileName.GetBuffer();
@@ -118,6 +124,7 @@ bool CArchiveRecovery::performRecovery(CPartFile *partFile, CTypedPtrList<CPtrLi
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 	return success;
 }
@@ -186,7 +193,7 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 					zipInput->Seek(fill->start, CFile::begin);
 
 				// If there is any problem, then don't bother checking the rest of this part
-				while (true)
+				for (;;)
 				{
 					// Scan for entry marker within this filled area
 					if (!scanForZipMarker(zipInput, (uint32)ZIP_LOCAL_HEADER_MAGIC, (fill->end - zipInput->GetPosition() + 1)))
@@ -265,6 +272,7 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, CTypedPtrLi
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 
 	// Tell the user how many files were recovered
@@ -351,6 +359,7 @@ bool CArchiveRecovery::readZipCentralDirectory(CFile *zipInput, CTypedPtrList<CP
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 	return retVal;
 }
@@ -485,7 +494,8 @@ bool CArchiveRecovery::processZipEntry(CFile *zipInput, CFile *zipOutput, uint32
 			if (entry.lenExtraField > 0)
 				cdEntry->extraField = entry.extraField;
 			cdEntry->comment = new BYTE[cdEntry->lenComment];
-			MEMCOPY(cdEntry->comment, ZIP_COMMENT, cdEntry->lenComment);
+			memcpy(cdEntry->comment, ZIP_COMMENT, cdEntry->lenComment);
+
 			centralDirectoryEntries->AddTail(cdEntry);
 		}
 		else
@@ -500,6 +510,7 @@ bool CArchiveRecovery::processZipEntry(CFile *zipInput, CFile *zipOutput, uint32
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 	return retVal;
 }
@@ -561,6 +572,7 @@ bool CArchiveRecovery::CopyFile(CPartFile *partFile, CTypedPtrList<CPtrList, Gap
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 
 	if (srcFile)
@@ -601,6 +613,7 @@ bool CArchiveRecovery::recoverRar(CFile *rarInput, CFile *rarOutput, CTypedPtrLi
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 
 	// Tell the user how many files were recovered
@@ -683,6 +696,7 @@ bool CArchiveRecovery::scanForZipMarker(CFile *input, uint32 marker, uint32 avai
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 	return false;
 }
@@ -792,6 +806,7 @@ RAR_BlockFile *CArchiveRecovery::scanForRarFileHeader(CFile *input, uint32 avail
 		error->Delete();
 	}
 	catch (...){
+		ASSERT(0);
 	}
 	return false;
 }
@@ -876,10 +891,11 @@ void CArchiveRecovery::writeRarBlock(CFile *input, CFile *output, RAR_BlockFile 
 	}
 	catch (CFileException* error){
 		error->Delete();
-		try { output->SetLength(offsetStart); } catch (...) {}
+		try { output->SetLength(offsetStart); } catch (...) {ASSERT(0);}
 	}
 	catch (...){
-		try { output->SetLength(offsetStart); } catch (...) {}
+		ASSERT(0);
+		try { output->SetLength(offsetStart); } catch (...) {ASSERT(0);}
 	}
 }
 
@@ -907,7 +923,7 @@ uint16 CArchiveRecovery::calcUInt16(BYTE *input)
 	try
 	{
 		retVal = (((uint16)input[1]) << 8) + ((uint16)input[0]);
-	} catch (...) {}
+	} catch (...) {ASSERT(0);}
 	return retVal;
 }
 
@@ -917,7 +933,7 @@ uint32 CArchiveRecovery::calcUInt32(BYTE *input)
 	try
 	{
 		retVal = (((uint32)input[3]) << 24) + (((uint32)input[2]) << 16) + (((uint32)input[1]) << 8) + ((uint32)input[0]);
-	} catch (...) {}
+	} catch (...) {ASSERT(0);}
 	return retVal;
 }
 

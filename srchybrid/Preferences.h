@@ -16,9 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "types.h"
-#include "opcodes.h"
-#include "MD5Sum.h"
 #include "loggable.h"
 
 
@@ -154,6 +151,9 @@ struct Preferences_Struct{
 	bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	char	nick[255];
+	//MORPH START - Added by SiRoB, (SUC) & (USS)
+	uint16		minupload;
+	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	uint16	maxupload;
 	uint16	maxdownload;
 	uint16	port;
@@ -436,7 +436,6 @@ struct Preferences_Struct{
 
 	bool	m_bVerbose;
 	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
-	bool	m_bDebugSecuredConnection; //MORPH - Added by SiRoB, Debug Log option for Secured Connection
 	DWORD	m_dwDebugServerTCP;
 	DWORD	m_dwDebugServerUDP;
 	DWORD	m_dwDebugServerSources;
@@ -504,6 +503,7 @@ struct Preferences_Struct{
 	bool	debug2disk;
 	bool	DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	int		iMaxLogBuff;
+	UINT	uMaxLogFileSize;
 	bool	scheduler;
 	bool	dontcompressavi;
 	bool	msgonlyfriends;
@@ -597,16 +597,13 @@ struct Preferences_Struct{
 	uint8		m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = average
 	// khaos::accuratetimerem-
 	
-	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	uint16		m_iMinUpload;
-	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	bool		m_bDynUpEnabled;
-	int			m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
 	int			m_iDynUpPingTolerance;
 	int			m_iDynUpGoingUpDivider;
 	int			m_iDynUpGoingDownDivider;
 	int			m_iDynUpNumberOfPings;
+	int			m_iDynUpPingLimit; // EastShare - Added by TAHO, USS limit
 	bool		m_bIsUSSLimit; // EastShare - Added by linekin, USS limit applied?
 	bool		m_bDynUpLog;
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
@@ -805,6 +802,9 @@ public:
 	uint16	GetServerUDPPort(){return prefs->nServerUDPPort;}
 	uint16	GetKadUDPPort()	{return prefs->kadudpport;}
 	char*	GetUserHash()	{return userhash;}
+	//MORPH START - Added by SiRoB, (SUC) & (USS)
+	uint16	GetMinUpload()				{return prefs->minupload;}
+	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	uint16	GetMaxUpload()	{return	prefs->maxupload;}
 	bool	IsICHEnabled()	{return prefs->ICH;}
 	bool	AutoServerlist(){return prefs->autoserverlist;}
@@ -1034,11 +1034,8 @@ public:
 	void	SetMaxGraphUploadRate(int in)	{prefs->maxGraphUploadRate  =(in)?in:16;}
 	void	SetMaxGraphDownloadRate(int in)	{prefs->maxGraphDownloadRate=(in)?in:96;}
 	uint16	MaxConnectionsSwitchBorder() const {return prefs->maxconnectionsswitchborder;}//MORPH - Added by Yun.SF3, Auto DynUp changing
-	//MORPH START - Added by SiRoB, (SUC) & (USS)
-	uint16	GetMinUpload()				{return prefs->m_iMinUpload;}
-	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	bool	IsSUCDoesWork()				{return prefs->m_iMinUpload<prefs->maxupload && prefs->maxupload != UNLIMITED && prefs->m_bSUCEnabled;}
+	bool	IsSUCDoesWork();
 	bool	IsSUCEnabled()				{return prefs->m_bSUCEnabled;}
 	//MORPH START - Added by Yun.SF3, Auto DynUp changing
 	void	SetSUCEnabled(bool newValue){prefs->m_bSUCEnabled = newValue;}
@@ -1091,6 +1088,8 @@ public:
 	void	GetLanguages(CWordArray& aLanguageIDs) const;
 	void	SetLanguage();
 	const CString& GetLangDir() const {return m_strLangDir;}
+	bool	IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore);
+	CString	GetLangDLLNameByID(LANGID lidSelected);
 
 	int8	IsDoubleClickEnabled()		{return prefs->transferDoubleclick;}
 	int8	CanSeeShares(void)			{return prefs->m_iSeeShares;}
@@ -1150,7 +1149,6 @@ public:
 	DWORD	GetDebugServerUDP()					{return prefs->m_dwDebugServerUDP;}
 	DWORD	GetDebugServerSources()				{return prefs->m_dwDebugServerSources;}
 	DWORD	GetDebugServerSearches()			{return prefs->m_dwDebugServerSearches;}
-	bool	GetDebugSecuredConnection()			{return prefs->m_bDebugSecuredConnection;}  //MORPH - Added by SiRoB, Debug Log option for Secured Connection
 	bool	GetPreviewPrio()					{return prefs->m_bpreviewprio;}
 	void	SetPreviewPrio(bool in)				{prefs->m_bpreviewprio=in;}
 	bool	GetUpdateQueueList()				{return prefs->m_bupdatequeuelist;}
@@ -1236,9 +1234,9 @@ public:
 	bool	ShareAll()			{return prefs->shareall;}	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
-	void	SetMinUpload(uint16 in) {  prefs->m_iMinUpload = in; } //MORPH - Added by SiRoB, (SUC) & (USS)
-	void	SetMaxUpload(uint16 in) {  prefs->maxupload = (in) ? in : 0xffff; }
-	void	SetMaxDownload(uint16 in) {prefs->maxdownload=(in) ? in : 0xffff; }
+	void	SetMinUpload(uint16 in); //MORPH - Added by SiRoB, (SUC) & (USS)
+	void	SetMaxUpload(uint16 in);
+	void	SetMaxDownload(uint16 in);
 
 	WINDOWPLACEMENT GetEmuleWindowPlacement() {return prefs->EmuleWindowPlacement; }
 	void SetWindowLayout(WINDOWPLACEMENT in) {prefs->EmuleWindowPlacement=in; }
@@ -1249,7 +1247,7 @@ public:
 	int8 AutoConnectStaticOnly()	{return prefs->autoconnectstaticonly;}	
 	int8 GetUpdateDays()			{return prefs->versioncheckdays;}
 	uint32 GetLastVC()				{return prefs->versioncheckLastAutomatic;}
-	void   UpdateLastVC()			{prefs->versioncheckLastAutomatic=mktime(CTime::GetCurrentTime().GetLocalTm());}
+	void   UpdateLastVC();
 	int	GetIPFilterLevel()			{ return prefs->filterlevel;}
 	CString GetMessageFilter()		{ return CString(prefs->messageFilter);}
 	CString GetCommentFilter()		{ return CString(prefs->commentFilter);}
@@ -1281,12 +1279,13 @@ public:
 	bool	Debug2Disk()	{ return prefs->debug2disk;}
 	bool	DateFileNameLog()	{ return prefs->DateFileNameLog;}//Morph - added by AndCycle, Date File Name Log
 	int		GetMaxLogBuff() { return prefs->iMaxLogBuff;}
+	UINT	GetMaxLogFileSize() { return prefs->uMaxLogFileSize; }
 
 	// WebServer
 	uint16	GetWSPort()								{ return prefs->m_nWebPort; }
 	void	SetWSPort(uint16 uPort)					{ prefs->m_nWebPort=uPort; }
 	CString	GetWSPass()								{ return CString(prefs->m_sWebPassword); }
-	void	SetWSPass(CString strNewPass)			{ sprintf(prefs->m_sWebPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0)); }
+	void	SetWSPass(CString strNewPass);
 	bool	GetWSIsEnabled()						{ return prefs->m_bWebEnabled; }
 	void	SetWSIsEnabled(bool bEnable)			{ prefs->m_bWebEnabled=bEnable; }
 	bool	GetWebUseGzip()							{ return prefs->m_bWebUseGzip; }
@@ -1296,7 +1295,7 @@ public:
 	bool	GetWSIsLowUserEnabled()					{ return prefs->m_bWebLowEnabled; }
 	void	SetWSIsLowUserEnabled(bool in)			{ prefs->m_bWebLowEnabled=in; }
 	CString	GetWSLowPass()							{ return CString(prefs->m_sWebLowPassword); }
-	void	SetWSLowPass(CString strNewPass)		{ sprintf(prefs->m_sWebLowPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0)); }
+	void	SetWSLowPass(CString strNewPass);
 
 	void	SetMaxSourcesPerFile(uint16 in)			{ prefs->maxsourceperfile=in;}
 	void	SetMaxConnections(uint16 in)			{ prefs->maxconnections =in;}
@@ -1318,7 +1317,7 @@ public:
 
 	// mobileMule
 	CString	GetMMPass()								{ return CString(prefs->m_sMMPassword); }
-	void	SetMMPass(CString strNewPass)			{ sprintf(prefs->m_sMMPassword,"%s",MD5Sum(strNewPass).GetHash().GetBuffer(0)); }
+	void	SetMMPass(CString strNewPass);
 	bool	IsMMServerEnabled()						{ return prefs->m_bMMEnabled; }
 	void	SetMMIsEnabled(bool bEnable)			{ prefs->m_bMMEnabled=bEnable; }
 	uint16	GetMMPort()								{ return prefs->m_nMMPort; }
@@ -1396,20 +1395,20 @@ bool	IsExtControlsEnabled()		{ return prefs->m_bExtControls;}
 
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	bool	IsDynUpEnabled() { return prefs->m_bDynUpEnabled; }
+	void	SetDynUpEnabled(bool newValue) { prefs->m_bDynUpEnabled = newValue; }
+	int		GetDynUpPingTolerance() { return prefs->m_iDynUpPingTolerance; }
+	int		GetDynUpGoingUpDivider() { return prefs->m_iDynUpGoingUpDivider; }
+	int		GetDynUpGoingDownDivider() { return prefs->m_iDynUpGoingDownDivider; }
+	int		GetDynUpNumberOfPings() { return prefs->m_iDynUpNumberOfPings; }
 	bool	IsUSSLog() {return prefs->m_bDynUpLog;}
 	bool	IsUSSLimit() { return prefs->m_bIsUSSLimit;} // EastShare - Added by TAHO, USS limit
-	void	SetDynUpEnabled(bool newValue) { prefs->m_bDynUpEnabled = newValue; }
+	int		GetDynUpPingLimit() { return prefs->m_iDynUpPingLimit; } // EastShare - Added by TAHO, USS limit
+	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 	//EastShare START - Added by Pretender, add USS settings in scheduler tab
 	void	SetDynUpPingLimit(int in) { prefs->m_iDynUpPingLimit = in; }
 	void	SetDynUpGoingUpDivider(int in) { prefs->m_iDynUpGoingUpDivider = in; }
 	void	SetDynUpGoingDownDivider(int in) { prefs->m_iDynUpGoingDownDivider = in; }
 	//EastShare END - Added by Pretender, add USS settings in scheduler tab
-	int		GetDynUpPingLimit() { return prefs->m_iDynUpPingLimit; } // EastShare - Added by TAHO, USS limit
-	int		GetDynUpPingTolerance() { return prefs->m_iDynUpPingTolerance; }
-	int		GetDynUpGoingUpDivider() { return prefs->m_iDynUpGoingUpDivider; }
-	int		GetDynUpGoingDownDivider() { return prefs->m_iDynUpGoingDownDivider; }
-	int		GetDynUpNumberOfPings() { return prefs->m_iDynUpNumberOfPings; }
-	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 protected:
 	void	CreateUserHash();
 	void	SetStandartValues();

@@ -16,57 +16,38 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "types.h"
-#include "KnownFile.h"
-#include "PartFile.h"
-#include <math.h>
 
-#define _WINVER_NT4_	0x0004
-#define _WINVER_95_		0x0004
-#define _WINVER_98_		0x0A04
-#define _WINVER_ME_		0x5A04
-#define _WINVER_2K_		0x0005
-#define _WINVER_XP_		0x0105
+class CAbstractFile;
 
 #define ROUND(x) (floor((float)x+0.5f))
 
-#ifdef _DEBUG
-#define OUTPUT_DEBUG_TRACE() {(void)0;}
-#else
-#define OUTPUT_DEBUG_TRACE() ((void)0)
-#endif
 
-#define ELEMENT_COUNT(X) (sizeof(X) / sizeof(X[0]))
+///////////////////////////////////////////////////////////////////////////////
+// Low level str
+//
+__inline char* nstrdup(const char* todup){
+   size_t len = strlen(todup) + 1;
+   return (char*)memcpy(new char[len], todup, len);
+}
 
-enum EED2KFileType
-{
-	ED2KFT_ANY,
-	ED2KFT_AUDIO,
-	ED2KFT_VIDEO,
-	ED2KFT_IMAGE,
-	ED2KFT_PROGRAM,
-	ED2KFT_DOCUMENT,
-	ED2KFT_ARCHIVE,
-	ED2KFT_CDIMAGE
-};
+CHAR *stristr(const CHAR *str1, const CHAR *str2);
 
 
+///////////////////////////////////////////////////////////////////////////////
+// String conversion
+//
 CString CastItoXBytes(uint64 count);
+CString CastItoIShort(uint64 number);
+CString CastSecondsToHM(sint32 seconds);
+CString	CastSecondsToLngHM(__int64 count);
+CString GetFormatedUInt(ULONG ulVal);
+void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
+CString LeadingZero(uint32 units);
 // khaos::categorymod+ Takes a string and returns bytes...
 ULONG	CastXBytesToI(const CString& strExpr);
 // Takes bytes and returns a string with only integers...
 CString CastItoUIXBytes(uint32 count);
 // khaos::categorymod-
-CString CastItoIShort(uint64 number);
-CString CastSecondsToHM(sint32 seconds); //<<--9/21/02
-
-// -khaos--+++>
-CString	CastSecondsToLngHM(__int64 count);
-// <-----khaos-
-
-CString LeadingZero(uint32 units);
-void ShellOpenFile(CString name); //<<--9/21/02
-void ShellOpenFile(CString name, LPCTSTR pszVerb);
 
 // khaos::kmod+ Random number generator using ranges.
 int			GetRandRange( int from, int to);
@@ -77,6 +58,53 @@ static int	rgiState[2+55];
 int wildcmp(char *wild, char *string);
 // khaos::kmod-
 
+
+///////////////////////////////////////////////////////////////////////////////
+// URL conversion
+//
+void URLDecode(CString& result, const char* buff); // Make a malloc'd decoded strnig from an URL encoded string (with escaped spaces '%20' and  the like
+CString URLDecode(CString sIn);
+CString URLEncode(CString sIn);
+CString MakeStringEscaped(CString in);
+CString	StripInvalidFilenameChars(CString strText, bool bKeepSpaces = true);
+CString	CreateED2kLink( CAbstractFile* f );
+CString	CreateHTMLED2kLink( CAbstractFile* f );
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Hex conversion
+//
+CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen);
+CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen);
+int	DecodeLengthBase16(int base16Length);
+void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer);
+
+///////////////////////////////////////////////////////////////////////////////
+// File/Path string helpers
+//
+void MakeFoldername(char* path);
+CString RemoveFileExtension(const CString& rstrFilePath);
+int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
+CString StringLimit(CString in,uint16 length);
+CString CleanupFilename(CString filename);
+
+///////////////////////////////////////////////////////////////////////////////
+// GUI helpers
+//
+void ShellOpenFile(CString name);
+void ShellOpenFile(CString name, LPCTSTR pszVerb);
+bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle = NULL, LPCTSTR pszDlgTitle = NULL);
+BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultFileName = NULL, DWORD dwFlags = 0,bool openfilestyle=true);
+void GetPopupMenuPos(CListCtrl& lv, CPoint& point);
+void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
+void UpdateURLMenu(CMenu &menu, int &counter);
+void RunURL(CAbstractFile* file,CString urlpattern);
+void InitWindowStyles(CWnd* pWnd);
+CString GetRateString(uint16 rate);
+
+///////////////////////////////////////////////////////////////////////////////
+// Resource strings
+//
 #ifdef USE_STRING_IDS
 #define	RESSTRIDTYPE		LPCTSTR
 #define	IDS2RESIDTYPE(id)	#id
@@ -89,12 +117,9 @@ CString GetResString(RESSTRIDTYPE StringID);
 #define _GetResString(id)	GetResString(id)
 #endif//!USE_STRING_IDS
 
-__inline char* nstrdup(const char* todup){
-   size_t len = strlen(todup) + 1;
-   return (char*)memcpy(new char[len], todup, len);
-}
-
-CHAR *stristr(const CHAR *str1, const CHAR *str2);
+///////////////////////////////////////////////////////////////////////////////
+// Error strings, Debugging, Logging
+//
 int GetSystemErrorString(DWORD dwError, CString &rstrError);
 int GetModuleErrorString(DWORD dwError, CString &rstrError, LPCTSTR pszModule);
 int GetErrorMessage(DWORD dwError, CString &rstrErrorMsg, DWORD dwFlags = 0);
@@ -107,48 +132,34 @@ void DebugHexDump(CFile& file);
 CString DbgGetFileInfo(const uchar* hash);
 LPCTSTR DbgGetHashTypeString(const uchar* hash);
 CString DbgGetClientID(uint32 nClientID);
-CString GetFormatedUInt(ULONG ulVal);
-void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
-ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
 
-void URLDecode(CString& result, const char* buff); // Make a malloc'd decoded strnig from an URL encoded string (with escaped spaces '%20' and  the like
-CString URLDecode(CString sIn);
-CString URLEncode(CString sIn);
+///////////////////////////////////////////////////////////////////////////////
+// Win32 specifics
+//
+bool Ask4RegFix(bool checkOnly, bool dontAsk = false); // Barry - Allow forced update without prompt
+void BackupReg(void); // Barry - Store previous values
+void RevertReg(void); // Barry - Restore previous values
+
+int GetMaxWindowsTCPConnections();
+
+#define _WINVER_NT4_	0x0004
+#define _WINVER_95_		0x0004
+#define _WINVER_98_		0x0A04
+#define _WINVER_ME_		0x5A04
+#define _WINVER_2K_		0x0005
+#define _WINVER_XP_		0x0105
+WORD	DetectWinVersion();
+uint64	GetFreeDiskSpaceX(LPCTSTR pDirectory);
+ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
+int		GetAppImageListColorFlag();
+
+///////////////////////////////////////////////////////////////////////////////
+// MD4 helpers
+//
 
 __inline BYTE toHex(const BYTE &x){
 	return x > 9 ? x + 55: x + 48;
 }
-
-bool Ask4RegFix(bool checkOnly, bool dontAsk = false); // Barry - Allow forced update without prompt
-void BackupReg(void); // Barry - Store previous values
-void RevertReg(void); // Barry - Restore previous values
-int GetMaxConnections();
-CString MakeStringEscaped(CString in);
-void RunURL(CAbstractFile* file,CString urlpattern);
-
-WORD	DetectWinVersion();
-uint64	GetFreeDiskSpaceX(LPCTSTR pDirectory);
-//For Rate File 
-CString GetRateString(uint16 rate);
-void	UpdateURLMenu(CMenu &menu, int &counter);
-int		GetAppImageListColorFlag();
-
-// From Gnucleus project [found by Tarod]
-CString EncodeBase32(const unsigned char* buffer, unsigned int bufLen);
-CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen);
-int	DecodeLengthBase16(int base16Length);
-void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer);
-bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle = NULL, LPCTSTR pszDlgTitle = NULL);
-void MakeFoldername(char* path);
-CString RemoveFileExtension(const CString& rstrFilePath);
-int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
-CString StringLimit(CString in,uint16 length);
-BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultFileName = NULL, DWORD dwFlags = 0);
-bool CheckShowItemInGivenCat(CPartFile* file,int inCategory);
-uint8 GetRealPrio(uint8 in);
-
-CString CleanupFilename(CString filename);
-// khaos::categorymod+ Obsolete CString GetCatTitle(int catid);
 
 // md4cmp -- replacement for memcmp(hash1,hash2,16)
 // Like 'memcmp' this function returns 0, if hash1==hash2, and !0, if hash1!=hash2.
@@ -160,13 +171,11 @@ __inline int md4cmp(const void* hash1, const void* hash2) {
 		     ((uint32*)hash1)[3] == ((uint32*)hash2)[3]);
 }
 
-// md4clr -- replacement for MEMSET(hash,0,16)
+// md4clr -- replacement for memset(hash,0,16)
 __inline void md4clr(const void* hash) {
 	((uint32*)hash)[0] = ((uint32*)hash)[1] = ((uint32*)hash)[2] = ((uint32*)hash)[3] = 0;
 }
 
-//Morph Start - commented by AndCycle, eMulePlus CPU optimize
-/*	//original commented
 // md4cpy -- replacement for memcpy(dst,src,16)
 __inline void md4cpy(void* dst, const void* src) {
 	((uint32*)dst)[0] = ((uint32*)src)[0];
@@ -174,8 +183,6 @@ __inline void md4cpy(void* dst, const void* src) {
 	((uint32*)dst)[2] = ((uint32*)src)[2];
 	((uint32*)dst)[3] = ((uint32*)src)[3];
 }
-*/
-//Morph End - commented by AndCycle, eMulePlus CPU optimize
 
 #define	MAX_HASHSTR_SIZE (16*2+1)
 CString md4str(const uchar* hash);
@@ -203,12 +210,39 @@ __inline int CompareOptStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 	return 0;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// ED2K File Type
+//
+enum EED2KFileType
+{
+	ED2KFT_ANY,
+	ED2KFT_AUDIO,
+	ED2KFT_VIDEO,
+	ED2KFT_IMAGE,
+	ED2KFT_PROGRAM,
+	ED2KFT_DOCUMENT,
+	ED2KFT_ARCHIVE,
+	ED2KFT_CDIMAGE
+};
+
 CString GetFiletypeByName(LPCTSTR pszFileName);
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
-
-bool IsGoodIP(uint32 nIP, bool forceCheck = false); //MORPH - Modified by SiRoB, ZZ Upload system (USS)
+ 
+//MORPH - Modified by SiRoB, ZZ Upload system (USS)
+bool IsGoodIP(uint32 nIP, bool forceCheck = false);
 bool IsGoodIPPort(uint32 nIP, uint16 nPort);
+__inline bool IsLowIDHybrid(uint32 id){
+	return (id < 16777216);
+}
+__inline bool IsLowIDED2K(uint32 id){
+	return (id < 16777216); //Need to verify what the highest LowID can be returned by the server.
+}
+CString ipstr(uint32 nIP);
 
-bool	IsLowIDHybrid(uint32 id);
-bool	IsLowIDED2K(uint32 id);
+
+///////////////////////////////////////////////////////////////////////////////
+// Date/Time
+//
+time_t safe_mktime(struct tm* ptm);

@@ -1,10 +1,5 @@
 #pragma once
 
-#include "preferences.h"
-#include "wizard.h"
-
-// CPPgConnection dialog
-
 class CPPgConnection : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgConnection)

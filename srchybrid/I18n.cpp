@@ -1,7 +1,8 @@
-#include <stdafx.h>
+#include "stdafx.h"
 #include <locale.h>
 #include "emule.h"
 #include "OtherFunctions.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -40,7 +41,7 @@ static char THIS_FILE[]=__FILE__;
 #define LANGID_ZH_TW MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_TRADITIONAL)
 #define LANGID_HE_IL MAKELANGID(LANG_HEBREW,SUBLANG_DEFAULT)
 #define LANGID_JP_JP MAKELANGID(LANG_JAPANESE,SUBLANG_DEFAULT)
-#define LANGID_CZ_CZ MAKELANGID(LANG_CZECH,SUBLANG_DEFAULT)
+
 
 static HINSTANCE _hLangDLL = NULL;
 
@@ -107,10 +108,10 @@ static SLanguage _aLanguages[] =
 	{0, NULL, 0}
 };
 
-static void InitLanguages(const CString& rstrLangDir)
+static void InitLanguages(const CString& rstrLangDir, bool bReInit = false)
 {
 	static BOOL _bInitialized = FALSE;
-	if (_bInitialized)
+	if (_bInitialized && !bReInit)
 		return;
 	_bInitialized = TRUE;
 
@@ -150,8 +151,9 @@ void CPreferences::GetLanguages(CWordArray& aLanguageIDs) const
 {
 	const SLanguage* pLang = _aLanguages;
 	while (pLang->lid){
-		if (pLang->bSupported)
-			aLanguageIDs.Add(pLang->lid);
+		//if (pLang->bSupported)
+		//show all languages, offer download if not supported ones later
+		aLanguageIDs.Add(pLang->lid);
 		pLang++;
 	}
 }
@@ -190,12 +192,14 @@ bool CheckLangDLLVersion(const CString& rstrLangDLL)
 		}
 	}
 
-	if (!bResult){
+	// no messagebox anymore since we just offer the user to download the new one
+	/*if (!bResult){
 		CString strError;
 		// Don't try to load a localized version of that string! ;)
 		strError.Format(_T("Language DLL \"%s\" is not for this eMule version. Please update the language DLL!"), rstrLangDLL);
 		AfxMessageBox(strError, MB_ICONSTOP);
-	}
+	}*/
+
 	return bResult;
 }
 
@@ -264,4 +268,27 @@ void CPreferences::SetLanguage()
 		LoadLangLib(GetLangDir(), LANGID_EN_US);
 		prefs->languageID = LANGID_EN_US;
 	}
+}
+
+bool CPreferences::IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore){
+	InitLanguages(GetLangDir(), bUpdateBefore);
+	if (lidSelected == LANGID_EN_US)
+		return true;
+	const SLanguage* pLang = _aLanguages;
+	for (;pLang->lid;pLang++){
+		if (pLang->lid == lidSelected && pLang->bSupported){
+			return CheckLangDLLVersion(GetLangDir()+CString(pLang->pszISOLocale) + _T(".dll"));
+		}
+	}
+	return false; 
+}
+
+CString CPreferences::GetLangDLLNameByID(LANGID lidSelected){
+	const SLanguage* pLang = _aLanguages;
+	for (;pLang->lid;pLang++){
+		if (pLang->lid == lidSelected)
+			return CString(pLang->pszISOLocale) + _T(".dll"); 
+	}
+	ASSERT ( false );
+	return CString("");
 }

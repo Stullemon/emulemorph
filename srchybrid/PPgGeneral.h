@@ -1,11 +1,6 @@
 #pragma once
 
-#include "preferences.h"
-#include "afxwin.h"
-
-// CPPgGeneral dialog
-
-class CPPgGeneral : public CPropertyPage
+class CPPgGeneral : public CPropertyPage, CLoggable
 {
 	DECLARE_DYNAMIC(CPPgGeneral)
 
@@ -32,10 +27,12 @@ public:
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnBnClickedEd2kfix();
 	afx_msg void OnBnClickedEditWebservices();
+	afx_msg void OnLangChange();
 
 protected:
 	CComboBox m_language;
 public:
 	void Localize(void);
+	afx_msg void OnCbnCloseupLangs();
 };
 

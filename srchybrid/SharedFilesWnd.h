@@ -14,16 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
-#include "sharedfilesctrl.h"
 #include "ResizableLib\ResizableDialog.h"
-#include "progressctrlx.h"
-#include "afxwin.h"
-#include "iconstatic.h"
-
-// CSharedFilesWnd dialog
+#include "SharedFilesCtrl.h"
+#include "ProgressCtrlX.h"
+#include "IconStatic.h"
 
 class CSharedFilesWnd : public CResizableDialog
 {
@@ -39,14 +34,18 @@ public:
 	CSharedFilesCtrl sharedfilesctrl;
 
 protected:
+	void SetAllIcons();
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	virtual BOOL	PreTranslateMessage(MSG* pMsg);
-	DECLARE_MESSAGE_MAP()
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedReloadsharedfiles();
 	afx_msg void OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickSflist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
+
 private:
 	void ShowDetails(CKnownFile* cur_file);
 	CProgressCtrlX pop_bar;
@@ -56,6 +55,4 @@ private:
 	uchar shownFileHash[16];
 	CIconStatic m_ctrlStatisticsFrm;
 	HICON icon_files;
-public:
-	afx_msg void OnSysColorChange();
 };

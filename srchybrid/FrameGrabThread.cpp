@@ -14,29 +14,43 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "framegrabthread.h"
-#include "CxImage/xImage.h"
-#include "otherfunctions.h"
+#include "stdafx.h"
 #include "emule.h"
-#include <Windows.h>
+#include "FrameGrabThread.h"
+#include "CxImage/xImage.h"
+#include "OtherFunctions.h"
 #include "quantize.h"
 // DirectShow MediaDet
 #include <strmif.h>
-#include <uuids.h>
+//#include <uuids.h>
+#define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+        EXTERN_C const GUID DECLSPEC_SELECTANY name \
+                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+
+_DEFINE_GUID(MEDIATYPE_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+_DEFINE_GUID(MEDIATYPE_Audio, 0x73647561, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+_DEFINE_GUID(FORMAT_VideoInfo,0x05589f80, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
+_DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 #include <qedit.h>
 typedef struct tagVIDEOINFOHEADER {
-
     RECT            rcSource;          // The bit we really want to use
     RECT            rcTarget;          // Where the video should go
     DWORD           dwBitRate;         // Approximate bit data rate
     DWORD           dwBitErrorRate;    // Bit error rate for this stream
     REFERENCE_TIME  AvgTimePerFrame;   // Average time per frame (100ns units)
-
     BITMAPINFOHEADER bmiHeader;
-
 } VIDEOINFOHEADER;
+
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 IMPLEMENT_DYNCREATE(CFrameGrabThread, CWinThread)
 
@@ -141,16 +155,17 @@ uint8 CFrameGrabThread::GrabFrames(){
 				char* buffer = new char[nFullBufferLen];
 				
 				BITMAPFILEHEADER bfh;
-				MEMSET( &bfh, 0, sizeof( bfh ) );
+				memset( &bfh, 0, sizeof( bfh ) );
 				bfh.bfType = 'MB';
 				bfh.bfSize = nFullBufferLen;
 				bfh.bfOffBits = sizeof( BITMAPINFOHEADER ) + sizeof( BITMAPFILEHEADER );
-				MEMCOPY(buffer,&bfh,sizeof( bfh ) );
+				memcpy(buffer,&bfh,sizeof( bfh ) );
 
 				try {
 					hr = pDet->GetBitmapBits(dStartTime+ (nFramesGrabbed*TIMEBETWEENFRAMES), NULL, buffer + sizeof( bfh ), width, height);
 				}
 				catch (...) {
+					ASSERT(0);
 					hr = E_FAIL;
 				}
 				if (SUCCEEDED(hr))
@@ -181,8 +196,8 @@ uint8 CFrameGrabThread::GrabFrames(){
 						free(ppal);
 					}
 					
-					CString TestName;
-					TestName.Format("G:\\testframe%i.png",nFramesGrabbed);
+					//CString TestName;
+					//TestName.Format("G:\\testframe%i.png",nFramesGrabbed);
 					//imgResult->Save(TestName,CXIMAGE_FORMAT_PNG);
 					// done
 					imgResults[nFramesGrabbed] = imgResult;
@@ -196,6 +211,7 @@ uint8 CFrameGrabThread::GrabFrames(){
 		return nFramesGrabbed;
 	}
 	catch(...){
+		ASSERT(0);
 		return 0;
 	}
 }

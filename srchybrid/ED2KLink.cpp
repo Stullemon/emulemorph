@@ -15,10 +15,9 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "stdafx.h"
-#include <winsock2.h>
+#include "resource.h"
 #include "ED2KLink.h"
-#include "otherfunctions.h"
-#include "emule.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -246,7 +245,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 				while( *pCh != 0 && nCount < MAXSHORT ) {
 					pIP = pCh;
 					// find the end of this ip:port string & start of next ip:port string.
-					if( pCh = _tcschr(pCh, _T(',')) ) {
+					if( (pCh = _tcschr(pCh, _T(','))) != NULL ) {
 						*pCh = 0; // terminate current "ip:port"
 						pCh++; // point to next "ip:port"
 					}

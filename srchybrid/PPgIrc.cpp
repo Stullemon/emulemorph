@@ -1,9 +1,26 @@
-// PPgIRC.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgIRC.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "Preferences.h"
+#include "IrcWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -11,8 +28,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-// CPPgIRC dialog
 
 IMPLEMENT_DYNAMIC(CPPgIRC, CPropertyPage)
 CPPgIRC::CPPgIRC()
@@ -156,9 +171,9 @@ BOOL CPPgIRC::OnApply()
 	{
 		GetDlgItem(IDC_IRC_NICK_BOX)->GetWindowText(buffer,20);
 		strcpy(app_prefs->prefs->m_sircnick,buffer);
-		if( theApp.emuledlg->ircwnd.GetLoggedIn() && m_bnickModified == true){
+		if( theApp.emuledlg->ircwnd->GetLoggedIn() && m_bnickModified == true){
 			m_bnickModified = false;
-			theApp.emuledlg->ircwnd.SendString( (CString)"NICK " + (CString)buffer );
+			theApp.emuledlg->ircwnd->SendString( (CString)"NICK " + (CString)buffer );
 		}
 	}
 

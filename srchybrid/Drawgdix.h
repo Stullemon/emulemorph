@@ -1,6 +1,8 @@
 #ifndef DRAWGDIX_H
 #define DRAWGDIX_H
 
+#pragma once
+
 /*******************************************************************
 
 GDI Helper Classes, MFC Version, by G. Bavestrelli, Techint S.p.A.

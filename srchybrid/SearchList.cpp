@@ -14,11 +14,24 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#include "emule.h"
 #include "SearchList.h"
-#include "SearchDlg.h"
+#include "Packets.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "UpDownClient.h"
+#include "SafeFile.h"
+#include "MMServer.h"
+#include "SharedFileList.h"
+#include "DownloadQueue.h"
+#include "PartFile.h"
 #include "CxImage/xImage.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "SearchDlg.h"
+#endif
+#include "Fakecheck.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -440,7 +453,7 @@ CString CSearchList::GetWebList(CString linePattern,int sortby,bool asc) const {
 	CString buffer;
 	CString temp;
 	CArray<CSearchFile*, CSearchFile*> sortarray;
-	int swap;
+	int swap = 0;
 	bool inserted;
 
 	// insertsort
@@ -502,7 +515,7 @@ void CSearchList::AddFileToDownloadByHash(const uchar* hash,uint8 cat) {
 	for (POSITION pos = list.GetHeadPosition(); pos !=0; ){
 		CSearchFile* sf=list.GetNext(pos);//->GetSearchID() == nSearchID ){
 		if (!md4cmp(hash,sf->GetFileHash())) {
-			theApp.downloadqueue->AddSearchToDownload(sf,cat);
+			theApp.downloadqueue->AddSearchToDownload(sf,2,cat);
 			break;
 		}
 	}

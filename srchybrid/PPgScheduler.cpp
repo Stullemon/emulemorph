@@ -5,6 +5,10 @@
 #include "emule.h"
 #include "PreferencesDlg.h"
 #include "InputBox.h"
+#include "emuledlg.h"
+#include "Preferences.h"
+#include "Scheduler.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -185,12 +189,12 @@ void CPPgScheduler::OnBnClickedApply()
 		CTime myTime;
 		DWORD result=m_time.GetTime(myTime);
 		if (result == GDT_VALID){
-			schedule->time=mktime(myTime.GetLocalTm());
+			schedule->time=safe_mktime(myTime.GetLocalTm());
 		}
 		CTime myTime2;
 		DWORD result2=m_timeTo.GetTime(myTime2);
 		if (result2 == GDT_VALID){
-			schedule->time2=mktime(myTime2.GetLocalTm());
+			schedule->time2=safe_mktime(myTime2.GetLocalTm());
 		}
 		if (IsDlgButtonChecked(IDC_CHECKNOENDTIME)) schedule->time2=0;
 

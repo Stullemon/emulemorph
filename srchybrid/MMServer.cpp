@@ -14,16 +14,28 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "mmserver.h"
+#include "stdafx.h"
 #include "emule.h"
+#include "mmserver.h"
 #include "opcodes.h"
 #include "md5sum.h"
-#include "searchdlg.h"
 #include "packets.h"
 #include "searchlist.h"
 #include "Exceptions.h"
+#include "UploadQueue.h"
+#include "DownloadQueue.h"
+#include "Statistics.h"
+#include "MMSocket.h"
+#include "OtherFunctions.h"
+#include "Sockets.h"
+#include "Server.h"
+#include "PartFile.h"
+#include "KnownFileList.h"
+#include "CxImage/xImage.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "searchdlg.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -87,7 +99,7 @@ void CMMServer::DeleteSearchFiles(){
 bool CMMServer::PreProcessPacket(char* pPacket, uint32 nSize, CMMSocket* sender){
 	if (nSize >= 3){
 		uint16 nSessionID;
-		MEMCOPY(&nSessionID,pPacket+1,sizeof(nSessionID));
+		memcpy(&nSessionID,pPacket+1,sizeof(nSessionID));
 		if ( (m_nSessionID && nSessionID == m_nSessionID) || pPacket[0] == MMP_HELLO){
 			return true;
 		}
@@ -125,17 +137,22 @@ void CMMServer::ProcessHelloPacket(CMMData* data, CMMSocket* sender){
 			sender->SendPacket(packet);
 			m_cPWFailed++;
 			if (m_cPWFailed == 3){
+				AddLogLine(false, _T("3 failed logins for MobileMule logged - any further attempt is blocked for 10 min!"));
 				m_cPWFailed = 0;
 				m_dwBlocked = ::GetTickCount() + MMS_BLOCKTIME;
 			}
 			return;
 		}
 		else{
+			m_bUseFakeContent = (data->ReadByte() != 0); 
 			// everything ok, new sessionid
+			AddLogLine(false, _T("New user successfully logged into MobileMule-Server"));
 			packet->WriteByte(MMT_OK);
 			m_nSessionID = rand();
 			packet->WriteShort(m_nSessionID);
 			packet->WriteString(theApp.glob_prefs->GetUserNick());
+			packet->WriteShort((theApp.glob_prefs->GetMaxUpload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxUpload());
+			packet->WriteShort((theApp.glob_prefs->GetMaxDownload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxDownload());
 			ProcessStatusRequest(sender,packet);
 			//sender->SendPacket(packet);
 		}
@@ -157,7 +174,7 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 	packet->WriteByte((uint8)theApp.downloadqueue->GetDownloadingFileCount());
 	packet->WriteByte((uint8)theApp.downloadqueue->GetPausedFileCount());
 	packet->WriteInt(theApp.stat_sessionReceivedBytes/1048576);
-	packet->WriteShort((uint16)((theApp.emuledlg->statisticswnd.GetAvgDownloadRate(0)*1024)/100));
+	packet->WriteShort((uint16)((theApp.statistics->GetAvgDownloadRate(0)*1024)/100));
 	if (theApp.serverconnect->IsConnected()){
 		if(theApp.serverconnect->IsLowID())
 			packet->WriteByte(1);
@@ -295,7 +312,6 @@ void  CMMServer::ProcessDetailRequest(CMMData* data, CMMSocket* sender){
 	}
 	CPartFile* selFile = m_SentFileList[byFileIndex];
 	CMMPacket* packet = new CMMPacket(MMP_FILEDETAILANS);
-	uint32 test = selFile->GetFileSize();
 	packet->WriteInt(selFile->GetFileSize());
 	packet->WriteInt(selFile->GetTransfered());
 	packet->WriteInt(selFile->GetCompletedSize());
@@ -387,7 +403,7 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	}
 
 	CSafeMemFile searchdata(100);
-	if (!GetSearchPacket(searchdata, strSearch, strLocalSearchType, 0, 0, -1, "", false) || searchdata.GetLength() == 0){
+	if (!GetSearchPacket(&searchdata, strSearch, strLocalSearchType, 0, 0, -1, "", false) || searchdata.GetLength() == 0){
 		bServerError = true;
 	}
 	else{
@@ -411,9 +427,24 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	searchpacket->opcode = OP_SEARCHREQUEST;
 	theApp.uploadqueue->AddUpDataOverheadServer(searchpacket->size);
 	theApp.serverconnect->SendPacket(searchpacket,true);
-	char buffer[] = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: application/octet-stream\r\n";
+	char buffer[500];
+	wsprintfA(buffer, "HTTP/1.1 200 OK\r\nConnection: Close\r\nContent-Type: %s\r\n", GetContentType());
 	sender->Send(buffer,strlen(buffer));
 }
+
+
+void  CMMServer::ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender){
+	uint16 nNewUpload = data->ReadShort();
+	uint16 nNewDownload = data->ReadShort();
+	theApp.glob_prefs->SetMaxUpload(nNewUpload);
+	theApp.glob_prefs->SetMaxDownload(nNewDownload);
+
+	CMMPacket* packet = new CMMPacket(MMP_CHANGELIMITANS);
+	packet->WriteShort((theApp.glob_prefs->GetMaxUpload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxUpload());
+	packet->WriteShort((theApp.glob_prefs->GetMaxDownload() == UNLIMITED) ? 0 : theApp.glob_prefs->GetMaxDownload());
+	sender->SendPacket(packet);
+}
+
 
 void CMMServer::SearchFinished(bool bTimeOut){
 #define MAXRESULTS	20
@@ -467,7 +498,7 @@ void  CMMServer::ProcessDownloadRequest(CMMData* data, CMMSocket* sender){
 		return;		
 	}
 	CSearchFile* todownload = m_SendSearchList[byFileIndex];
-	theApp.downloadqueue->AddSearchToDownload(todownload,0);
+	theApp.downloadqueue->AddSearchToDownload(todownload,2,0);
 	CMMPacket* packet = new CMMPacket(MMP_DOWNLOADANS);
 	if (theApp.downloadqueue->GetFileByID(todownload->GetFileHash()) != NULL){
 		packet->WriteByte(MMT_OK);
@@ -483,7 +514,7 @@ void  CMMServer::ProcessPreviewRequest(CMMData* data, CMMSocket* sender){
 	uint8 byFileIndex = data->ReadByte();
 	uint16 nDisplayWidth = data->ReadShort();
 	uint8 nNumber = data->ReadByte();
-	CKnownFile* knownfile;
+	CKnownFile* knownfile = NULL;
 	bool bError = false;
 
 	if (byFileType == MMT_PARTFILFE){
@@ -573,6 +604,13 @@ void CMMServer::Process(){
 	if (m_pSocket){ 
 		m_pSocket->Process(); 
 	} 
+}
+
+CString CMMServer::GetContentType(){
+	if (m_bUseFakeContent)
+		return CString("image/vnd.wap.wbmp");
+	else
+		return CString("application/octet-stream");
 }
 
 VOID CALLBACK CMMServer::CommandTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime)

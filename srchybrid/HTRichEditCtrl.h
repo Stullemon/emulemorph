@@ -1,19 +1,6 @@
 #pragma once
 
-class CPreparedRTFText
-{
-public:
-	CPreparedRTFText();
-	~CPreparedRTFText();
-
-	const CString& GetText();
-
-	void AppendText(const CString& sText);
-	void AppendKeyWord(const CString& sText, COLORREF iColor);
-
-//protected:
-	CString m_sText;
-};
+#include "TitleMenu.h"
 
 class CHTRichEditCtrl : public CRichEditCtrl
 {
@@ -24,20 +11,22 @@ public:
 	virtual ~CHTRichEditCtrl();
 
 	void Init(LPCTSTR pszTitle);
+	void SetTitle(LPCTSTR pszTitle);
 	void Localize();
 
 	void AddEntry(LPCTSTR pszMsg);
+	void Add(LPCTSTR pszMsg, int iLen = -1);
 	void Reset();
 	CString GetLastLogEntry();
 	CString GetAllLogEntries();
+	bool SaveLog(LPCTSTR pszDefName = NULL);
 
 	void AppendText(const CString& sText, bool bInvalidate = true);
 	void AppendHyperLink(const CString& sText, const CString& sTitle, const CString& sCommand, const CString& sDirectory, bool bInvalidate = true);
+	void AppendKeyWord(const CString& sText, COLORREF cr);
+	void AppendColoredText(LPCTSTR pszText, COLORREF cr);
 
 	CString GetText() const;
-	CPreparedRTFText* GetHyperText();
-	void SetHyperText(CPreparedRTFText*, bool bInvalidate = true);
-	void UpdateSize(bool bRepaint);
 
 	void SetFont(CFont* pFont, BOOL bRedraw = TRUE);
 	CFont* GetFont() const;
@@ -50,13 +39,17 @@ protected:
 	CStringArray m_astrBuff;
 	bool m_bNoPaint;
 	bool m_bEnErrSpace;
-	CPreparedRTFText* m_pPreparedText;
+	CString m_strTitle;
+	bool m_bRestoreFormat;
+	CHARFORMAT m_cfDefault;
 
-	void AddLine(LPCTSTR pszMsg, bool bLink = false);
+	void AddLine(LPCTSTR pszMsg, int iLen = -1, bool bLink = false, COLORREF cr = CLR_DEFAULT);
 	void SelectAllItems();
 	void CopySelectedItems();
 	int GetMaxSize();
-	void SafeAddLine(int nPos, LPCTSTR pszLine, long& nStartChar, long& nEndChar, bool bLink);
+	void SafeAddLine(int nPos, LPCTSTR pszLine, long& nStartChar, long& nEndChar, bool bLink, COLORREF cr);
+	void FlushBuffer();
+	void AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr);
 	void ScrollToLastLine();
 
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);

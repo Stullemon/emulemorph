@@ -1,3 +1,19 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "CBase64Coding.hpp"
 #pragma hdrstop
@@ -18,7 +34,7 @@
 ** Copyright, 2000, Samuel R. Blackburn
 **
 ** $Workfile: CBase64Coding.cpp $
-** $Revision: 1.1 $
+** $Revision: 1.2 $
 ** $Modtime: 5/12/00 3:39p $
 ** $Reuse Tracing Code: 1 $
 */
@@ -212,7 +228,7 @@ BOOL CBase64Coding::Encode( const char * source, int len, char * destination_str
 
 <H1>CBase64Coding</H1>
 
-$Revision: 1.1 $<BR><HR>
+$Revision: 1.2 $<BR><HR>
 
 <H2>Description</H2>
 

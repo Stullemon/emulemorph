@@ -17,11 +17,10 @@
 
 
 #pragma once
+#include "Loggable.h"
 
-#include "KnownFile.h"
-#include <afxmt.h>
-#include "emule.h"
-#include "loggable.h"
+class CKnownFile;
+class CPreferences;
 
 class CKnownFileList : public CArray<CKnownFile*,CKnownFile*>, public CLoggable
 {

@@ -1,6 +1,25 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
-#include "eMule.h"
+#include "emule.h"
 #include "HTRichEditCtrl.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -21,12 +40,14 @@ BEGIN_MESSAGE_MAP(CHTRichEditCtrl, CRichEditCtrl)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
-CHTRichEditCtrl::CHTRichEditCtrl(){
+CHTRichEditCtrl::CHTRichEditCtrl()
+{
 	m_bRichEdit = true;
 	m_bAutoScroll = true;
 	m_bNoPaint = false;
 	m_bEnErrSpace = false;
-	m_pPreparedText = NULL;
+	m_bRestoreFormat = false;
+	memset(&m_cfDefault, 0, sizeof m_cfDefault);
 }
 
 CHTRichEditCtrl::~CHTRichEditCtrl(){
@@ -37,14 +58,17 @@ void CHTRichEditCtrl::Localize(){
 
 void CHTRichEditCtrl::Init(LPCTSTR pszTitle)
 {
+	SetTitle(pszTitle);
+
 	m_LogMenu.CreatePopupMenu();
 	m_LogMenu.AddMenuTitle(GetResString(IDS_LOGENTRY));
-	m_LogMenu.AppendMenu(MF_STRING,MP_COPYSELECTED, GetResString(IDS_COPY));
+	m_LogMenu.AppendMenu(MF_STRING, MP_COPYSELECTED, GetResString(IDS_COPY));
 	m_LogMenu.AppendMenu(MF_SEPARATOR);
-	m_LogMenu.AppendMenu(MF_STRING,MP_SELECTALL, GetResString(IDS_SELECTALL));
-	m_LogMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_PW_RESET));
+	m_LogMenu.AppendMenu(MF_STRING, MP_SELECTALL, GetResString(IDS_SELECTALL));
+	m_LogMenu.AppendMenu(MF_STRING, MP_REMOVEALL, GetResString(IDS_PW_RESET));
+	m_LogMenu.AppendMenu(MF_STRING, MP_SAVELOG, GetResString(IDS_SAVELOG) + _T("..."));
 	m_LogMenu.AppendMenu(MF_SEPARATOR);
-	m_LogMenu.AppendMenu(MF_STRING,MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
+	m_LogMenu.AppendMenu(MF_STRING, MP_AUTOSCROLL, GetResString(IDS_AUTOSCROLL));
 
 	VERIFY( SendMessage(EM_SETUNDOLIMIT, 0, 0) == 0 );
 	int iMaxLogBuff = theApp.glob_prefs->GetMaxLogBuff();
@@ -52,6 +76,13 @@ void CHTRichEditCtrl::Init(LPCTSTR pszTitle)
 		LimitText(iMaxLogBuff > 0xFFFF ? 0xFFFF : iMaxLogBuff);
 	else
 		LimitText(iMaxLogBuff ? iMaxLogBuff : 128*1024);
+
+	VERIFY( GetSelectionCharFormat(m_cfDefault) );
+}
+
+void CHTRichEditCtrl::SetTitle(LPCTSTR pszTitle)
+{
+	m_strTitle = pszTitle;
 }
 
 int CHTRichEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -75,6 +106,15 @@ LRESULT CHTRichEditCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 	return CRichEditCtrl::WindowProc(message, wParam, lParam);
 }
 
+void CHTRichEditCtrl::FlushBuffer()
+{
+	if (m_astrBuff.GetSize() > 0){ // flush buffer
+		for (int i = 0; i < m_astrBuff.GetSize(); i++)
+			AddLine(m_astrBuff[i], m_astrBuff[i].GetLength());
+		m_astrBuff.RemoveAll();
+	}
+}
+
 void CHTRichEditCtrl::AddEntry(LPCTSTR pszMsg)
 {
 	CString strLine(pszMsg);
@@ -83,18 +123,26 @@ void CHTRichEditCtrl::AddEntry(LPCTSTR pszMsg)
 		m_astrBuff.Add(strLine);
 	}
 	else{
-		if (m_astrBuff.GetSize() > 0){ // flush buffer
-			for (int i = 0; i < m_astrBuff.GetSize(); i++)
-				AddLine(m_astrBuff[i]);
-			m_astrBuff.RemoveAll();
-		}
-		AddLine(strLine);
+		FlushBuffer();
+		AddLine(strLine, strLine.GetLength());
 	}
 }
 
-void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, bool bLink)
+void CHTRichEditCtrl::Add(LPCTSTR pszMsg, int iLen)
 {
-	int iMsgLen = _tcslen(pszMsg);
+	if (m_hWnd == NULL){
+		CString strLine(pszMsg);
+		m_astrBuff.Add(strLine);
+	}
+	else{
+		FlushBuffer();
+		AddLine(pszMsg, iLen);
+	}
+}
+
+void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, int iLen, bool bLink, COLORREF cr)
+{
+	int iMsgLen = (iLen == -1) ? _tcslen(pszMsg) : iLen;
 	if (iMsgLen == 0)
 		return;
 #ifdef _DEBUG
@@ -116,7 +164,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, bool bLink)
 		if (m_bAutoScroll && GetScrollInfo(SB_VERT, &si) && si.nPos >= (int)(si.nMax - si.nPage + 1))
 		{
 			// Not scrolled away
-			SafeAddLine(iSize, pszMsg, iStartChar, iEndChar, bLink);
+			SafeAddLine(iSize, pszMsg, iStartChar, iEndChar, bLink, cr);
 			if (m_bAutoScroll && !IsWindowVisible())
 				ScrollToLastLine();
 		}
@@ -133,7 +181,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, bool bLink)
 		
 			// Select at the end of text and replace the selection
 			// This is a very fast way to add text to an edit control
-			SafeAddLine(iSize, pszMsg, iStartChar, iEndChar, bLink);
+			SafeAddLine(iSize, pszMsg, iStartChar, iEndChar, bLink, cr);
 			SetSel(iStartChar, iEndChar); // Restore our previous selection
 
 			if (!m_bAutoScroll)
@@ -192,7 +240,7 @@ void CHTRichEditCtrl::AddLine(LPCTSTR pszMsg, bool bLink)
 		
 		// Select at the end of text and replace the selection
 		// This is a very fast way to add text to an edit control
-		SafeAddLine(iSize, pszMsg, iStartChar, iEndChar, bLink);
+		SafeAddLine(iSize, pszMsg, iStartChar, iEndChar, bLink, cr);
 		SetSel(iStartChar, iEndChar); // Restore our previous selection
 
 		if (!m_bAutoScroll){
@@ -233,19 +281,41 @@ void CHTRichEditCtrl::ScrollToLastLine()
 	}
 }
 
-void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, long& iStartChar, long& iEndChar, bool bLink)
+void CHTRichEditCtrl::AddString(int nPos, LPCTSTR pszString, bool bLink, COLORREF cr)
 {
+	bool bRestoreFormat = false;
 	m_bEnErrSpace = false;
 	SetSel(nPos, nPos);
-	if (bLink){
+	if (bLink)
+	{
 		CHARFORMAT2 cf;
-		MEMSET(&cf, 0, sizeof cf);
+		memset(&cf, 0, sizeof cf);
 		GetSelectionCharFormat(cf);
 		cf.dwMask |= CFM_LINK;
 		cf.dwEffects |= CFE_LINK;
 		SetSelectionCharFormat(cf);
 	}
-	ReplaceSel(pszLine);
+	else if (cr != CLR_DEFAULT)
+	{
+		CHARFORMAT cf;
+		GetSelectionCharFormat(cf);
+		cf.dwMask |= CFM_COLOR;
+		cf.dwEffects &= ~CFE_AUTOCOLOR;
+		cf.crTextColor = cr;
+		SetSelectionCharFormat(cf);
+		bRestoreFormat = true;
+	}
+	else if (m_bRestoreFormat)
+	{
+		SetSelectionCharFormat(m_cfDefault);
+	}
+	ReplaceSel(pszString);
+	m_bRestoreFormat = bRestoreFormat;
+}
+
+void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, long& iStartChar, long& iEndChar, bool bLink, COLORREF cr)
+{
+	AddString(nPos, pszLine, bLink, cr);
 
 	if (m_bEnErrSpace)
 	{
@@ -278,9 +348,7 @@ void CHTRichEditCtrl::SafeAddLine(int nPos, LPCTSTR pszLine, long& iStartChar, l
 
 			// add the new line again
 			nPos = GetWindowTextLength();
-			SetSel(nPos, nPos);
-			m_bEnErrSpace = false;
-			ReplaceSel(pszLine);
+			AddString(nPos, pszLine, bLink, cr);
 
 			if (m_bEnErrSpace && nPos == 0){
 				// should never happen: if we tried to add the line another time in the 1st line, there 
@@ -315,8 +383,14 @@ void CHTRichEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
 	m_LogMenu.EnableMenuItem(MP_COPYSELECTED, iSelEnd > iSelStart ? MF_ENABLED : MF_GRAYED);
 	m_LogMenu.EnableMenuItem(MP_REMOVEALL, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
 	m_LogMenu.EnableMenuItem(MP_SELECTALL, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
+	m_LogMenu.EnableMenuItem(MP_SAVELOG, iTextLen > 0 ? MF_ENABLED : MF_GRAYED);
 	m_LogMenu.CheckMenuItem(MP_AUTOSCROLL, m_bAutoScroll ? MF_CHECKED : MF_UNCHECKED);
-	m_LogMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+	if (point.x == -1 && point.y == -1){
+		point.x = 16;
+		point.y = 32;
+		ClientToScreen(&point);
+	}
+	m_LogMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
 BOOL CHTRichEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam){
@@ -330,11 +404,44 @@ BOOL CHTRichEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam){
 	case MP_REMOVEALL:
 		Reset();
 		break;
+	case MP_SAVELOG:
+		SaveLog();
+		break;
 	case MP_AUTOSCROLL:
 		m_bAutoScroll = !m_bAutoScroll;
 		break;
 	}
 	return TRUE;
+}
+
+bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
+{
+	bool bResult = false;
+	CFileDialog dlg(FALSE, _T("log"), pszDefName ? pszDefName : (LPCTSTR)m_strTitle, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Log Files (*.log)|*.log||"), this, 0);
+	if (dlg.DoModal() == IDOK)
+	{
+		FILE* fp = fopen(dlg.GetPathName(), "wt");
+		if (fp)
+		{
+			CString strText;
+			GetWindowText(strText);
+			fwrite(strText, strText.GetLength(), 1, fp);
+			if (ferror(fp)){
+				CString strError;
+				strError.Format(_T("Failed to write log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+				AfxMessageBox(strError, MB_ICONERROR);
+			}
+			else
+				bResult = true;
+			fclose(fp);
+		}
+		else{
+			CString strError;
+			strError.Format(_T("Failed to create log file \"%s\" - %s"), dlg.GetPathName(), strerror(errno));
+			AfxMessageBox(strError, MB_ICONERROR);
+		}
+	}
+	return bResult;
 }
 
 CString CHTRichEditCtrl::GetLastLogEntry(){
@@ -410,18 +517,18 @@ void CHTRichEditCtrl::AppendText(const CString& sText, bool bInvalidate)
 				// output everything before the URL
 				if (psz - pszStart > 0){
 					CString str(pszStart, psz - pszStart);
-					AddLine(str);
+					AddLine(str, str.GetLength());
 				}
 
 				// search next space or EOL
 				int iLen = _tcscspn(psz, _T(" \n\r\t"));
 				if (iLen == 0){
-					AddLine(psz, true);
+					AddLine(psz, -1, true);
 					psz += _tcslen(psz);
 				}
 				else{
 					CString str(psz, iLen);
-					AddLine(str, true);
+					AddLine(str, str.GetLength(), true);
 					psz += iLen;
 				}
 				pszStart = psz;
@@ -434,7 +541,7 @@ void CHTRichEditCtrl::AppendText(const CString& sText, bool bInvalidate)
 	}
 
 	if (*pszStart != _T('\0'))
-		AddLine(pszStart);
+		AddLine(pszStart, -1);
 }
 
 void CHTRichEditCtrl::AppendHyperLink(const CString& sText, const CString& sTitle, const CString& sCommand, const CString& sDirectory, bool bInvalidate)
@@ -442,7 +549,17 @@ void CHTRichEditCtrl::AppendHyperLink(const CString& sText, const CString& sTitl
 	ASSERT( sText.IsEmpty() );
 	ASSERT( sTitle.IsEmpty() );
 	ASSERT( sDirectory.IsEmpty() );
-	AddLine(sCommand, true);
+	AddLine(sCommand, sCommand.GetLength(), true);
+}
+
+void CHTRichEditCtrl::AppendColoredText(LPCTSTR pszText, COLORREF cr)
+{
+	AddLine(pszText, -1, false, cr);
+}
+
+void CHTRichEditCtrl::AppendKeyWord(const CString& str, COLORREF cr)
+{
+	AppendColoredText(str, cr);
 }
 
 BOOL CHTRichEditCtrl::OnEnLink(NMHDR *pNMHDR, LRESULT *pResult)
@@ -476,32 +593,6 @@ CString CHTRichEditCtrl::GetText() const
 	return strText;
 }
  
-CPreparedRTFText* CHTRichEditCtrl::GetHyperText()
-{
-	return m_pPreparedText;
-}
-
-void CHTRichEditCtrl::SetHyperText(CPreparedRTFText* pPreparedText, bool bInvalidate)
-{
-	m_pPreparedText = pPreparedText;
-	if (bInvalidate)
-		UpdateSize(true);
-}
-
-void CHTRichEditCtrl::UpdateSize(bool bRepaint)
-{
-	if (m_pPreparedText == NULL)
-		return;
-	//SetWindowText(m_pPreparedText->GetText());
-
-	m_pPreparedText->m_sText.AppendChar('}');
-	SETTEXTEX st = {0};
-	st.flags = ST_DEFAULT;
-	st.codepage = CP_ACP;
-	SendMessage(EM_SETTEXTEX, (WPARAM)&st, (LPARAM)(LPCTSTR)m_pPreparedText->GetText());
-	m_pPreparedText->m_sText.Delete(m_pPreparedText->m_sText.GetLength()-1);
-}
-
 void CHTRichEditCtrl::SetFont(CFont* pFont, BOOL bRedraw)
 {
 	LOGFONT lf = {0};
@@ -540,6 +631,7 @@ void CHTRichEditCtrl::SetFont(CFont* pFont, BOOL bRedraw)
 
 	cf.yOffset = 0;
 	VERIFY( SetDefaultCharFormat(cf) );
+	VERIFY( GetSelectionCharFormat(m_cfDefault) );
 
 	if (bRedraw){
 		Invalidate();
@@ -551,43 +643,4 @@ CFont* CHTRichEditCtrl::GetFont() const
 {
 	ASSERT(0);
 	return NULL;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// CPreparedRTFText
-
-CPreparedRTFText::CPreparedRTFText()
-{
-	m_sText = _T("{\\rtf\\ansi");
-}
-
-CPreparedRTFText::~CPreparedRTFText()
-{
-}
-
-void CPreparedRTFText::AppendKeyWord(const CString& str, COLORREF cr)
-{
-	if (!m_sText.IsEmpty() && m_sText[m_sText.GetLength()-1] == _T('\n'))
-	{
-		m_sText.Delete(m_sText.GetLength()-1);
-		m_sText += _T("\\par");
-	}
-	m_sText.AppendFormat(_T("\\red%u\\green%u\\blue%u"), GetRValue(cr), GetGValue(cr), GetBValue(cr));
-	m_sText += str;
-}
-
-void CPreparedRTFText::AppendText(const CString& str)
-{
-	if (!m_sText.IsEmpty() && m_sText[m_sText.GetLength()-1] == _T('\n'))
-	{
-		m_sText.Delete(m_sText.GetLength()-1);
-		m_sText += _T("\\par");
-	}
-	m_sText += str;
-}
-
-const CString& CPreparedRTFText::GetText()
-{
-	return m_sText;
 }

@@ -17,19 +17,38 @@
 
 #include "stdafx.h"
 #include "emule.h"
-#include "packets.h"
-#include "serversocket.h"
+#include "ServerSocket.h"
+#include "SearchList.h"
+#include "DownloadQueue.h"
+#include "ClientList.h"
+#include "Server.h"
+#include "ServerList.h"
+#include "Sockets.h"
+#include "OtherFunctions.h"
+#include "Opcodes.h"
+#include "Preferences.h"
+#include "SafeFile.h"
+#include "PartFile.h"
+#include "Packets.h"
+#include "UpDownClient.h"
+#ifndef _CONSOLE
 #include "emuleDlg.h"
+#include "ServerWnd.h"
 #include "SearchDlg.h"
-#include "opcodes.h"
-#include "searchlist.h"
-#include <time.h>
-#include <afxmt.h>
+#endif
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+
+#pragma pack(1)
+struct LoginAnswer_Struct {
+	uint32	clientid;
+};
+#pragma pack()
 
 
 CServerSocket::CServerSocket(CServerConnect* in_serverconnect){
@@ -53,7 +72,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 		case 0:{
 			if (cur_server->HasDynIP()){
 				SOCKADDR_IN sockAddr;
-				MEMSET(&sockAddr, 0, sizeof(sockAddr));
+				memset(&sockAddr, 0, sizeof(sockAddr));
 				uint32 nSockAddrLen = sizeof(sockAddr);
 				GetPeerName((SOCKADDR*)&sockAddr,(int*)&nSockAddrLen);
 				cur_server->SetID(sockAddr.sin_addr.S_un.S_addr);
@@ -104,14 +123,13 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			case OP_SERVERMESSAGE:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_ServerMessage\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 
 				CStringA strMessages;
 				if (size >= 2){
 					UINT uLen = *(uint16*)packet;
 					if (uLen > size-2)
 						uLen = size-2;
-					MEMCOPY(strMessages.GetBuffer(uLen), packet + sizeof uint16, uLen);
+					memcpy(strMessages.GetBuffer(uLen), packet + sizeof uint16, uLen);
 					strMessages.ReleaseBuffer(uLen);
 				}
 
@@ -129,7 +147,8 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					CServer* eserver = theApp.serverlist->GetServerByAddress(cur_server->GetAddress(),cur_server->GetPort());
 						if (eserver){
 						eserver->SetVersion(strVer);
-							theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(eserver);
+							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(eserver);
+							theApp.emuledlg->serverwnd->UpdateMyInfo();
 					}
 						if (theApp.glob_prefs->GetDebugServerTCP())
 							Debug("%s\n", message);
@@ -159,7 +178,8 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 						if (eserver){
 							eserver->SetDynIP(dynip.GetBuffer());
 							cur_server->SetDynIP(dynip.GetBuffer());
-							theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(eserver);
+								theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(eserver);
+								theApp.emuledlg->serverwnd->UpdateMyInfo();
 						}
 					}
 				}
@@ -173,7 +193,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			case OP_IDCHANGE:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_IDChange\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				if (size < sizeof(LoginAnswer_Struct)){
 					throw GetResString(IDS_ERR_BADSERVERREPLY);
 				}
@@ -246,18 +265,12 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				serverconnect->SetClientID(la->clientid);
 				AddLogLine(false,GetResString(IDS_NEWCLIENTID),la->clientid);
 
-				for(POSITION pos = theApp.downloadqueue->filelist.GetHeadPosition(); pos != NULL;theApp.downloadqueue->filelist.GetNext(pos)) { 
-					CPartFile* cur_file = theApp.downloadqueue->filelist.GetAt(pos); 
-					if( cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY ){
-						cur_file->ResumeFile();
-					}
-				}
+				theApp.downloadqueue->ResetLocalServerRequests();
 				break;
 			}
 			case OP_SEARCHRESULT:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_SearchResult\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				CServer* cur_srv = (serverconnect) ? serverconnect->GetCurrentServer() : NULL;
 				bool bMoreResultsAvailable;
 				uint16 uSearchResults = theApp.searchlist->ProcessSearchanswer(packet, size, cur_srv ? cur_srv->GetIP():0, cur_srv ? cur_srv->GetPort() : 0, &bMoreResultsAvailable);
@@ -267,7 +280,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			case OP_FOUNDSOURCES:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_FoundSources; Sources=%u  %s\n", (UINT)(uchar)packet[16], DbgGetFileInfo((uchar*)packet));
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				CSafeMemFile sources((BYTE*)packet,size);
 				uchar fileid[16];
 				sources.Read(fileid,16);
@@ -278,20 +290,20 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			case OP_SERVERSTATUS:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_ServerStatus\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				// FIXME some statuspackets have a different size -> why? structur?
 				if (size < 8)
 					break;//throw "Invalid status packet";
 				uint32 cur_user;
-				MEMCOPY(&cur_user,packet,4);
+				memcpy(&cur_user,packet,4);
 				uint32 cur_files;
-				MEMCOPY(&cur_files,packet+4,4);
+				memcpy(&cur_files,packet+4,4);
 				CServer* update = theApp.serverlist->GetServerByAddress( cur_server->GetAddress(), cur_server->GetPort() );
 				if (update){
 					update->SetUserCount(cur_user); 
 					update->SetFileCount(cur_files);
 					theApp.emuledlg->ShowUserCount();
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( update );
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
+					theApp.emuledlg->serverwnd->UpdateMyInfo();
 				}
 				if (theApp.glob_prefs->GetDebugServerTCP()){
 					if (size > 8){
@@ -305,7 +317,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				// OP_SERVERIDENT - this is sent by the server only if we send a OP_GETSERVERLIST
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_ServerIdent\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				if (size<16+4+2+4) {
 					AddDebugLogLine(false,GetResString(IDS_ERR_KNOWNSERVERINFOREC)); 
 					break;// throw "Invalid server info received"; 
@@ -376,7 +387,8 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 								update->SetVersion(_T("eFarm"));
 						}
 						theApp.emuledlg->ShowConnectionState(); 
-						theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(update); 
+						theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(update); 
+						theApp.emuledlg->serverwnd->UpdateMyInfo();
 					}
 				}
 				break;
@@ -385,7 +397,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			case OP_SERVERLIST:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_ServerList\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				try{
 					CSafeMemFile servers((BYTE*)packet,size);
 					byte count;
@@ -403,7 +414,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 						host.S_un.S_addr = ip;
 						CServer* srv = new CServer(port, inet_ntoa(host));
 						srv->SetListName(srv->GetFullIP());
-						if (!theApp.emuledlg->serverwnd.serverlistctrl.AddServer(srv, true))
+						if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(srv, true))
 							delete srv;
 						else
 							addcount++;
@@ -420,7 +431,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					}
 				}
 				catch(CFileException* error){
-					OUTPUT_DEBUG_TRACE();
 					AddDebugLogLine(false,GetResString(IDS_ERR_BADSERVERLISTRECEIVED));
 					error->Delete();	//memleak fix
 				}
@@ -429,12 +439,11 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			case OP_CALLBACKREQUESTED:{
 				if (theApp.glob_prefs->GetDebugServerTCP())
 					Debug("ServerMsg - OP_CallbackRequested\n");
-				theApp.downloadqueue->AddDownDataOverheadServer(size);
 				if (size == 6){
 					uint32 dwIP;
-					MEMCOPY(&dwIP,packet,4);
+					memcpy(&dwIP,packet,4);
 					uint16 nPort;
-					MEMCOPY(&nPort,packet+4,2);
+					memcpy(&nPort,packet+4,2);
 					CUpDownClient* client = theApp.clientlist->FindClientByIP(dwIP,nPort);
 					if (client)
 						client->TryToConnect();
@@ -468,7 +477,6 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 		return true;
 	}
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		char szError[MAX_CFEXP_ERRORMSG];
 		error->m_strFileName = "server packet";
 		error->GetErrorMessage(szError,sizeof(szError));
@@ -478,19 +486,17 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			return true;
 	}
 	catch(CMemoryException* error){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),_T("CMemoryException"));
 		error->Delete();
 		if (opcode==OP_SEARCHRESULT || opcode==OP_FOUNDSOURCES)
 			return true;
 	}
 	catch(CString error){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),error.GetBuffer());
 	}
 	catch(...){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),_T("Unknown exception"));
+		ASSERT(0);
 	}
 
 	SetConnectionState(CS_DISCONNECTED);
@@ -541,12 +547,12 @@ void CServerSocket::PacketReceived(Packet* packet)
 {
 	try
 	{
+		theApp.downloadqueue->AddDownDataOverheadServer(packet->size);
 		if (packet->prot == OP_PACKEDPROT)
 		{
 			uint32 uComprSize = packet->size;
 			if (!packet->UnPackPacket(250000)){
 				AddDebugLogLine(false,_T("Failed to decompress server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
-				theApp.downloadqueue->AddDownDataOverheadServer(packet->size);
 				return;
 			}
 			packet->prot = OP_EDONKEYPROT;
@@ -561,13 +567,12 @@ void CServerSocket::PacketReceived(Packet* packet)
 		else
 		{
 			AddDebugLogLine(false,_T("Received server TCP packet with unknown protocol: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
-			theApp.downloadqueue->AddDownDataOverheadServer(packet->size);
 		}
 	}
 	catch(...)
 	{
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,_T("Unhandled exception while processing server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
+		ASSERT(0);
 	}
 }
 
@@ -598,5 +603,6 @@ void CServerSocket::SetConnectionState(sint8 newstate){
 
 bool CServerSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket){
 	m_dwLastTransmission = GetTickCount();
-	return CEMSocket::SendPacket(packet, delpacket, controlpacket);
+	/*return */ CEMSocket::SendPacket(packet, delpacket, controlpacket);
+    return true; // PENDING: this is a workaround, but SendPacket always returned true anyway (?)
 }

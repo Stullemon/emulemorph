@@ -14,15 +14,13 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// SharedFilesWnd.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "SharedFilesWnd.h"
-#include "otherfunctions.h"
+#include "OtherFunctions.h"
+#include "SharedFileList.h"
+#include "KnownFileList.h"
+#include "KnownFile.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -60,6 +58,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
+	SetAllIcons();
 	sharedfilesctrl.Init();
 	
 	pop_bar.SetGradientColors(RGB(255,255,240),RGB(255,255,0));
@@ -130,9 +129,9 @@ void CSharedFilesWnd::Check4StatUpdate(CKnownFile* file){
 
 void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	if (sharedfilesctrl.GetSelectionMark() != (-1) ) {
-		CKnownFile* cur_file = (CKnownFile*)sharedfilesctrl.GetItemData(sharedfilesctrl.GetSelectionMark());
-
+	int iSel = sharedfilesctrl.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel != -1) {
+		CKnownFile* cur_file = (CKnownFile*)sharedfilesctrl.GetItemData(iSel);
 		ShowDetails(cur_file);
 	}
 }
@@ -203,17 +202,20 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 
 void CSharedFilesWnd::OnSysColorChange()
 {
-	Localize();
 	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
 }
 
-void CSharedFilesWnd::Localize()
+void CSharedFilesWnd::SetAllIcons()
 {
 	if (icon_files)
 		VERIFY( DestroyIcon(icon_files) );
 	icon_files = theApp.LoadIcon("SharedFiles", 16, 16);
 	((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
+}
 
+void CSharedFilesWnd::Localize()
+{
 	sharedfilesctrl.Localize();
 	GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES));
 	GetDlgItem(IDC_RELOADSHAREDFILES)->SetWindowText(GetResString(IDS_SF_RELOAD));

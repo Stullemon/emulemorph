@@ -109,7 +109,7 @@ int CCustomAutoComplete::FindItem(const CString& rstr)
 	return -1;
 }
 
-BOOL CCustomAutoComplete::AddItem(CString& p_sItem, int iPos)
+BOOL CCustomAutoComplete::AddItem(const CString& p_sItem, int iPos)
 {
 	if (p_sItem.GetLength() != 0)
 	{
@@ -135,7 +135,7 @@ int CCustomAutoComplete::GetItemCount()
 	return (int)m_asList.GetCount();
 }
 
-BOOL CCustomAutoComplete::RemoveItem(CString& p_sItem)
+BOOL CCustomAutoComplete::RemoveItem(const CString& p_sItem)
 {
 	if (p_sItem.GetLength() != 0)
 	{

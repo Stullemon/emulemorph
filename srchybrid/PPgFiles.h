@@ -1,9 +1,5 @@
 #pragma once
 
-// CPPgFiles dialog
-
-#include "preferences.h"
-
 class CPPgFiles : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgFiles)

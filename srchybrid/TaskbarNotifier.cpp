@@ -14,12 +14,20 @@
 // kei-kun modifications:
 // 30 October  2002: - Added event type management (TBN_*) for eMule project
 // 04 November 2002: - added skin support via .ini file
-
 #include "stdafx.h"
+#include "emule.h"
 #include "ini2.h"
 #include "otherfunctions.h"
-#include "emule.h"
 #include "enbitmap.h"
+#include "TaskbarNotifier.h"
+#include "emuledlg.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 #define IDT_HIDDEN		0
 #define IDT_APPEARING	1
 #define IDT_WAITING		2
@@ -114,7 +122,7 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 	wcx.lpszClassName = "TaskbarNotifierClass";
 	wcx.hIconSm = NULL;
 
-	ATOM classAtom = RegisterClassEx(&wcx);
+	RegisterClassEx(&wcx);
       
 	return CreateEx(WS_EX_TOPMOST,"TaskbarNotifierClass",NULL,WS_POPUP,0,0,0,0,pWndParent->m_hWnd,NULL);
 }
@@ -597,7 +605,7 @@ HRGN CTaskbarNotifier::CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color)
 
 	// allocate memory for region data
 	RGNDATAHEADER* pRgnData = (RGNDATAHEADER*)new BYTE[ RDHDR + ++cBlocks * MAXBUF * sizeof(RECT) ];
-	MEMSET( pRgnData, 0, RDHDR + cBlocks * MAXBUF * sizeof(RECT) );
+	memset( pRgnData, 0, RDHDR + cBlocks * MAXBUF * sizeof(RECT) );
 	// fill it by default
 	pRgnData->dwSize	= RDHDR;
 	pRgnData->iType 	= RDH_RECTANGLES;
@@ -616,7 +624,7 @@ HRGN CTaskbarNotifier::CreateRgnFromBitmap(HBITMAP hBmp, COLORREF color)
 				// if buffer full reallocate it
 				if ( pRgnData->nCount >= cBlocks * MAXBUF ){
 					LPBYTE pRgnDataNew = new BYTE[ RDHDR + ++cBlocks * MAXBUF * sizeof(RECT) ];
-					MEMCOPY( pRgnDataNew, pRgnData, RDHDR + (cBlocks - 1) * MAXBUF * sizeof(RECT) );
+					memcpy( pRgnDataNew, pRgnData, RDHDR + (cBlocks - 1) * MAXBUF * sizeof(RECT) );
 					delete pRgnData;
 					pRgnData = (RGNDATAHEADER*)pRgnDataNew;
 				}
@@ -789,7 +797,6 @@ BOOL CTaskbarNotifier::OnEraseBkgnd(CDC* pDC)
 void CTaskbarNotifier::OnPaint()
 {
 	CPaintDC dc(this);
-	CRect rcClient;
 	CFont *pOldFont;
 	char *szBuffer;
 
@@ -818,7 +825,6 @@ void CTaskbarNotifier::OnPaint()
 	strcpy(szBuffer,m_strCaption);
 
 	dc.SetBkMode(TRANSPARENT); 
-	rcClient.DeflateRect(10,20,10,20);
 	dc.DrawText(szBuffer,-1,m_rcText,m_uTextFormat);
 	
 	delete[] szBuffer;

@@ -23,7 +23,14 @@
 #include "emule.h"
 #include "SearchDlg.h"
 #include "TransferWnd.h"
-#include "otherfunctions.h"
+#include "OtherFunctions.h"
+#include "ClientList.h"
+#include "UploadQueue.h"
+#include "DownloadQueue.h"
+#include "emuledlg.h"
+#include "MenuCmds.h"
+#include "PartFile.h"
+#include "CatDialog.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -82,9 +89,9 @@ BOOL CTransferWnd::OnInitDialog()
 	clientlistctrl.Hide();
 	uploadlistctrl.Visable();
 
+	SetAllIcons();
     Localize(); // i_a 
 
-	m_uplBtn.SetIcon("Upload");
 	m_uplBtn.SetAlign(CButtonST::ST_ALIGN_HORIZ);
 	m_uplBtn.SetFlat();
 	m_uplBtn.SetLeftAlign(true); 
@@ -460,18 +467,21 @@ void CTransferWnd::SwitchUploadList()
 
 void CTransferWnd::OnSysColorChange()
 {
-	Localize();
 	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
 }
 
-void CTransferWnd::Localize()
+void CTransferWnd::SetAllIcons()
 {
 	if (icon_download)
 		VERIFY( DestroyIcon(icon_download) );
 	icon_download = theApp.LoadIcon("SearchDirectDownload", 16, 16);
 	((CStatic*)GetDlgItem(IDC_DOWNLOAD_ICO))->SetIcon(icon_download);
 	m_uplBtn.SetIcon("Upload");
+}
 
+void CTransferWnd::Localize()
+{
 	GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(GetResString(IDS_TW_DOWNLOADS));
 	GetDlgItem(IDC_UPLOAD_ICO)->SetWindowText(GetResString(IDS_TW_UPLOADS));
 	GetDlgItem(IDC_TSTATIC1)->SetWindowText(GetResString(IDS_TW_QUEUE));
@@ -493,7 +503,7 @@ void CTransferWnd::OnBnClickedQueueRefreshButton()
 	CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
 
 	while( update ){
-		theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient( update);
+		theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient( update);
 		update = theApp.uploadqueue->GetNextClient(update);
 	}
 }
@@ -744,7 +754,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 	switch (wParam){ 
 		case MP_CAT_ADD: {
 			m_nLastCatTT=-1;
-			int newindex=AddCategorie("?",theApp.glob_prefs->GetIncomingDir(),"",false);
+			int newindex=AddCategorie("?",theApp.glob_prefs->GetIncomingDir(),"","",false);
 			m_dlTab.InsertItem(newindex,theApp.glob_prefs->GetCategory(newindex)->title);
 			CCatDialog dialog(newindex);
 			dialog.DoModal();
@@ -847,7 +857,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			break;
 		}*/
 		case MP_CAT_RESUMENEXT: {
-			theApp.downloadqueue->StartNextFile(rightclickindex, true);
+			theApp.downloadqueue->StartNextFile(rightclickindex);
 			break;
 		}
 		case MP_CAT_STOPLAST: {
@@ -967,7 +977,7 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 		for (int i=0;i<theApp.downloadqueue->GetFileCount();i++) {
 			cur_file=theApp.downloadqueue->GetFileByIndex(i);
 			if (cur_file==0) continue;
-			if (CheckShowItemInGivenCat(cur_file,index)) {
+			if (cur_file->CheckShowItemInGivenCat(index)) {
 				count++;
 				if (cur_file->GetTransferingSrcCount()>0) dwl++;
 //				speed+=cur_file->GetDatarate()/1024.0f;
@@ -986,7 +996,7 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 	VerifyCatTabSize();
 }
 
-int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newcomment,bool addTab){
+int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab){
 	Category_Struct* newcat=new Category_Struct;
 
 	sprintf(newcat->title,newtitle);
@@ -1101,7 +1111,7 @@ CString CTransferWnd::GetTabStatistic(uint8 tab) {
 	for (int i=0;i<theApp.downloadqueue->GetFileCount();++i) {
 		cur_file=theApp.downloadqueue->GetFileByIndex(i);
 		if (cur_file==0) continue;
-		if (CheckShowItemInGivenCat(cur_file,tab)) {
+		if (cur_file->CheckShowItemInGivenCat(tab)) {
 			count++;
 			if (cur_file->GetTransferingSrcCount()>0) ++dwl;
 			speed+=cur_file->GetDatarate()/1024.0f;
@@ -1179,6 +1189,25 @@ void CTransferWnd::VerifyCatTabSize() {
 			RemoveAnchor(m_dlTab);
 
 			m_dlTab.SetWindowPlacement(&wpTabWinPos);
-
 			AddAnchor(m_dlTab,TOP_RIGHT);
 }
+//MORPH - Removed by SiRoB, Due to Khaos Categorie
+/*CString CTransferWnd::GetCatTitle(int catid)
+{
+	switch (catid) {
+		case 0 : return GetResString(IDS_ALL);
+		case 1 : return GetResString(IDS_ALLOTHERS);
+		case 2 : return GetResString(IDS_STATUS_NOTCOMPLETED);
+		case 3 : return GetResString(IDS_DL_TRANSFCOMPL);
+		case 4 : return GetResString(IDS_WAITING);
+		case 5 : return GetResString(IDS_DOWNLOADING);
+		case 6 : return GetResString(IDS_ERRORLIKE);
+		case 7 : return GetResString(IDS_PAUSED);
+		case 8 : return GetResString(IDS_STOPPED);
+		case 10 : return GetResString(IDS_VIDEO);
+		case 11 : return GetResString(IDS_AUDIO);
+		case 12 : return GetResString(IDS_SEARCH_ARC);
+		case 13 : return GetResString(IDS_SEARCH_CDIMG);
+	}
+	return "?";
+}*/

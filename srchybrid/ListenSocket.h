@@ -18,35 +18,29 @@
 // handling incoming connections (up or downloadrequests)
 
 #pragma once
-#include "preferences.h"
-#include "packets.h"
-#include "emsocket.h"
-
+#include "EMSocket.h"
 
 class CUpDownClient;
 class CPacket;
 class CTimerWnd;
+class CPreferences;
 
 class CClientReqSocket : public CEMSocket{
 	friend class CListenSocket;
 public:
 	CClientReqSocket(CPreferences* in_prefs, CUpDownClient* in_client = 0);	
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	void	Disconnect(CString reason = NULL);
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
+	void	Disconnect();
 
 	void	ResetTimeOutTimer();
 	bool	CheckTimeOut();
 	void	Safe_Delete();
 	
 	bool	Create();
-	//MORPH START - Changed by SiRoB, Due to ZZ Upload System
-	bool	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-	//MORPH END   - Changed by SiRoB, Due to ZZ Upload System
-	CUpDownClient*	client;
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030818-1923
+
+	CUpDownClient*	client;
 protected:
 	virtual void Close()	{CAsyncSocketEx::Close();} // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	virtual	void OnInit();
@@ -76,7 +70,7 @@ private:
 
 // CListenSocket command target
 class CListenSocket : public CAsyncSocketEx
-{ // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+{
 public:
 	CListenSocket(CPreferences* in_prefs);
 	~CListenSocket();
@@ -95,6 +89,14 @@ public:
 	void	RecalculateStats();
 	void	ReStartListening();
 	void	Debug_ClientDeleted(CUpDownClient* deleted);
+
+	void	UpdateConnectionsStatus();
+	float	GetMaxConperFiveModifier();
+	uint32	GetPeakConnections()		{ return peakconnections; }
+	uint32	GetTotalConnectionChecks()	{ return totalconnectionchecks; }
+	float	GetAverageConnections()		{ return averageconnections; }
+	uint32	GetActiveConnections()		{ return activeconnections; }
+
 private:
 	bool bListening;
 	CPreferences* app_prefs;
@@ -104,10 +106,13 @@ private:
 	uint32	maxconnectionreached;
 	uint16	m_ConnectionStates[3];
 	uint16	m_nPeningConnections;
-	uint16	per5average;
-//MORPH START - Added by Yun.SF3, Auto DynUp changing
+	uint32	peakconnections;
+	uint32	totalconnectionchecks;
+	float	averageconnections;
+	uint32	activeconnections;
+	//MORPH START - Added by Yun.SF3, Auto DynUp changing
 	void	SwitchSUC(bool bSetSUCOn = false);
-//MORPH END - Added by Yun.SF3, Auto DynUp changing
-	
+	uint16	per5average;
+	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 };
 

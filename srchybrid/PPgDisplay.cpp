@@ -1,12 +1,29 @@
-// PPgDisplay.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
 #include "PPgDisplay.h"
 #include <dlgs.h>
 #include "HTRichEditCtrl.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "TransferWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -14,8 +31,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-
-// CPPgDisplay dialog
 
 IMPLEMENT_DYNAMIC(CPPgDisplay, CPropertyPage)
 CPPgDisplay::CPPgDisplay()
@@ -142,13 +157,13 @@ BOOL CPPgDisplay::OnApply()
 		app_prefs->prefs->m_bDisableKnownClientList = false;
 
 	theApp.glob_prefs->ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO));
-	if (!theApp.glob_prefs->ShowCatTabInfos()) theApp.emuledlg->transferwnd.UpdateCatTabTitles();
+	if (!theApp.glob_prefs->ShowCatTabInfos()) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 
 	if( flag != app_prefs->prefs->m_bDisableKnownClientList){
 		if( !flag )
-			theApp.emuledlg->transferwnd.clientlistctrl.DeleteAllItems();
+			theApp.emuledlg->transferwnd->clientlistctrl.DeleteAllItems();
 		else
-			theApp.emuledlg->transferwnd.clientlistctrl.ShowKnownClients();
+			theApp.emuledlg->transferwnd->clientlistctrl.ShowKnownClients();
 	}
 
 	flag = app_prefs->prefs->m_bDisableQueueList;
@@ -160,9 +175,9 @@ BOOL CPPgDisplay::OnApply()
 
 	if( flag != app_prefs->prefs->m_bDisableQueueList){
 		if( !flag )
-			theApp.emuledlg->transferwnd.queuelistctrl.DeleteAllItems();
+			theApp.emuledlg->transferwnd->queuelistctrl.DeleteAllItems();
 		else
-			theApp.emuledlg->transferwnd.queuelistctrl.ShowQueueClients();
+			theApp.emuledlg->transferwnd->queuelistctrl.ShowQueueClients();
 	}
 
 	GetDlgItem(IDC_TOOLTIPDELAY)->GetWindowText(buffer,20);
@@ -171,22 +186,21 @@ BOOL CPPgDisplay::OnApply()
 	else
 		app_prefs->prefs->m_iToolDelayTime = atoi(buffer);
 	
-//	((CemuleDlg*)AfxGetMainWnd())->transferwnd.m_ttip.SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
-	((CemuleDlg*)AfxGetMainWnd())->transferwnd.m_tooltip.SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
+	((CemuleDlg*)AfxGetMainWnd())->transferwnd->m_tooltip.SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
 
 	CToolTipCtrl* tooltip = ((CemuleDlg*)AfxGetMainWnd())->searchwnd->searchlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
 
-	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd.downloadlistctrl.GetToolTips();
+	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd->downloadlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
 
-	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd.uploadlistctrl.GetToolTips();
+	tooltip = ((CemuleDlg*)AfxGetMainWnd())->transferwnd->uploadlistctrl.GetToolTips();
 	if (tooltip)
 		tooltip->SetDelayTime(TTDT_INITIAL, theApp.glob_prefs->GetToolTipDelay()*1000);
 
-	theApp.emuledlg->transferwnd.downloadlistctrl.SetStyle();
+	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 	LoadSettings();
 
 	if (mintotray_old != app_prefs->prefs->mintotray)
@@ -273,7 +287,7 @@ UINT CALLBACK ChooseFontHook(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam
 void CPPgDisplay::OnBnClickedSelectHypertextFont()
 {
 	// get current font description
-	CFont* pFont = theApp.emuledlg->chatwnd.chatselector.chatout.GetFont();
+	CFont* pFont = &theApp.emuledlg->m_fontHyperText;
 	LOGFONT lf;
 	if (pFont != NULL)
 	   pFont->GetObject(sizeof(LOGFONT), &lf);
@@ -293,4 +307,3 @@ void CPPgDisplay::OnBnClickedSelectHypertextFont()
 
 	_pfnChooseFontHook = NULL;
 }
-

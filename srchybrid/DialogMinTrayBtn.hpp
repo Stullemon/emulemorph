@@ -11,6 +11,7 @@
 #include "DialogMinTrayBtn.h"
 #include "VisualStylesXP.h"
 
+extern void InitWindowStyles(CWnd* pWnd);
 
 // ------------------------------
 //  constants
@@ -129,8 +130,8 @@ template <class BASE> BOOL CDialogMinTrayBtn<BASE>::OnInitDialog()
 {
 	BOOL bReturn= BASE::OnInitDialog();
 	InitWindowStyles(this);
-	m_nMinTrayBtnTimerId= SetTimer(TIMERMINTRAYBTN_ID, TIMERMINTRAYBTN_PERIOD, NULL);
-	return bReturn;
+    m_nMinTrayBtnTimerId= SetTimer(TIMERMINTRAYBTN_ID, TIMERMINTRAYBTN_PERIOD, NULL);
+    return bReturn;
 }
 
 template <class BASE> void CDialogMinTrayBtn<BASE>::OnNcPaint() 
@@ -458,7 +459,7 @@ template <class BASE> void CDialogMinTrayBtn<BASE>::MinTrayBtnSetDown()
 
 template <class BASE> BOOL CDialogMinTrayBtn<BASE>::IsWindowsClassicStyle() const
 {
-    return (!((g_xpStyle.IsThemeActive()) && (g_xpStyle.IsAppThemed())));
+	return m_bMinTrayBtnWindowsClassicStyle;
 }
 
 template <class BASE> void CDialogMinTrayBtn<BASE>::SetWindowText(LPCTSTR lpszString)
@@ -493,6 +494,8 @@ template <class BASE> INT CDialogMinTrayBtn<BASE>::GetVisualStylesXPColor() cons
 
 template <class BASE> BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnInitBitmap()
 {
+	m_bMinTrayBtnWindowsClassicStyle = !(g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed());
+
 	INT nColor;
 	m_bmMinTrayBtnBitmap.DeleteObject();
 	if ((nColor= GetVisualStylesXPColor()) == -1)

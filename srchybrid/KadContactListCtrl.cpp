@@ -14,14 +14,13 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-// FriendListCtrl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "KademliaWnd.h"
 #include "KadContactListCtrl.h"
 #include "Ini2.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -43,10 +42,9 @@ enum ECols
 IMPLEMENT_DYNAMIC(CKadContactListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CKadContactListCtrl, CMuleListCtrl)
-	ON_NOTIFY_REFLECT (NM_RCLICK, OnNMRclick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_WM_DESTROY()
+	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
 
 CKadContactListCtrl::CKadContactListCtrl()
@@ -67,6 +65,7 @@ void CKadContactListCtrl::Init()
 	InsertColumn(colType,GetResString(IDS_TYPE) ,LVCFMT_LEFT,50);
 	InsertColumn(colContact, GetResString(IDS_KADCONTACTLAB) ,LVCFMT_LEFT,50);
 	InsertColumn(colDistance,GetResString(IDS_KADDISTANCE),LVCFMT_LEFT,50);
+	SetAllIcons();
 	Localize();
 
 	CString strIniFile;
@@ -86,7 +85,13 @@ void CKadContactListCtrl::SaveAllSettings(CIni* ini)
 	ini->WriteInt(m_strLVName + "SortAscending", GetSortAscending());
 }
 
-void CKadContactListCtrl::Localize()
+void CKadContactListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CKadContactListCtrl::SetAllIcons()
 {
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -101,6 +106,10 @@ void CKadContactListCtrl::Localize()
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
 		ImageList_Destroy(himl);
+}
+
+void CKadContactListCtrl::Localize()
+{
 }
 
 void CKadContactListCtrl::ContactAdd(Kademlia::CContact* contact)
@@ -169,19 +178,9 @@ void CKadContactListCtrl::ContactRef(Kademlia::CContact* contact)
 	catch(...){ASSERT(0);}
 }
 
-void CKadContactListCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	*pResult = 0;
-}
-
 BOOL CKadContactListCtrl::OnCommand(WPARAM wParam,LPARAM lParam)
 {
 	return TRUE;
-}
-
-void CKadContactListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	*pResult = 0;
 }
 
 void CKadContactListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)

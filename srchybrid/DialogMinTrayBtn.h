@@ -6,9 +6,7 @@
 //  DialogMinTrayBtn.h
 //  zegzav - 2002,2003 - eMule project (http://www.emule-project.net)
 // ------------------------------------------------------------
-
 #pragma once
-
 #define HTMINTRAYBUTTON         65
 #define SC_MINIMIZETRAY         0xE000
 
@@ -77,6 +75,7 @@ private:
     BOOL   m_bMinTrayBtnHitTest;
     UINT_PTR m_nMinTrayBtnTimerId;
 	CBitmap m_bmMinTrayBtnBitmap;
+	BOOL	m_bMinTrayBtnWindowsClassicStyle;
 	static const CHAR *m_pszMinTrayBtnBmpName[];
 };
 
@@ -106,4 +105,3 @@ template <class BASE> inline BOOL CDialogMinTrayBtn<BASE>::MinTrayBtnIsEnabled()
 }
 
 #include "DialogMinTrayBtn.hpp"
-

@@ -1,9 +1,5 @@
 #pragma once
 
-#include "preferences.h"
-
-// CPPgServer dialog
-
 class CPPgServer : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgServer)

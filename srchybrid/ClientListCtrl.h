@@ -14,15 +14,9 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include <sys/timeb.h>
-#include "types.h"
-#include "titlemenu.h"
 #include "MuleListCtrl.h"
 
-
-// CClientListCtrl
 class CUpDownClient;
 
 class CClientListCtrl : public CMuleListCtrl
@@ -32,7 +26,7 @@ class CClientListCtrl : public CMuleListCtrl
 public:
 	CClientListCtrl();
 	virtual ~CClientListCtrl();
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
 	void	Init();
 	void	AddClient(CUpDownClient* client);
 	void	RemoveClient(CUpDownClient* client);
@@ -42,14 +36,22 @@ public:
 	void	Localize();
 	void	ShowSelectedUserDetails();
 	void	ShowKnownClients();
-	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
+
 protected:
+	void SetAllIcons();
+
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
+
 private:
 	CImageList imagelist;
 };

@@ -1,9 +1,6 @@
 #pragma once
 
 #include "enbitmap.h"
-#include "afxwin.h"
-
-// CSplashScreen dialog
 
 class CSplashScreen : public CDialog
 {

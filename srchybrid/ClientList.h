@@ -14,12 +14,18 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "updownclient.h"
-#include "types.h"
-#include "listensocket.h"
-#include "loggable.h"
+#include "Loggable.h"
+#include "updownclient.h" //MORPH - Added by SiRoB
+
+class CClientReqSocket;
+//class CUpDownClient;
+
+namespace Kademlia{
+	class CContact;
+};
+typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
+
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 #include <map>
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
@@ -37,11 +43,7 @@ struct PORTANDHASH{
 };
 class CDeletedClient{
 public:
-	CDeletedClient(CUpDownClient* pClient){
-		m_dwInserted = ::GetTickCount();
-		PORTANDHASH porthash = { pClient->GetUserPort(), pClient->Credits()};
-		m_ItemsList.Add(porthash);
-	}
+	CDeletedClient(CUpDownClient* pClient);
 	CArray<PORTANDHASH,PORTANDHASH> m_ItemsList;
 	uint32							m_dwInserted;
 };
@@ -55,14 +57,17 @@ public:
 	CClientList();
 	~CClientList();
 	void	AddClient(CUpDownClient* toadd,bool bSkipDupTest = false);
-	void	RemoveClient(CUpDownClient* toremove, CString reason = NULL);
+	void	RemoveClient(CUpDownClient* toremove);
 	void	GetStatistics(uint32 &totalclient, int stats[], CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkey=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEDonkeyHybrid=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionEMule=NULL, CMap<uint16, uint16, uint32, uint32> *clientVersionLMule=NULL); // xrmb : statsclientstatus
 	void	DeleteAll();
 	bool	AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket* sender);
-	CUpDownClient* FindClientByIP(uint32 clientip,uint16 port);
+	CUpDownClient* FindClientByIP(uint32 clientip, UINT port);
+	CUpDownClient* FindClientByUserHash(const uchar* clienthash);
+	CUpDownClient* FindClientByIP(uint32 clientip);
+	CUpDownClient* FindClientByIP_UDP(uint32 clientip, UINT nUDPport);
+	CUpDownClient* FindClientByServerID(uint32 uServerIP, uint32 uUserID);
 	CUpDownClient* FindClientByID_KadPort(uint32 clientID,uint16 kadPort);
-	CUpDownClient* FindClientByUserHash(uchar* clienthash);
-	void	GetClientListByFileID(CTypedPtrList<CPtrList, CUpDownClient*> *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
+	void	GetClientListByFileID(CUpDownClientPtrList *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
 	
 	void	AddBannedClient(uint32 dwIP);
 	bool	IsBannedClient(uint32 dwIP);
@@ -79,16 +84,17 @@ public:
 	
 	bool	IsValidClient(CUpDownClient* tocheck);
 	void	Debug_SocketDeleted(CClientReqSocket* deleted);
+
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 	bool GiveClientsForTraceRoute();
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 private:
-	CTypedPtrList<CPtrList, CUpDownClient*> list;
+	CUpDownClientPtrList list;
 	CMap<uint32, uint32, uint32, uint32> m_bannedList;
 	CMap<uint32, uint32, CDeletedClient*, CDeletedClient*> m_trackedClientsList;
 	uint32	m_dwLastBannCleanUp;
 	uint32	m_dwLastTrackedCleanUp;
-	CTypedPtrList<CPtrList, CUpDownClient*> RequestTCPList;
+	CUpDownClientPtrList RequestTCPList;
 
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 public:

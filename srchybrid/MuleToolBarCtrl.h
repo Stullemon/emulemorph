@@ -3,11 +3,6 @@
 #define IDC_TOOLBAR			16127
 #define IDC_TOOLBARBUTTON	16129
 
-//#define USE_TEXTURE
-//#define USE_REBAR
-
-// CMuleToolbarCtrl
-
 class CMuleToolbarCtrl : public CToolBarCtrl
 {
 	DECLARE_DYNAMIC(CMuleToolbarCtrl)
@@ -41,6 +36,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnSysColorChange();
 	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTbnQueryDelete(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTbnQueryInsert(NMHDR *pNMHDR, LRESULT *pResult);
@@ -55,6 +51,4 @@ protected:
 	void ChangeToolbarBitmap(CString path, bool refresh);
 	void ChangeTextLabelStyle(int settings, bool refresh);
 	void Refresh();
-public:
-	afx_msg void OnSysColorChange();
 };

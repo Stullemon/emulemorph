@@ -319,7 +319,7 @@ int XMessageBox(HWND hwnd,
 	// get font for message box
 /*
 	LOGFONT lf;
-	MEMSET(&lf, 0, sizeof(lf));
+	memset(&lf, 0, sizeof(lf));
 	_tcscpy(lf.lfFaceName, _T("MS Sans Serif"));
 	lf.lfHeight = -12;
 	lf.lfWeight = FW_NORMAL;
@@ -327,7 +327,7 @@ int XMessageBox(HWND hwnd,
 */
 
 	NONCLIENTMETRICS ncm;
-	MEMSET(&ncm, 0, sizeof(ncm));
+	memset(&ncm, 0, sizeof(ncm));
 	ncm.cbSize = sizeof(ncm);
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, 0, &ncm, 0);
 	ghFont = ::CreateFontIndirect(&ncm.lfMessageFont);
@@ -1112,7 +1112,7 @@ int CDialogTemp::Display(LPCTSTR lpszCaption)
 		BYTE* pdest = pBuffer;
 
 		// transfer DLGTEMPLATE structure to the buffer
-		MEMCOPY(pdest, &gdlgTempl, sizeof(DLGTEMPLATE));
+		memcpy(pdest, &gdlgTempl, sizeof(DLGTEMPLATE));
 		pdest += sizeof(DLGTEMPLATE);
 
 		*(WORD*)pdest = 0;                              // no menu
@@ -1127,7 +1127,7 @@ int CDialogTemp::Display(LPCTSTR lpszCaption)
 		pchCaption = new WCHAR[nTitleLen + 1];
 		nActualChars = MultiByteToWideChar(CP_ACP, 0, szTitle, -1, pchCaption, nTitleLen + 1);
 		ASSERT(nActualChars > 0);
-		MEMCOPY(pdest, pchCaption, nActualChars * sizeof(WCHAR));
+		memcpy(pdest, pchCaption, nActualChars * sizeof(WCHAR));
 		pdest += nActualChars * sizeof(WCHAR);
 		delete pchCaption;
 
@@ -1135,7 +1135,7 @@ int CDialogTemp::Display(LPCTSTR lpszCaption)
 		for (i = 0; i < gdlgTempl.cdit; i++)
 		{
 			pdest = (BYTE*)(((DWORD)pdest + 3) & ~3);  // make the pointer DWORD aligned
-			MEMCOPY(pdest, (void *)&m_pDlgItemArray[i]->m_dlgItemTemplate, sizeof(DLGITEMTEMPLATE));
+			memcpy(pdest, (void *)&m_pDlgItemArray[i]->m_dlgItemTemplate, sizeof(DLGITEMTEMPLATE));
 			pdest += sizeof(DLGITEMTEMPLATE);
 			*(WORD*)pdest = 0xFFFF;                     // indicating atom value
 			pdest += sizeof(WORD);
@@ -1150,7 +1150,7 @@ int CDialogTemp::Display(LPCTSTR lpszCaption)
 			int nActualChars = MultiByteToWideChar(CP_ACP, 0,
 											   m_pDlgItemArray[i]->m_szCaption, -1, pchCaption, nChars);
 			ASSERT(nActualChars > 0);
-			MEMCOPY(pdest, pchCaption, nActualChars * sizeof(WCHAR));
+			memcpy(pdest, pchCaption, nActualChars * sizeof(WCHAR));
 			pdest += nActualChars * sizeof(WCHAR);
 			delete pchCaption;
 

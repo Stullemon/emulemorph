@@ -1,9 +1,7 @@
 #if !defined(AFX_PROGRESSCTRLX_H__F26E8924_D1C1_11D3_B261_00104BB13A66__INCLUDED_)
 #define AFX_PROGRESSCTRLX_H__F26E8924_D1C1_11D3_B261_00104BB13A66__INCLUDED_
 
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 // class CProgressCtrlX

@@ -14,11 +14,10 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "types.h"
-#include "packets.h"
-#include "loggable.h"
+#include "Loggable.h"
+
+class Packet;
 
 #pragma pack(1)
 struct UDPPack
@@ -37,13 +36,14 @@ public:
 
 	bool	Create();
 	bool	SendPacket(Packet* packet, uint32 dwIP, uint16 nPort);
-	bool	IsBusy() const	{return m_bWouldBlock;}
+	bool	IsBusy() const { return m_bWouldBlock; }
 
 protected:
 	bool	ProcessPacket(char* packet, int16 size, int8 opcode, char* host, uint16 port);
 	
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);
+
 private:
 	int		SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort);
 	bool	m_bWouldBlock;

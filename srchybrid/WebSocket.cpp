@@ -1,14 +1,10 @@
-// ws2.cpp : Defines the entry point for the application.
-//
-
-#include <stdafx.h> 
-#pragma comment(lib, "ws2_32.lib") 
-
-#include <stdlib.h> // for atol function
-
+#include <stdafx.h>
+#pragma comment(lib, "ws2_32.lib")
+#include "emule.h"
+#include "OtherFunctions.h"
 #include "WebSocket.h"
 #include "WebServer.h"
-#include "emule.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -153,8 +149,8 @@ void CWebSocket::OnReceived(void* pData, DWORD dwSize, in_addr inad)
 		if (m_bCanRecv && (m_dwRecv > m_dwHttpHeaderLen + m_dwHttpContentLen))
 		{
 			// move our data
-			MoveMemory(m_pBuf, m_pBuf + m_dwHttpHeaderLen + m_dwHttpContentLen, m_dwRecv - m_dwHttpHeaderLen + m_dwHttpContentLen);
 			m_dwRecv -= m_dwHttpHeaderLen + m_dwHttpContentLen;
+			MoveMemory(m_pBuf, m_pBuf + m_dwHttpHeaderLen + m_dwHttpContentLen, m_dwRecv);
 		} else
 			m_dwRecv = 0;
 
@@ -202,7 +198,7 @@ void CWebSocket::SendData(const void* pData, DWORD dwDataSize)
 			{
 				pChunk->m_pNext = NULL;
 				pChunk->m_dwSize = dwDataSize;
-				if (pChunk->m_pData = new char[dwDataSize])
+				if ((pChunk->m_pData = new char[dwDataSize]) != NULL)
 				{
 					//-- data should be copied into "pChunk->m_pData" anyhow
 					//-- possible solution is simple:
@@ -303,7 +299,7 @@ UINT AFX_CDECL WebSocketAcceptedFunc(LPVOID pD)
 							break; //no more events till now
 
 						if (FD_READ & stEvents.lNetworkEvents)
-							while (true)
+							for (;;)
 							{
 								char pBuf[0x1000];
 								int nRes = recv(hSocket, pBuf, sizeof(pBuf), 0);
@@ -355,7 +351,8 @@ UINT AFX_CDECL WebSocketAcceptedFunc(LPVOID pD)
 								// erase this chunk
 								CWebSocket::CChunk* pNext = stWebSocket.m_pHead->m_pNext;
 								delete stWebSocket.m_pHead;
-								if (!(stWebSocket.m_pHead = pNext))
+								stWebSocket.m_pHead = pNext;
+								if (stWebSocket.m_pHead == NULL)
 									stWebSocket.m_pTail = NULL;
 							}
 					}
@@ -405,7 +402,7 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 						HANDLE pWait[] = { hEvent, s_hTerminate };
 						while (WAIT_OBJECT_0 == WaitForMultipleObjects(2, pWait, FALSE, INFINITE))
 						{
-							while (true)
+							for (;;)
 							{
 								struct sockaddr_in their_addr;
                                 int sin_size = sizeof(struct sockaddr_in);
@@ -416,7 +413,6 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 
 								if(theApp.glob_prefs->GetWSIsEnabled())
 								{
-									DWORD dwThread = 0;
 									SocketData *pData = new SocketData;
 									pData->hSocket = hAccepted;
 									pData->pThis = pThis;
@@ -485,7 +481,7 @@ void StopSockets()
 			if (dwWaitRes == WAIT_TIMEOUT)
 			{
 				TRACE("*** Failed to wait for websocket thread termination - Timeout\n");
-				VERIFY( TerminateThread(s_pSocketThread->m_hThread, -1) );
+				VERIFY( TerminateThread(s_pSocketThread->m_hThread, (DWORD)-1) );
 				VERIFY( CloseHandle(s_pSocketThread->m_hThread) );
 			}
 			else if (dwWaitRes == -1)

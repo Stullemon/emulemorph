@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "BtnST.h"
 #include "emule.h"
-
 #ifdef	BTNST_USE_SOUND
 #pragma comment(lib, "winmm.lib")
 #include <Mmsystem.h>
@@ -467,7 +466,7 @@ BOOL CButtonST::OnClicked()
 			{
 				SHELLEXECUTEINFO	csSEI;
 
-				MEMSET(&csSEI, 0, sizeof(csSEI));
+				memset(&csSEI, 0, sizeof(csSEI));
 				csSEI.cbSize = sizeof(SHELLEXECUTEINFO);
 				csSEI.fMask = SEE_MASK_FLAG_NO_UI;
 				csSEI.lpVerb = _T("open");
@@ -1778,7 +1777,7 @@ DWORD CButtonST::SetBk(CDC* pDC)
 DWORD CButtonST::SetURL(LPCTSTR lpszURL)
 {
 	// Remove any existing URL
-	MEMSET(m_szURL, 0, sizeof(m_szURL));
+	memset(m_szURL, 0, sizeof(m_szURL));
 
 	if (lpszURL)
 	{

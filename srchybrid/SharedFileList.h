@@ -14,48 +14,40 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
-#include "opcodes.h"
-#include "emule.h"
-#include "types.h"
-#include "preferences.h"
-#include "KnownFile.h"
-#include "knownfilelist.h"
-#include "sharedfilesctrl.h"
-#include "sockets.h"
-#include "partfile.h"
-#include "mapkey.h"
-#include "loggable.h"
+#include "MapKey.h"
+#include "Loggable.h"
+
+class CKnownFileList;
+class CPreferences;
+class CServerConnect;
+class CPartFile;
+class CKnownFile;
+class CPublishKeywordList;
 
 struct UnknownFile_Struct{
 	CString strName;
 	CString strDirectory;
 };
 
-class CKnownFileList;
-
 class CSharedFileList: public CLoggable
 {
 	friend class CSharedFilesCtrl;
 	friend class CClientReqSocket;
+
 public:
-	CSharedFileList(CPreferences* in_prefs,CServerConnect* in_server, CKnownFileList* in_filelist);
+	CSharedFileList(CPreferences* in_prefs, CServerConnect* in_server);
 	~CSharedFileList();
+
 	void	SendListToServer();
 	void	Reload();
 	void	SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd = false);
 	void	SetOutputCtrl(CSharedFilesCtrl* in_ctrl);
 	void	RemoveFile(CKnownFile* toremove);
-	CMutex	list_mut;
 	CKnownFile*	GetFileByID(const uchar* filehash);
 	CKnownFile*	GetFileByIndex(int index);
-	CKnownFileList*		filelist;
 	void	CreateOfferedFilePacket(CKnownFile* cur_file, CMemFile* files, bool bForServer = true, bool bSendED2KTags = true);
-	// -khaos--+++> New parameter, pbytesLargest
 	uint64	GetDatasize(uint64 &pbytesLargest);
-	// <-----khaos-
 	uint16	GetCount()	{return m_Files_map.GetCount(); }
 	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER: SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
@@ -64,8 +56,11 @@ public:
 	void	ClearED2KPublishInfo();
 	void	Process();
 	void	Publish();
+	void	AddKeywords(CKnownFile* pFile);
+	void	RemoveKeywords(CKnownFile* pFile);
 
 private:
+	void	AddFile(CKnownFile* pFile);
 	void	FindSharedFiles();
 	void	HashNextFile();
 	// SLUGFILLER: SafeHash
@@ -74,6 +69,7 @@ private:
 	// SLUGFILLER: SafeHash
 
 	CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> m_Files_map;
+	CPublishKeywordList* m_keywords;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> waitingforhash_list;
 	CTypedPtrList<CPtrList, UnknownFile_Struct*> currentlyhashing_list;	// SLUGFILLER: SafeHash
 	CPreferences*		app_prefs;
@@ -84,13 +80,13 @@ private:
 	int m_currFileSrc;
 	int m_currFileKey;
 	uint32 m_lastPublishKadSrc;
-	uint32 m_lastPublishKadKey;
+	uint32 m_lastProcessPublishKadKeywordList;
+	CMutex	list_mut;
 };
 
-//class CPartFile;
 class CAddFileThread : public CWinThread
 {
-		DECLARE_DYNCREATE(CAddFileThread)
+	DECLARE_DYNCREATE(CAddFileThread)
 protected:
 	CAddFileThread();
 public:

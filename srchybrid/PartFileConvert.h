@@ -14,39 +14,12 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// created by Ornis
-
 #pragma once
+#include "ResizableLib\ResizableDialog.h"
+#include "Loggable.h"
+#include "ProgressCtrlX.h"
 
-#include "emule.h"
-#include "PartFile.h"
-#include "loggable.h"
-
-enum convstatus{
-	CONV_OK				=0,
-	CONV_QUEUE,
-	CONV_INPROGRESS,
-	CONV_OUTOFDISKSPACE,
-	CONV_PARTMETNOTFOUND,
-	CONV_IOERROR,
-	CONV_FAILED,
-	CONV_ALREADYEXISTS
-};
-
-struct ConvertJob {
-	CString folder;
-	CString filename;
-	CString filehash;
-	int     format;
-	int		state;
-	uint32	size;
-	uint32	spaceneeded;
-	uint8	versiontag;
-	bool	removeSource;
-	ConvertJob() {size=0;spaceneeded=0;versiontag=0;removeSource=true;}
-	//~ConvertJob() {}
-};
+struct ConvertJob;
 
 class CPartFileConvert: public CLoggable
 {

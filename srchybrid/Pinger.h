@@ -71,14 +71,6 @@
 
 #pragma once
 
-#include "afxtempl.h"
-
-#include <windows.h>
-// #include <winsock.h>
-#include <winsock2.h>
-
-#include "types.h"
-
 #define DEFAULT_TTL 64
 
 #define IP_STATUS_BASE 11000

@@ -73,11 +73,20 @@
 *
 * <--- End cut --->
 */
-
 #include "stdafx.h"
-
+#include "emule.h"
 #include "Pinger.h"
-#include "Emule.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
+#include "OtherFunctions.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 #define BUFSIZE     8192
 #define DEFAULT_LEN 0

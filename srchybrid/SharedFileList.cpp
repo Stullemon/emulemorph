@@ -14,14 +14,29 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "sharedfilelist.h"
-#include "knownfilelist.h"
-#include "packets.h"
+#include "stdafx.h"
+#include "emule.h"
+#include "SharedFileList.h"
+#include "KnownFileList.h"
+#include "Packets.h"
 #include "kademlia/kademlia/search.h"
 #include "kademlia/routing/Timer.h"
-#include <time.h>
+#include "kademlia/kademlia/prefs.h"
+#define NOMD4MACROS
+#include "kademlia/utils/md4.h"
+#include "DownloadQueue.h"
+#include "UploadQueue.h"
+#include "KademliaMain.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+#include "KnownFile.h"
+#include "Sockets.h"
+#include "SafeFile.h"
+#include "Server.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "SharedFilesWnd.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -30,19 +45,268 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-CSharedFileList::CSharedFileList(CPreferences* in_prefs,CServerConnect* in_server,CKnownFileList* in_filelist){
+typedef CSimpleArray<CKnownFile*> CSimpleKnownFileArray;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CPublishKeyword
+
+class CPublishKeyword
+{
+public:
+	CPublishKeyword(const CString& rstrKeyword)
+	{
+		m_strKeyword = rstrKeyword;
+		ASSERT( rstrKeyword.GetLength() >= 3 );
+		Kademlia::CMD4::hash((byte*)(LPCSTR)rstrKeyword, rstrKeyword.GetLength(), &m_nKadID);
+		SetNextPublishTime(0);
+		SetPublishedCount(0);
+	}
+
+	const Kademlia::CUInt128& GetKadID() const { return m_nKadID; }
+	const CString& GetKeyword() const { return m_strKeyword; }
+	int GetRefCount() const { return m_aFiles.GetSize(); }
+	const CSimpleKnownFileArray& GetReferences() const { return m_aFiles; }
+
+	UINT GetNextPublishTime() const { return m_tNextPublishTime; }
+	void SetNextPublishTime(UINT tNextPublishTime) { m_tNextPublishTime = tNextPublishTime; }
+
+	UINT GetPublishedCount() const { return m_uPublishedCount; }
+	void SetPublishedCount(UINT uPublishedCount) { m_uPublishedCount = uPublishedCount; }
+	void IncPublishedCount() { m_uPublishedCount++; }
+
+	BOOL AddRef(CKnownFile* pFile)
+	{
+		ASSERT( m_aFiles.Find(pFile) == -1 );
+		return m_aFiles.Add(pFile);
+	}
+
+	int RemoveRef(CKnownFile* pFile)
+	{
+		m_aFiles.Remove(pFile);
+		return m_aFiles.GetSize();
+	}
+
+	void RemoveAllReferences()
+	{
+		m_aFiles.RemoveAll();
+	}
+
+	void RotateReferences(int iRotateSize)
+	{
+		if (m_aFiles.GetSize() > iRotateSize)
+		{
+			CKnownFile** ppRotated = (CKnownFile**)malloc(m_aFiles.m_nAllocSize * sizeof(*m_aFiles.GetData()));
+			if (ppRotated != NULL)
+			{
+				memcpy(ppRotated, m_aFiles.GetData() + iRotateSize, (m_aFiles.GetSize() - iRotateSize) * sizeof(*m_aFiles.GetData()));
+				memcpy(ppRotated + m_aFiles.GetSize() - iRotateSize, m_aFiles.GetData(), iRotateSize * sizeof(*m_aFiles.GetData()));
+				free(m_aFiles.GetData());
+				m_aFiles.m_aT = ppRotated;
+			}
+		}
+	}
+
+protected:
+	CString m_strKeyword;
+	Kademlia::CUInt128 m_nKadID;
+	UINT m_tNextPublishTime;
+	UINT m_uPublishedCount;
+	CSimpleKnownFileArray m_aFiles;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CPublishKeywordList
+
+class CPublishKeywordList
+{
+public:
+	CPublishKeywordList();
+	~CPublishKeywordList();
+
+	void AddKeywords(CKnownFile* pFile);
+	void RemoveKeywords(CKnownFile* pFile);
+	void RemoveAllKeywords();
+
+	void RemoveAllKeywordReferences();
+	void PurgeUnreferencedKeywords();
+
+	int GetCount() const { return m_lstKeywords.GetCount(); }
+
+	CPublishKeyword* GetNextKeyword();
+	void ResetNextKeyword();
+
+	UINT GetNextPublishTime() const { return m_tNextPublishKeywordTime; }
+	void SetNextPublishTime(UINT tNextPublishKeywordTime) { m_tNextPublishKeywordTime = tNextPublishKeywordTime; }
+
+#ifdef _DEBUG
+	void Dump();
+#endif
+
+protected:
+	// can't use a CMap - too many disadvantages in processing the 'list'
+	//CTypedPtrMap<CMapStringToPtr, CString, CPublishKeyword*> m_lstKeywords;
+	CTypedPtrList<CPtrList, CPublishKeyword*> m_lstKeywords;
+	POSITION m_posNextKeyword;
+	UINT m_tNextPublishKeywordTime;
+
+	CPublishKeyword* FindKeyword(const CString& rstrKeyword, POSITION* ppos = NULL) const;
+};
+
+CPublishKeywordList::CPublishKeywordList()
+{
+	ResetNextKeyword();
+	SetNextPublishTime(0);
+}
+
+CPublishKeywordList::~CPublishKeywordList()
+{
+	RemoveAllKeywords();
+}
+
+CPublishKeyword* CPublishKeywordList::GetNextKeyword()
+{
+	if (m_posNextKeyword == NULL)
+	{
+		m_posNextKeyword = m_lstKeywords.GetHeadPosition();
+		if (m_posNextKeyword == NULL)
+			return NULL;
+	}
+	return m_lstKeywords.GetNext(m_posNextKeyword);
+}
+
+void CPublishKeywordList::ResetNextKeyword()
+{
+	m_posNextKeyword = m_lstKeywords.GetHeadPosition();
+}
+
+CPublishKeyword* CPublishKeywordList::FindKeyword(const CString& rstrKeyword, POSITION* ppos) const
+{
+	POSITION pos = m_lstKeywords.GetHeadPosition();
+	while (pos)
+	{
+		POSITION posLast = pos;
+		CPublishKeyword* pPubKw = m_lstKeywords.GetNext(pos);
+		if (pPubKw->GetKeyword() == rstrKeyword)
+		{
+			if (ppos)
+				*ppos = posLast;
+			return pPubKw;
+		}
+	}
+	return NULL;
+}
+
+void CPublishKeywordList::AddKeywords(CKnownFile* pFile)
+{
+	const Kademlia::WordList& wordlist = pFile->GetKadKeywords();
+	ASSERT( wordlist.size() > 0 );
+	Kademlia::WordList::const_iterator it;
+	for (it = wordlist.begin(); it != wordlist.end(); it++)
+	{
+		const CString& strKeyword = *it;
+		CPublishKeyword* pPubKw = FindKeyword(strKeyword);
+		if (pPubKw == NULL)
+		{
+			pPubKw = new CPublishKeyword(strKeyword);
+			m_lstKeywords.AddTail(pPubKw);
+			SetNextPublishTime(0);
+		}
+		pPubKw->AddRef(pFile);
+	}
+}
+
+void CPublishKeywordList::RemoveKeywords(CKnownFile* pFile)
+{
+	const Kademlia::WordList& wordlist = pFile->GetKadKeywords();
+	ASSERT( wordlist.size() > 0 );
+	Kademlia::WordList::const_iterator it;
+	for (it = wordlist.begin(); it != wordlist.end(); it++)
+	{
+		const CString& strKeyword = *it;
+		POSITION pos;
+		CPublishKeyword* pPubKw = FindKeyword(strKeyword, &pos);
+		if (pPubKw != NULL)
+		{
+			if (pPubKw->RemoveRef(pFile) == 0)
+			{
+				if (pos == m_posNextKeyword)
+					(void)m_lstKeywords.GetNext(m_posNextKeyword);
+				m_lstKeywords.RemoveAt(pos);
+				delete pPubKw;
+				SetNextPublishTime(0);
+			}
+		}
+	}
+}
+
+void CPublishKeywordList::RemoveAllKeywords()
+{
+	POSITION pos = m_lstKeywords.GetHeadPosition();
+	while (pos)
+		delete m_lstKeywords.GetNext(pos);
+	m_lstKeywords.RemoveAll();
+	ResetNextKeyword();
+	SetNextPublishTime(0);
+}
+
+void CPublishKeywordList::RemoveAllKeywordReferences()
+{
+	POSITION pos = m_lstKeywords.GetHeadPosition();
+	while (pos)
+		m_lstKeywords.GetNext(pos)->RemoveAllReferences();
+}
+
+void CPublishKeywordList::PurgeUnreferencedKeywords()
+{
+	POSITION pos = m_lstKeywords.GetHeadPosition();
+	while (pos)
+	{
+		POSITION posLast = pos;
+		CPublishKeyword* pPubKw = m_lstKeywords.GetNext(pos);
+		if (pPubKw->GetRefCount() == 0)
+		{
+			if (posLast == m_posNextKeyword)
+				(void)m_lstKeywords.GetNext(m_posNextKeyword);
+			m_lstKeywords.RemoveAt(posLast);
+			delete pPubKw;
+			SetNextPublishTime(0);
+		}
+	}
+}
+
+#ifdef _DEBUG
+void CPublishKeywordList::Dump()
+{
+	int i = 0;
+	POSITION pos = m_lstKeywords.GetHeadPosition();
+	while (pos)
+	{
+		CPublishKeyword* pPubKw = m_lstKeywords.GetNext(pos);
+		TRACE("%3u: %-10s  ref=%u  %s\n", i, pPubKw->GetKeyword(), pPubKw->GetRefCount(), CastSecondsToHM(pPubKw->GetNextPublishTime()));
+		i++;
+	}
+}
+#endif
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CSharedFileList
+
+CSharedFileList::CSharedFileList(CPreferences* in_prefs,CServerConnect* in_server){
 	app_prefs = in_prefs;
 	server = in_server;
-	filelist = in_filelist;
 	output = 0;
 	m_Files_map.InitHashTable(1031);
-	FindSharedFiles();
+	m_keywords = new CPublishKeywordList;
 	m_lastPublishED2K = 0;
 	m_lastPublishED2KFlag = true;
 	m_currFileSrc = 0;
 	m_lastPublishKadSrc = 0;
 	m_currFileKey = 0;
-	m_lastPublishKadKey = 0;
+	m_lastProcessPublishKadKeywordList = 0;
+//	FindSharedFiles(); //Removed by SiRoB - SAfe hash
 }
 
 CSharedFileList::~CSharedFileList(){
@@ -56,6 +320,7 @@ CSharedFileList::~CSharedFileList(){
 		delete nextfile;
 	}
 	// SLUGFILLER: SafeHash
+	delete m_keywords;
 }
 
 void CSharedFileList::FindSharedFiles(){
@@ -153,11 +418,11 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 		CTime lwtime;
 		if (!ff.GetLastWriteTime(lwtime))
 			AddDebugLogLine(false, "Failed to get file date of %s - %s", ff.GetFilePath(), GetErrorMessage(GetLastError()));
-		uint32 fdate = mktime(lwtime.GetLocalTm());
+		uint32 fdate = safe_mktime(lwtime.GetLocalTm());
 		if (fdate == -1)
 			AddDebugLogLine(false, "Failed to convert file date of %s", ff.GetFilePath());
 
-		CKnownFile* toadd = filelist->FindKnownFile(ff.GetFileName().GetBuffer(),fdate,(uint32)ff.GetLength());
+		CKnownFile* toadd = theApp.knownfiles->FindKnownFile(ff.GetFileName().GetBuffer(),fdate,(uint32)ff.GetLength());
 		if (toadd){
 			toadd->SetPath(rstrDirectory);
 			toadd->SetFilePath(ff.GetFilePath());
@@ -186,33 +451,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory){
 
 void CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd){
 	RemoveFromHashing(toadd);	// SLUGFILLER: SafeHash - hashed ok, remove from list, in case it was on the list
-	CSingleLock sLock(&list_mut,true);
-	// SLUGFILLER: mergeKnown - check for duplicates
-	CKnownFile* other = GetFileByID(toadd->GetFileHash());
-	if (other && other != toadd){
-		if (other->IsPartFile()){
-			if (!toadd->IsPartFile()){	// fail-safe, two part files shouldn't have the same hash
-				other->statistic.Merge(&toadd->statistic);
-				if (!bOnlyAdd && output)
-					output->UpdateFile(other);
-				filelist->RemoveFile(toadd);
-				delete toadd;
-				sLock.Unlock();
-				return;
-			}
-		}
-		else {
-			toadd->statistic.Merge(&other->statistic);
-			RemoveFile(other);
-			filelist->RemoveFile(other);
-			delete other;
-		}
-	}
-	filelist->FilterDuplicateKnownFiles(toadd);
-	// SLUGFILLER: mergeKnown
-	m_Files_map.SetAt(CCKey(toadd->GetFileHash()),toadd);
-	toadd->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
-	sLock.Unlock();
+	AddFile(toadd);
 	toadd->UpdateClientUploadList();		// #zegzav:updcliuplst
 	if (bOnlyAdd)
 		return;
@@ -221,27 +460,75 @@ void CSharedFileList::SafeAddKFile(CKnownFile* toadd, bool bOnlyAdd){
 	m_lastPublishED2KFlag = true;
 }
 
+void CSharedFileList::AddFile(CKnownFile* pFile)
+{
+	CSingleLock sLock(&list_mut, true);
+	// SLUGFILLER: mergeKnown - check for duplicates
+	CKnownFile* other = GetFileByID(pFile->GetFileHash());
+	if (other && other != pFile){
+		if (other->IsPartFile()){
+			if (!pFile->IsPartFile()){	// fail-safe, two part files shouldn't have the same hash
+				other->statistic.Merge(&pFile->statistic);
+				if (output)
+					output->UpdateFile(other);
+				theApp.knownfiles->RemoveFile(pFile);
+				delete pFile;
+				sLock.Unlock();
+				return;
+			}
+		}
+		else {
+			pFile->statistic.Merge(&other->statistic);
+			RemoveFile(other);
+			theApp.knownfiles->RemoveFile(other);
+			delete other;
+		}
+	}
+	theApp.knownfiles->FilterDuplicateKnownFiles(pFile);
+	// SLUGFILLER: mergeKnown
+	m_Files_map.SetAt(CCKey(pFile->GetFileHash()), pFile);
+	m_keywords->AddKeywords(pFile);
+	sLock.Unlock();
+}
+
 // removes first occurrence of 'toremove' in 'list'
-void CSharedFileList::RemoveFile(CKnownFile* toremove){
+void CSharedFileList::RemoveFile(CKnownFile* pFile)
+{
 	if (output)	// SLUGFILLER: mergeKnown - prevent crash in case of no output
-		output->RemoveFile(toremove);
-	m_Files_map.RemoveKey(CCKey(toremove->GetFileHash()));
-	toremove->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
+		output->RemoveFile(pFile);
+	m_Files_map.RemoveKey(CCKey(pFile->GetFileHash()));
+	m_keywords->RemoveKeywords(pFile);
+	pFile->statistic.SetLastUsed(time(NULL)); //EastShare - Added by TAHO, .met file control
 }
 
 void CSharedFileList::Reload(){
 	// SLUGFILLER: SafeHash - don't allow to be called until after the control is loaded
 	if (!output)
 		return;
-	this->FindSharedFiles();
-		output->ShowFileList(this);
+	m_keywords->RemoveAllKeywordReferences();	
+	FindSharedFiles();
+	m_keywords->PurgeUnreferencedKeywords();
+	output->ShowFileList(this);
 	// SLUGFILLER: SafeHash
 }
 
-void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl){
+void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl)
+{
 	output = in_ctrl;
 	output->ShowFileList(this);
 	Reload();		// SLUGFILLER: SafeHash - load shared files after everything
+}
+
+uint8 GetRealPrio(uint8 in)
+{
+	switch(in) {
+		case 4 : return 0;
+		case 0 : return 1;
+		case 1 : return 2;
+		case 2 : return 3;
+		case 3 : return 4;
+	}
+	return 0;
 }
 
 void CSharedFileList::SendListToServer(){
@@ -365,7 +652,7 @@ void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* fil
 		nClientPort = 0;
 	}
 	else{
-		nClientID = ntohl(theApp.GetID());
+		nClientID = theApp.GetID();
 		nClientPort = theApp.glob_prefs->GetPort();
 	}
 	files->Write(&nClientID,4);
@@ -489,7 +776,7 @@ void CSharedFileList::HashNextFile(){
 	// SLUGFILLER: SafeHash
 	if (!theApp.emuledlg || !theApp.emuledlg->IsRunning() || !::IsWindow(theApp.emuledlg->m_hWnd))	// wait for the dialog to open
 		return;
-	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.ShowFilesCount();
+	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.ShowFilesCount();
 	if (!currentlyhashing_list.IsEmpty())	// one hash at a time
 		return;
 	// SLUGFILLER: SafeHash
@@ -606,45 +893,94 @@ void CSharedFileList::Process()
 	m_lastPublishED2K = ::GetTickCount();
 }
 
-void CSharedFileList::Publish(){
+void CSharedFileList::Publish()
+{
+	UINT tNow = time(NULL);
+
 	if(Kademlia::CTimer::getThreadID() && theApp.kademlia->isConnected() && theApp.IsConnected() && GetCount())
 	{ //Once we can handle lowID users in Kad, we need to publish firewalled sources.
 		if( theApp.kademlia->getStatus()->m_totalStoreKey < KADEMLIATOTALSTOREKEY)
 		{
-			if( (!m_lastPublishKadKey || (::GetTickCount() - m_lastPublishKadKey) > KADEMLIAPUBLISHTIME) )
+			if( (!m_lastProcessPublishKadKeywordList || (::GetTickCount() - m_lastProcessPublishKadKeywordList) > KADEMLIAPUBLISHTIME) )
 			{
 				if(m_currFileKey > GetCount())
 					m_currFileKey = 0;
 				CSingleLock sLock(&list_mut,true);
-				CKnownFile* pCurKnownFile = GetFileByIndex(m_currFileKey);
-				if(pCurKnownFile)
+				if (tNow >= m_keywords->GetNextPublishTime())
 				{
-					Kademlia::CUInt128 testID;
-					int test = pCurKnownFile->PublishKey(&testID);
-					if (test)
+					// faile safe; reset the next publish keyword, the "worse case" would be that we process the
+					// keyword list each KADEMLIAPUBLISHTIME seconds
+					m_keywords->SetNextPublishTime(0);
+
+					// search the next keyword which has to be (re)-published
+					UINT tMinNextPublishTime = (UINT)-1;
+					int iCheckedKeywords = 0;
+					CPublishKeyword* pPubKw = m_keywords->GetNextKeyword();
+					while (pPubKw)
+				{
+						iCheckedKeywords++;
+						UINT tNextKwPublishTime = pPubKw->GetNextPublishTime();
+
+						ASSERT( pPubKw->GetRefCount() != 0 );
+
+						if (tNextKwPublishTime == 0 || tNextKwPublishTime <= tNow)
 					{
-						m_lastPublishKadKey = ::GetTickCount();
-						Kademlia::CUInt128 kadFileID;
-						kadFileID.setValue(pCurKnownFile->GetFileHash());
-						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, testID);
+							DEBUG_ONLY( Debug("pkwlst: %-18s  Refs=%3u  Published=%2u  NextPublish=%s  Publishing\n", pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
+
+							Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, pPubKw->GetKadID());
 						if (pSearch)
 						{
 							pSearch->setSearchTypes(Kademlia::CSearch::STOREKEYWORD);
-							pSearch->m_keywordPublish = kadFileID;
-							pSearch->setKeywordCount(test);
+
+								// add all file IDs which relate to the current keyword to be published
+								const CSimpleKnownFileArray& aFiles = pPubKw->GetReferences();
+								for (int f = 0; f < aFiles.GetSize(); f++)
+								{
+									ASSERT_VALID( aFiles[f] );
+									Kademlia::CUInt128 kadFileID(aFiles[f]->GetFileHash());
+									pSearch->addFileID(kadFileID);
+									if( f > 150 )
+									{
+										pPubKw->RotateReferences(150);
+										break;
+									}
+								}
+
+								pSearch->PreparePacket();
+
 							if (!PostThreadMessage(Kademlia::CTimer::getThreadID(), WM_KADEMLIA_STARTSEARCH, 0, (LPARAM)pSearch))
 								Kademlia::CSearchManager::deleteSearch(pSearch);
+								else
+								{
+									pPubKw->SetNextPublishTime(tNow + KADEMLIAREPUBLISHTIME);
+									pPubKw->IncPublishedCount();
+								}
+							}
+							break;
 						}
+						//DEBUG_ONLY( Debug("pkwlst: %-18s  Refs=%3u  Published=%2u  NextPublish=%s\n", pPubKw->GetKeyword(), pPubKw->GetRefCount(), pPubKw->GetPublishedCount(), CastSecondsToHM(tNextKwPublishTime - tNow)) );
+
+						if (tNextKwPublishTime < tMinNextPublishTime)
+							tMinNextPublishTime = tNextKwPublishTime;
+
+						if (iCheckedKeywords >= m_keywords->GetCount()){
+							DEBUG_ONLY( Debug("pkwlst: EOL\n") );
+							// we processed the entire list of keywords to be published, set the next list processing
+							// time to the min. time the next keyword has to be published.
+							m_keywords->SetNextPublishTime(tMinNextPublishTime);
+							break;
 					}
-					else
-					{
-						m_currFileKey++;
+
+						pPubKw = m_keywords->GetNextKeyword();
 					}
 				}
-				else
-				{
-					m_currFileKey++;
+				else{
+					//DEBUG_ONLY( Debug("Next processing of publish keyword list in %s\n", CastSecondsToHM(m_keywords->GetNextPublishTime() - tNow)) );
 				}
+
+				// even if we did not publish a keyword, reset the timer so that this list is processed
+				// only every KADEMLIAPUBLISHTIME seconds.
+				m_lastProcessPublishKadKeywordList = GetTickCount();
 			}
 		}
 		if( theApp.kademlia->getStatus()->m_totalStoreSrc< KADEMLIATOTALSTORESRC)
@@ -660,7 +996,6 @@ void CSharedFileList::Publish(){
 					Kademlia::CUInt128 testID;
 					if (pCurKnownFile->PublishSrc(&testID))
 					{
-						m_lastPublishKadSrc = ::GetTickCount();
 						Kademlia::CUInt128 kadFileID;
 						kadFileID.setValue(pCurKnownFile->GetFileHash());
 						Kademlia::CSearch* pSearch = Kademlia::CSearchManager::prepareFindFile(NULL, kadFileID);
@@ -673,7 +1008,21 @@ void CSharedFileList::Publish(){
 					}	
 				}
 				m_currFileSrc++;
+
+				// even if we did not publish a source, reset the timer so that this list is processed
+				// only every KADEMLIAPUBLISHTIME seconds.
+				m_lastPublishKadSrc = ::GetTickCount();
+			}
 			}
 		}
 	}
+
+void CSharedFileList::AddKeywords(CKnownFile* pFile)
+{
+	m_keywords->AddKeywords(pFile);
+}
+
+void CSharedFileList::RemoveKeywords(CKnownFile* pFile)
+{
+	m_keywords->RemoveKeywords(pFile);
 }

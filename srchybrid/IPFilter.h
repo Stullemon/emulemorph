@@ -16,11 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "types.h"
-#include "listensocket.h"
 #include <map>
-
-using namespace std;
 
 struct IPRange_Struct{
    uint32           IPstart;

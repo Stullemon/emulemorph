@@ -28,6 +28,16 @@
 #include "kademlia/kademlia/kademlia.h"
 #include "kademlia/kademlia/prefs.h"
 #include "kademlia/utils/MiscUtils.h"
+#include "kademlia/routing/Timer.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "KademliaMain.h"
+#include "WebServer.h"
+#include "CustomAutoComplete.h"
+#include "Server.h"
+#include "ServerList.h"
+#include "Sockets.h"
+#include "MuleStatusBarCtrl.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -48,6 +58,8 @@ CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
 	m_pacServerMetURL=NULL;
 	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
 	icon_srvlist = NULL;
+	memset(&m_cfDef, 0, sizeof m_cfDef);
+	memset(&m_cfBold, 0, sizeof m_cfBold);
 }
 
 CServerWnd::~CServerWnd()
@@ -67,6 +79,7 @@ BOOL CServerWnd::OnInitDialog()
 	logbox.Init(GetResString(IDS_SV_LOG));
 	debuglog.Init(SZ_DEBUG_LOG_TITLE);
 
+	SetAllIcons();
 	Localize();
 	serverlistctrl.Init(theApp.serverlist);
 	
@@ -82,8 +95,10 @@ BOOL CServerWnd::OnInitDialog()
 	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
 	if (servermsgbox->Create(WS_VISIBLE | WS_CHILD | WS_HSCROLL | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rect, this, 123)){
 		servermsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		servermsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 		servermsgbox->SetEventMask(servermsgbox->GetEventMask() | ENM_LINK);
 		servermsgbox->SetFont(&theApp.emuledlg->m_fontHyperText);
+		servermsgbox->SetTitle(GetResString(IDS_SV_SERVERINFO));
 
 		servermsgbox->AppendText(CString(CString("eMule v")+theApp.m_strCurVersionLong+CString("\n")));
 		// MOD Note: Do not remove this part - Merkur
@@ -143,15 +158,27 @@ BOOL CServerWnd::OnInitDialog()
 	if (servermsgbox->m_hWnd)
 		servermsgbox->ShowWindow(SW_SHOW);
 
-	CString nameCountStr; 
-	MyInfoList = (CMuleListCtrl*)GetDlgItem(IDC_MYINFOLIST); 
+	m_MyInfo.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+	m_MyInfo.SetAutoURLDetect();
+	m_MyInfo.SetEventMask(m_MyInfo.GetEventMask() | ENM_LINK);
 	
-	((CListCtrl*)GetDlgItem(IDC_MYINFOLIST))->SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	PARAFORMAT pf = {0};
+	pf.cbSize = sizeof pf;
+	if (m_MyInfo.GetParaFormat(pf)){
+		pf.dwMask |= PFM_TABSTOPS;
+		pf.cTabCount = 4;
+		pf.rgxTabs[0] = 900;
+		pf.rgxTabs[1] = 1000;
+		pf.rgxTabs[2] = 1100;
+		pf.rgxTabs[3] = 1200;
+		m_MyInfo.SetParaFormat(pf);
+	}
 
-	if (MyInfoList->GetHeaderCtrl()->GetItemCount() < 2) { 
-		MyInfoList->DeleteColumn(0); 
-		MyInfoList->InsertColumn(0, "", LVCFMT_LEFT, 60, -1); 
-		MyInfoList->InsertColumn(1, "", LVCFMT_LEFT, 126, 1); 
+	m_cfDef.cbSize = sizeof m_cfDef;
+	if (m_MyInfo.GetSelectionCharFormat(m_cfDef)){
+		m_cfBold = m_cfDef;
+		m_cfBold.dwMask |= CFM_BOLD;
+		m_cfBold.dwEffects |= CFE_BOLD;
 	}
 
 	if (theApp.glob_prefs->GetUseAutocompletion()){
@@ -176,6 +203,7 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SSTATIC6, m_ctrlUpdateServerFrm);
 	DDX_Control(pDX, IDC_MYINFO, m_ctrlMyInfo);
 	DDX_Control(pDX, IDC_TAB3, StatusSelector);
+	DDX_Control(pDX, IDC_MYINFOLIST, m_MyInfo);
 }
 
 bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
@@ -211,11 +239,11 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL) {
 
 void CServerWnd::OnSysColorChange()
 {
-	Localize();
 	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
 }
 
-void CServerWnd::Localize()
+void CServerWnd::SetAllIcons()
 {
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -230,7 +258,10 @@ void CServerWnd::Localize()
 		VERIFY( DestroyIcon(icon_srvlist) );
 	icon_srvlist = theApp.LoadIcon("ServerList", 16, 16);
 	((CStatic*)GetDlgItem(IDC_SERVLST_ICO))->SetIcon(icon_srvlist);
+}
 
+void CServerWnd::Localize()
+{
 	serverlistctrl.Localize();
 
 	if (theApp.glob_prefs->GetLanguageID() != m_uLangID){
@@ -396,11 +427,11 @@ void CServerWnd::OnBnClickedResetLog() {
 		return;
 	if( cur_sel == 2 ){
 		theApp.emuledlg->ResetDebugLog();
-		theApp.emuledlg->statusbar.SetText(_T(""),0,0);
+		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
 	}
 	if( cur_sel == 1 ){
 		theApp.emuledlg->ResetLog();
-		theApp.emuledlg->statusbar.SetText(_T(""),0,0);
+		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
 	}
 	if( cur_sel == 0 ){
 		servermsgbox->Reset();
@@ -464,83 +495,119 @@ void CServerWnd::ToggleDebugWindow(){
 
 void CServerWnd::UpdateMyInfo() {
 	CString buffer;
-	int item;
-	MyInfoList->DeleteAllItems();
-	MyInfoList->InsertItem(0,"ED2K");
-	MyInfoList->InsertItem(1,GetResString(IDS_STATUS)+":");
+
+	m_MyInfo.SetRedraw(FALSE);
+	m_MyInfo.SetWindowText(_T(""));
+
+	///////////////////////////////////////////////////////////////////////////
+	// ED2K
+	///////////////////////////////////////////////////////////////////////////
+	m_MyInfo.SetSelectionCharFormat(m_cfBold);
+	m_MyInfo << "eD2K " << GetResString(IDS_NETWORK) << "\r\n";
+	m_MyInfo.SetSelectionCharFormat(m_cfDef);
+
+	m_MyInfo << GetResString(IDS_STATUS) << ":\t";
 	if (theApp.serverconnect->IsConnected())
-		MyInfoList->SetItemText(1, 1, GetResString(IDS_CONNECTED));
-	else
-		if(theApp.serverconnect->IsConnecting())
-			MyInfoList->SetItemText(1, 1, GetResString(IDS_CONNECTING)); 
-		else 
-			MyInfoList->SetItemText(1, 1, GetResString(IDS_DISCONNECTED)); 
+		m_MyInfo << GetResString(IDS_CONNECTED);
+	else if(theApp.serverconnect->IsConnecting())
+		m_MyInfo << GetResString(IDS_CONNECTING);
+	else 
+		m_MyInfo << GetResString(IDS_DISCONNECTED);
+	m_MyInfo << "\r\n";
 
-	if (theApp.serverconnect->IsConnected()) {
-		MyInfoList->InsertItem(2,GetResString(IDS_IP) +":"+GetResString(IDS_PORT) );
+	if (theApp.serverconnect->IsConnected()){
+		m_MyInfo << GetResString(IDS_IP) << ":" << GetResString(IDS_PORT);
 		if (theApp.serverconnect->IsLowID())
-			buffer=GetResString(IDS_UNKNOWN);
-		else {
-			uint32 myid=theApp.serverconnect->GetClientID();
-			uint8 d=myid/(256*256*256);myid-=d*(256*256*256);
-			uint8 c=myid/(256*256);myid-=c*256*256;
-			uint8 b=myid/(256);myid-=b*256;
-			buffer.Format("%i.%i.%i.%i:%i",myid,b,c,d,theApp.glob_prefs->GetPort());
-		}
-		MyInfoList->SetItemText(2,1,buffer);
-
-		buffer.Format("%u",theApp.serverconnect->GetClientID());
-		MyInfoList->InsertItem(3,GetResString(IDS_ID));
-		if (theApp.serverconnect->IsConnected()) 
-			MyInfoList->SetItemText(3, 1, buffer); 
-
-		MyInfoList->InsertItem(4,"");
-		if (theApp.serverconnect->IsLowID())
-			MyInfoList->SetItemText(4, 1,GetResString(IDS_IDLOW));
-		else MyInfoList->SetItemText(4, 1,GetResString(IDS_IDHIGH));
-	}
-
-	MyInfoList->InsertItem(5,"");
-	MyInfoList->InsertItem(6,"KADEMLIA");
-	item = MyInfoList->InsertItem(7,GetResString(IDS_STATUS)+":");
-//	if( Kademlia::CTimer::getThreadID()){
-		if(theApp.kademlia->isConnected()){
-			if(theApp.kademlia->isFirewalled())
-				MyInfoList->SetItemText(item,1,"Firewalled");
-			else
-				MyInfoList->SetItemText(item,1,"Open");
-			item=MyInfoList->InsertItem(8,GetResString(IDS_IP) +":"+GetResString(IDS_PORT) );
-			CString IP;
-			Kademlia::CMiscUtils::ipAddressToString(theApp.kademlia->getIP(),&IP);
-			buffer.Format("%s:%i", IP, theApp.kademlia->getUdpPort());
-			MyInfoList->SetItemText(item,1,buffer);
-			item=MyInfoList->InsertItem(9,GetResString(IDS_ID));
-			buffer.Format("%u",theApp.kademlia->getIP());
-			MyInfoList->SetItemText(item,1,buffer);
-		}
-		else if (Kademlia::CTimer::getThreadID())
-			MyInfoList->SetItemText(item,1,GetResString(IDS_CONNECTING));
+			buffer = GetResString(IDS_UNKNOWN);
 		else
-			MyInfoList->SetItemText(item,1,GetResString(IDS_DISCONNECTED));
-//	}
-	MyInfoList->InsertItem(10,"");
-	item=MyInfoList->InsertItem(11,GetResString(IDS_WEBSRV));
-	MyInfoList->SetItemText(item,1,(theApp.webserver->IsRunning())?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+			buffer.Format(_T("%s:%i"), ipstr(theApp.serverconnect->GetClientID()), theApp.glob_prefs->GetPort());
+		m_MyInfo << "\t" << buffer << "\r\n";
+
+		m_MyInfo << GetResString(IDS_ID) << "\t";
+		if (theApp.serverconnect->IsConnected()){
+			buffer.Format("%u",theApp.serverconnect->GetClientID());
+			m_MyInfo << buffer;
+		}
+		m_MyInfo << "\r\n";
+
+		m_MyInfo << "\t";
+		if (theApp.serverconnect->IsLowID())
+			m_MyInfo << GetResString(IDS_IDLOW);
+		else
+			m_MyInfo << GetResString(IDS_IDHIGH);
+		m_MyInfo << "\r\n";
+
+		CServer* cur_server = theApp.serverconnect->GetCurrentServer();
+		CServer* srv = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
+		if (srv){
+			m_MyInfo << "\r\n";
+			m_MyInfo.SetSelectionCharFormat(m_cfBold);
+			m_MyInfo << "eD2K " << GetResString(IDS_SERVER) << "\r\n";
+			m_MyInfo.SetSelectionCharFormat(m_cfDef);
+
+			m_MyInfo << GetResString(IDS_SW_NAME) << ":\t" << srv->GetListName() << "\r\n";
+			m_MyInfo << GetResString(IDS_DESCRIPTION) << ":\t" << srv->GetDescription() << "\r\n";
+			m_MyInfo << GetResString(IDS_IP) << ":\t" << srv->GetAddress() << ":" << srv->GetPort() << "\r\n";
+			m_MyInfo << GetResString(IDS_VERSION) << ":\t" << srv->GetVersion() << "\r\n";
+			m_MyInfo << GetResString(IDS_UUSERS) << ":\t" << srv->GetUsers() << "\r\n";
+			m_MyInfo << GetResString(IDS_PW_FILES) << ":\t" << srv->GetFiles() << "\r\n";
+		}
+	}
+	m_MyInfo << "\r\n";
+
+	///////////////////////////////////////////////////////////////////////////
+	// Kademlia
+	///////////////////////////////////////////////////////////////////////////
+	m_MyInfo.SetSelectionCharFormat(m_cfBold);
+	m_MyInfo << GetResString(IDS_KADEMLIA) << " " << GetResString(IDS_NETWORK) << "\r\n";
+	m_MyInfo.SetSelectionCharFormat(m_cfDef);
+	
+	m_MyInfo << GetResString(IDS_STATUS) << ":\t";
+	if(theApp.kademlia->isConnected()){
+		if(theApp.kademlia->isFirewalled())
+			m_MyInfo << GetResString(IDS_FIREWALLED);
+		else
+			m_MyInfo << "Open";
+		m_MyInfo << "\r\n";
+
+		CString IP;
+		Kademlia::CMiscUtils::ipAddressToString(theApp.kademlia->getIP(),&IP);
+		buffer.Format("%s:%i", IP, theApp.kademlia->getUdpPort());
+		m_MyInfo << GetResString(IDS_IP) << ":" << GetResString(IDS_PORT) << "\t" << buffer << "\r\n";
+
+		buffer.Format("%u",theApp.kademlia->getIP());
+		m_MyInfo << GetResString(IDS_ID) << "\t" << buffer << "\r\n";
+	}
+	else if (Kademlia::CTimer::getThreadID())
+		m_MyInfo << GetResString(IDS_CONNECTING) << "\r\n";
+	else
+		m_MyInfo << GetResString(IDS_DISCONNECTED) << "\r\n";
+	m_MyInfo << "\r\n";
+
+	///////////////////////////////////////////////////////////////////////////
+	// Web Interface
+	///////////////////////////////////////////////////////////////////////////
+	m_MyInfo.SetSelectionCharFormat(m_cfBold);
+	m_MyInfo << GetResString(IDS_WEBSRV) << "\r\n";
+	m_MyInfo.SetSelectionCharFormat(m_cfDef);
+	m_MyInfo << GetResString(IDS_STATUS) << ":\t";
+	m_MyInfo << (theApp.webserver->IsRunning() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << "\r\n";
 	if (theApp.glob_prefs->GetWSIsEnabled()){
-		item=MyInfoList->InsertItem(12 ,"");
 		CString count;
 		count.Format("%i %s",theApp.webserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
-		MyInfoList->SetItemText(item,1,count);
+		m_MyInfo << "\t" << count << "\r\n";
+		uint32 nLocalIP = theApp.serverconnect->GetLocalIP();
+		m_MyInfo << "URL:\t" << "http://" << inet_ntoa(*(in_addr*)&nLocalIP) << ":" << theApp.glob_prefs->GetWSPort() << "/\r\n";
 	}
-
-	//MORPH START - Added by IceCream, Mighty Knife: display complete userhash in status window
-	item=MyInfoList->InsertItem(12,GetResString(IDS_CD_UHASH));
+	//MORPH START - Added by SiRoB, Mighty Knife: display complete userhash in status window
+	m_MyInfo << "\r\n";
 	buffer.Format("%s",(LPCTSTR)(md4str((uchar*)theApp.glob_prefs->GetUserHash())));
-	MyInfoList->SetItemText(item, 1, buffer.Left (16)+"-");
+	m_MyInfo << GetResString(IDS_CD_UHASH) << ":\t" << buffer.Left (16) << "-";
+	m_MyInfo << "\r\n\t" << buffer.Mid (16,255);
+	//MORPH END   - Added by SiRoB, [end] Mighty Knife
 
-	item=MyInfoList->InsertItem(7,"");
-	MyInfoList->SetItemText(item, 1, buffer.Mid (16,255));
-	//MORPH END   - Added by IceCream, [end] Mighty Knife
+	m_MyInfo.SetRedraw(TRUE);
+	m_MyInfo.Invalidate();
 }
 
 BOOL CServerWnd::PreTranslateMessage(MSG* pMsg) 
@@ -697,6 +764,8 @@ void CServerWnd::UpdateControlsState() {
 void CServerWnd::OnBnConnect() {
 	if (theApp.serverconnect->IsConnected())
 		theApp.serverconnect->Disconnect();
+	else if (theApp.serverconnect->IsConnecting() )
+		theApp.serverconnect->StopConnectionTry();
 	else
 		theApp.serverconnect->ConnectToAnyServer();
 }

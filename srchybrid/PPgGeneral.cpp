@@ -4,8 +4,18 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "SearchDlg.h"
-#include "KademliaWnd.h"
 #include "PreferencesDlg.h"
+#include "ppggeneral.h"
+#include "HttpDownloadDlg.h"
+#include "version.h"
+#include "Preferences.h"
+#include "emuledlg.h"
+#include "StatisticsDlg.h"
+#include "ServerWnd.h"
+#include "TransferWnd.h"
+#include "ChatWnd.h"
+#include "SharedFilesWnd.h"
+#include "IrcWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -40,7 +50,7 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_EXIT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SPLASHON, OnSettingsChange)
 	ON_BN_CLICKED(IDC_BRINGTOFOREGROUND, OnSettingsChange)
-	ON_CBN_SELCHANGE(IDC_LANGS, OnSettingsChange)
+	ON_CBN_SELCHANGE(IDC_LANGS, OnLangChange)
 	ON_BN_CLICKED(IDC_ED2KFIX, OnBnClickedEd2kfix)
 	ON_BN_CLICKED(IDC_WEBSVEDIT , OnBnClickedEditWebservices)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
@@ -138,19 +148,18 @@ BOOL CPPgGeneral::OnApply()
 			theApp.glob_prefs->SetLanguage();
 
 			theApp.emuledlg->preferenceswnd->Localize();
-			theApp.emuledlg->statisticswnd.CreateMyTree();
-			theApp.emuledlg->statisticswnd.Localize();
-			theApp.emuledlg->statisticswnd.ShowStatistics(true);
-			theApp.emuledlg->statisticswnd.RepaintMeters(); //MORPH - Added by SiRoB, Due to new Oscope
-			theApp.emuledlg->serverwnd.Localize();
-			theApp.emuledlg->transferwnd.Localize();
-			theApp.emuledlg->transferwnd.UpdateCatTabTitles();
+			theApp.emuledlg->statisticswnd->CreateMyTree();
+			theApp.emuledlg->statisticswnd->Localize();
+			theApp.emuledlg->statisticswnd->ShowStatistics(true);
+			theApp.emuledlg->statisticswnd->RepaintMeters(); //MORPH - Added by SiRoB, Due to new Oscope
+			theApp.emuledlg->serverwnd->Localize();
+			theApp.emuledlg->transferwnd->Localize();
+			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 			theApp.emuledlg->searchwnd->Localize();
-			theApp.emuledlg->sharedfileswnd.Localize();
-			theApp.emuledlg->chatwnd.Localize();
+			theApp.emuledlg->sharedfileswnd->Localize();
+			theApp.emuledlg->chatwnd->Localize();
 			theApp.emuledlg->Localize();
-			theApp.emuledlg->ircwnd.Localize();
-			theApp.emuledlg->kademliawnd->Localize();
+			theApp.emuledlg->ircwnd->Localize();
 		}
 	}
 
@@ -163,7 +172,7 @@ BOOL CPPgGeneral::OnApply()
 	app_prefs->prefs->onlineSig= (int8)IsDlgButtonChecked(IDC_ONLINESIG);
 	app_prefs->prefs->versioncheckdays = ((CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS))->GetPos();
 
-	theApp.emuledlg->transferwnd.downloadlistctrl.SetStyle();
+	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 	LoadSettings();
 
 	SetModified(FALSE);
@@ -214,4 +223,44 @@ void CPPgGeneral::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 void CPPgGeneral::OnBnClickedEditWebservices(){
 	ShellExecute(NULL, "open", theApp.glob_prefs->GetTxtEditor(), "\""+CString(theApp.glob_prefs->GetConfigDir())+"webservices.dat\"", NULL, SW_SHOW); 
+}
+void CPPgGeneral::OnLangChange()
+{
+#define MIRRORS_URL	"http://langmirror%i.emule-project.org/lang/%i%i%i%i/"
+
+	WORD byNewLang =  m_language.GetItemData(m_language.GetCurSel());
+	if (app_prefs->GetLanguageID() != byNewLang){
+		if	(!theApp.glob_prefs->IsLanguageSupported(byNewLang, false)){
+			if (AfxMessageBox(GetResString(IDS_ASKDOWNLOADLANGCAP) + _T("\r\n\r\n") + GetResString(IDS_ASKDOWNLOADLANG), MB_ICONQUESTION | MB_YESNO) == IDYES){
+				// download file
+				// create url, use random mirror for load balancing
+				uint16 nRand = (rand()/(RAND_MAX/3))+1;
+				CString strUrl;
+				strUrl.Format(MIRRORS_URL,nRand, VERSION_MJR, VERSION_MIN, VERSION_UPDATE, VERSION_BUILD);
+				strUrl += theApp.glob_prefs->GetLangDLLNameByID(byNewLang);
+				// safeto
+				CString strFilename = theApp.glob_prefs->GetLangDir() + theApp.glob_prefs->GetLangDLLNameByID(byNewLang);
+				// start
+				CHttpDownloadDlg dlgDownload;
+				dlgDownload.m_sURLToDownload = strUrl;
+				dlgDownload.m_sFileToDownloadInto = strFilename;
+				if (dlgDownload.DoModal() == IDOK && theApp.glob_prefs->IsLanguageSupported(byNewLang, true))
+				{
+					// everything ok, new language downloaded and working
+					OnSettingsChange();
+					return;
+				}
+				CString strErr;
+				strErr.Format(GetResString(IDS_ERR_FAILEDDOWNLOADLANG), strUrl);
+				AddLogLine(true, strErr);
+				AfxMessageBox(strErr, MB_ICONERROR | MB_OK);
+			}
+			// undo change selection
+			for(int i = 0; i < m_language.GetCount(); i++)
+				if(m_language.GetItemData(i) == app_prefs->GetLanguageID())
+					m_language.SetCurSel(i);
+		}
+		else
+			OnSettingsChange();
+	}
 }

@@ -16,17 +16,19 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "otherstructs.h"
-#include "packets.h"
-#include "types.h"
+#include "Loggable.h"
 #include "BarShader.h"
-#include <afxcoll.h>
-#include <afxtempl.h>
-#include <afxcmn.h>
-#include "Kademlia/Kademlia/Kademlia.h"
-#include "loggable.h"
+#include <list>
 
+class CTag;
 class CxImage;
+namespace Kademlia{
+class CUInt128;
+typedef std::list<CString> WordList;
+};
+class CUpDownClient;
+class Packet;
+typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CFileStatistic{
 	friend class CKnownFile;
@@ -98,21 +100,24 @@ CAbstractFile
 		  CSearchFile
 */
 class CAbstractFile: public CLoggable
+#ifdef _DEBUG
+					,public CObject
+#endif
 {
 public:
 	CAbstractFile();
 	virtual ~CAbstractFile() { }
 
 	const CString& GetFileName() const { return m_strFileName; }
-	void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
+	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	const CString& GetFileType() const { return m_strFileType; }
-	void SetFileType(LPCTSTR pszFileType);
+	virtual void SetFileType(LPCTSTR pszFileType);
 
 	const uchar* GetFileHash() const { return m_abyFileHash; }
 
 	uint32 GetFileSize() const { return m_nFileSize; }
-	void SetFileSize(uint32 nFileSize) { m_nFileSize = nFileSize; }
+	virtual void SetFileSize(uint32 nFileSize) { m_nFileSize = nFileSize; }
 
 	uint32 GetIntTagValue(uint8 tagname) const;
 	uint32 GetIntTagValue(LPCSTR tagname) const;
@@ -125,6 +130,12 @@ public:
 	void AddTagUnique(CTag* pTag);
 	const CArray<CTag*,CTag*>& GetTags() const { return taglist; }
 
+#ifdef _DEBUG
+	// Diagnostic Support
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
+
 protected:
 	CString m_strFileName;
 	uchar	m_abyFileHash[16];
@@ -135,15 +146,13 @@ protected:
 	CArray<CTag*,CTag*> taglist;
 };
 
-class CUpDownClient;
-
 class CKnownFile : public CAbstractFile
 {
 public:
 	CKnownFile();
 	~CKnownFile();
 
-	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
+	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 	
 	const CString& GetPath() const	{return m_strDirectory;}
 	void	SetPath(LPCTSTR path);
@@ -151,6 +160,7 @@ public:
 	const CString& GetFilePath() const { return m_strFilePath; }
 	void SetFilePath(LPCTSTR pszFilePath);
 
+	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
 	virtual	bool	IsPartFile()	{return false;}
 	virtual bool	LoadFromFile(CFile* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFile* file);	
@@ -159,7 +169,7 @@ public:
 	CTime	GetCrCFileDate()		{return CTime(dateC);}
 	uint32	GetCrFileDate()			{return dateC;}
 
-	void SetFileSize(uint32 nFileSize);
+	virtual void SetFileSize(uint32 nFileSize);
 
 	// local available part hashs
 	uint16	GetHashCount() const	{return hashlist.GetCount();}
@@ -173,12 +183,9 @@ public:
 	// nr. of 9MB parts according the file size wrt ED2K protocol (OP_FILESTATUS)
 	__inline uint16 GetED2KPartCount() const { return m_iED2KPartCount; }
 
-	uint32	date;
-	uint32	dateC;
-
 	// file upload priority
 	uint8	GetUpPriority(void)		{return m_iUpPriority;};
-	void	SetUpPriority(uint8 iNewUpPriority, bool m_bsave = true);
+	void	SetUpPriority(uint8 iNewUpPriority, bool bSave = true);
 	bool	IsAutoUpPriority(void)		{return m_bAutoUpPriority;};
 	void	SetAutoUpPriority(bool NewAutoUpPriority) {m_bAutoUpPriority = NewAutoUpPriority;};
 	void	UpdateAutoUpPriority();
@@ -187,7 +194,7 @@ public:
 	uint32	GetQueuedCount()			{return m_iQueuedCount; /*call func after 'return'!? what's the ident here?*/ /*UpdateAutoUpPriority();*/}
 	// shared file view permissions (all, only friends, no one)
 	uint8	GetPermissions(void)	{ return m_iPermissions; };
-	void	SetPermissions(uint8 iNewPermissions) {m_iPermissions = iNewPermissions;};
+	void	SetPermissions(uint8 iNewPermissions);
 
 	bool	LoadHashsetFromFile(CFile* file, bool checkhash);
 
@@ -198,7 +205,6 @@ public:
 	void	NewAvailPartsInfo();
 	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
 
-	CFileStatistic statistic;
 	// comment 
 	CString	GetFileComment()		{if (!m_bCommentLoaded) LoadComment(); return m_strComment;} 
 	void	SetFileComment(CString strNewComment);
@@ -210,13 +216,9 @@ public:
 	void	SetKadFileSearchID( uint32 id )	{kadFileSearchID = id;} //Don't use this unless you know what your are DOING!! (Hopefully I do.. :)
 	void	SetPublishedKadSrc();
 	uint32	GetPublishedKadSrc()	{return m_PublishedKadSrc;}
-	void	SetPublishedKadKey();
-	uint32	GetPublishedKadKey()	{return m_PublishedKadKey;}
-	uint32	GetKadKeywordCount() {return m_keywordcount;}
+	const Kademlia::WordList& GetKadKeywords() const { return wordlist; }
 	uint32	GetLastPublishTimeKadSrc() {return m_lastPublishTimeKadSrc;}
 	void	SetLastPublishTimeKadSrc( uint32 val ) {m_lastPublishTimeKadSrc = val;}
-	uint32	GetLastPublishTimeKadKey() {return m_lastPublishTimeKadKey;}
-	void	SetLastPublishTimeKadKey( uint32 val ) {m_lastPublishTimeKadKey = val;}
 	int		PublishKey( Kademlia::CUInt128* nextID);
 	bool	PublishSrc( Kademlia::CUInt128* nextID);
 
@@ -230,6 +232,30 @@ public:
 	bool	IsMovie();
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
+	uint32	date;
+	uint32	dateC;
+	CFileStatistic statistic;
+	time_t m_nCompleteSourcesTime;
+	uint16 m_nCompleteSourcesCount;
+	uint16 m_nCompleteSourcesCountLo;
+	uint16 m_nCompleteSourcesCountHi;
+	CUpDownClientPtrList m_ClientUploadList;
+	CArray<uint16,uint16> m_AvailPartFrequency;
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	uint16 m_nVirtualCompleteSourcesCount;
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	
+	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
+	bool ShareOnlyTheNeed(CFile* file);//wistily Share only the need
+
+	//MORPH START - Added by SiRoB, Track Part File Sent
+	bool	clientarevisible; // used for SharedFilesCtrl
+	//MORPH END   - Added by SiRoB, Track Part File Sent
+#ifdef _DEBUG
+	// Diagnostic Support
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 	void    SetPowerShared(int newValue) {m_powershared = newValue;};
@@ -251,7 +277,7 @@ protected:
 	void	CreateHashFromFile(FILE* file, int Length, uchar* Output)	{CreateHashFromInput(file,0,Length,Output,0);}
 	void	CreateHashFromFile(CFile* file, int Length, uchar* Output)	{CreateHashFromInput(0,file,Length,Output,0);}
 	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output)	{CreateHashFromInput(0,0,Length,Output,in_string);}
-	void	LoadComment();//comment
+	void	LoadComment();
 	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;
 	CString	m_strDirectory;
@@ -271,10 +297,7 @@ private:
 	bool	m_PublishedED2K;
 	uint32	kadFileSearchID;
 	uint32	m_lastPublishTimeKadSrc;
-	uint32	m_lastPublishTimeKadKey;
 	uint32	m_PublishedKadSrc;
-	uint32	m_PublishedKadKey;
-	uint32	m_keywordcount;
 	Kademlia::WordList wordlist;
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;
@@ -290,19 +313,6 @@ private:
 	bool	m_bPowerShareAuthorized;
 	bool	m_bPowerShareAuto;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-public:
-	time_t m_nCompleteSourcesTime;
-	uint16 m_nCompleteSourcesCount;
-	uint16 m_nCompleteSourcesCountLo;
-	uint16 m_nCompleteSourcesCountHi;
-	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	uint16 m_nVirtualCompleteSourcesCountMin;
-	uint16 m_nVirtualCompleteSourcesCountMax;
-	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	CTypedPtrList<CPtrList, CUpDownClient*> m_ClientUploadList;
-	CArray<uint16,uint16> m_AvailPartFrequency;
-	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
-	bool ShareOnlyTheNeed(CFile* file);//wistily Share only the need
 };
 
 // permission values for shared files

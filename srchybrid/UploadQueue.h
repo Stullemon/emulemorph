@@ -16,12 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "types.h"
-#include "opcodes.h"
-#include "updownclient.h"
-#include "preferences.h"
-#include "loggable.h"
+#include "Loggable.h"
 
+class CPreferences;
+class CUpDownClient;
+typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 class CUploadQueue: public CLoggable
 {
@@ -68,6 +67,7 @@ public:
 	CUpDownClient* GetWaitClientAt(POSITION &curpos)	{return waitinglist.GetAt(curpos);}
 
 	CUpDownClient*	GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
+	CUpDownClient*	GetWaitingClientByIP(uint32 dwIP);
 	CUpDownClient*	GetNextClient(CUpDownClient* update);
 
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
@@ -80,7 +80,7 @@ public:
 	uint32	GetSuccessfullUpCount()					{return successfullupcount;}
 	uint32	GetFailedUpCount()						{return failedupcount;}
 	uint32	GetAverageUpTime();
-	void	FindSourcesForFileById(CTypedPtrList<CPtrList, CUpDownClient*>* srclist, const uchar* filehash);
+	void	FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash);
 	//MORPH START - Changed by SiRoB, ZZ Upload system 20030818-1923
 	void	AddUpDataOverheadSourceExchange(uint32 data)	{ /*m_nUpDataRateMSOverhead += data;*/
 															  m_nUpDataOverheadSourceExchange += data;
@@ -124,6 +124,12 @@ protected:
 	static VOID CALLBACK UploadTimer(HWND hWnd, UINT nMsg, UINT nId, DWORD dwTime);
 
 private:
+	//MORPH - Removed by SiRoB, ZZ Upload System
+	/*
+	void	UpdateMaxClientScore();
+	uint32	GetMaxClientScore()						{return m_imaxscore;}
+	*/
+
     void InsertInUploadingList(CUpDownClient* newclient);
     void RemoveLowestFromWaitinglist();
     double GetAverageCombinedFilePrioAndCredit();
@@ -138,8 +144,8 @@ private:
 	CList<int,int> activeClients_list;
 	CList<DWORD,DWORD> activeClients_tick_list;
 
-	CTypedPtrList<CPtrList, CUpDownClient*> waitinglist;
-	CTypedPtrList<CPtrList, CUpDownClient*> uploadinglist;
+	CUpDownClientPtrList	waitinglist;
+	CUpDownClientPtrList	uploadinglist;
 	uint32	datarate;   //datarate of sent to network (including friends)
 	uint32  friendDatarate; // datarate of sent to friends (included in above total)
 	//uint32	dataratems;

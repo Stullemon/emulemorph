@@ -62,6 +62,9 @@ to tim.kosse@gmx.de
 */
 
 #include "stdafx.h"
+#ifdef _DEBUG
+#include "DebugHelpers.h"
+#endif
 #include "AsyncSocketEx.h"
 #include "wtypes.h"
 #include "oleauto.h"
@@ -126,7 +129,7 @@ public:
 	{
 		//Initialize data
 		m_pAsyncSocketExWindowData=new t_AsyncSocketExWindowData[512]; //Reserve space for 512 active sockets
-		MEMSET(m_pAsyncSocketExWindowData, 0, 512*sizeof(t_AsyncSocketExWindowData));
+		memset(m_pAsyncSocketExWindowData, 0, 512*sizeof(t_AsyncSocketExWindowData));
 		m_nWindowDataSize=512;
 		m_nSocketCount=0;
 		m_nWindowDataPos=0;
@@ -178,7 +181,7 @@ public:
 			ASSERT(!m_nSocketCount);
 			m_nWindowDataSize=512;
 			m_pAsyncSocketExWindowData=new t_AsyncSocketExWindowData[512]; //Reserve space for 512 active sockets
-			MEMSET(m_pAsyncSocketExWindowData, 0, 512*sizeof(t_AsyncSocketExWindowData));
+			memset(m_pAsyncSocketExWindowData, 0, 512*sizeof(t_AsyncSocketExWindowData));
 		}
 
 		if (nSocketIndex!=-1)
@@ -200,8 +203,8 @@ public:
 				m_nWindowDataSize=MAX_SOCKETS;
 			t_AsyncSocketExWindowData *tmp=m_pAsyncSocketExWindowData;
 			m_pAsyncSocketExWindowData = new t_AsyncSocketExWindowData[m_nWindowDataSize];
-			MEMCOPY(m_pAsyncSocketExWindowData, tmp, nOldWindowDataSize * sizeof(t_AsyncSocketExWindowData));
-			MEMSET(m_pAsyncSocketExWindowData+nOldWindowDataSize, 0, (m_nWindowDataSize-nOldWindowDataSize)*sizeof(t_AsyncSocketExWindowData));
+			memcpy(m_pAsyncSocketExWindowData, tmp, nOldWindowDataSize * sizeof(t_AsyncSocketExWindowData));
+			memset(m_pAsyncSocketExWindowData+nOldWindowDataSize, 0, (m_nWindowDataSize-nOldWindowDataSize)*sizeof(t_AsyncSocketExWindowData));
 			delete [] tmp;
 		}
 
@@ -243,8 +246,10 @@ public:
 	//Processes event notifications sent by the sockets or the layers
 	static LRESULT CALLBACK WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 	{
+#ifndef _DEBUG
 		try
 		{
+#endif
 			if (message>=WM_SOCKETEX_NOTIFY)
 			{
 				//Verify parameters
@@ -382,7 +387,7 @@ public:
 				CAsyncSocketExHelperWindow *pWnd=(CAsyncSocketExHelperWindow *)GetWindowLong(hWnd, GWL_USERDATA);
 				ASSERT(pWnd);
 
-				CAsyncSocketEx *pSocket;
+				CAsyncSocketEx *pSocket = NULL;
 				for (int i=0; i<pWnd->m_nWindowDataSize; i++)
 				{
 					pSocket = pWnd->m_pAsyncSocketExWindowData[i].m_pSocket;
@@ -394,7 +399,6 @@ public:
 					return 0;
 
 				int nErrorCode = lParam >> 16;
-				int len = lParam % 0xFFFF;
 				if (nErrorCode)
 				{
 					pSocket->OnConnect(nErrorCode);
@@ -402,7 +406,7 @@ public:
 				}
 
 				SOCKADDR_IN sockAddr;
-				MEMSET(&sockAddr,0,sizeof(sockAddr));
+				memset(&sockAddr,0,sizeof(sockAddr));
 				sockAddr.sin_family=AF_INET;
 				sockAddr.sin_addr.s_addr = ((LPIN_ADDR)((LPHOSTENT)pSocket->m_pAsyncGetHostByNameBuffer)->h_addr)->s_addr;
 
@@ -419,6 +423,7 @@ public:
 				return 0;
 			}
 			return DefWindowProc(hWnd, message, wParam, lParam);
+#ifndef _DEBUG
 		}
 		catch(CException* e){
 			TCHAR szError[1024];
@@ -434,7 +439,9 @@ public:
 			// TODO: This exception handler should definitively *not* be here. Though we seem to need it to
 			// catch some very strange crashs which deal with socket deletion problems in the client's TCP socket.
 			TRACE("*** Unknown exception in CAsyncSocketExHelperWindow::WindowProc\n");
+			ASSERT(0);
 		}
+#endif
 		return 0;
 	}
 
@@ -559,7 +566,7 @@ BOOL CAsyncSocketEx::Bind(UINT nSocketPort, LPCTSTR lpszSocketAddress)
 	USES_CONVERSION;
 
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr,0,sizeof(sockAddr));
+	memset(&sockAddr,0,sizeof(sockAddr));
 
 	LPSTR lpszAscii = T2A((LPTSTR)lpszSocketAddress);
 	sockAddr.sin_family = AF_INET;
@@ -782,7 +789,7 @@ BOOL CAsyncSocketEx::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
 		ASSERT(lpszHostAddress != NULL);
 
 		SOCKADDR_IN sockAddr;
-		MEMSET(&sockAddr,0,sizeof(sockAddr));
+		memset(&sockAddr,0,sizeof(sockAddr));
 
 		LPSTR lpszAscii = T2A((LPTSTR)lpszHostAddress);
 		sockAddr.sin_family = AF_INET;
@@ -828,7 +835,7 @@ BOOL CAsyncSocketEx::GetPeerName( CString& rPeerAddress, UINT& rPeerPort )
 #endif NOLAYERS
 
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr, 0, sizeof(sockAddr));
+	memset(&sockAddr, 0, sizeof(sockAddr));
 
 	int nSockAddrLen = sizeof(sockAddr);
 	BOOL bResult = GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
@@ -858,7 +865,7 @@ BOOL CAsyncSocketEx::GetPeerName( SOCKADDR* lpSockAddr, int* lpSockAddrLen )
 BOOL CAsyncSocketEx::GetSockName(CString& rSocketAddress, UINT& rSocketPort)
 {
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr, 0, sizeof(sockAddr));
+	memset(&sockAddr, 0, sizeof(sockAddr));
 
 	int nSockAddrLen = sizeof(sockAddr);
 	BOOL bResult = GetSockName((SOCKADDR*)&sockAddr, &nSockAddrLen);
@@ -1062,3 +1069,43 @@ BOOL CAsyncSocketEx::SetSockOpt(int nOptionName, const void* lpOptionValue, int 
 {
 	return (SOCKET_ERROR != setsockopt(m_SocketData.hSocket, nLevel, nOptionName, (LPSTR)lpOptionValue, nOptionLen));
 }
+
+#ifdef _DEBUG
+void CAsyncSocketEx::AssertValid() const
+{
+	CObject::AssertValid();
+
+	(void)m_SocketData;
+	(void)m_lEvent;
+	(void)m_pAsyncGetHostByNameBuffer;
+	(void)m_hAsyncGetHostByNameHandle;
+	(void)m_nAsyncGetHostByNamePort;
+
+	//Pointer to the data of the local thread
+//	struct t_AsyncSocketExThreadData
+//	{
+//		CAsyncSocketExHelperWindow *m_pHelperWindow;
+//		int nInstanceCount;
+//		DWORD nThreadId;
+//	} *m_pLocalAsyncSocketExThreadData;
+
+	//List of the data structures for all threads
+//	static struct t_AsyncSocketExThreadDataList
+//	{
+//		t_AsyncSocketExThreadDataList *pNext;
+//		t_AsyncSocketExThreadData *pThreadData;
+//	} *m_spAsyncSocketExThreadDataList;
+
+#ifndef NOLAYERS
+	CHECK_PTR(m_pFirstLayer);
+	CHECK_PTR(m_pLastLayer);
+#endif //NOLAYERS
+}
+#endif
+
+#ifdef _DEBUG
+void CAsyncSocketEx::Dump(CDumpContext& dc) const
+{
+	CObject::Dump(dc);
+}
+#endif

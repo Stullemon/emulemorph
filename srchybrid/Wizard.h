@@ -1,8 +1,5 @@
 #pragma once
 
-
-// Wizard dialog
-
 class Wizard : public CDialog
 {
 	DECLARE_DYNAMIC(Wizard)
@@ -22,10 +19,11 @@ public:
 	enum { IDD = IDD_WIZARD };
 protected:
 	CPreferences* app_prefs;
-protected:
+	void SetCustomItemsActivation();
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
 	DECLARE_MESSAGE_MAP()
-public:
 	afx_msg void OnBnClickedApply();
 	afx_msg void OnBnClickedCancel();
 	afx_msg void OnBnClickedWizRadioOsNtxp();
@@ -34,10 +32,6 @@ public:
 	afx_msg void OnBnClickedWizMediumdownloadRadio();
 	afx_msg void OnBnClickedWizHighdownloadRadio();
 	afx_msg void OnBnClickedWizResetButton();
-protected:
-	CListCtrl m_provider;
-private:
-	void SetCustomItemsActivation();
-public:
 	afx_msg void OnNMClickProviders(NMHDR *pNMHDR, LRESULT *pResult);
+	CListCtrl m_provider;
 };

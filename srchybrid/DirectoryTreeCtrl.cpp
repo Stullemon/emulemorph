@@ -1,13 +1,25 @@
-// DirectoryTreeCtrl.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-/////////////////////////////////////////////
-// written by robert rostek - tecxx@rrs.at //
-/////////////////////////////////////////////
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include "emule.h"
 #include "DirectoryTreeCtrl.h"
 #include "otherfunctions.h"
-#include "emule.h"
+#include "Preferences.h"
+#include "TitleMenu.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -15,10 +27,31 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+/////////////////////////////////////////////
+// written by robert rostek - tecxx@rrs.at //
+/////////////////////////////////////////////
+
+struct STreeItem
+{
+	CString strPath;
+};
+
 
 // CDirectoryTreeCtrl
 
 IMPLEMENT_DYNAMIC(CDirectoryTreeCtrl, CTreeCtrl)
+
+BEGIN_MESSAGE_MAP(CDirectoryTreeCtrl, CTreeCtrl)
+	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, OnTvnItemexpanding)
+	ON_NOTIFY_REFLECT(TVN_GETDISPINFO, OnTvnGetdispinfo)
+	ON_WM_LBUTTONDOWN()
+	ON_NOTIFY_REFLECT(TVN_DELETEITEM, OnTvnDeleteItem)
+	ON_WM_CONTEXTMENU()
+	ON_WM_RBUTTONDOWN()
+	ON_WM_KEYDOWN()
+	ON_WM_CHAR()
+END_MESSAGE_MAP()
+
 CDirectoryTreeCtrl::CDirectoryTreeCtrl()
 {
 	m_bSelectSubDirs = false;
@@ -30,20 +63,11 @@ CDirectoryTreeCtrl::~CDirectoryTreeCtrl()
 	m_image.Detach();
 }
 
-
-BEGIN_MESSAGE_MAP(CDirectoryTreeCtrl, CTreeCtrl)
-	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, OnTvnItemexpanding)
-	ON_NOTIFY_REFLECT(TVN_GETDISPINFO, OnTvnGetdispinfo)
-	ON_WM_LBUTTONDOWN()
-	ON_NOTIFY_REFLECT(NM_RCLICK, OnNMRclickSharedList)
-END_MESSAGE_MAP()
-
-
-
-// CDirectoryTreeCtrl message handlers
-
 void CDirectoryTreeCtrl::OnTvnItemexpanding(NMHDR *pNMHDR, LRESULT *pResult)
 {
+	CWaitCursor curWait;
+	SetRedraw(FALSE);
+
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	HTREEITEM hItem = pNMTreeView->itemNew.hItem;
 	// remove all subitems
@@ -60,32 +84,80 @@ void CDirectoryTreeCtrl::OnTvnItemexpanding(NMHDR *pNMHDR, LRESULT *pResult)
 	// fetch all subdirectories and add them to the node
 	AddSubdirectories(hItem, strDir);
 
+	SetRedraw(TRUE);
+	Invalidate();
 	*pResult = 0;
 }
 
-void CDirectoryTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point) { 
+void CDirectoryTreeCtrl::ShareSubDirTree(HTREEITEM hItem, BOOL bRecurse)
+{
+	CWaitCursor curWait;
+	SetRedraw(FALSE);
+
+	HTREEITEM hItemVisibleItem = GetFirstVisibleItem();
+	CheckChanged(hItem, !GetCheck(hItem));
+	if (bRecurse)
+	{
+		Expand(hItem, TVE_TOGGLE);
+		HTREEITEM hChild = GetChildItem(hItem);
+		while (hChild != NULL)
+		{
+			MarkChilds(hChild, !GetCheck(hItem));
+			hChild = GetNextSiblingItem(hChild);
+		}
+		Expand(hItem, TVE_TOGGLE);
+	}
+	if (hItemVisibleItem)
+		SelectSetFirstVisible(hItemVisibleItem);
+
+	SetRedraw(TRUE);
+	Invalidate();
+}
+
+void CDirectoryTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
+{
 	//VQB adjustments to provide for sharing or unsharing of subdirectories when control key is Down 
-	UINT uFlags; 
-	HTREEITEM hItem = HitTest(point, &uFlags); 
-	HTREEITEM tItem = GetFirstVisibleItem(); // VQB mark initial window position 
-	if ( (hItem) && (uFlags & TVHT_ONITEMSTATEICON)) { 
-		CheckChanged(hItem, !GetCheck(hItem)); 
-		if (nFlags & MK_CONTROL) { // Is control key down? 
-			CWaitCursor curWait;
-			Expand(hItem, TVE_TOGGLE); //VQB - make sure tree has entries 
-			HTREEITEM hChild; 
-			hChild = GetChildItem(hItem); 
-			while (hChild != NULL) 
-			{ 
-				MarkChilds(hChild,!GetCheck(hItem)); 
-				hChild = GetNextSiblingItem( hChild ); 
-			} 
-			Expand(hItem, TVE_TOGGLE); // VQB - restore tree to initial disposition 
-		} 
-	} 
-	SelectSetFirstVisible(tItem); // VQB - restore window scroll to initial position 
+	UINT uHitFlags; 
+	HTREEITEM hItem = HitTest(point, &uHitFlags); 
+	if (hItem && (uHitFlags & TVHT_ONITEMSTATEICON))
+		ShareSubDirTree(hItem, nFlags & MK_CONTROL);
 	CTreeCtrl::OnLButtonDown(nFlags, point); 
-} 
+}
+
+void CDirectoryTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	if (nChar == VK_SPACE)
+	{
+		HTREEITEM hItem = GetSelectedItem();
+		if (hItem)
+		{
+			ShareSubDirTree(hItem, GetKeyState(VK_CONTROL) & 0x8000);
+
+			// if Ctrl+Space is passed to the tree control, it just beeps and does not check/uncheck the item!
+			SetCheck(hItem, !GetCheck(hItem));
+			return;
+		}
+	}
+
+	CTreeCtrl::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CDirectoryTreeCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// If we let any keystrokes which are handled by us -- but not by the tree
+	// control -- pass to the control, the user will hear a system event
+	// sound (Standard Error!)
+	BOOL bCallDefault = TRUE;
+
+	if (GetKeyState(VK_CONTROL) & 0x8000)
+	{
+		if (nChar == VK_SPACE)
+			bCallDefault = FALSE;
+	}
+
+	if (bCallDefault)
+		CTreeCtrl::OnChar(nChar, nRepCnt, nFlags);
+}
 
 void CDirectoryTreeCtrl::MarkChilds(HTREEITEM hChild,bool mark) { 
 	CheckChanged(hChild, mark); 
@@ -172,7 +244,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 		strPath += "\\";
 	CString strDir = strPath + strText;
 	TV_INSERTSTRUCT itInsert;
-	MEMSET(&itInsert, 0, sizeof(itInsert));
+	memset(&itInsert, 0, sizeof(itInsert));
 	
 	// START: changed by FoRcHa /////
 	WORD wWinVer = theApp.glob_prefs->GetWindowsVersion();
@@ -200,44 +272,55 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 
 	itInsert.item.pszText = strText.GetBuffer();
 	itInsert.item.cchTextMax = strText.GetLength();
-	itInsert.hInsertAfter = TVI_SORT;
+	itInsert.hInsertAfter = hRoot ? TVI_SORT : TVI_LAST;
 	itInsert.hParent = hRoot;
 	
 	// START: added by FoRcHa ////////////////
 	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
 	{
-	CString strTemp = strDir;
-	if(strTemp.Right(1) != "\\")
-		strTemp += "\\";
+		CString strTemp = strDir;
+		if(strTemp.Right(1) != "\\")
+			strTemp += "\\";
+		
+		UINT nType = GetDriveType(strTemp);
+		if(DRIVE_REMOVABLE <= nType && nType <= DRIVE_RAMDISK)
+			itInsert.item.iImage = nType;
 	
-	UINT nType = GetDriveType(strTemp);
-	if(DRIVE_REMOVABLE <= nType && nType <= DRIVE_RAMDISK)
-		itInsert.item.iImage = nType;
+		SHFILEINFO shFinfo;
+		shFinfo.szDisplayName[0] = _T('\0');
+		if(!SHGetFileInfo(strTemp, 0, &shFinfo,	sizeof(shFinfo),
+						SHGFI_ICON | SHGFI_SMALLICON | SHGFI_DISPLAYNAME))
+		{
+			TRACE(_T("Error Gettting SystemFileInfo!"));
+			itInsert.itemex.iImage = 0; // :(
+		}
+		else
+		{
+			itInsert.itemex.iImage = shFinfo.iIcon;
+			DestroyIcon(shFinfo.hIcon);
+			if (hRoot == NULL && shFinfo.szDisplayName[0] != _T('\0'))
+			{
+				STreeItem* pti = new STreeItem;
+				pti->strPath = strText;
+				strText = shFinfo.szDisplayName;
+				itInsert.item.pszText = strText.GetBuffer();
+				itInsert.item.cchTextMax = strText.GetLength();
+				itInsert.item.mask |= TVIF_PARAM;
+				itInsert.item.lParam = (LPARAM)pti;
+			}
+		}
 
-	SHFILEINFO shFinfo;
-	if(!SHGetFileInfo(strTemp, 0, &shFinfo,	sizeof(shFinfo),
-					SHGFI_ICON | SHGFI_SMALLICON))
-	{
-		TRACE(_T("Error Gettting SystemFileInfo!"));
-		itInsert.itemex.iImage = 0; // :(
-	}
-	else
-	{
-		itInsert.itemex.iImage = shFinfo.iIcon;
-		DestroyIcon(shFinfo.hIcon);
-	}
-	
-	if(!SHGetFileInfo(strTemp, 0, &shFinfo, sizeof(shFinfo),
-						SHGFI_ICON | SHGFI_OPENICON | SHGFI_SMALLICON))
-	{
-		TRACE(_T("Error Gettting SystemFileInfo!"));
-		itInsert.itemex.iImage = 0;
-	}
-	else
-	{
-		itInsert.itemex.iSelectedImage = shFinfo.iIcon;
-		DestroyIcon(shFinfo.hIcon);
-	}
+		if(!SHGetFileInfo(strTemp, 0, &shFinfo, sizeof(shFinfo),
+							SHGFI_ICON | SHGFI_OPENICON | SHGFI_SMALLICON))
+		{
+			TRACE(_T("Error Gettting SystemFileInfo!"));
+			itInsert.itemex.iImage = 0;
+		}
+		else
+		{
+			itInsert.itemex.iSelectedImage = shFinfo.iIcon;
+			DestroyIcon(shFinfo.hIcon);
+		}
 	}
 	// END: added by FoRcHa //////////////
 	
@@ -255,7 +338,13 @@ CString CDirectoryTreeCtrl::GetFullPath(HTREEITEM hItem)
 	HTREEITEM hSearchItem = hItem;
 	while(hSearchItem != NULL)
 	{
-		strDir = GetItemText(hSearchItem) + "\\" + strDir;
+		CString strSearchItemDir;
+		STreeItem* pti = (STreeItem*)GetItemData(hSearchItem);
+		if (pti)
+			strSearchItemDir = pti->strPath;
+		else
+			strSearchItemDir = GetItemText(hSearchItem);
+		strDir = strSearchItemDir + "\\" + strDir;
 		hSearchItem = GetParentItem(hSearchItem);
 	}
 	return strDir;
@@ -410,15 +499,32 @@ void CDirectoryTreeCtrl::UpdateParentItems(HTREEITEM hChild)
 	}
 }
 
-
-void CDirectoryTreeCtrl::OnNMRclickSharedList(NMHDR *pNMHDR, LRESULT *pResult)
+void CDirectoryTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
-	// get item under cursor
-	POINT point;
-	::GetCursorPos(&point);
-	CPoint p = point;
-	ScreenToClient(&p);
-	HTREEITEM hItem = HitTest(p);
+	CPoint ptMenu(-1, -1);
+	if (point.x != -1 && point.y != -1)
+	{
+		ptMenu = point;
+		ScreenToClient(&point);
+	}
+	else
+	{
+		HTREEITEM hSel = GetNextItem(TVI_ROOT, TVGN_CARET);
+		if (hSel)
+		{
+			CRect rcItem;
+			if (GetItemRect(hSel, &rcItem, TRUE))
+			{
+				ptMenu.x = rcItem.left;
+				ptMenu.y = rcItem.top;
+				ClientToScreen(&ptMenu);
+			}
+		}
+		else
+			ClientToScreen(&(ptMenu = (0, 0)));
+	}
+
+	HTREEITEM hItem = HitTest(point);
 
 	// create the menu
 	CTitleMenu SharedMenu;
@@ -442,9 +548,14 @@ void CDirectoryTreeCtrl::OnNMRclickSharedList(NMHDR *pNMHDR, LRESULT *pResult)
 		SharedMenu.AppendMenu(MF_STRING,MP_SHAREDFOLDERS_FIRST+iCnt, (LPCTSTR)m_lstShared.GetNext(pos));
 
 	// display menu
-	SharedMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+	SharedMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, ptMenu.x, ptMenu.y, this);
 	VERIFY( SharedMenu.DestroyMenu() );
-	*pResult = 0;
+}
+
+void CDirectoryTreeCtrl::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// catch WM_RBUTTONDOWN and do not route it the default way.. otherwise we won't get a WM_CONTEXTMENU.
+	//CTreeCtrl::OnRButtonDown(nFlags, point);
 }
 
 BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
@@ -465,4 +576,12 @@ BOOL CDirectoryTreeCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 		cnt++;
 	}
 	return true;
+}
+
+void CDirectoryTreeCtrl::OnTvnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	if (pNMTreeView->itemOld.lParam)
+		delete (STreeItem*)pNMTreeView->itemOld.lParam;
+	*pResult = 0;
 }

@@ -16,10 +16,13 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "types.h"
-#include "memdc.h"
-#include "titlemenu.h"
+#include "MuleListCtrl.h"
+#include "TitleMenu.h"
 #include <map>
+
+#define COLLAPSE_ONLY	0
+#define EXPAND_ONLY		1
+#define EXPAND_COLLAPSE	2
 
 // Foward declaration
 class CPartFile;
@@ -44,7 +47,7 @@ class CDownloadListCtrl : public CMuleListCtrl
 public:
 	CDownloadListCtrl();
 	virtual ~CDownloadListCtrl();
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
 	uint8	curTab;
 	void	UpdateItem(void* toupdate);
 	void	Init();
@@ -53,8 +56,6 @@ public:
 	void	RemoveSource(CUpDownClient* source,CPartFile* owner);
 	bool	RemoveFile(CPartFile* toremove);
 	void	ClearCompleted(bool ignorecats=false);
-	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
-	//virtual BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void	SetStyle();
 	void	CreateMenues();
 	void	Localize();
@@ -69,8 +70,18 @@ public:
 	void	GetDisplayedFiles(CArray<CPartFile*,CPartFile*> *list);
 	void	MoveCompletedfilesCat(uint8 from, uint8 to);
 protected:
+	void SetAllIcons();
 	void	DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
 	void	DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
+    static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+    static int Compare(CPartFile* file1, CPartFile* file2, LPARAM lParamSort);
+    static int Compare(CUpDownClient* client1, CUpDownClient* client2, LPARAM lParamSort, int sortMod);
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
 	afx_msg void OnItemActivate(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
@@ -78,11 +89,7 @@ protected:
 	afx_msg void OnNMDblclkDownloadlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
-    static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-    static int Compare(CPartFile* file1, CPartFile* file2, LPARAM lParamSort);
-    static int Compare(CUpDownClient* client1, CUpDownClient* client2, LPARAM lParamSort, int sortMod);
 
-	DECLARE_MESSAGE_MAP()
 private:
 	CImageList  m_ImageList;
 	CTitleMenu	m_ClientMenu;

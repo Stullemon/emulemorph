@@ -14,13 +14,22 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #pragma once
-#include "safefile.h"
-#include "types.h"
-#include "packets.h"
-#include "otherstructs.h"
+
+class CTag;
+
+#pragma pack(1)
+struct ServerMet_Struct {
+	uint32	ip;
+	uint16	port;
+	uint32	tagcount;
+};
+#pragma pack()
+
+#define SRV_PR_LOW			2
+#define SRV_PR_NORMAL		0
+#define SRV_PR_HIGH			1
+
 
 // Server TCP flags
 #define	SRV_TCPFLG_COMPRESSION	0x00000001

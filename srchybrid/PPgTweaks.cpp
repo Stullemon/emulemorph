@@ -6,6 +6,13 @@
 #include "SearchDlg.h"
 #include "PPgTweaks.h"
 #include "Scheduler.h"
+#include "DownloadQueue.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+#include "TransferWnd.h"
+#include "emuledlg.h"
+#include "SharedFilesWnd.h"
+#include "ServerWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -37,7 +44,6 @@ CPPgTweaks::CPPgTweaks()
 	m_htiAutoTakeEd2kLinks = NULL;
 	m_htiVerbose = NULL;
 	m_htiDebugSourceExchange = NULL;
-	m_htiDebugSecuredConnection = NULL; //MORPH - Added by SiRoB, Debug Log option for Secured connection
 	m_htiCreditSystem = NULL;
 	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
@@ -53,6 +59,18 @@ CPPgTweaks::CPPgTweaks()
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+
+	/* Temp removed until further testing
+	// ZZ:UploadSpeedSense -->
+    m_htiDynUp = NULL;
+	m_htiDynUpEnabled = NULL;
+    m_htiDynUpMinUpload = NULL;
+    m_htiDynUpPingTolerance = NULL;
+    m_htiDynUpGoingUpDivider = NULL;
+    m_htiDynUpGoingDownDivider = NULL;
+    m_htiDynUpNumberOfPings = NULL;
+	// ZZ:UploadSpeedSense <--
+	*/
 }
 
 CPPgTweaks::~CPPgTweaks()
@@ -67,10 +85,20 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	{
 		int iImgBackup = 8; // default icon
 		int iImgLog = 8; // default icon
+		/*
+		// ZZ:UploadSpeedSense -->
+		int iImgDynyp = 8; // default icon
+		// ZZ:UploadSpeedSense <--
+		*/
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgBackup = piml->Add(CTempIconLoader("SafeFileWrite"));
 			iImgLog = piml->Add(CTempIconLoader("Log"));
+			/*
+            // ZZ:UploadSpeedSense -->
+			iImgDynyp = piml->Add(CTempIconLoader("upload"));
+			// ZZ:UploadSpeedSense <--
+			*/
 		}
 
 		m_htiMaxCon5Sec = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCON5SECLABEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
@@ -79,10 +107,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiVerbose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_VERBOSE), TVI_ROOT, m_iVerbose);
 		m_htiDebugSourceExchange = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DEBUG_SOURCE_EXCHANGE), TVI_ROOT, m_iDebugSourceExchange);
 		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
-		//MORPH START - Added by SiRoB, Debug Log option for Secured connection
-		m_htiDebugSecuredConnection = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWSECUREDCONNECTION), TVI_ROOT, m_iDebugSecuredConnection);
-		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSecuredConnection, m_iVerbose);
-		//MORPH END - Added by SiRoB, Debug Log option for Secured connection
 		m_htiCreditSystem = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECREDITSYSTEM), TVI_ROOT, m_iCreditSystem);
 		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiCreditSystem,false); //MORPH - Added by SiRoB, Credit System Allways Used
 		
@@ -109,9 +133,36 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEdit));
 		// itsonlyme: hostnameSource
 
+		/*
+		// ZZ:UploadSpeedSense -->
+        m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
+		m_htiDynUpEnabled = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DYNUPENABLED), m_htiDynUp, m_iDynUpEnabled);
+
+        m_htiDynUpMinUpload = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_PINGTOLERANCE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpMinUpload, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+        m_htiDynUpPingTolerance = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_PINGTOLERANCE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpPingTolerance, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+        m_htiDynUpGoingUpDivider = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_GOINGUPDIVIDER), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpGoingUpDivider, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+        m_htiDynUpGoingDownDivider = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_GOINGDOWNDIVIDER), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpGoingDownDivider, RUNTIME_CLASS(CNumTreeOptionsEdit));
+
+        m_htiDynUpNumberOfPings = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_NUMBEROFPINGS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
+		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		// ZZ:UploadSpeedSense <--
+		*/
+
 		m_ctrlTreeOptions.Expand(m_htiSaveLogs, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
+		/*
+        // ZZ:UploadSpeedSense -->
+		m_ctrlTreeOptions.Expand(m_htiDynUp, TVE_EXPAND);
+		// ZZ:UploadSpeedSense <--
+		*/
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
 		m_bInitializedTreeOpts = true;
 	}
@@ -121,8 +172,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_iAutoTakeEd2kLinks);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_iVerbose);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSourceExchange, m_iDebugSourceExchange);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebugSecuredConnection, m_iDebugSecuredConnection); //MORPH - Added by SiRoB, Debug Log option for Secured connection
-	//MORPH START - Changed by SiRoB, Hot fix to show correct disabled checkbox
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_iCreditSystem);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiLog2Disk, m_iLog2Disk);
@@ -134,9 +183,31 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiServerKeepAliveTimeout, m_uServerKeepAliveTimeout);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_iCheckDiskspace);	// SLUGFILLER: checkDiskspace
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
+	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);	// itsonlyme: hostnameSource
 
 	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, m_iVerbose);
+
+	/*
+	// ZZ:UploadSpeedSense -->
+    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDynUpEnabled, m_iDynUpEnabled);
+
+    DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpMinUpload, m_iDynUpMinUpload);
+	DDV_MinMaxInt(pDX, m_iDynUpMinUpload, 1, INT_MAX);
+
+    DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpPingTolerance, m_iDynUpPingTolerance);
+	DDV_MinMaxInt(pDX, m_iDynUpPingTolerance, 100, INT_MAX);
+
+    DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpGoingUpDivider, m_iDynUpGoingUpDivider);
+	DDV_MinMaxInt(pDX, m_iDynUpGoingUpDivider, 1, INT_MAX);
+
+    DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpGoingDownDivider, m_iDynUpGoingDownDivider);
+	DDV_MinMaxInt(pDX, m_iDynUpGoingDownDivider, 1, INT_MAX);
+
+    DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpNumberOfPings, m_iDynUpNumberOfPings);
+	DDV_MinMaxInt(pDX, m_iDynUpNumberOfPings, 1, INT_MAX);
+	// ZZ:UploadSpeedSense <--
+	*/
 }
 BOOL CPPgTweaks::OnInitDialog()
 {
@@ -144,7 +215,6 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iAutoTakeEd2kLinks = app_prefs->prefs->autotakeed2klinks;
 	m_iVerbose = app_prefs->prefs->m_bVerbose;
 	m_iDebugSourceExchange = app_prefs->prefs->m_bDebugSourceExchange;
-	m_iDebugSecuredConnection = app_prefs->prefs->m_bDebugSecuredConnection;  //MORPH - Added by SiRoB, Debug Log option for Secured Connection
 	m_iLog2Disk = app_prefs->prefs->log2disk;
 	m_iDebug2Disk = app_prefs->prefs->debug2disk;
 	m_iDateFileNameLog = app_prefs->prefs->DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
@@ -156,6 +226,17 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iCheckDiskspace = app_prefs->prefs->checkDiskspace;	// SLUGFILLER: checkDiskspace
 	m_fMinFreeDiskSpaceMB = (float)(app_prefs->prefs->m_uMinFreeDiskSpace / (1024.0 * 1024.0));
 	m_sYourHostname = app_prefs->GetYourHostname();	// itsonlyme: hostnameSource
+
+	/*
+	// ZZ:UploadSpeedSense -->
+    m_iDynUpEnabled = app_prefs->IsDynUpEnabled();
+    m_iDynUpMinUpload = app_prefs->GetMinUpload();
+    m_iDynUpPingTolerance = app_prefs->GetDynUpPingTolerance();
+    m_iDynUpGoingUpDivider = app_prefs->GetDynUpGoingUpDivider();
+    m_iDynUpGoingDownDivider = app_prefs->GetDynUpGoingDownDivider();
+    m_iDynUpNumberOfPings = app_prefs->GetDynUpNumberOfPings();
+	// ZZ:UploadSpeedSense <--
+	*/
 
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
@@ -201,28 +282,47 @@ BOOL CPPgTweaks::OnApply()
 
 	app_prefs->prefs->m_bVerbose = m_iVerbose;
 	app_prefs->prefs->m_bDebugSourceExchange = m_iDebugSourceExchange;
-	app_prefs->prefs->m_bDebugSecuredConnection = m_iDebugSecuredConnection; //MORPH - Added by SiRoB, Debug Log option for Secured Connection
 	app_prefs->prefs->m_bCreditSystem = m_iCreditSystem;
-	app_prefs->prefs->log2disk = m_iLog2Disk;
-	app_prefs->prefs->debug2disk = m_iDebug2Disk;
 	app_prefs->prefs->DateFileNameLog = m_iDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
+	if (!app_prefs->prefs->log2disk && m_iLog2Disk)
+		theLog.Open();
+	else if (app_prefs->prefs->log2disk && !m_iLog2Disk)
+		theLog.Close();
+	app_prefs->prefs->log2disk = m_iLog2Disk;
+
+	if (!app_prefs->prefs->debug2disk && m_iDebug2Disk)
+		theVerboseLog.Open();
+	else if (app_prefs->prefs->debug2disk && !m_iDebug2Disk)
+		theVerboseLog.Close();
+	app_prefs->prefs->debug2disk = m_iDebug2Disk;
 	app_prefs->prefs->m_iCommitFiles = m_iCommitFiles;
 	app_prefs->prefs->filterBadIP = m_iFilterLANIPs;
 	app_prefs->prefs->m_iFileBufferSize = m_iFileBufferSize;
 	app_prefs->prefs->m_iQueueSize = m_iQueueSize;
 	if (app_prefs->prefs->m_bExtControls != (bool)m_iExtControls) {
 		app_prefs->prefs->m_bExtControls = m_iExtControls;
-		theApp.emuledlg->transferwnd.downloadlistctrl.CreateMenues();
+		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
 		theApp.emuledlg->searchwnd->searchlistctrl.CreateMenues();
-		theApp.emuledlg->sharedfileswnd.sharedfilesctrl.CreateMenues();
+		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 	}
 	app_prefs->prefs->m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
 	app_prefs->prefs->checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	app_prefs->prefs->m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	app_prefs->SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
 
-	theApp.emuledlg->serverwnd.ToggleDebugWindow();
-	theApp.emuledlg->serverwnd.UpdateLogTabSelection();
+	/*
+	// ZZ:UploadSpeedSense -->
+    app_prefs->prefs->m_bDynUpEnabled = m_iDynUpEnabled;
+    app_prefs->prefs->minupload = m_iDynUpMinUpload;
+    app_prefs->prefs->m_iDynUpPingTolerance = m_iDynUpPingTolerance;
+    app_prefs->prefs->m_iDynUpGoingUpDivider = m_iDynUpGoingUpDivider;
+    app_prefs->prefs->m_iDynUpGoingDownDivider = m_iDynUpGoingDownDivider;
+    app_prefs->prefs->m_iDynUpNumberOfPings = m_iDynUpNumberOfPings;
+	// ZZ:UploadSpeedSense <--
+	*/
+
+	theApp.emuledlg->serverwnd->ToggleDebugWindow();
+	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 	theApp.downloadqueue->CheckDiskspace();
 
 	SetModified(FALSE);
@@ -258,8 +358,6 @@ void CPPgTweaks::Localize(void)
 		if (m_htiAutoTakeEd2kLinks) m_ctrlTreeOptions.SetItemText(m_htiAutoTakeEd2kLinks, GetResString(IDS_AUTOTAKEED2KLINKS));
 		if (m_htiVerbose) m_ctrlTreeOptions.SetItemText(m_htiVerbose, GetResString(IDS_VERBOSE));
 		if (m_htiDebugSourceExchange) m_ctrlTreeOptions.SetItemText(m_htiDebugSourceExchange, GetResString(IDS_DEBUG_SOURCE_EXCHANGE));
-		if (m_htiDebugSecuredConnection) m_ctrlTreeOptions.SetItemText(m_htiDebugSecuredConnection, GetResString(IDS_SHOWSECUREDCONNECTION)); //MORPH - Added by SiRoB, Debug Log option for Secured connection
-			
 		if (m_htiCreditSystem) m_ctrlTreeOptions.SetItemText(m_htiCreditSystem, GetResString(IDS_USECREDITSYSTEM));
 
 		if (m_htiSaveLogs) m_ctrlTreeOptions.SetItemText(m_htiSaveLogs, GetResString(IDS_LOG2DISKFRAME));
@@ -276,6 +374,18 @@ void CPPgTweaks::Localize(void)
 		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));	// SLUGFILLER: checkDiskspace
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
+
+		/*
+		// ZZ:UploadSpeedSense -->
+        if (m_htiDynUp) m_ctrlTreeOptions.SetItemText(m_htiDynUp, GetResString(IDS_DYNUP));
+		if (m_htiDynUpEnabled) m_ctrlTreeOptions.SetItemText(m_htiDynUpEnabled, GetResString(IDS_DYNUPENABLED));
+        if (m_htiDynUpMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpMinUpload, GetResString(IDS_DYNUP_MINUPLOAD));
+        if (m_htiDynUpPingTolerance) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpPingTolerance, GetResString(IDS_DYNUP_PINGTOLERANCE));
+        if (m_htiDynUpGoingUpDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingUpDivider, GetResString(IDS_DYNUP_GOINGUPDIVIDER));
+        if (m_htiDynUpGoingDownDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingDownDivider, GetResString(IDS_DYNUP_GOINGDOWNDIVIDER));
+        if (m_htiDynUpNumberOfPings) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpNumberOfPings, GetResString(IDS_DYNUP_NUMBEROFPINGS));
+		// ZZ:UploadSpeedSense <--
+		*/
 
 		CString temp;
 		temp.Format( GetResString(IDS_FILEBUFFERSIZE), m_iFileBufferSize*15000 );
@@ -294,7 +404,6 @@ void CPPgTweaks::OnDestroy()
 	m_htiAutoTakeEd2kLinks = NULL;
 	m_htiVerbose = NULL;
 	m_htiDebugSourceExchange = NULL;
-	m_htiDebugSecuredConnection = NULL; //MORPH - Added by SiRoB, Debug Log option for Secured Connection
 	m_htiCreditSystem = NULL;
 	m_htiSaveLogs = NULL;
 	m_htiLog2Disk = NULL;
@@ -310,6 +419,19 @@ void CPPgTweaks::OnDestroy()
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
+
+	/*
+	// ZZ:UploadSpeedSense -->
+    m_htiDynUp = NULL;
+	m_htiDynUpEnabled = NULL;
+    m_htiDynUpMinUpload = NULL;
+    m_htiDynUpPingTolerance = NULL;
+    m_htiDynUpGoingUpDivider = NULL;
+    m_htiDynUpGoingDownDivider = NULL;
+    m_htiDynUpNumberOfPings = NULL;
+	// ZZ:UploadSpeedSense <--
+	*/
+    
 	CPropertyPage::OnDestroy();
 }
 
@@ -319,10 +441,8 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 		TREEOPTSCTRLNOTIFY* pton = (TREEOPTSCTRLNOTIFY*)lParam;
 		if (pton->hItem == m_htiVerbose){
 			BOOL bCheck;
-			if (m_ctrlTreeOptions.GetCheckBox(m_htiVerbose, bCheck)){
+			if (m_ctrlTreeOptions.GetCheckBox(m_htiVerbose, bCheck))
 				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSourceExchange, bCheck);
-				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebugSecuredConnection, bCheck); //MORPH - Added by SiRoB, Debug Log option for Secured Connection
-			}
 		}
 		SetModified();
 	}

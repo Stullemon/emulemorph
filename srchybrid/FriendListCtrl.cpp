@@ -23,6 +23,17 @@
 #include "friend.h"
 #include "ClientDetailDialog.h"
 #include "Addfriend.h"
+#include "FriendList.h"
+#include "emuledlg.h"
+#include "ClientList.h"
+#include "OtherFunctions.h"
+#include "UpDownClient.h"
+#include "ListenSocket.h"
+#include "MenuCmds.h"
+#include "ChatWnd.h"
+#include "DownloadQueue.h" //MORPH - Added by SiRoB
+#include "PartFile.h" //MORPH - Added by SiRoB
+#include "SharedFileList.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -44,11 +55,10 @@ CFriendListCtrl::~CFriendListCtrl()
 
 
 BEGIN_MESSAGE_MAP(CFriendListCtrl, CMuleListCtrl)
-	ON_NOTIFY_REFLECT (NM_RCLICK, OnNMRclick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
-	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
 	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
 END_MESSAGE_MAP()
 
 
@@ -61,12 +71,18 @@ void CFriendListCtrl::Init()
 	RECT rcWindow;
 	GetWindowRect(&rcWindow);
 	InsertColumn(0, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, rcWindow.right - rcWindow.left - 4, 0);
-
+	SetAllIcons();
 	theApp.friendlist->SetWindow(this);
 	SetSortArrow(0, true);
 }
 
-void CFriendListCtrl::Localize()
+void CFriendListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CFriendListCtrl::SetAllIcons()
 {
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -78,7 +94,10 @@ void CFriendListCtrl::Localize()
 	HIMAGELIST himlOld = ApplyImageList(iml.Detach());
 	if (himlOld)
 		ImageList_Destroy(himlOld);
+}
 
+void CFriendListCtrl::Localize()
+{
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -167,49 +186,8 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 
 	}
+	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-}
-
-void CFriendListCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult){	
-//	POINT point;
-//	::GetCursorPos(&point);	
-//	CFriend* cur_friend=NULL;
-//
-//	if (m_ClientMenu) VERIFY( m_ClientMenu.DestroyMenu() );
-//	m_ClientMenu.CreatePopupMenu();
-//	m_ClientMenu.AddMenuTitle(GetResString(IDS_FRIENDLIST));
-//
-//	if (GetSelectionMark() != (-1)){
-//		cur_friend = (CFriend*)GetItemData(GetSelectionMark());
-//
-//		m_ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
-//	}
-//
-//	m_ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND));
-//
-//	if (GetSelectionMark() != (-1)){
-//
-//		m_ClientMenu.AppendMenu(MF_STRING,MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-//		m_ClientMenu.AppendMenu(MF_STRING,MP_MESSAGE, GetResString(IDS_SEND_MSG));
-//		m_ClientMenu.AppendMenu(MF_STRING,MP_SHOWLIST, GetResString(IDS_VIEWFILES));
-//		m_ClientMenu.AppendMenu(MF_STRING,MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
-//		//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-//		//if (cur_friend && cur_friend->GetLinkedClient() && !cur_friend->GetLinkedClient()->HasLowID()){
-//		m_ClientMenu.EnableMenuItem(MP_FRIENDSLOT,MF_ENABLED);
-//		m_ClientMenu.CheckMenuItem(MP_FRIENDSLOT, ((cur_friend->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) );  
-//		//MORPH START - Added by IceCream, List Requested Files
-//		m_ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
-//		m_ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
-//		//MORPH END - Added by IceCream, List Requested Files	
-//		//}
-//		//else
-//		//	m_ClientMenu.EnableMenuItem(MP_FRIENDSLOT,MF_GRAYED);
-//		//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-//	}
-//
-//	//SetMenu(&m_ClientMenu);
-//	m_ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-	*pResult = 0;
 }
 
 BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
@@ -224,13 +202,13 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			if (cur_friend){
 				//MORPH - Added by Yun.SF3, ZZ Upload System
 				if (cur_friend->GetLinkedClient())
-					theApp.emuledlg->chatwnd.StartSession(cur_friend->GetLinkedClient());
+					theApp.emuledlg->chatwnd->StartSession(cur_friend->GetLinkedClient());
 				//MORPH - Added by Yun.SF3, ZZ Upload System
 				else{
 					CUpDownClient* chatclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
 					chatclient->SetUserName(cur_friend->m_strName.GetBuffer());
 					theApp.clientlist->AddClient(chatclient);
-					theApp.emuledlg->chatwnd.StartSession(chatclient);
+					theApp.emuledlg->chatwnd->StartSession(chatclient);
 				}
 			}
 			break;
@@ -286,6 +264,11 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 					{
 						fileList += "\n" ; 
 						fileList += cur_friend->GetLinkedClient()->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
+					}
+					for(POSITION pos = cur_friend->GetLinkedClient()->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;cur_friend->GetLinkedClient()->m_OtherNoNeeded_list.GetNext(pos))
+					{
+						fileList += "\n" ;
+						fileList += cur_friend->GetLinkedClient()->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
 					}
 				}
 				else

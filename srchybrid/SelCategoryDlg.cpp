@@ -5,6 +5,9 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "SelCategoryDlg.h"
+#include "OtherFunctions.h"
+#include "emuleDlg.h"
+#include "TransferWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -22,7 +25,7 @@ CSelCategoryDlg::CSelCategoryDlg(CWnd* pWnd)
 	// If they have selected to use the active category as the default
 	// when adding links, then set m_Return to it.  Otherwise, use 'All' (0).
 	if (theApp.glob_prefs->UseActiveCatForLinks())
-		m_Return =	theApp.emuledlg->transferwnd.GetActiveCategory();
+		m_Return =	theApp.emuledlg->transferwnd->GetActiveCategory();
 	else
 		m_Return = 0;
 
@@ -58,7 +61,7 @@ BOOL CSelCategoryDlg::OnInitDialog()
 
 	// Select the category that is currently visible in the transfer dialog as default, or 0 if they are
 	// not using "New Downloads Default To Active Category"
-	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->SetCurSel(theApp.glob_prefs->UseActiveCatForLinks()?theApp.emuledlg->transferwnd.GetActiveCategory():0);
+	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->SetCurSel(theApp.glob_prefs->UseActiveCatForLinks()?theApp.emuledlg->transferwnd->GetActiveCategory():0);
 
 	return TRUE;
 }
@@ -78,7 +81,7 @@ void CSelCategoryDlg::OnOK()
 		m_Return = comboIndex;
 	else {
 		m_bCreatedNew = true;
-		m_Return = theApp.emuledlg->transferwnd.AddCategorie(comboText, theApp.glob_prefs->GetIncomingDir(), "");
+		m_Return = theApp.emuledlg->transferwnd->AddCategorie(comboText, theApp.glob_prefs->GetIncomingDir(), "","");
 	}
 
 	delete catTitle;

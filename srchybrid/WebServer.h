@@ -1,10 +1,8 @@
 #pragma once
+#include "Loggable.h"
 
-#include <zlib/zlib.h>
-#include "WebSocket.h"
-#include "Partfile.h"
-#include "OtherFunctions.h"
-#include "loggable.h"
+class CWebSocket;
+class CUpDownClient;
 
 #define WEB_GRAPH_HEIGHT		120
 #define WEB_GRAPH_WIDTH			500
@@ -20,12 +18,12 @@ typedef struct
 {
 	CString	sFileName;
 	CString	sFileStatus;
-	uint64	lFileSize;
-	long	lFileTransferred;
-	long	lFileSpeed;
-	long	lSourceCount;
-	long	lNotCurrentSourceCount;
-	long	lTransferringSourceCount;
+	uint32	lFileSize;
+	uint32	lFileTransferred;
+	uint32	lFileSpeed;
+	uint16	lSourceCount;
+	uint16	lNotCurrentSourceCount;
+	uint16	lTransferringSourceCount;
 	float	fCompleted;
 	int		nFileStatus;
 	int		nFilePrio;
@@ -93,6 +91,11 @@ typedef enum
 	SERVER_SORT_FILES
 } ServerSort;
 
+struct BadLogin {
+	uint32	datalen;
+	DWORD	timestamp;
+};
+
 typedef struct
 {
 	uint32			nUsers;
@@ -106,7 +109,7 @@ typedef struct
 
 	CArray<UpDown, UpDown>		PointsForWeb;
 	CArray<Session, Session>	Sessions;
-	CArray<TransferredData,TransferredData> badlogins;	//TransferredData= IP : time
+	CArray<BadLogin, BadLogin> badlogins;	//TransferredData= IP : time
 	
 	CString sLastModified;
 	CString	sETag;
@@ -223,7 +226,7 @@ private:
 	static CString	_GetPlainResString(RESSTRIDTYPE nID, bool noquote = false);
 	static CString	_GetPlainResStringNoQuote(RESSTRIDTYPE nID) { return _GetPlainResString(nID, true); }
 #endif
-	static int		_GzipCompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level);
+	static int		_GzipCompress(BYTE* dest, ULONG* destLen, const BYTE* source, ULONG sourceLen, int level);
 	static void		_SetSharedFilePriority(CString hash, uint8 priority);
 	static CString	_GetWebCharSet();
 	CString			_LoadTemplate(CString sAll, CString sTemplateName);

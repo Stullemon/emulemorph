@@ -17,18 +17,18 @@
 
 
 #pragma once
-#include "searchlistctrl.h"
-#include "afxcmn.h"
-#include "packets.h"
-#include "types.h"
-#include "afxwin.h"
-#include "iconstatic.h"
-#include "closabletabctrl.h"
+#include "ResizableLib\ResizableDialog.h"
+#include "SearchListCtrl.h"
+#include "ClosableTabCtrl.h"
+#include "IconStatic.h"
+#include "EditX.h"
 #include "ComboBoxEx2.h"
 #include "kademlia/utils/UInt128.h"
 
 class CCustomAutoComplete;
 class CJigleSOAPThread;
+class Packet;
+class CSafeMemFile;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ struct SSearchParams
 {
 	SSearchParams()
 	{
-		dwSearchID = -1;
+		dwSearchID = (DWORD)-1;
 		eType = SearchTypeServer;
 		ulMinSize = 0;
 		ulMaxSize = 0;
@@ -96,6 +96,7 @@ public:
 
 	void	Localize();
 	void	DownloadSelected();
+	void	DownloadSelected(bool paused);
 	void	LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
 	void	AddUDPResult(uint16 count);
 	void	DeleteSearch(uint32 nSearchID);
@@ -125,6 +126,7 @@ protected:
 	CString	CreateWebQuery();
 	void UpdateControls();
 	void ShowResults(const SSearchParams* pParams);
+	void SetAllIcons();
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
@@ -136,6 +138,7 @@ protected:
 	afx_msg void OnCbnSelchangeCombo1();
 	afx_msg void OnCbnSelendokCombo1();
 	afx_msg void OnBnClickedMore();
+	afx_msg void OnSysColorChange();
 
 	DECLARE_MESSAGE_MAP()
 
@@ -148,6 +151,7 @@ private:
 	uint16		servercount;
 	bool		globsearch;
 	uint32		m_nSearchID;
+	CEditX		m_ctlName;
 	CComboBoxEx2 methodBox;
 	CComboBox	Stypebox;
 	CImageList	m_ImageList;
@@ -167,11 +171,9 @@ private:
 
 	CJigleSOAPThread* m_pJigleThread;
 	bool DoNewJigleSearch(SSearchParams* pParams);
-public:
-	afx_msg void OnSysColorChange();
 };
 
-bool GetSearchPacket(CSafeMemFile& data,
+bool GetSearchPacket(CSafeMemFile* data,
 					 const CString& strSearchString, const CString& strLocalizedType,
 					 ULONG ulMinSize, ULONG ulMaxSize, int iAvailability, 
 					 const CString& strExtension, bool bAllowEmptySearchString);

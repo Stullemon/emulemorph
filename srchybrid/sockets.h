@@ -14,20 +14,7 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// Client to Server communication
-
 #pragma once
-
-#include "types.h"
-#include "server.h"
-#include "packets.h"
-#include "ServerListCtrl.h"
-#include "Preferences.h"
-#include "server.h"
-#include "serverlist.h"
-#include "preferences.h"
-#include "serversocket.h"
 #include "loggable.h"
 
 #define CS_FATALERROR	-5
@@ -43,7 +30,12 @@
 
 #define CS_RETRYCONNECTTIME  30 // seconds
 
+class CServerList;
+class CPreferences;
 class CUDPSocket;
+class CServerSocket;
+class CServer;
+class Packet;
 
 class CServerConnect: public CLoggable
 {
@@ -75,7 +67,7 @@ public:
 	uint8	pendingConnects;
 	uint32	m_curuser;
 
-	bool	IsLowID()		{return IsLowIDED2K(clientid);}
+	bool	IsLowID();
 	void	SetClientID(uint32 newid);
 	bool	IsLocalServer(uint32 dwIP, uint16 nPort);
 	void	TryAnotherConnectionrequest();

@@ -35,11 +35,11 @@ there client on the eMule forum..
 #include "SearchManager.h"
 #include "Indexed.h"
 #include "../net/KademliaUDPListener.h"
-//#include "../net/KademliaTCPListener.h"
 #include "../routing/RoutingZone.h"
 #include "../utils/MiscUtils.h"
 #include "../../sharedfilelist.h"
 #include "../routing/contact.h"
+#include "../routing/timer.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -125,27 +125,42 @@ void CKademlia::stop(bool bAppShutdown)
 
 	CTimer::stop(bAppShutdown);
 	CSearchManager::stopAllSearches();
-	try
-	{
+	try{
 		instance->m_udpListener->stop(bAppShutdown);
 		delete instance->m_udpListener;
-	}catch(...){ASSERT(0);}
-	try
-	{
+	}
+	catch(...){
+		ASSERT(0);
+	}
+
+	try{
 		delete instance->m_routingZone;
-	}catch(...){ASSERT(0);}
-	try
-	{
+	}
+	catch(...){
+		ASSERT(0);
+	}
+
+	try{
 		delete instance->m_prefs;
-	}catch(...){ASSERT(0);}
-	try
-	{
+	}
+	catch(...){
+		ASSERT(0);
+	}
+
+	try{
 		delete instance->m_indexed;
-	}catch(...){ASSERT(0);}
-	try
-	{
+	}
+	catch(...){
+		ASSERT(0);
+	}
+
+	try{
 		delete instance;
-	}catch(...){ASSERT(0);}
+	}
+	catch(...){
+		ASSERT(0);
+	}
+
 	instance = NULL;
 }
 
@@ -322,7 +337,7 @@ void CKademlia::reportRequestTcp(CContact* contact)
 	catch(...){return;}
 }
 
-void CKademlia::reportUpdateStatus(Status* status)
+void CKademlia::reportUpdateStatus(::Status* status)
 {
 	try
 	{

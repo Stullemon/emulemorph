@@ -14,15 +14,37 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
+#ifndef __UP_DOWN_CLIENT_H__
+#define	__UP_DOWN_CLIENT_H__
 #pragma once
-#include "types.h"
-#include "listensocket.h"
-#include "partfile.h"
-#include "clientcredits.h"
-#include "safefile.h"
-#include "BarShader.h"
 #include "loggable.h"
+#include "BarShader.h"
+
+class CClientReqSocket;
+class CFriend;
+class CPartFile;
+class CClientCredits;
+class CAbstractFile;
+class CKnownFile;
+class Packet;
+class CxImage;
+struct Requested_Block_Struct;
+class CSafeMemFile;
+
+struct Pending_Block_Struct{
+	Requested_Block_Struct*	block;
+	struct z_stream_s*      zStream;       // Barry - Used to unzip packets
+	uint32                  totalUnzipped; // Barry - This holds the total unzipped bytes for all packets so far
+	bool					bZStreamError;
+};
+
+#pragma pack(1)
+struct Requested_File_Struct{
+	uchar	  fileid[16];
+	uint32	  lastasked;
+	uint8	  badrequests;
+};
+#pragma pack()
 
 enum EUploadState{
 	US_UPLOADING,
@@ -91,15 +113,23 @@ enum EInfoPacketState{
 	IP_BOTH				= 3,
 };
 
+enum ESourceFrom{
+	SF_SERVER			= 0,
+	SF_KADEMLIA			= 1,
+	SF_SOURCE_EXCHANGE	= 2,
+	SF_PASSIVE			= 3,
+	SF_SLS			= 4 //MORPH - Added by SiRoB, Save Load Sources (SLS)
+};
+
 struct PartFileStamp {
 	CPartFile*	file;
 	DWORD		timestamp;
 };
-class CClientReqSocket;
-class CFriend;
-
 
 class CUpDownClient: public CLoggable
+#ifdef _DEBUG
+					,public CObject
+#endif
 {
 	friend class CUploadQueue;
 
@@ -108,7 +138,8 @@ public:
 	CUpDownClient(CClientReqSocket* sender = 0);
 	CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid, uint32 in_serverup, uint16 in_serverport, bool ed2kID = false);
 	~CUpDownClient();
-	bool			Disconnected(CString reason = NULL,bool m_FromSocket = false); //MORPH - Changed by SiRoB, ZZ Upload system
+
+	bool			Disconnected(bool bFromSocket = false);
 	bool			TryToConnect(bool bIgnoreMaxCon = false);
 	// khaos::concrash-
 	void			ConnectionEstablished();
@@ -116,7 +147,7 @@ public:
 	void			SetUserIDHybrid(uint32 val)	{m_nUserIDHybrid = val;}
 	char*			GetUserName()				{return m_pszUsername;}
 	uint32			GetIP()						{return m_dwUserIP;}
-	bool			HasLowID()					{return IsLowIDHybrid(m_nUserIDHybrid);}
+	bool			HasLowID();
 	char*			GetFullIP()					{return m_szFullUserIP;}
 	uint16			GetUserPort()				{return m_nUserPort;}
 	void			SetUserPort( uint16 val )	{m_nUserPort = val;}
@@ -132,9 +163,6 @@ public:
 												        ((int*)m_achUserHash[2]) != 0 || ((int*)m_achUserHash[3]) != 0; }
 	int				GetHashType();
 	uint32			GetVersion()				{return m_nClientVersion;}
-	uint32			GetMajVersion()				{return m_nClientMajVersion;}
-	uint32			GetMinVersion()				{return m_nClientMinVersion;}
-	uint32			GetUpVersion()				{return m_nClientUpVersion;}
 	uint8			GetMuleVersion()			{return m_byEmuleVersion;}
 	bool			ExtProtocolAvailable()		{return m_bEmuleProtocol;}
 	bool			IsEmuleClient()				{return m_byEmuleVersion;}
@@ -149,7 +177,7 @@ public:
 	void			SetKadPort(uint16 nPort)	{ m_nKadPort = nPort; }
 	uint8			GetUDPVersion()				{return m_byUDPVer;}
 	uint8			GetExtendedRequestsVersion(){return m_byExtendedRequestsVer;}
-	uint32			GetL2HACTime()				{return m_L2HAC_time ? (m_L2HAC_time - L2HAC_CALLBACK_PRECEDE) : 0;} //<<-- enkeyDEV(th1) -L2HAC-
+	uint32			GetL2HACTime(); //<<-- enkeyDEV(th1) -L2HAC-
 
 	bool			IsFriend()					{return m_Friend != NULL;}
 	float			GetCompression()	{return (float)compressiongain/notcompressed*100.0f;} // Add rod show compression
@@ -160,10 +188,10 @@ public:
 	// CString			GetUploadFileInfo(); Moved to WebServer.h
 	
 	void			SetUserName(char* pszNewName);
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-//	EClientSoftware	GetClientSoft()				{return m_clientSoft;}
-//	void			ReGetClientSoft();
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+	EClientSoftware	GetClientSoft()				{return m_clientSoft;}
+	const CString&	GetClientSoftVer() const	{return m_strClientSoftware;}
+	const CString&  GetClientModString() const { return m_clientModString; }//MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- (Maella)
+	void			ReGetClientSoft();
 	void			ClearHelloProperties();
 	bool			ProcessHelloAnswer(char* pachPacket, uint32 nSize);
 	bool			ProcessHelloPacket(char* pachPacket, uint32 nSize);
@@ -183,6 +211,8 @@ public:
 	void			SetFriendSlot(bool bNV)		{m_bFriendSlot = bNV;}
 	void			SetCommentDirty(bool bDirty = true) {m_bCommentDirty = bDirty;}
 	uint8			GetSourceExchangeVersion()	{return m_bySourceExchangeVer;}
+	bool			GetSentCancelTransfer()		{return m_fSentCancelTransfer;}
+	void			SetSentCancelTransfer(bool bVal) {m_fSentCancelTransfer = bVal;}
 	
 	uint32			GetAskTime()	{return AskTime;} //MORPH - Added by SiRoB - Smart Upload Control v2 (SUC) [lovelace]
 	
@@ -205,12 +235,7 @@ public:
 	bool			SupportsPreview()		{return m_bSupportsPreview;}
 	bool			SafeSendPacket(Packet* packet);
 
-	CClientReqSocket*	socket;
-	CClientCredits*		credits;
-	CFriend*			m_Friend;
 	//upload
-	uint32	compressiongain; /// Add show compression
-	uint32  notcompressed; // Add show compression
 	EUploadState	GetUploadState()			{return m_nUploadState;}
 	void			SetUploadState(EUploadState news);
 	uint32			GetWaitStartTime();
@@ -222,10 +247,7 @@ public:
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
 	uint32			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false);
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
-	bool			m_bAddNextConnect;  // VQB Fix for LowID slots only on connection
-	//MORPH START - Added by SiRoB, ZZ Upload System
-	void			CreateNextBlockPackage(bool startNextChunk = false);
-	//MORPH END - Added by SiRoB, ZZ Upload System
+	void			CreateNextBlockPackage();
 	void 			SetUpStartTime() {m_dwUploadTime = ::GetTickCount();}
 	uint32			GetUpStartTimeDelay()		{return ::GetTickCount() - m_dwUploadTime;}
 	void 			SetWaitStartTime();
@@ -240,9 +262,6 @@ public:
 	void			SendRankingInfo();
 	void			SendCommentInfo(CKnownFile *file);
 	void			AddRequestCount(uchar* fileid);
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
-	bool			IsDifferentPartBlock(bool startNextChunk = false);
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
 	void			UnBan();
 	void			Ban();
 	void			BanLeecher(int log_message = true); //MORPH - Added by IceCream, Anti-leecher feature
@@ -267,6 +286,7 @@ public:
 	void			ProcessUpFileStatus(char* packet,uint32 size);
 	uint16			GetUpPartCount()			{return m_nUpPartCount;}
 	void			DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
+	uint32          GetPayloadInBuffer() { return m_addedPayloadQueueSession-GetQueueSessionPayloadUp(); }
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
 	bool			GetPowerShared();
@@ -315,23 +335,22 @@ public:
 	bool			SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensions, bool bRemoveCompletely, CPartFile* toFile = NULL);
 	void			DontSwapTo(CPartFile* file);
 	bool			IsSwapSuspended(CPartFile* file);
+	//MORPH - Changed by SiRoB, khaos::kmod+ Smart A4AF Handling
 	bool			DoSwap(CPartFile* SwapTo, bool anotherfile=false, int iDebugMode = 0);
-	// khaos::kmod+ Smart A4AF Handling
-	//bool			SwapToAnotherFile(bool bIgnoreNoNeeded = false, bool forceSmart = false);
 	bool			BalanceA4AFSources(bool byPriorityOnly = false);
 	bool			StackA4AFSources();
 	bool			SwapToForcedA4AF();
-	//void			SwapThisSource(CPartFile* pNewFile, bool bAddReqFile, int iDebugMode = 0);
 	uint32			GetLastBalanceTick()		{return m_iLastSwapAttempt;}
 	uint32			GetLastForceA4AFTick()	{ return m_iLastForceA4AFAttempt; }
-	// khaos::kmod-
+	//MORPH - Changed by SiRoB, khaos::kmod-
 	void			UDPReaskACK(uint16 nNewQR);
 	void			UDPReaskFNF();
 	void			UDPReaskForDownload();
 	bool			IsSourceRequestAllowed();
+	bool			IsValidSource();
 	// -khaos--+++> Download Sessions Stuff
-	uint8			GetSourceFrom()				{return m_bySourceFrom;}
-	void			SetSourceFrom(uint8 val)	{m_bySourceFrom=val;}
+	ESourceFrom		GetSourceFrom()				{return m_nSourceFrom;}
+	void			SetSourceFrom(ESourceFrom val)	{m_nSourceFrom = val;}
 	//MORPH START - Changed by SiRoB, Better Download rate calcul
 	//void			SetDownStartTime()			{m_dwDownStartTime = ::GetTickCount();}
 	void			SetDownStartTime()			{m_dwDownStartTime = ::GetTickCount(); m_AvarageDDRlastRemovedHeadTimestamp = 0;}
@@ -353,15 +372,9 @@ public:
 	uint16			GetUpCompleteSourcesCount()	{return m_nUpCompleteSourcesCount;}
 	void			SetUpCompleteSourcesCount(uint16 n)	{m_nUpCompleteSourcesCount= n;}
 
-	CPartFile*		reqfile;
-	int				sourcesslot;
-
 	//chat
 	EChatState		GetChatState()				{return m_nChatstate;}
 	void			SetChatState(EChatState nNewS)	{m_nChatstate = nNewS;}
-	bool			m_bIsSpammer;
-	uint8			m_cMessagesReceived;	// count of chatmessages he sent to me
-	uint8			m_cMessagesSend;		// count of chatmessages I sent to him
 
 	//KadIPCheck
 	EKadIPCheckState GetKadIPCheckState()		{return m_nKadIPCheckState;}
@@ -380,13 +393,35 @@ public:
 	void UpdateDisplayedInfo(boolean force=false);
     int             GetFileListRequested() { return m_iFileListRequested; }
     void            SetFileListRequested(int iFileListRequested) { m_iFileListRequested = iFileListRequested; }
+
+#ifdef _DEBUG
+	// Diagnostic Support
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
+
+	CClientReqSocket* socket;
+	CClientCredits*	credits;
+	CFriend*		m_Friend;
+	CPartFile*		reqfile;
+	uint32			compressiongain; /// Add show compression
+	uint32			notcompressed; // Add show compression
+	uint8*			m_abyUpPartStatus;
+	uint32			m_nSumForAvgUpDataRate;
+	CTypedPtrList<CPtrList, CPartFile*> m_OtherRequests_list;
+	CTypedPtrList<CPtrList, CPartFile*> m_OtherNoNeeded_list;
+	uint16			m_lastPartAsked;
+	bool			m_bAddNextConnect;  // VQB Fix for LowID slots only on connection
+	bool			m_bIsSpammer;
+	uint8			m_cMessagesReceived;	// count of chatmessages he sent to me
+	uint8			m_cMessagesSend;		// count of chatmessages I sent to him
 	bool			m_bMsgFiltered;
 
 	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
 	void SetSlotNumber(uint32 newValue) { m_slotNumber = newValue; }
 	uint32 GetSlotNumber() { return m_slotNumber; }
 	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-01333
-
+	bool		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
 	//MORPH START - Added by SiRoB, Is Morph Client
 	bool IsMorph() { return m_bIsMorph;}
 	//MORPH END   - Added by SiRoB, Is Morph Client
@@ -420,42 +455,41 @@ private:
 	uint16	m_nUserPort;
 	uint16	m_nServerPort;
 	uint32	m_nClientVersion;
-	uint32	m_nClientMajVersion;
-	uint32	m_nClientMinVersion;
-	uint32	m_nClientUpVersion;
 	uint32	m_nUpDatarate;
 	uint32	dataratems;
 	uint32	m_cSendblock;
 	uint8	m_byEmuleVersion;
 	uint8	m_byDataCompVer;
 	bool	m_bEmuleProtocol;
+	bool	m_bIsHybrid;
 	char*	m_pszUsername;
-	char	m_szFullUserIP[21];
+	char*	old_m_pszUsername; //MORPH - Added by IceCream, Antileecher feature
+	char	m_szFullUserIP[3+1+3+1+3+1+3+1]; // 16
 	char	m_achUserHash[16];
 	uint16	m_nUDPPort;
-	uint8	m_byUDPVer;
 	uint16	m_nKadPort;
+	uint8	m_byUDPVer;
 	uint8	m_bySourceExchangeVer;
 	uint8	m_byAcceptCommentVer;
 	uint8	m_byExtendedRequestsVer;
 	uint8	m_cFailed;
-//	EClientSoftware m_clientSoft; //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-
+	bool	m_bFriendSlot;
+	bool	m_bCommentDirty;
+	bool	m_bIsML;
+	EClientSoftware m_clientSoft;
+	CString m_strClientSoftware;
+	CString	old_m_strClientSoftware; //MORPH - Added by IceCream, Antileecher feature
+	CString         m_clientModString; //MORPH - Added by SiRoB, -Support for tag ET_MOD_VERSION 0x55 II- (Maella)
 	uint32	m_dwLastSourceRequest;
 	uint32	m_dwLastSourceAnswer;
 	uint32	m_dwLastAskedForSources;
     int     m_iFileListRequested;
-	bool	m_bFriendSlot;
-	bool	m_bCommentDirty;
-	bool	m_bIsHybrid;
-	bool	m_bIsML;
-	bool	m_bGPLEvildoer;
+	uint8	m_byCompatibleClient;
 	// preview
 	bool	m_bSupportsPreview;
 	bool	m_bPreviewReqPending;
 	bool	m_bPreviewAnsPending;
 
-	uint8	m_byCompatibleClient;
 	CTypedPtrList<CPtrList, Packet*>				 m_WaitingPackets_list;
 	CList<PartFileStamp, PartFileStamp>				 m_DontSwap_list;
 	DWORD	m_lastRefreshedDLDisplay;
@@ -468,8 +502,8 @@ private:
 
 
 	ESecureIdentState	m_SecureIdentState;
-	uint8	m_byInfopacketsReceived;			// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
 	uint32	m_dwLastSignatureIP;
+	uint8	m_byInfopacketsReceived;			// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
 	uint8	m_bySupportSecIdent;
 
 
@@ -484,18 +518,14 @@ private:
 	int CUpDownClient::GetFilePrioAsNumber();
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	bool		m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
-	char*		old_m_pszUsername; //MORPH - Added by IceCream, Antileecher feature
-	CString		old_m_clientVerString; //MORPH - Added by IceCream, Antileecher feature
 	uint32		m_nTransferedUp;
 	EUploadState m_nUploadState;
-	uint32		m_dwWaitTime;
 	uint32		m_dwUploadTime;
 	uint32		m_nMaxSendAllowed;
 	uint32		m_nAvUpDatarate;
 	uint32		m_cAsked;
 	uint32		m_dwLastUpRequest;
 	uint32		m_last_l2hac_exec; //<<-- enkeyDEV(th1) -L2HAC-
-	bool		m_bUsedComprUp;	//only used for interface output
 	uint32		m_nCurSessionUp;
 	uint32      m_nCurQueueSessionUp;
 	uint32      m_nCurQueueSessionPayloadUp;
@@ -505,72 +535,73 @@ private:
 	uint16		m_nUpCompleteSourcesCount;
 	static		CBarShader s_UpStatusBar;
 	uchar		requpfileid[16];
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030807-1911
-	uint16      m_currentPartNumber;
-	bool        m_currentPartNumberIsKnown;
-	uint32      m_slotNumber;
-
-	DWORD       m_dwLastCheckedForEvictTick;
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
-	bool		m_bPayBackFirstTag; //EastShare - added by AndCycle, Pay Back First
-	bool		m_bFullChunkTransferTag;//Morph - added by AndCycle, keep full chunk transfer
-public:
-	uint16		m_lastPartAsked;
-	uint8*		m_abyUpPartStatus;
-	uint32		m_nSumForAvgUpDataRate;
-	CTypedPtrList<CPtrList, CPartFile*>				 m_OtherRequests_list;
-	CTypedPtrList<CPtrList, CPartFile*>				 m_OtherNoNeeded_list;
-	bool		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
-private:
+	DWORD       m_lastRefreshedULDisplay;
+	typedef struct TransferredData {
+		uint32	datalen;
+		DWORD	timestamp;
+	};
+	
 	CList<TransferredData,TransferredData>			 m_AvarageUDR_list; // By BadWolf
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	DWORD		m_lastRefreshedULDisplay;
 	CTypedPtrList<CPtrList, Packet*>				 m_BlockSend_queue;
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_BlockRequests_queue;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DoneBlocks_list;
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
 	bool		m_l2hac_enabled; //<<-- enkeyDEV(th1) -L2HAC- lowid side
+	//MORPH START - Added by SiRoB, ZZ Upload System 20030807-1911
+	uint32      m_slotNumber;
+	DWORD       m_dwLastCheckedForEvictTick;
+	//MORPH END - Added by SiRoB, ZZ Upload System 20030807-1911
+	bool		m_bPayBackFirstTag; //EastShare - added by AndCycle, Pay Back First
+	bool		m_bFullChunkTransferTag;//Morph - added by AndCycle, keep full chunk transfer
+
 	//download
     
 
-	bool		m_bRemoteQueueFull;
-	bool		usedcompressiondown; //only used for interface output
 	EDownloadState m_nDownloadState;
-	uint16		m_nPartCount;
 	uint32		m_cDownAsked;
 	uint8*		m_abyPartStatus;
 	uint32		m_dwLastAskedTime;
 	CString		m_strClientFilename;
 	uint32		m_nTransferedDown;
 	// -khaos--+++> Download Session Stats
-	bool		m_bTransferredDownMini;
 	uint32		m_dwDownStartTime;
 	// <-----khaos-
 	uint32      m_nLastBlockOffset;   // Patch for show parts that you download [Cax2]
 	uint32		m_nDownDatarate;
 	uint32		m_nDownDataRateMS;
 	uint32		m_nAvDownDatarate;
+	uint32		m_nSumForAvgDownDataRate;
 	uint16		m_cShowDR;
-	uint32		m_dwLastBlockReceived;
 	uint16		m_nRemoteQueueRank;
-	int			m_iDifferenceQueueRank;	//Morph - added by AndCycle, DiffQR
+	int		m_iDifferenceQueueRank;	//Morph - added by AndCycle, DiffQR
+	uint32		m_dwLastBlockReceived;
+	ESourceFrom	m_nSourceFrom;
+	uint16		m_nPartCount;
+	bool		m_bRemoteQueueFull;
+	bool		usedcompressiondown; //only used for interface output
 	bool		m_bCompleteSource;
 	bool		m_bReaskPending;
 	bool		m_bUDPPending;
-	uint32		m_nSumForAvgDownDataRate;
-	uint8		m_bySourceFrom;
+	bool		m_bTransferredDownMini;
+	bool		m_bUsedComprUp;	//only used for interface output
+
 	// khaos::kmod+
 	uint32		m_iLastSwapAttempt;
 	uint32		m_iLastActualSwap;
 	uint32		m_iLastForceA4AFAttempt;
-	CString		m_sModIdent;
-	CString		m_sClientVersion;
 	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_PartStatus_list;
 	// khaos::kmod-
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	uint32		m_random_update_wait;
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
+	// KadIPCheck
+	EKadIPCheckState m_nKadIPCheckState;
+
+	// using bitfield for less important flags, to save some bytes
+	UINT m_fHashsetRequesting : 1, // we have sent a hashset request to this client in the current connection
+		 m_fSharedDirectories : 1, // client supports OP_ASKSHAREDIRS opcodes
+		 m_fSentCancelTransfer: 1; // we have sent an OP_CANCELTRANSFER in the current connection
+
 	// By BadWolf - Accurate Speed Measurement (Ottavio84 idea)
 	CList<TransferredData,TransferredData>			 m_AvarageDDR_list;
 	//MORPH START - Added by SiRoB, Better Download Speed calcul
@@ -591,38 +622,7 @@ private:
 	EChatState	m_nChatstate;
 	CString		m_strComment;
 	int8		m_iRate; 
-
-	// KadIPCheck
-	EKadIPCheckState m_nKadIPCheckState;
-
-	// using bitfield for less important flags, to save some bytes
-	UINT m_fHashsetRequesting : 1, // we have sent a hashset request to this client
-		 m_fSharedDirectories : 1; // client supports OP_ASKSHAREDIRS opcodes
- //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-// Maella -Support for tag ET_MOD_VERSION 0x55-
-private:
-	EClientSoftware m_clientSoft;
-	CString         m_clientModString;
-	CString         m_clientVerString;
-
-public:
-	void            ReGetClientSoft();
-	EClientSoftware GetClientSoft() const { return m_clientSoft; }
-	const CString&  GetClientModString() const { return m_clientModString; }
-	const CString&  GetClientVerString() const { return m_clientVerString; }
-// Maella end
-	//MORPH END - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-	//MORPH START - Added by Yun.SF3, ZZ Upload System
-	uint16 m_iPriorPartNumber;
-	bool m_bHasPriorPart;
-	//MORPH END - Added by Yun.SF3, ZZ Upload System
 };
+//#pragma pack()
 
-//MORPH START - Added by IceCream, xrmb's Hashthief protection
-	//--- xrmb:hashthieves1 ---
-	typedef CMap <uint64, uint64, uint32, uint32> t_offensecounter;
-	extern t_offensecounter offensecounter;
-	typedef CMap <uint64, uint64, uint64, uint64> t_hashbase;
-	extern t_hashbase hashbase;
-	//--- :xrmb ---
-//MORPH END   - Added by IceCream, xrmb's Hashthief protection
+#endif//__UP_DOWN_CLIENT_H__

@@ -14,14 +14,30 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "serverlist.h"
-#include "emule.h"
-#include "HttpDownloadDlg.h"
-#include "safefile.h"
+#include "stdafx.h"
 #include <io.h>
+#include "emule.h"
+#include "ServerList.h"
+#include "SafeFile.h"
 #include "Exceptions.h"
+#include "OtherFunctions.h"
+#include "IPFilter.h"
+#include "LastCommonRouteFinder.h"
+#include "UploadQueue.h"
+#include "DownloadQueue.h"
+#include "Preferences.h"
+#include "Opcodes.h"
+#include "Server.h"
+#include "Sockets.h"
+#include "Packets.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "HttpDownloadDlg.h"
+#include "ServerWnd.h"
+#endif
+#include "Fakecheck.h" //MORPH - Added by SiRoB
+#include "SharedFileList.h" //MORPH - Added by SiRoB
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -117,7 +133,7 @@ bool CServerList::Init(){
 bool CServerList::AddServermetToList(CString strFile, bool merge){
 	if (!merge)
 	{
-		theApp.emuledlg->serverwnd.serverlistctrl.DeleteAllItems();
+		theApp.emuledlg->serverwnd->serverlistctrl.DeleteAllItems();
 		this->RemoveAllServers();
 	}
 	CSafeBufferedFile servermet;
@@ -142,8 +158,8 @@ bool CServerList::AddServermetToList(CString strFile, bool merge){
 			AddLogLine(false,GetResString(IDS_ERR_BADSERVERMETVERSION),version);
 			return false;
 		}
-		theApp.emuledlg->serverwnd.serverlistctrl.Hide();
-		theApp.emuledlg->serverwnd.serverlistctrl.SetRedraw(FALSE);
+		theApp.emuledlg->serverwnd->serverlistctrl.Hide();
+		theApp.emuledlg->serverwnd->serverlistctrl.SetRedraw(FALSE);
 		uint32 fservercount;
 		servermet.Read(&fservercount,4);
 		
@@ -163,13 +179,13 @@ bool CServerList::AddServermetToList(CString strFile, bool merge){
 				newserver->SetListName(listname);
 				delete[] listname;
 			}
-			if (!theApp.emuledlg->serverwnd.serverlistctrl.AddServer(newserver,true) ){
+			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(newserver,true) ){
 				CServer* update = theApp.serverlist->GetServerByAddress(newserver->GetAddress(), newserver->GetPort());
 				if(update){
 					update->SetListName( newserver->GetListName());
 					if( newserver->GetDescription() )
 						update->SetDescription( newserver->GetDescription());
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(update);
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(update);
 				}
 				delete newserver;
 			}
@@ -184,7 +200,6 @@ bool CServerList::AddServermetToList(CString strFile, bool merge){
 		servermet.Close();
 	}
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		if (error->m_cause == CFileException::endOfFile)
 			AddDebugLogLine(true,GetResString(IDS_ERR_BADSERVERLIST));
 		else{
@@ -194,8 +209,8 @@ bool CServerList::AddServermetToList(CString strFile, bool merge){
 		}
 		error->Delete();	//memleak fix
 	}
-	theApp.emuledlg->serverwnd.serverlistctrl.SetRedraw(TRUE);
-	theApp.emuledlg->serverwnd.serverlistctrl.Visable();
+	theApp.emuledlg->serverwnd->serverlistctrl.SetRedraw(TRUE);
+	theApp.emuledlg->serverwnd->serverlistctrl.Visable();
 	return true;
 }
 
@@ -220,7 +235,7 @@ bool CServerList::AddServer(CServer* in_server){
 	CServer* test_server = GetServerByAddress(in_server->GetAddress(), in_server->GetPort());
 	if (test_server){
 		test_server->ResetFailedCount();
-		theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( test_server );		
+		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( test_server );		
 		return false;
 	}
 	list.AddTail(in_server);
@@ -249,18 +264,18 @@ void CServerList::ServerStats(){
 				return;
 		}
 		if( ping_server->GetFailedCount() >= theApp.glob_prefs->GetDeadserverRetries() && theApp.glob_prefs->DeadServer() ){
-			theApp.emuledlg->serverwnd.serverlistctrl.RemoveServer(ping_server);
+			theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(ping_server);
 			return;
 		}
 		Packet* packet = new Packet( OP_GLOBSERVSTATREQ, 4 );
 		srand((unsigned)time(NULL));
 		uint32 time = 0x55AA0000 + (uint16)rand();
 		ping_server->SetChallenge(time);
-		MEMCOPY( packet->pBuffer, &time, 4 );
+		memcpy( packet->pBuffer, &time, 4 );
 		ping_server->SetLastPinged( ::GetTickCount() );
 		ping_server->SetLastPingedTime( temp );
 		ping_server->AddFailedCount();
-		theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( ping_server );
+		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( ping_server );
 		if (theApp.glob_prefs->GetDebugServerUDP())
 			Debug(">>> Sending OP__GlobServStatReq to %s:%u\n", ping_server->GetAddress(), ping_server->GetPort());
 		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
@@ -581,7 +596,7 @@ bool CServerList::SaveServermetToFile(){
 	if (!servermet.Open(newservermet, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
 		CString strError(GetResString(IDS_ERR_SAVESERVERMET));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -666,10 +681,9 @@ bool CServerList::SaveServermetToFile(){
 		CFile::Rename(newservermet,curservermet);
 	}
 	catch(CFileException* error) {
-		OUTPUT_DEBUG_TRACE();
 		CString strError(GetResString(IDS_ERR_SAVESERVERMET2));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (error->GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (error->GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -719,7 +733,10 @@ void CServerList::AddServersFromTextFile(CString strFilename) {
 				priority = atoi(strPriority.GetBuffer(0));
 				if ((priority < 0) || (priority > 2))
 					priority = SRV_PR_HIGH;
-			} catch (...) {}
+			}
+			catch (...){
+				ASSERT(0);
+			}
 			strLine = strLine.Mid(pos+1);
 		}
 	
@@ -734,7 +751,7 @@ void CServerList::AddServersFromTextFile(CString strFilename) {
 		nsrv->SetIsStaticMember(true);
 		// Barry - Was always high
 		nsrv->SetPreference(priority); 
-		if (!theApp.emuledlg->serverwnd.serverlistctrl.AddServer(nsrv, true))
+		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv, true))
 		{
 			delete nsrv;
 			CServer* srvexisting = GetServerByAddress(strHost.GetBuffer(), atoi(strPort));
@@ -743,7 +760,7 @@ void CServerList::AddServersFromTextFile(CString strFilename) {
 				srvexisting->SetIsStaticMember(true);
 				// Barry - Was always high
 				srvexisting->SetPreference(priority); 
-				if (theApp.emuledlg->serverwnd) theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer(srvexisting);
+				if (theApp.emuledlg->serverwnd) theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(srvexisting);
 			}
 
 		}

@@ -1,16 +1,47 @@
-#include "StdAfx.h"
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#include "stdafx.h"
 #include "emule.h"
+#include "OtherFunctions.h"
+#include <zlib/zlib.h>
 #include "SearchDlg.h"
-#include "webserver.h"
+#include "WebServer.h"
 #include "ED2KLink.h"
 #include "MD5Sum.h"
-#include <stdlib.h>
 #include "SearchList.h"
 #include <locale.h>
 #include "HTRichEditCtrl.h"
 #include "KademliaWnd.h"
 #include "KadContactListCtrl.h"
 #include "KadSearchListCtrl.h"
+#include "UploadQueue.h"
+#include "DownloadQueue.h"
+#include "KademliaMain.h"
+#include "WebSocket.h"
+#include "ServerList.h"
+#include "SharedFileList.h"
+#include "emuledlg.h"
+#include "ServerWnd.h"
+#include "Sockets.h"
+#include "Server.h"
+#include "TransferWnd.h"
+#include "PartFile.h"
+#include "UpDownClient.h"
+#include "StatisticsDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -316,7 +347,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				ses.startTime = CTime::GetCurrentTime();
 				ses.lSession = lSession = rand() * 10000L + rand();
 				pThis->m_Params.Sessions.Add(ses);
-				theApp.emuledlg->serverwnd.UpdateMyInfo();
+				theApp.emuledlg->serverwnd->UpdateMyInfo();
 				AddLogLine(true,GetResString(IDS_WEB_ADMINLOGIN)+" (%s)",ip);
 				login=true;
 			}
@@ -327,13 +358,13 @@ void CWebServer::ProcessURL(ThreadData Data)
 				ses.startTime = CTime::GetCurrentTime();
 				ses.lSession = lSession = rand() * 10000L + rand();
 				pThis->m_Params.Sessions.Add(ses);
-				theApp.emuledlg->serverwnd.UpdateMyInfo();
+				theApp.emuledlg->serverwnd->UpdateMyInfo();
 				AddLogLine(true,GetResString(IDS_WEB_GUESTLOGIN)+" (%s)",ip);
 				login=true;
 			} else {
 				AddLogLine(true,GetResString(IDS_WEB_BADLOGINATTEMPT)+" (%s)",ip);
 
-				TransferredData newban={inet_addr(ip), ::GetTickCount()};	// save failed attempt (ip,time)
+				BadLogin newban={inet_addr(ip), ::GetTickCount()};	// save failed attempt (ip,time)
 				pThis->m_Params.badlogins.Add(newban);
 				login=false;
 			}
@@ -437,8 +468,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 						gzipLen = destLen;
 					}
 				}
-				catch(...)
-				{
+				catch(...){
+					ASSERT(0);
 				}
 				if(!bOk)
 				{
@@ -466,7 +497,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				Out += _GetPlainResString(IDS_ACCESSDENIED);
 				
 				// set 15 mins ban by using the badlist
-				TransferredData preventive={ip, ::GetTickCount() + (15*60*1000) };
+				BadLogin preventive={ip, ::GetTickCount() + (15*60*1000) };
 				for (int i=0;i<=5;i++)
 					pThis->m_Params.badlogins.Add(preventive);
 
@@ -489,6 +520,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 	}
 	catch(...){
 		TRACE("*** Unknown exception in CWebServer::ProcessURL\n");
+		ASSERT(0);
 	}
 
 	CoUninitialize();
@@ -907,7 +939,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	CString Out = "";
 
 	if (clcompl && IsSessionAdmin(Data,sSession)) 
-		theApp.emuledlg->transferwnd.downloadlistctrl.ClearCompleted(true);
+		theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(true);
 
 	if (_ParseURL(Data.sURL, "c") != "" && IsSessionAdmin(Data,sSession)) 
 	{
@@ -1074,7 +1106,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	CArray<DownloadFiles, DownloadFiles> FilesArray;
 
 	CArray<CPartFile*,CPartFile*> partlist;
-	theApp.emuledlg->transferwnd.downloadlistctrl.GetDisplayedFiles(&partlist);
+	theApp.emuledlg->transferwnd->downloadlistctrl.GetDisplayedFiles(&partlist);
 
 	// Populating array
 	bool completedAv=false;
@@ -1100,7 +1132,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 			if (theApp.IsConnected() && !theApp.IsFirewalled())
 				dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
 			else
-				dFile.sED2kLink = theApp.CreateED2kLink(cur_file);
+				dFile.sED2kLink = CreateED2kLink(cur_file);
 			dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary(cur_file));
 
 			if (cat>0 && cur_file->GetCategory()!=cat) continue;
@@ -1616,7 +1648,7 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 		if (theApp.IsConnected() && !theApp.IsFirewalled()) 
 			dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
 		else
-            dFile.sED2kLink = theApp.CreateED2kLink(cur_file);
+            dFile.sED2kLink = CreateED2kLink(cur_file);
 
 		dFile.nFileTransferred = cur_file->statistic.GetTransferred();
 		dFile.nFileAllTimeTransferred = cur_file->statistic.GetAllTimeTransferred();
@@ -1825,7 +1857,6 @@ CString CWebServer::_GetGraphs(ThreadData Data)
 	CString sGraphDownload = "", sGraphUpload = "", sGraphCons = "";
 	CString sTmp = "";
 
-	int nPrevValUp = 0, nPrevValDown = 0;
 	for(int i = 0; i < WEB_GRAPH_WIDTH; i++)
 	{
 		if(i < pThis->m_Params.PointsForWeb.GetCount())
@@ -1890,14 +1921,14 @@ CString CWebServer::_GetAddServerBox(ThreadData Data)
 	{
 		CServer* nsrv = new CServer(atoi(_ParseURL(Data.sURL, "serverport")), _ParseURL(Data.sURL, "serveraddr").GetBuffer() );
 		nsrv->SetListName(_ParseURL(Data.sURL, "servername"));
-		theApp.emuledlg->serverwnd.serverlistctrl.AddServer(nsrv,true);
+		theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv,true);
 		CString resultlog = _SpecialChars(theApp.emuledlg->GetLastLogEntry());
 		Out.Replace("[Message]",resultlog);
 	}
 	else
 		if(_ParseURL(Data.sURL, "updateservermetfromurl") == "true")
 		{
-				theApp.emuledlg->serverwnd.UpdateServerMetFromURL(_ParseURL(Data.sURL, "servermeturl"));
+				theApp.emuledlg->serverwnd->UpdateServerMetFromURL(_ParseURL(Data.sURL, "servermeturl"));
 				//CString resultlog = _SpecialChars(theApp.emuledlg->logtext);
 				//resultlog = resultlog.TrimRight('\n');
 				//resultlog = resultlog.Mid(resultlog.ReverseFind('\n'));
@@ -1987,10 +2018,10 @@ CString CWebServer::_GetServerInfo(ThreadData Data)
 
 	if (_ParseURL(Data.sURL, "clear") == "yes")
 	{
-		theApp.emuledlg->serverwnd.servermsgbox->SetWindowText("");
+		theApp.emuledlg->serverwnd->servermsgbox->SetWindowText("");
 	}
 	Out.Replace("[Clear]", _GetPlainResString(IDS_PW_RESET));
-	Out.Replace("[ServerInfo]", _SpecialChars(theApp.emuledlg->serverwnd.servermsgbox->GetText()));
+	Out.Replace("[ServerInfo]", _SpecialChars(theApp.emuledlg->serverwnd->servermsgbox->GetText()));
 	Out.Replace("[Session]", sSession);
 
 	return Out;
@@ -2027,10 +2058,10 @@ CString CWebServer::_GetStats(ThreadData Data)
 	CString sSession = _ParseURL(Data.sURL, "ses");
 
 	// refresh statistics
-	theApp.emuledlg->statisticswnd.ShowStatistics(true);
+	theApp.emuledlg->statisticswnd->ShowStatistics(true);
 
 	CString Out = pThis->m_Templates.sStats;
-	Out.Replace("[STATSDATA]", theApp.emuledlg->statisticswnd.stattree.GetHTML(false));
+	Out.Replace("[STATSDATA]", theApp.emuledlg->statisticswnd->stattree.GetHTML(false));
 
 	return Out;
 
@@ -2089,9 +2120,9 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 		}
 
 		if(lastmaxgu != theApp.glob_prefs->GetMaxGraphUploadRate()) 
-			theApp.emuledlg->statisticswnd.SetARange(false,theApp.glob_prefs->GetMaxGraphUploadRate());
+			theApp.emuledlg->statisticswnd->SetARange(false,theApp.glob_prefs->GetMaxGraphUploadRate());
 		if(lastmaxgd!=theApp.glob_prefs->GetMaxGraphDownloadRate())
-			theApp.emuledlg->statisticswnd.SetARange(true,theApp.glob_prefs->GetMaxGraphDownloadRate());
+			theApp.emuledlg->statisticswnd->SetARange(true,theApp.glob_prefs->GetMaxGraphDownloadRate());
 
 
 		if(_ParseURL(Data.sURL, "maxsources") != "")
@@ -2294,7 +2325,7 @@ CString CWebServer::_GetConnectedServer(ThreadData Data)
 // We have to add gz-header and some other stuff
 // to standard zlib functions
 // in order to use gzip in web pages
-int CWebServer::_GzipCompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level)
+int CWebServer::_GzipCompress(BYTE* dest, ULONG* destLen, const BYTE* source, ULONG sourceLen, int level)
 { 
 	const static int gz_magic[2] = {0x1f, 0x8b}; // gzip magic header
 	int err;
@@ -2382,7 +2413,7 @@ bool CWebServer::_RemoveSession(ThreadData Data, long lSession)
 		if(pThis->m_Params.Sessions[i].lSession == lSession && lSession != 0)
 		{
 			pThis->m_Params.Sessions.RemoveAt(i);
-			theApp.emuledlg->serverwnd.UpdateMyInfo();
+			theApp.emuledlg->serverwnd->UpdateMyInfo();
 			AddLogLine(true,GetResString(IDS_WEB_SESSIONEND));
 			return true;
 		}
@@ -2690,7 +2721,7 @@ int CWebServer::UpdateSessionCount() {
 			i++;
 	}
 
-	if (oldvalue!=m_Params.Sessions.GetSize()) theApp.emuledlg->serverwnd.UpdateMyInfo();
+	if (oldvalue!=m_Params.Sessions.GetSize()) theApp.emuledlg->serverwnd->UpdateMyInfo();
 		
 	return m_Params.Sessions.GetCount();
 }

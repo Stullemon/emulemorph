@@ -14,15 +14,20 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#ifdef _DEBUG
+#include "DebugHelpers.h"
+#endif
+#include "emule.h"
 #include "emsocket.h"
-#include "opcodes.h"
-#include "emule.h" // deadlake PROXYSUPPORT
-#include "emuleDlg.h" // deadlake PROXYSUPPORT
-#include <io.h>
-#include <fcntl.h>
-#include <sys/stat.h>
+#include "AsyncProxySocketLayer.h"
+#include "Packets.h"
+#include "OtherFunctions.h"
+#include "UploadBandwidthThrottler.h"
+#include "Preferences.h"
+#ifndef _CONSOLE
+#include "emuleDlg.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -86,7 +91,7 @@ CEMSocket::CEMSocket(void){
 	pendingOnReceive = false;
 
 	// Download partial header
-	// MEMSET(pendingHeader, 0, sizeof(pendingHeader));
+	// memset(pendingHeader, 0, sizeof(pendingHeader));
 	pendingHeaderSize = 0;
 
 	// Download partial packet
@@ -97,49 +102,44 @@ CEMSocket::CEMSocket(void){
 	sendbuffer = NULL;
 	sendblen = 0;
 	sent = 0;
-	//m_bLinkedPackets = false; //MORPH - Added by Yun.SF3, ZZ Upload System
-
+	//m_bLinkedPackets = false;
 
 	// deadlake PROXYSUPPORT
 	m_pProxyLayer = NULL;
 	m_ProxyConnectFailed = false;
 
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030807-1911
-	//m_startSendTick = 0;
-	//m_currentSendSize = 0;
-	//m_lastSendLatency = 0;
-	//m_lastSendSize = 0;
+    //m_startSendTick = 0;
+    //m_lastSendLatency = 0;
+    //m_latency_sum = 0;
+    //m_wasBlocked = false;
 
-	//m_datalen_sum = 0;
-	//m_latency_sum = 0;
-	//m_wasBlocked = false;
+    m_currentPacket_is_controlpacket = false;
+	m_currentPackageIsFromPartFile = false;
 
-	m_currentPacket_is_controlpacket = false;
+    m_numberOfSentBytesCompleteFile = 0;
+    m_numberOfSentBytesPartFile = 0;
+    m_numberOfSentBytesControlPacket = 0;
 
-	m_numberOfSentBytesCompleteFile = 0;
-	m_numberOfSentBytesPartFile = 0;
-	m_numberOfSentBytesControlPacket = 0;
+    lastCalledSend = ::GetTickCount();
 
-	lastCalledSend = ::GetTickCount();
-
-	m_actualPayloadSize = 0;
-	m_actualPayloadSizeSent = 0;
-	//MORPH END   - Added by SiRoB, ZZ Upload system 200308181923
+    m_actualPayloadSize = 0;
+    m_actualPayloadSizeSent = 0;
 }
 
 CEMSocket::~CEMSocket(){
 	EMTrace("CEMSocket::~CEMSocket() on %d",(SOCKET)this);
-	//MORPH START - Added by Yun.SF3, ZZ Upload System 20030724-0336
-	// need to be locked here to know that the other methods
-	// won't be in the middle of things
-	sendLocker.Lock();
+
+    // need to be locked here to know that the other methods
+    // won't be in the middle of things
+    sendLocker.Lock();
 	byConnected = ES_DISCONNECTED;
-	sendLocker.Unlock();
-	// now that we know no other method will keep adding to the queue
-	// we can remove ourself from the queue
-	theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this);
-	//MORPH END - Added by Yun.SF3, ZZ Upload System 20030807-1911
-	ClearQueues();
+    sendLocker.Unlock();
+
+    // now that we know no other method will keep adding to the queue
+    // we can remove ourself from the queue
+    theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this);
+
+    ClearQueues();
 	RemoveAllLayers(); // deadlake PROXYSUPPORT
 	AsyncSelect(0);
 }
@@ -148,15 +148,13 @@ CEMSocket::~CEMSocket(){
 // By Maverick: Connection initialisition is done by class itself
 BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
 {
-	// By Maverick Destroy all layers
-	Close();
-	//RemoveAllLayers();
-
 	// ProxyInitialisation
 	const ProxySettings& settings = theApp.glob_prefs->GetProxy();
 	m_ProxyConnectFailed = false;
-	if (settings.UseProxy && settings.type!=PROXYTYPE_NOPROXY)
+	if (settings.UseProxy && settings.type != PROXYTYPE_NOPROXY)
 	{
+		Close();
+
 		m_pProxyLayer=new CAsyncProxySocketLayer;
 		switch (settings.type)
 		{
@@ -181,13 +179,13 @@ BOOL CEMSocket::Connect(LPCTSTR lpszHostAddress, UINT nHostPort)
 			default: ASSERT(FALSE);
 		}
 		AddLayer(m_pProxyLayer);
+
+		// Connection Initialisation
+		Create();
+		AsyncSelect(FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
 	}
 
-	// Connection Initialisation
-	Create();
-	AsyncSelect(FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
 	return CAsyncSocketEx::Connect(lpszHostAddress, nHostPort);
-	return false;
 }
 // end deadlake
 
@@ -197,6 +195,7 @@ void CEMSocket::ClearQueues(){
 	for(POSITION pos = controlpacket_queue.GetHeadPosition(); pos != NULL; controlpacket_queue.GetNext(pos))
 		delete controlpacket_queue.GetAt(pos);
 	controlpacket_queue.RemoveAll();
+
 	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; standartpacket_queue.GetNext(pos))
 		delete standartpacket_queue.GetAt(pos).packet;
 	standartpacket_queue.RemoveAll();
@@ -207,7 +206,7 @@ void CEMSocket::ClearQueues(){
 	pendingOnReceive = false;
 
 	// Download partial header
-	// MEMSET(pendingHeader, 0, sizeof(pendingHeader));
+	// memset(pendingHeader, 0, sizeof(pendingHeader));
 	pendingHeaderSize = 0;
 
 	// Download partial packet
@@ -224,24 +223,19 @@ void CEMSocket::ClearQueues(){
 	}
 	sendblen = 0;
 	sent = 0;
-
-	//MORPH - Added by Yun.SF3, ZZ Upload System 20030807-1911
-	//m_bLinkedPackets = false;
-	//m_isSplitted = false;
-	//MORPH - Added by Yun.SF3, ZZ Upload System 20030807-1911
 }
 
 void CEMSocket::OnClose(int nErrorCode){
-	//MORPH START - Added by Yun.SF3, ZZ Upload System 20030807-1911
-	// need to be locked here to know that the other methods
-	// won't be in the middle of things
-	sendLocker.Lock();
+    // need to be locked here to know that the other methods
+    // won't be in the middle of things
+    sendLocker.Lock();
 	byConnected = ES_DISCONNECTED;
-	sendLocker.Unlock();
-	// now that we know no other method will keep adding to the queue
-	// we can remove ourself from the queue
-	theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this);
-	//MORPH END - Added by Yun.SF3, ZZ Upload System 20030807-1911
+    sendLocker.Unlock();
+
+    // now that we know no other method will keep adding to the queue
+    // we can remove ourself from the queue
+    theApp.uploadBandwidthThrottler->RemoveFromAllQueues(this);
+
 	CAsyncSocketEx::OnClose(nErrorCode); // deadlake changed socket to PROXYSUPPORT ( AsyncSocketEx )
 	RemoveAllLayers(); // deadlake PROXYSUPPORT
 	ClearQueues();
@@ -278,15 +272,15 @@ void CEMSocket::OnReceive(int nErrorCode){
 		byConnected = ES_CONNECTED; // ES_DISCONNECTED, ES_NOTCONNECTED, ES_CONNECTED
 	}
 
-	// CPU load improvement
-	if(downloadLimitEnable == true && downloadLimit == 0){
-		EMTrace("CEMSocket::OnReceive blocked by limit");
-		pendingOnReceive = true;
+    // CPU load improvement
+    if(downloadLimitEnable == true && downloadLimit == 0){
+        EMTrace("CEMSocket::OnReceive blocked by limit");
+        pendingOnReceive = true;
 
         //Receive(GlobalReadBuffer + pendingHeaderSize, 0);
 
-		return;
-	}
+        return;
+    }
 
 	// Remark: an overflow can not occur here
 	uint32 readMax = sizeof(GlobalReadBuffer) - pendingHeaderSize; 
@@ -312,7 +306,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 
 	// Copy back the partial header into the global read buffer for processing
 	if(pendingHeaderSize > 0) {
-  		MEMCOPY(GlobalReadBuffer, pendingHeader, pendingHeaderSize);
+  		memcpy(GlobalReadBuffer, pendingHeader, pendingHeaderSize);
 		ret += pendingHeaderSize;
 		pendingHeaderSize = 0;
 	}
@@ -382,7 +376,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 			             (pendingPacket->size - pendingPacketSize) : (uint32)(rend - rptr);
 
 		// Copy Bytes from Global buffer to packet's internal buffer
-		MEMCOPY(&pendingPacket->pBuffer[pendingPacketSize], rptr, toCopy);
+		memcpy(&pendingPacket->pBuffer[pendingPacketSize], rptr, toCopy);
 		pendingPacketSize += toCopy;
 		rptr += toCopy;
 		
@@ -408,7 +402,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 	if(rptr != rend) {
 		// Keep the partial head
 		pendingHeaderSize = rend - rptr;
-		MEMCOPY(pendingHeader, rptr, pendingHeaderSize);
+		memcpy(pendingHeader, rptr, pendingHeaderSize);
 	}	
 }
 
@@ -431,7 +425,6 @@ void CEMSocket::DisableDownloadLimit(){
 	}
 }
 
-	//MORPH - Added by Yun.SF3, ZZ Upload System 20030807-1911
 /**
  * Queues up the packet to be sent. Another thread will actually send the packet.
  *
@@ -453,35 +446,41 @@ void CEMSocket::DisableDownloadLimit(){
  *
  * @return true if the packet was added to the queue, false otherwise
  */
-bool CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
+void CEMSocket::SendPacket(Packet* packet, bool delpacket, bool controlpacket, uint32 actualPayloadSize){
 	//EMTrace("CEMSocket::OnSenPacked1 linked: %i, controlcount %i, standartcount %i, isbusy: %i",m_bLinkedPackets, controlpacket_queue.GetCount(), standartpacket_queue.GetCount(), IsBusy());
-	if (!delpacket){
-		//ASSERT ( !packet->IsSplitted() );
-		Packet* copy = new Packet(packet->opcode,packet->size);
-		MEMCOPY(copy->pBuffer,packet->pBuffer,packet->size);
-		packet = copy;
-	}
 
-	bool queued = false;
+    sendLocker.Lock();
 
-	sendLocker.Lock();
+    if (byConnected == ES_DISCONNECTED) {
+        sendLocker.Unlock();
+        if(delpacket) {
+			delete packet;
+        }
+		return;
+    } else {
+        if (!delpacket){
+            //ASSERT ( !packet->IsSplitted() );
+            Packet* copy = new Packet(packet->opcode,packet->size);
+		    memcpy(copy->pBuffer,packet->pBuffer,packet->size);
+		    packet = copy;
+	    }
 
-	//if(m_startSendTick > 0) {
-	//	m_lastSendLatency = ::GetTickCount() - m_startSendTick;
-	//}
+        //if(m_startSendTick > 0) {
+        //    m_lastSendLatency = ::GetTickCount() - m_startSendTick;
+        //}
 
-		if (controlpacket) {
-			controlpacket_queue.AddTail(packet);
+        if (controlpacket) {
+	        controlpacket_queue.AddTail(packet);
 
-			// queue up for controlpacket
-			theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
-		} else {
-        StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
-		standartpacket_queue.AddTail(queueEntry);
-		}
+            // queue up for controlpacket
+            theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+	    } else {
+            StandardPacketQueueEntry queueEntry = { actualPayloadSize, packet };
+		    standartpacket_queue.AddTail(queueEntry);
+	    }
+    }
 
-	sendLocker.Unlock();
-	return true;
+    sendLocker.Unlock();
 }
 
 uint64 CEMSocket::GetSentBytesCompleteFileSinceLastCallAndReset() {
@@ -531,7 +530,7 @@ uint64 CEMSocket::GetSentPayloadSinceLastCallAndReset() {
 void CEMSocket::OnSend(int nErrorCode){
     //onSendWillBeCalledOuter = false;
 
-	if (nErrorCode){
+    if (nErrorCode){
 		OnError(nErrorCode);
 		return;
 	}
@@ -556,6 +555,32 @@ void CEMSocket::OnSend(int nErrorCode){
 
     sendLocker.Unlock();
 }
+
+//void CEMSocket::StoppedSendSoUpdateStats() {
+//    if(m_startSendTick > 0) {
+//        m_lastSendLatency = ::GetTickCount()-m_startSendTick;
+//        
+//        if(m_lastSendLatency > 0) {
+//            if(m_wasBlocked == true) {
+//                SocketTransferStats newLatencyStat = { m_lastSendLatency, ::GetTickCount() };
+//                m_Average_sendlatency_list.AddTail(newLatencyStat);
+//                m_latency_sum += m_lastSendLatency;
+//            }
+//
+//            m_startSendTick = 0;
+//            m_wasBlocked = false;
+//
+//            CleanSendLatencyList();
+//        }
+//    }
+//}
+//
+//void CEMSocket::CleanSendLatencyList() {
+//    while(m_Average_sendlatency_list.GetCount() > 0 && ::GetTickCount() - m_Average_sendlatency_list.GetHead().timestamp > 3*1000) {
+//        SocketTransferStats removedLatencyStat = m_Average_sendlatency_list.RemoveHead();
+//        m_latency_sum -= removedLatencyStat.latency;
+//    }
+//}
 
 /**
  * Try to put queued up data on the socket.
@@ -604,7 +629,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
             if(!controlpacket_queue.IsEmpty()) {
                 // There's a control packet to send, and we are not currently in the progress of sending a split standard packet
                 m_currentPacket_is_controlpacket = true;
-		        curPacket = controlpacket_queue.RemoveHead();
+                curPacket = controlpacket_queue.RemoveHead();
             } else if(!standartpacket_queue.IsEmpty() && onlyAllowedToSendControlPacket == false) {
                 // There's a standard packet to send
                 m_currentPacket_is_controlpacket = false;
@@ -624,33 +649,39 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
 
                 SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
                 return returnVal;
-}
+            }
 
-                // We found a package to send. Get the data to send from the
-                // package container and dispose of the container.
-		        sendblen = curPacket->GetRealPacketSize();
-                sendbuffer = curPacket->DetachPacket();
-		sent = 0;
-                delete curPacket;
-	}
-
-        lastCalledSend = ::GetTickCount();
+            // We found a package to send. Get the data to send from the
+            // package container and dispose of the container.
+            sendblen = curPacket->GetRealPacketSize();
+            sendbuffer = curPacket->DetachPacket();
+            sent = 0;
+            delete curPacket;
+        }
 
         // At this point we've got a packet to send in sendbuffer. Try to send it. Loop until entire packet
         // is sent, or until we reach maximum bytes to send for this call, or until we get an error.
         // NOTE! If send would block (returns WSAEWOULDBLOCK), we will return from this method INSIDE this loop.
         while (sent < sendblen && sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall < maxNumberOfBytesToSend && anErrorHasOccured == false){
-		uint32 tosend = sendblen-sent;
+		    uint32 tosend = sendblen-sent;
 		    if (maxNumberOfBytesToSend >= sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall && tosend > maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall))
 			    tosend = maxNumberOfBytesToSend-(sentStandardPacketBytesThisCall + sentControlPacketBytesThisCall);
-		ASSERT (tosend != 0);
-		
+		    ASSERT (tosend != 0);
+    		
             //DWORD tempStartSendTick = ::GetTickCount();
 
-		uint32 result = CAsyncSocketEx::Send(sendbuffer+sent,tosend); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
-		if (result == (uint32)SOCKET_ERROR){
-			uint32 error = GetLastError();
-			if (error == WSAEWOULDBLOCK){
+		    uint32 result = CAsyncSocketEx::Send(sendbuffer+sent,tosend); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+		    if (result == (uint32)SOCKET_ERROR){
+			    uint32 error = GetLastError();
+			    if (error == WSAEWOULDBLOCK){
+                    if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || m_currentPacket_is_controlpacket)) {
+                        // enter control packet send queue
+                        // we might enter control packet queue several times for the same package,
+                        // but that costs very little overhead. Less overhead than trying to make sure
+                        // that we only enter the queue once.
+                        theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
+                    }
+
                     //m_wasBlocked = true;
                     sendLocker.Unlock();
 
@@ -659,10 +690,11 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
 			    } else{
                     // Send() gave an error
                     anErrorHasOccured = true;
-                    //theApp.emuledlg->AddDebugLogLine(true,"EMSocket: An error has occured: %i", error);
+                    //AddDebugLogLine(true,"EMSocket: An error has occured: %i", error);
                 }
             } else {
                 // we managed to send some bytes. Perform bookkeeping.
+                lastCalledSend = ::GetTickCount();
                 sent += result;
 
                 // Log send bytes in correct class
@@ -677,35 +709,34 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
                 } else {
                     sentControlPacketBytesThisCall += result;
                     m_numberOfSentBytesControlPacket += result;
-			}
-			}
-		}
+                }
+            }
+	    }
 
-		if (sent == sendblen){
+        if (sent == sendblen){
             // we are done sending the current package. Delete it and set
             // sendbuffer to NULL so a new packet can be fetched.
-			delete[] sendbuffer;
+		    delete[] sendbuffer;
 		    sendbuffer = NULL;
+			sendblen = 0;
 
             if(!m_currentPacket_is_controlpacket) {
                 m_actualPayloadSizeSent += m_actualPayloadSize;
                 m_actualPayloadSize = 0;
             }
 
-			sent = 0;
-	//		sendblen = 0;
-	//		break;
-		}
-		}
+            sent = 0;
+        }
+    }
 
 
-    if(!controlpacket_queue.IsEmpty()) {
+    if(onlyAllowedToSendControlPacket && (!controlpacket_queue.IsEmpty() || sendbuffer != NULL && m_currentPacket_is_controlpacket)) {
         // enter control packet send queue
         // we might enter control packet queue several times for the same package,
         // but that costs very little overhead. Less overhead than trying to make sure
         // that we only enter the queue once.
         theApp.uploadBandwidthThrottler->QueueForSendingControlPacket(this);
-	}
+    }
 
     //CleanSendLatencyList();
 
@@ -719,7 +750,6 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedT
 // written this overriden Receive to handle transparently FIN notifications coming from calls to recv()
 // This was maybe(??) the cause of a lot of socket error, notably after a brutal close from peer
 // also added trace so that we can debug after the fact ...
-//MORPH - Added by Yun.SF3, ZZ Upload System
 int CEMSocket::Receive(void* lpBuf, int nBufLen, int nFlags)
 {
 //	EMTrace("CEMSocket::Receive on %d, maxSize=%d",(SOCKET)this,nBufLen);
@@ -730,7 +760,7 @@ int CEMSocket::Receive(void* lpBuf, int nBufLen, int nFlags)
 		// FIN received on socket // Connection is being closed by peer
 		//ASSERT (false);
 		if ( 0 == AsyncSelect(FD_CLOSE|FD_WRITE) ) { // no more READ notifications ...
-			int waserr = GetLastError(); // oups, AsyncSelect failed !!!
+			//int waserr = GetLastError(); // oups, AsyncSelect failed !!!
 			ASSERT(false);
 		}
 		return 0;
@@ -777,7 +807,7 @@ int CEMSocket::Receive(void* lpBuf, int nBufLen, int nFlags)
 			EMTrace("CEMSocket::OnReceive:Unexpected socket error %x on socket %d",GetLastError(),(SOCKET)this);
 			break;
 		}
-		return SOCKET_ERROR;
+		break;
 	default:
 //		EMTrace("CEMSocket::OnReceive on %d, receivedSize=%d",(SOCKET)this,recvRetCode);
 		return recvRetCode;
@@ -808,10 +838,10 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 		if (pLayer==m_pProxyLayer)
 		{
 			//logline.Format(_T("ProxyLayer changed state from %d to %d"), nParam2, nParam1);
-			//theApp.emuledlg->AddLogLine(false,logline);
+			//AddLogLine(false,logline);
 		}else
 			//logline.Format(_T("Layer @ %d changed state from %d to %d"), pLayer, nParam2, nParam1);
-			//theApp.emuledlg->AddLogLine(false,logline);
+			//AddLogLine(false,logline);
 		return 1;
 	}
 	else if (nType==LAYERCALLBACK_LAYERSPECIFIC)
@@ -867,19 +897,7 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 	}
 	return 1;
 }
-// end deadlake //MORPH - Added by Yun.SF3, ZZ Upload System
-/**
- * Does this socket want to send?
- *
- * @return true if the socket has something to send, false otherwise
- */
-bool CEMSocket::HasQueues() {
-    sendLocker.Lock();
-    bool hasQueues = (sendbuffer != NULL || !controlpacket_queue.IsEmpty() || !standartpacket_queue.IsEmpty());
-    sendLocker.Unlock();
-
-    return hasQueues;
-}
+// end deadlake
 
 /**
  * Removes all packets from the standard queue that don't have to be sent for the socket to be able to send a control packet.
@@ -891,13 +909,51 @@ bool CEMSocket::HasQueues() {
  * after it. The method doesn't touch the control packet queue.
  */
 void CEMSocket::TruncateQueues() {
-	sendLocker.Lock();
-	// Clear the standard queue totally
-	// Please not! There may still be a standardpacket in the sendbuffer variable!
+    sendLocker.Lock();
+
+    // Clear the standard queue totally
+    // Please not! There may still be a standardpacket in the sendbuffer variable!
 	for(POSITION pos = standartpacket_queue.GetHeadPosition(); pos != NULL; standartpacket_queue.GetNext(pos))
 		delete standartpacket_queue.GetAt(pos).packet;
 	standartpacket_queue.RemoveAll();
 
-	sendLocker.Unlock();
+    sendLocker.Unlock();
 }
 
+#ifdef _DEBUG
+void CEMSocket::AssertValid() const
+{
+	CAsyncSocketEx::AssertValid();
+
+	ASSERT( byConnected==ES_DISCONNECTED || byConnected==ES_NOTCONNECTED || byConnected==ES_CONNECTED );
+	CHECK_BOOL(m_ProxyConnectFailed);
+	CHECK_PTR(m_pProxyLayer);
+	downloadLimit;
+	CHECK_BOOL(downloadLimitEnable);
+	CHECK_BOOL(pendingOnReceive);
+	//char* pendingHeader[PACKET_HEADER_SIZE];
+	pendingHeaderSize;
+	CHECK_PTR(pendingPacket);
+	(void)pendingPacketSize;
+	CHECK_ARR(sendbuffer, sendblen);
+	(void)sent;
+	controlpacket_queue.AssertValid();
+	standartpacket_queue.AssertValid();
+	CHECK_BOOL(m_currentPacket_is_controlpacket);
+    (void)sendLocker;
+    (void)m_numberOfSentBytesCompleteFile;
+    (void)m_numberOfSentBytesPartFile;
+    (void)m_numberOfSentBytesControlPacket;
+    CHECK_BOOL(m_currentPackageIsFromPartFile);
+    (void)lastCalledSend;
+    (void)m_actualPayloadSize;
+    (void)m_actualPayloadSizeSent;
+}
+#endif
+
+#ifdef _DEBUG
+void CEMSocket::Dump(CDumpContext& dc) const
+{
+	CAsyncSocketEx::Dump(dc);
+}
+#endif

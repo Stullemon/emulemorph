@@ -14,11 +14,9 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "types.h"
-#include "safefile.h"
-#include "loggable.h"
+#include "Loggable.h"
+#include "SafeFile.h"
 
 class CMMServer;
 
@@ -142,6 +140,8 @@ private:
 #define MMP_PREVIEWANS		0x20
 #define MMP_FINISHEDREQ		0x21
 #define MMP_FINISHEDANS		0x22
+#define MMP_CHANGELIMIT		0x23
+#define MMP_CHANGELIMITANS	0x24
 
 // tags
 #define	MMT_OK				0x01
@@ -175,5 +175,5 @@ private:
 #define MMT_PARTFILFE		0x01
 #define MMT_FINISHEDFILE	0x02
 
-#define MM_VERSION			0x5a
-#define MM_STRVERSION		"0.5x"
+#define MM_VERSION			0x6b
+#define MM_STRVERSION		"0.6b"

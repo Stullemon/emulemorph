@@ -20,7 +20,17 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "StatisticsDlg.h"
-#include "uploadqueue.h"
+#include "UploadQueue.h"
+#include "Statistics.h"
+#include "emuledlg.h"
+#include "OtherFunctions.h"
+#include "WebServer.h"
+#include "DownloadQueue.h"
+#include "ClientList.h"
+#include "Preferences.h"
+#include "ListenSocket.h"
+#include "ServerList.h"
+#include "SharedFileList.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -75,14 +85,75 @@ END_MESSAGE_MAP()
 
 void CStatisticsDlg::OnSysColorChange()
 {
-	Localize();
 	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CStatisticsDlg::SetAllIcons()
+{
+	InitWindowStyles(this);
+
+	CImageList iml;
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+	iml.Add(CTempIconLoader("StatsGeneric"));			// Dots & Arrow (Default icon for stats)
+	iml.Add(CTempIconLoader("UP1DOWN1"));				// Transfer
+	iml.Add(CTempIconLoader("ConnectedHighID"));		// Connection
+	iml.Add(CTempIconLoader("StatsClients"));			// Clients
+	iml.Add(CTempIconLoader("PREF_SERVER"));			// Server
+	iml.Add(CTempIconLoader("SharedFiles"));			// Shared Files
+	iml.Add(CTempIconLoader("Upload"));					// Transfer > Upload
+	iml.Add(CTempIconLoader("SearchDirectDownload"));	// Transfer > Download
+	iml.Add(CTempIconLoader("Statistics"));				// Session Sections
+	iml.Add(CTempIconLoader("StatsCUMULATIVE"));		// Cumulative Sections
+	iml.Add(CTempIconLoader("PREF_TWEAK"));				// Records
+	iml.Add(CTempIconLoader("PREF_CONNECTION"));		// Connection > General
+	iml.Add(CTempIconLoader("PREF_SCHEDULER"));			// Time Section
+	iml.Add(CTempIconLoader("PREF_STATISTICS"));		// Time > Averages and Projections
+	iml.Add(CTempIconLoader("StatsDay"));				// Time > Averages and Projections > Daily
+	iml.Add(CTempIconLoader("StatsMonth"));				// Time > Averages and Projections > Monthly
+	iml.Add(CTempIconLoader("StatsYear"));				// Time > Averages and Projections > Yearly
+	iml.Add(CTempIconLoader("HardDisk"));				// Diskspace
+	stattree.SetImageList(&iml, TVSIL_NORMAL);
+	imagelistStatTree.DeleteImageList();
+	imagelistStatTree.Attach(iml.Detach());
+
+	COLORREF crBk = GetSysColor(COLOR_WINDOW);
+	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
+	LPCTSTR pszSkinProfile = theApp.glob_prefs->GetSkinProfile();
+	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
+	{
+		TCHAR szColor[MAX_PATH];
+		GetPrivateProfileString(_T("Colors"), _T("StatisticsTvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				crBk = RGB(red, grn, blu);
+		}
+
+		GetPrivateProfileString(_T("Colors"), _T("StatisticsTvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+		{
+			UINT red, grn, blu;
+			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
+			if (iVals == 3)
+				crFg = RGB(red, grn, blu);
+		}
+	}
+	stattree.SetBkColor(crBk);
+	stattree.SetTextColor(crFg);
 }
 
 BOOL CStatisticsDlg::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	EnableWindow( FALSE );
+	SetAllIcons();
 	Localize();
 
 	CreateMyTree();
@@ -149,35 +220,6 @@ BOOL CStatisticsDlg::OnInitDialog()
 	EnableWindow( TRUE );
 
 	m_ilastMaxConnReached = 0;
-	peakconnections = 0;
-	totalconnectionchecks = 0;
-	averageconnections = 0;
-	activeconnections = 0;
-	maxDown=0;
-	maxDownavg=0;
-	// -khaos--+++> New vars need to be initialized...  And changed anchors, borrows a little from eMule Plus v1
-	maxcumDown =			theApp.glob_prefs->GetConnMaxDownRate();
-	cumUpavg =				theApp.glob_prefs->GetConnAvgUpRate();
-	maxcumDownavg =			theApp.glob_prefs->GetConnMaxAvgDownRate();
-	cumDownavg =			theApp.glob_prefs->GetConnAvgDownRate();
-	maxcumUpavg =			theApp.glob_prefs->GetConnMaxAvgUpRate();
-	maxcumUp =				theApp.glob_prefs->GetConnMaxUpRate();
-	maxUp =					0;
-	maxUpavg =				0;
-	rateDown =				0;
-	rateUp =				0;
-	timeTransfers =			0;
-	timeDownloads =			0;
-	timeUploads =			0;
-	start_timeTransfers =	0;
-	start_timeDownloads =	0;
-	start_timeUploads =		0;
-	time_thisTransfer =		0;
-	time_thisDownload =		0;
-	time_thisUpload =		0;
-	timeServerDuration =	0;
-	time_thisServerDuration=0;
-	cntDelay =				0;
 	//MORPH START - Removed by SiRoB, New Graph
 	/*AddAnchor(IDC_STATTREE,TOP_LEFT, BOTTOM_LEFT );
 
@@ -332,15 +374,15 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 	UpDown updown;
 	updown.upload = uploadrate;
 	updown.download = downloadrate;
-	updown.connections=activeconnections;
+	updown.connections=theApp.listensocket->GetActiveConnections();
 	theApp.webserver->AddStatsLine(updown);
 
 	// averages
-	m_dPlotDataDown[0]=	GetAvgDownloadRate(AVG_SESSION);
-	m_dPlotDataUp[0]=	GetAvgUploadRate(AVG_SESSION);
+	m_dPlotDataDown[0]=	theApp.statistics->GetAvgDownloadRate(AVG_SESSION);
+	m_dPlotDataUp[0]=	theApp.statistics->GetAvgUploadRate(AVG_SESSION);
 
-	m_dPlotDataDown[1]=	GetAvgDownloadRate(AVG_TIME);
-	m_dPlotDataUp[1]=	GetAvgUploadRate(AVG_TIME);
+	m_dPlotDataDown[1]=	theApp.statistics->GetAvgDownloadRate(AVG_TIME);
+	m_dPlotDataUp[1]=	theApp.statistics->GetAvgUploadRate(AVG_TIME);
 
 	// show
 	m_DownloadOMeter.AppendPoints(m_dPlotDataDown);
@@ -350,7 +392,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 	// get Partialfiles summary
 	theApp.downloadqueue->GetDownloadStats(myStats);
 	// -khaos--+++> Ratio is now handled in the scope itself
-	m_dPlotDataMore[0]=activeconnections;
+	m_dPlotDataMore[0]=theApp.listensocket->GetActiveConnections();
 	// <-----khaos-
  	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	m_dPlotDataMore[1]=theApp.uploadqueue->GetActiveUploadsCount();
@@ -361,138 +403,6 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate, float 
 	//for (int i=0;i<4;i++) if (m_dPlotDataMore[i]>theApp.glob_prefs->GetStatsMax()) {resize=true;theApp.glob_prefs->GetStatsMax()=(int)m_dPlotDataMore[i];}
 	//if (resize) m_Statistics.SetRanges(0, theApp.glob_prefs->GetStatsMax()+15) ;
 	m_Statistics.AppendPoints(m_dPlotDataMore);
-}
-
-// -khaos--+++> This function is going to basically calculate and save a bunch of averages.
-//				I made a seperate funtion so that it would always run instead of having
-//				the averages not be calculated if the graphs are disabled (Which is bad!).
-void CStatisticsDlg::UpdateConnectionStats(float uploadrate, float downloadrate){
-	rateUp = uploadrate;
-	rateDown = downloadrate;
-
-	if (maxUp<uploadrate) maxUp=uploadrate;
-	if (maxcumUp<maxUp) {
-		maxcumUp=maxUp;
-		theApp.glob_prefs->Add2ConnMaxUpRate(maxcumUp);
-	}
-
-	if (maxDown<downloadrate) maxDown=downloadrate; // MOVED from SetCurrentRate!
-	if (maxcumDown<maxDown) {
-		maxcumDown=maxDown;
-		theApp.glob_prefs->Add2ConnMaxDownRate(maxcumDown);
-	}
-
-	cumDownavg = GetAvgDownloadRate(AVG_TOTAL);
-	if (maxcumDownavg<cumDownavg) {
-		maxcumDownavg=cumDownavg;
-		theApp.glob_prefs->Add2ConnMaxAvgDownRate(maxcumDownavg);
-	}
-
-	cumUpavg = GetAvgUploadRate(AVG_TOTAL);
-	if (maxcumUpavg<cumUpavg) {
-		maxcumUpavg=cumUpavg;
-		theApp.glob_prefs->Add2ConnMaxAvgUpRate(maxcumUpavg);
-	}
-	
-
-	// Transfer Times (Increment Session)
-	if (uploadrate > 0 || downloadrate > 0) {
-		if (start_timeTransfers == 0) start_timeTransfers = GetTickCount();
-		else time_thisTransfer = (GetTickCount() - start_timeTransfers) / 1000;
-
-		if (uploadrate > 0) {
-			if (start_timeUploads == 0) start_timeUploads = GetTickCount();
-			else time_thisUpload = (GetTickCount() - start_timeUploads) / 1000;
-		}
-
-		if (downloadrate > 0) {
-			if (start_timeDownloads == 0) start_timeDownloads = GetTickCount();
-			else time_thisDownload = (GetTickCount() - start_timeDownloads) / 1000;
-		}
-	}
-
-	if (uploadrate == 0 && downloadrate == 0 && (time_thisTransfer > 0 || start_timeTransfers > 0)) {
-		timeTransfers += time_thisTransfer;
-		time_thisTransfer = 0;
-		start_timeTransfers = 0;
-	}
-
-	if (uploadrate == 0 && (time_thisUpload > 0 || start_timeUploads > 0)) {
-		timeUploads += time_thisUpload;
-		time_thisUpload = 0;
-		start_timeUploads = 0;
-	}
-
-	if (downloadrate == 0 && (time_thisDownload > 0 || start_timeDownloads > 0)) {
-		timeDownloads += time_thisDownload;
-		time_thisDownload = 0;
-		start_timeDownloads = 0;
-	}
-
-	// Server Durations
-	if (theApp.stat_serverConnectTime==0) time_thisServerDuration = 0;
-	else time_thisServerDuration = ( GetTickCount() - theApp.stat_serverConnectTime ) / 1000;
-}
-// <-----khaos-
-
-void CStatisticsDlg::UpdateConnectionsStatus(){
-	activeconnections = theApp.listensocket->GetOpenSockets();
-	if( peakconnections < activeconnections )
-		peakconnections = activeconnections;
-	// -khaos--+++>
-	if (peakconnections>theApp.glob_prefs->GetConnPeakConnections()) theApp.glob_prefs->Add2ConnPeakConnections(peakconnections);
-	// <-----khaos-
-	if( theApp.IsConnected() ){
-		totalconnectionchecks++;
-		float percent;
-		percent = (float)(totalconnectionchecks-1)/(float)totalconnectionchecks;
-		if( percent > .99f )
-			percent = .99f;
-		averageconnections = (averageconnections*percent) + (float)activeconnections*(1.0f-percent);
-	}
-}
-
-float CStatisticsDlg::GetMaxConperFiveModifier(){
-	//This is a alpha test.. Will clean up for b version.
-	float SpikeSize = theApp.listensocket->GetOpenSockets() - averageconnections ;
-	if ( SpikeSize < 1 )
-		return 1;
-	float SpikeTolerance = 25.0f*(float)theApp.glob_prefs->GetMaxConperFive()/10.0f;
-	if ( SpikeSize > SpikeTolerance )
-		return 0;
-	float Modifier = (1.0f-(SpikeSize/SpikeTolerance));
-	return Modifier;
-}
-
-void CStatisticsDlg::RecordRate() {
-	
-	if (theApp.stat_transferStarttime==0) return;
-
-	// every second By BadWolf - Accurate datarate Calculation
-	uint32 stick =  ::GetTickCount();
-	TransferredData newitemUP = {theApp.stat_sessionSentBytes, stick};
-	TransferredData newitemDN = {theApp.stat_sessionReceivedBytes, stick};
-	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
-	TransferredData newitemFriends = {theApp.stat_sessionSentBytesToFriend, stick};
-	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
-
-	downrateHistory.push_front(newitemDN);
-	uprateHistory.push_front(newitemUP);
-	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
-	uprateHistoryFriends.push_front(newitemFriends);
-	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
-
-	// limit to maxmins
-	int iAverageSeconds = theApp.glob_prefs->GetStatsAverageMinutes()*60;
-	while ((float)(downrateHistory.front().timestamp - downrateHistory.back().timestamp) / 1000.0 > iAverageSeconds)
-		downrateHistory.pop_back();
-	while ((float)(uprateHistory.front().timestamp - uprateHistory.back().timestamp) / 1000.0 > iAverageSeconds)
-		uprateHistory.pop_back();
-	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
-	while ((float)(uprateHistoryFriends.front().timestamp - uprateHistoryFriends.back().timestamp) / 1000.0 > iAverageSeconds)
-		uprateHistoryFriends.pop_back();
-	//MORPH END   - Added by SiRoB, ZZ Upload system 20030818-1923
-	//theApp.emuledlg->ShowTransferRate(false);
 }
 
 // -khaos--+++> Completely rewritten ShowStatistics
@@ -1210,13 +1120,13 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						percentSessions = 0;
 						cbuffer.Format( "%s: %s" , GetResString(IDS_STATS_AVGDATAULSES) , GetResString(IDS_FSTAT_WAITING) ); }
 					stattree.SetItemText(up_tsessions[2], cbuffer);
-					cbuffer.Format(GetResString(IDS_STATS_SUCCUPCOUNT)+" (%.2f%%)",statGoodSessions,percentSessions);
+					cbuffer.Format(GetResString(IDS_STATS_SUCCUPCOUNT),statGoodSessions,percentSessions);
 					stattree.SetItemText(up_tsessions[0], cbuffer);
 					// Set Failed Upload Sessions
 					if (percentSessions != 0 && statBadSessions > 0) percentSessions = 100 - percentSessions; // There were some good sessions and bad ones...
 					else if (percentSessions == 0 && statBadSessions > 0) percentSessions = 100; // There were bad sessions and no good ones, must be 100%
 					else percentSessions = 0; // No sessions at all, or no bad ones.
-					cbuffer.Format(GetResString(IDS_STATS_FAILUPCOUNT)+" (%.2f%%)",statBadSessions,percentSessions);
+					cbuffer.Format(GetResString(IDS_STATS_FAILUPCOUNT),statBadSessions,percentSessions);
 					stattree.SetItemText(up_tsessions[1], cbuffer);
 					// Set Avg Upload time
 					uint32 avguptime = theApp.uploadqueue->GetAverageUpTime();
@@ -1263,13 +1173,13 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				else cbuffer.Format(GetResString(IDS_STATS_RECONNECTS),0);
 				stattree.SetItemText(conn_sg[i], cbuffer); i++;
 				// Active Connections
-				cbuffer.Format("%s: %i",GetResString(IDS_SF_ACTIVECON),activeconnections);
+				cbuffer.Format("%s: %i",GetResString(IDS_SF_ACTIVECON),theApp.listensocket->GetActiveConnections());
 				stattree.SetItemText(conn_sg[i], cbuffer); i++;
 				// Average Connections
-				cbuffer.Format("%s: %i",GetResString(IDS_SF_AVGCON),(int)averageconnections);
+				cbuffer.Format("%s: %i",GetResString(IDS_SF_AVGCON),(int)theApp.listensocket->GetAverageConnections());
 				stattree.SetItemText(conn_sg[i], cbuffer); i++;
 				// Peak Connections
-				cbuffer.Format("%s: %i",GetResString(IDS_SF_PEAKCON),peakconnections);
+				cbuffer.Format("%s: %i",GetResString(IDS_SF_PEAKCON),theApp.listensocket->GetPeakConnections());
 				stattree.SetItemText(conn_sg[i], cbuffer); i++;
 				// Connect Limit Reached
 				uint32 m_itemp = theApp.listensocket->GetMaxConnectionReached();
@@ -1291,29 +1201,29 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			if (forceUpdate || stattree.IsExpanded(hconn_su)) {
 				int i = 0;
 				// Upload Rate
-				cbuffer.Format("%s: %.2f %s", GetResString(IDS_ST_UPLOAD), rateUp,GetResString(IDS_KBYTESEC));			stattree.SetItemText(conn_su[i], cbuffer); i++;
+				cbuffer.Format("%s: %.2f %s", GetResString(IDS_ST_UPLOAD),theApp.statistics->rateUp,GetResString(IDS_KBYTESEC));			stattree.SetItemText(conn_su[i], cbuffer); i++;
 				// Average Upload Rate
-				cbuffer.Format(GetResString(IDS_STATS_AVGUL),GetAvgUploadRate(AVG_SESSION));	stattree.SetItemText(conn_su[i], cbuffer); i++;
+				cbuffer.Format(GetResString(IDS_STATS_AVGUL),theApp.statistics->GetAvgUploadRate(AVG_SESSION));	stattree.SetItemText(conn_su[i], cbuffer); i++;
 				// Max Upload Rate
-				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXUL), maxUp,GetResString(IDS_KBYTESEC));			stattree.SetItemText(conn_su[i], cbuffer); i++;
+				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXUL), theApp.statistics->maxUp,GetResString(IDS_KBYTESEC));			stattree.SetItemText(conn_su[i], cbuffer); i++;
 				// Max Average Upload Rate
-				float myAverageUpRate = GetAvgUploadRate(AVG_SESSION);
-				if (myAverageUpRate>maxUpavg) maxUpavg = myAverageUpRate;
-				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXAVGUL), maxUpavg,GetResString(IDS_KBYTESEC));	stattree.SetItemText(conn_su[i], cbuffer); i++;
+				float myAverageUpRate = theApp.statistics->GetAvgUploadRate(AVG_SESSION);
+				if (myAverageUpRate>theApp.statistics->maxUpavg) theApp.statistics->maxUpavg = myAverageUpRate;
+				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXAVGUL), theApp.statistics->maxUpavg,GetResString(IDS_KBYTESEC));	stattree.SetItemText(conn_su[i], cbuffer); i++;
 			} // - End Connection -> Session -> Uploads Section
 			// CONNECTION -> SESSION -> DOWNLOADS SECTION
 			if (forceUpdate || stattree.IsExpanded(hconn_sd)) {
 				int i = 0;
 				// Download Rate
-				cbuffer.Format("%s: %.2f KB/s", GetResString(IDS_ST_DOWNLOAD), rateDown);		stattree.SetItemText(conn_sd[i], cbuffer); i++;
+				cbuffer.Format("%s: %.2f %s", GetResString(IDS_ST_DOWNLOAD), theApp.statistics->rateDown, GetResString(IDS_KBYTESEC));		stattree.SetItemText(conn_sd[i], cbuffer); i++;
 				// Average Download Rate
-				cbuffer.Format(GetResString(IDS_STATS_AVGDL),GetAvgDownloadRate(AVG_SESSION));	stattree.SetItemText(conn_sd[i], cbuffer); i++;
+				cbuffer.Format(GetResString(IDS_STATS_AVGDL),theApp.statistics->GetAvgDownloadRate(AVG_SESSION));	stattree.SetItemText(conn_sd[i], cbuffer); i++;
 				// Max Download Rate
-				cbuffer.Format(GetResString(IDS_STATS_MAXDL),maxDown);							stattree.SetItemText(conn_sd[i], cbuffer); i++;
+				cbuffer.Format(GetResString(IDS_STATS_MAXDL),theApp.statistics->maxDown);							stattree.SetItemText(conn_sd[i], cbuffer); i++;
 				// Max Average Download Rate
-				float myAverageDownRate = GetAvgDownloadRate(AVG_SESSION);
+				float myAverageDownRate = theApp.statistics->GetAvgDownloadRate(AVG_SESSION);
 				if (myAverageDownRate>maxDownavg) maxDownavg = myAverageDownRate;
-				cbuffer.Format(GetResString(IDS_STATS_MAXAVGDL), maxDownavg);					stattree.SetItemText(conn_sd[i], cbuffer); i++;
+				cbuffer.Format(GetResString(IDS_STATS_MAXAVGDL), theApp.statistics->maxDownavg);					stattree.SetItemText(conn_sd[i], cbuffer); i++;
 			} // - End Connection -> Session -> Downloads Section		
 		} // - End Connection -> Session Section
 		// CONNECTION -> CUMULATIVE SECTION
@@ -1328,7 +1238,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					cbuffer.Format(GetResString(IDS_STATS_RECONNECTS),theApp.glob_prefs->GetConnNumReconnects());
 				stattree.SetItemText(conn_tg[i], cbuffer); i++;
 				// Average Connections
-				cbuffer.Format("%s: %i", GetResString(IDS_SF_AVGCON), (int) (activeconnections + theApp.glob_prefs->GetConnAvgConnections()) / 2 );
+				cbuffer.Format("%s: %i", GetResString(IDS_SF_AVGCON), (int) (theApp.listensocket->GetActiveConnections() + theApp.glob_prefs->GetConnAvgConnections()) / 2 );
 				stattree.SetItemText(conn_tg[i], cbuffer); i++;
 				// Peak Connections
 				cbuffer.Format("%s: %i", GetResString(IDS_SF_PEAKCON), theApp.glob_prefs->GetConnPeakConnections());
@@ -1341,26 +1251,26 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			if (forceUpdate || stattree.IsExpanded(hconn_tu)) {
 				int i = 0;
 				// Average Upload Rate
-				cbuffer.Format(GetResString(IDS_STATS_AVGUL),cumUpavg);
+				cbuffer.Format(GetResString(IDS_STATS_AVGUL),theApp.statistics->cumUpavg);
 				stattree.SetItemText(conn_tu[i], cbuffer); i++;
 				// Max Upload Rate
-				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXUL), maxcumUp,GetResString(IDS_KBYTESEC));
+				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXUL), theApp.statistics->maxcumUp,GetResString(IDS_KBYTESEC));
 				stattree.SetItemText(conn_tu[i], cbuffer); i++;
 				// Max Average Upload Rate
-				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXAVGUL), maxcumUpavg,GetResString(IDS_KBYTESEC));
+				cbuffer.Format("%s: %.2f %s", GetResString(IDS_STATS_MAXAVGUL), theApp.statistics->maxcumUpavg,GetResString(IDS_KBYTESEC));
 				stattree.SetItemText(conn_tu[i], cbuffer); i++;
 			} // - End Connection -> Cumulative -> Uploads Section
 			// CONNECTION -> CUMULATIVE -> DOWNLOADS SECTION
 			if (forceUpdate || stattree.IsExpanded(hconn_td)) {
 				int i = 0;
 				// Average Download Rate
-				cbuffer.Format(GetResString(IDS_STATS_AVGDL), cumDownavg);
+				cbuffer.Format(GetResString(IDS_STATS_AVGDL), theApp.statistics->cumDownavg);
 				stattree.SetItemText(conn_td[i], cbuffer); i++;
 				// Max Download Rate
-				cbuffer.Format(GetResString(IDS_STATS_MAXDL), maxcumDown);
+				cbuffer.Format(GetResString(IDS_STATS_MAXDL), theApp.statistics->maxcumDown);
 				stattree.SetItemText(conn_td[i], cbuffer); i++;
 				// Max Average Download Rate
-				cbuffer.Format(GetResString(IDS_STATS_MAXAVGDL), maxcumDownavg);
+				cbuffer.Format(GetResString(IDS_STATS_MAXAVGDL), theApp.statistics->maxcumDownavg);
 				stattree.SetItemText(conn_td[i], cbuffer); i++;
 			} // - End Connection -> Cumulative -> Downloads Section
 		} // - End Connection -> Cumulative Section
@@ -1395,22 +1305,22 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			stattree.SetItemText(tvitime_s[i], cbuffer); i++;
 			if (!sessionRunTime) sessionRunTime = 1;
 			// Transfer Time
-			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TRANSTIME), CastSecondsToLngHM(GetTransferTime()), (double) (100 * GetTransferTime()) / sessionRunTime);
+			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TRANSTIME), CastSecondsToLngHM(theApp.statistics->GetTransferTime()), (double) (100 *  theApp.statistics->GetTransferTime() ) / sessionRunTime);
 			stattree.SetItemText(tvitime_s[i], cbuffer);
 			if (forceUpdate || stattree.IsExpanded(tvitime_s[i])) {
 				int x = 0;
 				// Upload Time
-				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_UPTIME), CastSecondsToLngHM(GetUploadTime()), (double) (100 * GetUploadTime()) / sessionRunTime);
+				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_UPTIME), CastSecondsToLngHM(theApp.statistics->GetUploadTime()), (double) (100 * theApp.statistics->GetUploadTime()) / sessionRunTime);
 				stattree.SetItemText(tvitime_st[x], cbuffer); x++;;
 				// Download Time
-				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_DOWNTIME), CastSecondsToLngHM(GetDownloadTime()), (double) (100 * GetDownloadTime()) / sessionRunTime);
+				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_DOWNTIME), CastSecondsToLngHM(theApp.statistics->GetDownloadTime()), (double) (100 * theApp.statistics->GetDownloadTime()) / sessionRunTime);
 				stattree.SetItemText(tvitime_st[x], cbuffer); x++;
 			} i++;
 			// Current Server Duration				
-			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_CURRSRVDUR), CastSecondsToLngHM(time_thisServerDuration), (double) (100 * time_thisServerDuration) / sessionRunTime);
+			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_CURRSRVDUR), CastSecondsToLngHM(theApp.statistics->time_thisServerDuration), (double) (100 * theApp.statistics->time_thisServerDuration) / sessionRunTime);
 			stattree.SetItemText(tvitime_s[i], cbuffer); i++;
 			// Total Server Duration
-			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TOTALSRVDUR), CastSecondsToLngHM(GetServerDuration()), (double) (100 * GetServerDuration()) / sessionRunTime);
+			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TOTALSRVDUR), CastSecondsToLngHM(theApp.statistics->GetServerDuration()), (double) (100 * theApp.statistics->GetServerDuration()) / sessionRunTime);
 			stattree.SetItemText(tvitime_s[i], cbuffer); i++;
 		}
 		// TIME STATISTICS -> CUMULATIVE SECTION
@@ -1422,19 +1332,19 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 			stattree.SetItemText(tvitime_t[i], cbuffer); i++;
 			if (!totalRunTime) totalRunTime = 1;
 			// Transfer Time
-			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TRANSTIME), CastSecondsToLngHM(GetTransferTime() + theApp.glob_prefs->GetConnTransferTime()), (double) (100 * (GetTransferTime() + theApp.glob_prefs->GetConnTransferTime())) / totalRunTime);
+			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TRANSTIME), CastSecondsToLngHM(theApp.statistics->GetTransferTime() + theApp.glob_prefs->GetConnTransferTime()), (double) (100 * (theApp.statistics->GetTransferTime() + theApp.glob_prefs->GetConnTransferTime())) / totalRunTime);
 			stattree.SetItemText(tvitime_t[i], cbuffer);
 			if (forceUpdate || stattree.IsExpanded(tvitime_t[i])) {
 				int x = 0;
 				// Upload Time
-				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_UPTIME), CastSecondsToLngHM(GetUploadTime() + theApp.glob_prefs->GetConnUploadTime()), (double) (100 * (GetUploadTime() + theApp.glob_prefs->GetConnUploadTime())) / totalRunTime);
+				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_UPTIME), CastSecondsToLngHM(theApp.statistics->GetUploadTime() + theApp.glob_prefs->GetConnUploadTime()), (double) (100 * (theApp.statistics->GetUploadTime() + theApp.glob_prefs->GetConnUploadTime())) / totalRunTime);
 				stattree.SetItemText(tvitime_tt[x], cbuffer); x++;;
 				// Download Time
-				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_DOWNTIME), CastSecondsToLngHM(GetDownloadTime() + theApp.glob_prefs->GetConnDownloadTime()), (double) (100 * (GetDownloadTime() + theApp.glob_prefs->GetConnDownloadTime())) / totalRunTime);
+				cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_DOWNTIME), CastSecondsToLngHM(theApp.statistics->GetDownloadTime() + theApp.glob_prefs->GetConnDownloadTime()), (double) (100 * (theApp.statistics->GetDownloadTime() + theApp.glob_prefs->GetConnDownloadTime())) / totalRunTime);
 				stattree.SetItemText(tvitime_tt[x], cbuffer); x++;
 			} i++;
 			// Total Server Duration
-			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TOTALSRVDUR), CastSecondsToLngHM(GetServerDuration() + theApp.glob_prefs->GetConnServerDuration()), (double) (100 * (GetServerDuration() + theApp.glob_prefs->GetConnServerDuration())) / totalRunTime);
+			cbuffer.Format("%s: %s (%1.1f%%)", GetResString(IDS_STATS_TOTALSRVDUR), CastSecondsToLngHM(theApp.statistics->GetServerDuration() + theApp.glob_prefs->GetConnServerDuration()), (double) (100 * (theApp.statistics->GetServerDuration() + theApp.glob_prefs->GetConnServerDuration())) / totalRunTime);
 			stattree.SetItemText(tvitime_t[i], cbuffer); i++;
 		}
 		// TIME STATISTICS -> PROJECTED AVERAGES SECTION
@@ -1866,10 +1776,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 
 			// CLIENTS -> CLIENT SOFTWARE -> EMULE SECTION
 			if (forceUpdate || stattree.IsExpanded(clisoft[0]) || cli_lastCount[0] == 0) {				
-				uint32 verMaj = 0;
-				uint32 verMin = 0;
-				uint32 verUp = 0;
-				uint32 totcnt = 0;
 				uint32 verCount = 0;
 				
 				//--- find top 4 eMule client versions ---
@@ -1899,12 +1805,10 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					lasttop=currtop;
 					currtop=0;
 
-					verMaj = topver/(100*10*100);
-					verMin = (topver - (verMaj*100*10*100))/(100*10);
-					verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
-
-					if (topcnt)
-					{
+					if (topcnt){
+						UINT verMaj = topver/(100*10*100);
+						UINT verMin = (topver - (verMaj*100*10*100))/(100*10);
+						UINT verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
 						cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
 					}
 					else 
@@ -1935,10 +1839,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 
 			// CLIENTS -> CLIENT SOFTWARE -> XMULE SECTION
 			if (forceUpdate || stattree.IsExpanded(clisoft[3]) || cli_lastCount[3] == 0) {				
-				uint32 verMaj = 0;
-				uint32 verMin = 0;
-				uint32 verUp = 0;
-				uint32 totcnt = 0;
 				uint32 verCount = 0;
 				
 				//--- find top 4 xMule client versions ---
@@ -1968,12 +1868,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					lasttop=currtop;
 					currtop=0;
 
-					verMaj = topver/(100*10*100);
-					verMin = (topver - (verMaj*100*10*100))/(100*10);
-					verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
-
-					if (topcnt) cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
-					else continue;
+					if (topcnt){
+						UINT verMaj = topver/(100*10*100);
+						UINT verMin = (topver - (verMaj*100*10*100))/(100*10);
+						UINT verUp = (topver - (verMaj*100*10*100) - (verMin*100*10))/(100);
+						cbuffer.Format("v%u.%u.%u: %i (%1.1f%%)", verMaj, verMin, verUp, topcnt, topper*100);
+					}
+					else
+						continue;
 
 					if (i > 3) totalOther += topcnt;
 					
@@ -2210,61 +2112,6 @@ void CStatisticsDlg::UpdateConnectionsGraph()
 	//MORPH END   - Removed by SiRoB, New Graph
 } // UpdateConnectionsGraph()
 
-// Changed these two functions (khaos)...
-float CStatisticsDlg::GetAvgDownloadRate(int averageType) {
-	DWORD running;
-	switch(averageType) {
-		case AVG_SESSION:
-			if (theApp.stat_transferStarttime == 0) return 0;            
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return 0;
-			return (float) (theApp.stat_sessionReceivedBytes/1024) / running;
-
-		case AVG_TOTAL:
-			if (theApp.stat_transferStarttime == 0) return theApp.glob_prefs->GetConnAvgDownRate();
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return theApp.glob_prefs->GetConnAvgDownRate();
-			return (float) ((( (float) (theApp.stat_sessionReceivedBytes/1024) / running ) + theApp.glob_prefs->GetConnAvgDownRate() ) / 2 );
-
-		default:
-			// By BadWolf - Accurate datarate Calculation
-			if (downrateHistory.size()==0) return 0;
-			float deltat = (float)(downrateHistory.front().timestamp - downrateHistory.back().timestamp) / 1000.0;
-			if (deltat > 0.0) 
-				return (float)((float)(downrateHistory.front().datalen-downrateHistory.back().datalen) / deltat)/1024;
-			else
-				return 0;
-			// END By BadWolf - Accurate datarate Calculation
-	}
-}
-
-float CStatisticsDlg::GetAvgUploadRate(int averageType) {
-	DWORD running;
-	switch(averageType) {
-		case AVG_SESSION:
-			if (theApp.stat_transferStarttime == 0) return 0;            
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return 0;
-			return (float) (theApp.stat_sessionSentBytes/1024) / running;
-
-		case AVG_TOTAL:
-			if (theApp.stat_transferStarttime == 0) return theApp.glob_prefs->GetConnAvgUpRate();
-			running=(GetTickCount()-theApp.stat_transferStarttime)/1000;
-			if (running<5) return theApp.glob_prefs->GetConnAvgUpRate();
-			return (float) ((( (float) (theApp.stat_sessionSentBytes/1024) / running ) + theApp.glob_prefs->GetConnAvgUpRate() ) / 2 );
-
-		default:
-			// By BadWolf - Accurate datarate Calculation
-			if (uprateHistory.size()==0) return 0;
-			float deltat = (float)(uprateHistory.front().timestamp - uprateHistory.back().timestamp) / 1000.0;
-			if (deltat > 0.0) 
-				return (float)((float)(uprateHistory.front().datalen-uprateHistory.back().datalen) / deltat)/1024;
-			else
-				return 0;
-			// END By BadWolf - Accurate datarate Calculation
-	}
-}
-// <-----khaos-
 
 void CStatisticsDlg::OnShowWindow(BOOL bShow,UINT nStatus){
 
@@ -2284,10 +2131,14 @@ void CStatisticsDlg::OnSize(UINT nType, int cx, int cy)
 
 }  //OnSize
 
-void CStatisticsDlg::ShowInterval(){
-	if (!theApp.emuledlg->IsRunning()) return;
+void CStatisticsDlg::ShowInterval()
+{
+	if (!theApp.emuledlg->IsRunning())
+		return;
+
 	// Check if OScope already initialized
-	if(m_DownloadOMeter.GetSafeHwnd() != NULL && m_UploadOMeter.GetSafeHwnd() != NULL){ 
+	if(m_DownloadOMeter.GetSafeHwnd() != NULL && m_UploadOMeter.GetSafeHwnd() != NULL)
+	{
 		// Retrieve the size (in pixel) of the OScope
 		CRect plotRect;
 		m_UploadOMeter.GetPlotRect(plotRect);
@@ -2331,63 +2182,6 @@ void CStatisticsDlg::SetARange(bool SetDownload,int maxValue){
 // -khaos--+++> Various changes in Localize() and a new button event...
 void CStatisticsDlg::Localize()
 {
-	InitWindowStyles(this);
-
-	CImageList iml;
-	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-	iml.Add(CTempIconLoader("StatsGeneric"));			// Dots & Arrow (Default icon for stats)
-	iml.Add(CTempIconLoader("UP1DOWN1"));				// Transfer
-	iml.Add(CTempIconLoader("ConnectedHighID"));		// Connection
-	iml.Add(CTempIconLoader("StatsClients"));			// Clients
-	iml.Add(CTempIconLoader("PREF_SERVER"));			// Server
-	iml.Add(CTempIconLoader("SharedFiles"));			// Shared Files
-	iml.Add(CTempIconLoader("Upload"));					// Transfer > Upload
-	iml.Add(CTempIconLoader("SearchDirectDownload"));	// Transfer > Download
-	iml.Add(CTempIconLoader("Statistics"));				// Session Sections
-	iml.Add(CTempIconLoader("StatsCUMULATIVE"));		// Cumulative Sections
-	iml.Add(CTempIconLoader("PREF_TWEAK"));				// Records
-	iml.Add(CTempIconLoader("PREF_CONNECTION"));		// Connection > General
-	iml.Add(CTempIconLoader("PREF_SCHEDULER"));			// Time Section
-	iml.Add(CTempIconLoader("PREF_STATISTICS"));		// Time > Averages and Projections
-	iml.Add(CTempIconLoader("StatsDay"));				// Time > Averages and Projections > Daily
-	iml.Add(CTempIconLoader("StatsMonth"));				// Time > Averages and Projections > Monthly
-	iml.Add(CTempIconLoader("StatsYear"));				// Time > Averages and Projections > Yearly
-	iml.Add(CTempIconLoader("HardDisk"));				// Diskspace
-	stattree.SetImageList(&iml, TVSIL_NORMAL);
-	imagelistStatTree.DeleteImageList();
-	imagelistStatTree.Attach(iml.Detach());
-
-	COLORREF crBk = GetSysColor(COLOR_WINDOW);
-	COLORREF crFg = GetSysColor(COLOR_WINDOWTEXT);
-	LPCTSTR pszSkinProfile = theApp.glob_prefs->GetSkinProfile();
-	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
-	{
-		TCHAR szColor[MAX_PATH];
-		GetPrivateProfileString(_T("Colors"), _T("StatisticsTvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] == _T('\0'))
-			GetPrivateProfileString(_T("Colors"), _T("DefLvBk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] != _T('\0'))
-		{
-			UINT red, grn, blu;
-			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
-			if (iVals == 3)
-				crBk = RGB(red, grn, blu);
-		}
-
-		GetPrivateProfileString(_T("Colors"), _T("StatisticsTvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] == _T('\0'))
-			GetPrivateProfileString(_T("Colors"), _T("DefLvFg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
-		if (szColor[0] != _T('\0'))
-		{
-			UINT red, grn, blu;
-			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
-			if (iVals == 3)
-				crFg = RGB(red, grn, blu);
-		}
-	}
-	stattree.SetBkColor(crBk);
-	stattree.SetTextColor(crFg);
-
 	// Used for formatting the Active Connections ratio and the time for average graphs
 	CString myBuffer;
 

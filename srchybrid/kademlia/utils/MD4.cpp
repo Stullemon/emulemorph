@@ -200,7 +200,7 @@ void CMD4::transform (unsigned int *state, const byte *block)
 	state[3] += d;
 
 	// Zeroize sensitive information.
-	MEMSET(x, 0, 16);
+	memset(x, 0, 16);
 }
 
 void CMD4::encode(byte *output, const unsigned int *input, unsigned int len)

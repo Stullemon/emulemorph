@@ -26,10 +26,9 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #include "stdafx.h"
 #include "emule.h"
+#include "emuledlg.h"
 #include "hypertextctrl.h"
 #include <deque>
 
@@ -1216,7 +1215,6 @@ void CHyperTextCtrl::OnMouseMove(UINT nFlags,CPoint pt){
 	}
 	else
 		ReleaseCapture();
-	//m_tip.OnMouseMove(nFlags,pt);
 }
 
 void CHyperTextCtrl::OnLButtonDown(UINT nFlags,CPoint pt){

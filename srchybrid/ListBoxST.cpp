@@ -301,7 +301,7 @@ DWORD CListBoxST::OnDrawIcon(int nIndex, CDC* pDC, CRect* prcItem, CRect* prcIco
 
 BOOL CListBoxST::OnReflectedDblclk() 
 {
-	UINT			nIndex = LB_ERR;
+	INT				nIndex = LB_ERR;
 	BOOL			bOutside = FALSE;
 	DWORD			dwPos = ::GetMessagePos();
 	CPoint			Point(((int)(short)LOWORD(dwPos)), ((int)(short)HIWORD(dwPos)));
@@ -516,7 +516,7 @@ DWORD CListBoxST::GetItemData(int nIndex)
 	if (lpLBData != (LPVOID)-1L)
 		return lpLBData->dwItemData;
 
-	return LB_ERR;
+	return (DWORD)LB_ERR;
 } // End of GetItemData
 
 // Sets a pointer to a list box item.

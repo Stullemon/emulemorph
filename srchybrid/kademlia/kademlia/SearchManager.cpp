@@ -39,6 +39,7 @@ there client on the eMule forum..
 #include "../utils/UInt128.h"
 #include "../utils/MD4.h"
 #include "../io/ByteIO.h"
+#include "../kademlia/prefs.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -379,8 +380,10 @@ bool CSearchManager::alreadySearchingFor(const CUInt128 &target)
 void CSearchManager::getWords(LPCSTR str, WordList *words)
 {
 	LPSTR s = (LPSTR)str;
-	int len;
+	int len = 0;
 	CString word;
+	CString wordtemp;
+	uint32 i;
 	while (strlen(s) > 0)
 	{
 		len = (int)strcspn(s, " ()[]{}<>,._-!?");
@@ -389,49 +392,13 @@ void CSearchManager::getWords(LPCSTR str, WordList *words)
 			word = s;
 			word.Truncate(len);
 			word.MakeLower();
-			words->push_back(word);
-		}
-//		else if ((len == 0) && (s[0] == '-'))
-//		{
-//			len = (int)strcspn(s, " ");
-//			if ((!strnicmp(s, SEARCH_IMAGE, len))
-//			||  (!strnicmp(s, SEARCH_AUDIO, len))
-//			||  (!strnicmp(s, SEARCH_VIDEO, len))
-//			||  (!strnicmp(s, SEARCH_DOC  , len))
-//			||  (!strnicmp(s, SEARCH_PRO  , len)))
-//			{
-//				word = s;
-//				word.Truncate(len);
-//				word.MakeLower();
-//				words->push_back(word);
-///			}
-//			else 
-//				len = 0;
-//		}
-		if (len < (int)strlen(s))
-			len++;
-		s += len;
-	}
-	if(words->size() > 1 && len == 3)
-	{
-		words->pop_back();
-	}
-}
-
-// This may not be used and needs removed.
-void CSearchManager::getWordsValid(LPCSTR str, WordList *words)
-{
-	LPSTR s = (LPSTR)str;
-	int len;
-	CString word;
-	while (strlen(s) > 0)
-	{
-		len = (int)strcspn(s, " ()[]{}<>,._-!?");
-		if (len > 2)
-		{
-			word = s;
-			word.Truncate(len);
-			word.MakeLower();
+			for( i = 0; i < words->size(); i++)
+			{
+				wordtemp = words->front();
+				words->pop_front();
+				if(  wordtemp != word )
+					words->push_back(wordtemp);
+			}
 			words->push_back(word);
 		}
 		if (len < (int)strlen(s))

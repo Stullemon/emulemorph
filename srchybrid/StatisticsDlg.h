@@ -16,13 +16,9 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "afxdlgs.h"
 #include "ResizableLib\ResizableDialog.h"
-#include "OScopeCtrl.h"
-#include "otherfunctions.h"
-// -khaos--+++>
 #include "StatisticsTree.h"
-// <-----khaos-
+#include "OScopeCtrl.h"
 #include "ColorFrameCtrl.h"
 #include <list>
  //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
@@ -49,26 +45,9 @@ public:
 	void ShowStatistics(bool forceUpdate = false);
 	// <-----khaos-
 	void SetARange(bool SetDownload,int maxValue);
-	void RecordRate();
-	float GetAvgDownloadRate(int averageType);
-	float GetAvgUploadRate(int averageType);
 	void RepaintMeters();
-	void UpdateConnectionsStatus();
-	float GetMaxConperFiveModifier();
 
-	// -khaos--+++> (2-11-03)
-	uint32	GetPeakConnections()		{ return peakconnections; }
-	uint32	GetTotalConnectionChecks()	{ return totalconnectionchecks; }
-	float	GetAverageConnections()		{ return averageconnections; }
-	uint32	GetActiveConnections()		{ return activeconnections; }
-	uint32	GetTransferTime()			{ return timeTransfers + time_thisTransfer; }
-	uint32	GetUploadTime()				{ return timeUploads + time_thisUpload; }
-	uint32	GetDownloadTime()			{ return timeDownloads + time_thisDownload; }
-	uint32	GetServerDuration()			{ return timeServerDuration + time_thisServerDuration; }
-	void	Add2TotalServerDuration()	{ timeServerDuration += time_thisServerDuration;
-										  time_thisServerDuration = 0; }
 	void	UpdateConnectionsGraph();
-	void	UpdateConnectionStats(float uploadrate, float downloadrate);
 	void	DoTreeMenu();
 	void	CreateMyTree();
 	// -khaos--+++> New class for our humble little tree.
@@ -81,38 +60,12 @@ private:
 	CColorFrameCtrl m_Led2[ 3 ];
 	CColorFrameCtrl m_Led3[ 4 ];
 
-	int dl_users,dl_active;
 	double m_dPlotDataMore[4];
-	int stat_max;
 	float maxDownavg;
 	float maxDown;
 	uint32 m_ilastMaxConnReached;
 
-	// -khaos--+++>
-	//	Cumulative Stats
-	float	cumDownavg;
-	float	maxcumDownavg;
-	float	maxcumDown;
-	float	cumUpavg;
-	float	maxcumUpavg;
-	float	maxcumUp;
-	float	maxUp;
-	float	maxUpavg;
-	float	rateDown;
-	float	rateUp;
-	uint32	timeTransfers;
-	uint32	timeDownloads;
-	uint32	timeUploads;
-	uint32	start_timeTransfers;
-	uint32	start_timeDownloads;
-	uint32	start_timeUploads;
-	uint32	time_thisTransfer;
-	uint32	time_thisDownload;
-	uint32	time_thisUpload;
-	uint32	timeServerDuration;
-	uint32	time_thisServerDuration;
 	uint32	cli_lastCount[5];
-	uint8	cntDelay;
 	//	Tree ImageList (2-18-03)
 	CImageList	imagelistStatTree;
 	//	Tree Font (2-24-03)
@@ -158,19 +111,7 @@ private:
 	void SetupLegend( int ResIdx, int ElmtIdx, int legendNr);
 	void SetStatsRanges(int min, int max);
 
-	const static int AVG_SESSION =0;
-	// -khaos--+++> For the total average
-	const static int AVG_TOTAL =2;
-	// <-----khaos-
-	const static int AVG_TIME =1;
-	list<TransferredData> uprateHistory; // By BadWolf
-	list<TransferredData> downrateHistory; // By BadWolf
-	list<TransferredData> uprateHistoryFriends; //MORPH - Added by Yun.SF3, ZZ Upload System
 
-	uint32	peakconnections;
-	uint32	totalconnectionchecks;
-	float	averageconnections;
-	uint32	activeconnections;
 	int		m_oldcx;
 	int		m_oldcy;
 
@@ -196,14 +137,15 @@ private:
 	CArray<HTREEITEM> clientSoft[CS_UNKNOWN+1];
  	//MORPH END   - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 protected:
+	void SetAllIcons();
+
+	virtual BOOL OnInitDialog(); 
 	virtual void OnSize(UINT nType,int cx,int cy);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
 	DECLARE_MESSAGE_MAP()
-	virtual BOOL OnInitDialog(); 
-	void	OnShowWindow(BOOL bShow,UINT nStatus);
+	afx_msg void OnSysColorChange();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	// -khaos--+++> Buttons, stuff.
 	afx_msg void OnMenuButtonClicked();
 	// <-----khaos-
-public:
-	afx_msg void OnSysColorChange();
 };

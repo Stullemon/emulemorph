@@ -1,6 +1,19 @@
-// KademliaWnd.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "KademliaWnd.h"
@@ -8,8 +21,12 @@
 #include "KadSearchListCtrl.h"
 #include "Kademlia/routing/timer.h"
 #include "Kademlia/Kademlia/kademlia.h"
+#include "Kademlia/Kademlia/prefs.h"
 #include "Kademlia/net/kademliaudplistener.h"
 #include "Ini2.h"
+#include "CustomAutoComplete.h"
+#include "OtherFunctions.h"
+#include "KademliaMain.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -27,6 +44,7 @@ CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
 {
 	contactList = new CKadContactListCtrl;
 	searchList = new CKadSearchListCtrl;
+	m_pacONBSIPs = NULL;
 }
 
 CKademliaWnd::~CKademliaWnd()
@@ -60,7 +78,7 @@ BOOL CKademliaWnd::OnInitDialog()
 	InitWindowStyles(this);
 	contactList->Init();
 	searchList->Init();
-	
+
 	AddAnchor(IDC_CONTACTLIST,TOP_LEFT, CSize(100,50));
 	AddAnchor(IDC_SEARCHLIST,CSize(0,50),CSize(100,100));
 	AddAnchor(IDC_KADCONTACTLAB,TOP_LEFT);
@@ -74,6 +92,7 @@ BOOL CKademliaWnd::OnInitDialog()
 	AddAnchor(IDC_SSTATIC4, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC7, TOP_RIGHT);
 
+	SetAllIcons();
 	Localize();
 
 	if (theApp.glob_prefs->GetUseAutocompletion()){
@@ -101,7 +120,6 @@ BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_FIREWALLCHECKBUTTON, OnBnClickedFirewallcheckbutton)
 	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
-	ON_STN_CLICKED(IDC_KADCONTACTLAB, OnStnClickedKadcontactlab)
 END_MESSAGE_MAP()
 
 
@@ -111,27 +129,28 @@ END_MESSAGE_MAP()
 void CKademliaWnd::OnBnClickedBootstrapbutton()
 {
 	if(!Kademlia::CTimer::getThreadID())
-		return;
+	{
+		theApp.kademlia->Connect();
+	}
 
 	uint16 tempVal=0;
 	CString strBuffer;
-	char buffer[510];
-
 	GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowText(strBuffer);
 
 	// handle ip:port
 	if (strBuffer.Find(':')!=-1) {
 		int pos=strBuffer.Find(':');
-
 		GetDlgItem(IDC_BOOTSTRAPPORT)->SetWindowText( strBuffer.Right( strBuffer.GetLength()-pos-1));
 		GetDlgItem(IDC_BOOTSTRAPIP)->SetWindowText( strBuffer.Left(pos));
 		strBuffer=strBuffer.Right( strBuffer.GetLength()-pos-1);
 	}
 
+	char buffer[510];
 	GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowText(buffer,10);
 	tempVal= atoi(buffer);
 
-	if (strBuffer.GetLength()<7 || tempVal<1) return;
+	if (strBuffer.GetLength()<7 || tempVal<1)
+		return;
 
 	if (m_pacONBSIPs && m_pacONBSIPs->IsBound())
 		m_pacONBSIPs->AddItem(strBuffer +":"+CString(buffer) ,0);
@@ -141,7 +160,8 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 
 void CKademliaWnd::OnBnClickedFirewallcheckbutton()
 {
-	if(Kademlia::CTimer::getThreadID() && Kademlia::CKademlia::getPrefs()->getFirewalled()){
+	if(Kademlia::CTimer::getThreadID()){
+		//This isn't thread safe and needs to be changed to a message.
 		Kademlia::CKademlia::getPrefs()->setRecheckIP();
 	}
 }
@@ -157,15 +177,19 @@ void CKademliaWnd::OnBnConnect() {
 
 void CKademliaWnd::OnSysColorChange()
 {
-	Localize();
 	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CKademliaWnd::SetAllIcons()
+{
 }
 
 void CKademliaWnd::Localize() {
 	GetDlgItem(IDC_BSSTATIC)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->SetWindowText(GetResString(IDS_BOOTSTRAP));
-	GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS));
-	GetDlgItem(IDC_SSTATIC7)->SetWindowText(GetResString(IDS_SV_PORT));
+	GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS) + _T(":"));
+	GetDlgItem(IDC_SSTATIC7)->SetWindowText(GetResString(IDS_SV_PORT) + _T(":"));
 	GetDlgItem(IDC_FIREWALLCHECKBUTTON)->SetWindowText(GetResString(IDS_KAD_RECHECKFW));
 	
 	SetDlgItemText(IDC_KADCONTACTLAB,GetResString(IDS_KADCONTACTLAB));
@@ -190,13 +214,6 @@ void CKademliaWnd::UpdateControlsState() {
 	else
 	{
 		GetDlgItem(IDC_KADCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_CONNECT ) );
-		GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(false);
+		GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(true);
 	}
-	if (!theApp.glob_prefs->GetNetworkKademlia())
-		GetDlgItem(IDC_KADCONNECT)->EnableWindow(FALSE);
-}
-
-void CKademliaWnd::OnStnClickedKadcontactlab()
-{
-	// TODO: Add your control notification handler code here
 }

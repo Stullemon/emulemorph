@@ -64,10 +64,7 @@ to tim.kosse@gmx.de
 #if !defined(AFX_ASYNCSOCKETEX_H__AA9E4531_63B1_442F_9A71_09B2FEEDF34E__INCLUDED_)
 #define AFX_ASYNCSOCKETEX_H__AA9E4531_63B1_442F_9A71_09B2FEEDF34E__INCLUDED_
 
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-
 #define FD_FORCEREAD (1<<15)
 
 #include "winsock.h"
@@ -95,6 +92,9 @@ class CAsyncSocketExLayer;
 #endif //NOLAYERS
 class CCriticalSectionWrapper;
 class CAsyncSocketEx: public CLoggable
+#ifdef _DEBUG
+					 ,public CObject
+#endif
 {
 public:
 	///////////////////////////////////////
@@ -219,6 +219,12 @@ public:
 	//Trigers an event on the socket
 	// Any combination of FD_READ, FD_WRITE, FD_CLOSE, FD_ACCEPT, FD_CONNECT and FD_FORCEREAD is valid for lEvent.
 	BOOL TriggerEvent(long lEvent);
+
+#ifdef _DEBUG
+	// Diagnostic Support
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
 
 protected:
 	//Strucure to hold the socket data

@@ -21,7 +21,13 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "ClientDetailDialog.h"
+#include "UpDownClient.h"
+#include "PartFile.h"
+#include "ClientCredits.h"
 #include "otherfunctions.h"
+#include "Server.h"
+#include "ServerList.h"
+#include "SharedFileList.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -70,96 +76,7 @@ BOOL CClientDetailDialog::OnInitDialog(){
 	else
 		GetDlgItem(IDC_DHASH)->SetWindowText("?");
 	
-	switch(m_client->GetClientSoft()){
-		case SO_UNKNOWN:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("?");
-			GetDlgItem(IDC_DVERSION)->SetWindowText("?");
-			break;
-		case SO_EMULE:
-		case SO_OLDEMULE:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("eMule");
-			if(m_client->GetMuleVersion() == 0x99)
-			{
-				buffer.Format("v%u.%u%c", m_client->GetMajVersion(), m_client->GetMinVersion(), _T('a') + m_client->GetUpVersion());
-			}
-			else
-			{
-				buffer.Format("v%u.%u", m_client->GetMajVersion(), m_client->GetMinVersion());
-			}
-			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			if(m_client->GetClientModString().IsEmpty() == false){
-				buffer += _T(" [");
-				buffer += m_client->GetClientModString();
-				buffer += _T("]");
-			}
-			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-			break;
-		case SO_CDONKEY:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("cDonkey");
-			if(m_client->GetMuleVersion() == 0x99)
-			{
-				buffer.Format("v%u.%u%c", m_client->GetMajVersion(), m_client->GetMinVersion(), _T('a') + m_client->GetUpVersion());
-			}
-			else
-			{
-				buffer.Format("v%u.%u", m_client->GetMajVersion(), m_client->GetMinVersion());
-			}
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-			break;
-		case SO_SHAREAZA:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("Shareaza");
-			if(m_client->GetMuleVersion() == 0x99)
-			{
-				buffer.Format("v%u.%u%c", m_client->GetMajVersion(), m_client->GetMinVersion(), _T('a') + m_client->GetUpVersion());
-			}
-			else
-			{
-				buffer.Format("v%u.%u", m_client->GetMajVersion(), m_client->GetMinVersion());
-			}
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-			break;
-		case SO_XMULE:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("xMule");
-			if(m_client->GetMuleVersion() == 0x99)
-			{
-				buffer.Format("v%u.%u%c", m_client->GetMajVersion(), m_client->GetMinVersion(), _T('a') + m_client->GetUpVersion());
-			}
-			else
-			{
-				buffer.Format("v%u.%u", m_client->GetMajVersion(), m_client->GetMinVersion());
-			}
- 			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			if(m_client->GetClientModString().IsEmpty() == false){
-				buffer += _T(" [");
-				buffer += m_client->GetClientModString();
-				buffer += _T("]");
-			}
-			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-			break;
-		case SO_EDONKEY:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("eDonkey");
-			buffer.Format("v%u",m_client->GetVersion());
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-			break;
-		case SO_EDONKEYHYBRID:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("eDonkeyHybrid");
-			buffer.Format("v%u",m_client->GetVersion());
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-			break;
-		case SO_MLDONKEY:
-			GetDlgItem(IDC_DSOFT)->SetWindowText("MLdonkey");
-			if(m_client->GetMuleVersion() == 0x99)
-			{
-				buffer.Format("v%u.%u%c", m_client->GetMajVersion(), m_client->GetMinVersion(), _T('a') + m_client->GetUpVersion());
-			}
-			else
-			{
-				buffer.Format("v%u.%u", m_client->GetMajVersion(), m_client->GetMinVersion());
-			}
-			GetDlgItem(IDC_DVERSION)->SetWindowText(buffer);
-	}
+	GetDlgItem(IDC_DSOFT)->SetWindowText(m_client->GetClientSoftVer());
 
 	buffer.Format("%s",(m_client->HasLowID() ? GetResString(IDS_IDLOW):GetResString(IDS_IDHIGH)));
 	GetDlgItem(IDC_DID)->SetWindowText(buffer);
@@ -274,7 +191,6 @@ void CClientDetailDialog::Localize(){
 	GetDlgItem(IDC_STATIC32)->SetWindowText(GetResString(IDS_CD_UHASH));
 	GetDlgItem(IDC_STATIC33)->SetWindowText(GetResString(IDS_CD_CSOFT));
 	GetDlgItem(IDC_STATIC35)->SetWindowText(GetResString(IDS_CD_SIP));
-	GetDlgItem(IDC_STATIC36)->SetWindowText(GetResString(IDS_CD_VERSION));
 	GetDlgItem(IDC_STATIC38)->SetWindowText(GetResString(IDS_CD_SNAME));
 
 	GetDlgItem(IDC_STATIC40)->SetWindowText(GetResString(IDS_CD_TRANS));

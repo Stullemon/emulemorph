@@ -23,14 +23,26 @@
 #include "DownloadListCtrl.h"
 #include "otherfunctions.h" 
 #include "updownclient.h"
-#include "opcodes.h"
+#include "MenuCmds.h"
 #include "ClientDetailDialog.h"
 #include "FileDetailDialog.h"
 #include "commentdialoglst.h"
 #include "MetaDataDlg.h"
 #include "InputBox.h"
 #include "KademliaWnd.h"
+#include "KademliaMain.h"
+#include "emuledlg.h"
+#include "DownloadQueue.h"
+#include "FriendList.h"
+#include "PartFile.h"
+#include "ClientCredits.h"
+#include "MemDC.h"
+#include "ChatWnd.h"
+#include "TransferWnd.h"
+#include "SharedFileList.h" //MORPH - Added by SiRoB
+
 #include "version.h" //MORPH - Added by SiRoB
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -108,6 +120,7 @@ void CDownloadListCtrl::Init()
 	InsertColumn(15, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
 	// khaos::accuratetimerem-
 
+	SetAllIcons();
 	Localize();
 	LoadSettings(CPreferences::tableDownload);
 	curTab=0;
@@ -126,7 +139,13 @@ void CDownloadListCtrl::Init()
 	// SLUGFILLER: multiSort
 }
 
-void CDownloadListCtrl::Localize()
+void CDownloadListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CDownloadListCtrl::SetAllIcons()
 {
 	m_ImageList.DeleteImageList();
 	m_ImageList.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -145,7 +164,6 @@ void CDownloadListCtrl::Localize()
 	m_ImageList.Add(CTempIconLoader("ClientEDonkeyHybrid"));
 	m_ImageList.Add(CTempIconLoader("ClientShareaza"));
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader("ClientSecureOvl")), 1);
-
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader("ClientRightEdonkey")); //14
 	m_ImageList.Add(CTempIconLoader("ClientMorph")); //15
@@ -160,6 +178,10 @@ void CDownloadListCtrl::Localize()
 	m_ImageList.Add(CTempIconLoader("RATING_POOR"));  // 22
 	m_ImageList.Add(CTempIconLoader("RATING_FAKE"));  // 23
 	//MORPH END   - Added by IceCream, eMule Plus rating icones
+}
+
+void CDownloadListCtrl::Localize()
+{
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -277,7 +299,7 @@ void CDownloadListCtrl::AddFile(CPartFile* toadd){
 		ASSERT(m_ListItems.find(toadd) == m_ListItems.end());
 		m_ListItems.insert(ListItemsPair(toadd, newitem));
 
-		if (CheckShowItemInGivenCat(toadd, curTab ))
+		if (toadd->CheckShowItemInGivenCat(curTab))
 		InsertItem(LVIF_PARAM|LVIF_TEXT,itemnr,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)newitem);
 
 		ShowFilesCount();
@@ -422,7 +444,8 @@ void CDownloadListCtrl::UpdateItem(void* toupdate){
 	}
 }
 
-void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem) {
+void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem)
+{
 	//MORPH START - Added by SiRoB, Don't draw hidden Rect
 	CRect Rect;
 	this->GetClientRect(Rect);
@@ -430,7 +453,9 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 	if (Rect.IsRectEmpty())
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
-	if(lpRect->left < lpRect->right) {
+
+	if(lpRect->left < lpRect->right)
+	{
 		CString buffer;
 		CPartFile *lpPartFile = (CPartFile*)lpCtrlItem->value;
 
@@ -440,10 +465,12 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlIt
 				dc->SetTextColor(RGB(192,0,0));
 		//MORPH END   - Added by IceCream, show download in red
 
-		switch(nColumn) {
-		
+		switch(nColumn)
+		{
 		case 0:{		// file name
-			dc->SetTextColor( (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory())>0)?theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()):(::GetSysColor(COLOR_WINDOWTEXT)) );
+			if (theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()) > 0)
+				dc->SetTextColor(theApp.glob_prefs->GetCatColor(lpPartFile->GetCategory()));
+
 			//MORPH START - Added by IceCream, eMule Plus rating icons
 			int iImage = theApp.GetFileTypeSystemImageIdx(lpPartFile->GetFileName());
 			if (theApp.GetSystemImageList() != NULL)
@@ -761,7 +788,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 		case 0:		// icon, name, status
 			{
 				RECT cur_rec;
-				MEMCOPY(&cur_rec, lpRect, sizeof(RECT));
+				memcpy(&cur_rec, lpRect, sizeof(RECT));
 				POINT point = {cur_rec.left, cur_rec.top+1};
 				if (lpCtrlItem->type == AVAILABLE_SOURCE){
 					switch (lpUpDownClient->GetDownloadState()) {
@@ -809,29 +836,27 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				POINT point2= {cur_rec.left,cur_rec.top+1};
 				if (lpUpDownClient->IsFriend())
 					m_ImageList.Draw(dc, 6, point2, ILD_NORMAL | uOvlImg);
-				else{
-					if( lpUpDownClient->GetClientSoft() == SO_MLDONKEY )
-						m_ImageList.Draw(dc, 8, point2, ILD_NORMAL | uOvlImg);
-					else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY )
+				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEYHYBRID)
+					m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
+				else if( lpUpDownClient->GetClientSoft() == SO_MLDONKEY)
+					m_ImageList.Draw(dc, 8, point2, ILD_NORMAL | uOvlImg);
+				else if ( lpUpDownClient->GetClientSoft() == SO_SHAREAZA)
+					m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
+				else if (lpUpDownClient->ExtProtocolAvailable())
+					m_ImageList.Draw(dc, (lpUpDownClient->IsMorph())?15:5, point2, ILD_NORMAL | uOvlImg);
+				else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEY)
 						m_ImageList.Draw(dc, 14, point2, ILD_NORMAL | uOvlImg);
-					else if ( lpUpDownClient->GetClientSoft() == SO_EDONKEYHYBRID )
-						m_ImageList.Draw(dc, 11, point2, ILD_NORMAL | uOvlImg);
-					else if ( lpUpDownClient->GetClientSoft() == SO_SHAREAZA )
-						m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | uOvlImg);
-					else if (lpUpDownClient->ExtProtocolAvailable())
-						m_ImageList.Draw(dc, (lpUpDownClient->IsMorph())?15:5, point2, ILD_NORMAL | uOvlImg);
-					else
-						m_ImageList.Draw(dc, 7, point2, ILD_NORMAL | uOvlImg);
-				}
+				else
+					m_ImageList.Draw(dc, 7, point2, ILD_NORMAL | uOvlImg);
 				cur_rec.left += 20;
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
-				if (!lpUpDownClient->GetUserName()) {
+
+				if (!lpUpDownClient->GetUserName())
 					buffer = "?";
-				}
 				else {
 					//MORPH START - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 					//buffer = lpUpDownClient->GetUserName();
-					buffer.Format("(%i+%i) %s",lpUpDownClient->m_OtherRequests_list.GetCount()+1,lpUpDownClient->m_OtherNoNeeded_list.GetCount(),lpUpDownClient->GetUserName());
+					buffer.Format("(%i) %s",lpUpDownClient->m_OtherRequests_list.GetCount()+1+lpUpDownClient->m_OtherNoNeeded_list.GetCount(),lpUpDownClient->GetUserName());
 					//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 				}
 				dc->DrawText(buffer,buffer.GetLength(),&cur_rec, DLC_DT_TEXT);
@@ -840,17 +865,20 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 
 		case 1:		// size
 			switch(lpUpDownClient->GetSourceFrom()){
-				case 0:
-					buffer = "ED2K Server/Queue";
+				case SF_SERVER:
+					buffer = "ED2K Server";
 					break;
-				case 1:
-					buffer = "Kademlia";
+				case SF_KADEMLIA:
+					buffer = "Kad";
 					break;
-				case 2:
+				case SF_SOURCE_EXCHANGE:
 					buffer = "Source Exchange";
 					break;
+				case SF_PASSIVE:
+					buffer = "Passive";
+					break;
 				//MORPH START - Added by SiRoB, Source Loader Saver [SLS]
-				case 3:
+				case SF_SLS:
 					buffer = "SLS";
 					break;
 				//MORPH END   - Added by SiRoB, Source Loader Saver [SLS]
@@ -922,10 +950,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 			break;
 
 		case 6:{		// sources
-			//MORPH - Changed by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-			dc->DrawText(lpUpDownClient->GetClientVerString(), lpRect, DLC_DT_TEXT);
+			buffer = lpUpDownClient->GetClientSoftVer();
+			if (buffer.IsEmpty())
+				buffer = GetResString(IDS_UNKNOWN);
+			dc->DrawText(buffer,buffer.GetLength(),lpRect, DLC_DT_TEXT);
 			break;
-			//MORPH - Changed by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 		}
 
 		case 7:		// prio
@@ -1033,18 +1062,21 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 			odc->SetBkColor(m_crHighlight);
 		else
 			odc->SetBkColor(m_crNoHighlight);
-
-	} /*else if (content->type != FILE_TYPE) {
-		COLORREF crHighlight = m_crWindowText;
-		COLORREF crWindow = m_crWindow;
-		COLORREF crHalf = DLC_RGBBLEND(crHighlight, crWindow, 16);
-		odc->SetBkColor(crHalf);
-	}*/ else
+	}
+	else
 		odc->SetBkColor(GetBkColor());
 
 	CMemDC dc(odc,&CRect(lpDrawItemStruct->rcItem));
 	CFont *pOldFont = dc->SelectObject(GetFont());
 	COLORREF crOldTextColor = dc->SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
 
 	BOOL notLast = lpDrawItemStruct->itemID + 1 != GetItemCount();
 	BOOL notFirst = lpDrawItemStruct->itemID != 0;
@@ -1052,7 +1084,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	int tree_end=0;
 
 	RECT cur_rec;
-	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 	//offset was 4, now it's the standard 2 spaces
 	int iOffset = dc->GetTextExtent(_T(" "), 1 ).cx*2;
@@ -1108,7 +1140,6 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 				DrawSourceItem(dc, 5, &cur_rec, content);
 				cur_rec.left = iNextLeft;
 			} else {
-					int iNext = pHeaderCtrl->OrderToIndex(iCurrent + 1);
 				cur_rec.right += cx;
 				DrawSourceItem(dc, iColumn, &cur_rec, content);
 				cur_rec.left += cx;
@@ -1119,9 +1150,10 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) &&
 		(lpDrawItemStruct->itemState & ODS_SELECTED) &&
-		(content->type == FILE_TYPE)) {
+		(content->type == FILE_TYPE))
+	{
 			RECT outline_rec;
-			MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+			memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -1152,9 +1184,8 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	}
 
 	//draw focus rectangle around non-highlightable items when they have the focus
-	else if (((lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS) &&
-		(GetFocus() == this)) {
-
+	else if (((lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS) && (GetFocus() == this))
+	{
 		RECT focus_rec;
 		focus_rec.top    = lpDrawItemStruct->rcItem.top;
 		focus_rec.bottom = lpDrawItemStruct->rcItem.bottom;
@@ -1236,6 +1267,8 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	}
 
 	//put the original objects back
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
 	dc->SelectObject(pOldFont);
 	dc->SetTextColor(crOldTextColor);
 }
@@ -1266,11 +1299,12 @@ void CDownloadListCtrl::HideSources(CPartFile* toCollapse,bool isShift,bool isCt
 }
 
 BEGIN_MESSAGE_MAP(CDownloadListCtrl, CMuleListCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_ITEMACTIVATE, OnItemActivate)
 	ON_NOTIFY_REFLECT(LVN_ITEMCHANGED, OnListModified)
 	ON_NOTIFY_REFLECT(LVN_INSERTITEM, OnListModified)
 	ON_NOTIFY_REFLECT(LVN_DELETEITEM, OnListModified)
-	ON_WM_CONTEXTMENU()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclkDownloadlist)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
@@ -1368,7 +1402,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			m_FileMenu.EnableMenuItem(MP_PAUSE,((file->GetStatus() != PS_PAUSED && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));
 			m_FileMenu.EnableMenuItem(MP_STOP,((!file->IsStopped() && file->GetStatus() != PS_ERROR && !filedone ) ? MF_ENABLED:MF_GRAYED));
-			m_FileMenu.EnableMenuItem(MP_RESUME,((file->GetStatus() == PS_PAUSED) ? MF_ENABLED:MF_GRAYED));
+			m_FileMenu.EnableMenuItem(MP_RESUME,((file->GetStatus() == PS_PAUSED || file->GetStatus() == PS_INSUFFICIENT || (file->GetStatus() == PS_ERROR && file->GetCompletionError())) ? MF_ENABLED:MF_GRAYED));
 			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 			m_FileMenu.EnableMenuItem(MP_FORCE,((file->notSeenCompleteSource() && file->GetStatus() != PS_ERROR && !filedone) ? MF_ENABLED:MF_GRAYED));//shadow#(onlydownloadcompletefiles)
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
@@ -1435,6 +1469,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			}
 			// khaos::categorymod-
 
+			GetPopupMenuPos(*this, point);
 			m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 
 			// khaos::categorymod+ Condensed this code, and we needed to remove another menu item.
@@ -1445,7 +1480,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 			VERIFY( m_Web.DestroyMenu() );
 			// khaos::categorymod+ VERIFY( cats.DestroyMenu() ); //khaos::categorymod-
-		}else {
+		}
+		else {
 			m_ClientMenu.CreatePopupMenu();
 			m_ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
 			m_ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
@@ -1473,6 +1509,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_ClientMenu.AppendMenu(MF_SEPARATOR);
 			m_ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 			//MORPH END - Added by Yun.SF3, List Requested Files
+
+			GetPopupMenuPos(*this, point);
 			m_ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 			
 			VERIFY( mc_A4AFMenu.DestroyMenu() );
@@ -1489,6 +1527,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_FileMenu.EnableMenuItem(MP_PREVIEW,MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_OPEN,MF_GRAYED); //<<--9/21/02
+		GetPopupMenuPos(*this, point);
 		m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 	}
 }
@@ -1660,14 +1699,22 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					if(selectedCount > 1)
 					{
 						SetRedraw(false);
-						while(!selectedList.IsEmpty()) { 
-							selectedList.GetHead()->ResumeFile(); 
+						while(!selectedList.IsEmpty())
+						{
+							CPartFile* partfile = selectedList.GetHead();
+							if (partfile->GetStatus() == PS_INSUFFICIENT)
+								partfile->ResumeFileInsufficient();
+							else
+								partfile->ResumeFile();
 							selectedList.RemoveHead(); 
 						}
 						SetRedraw(true);
 						break; 
 					} 
-					file->ResumeFile();
+					if (file->GetStatus() == PS_INSUFFICIENT)
+						file->ResumeFileInsufficient();
+					else
+						file->ResumeFile();
 					break;
 				//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 				case MP_FORCE://shadow#(onlydownloadcompletefiles)-start
@@ -1744,22 +1791,15 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				{
 					SetRedraw(false);
 
-					if (selectedCount == 1 
-					&& (file->GetStatus(false) == PS_READY || file->GetStatus(false) == PS_EMPTY))
+					if (selectedCount == 1 && (file->GetStatus(false) == PS_READY || file->GetStatus(false) == PS_EMPTY))
 					{
 						theApp.downloadqueue->DisableAllA4AFAuto();
 						
-						for (int sl=0;sl<SOURCESSLOTS;sl++)
-						{
-							if (!file->srclists[sl].IsEmpty())
-							{
-								POSITION pos1, pos2;
-								for(pos1 = file->srclists[sl].GetHeadPosition(); (pos2 = pos1) != NULL;)
+						POSITION pos1, pos2;
+						for (pos1 = file->srclist.GetHeadPosition(); (pos2 = pos1) != NULL;)
 								{
-									file->srclists[sl].GetNext(pos1);
-									file->srclists[sl].GetAt(pos2)->SwapToAnotherFile(false, false, false, NULL);
-								}
-							}
+							file->srclist.GetNext(pos1);
+							file->srclist.GetAt(pos2)->SwapToAnotherFile(false, false, false, NULL);
 						}
 					}
 					SetRedraw(true);
@@ -1792,28 +1832,28 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					{
 						CString str;
 						while(!selectedList.IsEmpty()) { 
-							str += theApp.CreateED2kLink(selectedList.GetHead()) + "\n"; 
+							str += CreateED2kLink(selectedList.GetHead()) + "\n"; 
 							selectedList.RemoveHead(); 
 						}
 						theApp.CopyTextToClipboard(str);
 						//AfxMessageBox(GetResString(IDS_COPIED2CB) + str);
 						break; 
 					} 
-					theApp.CopyTextToClipboard(theApp.CreateED2kLink(file));
+					theApp.CopyTextToClipboard(CreateED2kLink(file));
 					break;
 				case MP_GETHTMLED2KLINK:
 					if(selectedCount > 1)
 					{
 						CString str;
 						while(!selectedList.IsEmpty()) { 
-							str += theApp.CreateHTMLED2kLink(selectedList.GetHead()) + "\n"; 
+							str += CreateHTMLED2kLink(selectedList.GetHead()) + "\n"; 
 							selectedList.RemoveHead(); 
 						}
 						theApp.CopyTextToClipboard(str);
 						//AfxMessageBox(GetResString(IDS_COPIED2CB) + str);
 						break; 
 					} 
-					theApp.CopyTextToClipboard(theApp.CreateHTMLED2kLink(file));
+					theApp.CopyTextToClipboard(CreateHTMLED2kLink(file));
 					break;
 				case MP_OPEN:{
 					if(selectedCount > 1)
@@ -1873,7 +1913,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 						break; 
 					} 
 					//theApp.CopyTextToClipboard(theApp.CreateED2kLink(file));
-					ShellExecute(NULL, NULL, "http://edonkeyfakes.ath.cx/report/index.php?link2="+theApp.CreateED2kLink(file), NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
+					ShellExecute(NULL, NULL, "http://edonkeyfakes.ath.cx/report/index.php?link2="+CreateED2kLink(file), NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
 					break;
 				}
  				case MP_CHECKFAKE:{ 
@@ -1889,7 +1929,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 						break; 
 					} 
 					//theApp.CopyTextToClipboard(theApp.CreateED2kLink(file));
-					ShellExecute(NULL, NULL, "http://edonkeyfakes.ath.cx/fakecheck/update/fakecheck.php?ed2k="+theApp.CreateED2kLink(file), NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
+					ShellExecute(NULL, NULL, "http://edonkeyfakes.ath.cx/fakecheck/update/fakecheck.php?ed2k="+CreateED2kLink(file), NULL, theApp.glob_prefs->GetAppDir(), SW_SHOWDEFAULT);
 					break;
 				}
 				//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -2116,7 +2156,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 					client->RequestSharedFileList();
 					break;
 				case MP_MESSAGE:
-					theApp.emuledlg->chatwnd.StartSession(client);
+					theApp.emuledlg->chatwnd->StartSession(client);
 					break;
 				case MP_ADDFRIEND:{
 					theApp.friendlist->AddFriend(client);
@@ -2164,6 +2204,11 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 							{
 								fileList += "\n" ; 
 								fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
+							}
+							for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
+							{
+								fileList += "\n" ;
+								fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
 							}
 						}
 						else
@@ -2277,7 +2322,7 @@ void CDownloadListCtrl::ClearCompleted(bool ignorecats){
 		it++; // Already point to the next iterator. 
 		if(cur_item->type == FILE_TYPE){
 			CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
-			if(file->IsPartFile() == false && (CheckShowItemInGivenCat(file,curTab) || ignorecats) ){
+			if(file->IsPartFile() == false && (file->CheckShowItemInGivenCat(curTab) || ignorecats) ){
 				if (RemoveFile(file))
 					it = m_ListItems.begin();
 			}
@@ -2439,7 +2484,7 @@ int CDownloadListCtrl::Compare(CUpDownClient *client1, CUpDownClient *client2, L
 		// Maella -Support for tag ET_MOD_VERSION 0x55-
 		if( client1->GetClientSoft() == client2->GetClientSoft() )
 			if(client2->GetVersion() == client1->GetVersion() && client1->GetClientSoft() == SO_EMULE){
-				return strcmpi(client2->GetClientVerString(), client1->GetClientVerString());
+				return strcmpi(client2->GetClientSoftVer(), client1->GetClientSoftVer());
 			}
 			else {
 			return client2->GetVersion() - client1->GetVersion();
@@ -2615,8 +2660,6 @@ CString CDownloadListCtrl::getTextList() {
 		if(cur_item->type == FILE_TYPE){
 			CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
 
-			AddLogLine(false, _T("%s"), file->GetFileName());
-
 			char buffer[50+1];
 			ASSERT( !file->GetFileName().IsEmpty() );
 			strncpy(buffer, file->GetFileName(), 50);
@@ -2634,26 +2677,29 @@ CString CDownloadListCtrl::getTextList() {
 		}
 	}
 
-	AddLogLine(false, _T("%s"), out);
 	return out;
 }
 
 // khaos::categorymod+
 void CDownloadListCtrl::ShowFilesCount() {
+	uint16	count=0;
 	CString counter;
-	uint16	count=0;//theApp.downloadqueue->GetFileCount();
+	CtrlItem_Struct* cur_item;
 	uint16	totcnt=0;
 
 	for(ListItems::const_iterator it = m_ListItems.begin(); it != m_ListItems.end(); it++){
-		const CtrlItem_Struct* cur_item = it->second;
+		cur_item = it->second;
 		if (cur_item->type == FILE_TYPE){
 			CPartFile* file=(CPartFile*)cur_item->value;
-			if (CheckShowItemInGivenCat(file, curTab)) count++; totcnt++;
+			if (file->CheckShowItemInGivenCat(curTab))
+				count++;
+			totcnt++;
 		}
 	}
 
-	counter.Format("%s: %u (%u Total | %s)", GetResString(IDS_TW_DOWNLOADS),count,totcnt,theApp.glob_prefs->GetCategory(curTab)->viewfilters.bSuspendFilters ? GetResString(IDS_CAT_FILTERSSUSP) : GetResString(IDS_CAT_FILTERSACTIVE));
-	theApp.emuledlg->transferwnd.GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(counter);
+	if (theApp.glob_prefs->GetCategory(curTab))
+		counter.Format("%s: %u (%u Total | %s)", GetResString(IDS_TW_DOWNLOADS),count,totcnt,theApp.glob_prefs->GetCategory(curTab)->viewfilters.bSuspendFilters ? GetResString(IDS_CAT_FILTERSSUSP) : GetResString(IDS_CAT_FILTERSACTIVE));
+	theApp.emuledlg->transferwnd->GetDlgItem(IDC_DOWNLOAD_TEXT)->SetWindowText(counter);
 }
 // khaos::categorymod-
 
@@ -2696,9 +2742,10 @@ void CDownloadListCtrl::ChangeCategory(int newsel){
 		if (cur_item->type == FILE_TYPE){
 			CPartFile* file = reinterpret_cast<CPartFile*>(cur_item->value);
 			
-			if ( !CheckShowItemInGivenCat(file,newsel)) HideFile(file);
-				else ShowFile(file);
-
+			if (!file->CheckShowItemInGivenCat(newsel))
+				HideFile(file);
+			else
+				ShowFile(file);
 		}
 	}
 
@@ -2730,7 +2777,8 @@ void CDownloadListCtrl::HideFile(CPartFile* tohide){
 void CDownloadListCtrl::ShowFile(CPartFile* toshow){
 	// Retrieve all entries matching the source
 	std::pair<ListItems::const_iterator, ListItems::const_iterator> rangeIt = m_ListItems.equal_range(toshow);
-	for(ListItems::const_iterator it = rangeIt.first; it != rangeIt.second; it++){
+	ListItems::const_iterator it = rangeIt.first;
+	if(it != rangeIt.second){
 		CtrlItem_Struct* updateItem  = it->second;
 
 		// Check if entry is already in the List
@@ -2740,8 +2788,6 @@ void CDownloadListCtrl::ShowFile(CPartFile* toshow){
 		sint16 result = FindItem(&find);
 		if(result == (-1))
 			InsertItem(LVIF_PARAM|LVIF_TEXT,GetItemCount(),LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)updateItem);
-
-		return;
 	}
 }
 
@@ -2868,8 +2914,8 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				in_addr server;
 				server.S_un.S_addr = client->GetServerIP();
 
-				info.Format(GetResString(IDS_NICKNAME)+" %s\n"
-					+GetResString(IDS_SERVER)+" %s:%d\n"
+				info.Format(GetResString(IDS_NICKNAME) + _T(" %s\n")
+							+ GetResString(IDS_SERVER) + _T(": %s:%d\n")
 					+GetResString(IDS_SOURCEINFO),
 							client->GetUserName(),
 							inet_ntoa(server), client->GetServerPort(),
@@ -2895,7 +2941,9 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 						} 
 						info += "\n" + GetRateString(client->GetFileRate());
 					}
-				} catch(...) { 
+				}
+				catch(...) {
+					ASSERT(0);
 					//Information not received = not connected or connecting 
 					info += "\n" + GetResString(IDS_CMT_NOTCONNECTED); 
 				} 

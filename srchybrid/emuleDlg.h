@@ -14,37 +14,38 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
-// emuleDlg.h : Headerdatei
-//
 #pragma once
-#include "sockets.h"
-#include "afxcmn.h"
-#include "afxwin.h"
-#include "serverlistctrl.h"
-#include "knownfilelist.h"
-#include "TransferWnd.h"
-#include "ServerWnd.h"
-#include "SharedFilesWnd.h"
-#include "ChatWnd.h"
-#include "traydialog.h"
-#include "BtnST.h"
-#include "StatisticsDlg.h"
+#include "TrayDialog.h"
 #include "MeterIcon.h"
-#include "IrcWnd.h"
-#include "TaskbarNotifier.h"
-#include "MuleToolBarCtrl.h"
-#include "MuleStatusBarCtrl.h"
+#include "TitleMenu.h"
 //MORPH START - Added by SiRoB, New Systray Popup from fusion
 #include "MuleSystrayDlg.h"
 //MORPH END   - Added by SiRoB, New Systray Popup from fusion
-#define MP_RESTORE		4001
-#define MP_CONNECT		4002
-#define MP_DISCONNECT	4003
-#define MP_EXIT			4004
 
-//MORPH START - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
+namespace Kademlia {
+	class CSearch;
+	class CContact;
+	class CEntry;
+	class CUInt128;
+};
+
+class CChatWnd;
+class CIrcWnd;
+class CKademliaWnd;
+class CKnownFileList; 
+class CMainFrameDropTarget;
+class CMuleStatusBarCtrl;
+class CMuleToolbarCtrl;
+class CPreferencesDlg;
+class CSearchDlg;
+class CServerWnd;
+class CSharedFilesWnd;
+class CStatisticsDlg;
+class CTaskbarNotifier;
+class CTransferWnd;
+struct Status;
+
+// Elandal:ThreadSafeLogging -->
 class LogItem {
 public:
     bool addtostatusbar;
@@ -52,10 +53,9 @@ public:
 };
 //MORPH END   - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
 
-class CKnownFileList; 
-class CPreferencesDlg;
-class CSearchDlg;
-class CKademliaWnd;
+// emuleapp <-> emuleapp
+#define OP_ED2KLINK				12000
+#define OP_CLCOMMAND			12001
 
 // CemuleDlg Dialogfeld
 class CemuleDlg : public CTrayDialog
@@ -74,6 +74,9 @@ public:
 	void			ShowMessageState(uint8 iconnr);
 	void			SetActiveDialog(CDialog* dlg);
 	void			ShowTransferRate(bool forceAll=false);
+	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
+	void			ShowPing();
+	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 	void			Localize();
 	void			ResetLog();
 	void			ResetDebugLog();
@@ -88,26 +91,24 @@ public:
 	CString			GetAllDebugLogEntries();
 	void			ApplyHyperTextFont(LPLOGFONT pFont);
 	void			SetKadButtonState();
+	void			ProcessED2KLink(LPCTSTR pszData);
 
-	CTransferWnd	transferwnd;
-	CServerWnd		serverwnd;
+	CTransferWnd*	transferwnd;
+	CServerWnd*		serverwnd;
 	CPreferencesDlg* preferenceswnd;
-	CSharedFilesWnd	sharedfileswnd;
+	CSharedFilesWnd* sharedfileswnd;
 	CSearchDlg*		searchwnd;
-	CChatWnd		chatwnd;
-	CMuleStatusBarCtrl  statusbar;
-	CDialog*		activewnd;
-	CStatisticsDlg  statisticswnd;
-	CIrcWnd			ircwnd;
-	CTaskbarNotifier m_wndTaskbarNotifier;
-	CMuleToolbarCtrl toolbar;
+	CChatWnd*		chatwnd;
+	CMuleStatusBarCtrl* statusbar;
+	CStatisticsDlg*  statisticswnd;
+	CIrcWnd*		ircwnd;
+	CTaskbarNotifier* m_wndTaskbarNotifier;
+	CMuleToolbarCtrl* toolbar;
 	CKademliaWnd*	kademliawnd;
+
+	CDialog*		activewnd;
 	uint8			status;
-	HICON sourceTrayIcon;
 	CFont			m_fontHyperText;
-	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
-	void			ShowPing();
-	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 	//MORPH START - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
 	// thread safe log calls
 	void   QueueDebugLogLine(bool addtostatusbar,CString line,...);
@@ -120,14 +121,20 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnTrayRButtonDown(CPoint pt);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	BOOL OnQueryEndSession();
 
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSize(UINT nType,int cx,int cy);
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButton2();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnBnClickedHotmenu();
+	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
+	afx_msg void OnSysColorChange();
+	afx_msg BOOL OnQueryEndSession();
+	afx_msg void OnEndSession(BOOL bEnding);
 
 	// quick-speed changer -- based on xrmb
 	afx_msg void QuickSpeedUpload(UINT nID);
@@ -158,6 +165,9 @@ protected:
 	// Jigle SOAP service
 	afx_msg LRESULT OnJigleSearchResponse(WPARAM wParam, LPARAM lParam);
 
+	// VersionCheck DNS
+	afx_msg LRESULT OnVersionCheckResponse(WPARAM wParam, LPARAM lParam);
+
 	// Kademlia message
 	afx_msg LRESULT OnKademliaSearchAdd		(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnKademliaSearchRem		(WPARAM wParam, LPARAM lParam);
@@ -176,13 +186,13 @@ protected:
 	afx_msg LRESULT OnKademliaOverheadSend	(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnKademliaOverheadRecv	(WPARAM wParam, LPARAM lParam);
 
-	virtual void OnSize(UINT nType,int cx,int cy);
 	void		 OnOK()			{}
 	void		 OnClose();
+	bool CanClose();
 
-	DECLARE_MESSAGE_MAP()
 private:
-	bool			ready,startUpMinimized;
+	bool			ready;
+	bool			startUpMinimized;
 	HICON			connicons[3];
 	HICON			transicons[4];
 	HICON			imicons[3];
@@ -190,14 +200,16 @@ private:
 	HICON			usericon;
 
 	CMeterIcon trayIcon;
-
-	HICON sourceTrayIconGrey;
-	HICON sourceTrayIconLow;
+	HICON			sourceTrayIcon;		// do not use those icons for anything else than the traybar!!!
+	HICON			sourceTrayIconGrey;	// do not use those icons for anything else than the traybar!!!
+	HICON			sourceTrayIconLow;	// do not use those icons for anything else than the traybar!!!
+	int				m_iMsgIcon;
 
 	uint32			lastuprate;
 	uint32			lastdownrate;
 	CImageList		imagelist;
 	CTitleMenu		trayPopup;
+	CMainFrameDropTarget* m_pDropTarget;
 
 	UINT_PTR m_hTimer;
 	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
@@ -206,12 +218,19 @@ private:
 	void CloseConnection();
 	void RestoreWindow();
 	void UpdateTrayIcon(int procent);
+	void ShowConnectionStateIcon();
+	void ShowTransferStateIcon();
+	void ShowUserStateIcon();
 	void AddSpeedSelectorSys(CMenu* addToMenu);
 	int  GetRecMaxUpload();
 	int	 IsNewVersionAvailable();
 	void LoadNotifier(CString configuration); //<<--enkeyDEV(kei-kun) -TaskbarNotifier-
 	bool notifierenabled;					  //<<-- enkeyDEV(kei-kun) -Quick disable/enable notifier-
 	void ShowToolPopup(bool toolsonly=false);
+	void SetStatusBarPartsSize();
+	void SetAllIcons();
+
+	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
 
 	//MORPH START - Added by SiRoB, New Systray Popup from fusion
 	CMuleSystrayDlg *m_pSystrayDlg;
@@ -221,13 +240,7 @@ private:
 	CCriticalSection queueLock;
 	CTypedPtrList<CPtrList, LogItem*> m_LogQueue;
 	//MORPH END   - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
-public:
-	afx_msg void OnBnClickedHotmenu();
-	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
-	afx_msg void OnSysColorChange();
 };
-
-void InitWindowStyles(CWnd* pWnd);
 
 
 // ALL emuledlg WM_USER messages are to be declared here!!
@@ -246,6 +259,9 @@ enum EEmuleUserMsgs
 	WEB_SHARED_FILES_RELOAD,
 
 	WM_JIGLE_SEARCH_RESPONSE,
+
+	// VC
+	WM_VERSIONCHECK_RESPONSE,
 
     // Messages sent to main app window from within Kademlia threads
     WM_KAD_SEARCHADD,

@@ -18,10 +18,19 @@
 // CatDialog.cpp : implementation file
 
 #include "stdafx.h"
-#include "eMule.h"
+#include "emule.h"
 #include "CatDialog.h"
 #include "Preferences.h"
 #include "otherfunctions.h"
+#include "SharedFileList.h"
+#include "emuledlg.h"
+#include "TransferWnd.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
 
 // CCatDialog dialog
 
@@ -59,8 +68,9 @@ void CCatDialog::UpdateData(){
 	m_ctlColor.SetColor(selcolor);
 
 	// HoaX_69: AutoCat
-	//MORPH - Removed by SiRoB, Due to Khaos Categorie
+	//MORPH - Changed by SiRoB, Due to Khaos Categorie
 	//GetDlgItem(IDC_AUTOCATEXT)->SetWindowText(m_myCat->autocat);
+	GetDlgItem(IDC_AUTOCATEXT)->SetWindowText(m_myCat->viewfilters.sAdvancedFilterMask);
 
 	m_prio.SetCurSel(m_myCat->prio);
 
@@ -89,8 +99,6 @@ void CCatDialog::UpdateData(){
 
 	CheckDlgButton(IDC_CHECK_FS, m_myCat->selectioncriteria.bFileSize?1:0);
 	CheckDlgButton(IDC_CHECK_MASK, m_myCat->selectioncriteria.bAdvancedFilterMask?1:0);
-
-	GetDlgItem(IDC_AUTOCATEXT)->SetWindowText(m_myCat->viewfilters.sAdvancedFilterMask);
 	// khaos::categorymod-
 }
 
@@ -198,16 +206,29 @@ void CCatDialog::OnBnClickedOk()
 	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->comment,255);
 
 	MakeFoldername(m_myCat->incomingpath);
-	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
-	if (!PathFileExists(m_myCat->incomingpath)) ::CreateDirectory(m_myCat->incomingpath,0);
+
+	if (!theApp.glob_prefs->IsShareableDirectory(m_myCat->incomingpath)){
+		_snprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), theApp.glob_prefs->GetIncomingDir());
+		MakeFoldername(m_myCat->incomingpath);
+	}
+
+	if (!PathFileExists(m_myCat->incomingpath))
+		if (! ::CreateDirectory(m_myCat->incomingpath,0))
+		{
+			MessageBox(GetResString(IDS_ERR_BADFOLDER),GetResString(IDS_ERROR));
+			strcpy(m_myCat->incomingpath,oldpath);
+			return;
+		}
 
 	if (CString(m_myCat->incomingpath).CompareNoCase(oldpath)!=0)
 		theApp.sharedfiles->Reload();
 
 	m_myCat->color=newcolor;
 	m_myCat->prio=m_prio.GetCurSel();
-	//MORPH - Removed by SiRoB, Due to Khoas categori
+	//MORPH - Changed by SiRoB, Due to Khoas categori
 	//GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->autocat.GetBuffer() ,255);
+	GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->viewfilters.sAdvancedFilterMask);
+
 	// khaos::kmod+ Category Advanced A4AF Mode and Auto Cat
 	m_myCat->iAdvA4AFMode = m_comboA4AF.GetCurSel();
 	// khaos::kmod-
@@ -236,13 +257,11 @@ void CCatDialog::OnBnClickedOk()
 	GetDlgItem(IDC_ASC_MAX)->GetWindowText(sBuffer);
 	m_myCat->viewfilters.nAvailSourceCountMax = atoi(sBuffer);
 
-	GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->viewfilters.sAdvancedFilterMask);
-
 	m_myCat->selectioncriteria.bFileSize = IsDlgButtonChecked(IDC_CHECK_FS)?true:false;
 	m_myCat->selectioncriteria.bAdvancedFilterMask = IsDlgButtonChecked(IDC_CHECK_MASK)?true:false;	
 	// khaos::categorymod-
 
-	theApp.emuledlg->transferwnd.downloadlistctrl.Invalidate();
+	theApp.emuledlg->transferwnd->downloadlistctrl.Invalidate();
 
 	OnOK();
 }

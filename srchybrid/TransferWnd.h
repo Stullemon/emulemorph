@@ -17,20 +17,19 @@
 
 
 #pragma once
-#include "uploadlistctrl.h"
-#include "downloadlistctrl.h"
 #include "ResizableLib\ResizableDialog.h"
 #include "SplitterControl.h"
-#include "queuelistctrl.h"
-#include "clientlistctrl.h"
 #include "BtnST.h"
-#include "CatDialog.h"
-#include "tabctrl.hpp"
+#include "TabCtrl.hpp"
+#include "UploadListCtrl.h"
+#include "DownloadListCtrl.h"
+#include "QueueListCtrl.h"
+#include "ClientListCtrl.h"
 
-#define COLLAPSE_ONLY	0
-#define EXPAND_ONLY		1
-#define EXPAND_COLLAPSE	2
-// CTransferWnd dialog
+class CUploadListCtrl;
+class CDownloadListCtrl;
+class CQueueListCtrl;
+class CClientListCtrl;
 
 class CTransferWnd : public CResizableDialog
 {
@@ -66,6 +65,8 @@ protected:
 	void SetInitLayout();
 	void DoSplitResize(int delta);
 	CSplitterControl m_wndSplitter;
+	void SetAllIcons();
+	//MOPRH Removed by SiRoB, Due to Khaos Cat /*CString GetCatTitle(int catid);*/
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -114,7 +115,7 @@ public:
 	void OnLButtonUp(UINT nFlags, CPoint point);
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
 	// khaos::categorymod+	
-	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,bool addTab=true);
+	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
 	// khaos::categorymod-
 	afx_msg void OnLvnKeydownDownloadlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();

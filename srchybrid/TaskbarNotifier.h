@@ -1,12 +1,7 @@
 // CTaskbarNotifier Header file
 // By John O'Byrne - 15 July 2002
 // Modified by kei-kun
-
-
 #pragma once
-
-#include <ShellApi.h>
-#include "resource.h"
 
 #define TN_TEXT_NORMAL			0x0000
 #define TN_TEXT_BOLD			0x0001
@@ -26,7 +21,6 @@ enum TbnMsg {
 };
 //END - enkeyDEV(kei-kun) -TaskbarNotifier-
 
-//CTaskbarNotifierHistory
 class CTaskbarNotifierHistory : public CObject
 {
 public:

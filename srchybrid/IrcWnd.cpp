@@ -1,3 +1,6 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
 //as published by the Free Software Foundation; either
@@ -11,15 +14,15 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// IrcWnd.cpp : implementation file
-//
-
 #include "stdafx.h"
-#include "IrcWnd.h"
 #include "emule.h"
+#include "IrcWnd.h"
+#include "IrcMain.h"
+#include "emuledlg.h"
 #include "otherfunctions.h"
-#include "opcodes.h"
+#include "MenuCmds.h"
+#include "HTRichEditCtrl.h"
+#include "ClosableTabCtrl.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -27,21 +30,67 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
+#define NICK_LV_PROFILE_NAME _T("IRCNicksLv")
+#define CHAN_LV_PROFILE_NAME _T("IRCChannelsLv")
+
+
+struct ChannelList
+{
+	CString name;
+	CString users;
+	CString desc;
+};
+
+struct Channel
+{
+	CString	name;
+	CHTRichEditCtrl log;
+	CString title;
+	CPtrList nicks;
+	uint8 type;
+	CStringArray history;
+	uint16 history_pos;
+	// Type is mainly so that we can use this for IRC and the eMule Messages..
+	// 1-Status, 2-Channel list, 4-Channel, 5-Private Channel, 6-eMule Message(Add later)
+};
+
+struct Nick{
+	CString nick;
+	CString op;
+	CString hop;
+	CString voice;
+	CString uop;
+	CString owner;
+	CString protect;
+};
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
 // CIrcWnd dialog
-/////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////
+//
+
 IMPLEMENT_DYNAMIC(CIrcWnd, CDialog)
+
+BEGIN_MESSAGE_MAP(CIrcWnd, CDialog)
+	// Tab control
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB2, OnTcnSelchangeTab2)
+	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
+
+	ON_WM_SIZE()
+	ON_WM_CREATE()
+    ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
+END_MESSAGE_MAP()
+
 CIrcWnd::CIrcWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CIrcWnd::IDD, pParent)
 {
-   m_pIrcMain = 0; // i_a: bugfix: crash prevention 
-   m_bConnected = false;          // i_a 
-   m_bLoggedIn = false;          // i_a 
-   m_pCurrentChannel = 0;         // i_a 
-   MEMSET(&asc_sort, 0, sizeof(asc_sort)); // i_a 
+   m_pIrcMain = NULL;
+   m_bConnected = false;
+   m_bLoggedIn = false;
+   m_pCurrentChannel = NULL;
+   nickList.m_pParent = this;
+   serverChannelList.m_pParent = this;
 }
 
 CIrcWnd::~CIrcWnd()
@@ -72,6 +121,25 @@ void CIrcWnd::UpdateNickCount(){
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(0, &hdi);
 	strRes.ReleaseBuffer();
+}
+
+void CIrcWnd::OnSysColorChange()
+{ 
+	CResizableDialog::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CIrcWnd::SetAllIcons()
+{ 
+	CImageList iml;
+	iml.DeleteImageList();
+	iml.Create(16,16,theApp.m_iDfltImageListColorFlags | ILC_MASK,0,1);
+	iml.Add(CTempIconLoader("Chat"));
+	iml.Add(CTempIconLoader("Message"));
+	iml.Add(CTempIconLoader("MessagePending"));
+	channelselect.SetImageList(&iml);
+	m_imagelist.DeleteImageList();
+	m_imagelist.Attach(iml.Detach());
 }
 
 void CIrcWnd::Localize(){
@@ -117,6 +185,12 @@ void CIrcWnd::Localize(){
 	hdi.mask = HDI_TEXT;
 	CString strRes;
 
+	pHeaderCtrl = nickList.GetHeaderCtrl();
+
+	strRes = GetResString(IDS_STATUS);
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
+	pHeaderCtrl->SetItem(1, &hdi);
+
 	UpdateNickCount();
 
 	pHeaderCtrl = serverChannelList.GetHeaderCtrl();
@@ -135,17 +209,22 @@ void CIrcWnd::Localize(){
 	hdi.pszText = strRes.GetBuffer();
 	pHeaderCtrl->SetItem(0, &hdi);
 	strRes.ReleaseBuffer();
-
 }
 
-BOOL CIrcWnd::OnInitDialog(){
+BOOL CIrcWnd::OnInitDialog()
+{
 	CResizableDialog::OnInitDialog();
+#ifdef _DEBUG
+	CString strBuff;
+	nickList.GetWindowText(strBuff);
+	ASSERT( strBuff == NICK_LV_PROFILE_NAME );
 
-	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags | ILC_MASK,0,1);
-	imagelist.Add(CTempIconLoader("Chat"));
-	imagelist.Add(CTempIconLoader("Message"));
-	imagelist.Add(CTempIconLoader("MessagePending"));
-	channelselect.SetImageList(&imagelist);
+	strBuff.Empty();
+	serverChannelList.GetWindowText(strBuff);
+	ASSERT( strBuff == CHAN_LV_PROFILE_NAME );
+#endif
+
+	SetAllIcons();
 
 	m_bConnected = false;
 	m_bLoggedIn = false;
@@ -154,16 +233,12 @@ BOOL CIrcWnd::OnInitDialog(){
 	m_pIrcMain->SetIRCWnd(this);
 
 	nickList.InsertColumn(0,GetResString(IDS_IRC_NICK),LVCFMT_LEFT,113);
-	nickList.InsertColumn(1,"",LVCFMT_LEFT,60);
+	nickList.InsertColumn(1,GetResString(IDS_STATUS),LVCFMT_LEFT,60);
 
 	serverChannelList.InsertColumn(0, GetResString(IDS_IRC_NAME), LVCFMT_LEFT, 203 );
 	serverChannelList.InsertColumn(1, GetResString(IDS_UUSERS), LVCFMT_LEFT, 50 );
 	serverChannelList.InsertColumn(2, GetResString(IDS_DESCRIPTION), LVCFMT_LEFT, 350 );
 
-	CRect rect;
-	GetDlgItem(IDC_STATUSWINDOW)->GetWindowRect(rect);
-	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	statusWindow.CreateEx(WS_EX_STATICEDGE,0,"MsgWnd",WS_CHILD | HTC_WORDWRAP |HTC_AUTO_SCROLL_BARS | HTC_UNDERLINE_HOVER,rect.left,rect.top,rect.Width(),rect.Height(),m_hWnd,0);
 	NewChannel( GetResString(IDS_STATUS), 1 );
 	NewChannel( GetResString(IDS_IRC_CHANNELLIST), 2);
 	UpdateFonts(&theApp.emuledlg->m_fontHyperText);
@@ -181,29 +256,36 @@ BOOL CIrcWnd::OnInitDialog(){
 	AddAnchor(IDC_NICKLIST,TOP_LEFT,BOTTOM_LEFT);
 	AddAnchor(IDC_TITLEWINDOW,TOP_LEFT,TOP_RIGHT);
 	AddAnchor(IDC_SERVERCHANNELLIST,TOP_LEFT,BOTTOM_RIGHT);
-	AddAnchor(statusWindow,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_TAB2,TOP_LEFT, TOP_RIGHT);
 
-	serverChannelList.SortItems(SortProcChanL, 11);
+	serverChannelList.SortItems(serverChannelList.SortProc, 11);
 	serverChannelList.SetSortArrow(1, false);
-	nickList.SortItems(SortProcNick, 0);
+	nickList.SortItems(nickList.SortProc, 0);
 	return true;
 }
 
 void CIrcWnd::UpdateFonts(CFont* pFont)
 {
-	if (pFont->m_hObject){
-		// since the font is selectable this does not make sense any longer. would have to size those controls
-		// according the selected font. maybe in some future version.
-		//statusWindow.SetFont(pFont);
-		//titleWindow.SetFont(pFont);
-		//inputWindow.SetFont(pFont);
+	TCITEM tci;
+	tci.mask = TCIF_PARAM;
+	int i = 0;
+	while (channelselect.GetItem(i++, &tci)){
+		Channel* ch = (Channel*)tci.lParam;
+		if (ch->log.m_hWnd != NULL)
+			ch->log.SetFont(pFont);
 	}
 }
 
 void CIrcWnd::OnSize(UINT nType, int cx, int cy) 
 {
 	CResizableDialog::OnSize(nType, cx, cy);
+
+	if (m_pCurrentChannel && m_pCurrentChannel->log.m_hWnd){
+		CRect rcChannel;
+		serverChannelList.GetWindowRect(&rcChannel);
+		ScreenToClient(&rcChannel);
+		m_pCurrentChannel->log.SetWindowPos(NULL, rcChannel.left, rcChannel.top, rcChannel.Width(), rcChannel.Height(), SWP_NOZORDER);
+	}
 }
 
 int CIrcWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) {
@@ -218,13 +300,12 @@ void CIrcWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TITLEWINDOW, titleWindow);
 	DDX_Control(pDX, IDC_SERVERCHANNELLIST, serverChannelList);
 	DDX_Control(pDX, IDC_TAB2, channelselect);
-
 }
 
 BOOL CIrcWnd::OnCommand(WPARAM wParam,LPARAM lParam ){ 
-   int nickItem= nickList.GetSelectionMark(); 
+   int nickItem = nickList.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
    int chanItem= channelselect.GetCurSel(); 
-   //int chanLItem= serverChannelList.GetSelectionMark(); 
+   //int chanLItem= serverChannelList.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED); 
    switch( wParam ){
 	   case IDC_BN_IRCCONNECT: {
 		   OnBnClickedBnIrcconnect();
@@ -234,6 +315,7 @@ BOOL CIrcWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		   OnBnClickedChatsend();
 		   return true;
 	   }
+	   case MP_REMOVE:
 	   case IDC_CLOSECHAT: {
 		   OnBnClickedClosechat();
 		   return true;
@@ -453,8 +535,7 @@ BOOL CIrcWnd::PreTranslateMessage(MSG* pMsg) {
 			ScrollHistory(pMsg->wParam == VK_DOWN);
 			return TRUE;
 		}	   
-   }
-
+	}
 	return CResizableDialog::PreTranslateMessage(pMsg);
 }
 
@@ -472,11 +553,9 @@ void CIrcWnd::OnBnClickedClosechat(int nItem)
 {
 	TCITEM item;
 	item.mask = TCIF_PARAM;
-
-	if (nItem==-1) {
+	if (nItem == -1)
 		nItem = channelselect.GetCurSel();
-	}
-	if (nItem== (-1))
+	if (nItem == -1)
 		return;
 
 	channelselect.GetItem(nItem,&item);
@@ -497,55 +576,58 @@ void CIrcWnd::OnBnClickedClosechat(int nItem)
 
 void CIrcWnd::OnTcnSelchangeTab2(NMHDR *pNMHDR, LRESULT *pResult)
 {
-//	int index = -1;
-//	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: Add your control notification handler code here
 	nickList.DeleteAllItems();
 
 	TCITEM item;
 	item.mask = TCIF_PARAM;
 	int cur_sel = channelselect.GetCurSel();
-	if (cur_sel == (-1))
+	if (cur_sel == -1)
 		return;
-	channelselect.GetItem(cur_sel,&item);
+	if (!channelselect.GetItem(cur_sel, &item))
+		return;
 	Channel* update = (Channel*)item.lParam;
+
 	m_pCurrentChannel = update;
 	UpdateNickCount();
-	if( m_pCurrentChannel->type == 1 ){
+
+	if (m_pCurrentChannel->type == 1){
 		titleWindow.SetWindowText(GetResString(IDS_STATUS));
-		statusWindow.ShowWindow(SW_SHOW);
-		serverChannelList.ShowWindow(SW_HIDE);
 	}
-	if( m_pCurrentChannel->type == 2 ){
+	if (m_pCurrentChannel->type == 2){
 		titleWindow.SetWindowText(GetResString(IDS_IRC_CHANNELLIST));
-		statusWindow.ShowWindow(SW_HIDE);
 		serverChannelList.ShowWindow(SW_SHOW);
+		TCITEM tci;
+		tci.mask = TCIF_PARAM;
+		int i = 0;
+		while (channelselect.GetItem(i++, &tci)){
+			Channel* ch2 = (Channel*)tci.lParam;
+			if (ch2 != m_pCurrentChannel && ch2->log.m_hWnd != NULL)
+				ch2->log.ShowWindow(SW_HIDE);
+		}
 		return;
 	}
+
 	SetActivity( m_pCurrentChannel->name, false );
-	statusWindow.SetHyperText(&m_pCurrentChannel->log);
-	statusWindow.ShowWindow(SW_SHOW);
+	CRect rcChannel;
+	serverChannelList.GetWindowRect(&rcChannel);
+	ScreenToClient(&rcChannel);
+	m_pCurrentChannel->log.SetWindowPos(NULL, rcChannel.left, rcChannel.top, rcChannel.Width(), rcChannel.Height(), SWP_NOZORDER);
+	m_pCurrentChannel->log.ShowWindow(SW_SHOW);
+	TCITEM tci;
+	tci.mask = TCIF_PARAM;
+	int i = 0;
+	while (channelselect.GetItem(i++, &tci)){
+		Channel* ch2 = (Channel*)tci.lParam;
+		if (ch2 != m_pCurrentChannel && ch2->log.m_hWnd != NULL)
+			ch2->log.ShowWindow(SW_HIDE);
+	}
 	serverChannelList.ShowWindow(SW_HIDE);
 	RefreshNickList( update->name );
 	SetTitle( update->name, update->title );
+	GetDlgItem(IDC_INPUTWINDOW)->SetFocus();
 	if( pResult )
 		*pResult = 0;
 }
-
-BEGIN_MESSAGE_MAP(CIrcWnd, CDialog)
-	ON_NOTIFY(NM_CLICK, IDC_NICKLIST, OnNMClickNicklist)
-	ON_NOTIFY(NM_DBLCLK, IDC_SERVERCHANNELLIST, OnNMDblclkserverChannelList)
-	ON_NOTIFY(NM_DBLCLK, IDC_NICKLIST, OnNMDblclkNickList)
-	ON_NOTIFY(LVN_COLUMNCLICK, IDC_NICKLIST, OnColumnClickNick)
-	ON_NOTIFY(LVN_COLUMNCLICK, IDC_SERVERCHANNELLIST, OnColumnClickChanL)
-	ON_NOTIFY(NM_RCLICK, IDC_NICKLIST, OnNMRclickNick)
-	ON_NOTIFY(NM_RCLICK, IDC_SERVERCHANNELLIST, OnNMRclickChanL)
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB2, OnTcnSelchangeTab2)
-	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
-
-	ON_WM_SIZE()
-	ON_WM_CREATE()
-END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -586,52 +668,71 @@ void CIrcWnd::AddChannelToList( CString name, CString user, CString description 
 	serverChannelList.SetItemText(itemnr,2,toadd->desc);
 }
 
-int CIrcWnd::SortProcChanL(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
+///////////////////////////////////////////////////////////////////////////////
+//  CIrcChannelListCtrl
+
+IMPLEMENT_DYNAMIC(CIrcChannelListCtrl, CMuleListCtrl)
+
+BEGIN_MESSAGE_MAP(CIrcChannelListCtrl, CMuleListCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
+END_MESSAGE_MAP()
+
+CIrcChannelListCtrl::CIrcChannelListCtrl()
+{
+	memset(m_asc_sort, 0, sizeof m_asc_sort);
+	m_pParent = NULL;
+}
+
+int CIrcChannelListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
 	ChannelList* item1 = (ChannelList*)lParam1;
 	ChannelList* item2 = (ChannelList*)lParam2;
-		switch(lParamSort){
+	switch(lParamSort){
 		case 0: 
-			return CString(item1->name).CompareNoCase(item2->name);
+			return item1->name.CompareNoCase(item2->name);
 		case 10:
-			return CString(item2->name).CompareNoCase(item1->name);
+			return item2->name.CompareNoCase(item1->name);
 		case 1: 
 			return atoi(item1->users) - atoi(item2->users);
 		case 11:
 			return atoi(item2->users) - atoi(item1->users);
 		case 2: 
-			return CString(item1->desc).CompareNoCase(item2->desc);
+			return item1->desc.CompareNoCase(item2->desc);
 		case 12:
-			return CString(item2->desc).CompareNoCase(item1->desc);
+			return item2->desc.CompareNoCase(item1->desc);
 		default:
 			return 0;
 	}
 }
 
-void CIrcWnd::OnColumnClickChanL( NMHDR* pNMHDR, LRESULT* pResult){
-
+void CIrcChannelListCtrl::OnLvnColumnclick(NMHDR* pNMHDR, LRESULT* pResult)
+{
 	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	asc_sort[pNMListView->iSubItem] = !asc_sort[pNMListView->iSubItem];
-	serverChannelList.SetSortArrow(pNMListView->iSubItem, asc_sort[pNMListView->iSubItem]);
-	serverChannelList.SortItems(SortProcChanL, pNMListView->iSubItem+ ((asc_sort[pNMListView->iSubItem])? 0:10));
+	m_asc_sort[pNMListView->iSubItem] = !m_asc_sort[pNMListView->iSubItem];
+	SetSortArrow(pNMListView->iSubItem, m_asc_sort[pNMListView->iSubItem]);
+	SortItems(SortProc, pNMListView->iSubItem + ((m_asc_sort[pNMListView->iSubItem]) ? 0 : 10));
 	*pResult = 0;
 }
 
-void CIrcWnd::OnNMRclickChanL(NMHDR *pNMHDR, LRESULT *pResult){
-	POINT point; 
-	::GetCursorPos(&point); 
-	CPoint p = point; 
-	ScreenToClient(&p); 
-	CTitleMenu m_ChanLMenu;
-	m_ChanLMenu.CreatePopupMenu();
-	m_ChanLMenu.AddMenuTitle(GetResString(IDS_IRC_CHANNEL));
-	m_ChanLMenu.AppendMenu(MF_STRING,Irc_Join,GetResString(IDS_IRC_JOIN)); 
-	m_ChanLMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this); 
-	VERIFY( m_ChanLMenu.DestroyMenu() );
-	*pResult = 0; 
+void CIrcChannelListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	int iCurSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	CTitleMenu ChanLMenu;
+	ChanLMenu.CreatePopupMenu();
+	ChanLMenu.AddMenuTitle(GetResString(IDS_IRC_CHANNEL));
+	ChanLMenu.AppendMenu(MF_STRING, Irc_Join, GetResString(IDS_IRC_JOIN));
+	if (iCurSel == -1)
+		ChanLMenu.EnableMenuItem(Irc_Join, MF_GRAYED);
+	GetPopupMenuPos(*this, point);
+	ChanLMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, m_pParent); 
+	VERIFY( ChanLMenu.DestroyMenu() );
 }
 
-void CIrcWnd::OnNMDblclkserverChannelList(NMHDR *pNMHDR, LRESULT *pResult){
-	JoinChannels();
+void CIrcChannelListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	m_pParent->JoinChannels();
 	*pResult = 0;
 }
 
@@ -803,7 +904,7 @@ bool CIrcWnd::ChangeNick( CString channel, CString oldnick, CString newnick ){
 		update->nicks.GetNext(pos1);
 		Nick* curr_nick = (Nick*)update->nicks.GetAt(pos2);
 		if( curr_nick->nick == oldnick ){
-			if( update = m_pCurrentChannel ){
+			if((update = m_pCurrentChannel) != NULL){
 				LVFINDINFO find;
 				find.flags = LVFI_PARAM;
 				find.lParam = (LPARAM)curr_nick;
@@ -828,7 +929,7 @@ bool CIrcWnd::ChangeMode( CString channel, CString nick, CString mode ){
 		Nick* curr_nick = (Nick*)update->nicks.GetAt(pos2);
 		if( curr_nick->nick == nick ){
 			sint32 itemnr = -1;
-			if( update = m_pCurrentChannel ){
+			if( (update = m_pCurrentChannel) != NULL ){
 				LVFINDINFO find;
 				find.flags = LVFI_PARAM;
 				find.lParam = (LPARAM)curr_nick;
@@ -882,12 +983,12 @@ bool CIrcWnd::ChangeMode( CString channel, CString nick, CString mode ){
 
 void CIrcWnd::ParseChangeMode( CString channel, CString changer, CString commands, CString names ){
 	try{
-	if( commands.GetLength() == 2 ){
-		if( ChangeMode( channel, names, commands ))
-			if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
-				AddInfoMessage( channel, GetResString(IDS_IRC_SETSMODE), changer, commands, names);
-		return;
-	}
+		if( commands.GetLength() == 2 ){
+			if( ChangeMode( channel, names, commands ))
+				if( !theApp.glob_prefs->GetIrcIgnoreInfoMessage() )
+					AddInfoMessage( channel, GetResString(IDS_IRC_SETSMODE), changer, commands, names);
+			return;
+		}
 		else{
 			CString dir;
 			dir = commands[0];
@@ -911,8 +1012,9 @@ void CIrcWnd::ParseChangeMode( CString channel, CString changer, CString command
 		}
 	}
 	catch(...){
-	AddInfoMessage( channel, GetResString(IDS_IRC_NOTSUPPORTED));
-}
+		AddInfoMessage( channel, GetResString(IDS_IRC_NOTSUPPORTED));
+		ASSERT(0);
+	}
 }
 
 void CIrcWnd::ChangeAllNick( CString oldnick, CString newnick ){
@@ -932,7 +1034,6 @@ void CIrcWnd::ChangeAllNick( CString oldnick, CString newnick ){
 			return;
 		item.mask = TCIF_TEXT;
 		item.pszText = newnick.GetBuffer();
-		item.cchTextMax = (int)newnick.GetLength()+1;
 		channelselect.SetItem( i, &item);
 	}
 	POSITION pos1, pos2;
@@ -953,147 +1054,174 @@ void CIrcWnd::SetNick( CString in_nick ){
 }
 */
 
-int CIrcWnd::SortProcNick(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
+///////////////////////////////////////////////////////////////////////////////
+//  CIrcNickListCtrl
+
+IMPLEMENT_DYNAMIC(CIrcNickListCtrl, CMuleListCtrl)
+
+BEGIN_MESSAGE_MAP(CIrcNickListCtrl, CMuleListCtrl)
+	ON_WM_CONTEXTMENU()
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
+END_MESSAGE_MAP()
+
+CIrcNickListCtrl::CIrcNickListCtrl()
+{
+	memset(m_asc_sort, 0, sizeof m_asc_sort);
+	m_pParent = NULL;
+}
+
+int CIrcNickListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
 	Nick* item1 = (Nick*)lParam1;
 	Nick* item2 = (Nick*)lParam2;
-		switch(lParamSort){
-		case 0: 
-			if( item1->owner == "!" ){
-				if( item2->owner != "!" )
-					return -1;
-			}
-			else if( item2->owner == "!" ){
-				return 1;
-			}
-			if( item1->protect == "*" ){
-				if( item2->protect != "*" )
-					return -1;
-			}
-			else if( item2->protect == "*" ){
-				return 1;
-			}
-			if( item1->op == "@" ){
-				if( item2->op != "@" )
-					return -1;
-			}
-			else if( item2->op == "@" ){
-				return 1;
-			}
-			if( item1->hop == "%" ){
-				if( item2->hop != "%" )
-					return -1;
-			}
-			else if( item2->hop == "%" ){
-				return 1;
-			}
-			if( item1->voice == "+" ){
-				if( item2->voice != "+" )
-					return -1;
-			}
-			else if( item2->voice == "+" ){
-				return 1;
-			}
-			if( item1->uop == "-" ){
-				if( item2->uop != "-" )
-					return -1;
-			}
-			else if( item2->uop == "-" ){
-				return 1;
-			}
-			return CString(item1->nick).CompareNoCase(item2->nick);
-		case 10:
-			if( item1->owner == "!" ){
-				if( item2->owner != "!" )
-					return -1;
-			}
-			else if( item2->owner == "!" ){
-				return 1;
-			}
-			if( item1->op == "@" ){
-				if( item2->op != "@" )
-					return -1;
-			}
-			else if( item2->op == "@" ){
-				return 1;
-			}
-			if( item1->voice == "+" ){
-				if( item2->voice != "+" )
-					return -1;
-			}
-			else if( item2->voice == "+" ){
-				return 1;
-			}
-			if( item1->uop == "-" ){
-				if( item2->uop != "-" )
-					return -1;
-			}
-			else if( item2->uop == "-" ){
-				return 1;
-			}
-			return CString(item1->nick).CompareNoCase(item2->nick);
-		default:
-			return 0;
+
+	switch(lParamSort){
+	case 0:
+		if( item1->owner == "!" ){
+			if( item2->owner != "!" )
+				return -1;
+		}
+		else if( item2->owner == "!" ){
+			return 1;
+		}
+		if( item1->protect == "*" ){
+			if( item2->protect != "*" )
+				return -1;
+		}
+		else if( item2->protect == "*" ){
+			return 1;
+		}
+		if( item1->op == "@" ){
+			if( item2->op != "@" )
+				return -1;
+		}
+		else if( item2->op == "@" ){
+			return 1;
+		}
+		if( item1->hop == "%" ){
+			if( item2->hop != "%" )
+				return -1;
+		}
+		else if( item2->hop == "%" ){
+			return 1;
+		}
+		if( item1->voice == "+" ){
+			if( item2->voice != "+" )
+				return -1;
+		}
+		else if( item2->voice == "+" ){
+			return 1;
+		}
+		if( item1->uop == "-" ){
+			if( item2->uop != "-" )
+				return -1;
+		}
+		else if( item2->uop == "-" ){
+			return 1;
+		}
+		return item1->nick.CompareNoCase(item2->nick);
+	case 10:
+		if( item1->owner == "!" ){
+			if( item2->owner != "!" )
+				return -1;
+		}
+		else if( item2->owner == "!" ){
+			return 1;
+		}
+		if( item1->op == "@" ){
+			if( item2->op != "@" )
+				return -1;
+		}
+		else if( item2->op == "@" ){
+			return 1;
+		}
+		if( item1->voice == "+" ){
+			if( item2->voice != "+" )
+				return -1;
+		}
+		else if( item2->voice == "+" ){
+			return 1;
+		}
+		if( item1->uop == "-" ){
+			if( item2->uop != "-" )
+				return -1;
+		}
+		else if( item2->uop == "-" ){
+			return 1;
+		}
+		return item1->nick.CompareNoCase(item2->nick);
+	default:
+		return 0;
 	}
 }
 
-void CIrcWnd::OnColumnClickNick( NMHDR* pNMHDR, LRESULT* pResult){
-
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
-	asc_sort[pNMListView->iSubItem] = !asc_sort[pNMListView->iSubItem];
-//	nickList.SetSortArrow(pNMListView->iSubItem, asc_sort[pNMListView->iSubItem]);
-	nickList.SortItems(SortProcNick, pNMListView->iSubItem+ ((asc_sort[pNMListView->iSubItem])? 0:10));
-	*pResult = 0;
-}
-
-void CIrcWnd::OnNMRclickNick(NMHDR *pNMHDR, LRESULT *pResult) 
-{ 
-	
-	if (nickList.GetSelectionMark() != (-1) ){
-		POINT point; 
-		::GetCursorPos(&point); 
-		CPoint p = point; 
-		ScreenToClient(&p); 
-		CTitleMenu m_NickMenu;
-		m_NickMenu.CreatePopupMenu(); 
-		m_NickMenu.AddMenuTitle(GetResString(IDS_IRC_NICK));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Priv,GetResString(IDS_IRC_PRIVMESSAGE));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_AddFriend,GetResString(IDS_IRC_ADDTOFRIENDLIST));
-		if( !GetSendFileString().IsEmpty() )
-			m_NickMenu.AppendMenu(MF_STRING,Irc_SendLink, (CString)GetResString(IDS_IRC_SENDLINK) + GetSendFileString() );
-		else
-			m_NickMenu.AppendMenu(MF_STRING,Irc_SendLink, (CString)GetResString(IDS_IRC_SENDLINK) + "No Shared File Selected" );
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Slap,GetResString(IDS_IRC_SLAP));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Owner,"Owner");
-		m_NickMenu.AppendMenu(MF_STRING,Irc_DeOwner,"DeOwner");
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Op,GetResString(IDS_IRC_OP));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_DeOp,GetResString(IDS_IRC_DEOP));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_HalfOp,GetResString(IDS_IRC_HALFOP));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_DeHalfOp,GetResString(IDS_IRC_DEHALFOP));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Voice,GetResString(IDS_IRC_VOICE));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_DeVoice,GetResString(IDS_IRC_DEVOICE));
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Protect,"Protect");
-		m_NickMenu.AppendMenu(MF_STRING,Irc_DeProtect,"DeProtect");
-		m_NickMenu.AppendMenu(MF_STRING,Irc_Kick,GetResString(IDS_IRC_KICK));
-		m_NickMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this); 
-		VERIFY( m_NickMenu.DestroyMenu() );
-	}
-   *pResult = 0; 
-}
-
-void CIrcWnd::OnNMDblclkNickList(NMHDR *pNMHDR, LRESULT *pResult){
-	int nickItem= nickList.GetSelectionMark();
-	if(nickItem != -1) {
-		Nick* nick = (Nick*)nickList.GetItemData(nickItem);
-		if(nick)
-			AddInfoMessage( nick->nick, GetResString(IDS_IRC_PRIVATECHANSTART));
-	}
-	*pResult = 0;
-}
-
-void CIrcWnd::OnNMClickNicklist(NMHDR *pNMHDR, LRESULT *pResult)
+void CIrcNickListCtrl::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	//LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: Add your control notification handler code here
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	m_asc_sort[pNMLV->iSubItem] = !m_asc_sort[pNMLV->iSubItem];
+	//SetSortArrow(pNMLV->iSubItem, m_asc_sort[pNMLV->iSubItem]);
+	SortItems(SortProc, pNMLV->iSubItem + ((m_asc_sort[pNMLV->iSubItem]) ? 0 : 10));
+	*pResult = 0;
+}
+
+void CIrcNickListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
+{
+	int iCurSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	CTitleMenu NickMenu;
+	NickMenu.CreatePopupMenu(); 
+	NickMenu.AddMenuTitle(GetResString(IDS_IRC_NICK));
+	NickMenu.AppendMenu(MF_STRING, Irc_Priv, GetResString(IDS_IRC_PRIVMESSAGE));
+	NickMenu.AppendMenu(MF_STRING, Irc_AddFriend, GetResString(IDS_IRC_ADDTOFRIENDLIST));
+	if (!m_pParent->GetSendFileString().IsEmpty())
+		NickMenu.AppendMenu(MF_STRING, Irc_SendLink, GetResString(IDS_IRC_SENDLINK) + m_pParent->GetSendFileString());
+	else
+		NickMenu.AppendMenu(MF_STRING, Irc_SendLink, GetResString(IDS_IRC_SENDLINK) + _T("No Shared File Selected"));
+	NickMenu.AppendMenu(MF_STRING, Irc_Slap, GetResString(IDS_IRC_SLAP));
+	NickMenu.AppendMenu(MF_STRING, Irc_Owner, _T("Owner"));
+	NickMenu.AppendMenu(MF_STRING, Irc_DeOwner, _T("DeOwner"));
+	NickMenu.AppendMenu(MF_STRING, Irc_Op, GetResString(IDS_IRC_OP));
+	NickMenu.AppendMenu(MF_STRING, Irc_DeOp, GetResString(IDS_IRC_DEOP));
+	NickMenu.AppendMenu(MF_STRING, Irc_HalfOp, GetResString(IDS_IRC_HALFOP));
+	NickMenu.AppendMenu(MF_STRING, Irc_DeHalfOp, GetResString(IDS_IRC_DEHALFOP));
+	NickMenu.AppendMenu(MF_STRING, Irc_Voice, GetResString(IDS_IRC_VOICE));
+	NickMenu.AppendMenu(MF_STRING, Irc_DeVoice, GetResString(IDS_IRC_DEVOICE));
+	NickMenu.AppendMenu(MF_STRING, Irc_Protect, _T("Protect"));
+	NickMenu.AppendMenu(MF_STRING, Irc_DeProtect, _T("DeProtect"));
+	NickMenu.AppendMenu(MF_STRING, Irc_Kick, GetResString(IDS_IRC_KICK));
+
+	if (iCurSel == -1)
+	{
+		NickMenu.EnableMenuItem(Irc_Priv, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_AddFriend, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_SendLink, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_Slap, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_Owner, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_DeOwner, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_Op, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_DeOp, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_HalfOp, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_DeHalfOp, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_Voice, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_DeVoice, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_Protect, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_DeProtect, MF_GRAYED);
+		NickMenu.EnableMenuItem(Irc_Kick, MF_GRAYED);
+	}
+
+	GetPopupMenuPos(*this, point);
+	NickMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, m_pParent); 
+	VERIFY( NickMenu.DestroyMenu() );
+}
+
+void CIrcNickListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	int nickItem = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (nickItem != -1) {
+		Nick* nick = (Nick*)GetItemData(nickItem);
+		if (nick)
+			m_pParent->AddInfoMessage(nick->nick, GetResString(IDS_IRC_PRIVATECHANSTART));
+	}
 	*pResult = 0;
 }
 
@@ -1132,10 +1260,8 @@ void CIrcWnd::AddStatus( CString line,...){
 	}
 	else
 		update_channel->log.AppendText(timestamp + line);
-	if( m_pCurrentChannel == update_channel ){
-		statusWindow.SetHyperText(&update_channel->log,true);
+	if( m_pCurrentChannel == update_channel )
 		return;
-	}
 	SetActivity( update_channel->name, true );
 }
 
@@ -1174,10 +1300,8 @@ void CIrcWnd::AddInfoMessage( CString channelName, CString line,...){
 	else
 		update_channel->log.AppendText(timestamp + line);
 	
-	if( m_pCurrentChannel == update_channel ){
-		statusWindow.SetHyperText(&update_channel->log,true);
+	if( m_pCurrentChannel == update_channel )
 		return;
-	}
 	SetActivity( update_channel->name, true );
 }
 
@@ -1212,10 +1336,8 @@ void CIrcWnd::AddMessage( CString channelName, CString targetname, CString line,
 	update_channel->log.AppendText(timestamp);
 	update_channel->log.AppendKeyWord(targetname, color);
 	update_channel->log.AppendText(CString(" ")+line);
-	if( m_pCurrentChannel == update_channel ){
-		statusWindow.SetHyperText(&update_channel->log,true);
+	if( m_pCurrentChannel == update_channel )
 		return;
-	}
 	SetActivity( update_channel->name, true );	
 }
 
@@ -1345,13 +1467,13 @@ void CIrcWnd::SetActivity( CString channel, bool flag){
 		return;
     if( flag ){
 		item.mask = TCIF_IMAGE;
- 	   item.iImage = 2;
-	   channelselect.SetItem( i, &item );
+		item.iImage = 2; // 'MessagePending'
+		channelselect.SetItem( i, &item );
     }
 	else{
-	   item.mask = TCIF_IMAGE;
- 	   item.iImage = 1;
-	   channelselect.SetItem( i, &item );
+		item.mask = TCIF_IMAGE;
+ 		item.iImage = 1; // 'Message'
+		channelselect.SetItem( i, &item );
     }
 }
 
@@ -1360,6 +1482,7 @@ void CIrcWnd::OnBnClickedChatsend()
 	CString send;
 	GetDlgItem(IDC_INPUTWINDOW)->GetWindowText(send);
 	GetDlgItem(IDC_INPUTWINDOW)->SetWindowText("");
+	GetDlgItem(IDC_INPUTWINDOW)->SetFocus();
 
 	if (m_pCurrentChannel->history.GetCount()==theApp.glob_prefs->GetMaxChatHistoryLines()) m_pCurrentChannel->history.RemoveAt(0);
 	m_pCurrentChannel->history.Add(send);
@@ -1436,14 +1559,24 @@ Channel* CIrcWnd::NewChannel( CString name, uint8 type ){
 	toadd->name = name;
 	toadd->title = name;
 	toadd->type = type;
-	toadd->history_pos=0;
+	toadd->history_pos = 0;
+	if (type != 2){
+		CRect rcChannel;
+		serverChannelList.GetWindowRect(&rcChannel);
+		toadd->log.Create(WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rcChannel, this, (UINT)-1);
+		toadd->log.ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		toadd->log.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		toadd->log.SetEventMask(toadd->log.GetEventMask() | ENM_LINK);
+		toadd->log.SetFont(&theApp.emuledlg->m_fontHyperText);
+		toadd->log.SetTitle(name);
+	}
 	channelPtrList.AddTail(toadd);
+	
 	TCITEM newitem;
 	newitem.mask = TCIF_PARAM|TCIF_TEXT|TCIF_IMAGE;
 	newitem.lParam = (LPARAM)toadd;
 	newitem.pszText = name.GetBuffer();
-	newitem.cchTextMax = (int)name.GetLength()+1;
-	newitem.iImage = 1;
+	newitem.iImage = 1; // 'Message'
 	channelselect.InsertItem(channelselect.GetItemCount(),&newitem);
 	return toadd;
 }
@@ -1467,7 +1600,6 @@ void CIrcWnd::RemoveChannel( CString channel ){
 
 	if( todel == m_pCurrentChannel ){
 		nickList.DeleteAllItems();
-		statusWindow.SetWindowText("");
 		if( channelselect.GetItemCount() > 2 && i > 1 ) {
 			if ( i == 2 )
 				i++;
@@ -1513,26 +1645,43 @@ void CIrcWnd::JoinChannels(){
 	} 
 }
 
-
 LRESULT CIrcWnd::OnCloseTab(WPARAM wparam, LPARAM lparam) {
 	OnBnClickedClosechat( (int)wparam );
 	return true;
 }
 
 void CIrcWnd::SendString( CString send ){ 
-	if( this->m_bConnected ) m_pIrcMain->SendString( send );
+	if( this->m_bConnected )
+		m_pIrcMain->SendString( send );
 }
 
 void CIrcWnd::ScrollHistory(bool down) {
 	CString buffer;
 
-	if ( (m_pCurrentChannel->history_pos==0 && !down) || (m_pCurrentChannel->history_pos==m_pCurrentChannel->history.GetCount() && down)) return;
+	if ( (m_pCurrentChannel->history_pos==0 && !down) || (m_pCurrentChannel->history_pos==m_pCurrentChannel->history.GetCount() && down))
+		return;
 	
-	
-	if (down) ++m_pCurrentChannel->history_pos; else --m_pCurrentChannel->history_pos;
+	if (down)
+		++m_pCurrentChannel->history_pos;
+	else
+		--m_pCurrentChannel->history_pos;
 
-	buffer= (m_pCurrentChannel->history_pos==m_pCurrentChannel->history.GetCount())?"":m_pCurrentChannel->history.GetAt(m_pCurrentChannel->history_pos);
+	buffer= (m_pCurrentChannel->history_pos==m_pCurrentChannel->history.GetCount()) ? "" : m_pCurrentChannel->history.GetAt(m_pCurrentChannel->history_pos);
 
 	GetDlgItem(IDC_INPUTWINDOW)->SetWindowText(buffer);
 	inputWindow.SetSel(buffer.GetLength(),buffer.GetLength());
+}
+
+void CIrcWnd::OnContextMenu(CWnd* pWnd, CPoint point)
+{ 
+	int iCurTab = channelselect.GetCurSel();
+
+	CTitleMenu ChatMenu;
+	ChatMenu.CreatePopupMenu();
+	ChatMenu.AddMenuTitle(GetResString(IDS_IRC));
+	ChatMenu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
+	if (iCurTab < 2) // no 'Close' for status log and channel list
+		ChatMenu.EnableMenuItem(MP_REMOVE, MF_GRAYED);
+	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	VERIFY( ChatMenu.DestroyMenu() );
 }

@@ -121,9 +121,9 @@ void CRoutingBin::setAlive(uint32 ip, uint16 port)
 			c->madeContact(true);
 //			c->m_expires = time(NULL) + HOUR;
 
-			// Move to the end of the list
-			remove(c);
-			m_entries.push_back(c);
+			// Move to the end of the list - this is not thread save..
+//			remove(c);
+//			m_entries.push_back(c);
 			break;
 		}
 	}

@@ -16,9 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "stdafx.h"
-#include "server.h"
-#include "opcodes.h"
 #include "emule.h"
+#include "Server.h"
+#include "Opcodes.h"
+#include "OtherFunctions.h"
+#include "Packets.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

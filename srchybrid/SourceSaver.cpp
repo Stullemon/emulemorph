@@ -2,6 +2,10 @@
 #include "sourcesaver.h"
 #include "PartFile.h"
 #include "emule.h"
+#include "emuledlg.h"
+#include "OtherFunctions.h"
+#include "DownloadQueue.h"
+#include "updownclient.h"
 
 #define RELOADTIME	3600000 //60 minutes	
 #define RESAVETIME	 600000 //10 minutes
@@ -26,8 +30,8 @@ CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const char* exp)
 	sourcePort = client->GetUserPort(); 
 	partsavailable = client->GetAvailablePartCount();
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
-	//MEMCOPY(expiration, exp, 7);
-	MEMCOPY(expiration, exp, 11);
+	//memcpy(expiration, exp, 7);
+	memcpy(expiration, exp, 11);
 	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 	//expiration[6] = 0;
 	expiration[10] = 0;
@@ -141,7 +145,7 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, false);
 		else
 				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, true);
-		newclient->SetSourceFrom(3);
+		newclient->SetSourceFrom(SF_SLS);
 		//MORPH END   - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		theApp.downloadqueue->CheckAndAddSource(file, newclient);
         
@@ -162,60 +166,54 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 
 	ASSERT(srcstosave.IsEmpty());
 
-	POSITION pos, pos2;
-
+	POSITION pos2;
+	CUpDownClient* cur_src;
 	// Choose best sources for the file
-	for (int sl=0;sl<SOURCESSLOTS;sl++) 
-	{
-		if (!file->srclists[sl].IsEmpty()) 
-		{
-			for (pos = file->srclists[sl].GetHeadPosition();pos != 0;file->srclists[sl].GetNext(pos)){
-				CUpDownClient* cur_src = file->srclists[sl].GetAt(pos);
-				if (cur_src->HasLowID())
-					continue;
-				if (srcstosave.IsEmpty()) {
+	for(POSITION pos = file->m_downloadingSourceList.GetHeadPosition();pos!=0;){
+		cur_src = file->m_downloadingSourceList.GetNext(pos);
+		if (cur_src->HasLowID())
+			continue;
+		if (srcstosave.IsEmpty()) {
+			sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
+			srcstosave.AddHead(sourcedata);
+			continue;
+		}
+		if ((srcstosave.GetCount() < maxSourcesToSave) || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchangeVersion() > srcstosave.GetTail()->nSrcExchangeVer)) {
+			if (srcstosave.GetCount() == maxSourcesToSave)
+				delete srcstosave.RemoveTail();
+			ASSERT(srcstosave.GetCount() < maxSourcesToSave);
+			bool bInserted = false;
+			for (pos2 = srcstosave.GetTailPosition();pos2 != 0;srcstosave.GetPrev(pos2)){
+				CSourceData* cur_srctosave = srcstosave.GetAt(pos2);
+				// khaos::kmod+ Source Exchange Version
+				if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) &&
+					cur_srctosave->nSrcExchangeVer > cur_src->GetSourceExchangeVersion())
+				{
+					bInserted = true;
+				}
+				else if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) && 
+							cur_srctosave->nSrcExchangeVer == cur_src->GetSourceExchangeVersion() &&
+							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
+				{
+					bInserted = true;
+				}
+				else if (file->GetAvailableSrcCount() <= (maxSourcesToSave*2) &&
+							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
+				{
+					bInserted = true;
+				}
+				if (bInserted)
+				{
 					sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
-					srcstosave.AddHead(sourcedata);
-					continue;
+					srcstosave.InsertAfter(pos2, sourcedata);
+					break;
 				}
-				if ((srcstosave.GetCount() < maxSourcesToSave) || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchangeVersion() > srcstosave.GetTail()->nSrcExchangeVer)) {
-					if (srcstosave.GetCount() == maxSourcesToSave)
-						delete srcstosave.RemoveTail();
-					ASSERT(srcstosave.GetCount() < maxSourcesToSave);
-					bool bInserted = false;
-					for (pos2 = srcstosave.GetTailPosition();pos2 != 0;srcstosave.GetPrev(pos2)){
-						CSourceData* cur_srctosave = srcstosave.GetAt(pos2);
-						// khaos::kmod+ Source Exchange Version
-						if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) &&
-							cur_srctosave->nSrcExchangeVer > cur_src->GetSourceExchangeVersion())
-						{
-							bInserted = true;
-						}
-						else if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) && 
-								 cur_srctosave->nSrcExchangeVer == cur_src->GetSourceExchangeVersion() &&
-								 cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
-						{
-							bInserted = true;
-						}
-						else if (file->GetAvailableSrcCount() <= (maxSourcesToSave*2) &&
-								 cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
-						{
-							bInserted = true;
-						}
-						if (bInserted)
-						{
-							sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
-							srcstosave.InsertAfter(pos2, sourcedata);
-							break;
-						}
-						// khaos::kmod-
-					}
-					if (!bInserted) {
-						sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
-						srcstosave.AddHead(sourcedata);
-					}
-				}
-			}	
+				// khaos::kmod-
+			}
+			if (!bInserted) {
+				sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
+				srcstosave.AddHead(sourcedata);
+			}
 		}
 	}
 	
@@ -246,7 +244,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 	if (!f.Open(slsfile, CFile::modeCreate | CFile::modeWrite | CFile::typeText))
 		return;
 	f.WriteString("#format: a.b.c.d:port,expirationdate(yymmddhhmm);\r\n");
-	f.WriteString("#" + theApp.CreateED2kLink(file) + "\r\n"); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
+	f.WriteString("#" + CreateED2kLink(file) + "\r\n"); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
 	while (!srcstosave.IsEmpty()) {
 		CSourceData* cur_src = srcstosave.RemoveHead();
 		uint32 dwID = cur_src->sourceID;

@@ -30,15 +30,15 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "../../stdafx.h"
-#include "../../Types.h"
-#include "../kademlia/Tag.h"
+#include <list>
 
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////
 
 class CUInt128;
+class CTag;
+typedef std::list<CTag*> TagList;
 
 class CDataIO
 {

@@ -28,8 +28,6 @@ Any mod that changes anything within the Kademlia side will not be allowed to ad
 there client on the eMule forum..
 */
 
-#include "../../stdafx.h"
-
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////

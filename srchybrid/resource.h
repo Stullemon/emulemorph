@@ -1146,7 +1146,7 @@
 #define IDS_SERVERKEEPALIVETIMEOUT      1190
 #define IDS_MORE                        1191
 #define IDS_TOOLS                       1192
-#define IDS_PAWCIO_CREDIT               1193
+#define IDS_ERR_JIGLENEEDSTYPE          1193
 #define IDS_CREATEHOSTNAMESRCLINK       1194
 #define IDS_HASHINGFILESCOUNT           1195
 #define IDS_CHECKDISKSPACE              1196
@@ -1178,13 +1178,21 @@
 #define IDS_IMP_DELSRC                  1222
 #define IDS_IMP_SIZE                    1223
 #define IDS_IMP_STATUS                  1224
-#define IDS_AUTO_CLEAR_COMPLETE         1225
-#define IDS_ONLY_DOWNLOAD_COMPLETE_FILES 1226
-#define IDS_DL_FORCE                    1227
-#define IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 1228
-#define IDS_DATEFILENAMELOG             1229
-#define IDS_ECFEF                       1230
-#define IDS_ALL_TIME                    1231
+#define IDS_DYNUPENABLED                1225
+#define IDS_DYNUP_PINGTOLERANCE         1226
+#define IDS_DYNUP_GOINGUPDIVIDER        1227
+#define IDS_DYNUP_GOINGDOWNDIVIDER      1228
+#define IDS_DYNUP_NUMBEROFPINGS         1229
+#define IDS_DYNUP_MINUPLOAD             1230
+#define IDS_ESTTIMELEFT                 1231
+#define IDS_TRANSFER_RATE_LABEL         1232
+#define IDS_SAVELOG                     1233
+#define IDS_CMT_COPYCLIPBOARD           1234
+#define IDS_ASKDOWNLOADLANG             1235
+#define IDS_ASKDOWNLOADLANGCAP          1236
+#define IDS_STRING1237                  1237
+#define IDS_ERR_FAILEDDOWNLOADLANG      1237
+#define IDS_ERR_BADFOLDER               1238
 #define IDS_BOOTSTRAP                   1300
 #define IDS_VIAED2KSQ                   1301
 #define IDS_EM_KADEMLIA                 1302
@@ -1221,12 +1229,20 @@
 #define IDS_EM_TOOLS                    1335
 #define IDS_EM_HELP                     1336
 #define IDS_WRN_FRIENDDUPLIPPORT        1337
+#define IDS_DYNUP                       1338
 #define IDC_PARTMET                     1345
 #define IDD_PPG_BACKUP                  1378
 #define IDS_SWITCHSUC                   1468
 #define IDS_SWITCHDYNUP                 1469
 #define IDS_AUTODYNUPSWITCHING          1470
 #define IDS_MAXCONNECTIONSSWITCHBORDER  1471
+#define IDS_AUTO_CLEAR_COMPLETE         1525
+#define IDS_ONLY_DOWNLOAD_COMPLETE_FILES 1526
+#define IDS_DL_FORCE                    1527
+#define IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME 1528
+#define IDS_DATEFILENAMELOG             1529
+#define IDS_ECFEF                       1530
+#define IDS_ALL_TIME                    1531
 #define IDS_COPYFEEDBACK                1532
 #define IDS_ANTILEECHERLOG              1534
 #define IDI_SUC                         1535
@@ -1991,6 +2007,7 @@
 #define IDC_UPDATEFAKELISTSTART         2390
 #define IDC_WSENABLED                   2391
 #define IDC_ENABLE                      2392
+#define IDC_WS_GZIP                     2392
 #define IDC_MSGONLYFRIENDS              2393
 #define IDC_SELTEMPDIR                  2394
 #define IDC_FD_X2                       2395
@@ -2113,6 +2130,9 @@
 #define IDC_CURJOB                      2519
 #define IDD_CONVERTPARTFILES            2520
 #define IDC_JOBINFO                     2523
+#define IDC_TIMELEFTTEXT                2524
+#define IDC_TRANSFER_RATE_LABEL         2525
+
 #define IDC_CATNAME                     2578
 #define IDC_STATIC_A4AF                 2578
 #define IDC_VALIDSRCS                   2579
@@ -2237,7 +2257,7 @@
 #define IDS_POWERSHARE_DISABLED_LABEL   3118
 #define IDS_POWERSHARE_AUTO_LABEL       3119
 #define IDS_POWERSHARE_AUTO             3120
-#define IDS_DYNUP                       3122
+#define IDS_DYNUPLOAD                       3122
 #define IDS_HIDEOVERSHARES              3123
 #define IDS_SELECTIVESHARE              3124
 #define IDS_BACKUP                      4001
@@ -2254,6 +2274,7 @@
 #define IDS_EXPIRED_CLIENTS             4012
 #define IDS_EXPIRED_KNOWN               4013
 #define IDS_DELETEFILE                  4014
+#define IDS_PAWCIO_CREDIT               4015
 #define IDS_UPDATEIPFILTER              4742
 #define IDS_UPDATEIPFILTERONSTART       4743
 #define IDS_UPDATEIPFILTERERROR         4744
@@ -2385,9 +2406,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        1150
+#define _APS_NEXT_RESOURCE_VALUE        1340
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         2481
+#define _APS_NEXT_CONTROL_VALUE         2526
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

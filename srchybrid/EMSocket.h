@@ -14,13 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "afxsock.h"
-#include "types.h"
-#include "packets.h"
-#include "AsyncSocketEx.h" // deadlake PROXYSUPPORT Socketfiles
-#include "AsyncProxySocketLayer.h" // deadlake PROXYSUPPORT Socketfiles
+#include "AsyncSocketEx.h"
+
+class CAsyncProxySocketLayer;
+class Packet;
 
 #define ERR_WRONGHEADER		0x01
 #define ERR_TOOBIG			0x02
@@ -42,19 +40,16 @@ struct StandardPacketQueueEntry {
     Packet* packet;
 };
 
-class CEMSocket : public CAsyncSocketEx // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+class CEMSocket : public CAsyncSocketEx
 {
-	//MORPH - Added by Yun.SF3, ZZ Upload System
-	friend class UploadBandwidthThrottler;
-
+    friend class UploadBandwidthThrottler;
 public:
 	CEMSocket(void);
 	~CEMSocket(void);
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	bool 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
-	bool    HasQueues();
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030818-1923
-	bool	IsConnected() const {return byConnected == ES_CONNECTED;}
+
+	void 	SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0);
+    bool    HasQueues();
+    bool	IsConnected() const {return byConnected == ES_CONNECTED;}
 	uint8	GetConState() const {return byConnected;}
 	void	SetDownloadLimit(uint32 limit);
 	void	DisableDownloadLimit();
@@ -66,22 +61,22 @@ public:
 	// Reset Layer Chain
 	virtual void RemoveAllLayers();
 
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	//DWORD m_startSendTick;
-	//DWORD m_currentSendSize;
-	//DWORD   GetLastSendLatency() { return (m_Average_sendlatency_list.GetCount() > 0)?(m_Average_sendlatency_list.GetTail().latency):0; }
-	//uint32  GetLastSendSize() { return (m_Average_sendlatency_list.GetCount() > 0)?(m_Average_sendlatency_list.GetTail().datalen):0; }
-	//DWORD   GetAverageLatency() { return (m_Average_sendlatency_list.GetCount() > 0)?(m_latency_sum/m_Average_sendlatency_list.GetCount()):0; }
-	//uint32  GetAverageSize() { return (m_Average_sendlatency_list.GetCount() > 0)?(m_datalen_sum/m_Average_sendlatency_list.GetCount()):0; }
+    //DWORD   GetLastSendLatency() { return (m_Average_sendlatency_list.GetCount() > 0)?(m_Average_sendlatency_list.GetTail().latency):0; }
+    //DWORD   GetAverageLatency() { return (m_Average_sendlatency_list.GetCount() > 0)?(m_latency_sum/m_Average_sendlatency_list.GetCount()):0; }
 
-	DWORD GetLastCalledSend() { return lastCalledSend; }
+    DWORD GetLastCalledSend() { return lastCalledSend; }
 
-	uint64 GetSentBytesCompleteFileSinceLastCallAndReset();
-	uint64 GetSentBytesPartFileSinceLastCallAndReset();
-	uint64 GetSentBytesControlPacketSinceLastCallAndReset();
-	uint64 GetSentPayloadSinceLastCallAndReset();
-	void TruncateQueues();
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
+    uint64 GetSentBytesCompleteFileSinceLastCallAndReset();
+    uint64 GetSentBytesPartFileSinceLastCallAndReset();
+    uint64 GetSentBytesControlPacketSinceLastCallAndReset();
+    uint64 GetSentPayloadSinceLastCallAndReset();
+    void TruncateQueues();
+
+#ifdef _DEBUG
+	// Diagnostic Support
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
 
 protected:
 	virtual int	OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2);	// deadlake PROXYSUPPORT
@@ -97,14 +92,10 @@ protected:
 	bool	m_ProxyConnectFailed;
 	CAsyncProxySocketLayer* m_pProxyLayer;
 
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
+    virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
 
 private:
 	void	ClearQueues();	
-//	int		Send(char* lpBuf,int nBufLen,int nFlags = 0); //MORPH - Added by Yun.SF3, ZZ Upload System
-
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
 
 	// Download (pseudo) rate control	
@@ -124,35 +115,31 @@ private:
 	char*	sendbuffer;
 	uint32	sendblen;
 	uint32	sent;
-//	bool	m_bLinkedPackets; //MORPH - Added by Yun.SF3, ZZ Upload System
-
 
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030807-1911
 	CList<StandardPacketQueueEntry, StandardPacketQueueEntry> standartpacket_queue;
 
-	bool m_currentPacket_is_controlpacket;
+    bool m_currentPacket_is_controlpacket;
 
-	CCriticalSection sendLocker;
-	//uint64 m_controlSize;
-	//uint64 m_standardSize;
+    CCriticalSection sendLocker;
+    //uint64 m_controlSize;
+    //uint64 m_standardSize;
 
-	uint64 m_numberOfSentBytesCompleteFile;
-	uint64 m_numberOfSentBytesPartFile;
-	uint64 m_numberOfSentBytesControlPacket;
-	bool m_currentPackageIsFromPartFile;
+    uint64 m_numberOfSentBytesCompleteFile;
+    uint64 m_numberOfSentBytesPartFile;
+    uint64 m_numberOfSentBytesControlPacket;
+    bool m_currentPackageIsFromPartFile;
 
-	DWORD lastCalledSend;
+    DWORD lastCalledSend;
 
-	//void StoppedSendSoUpdateStats();
-	//void CleanSendLatencyList();
-	//DWORD   m_startSendTick;
-	//CList<SocketTransferStats,SocketTransferStats>	m_Average_sendlatency_list;
-	//DWORD   m_lastSendLatency;
-	//uint32 m_latency_sum;
-	//bool m_wasBlocked;
+    //void StoppedSendSoUpdateStats();
+    //void CleanSendLatencyList();
+    //DWORD   m_startSendTick;
+    //CList<SocketTransferStats,SocketTransferStats>	m_Average_sendlatency_list;
+    //DWORD   m_lastSendLatency;
+    //uint32 m_latency_sum;
+    //bool m_wasBlocked;
 
-	uint32 m_actualPayloadSize;
-	uint32 m_actualPayloadSizeSent;
-	//MORPH END   - Added by SiRoB, ZZ Upload System 20030807-1911
+    uint32 m_actualPayloadSize;
+    uint32 m_actualPayloadSizeSent;
 };

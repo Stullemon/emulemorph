@@ -1,6 +1,12 @@
-#include "StdAfx.h"
-#include <windows.h>
+#include "stdafx.h"
 #include "Quantize.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 /////////////////////////////////////////////////////////////////////////////
 CQuantizer::CQuantizer (UINT nMaxColors, UINT nColorBits)
@@ -26,7 +32,7 @@ BOOL CQuantizer::ProcessImage (HANDLE hImage)
 	int	i, j;
 
 	BITMAPINFOHEADER ds;
-	MEMCOPY(&ds,hImage, sizeof(ds));
+	memcpy(&ds,hImage, sizeof(ds));
 	int effwdt = ((((ds.biBitCount * ds.biWidth ) + 31) / 32) * 4);
 
 	int	nPad = effwdt - (((ds.biWidth *	ds.biBitCount) + 7) / 8);

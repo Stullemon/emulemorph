@@ -17,10 +17,9 @@
 
 #pragma once
 
-#include "afxtempl.h"
-#include "types.h"
-#include "UpdownClient.h"
-#include "Server.h"
+class CServer;
+class CUpDownClient;
+typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
 
 struct CurrentPingStruct {
 	//uint32	datalen;
@@ -38,7 +37,7 @@ public:
     void EndThread();
 
     bool AddHostsToCheck(CTypedPtrList<CPtrList, CServer*> &list);
-    bool AddHostsToCheck(CTypedPtrList<CPtrList, CUpDownClient*> &list);
+    bool AddHostsToCheck(CUpDownClientPtrList &list);
 
     //uint32 GetPingedHost();
     CurrentPingStruct GetCurrentPing();
@@ -54,8 +53,10 @@ private:
     void SetUpload(uint32 newValue);
 
     bool doRun;
-
+    bool acceptNewClient;
+    bool m_enabled;
     bool needMoreHosts;
+
     CCriticalSection addHostLocker;
     CCriticalSection prefsLocker;
     CCriticalSection uploadLocker;
@@ -75,9 +76,6 @@ private:
     uint32 m_CurUpload;
     uint32 m_upload;
 
-    bool acceptNewClient;
-
-    bool m_enabled;
     double m_pingTolerance;
     uint32 m_goingUpDivider;
     uint32 m_goingDownDivider;

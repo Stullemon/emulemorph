@@ -21,10 +21,23 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "UploadListCtrl.h"
+#include "TransferWnd.h"
 #include "otherfunctions.h"
-#include "opcodes.h"
+#include "MenuCmds.h"
 #include "ClientDetailDialog.h"
 #include "KademliaWnd.h"
+#include "emuledlg.h"
+#include "KademliaMain.h"
+#include "friendlist.h"
+#include "MemDC.h"
+#include "KnownFile.h"
+#include "SharedFileList.h"
+#include "UpDownClient.h"
+#include "ClientCredits.h"
+#include "ChatWnd.h"
+#include "Opcodes.h" //MORPH - Added by SiRoB
+#include "PartFile.h" //MORPH - Added by SiRoB
+#include "DownloadQueue.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -75,6 +88,9 @@ void CUploadListCtrl::Init()
 	//MORPH START - Added by SiRoB, Show Compression by Tarod
 	InsertColumn(12,GetResString(IDS_COMPRESSIONGAIN),LVCFMT_LEFT,50,12);
 	//MORPH END - Added by SiRoB, Show Compression by Tarod
+
+	SetAllIcons();
+	Localize();
 	LoadSettings(CPreferences::tableUpload);
 
 	// Barry - Use preferred sort order from preferences
@@ -94,7 +110,13 @@ void CUploadListCtrl::Init()
 CUploadListCtrl::~CUploadListCtrl(){
 }
 
-void CUploadListCtrl::Localize()
+void CUploadListCtrl::OnSysColorChange()
+{
+	CMuleListCtrl::OnSysColorChange();
+	SetAllIcons();
+}
+
+void CUploadListCtrl::SetAllIcons()
 {
 	imagelist.DeleteImageList();
 	imagelist.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -117,7 +139,10 @@ void CUploadListCtrl::Localize()
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditOvl")), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader("ClientCreditSecureOvl")), 3);
 	//MORPH END   - Modified by SiRoB, More client & Credit overlay icon
+}
 
+void CUploadListCtrl::Localize()
+{
 	CHeaderCtrl* pHeaderCtrl = GetHeaderCtrl();
 	HDITEM hdi;
 	hdi.mask = HDI_TEXT;
@@ -203,7 +228,7 @@ void CUploadListCtrl::AddClient(CUpDownClient* client){
 	uint32 itemnr = GetItemCount();
 	itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,LPSTR_TEXTCALLBACK,0,0,1,(LPARAM)client);
 	RefreshClient(client);
-	theApp.emuledlg->transferwnd.UpdateListCount(1);
+	theApp.emuledlg->transferwnd->UpdateListCount(1);
 }
 
 void CUploadListCtrl::RemoveClient(CUpDownClient* client){
@@ -213,7 +238,7 @@ void CUploadListCtrl::RemoveClient(CUpDownClient* client){
 	sint32 result = FindItem(&find);
 	if (result != (-1) )
 		DeleteItem(result);
-	theApp.emuledlg->transferwnd.UpdateListCount(1);
+	theApp.emuledlg->transferwnd->UpdateListCount(1);
 }
 
 void CUploadListCtrl::RefreshClient(CUpDownClient* client){
@@ -255,8 +280,16 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
 	CFont *pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
-	MEMCOPY(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
+
+	int iOldBkMode;
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
+		iOldBkMode = dc.SetBkMode(TRANSPARENT);
+	}
+	else
+		iOldBkMode = OPAQUE;
 
 	CString Sbuffer;
 	CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
@@ -275,20 +308,19 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					uint8 image;
 					if (client->IsFriend())
 						image = 2;
-					else{
-						if (client->GetClientSoft() == SO_MLDONKEY )
-							image = 3;
-						else if (client->GetClientSoft() == SO_EDONKEYHYBRID )
-							image = 4;
-						else if (client->GetClientSoft() == SO_SHAREAZA )
-							image = 5;
-						else if (client->GetClientSoft() == SO_EDONKEY )
-							image = 6;
-						else if (client->ExtProtocolAvailable())
-							image = (client->IsMorph())?7:1;
-						else
-							image = 0;
-					}
+					else if (client->GetClientSoft() == SO_MLDONKEY )
+						image = 3;
+					else if (client->GetClientSoft() == SO_EDONKEYHYBRID )
+						image = 4;
+					else if (client->GetClientSoft() == SO_SHAREAZA )
+						image = 5;
+					else if (client->GetClientSoft() == SO_EDONKEY )
+						image = 6;
+					else if (client->ExtProtocolAvailable())
+						image = (client->IsMorph())?7:1;
+					else
+						image = 0;
+
 					POINT point = {cur_rec.left, cur_rec.top+1};
 					UINT uOvlImg = INDEXTOOVERLAYMASK(((client->Credits() && client->Credits()->GetCurrentIdentState(client->GetIP()) == IS_IDENTIFIED) ? 1 : 0) | ((client->credits->GetScoreRatio(client->GetIP()) > 1) ? 2 : 0));
 					if (client->IsLeecher())
@@ -380,10 +412,12 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 						uint32 tempLastUploaded = client->GetQueueSessionUp() - client->GetSessionUp();
 						if(tempLastUploaded != 0){
-							Sbuffer.Format("%s=%s+%s", CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()),CastItoXBytes(tempLastUploaded));
+							Sbuffer.Format("%s=%s+%s (%s-%s)", CastItoXBytes(client->GetQueueSessionUp()), CastItoXBytes(client->GetSessionUp()),CastItoXBytes(tempLastUploaded), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
 						}
 						else{
-							Sbuffer = CastItoXBytes(client->GetSessionUp());//original
+							// PENDING: ZZ: Debug printout of current buffer size for socket
+							Sbuffer.Format("%s (%s-%s)", CastItoXBytes(client->GetSessionUp()), CastItoXBytes(client->GetPayloadInBuffer()), CastItoXBytes(client->GetQueueSessionPayloadUp()));
+		
 						}
 						//Morph - modified by AndCycle, more uploading session info to show full chunk transfer
 					}
@@ -402,8 +436,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						else if(client->GetPowerShared() && client->GetSessionUp() > SESSIONAMOUNT) timeleft = -1; //(float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
 						else if(file->GetFileSize() > SESSIONAMOUNT)	timeleft = (float)(SESSIONAMOUNT - client->GetSessionUp())/client->GetDatarate();
 						else	timeleft = (float)(file->GetFileSize() - client->GetSessionUp())/client->GetDatarate();
-						Sbuffer = CastSecondsToHM((client->GetUpStartTimeDelay())/1000);//original
-						Sbuffer.Format("%s (+%s)", Sbuffer, CastSecondsToHM(timeleft));
+						Sbuffer.Format("%s (+%s)", CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
 					}//Morph - modified by AndCycle, upRemain
 					break;
 				case 6:
@@ -423,7 +456,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					break;
 				case 7:
 				//MORPH START - Modified by SiRoB, ZZ Upload System 20030724-0336
-					//if( client->GetUpPartCount() ){
+					//if( client->GetUpPartCount() )[
 						cur_rec.bottom--;
 						cur_rec.top++;
 						client->DrawUpStatusBar(dc,&cur_rec,false,theApp.glob_prefs->UseFlatBar());
@@ -435,9 +468,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 
 				//MORPH START - Modified by SiRoB, Client Software
 				case 8:			
-					Sbuffer = client->GetClientVerString();
+					Sbuffer = client->GetClientSoftVer();
 					break;
-				//MORPH END - Modified by SiRoB, Client Software		
+				//MORPH END - Modified by SiRoB, Client Software
 			
 				//MORPH START - Added By Yun.SF3, Upload/Download
 				case 9: //LSD Total UP/DL
@@ -471,10 +504,11 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 						else if(client->IsRemoteQueueFull())
 							Sbuffer.Format( "%s",GetResString(IDS_QUEUEFULL));
 						else
-							Sbuffer = GetResString(IDS_UNKNOWN);
-					}
+							Sbuffer.Format("%s",GetResString(IDS_UNKNOWN));
+					
+				}
 					break;	
-				//MORPH END - Added By Yun.SF3, Remote Status
+					//MORPH END - Added By Yun.SF3, Remote Status
 
 				case 11:{
 					Sbuffer.Format("%i", client->GetSlotNumber());
@@ -522,7 +556,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 					}
 					//MORPH END   - Added by SiRoB, Upload Bandwidth Splited by class
 				}break;
-					
 				//MORPH START - Added by SiRoB, Show Compression by Tarod
 				case 12:
 					if (client->GetCompression() < 0.1f)
@@ -542,7 +575,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
 		RECT outline_rec;
-		MEMCOPY(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
+		memcpy(&outline_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
 
 		outline_rec.top--;
 		outline_rec.bottom++;
@@ -558,12 +591,15 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
 
+	if (m_crWindowTextBk == CLR_NONE)
+		dc.SetBkMode(iOldBkMode);
 	dc.SelectObject(pOldFont);
 	dc.SetTextColor(crOldTextColor);
 }
 
 BEGIN_MESSAGE_MAP(CUploadListCtrl, CMuleListCtrl)
 	ON_WM_CONTEXTMENU()
+	ON_WM_SYSCOLORCHANGE()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnGetDispInfo)
@@ -589,6 +625,7 @@ void CUploadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
 	ClientMenu.AppendMenu(MF_STRING | uFlags,MP_LIST_REQUESTED_FILES, _T(GetResString(IDS_LISTREQUESTED))); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
+	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -601,7 +638,7 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				client->RequestSharedFileList();
 				break;
 			case MP_MESSAGE:{
-				theApp.emuledlg->chatwnd.StartSession(client);
+				theApp.emuledlg->chatwnd->StartSession(client);
 				break;
 			}
 			case MP_ADDFRIEND:{
@@ -635,6 +672,11 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 						{
 							fileList += "\n" ; 
 							fileList += client->m_OtherRequests_list.GetAt(pos)->GetFileName(); 
+						}
+						for(POSITION pos = client->m_OtherNoNeeded_list.GetHeadPosition();pos!=0;client->m_OtherNoNeeded_list.GetNext(pos))
+						{
+							fileList += "\n" ;
+							fileList += client->m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
 						}
 					}
 					else
@@ -749,9 +791,9 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return item2->GetUpPartCount() - item1->GetUpPartCount();
 		//MORPH START - Modified by SiRoB, Client Software	
 		case 8:
-			return item2->GetClientVerString().CompareNoCase(item1->GetClientVerString());
+			return item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
 		case 108:
-			return item1->GetClientVerString().CompareNoCase(item2->GetClientVerString());
+			return item1->GetClientSoftVer().CompareNoCase(item2->GetClientSoftVer());
 		//MORPH END - Modified by SiRoB, Client Software
 		
 		//MORPH START - Added By Yun.SF3, Upload/Download
@@ -871,7 +913,7 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 			info.Format(GetResString(IDS_USERINFO), client->GetUserName());
 			if (file)
 			{
-				info += GetResString(IDS_SF_REQUESTED) + CString(file->GetFileName()) + "\n";
+				info += GetResString(IDS_SF_REQUESTED) + _T(" ") + CString(file->GetFileName()) + _T("\n");
 				CString stat;
 				stat.Format(GetResString(IDS_FILESTATS_SESSION)+GetResString(IDS_FILESTATS_TOTAL),
 							file->statistic.GetAccepts(), file->statistic.GetRequests(), CastItoXBytes(file->statistic.GetTransferred()),

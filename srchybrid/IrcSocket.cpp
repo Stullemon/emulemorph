@@ -1,3 +1,6 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
 //as published by the Free Software Foundation; either
@@ -11,10 +14,15 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
-#include "IrcSocket.h"
 #include "emule.h"
+#include "IrcSocket.h"
+#include "AsyncProxySocketLayer.h"
+#include "IrcMain.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+#include "DownloadQueue.h"
+#include "UploadQueue.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

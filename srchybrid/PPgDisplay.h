@@ -1,10 +1,5 @@
 #pragma once
 
-#include "preferences.h"
-#include "afxwin.h"
-
-// CPPgDisplay dialog
-
 class CPPgDisplay : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgDisplay)

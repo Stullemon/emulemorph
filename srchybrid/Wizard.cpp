@@ -1,10 +1,25 @@
-// Wizard.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "PreferencesDlg.h"
 #include "Wizard.h"
+#include "emuledlg.h"
+#include "StatisticsDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -96,8 +111,8 @@ void Wizard::OnBnClickedApply()
 			// removes warning regarding implicit cast
 			app_prefs->prefs->maxdownload = (uint16)((download * 9L) / 10);
 
-		theApp.emuledlg->statisticswnd.SetARange(false,app_prefs->prefs->maxGraphUploadRate);
-		theApp.emuledlg->statisticswnd.SetARange(true,app_prefs->prefs->maxGraphDownloadRate);
+		theApp.emuledlg->statisticswnd->SetARange(false,app_prefs->prefs->maxGraphUploadRate);
+		theApp.emuledlg->statisticswnd->SetARange(true,app_prefs->prefs->maxGraphDownloadRate);
 
 		if( m_iOS == 1 )
 			app_prefs->prefs->maxconnections = 50;

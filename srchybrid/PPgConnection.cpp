@@ -1,18 +1,36 @@
-// PPgConnection.cpp : implementation file
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <math.h>
 #include "emule.h"
 #include "PPgConnection.h"
 #include "wizard.h"
 #include "Scheduler.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "Preferences.h"
+#include "Opcodes.h"
+#include "StatisticsDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
-
 
 // CPPgConnection dialog
 
@@ -105,9 +123,7 @@ void CPPgConnection::LoadSettings(void)
 {
 	if(m_hWnd)
 	{
-		//MORPH START - Added by SiRoB, Avoid change of the MaxDownloadLimit when we are in dyn upload
-		if( app_prefs->prefs->maxupload != 0 && !(app_prefs->prefs->m_bDynUpEnabled || app_prefs->prefs->m_bSUCEnabled || app_prefs->prefs->isautodynupswitching))
-		//MORPH END   - Added by SiRoB, Avoid change of the MaxDownloadLimit when we are in dyn upload
+		if( app_prefs->prefs->maxupload != 0)
 			app_prefs->prefs->maxdownload = app_prefs->GetMaxDownload();
 
 		CString strBuffer;
@@ -289,9 +305,9 @@ BOOL CPPgConnection::OnApply()
 	app_prefs->prefs->reconnect = (int8)IsDlgButtonChecked(IDC_RECONN);
 		
 	if(lastmaxgu != app_prefs->prefs->maxGraphUploadRate) 
-		theApp.emuledlg->statisticswnd.SetARange(false,app_prefs->prefs->maxGraphUploadRate);
+		theApp.emuledlg->statisticswnd->SetARange(false,app_prefs->prefs->maxGraphUploadRate);
 	if(lastmaxgd!=app_prefs->prefs->maxGraphDownloadRate)
-		theApp.emuledlg->statisticswnd.SetARange(true,app_prefs->prefs->maxGraphDownloadRate);
+		theApp.emuledlg->statisticswnd->SetARange(true,app_prefs->prefs->maxGraphDownloadRate);
 
 	uint16 tempcon = app_prefs->prefs->maxconnections;
 	if(GetDlgItem(IDC_MAXCON)->GetWindowTextLength())
@@ -300,17 +316,17 @@ BOOL CPPgConnection::OnApply()
 		tempcon = (atoi(buffer)) ? atoi(buffer) : CPreferences::GetRecommendedMaxConnections();
 	}
 
-	if(tempcon > (unsigned)::GetMaxConnections())
+	if(tempcon > (unsigned)::GetMaxWindowsTCPConnections())
 	{
 		CString strMessage;
-		strMessage.Format(GetResString(IDS_PW_WARNING), GetResString(IDS_PW_MAXC), ::GetMaxConnections());
+		strMessage.Format(GetResString(IDS_PW_WARNING), GetResString(IDS_PW_MAXC), ::GetMaxWindowsTCPConnections());
 		int iResult = AfxMessageBox(strMessage, MB_ICONWARNING | MB_YESNO);
 		if(iResult != IDYES)
 		{
 			//TODO: set focus to max connection?
 			strMessage.Format("%d", app_prefs->prefs->maxconnections);
 			GetDlgItem(IDC_MAXCON)->SetWindowText(strMessage);
-			tempcon = ::GetMaxConnections();
+			tempcon = ::GetMaxWindowsTCPConnections();
 		}
 	}
 	app_prefs->prefs->maxconnections = tempcon;

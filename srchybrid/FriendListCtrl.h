@@ -15,9 +15,9 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "friend.h"
-#include "titlemenu.h"
-// CFriendListCtrl
+#include "MuleListCtrl.h"
+
+class CFriend;
 
 class CFriendListCtrl : public CMuleListCtrl
 {
@@ -33,18 +33,19 @@ public:
 	void	UpdateList();
 
 protected:
-	DECLARE_MESSAGE_MAP()
-
+	void	SetAllIcons();
 	void	AddFriend(CFriend* toadd);
 	void	RemoveFriend(CFriend* toremove);
 	void	RefreshFriend(CFriend* toupdate);
 	void	ShowFriendDetails(CFriend* pFriend);
-	BOOL	OnCommand(WPARAM wParam,LPARAM lParam );
-	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-public:
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSysColorChange();
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
+	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 };

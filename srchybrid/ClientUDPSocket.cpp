@@ -21,7 +21,15 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "ClientUDPSocket.h"
-#include "opcodes.h"
+#include "Packets.h"
+#include "DownloadQueue.h"
+#include "PartFile.h"
+#include "SharedFileList.h"
+#include "UploadQueue.h"
+#include "UpDownClient.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -137,7 +145,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 						break;
 
 					uint16 nRank;
-					MEMCOPY(&nRank,packet,2);
+					memcpy(&nRank,packet,2);
 					sender->SetRemoteQueueFull(false);
 					sender->UDPReaskACK(nRank);
 					sender->AddAskedCountDown();
@@ -149,7 +157,8 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 				theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 				CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP_UDP(inet_addr(host), port);
 				if (sender){
-					sender->UDPReaskFNF();
+					sender->UDPReaskFNF(); // may delete 'sender'!
+					sender = NULL;
 				}
 				break;
 			}
@@ -160,22 +169,19 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 		return true;
 	}
 	catch(CFileException* error){ // preventive, just if someone uses a CSafeMemFile in the future..
-		OUTPUT_DEBUG_TRACE();
 		error->Delete();
 		AddDebugLogLine(false,GetResString(IDS_ERR_UDP_MISCONF) + _T(" - CFileException"));
 	}
 	catch(CMemoryException* error){
-		OUTPUT_DEBUG_TRACE();
 		error->Delete();
 		AddDebugLogLine(false,GetResString(IDS_ERR_UDP_MISCONF) + _T(" - CMemoryException"));
 	}
 	catch(CString error){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_UDP_MISCONF) + _T(" - ") + error);
 	}
 	catch(...){
-		OUTPUT_DEBUG_TRACE();
 		AddDebugLogLine(false,GetResString(IDS_ERR_UDP_MISCONF) + _T(" - Unknown exception"));
+		ASSERT(0);
 	}
 
 	return false;
@@ -189,8 +195,8 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 	while (controlpacket_queue.GetHeadPosition() != 0 && !IsBusy()){
 		UDPPack* cur_packet = controlpacket_queue.GetHead();
 		char* sendbuffer = new char[cur_packet->packet->size+2];
-		MEMCOPY(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
-		MEMCOPY(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
+		memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
+		memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 		if (!SendTo(sendbuffer, cur_packet->packet->size+2, cur_packet->dwIP, cur_packet->nPort) ){
 			controlpacket_queue.RemoveHead();
 			delete cur_packet->packet;
@@ -225,8 +231,8 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort){
 		return true;
 	}
 	char* sendbuffer = new char[packet->size+2];
-	MEMCOPY(sendbuffer,packet->GetUDPHeader(),2);
-	MEMCOPY(sendbuffer+2,packet->pBuffer,packet->size);
+	memcpy(sendbuffer,packet->GetUDPHeader(),2);
+	memcpy(sendbuffer+2,packet->pBuffer,packet->size);
 	if (SendTo(sendbuffer, packet->size+2, dwIP, nPort)){
 		controlpacket_queue.AddTail(newpending);
 	}

@@ -5,13 +5,21 @@
 
 #include "stdafx.h"
 #include "emule.h"
-#include "memdc.h"
+#include "MemDC.h"
 #include "MuleListCtrl.h"
 #include "Ini2.h"
 #include "SharedFilesCtrl.h"
 #include "SearchListCtrl.h"
 #include "KadContactListCtrl.h"
 #include "KadSearchListCtrl.h"
+#include "DownloadListCtrl.h"
+#include "UploadListCtrl.h"
+#include "QueueListCtrl.h"
+#include "ClientListCtrl.h"
+#include "FriendListCtrl.h"
+#include "ServerListCtrl.h"
+#include "MenuCmds.h"
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -62,6 +70,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort) {
 	//just in case
     m_crWindow = 0;
     m_crWindowText = 0;
+	m_crWindowTextBk = m_crWindow;
     m_crHighlight = 0;
 	m_crGlow=0;
     m_crFocusLine = 0;
@@ -299,38 +308,45 @@ void CMuleListCtrl::LoadSettings(CIni* ini, LPCTSTR pszLVName)
 	delete[] piColHidden;
 }
 
-void CMuleListCtrl::SetColors() {
+void CMuleListCtrl::SetColors(LPCTSTR pszLvKey) {
 	m_crWindow      = ::GetSysColor(COLOR_WINDOW);
 	m_crWindowText  = ::GetSysColor(COLOR_WINDOWTEXT);
+	m_crWindowTextBk = m_crWindow;
 
 	COLORREF crHighlight = ::GetSysColor(COLOR_HIGHLIGHT);
 
+	CString strBkImage;
 	LPCTSTR pszSkinProfile = theApp.glob_prefs->GetSkinProfile();
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
 	{
 		CString strKey;
-		if (IsKindOf(RUNTIME_CLASS(CServerListCtrl)))
-			strKey = "ServersLv";
+		if (pszLvKey != NULL && pszLvKey[0] != _T('\0'))
+			strKey = pszLvKey;
+		else if (IsKindOf(RUNTIME_CLASS(CServerListCtrl)))
+			strKey = _T("ServersLv");
 		else if (IsKindOf(RUNTIME_CLASS(CSearchListCtrl)))
-			strKey = "SearchResultsLv";
+			strKey = _T("SearchResultsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CDownloadListCtrl)))
-			strKey = "DownloadsLv";
+			strKey = _T("DownloadsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CUploadListCtrl)))
-			strKey = "UploadsLv";
+			strKey = _T("UploadsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CQueueListCtrl)))
 			strKey = "QueuedLv";
 		else if (IsKindOf(RUNTIME_CLASS(CClientListCtrl)))
-			strKey = "ClientsLv";
+			strKey = _T("ClientsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CFriendListCtrl)))
-			strKey = "FriendsLv";
+			strKey = _T("FriendsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CSharedFilesCtrl)))
-			strKey = "SharedFilesLv";
+			strKey = _T("SharedFilesLv");
 		else if (IsKindOf(RUNTIME_CLASS(CKadContactListCtrl)))
-			strKey = "KadContactsLv";
+			strKey = _T("KadContactsLv");
 		else if (IsKindOf(RUNTIME_CLASS(CKadSearchListCtrl)))
-			strKey = "KadActionsLv";
+			strKey = _T("KadActionsLv");
 		else
-			strKey = "DefLv";
+			GetWindowText(strKey);
+
+		if (strKey.IsEmpty())
+			strKey = _T("DefLv");
 
 		TCHAR szColor[MAX_PATH];
 		GetPrivateProfileString(_T("Colors"), strKey + _T("Bk"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
@@ -341,7 +357,10 @@ void CMuleListCtrl::SetColors() {
 			UINT red, grn, blu;
 			int iVals = _stscanf(szColor, _T("%i , %i , %i"), &red, &grn, &blu);
 			if (iVals == 3)
+			{
 				m_crWindow = RGB(red, grn, blu);
+				m_crWindowTextBk = m_crWindow;
+			}
 		}
 
 		GetPrivateProfileString(_T("Colors"), strKey + _T("Fg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
@@ -365,16 +384,50 @@ void CMuleListCtrl::SetColors() {
 			if (iVals == 3)
 				crHighlight = RGB(red, grn, blu);
 		}
+
+		GetPrivateProfileString(_T("Colors"), strKey + _T("BkImg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] == _T('\0'))
+			GetPrivateProfileString(_T("Colors"), _T("DefLvBkImg"), _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		if (szColor[0] != _T('\0'))
+			strBkImage = szColor;
 	}
 	SetBkColor(m_crWindow);
-	SetTextBkColor(m_crWindow);
+	SetTextBkColor(m_crWindowTextBk);
 	SetTextColor(m_crWindowText);
+	LVBKIMAGE lvimg = {0};
+	lvimg.ulFlags = LVBKIF_SOURCE_NONE;
+	SetBkImage(&lvimg);
+	if (!strBkImage.IsEmpty())
+	{
+		// expand any optional available environment strings
+		TCHAR szExpSkinRes[MAX_PATH];
+		if (ExpandEnvironmentStrings(strBkImage, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			strBkImage = szExpSkinRes;
 
-	// This can not be used, because currently the DrawItem and related functions are not prepared to deal
-	// with that (Hint: the biggest problem is the CMemDC BitBlt)..
-//	if (SetBkImage("file://C:\\WINDOWS\\ServicePackFiles\\i386\\lvback.gif", FALSE)){
-//		SetTextBkColor(CLR_NONE);
-//	}
+		// create absolute path to icon resource file
+		TCHAR szFullResPath[MAX_PATH];
+		if (PathIsRelative(strBkImage))
+		{
+			TCHAR szSkinResFolder[MAX_PATH];
+			_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
+			szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+			PathRemoveFileSpec(szSkinResFolder);
+			_tmakepath(szFullResPath, NULL, szSkinResFolder, strBkImage, NULL);
+		}
+		else
+		{
+			_tcsncpy(szFullResPath, strBkImage, ARRSIZE(szFullResPath));
+			szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+		}
+
+		CString strUrl(_T("file://"));
+		strUrl += szFullResPath;
+		if (SetBkImage(const_cast<LPTSTR>((LPCTSTR)strUrl), FALSE, 0, 0))
+		{
+			m_crWindowTextBk = CLR_NONE;
+			SetTextBkColor(m_crWindowTextBk);
+		}
+	}
 
 	m_crFocusLine   = crHighlight;
 	m_crNoHighlight = MLC_RGBBLEND(crHighlight, m_crWindow, 8);
@@ -948,7 +1001,7 @@ BOOL CMuleListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LR
 
 			m_bCustomDraw = CListCtrl::OnChildNotify(message, wParam, lParam, pResult);
 			if(m_bCustomDraw)
-				MEMCOPY(&m_lvcd, (void*)lParam, sizeof(NMLVCUSTOMDRAW));
+				memcpy(&m_lvcd, (void*)lParam, sizeof(NMLVCUSTOMDRAW));
 
 			return m_bCustomDraw;
 		}
@@ -988,6 +1041,10 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 		crOldTextColor = pDC->SetTextColor(m_lvcd.clrText);
 	else
 		crOldTextColor = pDC->SetTextColor(m_crWindowText);
+
+	if (m_crWindowTextBk == CLR_NONE){
+		DefWindowProc(WM_ERASEBKGND, (WPARAM)pDC->m_hDC, 0);
+	}
 
 	int iOffset = pDC->GetTextExtent(_T(" "), 1 ).cx*2;
 	int iItem = lpDrawItemStruct->itemID;
@@ -1056,7 +1113,8 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 		}
 		else
 		{
-			pDC->FillRect(rcHighlight, &CBrush(m_crWindow));
+			if (m_crWindowTextBk != CLR_NONE)
+				pDC->FillRect(rcHighlight, &CBrush(m_crWindow)); // was already done with WM_ERASEBKGND
 			crOldBckColor = pDC->SetBkColor(m_crWindow);
 		}
 	}
@@ -1085,6 +1143,8 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 		pImageList->Draw(pDC, lvi.iImage, rcIcon.TopLeft(), ILD_NORMAL);
 		pImageList->SetBkColor(crOld);
 	}
+
+	int iOldBkMode = (m_crWindowTextBk == CLR_NONE) ? pDC->SetBkMode(TRANSPARENT) : OPAQUE;
 
 	//draw item label (column 0)
 	rcLabel.left += iOffset / 2;
@@ -1147,14 +1207,19 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	}
 
 	pDC->Flush();
-	//restore old font
+	if (m_crWindowTextBk == CLR_NONE)
+		pDC->SetBkMode(iOldBkMode);
 	pDC->SelectObject(pOldFont);
 	pDC->SetTextColor(crOldTextColor);
 	pDC->SetBkColor(crOldBckColor);
 	oDC->SetBkColor(crOldDCBkColor);
 }
 
-BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC) {
+BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC)
+{
+//	if (m_crWindowTextBk == CLR_NONE) // this creates a lot screen flickering
+//		return CListCtrl::OnEraseBkgnd(pDC);
+
 	int itemCount = GetItemCount();
 	if (!itemCount)
 		return CListCtrl::OnEraseBkgnd(pDC);
@@ -1164,18 +1229,25 @@ BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC) {
 	int topIndex = GetTopIndex();
 	int maxItems = GetCountPerPage();
 	int drawnItems = itemCount < maxItems ? itemCount : maxItems;
+	CRect rcClip;
 
 	//draw top portion
 	GetClientRect(&clientRect);
+	rcClip = clientRect;
 	GetItemRect(topIndex, &itemRect, LVIR_BOUNDS);
 	clientRect.bottom = itemRect.top;
+	if (m_crWindowTextBk != CLR_NONE)
 	pDC->FillSolidRect(&clientRect,GetBkColor());
+	else
+		rcClip.top = itemRect.top;
 
 	//draw bottom portion if we have to
 	if(topIndex + maxItems >= itemCount) {
 		GetClientRect(&clientRect);
 		GetItemRect(topIndex + drawnItems - 1, &itemRect, LVIR_BOUNDS);
 		clientRect.top = itemRect.bottom;
+		rcClip.bottom = itemRect.bottom;
+		if (m_crWindowTextBk != CLR_NONE)
 		pDC->FillSolidRect(&clientRect, GetBkColor());
 	}
 
@@ -1183,9 +1255,21 @@ BOOL CMuleListCtrl::OnEraseBkgnd(CDC* pDC) {
 	if (itemRect.right < clientRect.right) {
 		GetClientRect(&clientRect);
 		clientRect.left = itemRect.right;
+		rcClip.right = itemRect.right;
+		if (m_crWindowTextBk != CLR_NONE)
 		pDC->FillSolidRect(&clientRect, GetBkColor());
 	}
 
+	if (m_crWindowTextBk == CLR_NONE){
+		CRect rcClipBox;
+		pDC->GetClipBox(&rcClipBox);
+		rcClipBox.SubtractRect(&rcClipBox, &rcClip);
+		if (!rcClipBox.IsRectEmpty()){
+			pDC->ExcludeClipRect(&rcClip);
+			CListCtrl::OnEraseBkgnd(pDC);
+			InvalidateRect(&rcClip, FALSE);
+		}
+	}
 	return TRUE;
 }
 
@@ -1280,13 +1364,11 @@ BOOL CDlgListSearchListSearch::OnInitDialog()
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
 
+	SetWindowText(GetResString(IDS_SW_SEARCHBOX));
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_TEXT_LBL, GetResString(IDS_SEARCH_TEXT) + _T(':'));
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_COLUMN_LBL, GetResString(IDS_SEARCH_COLUMN) + _T(':'));
 	
 	SetDlgItemText(IDCANCEL, GetResString(IDS_CANCEL));	
-
-	SetIcon(theApp.emuledlg->sourceTrayIcon,FALSE);
-	SetWindowText(GetResString(IDS_SW_SEARCHBOX));
 
 	if (m_pListView != NULL)
 	{

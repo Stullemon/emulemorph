@@ -4,12 +4,16 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgMorph.h"
+#include "emuledlg.h"
+#include "serverWnd.h" //MORPH - Added by SiRoB
+#include "OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // CPPgMorph dialog
@@ -163,7 +167,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 		CString Buffer;
 		m_htiUM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_UM), iImgUM, TVI_ROOT);
-		m_htiDYNUP = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDYNUP, m_htiUM);
+		m_htiDYNUP = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUPLOAD), iImgDYNUP, m_htiUM);
 		
 		m_htiDynUpOFF = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_DISABLED), m_htiDYNUP, m_iDynUpMode == 0);
 		m_htiDynUpSUC = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SUC), m_htiDYNUP, m_iDynUpMode == 1);
@@ -316,7 +320,7 @@ BOOL CPPgMorph::OnInitDialog()
     m_iUSSGoingUpDivider = app_prefs->prefs->m_iDynUpGoingUpDivider;
     m_iUSSGoingDownDivider = app_prefs->prefs->m_iDynUpGoingDownDivider;
     m_iUSSNumberOfPings = app_prefs->prefs->m_iDynUpNumberOfPings;
-	m_iMinUpload = app_prefs->prefs->m_iMinUpload;
+	m_iMinUpload = app_prefs->prefs->minupload;
 	m_bEnableZeroFilledTest = app_prefs->prefs->enableZeroFilledTest;
 	m_bEnableDownloadInRed = app_prefs->prefs->enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	m_bEnableAntiLeecher = app_prefs->prefs->enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
@@ -399,8 +403,8 @@ BOOL CPPgMorph::OnApply()
 	app_prefs->prefs->m_bisautopowersharenewdownloadfile = m_bIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	app_prefs->prefs->hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	app_prefs->prefs->selectiveShare = m_iSelectiveShare;
-	theApp.emuledlg->serverwnd.ToggleDebugWindow();
-	theApp.emuledlg->serverwnd.UpdateLogTabSelection();
+	theApp.emuledlg->serverwnd->ToggleDebugWindow();
+	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	app_prefs->prefs->m_bShowCatNames = m_iShowCatNames;

@@ -1,7 +1,4 @@
 #pragma once
-
-#include "preferences.h"
-#include "wizard.h"
 #include "TreeOptionsCtrlEx.h"
 
 // CPPgTweaks dialog
@@ -26,7 +23,6 @@ protected:
 	int m_iAutoTakeEd2kLinks;
 	int m_iVerbose;
 	int m_iDebugSourceExchange;
-	int m_iDebugSecuredConnection;  //MORPH - Added by SiRoB, Debug Log option for Secured connection
 	int m_iCreditSystem;
 	int m_iLog2Disk;
 	int m_iDebug2Disk;
@@ -39,13 +35,21 @@ protected:
 	float m_fMinFreeDiskSpaceMB;
 	CString m_sYourHostname;	// itsonlyme: hostnameSource
 	
+	// ZZ:UploadSpeedSense -->
+    int m_iDynUpEnabled;
+    int m_iDynUpMinUpload;
+    int m_iDynUpPingTolerance;
+    int m_iDynUpGoingUpDivider;
+    int m_iDynUpGoingDownDivider;
+    int m_iDynUpNumberOfPings;
+	// ZZ:UploadSpeedSense <--
+
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiMaxCon5Sec;
 	HTREEITEM m_htiAutoTakeEd2kLinks;
 	HTREEITEM m_htiVerbose;
 	HTREEITEM m_htiDebugSourceExchange;
-	HTREEITEM m_htiDebugSecuredConnection; // MORPH - Added by SiRoB, Debug Log option for Secured connection
 	HTREEITEM m_htiCreditSystem;
 	HTREEITEM m_htiSaveLogs;
 	HTREEITEM m_htiLog2Disk;
@@ -62,6 +66,16 @@ protected:
 	HTREEITEM m_htiMinFreeDiskSpace;
 	HTREEITEM m_htiYourHostname;	// itsonlyme: hostnameSource
 	
+	// ZZ:UploadSpeedSense -->
+    HTREEITEM m_htiDynUp;
+	HTREEITEM m_htiDynUpEnabled;
+    HTREEITEM m_htiDynUpMinUpload;
+    HTREEITEM m_htiDynUpPingTolerance;
+    HTREEITEM m_htiDynUpGoingUpDivider;
+    HTREEITEM m_htiDynUpGoingDownDivider;
+    HTREEITEM m_htiDynUpNumberOfPings;
+	// ZZ:UploadSpeedSense <--
+
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);

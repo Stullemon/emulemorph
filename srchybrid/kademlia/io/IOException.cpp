@@ -32,8 +32,6 @@ there client on the eMule forum..
 #include "IOException.h"
 #include <string.h>
 #include "../../Resource.h"
-// ONLY AVAILABLE WITH EMULE INTEGRATION
-//#include "../../OtherFunctions.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

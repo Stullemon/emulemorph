@@ -14,28 +14,32 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-
-#include "types.h"
-#include "updownclient.h"
-#include "hypertextctrl.h"
-#include "otherfunctions.h"
 #include "ClosableTabCtrl.h"
 
-#define URLINDICATOR	"http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:"
+class CHTRichEditCtrl;
+class CUpDownClient;
 
-class CChatItem{
+
+///////////////////////////////////////////////////////////////////////////////
+// CChatItem
+
+class CChatItem
+{
 public:
 	CChatItem();
-	~CChatItem()		{safe_delete(log);}
+	~CChatItem();
+
 	CUpDownClient*		client;
-	CPreparedHyperText*	log;
+	CHTRichEditCtrl*	log;
 	char*				messagepending;
 	bool				notify;
 	CStringArray		history;
 	int					history_pos;
 };
+
+
+///////////////////////////////////////////////////////////////////////////////
 // CChatSelector
 
 class CChatSelector : public CClosableTabCtrl
@@ -44,46 +48,48 @@ class CChatSelector : public CClosableTabCtrl
 
 public:
 	CChatSelector();
-	virtual		~CChatSelector();
+	virtual	~CChatSelector();
+
 	void		Init();
+	void		Localize(void);
 	CChatItem*	StartSession(CUpDownClient* client, bool show = true);
 	void		EndSession(CUpDownClient* client = 0);
 	uint16		GetTabByClient(CUpDownClient* client);
 	CChatItem*	GetItemByClient(CUpDownClient* client);
-	CHyperTextCtrl chatout;
 	void		ProcessMessage(CUpDownClient* sender, char* message);
-	bool		SendMessage(char* message);
+	bool		SendMessage(LPCTSTR message);
 	void		DeleteAllItems();
 	void		ShowChat();
 	void		ConnectingResult(CUpDownClient* sender,bool success);
 	void		Send();
 	void		UpdateFonts(CFont* pFont);
 	CChatItem*	GetCurrentChatItem();
+	BOOL		RemoveItem(int nItem) { return DeleteItem(nItem); }
+
 protected:
-	void		OnTimer(UINT_PTR nIDEvent);
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDestroy();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnTcnSelchangeChatsel(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCsend();
 	afx_msg void OnBnClickedCclose();
-	DECLARE_MESSAGE_MAP()
-	virtual INT		InsertItem(int nItem,TCITEM* pTabCtrlItem);
-	virtual BOOL	DeleteItem(int nItem);
-	void		AddTimeStamp(CChatItem*);
-	bool		IsSpam(CString strMessage, CUpDownClient* client);
-private:
-	CImageList	imagelist;
-	UINT_PTR	m_Timer;
-	bool		blinkstate;
-	bool		lastemptyicon;
 
-	CWnd		*m_pMessageBox;
-	CWnd		*m_pCloseBtn;
-	CWnd		*m_pSendBtn;
-public:
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	void Localize(void);
-	BOOL		RemoveItem(int nItem)		{ return DeleteItem(nItem);}
-	afx_msg void OnDestroy();
+	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
+	virtual BOOL DeleteItem(int nItem);
+
+	void AddTimeStamp(CChatItem*);
+	bool IsSpam(CString strMessage, CUpDownClient* client);
+	void SetAllIcons();
+	void GetChatSize(CRect& rcChat);
+
+private:
+	//CImageList m_imagelist; // as long we use the 'CCloseableTabCtrl' we can't use icons..
+	UINT_PTR m_Timer;
+	bool m_blinkstate;
+	bool m_lastemptyicon;
+	CWnd* m_pMessageBox;
+	CWnd* m_pCloseBtn;
+	CWnd* m_pSendBtn;
 };
-
-

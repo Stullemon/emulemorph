@@ -14,10 +14,7 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "types.h"
-#include "OtherFunctions.h"
 
 class CCKey : public CObject{
 public:
@@ -25,7 +22,7 @@ public:
 	CCKey(const CCKey& k1)		{m_key = k1.m_key;}
 
 	CCKey& operator=(const CCKey& k1)						{m_key = k1.m_key; return *this; }
-	friend bool operator==(const CCKey& k1,const CCKey& k2)	{return !md4cmp(k1.m_key,k2.m_key);}
+	friend bool operator==(const CCKey& k1,const CCKey& k2);
 	
 	const uchar* m_key;
 };

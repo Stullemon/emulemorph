@@ -291,11 +291,11 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 					m_nProxyOpState++;
 					unsigned long ip;
 					int port;
-					MEMCOPY(&ip,&m_pRecvBuffer[4],4);
+					memcpy(&ip,&m_pRecvBuffer[4],4);
 					if (!ip)
 					{ //No IP return, use the IP of the proxy server
 						SOCKADDR SockAddr;
-						MEMSET(&SockAddr,0,sizeof(SockAddr));
+						memset(&SockAddr,0,sizeof(SockAddr));
 						int SockAddrLen=sizeof(SockAddr);
 						if (GetPeerName(&SockAddr, &SockAddrLen ))
 						{
@@ -313,7 +313,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 							return;
 						}
 					}
-					MEMCOPY(&port,&m_pRecvBuffer[2],2);
+					memcpy(&port,&m_pRecvBuffer[2],2);
 					t_ListenSocketCreatedStruct data;
 					data.ip=ip;
 					data.nPort=port;
@@ -459,7 +459,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 			//Send connection request
 			LPCSTR lpszAsciiHost = m_pProxyPeerHost?m_pProxyPeerHost:"";
 			char *command=new char[10+strlen(lpszAsciiHost)+1];
-			MEMSET(command,0,10+strlen(lpszAsciiHost)+1);
+			memset(command,0,10+strlen(lpszAsciiHost)+1);
 			command[0]=5;
 			command[1]=(m_nProxyOpID==PROXYOP_CONNECT)?1:2;
 			command[2]=0;
@@ -467,7 +467,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 			int len=4;
 			if (m_nProxyPeerIp)
 			{
-				MEMCOPY(&command[len],&m_nProxyPeerIp,4);
+				memcpy(&command[len],&m_nProxyPeerIp,4);
 				len+=4;
 			}
 			else
@@ -476,7 +476,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				strcpy(&command[len+1],lpszAsciiHost);
 				len+=strlen(lpszAsciiHost)+1;
 			}
-			MEMCOPY(&command[len],&m_nProxyPeerPort,2);
+			memcpy(&command[len],&m_nProxyPeerPort,2);
 			len+=2;
 			int res=SendNext(command,len);
 			delete [] command;
@@ -531,7 +531,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				}
 				LPCSTR lpszAsciiHost = m_pProxyPeerHost?m_pProxyPeerHost:"";
 				char *command=new char[10+strlen(lpszAsciiHost)+1];
-				MEMSET(command,0,10+strlen(lpszAsciiHost)+1);
+				memset(command,0,10+strlen(lpszAsciiHost)+1);
 				command[0]=5;
 				command[1]=(m_nProxyOpID==PROXYOP_CONNECT)?1:2;
 				command[2]=0;
@@ -539,7 +539,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				int len=4;
 				if (m_nProxyPeerIp)
 				{
-					MEMCOPY(&command[len],&m_nProxyPeerIp,4);
+					memcpy(&command[len],&m_nProxyPeerIp,4);
 					len+=4;
 				}
 				else
@@ -548,7 +548,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 					strcpy(&command[len+1],lpszAsciiHost);
 					len+=strlen(lpszAsciiHost)+1;
 				}
-				MEMCOPY(&command[len],&m_nProxyPeerPort,2);
+				memcpy(&command[len],&m_nProxyPeerPort,2);
 				len+=2;
 				int res=SendNext(command,len);
 				delete [] command;
@@ -613,7 +613,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 					else
 					{
 						char *tmp=new char[m_nRecvBufferLen+=m_pRecvBuffer[4]+2];
-						MEMCOPY(tmp,m_pRecvBuffer,5);
+						memcpy(tmp,m_pRecvBuffer,5);
 						delete [] m_pRecvBuffer;
 						m_pRecvBuffer=tmp;
 						m_nRecvBufferLen+=m_pRecvBuffer[4]+2;
@@ -637,8 +637,8 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 					unsigned long ip;
 					int port;
 					ASSERT(m_pRecvBuffer[3]==1);
-					MEMCOPY(&ip,&m_pRecvBuffer[4],4);
-					MEMCOPY(&port,&m_pRecvBuffer[8],2);
+					memcpy(&ip,&m_pRecvBuffer[4],4);
+					memcpy(&port,&m_pRecvBuffer[8],2);
 					t_ListenSocketCreatedStruct data;
 					data.ip=ip;
 					data.nPort=port;
@@ -724,7 +724,7 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				strcpy(m_pStrBuffer + strlen(tmp), buffer);
 				delete [] tmp;
 			}
-			MEMSET(buffer, 0, 9);
+			memset(buffer, 0, 9);
 			const char start[] = "HTTP/";
 			if (memcmp(start, m_pStrBuffer, (strlen(start)>strlen(m_pStrBuffer)) ? strlen(m_pStrBuffer) : strlen(start)))
 			{
@@ -776,7 +776,7 @@ BOOL CAsyncProxySocketLayer::Connect( LPCTSTR lpszHostAddress, UINT nHostPort )
 	ASSERT(lpszHostAddress != NULL);
 
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr,0,sizeof(sockAddr));
+	memset(&sockAddr,0,sizeof(sockAddr));
 
 	LPCSTR lpszAscii = T2A((LPTSTR)lpszHostAddress);
 	sockAddr.sin_family = AF_INET;
@@ -905,11 +905,11 @@ void CAsyncProxySocketLayer::OnConnect(int nErrorCode)
 			//Send request
 			LPCSTR lpszAscii = m_pProxyPeerHost?m_pProxyPeerHost:"";
 			char *command=new char [9+strlen(lpszAscii)+1];
-			MEMSET(command,0,9+strlen(lpszAscii)+1);
+			memset(command,0,9+strlen(lpszAscii)+1);
 			int len=9;
 			command[0]=4;
 			command[1]=(m_nProxyOpID==PROXYOP_CONNECT)?1:2; //CONNECT or BIND request
-			MEMCOPY(&command[2],&m_nProxyPeerPort,2); //Copy target address
+			memcpy(&command[2],&m_nProxyPeerPort,2); //Copy target address
 			if (!m_nProxyPeerIp)
 			{
 				ASSERT(m_ProxyData.nProxyType==PROXYTYPE_SOCKS4A);
@@ -924,7 +924,7 @@ void CAsyncProxySocketLayer::OnConnect(int nErrorCode)
 				len+=strlen(lpszAscii)+1;
 			}
 			else
-			MEMCOPY(&command[4],&m_nProxyPeerIp,4);
+				memcpy(&command[4],&m_nProxyPeerIp,4);
 			int res=SendNext(command,len); //Send command
 			delete [] command;
 			int nErrorCode=WSAGetLastError();
@@ -955,7 +955,7 @@ void CAsyncProxySocketLayer::OnConnect(int nErrorCode)
 		{ //SOCKS5 proxy
 			//Send initialization request
 			unsigned char command[10];
-			MEMSET(command,0,10);
+			memset(command,0,10);
 			command[0]=5;
 			//CAsyncProxySocketLayer supports to logon types: No logon and
 			//cleartext username/password (if set) logon

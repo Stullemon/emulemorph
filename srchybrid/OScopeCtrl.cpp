@@ -1,10 +1,11 @@
 // OScopeCtrl.cpp : implementation file//
 
 #include "stdafx.h"
-#include "math.h"
-
-#include "OScopeCtrl.h"
+#include <math.h>
 #include "emule.h"
+#include "OScopeCtrl.h"
+#include "emuledlg.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -158,13 +159,12 @@ END_MESSAGE_MAP()
 // COScopeCtrl message handlers
 
 /////////////////////////////////////////////////////////////////////////////
-BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, 
-		                     CWnd* pParentWnd, UINT nID) 
+BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID) 
 {
 	BOOL result;
 	static CString className = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW);
 	
-	result = CWnd::CreateEx(WS_EX_CLIENTEDGE | WS_EX_STATICEDGE, 
+	result = CWnd::CreateEx(WS_EX_CLIENTEDGE /*| WS_EX_STATICEDGE*/, 
 		className, NULL, dwStyle, 
 		rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
 		pParentWnd->GetSafeHwnd(), (HMENU)nID);
@@ -529,20 +529,16 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		m_dcPlot.FillRect(m_rectClient, &m_brushBack);
 	}
 
-	if(true)	// more to come *g*
-	{
-		int iNewSize = m_rectClient.Width() / m_nShiftPixels + 10;		// +10 just in case :)
-		if(m_nMaxPointCnt < iNewSize)
-			m_nMaxPointCnt = iNewSize;									// keep the bigest value
-		m_bDoUpdate = false;
-
+	int iNewSize = m_rectClient.Width() / m_nShiftPixels + 10;		// +10 just in case :)
+	if(m_nMaxPointCnt < iNewSize)
+		m_nMaxPointCnt = iNewSize;									// keep the bigest value
+	m_bDoUpdate = false;
 		if (theApp.emuledlg->IsRunning()) 
-		{
-			if (!theApp.glob_prefs->IsGraphRecreateDisabled()) {
-				if(m_nRedrawTimer)
-					KillTimer(m_nRedrawTimer);
-				VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) ); // reduce flickering
-			}
+	{
+		if (!theApp.glob_prefs->IsGraphRecreateDisabled()) {
+			if(m_nRedrawTimer)
+				KillTimer(m_nRedrawTimer);
+			VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) != NULL ); // reduce flickering
 		}
 	}
 

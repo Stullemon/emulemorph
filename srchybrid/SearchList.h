@@ -17,15 +17,8 @@
 
 
 #pragma once
-#include "opcodes.h"
-#include "emule.h"
-#include "types.h"
-#include "preferences.h"
+#include "Loggable.h"
 #include "KnownFile.h"
-#include "packets.h"
-#include "searchlistctrl.h"
-#include "otherfunctions.h"
-#include "loggable.h"
 
 class CSearchFile : public CAbstractFile
 {

@@ -14,10 +14,17 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
+#include "stdafx.h"
+#include "emule.h"
 #include "UploadBandwidthThrottler.h"
-#include "Emule.h"
+#include "EMSocket.h"
+#include "opcodes.h"
+#include "UploadQueue.h"
+#include "LastCommonRouteFinder.h"
+#include "OtherFunctions.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -278,6 +285,7 @@ void UploadBandwidthThrottler::EndThread() {
  * @return
  */
 UINT AFX_CDECL UploadBandwidthThrottler::RunProc(LPVOID pParam) {
+	DbgSetThreadName("UploadBandwidthThrottler");
     UploadBandwidthThrottler* uploadBandwidthThrottler = (UploadBandwidthThrottler*)pParam;
 
     return uploadBandwidthThrottler->RunInternal();

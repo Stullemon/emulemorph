@@ -14,23 +14,25 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// PreviewDlg.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "emule.h"
 #include "PreviewDlg.h"
 #include "CxImage/xImage.h"
+#include "OtherFunctions.h"
+#include "SearchList.h"
 
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
 
-// PreviewDlg dialog
 
 IMPLEMENT_DYNAMIC(PreviewDlg, CDialog)
 PreviewDlg::PreviewDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(PreviewDlg::IDD, pParent)
 {
-	MEMSET(m_icons, 0, sizeof m_icons);
+	memset(m_icons, 0, sizeof m_icons);
 }
 
 PreviewDlg::~PreviewDlg()

@@ -15,15 +15,19 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "server.h"
-#include "packets.h"
 #include "loggable.h"
 
 #define WM_DNSLOOKUPDONE	(WM_USER+0x101)
 
-// Client to Server communication
 class CServerConnect;
 struct SServerUDPPacket;
+class CUDPSocket;
+class Packet;
+class CServer;
+
+
+///////////////////////////////////////////////////////////////////////////////
+// CUDPSocketWnd
 
 class CUDPSocketWnd : public CWnd
 {
@@ -31,13 +35,15 @@ class CUDPSocketWnd : public CWnd
 public:
 	CUDPSocketWnd();
 	CUDPSocket* m_pOwner;
+
 protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnDNSLookupDone(WPARAM wParam,LPARAM lParam);
-private:
-	
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// CUDPSocket
 
 class CUDPSocket : public CAsyncSocket, public CLoggable
 {

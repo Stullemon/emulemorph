@@ -1,4 +1,5 @@
 #pragma once
+#include "TitleMenu.h"
 
 class CLogEditCtrl : public CEdit
 {
@@ -8,27 +9,31 @@ public:
 	virtual ~CLogEditCtrl();
 
 	void Init(LPCTSTR pszTitle);
+	void SetTitle(LPCTSTR pszTitle);
 	void Localize();
 
 	void AddEntry(LPCTSTR pszMsg);
+	void Add(LPCTSTR pszMsg, int iLen = -1);
 	void Reset();
 	CString GetLastLogEntry();
 	CString GetAllLogEntries();
+	bool SaveLog(LPCTSTR pszDefName = NULL);
 
 protected:
 	bool m_bRichEdit;
 	CTitleMenu m_LogMenu;
-	int m_iMaxLogMessages;
+	int m_iMaxLogBuff;
 	bool m_bAutoScroll;
 	CStringArray m_astrBuff;
 	bool m_bNoPaint;
 	bool m_bEnErrSpace;
+	CString m_strTitle;
 
-	void AddLine(LPCTSTR pszMsg);
+	void AddLine(LPCTSTR pszMsg, int iLen);
 	void SelectAllItems();
 	void CopySelectedItems();
 	int GetMaxSize();
-	void SafeAddLine(int nPos, LPCTSTR pszLine, int& nStartChar, int& nEndChar);
+	void SafeAddLine(int nPos, int iLineLen, LPCTSTR pszLine, int& nStartChar, int& nEndChar);
 	void FlushBuffer();
 	void ScrollToLastLine();
 

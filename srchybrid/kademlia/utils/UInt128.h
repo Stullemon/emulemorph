@@ -30,8 +30,6 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "../../stdafx.h"
-
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////

@@ -8,6 +8,12 @@
 #include <cassert>
 
 
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 /************************************************
 *
 *                   TAB CONTROL
@@ -287,7 +293,7 @@ bool TabControl::DrawIndicator(
       m_nDstTab--;
   }
 
-  BOOL bRet = GetItemRect(m_nDstTab,&rect);
+  GetItemRect(m_nDstTab,&rect);
 
   CRect newInsertPosRect(rect.left-1,rect.top,rect.left-1+INDICATOR_WIDTH, rect.bottom);
 

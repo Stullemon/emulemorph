@@ -16,9 +16,18 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "stdafx.h"
-#include "otherfunctions.h"
 #include "emule.h"
-#include "shlobj.h" 
+#include "OtherFunctions.h"
+#include "DownloadQueue.h"
+#include "Preferences.h"
+#include "PartFile.h"
+#include "SharedFileList.h"
+#include "UpDownClient.h"
+#ifndef _CONSOLE
+#include <shlobj.h>
+#include "emuledlg.h"
+#include "MenuCmds.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -282,23 +291,34 @@ bool Ask4RegFix(bool checkOnly, bool dontAsk){
 
 	// check registry if ed2k links is assigned to emule
 	CRegKey regkey;
-	regkey.Create(HKEY_CLASSES_ROOT,"ed2k\\shell\\open\\command");
-	ULONG maxsize = 500;
+	regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
+
 	TCHAR rbuffer[500];
-	char modbuffer[490];
-	char regbuffer[520];
-	regkey.QueryStringValue(0,rbuffer,&maxsize);
-	::GetModuleFileName(0,modbuffer, 490);
-	sprintf(regbuffer,"\"%s\" \"%%1\"",modbuffer);
-	if (strcmp(rbuffer,regbuffer)){
-		if (checkOnly) return true;
+	ULONG maxsize = ARRSIZE(rbuffer);
+	regkey.QueryStringValue(NULL, rbuffer, &maxsize);
+
+	TCHAR modbuffer[490];
+	::GetModuleFileName(NULL, modbuffer, ARRSIZE(modbuffer));
+	CString strCanonFileName = modbuffer;
+	strCanonFileName.Replace(_T("%"), _T("%%"));
+
+	TCHAR regbuffer[520];
+	_sntprintf(regbuffer, ARRSIZE(regbuffer), _T("\"%s\" \"%%1\""), strCanonFileName);
+	if (_tcscmp(rbuffer,regbuffer)){
+		if (checkOnly)
+			return true;
 		if (dontAsk || (AfxMessageBox(GetResString(IDS_ASSIGNED2K),MB_ICONQUESTION|MB_YESNO) == IDYES)){
-			regkey.SetStringValue(0,regbuffer);	
-			regkey.Create(HKEY_CLASSES_ROOT,"ed2k\\DefaultIcon" );// Added Shrink 
-			regkey.SetStringValue(0,modbuffer);
-			regkey.Create(HKEY_CLASSES_ROOT,"ed2k" );
-			regkey.SetStringValue(0,"URL: ed2k Protocol");
-			regkey.SetStringValue("URL Protocol","" );
+			regkey.SetStringValue(NULL, regbuffer);	
+			
+			regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
+			regkey.SetStringValue(NULL, modbuffer);
+
+			regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k"));
+			regkey.SetStringValue(NULL, _T("URL: ed2k Protocol"));
+			regkey.SetStringValue(_T("URL Protocol"), _T(""));
+
+			regkey.Open(HKEY_CLASSES_ROOT, _T("ed2k"));
+			regkey.RecurseDeleteKey(_T("ddexec"));
 		}
 	}
 	regkey.Close();
@@ -309,19 +329,20 @@ void BackupReg(void)
 {
 	// Look for pre-existing old ed2k links
 	CRegKey regkey;
-	regkey.Create(HKEY_CLASSES_ROOT, "ed2k\\shell\\open\\command");
-	ULONG maxsize = 500;
+	regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
 	TCHAR rbuffer[500];
+	ULONG maxsize = ARRSIZE(rbuffer);
 	// Is it ok to write new values
-	if ((regkey.QueryStringValue("OldDefault", rbuffer, &maxsize) != ERROR_SUCCESS) || (maxsize == 0))
+	if ((regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) != ERROR_SUCCESS) || (maxsize == 0))
 	{
-		maxsize = 500;
-		regkey.QueryStringValue(0, rbuffer, &maxsize);
-		regkey.SetStringValue("OldDefault", rbuffer);	
-		regkey.Create(HKEY_CLASSES_ROOT, "ed2k\\DefaultIcon" );
-		maxsize = 500;	
-		if (regkey.QueryStringValue(0, rbuffer, &maxsize) == ERROR_SUCCESS)
-			regkey.SetStringValue("OldIcon", rbuffer);
+		maxsize = ARRSIZE(rbuffer);
+		regkey.QueryStringValue(NULL, rbuffer, &maxsize);
+		regkey.SetStringValue(_T("OldDefault"), rbuffer);
+
+		regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
+		maxsize = ARRSIZE(rbuffer);
+		if (regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS)
+			regkey.SetStringValue(_T("OldIcon"), rbuffer);
 	}
 	regkey.Close();
 }
@@ -331,25 +352,25 @@ void RevertReg(void)
 {
 	// restore previous ed2k links before being assigned to emule
 	CRegKey regkey;
-	regkey.Create(HKEY_CLASSES_ROOT, "ed2k\\shell\\open\\command");
-	ULONG maxsize = 500;
+	regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"));
 	TCHAR rbuffer[500];
-	if (regkey.QueryStringValue("OldDefault", rbuffer, &maxsize) == ERROR_SUCCESS)
+	ULONG maxsize = ARRSIZE(rbuffer);
+	if (regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) == ERROR_SUCCESS)
 	{
-		regkey.SetStringValue(0, rbuffer);	
-		regkey.Create(HKEY_CLASSES_ROOT, "ed2k\\DefaultIcon" );
-		regkey.DeleteValue("OldDefault");
-		maxsize = 500;	
-		if (regkey.QueryStringValue("OldIcon", rbuffer, &maxsize) == ERROR_SUCCESS)
+		regkey.SetStringValue(NULL, rbuffer);
+		regkey.DeleteValue(_T("OldDefault"));
+		regkey.Create(HKEY_CLASSES_ROOT, _T("ed2k\\DefaultIcon"));
+		maxsize = ARRSIZE(rbuffer);
+		if (regkey.QueryStringValue(_T("OldIcon"), rbuffer, &maxsize) == ERROR_SUCCESS)
 		{
-			regkey.SetStringValue(0, rbuffer);
-			regkey.DeleteValue("OldIcon");
+			regkey.SetStringValue(NULL, rbuffer);
+			regkey.DeleteValue(_T("OldIcon"));
 		}
 	}
 	regkey.Close();
 }
 
-int GetMaxConnections() {
+int GetMaxWindowsTCPConnections() {
 	OSVERSIONINFOEX osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
@@ -409,12 +430,9 @@ int GetMaxConnections() {
 WORD DetectWinVersion()
 {
 	OSVERSIONINFOEX osvi;
-	BOOL bOsVersionInfoEx;
-
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-	if(!(bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO*)&osvi)))
+	if(!GetVersionEx((OSVERSIONINFO*)&osvi))
 	{
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 		if(!GetVersionEx((OSVERSIONINFO*)&osvi)) 
@@ -471,7 +489,7 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 		char *p = strchr(pDirectory, '\\');
 		if(p)
 		{
-			MEMCOPY(cDrive, pDirectory, p-pDirectory);
+			memcpy(cDrive, pDirectory, p-pDirectory);
 			cDrive[p-pDirectory] = '\0';
 		}
 		else
@@ -482,8 +500,8 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 	}
 }
 
-//For  Rate File // 
-CString   GetRateString(uint16 rate)   { 
+CString GetRateString(uint16 rate)
+{ 
       switch (rate){ 
       case 0: 
          return GetResString(IDS_CMT_NOTRATED); 
@@ -577,7 +595,7 @@ CString EncodeBase16(const unsigned char* buffer, unsigned int bufLen)
 //   buffer: byte array containing decoded string
 void DecodeBase16(const char *base16Buffer, unsigned int base16BufLen, byte *buffer)
 {
-    MEMSET(buffer, 0, DecodeLengthBase16(base16BufLen));
+    memset(buffer, 0, DecodeLengthBase16(base16BufLen));
   
     for(unsigned int i = 0; i < base16BufLen; i++) {
 		int lookup = toupper(base16Buffer[i]) - '0';
@@ -742,8 +760,8 @@ CString StringLimit(CString in,uint16 length){
 	return (in.Left(length-8)+"..."+in.Right(8));
 }
 
-BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultFileName, DWORD dwFlags) {
-    CFileDialog myFileDialog(true,NULL,pszDefaultFileName,
+BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultFileName, DWORD dwFlags,bool openfilestyle) {
+    CFileDialog myFileDialog(openfilestyle,NULL,pszDefaultFileName,
 							 dwFlags | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, pszFilters, NULL, 
 							 0/*automatically use explorer style open dialog on systems which support it*/);
     if (myFileDialog.DoModal() != IDOK)
@@ -751,101 +769,6 @@ BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultF
 	rstrPath = myFileDialog.GetPathName();
 	return TRUE;
 }
-
-// khaos::categorymod+ Obsolete
-/*CString GetCatTitle(int catid) {
-	switch (catid) {
-		case 0 : return GetResString(IDS_ALL);
-		case 1 : return GetResString(IDS_ALLOTHERS);
-		case 2 : return GetResString(IDS_STATUS_NOTCOMPLETED);
-		case 3 : return GetResString(IDS_DL_TRANSFCOMPL);
-		case 4 : return GetResString(IDS_WAITING);
-		case 5 : return GetResString(IDS_DOWNLOADING);
-		case 6 : return GetResString(IDS_ERRORLIKE);
-		case 7 : return GetResString(IDS_PAUSED);
-		case 8 : return GetResString(IDS_STOPPED);
-		case 10 : return GetResString(IDS_VIDEO);
-		case 11 : return GetResString(IDS_AUDIO);
-		case 12 : return GetResString(IDS_SEARCH_ARC);
-		case 13 : return GetResString(IDS_SEARCH_CDIMG);
-	}
-	return "?";
-}*/
- 
-/*Checks, if a given item should be shown in a given category
-AllcatTypes:
-	0	all
-	1	all not assigned
-	2	not completed
-	3	completed
-	4	waiting
-	5	transfering
-	6	errorous
-	7	paused
-	8	stopped
-	10	Video
-	11	Audio
-	12	Archive
-	13	CDImage
-*/
-// Rewritten.
-bool CheckShowItemInGivenCat(CPartFile* file, int inCategory) {
-
-	Category_Struct* curCat = theApp.glob_prefs->GetCategory(inCategory);
-
-	if (curCat->viewfilters.bSuspendFilters && (file->GetCategory() == inCategory || curCat->viewfilters.nFromCats == 0))
-		return true;
-
-	if (curCat->viewfilters.nFromCats == 2 && file->GetCategory() != inCategory)
-		return false;
-
-	if (!curCat->viewfilters.bVideo && file->IsMovie())
-		return false;
-	if (!curCat->viewfilters.bAudio && ED2KFT_AUDIO == GetED2KFileTypeID(file->GetFileName()))
-		return false;
-	if (!curCat->viewfilters.bArchives && file->IsArchive())
-		return false;
-	if (!curCat->viewfilters.bImages && ED2KFT_CDIMAGE == GetED2KFileTypeID(file->GetFileName()))
-		return false;
-	if (!curCat->viewfilters.bWaiting && !file->IsPaused() && !file->IsStopped() && ((file->GetStatus()==PS_READY|| file->GetStatus()==PS_EMPTY) && file->GetTransferingSrcCount()==0))
-		return false;
-	if (!curCat->viewfilters.bTransferring && ((file->GetStatus()==PS_READY|| file->GetStatus()==PS_EMPTY) && file->GetTransferingSrcCount()>0))
-		return false;
-	if (!curCat->viewfilters.bPaused && file->IsPaused())
-		return false;
-	if (!curCat->viewfilters.bStopped && file->IsStopped())
-		return false;
-	if (!curCat->viewfilters.bComplete && !file->IsPartFile())
-		return false;
-	if (!curCat->viewfilters.bCompleting && file->GetStatus() == PS_COMPLETING)
-		return false;
-	if (!curCat->viewfilters.bHashing && file->GetStatus() == PS_HASHING)
-		return false;
-	if (!curCat->viewfilters.bErrorUnknown && (file->GetStatus() == PS_ERROR || file->GetStatus() == PS_UNKNOWN))
-		return false;
-	if (file->GetFileSize() < curCat->viewfilters.nFSizeMin || (curCat->viewfilters.nFSizeMax != 0 && file->GetFileSize() > curCat->viewfilters.nFSizeMax))
-		return false;
-	uint32 nTemp = file->GetFileSize() - file->GetCompletedSize();
-	if (nTemp < curCat->viewfilters.nRSizeMin || (curCat->viewfilters.nRSizeMax != 0 && nTemp > curCat->viewfilters.nRSizeMax))
-		return false;
-	if (curCat->viewfilters.nTimeRemainingMin > 0 || curCat->viewfilters.nTimeRemainingMax > 0)
-	{
-		sint32 nTemp2 = file->getTimeRemaining();
-		if (nTemp2 < (sint32)curCat->viewfilters.nTimeRemainingMin || (curCat->viewfilters.nTimeRemainingMax != 0 && nTemp2 > (sint32)curCat->viewfilters.nTimeRemainingMax))
-	return false;
-}
-	nTemp = file->GetSourceCount();
-	if (nTemp < curCat->viewfilters.nSourceCountMin || (curCat->viewfilters.nSourceCountMax != 0 && nTemp > curCat->viewfilters.nSourceCountMax))
-		return false;
-	nTemp = file->GetAvailableSrcCount();
-	if (nTemp < curCat->viewfilters.nAvailSourceCountMin || (curCat->viewfilters.nAvailSourceCountMax != 0 && nTemp > curCat->viewfilters.nAvailSourceCountMax))
-		return false;
-	if (!curCat->viewfilters.sAdvancedFilterMask.IsEmpty() && !theApp.downloadqueue->ApplyFilterMask(file->GetFileName(), inCategory))
-		return false;
-
-	return true;
-}
-// khaos::categorymod-
 
 void md4str(const uchar* hash, char* pszHash)
 {
@@ -862,17 +785,6 @@ CString md4str(const uchar* hash)
 	char szHash[MAX_HASHSTR_SIZE];
 	md4str(hash, szHash);
 	return szHash;
-}
-
-uint8 GetRealPrio(uint8 in) {
-	switch(in) {
-		case 4 : return 0;
-		case 0 : return 1;
-		case 1 : return 2;
-		case 2 : return 3;
-		case 3 : return 4;
-	}
-	return 0;
 }
 
 CString CleanupFilename(CString filename) {
@@ -921,7 +833,8 @@ CString CleanupFilename(CString filename) {
 
 	int pos1,pos2;
 	pos1=-1;
-	while (true) {
+	for (;;)
+	{
 		pos1=filename.Find('[',pos1+1);
 		if (pos1==-1) break;
 		pos2=filename.Find(']',pos1);
@@ -934,8 +847,7 @@ CString CleanupFilename(CString filename) {
 				if (numcount>tempStr.GetLength()/2) continue;
 			}
 			filename=filename.Left(pos1)+filename.Right(filename.GetLength()-pos2-1);
-			//pos1-=(pos2-pos1);//original
-			pos1--; // KuSh: -fix: cleaning brackets in CleanupFilename-
+			pos1--;
 		} else break;
 	}
 
@@ -1136,7 +1048,7 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName)
 	SED2KFileType ft;
 	ft.pszExt = strExt;
 	ft.iFileType = ED2KFT_ANY;
-	const SED2KFileType* pFound = (SED2KFileType*)bsearch(&ft, _aED2KFileTypes, ELEMENT_COUNT(_aED2KFileTypes), sizeof _aED2KFileTypes[0], CompareE2DKFileType);
+	const SED2KFileType* pFound = (SED2KFileType*)bsearch(&ft, _aED2KFileTypes, ARRSIZE(_aED2KFileTypes), sizeof _aED2KFileTypes[0], CompareE2DKFileType);
 	if (pFound != NULL)
 		return pFound->iFileType;
 	return ED2KFT_ANY;
@@ -1172,11 +1084,11 @@ CString GetFiletypeByName(LPCTSTR pszFileName)
 class CED2KFileTypes{
 public:
 	CED2KFileTypes(){
-		qsort(_aED2KFileTypes, ELEMENT_COUNT(_aED2KFileTypes), sizeof _aED2KFileTypes[0], CompareE2DKFileType);
+		qsort(_aED2KFileTypes, ARRSIZE(_aED2KFileTypes), sizeof _aED2KFileTypes[0], CompareE2DKFileType);
 #ifdef _DEBUG
 		// check for duplicate entries
 		LPCTSTR pszLast = _aED2KFileTypes[0].pszExt;
-		for (int i = 1; i < ELEMENT_COUNT(_aED2KFileTypes); i++){
+		for (int i = 1; i < ARRSIZE(_aED2KFileTypes); i++){
 			ASSERT( _tcscmp(pszLast, _aED2KFileTypes[i].pszExt) != 0 );
 			pszLast = _aED2KFileTypes[i].pszExt;
 		}
@@ -1391,7 +1303,7 @@ typedef struct tagTHREADNAME_INFO
 		THREADNAME_INFO info; 
 		info.dwType = 0x1000; 
 		info.szName = buffer; 
-		info.dwThreadID = -1; 
+		info.dwThreadID = (DWORD)-1; 
 		info.dwFlags = 0; 
 		__try 
 		{ 
@@ -1427,17 +1339,18 @@ int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2)
 	return strDir1.CompareNoCase(strDir2);		// compare again
 }
 
-bool IsGoodIP(uint32 nIP, bool forceCheck) //MORPH - Modified by SiRoB, ZZ Upload system (USS)
+bool IsGoodIP(uint32 nIP, bool forceCheck)
 {
 	// always filter following IP's
 	// -------------------------------------------
 	//	 0.0.0.0
 	// 127.*.*.*						localhost
 
-	if (nIP==0 || (uint8)nIP==127)
+	if (nIP==0 || (uint8)nIP==127 || nIP==INADDR_NONE)
 		return false;
 
-	if (!theApp.glob_prefs->FilterBadIPs() && !forceCheck) //MORPH - Modified by SiRoB, ZZ Upload system (USS)
+	// ZZ:UploadSpeedSense <--
+	if (!theApp.glob_prefs->FilterBadIPs() && !forceCheck)
 		return true;
 
 	// filter LAN IP's
@@ -1584,7 +1497,7 @@ void DebugHexDump(CFile& file)
 
 bool strmd4(const char* pszHash, uchar* hash)
 {
-	MEMSET(hash, 0, 16);
+	memset(hash, 0, 16);
 	for (int i = 0; i < 16; i++)
 	{
 		char byte[3];
@@ -1602,7 +1515,7 @@ bool strmd4(const char* pszHash, uchar* hash)
 
 bool strmd4(const CString& rstr, uchar* hash)
 {
-	MEMSET(hash, 0, 16);
+	memset(hash, 0, 16);
 	if (rstr.GetLength() != 16*2)
 		return false;
 	for (int i = 0; i < 16; i++)
@@ -1682,14 +1595,6 @@ CString DbgGetClientID(uint32 nClientID)
 	return strClientID;
 }
 
-bool	IsLowIDHybrid(uint32 id){
-	return (id < 16777216);
-}
-
-bool	IsLowIDED2K(uint32 id){
-	return (id < 16777216); //Need to verify what the highest LowID can be returned by the server.
-}
-
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)
 {
 	static BOOL _bInitialized = FALSE;
@@ -1718,6 +1623,122 @@ ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)
 	FindClose(hFind);
 
 	return (ULONGLONG)fd.nFileSizeHigh << 32 | (ULONGLONG)fd.nFileSizeLow;
+}
+
+// Listview helper function
+void GetPopupMenuPos(CListCtrl& lv, CPoint& point)
+{
+	// If the context menu was not opened using the right mouse button,
+	// but the keyboard (Shift+F10), get a useful position for the context menu.
+	if (point.x == -1 && point.y == -1)
+	{
+		int iIdxItem = lv.GetNextItem(-1, LVNI_SELECTED | LVNI_FOCUSED);
+		if (iIdxItem != -1)
+		{
+			CRect rc;
+			if (lv.GetItemRect(iIdxItem, &rc, LVIR_BOUNDS))
+			{
+				point.x = rc.left + lv.GetColumnWidth(0) / 2;
+				point.y = rc.top + rc.Height() / 2;
+				lv.ClientToScreen(&point);
+			}
+		}
+		else
+		{
+			point.x = 16;
+			point.y = 32;
+			lv.ClientToScreen(&point);
+		}
+	}
+}
+
+void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point)
+{
+	// If the context menu was not opened using the right mouse button,
+	// but the keyboard (Shift+F10), get a useful position for the context menu.
+	if (point.x == -1 && point.y == -1)
+	{
+		HTREEITEM hSel = tv.GetNextItem(TVI_ROOT, TVGN_CARET);
+		if (hSel)
+		{
+			CRect rcItem;
+			if (tv.GetItemRect(hSel, &rcItem, TRUE))
+			{
+				point.x = rcItem.left;
+				point.y = rcItem.top;
+				tv.ClientToScreen(&point);
+			}
+		}
+		else
+		{
+			point.x = 16;
+			point.y = 32;
+			tv.ClientToScreen(&point);
+		}
+	}
+}
+
+time_t safe_mktime(struct tm* ptm)
+{
+	if (ptm == NULL)
+		return -1;
+	return mktime(ptm);
+}
+
+CString StripInvalidFilenameChars(CString strText, bool bKeepSpaces)
+{
+	LPTSTR pszBuffer = strText.GetBuffer();
+	LPTSTR pszSource = pszBuffer;
+	LPTSTR pszDest = pszBuffer;
+
+	while (*pszSource != '\0')
+	{
+		if (!((*pszSource <= 31 && *pszSource >= 0)	|| // lots of invalid chars for filenames in windows :=)
+			*pszSource == '\"' || *pszSource == '*' || *pszSource == '<'  || *pszSource == '>' ||
+			*pszSource == '?'  || *pszSource == '|' || *pszSource == '\\' || *pszSource == '/' || 
+			*pszSource == ':') )
+		{
+			if (!bKeepSpaces && *pszSource == ' ')
+				*pszDest = '.';
+			*pszDest = *pszSource;
+			pszDest++;
+		}
+		pszSource++;
+	}
+	*pszDest = '\0';
+	strText.ReleaseBuffer();
+	return strText;
+}
+
+CString CreateED2kLink( CAbstractFile* f )
+{
+	CString strLink;
+	strLink.Format("ed2k://|file|%s|%u|%s|/",
+		StripInvalidFilenameChars(f->GetFileName(), false),	// spaces to dots
+		f->GetFileSize(),
+		EncodeBase16(f->GetFileHash(),16)
+		);
+	return strLink;
+}
+
+CString CreateHTMLED2kLink( CAbstractFile* f )
+{
+	CString strCode = "<a href=\"" + CreateED2kLink(f) + "\">" + StripInvalidFilenameChars(f->GetFileName(), true) + "</a>";
+	return strCode;
+}
+
+bool operator==(const CCKey& k1,const CCKey& k2)
+{
+	return !md4cmp(k1.m_key, k2.m_key);
+}
+
+CString ipstr(uint32 nIP)
+{
+	// following gives the same string as 'inet_ntoa(*(in_addr*)&nIP)' but is not restricted to ASCII strings
+	const BYTE* pucIP = (BYTE*)&nIP;
+	CString strIP;
+	strIP.ReleaseBuffer(_stprintf(strIP.GetBuffer(3+1+3+1+3+1+3), _T("%u.%u.%u.%u"), pucIP[0], pucIP[1], pucIP[2], pucIP[3]));
+	return strIP;
 }
 
 // khaos::kmod+ Functions to return a random number within a given range.

@@ -50,6 +50,7 @@ void CByteIO::readArray(LPVOID lpResult, const uint32 byteCount)
 
 	memcpy(lpResult, m_buffer, byteCount);
 	m_buffer += byteCount;
+	m_used += byteCount;
 	m_available -= byteCount;
 }
 
@@ -63,6 +64,13 @@ void CByteIO::writeArray(LPCVOID lpVal, const uint32 byteCount)
 
 	memcpy(m_buffer, lpVal, byteCount);
 	m_buffer += byteCount;
+	m_used += byteCount;
 	m_available -= byteCount;
 }
 
+void CByteIO::reset(void)
+{
+	m_available += m_used;
+	m_buffer -= m_used;
+	m_used = 0;
+}

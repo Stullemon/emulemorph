@@ -14,13 +14,14 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "types.h"
+#include "ResizableLib/ResizablePage.h"
 #include "ResizableLib/ResizableSheet.h"
 #include "FileInfoDialog.h"
 #include "CommentDialogLst.h"
 #include "MetaDataDlg.h"
+
+class CMuleListCtrl;
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialogInfo dialog

@@ -52,19 +52,19 @@ static char THIS_FILE[]=__FILE__;
 using namespace Kademlia;
 ////////////////////////////////////////
 
-HANDLE		CTimer::m_hThread = NULL;
+CWinThread* CTimer::m_pThread = NULL;
+DWORD		CTimer::m_dwThreadID = 0;
 HANDLE		CTimer::m_hStopEvent = NULL;
 EventMap	CTimer::m_events;
 time_t		CTimer::m_nextSearchJumpStart;
 time_t		CTimer::m_nextSelfLookup;
-DWORD		CTimer::m_dwThreadID = 0;
 time_t		CTimer::m_statusUpdate;
 time_t		CTimer::m_bigTimer;
 time_t		CTimer::m_nextFirewallCheck;
 
 void CTimer::start(void)
 {
-	if (m_hThread != NULL)
+	if (m_pThread != NULL && m_pThread->m_hThread != NULL)
 		return;
 
 	m_nextSearchJumpStart = time(NULL);
@@ -73,75 +73,81 @@ void CTimer::start(void)
 	m_bigTimer = time(NULL);
 	m_nextFirewallCheck = time(NULL) + (HOUR);
 
-	// SetTimer is designed for windows applications, not console applications.
-	m_hThread = CreateThread(	NULL,				// no security attributes 
-								0,					// use default stack size  
-								timer,				// thread function 
-								NULL,				// argument to thread function 
-								0,					// use default creation flags 
-								&m_dwThreadID);		// returns the thread identifier 
-	if (m_hThread == NULL)
+	ASSERT( m_pThread == NULL );
+	m_pThread = new CWinThread(timer, NULL);
+	m_pThread->m_bAutoDelete = FALSE;
+	if (!m_pThread->CreateThread())
+	{
+		delete m_pThread;
+		m_pThread = NULL;
 		CKademlia::reportError(ERR_CREATE_THREAD_FAILED, "Failed to create Kademlia timer thread.");
+	}
 	else
+	{
+		m_dwThreadID = m_pThread->m_nThreadID; // stored thread ID in sync save member var
 		m_hStopEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	}
 }
 
 void CTimer::stop(bool bAppShutdown)
 {
-	if (m_hThread != NULL)
+	if (m_pThread != NULL)
 	{
-		m_dwThreadID = 0;
-		SetEvent(m_hStopEvent);
-
-		if (bAppShutdown)
+		if (m_pThread->m_hThread != NULL)
 		{
-			// NOTE: This code is to be invoked from within the main thread *only*!
-			bool bQuit = false;
-			while (!bQuit)
+			m_dwThreadID = 0; // don't all other threads to post messages to the thread during thread termination
+			SetEvent(m_hStopEvent);
+
+			if (bAppShutdown)
 			{
-				const int iNumEvents = 1;
-				DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_hThread, FALSE, INFINITE, QS_ALLINPUT);
-				if (dwEvent == -1)
+				// NOTE: This code is to be invoked from within the main thread *only*!
+				bool bQuit = false;
+				while (!bQuit)
 				{
-					TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
-					ASSERT(0);
-				}
-				else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
-				{
-					CWinThread *pThread = AfxGetThread();
-					MSG* pMsg = AfxGetCurrentMessage();
-					while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
+					const int iNumEvents = 1;
+					DWORD dwEvent = MsgWaitForMultipleObjects(iNumEvents, &m_pThread->m_hThread, FALSE, INFINITE, QS_ALLINPUT);
+					if (dwEvent == -1)
 					{
-						TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
-						// pump message, but quit on WM_QUIT
-						if (!pThread->PumpMessage()) {
-							AfxPostQuitMessage(0);
-							bQuit = true;
-							break;
+						TRACE("%s: Error in MsgWaitForMultipleObjects: %08x\n", __FUNCTION__, GetLastError());
+						ASSERT(0);
+					}
+					else if (dwEvent == WAIT_OBJECT_0 + iNumEvents)
+					{
+						CWinThread *pThread = AfxGetThread();
+						MSG* pMsg = AfxGetCurrentMessage();
+						while (::PeekMessage(pMsg, NULL, NULL, NULL, PM_NOREMOVE))
+						{
+							TRACE("%s: Message %08x arrived while waiting on thread shutdown\n", __FUNCTION__, pMsg->message);
+							// pump message, but quit on WM_QUIT
+							if (!pThread->PumpMessage()) {
+								AfxPostQuitMessage(0);
+								bQuit = true;
+								break;
+							}
 						}
 					}
-				}
-				else if (dwEvent == WAIT_OBJECT_0 + 0)
-				{
-					// thread has finished
-					break;
-				}
-				else
-				{
-					ASSERT(0);
+					else if (dwEvent == WAIT_OBJECT_0 + 0)
+					{
+						// thread has finished
+						break;
+					}
+					else
+					{
+						ASSERT(0);
+					}
 				}
 			}
-		}
-		else
-		{
-			WaitForSingleObject(m_hThread, INFINITE);
-		}
+			else
+			{
+				WaitForSingleObject(m_pThread->m_hThread, INFINITE);
+			}
 
-		CloseHandle(m_hThread);
-		CloseHandle(m_hStopEvent);
-		m_hThread = NULL;
-		m_hStopEvent = NULL;
-		m_events.clear();
+			CloseHandle(m_hStopEvent);
+			m_hStopEvent = NULL;
+			m_events.clear();
+		}
+		delete m_pThread;
+		m_pThread = NULL;
 	}
 }
 
@@ -155,7 +161,7 @@ void CTimer::removeEvent(CRoutingZone *zone)
 	m_events.erase(zone);
 }
 
-DWORD WINAPI CTimer::timer(LPVOID lpParam)
+UINT AFX_CDECL CTimer::timer(LPVOID lpParam)
 {
 	Kademlia::SetThreadName("Kademlia Routing Timer");
 
@@ -163,7 +169,7 @@ DWORD WINAPI CTimer::timer(LPVOID lpParam)
 	CRoutingZone *zone;
 	EventMap::const_iterator it;
 	uint32 maxUsers = 0;
-	while (true)
+	for (;;)
 	{
 		try
 		{
@@ -182,8 +188,6 @@ DWORD WINAPI CTimer::timer(LPVOID lpParam)
 				prefs->setRecheckIP();
 				m_nextFirewallCheck = HOUR + now;
 			}
-//			if ( prefs->getLastContact() == false && (m_nextSelfLookup > now + ONE_MIN ))
-//				m_nextSelfLookup = (ONE_SEC*10) + now;
 			if (m_nextSelfLookup <= now)
 			{
 				CUInt128 me;
@@ -227,8 +231,6 @@ DWORD WINAPI CTimer::timer(LPVOID lpParam)
 				}
 			}
 
-//			if (WaitForSingleObject(m_hStopEvent, 1000) == WAIT_OBJECT_0)
-//				break;
 			DWORD dwEvent = MsgWaitForMultipleObjects(1, &m_hStopEvent, FALSE, 1000, QS_SENDMESSAGE | QS_POSTMESSAGE | QS_TIMER);
 			if (dwEvent == WAIT_OBJECT_0)
 				break;
@@ -266,5 +268,6 @@ DWORD WINAPI CTimer::timer(LPVOID lpParam)
 
 DWORD CTimer::getThreadID()
 {
+	// this function is allowed to be called from any thread -> do not use 'm_pThread->m_nThreadID'
 	return m_dwThreadID;
 }

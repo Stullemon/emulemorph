@@ -15,8 +15,8 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "types.h"
-#include "updownclient.h"
+
+class CUpDownClient;
 
 #define	FF_NAME		0x01
 //MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System

@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="2"
@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..;..\id3lib\include;system"
+				AdditionalIncludeDirectories=".,..;..\id3lib\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="0"
@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib vfw32.lib version.lib gdiplus.lib ..\zlib\debug\libz.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
@@ -93,7 +93,7 @@
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories=".;..;..\id3lib\include;system"
+				AdditionalIncludeDirectories=".;..;..\id3lib\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
@@ -112,8 +112,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/fixed:no"
-				AdditionalDependencies="delayimp.lib vfw32.lib version.lib gdiplus.lib ..\zlib\release\libz.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
-				LinkIncremental="2"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
 				GenerateDebugInformation="TRUE"
@@ -179,7 +178,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="delayimp.lib vfw32.lib version.lib gdiplus.lib ..\zlib\release\libz.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
+				AdditionalDependencies="delayimp.lib version.lib gdiplus.lib ..\zlib\release\zlib.lib ..\crypto51\release\cryptlib.lib ..\id3lib\libprj\id3lib.lib .\CxImage\Release\cximage.lib ..\png\Release\png.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="OLEACC.DLL;gdiplus.dll"
@@ -247,9 +246,6 @@
 				RelativePath="ClientUDPSocket.cpp">
 			</File>
 			<File
-				RelativePath="CustomAutoComplete.cpp">
-			</File>
-			<File
 				RelativePath="DownloadClient.cpp">
 			</File>
 			<File
@@ -263,9 +259,6 @@
 			</File>
 			<File
 				RelativePath="Emule.cpp">
-			</File>
-			<File
-				RelativePath="EnBitmap.cpp">
 			</File>
 			<File
 				RelativePath="fakecheck.cpp">
@@ -340,6 +333,9 @@
 				RelativePath="PartFileConvert.cpp">
 			</File>
 			<File
+				RelativePath="PerfLog.cpp">
+			</File>
+			<File
 				RelativePath="Pinger.cpp">
 			</File>
 			<File
@@ -379,6 +375,9 @@
 				RelativePath="SourceSaver.cpp">
 			</File>
 			<File
+				RelativePath="Statistics.cpp">
+			</File>
+			<File
 				RelativePath="Stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -398,9 +397,6 @@
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="TitleMenu.cpp">
 			</File>
 			<File
 				RelativePath="UDPSocket.cpp">
@@ -570,10 +566,7 @@
 				RelativePath="ClientUDPSocket.h">
 			</File>
 			<File
-				RelativePath="CustomAutoComplete.h">
-			</File>
-			<File
-				RelativePath=".\definereplace.h">
+				RelativePath="DebugHelpers.h">
 			</File>
 			<File
 				RelativePath="DownloadQueue.h">
@@ -588,7 +581,7 @@
 				RelativePath="Emule.h">
 			</File>
 			<File
-				RelativePath="EnBitmap.h">
+				RelativePath="Exceptions.h">
 			</File>
 			<File
 				RelativePath="fakecheck.h">
@@ -645,9 +638,6 @@
 				RelativePath="Mdump.h">
 			</File>
 			<File
-				RelativePath="MemDC.h">
-			</File>
-			<File
 				RelativePath="MMServer.h">
 			</File>
 			<File
@@ -660,9 +650,6 @@
 				RelativePath="OtherFunctions.h">
 			</File>
 			<File
-				RelativePath="OtherStructs.h">
-			</File>
-			<File
 				RelativePath="Packets.h">
 			</File>
 			<File
@@ -672,6 +659,9 @@
 				RelativePath="PartFileConvert.h">
 			</File>
 			<File
+				RelativePath="PerfLog.h">
+			</File>
+			<File
 				RelativePath="Pinger.h">
 			</File>
 			<File
@@ -679,9 +669,6 @@
 			</File>
 			<File
 				RelativePath="Preview.h">
-			</File>
-			<File
-				RelativePath="QArray.h">
 			</File>
 			<File
 				RelativePath="Quantize.h">
@@ -717,10 +704,10 @@
 				RelativePath="SourceSaver.h">
 			</File>
 			<File
-				RelativePath="Stdafx.h">
+				RelativePath="Statistics.h">
 			</File>
 			<File
-				RelativePath="TitleMenu.h">
+				RelativePath="Stdafx.h">
 			</File>
 			<File
 				RelativePath="Types.h">
@@ -901,13 +888,25 @@
 				RelativePath="CreditsThread.cpp">
 			</File>
 			<File
+				RelativePath="CustomAutoComplete.cpp">
+			</File>
+			<File
 				RelativePath="DialogMinTrayBtn.hpp">
 			</File>
 			<File
 				RelativePath="DirectoryTreeCtrl.cpp">
 			</File>
 			<File
+				RelativePath="DropTarget.cpp">
+			</File>
+			<File
+				RelativePath="EditX.cpp">
+			</File>
+			<File
 				RelativePath="EmuleDlg.cpp">
+			</File>
+			<File
+				RelativePath="EnBitmap.cpp">
 			</File>
 			<File
 				RelativePath="FileDetailDialog.cpp">
@@ -956,6 +955,9 @@
 			</File>
 			<File
 				RelativePath="MeterIcon.cpp">
+			</File>
+			<File
+				RelativePath="MuleListCtrl.cpp">
 			</File>
 			<File
 				RelativePath="MuleStatusBarCtrl.cpp">
@@ -1009,7 +1011,7 @@
 				RelativePath="PPgNotify.cpp">
 			</File>
 			<File
-				RelativePath="PPGProxy.cpp">
+				RelativePath="PPgProxy.cpp">
 			</File>
 			<File
 				RelativePath="PPgScheduler.cpp">
@@ -1040,6 +1042,9 @@
 			</File>
 			<File
 				RelativePath="PShtWiz1.cpp">
+			</File>
+			<File
+				RelativePath="RichEditCtrlX.cpp">
 			</File>
 			<File
 				RelativePath="Scanner.cpp">
@@ -1096,6 +1101,9 @@
 				RelativePath="TaskbarNotifier.cpp">
 			</File>
 			<File
+				RelativePath="TitleMenu.cpp">
+			</File>
+			<File
 				RelativePath="TransferWnd.cpp">
 			</File>
 			<File
@@ -1139,9 +1147,6 @@
 				</File>
 				<File
 					RelativePath="KadSearchListCtrl.cpp">
-				</File>
-				<File
-					RelativePath="MuleListCtrl.cpp">
 				</File>
 				<File
 					RelativePath="QueueListCtrl.cpp">
@@ -1264,6 +1269,9 @@
 				RelativePath="CreditsThread.h">
 			</File>
 			<File
+				RelativePath="CustomAutoComplete.h">
+			</File>
+			<File
 				RelativePath="DialogMinTrayBtn.h">
 			</File>
 			<File
@@ -1273,7 +1281,16 @@
 				RelativePath="Drawgdix.h">
 			</File>
 			<File
+				RelativePath="DropTarget.h">
+			</File>
+			<File
+				RelativePath="EditX.h">
+			</File>
+			<File
 				RelativePath="EmuleDlg.h">
+			</File>
+			<File
+				RelativePath="EnBitmap.h">
 			</File>
 			<File
 				RelativePath="FileDetailDialog.h">
@@ -1315,6 +1332,12 @@
 				RelativePath="LogEditCtrl.h">
 			</File>
 			<File
+				RelativePath="MemDC.h">
+			</File>
+			<File
+				RelativePath="MenuCmds.h">
+			</File>
+			<File
 				RelativePath="MetaDataDlg.h">
 			</File>
 			<File
@@ -1331,9 +1354,6 @@
 			</File>
 			<File
 				RelativePath="OScopeCtrl.h">
-			</File>
-			<File
-				RelativePath="OvernetWnd.h">
 			</File>
 			<File
 				RelativePath="Parser.hpp">
@@ -1372,7 +1392,7 @@
 				RelativePath="PPgNotify.h">
 			</File>
 			<File
-				RelativePath="PPGProxy.h">
+				RelativePath="PPgProxy.h">
 			</File>
 			<File
 				RelativePath="PPgScheduler.h">
@@ -1400,6 +1420,9 @@
 			</File>
 			<File
 				RelativePath="ProgressCtrlX.h">
+			</File>
+			<File
+				RelativePath="RichEditCtrlX.h">
 			</File>
 			<File
 				RelativePath="Scanner.h">
@@ -1436,6 +1459,9 @@
 			</File>
 			<File
 				RelativePath="TaskbarNotifier.h">
+			</File>
+			<File
+				RelativePath="TitleMenu.h">
 			</File>
 			<File
 				RelativePath="TransferWnd.h">
@@ -1569,28 +1595,28 @@
 				RelativePath="res\connectedhigh.ICO">
 			</File>
 			<File
-				RelativePath=".\res\Contact0.ico">
+				RelativePath="res\Contact0.ico">
 			</File>
 			<File
-				RelativePath=".\res\Contact1.ico">
+				RelativePath="res\Contact1.ico">
 			</File>
 			<File
-				RelativePath=".\res\Contact2.ico">
+				RelativePath="res\Contact2.ico">
 			</File>
 			<File
-				RelativePath=".\res\Contact3.ico">
+				RelativePath="res\Contact3.ico">
 			</File>
 			<File
-				RelativePath=".\res\Contact4.ico">
+				RelativePath="res\Contact4.ico">
 			</File>
 			<File
-				RelativePath=".\res\convert.ico">
+				RelativePath="res\convert.ico">
 			</File>
 			<File
-				RelativePath=".\res\CreditOvl.ico">
+				RelativePath="res\CreditOvl.ico">
 			</File>
 			<File
-				RelativePath=".\res\CreditSecureOvl.ico">
+				RelativePath="res\CreditSecureOvl.ico">
 			</File>
 			<File
 				RelativePath="res\CumulativeStats.ico">
@@ -1608,10 +1634,10 @@
 				RelativePath="res\down2x.bmp">
 			</File>
 			<File
-				RelativePath=".\res\EastShare.ico">
+				RelativePath="res\EastShare.ico">
 			</File>
 			<File
-				RelativePath=".\res\eDonkey.ico">
+				RelativePath="res\eDonkey.ico">
 			</File>
 			<File
 				RelativePath="res\eDonkeyHybrid.ico">
@@ -1629,7 +1655,7 @@
 				RelativePath="res\emule.rc2">
 			</File>
 			<File
-				RelativePath=".\res\EQfile.ico">
+				RelativePath="res\EQfile.ico">
 			</File>
 			<File
 				RelativePath="res\Filedonkey.ico">
@@ -1653,7 +1679,7 @@
 				RelativePath="res\global.ico">
 			</File>
 			<File
-				RelativePath=".\res\help.ico">
+				RelativePath="res\help.ico">
 			</File>
 			<File
 				RelativePath="res\ico00001.ico">
@@ -1695,19 +1721,19 @@
 				RelativePath="res\Jigle.ico">
 			</File>
 			<File
-				RelativePath=".\res\KadFileSearch.ico">
+				RelativePath="res\KadFileSearch.ico">
 			</File>
 			<File
-				RelativePath=".\res\KadNodeSearch.ico">
+				RelativePath="res\KadNodeSearch.ico">
 			</File>
 			<File
-				RelativePath=".\res\KadStoreFile.ico">
+				RelativePath="res\KadStoreFile.ico">
 			</File>
 			<File
-				RelativePath=".\res\KadStoreWord.ico">
+				RelativePath="res\KadStoreWord.ico">
 			</File>
 			<File
-				RelativePath=".\res\KadWordSearch.ico">
+				RelativePath="res\KadWordSearch.ico">
 			</File>
 			<File
 				RelativePath="res\Log.ico">
@@ -1725,7 +1751,7 @@
 				RelativePath="res\mldonk.ico">
 			</File>
 			<File
-				RelativePath=".\res\MorphNext.ico">
+				RelativePath="res\MorphNext.ico">
 			</File>
 			<File
 				RelativePath="res\mpending.ICO">
@@ -1830,22 +1856,22 @@
 				RelativePath="res\PROVIDER.ICO">
 			</File>
 			<File
-				RelativePath=".\res\Rating-Excellent.ico">
+				RelativePath="res\Rating-Excellent.ico">
 			</File>
 			<File
-				RelativePath=".\res\Rating-Fair.ico">
+				RelativePath="res\Rating-Fair.ico">
 			</File>
 			<File
-				RelativePath=".\res\Rating-Fake.ico">
+				RelativePath="res\Rating-Fake.ico">
 			</File>
 			<File
-				RelativePath=".\res\Rating-Good.ico">
+				RelativePath="res\Rating-Good.ico">
 			</File>
 			<File
-				RelativePath=".\res\Rating-NotRated.ico">
+				RelativePath="res\Rating-NotRated.ico">
 			</File>
 			<File
-				RelativePath=".\res\Rating-Poor.ico">
+				RelativePath="res\Rating-Poor.ico">
 			</File>
 			<File
 				RelativePath="res\Rating.ico">
@@ -1902,25 +1928,25 @@
 				RelativePath="res\Stats_HD.ico">
 			</File>
 			<File
-				RelativePath=".\res\suc.ico">
+				RelativePath="res\suc.ico">
 			</File>
 			<File
-				RelativePath=".\res\systray_connect.ico">
+				RelativePath="res\systray_connect.ico">
 			</File>
 			<File
-				RelativePath=".\res\systray_disconnect.ico">
+				RelativePath="res\systray_disconnect.ico">
 			</File>
 			<File
-				RelativePath=".\res\systray_exit.ico">
+				RelativePath="res\systray_exit.ico">
 			</File>
 			<File
-				RelativePath=".\res\systray_restore.ico">
+				RelativePath="res\systray_restore.ico">
 			</File>
 			<File
-				RelativePath=".\res\systray_speed.ico">
+				RelativePath="res\systray_speed.ico">
 			</File>
 			<File
-				RelativePath=".\res\systray_tomax.ico">
+				RelativePath="res\systray_tomax.ico">
 			</File>
 			<File
 				RelativePath="res\taskbarNotifier.bmp">
@@ -1932,7 +1958,7 @@
 				RelativePath="res\taskbarNotifier.jpg">
 			</File>
 			<File
-				RelativePath=".\res\tools.ico">
+				RelativePath="res\tools.ico">
 			</File>
 			<File
 				RelativePath="res\transfer.ico">
@@ -1981,19 +2007,6 @@
 			</File>
 			<File
 				RelativePath="res\WebServer.ico">
-			</File>
-		</Filter>
-		<Filter
-			Name="system"
-			Filter="">
-			<File
-				RelativePath=".\system\memcpy_amd.cpp">
-			</File>
-			<File
-				RelativePath=".\system\memcpy_amd.h">
-			</File>
-			<File
-				RelativePath=".\system\optimize.h">
 			</File>
 		</Filter>
 	</Files>

@@ -30,8 +30,6 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "../../Types.h"
-
 ////////////////////////////////////////
 namespace Kademlia {
 ////////////////////////////////////////

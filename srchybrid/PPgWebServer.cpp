@@ -1,7 +1,28 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgWebServer.h"
 #include "otherfunctions.h"
+#include "WebServer.h"
+#include "MMServer.h"
+#include "emuledlg.h"
+#include "Preferences.h"
+#include "ServerWnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -10,6 +31,7 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 #define HIDDEN_PASSWORD _T("*****")
+
 
 IMPLEMENT_DYNAMIC(CPPgWebServer, CPropertyPage)
 CPPgWebServer::CPPgWebServer()
@@ -40,6 +62,7 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_MMENABLED, OnEnChangeMMEnabled)
 	ON_BN_CLICKED(IDC_WSRELOADTMPL, OnReloadTemplates)
 	ON_BN_CLICKED(IDC_TMPLBROWSE, OnBnClickedTmplbrowse)
+	ON_BN_CLICKED(IDC_WS_GZIP, OnDataChange)
 END_MESSAGE_MAP()
 
 
@@ -102,6 +125,8 @@ void CPPgWebServer::LoadSettings(void)
 		CheckDlgButton(IDC_MMENABLED,1);
 	else
 		CheckDlgButton(IDC_MMENABLED,0);
+
+	CheckDlgButton(IDC_WS_GZIP,(app_prefs->GetWebUseGzip())?1:0 );
 	
 	OnEnChangeMMEnabled();
 
@@ -130,6 +155,8 @@ BOOL CPPgWebServer::OnApply()
 		}
 		app_prefs->SetWSIsEnabled((int8)IsDlgButtonChecked(IDC_WSENABLED));
 		app_prefs->SetWSIsLowUserEnabled((int8)IsDlgButtonChecked(IDC_WSENABLEDLOW));
+		app_prefs->SetWebUseGzip( (int8)IsDlgButtonChecked(IDC_WS_GZIP));
+
 		theApp.webserver->StartServer();
 
 		GetDlgItem(IDC_TMPLPATH)->GetWindowText(sBuf);
@@ -152,7 +179,7 @@ BOOL CPPgWebServer::OnApply()
 		if(sBuf != HIDDEN_PASSWORD)
 			app_prefs->SetMMPass(sBuf);
 
-		theApp.emuledlg->serverwnd.UpdateMyInfo();
+		theApp.emuledlg->serverwnd->UpdateMyInfo();
 		SetModified(FALSE);
 	}
 
@@ -168,6 +195,7 @@ void CPPgWebServer::Localize(void)
 		GetDlgItem(IDC_WSENABLED)->SetWindowText(GetResString(IDS_ENABLED));
 		GetDlgItem(IDC_WSRELOADTMPL)->SetWindowText(GetResString(IDS_SF_RELOAD));
 		GetDlgItem(IDC_WSENABLED)->SetWindowText(GetResString(IDS_ENABLED));
+		SetDlgItemText(IDC_WS_GZIP,GetResString(IDS_WEB_GZIP_COMPRESSION));
 
 		GetDlgItem(IDC_WSPASS_LBL2)->SetWindowText(GetResString(IDS_WS_PASS));
 		GetDlgItem(IDC_WSENABLEDLOW)->SetWindowText(GetResString(IDS_ENABLED));
@@ -194,6 +222,7 @@ void CPPgWebServer::OnEnChangeWSEnabled()
 	GetDlgItem(IDC_TMPLPATH)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
 	GetDlgItem(IDC_TMPLBROWSE)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
 	GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
+	GetDlgItem(IDC_WS_GZIP)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED));
 
 	GetDlgItem(IDC_WSPASSLOW)->EnableWindow(IsDlgButtonChecked(IDC_WSENABLED) && IsDlgButtonChecked(IDC_WSENABLEDLOW));
 

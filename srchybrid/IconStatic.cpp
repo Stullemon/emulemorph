@@ -1,10 +1,23 @@
-// IconStatic.cpp: Implementierungsdatei
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
 //
-
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include "emule.h"
 #include "IconStatic.h"
 #include "VisualStylesXP.h"
-#include "emule.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -72,6 +85,34 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 	
 	DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_pszIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL);
 
+	// clear all alpha channel data
+	BITMAP bmMem;
+	if (m_MemBMP.GetObject(sizeof bmMem, &bmMem) >= sizeof bmMem && bmMem.bmBitsPixel == 32)
+	{
+		DWORD dwSize = m_MemBMP.GetBitmapBits(0, NULL);
+		if (dwSize)
+		{
+			LPBYTE pPixels = (LPBYTE)malloc(dwSize);
+			if (pPixels)
+			{
+				if (m_MemBMP.GetBitmapBits(dwSize, pPixels) == dwSize)
+				{
+					LPBYTE pLine = pPixels;
+					int iLines = bmMem.bmHeight;
+					while (iLines-- > 0)
+					{
+						LPDWORD pdwPixel = (LPDWORD)pLine;
+						for (int x = 0; x < bmMem.bmWidth; x++)
+							*pdwPixel++ &= 0x00FFFFFF;
+						pLine += bmMem.bmWidthBytes;
+					}
+					m_MemBMP.SetBitmapBits(dwSize, pPixels);
+				}
+				free(pPixels);
+			}
+		}
+	}
+
 	rCaption.left += 22;
 	
 	if(g_xpStyle.IsAppThemed())
@@ -79,7 +120,7 @@ bool CIconStatic::Init(LPCTSTR pszIconID)
 		HTHEME hTheme = g_xpStyle.OpenThemeData(NULL, L"BUTTON"); 
 		USES_CONVERSION;
 		LPOLESTR oleText = T2OLE(m_strText); 
-		g_xpStyle.DrawThemeText(hTheme, MemDC.m_hDC, 4, 1, oleText, ocslen (oleText), 
+		g_xpStyle.DrawThemeText(hTheme, MemDC.m_hDC, BP_GROUPBOX, GBS_NORMAL, oleText, ocslen (oleText), 
 			DT_WORDBREAK | DT_CENTER | DT_WORD_ELLIPSIS, NULL, &rCaption); 
 		g_xpStyle.CloseThemeData(hTheme);
 	}
@@ -124,6 +165,8 @@ bool CIconStatic::SetIcon(LPCTSTR pszIconID)
 	return Init(pszIconID);
 }
 
-void CIconStatic::OnSysColorChange() {
+void CIconStatic::OnSysColorChange()
+{
+	CStatic::OnSysColorChange();
 	Init(m_pszIconID);
 }

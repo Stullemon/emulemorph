@@ -27,10 +27,7 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "../../stdafx.h"
 #include "UDPSocketListener.h"
 #include "../utils/UInt128.h"
 #include "../io/ByteIO.h"
@@ -51,7 +48,7 @@ public:
 	void bootstrap(const uint32 ip, const uint16 port);
 	void firewalledCheck(const uint32 ip, const uint16 port);
 	void sendMyDetails(const byte opcode, const uint32 ip, const uint16 port);
-	void publishPacket(const uint32 ip, const uint16 port, const Kademlia::CUInt128 &targetID, const Kademlia::CUInt128 &contactID, const TagList& tags);
+	void publishPacket(const uint32 ip, const uint16 port, const CUInt128 &targetID, const CUInt128 &contactID, const TagList& tags);
 	void sendNullPacket(byte opcode, uint32 ip, uint16 port);
 private:
 

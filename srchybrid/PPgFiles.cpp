@@ -5,6 +5,8 @@
 #include "emule.h"
 #include "PPgFiles.h"
 #include "Inputbox.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -54,9 +56,9 @@ BOOL CPPgFiles::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
-	//MORPH START - Added by SiRoB, Allways use securedid
+	//MORPH START - Added by SiRoB, Allways use transfertfull chunk
 	GetDlgItem(IDC_FULLCHUNKTRANS)->EnableWindow(0);
-	//MORPH END   - Added by SiRoB, Allways use securedid	
+	//MORPH END   - Added by SiRoB, Allways use transfertfull chunk
 	LoadSettings();
 	Localize();
 	

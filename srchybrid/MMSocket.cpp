@@ -14,10 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "mmsocket.h"
+#include "stdafx.h"
 #include "emule.h"
+#include "mmsocket.h"
+#include "MMServer.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -157,8 +158,8 @@ void CMMSocket::OnReceive(int nErrorCode){
 		if (m_dwRecv > m_dwHttpHeaderLen + m_dwHttpContentLen)
 		{
 			// move our data
-			MoveMemory(m_pBuf, m_pBuf + m_dwHttpHeaderLen + m_dwHttpContentLen, m_dwRecv - m_dwHttpHeaderLen + m_dwHttpContentLen);
 			m_dwRecv -= m_dwHttpHeaderLen + m_dwHttpContentLen;
+			MoveMemory(m_pBuf, m_pBuf + m_dwHttpHeaderLen + m_dwHttpContentLen, m_dwRecv);
 		} else
 			m_dwRecv = 0;
 
@@ -176,12 +177,12 @@ bool CMMSocket::SendPacket(CMMPacket* packet, bool bQueueFirst){
 		char szBuf[0x1000];
 		int nLen;
 		if (!packet->m_bSpecialHeader)
-			nLen = wsprintfA(szBuf, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: application/octet-stream\r\nContent-Length: %ld\r\n\r\n", packet->m_pBuffer->GetLength());
+			nLen = wsprintfA(szBuf, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n",m_pOwner->GetContentType(), packet->m_pBuffer->GetLength());
 		else
 			nLen = wsprintfA(szBuf, "Content-Length: %ld\r\n\r\n", packet->m_pBuffer->GetLength());
 		m_nSendLen = nLen + packet->m_pBuffer->GetLength();
 		m_pSendBuffer =	new char[m_nSendLen];
-		MEMCOPY(m_pSendBuffer,szBuf,nLen);
+		memcpy(m_pSendBuffer,szBuf,nLen);
 		packet->m_pBuffer->SeekToBegin();
 		packet->m_pBuffer->Read(m_pSendBuffer+nLen,packet->m_pBuffer->GetLength()); 
 		
@@ -286,6 +287,9 @@ void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData,
 						break;
 					case MMP_PREVIEWREQ:
 						m_pOwner->ProcessPreviewRequest(&data,this);
+						break;
+					case MMP_CHANGELIMIT:
+						m_pOwner->ProcessChangeLimitRequest(&data,this);
 						break;
 				}
 			}

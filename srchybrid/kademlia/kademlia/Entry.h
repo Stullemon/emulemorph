@@ -23,11 +23,8 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "../../Types.h"
-#include <list>
+#include "../kademlia/tag.h"
 
 ////////////////////////////////////////
 namespace Kademlia {
@@ -47,7 +44,7 @@ namespace Kademlia {
 		}
 		~CEntry()
 		{
-			Kademlia::CTag* tag;
+			CTag* tag;
 			while( taglist.size() )
 			{
 				tag = taglist.front();
@@ -58,11 +55,11 @@ namespace Kademlia {
 		uint32 ip;
 		uint16 tcpport;
 		uint16 udpport;
-		Kademlia::CUInt128 keyID;
-		Kademlia::CUInt128 sourceID;
+		CUInt128 keyID;
+		CUInt128 sourceID;
 		CString fileName;
 		uint32	size;
-		Kademlia::TagList taglist;
+		TagList taglist;
 		time_t lifetime;
 		bool source;
 	};

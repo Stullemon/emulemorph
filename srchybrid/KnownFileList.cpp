@@ -14,12 +14,19 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "knownfilelist.h"
-#include "opcodes.h"
-#include "emule.h"
+#include "stdafx.h"
 #include <io.h>
+#include "emule.h"
+#include "KnownFileList.h"
+#include "KnownFile.h"
+#include "opcodes.h"
+#include "Preferences.h"
+#include "SafeFile.h"
+#include "OtherFunctions.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
+#include "DownloadQueue.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -64,7 +71,7 @@ bool CKnownFileList::Init()
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(_T("Failed to load ") KNOWN_MET_FILENAME _T(" file"));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 				strError += _T(" - ");
 				strError += szError;
 			}
@@ -117,7 +124,6 @@ bool CKnownFileList::Init()
 		AddLogLine(false, "known.met loaded, %i files are known, %i files are deleted.", cAdded, cDeleted); // EastShare - Added by TAHO, .met file control
 	}
 	catch(CFileException* error){
-		OUTPUT_DEBUG_TRACE();
 		if (error->m_cause == CFileException::endOfFile)
 			AddLogLine(true,GetResString(IDS_ERR_SERVERMET_BAD));
 		else{
@@ -143,7 +149,7 @@ void CKnownFileList::Save()
 	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
 		CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}
@@ -177,7 +183,7 @@ void CKnownFileList::Save()
 	catch(CFileException* error){
 		CString strError(_T("Failed to save ") KNOWN_MET_FILENAME _T(" file"));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		if (error->GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+		if (error->GetErrorMessage(szError, ARRSIZE(szError))){
 			strError += _T(" - ");
 			strError += szError;
 		}

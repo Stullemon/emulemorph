@@ -1,6 +1,4 @@
 #pragma once
-#include "types.h"
-#include <atlcoll.h>	// SLUGFILLER: speedBarShader
 
 class CBarShader
 {

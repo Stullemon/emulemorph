@@ -14,18 +14,39 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "uploadqueue.h"
-#include "packets.h"
+#include "stdafx.h"
+#include "DebugHelpers.h"
 #include "emule.h"
-#include "SearchDlg.h"
-#include "knownfile.h"
-#include "listensocket.h"
-#include "ini2.h"
-#include "math.h"
+#include "UploadQueue.h"
+#include "Packets.h"
+#include "KnownFile.h"
+#include "ListenSocket.h"
 #include "Exceptions.h"
 #include "Scheduler.h"
+#include "PerfLog.h"
+#include "UploadBandwidthThrottler.h"
+#include "ClientList.h"
+#include "LastCommonRouteFinder.h"
+#include "DownloadQueue.h"
+#include "FriendList.h"
+#include "Statistics.h"
+#include "MMServer.h"
+#include "OtherFunctions.h"
+#include "UpDownClient.h"
+#include "SharedFileList.h"
+#include "KnownFileList.h"
+#include "Sockets.h"
+#include "ClientCredits.h"
+#include "Server.h"
+#include "ServerList.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "ServerWnd.h"
+#include "TransferWnd.h"
+#include "SearchDlg.h"
+#include "StatisticsDlg.h"
+#endif
+#include "PartFile.h" //MORPH - Added by SiRoB
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -43,18 +64,18 @@ static uint32 igraph, istats, iupdateconnstats;
 
 CUploadQueue::CUploadQueue(CPreferences* in_prefs){
 	app_prefs = in_prefs;
-	VERIFY( (h_timer = SetTimer(0,0,100,UploadTimer)) );
+	VERIFY( (h_timer = SetTimer(0,0,100,UploadTimer)) != NULL );
 	if (!h_timer)
 		AddDebugLogLine(true,_T("Failed to create 'upload queue' timer - %s"),GetErrorMessage(GetLastError()));
 	estadatarate = 2000;
 	datarate = 0;
-	//dataratems = 0;
+	//MORPH - Removed by SiRoB, Not used in this mod
 	datarateave = 0;
 	counter=0;
 	successfullupcount = 0;
 	failedupcount = 0;
 	totaluploadtime = 0;
-	//m_nUpDataRateMSOverhead = 0; //MORPH - Removed by SiRoB, ZZ UPload System 20030818-1923
+	//MORPH - Removed by SiRoB, ZZ UPload System 20030818-1923
 	m_nUpDatarateOverhead = 0;
 	m_nUpDataOverheadSourceExchange = 0;
 	m_nUpDataOverheadFileRequest = 0;
@@ -76,11 +97,7 @@ CUploadQueue::CUploadQueue(CPreferences* in_prefs){
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	// By BadWolf - Accurate Speed Measurement
 	sumavgUDRO = 0;
-	//sendperclient = 0;
-	//uLastAcceptNewClient = ::GetTickCount();
-	//sumavgdata = 0;
-	//m_delay = ::GetTickCount();
-	//m_delaytmp = 0;
+	//Removed by SiRoB, Not used in this mod
 	// END By BadWolf - Accurate Speed Measurement
 
 //MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
@@ -414,7 +431,8 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) ){
 			RemoveFromWaitingQueue(pos2,true);	
 			if (!cur_client->socket)
-				cur_client->Disconnected("Socket it NULL. 1");
+				if(cur_client->Disconnected())
+					delete cur_client;
 		} else {
 			// finished clearing
 			uint32 cur_score = cur_client->GetScore(false);
@@ -623,8 +641,10 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			}
 
 			//RemoveFromWaitingQueue(toadd, true);
+			//MORPH - Added by SiRoB, VQB LowID alternate
+			lastupslotHighID = true; // VQB LowID alternate
 			RemoveFromWaitingQueue(newclient, true);
-			theApp.emuledlg->transferwnd.ShowQueueCount(waitinglist.GetCount());
+			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 		}
 	} else
 		newclient = directadd;
@@ -672,7 +692,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			reqfile->statistic.AddAccepted();
 		//	}
 		
-		theApp.emuledlg->transferwnd.uploadlistctrl.AddClient(newclient);
+		theApp.emuledlg->transferwnd->uploadlistctrl.AddClient(newclient);
 
 		m_dwLastSlotAddTick = ::GetTickCount();
 
@@ -862,6 +882,15 @@ CUpDownClient* CUploadQueue::GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPo
 	return 0;
 }
 
+CUpDownClient* CUploadQueue::GetWaitingClientByIP(uint32 dwIP){
+	for (POSITION pos = waitinglist.GetHeadPosition();pos != 0;){
+		CUpDownClient* cur_client = waitinglist.GetNext(pos);
+		if (dwIP == cur_client->GetIP())
+			return cur_client;
+	}
+	return 0;
+}
+
 /*void CUploadQueue::UpdateBanCount(){
 	int count=0;
 	for (POSITION pos = waitinglist.GetHeadPosition();pos != 0;waitinglist.GetNext(pos)){
@@ -882,13 +911,6 @@ CUpDownClient* CUploadQueue::GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPo
 * @param addInFirstPlace the client should be added first in queue, not last
 */
 void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit, bool addInFirstPlace){
-	//MORPH START - Removed by SiRoB, Anti-leecher feature
-	////MORPH START - Added by IceCream, Anti-leecher feature
-	//if (theApp.glob_prefs->GetEnableAntiLeecher())
-	//	if (client->TestLeecher()) 
-	//		client->BanLeecher();
-	////MORPH END   - Added by IceCream, Anti-leecher feature
-	//MORPH END   - Removed by SiRoB, Anti-leecher feature
 	if(addInFirstPlace == false) {
 		if (theApp.serverconnect->IsConnected() && theApp.serverconnect->IsLowID() //This may need to be changed with the Kad now being used.
 			&& !theApp.serverconnect->IsLocalServer(client->GetServerIP(),client->GetServerPort())
@@ -915,17 +937,17 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 // VQB LowID Slot Patch, enhanced in ZZUL
 			if (addInFirstPlace == false && client->HasLowID()&&
 				client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount())) {
-
-				RemoveFromWaitingQueue(client, true);
-				AddUpNextClient(client);
-				client->m_bAddNextConnect = false;
-				//theApp.emuledlg->AddDebugLogLine(true,"Added Low ID User On Reconnect: " + (CString)client->GetUserName()); // VQB:  perhaps only add to debug log?
-				return;
-			} //else if(client->HasLowID())
-			//theApp.emuledlg->AddDebugLogLine(true, "Skipped LowID User on Reconnect: " + (CString)client->GetUserName());
+				if (lastupslotHighID) {
+					client->m_bAddNextConnect = false;
+					RemoveFromWaitingQueue(client, true);
+					AddUpNextClient(client);
+					lastupslotHighID = false; // LowID alternate
+					return;
+				}
+			}
 // VQB end
 			client->SendRankingInfo();
-			theApp.emuledlg->transferwnd.queuelistctrl.RefreshClient(client);
+			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(client);
 			return;			
 		}
 		else if ( client->Compare(cur_client) ) {
@@ -943,7 +965,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),cur_client->GetUserName() );
 				RemoveFromWaitingQueue(pos2,true);	
 				if (!cur_client->socket){
-					if(cur_client->Disconnected("Socket is NULL. 3")){
+					if(cur_client->Disconnected()){
 						delete cur_client;
 					}
 				}
@@ -953,7 +975,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				AddDebugLogLine(false,CString(GetResString(IDS_SAMEUSERHASH)),client->GetUserName(),cur_client->GetUserName(),"Both" );
 				RemoveFromWaitingQueue(pos2,true);	
 				if (!cur_client->socket){
-					if(cur_client->Disconnected("Socket is NULL. 2")){
+					if(cur_client->Disconnected()){
 						delete cur_client;
 					}
 				}
@@ -983,7 +1005,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		CServer* srv = new CServer(client->GetServerPort(), inet_ntoa(host));
 		srv->SetListName(srv->GetAddress());
 
-		if (!theApp.emuledlg->serverwnd.serverlistctrl.AddServer(srv, true))
+		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(srv, true))
 			delete srv;
 	}
 
@@ -1035,8 +1057,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	client->SetUploadState(US_ONUPLOADQUEUE);
 
 	// Add client to waiting list. If addInFirstPlace is set, client should not have its waiting time resetted
-	theApp.emuledlg->transferwnd.queuelistctrl.AddClient(client, (addInFirstPlace == false));
-	theApp.emuledlg->transferwnd.ShowQueueCount(waitinglist.GetCount());
+	theApp.emuledlg->transferwnd->queuelistctrl.AddClient(client, (addInFirstPlace == false));
+	theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 	client->SendRankingInfo();
 }
 
@@ -1066,11 +1088,10 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, bool updatewindow, bool earlyabort){
 	theApp.clientlist->AddTrackClient(client); // Keep track of this client
-	uint32 posCounter = 0;
 	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;uploadinglist.GetNext(pos)){
 		if (client == uploadinglist.GetAt(pos)){
 			if (updatewindow)
-				theApp.emuledlg->transferwnd.uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
+				theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(uploadinglist.GetAt(pos));
 	        
 			if(!reason || reason.Compare("") == 0) {
 				CString tempReason = GetResString(IDS_REMULNOREASON);
@@ -1120,7 +1141,6 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 			client->ClearUploadBlockRequests(/*!earlyabort*/);
 			return true;
 		}
-		posCounter++;
 	}
 	return false;
 }
@@ -1137,19 +1157,18 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 	if (pos){
 		RemoveFromWaitingQueue(pos,updatewindow);
 		if (updatewindow)
-			theApp.emuledlg->transferwnd.ShowQueueCount(waitinglist.GetCount());
+			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 		return true;
 	}
 	else
 		return false;
 }
 
-// Moonlight: SUQWT: Save queue wait time and clear wait start times before removing from queue.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){	
 	CUpDownClient* todelete = waitinglist.GetAt(pos);
 	waitinglist.RemoveAt(pos);
 	if (updatewindow)
-		theApp.emuledlg->transferwnd.queuelistctrl.RemoveClient(todelete);
+		theApp.emuledlg->transferwnd->queuelistctrl.RemoveClient(todelete);
 	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		todelete->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
@@ -1160,6 +1179,17 @@ void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){
 }
 
 /*
+void CUploadQueue::UpdateMaxClientScore() {
+	m_imaxscore=0;
+	uint32 score;
+
+	for(POSITION pos = waitinglist.GetHeadPosition(); pos != 0; ) {
+		score=waitinglist.GetNext(pos)->GetScore(true, false);
+		if(score > m_imaxscore )
+			m_imaxscore=score;
+	}
+}
+
 bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 	if( client->GetUpStartTimeDelay() > 3600000 ){ // Try to keep the clients from downloading for ever.
 		AddDebugLogLine(false, "%s: Upload session ended due to excessive time.", client->GetUserName());
@@ -1173,22 +1203,17 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 		const uint32 score = client->GetScore(true, true);
 
 		// Check if another client has a bigger score
-		for(POSITION pos = waitinglist.GetHeadPosition(); pos != 0; )
-			if(score < waitinglist.GetNext(pos)->GetScore(true, false)){
-				//theApp.emuledlg->AddDebugLogLine(false, "%s: Upload session ended due to score.", client->GetUserName());
+		if (score<GetMaxClientScore()) {
+			AddDebugLogLine(false, "%s: Upload session ended due to score.", client->GetUserName());
 				return true;
 			}
 	}
 	else{
-	// more than one chunk allowed if we use the score system
-
-	// For some reason, some clients can continue to download after a chunk size.
-	// Are they redownloading the same chunk over and over????
-	if( client->GetSessionUp() > 10485760 ){
-		AddDebugLogLine(false, "%s: Upload session ended due to excessive transfered amount.", client->GetUserName());
-		return true;
-	}
-
+		// Allow the client to download a specified amount per session
+		if( client->GetSessionUp() > SESSIONAMOUNT ){
+			AddDebugLogLine(false, "%s: Upload session ended due to excessive transfered amount.", client->GetUserName());
+			return true;
+		}
 	}
 	return false;
 }
@@ -1197,6 +1222,7 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 void CUploadQueue::DeleteAll(){
 	waitinglist.RemoveAll();
 	uploadinglist.RemoveAll();
+    // PENDING: Remove from UploadBandwidthThrottler as well!
 }
 
 uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client){
@@ -1283,7 +1309,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			if( theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsSingleConnect() )
 				theApp.serverconnect->TryAnotherConnectionrequest();
 
-			theApp.emuledlg->statisticswnd.UpdateConnectionsStatus();
+			theApp.listensocket->UpdateConnectionsStatus();
 			if (theApp.glob_prefs->WatchClipboard4ED2KLinks())
 				theApp.emuledlg->searchwnd->SearchClipBoard();		
 
@@ -1295,8 +1321,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			// 2 seconds
 			if (iupdateconnstats>=2) {
 				iupdateconnstats=0;
-				//theApp.emuledlg->statisticswnd.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
-				theApp.emuledlg->statisticswnd.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
+				theApp.statistics->UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
 			}
 			// <-----khaos-
 
@@ -1306,24 +1331,24 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 
 				if (igraph >= (uint32)(theApp.glob_prefs->GetTrafficOMeterInterval()) ) {
 					igraph=0;
-					//theApp.emuledlg->statisticswnd.SetCurrentRate((float)(theApp.uploadqueue->Getavgupload()/theApp.uploadqueue->Getavg())/1024,(float)(theApp.uploadqueue->Getavgdownload()/theApp.uploadqueue->Getavg())/1024);
-					theApp.emuledlg->statisticswnd.SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024, (float)(theApp.uploadqueue->GetDatarate()-theApp.uploadqueue->GetToNetworkDatarate())/1024, (float)(theApp.uploadqueue->GetUpDatarateOverhead())/1024);
+					//theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024);
+					theApp.emuledlg->statisticswnd->SetCurrentRate((float)(theApp.uploadqueue->GetDatarate())/1024,(float)(theApp.downloadqueue->GetDatarate())/1024, (float)(theApp.uploadqueue->GetDatarate()-theApp.uploadqueue->GetToNetworkDatarate())/1024, (float)(theApp.uploadqueue->GetUpDatarateOverhead())/1024);
 					//theApp.uploadqueue->Zeroavg();
 				}
 			}
-			if (theApp.emuledlg->activewnd == &theApp.emuledlg->statisticswnd && theApp.emuledlg->IsWindowVisible() )  {
+			if (theApp.emuledlg->activewnd == theApp.emuledlg->statisticswnd && theApp.emuledlg->IsWindowVisible() )  {
 				// display stats
 				if (theApp.glob_prefs->GetStatsInterval()>0) {
 					istats++;
 
 					if (istats >= (uint32)(theApp.glob_prefs->GetStatsInterval()) ) {
 						istats=0;
-						theApp.emuledlg->statisticswnd.ShowStatistics();
+						theApp.emuledlg->statisticswnd->ShowStatistics();
 					}
 				}
 			}
 			//save rates every second
-			theApp.emuledlg->statisticswnd.RecordRate();
+			theApp.statistics->RecordRate();
 			// mobilemule sockets
 			theApp.mmserver->Process();
 
@@ -1349,13 +1374,20 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 				theApp.OnlineSig(); // Added By Bouc7 
 				theApp.emuledlg->ShowTransferRate();
 				
+				//MORPH - Removed by SiRoB
+				/*
+				if (!theApp.glob_prefs->TransferFullChunks())
+					theApp.uploadqueue->UpdateMaxClientScore();
+				*/
+
 				// update cat-titles with downloadinfos only when needed
 				if (theApp.glob_prefs->ShowCatTabInfos() && 
-					theApp.emuledlg->activewnd==&theApp.emuledlg->transferwnd && 
+					theApp.emuledlg->activewnd == theApp.emuledlg->transferwnd && 
 					theApp.emuledlg->IsWindowVisible()) 
-						theApp.emuledlg->transferwnd.UpdateCatTabTitles();
+						theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 				
-				if (theApp.glob_prefs->IsSchedulerEnabled()) theApp.scheduler->Check();
+				if (theApp.glob_prefs->IsSchedulerEnabled())
+					theApp.scheduler->Check();
 			}
 
 			statsave++;
@@ -1371,6 +1403,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 			// <-----khaos-
 
 				theApp.serverconnect->KeepConnectionAlive();
+				thePerfLog.LogSamples();
 			}
 		}
 	}
@@ -1384,7 +1417,7 @@ CUpDownClient* CUploadQueue::GetNextClient(CUpDownClient* lastclient){
 		return waitinglist.GetHead();
 	POSITION pos = waitinglist.Find(lastclient);
 	if (!pos){
-		TRACE("Error: CServerList::GetNextClient");
+		TRACE("Error: CUploadQueue::GetNextClient");
 		return waitinglist.GetHead();
 	}
 	waitinglist.GetNext(pos);
@@ -1394,7 +1427,7 @@ CUpDownClient* CUploadQueue::GetNextClient(CUpDownClient* lastclient){
 		return waitinglist.GetAt(pos);
 }
 
-void CUploadQueue::FindSourcesForFileById(CTypedPtrList<CPtrList, CUpDownClient*>* srclist, const uchar* filehash) {
+void CUploadQueue::FindSourcesForFileById(CUpDownClientPtrList* srclist, const uchar* filehash) {
 	POSITION pos;
 	
 	pos = uploadinglist.GetHeadPosition();

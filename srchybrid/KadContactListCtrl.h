@@ -14,16 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-
 #include "MuleListCtrl.h"
-#include "titlemenu.h"
 #include "kademlia/routing/contact.h"
 
 class CIni;
-
-// CKadContactListCtrl
 
 class CKadContactListCtrl : public CMuleListCtrl
 {
@@ -45,15 +40,14 @@ public:
 
 protected:
 	CString m_strLVName;
+
+	void SetAllIcons();
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
+	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
-	BOOL	OnCommand(WPARAM wParam,LPARAM lParam);
-	void	OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
-
-private:
-//	CTitleMenu m_ClientMenu;
-//	CImageList imagelist;
 };

@@ -30,7 +30,6 @@ there client on the eMule forum..
 
 #pragma once
 
-#include "../../stdafx.h"
 #include "../kademlia/Error.h"
 
 ////////////////////////////////////////

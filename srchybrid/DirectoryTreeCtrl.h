@@ -3,9 +3,6 @@
 // written by robert rostek - tecxx@rrs.at //
 /////////////////////////////////////////////
 
-// CDirectoryTreeCtrl
-#include "TitleMenu.h"
-
 #define USRMSG_ITEMSTATECHANGED		(WM_USER + 0x101)
 #define MP_SHAREDFOLDERS_FIRST	46901
 
@@ -37,6 +34,7 @@ private:
 	bool HasSharedSubdirectory(CString strDir);
 	// when sharing a directory, make all parent directories bold
 	void UpdateParentItems(HTREEITEM hChild);
+	void ShareSubDirTree(HTREEITEM hItem, BOOL bShare);
 
 	// share list access
 	bool IsShared(CString strDir);
@@ -55,11 +53,13 @@ public:
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
 
 protected:
-	afx_msg void OnNMRclickSharedList(NMHDR *pNMHDR, LRESULT *pResult);
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnTvnItemexpanding(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnTvnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
-
-

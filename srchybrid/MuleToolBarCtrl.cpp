@@ -1,12 +1,36 @@
-// MuleToolBarCtrl.cpp : implementation file
-///////////////////////////////////////////////////////////////////////////////
-
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
+//This program is free software; you can redistribute it and/or
+//modify it under the terms of the GNU General Public License
+//as published by the Free Software Foundation; either
+//version 2 of the License, or (at your option) any later version.
+//
+//This program is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//GNU General Public License for more details.
+//
+//You should have received a copy of the GNU General Public License
+//along with this program; if not, write to the Free Software
+//Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
-#include "MuleToolbarCtrl.h"
 #include "emule.h"
+#include "MuleToolbarCtrl.h"
 #include "SearchDlg.h"
 #include "KademliaWnd.h"
 #include "EnBitmap.h"
+#include "OtherFunctions.h"
+#include "emuledlg.h"
+#include "Sockets.h"
+#include "MenuCmds.h"
+#include "MuleStatusbarCtrl.h"
+#include "ServerWnd.h"
+#include "TransferWnd.h"
+#include "SharedFilesWnd.h"
+#include "ChatWnd.h"
+#include "IrcWnd.h"
+#include "StatisticsDlg.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -34,6 +58,8 @@ static const LPCTSTR _apszSkinFiles[] =
 	_T("*.") EMULSKIN_BASEEXT _T(".ini"),
 };
 
+static int _iPreviousHeight = 0;
+
 // CMuleToolbarCtrl
 
 IMPLEMENT_DYNAMIC(CMuleToolbarCtrl, CToolBarCtrl)
@@ -41,8 +67,8 @@ CMuleToolbarCtrl::CMuleToolbarCtrl()
 {
 	m_iLastPressedButton = -1;
 	m_buttoncount=0;
-	MEMSET(TBButtons, 0, sizeof(TBButtons));
-	MEMSET(TBStrings, 0, sizeof(TBStrings));
+	memset(TBButtons, 0, sizeof(TBButtons));
+	memset(TBStrings, 0, sizeof(TBStrings));
 	m_iToolbarLabelSettings = 0;
 }
 
@@ -80,62 +106,62 @@ void CMuleToolbarCtrl::Init(void)
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_KADEMLIA)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_KADEMLIA), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_KADEMLIA), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_SERVER)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_SERVER), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_SERVER), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_TRANS)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_TRANS), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_TRANS), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_SEARCH)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_SEARCH), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_SEARCH), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_FILES)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_FILES), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_FILES), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_MESSAGES)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_MESSAGES), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_MESSAGES), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_IRC)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_IRC), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_IRC), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_STATISTIC)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_STATISTIC), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_STATISTIC), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_PREFS)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_PREFS), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_PREFS), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_TOOLS)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_TOOLS), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_TOOLS), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	lLen2 = _tcslen(GetResString(IDS_EM_HELP)) + 1;
-	MEMCOPY(cButtonStrings+lLen, GetResString(IDS_EM_HELP), lLen2);
+	memcpy(cButtonStrings+lLen, GetResString(IDS_EM_HELP), lLen2);
 	lLen += lLen2;
 	++m_buttoncount;
 
 	// terminate
-	MEMCOPY(cButtonStrings+lLen, "\0", 1);
+	memcpy(cButtonStrings+lLen, "\0", 1);
 
 	AddStrings(cButtonStrings);
 
@@ -208,11 +234,14 @@ void CMuleToolbarCtrl::Init(void)
 	rClient.left = rClient.right - iHeight * 2;
 
 	// resize speed-meter	
-	CRect r;
-	GetWindowRect(&r);
-	OnSize(0,r.Width(),r.Height());
+	CRect rcWnd;
+	GetWindowRect(&rcWnd);
+	OnSize(0, rcWnd.Width(), rcWnd.Height());
 
 	theApp.emuledlg->SetKadButtonState();
+
+	GetWindowRect(&rcWnd);
+	_iPreviousHeight = rcWnd.Height();
 }
 
 void CMuleToolbarCtrl::Localize(void)
@@ -318,6 +347,9 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 			ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
 		if (!CString(theApp.glob_prefs->GetSkinProfile()).IsEmpty())
 			theApp.ApplySkin(theApp.glob_prefs->GetSkinProfile());
+
+		*pResult = TRUE;
+		return;
 	}
 
 	POINT point;
@@ -454,7 +486,6 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult)
 	m_ToolbarMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 
 	*pResult = TRUE;
-
 }
 
 void CMuleToolbarCtrl::OnTbnQueryDelete(NMHDR *pNMHDR, LRESULT *pResult)
@@ -711,45 +742,50 @@ void CMuleToolbarCtrl::Refresh()
 {
 	SetBtnWidth();
 	AutoSize();
+
 	CRect rToolbarRect;
 	GetWindowRect(&rToolbarRect);
-	static int previousheight=0;
-	if(previousheight==rToolbarRect.Height())
+
+	if (_iPreviousHeight == rToolbarRect.Height())
 	{
 		Invalidate();
 		RedrawWindow();
 	}
 	else
 	{
-		previousheight=rToolbarRect.Height();
+		_iPreviousHeight = rToolbarRect.Height();
 
 		CRect rClientRect;
 		theApp.emuledlg->GetClientRect(&rClientRect);
+
 		CRect rStatusbarRect;
-		theApp.emuledlg->statusbar.GetWindowRect(&rStatusbarRect);
+		theApp.emuledlg->statusbar->GetWindowRect(&rStatusbarRect);
+
 		rClientRect.top += rToolbarRect.Height();
 		rClientRect.bottom -= rStatusbarRect.Height();
+
 		CWnd* wnds[] =
 		{
-			&theApp.emuledlg->serverwnd,
+			theApp.emuledlg->serverwnd,
 			theApp.emuledlg->kademliawnd,
-			&theApp.emuledlg->transferwnd,
-			&theApp.emuledlg->sharedfileswnd,
+			theApp.emuledlg->transferwnd,
+			theApp.emuledlg->sharedfileswnd,
 			theApp.emuledlg->searchwnd,
-			&theApp.emuledlg->chatwnd,
-			&theApp.emuledlg->ircwnd,
-			&theApp.emuledlg->statisticswnd
+			theApp.emuledlg->chatwnd,
+			theApp.emuledlg->ircwnd,
+			theApp.emuledlg->statisticswnd
 		};
-		for(int i=0;i<8;i++)
+		for (int i = 0; i < ARRSIZE(wnds); i++)
 		{
-			wnds[i]->SetWindowPos(NULL, rClientRect.left, rClientRect.top,rClientRect.Width(), rClientRect.Height(), SWP_NOZORDER);
+			wnds[i]->SetWindowPos(NULL, rClientRect.left, rClientRect.top, rClientRect.Width(), rClientRect.Height(), SWP_NOZORDER);
 			theApp.emuledlg->RemoveAnchor(wnds[i]->m_hWnd);
-			theApp.emuledlg->AddAnchor(wnds[i]->m_hWnd,TOP_LEFT,BOTTOM_RIGHT);
+			theApp.emuledlg->AddAnchor(wnds[i]->m_hWnd, TOP_LEFT, BOTTOM_RIGHT);
 		}
 		theApp.emuledlg->Invalidate();
 		theApp.emuledlg->RedrawWindow();
 	}
 }
+
 void CMuleToolbarCtrl::OnTbnReset(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// First get rid of old buttons
@@ -810,6 +846,6 @@ void CMuleToolbarCtrl::OnTbnInitCustomize(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CMuleToolbarCtrl::OnSysColorChange()
 {
-	ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
 	CToolBarCtrl::OnSysColorChange();
+	ChangeToolbarBitmap(theApp.glob_prefs->GetToolbarBitmapSettings(), true);
 }

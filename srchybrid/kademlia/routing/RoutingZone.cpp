@@ -45,6 +45,7 @@ there client on the eMule forum..
  */
 
 #include "stdafx.h"
+#include <math.h>
 #include "RoutingZone.h"
 #include "Contact.h"
 #include "RoutingBin.h"
@@ -59,6 +60,7 @@ there client on the eMule forum..
 #include "../io/FileIO.h"
 #include "../net/KademliaUDPListener.h"
 #include "../../otherfunctions.h"
+#include "../../Opcodes.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -84,7 +86,7 @@ CRoutingZone::CRoutingZone()
 	ASSERT(prefs != NULL); 
 	prefs->getClientID(&me);
 	m_filename = CMiscUtils::getAppDir();
-	m_filename.Append(_T(CONFIGFOLDER));
+	m_filename.Append(CONFIGFOLDER);
 	m_filename.Append("nodes.dat");
 	CUInt128 zero((ulong)0);
 	init(NULL, 0, zero);
@@ -144,7 +146,6 @@ void CRoutingZone::readFile(void)
 	try
 	{
 		uint32 numContacts = 0;
-		byte limit = 2;
 		CFileIO file;
 		if (file.Open(m_filename.GetBuffer(0), CFile::modeRead))
 		{
@@ -187,7 +188,6 @@ void CRoutingZone::writeFile(void)
 	{
 //		dumpContents();
 		uint32 count = 0;
-		uint32 liveCount = 0;
 		CContact *c;
 		CUInt128 id;
 		CFileIO file;
@@ -477,7 +477,6 @@ void CRoutingZone::split(void)
 		m_subZones[0] = genSubZone(0);
 		m_subZones[1] = genSubZone(1);
 
-		uint32 count = m_bin->getSize();
 		ContactList entries;
 		m_bin->getEntries(&entries);
 		ContactList::const_iterator it;
@@ -573,7 +572,7 @@ bool CRoutingZone::onBigTimer(void)
 	if (!isLeaf())
 		return false;
 
-	if ( (m_zoneIndex < KK || m_level < KBASE || m_bin->getRemaining() > 3))
+	if ( (m_zoneIndex < KK || m_level < KBASE || m_bin->getRemaining() >= (K*.4)))
 	{
 		randomLookup();
 		return true;
@@ -589,7 +588,7 @@ uint32 CRoutingZone::estimateCount(void)
 	if( m_level < KBASE )
 		return (pow(2, m_level)*10);
 	CRoutingZone* curZone = m_superZone;
-	uint32 userCountBase = (pow( 2, m_level))*10;
+	uint32 userCountBase = (pow( 2, m_level+1))*10;
 	uint32 sample = curZone->getNumContacts();
 	float modifier = (float)sample/20;
 //	uint32 final = userCountBase * modifier;
@@ -605,7 +604,7 @@ void CRoutingZone::onSmallTimer(void)
 	CString test;
 	m_zoneIndex.toBinaryString(&test);
 
-	CContact *c;
+	CContact *c = NULL;
 	time_t now = time(NULL);
 	ContactList entries;
 	ContactList::iterator it;
@@ -639,7 +638,7 @@ void CRoutingZone::onSmallTimer(void)
 		c = NULL;
 		//Ping only contacts that are in the branches that meet the set level and are not close to our ID.
 		//The other contacts are checked with the big timer.
-		if( m_bin->getRemaining() < 4 )
+		if( m_bin->getRemaining() < (K*(.4)) )
 			c = m_bin->getOldest();
 		if( c != NULL )
 		{

@@ -1,7 +1,6 @@
 #pragma once 
 
-
-// CCommentDialog dialog 
+class CKnownFile;
 
 class CCommentDialog : public CDialog 
 { 
@@ -26,4 +25,4 @@ public:
 private: 
 	CComboBox   ratebox;//For rate 
 	CKnownFile* m_file; 
-}; 
+};

@@ -14,20 +14,50 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-// PartFileConvert.cpp : implementation file
-// created by Ornis
-
 #include "stdafx.h"
-#include "PartFileConvert.h"
-#include "ResizableLib\ResizableDialog.h"
 #include <io.h>
+#include "emule.h"
+#include "PartFileConvert.h"
+#include "OtherFunctions.h"
+#include "DownloadQueue.h"
+#include "PartFile.h"
+#include "Preferences.h"
+#include "SafeFile.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+enum convstatus{
+	CONV_OK				=0,
+	CONV_QUEUE,
+	CONV_INPROGRESS,
+	CONV_OUTOFDISKSPACE,
+	CONV_PARTMETNOTFOUND,
+	CONV_IOERROR,
+	CONV_FAILED,
+	CONV_ALREADYEXISTS
+};
+
+struct ConvertJob {
+	CString folder;
+	CString filename;
+	CString filehash;
+	int     format;
+	int		state;
+	uint32	size;
+	uint32	spaceneeded;
+	uint8	partmettype;
+	bool	removeSource;
+	ConvertJob() {size=0;spaceneeded=0;partmettype=PMT_UNKNOWN;removeSource=true;}
+	//~ConvertJob() {}
+};
+
 
 int CPartFileConvert::ScanFolderToAdd(CString folder,bool deletesource) {
 	int count=0;
@@ -82,8 +112,8 @@ UINT AFX_CDECL CPartFileConvert::run(LPVOID lpParam)
 {
 	DbgSetThreadName("Partfile-Converter");
 
-	while (true) {
-
+	for (;;)
+	{
 		// search next queued job and start it
 		pfconverting=NULL;
 		for(POSITION pos = m_jobs.GetHeadPosition(); pos != NULL; m_jobs.GetNext(pos)){
@@ -112,7 +142,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 	BOOL bWorking;
 	CString filepartindex,newfilename;
 	CString buffer;
-	int fileindex;
+	UINT fileindex;
 	CFileFind finder;
 	
 	CString partfile=folder;
@@ -129,9 +159,9 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 	UpdateGUI(4,GetResString(IDS_IMP_STEPBASICINF));
 
 	CPartFile* file=new CPartFile();
-	pfconverting->versiontag=file->LoadPartFile(folder,filepartindex+".part.met",true);
+	pfconverting->partmettype=file->LoadPartFile(folder,filepartindex+".part.met",true);
 
-	if (pfconverting->versiontag==0) {
+	if (pfconverting->partmettype==PMT_UNKNOWN) {
 		delete file;
 		return CONV_FAILED;
 	}
@@ -146,7 +176,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		return CONV_ALREADYEXISTS;
 	}
 	
-	if (pfconverting->versiontag==PARTFILE_SPLITTEDVERSION) {
+	if (pfconverting->partmettype==PMT_SPLITTED ) {
 		try {
 			CByteArray ba;
 			ba.SetSize(PARTSIZE);
@@ -156,8 +186,8 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 			CString filename;
 
 			// just count
-			uint16 maxindex=0;
-			uint16 partfilecount=0;
+			UINT maxindex=0;
+			UINT partfilecount=0;
 			bWorking = finder.FindFile(folder+"\\"+filepartindex+".*.part");
 			while (bWorking)
 			{
@@ -227,10 +257,9 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 			}
 		}
 		catch(CFileException* error) {
-			OUTPUT_DEBUG_TRACE();
 			CString strError(GetResString(IDS_IMP_IOERROR));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (error->GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+			if (error->GetErrorMessage(szError, ARRSIZE(szError))){
 				strError += _T(" - ");
 				strError += szError;
 			}
@@ -243,11 +272,10 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 	}
 
 	// import an external common format partdownload
-	else if (pfconverting->versiontag==PARTFILE_VERSION) {
+	else if (pfconverting->partmettype==PMT_DEFAULTOLD || pfconverting->partmettype==PMT_NEWOLD ) {
 		
-
 		if (!pfconverting->removeSource) 
-		pfconverting->spaceneeded=GetDiskFileSize(folder+"\\"+partfile.Left(partfile.GetLength()-4));
+			pfconverting->spaceneeded=GetDiskFileSize(folder+"\\"+partfile.Left(partfile.GetLength()-4));
 
 		UpdateGUI(pfconverting);
 
@@ -259,20 +287,29 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		file->CreatePartFile();
 		newfilename=file->GetFullName();
 
-		if (pfconverting->removeSource)
-			MoveFile(folder+"\\"+partfile,newfilename);
-		else CopyFile(folder+"\\"+partfile,newfilename,false);
-		
 		file->m_hpartfile.Close();
 
-		if (pfconverting->removeSource)
-			MoveFile(folder+"\\"+partfile.Left(partfile.GetLength()-4), newfilename.Left(newfilename.GetLength()-4) );
-		else CopyFile(folder+"\\"+partfile.Left(partfile.GetLength()-4), newfilename.Left(newfilename.GetLength()-4) ,false);
+		bool ret;
+		UpdateGUI( 92 ,GetResString(IDS_COPY));
+		DeleteFile(newfilename.Left(newfilename.GetLength()-4));
+		if (pfconverting->removeSource) 
+			ret=MoveFile( folder+"\\"+partfile.Left(partfile.GetLength()-4), newfilename.Left(newfilename.GetLength()-4) );
+		else 
+			ret=CopyFile( folder+"\\"+partfile.Left(partfile.GetLength()-4), newfilename.Left(newfilename.GetLength()-4) ,false);
+
+		if (!ret) {
+			delete file;
+			return CONV_FAILED;
+		}
+
 	}
 
-
 	UpdateGUI( 94 ,GetResString(IDS_IMP_GETPFINFO));
-	CopyFile(folder+"\\"+filepartindex+".part.met",newfilename,false);
+
+	DeleteFile(newfilename);
+	if (pfconverting->removeSource)
+		MoveFile(folder+"\\"+partfile,newfilename);
+	else CopyFile(folder+"\\"+partfile,newfilename,false);
 
 	for (int i = 0; i < file->hashlist.GetSize(); i++)
 		delete[] file->hashlist[i];
@@ -287,7 +324,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		return CONV_FAILED;
 	}
 
-	if (pfconverting->versiontag==PARTFILE_SPLITTEDVERSION) {
+	if (pfconverting->partmettype==PMT_NEWOLD || pfconverting->partmettype==PMT_SPLITTED ) {
 		file->completedsize=file->transfered;
 		file->m_iGainDueToCompression = 0;
 		file->m_iLostDueToCorruption = 0;
@@ -295,7 +332,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 
 	UpdateGUI( 100 ,GetResString(IDS_IMP_ADDDWL));
 
-	theApp.downloadqueue->AddDownload(file);
+	theApp.downloadqueue->AddDownload(file,theApp.glob_prefs->AddNewFilesPaused());
 	file->SavePartFile();
 
 	if (pfconverting->removeSource) {
@@ -307,7 +344,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 			unlink(finder.GetFilePath());
 		}
 
-		if (pfconverting->versiontag==PARTFILE_SPLITTEDVERSION)
+		if (pfconverting->partmettype==PMT_SPLITTED)
 			RemoveDirectory(folder+"\\");
 	}
 
@@ -382,6 +419,7 @@ void CPartFileConvert::ShowGUI(){
 		m_convertgui->SetDlgItemText(IDC_RETRY,GetResString(IDS_IMP_RETRYBTN));
 		m_convertgui->SetDlgItemText(IDC_CONVREMOVE,GetResString(IDS_IMP_REMOVEBTN));
 		m_convertgui->SetDlgItemText(IDC_HIDECONVDLG,GetResString(IDS_FD_CLOSE));		
+		m_convertgui->SetWindowText(GetResString(IDS_IMPORTSPLPF));
 
 		
 		// fill joblist
@@ -513,48 +551,48 @@ void CModeless::PostNcDestroy()
 void CModeless::OnAddFolder() {
 	// browse...
 	
-	LPMALLOC pMalloc;
-	SHGetMalloc(&pMalloc);
+	LPMALLOC pMalloc = NULL;
+	if (SHGetMalloc(&pMalloc) == NOERROR)
+	{
+		// buffer - a place to hold the file system pathname
+		char buffer[MAX_PATH];
 
-	// buffer - a place to hold the file system pathname
-	char buffer[MAX_PATH];
+		// This struct holds the various options for the dialog
+		BROWSEINFO bi;
+		bi.hwndOwner = this->m_hWnd;
+		bi.pidlRoot = NULL;
+		bi.pszDisplayName = buffer;
+		CString title=GetResString(IDS_IMP_SELFOLDER);
+		bi.lpszTitle = title.GetBuffer(title.GetLength());
+		bi.ulFlags =  BIF_EDITBOX | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_SHAREABLE ;
+		bi.lpfn = NULL;
 
-	LPITEMIDLIST pidlRoot;
+		// Now cause the dialog to appear.
+		LPITEMIDLIST pidlRoot;
+		if((pidlRoot = SHBrowseForFolder(&bi)) != NULL)
+		{
+			bool removesrc;
+			int antw=AfxMessageBox(GetResString(IDS_IMP_DELSRC), MB_YESNOCANCEL);
+			if (antw!=IDCANCEL){
+				removesrc = (antw==IDYES);
 
-	// This struct holds the various options for the dialog
-	BROWSEINFO bi;
-	bi.hwndOwner = this->m_hWnd;
-	bi.pidlRoot = NULL;
-	bi.pszDisplayName = buffer;
-	CString title=GetResString(IDS_IMP_SELFOLDER);
-	bi.lpszTitle = title.GetBuffer(title.GetLength());
-	bi.ulFlags =  BIF_EDITBOX | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_SHAREABLE ;
-	bi.lpfn = NULL;
+				//
+				// Again, almost undocumented.  How to get a ASCII pathname
+				// from the LPITEMIDLIST struct.  I guess you just have to
+				// "know" this stuff.
+				//
+				if(SHGetPathFromIDList(pidlRoot, buffer)){
+					// Do something with the converted string.
+					CPartFileConvert::ScanFolderToAdd(CString(buffer), removesrc);
+				}
+			}
 
-	// Now cause the dialog to appear.
-	if((pidlRoot = SHBrowseForFolder(&bi)) == NULL){
-		// User hit cancel - do whatever
-		return;
+			// Free the returned item identifier list using the
+			// shell's task allocator!Arghhhh.
+			pMalloc->Free(pidlRoot);
+		}
+		pMalloc->Release();
 	}
-
-	bool removesrc;
-	int antw=MessageBox(GetResString(IDS_IMP_DELSRC), GetResString(IDS_REMOVE) ,MB_YESNOCANCEL);
-	if (antw==IDCANCEL) return;
-	else removesrc=(antw==IDYES);
-
-	//
-	// Again, almost undocumented.  How to get a ASCII pathname
-	// from the LPITEMIDLIST struct.  I guess you just have to
-	// "know" this stuff.
-	//
-	if(SHGetPathFromIDList(pidlRoot, buffer)){
-		// Do something with the converted string.
-		CPartFileConvert::ScanFolderToAdd(CString(buffer), removesrc);
-	}
-
-	// Free the returned item identifier list using the
-	// shell's task allocator!Arghhhh.
-	pMalloc->Free(pidlRoot);
 }
 
 void CModeless::UpdateJobInfo(ConvertJob* job) {

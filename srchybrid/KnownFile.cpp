@@ -16,50 +16,49 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "knownfile.h"
-#include "opcodes.h"
+#include "stdafx.h"
 #include <io.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef _DEBUG
+#include "DebugHelpers.h"
+#endif
 #include "emule.h"
+#include "KnownFile.h"
+#include "KnownFileList.h"
+#include "SharedFileList.h"
+#include "UpDownClient.h"
+#include "UploadQueue.h"
+#include "MMServer.h"
+#include "ClientList.h"
+#include "opcodes.h"
 #include "ini2.h"
 #define NOMD4MACROS
 #include "kademlia/utils/md4.h"
 #include "QArray.h"
-#include "framegrabthread.h"
+#include "FrameGrabThread.h"
 #include "CxImage/xImage.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
+#include "PartFile.h"
+#include "Packets.h"
+#include "Kademlia/Kademlia/SearchManager.h"
 
 // id3lib
 #define _SIZED_TYPES_H_ // ugly, ugly.. TODO change *our* types.h!!!!
 #include <id3/tag.h>
 #include <id3/misc_support.h>
 
-// Video for Windows API
-// Those defines are for 'mmreg.h' which is included by 'vfw.h'
-#define NOMMIDS		 // Multimedia IDs are not defined
-#define NONEWWAVE	   // No new waveform types are defined except WAVEFORMATEX
-#define NONEWRIFF	 // No new RIFF forms are defined
-#define NOJPEGDIB	 // No JPEG DIB definitions
-#define NONEWIC		 // No new Image Compressor types are defined
-#define NOBITMAP	 // No extended bitmap info header definition
-// Those defines are for 'vfw.h'
-#define NOCOMPMAN
-#define NODRAWDIB
-#define NOVIDEO
-#define NOAVIFMT
-#define NOMMREG
-//#define NOAVIFILE
-#define NOMCIWND
-#define NOAVICAP
-#define NOMSACM
-#define MMNOMMIO
-#include <vfw.h>
-
 // DirectShow MediaDet
 #include <strmif.h>
-#include <uuids.h>
+//#include <uuids.h>
+#define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+        EXTERN_C const GUID DECLSPEC_SELECTANY name \
+                = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
+_DEFINE_GUID(MEDIATYPE_Video, 0x73646976, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+_DEFINE_GUID(MEDIATYPE_Audio, 0x73647561, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
+_DEFINE_GUID(FORMAT_VideoInfo,0x05589f80, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
+_DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0xaa, 0x00, 0x55, 0x59, 0x5a);
 #include <qedit.h>
 //#include <amvideo.h>
 typedef struct tagVIDEOINFOHEADER {
@@ -69,10 +68,14 @@ typedef struct tagVIDEOINFOHEADER {
     DWORD           dwBitRate;         // Approximate bit data rate
     DWORD           dwBitErrorRate;    // Bit error rate for this stream
     REFERENCE_TIME  AvgTimePerFrame;   // Average time per frame (100ns units)
-
     BITMAPINFOHEADER bmiHeader;
-
 } VIDEOINFOHEADER;
+
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "SharedFilesWnd.h"
+#endif
+
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -332,6 +335,24 @@ CAbstractFile::CAbstractFile()
 	m_nFileSize = 0;
 	m_iRate = 0;
 }
+#ifdef _DEBUG
+void CAbstractFile::AssertValid() const
+{
+	CObject::AssertValid();
+	(void)m_strFileName;
+	(void)m_abyFileHash[16];
+	(void)m_nFileSize;
+	(void)m_strComment;
+	(void)m_iRate;
+	(void)m_strFileType;
+	taglist.AssertValid();
+}
+
+void CAbstractFile::Dump(CDumpContext& dc) const
+{
+	CObject::Dump(dc);
+}
+#endif
 
 CKnownFile::CKnownFile()
 {
@@ -355,10 +376,7 @@ CKnownFile::CKnownFile()
 	(void)m_strComment;
 	m_PublishedED2K = false;
 	kadFileSearchID = 0;
-	m_PublishedKadKey = 0;
 	m_PublishedKadSrc = 0;
-	m_keywordcount = 0;
-	m_lastPublishTimeKadKey = 0;
 	m_lastPublishTimeKadSrc = 0;
 	m_nCompleteSourcesTime = time(NULL);
 	m_nCompleteSourcesCount = 1;
@@ -374,8 +392,7 @@ CKnownFile::CKnownFile()
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
 	m_bPowerShareAuthorized = true;
 	m_bPowerShareAuto = false;
-	m_nVirtualCompleteSourcesCountMin = 0;
-	m_nVirtualCompleteSourcesCountMax = 0;
+	m_nVirtualCompleteSourcesCount = 0;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powershare
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 	InChangedSharedStatusBar = false;
@@ -394,6 +411,45 @@ CKnownFile::~CKnownFile(){
 	if(m_pbitmapOldSharedStatusBar != NULL) m_dcSharedStatusBar.SelectObject(m_pbitmapOldSharedStatusBar);
 	//MORPH END   - Added by SiRoB, Reduce SharedStatusBar CPU consumption
 }
+
+#ifdef _DEBUG
+void CKnownFile::AssertValid() const
+{
+	CAbstractFile::AssertValid();
+
+	(void)date;
+	(void)dateC;
+	(void)statistic;
+	(void)m_nCompleteSourcesTime;
+	(void)m_nCompleteSourcesCount;
+	(void)m_nCompleteSourcesCountLo;
+	(void)m_nCompleteSourcesCountHi;
+	m_ClientUploadList.AssertValid();
+	m_AvailPartFrequency.AssertValid();
+	hashlist.AssertValid();
+	(void)m_strDirectory;
+	(void)m_strFilePath;
+	CHECK_BOOL(m_bCommentLoaded);
+	(void)m_iPartCount;
+	(void)m_iED2KPartCount;
+	//(void)m_iED2KPartHashCount;
+	ASSERT( m_iUpPriority == PR_VERYLOW || m_iUpPriority == PR_LOW || m_iUpPriority == PR_NORMAL || m_iUpPriority == PR_HIGH || m_iUpPriority == PR_VERYHIGH );
+	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
+	CHECK_BOOL(m_bAutoUpPriority);
+	(void)m_iQueuedCount;
+	(void)s_ShareStatusBar;
+	CHECK_BOOL(m_PublishedED2K);
+	(void)kadFileSearchID;
+	(void)m_lastPublishTimeKadSrc;
+	(void)m_PublishedKadSrc;
+	(void)wordlist;
+}
+
+void CKnownFile::Dump(CDumpContext& dc) const
+{
+	CAbstractFile::Dump(dc);
+}
+#endif
 
 CBarShader CKnownFile::s_ShareStatusBar(16);
 
@@ -476,46 +532,34 @@ static void HeapSort(CArray<uint16,uint16> &count, int32 first, int32 last){
 }
 // SLUGFILLER: heapsortCompletesrc
 
-void CKnownFile::NewAvailPartsInfo(){
+void CKnownFile::NewAvailPartsInfo()
+{
 	// Cache part count
 	uint16 partcount = GetPartCount();
 	bool flag = (time(NULL) - m_nCompleteSourcesTime > 0); 
 	
-	CArray<uint16,uint16> count;	// SLUGFILLER: heapsortCompletesrc
-	count.SetSize(0, m_ClientUploadList.GetSize());
-
-	if(m_AvailPartFrequency.GetSize() < partcount)
-	{
-		m_AvailPartFrequency.SetSize(partcount);
-	}
-
 	// Reset part counters
+	if(m_AvailPartFrequency.GetSize() < partcount)
+		m_AvailPartFrequency.SetSize(partcount);
 	for(int i = 0; i < partcount; i++)
-	{
 		m_AvailPartFrequency[i] = 1;
-	}
-	CUpDownClient* cur_src;
-	if(this->IsPartFile())
-	{
-		cur_src = NULL;
-	}
-	
-	uint16 cur_count = 0;
+
+	CArray<uint16,uint16> count;
+	if (flag)
+		count.SetSize(0, m_ClientUploadList.GetSize());
+
 	for (POSITION pos = m_ClientUploadList.GetHeadPosition(); pos != 0; )
 	{
-		cur_src = m_ClientUploadList.GetNext(pos);
+		CUpDownClient* cur_src = m_ClientUploadList.GetNext(pos);
 		for (uint16 i = 0; i < partcount; i++)
 		{
 			if (cur_src->IsUpPartAvailable(i))
-			{
 				m_AvailPartFrequency[i] +=1;
-			}
 		}
-		cur_count= cur_src->GetUpCompleteSourcesCount();
-		if ( flag && cur_count )
-		{
+
+		uint16 cur_count;
+		if ( flag && (cur_count = cur_src->GetUpCompleteSourcesCount()) != 0 )
 			count.Add(cur_count);
-		}
 	}
 	if(flag)
 	{
@@ -526,18 +570,12 @@ void CKnownFile::NewAvailPartsInfo(){
 		for (uint16 i = 1; i < partcount; i++)
 		{
 			if( m_nCompleteSourcesCount > m_AvailPartFrequency[i])
-			{
 				m_nCompleteSourcesCount = m_AvailPartFrequency[i];
-			}
 		}
 	
 		if (m_nCompleteSourcesCount)
-		{
 			count.Add(m_nCompleteSourcesCount);
-		}
-	
-		count.FreeExtra();
-	
+
 		int32 n = count.GetSize();
 		if (n > 0)
 		{
@@ -590,23 +628,19 @@ void CKnownFile::NewAvailPartsInfo(){
 		m_nCompleteSourcesTime = time(NULL) + (60);
 	}
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	m_nVirtualCompleteSourcesCountMin = (uint16)-1;
-	m_nVirtualCompleteSourcesCountMax = 0;
+	m_nVirtualCompleteSourcesCount = 0;
 	for (uint16 i = 0; i < partcount; i++){
-		if(m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCountMax)
-			m_nVirtualCompleteSourcesCountMax = m_AvailPartFrequency[i];
-		if(m_nVirtualCompleteSourcesCountMin > m_AvailPartFrequency[i])
-			m_nVirtualCompleteSourcesCountMin = m_AvailPartFrequency[i];
+		if(m_AvailPartFrequency[i] > m_nVirtualCompleteSourcesCount)
+			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCountMin<11), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCountMin==1);//rechanged think should be right tell me [SiRoB]// changed (temporaly perhaps) [Yun.SF3]
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCount<11), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
 	//MORPH END   - Added by SiRoB, Reduce ShareStatusBar CPU consumption
-	if (theApp.emuledlg->sharedfileswnd.m_hWnd)
-		theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
-
+	if (theApp.emuledlg->sharedfileswnd->m_hWnd)
+		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 }
 
 void CKnownFile::AddUploadingClient(CUpDownClient* client){
@@ -623,7 +657,28 @@ void CKnownFile::RemoveUploadingClient(CUpDownClient* client){
 	}
 }
 
-void CKnownFile::SetPath(LPCTSTR path){
+#ifdef _DEBUG
+void Dump(const Kademlia::WordList& wordlist)
+{
+	Kademlia::WordList::const_iterator it;
+	for (it = wordlist.begin(); it != wordlist.end(); it++)
+	{
+		const CString& rstrKeyword = *it;
+		TRACE("  %s\n", rstrKeyword);
+	}
+}
+#endif
+
+void CKnownFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars)
+{ 
+	CAbstractFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars);
+
+	wordlist.clear();
+	Kademlia::CSearchManager::getWords(GetFileName(), &wordlist);
+} 
+
+void CKnownFile::SetPath(LPCTSTR path)
+{
 	m_strDirectory = path;
 }
 
@@ -659,7 +714,8 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 
 	m_AvailPartFrequency.SetSize(GetPartCount());
 	for (uint32 i = 0; i < GetPartCount();i++)
-		m_AvailPartFrequency[i] = 0;	// rayita: arraySetSizeFix
+		m_AvailPartFrequency[i] = 0;
+
 	// create hashset
 	uint32 togo = m_nFileSize;
 	for (uint16 hashcount = 0; togo >= PARTSIZE; ) {
@@ -857,7 +913,7 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 				SetFileSize(newtag->tag.intvalue);
 				m_AvailPartFrequency.SetSize(GetPartCount());
 				for (uint32 i = 0; i < GetPartCount();i++)
-					m_AvailPartFrequency[i] = 0;	// rayita: arraySetSizeFix
+					m_AvailPartFrequency[i] = 0;
 				delete newtag;
 				break;
 			}
@@ -890,22 +946,22 @@ bool CKnownFile::LoadTagsFromFile(CFile* file){
 			case FT_ULPRIORITY:{
 				uint8 autoprio = PR_AUTO;
 				m_iUpPriority = newtag->tag.intvalue;
-				if( m_iUpPriority == autoprio ){
+				if( m_iUpPriority == PR_AUTO ){
 					m_iUpPriority = PR_HIGH;
 					m_bAutoUpPriority = true;
 				}
-				else
+				else{
+					if (m_iUpPriority != PR_VERYLOW && m_iUpPriority != PR_LOW && m_iUpPriority != PR_NORMAL && m_iUpPriority != PR_HIGH && m_iUpPriority != PR_VERYHIGH)
+						m_iUpPriority = PR_NORMAL;
 					m_bAutoUpPriority = false;
+				}
 				delete newtag;
 				break;
 			}
 			case FT_PERMISSIONS:{
 				m_iPermissions = newtag->tag.intvalue;
-				delete newtag;
-				break;
-			}
-			case FT_KADLASTPUBLISHKEY:{
-				m_lastPublishTimeKadKey = newtag->tag.intvalue;
+				if (m_iPermissions != PERM_ALL && m_iPermissions != PERM_FRIENDS && m_iPermissions != PERM_NOONE)
+					m_iPermissions = PERM_ALL;
 				delete newtag;
 				break;
 			}
@@ -1013,9 +1069,7 @@ bool CKnownFile::WriteToFile(CFile* file){
 		file->Write(hashlist[i],16);
 	//tags
 	//MORPH START - Modified by SiRoB, ZZ Upload System
-	//const int iFixedTags = 10;
-	//const int iFixedTags = 11;
-	const int iFixedTags = 12;//EastShare - met control, known files expire tag[TAHO]
+	const int iFixedTags = 11;//9 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO]
 	//MORPH END - Modified by SiRoB, ZZ Upload System
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
@@ -1066,9 +1120,6 @@ bool CKnownFile::WriteToFile(CFile* file){
 
 	CTag permtag(FT_PERMISSIONS, m_iPermissions);
 	permtag.WriteTagToFile(file);
-
-	CTag kadLastPubKey(FT_KADLASTPUBLISHKEY, m_lastPublishTimeKadKey);
-	kadLastPubKey.WriteTagToFile(file);
 
 	CTag kadLastPubSrc(FT_KADLASTPUBLISHSRC, m_lastPublishTimeKadSrc);
 	kadLastPubSrc.WriteTagToFile(file);
@@ -1166,18 +1217,18 @@ void CKnownFile::CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar*
 	if (Required >= 56){
 		X[Required] = 0x80;
 		PaddingStarted = TRUE;
-		MEMSET(&X[Required + 1], 0, 63 - Required);
+		memset(&X[Required + 1], 0, 63 - Required);
 		MD4Transform(Hash, (uint32*)X);
 		Required = 0;
 	}
 	if (!PaddingStarted)
 		X[Required++] = 0x80;
-	MEMSET(&X[Required], 0, 64 - Required);
+	memset(&X[Required], 0, 64 - Required);
 	// add size (convert to bits)
 	uint32 Length2 = Length >> 29;
 	Length <<= 3;
-	MEMCOPY(&X[56], &Length, 4);
-	MEMCOPY(&X[60], &Length2, 4);
+	memcpy(&X[56], &Length, 4);
+	memcpy(&X[60], &Length2, 4);
 	MD4Transform(Hash, (uint32*)X);
 	md4cpy(Output, Hash);
 	safe_delete(data);
@@ -1372,7 +1423,9 @@ void CAbstractFile::AddTagUnique(CTag* pTag)
 }
 
 Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient){
-	CTypedPtrList<CPtrList, CUpDownClient*> srclist;
+	CUpDownClientPtrList srclist;
+	CUpDownClientPtrList srclistbackup;
+
 	theApp.uploadqueue->FindSourcesForFileById(&srclist, forClient->GetUploadFileID()); //should we use "m_abyFileHash"?
 
 	if(srclist.IsEmpty())
@@ -1385,35 +1438,64 @@ Packet*	CKnownFile::CreateSrcInfoPacket(CUpDownClient* forClient){
 	data.Write(&nCount, 2);
 
 	//uint32 lastRequest = forClient->GetLastSrcReqTime();
-	//we are only taking 30 random sources since we can't be sure if they have parts we need
-	//this is hard coded because its a temp solution until next(?) version
+	//Try to get 30 random sources with obtained parts..
 	srand(time(NULL));
-	for(int i = 0; i < 30; i++) {
+	while( nCount < 31 ){
 		int victim = ((rand() >> 7) % srclist.GetSize());
 		POSITION pos = srclist.FindIndex(victim);
 		CUpDownClient *cur_src = srclist.GetAt(pos);
-		if(!cur_src->HasLowID() && cur_src != forClient) {
-			nCount++;
-			uint32 dwID;
-			if(forClient->GetSourceExchangeVersion() > 2)
-				dwID = cur_src->GetUserIDHybrid();
-			else
-				dwID = cur_src->GetIP();
-			uint16 nPort = cur_src->GetUserPort();
-			uint32 dwServerIP = cur_src->GetServerIP();
-			uint16 nServerPort = cur_src->GetServerPort();
-			data.Write(&dwID, 4);
-			data.Write(&nPort, 2);
-			data.Write(&dwServerIP, 4);
-			data.Write(&nServerPort, 2);
-			if (forClient->GetSourceExchangeVersion() > 1)
-				data.Write(cur_src->GetUserHash(),16);
+		if(!cur_src->HasLowID() && cur_src != forClient )
+		{
+			if( cur_src->GetUpPartCount() ) {
+				nCount++;
+				uint32 dwID;
+				if(forClient->GetSourceExchangeVersion() > 2)
+					dwID = cur_src->GetUserIDHybrid();
+				else
+					dwID = cur_src->GetIP();
+				uint16 nPort = cur_src->GetUserPort();
+				uint32 dwServerIP = cur_src->GetServerIP();
+				uint16 nServerPort = cur_src->GetServerPort();
+				data.Write(&dwID, 4);
+				data.Write(&nPort, 2);
+				data.Write(&dwServerIP, 4);
+				data.Write(&nServerPort, 2);
+				if (forClient->GetSourceExchangeVersion() > 1)
+					data.Write(cur_src->GetUserHash(),16);
+			}
+			else{
+				srclistbackup.AddHead(cur_src);
+			}
 		}
 
 		srclist.RemoveAt(pos);
 		if(srclist.GetSize() == 0)
 			break;
 	}
+
+	//If we did not get enough sources, try to pull the rest from our backup list.
+	//It is impossible to know if these sources have a chunk already or not..
+	//This is left in here for rare files..
+	while( nCount < 31 && !srclistbackup.IsEmpty())
+	{
+		CUpDownClient *cur_src = srclistbackup.RemoveHead();
+		uint32 dwID;
+		if(forClient->GetSourceExchangeVersion() > 2)
+			dwID = cur_src->GetUserIDHybrid();
+		else
+			dwID = cur_src->GetIP();
+		uint16 nPort = cur_src->GetUserPort();
+		uint32 dwServerIP = cur_src->GetServerIP();
+		uint16 nServerPort = cur_src->GetServerPort();
+		data.Write(&dwID, 4);
+		data.Write(&nPort, 2);
+		data.Write(&dwServerIP, 4);
+		data.Write(&nServerPort, 2);
+		if (forClient->GetSourceExchangeVersion() > 1)
+			data.Write(cur_src->GetUserHash(),16);
+		nCount++;
+	}
+
 	if (!nCount)
 		return 0;
 	data.Seek(16,0);
@@ -1460,7 +1542,7 @@ void CKnownFile::SetFileComment(CString strNewComment){
 	m_strComment = strNewComment;
 	delete[] fullpath;
    
-	CTypedPtrList<CPtrList, CUpDownClient*> srclist;
+	CUpDownClientPtrList srclist;
 	theApp.uploadqueue->FindSourcesForFileById(&srclist, this->GetFileHash());
 
 	for (POSITION pos = srclist.GetHeadPosition();pos != 0;srclist.GetNext(pos)){
@@ -1484,7 +1566,7 @@ void CKnownFile::SetFileRate(int8 iNewRate){
 	m_iRate = iNewRate; 
 	delete[] fullpath;
 
-	CTypedPtrList<CPtrList, CUpDownClient*> srclist;
+	CUpDownClientPtrList srclist;
 	theApp.uploadqueue->FindSourcesForFileById(&srclist, this->GetFileHash());
 	for (POSITION pos = srclist.GetHeadPosition();pos != 0;srclist.GetNext(pos)){
 		CUpDownClient *cur_src = srclist.GetAt(pos);
@@ -1498,27 +1580,36 @@ void CKnownFile::UpdateAutoUpPriority(){
 	if ( GetQueuedCount() > 20 ){
 		if( GetUpPriority() != PR_LOW ){
 			SetUpPriority( PR_LOW );
-			theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
+			theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 		}
 		return;
 	}
 	if ( GetQueuedCount() > 1 ){
 		if( GetUpPriority() != PR_NORMAL ){
 			SetUpPriority( PR_NORMAL );
-			theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
+			theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 		}
 		return;
 	}
 	if( GetUpPriority() != PR_HIGH){
 		SetUpPriority( PR_HIGH );
-		theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
+		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 	}
 }
 
-void CKnownFile::SetUpPriority(uint8 iNewUpPriority, bool m_bsave){
+void CKnownFile::SetUpPriority(uint8 iNewUpPriority, bool bSave)
+{
 	m_iUpPriority = iNewUpPriority;
-	if( this->IsPartFile() && m_bsave )
+	ASSERT( m_iUpPriority == PR_VERYLOW || m_iUpPriority == PR_LOW || m_iUpPriority == PR_NORMAL || m_iUpPriority == PR_HIGH || m_iUpPriority == PR_VERYHIGH );
+
+	if( IsPartFile() && bSave )
 		((CPartFile*)this)->SavePartFile();
+}
+
+void CKnownFile::SetPermissions(uint8 iNewPermissions)
+{
+	ASSERT( m_iPermissions == PERM_ALL || m_iPermissions == PERM_FRIENDS || m_iPermissions == PERM_NOONE );
+	m_iPermissions = iNewPermissions;
 }
 
 void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength)
@@ -1538,34 +1629,6 @@ void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength)
 	}
 }
 
-int GetStreamFormat(const PAVISTREAM pAviStrm, long &rlStrmFmtSize, LPVOID &rpStrmFmt)
-{
-	ASSERT(pAviStrm);
-	ASSERT(rpStrmFmt == NULL);
-
-	// Get size of stream format data
-	HRESULT hr;
-	rlStrmFmtSize = 0;
-	if ((hr = AVIStreamReadFormat(pAviStrm, AVIStreamStart(pAviStrm), NULL, &rlStrmFmtSize)) != AVIERR_OK)
-		return FALSE;
-
-	// Alloc stream format data
-	if (rlStrmFmtSize == 0)
-		return FALSE;
-	rpStrmFmt = (LPVOID)malloc(rlStrmFmtSize);
-	if (rpStrmFmt == NULL)
-		return FALSE;
-
-	// Read stream format data
-	if ((hr = AVIStreamReadFormat(pAviStrm, AVIStreamStart(pAviStrm), rpStrmFmt, &rlStrmFmtSize)) != AVIERR_OK) {
-		free(rpStrmFmt);
-		rpStrmFmt = NULL;
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 void CKnownFile::GetMetaDataTags()
 {
 	if (theApp.glob_prefs->GetExtractMetaData() == 0)
@@ -1581,7 +1644,7 @@ void CKnownFile::GetMetaDataTags()
 
 		try{
 			ID3_Tag myTag;
-			myTag.Link(szFullPath, ID3TT_ALL);
+			myTag.Link(szFullPath);
 
 			const Mp3_Headerinfo* mp3info;
 			mp3info = myTag.GetMp3HeaderInfo();
@@ -1649,96 +1712,10 @@ void CKnownFile::GetMetaDataTags()
 			delete iter;
 		}
 		catch(...){
-			ASSERT(0);
 			AddDebugLogLine(false, _T("Unhandled exception while extracting file meta (MP3) data from \"%s\""), szFullPath);
+			ASSERT(0);
 		}
 	}
-	/*else if (_tcscmp(szExt, _T(".avi"))==0)
-	{
-		TCHAR szFullPath[MAX_PATH];
-		_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
-
-		try{
-			AVISTREAMINFO VideoStrmInf = {0};
-			LPVOID pVideoStrmFmt = NULL;
-			long lVideoStrmFmtSize = 0;
-			AVISTREAMINFO AudioStrmInf = {0};
-			LPVOID pAudioStrmFmt = NULL;
-			long lAudioStrmFmtSize = 0;
-
-			PAVIFILE pAviFile;
-			HRESULT hr = AVIFileOpen(&pAviFile, szFullPath, OF_READ | OF_SHARE_DENY_NONE, NULL);
-			if (hr == AVIERR_OK)
-			{
-				int iStreamIdx = 0;
-				PAVISTREAM pAviStrm;
-				while (AVIFileGetStream(pAviFile, &pAviStrm, 0, iStreamIdx) == AVIERR_OK)
-				{
-					AVISTREAMINFO AviStrmInf;
-					if (AVIStreamInfo(pAviStrm, &AviStrmInf, sizeof(AviStrmInf)) != AVIERR_OK) {
-						AVIStreamRelease(pAviStrm);
-						break;
-					}
-
-					if (AviStrmInf.fccType == streamtypeVIDEO){
-						if (VideoStrmInf.fccType == 0){
-							VideoStrmInf = AviStrmInf;
-							GetStreamFormat(pAviStrm, lVideoStrmFmtSize, pVideoStrmFmt);
-						}
-					}
-					else if (AviStrmInf.fccType == streamtypeAUDIO){
-						if (AudioStrmInf.fccType == 0){
-							AudioStrmInf = AviStrmInf;
-							GetStreamFormat(pAviStrm, lAudioStrmFmtSize, pAudioStrmFmt);
-						}
-					}
-					AVIStreamRelease(pAviStrm);
-					iStreamIdx++;
-				}
-				AVIFileRelease(pAviFile);
-			}
-
-			if (VideoStrmInf.fccType == streamtypeVIDEO && pVideoStrmFmt != NULL)
-			{
-				// length
-				double fSamplesSec = (VideoStrmInf.dwScale != 0) ? (double)VideoStrmInf.dwRate / (double)VideoStrmInf.dwScale : 0.0F;
-				double fLengthSec = (fSamplesSec > 0.0) ? VideoStrmInf.dwLength / fSamplesSec : 0;
-				if (fLengthSec > 0.0){
-					CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)fLengthSec);
-					AddTagUnique(pTag);
-				}
-
-				// codec
-				LPBITMAPINFOHEADER pbmi = (LPBITMAPINFOHEADER)pVideoStrmFmt;
-				CStringA strCodec;
-				if (pbmi->biCompression == BI_RGB)
-					strCodec = "rgb";
-				else if (pbmi->biCompression == BI_RLE8)
-					strCodec = "rle8";
-				else if (pbmi->biCompression == BI_RLE4)
-					strCodec = "rle4";
-				else if (pbmi->biCompression == BI_BITFIELDS)
-					strCodec = "bitfields";
-				else{
-					MEMCOPY(strCodec.GetBuffer(4), &pbmi->biCompression, 4);
-					strCodec.ReleaseBuffer(4);
-					strCodec.MakeLower();
-				}
-				CTag* pTag = new CTag(FT_MEDIA_CODEC, strCodec);
-				AddTagUnique(pTag);
-
-				// bitrate.. audio or video??
-			}
-
-			if (pVideoStrmFmt)
-				free(pVideoStrmFmt);
-			if (pAudioStrmFmt)
-				free(pAudioStrmFmt);
-		}
-		catch(...){
-			AddDebugLogLine(false, _T("Unhandled exception while extracting meta data (AVI) from \"%s\""), szFullPath);
-		}
-	}*/
 	else if (theApp.glob_prefs->GetExtractMetaData() > 1)
 	{
 		// starting the MediaDet object takes a noticeable amount of time.. avoid starting that object
@@ -1765,7 +1742,7 @@ void CKnownFile::GetMetaDataTags()
 						DWORD dwVideoCodec = 0;
 						double fAudioStreamLengthSec = 0.0;
 						DWORD dwAudioBitRate = 0;
-						DWORD dwAudioCodec = 0;
+						//DWORD dwAudioCodec = 0;
 						long lStreams;
 						if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
 						{
@@ -1844,7 +1821,7 @@ void CKnownFile::GetMetaDataTags()
 							else if (dwVideoCodec == BI_BITFIELDS)
 								strCodec = "bitfields";
 							else{
-								MEMCOPY(strCodec.GetBuffer(4), &dwVideoCodec, 4);
+								memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
 								strCodec.ReleaseBuffer(4);
 								strCodec.MakeLower();
 							}
@@ -1874,52 +1851,19 @@ void CKnownFile::GetMetaDataTags()
 			}
 			catch(...){
 				AddDebugLogLine(false, _T("Unhandled exception while extracting meta data (MediaDet) from \"%s\""), szFullPath);
+				ASSERT(0);
 			}
 		}
 	}
 }
 void CKnownFile::SetPublishedED2K(bool val){
 	m_PublishedED2K = val;
-	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
+	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 }
 
 void CKnownFile::SetPublishedKadSrc(){
 	m_PublishedKadSrc++;
-	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
-}
-void CKnownFile::SetPublishedKadKey(){
-	m_PublishedKadKey++;
-	theApp.emuledlg->sharedfileswnd.sharedfilesctrl.UpdateFile(this);
-}
-
-int CKnownFile::PublishKey(Kademlia::CUInt128 *nextID)
-{
-	if( m_lastPublishTimeKadKey > 0)
-	{
-		if( ((uint32)time(NULL)-m_lastPublishTimeKadKey) < KADEMLIAREPUBLISHTIME)
-		{
-			return false;
-		}
-	}
-	if(wordlist.empty())
-	{
-		if(m_keywordcount)
-		{
-			m_lastPublishTimeKadKey = (uint32)time(NULL);
-			m_keywordcount = 0;
-			return false;
-		}
-		Kademlia::CSearchManager::getWordsValid(this->GetFileName(), &wordlist);
-		if(wordlist.empty())
-		{
-			return false;
-		}
-	}
-	CString word = wordlist.front();
-	wordlist.pop_front();
-	Kademlia::CMD4::hash((byte*)word.GetBuffer(0), word.GetLength(), nextID);
-	m_keywordcount++;
-	return m_keywordcount;
+	theApp.emuledlg->sharedfileswnd->sharedfilesctrl.UpdateFile(this);
 }
 
 bool CKnownFile::PublishSrc(Kademlia::CUInt128 *nextID)

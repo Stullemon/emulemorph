@@ -17,10 +17,22 @@
 
 #include "stdafx.h"
 #include "emule.h"
-#include "SearchDlg.h"
-#include "packets.h"
 #include "UDPSocket.h"
 #include "SearchList.h"
+#include "DownloadQueue.h"
+#include "Server.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+#include "ServerList.h"
+#include "Opcodes.h"
+#include "SafeFile.h"
+#include "PartFile.h"
+#include "Packets.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "ServerWnd.h"
+#include "SearchDlg.h"
+#endif
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -111,7 +123,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 		CServer* update = theApp.serverlist->GetServerByAddress( host, nUDPPort-4 );
 		if( update ){
 			update->ResetFailedCount();
-			theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( update );
+			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 		}
 		switch(opcode){
 			case OP_GLOBSEARCHRES:{
@@ -259,7 +271,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 					//if (update->GetUDPFlags() != uUDPFlags)
 					//	update->SetVersion(_T(""));
 					update->SetUDPFlags( uUDPFlags );
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( update );
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 				}
 #undef get_uint32
 				break;
@@ -291,7 +303,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				if(update){
 					update->SetDescription(strDesc);
 					update->SetListName(strName);
-					theApp.emuledlg->serverwnd.serverlistctrl.RefreshServer( update );
+					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 				}
 				break;
 			}
@@ -327,6 +339,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 	}
 	catch(...){
 		ProcessPacketError(size, opcode, host, nUDPPort-4, _T("Unknown exception"));
+		ASSERT(0);
 	}
 
 	return false;
@@ -351,7 +364,7 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 	// see if we have a ip already
 	USES_CONVERSION;
 	SOCKADDR_IN sockAddr;
-	MEMSET(&sockAddr,0,sizeof(sockAddr));
+	memset(&sockAddr,0,sizeof(sockAddr));
 	LPSTR lpszAscii = T2A((LPTSTR)m_lpszHostAddress);
 	sockAddr.sin_family = AF_INET;
 	sockAddr.sin_addr.s_addr = inet_addr(lpszAscii);
@@ -362,7 +375,7 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 
 	if (sockAddr.sin_addr.s_addr == INADDR_NONE){
 		/* Resolve hostname "hostname" asynchronously */ 
-		MEMSET(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
+		memset(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
 
 		m_DnsTaskHandle = WSAAsyncGetHostByName(
 			m_hWndResolveMessage,
@@ -410,15 +423,23 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 				m_SaveAddr.sin_addr.s_addr = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
 		}
 		// also reset the receive buffer
-		MEMSET(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
+		memset(m_DnsHostBuffer, 0, sizeof(m_DnsHostBuffer));
 	}
 	if (m_cur_server){
 		if (m_SaveAddr.sin_addr.s_addr != INADDR_NONE){
 			CServer* update = theApp.serverlist->GetServerByAddress(m_cur_server->GetAddress(),m_cur_server->GetPort());
 		    if (update)
 			    update->SetID(m_SaveAddr.sin_addr.S_un.S_addr);
+			SendBuffer();
 		}
-		SendBuffer();
+		else{
+			// still no valid IP for this server - delete packet
+			delete m_cur_server;
+			m_cur_server = NULL;
+			delete[] m_sendbuffer;
+			m_sendbuffer = NULL;
+			m_sendblen = 0;
+		}
 	}
 }
 
@@ -480,10 +501,17 @@ void CUDPSocket::SendBuffer(){
 }
 
 void CUDPSocket::SendPacket(Packet* packet,CServer* host){
+	// if the last DNS query did not yet return, we may still have a packet queued - delete it
+	delete m_cur_server;
+	m_cur_server = NULL;
+	delete[] m_sendbuffer;
+	m_sendbuffer = NULL;
+	m_sendblen = 0;
+
 	m_cur_server = new CServer(host);
 	m_sendbuffer = new uint8[packet->size+2];
-	MEMCOPY(m_sendbuffer,packet->GetUDPHeader(),2);
-	MEMCOPY(m_sendbuffer+2,packet->pBuffer,packet->size);
+	memcpy(m_sendbuffer,packet->GetUDPHeader(),2);
+	memcpy(m_sendbuffer+2,packet->pBuffer,packet->size);
 	m_sendblen = packet->size+2;
 	AsyncResolveDNS(m_cur_server->GetAddress(),m_cur_server->GetPort()+4);
 }

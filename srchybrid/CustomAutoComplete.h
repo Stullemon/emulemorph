@@ -6,10 +6,7 @@
 #if !defined(CCustomAutoComplete_INCLUDED)
 #define CCustomAutoComplete_INCLUDED
 
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
-
 #include <initguid.h>
 #include <shldisp.h>
 #include <shlguid.h>
@@ -42,8 +39,8 @@ public:
 	const CStringArray& GetList() const;
 	int GetItemCount();
 
-	BOOL AddItem(CString& p_sItem, int iPos);
-	BOOL RemoveItem(CString& p_sItem);
+	BOOL AddItem(const CString& p_sItem, int iPos);
+	BOOL RemoveItem(const CString& p_sItem);
 	
 	BOOL Clear();
 	BOOL Disable();

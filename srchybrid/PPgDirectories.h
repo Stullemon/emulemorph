@@ -1,9 +1,5 @@
 #pragma once
-
-#include "preferences.h"
 #include "DirectoryTreeCtrl.h"
-
-// CPPgDirectories dialog
 
 class CPPgDirectories : public CPropertyPage
 {

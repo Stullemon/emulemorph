@@ -14,11 +14,23 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #include "stdafx.h"
+#include "emule.h"
 #include "LastCommonRouteFinder.h"
+#include "Server.h"
+#include "OtherFunctions.h"
+#include "UpDownClient.h"
+#include "Preferences.h"
 #include "Pinger.h"
-#include "Emule.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#endif
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
 
 
 LastCommonRouteFinder::LastCommonRouteFinder() {
@@ -77,9 +89,9 @@ bool LastCommonRouteFinder::AddHostsToCheck(CTypedPtrList<CPtrList, CServer*> &l
                         hostsToTraceRoute.AddTail(ip);
                     }
 
-                    if(pos == NULL) {
-                        POSITION pos = list.GetHeadPosition();
-                    }
+//                    if(pos == NULL) {
+//                        POSITION pos = list.GetHeadPosition();
+//                    }
                 }
             }
 
@@ -104,7 +116,7 @@ bool LastCommonRouteFinder::AddHostsToCheck(CTypedPtrList<CPtrList, CServer*> &l
     }
 }
 
-bool LastCommonRouteFinder::AddHostsToCheck(CTypedPtrList<CPtrList, CUpDownClient*> &list) {
+bool LastCommonRouteFinder::AddHostsToCheck(CUpDownClientPtrList &list) {
     if(needMoreHosts) {
         addHostLocker.Lock();
         
@@ -130,9 +142,9 @@ bool LastCommonRouteFinder::AddHostsToCheck(CTypedPtrList<CPtrList, CUpDownClien
                         hostsToTraceRoute.AddTail(ip);
                     }
 
-                    if(pos == NULL) {
-                        POSITION pos = list.GetHeadPosition();
-                    }
+//                    if(pos == NULL) {
+//                        POSITION pos = list.GetHeadPosition();
+//                    }
                 }
             }
 
@@ -269,6 +281,7 @@ void LastCommonRouteFinder::EndThread() {
  * @return
  */
 UINT AFX_CDECL LastCommonRouteFinder::RunProc(LPVOID pParam) {
+	DbgSetThreadName("LastCommonRouteFinder");
     LastCommonRouteFinder* lastCommonRouteFinder = (LastCommonRouteFinder*)pParam;
 
     return lastCommonRouteFinder->RunInternal();
@@ -354,7 +367,7 @@ UINT LastCommonRouteFinder::RunInternal() {
                 for(uint32 ttl = 1; doRun && enabled && (curHost != 0 && ttl <= 64 || curHost == 0 && ttl < 5) && foundLastCommonHost == false && failed == false; ttl++) {
                         if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,"UploadSpeedSense: Pinging for TTL %i...", ttl);
                     curHost = 0;
-                    PingStatus pingStatus;
+						PingStatus pingStatus = {0};
 
                     if(m_enabled == false) {
                         enabled = false;
@@ -540,7 +553,8 @@ UINT LastCommonRouteFinder::RunInternal() {
                 initial_ping = lowestInitialPingAllowed;
             }
 
-		uint32 upload;
+            uint32 upload = 0;
+
 		 if(doRun && enabled) {
             //MORPH - Modified by SiRoB, USS log debug
             if(theApp.glob_prefs->IsUSSLog()) theApp.emuledlg->QueueDebugLogLine(false,GetResString(IDS_USSLOWESTPING), initial_ping);

@@ -27,10 +27,7 @@ what all it does can cause great harm to the network if released in mass form..
 Any mod that changes anything within the Kademlia side will not be allowed to advertise
 there client on the eMule forum..
 */
-
 #pragma once
-
-#include "../../stdafx.h"
 #include <map>
 #include <list>
 #include <set>

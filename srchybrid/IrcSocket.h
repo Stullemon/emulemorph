@@ -1,9 +1,8 @@
 #pragma once
-
 #include "AsyncSocketEx.h"
-#include "AsyncProxySocketLayer.h"
 
 class CIrcMain;
+class CAsyncProxySocketLayer;
 
 class CIrcSocket : public CAsyncSocketEx
 {

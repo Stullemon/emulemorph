@@ -17,13 +17,14 @@
 
 
 #pragma once
-#include "sharedfilelist.h"
-#include "knownfile.h"
-#include "types.h"
 #include "MuleListCtrl.h"
+#include "TitleMenu.h"
 
 // CSharedFilesCtrl
 class CSharedFileList;
+class CKnownFile;
+class CPartFile; //MORPH - Added by SiRoB, delete shared file
+
 class CSharedFilesCtrl : public CMuleListCtrl
 {
 	DECLARE_DYNAMIC(CSharedFilesCtrl)
@@ -31,7 +32,6 @@ class CSharedFilesCtrl : public CMuleListCtrl
 public:
 	CSharedFilesCtrl();
 	virtual ~CSharedFilesCtrl();
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	void	Init();
 	void	CreateMenues();
 	void	ShowFileList(CSharedFileList* in_sflist);
@@ -42,13 +42,16 @@ public:
 	void	ShowFilesCount();
 	void	ShowComments(int index);
 protected:
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
-	DECLARE_MESSAGE_MAP()
 private:
 	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
 	CTitleMenu	m_SharedFilesMenu;

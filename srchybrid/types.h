@@ -1,6 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#pragma once
+
 typedef unsigned char		int8;
 typedef unsigned short		int16;
 typedef unsigned int		int32;
@@ -17,4 +19,5 @@ typedef unsigned long		ulong;
 typedef unsigned short		ushort;
 typedef unsigned char		uchar;
 template <typename type> void safe_delete(type &del) { if(del) { delete del; del=0; } }
+
 #endif

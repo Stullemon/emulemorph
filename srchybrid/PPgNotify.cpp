@@ -1,3 +1,6 @@
+//this file is part of eMule
+//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
 //as published by the Free Software Foundation; either
@@ -14,6 +17,9 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgNotify.h"
+#include "Preferences.h"
+#include "OtherFunctions.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

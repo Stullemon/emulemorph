@@ -16,10 +16,10 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-
-#include "emule.h"
-#include "PartFile.h"
 #include "loggable.h"
+
+class CPartFile;
+struct Gap_Struct;
 
 #define ZIP_LOCAL_HEADER_MAGIC		0x04034b50
 #define ZIP_LOCAL_HEADER_EXT_MAGIC	0x08074b50

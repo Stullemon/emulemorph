@@ -29,7 +29,6 @@ there client on the eMule forum..
 #pragma once
 
 #include "Indexed.h"
-
 #include "../../Types.h"
 #include <list>
 #include "SearchManager.h"
@@ -49,19 +48,8 @@ struct KeywordHash{
 
 struct SSearchTerm
 {
-	SSearchTerm()
-	{
-		type = AND;
-		tag = NULL;
-		left = NULL;
-		right = NULL;
-	};
-	~SSearchTerm()
-	{
-		if (type == String)
-			delete str;
-		delete tag;
-	};
+	SSearchTerm();
+	~SSearchTerm();
 	
 	enum {
 		AND,
@@ -93,6 +81,8 @@ public:
 	bool IndexedAdd( Kademlia::CUInt128 keyWordID, Kademlia::CUInt128 sourceID, Kademlia::CEntry* entry);
 	uint32 GetIndexedCount() {return keywordHashList.GetCount();}
 	void SendValidResult( Kademlia::CUInt128 keyWordID, const SSearchTerm* pSearchTerms, const sockaddr_in *senderAddress, bool source );
+	uint32 m_totalIndexSource;
+	uint32 m_totalIndexKeyword;
 private:
 	time_t m_lastClean;
 	CTypedPtrList<CPtrList, KeywordHash*> keywordHashList;

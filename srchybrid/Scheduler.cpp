@@ -14,12 +14,24 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-#include "StdAfx.h"
-#include "Scheduler.h"
+#include "stdafx.h"
 #include "emule.h"
-#include "otherfunctions.h"
+#include "Scheduler.h"
+#include "OtherFunctions.h"
 #include "ini2.h"
+#include "Preferences.h"
+#include "DownloadQueue.h"
+#ifndef _CONSOLE
+#include "emuledlg.h"
+#include "MenuCmds.h"
+#endif
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 CScheduler::CScheduler(){
 	LoadFromFile();
@@ -54,9 +66,9 @@ int CScheduler::LoadFromFile(){
 			news->time=ini.GetInt("StartTime");
 			news->time2=ini.GetInt("EndTime");
 			ini.SerGet(true, news->actions,
-				ELEMENT_COUNT(news->actions), "Actions");
+				ARRSIZE(news->actions), "Actions");
 			ini.SerGet(true, news->values,
-				ELEMENT_COUNT(news->values), "Values");
+				ARRSIZE(news->values), "Values");
 
 			AddSchedule(news);
 			count++;
@@ -89,9 +101,9 @@ void CScheduler::SaveToFile(){
 		ini.WriteBool("Enabled",schedule->enabled);
 
 		ini.SerGet(false, schedule->actions,
-			ELEMENT_COUNT(schedule->actions), "Actions");
+			ARRSIZE(schedule->actions), "Actions");
 		ini.SerGet(false, schedule->values,
-			ELEMENT_COUNT(schedule->values), "Values");
+			ARRSIZE(schedule->values), "Values");
 	}
 }
 
@@ -121,7 +133,7 @@ int CScheduler::Check(bool forcecheck){
 		|| !theApp.emuledlg->IsRunning()) return -1;
 
 	Schedule_Struct* schedule;
-	CTime tNow=CTime(mktime(CTime::GetCurrentTime().GetLocalTm()));
+	CTime tNow=CTime(safe_mktime(CTime::GetCurrentTime().GetLocalTm()));
 	
 	if (!forcecheck && tNow.GetMinute()==m_iLastCheckedMinute) return -1;
 

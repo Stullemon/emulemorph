@@ -4,13 +4,17 @@
 #include "stdafx.h"
 #include "emule.h"
 #include "PPgMorph2.h"
+#include "emuleDlg.h"
+#include "OtherFunctions.h"
+#include "serverWnd.h"
+#include "Fakecheck.h"
+#include "IPFilter.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
-
 
 // CPPgMorph dialog
 
