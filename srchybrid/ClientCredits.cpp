@@ -411,8 +411,8 @@ void CClientCreditsList::LoadList()
 			else if(loadFileStatus[curFile].m_mtime > loadFileStatus[lastFile].m_mtime){
 				lastFile = curFile;
 			}
+			loadFile.Close(); //MORPH - Moved by SiRoB, close file when succefully opened
 		}
-		loadFile.Close();
 	}
 
 	if(lastFile != -1)	strFileName = loadFileName[lastFile];
