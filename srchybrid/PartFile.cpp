@@ -243,7 +243,6 @@ void CPartFile::Init(){
 	//MORPH END   - Added by SiRoB, ZZ Upload System 20030723-0133
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	InChangedSharedStatusBar = false;
-	m_pbitmapOldSharedStatusBar = NULL;
 	//MORPH END   - Added by SiRoB,  SharedStatusBar CPU Optimisation
 }
 
@@ -1162,59 +1161,57 @@ void CPartFile::UpdateCompletedInfos()
 
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
 void CPartFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat){ 
-	int wSize=rect->right - rect->left;
-	int hSize=rect->bottom - rect->top;
+	int iWidth=rect->right - rect->left;
+	if (iWidth <= 0)	return;
+	int iHeight=rect->bottom - rect->top;
+	if (m_bitmapSharedStatusBar == (HBITMAP)NULL)
+		VERIFY(m_bitmapSharedStatusBar.CreateBitmap(1, 1, 1, 8, NULL)); 
+	CDC cdcStatus;
+	HGDIOBJ hOldBitmap;
+	cdcStatus.CreateCompatibleDC(dc);
+	if(!InChangedSharedStatusBar || lastSize!=iWidth || lastonlygreyrect!=onlygreyrect || lastbFlat!=bFlat){
+		InChangedSharedStatusBar = true;
+		lastSize=iWidth;
+		lastonlygreyrect=onlygreyrect;
+		lastbFlat=bFlat;
+		m_bitmapSharedStatusBar.DeleteObject(); 
+		m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
+		m_bitmapSharedStatusBar.SetBitmapDimension(iWidth,  iHeight); 
+		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
+		
+		COLORREF crProgress;
+		COLORREF crHave;
+		COLORREF crPending;
+		COLORREF crMissing = RGB(255, 0, 0);
 
-	if (wSize>0){
-		if(!InChangedSharedStatusBar || lastSize!=wSize || lastonlygreyrect!=onlygreyrect || lastbFlat!=bFlat){
-			InChangedSharedStatusBar = true;
-			lastSize=wSize;
-			lastonlygreyrect=onlygreyrect;
-			lastbFlat=bFlat;
-			if(m_pbitmapOldSharedStatusBar && m_bitmapSharedStatusBar.GetSafeHandle() && m_dcSharedStatusBar.GetSafeHdc())
-			{
-				m_dcSharedStatusBar.SelectObject(m_pbitmapOldSharedStatusBar);
-				m_bitmapSharedStatusBar.DeleteObject();
-				m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc, wSize, hSize);
-				m_pbitmapOldSharedStatusBar = m_dcSharedStatusBar.SelectObject(&m_bitmapSharedStatusBar);
-			}
-			if(m_dcSharedStatusBar.GetSafeHdc() == NULL){
-				m_dcSharedStatusBar.CreateCompatibleDC(dc);
-				m_bitmapSharedStatusBar.DeleteObject();
-				m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc, wSize, hSize);
-				m_pbitmapOldSharedStatusBar = m_dcSharedStatusBar.SelectObject(&m_bitmapSharedStatusBar);
-			}
-			COLORREF crProgress;
-			COLORREF crHave;
-			COLORREF crPending;
-			COLORREF crMissing = RGB(255, 0, 0);
+		if(bFlat) { 
+			crProgress = RGB(0, 150, 0);
+			crHave = RGB(0, 0, 0);
+			crPending = RGB(255,208,0);
+		} else { 
+			crProgress = RGB(0, 224, 0);
+			crHave = RGB(104, 104, 104);
+			crPending = RGB(255, 208, 0);
+		} 
 
-			if(bFlat) { 
-				crProgress = RGB(0, 150, 0);
-				crHave = RGB(0, 0, 0);
-				crPending = RGB(255,208,0);
-			} else { 
-				crProgress = RGB(0, 224, 0);
-				crHave = RGB(104, 104, 104);
-				crPending = RGB(255, 208, 0);
-			} 
-
-			s_ChunkBar.SetFileSize(this->GetFileSize()); 
-			s_ChunkBar.SetHeight(hSize); 
-			s_ChunkBar.SetWidth(wSize); 
-			s_ChunkBar.Fill(crMissing); 
-			COLORREF color;
-			if (!onlygreyrect && !m_SrcpartFrequency.IsEmpty()) { 
-				for (int i = 0;i < GetPartCount();i++)
-					if(m_SrcpartFrequency[i] > 0 ){
-						color = RGB(0, (210-(22*(m_SrcpartFrequency[i]-1)) <  0)? 0:210-(22*(m_SrcpartFrequency[i]-1)), 255);
-						s_ChunkBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
-					}
-			}
-   			s_ChunkBar.Draw(&m_dcSharedStatusBar, 0, 0, bFlat);
+		s_ChunkBar.SetFileSize(this->GetFileSize()); 
+		s_ChunkBar.SetHeight(iHeight); 
+		s_ChunkBar.SetWidth(iWidth); 
+		s_ChunkBar.Fill(crMissing); 
+		COLORREF color;
+		if (!onlygreyrect && !m_SrcpartFrequency.IsEmpty()) { 
+			for (int i = 0;i < GetPartCount();i++)
+				if(m_SrcpartFrequency[i] > 0 ){
+					color = RGB(0, (210-(22*(m_SrcpartFrequency[i]-1)) <  0)? 0:210-(22*(m_SrcpartFrequency[i]-1)), 255);
+					s_ChunkBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
+				}
 		}
-		if(m_dcSharedStatusBar.GetSafeHdc() != NULL)	dc->BitBlt(rect->left,rect->top,wSize,hSize,&m_dcSharedStatusBar,0,0,SRCCOPY);
+   		s_ChunkBar.Draw(&cdcStatus, 0, 0, bFlat);
 	}
+	else
+		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
+	dc->BitBlt(rect->left,rect->top,iWidth,iHeight,&cdcStatus,0,0,SRCCOPY);
+	cdcStatus.SelectObject(hOldBitmap);
 } 
 
 void CPartFile::DrawStatusBar(CDC* dc, RECT* rect, bool bFlat){ 
@@ -2041,7 +2038,7 @@ void CPartFile::NewSrcPartsInfo(){
 			m_nVirtualCompleteSourcesCountMin = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(m_nVirtualCompleteSourcesCountMin==0), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCountMin>0));
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(m_nVirtualCompleteSourcesCountMin<11), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCountMin>0) || m_nVirtualCompleteSourcesCountMin==1); //rechanged think should be right tell me ;) [SiRoB] //changed (temporaly perhaps) [Yun.SF3]
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo();
