@@ -14,7 +14,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "Loggable.h"
 #include "MenuCmds.h" //Morph
 
 class CSafeMemFile;
@@ -62,7 +61,7 @@ private:
 };
 // SLUGFILLER: hostnameSources
 
-class CDownloadQueue: public CLoggable
+class CDownloadQueue
 {
 	friend class CAddFileThread;
 	friend class CServerSocket;
@@ -123,7 +122,7 @@ public:
 
 	// statistics
 	typedef struct{
-		int	a[22];
+		int	a[23];
 	} SDownloadStats;
 	void	GetDownloadStats(SDownloadStats& results);
 	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);

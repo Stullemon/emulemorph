@@ -1,6 +1,6 @@
 #pragma once
 
-class CPPgGeneral : public CPropertyPage, CLoggable
+class CPPgGeneral : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgGeneral)
 

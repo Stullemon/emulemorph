@@ -45,6 +45,7 @@
 #include "Kademlia/Kademlia/prefs.h"
 #include "ClientUDPSocket.h"
 #include "SHAHashSet.h"
+#include "Log.h"
 
 #include "FirewallOpener.h" //MORPH - Added by SiRoB, [MoNKi: -Random Ports-]
 
@@ -693,7 +694,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 							if (thePrefs.GetVerbose())
 							{
 								if (auEndOffsets[i] != 0 || auStartOffsets[i] != 0)
-									AddDebugLogLine(false, _T("Client requests invalid %u. file block %u-%u (%d bytes): %s"), i, auStartOffsets[i], auEndOffsets[i], auEndOffsets[i] - auStartOffsets[i], client->DbgGetClientInfo());
+									DebugLogWarning(_T("Client requests invalid %u. file block %u-%u (%d bytes): %s"), i, auStartOffsets[i], auEndOffsets[i], auEndOffsets[i] - auStartOffsets[i], client->DbgGetClientInfo());
 							}
 						}
 					}
@@ -716,7 +717,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					{
 						if (theApp.uploadqueue->RemoveFromUploadQueue(client, _T("Remote client ended transfer."))){
 							if (thePrefs.GetLogUlDlEvents())
-								AddDebugLogLine(false, DLP_LOW, _T("%s: Upload session ended due to ended transfer."), client->GetUserName());
+								AddDebugLogLine(DLP_LOW, false, "%s: Upload session ended due to ended transfer.", client->GetUserName());
 						}
 					}
 					else
@@ -1242,7 +1243,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 		}
 		catch(CFileException* error)
 		{
-			error->Delete();	//mf
+			error->Delete();
 			throw GetResString(IDS_ERR_INVALIDPACKAGE);
 		}
 		catch(CMemoryException* error)
@@ -1254,7 +1255,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 	catch(CClientException* ex) // nearly same as the 'CString' exception but with optional deleting of the client
 	{
 		if (thePrefs.GetVerbose() && !ex->m_strMsg.IsEmpty())
-			AddDebugLogLine(false, _T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), ex->m_strMsg, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
+			DebugLogWarning(_T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), ex->m_strMsg, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
 		if (client && ex->m_bDelete)
 			client->SetDownloadState(DS_ERROR);
 		Disconnect(ex->m_strMsg);
@@ -1265,9 +1266,9 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 	{
 		if (thePrefs.GetVerbose() && !error.IsEmpty()){
 			if (opcode == OP_REQUESTFILENAME /*low priority for OP_REQUESTFILENAME*/)
-				AddDebugLogLine(DLP_LOW, false, _T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), error, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
+				DebugLogWarning(_T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), error, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
 			else
-				AddDebugLogLine(DLP_HIGH, false, _T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), error, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
+				DebugLogWarning(_T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), error, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
 		}
 		if (client)
 			client->SetDownloadState(DS_ERROR);	
@@ -1359,6 +1360,9 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 							}
 							case OP_AICHFILEHASHREQ:
 							{
+								if (thePrefs.GetDebugClientTCPLevel() > 0)
+									DebugRecv("OP_MPAichFileHashReq", client, packet);
+
 								if (client->IsSupportingAICH() && reqfile->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE
 									&& reqfile->GetAICHHashset()->HasValidMasterHash())
 								{
@@ -1520,7 +1524,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 					if( data_out.GetLength() > 16 )
 					{
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
-							DebugSend("OP__MulitPacketAns", client, (char*)reqfile->GetFileHash());
+							DebugSend("OP__MultiPacketAns", client, (char*)reqfile->GetFileHash());
 						Packet* reply = new Packet(&data_out, OP_EMULEPROT);
 						reply->opcode = OP_MULTIPACKETANSWER;
 						theStats.AddUpDataOverheadFileRequest(reply->size);
@@ -1573,7 +1577,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 							case OP_AICHFILEHASHANS:
 							{
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
-									DebugRecv("OP_MPAICHFILEHASH", client);
+									DebugRecv("OP_MPAichFileHashAns", client);
+								
 								client->ProcessAICHFileHash(&data_in, reqfile);
 								break;
 							}
@@ -2030,7 +2035,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 						}
 						else
 						{
-							AddDebugLogLine(false, _T("Client UDP socket; OP_REASKCALLBACKTCP; reqfile does not match"));
+							DebugLogWarning(_T("Client UDP socket; OP_REASKCALLBACKTCP; reqfile does not match"));
 							TRACE(_T("reqfile:         %s\n"), DbgGetFileInfo(reqfile->GetFileHash()));
 							TRACE(_T("sender->GetRequestFile(): %s\n"), sender->GetRequestFile() ? DbgGetFileInfo(sender->GetRequestFile()->GetFileHash()) : _T("(null)"));
 						}
@@ -2059,7 +2064,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 				{
 					theStats.AddDownDataOverheadOther(uRawSize);
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
-						DebugRecv("OP_AICHANSWER", client);
+						DebugRecv("OP_AichAnswer", client);
+
 					client->ProcessAICHAnswer(packet,size);
 					break;
 				}
@@ -2067,7 +2073,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 				{
 					theStats.AddDownDataOverheadOther(uRawSize);
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
-						DebugRecv("OP_AICHREQUEST", client);
+						DebugRecv("OP_AichRequest", client);
+
 					client->ProcessAICHRequest(packet,size);
 					break;
 				}
@@ -2076,13 +2083,18 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 					// those should not be received normally, since we should only get those in MULTIPACKET
 					theStats.AddDownDataOverheadOther(uRawSize);
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
-						DebugRecv("OP_AICHFILEHASH", client);
+						DebugRecv("OP_AichFileHashAns", client);
+
 					CSafeMemFile data((BYTE*)packet, size);
 					client->ProcessAICHFileHash(&data, NULL);
 					break;
 				}
 				case OP_AICHFILEHASHREQ:
 				{
+					theStats.AddDownDataOverheadOther(uRawSize);
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_AichFileHashReq", client);
+
 					// those should not be received normally, since we should only get those in MULTIPACKET
 					CSafeMemFile data((BYTE*)packet, size);
 					uchar abyHash[16];
@@ -2133,7 +2145,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 	catch(CClientException* ex) // nearly same as the 'CString' exception but with optional deleting of the client
 	{
 		if (thePrefs.GetVerbose() && !ex->m_strMsg.IsEmpty())
-			AddDebugLogLine(false, _T("%s - while processing eMule packet: opcode=%s  size=%u; %s"), ex->m_strMsg, DbgGetMuleClientTCPOpcode(opcode), size, DbgGetClientInfo());
+			DebugLogWarning(_T("%s - while processing eMule packet: opcode=%s  size=%u; %s"), ex->m_strMsg, DbgGetMuleClientTCPOpcode(opcode), size, DbgGetClientInfo());
 		if (client && ex->m_bDelete)
 			client->SetDownloadState(DS_ERROR);
 		Disconnect(ex->m_strMsg);
@@ -2143,7 +2155,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 	catch(CString error)
 	{
 		if (thePrefs.GetVerbose() && !error.IsEmpty())
-			AddDebugLogLine(false, _T("%s - while processing eMule packet: opcode=%s  size=%u; %s"), error, DbgGetMuleClientTCPOpcode(opcode), size, DbgGetClientInfo());
+			DebugLogWarning(_T("%s - while processing eMule packet: opcode=%s  size=%u; %s"), error, DbgGetMuleClientTCPOpcode(opcode), size, DbgGetClientInfo());
 		if (client)
 			client->SetDownloadState(DS_ERROR);
 		Disconnect(_T("ProcessExtPacket error. ") + error);
@@ -2167,7 +2179,7 @@ void CClientReqSocket::PacketToDebugLogLine(LPCTSTR protocol, const char* packet
 		}
 		buffer += (i == size) ? _T("]") : _T("..]");
 		DbgAppendClientInfo(buffer);
-		AddDebugLogLine(dlpPriority, false, _T("%s"), buffer);
+		DebugLogWarning(_T("%s"), buffer);
 	}
 }
 
@@ -2213,7 +2225,7 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 		{
 		    strTCPError = GetErrorMessage(nErrorCode, 1);
 		    if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
-			    AddDebugLogLine(false, _T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
+			    DebugLogError(_T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
 	}
 	else
@@ -2239,7 +2251,7 @@ void CClientReqSocket::OnError(int nErrorCode)
 			strTCPError = _T("Too much data sent");
 		else
 			strTCPError = GetErrorMessage(nErrorCode);
-		AddDebugLogLine(false, _T("Client TCP socket error: %s; %s"), strTCPError, DbgGetClientInfo());
+		DebugLogWarning(_T("Client TCP socket error: %s; %s"), strTCPError, DbgGetClientInfo());
 	}
 
 	Disconnect(strTCPError);
@@ -2256,7 +2268,7 @@ bool CClientReqSocket::PacketReceivedCppEH(Packet* packet)
 		case OP_PACKEDPROT:
 			if (!packet->UnPackPacket()){
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("Failed to decompress client TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
+					DebugLogError(_T("Failed to decompress client TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
 				bResult = false;
 				break;
 			}
@@ -2274,7 +2286,7 @@ bool CClientReqSocket::PacketReceivedCppEH(Packet* packet)
 		default:{
 			theStats.AddDownDataOverheadOther(uRawSize);
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Received unknown client TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
+				DebugLogWarning(_T("Received unknown client TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
 
 			if (client)
 				client->SetDownloadState(DS_ERROR);
@@ -2303,11 +2315,11 @@ int FilterSE(DWORD dwExCode, LPEXCEPTION_POINTERS pExPtrs, CClientReqSocket* req
 			CString strError = strExError;
 			strError.AppendFormat(_T("; %s"), DbgGetClientTCPPacket(packet?packet->prot:0, packet?packet->opcode:0, packet?packet->size:0));
 			reqsock->DbgAppendClientInfo(strError);
-			CemuleApp::AddDebugLogLine(false, _T("%s"), strError);
+			DebugLogError(_T("%s"), strError);
 		}
 		catch(...){
 			ASSERT(0);
-			CemuleApp::AddDebugLogLine(false, _T("%s"), strExError);
+			DebugLogError(_T("%s"), strExError);
 		}
 	}
 	
@@ -2423,7 +2435,6 @@ bool CListenSocket::SendPortTestReply(char result,bool disconnect) {
 CListenSocket::CListenSocket()
 {
 	bListening = false;
-	opensockets = 0;
 	maxconnectionreached = 0;
 	m_OpenSocketsInterval = 0;
 	m_nPendingConnections = 0;
@@ -2555,7 +2566,8 @@ void CListenSocket::OnAccept(int nErrorCode){
 		else if ( bListening == false )
 			ReStartListening(); //If the client is still at maxconnections, this will allow it to go above it.. But if you don't, you will get a lowID on all servers.
 	
-		for (/**/; m_nPendingConnections; AddConnection())
+		uint32 nFataErrors = 0;
+		while( m_nPendingConnections )
 		{
 			// MORPH START - Added by SiRoB, WebCache 1.2f
 			// JP detect fake HighID
@@ -2564,21 +2576,43 @@ void CListenSocket::OnAccept(int nErrorCode){
 			// MOD END netfinity
 			// MORPH END   - Added by SiRoB, WebCache 1.2f
 
-			m_nPendingConnections--;
-
 			CClientReqSocket* newclient = new CClientReqSocket();
 			SOCKADDR_IN SockAddr = {0};
 			int iSockAddrLen = sizeof SockAddr;
 			if (!Accept(*newclient, (SOCKADDR*)&SockAddr, &iSockAddrLen)){
 				newclient->Safe_Delete();
+				uint32 nError = GetLastError();
+				if (nError == WSAEWOULDBLOCK){
+					AddDebugLogLine(DLP_VERYHIGH, true, _T("ERROR: Backlogcounter says %u connections waiting, Accept() says WSAEWOULDBLOCK - setting counter to zero!"), m_nPendingConnections); 
+					m_nPendingConnections = 0;
+					break;
+				}
+				else{
+					AddDebugLogLine(DLP_VERYHIGH, true, _T("ERROR: Accept() returned unexpected error %u - Pending: %u"),nError,  m_nPendingConnections); 
+					nFataErrors++;
+				}
+				if (nFataErrors > 10){
+					// the question is what todo on a error. We cant just ignore it because then the backlog will fill up
+					// and lock everything. We can also just endlos try to repeat it because this will lock up eMule
+					// this should basically never happen anyway
+					// however if we are in such a position, try to reinitalize the socket.
+					AddDebugLogLine(DLP_VERYHIGH, true, _T("ERROR Accept() Error Loop, recreating socket"),nError,  m_nPendingConnections); 
+					Close();
+					StartListening();
+					m_nPendingConnections = 0;
+					break;
+				}
 				continue;
 			}
+
+			m_nPendingConnections--;
+			AddConnection();
 
 			if (SockAddr.sin_addr.S_un.S_addr == 0) // for safety..
 			{
 				iSockAddrLen = sizeof SockAddr;
 				newclient->GetPeerName((SOCKADDR*)&SockAddr, &iSockAddrLen);
-				AddDebugLogLine(false, _T("***NOTE: SockAddr.sin_addr.S_un.S_addr == 0;  GetPeerName returned %s"), ipstr(SockAddr.sin_addr.S_un.S_addr));
+				DebugLogWarning(_T("SockAddr.sin_addr.S_un.S_addr == 0;  GetPeerName returned %s"), ipstr(SockAddr.sin_addr.S_un.S_addr));
 		}
 
 			ASSERT( SockAddr.sin_addr.S_un.S_addr != 0 && SockAddr.sin_addr.S_un.S_addr != INADDR_NONE );
@@ -2609,7 +2643,6 @@ void CListenSocket::OnAccept(int nErrorCode){
 void CListenSocket::Process(){
 	POSITION pos2;
 	m_OpenSocketsInterval = 0;
-	opensockets = 0;
 	// MORPH START - Added by Commander, WebCache 1.2e
 	if( !SINGLEProxyClient )
 		WebCachedBlockList.TryToDL();
@@ -2624,7 +2657,6 @@ void CListenSocket::Process(){
 	for(POSITION pos1 = socket_list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
 		socket_list.GetNext(pos1);
 		CClientReqSocket* cur_sock = socket_list.GetAt(pos2);
-		opensockets++;
 
 		if (cur_sock->deletethis){
 			if (cur_sock->m_SocketData.hSocket != INVALID_SOCKET){ // deadlake PROXYSUPPORT - changed to AsyncSocketEx
@@ -2686,7 +2718,6 @@ void CListenSocket::AddConnection(){
 	per5average++;
 	//MORPH END - Added by Yun.SF3, Auto DynUp changing
 	m_OpenSocketsInterval++;
-	opensockets++;
 //MORPH START - Added by Yun.SF3, Auto DynUp changing
 	if (thePrefs.IsAutoDynUpSwitching())
 		if (per5average >= thePrefs.MaxConnectionsSwitchBorder() && !thePrefs.IsSUCEnabled())

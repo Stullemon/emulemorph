@@ -31,6 +31,8 @@
 #include "emuledlg.h"
 #include "Preferences.h"
 #include "OtherFunctions.h"
+#include "Log.h"
+#include "StringConversion.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -130,27 +132,28 @@ void CStatisticsTree::DoMenu(CPoint doWhere, UINT nFlags)
 		else myFlags = MF_STRING;
 
 	mnuContext.CreatePopupMenu();
-	mnuContext.AddMenuTitle(GetResString(IDS_STATS_MNUTREETITLE));
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_RESET, GetResString(IDS_STATS_BNRESET));
-	mnuContext.AppendMenu(myFlags, MP_STATTREE_RESTORE, GetResString(IDS_STATS_BNRESTORE));
+	mnuContext.AddMenuTitle(GetResString(IDS_STATS_MNUTREETITLE), true);
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_RESET, GetResString(IDS_STATS_BNRESET), _T("DELETE"));
+	mnuContext.AppendMenu(myFlags, MP_STATTREE_RESTORE, GetResString(IDS_STATS_BNRESTORE), _T("RESTORE"));
 	mnuContext.AppendMenu(MF_SEPARATOR);
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_EXPANDMAIN, GetResString(IDS_STATS_MNUTREEEXPANDMAIN));
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_EXPANDALL, GetResString(IDS_STATS_MNUTREEEXPANDALL));
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COLLAPSEALL, GetResString(IDS_STATS_MNUTREECOLLAPSEALL));
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_EXPANDMAIN, GetResString(IDS_STATS_MNUTREEEXPANDMAIN), _T("EXPANDMAIN"));
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_EXPANDALL, GetResString(IDS_STATS_MNUTREEEXPANDALL), _T("EXPANDALL"));
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COLLAPSEALL, GetResString(IDS_STATS_MNUTREECOLLAPSEALL), _T("COLLAPSE"));
 	mnuContext.AppendMenu(MF_SEPARATOR);
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COPYSEL, GetResString(IDS_STATS_MNUTREECPYSEL));
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COPYVIS, GetResString(IDS_STATS_MNUTREECPYVIS));
-	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COPYALL, GetResString(IDS_STATS_MNUTREECPYALL));
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COPYSEL, GetResString(IDS_STATS_MNUTREECPYSEL), _T("COPY"));
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COPYVIS, GetResString(IDS_STATS_MNUTREECPYVIS), _T("COPYVISIBLE"));
+	mnuContext.AppendMenu(MF_STRING, MP_STATTREE_COPYALL, GetResString(IDS_STATS_MNUTREECPYALL), _T("COPYSELECTED"));
 	mnuContext.AppendMenu(MF_SEPARATOR);
 
 	mnuHTML.CreateMenu();
-	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLCOPYSEL, GetResString(IDS_STATS_MNUTREECPYSEL));
-	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLCOPYVIS, GetResString(IDS_STATS_MNUTREECPYVIS));
-	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLCOPYALL, GetResString(IDS_STATS_MNUTREECPYALL));
+	mnuHTML.AddMenuTitle(NULL, true);
+	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLCOPYSEL, GetResString(IDS_STATS_MNUTREECPYSEL), _T("COPY"));
+	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLCOPYVIS, GetResString(IDS_STATS_MNUTREECPYVIS), _T("COPYVISIBLE"));
+	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLCOPYALL, GetResString(IDS_STATS_MNUTREECPYALL), _T("COPYSELECTED"));
 	mnuHTML.AppendMenu(MF_SEPARATOR);
-	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLEXPVIS, GetResString(IDS_STATS_EXPORTVIS));
-	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLEXPORT, GetResString(IDS_STATS_EXPORT2HTML));
-	mnuContext.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)mnuHTML.m_hMenu, GetResString(IDS_STATS_MNUTREEHTML));
+	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLEXPVIS, GetResString(IDS_STATS_EXPORTVIS), _T("EXPORTSELECTED"));
+	mnuHTML.AppendMenu(MF_STRING, MP_STATTREE_HTMLEXPORT, GetResString(IDS_STATS_EXPORT2HTML), _T("EXPORTALL"));
+	mnuContext.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)mnuHTML.m_hMenu, GetResString(IDS_STATS_MNUTREEHTML), _T("WEB"));
 
 	GetPopupMenuPos(*this, doWhere);
 	mnuContext.TrackPopupMenu(nFlags, doWhere.x, doWhere.y, this);
@@ -184,7 +187,7 @@ BOOL CStatisticsTree::OnCommand( WPARAM wParam, LPARAM lParam )
 					break;
 
 				if(!thePrefs.LoadStats(1))
-					AddLogLine(true, GetResString(IDS_ERR_NOSTATBKUP));
+					LogError(LOG_STATUSBAR, GetResString(IDS_ERR_NOSTATBKUP));
 				else {
 					AddLogLine(false, GetResString(IDS_STATS_NFOLOADEDBKUP));
 					CString myBuffer;
@@ -499,11 +502,13 @@ bool CStatisticsTree::CopyText(int copyMode)
 //					bdy		= The BODY tag.  Used to control the background color.
 CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, int theItemLevel, bool firstItem)
 {
-	CString		strBuffer, strItem, strImage, strChild, strTab;
-	int			nImage=0, nSelectedImage=0;
+	CString		strBuffer, strItem;
 	HTREEITEM	hCurrent;
-	
+	//MORPH START - Added by SiRoB, Tree Stat from eMule+
+	CString		strImage, strChild, strTab;
+	int			nImage=0, nSelectedImage=0;
 	CString strDivStart, strDiv, strDivA, strDivEnd, strJ, strName;
+	//MORPH END   - Added by SiRoB, Tree Stat from eMule+
 
 	strBuffer.Empty();
 
@@ -512,6 +517,17 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 
 	while (hCurrent != NULL)
 	{
+		//MORPH START - Changed by SiRoB, Tree Stat from eMule+
+		/*
+		if (IsBold(hCurrent)) strItem = _T("<span id=\"sec\">") + GetItemText(hCurrent) + _T("</span>");
+		else strItem = _T("<span id=\"item\">") + GetItemText(hCurrent) + _T("</span>");
+		for (int i = 0; i < theItemLevel; i++) strBuffer += _T("&nbsp;&nbsp;&nbsp;");
+		if (theItemLevel==0) strBuffer .Append(_T("\n"));
+		strBuffer += strItem + _T("<br>");
+		if (ItemHasChildren(hCurrent) && (!onlyVisible || IsExpanded(hCurrent)))
+			strBuffer += (CString) GetHTMLForExport(onlyVisible, GetChildItem(hCurrent), theItemLevel+1, false);
+		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
+		*/
 		strItem.Empty();
 		if (ItemHasChildren(hCurrent))
 		{
@@ -573,6 +589,7 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 			strBuffer += strTab + strDivEnd;
 		}
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);
+		//MORPH END   - Changed by SiRoB, Tree Stat from eMule+
 	}
 	return strBuffer;
 }
@@ -581,74 +598,40 @@ CString CStatisticsTree::GetHTMLForExport(bool onlyVisible, HTREEITEM theItem, i
 void CStatisticsTree::ExportHTML(bool onlyvisible)
 {
 	CFile htmlFile;
+	CString htmlFileName;
+	CString theHTML;
 
-	TCHAR szDir[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, szDir);
-
-	CFileDialog saveAsDlg (false, _T("html"), _T("*.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
+	CFileDialog saveAsDlg (false, _T("html"), _T("eMule Statistics.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK)
 	{
-		CString		strHTML;
-        CString     test;
-		strHTML.Format( _T("<html>\r\n<header>\r\n<title>")+test+_T(" %s [%s]</title>\r\n")
 		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
-			_T("<style type=\"text/css\">\r\n")
-			_T("#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n")
-			_T("#pghdr2 { color: #000F80; font: bold 10pt/12pt Verdana, Courier New, Helvetica; }\r\n")
-			_T("img { border: 0px; }\r\n")
-			_T("a { text-decoration: none; }\r\n")
-			_T("#sec { color: #000000; font: bold 9pt/11pt Verdana, Courier New, Helvetica; }\r\n")
-			_T("#item { color: #000000; font: normal 8pt/10pt Verdana, Courier New, Helvetica; }\r\n")
-			_T("#bdy { color: #000000; font: normal 8pt/10pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</header>\r\n")
-			_T("<script language=\"JavaScript1.2\" type=\"text/javascript\">\r\n")
-			_T("function obj(menu)\r\n")
-			_T("{\r\n")
-			_T("return (navigator.appName == \"Microsoft Internet Explorer\")?this[menu]:document.getElementById(menu);\r\n")
-			_T("}\r\n")
-			_T("function togglevisible(treepart)\r\n")
-			_T("{\r\n")
-			_T("if (this.obj(\"T\"+treepart).style.visibility == \"hidden\")\r\n")
-			_T("{\r\n")
-			_T("this.obj(\"T\"+treepart).style.position=\"\";\r\n")
-			_T("this.obj(\"T\"+treepart).style.visibility=\"\";\r\n")
-			_T("document[\"I\"+treepart].src=\"stats_visible.gif\";\r\n")
-			_T("}\r\n")
-			_T("else\r\n")
-			_T("{\r\n")
-			_T("this.obj(\"T\"+treepart).style.position=\"absolute\";\r\n")
-			_T("this.obj(\"T\"+treepart).style.visibility=\"hidden\";\r\n")
-			_T("document[\"I\"+treepart].src=\"stats_hidden.gif\";\r\n")
-			_T("}\r\n")
-			_T("}\r\n")
-			_T("</script>\r\n")
-			_T("<body id=\"bdy\">\r\n")
+		/*
+		theHTML.Format(_T("<html>\r\n<head>\r\n<title>eMule v%s %s [%s]</title>\r\n"), theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		*/
+		theHTML.Format(_T("<html>\r\n<head>\r\n<title>eMule v%s [%s] %s [%s]</title>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 
-			_T("<span id=\"pghdr\"><b>")+test+_T(" %s</b></span><br><span id=\"pghdr2\">%s %s</span>\r\n<br><br>\r\n")
-			_T("%s</body></html>"),
-			GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick(),
-			GetResString(IDS_SF_STATISTICS), GetResString(IDS_CD_UNAME), thePrefs.GetUserNick(),
-			GetHTMLForExport(onlyvisible) );
-
-		htmlFile.Open(saveAsDlg.GetPathName(), CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
-		htmlFile.Write(strHTML, strHTML.GetLength());
+#ifdef _UNICODE
+		theHTML += _T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
+#endif
+		theHTML += _T("<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Verdana, Courier New, Helvetica; }\r\n");
+		theHTML += _T("#sec { color: #000000; font: bold 11pt/13pt Verdana, Courier New, Helvetica; }\r\n");
+		theHTML += _T("#item { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; }\r\n");
+		theHTML += _T("#bdy { color: #000000; font: normal 10pt/12pt Verdana, Courier New, Helvetica; background-color: #FFFFFF; }\r\n</style>\r\n</head>\r\n");
+		theHTML += _T("<body id=\"bdy\">\r\n");
+		theHTML.Format(_T("%s<span id=\"pghdr\">eMule v%s %s [%s]</span>\r\n<br><br>\r\n"), theHTML, theApp.m_strCurVersionLong, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
+		theHTML += GetHTMLForExport(onlyvisible) + _T("</body></html>");
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+		htmlFileName = saveAsDlg.GetPathName();
+		htmlFile.Open(htmlFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
+#ifdef _UNICODE
+		CStringA strHtmlA(wc2utf8(theHTML));
+		htmlFile.Write(strHtmlA, strHtmlA.GetLength());
+#else
+		htmlFile.Write(theHTML.GetString(), strlen(theHTML.GetString()));
+#endif
 		htmlFile.Close();
-
-		static const TCHAR *const s_apcFileNames[] = {
-			_T("stats_0.gif"), _T("stats_1.gif"), _T("stats_2.gif"), _T("stats_3.gif"), _T("stats_4.gif"),
-			_T("stats_5.gif"), _T("stats_6.gif"), _T("stats_7.gif"), _T("stats_8.gif"), _T("stats_9.gif"),
-			_T("stats_10.gif"), _T("stats_11.gif"), _T("stats_12.gif"), _T("stats_13.gif"),
-			_T("stats_14.gif"), _T("stats_15.gif"), _T("stats_16.gif"),
-			_T("stats_hidden.gif"), _T("stats_space.gif"), _T("stats_visible.gif")
-		};
-		CString		strDst = saveAsDlg.GetPathName().Left(saveAsDlg.GetPathName().GetLength() - saveAsDlg.GetFileName().GetLength());// EC - what if directory name == filename? this should fix this
-		CString		strSrc = thePrefs.GetAppDir();
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
-		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
-
 	}
-
-	SetCurrentDirectory(szDir);
 }
 
 // Expand all the tree sections.  Recursive.

@@ -30,6 +30,7 @@
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Net/KademliaUDPListener.h"
 #include "Exceptions.h"
+#include "Log.h"
 // emulEspaña: added by Announ [Maella: -Allow Bandwidth Settings in <1KB Incremements-]
 #include "opcodes.h"
 // End emulEspaña

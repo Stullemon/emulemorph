@@ -20,6 +20,7 @@ All rights reserved.
 #include "emule.h"
 #include "HttpDownloadDlg.h"
 #include "OtherFunctions.h"
+#include "Log.h"
 
 ///////////////////////////////// Defines /////////////////////////////////////
 #define HAS_ZLIB
@@ -241,7 +242,7 @@ LRESULT CHttpDownloadDlg::OnThreadFinished(WPARAM wParam, LPARAM /*lParam*/)
 	else if (wParam)
 	{
 		if (!m_sError.IsEmpty())
-			theApp.AddDebugLogLine(false, _T("%s"), m_sError);
+			AddDebugLogLine(false, _T("%s"), m_sError);
 		EndDialog(IDCANCEL);
 	}
 	else
@@ -264,7 +265,7 @@ BOOL CHttpDownloadDlg::OnInitDialog()
 	InitWindowStyles(this);
 
 	//Setup the animation control
-	m_ctrlAnimate.Open(IDR_HTTPDOWNLOAD_ANIMATION);
+	m_ctrlAnimate.Open(IDR_HTTPDOWNLOAD_ANI);
 
 	//Validate the URL
 	ASSERT(m_sURLToDownload.GetLength()); //Did you forget to specify the file to download

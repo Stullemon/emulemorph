@@ -19,6 +19,7 @@
 #include "mmsocket.h"
 #include "MMServer.h"
 #include "Preferences.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

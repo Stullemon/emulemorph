@@ -22,6 +22,9 @@
 #include "ServerWnd.h"
 #include "StatisticsDlg.h"
 #include "ChatWnd.h"
+#include "Sockets.h"
+#include "Server.h"
+#include "ServerList.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -53,29 +56,31 @@ void CMuleStatusBarCtrl::Init(void)
 
 void CMuleStatusBarCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	int pane = GetPaneAtPosition(point);
-	switch (pane)
+	int iPane = GetPaneAtPosition(point);
+	switch (iPane)
 	{
-	case -1:
-		break;
-	case 0:
-		AfxMessageBox(_T( "eMule ") + GetResString(IDS_SV_LOG) + _T("\n\n") + GetText(0));
-		break;
-	case 1:
-		break;
-	case 2:
-		theApp.emuledlg->SetActiveDialog(theApp.emuledlg->statisticswnd);
-		break;
-	case 3: 
-		theApp.emuledlg->serverwnd->ShowNetworkInfo();
-		break;
-	case 4:
-		theApp.emuledlg->SetActiveDialog(theApp.emuledlg->chatwnd);
-		break;
+		case SBarLog:
+			AfxMessageBox(_T("eMule ") + GetResString(IDS_SV_LOG) + _T("\n\n") + GetText(SBarLog));
+			break;
+
+		case SBarUsers:
+			break;
+		
+		case SBarUpDown:
+			theApp.emuledlg->SetActiveDialog(theApp.emuledlg->statisticswnd);
+			break;
+		
+		case SBarConnected:
+			theApp.emuledlg->serverwnd->ShowNetworkInfo();
+			break;
+
+		case SBarChatMsg:
+			theApp.emuledlg->SetActiveDialog(theApp.emuledlg->chatwnd);
+			break;
 	}
 }
 
-int CMuleStatusBarCtrl::GetPaneAtPosition(CPoint& point)
+int CMuleStatusBarCtrl::GetPaneAtPosition(CPoint& point) const
 {
 	CRect rect;
 	int nParts = GetParts(0, NULL);
@@ -86,4 +91,59 @@ int CMuleStatusBarCtrl::GetPaneAtPosition(CPoint& point)
 			return i;
 	}
 	return -1;
+}
+
+CString CMuleStatusBarCtrl::GetPaneToolTipText(EStatusBarPane iPane) const
+{
+	CString strText;
+	switch (iPane)
+	{
+	case SBarConnected:
+		if (theApp.serverconnect && theApp.serverconnect->IsConnected())
+		{
+			CServer* cur_server = theApp.serverconnect->GetCurrentServer();
+			CServer* srv = cur_server ? theApp.serverlist->GetServerByAddress(cur_server->GetAddress(), cur_server->GetPort()) : NULL;
+			if (srv)
+			{
+				// Can't add more info than just the server name, unfortunately the MFC tooltip which 
+				// we use here does not show more than one(!) line of text.
+				strText = _T("eD2K ") + GetResString(IDS_SERVER) + _T(": ") + srv->GetListName();
+				strText.AppendFormat(_T("  (%s %s)"), GetFormatedUInt(srv->GetUsers()), GetResString(IDS_UUSERS));
+			}
+		}
+		break;
+	}
+	return strText;
+}
+
+int CMuleStatusBarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+#ifdef _DEBUG
+	if (theApp.emuledlg->IsZoomed())
+		TRACE("%s; %08x, \n", __FUNCTION__, GetTickCount());
+#endif
+	int iHit = CWnd::OnToolHitTest(point, pTI);
+	if (iHit == -1 && pTI != NULL && pTI->cbSize >= sizeof(AFX_OLDTOOLINFO))
+	{
+		int iPane = GetPaneAtPosition(point);
+		if (iPane != -1)
+		{
+			CString strToolTipText = GetPaneToolTipText((EStatusBarPane)iPane);
+			if (!strToolTipText.IsEmpty())
+			{
+				pTI->hwnd = m_hWnd;
+				pTI->uId = (UINT_PTR)iPane;
+				pTI->uFlags &= ~TTF_IDISHWND;
+				pTI->uFlags |= TTF_NOTBUTTON|TTF_ALWAYSTIP;
+				pTI->lpszText = _tcsdup(strToolTipText); // gets freed by MFC
+				GetRect(iPane, &pTI->rect);
+				iHit = iPane;
+			}
+		}
+	}
+#ifdef _DEBUG
+	if (theApp.emuledlg->IsZoomed())
+		TRACE(_T("%hs; %08x, iHit=%d, \"%s\"\n"), __FUNCTION__, GetTickCount(), iHit, pTI->lpszText);
+#endif
+	return iHit;
 }

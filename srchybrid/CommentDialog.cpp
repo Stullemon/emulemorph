@@ -78,6 +78,7 @@ void CCommentDialog::OnBnClickedReset()
 BOOL CCommentDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	SetIcon(theApp.LoadIcon(_T("FileComments")), FALSE);
 	InitWindowStyles(this);
 	Localize();
 

@@ -16,14 +16,13 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "WebCachedBlock.h"
-#include "Loggable.h"
 
 typedef CTypedPtrList<CPtrList, CWebCachedBlock*> CStdWebCachedBlockList;
 
 
 ////////CWebCachedBlockList////////////////////////////////////////////////////
 class CWebCachedBlockList :
-	public CStdWebCachedBlockList, CLoggable
+	public CStdWebCachedBlockList
 {
 public:
 	CWebCachedBlockList(void);
@@ -36,7 +35,7 @@ public:
 
 ////////CStoppedWebCachedBlockList////////////////////////////////////////////////////
 class CStoppedWebCachedBlockList :
-	public CStdWebCachedBlockList, CLoggable
+	public CStdWebCachedBlockList
 {
 public:
 	CStoppedWebCachedBlockList(void);

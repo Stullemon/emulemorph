@@ -58,9 +58,8 @@
 #include "Peercachefinder.h"
 #include "ClientUDPSocket.h"
 #include "shahashset.h"
-
+#include "Log.h"
 #include "FunnyNick.h" //MORPH - Added by IceCream, xrmb FunnyNick
-
 #include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -108,7 +107,7 @@ CUpDownClient::CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_us
 void CUpDownClient::Init()
 {
 	credits = 0;
-	sumavgUDR = 0; // by BadWolf - Accurate Speed Measurement
+	m_nSumForAvgUpDataRate = 0;
 	//MORPH START - Changed by SiRoB, ZZUL_20040904	
 	/*
 	m_bAddNextConnect = false;  // VQB Fix for LowID slots only on connection
@@ -123,7 +122,6 @@ void CUpDownClient::Init()
 	m_nTransferedUp = 0;
 	m_cAsked = 0;
 	m_cDownAsked = 0;
-	dataratems = 0;
 	m_nUpDatarate = 0;
 	m_pszUsername = 0;
 	m_nUserIDHybrid = 0;
@@ -1337,7 +1335,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 		//
 		// 2.) The remote client may have already received those blocks from some other client when it gets the next
 		// upload slot.
-        AddDebugLogLine(DLP_LOW, false, _T("***NOTE: Disconnected client with non empty block send queue; %s reqs: %s doneblocks: %s"), DbgGetClientInfo(), m_BlockRequests_queue.GetCount() > 0 ? _T("true") : _T("false"), m_DoneBlocks_list.GetCount() ? _T("true") : _T("false"));
+        DebugLogWarning(_T("Disconnected client with non empty block send queue; %s reqs: %s doneblocks: %s"), DbgGetClientInfo(), m_BlockRequests_queue.GetCount() > 0 ? _T("true") : _T("false"), m_DoneBlocks_list.GetCount() ? _T("true") : _T("false"));
 		ClearUploadBlockRequests();
 	}
 
@@ -1409,7 +1407,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket){
 	}
 	socket = 0;
     if (m_iFileListRequested){
-		AddLogLine(true,GetResString(IDS_SHAREDFILES_FAILED),GetUserName());
+		LogWarning(LOG_STATUSBAR, GetResString(IDS_SHAREDFILES_FAILED), GetUserName());
         m_iFileListRequested = 0;
 	}
 	if (m_Friend)
@@ -1911,6 +1909,12 @@ void CUpDownClient::ReGetClientSoft()
 			nClientMinVersion = (m_nClientVersion - uMaj*10000) / 10;
 			nClientUpVersion = m_nClientVersion % 10;
 		}
+		else if (m_nClientVersion >= 1000 && m_nClientVersion < 1020){
+			UINT uMaj = m_nClientVersion/1000;
+			nClientMajVersion = uMaj;
+			nClientMinVersion = (m_nClientVersion - uMaj*1000) / 10;
+			nClientUpVersion = m_nClientVersion % 10;
+		}
 		else if (m_nClientVersion > 1000){
 			UINT uMaj = m_nClientVersion/1000;
 			nClientMajVersion = uMaj - 1;
@@ -2055,7 +2059,7 @@ void CUpDownClient::RequestSharedFileList()
 		TryToConnect(true);
 	}
 	else{
-		AddLogLine(true,_T("Requesting shared files from user %s (%u) is already in progress"),GetUserName(),GetUserIDHybrid());
+		LogWarning(LOG_STATUSBAR, _T("Requesting shared files from user %s (%u) is already in progress"), GetUserName(), GetUserIDHybrid());
 	}
 }
 
@@ -2087,7 +2091,6 @@ void CUpDownClient::SetBuddyID(const uchar* pucBuddyID)
 }
 
 void CUpDownClient::SendPublicKeyPacket(){
-	///* delete this line later*/ AddDebugLogLine(false, _T("sending public key to '%s'"), GetUserName()));
 	// send our public key to the client who requested it
 	if (socket == NULL || credits == NULL || m_SecureIdentState != IS_KEYANDSIGNEEDED){
 		ASSERT ( false );
@@ -2117,7 +2120,6 @@ void CUpDownClient::SendSignaturePacket(){
 		return;
 	if (credits->GetSecIDKeyLen() == 0)
 		return; // We don't have his public key yet, will be back here later
-		///* delete this line later*/ AddDebugLogLine(false, _T("sending signature key to '%s'"), GetUserName()));
 	// do we have a challenge value received (actually we should if we are in this function)
 	if (credits->m_dwCryptRndChallengeFrom == 0){
 		if (thePrefs.GetLogSecureIdent())
@@ -2167,7 +2169,6 @@ void CUpDownClient::SendSignaturePacket(){
 void CUpDownClient::ProcessPublicKeyPacket(uchar* pachPacket, uint32 nSize){
 	theApp.clientlist->AddTrackClient(this);
 
-	///* delete this line later*/ AddDebugLogLine(false, _T("recieving public key from '%s'"), GetUserName()));
 	if (socket == NULL || credits == NULL || pachPacket[0] != nSize-1
 		|| nSize == 0 || nSize > 250){
 		ASSERT ( false );
@@ -2368,8 +2369,7 @@ void CUpDownClient::SendPreviewRequest(const CAbstractFile* pForFile)
 		SafeSendPacket(packet);
 	}
 	else{
-		//to res table - later
-		AddLogLine(true, GetResString(IDS_ERR_PREVIEWALREADY));
+		LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_PREVIEWALREADY));
 	}
 }
 
@@ -2437,8 +2437,7 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 	data.ReadHash16(Hash);
 	uint8 nCount = data.ReadUInt8();
 	if (nCount == 0){
-		// to res table -later
-		AddLogLine(true, GetResString(IDS_ERR_PREVIEWFAILED),GetUserName());
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_PREVIEWFAILED), GetUserName());
 		return;
 	}
 	CSearchFile* sfile = theApp.searchlist->GetSearchFileByHash(Hash);
@@ -2514,7 +2513,6 @@ void CUpDownClient::AssertValid() const
 	(void)m_nServerPort;
 	(void)m_nClientVersion;
 	(void)m_nUpDatarate;
-	(void)dataratems;
 	(void)m_byEmuleVersion;
 	(void)m_byDataCompVer;
 	CHECK_BOOL(m_bEmuleProtocol);
@@ -2587,7 +2585,7 @@ void CUpDownClient::AssertValid() const
 	CHECK_BOOL(m_bUnicodeSupport);
 	ASSERT( m_nKadState >= KS_NONE && m_nKadState <= KS_QUEUE_LOWID );
 	m_AvarageDDR_list.AssertValid();
-	(void)sumavgUDR;
+	(void)m_nSumForAvgUpDataRate;
 	m_PendingBlocks_list.AssertValid();
 	m_DownloadBlocks_list.AssertValid();
 	(void)s_StatusBar;

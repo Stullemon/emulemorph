@@ -9,7 +9,7 @@
 #include "eMule.h"
 #include "WebCacheSocket.h" //JP block-selection
 #include "opcodes.h" //JP HR2MS needed in GetNextBlockToDownload()
-
+#include "Log.h"
 #define MAX_WCBLOCKLIST_SIZE 2000
 #define MAX_TIME_TO_KEEP_OHCB_IN_LIST 60*60*1000  //this is currently only used for Stopped WC-Block-List
 

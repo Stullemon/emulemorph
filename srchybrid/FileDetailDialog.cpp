@@ -26,6 +26,7 @@
 #include "PartFile.h"
 #include "StringConversion.h"
 #include "shahashset.h"
+#include "HighColorTab.hpp"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -54,34 +55,46 @@ CFileDetailDialog::CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, EI
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
 	m_wndInfo.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndInfo.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndInfo.m_psp.pszIcon = _T("FILEINFO");
 	m_wndInfo.SetMyfile(paFiles);
 	AddPage(&m_wndInfo);
 
 	if (paFiles->GetSize() == 1)
 	{
 		m_wndName.m_psp.dwFlags &= ~PSP_HASHELP;
+		m_wndName.m_psp.dwFlags |= PSP_USEICONID;
+		m_wndName.m_psp.pszIcon = _T("FILERENAME");
 		m_wndName.SetMyfile(m_file);
 		AddPage(&m_wndName);
 
 		m_wndComments.m_psp.dwFlags &= ~PSP_HASHELP;
+		m_wndComments.m_psp.dwFlags |= PSP_USEICONID;
+		m_wndComments.m_psp.pszIcon = _T("FILECOMMENTS");
 		m_wndComments.SetMyfile(m_file);
 		AddPage(&m_wndComments);
 	}
 
-	m_wndVideo.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndVideo.SetMyfile(&m_aKnownFiles);
-	AddPage(&m_wndVideo);
+	m_wndMediaInfo.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndMediaInfo.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndMediaInfo.m_psp.pszIcon = _T("MEDIAINFO");
+	m_wndMediaInfo.SetMyfile(&m_aKnownFiles);
+	AddPage(&m_wndMediaInfo);
 
 	if (paFiles->GetSize() == 1)
 	{
 		if (thePrefs.IsExtControlsEnabled()){
 			m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
+			m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
+			m_wndMetaData.m_psp.pszIcon = _T("METADATA");
 			m_wndMetaData.SetFile(m_file);
 			AddPage(&m_wndMetaData);
 		}
 	}
 
 	m_wndFileLink.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndFileLink.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndFileLink.m_psp.pszIcon = _T("ED2KLINK");
 	m_wndFileLink.SetMyfile(&m_aKnownFiles);
 	AddPage(&m_wndFileLink);
 
@@ -104,6 +117,7 @@ BOOL CFileDetailDialog::OnInitDialog()
 {		
 	EnableStackedTabs(FALSE);
 	BOOL bResult = CResizableSheet::OnInitDialog();
+	HighColorTab::UpdateImageList(*this);
 	InitWindowStyles(this);
 	EnableSaveRestore(_T("FileDetailDialog")); // call this after(!) OnInitDialog
 	SetWindowText(GetResString(IDS_FD_TITLE));
@@ -273,7 +287,7 @@ void CFileDetailDialogInfo::RefreshData()
 		// last seen complete
 		struct tm* ptimLastSeenComplete = (*m_paFiles)[0]->lastseencomplete.GetLocalTm();
 		if ((*m_paFiles)[0]->lastseencomplete == NULL || ptimLastSeenComplete == NULL)
-			str.Format(GetResString(IDS_UNKNOWN));
+			str.Format(GetResString(IDS_NEVER));
 		else{
 			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
 						(*m_paFiles)[0]->lastseencomplete.Format(thePrefs.GetDateTimeFormat()),

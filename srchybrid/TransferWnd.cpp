@@ -441,7 +441,7 @@ void CTransferWnd::UpdateListCount(uint8 listindex, int iCount /*=-1*/)
 {
 	if (m_uWnd2 != listindex)
 		return;
-
+	return;
 	CString buffer;
 	switch (m_uWnd2){
         case 1: {
@@ -693,7 +693,7 @@ void CTransferWnd::CreateCategoryMenus()
 
 	// View Filter Menu
 	m_mnuCatViewFilter.CreateMenu();
-	m_mnuCatViewFilter.AddMenuTitle(GetResString(IDS_CHANGECATVIEW));
+	m_mnuCatViewFilter.AddMenuTitle(GetResString(IDS_CHANGECATVIEW),_T("SEARCHPARAMS"));
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0, GetResString(IDS_ALL) );
 	//m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+1, GetResString(IDS_ALLOTHERS) );
 	m_mnuCatViewFilter.AppendMenu(MF_STRING, MP_CAT_SET0+2, GetResString(IDS_CAT_THISCAT) );
@@ -731,26 +731,28 @@ void CTransferWnd::CreateCategoryMenus()
 
 	// Create the main menu...
 	m_mnuCategory.CreatePopupMenu();
-	m_mnuCategory.AddMenuTitle(GetResString(IDS_CAT));
+	m_mnuCategory.AddMenuTitle(GetResString(IDS_CAT),true);
 
-	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatViewFilter.m_hMenu, GetResString(IDS_CHANGECATVIEW));
+	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatViewFilter.m_hMenu, GetResString(IDS_CHANGECATVIEW),_T("SEARCHPARAMS"));
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_ADD, GetResString(IDS_CAT_ADD));
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_EDIT, GetResString(IDS_CAT_EDIT));
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_MERGE, GetResString(IDS_CAT_MERGE));
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_REMOVE, GetResString(IDS_CAT_REMOVE));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_ADD, GetResString(IDS_CAT_ADD),_T("CATADD"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_EDIT, GetResString(IDS_CAT_EDIT),_T("CATEDIT"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_MERGE, GetResString(IDS_CAT_MERGE),_T("CATMERGE"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_REMOVE, GetResString(IDS_CAT_REMOVE),_T("CATREMOVE"));
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
-	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatA4AF.m_hMenu, GetResString(IDS_CAT_ADVA4AF));
-	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatPriority.m_hMenu, GetResString(IDS_PRIORITY));
+	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatA4AF.m_hMenu, GetResString(IDS_CAT_ADVA4AF),_T("ADVA4AF"));
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CANCEL, GetResString(IDS_MAIN_BTN_CANCEL));
-	m_mnuCategory.AppendMenu(MF_STRING, MP_STOP, GetResString(IDS_DL_STOP));
-	m_mnuCategory.AppendMenu(MF_STRING, MP_PAUSE, GetResString(IDS_DL_PAUSE));
-	m_mnuCategory.AppendMenu(MF_STRING, MP_RESUME, GetResString(IDS_DL_RESUME));
+	m_mnuCategory.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC), _T("FOLDERS") );
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_STOPLAST, GetResString(IDS_CAT_STOPLAST));	
-	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_PAUSELAST, GetResString(IDS_CAT_PAUSELAST));	
-	m_mnuCategory.AppendMenu(MF_STRING, MP_RESUMENEXT, GetResString(IDS_CAT_RESUMENEXT));    	
+	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatPriority.m_hMenu, GetResString(IDS_PRIORITY), _T("FILEPRIORITY"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CANCEL, GetResString(IDS_MAIN_BTN_CANCEL), _T("DELETE"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_STOP, GetResString(IDS_DL_STOP), _T("STOP"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_PAUSE, GetResString(IDS_DL_PAUSE), _T("PAUSE"));
+	m_mnuCategory.AppendMenu(MF_STRING, MP_RESUME, GetResString(IDS_DL_RESUME), _T("RESUME"));
+	m_mnuCategory.AppendMenu(MF_SEPARATOR);
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_STOPLAST, GetResString(IDS_CAT_STOPLAST), _T("CATSTOPLAST"));	
+	m_mnuCategory.AppendMenu(MF_STRING, MP_CAT_PAUSELAST, GetResString(IDS_CAT_PAUSELAST), _T("CATPAUSELAST"));	
+	m_mnuCategory.AppendMenu(MF_STRING, MP_RESUMENEXT, GetResString(IDS_CAT_RESUMENEXT), _T("CATRESUMENEXT"));    	
 
 }
 
@@ -829,12 +831,9 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 
 
 			m_dlTab.SetCurSel(downloadlistctrl.curTab);
-			//MORPH - Changed by SiRoB, Due to Khaos Category
-			/*
-			if (m_dlTab.GetCurSel()>0 || (thePrefs.GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
-			*/
-			if (m_dlTab.GetCurSel()>0)
-				downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
+			//if (m_dlTab.GetCurSel()>0 || (thePrefs.GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
+			downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
+
 			UpdateCatTabTitles();
 
 		} else m_dlTab.SetCurSel(downloadlistctrl.curTab);
@@ -848,12 +847,23 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 	Category_Struct* curCat;
 	curCat = thePrefs.GetCategory(rightclickindex);
 	/*
-	if (wParam >= MP_CAT_SET0 && wParam <= MP_CAT_SET0 + 20) {
-		thePrefs.SetAllcatType(wParam-MP_CAT_SET0);
-		m_nLastCatTT=-1;
-		m_dlTab.SetCurSel(0);
-		downloadlistctrl.ChangeCategory(0);
-		EditCatTabLabel(0,GetCatTitle( thePrefs.GetAllcatType()));
+	if (wParam>=MP_CAT_SET0 && wParam<=MP_CAT_SET0+20) {
+		if (wParam==MP_CAT_SET0+20) {
+			// negate
+			thePrefs.SetCatFilterNeg(m_isetcatmenu, (!thePrefs.GetCatFilterNeg(m_isetcatmenu)) );
+
+
+		} else {
+			// dont negate all/uncat filter
+			if (wParam-MP_CAT_SET0<=1)
+				thePrefs.SetCatFilterNeg(m_isetcatmenu, false);
+
+			thePrefs.SetCatFilter(m_isetcatmenu,wParam-MP_CAT_SET0);
+			m_nLastCatTT=-1;
+		}
+		EditCatTabLabel(m_isetcatmenu);
+		downloadlistctrl.ChangeCategory( m_dlTab.GetCurSel() );
+		thePrefs.SaveCats();
 	}
 	*/
 	// khaos::categorymod-
@@ -869,7 +879,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			else {
 				theApp.emuledlg->searchwnd->UpdateCatTabs();
 				m_dlTab.InsertItem(newindex,thePrefs.GetCategory(newindex)->title);
-				EditCatTabLabel(newindex,thePrefs.GetCategory(newindex)->title);
+				EditCatTabLabel(newindex);
 				thePrefs.SaveCats();
 				VerifyCatTabSize();
 			}
@@ -1028,6 +1038,9 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 			OnBnClickedQueueRefreshButton();
 			break;
 		}
+		case MP_HM_OPENINC:
+			ShellExecute(NULL, _T("open"), curCat->incomingpath,NULL, NULL, SW_SHOW);
+			break;
 		// khaos::categorymod+ Handle the new view filter menu.
 		case MP_CAT_SET0+1:
 			if (rightclickindex != 0 && theApp.downloadqueue->GetCategoryFileCount(rightclickindex))
@@ -1132,6 +1145,14 @@ void CTransferWnd::UpdateCatTabTitles(bool force) {
 		//MORPH END   - Changed by SiRoB, Due to Khaos Category
 }
 
+void CTransferWnd::EditCatTabLabel(int i) {
+	//MORPH	- Changed by SiRoB, Khaos Category
+	/*
+	EditCatTabLabel(i,(i==0)? GetCatTitle( thePrefs.GetAllcatType() ):thePrefs.GetCategory(i)->title);
+	*/
+	EditCatTabLabel(i,thePrefs.GetCategory(i)->title);
+}
+
 void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 
 	TCITEM tabitem;
@@ -1140,6 +1161,19 @@ void CTransferWnd::EditCatTabLabel(int index,CString newlabel) {
 	tabitem.mask = TCIF_TEXT;
 
 	newlabel.Replace(_T("&"),_T("&&"));
+	//MORPH - Removed by SIROB, Due to Khaos Cat
+	/*
+	// add filter label
+	if (index && thePrefs.GetCatFilter(index)>0) {
+		newlabel.Append(_T(" (")) ;
+		if (thePrefs.GetCatFilterNeg(index))
+			newlabel.Append(_T("!"));			
+			newlabel.Append( GetCatTitle(thePrefs.GetCatFilter(index)) + _T(")") );
+	} else
+		if (!index && thePrefs.GetCatFilterNeg(index)  )
+			newlabel=_T("!") + newlabel;
+	*/
+
 	int count,dwl;
 
 // ZZ:DownloadManager -->
@@ -1197,8 +1231,11 @@ int CTransferWnd::AddCategorie(CString newtitle,CString newincoming,CString newc
 	// khaos::kmod-
 	_stprintf(newcat->incomingpath,newincoming);
 	_stprintf(newcat->comment,newcomment);
-	/*autocat=newautocat -> viewfilters.sAdvancedFilterMask
+	/*
+	autocat=newautocat; //replaced by viewfilters.sAdvancedFilterMask
 	newcat->autocat=newautocat;
+	newcat->filter=0;
+	newcat->filterNeg=false;
 	*/
     newcat->downloadInAlphabeticalOrder = FALSE; // ZZ:DownloadManager
 

@@ -18,11 +18,10 @@
 
 #include "PartFile.h"
 #include "UpDownClient.h"
-#include "Loggable.h"
 
 class CWebCacheProxyClient;
 
-class CWebCachedBlock : CLoggable
+class CWebCachedBlock
 {
 	friend class CWebCacheProxyClient;
 private:

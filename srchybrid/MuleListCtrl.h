@@ -1,5 +1,4 @@
 #pragma once
-#include "Loggable.h"
 #include "Preferences.h"
 #include "resource.h"
 
@@ -8,7 +7,7 @@ class CIni;
 ///////////////////////////////////////////////////////////////////////////////
 // CMuleListCtrl
 
-class CMuleListCtrl : public CListCtrl, public CLoggable
+class CMuleListCtrl : public CListCtrl
 {
 	DECLARE_DYNAMIC(CMuleListCtrl)
 

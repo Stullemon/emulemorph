@@ -16,12 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
-#include "Loggable.h"
 #include "ProgressCtrlX.h"
 
 struct ConvertJob;
 
-class CPartFileConvert: public CLoggable
+class CPartFileConvert
 {
 public:
 	static int	ScanFolderToAdd(CString folder,bool deletesource=false);

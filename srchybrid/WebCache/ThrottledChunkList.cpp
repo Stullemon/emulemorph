@@ -5,6 +5,7 @@
 #include "ThrottledChunkList.h" //jp throttled chunks
 #include "OtherFunctions.h" //jp throttled chunks
 #include "Preferences.h" //jp logging
+#include "Log.h"
 
 #define THROTTLED_CHUNK_LIST_SIZE 100 
 #define THROTTLETIME	1000*60*10	// chunks are throttled for 10 minutes

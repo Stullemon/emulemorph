@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "loggable.h"
 #include "UploadBandwidthThrottler.h" // ZZ:UploadBandWithThrottler (UDP)
 
 #define WM_DNSLOOKUPDONE	(WM_USER+0x101)
@@ -46,7 +45,7 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 // CUDPSocket
 
-class CUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
+class CUDPSocket : public CAsyncSocket, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 	friend class CServerConnect;
 

@@ -160,7 +160,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		// Added by by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 		int iImgICF = 8; // default icon
 		if (piml){
-			iImgICF = piml->Add(CTempIconLoader(_T("PREF_PROXY")));
+			iImgICF = piml->Add(CTempIconLoader(_T("PROXY")));
 		}
 		m_htiICFSupportRoot = m_ctrlTreeOptions.InsertItem(_T("Internet Connection Firewall (ICF)"), iImgICF, iImgICF, TVI_ROOT);
 		m_htiICFSupport = m_ctrlTreeOptions.InsertCheckBox(_T("Enable Windows Internet Connection Firewall (ICF) support"), m_htiICFSupportRoot, m_bICFSupport);
@@ -172,7 +172,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 		int iImgUPnP = 8; // default icon
 		if (piml){
-			iImgUPnP = piml->Add(CTempIconLoader(_T("PREF_PROXY")));
+			iImgUPnP = piml->Add(CTempIconLoader(_T("PROXY")));
 		}
 		m_htiUPnPRoot = m_ctrlTreeOptions.InsertItem(_T("Universal Plug & Play (UPnP)"), iImgUPnP, iImgUPnP, TVI_ROOT);
 		m_htiUPnP  = m_ctrlTreeOptions.InsertCheckBox(_T("Enable UPnP on emule ports"), m_htiUPnPRoot, m_bUPnP);

@@ -40,6 +40,10 @@ CListViewSearchDlg::CListViewSearchDlg(CWnd* pParent /*=NULL*/)
 	m_iSearchColumn = 0;
 }
 
+CListViewSearchDlg::~CListViewSearchDlg()
+{
+}
+
 void CListViewSearchDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -61,6 +65,7 @@ void CListViewSearchDlg::UpdateControls()
 BOOL CListViewSearchDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
+	SetIcon(theApp.LoadIcon(_T("Search")), FALSE);
 	InitWindowStyles(this);
 
 	SetWindowText(GetResString(IDS_SW_SEARCHBOX));

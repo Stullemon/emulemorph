@@ -36,6 +36,7 @@
 #include "emuledlg.h"
 #include "TransferWnd.h"
 #include "serverwnd.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -640,18 +641,42 @@ void CClientList::Process(){
 		}
 	}
 
-	//Check if we are a lowID and need a buddy..
-	if ( !m_bHaveBuddy && Kademlia::CKademlia::isConnected() && Kademlia::CKademlia::isFirewalled() )
+	if ( Kademlia::CKademlia::isConnected() )
 	{
-		ASSERT( Kademlia::CKademlia::getPrefs() != NULL );
-		if( Kademlia::CKademlia::getPrefs()->getFindBuddy() )
+		if( Kademlia::CKademlia::isFirewalled() )
 		{
-			Kademlia::CSearch *findBuddy = new Kademlia::CSearch;
-			findBuddy->setSearchTypes(Kademlia::CSearch::FINDBUDDY);
-			Kademlia::CUInt128 ID(true);
-			ID.xor(Kademlia::CKademlia::getPrefs()->getKadID());
-			findBuddy->setTargetID(ID);
-			Kademlia::CSearchManager::startSearch(findBuddy);
+			ASSERT( Kademlia::CKademlia::getPrefs() != NULL );
+			if( !m_bHaveBuddy && Kademlia::CKademlia::getPrefs()->getFindBuddy() )
+			{
+				//We are a firewalled client with no buddy. We have also waited a set time 
+				//to try to avoid a false firewalled status.. So lets look for a buddy..
+				Kademlia::CSearch *findBuddy = new Kademlia::CSearch;
+				findBuddy->setSearchTypes(Kademlia::CSearch::FINDBUDDY);
+				Kademlia::CUInt128 ID(true);
+				ID.xor(Kademlia::CKademlia::getPrefs()->getKadID());
+				findBuddy->setTargetID(ID);
+				Kademlia::CSearchManager::startSearch(findBuddy);
+			}
+		}
+		else
+		{
+			if( m_bHaveBuddy )
+			{
+				//Two Open clients ended up buddies
+				//Someone must have fixed their firewall or stopped saturating their line.. 
+				ASSERT(m_pBuddy);
+				if( !m_pBuddy->HasLowID() )
+					m_pBuddy->SetKadState(KS_NONE);
+			}
+		}
+	}
+	else
+	{
+		if( m_bHaveBuddy )
+		{
+			//We are not connected anymore.. Drop this buddy..
+			ASSERT(m_pBuddy);
+			m_pBuddy->SetKadState(KS_NONE);
 		}
 	}
 

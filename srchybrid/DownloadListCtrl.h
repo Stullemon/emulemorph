@@ -78,7 +78,7 @@ protected:
 	CImageList m_overlayimages;
 	// [end] Mighty Knife
 
-	CMenu		m_PrioMenu;
+	CTitleMenu		m_PrioMenu;
 	CTitleMenu	m_FileMenu;
 	CMenu		m_A4AFMenu;
 	
@@ -87,8 +87,8 @@ protected:
 	bool		m_bRemainSort;
 	*/
 
-	CMenu		m_PermMenu;	// xMule_MOD: showSharePermissions
-	CMenu		m_A4AFMenuFlag; //MORPH - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
+	CTitleMenu		m_PermMenu;	// xMule_MOD: showSharePermissions
+	CTitleMenu		m_A4AFMenuFlag; //MORPH - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 
 	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;
 	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;

@@ -37,6 +37,7 @@
 #include "DownloadQueue.h"
 #include "emuledlg.h"
 #include "TransferWnd.h"
+#include "Log.h"
 #include "WebCache\WebCacheSocket.h" // yonatan http // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -172,13 +173,25 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 	}
 } 
 
-void CUpDownClient::SetUploadState(EUploadState news){
-	// don't add any final cleanups for US_NONE here	
-	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	if (news!=US_UPLOADING) m_bPowerShared = GetPowerShared();
-	//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
-	m_nUploadState = news;
-	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+void CUpDownClient::SetUploadState(EUploadState eNewState)
+{
+	if (eNewState != m_nUploadState)
+	{
+		if (m_nUploadState == US_UPLOADING)
+		{
+
+			m_nUpDatarate = 0;
+			m_nSumForAvgUpDataRate = 0;
+			m_AvarageUDR_list.RemoveAll();
+		}
+		// don't add any final cleanups for US_NONE here	
+		//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+		if (eNewState!=US_UPLOADING)
+			m_bPowerShared = GetPowerShared();
+		//MORPH START - Added by SiRoB, Keep PowerShare State when client have been added in uploadqueue
+		m_nUploadState = eNewState;
+		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+	}
 }
 
 /**
@@ -568,10 +581,9 @@ void CUpDownClient::CreateNextBlockPackage(){
 	catch(CString error)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED),GetUserName(),error.GetBuffer());
+			DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), GetUserName(), error);
 		theApp.uploadqueue->RemoveFromUploadQueue(this, _T("Client error: ") + error);
-		if (filedata)
-			delete[] filedata;
+		delete[] filedata;
 		return;
 	}
 	catch(CFileException* e)
@@ -579,18 +591,12 @@ void CUpDownClient::CreateNextBlockPackage(){
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		e->GetErrorMessage(szError, ARRSIZE(szError));
 		if (thePrefs.GetVerbose())
-		{
-			AddDebugLogLine(false,_T("Failed to create upload package for %s - %s"),GetUserName(),szError);
-		}
+			DebugLogWarning(_T("Failed to create upload package for %s - %s"), GetUserName(), szError);
 		theApp.uploadqueue->RemoveFromUploadQueue(this, ((CString)_T("Failed to create upload package.")) + szError);
-		if (filedata)
-			delete[] filedata;
+		delete[] filedata;
 		e->Delete();
 		return;
 	}
-	//if (thePrefs.GetVerbose())
-	//	AddDebugLogLine(false,"Debug: Packet done. Size: %i",blockpack->GetLength());
-	//return true;
 }
 
 void CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
@@ -673,6 +679,12 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 		uint32 endpos = (currentblock->EndOffset - togo);
 		if (IsUploadingToPeerCache())
 		{
+			if (m_pPCUpSocket == NULL){
+				ASSERT(0);
+				CString strError;
+				strError.Format(_T("Failed to upload to PeerCache - missing socket; %s"), DbgGetClientInfo());
+				throw strError;
+			}
 			USES_CONVERSION;
 			CSafeMemFile dataHttp(10240);
 			if (m_iHttpSendState == 0)
@@ -711,6 +723,12 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 		// MORPH START - Added by Commander, WebCache 1.2e
 		else if (IsUploadingToWebCache())
 		{
+			if (m_pWCUpSocket == NULL){
+				ASSERT(0);
+				CString strError;
+				strError.Format(_T("Failed to upload to WebCache - missing socket; %s"), DbgGetClientInfo());
+				throw strError;
+			}
 			USES_CONVERSION;
 			CSafeMemFile dataHttp(10240);
 			if (m_iHttpSendState == 0) // yonatan - not sure it's wise to use this (also used by PC).
@@ -954,7 +972,7 @@ uint32 CUpDownClient::SendBlockData(){
 
                 // first clear the average speed, to show ?? as speed in upload slot display
                 m_AvarageUDR_list.RemoveAll();
-                sumavgUDR = 0;
+                m_nSumForAvgUpDataRate = 0;
 
 	            // Give clients in queue a chance to kick this client out.
                 // It will be kicked out only if queue contains a client
@@ -991,23 +1009,23 @@ uint32 CUpDownClient::SendBlockData(){
 		// keep sum of all values in list up to date
 		TransferredData newitem = {sentBytesCompleteFile + sentBytesPartFile, curTick};
 		m_AvarageUDR_list.AddTail(newitem);
-		sumavgUDR += sentBytesCompleteFile + sentBytesPartFile;
+		m_nSumForAvgUpDataRate += sentBytesCompleteFile + sentBytesPartFile;
 	}
 			
 	while (m_AvarageUDR_list.GetCount() > 0)
 		if ((curTick - m_AvarageUDR_list.GetHead().timestamp) > 10000) {
-			sumavgUDR -=  m_AvarageUDR_list.RemoveHead().datalen;
+			m_nSumForAvgUpDataRate -=  m_AvarageUDR_list.RemoveHead().datalen;
 		}else
 			break;
-    	if(m_AvarageUDR_list.GetCount() > 0) {
+    if(m_AvarageUDR_list.GetCount() > 0) {
 		if(m_AvarageUDR_list.GetCount() == 1)
-			m_nUpDatarate = (sumavgUDR*1000) / 10000;
+			m_nUpDatarate = ((ULONGLONG)m_nSumForAvgUpDataRate*1000) / 10000;
 		else {
 			DWORD dwDuration = m_AvarageUDR_list.GetTail().timestamp - m_AvarageUDR_list.GetHead().timestamp;
 			if ((m_AvarageUDR_list.GetCount() - 1)*(curTick - m_AvarageUDR_list.GetTail().timestamp) > dwDuration)
 				dwDuration = curTick - m_AvarageUDR_list.GetHead().timestamp - dwDuration / (m_AvarageUDR_list.GetCount() - 1);
-			if (dwDuration < 1000) dwDuration = 3000;
-			m_nUpDatarate = ((sumavgUDR - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
+			if (dwDuration < 3000) dwDuration = 3000;
+			m_nUpDatarate = ((ULONGLONG)(m_nSumForAvgUpDataRate - m_AvarageUDR_list.GetHead().datalen)*1000) / dwDuration;
 		}
 	} else {
    	    m_nUpDatarate = 0;
@@ -1190,7 +1208,7 @@ void CUpDownClient::BanLeecher(LPCTSTR pszReason){
 	if (!m_bLeecher){
 		theStats.leecherclients++;
 		m_bLeecher = true;
-		theApp.emuledlg->AddDebugLogLine(false,GetResString(IDS_ANTILEECHERLOG) + _T(" (%s)"),DbgGetClientInfo(),pszReason==NULL ? _T("No Reason") : pszReason);
+		AddDebugLogLine(false,GetResString(IDS_ANTILEECHERLOG) + _T(" (%s)"),DbgGetClientInfo(),pszReason==NULL ? _T("No Reason") : pszReason);
 	}
 	theApp.clientlist->AddBannedClient( GetIP() );
 	SetUploadState(US_BANNED);

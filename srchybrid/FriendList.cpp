@@ -26,6 +26,7 @@
 #include "opcodes.h"
 #include "emuledlg.h"
 #include "FriendListCtrl.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -61,7 +62,7 @@ bool CFriendList::LoadList(){
 				strError += _T(" - ");
 				strError += szError;
 			}
-			AddLogLine(true, _T("%s"), strError);
+			LogError(LOG_STATUSBAR, _T("%s"), strError);
 		}
 		return false;
 	}
@@ -82,11 +83,11 @@ bool CFriendList::LoadList(){
 	}
 	catch(CFileException* error){
 		if (error->m_cause == CFileException::endOfFile)
-			AddLogLine(true,GetResString(IDS_ERR_EMFRIENDSINVALID));
+			LogError(LOG_STATUSBAR,GetResString(IDS_ERR_EMFRIENDSINVALID));
 		else{
 			TCHAR buffer[MAX_CFEXP_ERRORMSG];
 			error->GetErrorMessage(buffer, ARRSIZE(buffer));
-			AddLogLine(true,GetResString(IDS_ERR_READEMFRIENDS),buffer);
+			LogError(LOG_STATUSBAR,GetResString(IDS_ERR_READEMFRIENDS),buffer);
 		}
 		error->Delete();
 		return false;
@@ -110,7 +111,7 @@ void CFriendList::SaveList(){
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(true, _T("%s"), strError);
+		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		return;
 	}
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
@@ -134,7 +135,7 @@ void CFriendList::SaveList(){
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(true, _T("%s"), strError);
+		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		error->Delete();
 	}
 }

@@ -26,7 +26,7 @@
 #include "UploadBandwidthThrottler.h"
 #include "Preferences.h"
 #include "emuleDlg.h"
-
+#include "Log.h"
 #include "WebCache/WebCacheSocket.h" // yonatan http // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
@@ -690,7 +690,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 
     lastCalledSend = ::GetTickCount();
 
-    boolean anErrorHasOccured = false;
+    bool anErrorHasOccured = false;
     uint32 sentStandardPacketBytesThisCall = 0;
     uint32 sentControlPacketBytesThisCall = 0;
 
@@ -1020,7 +1020,7 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 						CString strErrInf;
 						if (nParam2 && GetErrorMessage(nParam2, strErrInf))
 							strError += _T(" - ") + strErrInf;
-						AddLogLine(false, _T("%s"), strError);
+						LogWarning(false, _T("%s"), strError);
 					}
 					break;
 				}
@@ -1033,24 +1033,24 @@ int CEMSocket::OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int
 							strError += _T(" - ");
 							strError += (LPCSTR)nParam2;
 						}
-						AddLogLine(false, _T("%s"), strError);
+						LogWarning(false, _T("%s"), strError);
 					}
 					break;
 				}
 				case PROXYERROR_AUTHTYPEUNKNOWN:
-					AddLogLine(false,_T("Required authtype reported by proxy server is unknown or unsupported"));
+					LogWarning(false,_T("Required authtype reported by proxy server is unknown or unsupported"));
 					break;
 				case PROXYERROR_AUTHFAILED:
-					AddLogLine(false,_T("Authentification failed"));
+					LogWarning(false,_T("Authentification failed"));
 					break;
 				case PROXYERROR_AUTHNOLOGON:
-					AddLogLine(false,_T("Proxy requires authentification"));
+					LogWarning(false,_T("Proxy requires authentification"));
 					break;
 				case PROXYERROR_CANTRESOLVEHOST:
-					AddLogLine(false,_T("Can't resolve host of proxy"));
+					LogWarning(false,_T("Can't resolve host of proxy"));
 					break;
 				default:{
-					AddLogLine(false,_T("Proxy error - %s"), GetProxyError(nParam1));
+					LogWarning(false,_T("Proxy error - %s"), GetProxyError(nParam1));
 				}
 			}
 		}

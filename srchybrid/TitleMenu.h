@@ -5,6 +5,27 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+typedef struct tagMENUINFO
+{
+    DWORD   cbSize;
+    DWORD   fMask;
+    DWORD   dwStyle;
+    UINT    cyMax;
+    HBRUSH  hbrBack;
+    DWORD   dwContextHelpID;
+    ULONG_PTR dwMenuData;
+}   MENUINFO, FAR *LPMENUINFO;
+typedef MENUINFO CONST FAR *LPCMENUINFO;
+
+typedef BOOL (WINAPI* TSetMenuInfo)(
+  HMENU hmenu,       // handle to menu
+  LPCMENUINFO lpcmi  // menu information
+);
+typedef BOOL (WINAPI* TGetMenuInfo)(
+  HMENU hmenu,            // handle to menu
+  LPCMENUINFO lpcmi       // menu information
+);
+
 class CTitleMenu : public CMenu
 {
 	typedef UINT (CALLBACK* LPFNDLLFUNC1)(HDC,CONST PTRIVERTEX,DWORD,CONST PVOID,DWORD,DWORD);
@@ -14,7 +35,6 @@ public:
 
 // Attributes
 protected:
-	CFont m_Font;
 	CString m_strTitle;
 
 	LPFNDLLFUNC1 dllfunc_GradientFill;
@@ -23,15 +43,22 @@ protected:
 	long clLeft;
 	long clText;
 	bool bDrawEdge;
+	bool m_bIconMenu;
 	UINT flag_edge;
 
+private:
+	static HMODULE		m_hUSER32_DLL;
+	CImageList  m_ImageList;
+	CMap<int, int, int, int> m_mapIconPos;
 // Operations
 public:
-	void AddMenuTitle(LPCTSTR lpszTitle);
+	void AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu = false);
+	static  void	FreeAPI();
+	static	void	Init();
 
 protected:
 	bool m_bCanDoGradientFill;
-	HFONT CreatePopupMenuTitleFont();
+
 	BOOL GradientFill(	HDC hdc,
 						CONST PTRIVERTEX pVertex,
 						DWORD dwNumVertex,
@@ -39,6 +66,10 @@ protected:
 						DWORD dwNumMesh,
 						DWORD dwMode);
 
+	void	DrawMonoIcon(int nIconPos, CPoint nDrawPos, CDC *dc);
+	static  TSetMenuInfo SetMenuInfo;
+	static  TGetMenuInfo GetMenuInfo;
+	static	bool	LoadAPI();
 	// Implementation
 public:
 	void SetColor(long cl) {clLeft=cl;};
@@ -55,4 +86,7 @@ public:
 	virtual ~CTitleMenu();
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
+
+	BOOL AppendMenu(UINT nFlags, UINT_PTR nIDNewItem = 0, LPCTSTR lpszNewItem = NULL, LPCTSTR lpszIconName = NULL);
+
 };

@@ -150,7 +150,7 @@ void UploadBandwidthThrottler::AddToStandardList(uint32 index, ThrottledFileSock
         sendLocker.Unlock();
 //	} else {
 //		if (thePrefs.GetVerbose())
-//			theApp.AddDebugLogLine(true,"Tried to add NULL socket to UploadBandwidthThrottler Standard list! Prevented.");
+//			AddDebugLogLine(true,"Tried to add NULL socket to UploadBandwidthThrottler Standard list! Prevented.");
     }
 }
 
@@ -478,6 +478,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			memzero(spentBytesClass,sizeof(spentBytesClass));
 			uint64 spentOverheadClass[NB_SPLITTING_CLASS];
 			memzero(spentOverheadClass,sizeof(spentOverheadClass));
+
+			sendLocker.Lock();
+
         	tempQueueLocker.Lock();
     
 	        // are there any sockets in m_TempControlQueue_list? Move them to normal m_ControlQueue_list;
@@ -492,8 +495,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
     
        		tempQueueLocker.Unlock();
         
-            sendLocker.Lock();
-
         	// Send any queued up control packets first
             while(bytesToSpendClass[LAST_CLASS] > 0 && spentBytesClass[LAST_CLASS] <  (uint64)bytesToSpendClass[LAST_CLASS] && (!m_ControlQueueFirst_list.IsEmpty() || !m_ControlQueue_list.IsEmpty())) {
                 ThrottledControlSocket* socket = NULL;

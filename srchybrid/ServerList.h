@@ -15,13 +15,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "Loggable.h"
 
 class CPartFile; //Morph - added by AndCycle, itsonlyme: cacheUDPsearchResults
 
 class CServer;
 
-class CServerList: public CLoggable
+class CServerList
 {
 	friend class CServerListCtrl;
 public:
@@ -70,9 +69,10 @@ public:
 	uint32		GetDeletedServerCount() const { return delservercount; }
 	void		Process();
 	void		AutoUpdate();
-	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
-	bool		GiveServersForTraceRoute();
-	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+
+	// ZZ:UploadSpeedSense -->
+    bool        GiveServersForTraceRoute();
+	// ZZ:UploadSpeedSense <--
 
 private:
 	uint32		serverpos;

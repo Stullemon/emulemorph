@@ -172,15 +172,12 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
 
 	Hide();
 
-	CIni ini(szFileName,_T("CONFIG"));
+	CIni ini(szFileName, _T("CONFIG"));
 	_tcscpy(buffer, szFileName);
 	LPTSTR pszFileName = _tcsrchr(buffer, _T('\\'));
-
-	if (pszFileName != NULL) {
-		*(pszFileName+1) = _T('\0');
-	}
-	else
+	if (pszFileName == NULL)
 		return FALSE;
+	*(pszFileName + 1) = _T('\0');
 
 	nRed   = ini.GetInt(_T("TextNormalRed"),255);
 	nGreen = ini.GetInt(_T("TextNormalGreen"),255);
@@ -191,11 +188,11 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
 	bmpTrasparentRed   = ini.GetInt(_T("bmpTrasparentRed"),255);
 	bmpTrasparentGreen = ini.GetInt(_T("bmpTrasparentGreen"),0);
 	bmpTrasparentBlue  = ini.GetInt(_T("bmpTrasparentBlue"),255);
-	fontSize = ini.GetInt(_T("TextFontSize"),70);		
+	fontType = ini.GetString(_T("FontType"), _T("MS Shell Dlg"));
+	fontSize = ini.GetInt(_T("FontSize"), 8) * 10;
 	m_dwTimeToStay = ini.GetInt(_T("TimeToStay"), 4000);
 	m_dwTimeToShow = ini.GetInt(_T("TimeToShow"), 500); 
 	m_dwTimeToHide = ini.GetInt(_T("TimeToHide"), 200);
-	fontType = ini.GetString(_T("FontType"), _T("Arial"));
 	bmpFullPath.Format(_T("%s\\%s"), buffer, ini.GetString(_T("bmpFileName"), _T(""))); 
 
 	// get text rectangle coordinates
@@ -239,8 +236,8 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR szFileName)
 			return FALSE;
 	}
 
-	SetTextFont(fontType, fontSize,TN_TEXT_NORMAL,TN_TEXT_UNDERLINE);
-	SetTextColor(RGB(nRed,nGreen,nBlue),RGB(sRed,sGreen,sBlue));
+	SetTextFont(fontType, fontSize, TN_TEXT_NORMAL,TN_TEXT_UNDERLINE);
+	SetTextColor(RGB(nRed,nGreen,nBlue), RGB(sRed,sGreen,sBlue));
 	return TRUE;
 }
 

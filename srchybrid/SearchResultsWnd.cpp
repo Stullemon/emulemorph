@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CSearchResultsWnd, CResizableFormView)
 	ON_BN_CLICKED(IDC_CLEARALL, OnBnClickedClearall)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, OnTcnSelchangeTab1)
 	ON_MESSAGE(WM_CLOSETAB, OnCloseTab)
+	ON_MESSAGE(WM_DBLCLICKTAB, OnDblClickTab)
 	ON_WM_DESTROY()
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_SIZE()
@@ -148,8 +149,8 @@ void CSearchResultsWnd::OnInitialUpdate()
 
 	ShowSearchSelector(false);
 
-	if (theApp.emuledlg->m_fontMarlett.m_hObject){
-		GetDlgItem(IDC_STATIC_DLTOof)->SetFont(&theApp.emuledlg->m_fontMarlett);
+	if (theApp.m_fontSymbol.m_hObject){
+		GetDlgItem(IDC_STATIC_DLTOof)->SetFont(&theApp.m_fontSymbol);
 		GetDlgItem(IDC_STATIC_DLTOof)->SetWindowText(_T("8")); // show a right-arrow
 	}
 }
@@ -411,7 +412,7 @@ void CSearchResultsWnd::DownloadSelected()
 	DownloadSelected(thePrefs.AddNewFilesPaused());
 }
 
-void CSearchResultsWnd::DownloadSelected(bool paused)
+void CSearchResultsWnd::DownloadSelected(bool bPaused)
 {
 	CWaitCursor curWait;
 	POSITION pos = searchlistctrl.GetFirstSelectedItemPosition(); 
@@ -440,11 +441,20 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 
 	while (pos != NULL) 
 	{ 
-		int index = searchlistctrl.GetNextSelectedItem(pos); 
-		if (index > -1)
+		int iIndex = searchlistctrl.GetNextSelectedItem(pos); 
+		if (iIndex >= 0)
 		{
 			// get selected listview item (may be a child item from an expanded search result)
-			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(index);
+			CSearchFile* cur_file = (CSearchFile*)searchlistctrl.GetItemData(iIndex);
+			if (cur_file->IsComplete() == 0 && cur_file->GetSourceCount() >= 50)
+			{
+				CString strMsg;
+				strMsg.Format(GetResString(IDS_ASKDLINCOMPLETE), cur_file->GetFileName());
+				int iAnswer = AfxMessageBox(strMsg, MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON2);
+				if (iAnswer != IDYES)
+					continue;
+			}
+
 			// khaos::categorymod+ m_cattabs is obsolete.
 			if (!thePrefs.SelectCatForNewDL() && thePrefs.UseAutoCat() && useCat==-1)
 			{
@@ -454,13 +464,13 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 			}
 			
 			if (thePrefs.SmallFileDLPush() && cur_file->GetFileSize() < 154624)
-				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, 0);
+				theApp.downloadqueue->AddSearchToDownload(cur_file, bPaused, useCat, 0);
 			else if (thePrefs.AutoSetResumeOrder())
-				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1);
+				theApp.downloadqueue->AddSearchToDownload(cur_file, bPaused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat)+1);
 			else
 			// khaos::categorymod-
 			// use filename of selected listview item
-			theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat));
+			theApp.downloadqueue->AddSearchToDownload(cur_file, bPaused, useCat, theApp.downloadqueue->GetMaxCatResumeOrder(useCat));
 
 			// get parent
 			if (cur_file->GetListParent()!=NULL)
@@ -472,7 +482,7 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 	}
 	
 	// This bit of code will resume the number of files that the user specifies in preferences (Off by default)
-	if (thePrefs.StartDLInEmptyCats() > 0 && bCreatedNewCat && paused)
+	if (thePrefs.StartDLInEmptyCats() > 0 && bCreatedNewCat && bPaused)
 		for (int i = 0; i < thePrefs.StartDLInEmptyCats(); i++)
 			if (!theApp.downloadqueue->StartNextFile(useCat)) break;
 }
@@ -481,6 +491,7 @@ void CSearchResultsWnd::OnSysColorChange()
 {
 	CResizableFormView::OnSysColorChange();
 	SetAllIcons();
+	searchlistctrl.CreateMenues();
 }
 
 void CSearchResultsWnd::SetAllIcons()
@@ -1489,7 +1500,8 @@ void CSearchResultsWnd::ShowResults(const SSearchParams* pParams)
 {
 	// restoring the params works and is nice during development/testing but pretty annoying in practice.
 	// TODO: maybe it should be done explicitly via a context menu function or such.
-	//m_pwndParams->SetParameters(pParams);
+	if (GetAsyncKeyState(VK_CONTROL) < 0)
+		m_pwndParams->SetParameters(pParams);
 	searchlistctrl.ShowResults(pParams->dwSearchID);
 }
 
@@ -1509,11 +1521,11 @@ void CSearchResultsWnd::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wparam, LPARAM lparam)
+LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wParam, LPARAM lParam)
 {
 	TCITEM item;
 	item.mask = TCIF_PARAM;
-	if (searchselect.GetItem((int)wparam, &item) && item.lParam != NULL)
+	if (searchselect.GetItem((int)wParam, &item) && item.lParam != NULL)
 	{
 		int nSearchID = ((const SSearchParams*)item.lParam)->dwSearchID;
 		if (!canceld && nSearchID == m_nSearchID)
@@ -1523,17 +1535,34 @@ LRESULT CSearchResultsWnd::OnCloseTab(WPARAM wparam, LPARAM lparam)
 	return TRUE;
 }
 
+LRESULT CSearchResultsWnd::OnDblClickTab(WPARAM wParam, LPARAM lParam)
+{
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	if (searchselect.GetItem((int)wParam, &item) && item.lParam != NULL)
+	{
+		m_pwndParams->SetParameters((const SSearchParams*)item.lParam);
+	}
+	return TRUE;
+}
+
 void CSearchResultsWnd::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
-	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++){
 	//MORPH START - Changed by SiRoB, Selection category support
 	/*
-		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
+		CString label=(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title;
+		label.Replace(_T("&"),_T("&&"));
+		m_cattabs.InsertItem(ix,label);
+	}
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
 		oldsel=0;
 	*/
-		m_cattabs.InsertItem(ix,thePrefs.GetCategory(ix)->title);
+		CString label=thePrefs.GetCategory(ix)->title;
+		label.Replace(_T("&"),_T("&&"));
+		m_cattabs.InsertItem(ix,label);
+	}
 	if (oldsel>=m_cattabs.GetItemCount())
 		oldsel=-1;
 	//MORPH END   - Changed by SiRoB, Selection category support

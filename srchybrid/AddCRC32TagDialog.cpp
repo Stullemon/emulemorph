@@ -22,7 +22,7 @@
 #include "emuleDlg.h"
 #include "SharedFilesWnd.h"
 #include <crypto51/crc.h>
-
+#include "log.h"
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -80,6 +80,7 @@ void AddCRC32InputBox::OnCancel()
 BOOL AddCRC32InputBox::OnInitDialog(){
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
+	SetIcon(theApp.LoadIcon(_T("FILECRC32"),16,16),FALSE);
 
 	CheckDlgButton(IDC_DONTADDCRC,thePrefs.GetDontAddCRCToFilename() ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CRCFORCEUPPERCASE,thePrefs.GetCRC32ForceUppercase() ? BST_CHECKED : BST_UNCHECKED);
@@ -117,27 +118,27 @@ void CCRC32CalcWorker::Run () {
 		// Let's hope the creator of this Worker thread has set the filename so we can
 		// display it...
 		if (m_FilePath == "") {
-			theApp.AddLogLine (false,_T("Warning: A file for which the CRC32 should be calculated is not shared anymore. Calculation skipped."));
+			AddLogLine (false,_T("Warning: A file for which the CRC32 should be calculated is not shared anymore. Calculation skipped."));
 		} else {
-			theApp.AddLogLine (false,_T("Warning: File '%s' is not shared anymore. CRC32 calculation skipped."),m_FilePath);
+			AddLogLine (false,_T("Warning: File '%s' is not shared anymore. CRC32 calculation skipped."),m_FilePath);
 		}
 		return;         
 	}
 	if (f->IsCRC32Calculated ()) {     
 		// We already have the CRC
-		theApp.AddLogLine (false,_T("CRC32-calculation of file '%s' skipped - already calculated."),
+		AddLogLine (false,_T("CRC32-calculation of file '%s' skipped - already calculated."),
 						   f->GetFileName ());
 		UnlockSharedFilesList ();
 		return;
 	}
 	if (f->IsPartFile ()) {     
 		// We can't add a CRC suffix to files which are not complete
-		theApp.AddLogLine (false,_T("Can't calculate CRC32 of file '%s'; file is a part file and not complete !"),
+		AddLogLine (false,_T("Can't calculate CRC32 of file '%s'; file is a part file and not complete !"),
 						   f->GetFileName ());
 		UnlockSharedFilesList ();
 		return;
 	}
-	theApp.AddLogLine (false,_T("Calculating CRC32 of file '%s'..."),f->GetFileName ());
+	AddLogLine (false,_T("Calculating CRC32 of file '%s'..."),f->GetFileName ());
 	CString Filename = f->GetFileName ();
 	// Release the lock while computing...
 	UnlockSharedFilesList ();
@@ -172,7 +173,7 @@ void CCRC32CalcWorker::Run () {
 		if (m_pOwner->IsTerminating ()) {
 			// Calculation aborted; this will stop all calculations, so we can tell
 			// the user its completly stopped.
-			theApp.AddLogLine (false,_T("CRC32 calculation aborted."));
+			AddLogLine (false,_T("CRC32 calculation aborted."));
 			return;
 		}
 
@@ -183,7 +184,7 @@ void CCRC32CalcWorker::Run () {
 										  (int) FinalCRC32 [2],
 										  (int) FinalCRC32 [1],
 										  (int) FinalCRC32 [0]);
-		theApp.AddLogLine (false,_T("Calculation of CRC32 for file '%s' completed. File CRC: %s"),Filename,sCRC32);
+		AddLogLine (false,_T("Calculation of CRC32 for file '%s' completed. File CRC: %s"),Filename,sCRC32);
 
 		// relock the list, get the file pointer
 		f = ValidateKnownFile (m_fileHashToProcess);
@@ -204,7 +205,7 @@ void CCRC32CalcWorker::Run () {
 					0, (LPARAM) m_fileHashToProcess);
 	} else {
 		// File cannot be accessed
-		theApp.AddLogLine (false,_T("Warning: Can't open file '%s' for CRC32 calculation. File skipped."),
+		AddLogLine (false,_T("Warning: Can't open file '%s' for CRC32 calculation. File skipped."),
 						   Filename);
 	}
 

@@ -132,7 +132,7 @@ BOOL CIrcWnd::OnInitDialog()
 	m_pIrcMain = new CIrcMain();
 	m_pIrcMain->SetIRCWnd(this);
 
-	UpdateFonts(&theApp.emuledlg->m_fontHyperText);
+	UpdateFonts(&theApp.m_fontHyperText);
 	InitWindowStyles(this);
 
 	((CEdit*)GetDlgItem(IDC_INPUTWINDOW))->SetLimitText(MAX_IRC_MSG_LEN);

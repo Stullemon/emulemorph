@@ -33,7 +33,7 @@ struct SSearchParams;
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchResultsWnd dialog
 
-class CSearchResultsWnd : public CResizableFormView, public CLoggable
+class CSearchResultsWnd : public CResizableFormView
 {
 	DECLARE_DYNCREATE(CSearchResultsWnd)
 
@@ -116,7 +116,8 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnBnClickedSdownload();
 	afx_msg void OnBnClickedClearall();
-	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
+	afx_msg LRESULT OnCloseTab(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnDblClickTab(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnClose();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);

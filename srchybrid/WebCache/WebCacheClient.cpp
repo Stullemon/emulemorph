@@ -29,6 +29,7 @@
 #include "WebCacheSocket.h"
 #include "UploadBandwidthThrottler.h"
 #include "UploadQueue.h"
+#include "Log.h"
 // yonatan http start //////////////////////////////////////////////////////////////////////////
 #include "ClientList.h"
 #include "WebCache.h"
@@ -385,7 +386,7 @@ bool CWebCacheUpSocket::ProcessHttpRequest()
 		SetTimeOut(SEC2MS(30));
 		return true;
 	}
-	GetClient()->m_iHttpSendState = 0;
+	GetClient()->SetHttpSendState(0);
 
 	SetHttpState(HttpStateRecvExpected);
 	GetClient()->SetUploadState(US_UPLOADING);

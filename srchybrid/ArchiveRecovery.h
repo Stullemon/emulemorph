@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "loggable.h"
 
 class CPartFile;
 struct Gap_Struct;
@@ -115,7 +114,7 @@ struct ThreadParam
 	bool bCreatePartFileCopy;
 };
 
-class CArchiveRecovery: public CLoggable
+class CArchiveRecovery
 {
 public:
 	static void recover(CPartFile *partFile, bool preview = false, bool bCreatePartFileCopy = true);

@@ -134,6 +134,7 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
+	SetIcon(theApp.LoadIcon(_T("PASTELINK"),16,16),FALSE);
 
 	AddAnchor(IDC_DDOWN_FRM, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_ELINK, TOP_LEFT, BOTTOM_RIGHT);
@@ -163,8 +164,8 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 	}
 	else {
 		UpdateCatTabs();
-		if (theApp.emuledlg->m_fontMarlett.m_hObject){
-			GetDlgItem(IDC_CATLABEL)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		if (theApp.m_fontSymbol.m_hObject){
+			GetDlgItem(IDC_CATLABEL)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_CATLABEL)->SetWindowText(_T("8")); // show a right-arrow
 		}
 
@@ -179,14 +180,20 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 void CDirectDownloadDlg::UpdateCatTabs() {
 	int oldsel=m_cattabs.GetCurSel();
 	m_cattabs.DeleteAllItems();
-	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++) {
 	//MORPH START - Changed by SiRoB, Selection category support
 	/*
-		m_cattabs.InsertItem(ix,(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title);
+		CString label=(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title;
+		label.Replace(_T("&"),_T("&&"));
+		m_cattabs.InsertItem(ix,label);
+	}
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
 		oldsel=0; 
 	*/
-		m_cattabs.InsertItem(ix,thePrefs.GetCategory(ix)->title);
+		CString label=thePrefs.GetCategory(ix)->title;
+		label.Replace(_T("&"),_T("&&"));
+		m_cattabs.InsertItem(ix,label);
+	}
 	if (oldsel>=m_cattabs.GetItemCount())
 		oldsel=-1; 
 	//MORPH END   - Changed by SiRoB, Selection category support

@@ -28,6 +28,11 @@
 #include "ListenSocket.h"
 #include "ChatWnd.h"
 #include "SafeFile.h"
+#include "Log.h"
+#include "MenuCmds.h"
+#include "ClientDetailDialog.h"
+#include "FriendList.h"
+#include "ClientList.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -68,6 +73,7 @@ BEGIN_MESSAGE_MAP(CChatSelector, CClosableTabCtrl)
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeChatsel)
 	ON_BN_CLICKED(IDC_CCLOSE, OnBnClickedCclose)
 	ON_BN_CLICKED(IDC_CSEND, OnBnClickedCsend)
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CChatSelector::CChatSelector()
@@ -78,7 +84,7 @@ CChatSelector::CChatSelector()
 	m_lastemptyicon = false;
 	m_blinkstate = false;
 	m_Timer = 0;
-	m_bCloseable = true;
+	m_bCloseable = false;
 }
 
 CChatSelector::~CChatSelector()
@@ -156,7 +162,7 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 	chatitem->log->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 	chatitem->log->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 	chatitem->log->SetEventMask(chatitem->log->GetEventMask() | ENM_LINK);
-	chatitem->log->SetFont(&theApp.emuledlg->m_fontHyperText);
+	chatitem->log->SetFont(&theApp.m_fontHyperText);
 	chatitem->log->SetProfileSkinKey(_T("Chat"));
 	chatitem->log->ApplySkin();
 
@@ -231,7 +237,7 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 	{
 		if (!sender->IsSpammer()){
 			if (thePrefs.GetVerbose())
-				theApp.emuledlg->AddDebugLogLine(false, _T("'%s' has been marked as spammer"), sender->GetUserName());
+				AddDebugLogLine(false, _T("'%s' has been marked as spammer"), sender->GetUserName());
 		}
 		sender->SetSpammer(true);
 		if (ci)
@@ -645,4 +651,55 @@ void CChatSelector::OnDestroy()
 		m_Timer = NULL;
 	}
 	CClosableTabCtrl::OnDestroy();
+}
+
+void CChatSelector::OnContextMenu(CWnd* pWnd, CPoint point)
+{ 
+	const CChatItem* ci = GetCurrentChatItem();
+	if (!ci)
+		return;
+
+
+	bool  isvalidconclient=false;
+	if (ci->client &&  ci->client->HasValidHash())
+		isvalidconclient=true;
+
+	CTitleMenu ChatMenu;
+	ChatMenu.CreatePopupMenu(); 
+	ChatMenu.AddMenuTitle(GetResString(IDS_CW_MESSAGES),true);
+
+	ChatMenu.AppendMenu(MF_STRING | isvalidconclient?MF_ENABLED : MF_GRAYED, MP_DETAIL, GetResString(IDS_SHOWDETAILS),_T("CLIENTDETAILS"));
+	ChatMenu.AppendMenu(MF_STRING | (isvalidconclient && !ci->client->IsFriend() )? MF_ENABLED : MF_GRAYED , MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND),_T("ADDFRIEND"));
+	ChatMenu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE), _T("DELETE") );
+
+	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+ 	VERIFY( ChatMenu.DestroyMenu() );
+	
+}
+
+BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam){ 
+		case MP_DETAIL:{
+			const CChatItem* ci = GetCurrentChatItem();
+			if (ci) {
+				CClientDetailDialog dialog(ci->client);
+				dialog.DoModal();
+			}
+			break;
+		}
+		case MP_ADDFRIEND:{
+			const CChatItem* ci = GetCurrentChatItem();
+			if (ci && !ci->client->IsFriend() )
+				theApp.friendlist->AddFriend(ci->client);
+			break;
+		}
+		case MP_REMOVE:{
+			const CChatItem* ci = GetCurrentChatItem();
+			if (ci)
+				EndSession(ci->client);
+			break;
+		}
+	}
+	return TRUE;
 }

@@ -17,7 +17,7 @@
 
 #pragma once
 #include "otherfunctions.h"
-#include "loggable.h"
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //// CDeadSource
 
@@ -56,14 +56,14 @@ template<> inline UINT AFXAPI HashKey(const CDeadSource& ds){
 ///////////////////////////////////////////////////////////////////////////////////////
 //// CDeadSourceList
 class CUpDownClient;
-class CDeadSourceList : public CLoggable
+class CDeadSourceList 
 {
 public:
 	CDeadSourceList(void);
 	~CDeadSourceList(void);
 	void		AddDeadSource(const CUpDownClient* pToAdd);
 	bool		IsDeadSource(const CUpDownClient* pToCheck) const;
-	uint32		GetDeadSourcesCount()					{ return m_mapDeadSources.GetCount(); }
+	uint32		GetDeadSourcesCount() const { return m_mapDeadSources.GetCount(); }
 	void		Init(bool bGlobalList);
 
 protected:

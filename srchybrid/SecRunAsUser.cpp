@@ -14,14 +14,20 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 #include "StdAfx.h"
 #include "emule.h"
 #include "secrunasuser.h"
 #include "Preferences.h"
 #include "emuledlg.h"
 #include "otherfunctions.h"
+#include "Log.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 CSecRunAsUser::CSecRunAsUser(void)
 {
@@ -42,74 +48,83 @@ bool CSecRunAsUser::PrepareUser(){
 	bool bResult = false;
 	if (!LoadAPI())
 		return false;
-	
-	IADsContainerPtr pUsers;
+
 	try{
-		IADsWinNTSystemInfoPtr pNTsys;
-		if (CoCreateInstance(CLSID_WinNTSystemInfo,NULL,CLSCTX_INPROC_SERVER,IID_IADsWinNTSystemInfo,(void**)&pNTsys) != S_OK)
-			throw CString("Failed to create IADsWinNTSystemInfo");
-		// check if we are already running on our eMule Account
-		// todo: check if the current account is an administrator
-		
-		CComBSTR bstrUserName;
-		pNTsys->get_UserName(&bstrUserName);
-		m_strCurrentUser = bstrUserName;
-
-		if (m_strCurrentUser == EMULEACCOUNTW){
-			theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNT); 
-			bRunningAsEmule = true;
-			throw CString("Already running as eMule_Secure Account (everything is fine)");
-		}
-		CComBSTR bstrCompName;
-		pNTsys->get_ComputerName(&bstrCompName);
-		CStringW cscompName = bstrCompName;
-
-		CComBSTR bstrDomainName;
-		pNTsys->get_DomainName(&bstrDomainName);
-		m_strDomain = bstrDomainName;
-	
-		ADSPath.Format(L"WinNT://%s,computer",cscompName);
-		if ( !SUCCEEDED(ADsGetObject(ADSPath.AllocSysString(),IID_IADsContainer,(void **)&pUsers)) )
-			throw CString("Failed ADsGetObject()");
-
-		IEnumVARIANTPtr pEnum; 
-		ADsBuildEnumerator (pUsers,&pEnum);
-		int cnt=0;
-
-		IADsUserPtr pChild;
-		_variant_t vChild;			  
-		while( ADsEnumerateNext (pEnum,1,&vChild,NULL) == S_OK )
-		{	
-			if (vChild.pdispVal->QueryInterface(IID_IADsUser,(void **)&pChild) != S_OK)
-				continue;
-			//If the object in the container is user then get properties
-			CComBSTR bstrName; 
-			pChild->get_Name(&bstrName);
-			CStringW csName= bstrName;
+		IADsContainerPtr pUsers;
+		try{
+			IADsWinNTSystemInfoPtr pNTsys;
+			if (CoCreateInstance(CLSID_WinNTSystemInfo,NULL,CLSCTX_INPROC_SERVER,IID_IADsWinNTSystemInfo,(void**)&pNTsys) != S_OK)
+				throw CString("Failed to create IADsWinNTSystemInfo");
+			// check if we are already running on our eMule Account
+			// todo: check if the current account is an administrator
 			
-			// find the emule user account if possible
-			if ( csName == EMULEACCOUNTW ){
-				// account found, set new random password and save it
-				m_strPassword = CreateRandomPW();
-				if ( !SUCCEEDED(pChild->SetPassword(m_strPassword.AllocSysString())) )
-					throw CString("Failed to set password");
+			CComBSTR bstrUserName;
+			pNTsys->get_UserName(&bstrUserName);
+			m_strCurrentUser = bstrUserName;
 
-				bResult = true;
-				break;
+			if (m_strCurrentUser == EMULEACCOUNTW){
+				theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNT); 
+				bRunningAsEmule = true;
+				throw CString("Already running as eMule_Secure Account (everything is fine)");
 			}
-		}
+			CComBSTR bstrCompName;
+			pNTsys->get_ComputerName(&bstrCompName);
+			CStringW cscompName = bstrCompName;
 
+			CComBSTR bstrDomainName;
+			pNTsys->get_DomainName(&bstrDomainName);
+			m_strDomain = bstrDomainName;
+		
+			ADSPath.Format(L"WinNT://%s,computer",cscompName);
+			if ( !SUCCEEDED(ADsGetObject(ADSPath.AllocSysString(),IID_IADsContainer,(void **)&pUsers)) )
+				throw CString("Failed ADsGetObject()");
+
+			IEnumVARIANTPtr pEnum; 
+			ADsBuildEnumerator (pUsers,&pEnum);
+			int cnt=0;
+
+			IADsUserPtr pChild;
+			_variant_t vChild;			  
+			while( ADsEnumerateNext (pEnum,1,&vChild,NULL) == S_OK )
+			{	
+				if (vChild.pdispVal->QueryInterface(IID_IADsUser,(void **)&pChild) != S_OK)
+					continue;
+				//If the object in the container is user then get properties
+				CComBSTR bstrName; 
+				pChild->get_Name(&bstrName);
+				CStringW csName= bstrName;
+				
+				// find the emule user account if possible
+				if ( csName == EMULEACCOUNTW ){
+					// account found, set new random password and save it
+					m_strPassword = CreateRandomPW();
+					if ( !SUCCEEDED(pChild->SetPassword(m_strPassword.AllocSysString())) )
+						throw CString("Failed to set password");
+
+					bResult = true;
+					break;
+				}
+			}
+
+		}
+		catch(CString error){
+			// clean up and abort
+			theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Exception while preparing user account: %s!"), error);
+			CoUninitialize();
+			return false;
+		}
+		if (bResult || CreateEmuleUser(pUsers) ){
+			bResult = SetDirectoryPermissions();
+		}
 	}
-	catch(CString error){
+	catch(...){
 		// clean up and abort
-		theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Exception while preparing user account: %s!"), error);
+		theApp.QueueDebugLogLine(false, _T("Run as unpriveleged user: Unexpected fatal error while preparing user account!"));
 		CoUninitialize();
 		return false;
 	}
 
-	if (bResult || CreateEmuleUser(pUsers) ){
-		bResult = SetDirectoryPermissions();
-	}
+
 
 	CoUninitialize();
 	FreeAPI();

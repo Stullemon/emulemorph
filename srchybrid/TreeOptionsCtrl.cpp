@@ -1731,13 +1731,13 @@ void CTreeOptionsCtrl::SetEditText(HTREEITEM hItem, const CString& sEditText)
 	CString sNewText;
 
 	if(pItemData->m_Type == CTreeOptionsItemData::PassEditBox){
-		TCHAR *buffer;
+		char *buffer;
 		int buffLen = sEditText.GetLength()+1;
-		buffer = new TCHAR[buffLen];
-		if(buffer){
-			_tcsnset(buffer, '*',buffLen-1); //Fixed by SiRoB, not very clean but it work
-			buffer[buffLen-1] = '\0';
-			sNewText = buffer;
+		if(buffLen){
+			buffer = new char[buffLen];
+			strnset(buffer, '*',buffLen-1);
+			buffer[buffLen-1] = 0;
+			sNewText = CStringA(buffer);
 			delete[] buffer;
 		}
 		else

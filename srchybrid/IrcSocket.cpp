@@ -22,6 +22,7 @@
 #include "Preferences.h"
 #include "OtherFunctions.h"
 #include "Statistics.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -150,7 +151,7 @@ void CIrcSocket::OnReceive(int nErrorCode)
 void CIrcSocket::OnConnect(int nErrorCode)
 {
 	if (nErrorCode){
-		AddLogLine(true, _T("IRC socket: Failed to connect - %s"), GetErrorMessage(nErrorCode, 1));
+		LogError(LOG_STATUSBAR, _T("IRC socket: Failed to connect - %s"), GetErrorMessage(nErrorCode, 1));
 		m_pIrcMain->Disconnect();
 		return;
 	}
@@ -200,7 +201,7 @@ int CIrcSocket::OnLayerCallback(const CAsyncSocketExLayer* pLayer, int nType, in
 					CString strErrInf;
 					if (nParam2 && GetErrorMessage(nParam2, strErrInf))
 						strError += _T(" - ") + strErrInf;
-					AddLogLine(true, _T("%s"), strError);
+					LogWarning(LOG_STATUSBAR, _T("%s"), strError);
 					break;
 				}
 				case PROXYERROR_REQUESTFAILED:{
@@ -209,23 +210,23 @@ int CIrcSocket::OnLayerCallback(const CAsyncSocketExLayer* pLayer, int nType, in
 						strError += _T(" - ");
 						strError += (LPCSTR)nParam2;
 					}
-					AddLogLine(true, _T("%s"), strError);
+					LogWarning(LOG_STATUSBAR, _T("%s"), strError);
 					break;
 				}
 				case PROXYERROR_AUTHTYPEUNKNOWN:
-					AddLogLine(true, _T("IRC socket: Required authentification type reported by proxy server is unknown or unsupported"));
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: Required authentification type reported by proxy server is unknown or unsupported"));
 					break;
 				case PROXYERROR_AUTHFAILED:
-					AddLogLine(true, _T("IRC socket: Proxy server authentification failed"));
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: Proxy server authentification failed"));
 					break;
 				case PROXYERROR_AUTHNOLOGON:
-					AddLogLine(true, _T("IRC socket: Proxy server requires authentification"));
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: Proxy server requires authentification"));
 					break;
 				case PROXYERROR_CANTRESOLVEHOST:
-					AddLogLine(true, _T("IRC socket: Can't resolve host of proxy server"));
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: Can't resolve host of proxy server"));
 					break;
 				default:{
-					AddLogLine(true, _T("IRC socket: Proxy server error - %s"), GetProxyError(nParam1));
+					LogWarning(LOG_STATUSBAR, _T("IRC socket: Proxy server error - %s"), GetProxyError(nParam1));
 				}
 			}
 		}

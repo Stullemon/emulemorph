@@ -8,7 +8,7 @@
 #include "eMuleDlg.h"
 #include "TransferWnd.h"
 #include "WebCachedBlockList.h"
-
+#include "Log.h"
 CWebCacheProxyClient* SINGLEProxyClient = 0;
 
 CWebCacheProxyClient::CWebCacheProxyClient(CWebCachedBlock* iBlock) : CUpDownClient()

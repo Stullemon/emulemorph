@@ -174,9 +174,9 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM wParam, LPARAM lParam)
 		m_pacSearchString->AddRef();
 		if (m_pacSearchString->Bind(m_ctlName, ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST))
 			m_pacSearchString->LoadList(thePrefs.GetConfigDir() +  _T("\\") SEARCH_STRINGS_PROFILE);
-		if (theApp.emuledlg->m_fontMarlett.m_hObject)
+		if (theApp.m_fontSymbol.m_hObject)
 		{
-			GetDlgItem(IDC_DD)->SetFont(&theApp.emuledlg->m_fontMarlett);
+			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
 		}
 	}
@@ -678,7 +678,11 @@ void CSearchParamsWnd::SaveSettings()
 void CSearchParamsWnd::OnEnChangeName()
 {
 	m_ctlStart.EnableWindow(m_ctlName.GetWindowTextLength() > 0);
+	UpdateUnicodeCtrl();
+}
 
+void CSearchParamsWnd::UpdateUnicodeCtrl()
+{
 	bool bOfferUnicode = false;
 #ifdef _UNICODE
 	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeFileDonkey)
@@ -730,6 +734,19 @@ void CSearchParamsWnd::SetParameters(const SSearchParams* pParams)
 	if (!pParams->bClientSharedFiles)
 	{
 		m_ctlName.SetWindowText(pParams->strExpression);
+		if (m_ctlUnicode.IsWindowEnabled())
+			m_ctlUnicode.SetCheck(pParams->bUnicode);
+		else
+			m_ctlUnicode.SetCheck(0);
+
+		int iItems = m_ctlFileType.GetCount();
+		for (int i = 0; i < iItems; i++){
+			if (strcmp((LPCSTR)m_ctlFileType.GetItemDataPtr(i), pParams->strFileType) == 0){
+				m_ctlFileType.SetCurSel(i);
+				break;
+			}
+		}
+
 		m_ctlOpts.SetItemText(orMinSize, 1, pParams->strMinSize);
 		m_ctlOpts.SetItemText(orMaxSize, 1, pParams->strMaxSize);
 		m_ctlOpts.SetItemText(orExtension, 1, pParams->strExtension);

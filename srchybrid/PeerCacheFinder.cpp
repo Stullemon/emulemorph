@@ -13,9 +13,6 @@
 //
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
-
-// notes to myself, remove before release :)
-
 #include "StdAfx.h"
 #include <windns.h>
 #include "peercachefinder.h"
@@ -27,6 +24,7 @@
 #include "version.h"
 #include <crypto51/rsa.h>
 #include <crypto51/integer.h>
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -477,11 +475,15 @@ bool CPCValditeThread::Valdite(){
 			m_nPCPort = anPeerCachPorts[i];
 			break;
 		}
-		catch (CInternetException* m_pException){
+		catch (CInternetException* pException){
 			// set file to NULL if there's an error
 			file = NULL;
-			m_pException->Delete();
-			DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("PeerCache: Failed to retrieve .p2pinfo file on Port %u"),anPeerCachPorts[i]));
+			CString strError;
+			pException->GetErrorMessage(strError.GetBuffer(512), 512);
+			strError.ReleaseBuffer();
+			strError.Trim(_T(" \r\n"));
+			pException->Delete();
+			DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("PeerCache: Failed to retrieve .p2pinfo file on Port %u - %s"),anPeerCachPorts[i], strError));
 			if (i == (ARRSIZE(anPeerCachPorts)-1)){ // was last try
 				DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("PeerCache: Failed to retrieve .p2pinfo file, cache disabled"),anPeerCachPorts[i]));
 				return false;

@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "loggable.h"
 
 #define	DFLT_TRANSFER_WND2	1
 
@@ -128,7 +127,7 @@ struct DynDNS_Struct{
 #pragma pack()
 //MORPH END - Added by SiRoB, DynDNS
 
-class CPreferences: public CLoggable
+class CPreferences
 {
 public:
 	static	CString	strNick;
@@ -265,8 +264,8 @@ public:
 
 	// Saved stats for cumulative downline data...
 	static	uint32	cumDownCompletedFiles;
-	static	uint16	cumDownSuccessfulSessions;
-	static	uint16	cumDownFailedSessions;
+	static	uint32	cumDownSuccessfulSessions;
+	static	uint32	cumDownFailedSessions;
 	static	uint32	cumDownAvgTime;
 
 	// Cumulative statistics for saved due to compression/lost due to corruption
@@ -275,13 +274,13 @@ public:
 	static	uint32	cumPartsSavedByICH;
 
 	// Session statistics for download sessions
-	static	uint16	sesDownSuccessfulSessions;
-	static	uint16	sesDownFailedSessions;
+	static	uint32	sesDownSuccessfulSessions;
+	static	uint32	sesDownFailedSessions;
 	static	uint32	sesDownAvgTime;
-	static	uint16	sesDownCompletedFiles;
+	static	uint32	sesDownCompletedFiles;
 	static	uint64	sesLostFromCorruption;
 	static	uint64	sesSavedFromCompression;
-	static	uint16	sesPartsSavedByICH;
+	static	uint32	sesPartsSavedByICH;
 
 	// Cumulative client breakdown stats for received bytes...
 	static	uint64	cumDownData_EDONKEY;
@@ -323,22 +322,22 @@ public:
 	static	float	cumConnMaxAvgUpRate;
 	static	float	cumConnMaxUpRate;
 	static	uint64	cumConnRunTime;
-	static	uint16	cumConnNumReconnects;
-	static	uint16	cumConnAvgConnections;
-	static	uint16	cumConnMaxConnLimitReached;
-	static	uint16	cumConnPeakConnections;
+	static	uint32	cumConnNumReconnects;
+	static	uint32	cumConnAvgConnections;
+	static	uint32	cumConnMaxConnLimitReached;
+	static	uint32	cumConnPeakConnections;
 	static	uint32	cumConnTransferTime;
 	static	uint32	cumConnDownloadTime;
 	static	uint32	cumConnUploadTime;
 	static	uint32	cumConnServerDuration;
 
 	// Saved records for servers / network...
-	static	uint16	cumSrvrsMostWorkingServers;
+	static	uint32	cumSrvrsMostWorkingServers;
 	static	uint32	cumSrvrsMostUsersOnline;
 	static	uint32	cumSrvrsMostFilesAvail;
 
 	// Saved records for shared files...
-	static	uint16	cumSharedMostFilesShared;
+	static	uint32	cumSharedMostFilesShared;
 	static	uint64	cumSharedLargestShareSize;
 	static	uint64	cumSharedLargestAvgFileSize;
 	static	uint64	cumSharedLargestFileSize;
@@ -426,6 +425,7 @@ public:
 	static	uint16	MaxConperFive;
 	static	int		checkDiskspace; // SLUGFILLER: checkDiskspace
 	static	UINT	m_uMinFreeDiskSpace;
+	static	bool	m_bSparsePartFiles;
 	static	TCHAR	yourHostname[127];	// itsonlyme: hostnameSource
 	static	bool	m_bEnableVerboseOptions;
 	static	bool	m_bVerbose;
@@ -527,6 +527,9 @@ public:
 	static	TCHAR	datetimeformat4log[64];
 	static	LOGFONT m_lfHyperText;
 	static	LOGFONT m_lfLogText;
+	static	COLORREF m_crLogError;
+	static	COLORREF m_crLogWarning;
+	static	COLORREF m_crLogSuccess;
 	static	int		m_iExtractMetaData;
 	static	bool	m_bAdjustNTFSDaylightFileTime;
 
@@ -539,6 +542,7 @@ public:
 	static	int		m_nWebPageRefresh;
 	static	bool	m_bWebLowEnabled;
 	static	TCHAR	m_sWebResDir[MAX_PATH];
+	static	int		m_iWebTimeoutMins;
 
 	static	TCHAR	m_sTemplateFile[MAX_PATH];
 	static	ProxySettings proxy; // deadlake PROXYSUPPORT
@@ -893,6 +897,7 @@ public:
 	static	const CString& GetConfigDir()			{return configdir;}
 	static	const CString& GetWebServerDir()		{return m_strWebServerDir;}
 	static	const CString& GetFileCommentsFilePath(){return m_strFileCommentsFilePath;}
+	static	const CString& GetLogDir()				{return m_strLogDir;}
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	static	const CString& GetFeedsDir()			{return m_strFeedsDir;} // Added by N_OxYdE: XML News
@@ -1018,13 +1023,13 @@ public:
 
 	//		Saved stats for cumulative downline data
 	static	uint32	GetDownCompletedFiles()			{ return cumDownCompletedFiles;}
-	static	uint16	GetDownC_SuccessfulSessions()	{ return cumDownSuccessfulSessions;}
-	static	uint16	GetDownC_FailedSessions()		{ return cumDownFailedSessions;}
+	static	uint32	GetDownC_SuccessfulSessions()	{ return cumDownSuccessfulSessions;}
+	static	uint32	GetDownC_FailedSessions()		{ return cumDownFailedSessions;}
 	static	uint32	GetDownC_AvgTime()				{ return cumDownAvgTime;}
 	//		Session download stats
-	static	uint16	GetDownSessionCompletedFiles()	{ return sesDownCompletedFiles;}
-	static	uint16	GetDownS_SuccessfulSessions()	{ return sesDownSuccessfulSessions;}
-	static	uint16	GetDownS_FailedSessions()		{ return sesDownFailedSessions;}
+	static	uint32	GetDownSessionCompletedFiles()	{ return sesDownCompletedFiles;}
+	static	uint32	GetDownS_SuccessfulSessions()	{ return sesDownSuccessfulSessions;}
+	static	uint32	GetDownS_FailedSessions()		{ return sesDownFailedSessions;}
 	static	uint32	GetDownS_AvgTime()				{ return GetDownS_SuccessfulSessions()?sesDownAvgTime/GetDownS_SuccessfulSessions():0;}
 
 	//		Saved stats for corruption/compression
@@ -1146,22 +1151,22 @@ public:
 	static	float	GetConnMaxAvgUpRate()			{ return cumConnMaxAvgUpRate;}
 	static	float	GetConnMaxUpRate()				{ return cumConnMaxUpRate;}
 	static	uint64	GetConnRunTime()				{ return cumConnRunTime;}
-	static	uint16	GetConnNumReconnects()			{ return cumConnNumReconnects;}
-	static	uint16	GetConnAvgConnections()			{ return cumConnAvgConnections;}
-	static	uint16	GetConnMaxConnLimitReached()	{ return cumConnMaxConnLimitReached;}
-	static	uint16	GetConnPeakConnections()		{ return cumConnPeakConnections;}
+	static	uint32	GetConnNumReconnects()			{ return cumConnNumReconnects;}
+	static	uint32	GetConnAvgConnections()			{ return cumConnAvgConnections;}
+	static	uint32	GetConnMaxConnLimitReached()	{ return cumConnMaxConnLimitReached;}
+	static	uint32	GetConnPeakConnections()		{ return cumConnPeakConnections;}
 	static	uint32	GetConnTransferTime()			{ return cumConnTransferTime;}
 	static	uint32	GetConnDownloadTime()			{ return cumConnDownloadTime;}
 	static	uint32	GetConnUploadTime()				{ return cumConnUploadTime;}
 	static	uint32	GetConnServerDuration()			{ return cumConnServerDuration;}
 
 	//		Saved records for servers / network
-	static	uint16	GetSrvrsMostWorkingServers()	{ return cumSrvrsMostWorkingServers;}
+	static	uint32	GetSrvrsMostWorkingServers()	{ return cumSrvrsMostWorkingServers;}
 	static	uint32	GetSrvrsMostUsersOnline()		{ return cumSrvrsMostUsersOnline;}
 	static	uint32	GetSrvrsMostFilesAvail()		{ return cumSrvrsMostFilesAvail;}
 
 	//		Saved records for shared files
-	static	uint16	GetSharedMostFilesShared()		{ return cumSharedMostFilesShared;}
+	static	uint32	GetSharedMostFilesShared()		{ return cumSharedMostFilesShared;}
 	static	uint64	GetSharedLargestShareSize()		{ return cumSharedLargestShareSize;}
 	static	uint64	GetSharedLargestAvgFileSize()	{ return cumSharedLargestAvgFileSize;}
 	static	uint64	GetSharedLargestFileSize()		{ return cumSharedLargestFileSize;}
@@ -1197,7 +1202,7 @@ public:
 	static	void	SetMaxGraphDownloadRate(int in) {maxGraphDownloadRate=(in)?in:96;}
 
 	static	uint16	GetMaxDownload();
-	static	uint64	GetMaxDownloadInBytesPerSec(boolean dynamic = false);
+	static	uint64	GetMaxDownloadInBytesPerSec(bool dynamic = false);
 	static	uint16	GetMaxConnections()			{return maxconnections;}
 	static	uint16	GetMaxHalfConnections()		{return maxhalfconnections;}
 	static	uint16	GetMaxSourcePerFile()		{return maxsourceperfile;}
@@ -1358,6 +1363,9 @@ public:
 	static	void	SetHyperTextFont(LPLOGFONT plf)		{m_lfHyperText = *plf;}
 	static	LPLOGFONT GetLogFont()						{return &m_lfLogText;}
 	static	void	SetLogFont(LPLOGFONT plf)			{m_lfLogText = *plf;}
+	static	COLORREF GetLogErrorColor()					{return m_crLogError;}
+	static	COLORREF GetLogWarningColor()				{return m_crLogWarning;}
+	static	COLORREF GetLogSuccessColor()				{return m_crLogSuccess;}
 
 	static	uint16	GetMaxConperFive()					{return MaxConperFive;}
 	static	uint16	GetDefaultMaxConperFive();
@@ -1378,6 +1386,8 @@ public:
 	// itsonlyme: hostnameSource
 	static	bool	IsCheckDiskspaceEnabled()			{return checkDiskspace != 0;}	// SLUGFILLER: checkDiskspace
 	static	UINT	GetMinFreeDiskSpace()				{return m_uMinFreeDiskSpace;}
+	static	bool	GetSparsePartFiles()				{return m_bSparsePartFiles;}
+	static	void	SetSparsePartFiles(bool bEnable)	{m_bSparsePartFiles = bEnable;}
 
 	static	void	SetMaxUpload(uint16 in);
 	static	void	SetMaxDownload(uint16 in);
@@ -1405,6 +1415,12 @@ public:
 	static	bool	MoveCat(UINT from, UINT to);
 	static	void	RemoveCat(int index);
 	static	int		GetCatCount()			{ return catMap.GetCount();}
+	/*// khaos::kmod+ Obsolete 
+	static  bool	SetCatFilter(int index, int filter);
+	static  int		GetCatFilter(int index);
+	static	bool	GetCatFilterNeg(int index);
+	static	void	SetCatFilterNeg(int index, bool val);
+	*/
 	static	Category_Struct* GetCategory(int index) { if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index); else return NULL;}
 	static	TCHAR*	GetCatPath(uint8 index) { return catMap.GetAt(index)->incomingpath;}
 	static	DWORD	GetCatColor(uint8 index)	{ if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index)->color; else return 0;}
@@ -1436,6 +1452,7 @@ public:
 	static	bool	GetWSIsLowUserEnabled()					{ return m_bWebLowEnabled; }
 	static	void	SetWSIsLowUserEnabled(bool in)			{ m_bWebLowEnabled=in; }
 	static	CString GetWSLowPass()							{ return CString(m_sWebLowPassword); }
+	static	int		GetWebTimeoutMins()						{ return m_iWebTimeoutMins;}
 	static	void	SetWSLowPass(CString strNewPass);
 
 	static	void	SetMaxSourcesPerFile(uint16 in)			{ maxsourceperfile=in;}
@@ -1795,6 +1812,7 @@ protected:
 	static	CString m_strWebServerDir;
 	static	CString m_strLangDir;
 	static	CString m_strFileCommentsFilePath;
+	static	CString m_strLogDir;
 	//MORPH START - Added by SiRoB, XML News [O²]
 	static	CString m_strFeedsDir; // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]

@@ -13,6 +13,7 @@
 #include "WebCacheSocket.h"
 #include "WebCachedBlockList.h"
 #include "ThrottledChunkList.h" // jp Don't request chunks for which we are currently receiving proxy sources
+#include "Log.h"
 
 CWebCachedBlock::CWebCachedBlock( const char* packet, uint32 size, CUpDownClient* client )
 {

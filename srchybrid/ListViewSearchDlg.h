@@ -9,6 +9,7 @@ class CListViewSearchDlg : public CDialog
 
 public:
 	CListViewSearchDlg(CWnd* pParent = NULL);	  // standard constructor
+	virtual ~CListViewSearchDlg();
 
 // Dialog Data
 	enum { IDD = IDD_LISTVIEW_SEARCH };
@@ -22,11 +23,9 @@ protected:
 
 	void UpdateControls();
 
+	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-
-public:
 	afx_msg void OnEnChangeSearchText();
-	virtual BOOL OnInitDialog();
 };

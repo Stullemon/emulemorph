@@ -139,7 +139,7 @@ protected:
 	CSimpleArray<const CKnownFile*> m_aKnownFiles;
 	CFileDetailDialogInfo	m_wndInfo;
 	CFileDetailDialogName	m_wndName;
-	CFileInfoDialog			m_wndVideo;
+	CFileInfoDialog			m_wndMediaInfo;
 	CCommentDialogLst		m_wndComments;
 	CMetaDataDlg			m_wndMetaData;
 	CED2kLinkDlg			m_wndFileLink;

@@ -15,9 +15,15 @@ public:
 	void Localize(void);
 
 protected:
-	CComboBox m_colors, m_cratio;
+	CComboBox m_colors;
+	CComboBox m_cratio;
 	CColorButton m_ctlColor;
-	int mystats1, mystats2, mystats3;
+	CSliderCtrl m_ctlGraphsUpdate;
+	CSliderCtrl m_ctlGraphsAvgTime;
+	CSliderCtrl m_ctlStatsUpdate;
+	int m_iGraphsUpdate;
+	int m_iGraphsAvgTime;
+	int m_iStatsUpdate;
 	BOOL m_bModified;
 
 	void ShowInterval();

@@ -82,6 +82,7 @@ void HTMLParse(CString &buffer); // Added by N_OxYdE
 CString URLDecode(const CString& sIn);
 CString URLEncode(const CString& sIn);
 CString MakeStringEscaped(CString in);
+CString RemoveAmbersand(const CString& rstr);
 CString	StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces = true);
 CString	CreateED2kLink(const CAbstractFile* f, bool bEscapeLink = true);
 CString	CreateHTMLED2kLink(const CAbstractFile* f);
@@ -107,6 +108,7 @@ CString StringLimit(CString in,uint16 length);
 CString CleanupFilename(CString filename);
 bool ExpandEnvironmentStrings(CString& rstrStrings);
 int CompareLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2);
+void StripTrailingCollon(CString& rstr);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,6 +195,7 @@ int GetMaxWindowsTCPConnections();
 #define _WINVER_2K_		0x0005
 #define _WINVER_XP_		0x0105
 WORD DetectWinVersion();
+int			IsRunningXPSP2();
 uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory);
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
 int GetAppImageListColorFlag();

@@ -34,6 +34,7 @@
 #include "ServerWnd.h"
 #include "IRCWnd.h"
 #include "StringConversion.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -148,7 +149,7 @@ void CIrcMain::ProcessLink( CString ed2kLink )
 	} 
 	catch(...) 
 	{
-		AddLogLine(true, GetResString(IDS_LINKNOTADDED));
+		LogWarning(LOG_STATUSBAR, GetResString(IDS_LINKNOTADDED));
 		ASSERT(0);
 	}
 }

@@ -8,8 +8,8 @@
 #else
 #define	CATCH_DFLT_ALL(fname) \
 	catch(...){ \
-		if (thePrefs.GetVerbose() && theApp.emuledlg) \
-			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown exception in ") fname); \
+		if (thePrefs.GetVerbose()) \
+			DebugLogError(LOG_STATUSBAR, _T("Unknown exception in ") fname); \
 		ASSERT(0); \
 	}
 #endif
@@ -25,13 +25,13 @@
 		LPCSTR pszClassName = (pRuntimeClass) ? pRuntimeClass->m_lpszClassName : NULL; \
 		if (!pszClassName) \
 			pszClassName = "CException"; \
-		if (thePrefs.GetVerbose() && theApp.emuledlg) \
-			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown %hs exception in ") fname _T(" - %s"), pszClassName, szError); \
+		if (thePrefs.GetVerbose()) \
+			DebugLogError(LOG_STATUSBAR, _T("Unknown %hs exception in ") fname _T(" - %s"), pszClassName, szError); \
 		e->Delete(); \
 	} \
 	catch(CString strError){ \
-		if (thePrefs.GetVerbose() && theApp.emuledlg) \
-			theApp.emuledlg->AddDebugLogLine(false, _T("Unknown CString exception in ") fname _T(" - %s"), strError); \
+		if (thePrefs.GetVerbose()) \
+			DebugLogError(LOG_STATUSBAR, _T("Unknown CString exception in ") fname _T(" - %s"), strError); \
 	}
 
 

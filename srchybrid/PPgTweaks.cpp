@@ -27,6 +27,7 @@
 #include "SharedFilesWnd.h"
 #include "ServerWnd.h"
 #include "HelpIDs.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -79,6 +80,7 @@ CPPgTweaks::CPPgTweaks()
 	m_iFilterLANIPs = 0;
 	m_iExtControls = 0;
 	m_uServerKeepAliveTimeout = 0;
+	m_iSparsePartFiles = 0;
 	m_iCheckDiskspace = 0;
 	m_fMinFreeDiskSpaceMB = 0.0F;
 	(void)m_sYourHostname;
@@ -89,7 +91,6 @@ CPPgTweaks::CPPgTweaks()
 	// End emulEspaña
 	m_iLogLevel = 0;
 	m_iDisablePeerCache = 0;
-
 	// ZZ:UploadSpeedSense -->
     m_iDynUpEnabled = 0;
     m_iDynUpMinUpload = 0;
@@ -97,7 +98,6 @@ CPPgTweaks::CPPgTweaks()
     m_iDynUpGoingUpDivider = 0;
     m_iDynUpGoingDownDivider = 0;
     m_iDynUpNumberOfPings = 0;
-	// ZZ:UploadSpeedSense <--
 	// ZZ:DownloadManager
     m_iA4AFSaveCpu = 0; 
 
@@ -129,6 +129,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiFilterLANIPs = NULL;
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
+	m_htiSparsePartFiles = NULL;
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
@@ -139,7 +140,6 @@ CPPgTweaks::CPPgTweaks()
 	// End emulEspaña
 	m_htiLogLevel = NULL;
 	m_htiDisablePeerCache = NULL;
-
 	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;
@@ -152,8 +152,6 @@ CPPgTweaks::CPPgTweaks()
     m_htiDynUpGoingUpDivider = NULL;
     m_htiDynUpGoingDownDivider = NULL;
     m_htiDynUpNumberOfPings = NULL;
-	// ZZ:UploadSpeedSense <--
-
     // ZZ:DownloadManager
     m_htiA4AFSaveCpu = NULL;
 	m_htiLogA4AF = NULL;
@@ -168,6 +166,8 @@ CPPgTweaks::~CPPgTweaks()
 void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_FILEBUFFERSIZE, m_ctlFileBuffSize);
+	DDX_Control(pDX, IDC_QUEUESIZE, m_ctlQueueSize);
 	DDX_Control(pDX, IDC_EXT_OPTS, m_ctrlTreeOptions);
 	if (!m_bInitializedTreeOpts)
 	{
@@ -204,13 +204,12 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiExtControls = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWEXTSETTINGS), TVI_ROOT, m_iExtControls);
         m_htiA4AFSaveCpu = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SAVE_CPU), TVI_ROOT, m_iA4AFSaveCpu); // ZZ:DownloadManager
 
+		m_htiSparsePartFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SPARSEPARTFILES), TVI_ROOT, m_iSparsePartFiles);
 		m_htiCheckDiskspace = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CHECKDISKSPACE), TVI_ROOT, m_iCheckDiskspace);	// SLUGFILLER: checkDiskspace
 		m_htiMinFreeDiskSpace = m_ctrlTreeOptions.InsertItem(GetResString(IDS_MINFREEDISKSPACE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiCheckDiskspace);
 		m_ctrlTreeOptions.AddEditBox(m_htiMinFreeDiskSpace, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		// itsonlyme: hostnameSource
 		m_htiYourHostname = m_ctrlTreeOptions.InsertItem(GetResString(IDS_YOURHOSTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEdit));
-		// itsonlyme: hostnameSource
 		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), TVI_ROOT, m_iDisablePeerCache);
 
 		m_htiLog2Disk = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_LOG2DISK), TVI_ROOT, m_iLog2Disk);
@@ -275,7 +274,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
-
 		// ZZ:UploadSpeedSense -->
 		m_ctrlTreeOptions.Expand(m_htiDynUp, TVE_EXPAND);
         m_ctrlTreeOptions.Expand(m_htiDynUpPingToleranceGroup, TVE_EXPAND);
@@ -315,6 +313,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_iFilterLANIPs);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtControls, m_iExtControls);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiServerKeepAliveTimeout, m_uServerKeepAliveTimeout);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSparsePartFiles, m_iSparsePartFiles);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_iCheckDiskspace);	// SLUGFILLER: checkDiskspace
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
@@ -408,6 +407,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iFilterLANIPs = thePrefs.filterLANIPs;
 	m_iExtControls = thePrefs.m_bExtControls;
 	m_uServerKeepAliveTimeout = thePrefs.m_dwServerKeepAliveTimeout / 60000;
+	m_iSparsePartFiles = thePrefs.m_bSparsePartFiles;
 	m_iCheckDiskspace = thePrefs.checkDiskspace;	// SLUGFILLER: checkDiskspace
 	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
 	m_sYourHostname = thePrefs.GetYourHostname();	// itsonlyme: hostnameSource
@@ -435,16 +435,20 @@ BOOL CPPgTweaks::OnInitDialog()
 	InitWindowStyles(this);
 
 	m_iFileBufferSize = thePrefs.m_iFileBufferSize;
-	//MORPH - Changed by SiRoB, Rise the file buffer to 3MBytes
-	/*
-	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(16, (1024+512)*2, TRUE);
-	*/
-	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetRange(16, (1024+512)*2, TRUE);
-	((CSliderCtrl*)GetDlgItem(IDC_FILEBUFFERSIZE))->SetPos(m_iFileBufferSize/1024);
+	m_ctlFileBuffSize.SetRange(16, 1024+512, TRUE);
+	int iMin, iMax;
+	m_ctlFileBuffSize.GetRange(iMin, iMax);
+	m_ctlFileBuffSize.SetPos(m_iFileBufferSize/1024);
+	int iPage = 128;
+	for (int i = ((iMin+iPage-1)/iPage)*iPage; i < iMax; i += iPage)
+		m_ctlFileBuffSize.SetTic(i);
+	m_ctlFileBuffSize.SetPageSize(iPage);
 
 	m_iQueueSize = thePrefs.m_iQueueSize;
-	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetRange(20, 100, TRUE);
-	((CSliderCtrl*)GetDlgItem(IDC_QUEUESIZE))->SetPos(m_iQueueSize/100);
+	m_ctlQueueSize.SetRange(20, 100, TRUE);
+	m_ctlQueueSize.SetPos(m_iQueueSize/100);
+	m_ctlQueueSize.SetTicFreq(10);
+	m_ctlQueueSize.SetPageSize(10);
 
 	Localize();
 
@@ -497,8 +501,8 @@ BOOL CPPgTweaks::OnApply()
 
 		//reset path
 		// Mighty Knife: log files are places in the "log" folder
-		VERIFY( theLog.SetFilePath(thePrefs.GetAppDir() + _T("logs\\eMule.log")) );
-		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetAppDir() + _T("logs\\eMule_Verbose.log")) );
+		VERIFY( theLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule.log")) );
+		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule_Verbose.log")) );
 		// [end] Mighty Knife
 
 		//open log again
@@ -545,6 +549,7 @@ BOOL CPPgTweaks::OnApply()
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 	}
 	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
+	thePrefs.m_bSparsePartFiles = m_iSparsePartFiles;
 	thePrefs.checkDiskspace = m_iCheckDiskspace;	// SLUGFILLER: checkDiskspace
 	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	thePrefs.SetYourHostname(m_sYourHostname);	// itsonlyme: hostnameSource
@@ -581,15 +586,15 @@ BOOL CPPgTweaks::OnApply()
 
 void CPPgTweaks::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	if (pScrollBar == GetDlgItem(IDC_FILEBUFFERSIZE))
+	if (pScrollBar->GetSafeHwnd() == m_ctlFileBuffSize.m_hWnd)
 	{
-		m_iFileBufferSize = ((CSliderCtrl*)pScrollBar)->GetPos() * 1024;
+		m_iFileBufferSize = m_ctlFileBuffSize.GetPos() * 1024;
 	CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
 		SetModified(TRUE);
 	}
-	else if (pScrollBar == GetDlgItem(IDC_QUEUESIZE))
+	else if (pScrollBar->GetSafeHwnd() == m_ctlQueueSize.m_hWnd)
 	{
 		m_iQueueSize = ((CSliderCtrl*)pScrollBar)->GetPos() * 100;
 		CString temp;
@@ -637,6 +642,7 @@ void CPPgTweaks::Localize(void)
 		if (m_htiFilterLANIPs) m_ctrlTreeOptions.SetItemText(m_htiFilterLANIPs, GetResString(IDS_PW_FILTER));
 		if (m_htiExtControls) m_ctrlTreeOptions.SetItemText(m_htiExtControls, GetResString(IDS_SHOWEXTSETTINGS));
 		if (m_htiServerKeepAliveTimeout) m_ctrlTreeOptions.SetEditLabel(m_htiServerKeepAliveTimeout, GetResString(IDS_SERVERKEEPALIVETIMEOUT));
+		if (m_htiSparsePartFiles) m_ctrlTreeOptions.SetItemText(m_htiSparsePartFiles, GetResString(IDS_SPARSEPARTFILES));
 		if (m_htiCheckDiskspace) m_ctrlTreeOptions.SetItemText(m_htiCheckDiskspace, GetResString(IDS_CHECKDISKSPACE));	// SLUGFILLER: checkDiskspace
 		if (m_htiMinFreeDiskSpace) m_ctrlTreeOptions.SetEditLabel(m_htiMinFreeDiskSpace, GetResString(IDS_MINFREEDISKSPACE));
 		if (m_htiYourHostname) m_ctrlTreeOptions.SetEditLabel(m_htiYourHostname, GetResString(IDS_YOURHOSTNAME));	// itsonlyme: hostnameSource
@@ -702,6 +708,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiFilterLANIPs = NULL;
 	m_htiExtControls = NULL;
 	m_htiServerKeepAliveTimeout = NULL;
+	m_htiSparsePartFiles = NULL;
 	m_htiCheckDiskspace = NULL;	// SLUGFILLER: checkDiskspace
 	m_htiMinFreeDiskSpace = NULL;
 	m_htiYourHostname = NULL;	// itsonlyme: hostnameSource
@@ -711,7 +718,6 @@ void CPPgTweaks::OnDestroy()
 	*/
 	// End emulEspaña
 	m_htiDisablePeerCache = NULL;
-	
 	// ZZ:UploadSpeedSense -->
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;

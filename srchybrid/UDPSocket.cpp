@@ -32,6 +32,7 @@
 #include "emuledlg.h"
 #include "ServerWnd.h"
 #include "SearchDlg.h"
+#include "Log.h"
 #include "FirewallOpener.h" //MORPH - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
 #ifdef _DEBUG
@@ -95,13 +96,13 @@ bool CUDPSocket::Create(){
 		//MORPH START - Changed by SiRoB, [MoNKi: -UPnPNAT Support-]
 		/*
 		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
-			AddLogLine(true, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
+			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
 			return false;
 		}
 		return true;
 		*/
 		if (!CAsyncSocket::Create(thePrefs.GetServerUDPPort()==0xFFFF ? 0 : thePrefs.GetServerUDPPort(), SOCK_DGRAM, FD_READ | FD_WRITE)){
-			AddLogLine(true, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
+			LogError(LOG_STATUSBAR, _T("Error: Server UDP socket: Failed to create server UDP socket on port - %s"), GetErrorMessage(GetLastError()));
 			return false;
 		}
 		else {
@@ -112,9 +113,9 @@ bool CUDPSocket::Create(){
 			//MORPH START -, Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 			if(thePrefs.GetICFSupport() && thePrefs.GetICFSupportServerUDP()){
 				if (theApp.m_pFirewallOpener->OpenPort(port, NAT_PROTOCOL_UDP, EMULE_DEFAULTRULENAME_SERVERUDP, thePrefs.IsOpenPortsOnStartupEnabled() || thePrefs.GetServerUDPPort()==0xFFFF))
-					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_S), port);
+					Log(GetResString(IDS_FO_TEMPUDP_S), port);
 				else
-					theApp.QueueLogLine(false, GetResString(IDS_FO_TEMPUDP_F), port);
+					Log(GetResString(IDS_FO_TEMPUDP_F), port);
 			}
 			//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
@@ -135,7 +136,7 @@ bool CUDPSocket::Create(){
 void CUDPSocket::OnReceive(int nErrorCode){
 	if (nErrorCode){
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Error: Server UDP socket: Receive failed - %s"), GetErrorMessage(nErrorCode, 1));
+			DebugLogError(_T("Error: Server UDP socket: Receive failed - %s"), GetErrorMessage(nErrorCode, 1));
 	}
 
 	uint8 buffer[5000];
@@ -152,23 +153,23 @@ void CUDPSocket::OnReceive(int nErrorCode){
 	else
 	{
 		DWORD dwError = WSAGetLastError();
-		if (thePrefs.GetVerbose())
+		if (dwError == WSAECONNRESET)
 		{
 			// Depending on local and remote OS and depending on used local (remote?) router we may receive
 			// WSAECONNRESET errors. According some KB articels, this is a special way of winsock to report 
 			// that a sent UDP packet was not received by the remote host because it was not listening on 
 			// the specified port -> no server running there.
 			//
-			CString strServerInfo;
-			if (iSockAddrLen > 0 && sockAddr.sin_addr.S_un.S_addr != 0 && sockAddr.sin_addr.S_un.S_addr != INADDR_NONE)
-				strServerInfo.Format(_T(" from %s:%u"), ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port));
-			AddDebugLogLine(false, _T("Error: Server UDP socket, failed to receive data%s: %s"), strServerInfo, GetErrorMessage(dwError, 1));
-		}
-		if (dwError == WSAECONNRESET)
-		{
 			CServer* pServer = theApp.serverlist->GetServerByAddress(ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port)-4);
 			if (pServer && pServer->GetChallenge()==0)
 				pServer->AddFailedCount();
+		}
+		if (thePrefs.GetVerbose() && dwError != WSAECONNRESET)
+		{
+			CString strServerInfo;
+			if (iSockAddrLen > 0 && sockAddr.sin_addr.S_un.S_addr != 0 && sockAddr.sin_addr.S_un.S_addr != INADDR_NONE)
+				strServerInfo.Format(_T(" from %s:%u"), ipstr(sockAddr.sin_addr), ntohs(sockAddr.sin_port));
+			DebugLogError(_T("Error: Server UDP socket, failed to receive data%s: %s"), strServerInfo, GetErrorMessage(dwError, 1));
 		}
 	}
 }
@@ -468,7 +469,7 @@ void CUDPSocket::ProcessPacketError(UINT size, UINT opcode, uint32 nIP, uint16 n
 		CServer* pServer = theApp.serverlist->GetServerByAddress(ipstr(nIP), nTCPPort);
 		if (pServer)
 			strName = _T(" (") + pServer->GetListName() + _T(")");
-		AddDebugLogLine(false, _T("Error: Failed to process server UDP packet from %s:%u%s opcode=0x%02x size=%u - %s"), ipstr(nIP), nTCPPort, strName, opcode, size, pszError);
+		DebugLogWarning(false, _T("Error: Failed to process server UDP packet from %s:%u%s opcode=0x%02x size=%u - %s"), ipstr(nIP), nTCPPort, strName, opcode, size, pszError);
 	}
 }
 
@@ -501,7 +502,7 @@ void CUDPSocket::AsyncResolveDNS(LPCSTR lpszHostAddressA, UINT nHostPort)
 
 		if (m_DnsTaskHandle == NULL){
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for '%hs' - %s"), lpszHostAddressA, GetErrorMessage(GetLastError(), 1));
+				DebugLogWarning(_T("Error: Server UDP socket: Failed to resolve address for '%hs' - %s"), lpszHostAddressA, GetErrorMessage(GetLastError(), 1));
 			delete[] m_sendbuffer;
 			m_sendbuffer = NULL;
 			delete m_cur_server;
@@ -519,7 +520,7 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 	/* An asynchronous database routine completed. */
 	if (WSAGETASYNCERROR(lp) != 0){
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s) - %s"), m_cur_server ? m_cur_server->GetListName() : _T(""), m_cur_server ? m_cur_server->GetAddress() : _T(""), GetErrorMessage(WSAGETASYNCERROR(lp), 1));
+			DebugLogWarning(_T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s) - %s"), m_cur_server ? m_cur_server->GetListName() : _T(""), m_cur_server ? m_cur_server->GetAddress() : _T(""), GetErrorMessage(WSAGETASYNCERROR(lp), 1));
 		delete[] m_sendbuffer;
 		m_sendbuffer = NULL;
 		delete m_cur_server;
@@ -571,7 +572,7 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 		else{
 			// still no valid IP for this server - delete packet
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
+				DebugLogWarning(_T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
 			delete m_cur_server;
 			m_cur_server = NULL;
 			delete[] m_sendbuffer;
@@ -584,7 +585,7 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 void CUDPSocket::OnSend(int nErrorCode){
 	if (nErrorCode){
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to send packet - %s"), GetErrorMessage(nErrorCode, 1));
+			DebugLogError(_T("Error: Server UDP socket: Failed to send packet - %s"), GetErrorMessage(nErrorCode, 1));
 		return;
 	}
 	m_bWouldBlock = false;
@@ -675,7 +676,7 @@ void CUDPSocket::SendPacket(Packet* packet,CServer* host){
 	USES_CONVERSION;
 	// if the last DNS query did not yet return, we may still have a packet queued - delete it
 	if (thePrefs.GetVerbose() && m_cur_server)
-		AddDebugLogLine(false, _T("Warning: Server UDP socket: Timeout occured when trying to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
+		DebugLogWarning(_T("Warning: Server UDP socket: Timeout occured when trying to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
 	delete m_cur_server;
 	m_cur_server = NULL;
 	delete[] m_sendbuffer;

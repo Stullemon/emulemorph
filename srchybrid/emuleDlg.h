@@ -51,7 +51,7 @@ class CMuleSystrayDlg;
 #define	EMULE_HOTMENU_ACCEL		'x'
 #define	EMULSKIN_BASEEXT		_T("eMuleSkin")
 
-class CemuleDlg : public CTrayDialog, public CLoggable
+class CemuleDlg : public CTrayDialog
 {
 	friend class CMuleToolbarCtrl;
 // Konstruktion
@@ -73,7 +73,7 @@ public:
 	void			Localize();
 
 	// Logging
-	void			AddLogText(bool addtostatusbar,const CString& txt, bool bDebug);
+	void			AddLogText(UINT uFlags, LPCTSTR pszText);
 	void			ResetLog();
 	void			ResetDebugLog();
 	CString			GetLastLogEntry();
@@ -110,9 +110,6 @@ public:
 	CKademliaWnd*	kademliawnd;
 	CWnd*			activewnd;
 	uint8			status;
-	CFont			m_fontHyperText;
-	CFont			m_fontMarlett;
-	CFont			m_fontLog;
 
 protected:
 	HICON m_hIcon;
@@ -207,6 +204,10 @@ private:
 	CMenu			m_SysMenuOptions;
 	CMenu			m_menuUploadCtrl;
 	CMenu			m_menuDownloadCtrl;
+	char			m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH START - Added by SiRoB, Version check
+	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
+	//MORPH END   - Added by SiRoB, Version check
 
 	UINT_PTR m_hTimer;
 	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
@@ -224,12 +225,6 @@ private:
 	bool notifierenabled;					  //<<-- enkeyDEV(kei-kun) -Quick disable/enable notifier-
 	void ShowToolPopup(bool toolsonly=false);
 	void SetAllIcons();
-
-	
-	char m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
-	//MORPH START - Added by SiRoB, Version check
-	char m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
-	//MORPH END   - Added by SiRoB, Version check
 
 //Commander - Added: Invisible Mode [TPT] - Start	
 public:
@@ -253,8 +248,6 @@ private:
 	//Commander - Added: Invisible Mode [TPT] - End
 //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
 	HICON	sourceTrayMessage;
-	HICON	sourceTrayMessageLow;
-	HICON	sourceTrayMessageGrey;
 //Commander - Added: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 };
 

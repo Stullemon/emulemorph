@@ -96,6 +96,7 @@ protected:
 	int AddCategorie(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);
 	*/
 	void EditCatTabLabel(int index,CString newlabel);
+	void EditCatTabLabel(int index);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

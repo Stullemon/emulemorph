@@ -103,7 +103,7 @@ void CSplashScreen::OnPaint()
 			dc.BitBlt(0, 0, BM.bmWidth, BM.bmHeight, &dcMem, 0, 0, SRCCOPY);
 			if (pOldBM)
 				dcMem.SelectObject(pOldBM);
-			CRect rc(0, BM.bmHeight * 0.95, BM.bmWidth, BM.bmHeight);//Commander - Changed
+			CRect rc(2, 0, BM.bmWidth, BM.bmHeight);//Commander - Changed
 			//Commander - Removed
 			//dc.FillSolidRect(rc.left+1, rc.top+1, rc.Width()-2, rc.Height()-2, RGB(255,255,255));
 
@@ -112,11 +112,16 @@ void CSplashScreen::OnPaint()
 			lf.lfWeight = FW_BOLD;
 			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
 			_tcscpy(lf.lfFaceName, _T("Arial"));
-			COLORREF oldclr = dc.SetTextColor(RGB(255,255,255));//Commander: Set white text color
+			COLORREF oldclr = dc.SetTextColor(RGB(128,128,255));//Commander: Set white text color
 			int iOMode = dc.SetBkMode(TRANSPARENT);//Commander: Make bg transparent
 			CFont font;
 			font.CreateFontIndirect(&lf);
 			CFont* pOldFont = dc.SelectObject(&font);
+			CString strAppVersion(_T("eMule ") + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
+#ifdef _UNICODE
+			strAppVersion += _T(" Unicode");
+#endif
+			dc.DrawText(strAppVersion, &rc, DT_LEFT | DT_NOPREFIX | DT_TOP);
 			//Commander - Added: OptimizeMode - Start
 			CString mode;
 			switch (get_cpu_type())
@@ -132,7 +137,8 @@ void CSplashScreen::OnPaint()
 				mode += GetResString(IDS_SSE_ACTIVE);
 				break;
 			}
-			rc.top += dc.DrawText( mode, &rc, DT_RIGHT | DT_NOPREFIX);
+			rc.top = 0.95 * BM.bmHeight;
+			rc.top += dc.DrawText( mode, &rc, DT_RIGHT | DT_NOPREFIX | DT_BOTTOM);
 			if (pOldFont)
 				dc.SetBkMode(iOMode);
 			    dc.SetTextColor(oldclr);

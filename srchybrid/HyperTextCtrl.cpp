@@ -951,7 +951,7 @@ LRESULT CHyperTextCtrl::OnCreate(WPARAM wParam, LPARAM lParam){
 	m_bDontUpdateSizeInfo = false;
 	m_iHorzPos = 0;
 	m_iVertPos = 0;
-	m_Font = &theApp.emuledlg->m_fontHyperText;
+	m_Font = &theApp.m_fontHyperText;
 	SetColors(); 
 	LoadHandCursor();
 	m_DefaultCursor = LoadCursor(NULL,IDC_ARROW);

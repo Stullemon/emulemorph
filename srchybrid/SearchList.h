@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "Loggable.h"
 #include "KnownFile.h"
 
 class CFileDataIO;
@@ -38,6 +37,9 @@ public:
 	uint32	GetSourceCount() const;
 	uint32	AddCompleteSources(uint32 count);
 	uint32	GetCompleteSourceCount() const;
+	int		IsComplete() const;
+	int		IsComplete(UINT uSources, UINT uCompleteSources) const;
+	time_t	GetLastSeenComplete() const;
 	uint32	GetSearchID() const { return m_nSearchID; }
 	LPCTSTR	GetFakeComment() const { return m_pszIsFake; } //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	LPCTSTR GetDirectory() const { return m_pszDirectory; }
@@ -147,7 +149,7 @@ __inline bool __stdcall operator==(const CSearchFile::SClient& c1, const CSearch
 }
 
 
-class CSearchList: public CLoggable
+class CSearchList
 {
 friend class CSearchListCtrl;
 public:

@@ -72,7 +72,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	GetFont()->GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
 	bold.CreateFontIndirect(&lf);
-	m_ctrlStatisticsFrm.Init(_T("Statistics"));
+	m_ctrlStatisticsFrm.Init(_T("StatsDetail"));
     m_ctrlStatisticsFrm.SetFont(&bold); // should run Init() *first* before setting font bold. 
     m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS)); // i_a: XXX: moved here from 'Localize()' 
     
@@ -249,13 +249,14 @@ void CSharedFilesWnd::OnSysColorChange()
 {
 	CResizableDialog::OnSysColorChange();
 	SetAllIcons();
+	sharedfilesctrl.CreateMenues();
 }
 
 void CSharedFilesWnd::SetAllIcons()
 {
 	if (icon_files)
 		VERIFY( DestroyIcon(icon_files) );
-	icon_files = theApp.LoadIcon(_T("SharedFiles"), 16, 16);
+	icon_files = theApp.LoadIcon(_T("SharedFilesList"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_FILES_ICO))->SetIcon(icon_files);
 }
 

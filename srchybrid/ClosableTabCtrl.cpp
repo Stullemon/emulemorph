@@ -34,6 +34,7 @@ IMPLEMENT_DYNAMIC(CClosableTabCtrl, CTabCtrl)
 
 BEGIN_MESSAGE_MAP(CClosableTabCtrl, CTabCtrl)
 	ON_WM_LBUTTONUP()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_CREATE()
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_CONTEXTMENU()
@@ -82,6 +83,22 @@ void CClosableTabCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	
 	CTabCtrl::OnLButtonDown(nFlags, point);
+}
+
+void CClosableTabCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	int iTabs = GetItemCount();
+	for (int i = 0; i < iTabs; i++)
+	{
+		CRect rcItem;
+		GetItemRect(i, rcItem);
+		if (rcItem.PtInRect(point))
+		{
+			GetParent()->SendMessage(WM_DBLCLICKTAB, (WPARAM)i);
+			return;
+		}
+	}
+	CTabCtrl::OnLButtonDblClk(nFlags, point);
 }
 
 void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)

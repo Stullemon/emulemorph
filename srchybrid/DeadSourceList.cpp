@@ -21,6 +21,14 @@
 #include "opcodes.h"
 #include "updownclient.h"
 #include "partfile.h"
+#include "Log.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
 
 #define	CLEANUPTIME			MIN2MS(60)
 

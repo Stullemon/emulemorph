@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "MapKey.h"
-#include "Loggable.h"
 
 class CKnownFileList;
 class CServerConnect;
@@ -31,7 +30,7 @@ struct UnknownFile_Struct{
 	CString strDirectory;
 };
 
-class CSharedFileList: public CLoggable
+class CSharedFileList
 {
 	friend class CSharedFilesCtrl;
 	friend class CClientReqSocket;
@@ -49,10 +48,11 @@ public:
 	CKnownFile* GetFileByID(const uchar* filehash) const;
 	CKnownFile*	GetFileByIndex(int index);
 	bool	IsFilePtrInList(const CKnownFile* file) const;
+	void	PublishNextTurn()	{ m_lastPublishED2KFlag=true;	}
 	void	CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeMemFile* files, CServer* pServer, CUpDownClient* pClient = NULL);
 	uint64	GetDatasize(uint64 &pbytesLargest) const;
 	uint16	GetCount()	{return m_Files_map.GetCount(); }
-	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER: SafeHash
+	uint16	GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
 	void	AddFilesFromDirectory(const CString& rstrDirectory);
 	void	HashFailed(UnknownFile_Struct* hashed);		// SLUGFILLER: SafeHash
@@ -83,7 +83,7 @@ private:
 	CServerConnect*		server;
 	CSharedFilesCtrl*	output;
 	uint32 m_lastPublishED2K;
-	uint32 m_lastPublishED2KFlag;
+	bool	 m_lastPublishED2KFlag;
 	int m_currFileSrc;
 	int m_currFileKey;
 	uint32 m_lastPublishKadSrc;

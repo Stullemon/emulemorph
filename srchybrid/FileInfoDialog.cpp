@@ -1264,10 +1264,10 @@ void WarnAboutWrongFileExtension(SMediaInfo* mi, LPCTSTR pszFileName, LPCTSTR ps
 	if (!mi->strInfo.str.IsEmpty())
 		mi->strInfo.str += _T("\r\n");
 	mi->strInfo.str.AppendFormat(
-		_T("Warning: The file extension of \"%s\" does not match the file extension ") 
-		_T("typically used for that file format. You may want to rename the file to ")
-		_T("use one of those file extension \"%s\" for properly using or viewing that ")
-		_T("file format."), pszFileName, pszExtensions);
+		_T("Warning: The file extension of \"%s\" does not match the file extension\r\n") 
+		_T("typically used for that file format. You may want to rename the file to\r\n")
+		_T("use one of those file extension \"%s\"\r\n")
+		_T("for properly using or viewing that file format.\r\n"), pszFileName, pszExtensions);
 }
 
 bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool bSingleFile)
@@ -1478,13 +1478,12 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				LPCSTR desc = frame->GetDescription();
 				if (!desc)
 					desc = frame->GetTextID();
-				mi->strInfo << _T("   ") << A2CT(desc) << _T(":\t");
 
+				CStringStream strFidInfo;
 				ID3_FrameID eFrameID = frame->GetID();
 				switch (eFrameID)
 				{
 				case ID3FID_ALBUM:
-				case ID3FID_BPM:
 				case ID3FID_COMPOSER:
 				case ID3FID_CONTENTTYPE:
 				case ID3FID_COPYRIGHT:
@@ -1499,7 +1498,6 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_SUBTITLE:
 				case ID3FID_INITIALKEY:
 				case ID3FID_LANGUAGE:
-				case ID3FID_SONGLEN:
 				case ID3FID_MEDIATYPE:
 				case ID3FID_ORIGALBUM:
 				case ID3FID_ORIGFILENAME:
@@ -1523,7 +1521,31 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_YEAR:
 				{
 					char *sText = ID3_GetString(frame, ID3FN_TEXT);
-					mi->strInfo << sText << _T("\n");
+					CString strText(sText);
+					strText.Trim();
+					strFidInfo << strText;
+					delete [] sText;
+					break;
+				}
+				case ID3FID_BPM:
+				{
+					char *sText = ID3_GetString(frame, ID3FN_TEXT);
+					long lLength = atol(sText);
+					if (lLength) // check for != "0"
+						strFidInfo << sText;
+					delete [] sText;
+					break;
+				}
+				case ID3FID_SONGLEN:
+				{
+					char *sText = ID3_GetString(frame, ID3FN_TEXT);
+					long lLength = atol(sText) / 1000;
+					if (lLength)
+					{
+						CString strLength;
+						SecToTimeLength(lLength, strLength);
+						strFidInfo << strLength;
+					}
 					delete [] sText;
 					break;
 				}
@@ -1532,7 +1554,19 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					char
 					*sText = ID3_GetString(frame, ID3FN_TEXT),
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
-					mi->strInfo << _T("(") << sDesc << _T("): ") << sText << _T("\n");
+					CString strText(sText);
+					strText.Trim();
+					if (!strText.IsEmpty())
+					{
+						CString strDesc(sDesc);
+						strDesc.Trim();
+						if (!strDesc.IsEmpty())
+							strFidInfo << _T("(") << strDesc << _T(")");
+
+						if (!strDesc.IsEmpty())
+							strFidInfo << _T(": ");
+						strFidInfo << strText;
+					}
 					delete [] sText;
 					delete [] sDesc;
 					break;
@@ -1544,7 +1578,26 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					*sText = ID3_GetString(frame, ID3FN_TEXT),
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION),
 					*sLang = ID3_GetString(frame, ID3FN_LANGUAGE);
-					mi->strInfo << _T("(") << sDesc << _T(")[") << sLang << _T("]: ") << sText << _T("\n");
+					CString strText(sText);
+					strText.Trim();
+					if (!strText.IsEmpty())
+					{
+						CString strDesc(sDesc);
+						strDesc.Trim();
+						if (strDesc == _T("ID3v1 Comment"))
+							strDesc.Empty();
+						if (!strDesc.IsEmpty())
+							strFidInfo << _T("(") << strDesc << _T(")");
+
+						CString strLang(sLang);
+						strLang.Trim();
+						if (!strLang.IsEmpty())
+							strFidInfo << _T("[") << strLang << _T("]");
+
+						if (!strDesc.IsEmpty() || !strLang.IsEmpty())
+							strFidInfo << _T(": ");
+						strFidInfo << strText;
+					}
 					delete [] sText;
 					delete [] sDesc;
 					delete [] sLang;
@@ -1560,7 +1613,9 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_WWWRADIOPAGE:
 				{
 					char *sURL = ID3_GetString(frame, ID3FN_URL);
-					mi->strInfo << sURL << _T("\n");
+					CString strURL(sURL);
+					strURL.Trim();
+					strFidInfo << strURL;
 					delete [] sURL;
 					break;
 				}
@@ -1569,7 +1624,19 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					char
 					*sURL = ID3_GetString(frame, ID3FN_URL),
 					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
-					mi->strInfo << _T("(") << sDesc << _T("): ") << sURL << _T("\n");
+					CString strURL(sURL);
+					strURL.Trim();
+					if (!strURL.IsEmpty())
+					{
+						CString strDesc(sDesc);
+						strDesc.Trim();
+						if (!strDesc.IsEmpty())
+							strFidInfo << _T("(") << strDesc << _T(")");
+
+						if (!strDesc.IsEmpty())
+							strFidInfo << _T(": ");
+						strFidInfo << strURL;
+					}
 					delete [] sURL;
 					delete [] sDesc;
 					break;
@@ -1580,12 +1647,11 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					for (size_t nIndex = 0; nIndex < nItems; nIndex++)
 					{
 						char *sPeople = ID3_GetString(frame, ID3FN_TEXT, nIndex);
-						mi->strInfo << sPeople;
+						strFidInfo << sPeople;
 						delete [] sPeople;
 						if (nIndex + 1 < nItems)
-							mi->strInfo << _T(", ");
+							strFidInfo << _T(", ");
 					}
-					mi->strInfo << _T("\n");
 					break;
 				}
 				case ID3FID_PICTURE:
@@ -1597,9 +1663,8 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					size_t
 					nPicType   = frame->GetField(ID3FN_PICTURETYPE)->Get(),
 					nDataSize  = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << _T("(") << sDesc << _T(")[") << sFormat << _T(", ")
-						<< nPicType << _T("]: ") << sMimeType << _T(", ") << nDataSize
-						<< _T(" bytes") << _T("\n");
+					strFidInfo << _T("(") << sDesc << _T(")[") << sFormat << _T(", ")
+							   << nPicType << _T("]: ") << sMimeType << _T(", ") << nDataSize << _T(" bytes");
 					delete [] sMimeType;
 					delete [] sDesc;
 					delete [] sFormat;
@@ -1613,9 +1678,8 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					*sFileName = ID3_GetString(frame, ID3FN_FILENAME);
 					size_t
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << _T("(") << sDesc << _T(")[")
-						<< sFileName << _T("]: ") << sMimeType << _T(", ") << nDataSize
-						<< _T(" bytes") << _T("\n");
+					strFidInfo << _T("(") << sDesc << _T(")[")
+						<< sFileName << _T("]: ") << sMimeType << _T(", ") << nDataSize << _T(" bytes");
 					delete [] sMimeType;
 					delete [] sDesc;
 					delete [] sFileName;
@@ -1625,15 +1689,14 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				{
 					char *sOwner = ID3_GetString(frame, ID3FN_OWNER);
 					size_t nDataSize = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << sOwner << _T(", ") << nDataSize
-						<< _T(" bytes") << _T("\n");
+					strFidInfo << sOwner << _T(", ") << nDataSize << _T(" bytes");
 					delete [] sOwner;
 					break;
 				}
 				case ID3FID_PLAYCOUNTER:
 				{
 					size_t nCounter = frame->GetField(ID3FN_COUNTER)->Get();
-					mi->strInfo << nCounter << _T("\n");
+					strFidInfo << nCounter;
 					break;
 				}
 				case ID3FID_POPULARIMETER:
@@ -1642,8 +1705,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					size_t
 					nCounter = frame->GetField(ID3FN_COUNTER)->Get(),
 					nRating = frame->GetField(ID3FN_RATING)->Get();
-					mi->strInfo << sEmail << _T(", counter=")
-						<< nCounter << _T(" rating=") << nRating << _T("\n");
+					strFidInfo << sEmail << _T(", counter=") << nCounter << _T(" rating=") << nRating;
 					delete [] sEmail;
 					break;
 				}
@@ -1654,8 +1716,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					size_t
 					nSymbol = frame->GetField(ID3FN_ID)->Get(),
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
-					mi->strInfo << _T("(") << nSymbol << _T("): ") << sOwner
-						<< _T(", ") << nDataSize << _T(" bytes") << _T("\n");
+					strFidInfo << _T("(") << nSymbol << _T("): ") << sOwner << _T(", ") << nDataSize << _T(" bytes");
 					break;
 				}
 				case ID3FID_SYNCEDLYRICS:
@@ -1667,30 +1728,28 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 					//nTimestamp = frame->GetField(ID3FN_TIMESTAMPFORMAT)->Get(),
 					nRating = frame->GetField(ID3FN_CONTENTTYPE)->Get();
 					//const char* format = (2 == nTimestamp) ? "ms" : "frames";
-					mi->strInfo << _T("(") << sDesc << _T(")[") << sLang << _T("]: ");
+					strFidInfo << _T("(") << sDesc << _T(")[") << sLang << _T("]: ");
 					switch (nRating)
 					{
-					case ID3CT_OTHER:    mi->strInfo << _T("Other"); break;
-					case ID3CT_LYRICS:   mi->strInfo << _T("Lyrics"); break;
-					case ID3CT_TEXTTRANSCRIPTION:     mi->strInfo << _T("Text transcription"); break;
-					case ID3CT_MOVEMENT: mi->strInfo << _T("Movement/part name"); break;
-					case ID3CT_EVENTS:   mi->strInfo << _T("Events"); break;
-					case ID3CT_CHORD:    mi->strInfo << _T("Chord"); break;
-					case ID3CT_TRIVIA:   mi->strInfo << _T("Trivia/'pop up' information"); break;
+					case ID3CT_OTHER:    strFidInfo << _T("Other"); break;
+					case ID3CT_LYRICS:   strFidInfo << _T("Lyrics"); break;
+					case ID3CT_TEXTTRANSCRIPTION:     strFidInfo << _T("Text transcription"); break;
+					case ID3CT_MOVEMENT: strFidInfo << _T("Movement/part name"); break;
+					case ID3CT_EVENTS:   strFidInfo << _T("Events"); break;
+					case ID3CT_CHORD:    strFidInfo << _T("Chord"); break;
+					case ID3CT_TRIVIA:   strFidInfo << _T("Trivia/'pop up' information"); break;
 					}
-					mi->strInfo << _T("\n");
 					/*ID3_Field* fld = frame->GetField(ID3FN_DATA);
 					if (fld)
 					{
 						ID3_MemoryReader mr(fld->GetRawBinary(), fld->BinSize());
 						while (!mr.atEnd())
 						{
-							mi->strInfo << io::readString(mr).c_str();
-							mi->strInfo << " [" << io::readBENumber(mr, sizeof(uint32)) << " "
+							strFidInfo << io::readString(mr).c_str();
+							strFidInfo << " [" << io::readBENumber(mr, sizeof(uint32)) << " "
 								<< format << "] ";
 						}
-					}
-					mi->strInfo << "\n";*/
+					}*/
 					delete [] sDesc;
 					delete [] sLang;
 					break;
@@ -1708,11 +1767,16 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 				case ID3FID_REVERB:
 				case ID3FID_SYNCEDTEMPO:
 				case ID3FID_METACRYPTO:
-					mi->strInfo << _T(" (unimplemented)") << _T("\n");
+					//strFidInfo << _T(" (unimplemented)");
 					break;
 				default:
-					mi->strInfo << _T(" frame") << _T("\n");
+					//strFidInfo << _T(" frame");
 					break;
+				}
+
+				if (!strFidInfo.str.IsEmpty())
+				{
+					mi->strInfo << _T("   ") << A2CT(desc) << _T(":\t") << strFidInfo.str << _T("\n");
 				}
 			}
 			delete iter;
@@ -2052,7 +2116,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 												mi->strInfo << _T("\n");
 										}
 										else{
-											TRACE("%s - Unknown stream type\n", pFile->GetFileName());
+											TRACE(_T("%s - Unknown stream type\n"), pFile->GetFileName());
 										}
 									}
 								}
@@ -2060,7 +2124,7 @@ bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool 
 						}
 					}
 					else{
-						TRACE("Failed to open \"%s\" - %s\n", pFile->GetFilePath(), GetErrorMessage(hr, 1));
+						TRACE(_T("Failed to open \"%s\" - %s\n"), pFile->GetFilePath(), GetErrorMessage(hr, 1));
 					}
 				}
 			}
@@ -2099,6 +2163,7 @@ void CFileInfoDialog::Localize()
 	GetDlgItem(IDC_FD_XI12)->SetWindowText( GetResString(IDS_SAMPLERATE)+_T(":"));
 
 	GetDlgItem(IDC_STATICFI)->SetWindowText( GetResString(IDS_FILEFORMAT)+_T(":"));
+	GetDlgItem(IDC_FD_XI14)->SetWindowText( GetResString(IDS_ASPECTRATIO)+_T(":"));
 }
 
 void CFileInfoDialog::AddFileInfo(LPCTSTR pszFmt, ...)

@@ -16,6 +16,7 @@
 #pragma once
 #include "KnownFile.h"
 #include "DeadSourceList.h"
+#include "CorruptionBlackBox.h"
 
 // khaos::kmod+ Save/Load Sources
 #include "SourceSaver.h" //<<-- enkeyDEV(Ottavio84) -New SLS-
@@ -269,7 +270,7 @@ public:
 	CString GetInfoSummary(CPartFile* partfile) const;
 
 //	int		GetCommonFilePenalty() const;
-	void	UpdateDisplayedInfo(boolean force=false);
+	void	UpdateDisplayedInfo(bool force = false);
 
 	uint8	GetCategory() const;
 	void	SetCategory(uint8 cat,bool setprio=true);
@@ -380,6 +381,12 @@ protected:
 	CSourceSaver m_sourcesaver; //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
 private:
+	BOOL 		PerformFileComplete(); // Lord KiRon
+	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
+	static UINT AFX_CDECL AllocateSpaceThread(LPVOID lpParam);
+	void		CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
+
+	CCorruptionBlackBox	m_CorruptionBlackBox;
 	static CBarShader s_LoadBar;
 	static CBarShader s_ChunkBar;
 	uint32	m_iLastPausePurge;
@@ -418,6 +425,7 @@ private:
 	DWORD	m_lastRefreshedDLDisplay;
 	CUpDownClientPtrList m_downloadingSourceList;
 	bool	m_bDeleteAfterAlloc;
+    bool	m_bpreviewprio;
 	// Barry - Buffered data to be written
 	CTypedPtrList<CPtrList, PartFileBufferedData*> m_BufferedData_list;
 	uint32 m_nTotalBufferData;
@@ -428,24 +436,15 @@ private:
 	uint32	m_nDlActiveTime;
 	uint32	m_tLastModified;	// last file modification time (NT's version of UTC), to be used for stats only!
 	uint32	m_tCreated;			// file creation time (NT's version of UTC), to be used for stats only!
+    uint32	m_random_update_wait;	
 	volatile EPartFileOp m_eFileOp;
 	volatile UINT m_uFileOpProgress;
 
-    uint32 m_random_update_wait;
-
-	BOOL 	PerformFileComplete(); // Lord KiRon
-	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
-	static UINT AFX_CDECL AllocateSpaceThread(LPVOID lpParam);
+    DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 
 	//Morph Start - added by AndCycle, itsonlyme: cacheUDPsearchResults
 	CRBMultiMap<UINT, SServer>	m_preferredServers;	// itsonlyme: cacheUDPsearchResults
 	//Morph End - added by AndCycle, itsonlyme: cacheUDPsearchResults
-
-	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
-
-    DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
-    bool m_bpreviewprio;
-
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;
 	// khaos::categorymod-

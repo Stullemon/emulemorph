@@ -38,6 +38,7 @@
 #include "SearchParams.h"
 #include "kademlia/kademlia/kademlia.h"
 #include "emuledlg.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

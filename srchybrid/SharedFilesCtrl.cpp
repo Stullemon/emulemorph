@@ -37,8 +37,9 @@
 #include "TransferWnd.h"
 #include "ClientList.h"
 #include "ED2kLinkDlg.h"
+#include "HighColorTab.hpp"
 #include "uploadqueue.h" //MORPH - Added by SiRoB, 
-
+#include "Log.h"
 // Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
 #include "MassRename.h"
@@ -94,7 +95,12 @@ CSharedFileDetailsSheet::CSharedFileDetailsSheet(const CTypedPtrList<CPtrList, C
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
 	m_wndMediaInfo.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndMediaInfo.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndMediaInfo.m_psp.pszIcon = _T("MEDIAINFO");
+
 	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndMetaData.m_psp.pszIcon = _T("METADATA");
 
 	m_wndMediaInfo.SetMyfile(&m_aKnownFiles);
 	if (m_aKnownFiles.GetSize() == 1 && thePrefs.IsExtControlsEnabled())
@@ -105,6 +111,8 @@ CSharedFileDetailsSheet::CSharedFileDetailsSheet(const CTypedPtrList<CPtrList, C
 		AddPage(&m_wndMetaData);
 
 	m_wndFileLink.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndFileLink.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndFileLink.m_psp.pszIcon = _T("ED2KLINK");
 	m_wndFileLink.SetMyfile(&m_aKnownFiles);
 	AddPage(&m_wndFileLink);
 
@@ -126,6 +134,7 @@ BOOL CSharedFileDetailsSheet::OnInitDialog()
 {		
 	EnableStackedTabs(FALSE);
 	BOOL bResult = CResizableSheet::OnInitDialog();
+	HighColorTab::UpdateImageList(*this);
 	InitWindowStyles(this);
 	EnableSaveRestore(_T("SharedFileDetailsSheet")); // call this after(!) OnInitDialog
 	if (m_aKnownFiles.GetSize() == 1)
@@ -1026,7 +1035,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		buffer.Format(_T(" (%u)"),thePrefs.GetHideOvershares());
 	m_HideOSMenu.ModifyMenu(MP_HIDEOS_DEFAULT, MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
 	if (iHideOS==-1)
-		buffer = _T("Set");
+		buffer = GetResString(IDS_EDIT);
 	else if (iHideOS==0)
 		buffer = GetResString(IDS_DISABLED);
 	else
@@ -1101,7 +1110,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		buffer.Format(_T(" (%u)"),thePrefs.GetPowerShareLimit());
 	m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT, MF_STRING,MP_POWERSHARE_LIMIT, GetResString(IDS_DEFAULT) + buffer);
 	if (iPowerShareLimit==-1)
-		buffer = _T("Set");
+		buffer = GetResString(IDS_EDIT);
 	else if (iPowerShareLimit==0)
 		buffer = GetResString(IDS_DISABLED);
 	else
@@ -1126,11 +1135,12 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	#endif
 	m_SharedFilesMenu.EnableMenuItem(Irc_SetSendLink, iSelectedItems == 1 && theApp.emuledlg->ircwnd->IsConnected() ? MF_ENABLED : MF_GRAYED);
 
-	CMenu WebMenu;
+	CTitleMenu WebMenu;
 	WebMenu.CreateMenu();
-	int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
+	WebMenu.AddMenuTitle(NULL, true);
+	int iWebMenuEntries = theWebServices.GetFileMenuEntries(&WebMenu);
 	UINT flag2 = (iWebMenuEntries == 0 || iSelectedItems != 1) ? MF_GRAYED : MF_STRING;
-	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
+	m_SharedFilesMenu.AppendMenu(flag2 | MF_POPUP, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES), _T("WEB"));
 	
 	GetPopupMenuPos(*this, point);
 	m_SharedFilesMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON,point.x,point.y,this);
@@ -1231,7 +1241,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						newpath.ReleaseBuffer();
 						if (_trename(file->GetFilePath(), newpath) != 0){
 							CString strError;
-							strError.Format(GetResString(IDS_ERR_RENAMESF), file->GetFilePath(), newpath, _tcserror(errno));
+							strError.Format(GetResString(IDS_ERR_RENAMESF), file->GetFilePath(), newpath, _tcserror(errno)); //UNICODE FIX
 							AfxMessageBox(strError);
 							break;
 						}
@@ -1763,16 +1773,16 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		// Let's hope the creator of this Worker thread has set the filename so we can
 		// display it...
 		if (worker->GetFilePath () == "") {
-			theApp.AddLogLine (false,_T("Warning: A File that should be renamed is not shared anymore. Renaming skipped."));
+			AddLogLine (false,_T("Warning: A File that should be renamed is not shared anymore. Renaming skipped."));
 		} else {
-			theApp.AddLogLine (false,_T("Warning: File '%s' is not shared anymore. File is not renamed."),
+			AddLogLine (false,_T("Warning: File '%s' is not shared anymore. File is not renamed."),
 				worker->GetFilePath ());
 		}
 		return 0;         
 	}
 	if (f->IsPartFile () && !worker->m_DontAddCRCAndSuffix) {     
 		// We can't add a CRC suffix to files which are not complete
-		theApp.AddLogLine (false,_T("Can't add CRC to file '%s'; file is a part file and not complete !"),
+		AddLogLine (false,_T("Can't add CRC to file '%s'; file is a part file and not complete !"),
 						   f->GetFileName ());
 		return 0;
 	}
@@ -1780,7 +1790,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		// The CRC must have been calculate, otherwise we can't add it.
 		// Normally this mesage is not shown because if the CRC is not calculated
 		// the main thread creates a worker thread before to calculate it...
-		theApp.AddLogLine (false,_T("Can't add CRC32 to file '%s'; CRC is not calculated !"),
+		AddLogLine (false,_T("Can't add CRC32 to file '%s'; CRC is not calculated !"),
 						   f->GetFileName ());
 		return 0;
 	}
@@ -1800,7 +1810,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		// Ok, the filename already contains the CRC. Normally we won't rename it, except for
 		// we have to make sure it's uppercase
 		if ((!worker->m_CRC32ForceUppercase) || (fn.Find(f->GetLastCalculatedCRC32()) != -1)) {
-			theApp.AddLogLine (false, _T("File '%s' already contains the correct CRC32 tag, won't be renamed."), fn);
+			AddLogLine (false, _T("File '%s' already contains the correct CRC32 tag, won't be renamed."), fn);
 			return 0;
 		} else {
 			// This file contains a valid CRC, but not in uppercase - replace it!
@@ -1828,7 +1838,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 		NewFn = NewFn + p4;
 	}
 
-	theApp.AddLogLine (false,_T("File '%s' will be renamed to '%s'..."),fn,NewFn);
+	AddLogLine (false,_T("File '%s' will be renamed to '%s'..."),fn,NewFn);
 
 	// Add the path of the old filename to the new one
 	CString NewPath; 
@@ -1837,7 +1847,7 @@ afx_msg LRESULT CSharedFilesCtrl::OnCRC32RenameFile	(WPARAM wParam, LPARAM lPara
 
 	// Try to rename
 	if ((!f->IsPartFile()) && (_trename(f->GetFilePath (), NewPath) != 0)) {
-		theApp.AddLogLine (false,_T("Can't rename file '%s' ! Error: %hs"),fn,_tcserror(errno));
+		AddLogLine (false,_T("Can't rename file '%s' ! Error: %hs"),fn,_tcserror(errno));
 	} else {
 		CString strres;
 		if (!f->IsPartFile()) {
@@ -2309,48 +2319,48 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH END   - Changed by SiRoB, [end] Mighty Knife
 
 	m_SharedFilesMenu.CreatePopupMenu();
-	m_SharedFilesMenu.AddMenuTitle(GetResString(IDS_SHAREDFILES));
+	m_SharedFilesMenu.AddMenuTitle(GetResString(IDS_SHAREDFILES), true);
 
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_OPENFILE));
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPENFOLDER, GetResString(IDS_OPENFOLDER));
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RENAME, GetResString(IDS_RENAME) + _T("..."));
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_DELETE));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_OPENFILE), _T("OPENFILE"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_OPENFOLDER, GetResString(IDS_OPENFOLDER), _T("OPENFOLDER"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_RENAME, GetResString(IDS_RENAME) + _T("..."), _T("FILERENAME"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_DELETE), _T("DELETE"));
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	//MOPRH START - Added by SiRoB, Keep permission flag	
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));	// xMule_MOD: showSharePermissions - done
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions - done
 	//MOPRH END   - Added by SiRoB, Keep permission flag
 	//MORPH START - Added by SiRoB, ZZ Upload System
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowershareMenu.m_hMenu, GetResString(IDS_POWERSHARE));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowershareMenu.m_hMenu, GetResString(IDS_POWERSHARE), _T("FILEPOWERSHARE"));
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
 	m_PowershareMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	m_PowershareMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowerShareLimitMenu.m_hMenu, GetResString(IDS_POWERSHARE_LIMIT));
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, HIDEOS
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_HideOSMenu.m_hMenu, GetResString(IDS_HIDEOS));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_HideOSMenu.m_hMenu, GetResString(IDS_HIDEOS), _T("FILEHIDEOS"));
 	m_HideOSMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	m_HideOSMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SelectiveChunkMenu.m_hMenu, GetResString(IDS_SELECTIVESHARE));
 	//MORPH END   - Added by SiRoB, HIDEOS
 
 	//MORPH START - Added by SiRoB,	SHARE_ONLY_THE_NEED
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, GetResString(IDS_SHAREONLYTHENEED));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, GetResString(IDS_SHAREONLYTHENEED), _T("FILESHAREONLYTHENEED"));
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_PW_CON_UPLBL) + _T(")"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_PW_CON_UPLBL) + _T(")"), _T("FILEPRIORITY"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 	
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_SHOWED2KLINK, GetResString(IDS_DL_SHOWED2KLINK) );
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD)); 
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("FILEINFO"));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_SHOWED2KLINK, GetResString(IDS_DL_SHOWED2KLINK), _T("ED2KLINK") );
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_CMT, GetResString(IDS_CMT_ADD), _T("FILECOMMENTS")); 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	
 	//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_CRC32Menu.m_hMenu, GetResString(IDS_CRC32));
+	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_CRC32Menu.m_hMenu, GetResString(IDS_CRC32), _T("FILECRC32"));
 	//MORPH START - Changed by SiRoB, [end] Mighty Knife
 
 	// Mighty Knife: Mass Rename
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,GetResString(IDS_MR));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,GetResString(IDS_MR), _T("FILEMASSRENAME"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 	// [end] Mighty Knife
 
@@ -2360,8 +2370,7 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 	
 #endif
 
-	
-	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC));
+	m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC), _T("IRCCLIPBOARD"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
 }
 

@@ -22,7 +22,6 @@
 #include "emuledlg.h"
 #include "UpDownClient.h"
 #include "OtherFunctions.h"
-#include "MenuCmds.h"
 #include "HelpIDs.h"
 #include "Opcodes.h"
 #include "friend.h"
@@ -32,6 +31,8 @@
 #include "HttpDownloadDlg.h"
 #include "ED2KLink.h"
 #include "InputBox.h"
+#include "MenuCmds.h"
+#include "Log.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
 
 #ifdef _DEBUG
@@ -86,6 +87,7 @@ void CChatWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHATSEL, chatselector);
 	DDX_Control(pDX, IDC_LIST2, m_FriendListCtrl);
 	DDX_Control(pDX, IDC_CMESSAGE, inputtext);
+	DDX_Control(pDX, IDC_FRIENDS_MSG, m_cUserInfo);
 }
 
 void CChatWnd::OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult)
@@ -134,8 +136,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	// Client
 	if (pFriend->GetLinkedClient())
 	{
-		//Morph
-		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->GetClientSoftVer());
+			GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(pFriend->GetLinkedClient()->DbgGetFullClientSoftVer());
 	}
 	else
 		GetDlgItem(IDC_FRIENDS_CLIENTE_EDIT)->SetWindowText(_T("?"));
@@ -206,9 +207,9 @@ BOOL CChatWnd::OnInitDialog()
 	chatselector.Init();
 	m_FriendListCtrl.Init();
     // MORPH START - Added by Commander, Friendlinks [emulEspaña]
-	if ( theApp.emuledlg->m_fontMarlett.m_hObject )
+	if ( theApp.m_fontSymbol.m_hObject )
 	{
-		GetDlgItem(IDC_BTN_MENU)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_BTN_MENU)->SetFont(&theApp.m_fontSymbol);
 		GetDlgItem(IDC_BTN_MENU)->SetWindowText(_T("6")); // show a down-arrow
 	}
 	// MORPH END - Added by Commander, Friendlinks [emulEspaña]
@@ -252,10 +253,12 @@ BOOL CChatWnd::OnInitDialog()
 	AddAnchor(IDC_FRIENDS_COUNTRY, BOTTOM_LEFT);
     //Commander - Added: IP2Country - End
 
+	m_cUserInfo.Init(_T("Info"));
+
 	Localize();
 	theApp.friendlist->ShowFriends();
 
-	return true;
+	return TRUE;
 }
 
 void CChatWnd::DoResize(int delta)
@@ -435,15 +438,17 @@ void CChatWnd::Localize()
 {
 	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(GetResString(IDS_CW_FRIENDS));
 	GetDlgItem(IDC_MESSAGES_LBL)->SetWindowText(GetResString(IDS_CW_MESSAGES));
-	//MORPH START - Added by SiRoB, New friend message window
-	GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_COUNTRY));
-	//MORPH END   - Added by SiRoB, New friend message window
 	GetDlgItem(IDC_FRIENDS_DOWNLOADED)->SetWindowText(GetResString(IDS_CHAT_DOWNLOADED));
 	GetDlgItem(IDC_FRIENDS_UPLOADED)->SetWindowText(GetResString(IDS_CHAT_UPLOADED));
 	GetDlgItem(IDC_FRIENDS_IDENT)->SetWindowText(GetResString(IDS_CHAT_IDENT));
 	GetDlgItem(IDC_FRIENDS_CLIENT)->SetWindowText(GetResString(IDS_CHAT_CLIENT));
 	GetDlgItem(IDC_FRIENDS_NAME)->SetWindowText(GetResString(IDS_NICKNAME));
 	GetDlgItem(IDC_FRIENDS_MSG)->SetWindowText(GetResString(IDS_INFO));
+	GetDlgItem(IDC_FRIENDS_USERHASH)->SetWindowText(GetResString(IDS_CD_UHASH));	
+	//MORPH START - Added by SiRoB, New friend message window
+	GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_COUNTRY));
+	//MORPH END   - Added by SiRoB, New friend message window
+	
 	chatselector.Localize();
 	m_FriendListCtrl.Localize();
 }
@@ -479,16 +484,24 @@ void CChatWnd::OnSysColorChange()
 	SetAllIcons();
 }
 
+void CChatWnd::UpdateFriendlistCount(uint16 count) {
+	CString temp;
+	temp.Format(_T(" (%i)"),count);
+	temp=GetResString(IDS_CW_FRIENDS)+temp;
+
+	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(temp);
+}
+
+BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
+{
+	theApp.ShowHelp(eMule_FAQ_Friends);
+	return TRUE;
+}
+
+// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam){ 
-		case MP_REMOVE:{
-			const CChatItem* ci = chatselector.GetCurrentChatItem();
-			if (ci)
-				chatselector.EndSession(ci->client);
-			break;
-		}
-		// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 		case MP_GETFRIENDED2KLINK:
 			{
 				CString sLink;
@@ -518,7 +531,6 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 					UpdateEmfriendsMetFromURL(url);
 		} break;
         //MORPH END - Added by Commander, Manual eMfriend.met download
-
 		default:
 			return CResizableDialog::OnCommand(wParam, lParam);
 		// MORPH END - Added by Commander, Friendlinks [emulEspaña]
@@ -526,39 +538,11 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 	return TRUE;
 }
 
-void CChatWnd::OnContextMenu(CWnd* pWnd, CPoint point)
-{ 
-	if (!chatselector.GetCurrentChatItem())
-		return;
-
-	CTitleMenu ChatMenu;
-	ChatMenu.CreatePopupMenu(); 
-	ChatMenu.AddMenuTitle(GetResString(IDS_CW_MESSAGES));
-	ChatMenu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
-	ChatMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
- 	VERIFY( ChatMenu.DestroyMenu() );
-}
-
-void CChatWnd::UpdateFriendlistCount(uint16 count) {
-	CString temp;
-	temp.Format(_T(" (%i)"),count);
-	temp=GetResString(IDS_CW_FRIENDS)+temp;
-
-	GetDlgItem(IDC_FRIENDS_LBL)->SetWindowText(temp);
-}
-
-BOOL CChatWnd::OnHelpInfo(HELPINFO* pHelpInfo)
-{
-	theApp.ShowHelp(eMule_FAQ_Friends);
-	return TRUE;
-}
-
-// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 bool CChatWnd::UpdateEmfriendsMetFromURL(const CString& strURL)
 {
 	if ( strURL.IsEmpty() || strURL.Find(_T("://")) == -1 )	// not a valid URL
 	{
-		theApp.AddLogLine(true, GetResString(IDS_INVALIDURL));
+		LogError(LOG_STATUSBAR, GetResString(IDS_INVALIDURL));
 		return false;
 	}
 
@@ -571,7 +555,7 @@ bool CChatWnd::UpdateEmfriendsMetFromURL(const CString& strURL)
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
 	if ( dlgDownload.DoModal() != IDOK )
 	{
-		theApp.AddLogLine(true, GetResString(IDS_ERR_FAILEDDOWNLOADEMFRIENDS), strURL);
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FAILEDDOWNLOADEMFRIENDS), strURL);
 		return false;
 	}
 

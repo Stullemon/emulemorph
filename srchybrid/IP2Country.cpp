@@ -17,6 +17,7 @@ the IP to country data is provided by http://ip-to-country.webhosting.info/
 #include "emule.h"
 #include "otherfunctions.h"
 #include <flag/resource.h>
+#include "log.h"
 
 //refresh list
 #include "serverlist.h"
@@ -231,8 +232,8 @@ bool CIP2Country::LoadFromFile(){
 
 			if (thePrefs.GetVerbose())
 			{
-				theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP2Country from \"%s\" in %ums"), ip2countryCSVfile, GetTickCount()-startMesure);
-				theApp.emuledlg->AddDebugLogLine(false, _T("Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"), iLine, iCount, iDuplicate, iMerged);
+				AddDebugLogLine(false, _T("Loaded IP2Country from \"%s\" in %ums"), ip2countryCSVfile, GetTickCount()-startMesure);
+				AddDebugLogLine(false, _T("Parsed lines:%u  Found IPCountry ranges:%u  Duplicate:%u  Merged:%u"), iLine, iCount, iDuplicate, iMerged);
 			}
 
 		}
@@ -553,7 +554,7 @@ void CIP2Country::UpdateIP2CountryURL()
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			AddLogLine(true, _T("IP to Country file download failed"));
+			LogError(LOG_STATUSBAR, _T("IP to Country file download failed"));
 			return;
 		}
         
@@ -583,10 +584,10 @@ void CIP2Country::UpdateIP2CountryURL()
 					bUnzipped = true;
 				}
 				else
-					AddLogLine(true, _T("Failed to extract IP to Country file from downloaded IP to Country ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, _T("Failed to extract IP to Country file from downloaded IP to Country ZIP file \"%s\"."), szTempFilePath);
 			}
 			else
-				AddLogLine(true, _T("Downloaded IP to Country file \"%s\" is a ZIP file with unexpected content."), szTempFilePath); //File not found inside the zip-file
+				LogError(LOG_STATUSBAR, _T("Downloaded IP to Country file \"%s\" is a ZIP file with unexpected content."), szTempFilePath); //File not found inside the zip-file
 
 			zip.Close();
 		}

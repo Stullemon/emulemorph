@@ -46,7 +46,7 @@
 #define	GET_VALUE				1
 // <-----khaos--
 
-class CStatisticsTree : public CTreeCtrl, public CLoggable
+class CStatisticsTree : public CTreeCtrl
 {
 	DECLARE_DYNAMIC(CStatisticsTree)
 public:
@@ -83,7 +83,7 @@ public:
 	int					ApplyExpandedMask(CString theMask, HTREEITEM theItem = NULL, int theStringIndex = 0);
 private:
 	CTitleMenu			mnuContext;
-	CMenu				mnuHTML;
+	CTitleMenu			mnuHTML;
 	bool				m_bExpandingAll;
 
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]

@@ -17,7 +17,7 @@
 #include "PPgDebug.h"
 #endif
 #include "otherfunctions.h"
-#include "ListBoxST.h"
+#include "TreePropSheet.h"
 #include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
 #include "PPgMorphShare.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
@@ -29,7 +29,7 @@
 #include "KCSideBannerWnd.h" //Commander - Added: Preferences Banner [TPT]
 #include "SlideBar.h" //MORPH - Added by SiRoB, ePLus Group
 
-class CPreferencesDlg : public CPropertySheet
+class CPreferencesDlg : public CTreePropSheet
 {
 	DECLARE_DYNAMIC(CPreferencesDlg)
 
@@ -62,18 +62,11 @@ public:
 	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 	CPPgEmulespana	m_wndEmulespana; //MORPH - Added by SiRoB, emulEspaña preferency
 	CPPgWebcachesettings	m_wndWebcachesettings; //MORPH - Added by SiRoB, WebCache 1.2f
-	CListBoxST		m_listbox;
-	CButton			m_groupbox;
-	CImageList		ImageList;
-	int				m_iPrevPage;
-	//MORPH START - Changed by SiRoB, ePlus Group
-	CSlideBar	 	m_slideBar;
-	//MORPH END   - Changed by SiRoB, ePlus Group
 	
 	void Localize();
-	void OpenPage(UINT uResourceID);
 
 protected:
+	int m_iPrevPage;
 	UINT m_nActiveWnd;
 
 	virtual BOOL OnInitDialog();
@@ -81,14 +74,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnDestroy();
-	//MORPH START - Changed by SiRoB, ePlus Group
-	/*
-	afx_msg void OnSelChanged();
-	*/
-	afx_msg LRESULT		OnSlideBarSelChanged(WPARAM wParam, LPARAM lParam);
-	//MORPH END   - Changed by SiRoB, ePlus Group
 
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 public:

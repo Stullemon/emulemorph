@@ -38,6 +38,7 @@
 #include "TransferWnd.h"
 #include "TaskbarNotifier.h"
 #include "MenuCmds.h"
+#include "Log.h"
 #include "UploadQueue.h"
 
 #ifdef _DEBUG
@@ -816,15 +817,15 @@ bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings)
 	if (file){
 		if (bLogWarnings){
 			if (file->IsPartFile())
-				AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName() );
+				LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName());
 			else
-				AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADED), file->GetFileName() );
+				LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_ALREADY_DOWNLOADED), file->GetFileName());
 		}
 		return true;
 	}
 	else if ((file = GetFileByID(fileid)) != NULL){
 		if (bLogWarnings)
-			AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName() );
+			LogWarning(LOG_STATUSBAR, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName());
 		return true;
 	}
 	return false;
@@ -880,7 +881,7 @@ void CDownloadQueue::Process(){
 		}
     }
 
-	if (maxDownload != UNLIMITED && datarate > 300 || thePrefs.IsZZRatioDoesWork()){
+	if (maxDownload != UNLIMITED*1024 && datarate > 300 || thePrefs.IsZZRatioDoesWork()){
 		downspeed = (maxDownload*100)/(datarate+1);
 		if (downspeed < 50)
 			downspeed = 50;
@@ -909,7 +910,7 @@ void CDownloadQueue::Process(){
 
             if(downspeed == 0 || tempDownspeed < downspeed) {
                 downspeed = tempDownspeed;
-                //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
+                //AddLogLine(true, "Limiting downspeed");
 				tempIsZZRatioInWork = true; //MORPH - Added by SiRoB, ZZ Ratio in work
             }
         }
@@ -950,7 +951,12 @@ void CDownloadQueue::Process(){
 	for (POSITION pos =filelist.GetHeadPosition();pos != 0;){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_READY || cur_file->GetStatus() == PS_EMPTY){
+			//MORPH STRAT - Changed by SiRoB, zz Upload System
+			/*
+			datarateX += cur_file->Process(downspeed,udcounter);
+			*/
 			datarateX += cur_file->Process(downspeed,udcounter, friendDownspeed);
+			//MORPH END   - Changed by SiRoB, zz Upload System
 		}
 		else{
 			//This will make sure we don't keep old sources to paused and stoped files..
@@ -1680,6 +1686,7 @@ void CDownloadQueue::GetDownloadStats(SDownloadStats& results)
 		results.a[19] += cur_file->net_stats[0];
 		results.a[20] += cur_file->net_stats[1];
 		results.a[21] += cur_file->net_stats[2];
+		results.a[22] += cur_file->m_DeadSourceList.GetDeadSourcesCount();
 	}
 }
 
@@ -2262,7 +2269,7 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(false, _T("Failed to create part.met file list%s"), strError);
+		LogError(_T("Failed to create part.met file list%s"), strError);
 		return;
 	}
 
@@ -2316,7 +2323,7 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(false, _T("Failed to write part.met file list%s"), strError);
+		LogError(_T("Failed to write part.met file list%s"), strError);
 		e->Delete();
 		file.Abort();
 		(void)_tremove(file.GetFilePath());

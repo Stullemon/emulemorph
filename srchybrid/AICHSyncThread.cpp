@@ -27,12 +27,14 @@
 #include "knownfilelist.h"
 #include "preferences.h"
 #include "sharedfileswnd.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ///CAICHSyncThread
@@ -70,7 +72,7 @@ int CAICHSyncThread::Run()
 				strError += _T(" - ");
 				strError += szError;
 			}
-			theApp.QueueLogLine(true, _T("%s"), strError);
+			LogError(LOG_STATUSBAR, _T("%s"), strError);
 		}
 		return false;
 	}
@@ -91,7 +93,7 @@ int CAICHSyncThread::Run()
 	}
 	catch(CFileException* error){
 		if (error->m_cause == CFileException::endOfFile){
-			theApp.QueueLogLine(true,GetResString(IDS_ERR_SERVERMET_BAD));
+			LogError(LOG_STATUSBAR,GetResString(IDS_ERR_SERVERMET_BAD));
 			// truncate the file to the size to the last verified valid pos
 			try{
 				file.SetLength(nLastVerifiedPos);
@@ -103,7 +105,7 @@ int CAICHSyncThread::Run()
 		else{
 			TCHAR buffer[MAX_CFEXP_ERRORMSG];
 			error->GetErrorMessage(buffer, ARRSIZE(buffer));
-			theApp.QueueLogLine(true,GetResString(IDS_ERR_SERVERMET_UNKNOWN),buffer);
+			LogError(LOG_STATUSBAR,GetResString(IDS_ERR_SERVERMET_UNKNOWN),buffer);
 		}
 		error->Delete();
 		return false;
@@ -141,7 +143,7 @@ int CAICHSyncThread::Run()
 	}
 	// warn the user if he just upgraded
 	if (thePrefs.IsFirstStart() && !m_liToHash.IsEmpty()){
-		theApp.QueueLogLine(false, GetResString(IDS_AICH_WARNUSER));
+		LogWarning(GetResString(IDS_AICH_WARNUSER));
 	}
 
 	if (!m_liToHash.IsEmpty()){

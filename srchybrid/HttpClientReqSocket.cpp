@@ -23,6 +23,7 @@
 #include "HttpClientReqSocket.h"
 #include "Preferences.h"
 #include "Statistics.h"
+#include "Log.h"
 // MORPH START - Added by Commander, WebCache 1.2e
 #include "WebCache/WebCachedBlockList.h"
 #include "WebCache/WebCacheProxyClient.h" 
@@ -95,7 +96,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 	{
 		strError.Format(_T("Error: HTTP socket: Memory exception; %s"), DbgGetClientInfo());
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("%s"), strError);
+			AddDebugLogLine(false, _T("%s"), strError);
 		ex->Delete();
 	}
 	catch(CFileException* ex)
@@ -104,7 +105,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 		ex->GetErrorMessage(szError, ARRSIZE(szError));
 		strError.Format(_T("Error: HTTP socket: File exception - %s; %s"), szError, DbgGetClientInfo()); // MORPH - Modified by Commander, WebCache 1.2e
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("%s"), strError);
+			AddDebugLogLine(false, _T("%s"), strError);
 		ex->Delete();
 	}
 	catch(CString ex)
@@ -115,7 +116,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 		strError.Format(_T("Error: HTTP socket: %s"), ex);
 #endif
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("%s"), strError);
+			AddDebugLogLine(false, _T("%s"), strError);
 		// MORPH START - Added by Commander, WebCache 1.2e
 		// client removal experiment
 		if( GetClient() && GetClient()->IsProxy() ) {
@@ -135,7 +136,7 @@ void CHttpClientReqSocket::DataReceived(const BYTE* pucData, UINT uSize)
 		{
 			for (int i = 0; i < m_astrHttpHeaders.GetCount(); i++)
 				// MORPH START - Added by Commander, WebCache 1.2e
-				theApp.AddDebugLogLine(false, _T("<%s"), CA2T(m_astrHttpHeaders.GetAt(i))); // yonatan - unicode bugfix
+				AddDebugLogLine(false, _T("<%s"), CA2T(m_astrHttpHeaders.GetAt(i))); // yonatan - unicode bugfix
 				// MORPH END - Added by Commander, WebCache 1.2e
 		}
 

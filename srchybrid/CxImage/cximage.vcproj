@@ -17,7 +17,7 @@
 			OutputDirectory=".\Release"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="4"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="1"
 			WholeProgramOptimization="TRUE">
@@ -51,7 +51,8 @@
 				Name="VCLibrarianTool"
 				AdditionalOptions="/LTCG:STATUS"
 				OutputFile=".\Release\CxImage.lib"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -78,9 +79,9 @@
 			OutputDirectory=".\Debug"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="4"
-			UseOfMFC="1"
+			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="1">
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -88,7 +89,6 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;JAS_WIN_MSVC_BUILD"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				TreatWChar_tAsBuiltInType="TRUE"
 				PrecompiledHeaderFile=".\Debug/CxImage.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"

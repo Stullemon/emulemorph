@@ -25,6 +25,7 @@
 #include "emuledlg.h"
 #include "HelpIDs.h"
 #include "ZipFile.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -134,8 +135,8 @@ BOOL CPPgSecurity::OnInitDialog()
 				m_pacIPFilterURL->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") IPFILTERUPDATEURL_STRINGS_PROFILE);
 		}
 		SetDlgItemText(IDC_UPDATEURL,m_pacIPFilterURL->GetItem(0));
-		if (theApp.emuledlg->m_fontMarlett.m_hObject){
-			GetDlgItem(IDC_DD)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		if (theApp.m_fontSymbol.m_hObject){
+			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
 		}
 	}
@@ -248,7 +249,7 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			AddLogLine(true, _T("IP Filter download failed"));
+			LogWarning(LOG_STATUSBAR, _T("IP Filter download failed"));
 			return;
 		}
 
@@ -278,10 +279,10 @@ void CPPgSecurity::OnLoadIPFFromURL() {
 					bUnzipped = true;
 				}
 				else
-					AddLogLine(true, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
 			}
 			else
-				AddLogLine(true, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				LogError(LOG_STATUSBAR, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
 
 			zip.Close();
 		}

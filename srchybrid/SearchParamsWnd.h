@@ -74,6 +74,7 @@ protected:
 	CCustomAutoComplete* m_pacSearchString;
 
 	void UpdateControls();
+	void UpdateUnicodeCtrl();
 	BOOL SaveSearchStrings();
 	void SetAllIcons();
 	void InitMethodsCtrl();

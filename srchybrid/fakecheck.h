@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "loggable.h"
 
 struct Fakes_Struct{
    uchar			Hash[16];
@@ -28,7 +27,7 @@ struct Fakes_Struct{
 
 typedef CTypedPtrArray<CPtrArray, Fakes_Struct*> CFakecheckArray;
 
-class CFakecheck: public CLoggable
+class CFakecheck
 {
 public:
 	CFakecheck();

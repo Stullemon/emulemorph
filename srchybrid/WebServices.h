@@ -3,6 +3,8 @@
 #define	WEBSVC_GEN_URLS		0x0001
 #define	WEBSVC_FILE_URLS	0x0002
 
+class CTitleMenu;
+
 class CWebServices
 {
 public:
@@ -12,9 +14,9 @@ public:
 	int ReadAllServices();
 	void RemoveAllServices();
 
-	int GetFileMenuEntries(CMenu& rMenu) { return GetAllMenuEntries(rMenu, WEBSVC_FILE_URLS); }
-	int GetGeneralMenuEntries(CMenu& rMenu) { return GetAllMenuEntries(rMenu, WEBSVC_GEN_URLS); }
-	int GetAllMenuEntries(CMenu& rMenu, DWORD dwFlags = WEBSVC_GEN_URLS | WEBSVC_FILE_URLS);
+	int GetFileMenuEntries(CTitleMenu* pMenu) { return GetAllMenuEntries(pMenu, WEBSVC_FILE_URLS); }
+	int GetGeneralMenuEntries(CTitleMenu* pMenu) { return GetAllMenuEntries(pMenu, WEBSVC_GEN_URLS); }
+	int GetAllMenuEntries(CTitleMenu* pMenu, DWORD dwFlags = WEBSVC_GEN_URLS | WEBSVC_FILE_URLS);
 	bool RunURL(const CAbstractFile* file, UINT uMenuID);
 	void Edit();
 

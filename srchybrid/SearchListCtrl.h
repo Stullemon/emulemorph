@@ -50,6 +50,7 @@ protected:
 	CTitleMenu m_SearchFileMenu;
 	CSearchList* searchlist;
 
+	CString GetCompleteSourcesDisplayString(const CSearchFile* pFile, UINT uSources, bool* pbComplete = NULL) const;
 	void	ExpandCollapseItem(int item);
 	void	HideSources(CSearchFile* toCollapse);
 	void	SetStyle();

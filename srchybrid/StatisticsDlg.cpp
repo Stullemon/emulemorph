@@ -30,6 +30,10 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 
+#ifndef TVM_SETLINECOLOR
+#define TVM_SETLINECOLOR            (TV_FIRST + 40)
+#endif
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -98,19 +102,19 @@ void CStatisticsDlg::SetAllIcons()
 	CImageList iml;
 	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 	iml.Add(CTempIconLoader(_T("StatsGeneric")));			// Dots & Arrow (Default icon for stats)
-	iml.Add(CTempIconLoader(_T("Up1Down1")));				// Transfer
-	iml.Add(CTempIconLoader(_T("Pref_Connection")));		// Connection
+	iml.Add(CTempIconLoader(_T("TransferUpDown")));			// Transfer
+	iml.Add(CTempIconLoader(_T("Connection")));				// Connection
 	iml.Add(CTempIconLoader(_T("StatsClients")));			// Clients
-	iml.Add(CTempIconLoader(_T("Pref_Server")));			// Server
+	iml.Add(CTempIconLoader(_T("Server")));					// Server
 	iml.Add(CTempIconLoader(_T("SharedFiles")));			// Shared Files
 	iml.Add(CTempIconLoader(_T("Upload")));					// Transfer > Upload
 	iml.Add(CTempIconLoader(_T("Download")));				// Transfer > Download
-	iml.Add(CTempIconLoader(_T("Statistics")));				// Session Sections
+	iml.Add(CTempIconLoader(_T("StatsDetail")));			// Session Sections
 	iml.Add(CTempIconLoader(_T("StatsCumulative")));		// Cumulative Sections
-	iml.Add(CTempIconLoader(_T("Pref_Tweak")));				// Records
-	iml.Add(CTempIconLoader(_T("ConnectedHighHigh")));		// Connection > General
-	iml.Add(CTempIconLoader(_T("Pref_Scheduler")));			// Time Section
-	iml.Add(CTempIconLoader(_T("Pref_Statistics")));		// Time > Averages and Projections
+	iml.Add(CTempIconLoader(_T("Tweak")));					// Records
+	iml.Add(CTempIconLoader(_T("TransferUpDown")));			// Connection > General
+	iml.Add(CTempIconLoader(_T("StatsTime")));				// Time Section
+	iml.Add(CTempIconLoader(_T("StatsProjected")));			// Time > Averages and Projections
 	iml.Add(CTempIconLoader(_T("StatsDay")));				// Time > Averages and Projections > Daily
 	iml.Add(CTempIconLoader(_T("StatsMonth")));				// Time > Averages and Projections > Monthly
 	iml.Add(CTempIconLoader(_T("StatsYear")));				// Time > Averages and Projections > Yearly
@@ -149,6 +153,8 @@ void CStatisticsDlg::SetAllIcons()
 	}
 	stattree.SetBkColor(crBk);
 	stattree.SetTextColor(crFg);
+	// can't use 'TVM_SETLINECOLOR' because the color may not match that one used in "StatsGeneric" item image.
+	//stattree.SendMessage(TVM_SETLINECOLOR, 0, (LPARAM)crFg);
 }
 
 BOOL CStatisticsDlg::OnInitDialog()
@@ -157,9 +163,9 @@ BOOL CStatisticsDlg::OnInitDialog()
 	EnableWindow(FALSE);
 	SetAllIcons();
 
-	if (theApp.emuledlg->m_fontMarlett.m_hObject)
+	if (theApp.m_fontSymbol.m_hObject)
 	{
-		GetDlgItem(IDC_BNMENU)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		GetDlgItem(IDC_BNMENU)->SetFont(&theApp.m_fontSymbol);
 		GetDlgItem(IDC_BNMENU)->SetWindowText(_T("6")); // show a down-arrow
 	}
 
@@ -995,6 +1001,10 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					cbuffer.Format(_T("%s: %s, %s: %s (%.1f%%)"), GetResString(IDS_UDPREASKS), CastItoIShort(theApp.downloadqueue->GetUDPFileReasks()), GetResString(IDS_UFAILED), CastItoIShort(theApp.downloadqueue->GetFailedUDPFileReasks()), theApp.downloadqueue->GetUDPFileReasks() ? (theApp.downloadqueue->GetFailedUDPFileReasks() * 100.0 / theApp.downloadqueue->GetUDPFileReasks()) : 0.0 );
 					stattree.SetItemText( down_sources[i] , cbuffer );
 					i++;
+
+					cbuffer.Format(_T("%s: %s (%s + %s)"), GetResString(IDS_DEADSOURCES), CastItoIShort(theApp.clientlist->m_globDeadSourceList.GetDeadSourcesCount() + myStats.a[22]), CastItoIShort(theApp.clientlist->m_globDeadSourceList.GetDeadSourcesCount()), CastItoIShort((UINT)myStats.a[22]));
+					stattree.SetItemText( down_sources[i] , cbuffer );
+					i++;
 				}
 				// Set Download Sessions
 				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
@@ -1459,7 +1469,10 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 				stattree.SetItemText(up_S[4], cbuffer);
 
 				// Set Upload Sessions
-				statGoodSessions = theApp.uploadqueue->GetSuccessfullUpCount(); // + theApp.uploadqueue->GetUploadQueueLength();
+				/*ZZ
+				statGoodSessions = theApp.uploadqueue->GetSuccessfullUpCount() + theApp.uploadqueue->GetUploadQueueLength();
+				*/
+				statGoodSessions = theApp.uploadqueue->GetSuccessfullUpCount(); //ZZ + theApp.uploadqueue->GetUploadQueueLength();
 				statBadSessions = theApp.uploadqueue->GetFailedUpCount();
 				cbuffer.Format(_T("%s: %u"), GetResString(IDS_STATS_ULSES), statGoodSessions + statBadSessions);
 				stattree.SetItemText(up_S[5], cbuffer);
@@ -1469,7 +1482,9 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					if (statGoodSessions>0)
 					{ // Blackholes are when God divided by 0
 						percentSessions = (double) 100*statGoodSessions/(statGoodSessions+statBadSessions);
+						/*ZZ
 						cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( (uint64) theStats.GetTotalCompletedBytes() / statGoodSessions, false, false) ); 
+						*/cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDATAULSES), CastItoXBytes( (uint64) theStats.GetTotalCompletedBytes() / statGoodSessions, false, false) ); 
 					}
 					else 
 					{
@@ -2971,11 +2986,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		uint64 ui64TotFileSize=0; 
 		uint64 ui64TotBytesLeftToTransfer=0;
 		uint64 ui64TotNeededSpace=0;
-		uint64 t_FreeBytes=0;
-		theApp.downloadqueue->GetDownloadStats(myRateStats,ui64TotFileSize,ui64TotBytesLeftToTransfer,ui64TotNeededSpace);
-
-		uint64 ui64BytesTransfered;
-		float fPercent = 0.0f;
+		theApp.downloadqueue->GetDownloadStats(myRateStats, 
+											   ui64TotFileSize, ui64TotBytesLeftToTransfer, ui64TotNeededSpace);
 
 		cbuffer.Format(GetResString(IDS_DWTOT_NR),myRateStats[2]); 
 		stattree.SetItemText(h_total_num_of_dls, cbuffer);
@@ -2983,7 +2995,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		cbuffer.Format(GetResString(IDS_DWTOT_TSD),CastItoXBytes(ui64TotFileSize, false, false)); 
 		stattree.SetItemText(h_total_size_of_dls, cbuffer);
 
-		ui64BytesTransfered = (ui64TotFileSize-ui64TotBytesLeftToTransfer);
+		uint64 ui64BytesTransfered = (ui64TotFileSize - ui64TotBytesLeftToTransfer);
+		float fPercent = 0.0f;
 		if(ui64TotFileSize != 0)
 			fPercent = (float)((ui64BytesTransfered*100)/(ui64TotFileSize)); //kuchin
 		cbuffer.Format(GetResString(IDS_DWTOT_TCS),CastItoXBytes(ui64BytesTransfered, false, false),fPercent); 
@@ -2996,11 +3009,11 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		stattree.SetItemText(h_total_size_needed, cbuffer);
 
 		CString buffer2;
-		t_FreeBytes = GetFreeDiskSpaceX(thePrefs.GetTempDir());
-		buffer2.Format(GetResString(IDS_DWTOT_FS), CastItoXBytes(t_FreeBytes, false, false));
+		uint64 ui64FreeBytes = GetFreeDiskSpaceX(thePrefs.GetTempDir());
+		buffer2.Format(GetResString(IDS_DWTOT_FS), CastItoXBytes(ui64FreeBytes, false, false));
 
-		if(ui64TotNeededSpace > t_FreeBytes  )
-			cbuffer.Format(GetResString(IDS_NEEDFREEDISKSPACE),buffer2,CastItoXBytes(ui64TotNeededSpace - t_FreeBytes, false, false));
+		if (ui64TotNeededSpace > ui64FreeBytes)
+			cbuffer.Format(GetResString(IDS_NEEDFREEDISKSPACE),buffer2,CastItoXBytes(ui64TotNeededSpace - ui64FreeBytes, false, false));
 		else
 			cbuffer=buffer2;
 
@@ -3217,7 +3230,7 @@ void CStatisticsDlg::CreateMyTree()
 	  hdown_spb= stattree.InsertItem(GetResString(IDS_PORT),down_S[0]);							// Ports Section
 	for(int i = 0; i<2; i++) 
 		down_spb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_spb);
-	for(int i = 0; i<21; i++) 
+	for(int i = 0; i<ARRSIZE(down_sources); i++) 
 		down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
 	//MORPH - Changed by SiRoB, WebCache 1.2f
 	for(int i = 0; i<5/* changed to 5 jp webcache statistics */; i++) 

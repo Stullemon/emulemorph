@@ -1,9 +1,8 @@
 #pragma once
-#include "loggable.h"
 
 class CCustomAutoComplete;
 
-class CPPgSecurity : public CPropertyPage, public CLoggable
+class CPPgSecurity : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgSecurity)
 

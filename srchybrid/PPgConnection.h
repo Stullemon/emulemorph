@@ -16,8 +16,11 @@ public:
 
 protected:
 	bool guardian;
+	CSliderCtrl m_ctlMaxDown;
+	CSliderCtrl m_ctlMaxUp;
 
 	void ShowLimitValues();
+	void SetRateSliderTicks(CSliderCtrl& rRate);
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();

@@ -43,6 +43,7 @@
 #include "AddSourceDlg.h"
 #include "SharedFileList.h" //MORPH - Added by SiRoB
 #include "MassRename.h" //SLAHAM: ADDED MassRename DownloadList
+#include "log.h" //MassRename DownloadList
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -189,6 +190,7 @@ void CDownloadListCtrl::OnSysColorChange()
 {
 	CMuleListCtrl::OnSysColorChange();
 	SetAllIcons();
+	CreateMenues();
 }
 
 void CDownloadListCtrl::SetAllIcons()
@@ -215,7 +217,7 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	//MORPH START - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.Add(CTempIconLoader(_T("ClientRightEdonkey"))); //17
-	m_ImageList.Add(CTempIconLoader(_T("ClientMorph"))); //18
+	m_ImageList.Add(CTempIconLoader(_T("Morph"))); //18
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2); //19
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3); //20
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
@@ -228,7 +230,7 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("RATING_EXCELLENT")));  // 26
 	//MORPH END   - Added by IceCream, eMule Plus rating icones
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	m_ImageList.Add(CTempIconLoader(_T("PREF_WEBCACHE"))); // 27// jp webcacheclient icon
+	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE"))); // 27// jp webcacheclient icon
 	//MORPH END   - Added by SiRoB, WebCache 1.2
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
@@ -751,7 +753,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 					tempbuffer.Format(_T("%u - %u"), lpPartFile->m_nCompleteSourcesCountLo, lpPartFile->m_nCompleteSourcesCountHi);
 				}
 				if (lpPartFile->lastseencomplete==NULL)
-					buffer.Format(_T("%s (%s)"),GetResString(IDS_UNKNOWN),tempbuffer);
+					buffer.Format(_T("%s (%s)"),GetResString(IDS_NEVER),tempbuffer);
 				else
 					buffer.Format(_T("%s (%s)"),lpPartFile->lastseencomplete.Format( thePrefs.GetDateTimeFormat()),tempbuffer);
 				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
@@ -1753,21 +1755,35 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK_US, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
             m_FileMenu.EnableMenuItem(MP_MASSRENAME, iSelectedItems > 0? MF_ENABLED : MF_GRAYED); //Commander - Added: MassRename [Dragon]
 	
-			CMenu WebMenu;
+			CTitleMenu WebMenu;
 			WebMenu.CreateMenu();
-			int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
+			WebMenu.AddMenuTitle(NULL, true);
+			int iWebMenuEntries = theWebServices.GetFileMenuEntries(&WebMenu);
 			UINT flag = (iWebMenuEntries == 0 || iSelectedItems != 1) ? MF_GRAYED : MF_ENABLED;
-			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
+			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES), _T("WEB"));
 
 			// create cat-submenue
 			CMenu CatsMenu;
 			CatsMenu.CreateMenu();
 			flag = (thePrefs.GetCatCount() == 1) ? MF_GRAYED : MF_ENABLED;
+			CString label;
 			if (thePrefs.GetCatCount()>1) {
-				for (int i = 0; i < thePrefs.GetCatCount(); i++)
-					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i, (i==0)?GetResString(IDS_CAT_UNASSIGN):thePrefs.GetCategory(i)->title);
+				for (int i = 0; i < thePrefs.GetCatCount(); i++){
+					//MORPH START - Changed By SiRoB, Khaos Category
+					/*
+					if (i>0) {
+						label=thePrefs.GetCategory(i)->title;
+						label.Replace(_T("&"), _T("&&") );
+					}
+					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i, (i==0)?GetResString(IDS_CAT_UNASSIGN):label);
+					*/
+					label=thePrefs.GetCategory(i)->title;
+					label.Replace(_T("&"), _T("&&") );
+					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i,label);
+					//MORPH END   - Changed By SiRoB, Khaos Category
+				}
 			}
-			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)CatsMenu.m_hMenu, GetResString(IDS_TOCAT));
+			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)CatsMenu.m_hMenu, GetResString(IDS_TOCAT), _T("CATEGORY"));
 			
 			// khaos::categorymod+			
 			CTitleMenu mnuOrder;
@@ -1803,16 +1819,16 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			const CUpDownClient* client = (CUpDownClient*)content->value;
 			CTitleMenu ClientMenu;
 			ClientMenu.CreatePopupMenu();
-			ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS));
-			ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+			ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS), true);
+			ClientMenu.AppendMenu(MF_STRING, MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
 			ClientMenu.SetDefaultItem(MP_DETAIL);
-			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND));
+			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND), _T("ADDFRIEND"));
 			//MORPH START - Added by SiRoB, Friend Addon
-			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
+			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
 			//MORPH END - Added by SiRoB, Friend Addon
-			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
-			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
+			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
 			if (Kademlia::CKademlia::isRunning() && !Kademlia::CKademlia::isConnected())
 				ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 
@@ -1830,7 +1846,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			
 			//MORPH START - Added by Yun.SF3, List Requested Files
 			ClientMenu.AppendMenu(MF_SEPARATOR);
-			ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
+			ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED), _T("FILEREQUESTED")); // Added by sivka
 			//MORPH END - Added by Yun.SF3, List Requested Files
 
 			GetPopupMenuPos(*this, point);
@@ -1880,10 +1896,11 @@ void CDownloadListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 		// also show the "Web Services" entry, even if its disabled and therefore not useable, it though looks a little 
 		// less confusing this way.
-		CMenu WebMenu;
+		CTitleMenu WebMenu;
 		WebMenu.CreateMenu();
-		int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
-		m_FileMenu.AppendMenu(MF_POPUP | MF_GRAYED, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
+		WebMenu.AddMenuTitle(NULL, true);
+		int iWebMenuEntries = theWebServices.GetFileMenuEntries(&WebMenu);
+		m_FileMenu.AppendMenu(MF_POPUP | MF_GRAYED, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES), _T("WEB"));
 
 		GetPopupMenuPos(*this, point);
 		m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -2958,6 +2975,7 @@ void CDownloadListCtrl::CreateMenues() {
 	if (m_FileMenu) VERIFY( m_FileMenu.DestroyMenu() );
 
 	m_PrioMenu.CreateMenu();
+	m_PrioMenu.AddMenuTitle(NULL, true);
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOLOW,GetResString(IDS_PRIOLOW));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIONORMAL,GetResString(IDS_PRIONORMAL));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
@@ -2972,6 +2990,7 @@ void CDownloadListCtrl::CreateMenues() {
 	
 	// xMule_MOD: showSharePermissions
 	m_PermMenu.CreateMenu();
+	m_PermMenu.AddMenuTitle(NULL, true);
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
 	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
@@ -2983,55 +3002,52 @@ void CDownloadListCtrl::CreateMenues() {
 
 	//MORPH START - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 	m_A4AFMenuFlag.CreateMenu();
+	m_A4AFMenuFlag.AddMenuTitle(NULL, true);
 	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFONFLAG, GetResString(IDS_A4AF_ONFLAG));
 	m_A4AFMenuFlag.AppendMenu(MF_STRING, MP_FORCEA4AFOFFFLAG, GetResString(IDS_A4AF_OFFFLAG));
 	//MORPH END   - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
 
 	m_FileMenu.CreatePopupMenu();
-	m_FileMenu.AddMenuTitle(GetResString(IDS_DOWNLOADMENUTITLE));
-	// khaos::kmod+
-	m_FileMenu.AppendMenu(MF_STRING, MP_FORCEA4AF, GetResString(IDS_A4AF_FORCEALL));
-	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_A4AFMenuFlag.m_hMenu, GetResString(IDS_A4AF_FLAGS));
+	m_FileMenu.AddMenuTitle(GetResString(IDS_DOWNLOADMENUTITLE),true);
 	if (thePrefs.IsExtControlsEnabled()){
+		// khaos::kmod+
+		m_FileMenu.AppendMenu(MF_STRING, MP_FORCEA4AF, GetResString(IDS_A4AF_FORCEALL));
+		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_A4AFMenuFlag.m_hMenu, GetResString(IDS_A4AF_FLAGS));
 		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
+		// khaos::kmod-
 		m_FileMenu.AppendMenu(MF_STRING,MP_ADDSOURCE, GetResString(IDS_ADDSRCMANUALLY) );
+		m_FileMenu.AppendMenu(MF_SEPARATOR);
 	}
-	m_FileMenu.AppendMenu(MF_SEPARATOR);
-	// khaos::kmod-
-	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION));	// xMule_MOD: showSharePermissions
-	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_DOWNLOAD) + _T(")"));
-	// khaos::kmod+
-	m_FileMenu.AppendMenu(MF_SEPARATOR);
-	// khaos::kmod-
-	m_FileMenu.AppendMenu(MF_STRING,MP_PAUSE, GetResString(IDS_DL_PAUSE));
-	m_FileMenu.AppendMenu(MF_STRING,MP_STOP, GetResString(IDS_DL_STOP));
-	m_FileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DL_RESUME));
-	m_FileMenu.AppendMenu(MF_STRING,MP_CANCEL,GetResString(IDS_MAIN_BTN_CANCEL) );
+	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions
+	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_DOWNLOAD) + _T(")"), _T("FILEPRIORITY"));
+
+	m_FileMenu.AppendMenu(MF_STRING,MP_PAUSE, GetResString(IDS_DL_PAUSE), _T("PAUSE"));
+	m_FileMenu.AppendMenu(MF_STRING,MP_STOP, GetResString(IDS_DL_STOP), _T("STOP"));
+	m_FileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DL_RESUME), _T("RESUME"));
+	m_FileMenu.AppendMenu(MF_STRING,MP_CANCEL,GetResString(IDS_MAIN_BTN_CANCEL), _T("DELETE"));
 	//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-	m_FileMenu.AppendMenu(MF_STRING,MP_FORCE, GetResString(IDS_DL_FORCE));//shadow#(onlydownloadcompletefiles)
+	if(thePrefs.OnlyDownloadCompleteFiles())
+		m_FileMenu.AppendMenu(MF_STRING,MP_FORCE, GetResString(IDS_DL_FORCE));//shadow#(onlydownloadcompletefiles)
 	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
-	m_FileMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_DL_OPEN) );//<--9/21/02
+	m_FileMenu.AppendMenu(MF_STRING,MP_OPEN, GetResString(IDS_DL_OPEN), _T("OPENFILE") );//<--9/21/02
 	if (thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio())
     	m_FileMenu.AppendMenu(MF_STRING,MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS));
-	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW) );
-	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO) );//<--9/21/02
-	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL) );
-    m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR));//Commander - Added: MassRename [Dragon]
+	m_FileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
+	m_FileMenu.AppendMenu(MF_STRING,MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO") );//<--9/21/02
+	m_FileMenu.AppendMenu(MF_STRING,MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS") );
+	if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
-	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR));
-	
-	//MORPH - Moved by SiRoB, see on top
-	/*
+	m_FileMenu.AppendMenu(MF_STRING,MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR), _T("CLEARCOMPLETE"));
+	/* See on top
 	if (thePrefs.IsExtControlsEnabled()){
 		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
 		m_FileMenu.AppendMenu(MF_STRING,MP_ADDSOURCE, GetResString(IDS_ADDSRCMANUALLY) );
 	}
 	*/
-
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
-	m_FileMenu.AppendMenu(MF_STRING,MP_SHOWED2KLINK, GetResString(IDS_DL_SHOWED2KLINK) );
-	m_FileMenu.AppendMenu(MF_STRING,MP_PASTE, GetResString(IDS_SW_DIRECTDOWNLOAD));
+	m_FileMenu.AppendMenu(MF_STRING,MP_SHOWED2KLINK, GetResString(IDS_DL_SHOWED2KLINK), _T("ED2KLINK") );
+	m_FileMenu.AppendMenu(MF_STRING,MP_PASTE, GetResString(IDS_SW_DIRECTDOWNLOAD), _T("PASTELINK"));
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	//MORPH START - Added by IceCream, copy feedback feature
 	m_FileMenu.AppendMenu(MF_STRING,MP_COPYFEEDBACK, GetResString(IDS_COPYFEEDBACK));

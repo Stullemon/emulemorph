@@ -33,29 +33,58 @@
  This is a byte oriented version of SHA1 that operates on arrays of bytes
  stored in memory. It runs at 22 cycles per byte on a Pentium P4 processor
 */
-
 #pragma once
 #include "shahashset.h"
 
-class CSHA : public CAICHHashAlgo  
+typedef struct
+{
+	BYTE	b[20];
+} SHA1;
+
+#define SHA1_BLOCK_SIZE		64
+#define SHA1_DIGEST_SIZE	20
+
+class CSHA : public CAICHHashAlgo
 {
 // Construction
 public:
 	CSHA();
-	~CSHA();
+	virtual ~CSHA();
+
+	static bool VerifyImplementation();
+
+// Attributes
+protected:
+	// NOTE: if you change this, modify the offsets in SHA_ASM.ASM accordingly
+	DWORD	m_nCount[2];
+	DWORD	m_nHash[5];
+	DWORD	m_nBuffer[16];
+
 // Operations
 public:
+	// CAICHHashAlgo interface
 	virtual void	Reset();
 	virtual void	Add(LPCVOID pData, DWORD nLength);
 	virtual void	Finish(CAICHHash& Hash);
 	virtual void	GetHash(CAICHHash& Hash);
-protected:
-	void			Compile();
-private:
-	DWORD	m_nCount[2];
-	DWORD	m_nHash[5];
-	DWORD	m_nBuffer[16];
+
+	void	Finish();
+	void	GetHash(SHA1* pHash);
+	CString	GetHashString(BOOL bURN = FALSE);
+
+	static CString	HashToString(const SHA1* pHash, BOOL bURN = FALSE);
+	static CString	HashToHexString(const SHA1* pHash, BOOL bURN = FALSE);
+	static BOOL		HashFromString(LPCTSTR pszHash, SHA1* pHash);
+	static BOOL		HashFromURN(LPCTSTR pszHash, SHA1* pHash);
+	static BOOL		IsNull(SHA1* pHash);
 };
 
-#define SHA1_BLOCK_SIZE		64
-#define SHA1_DIGEST_SIZE	20
+inline bool operator==(const SHA1& sha1a, const SHA1& sha1b)
+{
+    return memcmp( &sha1a, &sha1b, 20 ) == 0;
+}
+
+inline bool operator!=(const SHA1& sha1a, const SHA1& sha1b)
+{
+    return memcmp( &sha1a, &sha1b, 20 ) != 0;
+}

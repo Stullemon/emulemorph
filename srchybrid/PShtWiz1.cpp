@@ -452,7 +452,7 @@ public:
 	virtual BOOL OnInitDialog();
 
 // Dialog Data
-	enum { IDD = IDD_WIZ1_UL_PRIO };
+	enum { IDD = IDD_WIZ1_ULDL_PRIO };
 
 	int m_iUAP;
 	int m_iDAP;

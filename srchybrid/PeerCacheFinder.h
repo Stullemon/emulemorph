@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 
 #pragma once
-#include "loggable.h"
 #include <afxinet.h>
 #include "ClientVersionInfo.h"
 
@@ -46,7 +45,7 @@ enum EPCLookUpState{
 ////////////////////////////////////////////////////////////////////////////////////
 /// CPeerCacheFinder
 
-class CPeerCacheFinder: public CLoggable
+class CPeerCacheFinder
 {
 	friend class CPCValditeThread;
 public:

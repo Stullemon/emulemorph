@@ -1,5 +1,4 @@
 #pragma once
-#include "Loggable.h"
 #include "WapServer/WebWapDefinitions.h"	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 class CWebSocket;
@@ -10,7 +9,6 @@ class CUpDownClient;
 
 // emulEspaña: Removed by MoNKi, now in WebWapDefinitions.h [MoNKi: -Wap Server-]
 /*
-#define SESSION_TIMEOUT_SECS	300	// 5 minutes session expiration
 #define SHORT_FILENAME_LENGTH	40	// Max size of file name.
 
 typedef struct { float download; float upload;  long connections; } UpDown;
@@ -158,7 +156,9 @@ typedef struct
 	CString sStats;
 	CString sPreferences;
 	CString	sLogin;
+	//MORPH START - Added by SiRoB, Login Failed from eMule+
 	CString sFailedLogin;
+ 	//MORPH END   - Added by SiRoB, Login Failed from eMule+
 	CString	sConnectedServer;
 	CString	sAddServerBox;
 	CString	sWebSearch;
@@ -174,7 +174,7 @@ typedef struct
 	CString sKad;
 } WebTemplates;
 
-class CWebServer: public CLoggable
+class CWebServer
 {
 	friend class CWebSocket;
 
@@ -208,7 +208,9 @@ private:
 	static CString	_GetStats(ThreadData);
 	static CString	_GetPreferences(ThreadData);
 	static CString	_GetLoginScreen(ThreadData);
+	//MORPH START - Added by SiRoB, Login Failed from eMule+
 	static CString  _GetFailedLoginScreen(ThreadData);
+	//MORPH END   - Added by SiRoB, Login Failed from eMule+
 	static CString	_GetConnectedServer(ThreadData);
 	static CString 	_GetAddServerBox(ThreadData Data);
 	static void		_RemoveServer(CString sIP, int nPort);

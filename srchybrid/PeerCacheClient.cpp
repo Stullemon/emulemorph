@@ -30,6 +30,7 @@
 #include "UploadBandwidthThrottler.h"
 #include "PeerCacheFinder.h"
 #include "UploadQueue.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -307,7 +308,7 @@ bool CPeerCacheUpSocket::ProcessHttpRequest()
 		SetTimeOut(SEC2MS(30));
 		return true;
 	}
-	GetClient()->m_iHttpSendState = 0;
+	GetClient()->SetHttpSendState(0);
 
 	SetHttpState(HttpStateRecvExpected);
 	GetClient()->SetUploadState(US_UPLOADING);
@@ -788,14 +789,14 @@ bool CUpDownClient::ProcessPeerCacheQuery(const char* packet, UINT size)
 
 	if (uCacheIP == 0 || uCachePort == 0 || uPushId == 0 || isnulmd4(aucFileHash)){
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("Invalid PeerCacheQuery; %s"), DbgGetClientInfo());
+			AddDebugLogLine(false, _T("Invalid PeerCacheQuery; %s"), DbgGetClientInfo());
 		return false;
 	}
 
 	CKnownFile* pUploadFile = theApp.sharedfiles->GetFileByID(aucFileHash);
 	if (pUploadFile == NULL){
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("PeerCacheQuery reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
+			AddDebugLogLine(false, _T("PeerCacheQuery reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
 		return false;
 	}
 
@@ -880,7 +881,7 @@ bool CUpDownClient::ProcessPeerCacheAnswer(const char* packet, UINT size)
 	uint8 uPCOpcode = dataRecv.ReadUInt8();
 	if (uPCOpcode == PCOP_NONE){
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("Client does not support PeerCache; %s"), DbgGetClientInfo());
+			AddDebugLogLine(false, _T("Client does not support PeerCache; %s"), DbgGetClientInfo());
 		return false;
 	}
 	if (uPCOpcode != PCOP_RES){
@@ -935,13 +936,13 @@ bool CUpDownClient::ProcessPeerCacheAnswer(const char* packet, UINT size)
 
 	if (uPushId == 0 || uRemoteIP == 0 || isnulmd4(aucFileHash)){
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("Invalid PeerCacheAnswer; %s"), DbgGetClientInfo());
+			AddDebugLogLine(false, _T("Invalid PeerCacheAnswer; %s"), DbgGetClientInfo());
 		return false;
 	}
 
 	if (md4cmp(aucFileHash, reqfile->GetFileHash()) != 0){
 		if (thePrefs.GetVerbose())
-			theApp.AddDebugLogLine(false, _T("PeerCacheAnswer reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
+			AddDebugLogLine(false, _T("PeerCacheAnswer reqfile does not match ed2k reqfile; %s"), DbgGetClientInfo());
 		return false;
 	}
 
@@ -979,7 +980,12 @@ bool CUpDownClient::ProcessPeerCacheAcknowledge(const char* packet, UINT size)
 		// PC-TODO: If this socket is closed, PeerCache also closes the socket which it had opened to the
 		// remote client! So, to give the remote client a chance to receive all the data from the PeerCache,
 		// we have to keep this socket open, although it's not needed nor could it be reused!
-		ASSERT( m_pPCUpSocket != NULL );
+		if (m_pPCUpSocket == NULL){
+			if (thePrefs.GetVerbose())
+				DebugLogError(_T("PeerCacheAck received - missing socket; %s"), DbgGetClientInfo());
+			ASSERT(0);
+			return false;
+		}
 //		m_pPCUpSocket->Safe_Delete();
 //		m_pPCUpSocket = NULL;
 		m_pPCUpSocket->SetTimeOut(MIN2MS(60)); // set socket timeout to 1 hour ??

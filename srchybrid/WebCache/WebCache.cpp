@@ -14,7 +14,7 @@
 #include "kademlia/kademlia/Kademlia.h"
 #include "RichEditCtrlX.h"
 #include <atlenc.h>
-
+#include "log.h"
 #include "WebCacheSocket.h"//JP proxy configuration test
 #include "Packets.h"//JP proxy configuration test
 #include "Statistics.h" //JP proxy configuration test
@@ -168,7 +168,7 @@ void detectWebcacheOnStart()
 	{
 		delete detectedWebcache;
 		if (thePrefs.GetLogWebCacheEvents())
-		theApp.AddDebugLogLine( false,_T("Error during webcachedetection on first start: ") + strError); // jp log
+		AddDebugLogLine( false,_T("Error during webcachedetection on first start: ") + strError); // jp log
 		if	((strError != _T("parsing webcache database failed")) &&
 			(strError != _T("Not starting a detection:\nlast failed DNS reverse lookup attempt is too near,\nIP has not changed")))
 		// AfxMessageBox(strError ,MB_OK | MB_ICONINFORMATION,0); //jp no messagebox for detect on startup

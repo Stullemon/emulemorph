@@ -2,7 +2,6 @@
 
 // by Superlexx, based on IPFilter by Bouc7
 #pragma once
-#include "loggable.h"
 #include <atlcoll.h>
 
 struct IPRange_Struct2{
@@ -28,7 +27,7 @@ enum IP2CountryNameSelection{
 
 typedef CTypedPtrArray<CPtrArray, IPRange_Struct2*> CIP2CountryArray;
 
-class CIP2Country: public CLoggable
+class CIP2Country
 {
 	public:
 		CIP2Country(void);

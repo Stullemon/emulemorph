@@ -33,6 +33,7 @@
 #include "WebServices.h"
 #include "HelpIDs.h"
 #include "StringConversion.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -389,7 +390,7 @@ void CPPgGeneral::OnLangChange()
 				}
 				CString strErr;
 				strErr.Format(GetResString(IDS_ERR_FAILEDDOWNLOADLANG), strUrl);
-				AddLogLine(true, strErr);
+				LogError(LOG_STATUSBAR, _T("%s"), strErr);
 				AfxMessageBox(strErr, MB_ICONERROR | MB_OK);
 			}
 			// undo change selection

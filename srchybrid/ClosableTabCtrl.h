@@ -2,6 +2,7 @@
 
 #define WM_CLOSETAB		(WM_USER + 0x101)
 #define	WM_QUERYTAB		(WM_USER + 0x102)
+#define	WM_DBLCLICKTAB	(WM_USER + 0x103)
 
 class CClosableTabCtrl : public CTabCtrl
 {
@@ -28,6 +29,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnSysColorChange();
-	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 };

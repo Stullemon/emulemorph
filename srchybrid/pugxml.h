@@ -9,6 +9,7 @@
 // Contributions by Neville Franks (readonly@getsoft.com).
 //
 ///////////////////////////////////////////////////////////////////////////////
+
 #if !defined(_PUGXML_)
 #define _PUGXML_
 #pragma once
@@ -1975,7 +1976,7 @@ public:
 	//<summary>Set attribute to std::string.</summary>
 	//<param name="rhs">Value std::string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
-//	xml_attribute& operator=(const std::string& rhs){ value(rhs.c_str()); return *this; }
+	//xml_attribute& operator=(const std::string& rhs){ value(rhs.c_str()); return *this; }
 	//<summary>Set attribute to string.</summary>
 	//<param name="rhs">Value string to set.</param>
 	//<returns>Reference to xml_attribute.</returns>
@@ -3108,7 +3109,7 @@ public:
 //		free(temp);
 //		return returns; //Return the path;
 //	}
-
+	
 	//<summary>Search for a node by path.</summary>
 	//<param name="path">
 	//	Path string; e.g. './foo/bar' (relative to node), '/foo/bar' (relative 
@@ -3116,7 +3117,7 @@ public:
 	//</param>
 	//<param name="delimiter">Delimiter string to use in tokenizing path.</param>
 	//<returns>Matching node, or xml_node(NULL) if not found.</returns>
-	//xml_node first_element_by_path(const std::string& path,string& delimiter = _T("/")){ return first_element_by_path(path.c_str(),delimiter.c_str()); }
+	//xml_node first_element_by_path(const std::string& path,const std::string& delimiter = "/"){ return first_element_by_path(path.c_str(),delimiter.c_str()); }
 
 	//<summary>Search for a node by path.</summary>
 	//<param name="path">

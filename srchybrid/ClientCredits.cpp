@@ -28,6 +28,7 @@
 #include <crypto51/files.h>
 #include <crypto51/sha.h>
 #include "emuledlg.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -397,7 +398,7 @@ void CClientCreditsList::LoadList()
 					strError += _T(" - ");
 					strError += szError;
 				}
-				AddLogLine(true, _T("%s"), strError);
+			LogError(LOG_STATUSBAR, _T("%s"), strError);
 			}
 			//MORPH START - Changed by SiRoB, Allternative choose .met to load
 			/*
@@ -413,7 +414,7 @@ void CClientCreditsList::LoadList()
 			//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			/*
 			if (version != CREDITFILE_VERSION && version != CREDITFILE_VERSION_29){
-				AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
+				LogWarning(GetResString(IDS_ERR_CREDITFILEOLD));
 				file.Close();
 				return;
 			}
@@ -421,7 +422,7 @@ void CClientCreditsList::LoadList()
 			// Moonlight: SUQWT - Import CreditStruct from 0.30c and SUQWTv1
 			if (version != CREDITFILE_VERSION_30_SUQWTv1 && version != CREDITFILE_VERSION_30_SUQWTv2 &&
 				version != CREDITFILE_VERSION_30 && version != CREDITFILE_VERSION_29){
-				AddLogLine(false, GetResString(IDS_ERR_CREDITFILEOLD));
+				LogWarning(GetResString(IDS_ERR_CREDITFILEOLD));
 				file.Close();
 				//MORPH START - Changed by SiRoB, Allternative choose .met to load
 				/*
@@ -465,7 +466,7 @@ void CClientCreditsList::LoadList()
 				file.Close(); // close the file before copying
 
 				if (!::CopyFile(strFileName, strBakFileName, FALSE))
-					AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
+					LogError(GetResString(IDS_ERR_MAKEBAKCREDITFILE));
 
 				// reopen file
 				CFileException fexp;
@@ -476,8 +477,8 @@ void CClientCreditsList::LoadList()
 						strError += _T(" - ");
 						strError += szError;
 					}
-					AddLogLine(true, _T("%s"), strError);
-					continue;
+					LogError(LOG_STATUSBAR, _T("%s"), strError);
+					continue; //MORPH - Continue loading files
 				}
 				setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 				file.Seek(1, CFile::begin); //set filepointer behind file version byte
@@ -533,19 +534,21 @@ void CClientCreditsList::LoadList()
 			}
 			file.Close();
 
-			if (cDeleted>0) AddLogLine(false, GetResString(IDS_CREDITFILELOADED) + GetResString(IDS_CREDITSEXPIRED), count-cDeleted,cDeleted);
-				else AddLogLine(false, GetResString(IDS_CREDITFILELOADED), count);
+			if (cDeleted>0)
+				AddLogLine(false, GetResString(IDS_CREDITFILELOADED) + GetResString(IDS_CREDITSEXPIRED), count-cDeleted,cDeleted);
+			else
+				AddLogLine(false, GetResString(IDS_CREDITFILELOADED), count);
 			
 			//We got a valide Credit file so exit now
 			break; //Added by SiRoB
 		}
 		catch(CFileException* error){
 			if (error->m_cause == CFileException::endOfFile)
-				AddLogLine(true, GetResString(IDS_CREDITFILECORRUPT));
+			LogError(LOG_STATUSBAR, GetResString(IDS_CREDITFILECORRUPT));
 			else{
 				TCHAR buffer[MAX_CFEXP_ERRORMSG];
 				error->GetErrorMessage(buffer, ARRSIZE(buffer));
-				AddLogLine(true, GetResString(IDS_ERR_CREDITFILEREAD), buffer);
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_CREDITFILEREAD), buffer);
 			}
 			error->Delete();
 		}
@@ -573,7 +576,7 @@ void CClientCreditsList::SaveList()
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(true, _T("%s"), strError);
+		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		return;
 	}
 
@@ -586,7 +589,7 @@ void CClientCreditsList::SaveList()
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(true, _T("%s"), strError);
+		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		return;
 	}
 	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -661,7 +664,7 @@ void CClientCreditsList::SaveList()
 			strError += _T(" - ");
 			strError += szError;
 		}
-		AddLogLine(true, _T("%s"), strError);
+		LogError(LOG_STATUSBAR, _T("%s"), strError);
 		error->Delete();
 	}
 
@@ -784,7 +787,7 @@ void CClientCreditsList::InitalizeCrypting(){
 			delete m_pSignkey;
 			m_pSignkey = NULL;
 		}
-		AddLogLine(false, GetResString(IDS_CRYPT_INITFAILED));
+		LogError(LOG_STATUSBAR, GetResString(IDS_CRYPT_INITFAILED));
 		ASSERT(0);
 	}
 	//Debug_CheckCrypting();

@@ -20,6 +20,7 @@
 class CUpDownClient;
 class CPacket;
 class CTimerWnd;
+enum EDebugLogPriority;
 
 enum SocketState 
 {
@@ -126,7 +127,6 @@ public:
 private:
 	bool bListening;
 	CTypedPtrList<CPtrList, CClientReqSocket*> socket_list;
-	uint16	opensockets;
 	uint16	m_OpenSocketsInterval;
 	uint32	maxconnectionreached;
 	uint16	m_ConnectionStates[3];

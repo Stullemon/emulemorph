@@ -142,7 +142,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	rCtrl << _T("\r\n");
 
 	if (theApp.serverconnect->IsConnected()){
-		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) ;
+		rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T(":") ;
 		if (theApp.serverconnect->IsLowID())
 			buffer = GetResString(IDS_UNKNOWN);
 		else
@@ -173,7 +173,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 			rCtrl << GetResString(IDS_SW_NAME) << _T(":\t") << srv->GetListName() << _T("\r\n");
 			rCtrl << GetResString(IDS_DESCRIPTION) << _T(":\t") << srv->GetDescription() << _T("\r\n");
-			rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T("\t") << srv->GetAddress() << _T(":") << srv->GetPort() << _T("\r\n");
+			rCtrl << GetResString(IDS_IP) << _T(":") << GetResString(IDS_PORT) << _T(":\t") << srv->GetAddress() << _T(":") << srv->GetPort() << _T("\r\n");
 			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 //			if (srv->GetConnPort() != srv->GetPort())  
 			rCtrl << GetResString(IDS_AUXPORTS) << _T(":\t") << srv->GetConnPort() << _T("\r\n"); 
@@ -189,21 +189,29 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 
 				rCtrl << _T("\r\n");
 				rCtrl.SetSelectionCharFormat(rcfBold);
-				rCtrl << _T("eD2K ") << GetResString(IDS_SERVER) << GetResString(IDS_FEATURES) << _T("\r\n");
+				rCtrl << _T("eD2K ") << GetResString(IDS_SERVER) << _T(" ") << GetResString(IDS_FEATURES) << _T("\r\n");
 				rCtrl.SetSelectionCharFormat(rcfDef);
 
 				rCtrl << GetResString(IDS_SERVER_LIMITS) << _T(": ") << GetFormatedUInt(srv->GetSoftFiles()) << _T("/") << GetFormatedUInt(srv->GetHardFiles()) << _T("\r\n");
 
-				if (thePrefs.IsExtControlsEnabled()){
-					rCtrl << _T("Unicode") << _T(": ");
-					if (srv->GetTCPFlags() & SRV_TCPFLG_UNICODE)
+				if (thePrefs.IsExtControlsEnabled())
+				{
+					rCtrl << GetResString(IDS_SRV_TCPCOMPR) << _T(": ");
+					if (srv->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
 						rCtrl << GetResString(IDS_YES);
 					else
 						rCtrl << GetResString(IDS_NO);
 					rCtrl << _T("\r\n");
 
-					rCtrl << GetResString(IDS_SRV_TCPCOMPR) << _T(": ");
-					if (srv->GetTCPFlags() & SRV_TCPFLG_COMPRESSION)
+					rCtrl << _T("Short tags") << _T(": ");
+					if (srv->GetTCPFlags() & SRV_TCPFLG_NEWTAGS)
+						rCtrl << GetResString(IDS_YES);
+					else
+						rCtrl << GetResString(IDS_NO);
+					rCtrl << _T("\r\n");
+
+					rCtrl << _T("Unicode") << _T(": ");
+					if (srv->GetTCPFlags() & SRV_TCPFLG_UNICODE)
 						rCtrl << GetResString(IDS_YES);
 					else
 						rCtrl << GetResString(IDS_NO);

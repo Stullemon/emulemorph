@@ -19,6 +19,7 @@
 #include "ChatSelector.h"
 #include "FriendListCtrl.h"
 #include "SplitterControl.h"
+#include "IconStatic.h"
 
 class CChatWnd : public CResizableDialog
 {
@@ -48,13 +49,14 @@ protected:
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
 	virtual BOOL OnInitDialog(); 
+	// MORPH START - Added by Commander, Friendlinks [emulEspaña]
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	// MORPH END   - Added by Commander, Friendlinks [emulEspaña]
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnSysColorChange();
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult);
@@ -65,6 +67,7 @@ protected:
 
 private:
 	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
+	CIconStatic m_cUserInfo;
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool	UpdateEmfriendsMetFromURL(const CString& strURL);

@@ -37,6 +37,8 @@
 #include "Opcodes.h"
 #include "Packets.h"
 #include "WebServices.h"
+#include "Log.h"
+#include "HighColorTab.hpp"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 #ifdef _DEBUG
@@ -84,6 +86,8 @@ CSearchResultFileDetailSheet::CSearchResultFileDetailSheet(const CSearchFile* fi
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
 	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
+	m_wndMetaData.m_psp.dwFlags |= PSP_USEICONID;
+	m_wndMetaData.m_psp.pszIcon = _T("METADATA");
 
 	if (thePrefs.IsExtControlsEnabled())
 		m_wndMetaData.SetFile(file);
@@ -106,6 +110,7 @@ BOOL CSearchResultFileDetailSheet::OnInitDialog()
 {		
 	EnableStackedTabs(FALSE);
 	BOOL bResult = CResizableSheet::OnInitDialog();
+	HighColorTab::UpdateImageList(*this);
 	InitWindowStyles(this);
 	EnableSaveRestore(_T("SearchResultFileDetailsSheet")); // call this after(!) OnInitDialog
 	SetWindowText(GetResString(IDS_DETAILS) + _T(": ") + m_file->GetFileName());
@@ -302,18 +307,7 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 	else
 		strBuffer.Format(_T("%u"), nSources);
 	SetItemText(itemnr,2,strBuffer);
-
-	uint32 uCompleteSources;
-	if (toshow->IsKademlia())
-		strBuffer = _T("?");
-	else{
-		if ( (uCompleteSources = toshow->GetIntTagValue(FT_COMPLETE_SOURCES))  > 0 && nSources > 0)
-			strBuffer.Format(_T("%u%%"), (uCompleteSources*100)/nSources);	
-		else
-			strBuffer = _T("0%");
-	}
-	SetItemText(itemnr,3,strBuffer);
-
+	SetItemText(itemnr,3,GetCompleteSourcesDisplayString(toshow, nSources));
 	SetItemText(itemnr,4,toshow->GetFileTypeDisplayStr());
 	SetItemText(itemnr,5,md4str(toshow->GetFileHash()));
 	SetItemText(itemnr,6,toshow->GetStrTagValue(FT_MEDIA_ARTIST));
@@ -346,8 +340,10 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 		SetItemText(itemnr,13,GetResString(IDS_DOWNLOADING));
 	else if (toshow->m_eKnown == CSearchFile::Downloaded)
 		SetItemText(itemnr,13,GetResString(IDS_DOWNLOADED));
+	//MORPH START - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+	SetItemText(itemnr,14,toshow->GetFakeComment());
+	//MORPH END   - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 
-	SetItemText(itemnr,14,toshow->GetFakeComment()); //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 }
 
 void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
@@ -366,17 +362,7 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 		else
 			strBuffer.Format(_T("%u"), nSources);
 		SetItemText(index,2,strBuffer);
-
-		uint32 uCompleteSources;
-		if (toupdate->IsKademlia())
-			strBuffer = _T("?");
-		else{
-			if ( (uCompleteSources = toupdate->GetIntTagValue(FT_COMPLETE_SOURCES))  > 0 && nSources > 0)
-				strBuffer.Format(_T("%u%%"), (uCompleteSources*100)/nSources);	
-			else
-				strBuffer = _T("0%");
-		}
-		SetItemText(index,3,strBuffer);
+		SetItemText(index,3,GetCompleteSourcesDisplayString(toupdate, nSources));
 
 		uint16 maxhitsname = (uint16)-1;
 		bool change=false;
@@ -411,6 +397,35 @@ void CSearchListCtrl::UpdateSources(const CSearchFile* toupdate)
 			SetItemText(index,0,strFileName);
 		Update(index);
 	}
+}
+
+CString CSearchListCtrl::GetCompleteSourcesDisplayString(const CSearchFile* pFile, UINT uSources, bool* pbComplete) const
+{
+	UINT uCompleteSources = pFile->GetIntTagValue(FT_COMPLETE_SOURCES);
+	int iComplete = pFile->IsComplete(uSources, uCompleteSources);
+
+	CString str;
+	if (iComplete < 0)			// '< 0' ... unknown
+	{
+		str = _T("?");
+		if (pbComplete)
+			*pbComplete = true;	// treat 'unknown' as complete
+	}
+	else if (iComplete > 0)		// '> 0' ... we know it's complete
+	{
+		ASSERT( uSources );
+		if (uSources)
+			str.Format(_T("%u%%"), (uCompleteSources*100)/uSources);
+		if (pbComplete)
+			*pbComplete = true;
+	}
+	else						// '= 0' ... we know it's not complete
+	{
+		str = _T("0%");
+		if (pbComplete)
+			*pbComplete = false;
+	}
+	return str;
 }
 
 void CSearchListCtrl::RemoveResult(const CSearchFile* toremove)
@@ -629,11 +644,12 @@ void CSearchListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	m_SearchFileMenu.EnableMenuItem(MP_REMOVE, theApp.emuledlg->searchwnd->CanDeleteSearch(m_nResultsID) ? MF_ENABLED : MF_GRAYED);
 	m_SearchFileMenu.EnableMenuItem(MP_FIND, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
 	
-	CMenu WebMenu;
+	CTitleMenu WebMenu;
 	WebMenu.CreateMenu();
-	int iWebMenuEntries = theWebServices.GetFileMenuEntries(WebMenu);
+	WebMenu.AddMenuTitle(NULL, true);
+	int iWebMenuEntries = theWebServices.GetFileMenuEntries(&WebMenu);
 	UINT flag2 = (iWebMenuEntries == 0 || iSelected != 1) ? MF_GRAYED : MF_STRING;
-	m_SearchFileMenu.AppendMenu(MF_POPUP | flag2, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES));
+	m_SearchFileMenu.AppendMenu(MF_POPUP | flag2, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES), _T("WEB"));
 	
 	if (iToDownload > 0)
 	m_SearchFileMenu.SetDefaultItem( ( !thePrefs.AddNewFilesPaused() || !thePrefs.IsExtControlsEnabled() )?MP_RESUME:MP_RESUMEPAUSED);
@@ -765,25 +781,25 @@ void CSearchListCtrl::CreateMenues()
 		VERIFY( m_SearchFileMenu.DestroyMenu() );
 
 	m_SearchFileMenu.CreatePopupMenu();
-	m_SearchFileMenu.AddMenuTitle(GetResString(IDS_FILE));
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DOWNLOAD));
+	m_SearchFileMenu.AddMenuTitle(GetResString(IDS_FILE), true);
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_RESUME, GetResString(IDS_DOWNLOAD), _T("RESUME"));
 
 	if (thePrefs.IsExtControlsEnabled())
 		m_SearchFileMenu.AppendMenu(MF_STRING, MP_RESUMEPAUSED, GetResString(IDS_DOWNLOAD) + _T(" (") + GetResString(IDS_PAUSED) + _T(")"));
 
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW));
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
 	if (thePrefs.IsExtControlsEnabled())
-		m_SearchFileMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+		m_SearchFileMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("FILEINFO"));
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_GETHTMLED2KLINK, GetResString(IDS_DL_LINK2));
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1), _T("ED2KLINK"));
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_GETHTMLED2KLINK, GetResString(IDS_DL_LINK2), _T("ED2KLINK"));
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVESELECTED, GetResString(IDS_REMOVESELECTED));
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_REMOVESEARCHSTRING));
-	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALLSEARCH));
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVESELECTED, GetResString(IDS_REMOVESELECTED), _T("DELETESELECTED"));
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVE, GetResString(IDS_REMOVESEARCHSTRING), _T("DELETE"));
+	m_SearchFileMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALLSEARCH), _T("CLEARCOMPLETE"));
 
 	m_SearchFileMenu.AppendMenu(MF_SEPARATOR);
-	m_SearchFileMenu.AppendMenu(MF_STRING, MP_FIND, GetResString(IDS_FIND));
+	m_SearchFileMenu.AppendMenu(MF_STRING, MP_FIND, GetResString(IDS_FIND), _T("Search"));
 }
 
 void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
@@ -909,7 +925,7 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				}
 			}
 
-#ifdef _DEBUG
+    #ifdef USE_DEBUG_DEVICE
 			if (file->GetClientsCount()){
 				CString strSource;
 				if (file->GetClientID() && file->GetClientPort()){
@@ -1507,22 +1523,12 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 
 			}
 			case 3:{		// complete sources
-				if (!src->IsKademlia()){
-					uint32 nSources = src->GetSourceCount();	
-				uint32 uCompleteSources;
-					if ( (uCompleteSources = src->GetIntTagValue(FT_COMPLETE_SOURCES))  > 0 && nSources > 0){
-						buffer.Format(_T("%u%%"), (uCompleteSources*100)/nSources);
+				bool bComplete = false;
+				buffer = GetCompleteSourcesDisplayString(src, src->GetSourceCount(), &bComplete);
+				COLORREF crOldTextColor;
+				if (!bComplete)
+					crOldTextColor = dc->SetTextColor(RGB(255, 0, 0));
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
-					}
-					else{
-						buffer = _T("0%");
-						COLORREF crColorBuffer = dc->SetTextColor(RGB(255,0,0));
-						dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
-						dc->SetTextColor(crColorBuffer);
-					}
-				}
-				else
-					dc->DrawText(_T("?"), 1, lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
 			}
 			case 4:			// file type

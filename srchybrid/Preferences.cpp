@@ -36,6 +36,7 @@
 #include "SafeFile.h"
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
+#include "Log.h"
 #include "LastCommonRouteFinder.h" //MORPH - Added by SiRoB
 #include "friendlist.h" //MORPH - Added by SiRoB, There is one slot friend or more
 
@@ -268,19 +269,19 @@ uint64	CPreferences::cumUpData_Partfile;
 uint64	CPreferences::sesUpData_File;
 uint64	CPreferences::sesUpData_Partfile;
 uint32	CPreferences::cumDownCompletedFiles;
-uint16	CPreferences::cumDownSuccessfulSessions;
-uint16	CPreferences::cumDownFailedSessions;
+uint32	CPreferences::cumDownSuccessfulSessions;
+uint32	CPreferences::cumDownFailedSessions;
 uint32	CPreferences::cumDownAvgTime;
 uint64	CPreferences::cumLostFromCorruption;
 uint64	CPreferences::cumSavedFromCompression;
 uint32	CPreferences::cumPartsSavedByICH;
-uint16	CPreferences::sesDownSuccessfulSessions;
-uint16	CPreferences::sesDownFailedSessions;
+uint32	CPreferences::sesDownSuccessfulSessions;
+uint32	CPreferences::sesDownFailedSessions;
 uint32	CPreferences::sesDownAvgTime;
-uint16	CPreferences::sesDownCompletedFiles;
+uint32	CPreferences::sesDownCompletedFiles;
 uint64	CPreferences::sesLostFromCorruption;
 uint64	CPreferences::sesSavedFromCompression;
-uint16	CPreferences::sesPartsSavedByICH;
+uint32	CPreferences::sesPartsSavedByICH;
 uint64	CPreferences::cumDownData_EDONKEY;
 uint64	CPreferences::cumDownData_EDONKEYHYBRID;
 uint64	CPreferences::cumDownData_EMULE;
@@ -314,18 +315,18 @@ float	CPreferences::cumConnAvgUpRate;
 float	CPreferences::cumConnMaxAvgUpRate;
 float	CPreferences::cumConnMaxUpRate;
 uint64	CPreferences::cumConnRunTime;
-uint16	CPreferences::cumConnNumReconnects;
-uint16	CPreferences::cumConnAvgConnections;
-uint16	CPreferences::cumConnMaxConnLimitReached;
-uint16	CPreferences::cumConnPeakConnections;
+uint32	CPreferences::cumConnNumReconnects;
+uint32	CPreferences::cumConnAvgConnections;
+uint32	CPreferences::cumConnMaxConnLimitReached;
+uint32	CPreferences::cumConnPeakConnections;
 uint32	CPreferences::cumConnTransferTime;
 uint32	CPreferences::cumConnDownloadTime;
 uint32	CPreferences::cumConnUploadTime;
 uint32	CPreferences::cumConnServerDuration;
-uint16	CPreferences::cumSrvrsMostWorkingServers;
+uint32	CPreferences::cumSrvrsMostWorkingServers;
 uint32	CPreferences::cumSrvrsMostUsersOnline;
 uint32	CPreferences::cumSrvrsMostFilesAvail;
-uint16	CPreferences::cumSharedMostFilesShared;
+uint32	CPreferences::cumSharedMostFilesShared;
 uint64	CPreferences::cumSharedLargestShareSize;
 uint64	CPreferences::cumSharedLargestAvgFileSize;
 uint64	CPreferences::cumSharedLargestFileSize;
@@ -394,6 +395,7 @@ int		CPreferences::m_iLastLogPaneID;
 uint16	CPreferences::MaxConperFive;
 int		CPreferences::checkDiskspace;
 UINT	CPreferences::m_uMinFreeDiskSpace;
+bool	CPreferences::m_bSparsePartFiles;
 TCHAR	CPreferences::yourHostname[127];
 bool	CPreferences::m_bEnableVerboseOptions;
 bool	CPreferences::m_bVerbose;
@@ -489,6 +491,9 @@ TCHAR	CPreferences::datetimeformat[64];
 TCHAR	CPreferences::datetimeformat4log[64];
 LOGFONT CPreferences::m_lfHyperText;
 LOGFONT CPreferences::m_lfLogText;
+COLORREF CPreferences::m_crLogError = RGB(255, 0, 0);
+COLORREF CPreferences::m_crLogWarning = RGB(128, 0, 128);
+COLORREF CPreferences::m_crLogSuccess = RGB(0, 0, 255);
 int		CPreferences::m_iExtractMetaData;
 bool	CPreferences::m_bAdjustNTFSDaylightFileTime = true;
 TCHAR	CPreferences::m_sWebPassword[256];
@@ -512,6 +517,7 @@ bool	CPreferences::m_bWebUseGzip;
 int		CPreferences::m_nWebPageRefresh;
 bool	CPreferences::m_bWebLowEnabled;
 TCHAR	CPreferences::m_sWebResDir[MAX_PATH];
+int		CPreferences::m_iWebTimeoutMins;
 TCHAR	CPreferences::m_sTemplateFile[MAX_PATH];
 ProxySettings CPreferences::proxy;
 bool	CPreferences::m_bIsASCWOP;
@@ -702,6 +708,7 @@ CString CPreferences::configdir;
 CString CPreferences::m_strWebServerDir;
 CString CPreferences::m_strLangDir;
 CString CPreferences::m_strFileCommentsFilePath;
+CString	CPreferences::m_strLogDir;
 Preferences_Ext_Struct* CPreferences::prefsExt;
 WORD	CPreferences::m_wWinVer;
 bool	CPreferences::m_UseProxyListenPort;
@@ -871,6 +878,7 @@ void CPreferences::Init()
 	//End emulEspaña
 	m_strLangDir = appdir + _T("lang\\");
 	m_strFileCommentsFilePath = configdir + _T("fileinfo.ini");
+	m_strLogDir = appdir + _T("logs\\");
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	m_strFeedsDir = appdir + _T("feeds\\"); // Added by N_OxYdE: XML News
@@ -898,6 +906,21 @@ void CPreferences::Init()
 	//MORPH START - Added by SiRoB, XML News [O²]
 	if ( PathFileExists(appdir+_T("xmlnews.dat"))) MoveFile(appdir+_T("xmlnews.dat"),configdir+_T("xmlnews.dat")); // Added by N_OxYdE:XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
+
+	///////////////////////////////////////////////////////////////////////////
+	// Create 'logs' directory (and optionally move files from application directory)
+	//
+	::CreateDirectory(GetLogDir(), 0);
+	CFileFind ff;
+	bool bFoundFile = ff.FindFile(GetAppDir() + _T("eMule*.log"), 0);
+	while (bFoundFile)
+	{
+		bFoundFile = ff.FindNextFile();
+		if (ff.IsDots() || ff.IsSystem() || ff.IsDirectory() || ff.IsHidden())
+			continue;
+		MoveFile(ff.GetFilePath(), GetLogDir() + ff.GetFileName());
+	}
+
 
 	CreateUserHash();
 
@@ -1170,7 +1193,7 @@ uint16 CPreferences::GetMaxDownload(){
     return GetMaxDownloadInBytesPerSec()/1024;
 }
 
-uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
+uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
 //dont be a Lam3r :)
 	//MORPH START - Added by SiRoB, ZZ Upload system
 	if (IsZZRatioDoesWork() || (dynamic && (thePrefs.IsDynUpEnabled() || thePrefs.IsSUCDoesWork())))
@@ -1782,17 +1805,17 @@ bool CPreferences::LoadStats(int loadBackUp)
 	if (loadBackUp == 1)
 	{
 		// Load records for servers / network
-		if (ini.GetInt(_T("SrvrsMostWorkingServers")) > cumSrvrsMostWorkingServers)
+		if ((UINT)ini.GetInt(_T("SrvrsMostWorkingServers")) > cumSrvrsMostWorkingServers)
 			cumSrvrsMostWorkingServers = ini.GetInt(_T("SrvrsMostWorkingServers"));
 
-		if (ini.GetInt(_T("SrvrsMostUsersOnline")) > (int)cumSrvrsMostUsersOnline)
+		if ((UINT)ini.GetInt(_T("SrvrsMostUsersOnline")) > cumSrvrsMostUsersOnline)
 			cumSrvrsMostUsersOnline = ini.GetInt(_T("SrvrsMostUsersOnline"));
 
-		if (ini.GetInt(_T("SrvrsMostFilesAvail")) > (int)cumSrvrsMostFilesAvail)
+		if ((UINT)ini.GetInt(_T("SrvrsMostFilesAvail")) > cumSrvrsMostFilesAvail)
 			cumSrvrsMostFilesAvail = ini.GetInt(_T("SrvrsMostFilesAvail"));
 
 		// Load records for shared files
-		if (ini.GetInt(_T("SharedMostFilesShared")) > cumSharedMostFilesShared)
+		if ((UINT)ini.GetInt(_T("SharedMostFilesShared")) > cumSharedMostFilesShared)
 			cumSharedMostFilesShared =	ini.GetInt(_T("SharedMostFilesShared"));
 
 		uint64 temp64 = ini.GetUInt64(_T("SharedLargestShareSize"));
@@ -2261,6 +2284,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("SearchMethod"),m_iSearchMethod);
 	ini.WriteBool(_T("CheckDiskspace"),checkDiskspace);	// SLUGFILLER: checkDiskspace
 	ini.WriteInt(_T("MinFreeDiskSpace"),m_uMinFreeDiskSpace);
+	ini.WriteBool(_T("SparsePartFiles"),m_bSparsePartFiles);
 	// itsonlyme: hostnameSource
 	buffer.Format(_T("%s"),yourHostname);
 	ini.WriteString(_T("YourHostname"),buffer);
@@ -2495,6 +2519,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("RunAsUnprivilegedUser"), m_bRunAsUser);
 	ini.WriteBool(_T("OpenPortsOnStartUp"), m_bOpenPortsOnStartUp);
 	ini.WriteInt(_T("DebugLogLevel"), m_byLogLevel);
+	ini.WriteInt(_T("WinXPSP2"), IsRunningXPSP2());
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2930,6 +2955,17 @@ void CPreferences::LoadPreferences()
 	if (maxdownload>maxGraphDownloadRate && maxdownload!=UNLIMITED) maxdownload=maxGraphDownloadRate*.8;
 	maxconnections=ini.GetInt(_T("MaxConnections"),GetRecommendedMaxConnections());
 	maxhalfconnections=ini.GetInt(_T("MaxHalfConnections"),9);
+
+	// reset max halfopen to a default if OS changed to SP2 or away
+	int dwSP2 = ini.GetInt(_T("WinXPSP2"), -1);
+	int dwCurSP2 = IsRunningXPSP2();
+	if (dwSP2 != dwCurSP2){
+		if (dwCurSP2 == 0)
+			maxhalfconnections = 50;
+		else if (dwCurSP2 == 1)
+			maxhalfconnections = 9;
+	}
+
 	port=ini.GetInt(_T("Port"), DEFAULT_TCP_PORT);
 	udpport=ini.GetInt(_T("UDPPort"),port+10);
 	nServerUDPPort = ini.GetInt(_T("ServerUDPPort"), -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
@@ -3018,6 +3054,7 @@ void CPreferences::LoadPreferences()
 	filterlevel=ini.GetInt(_T("FilterLevel"),127);
 	checkDiskspace=ini.GetBool(_T("CheckDiskspace"),false);	// SLUGFILLER: checkDiskspace
 	m_uMinFreeDiskSpace=ini.GetInt(_T("MinFreeDiskSpace"),20*1024*1024);
+	m_bSparsePartFiles=ini.GetBool(_T("SparsePartFiles"),false);
 	_stprintf(yourHostname,_T("%s"),ini.GetString(_T("YourHostname"),_T("")));	// itsonlyme: hostnameSource
 
 	// Barry - New properties...
@@ -3153,6 +3190,7 @@ void CPreferences::LoadPreferences()
 	// khaos::kmod+ Obsolete
 	/*
 	allcatType=ini.GetInt(_T("AllcatType"),0);
+	allcatTypeNeg=ini.GetBool(_T("AllcatTypeNeg"),false);
 	*/
 	watchclipboard=ini.GetBool(_T("WatchClipboard4ED2kFilelinks"),false);
 	m_iSearchMethod=ini.GetInt(_T("SearchMethod"),0);
@@ -3190,7 +3228,7 @@ void CPreferences::LoadPreferences()
 	
 	_stprintf(m_sTemplateFile,_T("%s"),ini.GetString(_T("WebTemplateFile"),_T("eMule.tmpl")));
 
-	_stprintf(messageFilter,_T("%s"),ini.GetString(_T("MessageFilter"),_T("Your client has an infinite queue")));
+	_stprintf(messageFilter,_T("%s"),ini.GetString(_T("MessageFilter"),_T("Your client has an infinite queue|Your client is connecting too fast|fastest download speed")));
 	commentFilter = ini.GetString(_T("CommentFilter"),_T("http://|www."));
 	commentFilter.MakeLower();
 	_stprintf(filenameCleanups,_T("%s"),ini.GetString(_T("FilenameCleanups"),_T("http|www.|.com|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt")));
@@ -3368,9 +3406,6 @@ void CPreferences::LoadPreferences()
 	enableNEWS=ini.GetBool(_T("ShowNews"), 1);
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
-	//if (maxGraphDownloadRate<maxdownload) maxdownload=UNLIMITED;
-	//if (maxGraphUploadRate<maxupload) maxupload=UNLIMITED;
-
 	ini.SerGet(true, downloadColumnWidths,
 		ARRSIZE(downloadColumnWidths), _T("DownloadColumnWidths"));
 	ini.SerGet(true, downloadColumnHidden,
@@ -3506,6 +3541,10 @@ void CPreferences::LoadPreferences()
 		memset(&m_lfLogText, 0, sizeof m_lfLogText);
 	delete[] pData;
 
+	m_crLogError = ini.GetColRef(_T("LogErrorColor"), m_crLogError);
+	m_crLogWarning = ini.GetColRef(_T("LogWarningColor"), m_crLogWarning);
+	m_crLogSuccess = ini.GetColRef(_T("LogSuccessColor"), m_crLogSuccess);
+
 	if (statsAverageMinutes < 1)
 		statsAverageMinutes = 5;
 
@@ -3610,6 +3649,7 @@ void CPreferences::LoadPreferences()
 	m_bWebUseGzip=ini.GetBool(_T("UseGzip"), true);
 	m_bWebLowEnabled=ini.GetBool(_T("UseLowRightsUser"), false);
 	m_nWebPageRefresh=ini.GetInt(_T("PageRefreshTime"), 120);
+	m_iWebTimeoutMins=ini.GetInt(_T("WebTimeoutMins"), 5 );
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "MobileMule"
@@ -4095,6 +4135,49 @@ void CPreferences::RemoveCat(int index)	{
 		delete delcat;
 	}
 }
+
+/*
+bool CPreferences::SetCatFilter(int index, int filter){
+	if (index==0)
+		allcatType=filter;
+	else if (index>0 && index<catMap.GetCount()) { 
+		Category_Struct* cat;
+		cat=catMap.GetAt(index); 
+		cat->filter=filter;
+		return true;
+	} 
+	
+	return false;
+}
+
+int CPreferences::GetCatFilter(int index){
+	if (index==0)
+		return allcatType;
+	else if (index>0 && index<catMap.GetCount()) {
+		return catMap.GetAt(index)->filter;
+	}
+	
+    return 0;
+}
+
+bool CPreferences::GetCatFilterNeg(int index){
+	if (index==0)
+		return allcatTypeNeg;
+	else if (index>0 && index<catMap.GetCount()) {
+		return catMap.GetAt(index)->filterNeg;
+	}
+	
+    return false;
+}
+
+void CPreferences::SetCatFilterNeg(int index, bool val) {
+	if (index==0)
+		allcatTypeNeg=val;
+	else if (index>0 && index<catMap.GetCount()) {
+		catMap.GetAt(index)->filterNeg=val;
+	}
+}
+*/
 
 bool CPreferences::MoveCat(UINT from, UINT to){
 	if (from>=(UINT)catMap.GetCount() || to >=(UINT)catMap.GetCount()+1 || from==to) return false;

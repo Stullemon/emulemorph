@@ -21,6 +21,7 @@
 #include "otherfunctions.h"
 #include "Preferences.h"
 #include "emuledlg.h"
+#include "Log.h"
 #include "HttpDownloadDlg.h"//MORPH START added by Yun.SF3: Ipfilter.dat update
 #include "ZipFile.h"//MORPH - Added by SiRoB, ZIP File download decompress
 
@@ -208,11 +209,11 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			}
 		}
 
-		theApp.emuledlg->AddLogLine(bShowResponse, GetResString(IDS_IPFILTERLOADED), m_iplist.GetCount());
+		AddLogLine(bShowResponse, GetResString(IDS_IPFILTERLOADED), m_iplist.GetCount());
 		if (thePrefs.GetVerbose())
 		{
-			theApp.emuledlg->AddDebugLogLine(false, _T("Loaded IP filters from \"%s\" in %ums"), pszFilePath, GetTickCount()-startMesure);
-			theApp.emuledlg->AddDebugLogLine(false, _T("Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"), iLine, iFoundRanges, iDuplicate, iMerged);
+			AddDebugLogLine(false, _T("Loaded IP filters from \"%s\" in %ums"), pszFilePath, GetTickCount()-startMesure);
+			AddDebugLogLine(false, _T("Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"), iLine, iFoundRanges, iDuplicate, iMerged);
 		}
 	}
 	return m_iplist.GetCount();
@@ -430,7 +431,7 @@ void CIPFilter::UpdateIPFilterURL()
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		_tremove(szTempFilePath);
-		AddLogLine(true, _T("Error downloading %s"), strURL);
+		LogError(LOG_STATUSBAR, _T("Error downloading %s"), strURL);
 		return;
 	}
 	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
@@ -456,7 +457,7 @@ void CIPFilter::UpdateIPFilterURL()
 		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
 		{
 			_tremove(szTempFilePath);
-			AddLogLine(true, _T("IP Filter download failed"));
+			LogError(LOG_STATUSBAR, _T("IP Filter download failed"));
 			return;
 		}
 
@@ -486,10 +487,10 @@ void CIPFilter::UpdateIPFilterURL()
 					bUnzipped = true;
 				}
 				else
-					AddLogLine(true, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, _T("Failed to extract IP filter file from downloaded IP filter ZIP file \"%s\"."), szTempFilePath);
 			}
 			else
-				AddLogLine(true, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				LogError(LOG_STATUSBAR, _T("Downloaded IP filter file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
 
 			zip.Close();
 		}

@@ -75,10 +75,12 @@ protected:
 	afx_msg void OnBnClickedCsend();
 	afx_msg void OnBnClickedCclose();
 	afx_msg void OnSysColorChange();
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
 	virtual BOOL DeleteItem(int nItem);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	void AddTimeStamp(CChatItem*);
 	bool IsSpam(CString strMessage, CUpDownClient* client);

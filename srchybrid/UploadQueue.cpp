@@ -46,6 +46,7 @@
 #include "StatisticsDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Kademlia/Prefs.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -529,7 +530,7 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 
 						if (RightClientIsSuperior(lastClient, newclient) > 0) {
 
-							//theApp.emuledlg->AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
+							//AddDebugLogLine(false, "%s: Ended upload to make room for higher prio client.", lastClient->GetUserName());
 							// Remove last client from ul list to make room for higher prio client
 							theApp.uploadqueue->RemoveFromUploadQueue(lastClient, GetResString(IDS_REMULHIGHERPRIO), true, true);
 

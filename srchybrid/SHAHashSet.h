@@ -62,7 +62,6 @@ Example
 */
 
 #pragma once
-#include "Loggable.h"
 
 #define HASHSIZE		20
 #define KNOWN2_MET_FILENAME		_T("known2.met")
@@ -185,6 +184,7 @@ public:
 	bool			IsPartDataAvailable(uint32 nPartStartPos);
 	void			SetStatus(EAICHStatus bNewValue)			{m_eStatus = bNewValue;}
 	EAICHStatus		GetStatus()	const							{return m_eStatus;}
+	void			SetOwner(CKnownFile* val)					{m_pOwner = val;}
 	
 	void			FreeHashSet();
 	void			SetFileSize(uint32 nSize);

@@ -23,8 +23,6 @@
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "kademlia/kademlia/search.h"
 #include "kademlia/kademlia/prefs.h"
-#define NOMD4MACROS
-#include "kademlia/utils/md4.h"
 #include "DownloadQueue.h"
 #include "Statistics.h"
 #include "Preferences.h"
@@ -39,7 +37,7 @@
 #include "SharedFilesWnd.h"
 #include "StringConversion.h"
 #include "ClientList.h"
-
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -422,7 +420,7 @@ void CSharedFileList::FindSharedFiles()
 				CString hashfilename;
 				hashfilename.Format (_T("%s\\%s"),f->strDirectory, f->strName);
 				if (hashfilename.Find (_T("\\\\")) >= 0) hashfilename.Format (_T("%s%s"),f->strDirectory, f->strName);
-				AddLogLine(false, _T("New file: '%s'"), hashfilename);
+				Log(_T("New file: '%s'"), hashfilename);
 				waitingforhash_list.GetNext (p);
 			}
 		}
@@ -521,7 +519,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 				TRACE(_T("%hs: File already in shared file list: %s \"%s\"\n"), __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFilePath());
 				TRACE(_T("%hs: File to add:                      %s \"%s\"\n"), __FUNCTION__, md4str(toadd->GetFileHash()), ff.GetFilePath());
 				if (!pFileInMap->IsKindOf(RUNTIME_CLASS(CPartFile)) || theApp.downloadqueue->IsPartFile(pFileInMap))
-					AddLogLine(false, _T("Duplicate shared files: \"%s\" and \"%s\""), pFileInMap->GetFilePath(), ff.GetFilePath());
+					LogWarning(_T("Duplicate shared files: \"%s\" and \"%s\""), pFileInMap->GetFilePath(), ff.GetFilePath());
 			}
 			else
 			{
@@ -583,7 +581,7 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 		TRACE(_T("%hs: File already in shared file list: %s \"%s\" \"%s\"\n"), __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileName(), pFileInMap->GetFilePath());
 		TRACE(_T("%hs: File to add:                      %s \"%s\" \"%s\"\n"), __FUNCTION__, md4str(pFile->GetFileHash()), pFile->GetFileName(), pFile->GetFilePath());
 		if (!pFileInMap->IsKindOf(RUNTIME_CLASS(CPartFile)) || theApp.downloadqueue->IsPartFile(pFileInMap))
-			AddLogLine(false, _T("Duplicate shared files: \"%s\" and \"%s\""), pFileInMap->GetFilePath(), pFile->GetFilePath());
+			LogWarning(_T("Duplicate shared files: \"%s\" and \"%s\""), pFileInMap->GetFilePath(), pFile->GetFilePath());
 		return false;
 	}
 	// SLUGFILLER: mergeKnown
@@ -615,7 +613,7 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 	{
 		TRACE(_T("%hs: File already in shared file list: %s \"%s\"\n"), __FUNCTION__, md4str(found_file->GetFileHash()), found_file->GetFilePath());
 		TRACE(_T("%hs: File to add:                      %s \"%s\"\n"), __FUNCTION__, md4str(file->GetFileHash()), file->GetFilePath());
-		AddLogLine(false, _T("Duplicate shared files: \"%s\" and \"%s\""), found_file->GetFilePath(), file->GetFilePath());
+		LogWarning(_T("Duplicate shared files: \"%s\" and \"%s\""), found_file->GetFilePath(), file->GetFilePath());
 
 		RemoveFromHashing(file);
 		if (!IsFilePtrInList(file) && !theApp.knownfiles->IsFilePtrInList(file))
@@ -1113,9 +1111,9 @@ int CAddFileThread::Run()
 	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
 	strFilePath.ReleaseBuffer();
 	if (m_partfile)
-		theApp.QueueLogLine(false, GetResString(IDS_HASHINGFILE) + _T(" \"%s\" \"%s\""), m_partfile->GetFileName(), strFilePath);
+		Log(GetResString(IDS_HASHINGFILE) + _T(" \"%s\" \"%s\""), m_partfile->GetFileName(), strFilePath);
 	else
-		theApp.QueueLogLine(false, GetResString(IDS_HASHINGFILE) + _T(" \"%s\""), strFilePath);
+		Log(GetResString(IDS_HASHINGFILE) + _T(" \"%s\""), strFilePath);
 
 	CKnownFile* newrecord = new CKnownFile();
 	if (newrecord->CreateFromFile(m_strDirectory, m_strFilename, m_partfile) && theApp.emuledlg && theApp.emuledlg->IsRunning()) // SLUGFILLER: SafeHash - in case of shutdown while still hashing

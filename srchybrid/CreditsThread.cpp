@@ -450,11 +450,11 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Commander"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:IceCream"));
+	m_arCredits.Add(_T("01:06:IceCream (inactive)"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:JLEE (inactive)"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:Mighty Knife"));
+	m_arCredits.Add(_T("01:06:Mighty Knife (inactive)"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Milobac (inactive)"));
 	m_arCredits.Add(_T("S:5"));

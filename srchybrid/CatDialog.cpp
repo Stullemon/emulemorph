@@ -42,6 +42,7 @@ CCatDialog::CCatDialog(int index)
 BOOL CCatDialog::OnInitDialog(){
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
+	SetIcon(theApp.LoadIcon(_T("CATEGORY"),16,16),FALSE);
 	Localize();
 	UpdateData();
 	m_bCancelled=false;

@@ -1,7 +1,6 @@
 // jp list that contains chunks that should not be requested during regular downloads because we are currently receiving proxy-sources for it
 
 #pragma once
-#include "Loggable.h"
 #include "PartFile.h"
 
 struct ThrottledChunk 
@@ -14,7 +13,7 @@ struct ThrottledChunk
 typedef CList<ThrottledChunk, ThrottledChunk&> CStdThrottledChunkList;
 
 class CThrottledChunkList :
-	public CStdThrottledChunkList, CLoggable
+	public CStdThrottledChunkList
 {
 public:
 	bool CheckList(ThrottledChunk tocompare, bool checktime);

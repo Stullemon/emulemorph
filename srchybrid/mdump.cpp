@@ -113,7 +113,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 					BOOL bOK = pDump( GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &ExInfo, NULL, NULL );
 					if (bOK)
 					{
-						_stprintf( szScratch, _T("Saved dump file to '%s'\nPlease send this file together with a bugreport to ornis@emule-project.net\nThank you for helping to improve eMule"), szDumpPath );
+						_stprintf( szScratch, _T("Saved dump file to '%s'\n.Please send this file together with a bugreport to dumps@emule-project.net !\nThank you for helping to improve eMule."), szDumpPath );
 						szResult = szScratch;
 						retval = EXCEPTION_EXECUTE_HANDLER;
 					}

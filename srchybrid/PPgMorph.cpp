@@ -137,18 +137,18 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			iImgDYNUP = piml->Add(CTempIconLoader(_T("SUC")));
 			iImgDM = piml->Add(CTempIconLoader(_T("DOWNLOAD")));
 			//MORPH START - Added by SiRoB, khaos::categorymod+
-			iImgSCC = piml->Add(CTempIconLoader(_T("PREF_FOLDERS")));
+			iImgSCC = piml->Add(CTempIconLoader(_T("CATEGORY")));
 			iImgSAC = piml->Add(CTempIconLoader(_T("ClientCompatible")));
-			iImgA4AF = piml->Add(CTempIconLoader(_T("SERVERLIST")));
+			iImgA4AF = piml->Add(CTempIconLoader(_T("ADVA4AF")));
 			// khaos::accuratetimerem+
-			iImgTimeRem = piml->Add(CTempIconLoader(_T("PREF_SCHEDULER")));
+			iImgTimeRem = piml->Add(CTempIconLoader(_T("STATSTIME")));
 			// khaos::accuratetimerem-
 			//MORPH END - Added by SiRoB, khaos::categorymod+
-			iImgSecu = piml->Add(CTempIconLoader(_T("PREF_SECURITY")));
-			iImgDisp = piml->Add(CTempIconLoader(_T("PREF_DISPLAY")));
+			iImgSecu = piml->Add(CTempIconLoader(_T("SECURITY")));
+			iImgDisp = piml->Add(CTempIconLoader(_T("DISPLAY")));
 			//MORPH START - Added by SiRoB, Upload Splitting Class
 			iImgFriend = piml->Add(CTempIconLoader(_T("FRIEND")));
-			iImgPowerShare = piml->Add(CTempIconLoader(_T("PREF_FILES")));
+			iImgPowerShare = piml->Add(CTempIconLoader(_T("FILEPOWERSHARE")));
 			iImgNormal = piml->Add(CTempIconLoader(_T("ClientCompatible")));
 			//MORPH END   - Added by SiRoB, Upload Splitting Class
 		}

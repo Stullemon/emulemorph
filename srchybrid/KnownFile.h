@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "Loggable.h"
 #include "BarShader.h"
 #include <list>
 
@@ -132,7 +131,7 @@ CAbstractFile
 		\ 
 		  CSearchFile
 */
-class CAbstractFile: public CObject, public CLoggable
+class CAbstractFile: public CObject
 {
 	DECLARE_DYNAMIC(CAbstractFile)
 
@@ -374,9 +373,9 @@ protected:
 	bool	GrabImage(CString strFileName,uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	bool	LoadTagsFromFile(CFileDataIO* file);
 	bool	LoadDateFromFile(CFileDataIO* file);
-	void	CreateHashFromFile(FILE* file, int Length, uchar* Output, CAICHHashTree* pShaHashOut) const { CreateHashFromInput(file, NULL, Length, Output, NULL, pShaHashOut); }
-	void	CreateHashFromFile(CFile* file, int Length, uchar* Output, CAICHHashTree* pShaHashOut) const { CreateHashFromInput(NULL, file, Length, Output, NULL, pShaHashOut); }
-	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output) const { CreateHashFromInput(NULL, NULL, Length, Output, in_string, NULL); }
+	void	CreateHash(CFile* pFile, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	bool	CreateHash(FILE* fp, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
+	bool	CreateHash(const uchar* pucData, UINT uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
 	void	LoadComment();
 	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;
@@ -384,8 +383,6 @@ protected:
 	CString m_strFilePath;
 	CAICHHashSet*			m_pAICHHashSet; 
 private:
-	void	CreateHashFromInput(FILE* file, CFile* file2, int Length, uchar* Output, uchar* in_string, CAICHHashTree* pShaHashOut) const;
-
 	static CBarShader s_ShareStatusBar;
 	uint16	m_iPartCount;
 	uint16  m_iED2KPartCount;

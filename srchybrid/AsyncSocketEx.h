@@ -27,7 +27,7 @@ First have a look at the way CAsyncSocket works. For each thread that uses
 CAsyncSocket, a window is created. CAsyncSocket calls WSAAsyncSelect with
 the handle of that window. Until here, CAsyncSocketEx works the same way.
 But CAsyncSocket uses only one window message (WM_SOCKET_NOTIFY) for all
-sockets within one thread. When the window recieve WM_SOCKET_NOTIFY, wParam
+sockets within one thread. When the window receive WM_SOCKET_NOTIFY, wParam
 contains the socket handle and the window looks up an CAsyncSocket instance
 using a map. CAsyncSocketEx works differently. It's helper window uses a
 wide range of different window messages (WM_USER through 0xBFFF) and passes
@@ -66,7 +66,6 @@ to tim.kosse@gmx.de
 
 #pragma once
 #define FD_FORCEREAD (1<<15)
-#include "loggable.h"
 
 #if defined(_AFXDLL) && (_MFC_VER==0x0700)
 // See also: KB article Q316312 - BUG: Mfc70.lib Does Not Export AfxGetModuleThreadState
@@ -89,8 +88,7 @@ class CAsyncSocketExHelperWindow;
 class CAsyncSocketExLayer;
 #endif //NOLAYERS
 class CCriticalSectionWrapper;
-class CAsyncSocketEx: public CLoggable
-					 ,public CObject
+class CAsyncSocketEx : public CObject
 {
 	DECLARE_DYNAMIC(CAsyncSocketEx)
 public:

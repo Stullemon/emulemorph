@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "MapKey.h"
-#include "Loggable.h"
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include <crypto51/rsa.h>
 #pragma warning(default:4516)
@@ -125,7 +124,7 @@ enum CreditSystemSelection {
 	CS_EASTSHARE
 };
 //EastShare End - added by AndCycle, creditsystem integration
-class CClientCredits: public CLoggable
+class CClientCredits
 {
 	friend class CClientCreditsList;
 public:
@@ -182,8 +181,10 @@ private:
 	uint32			m_dwWaitTime;
         //Commander - Changed: SUQWT - Start
 	//EastShare START - Modified by TAHO, modified SUQWT
-	//uint32		m_dwSecureWaitTime;
-	//uint32		m_dwUnSecureWaitTime;
+	/*
+	uint32		m_dwSecureWaitTime;
+	uint32		m_dwUnSecureWaitTime;
+	*/
 	sint64			m_dwSecureWaitTime;
 	sint64			m_dwUnSecureWaitTime;
         // EastShare - added by TAHO, modified SUQWT
@@ -201,7 +202,7 @@ private:
 
 };
 
-class CClientCreditsList: public CLoggable
+class CClientCreditsList
 {
 public:
 	CClientCreditsList();

@@ -1,8 +1,7 @@
 #pragma once
 #include "HypertextCtrl.h"
-#include "loggable.h"
 
-class CPPgWebServer : public CPropertyPage, public CLoggable
+class CPPgWebServer : public CPropertyPage
 {
 	DECLARE_DYNAMIC(CPPgWebServer)
 

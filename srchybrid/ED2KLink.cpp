@@ -370,8 +370,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* name,const TCHAR* size, const TCHAR* h
 					*pPort = 0;	// terminate ip string
 					pPort++;	// point pPort to port string.
 
-					USES_CONVERSION;
-					dwID = inet_addr(T2A(pIP));
+					dwID = inet_addr(CStringA(pIP));
 					ul = _tcstoul( pPort, 0, 10 );
 					nPort = static_cast<uint16>(ul);
 

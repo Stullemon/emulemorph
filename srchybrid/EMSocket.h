@@ -158,6 +158,6 @@ private:
     uint32 m_actualPayloadSize;
     uint32 m_actualPayloadSizeSent;
 
-    boolean m_bBusy;
-    boolean m_hasSent;
+    bool m_bBusy;
+    bool m_hasSent;
 };

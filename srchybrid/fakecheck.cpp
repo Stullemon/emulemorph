@@ -24,6 +24,7 @@
 #include "emuleDlg.h"
 #include "Preferences.h"
 #include "ZipFile.h"
+#include "log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -178,7 +179,7 @@ void CFakecheck::DownloadFakeList()
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		_tremove(szTempFilePath);
-		AddLogLine(true, _T("Error downloading %s"), strURL);
+		LogError(LOG_STATUSBAR, _T("Error downloading %s"), strURL);
 		return;
 	}
 	readFile = _tfsopen(szTempFilePath, _T("r"), _SH_DENYWR);
@@ -204,7 +205,7 @@ void CFakecheck::DownloadFakeList()
 		if (dlgDownload.DoModal() != IDOK || FileSize(szTempFilePath) < 10240)
 		{
 			_tremove(szTempFilePath);
-			AddLogLine(true,GetResString(IDS_FAKECHECKUPERROR));
+			LogError(LOG_STATUSBAR, GetResString(IDS_FAKECHECKUPERROR));
 			return;
 		}
 
@@ -234,10 +235,10 @@ void CFakecheck::DownloadFakeList()
 					bUnzipped = true;
 				}
 				else
-					AddLogLine(true, _T("Failed to extract fake check file from downloaded fake check ZIP file \"%s\"."), szTempFilePath);
+					LogError(LOG_STATUSBAR, _T("Failed to extract fake check file from downloaded fake check ZIP file \"%s\"."), szTempFilePath);
 			}
 			else
-				AddLogLine(true, _T("Downloaded fake check file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
+				LogError(LOG_STATUSBAR, _T("Downloaded fake check file \"%s\" is a ZIP file with unexpected content."), szTempFilePath);
 
 			zip.Close();
 		}

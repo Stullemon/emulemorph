@@ -35,6 +35,7 @@
 #include "ServerWnd.h"
 #include "SearchDlg.h"
 #include "IPFilter.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -86,7 +87,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 		case WSAETIMEDOUT: 	
 		case WSAEADDRINUSE:
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
+				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
 			m_bIsDeleting = true;
 			SetConnectionState(CS_SERVERDEAD);
 			serverconnect->DestroySocket(this);
@@ -96,7 +97,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 			if (m_ProxyConnectFailed)
 			{
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
+					DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
 				m_ProxyConnectFailed = false;
 				m_bIsDeleting = true;
 				SetConnectionState(CS_SERVERDEAD);
@@ -105,7 +106,7 @@ void CServerSocket::OnConnect(int nErrorCode){
 			}
 		default:	
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
+				DebugLogError(_T("Failed to connect to server %s; %s"), cur_server->GetAddress(), GetErrorMessage(nErrorCode, 1));
 			m_bIsDeleting = true;
 			SetConnectionState(CS_FATALERROR);
 			serverconnect->DestroySocket(this);
@@ -161,7 +162,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 							Debug(_T("%s\n"), message);
 					}
 					else if (_tcsncmp(message, _T("ERROR"), 5) == 0){
-						AddLogLine(true, _T("%s %s (%s:%u) - %s"), 
+						LogError(LOG_STATUSBAR, _T("%s %s (%s:%u) - %s"), 
 							GetResString(IDS_ERROR),
 							pServer ? pServer->GetListName() : GetResString(IDS_PW_SERVER), 
 							cur_server ? cur_server->GetAddress() : _T(""), 
@@ -169,7 +170,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 						bOutputMessage = false;
 					}
 					else if (_tcsncmp(message, _T("WARNING"), 7) == 0){
-						AddLogLine(true, _T("%s %s (%s:%u) - %s"), 
+						LogWarning(LOG_STATUSBAR, _T("%s %s (%s:%u) - %s"), 
 							GetResString(IDS_WARNING),
 							pServer ? pServer->GetListName() : GetResString(IDS_PW_SERVER), 
 							cur_server ? cur_server->GetAddress() : _T(""),
@@ -360,7 +361,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 					Debug(_T("ServerMsg - OP_ServerIdent\n"));
 				if (size<16+4+2+4) {
 					if (thePrefs.GetVerbose())
-						AddDebugLogLine(false,GetResString(IDS_ERR_KNOWNSERVERINFOREC)); 
+						DebugLogError(_T("%s"), GetResString(IDS_ERR_KNOWNSERVERINFOREC));
 					break;// throw "Invalid server info received"; 
 				} 
 
@@ -463,7 +464,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 				}
 				catch(CFileException* error){
 					if (thePrefs.GetVerbose())
-						AddDebugLogLine(false,GetResString(IDS_ERR_BADSERVERLISTRECEIVED));
+						DebugLogError(_T("%s"), GetResString(IDS_ERR_BADSERVERLISTRECEIVED));
 					error->Delete();
 				}
 				break;
@@ -514,7 +515,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 				// this could happen if we send a command with the wrong protocol (e.g. sending a compressed packet to
 				// a server which does not support that protocol).
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("Server rejected last command"));
+					DebugLogError(_T("Server rejected last command"));
 				break;
 			}
 			default:
@@ -532,7 +533,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			error->m_strFileName = _T("server packet");
 			error->GetErrorMessage(szError, ARRSIZE(szError));
-			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),szError);
+		    DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), szError);
 		}
 		error->Delete();
 		ASSERT(0);
@@ -542,7 +543,7 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 	catch(CMemoryException* error)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),_T("CMemoryException"));
+			DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), _T("CMemoryException"));
 		error->Delete();
 		ASSERT(0);
 		if (opcode==OP_SEARCHRESULT || opcode==OP_FOUNDSOURCES)
@@ -551,13 +552,13 @@ bool CServerSocket::ProcessPacket(char* packet, uint32 size, uint8 opcode){
 	catch(CString error)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),error.GetBuffer());
+			DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), error);
 		ASSERT(0);
 	}
 	catch(...)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,GetResString(IDS_ERR_PACKAGEHANDLING),_T("Unknown exception"));
+			DebugLogError(GetResString(IDS_ERR_PACKAGEHANDLING), _T("Unknown exception"));
 		ASSERT(0);
 	}
 
@@ -573,7 +574,7 @@ void CServerSocket::ConnectToServer(CServer* server){
 	}
 
 	cur_server = new CServer(server);
-	AddLogLine(false,GetResString(IDS_CONNECTINGTO),cur_server->GetListName(),cur_server->GetFullIP(),cur_server->GetPort());
+	Log(GetResString(IDS_CONNECTINGTO), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort());
 
 	if (thePrefs.IsProxyASCWOP() )
 	{
@@ -590,13 +591,13 @@ void CServerSocket::ConnectToServer(CServer* server){
 	SetConnectionState(CS_CONNECTING);
 	//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 	/*
-	if (!this->Connect(server->GetAddress(),server->GetPort())){
+	if (!Connect(server->GetAddress(),server->GetPort())){
 	*/
-	if (!this->Connect(server->GetAddress(),server->GetConnPort())){
+	if (!Connect(server->GetAddress(),server->GetConnPort())){
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-		int error = this->GetLastError();
-		if ( error != WSAEWOULDBLOCK){
-			AddLogLine(false,GetResString(IDS_ERR_CONNECTIONERROR),cur_server->GetListName(),cur_server->GetFullIP(),cur_server->GetPort(), GetErrorMessage(error, 1)); 
+		DWORD dwError = GetLastError();
+		if ( dwError != WSAEWOULDBLOCK){
+			LogError(GetResString(IDS_ERR_CONNECTIONERROR), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetErrorMessage(dwError, 1));
 			SetConnectionState(CS_FATALERROR);
 			return;
 		}
@@ -608,7 +609,7 @@ void CServerSocket::OnError(int nErrorCode)
 {
 	SetConnectionState(CS_DISCONNECTED);
 	if (thePrefs.GetVerbose())
-		AddDebugLogLine(false,GetResString(IDS_ERR_SOCKET),cur_server->GetListName(),cur_server->GetFullIP(),cur_server->GetPort(), GetErrorMessage(nErrorCode, 1));
+		DebugLogError(GetResString(IDS_ERR_SOCKET), cur_server->GetListName(), cur_server->GetFullIP(), cur_server->GetPort(), GetErrorMessage(nErrorCode, 1));
 }
 
 bool CServerSocket::PacketReceived(Packet* packet)
@@ -621,7 +622,7 @@ bool CServerSocket::PacketReceived(Packet* packet)
 			uint32 uComprSize = packet->size;
 			if (!packet->UnPackPacket(250000)){
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false,_T("Failed to decompress server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
+					DebugLogError(_T("Failed to decompress server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
 				return true;
 			}
 			packet->prot = OP_EDONKEYPROT;
@@ -636,13 +637,13 @@ bool CServerSocket::PacketReceived(Packet* packet)
 		else
 		{
 			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false,_T("Received server TCP packet with unknown protocol: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
+				DebugLogWarning(_T("Received server TCP packet with unknown protocol: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
 		}
 	}
 	catch(...)
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,_T("Error: Unhandled exception while processing server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
+			DebugLogError(_T("Error: Unhandled exception while processing server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
 		ASSERT(0);
 		return false;
 	}

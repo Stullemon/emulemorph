@@ -712,6 +712,9 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				}
 				return;
 			}
+			else if (numread == 0)
+				return;
+
 			//Response begins with HTTP/
 			if (!m_pStrBuffer)
 			{

@@ -9,6 +9,13 @@
 #include "emule.h"
 #include "HTRichEditCtrl.h"
 
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+
 struct Channel
 {
 	CString	name;
@@ -223,7 +230,7 @@ Channel* CIrcChannelTabCtrl::NewChannel( CString name, uint8 type )
 		toadd->log.ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 		toadd->log.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 		toadd->log.SetEventMask(toadd->log.GetEventMask() | ENM_LINK);
-		toadd->log.SetFont(&theApp.emuledlg->m_fontHyperText);
+		toadd->log.SetFont(&theApp.m_fontHyperText);
 		toadd->log.SetTitle(name);
 		toadd->log.SetProfileSkinKey(_T("IRCChannel"));
 		toadd->log.ApplySkin();

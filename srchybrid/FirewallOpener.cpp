@@ -22,6 +22,13 @@
 #include "preferences.h"
 #include "otherfunctions.h"
 
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
+
+
 #define RETURN_ON_FAIL(x)	if (!SUCCEEDED(x)) return false;
 
 CFirewallOpener::CFirewallOpener(void)

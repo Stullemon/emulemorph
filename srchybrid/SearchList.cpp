@@ -34,6 +34,7 @@
 #include "SearchDlg.h"
 #include "SearchListCtrl.h"
 #include "Fakecheck.h" //MORPH - Added by SiRoB
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -324,6 +325,25 @@ uint32 CSearchFile::GetCompleteSourceCount() const
 	return GetIntTagValue(FT_COMPLETE_SOURCES);
 }
 
+int CSearchFile::IsComplete() const
+{
+	return IsComplete(GetSourceCount(), GetIntTagValue(FT_COMPLETE_SOURCES));
+}
+
+int CSearchFile::IsComplete(UINT uSources, UINT uCompleteSources) const
+{
+	if (IsKademlia())
+		return -1;		// unknown
+	else if (uSources > 0 && uCompleteSources > 0)
+		return 1;		// complete
+	else
+		return 0;		// not complete
+}
+
+time_t CSearchFile::GetLastSeenComplete() const
+{
+	return GetIntTagValue(FT_LASTSEENCOMPLETE);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

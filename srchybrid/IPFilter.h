@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "loggable.h"
 
 struct SIPFilter
 {
@@ -33,7 +32,7 @@ struct SIPFilter
 //typedef CArray<SIPFilter, SIPFilter> CIPFilterArray; 
 typedef CTypedPtrArray<CPtrArray, SIPFilter*> CIPFilterArray;
 
-class CIPFilter: public CLoggable
+class CIPFilter
 {
 public:
 	CIPFilter();

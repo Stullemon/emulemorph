@@ -23,7 +23,9 @@
 #include "PartFile.h"
 #include "Preferences.h"
 #include "SafeFile.h"
+#include "SharedFileList.h"
 #include "emuledlg.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -118,6 +120,8 @@ UINT AFX_CDECL CPartFileConvert::run(LPVOID lpParam)
 	DbgSetThreadName("Partfile-Converter");
 	InitThreadLocale();
 
+	int imported=0;
+
 	for (;;)
 	{
 		// search next queued job and start it
@@ -130,6 +134,10 @@ UINT AFX_CDECL CPartFileConvert::run(LPVOID lpParam)
 			pfconverting->state=CONV_INPROGRESS;
 			UpdateGUI(pfconverting);
 			pfconverting->state=performConvertToeMule(pfconverting->folder);
+
+			if (pfconverting->state==CONV_OK)
+				++imported;
+
 			UpdateGUI(pfconverting);
 			AddLogLine(true,GetResString(IDS_IMP_STATUS),pfconverting->folder,GetReturncodeText(pfconverting->state));
 		} else
@@ -138,6 +146,9 @@ UINT AFX_CDECL CPartFileConvert::run(LPVOID lpParam)
 
 	// clean up
 	UpdateGUI(NULL);
+
+	if (imported)
+		theApp.sharedfiles->PublishNextTurn();
 
 	convertPfThread=NULL;
 	return 0;
@@ -274,7 +285,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 				strError += _T(" - ");
 				strError += szError;
 			}
-			AddLogLine(false, _T("%s"), strError);
+			LogError(false, _T("%s"), strError);
 			error->Delete();
 			delete file;
 			return CONV_IOERROR;
@@ -364,6 +375,10 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 
 	theApp.downloadqueue->AddDownload(file,thePrefs.AddNewFilesPaused());
 	file->SavePartFile();
+	
+	if (file->GetStatus(true) == PS_READY)
+		theApp.sharedfiles->SafeAddKFile(file); // part files are always shared files
+
 
 	if (pfconverting->removeSource) {
 
@@ -426,10 +441,7 @@ void CPartFileConvert::ShowGUI(){
 		m_convertgui->AddAnchor(IDC_CONVREMOVE, BOTTOM_LEFT);
 		m_convertgui->AddAnchor(IDC_HIDECONVDLG, BOTTOM_RIGHT);
 
-		HICON importicon;
-		importicon=theApp.LoadIcon(_T("CONVERT"),16,16);
-		//importicon=theApp.LoadIcon(IDI_IMPORT);
-		m_convertgui->SetIcon(importicon,FALSE);
+		m_convertgui->SetIcon(theApp.LoadIcon(_T("CONVERT"),16,16),FALSE);
 		
 		// init gui
 		m_convertgui->pb_current.SetRange(0,100);

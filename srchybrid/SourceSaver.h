@@ -1,10 +1,9 @@
 #pragma once
-#include "loggable.h"
 
 class CPartFile;
 class CUpDownClient;
 
-class CSourceSaver: public CLoggable
+class CSourceSaver
 {
 public:
 	CSourceSaver(void);

@@ -39,7 +39,9 @@
 #include "Kademlia/Kademlia/Search.h"
 #include "SHAHashSet.h"
 #include "SharedFileList.h"
-#include "IPFilter.h" //MORPH - Added by SiRoB
+#include "Log.h"
+
+#include "IPFilter.h" //MORPH - Added by SiRoB, See Defeat 0-filled
 
 // MORPH START - Added by Commander, WebCache 1.2e
 #include "WebCache/WebCacheSocket.h" // yonatan http
@@ -373,13 +375,12 @@ void CUpDownClient::SendFileRequest()
 				AddDebugLogLine(false, _T("SXSend: Client source request; %s, File=\"%s\""), DbgGetClientInfo(), reqfile->GetFileName());
 		}
 		if (IsSupportingAICH()){
-			///*toremove*/ AddDebugLogLine(false, _T("Send OP_AICHFILEHASHREQ, %s"), DbgGetClientInfo());
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__MPAichFileHashReq", this, (char*)reqfile->GetFileHash());
 			dataFileReq.WriteUInt8(OP_AICHFILEHASHREQ);
 		}
-		/*else
-		AddDebugLogLine(false, _T("Did not Send OP_AICHFILEHASHREQ, %s"), DbgGetClientInfo());*/
 
-                // MORPH START - Added by Commander, WebCache 1.2e
+		// MORPH START - Added by Commander, WebCache 1.2e
 		// Superlexx - webcache - the webcache-only tags, moved here from the hello packet
 		if (SupportsWebCache() && WebCacheInfoNeeded())
 		{
@@ -896,6 +897,9 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			ClearDownloadBlockRequests();
 				
 			m_nDownDatarate = 0;
+			m_AvarageDDR_list.RemoveAll();
+			m_nSumForAvgDownDataRate = 0;
+
 			if (nNewState == DS_NONE){
 				
 				//MORPH START - Removed by SiRoB, See A4AF PartStatus
@@ -1237,7 +1241,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 							// Ban => serious error (Attack?)
 							if(lenUnzipped > 4*nBlockSize && reqfile->IsArchive() == true){
-								Ban(); //theApp.ipfilter->AddIP(GetIP(), 1, _T("Temporary"));
+								theApp.ipfilter->AddIP(GetIP(), 1, _T("Temporary"));
 								SetDownloadState(DS_ERROR);
 							}
 
@@ -1260,7 +1264,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 
 					    if (nStartPos > cur_block->block->EndOffset || nEndPos > cur_block->block->EndOffset){
 							if (thePrefs.GetVerbose())
-								AddDebugLogLine(false, _T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
+								DebugLogError(_T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG),reqfile->GetFileName(),666);
 							reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 							// There is no chance to recover from this error
 						}
@@ -1286,7 +1290,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 								ASSERT(0);
 								strZipError.AppendFormat(_T("; Z_OK,lenUnzipped=%d"), lenUnzipped);
 							}
-						AddDebugLogLine(false, _T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG) + strZipError, reqfile->GetFileName(), result);
+						DebugLogError(_T("PrcBlkPkt: ") + GetResString(IDS_ERR_CORRUPTCOMPRPKG) + strZipError, reqfile->GetFileName(), result);
 						}
 						reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 
@@ -1339,14 +1343,11 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 						delete cur_block->zStream;
 					}
 					delete cur_block;
-						m_PendingBlocks_list.RemoveAt(posLast);
+					m_PendingBlocks_list.RemoveAt(posLast);
 
 					// Request next block
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("More block requests", this);
-					// MORPH START - Added by Commander, WebCache 1.2e
-					if (m_PendingBlocks_list.IsEmpty()) // Superlexx - tmp
-					// MORPH END - Added by Commander, WebCache 1.2e
 					SendBlockRequests();	
 				}
 			}
@@ -1470,7 +1471,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
 				else if (err != Z_OK)
 					strZipError.Format(_T(" %d"), err);
 				TRACE_UNZIP("; Error: %s\n", strZipError);
-				AddDebugLogLine(false, _T("Unexpected zip error%s in file \"%s\""), strZipError, reqfile ? reqfile->GetFileName() : NULL);
+				DebugLogError(_T("Unexpected zip error%s in file \"%s\""), strZipError, reqfile ? reqfile->GetFileName() : NULL);
 			}
 	    }
     
@@ -1479,7 +1480,7 @@ int CUpDownClient::unzip(Pending_Block_Struct *block, BYTE *zipped, uint32 lenZi
   	}
   	catch (...){
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false, _T("Unknown exception in %hs: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
+			DebugLogError(_T("Unknown exception in %hs: file \"%s\""), __FUNCTION__, reqfile ? reqfile->GetFileName() : NULL);
 		err = Z_DATA_ERROR;
 		ASSERT(0);
 	}
@@ -1498,19 +1499,19 @@ uint32 CUpDownClient::CalculateDownloadRate(){
     }
 	
 	while (m_AvarageDDR_list.GetCount() > 0)
-		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 30000)
+		if((cur_tick - m_AvarageDDR_list.GetHead().timestamp) > 10000)
 			m_nSumForAvgDownDataRate -= m_AvarageDDR_list.RemoveHead().datalen;
 		else
 			break;
 	
 	if (m_AvarageDDR_list.GetCount() > 0){
 		if (m_AvarageDDR_list.GetCount() == 1)
-			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 30000;
+			m_nDownDatarate = (m_nSumForAvgDownDataRate*1000) / 10000;
 		else{
 			DWORD dwDuration = m_AvarageDDR_list.GetTail().timestamp - m_AvarageDDR_list.GetHead().timestamp;
 			if ((m_AvarageDDR_list.GetCount() - 1)*(cur_tick - m_AvarageDDR_list.GetTail().timestamp) > dwDuration)
 				dwDuration = cur_tick - m_AvarageDDR_list.GetHead().timestamp - dwDuration / (m_AvarageDDR_list.GetCount() - 1);
-			if (dwDuration < 5000) dwDuration = 5000;
+			if (dwDuration < 3000) dwDuration = 3000;
 			m_nDownDatarate = ((m_nSumForAvgDownDataRate - m_AvarageDDR_list.GetHead().datalen)*1000) / dwDuration;
 		}
 	}else
@@ -1611,7 +1612,7 @@ void CUpDownClient::UDPReaskFNF(){
 	m_bUDPPending = false;
 	if (GetDownloadState()!=DS_DOWNLOADING){ // avoid premature deletion of 'this' client
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(DLP_LOW, false, _T("UDP ANSWER FNF : %s - %s"),DbgGetClientInfo(), DbgGetFileInfo(reqfile ? reqfile->GetFileHash() : NULL));
+			AddDebugLogLine(DLP_LOW, false, _T("UDP FNF-Answer: %s - %s"),DbgGetClientInfo(), DbgGetFileInfo(reqfile ? reqfile->GetFileHash() : NULL));
 		if (reqfile)
 			reqfile->m_DeadSourceList.AddDeadSource(this);
 		switch (GetDownloadState()) {
@@ -1632,7 +1633,7 @@ void CUpDownClient::UDPReaskFNF(){
 	else
 	{
 		if (thePrefs.GetVerbose())
-			AddDebugLogLine(false,_T("UDP ANSWER FNF : %s - did not remove client because of current download state"),GetUserName());
+			DebugLogWarning(_T("UDP FNF-Answer: %s - did not remove client because of current download state"),GetUserName());
 	}
 }
 

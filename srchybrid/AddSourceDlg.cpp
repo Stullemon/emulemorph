@@ -34,8 +34,8 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNAMIC(CAddSourceDlg, CDialog)
 
 BEGIN_MESSAGE_MAP(CAddSourceDlg, CResizableDialog)
-	ON_BN_CLICKED(IDC_RADIO1, OnBnClickedRadio1)
-	ON_BN_CLICKED(IDC_RADIO4, OnBnClickedRadio4)
+	ON_BN_CLICKED(IDC_RSRC, OnBnClickedRadio1)
+	ON_BN_CLICKED(IDC_RURL, OnBnClickedRadio4)
 	ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedButton1)
 	ON_BN_CLICKED(IDOK, OnBnClickedOk)
 END_MESSAGE_MAP()
@@ -54,7 +54,7 @@ CAddSourceDlg::~CAddSourceDlg()
 void CAddSourceDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizableDialog::DoDataExchange(pDX);
-	DDX_Radio(pDX, IDC_RADIO1, m_nSourceType);
+	DDX_Radio(pDX, IDC_RSRC, m_nSourceType);
 }
 
 void CAddSourceDlg::SetFile( CPartFile *pFile )

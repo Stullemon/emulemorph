@@ -33,7 +33,9 @@
 #include "MuleStatusBarCtrl.h"
 #include "HelpIDs.h"
 #include "NetworkInfoDlg.h"
+#include "Log.h"
 #include <share.h> //Morph
+
 // Mighty Knife: Popup-Menu for editing news feeds
 #include "MenuCmds.h"
 #include "InputBox.h"
@@ -58,10 +60,38 @@ static char THIS_FILE[]=__FILE__;
 // CServerWnd dialog
 
 IMPLEMENT_DYNAMIC(CServerWnd, CDialog)
+
+BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
+	ON_BN_CLICKED(IDC_ADDSERVER, OnBnClickedAddserver)
+	ON_BN_CLICKED(IDC_UPDATESERVERMETFROMURL, OnBnClickedUpdateservermetfromurl)
+	ON_BN_CLICKED(IDC_LOGRESET, OnBnClickedResetLog)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB3, OnTcnSelchangeTab3)
+	ON_NOTIFY(EN_LINK, IDC_SERVMSG, OnEnLinkServerBox)
+	ON_BN_CLICKED(IDC_ED2KCONNECT, OnBnConnect)
+	ON_WM_SYSCOLORCHANGE()
+	ON_BN_CLICKED(IDC_DD,OnDDClicked)
+	ON_WM_HELPINFO()
+	ON_EN_CHANGE(IDC_IPADDRESS, OnSvrTextChange)
+	ON_EN_CHANGE(IDC_SPORT, OnSvrTextChange)
+	ON_EN_CHANGE(IDC_SNAME, OnSvrTextChange)
+	ON_EN_CHANGE(IDC_SERVERMETURL, OnSvrTextChange)
+	//MORPH START - Added by SiRoB, XML News [O²]
+	ON_NOTIFY(EN_LINK, IDC_NEWSMSG, OnEnLinkNewsBox)
+	ON_BN_CLICKED(IDC_FEEDUPDATE, DownloadFeed)
+	ON_LBN_SELCHANGE(IDC_FEEDLIST, OnFeedListSelChange)
+	ON_CBN_DROPDOWN(IDC_FEEDLIST, ListFeeds)
+	//MORPH END   - Added by SiRoB, XML News [O²]
+	// Mighty Knife: News feed edit button
+	ON_BN_CLICKED(IDC_FEEDCHANGE, OnBnClickedFeedchange)
+	// [end] Mighty Knife
+END_MESSAGE_MAP()
+
 CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CServerWnd::IDD, pParent)
 {
 	servermsgbox = new CHTRichEditCtrl;
+	logbox = new CHTRichEditCtrl;
+	debuglog = new CHTRichEditCtrl;
 	//MORPH START - Added by SiRoB, XML News [O²]
 	newsmsgbox = new CHTRichEditCtrl; // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
@@ -81,6 +111,8 @@ CServerWnd::~CServerWnd()
 		m_pacServerMetURL->Unbind();
 		m_pacServerMetURL->Release();
 	}
+	delete debuglog;
+	delete logbox;
 	delete servermsgbox;
 	//MORPH START - Added by SiRoB, XML News [O²]
 	delete newsmsgbox; // Added by N_OxYdE: XML News
@@ -89,28 +121,91 @@ CServerWnd::~CServerWnd()
 
 BOOL CServerWnd::OnInitDialog()
 {
+	if (theApp.m_fontLog.m_hObject == NULL)
+	{
+		CFont* pFont = GetDlgItem(IDC_SSTATIC)->GetFont();
+		LOGFONT lf;
+		pFont->GetObject(sizeof lf, &lf);
+		theApp.m_fontLog.CreateFontIndirect(&lf);
+	}
+
 #ifdef _UNICODE
 	ReplaceRichEditCtrl(GetDlgItem(IDC_MYINFOLIST), this, GetDlgItem(IDC_SSTATIC)->GetFont());
 #endif
 	CResizableDialog::OnInitDialog();
 
-	logbox.Init(GetResString(IDS_SV_LOG), _T("Log"));
-	if (theApp.emuledlg->m_fontLog.m_hObject)
-		logbox.SetFont(&theApp.emuledlg->m_fontLog);
-	else{
-		CFont* pFont = logbox.GetFont();
-		if (pFont){
-			LOGFONT lf;
-			pFont->GetObject(sizeof lf, &lf);
-			theApp.emuledlg->m_fontLog.CreateFontIndirect(&lf);
-		}
-	}
-	logbox.ApplySkin();
+	// using ES_NOHIDESEL is actually not needed, but it helps to get around a tricky window update problem!
+#define	LOG_PANE_RICHEDIT_STYTES WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_NOHIDESEL
+	CRect rect;
 
-	debuglog.Init(SZ_DEBUG_LOG_TITLE, _T("VerboseLog"));
-	if (theApp.emuledlg->m_fontLog.m_hObject)
-		debuglog.SetFont(&theApp.emuledlg->m_fontLog);
-	debuglog.ApplySkin();
+	GetDlgItem(IDC_SERVMSG)->GetWindowRect(rect);
+	GetDlgItem(IDC_SERVMSG)->DestroyWindow();
+	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
+	if (servermsgbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_SERVMSG)){
+		servermsgbox->SetProfileSkinKey(_T("ServerInfoLog"));
+		servermsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		servermsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		servermsgbox->SetEventMask(servermsgbox->GetEventMask() | ENM_LINK);
+		servermsgbox->SetFont(&theApp.m_fontHyperText);
+		servermsgbox->ApplySkin();
+		servermsgbox->SetTitle(GetResString(IDS_SV_SERVERINFO));
+
+		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
+		/*
+		servermsgbox->AppendText(_T("eMule v") + theApp.m_strCurVersionLong + _T("\n"));
+		*/
+		m_strMorphNewVersion = _T("eMule v") + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]");
+		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strMorphNewVersion,_T(""),false);
+		servermsgbox->AppendText(_T("\n"));
+		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
+
+		// MOD Note: Do not remove this part - Merkur
+		m_strClickNewVersion = GetResString(IDS_EMULEW) + _T(" ") + GetResString(IDS_EMULEW3) + _T(" ") + GetResString(IDS_EMULEW2);
+		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strClickNewVersion,_T(""),false);
+		// MOD Note: end
+		servermsgbox->AppendText(_T("\n\n"));
+	}
+	GetDlgItem(IDC_LOGBOX)->GetWindowRect(rect);
+	GetDlgItem(IDC_LOGBOX)->DestroyWindow();
+	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
+	if (logbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_LOGBOX)){
+		logbox->SetProfileSkinKey(_T("Log"));
+		logbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		logbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		if (theApp.m_fontLog.m_hObject)
+			logbox->SetFont(&theApp.m_fontLog);
+		logbox->ApplySkin();
+		logbox->SetTitle(GetResString(IDS_SV_LOG));
+		logbox->SetAutoURLDetect(FALSE);
+	}
+	//MORPH START - Added by SiRoB, XML News [O²]
+	GetDlgItem(IDC_NEWSMSG)->GetWindowRect(rect);
+	GetDlgItem(IDC_NEWSMSG)->DestroyWindow();
+	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
+		if (newsmsgbox->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_NEWSMSG)){
+		newsmsgbox->SetProfileSkinKey(_T("FeedInfoLog"));
+		newsmsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		newsmsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		newsmsgbox->SetEventMask(newsmsgbox->GetEventMask() | ENM_LINK);
+		newsmsgbox->SetFont(&theApp.m_fontHyperText);
+		newsmsgbox->ApplySkin();
+		newsmsgbox->SetTitle(GetResString(IDS_FEED));
+	}
+	//MORPH END   - Added by SiRoB, XML News [O²]
+
+	GetDlgItem(IDC_DEBUG_LOG)->GetWindowRect(rect);
+	GetDlgItem(IDC_DEBUG_LOG)->DestroyWindow();
+	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
+	if (debuglog->Create(LOG_PANE_RICHEDIT_STYTES, rect, this, IDC_DEBUG_LOG)){
+		debuglog->SetProfileSkinKey(_T("VerboseLog"));
+		debuglog->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
+		debuglog->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		if (theApp.m_fontLog.m_hObject)
+			debuglog->SetFont(&theApp.m_fontLog);
+		debuglog->ApplySkin();
+		debuglog->SetTitle(SZ_DEBUG_LOG_TITLE);
+		debuglog->SetAutoURLDetect(FALSE);
+	}
 
 	SetAllIcons();
 	Localize();
@@ -118,43 +213,7 @@ BOOL CServerWnd::OnInitDialog()
 
 	((CEdit*)GetDlgItem(IDC_SPORT))->SetLimitText(5);
 	GetDlgItem(IDC_SPORT)->SetWindowText(_T("4661"));
-	CRect rect;
 
-	GetDlgItem(IDC_SERVMSG)->GetWindowRect(rect);
-	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	if (servermsgbox->Create(WS_VISIBLE | WS_CHILD | WS_HSCROLL | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rect, this, 123)){
-		servermsgbox->SetProfileSkinKey(_T("ServerInfoLog"));
-		servermsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
-		servermsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
-		servermsgbox->SetEventMask(servermsgbox->GetEventMask() | ENM_LINK);
-		servermsgbox->SetFont(&theApp.emuledlg->m_fontHyperText);
-		servermsgbox->ApplySkin();
-		servermsgbox->SetTitle(GetResString(IDS_SV_SERVERINFO));
-
-		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
-		/*
-		servermsgbox->AppendText(CString(CString("eMule v")+theApp.m_strCurVersionLong+CString("\n")));
-		*/
-		m_strMorphNewVersion = CString(CString(_T("eMule v")) + theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"));
-		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strMorphNewVersion,_T(""),false);
-		servermsgbox->AppendText(CString("\n"));
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-] & New Version Check
-
-		// MOD Note: Do not remove this part - Merkur
-		m_strClickNewVersion = GetResString(IDS_EMULEW) + _T(" ") + GetResString(IDS_EMULEW3) + _T(" ") + GetResString(IDS_EMULEW2);
-		servermsgbox->AppendHyperLink(_T(""),_T(""),m_strClickNewVersion,_T(""),false);
-		// MOD Note: end
-		servermsgbox->AppendText(CString("\n\n"));
-	}
-	//MORPH START - Added by SiRoB, XML News [O²]
-	if (newsmsgbox->Create(WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rect, this, 124)){
-		newsmsgbox->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
-		newsmsgbox->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
-		newsmsgbox->SetEventMask(newsmsgbox->GetEventMask() | ENM_LINK);
-		newsmsgbox->SetFont(&theApp.emuledlg->m_fontHyperText);
-		newsmsgbox->SetTitle(GetResString(IDS_FEED));
-	}
-	//MORPH END   - Added by SiRoB, XML News [O²]
 	TCITEM newitem;
 	CString name;
 	name = GetResString(IDS_SV_SERVERINFO);
@@ -170,7 +229,7 @@ BOOL CServerWnd::OnInitDialog()
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneLog );
 
 	//MORPH START - Added by SiRoB, XML News [O²]
-	name = "News";
+	name = GetResString(IDS_FEED);
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
@@ -183,9 +242,7 @@ BOOL CServerWnd::OnInitDialog()
 	newitem.iImage = 0;
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneVerboseLog );
 
-	AddAnchor(IDC_SERVLIST,TOP_LEFT, CSize(100,50));
-	AddAnchor(IDC_LOGBOX, CSize(0,50), BOTTOM_RIGHT);
-	AddAnchor(IDC_DEBUG_LOG, CSize(0,50), BOTTOM_RIGHT);
+	AddAnchor(IDC_SERVLIST, TOP_LEFT, MIDDLE_RIGHT);
 	AddAnchor(IDC_SSTATIC,TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC4,TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC7,TOP_RIGHT);
@@ -194,14 +251,14 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_SNAME,TOP_RIGHT);
 	AddAnchor(IDC_ADDSERVER,TOP_RIGHT );
 	AddAnchor(IDC_SSTATIC5,TOP_RIGHT);
-	AddAnchor(IDC_MYINFO,TOP_RIGHT ,CSize(100, 100));
-	AddAnchor(IDC_MYINFOLIST,TOP_RIGHT,CSize(100,100));
+	AddAnchor(IDC_MYINFO, TOP_RIGHT, BOTTOM_RIGHT);
+	AddAnchor(IDC_MYINFOLIST, TOP_RIGHT, BOTTOM_RIGHT);
 	AddAnchor(IDC_SPORT,TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC6,TOP_RIGHT);
 	AddAnchor(IDC_SERVERMETURL,TOP_RIGHT);
 	AddAnchor(IDC_UPDATESERVERMETFROMURL,TOP_RIGHT);
-	AddAnchor(IDC_TAB3,CSize(0,50), BOTTOM_RIGHT);
-	AddAnchor(IDC_LOGRESET,CSize(100,50)); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
+	AddAnchor(IDC_TAB3,MIDDLE_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDC_LOGRESET, MIDDLE_RIGHT); // avoid resizing GUI glitches with the tab control by adding this control as the last one (Z-order)
 	AddAnchor(IDC_ED2KCONNECT,TOP_RIGHT);
 	AddAnchor(IDC_DD,TOP_RIGHT);
 
@@ -211,21 +268,22 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_FEEDLIST, MIDDLE_LEFT, MIDDLE_RIGHT);
 	//MORPH END   - Added by SiRoB, XML News [O²]
 	
-	if (servermsgbox->m_hWnd)
-		AddAnchor(*servermsgbox, CSize(0,50), BOTTOM_RIGHT);
+	AddAnchor(*servermsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);
+	AddAnchor(*logbox, MIDDLE_LEFT, BOTTOM_RIGHT);
+	AddAnchor(*debuglog, MIDDLE_LEFT, BOTTOM_RIGHT);
 	debug = true;
 	//MORPH START - Added by SiRoB, XML News [O²]
-	if (newsmsgbox->m_hWnd)
-		AddAnchor(*newsmsgbox, CSize(0,50), BOTTOM_RIGHT);
+	AddAnchor(*newsmsgbox, MIDDLE_LEFT, BOTTOM_RIGHT);
 	news = true;
 	//MORPH END   - Added by SiRoB, XML News [O²]	
 	ToggleDebugWindow();
 
-	debuglog.ShowWindow(SW_HIDE);
-	logbox.ShowWindow(SW_HIDE);
+	debuglog->ShowWindow(SW_HIDE);
+	logbox->ShowWindow(SW_HIDE);
 	//MORPH START - Added by SiRoB, XML News [O²]
 	newsmsgbox->ShowWindow(SW_HIDE); // Added by N_OxYdE: XML News
 	//MORPH END   - Added by SiRoB, XML News [O²]
+	servermsgbox->ShowWindow(SW_SHOW);
 
 	// Mighty Knife: Context menu for editing news feeds
 	if (m_FeedsMenu) VERIFY (m_FeedsMenu.DestroyMenu ());
@@ -237,9 +295,6 @@ BOOL CServerWnd::OnInitDialog()
 	m_FeedsMenu.AppendMenu(MF_STRING,MP_DELETEALLFEEDS,GetResString (IDS_FEEDDELETEALL));
     m_FeedsMenu.AppendMenu(MF_STRING,MP_DOWNLOADALLFEEDS,GetResString (IDS_DOWNLOADALLFEEDS)); //Commander - Added: Update All Feeds at once
 	// [end] Mighty Knife
-
-	if (servermsgbox->m_hWnd)
-		servermsgbox->ShowWindow(SW_SHOW);
 
 	// optional: restore last used log pane
 	if (thePrefs.GetRestoreLastLogPane())
@@ -283,8 +338,8 @@ BOOL CServerWnd::OnInitDialog()
 		m_pacServerMetURL->AddRef();
 		if (m_pacServerMetURL->Bind(::GetDlgItem(m_hWnd, IDC_SERVERMETURL), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
 			m_pacServerMetURL->LoadList(CString(thePrefs.GetConfigDir()) +  _T("\\") SERVERMET_STRINGS_PROFILE);
-		if (theApp.emuledlg->m_fontMarlett.m_hObject){
-			GetDlgItem(IDC_DD)->SetFont(&theApp.emuledlg->m_fontMarlett);
+		if (theApp.m_fontSymbol.m_hObject){
+			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
 		}
 	}
@@ -303,8 +358,6 @@ void CServerWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_SERVLIST, serverlistctrl);
-	DDX_Control(pDX, IDC_LOGBOX, logbox);
-	DDX_Control(pDX, IDC_DEBUG_LOG, debuglog);
 	DDX_Control(pDX, IDC_SSTATIC, m_ctrlNewServerFrm);
 	DDX_Control(pDX, IDC_SSTATIC6, m_ctrlUpdateServerFrm);
 	DDX_Control(pDX, IDC_MYINFO, m_ctrlMyInfo);
@@ -319,7 +372,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 {
 	if (strURL.IsEmpty() || (strURL.Find(_T("://")) == -1))	// not a valid URL
 	{
-		AddLogLine(true, GetResString(IDS_INVALIDURL) );
+		LogError(LOG_STATUSBAR, GetResString(IDS_INVALIDURL) );
 		return false;
 	}
 
@@ -336,7 +389,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 	dlgDownload.m_sFileToDownloadInto = strTempFilename;
 	if (dlgDownload.DoModal() != IDOK)
 	{
-		AddLogLine(true, GetResString(IDS_ERR_FAILEDDOWNLOADMET), strURL);
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FAILEDDOWNLOADMET), strURL);
 		return false;
 	}
 
@@ -358,7 +411,7 @@ void CServerWnd::SetAllIcons()
 {
 	m_ctrlNewServerFrm.Init(_T("AddServer"));
 	m_ctrlUpdateServerFrm.Init(_T("ServerUpdateMET"));
-	m_ctrlMyInfo.Init(_T("MyInfo"));
+	m_ctrlMyInfo.Init(_T("Info"));
 
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -430,34 +483,6 @@ void CServerWnd::Localize()
 	UpdateLogTabSelection();
 	UpdateControlsState();
 }
-
-BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
-	ON_BN_CLICKED(IDC_ADDSERVER, OnBnClickedAddserver)
-	ON_BN_CLICKED(IDC_UPDATESERVERMETFROMURL, OnBnClickedUpdateservermetfromurl)
-	ON_BN_CLICKED(IDC_LOGRESET, OnBnClickedResetLog)
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB3, OnTcnSelchangeTab3)
-	ON_NOTIFY(EN_LINK, 123, OnEnLinkServerBox)
-	ON_BN_CLICKED(IDC_ED2KCONNECT, OnBnConnect)
-	ON_WM_SYSCOLORCHANGE()
-	ON_BN_CLICKED(IDC_DD,OnDDClicked)
-	ON_WM_HELPINFO()
-	ON_EN_CHANGE(IDC_IPADDRESS, OnSvrTextChange)
-	ON_EN_CHANGE(IDC_SPORT, OnSvrTextChange)
-	ON_EN_CHANGE(IDC_SNAME, OnSvrTextChange)
-	ON_EN_CHANGE(IDC_SERVERMETURL, OnSvrTextChange)
-	//MORPH START - Added by SiRoB, XML News [O²]
-	ON_NOTIFY(EN_LINK, 124, OnEnLinkNewsBox)
-	ON_BN_CLICKED(IDC_FEEDUPDATE, DownloadFeed)
-	ON_LBN_SELCHANGE(IDC_FEEDLIST, OnFeedListSelChange)
-	ON_CBN_DROPDOWN(IDC_FEEDLIST, ListFeeds)
-	//MORPH END   - Added by SiRoB, XML News [O²]
-	// Mighty Knife: News feed edit button
-	ON_BN_CLICKED(IDC_FEEDCHANGE, OnBnClickedFeedchange)
-	// [end] Mighty Knife
-END_MESSAGE_MAP()
-
-
-// CServerWnd message handlers
 
 void CServerWnd::OnBnClickedAddserver()
 {
@@ -631,12 +656,12 @@ void CServerWnd::OnBnClickedResetLog()
 	//MORPH END   - Changed by SiRoB, XML News [O²]
 	{
 		theApp.emuledlg->ResetDebugLog();
-		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
+		theApp.emuledlg->statusbar->SetText(_T(""), SBarLog, 0);
 	}
 	if (cur_sel == PaneLog)
 	{
 		theApp.emuledlg->ResetLog();
-		theApp.emuledlg->statusbar->SetText(_T(""),0,0);
+		theApp.emuledlg->statusbar->SetText(_T(""), SBarLog, 0);
 	}
 	if (cur_sel == PaneServerInfo)
 	{
@@ -673,27 +698,29 @@ void CServerWnd::UpdateLogTabSelection()
 	//MORPH END   - Changed by SiRoB, XML News [O²]
 	{
 		servermsgbox->ShowWindow(SW_HIDE);
-		logbox.ShowWindow(SW_HIDE);
+		logbox->ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
-		debuglog.ShowWindow(SW_SHOW);
+		debuglog->ShowWindow(SW_SHOW);
+		debuglog->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 	if (cur_sel == PaneLog)
 	{
-		debuglog.ShowWindow(SW_HIDE);
+		debuglog->ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
-		logbox.ShowWindow(SW_SHOW);
+		logbox->ShowWindow(SW_SHOW);
+		logbox->Invalidate();
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 	if (cur_sel == PaneServerInfo)
 	{
-		debuglog.ShowWindow(SW_HIDE);
-		logbox.ShowWindow(SW_HIDE);
+		debuglog->ShowWindow(SW_HIDE);
+		logbox->ShowWindow(SW_HIDE);
 		//MORPH START - Added by SiRoB, XML News [O²]
 		newsmsgbox->ShowWindow(SW_HIDE); // added by O? XML News
 		//MORPH END   - Added by SiRoB, XML News [O²]
@@ -706,12 +733,14 @@ void CServerWnd::UpdateLogTabSelection()
 	if( cur_sel == 2  && news )
 	//if (cur_sel == PaneNews)
 	{
-		debuglog.ShowWindow(SW_HIDE);
-		logbox.ShowWindow(SW_HIDE);
+		debuglog->ShowWindow(SW_HIDE);
+		logbox->ShowWindow(SW_HIDE);
+		servermsgbox->ShowWindow(SW_HIDE);
 		// eMule O?
 		newsmsgbox->ShowWindow(SW_SHOW); // added by O? XML News
+		newsmsgbox->Invalidate();
 		// END eMule O?
-		servermsgbox->ShowWindow(SW_HIDE);
+		
 		StatusSelector.HighlightItem(cur_sel, FALSE);
 	}
 	//MORPH END   - Added by SiRoB, XML News [O²]
@@ -740,9 +769,9 @@ void CServerWnd::ToggleDebugWindow()
 			StatusSelector.SetCurSel(PaneLog);
 			StatusSelector.SetFocus();
 		}
-		debuglog.ShowWindow(SW_HIDE);
+		debuglog->ShowWindow(SW_HIDE);
 		servermsgbox->ShowWindow(SW_HIDE);
-		logbox.ShowWindow(SW_SHOW);
+		logbox->ShowWindow(SW_SHOW);
 		StatusSelector.DeleteItem(PaneVerboseLog);
 		debug = false;
 	}
@@ -755,9 +784,9 @@ void CServerWnd::ToggleDebugWindow()
 		StatusSelector.SetFocus();
 	}
 	servermsgbox->ShowWindow(SW_HIDE);
-	logbox.ShowWindow(SW_SHOW);
 	newsmsgbox->ShowWindow(SW_HIDE);
-	debuglog.ShowWindow(SW_HIDE);
+	debuglog->ShowWindow(SW_HIDE);
+	logbox->ShowWindow(SW_SHOW);
 
 	StatusSelector.DeleteItem(3);
 	StatusSelector.DeleteItem(2);
@@ -998,7 +1027,7 @@ void CServerWnd::DownloadFeed()
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		_tremove(szTempFilePath);
-		theApp.emuledlg->AddLogLine(true, _T("Error downloading %s"), strURL);
+		AddLogLine(true, _T("Error downloading %s"), strURL);
 		return;
 	}
 	_tremove(szFilePath);
@@ -1047,7 +1076,7 @@ void CServerWnd::DownloadAllFeeds()
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			_tremove(szTempFilePath);
-			theApp.emuledlg->AddLogLine(true, _T("Error downloading %s"), strURL);
+			AddLogLine(true, _T("Error downloading %s"), strURL);
 			return;
 		}
 		_tremove(szFilePath);

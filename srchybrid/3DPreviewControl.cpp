@@ -1,16 +1,23 @@
-// 3DPreviewControl.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "eMule.h"
 #include "3DPreviewControl.h"
+
+#ifdef _DEBUG
+#undef THIS_FILE
+static char THIS_FILE[]=__FILE__;
+#define new DEBUG_NEW
+#endif
 
 
 CBarShader C3DPreviewControl::s_preview(16,32); 
 
 // C3DPreviewControl
-
 IMPLEMENT_DYNAMIC(C3DPreviewControl, CStatic)
+
+BEGIN_MESSAGE_MAP(C3DPreviewControl, CStatic)
+	ON_WM_PAINT()
+END_MESSAGE_MAP()
+
 C3DPreviewControl::C3DPreviewControl()
 : m_iSliderPos(0) // use flat 
 {
@@ -19,13 +26,6 @@ C3DPreviewControl::C3DPreviewControl()
 C3DPreviewControl::~C3DPreviewControl()
 {
 }
-
-
-BEGIN_MESSAGE_MAP(C3DPreviewControl, CStatic)
-	ON_WM_PAINT()
-END_MESSAGE_MAP()
-
-
 
 // Sets "slider" position for type of preview
 

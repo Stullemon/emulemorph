@@ -26,7 +26,6 @@
 #include "TransferWnd.h"
 #include "ServerWnd.h"
 #include "HelpIDs.h"
-#include "PreferencesDlg.h" //Commander - Added: Side Banner
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -66,8 +65,6 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_DISABLEQUEUELIST, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWCATINFO, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWDWLPERCENT, OnSettingsChange)
-	ON_BN_CLICKED(IDC_SHOWCLIENTPERCENTAGE, OnSettingsChange) //Commander - Added: Client Percentage
-    ON_BN_CLICKED(IDC_BANNER, OnSettingsChange) //Commander - Added: Side Banner
 	ON_BN_CLICKED(IDC_REPAINT,OnSettingsChange)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
 	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
@@ -112,18 +109,10 @@ void CPPgDisplay::LoadSettings(void)
 		CheckDlgButton(IDC_DISABLEQUEUELIST,1);
 	else
 		CheckDlgButton(IDC_DISABLEQUEUELIST,0);
-    //Commander - Added: Enable/Disable Startupsound - Start
-    if(thePrefs.UseSideBanner())
-		CheckDlgButton(IDC_BANNER,1);
-	else
-		CheckDlgButton(IDC_BANNER,0);
-    //Commander - Added: Enable/Disable Startupsound - End
 
 	CheckDlgButton(IDC_SHOWCATINFO,(UINT)thePrefs.ShowCatTabInfos());
 	CheckDlgButton(IDC_REPAINT,(UINT)thePrefs.IsGraphRecreateDisabled() );
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
-	CheckDlgButton(IDC_SHOWCLIENTPERCENTAGE,(UINT)thePrefs.GetUseClientPercentage()); //Commander - Added: Client Percentage
-	CheckDlgButton(IDC_BANNER,(UINT)thePrefs.UseSideBanner()); //Commander - Added: Side Banner
 	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
 
 	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
@@ -143,6 +132,7 @@ BOOL CPPgDisplay::OnInitDialog()
 	CSliderCtrl *slider3D = (CSliderCtrl*)GetDlgItem(IDC_3DDEPTH);
 	slider3D->SetRange(0, 5, true);
 	slider3D->SetPos(thePrefs.Get3DDepth());
+	slider3D->SetTicFreq(1);
 	DrawPreview();
 
 	LoadSettings();
@@ -163,16 +153,8 @@ BOOL CPPgDisplay::OnApply()
 	thePrefs.indicateratings= (uint8)IsDlgButtonChecked(IDC_INDICATERATINGS);
 	thePrefs.dontRecreateGraphs=(uint8)IsDlgButtonChecked(IDC_REPAINT);
 	thePrefs.m_bShowDwlPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
-	thePrefs.m_bShowClientPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWCLIENTPERCENTAGE); //Commander - Added: Client Percentage
 	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
-	//Commander - Added: Side Banner
-	if (thePrefs.sidebanner != (uint8)IsDlgButtonChecked(IDC_BANNER)){
-		theApp.emuledlg->preferenceswnd->m_banner.SetSize(thePrefs.sidebanner?0:70);
-		theApp.emuledlg->preferenceswnd->m_banner.UpdateSize();
-	}
-	thePrefs.sidebanner = (uint8)IsDlgButtonChecked(IDC_BANNER);
-	//Commander - Added: Side Banner
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		thePrefs.m_bupdatequeuelist = false;
 	else
@@ -277,9 +259,7 @@ void CPPgDisplay::Localize(void)
 		SetDlgItemText(IDC_HYPERTEXT_FONT_HINT, GetResString(IDS_HYPERTEXT_FONT_HINT));
 		SetDlgItemText(IDC_SELECT_HYPERTEXT_FONT, GetResString(IDS_SELECT_FONT) + _T("..."));
 		SetDlgItemText(IDC_SHOWDWLPERCENT, GetResString(IDS_SHOWDWLPERCENTAGE));
-		SetDlgItemText(IDC_SHOWCLIENTPERCENTAGE, GetResString(IDS_CLIENTPERCENTAGE)); //Commander - Added: Client Percentage
 		GetDlgItem(IDC_CLEARCOMPL)->SetWindowText(GetResString(IDS_AUTOREMOVEFD));
-        SetDlgItemText(IDC_BANNER, GetResString(IDS_BANNER)); //Commander - Added: Side Banner
 
 		GetDlgItem(IDC_RESETLABEL)->SetWindowText(GetResString(IDS_RESETLABEL));
 		GetDlgItem(IDC_RESETHIST)->SetWindowText(GetResString(IDS_PW_RESET));
@@ -348,14 +328,14 @@ void CPPgDisplay::OnBnClickedSelectHypertextFont()
 	// get current font description
 	CFont* pFont;
 	if (m_eSelectFont == sfLog)
-		pFont = &theApp.emuledlg->m_fontLog;
+		pFont = &theApp.m_fontLog;
 	else
-		pFont = &theApp.emuledlg->m_fontHyperText;
+		pFont = &theApp.m_fontHyperText;
 	LOGFONT lf;
 	if (pFont != NULL)
 	   pFont->GetObject(sizeof(LOGFONT), &lf);
 	else
-	   ::GetObject(GetStockObject(SYSTEM_FONT), sizeof(LOGFONT), &lf);
+	   ::GetObject(GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &lf);
 
 	// Initialize 'CFontDialog'
 	CFontDialog dlg(&lf, CF_SCREENFONTS | CF_INITTOLOGFONTSTRUCT);
@@ -414,7 +394,7 @@ void CPPgDisplay::On3DDepth(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	DrawPreview();
-theApp.AddLogLine(true,"ding");
+AddLogLine(true,"ding");
 
 	*pResult = 0;
 }

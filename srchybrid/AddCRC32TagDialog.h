@@ -20,6 +20,7 @@
 #pragma once
 
 #include "FileProcessing.h"
+#include "IconStatic.h"
 
 class AddCRC32InputBox : public CDialog
 {

@@ -18,6 +18,7 @@
 // Original file: Written by Mighty Knife, EMule Morph Team
 
 #include "stdafx.h"
+#include "emule.h"
 #include "resource.h"
 #include "Preferences.h"
 #include "MassRename.h"
@@ -49,7 +50,6 @@ CMassRenameDialog::CMassRenameDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CMassRenameDialog::IDD, pParent)
 {
 }
-
 void CMassRenameEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// Get the current string before edit and the selection - then default message processing
@@ -140,6 +140,7 @@ BOOL CMassRenameDialog::OnInitDialog() {
 	Localize ();
 
 	InitWindowStyles(this);
+	SetIcon(theApp.LoadIcon(_T("FILEMASSRENAME"),16,16),FALSE);
 
 	// Go through the list of files, collect all filenames to one string and
 	// show it in the list of the old filenames

@@ -45,35 +45,6 @@ static char THIS_FILE[]=__FILE__;
 
 
 IMPLEMENT_DYNAMIC(CPPgConnection, CPropertyPage)
-CPPgConnection::CPPgConnection()
-	: CPropertyPage(CPPgConnection::IDD)
-{
-	guardian=false;
-}
-
-CPPgConnection::~CPPgConnection()
-{
-}
-
-void CPPgConnection::DoDataExchange(CDataExchange* pDX)
-{
-	CPropertyPage::DoDataExchange(pDX);
-
-	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
-	CString text;
-
-	DDX_Control(pDX, IDC_MINPORT, m_minRndPort);
-	m_minRndPort.GetWindowText(text);
-	DDV_MinMaxInt(pDX,_ttoi(text),1,0xFFFF);
-
-	DDX_Control(pDX, IDC_MAXPORT, m_maxRndPort);
-	m_maxRndPort.GetWindowText(text);
-	DDV_MinMaxInt(pDX,_ttoi(text),1,0xFFFF);
-
-	DDX_Control(pDX, IDC_SPIN_MIN, m_minRndPortSpin);
-	DDX_Control(pDX, IDC_SPIN_MAX, m_maxRndPortSpin);
-	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
-}
 
 BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	ON_BN_CLICKED(IDC_STARTTEST, OnStartPortTest)
@@ -100,19 +71,49 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 END_MESSAGE_MAP()
 
+CPPgConnection::CPPgConnection()
+	: CPropertyPage(CPPgConnection::IDD)
+{
+	guardian=false;
+}
 
-// CPPgConnection message handlers
-void CPPgConnection::OnEnChangeTCP(){
+CPPgConnection::~CPPgConnection()
+{
+}
+
+void CPPgConnection::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_MAXDOWN_SLIDER, m_ctlMaxDown);
+	DDX_Control(pDX, IDC_MAXUP_SLIDER, m_ctlMaxUp);
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	CString text;
+
+	DDX_Control(pDX, IDC_MINPORT, m_minRndPort);
+	m_minRndPort.GetWindowText(text);
+	DDV_MinMaxInt(pDX,_ttoi(text),1,0xFFFF);
+
+	DDX_Control(pDX, IDC_MAXPORT, m_maxRndPort);
+	m_maxRndPort.GetWindowText(text);
+	DDV_MinMaxInt(pDX,_ttoi(text),1,0xFFFF);
+
+	DDX_Control(pDX, IDC_SPIN_MIN, m_minRndPortSpin);
+	DDX_Control(pDX, IDC_SPIN_MAX, m_maxRndPortSpin);
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+}
+
+void CPPgConnection::OnEnChangeTCP()
+{
 	OnEnChangePorts(true);
 }
 
-void CPPgConnection::OnEnChangeUDP(){
+void CPPgConnection::OnEnChangeUDP()
+{
 	OnEnChangePorts(false);
 }
 
-void CPPgConnection::OnEnChangePorts(uint8 istcpport){
-
-
+void CPPgConnection::OnEnChangePorts(uint8 istcpport)
+{
 	// ports unchanged?
 	CString buffer;
 	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
@@ -132,39 +133,41 @@ void CPPgConnection::OnEnChangePorts(uint8 istcpport){
 		OnSettingsChange();
 }
 
-void CPPgConnection::OnEnChangeUDPDisable(){
-		if (guardian) return;
+void CPPgConnection::OnEnChangeUDPDisable()
+{
+	if (guardian)
+		return;
 
 		uint16 tempVal=0;
-		CString strBuffer;
-		TCHAR buffer[510];
-		
-		guardian=true;
-		SetModified();
+	CString strBuffer;
+	TCHAR buffer[510];
 
-		//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
-		/*
-		GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE));
-		*/
-		GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE) && !IsDlgButtonChecked(IDC_RANDOMPORTS));
-		//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+	guardian=true;
+	SetModified();
 
-		if(GetDlgItem(IDC_UDPPORT)->GetWindowTextLength())
-		{
-			GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer,20);
-			tempVal= _tstoi(buffer);
-		}
+	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
+	/*
+	GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE));
+	*/
+	GetDlgItem(IDC_UDPPORT)->EnableWindow(!IsDlgButtonChecked(IDC_UDPDISABLE) && !IsDlgButtonChecked(IDC_RANDOMPORTS));
+	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
-		
-		if (IsDlgButtonChecked(IDC_UDPDISABLE) || (!IsDlgButtonChecked(IDC_UDPDISABLE) && tempVal==0)){
-			tempVal= (_tstoi(buffer)) ? _tstoi(buffer)+10 : thePrefs.port+10;
-			if ( IsDlgButtonChecked(IDC_UDPDISABLE))
-				tempVal=0;
-			strBuffer.Format(_T("%d"), tempVal);
-			GetDlgItem(IDC_UDPPORT)->SetWindowText(strBuffer);
-		}
+	if(GetDlgItem(IDC_UDPPORT)->GetWindowTextLength())
+	{
+		GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer,20);
+		tempVal= _tstoi(buffer);
+	}
 
-		guardian=false;
+	if (IsDlgButtonChecked(IDC_UDPDISABLE) || (!IsDlgButtonChecked(IDC_UDPDISABLE) && tempVal == 0))
+	{
+		tempVal = _tstoi(buffer) ? _tstoi(buffer)+10 : thePrefs.port+10;
+		if ( IsDlgButtonChecked(IDC_UDPDISABLE))
+			tempVal=0;
+		strBuffer.Format(_T("%d"), tempVal);
+		GetDlgItem(IDC_UDPPORT)->SetWindowText(strBuffer);
+	}
+
+	guardian=false;
 }
 
 BOOL CPPgConnection::OnInitDialog()
@@ -210,24 +213,20 @@ void CPPgConnection::LoadSettings(void)
 		strBuffer.Format(_T("%d"), thePrefs.maxGraphDownloadRate);
 		GetDlgItem(IDC_DOWNLOAD_CAP)->SetWindowText(strBuffer);
 
-		((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetRange(1, thePrefs.maxGraphDownloadRate);
+		m_ctlMaxDown.SetRange(1, thePrefs.maxGraphDownloadRate);
+		SetRateSliderTicks(m_ctlMaxDown);
 
 		strBuffer.Format(_T("%d"), thePrefs.maxGraphUploadRate);
 		GetDlgItem(IDC_UPLOAD_CAP)->SetWindowText(strBuffer);
 
-		((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->SetRange(1, thePrefs.maxGraphUploadRate);
-
+		m_ctlMaxUp.SetRange(1, thePrefs.maxGraphUploadRate);
+		SetRateSliderTicks(m_ctlMaxUp);
 
 		CheckDlgButton( IDC_DLIMIT_LBL, (thePrefs.maxdownload!=UNLIMITED) );
 		CheckDlgButton( IDC_ULIMIT_LBL, (thePrefs.maxupload!=UNLIMITED) );
 
-		((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetPos(
-			(thePrefs.maxdownload!=UNLIMITED)?thePrefs.maxdownload:thePrefs.maxGraphDownloadRate
-		);
-		
-		((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->SetPos(
-			(thePrefs.maxupload!=UNLIMITED)?thePrefs.maxupload:thePrefs.maxGraphUploadRate
-		);
+		m_ctlMaxDown.SetPos((thePrefs.maxdownload != UNLIMITED) ? thePrefs.maxdownload : thePrefs.maxGraphDownloadRate);
+		m_ctlMaxUp.SetPos((thePrefs.maxupload != UNLIMITED) ? thePrefs.maxupload : thePrefs.maxGraphUploadRate);
 
 		strBuffer.Format(_T("%d"), thePrefs.port);
 		GetDlgItem(IDC_PORT)->SetWindowText(strBuffer);
@@ -237,8 +236,7 @@ void CPPgConnection::LoadSettings(void)
 
 		if(thePrefs.maxsourceperfile == 0xFFFF)
 			GetDlgItem(IDC_MAXSOURCEPERFILE)->SetWindowText(_T("0"));
-		else
-		{
+		else{
 			strBuffer.Format(_T("%d"), thePrefs.maxsourceperfile);
 			GetDlgItem(IDC_MAXSOURCEPERFILE)->SetWindowText(strBuffer);
 		}
@@ -309,7 +307,8 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxGraphDownloadRate(_tstoi(buffer));
 	}
 
-	((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetRange(1, thePrefs.GetMaxGraphDownloadRate(), TRUE);
+	m_ctlMaxDown.SetRange(1, thePrefs.GetMaxGraphDownloadRate(), TRUE);
+	SetRateSliderTicks(m_ctlMaxDown);
 
 	if(GetDlgItem(IDC_UPLOAD_CAP)->GetWindowTextLength())
 	{
@@ -317,29 +316,30 @@ BOOL CPPgConnection::OnApply()
 		thePrefs.SetMaxGraphUploadRate(_tstoi(buffer));
 	}
 
-	((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->SetRange(1, thePrefs.GetMaxGraphUploadRate(), TRUE);
+	m_ctlMaxUp.SetRange(1, thePrefs.GetMaxGraphUploadRate(), TRUE);
+	SetRateSliderTicks(m_ctlMaxUp);
 
-	if (IsDlgButtonChecked(IDC_ULIMIT_LBL)==FALSE)
+	if (!IsDlgButtonChecked(IDC_ULIMIT_LBL))
 		thePrefs.SetMaxUpload(UNLIMITED);
 	else
-		thePrefs.SetMaxUpload(((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->GetPos());
+		thePrefs.SetMaxUpload(m_ctlMaxUp.GetPos());
 
 	if( thePrefs.GetMaxGraphUploadRate() < thePrefs.GetMaxUpload() && thePrefs.GetMaxUpload()!=UNLIMITED  )
-		thePrefs.SetMaxUpload(thePrefs.GetMaxGraphUploadRate()*.8);
+		thePrefs.SetMaxUpload(thePrefs.GetMaxGraphUploadRate() * 0.8);
 
 	if (thePrefs.GetMaxUpload()!=UNLIMITED)
-		((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->SetPos(thePrefs.GetMaxUpload());
+		m_ctlMaxUp.SetPos(thePrefs.GetMaxUpload());
 	
-	if (IsDlgButtonChecked(IDC_DLIMIT_LBL)==FALSE)
+	if (!IsDlgButtonChecked(IDC_DLIMIT_LBL))
 		thePrefs.SetMaxDownload(UNLIMITED);
 	else
-		thePrefs.SetMaxDownload(((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->GetPos());
+		thePrefs.SetMaxDownload(m_ctlMaxDown.GetPos());
 
 	if( thePrefs.GetMaxGraphDownloadRate() < thePrefs.GetMaxDownload() && thePrefs.GetMaxDownload()!=UNLIMITED )
-		thePrefs.SetMaxDownload(thePrefs.GetMaxGraphDownloadRate()*.8);
+		thePrefs.SetMaxDownload(thePrefs.GetMaxGraphDownloadRate() * 0.8);
 
 	if (thePrefs.GetMaxDownload()!=UNLIMITED)
-		((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetPos(thePrefs.GetMaxDownload());
+		m_ctlMaxDown.SetPos(thePrefs.GetMaxDownload());
 
 	if(GetDlgItem(IDC_PORT)->GetWindowTextLength())
 	{
@@ -457,9 +457,6 @@ BOOL CPPgConnection::OnApply()
 	thePrefs.maxconnections = tempcon;
 	theApp.scheduler->SaveOriginals();
 
-	//if (thePrefs.maxGraphDownloadRate<thePrefs.maxdownload) thePrefs.maxdownload=UNLIMITED;
-	//if (thePrefs.maxGraphUploadRate<thePrefs.maxupload) thePrefs.maxupload=UNLIMITED;
-
 	//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
 	if((bool)IsDlgButtonChecked(IDC_RANDOMPORTS) != thePrefs.GetUseRandomPorts()){
 		bRestartApp = true;
@@ -499,9 +496,6 @@ BOOL CPPgConnection::OnApply()
 
 	theApp.emuledlg->ShowConnectionState();
 
-//	thePrefs.Save();
-//	theApp.emuledlg->preferenceswnd->m_wndTweaks.LoadSettings();
-
 	if (bRestartApp)
 		AfxMessageBox(GetResString(IDS_NOPORTCHANGEPOSSIBLE));
 
@@ -519,38 +513,25 @@ void CPPgConnection::Localize(void)
 		GetDlgItem(IDC_CAPACITIES_FRM)->SetWindowText(GetResString(IDS_PW_CON_CAPFRM));
 		GetDlgItem(IDC_DCAP_LBL)->SetWindowText(GetResString(IDS_PW_CON_DOWNLBL));
 		GetDlgItem(IDC_UCAP_LBL)->SetWindowText(GetResString(IDS_PW_CON_UPLBL));
-		
 		GetDlgItem(IDC_LIMITS_FRM)->SetWindowText(GetResString(IDS_PW_CON_LIMITFRM));
-		
 		GetDlgItem(IDC_DLIMIT_LBL)->SetWindowText(GetResString(IDS_PW_DOWNL));
 		GetDlgItem(IDC_ULIMIT_LBL)->SetWindowText(GetResString(IDS_PW_UPL));
-
 		GetDlgItem(IDC_CONNECTION_NETWORK)->SetWindowText(GetResString(IDS_NETWORK));
-
-//		GetDlgItem(IDC_KBS1)->SetWindowText(GetResString(IDS_KBYTESEC));
 		GetDlgItem(IDC_KBS2)->SetWindowText(GetResString(IDS_KBYTESEC));
 		GetDlgItem(IDC_KBS3)->SetWindowText(GetResString(IDS_KBYTESEC));
-//		GetDlgItem(IDC_KBS4)->SetWindowText(GetResString(IDS_KBYTESEC));
-
 		ShowLimitValues();
-
 		GetDlgItem(IDC_MAXCONN_FRM)->SetWindowText(GetResString(IDS_PW_CONLIMITS));
 		GetDlgItem(IDC_MAXCONLABEL)->SetWindowText(GetResString(IDS_PW_MAXC));
-
 		GetDlgItem(IDC_SHOWOVERHEAD)->SetWindowText(GetResString(IDS_SHOWOVERHEAD));
-		
 		GetDlgItem(IDC_CLIENTPORT_FRM)->SetWindowText(GetResString(IDS_PW_CLIENTPORT));
 		GetDlgItem(IDC_MAXSRC_FRM)->SetWindowText(GetResString(IDS_PW_MAXSOURCES));
-
 		GetDlgItem(IDC_AUTOCONNECT)->SetWindowText(GetResString(IDS_PW_AUTOCON));
 		GetDlgItem(IDC_RECONN)->SetWindowText(GetResString(IDS_PW_RECON));
 		GetDlgItem(IDC_MAXSRCHARD_LBL)->SetWindowText(GetResString(IDS_HARDLIMIT));
 		GetDlgItem(IDC_WIZARD)->SetWindowText(GetResString(IDS_WIZARD));
 		GetDlgItem(IDC_UDPDISABLE)->SetWindowText(GetResString(IDS_UDPDISABLED));
-
 		GetDlgItem(IDC_OPENPORTS)->SetWindowText(GetResString(IDS_FO_PREFBUTTON));
 		SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
-
 		//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
 		GetDlgItem(IDC_RANDOMPORTS)->SetWindowText(GetResString(IDS_RANDOMPORTS));
 		GetDlgItem(IDC_LBL_MIN)->SetWindowText(GetResString(IDS_MINPORT));
@@ -569,30 +550,30 @@ void CPPgConnection::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	SetModified(TRUE);
 
-	if( pScrollBar == (CScrollBar*)GetDlgItem(IDC_MAXUP_SLIDER))
+	if (pScrollBar->GetSafeHwnd() == m_ctlMaxUp.m_hWnd)
 	{
-		uint32 maxup = ((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->GetPos();
-		uint32 maxdown = ((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->GetPos();
+		uint32 maxup = m_ctlMaxUp.GetPos();
+		uint32 maxdown = m_ctlMaxDown.GetPos();
 		if( maxup < 4 && maxup*3 < maxdown)
 		{
-			((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetPos(maxup*3);
+			m_ctlMaxDown.SetPos(maxup*3);
 		}
 		if( maxup < 10 && maxup*4 < maxdown)
 		{
-			((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->SetPos(maxup*4);
+			m_ctlMaxDown.SetPos(maxup*4);
 		}
 	}
-	else if (pScrollBar == (CScrollBar*)GetDlgItem(IDC_MAXDOWN_SLIDER))
+	else if (pScrollBar->GetSafeHwnd() == m_ctlMaxDown.m_hWnd)
 	{
-		uint32 maxup = ((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->GetPos();
-		uint32 maxdown = ((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->GetPos();
+		uint32 maxup = m_ctlMaxUp.GetPos();
+		uint32 maxdown = m_ctlMaxDown.GetPos();
 		if( maxdown < 13 && maxup*3 < maxdown)
 		{
-			((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->SetPos(ceil((double)maxdown/3));
+			m_ctlMaxUp.SetPos(ceil((double)maxdown/3));
 		}
 		if( maxdown < 41 && maxup*4 < maxdown)
 		{
-			((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->SetPos(ceil((double)maxdown/4));
+			m_ctlMaxUp.SetPos(ceil((double)maxdown/4));
 		}
 	}
 
@@ -602,26 +583,27 @@ void CPPgConnection::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CPropertyPage::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-void CPPgConnection::ShowLimitValues() {
+void CPPgConnection::ShowLimitValues()
+{
 	CString buffer;
 
-	if (IsDlgButtonChecked(IDC_ULIMIT_LBL)==FALSE)
+	if (!IsDlgButtonChecked(IDC_ULIMIT_LBL))
 		buffer=_T("");
 	else
-		buffer.Format(_T("%u %s"), ((CSliderCtrl*)GetDlgItem(IDC_MAXUP_SLIDER))->GetPos(), GetResString(IDS_KBYTESEC));
+		buffer.Format(_T("%u %s"), m_ctlMaxUp.GetPos(), GetResString(IDS_KBYTESEC));
 	GetDlgItem(IDC_KBS4)->SetWindowText(buffer);
 	
-	if (IsDlgButtonChecked(IDC_DLIMIT_LBL)==FALSE)
+	if (!IsDlgButtonChecked(IDC_DLIMIT_LBL))
 		buffer=_T("");
 	else
-		buffer.Format(_T("%u %s"), ((CSliderCtrl*)GetDlgItem(IDC_MAXDOWN_SLIDER))->GetPos(), GetResString(IDS_KBYTESEC));
+		buffer.Format(_T("%u %s"), m_ctlMaxDown.GetPos(), GetResString(IDS_KBYTESEC));
 	GetDlgItem(IDC_KBS1)->SetWindowText(buffer);
 }
 
-void CPPgConnection::OnLimiterChange() {
-	
-	GetDlgItem(IDC_MAXDOWN_SLIDER)->ShowWindow( IsDlgButtonChecked(IDC_DLIMIT_LBL)?SW_SHOW:SW_HIDE);
-	GetDlgItem(IDC_MAXUP_SLIDER)->ShowWindow( IsDlgButtonChecked(IDC_ULIMIT_LBL)?SW_SHOW:SW_HIDE );
+void CPPgConnection::OnLimiterChange()
+{
+	m_ctlMaxDown.ShowWindow(IsDlgButtonChecked(IDC_DLIMIT_LBL) ? SW_SHOW : SW_HIDE);
+	m_ctlMaxUp.ShowWindow(IsDlgButtonChecked(IDC_ULIMIT_LBL) ? SW_SHOW : SW_HIDE);
 
 	ShowLimitValues();
 	SetModified(TRUE);	
@@ -676,8 +658,8 @@ void CPPgConnection::OnBnClickedOpenports()
 		AfxMessageBox(GetResString(IDS_FO_PREF_FAILED), MB_ICONSTOP | MB_OK);
 }
 
-void CPPgConnection::OnStartPortTest() {
-
+void CPPgConnection::OnStartPortTest()
+{
 	CString buffer;
 
 	GetDlgItem(IDC_PORT)->GetWindowText(buffer);
@@ -687,6 +669,41 @@ void CPPgConnection::OnStartPortTest() {
 	uint16 udp= _tstoi(buffer);
 
 	TriggerPortTest(tcp,udp);
+}
+
+void CPPgConnection::SetRateSliderTicks(CSliderCtrl& rRate)
+{
+	rRate.ClearTics();
+	int iMin = 0, iMax = 0;
+	rRate.GetRange(iMin, iMax);
+	int iDiff = iMax - iMin;
+	if (iDiff > 0)
+	{
+		CRect rc;
+		rRate.GetWindowRect(&rc);
+		if (rc.Width() > 0)
+		{
+			int iTic;
+			int iPixels = rc.Width() / iDiff;
+			if (iPixels >= 6)
+				iTic = 1;
+			else
+			{
+				iTic = 10;
+				while (rc.Width() / (iDiff / iTic) < 8)
+					iTic *= 10;
+			}
+			if (iTic)
+			{
+				for (int i = ((iMin+(iTic-1))/iTic)*iTic; i < iMax; /**/)
+				{
+					rRate.SetTic(i);
+					i += iTic;
+				}
+			}
+			rRate.SetPageSize(iTic);
+		}
+	}
 }
 
 //MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]

@@ -28,6 +28,7 @@
 #include "ServerWnd.h"
 #include "IrcWnd.h"
 #include "Opcodes.h"
+#include "Log.h"
 #include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "MemDC.h"
 
@@ -450,9 +451,9 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	CTitleMenu ServerMenu;
 	ServerMenu.CreatePopupMenu();
-	ServerMenu.AddMenuTitle(GetResString(IDS_EM_SERVER));
+	ServerMenu.AddMenuTitle(GetResString(IDS_EM_SERVER), true);
 
-	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_CONNECTTO, GetResString(IDS_CONNECTTHIS));
+	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_CONNECTTO, GetResString(IDS_CONNECTTHIS), _T("CONNECT"));
 	ServerMenu.SetDefaultItem(iSelectedItems > 0 ? MP_CONNECTTO : -1);
 
 	CMenu ServerPrioMenu;
@@ -463,20 +464,20 @@ void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		ServerPrioMenu.AppendMenu(MF_STRING, MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
 		ServerPrioMenu.CheckMenuRadioItem(MP_PRIOLOW, MP_PRIOHIGH, uPrioMenuItem, 0);
 	}
-	ServerMenu.AppendMenu(MF_POPUP  | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)ServerPrioMenu.m_hMenu, GetResString(IDS_PRIORITY));
+	ServerMenu.AppendMenu(MF_POPUP  | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)ServerPrioMenu.m_hMenu, GetResString(IDS_PRIORITY), _T("PRIORITY"));
 
 	// enable add/remove from static server list, if there is at least one selected server which can be used for the action
-	ServerMenu.AppendMenu(MF_STRING | (iStaticServers < iSelectedItems ? MF_ENABLED : MF_GRAYED), MP_ADDTOSTATIC, GetResString(IDS_ADDTOSTATIC));
-	ServerMenu.AppendMenu(MF_STRING | (iStaticServers > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEFROMSTATIC, GetResString(IDS_REMOVEFROMSTATIC));
+	ServerMenu.AppendMenu(MF_STRING | (iStaticServers < iSelectedItems ? MF_ENABLED : MF_GRAYED), MP_ADDTOSTATIC, GetResString(IDS_ADDTOSTATIC), _T("ListAdd"));
+	ServerMenu.AppendMenu(MF_STRING | (iStaticServers > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEFROMSTATIC, GetResString(IDS_REMOVEFROMSTATIC), _T("ListRemove"));
 	ServerMenu.AppendMenu(MF_SEPARATOR);
 
-	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVE, GetResString(IDS_REMOVETHIS));
-	ServerMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL, GetResString(IDS_REMOVEALL));
-	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
-	ServerMenu.AppendMenu(MF_STRING | (theApp.IsEd2kServerLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE));
+	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVE, GetResString(IDS_REMOVETHIS), _T("DELETESELECTED"));
+	ServerMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL, GetResString(IDS_REMOVEALL), _T("DELETE"));
+	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_GETED2KLINK, GetResString(IDS_DL_LINK1), _T("ED2KLINK"));
+	ServerMenu.AppendMenu(MF_STRING | (theApp.IsEd2kServerLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE), _T("PASTELINK"));
 
 	ServerMenu.AppendMenu(MF_SEPARATOR);
-	ServerMenu.AppendMenu(MF_ENABLED | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND));
+	ServerMenu.AppendMenu(MF_ENABLED | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 
 	GetPopupMenuPos(*this, point);
 	ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -843,7 +844,7 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 		FILE* staticservers = _tfsopen(thePrefs.GetConfigDir() + _T("staticservers.dat"), _T("a"), _SH_DENYWR);
 		if (staticservers==NULL) 
 		{
-			AddLogLine( false, GetResString(IDS_ERROR_SSF));
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERROR_SSF));
 			return false;
 		}
 		
@@ -892,7 +893,7 @@ bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 				fclose(staticservers);
 			if (statictemp)
 				fclose(statictemp);
-			AddLogLine( false, GetResString(IDS_ERROR_SSF));
+			LogError(LOG_STATUSBAR, GetResString(IDS_ERROR_SSF));
 			return false;
 		}
 

@@ -31,6 +31,7 @@
 #include "DownloadQueue.h" //MORPH - Added by SiRoB
 #include "PartFile.h" //MORPH - Added by SiRoB
 #include "SharedFileList.h" //MORPH - Added by SiRoB
+#include "Log.h"
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 #include "ED2KLink.h"
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
@@ -204,41 +205,41 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
-	ClientMenu.AddMenuTitle(GetResString(IDS_FRIENDLIST));
+	ClientMenu.AddMenuTitle(GetResString(IDS_FRIENDLIST), true);
 
 	const CFriend* cur_friend = NULL;
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		cur_friend = (CFriend*)GetItemData(iSel);
-		ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+		ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
 		ClientMenu.SetDefaultItem(MP_DETAIL);
 	}
 
-	ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND));
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND));
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG));
-	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->GetLinkedClient() && !cur_friend->GetLinkedClient()->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES));
+	ClientMenu.AppendMenu(MF_STRING, MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND), _T("ADDFRIEND"));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
+	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->GetLinkedClient() && !cur_friend->GetLinkedClient()->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES) , _T("VIEWFILES"));
 	//MORPH START - Modified by SiRoB, Friend Slot
 	/*
-	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
 	ClientMenu.EnableMenuItem(MP_FRIENDSLOT, (cur_friend)?MF_ENABLED : MF_GRAYED);
 	ClientMenu.CheckMenuItem(MP_FRIENDSLOT, (cur_friend && cur_friend->GetFriendSlot()) ? MF_CHECKED : MF_UNCHECKED);
 	*/
 	//MORPH END   - Modified by SiRoB, Friend Slot
 
 	ClientMenu.AppendMenu(MF_SEPARATOR);
-    ClientMenu.AppendMenu(MF_STRING | (theApp.IsEd2kFriendLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE));
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETFRIENDED2KLINK, GetResString(IDS_GETFRIENDED2KLINK));
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETHTMLFRIENDED2KLINK));
+    ClientMenu.AppendMenu(MF_STRING | (theApp.IsEd2kFriendLinkInClipboard() ? MF_ENABLED : MF_GRAYED), MP_PASTE, GetResString(IDS_PASTE), _T("PASTELINK"));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETFRIENDED2KLINK, GetResString(IDS_GETFRIENDED2KLINK), _T("ED2KLINK"));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_GETHTMLFRIENDED2KLINK, GetResString(IDS_GETHTMLFRIENDED2KLINK), _T("ED2KLINK"));
 	ClientMenu.AppendMenu(MF_SEPARATOR);
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend? MF_ENABLED | (cur_friend->GetFriendSlot()? MF_CHECKED : MF_UNCHECKED) : MF_GRAYED) , MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
 
 	//MORPH START - Added by SiRoB, Friend Addon
-	ClientMenu.AppendMenu(MF_STRING | (theApp.friendlist->IsFriendSlot() ? MF_ENABLED : MF_GRAYED),MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT));
+	ClientMenu.AppendMenu(MF_STRING | (theApp.friendlist->IsFriendSlot() ? MF_ENABLED : MF_GRAYED),MP_REMOVEALLFRIENDSLOT, GetResString(IDS_REMOVEALLFRIENDSLOT), _T("FRIENDSLOTREMOVE"));
 	//MORPH END   - Added by SiRoB, Friend Addon
 	//MORPH START - Added by IceCream, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka [sivka: -listing all requested files from user-]
-	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED)); // Added by sivka
+	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED), _T("FILEREQUESTED")); // Added by sivka
 	//MORPH END - Added by IceCream, List Requested Files	
 
 	GetPopupMenuPos(*this, point);
@@ -387,7 +388,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						{
 							CString msg;
 							msg.Format(GetResString(IDS_USER_ALREADY_FRIEND), pFriendLink->GetUserName());
-							theApp.AddLogLine(true, msg);
+							AddLogLine(true, msg);
 						}
 					}
 				}

@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "Loggable.h"
 #include "UploadBandwidthThrottler.h" // ZZ:UploadBandWithThrottler (UDP)
 
 class Packet;
@@ -31,7 +30,7 @@ struct UDPPack
 };
 #pragma pack()
 
-class CClientUDPSocket : public CAsyncSocket, public CLoggable, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
+class CClientUDPSocket : public CAsyncSocket, public ThrottledControlSocket // ZZ:UploadBandWithThrottler (UDP)
 {
 public:
 	CClientUDPSocket();

@@ -121,46 +121,46 @@ BOOL CMetaDataDlg::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-
-CString GetTagNameByID(UINT id) {
-
-	switch(id) {
-		case FT_FILENAME : return GetResString(IDS_SW_NAME);
-		case FT_FILESIZE : return GetResString(IDS_DL_SIZE);
-		case FT_FILETYPE : return GetResString(IDS_TYPE);
-		case FT_FILEFORMAT : return GetResString(IDS_FORMAT);
-		case 0x05		 : return GetResString(IDS_META_COLLECTION);
-		case 0x06		 : return GetResString(IDS_META_PARTPATH);
-		case 0x07		 : return GetResString(IDS_META_PARTHASH);
-		case FT_TRANSFERED		 : return GetResString(IDS_DL_TRANSF);
-		case FT_GAPSTART		 : return GetResString(IDS_META_GAPSTART);
-		case FT_GAPEND		 : return GetResString(IDS_META_GAPEND);
-		case 0x0B		 : return GetResString(IDS_DESCRIPTION);
-		case 0x0C		 : return GetResString(IDS_PING);
-		case 0x0D		 : return GetResString(IDS_FAIL);
-		case 0x0E		 : return GetResString(IDS_META_PREFERENCES);
-		case 0x0F		 : return GetResString(IDS_PORT);
-		case 0x10		 : return GetResString(IDS_IP);
-		case 0x11		 : return GetResString(IDS_META_VERSION);
-		case FT_PARTFILENAME : return GetResString(IDS_META_TEMPFILE);
-		case 0x13		 : return GetResString(IDS_PRIORITY);
-		case FT_STATUS		 : return GetResString(IDS_STATUS);
-		case FT_SOURCES		 : return GetResString(IDS_SEARCHAVAIL);
-		case 0x16		 : return GetResString(IDS_PERMISSION);
-		case 0x17		 : return GetResString(IDS_FD_PARTS);
-		case FT_COMPLETE_SOURCES	: return GetResString(IDS_COMPLSOURCES);
-		case FT_MEDIA_ARTIST		 : return GetResString(IDS_ARTIST);
-		case FT_MEDIA_ALBUM		 : return GetResString(IDS_ALBUM);
-		case FT_MEDIA_TITLE		 : return GetResString(IDS_TITLE);
-		case FT_MEDIA_LENGTH		 : return GetResString(IDS_LENGTH);
-		case FT_MEDIA_BITRATE		 : return GetResString(IDS_BITRATE);
-		case FT_MEDIA_CODEC		 : return GetResString(IDS_CODEC);
-		case 0xFA		 : return GetResString(IDS_META_SERVERPORT);
-		case 0xFB		 : return GetResString(IDS_META_SERVERIP);
-		case 0xFC		 : return GetResString(IDS_META_SRCUDPPORT);
-		case 0xFD		 : return GetResString(IDS_META_SRCTCPPORT);
-		case 0xFE		 : return GetResString(IDS_META_SRCIP);
-		case 0xFF		 : return GetResString(IDS_META_SRCTYPE);
+CString GetTagNameByID(UINT id)
+{
+	switch (id)
+	{
+		case FT_FILENAME: return GetResString(IDS_SW_NAME);
+		case FT_FILESIZE: return GetResString(IDS_DL_SIZE);
+		case FT_FILETYPE: return GetResString(IDS_TYPE);
+		case FT_FILEFORMAT: return GetResString(IDS_FORMAT);
+		case FT_LASTSEENCOMPLETE: return GetResString(IDS_LASTSEENCOMPL);	// 01-Nov-2004: Sent in server<->client protocol as 'Last Seen Complete'
+		case 0x06: return GetResString(IDS_META_PARTPATH);
+		case 0x07: return GetResString(IDS_META_PARTHASH);
+		case FT_TRANSFERED: return GetResString(IDS_DL_TRANSF);
+		case FT_GAPSTART: return GetResString(IDS_META_GAPSTART);
+		case FT_GAPEND: return GetResString(IDS_META_GAPEND);
+		case 0x0B: return GetResString(IDS_DESCRIPTION);
+		case 0x0C: return GetResString(IDS_PING);
+		case 0x0D: return GetResString(IDS_FAIL);
+		case 0x0E: return GetResString(IDS_META_PREFERENCES);
+		case 0x0F: return GetResString(IDS_PORT);
+		case 0x10: return GetResString(IDS_IP);
+		case 0x11: return GetResString(IDS_META_VERSION);
+		case FT_PARTFILENAME: return GetResString(IDS_META_TEMPFILE);
+		case 0x13: return GetResString(IDS_PRIORITY);
+		case FT_STATUS: return GetResString(IDS_STATUS);
+		case FT_SOURCES: return GetResString(IDS_SEARCHAVAIL);
+		case 0x16: return GetResString(IDS_PERMISSION);
+		case 0x17: return GetResString(IDS_FD_PARTS);
+		case FT_COMPLETE_SOURCES: return GetResString(IDS_COMPLSOURCES);
+		case FT_MEDIA_ARTIST: return GetResString(IDS_ARTIST);
+		case FT_MEDIA_ALBUM: return GetResString(IDS_ALBUM);
+		case FT_MEDIA_TITLE: return GetResString(IDS_TITLE);
+		case FT_MEDIA_LENGTH: return GetResString(IDS_LENGTH);
+		case FT_MEDIA_BITRATE: return GetResString(IDS_BITRATE);
+		case FT_MEDIA_CODEC: return GetResString(IDS_CODEC);
+		case 0xFA: return GetResString(IDS_META_SERVERPORT);
+		case 0xFB: return GetResString(IDS_META_SERVERIP);
+		case 0xFC: return GetResString(IDS_META_SRCUDPPORT);
+		case 0xFD: return GetResString(IDS_META_SRCTCPPORT);
+		case 0xFE: return GetResString(IDS_META_SRCIP);
+		case 0xFF: return GetResString(IDS_META_SRCTYPE);
 	}
 
 	CString buffer;
@@ -170,16 +170,19 @@ CString GetTagNameByID(UINT id) {
 
 CString GetMetaTagName(UINT uTagID)
 {
-	return GetTagNameByID(uTagID);
+	CString strName = GetTagNameByID(uTagID);
+	StripTrailingCollon(strName);
+	return strName;
 }
 
 CString GetName(const CTag* pTag)
 {
 	CString strName;
 	if (pTag->GetNameID())
-		strName=GetTagNameByID(pTag->GetNameID());
+		strName = GetTagNameByID(pTag->GetNameID());
 	else
 		strName = pTag->GetName();
+	StripTrailingCollon(strName);
 	return strName;
 }
 
@@ -187,10 +190,10 @@ CString GetName(const Kademlia::CTag* pTag)
 {
 	CString strName;
 	if (pTag->m_name.GetLength() == 1)
-		strName=GetTagNameByID((BYTE)pTag->m_name[0]);
+		strName = GetTagNameByID((BYTE)pTag->m_name[0]);
 	else
 		strName = (LPCSTR)pTag->m_name;
-
+	StripTrailingCollon(strName);
 	return strName;
 }
 
@@ -203,7 +206,7 @@ CString GetValue(const CTag* pTag)
 	{
 		if (pTag->GetNameID() == 0x10 || pTag->GetNameID() >= 0xFA)
 			strValue.Format(_T("%u"), pTag->GetInt());
-		else if (pTag->GetNameID() == FT_MEDIA_LENGTH)
+		else if (pTag->GetNameID() == FT_MEDIA_LENGTH || pTag->GetNameID() == FT_LASTSEENCOMPLETE)
 			SecToTimeLength(pTag->GetInt(), strValue);
 		else
 			strValue = GetFormatedUInt(pTag->GetInt());
@@ -264,14 +267,38 @@ void CMetaDataDlg::InitTags()
 	m_tags.DeleteAllItems();
 	m_tags.SetRedraw(FALSE);
 
+	int iMetaTags = 0;
 	if (m_file != NULL)
 	{
+		LVITEM lvi;
+		lvi.mask = LVIF_TEXT;
+		lvi.iItem = INT_MAX;
+		lvi.iSubItem = META_DATA_COL_NAME;
+		CString strBuff = GetResString(IDS_FD_HASH);
+		StripTrailingCollon(strBuff);
+		lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
+		int iItem = m_tags.InsertItem(&lvi);
+		if (iItem >= 0)
+		{
+			lvi.mask = LVIF_TEXT;
+			lvi.iItem = iItem;
+
+			strBuff.Empty(); // intentionally left blank as it's not a real meta tag
+			lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
+			lvi.iSubItem = META_DATA_COL_TYPE;
+			m_tags.SetItem(&lvi);
+
+			strBuff = md4str(m_file->GetFileHash());
+			lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
+			lvi.iSubItem = META_DATA_COL_VALUE;
+			m_tags.SetItem(&lvi);
+		}
+
 		const CArray<CTag*,CTag*>& aTags = m_file->GetTags();
 		int iTags = aTags.GetCount();
 		for (int i = 0; i < iTags; i++)
 		{
 			const CTag* pTag = aTags.GetAt(i);
-			CString strBuff;
 			LVITEM lvi;
 			lvi.mask = LVIF_TEXT;
 			lvi.iItem = INT_MAX;
@@ -293,6 +320,8 @@ void CMetaDataDlg::InitTags()
 				lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
 				lvi.iSubItem = META_DATA_COL_VALUE;
 				m_tags.SetItem(&lvi);
+
+				iMetaTags++;
 			}
 		}
 	}
@@ -325,11 +354,13 @@ void CMetaDataDlg::InitTags()
 				lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
 				lvi.iSubItem = META_DATA_COL_VALUE;
 				m_tags.SetItem(&lvi);
+
+				iMetaTags++;
 			}
 		}
 	}
 	CString strTmp;
-	strTmp.Format(_T("%s %u"), GetResString(IDS_METATAGS), m_tags.GetItemCount());
+	strTmp.Format(_T("%s %u"), GetResString(IDS_METATAGS), iMetaTags);
 	SetDlgItemText(IDC_TOTAL_TAGS, strTmp);
 	m_tags.SetRedraw();
 }

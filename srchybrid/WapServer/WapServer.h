@@ -6,7 +6,6 @@
 #include "WapSocket.h"
 #include "Partfile.h"
 #include "OtherFunctions.h"
-#include "loggable.h"
 #include "WebWapDefinitions.h"
 
 typedef struct
@@ -56,7 +55,7 @@ typedef struct
 	CString sKad;
 } WapTemplates;
 
-class CWapServer: public CLoggable
+class CWapServer
 {
 	friend class CWapSocket;
 
