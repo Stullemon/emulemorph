@@ -162,7 +162,7 @@ void CQueueListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("ClientLPhant")));
 	//imagelist.Add(CTempIconLoader(_T("ClientLPhantPlus")));
 	imagelist.Add(CTempIconLoader(_T("ClientRightEdonkey")));
-	imagelist.Add(CTempIconLoader(_T("ClientMorph")));
+	imagelist.Add(CTempIconLoader(_T("Morph")));
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditOvl"))), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientCreditSecureOvl"))), 3);//10
