@@ -338,6 +338,7 @@ CString ReverseDnsLookup(DWORD dwIP)
 				{
 					if (AtlIsValidAddress(pDnsRecords->Data.PTR.pNameHost, sizeof(TCHAR), FALSE))
 						strHostName = pDnsRecords->Data.PTR.pNameHost;
+				if (pDnsRecords) //Added by SiRoB, Pawcio fix
 					(*pfnDnsRecordListFree)(pDnsRecords, DnsFreeRecordListDeep);
 				}
 			}
