@@ -1,7 +1,13 @@
 --------------------------------------
 Changelog for eMule 0.44b MorphXT v5.4
 --------------------------------------
+MERGED : Mobile Mule 0.9a [SiRoB]
+
 FIXED  : Fixed Upload Splitting Class [SiRoB]
+
+CHANGED: Morph version check is done at each start [SiRoB]
+
+ADDED  : Manuel Morph version checker in the top left corner popup [SiRoB]
 
 NOTE: About WebCache from the official thread
 Quick Start:
