@@ -260,8 +260,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						break;						
 					if (size >= 16)
 					{
-						if (!client->GetWaitStartTime())
-							client->SetWaitStartTime();
+						// EastShare START - Marked by TAHO, modified SUQWT
+						//if (!client->GetWaitStartTime())
+						//	client->SetWaitStartTime();
+						// EastShare END - Marked by TAHO, modified SUQWT
 						CSafeMemFile data_in((BYTE*)packet,size);
 						uchar reqfilehash[16];
 						data_in.ReadHash16(reqfilehash);
@@ -310,8 +312,10 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 					if (client->IsBanned())
 						break;
 					if (size == 16){
-						if (!client->GetWaitStartTime())
-							client->SetWaitStartTime();
+						// EastShare START - Marked by TAHO, modified SUQWT
+						//if (!client->GetWaitStartTime())
+						//	client->SetWaitStartTime();
+						// EastShare END - Marked by TAHO, modified SUQWT
 						CKnownFile* reqfile;
 						if ( (reqfile = theApp.sharedfiles->GetFileByID((uchar*)packet)) == NULL ){
 							if ( !((reqfile = theApp.downloadqueue->GetFileByID((uchar*)packet)) != NULL
@@ -336,7 +340,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						data.WriteHash16(reqfile->GetFileHash());
 						if (reqfile->IsPartFile())
 							((CPartFile*)reqfile)->WritePartStatus(&data, client);	// SLUGFILLER: hideOS
-						else if (!reqfile->ShareOnlyTheNeed(&data)) //wistily SOTN
+						else if (!reqfile->ShareOnlyTheNeed(&data, client)) //wistily SOTN
 							if (!reqfile->HideOvershares(&data, client))	//Slugfiller: HideOS
 								data.WriteUInt16(0);
 						Packet* packet = new Packet(&data);
@@ -1212,8 +1216,10 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 						}
 					}
 
-					if (!client->GetWaitStartTime())
-						client->SetWaitStartTime();
+					// EastShare START - Marked by TAHO, modified SUQWT
+					//if (!client->GetWaitStartTime())
+					//	client->SetWaitStartTime();
+					// EastShare END - Marked by TAHO, modified SUQWT
 					// if we are downloading this file, this could be a new source
 					// no passive adding of files with only one part
 					if (reqfile->IsPartFile() && reqfile->GetFileSize() > PARTSIZE)
@@ -1245,7 +1251,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								data_out.WriteUInt8(OP_FILESTATUS);
 								if (reqfile->IsPartFile())
 									((CPartFile*)reqfile)->WritePartStatus(&data_out, client);	// SLUGFILLER: hideOS
-								else if (!reqfile->ShareOnlyTheNeed(&data_out)) //wistily SOTN
+								else if (!reqfile->ShareOnlyTheNeed(&data_out, client)) //wistily SOTN
 									if (!reqfile->HideOvershares(&data_out, client))	//Slugfiller: HideOS
 										data_out.WriteUInt16(0);
 								break;
