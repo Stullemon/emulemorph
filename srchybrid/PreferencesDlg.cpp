@@ -114,16 +114,22 @@ BOOL CPreferencesDlg::OnInitDialog()
 	m_groupbox.SetWindowText(currenttext);
 	m_iPrevPage = curSel;
     
-	//Commander - Added: Preferences Banner [TPT] - Start		
+	
+	//MORPH START - Added by SiRoB, Load a jpg
 	CBitmap bmp;
-	bmp.LoadBitmap(IDB_MORPH_BANNER);
-	m_banner.SetTexture((HBITMAP)bmp.Detach());	
-	m_banner.SetFillFlag(KCSB_FILL_TEXTURE);
-	m_banner.SetSize(thePrefs.sidebanner?70:0);
-	m_banner.SetTitle(_T(""));
-	m_banner.SetCaption(_T(""));
-	m_banner.Attach(this, KCSB_ATTACH_RIGHT);
-	//Commander - Added: Preferences Banner [TPT] - End
+	VERIFY( bmp.Attach(theApp.LoadImage(_T("BANNER"), _T("JPG"))) );
+	if (bmp.GetSafeHandle())
+	{
+	//MORPH END   - Added by SiRoB, Load a jpg
+		//Commander - Added: Preferences Banner [TPT] - Start			
+		m_banner.SetTexture((HBITMAP)bmp.Detach());	
+		m_banner.SetFillFlag(KCSB_FILL_TEXTURE);
+		m_banner.SetSize(thePrefs.sidebanner?70:0);
+		m_banner.SetTitle(_T(""));
+		m_banner.SetCaption(_T(""));
+		m_banner.Attach(this, KCSB_ATTACH_RIGHT);
+		//Commander - Added: Preferences Banner [TPT] - End
+	}
 
 	return bResult;
 }

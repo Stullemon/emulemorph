@@ -2515,7 +2515,7 @@ IDR_HTTPDOWNLOAD_ANIMATION AVI                     "res\\inetdownload.avi"
 
 SPLASH                  JPG                     "res\\About.jpg"
 ABOUT                   JPG                     "res\\logo.jpg"
-
+BANNER                  JPG                     "res\\Banner_Morph.jpg"
 /////////////////////////////////////////////////////////////////////////////
 //
 // GIF
