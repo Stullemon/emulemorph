@@ -638,11 +638,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
            		}
         	}
 		   	// Any bandwidth that hasn't been used yet are used first to last.
-			for(uint32 slotCounter = 0; slotCounter < (uint32)m_FriendOrder_list.GetSize() && bytesToSpendFriend > 0 && spentBytes < (uint64)bytesToSpendFriend; slotCounter++) {
+			for(uint32 slotCounter = 0; slotCounter < (uint32)m_FriendOrder_list.GetSize() && min(bytesToSpend,bytesToSpendFriend) > 0 && spentBytes < (uint64)min(bytesToSpend,bytesToSpendFriend); slotCounter++) {
 				ThrottledFileSocket* socket = m_FriendOrder_list.GetAt(slotCounter);
 				
                	if(socket != NULL) {
-					uint32 bytesToSpendTemp = bytesToSpendFriend-spentBytes;
+					uint32 bytesToSpendTemp = min(bytesToSpend,bytesToSpendFriend)-spentBytes;
 					SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 					uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 
