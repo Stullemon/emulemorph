@@ -582,15 +582,18 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	{
 		return false;
 	}
-	tempUploadinglist.AddTail(newclient);
 	// tell the client that we are now ready to upload
 	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
+		tempUploadinglist.AddTail(newclient);
 		newclient->SetUploadState(US_CONNECTING);
 		if (!newclient->TryToConnect(true))
 			return false;
 		if (!newclient->socket) // Pawcio: BC
+		{
+			newclient->SetUploadState(US_NONE);		
 			return false;
+		}
 	}
 	else
 	{
