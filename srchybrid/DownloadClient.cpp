@@ -1093,7 +1093,7 @@ bool CUpDownClient::SwapToAnotherFile(bool bIgnoreNoNeeded, bool ignoreSuspensio
 		for (POSITION pos = m_OtherRequests_list.GetHeadPosition();pos != 0;m_OtherRequests_list.GetNext(pos)){
 			cur_file = m_OtherRequests_list.GetAt(pos);
 			if (cur_file != reqfile && theApp.downloadqueue->IsPartFile(cur_file) && !cur_file->IsStopped() 
-				&& (cur_file->lastseencomplete != NULL || !theApp.glob_prefs->OnlyDownloadCompleteFiles()) //EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+				&& (!cur_file->notSeenCompleteSource()) //EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 				&& (cur_file->GetStatus(false) == PS_READY || cur_file->GetStatus(false) == PS_EMPTY))	
 			{
 				//MORPH START - Added by SiRoB, Advanced A4AF derivated from Khaos
@@ -1328,7 +1328,7 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
 				continue;
 			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			if (cur_file->lastseencomplete == NULL && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+			if (cur_file->notSeenCompleteSource())
 				continue;
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 			if (cur_file->ForceAllA4AF()) {
@@ -1408,7 +1408,7 @@ bool CUpDownClient::StackA4AFSources()
 			if (cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) > 5 || cur_file->GetSrcStatisticsValue(DS_TOOMANYCONNS) == cur_file->GetSourceCount())
 				return false;
 			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			if (cur_file->lastseencomplete == NULL && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+			if (cur_file->notSeenCompleteSource())
 				continue;
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 			if (cur_file->ForceAllA4AF()) {

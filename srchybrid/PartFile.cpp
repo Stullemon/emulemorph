@@ -1674,7 +1674,7 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							}
 							//MORPH END - Added by SiRoB, Due to Khaos A4AF
 							//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && (lastseencomplete==NULL) && theApp.glob_prefs->OnlyDownloadCompleteFiles())
+							if ((cur_src->GetLastAskedTime()) && ((dwCurTick - cur_src->GetLastAskedTime()) < FILEREASKTIME*2) && notSeenCompleteSource())
 								break;//shadow#(onlydownloadcompletefiles)
 							//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 							if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME-20000))
@@ -3846,7 +3846,7 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 				// Define the bounds of the three zones (very rare, rare)
 				// more depending on available sources
 				uint8 modif=10;
-				if (GetSourceCount()>200) modif=5; else if (GetSourceCount()>800) modif=2;
+				if (GetSourceCount()>800) modif=2; 	else if (GetSourceCount()>200) modif=5;//Morph - corrected by AndCycle
 				uint16 limit= modif*GetSourceCount()/ 100;
 				if (limit==0) limit=1;
 
@@ -4169,24 +4169,42 @@ int CPartFile::GetRating(){
     int num,tot,fRate;  
     num=tot=0;  
     POSITION pos1,pos2;  
-    for (int sl=0;sl<SOURCESSLOTS;sl++) if (!srclists[sl].IsEmpty())  
-    for (pos1 = srclists[sl].GetHeadPosition();( pos2 = pos1 ) != NULL;){  
-          srclists[sl].GetNext(pos1);  
-          fRate =((CUpDownClient*) srclists[sl].GetAt(pos2))->GetFileRate();  
-          if (fRate>0)  
-          {  
-              num++;
-      //Cax2 - bugfix: for some ?%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
-      if (fRate==3 || fRate==4) fRate=(fRate==3)?4:3;
-              tot+=fRate;  
-          }  
-    }  
-  if (num>0)
-  {
-  num=(float)tot/num+.5; //Cax2 - get the average of all the ratings
-  //Cax2 - bugfix: for some ?%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
-  if (num==3 || num==4) num=(num==3)?4:3;
-  }
+    for (int sl=0;sl<SOURCESSLOTS;sl++) 
+		if (!srclists[sl].IsEmpty())  
+			for (pos1 = srclists[sl].GetHeadPosition();( pos2 = pos1 ) != NULL;){  
+				srclists[sl].GetNext(pos1);  
+				fRate =((CUpDownClient*) srclists[sl].GetAt(pos2))->GetFileRate();  
+				if (fRate>0)  
+				{  
+					num++;
+					//Cax2 - bugfix: for some ?%#ing reason  fair=4 & good=3, breaking the progression from fake(1) to excellent(5)
+					if (fRate==3 || fRate==4) fRate=(fRate==3)?4:3;
+					tot+=fRate;  
+				}  
+			}  
+	if (num>0)
+	{
+		num=(float)tot/num+.5; //Cax2 - get the average of all the ratings
+		//Cax2 - bugfix: for some ?%#ing reason good=3 & fair=4, breaking the progression from fake(1) to excellent(5)
+		if (num==3 || num==4) num=(num==3)?4:3;
+	}
     return num; //Cax2 - if no ratings found, will return 0!
 }
 //MORPH END   - Added by IceCream, eMule Plus rating icons
+
+//Morph - added by AndCycle, Only download complete files v2.1 (shadow)
+bool	CPartFile::notSeenCompleteSource(){
+	
+	if(!theApp.glob_prefs->OnlyDownloadCompleteFiles()){
+		return false;
+	}
+	else if(lastseencomplete == NULL){
+		return true;
+	}
+	else if(CTime::GetCurrentTime() - lastseencomplete > 604800){
+		return true;
+	}
+	return false;
+
+}
+//Morph - added by AndCycle, Only download complete files v2.1 (shadow)

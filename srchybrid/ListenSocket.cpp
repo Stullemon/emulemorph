@@ -374,7 +374,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 				//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 					//if (client->reqfile && !client->reqfile->IsStopped() && 
-					if (client->reqfile && !client->reqfile->IsStopped() && (client->reqfile->lastseencomplete!=NULL || !app_prefs->OnlyDownloadCompleteFiles()) /*shadow#(onlydownloadcompletefiles)*/ &&
+					if (client->reqfile && !client->reqfile->IsStopped() && (!client->reqfile->notSeenCompleteSource()) /*shadow#(onlydownloadcompletefiles)*/ &&
 				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						if (client->GetDownloadState() == DS_ONQUEUE){
@@ -546,12 +546,12 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 //					theApp.downloadqueue->AddDownDataOverheadOther(0, 24);
 					//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 					//if (client->reqfile && !client->reqfile->IsStopped() && 
-					if (client->reqfile && !client->reqfile->IsStopped() && (client->reqfile->lastseencomplete!=NULL || !app_prefs->OnlyDownloadCompleteFiles())/*shadow#(onlydownloadcompletefiles)*/ &&
+					if (client->reqfile && !client->reqfile->IsStopped() && (!client->reqfile->notSeenCompleteSource())/*shadow#(onlydownloadcompletefiles)*/ &&
 					//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 					(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						client->ProcessBlockPacket(packet,size);
 						//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || (client->reqfile->lastseencomplete==NULL && app_prefs->OnlyDownloadCompleteFiles())){
+						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR || client->reqfile->notSeenCompleteSource()){
 						//if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
 						//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)		
 							Packet* packet = new Packet(OP_CANCELTRANSFER,0);

@@ -238,6 +238,7 @@ public:
 	void	SetForceA4AFOff(bool in)		{ m_bForceA4AFOff = in; }
 	// khaos::kmod-
 	int  CPartFile::GetRating(); //MORPH - Added by IceCream, eMule Plus rating icons
+	bool	notSeenCompleteSource();
 
 protected:
 	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result);

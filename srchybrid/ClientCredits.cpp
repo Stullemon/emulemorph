@@ -371,7 +371,6 @@ void CClientCreditsList::LoadList()
 //Morph Start - added by AndCycle, choose .met to load
 
 	CSafeBufferedFile	loadFile;
-	bool		haveTrouble = false;
 
 	const int	totalLoadFile = 12;
 
@@ -399,6 +398,7 @@ void CClientCreditsList::LoadList()
 		//check credits.met status
 		successLoadFile[curFile] = loadFile.Open(loadFileName[curFile], iOpenFlags, &fexp);
 		if (!successLoadFile[curFile]){
+/*
 			if (fexp.m_cause != CFileException::fileNotFound){
 				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 				TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -406,11 +406,11 @@ void CClientCreditsList::LoadList()
 					strError += _T(" - ");
 					strError += szError;
 				}
-				AddLogLine(true, _T("%s"), strError);
-				haveTrouble = true;
+				AddLogLine(false, _T("%s"), strError);
 			}else{
 				//AddLogLine(false, "%s does not exist,", loadFileName[curFile]);
 			}
+*/
 		}else{
 			loadFile.GetStatus(loadFileStatus[curFile]);
 			loadFile.Close();

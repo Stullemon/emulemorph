@@ -55,6 +55,7 @@
 #include <afxdlgs.h>
 #include <..\src\mfc\afximpl.h>
 #include <atlcoll.h>
+#include "cpu_optimize.h" //eWombat [OnTheFly] Optimizer//Morph End - added by AndCycle, On the fly processor optimization(eWombat)
 
 #define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
 

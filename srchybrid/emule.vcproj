@@ -93,7 +93,7 @@
 				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				AdditionalIncludeDirectories=".;..;..\id3lib\include;system"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
@@ -245,6 +245,12 @@
 			</File>
 			<File
 				RelativePath="ClientUDPSocket.cpp">
+			</File>
+			<File
+				RelativePath=".\system\cpu_info.cpp">
+			</File>
+			<File
+				RelativePath=".\system\cpu_optimize.cpp">
 			</File>
 			<File
 				RelativePath="CustomAutoComplete.cpp">
@@ -546,6 +552,9 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
+				RelativePath=".\system\afxsock.h">
+			</File>
+			<File
 				RelativePath="ArchiveRecovery.h">
 			</File>
 			<File
@@ -568,6 +577,12 @@
 			</File>
 			<File
 				RelativePath="ClientUDPSocket.h">
+			</File>
+			<File
+				RelativePath=".\system\cpu_info.h">
+			</File>
+			<File
+				RelativePath=".\system\cpu_optimize.h">
 			</File>
 			<File
 				RelativePath="CustomAutoComplete.h">
