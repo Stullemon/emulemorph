@@ -953,7 +953,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam,LPARAM lParam ){
 		}
 		//Commander - Fixed: Resume Next File - Start
 		case MP_CAT_RESUMENEXT: {
-			theApp.downloadqueue->StartNextFile(rightclickindex/*,true*/);
+			theApp.downloadqueue->StartNextFile(rightclickindex,true);
 			break;
 		}
 		//Commander - Fixed: Resume Next File - End

@@ -3,6 +3,7 @@ Changelog for eMule 0.43b MorphXT v4.x
 --------------------------------------
 FIXED  : Resource ID [SiRoB]
 FIXED  : minor gui display bug arround the category priority [SiRoB]
+FIXED  : Definitly fixed the Resume Next in the category context menu, this is not anymore a globaly Resume Next but a per-category resume [SiRoB]
 
 CHANGED: Removed the "..." and change the tree in Morph preferency [SiRoB]
 

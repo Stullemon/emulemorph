@@ -255,7 +255,7 @@ bool CDownloadQueue::StartNextFile(int cat , bool force){
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->GetStatus() == PS_PAUSED)
 		{
-			if (!force && (thePrefs.StartNextFile()==3 || thePrefs.GetCategory(cur_file->GetCategory())->bResumeFileOnlyInSameCat) && cur_file->GetCategory()!=cat && cat!=-1) //MORPH START - Added by SiRoB, Resume file only in the same category
+			if ((force || thePrefs.StartNextFile()==3 || thePrefs.GetCategory(cur_file->GetCategory())->bResumeFileOnlyInSameCat) && cur_file->GetCategory()!=cat && cat!=-1) //MORPH START - Added by SiRoB, Resume file only in the same category
 				continue;
 			if (!pfile) {
 				pfile = cur_file;
