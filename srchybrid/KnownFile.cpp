@@ -709,7 +709,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename)
 
 	// open file
 	CString namebuffer;
-	namebuffer.Format("%s%s", in_directory, in_filename);
+	namebuffer.Format("%s\\%s", in_directory, in_filename);
 	SetFilePath(namebuffer);
 	FILE* file = fopen(namebuffer, "rbS");
 	if (!file){
