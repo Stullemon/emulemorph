@@ -58,7 +58,7 @@ CServer::CServer(uint16 in_port, char* i_addr){
 	taglist = new CTypedPtrList<CPtrList, CTag*>;
 	port = in_port;
 	tagcount = 0;
-	if (inet_addr(i_addr) == INADDR_NONE){
+	if (inet_addr(i_addr) == INADDR_NONE && strcmp(i_addr, "255.255.255.255") != 0){//bluecow patch
 		dynip = nstrdup(i_addr);
 		ip = 0;
 	}
