@@ -31,6 +31,19 @@ static char THIS_FILE[] = __FILE__;
 
 #define	NO_FLAG	65535
 
+CString FirstCharCap(CString target){
+
+	target.TrimRight();//clean out the space at the end, prevent exception for index++
+	if(target.IsEmpty()) return "";
+	target.MakeLower();
+	target.SetAt(0, target.Left(1).MakeUpper().GetAt(0));
+	for(int index = target.Find(' '); index != -1; index = target.Find(' ', index)){
+		index++;//set the character next to space be Upper
+		target.SetAt(index, target.Mid(index, 1).MakeUpper().GetAt(0));
+	}
+	return target;
+}
+
 CIP2Country::CIP2Country()
 {
 	defaultIP2Country.IPstart = 0;
@@ -115,16 +128,7 @@ bool CIP2Country::LoadFromFile(){
 				}
 				
 				//tempStr[4] is full country name, capitalize country name from rayita
-				int index;
-				index = 0;
-				tempStr[4].TrimRight();
-				tempStr[4].MakeLower();
-				tempStr[4].SetAt(0, tempStr[4].Left(1).MakeUpper().GetAt(0));
-				index = tempStr[4].Find(' ');
-				if(index != -1){
-					index++;
-					tempStr[4].SetAt(index, tempStr[4].Mid(index, 1).MakeUpper().GetAt(0));
-				}
+				tempStr[4] = FirstCharCap(tempStr[4]);
 
 				count++;
 				AddIPRange(atoi(tempStr[0]),atoi(tempStr[1]), tempStr[2], tempStr[3], tempStr[4]);
