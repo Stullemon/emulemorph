@@ -677,8 +677,9 @@ bool CUploadQueue::AcceptNewClient(uint32 numberOfUploads){
 		return false;
 
 	//now the final check
-    if (numberOfUploads < GetDatarate()/2500 ||
-        GetDatarate() < 2500*2 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
+    	//now the final check
+    if (numberOfUploads < (GetDatarate()/UPLOAD_CLIENT_DATARATE)+3 ||
+        GetDatarate() < 2400*3 && numberOfUploads < GetDatarate()/UPLOAD_CLIENT_DATARATE)
 			return true;
 //	}
 	//nope
