@@ -259,6 +259,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if ((IsFriend()) && (theApp.glob_prefs->IsBoostFriends()) && (theApp.glob_prefs->UseCreditSystem()) && ((credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED) || theApp.glob_prefs->GetEnableAntiCreditHack() || ((!IsEmuleClient()) && (GetSourceExchangeVersion()==0)))) //MORPH - Added by IceCream, only boost for secured friend
 		fBaseValue *=1.5f;
 	//MORPH END - Added by Yun.SF3, boost friend
+
 	if (!isdownloading && !onlybasevalue){
 		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
 			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
@@ -909,6 +910,34 @@ void CUpDownClient::SendRankingInfo(){
 	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true,true);
 }
+
+/* Name:     IsCommunity
+   Function: Test if client is community member
+   Return:   true  - if one of the community tags occur in the name of the actual client
+					 and community sharing is enabled
+			 false - otherwise
+   Remarks:  All strings will be treated case-insensitive. There can be more than one
+			 community tag in the community tag string - all these strings must be separated
+			 by "|". Spaces around community tags are trimmed.
+   Author:   Mighty Knife
+*/
+bool CUpDownClient::IsCommunity() const {
+	if (!theApp.glob_prefs->IsCommunityEnabled()) return false;
+	CString ntemp = m_pszUsername;
+	ntemp.MakeLower ();
+	CString ctemp = theApp.glob_prefs->GetCommunityName(); 
+	ctemp.MakeLower ();
+	bool isCom = false;
+// The different community tags are separated by "|", so we have to extract each
+// before testing if it's contained in the username.
+	int p=0;
+	do {
+		CString tag = ctemp.Tokenize ("|",p).Trim ();
+		if (tag != "") isCom = ntemp.Find (tag) >= 0;
+	} while ((!isCom) && (p >= 0));
+	return isCom;
+}
+// [end] Mighty Knife
 
 void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
 {
