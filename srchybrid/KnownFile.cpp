@@ -2456,8 +2456,14 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 void CKnownFile::SetPowerShared(int newValue) {
     int oldValue = m_powershared;
     m_powershared = newValue;
-    if(theApp.uploadqueue && oldValue != newValue)
-        theApp.uploadqueue->ReSortUploadSlots(true);
+	if(theApp.uploadqueue && oldValue != newValue)
+	{
+		if (IsPartFile())
+			((CPartFile*)this)->UpdatePartsInfo();
+		else
+			UpdatePartsInfo();
+		theApp.uploadqueue->ReSortUploadSlots(true);
+	}
 }
 
 void CKnownFile::UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare, bool limitedpowershare)
