@@ -3,6 +3,7 @@ FIXED  : Various display bugs. [MightyKnife]
 FIXED  : Possible "Divide by 0"-crash. [MightyKnife]
 FIXED  : Renaming existing CRC32 to uppercase only worked for the first 4 characters in Unicode built. [MightyKnife]
 FIXED  : Improper treatment of sets of empty parameters in preferences.ini. [MightyKnife]
+FIXED  : Oscop mouse cursor fix by apph [SiRoB]
 
 ADDED  : Backup of config-folder, update of fakes.dat and update of ipfilter.dat can be scheduled. [MightyKnife]
 
