@@ -84,9 +84,9 @@ CUploadQueue::CUploadQueue()
 	*/
     m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	memzero(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass,sizeof(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass));
-	memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
-	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate));
+	memset(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass,0,sizeof(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass));
+	memset(m_aiSlotCounter,0,sizeof(m_aiSlotCounter));
+	memset(m_abOnClientOverHideClientDatarate,0,sizeof(m_abOnClientOverHideClientDatarate));
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
 	m_MaxActiveClients = 0;
 	m_MaxActiveClientsShortTime = 0;
@@ -825,7 +825,7 @@ void CUploadQueue::Process() {
 	UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
+	memset(m_aiSlotCounter,0,sizeof(m_aiSlotCounter));
 	POSITION pos2 = uploadinglist.GetHeadPosition();
 	while(pos2 != NULL){
 		// Get the client. Note! Also updates pos as a side effect.
@@ -987,7 +987,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
 	/*
 	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1) && datarate < 102400 )
     */
-	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(1))
+	if (::GetTickCount() - m_nLastStartUpload < SEC2MS(3))
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 		return false;
 	
@@ -1001,7 +1001,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
             curUploadSlotsReal--;
         }
     }
-
+	else //MORPH - Added by SiRoB, -Fix-
     if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
 		return true;
 
@@ -1016,7 +1016,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot) {
     }
 
     if(curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall /*+1*/ ||
-       curUploadSlots < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
+       curUploadSlots+1 < m_iHighestNumberOfFullyActivatedSlotsSinceLastCall/*+1*/ && ::GetTickCount() - m_nLastStartUpload > SEC2MS(10)) {
 		return true;
     }
 
