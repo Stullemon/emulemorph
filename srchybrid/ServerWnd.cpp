@@ -186,7 +186,7 @@ BOOL CServerWnd::OnInitDialog()
 	AddAnchor(IDC_FEEDUPDATE, MIDDLE_RIGHT);
 	AddAnchor(IDC_FEEDLIST, MIDDLE_LEFT, MIDDLE_RIGHT);
 	//MORPH END   - Added by SiRoB, XML News [O²]
-
+	
 	if (servermsgbox->m_hWnd)
 		AddAnchor(*servermsgbox, CSize(0,50), BOTTOM_RIGHT);
 	debug = true;
@@ -407,6 +407,7 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_NOTIFY(EN_LINK, 124, OnEnLinkNewsBox)
 	ON_BN_CLICKED(IDC_FEEDUPDATE, DownloadFeed)
 	ON_LBN_SELCHANGE(IDC_FEEDLIST, OnFeedListSelChange)
+	ON_CBN_DROPDOWN(IDC_FEEDLIST, ListFeeds)
 	//MORPH END   - Added by SiRoB, XML News [O²]
 END_MESSAGE_MAP()
 
@@ -738,37 +739,8 @@ void CServerWnd::ToggleDebugWindow()
 		StatusSelector.InsertItem(StatusSelector.GetItemCount(),&newitem);
 		debug = true;
 	}
-	RedrawFeedList();
 	//MORPH END   - Changed by SiRoB, XML News [O²]
 }
-
-//MORPH START - Added by SiRoB, XML News [O²]
-void CServerWnd::RedrawFeedList(){
-	if (news) {
-		uint8 verbose;
-		if (debug)
-			verbose = 3;
-		else
-			verbose = 2;
-		CRect rectab, rectlist, rectgo;
-		StatusSelector.GetItemRect(verbose,rectab);
-		GetDlgItem(IDC_FEEDLIST)->GetWindowRect(rectlist);
-		ScreenToClient(rectlist);
-		GetDlgItem(IDC_FEEDUPDATE)->GetWindowRect(rectgo);
-		ScreenToClient(rectgo);
-		rectlist.left = rectab.right + 20;
-		rectlist.right = rectgo.left - 10 ;
-		GetDlgItem(IDC_FEEDLIST)->MoveWindow(rectlist, true);
-	}
-}
-
-LRESULT CServerWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam) 
-{
-	if ((message == WM_PAINT) && (m_feedlist))
-		RedrawFeedList();
-	return CResizableDialog::DefWindowProc(message, wParam, lParam);
-}
-//MORPH START - Added by SiRoB, XML News [O²]
 
 void CServerWnd::UpdateMyInfo() {
 	CString buffer;
@@ -1087,6 +1059,7 @@ void CServerWnd::ListFeeds()
 {
 	while (m_feedlist.GetCount()>0)
 		m_feedlist.DeleteString(0);
+	aFeedUrls.RemoveAll();
 	int counter=0;
 	CString sbuffer;
 	char buffer[1024];
@@ -1129,58 +1102,22 @@ void CServerWnd::DownloadFeed()
 	int numero = m_feedlist.GetCurSel();
 	CString strURL = aFeedUrls.GetAt(numero);
 	CString strTempFilename; 
-	CString strTempFilenameToNormalize; // Format XML by bzubzu
 	strTempFilename.Format("%s%d.xml",thePrefs.GetFeedsDir(),numero);
-	strTempFilenameToNormalize.Format("%s%d.xmltmp",thePrefs.GetFeedsDir(),numero); // Format XML by bzubzu
-	FILE* readFileToNormalize = fopen(strTempFilenameToNormalize, "r");
-	if (readFileToNormalize!=NULL)
+	FILE* readFile = fopen(strTempFilename, "r");
+	if (readFile!=NULL)
 	{
-		fclose(readFileToNormalize);
-		remove(strTempFilenameToNormalize);
+		fclose(readFile);
+		remove(strTempFilename);
 	}
-	readFileToNormalize = fopen(strTempFilenameToNormalize, "r");
+	readFile = fopen(strTempFilename, "r");
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_sURLToDownload = strURL;
-	dlgDownload.m_sFileToDownloadInto = strTempFilenameToNormalize;
+	dlgDownload.m_sFileToDownloadInto = strTempFilename;
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		theApp.emuledlg->AddLogLine(true, "Error downloading %s", strURL);
 		return;
 	}
-	// Format XML by bzubzu
-	FILE* writeFile = fopen(strTempFilename, "w");
-	readFileToNormalize = fopen(strTempFilenameToNormalize, "r");
-	if (writeFile!=NULL)
-	{
-		fclose(writeFile);
-		remove(strTempFilename);
-	}
-	writeFile = fopen(strTempFilename, "w");
-	int ch;
-	while (!feof(readFileToNormalize)){
-		ch = fgetc( readFileToNormalize );
-		switch ((char)ch){
-			case 'é': //&eacute;
-				fputs( "&eacute;", writeFile );
-				break;
-			case 'è': //&egrave;
-				fputs( "&egrave;", writeFile );
-				break;
-			case 'ç': //&ccedil;
-				fputs( "&ccedil;", writeFile );
-				break;
-			case 'à': //&agrave;
-				fputs( "&agrave;", writeFile );
-				break;
-			default:
-				putc(ch, writeFile);
-				break;
-		}
-	}
-	fclose(writeFile);
-	fclose(readFileToNormalize);
-	remove(strTempFilenameToNormalize);
-	// END Format XML by bzubzu
 	ParseNewsFile(strTempFilename);
 }
 

@@ -38,9 +38,6 @@ public:
 	void Localize();
 	bool UpdateServerMetFromURL(CString strURL);
 	void ToggleDebugWindow();
-	//MORPH START - Added by SiRoB, XML News [O²]
-	void RedrawFeedList(); // eMule O² Bzubzu
-	//MORPH END   - Added by SiRoB, XML News [O²]
 	void UpdateMyInfo();
 	void UpdateLogTabSelection();
 	void SaveAllSettings();
@@ -96,9 +93,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	//MORPH START - Added by SiRoB, XML News [O²]	
-	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-	//MORPH END   - Added by SiRoB, XML News [O²]
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedAddserver();
 	afx_msg void OnBnClickedUpdateservermetfromurl();
