@@ -387,6 +387,7 @@ bool CUpDownClient::IsSecure() const
 * @return true if the requested file has release priority
 */
 bool CUpDownClient::GetPowerShared() const {
+	if(!IsSecure()) return false;
 	//MORPH START - Changed by SiRoB, Keep PowerShare State when client have been added in uploadqueue
 	bool bPowerShared;
 	if (GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
