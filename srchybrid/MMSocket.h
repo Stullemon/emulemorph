@@ -142,6 +142,8 @@ private:
 #define MMP_FINISHEDANS		0x22
 #define MMP_CHANGELIMIT		0x23
 #define MMP_CHANGELIMITANS	0x24
+#define MMP_STATISTICSREQ	0x25
+#define MMP_STATISTICSANS	0x26
 
 // tags
 #define	MMT_OK				0x01
@@ -175,5 +177,5 @@ private:
 #define MMT_PARTFILFE		0x01
 #define MMT_FINISHEDFILE	0x02
 
-#define MM_VERSION			0x6b
-#define MM_STRVERSION		"0.6b"
+#define MM_VERSION			0x7a
+#define MM_STRVERSION		"0.7a"

@@ -197,7 +197,8 @@ static const struct {
 	{ 0x13,					_T("Priority") },
 	{ FT_STATUS,			_T("Status") },
 	{ FT_SOURCES,			_T("Availability") },
-	{ 0x16,					_T("QTime") },
+	//{ 0x16,				_T("QTime") },
+	{ 0x16,					_T("Permission") },	// though not (never) used, this will be found in almost all known.met files
 	{ 0x17,					_T("Parts") },
 	{ FT_MEDIA_ARTIST,		_T("Artist") },
 	{ FT_MEDIA_ALBUM,		_T("Album") },

@@ -34,7 +34,7 @@ private:
 	bool	   m_bFlushed;
 public:
     
-    CMemDC(CDC* pDC, const CRect* pRect = NULL) : CDC()
+	CMemDC(CDC* pDC, LPCRECT pRect = NULL) : CDC()
     {
         ASSERT(pDC != NULL); 
  

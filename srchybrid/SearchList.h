@@ -24,7 +24,7 @@ class CSearchFile : public CAbstractFile
 	friend class CSearchListCtrl;
 public:
 	CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP=0, uint16 nServerPort=0, LPCTSTR pszDirectory = NULL, bool nKademlia = false);
-	CSearchFile(CSearchFile* copyfrom);
+	CSearchFile(const CSearchFile* copyfrom);
 	CSearchFile(uint32 nSearchID, const uchar* pucFileHash, uint32 uFileSize, LPCTSTR pszFileName, int iFileType, int iAvailability);
 	~CSearchFile();
 
@@ -69,8 +69,8 @@ public:
 		uint16 m_nPort;
 		uint16 m_nServerPort;
 	};
-	void AddClient(SClient& client) { m_aClients.Add(client); }
-	const CSimpleArray<SClient>& GetClients() { return m_aClients; }
+	void AddClient(const SClient& client) { m_aClients.Add(client); }
+	const CSimpleArray<SClient>& GetClients() const { return m_aClients; }
 
 	struct SServer {
 		SServer() {
@@ -86,13 +86,13 @@ public:
 		uint16 m_nPort;
 		UINT   m_uAvail;
 	};
-	void AddServer(SServer& server) { m_aServers.Add(server); }
+	void AddServer(const SServer& server) { m_aServers.Add(server); }
 	const CSimpleArray<SServer>& GetServers() const { return m_aServers; }
-	SServer& GetServer(int iServer) { return m_aServers[iServer]; }
+	SServer& GetServerAt(int iServer) { return m_aServers[iServer]; }
 	
 	void	AddPreviewImg(CxImage* img)	{	m_listImages.Add(img); }
-	const CSimpleArray<CxImage*>& GetPreviews() { return m_listImages; }
-	bool	IsPreviewPossible()			{ return m_bPreviewPossible;}
+	const CSimpleArray<CxImage*>& GetPreviews() const { return m_listImages; }
+	bool	IsPreviewPossible() const { return m_bPreviewPossible;}
 	void	SetPreviewPossible(bool in)	{ m_bPreviewPossible = in; }
 
 private:
@@ -107,11 +107,11 @@ private:
 	CSimpleArray<CxImage*> m_listImages;
 	LPSTR m_pszDirectory;
 	LPSTR m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+
+	bool		 m_bPreviewPossible;
 	bool		 m_list_bExpanded;
 	uint16		 m_list_childcount;
 	CSearchFile* m_list_parent;
-	bool		 m_bPreviewPossible;
-
 };
 
 __inline bool __stdcall operator==(const CSearchFile::SServer& s1, const CSearchFile::SServer& s2)

@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <io.h>
 #include "emule.h"
 #include "loggable.h"
 #include "OtherFunctions.h"
@@ -175,9 +176,12 @@ bool CLog::Open()
 	if (m_fp != NULL)
 		return true;
 
-	m_fp = fopen(m_strFilePath, "at");
+	m_fp = fopen(m_strFilePath, "ab");
 	if (m_fp != NULL)
+	{
 		m_tStarted = time(NULL);
+		m_uBytesWritten = _filelength(fileno(m_fp));
+	}
 	return m_fp != NULL;
 }
 

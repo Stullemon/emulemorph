@@ -64,10 +64,12 @@ CDownloadQueue::CDownloadQueue(CPreferences* in_prefs,CSharedFileList* in_shared
 	m_nDownDataOverheadFileRequest = 0;
 	m_nDownDataOverheadOther = 0;
 	m_nDownDataOverheadServer = 0;
+	m_nDownDataOverheadKad = 0;
 	m_nDownDataOverheadSourceExchangePackets = 0;
 	m_nDownDataOverheadFileRequestPackets = 0;
 	m_nDownDataOverheadOtherPackets = 0;
 	m_nDownDataOverheadServerPackets = 0;
+	m_nDownDataOverheadKadPackets = 0;
 	sumavgDDRO = 0;
 	//m_lastRefreshedDLDisplay = 0;
 	m_dwNextTCPSrcReq = 0;
@@ -804,24 +806,28 @@ void CDownloadQueue::AddDownload(CPartFile* newfile,bool paused) {
 	theApp.emuledlg->ShowNotifier(msgTemp, TBN_DLOADADDED);
 }
 
-bool CDownloadQueue::IsFileExisting(const uchar* fileid){
-	CKnownFile* file = sharedfilelist->GetFileByID(fileid);
+bool CDownloadQueue::IsFileExisting(const uchar* fileid, bool bLogWarnings)
+{
+	const CKnownFile* file = sharedfilelist->GetFileByID(fileid);
 	if (file){
-		if (file->IsPartFile())
-			AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName() );
-		else
-			AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADED), file->GetFileName() );
+		if (bLogWarnings){
+			if (file->IsPartFile())
+				AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName() );
+			else
+				AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADED), file->GetFileName() );
+		}
 		return true;
 	}
-	else if ((file = this->GetFileByID(fileid)) != NULL){
-		AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName() );
+	else if ((file = GetFileByID(fileid)) != NULL){
+		if (bLogWarnings)
+			AddLogLine(true, GetResString(IDS_ERR_ALREADY_DOWNLOADING), file->GetFileName() );
 		return true;
 	}
 	return false;
 }
 
 
- //MORPH - Added by Yun.SF3, ZZ Upload System
+//MORPH - Added by Yun.SF3, ZZ Upload System
 void CDownloadQueue::Process(){
 	
 	ProcessLocalRequests(); // send src requests to local server
@@ -880,8 +886,8 @@ void CDownloadQueue::Process(){
            if(downspeed == 0 || tempDownspeed < downspeed) {
                 downspeed = tempDownspeed;
                 //theApp.emuledlg->AddLogLine(true, "Limiting downspeed");
-            }
-	}
+		   }
+		   }
 
         // has this client downloaded more than it has uploaded this session? (friends included)
         // then limit its download speed from all friends
@@ -1256,7 +1262,7 @@ bool CDownloadQueue::SendGlobGetSourcesUDPPacket(CSafeMemFile* data)
 	{
 		ASSERT( data->GetLength() > 0 && data->GetLength() % 16 == 0 );
 		int iFileIDs = data->GetLength() / 16;
-		if (theApp.glob_prefs->GetDebugServerUDP())
+		if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 			Debug(">>> Sending OP__GlobGetSources to server(#%02x) %-15s (%3u of %3u); FileIDs=%u\n", cur_udpserver->GetUDPFlags(), cur_udpserver->GetAddress(), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFileIDs);
 		Packet packet(data);
 		packet.opcode = OP_GLOBGETSOURCES;
@@ -1331,7 +1337,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 						if (cur_udpserver == NULL)
 						{
 							// finished asking all servers for all files
-							if (theApp.glob_prefs->GetDebugServerUDP() && theApp.glob_prefs->GetDebugServerSources())
+							if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0 && theApp.glob_prefs->GetDebugServerSourcesLevel() > 0)
 								Debug("Finished UDP search processing for all servers (%u)\n", theApp.serverlist->GetServerCount());
 
 							lastudpsearchtime = ::GetTickCount();
@@ -1367,7 +1373,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 		{
 			dataGlobGetSources.Write(nextfile->GetFileHash(), 16);
 			iFiles++;
-			if (theApp.glob_prefs->GetDebugServerUDP() && theApp.glob_prefs->GetDebugServerSources())
+			if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0 && theApp.glob_prefs->GetDebugServerSourcesLevel() > 0)
 				Debug(">>> Sending OP__GlobGetSources to server(#%02x) %-15s (%3u of %3u); Buff  %u=%s\n", cur_udpserver->GetUDPFlags(), cur_udpserver->GetAddress(), m_iSearchedServers + 1, theApp.serverlist->GetServerCount(), iFiles, DbgGetFileInfo(nextfile->GetFileHash()));
 		}
 	}
@@ -1381,7 +1387,7 @@ bool CDownloadQueue::SendNextUDPPacket()
 	// if we have more than 35 files, we rotate the list and use it as queue
 	if (m_cRequestsSentToServer >= MAX_REQUESTS_PER_SERVER)
 	{
-		if (theApp.glob_prefs->GetDebugServerUDP() && theApp.glob_prefs->GetDebugServerSources())
+		if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0 && theApp.glob_prefs->GetDebugServerSourcesLevel() > 0)
 			Debug("Rotating file list\n");
 
 		// move the last 35 files to the head
@@ -1885,7 +1891,7 @@ void CDownloadQueue::ProcessLocalRequests()
 				// create request packet
 				Packet* packet = new Packet(OP_GETSOURCES,16);
 				md4cpy(packet->pBuffer,cur_file->GetFileHash());
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug(">>> Sending OP__GetSources(%2u/%2u); %s\n", iFiles, iMaxFilesPerTcpFrame, DbgGetFileInfo(cur_file->GetFileHash()));
 				dataTcpFrame.Write(packet->GetPacket(), packet->GetRealPacketSize());
 				delete packet;
@@ -1903,8 +1909,8 @@ void CDownloadQueue::ProcessLocalRequests()
 			Packet* packet = new Packet(new char[iSize], dataTcpFrame.GetLength(), true, false);
 			dataTcpFrame.Seek(0, CFile::begin);
 			dataTcpFrame.Read(packet->GetPacket(), iSize);
-			theApp.serverconnect->SendPacket(packet, true);
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
+			theApp.serverconnect->SendPacket(packet, true);
 		}
 
 		// next TCP frame with up to 15 source requests is allowed to be sent in..
@@ -2084,3 +2090,14 @@ void CDownloadQueue::BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cc
 	pszBuff[1023] = '\n';
 }
 // END enkeyDEV(ColdShine) -PartfileNameRecovery-
+//MORPH START - Added by SiRoB, ZZ Ratio
+bool CDownloadQueue::IsFilesPowershared()
+{
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;filelist.GetNext(pos)){
+		CPartFile* cur_file =  filelist.GetAt(pos);
+		if (cur_file->IsPartFile() && cur_file->GetPowerSharedMode()==1)
+			return true;
+	}
+	return false;
+}
+//MORPH END   - Added by SiRoB, ZZ Ratio

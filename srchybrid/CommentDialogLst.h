@@ -14,7 +14,7 @@ public:
 	CCommentDialogLst(); 
 	virtual ~CCommentDialogLst(); 
 
-	void SetMyfile(CPartFile* file)	{m_file=file;}
+	void SetMyfile(/*const*/ CPartFile* file) {m_file=file;}
 
 // Dialog Data 
 	enum { IDD = IDD_COMMENTLST }; 
@@ -22,7 +22,7 @@ public:
 protected: 
 	CString m_strCaption;
 	CListCtrl pmyListCtrl;
-	CPartFile* m_file; 
+	/*const*/ CPartFile* m_file;
 
 	void Localize(); 
 	void CompleteList(); 

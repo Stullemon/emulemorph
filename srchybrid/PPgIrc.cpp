@@ -47,8 +47,8 @@ void CPPgIRC::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPPgIRC, CPropertyPage)
 	ON_BN_CLICKED(IDC_IRC_TIMESTAMP, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_USECHANFILTER, OnSettingsChange)
-	ON_BN_CLICKED(IDC_IRC_USEPERFORM, OnSettingsChange)
+	ON_BN_CLICKED(IDC_IRC_USECHANFILTER, OnBtnClickPerform)
+	ON_BN_CLICKED(IDC_IRC_USEPERFORM, OnBtnClickPerform)
 	ON_BN_CLICKED(IDC_IRC_ACCEPTLINKS, OnSettingsChange)
 	ON_BN_CLICKED(IDC_IRC_ACCEPTLINKSFRIENDS, OnSettingsChange)
 	ON_BN_CLICKED(IDC_IRC_INFOMESSAGE, OnSettingsChange)
@@ -75,6 +75,10 @@ BOOL CPPgIRC::OnInitDialog()
 	LoadSettings();
 	Localize();
 	m_bnickModified = false;
+
+	GetDlgItem(IDC_IRC_PERFORM_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USEPERFORM) );
+	GetDlgItem(IDC_IRC_NAME_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
+	GetDlgItem(IDC_IRC_MINUSER_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -234,4 +238,12 @@ void CPPgIRC::Localize(void)
 		GetDlgItem(IDC_IRC_EMULEPROTO_INFOMESSAGE)->SetWindowText(GetResString(IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE));
 		GetDlgItem(IDC_IRC_HELPCHANNEL)->SetWindowText(GetResString(IDS_IRC_HELPCHANNEL));
 	}
+}
+
+void CPPgIRC::OnBtnClickPerform() {
+	SetModified();
+	GetDlgItem(IDC_IRC_PERFORM_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USEPERFORM) );
+
+	GetDlgItem(IDC_IRC_NAME_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
+	GetDlgItem(IDC_IRC_MINUSER_BOX)->EnableWindow( IsDlgButtonChecked(IDC_IRC_USECHANFILTER) );
 }

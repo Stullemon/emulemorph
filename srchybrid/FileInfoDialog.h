@@ -30,14 +30,14 @@ public:
 	CFileInfoDialog();   // standard constructor
 	virtual ~CFileInfoDialog();
 
-	void SetMyfile(CKnownFile* file) {m_file=file;}
+	void SetMyfile(const CKnownFile* file) {m_file=file;}
 
 // Dialog Data
 	enum { IDD = IDD_FILEINFO };
 
 protected:
 	CString m_strCaption;
-	CKnownFile* m_file;
+	const CKnownFile* m_file;
 	long m_lAudioBitrate;
 	BOOL m_bAudioRoundBitrate;
 	CRichEditCtrlX m_fi;

@@ -28,6 +28,7 @@
 #include "TransferWnd.h"
 #include "ChatWnd.h"
 #include "SharedFilesWnd.h"
+#include "KademliaWnd.h"
 #include "IrcWnd.h"
 
 #ifdef _DEBUG
@@ -65,7 +66,7 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_ED2KFIX, OnBnClickedEd2kfix)
 	ON_BN_CLICKED(IDC_WEBSVEDIT , OnBnClickedEditWebservices)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
-	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnSettingsChange)
+	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnBnClickedCheck4Update)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -140,6 +141,8 @@ BOOL CPPgGeneral::OnInitDialog()
 	
 	LoadSettings();
 	Localize();
+	GetDlgItem(IDC_CHECKDAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
+	GetDlgItem(IDC_DAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -171,6 +174,7 @@ BOOL CPPgGeneral::OnApply()
 			theApp.emuledlg->chatwnd->Localize();
 			theApp.emuledlg->Localize();
 			theApp.emuledlg->ircwnd->Localize();
+			theApp.emuledlg->kademliawnd->Localize();
 		}
 	}
 
@@ -251,7 +255,10 @@ void CPPgGeneral::OnLangChange()
 				strUrl.Format(MIRRORS_URL,nRand, VERSION_MJR, VERSION_MIN, VERSION_UPDATE, VERSION_BUILD);
 				strUrl += theApp.glob_prefs->GetLangDLLNameByID(byNewLang);
 				// safeto
-				CString strFilename = theApp.glob_prefs->GetLangDir() + theApp.glob_prefs->GetLangDLLNameByID(byNewLang);
+				CString strFilename = theApp.glob_prefs->GetLangDir();
+				if (!PathFileExists(strFilename))
+					CreateDirectory(strFilename,0);
+				strFilename.Append(theApp.glob_prefs->GetLangDLLNameByID(byNewLang));
 				// start
 				CHttpDownloadDlg dlgDownload;
 				dlgDownload.m_sURLToDownload = strUrl;
@@ -275,4 +282,11 @@ void CPPgGeneral::OnLangChange()
 		else
 			OnSettingsChange();
 	}
+}
+
+void CPPgGeneral::OnBnClickedCheck4Update()
+{
+	SetModified();
+	GetDlgItem(IDC_CHECKDAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
+	GetDlgItem(IDC_DAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE)?SW_SHOW:SW_HIDE );
 }

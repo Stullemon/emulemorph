@@ -291,6 +291,9 @@ void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData,
 					case MMP_CHANGELIMIT:
 						m_pOwner->ProcessChangeLimitRequest(&data,this);
 						break;
+					case MMP_STATISTICSREQ:
+						m_pOwner->ProcessStatisticsRequest(&data,this);
+						break;
 				}
 			}
 			catch(CFileException* error){

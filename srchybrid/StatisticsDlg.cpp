@@ -640,8 +640,17 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				stattree.SetItemText( down_S[7] , cbuffer );
 
 				// Calculate downline OH totals
-				DownOHTotal = theApp.downloadqueue->GetDownDataOverheadFileRequest() + theApp.downloadqueue->GetDownDataOverheadSourceExchange() + theApp.downloadqueue->GetDownDataOverheadServer() + theApp.downloadqueue->GetDownDataOverheadOther();
-				DownOHTotalPackets = theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + theApp.downloadqueue->GetDownDataOverheadServerPackets() + theApp.downloadqueue->GetDownDataOverheadOtherPackets();
+				DownOHTotal =	theApp.downloadqueue->GetDownDataOverheadFileRequest() + 
+								theApp.downloadqueue->GetDownDataOverheadSourceExchange() + 
+								theApp.downloadqueue->GetDownDataOverheadServer() + 
+								theApp.downloadqueue->GetDownDataOverheadKad() + 
+								theApp.downloadqueue->GetDownDataOverheadOther();
+				DownOHTotalPackets = 
+								theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + 
+								theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + 
+								theApp.downloadqueue->GetDownDataOverheadServerPackets() + 
+								theApp.downloadqueue->GetDownDataOverheadKadPackets() + 
+								theApp.downloadqueue->GetDownDataOverheadOtherPackets();
 
 				// Downline Overhead
 				cbuffer.Format( GetResString( IDS_TOVERHEAD ) , CastItoXBytes( DownOHTotal ) , CastItoIShort( DownOHTotalPackets ) );
@@ -655,7 +664,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					cbuffer.Format( GetResString( IDS_SSOVERHEAD ) , CastItoXBytes( theApp.downloadqueue->GetDownDataOverheadSourceExchange() ), CastItoIShort( theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() ) );
 					stattree.SetItemText( down_soh[i] , cbuffer ); i++;
 					// Set down session server OH
-					cbuffer.Format( GetResString( IDS_SOVERHEAD ) , CastItoXBytes( theApp.downloadqueue->GetDownDataOverheadServer() ), CastItoIShort( theApp.downloadqueue->GetDownDataOverheadServerPackets() ) );
+					cbuffer.Format(GetResString(IDS_SOVERHEAD),
+								   CastItoXBytes(theApp.downloadqueue->GetDownDataOverheadServer()), 
+								   CastItoIShort(theApp.downloadqueue->GetDownDataOverheadServerPackets()));
+					stattree.SetItemText( down_soh[i] , cbuffer ); i++;
+					// Set down session Kad OH
+					cbuffer.Format(GetResString(IDS_KADOVERHEAD),
+								   CastItoXBytes(theApp.downloadqueue->GetDownDataOverheadKad()), 
+								   CastItoIShort(theApp.downloadqueue->GetDownDataOverheadKadPackets()));
 					stattree.SetItemText( down_soh[i] , cbuffer ); i++;
 				}
 
@@ -793,8 +809,17 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				stattree.SetItemText( down_T[5] , cbuffer );
 
 				if (DownOHTotal == 0 || DownOHTotalPackets == 0) {
-					DownOHTotal = theApp.downloadqueue->GetDownDataOverheadFileRequest() + theApp.downloadqueue->GetDownDataOverheadSourceExchange() + theApp.downloadqueue->GetDownDataOverheadServer() + theApp.downloadqueue->GetDownDataOverheadOther();
-					DownOHTotalPackets = theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + theApp.downloadqueue->GetDownDataOverheadServerPackets() + theApp.downloadqueue->GetDownDataOverheadOtherPackets();
+					DownOHTotal =	theApp.downloadqueue->GetDownDataOverheadFileRequest() + 
+									theApp.downloadqueue->GetDownDataOverheadSourceExchange() + 
+									theApp.downloadqueue->GetDownDataOverheadServer() + 
+									theApp.downloadqueue->GetDownDataOverheadKad() + 
+									theApp.downloadqueue->GetDownDataOverheadOther();
+					DownOHTotalPackets = 
+									theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + 
+									theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + 
+									theApp.downloadqueue->GetDownDataOverheadServerPackets() + 
+									theApp.downloadqueue->GetDownDataOverheadKadPackets() + 
+									theApp.downloadqueue->GetDownDataOverheadOtherPackets();
 				}
 				// Total Overhead
 				cbuffer.Format(GetResString(IDS_TOVERHEAD),CastItoXBytes(DownOHTotal + theApp.glob_prefs->GetDownOverheadTotal()), CastItoIShort(DownOHTotalPackets + theApp.glob_prefs->GetDownOverheadTotalPackets()));
@@ -808,7 +833,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					cbuffer.Format(GetResString(IDS_SSOVERHEAD), CastItoXBytes( theApp.downloadqueue->GetDownDataOverheadSourceExchange()+theApp.glob_prefs->GetDownOverheadSrcEx()), CastItoIShort(theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets()+theApp.glob_prefs->GetDownOverheadSrcExPackets()));
 					stattree.SetItemText(down_toh[i], cbuffer); i++;
 					// Server Overhead
-					cbuffer.Format(GetResString(IDS_SOVERHEAD), CastItoXBytes( theApp.downloadqueue->GetDownDataOverheadServer()+theApp.glob_prefs->GetDownOverheadServer()), CastItoIShort(theApp.downloadqueue->GetDownDataOverheadServerPackets()+theApp.glob_prefs->GetDownOverheadServerPackets()));
+					cbuffer.Format(GetResString(IDS_SOVERHEAD), 
+								   CastItoXBytes(theApp.downloadqueue->GetDownDataOverheadServer() + 
+												 theApp.glob_prefs->GetDownOverheadServer()), 
+								   CastItoIShort(theApp.downloadqueue->GetDownDataOverheadServerPackets() +
+												 theApp.glob_prefs->GetDownOverheadServerPackets()));
+					stattree.SetItemText(down_toh[i], cbuffer); i++;
+					// Kad Overhead
+					cbuffer.Format(GetResString(IDS_KADOVERHEAD), 
+								   CastItoXBytes(theApp.downloadqueue->GetDownDataOverheadKad() + 
+												 theApp.glob_prefs->GetDownOverheadKad()), 
+								   CastItoIShort(theApp.downloadqueue->GetDownDataOverheadKadPackets() +
+												 theApp.glob_prefs->GetDownOverheadKadPackets()));
 					stattree.SetItemText(down_toh[i], cbuffer); i++;
 				}
 			} // - End Transfer -> Downloads -> Cumulative Section
@@ -979,8 +1015,16 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					stattree.SetItemText(up_ssessions[3], cbuffer);
 				}
 				// Calculate Upline OH Totals
-				UpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + theApp.uploadqueue->GetUpDataOverheadSourceExchange() + theApp.uploadqueue->GetUpDataOverheadServer() + theApp.uploadqueue->GetUpDataOverheadOther();
-				UpOHTotalPackets = theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + theApp.uploadqueue->GetUpDataOverheadServerPackets() + theApp.uploadqueue->GetUpDataOverheadOtherPackets();
+				UpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + 
+							theApp.uploadqueue->GetUpDataOverheadSourceExchange() + 
+							theApp.uploadqueue->GetUpDataOverheadServer() + 
+							theApp.uploadqueue->GetUpDataOverheadKad() + 
+							theApp.uploadqueue->GetUpDataOverheadOther();
+				UpOHTotalPackets = theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + 
+							theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + 
+							theApp.uploadqueue->GetUpDataOverheadServerPackets() + 
+							theApp.uploadqueue->GetUpDataOverheadKadPackets() + 
+							theApp.uploadqueue->GetUpDataOverheadOtherPackets();
 				// Total Upline Overhead
 				cbuffer.Format(GetResString(IDS_TOVERHEAD), CastItoXBytes( UpOHTotal), CastItoIShort(UpOHTotalPackets));
 				stattree.SetItemText(hup_soh, cbuffer);
@@ -993,7 +1037,14 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					cbuffer.Format(GetResString(IDS_SSOVERHEAD), CastItoXBytes( theApp.uploadqueue->GetUpDataOverheadSourceExchange()), CastItoIShort(theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets()));
 					stattree.SetItemText(up_soh[i], cbuffer); i++;
 					// Server Overhead
-					cbuffer.Format(GetResString(IDS_SOVERHEAD), CastItoXBytes( theApp.uploadqueue->GetUpDataOverheadServer()), CastItoIShort(theApp.uploadqueue->GetUpDataOverheadServerPackets()));
+					cbuffer.Format(GetResString(IDS_SOVERHEAD), 
+								   CastItoXBytes(theApp.uploadqueue->GetUpDataOverheadServer()), 
+								   CastItoIShort(theApp.uploadqueue->GetUpDataOverheadServerPackets()));
+					stattree.SetItemText(up_soh[i], cbuffer); i++;
+					// Kad Overhead
+					cbuffer.Format(GetResString(IDS_KADOVERHEAD), 
+								   CastItoXBytes(theApp.uploadqueue->GetUpDataOverheadKad()), 
+								   CastItoIShort(theApp.uploadqueue->GetUpDataOverheadKadPackets()));
 					stattree.SetItemText(up_soh[i], cbuffer); i++;
 				}
 			} // - End Transfer -> Uploads -> Session Section
@@ -1136,8 +1187,16 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 
 				if (UpOHTotal == 0 || UpOHTotalPackets == 0) {
 					// Calculate Upline OH Totals
-					UpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + theApp.uploadqueue->GetUpDataOverheadSourceExchange() + theApp.uploadqueue->GetUpDataOverheadServer() + theApp.uploadqueue->GetUpDataOverheadOther();
-					UpOHTotalPackets = theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + theApp.uploadqueue->GetUpDataOverheadServerPackets() + theApp.uploadqueue->GetUpDataOverheadOtherPackets();
+					UpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + 
+								theApp.uploadqueue->GetUpDataOverheadSourceExchange() + 
+								theApp.uploadqueue->GetUpDataOverheadServer() + 
+								theApp.uploadqueue->GetUpDataOverheadKad() + 
+								theApp.uploadqueue->GetUpDataOverheadOther();
+					UpOHTotalPackets = theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + 
+								theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + 
+								theApp.uploadqueue->GetUpDataOverheadServerPackets() + 
+								theApp.uploadqueue->GetUpDataOverheadKadPackets() + 
+								theApp.uploadqueue->GetUpDataOverheadOtherPackets();
 				}
 				// Set Cumulative Total Overhead
 				cbuffer.Format(GetResString(IDS_TOVERHEAD),CastItoXBytes(UpOHTotal + theApp.glob_prefs->GetUpOverheadTotal()), CastItoIShort(UpOHTotalPackets + theApp.glob_prefs->GetUpOverheadTotalPackets()));
@@ -1151,7 +1210,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 					cbuffer.Format(GetResString(IDS_SSOVERHEAD), CastItoXBytes( theApp.uploadqueue->GetUpDataOverheadSourceExchange()+theApp.glob_prefs->GetUpOverheadSrcEx()), CastItoIShort(theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets()+theApp.glob_prefs->GetUpOverheadSrcExPackets()));
 					stattree.SetItemText(up_toh[i], cbuffer); i++;
 					// Set up total server OH
-					cbuffer.Format(GetResString(IDS_SOVERHEAD), CastItoXBytes( theApp.uploadqueue->GetUpDataOverheadServer()+theApp.glob_prefs->GetUpOverheadServer()), CastItoIShort(theApp.uploadqueue->GetUpDataOverheadServerPackets()+theApp.glob_prefs->GetUpOverheadServerPackets()));
+					cbuffer.Format(GetResString(IDS_SOVERHEAD), 
+								   CastItoXBytes(theApp.uploadqueue->GetUpDataOverheadServer()
+												 + theApp.glob_prefs->GetUpOverheadServer()), 
+								   CastItoIShort(theApp.uploadqueue->GetUpDataOverheadServerPackets()
+												 + theApp.glob_prefs->GetUpOverheadServerPackets()));
+					stattree.SetItemText(up_toh[i], cbuffer); i++;
+					// Set up total Kad OH
+					cbuffer.Format(GetResString(IDS_KADOVERHEAD), 
+								   CastItoXBytes(theApp.uploadqueue->GetUpDataOverheadKad() + 
+											     theApp.glob_prefs->GetUpOverheadKad()), 
+								   CastItoIShort(theApp.uploadqueue->GetUpDataOverheadKadPackets() + 
+												 theApp.glob_prefs->GetUpOverheadKadPackets()));
 					stattree.SetItemText(up_toh[i], cbuffer); i++;
 				}
 			} // - End Transfer -> Uploads -> Cumulative Section
@@ -1483,8 +1553,18 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						}
 
 						// Calculate Upline OH Totals
-						uint64 UpOHTotal = (uint64) (theApp.uploadqueue->GetUpDataOverheadFileRequest() + theApp.uploadqueue->GetUpDataOverheadSourceExchange() + theApp.uploadqueue->GetUpDataOverheadServer() + theApp.uploadqueue->GetUpDataOverheadOther()) * avgModifier[mx];
-						uint64 UpOHTotalPackets = (uint64) (theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + theApp.uploadqueue->GetUpDataOverheadServerPackets() + theApp.uploadqueue->GetUpDataOverheadOtherPackets()) * avgModifier[mx];
+						uint64 UpOHTotal = (uint64)(theApp.uploadqueue->GetUpDataOverheadFileRequest() + 
+													theApp.uploadqueue->GetUpDataOverheadSourceExchange() + 
+													theApp.uploadqueue->GetUpDataOverheadServer() + 
+													theApp.uploadqueue->GetUpDataOverheadKad() + 
+													theApp.uploadqueue->GetUpDataOverheadOther()
+												   ) * avgModifier[mx];
+						uint64 UpOHTotalPackets = (uint64)(theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + 
+														   theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + 
+														   theApp.uploadqueue->GetUpDataOverheadServerPackets() + 
+														   theApp.uploadqueue->GetUpDataOverheadKadPackets() + 
+														   theApp.uploadqueue->GetUpDataOverheadOtherPackets()
+														  ) * avgModifier[mx];
 
 						// Set Cumulative Total Overhead
 						cbuffer.Format(GetResString(IDS_TOVERHEAD),CastItoXBytes(UpOHTotal + ((uint64)theApp.glob_prefs->GetUpOverheadTotal() * avgModifier[mx])), CastItoIShort(UpOHTotalPackets + ((uint64)theApp.glob_prefs->GetUpOverheadTotalPackets() * avgModifier[mx])));
@@ -1498,7 +1578,22 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 							cbuffer.Format(GetResString(IDS_SSOVERHEAD), CastItoXBytes( (uint64) (theApp.uploadqueue->GetUpDataOverheadSourceExchange()+theApp.glob_prefs->GetUpOverheadSrcEx()) * avgModifier[mx]), CastItoIShort( (uint64) (theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets()+theApp.glob_prefs->GetUpOverheadSrcExPackets()) * avgModifier[mx]));
 							stattree.SetItemText(time_aap_up_oh[mx][i], cbuffer); i++;
 							// Set up total server OH
-							cbuffer.Format(GetResString(IDS_SOVERHEAD), CastItoXBytes( (uint64) (theApp.uploadqueue->GetUpDataOverheadServer()+theApp.glob_prefs->GetUpOverheadServer()) * avgModifier[mx]), CastItoIShort( (uint64) (theApp.uploadqueue->GetUpDataOverheadServerPackets()+theApp.glob_prefs->GetUpOverheadServerPackets()) * avgModifier[mx]));
+							cbuffer.Format(GetResString(IDS_SOVERHEAD), 
+										   CastItoXBytes((uint64)(theApp.uploadqueue->GetUpDataOverheadServer() + 
+														          theApp.glob_prefs->GetUpOverheadServer()
+																 ) * avgModifier[mx]), 
+										   CastItoIShort((uint64)(theApp.uploadqueue->GetUpDataOverheadServerPackets() + 
+																  theApp.glob_prefs->GetUpOverheadServerPackets()
+																 ) * avgModifier[mx]));
+							stattree.SetItemText(time_aap_up_oh[mx][i], cbuffer); i++;
+							// Set up total Kad OH
+							cbuffer.Format(GetResString(IDS_KADOVERHEAD), 
+										   CastItoXBytes((uint64)(theApp.uploadqueue->GetUpDataOverheadKad() + 
+																  theApp.glob_prefs->GetUpOverheadKad()
+																 ) * avgModifier[mx]), 
+										   CastItoIShort((uint64)(theApp.uploadqueue->GetUpDataOverheadKadPackets() + 
+																  theApp.glob_prefs->GetUpOverheadKadPackets()
+																 ) * avgModifier[mx]));
 							stattree.SetItemText(time_aap_up_oh[mx][i], cbuffer); i++;
 						}
 					} // - End Time Statistics -> Projected Averages -> Time Period -> Uploads Section
@@ -1625,8 +1720,17 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 						//MORPH END   - Changed by SiRoB, Khaos stats
 						stattree.SetItemText( time_aap_down[mx][5] , cbuffer );
 
-						uint64 DownOHTotal = theApp.downloadqueue->GetDownDataOverheadFileRequest() + theApp.downloadqueue->GetDownDataOverheadSourceExchange() + theApp.downloadqueue->GetDownDataOverheadServer() + theApp.downloadqueue->GetDownDataOverheadOther();
-						uint64 DownOHTotalPackets = theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + theApp.downloadqueue->GetDownDataOverheadServerPackets() + theApp.downloadqueue->GetDownDataOverheadOtherPackets();
+						uint64 DownOHTotal =	theApp.downloadqueue->GetDownDataOverheadFileRequest() + 
+												theApp.downloadqueue->GetDownDataOverheadSourceExchange() + 
+												theApp.downloadqueue->GetDownDataOverheadServer() + 
+												theApp.downloadqueue->GetDownDataOverheadKad() + 
+												theApp.downloadqueue->GetDownDataOverheadOther();
+						uint64 DownOHTotalPackets = 
+												theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + 
+												theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + 
+												theApp.downloadqueue->GetDownDataOverheadServerPackets() + 
+												theApp.downloadqueue->GetDownDataOverheadKadPackets() + 
+												theApp.downloadqueue->GetDownDataOverheadOtherPackets();
 						// Total Overhead
 						cbuffer.Format(GetResString(IDS_TOVERHEAD),CastItoXBytes( (uint64) (DownOHTotal + theApp.glob_prefs->GetDownOverheadTotal()) * avgModifier[mx]), CastItoIShort((uint64)(DownOHTotalPackets + theApp.glob_prefs->GetDownOverheadTotalPackets()) * avgModifier[mx]));
 						stattree.SetItemText(time_aap_down[mx][6], cbuffer);
@@ -1639,7 +1743,20 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 							cbuffer.Format(GetResString(IDS_SSOVERHEAD), CastItoXBytes( (uint64)(theApp.downloadqueue->GetDownDataOverheadSourceExchange()+theApp.glob_prefs->GetDownOverheadSrcEx()) * avgModifier[mx]), CastItoIShort((uint64)(theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets()+theApp.glob_prefs->GetDownOverheadSrcExPackets()) * avgModifier[mx]));
 							stattree.SetItemText(time_aap_down_oh[mx][i], cbuffer); i++;
 							// Server Overhead
-							cbuffer.Format(GetResString(IDS_SOVERHEAD), CastItoXBytes( (uint64)(theApp.downloadqueue->GetDownDataOverheadServer()+theApp.glob_prefs->GetDownOverheadServer()) * avgModifier[mx]), CastItoIShort((uint64)(theApp.downloadqueue->GetDownDataOverheadServerPackets()+theApp.glob_prefs->GetDownOverheadServerPackets()) * avgModifier[mx]));
+							cbuffer.Format(GetResString(IDS_SOVERHEAD), 
+										   CastItoXBytes((uint64)(theApp.downloadqueue->GetDownDataOverheadServer() +
+													     theApp.glob_prefs->GetDownOverheadServer()) * avgModifier[mx]), 
+										   CastItoIShort((uint64)(theApp.downloadqueue->GetDownDataOverheadServerPackets() + 
+														 theApp.glob_prefs->GetDownOverheadServerPackets()) * avgModifier[mx]));
+							stattree.SetItemText(time_aap_down_oh[mx][i], cbuffer); i++;
+							// Kad Overhead
+							cbuffer.Format(GetResString(IDS_KADOVERHEAD), 
+										   CastItoXBytes((uint64)(theApp.downloadqueue->GetDownDataOverheadKad() +
+													              theApp.glob_prefs->GetDownOverheadKad()
+																 ) * avgModifier[mx]), 
+										   CastItoIShort((uint64)(theApp.downloadqueue->GetDownDataOverheadKadPackets() + 
+														          theApp.glob_prefs->GetDownOverheadKadPackets()
+																 ) * avgModifier[mx]));
 							stattree.SetItemText(time_aap_down_oh[mx][i], cbuffer); i++;
 						}
 					} // - End Time Statistics -> Projected Averages -> Time Period -> Downloads Section
@@ -1657,7 +1774,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 	//								Who wants to stare at totally blank tree items?  ;)
 	if (forceUpdate || stattree.IsExpanded(h_clients)) {
  //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-/*		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkey;
+/*
+		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkey;
 		CMap<uint16, uint16, uint32, uint32>	clientVersionEDonkeyHybrid;
 		CMap<uint16, uint16, uint32, uint32>	clientVersionEMule;
 		CMap<uint16, uint16, uint32, uint32>	clientVersionLMule;
@@ -2251,7 +2369,7 @@ void CStatisticsDlg::CreateMyTree() {
 		for(int i = 0; i<4; i++) up_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), up_S[5]); //MORPH - Added by Yun.SF3, ZZ Upload System
 
 	hup_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_up_session);					// Upline Overhead (Session)
-		for(int i = 0; i<3; i++) up_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_soh);
+		for(int i = 0; i<ARRSIZE(up_soh); i++) up_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_soh);
 
 	h_up_total= stattree.InsertItem(GetResString(IDS_STATS_CUMULATIVE),9,9, h_upload);		// Cumulative Section (Uploads)
 	up_T[0]= stattree.InsertItem(GetResString(IDS_FSTAT_WAITING),h_up_total);				// Uploaded Data (Total)
@@ -2264,7 +2382,7 @@ void CStatisticsDlg::CreateMyTree() {
 	up_T[1]= stattree.InsertItem(GetResString(IDS_FSTAT_WAITING),h_up_total);				// Upload Sessions (Total)
 		for(int i = 0; i<4; i++) up_tsessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), up_T[1]);
 	hup_toh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_up_total);						// Upline Overhead (Total)
-		for(int i = 0; i<3; i++) up_toh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_toh);
+		for(int i = 0; i<ARRSIZE(up_toh); i++) up_toh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_toh);
 
 	h_download = stattree.InsertItem(GetResString(IDS_TW_DOWNLOADS), 7,7,h_transfer);	// Downloads Section
 	h_down_session= stattree.InsertItem(GetResString(IDS_STATS_SESSION),8,8, h_download);	// Session Section (Downloads)
@@ -2276,7 +2394,7 @@ void CStatisticsDlg::CreateMyTree() {
 		for(int i = 0; i<16; i++) down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
 		for(int i = 0; i<4; i++) down_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[4]);
 	hdown_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_session);				// Downline Overhead (Session)
-		for(int i = 0; i<3; i++) down_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_soh);
+		for(int i = 0; i<ARRSIZE(down_soh); i++) down_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_soh);
 
 	h_down_total= stattree.InsertItem(GetResString(IDS_STATS_CUMULATIVE),9,9, h_download);	// Cumulative Section (Downloads)
 	for(int i = 0; i<6; i++) down_T[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_down_total);
@@ -2286,7 +2404,7 @@ void CStatisticsDlg::CreateMyTree() {
 		for(int i = 0; i<2; i++) down_tpb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_tpb);
 		for(int i = 0; i<4; i++) down_tsessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_T[2]);
 	hdown_toh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_total);					// Downline Overhead (Total)
-		for(int i = 0; i<3; i++) down_toh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_toh);
+		for(int i = 0; i<ARRSIZE(down_toh); i++) down_toh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_toh);
 
 	h_connection = stattree.InsertItem(GetResString(IDS_FSTAT_CONNECTION),2,2);				// Connection Section
 		h_conn_session= stattree.InsertItem(GetResString(IDS_STATS_SESSION),8,8,h_connection);	// Session Section (Connection)
@@ -2326,7 +2444,7 @@ void CStatisticsDlg::CreateMyTree() {
 						time_aap_up_hd[x][2] = stattree.InsertItem(GetResString(IDS_STATS_DATASOURCE),time_aap_up[x][0]);					// Data Source Section
 					for(int i = 0; i<2; i++) time_aap_up_ds[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_up_hd[x][2]);
 					for(int i = 0; i<2; i++) time_aap_up_s[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_up[x][1]);
-					for(int i = 0; i<3; i++) time_aap_up_oh[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_up[x][2]);
+					for(int i = 0; i<4; i++) time_aap_up_oh[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_up[x][2]);
 
 				time_aap_hdown[x] = stattree.InsertItem(GetResString(IDS_TW_DOWNLOADS),7,7,time_aaph[x]);// Download Section
 					for(int i = 0; i<7; i++) time_aap_down[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING),time_aap_hdown[x]);
@@ -2335,7 +2453,7 @@ void CStatisticsDlg::CreateMyTree() {
 						time_aap_down_hd[x][1] = stattree.InsertItem(GetResString(IDS_PORT),time_aap_down[x][0]);								// Ports Section
 					for(int i = 0; i<2; i++) time_aap_down_dp[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down_hd[x][1]);
 					for(int i = 0; i<2; i++) time_aap_down_s[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down[x][2]);
-					for(int i = 0; i<3; i++) time_aap_down_oh[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down[x][6]);
+					for(int i = 0; i<4; i++) time_aap_down_oh[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down[x][6]);
 			}
 
 	h_clients = stattree.InsertItem(GetResString(IDS_CLIENTS),3,3);							// Clients Section

@@ -28,9 +28,9 @@ public:
 	virtual ~CUploadListCtrl();
 
 	void	Init();
-	void	AddClient(CUpDownClient* client);
-	void	RemoveClient(CUpDownClient* client);
-	void	RefreshClient(CUpDownClient* client);
+	void	AddClient(const CUpDownClient* client);
+	void	RemoveClient(const CUpDownClient* client);
+	void	RefreshClient(const CUpDownClient* client);
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	Localize();

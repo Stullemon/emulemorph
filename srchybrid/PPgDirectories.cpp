@@ -16,6 +16,8 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "emuledlg.h"
+#include "SharedFilesWnd.h"
 #include "PPgDirectories.h"
 #include "otherfunctions.h"
 #include "InputBox.h"
@@ -134,7 +136,7 @@ BOOL CPPgDirectories::OnApply()
 
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
-	theApp.sharedfiles->Reload();
+	theApp.emuledlg->sharedfileswnd->Reload();
 
 	if (testdirchanged.CompareNoCase(app_prefs->GetTempDir())!=0)
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));

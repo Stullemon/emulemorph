@@ -28,9 +28,9 @@ public:
 	virtual ~CQueueListCtrl();
 
 	void	Init();
-	void	AddClient(CUpDownClient* client, bool resetwait = true);
-	void	RemoveClient(CUpDownClient* client);
-	void	RefreshClient(CUpDownClient* client);
+	void	AddClient(/*const*/ CUpDownClient* client, bool resetwait = true);
+	void	RemoveClient(const CUpDownClient* client);
+	void	RefreshClient(const CUpDownClient* client);
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	Localize();

@@ -26,25 +26,26 @@ class PreviewDlg : public CDialog
 public:
 	PreviewDlg(CWnd* pParent = NULL);   // standard constructor
 	virtual ~PreviewDlg();
-	void	SetFile(CSearchFile* pFile)		{m_pFile = pFile; Show();}
+
+	void	SetFile(const CSearchFile* pFile) { m_pFile = pFile; Show(); }
 	void	Show();	
 // Dialog Data
 	enum { IDD = IDD_PREVIEWDIALOG };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	BOOL	OnInitDialog();
+	const CSearchFile* m_pFile;
+	uint16 m_nCurrentImage;
+	CStatic m_ImageStatic;
+	HICON m_icons[3];
+
 	void	ShowImage(sint16 nNumber);
-	void	OnClose();
+
+	virtual BOOL OnInitDialog();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-public:
+	afx_msg void OnClose();
 	afx_msg void OnBnClickedPvExit();
 	afx_msg void OnBnClickedPvNext();
 	afx_msg void OnBnClickedPvPrior();
-private:
-	CSearchFile*	m_pFile;
-	uint16			m_nCurrentImage;
-	CStatic			m_ImageStatic;
-	HICON			m_icons[3];
 };

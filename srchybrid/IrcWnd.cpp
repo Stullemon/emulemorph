@@ -1493,6 +1493,17 @@ void CIrcWnd::OnBnClickedChatsend()
 
 	if( !this->m_bConnected )
 		return;
+	if( send.Left(4) == "/hop" )
+	{
+		if( m_pCurrentChannel->name.Left(1) == "#" )
+		{
+			CString channel = m_pCurrentChannel->name;
+			m_pIrcMain->SendString( "PART " + channel );
+			m_pIrcMain->SendString( "JOIN " + channel );
+			return;
+		}
+		return;
+	}
 	if( send.Left(1) == "/" && send.Left(3) != "/me"){
 		if (send.Left(4) == "/msg"){
 			if( m_pCurrentChannel->type == 4 || m_pCurrentChannel->type == 5){
@@ -1560,7 +1571,8 @@ Channel* CIrcWnd::NewChannel( CString name, uint8 type ){
 	toadd->title = name;
 	toadd->type = type;
 	toadd->history_pos = 0;
-	if (type != 2){
+	if (type != 2)
+	{
 		CRect rcChannel;
 		serverChannelList.GetWindowRect(&rcChannel);
 		toadd->log.Create(WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rcChannel, this, (UINT)-1);
@@ -1577,7 +1589,14 @@ Channel* CIrcWnd::NewChannel( CString name, uint8 type ){
 	newitem.lParam = (LPARAM)toadd;
 	newitem.pszText = name.GetBuffer();
 	newitem.iImage = 1; // 'Message'
-	channelselect.InsertItem(channelselect.GetItemCount(),&newitem);
+	uint32 pos = channelselect.GetItemCount();
+	channelselect.InsertItem(pos,&newitem);
+	if(type == 4)
+	{
+		channelselect.SetCurSel(pos);
+		channelselect.SetCurFocus(pos);
+		OnTcnSelchangeTab2( NULL, NULL );
+	}
 	return toadd;
 }
 

@@ -80,7 +80,7 @@ public:
 
 protected:
 	virtual int	OnLayerCallback(const CAsyncSocketExLayer *pLayer, int nType, int nParam1, int nParam2);	// deadlake PROXYSUPPORT
-	virtual void	PacketReceived(Packet* packet) = 0;
+	virtual bool	PacketReceived(Packet* packet) = 0;
 	virtual void	OnError(int nErrorCode) = 0;
 	virtual void	OnClose(int nErrorCode);
 	virtual void	OnSend(int nErrorCode);	

@@ -49,7 +49,8 @@ static char THIS_FILE[]=__FILE__;
 CBarShader CUpDownClient::s_StatusBar(16);
 //MORPH - Changed by SiRoB, Advanced A4AF derivated from Khaos
 //void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat){ 
-void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bFlat){ 
+void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bFlat)
+{ 
 	COLORREF crBoth; 
 	COLORREF crNeither; 
 	COLORREF crClientOnly; 
@@ -162,8 +163,8 @@ void CUpDownClient::DrawStatusBar(CDC* dc, RECT* rect, CPartFile* file, bool  bF
 	s_StatusBar.Draw(dc, rect->left, rect->top, bFlat); 
 } 
 
-
-bool CUpDownClient::Compare(CUpDownClient* tocomp, bool bIgnoreUserhash){
+bool CUpDownClient::Compare(const CUpDownClient* tocomp, bool bIgnoreUserhash) const
+{
 	if(!bIgnoreUserhash && HasValidHash() && tocomp->HasValidHash())
 	    return !md4cmp(this->GetUserHash(), tocomp->GetUserHash());
 	if (HasLowID()){
@@ -207,7 +208,8 @@ bool CUpDownClient::Compare(CUpDownClient* tocomp, bool bIgnoreUserhash){
 	return false;
 }
 
-void CUpDownClient::AskForDownload(){
+void CUpDownClient::AskForDownload()
+{
 	if (theApp.listensocket->TooManySockets() && !(socket && socket->IsConnected()) ){
 		if (GetDownloadState() != DS_TOOMANYCONNS)
 			SetDownloadState(DS_TOOMANYCONNS);
@@ -221,7 +223,8 @@ void CUpDownClient::AskForDownload(){
 
 }
 
-bool CUpDownClient::IsSourceRequestAllowed() {
+bool CUpDownClient::IsSourceRequestAllowed() const
+{
 	DWORD dwTickCount = ::GetTickCount() + CONNECTION_LATENCY;
 	unsigned int nTimePassedClient = dwTickCount - GetLastSrcAnswerTime();
 	unsigned int nTimePassedFile   = dwTickCount - reqfile->GetLastAnsweredTime();
@@ -461,6 +464,34 @@ bool CUpDownClient::AddRequestForAnotherFile(CPartFile* file){
 	return true;
 }
 
+void CUpDownClient::ClearDownloadBlockRequests()
+{
+	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;){
+		Requested_Block_Struct* cur_block = m_DownloadBlocks_list.GetNext(pos);
+		if (reqfile){
+			reqfile->RemoveBlockFromList(cur_block->StartOffset,cur_block->EndOffset);
+		}
+		delete cur_block;
+	}
+	m_DownloadBlocks_list.RemoveAll();
+
+	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition();pos != 0;){
+		Pending_Block_Struct *pending = m_PendingBlocks_list.GetNext(pos);
+		if (reqfile){
+			reqfile->RemoveBlockFromList(pending->block->StartOffset, pending->block->EndOffset);
+		}
+
+		delete pending->block;
+		// Not always allocated
+		if (pending->zStream){
+			inflateEnd(pending->zStream);
+			delete pending->zStream;
+		}
+		delete pending;
+	}
+	m_PendingBlocks_list.RemoveAll();
+}
+
 void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 	if (m_nDownloadState != nNewState){
 		if (reqfile){
@@ -491,29 +522,9 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState){
 			// <-----khaos-
 
 			m_nDownloadState = nNewState;
-			for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;){
-				Requested_Block_Struct* cur_block = m_DownloadBlocks_list.GetNext(pos);
-				if (reqfile)
-					reqfile->RemoveBlockFromList(cur_block->StartOffset,cur_block->EndOffset);
-				delete cur_block;
-			}
-			m_DownloadBlocks_list.RemoveAll();
-
-			for (POSITION pos = m_PendingBlocks_list.GetHeadPosition();pos != 0;)
-			{
-				Pending_Block_Struct *pending = m_PendingBlocks_list.GetNext(pos);
-				if (reqfile)
-					reqfile->RemoveBlockFromList(pending->block->StartOffset, pending->block->EndOffset);
+			
+			ClearDownloadBlockRequests();
 				
-				delete pending->block;
-				// Not always allocated
-				if (pending->zStream){
-					inflateEnd(pending->zStream);
-					delete pending->zStream;
-				}
-				delete pending;
-			}
-			m_PendingBlocks_list.RemoveAll();
 			m_nDownDatarate = 0;
 			if (nNewState == DS_NONE){
 				//khaos::kmod+ m_PartStatus_list
@@ -578,7 +589,8 @@ void CUpDownClient::SendBlockRequests(){
 		pblock->block = m_DownloadBlocks_list.RemoveHead();
 		pblock->zStream = NULL;
 		pblock->totalUnzipped = 0;
-		pblock->bZStreamError = false;
+		pblock->fZStreamError = 0;
+		pblock->fRecovered = 0;
 		m_PendingBlocks_list.AddTail(pblock);
 	}
 	if (m_PendingBlocks_list.IsEmpty()){
@@ -600,7 +612,8 @@ void CUpDownClient::SendBlockRequests(){
 	for (uint32 i = 0; i != 3; i++){
 		if (pos){
 			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
-			pending->bZStreamError = false;
+			pending->fZStreamError = 0;
+			pending->fRecovered = 0;
 			data.Write(&pending->block->StartOffset,4);
 		}
 		else
@@ -670,7 +683,6 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	{
 		data.Read(&nBlockSize, 4);
 		nEndPos = nStartPos + (size - HEADER_SIZE);
-		usedcompressiondown = true;
 	}
 	else
 		data.Read(&nEndPos,4);
@@ -690,12 +702,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 	// <-----khaos-
 
 	m_nDownDataRateMS += size - HEADER_SIZE;
-//Give more credits to rare files uploaders [Yun.SF3]
-	if (reqfile->m_nVirtualCompleteSourcesCount && theApp.glob_prefs->IsBoostLess())
-		credits->AddDownloaded((size - HEADER_SIZE)/reqfile->m_nVirtualCompleteSourcesCount, GetIP());
-	else
-		credits->AddDownloaded(size - HEADER_SIZE, GetIP());
-//Give more credits to rare files uploaders [Yun.SF3]
+	credits->AddDownloaded(size - HEADER_SIZE, GetIP());
 
 	// Move end back one, should be inclusive
 	nEndPos--;
@@ -709,8 +716,8 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 		{
 			// Found reserved block
 
-		    if (cur_block->bZStreamError){
-			    AddDebugLogLine(false, _T("Ignoring %u bytes of block %u-%u because of errornous zstream state for file \"%s\""), size - HEADER_SIZE, nStartPos, nEndPos, reqfile->GetFileName());
+				if (cur_block->fZStreamError){
+					AddDebugLogLine(false, _T("Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), size - HEADER_SIZE, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 			    reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 			    return;
 		    }
@@ -819,7 +826,7 @@ void CUpDownClient::ProcessBlockPacket(char *packet, uint32 size, bool packed)
 				    // Although we can't further use the current zstream, there is no need to disconnect the sending 
 				    // client because the next zstream (a series of 10K-blocks which build a 180K-block) could be
 				    // valid again. Just ignore all further blocks for the current zstream.
-				    cur_block->bZStreamError = true;					
+				    cur_block->fZStreamError = 1;					
 					//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 					if(theApp.glob_prefs->GetEnableZeroFilledTest() == true) {
 						CString userHash;
@@ -1031,25 +1038,21 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 
 	//MORPH END   - Modified by SiRoB, Better Download rate calcul
 
-	// no need for a special timeout here. Socket timeout will take care of it.
-	// and we want to keep downloads going as long as possible.
-	//MORPH START - Changed by SiRoB, in fact we need it when client is in uploading state making the socket not to close soon
 	if ((::GetTickCount() - m_dwLastBlockReceived) > DOWNLOADTIMEOUT){
-	//	if (!GetSentCancelTransfer()){
-	//		Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-	//		theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
-	//		socket->SendPacket(packet,true,true);
-	//	SetSentCancelTransfer(1);
-	//	}
-		if(GetUploadState() == US_UPLOADING)
-			SetDownloadState(DS_ONQUEUE);
-	//MORPH END   - Changed by SiRoB, in fact we need it when client is in uploading state making the socket not to close soon
+		if (!GetSentCancelTransfer()){
+			Packet* packet = new Packet(OP_CANCELTRANSFER,0);
+			theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
+			socket->SendPacket(packet,true,true);
+		SetSentCancelTransfer(1);
+		}
+		SetDownloadState(DS_ONQUEUE);
 	}
 		
 	return m_nDownDatarate;
 }
 
-uint16 CUpDownClient::GetAvailablePartCount(){
+uint16 CUpDownClient::GetAvailablePartCount() const
+{
 	uint16 result = 0;
 	for (int i = 0;i < m_nPartCount;i++){
 		if (IsPartAvailable(i))
@@ -1082,7 +1085,7 @@ void CUpDownClient::UDPReaskACK(uint16 nNewQR){
 void CUpDownClient::UDPReaskFNF(){
 	m_bUDPPending = false;
 	if (GetDownloadState()!=DS_DOWNLOADING){ // avoid premature deletion of 'this' client
-		AddDebugLogLine(false,CString("UDP ANSWER FNF : %s"),GetUserName());
+		AddDebugLogLine(false,CString("UDP ANSWER FNF : %s - %s"),DbgGetClientInfo(), DbgGetFileInfo(reqfile ? reqfile->GetFileHash() : NULL));
 		theApp.downloadqueue->RemoveSource(this);
 		if (!socket){
 			if (Disconnected())
@@ -1126,7 +1129,7 @@ void CUpDownClient::UDPReaskForDownload(){
 }
 
 // Barry - Sets string to show parts downloading, eg NNNYNNNNYYNYN
-void CUpDownClient::ShowDownloadingParts(CString *partsYN)
+void CUpDownClient::ShowDownloadingParts(CString *partsYN) const
 {
 	// Initialise to all N's
 	char *n = new char[m_nPartCount+1];
@@ -1139,7 +1142,8 @@ void CUpDownClient::ShowDownloadingParts(CString *partsYN)
 		partsYN->SetAt((m_PendingBlocks_list.GetNext(pos)->block->StartOffset / PARTSIZE), 'Y');
 }
 
-void CUpDownClient::UpdateDisplayedInfo(boolean force) {
+void CUpDownClient::UpdateDisplayedInfo(bool force)
+{
     DWORD curTick = ::GetTickCount();
 
     if(force || curTick-m_lastRefreshedDLDisplay > MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000))) {
@@ -1327,11 +1331,6 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 			reqfile->NewSrcPartsInfo();
 			reqfile->UpdateAvailablePartsCount();
 		}
-		else
-		{
-			m_nPartCount = 0;
-			m_abyPartStatus = NULL;
-		}
 		//MORPH END   - Added by SiRoB, Advanced A4AF derivated from Khaos
 		
 		return true;
@@ -1339,8 +1338,8 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, int iDebug
 	return false;
 }
 
-
-void CUpDownClient::DontSwapTo(CPartFile* file) {
+void CUpDownClient::DontSwapTo(/*const*/ CPartFile* file)
+{
 	DWORD dwNow = ::GetTickCount();
 
 	for (POSITION pos = m_DontSwap_list.GetHeadPosition(); pos != 0; m_DontSwap_list.GetNext(pos))
@@ -1352,7 +1351,8 @@ void CUpDownClient::DontSwapTo(CPartFile* file) {
 	m_DontSwap_list.AddHead(newfs);
 }
 
-bool CUpDownClient::IsSwapSuspended(CPartFile* file){
+bool CUpDownClient::IsSwapSuspended(const CPartFile* file)
+{
 	if (m_DontSwap_list.GetCount()==0)
 		return false;
 
@@ -1372,7 +1372,8 @@ bool CUpDownClient::IsSwapSuspended(CPartFile* file){
 	return false;
 }
 
-bool CUpDownClient::IsValidSource(){
+bool CUpDownClient::IsValidSource() const
+{
 	bool valid = false;
 	switch(GetDownloadState())
 	{

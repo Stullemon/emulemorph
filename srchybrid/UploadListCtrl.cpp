@@ -220,14 +220,16 @@ void CUploadListCtrl::Localize()
 	//MORPH END - Added by SiRoB, Show Compression by Tarod
 }
 
-void CUploadListCtrl::AddClient(CUpDownClient* client){
+void CUploadListCtrl::AddClient(const CUpDownClient* client)
+{
 	uint32 itemnr = GetItemCount();
 	itemnr = InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,LPSTR_TEXTCALLBACK,0,0,1,(LPARAM)client);
 	RefreshClient(client);
 	theApp.emuledlg->transferwnd->UpdateListCount(1);
 }
 
-void CUploadListCtrl::RemoveClient(CUpDownClient* client){
+void CUploadListCtrl::RemoveClient(const CUpDownClient* client)
+{
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)client;
@@ -237,7 +239,8 @@ void CUploadListCtrl::RemoveClient(CUpDownClient* client){
 	theApp.emuledlg->transferwnd->UpdateListCount(1);
 }
 
-void CUploadListCtrl::RefreshClient(CUpDownClient* client){
+void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
+{
 	// There is some type of timing issue here.. If you click on item in the queue or upload and leave
 	// the focus on it when you exit the cient, it breaks on line 854 of emuleDlg.cpp
 	// I added this IsRunning() check to this function and the DrawItem method and
@@ -256,7 +259,8 @@ void CUploadListCtrl::RefreshClient(CUpDownClient* client){
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
-void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
+void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
 	if( !theApp.emuledlg->IsRunning() )
 		return;
 	if (!lpDrawItemStruct->itemData)
@@ -272,8 +276,8 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	else
 		odc->SetBkColor(GetBkColor());
 
-	CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
+	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont *pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
 	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
@@ -720,9 +724,10 @@ void CUploadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	*pResult = 0;
 }
 
-int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
-	CUpDownClient* item1 = (CUpDownClient*)lParam1;
-	CUpDownClient* item2 = (CUpDownClient*)lParam2;
+int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	const CUpDownClient* item1 = (CUpDownClient*)lParam1;
+	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
@@ -819,7 +824,8 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	}
 }
 
-void CUploadListCtrl::ShowSelectedUserDetails() {
+void CUploadListCtrl::ShowSelectedUserDetails()
+{
 	POINT point;
 	::GetCursorPos(&point);
 	CPoint p = point; 
@@ -829,7 +835,7 @@ void CUploadListCtrl::ShowSelectedUserDetails() {
 	SetSelectionMark(it);   // display selection mark correctly! 
 	if (it == -1) return;
 
-	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
+	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 
 	if (client){
 		CClientDetailDialog dialog(client);
@@ -837,10 +843,11 @@ void CUploadListCtrl::ShowSelectedUserDetails() {
 	}
 }
 
-void CUploadListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
+void CUploadListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
-		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
 			CClientDetailDialog dialog(client);
 			dialog.DoModal();
@@ -864,7 +871,7 @@ void CUploadListCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
 		// function is invoked *very* often, no *NOT* put any time consuming code here in.
 
 		if (pDispInfo->item.mask & LVIF_TEXT){
-			CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
+			const CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
 			if (pClient != NULL){
 				switch (pDispInfo->item.iSubItem){
 					case 0:
@@ -900,7 +907,7 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 			return;
 		}
 
-		CUpDownClient* client = (CUpDownClient*)GetItemData(pGetInfoTip->iItem);
+		const CUpDownClient* client = (CUpDownClient*)GetItemData(pGetInfoTip->iItem);
 		if (client && pGetInfoTip->pszText && pGetInfoTip->cchTextMax > 0)
 		{
 			CString info;

@@ -81,10 +81,12 @@ CUploadQueue::CUploadQueue(CPreferences* in_prefs){
 	m_nUpDataOverheadFileRequest = 0;
 	m_nUpDataOverheadOther = 0;
 	m_nUpDataOverheadServer = 0;
+	m_nUpDataOverheadKad = 0;
 	m_nUpDataOverheadSourceExchangePackets = 0;
 	m_nUpDataOverheadFileRequestPackets = 0;
 	m_nUpDataOverheadOtherPackets = 0;
 	m_nUpDataOverheadServerPackets = 0;
+	m_nUpDataOverheadKadPackets = 0;
 	m_nLastStartUpload = 0;
 	statsave=0;
 	// -khaos--+++>
@@ -250,26 +252,6 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 						(
 							leftClient->GetFilePrioAsNumber() < rightClient->GetFilePrioAsNumber() || // and rightClient wants higher prio file, so rightClient is better
 							leftClient->GetFilePrioAsNumber() ==  rightClient->GetFilePrioAsNumber() && 
-							(//Morph - added by AndCycle, keep full chunk transfer
-								leftClient->needFullChunkTransfer() == false && rightClient->needFullChunkTransfer() == true ||	// rightClient hasn't finish a full chunk, let him get this first
-								leftClient->needFullChunkTransfer() == rightClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
-								(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
-									leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
-									leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
-									(//Morph - added by AndCycle, Equal Chance For Each File
-										leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
-										leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
-										(
-											leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
-										)
-									)
-								)
-							)
-						) ||  
-						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
-						(//Morph - added by AndCycle, keep full chunk transfer
-							leftClient->needFullChunkTransfer() == false && rightClient->needFullChunkTransfer() == true ||	// rightClient hasn't finish a full chunk, let him get this first
-							leftClient->needFullChunkTransfer() == rightClient->needFullChunkTransfer() &&					// both or none havn't finish full chunk
 							(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
 								leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
 								leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
@@ -279,6 +261,18 @@ bool CUploadQueue::RightClientIsBetter(CUpDownClient* leftClient, uint32 leftSco
 									(
 										leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
 									)
+								)
+							)
+						) ||  
+						leftClient->GetPowerShared() == false && rightClient->GetPowerShared() == false && //neither want powershare file
+						(//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
+							leftClient->GetQueueSessionUp() < rightClient->GetQueueSessionUp() ||
+							leftClient->GetQueueSessionUp() == rightClient->GetQueueSessionUp() &&
+							(//Morph - added by AndCycle, Equal Chance For Each File
+								leftClient->GetEqualChanceValue() > rightClient->GetEqualChanceValue() ||	//rightClient want a file have less chance been uploaded
+								leftClient->GetEqualChanceValue() == rightClient->GetEqualChanceValue() &&
+								(
+									leftScore < rightScore // same prio file, but rightClient has better score, so rightClient is better
 								)
 							)
 						)
@@ -609,13 +603,10 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			successfullupcount--;
 		}
 
-		if(newclient->chkFullChunkTransferTag() == false){
-			// statistic
-			CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
-			if (reqfile){
-				reqfile->statistic.AddAccepted();
-			}
-			newclient->setFullChunkTransferTag(true);//Morph - added by AndCycle, keep full chunk transfer
+		// statistic
+		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)newclient->GetUploadFileID());
+		if (reqfile){
+			reqfile->statistic.AddAccepted();
 		}
 		
 		theApp.emuledlg->transferwnd->uploadlistctrl.AddClient(newclient);
@@ -1046,18 +1037,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 					client->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 				//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			}
-			CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-
-			if(requestedFile != NULL) {
-				//MORPH START - Changed by SiRoB, HotFix Due to Complete Source Feature
-				//tempreqfile->NewAvailPartsInfo();
-				if(!requestedFile->IsPartFile())
-					requestedFile->NewAvailPartsInfo();
-				else
-					((CPartFile*)requestedFile)->NewSrcPartsInfo();
-				//MORPH END   - Changed by SiRoB, HotFix Due to Complete Source Feature
-			}
-
+			
 			client->SetUploadState(US_NONE);
 			client->ClearUploadBlockRequests(/*!earlyabort*/);
 			return true;
@@ -1112,8 +1092,8 @@ void CUploadQueue::UpdateMaxClientScore() {
 }
 
 bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
-	if( client->GetUpStartTimeDelay() > 3600000 ){ // Try to keep the clients from downloading for ever.
-		AddDebugLogLine(false, "%s: Upload session ended due to excessive time.", client->GetUserName());
+	if( client->GetUpStartTimeDelay() > SESSIONMAXTIME ){ // Try to keep the clients from downloading for ever.
+		AddDebugLogLine(false, "%s: Upload session ended due to max time %s.", client->GetUserName(), CastSecondsToHM(SESSIONMAXTIME/1000));
 		return true;
 	}
 
@@ -1131,8 +1111,8 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 	}
 	else{
 		// Allow the client to download a specified amount per session
-		if( client->GetSessionUp() > SESSIONAMOUNT ){
-			AddDebugLogLine(false, "%s: Upload session ended due to excessive transfered amount.", client->GetUserName());
+		if( client->GetQueueSessionPayloadUp() > SESSIONMAXTRANS ){
+			AddDebugLogLine(false, "%s: Upload session ended due to max transfered amount. %s", client->GetUserName(), CastItoXBytes(SESSIONMAXTRANS));
 			return true;
 		}
 	}
@@ -1170,7 +1150,8 @@ uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client){
 	return rank;
 }
 //MORPH - Removed by SiRoB, ZZ UPload System 20030818-1923
-/*void CUploadQueue::CompUpDatarateOverhead(){
+/*
+void CUploadQueue::CompUpDatarateOverhead(){
 	// Patch by BadWolf - Accurate datarate Calculation
 	TransferredData newitem = {m_nUpDataRateMSOverhead,::GetTickCount()};
 	this->m_AvarageUDRO_list.AddTail(newitem);
@@ -1187,7 +1168,8 @@ uint16 CUploadQueue::GetWaitingPosition(CUpDownClient* client){
 		m_nUpDatarateOverhead = 0;
 	return;
 	// END Patch by BadWolf	
-}*/
+}
+*/
 
 VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime)
 {
@@ -1201,6 +1183,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 		// Elandal:ThreadSafeLogging -->
 		// other threads may have queued up log lines. This prints them.
 		theApp.emuledlg->HandleDebugLogQueue();
+        theApp.emuledlg->HandleLogQueue();
 		// Elandal: ThreadSafeLogging <--
 
 		// Send allowed data rate to UploadBandWidthThrottler in a thread safe way
@@ -1331,12 +1314,12 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DW
 	CATCH_DFLT_EXCEPTIONS("CUploadQueue::UploadTimer")
 }
 
-CUpDownClient* CUploadQueue::GetNextClient(CUpDownClient* lastclient){
+CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 	if (waitinglist.IsEmpty())
 		return 0;
 	if (!lastclient)
 		return waitinglist.GetHead();
-	POSITION pos = waitinglist.Find(lastclient);
+	POSITION pos = waitinglist.Find(const_cast<CUpDownClient*>(lastclient));
 	if (!pos){
 		TRACE("Error: CUploadQueue::GetNextClient");
 		return waitinglist.GetHead();

@@ -223,7 +223,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 
 		Packet* packet = new Packet(&data);
 		packet->opcode = OP_LOGINREQUEST;
-		if (theApp.glob_prefs->GetDebugServerTCP())
+		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 			Debug(">>> Sending OP__LoginRequest\n");
 		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 		SendPacket(packet,true,sender);
@@ -243,7 +243,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender){
 		if (theApp.glob_prefs->AddServersFromServer())
 		{
 			Packet* packet = new Packet(OP_GETSERVERLIST,0);
-			if (theApp.glob_prefs->GetDebugServerTCP())
+			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 				Debug(">>> Sending OP__GetServerList\n");
 			theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 			SendPacket(packet,true);
@@ -337,7 +337,11 @@ void CServerConnect::ConnectionFailed(CServerSocket* sender){
 			if (connectedsocket) 
 				connectedsocket->Close();
 			connectedsocket = NULL;
-			theApp.emuledlg->searchwnd->OnBnClickedCancels();
+			theApp.emuledlg->searchwnd->CancelSearch();
+			// -khaos--+++> Tell our total server duration thinkymajig to update...
+			theApp.stat_serverConnectTime = 0;
+			theApp.statistics->Add2TotalServerDuration();
+			// <-----khaos-
 			if (app_prefs->Reconnect() && !connecting){
 				ConnectToAnyServer();		
 			}
@@ -554,10 +558,10 @@ void CServerConnect::KeepConnectionAlive()
 		files.Write(&nFiles,4);
 		Packet* packet = new Packet(&files);
 		packet->opcode = OP_OFFERFILES;
-		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 		AddDebugLogLine(false, _T("Refreshing server connection"));
-		if (theApp.glob_prefs->GetDebugServerTCP())
+		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 			Debug(">>> Sending OP__OfferFiles(KeepAlive) to server\n");
+		theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 		connectedsocket->SendPacket(packet,true);
 	}
 }

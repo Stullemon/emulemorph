@@ -47,7 +47,8 @@ static char THIS_FILE[]=__FILE__;
 
 CBarShader CUpDownClient::s_UpStatusBar(16);
 
-void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat){ 
+void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat) const
+{
 	COLORREF crBoth; 
 	COLORREF crNeither; 
 	COLORREF crClientOnly; 
@@ -142,13 +143,137 @@ void CUpDownClient::SetUploadState(EUploadState news){
 	m_nUploadState = news;
 	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
 }
+/**
+* Gets the current waiting score for this client, taking into consideration waiting
+* time, priority of requested file, and the client's credits.
+*/
+uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasevalue) const
+{
+
+	DWORD curTick = ::GetTickCount();
+
+	//TODO: complete this (friends, uploadspeed, emuleuser etc etc)
+	if (!m_pszUsername)
+		return 0;
+
+	if (credits == 0){
+		ASSERT ( false );
+		return 0;
+	}
+
+	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
+	if(!currequpfile)
+		return 0;
+	
+	// bad clients (see note in function)
+	if (credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY)
+		return 0;
+
+	//MORPH START - Added by IceCream, Anti-leecher feature
+	if (IsLeecher())
+		return 0;
+	//MORPH END   - Added by IceCream, Anti-leecher feature
+
+	// friend slot
+	if (IsFriend() && GetFriendSlot() && !HasLowID())
+		return 0x0FFFFFFF;
+
+	if (IsBanned())
+		return 0;
+
+	if (sysvalue && HasLowID() && !(socket && socket->IsConnected())){
+		return 0;
+	}
+
+	//MORPH - Changed by SiRoB, Upload ZZ System
+	/*
+	// TODO coded by tecxx & herbert, one yet unsolved problem here:
+	// sometimes a client asks for 2 files and there is no way to decide, which file the 
+	// client finally gets. so it could happen that he is queued first because of a 
+	// high prio file, but then asks for something completely different.
+	int filepriority = 10; // standard
+	switch(currequpfile->GetUpPriority()){
+		case PR_VERYHIGH:
+			filepriority = 18;
+			break;
+		case PR_HIGH: 
+			filepriority = 9; 
+			break; 
+		case PR_LOW: 
+			filepriority = 6; 
+			break; 
+		case PR_VERYLOW:
+			filepriority = 2;
+			break;
+		case PR_NORMAL: 
+			default: 
+			filepriority = 7; 
+		break; 
+	}
+	*/
+	int filepriority = GetFilePrioAsNumber();
+	
+	// calculate score, based on waitingtime and other factors
+	float fBaseValue;
+	if (onlybasevalue)
+		fBaseValue = 100;
+	else if (!isdownloading)
+		fBaseValue = (float)(curTick-GetWaitStartTime())/1000;
+	else{
+		// we dont want one client to download forever
+		// the first 15 min downloadtime counts as 15 min waitingtime and you get a 15 min bonus while you are in the first 15 min :)
+		// (to avoid 20 sec downloads) after this the score won't raise anymore 
+		fBaseValue = (float)(m_dwUploadTime-GetWaitStartTime());
+//Morph Start- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
+		// Moonlight: SUQWT - I'm exploiting negative overflows to adjust wait start times. Overflows should not be an issue as long
+		// as queue turnover rate is faster than 49 days.
+		// ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"//original commented out
+//Morph End- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)		
+		fBaseValue += (float)(curTick - m_dwUploadTime > 900000)? 900000:1800000;
+		fBaseValue /= 1000;
+	}
+	if(theApp.glob_prefs->UseCreditSystem())
+	{
+		float modif = credits->GetScoreRatio(GetIP());
+		fBaseValue *= modif;
+		if(!m_bySupportSecIdent){
+			switch(theApp.glob_prefs->GetCreditSystem()){
+				case CS_OFFICIAL:
+				//for those unsecure client have no credit, official gives lower Score
+				case CS_PAWCIO:
+					if(modif == 1)
+						fBaseValue *= 0.95f;
+					break;
+				case CS_LOVELACE:
+					//I think lovelace give enough punishment
+				case CS_EASTSHARE:
+					//this also punish those no credit client, so no need for more punishment
+				default:
+					break;
+			}
+		}
+	}
+	if (!onlybasevalue)
+		fBaseValue *= (float(filepriority)/10.0f);
+	if (!isdownloading && !onlybasevalue){
+		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
+			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
+				return 0;
+		}
+	}
+	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
+		fBaseValue *= 0.5f;
+
+	return (uint32)fBaseValue;
+}
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
 * Gets the queue score multiplier for this client, taking into consideration client's credits
 * and the requested file's priority.
 */
-double CUpDownClient::GetCombinedFilePrioAndCredit() {
+double CUpDownClient::GetCombinedFilePrioAndCredit()
+{
 	ASSERT(credits != NULL);
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
@@ -208,7 +333,8 @@ double CUpDownClient::GetCombinedFilePrioAndCredit() {
 /**
 * Gets the file multiplier for the file this client has requested.
 */
-int CUpDownClient::GetFilePrioAsNumber() {
+int CUpDownClient::GetFilePrioAsNumber() const
+{
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 	// TODO coded by tecxx & herbert, one yet unsolved problem here:
 	// sometimes a client asks for 2 files and there is no way to decide, which file the 
@@ -241,164 +367,27 @@ int CUpDownClient::GetFilePrioAsNumber() {
 	return filepriority;
 }
 
-/**
-* Gets the current waiting score for this client, taking into consideration waiting
-* time, priority of requested file, and the client's credits.
-*/
-uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasevalue){
-
-	DWORD curTick = ::GetTickCount();
-
-	//TODO: complete this (friends, uploadspeed, emuleuser etc etc)
-	if (!m_pszUsername)
-		return 0;
-
-	if (credits == 0){
-		ASSERT ( false );
-		return 0;
-	}
-
-	CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);
-	if(!currequpfile)
-		return 0;
-	
-	// bad clients (see note in function)
-	if (credits->GetCurrentIdentState(GetIP()) == IS_IDBADGUY)
-		return 0;
-
-	//MORPH START - Added by IceCream, Anti-leecher feature
-	if (IsLeecher())
-		return 0;
-	//MORPH END   - Added by IceCream, Anti-leecher feature
-
-	// friend slot
-	if (IsFriend() && GetFriendSlot() && !HasLowID())
-		return 0x0FFFFFFF;
-
-	if (IsBanned())
-		return 0;
-
-	if (sysvalue && HasLowID() && !(socket && socket->IsConnected())){
-		return 0;
-	}
-
-	int filepriority = GetFilePrioAsNumber();
-	//MORPH - Added by Yun.SF3, ZZ Upload System
-
-	// calculate score, based on waitingtime and other factors
-	float fBaseValue;
-	if (onlybasevalue)
-		fBaseValue = 100;
-	else if (!isdownloading)
-		fBaseValue = (float)(curTick-GetWaitStartTime())/1000;
-	else{
-		// we dont want one client to download forever
-		// the first 15 min downloadtime counts as 15 min waitingtime and you get a 15 min bonus while you are in the first 15 min :)
-		// (to avoid 20 sec downloads) after this the score won't raise anymore 
-		fBaseValue = (float)(m_dwUploadTime-GetWaitStartTime());
-//Morph Start- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		// Moonlight: SUQWT - I'm exploiting negative overflows to adjust wait start times. Overflows should not be an issue as long
-		// as queue turnover rate is faster than 49 days.
-		// ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"//original commented out
-//Morph End- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)		
-		fBaseValue += (float)(curTick - m_dwUploadTime > 900000)? 900000:1800000;
-		fBaseValue /= 1000;
-	}
-	if(theApp.glob_prefs->UseCreditSystem())
-	{
-		float modif = credits->GetScoreRatio(GetIP());
-		fBaseValue *= modif;
-		if(!m_bySupportSecIdent){
-			switch(theApp.glob_prefs->GetCreditSystem()){
-				case CS_OFFICIAL:
-				//for those unsecure client have no credit, official gives lower Score
-				case CS_PAWCIO:
-					if(modif == 1)
-						fBaseValue *= 0.85f;
-					break;
-				case CS_LOVELACE:
-					//I think lovelace give enough punishment
-				case CS_EASTSHARE:
-					//this also punish those no credit client, so no need for more punishment
-				default:
-					break;
-			}
-		}
-	}
-	if (!onlybasevalue)
-		fBaseValue *= (float(filepriority)/10.0f);
-	//MORPH START - Added by Yun.SF3, boost the less uploaded files
-	if (!theApp.sharedfiles->GetFileByID(GetUploadFileID())->IsAutoUpPriority() && theApp.glob_prefs->IsBoostLess())
-	{
-		if (theApp.sharedfiles->GetFileByID(GetUploadFileID())->statistic.GetAccepts())
-			fBaseValue /= theApp.sharedfiles->GetFileByID(GetUploadFileID())->statistic.GetAccepts();
-		else 
-			fBaseValue *= 2;
-	}
-	if ((IsFriend()) && (theApp.glob_prefs->IsBoostFriends()) && (theApp.glob_prefs->UseCreditSystem()) && ((credits->GetCurrentIdentState(GetIP()) == IS_IDENTIFIED) || theApp.glob_prefs->GetEnableAntiCreditHack() || ((!IsEmuleClient()) && (GetSourceExchangeVersion()==0)))) //MORPH - Added by IceCream, only boost for secured friend
-		fBaseValue *=1.5f;
-	//MORPH END - Added by Yun.SF3, boost the less uploaded files
-	if (!isdownloading && !onlybasevalue){
-		if (sysvalue && HasLowID() && !(socket && socket->IsConnected()) ){
-			if (!theApp.serverconnect->IsConnected() || theApp.serverconnect->IsLowID() || theApp.listensocket->TooManySockets()) //This may have to change when I add firewall support to Kad
-				return 0;
-		}
-	}
-	if( (IsEmuleClient() || this->GetClientSoft() < 10) && m_byEmuleVersion <= 0x19 )
-		fBaseValue *= 0.5f;
-
-	return (uint32)fBaseValue;
-}
-
 //EastShare Start - added by AndCycle, Pay Back First
-bool CUpDownClient::MoreUpThanDown(){
-
+bool CUpDownClient::MoreUpThanDown() const
+{
 	if(!theApp.glob_prefs->IsPayBackFirst()){
 		return false;
 	}
-
-	bool curPayBackFirstStatus = credits->GetPayBackFirstStatus();
-
-	//this to prevent continuous up and down
-	if(
-		//during uping and downing, if client fall from PBF and can't follow up our uploading speed,
-		GetUploadState() == US_UPLOADING && GetDownloadState() == DS_DOWNLOADING &&
-		chkPayBackFirstTag() && !curPayBackFirstStatus && 
-		//buffer up to Max SESSIONAMOUNT data to him
-		GetQueueSessionUp() < SESSIONAMOUNT){
-		return true;
-	}
-	setPayBackFirstTag(curPayBackFirstStatus);
-
-	return curPayBackFirstStatus;
-
-//	return credits->GetPayBackFirstStatus();
+	return credits->GetPayBackFirstStatus();
 }
 //EastShare End - added by AndCycle, Pay Back First
 
 //Morph Start - added by AndCycle, Equal Chance For Each File
-double CUpDownClient::GetEqualChanceValue(){
-
+double CUpDownClient::GetEqualChanceValue() const
+{
 	CKnownFile* currentReqFile = theApp.sharedfiles->GetFileByID((uchar*)GetUploadFileID());
 
 	if(currentReqFile != NULL){
 		return currentReqFile->GetEqualChanceValue();
 	}
-
 	return 0;
 }
 //Morph End - added by AndCycle, Equal Chance For Each File
-
-//Morph - added by AndCycle, keep full chunk transfer
-bool CUpDownClient::needFullChunkTransfer(){
-
-	if(!theApp.glob_prefs->TransferFullChunks()){
-		return false;
-	}
-
-	return chkFullChunkTransferTag();
-}
-//Morph - added by AndCycle, keep full chunk transfer
 
 //MORPH START - Added by Yun.SF3, ZZ Upload System
 /**
@@ -406,7 +395,7 @@ bool CUpDownClient::needFullChunkTransfer(){
 *
 * @return true if the requested file has release priority
 */
-bool CUpDownClient::GetPowerShared() {
+bool CUpDownClient::GetPowerShared() const {
 
 	if(GetUploadFileID() != NULL && theApp.sharedfiles->GetFileByID(GetUploadFileID()) != NULL) {
 		return theApp.sharedfiles->GetFileByID(GetUploadFileID())->GetPowerShared();
@@ -617,14 +606,8 @@ void CUpDownClient::ProcessUpFileStatus(char* packet,uint32 size){
 			SetUpCompleteSourcesCount(nCount);
 		}
 	}
-	//MORPH START - Changed by SiRoB, HotFix Due to Complete Source Feature
-	//tempreqfile->NewAvailPartsInfo();
-	if(!tempreqfile->IsPartFile())
-		tempreqfile->NewAvailPartsInfo();
-	else
-		((CPartFile*)tempreqfile)->NewSrcPartsInfo();
-	//MORPH END   - Changed by SiRoB, HotFix Due to Complete Source Feature
 	
+	tempreqfile->NewAvailPartsInfo();
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 }
 
@@ -654,7 +637,6 @@ uint64 CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bl
 		memcpy(&packet->pBuffer[20],&endpos,4);
 		memfile.Read(&packet->pBuffer[24],nPacketSize);
 		//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-		//m_BlockSend_queue.AddTail(packet);
 		totalBytes += packet->GetRealPacketSize();
 
 		// put packet directly on socket
@@ -684,7 +666,7 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 		return totalBytes;
 		//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 	}
-	m_bUsedComprUp = true;
+
 	// khaos::kmod+ Show Compression by Tarod
 	compressiongain += (togo-newsize);
 	notcompressed += togo;
@@ -736,7 +718,8 @@ uint64 CUpDownClient::CreatePackedPackets(byte* data,uint32 togo, Requested_Bloc
 	//MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 }
 
-void CUpDownClient::SetUploadFileID(uchar* tempreqfileid){
+void CUpDownClient::SetUploadFileID(const uchar* tempreqfileid)
+{
 	CKnownFile* newreqfile = NULL;
 	if( tempreqfileid )
 		newreqfile = theApp.sharedfiles->GetFileByID(tempreqfileid);
@@ -798,16 +781,7 @@ uint32 CUpDownClient::SendBlockData(){
 		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), false, true, sentBytesCompleteFile, (IsFriend()&& GetFriendSlot()));
 		theApp.glob_prefs->Add2SessionTransferData(GetClientSoft(), GetUserPort(), true, true, sentBytesPartFile, (IsFriend()&& GetFriendSlot()));
 		m_nTransferedUp += sentBytesCompleteFile + sentBytesPartFile;
-//Give more credits to rare files uploaders [Yun.SF3]
-		if (theApp.glob_prefs->IsBoostLess()){
-			CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(requpfileid);//check this if download completion problems occurs [Yun.SF3]
-			if(!currequpfile->IsPartFile())
-				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,currequpfile->m_nVirtualCompleteSourcesCount), GetIP());
-			else
-				credits->AddUploaded((sentBytesCompleteFile + sentBytesPartFile)/max(1,((CPartFile*)currequpfile)->m_nVirtualCompleteSourcesCount), GetIP());
-		}else
-			credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
-//Give more credits to rare files uploaders [Yun.SF3]
+		credits->AddUploaded(sentBytesCompleteFile + sentBytesPartFile, GetIP()); 
 
 		sentBytesPayload = socket->GetSentPayloadSinceLastCallAndReset();
 		m_nCurQueueSessionPayloadUp += sentBytesPayload;
@@ -938,11 +912,12 @@ void CUpDownClient::SendRankingInfo(){
 	Packet* packet = new Packet(OP_QUEUERANKING,12,OP_EMULEPROT);
 	memset(packet->pBuffer,0,12);
 	memcpy(packet->pBuffer+0,&nRank,2);
-	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true,true);
 }
 
-void CUpDownClient::SendCommentInfo(CKnownFile *file) {
+void CUpDownClient::SendCommentInfo(/*const*/ CKnownFile *file)
+{
 	if (!m_bCommentDirty || file == NULL || !ExtProtocolAvailable() || m_byAcceptCommentVer < 1)
 		return;
 	m_bCommentDirty = false;
@@ -962,11 +937,12 @@ void CUpDownClient::SendCommentInfo(CKnownFile *file) {
 		data.Write(desc.GetBuffer(),length);
 	Packet *packet = new Packet(&data,OP_EMULEPROT);
 	packet->opcode = OP_FILEDESC;
-	theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+	theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 	socket->SendPacket(packet,true);
 }
 
-void  CUpDownClient::AddRequestCount(uchar* fileid){
+void  CUpDownClient::AddRequestCount(const uchar* fileid)
+{
 	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;m_RequestedFiles_list.GetNext(pos)){
 		Requested_File_Struct* cur_struct = m_RequestedFiles_list.GetAt(pos);
 		if (!md4cmp(cur_struct->fileid,fileid)){
@@ -1011,14 +987,17 @@ void CUpDownClient::Ban(){
 	theApp.clientlist->AddTrackClient(this);
 	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()) ClearWaitStartTime();	// Moonlight: SUQWT//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if ( !IsBanned() ){
-		AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
+		if (theApp.glob_prefs->GetLogBannedClients())
+			AddDebugLogLine(false,GetResString(IDS_CLIENTBLOCKED),GetUserName());
 		//Morph Start - added by AndCycle, some special case could be happened
 		if(theApp.uploadqueue->IsDownloading(this))	theApp.uploadqueue->RemoveFromUploadQueue(this);
 		//Morph End - added by AndCycle, some special case could be happened
 	}
 #ifdef _DEBUG
-	else
+	else{
+		if (theApp.glob_prefs->GetLogBannedClients())
 		AddDebugLogLine(false,"Ban refreshed for %s (%s) ", GetUserName(), GetFullIP() );
+	}
 #endif
 	theApp.clientlist->AddBannedClient( GetIP() );
 	//theApp.uploadqueue->UpdateBanCount();
@@ -1044,7 +1023,8 @@ void CUpDownClient::BanLeecher(int log_message){
 }
 //MORPH END   - Added by IceCream, Anti-leecher feature
 
-void CUpDownClient::UDPFileReasked(){
+void CUpDownClient::UDPFileReasked()
+{
 	AddAskedCount();
 	SetLastUpRequest();
 	SetLastL2HACExecution(); //<<-- enkeyDEV(th1) -L2HAC-
@@ -1056,7 +1036,8 @@ void CUpDownClient::UDPFileReasked(){
 }
 
 // Moonlight: SUQWT - Compare linear time instead of time indexes to avoid overflow-induced false positives.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-uint32 CUpDownClient::GetWaitStartTime(){
+uint32 CUpDownClient::GetWaitStartTime() const
+{
 	if (credits == NULL){
 		ASSERT ( false );
 		return 0;
@@ -1098,7 +1079,8 @@ void CUpDownClient::ClearWaitStartTime(){
 	credits->ClearWaitStartTime();
 }
 
-bool CUpDownClient::GetFriendSlot(){
+bool CUpDownClient::GetFriendSlot() const
+{
 	if (credits && theApp.clientcredits->CryptoAvailable()){
 		switch(credits->GetCurrentIdentState(GetIP())){
 			case IS_IDFAILED:

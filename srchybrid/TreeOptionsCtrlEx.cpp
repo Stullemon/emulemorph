@@ -33,6 +33,7 @@ CTreeOptionsCtrlEx::CTreeOptionsCtrlEx(UINT uImageListColorFlags)
 {
 	m_uImageListColorFlags = uImageListColorFlags;
 	//SetAutoSelect(TRUE);	// does not work!?
+	SetToggleOverIconOnly(TRUE);
 }
 
 CTreeOptionsCtrlEx::~CTreeOptionsCtrlEx(void)
@@ -73,11 +74,25 @@ void CTreeOptionsCtrlEx::HandleCheckBox(HTREEITEM hItem, BOOL bCheck)
 	//automatically check the parent. If no checkboxes are checked, then
 	//also automatically uncheck the parent.
 	HTREEITEM hParent = GetNextItem(hItem, TVGN_PARENT);
+	UpdateCheckBoxGroup(hParent);
+
+	//Reset the redraw flag
+	SetRedraw(TRUE);
+}
+
+void CTreeOptionsCtrlEx::UpdateCheckBoxGroup(HTREEITEM hItem)
+{
+	SetRedraw(FALSE);
+
+	//Iterate through all children and if all the checkboxes are checked, then also
+	//automatically check the item. If no checkboxes are checked, then
+	//also automatically uncheck the item.
+	HTREEITEM hParent = hItem;
 	if (hParent && IsCheckBox(hParent))
 	{
 		BOOL bNoCheckBoxesChecked = TRUE;
 		BOOL bAllCheckBoxesChecked = TRUE;
-		hChild = GetNextItem(hParent, TVGN_CHILD);
+		HTREEITEM hChild = GetNextItem(hParent, TVGN_CHILD);
 		while (hChild)
 		{
 			if (IsCheckBox(hChild))

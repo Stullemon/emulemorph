@@ -62,9 +62,7 @@ to tim.kosse@gmx.de
 */
 
 #include "stdafx.h"
-#ifdef _DEBUG
 #include "DebugHelpers.h"
-#endif
 #include "AsyncSocketEx.h"
 #include "wtypes.h"
 #include "oleauto.h"
@@ -247,7 +245,7 @@ public:
 	//Processes event notifications sent by the sockets or the layers
 	static LRESULT CALLBACK WindowProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 	{
-#ifndef _DEBUG
+#ifdef USE_CLIENT_TCP_CATCH_ALL_HANDLER
 		try
 		{
 #endif
@@ -424,7 +422,7 @@ public:
 				return 0;
 			}
 			return DefWindowProc(hWnd, message, wParam, lParam);
-#ifndef _DEBUG
+#ifdef USE_CLIENT_TCP_CATCH_ALL_HANDLER
 		}
 		catch(CException* e){
 			TCHAR szError[1024];

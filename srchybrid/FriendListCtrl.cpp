@@ -107,14 +107,14 @@ void CFriendListCtrl::Localize()
 	strRes.ReleaseBuffer();
 }
 
-void CFriendListCtrl::AddFriend(CFriend* toadd)
+void CFriendListCtrl::AddFriend(const CFriend* toadd)
 {
 	int itemnr = GetItemCount();
-	InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE,itemnr,toadd->m_strName.GetBuffer(),0,0,1,(LPARAM)toadd);
+	InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE,itemnr,(LPCTSTR)toadd->m_strName,0,0,1,(LPARAM)toadd);
 	RefreshFriend(toadd);
 }
 
-void CFriendListCtrl::RemoveFriend(CFriend* toremove)
+void CFriendListCtrl::RemoveFriend(const CFriend* toremove)
 {
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
@@ -124,7 +124,7 @@ void CFriendListCtrl::RemoveFriend(CFriend* toremove)
 		DeleteItem(result);
 }
 
-void CFriendListCtrl::RefreshFriend(CFriend* toupdate)
+void CFriendListCtrl::RefreshFriend(const CFriend* toupdate)
 {
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
@@ -161,6 +161,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	if (iSel != -1){
 		cur_friend = (CFriend*)GetItemData(iSel);
 		ClientMenu.AppendMenu(MF_STRING,MP_DETAIL, GetResString(IDS_SHOWDETAILS));
+		ClientMenu.SetDefaultItem(MP_DETAIL);
 	}
 
 	ClientMenu.AppendMenu(MF_STRING,MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND));
@@ -311,7 +312,8 @@ void CFriendListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
 	*pResult = 0;
 }
 
-void CFriendListCtrl::ShowFriendDetails(CFriend* pFriend) {
+void CFriendListCtrl::ShowFriendDetails(const CFriend* pFriend)
+{
 	if (pFriend){
 		//MORPH - Added by Yun.SF3, ZZ Upload System
 		if (pFriend->GetLinkedClient()){
@@ -321,7 +323,7 @@ void CFriendListCtrl::ShowFriendDetails(CFriend* pFriend) {
 		}
 		else{
 			CAddFriend dlg;
-			dlg.m_pShowFriend = pFriend;
+			dlg.m_pShowFriend = const_cast<CFriend*>(pFriend);
 			dlg.DoModal();
 		}
 	}

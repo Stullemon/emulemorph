@@ -23,6 +23,11 @@
 
 class CMuleListCtrl;
 
+struct FCtrlItem_Struct{
+   CString	filename;
+   uint16	count;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialogInfo dialog
 
@@ -34,15 +39,16 @@ public:
 	CFileDetailDialogInfo();   // standard constructor
 	virtual ~CFileDetailDialogInfo();
 
-	void SetMyfile(CPartFile* file)	{m_file=file;}
+	void SetMyfile(const CSimpleArray<CPartFile*>* paFiles) { m_paFiles = paFiles; }
 
 	// Dialog Data
 	enum { IDD = IDD_FILEDETAILS_INFO };
 
 protected:
 	CString m_strCaption;
-	CPartFile* m_file;
+	const CSimpleArray<CPartFile*>* m_paFiles;
 	uint32 m_timer;
+	static LPCTSTR sm_pszNotAvail;
 
 	void Localize();
 	void RefreshData();
@@ -78,9 +84,9 @@ protected:
 	CPartFile* m_file;
 	CListCtrl* pmyListCtrl;
 	uint32 m_timer;
-	CMuleListCtrl* sourcesList;
-	bool m_SortAscending[2];
 	int m_aiColWidths[2];
+	uint8	m_sortindex;
+	bool	m_sortorder;
 
 	void Localize();
 	void RefreshData();
@@ -112,7 +118,7 @@ class CFileDetailDialog : public CResizableSheet
 	DECLARE_DYNAMIC(CFileDetailDialog)
 
 public:
-	CFileDetailDialog(CPartFile* myfile, bool bInvokeCommentsPage = false);
+	CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, bool bInvokeCommentsPage = false);
 	virtual ~CFileDetailDialog();
 
 protected:

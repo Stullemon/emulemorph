@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <io.h>
+#include "DebugHelpers.h"
 #include "emule.h"
 #include "Preferences.h"
 #include "Opcodes.h"
@@ -329,8 +330,10 @@ bool CPreferences::IsConfigFile(const CString& rstrDirectory, const CString& rst
 
 //MORPH - Added by SiRoB, ZZ Ratio
 bool CPreferences::IsZZRatioDoesWork(){
-	return true;
+	
 	if (theApp.stat_sessionSentBytesToFriend)
+		return true;
+	if (theApp.downloadqueue->IsFilesPowershared())
 		return true;
 	if (theApp.glob_prefs->IsSUCEnabled())
 		return theApp.uploadqueue->GetMaxVUR()<10240;
@@ -414,15 +417,28 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("DownDataPort_OTHER", buffer );
 
 	// Save Cumulative Downline Overhead Statistics
-	buffer.Format("%I64u",(uint64)theApp.downloadqueue->GetDownDataOverheadFileRequest()+theApp.downloadqueue->GetDownDataOverheadSourceExchange()+theApp.downloadqueue->GetDownDataOverheadServer()+theApp.downloadqueue->GetDownDataOverheadOther()+GetDownOverheadTotal());
+	buffer.Format("%I64u",	theApp.downloadqueue->GetDownDataOverheadFileRequest() +
+							theApp.downloadqueue->GetDownDataOverheadSourceExchange() +
+							theApp.downloadqueue->GetDownDataOverheadServer() +
+							theApp.downloadqueue->GetDownDataOverheadKad() +
+							theApp.downloadqueue->GetDownDataOverheadOther() +
+							GetDownOverheadTotal());
 	ini.WriteString("DownOverheadTotal", buffer );
 	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadFileRequest() + GetDownOverheadFileReq());
 	ini.WriteString("DownOverheadFileReq", buffer );
 	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadSourceExchange() + GetDownOverheadSrcEx());
 	ini.WriteString("DownOverheadSrcEx", buffer );
-	buffer.Format("%I64u",(uint64) theApp.downloadqueue->GetDownDataOverheadServer()+GetDownOverheadServer());
+	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadServer()+GetDownOverheadServer());
 	ini.WriteString("DownOverheadServer", buffer );
-	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + theApp.downloadqueue->GetDownDataOverheadServerPackets() + theApp.downloadqueue->GetDownDataOverheadOtherPackets() + GetDownOverheadTotalPackets());
+	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadKad()+GetDownOverheadKad());
+	ini.WriteString("DownOverheadKad", buffer );
+	
+	buffer.Format("%I64u",	theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + 
+							theApp.downloadqueue->GetDownDataOverheadSourceExchangePackets() + 
+							theApp.downloadqueue->GetDownDataOverheadServerPackets() + 
+							theApp.downloadqueue->GetDownDataOverheadKadPackets() + 
+							theApp.downloadqueue->GetDownDataOverheadOtherPackets() + 
+							GetDownOverheadTotalPackets());
 	ini.WriteString("DownOverheadTotalPackets", buffer );
 	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadFileRequestPackets() + GetDownOverheadFileReqPackets());
 	ini.WriteString("DownOverheadFileReqPackets", buffer );
@@ -430,6 +446,8 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("DownOverheadSrcExPackets", buffer );
 	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadServerPackets() + GetDownOverheadServerPackets());
 	ini.WriteString("DownOverheadServerPackets", buffer );
+	buffer.Format("%I64u",theApp.downloadqueue->GetDownDataOverheadKadPackets() + GetDownOverheadKadPackets());
+	ini.WriteString("DownOverheadKadPackets", buffer );
 
 	// Save Cumulative Upline Statistics
 	buffer.Format("%I64u",theApp.stat_sessionSentBytes+GetTotalUploaded());
@@ -467,7 +485,12 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("UpData_Partfile", buffer );
 
 	// Save Cumulative Upline Overhead Statistics
-	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadFileRequest() + theApp.uploadqueue->GetUpDataOverheadSourceExchange() + theApp.uploadqueue->GetUpDataOverheadServer() + theApp.uploadqueue->GetUpDataOverheadOther() + GetUpOverheadTotal());
+	buffer.Format("%I64u",	theApp.uploadqueue->GetUpDataOverheadFileRequest() + 
+							theApp.uploadqueue->GetUpDataOverheadSourceExchange() + 
+							theApp.uploadqueue->GetUpDataOverheadServer() + 
+							theApp.uploadqueue->GetUpDataOverheadKad() + 
+							theApp.uploadqueue->GetUpDataOverheadOther() + 
+							GetUpOverheadTotal());
 	ini.WriteString("UpOverheadTotal", buffer);
 	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadFileRequest() + GetUpOverheadFileReq());
 	ini.WriteString("UpOverheadFileReq", buffer );
@@ -475,7 +498,15 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("UpOverheadSrcEx", buffer );
 	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadServer() + GetUpOverheadServer());
 	ini.WriteString("UpOverheadServer", buffer );
-	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + theApp.uploadqueue->GetUpDataOverheadServerPackets() + theApp.uploadqueue->GetUpDataOverheadOtherPackets() + GetUpOverheadTotalPackets());
+	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadKad() + GetUpOverheadKad());
+	ini.WriteString("UpOverheadKad", buffer );
+
+	buffer.Format("%I64u",	theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + 
+							theApp.uploadqueue->GetUpDataOverheadSourceExchangePackets() + 
+							theApp.uploadqueue->GetUpDataOverheadServerPackets() + 
+							theApp.uploadqueue->GetUpDataOverheadKadPackets() + 
+							theApp.uploadqueue->GetUpDataOverheadOtherPackets() + 
+							GetUpOverheadTotalPackets());
 	ini.WriteString("UpOverheadTotalPackets", buffer );
 	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadFileRequestPackets() + GetUpOverheadFileReqPackets());
 	ini.WriteString("UpOverheadFileReqPackets", buffer );
@@ -483,6 +514,8 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteString("UpOverheadSrcExPackets", buffer );
 	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadServerPackets() + GetUpOverheadServerPackets());
 	ini.WriteString("UpOverheadServerPackets", buffer );
+	buffer.Format("%I64u",theApp.uploadqueue->GetUpDataOverheadKadPackets() + GetUpOverheadKadPackets());
+	ini.WriteString("UpOverheadKadPackets", buffer );
 
 	// Save Cumulative Connection Statistics
 	float tempRate = 0;
@@ -712,18 +745,22 @@ void CPreferences::ResetCumulativeStatistics(){
 	prefs->cumDownOverheadFileReq=0;
 	prefs->cumDownOverheadSrcEx=0;
 	prefs->cumDownOverheadServer=0;
+	prefs->cumDownOverheadKad=0;
 	prefs->cumDownOverheadTotalPackets=0;
 	prefs->cumDownOverheadFileReqPackets=0;
 	prefs->cumDownOverheadSrcExPackets=0;
 	prefs->cumDownOverheadServerPackets=0;
+	prefs->cumDownOverheadKadPackets=0;
 	prefs->cumUpOverheadTotal=0;
 	prefs->cumUpOverheadFileReq=0;
 	prefs->cumUpOverheadSrcEx=0;
 	prefs->cumUpOverheadServer=0;
+	prefs->cumUpOverheadKad=0;
 	prefs->cumUpOverheadTotalPackets=0;
 	prefs->cumUpOverheadFileReqPackets=0;
 	prefs->cumUpOverheadSrcExPackets=0;
 	prefs->cumUpOverheadServerPackets=0;
+	prefs->cumUpOverheadKadPackets=0;
 	prefs->cumUpSuccessfulSessions=0;
 	prefs->cumUpFailedSessions=0;
 	prefs->cumUpAvgTime=0;
@@ -835,6 +872,8 @@ bool CPreferences::LoadStats(int loadBackUp){
 	prefs->cumDownOverheadSrcEx=			_atoi64( buffer );
 	sprintf(buffer,ini.GetString(			"DownOverheadServer"			, 0	) );
 	prefs->cumDownOverheadServer=			_atoi64( buffer );
+	sprintf(buffer,ini.GetString(			"DownOverheadKad"				, 0	) );
+	prefs->cumDownOverheadKad=				_atoi64( buffer );
 	sprintf(buffer,ini.GetString(			"DownOverheadTotalPackets"		, 0 ) );
 	prefs->cumDownOverheadTotalPackets=		_atoi64( buffer );
 	sprintf(buffer,ini.GetString(			"DownOverheadFileReqPackets"	, 0 ) );
@@ -843,6 +882,8 @@ bool CPreferences::LoadStats(int loadBackUp){
 	prefs->cumDownOverheadSrcExPackets=		_atoi64( buffer );
 	sprintf(buffer,ini.GetString(			"DownOverheadServerPackets"		, 0 ) );
 	prefs->cumDownOverheadServerPackets=	_atoi64( buffer );
+	sprintf(buffer,ini.GetString(			"DownOverheadKadPackets"		, 0 ) );
+	prefs->cumDownOverheadKadPackets=		_atoi64( buffer );
 
 	// Load stats for cumulative upline overhead
 	sprintf(buffer , ini.GetString(			"UpOverHeadTotal"				, 0 ) );
@@ -853,6 +894,8 @@ bool CPreferences::LoadStats(int loadBackUp){
 	prefs->cumUpOverheadSrcEx=				_atoi64( buffer );
 	sprintf(buffer , ini.GetString(			"UpOverheadServer"				, 0 ) );
 	prefs->cumUpOverheadServer=				_atoi64( buffer );
+	sprintf(buffer , ini.GetString(			"UpOverheadKad"					, 0 ) );
+	prefs->cumUpOverheadKad=				_atoi64( buffer );
 	sprintf(buffer , ini.GetString(			"UpOverHeadTotalPackets"		, 0 ) );
 	prefs->cumUpOverheadTotalPackets=		_atoi64( buffer );
 	sprintf(buffer , ini.GetString(			"UpOverheadFileReqPackets"		, 0 ) );
@@ -861,6 +904,8 @@ bool CPreferences::LoadStats(int loadBackUp){
 	prefs->cumUpOverheadSrcExPackets=		_atoi64( buffer );
 	sprintf(buffer , ini.GetString(			"UpOverheadServerPackets"		, 0 ) );
 	prefs->cumUpOverheadServerPackets=		_atoi64( buffer );
+	sprintf(buffer , ini.GetString(			"UpOverheadKadPackets"			, 0 ) );
+	prefs->cumUpOverheadKadPackets=			_atoi64( buffer );
 
 	// Load stats for cumulative upline data
 	prefs->cumUpSuccessfulSessions =	ini.GetInt("UpSuccessfulSessions"	, 0 );
@@ -1354,15 +1399,12 @@ void CPreferences::SavePreferences(){
 
 	ini.WriteBool("EnableDownloadInRed", prefs->enableDownloadInRed); //MORPH - Added by IceCream, show download in red
 	ini.WriteBool("EnableDownloadInBold", prefs->enableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
-	ini.WriteBool("EnableChunkAvaibility", prefs->enableChunkAvaibility); //MORPH - Added by IceCream, enable ChunkAvaibility
 	ini.WriteBool("EnableAntiLeecher", prefs->enableAntiLeecher); //MORPH - Added by IceCream, enable AntiLeecher
 	ini.WriteBool("EnableAntiCreditHack", prefs->enableAntiCreditHack); //MORPH - Added by IceCream, enable AntiCreditHack
-	ini.WriteBool("IsBoostLess", prefs->isboostless);//Added by Yun.SF3, boost the less uploaded files
 	ini.WriteInt("CreditSystemMode", prefs->creditSystemMode);// EastShare - Added by linekin, ES CreditSystem
 	ini.WriteInt("EqualChanceForEachFileMode", prefs->equalChanceForEachFileMode);//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool("ECFEFallTime", prefs->m_bECFEFallTime);//Morph - added by AndCycle, Equal Chance For Each File
 	ini.WriteBool("IsUSSLimit", prefs->m_bIsUSSLimit); // EastShare - Added by TAHO, does USS limit
-	ini.WriteBool("IsBoostFriends", prefs->isboostfriends);//Added by Yun.SF3, boost friends
 
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	ini.WriteInt("MinUpload",prefs->minupload);
@@ -1410,10 +1452,12 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("TransferDoubleClick",prefs->transferDoubleclick);
 	ini.WriteBool("BeepOnError",prefs->beepOnError);
 	ini.WriteBool("ConfirmExit",prefs->confirmExit);
-	ini.WriteBool("FilterBadIPs",prefs->filterBadIP);
+	ini.WriteBool("FilterBadIPs",prefs->filterLANIPs);
     ini.WriteBool("Autoconnect",prefs->autoconnect);
 	ini.WriteBool("OnlineSignature",prefs->onlineSig);
 	ini.WriteBool("StartupMinimized",prefs->startMinimized);
+	ini.WriteInt("LastMainWndDlgID",prefs->m_iLastMainWndDlgID);
+	ini.WriteInt("LastLogPaneID",prefs->m_iLastLogPaneID);
 	ini.WriteBool("SafeServerConnect",prefs->safeServerConnect);
 	ini.WriteBool("ShowRatesOnTitle",prefs->showRatesInTitle);
 	ini.WriteBool("IndicateRatings",prefs->indicateratings);
@@ -1427,7 +1471,7 @@ void CPreferences::SavePreferences(){
 	// itsonlyme: hostnameSource
 
 	ini.WriteBool("AutoDynUpSwitching",prefs->isautodynupswitching);//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_bisautopowersharenewdownloadfile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool("AutoPowershareNewDownloadFile",prefs->m_inewdownloadfilepowersharemode); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	ini.WriteInt("FakesDatVersion",prefs->m_FakesDatVersion);
 	ini.WriteBool("UpdateFakeStartup",prefs->UpdateFakeStartup);
@@ -1487,6 +1531,16 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("SmartIdCheck", prefs->smartidcheck);
 	ini.WriteBool("Verbose", prefs->m_bVerbose);
 	ini.WriteBool("DebugSourceExchange", prefs->m_bDebugSourceExchange);
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	// following options are for debugging or when using an external debug device viewer only.
+	ini.WriteInt("DebugServerTCP",prefs->m_iDebugServerTCPLevel);
+	ini.WriteInt("DebugServerUDP",prefs->m_iDebugServerUDPLevel);
+	ini.WriteInt("DebugServerSources",prefs->m_iDebugServerSourcesLevel);
+	ini.WriteInt("DebugServerSearches",prefs->m_iDebugServerSearchesLevel);
+	ini.WriteInt("DebugClientTCP",prefs->m_iDebugClientTCPLevel);
+	ini.WriteInt("DebugClientUDP",prefs->m_iDebugClientUDPLevel);
+#endif
+	//ini.WriteBool("LogBannedClients", prefs->m_bLogBannedClients);
 	ini.WriteBool("PreviewPrio", prefs->m_bpreviewprio);
 	ini.WriteBool("UpdateQueueListPref", prefs->m_bupdatequeuelist);
 	ini.WriteBool("ManualHighPrio", prefs->m_bmanualhighprio);
@@ -1507,7 +1561,6 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("UseCreditSystem",prefs->m_bCreditSystem);
 
 	ini.WriteBool("IsPayBackFirst",prefs->m_bPayBackFirst);//EastShare - added by AndCycle, Pay Back First
-	ini.WriteBool("AutoClearComplete", prefs->m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	ini.WriteBool("OnlyDownloadCompleteFiles", prefs->m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	ini.WriteBool("SaveUploadQueueWaitTime", prefs->m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -1525,6 +1578,8 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("UseAutocompletion",prefs->m_bUseAutocompl);
 	ini.WriteBool("NetworkKademlia",prefs->networkkademlia);
 	ini.WriteBool("NetworkED2K",prefs->networked2k);
+	ini.WriteBool("AutoClearCompleted",prefs->m_bRemoveFinishedDownloads);
+	ini.WriteBool("TransflstRemainOrder",prefs->m_bTransflstRemain);
 
 	ini.WriteInt("VersionCheckLastAutomatic", prefs->versioncheckLastAutomatic);
 	ini.WriteInt("FilterLevel",prefs->filterlevel);
@@ -1532,6 +1587,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("SecureIdent", prefs->m_bUseSecureIdent);// change the name in future version to enable it by default
 	ini.WriteBool("AdvancedSpamFilter",prefs->m_bAdvancedSpamfilter);
 	ini.WriteBool("ShowDwlPercentage",prefs->m_bShowDwlPercentage);		
+	ini.WriteBool("RemoveFilesToBin",prefs->m_bRemove2bin);
 
 	// khaos::categorymod+ Save Preferences
 	ini.WriteBool("ValidSrcsOnly", prefs->m_bValidSrcsOnly);
@@ -1827,6 +1883,8 @@ void CPreferences::LoadPreferences(){
 	CIni ini(strFileName, "eMule");
 	//--- end Ozon :)
 
+	_iDbgHeap = ini.GetInt("DebugHeap", 1);
+
 	//MORPH START - Added by IceCream, changed default nickname
 	sprintf(prefs->nick,"%s",ini.GetString("Nick","eMule v"+strCurrVersion));
 	if(((strstr(prefs->nick, "eMule v"))&&(!StrStrI(prefs->nick, "morph"))) || (strstr(prefs->nick,"emule-project"))) 
@@ -1849,16 +1907,13 @@ void CPreferences::LoadPreferences(){
 
 	prefs->enableDownloadInRed = ini.GetBool("EnableDownloadInRed", true); //MORPH - Added by IceCream, show download in red
 	prefs->enableDownloadInBold = ini.GetBool("EnableDownloadInBold", true); //MORPH - Added by SiRoB, show download in Bold
-	prefs->enableChunkAvaibility = ini.GetBool("EnableChunkAvaibility", true); //MORPH - Added by IceCream, enable ChunkAvaibility
 	prefs->enableAntiLeecher = ini.GetBool("EnableAntiLeecher", true); //MORPH - Added by IceCream, enable AntiLeecher
 	prefs->enableAntiCreditHack = ini.GetBool("EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack
 	enableHighProcess = ini.GetBool("EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
-	prefs->isboostless = ini.GetBool("IsBoostLess", false);//Added by Yun.SF3, boost the less uploaded files
 	prefs->creditSystemMode = (CreditSystemSelection)ini.GetInt("CreditSystemMode", CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
 	prefs->equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bECFEFallTime = ini.GetBool("ECFEFallTime", false);//Morph - added by AndCycle, Equal Chance For Each File
 	prefs->m_bIsUSSLimit = ini.GetBool("IsUSSLimit", true); // EastShare - Added by TAHO, does USS limit
-	prefs->isboostfriends = ini.GetBool("IsBoostFriends", false);//Added by Yun.SF3, boost friends
 	prefs->maxGraphDownloadRate=ini.GetInt("DownloadCapacity",96);
 	if (prefs->maxGraphDownloadRate==0) prefs->maxGraphDownloadRate=96;
 	prefs->maxGraphUploadRate=ini.GetInt("UploadCapacity",16);
@@ -1877,6 +1932,13 @@ void CPreferences::LoadPreferences(){
 	prefs->udpport=ini.GetInt("UDPPort",prefs->port+10);
 	prefs->nServerUDPPort = ini.GetInt("ServerUDPPort", -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
 	prefs->kadudpport=ini.GetInt("KadUDPPort",prefs->port+11);
+	if(prefs->kadudpport == prefs->udpport )
+	{
+		prefs->kadudpport++;
+		CString msg;
+		msg.Format(GetResString(IDS_KADUDPPORTERR), prefs->kadudpport);
+		AfxMessageBox(msg);
+	}
 	prefs->maxsourceperfile=ini.GetInt("MaxSourcesPerFile",400 );
 	prefs->languageID=ini.GetWORD("Language",0);
 	prefs->m_iSeeShares=ini.GetInt("SeeShare",2);
@@ -1925,14 +1987,20 @@ void CPreferences::LoadPreferences(){
 	prefs->transferDoubleclick=ini.GetBool("TransferDoubleClick",true);
 	prefs->beepOnError=ini.GetBool("BeepOnError",true);
 	prefs->confirmExit=ini.GetBool("ConfirmExit",false);
-	prefs->filterBadIP=ini.GetBool("FilterBadIPs",true);
+	prefs->filterLANIPs=ini.GetBool("FilterBadIPs",true);
+	prefs->m_bAllocLocalHostIP=ini.GetBool("AllowLocalHostIP",false);
 	prefs->autoconnect=ini.GetBool("Autoconnect",false);
 	prefs->showRatesInTitle=ini.GetBool("ShowRatesOnTitle",false);
 
 	prefs->onlineSig=ini.GetBool("OnlineSignature",false);
 	prefs->startMinimized=ini.GetBool("StartupMinimized",false);
+	prefs->m_bRestoreLastMainWndDlg=ini.GetBool("RestoreLastMainWndDlg",false);
+	prefs->m_iLastMainWndDlgID=ini.GetInt("LastMainWndDlgID",0);
+	prefs->m_bRestoreLastLogPane=ini.GetBool("RestoreLastLogPane",false);
+	prefs->m_iLastLogPaneID=ini.GetInt("LastLogPaneID",0);
 	prefs->safeServerConnect =ini.GetBool("SafeServerConnect",false);
 
+	prefs->m_bTransflstRemain =ini.GetBool("TransflstRemainOrder",false);
 	prefs->filterserverbyip=ini.GetBool("FilterServersByIP",false);
 	prefs->filterlevel=ini.GetInt("FilterLevel",127);
 	prefs->checkDiskspace=ini.GetBool("CheckDiskspace",false);	// SLUGFILLER: checkDiskspace
@@ -1940,7 +2008,7 @@ void CPreferences::LoadPreferences(){
 	sprintf(prefs->yourHostname,"%s",ini.GetString("YourHostname",""));	// itsonlyme: hostnameSource
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	prefs->m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);
+	prefs->m_inewdownloadfilepowersharemode=ini.GetBool("AutoPowershareNewDownloadFile",true);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	prefs->m_FakesDatVersion=ini.GetInt("FakesDatVersion",0);
@@ -2014,10 +2082,28 @@ void CPreferences::LoadPreferences(){
 	prefs->smartidcheck=ini.GetBool("SmartIdCheck",true);
 	prefs->m_bVerbose=ini.GetBool("Verbose",false);
 	prefs->m_bDebugSourceExchange=ini.GetBool("DebugSourceExchange",false);
-	prefs->m_dwDebugServerTCP=ini.GetInt("DebugServerTCP",0);
-	prefs->m_dwDebugServerUDP=ini.GetInt("DebugServerUDP",0);
-	prefs->m_dwDebugServerSources=ini.GetInt("DebugServerSources",0);
-	prefs->m_dwDebugServerSearches=ini.GetInt("DebugServerSearches",0);
+	prefs->m_bLogBannedClients=ini.GetBool("LogBannedClients", true);
+	prefs->m_bLogRatingReceived=ini.GetBool("LogRatingReceived",true);
+	prefs->m_bLogDescriptionReceived=ini.GetBool("LogDescriptionReceived",true);
+	prefs->m_bLogFilteredIPs=ini.GetBool("LogFilteredIPs",true);
+	prefs->m_bLogFileSaving=ini.GetBool("LogFileSaving",true);
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	// following options are for debugging or when using an external debug device viewer only.
+	prefs->m_iDebugServerTCPLevel=ini.GetInt("DebugServerTCP",0);
+	prefs->m_iDebugServerUDPLevel=ini.GetInt("DebugServerUDP",0);
+	prefs->m_iDebugServerSourcesLevel=ini.GetInt("DebugServerSources",0);
+	prefs->m_iDebugServerSearchesLevel=ini.GetInt("DebugServerSearches",0);
+	prefs->m_iDebugClientTCPLevel=ini.GetInt("DebugClientTCP",0);
+	prefs->m_iDebugClientUDPLevel=ini.GetInt("DebugClientUDP",0);
+#else
+	// for normal release builds ensure that those options are all turned off
+	prefs->m_iDebugServerTCPLevel=0;
+	prefs->m_iDebugServerUDPLevel=0;
+	prefs->m_iDebugServerSourcesLevel=0;
+	prefs->m_iDebugServerSearchesLevel=0;
+	prefs->m_iDebugClientTCPLevel=0;
+	prefs->m_iDebugClientUDPLevel=0;
+#endif
 	prefs->m_bpreviewprio=ini.GetBool("PreviewPrio",false);
 	prefs->m_bupdatequeuelist=ini.GetBool("UpdateQueueListPref",false);
 	prefs->m_bmanualhighprio=ini.GetBool("ManualHighPrio",false);
@@ -2054,7 +2140,6 @@ void CPreferences::LoadPreferences(){
 	prefs->m_bCreditSystem=true; //ini.GetInt("UseCreditSystem",true); //MORPH - Changed by SiRoB, CreditSystem allways used
 
 	prefs->m_bPayBackFirst=ini.GetBool("IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
-	prefs->m_bAutoClearComplete = ini.GetBool("AutoClearComplete", false );//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	prefs->m_bOnlyDownloadCompleteFiles = ini.GetBool("OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	prefs->m_bSaveUploadQueueWaitTime = ini.GetBool("SaveUploadQueueWaitTime", true);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -2066,6 +2151,7 @@ void CPreferences::LoadPreferences(){
 	prefs->m_bShowDwlPercentage=ini.GetBool("ShowDwlPercentage",false);
 	prefs->networkkademlia=ini.GetBool("NetworkKademlia",true);
 	prefs->networked2k=ini.GetBool("NetworkED2K",true);
+	prefs->m_bRemove2bin=ini.GetBool("RemoveFilesToBin",true);
 
 	prefs->m_iMaxChatHistory=ini.GetInt("MaxChatHistoryLines",100);
 	if (prefs->m_iMaxChatHistory<1) prefs->m_iMaxChatHistory=100;
@@ -2086,6 +2172,7 @@ void CPreferences::LoadPreferences(){
 		
 	prefs->m_bUseSecureIdent=ini.GetBool("SecureIdent",true);
 	prefs->m_bAdvancedSpamfilter=ini.GetBool("AdvancedSpamFilter",true);
+	prefs->m_bRemoveFinishedDownloads=ini.GetBool("AutoClearCompleted",false);
 
 	// Toolbar
 	sprintf(prefs->m_sToolbarSettings,ini.GetString("ToolbarSetting", strDefaultToolbar));
@@ -2760,6 +2847,22 @@ void CPreferences::SetMaxUpload(uint16 in)
 void CPreferences::SetMaxDownload(uint16 in)
 {
 	prefs->maxdownload=(in) ? in : UNLIMITED;
+}
+
+uint16 CPreferences::GetMaxSourcePerFileSoft()
+{
+	UINT temp = ((UINT)prefs->maxsourceperfile * 9L) / 10;
+	if (temp > MAX_SOURCES_FILE_SOFT)
+		return MAX_SOURCES_FILE_SOFT;
+	return temp;
+}
+
+uint16 CPreferences::GetMaxSourcePerFileUDP()
+{	
+	UINT temp = ((UINT)prefs->maxsourceperfile * 3L) / 4;
+	if (temp > MAX_SOURCES_FILE_UDP)
+		return MAX_SOURCES_FILE_UDP;
+	return temp;
 }
 
 //MORPH START - Added by IceCream, high process priority

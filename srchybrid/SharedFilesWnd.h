@@ -27,10 +27,14 @@ class CSharedFilesWnd : public CResizableDialog
 public:
 	CSharedFilesWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CSharedFilesWnd();
+
 	void Localize();
-	void Check4StatUpdate(CKnownFile* file);
+	void Check4StatUpdate(const CKnownFile* file);
+	void Reload();
+
 // Dialog Data
 	enum { IDD = IDD_FILES };
+
 	CSharedFilesCtrl sharedfilesctrl;
 
 protected:
@@ -47,7 +51,8 @@ protected:
 	afx_msg void OnSysColorChange();
 
 private:
-	void ShowDetails(CKnownFile* cur_file);
+	void ShowDetails(const CKnownFile* cur_file);
+
 	CProgressCtrlX pop_bar;
 	CProgressCtrlX pop_baraccept;
 	CProgressCtrlX pop_bartrans;

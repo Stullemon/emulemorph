@@ -28,6 +28,7 @@ public:
 	afx_msg void OnBnClickedEd2kfix();
 	afx_msg void OnBnClickedEditWebservices();
 	afx_msg void OnLangChange();
+	afx_msg void OnBnClickedCheck4Update();
 
 protected:
 	CComboBox m_language;

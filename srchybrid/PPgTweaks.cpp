@@ -235,7 +235,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iDateFileNameLog = app_prefs->prefs->DateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	m_iCreditSystem = app_prefs->prefs->m_bCreditSystem;
 	m_iCommitFiles = app_prefs->prefs->m_iCommitFiles;
-	m_iFilterLANIPs = app_prefs->prefs->filterBadIP;
+	m_iFilterLANIPs = app_prefs->prefs->filterLANIPs;
 	m_iExtControls = app_prefs->prefs->m_bExtControls;
 	m_uServerKeepAliveTimeout = app_prefs->prefs->m_dwServerKeepAliveTimeout / 60000;
 	m_iCheckDiskspace = app_prefs->prefs->checkDiskspace;	// SLUGFILLER: checkDiskspace
@@ -312,7 +312,7 @@ BOOL CPPgTweaks::OnApply()
 	app_prefs->prefs->debug2disk = m_iDebug2Disk;
 
 	app_prefs->prefs->m_iCommitFiles = m_iCommitFiles;
-	app_prefs->prefs->filterBadIP = m_iFilterLANIPs;
+	app_prefs->prefs->filterLANIPs = m_iFilterLANIPs;
 	app_prefs->prefs->m_iFileBufferSize = m_iFileBufferSize;
 	app_prefs->prefs->m_iQueueSize = m_iQueueSize;
 	if (app_prefs->prefs->m_bExtControls != (bool)m_iExtControls) {

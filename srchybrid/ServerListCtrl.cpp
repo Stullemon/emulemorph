@@ -176,20 +176,8 @@ void CServerListCtrl::Localize()
 	strRes.ReleaseBuffer();
 }
 
-/*void CServerListCtrl::ShowServers(){ 
-   DeleteAllItems(); 
-   int i=0; 
-   CString temp; 
-   for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
-      CServer* cur_server = server_list->list.GetAt(pos); 
-      InsertItem(LVIF_TEXT|LVIF_PARAM,i,cur_server->GetListName(),0,0,0,(LPARAM)cur_server);
-	  RefreshServer( cur_server );
-      i++; 
-   } 
-}
-*/
-
-void CServerListCtrl::RemoveServer(CServer* todel,bool bDelToList){
+void CServerListCtrl::RemoveServer(CServer* todel)
+{
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
 	find.lParam = (LPARAM)todel;
@@ -198,12 +186,13 @@ void CServerListCtrl::RemoveServer(CServer* todel,bool bDelToList){
 		server_list->RemoveServer((CServer*)GetItemData(result));
 		DeleteItem(result); 
 	}
-	ShowFilesCount();
+	ShowServerCount();
 	return;
 }
 
 // Remove Dead Servers
-void CServerListCtrl::RemoveDeadServer(){
+void CServerListCtrl::RemoveDeadServer()
+{
 	if( theApp.glob_prefs->DeadServer() ){
 	   ShowWindow(SW_HIDE); 
 		for(POSITION pos = server_list->list.GetHeadPosition(); pos != NULL;server_list->list.GetNext(pos)) { 
@@ -217,7 +206,8 @@ void CServerListCtrl::RemoveDeadServer(){
 	}
 }
 
-bool CServerListCtrl::AddServer(CServer* toadd,bool bAddToList){ 
+bool CServerListCtrl::AddServer(CServer* toadd, bool bAddToList)
+{
    if (!server_list->AddServer(toadd)) 
       return false; 
    if (bAddToList) 
@@ -226,12 +216,11 @@ bool CServerListCtrl::AddServer(CServer* toadd,bool bAddToList){
 	   InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,toadd->GetListName(),0,0,1,(LPARAM)toadd);
 	   RefreshServer( toadd );
    }
-   ShowFilesCount();
+	ShowServerCount();
    return true; 
 }
 
-
-void CServerListCtrl::RefreshServer(CServer* server)
+void CServerListCtrl::RefreshServer(const CServer* server)
 {
 	if (!server || !theApp.emuledlg->IsRunning())
 		return;
@@ -243,7 +232,7 @@ void CServerListCtrl::RefreshServer(CServer* server)
 	if (itemnr == -1)
 		return;
 
-	CServer* cur_srv;
+	const CServer* cur_srv;
 	if (theApp.serverconnect->IsConnected()
 		&& (cur_srv = theApp.serverconnect->GetCurrentServer()) != NULL
 		&& cur_srv->GetPort() == server->GetPort()
@@ -331,14 +320,14 @@ void CServerListCtrl::RefreshServer(CServer* server)
 		SetItemText(itemnr,11,_T(""));
 
 	temp = server->GetVersion();
-	if (theApp.glob_prefs->GetDebugServerUDP()){
+	if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
 		if (server->GetUDPFlags() != 0){
 			if (!temp.IsEmpty())
 				temp += _T("; ");
 			temp.AppendFormat(_T("ExtUDP=%x"), server->GetUDPFlags());
 		}
 	}
-	if (theApp.glob_prefs->GetDebugServerTCP()){
+	if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
 		if (server->GetTCPFlags() != 0){
 			if (!temp.IsEmpty())
 				temp += _T("; ");
@@ -359,67 +348,73 @@ END_MESSAGE_MAP()
 
 void CServerListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 { 
-//   POINT point; 
-//   ::GetCursorPos(&point); 
+	// get merged settings
+	bool bFirstItem = true;
+	int iSelectedItems = GetSelectedCount();
+	int iStaticServers = 0;
+	UINT uPrioMenuItem = 0;
+	POSITION pos = GetFirstSelectedItemPosition();
+	while (pos)
+	{
+		const CServer* pServer = (CServer*)GetItemData(GetNextSelectedItem(pos));
 
-	// tecxx 0609 2002 
-	// fix - on right click, we also want to change the current selection like the left click does 
-	CPoint p = point; 
-	ScreenToClient(&p); 
-	int it = HitTest(p); 
-	if (it != -1) 
-		SetSelectionMark(it);   // display selection mark correctly! 
-	// fix end 
+		iStaticServers += pServer->IsStaticMember() ? 1 : 0;
 
-	// Create up-to-date popupmenu
-	UINT flags,flagSSL1,flagSSL2;
-	CTitleMenu m_ServerMenu;
-	CMenu m_ServerPrioMenu;
+		UINT uCurPrioMenuItem = 0;
+		if (pServer->GetPreferences() == SRV_PR_LOW)
+			uCurPrioMenuItem = MP_PRIOLOW;
+		else if (pServer->GetPreferences() == SRV_PR_NORMAL)
+			uCurPrioMenuItem = MP_PRIONORMAL;
+		else if (pServer->GetPreferences() == SRV_PR_HIGH)
+			uCurPrioMenuItem = MP_PRIOHIGH;
+		else
+			ASSERT(0);
 
-	CServer* test=NULL;
-	if (this->GetSelectionMark() != -1) test=(CServer*)GetItemData(GetSelectionMark());
+		if (bFirstItem)
+			uPrioMenuItem = uCurPrioMenuItem;
+		else if (uPrioMenuItem != uCurPrioMenuItem)
+			uPrioMenuItem = 0;
 
-	// set state of selection-dependent menuitems
-	flags=MF_STRING || MF_DISABLED;
-	if (this->GetSelectionMark() != -1) if (test != NULL) flags=MF_STRING;
-	flagSSL1=MF_STRING || MF_DISABLED;
-	flagSSL2=MF_STRING || MF_DISABLED;
+		bFirstItem = false;
+	}
 
-	if (test != NULL) 
-		if (test->IsStaticMember()) flagSSL2=MF_STRING; else flagSSL1=MF_STRING;
+	CTitleMenu ServerMenu;
+	ServerMenu.CreatePopupMenu();
+	ServerMenu.AddMenuTitle(GetResString(IDS_EM_SERVER));
 
-	// add priority switcher
-	m_ServerPrioMenu.CreateMenu();
-	m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIOLOW,GetResString(IDS_PRIOLOW));
-	m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIONORMAL,GetResString(IDS_PRIONORMAL));
-	m_ServerPrioMenu.AppendMenu(MF_STRING,MP_PRIOHIGH,GetResString(IDS_PRIOHIGH));
+	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_CONNECTTO, GetResString(IDS_CONNECTTHIS));
+	ServerMenu.SetDefaultItem(iSelectedItems > 0 ? MP_CONNECTTO : -1);
 
-	m_ServerMenu.CreatePopupMenu(); 
-	m_ServerMenu.AddMenuTitle(GetResString(IDS_EM_SERVER));
-	m_ServerMenu.AppendMenu(flags,MP_CONNECTTO, GetResString(IDS_CONNECTTHIS)); 
-	m_ServerMenu.AppendMenu(flags|MF_POPUP,(UINT_PTR)m_ServerPrioMenu.m_hMenu, GetResString(IDS_PRIORITY));
+	CMenu ServerPrioMenu;
+	ServerPrioMenu.CreateMenu();
+	if (iSelectedItems > 0){
+		ServerPrioMenu.AppendMenu(MF_STRING, MP_PRIOLOW, GetResString(IDS_PRIOLOW));
+		ServerPrioMenu.AppendMenu(MF_STRING, MP_PRIONORMAL, GetResString(IDS_PRIONORMAL));
+		ServerPrioMenu.AppendMenu(MF_STRING, MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
+		ServerPrioMenu.CheckMenuRadioItem(MP_PRIOLOW, MP_PRIOHIGH, uPrioMenuItem, 0);
+	}
+	ServerMenu.AppendMenu(MF_POPUP  | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)ServerPrioMenu.m_hMenu, GetResString(IDS_PRIORITY));
 
-	m_ServerMenu.AppendMenu( flagSSL1,MP_ADDTOSTATIC, GetResString(IDS_ADDTOSTATIC));
-	m_ServerMenu.AppendMenu( flagSSL2,MP_REMOVEFROMSTATIC, GetResString(IDS_REMOVEFROMSTATIC));
+	// enable add/remove from static server list, if there is at least one selected server which can be used for the action
+	ServerMenu.AppendMenu(MF_STRING | (iStaticServers < iSelectedItems ? MF_ENABLED : MF_GRAYED), MP_ADDTOSTATIC, GetResString(IDS_ADDTOSTATIC));
+	ServerMenu.AppendMenu(MF_STRING | (iStaticServers > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEFROMSTATIC, GetResString(IDS_REMOVEFROMSTATIC));
+	ServerMenu.AppendMenu(MF_SEPARATOR);
 
-	m_ServerMenu.AppendMenu(MF_STRING|MF_SEPARATOR);	
-	m_ServerMenu.AppendMenu(flags,MP_REMOVE,   GetResString(IDS_REMOVETHIS)); 
-	m_ServerMenu.AppendMenu(MF_STRING,MP_REMOVEALL, GetResString(IDS_REMOVEALL));
-	m_ServerMenu.AppendMenu(MF_SEPARATOR); 
-	m_ServerMenu.AppendMenu(MF_STRING,MP_GETED2KLINK, GetResString(IDS_DL_LINK1) );
-//   m_ServerMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC)); 
+	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVE, GetResString(IDS_REMOVETHIS));
+	ServerMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_REMOVEALL, GetResString(IDS_REMOVEALL));
+	ServerMenu.AppendMenu(MF_SEPARATOR);
 
-	m_ServerMenu.SetDefaultItem(MP_CONNECTTO);
+	ServerMenu.AppendMenu(MF_STRING | (iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED), MP_GETED2KLINK, GetResString(IDS_DL_LINK1));
+
 	GetPopupMenuPos(*this, point);
-	m_ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this); 
+	ServerMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 
-	VERIFY( m_ServerPrioMenu.DestroyMenu() );
-	VERIFY( m_ServerMenu.DestroyMenu() );
+	VERIFY( ServerPrioMenu.DestroyMenu() );
+	VERIFY( ServerMenu.DestroyMenu() );
 }
 
-BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){ 
-   int item= this->GetSelectionMark(); 
-
+BOOL CServerListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
+{
    if (wParam==MP_REMOVEALL)
    { 
 	   if( theApp.serverconnect->IsConnecting() ){
@@ -432,32 +427,32 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
        server_list->RemoveAllServers(); 
        DeleteAllItems(); 
        ShowWindow(SW_SHOW);
-	   ShowFilesCount();
+		ShowServerCount();
        return true;
    } 
 
+	int item = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
    if (item != -1){ 
-      if (((CServer*)GetItemData(GetSelectionMark())) != NULL){ 
-
+		if (((CServer*)GetItemData(item)) != NULL){
 		  switch (wParam){ 
             case MP_CONNECTTO: 
 			{
-				if ( this->GetSelectedCount()>1 ) {
+					if ( GetSelectedCount()>1 ) {
 					CServer* aServer;
 
 					theApp.serverconnect->Disconnect();
 					POSITION pos=GetFirstSelectedItemPosition();
 					while (pos!=NULL )
 					{ 
-						item = this->GetNextSelectedItem(pos); 
+							item = GetNextSelectedItem(pos);
 						if (item>-1) {
-							aServer=(CServer*)this->GetItemData(item);
+								aServer=(CServer*)GetItemData(item);
 							theApp.serverlist->MoveServerDown(aServer);
 						}
 					}
 					theApp.serverconnect->ConnectToAnyServer( theApp.serverlist->GetServerCount()-  this->GetSelectedCount(),false, false );
 				} else {
-					theApp.serverconnect->ConnectToServer((CServer*)GetItemData(GetSelectionMark()));
+						theApp.serverconnect->ConnectToServer((CServer*)GetItemData(item));
 				}
 				theApp.emuledlg->ShowConnectionState();
 			    break; 
@@ -467,23 +462,24 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
             { 
 				ShowWindow(SW_HIDE); 
 				POSITION pos;
-				while (GetFirstSelectedItemPosition()!=NULL) //(pos != NULL) 
+					while (GetFirstSelectedItemPosition() != NULL)
 				{ 
 					pos=GetFirstSelectedItemPosition();
-					item = this->GetNextSelectedItem(pos); 
-					server_list->RemoveServer( (CServer*)this->GetItemData(item));
+						item = GetNextSelectedItem(pos);
+						server_list->RemoveServer((CServer*)GetItemData(item));
 					DeleteItem(item);
 				}
-				ShowFilesCount();
+					ShowServerCount();
 				ShowWindow(SW_SHOW); 
 				break; 
             }
-			case MP_ADDTOSTATIC:{
+			case MP_ADDTOSTATIC:
+				{
 				POSITION pos=GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos));
+						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					if (!StaticServerFileAppend(change))
-						return false;
+							return FALSE;
 					change->SetIsStaticMember(true);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
@@ -494,9 +490,9 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 				{
 				POSITION pos=GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos));
+						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					if (!StaticServerFileRemove(change))
-						return false;
+							return FALSE;
 					change->SetIsStaticMember(false);
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(change);
 				}
@@ -504,9 +500,9 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			}
 			case MP_PRIOLOW:
 			{
-				POSITION pos = this->GetFirstSelectedItemPosition();
+					POSITION pos = GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos));
+						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					change->SetPreference( SRV_PR_LOW);
 //					if (change->IsStaticMember())
 //						StaticServerFileAppend(change); //Why are you adding to static when changing prioity? If I want it static I set it static.. I set server to LOW because I HATE this server, not because I like it!!!
@@ -516,9 +512,9 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			}
 			case MP_PRIONORMAL:
 			{
-				POSITION pos = this->GetFirstSelectedItemPosition();
+					POSITION pos = GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos));
+						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					change->SetPreference( SRV_PR_NORMAL );
 //					if (change->IsStaticMember())
 //						StaticServerFileAppend(change);
@@ -528,9 +524,9 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			}
 			case MP_PRIOHIGH:
 			{
-				POSITION pos = this->GetFirstSelectedItemPosition();
+					POSITION pos = GetFirstSelectedItemPosition();
 				while( pos != NULL ){
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos));
+						CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
 					change->SetPreference( SRV_PR_HIGH );
 //					if (change->IsStaticMember())
 //						StaticServerFileAppend(change);
@@ -540,12 +536,13 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			}
 			case MP_GETED2KLINK: 
 			{ 
-				POSITION pos = this->GetFirstSelectedItemPosition(); 
+					POSITION pos = GetFirstSelectedItemPosition();
 				CString buffer, link; 
 				while( pos != NULL ){ 
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos)); 
-					buffer.Format("ed2k://|server|%s|%d|/", change->GetFullIP(), change->GetPort()); 
-					if (link.GetLength()>0) buffer="\n"+buffer;
+						const CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
+						buffer.Format(_T("ed2k://|server|%s|%d|/"), change->GetFullIP(), change->GetPort());
+						if (link.GetLength() > 0)
+							buffer = _T("\r\n") + buffer;
 					link += buffer; 
 				} 
 				theApp.CopyTextToClipboard(link); 
@@ -553,12 +550,13 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
 			}
 			case Irc_SetSendLink:
 			{
-				POSITION pos = this->GetFirstSelectedItemPosition(); 
+					POSITION pos = GetFirstSelectedItemPosition();
 				CString buffer, link; 
 				while( pos != NULL ){ 
-					CServer* change = (CServer*)this->GetItemData(this->GetNextSelectedItem(pos)); 
-					buffer.Format("ed2k://|server|%s|%d|/", change->GetFullIP(), change->GetPort()); 
-					if (link.GetLength()>0) buffer="\n"+buffer;
+						const CServer* change = (CServer*)GetItemData(GetNextSelectedItem(pos));
+						buffer.Format(_T("ed2k://|server|%s|%d|/"), change->GetFullIP(), change->GetPort());
+						if (link.GetLength() > 0)
+							buffer = _T("\r\n") + buffer;
 					link += buffer; 
 				} 
 				theApp.emuledlg->ircwnd->SetSendFileString(link);
@@ -568,21 +566,24 @@ BOOL CServerListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
          } 
       } 
    } 
-   return true; 
+	return TRUE;
 }
-void CServerListCtrl::OnNMLdblclk(NMHDR *pNMHDR, LRESULT *pResult){ // mod bb 27.09.02
-	if (GetSelectionMark() != (-1)) {
-		theApp.serverconnect->ConnectToServer((CServer*)GetItemData(GetSelectionMark())); 
+
+void CServerListCtrl::OnNMLdblclk(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (iSel != -1){
+		theApp.serverconnect->ConnectToServer((CServer*)GetItemData(iSel));
 	   theApp.emuledlg->ShowConnectionState();
 	}
 }
 
-bool CServerListCtrl::AddServermetToList(CString strFile) 
+bool CServerListCtrl::AddServermetToList(const CString& strFile)
 { 
    SetRedraw(false);
    bool flag=server_list->AddServermetToList(strFile);
    RemoveDeadServer();
-   ShowFilesCount();
+	ShowServerCount();
    SetRedraw(true);
    return flag;
 }
@@ -612,10 +613,10 @@ void CServerListCtrl::OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
    *pResult = 0; 
 } 
 
-
-int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){ 
-   CServer* item1 = (CServer*)lParam1; 
-   CServer* item2 = (CServer*)lParam2; 
+int CServerListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	const CServer* item1 = (CServer*)lParam1;
+	const CServer* item2 = (CServer*)lParam2;
    if((item1 == NULL) || (item2 == NULL))
 	   return 0; 
    int iTemp=0; 
@@ -865,7 +866,7 @@ bool CServerListCtrl::StaticServerFileAppend(CServer *server)
 	return true;
 }
 
-bool CServerListCtrl::StaticServerFileRemove(CServer *server)
+bool CServerListCtrl::StaticServerFileRemove(const CServer *server)
 {
 	try
 	{
@@ -934,7 +935,7 @@ bool CServerListCtrl::StaticServerFileRemove(CServer *server)
 	return true;
 }
 
-void CServerListCtrl::ShowFilesCount() {
+void CServerListCtrl::ShowServerCount() {
 	CString counter;
 
 	counter.Format(" (%i)", GetItemCount());

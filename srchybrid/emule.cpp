@@ -85,32 +85,24 @@ static TCHAR _szCrtDebugReportFilePath[MAX_PATH] = APP_CRT_DEBUG_LOG_FILE;
 void CALLBACK myErrHandler(Kademlia::CKademliaError *error)
 {
 	CString msg;
-	msg.Format("\r\n\r\nError 0x%08X : %s\r\n\r\n", error->m_ErrorCode, error->m_ErrorDescription);
-//	cerr << msg.GetBuffer(0);
-//	OutputDebugString(msg);
-	if(theApp && theApp.emuledlg->IsRunning())
-		CemuleApp::AddLogLine(false, msg);
+	msg.Format(_T("\r\nError 0x%08X : %hs\r\n"), error->m_ErrorCode, error->m_ErrorDescription);
+	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
+		theApp.emuledlg->QueueDebugLogLine(false, msg);
 }
 
 void CALLBACK myDebugAndLogHandler(LPCSTR lpMsg)
 {
-//	cout << lpMsg << endl;
-	if(theApp && theApp.emuledlg->IsRunning())
-		CemuleApp::AddDebugLogLine(false, "%s", (CString)lpMsg);
-//	OutputDebugString(lpMsg);
-//	OutputDebugString("\r\n");
+	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
+		theApp.emuledlg->QueueDebugLogLine(false, _T("%hs"), lpMsg);
 }
 
 void CALLBACK myLogHandler(LPCSTR lpMsg)
 {
-//	cout << lpMsg << endl;
-	if(theApp && theApp.emuledlg->IsRunning())
-		CemuleApp::AddLogLine(false, "%s", (CString)lpMsg);
-//	OutputDebugString(lpMsg);
-//	OutputDebugString("\r\n");
+	if(theApp.emuledlg && theApp.emuledlg->IsRunning())
+		theApp.emuledlg->QueueLogLine(false, _T("%hs"), lpMsg);
 }
 
-const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(_T(EMULE_GUID));
+const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(EMULE_GUID);
 
 // CemuleApp
 
@@ -414,10 +406,8 @@ bool CemuleApp::ProcessCommandline()
 	CCommandLineInfo cmdInfo;
     ParseCommandLine(cmdInfo);
     
+	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE, EMULE_GUID);
 
-	m_hMutexOneInstance = ::CreateMutex(NULL, FALSE,_T(EMULE_GUID));	
-
-	// Maella -Allow multi-intance with debug-
 	HWND maininst = NULL;
 	bool bAlreadyRunning = false;
 	if (!bIgnoreRunningInstances){
@@ -448,7 +438,7 @@ bool CemuleApp::ProcessCommandline()
 		}
     }
     // khaos::removed: return (maininst || bAlreadyRunning);
-	return false || strlen(MOD_VERSION)>13; // khaos::multiple_instances
+	return false; // khaos::multiple_instances
 }
 
 BOOL CALLBACK CemuleApp::SearchEmuleWindow(HWND hWnd, LPARAM lParam){
@@ -488,7 +478,7 @@ void CemuleApp::SetTimeOnTransfer() {
 	stat_transferStarttime=GetTickCount();
 }
 
-CString CemuleApp::CreateED2kSourceLink( CAbstractFile* f )
+CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 {
 	if (!IsConnected() || IsFirewalled()){
 		AddLogLine(true,GetResString(IDS_SOURCELINKFAILED));
@@ -505,8 +495,7 @@ CString CemuleApp::CreateED2kSourceLink( CAbstractFile* f )
 	return strLink;
 }
 
-// itsonlyme: hostnameSource
-CString CemuleApp::CreateED2kHostnameSourceLink( CAbstractFile* f )
+CString CemuleApp::CreateED2kHostnameSourceLink(const CAbstractFile* f)
 {
 	CString strLink;
 	strLink.Format("ed2k://|file|%s|%u|%s|/|sources,%s:%i|/",
@@ -521,6 +510,9 @@ CString CemuleApp::CreateED2kHostnameSourceLink( CAbstractFile* f )
 //TODO: Move to emule-window
 bool CemuleApp::CopyTextToClipboard( CString strText )
 {
+	if (strText.IsEmpty())
+		return false;
+
 	//allocate global memory & lock it
 	HGLOBAL hGlobal = GlobalAlloc(GHND|GMEM_SHARE,strText.GetLength() + 1);
 	if(hGlobal == NULL)

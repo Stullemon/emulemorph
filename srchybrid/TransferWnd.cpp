@@ -694,38 +694,37 @@ void CTransferWnd::OnLButtonUp(UINT nFlags, CPoint point)
 		m_pDragImage->EndDrag ();
 		delete m_pDragImage;
 		
+		if (m_nDropIndex>-1 && (downloadlistctrl.curTab==0 ||
+				(downloadlistctrl.curTab>0 && m_nDropIndex!=downloadlistctrl.curTab) )) {
 
-		if (m_nDropIndex > -1)
-		{
-			Category_Struct* newCat = theApp.glob_prefs->GetCategory(m_nDropIndex);
-			
-			if (newCat->viewfilters.nFromCats != 1)
-			{
 			CPartFile* file;
-			int index = -1; 
+			
+			// for multiselections
+			CTypedPtrList <CPtrList,CPartFile*> selectedList; 
 			POSITION pos = downloadlistctrl.GetFirstSelectedItemPosition(); 
 			while(pos != NULL) 
 			{ 
-				index = downloadlistctrl.GetNextSelectedItem(pos); 
-				if(index > -1) 
+				int index = downloadlistctrl.GetNextSelectedItem(pos);
+				if(index > -1 && (((CtrlItem_Struct*)downloadlistctrl.GetItemData(index))->type == FILE_TYPE))
+					selectedList.AddTail( (CPartFile*)((CtrlItem_Struct*)downloadlistctrl.GetItemData(index))->value );
+			}
+
+			while (!selectedList.IsEmpty())
 				{
-					if (((CtrlItem_Struct*)downloadlistctrl.GetItemData(index))->type == FILE_TYPE) {
-						file=(CPartFile*)((CtrlItem_Struct*)downloadlistctrl.GetItemData(index))->value;
+				file = selectedList.GetHead();
+				selectedList.RemoveHead();
 						file->SetCategory(m_nDropIndex);
 					}
 
-				} 
-			}
+
 			m_dlTab.SetCurSel(downloadlistctrl.curTab);
+			//MORPH - Changed by SiRoB, Due to Khaos Category
+			//if (m_dlTab.GetCurSel()>0 || (theApp.glob_prefs->GetAllcatType()==1 && m_dlTab.GetCurSel()==0) )
+			if (m_dlTab.GetCurSel()>0)
 				downloadlistctrl.ChangeCategory(m_dlTab.GetCurSel());
 			UpdateCatTabTitles();
-			}
-			else
-				MessageBox(GetResString(IDS_CAT_FROMCATSINFO), GetResString(IDS_CAT_FROMCATSCAP));
 
-		}
-		else
-			m_dlTab.SetCurSel(downloadlistctrl.curTab);
+		} else m_dlTab.SetCurSel(downloadlistctrl.curTab);
 		downloadlistctrl.Invalidate();
 	}
 }

@@ -49,17 +49,18 @@ public:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	void	AddTransferred(uint32 start, uint32 bytes);
 	void	AddBlockTransferred(uint32 start, uint32 end, uint32 count);
-	void	DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat);
-	float	GetSpreadSortValue();
-	float	GetFullSpreadCount();
+	void	DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/;
+	float	GetSpreadSortValue() /*const*/;
+	float	GetFullSpreadCount() /*const*/;
 	//MORPH END - Added by IceCream SLUGFILLER: Spreadbars
 	void	Merge(CFileStatistic *other);	// SLUGFILLER: mergeKnown
-	uint16	GetRequests()				{return requested;}
-	uint16	GetAccepts()				{return accepted;}
-	uint64	GetTransferred()			{return transferred;}
-	uint16	GetAllTimeRequests()		{return alltimerequested;}
-	uint16	GetAllTimeAccepts()			{return alltimeaccepted;}
-	uint64	GetAllTimeTransferred()		{return alltimetransferred;}
+	uint16	GetRequests() const				{return requested;}
+	uint16	GetAccepts() const				{return accepted;}
+	uint64	GetTransferred() const			{return transferred;}
+	uint16	GetAllTimeRequests() const		{return alltimerequested;}
+	uint16	GetAllTimeAccepts() const		{return alltimeaccepted;}
+	uint64	GetAllTimeTransferred() const	{return alltimetransferred;}
+	
 	CKnownFile* fileParent;
 	uint32	GetLastUsed()				{return lastused;} // EastShare - Added by TAHO, .met fiel control
 	void	SetLastUsed(uint32 inLastUsed)				{lastused = inLastUsed;} // EastShare - Added by TAHO, .met fiel control
@@ -159,14 +160,14 @@ public:
 	void SetFilePath(LPCTSTR pszFilePath);
 
 	virtual bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename); // create date, hashset and tags from a file
-	virtual	bool	IsPartFile()	{return false;}
+	virtual bool IsPartFile() const { return false; }
 	virtual bool	LoadFromFile(CFile* file);	//load date, hashset and tags from a .met file
 
 	bool	WriteToFile(CFile* file);	
-	CTime	GetCFileDate()			{return CTime(date);}
-	uint32	GetFileDate()			{return date;}
-	CTime	GetCrCFileDate()		{return CTime(dateC);}
-	uint32	GetCrFileDate()			{return dateC;}
+	CTime	GetCFileDate() const { return CTime(date); }
+	uint32	GetFileDate() const { return date; }
+	CTime	GetCrCFileDate() const { return CTime(dateC); }
+	uint32	GetCrFileDate() const { return dateC; }
 
 	virtual void SetFileSize(uint32 nFileSize);
 
@@ -183,16 +184,16 @@ public:
 	__inline uint16 GetED2KPartCount() const { return m_iED2KPartCount; }
 
 	// file upload priority
-	uint8	GetUpPriority(void)		{return m_iUpPriority;};
+	uint8	GetUpPriority(void) const { return m_iUpPriority; }
 	void	SetUpPriority(uint8 iNewUpPriority, bool bSave = true);
-	bool	IsAutoUpPriority(void)		{return m_bAutoUpPriority;};
-	void	SetAutoUpPriority(bool NewAutoUpPriority) {m_bAutoUpPriority = NewAutoUpPriority;};
+	bool	IsAutoUpPriority(void) const { return m_bAutoUpPriority; }
+	void	SetAutoUpPriority(bool NewAutoUpPriority) { m_bAutoUpPriority = NewAutoUpPriority; }
 	void	UpdateAutoUpPriority();
 	void	AddQueuedCount()			{m_iQueuedCount++; UpdateAutoUpPriority();}
 	void	SubQueuedCount()			{if( m_iQueuedCount != 0 ) m_iQueuedCount--; UpdateAutoUpPriority();}
 	uint32	GetQueuedCount()			{return m_iQueuedCount; /*call func after 'return'!? what's the ident here?*/ /*UpdateAutoUpPriority();*/}
 	// shared file view permissions (all, only friends, no one)
-	uint8	GetPermissions(void)	{ return m_iPermissions; };
+	uint8	GetPermissions(void) const	{ return m_iPermissions; };
 	void	SetPermissions(uint8 iNewPermissions);
 
 	bool	LoadHashsetFromFile(CFile* file, bool checkhash);
@@ -202,33 +203,41 @@ public:
 	void	AddUploadingClient(CUpDownClient* client);
 	void	RemoveUploadingClient(CUpDownClient* client);
 	void	NewAvailPartsInfo();
-	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
+	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool bFlat) /*const*/;
 
 	// comment 
-	CString	GetFileComment()		{if (!m_bCommentLoaded) LoadComment(); return m_strComment;} 
+	CString GetFileComment() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_strComment; }
 	void	SetFileComment(CString strNewComment);
+
+	int8	GetFileRate() /*const*/ { if (!m_bCommentLoaded) LoadComment(); return m_iRate; }
 	void	SetFileRate(int8 iNewRate); 
-	int8	GetFileRate()			{if (!m_bCommentLoaded) LoadComment(); return m_iRate;}
+
+	bool	GetPublishedED2K() const { return m_PublishedED2K; }
 	void	SetPublishedED2K( bool val );
-	bool	GetPublishedED2K()	{return m_PublishedED2K;}
-	uint32	GetKadFileSearchID()	{return kadFileSearchID;}
+
+	uint32	GetKadFileSearchID() const { return kadFileSearchID; }
 	void	SetKadFileSearchID( uint32 id )	{kadFileSearchID = id;} //Don't use this unless you know what your are DOING!! (Hopefully I do.. :)
+
+	uint32	GetPublishedKadSrc() const { return m_PublishedKadSrc; }
 	void	SetPublishedKadSrc();
-	uint32	GetPublishedKadSrc()	{return m_PublishedKadSrc;}
+
 	const Kademlia::WordList& GetKadKeywords() const { return wordlist; }
-	uint32	GetLastPublishTimeKadSrc() {return m_lastPublishTimeKadSrc;}
+
+	uint32	GetLastPublishTimeKadSrc() const { return m_lastPublishTimeKadSrc; }
 	void	SetLastPublishTimeKadSrc( uint32 val ) {m_lastPublishTimeKadSrc = val;}
 	int		PublishKey( Kademlia::CUInt128* nextID);
 	bool	PublishSrc( Kademlia::CUInt128* nextID);
 
 	// file sharing
 	virtual	Packet*	CreateSrcInfoPacket(CUpDownClient* forClient);
-	void GetMetaDataTags();
+	UINT	GetMetaDataVer() const { return m_uMetaDataVer; }
+	void	UpdateMetaDataTags();
+	void	RemoveMetaDataTags();
 
 	void	UpdateClientUploadList();	// #zegzav:updcliuplst
 
 	// preview
-	bool	IsMovie();
+	bool	IsMovie() const;
 	virtual	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
 
@@ -248,10 +257,6 @@ public:
 	CArray<uint16,uint16> m_PartSentCount;	// SLUGFILLER: hideOS
 	bool ShareOnlyTheNeed(CFile* file);//wistily Share only the need
 
-	//MORPH START - Added by SiRoB, Track Part File Sent
-	bool	clientarevisible; // used for SharedFilesCtrl
-	//MORPH END   - Added by SiRoB, Track Part File Sent
-
 	//Morph - added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();
 
@@ -263,12 +268,22 @@ public:
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 	void    SetPowerShared(int newValue) {m_powershared = newValue;};
-	bool    GetPowerShared() {return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized;}
+	bool    GetPowerShared() const {return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized;}
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
+	//MORPH START - Added by SiRoB, HIDEOS
+	void	SetHideOS(int newValue) {m_iHideOS = newValue;};
+	int		GetHideOS() const {return m_iHideOS;}
+	void	SetSelectiveChunk(int newValue) {m_iSelectiveChunk = newValue;};
+	int		GetSelectiveChunk() const {return m_iSelectiveChunk;}
+	//MORPH END   - Added by SiRoB, HIDEOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+	void	SetShareOnlyTheNeed(int newValue) {m_iShareOnlyTheNeed = newValue;};
+	int		GetShareOnlyTheNeed() const {return m_iShareOnlyTheNeed;}
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	int		GetPowerSharedMode() {return m_powershared;}
-	bool	GetPowerShareAuthorized() {return m_bPowerShareAuthorized;}
-	bool	GetPowerShareAuto() {return m_bPowerShareAuto;}
+	int		GetPowerSharedMode() const {return m_powershared;}
+	bool	GetPowerShareAuthorized() const {return m_bPowerShareAuthorized;}
+	bool	GetPowerShareAuto() const {return m_bPowerShareAuto;}
 	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare) {m_bPowerShareAuthorized = authorizepowershare;m_bPowerShareAuto = autopowershare;}
    	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
@@ -278,9 +293,9 @@ protected:
 
 	bool	LoadTagsFromFile(CFile* file);
 	bool	LoadDateFromFile(CFile* file);
-	void	CreateHashFromFile(FILE* file, int Length, uchar* Output)	{CreateHashFromInput(file,0,Length,Output,0);}
-	void	CreateHashFromFile(CFile* file, int Length, uchar* Output)	{CreateHashFromInput(0,file,Length,Output,0);}
-	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output)	{CreateHashFromInput(0,0,Length,Output,in_string);}
+	void	CreateHashFromFile(FILE* file, int Length, uchar* Output) const { CreateHashFromInput(file, NULL, Length, Output, NULL); }
+	void	CreateHashFromFile(CFile* file, int Length, uchar* Output) const { CreateHashFromInput(NULL, file, Length, Output, NULL); }
+	void	CreateHashFromString(uchar* in_string, int Length, uchar* Output) const { CreateHashFromInput(NULL, NULL, Length, Output, in_string); }
 	void	LoadComment();
 	uint16	CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	CArray<uchar*,uchar*> hashlist;
@@ -288,22 +303,23 @@ protected:
 	CString m_strFilePath;
 
 private:
-	void	CreateHashFromInput(FILE* file,CFile* file2, int Length, uchar* Output, uchar* = 0);
+	void	CreateHashFromInput(FILE* file, CFile* file2, int Length, uchar* Output, uchar* = NULL) const;
 
-	bool	m_bCommentLoaded;
+	static CBarShader s_ShareStatusBar;
 	uint16	m_iPartCount;
 	uint16  m_iED2KPartCount;
 	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	uint8	m_iUpPriority;
-	uint8	m_iPermissions;
+	uint8	m_iPermissions; //MORPH - Added by SiRoB, Keep permission flag
 	bool	m_bAutoUpPriority;
-	uint32	m_iQueuedCount;
-	static	CBarShader s_ShareStatusBar;
+	bool	m_bCommentLoaded;
 	bool	m_PublishedED2K;
+	uint32	m_iQueuedCount;
 	uint32	kadFileSearchID;
 	uint32	m_lastPublishTimeKadSrc;
 	uint32	m_PublishedKadSrc;
 	Kademlia::WordList wordlist;
+	UINT	m_uMetaDataVer;
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;
 	CDC 	m_dcSharedStatusBar;
@@ -313,6 +329,16 @@ private:
 	bool	lastonlygreyrect;
 	bool	lastbFlat;
 	//MORPH END - Added by SiRoB,  SharedStatusBar CPU Optimisation
+
+	//MORPH START - Added by SiRoB, HIDEOS
+	int		m_iHideOS;
+	int		m_iSelectiveChunk;
+	//MORPH END   - Added by SiRoB, HIDEOS
+
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+	int		m_iShareOnlyTheNeed;
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	int		m_powershared;
 	bool	m_bPowerShareAuthorized;

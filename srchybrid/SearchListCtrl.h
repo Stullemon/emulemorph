@@ -38,22 +38,21 @@ public:
 
 	void	Init(CSearchList* in_searchlist);
 	void	CreateMenues();
-	void	UpdateSources(CSearchFile* toupdate);
-	void	AddResult(CSearchFile* toshow);
-	void	RemoveResult( CSearchFile* toremove);
+	void	UpdateSources(const CSearchFile* toupdate);
+	void	AddResult(const CSearchFile* toshow);
+	void	RemoveResult(const CSearchFile* toremove);
 	void	Localize();
 	void	ShowResults(uint32 nResultsID);
 	void	NoTabs()	{ m_nResultsID = 0; }
-	uint32	m_nResultsID;
 
 protected:
-	int m_iColumns;
-	bool m_bSetImageList;
-	void DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, CSearchFile* src);
-	void DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, CSearchFile* src);
+	uint32	m_nResultsID;
 
-	static int Compare(CSearchFile* item1, CSearchFile* item2, LPARAM lParamSort);
-	static int CompareChild(CSearchFile* file1, CSearchFile* file2, LPARAM lParamSort);
+	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src);
+	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, const CSearchFile* src);
+
+	static int Compare(const CSearchFile* item1, const CSearchFile* item2, LPARAM lParamSort);
+	static int CompareChild(const CSearchFile* file1, const CSearchFile* file2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);

@@ -25,6 +25,7 @@ public:
 	virtual ~CTreeOptionsCtrlEx(void);
 
 	void SetEditLabel(HTREEITEM hItem, const CString& rstrLabel);
+	void UpdateCheckBoxGroup(HTREEITEM hItem);
 
 	virtual void OnCreateImageList();
 	virtual void HandleChildControlLosingFocus();

@@ -32,6 +32,8 @@
 #include "PartFile.h"
 #include "KnownFileList.h"
 #include "CxImage/xImage.h"
+#include "WebServer.h"
+#include "otherfunctions.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "searchdlg.h"
@@ -137,7 +139,7 @@ void CMMServer::ProcessHelloPacket(CMMData* data, CMMSocket* sender){
 			sender->SendPacket(packet);
 			m_cPWFailed++;
 			if (m_cPWFailed == 3){
-				AddLogLine(false, _T("3 failed logins for MobileMule logged - any further attempt is blocked for 10 min!"));
+				AddLogLine(false, GetResString(IDS_MM_BLOCK));
 				m_cPWFailed = 0;
 				m_dwBlocked = ::GetTickCount() + MMS_BLOCKTIME;
 			}
@@ -146,7 +148,7 @@ void CMMServer::ProcessHelloPacket(CMMData* data, CMMSocket* sender){
 		else{
 			m_bUseFakeContent = (data->ReadByte() != 0); 
 			// everything ok, new sessionid
-			AddLogLine(false, _T("New user successfully logged into MobileMule-Server"));
+			AddLogLine(false, GetResString(IDS_MM_NEWUSER));
 			packet->WriteByte(MMT_OK);
 			m_nSessionID = rand();
 			packet->WriteShort(m_nSessionID);
@@ -180,12 +182,19 @@ void CMMServer::ProcessStatusRequest(CMMSocket* sender, CMMPacket* packet){
 			packet->WriteByte(1);
 		else
 			packet->WriteByte(2);
-		if (theApp.serverconnect->GetCurrentServer() != NULL)
+		if (theApp.serverconnect->GetCurrentServer() != NULL){
 			packet->WriteInt(theApp.serverconnect->GetCurrentServer()->GetUsers());
+			packet->WriteString(theApp.serverconnect->GetCurrentServer()->GetListName());
+		}
+		else{
+			packet->WriteInt(0);
+			packet->WriteString("");
+		}
 	}
 	else{
 		packet->WriteByte(0);
 		packet->WriteInt(0);
+		packet->WriteString("");
 	}
 
 	sender->SendPacket(packet);
@@ -650,4 +659,38 @@ VOID CALLBACK CMMServer::CommandTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWOR
 		}
 	}
 	CATCH_DFLT_EXCEPTIONS("CMMServer::CommandTimer")
+}
+
+void  CMMServer::ProcessStatisticsRequest(CMMData* data, CMMSocket* sender){
+	uint16 nWidth = data->ReadShort();
+	CArray<UpDown, UpDown>* rawData = theApp.webserver->GetPointsForWeb();
+	int nRawDataSize = rawData->GetSize();
+	int nCompressEvery = (nRawDataSize > nWidth) ? nRawDataSize / nWidth : 1;
+	int nPos = (nRawDataSize > nWidth) ? (nRawDataSize % nWidth) : 0;
+	int nAddUp, nAddDown, nAddCon, i;
+	ASSERT (nPos + nCompressEvery * nWidth == nRawDataSize || (nPos == 0 && nRawDataSize < nWidth));
+	
+	CMMPacket* packet = new CMMPacket(MMP_STATISTICSANS);
+	packet->WriteShort((nRawDataSize-nPos)*theApp.glob_prefs->GetTrafficOMeterInterval());
+	packet->WriteShort(min(nWidth, nRawDataSize));
+	while (nPos < nRawDataSize){
+		nAddUp = nAddDown = nAddCon = 0;
+		for (i = 0; i != nCompressEvery; i++){
+			if (nPos >= nRawDataSize){
+				ASSERT ( false );
+				break;
+			}
+			else{
+				nAddUp += (int) (rawData->ElementAt(nPos).upload * 1024);
+				nAddDown += (int) (rawData->ElementAt(nPos).download * 1024);
+				nAddCon += rawData->ElementAt(nPos).connections;
+			}
+			nPos++;
+		}
+		packet->WriteInt(ROUND(nAddUp/i));
+		packet->WriteInt(ROUND(nAddDown/i));
+		packet->WriteShort(ROUND(nAddCon/i));
+	}
+	ASSERT ( nPos == nRawDataSize );
+	sender->SendPacket(packet);
 }

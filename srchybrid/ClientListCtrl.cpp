@@ -169,12 +169,13 @@ void CClientListCtrl::Localize()
 	}
 }
 
-void CClientListCtrl::ShowKnownClients(){
+void CClientListCtrl::ShowKnownClients()
+{
 	DeleteAllItems(); 
 	int i=0; 
 	CString temp; 
 	for(POSITION pos = theApp.clientlist->list.GetHeadPosition(); pos != NULL;theApp.clientlist->list.GetNext(pos)) { 
-		CUpDownClient* cur_client = theApp.clientlist->list.GetAt(pos); 
+		const CUpDownClient* cur_client = theApp.clientlist->list.GetAt(pos); 
 		InsertItem(LVIF_TEXT|LVIF_PARAM,i,LPSTR_TEXTCALLBACK,0,0,0,(LPARAM)cur_client);
 		RefreshClient( cur_client );
 		i++; 
@@ -182,7 +183,8 @@ void CClientListCtrl::ShowKnownClients(){
 	theApp.emuledlg->transferwnd->UpdateListCount(3);
 }
 
-void CClientListCtrl::AddClient(CUpDownClient* client){
+void CClientListCtrl::AddClient(const CUpDownClient* client)
+{
 	if(theApp.glob_prefs->IsKnownClientListDisabled())
 		return;
 	LVFINDINFO find;
@@ -197,7 +199,8 @@ void CClientListCtrl::AddClient(CUpDownClient* client){
 	theApp.emuledlg->transferwnd->UpdateListCount(3);
 }
 
-void CClientListCtrl::RemoveClient(CUpDownClient* client){
+void CClientListCtrl::RemoveClient(const CUpDownClient* client)
+{
 	if (!theApp.emuledlg->IsRunning()) return;
 	sint32 result = 0;
 	while( result != -1 ){
@@ -211,7 +214,8 @@ void CClientListCtrl::RemoveClient(CUpDownClient* client){
 	theApp.emuledlg->transferwnd->UpdateListCount(3);
 }
 
-void CClientListCtrl::RefreshClient(CUpDownClient* client){
+void CClientListCtrl::RefreshClient(const CUpDownClient* client)
+{
 	// There is some type of timing issue here.. If you click on item in the queue or upload and leave
 	// the focus on it when you exit the cient, it breaks on line 854 of emuleDlg.cpp.. 
 	// I added this IsRunning() check to this function and the DrawItem method and
@@ -230,7 +234,8 @@ void CClientListCtrl::RefreshClient(CUpDownClient* client){
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
-void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
+void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
 	if( !theApp.emuledlg->IsRunning() )
 		return;
 	if (!lpDrawItemStruct->itemData)
@@ -245,8 +250,8 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	}
 	else
 		odc->SetBkColor(GetBkColor());
-	CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
+	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
 	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
@@ -469,7 +474,8 @@ void CClientListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
-BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
+BOOL CClientListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
@@ -564,9 +570,10 @@ void CClientListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	*pResult = 0;
 }
 
-int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
-	CUpDownClient* item1 = (CUpDownClient*)lParam1;
-	CUpDownClient* item2 = (CUpDownClient*)lParam2;
+int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	const CUpDownClient* item1 = (CUpDownClient*)lParam1;
+	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
@@ -692,8 +699,7 @@ void CClientListCtrl::ShowSelectedUserDetails() {
     if (it == -1) return;
 	SetSelectionMark(it);   // display selection mark correctly! 
 
-	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
-
+	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 	if (client){
 		CClientDetailDialog dialog(client);
 		dialog.DoModal();
@@ -703,7 +709,7 @@ void CClientListCtrl::ShowSelectedUserDetails() {
 void CClientListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
-		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
 			CClientDetailDialog dialog(client);
 			dialog.DoModal();
@@ -727,7 +733,7 @@ void CClientListCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
 		// function is invoked *very* often, no *NOT* put any time consuming code here in.
 
 		if (pDispInfo->item.mask & LVIF_TEXT){
-			CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
+			const CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
 			if (pClient != NULL){
 				switch (pDispInfo->item.iSubItem){
 					case 0:

@@ -27,6 +27,7 @@
 #include "SafeFile.h"
 #include "PartFile.h"
 #include "Packets.h"
+#include "IPFilter.h"
 #ifndef _CONSOLE
 #include "emuledlg.h"
 #include "ServerWnd.h"
@@ -73,10 +74,8 @@ CUDPSocket::CUDPSocket(CServerConnect* in_serverconnect){
 }
 
 CUDPSocket::~CUDPSocket(){
-	if (m_cur_server)
-		delete m_cur_server;
-	if (m_sendbuffer)
-		delete[] m_sendbuffer;
+	delete m_cur_server;
+	delete[] m_sendbuffer;
 	POSITION pos = controlpacket_queue.GetHeadPosition();
 	while (pos){
 		SServerUDPPacket* p = controlpacket_queue.GetNext(pos);
@@ -112,13 +111,14 @@ void CUDPSocket::OnReceive(int nErrorCode){
 	{
 		if (buffer[0] == OP_EDONKEYPROT)
 			ProcessPacket(buffer+2, length-2, buffer[1], host, nUDPPort);
-		else if (theApp.glob_prefs->GetDebugServerUDP())
+		else if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 			Debug("***NOTE: ServerUDPMessage from %s:%u - Unknown protocol 0x%02x\n", host, nUDPPort-4, buffer[0]);
 	}
 }
 
 bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR host, uint16 nUDPPort){
 	try{
+		theApp.downloadqueue->AddDownDataOverheadServer(size);
 		CServer* update = theApp.serverlist->GetServerByAddress( host, nUDPPort-4 );
 		if( update ){
 			update->ResetFailedCount();
@@ -126,13 +126,12 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 		}
 		switch(opcode){
 			case OP_GLOBSEARCHRES:{
-				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				CSafeMemFile data(packet, size);
 				// process all search result packets
 				int iLeft;
 				int iPacket = 1;
 				do{
-					if (theApp.glob_prefs->GetDebugServerUDP()){
+					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
 						uint32 nClientID = *((uint32*)(packet+16));
 						uint16 nClientPort = *((uint16*)(packet+20));
 						Debug("ServerUDPMessage from %s:%u - OP_GlobSearchResult(%u); %s\n", host, nUDPPort-4, iPacket++, DbgGetFileInfo((uchar*)packet), DbgGetClientID(nClientID), nClientPort);
@@ -164,15 +163,14 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				}
 				while (iLeft > 0);
 
-				if (iLeft > 0 && theApp.glob_prefs->GetDebugServerUDP()){
+				if (iLeft > 0 && theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
 					Debug("OP_GlobSearchResult contains %d additionl bytes\n", iLeft);
-					if (theApp.glob_prefs->GetDebugServerUDP() > 1)
+					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 1)
 						DebugHexDump(data);
 				}
 				break;
 			}
 			case OP_GLOBFOUNDSOURCES:{
-				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				CSafeMemFile data(packet, size);
 				// process all source packets
 				int iLeft;
@@ -180,7 +178,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				do{
 					uchar fileid[16];
 					data.Read(fileid,16);
-					if (theApp.glob_prefs->GetDebugServerUDP())
+					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 						Debug("ServerUDPMessage from %s:%u - OP_GlobFoundSources(%u); %s\n", host, nUDPPort-4, iPacket++, DbgGetFileInfo(fileid));
 					if (CPartFile* file = theApp.downloadqueue->GetFileByID(fileid))
 						file->AddSources(&data, inet_addr(host), nUDPPort-4);
@@ -215,17 +213,16 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				}
 				while (iLeft > 0);
 
-				if (iLeft > 0 && theApp.glob_prefs->GetDebugServerUDP()){
+				if (iLeft > 0 && theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
 					Debug("OP_GlobFoundSources contains %d additionl bytes\n", iLeft);
-					if (theApp.glob_prefs->GetDebugServerUDP() > 1)
+					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 1)
 						DebugHexDump(data);
 				}
 				break;
 			}
  			case OP_GLOBSERVSTATRES:{
-				if (theApp.glob_prefs->GetDebugServerUDP())
+				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 					Debug("ServerUDPMessage from %s:%u - OP_GlobServStatRes\n", host, nUDPPort-4);
-				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				if( size < 12 || update == NULL )
 					return true;
 #define get_uint32(p)	*((uint32*)(p))
@@ -247,10 +244,10 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				}
 				if( size >= 28 ){
 					uUDPFlags = get_uint32(packet+24);
-					if (theApp.glob_prefs->GetDebugServerUDP())
+					if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 						Debug(" UDP flags=0x%08x\n", uUDPFlags);
 				}
-				if (theApp.glob_prefs->GetDebugServerUDP()){
+				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
 					if( size > 28 ){
 					    Debug("***NOTE: ServerUDPMessage from %s:%u - OP_GlobServStatRes:  ***AddData: %s\n", host, nUDPPort-4, GetHexDump(packet+24, size-24));
 					}
@@ -277,11 +274,10 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 			}
 
  			case OP_SERVER_DESC_RES:{
-				if (theApp.glob_prefs->GetDebugServerUDP())
+				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 					Debug("ServerUDPMessage from %s:%u - OP_ServerDescRes\n", host, nUDPPort-4);
 				if(!update)
 					return true;
-				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				CSafeMemFile srvinfo(packet,size);
 				uint16 stringlen;
 				srvinfo.Read(&stringlen,2);
@@ -294,7 +290,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 				srvinfo.Read(strDesc.GetBuffer(stringlen),stringlen);
 				strDesc.ReleaseBuffer(stringlen);
 
-				if (theApp.glob_prefs->GetDebugServerUDP()){
+				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0){
 					UINT uAddData = srvinfo.GetLength() - srvinfo.GetPosition();
 					if (uAddData)
 						Debug("***NOTE: ServerUDPMessage from %s:%u - OP_ServerDescRes:  ***AddData: %s\n", host, nUDPPort-4, GetHexDump(packet + srvinfo.GetPosition(), uAddData));
@@ -308,7 +304,6 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, uint8 opcode, LPCTSTR h
 			}
 			default:
 				Debug("***NOTE: ServerUDPMessage from %s:%u - Unknown packet: opcode=0x%02X  %s\n", host, nUDPPort-4, opcode, GetHexDump(packet, size));
-				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				return false;
 		}
 
@@ -384,13 +379,11 @@ void CUDPSocket::AsyncResolveDNS(LPCTSTR lpszHostAddress, UINT nHostPort){
 			MAXGETHOSTSTRUCT);
 
 		if (m_DnsTaskHandle == NULL){
+			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for '%s' - %s"), lpszHostAddress, GetErrorMessage(GetLastError(), 1));
 			delete[] m_sendbuffer;
 			m_sendbuffer = NULL;
 			delete m_cur_server;
 			m_cur_server = NULL;
-#ifdef _DEBUG
-			AfxMessageBox("LOOKUPERROR DNSTASKHANDLE = 0");
-#endif
 		}
 	}
 	else{
@@ -403,14 +396,11 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 
 	/* An asynchronous database routine completed. */
 	if (WSAGETASYNCERROR(lp) != 0){
-		if (m_sendbuffer){
-			delete[] m_sendbuffer;
-			m_sendbuffer = NULL;
-		}
-		if (m_cur_server){
-			delete m_cur_server;
-			m_cur_server = NULL;
-		}
+		AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s) - %s"), m_cur_server ? m_cur_server->GetListName() : "", m_cur_server ? m_cur_server->GetAddress() : "", GetErrorMessage(WSAGETASYNCERROR(lp), 1));
+		delete[] m_sendbuffer;
+		m_sendbuffer = NULL;
+		delete m_cur_server;
+		m_cur_server = NULL;
 		return;
 	}
 	if (m_SaveAddr.sin_addr.s_addr == INADDR_NONE){
@@ -426,13 +416,38 @@ void CUDPSocket::DnsLookupDone(WPARAM wp, LPARAM lp){
 	}
 	if (m_cur_server){
 		if (m_SaveAddr.sin_addr.s_addr != INADDR_NONE){
-			CServer* update = theApp.serverlist->GetServerByAddress(m_cur_server->GetAddress(),m_cur_server->GetPort());
-		    if (update)
-			    update->SetID(m_SaveAddr.sin_addr.S_un.S_addr);
-			SendBuffer();
+			bool bRemoveServer = false;
+			if (!IsGoodIP(m_SaveAddr.sin_addr.s_addr)){
+				if (theApp.glob_prefs->GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Resolved IP for server '%s' is %s - Invalid IP or LAN address, server deleted."), m_cur_server->GetListName(), ipstr(m_SaveAddr.sin_addr.s_addr));
+				bRemoveServer = true;
+			}
+			if (!bRemoveServer && theApp.ipfilter->IsFiltered(m_SaveAddr.sin_addr.s_addr)){
+				if (theApp.glob_prefs->GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Resolved IP for server '%s' is %s - Found in IP-filter, server deleted."), m_cur_server->GetListName(), ipstr(m_SaveAddr.sin_addr.s_addr));
+				bRemoveServer = true;
+			}
+
+			if (!bRemoveServer){
+				CServer* update = theApp.serverlist->GetServerByAddress(m_cur_server->GetAddress(),m_cur_server->GetPort());
+			    if (update)
+				    update->SetID(m_SaveAddr.sin_addr.S_un.S_addr);
+				SendBuffer();
+			}
+			else{
+				CServer* todel = theApp.serverlist->GetServerByAddress(m_cur_server->GetAddress(), m_cur_server->GetPort());
+				if (todel)
+					theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer(todel);
+				delete m_cur_server;
+				m_cur_server = NULL;
+				delete[] m_sendbuffer;
+				m_sendbuffer = NULL;
+				m_sendblen = 0;
+			}
 		}
 		else{
 			// still no valid IP for this server - delete packet
+			AddDebugLogLine(false, _T("Error: Server UDP socket: Failed to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
 			delete m_cur_server;
 			m_cur_server = NULL;
 			delete[] m_sendbuffer;
@@ -501,6 +516,8 @@ void CUDPSocket::SendBuffer(){
 
 void CUDPSocket::SendPacket(Packet* packet,CServer* host){
 	// if the last DNS query did not yet return, we may still have a packet queued - delete it
+	if (m_cur_server)
+		AddDebugLogLine(false, _T("Warning: Server UDP socket: Timeout occured when trying to resolve address for server '%s' (%s)"), m_cur_server->GetListName(), m_cur_server->GetAddress());
 	delete m_cur_server;
 	m_cur_server = NULL;
 	delete[] m_sendbuffer;

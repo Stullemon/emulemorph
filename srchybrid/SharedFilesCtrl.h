@@ -32,16 +32,17 @@ public:
 
 	void	Init();
 	void	CreateMenues();
-	void	ShowFileList(CSharedFileList* in_sflist);
-	void	ShowFile(CKnownFile* file);
-	void	RemoveFile(CKnownFile* toremove);
-	void	UpdateFile(CKnownFile* file);
+	void	ShowFileList(const CSharedFileList* pSharedFiles);
+	void	ShowFile(const CKnownFile* file);
+	void	RemoveFile(const CKnownFile* toremove);
+	void	UpdateFile(const CKnownFile* file);
 	void	Localize();
 	void	ShowFilesCount();
-	void	ShowComments(int index);
+	void	ShowComments(CKnownFile* file);
 
 protected:
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	void UpdateItem(CKnownFile* file);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
@@ -53,22 +54,16 @@ protected:
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
 
 private:
-	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
+
 	CTitleMenu	m_SharedFilesMenu;
-	//MORPH START - Added by SiRoB, ZZ Upload System
-	CMenu       m_PowershareMenu;
-	//MORPH END - Added by SiRoB, ZZ Upload System
 	CMenu		m_PrioMenu;
-	CMenu		m_PermMenu;
-	CSharedFileList* sflist;
-	bool		sortstat[3];
-	void		OpenFile(CKnownFile* file);
-	//MORPH START - Added by SiRoB, About Open File Folder entry
-	void		OpenFileFolder(CKnownFile* file);
-	//MORPH END - Added by SiRoB, About Open File Folder entry
-	// EastShare Start added by linekin, TBH delete shared file
-	void		DeleteFileFromHDPart(CPartFile* file);
-	void		DeleteFileFromHDByKnown(CKnownFile* file);
-	void		DeleteFileFromHD(CKnownFile* file);
-	// EastShare End
+	bool		sortstat[4];
+	void		OpenFile(const CKnownFile* file);
+
+	CMenu		m_PermMenu; //MORPH START - Added by SiRoB, Keep Permission flag
+	CImageList  m_ImageList;	//MORPH - Added by IceCream, SLUGFILLER: showComments
+	CMenu       m_PowershareMenu; //MORPH - Added by SiRoB, ZZ Upload System
+	CMenu		m_HideOSMenu; //MORPH - Added by SiRoB, HIDEOS
+	CMenu		m_SelectiveChunkMenu; //MORPH - Added by SiRoB, HIDEOS
+	CMenu		m_ShareOnlyTheNeedMenu; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
 };

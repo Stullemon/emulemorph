@@ -92,6 +92,9 @@ void PreviewDlg::ShowImage(sint16 nNumber){
 	HBITMAP hbitmap = m_ImageStatic.SetBitmap(m_pFile->GetPreviews()[nNumber]->MakeBitmap(m_ImageStatic.GetDC()->m_hDC));
 	if (hbitmap)
 		DeleteObject(hbitmap);
+	CString strInfo;
+	strInfo.Format(_T("Image %u of %u"), nNumber+1, nImageCount);
+	SetDlgItemText(IDC_PREVIEW_INFO, strInfo);
 }
 
 void PreviewDlg::Show(){

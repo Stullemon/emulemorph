@@ -166,28 +166,28 @@ void CKadSearchListCtrl::SearchRef(Kademlia::CSearch* search)
 			SetItemText(result,colNum,id);
 			switch(search->getSearchTypes()){
 				case Kademlia::CSearch::FILE:
-					id.Format(GetResString(IDS_KAD_SEARCHSRC), search->getCount());
+					id.Format(GetResString(IDS_KAD_SEARCHSRC), search->getCount(), search->getCountSent());
 					SetItem(result,0,LVIF_IMAGE,0,0,0,0,0,0);
 					break;
 				case Kademlia::CSearch::KEYWORD:
-					id.Format(GetResString(IDS_KAD_SEARCHKW), search->getCount());
+					id.Format(GetResString(IDS_KAD_SEARCHKW), search->getCount(), search->getCountSent());
 					SetItem(result,0,LVIF_IMAGE,0,1,0,0,0,0);
 					break;
 				case Kademlia::CSearch::NODE:
 				case Kademlia::CSearch::NODECOMPLETE:
-					id.Format(GetResString(IDS_KAD_NODE), search->getCount());
+					id.Format(GetResString(IDS_KAD_NODE), search->getCount(), search->getCountSent());
 					SetItem(result,0,LVIF_IMAGE,0,2,0,0,0,0);
 					break;
 				case Kademlia::CSearch::STOREFILE:
-					id.Format(GetResString(IDS_KAD_STOREFILE), search->getCount(), search->getKeywordCount());
+					id.Format(GetResString(IDS_KAD_STOREFILE), search->getCount(), search->getCountSent());
 					SetItem(result,0,LVIF_IMAGE,0,3,0,0,0,0);
 					break;
 				case Kademlia::CSearch::STOREKEYWORD:
-					id.Format(GetResString(IDS_KAD_STOREKW), search->getCount(), search->getKeywordCount());
+					id.Format(GetResString(IDS_KAD_STOREKW), search->getCount(), search->getCountSent());
 					SetItem(result,0,LVIF_IMAGE,0,4,0,0,0,0);
 					break;
 				default:
-					id.Format(GetResString(IDS_KAD_UNKNOWN), search->getCount());
+					id.Format(GetResString(IDS_KAD_UNKNOWN), search->getCount(), search->getCountSent());
 			}
 			SetItemText(result,colType,id);
 			SetItemText(result,colName,search->getFileName());

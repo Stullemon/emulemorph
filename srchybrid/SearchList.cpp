@@ -124,7 +124,7 @@ void ConvertED2KTag(CTag*& pTag)
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchFile
 	
-CSearchFile::CSearchFile(CSearchFile* copyfrom)
+CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 {
 	md4cpy(m_abyFileHash, copyfrom->GetFileHash());
 	SetFileSize(copyfrom->GetIntTagValue(FT_FILESIZE));
@@ -139,13 +139,12 @@ CSearchFile::CSearchFile(CSearchFile* copyfrom)
 	m_nKademlia = copyfrom->IsKademlia();
 	for (int i = 0; i < copyfrom->GetTags().GetCount(); i++)
 		taglist.Add(new CTag(*copyfrom->GetTags().GetAt(i)));
-	for (i = 0; i < copyfrom->GetServers().GetSize(); i++){
-		SServer server = copyfrom->GetServer(i);
-		AddServer(server);
-	}
+	const CSimpleArray<SServer>& servers = copyfrom->GetServers();
+	for (i = 0; i < servers.GetSize(); i++)
+		AddServer(servers[i]);
 
 	m_list_bExpanded = false;
-	m_list_parent = copyfrom;
+	m_list_parent = const_cast<CSearchFile*>(copyfrom);
 	m_list_childcount = 0;
 	m_bPreviewPossible = false;
 }
@@ -158,7 +157,7 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 	in_data->Read(&m_nClientID,4);
 	in_data->Read(&m_nClientPort,2);
 	if ((m_nClientID || m_nClientPort) && !IsValidClientIPPort(m_nClientID, m_nClientPort)){
-		if (theApp.glob_prefs->GetDebugServerSearches() > 1)
+		if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
 			Debug("Filtered source from search result %s:%u\n", DbgGetClientID(m_nClientID), m_nClientPort);
 		m_nClientID = 0;
 		m_nClientPort = 0;
@@ -172,12 +171,12 @@ CSearchFile::CSearchFile(CFile* in_data, uint32 nSearchID, uint32 nServerIP, uin
 	//  *) does not return ClientIP+Port if the OP_OFFERFILES packet does not also contain it.
 	//  *) if the OP_OFFERFILES packet does contain our HighID and Port the server returns that data at least when
 	//     returning search results via TCP.
-	if (theApp.glob_prefs->GetDebugServerSearches() > 1)
+	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
 		Debug("Search Result: %s  Client=%u.%u.%u.%u:%u  Tags=%u\n", md4str(m_abyFileHash), (uint8)m_nClientID,(uint8)(m_nClientID>>8),(uint8)(m_nClientID>>16),(uint8)(m_nClientID>>24), m_nClientPort, tagcount);
 
 	for (int i = 0;i != tagcount; i++){
 		CTag* toadd = new CTag(in_data);
-		if (theApp.glob_prefs->GetDebugServerSearches() > 1)
+		if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
 			Debug("  %s\n", toadd->GetFullInfo());
 		ConvertED2KTag(toadd);
 		if (toadd)
@@ -410,16 +409,16 @@ uint16 CSearchList::ProcessSearchanswer(char* in_packet, uint32 size,
 		if (ucMore == 0x00 || ucMore == 0x01){
 			if (pbMoreResultsAvailable)
 				*pbMoreResultsAvailable = (bool)ucMore;
-			if (theApp.glob_prefs->GetDebugServerTCP())
+			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 				Debug("  Search answer(Server %s:%u): More=%u\n", inet_ntoa(*(in_addr*)&nServerIP), nServerPort, ucMore);
 		}
 		else{
-			if (theApp.glob_prefs->GetDebugServerTCP())
+			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 				Debug("*** NOTE: ProcessSearchanswer(Server %s:%u): ***AddData: 1 byte: 0x%02x\n", inet_ntoa(*(in_addr*)&nServerIP), nServerPort, ucMore);
 		}
 	}
 	else if (iAddData > 0){
-		if (theApp.glob_prefs->GetDebugServerTCP()){
+		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
 			Debug("*** NOTE: ProcessSearchanswer(Server %s:%u): ***AddData: %u bytes\n", inet_ntoa(*(in_addr*)&nServerIP), nServerPort, iAddData);
 			DebugHexDump((uint8*)in_packet + packet.GetPosition(), iAddData);
 		}
@@ -594,12 +593,12 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 						// in the parent item, but it gives a correct view of the server list within the server property page
 						for (int s = 0; s < toadd->GetServers().GetSize(); s++)
 						{
-							CSearchFile::SServer server = toadd->GetServer(s);
+							CSearchFile::SServer server = toadd->GetServerAt(s);
 							int iFound = cur_file2->GetServers().Find(server);
 							if (iFound == -1)
 								cur_file2->AddServer(server);
 							else
-								cur_file2->GetServer(iFound).m_uAvail += server.m_uAvail;
+								cur_file2->GetServerAt(iFound).m_uAvail += server.m_uAvail;
 						}
 						break;
 					}
@@ -630,7 +629,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 				}
 				else
 				{
-					if (theApp.glob_prefs->GetDebugServerSearches() > 1)
+					if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 1)
 					{
 						uint32 nIP = toadd->GetClientID();
 						Debug("Filtered source from search result %s:%u\n", DbgGetClientID(nIP), toadd->GetClientPort());
@@ -649,7 +648,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse){
 					cur_file->AddServer(server);
 				}
 				else
-					cur_file->GetServer(iFound).m_uAvail += uAvail;
+					cur_file->GetServerAt(iFound).m_uAvail += uAvail;
 			}
 			if (outputwnd && !m_MobilMuleSearch)
 				outputwnd->UpdateSources(cur_file);

@@ -35,11 +35,8 @@
 
 #define PR_VERYLOW			4 // I Had to change this because it didn't save negative number correctly.. Had to modify the sort function for this change..
 #define PR_LOW				0 //*
-#define SRV_PR_LOW			2
 #define PR_NORMAL			1 // Don't change this - needed for edonkey clients and server!
-#define SRV_PR_NORMAL		0
 #define	PR_HIGH				2 //*
-#define SRV_PR_HIGH			1
 #define PR_VERYHIGH			3
 #define PR_AUTO				5 //UAP Hunter
 
@@ -59,6 +56,7 @@
 
 class CSearchFile;
 class CUpDownClient;
+enum EDownloadState;
 class CxImage;
 
 #pragma pack(1)
@@ -66,7 +64,6 @@ struct Requested_Block_Struct
 {
 	uint32	StartOffset;
 	uint32	EndOffset;
-	uint32	packedsize;
 	uchar	FileID[16];
 	uint32  transferred; // Barry - This counts bytes completed
 };
@@ -92,7 +89,6 @@ class CPartFile : public CKnownFile
 {
 	friend class CPartFileConvert;
 public:
-	friend class CPartFileConvert;
 	friend class CPartHashThread;	// SLUGFILLER: SafeHash
 
 	CPartFile();
@@ -101,13 +97,28 @@ public:
 	CPartFile(class CED2KFileLink* fileLink);
 	virtual ~CPartFile();
 
+	bool	IsPartFile() const { return !(status == PS_COMPLETE); }
+
+	// eD2K filename
 	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
+
+	// part.met filename (without path!)
+	const CString& GetPartMetFileName() const { return m_partmetfilename; }
+
+	// full path to part.met file or completed file
+	const CString& GetFullName() const { return m_fullname; }
+	void	SetFullName(CString name) { m_fullname = name; }
+
+	// local file system related properties
+	bool	IsNormalFile() const { return (m_dwFileAttributes & (FILE_ATTRIBUTE_COMPRESSED | FILE_ATTRIBUTE_SPARSE_FILE)) == 0; }
+	uint64	GetRealFileSize() const;
+	void	GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uint32& pui32NeededSpace) const;
+	uint32	GetNeededSpace() const; // SLUGFILLER: checkDiskspace
 
 	void	InitializeFromLink(CED2KFileLink* fileLink);
 	bool	CreateFromFile(LPCTSTR directory,LPCTSTR filename)	{return false;}// not supported in this class
 	bool	LoadFromFile(FILE* file)						{return false;}
 	// SLUGFILLER: mergeKnown - allow WriteToFile to be called	
-	bool	IsPartFile()									{return !(status == PS_COMPLETE);}
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	uint32	Process(uint32 reducedownload,uint8 m_icounter, uint32 friendReduceddownload);
 	//MORPH END - Added by Yun.SF3, ZZ Upload System
@@ -116,137 +127,145 @@ public:
 	void	PartFileHashFinished(CKnownFile* result);
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
 	void	PartHashFinished(uint16 partnumber, bool corrupt);
-	bool	IsPartShareable(uint16 partnumber);
-	bool	IsRangeShareable(uint32 start, uint32 end);
+	bool	IsPartShareable(uint16 partnumber) const;
+	bool	IsRangeShareable(uint32 start, uint32 end) const;
 	// SLUGFILLER: SafeHash
-	uint64	GetRealFileSize();
-	bool	IsNormalFile() const { return (m_dwFileAttributes & (FILE_ATTRIBUTE_COMPRESSED | FILE_ATTRIBUTE_SPARSE_FILE)) == 0; }
-
+	
 	void	AddGap(uint32 start, uint32 end);
 	void	FillGap(uint32 start, uint32 end);
-	void	DrawStatusBar(CDC* dc, RECT* rect, bool bFlat);
-	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat);
-	bool	IsComplete(uint32 start, uint32 end);
-	bool	IsPureGap(uint32 start, uint32 end);
-	bool	IsCorruptedPart(uint16 partnumber);
+	void	DrawStatusBar(CDC* dc, RECT* rect, bool bFlat) /*const*/;
+	void	DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool	 bFlat) /*const*/;
+	bool	IsComplete(uint32 start, uint32 end) const;
+	bool	IsPureGap(uint32 start, uint32 end) const;
+	bool	IsCorruptedPart(uint16 partnumber) const;
 	void	UpdateCompletedInfos();
+	void	NewSrcPartsInfo();
 
-	bool	GetNextRequestedBlock(CUpDownClient* sender,Requested_Block_Struct** newblocks,uint16* count);
-	void	WritePartStatus(CFile* file, CUpDownClient* client = NULL); // SLUGFILLER: hideOS
-	void	WriteCompleteSourcesCount(CFile* file);
+	bool	GetNextRequestedBlock(CUpDownClient* sender, Requested_Block_Struct** newblocks, uint16* count) /*const*/;
+	void	WritePartStatus(CFile* file, CUpDownClient* client = NULL) /*const*/; // SLUGFILLER: hideOS
+	void	WriteCompleteSourcesCount(CFile* file) const;
 	void	AddSources(CMemFile* sources,uint32 serverip, uint16 serverport);
 	static bool	CanAddSource(uint32 userid, uint16 port, uint32 serverip, uint16 serverport, uint8* pdebug_lowiddropped = NULL);
-	uint8	GetStatus(bool ignorepause = false);
-	bool	GetCompletionError() const						{return m_bCompletionError;}
-	uint32  GetCompletedSize()								{return completedsize;}
-	void	NewSrcPartsInfo();
-	void	SetDownPriority(uint8 iNewDownPriority);
-	bool	IsAutoDownPriority(void)		{return m_bAutoDownPriority;};
-	void	SetAutoDownPriority(bool NewAutoDownPriority) {m_bAutoDownPriority = NewAutoDownPriority;};
-	void	UpdateAutoDownPriority();
-	const CString& GetPartMetFileName() const				{return m_partmetfilename;}
-	uint32	GetTransfered()									{return transfered;}
-	uint8	GetDownPriority()								{return m_iDownPriority;}
-	const CString& GetFullName() const						{return m_fullname;}
-	void	SetFullName(CString name)						{m_fullname=name;}
-	uint16	GetSourceCount() const							{return srclist.GetCount();}
-	// khaos::kmod+ Source Counts Are Cached
-	uint16	GetAvailableSrcCount()							{return m_anStates[0]+m_anStates[1];}	
-	// khaos::kmod-
-	uint16	GetSrcA4AFCount()								{return A4AFsrclist.GetCount();}
-	uint16  GetSrcStatisticsValue(uint16 value); // value = EDownloadState
-	uint16	GetTransferingSrcCount();			// == GetSrcStatisticsValue(DS_DOWNLOADING)
 	
-	// khaos::categorymod+
-	bool	IsPaused()										{return GetStatus()==PS_PAUSED;}
-	// khaos::categorymod-
-	uint32	GetDatarate()									{return datarate;}
-	float	GetPercentCompleted()							{return percentcompleted;}
-	//MORPH START - Modifified by SiRoB
-	uint16  GetNotCurrentSourcesCount()						{return m_anStates[2]+m_anStates[3]+m_anStates[4]+m_anStates[5]+m_anStates[6]+m_anStates[7]+m_anStates[8]+m_anStates[9]+m_anStates[10]+m_anStates[11]+m_anStates[12];} // m_iSourceCount - m_iSrcTransferring - m_iSrcOnQueue;}
-	int		GetValidSourcesCount()							{return m_anStates[1]+m_anStates[0]+m_anStates[2]+m_anStates[12] ;}// DS_ONQUEUE + DS_DOWNLOADING + DS_CONNECTED + DS_REMOTEQUEUEFULL;}
-	//MORPH END   - Modifified by SiRoB
+	uint8	GetStatus(bool ignorepause = false) const;
+	void	SetStatus(uint8 in);
+	bool	IsStopped() const { return stopped; }
+	bool	GetCompletionError() const { return m_bCompletionError;}
+	uint32  GetCompletedSize() const { return completedsize; }
+	CString getPartfileStatus() const;
+	int		getPartfileStatusRang() const;
+	
+	uint8	GetDownPriority() const { return m_iDownPriority; }
+	void	SetDownPriority(uint8 iNewDownPriority);
+	bool	IsAutoDownPriority(void) const { return m_bAutoDownPriority; }
+	void	SetAutoDownPriority(bool NewAutoDownPriority) { m_bAutoDownPriority = NewAutoDownPriority; }
+	void	UpdateAutoDownPriority();
 
-	uint32	GetNeededSpace(); // SLUGFILLER: checkDiskspace
-	bool	IsMovie();
-	bool	IsArchive(bool onlyPreviewable=false); // Barry - Also want to preview archives
-	bool	IsMusic(); //MORPH - Added by IceCream, added preview also for music files
-	bool	IsCDImage(); //MORPH - Added by IceCream, for defeat 0-filler
-	bool	IsDocument(); //MORPH - Added by IceCream, for defeat 0-filler
-	CString getPartfileStatus();
-	sint32	getTimeRemaining();
-	int		getPartfileStatusRang();
+	// khaos::kmod+ Source Counts Are Cached
+	uint16	GetAvailableSrcCount() const { return m_anStates[0]+m_anStates[1]; }
+	// khaos::kmod-
+	
+	uint16	GetSourceCount() const	{ return srclist.GetCount(); }
+	uint16	GetSrcA4AFCount() const { return A4AFsrclist.GetCount(); }
+	uint16  GetSrcStatisticsValue(EDownloadState nDLState) const;
+	uint16	GetTransferingSrcCount() const; // == GetSrcStatisticsValue(DS_DOWNLOADING)
+	uint32	GetTransfered() const { return transfered; }
+	uint32	GetDatarate() const { return datarate; }
+	float	GetPercentCompleted() const { return percentcompleted; }
+	//MORPH START - Modifified by SiRoB
+	uint16  GetNotCurrentSourcesCount() const { return m_anStates[2]+m_anStates[3]+m_anStates[4]+m_anStates[5]+m_anStates[6]+m_anStates[7]+m_anStates[8]+m_anStates[9]+m_anStates[10]+m_anStates[11]+m_anStates[12]; } // m_iSourceCount - m_iSrcTransferring - m_iSrcOnQueue; }
+	int		GetValidSourcesCount() const { return m_anStates[1]+m_anStates[0]+m_anStates[2]+m_anStates[12] ;}// DS_ONQUEUE + DS_DOWNLOADING + DS_CONNECTED + DS_REMOTEQUEUEFULL; }
+	//MORPH END   - Modifified by SiRoB
+	bool	IsArchive(bool onlyPreviewable = false) const; // Barry - Also want to preview archives
+	sint32	getTimeRemaining() const;
+	bool	IsMovie() const; //MORPH - Added by IceCream, added preview also for music files
+	bool	IsMusic() const; //MORPH - Added by IceCream, added preview also for music files
+	bool	IsCDImage() const; //MORPH - Added by IceCream, for defeat 0-filler
+	bool	IsDocument() const; //MORPH - Added by IceCream, for defeat 0-filler
 
 	// Barry - Added as replacement for BlockReceived to buffer data before writing to disk
 	uint32	WriteToBuffer(uint32 transize, BYTE *data, uint32 start, uint32 end, Requested_Block_Struct *block);
-	void	FlushBuffer(void);
+	void	FlushBuffer(bool forcewait=false);
 	// Barry - This will invert the gap list, up to caller to delete gaps when done
 	// 'Gaps' returned are really the filled areas, and guaranteed to be in order
-	void	GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled);
+	void	GetFilledList(CTypedPtrList<CPtrList, Gap_Struct*> *filled) const;
 
 	// Barry - Added to prevent list containing deleted blocks on shutdown
 	void	RemoveAllRequestedBlocks(void);
-	void	RemoveBlockFromList(uint32 start,uint32 end);
+	bool	RemoveBlockFromList(uint32 start, uint32 end);
 	void	RemoveAllSources(bool bTryToSwap);
+
+	bool	CanOpenFile() const;
+	bool	CanPreviewFile() const;
+	bool	CanStopFile() const;
+	bool	CanPauseFile() const;
+	bool	CanResumeFile() const;
+
+	void	OpenFile() const;
+	void	PreviewFile();
 	void	DeleteFile();
 	// khaos::kmod+ New param used for completing files
 	void	StopFile(bool bCancel = false,bool setVars = true);
 	// khaos::kmod-
 	void	PauseFile(bool bInsufficient = false);
+	void	StopPausedFile();
 	void	ResumeFile();
 	void	ResumeFileInsufficient();
 
-	virtual	Packet* CreateSrcInfoPacket(CUpDownClient* forClient);
+	virtual Packet* CreateSrcInfoPacket(CUpDownClient* forClient) const;
 	void	AddClientSources(CMemFile* sources, uint8 sourceexchangeversion);
 
-	void	PreviewFile();
-	bool	PreviewAvailable();
-	uint16	GetAvailablePartCount()			{return availablePartsCount;}
+	uint16	GetAvailablePartCount() const { return availablePartsCount; }
 	void	UpdateAvailablePartsCount();
 
-	uint32	GetLastAnsweredTime()			{ return m_ClientSrcAnswered; }
+	uint32	GetLastAnsweredTime() const	{ return m_ClientSrcAnswered; }
 	void	SetLastAnsweredTime()			{ m_ClientSrcAnswered = ::GetTickCount(); }
 	void	SetLastAnsweredTimeTimeout();
 	// -khaos--+++>
-	uint32	GetLostDueToCorruption()		{return m_iLostDueToCorruption+m_iSesCorruptionBytes;}
-	uint32	GetGainDueToCompression()		{return m_iGainDueToCompression+m_iSesCompressionBytes;}
-	uint32	GetSesCorruptionBytes()			{return m_iSesCorruptionBytes;}
-	uint32	GetSesCompressionBytes()		{return m_iSesCompressionBytes;}
+	uint32	GetLostDueToCorruption() const		{return m_iLostDueToCorruption+m_iSesCorruptionBytes;}
+	uint32	GetGainDueToCompression() const		{return m_iGainDueToCompression+m_iSesCompressionBytes;}
+	uint32	GetSesCorruptionBytes()	const		{return m_iSesCorruptionBytes;}
+	uint32	GetSesCompressionBytes() const		{return m_iSesCompressionBytes;}
 	// <-----khaos-
-	uint32	TotalPacketsSavedDueToICH()		{return m_iTotalPacketsSavedDueToICH;}
-	bool	HasComment()					{return hasComment;}
-	bool	HasRating()						{return hasRating;}
-	bool	HasBadRating()					{return hasBadRating;}
-	bool	IsStopped()						{return stopped;}
-	void	SetHasComment(bool in)			{hasComment=in;}
+	uint32	TotalPacketsSavedDueToICH() const	{return m_iTotalPacketsSavedDueToICH;}
+
+	bool	HasComment() const { return hasComment; }
+	void	SetHasComment(bool in) { hasComment = in; }
+
+	bool	HasRating() const { return hasRating; }
 	void	SetHasRating(bool in)			{hasRating=in;}
+	bool	HasBadRating() const { return hasBadRating; }
 	void	UpdateFileRatingCommentAvail();
+
 	void	AddDownloadingSource(CUpDownClient* client);
 	void	RemoveDownloadingSource(CUpDownClient* client);
-	void	SetStatus(uint8 in);
-	void	StopPausedFile();
 
-	void	SetA4AFAuto(bool in)			{m_is_A4AF_auto = in;} // [sivka / Tarod]
-	bool	IsA4AFAuto()					{return m_is_A4AF_auto;} // [sivka / Tarod]
-	CString GetProgressString(uint16 size);
-	CString GetInfoSummary(CPartFile* partfile);
+	bool	IsA4AFAuto() const { return m_is_A4AF_auto; }
+	void	SetA4AFAuto(bool in) { m_is_A4AF_auto = in; }
 
-	int		GetCommonFilePenalty();
+	CString GetProgressString(uint16 size) const;
+	CString GetInfoSummary(CPartFile* partfile) const;
+
+	int		GetCommonFilePenalty() const;
 	void	UpdateDisplayedInfo(boolean force=false);
-	uint8	GetCategory();
+
+	uint8	GetCategory() const;
 	void	SetCategory(uint8 cat);
 	bool	CheckShowItemInGivenCat(int inCategory);
-	void	GetSizeToTransferAndNeededSpace(uint32& pui32SizeToTransfer, uint32& pui32NeededSpace);
 
 	uint8*	MMCreatePartStatus();
 	
 	void	PerformFirstHash();		// SLUGFILLER: SafeHash	
 	//preview
-	bool	GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender);
-	void	GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed,void* pSender);
+	virtual bool GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender);
+	virtual void GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
+
+	void	FlushBuffersExceptionHandler(CFileException* error);
+	void	FlushBuffersExceptionHandler();
 
 	uint32	lastsearchtime;
 	uint32	lastsearchtimeKad;
+	uint32	m_iAllocinfo;
 	CUpDownClientPtrList srclist;
 	CUpDownClientPtrList A4AFsrclist; //<<-- enkeyDEV(Ottavio84) -A4AF-
 	CTime	lastseencomplete;
@@ -260,8 +279,8 @@ public:
 	bool	hashsetneeded;
 	// khaos::categorymod+
 	void	SetCatResumeOrder(uint16 order)	{ m_catResumeOrder = order; SavePartFile(); }
-	uint16	GetCatResumeOrder()				{ return m_catResumeOrder; }
-	uint16	GetFileGroup()					{ return m_catFileGroup; }
+	uint16	GetCatResumeOrder() const				{ return m_catResumeOrder; }
+	uint16	GetFileGroup() const					{ return m_catFileGroup; }
 	void	SetFileGroup(uint16 group)		{ m_catFileGroup = group; SavePartFile(); }
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
@@ -270,13 +289,13 @@ public:
 	sint32	GetTimeRemainingAvg();
 	// khaos::accuratetimerem-
 	// khaos::kmod+ Advanced A4AF: Brute Force Features
-	bool	ForceAllA4AF()					{ return m_bForceAllA4AF; }
-	bool	ForceA4AFOff()					{ return m_bForceA4AFOff; }
+	bool	ForceAllA4AF()	const			{ return m_bForceAllA4AF; }
+	bool	ForceA4AFOff()	const			{ return m_bForceA4AFOff; }
 	void	SetForceAllA4AF(bool in)		{ m_bForceAllA4AF = in; }
 	void	SetForceA4AFOff(bool in)		{ m_bForceA4AFOff = in; }
 	// khaos::kmod-
 	int  CPartFile::GetRating(); //MORPH - Added by IceCream, eMule Plus rating icons
-	bool	notSeenCompleteSource();
+	bool	notSeenCompleteSource() const;
 #ifdef _DEBUG
 	// Diagnostic Support
 	virtual void AssertValid() const;
@@ -284,8 +303,8 @@ public:
 #endif
 
 protected:
-	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result);
-	bool	IsAlreadyRequested(uint32 start, uint32 end);
+	bool	GetNextEmptyBlockInPart(uint16 partnumber,Requested_Block_Struct* result) const;
+	bool	IsAlreadyRequested(uint32 start, uint32 end) const;
 	void	CompleteFile(bool hashingdone);
 	void	CreatePartFile();
 	void	Init();
@@ -293,6 +312,8 @@ protected:
 	CSourceSaver m_sourcesaver; //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
 private:
+	static CBarShader s_LoadBar;
+	static CBarShader s_ChunkBar;
 	uint32	m_iLastPausePurge;
 	uint16	count;
 	uint16	m_anStates[STATES_COUNT];
@@ -330,18 +351,14 @@ private:
 	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<uint16,uint16>	corrupted_list;
-	uint16	availablePartsCount;
 	uint32	m_ClientSrcAnswered;
-	bool	m_bPercentUpdated;
-	static	CBarShader s_LoadBar; 
-	static	CBarShader s_ChunkBar; 
+	uint16	availablePartsCount;
 	bool	hasRating;
 	bool	hasBadRating;
 	bool	hasComment;
-	bool	updatemystatus;
+	bool	m_is_A4AF_auto;
+	CWinThread* m_AllocateThread;
 	DWORD	m_lastRefreshedDLDisplay;
-	DWORD   m_lastdatetimecheck;
-	CTime	m_lastdatecheckvalue;
 	CUpDownClientPtrList m_downloadingSourceList;
 
 	// Barry - Buffered data to be written
@@ -349,12 +366,13 @@ private:
 	uint32 m_nTotalBufferData;
 	uint32 m_nLastBufferFlushTime;
 	uint8	m_category;
-	bool	m_is_A4AF_auto;
 	DWORD	m_dwFileAttributes;
 
 	BOOL 	PerformFileComplete(); // Lord KiRon
 	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
-	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color);
+	static UINT AFX_CDECL AllocateSpaceThread(LPVOID lpParam);
+
+	void	CharFillRange(CString* buffer,uint32 start, uint32 end, char color) const;
 	// khaos::categorymod+
 	uint16	m_catResumeOrder;
 	uint16	m_catFileGroup;

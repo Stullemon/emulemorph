@@ -112,16 +112,37 @@ void CKadContactListCtrl::Localize()
 {
 }
 
+void CKadContactListCtrl::UpdateContact(int iItem, Kademlia::CContact* contact)
+{
+	CString id;
+	id.Format("%i",contact->getType());
+	SetItemText(iItem,colType,id);
+	
+	if(contact->madeContact())
+		id = GetResString(IDS_YES);
+	else
+		id = GetResString(IDS_NO);
+	SetItemText(iItem,colContact,id);
+
+	contact->getDistance(&id);
+	SetItemText(iItem,colDistance,id);
+}
+
 void CKadContactListCtrl::ContactAdd(Kademlia::CContact* contact)
 {
 	try
 	{
 		ASSERT( contact != NULL );
-		uint32 itemnr = GetItemCount();
-		InsertItem(LVIF_TEXT|LVIF_PARAM,itemnr,0,0,0,0,(LPARAM)contact);
-		ContactRef(contact);
+		uint32 result = GetItemCount();
 		CString id;
-		id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , itemnr+1);
+		contact->getClientID(&id);
+		int iItem = InsertItem(LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM,result,id,0,0,contact->getType()>4?4:contact->getType(),(LPARAM)contact);
+//		Trying to update all the columns causes one of the connection freezes in win98
+//		ContactRef(contact);
+		// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
+		if (!afxData.bWin95 && iItem >= 0)
+			UpdateContact(iItem, contact);
+		id.Format("%s (%i)", GetResString(IDS_KADCONTACTLAB) , result+1);
 		theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
 	}
 	catch(...){ASSERT(0);}

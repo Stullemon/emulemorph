@@ -133,7 +133,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 	try{
 		try{
 			if (!client && opcode != OP_HELLO){
-				//theApp.downloadqueue->AddDownDataOverheadOther(size);
+				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				throw GetResString(IDS_ERR_NOHELLO);
 			}
 			switch(opcode){
@@ -180,14 +180,15 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 
 					// if IP is filtered, dont reply but disconnect...
 					if (theApp.ipfilter->IsFiltered(client->GetIP())) {
-						AddDebugLogLine(true,GetResString(IDS_IPFILTERED),client->GetFullIP(),theApp.ipfilter->GetLastHit());
+						if (theApp.glob_prefs->GetLogFilteredIPs())
+							AddDebugLogLine(true,GetResString(IDS_IPFILTERED),client->GetFullIP(),theApp.ipfilter->GetLastHit());
 						theApp.stat_filteredclients++;
 						if (bNewClient){
 							delete client;
 							client = NULL;
 						}
 						Disconnect();
-						break;
+						return false;
 					}
 
 					// now we check if we know this client already. if yes this socket will
@@ -222,6 +223,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_FILEREQUEST:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					
 					// IP banned, no answer for this request
 					if (client->IsBanned() ){
@@ -294,6 +296,8 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_FILEREQANSNOFIL:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
+
 					// DbT:FileRequest
 					if (size == 16) {
 						// if that client do not have my file maybe has another different
@@ -321,16 +325,20 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_FILEREQANSWER:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					client->ProcessFileInfo(packet,size);
 					break;
 				}
 				case OP_FILESTATUS:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					client->ProcessFileStatus(packet,size);
 					break;
 				}
 				case OP_STARTUPLOADREQ:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					if (!client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode))
+						break;
 					if( size == 16 ){
 						uchar reqfileid[16];
 						md4cpy(reqfileid,packet);
@@ -350,6 +358,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_QUEUERANK:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					CSafeMemFile data((BYTE*)packet,size);
 					uint32 rank;
 					data.Read(&rank,4);
@@ -358,10 +367,11 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_ACCEPTUPLOADREQ:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-				//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
+					//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 					//if (client->reqfile && !client->reqfile->IsStopped() && 
 					if (client->reqfile && !client->reqfile->IsStopped() && (!client->reqfile->notSeenCompleteSource()) /*shadow#(onlydownloadcompletefiles)*/ &&
-				//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
+					//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						client->SetSentCancelTransfer(0);
 						if (client->GetDownloadState() == DS_ONQUEUE){
@@ -381,7 +391,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					else{
 						if (!client->GetSentCancelTransfer()){
 							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+							theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 							client->socket->SendPacket(packet,true,true);
 							client->SetSentCancelTransfer(1);
 						}
@@ -391,6 +401,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_REQUESTPARTS:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					CSafeMemFile data((BYTE*)packet,size);
 					uchar reqfilehash[16];
 					data.Read(reqfilehash,16);
@@ -499,8 +510,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_CANCELTRANSFER:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
-					//MORPH - Changed by SiRoB, Due to ZZ Upload System
-					//if(theApp.uploadqueue->RemoveFromUploadQueue(client,false))
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					if(theApp.uploadqueue->RemoveFromUploadQueue(client))
 						AddDebugLogLine(false, "%s: Upload session ended due canceled transfer.", client->GetUserName());
 					client->SetUploadFileID(NULL);
@@ -508,15 +518,17 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_END_OF_DOWNLOAD:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					if (size>=16 && !md4cmp(client->GetUploadFileID(),packet)){
-						theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_REMULUSEREND));
-							AddDebugLogLine(false, GetResString(IDS_ULENDENDTRANS), client->GetUserName());
+						if(theApp.uploadqueue->RemoveFromUploadQueue(client))
+							AddDebugLogLine(false, "%s: Upload session ended due to ended transfer.", client->GetUserName());
 						client->SetUploadFileID(NULL);
 					}
 					break;
 				}
 				case OP_HASHSETREQUEST:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					if (size != 16)
 						throw GetResString(IDS_ERR_WRONGHPACKAGESIZE);
 					client->SendHashsetPacket(packet);
@@ -524,11 +536,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_HASHSETANSWER:{
 					theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					client->ProcessHashSet(packet,size);
 					break;
 				}
 				case OP_SENDINGPART:{
 //					theApp.downloadqueue->AddDownDataOverheadOther(0, 24);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 					//if (client->reqfile && !client->reqfile->IsStopped() && 
 					if (client->reqfile && !client->reqfile->IsStopped() && (!client->reqfile->notSeenCompleteSource())/*shadow#(onlydownloadcompletefiles)*/ &&
@@ -541,7 +555,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 						//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)		
 							if (!client->GetSentCancelTransfer()){
 								Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-								theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+								theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 								client->socket->SendPacket(packet,true,true);
 								client->SetSentCancelTransfer(1);
 							}
@@ -551,7 +565,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					else{
 						if (!client->GetSentCancelTransfer()){
 							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+							theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 							client->socket->SendPacket(packet,true,true);
 							client->SetSentCancelTransfer(1);
 						}
@@ -625,6 +639,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_CHANGE_CLIENT_ID:{
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					CSafeMemFile data((BYTE*)packet, size);
 					uint32 nNewUserID;
 					data.Read(&nNewUserID, 4);
@@ -650,11 +665,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_CHANGE_SLOT:{
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					// sometimes sent by Hybrid
 					break;
 				}
 				case OP_MESSAGE:{
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					if (size < 2)
 						throw CString(_T("invalid message packet"));
 					uint16 length;
@@ -662,12 +679,12 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 					if ((UINT)(length+2) != size)
 						throw CString(_T("invalid message packet"));
 
-					AddDebugLogLine(true,GetResString(IDS_NEWMSGFROM),client->GetUserName(), client->GetFullIP());
+					AddDebugLogLine(true,"New Message from '%s' (IP:%s)",client->GetUserName(), client->GetFullIP());	
 					//filter me?
 					if ( (theApp.glob_prefs->MsgOnlyFriends() && !client->IsFriend()) ||
 						 (theApp.glob_prefs->MsgOnlySecure() && client->GetUserName()==NULL) ) {
 						if (!client->m_bMsgFiltered)
-							AddDebugLogLine(false,GetResString(IDS_FILTEREDFROM),client->GetUserName(), client->GetFullIP());
+							AddDebugLogLine(false,"Filtered Message from '%s' (IP:%s)",client->GetUserName(), client->GetFullIP());
 						client->m_bMsgFiltered=true;
 						break;
 					}
@@ -680,6 +697,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_ASKSHAREDFILES:	{	// client wants to know what we have in share, let's see if we allow him to know that
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					
 					// IP banned, no answer for this request
 					if (client->IsBanned() ){
@@ -726,11 +744,13 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 				}
 				case OP_ASKSHAREDFILESANSWER:{
 					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					client->ProcessSharedFileList(packet,size);
 					break;
 				}
                 case OP_ASKSHAREDDIRS:{
                     theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
                     ASSERT( size == 0 );
 					
 					// IP banned, no answer for this request
@@ -843,6 +863,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
                 }
                 case OP_ASKSHAREDFILESDIR:{
                     theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
 					
 					// IP banned, no answer for this request
 					if (client->IsBanned() ){
@@ -910,6 +931,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
                 }
                 case OP_ASKSHAREDDIRSANS:{
                     theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
                     if (client->GetFileListRequested() == 1){
                         CSafeMemFile data((uchar*)packet, size);
                         uint32 uDirs;
@@ -943,6 +965,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
                 }
                 case OP_ASKSHAREDFILESDIRANS:{
                     theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
                     CSafeMemFile data((uchar*)packet, size);
                     uint16 cnt;
                     data.Read(&cnt, 2);
@@ -963,6 +986,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
                 }
                 case OP_ASKSHAREDDENIEDANS:{
                     theApp.downloadqueue->AddDownDataOverheadOther(size);
+					client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
                     ASSERT( size == 0 );
 					AddLogLine(true,GetResString(IDS_SHAREDREQDENIED),client->GetUserName(),client->GetUserIDHybrid());
 					client->SetFileListRequested(0);
@@ -985,30 +1009,27 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode){
 		}
 	}
 	catch(CString error){
-		if (client){
+		AddDebugLogLine(false, _T("%s - while processing eDonkey packet: opcode=%s  size=%u; %s"), error, DbgGetDonkeyClientTCPOpcode(opcode), size, DbgGetClientInfo());
+		if (client)
 			client->SetDownloadState(DS_ERROR);	
-			AddDebugLogLine(false,GetResString(IDS_ERR_CLIENTERROR),client->GetUserName(),client->GetFullIP(),error.GetBuffer());
-		}
-		else
-			AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENTACTION),error.GetBuffer());
 		Disconnect();
 		return false;
 	}
 	return true;
 }
 
-bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
+bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, UINT uRawSize){
 	try{
 		try{
 			if (!client){
-				//theApp.downloadqueue->AddDownDataOverheadOther(size);
+				theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 				throw GetResString(IDS_ERR_UNKNOWNCLIENTACTION);
 			}
 			if (_iDbgHeap >= 2)
 				ASSERT_VALID(client);
 			switch(opcode){
 				case OP_EMULEINFO:{
-					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 					client->ProcessMuleInfoPacket(packet,size);
 
 					// start secure identification, if
@@ -1020,7 +1041,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
 				case OP_EMULEINFOANSWER:{
-					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 					client->ProcessMuleInfoPacket(packet,size);
 
 					// start secure identification, if
@@ -1030,6 +1051,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
 				case OP_SECIDENTSTATE:{
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 					client->ProcessSecIdentStatePacket((uchar*)packet,size);
 					if (client->GetSecureIdentState() == IS_SIGNATURENEEDED)
 						client->SendSignaturePacket();
@@ -1040,6 +1062,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
 				case OP_PUBLICKEY:{
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 					if (client->IsBanned() ){
 						break;						
 					}
@@ -1047,18 +1070,20 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
   				case OP_SIGNATURE:{
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 					client->ProcessSignaturePacket((uchar*)packet,size);
 					break;
 				}
 				case OP_COMPRESSEDPART:{
 	//				theApp.downloadqueue->AddDownDataOverheadOther(24);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					if (client->reqfile && !client->reqfile->IsStopped() && 
 						(client->reqfile->GetStatus()==PS_READY || client->reqfile->GetStatus()==PS_EMPTY)){
 						client->ProcessBlockPacket(packet,size,true);
 						if (client->reqfile->IsStopped() || client->reqfile->GetStatus()==PS_PAUSED || client->reqfile->GetStatus()==PS_ERROR){
 							if (!client->GetSentCancelTransfer()){
 								Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-								theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+								theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 								client->socket->SendPacket(packet,true,true);
 								client->SetSentCancelTransfer(1);
 							}
@@ -1068,7 +1093,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					else{
 						if (!client->GetSentCancelTransfer()){
 							Packet* packet = new Packet(OP_CANCELTRANSFER,0);
-							theApp.uploadqueue->AddUpDataOverheadOther(packet->size);
+							theApp.uploadqueue->AddUpDataOverheadFileRequest(packet->size);
 							client->socket->SendPacket(packet,true,true);
 							client->SetSentCancelTransfer(1);
 						}
@@ -1077,7 +1102,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
 				case OP_QUEUERANKING:{
-					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					theApp.downloadqueue->AddDownDataOverheadFileRequest(uRawSize);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					if (size != 12)
 						throw GetResString(IDS_ERR_BADSIZE);
 					uint16 newrank;
@@ -1087,7 +1113,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
  				case OP_REQUESTSOURCES:{
-					theApp.downloadqueue->AddDownDataOverheadSourceExchange(size);
+					theApp.downloadqueue->AddDownDataOverheadSourceExchange(uRawSize);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					if (client->GetSourceExchangeVersion() > 1){
 						if(size != 16)
 							throw GetResString(IDS_ERR_BADSIZE);
@@ -1113,7 +1140,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 								Packet* tosend = file->CreateSrcInfoPacket(client);
 								if(tosend){
 									if ( theApp.glob_prefs->GetDebugSourceExchange() )
-										AddDebugLogLine( false, GetResString(IDS_RECEIVEDSRCEXREQ), client->GetUserName(), file->GetFileName() );
+										AddDebugLogLine( false, "RCV:Source Request User(%s) File(%s)", client->GetUserName(), file->GetFileName() );
 									theApp.uploadqueue->AddUpDataOverheadSourceExchange(tosend->size);
 									SendPacket(tosend, true, true);
 								}
@@ -1123,7 +1150,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
  				case OP_ANSWERSOURCES:{
-					theApp.downloadqueue->AddDownDataOverheadSourceExchange(size);
+					theApp.downloadqueue->AddDownDataOverheadSourceExchange(uRawSize);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					CSafeMemFile data((BYTE*)packet,size);
 					uchar hash[16];
 					data.Read(hash,16);
@@ -1141,11 +1169,14 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
 				case OP_FILEDESC:{
-					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					theApp.downloadqueue->AddDownDataOverheadFileRequest(uRawSize);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					client->ProcessMuleCommentPacket(packet,size);
 					break;
 				}
 				case OP_REQUESTPREVIEW:{
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					// IP banned, no answer for this request
 					if (client->IsBanned() ){
 						break;						
@@ -1165,11 +1196,13 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 					break;
 				}
 				case OP_PREVIEWANSWER:{
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 					client->ProcessPreviewAnswer(packet, size);
 					break;
 				}
 				default:
-					theApp.downloadqueue->AddDownDataOverheadOther(size);
+					theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
 					PacketToDebugLogLine("eMule", packet, size, opcode);
 					break;
 			}
@@ -1184,7 +1217,7 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 		}
 	}
 	catch(CString error){
-		AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENTACTION),error.GetBuffer());
+		AddDebugLogLine(false, _T("%s - while processing eMule packet: opcode=%s  size=%u; %s"), error, DbgGetMuleClientTCPOpcode(opcode), size, DbgGetClientInfo());
 		if (client)
 			client->SetDownloadState(DS_ERROR);
 		Disconnect();
@@ -1193,7 +1226,8 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode){
 	return true;
 }
 
-void CClientReqSocket::PacketToDebugLogLine(LPCTSTR protocol, const char* packet, uint32 size, UINT opcode) const {
+void CClientReqSocket::PacketToDebugLogLine(LPCTSTR protocol, const char* packet, uint32 size, UINT opcode)
+{
 	CString buffer; 
 	buffer.Format(_T("unknown %s protocol opcode: 0x%02x, size=%u, data=["), protocol, opcode, size);
 	for (uint32 i = 0; i < size && i < 50; i++){
@@ -1204,7 +1238,34 @@ void CClientReqSocket::PacketToDebugLogLine(LPCTSTR protocol, const char* packet
 		buffer += temp;
 	}
 	buffer += (i == size) ? _T("]") : _T("..]");
-	AddDebugLogLine(false, buffer); 
+	DbgAppendClientInfo(buffer);
+	AddDebugLogLine(false, _T("%s"), buffer);
+}
+
+CString CClientReqSocket::DbgGetClientInfo()
+{
+	CString str;
+	SOCKADDR_IN sockAddr = {0};
+	int nSockAddrLen = sizeof(sockAddr);
+	GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);
+	if (sockAddr.sin_addr.S_un.S_addr != 0 && (client == NULL || sockAddr.sin_addr.S_un.S_addr != client->GetIP()))
+		str.AppendFormat(_T("IP=%s"), inet_ntoa(sockAddr.sin_addr));
+	if (client){
+		if (!str.IsEmpty())
+			str += _T("; ");
+		str += _T("client=") + client->DbgGetClientInfo();
+	}
+	return str;
+}
+
+void CClientReqSocket::DbgAppendClientInfo(CString& str)
+{
+	CString strClientInfo(DbgGetClientInfo());
+	if (!strClientInfo.IsEmpty()){
+		if (!str.IsEmpty())
+			str += _T("; ");
+		str += strClientInfo;
+	}
 }
 
 void CClientReqSocket::OnInit(){
@@ -1212,100 +1273,136 @@ void CClientReqSocket::OnInit(){
 	//SetSockOpt(SO_DONTLINGER,&tv,sizeof(BOOL));
 }
 
+void CClientReqSocket::OnConnect(int nErrorCode)
+{
+	CEMSocket::OnConnect(nErrorCode);
+	if (nErrorCode)
+	{
+		CString strTCPError = GetErrorMessage(nErrorCode, 1);
+
+		// WSAECONNREFUSED (10061) Connection refused.
+		// No connection could be made because the target machine actively refused it.
+		// This usually results from trying to connect to a service that is inactive on the foreign host
+		// that is, one with no server application running.
+		//
+		// WSAETIMEDOUT (10060) Connection timed out.
+		// A connection attempt failed because the connected party did not properly respond after a
+		// period of time, or the established connection failed because the connected host has failed to respond.
+		if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
+			AddDebugLogLine(false, _T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
+	}
+}
+
 void CClientReqSocket::OnSend(int nErrorCode){
 	ResetTimeOutTimer();
 	CEMSocket::OnSend(nErrorCode);
 }
 
-void CClientReqSocket::OnError(int nErrorCode){
-
-	if (client)
-		AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENT2),client->GetUserName(),client->GetFullIP(),nErrorCode);
+void CClientReqSocket::OnError(int nErrorCode)
+{
+	CString strTCPError;
+	if (nErrorCode == ERR_WRONGHEADER)
+		strTCPError = _T("Wrong header");
+	else if (nErrorCode == ERR_TOOBIG)
+		strTCPError = _T("Too much data sent");
 	else
-		AddDebugLogLine(false,GetResString(IDS_ERR_BADCLIENTACTION),GetErrorMessage(nErrorCode));
+		strTCPError = GetErrorMessage(nErrorCode);
+
+	AddDebugLogLine(false, _T("Client TCP socket error: %s; %s"), strTCPError, DbgGetClientInfo());
+
 	Disconnect();
 }
 
-void CClientReqSocket::PacketReceivedCppEx(Packet* packet){
-#ifndef _DEBUG
-	try{
-#endif
+bool CClientReqSocket::PacketReceivedCppEx(Packet* packet)
+{
+	bool bResult;
+	UINT uRawSize = packet->size;
 		switch (packet->prot){
 			case OP_EDONKEYPROT:
-				ProcessPacket(packet->pBuffer,packet->size,packet->opcode);
+			bResult = ProcessPacket(packet->pBuffer,packet->size,packet->opcode);
 				break;
 			case OP_PACKEDPROT:
 				if (!packet->UnPackPacket()){
-					SOCKADDR_IN sockAddr;
-					memset(&sockAddr, 0, sizeof(sockAddr));
-					int nSockAddrLen = sizeof(sockAddr);
-					GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
-					AddDebugLogLine(false,_T("Failed to decompress client TCP packet; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet->prot, packet->opcode, packet->size);
+				AddDebugLogLine(false, _T("Failed to decompress client TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
+				bResult = false;
 					break;
 				}
 			case OP_EMULEPROT:
-				ProcessExtPacket(packet->pBuffer,packet->size,packet->opcode);
+			bResult = ProcessExtPacket(packet->pBuffer, packet->size, packet->opcode, uRawSize);
 				break;
 		    default:{
-			    SOCKADDR_IN sockAddr;
-			    memset(&sockAddr, 0, sizeof(sockAddr));
-			    int nSockAddrLen = sizeof(sockAddr);
-			    GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
-			    AddDebugLogLine(false,_T("Received unknown client TCP packet; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet->prot, packet->opcode, packet->size);
+			theApp.downloadqueue->AddDownDataOverheadOther(uRawSize);
+			AddDebugLogLine(false, _T("Received unknown client TCP packet; %s; %s"), DbgGetClientTCPPacket(packet->prot, packet->opcode, packet->size), DbgGetClientInfo());
+
 				if (client)
 					client->SetDownloadState(DS_ERROR);
 				Disconnect();
+			bResult = false;
 		    }
 		}
-#ifndef _DEBUG
+	return bResult;
 	}
-	catch(...){
-		SOCKADDR_IN sockAddr;
-		memset(&sockAddr, 0, sizeof(sockAddr));
-		int nSockAddrLen = sizeof(sockAddr);
-		GetPeerName((SOCKADDR*)&sockAddr,&nSockAddrLen);
-		AddDebugLogLine(false,_T("Unknown exception in CClientReqSocket::PacketReceived; IP=%s  protocol=0x%02x  opcode=0x%02x  size=%u"), inet_ntoa(sockAddr.sin_addr), packet?packet->prot:0, packet?packet->opcode:0, packet?packet->size:0);
 
-		// TODO: This exception handler should definitively be *here*. Though we may get some very
-		// strange socket deletion crashs if we disconnect a client's TCP socket on catching an exception
-		// here. See also comments in 'CAsyncSocketExHelperWindow::WindowProc'
-		//if (client)
-		//	client->SetDownloadState(DS_ERROR);
-		//Disconnect();
-		throw; // pass the exception to the SEH
-	}
-#endif
-}
-
-int FilterSE(DWORD dwExCode, LPEXCEPTION_POINTERS pExPtrs)
+#ifdef USE_CLIENT_TCP_CATCH_ALL_HANDLER
+int FilterSE(DWORD dwExCode, LPEXCEPTION_POINTERS pExPtrs, CClientReqSocket* reqsock, Packet* packet)
 {
+	CString strExError;
 	if (pExPtrs){
 		const EXCEPTION_RECORD* er = pExPtrs->ExceptionRecord;
-		CemuleApp::AddDebugLogLine(false,_T("Structured exception %08x in CClientReqSocket::PacketReceived at %08x"), er->ExceptionCode, er->ExceptionAddress);
+		strExError.Format(_T("Error: Unknown exception %08x in CClientReqSocket::PacketReceived at 0x%08x"), er->ExceptionCode, er->ExceptionAddress);
 	}
 	else
-		CemuleApp::AddDebugLogLine(false,_T("Structured exception %08x in CClientReqSocket::PacketReceived"), dwExCode);
+		strExError.Format(_T("Error: Unknown exception %08x in CClientReqSocket::PacketReceived"), dwExCode);
 	
-	// this would continue the program "as usual"
-	//return EXCEPTION_EXECUTE_HANDLER; 
+	// we already had an unknown exception, better be prepared for dealing with invalid data -> use another exception handler
+	try{
+		CString strError = strExError;
+		strError.AppendFormat(_T("; %s"), DbgGetClientTCPPacket(packet?packet->prot:0, packet?packet->opcode:0, packet?packet->size:0));
+		reqsock->DbgAppendClientInfo(strError);
+		CemuleApp::AddDebugLogLine(false, _T("%s"), strError);
+	}
+	catch(...){
+		ASSERT(0);
+		CemuleApp::AddDebugLogLine(false, _T("%s"), strExError);
+	}
 
 	// this searches the next exception handler -> catch(...) in 'CAsyncSocketExHelperWindow::WindowProc'
-	// as long as I do not know where any why we are crashing, I prefere to have it handled that way which worked fine in 28a/b
-	return EXCEPTION_CONTINUE_SEARCH;
-}
+	// as long as I do not know where and why we are crashing, I prefere to have it handled that way which
+	// worked fine in 28a/b.
+	//
+	// 03-Jän-2004 [bc]: Returning the execution to the catch-all handler in 'CAsyncSocketExHelperWindow::WindowProc'
+	// can make things even worse, because in some situations, the socket will continue fireing received events. And
+	// because the processed packet (which has thrown the exception) was not removed from the EMSocket buffers, it would
+	// be processed again and again.
+	//return EXCEPTION_CONTINUE_SEARCH;
 
-void CClientReqSocket::PacketReceived(Packet* packet)
+	// this would continue the program "as usual" -> return execution to the '__except' handler
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
+
+bool CClientReqSocket::PacketReceived(Packet* packet)
 {
-#ifndef _DEBUG
+	bool bResult;
+#ifdef USE_CLIENT_TCP_CATCH_ALL_HANDLER
+	bool bUnknownException = false;
 	// this function is only here to get a chance of determining the crash address via SEH
 	__try{
-		PacketReceivedCppEx(packet);
+		bResult = PacketReceivedCppEx(packet);
 	}
-	__except(FilterSE(GetExceptionCode(), GetExceptionInformation())){
+	__except(FilterSE(GetExceptionCode(), GetExceptionInformation(), this, packet)){
+		bUnknownException = true;
+	}
+	if (bUnknownException){
+		 if (client)
+			 client->SetDownloadState(DS_ERROR);
+		 Disconnect();
+		 bResult = false;
 	}
 #else
-	PacketReceivedCppEx(packet);
+	bResult = PacketReceivedCppEx(packet);
 #endif
+	return bResult;
 }
 
 void CClientReqSocket::OnReceive(int nErrorCode){
@@ -1315,7 +1412,7 @@ void CClientReqSocket::OnReceive(int nErrorCode){
 
 bool CClientReqSocket::Create(){
 	theApp.listensocket->AddConnection();
-	BOOL result = CAsyncSocketEx::Create(0,SOCK_STREAM,FD_WRITE|FD_READ|FD_CLOSE); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
+	BOOL result = CAsyncSocketEx::Create(0,SOCK_STREAM,FD_WRITE|FD_READ|FD_CLOSE|FD_CONNECT); // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	OnInit();
 	return result;
 }

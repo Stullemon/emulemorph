@@ -45,7 +45,8 @@ CSharedFilesWnd::~CSharedFilesWnd()
 		VERIFY( DestroyIcon(icon_files) );
 }
 
-void CSharedFilesWnd::DoDataExchange(CDataExchange* pDX){
+void CSharedFilesWnd::DoDataExchange(CDataExchange* pDX)
+{
 	CResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_SFLIST, sharedfilesctrl);
 	DDX_Control(pDX, IDC_POPBAR, pop_bar);
@@ -73,12 +74,11 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	lf.lfWeight = FW_BOLD;
 	bold.CreateFontIndirect(&lf);
 	m_ctrlStatisticsFrm.Init("Statistics");
-
-    // i_a: XXX: should run Init() *first* before setting font bold. 
-    m_ctrlStatisticsFrm.SetFont(&bold); 
-    // i_a: XXX: localize static icon: 
+    m_ctrlStatisticsFrm.SetFont(&bold); // should run Init() *first* before setting font bold. 
     m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS)); // i_a: XXX: moved here from 'Localize()' 
-    Localize(); // i_a 
+    
+	Localize();
+
 	GetDlgItem(IDC_CURSESSION_LBL)->SetFont(&bold);
 	GetDlgItem(IDC_TOTAL_LBL)->SetFont(&bold);
 	
@@ -104,8 +104,14 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	AddAnchor(IDC_FSTATIC9,BOTTOM_LEFT);
 	AddAnchor(IDC_STRANSFERED2,BOTTOM_LEFT);
 	
-//	theApp.sharedfiles->SetOutputCtrl(&sharedfilesctrl); // Tried to delay some to see if it fixes win98's crash.
-	return true;
+	return TRUE;
+}
+
+void CSharedFilesWnd::Reload()
+{
+	theApp.sharedfiles->Reload();
+	if (theApp.sharedfiles->GetFileByID(shownFileHash) == NULL)
+		ShowDetails(NULL);
 }
 
 BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
@@ -120,58 +126,90 @@ END_MESSAGE_MAP()
 
 void CSharedFilesWnd::OnBnClickedReloadsharedfiles()
 {
-	theApp.sharedfiles->Reload();
+	Reload();
 }
 
-void CSharedFilesWnd::Check4StatUpdate(CKnownFile* file){
-	if (!md4cmp(file->GetFileHash(),shownFileHash)) ShowDetails(file);
+void CSharedFilesWnd::Check4StatUpdate(const CKnownFile* file)
+{
+	if (!md4cmp(file->GetFileHash(), shownFileHash))
+		ShowDetails(file);
 }
 
 void CSharedFilesWnd::OnLvnItemActivateSflist(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	int iSel = sharedfilesctrl.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
-		CKnownFile* cur_file = (CKnownFile*)sharedfilesctrl.GetItemData(iSel);
+		const CKnownFile* cur_file = (CKnownFile*)sharedfilesctrl.GetItemData(iSel);
 		ShowDetails(cur_file);
+	}
+	else
+		ShowDetails(NULL);
+}
+
+void CSharedFilesWnd::ShowDetails(const CKnownFile* cur_file)
+{
+	if (cur_file)
+	{
+		CString buffer;
+
+		pop_bartrans.SetRange32(0,theApp.knownfiles->transferred/1024);
+		pop_bartrans.SetPos(cur_file->statistic.GetTransferred()/1024);
+		pop_bartrans.SetShowPercent();			
+		GetDlgItem(IDC_STRANSFERED)->SetWindowText(CastItoXBytes(cur_file->statistic.GetTransferred()));
+
+		pop_bar.SetRange32(0,theApp.knownfiles->requested);
+		pop_bar.SetPos(cur_file->statistic.GetRequests());
+		pop_bar.SetShowPercent();			
+		buffer.Format("%u",cur_file->statistic.GetRequests());
+		GetDlgItem(IDC_SREQUESTED)->SetWindowText(buffer);
+
+		buffer.Format("%u",cur_file->statistic.GetAccepts());
+		pop_baraccept.SetRange32(0,theApp.knownfiles->accepted);
+		pop_baraccept.SetPos(cur_file->statistic.GetAccepts());
+		pop_baraccept.SetShowPercent();
+		GetDlgItem(IDC_SACCEPTED)->SetWindowText(buffer);
+
+		GetDlgItem(IDC_STRANSFERED2)->SetWindowText(CastItoXBytes(cur_file->statistic.GetAllTimeTransferred()));
+
+		buffer.Format("%u",cur_file->statistic.GetAllTimeRequests());
+		GetDlgItem(IDC_SREQUESTED2)->SetWindowText(buffer);
+
+		buffer.Format("%u",cur_file->statistic.GetAllTimeAccepts());
+		GetDlgItem(IDC_SACCEPTED2)->SetWindowText(buffer);
+
+		md4cpy(shownFileHash,cur_file->GetFileHash());
+
+		CString title=GetResString(IDS_SF_STATISTICS)+" ("+ MakeStringEscaped(cur_file->GetFileName()) +")";
+		m_ctrlStatisticsFrm.SetText(title);
+	}
+	else
+	{
+		pop_bartrans.SetRange32(0, 100);
+		pop_bartrans.SetPos(0);
+		pop_bartrans.SetTextFormat(_T(""));
+		GetDlgItem(IDC_STRANSFERED)->SetWindowText(_T("-"));
+
+		pop_bar.SetRange32(0, 100);
+		pop_bar.SetPos(0);
+		pop_bar.SetTextFormat(_T(""));
+		GetDlgItem(IDC_SREQUESTED)->SetWindowText(_T("-"));
+
+		pop_baraccept.SetRange32(0, 100);
+		pop_baraccept.SetPos(0);
+		pop_baraccept.SetTextFormat(_T(""));
+		GetDlgItem(IDC_SACCEPTED)->SetWindowText(_T("-"));
+
+		GetDlgItem(IDC_STRANSFERED2)->SetWindowText(_T("-"));
+		GetDlgItem(IDC_SREQUESTED2)->SetWindowText(_T("-"));
+		GetDlgItem(IDC_SACCEPTED2)->SetWindowText(_T("-"));
+
+		md4clr(shownFileHash);
+		m_ctrlStatisticsFrm.SetText(GetResString(IDS_SF_STATISTICS));
 	}
 }
 
-void CSharedFilesWnd::ShowDetails(CKnownFile* cur_file) {
-	ASSERT( cur_file != NULL);
-	CString buffer;
-
-	pop_bartrans.SetRange32(0,theApp.knownfiles->transferred/1024);
-	pop_bartrans.SetPos(cur_file->statistic.GetTransferred()/1024);
-	pop_bartrans.SetShowPercent();			
-	GetDlgItem(IDC_STRANSFERED)->SetWindowText(CastItoXBytes(cur_file->statistic.GetTransferred()));
-
-	pop_bar.SetRange32(0,theApp.knownfiles->requested);
-	pop_bar.SetPos(cur_file->statistic.GetRequests());
-	pop_bar.SetShowPercent();			
-	buffer.Format("%u",cur_file->statistic.GetRequests());
-	GetDlgItem(IDC_SREQUESTED)->SetWindowText(buffer);
-
-	buffer.Format("%u",cur_file->statistic.GetAccepts());
-	pop_baraccept.SetRange32(0,theApp.knownfiles->accepted);
-	pop_baraccept.SetPos(cur_file->statistic.GetAccepts());
-	pop_baraccept.SetShowPercent();
-	GetDlgItem(IDC_SACCEPTED)->SetWindowText(buffer);
-
-	GetDlgItem(IDC_STRANSFERED2)->SetWindowText(CastItoXBytes(cur_file->statistic.GetAllTimeTransferred()));
-
-	buffer.Format("%u",cur_file->statistic.GetAllTimeRequests());
-	GetDlgItem(IDC_SREQUESTED2)->SetWindowText(buffer);
-
-	buffer.Format("%u",cur_file->statistic.GetAllTimeAccepts());
-	GetDlgItem(IDC_SACCEPTED2)->SetWindowText(buffer);
-
-	md4cpy(shownFileHash,cur_file->GetFileHash());
-
-	CString title=GetResString(IDS_SF_STATISTICS)+" ("+ MakeStringEscaped(cur_file->GetFileName()) +")";
-	m_ctrlStatisticsFrm.SetText(title);
-}
-
-void CSharedFilesWnd::OnNMClickSflist(NMHDR *pNMHDR, LRESULT *pResult){
+void CSharedFilesWnd::OnNMClickSflist(NMHDR *pNMHDR, LRESULT *pResult)
+{
 	OnLvnItemActivateSflist(pNMHDR,pResult);
 	*pResult = 0;
 }
@@ -182,18 +220,17 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 	   if (pMsg->hwnd == GetDlgItem(IDC_SFLIST)->m_hWnd)
 			OnLvnItemActivateSflist(0,0);
    }
-   if (pMsg->message == WM_MBUTTONUP) {
+   if (pMsg->message == WM_MBUTTONUP){
 		POINT point;
 		::GetCursorPos(&point);
 		CPoint p = point; 
 		sharedfilesctrl.ScreenToClient(&p); 
 		int it = sharedfilesctrl.HitTest(p); 
-		if (it == -1) return FALSE;
+		if (it == -1)
+			return FALSE;
 
 		sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly! 
-
-		sharedfilesctrl.ShowComments(it);
-
+		sharedfilesctrl.ShowComments((CKnownFile*)sharedfilesctrl.GetItemData(it));
 		return TRUE;
    }
 

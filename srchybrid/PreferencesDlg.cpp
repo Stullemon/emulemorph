@@ -40,6 +40,9 @@ CPreferencesDlg::CPreferencesDlg(){
 	m_wndWebServer.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndTweaks.m_psp.dwFlags &= ~PSH_HASHELP;
 	m_wndSecurity.m_psp.dwFlags &= ~PSH_HASHELP;
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
+#endif
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndScheduler.m_psp.dwFlags &= ~PSH_HASHELP;
@@ -61,6 +64,9 @@ CPreferencesDlg::CPreferencesDlg(){
 	AddPage(&m_wndScheduler);
 	AddPage(&m_wndWebServer);
 	AddPage(&m_wndTweaks);
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	AddPage(&m_wndDebug);
+#endif
 	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
@@ -143,9 +149,9 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader("PREF_WEBSERVER"));
 	ImageList.Add(CTempIconLoader("PREF_TWEAK"));
 	ImageList.Add(CTempIconLoader("PREF_BACKUP")); //EastShare - Added by Pretender, TBH-AutoBackup
-	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by IceCream, Morph Prefs
-	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by SiRoB, Morph Prefs
-	ImageList.Add(CTempIconLoader("PREF_TWEAK"));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
+	ImageList.Add(CTempIconLoader("CLIENTMORPH"));  //MORPH - Added by IceCream, Morph Prefs
+	ImageList.Add(CTempIconLoader("CLIENTMORPH"));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader("CLIENTEASTSHARE"));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	m_listbox.SetImageList(&ImageList);
 
 	CString title = GetResString(IDS_EM_PREFS); 
@@ -187,6 +193,9 @@ void CPreferencesDlg::Localize()
 	buffer.Add(GetResString(IDS_SCHEDULER));
 	buffer.Add(GetResString(IDS_PW_WS));
 	buffer.Add(GetResString(IDS_PW_TWEAK)); 
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	buffer.Add(_T("Debug"));
+#endif
 	buffer.Add(GetResString(IDS_BACKUP)); //EastShare - Added by Pretender, TBH-AutoBackup
 	buffer.Add("Morph"); //MORPH - Added by IceCream, Morph Prefs
 	buffer.Add("Morph II"); //MORPH - Added by SiRoB, Morph Prefs

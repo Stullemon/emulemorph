@@ -315,9 +315,8 @@ void CEMSocket::OnReceive(int nErrorCode){
 	const char *rend = GlobalReadBuffer + ret; // end of buffer
 
 	// Loop, processing packets until we run out of them
-	while((rend - rptr >= PACKET_HEADER_SIZE) ||
-	      ((pendingPacket != NULL) && (rend - rptr > 0 ))){ 
-
+	while ((rend - rptr >= PACKET_HEADER_SIZE) || ((pendingPacket != NULL) && (rend - rptr > 0)))
+	{
 		// Two possibilities here: 
 		//
 		// 1. There is no pending incoming packet
@@ -389,10 +388,13 @@ void CEMSocket::OnReceive(int nErrorCode){
 			#endif
 
 			// Process packet
-			PacketReceived(pendingPacket);
+			bool bPacketResult = PacketReceived(pendingPacket);
 			delete pendingPacket;	
 			pendingPacket = NULL;
 			pendingPacketSize = 0;
+
+			if (!bPacketResult)
+				return;
 		}
 	}
 
@@ -925,10 +927,12 @@ void CEMSocket::AssertValid() const
 {
 	CAsyncSocketEx::AssertValid();
 
+	const_cast<CEMSocket*>(this)->sendLocker.Lock();
+
 	ASSERT( byConnected==ES_DISCONNECTED || byConnected==ES_NOTCONNECTED || byConnected==ES_CONNECTED );
 	CHECK_BOOL(m_ProxyConnectFailed);
 	CHECK_PTR(m_pProxyLayer);
-	downloadLimit;
+	(void)downloadLimit;
 	CHECK_BOOL(downloadLimitEnable);
 	CHECK_BOOL(pendingOnReceive);
 	//char* pendingHeader[PACKET_HEADER_SIZE];
@@ -940,7 +944,7 @@ void CEMSocket::AssertValid() const
 	controlpacket_queue.AssertValid();
 	standartpacket_queue.AssertValid();
 	CHECK_BOOL(m_currentPacket_is_controlpacket);
-    (void)sendLocker;
+    //(void)sendLocker;
     (void)m_numberOfSentBytesCompleteFile;
     (void)m_numberOfSentBytesPartFile;
     (void)m_numberOfSentBytesControlPacket;
@@ -948,6 +952,8 @@ void CEMSocket::AssertValid() const
     (void)lastCalledSend;
     (void)m_actualPayloadSize;
     (void)m_actualPayloadSizeSent;
+
+	const_cast<CEMSocket*>(this)->sendLocker.Unlock();
 }
 #endif
 

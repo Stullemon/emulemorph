@@ -39,7 +39,7 @@ protected:
 public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
-	void	SetValues(CKnownFile* in_pOwner,CString in_strFileName,uint8 in_nFramesToGrab, double in_dStartTime, bool in_bReduceColor, uint16 in_nMaxWidth, void* pSender);
+	void	SetValues(const CKnownFile* in_pOwner,CString in_strFileName,uint8 in_nFramesToGrab, double in_dStartTime, bool in_bReduceColor, uint16 in_nMaxWidth, void* pSender);
 	
 private:
 	CString strFileName;
@@ -48,6 +48,6 @@ private:
 	double dStartTime;
 	bool bReduceColor;
 	uint16 nMaxWidth;
-	CKnownFile* pOwner;
+	const CKnownFile* pOwner;
 	void* pSender;
 };

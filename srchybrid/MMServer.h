@@ -49,6 +49,7 @@ public:
 	void	ProcessDownloadRequest(CMMData* data, CMMSocket* sender);
 	void	ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender);
 	void	ProcessFinishedListRequest(CMMSocket* sender);
+	void	ProcessStatisticsRequest(CMMData* data, CMMSocket* sender);
 	// other
 	void	SearchFinished(bool bTimeOut);
 	void	PreviewFinished(CxImage** imgFrames, uint8 nCount);

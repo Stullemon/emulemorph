@@ -70,12 +70,13 @@ public:
 	void	MoveCompletedfilesCat(uint8 from, uint8 to);
 
 protected:
+	void ShowFileDialog(CPartFile* pFile = NULL, bool bOpenCommentsPage = false);
 	void SetAllIcons();
 	void DrawFileItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
 	void DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, CtrlItem_Struct *lpCtrlItem);
     static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-    static int Compare(CPartFile* file1, CPartFile* file2, LPARAM lParamSort);
-    static int Compare(CUpDownClient* client1, CUpDownClient* client2, LPARAM lParamSort, int sortMod);
+    static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
+    static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, int sortMod);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
@@ -92,13 +93,15 @@ protected:
 
 private:
 	CImageList  m_ImageList;
-	CTitleMenu	m_ClientMenu;
 	CMenu		m_PrioMenu;
 	CTitleMenu	m_FileMenu;
 	CMenu		m_A4AFMenu;
+	
+	//MORPH - Removed by SiRoB, Remain time and size Columns have been splited
+	//bool		m_bRemainSort;
+
 	CMenu		m_PermMenu;	// xMule_MOD: showSharePermissions
 	CMenu		m_A4AFMenuFlag; //MORPH - Added by SiRoB, Advanced A4AF Flag derivated from Khaos
-	CMenu		m_Web;
 
 	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;
 	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;

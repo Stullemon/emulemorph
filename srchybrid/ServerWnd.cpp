@@ -78,10 +78,6 @@ BOOL CServerWnd::OnInitDialog()
 	Localize();
 	serverlistctrl.Init(theApp.serverlist);
 
-	m_ctrlNewServerFrm.Init("AddServer");
-	m_ctrlUpdateServerFrm.Init("ServerUpdateMET");
-	m_ctrlMyInfo.Init("MyInfo");
-
 	((CEdit*)GetDlgItem(IDC_SPORT))->SetLimitText(5);
 	GetDlgItem(IDC_SPORT)->SetWindowText("4661");
 	CRect rect;
@@ -152,6 +148,20 @@ BOOL CServerWnd::OnInitDialog()
 	logbox.ShowWindow(SW_HIDE);
 	if (servermsgbox->m_hWnd)
 		servermsgbox->ShowWindow(SW_SHOW);
+
+	// optional: restore last used log pane
+	if (theApp.glob_prefs->GetRestoreLastLogPane())
+	{
+		if (theApp.glob_prefs->GetLastLogPaneID() >= 0 && theApp.glob_prefs->GetLastLogPaneID() < StatusSelector.GetItemCount())
+		{
+			int iCurSel = StatusSelector.GetCurSel();
+			StatusSelector.SetCurSel(theApp.glob_prefs->GetLastLogPaneID());
+			if (theApp.glob_prefs->GetLastLogPaneID() == StatusSelector.GetCurSel())
+				UpdateLogTabSelection();
+			else
+				StatusSelector.SetCurSel(iCurSel);
+		}
+	}
 
 	m_MyInfo.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 	m_MyInfo.SetAutoURLDetect();
@@ -240,6 +250,10 @@ void CServerWnd::OnSysColorChange()
 
 void CServerWnd::SetAllIcons()
 {
+	m_ctrlNewServerFrm.Init("AddServer");
+	m_ctrlUpdateServerFrm.Init("ServerUpdateMET");
+	m_ctrlMyInfo.Init("MyInfo");
+
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.Add(CTempIconLoader("Log"));
@@ -740,26 +754,32 @@ void CServerWnd::OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
-void CServerWnd::UpdateControlsState() {
+void CServerWnd::UpdateControlsState()
+{
+	CString strLabel;
 	if( theApp.serverconnect->IsConnected() )
-	{
-		GetDlgItem(IDC_ED2KCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_DISCONNECT ) );
-	}
+		strLabel = GetResString(IDS_MAIN_BTN_DISCONNECT);
 	else if( theApp.serverconnect->IsConnecting() )
-	{
-		GetDlgItem(IDC_ED2KCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_CANCEL));
-	}
+		strLabel = GetResString(IDS_MAIN_BTN_CANCEL);
 	else
-	{
-		GetDlgItem(IDC_ED2KCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_CONNECT ) );
-	}
+		strLabel = GetResString(IDS_MAIN_BTN_CONNECT);
+	strLabel.Remove(_T('&'));
+	GetDlgItem(IDC_ED2KCONNECT)->SetWindowText(strLabel);
 }
 
-void CServerWnd::OnBnConnect() {
+void CServerWnd::OnBnConnect()
+{
 	if (theApp.serverconnect->IsConnected())
 		theApp.serverconnect->Disconnect();
 	else if (theApp.serverconnect->IsConnecting() )
 		theApp.serverconnect->StopConnectionTry();
 	else
 		theApp.serverconnect->ConnectToAnyServer();
+}
+
+void CServerWnd::SaveAllSettings()
+{
+	theApp.glob_prefs->SetLastLogPaneID(StatusSelector.GetCurSel());
+	serverlistctrl.SaveSettings(CPreferences::tableServer);
+	SaveServerMetStrings();
 }

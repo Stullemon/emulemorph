@@ -116,8 +116,16 @@ void CPerfLog::LogSamples()
 	UINT nCurUp = theApp.stat_sessionSentBytes - m_nLastSessionSentBytes;
 
 	// 'overhead counters' amount of total overhead
-	uint64 nDnOHTotal = theApp.downloadqueue->GetDownDataOverheadFileRequest() + theApp.downloadqueue->GetDownDataOverheadSourceExchange() + theApp.downloadqueue->GetDownDataOverheadServer() + theApp.downloadqueue->GetDownDataOverheadOther();
-	uint64 nUpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + theApp.uploadqueue->GetUpDataOverheadSourceExchange() + theApp.uploadqueue->GetUpDataOverheadServer() + theApp.uploadqueue->GetUpDataOverheadOther();
+	uint64 nDnOHTotal = theApp.downloadqueue->GetDownDataOverheadFileRequest() + 
+						theApp.downloadqueue->GetDownDataOverheadSourceExchange() + 
+						theApp.downloadqueue->GetDownDataOverheadServer() + 
+						theApp.downloadqueue->GetDownDataOverheadKad() + 
+						theApp.downloadqueue->GetDownDataOverheadOther();
+	uint64 nUpOHTotal = theApp.uploadqueue->GetUpDataOverheadFileRequest() + 
+						theApp.uploadqueue->GetUpDataOverheadSourceExchange() + 
+						theApp.uploadqueue->GetUpDataOverheadServer() + 
+						theApp.uploadqueue->GetUpDataOverheadKad() + 
+						theApp.uploadqueue->GetUpDataOverheadOther();
 	UINT nCurDnOH = nDnOHTotal - m_nLastDnOH;
 	UINT nCurUpOH = nUpOHTotal - m_nLastUpOH;
 

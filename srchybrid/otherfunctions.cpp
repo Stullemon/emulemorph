@@ -22,6 +22,7 @@
 #include "PartFile.h"
 #include "SharedFileList.h"
 #include "UpDownClient.h"
+#include "Opcodes.h"
 #ifndef _CONSOLE
 #include <shlobj.h>
 #include "emuledlg.h"
@@ -317,6 +318,7 @@ bool Ask4RegFix(bool checkOnly, bool dontAsk){
 
 			regkey.Open(HKEY_CLASSES_ROOT, _T("ed2k"));
 			regkey.RecurseDeleteKey(_T("ddexec"));
+			regkey.RecurseDeleteKey(_T("ddeexec"));
 		}
 	}
 	regkey.Close();
@@ -667,7 +669,7 @@ void UpdateURLMenu(CMenu &menu,int &counter){
 	}
 }
 
-void RunURL(CAbstractFile* file, CString urlpattern)
+void RunURL(const CAbstractFile* file, CString urlpattern)
 {
 	if (file!=NULL) {
 		// Convert hash to hexadecimal text and add it to the URL
@@ -1340,15 +1342,21 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 {
 	// always filter following IP's
 	// -------------------------------------------
-	//	 0.0.0.0
-	// 127.*.*.*						localhost
+	// 0.0.0.0							invalid
+	// 127.0.0.0 - 127.255.255.255		Loopback
+    // 224.0.0.0 - 239.255.255.255		Multicast
+    // 240.0.0.0 - 255.255.255.255		Reserved for Future Use
 	// 255.255.255.255					invalid
 
-	if (nIP==0 || (uint8)nIP==127 || nIP==INADDR_NONE)
+	if (nIP==0 || (uint8)nIP==127 || (uint8)nIP>=224){
+#ifdef _DEBUG
+		if (nIP==0x0100007F && theApp.glob_prefs->GetAllowLocalHostIP())
+			return true;
+#endif
 		return false;
+	}
 
-	// ZZ:UploadSpeedSense <--
-	if (!theApp.glob_prefs->FilterBadIPs() && !forceCheck)
+	if (!theApp.glob_prefs->FilterLANIPs() && !forceCheck/*ZZ:UploadSpeedSense*/)
 		return true;
 	// ZZ:UploadSpeedSense <--
 
@@ -1371,25 +1379,6 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 	if (nFirst==0 || nFirst==10)
 		return false;
 
-	// itsonlyme: ipFiltering
-	// see http://www.faqs.org/rfcs/rfc3330.html
-	// filter other non-public IPs
-	// 169.254.0.0/16 - Link Local
-	// 192.0.2.0/24 - Test-Net
-	// 192.88.99.0/24 - 6to4 Relay Anycast
-	// 224.0.0.0/4 - Multicast
-	// 240.0.0.0/4 - Reserved for Future Use
-	uint8 nThird = (uint8)(nIP >> 16);
-	if (nFirst==169 && nSecond==254)
-	return false;
-	if (nFirst==192 && nSecond==0 && nThird==2)
-	return false;
-	if (nFirst==192 && nSecond==88 && nThird==99)
-	return false;
-	if (nFirst>=224)
-	return false;
-	// itsonlyme: ipFiltering
-
 	return true; 
 }
 
@@ -1402,6 +1391,29 @@ CString GetFormatedUInt(ULONG ulVal)
 {
 	TCHAR szVal[12];
 	_ultot(ulVal, szVal, 10);
+
+	static NUMBERFMT nf;
+	if (nf.Grouping == 0) {
+		nf.NumDigits = 0;
+		nf.LeadingZero = 0;
+		nf.Grouping = 3;
+		nf.lpDecimalSep = _T(",");
+		nf.lpThousandSep = _T(".");
+		nf.NegativeOrder = 0;
+	}
+	CString strVal;
+	const int iBuffSize = ARRSIZE(szVal)*2;
+	int iResult = GetNumberFormat(LOCALE_SYSTEM_DEFAULT, 0, szVal, &nf, strVal.GetBuffer(iBuffSize), iBuffSize);
+	strVal.ReleaseBuffer();
+	if (iResult == 0)
+		strVal = szVal;
+	return strVal;
+}
+
+CString GetFormatedUInt64(ULONGLONG ullVal)
+{
+	TCHAR szVal[24];
+	_ui64tot(ullVal, szVal, 10);
 
 	static NUMBERFMT nf;
 	if (nf.Grouping == 0) {
@@ -1560,7 +1572,7 @@ CString DbgGetFileInfo(const uchar* hash)
 	return strInfo;
 }
 
-int DbgGetHashType(const uchar* hash)
+int GetHashType(const uchar* hash)
 {
 	if (hash[5] == 13 && hash[14] == 110)
 		return SO_OLDEMULE;
@@ -1574,7 +1586,7 @@ int DbgGetHashType(const uchar* hash)
 
 LPCTSTR DbgGetHashTypeString(const uchar* hash)
 {
-	int iHashType = DbgGetHashType(hash);
+	int iHashType = GetHashType(hash);
 	if (iHashType == SO_EMULE)
 		return _T("eMule");
 	if (iHashType == SO_MLDONKEY)
@@ -1593,6 +1605,117 @@ CString DbgGetClientID(uint32 nClientID)
 	else
 		strClientID = inet_ntoa(*(in_addr*)&nClientID);
 	return strClientID;
+}
+
+#define _STRVAL(o)	{#o, o}
+
+CString DbgGetDonkeyClientTCPOpcode(UINT opcode)
+{
+	static const struct
+	{
+		LPCTSTR pszOpcode;
+		UINT uOpcode;
+	} _aOpcodes[] =
+	{
+		_STRVAL(OP_HELLO),
+		_STRVAL(OP_SENDINGPART),
+		_STRVAL(OP_REQUESTPARTS),
+		_STRVAL(OP_FILEREQANSNOFIL),
+		_STRVAL(OP_END_OF_DOWNLOAD),
+		_STRVAL(OP_ASKSHAREDFILES),
+		_STRVAL(OP_ASKSHAREDFILESANSWER),
+		_STRVAL(OP_HELLOANSWER),
+		_STRVAL(OP_CHANGE_CLIENT_ID),
+		_STRVAL(OP_MESSAGE),
+		_STRVAL(OP_SETREQFILEID),
+		_STRVAL(OP_FILESTATUS),
+		_STRVAL(OP_HASHSETREQUEST),
+		_STRVAL(OP_HASHSETANSWER),
+		_STRVAL(OP_STARTUPLOADREQ),
+		_STRVAL(OP_ACCEPTUPLOADREQ),
+		_STRVAL(OP_CANCELTRANSFER),
+		_STRVAL(OP_OUTOFPARTREQS),
+		_STRVAL(OP_FILEREQUEST),
+		_STRVAL(OP_FILEREQANSWER),
+		_STRVAL(OP_CHANGE_SLOT),
+		_STRVAL(OP_QUEUERANK),
+		_STRVAL(OP_ASKSHAREDDIRS),
+		_STRVAL(OP_ASKSHAREDFILESDIR),
+		_STRVAL(OP_ASKSHAREDDIRSANS),
+		_STRVAL(OP_ASKSHAREDFILESDIRANS),
+		_STRVAL(OP_ASKSHAREDDENIEDANS)
+	};
+
+	for (int i = 0; i < ARRSIZE(_aOpcodes); i++)
+	{
+		if (_aOpcodes[i].uOpcode == opcode)
+			return _aOpcodes[i].pszOpcode;
+	}
+	CString strOpcode;
+	strOpcode.Format(_T("0x%02x"), opcode);
+	return strOpcode;
+}
+
+CString DbgGetMuleClientTCPOpcode(UINT opcode)
+{
+	static const struct
+	{
+		LPCTSTR pszOpcode;
+		UINT uOpcode;
+	} _aOpcodes[] =
+	{
+		_STRVAL(OP_EMULEINFO),
+		_STRVAL(OP_EMULEINFOANSWER),
+		_STRVAL(OP_COMPRESSEDPART),
+		_STRVAL(OP_QUEUERANKING),
+		_STRVAL(OP_FILEDESC),
+		_STRVAL(OP_REQUESTSOURCES),
+		_STRVAL(OP_ANSWERSOURCES),
+		_STRVAL(OP_PUBLICKEY),
+		_STRVAL(OP_SIGNATURE),
+		_STRVAL(OP_SECIDENTSTATE),
+		_STRVAL(OP_REQUESTPREVIEW),
+		_STRVAL(OP_PREVIEWANSWER)
+	};
+
+	for (int i = 0; i < ARRSIZE(_aOpcodes); i++)
+	{
+		if (_aOpcodes[i].uOpcode == opcode)
+			return _aOpcodes[i].pszOpcode;
+	}
+	CString strOpcode;
+	strOpcode.Format(_T("0x%02x"), opcode);
+	return strOpcode;
+}
+
+#undef _STRVAL
+
+CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size)
+{
+	CString str;
+	if (protocol == OP_EDONKEYPROT)
+		str.Format(_T("protocol=eDonkey  opcode=%s  size=%u"), DbgGetDonkeyClientTCPOpcode(opcode), size);
+	else if (protocol == OP_PACKEDPROT)
+		str.Format(_T("protocol=Packed  opcode=%s  size=%u"), DbgGetMuleClientTCPOpcode(opcode), size);
+	else if (protocol == OP_EMULEPROT)
+		str.Format(_T("protocol=eMule  opcode=%s  size=%u"), DbgGetMuleClientTCPOpcode(opcode), size);
+	else
+		str.Format(_T("protocol=0x%02x  opcode=0x%02x  size=%u"), protocol, opcode, size);
+	return str;
+}
+
+CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode)
+{
+	CString str;
+	if (protocol == OP_EDONKEYPROT)
+		str.Format(_T("%s"), DbgGetDonkeyClientTCPOpcode(opcode));
+	else if (protocol == OP_PACKEDPROT)
+		str.Format(_T("%s"), DbgGetMuleClientTCPOpcode(opcode));
+	else if (protocol == OP_EMULEPROT)
+		str.Format(_T("%s"), DbgGetMuleClientTCPOpcode(opcode));
+	else
+		str.Format(_T("protocol=0x%02x  opcode=0x%02x"), protocol, opcode);
+	return str;
 }
 
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)
@@ -1710,7 +1833,7 @@ CString StripInvalidFilenameChars(CString strText, bool bKeepSpaces)
 	return strText;
 }
 
-CString CreateED2kLink( CAbstractFile* f )
+CString CreateED2kLink(const CAbstractFile* f)
 {
 	CString strLink;
 	strLink.Format("ed2k://|file|%s|%u|%s|/",
@@ -1721,7 +1844,7 @@ CString CreateED2kLink( CAbstractFile* f )
 	return strLink;
 }
 
-CString CreateHTMLED2kLink( CAbstractFile* f )
+CString CreateHTMLED2kLink(const CAbstractFile* f)
 {
 	CString strCode = "<a href=\"" + CreateED2kLink(f) + "\">" + StripInvalidFilenameChars(f->GetFileName(), true) + "</a>";
 	return strCode;

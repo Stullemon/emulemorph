@@ -27,5 +27,6 @@ public:
 	virtual BOOL OnApply();
 	afx_msg void OnSettingsChange()					{ SetModified(); }
 	afx_msg void OnEnChangeNick()					{ SetModified(); m_bnickModified = true;}
+	afx_msg void OnBtnClickPerform();
 	void Localize(void);
 };

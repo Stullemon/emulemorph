@@ -216,7 +216,7 @@ uint8 CFrameGrabThread::GrabFrames(){
 	}
 }
 
-void CFrameGrabThread::SetValues(CKnownFile* in_pOwner, CString in_strFileName,uint8 in_nFramesToGrab, double in_dStartTime, bool in_bReduceColor, uint16 in_nMaxWidth, void* in_pSender){
+void CFrameGrabThread::SetValues(const CKnownFile* in_pOwner, CString in_strFileName,uint8 in_nFramesToGrab, double in_dStartTime, bool in_bReduceColor, uint16 in_nMaxWidth, void* in_pSender){
 	strFileName =in_strFileName;
 	nFramesToGrab = in_nFramesToGrab;
 	dStartTime = in_dStartTime;

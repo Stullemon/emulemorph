@@ -68,6 +68,7 @@ public:
 	CUpDownClient* FindClientByIP_UDP(uint32 clientip, UINT nUDPport);
 	CUpDownClient* FindClientByServerID(uint32 uServerIP, uint32 uUserID);
 	CUpDownClient* FindClientByID_KadPort(uint32 clientID,uint16 kadPort);
+	CUpDownClient* GetRandomKadClient();
 	void	GetClientListByFileID(CUpDownClientPtrList *clientlist, const uchar *fileid);	// #zegzav:updcliuplst
 
 	void	AddBannedClient(uint32 dwIP);
@@ -96,7 +97,7 @@ private:
 	uint32	m_dwLastBannCleanUp;
 	uint32	m_dwLastTrackedCleanUp;
 	CUpDownClientPtrList RequestTCPList;
-
+	CCriticalSection m_RequestTCPLock;
 //MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 public:
 	void AddClientType(EClientSoftware clientSoft, const CString& description);

@@ -220,7 +220,7 @@ void CPublishKeywordList::AddKeywords(CKnownFile* pFile)
 void CPublishKeywordList::RemoveKeywords(CKnownFile* pFile)
 {
 	const Kademlia::WordList& wordlist = pFile->GetKadKeywords();
-	ASSERT( wordlist.size() > 0 );
+	//ASSERT( wordlist.size() > 0 );
 	Kademlia::WordList::const_iterator it;
 	for (it = wordlist.begin(); it != wordlist.end(); it++)
 	{
@@ -343,6 +343,8 @@ void CSharedFileList::FindSharedFiles(){
 	
 	stemp=app_prefs->GetIncomingDir();
 	stemp.MakeLower();
+	if (stemp.Right(1)!="\\") stemp+="\\";
+
 	l_sAdded.AddHead( stemp );
 	AddFilesFromDirectory(l_sAdded.GetHead());
 
@@ -351,6 +353,7 @@ void CSharedFileList::FindSharedFiles(){
 		{
 			tempDir=CString( theApp.glob_prefs->GetCatPath(ix) );
 			ltempDir=tempDir;ltempDir.MakeLower();
+			if (ltempDir.Right(1)!="\\") ltempDir+="\\";
 
 			if( l_sAdded.Find( ltempDir ) ==NULL ) {
 				l_sAdded.AddHead( ltempDir );
@@ -362,7 +365,9 @@ void CSharedFileList::FindSharedFiles(){
 	for (POSITION pos = app_prefs->shareddir_list.GetHeadPosition();pos != 0;app_prefs->shareddir_list.GetNext(pos))
 	{
 		tempDir = app_prefs->shareddir_list.GetAt(pos);
-		ltempDir= tempDir;ltempDir.MakeLower();
+		ltempDir= tempDir;
+		ltempDir.MakeLower();
+		if (ltempDir.Right(1)!="\\") ltempDir+="\\";
 
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
 			l_sAdded.AddHead( ltempDir );
@@ -482,7 +487,13 @@ void CSharedFileList::AddFile(CKnownFile* pFile)
 	}
 	theApp.knownfiles->FilterDuplicateKnownFiles(pFile);
 	// SLUGFILLER: mergeKnown
-	m_Files_map.SetAt(CCKey(pFile->GetFileHash()), pFile);
+	CCKey key(pFile->GetFileHash());
+	CKnownFile* pFileInMap;
+	if (m_Files_map.Lookup(key, pFileInMap)){
+		TRACE("%s: File already in shared file list: %s \"%s\" \"%s\"\n", __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileName(), pFileInMap->GetFilePath());
+		TRACE("%s: File to add:                      %s \"%s\" \"%s\"\n", __FUNCTION__, md4str(pFile->GetFileHash()), pFile->GetFileName(), pFile->GetFilePath());
+	}
+	m_Files_map.SetAt(key, pFile);
 	m_keywords->AddKeywords(pFile);
 	sLock.Unlock();
 }
@@ -596,11 +607,11 @@ void CSharedFileList::SendListToServer(){
 	if (pCurServer && pCurServer->GetTCPFlags() & SRV_TCPFLG_COMPRESSION){
 		UINT uUncomprSize = packet->size;
 		packet->PackPacket();
-		if (theApp.glob_prefs->GetDebugServerTCP())
+		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 			Debug(">>> Sending OP__OfferFiles(compressed); uncompr size=%u  compr size=%u  files=%u\n", uUncomprSize, packet->size, limit);
 	}
 	else{
-		if (theApp.glob_prefs->GetDebugServerTCP())
+		if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 			Debug(">>> Sending OP__OfferFiles; size=%u  files=%u\n", packet->size, limit);
 	}
 	theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
@@ -674,6 +685,9 @@ void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* fil
 		}
 	}
 
+	// only send verified meta data to servers/clients
+	if (cur_file->GetMetaDataVer() > 0)
+	{
 	static const struct
 	{
 		bool	bSendToServer;
@@ -725,6 +739,7 @@ void CSharedFileList::CreateOfferedFilePacket(CKnownFile* cur_file,CMemFile* fil
 				tags.Add(new CTag(pTag->tag));
 			}
 		}
+	}
 	}
 
 	uint32 uTagCount = tags.GetSize();
@@ -779,7 +794,7 @@ void CSharedFileList::HashNextFile(){
 		return;
 	UnknownFile_Struct* nextfile = waitingforhash_list.RemoveHead();
 	currentlyhashing_list.AddTail(nextfile);	// SLUGFILLER: SafeHash - keep track
-	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);	// SLUGFILLER: SafeHash - full speed hashing
+	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 	addfilethread->SetValues(this,nextfile->strDirectory,nextfile->strName);
 	addfilethread->ResumeThread();
 	// SLUGFILLER: SafeHash remove - nextfile deleting handled elsewhere
@@ -894,7 +909,7 @@ void CSharedFileList::Publish()
 
 	if(Kademlia::CTimer::getThreadID() && theApp.kademlia->isConnected() && theApp.IsConnected() && GetCount())
 	{ //Once we can handle lowID users in Kad, we need to publish firewalled sources.
-		if( theApp.kademlia->getStatus()->m_totalStoreKey < KADEMLIATOTALSTOREKEY)
+		if( theApp.kademlia->getStatus()->m_totalStoreKey < KADEMLIATOTALSTOREKEY && theApp.kademlia->getStatus()->m_keywordPublish)
 		{
 			if( (!m_lastProcessPublishKadKeywordList || (::GetTickCount() - m_lastProcessPublishKadKeywordList) > KADEMLIAPUBLISHTIME) )
 			{

@@ -72,7 +72,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 				if (!reqfile)
 				{
 					Packet* response = new Packet(OP_FILENOTFOUND,0,OP_EMULEPROT);
-					theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size + 8);
+					theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 					SendPacket(response,inet_addr(host),port);
 					break;
 				}
@@ -84,27 +84,31 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 					sender->UDPFileReasked();
 					if ((sender->GetUDPVersion() > 2) && (size > 17))
 					{
-						uint16 nCompleteCountLast= sender->GetUpCompleteSourcesCount();
-						uint16 nCompleteCountNew= *(uint16*)(packet+16);
-						sender->SetUpCompleteSourcesCount(nCompleteCountNew);
-						if (nCompleteCountLast != nCompleteCountNew)
-						{
-							if(reqfile->IsPartFile())
+						if (size == 18){
+							uint16 nCompleteCountLast= sender->GetUpCompleteSourcesCount();
+							uint16 nCompleteCountNew= *(uint16*)(packet+16);
+							sender->SetUpCompleteSourcesCount(nCompleteCountNew);
+							if (nCompleteCountLast != nCompleteCountNew)
 							{
-								((CPartFile*)reqfile)->NewSrcPartsInfo();
+								if(reqfile->IsPartFile())
+								{
+									((CPartFile*)reqfile)->NewSrcPartsInfo();
+								}
+								else
+								{
+									reqfile->NewAvailPartsInfo();
+								}
 							}
-							else
-							{
-								reqfile->NewAvailPartsInfo();
-							}
-						}
+						}else
+							AddDebugLogLine(false,"%s:%s:%i!=18" ,sender->GetUserName(),sender->GetClientSoftVer(),size);
+						
 					}
 					break;
 				}
 				else{
 					if (((uint32)theApp.uploadqueue->GetWaitingUserCount() + 50) > theApp.glob_prefs->GetQueueSize()){
 						Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
-						theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size + 8);
+						theApp.uploadqueue->AddUpDataOverheadFileRequest(response->size);
 						SendPacket(response,inet_addr(host),port);
 					}
 					break;
@@ -113,7 +117,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 			}
 			case OP_QUEUEFULL:
 			{
-				theApp.downloadqueue->AddDownDataOverheadOther(size);
+				theApp.downloadqueue->AddDownDataOverheadFileRequest(size);
 				CUpDownClient* sender = theApp.downloadqueue->GetDownloadClientByIP_UDP(inet_addr(host), port);
 				if (sender){
 					sender->SetRemoteQueueFull(true);
@@ -148,6 +152,7 @@ bool CClientUDPSocket::ProcessPacket(char* packet, int16 size, int8 opcode, char
 				break;
 			}
 			default:
+				theApp.downloadqueue->AddDownDataOverheadOther(size);
 				return false;
 		}
 

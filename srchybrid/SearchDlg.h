@@ -80,46 +80,46 @@ public:
 	CSearchDlg(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CSearchDlg();
 	
-	afx_msg void OnBnClickedStarts();
-	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnBnClickedCancels();
-	afx_msg void OnBnClickedSdownload();
-	afx_msg void OnBnClickedClearall();
-	afx_msg void OnBnClickedSearchReset();
-	afx_msg void OnEnKillfocusElink();
-	afx_msg void OnSearchKeyDown();
-
 	enum { IDD = IDD_SEARCH };
 
+	CSearchListCtrl searchlistctrl;
+	CClosableTabCtrl searchselect;
+
 	void	Localize();
+
+	bool	DoNewSearch(SSearchParams* pParams);
+	bool	DoNewKadSearch(SSearchParams* pParams);
+	void	CancelSearch();
+
 	void	DownloadSelected();
 	void	DownloadSelected(bool paused);
-	void	LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
-	void	AddUDPResult(uint16 count);
+
+	bool	CanDeleteSearch(uint32 nSearchID) const;
+	bool	CanDeleteAllSearches() const;
 	void	DeleteSearch(uint32 nSearchID);
 	void	DeleteAllSearchs();
-	bool	CreateNewTab(SSearchParams* pParams);
-	void	UpdateCatTabs();
+
+	void	LocalSearchEnd(uint16 count, bool bMoreResultsAvailable);
+	void	AddUDPResult(uint16 count);
+
 	void	SearchClipBoard();
 	// khaos::categorymod+ Changed Param: uint8 cat
 	void	AddEd2kLinksToDownload(CString strlink, int theCat = -1);
 	// Removed overloaded function
 	// khaos::categorymod-
-	CSearchListCtrl searchlistctrl;
-	CClosableTabCtrl searchselect;
 	void	IgnoreClipBoardLinks(CString strlink)		{m_lastclpbrd = strlink; }
-	bool	DoNewSearch(SSearchParams* pParams);
-	bool	DoNewKadSearch(SSearchParams* pParams);
+	bool	CreateNewTab(SSearchParams* pParams);
 	void	ShowSearchSelector(bool visible);
-	BOOL	SaveSearchStrings();
+	
 	//MORPH - Removed by SiRoB, Khaos Category
 	/*uint8	GetSelectedCat()	{ return m_cattabs.GetCurSel();}*/
+	void	SaveAllSettings();
+	BOOL	SaveSearchStrings();
 	LRESULT ProcessJigleSearchResponse(WPARAM wParam, LPARAM lParam);
 
 protected:
 	void StartNewSearch(bool bKademlia = false);
 	void StartNewSearchKad();
-	LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	CString	CreateWebQuery();
 	void UpdateControls();
 	void ShowResults(const SSearchParams* pParams);
@@ -128,6 +128,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnNMDblclkSearchlist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnEnChangeSearchname();
@@ -136,8 +138,15 @@ protected:
 	afx_msg void OnCbnSelendokCombo1();
 	afx_msg void OnBnClickedMore();
 	afx_msg void OnSysColorChange();
-
-	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedStarts();
+	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnBnClickedCancels();
+	afx_msg void OnBnClickedSdownload();
+	afx_msg void OnBnClickedClearall();
+	afx_msg void OnBnClickedSearchReset();
+	afx_msg void OnEnKillfocusElink();
+	afx_msg void OnSearchKeyDown();
+	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 
 private:
 	Packet*		searchpacket;		
@@ -156,7 +165,6 @@ private:
 	CString		m_lastclpbrd;
 	bool		m_guardCBPrompt;
 	CCustomAutoComplete* m_pacSearchString;
-	CString	ToQueryString(CString str);
 	HICON icon_search;
 	CIconStatic m_ctrlSearchFrm;
 	CIconStatic m_ctrlDirectDlFrm;
@@ -164,8 +172,9 @@ private:
 	LCID		m_uLangID;
 	CButton		m_ctlMore;
 	int			m_iSentMoreReq;
-
 	CJigleSOAPThread* m_pJigleThread;
+
+	CString ToQueryString(CString str);
 	bool DoNewJigleSearch(SSearchParams* pParams);
 };
 

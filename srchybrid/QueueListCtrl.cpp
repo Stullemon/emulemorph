@@ -207,11 +207,11 @@ void CQueueListCtrl::Localize()
 	}
 }
 
-void CQueueListCtrl::AddClient(CUpDownClient* client, bool resetclient){
+void CQueueListCtrl::AddClient(/*const*/CUpDownClient* client, bool resetclient)
+{
 	if( resetclient && client){
 			client->SetWaitStartTime();
 			client->SetAskedCount(1);
-			client->setFullChunkTransferTag(false);//Morph - added by AndCycle, keep full chunk transfer
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	} else if( client ) {
 		// Clients that have been put back "first" on queue (that is, they
@@ -228,7 +228,8 @@ void CQueueListCtrl::AddClient(CUpDownClient* client, bool resetclient){
 	theApp.emuledlg->transferwnd->UpdateListCount(2);
 }
 
-void CQueueListCtrl::RemoveClient(CUpDownClient* client){
+void CQueueListCtrl::RemoveClient(const CUpDownClient* client)
+{
 	if (!theApp.emuledlg->IsRunning()) return;
 	LVFINDINFO find;
 	find.flags = LVFI_PARAM;
@@ -239,7 +240,8 @@ void CQueueListCtrl::RemoveClient(CUpDownClient* client){
 	theApp.emuledlg->transferwnd->UpdateListCount(2);
 }
 
-void CQueueListCtrl::RefreshClient(CUpDownClient* client){
+void CQueueListCtrl::RefreshClient(const CUpDownClient* client)
+{
 	// There is some type of timing issue here.. If you click on item in the queue or upload and leave
 	// the focus on it when you exit the cient, it breaks on line 854 of emuleDlg.cpp.. 
 	// I added this IsRunning() check to this function and the DrawItem method and
@@ -258,7 +260,8 @@ void CQueueListCtrl::RefreshClient(CUpDownClient* client){
 
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
-void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
+void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
 	if( !theApp.emuledlg->IsRunning() )
 		return;
 	if (!lpDrawItemStruct->itemData)
@@ -273,8 +276,8 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	}
 	else
 		odc->SetBkColor(GetBkColor());
-	CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
-	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC),&CRect(lpDrawItemStruct->rcItem));
+	const CUpDownClient* client = (CUpDownClient*)lpDrawItemStruct->itemData;
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	RECT cur_rec;
 	memcpy(&cur_rec,&lpDrawItemStruct->rcItem,sizeof(RECT));
@@ -472,11 +475,6 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 							}
 							else
 								Sbuffer.Format("%i",client->GetScore(false));
-
-							if(client->needFullChunkTransfer()){
-								//show out how much have uploaded to this client
-								Sbuffer.Format("%s F(%s)", Sbuffer, CastItoXBytes(client->GetQueueSessionUp()));
-							}
 						}
 						break;
 					case 5:
@@ -556,7 +554,7 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	UINT uFlags = (iSel != -1) ? MF_ENABLED : MF_GRAYED;
-	CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
+	const CUpDownClient* client = (iSel != -1) ? (CUpDownClient*)GetItemData(iSel) : NULL;
 
 	CTitleMenu ClientMenu;
 	ClientMenu.CreatePopupMenu();
@@ -576,7 +574,8 @@ void CQueueListCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
-BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam ){
+BOOL CQueueListCtrl::OnCommand(WPARAM wParam,LPARAM lParam )
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1){
 		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
@@ -672,9 +671,10 @@ void CQueueListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	*pResult = 0;
 }
 
-int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
-	CUpDownClient* item1 = (CUpDownClient*)lParam1;
-	CUpDownClient* item2 = (CUpDownClient*)lParam2;
+int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	const CUpDownClient* item1 = (CUpDownClient*)lParam1;
+	const CUpDownClient* item2 = (CUpDownClient*)lParam2;
 	switch(lParamSort){
 		case 0: 
 			if(item1->GetUserName() && item2->GetUserName())
@@ -783,13 +783,6 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort){
 						0;
 				}
 
-				if(result == 0){
-					result =
-						item1->needFullChunkTransfer() == true && item2->needFullChunkTransfer() == false ? 1 :
-						item1->needFullChunkTransfer() == false && item2->needFullChunkTransfer() == true ? -1 :
-						0;
-				}
-
 				//Morph - added by AndCycle, try to finish faster for the one have finished more than others, for keep full chunk transfer
 				if(result == 0){
 					result =
@@ -868,7 +861,7 @@ void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEve
 			|| !theApp.emuledlg->transferwnd->queuelistctrl.IsWindowVisible() )
 			return;
 
-		CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
+		const CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
 		while( update )
 		{
 			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(update);
@@ -878,9 +871,10 @@ void CALLBACK CQueueListCtrl::QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEve
 	CATCH_DFLT_EXCEPTIONS("CQueueListCtrl::QueueUpdateTimer")
 }
 
-void CQueueListCtrl::ShowQueueClients(){
+void CQueueListCtrl::ShowQueueClients()
+{
 	DeleteAllItems(); 
-	CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
+	/*const*/ CUpDownClient* update = theApp.uploadqueue->GetNextClient(NULL);
 	while( update )
 	{
 		AddClient(update,false);
@@ -888,8 +882,8 @@ void CQueueListCtrl::ShowQueueClients(){
 	}
 }
 
-
-void CQueueListCtrl::ShowSelectedUserDetails() {
+void CQueueListCtrl::ShowSelectedUserDetails()
+{
 	POINT point;
 	::GetCursorPos(&point);
 	CPoint p = point; 
@@ -898,18 +892,18 @@ void CQueueListCtrl::ShowSelectedUserDetails() {
     if (it == -1) return;
 	SetSelectionMark(it);   // display selection mark correctly! 
 
-	CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
-
+	const CUpDownClient* client = (CUpDownClient*)GetItemData(GetSelectionMark());
 	if (client){
 		CClientDetailDialog dialog(client);
 		dialog.DoModal();
 	}
 }
 
-void CQueueListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult) {
+void CQueueListCtrl::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
+{
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (iSel != -1) {
-		CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
+		const CUpDownClient* client = (CUpDownClient*)GetItemData(iSel);
 		if (client){
 			CClientDetailDialog dialog(client);
 			dialog.DoModal();
@@ -933,7 +927,7 @@ void CQueueListCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
 		// function is invoked *very* often, no *NOT* put any time consuming code here in.
 
 		if (pDispInfo->item.mask & LVIF_TEXT){
-			CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
+			const CUpDownClient* pClient = reinterpret_cast<CUpDownClient*>(pDispInfo->item.lParam);
 			if (pClient != NULL){
 				switch (pDispInfo->item.iSubItem){
 					case 0:

@@ -86,6 +86,12 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
+struct SLogItem
+{
+    bool addtostatusbar;
+    CString line;
+};
+
 BOOL (WINAPI *_TransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT)= NULL;
 const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(_T(EMULE_GUID));
 // CemuleDlg Dialog
@@ -111,7 +117,8 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon("AAAEMULEAPP");
 	theApp.m_app_state = APP_STATE_RUNNING;
 	ready = false; 
-	startUpMinimized=false;
+	startUpMinimizedChecked = false;
+	m_bStartMinimized = false;
 	lastuprate = 0;
 	lastdownrate = 0;
 	status = 0;
@@ -263,15 +270,22 @@ LRESULT CemuleDlg::OnAreYouEmule(WPARAM, LPARAM)
 
 BOOL CemuleDlg::OnInitDialog()
 {
+	m_bStartMinimized = theApp.glob_prefs->GetStartMinimized();
+	// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
+	if (theApp.glob_prefs->IsFirstStart())
+		m_bStartMinimized = false;
+
 	CTrayDialog::OnInitDialog();
 	InitWindowStyles(this);
 
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
 	CMenu* pSysMenu = GetSystemMenu(FALSE);
 	if (pSysMenu != NULL){
 		pSysMenu->AppendMenu(MF_SEPARATOR);
-		pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, GetResString(IDS_ABOUTBOX));
+
+		ASSERT( (MP_ABOUTBOX & 0xFFF0) == MP_ABOUTBOX && MP_ABOUTBOX < 0xF000);
+		pSysMenu->AppendMenu(MF_STRING, MP_ABOUTBOX, GetResString(IDS_ABOUTBOX));
+
+		ASSERT( (MP_VERSIONCHECK & 0xFFF0) == MP_VERSIONCHECK && MP_VERSIONCHECK < 0xF000);
 		pSysMenu->AppendMenu(MF_STRING, MP_VERSIONCHECK, GetResString(IDS_VERSIONCHECK));
 
 		switch (theApp.glob_prefs->GetWindowsVersion()){
@@ -335,8 +349,40 @@ BOOL CemuleDlg::OnInitDialog()
 	statisticswnd->Create(IDD_STATISTICS);
 	kademliawnd->Create(IDD_KADEMLIAWND);
 	ircwnd->Create(IDD_IRC);
-	serverwnd->ShowWindow(SW_SHOW);
-	activewnd = serverwnd;
+
+	// optional: restore last used main window dialog
+	if (theApp.glob_prefs->GetRestoreLastMainWndDlg()){
+		switch (theApp.glob_prefs->GetLastMainWndDlgID()){
+		case IDD_SERVER:
+			SetActiveDialog(serverwnd);
+			break;
+		case IDD_FILES:
+			SetActiveDialog(sharedfileswnd);
+			break;
+		case IDD_SEARCH:
+			SetActiveDialog(searchwnd);
+			break;
+		case IDD_CHAT:
+			SetActiveDialog(chatwnd);
+			break;
+		case IDD_TRANSFER:
+			SetActiveDialog(transferwnd);
+			break;
+		case IDD_STATISTICS:
+			SetActiveDialog(statisticswnd);
+			break;
+		case IDD_KADEMLIAWND:
+			SetActiveDialog(kademliawnd);
+			break;
+		case IDD_IRC:
+			SetActiveDialog(ircwnd);
+			break;
+		}
+	}
+
+	// if still no active window, activate server window
+	if (activewnd == NULL)
+		SetActiveDialog(serverwnd);
 
 	// no support for changing traybar icons on-the-fly
 	sourceTrayIcon = theApp.LoadIcon("TrayConnected", 16, 16);
@@ -411,18 +457,19 @@ BOOL CemuleDlg::OnInitDialog()
 		AddDebugLogLine(true,_T("Failed to create 'startup' timer - %s"),GetErrorMessage(GetLastError()));
 
 	// splashscreen
-	if (theApp.glob_prefs->UseSplashScreen() && !theApp.glob_prefs->GetStartMinimized()){
+	if (theApp.glob_prefs->UseSplashScreen() && !m_bStartMinimized){
 		CSplashScreen splash(this);
 		splash.DoModal();
 	}
 
-
-
 	theApp.stat_starttime = GetTickCount();
 
-	if (theApp.glob_prefs->IsFirstStart()){
+	if (theApp.glob_prefs->IsFirstStart())
+	{
+		// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
+		m_bStartMinimized = false;
 		::DeleteFile(theApp.glob_prefs->GetConfigDir() + _T("PNRecovery.dat"));	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery- Avoid clashes with previous file format.
-		theApp.downloadqueue->UpdatePNRFile();									//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery- Force full rewrite.
+		theApp.downloadqueue->UpdatePNRFile();	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery- Force full rewrite.
 		extern BOOL FirstTimeWizard();
 		if (FirstTimeWizard()){
 			// start connection wizard
@@ -599,8 +646,7 @@ void CemuleDlg::OnSysCommand(UINT nID, LPARAM lParam){
 	}
 	
 	switch (nID /*& 0xFFF0*/){
-
-		case  IDM_ABOUTBOX : {
+		case MP_ABOUTBOX : {
 			CCreditsDlg dlgAbout;
 			dlgAbout.DoModal();
 			break;
@@ -630,15 +676,17 @@ void CemuleDlg::OnSysCommand(UINT nID, LPARAM lParam){
 			//MORPH START - Added by SiRoB, ZZ Upload system (USS)
 			ShowPing();
 			//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
-			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
+			transferwnd->UpdateCatTabTitles();
 		}
 }
 
-void CemuleDlg::OnPaint() {
-
-	if (!startUpMinimized) {
-		startUpMinimized=true;
-		if (theApp.glob_prefs->GetStartMinimized()) OnCancel();
+void CemuleDlg::OnPaint()
+{
+	if (!startUpMinimizedChecked){
+		//TODO: Use full initialized 'WINDOWPLACEMENT' and remove the 'OnCancel' call...
+		startUpMinimizedChecked = true;
+		if (m_bStartMinimized)
+			OnCancel();
 	}
 
 	if (IsIconic()){
@@ -726,47 +774,99 @@ void CemuleDlg::AddLogText(bool addtostatusbar,const CString& txt, bool bDebug) 
 	}
 }
 
-//MORPH START - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
-void CemuleDlg::QueueDebugLogLine(bool addtostatusbar,CString line,...) {
+// Elandal:ThreadSafeLogging -->
+void CemuleDlg::QueueDebugLogLine(bool addtostatusbar, LPCTSTR line, ...)
+{
    ASSERT( theApp.glob_prefs!=NULL );
    if( theApp.glob_prefs==NULL || (!theApp.glob_prefs->GetVerbose() && !theApp.glob_prefs->Debug2Disk()) )
        return;
 
-   queueLock.Lock();
+   m_queueLock.Lock();
 
-   char bufferline[1000];
+   TCHAR bufferline[1000];
 
    va_list argptr;
    va_start(argptr, line);
-   _vsnprintf(bufferline, 1000, line, argptr);
+	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
    va_end(argptr);
 
-   LogItem* newItem = new LogItem;
+	SLogItem* newItem = new SLogItem;
    newItem->addtostatusbar = addtostatusbar;
    newItem->line = bufferline;
-   m_LogQueue.AddTail(newItem);
+	m_QueueDebugLog.AddTail(newItem);
 
-   queueLock.Unlock();
+	m_queueLock.Unlock();
 }
 
-void CemuleDlg::HandleDebugLogQueue() {
-   queueLock.Lock();
-   while(!m_LogQueue.IsEmpty()) {
-       LogItem* newItem = m_LogQueue.RemoveHead();
-       AddDebugLogLine(newItem->addtostatusbar, newItem->line);
-       delete newItem;
-   }
-   queueLock.Unlock();
+void CemuleDlg::QueueLogLine(bool addtostatusbar, LPCTSTR line,...)
+{
+	ASSERT( theApp.glob_prefs!=NULL );
+	if( theApp.glob_prefs==NULL || (!theApp.glob_prefs->GetVerbose() && !theApp.glob_prefs->Debug2Disk()) )
+		return;
+
+	m_queueLock.Lock();
+
+	TCHAR bufferline[1000];
+
+	va_list argptr;
+	va_start(argptr, line);
+	_vsnprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	va_end(argptr);
+
+	SLogItem* newItem = new SLogItem;
+	newItem->addtostatusbar = addtostatusbar;
+	newItem->line = bufferline;
+	m_QueueLog.AddTail(newItem);
+
+	m_queueLock.Unlock();
 }
 
-void CemuleDlg::ClearDebugLogQueue() {
-   queueLock.Lock();
-   while(!m_LogQueue.IsEmpty()) {
-       delete m_LogQueue.RemoveHead();
-   }
-   queueLock.Unlock();
+void CemuleDlg::HandleDebugLogQueue()
+{
+	m_queueLock.Lock();
+	while(!m_QueueDebugLog.IsEmpty()) {
+		const SLogItem* newItem = m_QueueDebugLog.RemoveHead();
+		AddDebugLogLine(newItem->addtostatusbar, newItem->line);
+		delete newItem;
+	}
+	m_queueLock.Unlock();
 }
-//MORPH END   - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
+
+void CemuleDlg::HandleLogQueue()
+{
+	m_queueLock.Lock();
+	while(!m_QueueLog.IsEmpty()) {
+		const SLogItem* newItem = m_QueueLog.RemoveHead();
+		AddLogLine(newItem->addtostatusbar, newItem->line);
+		delete newItem;
+	}
+	m_queueLock.Unlock();
+}
+
+void CemuleDlg::ClearDebugLogQueue(bool bDebugPendingMsgs)
+{
+	m_queueLock.Lock();
+	while(!m_QueueDebugLog.IsEmpty())
+	{
+		if (bDebugPendingMsgs)
+			TRACE("Queued dbg log msg: %s\n", m_QueueDebugLog.GetHead()->line);
+		delete m_QueueDebugLog.RemoveHead();
+	}
+	m_queueLock.Unlock();
+}
+
+void CemuleDlg::ClearLogQueue(bool bDebugPendingMsgs)
+{
+	m_queueLock.Lock();
+	while(!m_QueueLog.IsEmpty())
+	{
+		if (bDebugPendingMsgs)
+			TRACE("Queued log msg: %s\n", m_QueueLog.GetHead()->line);
+		delete m_QueueLog.RemoveHead();
+	}
+	m_queueLock.Unlock();
+}
+// Elandal:ThreadSafeLogging <--
 
 CString CemuleDlg::GetLastLogEntry(){
 	return serverwnd->logbox.GetLastLogEntry();
@@ -804,9 +904,9 @@ void CemuleDlg::ShowConnectionStateIcon()
 
 void CemuleDlg::ShowConnectionState(){
 	
-	theApp.emuledlg->serverwnd->UpdateMyInfo();
-	theApp.emuledlg->serverwnd->UpdateControlsState();
-	theApp.emuledlg->kademliawnd->UpdateControlsState();
+	serverwnd->UpdateMyInfo();
+	serverwnd->UpdateControlsState();
+	kademliawnd->UpdateControlsState();
 
 	ShowConnectionStateIcon();
 	
@@ -943,9 +1043,9 @@ void CemuleDlg::ShowTransferRate(bool forceAll){
 
 		//MORPH START - Added by IceCream, Correct the bug of the download speed shown in the systray
 		if (theApp.IsConnected())
-			_snprintf(buffer2,sizeof buffer2,"[%s] (%s)\r\n%s","MorphKad",GetResString(IDS_CONNECTED),buffer);
+			_snprintf(buffer2,sizeof buffer2,"[%s] (%s)\r\n%s",MOD_VERSION,GetResString(IDS_CONNECTED),buffer);
 		else 
-			_snprintf(buffer2,sizeof buffer2,"[%s] (%s)\r\n%s","MorphKad",GetResString(IDS_DISCONNECTED),buffer);
+			_snprintf(buffer2,sizeof buffer2,"[%s] (%s)\r\n%s",MOD_VERSION,GetResString(IDS_DISCONNECTED),buffer);
 		//MORPH END   - Added by IceCream, Correct the bug of the download speed shown in the systray
 
 		buffer2[63]=0;
@@ -1012,38 +1112,38 @@ void CemuleDlg::SetActiveDialog(CDialog* dlg)
 {
 	if (dlg == activewnd)
 		return;
-
-	activewnd->ShowWindow(SW_HIDE);
+	if (activewnd)
+		activewnd->ShowWindow(SW_HIDE);
 	dlg->ShowWindow(SW_SHOW);
 	dlg->SetFocus();
 	activewnd = dlg;
 	if (dlg == transferwnd){
 		if (theApp.glob_prefs->ShowCatTabInfos())
-			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+3);
+			transferwnd->UpdateCatTabTitles();
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+3);
 	}
 	else if (dlg == serverwnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+2);
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+2);
 	}
 	else if (dlg == chatwnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+6);
-		theApp.emuledlg->chatwnd->chatselector.ShowChat();
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+6);
+		chatwnd->chatselector.ShowChat();
 	}
 	else if (dlg == ircwnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+7);
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+7);
 	}
 	else if (dlg == sharedfileswnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+5);
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+5);
 	}
 	else if (dlg == searchwnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+4);
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+4);
 	}
 	else if (dlg == statisticswnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+8);
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+8);
 		statisticswnd->ShowStatistics();
 	}
 	else if	(dlg == kademliawnd){
-		theApp.emuledlg->toolbar->PressMuleButton(IDC_TOOLBARBUTTON+1);
+		toolbar->PressMuleButton(IDC_TOOLBARBUTTON+1);
 	}
 }
 
@@ -1051,12 +1151,10 @@ void CemuleDlg::SetStatusBarPartsSize()
 {
 	CRect rect;
 	statusbar->GetClientRect(&rect);
-	//MORPH START - Changed by SiRoB, Related to SUC
-	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
+	//MORPH START - Added by SiRoB, Related to SUC
 	//int aiWidths[5] = { rect.right-650, rect.right-440, rect.right-250, rect.right-25, -1 };
-	int aiWidths[5] = { rect.right-725, rect.right-515, rect.right-325,rect.right-150/*100*/, -1 };
-	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
-	//MORPH END   - Changed by SiRoB, Related to SUC
+	int aiWidths[5] = { rect.right-725, rect.right-515, rect.right-325, rect.right-150, -1 };
+	//MORPH END   - Added by SiRoB, Related to SUC
 	statusbar->SetParts(5, aiWidths);
 }
 
@@ -1099,7 +1197,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 				_ASSERT( pListLink !=0 ); 
 				CString strAddress = pListLink->GetAddress(); 
 				if(strAddress.GetLength() != 0)
-					theApp.emuledlg->serverwnd->UpdateServerMetFromURL(strAddress);
+					serverwnd->UpdateServerMetFromURL(strAddress);
 			}
 			break;
 		case CED2KLink::kServer:
@@ -1117,7 +1215,7 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 				// Barry - Default all new servers to high priority
 				pSrv->SetPreference(PR_HIGH);
 
-				if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(pSrv,true)) 
+				if (!serverwnd->serverlistctrl.AddServer(pSrv,true)) 
 					delete pSrv; 
 				else
 					AddLogLine(true,GetResString(IDS_SERVERADDED), pSrv->GetListName());
@@ -1248,6 +1346,14 @@ LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam){
 	return 0;
 }
 // SLUGFILLER: SafeHash
+LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam){
+	if (lParam==0)
+		((CPartFile*)wParam)->FlushBuffersExceptionHandler();
+	else
+		((CPartFile*)wParam)->FlushBuffersExceptionHandler( (CFileException*)lParam );
+
+	return 0;
+}
 
 bool CemuleDlg::CanClose()
 {
@@ -1269,8 +1375,35 @@ void CemuleDlg::OnClose()
 	theApp.serverconnect->Disconnect();
 	theApp.OnlineSig(); // Added By Bouc7 
 
-	WINDOWPLACEMENT wp;wp.length=sizeof(wp);GetWindowPlacement(&wp);
+	// get main window placement
+	WINDOWPLACEMENT wp;
+	wp.length = sizeof(wp);
+	GetWindowPlacement(&wp);
 	theApp.glob_prefs->SetWindowLayout(wp);
+
+	// get active main window dialog
+	if (activewnd){
+		if (activewnd->IsKindOf(RUNTIME_CLASS(CServerWnd)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_SERVER);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CSharedFilesWnd)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_FILES);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CSearchDlg)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_SEARCH);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CChatWnd)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_CHAT);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CTransferWnd)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_TRANSFER);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CStatisticsDlg)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_STATISTICS);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CKademliaWnd)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_KADEMLIAWND);
+		else if (activewnd->IsKindOf(RUNTIME_CLASS(CIrcWnd)))
+			theApp.glob_prefs->SetLastMainWndDlgID(IDD_IRC);
+		else{
+			ASSERT(0);
+			theApp.glob_prefs->SetLastMainWndDlgID(0);
+		}
+	}
 
 	theApp.kademlia->DisConnect();
 
@@ -1280,15 +1413,13 @@ void CemuleDlg::OnClose()
 	transferwnd->uploadlistctrl.SaveSettings(CPreferences::tableUpload);
 	transferwnd->queuelistctrl.SaveSettings(CPreferences::tableQueue);
 	transferwnd->clientlistctrl.SaveSettings(CPreferences::tableClientList);
-	searchwnd->searchlistctrl.SaveSettings(CPreferences::tableSearch);
+	searchwnd->SaveAllSettings();
 	sharedfileswnd->sharedfilesctrl.SaveSettings(CPreferences::tableShared);
-	serverwnd->serverlistctrl.SaveSettings(CPreferences::tableServer);
+	serverwnd->SaveAllSettings();
 	kademliawnd->SaveAllSettings();
 
 	theApp.scheduler->RestoreOriginals();
 	theApp.glob_prefs->Save();
-	searchwnd->SaveSearchStrings();
-	serverwnd->SaveServerMetStrings();
 	thePerfLog.Shutdown();
 
 	//EastShare START - Pretender, TBH-AutoBackup
@@ -1320,8 +1451,10 @@ void CemuleDlg::OnClose()
 	CPartFileConvert::CloseGUI();
 	CPartFileConvert::RemoveAllJobs();
 
-	theApp.uploadBandwidthThrottler->EndThread(); //MORPH - Added by Yun.SF3, ZZ Upload System
-	theApp.lastCommonRouteFinder->EndThread(); //MORPH - Added by SiRoB, ZZ Upload system (USS)
+	//MORPH - Added by Yun.SF3, ZZ Upload System
+	theApp.uploadBandwidthThrottler->EndThread();
+	//MORPH - Added by SiRoB, ZZ Upload system (USS)
+	theApp.lastCommonRouteFinder->EndThread();
 
     // NOTE: Do not move those dtors into 'CemuleApp::InitInstance' (althought they should be there). The
 	// dtors are indirectly calling functions which access several windows which would not be available 
@@ -1344,12 +1477,18 @@ void CemuleDlg::OnClose()
 	delete theApp.webserver;
 	delete theApp.statistics;
 
-	delete theApp.uploadBandwidthThrottler; //MORPH - Added by Yun.SF3, ZZ Upload System
-	delete theApp.lastCommonRouteFinder; //MORPH - Added by SiRoB, ZZ Upload system (USS)
-	delete theApp.FakeCheck; //MORPH - Added by SiRoB, More clean :|
+	//MORPH - Added by Yun.SF3, ZZ Upload System
+	delete theApp.uploadBandwidthThrottler;
+	//MORPH - Added by SiRoB, ZZ Upload system (USS)
+	delete theApp.lastCommonRouteFinder;
 	delete theApp.glob_prefs;
 	delete theApp.kademlia;
+	//MORPH - Added by SiRoB, More clean :|
+	delete theApp.FakeCheck;
 
+	ClearDebugLogQueue(true);
+	ClearLogQueue(true);
+	
 	theApp.m_app_state = APP_STATE_DONE;
 	CTrayDialog::OnCancel();
 }
@@ -1853,6 +1992,7 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		case IDC_TOOLBARBUTTON + 0:
 			OnBnClickedButton2();
 			break;
+		case MP_HM_KAD:
 		case IDC_TOOLBARBUTTON +1:
 			SetActiveDialog(kademliawnd);
 			break;
@@ -1896,6 +2036,7 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		case MP_HM_OPENINC:
 			ShellExecute(NULL, "open", theApp.glob_prefs->GetIncomingDir(),NULL, NULL, SW_SHOW); 
 			break;
+		case MP_HM_HELP:
 		case IDC_TOOLBARBUTTON + 11:
 			wParam = ID_HELP;
 			break;
@@ -1923,6 +2064,15 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 		case MP_HM_SCHEDONOFF:
 			theApp.glob_prefs->SetSchedulerEnabled(!theApp.glob_prefs->IsSchedulerEnabled());
 			theApp.scheduler->Check(true);
+			break;
+		case MP_HM_1STSWIZARD:
+			extern BOOL FirstTimeWizard();
+			if (FirstTimeWizard()){
+				// start connection wizard
+				Wizard conWizard;
+				conWizard.SetPrefs(theApp.glob_prefs);
+				conWizard.DoModal();
+			}
 			break;
 	}	
 	if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+99) {
@@ -2056,6 +2206,7 @@ void CemuleDlg::ShowToolPopup(bool toolsonly) {
 		else
 			menu.AppendMenu(MF_STRING,MP_HM_CON,GetResString(IDS_MAIN_BTN_CONNECT));
 
+		menu.AppendMenu(MF_STRING,MP_HM_KAD, GetResString(IDS_EM_KADEMLIA) );
 		menu.AppendMenu(MF_STRING,MP_HM_SRVR, GetResString(IDS_EM_SERVER) );
 		menu.AppendMenu(MF_STRING,MP_HM_TRANSFER, GetResString(IDS_EM_TRANS));
 		menu.AppendMenu(MF_STRING,MP_HM_SEARCH, GetResString(IDS_EM_SEARCH));
@@ -2064,10 +2215,12 @@ void CemuleDlg::ShowToolPopup(bool toolsonly) {
 		menu.AppendMenu(MF_STRING,MP_HM_IRC, GetResString(IDS_IRC));
 		menu.AppendMenu(MF_STRING,MP_HM_STATS, GetResString(IDS_EM_STATISTIC));
 		menu.AppendMenu(MF_STRING,MP_HM_PREFS, GetResString(IDS_EM_PREFS));
+		menu.AppendMenu(MF_STRING,MP_HM_HELP, GetResString(IDS_EM_HELP));
 		menu.AppendMenu(MF_SEPARATOR);
 	}
 	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC));
 	menu.AppendMenu(MF_STRING,MP_HM_CONVERTPF, GetResString(IDS_IMPORTSPLPF));
+	menu.AppendMenu(MF_STRING,MP_HM_1STSWIZARD, GetResString(IDS_WIZ1));
 
 	menu.AppendMenu(MF_SEPARATOR);
 	menu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_Links.m_hMenu, GetResString(IDS_LINKS) );
@@ -2103,7 +2256,7 @@ LRESULT CemuleDlg::OnWebServerDisonnect(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnWebServerRemove(WPARAM wParam, LPARAM lParam)
 {
-	theApp.emuledlg->serverwnd->serverlistctrl.RemoveServer((CServer*)wParam); // sivka's bugfix
+	serverwnd->serverlistctrl.RemoveServer((CServer*)wParam); // sivka's bugfix
 	return 0;
 }
 
@@ -2119,17 +2272,17 @@ void CemuleDlg::ApplyHyperTextFont(LPLOGFONT plf)
 	if (m_fontHyperText.CreateFontIndirect(plf))
 	{
 		theApp.glob_prefs->SetHyperTextFont(plf);
-		theApp.emuledlg->serverwnd->servermsgbox->SetFont(&m_fontHyperText);
-		theApp.emuledlg->chatwnd->chatselector.UpdateFonts(&m_fontHyperText);
-		theApp.emuledlg->ircwnd->UpdateFonts(&m_fontHyperText);
+		serverwnd->servermsgbox->SetFont(&m_fontHyperText);
+		chatwnd->chatselector.UpdateFonts(&m_fontHyperText);
+		ircwnd->UpdateFonts(&m_fontHyperText);
 	}
 }
 
 LRESULT CemuleDlg::OnJigleSearchResponse(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->searchwnd->ProcessJigleSearchResponse(wParam, lParam);
+	searchwnd->ProcessJigleSearchResponse(wParam, lParam);
 	return 0;
 }
 
@@ -2138,55 +2291,55 @@ LRESULT CemuleDlg::OnJigleSearchResponse(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnKademliaSearchAdd(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->kademliawnd->searchList->SearchAdd((Kademlia::CSearch*)lParam);
+	kademliawnd->searchList->SearchAdd((Kademlia::CSearch*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaSearchRem(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->kademliawnd->searchList->SearchRem((Kademlia::CSearch*)lParam);
+	kademliawnd->searchList->SearchRem((Kademlia::CSearch*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaSearchRef(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->kademliawnd->searchList->SearchRef((Kademlia::CSearch*)lParam);
+	kademliawnd->searchList->SearchRef((Kademlia::CSearch*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaContactAdd(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->kademliawnd->contactList->ContactAdd((Kademlia::CContact*)lParam);
+	kademliawnd->contactList->ContactAdd((Kademlia::CContact*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaContactRem(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->kademliawnd->contactList->ContactRem((Kademlia::CContact*)lParam);
+	kademliawnd->contactList->ContactRem((Kademlia::CContact*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaContactRef(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.emuledlg->kademliawnd->contactList->ContactRef((Kademlia::CContact*)lParam);
+	kademliawnd->contactList->ContactRef((Kademlia::CContact*)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaResultFile(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
 	const KADFILERESULT* lpkadfr = (KADFILERESULT*)lParam;
 	KademliaSearchFile(lpkadfr->searchID, lpkadfr->pcontactID, lpkadfr->type, lpkadfr->ip, lpkadfr->tcp, lpkadfr->udp, lpkadfr->serverip, lpkadfr->serverport);
@@ -2195,7 +2348,7 @@ LRESULT CemuleDlg::OnKademliaResultFile(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnKademliaResultKeyword(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
 	const KADKEYWORDRESULT* kadkwr = (KADKEYWORDRESULT*)lParam;
 	KademliaSearchKeyword(kadkwr->searchID, kadkwr->pfileID, kadkwr->name, kadkwr->size, kadkwr->type, kadkwr->numProperties, kadkwr->args);
@@ -2204,7 +2357,7 @@ LRESULT CemuleDlg::OnKademliaResultKeyword(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnKademliaRequestTCP(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
 	theApp.clientlist->RequestTCP((Kademlia::CContact*)lParam);
 	return 0;
@@ -2212,7 +2365,7 @@ LRESULT CemuleDlg::OnKademliaRequestTCP(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnKademliaUpdateStatus(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
 	theApp.kademlia->setStatus((Status*)lParam);
 	return 0;
@@ -2220,17 +2373,17 @@ LRESULT CemuleDlg::OnKademliaUpdateStatus(WPARAM wParam, LPARAM lParam)
 
 LRESULT CemuleDlg::OnKademliaOverheadSend(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.uploadqueue->AddUpDataOverheadServer((uint32)lParam);
+	theApp.uploadqueue->AddUpDataOverheadKad((uint32)lParam);
 	return 0;
 }
 
 LRESULT CemuleDlg::OnKademliaOverheadRecv(WPARAM wParam, LPARAM lParam)
 {
-	if ( !theApp.emuledlg->IsRunning() )
+	if ( !IsRunning() )
 		return 1;
-	theApp.downloadqueue->AddDownDataOverheadServer((uint32)lParam);
+	theApp.downloadqueue->AddDownDataOverheadKad((uint32)lParam);
 	return 0;
 }
 
@@ -2270,7 +2423,7 @@ void StraightWindowStyles(CWnd* pWnd)
 	{
 		bool bButton = (_tcsicmp(szClassName, _T("Button")) == 0);
 
-		if (   _tcsicmp(szClassName, _T("EDIT")) == 0
+		if (   (_tcsicmp(szClassName, _T("EDIT")) == 0 && (pWnd->GetExStyle() & WS_EX_STATICEDGE))
 			//|| (bButton && (pWnd->GetStyle() & BS_GROUPBOX) == 0)
 			|| _tcsicmp(szClassName, _T("SysListView32")) == 0
 			//|| _tcsnicmp(szClassName, _T("RichEdit20"), 10) == 0

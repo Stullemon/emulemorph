@@ -44,14 +44,7 @@ class CStatisticsDlg;
 class CTaskbarNotifier;
 class CTransferWnd;
 struct Status;
-
-// Elandal:ThreadSafeLogging -->
-class LogItem {
-public:
-    bool addtostatusbar;
-    CString line;
-};
-//MORPH END   - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
+struct SLogItem;
 
 // emuleapp <-> emuleapp
 #define OP_ED2KLINK				12000
@@ -65,7 +58,6 @@ public:
 	~CemuleDlg();
 	enum { IDD = IDD_EMULE_DIALOG };
 
-	void			AddLogText(bool addtostatusbar,const CString& txt, bool bDebug);
 	void			AddServerMessageLine(LPCTSTR line);
 	void			ShowConnectionState();
 	void			ShowNotifier(CString Text, int MsgType, bool ForceSoundOFF = false); 
@@ -77,17 +69,30 @@ public:
 	void			ShowPing();
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 	void			Localize();
+
+	// Logging
+	void			AddLogText(bool addtostatusbar,const CString& txt, bool bDebug);
 	void			ResetLog();
 	void			ResetDebugLog();
+	CString			GetLastLogEntry();
+	CString			GetLastDebugLogEntry();
+	CString			GetAllLogEntries();
+	CString			GetAllDebugLogEntries();
+    // Elandal:ThreadSafeLogging -->
+    // thread safe log calls
+    void			QueueDebugLogLine(bool addtostatusbar, LPCTSTR line,...);
+    void			HandleDebugLogQueue();
+    void			ClearDebugLogQueue(bool bDebugPendingMsgs = false);
+    void			QueueLogLine(bool addtostatusbar, LPCTSTR line,...);
+    void			HandleLogQueue();
+    void			ClearLogQueue(bool bDebugPendingMsgs = false);
+    // Elandal:ThreadSafeLogging <--
+
 	void			OnCancel();
 	void			StopTimer();
 	// Barry - To find out if app is running or shutting/shut down
 	bool			IsRunning();
 	void			DoVersioncheck(bool manual);
-	CString			GetLastLogEntry();
-	CString			GetLastDebugLogEntry();
-	CString			GetAllLogEntries();
-	CString			GetAllDebugLogEntries();
 	void			ApplyHyperTextFont(LPLOGFONT pFont);
 	void			SetKadButtonState();
 	void			ProcessED2KLink(LPCTSTR pszData);
@@ -108,12 +113,6 @@ public:
 	CDialog*		activewnd;
 	uint8			status;
 	CFont			m_fontHyperText;
-	//MORPH START - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
-	// thread safe log calls
-	void   QueueDebugLogLine(bool addtostatusbar,CString line,...);
-	void   HandleDebugLogQueue();
-	void   ClearDebugLogQueue();
-	//MORPH END   - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
 protected:
 	HICON m_hIcon;
 	virtual void DoDataExchange(CDataExchange* pDX);
@@ -146,6 +145,7 @@ protected:
 	// SLUGFILLER: SafeHash
 	afx_msg LRESULT OnFileHashed(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnHashFailed(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnFileAllocExc(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnPartHashedOK(WPARAM wParam,LPARAM lParam);
 	afx_msg LRESULT OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam);
 	// SLUGFILLER: SafeHash
@@ -191,7 +191,8 @@ protected:
 
 private:
 	bool			ready;
-	bool			startUpMinimized;
+	bool			startUpMinimizedChecked;
+	bool			m_bStartMinimized;
 	HICON			connicons[3];
 	HICON			transicons[4];
 	HICON			imicons[3];
@@ -233,11 +234,13 @@ private:
 	//MORPH START - Added by SiRoB, New Systray Popup from fusion
 	CMuleSystrayDlg *m_pSystrayDlg;
 	//MORPH END   - Added by SiRoB, New Systray Popup from fusion
-	//MORPH START - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
-	// thread safe log calls
-	CCriticalSection queueLock;
-	CTypedPtrList<CPtrList, LogItem*> m_LogQueue;
-	//MORPH END   - Added by SiRoB, ZZ Upload System ZZUL-20030807-1911
+	
+    // Elandal:ThreadSafeLogging -->
+    // thread safe log calls
+    CCriticalSection m_queueLock;
+    CTypedPtrList<CPtrList, SLogItem*> m_QueueDebugLog;
+    CTypedPtrList<CPtrList, SLogItem*> m_QueueLog;
+    // Elandal:ThreadSafeLogging <--
 };
 
 
@@ -289,7 +292,8 @@ enum EEmlueAppMsgs
 	TM_PARTHASHEDOK,
 	TM_PARTHASHEDCORRUPT,
 	// SLUGFILLER: SafeHash
-	TM_FRAMEGRABFINISHED
+	TM_FRAMEGRABFINISHED,
+	TM_FILEALLOCEXC
 };
 
 

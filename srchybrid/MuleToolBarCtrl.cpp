@@ -181,8 +181,6 @@ void CMuleToolbarCtrl::Init(void)
 		case 11:
 			TBButtons[i].fsStyle = TBSTYLE_BUTTON;
 			break;
-		case 2:
-			TBButtons[i].fsState |= TBSTATE_CHECKED;
 		}
 	}
 
@@ -196,7 +194,6 @@ void CMuleToolbarCtrl::Init(void)
 		else
 			iBitmap += 1;
 	}
-	m_iLastPressedButton = IDC_TOOLBARBUTTON+2;
 	
 	TBBUTTON sepButton;
 	sepButton.idCommand = 0;

@@ -41,6 +41,7 @@ public:
 protected:
 	CString m_strLVName;
 
+	void UpdateContact(int iItem, Kademlia::CContact* contact);
 	void SetAllIcons();
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

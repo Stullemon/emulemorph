@@ -66,7 +66,7 @@ public:
 
 	CUpDownClient*	GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPort);
 	CUpDownClient*	GetWaitingClientByIP(uint32 dwIP);
-	CUpDownClient*	GetNextClient(CUpDownClient* update);
+	CUpDownClient*	GetNextClient(const CUpDownClient* update);
 
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
     	uint64 GetTotalCompletedBytes() { return totalCompletedBytes; }
@@ -94,6 +94,10 @@ public:
 	void	AddUpDataOverheadServer(uint32 data)			{ /*m_nUpDataRateMSOverhead += data;*/
 															  m_nUpDataOverheadServer += data;
 															  m_nUpDataOverheadServerPackets++;}
+	void	AddUpDataOverheadKad(uint32 data)				{ /*m_nUpDataRateMSOverhead += data;*/
+															  m_nUpDataOverheadKad += data;
+															  m_nUpDataOverheadKadPackets++;}
+	
 	void	AddUpDataOverheadOther(uint32 data)				{ /*m_nUpDataRateMSOverhead += data;*/
 															  m_nUpDataOverheadOther += data;
 															  m_nUpDataOverheadOtherPackets++;}
@@ -102,10 +106,12 @@ public:
 	uint64	GetUpDataOverheadSourceExchange()			{return m_nUpDataOverheadSourceExchange;}
 	uint64	GetUpDataOverheadFileRequest()				{return m_nUpDataOverheadFileRequest;}
 	uint64	GetUpDataOverheadServer()					{return m_nUpDataOverheadServer;}
+	uint64	GetUpDataOverheadKad()						{return m_nUpDataOverheadKad;}
 	uint64	GetUpDataOverheadOther()					{return m_nUpDataOverheadOther;}
 	uint64	GetUpDataOverheadSourceExchangePackets()	{return m_nUpDataOverheadSourceExchangePackets;}
 	uint64	GetUpDataOverheadFileRequestPackets()		{return m_nUpDataOverheadFileRequestPackets;}
 	uint64	GetUpDataOverheadServerPackets()			{return m_nUpDataOverheadServerPackets;}
+	uint64	GetUpDataOverheadKadPackets()				{return m_nUpDataOverheadKadPackets;}
 	uint64	GetUpDataOverheadOtherPackets()				{return m_nUpDataOverheadOtherPackets;}
 	//void	CompUpDatarateOverhead(); //MORPH - Removed by SiRoB, ZZ Upload system 20030818-1923
 	//MORPH START - Added by SiRoB, ZZ Upload system 20030818-1923
@@ -173,10 +179,12 @@ private:
 	uint64	m_nUpDataOverheadSourceExchange;
 	uint64	m_nUpDataOverheadFileRequest;
 	uint64	m_nUpDataOverheadServer;
+	uint64	m_nUpDataOverheadKad;
 	uint64	m_nUpDataOverheadOther;
 	uint64	m_nUpDataOverheadSourceExchangePackets;
 	uint64	m_nUpDataOverheadFileRequestPackets;
 	uint64	m_nUpDataOverheadServerPackets;
+	uint64	m_nUpDataOverheadKadPackets;
 	uint64	m_nUpDataOverheadOtherPackets;
 	bool	lastupslotHighID; // VQB lowID alternation
 

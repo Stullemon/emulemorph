@@ -35,43 +35,51 @@
 #define COMPILE_DATE			__DATE__
 #define COMPILE_TIME			__TIME__
 #ifdef _DEBUG
-#define EMULE_GUID				"EMULE-{4EADC6FC-516F-4b7c-9066-97D893649570}-DEBUG"
+#define EMULE_GUID				_T("EMULE-{4EADC6FC-516F-4b7c-9066-97D893649570}-DEBUG")
 #else
-#define EMULE_GUID				"EMULE-{4EADC6FC-516F-4b7c-9066-97D893649570}"
+#define EMULE_GUID				_T("EMULE-{4EADC6FC-516F-4b7c-9066-97D893649570}")
 #endif
 
 #define	SEC2MS(sec)		((sec)*1000)
 #define	MIN2MS(min)		SEC2MS((min)*60)
+#define	HR2MS(hr)		MIN2MS((hr)*60)
+#define SEC(sec)		(sec)
+#define	MIN2S(min)		((min)*60)
+#define	HR2S(hr)		MIN2S((hr)*60)
 
 // MOD Note: Do not change this part - Merkur
-#define UDPSEARCHSPEED			1000	//1 sec - if this value is too low you will miss sources
+#define UDPSEARCHSPEED			SEC2MS(1)	//1 sec - if this value is too low you will miss sources
 #define MAX_RESULTS				100		// max global search results
 #define	MAX_MORE_SEARCH_REQ		5		// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
 #define MAX_CLIENTCONNECTIONTRY	2
-//#define CONNECTION_TIMEOUT		40000	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
-#define CONNECTION_TIMEOUT		60000	// <<-- enkeyDEV(th1) -L2HAC-
-#define	FILEREASKTIME			1500000	//25 mins
-#define SERVERREASKTIME			900000  //15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
-#define UDPSERVERREASKTIME		1800000	//30 mins
-#define SOURCECLIENTREASK		1080000	//18 mins
-#define KADEMLIAASKTIME			1000	//10 second
+//#define CONNECTION_TIMEOUT		SEC2MS(40)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
+#define CONNECTION_TIMEOUT		SEC2MS(60)	// <<-- enkeyDEV(th1) -L2HAC-
+#define	FILEREASKTIME			MIN2MS(25)	//25 mins
+#define SERVERREASKTIME			MIN2MS(15)	//15 mins - don't set this too low, it wont speed up anything, but it could kill emule or your internetconnection
+#define UDPSERVERREASKTIME		MIN2MS(30)	//30 mins
+#define SOURCECLIENTREASK		MIN2MS(18)	//18 mins
+#define KADEMLIAASKTIME			SEC2MS(1)	//1 second
 #define KADEMLIATOTALFILE		5		//Total files to search sources for.
-#define KADEMLIAREASKTIME		3600000 //1 hour
-#define KADEMLIAPUBLISHTIME		2000	//2 second
+#define KADEMLIAREASKTIME		HR2MS(1)	//1 hour
+#define KADEMLIAPUBLISHTIME		SEC2MS(2)	//2 second
 #define KADEMLIATOTALSTORESRC	2		//Total hashes to store.
 #define KADEMLIATOTALSTOREKEY	1		//Total hashes to store.
-#define KADEMLIAREPUBLISHTIME	18000	//5 hours
-#define KADEMLIAINDEXCLEAN		18000	//5 hours
-#define KADEMLIADISCONNECTDELAY	900
-#define	KADEMLIAMAXINDEX		10000
-#define KADEMLIAMAXSOUCEPERFILE	300
+#define KADEMLIAREPUBLISHTIME	HR2S(5)		//5 hours
+#define KADEMLIAINDEXCLEAN		HR2S(5)		//5 hours
+#define KADEMLIADISCONNECTDELAY	MIN2S(20)	//20 mins
+#define	KADEMLIAMAXINDEX		10000		//Total indexed keys (Not used yet?)
+#define KADEMLIAMAXSOUCEPERFILE	300			//Max number of sources per file in index.
 
-#define ED2KREPUBLISHTIME		60000	//1 min
+#define ED2KREPUBLISHTIME		MIN2MS(1)	//1 min
 #define MINCOMMONPENALTY		9
-#define UDPSERVERSTATTIME		5000	//5 secs
-#define UDPSERVSTATREASKTIME	14400	//4 hours
+#define UDPSERVERSTATTIME		SEC2MS(5)	//5 secs
+#define UDPSERVSTATREASKTIME	HR2S(4)		//4 hours
 #define	UDPSERVERPORT			4665	//default udp port
 #define RSAKEYSIZE				384		//384 bits
+#define	MAX_SOURCES_FILE_SOFT	500
+#define	MAX_SOURCES_FILE_UDP	50
+#define SESSIONMAXTRANS			(9.3*1024*1024) // 9.3 Mbytes. "Try to send complete chunks" always sends this amount of data
+#define SESSIONMAXTIME			HR2MS(1)	//1 hour
 // MOD Note: end
 
 #define CONFIGFOLDER			"config\\"
@@ -85,26 +93,26 @@
 //MORPH END   - Added by Yun.SF3, ZZ Upload System 20030807-1911
 #define	MAX_UP_CLIENTS_ALLOWED	100		// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	2		// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
-#define DOWNLOADTIMEOUT			100000
-#define CONSERVTIMEOUT			25000	// agelimit for pending connection attempts
+#define DOWNLOADTIMEOUT			SEC2MS(100)
+#define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				25
 #define BADCLIENTBAN			4
-#define	MIN_REQUESTTIME			590000
-#define	MAX_PURGEQUEUETIME		3600000 
-#define PURGESOURCESWAPSTOP		900000	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
+#define	MIN_REQUESTTIME			MIN2MS(10) 
+#define	MAX_PURGEQUEUETIME		HR2MS(1) 
+#define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
 #define CONNECTION_LATENCY		22050	// latency for responces
 #define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   1000
 #define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
-#define MAXAVERAGETIME			40000 //millisecs
-#define CLIENTBANTIME			7200000 // 2h
-#define TRACKED_CLEANUP_TIME	3600000 // 1 hour
-#define KEEPTRACK_TIME			7200000 // 2h	//how long to keep track of clients which were once in the uploadqueue
-#define LOCALSERVERREQUESTS		20000	// only one local src request during this timespan
+#define MAXAVERAGETIME			SEC2MS(40) //millisecs
+#define CLIENTBANTIME			HR2MS(2)	// 2h
+#define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
+#define KEEPTRACK_TIME			HR2MS(2)	// 2h	//how long to keep track of clients which were once in the uploadqueue
+#define LOCALSERVERREQUESTS		20000		// only one local src request during this timespan (WHERE IS THIS USED?)
 #define DISKSPACERECHECKTIME	MIN2MS(15)	// SLUGFILLER: checkDiskspace
-#define SESSIONAMOUNT			(10*1024*1024) // 10 Mbytes. "Try to send complete chunks" always sends this amount of data
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 //MOPRH START - Added by SiRoB, ZZ Upload System 20030824-2238
+#define SESSIONAMOUNT			(10*1024*1024) // 10 Mbytes. "Try to send complete chunks" always sends this amount of data
 #define MINFRAGSIZE             2500/*512*/
 #define TRICKLE_CLIENT_DATARATE	(UPLOAD_CLIENT_DATARATE/6)
 //MOPRH END   - Added by SiRoB, ZZ Upload System 20030824-2238
@@ -281,6 +289,7 @@
 #define FT_ULPRIORITY			 0x19	// Was 17
 #define FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
 #define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
+#define	FT_FLAGS				 0x22
 #define	TAG_MEDIA_ARTIST		"\xD0"	// <string>
 #define	 FT_MEDIA_ARTIST		 0xD0	// <string>
 #define	TAG_MEDIA_ALBUM			"\xD1"	// <string>
@@ -338,6 +347,15 @@
 #define FT_POWERSHARE           "ZZUL_POWERSHARE"
 //MORPH END - Added by SiRoB, ZZ Upload System
 
+//MORPH START - Added by SiRoB, HIDEOS
+#define FT_HIDEOS				"HIDEOS"
+#define FT_SELECTIVE_CHUNK		"SELECT_CHUNK"
+//MORPH END   - Added by SiRoB, HIDEOS
+
+//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+#define FT_SHAREONLYTHENEED		"SHARE_ONLY_THE_NEED"
+//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+
 //MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 #define FT_SPREADSTART			0x70
 #define FT_SPREADEND			0x71
@@ -374,9 +392,7 @@
 #define ET_EXTENDEDREQUEST		0x25
 #define ET_COMPATIBLECLIENT		0x26
 #define ET_FEATURES				0x27
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
-#define ET_MOD_VERSION 			0x55 // Maella -Support for tag ET_MOD_VERSION 0x55-
-//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
+#define ET_MOD_VERSION 			0x55
 #define ET_L2HAC				0x3E //<<-- enkeyDEV(th1) -L2HAC-
 
 // GUI-Protocol TCP (ed2k_gui + java_gui)

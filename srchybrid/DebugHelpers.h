@@ -5,4 +5,10 @@
 #define CHECK_ARR(ptr, len)	ASSERT( (ptr == NULL && len == 0) || (ptr != NULL && len != 0 && AfxIsValidAddress(ptr, len)) );
 #define	CHECK_BOOL(bVal)	ASSERT( (UINT)(bVal) == 0 || (UINT)(bVal) == 1 );
 
+#define	CRASH_HERE()		(*((int*)NULL) = 0)
+
+#ifndef _DEBUG
+#define USE_CLIENT_TCP_CATCH_ALL_HANDLER
+#endif
+
 extern int _iDbgHeap;

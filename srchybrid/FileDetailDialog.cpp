@@ -45,34 +45,39 @@ BEGIN_MESSAGE_MAP(CFileDetailDialog, CResizableSheet)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
-CFileDetailDialog::CFileDetailDialog(CPartFile* file, bool bInvokeCommentsPage)
+CFileDetailDialog::CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, bool bInvokeCommentsPage)
 {
-	m_file = file;
+	m_file = (*paFiles)[0];
 	m_psh.dwFlags &= ~PSH_HASHELP;
 	m_psh.dwFlags |= PSH_NOAPPLYNOW;
 	
 	m_wndInfo.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndName.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndComments.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndVideo.m_psp.dwFlags &= ~PSP_HASHELP;
-	m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
-
-	m_wndInfo.SetMyfile(file);
-	m_wndName.SetMyfile(file);
-	m_wndVideo.SetMyfile(file);
-	m_wndComments.SetMyfile(file);
-	if (theApp.glob_prefs->IsExtControlsEnabled())
-		m_wndMetaData.SetFile(file);
-
+	m_wndInfo.SetMyfile(paFiles);
 	AddPage(&m_wndInfo);
-	AddPage(&m_wndName);
-	AddPage(&m_wndComments);
-	EED2KFileType eType = GetED2KFileTypeID(file->GetFileName());
-	if (eType == ED2KFT_AUDIO || eType == ED2KFT_VIDEO)
-		AddPage(&m_wndVideo);
 
-	if (theApp.glob_prefs->IsExtControlsEnabled())
-		AddPage(&m_wndMetaData);
+	if (paFiles->GetSize() == 1)
+	{
+		m_wndName.m_psp.dwFlags &= ~PSP_HASHELP;
+		m_wndName.SetMyfile(m_file);
+		AddPage(&m_wndName);
+
+		m_wndComments.m_psp.dwFlags &= ~PSP_HASHELP;
+		m_wndComments.SetMyfile(m_file);
+		AddPage(&m_wndComments);
+
+		EED2KFileType eType = GetED2KFileTypeID(m_file->GetFileName());
+		if (eType == ED2KFT_AUDIO || eType == ED2KFT_VIDEO){
+			m_wndVideo.m_psp.dwFlags &= ~PSP_HASHELP;
+			m_wndVideo.SetMyfile(m_file);
+			AddPage(&m_wndVideo);
+		}
+
+		if (theApp.glob_prefs->IsExtControlsEnabled()){
+			m_wndMetaData.m_psp.dwFlags &= ~PSP_HASHELP;
+			m_wndMetaData.SetFile(m_file);
+			AddPage(&m_wndMetaData);
+		}
+	}
 
 	m_bInvokeCommentsPage =  bInvokeCommentsPage;
 }
@@ -107,6 +112,8 @@ BOOL CFileDetailDialog::OnInitDialog()
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileDetailDialogInfo dialog
+
+LPCTSTR CFileDetailDialogInfo::sm_pszNotAvail = _T("-");
 
 IMPLEMENT_DYNAMIC(CFileDetailDialogInfo, CResizablePage)
 
@@ -146,13 +153,37 @@ BOOL CFileDetailDialogInfo::OnInitDialog()
 	AddAnchor(IDC_FD_X6, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FD_X8, TOP_LEFT, TOP_RIGHT);
 
+	AddAnchor(IDC_FNAME, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_METFILE, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_FHASH, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_FSIZE, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_PFSTATUS, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_PARTCOUNT, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_HASHSET, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_COMPLSIZE, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_DATARATE, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_SOURCECOUNT, TOP_LEFT, TOP_RIGHT);
+
 	AddAnchor(IDC_FILECREATED, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_LASTSEENCOMPL, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_LASTRECEIVED, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_FNAME, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_METFILE, TOP_LEFT, TOP_RIGHT);
 
 	Localize();
+
+	// properties which won't change during the dialog is open - no need to fresh them and mess with the focus
+	if (m_paFiles->GetSize() == 1)
+	{
+		SetDlgItemText(IDC_FNAME, (*m_paFiles)[0]->GetFileName());
+		SetDlgItemText(IDC_METFILE, (*m_paFiles)[0]->GetFullName());
+		SetDlgItemText(IDC_FHASH, md4str((*m_paFiles)[0]->GetFileHash()));
+	}
+	else
+	{
+		SetDlgItemText(IDC_FNAME, sm_pszNotAvail);
+		SetDlgItemText(IDC_METFILE, sm_pszNotAvail);
+		SetDlgItemText(IDC_FHASH, sm_pszNotAvail);
+	}
+
 	RefreshData();
 	VERIFY( (m_timer = SetTimer(301, 5000, 0)) != NULL );
 
@@ -163,84 +194,125 @@ BOOL CFileDetailDialogInfo::OnSetActive()
 {
 	if (!CResizablePage::OnSetActive())
 		return FALSE;
-	GetDlgItem(IDC_FNAME)->SetWindowText(m_file->GetFileName());
+	if (m_paFiles->GetSize() == 1)
+		SetDlgItemText(IDC_FNAME, (*m_paFiles)[0]->GetFileName());
 	return TRUE;
 }
 
 void CFileDetailDialogInfo::RefreshData()
 {
-	CString bufferS;
+	CString str;
 
-	GetDlgItem(IDC_FNAME)->SetWindowText(MakeStringEscaped(m_file->GetFileName()));
-	GetDlgItem(IDC_METFILE)->SetWindowText(m_file->GetFullName());
+	if (m_paFiles->GetSize() == 1)
+	{
+		if ((*m_paFiles)[0]->GetTransferingSrcCount() > 0)
+			str.Format(GetResString(IDS_PARTINFOS2), (*m_paFiles)[0]->GetTransferingSrcCount());
+		else
+			str = (*m_paFiles)[0]->getPartfileStatus();
+		SetDlgItemText(IDC_PFSTATUS, str);
 
-	GetDlgItem(IDC_FHASH)->SetWindowText(EncodeBase16(m_file->GetFileHash(), 16));
+		str.Format(_T("%u;  Available: %u (%.1f%%)"), (*m_paFiles)[0]->GetPartCount(), (*m_paFiles)[0]->GetAvailablePartCount(), (float)(((*m_paFiles)[0]->GetAvailablePartCount()*100)/(*m_paFiles)[0]->GetPartCount()));
+		SetDlgItemText(IDC_PARTCOUNT, str);
 
-	bufferS.Format("%s  (%s %s)",CastItoXBytes(m_file->GetFileSize()),GetFormatedUInt(m_file->GetFileSize()),GetResString(IDS_BYTES));
-	GetDlgItem(IDC_FSIZE)->SetWindowText(bufferS);
+		// date created
+		if ((*m_paFiles)[0]->GetCrFileDate() != NULL){
+			time_t fromtime = ((*m_paFiles)[0]->GetStatus() != PS_COMPLETE) ? time(NULL) : (*m_paFiles)[0]->GetFileDate();
+			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
+						(*m_paFiles)[0]->GetCrCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
+						CastSecondsToLngHM(fromtime - (*m_paFiles)[0]->GetCrFileDate()));
+		}
+		else
+			str = GetResString(IDS_UNKNOWN);
+		SetDlgItemText(IDC_FILECREATED, str);
 
-	if (m_file->GetTransferingSrcCount()>0) bufferS.Format(GetResString(IDS_PARTINFOS2),m_file->GetTransferingSrcCount());
-		else bufferS=m_file->getPartfileStatus();
-	GetDlgItem(IDC_PFSTATUS)->SetWindowText(bufferS);
-		
-	bufferS.Format("%i",m_file->GetHashCount());
-	GetDlgItem(IDC_PARTCOUNT)->SetWindowText(bufferS);
+		// last seen complete
+		struct tm* ptimLastSeenComplete = (*m_paFiles)[0]->lastseencomplete.GetLocalTm();
+		if ((*m_paFiles)[0]->lastseencomplete == NULL || ptimLastSeenComplete == NULL)
+			str.Format(GetResString(IDS_UNKNOWN));
+		else{
+			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
+						(*m_paFiles)[0]->lastseencomplete.Format(theApp.glob_prefs->GetDateTimeFormat()),
+						CastSecondsToLngHM(time(NULL) - safe_mktime(ptimLastSeenComplete)));
+		}
+		SetDlgItemText(IDC_LASTSEENCOMPL, str);
 
-	GetDlgItem(IDC_TRANSFERED)->SetWindowText(CastItoXBytes(m_file->GetTransfered()));
-
-	//Khaos corumptionByte++
-	bufferS.Format(GetResString(IDS_FD_STATS),CastItoXBytes(m_file->GetLostDueToCorruption()+m_file->GetSesCorruptionBytes()), CastItoXBytes(m_file->GetGainDueToCompression()+m_file->GetSesCompressionBytes()), m_file->TotalPacketsSavedDueToICH() );
-	GetDlgItem(IDC_FD_STATS)->SetWindowText(bufferS);
-	//Khaos corumptionByte--
-	GetDlgItem(IDC_COMPLSIZE)->SetWindowText(CastItoXBytes(m_file->GetCompletedSize()));
-
-	bufferS.Format("%.2f ",m_file->GetPercentCompleted());
-	GetDlgItem(IDC_PROCCOMPL)->SetWindowText(bufferS+GetResString(IDS_PROCDONE));
-
-	bufferS.Format("%.2f %s",(float)m_file->GetDatarate()/1024,GetResString(IDS_KBYTESEC));
-	GetDlgItem(IDC_DATARATE)->SetWindowText(bufferS);
-
-	if (m_file->IsPartFile() ) bufferS.Format(GetResString(IDS_SOURCESINFO),m_file->GetSourceCount(),m_file->GetValidSourcesCount(),m_file->GetSrcStatisticsValue(DS_NONEEDEDPARTS),m_file->GetSrcA4AFCount());
-		else bufferS="";
-	GetDlgItem(IDC_SOURCECOUNT)->SetWindowText(bufferS);
-
-	bufferS.Format(GetResString(IDS_AVAIL),m_file->GetPartCount(),m_file->GetAvailablePartCount(),(float) ((m_file->GetAvailablePartCount()*100)/ m_file->GetPartCount()));
-	GetDlgItem(IDC_PARTAVAILABLE)->SetWindowText(bufferS);
-
-	struct tm* ptimLastSeenComplete = m_file->lastseencomplete.GetLocalTm();
-	if (m_file->lastseencomplete == NULL || ptimLastSeenComplete == NULL)
-		bufferS.Format(GetResString(IDS_UNKNOWN));
-	else{
-		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
-				m_file->lastseencomplete.Format(theApp.glob_prefs->GetDateTimeFormat()),
-				CastSecondsToLngHM(time(NULL) - safe_mktime(ptimLastSeenComplete)));
-	}
-	GetDlgItem(IDC_LASTSEENCOMPL)->SetWindowText(bufferS);
-
-	if (m_file->GetFileDate() != NULL && m_file->GetRealFileSize() > 0){
-		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
-				m_file->GetCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
-				CastSecondsToLngHM(time(NULL) - m_file->GetFileDate()));
+		// last receive
+		if ((*m_paFiles)[0]->GetFileDate() != NULL && (*m_paFiles)[0]->GetRealFileSize() > 0){
+			str.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
+						(*m_paFiles)[0]->GetCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
+						CastSecondsToLngHM(time(NULL) - (*m_paFiles)[0]->GetFileDate()));
+		}
+		else
+			str = GetResString(IDS_UNKNOWN);
+		SetDlgItemText(IDC_LASTRECEIVED, str);
 	}
 	else
-		bufferS=GetResString(IDS_UNKNOWN);
-	GetDlgItem(IDC_LASTRECEIVED)->SetWindowText(bufferS);
+	{
+		SetDlgItemText(IDC_PFSTATUS, sm_pszNotAvail);
+		SetDlgItemText(IDC_PARTCOUNT, sm_pszNotAvail);
 
-	if (m_file->IsPartFile())
-		bufferS.Format(_T("(%s %s)"), GetResString(IDS_ONDISK), CastItoXBytes(m_file->GetRealFileSize()));
-	else
-		bufferS.Empty();
-	GetDlgItem(IDC_FSIZE2)->SetWindowText(bufferS);
-
-	if (m_file->GetCrFileDate() != NULL){
-		time_t fromtime = (m_file->GetStatus() != PS_COMPLETE) ? time(NULL) : m_file->GetFileDate();
-		bufferS.Format(_T("%s   ") + GetResString(IDS_TIMEBEFORE),
-				m_file->GetCrCFileDate().Format(theApp.glob_prefs->GetDateTimeFormat()),
-				CastSecondsToLngHM(fromtime - m_file->GetCrFileDate()));
+		SetDlgItemText(IDC_FILECREATED, sm_pszNotAvail);
+		SetDlgItemText(IDC_LASTSEENCOMPL, sm_pszNotAvail);
+		SetDlgItemText(IDC_LASTRECEIVED, sm_pszNotAvail);
 	}
+
+	uint64 uFileSize = 0;
+	uint64 uRealFileSize = 0;
+	uint64 uTransfered = 0;
+	uint64 uCorrupted = 0;
+	uint64 uRecovered = 0;
+	uint64 uCompression = 0;
+	uint64 uCompleted = 0;
+	int iHashsetAvailable = 0;
+	UINT uDataRate = 0;
+	UINT uSources = 0;
+	UINT uValidSources = 0;
+	UINT uNNPSources = 0;
+	UINT uA4AFSources = 0;
+	for (int i = 0; i < m_paFiles->GetSize(); i++)
+	{
+		uFileSize += (*m_paFiles)[i]->GetFileSize();
+		uRealFileSize += (*m_paFiles)[i]->GetRealFileSize();
+		uTransfered += (*m_paFiles)[i]->GetTransfered();
+		uCorrupted += (*m_paFiles)[i]->GetLostDueToCorruption();
+		uRecovered += (*m_paFiles)[i]->TotalPacketsSavedDueToICH();
+		uCompression += (*m_paFiles)[i]->GetGainDueToCompression();
+		uDataRate += (*m_paFiles)[i]->GetDatarate();
+		uCompleted += (*m_paFiles)[i]->GetCompletedSize();
+		iHashsetAvailable += ((*m_paFiles)[i]->GetHashCount() == (*m_paFiles)[i]->GetED2KPartCount()) ? 1 : 0; //MORPH - Changed by SiRoB, Safe Hash
+
+		if ((*m_paFiles)[i]->IsPartFile())
+		{
+			uSources += (*m_paFiles)[i]->GetSourceCount();
+			uValidSources += (*m_paFiles)[i]->GetValidSourcesCount();
+			uNNPSources += (*m_paFiles)[i]->GetSrcStatisticsValue(DS_NONEEDEDPARTS);
+			uA4AFSources += (*m_paFiles)[i]->GetSrcA4AFCount();
+		}
+	}
+
+	if (iHashsetAvailable == 0)
+		SetDlgItemText(IDC_HASHSET, GetResString(IDS_NO));
+	else if (iHashsetAvailable == m_paFiles->GetSize())
+		SetDlgItemText(IDC_HASHSET, GetResString(IDS_YES));
 	else
-		bufferS = GetResString(IDS_UNKNOWN);
-	GetDlgItem(IDC_FILECREATED)->SetWindowText(bufferS);
+		SetDlgItemText(IDC_HASHSET, _T(""));
+
+	str.Format(_T("%s (%.2f%%)"), CastItoXBytes(uCompleted), uFileSize!=0 ? (uCompleted * 100.0 / uFileSize) : 0.0);
+	SetDlgItemText(IDC_COMPLSIZE, str);
+
+	str.Format(_T("%.2f %s"), uDataRate/1024.0, GetResString(IDS_KBYTESEC));
+	SetDlgItemText(IDC_DATARATE, str);
+
+	str.Format(_T("%s  (%s %s);  %s %s"), CastItoXBytes(uFileSize), GetFormatedUInt64(uFileSize), GetResString(IDS_BYTES), GetResString(IDS_ONDISK), CastItoXBytes(uRealFileSize));
+	SetDlgItemText(IDC_FSIZE, str);
+
+	SetDlgItemText(IDC_TRANSFERED, CastItoXBytes(uTransfered));
+	SetDlgItemText(IDC_CORRUPTED, CastItoXBytes(uCorrupted));
+	SetDlgItemInt(IDC_RECOVERED, uRecovered, FALSE);
+	SetDlgItemText(IDC_COMPRESSION, CastItoXBytes(uCompression));
+
+	str.Format(GetResString(IDS_SOURCESINFO), uSources, uValidSources, uNNPSources, uA4AFSources);
+	SetDlgItemText(IDC_SOURCECOUNT, str);
 }
 
 void CFileDetailDialogInfo::OnDestroy()
@@ -254,14 +326,14 @@ void CFileDetailDialogInfo::OnDestroy()
 void CFileDetailDialogInfo::Localize()
 {
 	GetDlgItem(IDC_FD_X0)->SetWindowText(GetResString(IDS_FD_GENERAL));
-	GetDlgItem(IDC_FD_X1)->SetWindowText(GetResString(IDS_FD_NAME));
+	GetDlgItem(IDC_FD_X1)->SetWindowText(GetResString(IDS_SW_NAME));
 	GetDlgItem(IDC_FD_X2)->SetWindowText(GetResString(IDS_FD_MET));
 	GetDlgItem(IDC_FD_X3)->SetWindowText(GetResString(IDS_FD_HASH));
-	GetDlgItem(IDC_FD_X4)->SetWindowText(GetResString(IDS_FD_SIZE));
+	GetDlgItem(IDC_FD_X4)->SetWindowText(GetResString(IDS_DL_SIZE));
+	GetDlgItem(IDC_FD_X9)->SetWindowText(GetResString(IDS_FD_PARTS));
 	GetDlgItem(IDC_FD_X5)->SetWindowText(GetResString(IDS_FD_STATUS));
 	GetDlgItem(IDC_FD_X6)->SetWindowText(GetResString(IDS_FD_TRANSFER));
-	GetDlgItem(IDC_FD_X7)->SetWindowText(GetResString(IDS_DL_SOURCES)+":");
-	GetDlgItem(IDC_FD_X9)->SetWindowText(GetResString(IDS_FD_HASHSETS));
+	GetDlgItem(IDC_FD_X7)->SetWindowText(GetResString(IDS_DL_SOURCES)+_T(":"));
 	GetDlgItem(IDC_FD_X14)->SetWindowText(GetResString(IDS_FD_TRANS));
 	GetDlgItem(IDC_FD_X12)->SetWindowText(GetResString(IDS_FD_COMPSIZE));
 	GetDlgItem(IDC_FD_X13)->SetWindowText(GetResString(IDS_FD_DATARATE));
@@ -269,6 +341,15 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_LASTCHANGE)->SetWindowText(GetResString(IDS_FD_LASTCHANGE));
 	GetDlgItem(IDC_FD_X8)->SetWindowText(GetResString(IDS_FD_TIMEDATE));
 	GetDlgItem(IDC_FD_X16)->SetWindowText(GetResString(IDS_FD_DOWNLOADSTARTED));
+
+	
+	GetDlgItem(IDC_HSAV)->SetWindowText(GetResString(IDS_HSAV)+_T(":"));
+	GetDlgItem(IDC_FD_CORR)->SetWindowText(GetResString(IDS_FD_CORR)+_T(":"));
+	GetDlgItem(IDC_FD_RECOV)->SetWindowText(GetResString(IDS_FD_RECOV)+_T(":"));
+	GetDlgItem(IDC_FD_COMPR)->SetWindowText(GetResString(IDS_FD_COMPR)+_T(":"));
+	
+	
+
 }
 
 
@@ -299,6 +380,9 @@ CFileDetailDialogName::CFileDetailDialogName()
 	m_psp.dwFlags |= PSP_USETITLE;
 	m_timer = 0;
 	memset(m_aiColWidths, 0, sizeof m_aiColWidths);
+
+	m_sortorder=0;
+	m_sortindex=1;
 }
 
 CFileDetailDialogName::~CFileDetailDialogName()
@@ -351,13 +435,18 @@ void CFileDetailDialogName::RefreshData()
 	if (bufferS.GetLength()<3)
 		GetDlgItem(IDC_FILENAME)->SetWindowText(m_file->GetFileName());
 
-	int sel=pmyListCtrl->GetSelectionMark();
 	FillSourcenameList();
-	pmyListCtrl->SetSelectionMark(sel);
 }
 
 void CFileDetailDialogName::OnDestroy()
 {
+
+	for (int i=0;i<pmyListCtrl->GetItemCount();++i) {
+
+		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(i);
+		delete item;
+	}
+
 	CString strIniFile;
 	strIniFile.Format(_T("%spreferences.ini"), theApp.glob_prefs->GetConfigDir());
 	CIni ini(strIniFile, FILE_DETAIL_PREF_INI_SECTION);
@@ -372,10 +461,12 @@ void CFileDetailDialogName::OnDestroy()
 
 void CFileDetailDialogName::Localize()
 {
-	GetDlgItem(IDC_TAKEOVER)->SetWindowText(GetResString(IDS_TAKEOVER));
-	GetDlgItem(IDC_BUTTONSTRIP)->SetWindowText(GetResString(IDS_CLEANUP));
-	GetDlgItem(IDC_RENAME)->SetWindowText(GetResString(IDS_RENAME));
-	GetDlgItem(IDC_FD_SN)->SetWindowText(GetResString(IDS_SOURCENAMES));
+	if (theApp.glob_prefs->GetLanguageID() != MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT)){
+	    GetDlgItem(IDC_TAKEOVER)->SetWindowText(GetResString(IDS_TAKEOVER));
+	    GetDlgItem(IDC_BUTTONSTRIP)->SetWindowText(GetResString(IDS_CLEANUP));
+	    GetDlgItem(IDC_RENAME)->SetWindowText(GetResString(IDS_RENAME));
+	    GetDlgItem(IDC_FD_SN)->SetWindowText(GetResString(IDS_SOURCENAMES));
+    }
 }
 
 void CFileDetailDialogName::FillSourcenameList()
@@ -383,7 +474,6 @@ void CFileDetailDialogName::FillSourcenameList()
 	LVFINDINFO info; 
 	info.flags = LVFI_STRING; 
 	int itempos; 
-	int namecount; 
 
 	if (pmyListCtrl->GetHeaderCtrl()->GetItemCount() < 2)
 	{
@@ -396,8 +486,8 @@ void CFileDetailDialogName::FillSourcenameList()
 
 	// reset
 	for (int i=0;i<pmyListCtrl->GetItemCount();i++){
-		pmyListCtrl->SetItemText(i, 1, "0"); 
-		pmyListCtrl->SetItemData(i, 0);
+		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(i);
+		item->count=0;
 	}
 
 	// update
@@ -410,32 +500,35 @@ void CFileDetailDialogName::FillSourcenameList()
 		info.psz = cur_src->GetClientFilename(); 
 		if ((itempos=pmyListCtrl->FindItem(&info, -1)) == -1)
 		{ 
-			pmyListCtrl->InsertItem(0, cur_src->GetClientFilename()); 
+			FCtrlItem_Struct* newitem= new FCtrlItem_Struct();
+			newitem->count=1;
+			newitem->filename=cur_src->GetClientFilename();
+			
+			pmyListCtrl->InsertItem(LVIF_TEXT|LVIF_PARAM,0,cur_src->GetClientFilename(),0,0,0,(LPARAM)newitem);
 			pmyListCtrl->SetItemText(0, 1, "1"); 
-			pmyListCtrl->SetItemData(0, 1); 
 		}
 		else
-		{ 
-			namecount = atoi(pmyListCtrl->GetItemText(itempos, 1))+1; 
-			CString nameCountStr; 
-			nameCountStr.Format("%i", namecount); 
-			pmyListCtrl->SetItemText(itempos, 1, nameCountStr.GetString()); 
-			pmyListCtrl->SetItemData(itempos, namecount); 
+		{
+			FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(itempos);
+			item->count+=1;
+			strText.Format("%i",item->count);
+			pmyListCtrl->SetItemText(itempos, 1,strText ); 
 		} 
-		pmyListCtrl->SortItems(CompareListNameItems, 11); 
-		m_SortAscending[0] =true;
-		m_SortAscending[1] =false;
 	} 
 
 	// remove 0'er
 	for (int i=0;i<pmyListCtrl->GetItemCount();i++)
 	{
-		if (pmyListCtrl->GetItemData(i)==0)
+		FCtrlItem_Struct* item= (FCtrlItem_Struct*)pmyListCtrl->GetItemData(i);
+		if (item && item->count==0)
 		{
+			delete item;
 			pmyListCtrl->DeleteItem(i);
 			i=0;
 		}
 	}
+
+	pmyListCtrl->SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
 }
 
 void CFileDetailDialogName::TakeOver()
@@ -461,19 +554,24 @@ void CFileDetailDialogName::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 
-	m_SortAscending[pNMLV->iSubItem] = !m_SortAscending[pNMLV->iSubItem];
-	//SetSortArrow(pNMLV->iSubItem, m_SortAscending[pNMLV->iSubItem]);
+	if (m_sortindex!=pNMLV->iSubItem) m_sortorder=1; else m_sortorder=!(bool)m_sortorder;
+	m_sortindex=pNMLV->iSubItem;
 
-	pmyListCtrl->SortItems(&CompareListNameItems,pNMLV->iSubItem+((m_SortAscending[pNMLV->iSubItem])? 0:10));
+	pmyListCtrl->SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
 
 	*pResult = 0;
 }
 
 int CALLBACK CFileDetailDialogName::CompareListNameItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 { 
+	FCtrlItem_Struct* item1=(FCtrlItem_Struct*) lParam1;
+	FCtrlItem_Struct* item2=(FCtrlItem_Struct*) lParam2;
 	switch (lParamSort){
-		case 1: return (lParam1 - lParam2); break;
-		case 11: return (lParam2 - lParam1); break;
+		case 0: return ( stricmp(item1->filename,item2->filename)); break;
+		case 10: return ( stricmp(item2->filename,item1->filename)); break;
+		case 1: return (item1->count - item2->count); break;
+		case 11: return (item2->count - item1->count); break;
+
 		default: return 0;
 	}
 } 
@@ -525,6 +623,7 @@ void CFileDetailDialogName::OnRename()
 	GetDlgItem(IDC_FILENAME)->GetWindowText(NewFileName);
 
 	m_file->SetFileName(NewFileName, true); 
+	m_file->UpdateDisplayedInfo();
 	m_file->SavePartFile(); 
 	theApp.downloadqueue->UpdatePNRFile(m_file); //<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 } 

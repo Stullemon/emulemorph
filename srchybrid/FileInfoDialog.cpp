@@ -849,8 +849,11 @@ void CFileInfoDialog::RefreshData()
 													m_fi << "   Codec:\t" << (LPCSTR)strCodec << "\n";
 
 													m_fi << "   Width x Height:\t" << abs(pVIH->bmiHeader.biWidth) << " x " << abs(pVIH->bmiHeader.biHeight) << "\n";
-													if (pVIH->dwBitRate)
-														m_fi << "   Bitrate:\t" << (UINT)(pVIH->dwBitRate / 1000) << " kBit/s\n";
+													// do not use that 'dwBitRate', whatever this number is, it's not
+													// the bitrate of the encoded video stream. seems to be the bitrate
+													// of the uncompressed stream divided by 2 !??
+													//if (pVIH->dwBitRate)
+													//	m_fi << "   Bitrate:\t" << (UINT)(pVIH->dwBitRate / 1000) << " kBit/s\n";
 
 													double fFrameRate = 0.0;
 													if (SUCCEEDED(pMediaDet->get_FrameRate(&fFrameRate)) && fFrameRate)

@@ -120,7 +120,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 	try{
 		switch(opcode){
 			case OP_SERVERMESSAGE:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_ServerMessage\n");
 
 				CStringA strMessages;
@@ -149,7 +149,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 							theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(eserver);
 							theApp.emuledlg->serverwnd->UpdateMyInfo();
 						}
-						if (theApp.glob_prefs->GetDebugServerTCP())
+						if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 							Debug("%s\n", message);
 					}
 					else if (strncmp(message, "ERROR", 5) == 0){
@@ -190,7 +190,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			case OP_IDCHANGE:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_IDChange\n");
 				if (size < sizeof(LoginAnswer_Struct)){
 					throw GetResString(IDS_ERR_BADSERVERREPLY);
@@ -201,7 +201,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				ASSERT( cur_server );
 				if (cur_server){
 					if (size >= sizeof(LoginAnswer_Struct)+4){
-						if (theApp.glob_prefs->GetDebugServerTCP())
+						if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 							Debug("  Flags=%08x\n", *((uint32*)(packet + sizeof(LoginAnswer_Struct))));
 						cur_server->SetTCPFlags(*((uint32*)(packet + sizeof(LoginAnswer_Struct))));
 					}
@@ -264,7 +264,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			case OP_SEARCHRESULT:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_SearchResult\n");
 				CServer* cur_srv = (serverconnect) ? serverconnect->GetCurrentServer() : NULL;
 				bool bMoreResultsAvailable;
@@ -273,7 +273,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			case OP_FOUNDSOURCES:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_FoundSources; Sources=%u  %s\n", (UINT)(uchar)packet[16], DbgGetFileInfo((uchar*)packet));
 				CSafeMemFile sources((BYTE*)packet,size);
 				uchar fileid[16];
@@ -283,7 +283,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			case OP_SERVERSTATUS:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_ServerStatus\n");
 				// FIXME some statuspackets have a different size -> why? structur?
 				if (size < 8)
@@ -300,7 +300,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer( update );
 					theApp.emuledlg->serverwnd->UpdateMyInfo();
 				}
-				if (theApp.glob_prefs->GetDebugServerTCP()){
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
 					if (size > 8){
 						Debug("*** NOTE: OP_ServerStatus: ***AddData: %u bytes\n", size - 8);
 						DebugHexDump((uint8*)packet + 8, size - 8);
@@ -310,7 +310,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			}
 			case OP_SERVERIDENT:{
 				// OP_SERVERIDENT - this is sent by the server only if we send a OP_GETSERVERLIST
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_ServerIdent\n");
 				if (size<16+4+2+4) {
 					AddDebugLogLine(false,GetResString(IDS_ERR_KNOWNSERVERINFOREC)); 
@@ -325,14 +325,14 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				CSafeMemFile data((BYTE*)packet, size);
 				
 				data.Read(aucHash, sizeof aucHash);
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					strInfo.AppendFormat("Hash=%s (%s)", md4str(aucHash), DbgGetHashTypeString(aucHash));
 				data.Read(&nServerIP, sizeof nServerIP);
 				data.Read(&nServerPort, sizeof nServerPort);
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					strInfo.AppendFormat("  IP=%s:%u", inet_ntoa(*(in_addr*)&nServerIP), nServerPort);
 				data.Read(&nTags, sizeof nTags);
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					strInfo.AppendFormat("  Tags=%u", nTags);
 
 				CString strName;
@@ -342,21 +342,21 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					if (tag.tag.specialtag == ST_SERVERNAME){
 						if (tag.tag.type == 2){
 							strName = tag.tag.stringvalue;
-							if (theApp.glob_prefs->GetDebugServerTCP())
+							if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 								strInfo.AppendFormat("  Name=%s", strName);
 						}
 					}
 					else if (tag.tag.specialtag == ST_DESCRIPTION){
 						if (tag.tag.type == 2){
 							strDescription = tag.tag.stringvalue;
-							if (theApp.glob_prefs->GetDebugServerTCP())
+							if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 								strInfo.AppendFormat("  Desc=%s", strDescription);
 						}
 					}
-					else if (theApp.glob_prefs->GetDebugServerTCP())
+					else if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 						strInfo.AppendFormat("  ***UnkTag: 0x%02x=%u", tag.tag.specialtag, tag.tag.intvalue);
 				}
-				if (theApp.glob_prefs->GetDebugServerTCP()){
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
 					strInfo += _T('\n');
 					Debug(strInfo);
 
@@ -390,7 +390,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 			} 
 			// tecxx 1609 2002 - add server's serverlist to own serverlist
 			case OP_SERVERLIST:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_ServerList\n");
 				try{
 					CSafeMemFile servers((BYTE*)packet,size);
@@ -417,7 +417,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 					}
 					if (addcount)
 						AddLogLine(false,GetResString(IDS_NEWSERVERS), addcount);
-					if (theApp.glob_prefs->GetDebugServerTCP()){
+					if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0){
 						UINT uAddData = servers.GetLength() - servers.GetPosition();
 						if (uAddData > 0){
 							Debug("*** NOTE: OP_ServerList: ***AddData: %u bytes\n", uAddData);
@@ -432,7 +432,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			case OP_CALLBACKREQUESTED:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_CallbackRequested\n");
 				if (size == 6){
 					uint32 dwIP;
@@ -451,12 +451,12 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			case OP_CALLBACK_FAIL:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_Callback_Fail %s\n", GetHexDump((uint8*)packet, size));
 				break;
 			}
 			case OP_REJECT:{
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("ServerMsg - OP_Reject %s\n", GetHexDump((uint8*)packet, size));
 				// this could happen if we send a command with the wrong protocol (e.g. sending a compressed packet to
 				// a server which does not support that protocol).
@@ -464,7 +464,7 @@ bool CServerSocket::ProcessPacket(char* packet, int32 size, int8 opcode){
 				break;
 			}
 			default:
-				if (theApp.glob_prefs->GetDebugServerTCP())
+				if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 					Debug("***NOTE: ServerMsg - Unknown message; opcode=0x%02x  %s\n", opcode, GetHexDump((uint8*)packet, size));
 				;
 		}
@@ -538,7 +538,7 @@ void CServerSocket::OnError(int nErrorCode){
 	AddDebugLogLine(false,GetResString(IDS_ERR_SOCKET),cur_server->GetListName(),cur_server->GetFullIP(),cur_server->GetPort(), GetErrorMessage(nErrorCode, 1));
 }
 
-void CServerSocket::PacketReceived(Packet* packet)
+bool CServerSocket::PacketReceived(Packet* packet)
 {
 	try
 	{
@@ -548,10 +548,10 @@ void CServerSocket::PacketReceived(Packet* packet)
 			uint32 uComprSize = packet->size;
 			if (!packet->UnPackPacket(250000)){
 				AddDebugLogLine(false,_T("Failed to decompress server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
-				return;
+				return true;
 			}
 			packet->prot = OP_EDONKEYPROT;
-			if (theApp.glob_prefs->GetDebugServerTCP() > 1)
+			if (theApp.glob_prefs->GetDebugServerTCPLevel() > 1)
 				Debug("Received compressed server TCP packet; opcode=0x%02x  size=%u  uncompr size=%u\n", packet->opcode, uComprSize, packet->size);
 		}
 
@@ -566,9 +566,11 @@ void CServerSocket::PacketReceived(Packet* packet)
 	}
 	catch(...)
 	{
-		AddDebugLogLine(false,_T("Unhandled exception while processing server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
+		AddDebugLogLine(false,_T("Error: Unhandled exception while processing server TCP packet: protocol=0x%02x  opcode=0x%02x  size=%u"), packet ? packet->prot : 0, packet ? packet->opcode : 0, packet ? packet->size : 0);
 		ASSERT(0);
+		return false;
 	}
+	return true;
 }
 
 void CServerSocket::OnClose(int nErrorCode){

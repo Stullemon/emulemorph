@@ -141,6 +141,7 @@ bool CKnownFileList::Init()
 
 void CKnownFileList::Save()
 {
+	if (theApp.glob_prefs->GetLogFileSaving())
 	DEBUG_ONLY(AddDebugLogLine(false, "Saved KnownFileList"));
 	m_nLastSaved = ::GetTickCount(); 
 	CString fullpath=theApp.glob_prefs->GetConfigDir();

@@ -23,17 +23,19 @@ class CClientDetailDialog : public CDialog
 	DECLARE_DYNAMIC(CClientDetailDialog)
 
 public:
-	CClientDetailDialog(CUpDownClient* client);   // standard constructor
-	void Localize();
+	CClientDetailDialog(const CUpDownClient* client);   // standard constructor
 	virtual ~CClientDetailDialog();
-	virtual BOOL OnInitDialog();
+
+	void Localize();
+
 // Dialog Data
 	enum { IDD = IDD_SOURCEDETAILWND };
 
 protected:
+	const CUpDownClient* m_client;
+
+	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-private:
-	CUpDownClient* m_client;
 };

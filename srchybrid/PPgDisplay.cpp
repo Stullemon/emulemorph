@@ -62,6 +62,7 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_SHOWDWLPERCENT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_REPAINT,OnSettingsChange)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
+	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
 END_MESSAGE_MAP()
 
 void CPPgDisplay::LoadSettings(void)
@@ -104,6 +105,7 @@ void CPPgDisplay::LoadSettings(void)
 	CheckDlgButton(IDC_SHOWCATINFO,(UINT)theApp.glob_prefs->ShowCatTabInfos());
 	CheckDlgButton(IDC_REPAINT,(UINT)theApp.glob_prefs->IsGraphRecreateDisabled() );
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)theApp.glob_prefs->GetUseDwlPercentage() );
+	CheckDlgButton(IDC_CLEARCOMPL, (uint8)app_prefs->GetRemoveFinishedDownloads());
 
 	CString strBuffer;
 	strBuffer.Format("%u", app_prefs->prefs->m_iToolDelayTime);
@@ -138,6 +140,7 @@ BOOL CPPgDisplay::OnApply()
 	app_prefs->prefs->indicateratings= (int8)IsDlgButtonChecked(IDC_INDICATERATINGS);
 	app_prefs->prefs->dontRecreateGraphs=(int8)IsDlgButtonChecked(IDC_REPAINT);
 	app_prefs->prefs->m_bShowDwlPercentage=(int8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
+	app_prefs->prefs->m_bRemoveFinishedDownloads=(int8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 
 	if(IsDlgButtonChecked(IDC_UPDATEQUEUE))
 		app_prefs->prefs->m_bupdatequeuelist = false;
@@ -236,6 +239,7 @@ void CPPgDisplay::Localize(void)
 		SetDlgItemText(IDC_HYPERTEXT_FONT_HINT, GetResString(IDS_HYPERTEXT_FONT_HINT));
 		SetDlgItemText(IDC_SELECT_HYPERTEXT_FONT, GetResString(IDS_SELECT_FONT) + _T("..."));
 		SetDlgItemText(IDC_SHOWDWLPERCENT, GetResString(IDS_SHOWDWLPERCENTAGE));
+		GetDlgItem(IDC_CLEARCOMPL)->SetWindowText(GetResString(IDS_AUTOREMOVEFD));
 	}
 }
 

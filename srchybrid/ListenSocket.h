@@ -35,26 +35,29 @@ public:
 	bool	Create();
 	//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
 	virtual SocketSentBytes Send(uint32 maxNumberOfBytesToSend, bool onlyAllowedToSendControlPacket = false);
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030818-1923
+
+	void	DbgAppendClientInfo(CString& str);
+	CString DbgGetClientInfo();
 
 	CUpDownClient*	client;
 
 protected:
 	virtual void Close()	{CAsyncSocketEx::Close();} // deadlake PROXYSUPPORT - changed to AsyncSocketEx
 	virtual	void OnInit();
+	virtual void OnConnect(int nErrorCode);
 	void		 OnClose(int nErrorCode);
 	void		 OnSend(int nErrorCode);
 	void		 OnReceive(int nErrorCode);
 	void		 OnError(int nErrorCode);
-	void		 PacketReceived(Packet* packet);
-	void		 PacketReceivedCppEx(Packet* packet);
+	bool		 PacketReceived(Packet* packet);
+	bool		 PacketReceivedCppEx(Packet* packet);
 private:
 	void	Delete_Timed();
 	~CClientReqSocket();
 
 	bool	ProcessPacket(char* packet, uint32 size,UINT opcode);
-	bool	ProcessExtPacket(char* packet, uint32 size,UINT opcode);
-	void    PacketToDebugLogLine(const char* protocol, const char* packet, uint32 size, UINT opcode) const;
+	bool	ProcessExtPacket(char* packet, uint32 size, UINT opcode, UINT uRawSize);
+	void	PacketToDebugLogLine(const char* protocol, const char* packet, uint32 size, UINT opcode);
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	void  SmartUploadControl();
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

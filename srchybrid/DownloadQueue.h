@@ -70,7 +70,7 @@ public:
 	void	AddSearchToDownload(CString link,uint8 paused=2, uint8 cat=0, uint16 useOrder = 0);
 	void	AddFileLinkToDownload(class CED2KFileLink* pLink, bool AllocatedLink = false, bool SkipQueue = false);
 	// khaos::categorymod-
-	bool	IsFileExisting(const uchar* fileid);
+	bool	IsFileExisting(const uchar* fileid, bool bLogWarnings = true);
 	bool	IsPartFile(void* totest);
 	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName) const;	// SLUGFILLER: SafeHash
 	CPartFile*	GetFileByID(const uchar* filehash);
@@ -127,14 +127,19 @@ public:
 	void	AddDownDataOverheadOther(uint32 data)			{ m_nDownDataRateMSOverhead += data;
 															  m_nDownDataOverheadOther += data;
 															  m_nDownDataOverheadOtherPackets++;}
+	void	AddDownDataOverheadKad(uint32 data)				{ m_nDownDataRateMSOverhead += data;
+															  m_nDownDataOverheadKad += data;
+															  m_nDownDataOverheadKadPackets++;}
 	uint32	GetDownDatarateOverhead()			{return m_nDownDatarateOverhead;}
 	uint64	GetDownDataOverheadSourceExchange()	{return m_nDownDataOverheadSourceExchange;}
 	uint64	GetDownDataOverheadFileRequest()	{return m_nDownDataOverheadFileRequest;}
 	uint64	GetDownDataOverheadServer()			{return m_nDownDataOverheadServer;}
+	uint64	GetDownDataOverheadKad()					{return m_nDownDataOverheadKad;}
 	uint64	GetDownDataOverheadOther()			{return m_nDownDataOverheadOther;}
 	uint64	GetDownDataOverheadSourceExchangePackets()	{return m_nDownDataOverheadSourceExchangePackets;}
 	uint64	GetDownDataOverheadFileRequestPackets()		{return m_nDownDataOverheadFileRequestPackets;}
 	uint64	GetDownDataOverheadServerPackets()			{return m_nDownDataOverheadServerPackets;}
+	uint64	GetDownDataOverheadKadPackets()				{return m_nDownDataOverheadKadPackets;}
 	uint64	GetDownDataOverheadOtherPackets()			{return m_nDownDataOverheadOtherPackets;}
 	void	CompDownDatarateOverhead();
 	int		GetFileCount()						{return filelist.GetCount();}
@@ -160,7 +165,7 @@ public:
 
 	void	UpdatePNRFile(CPartFile * ppfUpdate = NULL);							//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
 	void	BuildPNRRecord(CPartFile * ppf, char * pszBuff, unsigned cchBuffMax);	//<<-- enkeyDEV(ColdShine) -PartfileNameRecovery-
-
+	bool	IsFilesPowershared(); //MORPH - Added by SiRoB, ZZ Ratio
 	// khaos::kmod+ Advanced A4AF: Brute Force
 	CPartFile* forcea4af_file;
 	// khaos::kmod-
@@ -205,13 +210,15 @@ private:
 	uint64		m_nDownDataOverheadServerPackets;
 	uint64		m_nDownDataOverheadOther;
 	uint64		m_nDownDataOverheadOtherPackets;
+	uint64		m_nDownDataOverheadKad;
+	uint64		m_nDownDataOverheadKadPackets;
 
 	// By BadWolf - Accurate Speed Measurement
-	//MORPH START - Removed by SiRoB, ZZ Upload System	
 	typedef struct TransferredData {
 		uint32	datalen;
 		DWORD	timestamp;
 	};
+	//MORPH START - Removed by SiRoB, ZZ Upload System	
 	//CList<TransferredData,TransferredData> avarage_dr_list;*/
 	//MORPH END   - Removed by SiRoB, ZZ Upload System
 	CList<TransferredData,TransferredData>	m_AvarageDDRO_list;

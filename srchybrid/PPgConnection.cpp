@@ -25,6 +25,8 @@
 #include "Preferences.h"
 #include "Opcodes.h"
 #include "StatisticsDlg.h"
+#include "KademliaMain.h"
+
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -56,8 +58,6 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	ON_EN_CHANGE(IDC_UDPPORT, OnEnChangeUDPDisable)
 	ON_EN_CHANGE(IDC_KADUDPPORT, OnSettingsChange)
 	ON_EN_CHANGE(IDC_UPLOAD_CAP, OnSettingsChange)
-	ON_EN_CHANGE(IDC_MAXDOWN, OnSettingsChange)
-	ON_EN_CHANGE(IDC_MAXUP, OnSettingsChange)
 	ON_EN_CHANGE(IDC_PORT, OnSettingsChange)
 	ON_EN_CHANGE(IDC_MAXCON, OnSettingsChange)
 	ON_EN_CHANGE(IDC_MAXSOURCEPERFILE, OnSettingsChange)
@@ -274,9 +274,23 @@ BOOL CPPgConnection::OnApply()
 	{
 		GetDlgItem(IDC_KADUDPPORT)->GetWindowText(buffer,20);
 		uint16 nNewPort = (atoi(buffer)) ? atoi(buffer) : 4673;
-		if (nNewPort != app_prefs->prefs->kadudpport){
+		bool udpChange = false;
+		while( nNewPort == app_prefs->prefs->udpport /*|| nNewPort == what is our servers listen UDP port?*/ )
+		{
+			nNewPort++;
+			udpChange = true;
+		}
+		if( udpChange )
+		{
+			CString msg;
+			msg.Format(GetResString(IDS_KADUDPPORTERR), nNewPort);
+			AfxMessageBox(msg);
+		}
+		if( app_prefs->prefs->kadudpport != nNewPort )
+		{
 			app_prefs->prefs->kadudpport = nNewPort;
-			bRestartApp = true;
+			if( theApp.kademlia->GetThreadID())
+				bRestartApp = true;
 		}
 	}
 
@@ -361,6 +375,8 @@ void CPPgConnection::Localize(void)
 		
 		GetDlgItem(IDC_DLIMIT_LBL)->SetWindowText(GetResString(IDS_PW_DOWNL));
 		GetDlgItem(IDC_ULIMIT_LBL)->SetWindowText(GetResString(IDS_PW_UPL));
+
+		GetDlgItem(IDC_CONNECTION_NETWORK)->SetWindowText(GetResString(IDS_NETWORK));
 
 //		GetDlgItem(IDC_KBS1)->SetWindowText(GetResString(IDS_KBYTESEC));
 		GetDlgItem(IDC_KBS2)->SetWindowText(GetResString(IDS_KBYTESEC));

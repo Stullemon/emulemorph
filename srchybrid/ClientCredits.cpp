@@ -211,57 +211,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 		}break;
 		// EastShare END - Added by TAHO, new Credit System
 
-		case CS_OFFICIAL:{
-			//MORPH START - Added by Yun.SF3, Boost the less uploaded files
-			if (theApp.glob_prefs->IsBoostLess())
-			{
-				if (!GetDownloadedTotal()){
-					result = 1;
-					break;
-				}
-				if (!GetUploadedTotal())
-					result = 10000;
-				else
-					result = (float)(((double)GetDownloadedTotal()*200.0)/(double)GetUploadedTotal());
-				float result2 = 0;
-				result2 = (float)GetDownloadedTotal()/1024.0;
-				result2 += 2;
-				result2 = (double)sqrt((double)result2);
-				if (result > result2)
-					result = result2;
-
-				if (result < 1){
-					result = 1;
-					break;
-				}else if (result > 10000){
-					result = 10000;
-					break;
-				}
-			}else{
-				if (GetDownloadedTotal() < 1000000){
-					result = 1;
-					break;
-				}
-				if (!GetUploadedTotal())
-					result = 10;
-				else
-					result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
-				float result2 = 0;
-				result2 = (float)GetDownloadedTotal()/1048576.0;
-				result2 += 2;
-				result2 = (double)sqrt((double)result2);
-				if (result > result2)
-				result = result2;
-				if (result < 1){
-					result = 1;
-					break;
-				}else if (result > 10){
-					result = 10;
-					break;
-				}
-			}
-		}break;
-
+		case CS_OFFICIAL:
 		default:{
 			if (GetDownloadedTotal() < 1000000){
 				result = 1;
@@ -570,7 +520,8 @@ void CClientCreditsList::LoadList()
 // Moonlight: SUQWT - Save the wait times before saving the list.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCreditsList::SaveList()
 {
-	DEBUG_ONLY(AddDebugLogLine(false, "Saved Credit list"));
+	if (theApp.glob_prefs->GetLogFileSaving())
+		DEBUG_ONLY(AddDebugLogLine(false, "Saved Credit list"));
 	m_nLastSaved = ::GetTickCount();
 
 	CString name = m_pAppPrefs->GetConfigDir() + CString(CLIENTS_MET_FILENAME);
@@ -895,7 +846,8 @@ bool CClientCreditsList::VerifyIdent(CClientCredits* pTarget, uchar* pachSignatu
 	}
 	catch(...)
 	{
-		ASSERT(0);
+		AddDebugLogLine(false, _T("Error: Unknown exception in %s"), __FUNCTION__);
+		//ASSERT(0);
 		bResult = false;
 	}
 	if (!bResult){
@@ -1034,10 +986,6 @@ void CClientCredits::ClearWaitStartTime(){
 
 //EastShare Start - added by AndCycle, Pay Back First
 void CClientCredits::TestPayBackFirstStatus(){
-
-	if(GetDownloadedTotal() < 1000000)
-		m_bPayBackFirst = false;
-	else
-		m_bPayBackFirst = GetDownloadedTotal() > GetUploadedTotal();
+	m_bPayBackFirst = false;//GetDownloadedTotal() > GetUploadedTotal()+SESSIONAMOUNT;
 }
 //EastShare End - added by AndCycle, Pay Back First

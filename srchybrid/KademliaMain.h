@@ -26,4 +26,5 @@ public:
 private:
 	//Most likely delete these and only keep the Status Object..
 	Status* m_status;
+	time_t m_bootstrapTimer;
 };

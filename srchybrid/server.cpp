@@ -28,7 +28,8 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 
-CServer::CServer(ServerMet_Struct* in_data){
+CServer::CServer(const ServerMet_Struct* in_data)
+{
 	taglist = new CTypedPtrList<CPtrList, CTag*>;
 	port = in_data->port;
 	tagcount = 0;
@@ -40,8 +41,8 @@ CServer::CServer(ServerMet_Struct* in_data){
 	users = 0;
 	preferences = 0;
 	ping = 0;
-	description = 0;
-	listname = 0;
+	description = NULL;
+	listname = NULL;
 	dynip = 0;
 	failedcount = 0; 
 	lastpinged = 0;
@@ -55,17 +56,20 @@ CServer::CServer(ServerMet_Struct* in_data){
 	m_uUDPFlags = 0;
 }
 
-CServer::CServer(uint16 in_port, char* i_addr){
-	taglist = new CTypedPtrList<CPtrList, CTag*>;
+CServer::CServer(uint16 in_port, LPCSTR i_addr)
+{
 	port = in_port;
+
+	taglist = new CTypedPtrList<CPtrList, CTag*>;
 	tagcount = 0;
-	if (inet_addr(i_addr) == INADDR_NONE && strcmp(i_addr, "255.255.255.255") != 0){//bluecow patch
+
+	if (inet_addr(i_addr) == INADDR_NONE && strcmp(i_addr, "255.255.255.255") != 0){
 		dynip = nstrdup(i_addr);
 		ip = 0;
 	}
 	else{
 		ip = inet_addr(i_addr);
-		dynip = 0;
+		dynip = NULL;
 	}
 	in_addr host;
 	host.S_un.S_addr = ip;
@@ -74,8 +78,8 @@ CServer::CServer(uint16 in_port, char* i_addr){
 	users = 0;
 	preferences = 0;
 	ping = 0;
-	description = 0;
-	listname = 0;
+	description = NULL;
+	listname = NULL;
 	failedcount = 0; 
 	lastpinged = 0;
 	lastpingedtime = 0;
@@ -89,12 +93,11 @@ CServer::CServer(uint16 in_port, char* i_addr){
 }
 
 // copy constructor
-CServer::CServer(CServer* pOld)
+CServer::CServer(const CServer* pOld)
 {
 	taglist = new CTypedPtrList<CPtrList, CTag*>;
-	for(POSITION pos = pOld->taglist->GetHeadPosition(); pos != NULL; pOld->taglist->GetNext(pos))
-	{
-		CTag* pOldTag = pOld->taglist->GetAt(pos);
+	for (POSITION pos = pOld->taglist->GetHeadPosition(); pos != NULL; ){
+		CTag* pOldTag = pOld->taglist->GetNext(pos);
 		taglist->AddTail(pOldTag->CloneTag());
 	}
 	port = pOld->port;
@@ -130,21 +133,19 @@ CServer::CServer(CServer* pOld)
 	m_uUDPFlags = pOld->m_uUDPFlags;
 }
 
-CServer::~CServer(){
-	if (description)
-		delete[] description;
-	if (listname)
-		delete[] listname;
-	if (dynip)
-		delete[] dynip;
-	for(POSITION pos = taglist->GetHeadPosition(); pos != NULL; taglist->GetNext(pos))
-		delete taglist->GetAt(pos);
-	taglist->RemoveAll();
+CServer::~CServer()
+{
+	delete[] description;
+	delete[] listname;
+	delete[] dynip;
+	for(POSITION pos = taglist->GetHeadPosition(); pos != NULL; )
+		delete taglist->GetNext(pos);
 	delete taglist;
 }
 
-bool CServer::AddTagFromFile(CFile* servermet){
-	if (servermet == 0)
+bool CServer::AddTagFromFile(CFile* servermet)
+{
+	if (servermet == NULL)
 		return false;
 	CTag* tag = new CTag(servermet);
 	switch(tag->tag.specialtag){		
@@ -226,7 +227,8 @@ bool CServer::AddTagFromFile(CFile* servermet){
 	return true;
 }
 
-void CServer::SetListName(LPCSTR newname){
+void CServer::SetListName(LPCSTR newname)
+{
 	if (listname){
 		delete[] listname;
 		listname = NULL;// needed, in case 'nstrdup' fires an exception!!
@@ -235,7 +237,8 @@ void CServer::SetListName(LPCSTR newname){
 		listname = nstrdup(newname);
 }
 
-void CServer::SetDescription(LPCSTR newname){
+void CServer::SetDescription(LPCSTR newname)
+{
 	if (description){
 		delete[] description;
 		description = NULL;// needed, in case 'nstrdup' fires an exception!!
@@ -244,25 +247,36 @@ void CServer::SetDescription(LPCSTR newname){
 		description = nstrdup(newname);
 }
 
-char* CServer::GetAddress(){
+LPCSTR CServer::GetAddress() const
+{
 	if (dynip)
 		return dynip;
 	else
 		return ipfull;
 }
 
-void CServer::SetID(uint32 newip){
+void CServer::SetID(uint32 newip)
+{
 	ip = newip;
 	in_addr host;
 	host.S_un.S_addr = ip;
 	strcpy(ipfull,inet_ntoa(host));
 }
 
-void CServer::SetDynIP(char* newdynip){
+void CServer::SetDynIP(LPCSTR newdynip)
+{
 	if (dynip){
 		delete[] dynip;
 		dynip = NULL;// needed, in case 'nstrdup' fires an exception!!
 	}
 	if( newdynip )
 		dynip = nstrdup(newdynip);
+}
+
+void CServer::SetLastDescPingedCount(bool bReset)
+{
+	if (bReset)
+		lastdescpingedcout = 0;
+	else
+		lastdescpingedcout++;
 }

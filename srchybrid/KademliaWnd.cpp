@@ -81,6 +81,7 @@ BOOL CKademliaWnd::OnInitDialog()
 
 	AddAnchor(IDC_CONTACTLIST,TOP_LEFT, CSize(100,50));
 	AddAnchor(IDC_SEARCHLIST,CSize(0,50),CSize(100,100));
+
 	AddAnchor(IDC_KADCONTACTLAB,TOP_LEFT);
 	AddAnchor(IDC_FIREWALLCHECKBUTTON, TOP_RIGHT);
 	AddAnchor(IDC_KADCONNECT, TOP_RIGHT);
@@ -91,6 +92,8 @@ BOOL CKademliaWnd::OnInitDialog()
 	AddAnchor(IDC_BOOTSTRAPIP, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC4, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC7, TOP_RIGHT);
+	AddAnchor(IDC_RADCLIENTS, TOP_RIGHT);
+	AddAnchor(IDC_RADIP, TOP_RIGHT);
 
 	SetAllIcons();
 	Localize();
@@ -101,6 +104,8 @@ BOOL CKademliaWnd::OnInitDialog()
 		if (m_pacONBSIPs->Bind(::GetDlgItem(m_hWnd, IDC_BOOTSTRAPIP), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
 			m_pacONBSIPs->LoadList(CString(theApp.glob_prefs->GetConfigDir()) +  _T("\\") ONBOOTSTRAP_STRINGS_PROFILE);
 	}
+
+	CheckDlgButton(IDC_RADCLIENTS,1);
 
 	return true;
 }
@@ -137,7 +142,7 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 	CString strBuffer;
 	GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowText(strBuffer);
 
-	// handle ip:port
+	// auto-handle ip:port
 	if (strBuffer.Find(':')!=-1) {
 		int pos=strBuffer.Find(':');
 		GetDlgItem(IDC_BOOTSTRAPPORT)->SetWindowText( strBuffer.Right( strBuffer.GetLength()-pos-1));
@@ -145,10 +150,18 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 		strBuffer=strBuffer.Right( strBuffer.GetLength()-pos-1);
 	}
 
-	char buffer[510];
-	GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowText(buffer,10);
+	char buffer[7];
+	GetDlgItem(IDC_BOOTSTRAPPORT)->GetWindowText(buffer,6);
 	tempVal= atoi(buffer);
 
+	// boot by kad-client
+	if ( IsDlgButtonChecked(IDC_RADCLIENTS) )
+	{
+		theApp.kademlia->Bootstrap(strBuffer,tempVal);
+		return;
+	}
+
+	// invalid IP/Port
 	if (strBuffer.GetLength()<7 || tempVal<1)
 		return;
 
@@ -195,25 +208,23 @@ void CKademliaWnd::Localize() {
 	SetDlgItemText(IDC_KADCONTACTLAB,GetResString(IDS_KADCONTACTLAB));
 	SetDlgItemText(IDC_KADSEARCHLAB,GetResString(IDS_KADSEARCHLAB));
 
+	SetDlgItemText(IDC_RADCLIENTS,GetResString(IDS_RADCLIENTS));
+
 	UpdateControlsState();
 	contactList->Localize();
 	searchList->Localize();
 }
 
-void CKademliaWnd::UpdateControlsState() {
-	if( theApp.kademlia->isConnected() )
-	{
-		GetDlgItem(IDC_KADCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_DISCONNECT ) );
-		GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(false);
-	}
-	else if( Kademlia::CTimer::getThreadID() )
-	{
-		GetDlgItem(IDC_KADCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_CANCEL));
-		GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(true);
-	}
+void CKademliaWnd::UpdateControlsState()
+{
+	CString strLabel;
+	if (theApp.kademlia->isConnected())
+		strLabel = GetResString(IDS_MAIN_BTN_DISCONNECT);
+	else if (Kademlia::CTimer::getThreadID())
+		strLabel = GetResString(IDS_MAIN_BTN_CANCEL);
 	else
-	{
-		GetDlgItem(IDC_KADCONNECT)->SetWindowText( GetResString(IDS_MAIN_BTN_CONNECT ) );
-		GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(true);
-	}
+		strLabel = GetResString(IDS_MAIN_BTN_CONNECT);
+	strLabel.Remove(_T('&'));
+	GetDlgItem(IDC_KADCONNECT)->SetWindowText(strLabel);
+	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(!theApp.kademlia->isConnected());
 }

@@ -40,6 +40,7 @@ CString CastItoIShort(uint64 number);
 CString CastSecondsToHM(sint32 seconds);
 CString	CastSecondsToLngHM(__int64 count);
 CString GetFormatedUInt(ULONG ulVal);
+CString GetFormatedUInt64(ULONGLONG ullVal);
 void SecToTimeLength(unsigned long ulSec, CStringA& rstrTimeLength);
 CString LeadingZero(uint32 units);
 // khaos::categorymod+ Takes a string and returns bytes...
@@ -66,8 +67,8 @@ CString URLDecode(CString sIn);
 CString URLEncode(CString sIn);
 CString MakeStringEscaped(CString in);
 CString	StripInvalidFilenameChars(CString strText, bool bKeepSpaces = true);
-CString	CreateED2kLink( CAbstractFile* f );
-CString	CreateHTMLED2kLink( CAbstractFile* f );
+CString	CreateED2kLink(const CAbstractFile* f);
+CString	CreateHTMLED2kLink(const CAbstractFile* f);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,7 +100,7 @@ BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultF
 void GetPopupMenuPos(CListCtrl& lv, CPoint& point);
 void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
 void UpdateURLMenu(CMenu &menu, int &counter);
-void RunURL(CAbstractFile* file,CString urlpattern);
+void RunURL(const CAbstractFile* file,CString urlpattern);
 void InitWindowStyles(CWnd* pWnd);
 CString GetRateString(uint16 rate);
 
@@ -135,6 +136,11 @@ void DebugHexDump(CFile& file);
 CString DbgGetFileInfo(const uchar* hash);
 LPCTSTR DbgGetHashTypeString(const uchar* hash);
 CString DbgGetClientID(uint32 nClientID);
+int GetHashType(const uchar* hash);
+CString DbgGetDonkeyClientTCPOpcode(UINT opcode);
+CString DbgGetMuleClientTCPOpcode(UINT opcode);
+CString DbgGetClientTCPOpcode(UINT protocol, UINT opcode);
+CString DbgGetClientTCPPacket(UINT protocol, UINT opcode, UINT size);
 
 
 ///////////////////////////////////////////////////////////////////////////////

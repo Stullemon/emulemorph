@@ -13,6 +13,9 @@
 #include "PPgWebServer.h"
 #include "PPgScheduler.h"
 #include "PPgProxy.h"
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+#include "PPgDebug.h"
+#endif
 #include "otherfunctions.h"
 #include "ListBoxST.h"
 #include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
@@ -44,6 +47,9 @@ public:
 	CPPgWebServer	m_wndWebServer;
 	CPPgScheduler	m_wndScheduler;
 	CPPgProxy		m_wndProxy;
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	CPPgDebug		m_wndDebug;
+#endif
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
 	CPPgMorph2		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
@@ -73,6 +79,9 @@ public:
 		m_wndWebServer.SetPrefs(in_prefs);
 		m_wndScheduler.SetPrefs(in_prefs);
 		m_wndProxy.SetPrefs(in_prefs);
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+		m_wndDebug.SetPrefs(in_prefs);
+#endif
 		m_wndMorph.SetPrefs(in_prefs); //MORPH - Added by IceCream, Morph Prefs
 		m_wndMorph2.SetPrefs(in_prefs);	//MORPH - Added by SiRoB, Morph Prefs
 		m_wndEastShare.SetPrefs(in_prefs);	//EastShare - Added by Pretender, ES Prefs

@@ -30,7 +30,6 @@ CPPgEastShare::CPPgEastShare()
 	m_bInitializedTreeOpts = false;
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
-	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -79,7 +78,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 			iImgECFEF = piml->Add(CTempIconLoader("EQFILE"));//Morph - added by AndCycle, Equal Chance For Each File
 		}
 		m_htiEnablePreferShareAll = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PREFER_SHARE_ALL), TVI_ROOT, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
-		m_htiAutoClearComplete = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_AUTO_CLEAR_COMPLETE), TVI_ROOT, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 		m_htiOnlyDownloadCompleteFiles = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES), TVI_ROOT, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_htiSaveUploadQueueWaitTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME), TVI_ROOT, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -131,7 +129,6 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnablePreferShareAll, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiIsPayBackFirst, m_bIsPayBackFirst);//EastShare - added by AndCycle, Pay Back First
-	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiAutoClearComplete, m_bAutoClearComplete);//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiOnlyDownloadCompleteFiles, m_bOnlyDownloadCompleteFiles);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiSaveUploadQueueWaitTime, m_bSaveUploadQueueWaitTime);//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 }
@@ -142,7 +139,6 @@ BOOL CPPgEastShare::OnInitDialog()
 
 	m_bEnablePreferShareAll = app_prefs->prefs->shareall;//EastShare - PreferShareAll by AndCycle
 	m_bIsPayBackFirst = app_prefs->prefs->m_bPayBackFirst;//EastShare - added by AndCycle, Pay Back First
-	m_bAutoClearComplete = app_prefs->prefs->m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_bOnlyDownloadCompleteFiles = app_prefs->prefs->m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = app_prefs->prefs->m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -180,7 +176,6 @@ BOOL CPPgEastShare::OnApply()
 		return FALSE;
 
 	app_prefs->prefs->shareall = m_bEnablePreferShareAll;//EastShare - PreferShareAll by AndCycle
-	app_prefs->prefs->m_bAutoClearComplete = m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	app_prefs->prefs->m_bPayBackFirst = m_bIsPayBackFirst;//EastShare - added by AndCycle, Pay Back First
 	app_prefs->prefs->m_bOnlyDownloadCompleteFiles = m_bOnlyDownloadCompleteFiles;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	if((bool)m_bSaveUploadQueueWaitTime != app_prefs->prefs->m_bSaveUploadQueueWaitTime)	bRestartApp = true;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
@@ -221,7 +216,6 @@ void CPPgEastShare::Localize(void)
 
 		if (m_htiEnablePreferShareAll) m_ctrlTreeOptions.SetItemText(m_htiEnablePreferShareAll, GetResString(IDS_PREFER_SHARE_ALL));//EastShare - PreferShareAll by AndCycle
 		if (m_htiIsPayBackFirst) m_ctrlTreeOptions.SetItemText(m_htiIsPayBackFirst, GetResString(IDS_PAYBACKFIRST));//EastShare - added by AndCycle, Pay Back First
-		if (m_htiAutoClearComplete) m_ctrlTreeOptions.SetItemText(m_htiAutoClearComplete, GetResString(IDS_AUTO_CLEAR_COMPLETE));//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 		if (m_htiOnlyDownloadCompleteFiles) m_ctrlTreeOptions.SetItemText(m_htiOnlyDownloadCompleteFiles,GetResString(IDS_ONLY_DOWNLOAD_COMPLETE_FILES));//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 		if (m_htiSaveUploadQueueWaitTime) m_ctrlTreeOptions.SetItemText(m_htiSaveUploadQueueWaitTime,GetResString(IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME));//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -241,7 +235,6 @@ void CPPgEastShare::OnDestroy()
 
 	m_htiEnablePreferShareAll = NULL; //EastShare - PreferShareAll by AndCycle
 	m_htiIsPayBackFirst = NULL; //EastShare - added by AndCycle, Pay Back First
-	m_htiAutoClearComplete = NULL; //EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	m_htiOnlyDownloadCompleteFiles = NULL;//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_htiSaveUploadQueueWaitTime = NULL;//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 

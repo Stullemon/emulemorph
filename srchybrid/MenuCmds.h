@@ -3,10 +3,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Menu commands for GUI only
 
-#define MP_RESTORE				4001
-#define MP_CONNECT				4002
-#define MP_DISCONNECT			4003
-#define MP_EXIT					4004
+// Menu entries for the application system menu -> require a set of IDs with special restrictions!
+#define MP_RESTORE				0x110
+#define MP_CONNECT				0x120
+#define MP_DISCONNECT			0x130
+#define MP_EXIT					0x140
+#define	MP_ABOUTBOX				0x150
+#define MP_VERSIONCHECK			0x160
 
 #define MP_MESSAGE				10102
 #define MP_DETAIL				10103
@@ -14,14 +17,29 @@
 #define MP_REMOVEFRIEND			10105
 #define MP_SHOWLIST				10106
 #define MP_FRIENDSLOT			10107
-//MORPH START - Added by SiRoB, ZZ Upload System, Kademlia 40f26
-#define MP_POWERSHARE_ON        10192
-#define MP_POWERSHARE_OFF       10194
-#define MP_POWERSHARE_AUTO      10195
-//MORPH END - Added by SiRoB, ZZ Upload System, Kademlia 40f26
-//MORPH START - Added by SiRoB, About Popup Open File Folder entry
-#define	MP_OPENFILEFOLDER		10196
-//MORPH END - Added by SiRoB, About Popup Open File Folder entry
+
+//MORPH START - Added by SiRoB, ZZ Upload System
+#define MP_POWERSHARE_OFF       10161
+#define MP_POWERSHARE_ON        10162
+#define MP_POWERSHARE_AUTO      10163
+//MORPH END   - Added by SiRoB, ZZ Upload System
+//MORPH START - Added by SiRoB, HIDEOS
+#define MP_HIDEOS               10170
+#define MP_HIDEOS_0             10171
+#define MP_HIDEOS_1             10172
+#define MP_HIDEOS_2             10173
+#define MP_HIDEOS_3             10174
+#define MP_HIDEOS_4             10175
+#define MP_HIDEOS_5             10176
+#define MP_SELECTIVE_CHUNK      10180
+#define MP_SELECTIVE_CHUNK_0    10181
+#define MP_SELECTIVE_CHUNK_1    10182
+//MORPH END   - Added by SiRoB, HIDEOS
+//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+#define MP_SHAREONLYTHENEED     10190
+#define MP_SHAREONLYTHENEED_0   10191
+#define MP_SHAREONLYTHENEED_1   10192
+//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 //MORPH START - Added by IceCream, copy feedback feature
 #define	MP_COPYFEEDBACK			10197
 #define MP_COPYFEEDBACK_US		10198
@@ -56,6 +74,10 @@
 #define MP_BOOT					10226
 #define MP_HM_CONVERTPF			10227
 #define MP_RESUMEPAUSED			10228
+#define MP_HM_KAD				10229
+#define MP_HM_HELP				10242
+#define MP_HM_1STSWIZARD		10243
+#define MP_OPENFOLDER			10244
 
 #define MP_HM_LINK1				10230
 #define MP_HM_LINK2				10231
@@ -93,7 +115,6 @@
 #define MP_CLCOMMAND			10317
 #define MP_REMOVEFROMSTATIC		10318
 #define MP_VIEWFILECOMMENTS		10319
-#define MP_VERSIONCHECK			10320
 #define MP_CAT_ADD				10321
 #define MP_CAT_EDIT				10322
 #define MP_CAT_REMOVE			10323
@@ -105,8 +126,8 @@
 #define MP_RESUMENEXT			10329
 #define MPG_ALTENTER			10330
 #define MPG_F2					10331
+#define	MP_RENAME				10332
 
-#define MP_DELFILE				10333 // eastshare added by linekin, TBH delete shared file
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10335
 #define MP_CAT_SETRESUMEORDER	10336

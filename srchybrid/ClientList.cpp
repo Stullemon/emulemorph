@@ -237,13 +237,15 @@ bool CClientList::AttachToAlreadyKnown(CUpDownClient** client, CClientReqSocket*
 				{
 					// if found_client is connected and has the IS_IDENTIFIED, it's safe to say that the other one is a bad guy
 					if (found_client->Credits() && found_client->Credits()->GetCurrentIdentState(found_client->GetIP()) == IS_IDENTIFIED){
-						AddDebugLogLine(false, GetResString(IDS_BANHASHINVALID), tocheck->GetUserName(),tocheck->GetFullIP()); 
+						if (theApp.glob_prefs->GetLogBannedClients())
+							AddDebugLogLine(false, "Clients: %s (%s), Banreason: Userhash invalid", tocheck->GetUserName(),tocheck->GetFullIP()); 
 						tocheck->Ban();
 						return false;
 					}
 	
 					//IDS_CLIENTCOL Warning: Found matching client, to a currently connected client: %s (%s) and %s (%s)
-					AddDebugLogLine(true,GetResString(IDS_CLIENTCOL),tocheck->GetUserName(),tocheck->GetFullIP(),found_client->GetUserName(),found_client->GetFullIP());
+					if (theApp.glob_prefs->GetLogBannedClients())
+						AddDebugLogLine(true,GetResString(IDS_CLIENTCOL),tocheck->GetUserName(),tocheck->GetFullIP(),found_client->GetUserName(),found_client->GetFullIP());
 					return false;
 				}
 				found_client->socket->client = 0;
@@ -300,6 +302,16 @@ CUpDownClient* CClientList::FindClientByID_KadPort(uint32 clientID,uint16 kadPor
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL;){
 		CUpDownClient* cur_client =	list.GetNext(pos);
 		if (cur_client->GetUserIDHybrid() == clientID && cur_client->GetKadPort() == kadPort)
+			return cur_client;
+	}
+	return 0;
+}
+
+//TODO: This needs to change to a random Kad user.
+CUpDownClient* CClientList::GetRandomKadClient(){
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL;){
+		CUpDownClient* cur_client =	list.GetNext(pos);
+		if (cur_client->GetKadPort())
 			return cur_client;
 	}
 	return 0;
@@ -415,30 +427,38 @@ void CClientList::Process(){
 	//If we don't connect, we need to remove the client..
 	//The sockets timeout should delete this object.
 	POSITION pos1, pos2;
-	for (pos1 = RequestTCPList.GetHeadPosition();( pos2 = pos1 ) != NULL;){
+	for (pos1 = RequestTCPList.GetHeadPosition();( pos2 = pos1 ) != NULL;)
+	{
 		RequestTCPList.GetNext(pos1);
 		CUpDownClient* cur_client =	RequestTCPList.GetAt(pos2);
 		switch(cur_client->GetKadIPCheckState()){
 			case KS_QUEUED:
 				cur_client->SetKadIPCHeckState(KS_CONNECTING);
-				if(!cur_client->TryToConnect()){
-					return;
-				}
+				cur_client->TryToConnect();
 				break;
 			case KS_CONNECTING:
 				break;
-			case KS_CONNECTED:
+			case KS_CONNECTED:{
 				//Set the Kademlia client a TCP connection ack! This most likely needs to be done in the Kademlia thread using a message to avoid issues.
-				Kademlia::CKademlia::getUDPListener()->sendNullPacket(KADEMLIA_FIREWALLED_ACK, ntohl(cur_client->GetIP()), cur_client->GetKadPort());
-				if(cur_client->Disconnected()){
-					delete cur_client;
-					return;
+				//Kademlia::CKademlia::getUDPListener()->sendNullPacket(KADEMLIA_FIREWALLED_ACK, ntohl(cur_client->GetIP()), cur_client->GetKadPort());
+				DWORD dwThreadID = Kademlia::CKademlia::getUDPListenerThreadID();
+				if (dwThreadID){
+					KADEMLIAFIREWALLEDACK* fwack = new KADEMLIAFIREWALLEDACK;
+					fwack->ip = ntohl(cur_client->GetIP());
+					fwack->port = cur_client->GetKadPort();
+					if (!PostThreadMessage(Kademlia::CKademlia::getUDPListenerThreadID(), WM_KADEMLIA_FIREWALLED_ACK, 0, (LPARAM)fwack))
+						delete fwack;
 				}
-				else{
-					ASSERT(0);
+				if(cur_client->Disconnected())
+					delete cur_client;
+				else
+				{
+					AddDebugLogLine(false, "Kad TCP Callback did not delete the client. This should not happen.");
+				}
+				break;
 				}
 			default:
-				ASSERT(0);
+				AddDebugLogLine(false, "Kad TCP Callback is not in a valid state. (%s:%s)", cur_client->GetUserHash(), cur_client->GetUserName());
 		}
 	}
 }
@@ -483,7 +503,6 @@ void CClientList::RequestTCP(Kademlia::CContact* contact){
 	//Although the odds of this happening is very small, it could still happen. This will make this a very minimal occurence.
 	//TODO: Maybe integrate these clients into the main clientlist to try to avoid this issue more.
 	if(this->FindClientByIP(ntohl(contact->getIPAddress()), contact->getTCPPort())){
-		delete contact;
 		return;
 	}
 	//Add these to the RequestTCP list then process them.
@@ -491,12 +510,12 @@ void CClientList::RequestTCP(Kademlia::CContact* contact){
 	test->SetKadPort(contact->getUDPPort());
 	test->SetKadIPCHeckState(KS_QUEUED);
 	RequestTCPList.AddTail(test);
-	delete contact;
 }
 
 void CClientList::RemoveTCP(CUpDownClient* torem){
 	POSITION pos = RequestTCPList.Find(torem);
-	if(pos){
+	if(pos)
+	{
 		RequestTCPList.RemoveAt(pos);
 	}
 }

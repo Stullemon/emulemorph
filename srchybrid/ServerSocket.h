@@ -37,13 +37,13 @@ protected:
 	void	OnConnect(int nErrorCode);
 	void	OnReceive(int nErrorCode);
 	void	OnError(int nErrorCode);
-	void	PacketReceived(Packet* packet);
+	bool	PacketReceived(Packet* packet);
 private:
 	bool	ProcessPacket(char* packet, int32 size,int8 opcode);
 	void	SetConnectionState(sint8 newstate);
 	CServerConnect*	serverconnect; 
 	sint8	connectionstate;
-	CServer*	cur_server;
+	CServer* cur_server; // holds a copy of a CServer from the CServerList
 	bool	headercomplete;
 	int32	sizetoget;
 	int32	sizereceived;

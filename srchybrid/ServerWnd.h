@@ -36,12 +36,19 @@ public:
 	void ToggleDebugWindow();
 	void UpdateMyInfo();
 	void UpdateLogTabSelection();
+	void SaveAllSettings();
 	BOOL SaveServerMetStrings();
 	void ShowServerInfo();
+	void UpdateControlsState();
 
 // Dialog Data
 	enum { IDD = IDD_SERVER };
 	CServerListCtrl serverlistctrl;
+	CHTRichEditCtrl* servermsgbox;
+	CLogEditCtrl logbox;
+	CLogEditCtrl debuglog;
+	CTabCtrl StatusSelector;
+
 protected:
 	void SetAllIcons();
 
@@ -49,10 +56,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	DECLARE_MESSAGE_MAP()
-public:
-	CHTRichEditCtrl* servermsgbox;
-	CLogEditCtrl logbox;
-	CLogEditCtrl debuglog;
 	afx_msg void OnBnClickedAddserver();
 	afx_msg void OnBnClickedUpdateservermetfromurl();
 	afx_msg void OnBnClickedResetLog();
@@ -61,8 +64,6 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnEnLinkServerBox(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
-	CTabCtrl StatusSelector;
-	void UpdateControlsState();
 
 private:
 	CIconStatic m_ctrlNewServerFrm;

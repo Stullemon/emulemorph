@@ -138,17 +138,15 @@ struct Preferences_Struct{
 //MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	bool	enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
-	bool	enableChunkAvaibility; //MORPH - Added by IceCream, ChunkAvaibility
 	bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 	bool	isZZRatioActivated;// Added By Yun.SF3, Option for Ratio Systems
-	bool	isboostless;//Added by Yun.SF3, boost the less uploaded files
 	CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
 	EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 	bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
-	bool	isboostfriends;//Added by Yun.SF3, boost friends
 	bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	bool	m_inewdownloadfilepowersharemode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	bool	m_inewsharedfilepowersharemode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	char	nick[255];
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	uint16		minupload;
@@ -203,15 +201,9 @@ struct Preferences_Struct{
 	int16	searchColumnWidths[12];//11+1/*Fakecheck*/
 	BOOL	searchColumnHidden[12];//11+1/*Fakecheck*/
 	INT		searchColumnOrder[12];//11+1/*Fakecheck*/
-	//EastShare Start- Added by Pretender, TBH-AutoBackup
-	bool	autobackup;
-	bool	autobackup2;
-	//EastShare End - Added by Pretender, TBH-AutoBackup
-	// SLUGFILLER: Spreadbars
-	int16	sharedColumnWidths[18];	//13+1/*PWSHARE*/+4/*Spreadbars*/
-	BOOL	sharedColumnHidden[18];	//13+1/*PWSHARE*/+4/*Spreadbars*/
-	INT		sharedColumnOrder[18]; //13+1/*PWSHARE*/+4/*Spreadbars*/
-	// SLUGFILLER: Spreadbars
+	int16	sharedColumnWidths[18];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/
+	BOOL	sharedColumnHidden[18];	//12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/
+	INT		sharedColumnOrder[18]; //12+1/*PERMISSION*/+1/*PWSHARE*/+4/*Spreadbars*/
 	int16	serverColumnWidths[13];
 	BOOL	serverColumnHidden[13];
 	INT 	serverColumnOrder[13];
@@ -219,9 +211,14 @@ struct Preferences_Struct{
 	BOOL	clientListColumnHidden[8];
 	INT 	clientListColumnOrder[8];
 	DWORD	statcolors[15];
-
+	//EastShare Start- Added by Pretender, TBH-AutoBackup
+	bool	autobackup;
+	bool	autobackup2;
+	//EastShare End - Added by Pretender, TBH-AutoBackup
+	
 	uint8	splashscreen;
-	uint8	filterBadIP;
+	uint8	filterLANIPs;
+	bool	m_bAllocLocalHostIP;
 	uint8	onlineSig;
 
 	// -khaos--+++> Struct Members for Storing Statistics
@@ -231,20 +228,24 @@ struct Preferences_Struct{
 	uint64	cumDownOverheadFileReq;
 	uint64	cumDownOverheadSrcEx;
 	uint64	cumDownOverheadServer;
+	uint64	cumDownOverheadKad;
 	uint64	cumDownOverheadTotalPackets;
 	uint64	cumDownOverheadFileReqPackets;
 	uint64	cumDownOverheadSrcExPackets;
 	uint64	cumDownOverheadServerPackets;
+	uint64	cumDownOverheadKadPackets;
 
 	// Saved stats for cumulative upline overhead...
 	uint64	cumUpOverheadTotal;
 	uint64	cumUpOverheadFileReq;
 	uint64	cumUpOverheadSrcEx;
 	uint64	cumUpOverheadServer;
+	uint64	cumUpOverheadKad;
 	uint64	cumUpOverheadTotalPackets;
 	uint64	cumUpOverheadFileReqPackets;
 	uint64	cumUpOverheadSrcExPackets;
 	uint64	cumUpOverheadServerPackets;
+	uint64	cumUpOverheadKadPackets;
 
 	// Saved stats for cumulative upline data...
 	uint32	cumUpSuccessfulSessions;
@@ -408,11 +409,17 @@ struct Preferences_Struct{
 	bool	m_bircignoreemuleprotoinfomessage;
 	bool	m_birchelpchannel;
 
+	bool	m_bRemove2bin;
+
 	bool	m_bpreviewprio;
 	bool	smartidcheck;
 	uint8	smartidstate;
 	bool	safeServerConnect;
 	bool	startMinimized;
+	bool	m_bRestoreLastMainWndDlg;
+	int		m_iLastMainWndDlgID;
+	bool	m_bRestoreLastLogPane;
+	int		m_iLastLogPaneID;
 	uint16	MaxConperFive;
 	int		checkDiskspace;	// SLUGFILLER: checkDiskspace
 	UINT	m_uMinFreeDiskSpace;
@@ -426,19 +433,27 @@ struct Preferences_Struct{
 	uint8	hideOS;
 	uint8	selectiveShare;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+	uint8	ShareOnlyTheNeed;
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 
 	//EastShare Start - PreferShareAll by AndCycle
 	bool	shareall;	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
 
-	bool	m_bAutoClearComplete;//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
-
 	bool	m_bVerbose;
 	bool	m_bDebugSourceExchange; // Sony April 23. 2003, button to keep source exchange msg out of verbose log
-	DWORD	m_dwDebugServerTCP;
-	DWORD	m_dwDebugServerUDP;
-	DWORD	m_dwDebugServerSources;
-	DWORD	m_dwDebugServerSearches;
+	bool	m_bLogBannedClients;
+	bool	m_bLogRatingReceived;
+	bool	m_bLogDescriptionReceived;
+	bool	m_bLogFilteredIPs;
+	bool	m_bLogFileSaving;
+	int		m_iDebugServerTCPLevel;
+	int		m_iDebugServerUDPLevel;
+	int		m_iDebugServerSourcesLevel;
+	int		m_iDebugServerSearchesLevel;
+	int		m_iDebugClientTCPLevel;
+	int		m_iDebugClientUDPLevel;
 	bool	m_bupdatequeuelist;
 	bool	m_bmanualhighprio;
 	bool	m_btransferfullchunks;
@@ -449,6 +464,7 @@ struct Preferences_Struct{
 	bool	m_bDisableKnownClientList;
 	bool	m_bDisableQueueList;
 	bool	m_bExtControls;
+	bool	m_bTransflstRemain;
 
 	int8	versioncheckdays;
 
@@ -546,6 +562,7 @@ struct Preferences_Struct{
 	// khaos::kmod+ Obsolete int			allcatType;
 	bool		m_bUseAutocompl;
 	bool		m_bShowDwlPercentage;
+	bool		m_bRemoveFinishedDownloads;
 	uint16		m_iMaxChatHistory;
 
 	int			m_iSearchMethod;
@@ -676,7 +693,7 @@ struct Preferences_Import20a_Struct{
 	int transferColumnWidths[9];
 	int serverColumnWidths[8];
 	uint8	splashscreen;
-	uint8	filterBadIP;
+	uint8	filterLANIPs;
 };
 #pragma pack()
 
@@ -713,7 +730,7 @@ struct Preferences_Import20b_Struct{
 	int transferColumnWidths[9];
 	int serverColumnWidths[8];
 	uint8	splashscreen;
-	uint8	filterBadIP;
+	uint8	filterLANIPs;
 	int64   totalDownloadedBytes;
 	int64	totalUploadedBytes;
 };
@@ -738,15 +755,13 @@ public:
 	friend class CPPgDisplay;
 	friend class CPPgSecurity;
 	friend class CPPgScheduler;
-    friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
+	friend class CPPgDebug;
+	friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
 	friend class CPPgMorph2; //MORPH - Added by SiRoB, Morph Prefs
 	friend class CPPgEastShare; //EastShare - Added by Pretender, ES Prefs
-//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
-	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
+	//MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
 	bool	GetEnableZeroFilledTest() const { return prefs->enableZeroFilledTest; }
-	//void	SetEnableZeroFilledTest(bool flag) { prefs->enableZeroFilledTest = flag; }
-	// Maella end
-//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
+	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
 
 	//MORPH START - Added by IceCream, high process priority
 	bool	enableHighProcess;
@@ -755,20 +770,19 @@ public:
 	//MORPH END   - Added by IceCream, high process priority
 
 	bool	GetEnableAntiCreditHack()					{ return prefs->enableAntiCreditHack; }//MORPH - Added by IceCream, enable AntiCreditHack
-	bool	GetChunkAvaibility()						{ return prefs->enableChunkAvaibility; }//MORPH - Added by IceCream, enable ChunkAvaibility
 
 	bool GetEnableDownloadInRed () const { return prefs->enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
 	bool GetEnableDownloadInBold () const { return prefs->enableDownloadInBold; } //MORPH - Added by SiRoB, show download in Bold
 	bool GetEnableAntiLeecher () const { return prefs->enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
-	bool IsBoostLess() const {return prefs->isboostless;}//Added by Yun.SF3, boost the less uploaded files
-
+	
 	CreditSystemSelection  GetCreditSystem() const {return prefs->creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
 	EqualChanceForEachFileSelection	GetEqualChanceForEachFileMode() const {return prefs->equalChanceForEachFileMode;}	//Morph - added by AndCycle, Equal Chance For Each File
 	bool	IsECFEFallTime()	const	{return prefs->m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
 	int  GetKnownMetDays() const {return prefs->m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
-	bool IsBoostFriends() const {return prefs->isboostfriends;}//Added by Yun.SF3, boost friends
 	bool IsAutoDynUpSwitching() const {return prefs->isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
-	bool IsAutoPowershareNewDownloadFile() const {return prefs->m_bisautopowersharenewdownloadfile;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	int NewDownloadFilePowerShareMode() const {return prefs->m_inewdownloadfilepowersharemode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	int NewSharedFilePowerShareMode() const {return prefs->m_inewsharedfilepowersharemode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	
 	CPreferences();
 	~CPreferences();
 
@@ -802,6 +816,7 @@ public:
 	uint16	GetUDPPort()	{return prefs->udpport;}
 	uint16	GetServerUDPPort(){return prefs->nServerUDPPort;}
 	uint16	GetKadUDPPort()	{return prefs->kadudpport;}
+	void	SetKadUDPPort( uint16 in_val )	{prefs->kadudpport = in_val;}
 	char*	GetUserHash()	{return userhash;}
 	//MORPH START - Added by SiRoB, (SUC) & (USS)
 	uint16	GetMinUpload()				{return prefs->minupload;}
@@ -868,20 +883,24 @@ public:
 	uint64	GetDownOverheadFileReq()		{ return prefs->cumDownOverheadFileReq;}
 	uint64	GetDownOverheadSrcEx()			{ return prefs->cumDownOverheadSrcEx;}
 	uint64	GetDownOverheadServer()			{ return prefs->cumDownOverheadServer;}
+	uint64	GetDownOverheadKad()			{ return prefs->cumDownOverheadKad;}
 	uint64	GetDownOverheadTotalPackets()	{ return prefs->cumDownOverheadTotalPackets;}
 	uint64	GetDownOverheadFileReqPackets() { return prefs->cumDownOverheadFileReqPackets;}
 	uint64	GetDownOverheadSrcExPackets()	{ return prefs->cumDownOverheadSrcExPackets;}
 	uint64	GetDownOverheadServerPackets()	{ return prefs->cumDownOverheadServerPackets;}
+	uint64	GetDownOverheadKadPackets()		{ return prefs->cumDownOverheadKadPackets;}
 
 	//		Saved stats for cumulative upline overhead
 	uint64	GetUpOverheadTotal()			{ return prefs->cumUpOverheadTotal;}
 	uint64	GetUpOverheadFileReq()			{ return prefs->cumUpOverheadFileReq;}
 	uint64	GetUpOverheadSrcEx()			{ return prefs->cumUpOverheadSrcEx;}
 	uint64	GetUpOverheadServer()			{ return prefs->cumUpOverheadServer;}
+	uint64	GetUpOverheadKad()				{ return prefs->cumUpOverheadKad;}
 	uint64	GetUpOverheadTotalPackets()		{ return prefs->cumUpOverheadTotalPackets;}
 	uint64	GetUpOverheadFileReqPackets()	{ return prefs->cumUpOverheadFileReqPackets;}
 	uint64	GetUpOverheadSrcExPackets()		{ return prefs->cumUpOverheadSrcExPackets;}
 	uint64	GetUpOverheadServerPackets()	{ return prefs->cumUpOverheadServerPackets;}
+	uint64	GetUpOverheadKadPackets()		{ return prefs->cumUpOverheadKadPackets;}
 
 	//		Saved stats for cumulative upline data
 	uint32	GetUpSuccessfulSessions()		{ return prefs->cumUpSuccessfulSessions;}
@@ -902,12 +921,11 @@ public:
 	//		Saved stats for corruption/compression
 	uint64	GetCumLostFromCorruption()			{ return prefs->cumLostFromCorruption;}
 	uint64	GetCumSavedFromCompression()		{ return prefs->cumSavedFromCompression;}
-	uint32	GetPartsSavedByICH()			{ return prefs->cumPartsSavedByICH;}
 	//		Session stats for corruption/compression
 	uint32	GetSesLostFromCorruption()		{ return prefs->sesLostFromCorruption;}
 	uint32	GetSesSavedFromCompression()	{ return prefs->sesSavedFromCompression;}
 	uint16	GetSesPartsSavedByICH()			{ return prefs->sesPartsSavedByICH;}
-
+	uint32	GetPartsSavedByICH()			{ return prefs->cumPartsSavedByICH;}
 	// Cumulative client breakdown stats for sent bytes
 	uint64	GetUpTotalClientData()			{ return (GetCumUpData_EDONKEY() +			GetCumUpData_EDONKEYHYBRID() +
 													  GetCumUpData_EMULE() +			GetCumUpData_MLDONKEY() +
@@ -1028,7 +1046,8 @@ public:
 	bool	IsErrorBeepEnabled()		{return prefs->beepOnError;}
 	bool	IsConfirmExitEnabled()		{return prefs->confirmExit;}
 	bool	UseSplashScreen()			{return prefs->splashscreen;}
-	bool	FilterBadIPs()				{return prefs->filterBadIP;}
+	bool	FilterLANIPs()				{return prefs->filterLANIPs;}
+	bool	GetAllowLocalHostIP()		{return prefs->m_bAllocLocalHostIP;}
 	bool	IsOnlineSignatureEnabled()  {return prefs->onlineSig;}
 	int		GetMaxGraphUploadRate()		{return prefs->maxGraphUploadRate;}
 	int		GetMaxGraphDownloadRate()		{return prefs->maxGraphDownloadRate;}
@@ -1053,18 +1072,8 @@ public:
 	uint16	GetMaxDownload();
 	uint16	GetMaxConnections()			{return	prefs->maxconnections;}
 	uint16	GetMaxSourcePerFile()		{return prefs->maxsourceperfile;}
-	uint16	GetMaxSourcePerFileSoft()	{	// Elandal: typesafe, integer math only
-											uint16 temp = (uint16)((prefs->maxsourceperfile * 9L) / 10);
-											if( temp > 500 )
-												return 500;
-                                            return temp;
-										}
-	uint16	GetMaxSourcePerFileUDP()	{	// Elandal: typesafe, integer math only
-											uint16 temp = (uint16)((prefs->maxsourceperfile * 3L) / 4);
-											if( temp > 50 )
-												return 50;
-                                            return temp;
-										}
+	uint16	GetMaxSourcePerFileSoft();
+	uint16	GetMaxSourcePerFileUDP();
 	uint16	GetDeadserverRetries()		{return prefs->deadserverretries;}
 	DWORD	GetServerKeepAliveTimeout()	{return prefs->m_dwServerKeepAliveTimeout;}
 
@@ -1140,16 +1149,32 @@ public:
 	WORD	GetWindowsVersion();
 	bool	GetStartMinimized()					{return prefs->startMinimized;}
 	void	SetStartMinimized( bool instartMinimized){prefs->startMinimized = instartMinimized;}
+
+	bool	GetRestoreLastMainWndDlg()			{return prefs->m_bRestoreLastMainWndDlg;}
+	int		GetLastMainWndDlgID()				{return prefs->m_iLastMainWndDlgID;}
+	void	SetLastMainWndDlgID(int iID)		{prefs->m_iLastMainWndDlgID = iID;}
+
+	bool	GetRestoreLastLogPane()				{return prefs->m_bRestoreLastLogPane;}
+	int		GetLastLogPaneID()					{return prefs->m_iLastLogPaneID;}
+	void	SetLastLogPaneID(int iID)			{prefs->m_iLastLogPaneID = iID;}
+
 	bool	GetSmartIdCheck()					{return prefs->smartidcheck;}
 	void	SetSmartIdCheck( bool in_smartidcheck){prefs->smartidcheck = in_smartidcheck;}
 	uint8	GetSmartIdState()					{return prefs->smartidstate;}
 	void	SetSmartIdState( uint8 in_smartidstate){prefs->smartidstate = in_smartidstate;}
 	bool	GetVerbose()						{return prefs->m_bVerbose;}
 	bool	GetDebugSourceExchange()			{return prefs->m_bDebugSourceExchange;}
-	DWORD	GetDebugServerTCP()					{return prefs->m_dwDebugServerTCP;}
-	DWORD	GetDebugServerUDP()					{return prefs->m_dwDebugServerUDP;}
-	DWORD	GetDebugServerSources()				{return prefs->m_dwDebugServerSources;}
-	DWORD	GetDebugServerSearches()			{return prefs->m_dwDebugServerSearches;}
+	bool	GetLogBannedClients()				{return prefs->m_bLogBannedClients;}
+	bool	GetLogRatingReceived()				{return prefs->m_bLogRatingReceived;}
+	bool	GetLogDescriptionReceived()			{return prefs->m_bLogDescriptionReceived;}
+	bool	GetLogFilteredIPs()					{return prefs->m_bLogFilteredIPs;}
+	bool	GetLogFileSaving()					{return prefs->m_bLogFileSaving;}
+	int		GetDebugServerTCPLevel()			{return prefs->m_iDebugServerTCPLevel;}
+	int		GetDebugServerUDPLevel() 			{return prefs->m_iDebugServerUDPLevel;}
+	int		GetDebugServerSourcesLevel()		{return prefs->m_iDebugServerSourcesLevel;}
+	int		GetDebugServerSearchesLevel()		{return prefs->m_iDebugServerSearchesLevel;}
+	int		GetDebugClientTCPLevel()			{return prefs->m_iDebugClientTCPLevel;}
+	int		GetDebugClientUDPLevel()			{return prefs->m_iDebugClientUDPLevel;}
 	bool	GetPreviewPrio()					{return prefs->m_bpreviewprio;}
 	void	SetPreviewPrio(bool in)				{prefs->m_bpreviewprio=in;}
 	bool	GetUpdateQueueList()				{return prefs->m_bupdatequeuelist;}
@@ -1169,7 +1194,6 @@ public:
 	void	SetCreditSystem(bool m_bInCreditSystem)	{prefs->m_bCreditSystem = m_bInCreditSystem;}	//EastShare - Credit System select
 	void	SetKnownMetDays(int m_iInKnownMetDays)	{prefs->m_iKnownMetDays = m_iInKnownMetDays;}	//EastShare - Added by TAHO, .met file control
 	bool	IsPayBackFirst()					{return prefs->m_bPayBackFirst;}	//EastShare - added by AndCycle, Pay Back First
-	bool	IsAutoClearComplete()				{return prefs->m_bAutoClearComplete; }	//EastShare - added by AndCycle - AutoClearComplete (NoamSon)
 	bool	OnlyDownloadCompleteFiles()			{return prefs->m_bOnlyDownloadCompleteFiles;} //EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	bool	SaveUploadQueueWaitTime()			{return prefs->m_bSaveUploadQueueWaitTime;}//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 
@@ -1195,6 +1219,9 @@ public:
 	uint16	Get3DDepth() { return prefs->depth3D;}
 	bool	AutoTakeED2KLinks() {return prefs->autotakeed2klinks;}
 	bool	AddNewFilesPaused() {return prefs->addnewfilespaused;}
+
+	bool	TransferlistRemainSortStyle()	{ return prefs->m_bTransflstRemain;}
+	void	TransferlistRemainSortStyle(bool in)	{ prefs->m_bTransflstRemain=in;}
 
 	void	SetStatsColor(int index,DWORD value) {prefs->statcolors[index]=value;}
 	DWORD	GetStatsColor(int index) {return prefs->statcolors[index];}
@@ -1229,7 +1256,10 @@ public:
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
 	uint8	GetHideOvershares()		{return prefs->hideOS;}
 	uint8	IsSelectiveShareEnabled()	{return prefs->selectiveShare;}
-	//MORPH END - Added by SiRoB, SLUGFILLER: hideOS
+	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+	uint8	GetShareOnlyTheNeed()	{return prefs->ShareOnlyTheNeed;}
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 
 	//EastShare Start - PreferShareAll by AndCycle
 	bool	ShareAll()			{return prefs->shareall;}	// SLUGFILLER: preferShareAll
@@ -1274,6 +1304,7 @@ public:
 	// khaos::kmod+ Obsolete void	SetAllcatType(int in)   { prefs->allcatType=in; }
 
 	bool	WatchClipboard4ED2KLinks()	{ return prefs->watchclipboard;}
+	bool	GetRemoveToBin()			{ return prefs->m_bRemove2bin;}
 	bool	FilterServerByIP()		{ return prefs->filterserverbyip;}
 
 	bool	Log2Disk()	{ return prefs->log2disk;}
@@ -1348,6 +1379,7 @@ public:
 	bool	IsGraphRecreateDisabled()	{ return prefs->dontRecreateGraphs;}
 bool	IsExtControlsEnabled()		{ return prefs->m_bExtControls;}
 	void	SetExtControls(bool in)		{ prefs->m_bExtControls=in;}
+	bool	GetRemoveFinishedDownloads(){ return prefs->m_bRemoveFinishedDownloads;}
 
 	uint16	GetMaxChatHistoryLines()	{ return prefs->m_iMaxChatHistory;}
 	bool	GetUseAutocompletion()		{ return prefs->m_bUseAutocompl;}

@@ -34,7 +34,7 @@
 ** Copyright, 2000, Samuel R. Blackburn
 **
 ** $Workfile: CBase64Coding.cpp $
-** $Revision: 1.3 $
+** $Revision: 1.4 $
 ** $Modtime: 5/12/00 3:39p $
 ** $Reuse Tracing Code: 1 $
 */
@@ -228,7 +228,7 @@ BOOL CBase64Coding::Encode( const char * source, int len, char * destination_str
 
 <H1>CBase64Coding</H1>
 
-$Revision: 1.3 $<BR><HR>
+$Revision: 1.4 $<BR><HR>
 
 <H2>Description</H2>
 

@@ -40,7 +40,7 @@ public:
 	uint32	m_dwHasHash;
 	CString m_strName;
 //MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-	CUpDownClient* GetLinkedClient() { return m_LinkedClient; };
+	CUpDownClient* GetLinkedClient() const { return m_LinkedClient; };
 	void SetLinkedClient(CUpDownClient* linkedClient);
 //MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 	void	LoadFromFile(CFile* file);

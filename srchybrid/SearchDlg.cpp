@@ -231,7 +231,7 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 
 	if (m_uTimerLocalServer != 0 && nIDEvent == m_uTimerLocalServer)
 	{
-		if (theApp.glob_prefs->GetDebugServerSearches())
+		if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0)
 			Debug("Timeout waiting on search results of local server\n");
 		// the local server did not answer within the timeout
 		VERIFY( KillTimer(m_uTimerLocalServer) );
@@ -244,7 +244,7 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 				VERIFY( (global_search_timer = SetTimer(TimerGlobalSearch, 750, 0)) != NULL );
 		}
 		else
-			OnBnClickedCancels();
+			CancelSearch();
 	}
 	else if (nIDEvent == global_search_timer)
 	{
@@ -259,22 +259,28 @@ void CSearchDlg::OnTimer(UINT nIDEvent)
 					searchpacket->opcode = OP_GLOBSEARCHREQ2;
 				else
 					searchpacket->opcode = OP_GLOBSEARCHREQ;
-				if (theApp.glob_prefs->GetDebugServerUDP())
+				if (theApp.glob_prefs->GetDebugServerUDPLevel() > 0)
 					Debug(">>> Sending %s  to server %s:%u (%u of %u)\n", (searchpacket->opcode == OP_GLOBSEARCHREQ2) ? "OP__GlobSearchReq2" : "OP__GlobSearchReq", toask->GetAddress(), toask->GetPort(), servercount, theApp.serverlist->GetServerCount());
+				theApp.uploadqueue->AddUpDataOverheadServer(searchpacket->size);
 			    theApp.serverconnect->SendUDPPacket(searchpacket,toask,false);
 			    searchprogress.StepIt();
 		    }
 		    else
-			    OnBnClickedCancels();
+				CancelSearch();
 	    }
 	    else
-		    OnBnClickedCancels();
+			CancelSearch();
     }
 	else
 		ASSERT( 0 );
 }
 
 void CSearchDlg::OnBnClickedCancels()
+{
+	CancelSearch();
+}
+
+void CSearchDlg::CancelSearch()
 {
 	canceld = true;
 
@@ -313,7 +319,7 @@ void CSearchDlg::LocalSearchEnd(uint16 count, bool bMoreResultsAvailable)
 	}
 
 	if (!canceld && count > MAX_RESULTS)
-		OnBnClickedCancels();
+		CancelSearch();
 	if (!canceld){
 		if (!globsearch){
 			GetDlgItem(IDC_STARTS)->EnableWindow(true);
@@ -331,7 +337,7 @@ void CSearchDlg::LocalSearchEnd(uint16 count, bool bMoreResultsAvailable)
 
 void CSearchDlg::AddUDPResult(uint16 count){
 	if (!canceld && count > MAX_RESULTS)
-		OnBnClickedCancels();
+		CancelSearch();
 }
 
 void CSearchDlg::OnBnClickedSdownload(){
@@ -656,7 +662,7 @@ void CSearchDlg::Localize()
 
 void CSearchDlg::OnBnClickedClearall()
 {
-	OnBnClickedCancels();
+	CancelSearch();
 	DeleteAllSearchs();
 
 	CWnd* pWndFocus = GetFocus();
@@ -728,7 +734,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 			strDbg.AppendFormat("\"%s\" ", str);
 		}
 	}
-	if (theApp.glob_prefs->GetDebugServerSearches())
+	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0)
 		Debug("Search Expr: %s\n", strDbg);
 
 	// this limit (+ the additonal operators which will be added later) has to match the limit in 'CreateSearchExpressionTree'
@@ -753,7 +759,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 		_SearchExpr.m_aExpr.Append(pexpr->m_aExpr);
 
 #ifdef _DEBUG
-	if (theApp.glob_prefs->GetDebugServerSearches()){
+	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0){
 		_strSearchTree.Empty();
 		DumpSearchTree(_SearchExpr);
 		Debug("Search Tree: %s\n", _strSearchTree);
@@ -1031,7 +1037,7 @@ bool GetSearchPacket(CSafeMemFile* pData,
 		}
 	}
 
-	if (theApp.glob_prefs->GetDebugServerSearches())
+	if (theApp.glob_prefs->GetDebugServerSearchesLevel() > 0)
 		Debug("Search Data: %s\n", strDbg);
 	_SearchExpr.m_aExpr.RemoveAll();
 	return true;
@@ -1070,7 +1076,7 @@ bool CSearchDlg::DoNewSearch(SSearchParams* pParams)
 
 	Packet* packet = new Packet(&data);
 	packet->opcode = OP_SEARCHREQUEST;
-	if (theApp.glob_prefs->GetDebugServerTCP())
+	if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 		Debug(">>> Sending OP__SearchRequest\n");
 	theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 	theApp.serverconnect->SendPacket(packet,false);
@@ -1120,7 +1126,7 @@ void CSearchDlg::OnBnClickedMore()
 
 	Packet* packet = new Packet();
 	packet->opcode = OP_QUERY_MORE_RESULT;
-	if (theApp.glob_prefs->GetDebugServerTCP())
+	if (theApp.glob_prefs->GetDebugServerTCPLevel() > 0)
 		Debug(">>> Sending OP__QueryMoreResults\n");
 	theApp.uploadqueue->AddUpDataOverheadServer(packet->size);
 	theApp.serverconnect->SendPacket(packet);
@@ -1305,6 +1311,11 @@ bool CSearchDlg::CreateNewTab(SSearchParams* pParams){
 	return true;
 }
 
+bool CSearchDlg::CanDeleteSearch(uint32 nSearchID) const
+{
+	return (searchselect.GetItemCount() > 0);
+}
+
 void CSearchDlg::DeleteSearch(uint32 nSearchID)
 {
 	Kademlia::CSearchManager::stopSearch(nSearchID);
@@ -1321,7 +1332,7 @@ void CSearchDlg::DeleteSearch(uint32 nSearchID)
 
 	// delete search results
 	if (!canceld && nSearchID == m_nSearchID)
-		OnBnClickedCancels();
+		CancelSearch();
 	theApp.searchlist->RemoveResults(nSearchID);
 
 	// delete search tab
@@ -1352,6 +1363,11 @@ void CSearchDlg::DeleteSearch(uint32 nSearchID)
 		ShowSearchSelector(false);
 		searchlistctrl.NoTabs();
 	}
+}
+
+bool CSearchDlg::CanDeleteAllSearches() const
+{
+	return (searchselect.GetItemCount() > 0);
 }
 
 void CSearchDlg::DeleteAllSearchs()
@@ -1409,7 +1425,7 @@ LRESULT CSearchDlg::OnCloseTab(WPARAM wparam, LPARAM lparam)
 	{
 		int nSearchID = ((const SSearchParams*)item.lParam)->dwSearchID;
 		if (!canceld && nSearchID == m_nSearchID)
-			OnBnClickedCancels();
+			CancelSearch();
 		DeleteSearch(nSearchID);
 	}
 	return TRUE;
@@ -1544,6 +1560,12 @@ BOOL CSearchDlg::SaveSearchStrings()
 	if (m_pacSearchString == NULL)
 		return FALSE;
 	return m_pacSearchString->SaveList(CString(theApp.glob_prefs->GetConfigDir()) + _T("\\") SEARCH_STRINGS_PROFILE);
+}
+
+void CSearchDlg::SaveAllSettings()
+{
+	searchlistctrl.SaveSettings(CPreferences::tableSearch);
+	SaveSearchStrings();
 }
 
 void CSearchDlg::OnDestroy()

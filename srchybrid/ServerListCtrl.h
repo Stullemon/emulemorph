@@ -13,16 +13,20 @@ public:
 
 	bool	Init(CServerList* in_list);
 	bool	AddServer(CServer* toadd,bool bAddToList = true);
-	void	RemoveServer(CServer* todel,bool bDelToList = true);
-	bool	AddServermetToList(CString strFile);
-	void	RefreshServer(CServer* server);
+	void	RemoveServer(CServer* todel);
+	bool	AddServermetToList(const CString& strFile);
+	void	RefreshServer(const CServer* server);
 	void	RemoveDeadServer();
 	void	Hide() {ShowWindow(SW_HIDE);}
 	void	Visable() {ShowWindow(SW_SHOW);}
 	void	Localize();
-	void	ShowFilesCount();
+	void	ShowServerCount();
 
 protected:
+	CServerList*	server_list;
+
+	bool StaticServerFileAppend(CServer *server);
+	bool StaticServerFileRemove(const CServer *server);
 	void SetAllIcons();
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
@@ -33,11 +37,4 @@ protected:
 	afx_msg	void OnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnNMLdblclk (NMHDR *pNMHDR, LRESULT *pResult);
-
-private:
-	CServerList*	server_list;
-
-	// Barry - New methods
-	bool StaticServerFileAppend(CServer *server);
-	bool StaticServerFileRemove(CServer *server);
 };

@@ -113,15 +113,13 @@ public:
 	virtual BOOL InitInstance();
 
 	// ed2k link functions
-	CString		CreateED2kSourceLink( CAbstractFile* f );
-	CString		CreateED2kHostnameSourceLink( CAbstractFile* f );	// itsonlyme: hostnameSource
-	CString		CreateHTMLED2kLink( CAbstractFile* f );
+	CString		CreateED2kSourceLink(const CAbstractFile* f);
+	CString		CreateED2kHostnameSourceLink(const CAbstractFile* f);
 	bool		CopyTextToClipboard( CString strText );
 	CString		CopyTextFromClipboard();
 	void		OnlineSig();
 	void		UpdateReceivedBytes(int32 bytesToAdd);
 	void		UpdateSentBytes(int32 bytesToAdd, bool sentToFriend = false); //MORPH - Added by Yun.SF3, ZZ Upload System
-
 	int			GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength = -1);
 	HIMAGELIST	GetSystemImageList() { return m_hSystemImageList; }
 	CSize		GetSmallSytemIconSize() { return m_sizSmallSystemIcon; }

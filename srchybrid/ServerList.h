@@ -25,40 +25,41 @@ class CServerList: public CLoggable
 	friend class CServerListCtrl;
 public:
 	CServerList(CPreferences* in_prefs);
-	~CServerList(void);
+	~CServerList();
+
 	bool		Init();
 	bool		AddServer(CServer* in_server );
-	void		RemoveServer(CServer* out_server);
+	void		RemoveServer(const CServer* out_server);
 	void		RemoveAllServers(void);
-	bool		AddServermetToList(CString strFile, bool merge = true);
-	void		AddServersFromTextFile(CString strFilename);
-	bool		SaveServermetToFile(); //<<--9/22/02
+
+	bool		AddServermetToList(const CString& rstrFile, bool bMerge = true);
+	void		AddServersFromTextFile(const CString& rstrFilename);
+	bool		SaveServermetToFile();
+
 	void		ServerStats();
 	void		ResetServerPos()	{serverpos = 0;}
 	void		ResetSearchServerPos()	{searchserverpos = 0;}
 	CServer*	GetNextServer();
 	CServer*	GetNextSearchServer();
 	CServer*	GetNextStatServer();
-	CServer*	GetServerAt(uint32 pos)	{return list.GetAt(list.FindIndex(pos));}
-	uint32		GetServerCount()	{return list.GetCount();}
-	CServer*	GetNextServer(CServer* lastserver); // slow
-	CServer*	GetServerByAddress(LPCTSTR address, uint16 port);
-	CServer*	GetServerByIP(uint32 nIP);
-	CServer*	GetServerByIP(uint32 nIP, uint16 nPort);
-	bool		IsGoodServerIP( CServer* in_server ); //<<--
-	void		GetStatus( uint32 &total, uint32 &failed, uint32 &user, uint32 &file, uint32 &tuser, uint32 &tfile, float &occ);
-	void		GetUserFileStatus( uint32 &user, uint32 &file);
-//	bool		BroadCastPacket(Packet* packet); //send Packet to all server in the list
-//	void		CancelUDPBroadcast();
-//	void static CALLBACK UDPTimer(HWND hwnd, UINT uMsg,UINT_PTR idEvent,DWORD dwTime);
+	CServer*	GetServerAt(uint32 pos) const { return list.GetAt(list.FindIndex(pos)); }
+	uint32		GetServerCount() const { return list.GetCount(); }
+	CServer*	GetNextServer(const CServer* lastserver) const; // slow
+	CServer*	GetServerByAddress(LPCTSTR address, uint16 port) const;
+	CServer*	GetServerByIP(uint32 nIP) const;
+	CServer*	GetServerByIP(uint32 nIP, uint16 nPort) const;
+	bool		IsGoodServerIP(const CServer* in_server) const;
+	void		GetStatus(uint32& total, uint32& failed, uint32& user, uint32& file, uint32& tuser, uint32& tfile, float& occ) const;
+	void		GetUserFileStatus(uint32& user, uint32& file) const;
+	
 	void		Sort();
 	//EastShare Start - PreferShareAll by AndCycle
 	void		PushBackNoShare();	// SLUGFILLER: preferShareAll
 	//EastShare End - PreferShareAll by AndCycle
-	void		MoveServerDown(CServer* aServer);
-	uint32		GetServerPostion()	{return serverpos;}
-	void		SetServerPosition(uint32 newPosition) { if (newPosition<(uint32)list.GetCount() ) serverpos=newPosition; else serverpos=0;}
-	uint32		GetDeletedServerCount()		{return delservercount;}
+	void		MoveServerDown(const CServer* aServer);
+	uint32		GetServerPostion() const { return serverpos;}
+	void		SetServerPosition(uint32 newPosition);
+	uint32		GetDeletedServerCount() const { return delservercount; }
 	void		Process();
 	void		AutoUpdate();
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)

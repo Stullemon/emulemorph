@@ -101,7 +101,8 @@ bool CFriendList::LoadList(){
 }
 
 void CFriendList::SaveList(){
-	DEBUG_ONLY(AddDebugLogLine(false, "Saved Friend list"));
+	if (theApp.glob_prefs->GetLogFileSaving())
+		DEBUG_ONLY(AddDebugLogLine(false, "Saved Friend list"));
 	m_nLastSaved = ::GetTickCount();
 
 	CString strFileName = CString(theApp.glob_prefs->GetConfigDir()) + CString(EMFRIENDS_MET_FILENAME);

@@ -35,7 +35,7 @@ static char THIS_FILE[]=__FILE__;
 // CClientDetailDialog dialog
 
 IMPLEMENT_DYNAMIC(CClientDetailDialog, CDialog)
-CClientDetailDialog::CClientDetailDialog(CUpDownClient* client)
+CClientDetailDialog::CClientDetailDialog(const CUpDownClient* client)
 	: CDialog(CClientDetailDialog::IDD, 0)
 {
 	m_client = client;
