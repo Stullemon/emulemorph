@@ -1472,7 +1472,7 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 				// If the difference in source counts is less than 10%, leave this source right where it is.
 				// This is a simple way to avoid constant swapping, because the source counts will never be precisely
 				// the same for each file.  It works because at this point reqfile always has more sources than pSwap.
-				if ( ( (float)(pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
+				if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
 					return false;
 			}
 		}
@@ -1559,7 +1559,7 @@ bool CUpDownClient::StackA4AFSources()
 			if (pSwap->GetAvailableSrcCount() >= reqfile->GetAvailableSrcCount())
 				return false;
 			// If the difference in source counts is less than 10%, leave this source right where it is.
-			if ( ( (float)(pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
+			if ( ( ((float)pSwap->GetAvailableSrcCount() / reqfile->GetAvailableSrcCount()) ) > .9 )
 				return false;
 		}
 		}
