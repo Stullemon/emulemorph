@@ -42,12 +42,8 @@ Note: Morph will detect your OS version and choose the correct one automaticly.
 -----------------------------------
 For questions concerning the flags:
 -----------------------------------
+eMail:	commanderger@users.sourceforge.net 	
 
-Mail:  	Commander@sir-boss.de (Commander at sir-boss dot de)
-ICQ:	UIN: 99733456 Reason: 'countryflags' to be authorized
-MSN:	Commander@sir-boss.de
-
-
-Last update: 28.05.2004
+Last update: 23.07.2004
 	
 
