@@ -21,7 +21,6 @@
 #include "SharedFileList.h"
 #include "KnownFileList.h"
 #include "KnownFile.h"
-#include ".\sharedfileswnd.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -120,7 +119,6 @@ BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_SFLIST, OnLvnItemActivateSflist)
 	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNMClickSflist)
 	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY(LVN_ITEMCHANGED, IDC_SFLIST, OnLvnItemchangedSflist)
 END_MESSAGE_MAP()
 
 
@@ -270,11 +268,4 @@ void CSharedFilesWnd::Localize()
 	GetDlgItem(IDC_FSTATIC9)->SetWindowText(GetResString(IDS_SF_TRANS));
 	GetDlgItem(IDC_FSTATIC8)->SetWindowText(GetResString(IDS_SF_ACCEPTED));
 	GetDlgItem(IDC_FSTATIC7)->SetWindowText(GetResString(IDS_SF_REQUESTS)+":");
-}
-
-void CSharedFilesWnd::OnLvnItemchangedSflist(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	// TODO: Fügen Sie hier Ihren Kontrollbehandlungscode für die Benachrichtigung ein.
-	*pResult = 0;
 }
