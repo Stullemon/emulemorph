@@ -60,7 +60,7 @@ private:
 	CColorFrameCtrl m_Led3[ 4 ];
 
 	double m_dPlotDataMore[4];
-	float maxDownavg;
+	//float maxDownavg; //MORPH - Removed by SiRoB, moved in statistics.h
 	float maxDown;
 	uint32 m_ilastMaxConnReached;
 

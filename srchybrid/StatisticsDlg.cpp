@@ -1220,7 +1220,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate) {
 				cbuffer.Format(GetResString(IDS_STATS_MAXDL),theApp.statistics->maxDown);							stattree.SetItemText(conn_sd[i], cbuffer); i++;
 				// Max Average Download Rate
 				float myAverageDownRate = theApp.statistics->GetAvgDownloadRate(AVG_SESSION);
-				if (myAverageDownRate>maxDownavg) maxDownavg = myAverageDownRate;
+				if (myAverageDownRate>theApp.statistics->maxDownavg) theApp.statistics->maxDownavg = myAverageDownRate;
 				cbuffer.Format(GetResString(IDS_STATS_MAXAVGDL), theApp.statistics->maxDownavg);					stattree.SetItemText(conn_sd[i], cbuffer); i++;
 			} // - End Connection -> Session -> Downloads Section		
 		} // - End Connection -> Session Section
