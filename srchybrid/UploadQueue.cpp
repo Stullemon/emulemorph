@@ -541,8 +541,6 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 			}
 
 			//RemoveFromWaitingQueue(toadd, true);
-			//MORPH - Added by SiRoB, VQB LowID alternate
-			lastupslotHighID = true; // VQB LowID alternate
 			RemoveFromWaitingQueue(newclient, true);
 			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 		}
@@ -817,7 +815,8 @@ CUpDownClient* CUploadQueue::GetWaitingClientByIP(uint32 dwIP){
 *
 * @param addInFirstPlace the client should be added first in queue, not last
 */
-void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit, bool addInFirstPlace){
+void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit, bool addInFirstPlace)
+{
 	if(addInFirstPlace == false) {
 		if (theApp.serverconnect->IsConnected() && theApp.serverconnect->IsLowID() //This may need to be changed with the Kad now being used.
 			&& !theApp.serverconnect->IsLocalServer(client->GetServerIP(),client->GetServerPort())
@@ -845,18 +844,15 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		if (cur_client == client)
 		{	
 			//already on queue
-			// VQB LowID Slot Patch, enhanced in ZZUL
-			if (addInFirstPlace == false && client->HasLowID() && client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount()))
+            // VQB LowID Slot Patch, enhanced in ZZUL
+            if (addInFirstPlace == false && client->HasLowID()&&
+                client->m_bAddNextConnect && AcceptNewClient(uploadinglist.GetCount()))
 			{
-				if (lastupslotHighID)
-				{
 					client->m_bAddNextConnect = false;
 					RemoveFromWaitingQueue(client, true);
 					AddUpNextClient(client);
-					lastupslotHighID = false; // LowID alternate
 					return;
 				}
-			}
 // VQB end
 			client->SendRankingInfo();
 			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(client);
@@ -1045,7 +1041,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, CString reason, 
 	//EastShare End - added by AndCycle, Pay Back First
 
 	if(!reason.IsEmpty())
-		AddDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
+		theApp.emuledlg->QueueDebugLogLine(true,GetResString(IDS_REMULREASON), client->GetUserName(), reason);
 	uploadinglist.RemoveAt(pos);
 	theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket);
 
