@@ -80,14 +80,6 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
-CFileStatistic::~CFileStatistic(){
-	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	if(m_pbitmapOldSpreadBar != NULL) m_dcSpreadBar.SelectObject(m_pbitmapOldSpreadBar);
-	//MORPH END - Added by SiRoB, Reduce SpreadBar CPU consumption
-}
-//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
-
 void CFileStatistic::AddRequest(){
 	requested++;
 	alltimerequested++;
@@ -197,30 +189,27 @@ CBarShader CFileStatistic::s_SpreadBar(16);
 
 //MORPH START - Changed by SiRoB, Reduce SpreadBar CPU consumption
 void CFileStatistic::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat){
-	int width=rect->right - rect->left;
-	if (width <= 0)	return;
-	int height=rect->bottom - rect->top;
+	int iWidth=rect->right - rect->left;
+	if (iWidth <= 0)	return;
+	int iHeight=rect->bottom - rect->top;
 	uint32 filesize = fileParent->GetFileSize()?fileParent->GetFileSize():1;
+	if (m_bitmapSpreadBar == (HBITMAP)NULL)
+		VERIFY(m_bitmapSpreadBar.CreateBitmap(1, 1, 1, 8, NULL)); 
+	CDC cdcStatus;
+	HGDIOBJ hOldBitmap;
+	cdcStatus.CreateCompatibleDC(dc);
 
-	if(!InChangedSpreadBar || lastSize!=width || lastbFlat!= bFlat){
+	if(!InChangedSpreadBar || lastSize!=iWidth || lastbFlat!= bFlat){
 		InChangedSpreadBar = true;
-		lastSize=width;
+		lastSize=iWidth;
 		lastbFlat=bFlat;
-		if(m_pbitmapOldSpreadBar && m_bitmapSpreadBar.GetSafeHandle() && m_dcSpreadBar.GetSafeHdc())
-		{
-			m_dcSpreadBar.SelectObject(m_pbitmapOldSpreadBar);
 			m_bitmapSpreadBar.DeleteObject();
-			m_bitmapSpreadBar.CreateCompatibleBitmap(dc, width, height);
-			m_pbitmapOldSpreadBar = m_dcSpreadBar.SelectObject(&m_bitmapSpreadBar);
-		}
-		if(m_dcSpreadBar.GetSafeHdc() == NULL){
-			m_dcSpreadBar.CreateCompatibleDC(dc);
-			m_bitmapSpreadBar.DeleteObject();
-			m_bitmapSpreadBar.CreateCompatibleBitmap(dc, width, height);
-			m_pbitmapOldSpreadBar = m_dcSpreadBar.SelectObject(&m_bitmapSpreadBar);
-		}
-		s_SpreadBar.SetHeight(height);
-		s_SpreadBar.SetWidth(width);
+		m_bitmapSpreadBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
+		m_bitmapSpreadBar.SetBitmapDimension(iWidth,  iHeight); 
+		hOldBitmap = cdcStatus.SelectObject(m_bitmapSpreadBar);
+			
+		s_SpreadBar.SetHeight(iHeight);
+		s_SpreadBar.SetWidth(iWidth);
 			
 		s_SpreadBar.SetFileSize(filesize);
 		s_SpreadBar.Fill(RGB(0, 0, 0));
@@ -237,9 +226,12 @@ void CFileStatistic::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat){
 				(232<22*count)? 0:232-22*count
 				,255));
 		}
-		s_SpreadBar.Draw(&m_dcSpreadBar, 0, 0, bFlat);
+		s_SpreadBar.Draw(&cdcStatus, 0, 0, bFlat);
 	}
-	if(m_dcSpreadBar.GetSafeHdc() != NULL)	dc->BitBlt(rect->left,rect->top,width,height,&m_dcSpreadBar,0,0,SRCCOPY);
+	else
+		hOldBitmap = cdcStatus.SelectObject(m_bitmapSpreadBar);
+	dc->BitBlt(rect->left, rect->top, iWidth, iHeight, &cdcStatus, 0, 0, SRCCOPY);
+	cdcStatus.SelectObject(hOldBitmap);
 }
 //MORPH END  - Changed by SiRoB, Reduce SpreadBar CPU consumption
 float CFileStatistic::GetSpreadSortValue(){
@@ -398,28 +390,27 @@ CBarShader CKnownFile::s_ShareStatusBar(16);
 
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
 void CKnownFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool  bFlat){ 
-	int wSize=rect->right - rect->left;
-	int hSize=rect->bottom - rect->top;
+	int iWidth=rect->right - rect->left;
+	if (iWidth <= 0)	return;
+	int iHeight=rect->bottom - rect->top;
 
-	if (wSize>0){
-		if(!InChangedSharedStatusBar || lastSize!=wSize || lastonlygreyrect!=onlygreyrect || lastbFlat!=bFlat){
+	if (m_bitmapSharedStatusBar == (HBITMAP)NULL)
+		VERIFY(m_bitmapSharedStatusBar.CreateBitmap(1, 1, 1, 8, NULL)); 
+	CDC cdcStatus;
+	HGDIOBJ hOldBitmap;
+	cdcStatus.CreateCompatibleDC(dc);
+
+	if(!InChangedSharedStatusBar || lastSize!=iWidth || lastonlygreyrect!=onlygreyrect || lastbFlat!=bFlat){
 			InChangedSharedStatusBar = true;
-			lastSize=wSize;
+		lastSize=iWidth;
 			lastonlygreyrect=onlygreyrect;
 			lastbFlat=bFlat;
-			if(m_pbitmapOldSharedStatusBar && m_bitmapSharedStatusBar.GetSafeHandle() && m_dcSharedStatusBar.GetSafeHdc())
-			{
-				m_dcSharedStatusBar.SelectObject(m_pbitmapOldSharedStatusBar);
+		
 				m_bitmapSharedStatusBar.DeleteObject();
-				m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc, wSize, hSize);
-				m_pbitmapOldSharedStatusBar = m_dcSharedStatusBar.SelectObject(&m_bitmapSharedStatusBar);
-			}
-			if(m_dcSharedStatusBar.GetSafeHdc() == NULL){
-				m_dcSharedStatusBar.CreateCompatibleDC(dc);
-				m_bitmapSharedStatusBar.DeleteObject();
-				m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc, wSize, hSize);
-				m_pbitmapOldSharedStatusBar = m_dcSharedStatusBar.SelectObject(&m_bitmapSharedStatusBar);
-			}
+		m_bitmapSharedStatusBar.CreateCompatibleBitmap(dc,  iWidth, iHeight); 
+		m_bitmapSharedStatusBar.SetBitmapDimension(iWidth,  iHeight); 
+		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
+			
 			COLORREF crProgress;
 			COLORREF crHave;
 			COLORREF crPending;
@@ -436,8 +427,8 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			} 
 
 			s_ShareStatusBar.SetFileSize(this->GetFileSize()); 
-			s_ShareStatusBar.SetHeight(hSize); 
-			s_ShareStatusBar.SetWidth(wSize); 
+		s_ShareStatusBar.SetHeight(iHeight); 
+		s_ShareStatusBar.SetWidth(iWidth); 
 			s_ShareStatusBar.Fill(crMissing); 
 			COLORREF color;
 			if (!onlygreyrect && !m_AvailPartFrequency.IsEmpty()) { 
@@ -447,10 +438,12 @@ void CKnownFile::DrawShareStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 						s_ShareStatusBar.FillRange(PARTSIZE*(i),PARTSIZE*(i+1),color);
 					}
 			}
-			s_ShareStatusBar.Draw(&m_dcSharedStatusBar, 0, 0, bFlat); 
-		}
-		if(m_dcSharedStatusBar.GetSafeHdc() != NULL)	dc->BitBlt(rect->left,rect->top,wSize,hSize,&m_dcSharedStatusBar,0,0,SRCCOPY);
+		s_ShareStatusBar.Draw(&cdcStatus, 0, 0, bFlat); 
 	}
+	else
+		hOldBitmap = cdcStatus.SelectObject(m_bitmapSharedStatusBar);
+	dc->BitBlt(rect->left, rect->top, iWidth, iHeight, &cdcStatus, 0, 0, SRCCOPY);
+	cdcStatus.SelectObject(hOldBitmap);
 } 
 //MORPH END - Modified by SiRoB,  Reduce ShareStatusBar CPU consumption
 
@@ -597,7 +590,7 @@ void CKnownFile::NewAvailPartsInfo(){
 			m_nVirtualCompleteSourcesCountMin = m_AvailPartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCountMin==1), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCountMin==1);
+	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCountMin<11), m_nVirtualCompleteSourcesCountMin==1);//rechanged think should be right tell me [SiRoB]// changed (temporaly perhaps) [Yun.SF3]
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;

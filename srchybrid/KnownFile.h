@@ -40,11 +40,8 @@ public:
 		InChangedSpreadBar = false;
 		lastSpreadSortValue = 0;;
 		lastFullSpreadCount = 0;
-		m_pbitmapOldSpreadBar = NULL;
-		lastused = time(NULL); //EastShare - Added by TAHO, .met file control
 	}
 	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
-	~CFileStatistic();	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	void	AddRequest();
 	void	AddAccepted();
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
@@ -73,9 +70,7 @@ private:
 	bool	InChangedSpreadSortValue;
 	bool	InChangedFullSpreadCount;
 	bool	InChangedSpreadBar;
-	CDC 	m_dcSpreadBar;
 	CBitmap m_bitmapSpreadBar;
-	CBitmap *m_pbitmapOldSpreadBar;
 	int		lastSize;
 	bool	lastbFlat;
 	float	lastSpreadSortValue;
