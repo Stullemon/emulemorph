@@ -906,7 +906,7 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock)
 	m_BlockRequests_queue.AddTail(reqblock);
 }
 
-bool CUpDownClient::SendBlockData(){
+uint32 CUpDownClient::SendBlockData(){
 	DWORD curTick = ::GetTickCount();
 
 	uint64 sentBytesCompleteFile = 0;
