@@ -134,6 +134,11 @@ bool CServerList::Init()
 	if (thePrefs.IsUpdateFakeStartupEnabled())
 	theApp.FakeCheck->DownloadFakeList();
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
+    
+    //Commander - Added: IP2Country auto-updating - Start
+	if (thePrefs.IsAutoUPdateIP2CountryEnabled())
+	theApp.ipfilter->UpdateIP2CountryURL();
+	//Commander - Added: IP2Country auto-updating - End
 
 	// ZZ:UploadSpeedSense -->
 	theApp.serverlist->GiveServersForTraceRoute();
