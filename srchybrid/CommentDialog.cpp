@@ -171,8 +171,8 @@ void CCommentDialog::Localize(void)
 	iml.Add(CTempIconLoader(_T("Rating_NotRated"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Fake"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Poor"), 16, 16));
-	iml.Add(CTempIconLoader(_T("Rating_Good"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Fair"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_Good"), 16, 16));
 	iml.Add(CTempIconLoader(_T("Rating_Excellent"), 16, 16));
 	m_ratebox.SetImageList(&iml);
 	m_imlRating.DeleteImageList();
@@ -182,8 +182,8 @@ void CCommentDialog::Localize(void)
 	m_ratebox.AddItem(GetResString(IDS_CMT_NOTRATED), 0);
 	m_ratebox.AddItem(GetResString(IDS_CMT_FAKE), 1);
 	m_ratebox.AddItem(GetResString(IDS_CMT_POOR), 2);
-	m_ratebox.AddItem(GetResString(IDS_CMT_GOOD), 3);
-	m_ratebox.AddItem(GetResString(IDS_CMT_FAIR), 4);
+	m_ratebox.AddItem(GetResString(IDS_CMT_FAIR), 3);
+	m_ratebox.AddItem(GetResString(IDS_CMT_GOOD), 4);
 	m_ratebox.AddItem(GetResString(IDS_CMT_EXCELLENT), 5);
 	UpdateHorzExtent(m_ratebox, 16); // adjust dropped width to ensure all strings are fully visible
 }
