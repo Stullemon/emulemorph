@@ -19,6 +19,7 @@
 #include "otherfunctions.h"
 #include "ListBoxST.h"
 #include "PPgMorph.h" //MORPH - Added by IceCream, Morph Prefs
+#include "PPgMorphShare.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgMorph2.h" //MORPH - Added by SiRoB, Morph Prefs
 #include "PPgMorph3.h" //Commander - Added: Morph III
 #include "PPgBackup.h" //EastShare - Added by Pretender, TBH-AutoBackup
@@ -53,6 +54,7 @@ public:
 	CPPgDebug		m_wndDebug;
 #endif
 	CPPgMorph		m_wndMorph; //MORPH - Added by IceCream, Morph Prefs
+	CPPgMorphShare	m_wndMorphShare; //MORPH - Added by SiRoB, Morph Prefs
 	CPPgMorph2		m_wndMorph2; //MORPH - Added by SiRoB, Morph Prefs
 	CPPgMorph3		m_wndMorph3; //Commander - Added: Morph III
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup

@@ -54,6 +54,7 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndDebug.m_psp.dwFlags &= ~PSH_HASHELP;
 #endif
 	m_wndMorph.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by IceCream, Morph Prefs
+	m_wndMorphShare.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph3.m_psp.dwFlags &= ~PSH_HASHELP; //Commander - Added: Morph III
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
@@ -87,6 +88,7 @@ CPreferencesDlg::CPreferencesDlg()
 	//MORPH group
 	AddPage(&m_wndBackup); //EastShare - Added by Pretender, TBH-AutoBackup
 	AddPage(&m_wndMorph); //MORPH - Added by IceCream, Morph Prefs
+	AddPage(&m_wndMorphShare); //MORPH - Added by SiRoB, Morph Prefs
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
 	AddPage(&m_wndMorph3); //Commander - Added: Morph III
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
@@ -241,6 +243,7 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("PREF_BACKUP"))); //EastShare - Added by Pretender, TBH-AutoBackup
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by IceCream, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by SiRoB, Morph Prefs
+	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH")));  //MORPH - Added by SiRoB, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("CLIENTMORPH"))); //Commander - Added: Morph III
 	ImageList.Add(CTempIconLoader(_T("CLIENTEASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	ImageList.Add(CTempIconLoader(_T("PREF_EMULESPANA")));  //MORPH - Added by IceCream, eMulEspaña Preferency
@@ -262,6 +265,7 @@ void CPreferencesDlg::Localize()
 	m_wndProxy.Localize();
 
 	m_wndMorph.Localize();//MORPH - Added by IceCream, Morph Prefs
+	m_wndMorphShare.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	m_wndMorph3.Localize(); //Commander - Added: Morph III
 	m_wndEastShare.Localize();
@@ -300,9 +304,10 @@ void CPreferencesDlg::Localize()
 	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, 14);
 	m_slideBar.AddGroupItem(_T("Morph"), iGroup, 15);
 	m_slideBar.AddGroupItem(_T("Morph Share"), iGroup, 16);
-	m_slideBar.AddGroupItem(_T("Morph DynDns"), iGroup, 17); //Commander - Added: Morph III
-	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 18);
-	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, 19); //MORPH - Added by SiRoB, emulEspaña preferency
+	m_slideBar.AddGroupItem(_T("Morph Update"), iGroup, 17);
+	m_slideBar.AddGroupItem(_T("Morph DynDns"), iGroup, 18); //Commander - Added: Morph III
+	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, 19);
+	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, 20); //MORPH - Added by SiRoB, emulEspaña preferency
 
 	//	Determines the width needed to the slidebar, and its position
 	int width = m_slideBar.GetGreaterStringWidth();

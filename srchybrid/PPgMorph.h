@@ -36,12 +36,6 @@ protected:
 	int m_iDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	int	m_iDynUpMode;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	int	m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	int m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
-	int m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	int m_iSelectiveShare;  //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	int m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	int m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
-	int m_iPermissions; //MORPH - Added by SiRoB, Show Permissions
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	int m_iShowCatNames;
 	int m_iSelectCat;
@@ -64,7 +58,6 @@ protected:
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiDM;
 	HTREEITEM m_htiUM;
-	HTREEITEM m_htiSFM;
 	HTREEITEM m_htiDYNUP;
 	HTREEITEM m_htiDynUpOFF;
 	HTREEITEM m_htiDynUpSUC;
@@ -91,24 +84,7 @@ protected:
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	HTREEITEM m_htiPowershareMode;
-	HTREEITEM m_htiPowershareDisabled;
-	HTREEITEM m_htiPowershareActivated;
-	HTREEITEM m_htiPowershareAuto;
-	HTREEITEM m_htiPowershareLimited;
-	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	HTREEITEM m_htiHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	HTREEITEM m_htiSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
-	HTREEITEM m_htiShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	HTREEITEM m_htiPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
-	//MORPH START - Added by SiRoB, Show Permission
-	HTREEITEM m_htiPermissions;
-	HTREEITEM m_htiPermAll;
-	HTREEITEM m_htiPermFriend;
-	HTREEITEM m_htiPermNone;
-	//MORPH END   - Added by SiRoB, Show Permission
-	
+
 	HTREEITEM m_htiSCC;
 	HTREEITEM m_htiSAC;
 	HTREEITEM m_htiDisp;
@@ -146,10 +122,6 @@ protected:
 	HTREEITEM m_htiReportHashingFiles;
 	BOOL	  m_bLogFriendlistActivities;
 	HTREEITEM m_htiLogFriendlistActivities;
-	// [end] Mighty Knife
-
-	// Mighty Knife: Community visible filelist
-	HTREEITEM m_htiPermCommunity;
 	// [end] Mighty Knife
 
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

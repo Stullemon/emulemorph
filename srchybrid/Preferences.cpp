@@ -1102,7 +1102,7 @@ uint16 CPreferences::GetMaxDownload(){
 uint64 CPreferences::GetMaxDownloadInBytesPerSec(boolean dynamic){
 //dont be a Lam3r :)
 	//MORPH START - Added by SiRoB, ZZ Upload system
-	if (IsZZRatioDoesWork())
+	if (IsZZRatioDoesWork() || (dynamic && (thePrefs.IsDynUpEnabled() || thePrefs.IsSUCDoesWork())))
 		return maxdownload*1024;
 	//MORPH END   - Added by SiRoB, ZZ Upload system
     uint64 maxup;

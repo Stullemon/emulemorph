@@ -1366,6 +1366,9 @@
 				RelativePath="PPgMorph3.cpp">
 			</File>
 			<File
+				RelativePath=".\PPgMorphShare.cpp">
+			</File>
+			<File
 				RelativePath="PPgNotify.cpp">
 			</File>
 			<File
@@ -1752,6 +1755,9 @@
 			</File>
 			<File
 				RelativePath="PPgMorph3.h">
+			</File>
+			<File
+				RelativePath=".\PPgMorphShare.h">
 			</File>
 			<File
 				RelativePath="PPgNotify.h">

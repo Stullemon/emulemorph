@@ -2375,6 +2375,7 @@
 #define IDS_EXPIRED_KNOWN               4013
 #define IDS_DELETEFILE                  4014
 #define IDS_PAWCIO_CREDIT               4015
+#define IDD_PPG_MORPH_SHARE              4100
 #define IDS_UPDATEIPFILTER              4742
 #define IDS_UPDATEIPFILTERONSTART       4743
 #define IDS_UPDATEIPFILTERERROR         4744
