@@ -1034,8 +1034,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				if (client->GetFriendSlot() == false && // client is not a friend with friend slot
             		client->IsPBForPS() == false && // client don't want powershared file
 						(
-							client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && thePrefs.GetEqualChanceForEachFileMode() == ECFEF_DISABLE ||
-							client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE//Morph - added by AndCycle, Equal Chance For Each File
+							client->GetCombinedFilePrioAndCredit() < GetAverageCombinedFilePrioAndCredit() && !thePrefs.IsEqualChanceEnable() ||
+							client->GetCombinedFilePrioAndCredit() > GetAverageCombinedFilePrioAndCredit() && thePrefs.IsEqualChanceEnable()//Morph - added by AndCycle, Equal Chance For Each File
 						)// and client has lower credits/wants lower prio file than average client in queue
 					) {
 					// then block client from getting on queue

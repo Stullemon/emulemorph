@@ -61,15 +61,8 @@ protected:
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
 
 	//Morph - added by AndCycle, Equal Chance For Each File
-	EqualChanceForEachFileSelection m_iEqualChanceForEachFile;
-	HTREEITEM m_htiECFEF;
-	HTREEITEM m_htiECFEF_DISABLE;
-	HTREEITEM m_htiECFEF_ACCEPTED;
-	HTREEITEM m_htiECFEF_ACCEPTED_COMPLETE;
-	HTREEITEM m_htiECFEF_TRANSFERRED;
-	HTREEITEM m_htiECFEF_TRANSFERRED_COMPLETE;
-	int m_bECFEFallTime;
-	HTREEITEM m_htiECFEF_ALLTIME;
+	int	m_iEnableEqualChanceForEachFile;
+	HTREEITEM m_htiEnableEqualChanceForEachFile;
 	//Morph - added by AndCycle, Equal Chance For Each File
 
 	// EastShare START - Added by TAHO, .met control

@@ -309,7 +309,7 @@ double CUpDownClient::GetCombinedFilePrioAndCredit()
 	if(clientReqFile){
 	
 		//Morph Start - added by AndCycle, Equal Chance For Each File
-		if(thePrefs.GetEqualChanceForEachFileMode() != ECFEF_DISABLE){
+		if(thePrefs.IsEqualChanceEnable()){
 			return clientReqFile->statistic.GetEqualChanceValue();
 		}
 		//Morph End - added by AndCycle, Equal Chance For Each File

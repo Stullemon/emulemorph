@@ -1,4 +1,9 @@
 --------------------------------------
+Changelog for eMule 0.42g MorphXT v3.x
+--------------------------------------
+CHANGED: Simplify Equal Chance for Each File to a checkbox [AndCycle]
+
+--------------------------------------
 Changelog for eMule 0.42g MorphXT v3.5
 --------------------------------------
 FIXED  : Sort on Sipmle UL in the Sharedfile Window [SiRoB]

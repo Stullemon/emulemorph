@@ -501,8 +501,7 @@ bool	CPreferences::enableDownloadInBold; //MORPH - Added by SiRoB, show download
 bool	CPreferences::enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 bool	CPreferences::enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by linekin, creditsystem integration
-EqualChanceForEachFileSelection CPreferences::equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
-bool	CPreferences::m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
+bool	CPreferences::m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 uint8	CPreferences::m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 uint16	CPreferences::maxconnectionsswitchborder;
@@ -2331,8 +2330,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("EnableAntiLeecher", enableAntiLeecher,"eMule"); //MORPH - Added by IceCream, enable AntiLeecher
 	ini.WriteBool("EnableAntiCreditHack", enableAntiCreditHack,"eMule"); //MORPH - Added by IceCream, enable AntiCreditHack
 	ini.WriteInt("CreditSystemMode", creditSystemMode,"eMule");// EastShare - Added by linekin, ES CreditSystem
-	ini.WriteInt("EqualChanceForEachFileMode", equalChanceForEachFileMode,"eMule");//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool("ECFEFallTime", m_bECFEFallTime,"eMule");//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool("EqualChanceForEachFile", m_bEnableEqualChanceForEachFile, "eMule");	//Morph - added by AndCycle, Equal Chance For Each File
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
 	ini.WriteInt("ReconnectOnLowIdRetries",LowIdRetries,"eMule");	// SLUGFILLER: lowIdRetry
@@ -2863,8 +2861,7 @@ void CPreferences::LoadPreferences(){
 	enableAntiCreditHack = ini.GetBool("EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack
 	enableHighProcess = ini.GetBool("EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
 	creditSystemMode = (CreditSystemSelection)ini.GetInt("CreditSystemMode", CS_OFFICIAL); // EastShare - Added by linekin, ES CreditSystem
-	equalChanceForEachFileMode = (EqualChanceForEachFileSelection)ini.GetInt("EqualChanceForEachFileMode", ECFEF_DISABLE);//Morph - added by AndCycle, Equal Chance For Each File
-	m_bECFEFallTime = ini.GetBool("ECFEFallTime", false);//Morph - added by AndCycle, Equal Chance For Each File
+	m_bEnableEqualChanceForEachFile = ini.GetBool("EqualChanceForEachFile", false);//Morph - added by AndCycle, Equal Chance For Each File
 
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	m_IPfilterVersion=ini.GetInt("IPfilterVersion",0); //added by milobac: Ipfilter.dat update

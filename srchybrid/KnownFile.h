@@ -18,7 +18,6 @@
 #include "Loggable.h"
 #include "BarShader.h"
 #include <list>
-#include "Preferences.h"//Morph - Added by AndCycle, Equal Chance For Each File, reduce CPU power
 
 class CTag;
 class CxImage;
@@ -55,7 +54,6 @@ public:
 		//Morph Start - Added by AndCycle, Equal Chance For Each File
 		shareStartTime = time(NULL);//this value init will be done in other place 
 		m_bCheckEqualChanceValue = true;
-		m_mLastEqualChanceSelection = thePrefs.GetEqualChanceForEachFileMode();
 		m_dLastEqualChanceSemiValue = 0;
 		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
@@ -115,7 +113,6 @@ private:
 	uint32	shareStartTime;
 	bool	m_bCheckEqualChanceValue;
 	double	m_dLastEqualChanceSemiValue;
-	EqualChanceForEachFileSelection m_mLastEqualChanceSelection;
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 };
 

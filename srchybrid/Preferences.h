@@ -138,18 +138,6 @@ enum CreditSystemSelection {
 };
 //EastShare End - added by AndCycle, creditsystem integration
 
-//Morph Start - added by AndCycle, Equal Chance For Each File
-enum EqualChanceForEachFileSelection{
-
-	ECFEF_DISABLE = 0,
-	ECFEF_ACCEPTED,				//accroading the file accepted
-	ECFEF_ACCEPTED_COMPLETE,	//file accepted base, one complete file
-	ECFEF_TRANSFERRED,			//accroading transfered
-	ECFEF_TRANSFERRED_COMPLETE	//transfered base, one complete file
-
-};
-//Morph End - added by AndCycle, Equal Chance For Each File
-
 class CPreferences: public CLoggable
 {
 public:
@@ -584,8 +572,7 @@ public:
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 	static CreditSystemSelection	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
-	static EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
-	static bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
+	static bool	m_bEnableEqualChanceForEachFile;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static uint8	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	static uint16	maxconnectionsswitchborder;
@@ -1386,8 +1373,7 @@ public:
 	static	bool GetEnableAntiLeecher()		{ return enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	
 	static	CreditSystemSelection	GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration
-	static	EqualChanceForEachFileSelection	GetEqualChanceForEachFileMode()	{return equalChanceForEachFileMode;}	//Morph - added by AndCycle, Equal Chance For Each File
-	static	bool	IsECFEFallTime()	{return m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
+	static	bool	IsEqualChanceEnable()	{ return m_bEnableEqualChanceForEachFile;}	//Morph - added by AndCycle, Equal Chance For Each File
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
 	static	uint8  GetPowerShareMode()	{return m_iPowershareMode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
