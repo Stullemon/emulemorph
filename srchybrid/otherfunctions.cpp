@@ -2797,15 +2797,15 @@ long FileSize(LPCTSTR fileName){
 //MORPH END   - Added by SiRoB, Used in Fake and ipfilter updater
 
 //Morph Start - added by AndCycle, minor tweak - prime
-uint32 getPrime(uint32 lower_bound)
+int getPrime(int lower_bound)
 {
-	std::list<uint32> prime_no_list;
-	prime_no_list.push_back(3);
+	std::list<int> prime_no_list;
+	prime_no_list.push_back(2);
 
-	uint32 cur_no = 3;
+	int cur_no = 1;
 	while(prime_no_list.back() < lower_bound){
 		cur_no = cur_no+2;
-		std::list<uint32>::iterator cur_pos = prime_no_list.begin();
+		std::list<int>::iterator cur_pos = prime_no_list.begin();
 		while(cur_no%(*cur_pos) != 0){
 			cur_pos++;
 			if(cur_pos == prime_no_list.end()){
