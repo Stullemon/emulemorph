@@ -1442,6 +1442,9 @@ bool CUpDownClient::BalanceA4AFSources(bool byPriorityOnly)
 				finalpos = pos;
 				continue;
 			}
+			else if (m_OtherNoNeeded_list.Find(cur_file)){
+				continue;
+			}
 			else if (!pSwap){
 				pSwap = cur_file;
 				finalpos = pos;
@@ -1529,6 +1532,9 @@ bool CUpDownClient::StackA4AFSources()
 			if (cur_file->ForceAllA4AF()) {
 				pSwap = cur_file;
 				finalpos = pos;
+				continue;
+			}
+			else if (m_OtherNoNeeded_list.Find(cur_file)){
 				continue;
 			}
 			else if (!pSwap){
