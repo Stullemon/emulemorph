@@ -696,12 +696,6 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						}else
 							if (thePrefs.IsSelectiveShareEnabled())
 								buffer.Append(_T(" + ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". S"));
-						buffer.Append(_T(" ("));
-						if (file->GetHideOSAuthorized())
-							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
-						else
-							buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
-						buffer.Append(_T(")"));
 						break;
 						//MORPH START - Changed by SiRoB, Avoid misusing of HideOS
 					}
