@@ -1016,7 +1016,7 @@ void CServerWnd::DownloadFeed()
 	fclose(tempFP);
 	fclose(targetFP);
 	_tremove(szTempFilePath);
-#elif
+#else
 	_trename(szTempFilePath, szFilePath);
 #endif
 	//Morph End - added by AndCycle, XML news unicode hack
