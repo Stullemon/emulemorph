@@ -360,20 +360,23 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 
 				CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(link);
 				_ASSERT(pLink);
-				if ( pLink->GetKind() == CED2KLink::kFriend )
+				if (pLink) //Added by SiRoB, HotFix
 				{
-					// Better with dynamic_cast, but no RTTI enabled in the project
-					CED2KFriendLink* pFriendLink = static_cast<CED2KFriendLink*>(pLink);
-					uchar userHash[16];
-					pFriendLink->GetUserHash(userHash);
-
-					if ( ! theApp.friendlist->IsAlreadyFriend(userHash) )
-						theApp.friendlist->AddFriend(userHash, 0U, 0U, 0U, 0U, pFriendLink->GetUserName(), 1U);
-					else
+					if ( pLink->GetKind() == CED2KLink::kFriend )
 					{
-						CString msg;
-						msg.Format(GetResString(IDS_USER_ALREADY_FRIEND), pFriendLink->GetUserName());
-						theApp.AddLogLine(true, msg);
+						// Better with dynamic_cast, but no RTTI enabled in the project
+						CED2KFriendLink* pFriendLink = static_cast<CED2KFriendLink*>(pLink);
+						uchar userHash[16];
+						pFriendLink->GetUserHash(userHash);
+
+						if ( ! theApp.friendlist->IsAlreadyFriend(userHash) )
+							theApp.friendlist->AddFriend(userHash, 0U, 0U, 0U, 0U, pFriendLink->GetUserName(), 1U);
+						else
+						{
+							CString msg;
+							msg.Format(GetResString(IDS_USER_ALREADY_FRIEND), pFriendLink->GetUserName());
+							theApp.AddLogLine(true, msg);
+						}
 					}
 				}
 			}
