@@ -96,11 +96,11 @@ CString CWapServer::_LoadTemplate(CString sAll, CString sTemplateName)
 void CWapServer::ReloadTemplates()
 {
 	CString sPrevLocale(setlocale(LC_TIME,NULL));
-	setlocale(LC_TIME, _T("English"));
+	_tsetlocale(LC_TIME, _T("English"));
 	CTime t = GetCurrentTime();
 	m_Params.sLastModified = t.FormatGmt(_T("%a, %d %b %Y %H:%M:%S GMT"));
 	m_Params.sETag = MD5Sum(m_Params.sLastModified).GetHash();
-	setlocale(LC_TIME, sPrevLocale);
+	_tsetlocale(LC_TIME, sPrevLocale);
 
 	CString sFile;
 	if (thePrefs.GetWapTemplate()==_T("") || thePrefs.GetWapTemplate().MakeLower()==_T("emule_wap.tmpl"))
@@ -168,7 +168,7 @@ void CWapServer::ReloadTemplates()
 			m_Templates.cDownColor = _tcstol(tmpColor,NULL,16);
 			tmpColor.Format(_T("0x00%s"),_LoadTemplate(sAll,_T("TMPL_UPLOAD_GRAPHCOLOR")));
 			m_Templates.cUpColor = _tcstol(tmpColor,NULL,16);
-			tmpColor.Format(_T("0x00%s)",_LoadTemplate(sAll,_T("TMPL_CONNECTIONS_GRAPHCOLOR")));
+			tmpColor.Format(_T("0x00%s"),_LoadTemplate(sAll,_T("TMPL_CONNECTIONS_GRAPHCOLOR")));
 			m_Templates.cConnectionsColor = _tcstol(tmpColor,NULL,16);
 		}
 	}
@@ -314,13 +314,13 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		long lSession = 0;
 
 		if(_ParseURL(Data.sURL, _T("ses")) != _T(""))
-			lSession = atol(_ParseURL(Data.sURL, _T("ses")));
+			lSession = _ttol(_ParseURL(Data.sURL, _T("ses")));
 
 		if (_ParseURL(Data.sURL, _T("w")) == _T("password"))
 		{
 			CString test=MD5Sum(_ParseURL(Data.sURL, _T("p"))).GetHash();
 			bool login=false;
-			CString ip=inet_ntoa( Data.inadr );
+			CString ip=ipstr( Data.inadr );
 
 			if(MD5Sum(_ParseURL(Data.sURL, _T("p"))).GetHash() == thePrefs.GetWapPass())
 			{
@@ -345,14 +345,15 @@ void CWapServer::ProcessURL(WapThreadData Data)
 				login=true;
 			} else {
 				AddLogLine(true,GetResString(IDS_WAP_BADLOGINATTEMPT)+_T(" (%s)"),ip);
-
-				BadLogin newban={inet_addr(ip), ::GetTickCount()};	// save failed attempt (ip,time)
+				USES_CONVERSION;
+				BadLogin newban={inet_addr(T2CA(ip)), ::GetTickCount()};	// save failed attempt (ip,time)
 				pThis->m_Params.badlogins.Add(newban);
 				login=false;
 			}
 
 			if (login) {
-				uint32 ipn=inet_addr( ip) ;
+				USES_CONVERSION;
+				uint32 ipn=inet_addr(T2CA(ip)) ;
 				for(int i = 0; i < pThis->m_Params.badlogins.GetSize();)
 				{
 					if (ipn == pThis->m_Params.badlogins[i].datalen) {
@@ -466,7 +467,8 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		}
 		else 
 		{
-			uint32 ip= inet_addr(inet_ntoa( Data.inadr ));
+			USES_CONVERSION;
+			uint32 ip= inet_addr(T2CA(ipstr( Data.inadr )));
 			uint32 faults=0;
 
 			// check for bans
@@ -474,11 +476,11 @@ void CWapServer::ProcessURL(WapThreadData Data)
 				if ( pThis->m_Params.badlogins[i].datalen==ip ) faults++;
 
 			if (faults>4) {
-				Out +="<?xml version=\"1.0\" encoding=\""+ _GetWebCharSet() +"\"?>";
-				Out +="<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">";
-				Out +="<wml><card><p>";
+				Out +=_T("<?xml version=\"1.0\" encoding=\"")+ _GetWebCharSet() +_T("\"?>");
+				Out +=_T("<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">");
+				Out +=_T("<wml><card><p>");
 				Out += _GetPlainResString(IDS_ACCESSDENIED);
-				Out +="</p></card></wml>";
+				Out +=_T("</p></card></wml>");
 				
 				// set 15 mins ban by using the badlist
 				BadLogin preventive={ip, ::GetTickCount() + (15*60*1000) };
@@ -522,8 +524,8 @@ CString CWapServer::_ParseURL(CString URL, CString fieldname)
 
 	CString value = _T("");
 	CString Parameter = _T("");
-	char fromReplace[4] = _T("");	// decode URL
-	char toReplace[2] = _T("");		// decode URL
+	TCHAR fromReplace[4] = _T("");	// decode URL
+	TCHAR toReplace[2] = _T("");		// decode URL
 	int i = 0;
 	int findPos = -1;
 	int findLength = 0;
@@ -551,11 +553,11 @@ CString CWapServer::_ParseURL(CString URL, CString fieldname)
 			// decode value ...
 			value.Replace(_T("+"), _T(" "));
 			for (i = 0 ; i <= 255 ; i++) {
-				_sprintf(fromReplace, _T("%%%02x"), i);
+				_stprintf(fromReplace, _T("%%%02x"), i);
 				toReplace[0] = (char)i;
 				toReplace[1] = NULL;
 				value.Replace(fromReplace, toReplace);
-				_sprintf(fromReplace, _T("%%%02X"), i);
+				_stprintf(fromReplace, _T("%%%02X"), i);
 				value.Replace(fromReplace, toReplace);
 			}
 		}
@@ -575,7 +577,7 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 	CString	Out = pThis->m_Templates.sMain;
 
 	Out.Replace(_T("[Session]"), sSession);
-	Out.Replace(_T("[eMuleAppName]"), "eMule");
+	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
 
 	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
 	
@@ -601,7 +603,7 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 	Out.Replace(_T("[SearchResults]"), _GetPlainResString(IDS_SW_RESULT));
 	Out.Replace(_T("[Kad]"), _GetPlainResString(IDS_KADEMLIA));
 
-	char HTTPTempC[100] = _T("");
+	TCHAR HTTPTempC[100] = _T("");
 	CString sConnected = _T("");
 	if (theApp.IsConnected()) 
 	{
@@ -614,7 +616,7 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 			CServer* cur_server = theApp.serverconnect->GetCurrentServer();
 			sConnected += _T(": ") + _SpecialChars(cur_server->GetListName());
 	
-			_sprintf(HTTPTempC, _T("%i "), cur_server->GetUsers());
+			_stprintf(HTTPTempC, _T("%i "), cur_server->GetUsers());
 			sConnected += _T(" [") + CString(HTTPTempC) + _GetPlainResString(IDS_LUSERS) + _T("]");
 		}
 	} 
@@ -631,7 +633,7 @@ CString CWapServer::_GetMain(WapThreadData Data, long lSession)
 		}
 	}
 	Out.Replace(_T("[Connected]"), _T("<b>")+_GetPlainResString(IDS_PW_CONNECTION)+_T(":</b> ")+sConnected);
-    _sprintf(HTTPTempC, _GetPlainResString(IDS_UPDOWNSMALL),(float)theApp.uploadqueue->GetDatarate()/1024,(float)theApp.downloadqueue->GetDatarate()/1024);
+    _stprintf(HTTPTempC, _GetPlainResString(IDS_UPDOWNSMALL),(float)theApp.uploadqueue->GetDatarate()/1024,(float)theApp.downloadqueue->GetDatarate()/1024);
 	CString sLimits;
 	// EC 25-12-2003
 	CString MaxUpload;
@@ -714,7 +716,7 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 	else{
 		if (sCmd == _T("connect") && IsSessionAdmin(Data,sSession) )
 		{
-			_ConnectToServer(_ParseURL(Data.sURL, _T("ip")),atoi(_ParseURL(Data.sURL, _T("port"))));
+			_ConnectToServer(_ParseURL(Data.sURL, _T("ip")),_ttoi(_ParseURL(Data.sURL, _T("port"))));
 		}	
 		else if (sCmd == _T("disconnect") && IsSessionAdmin(Data,sSession)) 
 		{
@@ -725,7 +727,7 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 			if (sCmd == _T("remove") && IsSessionAdmin(Data,sSession)) 
 			{
 				CString sIP = _ParseURL(Data.sURL, _T("ip"));
-				int nPort = atoi(_ParseURL(Data.sURL, _T("port")));
+				int nPort = _ttoi(_ParseURL(Data.sURL, _T("port")));
 				if(!sIP.IsEmpty())
 					_RemoveServer(sIP,nPort);
 			}	
@@ -840,7 +842,7 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 					while (resToken != _T("") && !posfound)
 					{
 						curPos2++;
-						if(sortpos==atoi(resToken)){
+						if(sortpos==_ttoi(resToken)){
 							CString strTemp;
 							strTemp.Format(_T("%i"),curPos2);
 							Out.Replace(Out.Mid(sortbypos,sortbypos2-sortbypos+1),strTemp);
@@ -920,7 +922,7 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 			int startpos=0,endpos;
 
 			if(_ParseURL(Data.sURL, _T("startpos"))!=_T(""))
-				startpos=atoi(_ParseURL(Data.sURL, _T("startpos")));
+				startpos=_ttoi(_ParseURL(Data.sURL, _T("startpos")));
 
 			endpos = startpos + thePrefs.GetWapMaxItemsInPages();
 
@@ -981,7 +983,7 @@ CString CWapServer::_GetServerList(WapThreadData Data)
 			}
 			if(endpos<ServerArray.GetCount()){
 				CString strTemp;
-				strTemp.Format("_T(<a href=\".") + strNavUrl + _T("&amp;startpos=%d\">") + _GetPlainResString(IDS_WAP_NEXT) + _T("</a> "), endpos);
+				strTemp.Format(_T("<a href=\".") + strNavUrl + _T("&amp;startpos=%d\">") + _GetPlainResString(IDS_WAP_NEXT) + _T("</a> "), endpos);
 				strNavLine += strTemp;
 			}
 			Out.Replace(_T("[NavigationLine]"), strNavLine);
@@ -1022,7 +1024,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		return _T("");
 
 	CString sSession = _ParseURL(Data.sURL, _T("ses"));
-	int cat=atoi(_ParseURL(Data.sURL,_T("cat")));
+	int cat=_ttoi(_ParseURL(Data.sURL,_T("cat")));
 
 	bool clcompl=(_ParseURL(Data.sURL,_T("ClCompl"))==_T("yes"));
 	CString sCat; (cat!=0)?sCat.Format(_T("&amp;cat=%i"),cat):sCat=_T("");
@@ -1330,7 +1332,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 				strSort+=_T(" (+)");
 			Out.Replace("[Filename]", strSort);
 		}else
-			Out.Replace("_T([SortName]"), _T("./?ses=[Session]&amp;w=transferdown&amp;sort=name"));
+			Out.Replace(_T("[SortName]"), _T("./?ses=[Session]&amp;w=transferdown&amp;sort=name"));
 		if(pThis->m_Params.DownloadSort == DOWN_SORT_SIZE){
 			Out.Replace(_T("[SortSize]"), _T("./?ses=[Session]&amp;w=transferdown&amp;sort=size&amp;sortreverse=") + sDownloadSortRev);
 			sortpos=2;
@@ -1389,7 +1391,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 				while (resToken != _T("") && !posfound)
 				{
 					curPos2++;
-					if(sortpos==atoi(resToken)){
+					if(sortpos==_ttoi(resToken)){
 						CString strTemp;
 						strTemp.Format(_T("%i"),curPos2);
 						Out.Replace(Out.Mid(sortbypos,sortbypos2-sortbypos+1),strTemp);
@@ -1505,7 +1507,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		int startpos=0,endpos;
 
 		if(_ParseURL(Data.sURL, _T("startpos"))!=_T(""))
-			startpos=atoi(_ParseURL(Data.sURL, _T("startpos")));
+			startpos=_ttoi(_ParseURL(Data.sURL, _T("startpos")));
 
 		endpos = startpos + thePrefs.GetWapMaxItemsInPages();
 
@@ -1582,8 +1584,8 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 				sActions.Replace(_T("[ConfirmCancel]"), _GetPlainResStringNoQuote(IDS_Q_CANCELDL2));
 				
 				if (FilesArray[i].nFileStatus!=PS_COMPLETE && FilesArray[i].nFileStatus!=PS_COMPLETING) {
-					sActions.Append(_T("<a href=\"./?ses=[Session]&amp;w=transferdown&amp;op=prioup&amp;file=") + FilesArray[i].sFileHash+sCat+_T("\">)[PriorityUp]</a><br />");
-					sActions.Append(_T("<a href=\"./?ses=[Session]&amp;w=transferdown&amp;op=priodown&amp;file=") + FilesArray[i].sFileHash+sCat _T(+"\")>[PriorityDown]</a><br />");
+					sActions.Append(_T("<a href=\"./?ses=[Session]&amp;w=transferdown&amp;op=prioup&amp;file=") + FilesArray[i].sFileHash+sCat+_T("\">[PriorityUp]</a><br />"));
+					sActions.Append(_T("<a href=\"./?ses=[Session]&amp;w=transferdown&amp;op=priodown&amp;file=") + FilesArray[i].sFileHash+sCat _T(+"\">[PriorityDown]</a><br />"));
 				}
 			}
 
@@ -1686,7 +1688,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		}
 		if(endpos<FilesArray.GetCount()){
 			CString strTemp;
-			strTemp.Format("_T(<a href=\".") + strNavUrl + _T("&amp;startpos=%d\">") + _GetPlainResString(IDS_WAP_NEXT) + _T("</a> "), endpos);
+			strTemp.Format(_T("<a href=\".") + strNavUrl + _T("&amp;startpos=%d\">") + _GetPlainResString(IDS_WAP_NEXT) + _T("</a> "), endpos);
 			strNavLine += strTemp;
 		}
 		Out.Replace(_T("[NavigationLine]"), strNavLine);
@@ -1766,7 +1768,7 @@ CString CWapServer::_GetTransferUpList(WapThreadData Data)
 	int startpos=0,endpos;
 
 	if(_ParseURL(Data.sURL, _T("startpos"))!=_T(""))
-		startpos=atoi(_ParseURL(Data.sURL, _T("startpos")));
+		startpos=_ttoi(_ParseURL(Data.sURL, _T("startpos")));
 
 	endpos = startpos + thePrefs.GetWapMaxItemsInPages();
 
@@ -1891,7 +1893,7 @@ CString CWapServer::_GetTransferQueueList(WapThreadData Data)
 	int startpos=0,endpos;
 
 	if(_ParseURL(Data.sURL, _T("startpos"))!=_T(""))
-		startpos=atoi(_ParseURL(Data.sURL, _T("startpos")));
+		startpos=_ttoi(_ParseURL(Data.sURL, _T("startpos")));
 
 	endpos = startpos + thePrefs.GetWapMaxItemsInPages();
 
@@ -1916,7 +1918,7 @@ CString CWapServer::_GetTransferQueueList(WapThreadData Data)
 				HTTPProcessData.Replace(_T("[FileName]"), _SpecialChars(file->GetFileName()));
 			else
 				HTTPProcessData.Replace(_T("[FileName]"), _T("?"));
-			sprintf(HTTPTempC, _T("%i") , cur_client->GetScore(false));
+			_stprintf(HTTPTempC, _T("%i") , cur_client->GetScore(false));
 			CString HTTPTemp = HTTPTempC;
 			HTTPProcessData.Replace(_T("[Score]"), HTTPTemp);
 			if (cur_client->IsBanned())
@@ -2035,7 +2037,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 		pThis->m_Params.bSharedSortReverse = (_ParseURL(Data.sURL, "sortreverse") == "true");
 
 	if(_ParseURL(Data.sURL, "hash") != "" && _ParseURL(Data.sURL, "setpriority") != "" && IsSessionAdmin(Data,sSession)) 
-		_SetSharedFilePriority(_ParseURL(Data.sURL, "hash"),atoi(_ParseURL(Data.sURL, "setpriority")));
+		_SetSharedFilePriority(_ParseURL(Data.sURL, "hash"),_ttoi(_ParseURL(Data.sURL, "setpriority")));
 
 	if(_ParseURL(Data.sURL, "reload") == "true")
 	{
@@ -2202,7 +2204,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 			while (resToken != "" && !posfound)
 			{
 				curPos2++;
-				if(sortpos==atoi(resToken)){
+				if(sortpos==_ttoi(resToken)){
 					CString strTemp;
 					strTemp.Format("%i",curPos2);
 					Out.Replace(Out.Mid(sortbypos,sortbypos2-sortbypos+1),strTemp);
@@ -2369,7 +2371,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 	int startpos=0,endpos;
 
 	if(_ParseURL(Data.sURL, "startpos")!="")
-		startpos=atoi(_ParseURL(Data.sURL, "startpos"));
+		startpos=_ttoi(_ParseURL(Data.sURL, "startpos"));
 
 	endpos = startpos + thePrefs.GetWapMaxItemsInPages();
 
@@ -2396,26 +2398,26 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 		else
 			HTTPProcessData.Replace("[ShortFileName]", _SpecialChars(SharedArray[i].sFileName));
 
-		sprintf(HTTPTempC, "%s",CastItoXBytes(SharedArray[i].lFileSize));
+		_stprintf(HTTPTempC, "%s",CastItoXBytes(SharedArray[i].lFileSize));
 		HTTPProcessData.Replace("[FileSize]", CString(HTTPTempC));
 		HTTPProcessData.Replace("[FileLink]", SharedArray[i].sED2kLink);
 
-		sprintf(HTTPTempC, "%s",CastItoXBytes(SharedArray[i].nFileTransferred));
+		_stprintf(HTTPTempC, "%s",CastItoXBytes(SharedArray[i].nFileTransferred));
 		HTTPProcessData.Replace("[FileTransferred]", CString(HTTPTempC));
 
-		sprintf(HTTPTempC, "%s",CastItoXBytes(SharedArray[i].nFileAllTimeTransferred));
+		_stprintf(HTTPTempC, "%s",CastItoXBytes(SharedArray[i].nFileAllTimeTransferred));
 		HTTPProcessData.Replace("[FileAllTimeTransferred]", CString(HTTPTempC));
 
-		sprintf(HTTPTempC, "%i", SharedArray[i].nFileRequests);
+		_stprintf(HTTPTempC, "%i", SharedArray[i].nFileRequests);
 		HTTPProcessData.Replace("[FileRequests]", CString(HTTPTempC));
 
-		sprintf(HTTPTempC, "%i", SharedArray[i].nFileAllTimeRequests);
+		_stprintf(HTTPTempC, "%i", SharedArray[i].nFileAllTimeRequests);
 		HTTPProcessData.Replace("[FileAllTimeRequests]", CString(HTTPTempC));
 
-		sprintf(HTTPTempC, "%i", SharedArray[i].nFileAccepts);
+		_stprintf(HTTPTempC, "%i", SharedArray[i].nFileAccepts);
 		HTTPProcessData.Replace("[FileAccepts]", CString(HTTPTempC));
 
-		sprintf(HTTPTempC, "%i", SharedArray[i].nFileAllTimeAccepts);
+		_stprintf(HTTPTempC, "%i", SharedArray[i].nFileAllTimeAccepts);
 		HTTPProcessData.Replace("[FileAllTimeAccepts]", CString(HTTPTempC));
 
 		HTTPProcessData.Replace("[Priority]", SharedArray[i].sFilePriority);
@@ -2456,9 +2458,9 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 		{
 			upperpriority = 5;	lesserpriority = 3;
 		}
-        sprintf(HTTPTempC, "%i", upperpriority);
+        _stprintf(HTTPTempC, "%i", upperpriority);
 		HTTPProcessData.Replace("[PriorityUpLink]", "hash=" + SharedArray[i].sFileHash +"&amp;setpriority=" + CString(HTTPTempC));
-        sprintf(HTTPTempC, "%i", lesserpriority);
+        _stprintf(HTTPTempC, "%i", lesserpriority);
 		HTTPProcessData.Replace("[PriorityDownLink]", "hash=" + SharedArray[i].sFileHash +"&amp;setpriority=" + CString(HTTPTempC));
 
 		sSharedList += HTTPProcessData;
@@ -2472,7 +2474,7 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 	strNavUrl = Data.sURL;
 	if((position=strNavUrl.Find("startpos=",0))>1){
 		if (strNavUrl.Mid(position-1,1)=="&") position--;
-		position2=strNavUrl.Find("&",position+1);
+		position2=strNavUrl.Find(_T("&"),position+1);
 		if (position2==-1) position2 = strNavUrl.GetLength();
 		strNavUrl = strNavUrl.Left(position) + strNavUrl.Right(strNavUrl.GetLength()-position2);
 	}	
@@ -2570,7 +2572,7 @@ CString CWapServer::_GetServerOptions(WapThreadData Data)
 
 	if(_ParseURL(Data.sURL, "addserver") == "true")
 	{
-		CServer* nsrv = new CServer(atoi(_ParseURL(Data.sURL, "serverport")), _ParseURL(Data.sURL, "serveraddr").GetBuffer() );
+		CServer* nsrv = new CServer(_ttoi(_ParseURL(Data.sURL, "serverport")), _ParseURL(Data.sURL, "serveraddr").GetBuffer() );
 		nsrv->SetListName(_ParseURL(Data.sURL, "servername"));
 		theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv,true);
 		CString resultlog = _SpecialChars(theApp.emuledlg->GetLastLogEntry());
@@ -2799,40 +2801,40 @@ CString CWapServer::_GetStats(WapThreadData Data)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
-	CString sSession = _ParseURL(Data.sURL, "ses");
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
 
 	// refresh statistics
 	theApp.emuledlg->statisticswnd->ShowStatistics(true);
 
 	CString Out = pThis->m_Templates.sStats;
 
-	if(_ParseURL(Data.sURL, "show")!=""){
+	if(_ParseURL(Data.sURL, _T("show"))!=""){
 		HTREEITEM item;
-		item = (HTREEITEM)strtoul(_ParseURL(Data.sURL, "show"),NULL,16);
+		item = (HTREEITEM)strtoul(_ParseURL(Data.sURL, _T("show")),NULL,16);
 		if(theApp.emuledlg->statisticswnd->stattree.ItemExist(item) &&
 			theApp.emuledlg->statisticswnd->stattree.ItemHasChildren(item))
 		{
 			CString strTemp;
-			strTemp = "<b>" + theApp.emuledlg->statisticswnd->stattree.GetItemText(item) + "</b><br/>";
+			strTemp = _T("<b>") + theApp.emuledlg->statisticswnd->stattree.GetItemText(item) + _T("</b><br/>");
 			strTemp += theApp.emuledlg->statisticswnd->stattree.GetWML(false, false, true,theApp.emuledlg->statisticswnd->stattree.GetChildItem(item),1,false);
-			Out.Replace("[Stats]", strTemp);
+			Out.Replace(_T("[Stats]"), strTemp);
 		}
 		else
 		{
-			Out.Replace("[Stats]", theApp.emuledlg->statisticswnd->stattree.GetWML(false, true));
+			Out.Replace(_T("[Stats]"), theApp.emuledlg->statisticswnd->stattree.GetWML(false, true));
 		}
 	}
 	else
 	{
-		Out.Replace("[Stats]", theApp.emuledlg->statisticswnd->stattree.GetWML(false, true));
+		Out.Replace(_T("[Stats]"), theApp.emuledlg->statisticswnd->stattree.GetWML(false, true));
 	}
 
-	Out.Replace("[Session]",sSession);
-	Out.Replace("[Section]", _GetPlainResString(IDS_SF_STATISTICS));
-	Out.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-	Out.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
+	Out.Replace(_T("[Session]"),sSession);
+	Out.Replace(_T("[Section]"), _GetPlainResString(IDS_SF_STATISTICS));
+	Out.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+	Out.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
 
 	return Out;
 
@@ -2842,252 +2844,238 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
-	CString sSession = _ParseURL(Data.sURL, "ses");
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
 
 	CString Out = pThis->m_Templates.sPreferences;
 
-	Out.Replace("[Session]", sSession);
+	Out.Replace(_T("[Session]"), sSession);
 
-	if ((_ParseURL(Data.sURL, "saveprefs") == "true") && IsSessionAdmin(Data,sSession) ) {
-		if(_ParseURL(Data.sURL, "logssize") != "")
+	if ((_ParseURL(Data.sURL, _T("saveprefs")) == "true") && IsSessionAdmin(Data,sSession) ) {
+		if(_ParseURL(Data.sURL, _T("logssize")) != "")
 		{
-			UINT logssize = atoi(_ParseURL(Data.sURL, "logssize"));
+			UINT logssize = _ttoi(_ParseURL(Data.sURL, _T("logssize")));
 			thePrefs.SetWapLogsSize(logssize);
 		}
-		if(_ParseURL(Data.sURL, "itemsperpage")!="")
+		if(_ParseURL(Data.sURL, _T("itemsperpage"))!="")
 		{
-			thePrefs.SetWapMaxItemsInPages(atoi(_ParseURL(Data.sURL, "itemsperpage")));
+			thePrefs.SetWapMaxItemsInPages(_ttoi(_ParseURL(Data.sURL, _T("itemsperpage"))));
 		}
-		if(_ParseURL(Data.sURL, "graphswidth")!="")
+		if(_ParseURL(Data.sURL, _T("graphswidth"))!="")
 		{
-			thePrefs.SetWapGraphWidth(atoi(_ParseURL(Data.sURL, "graphswidth")));
+			thePrefs.SetWapGraphWidth(_ttoi(_ParseURL(Data.sURL, _T("graphswidth"))));
 		}
-		if(_ParseURL(Data.sURL, "graphsheight")!="")
+		if(_ParseURL(Data.sURL, _T("graphsheight"))!="")
 		{
-			thePrefs.SetWapGraphHeight(atoi(_ParseURL(Data.sURL, "graphsheight")));
+			thePrefs.SetWapGraphHeight(_ttoi(_ParseURL(Data.sURL, _T("graphsheight"))));
 		}
-		if(_ParseURL(Data.sURL, "sendbwimages")!="")
+		if(_ParseURL(Data.sURL, _T("sendbwimages"))!="")
 		{
-			thePrefs.SetWapAllwaysSendBWImages(_ParseURL(Data.sURL, "sendbwimages").MakeLower() == "on");
+			thePrefs.SetWapAllwaysSendBWImages(_ParseURL(Data.sURL, _T("sendbwimages")).MakeLower() == "on");
 		}
-		if(_ParseURL(Data.sURL, "sendimages")!="")
+		if(_ParseURL(Data.sURL, _T("sendimages"))!="")
 		{
-			thePrefs.SetWapSendImages(_ParseURL(Data.sURL, "sendimages").MakeLower() == "on");
+			thePrefs.SetWapSendImages(_ParseURL(Data.sURL, _T("sendimages")).MakeLower() == "on");
 		}
-		if(_ParseURL(Data.sURL, "sendgraphs")!="")
+		if(_ParseURL(Data.sURL, _T("sendgraphs"))!="")
 		{
-			thePrefs.SetWapSendGraphs(_ParseURL(Data.sURL, "sendgraphs").MakeLower() == "on");
+			thePrefs.SetWapSendGraphs(_ParseURL(Data.sURL, _T("sendgraphs")).MakeLower() == "on");
 		}
-		if(_ParseURL(Data.sURL, "sendprogressbars")!="")
+		if(_ParseURL(Data.sURL, _T("sendprogressbars"))!="")
 		{
-			thePrefs.SetWapSendProgressBars(_ParseURL(Data.sURL, "sendprogressbars").MakeLower() == "on");
+			thePrefs.SetWapSendProgressBars(_ParseURL(Data.sURL, _T("sendprogressbars")).MakeLower() == "on");
 		}
 
-		if(_ParseURL(Data.sURL, "filledgraphs").MakeLower() == "on")
+		if(_ParseURL(Data.sURL, _T("filledgraphs")).MakeLower() == "on")
 		{
 			thePrefs.SetWapGraphsFilled(true);
 		}
-		if(_ParseURL(Data.sURL, "filledgraphs").MakeLower() == "off")
+		if(_ParseURL(Data.sURL, _T("filledgraphs")).MakeLower() == "off")
 		{
 			thePrefs.SetWapGraphsFilled(false);
 		}
-		if(_ParseURL(Data.sURL, "refresh") != "")
+		if(_ParseURL(Data.sURL, _T("refresh")) != "")
 		{
-			thePrefs.SetWebPageRefresh(atoi(_ParseURL(Data.sURL, "refresh")));
+			thePrefs.SetWebPageRefresh(_ttoi(_ParseURL(Data.sURL, _T("refresh"))));
 		}
 
+		//MORPH - Don't Use <1KB Increment
 		// emulEspaña: modified by MoNKi [Maella: -Allow Bandwidth Settings in <1KB Incremements-]
-		//if(_ParseURL(Data.sURL, "maxdown") != "")
-		//{
-		//	thePrefs.SetMaxDownload(atoi(_ParseURL(Data.sURL, "maxdown")));
-		//}
-		//if(_ParseURL(Data.sURL, "maxup") != "")
-		//{
-		//	thePrefs.SetMaxUpload(atoi(_ParseURL(Data.sURL, "maxup")));
-		//}
-		//uint16 lastmaxgu=thePrefs.GetMaxGraphUploadRate();
-		//uint16 lastmaxgd=thePrefs.GetMaxGraphDownloadRate();
-
-		//if(_ParseURL(Data.sURL, "maxcapdown") != "")
-		//{
-		//	thePrefs.SetMaxGraphDownloadRate(atoi(_ParseURL(Data.sURL, "maxcapdown")));
-		//}
-		//if(_ParseURL(Data.sURL, "maxcapup") != "")
-		//{
-		//	thePrefs.SetMaxGraphUploadRate(atoi(_ParseURL(Data.sURL, "maxcapup")));
-		//}
-
-		//if(lastmaxgu != thePrefs.GetMaxGraphUploadRate()) 
-		//	theApp.emuledlg->statisticswnd.SetARange(false,thePrefs.GetMaxGraphUploadRate());
-		//if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
-		//	theApp.emuledlg->statisticswnd.SetARange(true,thePrefs.GetMaxGraphDownloadRate());
-
-		if(_ParseURL(Data.sURL, "maxdown") != "")
+		if(_ParseURL(Data.sURL, _T("maxdown")) != "")
 		{
-			float maxdown = atof(_ParseURL(Data.sURL, "maxdown"));
+			thePrefs.SetMaxDownload(_ttoi(_ParseURL(Data.sURL, _T("maxdown"))));
+		}
+		if(_ParseURL(Data.sURL, _T("maxup")) != "")
+		{
+			thePrefs.SetMaxUpload(_ttoi(_ParseURL(Data.sURL, _T("maxup"))));
+		}
+		uint16 lastmaxgu=thePrefs.GetMaxGraphUploadRate();
+		uint16 lastmaxgd=thePrefs.GetMaxGraphDownloadRate();
+
+		if(_ParseURL(Data.sURL, _T("maxcapdown")) != "")
+		{
+			thePrefs.SetMaxGraphDownloadRate(_ttoi(_ParseURL(Data.sURL, _T("maxcapdown"))));
+		}
+		if(_ParseURL(Data.sURL, _T("maxcapup")) != "")
+		{
+			thePrefs.SetMaxGraphUploadRate(_ttoi(_ParseURL(Data.sURL, "maxcapup")));
+		}
+
+		if(lastmaxgu != thePrefs.GetMaxGraphUploadRate()) 
+			theApp.emuledlg->statisticswnd.SetARange(false,thePrefs.GetMaxGraphUploadRate());
+		if(lastmaxgd!=thePrefs.GetMaxGraphDownloadRate())
+			theApp.emuledlg->statisticswnd.SetARange(true,thePrefs.GetMaxGraphDownloadRate());
+		/*
+		if(_ParseURL(Data.sURL, _T("maxdown")) != "")
+		{
+			float maxdown = _ttof(_ParseURL(Data.sURL, _T("maxdown")));
 			if(maxdown > 0.0f)
 				thePrefs.SetMaxDownload(maxdown);
 			else
 				thePrefs.SetMaxDownload(UNLIMITED);
 		}
-		if(_ParseURL(Data.sURL, "maxup") != "")
+		if(_ParseURL(Data.sURL, _T("maxup")) != "")
 		{
-			float maxup = atof(_ParseURL(Data.sURL, "maxup"));
+			float maxup = _ttof(_ParseURL(Data.sURL, _T("maxup")));
 			if(maxup > 0.0f)
 				thePrefs.SetMaxUpload(maxup);
 			else
 				thePrefs.SetMaxUpload(UNLIMITED);
 		}
-		if(_ParseURL(Data.sURL, "maxcapdown") != "")
+		if(_ParseURL(Data.sURL, _T("maxcapdown")) != "")
 		{
-			thePrefs.SetMaxGraphDownloadRate(atof(_ParseURL(Data.sURL, "maxcapdown")));
+			thePrefs.SetMaxGraphDownloadRate(_ttof(_ParseURL(Data.sURL, _T("maxcapdown"))));
 		}
-		if(_ParseURL(Data.sURL, "maxcapup") != "")
+		if(_ParseURL(Data.sURL, _T("maxcapup")) != "")
 		{
-			thePrefs.SetMaxGraphUploadRate(atof(_ParseURL(Data.sURL, "maxcapup")));
+			thePrefs.SetMaxGraphUploadRate(_ttof(_ParseURL(Data.sURL, _T("maxcapup"))));
 		}
+		*/
 		// End emulEspaña
 
-		if(_ParseURL(Data.sURL, "maxsources") != "")
+		if(_ParseURL(Data.sURL, _T("maxsources")) != "")
 		{
-			thePrefs.SetMaxSourcesPerFile(atoi(_ParseURL(Data.sURL, "maxsources")));
+			thePrefs.SetMaxSourcesPerFile(_ttoi(_ParseURL(Data.sURL, _T("maxsources"))));
 		}
-		if(_ParseURL(Data.sURL, "maxconnections") != "")
+		if(_ParseURL(Data.sURL, _T("maxconnections")) != "")
 		{
-			thePrefs.SetMaxConnections(atoi(_ParseURL(Data.sURL, "maxconnections")));
+			thePrefs.SetMaxConnections(_ttoi(_ParseURL(Data.sURL, _T("maxconnections"))));
 		}
-		if(_ParseURL(Data.sURL, "maxconnectionsperfive") != "")
+		if(_ParseURL(Data.sURL, _T("maxconnectionsperfive")) != "")
 		{
-			thePrefs.SetMaxConsPerFive(atoi(_ParseURL(Data.sURL, "maxconnectionsperfive")));
+			thePrefs.SetMaxConsPerFive(_ttoi(_ParseURL(Data.sURL, _T("maxconnectionsperfive"))));
 		}
-		thePrefs.SetTransferFullChunks((_ParseURL(Data.sURL, "fullchunks").MakeLower() == "on"));
+		thePrefs.SetTransferFullChunks((_ParseURL(Data.sURL, _T("fullchunks")).MakeLower() == "on"));
 		//thePrefs.SetPreviewPrio((_ParseURL(Data.sURL, "firstandlast").MakeLower() == "on"));	// emulEspaña: removed by Announ [Announ: -per file option for downloading preview parts-]
 
-		thePrefs.SetNetworkED2K((_ParseURL(Data.sURL, "neted2k").MakeLower() == "on"));
-		thePrefs.SetNetworkKademlia((_ParseURL(Data.sURL, "netkad").MakeLower() == "on"));
+		thePrefs.SetNetworkED2K((_ParseURL(Data.sURL, _T("neted2k")).MakeLower() == "on"));
+		thePrefs.SetNetworkKademlia((_ParseURL(Data.sURL, _T("netkad")).MakeLower() == "on"));
 	}
 
 	// Fill form
-	Out.Replace("[WapGraphFilledVal]",thePrefs.GetWapGraphsFilled()?"1":"2");
-	Out.Replace("[SendGraphsVal]",thePrefs.GetWapSendGraphs()?"1":"2");
-	Out.Replace("[SendBWImagesVal]",thePrefs.GetWapAllwaysSendBWImages()?"1":"2");
-	Out.Replace("[SendImagesVal]",thePrefs.GetWapSendImages()?"1":"2");
-	Out.Replace("[SendProgressBarsVal]",thePrefs.GetWapSendProgressBars()?"1":"2");
+	Out.Replace(_T("[WapGraphFilledVal]"),thePrefs.GetWapGraphsFilled()?_T("1"):_T("2"));
+	Out.Replace(_T("[SendGraphsVal]"),thePrefs.GetWapSendGraphs()?_T("1"):_T("2"));
+	Out.Replace(_T("[SendBWImagesVal]"),thePrefs.GetWapAllwaysSendBWImages()?_T("1"):_T("2"));
+	Out.Replace(_T("[SendImagesVal]"),thePrefs.GetWapSendImages()?_T("1"):_T("2"));
+	Out.Replace(_T("[SendProgressBarsVal]"),thePrefs.GetWapSendProgressBars()?_T("1"):_T("2"));
 	// emulEspaña: modified by Announ [Announ: -per file option for downloading preview parts-]
 	/*
 	Out.Replace("[FirstAndLastVal]",thePrefs.GetPreviewPrio()?"1":"2");
 	*/
 	// End emulEspaña
 
-	Out.Replace("[FullChunksVal]",thePrefs.TransferFullChunks()?"1":"2");
+	Out.Replace(_T("[FullChunksVal]"),thePrefs.TransferFullChunks()?_T("1"):_T("2"));
 
 	CString sRefresh;
 
-	sRefresh.Format("%d", thePrefs.GetWapLogsSize());
-	Out.Replace("[LogsSizeVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetWapLogsSize());
+	Out.Replace(_T("[LogsSizeVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetWapGraphHeight());
-	Out.Replace("[GraphsHeightVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetWapGraphHeight());
+	Out.Replace(_T("[GraphsHeightVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetWapGraphWidth());
-	Out.Replace("[GraphsWidthVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetWapGraphWidth());
+	Out.Replace(_T("[GraphsWidthVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetWapMaxItemsInPages());
-	Out.Replace("[ItemsPerPageVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetWapMaxItemsInPages());
+	Out.Replace(_T("[ItemsPerPageVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetWebPageRefresh());
-	Out.Replace("[RefreshVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetWebPageRefresh());
+	Out.Replace(_T("[RefreshVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetMaxSourcePerFile());
-	Out.Replace("[MaxSourcesVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetMaxSourcePerFile());
+	Out.Replace(_T("[MaxSourcesVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetMaxConnections());
-	Out.Replace("[MaxConnectionsVal]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetMaxConnections());
+	Out.Replace(_T("[MaxConnectionsVal]"), sRefresh);
 
-	sRefresh.Format("%d", thePrefs.GetMaxConperFive());
-	Out.Replace("[MaxConnectionsPer5Val]", sRefresh);
+	sRefresh.Format(_T("%d"), thePrefs.GetMaxConperFive());
+	Out.Replace(_T("[MaxConnectionsPer5Val]"), sRefresh);
 
-	Out.Replace("[ED2KVAL]", (thePrefs.GetNetworkED2K())?"1":"2" );
-	Out.Replace("[KADVAL]", (thePrefs.GetNetworkKademlia())?"1":"2" );
+	Out.Replace(_T("[ED2KVAL]"), (thePrefs.GetNetworkED2K())?_T("1"):_T("2") );
+	Out.Replace(_T("[KADVAL]"), (thePrefs.GetNetworkKademlia())?_T("1"):_T("2") );
 
-	Out.Replace("[KBS]", _GetPlainResString(IDS_KBYTESEC)+":");
-	Out.Replace("[FileSettings]", CString(_GetPlainResString(IDS_WEB_FILESETTINGS)+":"));
-	Out.Replace("[LimitForm]", _GetPlainResString(IDS_WEB_CONLIMITS)+":");
-	Out.Replace("[MaxSources]", _GetPlainResString(IDS_PW_MAXSOURCES)+":");
-	Out.Replace("[MaxConnections]", _GetPlainResString(IDS_PW_MAXC)+":");
-	Out.Replace("[MaxConnectionsPer5]", _GetPlainResString(IDS_MAXCON5SECLABEL)+":");
-	Out.Replace("[ShowUploadQueueForm]", _GetPlainResString(IDS_WEB_SHOW_UPLOAD_QUEUE));
-	Out.Replace("[ShowUploadQueueComment]", _GetPlainResString(IDS_WEB_UPLOAD_QUEUE_COMMENT));
-	Out.Replace("[ShowQueue]", _GetPlainResString(IDS_WEB_SHOW_UPLOAD_QUEUE));
-	Out.Replace("[HideQueue]", _GetPlainResString(IDS_WEB_HIDE_UPLOAD_QUEUE));
-	Out.Replace("[RefreshTimeForm]", _GetPlainResString(IDS_WEB_REFRESH_TIME));
-	Out.Replace("[RefreshTimeComment]", _GetPlainResString(IDS_WEB_REFRESH_COMMENT));
-	Out.Replace("[SpeedForm]", _GetPlainResString(IDS_SPEED_LIMITS));
-	Out.Replace("[MaxDown]", _GetPlainResString(IDS_DOWNLOAD));
-	Out.Replace("[MaxUp]", _GetPlainResString(IDS_PW_CON_UPLBL));
-	Out.Replace("[SpeedCapForm]", _GetPlainResString(IDS_CAPACITY_LIMITS));
-	Out.Replace("[MaxCapDown]", _GetPlainResString(IDS_DOWNLOAD));
-	Out.Replace("[MaxCapUp]", _GetPlainResString(IDS_PW_CON_UPLBL));
-	Out.Replace("[TryFullChunks]", _GetPlainResString(IDS_FULLCHUNKTRANS));
-	Out.Replace("[FirstAndLast]", _GetPlainResString(IDS_DOWNLOADMOVIECHUNKS));
-	Out.Replace("[WapControl]", _GetPlainResString(IDS_WAP_CONTROL));
-	Out.Replace("[eMuleAppName]", "eMule");
-	Out.Replace("[Apply]", _GetPlainResString(IDS_PW_APPLY));
+	Out.Replace(_T("[KBS]"), _GetPlainResString(IDS_KBYTESEC)+_T(":"));
+	Out.Replace(_T("[FileSettings]"), _GetPlainResString(IDS_WEB_FILESETTINGS+_T(":")));
+	Out.Replace(_T("[LimitForm]"), _GetPlainResString(IDS_WEB_CONLIMITS)+_T(":"));
+	Out.Replace(_T("[MaxSources]"), _GetPlainResString(IDS_PW_MAXSOURCES)+_T(":"));
+	Out.Replace(_T("[MaxConnections]"), _GetPlainResString(IDS_PW_MAXC)+_T(":"));
+	Out.Replace(_T("[MaxConnectionsPer5]"), _GetPlainResString(IDS_MAXCON5SECLABEL)+_T(":"));
+	Out.Replace(_T("[ShowUploadQueueForm]"), _GetPlainResString(IDS_WEB_SHOW_UPLOAD_QUEUE));
+	Out.Replace(_T("[ShowUploadQueueComment]"), _GetPlainResString(IDS_WEB_UPLOAD_QUEUE_COMMENT));
+	Out.Replace(_T("[ShowQueue]"), _GetPlainResString(IDS_WEB_SHOW_UPLOAD_QUEUE));
+	Out.Replace(_T("[HideQueue]"), _GetPlainResString(IDS_WEB_HIDE_UPLOAD_QUEUE));
+	Out.Replace(_T("[RefreshTimeForm]"), _GetPlainResString(IDS_WEB_REFRESH_TIME));
+	Out.Replace(_T("[RefreshTimeComment]"), _GetPlainResString(IDS_WEB_REFRESH_COMMENT));
+	Out.Replace(_T("[SpeedForm]"), _GetPlainResString(IDS_SPEED_LIMITS));
+	Out.Replace(_T("[MaxDown]"), _GetPlainResString(IDS_DOWNLOAD));
+	Out.Replace(_T("[MaxUp]"), _GetPlainResString(IDS_PW_CON_UPLBL));
+	Out.Replace(_T("[SpeedCapForm]"), _GetPlainResString(IDS_CAPACITY_LIMITS));
+	Out.Replace(_T("[MaxCapDown]"), _GetPlainResString(IDS_DOWNLOAD));
+	Out.Replace(_T("[MaxCapUp]"), _GetPlainResString(IDS_PW_CON_UPLBL));
+	Out.Replace(_T("[TryFullChunks]"), _GetPlainResString(IDS_FULLCHUNKTRANS));
+	Out.Replace(_T("[FirstAndLast]"), _GetPlainResString(IDS_DOWNLOADMOVIECHUNKS));
+	Out.Replace(_T("[WapControl]"), _GetPlainResString(IDS_WAP_CONTROL));
+	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
+	Out.Replace(_T("[Apply]"), _GetPlainResString(IDS_PW_APPLY));
 
-	Out.Replace("[Yes]", _GetPlainResString(IDS_YES));
-	Out.Replace("[No]", _GetPlainResString(IDS_NO));	
-	Out.Replace("[On]", _GetPlainResString(IDS_WAP_ON));
-	Out.Replace("[Off]", _GetPlainResString(IDS_WAP_OFF));
-	Out.Replace("[Section]", _GetPlainResString(IDS_EM_PREFS));
-	Out.Replace("[SendImages]", _GetPlainResString(IDS_WAP_SENDIMAGES));
-	Out.Replace("[SendGraphs]", _GetPlainResString(IDS_WAP_SENDGRAPHS));
-	Out.Replace("[SendProgressBars]", _GetPlainResString(IDS_WAP_SENDPROGRESSBARS));
-	Out.Replace("[SendBWImages]", _GetPlainResString(IDS_WAP_SENDBWIMAGES));
-	Out.Replace("[GraphsWidth]", _GetPlainResString(IDS_WAP_GRAPHSWIDTH));
-	Out.Replace("[GraphsHeight]", _GetPlainResString(IDS_WAP_GRAPHSHEIGHT));
-	Out.Replace("[FilledGraphs]", _GetPlainResString(IDS_WAP_FILLEDGRAPHS));
-	Out.Replace("[LogsSize]", _GetPlainResString(IDS_WAP_LOGSSIZE));
-	Out.Replace("[ItemsPerPage]", _GetPlainResString(IDS_WAP_ITEMSPERPAGE));
-	Out.Replace("[Bytes]", _GetPlainResString(IDS_BYTES));
-	Out.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-	Out.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
-	Out.Replace("[NETWORKS]", _GetPlainResString(IDS_NETWORK));
-	Out.Replace("[BOOTSTRAP]", _GetPlainResString(IDS_BOOTSTRAP));
-	Out.Replace("[BS_IP]", _GetPlainResString(IDS_IP));
-	Out.Replace("[BS_PORT]", _GetPlainResString(IDS_PORT));
-	Out.Replace("[KADEMLIA]", GetResString(IDS_KADEMLIA) );
+	Out.Replace(_T("[Yes]"), _GetPlainResString(IDS_YES));
+	Out.Replace(_T("[No]"), _GetPlainResString(IDS_NO));	
+	Out.Replace(_T("[On]"), _GetPlainResString(IDS_WAP_ON));
+	Out.Replace(_T("[Off]"), _GetPlainResString(IDS_WAP_OFF));
+	Out.Replace(_T("[Section]"), _GetPlainResString(IDS_EM_PREFS));
+	Out.Replace(_T("[SendImages]"), _GetPlainResString(IDS_WAP_SENDIMAGES));
+	Out.Replace(_T("[SendGraphs]"), _GetPlainResString(IDS_WAP_SENDGRAPHS));
+	Out.Replace(_T("[SendProgressBars]"), _GetPlainResString(IDS_WAP_SENDPROGRESSBARS));
+	Out.Replace(_T("[SendBWImages]"), _GetPlainResString(IDS_WAP_SENDBWIMAGES));
+	Out.Replace(_T("[GraphsWidth]"), _GetPlainResString(IDS_WAP_GRAPHSWIDTH));
+	Out.Replace(_T("[GraphsHeight]"), _GetPlainResString(IDS_WAP_GRAPHSHEIGHT));
+	Out.Replace(_T("[FilledGraphs]"), _GetPlainResString(IDS_WAP_FILLEDGRAPHS));
+	Out.Replace(_T("[LogsSize]"), _GetPlainResString(IDS_WAP_LOGSSIZE));
+	Out.Replace(_T("[ItemsPerPage]"), _GetPlainResString(IDS_WAP_ITEMSPERPAGE));
+	Out.Replace(_T("[Bytes]"), _GetPlainResString(IDS_BYTES));
+	Out.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+	Out.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
+	Out.Replace(_T("[NETWORKS]"), _GetPlainResString(IDS_NETWORK));
+	Out.Replace(_T("[BOOTSTRAP]"), _GetPlainResString(IDS_BOOTSTRAP));
+	Out.Replace(_T("[BS_IP]"), _GetPlainResString(IDS_IP));
+	Out.Replace(_T("[BS_PORT]"), _GetPlainResString(IDS_PORT));
+	Out.Replace(_T("[KADEMLIA]"), GetResString(IDS_KADEMLIA) );
 
-	// emulEspaña: modified by MoNKi [Maella: -Allow Bandwidth Settings in <1KB Incremements-]
-	//CString sT;
-	//int n = (int)thePrefs.GetMaxDownload();
-	//if(n < 0 || n == 65535) n = 0;
-	//sT.Format("%d", n);
-	//Out.Replace("[MaxDownVal]", sT);
-	//n = (int)thePrefs.GetMaxUpload();
-	//if(n < 0 || n == 65535) n = 0;
-	//sT.Format("%d", n);
-	//Out.Replace("[MaxUpVal]", sT);
-	//sT.Format("%d", thePrefs.GetMaxGraphDownloadRate());
-	//Out.Replace("[MaxCapDownVal]", sT);
-	//sT.Format("%d", thePrefs.GetMaxGraphUploadRate());
-	//Out.Replace("[MaxCapUpVal]", sT);
 	CString sT;
-	float n = thePrefs.GetMaxDownload();
-	if(n < 0.0f || n >= UNLIMITED) n = 0.0f;
-	sT.Format("%0.1f", n);
-	Out.Replace("[MaxDownVal]", sT);
-	n = thePrefs.GetMaxUpload();
-	if(n < 0.0f || n >= UNLIMITED) n = 0.0f;
-	sT.Format("%.1f", n);
-	Out.Replace("[MaxUpVal]", sT);
-	sT.Format("%.1f", thePrefs.GetMaxGraphDownloadRate());
-	Out.Replace("[MaxCapDownVal]", sT);
-	sT.Format("%.1f", thePrefs.GetMaxGraphUploadRate());
-	Out.Replace("[MaxCapUpVal]", sT);
-	// End emulEspaña
-
+	int n = (int)thePrefs.GetMaxDownload();
+	if(n < 0 || n == 65535) n = 0;
+	sT.Format(_T("%d"), n);
+	Out.Replace(_T("[MaxDownVal]"), sT);
+	n = (int)thePrefs.GetMaxUpload();
+	if(n < 0 || n == 65535) n = 0;
+	sT.Format(_T("%d"), n);
+	Out.Replace(_T("[MaxUpVal]"), sT);
+	sT.Format(_T("%d"), thePrefs.GetMaxGraphDownloadRate());
+	Out.Replace(_T("[MaxCapDownVal]"), sT);
+	sT.Format(_T("%d"), thePrefs.GetMaxGraphUploadRate());
+	Out.Replace(_T("[MaxCapUpVal]"), sT);
 	return Out;
 }
 
@@ -3096,28 +3084,23 @@ CString CWapServer::_GetLoginScreen(WapThreadData Data)
 
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
-	CString sSession = _ParseURL(Data.sURL, "ses");
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
 
-	CString Out = "";
+	CString Out = _T("");
 
 	Out += pThis->m_Templates.sLogin;
 
-	Out.Replace("[eMulePlus]", "eMule");
-	Out.Replace("[eMuleAppName]", "eMule");
-	// modified by Announ [itsonlyme: -modname-]
-	/*
-	Out.Replace("[version]", _SpecialChars(theApp.m_strCurVersionLong));
-	*/
-	Out.Replace("[version]", _SpecialChars(theApp.m_strCurVersionLong)+CString(" ")+theApp.m_strModLongVersion);
-	// End -modname-
-	Out.Replace("[Login]", _GetPlainResString(IDS_WEB_LOGIN));
-	Out.Replace("[EnterPassword]", _GetPlainResString(IDS_WEB_ENTER_PASSWORD));
-	Out.Replace("[LoginNow]", _GetPlainResString(IDS_WEB_LOGIN_NOW));
-	Out.Replace("[WapControl]", _GetPlainResString(IDS_WAP_CONTROL));
-	Out.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-	Out.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
+	Out.Replace(_T("[eMulePlus]"), _T("eMule"));
+	Out.Replace(_T("[eMuleAppName]"), _T("eMule"));
+	Out.Replace(_T("[version]"), _SpecialChars(theApp.m_strCurVersionLong));
+	Out.Replace(_T("[Login]"), _GetPlainResString(IDS_WEB_LOGIN));
+	Out.Replace(_T("[EnterPassword]"), _GetPlainResString(IDS_WEB_ENTER_PASSWORD));
+	Out.Replace(_T("[LoginNow]"), _GetPlainResString(IDS_WEB_LOGIN_NOW));
+	Out.Replace(_T("[WapControl]"), _GetPlainResString(IDS_WAP_CONTROL));
+	Out.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+	Out.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
 
 	return Out;
 }
@@ -3126,50 +3109,50 @@ CString CWapServer::_GetConnectedServer(WapThreadData Data)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
-	CString sSession = _ParseURL(Data.sURL, "ses");
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
 
-	CString HTTPTemp = "";
-	char	HTTPTempC[100] = "";
+	CString HTTPTemp = _T("");
+	TCHAR	HTTPTempC[100] = _T("");
 
 	CString OutS = pThis->m_Templates.sConnectedServer;
 
-	OutS.Replace("[ConnectedServer]", _GetPlainResString(IDS_PW_SERVER));
-	OutS.Replace("[Servername]", _GetPlainResString(IDS_SL_SERVERNAME));
-	OutS.Replace("[Status]", _GetPlainResString(IDS_STATUS));
-	OutS.Replace("[Usercount]", _GetPlainResString(IDS_LUSERS));
-	OutS.Replace("[Action]", _GetPlainResString(IDS_CONNECTING));
-	OutS.Replace("[URL_Disconnect]", IsSessionAdmin(Data,sSession)?CString("./?ses=" + sSession + "&amp;w=server&amp;c=disconnect"):GetPermissionDenied());
-	OutS.Replace("[URL_Connect]", IsSessionAdmin(Data,sSession)?CString("./?ses=" + sSession + "&amp;w=server&amp;c=connect"):GetPermissionDenied());
-	OutS.Replace("[Disconnect]", _GetPlainResString(IDS_IRC_DISCONNECT));
-	OutS.Replace("[Connect]", _GetPlainResString(IDS_CONNECTTOANYSERVER));
-	OutS.Replace("[URL_ServerOptions]", IsSessionAdmin(Data,sSession)?CString("./?ses=" + sSession + "&amp;w=server&amp;c=options"):GetPermissionDenied());
-	OutS.Replace("[ServerOptions]", CString(_GetPlainResString(IDS_SERVER)+ " " + _GetPlainResString(IDS_EM_PREFS)));
-	OutS.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-	OutS.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
+	OutS.Replace(_T("[ConnectedServer]"), _GetPlainResString(IDS_PW_SERVER));
+	OutS.Replace(_T("[Servername]"), _GetPlainResString(IDS_SL_SERVERNAME));
+	OutS.Replace(_T("[Status]"), _GetPlainResString(IDS_STATUS));
+	OutS.Replace(_T("[Usercount]"), _GetPlainResString(IDS_LUSERS));
+	OutS.Replace(_T("[Action]"), _GetPlainResString(IDS_CONNECTING));
+	OutS.Replace(_T("[URL_Disconnect]"), IsSessionAdmin(Data,sSession)?_T("./?ses=") + sSession + _T("&amp;w=server&amp;c=disconnect"):GetPermissionDenied());
+	OutS.Replace(_T("[URL_Connect]"), IsSessionAdmin(Data,sSession)?_T("./?ses=") + sSession + _T("&amp;w=server&amp;c=connect"):GetPermissionDenied());
+	OutS.Replace(_T("[Disconnect]"), _GetPlainResString(IDS_IRC_DISCONNECT));
+	OutS.Replace(_T("[Connect]"), _GetPlainResString(IDS_CONNECTTOANYSERVER));
+	OutS.Replace(_T("[URL_ServerOptions]"), IsSessionAdmin(Data,sSession)?_T("./?ses=") + sSession + _T("&amp;w=server&amp;c=options"):GetPermissionDenied());
+	OutS.Replace(_T("[ServerOptions]"), _GetPlainResString(IDS_SERVER)+ _T(" ") + _GetPlainResString(IDS_EM_PREFS));
+	OutS.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+	OutS.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
 
 	if (theApp.serverconnect->IsConnected()) {
 		if(!theApp.serverconnect->IsLowID())
-			OutS.Replace("[1]", _GetPlainResString(IDS_CONNECTED));
+			OutS.Replace(_T("[1]"), _GetPlainResString(IDS_CONNECTED));
 		else
-			OutS.Replace("[1]", _GetPlainResString(IDS_CONNECTED) + " (" + _GetPlainResString(IDS_IDLOW) + ")");
+			OutS.Replace(_T("[1]"), _GetPlainResString(IDS_CONNECTED) + _T(" (") + _GetPlainResString(IDS_IDLOW) + _T(")"));
 
 		CServer* cur_server = theApp.serverconnect->GetCurrentServer();
-		OutS.Replace("[2]", _SpecialChars(cur_server->GetListName()));
+		OutS.Replace(_T("[2]"), _SpecialChars(cur_server->GetListName()));
 
-		sprintf(HTTPTempC, "%10i", cur_server->GetUsers());
+		_stprintf(HTTPTempC, _T("%10i"), cur_server->GetUsers());
 		HTTPTemp = HTTPTempC;												
-		OutS.Replace("[3]", HTTPTemp);
+		OutS.Replace(_T("[3]"), HTTPTemp);
 
 	} else if (theApp.serverconnect->IsConnecting()) {
-		OutS.Replace("[1]", _GetPlainResString(IDS_CONNECTING));
-		OutS.Replace("[2]", "");
-		OutS.Replace("[3]", "");
+		OutS.Replace(_T("[1]"), _GetPlainResString(IDS_CONNECTING));
+		OutS.Replace(_T("[2]"), _T(""));
+		OutS.Replace(_T("[3]"), _T(""));
 	} else {
-		OutS.Replace("[1]", _GetPlainResString(IDS_DISCONNECTED));
-		OutS.Replace("[2]", "");
-		OutS.Replace("[3]", "");
+		OutS.Replace(_T("[1]"), _GetPlainResString(IDS_DISCONNECTED));
+		OutS.Replace(_T("[2]"), _T(""));
+		OutS.Replace(_T("[3]"), _T(""));
 	}
 	return OutS;
 }
@@ -3255,19 +3238,19 @@ bool CWapServer::IsSessionAdmin(WapThreadData Data,CString SsessionID){
 }
 
 CString CWapServer::GetPermissionDenied() {
-	return "./script.wmls#accessdenied()";
+	return _T("./script.wmls#accessdenied()");
 }
 
 bool CWapServer::_GetFileHash(CString sHash, uchar *FileHash)
 {
-	char hex_byte[3];
+	TCHAR hex_byte[3];
 	int byte;
 	hex_byte[2] = '\0';
 	for (int i = 0; i < 16; i++) 
 	{
 		hex_byte[0] = sHash.GetAt(i*2);
 		hex_byte[1] = sHash.GetAt((i*2 + 1));
-		sscanf(hex_byte, "%02x", &byte);
+		_stscanf(hex_byte, _T("%02x"), &byte);
 		FileHash[i] = (uchar)byte;
 	}
 	return true;
@@ -3275,20 +3258,20 @@ bool CWapServer::_GetFileHash(CString sHash, uchar *FileHash)
 
 void CWapServer::PlainString(CString& rstr, bool noquot)
 {
-	rstr.Replace("&", "");
-	//rstr.Replace("&", "&amp;");
-	rstr.Replace("<", "&lt;");
-	rstr.Replace(">", "&gt;");
-	rstr.Replace("\"", "&quot;");
+	rstr.Replace(_T("&"), _T(""));
+	//rstr.Replace(_T("&"), "&amp;");
+	rstr.Replace(_T("<"), _T("&lt;"));
+	rstr.Replace(_T(">"), _T("&gt;"));
+	rstr.Replace(_T("\""), _T("&quot;"));
 
 	if(noquot)
 	{
-        rstr.Replace("'", "\\'");
-		rstr.Replace("\n", "\\n");
+        rstr.Replace(_T("'"), _T("\\'"));
+		rstr.Replace(_T("\n"), _T("\\n"));
 	}
 	else
 	{
-        rstr.Replace("'", "&apos;");
+        rstr.Replace(_T("'"), _T("&apos;"));
 	}
 }
 
@@ -3304,20 +3287,20 @@ CString	CWapServer::_GetWebCharSet()
 {
 	switch (thePrefs.GetLanguageID())
 	{
-		case MAKELANGID(LANG_POLISH,SUBLANG_DEFAULT):				return "windows-1250";
-		case MAKELANGID(LANG_RUSSIAN,SUBLANG_DEFAULT):				return "windows-1251";
-		case MAKELANGID(LANG_GREEK,SUBLANG_DEFAULT):				return "ISO-8859-7";
-		case MAKELANGID(LANG_HEBREW,SUBLANG_DEFAULT):				return "windows-1255";
-		case MAKELANGID(LANG_KOREAN,SUBLANG_DEFAULT):				return "EUC-KR";
-		case MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED):	return "GB2312";
-		case MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_TRADITIONAL):	return "Big5";
-		case MAKELANGID(LANG_LITHUANIAN,SUBLANG_DEFAULT):			return "windows-1257";
-		case MAKELANGID(LANG_TURKISH,SUBLANG_DEFAULT):				return "windows-1254";
+		case MAKELANGID(LANG_POLISH,SUBLANG_DEFAULT):				return _T("windows-1250");
+		case MAKELANGID(LANG_RUSSIAN,SUBLANG_DEFAULT):				return _T("windows-1251");
+		case MAKELANGID(LANG_GREEK,SUBLANG_DEFAULT):				return _T("ISO-8859-7");
+		case MAKELANGID(LANG_HEBREW,SUBLANG_DEFAULT):				return _T("windows-1255");
+		case MAKELANGID(LANG_KOREAN,SUBLANG_DEFAULT):				return _T("EUC-KR");
+		case MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED):	return _T("GB2312");
+		case MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_TRADITIONAL):	return _T("Big5");
+		case MAKELANGID(LANG_LITHUANIAN,SUBLANG_DEFAULT):			return _T("windows-1257");
+		case MAKELANGID(LANG_TURKISH,SUBLANG_DEFAULT):				return _T("windows-1254");
 	}
 
 	// Western (Latin) includes Catalan, Danish, Dutch, English, Faeroese, Finnish, French,
 	// German, Galician, Irish, Icelandic, Italian, Norwegian, Portuguese, Spanish and Swedish
-	return "ISO-8859-1";
+	return _T("ISO-8859-1");
 }
 
 // Ornis: creating the progressbar. colored if ressources are given/available
@@ -3326,15 +3309,15 @@ CString CWapServer::_GetDownloadGraph(WapThreadData Data,CString filehash)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
 	if(thePrefs.GetWapSendProgressBars()){
-		CString sSession = _ParseURL(Data.sURL, "ses");
+		CString sSession = _ParseURL(Data.sURL, _T("ses"));
 		CString Out;
-		Out="<img src=\"./?ses=" + sSession + "&amp;progressbar=" + filehash + "\" alt=\"ProgressBar\"/>";
+		Out=_T("<img src=\"./?ses=") + sSession + _T("&amp;progressbar=") + filehash + _T("\" alt=\"ProgressBar\"/>");
 		return Out;
 	}
-	else return "";
+	else return _T("");
 }
 
 
@@ -3342,47 +3325,47 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
-	CString sSession = _ParseURL(Data.sURL, "ses");
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
 	CString Out = pThis->m_Templates.sSearchMain;
 	CString OutList = pThis->m_Templates.sSearchList;
 
-	if (_ParseURL(Data.sURL, "downloads") != "" && IsSessionAdmin(Data,sSession) ) {
+	if (_ParseURL(Data.sURL, _T("downloads")) != "" && IsSessionAdmin(Data,sSession) ) {
 		CString downloads=_ParseURLArray(Data.sURL,"downloads");
-		uint8 cat=atoi(_ParseURL(Data.sURL, "cat"));
+		uint8 cat=_ttoi(_ParseURL(Data.sURL, _T("cat")));
 
 		CString resToken;
 		int curPos=0;
-		resToken= downloads.Tokenize("|",curPos);
+		resToken= downloads.Tokenize(_T("|"),curPos);
 		while (resToken != "")
 		{
 			uchar fileid[16];
 			if (resToken.GetLength()==32 && DecodeBase16(resToken.GetBuffer(),resToken.GetLength(),fileid,ARRSIZE(fileid)))
 			theApp.searchlist->AddFileToDownloadByHash(fileid,cat);
-			resToken= downloads.Tokenize("|",curPos);
+			resToken= downloads.Tokenize(_T("|"),curPos);
 		}
 	}
 
-	if(_ParseURL(Data.sURL, "tosearch") != "" && IsSessionAdmin(Data,sSession) )
+	if(_ParseURL(Data.sURL, _T("tosearch")) != "" && IsSessionAdmin(Data,sSession) )
 	{
 		// perform search
 		theApp.emuledlg->searchwnd->DeleteAllSearchs();
 		SSearchParams* pParams = new SSearchParams;
-		pParams->strExpression = _ParseURL(Data.sURL, "tosearch");
-		pParams->strFileType = _ParseURL(Data.sURL, "type");
-		pParams->ulMinSize = atol(_ParseURL(Data.sURL, "min"))*1048576;
-		pParams->ulMaxSize = atol(_ParseURL(Data.sURL, "max"))*1048576;
+		pParams->strExpression = _ParseURL(Data.sURL, _T("tosearch"));
+		pParams->strFileType = _ParseURL(Data.sURL, _T("type"));
+		pParams->ulMinSize = atol(_ParseURL(Data.sURL, _T("min")))*1048576;
+		pParams->ulMaxSize = atol(_ParseURL(Data.sURL, _T("max")))*1048576;
 		if (pParams->ulMaxSize < pParams->ulMinSize)
 			pParams->ulMaxSize = 0;
 		
-		pParams->uAvailability = (_ParseURL(Data.sURL, "avail")=="")?0:atoi(_ParseURL(Data.sURL, "avail"));
+		pParams->uAvailability = (_ParseURL(Data.sURL, _T("avail"))=="")?0:_ttoi(_ParseURL(Data.sURL, _T("avail")));
 		if (pParams->uAvailability > 1000000)
 			pParams->uAvailability = 1000000;
 			
-		pParams->strExtension = _ParseURL(Data.sURL, "ext");
+		pParams->strExtension = _ParseURL(Data.sURL, _T("ext"));
 	
-		CString method=(_ParseURL(Data.sURL, "method"));
+		CString method=(_ParseURL(Data.sURL, _T("method")));
 
 		if (method == "kademlia")
 			pParams->eType = SearchTypeKademlia;
@@ -3391,7 +3374,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 		else
 			pParams->eType = SearchTypeEd2kServer;
 
-		CString strResponse = "<a href=\"./?ses=[Session]&amp;w=search&amp;showlist=true\">" + _GetPlainResString(IDS_SW_SEARCHINGINFO) + "</a>";
+		CString strResponse = _T("<a href=\"./?ses=[Session]&amp;w=search&amp;showlist=true\">") + _GetPlainResString(IDS_SW_SEARCHINGINFO) + _T("</a>");
 		try
 		{
 		if (pParams->eType != SearchTypeKademlia){
@@ -3414,22 +3397,22 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 			ex->Delete();
 				delete pParams;
 		}
-		OutList.Replace("[Message]",strResponse);
+		OutList.Replace(_T("[Message]"),strResponse);
 	}
-	else if(_ParseURL(Data.sURL, "tosearch") != "" && !IsSessionAdmin(Data,sSession) ) {
-		OutList.Replace("[Message]",_GetPlainResString(IDS_ACCESSDENIED));
+	else if(_ParseURL(Data.sURL, _T("tosearch")) != "" && !IsSessionAdmin(Data,sSession) ) {
+		OutList.Replace(_T("[Message]"),_GetPlainResString(IDS_ACCESSDENIED));
 	}
-	else OutList.Replace("[Message]","");
+	else OutList.Replace(_T("[Message]"),_T(""));
 
-	if(_ParseURL(Data.sURL, "showlist") == "true"){
-		CString sSort = _ParseURL(Data.sURL, "sort");	if (sSort.GetLength()>0) pThis->m_iSearchSortby=atoi(sSort);
-		sSort = _ParseURL(Data.sURL, "sortAsc");		if (sSort.GetLength()>0) pThis->m_bSearchAsc=atoi(sSort);
+	if(_ParseURL(Data.sURL, _T("showlist")) == "true"){
+		CString sSort = _ParseURL(Data.sURL, _T("sort"));	if (sSort.GetLength()>0) pThis->m_iSearchSortby=_ttoi(sSort);
+		sSort = _ParseURL(Data.sURL, _T("sortAsc"));		if (sSort.GetLength()>0) pThis->m_bSearchAsc=_ttoi(sSort);
 
 		int startpos = 0;
 		bool more;
 
-		if(_ParseURL(Data.sURL, "startpos")!="")
-			startpos = atoi(_ParseURL(Data.sURL, "startpos"));
+		if(_ParseURL(Data.sURL, _T("startpos"))!="")
+			startpos = _ttoi(_ParseURL(Data.sURL, _T("startpos")));
 
 		int sortpos=0;
 		if(pThis->m_iSearchSortby==0){
@@ -3439,7 +3422,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 				strSortBy=_T(" (+)");
 			else
 				strSortBy=_T(" (-)");
-			OutList.Replace("[Filename]", _GetPlainResString(IDS_DL_FILENAME) + strSortBy);
+			OutList.Replace(_T("[Filename]"), _GetPlainResString(IDS_DL_FILENAME) + strSortBy);
 		}
 		else if(pThis->m_iSearchSortby==1){
 			sortpos=2;
@@ -3448,7 +3431,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 				strSortBy=_T(" (+)");
 			else
 				strSortBy=_T(" (-)");
-			OutList.Replace("[Filesize]", _GetPlainResString(IDS_DL_SIZE) + strSortBy);
+			OutList.Replace(_T("[Filesize]"), _GetPlainResString(IDS_DL_SIZE) + strSortBy);
 		}
 		else if(pThis->m_iSearchSortby==2){
 			sortpos=3;
@@ -3457,7 +3440,7 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 				strSortBy=_T(" (+)");
 			else
 				strSortBy=_T(" (-)");
-			OutList.Replace("[Filehash]", _GetPlainResString(IDS_FILEHASH) + strSortBy);
+			OutList.Replace(_T("[Filehash]"), _GetPlainResString(IDS_FILEHASH) + strSortBy);
 		}
 		else if(pThis->m_iSearchSortby==3){
 			sortpos=4;
@@ -3466,43 +3449,43 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 				strSortBy=_T(" (+)");
 			else
 				strSortBy=_T(" (-)");
-			OutList.Replace("[Sources]", _GetPlainResString(IDS_DL_SOURCES) + strSortBy);
+			OutList.Replace(_T("[Sources]"), _GetPlainResString(IDS_DL_SOURCES) + strSortBy);
 		}
 		//[SortByVal:x1,x2,x3,...]
-		int sortbypos=OutList.Find("[SortByVal:",0);
+		int sortbypos=OutList.Find(_T("[SortByVal:"),0);
 		if(sortbypos!=-1){
-			int sortbypos2=OutList.Find("]",sortbypos+1);
+			int sortbypos2=OutList.Find(_T("]"),sortbypos+1);
 			if(sortbypos2!=-1){
 				CString strSortByArray=OutList.Mid(sortbypos+11,sortbypos2-sortbypos-11);
 				CString resToken;
 				int curPos = 0,curPos2=0;
 				bool posfound=false;
-				resToken= strSortByArray.Tokenize(",",curPos);
+				resToken= strSortByArray.Tokenize(_T(","),curPos);
 				while (resToken != "" && !posfound)
 				{
 					curPos2++;
-					if(sortpos==atoi(resToken)){
+					if(sortpos==_ttoi(resToken)){
 						CString strTemp;
-						strTemp.Format("%i",curPos2);
+						strTemp.Format(_T("%i"),curPos2);
 						OutList.Replace(OutList.Mid(sortbypos,sortbypos2-sortbypos+1),strTemp);
 						posfound=true;
 					}
-					resToken= strSortByArray.Tokenize(",",curPos);
+					resToken= strSortByArray.Tokenize(_T(","),curPos);
 				};
 				if(!posfound)
-					OutList.Replace(Out.Mid(sortbypos,sortbypos2-sortbypos+1),"1");
+					OutList.Replace(Out.Mid(sortbypos,sortbypos2-sortbypos+1),_T("1"));
 			}
 		}
 
 		CString val;
-		val.Format("%i",(pThis->m_iSearchSortby!=0 || (pThis->m_iSearchSortby==0 && pThis->m_bSearchAsc==0 ))?1:0 );
-		OutList.Replace("[SORTASCVALUE0]", val);
-		val.Format("%i",(pThis->m_iSearchSortby!=1 || (pThis->m_iSearchSortby==1 && pThis->m_bSearchAsc==0 ))?1:0 );
-		OutList.Replace("[SORTASCVALUE1]", val);
-		val.Format("%i",(pThis->m_iSearchSortby!=2 || (pThis->m_iSearchSortby==2 && pThis->m_bSearchAsc==0 ))?1:0 );
-		OutList.Replace("[SORTASCVALUE2]", val);
-		val.Format("%i",(pThis->m_iSearchSortby!=3 || (pThis->m_iSearchSortby==3 && pThis->m_bSearchAsc==0 ))?1:0 );
-		OutList.Replace("[SORTASCVALUE3]", val);
+		val.Format(_T("%i"),(pThis->m_iSearchSortby!=0 || (pThis->m_iSearchSortby==0 && pThis->m_bSearchAsc==0 ))?1:0 );
+		OutList.Replace(_T("[SORTASCVALUE0]"), val);
+		val.Format(_T("%i"),(pThis->m_iSearchSortby!=1 || (pThis->m_iSearchSortby==1 && pThis->m_bSearchAsc==0 ))?1:0 );
+		OutList.Replace(_T("[SORTASCVALUE1]"), val);
+		val.Format(_T("%i"),(pThis->m_iSearchSortby!=2 || (pThis->m_iSearchSortby==2 && pThis->m_bSearchAsc==0 ))?1:0 );
+		OutList.Replace(_T("[SORTASCVALUE2]"), val);
+		val.Format(_T("%i"),(pThis->m_iSearchSortby!=3 || (pThis->m_iSearchSortby==3 && pThis->m_bSearchAsc==0 ))?1:0 );
+		OutList.Replace(_T("[SORTASCVALUE3]"), val);
 
 		CString result = theApp.searchlist->GetWapList(pThis->m_Templates.sSearchResultLine,pThis->m_iSearchSortby,pThis->m_bSearchAsc,startpos,thePrefs.GetWapMaxItemsInPages(),more);
 
@@ -3510,74 +3493,74 @@ CString	CWapServer::_GetSearch(WapThreadData Data)
 		CString strNavLine,strNavUrl;
 		int pos,pos2;
 		strNavUrl = Data.sURL;
-		if((pos=strNavUrl.Find("startpos=",0))>1){
+		if((pos=strNavUrl.Find(_T("startpos="),0))>1){
 			if (strNavUrl.Mid(pos-1,1)=="&") pos--;
-			pos2=strNavUrl.Find("&",pos+1);
+			pos2=strNavUrl.Find(_T("&"),pos+1);
 			if (pos2==-1) pos2 = strNavUrl.GetLength();
 			strNavUrl = strNavUrl.Left(pos) + strNavUrl.Right(strNavUrl.GetLength()-pos2);
 		}	
 		strNavUrl=_SpecialChars(strNavUrl);
 
 		if(more){
-			strNavLine.Format("<a href=\"." + strNavUrl + "&amp;startpos=%d\">" + _GetPlainResString(IDS_WAP_NEXT) + "</a> ", startpos+thePrefs.GetWapMaxItemsInPages());
+			strNavLine.Format(_T("<a href=\".") + strNavUrl + _T("&amp;startpos=%d\">") + _GetPlainResString(IDS_WAP_NEXT) + _T("</a> "), startpos+thePrefs.GetWapMaxItemsInPages());
 		}
 		if(startpos>0){
 			CString strTemp;
 			startpos-=thePrefs.GetWapMaxItemsInPages();
 			if (startpos<0) startpos = 0;
-			strTemp.Format("<a href=\"." + strNavUrl + "&amp;startpos=%d\">" + _GetPlainResString(IDS_WAP_PREV) + "</a>&nbsp;", startpos);
+			strTemp.Format(_T("<a href=\".") + strNavUrl + _T("&amp;startpos=%d\">") + _GetPlainResString(IDS_WAP_PREV) + _T("</a>&nbsp;"), startpos);
 			strNavLine.Insert(0,strTemp);
 		}
-		OutList.Replace("[NavigationLine]", strNavLine);
+		OutList.Replace(_T("[NavigationLine]"), strNavLine);
 
-		if (thePrefs.GetCatCount()>1) InsertCatBox(OutList,0,_GetPlainResString(IDS_TOCAT)+":&nbsp;<br/>"); else OutList.Replace("[CATBOX]","");
-		OutList.Replace("[URL]", _SpecialChars("." + Data.sURL));
+		if (thePrefs.GetCatCount()>1) InsertCatBox(OutList,0,_GetPlainResString(IDS_TOCAT)+_T(":&nbsp;<br/>")); else OutList.Replace(_T("[CATBOX]"),_T(""));
+		OutList.Replace(_T("[URL]"), _SpecialChars(_T(".") + Data.sURL));
 		
-		OutList.Replace("[RESULTLIST]", result);
-		OutList.Replace("[Result]", _GetPlainResString(IDS_SW_RESULT) );
-		OutList.Replace("[Session]", sSession);
-		OutList.Replace("[RefetchResults]", _GetPlainResString(IDS_SW_REFETCHRES));
-		OutList.Replace("[Download]", _GetPlainResString(IDS_DOWNLOAD));
-		OutList.Replace("[Filename]", _GetPlainResString(IDS_DL_FILENAME));
-		OutList.Replace("[Filesize]", _GetPlainResString(IDS_DL_SIZE));
-		OutList.Replace("[Filehash]", _GetPlainResString(IDS_FILEHASH));
-		OutList.Replace("[Sources]", _GetPlainResString(IDS_DL_SOURCES));
-		OutList.Replace("[Section]", _GetPlainResString(IDS_SW_SEARCHBOX));
-		OutList.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-		OutList.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
-		OutList.Replace("[SortBy]", _GetPlainResString(IDS_WAP_SORTBY));
+		OutList.Replace(_T("[RESULTLIST]"), result);
+		OutList.Replace(_T("[Result]"), _GetPlainResString(IDS_SW_RESULT) );
+		OutList.Replace(_T("[Session]"), sSession);
+		OutList.Replace(_T("[RefetchResults]"), _GetPlainResString(IDS_SW_REFETCHRES));
+		OutList.Replace(_T("[Download]"), _GetPlainResString(IDS_DOWNLOAD));
+		OutList.Replace(_T("[Filename]"), _GetPlainResString(IDS_DL_FILENAME));
+		OutList.Replace(_T("[Filesize]"), _GetPlainResString(IDS_DL_SIZE));
+		OutList.Replace(_T("[Filehash]"), _GetPlainResString(IDS_FILEHASH));
+		OutList.Replace(_T("[Sources]"), _GetPlainResString(IDS_DL_SOURCES));
+		OutList.Replace(_T("[Section]"), _GetPlainResString(IDS_SW_SEARCHBOX));
+		OutList.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+		OutList.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
+		OutList.Replace(_T("[SortBy]"), _GetPlainResString(IDS_WAP_SORTBY));
 		return OutList;
 
 	}
 	else
 	{ // No showlist
-		Out.Replace("[Name]", _GetPlainResString(IDS_SW_NAME));
-		Out.Replace("[Type]", _GetPlainResString(IDS_TYPE));
-		Out.Replace("[Any]", _GetPlainResString(IDS_SEARCH_ANY));
-		Out.Replace("[Audio]", _GetPlainResString(IDS_SEARCH_AUDIO));
-		Out.Replace("[Image]", _GetPlainResString(IDS_SEARCH_PICS));
+		Out.Replace(_T("[Name]"), _GetPlainResString(IDS_SW_NAME));
+		Out.Replace(_T("[Type]"), _GetPlainResString(IDS_TYPE));
+		Out.Replace(_T("[Any]"), _GetPlainResString(IDS_SEARCH_ANY));
+		Out.Replace(_T("[Audio]"), _GetPlainResString(IDS_SEARCH_AUDIO));
+		Out.Replace(_T("[Image]"), _GetPlainResString(IDS_SEARCH_PICS));
 
-		Out.Replace("[Video]", _GetPlainResString(IDS_SEARCH_VIDEO));
-		Out.Replace("[Other]", "Other");
-		Out.Replace("[Search]", _GetPlainResString(IDS_SW_SEARCHBOX));
-		Out.Replace("[Session]", sSession);
+		Out.Replace(_T("[Video]"), _GetPlainResString(IDS_SEARCH_VIDEO));
+		Out.Replace(_T("[Other]"), _T("Other"));
+		Out.Replace(_T("[Search]"), _GetPlainResString(IDS_SW_SEARCHBOX));
+		Out.Replace(_T("[Session]"), sSession);
 
-		Out.Replace("[SizeMin]", _GetPlainResString(IDS_SEARCHMINSIZE));
-		Out.Replace("[SizeMax]", _GetPlainResString(IDS_SEARCHMAXSIZE));
-		Out.Replace("[Availabl]", _GetPlainResString(IDS_SEARCHAVAIL));
-		Out.Replace("[Extention]", _GetPlainResString(IDS_SEARCHEXTENTION));
+		Out.Replace(_T("[SizeMin]"), _GetPlainResString(IDS_SEARCHMINSIZE));
+		Out.Replace(_T("[SizeMax]"), _GetPlainResString(IDS_SEARCHMAXSIZE));
+		Out.Replace(_T("[Availabl]"), _GetPlainResString(IDS_SEARCHAVAIL));
+		Out.Replace(_T("[Extention]"), _GetPlainResString(IDS_SEARCHEXTENTION));
 		//Out.Replace("[Global]", _GetPlainResString(IDS_GLOBALSEARCH2));
-		Out.Replace("[MB]", _GetPlainResString(IDS_MBYTES));
-		Out.Replace("[Section]", _GetPlainResString(IDS_SW_SEARCHBOX));
-		Out.Replace("[Yes]", _GetPlainResString(IDS_YES));
-		Out.Replace("[No]", _GetPlainResString(IDS_NO));
-		Out.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-		Out.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
+		Out.Replace(_T("[MB]"), _GetPlainResString(IDS_MBYTES));
+		Out.Replace(_T("[Section]"), _GetPlainResString(IDS_SW_SEARCHBOX));
+		Out.Replace(_T("[Yes]"), _GetPlainResString(IDS_YES));
+		Out.Replace(_T("[No]"), _GetPlainResString(IDS_NO));
+		Out.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+		Out.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
 
-		Out.Replace("[METHOD]", _GetPlainResString(IDS_METHOD));
-		Out.Replace("[USESSERVER]", _GetPlainResString(IDS_SERVER));
-		Out.Replace("[Global]", _GetPlainResString(IDS_GLOBALSEARCH));
-		Out.Replace("[KADEMLIA]", _GetPlainResString(IDS_KADEMLIA) );
+		Out.Replace(_T("[METHOD]"), _GetPlainResString(IDS_METHOD));
+		Out.Replace(_T("[USESSERVER]"), _GetPlainResString(IDS_SERVER));
+		Out.Replace(_T("[Global]"), _GetPlainResString(IDS_GLOBALSEARCH));
+		Out.Replace(_T("[KADEMLIA]"), _GetPlainResString(IDS_KADEMLIA) );
 		return Out;
 	}
 }
@@ -3615,38 +3598,38 @@ void CWapServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 	CString tempBuf2,tempBuf3;
 	CString tempBuf;
 	int pos=0;
-	tempBuf3 = "<select name=\"cat\">";
+	tempBuf3 = _T("<select name=\"cat\">");
 
 	for (int i=0;i< thePrefs.GetCatCount();i++) {
 		pos++;
 		if(preselect==i)
-			tempBuf3.Format("<select name=\"cat\" ivalue=\"%i\">",pos);
+			tempBuf3.Format(_T("<select name=\"cat\" ivalue=\"%i\">"),pos);
 		if(jump)
-			tempBuf2.Format("<option value=\"%i\" onpick=\"./script.wmls#GotoCat('%i','[URL]')\">%s</option>",i,i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
+			tempBuf2.Format(_T("<option value=\"%i\" onpick=\"./script.wmls#GotoCat('%i','[URL]')\">%s</option>"),i,i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
 		else
-			tempBuf2.Format("<option value=\"%i\">%s</option>",i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
+			tempBuf2.Format(_T("<option value=\"%i\">%s</option>"),i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
 		tempBuf.Append(tempBuf2);
 	}
 	if (extraCats) {
 		if (thePrefs.GetCatCount()>1){
 			pos++;
-			tempBuf2.Format("<option>------------</option>");
+			tempBuf2.Format(_T("<option>------------</option>"));
 			tempBuf.Append(tempBuf2);
 		}
 	
 		for (int i=(thePrefs.GetCatCount()>1)?1:2;i<=12;i++) {
 			pos++;
 			if(preselect==-i)
-				tempBuf3.Format("<select name=\"cat\" ivalue=\"%i\">",pos);
+				tempBuf3.Format(_T("<select name=\"cat\" ivalue=\"%i\">"),pos);
 			if(jump)
-				tempBuf2.Format("<option value=\"%i\" onpick=\"./script.wmls#GotoCat('%i','[URL]')\">%s</option>",-i,-i, GetSubCatLabel(-i) );
+				tempBuf2.Format(_T("<option value=\"%i\" onpick=\"./script.wmls#GotoCat('%i','[URL]')\">%s</option>"),-i,-i, GetSubCatLabel(-i) );
 			else
-				tempBuf2.Format("<option value=\"%i\">%s</option>",-i, GetSubCatLabel(-i) );
+				tempBuf2.Format(_T("<option value=\"%i\">%s</option>"),-i, GetSubCatLabel(-i) );
 			tempBuf.Append(tempBuf2);
 		}
 	}
 	tempBuf.Insert(0,tempBuf3);
-	tempBuf.Append("</select>");
+	tempBuf.Append(_T("</select>"));
 	//if(jump) tempBuf.Append("<a href=\"./script.wmls#GotoCat($(cat),'[URL]')\">Go</a>");
 	Out.Replace("[CATBOX]",boxlabel+tempBuf);
 }
@@ -3666,21 +3649,21 @@ CString CWapServer::GetSubCatLabel(int cat) {
 		case -11: return _GetPlainResString(IDS_SEARCH_ARC);
 		case -12: return _GetPlainResString(IDS_SEARCH_CDIMG);
 	}
-	return "?";
+	return _T("?");
 }
 
 // Elandal: moved from CUpDownClient
 // Webserber [kuchin]
 CString CWapServer::GetUploadFileInfo(CUpDownClient* client)
 {
-	if(client == NULL) return "";
+	if(client == NULL) return _T("");
 	CString sRet;
 
 	// build info text and display it
 	sRet.Format(GetResString(IDS_USERINFO), client->GetUserName(), client->GetUserIDHybrid());
 	if (client->reqfile)
 	{
-		sRet += GetResString(IDS_SF_REQUESTED) + CString(client->reqfile->GetFileName()) + "\n";
+		sRet += GetResString(IDS_SF_REQUESTED) + CString(client->reqfile->GetFileName()) + _T("\n");
 		CString stat;
 		stat.Format(GetResString(IDS_FILESTATS_SESSION)+GetResString(IDS_FILESTATS_TOTAL),
 			client->reqfile->statistic.GetAccepts(),
@@ -3697,7 +3680,7 @@ CString CWapServer::GetUploadFileInfo(CUpDownClient* client)
 	}
 	return sRet;
 
-	return "";
+	return _T("");
 }
 
 void CWapServer::DrawLineInCxImage(CxImage *image,int x1, int y1, int x2, int y2, COLORREF color){
@@ -3774,9 +3757,9 @@ void CWapServer::SendGraphFile(WapThreadData Data, int file_val){
 		return;
 	}
 
-	png=BrowserAccept(Data,"image/png");
-	gif=BrowserAccept(Data,"image/gif");
-	if(!(png || gif) && BrowserAccept(Data,"image/*")){
+	png=BrowserAccept(Data,_T("image/png"));
+	gif=BrowserAccept(Data,_T("image/gif"));
+	if(!(png || gif) && BrowserAccept(Data,_T("image/*"))){
 		png=true;
 		gif=true;
 	}
@@ -3896,13 +3879,13 @@ void CWapServer::SendScriptFile(WapThreadData Data){
 	if(pThis == NULL)
 		return;
 
-	if(!BrowserAccept(Data,"text/vnd.wap.wmlscript")){
+	if(!BrowserAccept(Data,_T("text/vnd.wap.wmlscript"))){
 		CString Out;
-		Out ="<?xml version=\"1.0\" encoding=\""+ _GetWebCharSet() +"\"?>";
-		Out +="<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">";
-		Out +="<wml><card><p>";
-		Out +="Error: This browser do not support WMLScript";
-		Out +="</p></card></wml>";
+		Out =_T("<?xml version=\"1.0\" encoding=\"")+ _GetWebCharSet() +_T("\"?>");
+		Out +=_T("<!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\">");
+		Out +=_T("<wml><card><p>");
+		Out +=_T("Error: This browser do not support WMLScript");
+		Out +=_T("</p></card></wml>");
 		Data.pSocket->SendContent(WMLInit, Out, Out.GetLength());
 		return;
 	}
@@ -3910,46 +3893,46 @@ void CWapServer::SendScriptFile(WapThreadData Data){
 	CString wmlsStr, question;
 	
 	wmlsStr = pThis->m_Templates.sScriptFile;
-	wmlsStr.Replace("[Yes]",RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_YES)));
-	wmlsStr.Replace("[No]",RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_NO)));
-	wmlsStr.Replace("[ConfirmRemoveServer]", RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_WEB_CONFIRM_REMOVE_SERVER)));
+	wmlsStr.Replace(_T("[Yes]"),RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_YES)));
+	wmlsStr.Replace(_T("[No]"),RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_NO)));
+	wmlsStr.Replace(_T("[ConfirmRemoveServer]"), RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_WEB_CONFIRM_REMOVE_SERVER)));
 
 	if(!wmlsStr.IsEmpty()) wmlsStr+="\n\n";
 
 	//Confirm cancel
 	question=RemoveWMLScriptInvalidChars(_GetPlainResStringNoQuote(IDS_Q_CANCELDL2));
-	question.Replace("\\n","");
-	wmlsStr += "extern function confirmcancel(curl) {\n"
-			"var a = Dialogs.confirm(\"" + 
-			question + "\", "
-			"\"" + RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_YES)) + "\", " +
-			"\"" + RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_NO)) + "\");\n"
-			"if(a) WMLBrowser.go(curl);\n"
-			"}\n\n";
+	question.Replace(_T("\\n"),_T(""));
+	wmlsStr += _T("extern function confirmcancel(curl) {\n")
+			_T("var a = Dialogs.confirm(\"") + 
+			question + _T("\", ")
+			_T("\"") + RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_YES)) + _T("\", ") +
+			_T("\"") + RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_NO)) + _T("\");\n")
+			_T("if(a) WMLBrowser.go(curl);\n")
+			_T("}\n\n");
 
 	//Access denied
-	wmlsStr += "extern function accessdenied() {\n"
-			"var a = Dialogs.alert(\"" +
-			RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_ACCESSDENIED)) + "\");\n"
-			"}\n\n";
+	wmlsStr += _T("extern function accessdenied() {\n")
+			_T("var a = Dialogs.alert(\"") +
+			RemoveWMLScriptInvalidChars(_GetPlainResString(IDS_ACCESSDENIED)) + _T("\");\n")
+			_T("}\n\n");
 
 	//Shows an ed2klink
-	wmlsStr += "extern function showed2k(fname,hash,size) {\n"
-			"var ed2k = \"ed2k://|file|\" + fname + \"|\" + size + \"|\" + hash + \"|/\";\n"
-			"var a = Dialogs.alert(ed2k);\n"
-			"}";
+	wmlsStr += _T("extern function showed2k(fname,hash,size) {\n")
+			_T("var ed2k = \"ed2k://|file|\" + fname + \"|\" + size + \"|\" + hash + \"|/\";\n")
+			_T("var a = Dialogs.alert(ed2k);\n")
+			_T("}");
 
-	Data.pSocket->SendContent("Server: eMule\r\nConnection: close\r\nContent-Type: text/vnd.wap.wmlscript\r\n", wmlsStr, wmlsStr.GetLength());
+	Data.pSocket->SendContent(_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/vnd.wap.wmlscript\r\n"), wmlsStr, wmlsStr.GetLength());
 }
 
 bool CWapServer::BrowserAccept(WapThreadData Data, CString sAccept){
 	int curPos= 0;
 	
 	CString header(Data.pSocket->m_pBuf,Data.pSocket->m_dwHttpHeaderLen);
-	header.Replace("\r\n","\n");
+	header.Replace(_T("\r\n"),_T("\n"));
 
 	CString resToken;
-	resToken=header.Tokenize("\n",curPos);
+	resToken=header.Tokenize(_T("\n"),curPos);
 	while (resToken != "")
 	{
 		if(resToken.Left(7).MakeLower()=="accept:")
@@ -3973,16 +3956,16 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 	bool png=false, gif=false;
 	bool sended = false;		
 
-	png=BrowserAccept(Data,"image/png");
-	gif=BrowserAccept(Data,"image/gif");
-	if(!(png || gif) && BrowserAccept(Data,"image/*")){
+	png=BrowserAccept(Data,_T("image/png"));
+	gif=BrowserAccept(Data,_T("image/gif"));
+	if(!(png || gif) && BrowserAccept(Data,_T("image/*"))){
 		png=true;
 		gif=true;
 	}
 
-	CString pngFile = filename.Left(filename.ReverseFind('.')) + ".png";
-	CString gifFile = filename.Left(filename.ReverseFind('.')) + ".gif";
-	CString wbmpFile = filename.Left(filename.ReverseFind('.')) + ".wbmp";
+	CString pngFile = filename.Left(filename.ReverseFind(_T('.'))) + _T(".png");
+	CString gifFile = filename.Left(filename.ReverseFind(_T('.'))) + _T(".gif");
+	CString wbmpFile = filename.Left(filename.ReverseFind(_T('.'))) + _T(".wbmp");
 
 	bool pngExist,gifExist,wbmpExist;
 	pngExist=FileExist(pngFile);
@@ -3996,7 +3979,7 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 	CxImage *cImage;
 	BYTE * buffer = NULL;
 	long size = 0;
-	CString moreContentType = "Last-Modified: " + pThis->m_Params.sLastModified + "\r\n" + "ETag: " + pThis->m_Params.sETag + "\r\n";
+	CString moreContentType = _T("Last-Modified: ") + pThis->m_Params.sLastModified + _T("\r\n") + _T("ETag: ") + pThis->m_Params.sETag + _T("\r\n");
 
 	if(!(png || gif) || thePrefs.GetWapAllwaysSendBWImages()){
 		if(wbmpExist){
@@ -4016,19 +3999,19 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 				sizeWBMP=FileSize(wbmpFile);
 
 				if(bufferPNG && bufferGIF && (sizePNG<=sizeGIF) && (sizePNG<=sizeWBMP)){
-					Data.pSocket->SendContent("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n" + moreContentType, bufferPNG, sizePNG);
+					Data.pSocket->SendContent(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType, bufferPNG, sizePNG);
 				}
 				else if(bufferPNG && bufferGIF && (sizeGIF<=sizePNG) && (sizeGIF<=sizeWBMP)){
-					Data.pSocket->SendContent("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n" + moreContentType, bufferGIF, sizeGIF);
+					Data.pSocket->SendContent(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType, bufferGIF, sizeGIF);
 				}
 				else if(bufferPNG && (sizePNG<=sizeWBMP)){
-					Data.pSocket->SendContent("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n" + moreContentType, bufferPNG, sizePNG);
+					Data.pSocket->SendContent(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType, bufferPNG, sizePNG);
 				}
 				else if(bufferGIF && (sizeGIF<=sizeWBMP)){
-					Data.pSocket->SendContent("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n" + moreContentType, bufferGIF, sizeGIF);
+					Data.pSocket->SendContent(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType, bufferGIF, sizeGIF);
 				}
 				else {
-					SendFile(Data,wbmpFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n" + moreContentType);
+					SendFile(Data,wbmpFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n") + moreContentType);
 				}
 
 				delete[] bufferPNG;
@@ -4055,26 +4038,26 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 		if(png && gif){
 			if(pngExist && gifExist){
 				if(FileSize(pngFile)<FileSize(gifFile))
-					SendFile(Data,pngFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n" + moreContentType);
+					SendFile(Data,pngFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType);
 				else
-					SendFile(Data,gifFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n" + moreContentType);
+					SendFile(Data,gifFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType);
 			}
 			else if(pngExist)
-				SendFile(Data,pngFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n" + moreContentType);
+				SendFile(Data,pngFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType);
 			else if(gifExist)
-				SendFile(Data,gifFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n" + moreContentType);
+				SendFile(Data,gifFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType);
 			else if(wbmpExist)
-				SendFile(Data,wbmpFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n" + moreContentType);
+				SendFile(Data,wbmpFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n") + moreContentType);
 			else
 				Data.pSocket->SendError404();
 		}
 		else if(png || gif){
 			if(png && pngExist)
-				SendFile(Data,pngFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n" + moreContentType);
+				SendFile(Data,pngFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType);
 			else if(gif && gifExist)
-				SendFile(Data,gifFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n" + moreContentType);
+				SendFile(Data,gifFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType);
 			else if(wbmpExist)
-				SendFile(Data,wbmpFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n" + moreContentType);
+				SendFile(Data,wbmpFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n") + moreContentType);
 			else{
 				if(pngExist){
 					cImage = new CxImage;
@@ -4099,7 +4082,7 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 		}
 		else{
 			if(wbmpExist)
-				SendFile(Data,wbmpFile,"Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n" + moreContentType);
+				SendFile(Data,wbmpFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n") + moreContentType);
 			else {
 				if(pngExist){
 					cImage = new CxImage;
@@ -4140,9 +4123,9 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 	CxImage progressImage;
 	bool png=false, gif=false;
 
-	png=BrowserAccept(Data, "image/png");
-	gif=BrowserAccept(Data, "image/gif");
-	if(!(png || gif) && BrowserAccept(Data,"image/*")){
+	png=BrowserAccept(Data, _T("image/png"));
+	gif=BrowserAccept(Data, _T("image/gif"));
+	if(!(png || gif) && BrowserAccept(Data,_T("image/*"))){
 		png=true;
 		gif=true;
 	}
@@ -4188,7 +4171,7 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 	int curcolor;
 	for (uint16 i=1;i<progressImage.GetWidth()-1;i++) {
 		curcolor = int(s_ChunkBar.GetAt(i-1)) - int('0');
-		if(curcolor>9) MessageBox(NULL,"Ups","Ups",MB_OK);
+		if(curcolor>9) MessageBox(NULL,_T("Ups"),_T("Ups"),MB_OK);
 		if((png || gif) && !thePrefs.GetWapAllwaysSendBWImages())
 		{
 			for(int y=0;y<10;y++)
@@ -4314,8 +4297,8 @@ void CWapServer::SendSmallestCxImage(WapThreadData Data, CxImage *cImage){
 	bool png=false, gif=false, bwImage;
 	ENUM_WAP_IMAGE_FORMAT imageToSend = WITHOUT_IMAGE;
 
-	png=BrowserAccept(Data, "image/png");
-	gif=BrowserAccept(Data, "image/gif");
+	png=BrowserAccept(Data, _T("image/png"));
+	gif=BrowserAccept(Data, _T("image/gif"));
 	if(!(png || gif) && BrowserAccept(Data,"image/*")){
 		png=true;
 		gif=true;
@@ -4395,14 +4378,14 @@ void CWapServer::SendSmallestCxImage(WapThreadData Data, CxImage *cImage){
 			break;
 		case PNG_IMAGE:
 			//AddDebugLogLine(false, "Wap Server: Send PNG CxImage");
-			Data.pSocket->SendContent("Server: eMule\r\nConnection: close\r\nCache-Control: no-cache\r\nContent-Type: image/png\r\n", bufferPNG, sizePNG);
+			Data.pSocket->SendContent(_T("Server: eMule\r\nConnection: close\r\nCache-Control: no-cache\r\nContent-Type: image/png\r\n"), bufferPNG, sizePNG);
 			break;
 		case WBMP_IMAGE:
 			//AddDebugLogLine(false, "Wap Server: Send WBMP CxImage");
-			Data.pSocket->SendContent("Server: eMule\r\nConnection: close\r\nCache-Control: no-cache\r\nContent-Type: image/vnd.wap.wbmp\r\n", bufferWBMP, sizeWBMP);
+			Data.pSocket->SendContent(_T("Server: eMule\r\nConnection: close\r\nCache-Control: no-cache\r\nContent-Type: image/vnd.wap.wbmp\r\n"), bufferWBMP, sizeWBMP);
 			break;
 		default:
-			AddDebugLogLine(false, "Wap Server: Error sending CxImage -> No image send");
+			AddDebugLogLine(false, _T("Wap Server: Error sending CxImage -> No image send"));
 			Data.pSocket->SendError404();
 			break;
 	}
@@ -4419,90 +4402,90 @@ CString CWapServer::RemoveWMLScriptInvalidChars(CString input)
 	CString tmpStr;
 	tmpStr = input;
 	for(int i=0; i<input.GetLength(); i++){ 
-		char c;
+		TCHAR c;
 		c = input.GetAt(i);
 		switch (c){
 			//Lower Case:
-			case 'á':
-			case 'ä':
-			case 'à':
-			case 'â':
-				c = 'a';
+			case _T('á'):
+			case _T('ä'):
+			case _T('à'):
+			case _T('â'):
+				c = _T('a');
 				break;
-			case 'é':
-			case 'ë':
-			case 'è':
-			case 'ê':
-				c = 'e';
+			case _T('é'):
+			case _T('ë'):
+			case _T('è'):
+			case _T('ê'):
+				c = _T('e');
 				break;
-			case 'í':
-			case 'ï':
-			case 'ì':
-			case 'î':
-				c = 'i';
+			case _T('í'):
+			case _T('ï'):
+			case _T('ì'):
+			case _T('î'):
+				c = _T('i');
 				break;
-			case 'ó':
-			case 'ö':
-			case 'ò':
-			case 'ô':
-				c = 'o';
+			case _T('ó'):
+			case _T('ö'):
+			case _T('ò'):
+			case _T('ô'):
+				c = _T('o');
 				break;
-			case 'ú':
-			case 'ü':
-			case 'ù':
-			case 'û':
-				c = 'u';
+			case _T('ú'):
+			case _T('ü'):
+			case _T('ù'):
+			case _T('û'):
+				c = _T('u');
 				break;
-			case 'ý':
-			case 'ÿ':
-				c = 'y';
+			case _T('ý'):
+			case _T('ÿ'):
+				c = _T('y');
 				break;
-			case 'ñ':
-				c = 'n';
+			case _T('ñ'):
+				c = _T('n');
 				break;
 
 			//Upper Case:
-			case 'Á':
-			case 'Ä':
-			case 'À':
-			case 'Â':
-				c = 'A';
+			case _T('Á'):
+			case _T('Ä'):
+			case _T('À'):
+			case _T('Â'):
+				c = _T('A');
 				break;
-			case 'É':
-			case 'Ë':
-			case 'È':
-			case 'Ê':
-				c = 'E';
+			case _T('É'):
+			case _T('Ë'):
+			case _T('È'):
+			case _T('Ê'):
+				c = _T('E');
 				break;
-			case 'Í':
-			case 'Ï':
-			case 'Ì':
-			case 'Î':
-				c = 'I';
+			case _T('Í'):
+			case _T('Ï'):
+			case _T('Ì'):
+			case _T('Î'):
+				c = _T('I');
 				break;
-			case 'Ó':
-			case 'Ö':
-			case 'Ò':
-			case 'Ô':
-				c = 'O';
+			case _T('Ó'):
+			case _T('Ö'):
+			case _T('Ò'):
+			case _T('Ô'):
+				c = _T('O');
 				break;
-			case 'Ú':
-			case 'Ü':
-			case 'Ù':
-			case 'Û':
-				c = 'U';
+			case _T('Ú'):
+			case _T('Ü'):
+			case _T('Ù'):
+			case _T('Û'):
+				c = _T('U');
 				break;
-			case 'Ý':
-				c = 'Y';
+			case _T('Ý'):
+				c = _T('Y');
 				break;
-			case 'Ñ':
-				c = 'N';
+			case _T('Ñ'):
+				c = _T('N');
 				break;
 
 			//Default Chars
 			default:
 				if((unsigned char)c >= 128)
-					c = '_';
+					c = _T('_');
 				break;
 		}
 		tmpStr.SetAt(i,c);
@@ -4514,67 +4497,67 @@ CString	CWapServer::_GetKadPage(WapThreadData Data)
 {
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if(pThis == NULL)
-		return "";
+		return _T("");
 
-	if (!thePrefs.GetNetworkKademlia()) return "";
+	if (!thePrefs.GetNetworkKademlia()) return _T("");
 
-	CString sSession = _ParseURL(Data.sURL, "ses");
+	CString sSession = _ParseURL(Data.sURL, _T("ses"));
 	CString Out = pThis->m_Templates.sKad;
-	Out.Replace("[Session]", sSession);
+	Out.Replace(_T("[Session]"), sSession);
 
-	if (_ParseURL(Data.sURL, "bootstrap") != "" && IsSessionAdmin(Data,sSession) ) {
-		CString dest=_ParseURL(Data.sURL, "ipport");
-		int pos=dest.Find(':');
+	if (_ParseURL(Data.sURL, _T("bootstrap")) != "" && IsSessionAdmin(Data,sSession) ) {
+		CString dest=_ParseURL(Data.sURL, _T("ipport"));
+		int pos=dest.Find(_T(':'));
 		if (pos!=-1) {
-			uint16 port=atoi(dest.Right( dest.GetLength()-pos-1));
+			uint16 port=_ttoi(dest.Right( dest.GetLength()-pos-1));
 			CString ip=dest.Left(pos);
 			Kademlia::CKademlia::bootstrap(ip,port);
 		}
 	}
 
-	if (_ParseURL(Data.sURL, "c") == "connect" && IsSessionAdmin(Data,sSession) ) {
+	if (_ParseURL(Data.sURL, _T("c")) == "connect" && IsSessionAdmin(Data,sSession) ) {
 		Kademlia::CKademlia::start();
 	}
 
-	if (_ParseURL(Data.sURL, "c") == "disconnect" && IsSessionAdmin(Data,sSession) ) {
+	if (_ParseURL(Data.sURL, _T("c")) == "disconnect" && IsSessionAdmin(Data,sSession) ) {
 		Kademlia::CKademlia::stop();
 	}
 
 	// check the condition if bootstrap is possible
 	if ( Kademlia::CKademlia::isRunning() &&  !Kademlia::CKademlia::isConnected()) {
 
-		Out.Replace("[BOOTSTRAPLINE]", pThis->m_Templates.sBootstrapLine );
+		Out.Replace(_T("[BOOTSTRAPLINE]"), pThis->m_Templates.sBootstrapLine );
 
 		// Bootstrap
-		CString bsip=_ParseURL(Data.sURL, "bsip");
-		uint16 bsport=atoi(_ParseURL(Data.sURL, "bsport"));
+		CString bsip=_ParseURL(Data.sURL, _T("bsip"));
+		uint16 bsport=_ttoi(_ParseURL(Data.sURL, _T("bsport")));
 
 		if (!bsip.IsEmpty() && bsport>0)
 			Kademlia::CKademlia::bootstrap(bsip,bsport);
-	} else Out.Replace("[BOOTSTRAPLINE]", "" );
+	} else Out.Replace(("[BOOTSTRAPLINE]"), _T("") );
 
 	// Infos
 	CString info;
 	if (thePrefs.GetNetworkKademlia()) {
 		CString buffer;
 			
-			buffer.Format("%s: %i<br/>", _GetPlainResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->contactList->GetItemCount());
+			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADCONTACTLAB), theApp.emuledlg->kademliawnd->contactList->GetItemCount());
 			info.Append(buffer);
 
-			buffer.Format("%s: %i<br/>", _GetPlainResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->searchList->GetItemCount());
+			buffer.Format(_T("%s: %i<br/>"), _GetPlainResString(IDS_KADSEARCHLAB), theApp.emuledlg->kademliawnd->searchList->GetItemCount());
 			info.Append(buffer);
 
 		
-	} else info="";
-	Out.Replace("[KADSTATSDATA]",info);
+	} else info=_T("");
+	Out.Replace(_T("[KADSTATSDATA]"),info);
 
-	Out.Replace("[BS_IP]",_GetPlainResString(IDS_IP));
-	Out.Replace("[BS_PORT]",_GetPlainResString(IDS_PORT));
-	Out.Replace("[BOOTSTRAP]",_GetPlainResString(IDS_BOOTSTRAP));
-	Out.Replace("[KADSTAT]",_GetPlainResString(IDS_STATSSETUPINFO));
-	Out.Replace("[Section]", _GetPlainResString(IDS_KADEMLIA));
-	Out.Replace("[Home]", _GetPlainResString(IDS_WAP_HOME));
-	Out.Replace("[Back]", _GetPlainResString(IDS_WAP_BACK));
+	Out.Replace(_T("[BS_IP]"),_GetPlainResString(IDS_IP));
+	Out.Replace(_T("[BS_PORT]"),_GetPlainResString(IDS_PORT));
+	Out.Replace(_T("[BOOTSTRAP]"),_GetPlainResString(IDS_BOOTSTRAP));
+	Out.Replace(_T("[KADSTAT]"),_GetPlainResString(IDS_STATSSETUPINFO));
+	Out.Replace(_T("[Section]"), _GetPlainResString(IDS_KADEMLIA));
+	Out.Replace(_T("[Home]"), _GetPlainResString(IDS_WAP_HOME));
+	Out.Replace(_T("[Back]"), _GetPlainResString(IDS_WAP_BACK));
 
 	return Out;
 }

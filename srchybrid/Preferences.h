@@ -1673,7 +1673,7 @@ protected:
 	// added by MoNKi [ MoNKi: -Wap Server- ]
 public:
 	static CString	GetWapTemplate()				{ return CString(m_sWapTemplateFile);}
-	static void		SetWapTemplate(CString in)		{ sprintf(m_sWapTemplateFile,"%s",in);}
+	static void		SetWapTemplate(CString in)		{ _stprintf(m_sWapTemplateFile,_T("%s"),in);}
 	static bool		GetWapServerEnabled()			{ return m_bWapEnabled; }
 	static void		SetWapServerEnabled(bool on)	{ m_bWapEnabled=on; }
 	static uint16	GetWapPort()					{ return m_nWapPort; }

@@ -46,12 +46,12 @@ void CWapSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData
 		sURL = sHeader.Trim();
 
 	else if(sHeader.Left(4) == "POST")
-		sURL = "?" + sData.Trim();	// '?' to imitate GET syntax for ParseURL
+		sURL = _T("?") + sData.Trim();	// '?' to imitate GET syntax for ParseURL
 
-	if(sURL.Find(" ") > -1)
-		sURL = sURL.Mid(sURL.Find(" ")+1, sURL.GetLength());
-	if(sURL.Find(" ") > -1)
-		sURL = sURL.Left(sURL.Find(" "));
+	if(sURL.Find(_T(" ")) > -1)
+		sURL = sURL.Mid(sURL.Find(_T(" "))+1, sURL.GetLength());
+	if(sURL.Find(_T(" ")) > -1)
+		sURL = sURL.Left(sURL.Find(_T(" ")));
 
 	if (sURL.GetLength()>5 && sURL.Right(5).MakeLower()==".wbmp" || sURL.Right(5).MakeLower()==".wmls"
 		|| sURL.Right(4).MakeLower()==".png" || sURL.Right(4).MakeLower()==".gif")
