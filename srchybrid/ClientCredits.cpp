@@ -121,9 +121,9 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP)
 	//Morph Start - Added by AndCycle, reduce a litte CPU usage for rating count
 	if(m_cssCurrentCreditSystem != theApp.glob_prefs->GetCreditSystem()){
 		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
-	}else if(m_bCheckScoreRatio = false){
+	}else if(m_bCheckScoreRatio == false){
 		return m_fLastScoreRatio;
-	}else if(m_bCheckScoreRatio = true){
+	}else if(m_bCheckScoreRatio == true){
 		m_bCheckScoreRatio = false;
 	}
 	//Morph End - Added by AndCycle, reduce a litte CPU usage for rating count
