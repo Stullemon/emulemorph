@@ -102,7 +102,7 @@ CUploadQueue::CUploadQueue(CPreferences* in_prefs){
 	//Removed by SiRoB, Not used in this mod
 	// END By BadWolf - Accurate Speed Measurement
 
-//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
+//MORPH START - Added by SiRoB, ZZ Upload System 20040213-1623
 	m_MaxActiveClients = 0;
 	m_MaxActiveClientsShortTime = 0;
 
@@ -118,7 +118,8 @@ CUploadQueue::CUploadQueue(CPreferences* in_prefs){
 	friendDatarate = 0;
 	totalCompletedBytes = 0;
 	m_FirstRanOutOfSlotsTick = 0;
-//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
+	m_averageActiveClients = 0;
+//MORPH END - Added by SiRoB, ZZ Upload System 20040213-1623
 }
 
 /**
@@ -607,6 +608,8 @@ void CUploadQueue::Process() {
 
 	uint32 tempMaxActiveClients = 0;
 	uint32 tempMaxActiveClientsShortTime = 0;
+    uint32 tempSumActiveClients = 0;
+    uint32 tempCountActiveClients = 0;
 	POSITION activeClientsTickPos = activeClients_tick_list.GetHeadPosition();
 	POSITION activeClientsListPos = activeClients_list.GetHeadPosition();
 	while(activeClientsListPos != NULL) {
@@ -617,6 +620,11 @@ void CUploadQueue::Process() {
 			tempMaxActiveClients = activeClientsSnapshot;
 		}
 
+        if(curTick - activeClientsTickSnapshot < 3 * 1000) {
+            tempCountActiveClients++;
+            tempSumActiveClients += activeClientsSnapshot;
+        }
+
 		if(activeClientsSnapshot > tempMaxActiveClientsShortTime && curTick - activeClientsTickSnapshot < 10 * 1000) {
 			tempMaxActiveClientsShortTime = activeClientsSnapshot;
 		}
@@ -626,6 +634,8 @@ void CUploadQueue::Process() {
 	}
 	m_MaxActiveClients = tempMaxActiveClients;
 	m_MaxActiveClientsShortTime = tempMaxActiveClientsShortTime;
+
+    m_averageActiveClients = (tempCountActiveClients>0?tempSumActiveClients/tempCountActiveClients:0);
 
 	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads();
 
@@ -645,9 +655,6 @@ void CUploadQueue::Process() {
 		}
 	}
 
-	//Morph - added by AndCycle, remove list
-	CTypedPtrList<CPtrList, CUpDownClient*> removeUploadinglist;
-
 	POSITION ulpos = uploadinglist.GetHeadPosition();
 	// The loop that feeds the upload slots with data.
 	while (ulpos != NULL) {
@@ -656,13 +663,14 @@ void CUploadQueue::Process() {
 		if (_iDbgHeap >= 2)
 			ASSERT_VALID(cur_client);
 		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
-		//Morph - modified by AndCycle, official code 41b29
 		if (!cur_client->socket){
-			removeUploadinglist.AddTail(cur_client);
+			RemoveFromUploadQueue(cur_client);
+			if(cur_client->Disconnected()){
+				delete cur_client;
+			}
 		} else {
-            cur_client->SendBlockData();
-        }
-		//Morph - modified by AndCycle, official code 41b29
+			cur_client->SendBlockData();
+		}
 	}
 
 	POSITION lastpos = uploadinglist.GetTailPosition();
@@ -671,20 +679,6 @@ void CUploadQueue::Process() {
 	if(lastpos != NULL) {
 		lastClient = uploadinglist.GetAt(lastpos);
 	}
-
-	//Morph - added by AndCycle, remove list
-	POSITION rmpos = removeUploadinglist.GetHeadPosition();
-	while( rmpos != NULL){
-		CUpDownClient* cur_client = removeUploadinglist.GetNext(rmpos);
-		//Morph - added by AndCycle, official code 41b29
-		RemoveFromUploadQueue(cur_client);
-		if(cur_client->Disconnected()){
-			delete cur_client;
-		}
-		//Morph - added by AndCycle, official code 41b29
-	}
-	removeUploadinglist.RemoveAll();
-	//Morph - added by AndCycle, remove list
 
 	// Save number of active clients for statistics
 	uint32 highestNumberOfFullyActivatedSlotsSinceLastCall = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
@@ -726,8 +720,8 @@ void CUploadQueue::Process() {
 
 		// open an extra slot so that we always have enough trickle slots
 		if(m_FirstRanOutOfSlotsTick != 0 && curTick-m_FirstRanOutOfSlotsTick > 500 &&
-		AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0 &&
-		(curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)
+           AcceptNewClient(uploadinglist.GetCount()+1) && waitinglist.GetCount() > 0 /*&&
+           (curTick - m_dwLastSlotAddTick > MINWAITBEFOREOPENANOTHERSLOTMS)*/
 		) {
 			// There's not enough open uploads. Open another one.
 			AddUpNextClient();

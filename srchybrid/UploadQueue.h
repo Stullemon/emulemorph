@@ -52,9 +52,10 @@ public:
 	bool	CheckForTimeOver(CUpDownClient* client);
 	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
-	//MORPH START - Added by SiRoB, ZZ Upload System 20030723-0133
+	//MORPH START - Added by SiRoB, ZZ Upload System 20040213-1623
 	int		GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
+	double  GetAverageActiveUploadsCount()          {return m_averageActiveClients;}
+	//MORPH END - Added by SiRoB, ZZ Upload System 20040213-1623
 
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
@@ -168,10 +169,11 @@ private:
 	uint32	failedupcount;
 	uint32	totaluploadtime;
 
-	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
+	//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20040213-1623
 	uint32  m_MaxActiveClients;
 	uint32  m_MaxActiveClientsShortTime;
-	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20030723-0133
+	double  m_averageActiveClients;
+	//MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System 20040213-1623
 
 	uint32	m_nLastStartUpload;
 	uint32	m_nUpDatarateOverhead;
