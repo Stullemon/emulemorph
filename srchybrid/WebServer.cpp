@@ -503,12 +503,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 				try
 				{
 					const CStringA* pstrOutA;
-#ifdef _UNICODE
 					CStringA strA(wc2utf8(Out));
 					pstrOutA = &strA;
-#else
-					pstrOutA = &Out;
-#endif
 					uLongf destLen = pstrOutA->GetLength() + 1024;
 					gzipOut = new TCHAR[destLen];
 					if(_GzipCompress((Bytef*)gzipOut, &destLen, (const Bytef*)(LPCSTR)*pstrOutA, pstrOutA->GetLength(), Z_DEFAULT_COMPRESSION) == Z_OK)
@@ -2678,14 +2674,7 @@ CString	CWebServer::_GetPlainResString(RESSTRIDTYPE nID, bool noquot)
 
 CString	CWebServer::_GetWebCharSet()
 {
-#ifdef _UNICODE
 	return _T("utf-8");
-#else
-	CString strHtmlCharset = thePrefs.GetHtmlCharset();
-	if (!strHtmlCharset.IsEmpty())
-		return strHtmlCharset;
-	return _T("ISO-8859-1"); // Western European (ISO)
-#endif
 }
 
 // Ornis: creating the progressbar. colored if ressources are given/available

@@ -547,9 +547,7 @@ CString GetVideoFormatName(DWORD biCompression)
 BOOL CFileInfoDialog::OnInitDialog()
 {
 	CWaitCursor curWait; // we may get quite busy here..
-#ifdef _UNICODE
 	ReplaceRichEditCtrl(GetDlgItem(IDC_FULL_FILE_INFO), this, GetDlgItem(IDC_FD_XI1)->GetFont());
-#endif
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 	AddAnchor(IDC_FULL_FILE_INFO, TOP_LEFT, BOTTOM_RIGHT);

@@ -608,7 +608,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							else
 								break;
 						}
-						if (isFocused == false) bytesToSpendTemp = doubleSendSize;
+						if (isFocused == false) {
+							++rememberedSlotCounterClass[classID];
+							bytesToSpendTemp = doubleSendSize;
+						}
 						SocketSentBytes socketSentBytes = socket->SendFileAndControlData(bytesToSpendTemp, doubleSendSize);
 						uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 						spentBytesClass[classID] += lastSpentBytes;
@@ -626,12 +629,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					} else {
 						theApp.QueueDebugLogLine(false,_T("There was a NULL socket in the UploadBandwidthThrottler Standard list (equal-for-all)! Prevented usage. Index: %i Size: %i Class: %s"), rememberedSlotCounterClass[classID], m_StandardOrder_list.GetSize(), classID);
 					}
-					//MORPH START - Changed by SiRoB, Upload Splitting Class
+					//MORPH START - Removed by SiRoB, Upload Splitting Class
 					/*
 					rememberedSlotCounter++;
 					*/
-					if(isFocused == false) ++rememberedSlotCounterClass[classID];
-					//MORPH END   - Changed by SiRoB, Upload Splitting Class
+					//MORPH END   - Removed by SiRoB, Upload Splitting Class
 				}
 				lastpos += slotCounterClass[classID];
 			}

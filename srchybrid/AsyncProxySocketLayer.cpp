@@ -103,7 +103,7 @@ Version history
 
 - 1.6 got rid of MFC
 - 1.5 released CAsyncSocketExLayer version
-- 1.4 added UNICODE support
+- 1.4 added Unicode support
 - 1.3 added basic HTTP1.1 authentication
       fixed memory leak in SOCKS5 code
 	  OnSocksOperationFailed will be called after Socket has been closed

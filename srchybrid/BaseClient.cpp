@@ -1212,11 +1212,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	const UINT uMultiPacket			= 1;
 	const UINT uSupportPreview		= (thePrefs.CanSeeShares() != vsfaNobody) ? 1 : 0; // set 'Preview supported' only if 'View Shared Files' allowed
 	const UINT uPeerCache			= 1;
-#ifdef _UNICODE
 	const UINT uUnicodeSupport		= 1;
-#else
-	const UINT uUnicodeSupport		= 0;
-#endif
 	const UINT nAICHVer				= 1;
 	CTag tagMisOptions1(CT_EMULE_MISCOPTIONS1, 
 				(nAICHVer				<< 29) |
@@ -2950,10 +2946,8 @@ void CUpDownClient::CheckFailedFileIdReqs(const uchar* aucFileHash)
 
 EUtf8Str CUpDownClient::GetUnicodeSupport() const
 {
-#ifdef _UNICODE
 	if (m_bUnicodeSupport)
 		return utf8strRaw;
-#endif
 	return utf8strNone;
 }
 //MORPH START - Added by SiRoB, ZZUL_20040904

@@ -186,9 +186,7 @@ BOOL CIPFilterDlg::OnInitDialog()
 	EnableSaveRestore(PREF_INI_SECTION);
 
 	ASSERT( m_ipfilter.GetStyle() & LVS_OWNERDATA );
-#ifdef _UNICODE
 	m_ipfilter.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
-#endif
 	m_ipfilter.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	m_ipfilter.EnableHdrCtrlSortBitmaps();
 	m_ipfilter.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);

@@ -181,6 +181,8 @@ BOOL CPPgGeneral::OnInitDialog()
 
 	UpdateEd2kLinkFixCtrl();
 
+	GetDlgItem(IDC_ONLINESIG)->ShowWindow( thePrefs.IsExtControlsEnabled()?SW_SHOW:SW_HIDE );
+
 	CSliderCtrl *sliderUpdate = (CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS);
 	sliderUpdate->SetRange(2, 7, true);
 	sliderUpdate->SetPos(thePrefs.GetUpdateDays());

@@ -315,17 +315,10 @@ BOOL CCustomAutoComplete::LoadList(LPCTSTR pszFileName)
 
 	// verify Unicode byte-order mark 0xFEFF
 	WORD wBOM = fgetwc(fp);
-#ifdef _UNICODE
 	if (wBOM != 0xFEFF){
-#else
-	if (wBOM == 0xFEFF){
-#endif
 		fclose(fp);
 		return FALSE;
 	}
-#ifndef _UNICODE
-	fseek(fp, 0, SEEK_SET);
-#endif
 
 	TCHAR szItem[256];
 	while (_fgetts(szItem, ARRSIZE(szItem), fp) != NULL){
@@ -343,10 +336,8 @@ BOOL CCustomAutoComplete::SaveList(LPCTSTR pszFileName)
 	if (fp == NULL)
 		return FALSE;
 
-#ifdef _UNICODE
 	// write Unicode byte-order mark 0xFEFF
 	fputwc(0xFEFF, fp);
-#endif
 
 	for (int i = 0; i < m_asList.GetCount(); i++)
 		_ftprintf(fp, _T("%s\r\n"), m_asList[i]);

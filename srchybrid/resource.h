@@ -1451,6 +1451,7 @@
 #define IDS_STORENOTES                  1499
 #define IDS_NOTES                       1500
 #define IDS_KADSEARCHALREADY            1501
+#define IDS_ALPHABETIC2NDSORT           1502
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -1559,6 +1560,7 @@
 #define IDC_PROGRESS1                   2180
 #define IDC_MINTRAY                     2181
 #define IDC_VCODEC                      2182
+#define IDC_ALPH2ND                     2182
 #define IDC_SEARCHNAME                  2183
 #define IDC_AUTOCONNECT                 2185
 #define IDC_VBITRATE                    2186

@@ -45,9 +45,7 @@ void CNetworkInfoDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CNetworkInfoDlg::OnInitDialog()
 {
-#ifdef _UNICODE
 	ReplaceRichEditCtrl(GetDlgItem(IDC_NETWORK_INFO), this, GetDlgItem(IDC_NETWORK_INFO_LABEL)->GetFont());
-#endif
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
 

@@ -364,7 +364,6 @@ void CSearch::processResponse(uint32 fromIP, uint16 fromPort, ContactList *resul
 							CSafeMemFile bio(34);
 							bio.WriteUInt128(&m_target);
 							bio.WriteUInt128(&CKademlia::getPrefs()->getKadID());
-							m_count++;
 							CKademlia::getUDPListener()->sendPacket( &bio, KADEMLIA_SRC_NOTES_REQ, from->getIPAddress(), from->getUDPPort());
 							break;
 						}
@@ -648,7 +647,10 @@ void CSearch::processResultNotes(uint32 fromIP, uint16 fromPort, const CUInt128 
 		file = (CKnownFile*)theApp.downloadqueue->GetFileByID(fileid);
 
 	if(file)
+	{
+		m_count++;
 		file->AddNote(entry);
+	}
 }
 
 void CSearch::processResultKeyword(uint32 fromIP, uint16 fromPort, const CUInt128 &answer, TagList *info)

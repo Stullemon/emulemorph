@@ -844,11 +844,7 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	va_list args;
 	va_start(args, numProperties);
 
-#ifdef _UNICODE
 	EUtf8Str eStrEncode = utf8strRaw;
-#else
-	EUtf8Str eStrEncode = utf8strNone;
-#endif
 	CSafeMemFile* temp = new CSafeMemFile(250);
 	uchar fileid[16];
 	fileID->toByteArray(fileid);

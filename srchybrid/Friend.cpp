@@ -102,9 +102,7 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 			case FF_NAME:{
 				ASSERT( newtag->IsStr() );
 				if (newtag->IsStr()){
-#ifdef _UNICODE
 					if (m_strName.IsEmpty())
-#endif
 						m_strName = newtag->GetStr();
 				}
 				break;
@@ -136,10 +134,8 @@ void CFriend::WriteToFile(CFileDataIO* file)
 	file->WriteUInt32(uTagCount);
 
 	if (!m_strName.IsEmpty()){
-#ifdef _UNICODE
 		if (WriteOptED2KUTF8Tag(file, m_strName, FF_NAME))
 			uTagCount++;
-#endif
 		CTag nametag(FF_NAME, m_strName);
 		nametag.WriteTagToFile(file);
 		uTagCount++;

@@ -1224,9 +1224,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 			case FT_FILENAME:{
 				ASSERT( newtag->IsStr() );
 				if (newtag->IsStr()){
-#ifdef _UNICODE
 					if (GetFileName().IsEmpty())
-#endif
 						SetFileName(newtag->GetStr());
 				}
 				delete newtag;
@@ -1239,6 +1237,9 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 					SetFileSize(newtag->GetInt());
 					m_AvailPartFrequency.SetSize(GetPartCount());
 					for (uint32 i = 0; i < GetPartCount();i++)
+						/*
+						m_AvailPartFrequency[i] = 0;
+						*/
 						m_AvailPartFrequency[i] = 1;
 				}
 				delete newtag;

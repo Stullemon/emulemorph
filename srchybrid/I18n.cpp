@@ -331,7 +331,6 @@ void CPreferences::SetRtlLocale(LCID lcid)
 
 void CPreferences::InitThreadLocale()
 {
-#ifdef _UNICODE
 	ASSERT( m_wLanguageID != 0 );
 
 	// NOTE: This function is for testing multi language support only.
@@ -391,7 +390,6 @@ void CPreferences::InitThreadLocale()
 			SetRtlLocale(lcid);
 		}
 	}
-#endif //_UNICODE
 }
 
 void InitThreadLocale()
@@ -401,7 +399,6 @@ void InitThreadLocale()
 
 bool CheckThreadLocale()
 {
-#ifdef _UNICODE
 	if (theApp.GetProfileInt(_T("eMule"), _T("SetLanguageACP"), 0) != 0)
 		return true;
 	int iSetSysACP = theApp.GetProfileInt(_T("eMule"), _T("SetSystemACP"), -1);
@@ -443,7 +440,6 @@ bool CheckThreadLocale()
 			iSetSysACP = 1;
 	}
 	theApp.WriteProfileInt(_T("eMule"), _T("SetSystemACP"), iSetSysACP);
-#endif
 	return true;
 }
 

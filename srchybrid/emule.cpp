@@ -92,7 +92,7 @@ static char THIS_FILE[]=__FILE__;
 // 
 HMODULE g_hUnicoWS = NULL;
 bool g_bUnicoWS = false;
-#ifdef _UNICODE
+
 void ShowUnicowsError()
 {
 	// NOTE: Do *NOT* use any MFC nor W-functions here!
@@ -145,7 +145,6 @@ extern "C" HMODULE __stdcall ExplicitPreLoadUnicows()
 
 // NOTE: Do *NOT* change the name of this function. It *HAS* to be named "_PfnLoadUnicows" !
 extern "C" HMODULE (__stdcall *_PfnLoadUnicows)(void) = &ExplicitPreLoadUnicows;
-#endif //_UNICODE
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -738,7 +737,6 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 		}
 	}
 
-#ifdef _UNICODE
 	CStringA strTextA(strText);
 	HGLOBAL hGlobalA = GlobalAlloc(GHND | GMEM_SHARE, (strTextA.GetLength() + 1) * sizeof(CHAR));
 	if (hGlobalA != NULL)
@@ -755,13 +753,8 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 			hGlobalA = NULL;
 		}
 	}
-#endif
 
-	if (hGlobalT == NULL
-#ifdef _UNICODE
-		&& hGlobalA == NULL
-#endif
-		)
+	if (hGlobalT == NULL && hGlobalA == NULL)
 		return false;
 
 	int iCopied = 0;
@@ -769,7 +762,6 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 	{
 		if( EmptyClipboard() )
 		{
-#ifdef _UNICODE
 			if (hGlobalT){
 				if (SetClipboardData(CF_UNICODETEXT, hGlobalT) != NULL){
 					iCopied++;
@@ -788,15 +780,6 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 					hGlobalA = NULL;
 				}
 			}
-#else
-			if (SetClipboardData(CF_TEXT, hGlobalT) != NULL){
-				iCopied++;
-			}
-			else{
-				GlobalFree(hGlobalT);
-				hGlobalT = NULL;
-			}
-#endif
 		}
 		CloseClipboard();
 	}
@@ -807,12 +790,10 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 			GlobalFree(hGlobalT);
 			hGlobalT = NULL;
 		}
-#ifdef _UNICODE
 		if (hGlobalA){
 			GlobalFree(hGlobalA);
 			hGlobalA = NULL;
 		}
-#endif
 	}
 	else
 		IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
@@ -823,7 +804,6 @@ bool CemuleApp::CopyTextToClipboard( CString strText )
 //TODO: Move to emule-window
 CString CemuleApp::CopyTextFromClipboard() 
 {
-#ifdef _UNICODE
 	if (IsClipboardFormatAvailable(CF_UNICODETEXT))
 	{
 		if (OpenClipboard(NULL))
@@ -846,7 +826,7 @@ CString CemuleApp::CopyTextFromClipboard()
 				return strClipboard;
 		}
 	}
-#endif
+
 	if (!IsClipboardFormatAvailable(CF_TEXT)) 
 		return _T(""); 
 	if (!OpenClipboard(NULL)) 
@@ -967,9 +947,9 @@ bool CemuleApp::GetLangHelpFilePath(CString& strResult)
 	bool bFound;
 	if (thePrefs.GetLanguageID() != MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT))
 	{
-		int pos = strHelpFile.ReverseFind(_T('.'));
+		int pos = strHelpFile.ReverseFind(_T('\\'));   //CML
 		CString temp;
-		temp.Format(_T("%s.%u.chm"), strHelpFile.Left(pos), thePrefs.GetLanguageID());
+		temp.Format(_T("%s\\eMule.%u.chm"), strHelpFile.Left(pos), thePrefs.GetLanguageID());
 		if (pos>0)
 			strHelpFile = temp;
 		
@@ -983,6 +963,10 @@ bool CemuleApp::GetLangHelpFilePath(CString& strResult)
 		strHelpFile.Replace(_T(".HLP"), _T(".chm"));
 	}
 	else{
+		int pos = strHelpFile.ReverseFind(_T('\\'));
+		CString temp;
+		temp.Format(_T("%s\\eMule.chm"), strHelpFile.Left(pos));
+		strHelpFile = temp;
 		strHelpFile.Replace(_T(".HLP"), _T(".chm"));
 		if (!ff.FindFile(strHelpFile, 0))
 			bFound = false;

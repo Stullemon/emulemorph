@@ -29,10 +29,10 @@ static char THIS_FILE[] = __FILE__;
 
 #define	FILETYPE_INETSHRTCUT	_T("Internet Shortcut File")
 #define FILEEXT_INETSHRTCUTA	 "url"					 // ANSI string
-#define FILEEXT_INETSHRTCUTW	L"url"					 // UNICODE string
+#define FILEEXT_INETSHRTCUTW	L"url"					 // Unicode string
 #define FILEEXT_INETSHRTCUT		_T(FILEEXT_INETSHRTCUTA)
 #define FILEEXTDOT_INETSHRTCUTA	   "."  FILEEXT_INETSHRTCUTA // ANSI string
-#define FILEEXTDOT_INETSHRTCUTW	  L"."  FILEEXT_INETSHRTCUTW // UNICODE string
+#define FILEEXTDOT_INETSHRTCUTW	  L"."  FILEEXT_INETSHRTCUTW // Unicode string
 #define FILEEXTDOT_INETSHRTCUT	_T(".") FILEEXT_INETSHRTCUT
 #define FILEFLT_INETSHRTCUT		FILETYPE_INETSHRTCUT _T("s (*") FILEEXTDOT_INETSHRTCUT _T(")|*") FILEEXTDOT_INETSHRTCUT _T("|")
 
@@ -98,7 +98,7 @@ LPCSTR GetFileExtA(LPCSTR pszPathA, int iLen /*= -1*/)
 	return NULL;
 }
 
-// GetFileExtW -- UNICODE version
+// GetFileExtW -- Unicode version
 //
 // This function is thought to be used only for filenames which have been
 // validated by 'GetFullPathName' or similar functions.

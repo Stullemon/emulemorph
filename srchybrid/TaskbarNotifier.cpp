@@ -113,12 +113,10 @@ CTaskbarNotifier::~CTaskbarNotifier()
 	}
 }
 
-#ifdef _UNICODE
 LRESULT CALLBACK My_AfxWndProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)
 {
 	return DefWindowProc(hWnd, nMsg, wParam, lParam);
 }
-#endif
 
 int CTaskbarNotifier::Create(CWnd *pWndParent)
 {
@@ -128,7 +126,6 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 	WNDCLASSEX wcx;
 
 	wcx.cbSize = sizeof(wcx);
-#ifdef _UNICODE
 	// From: http://www.trigeminal.com/usenet/usenet031.asp?1033
 	// Subject: If you are using MFC 6.0 or 7.0 and you want to use MSLU...
 	// 
@@ -145,9 +142,6 @@ int CTaskbarNotifier::Create(CWnd *pWndParent)
 		wcx.lpfnWndProc = My_AfxWndProc;
 	else
 		wcx.lpfnWndProc = AfxWndProc;
-#else
-	wcx.lpfnWndProc = AfxWndProc;
-#endif
 	static const TCHAR s_szClassName[] = _T("eMule_TaskbarNotifierWndClass");
 	wcx.style = CS_DBLCLKS|CS_SAVEBITS;
 	wcx.cbClsExtra = 0;

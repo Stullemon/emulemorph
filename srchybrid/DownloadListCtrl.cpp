@@ -190,6 +190,7 @@ void CDownloadListCtrl::Init()
         SetSortArrow(sortItem, sortAscending?arrowDoubleUp : arrowDoubleDown);
 		adder=81;
 	}
+	UpdateSortHistory(sortItem + (sortAscending ? 0:100), 100);
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100) + adder);
 	*/
 	int sortItem = thePrefs.GetColumnSortItem(CPreferences::tableDownload);
@@ -2738,6 +2739,9 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 
 	// Item is column clicked
 	sortItem = pNMListView->iSubItem + userSort;	// SLUGFILLER: DLsortFix
+	/*
+	UpdateSortHistory(sortItem + (sortAscending ? 0:100), 100);
+	*/
 
 	// Save new preferences
 	thePrefs.SetColumnSortItem(CPreferences::tableDownload, sortItem);
@@ -2745,6 +2749,7 @@ void CDownloadListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
 	//MORPH START - Changed by SiRoB, Remain time and size Columns have been splited
 	/*
 	thePrefs.TransferlistRemainSortStyle(m_bRemainSort);
+	
 	// Sort table
 	uint8 adder=0;
 	if (sortItem!=9 || !m_bRemainSort)
@@ -2905,7 +2910,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 			comp=CompareUnsigned(file1->GetDownPriority(), file2->GetDownPriority());
 			break;
 		case 8: //Status asc 
-			comp=CompareUnsigned(file1->getPartfileStatusRang(),file2->getPartfileStatusRang());
+			comp=CompareUnsigned(file2->getPartfileStatusRang(),file1->getPartfileStatusRang());
 			break;
 		case 9: //Remaining Time asc 
 		{
@@ -3005,10 +3010,7 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 		default:
 			comp=0;
 	}
-	if (comp!=0)
-		return comp;
-	// Fall back on lexicographical compare of filenames if no difference
-	return CompareLocaleStringNoCase(file1->GetFileName(),file2->GetFileName());
+	return comp;
 }
 
 int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient *client2, LPARAM lParamSort, int sortMod)

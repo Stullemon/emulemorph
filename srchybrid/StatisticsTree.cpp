@@ -617,9 +617,7 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 		theHTML.Format(_T("<html>\r\n<head>\r\n<title>eMule v%s [%s] %s [%s]</title>\r\n"), theApp.m_strCurVersionLong, theApp.m_strModLongVersion, GetResString(IDS_SF_STATISTICS), thePrefs.GetUserNick());
 		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 
-#ifdef _UNICODE
 		theHTML += _T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
-#endif
 		theHTML += _T("<meta name=vs_targetSchema content=\"http://schemas.microsoft.com/intellisense/ie5\">\r\n");
 		theHTML += _T("<style type=\"text/css\">\r\n#pghdr { color: #000F80; font: bold 12pt/14pt Tahoma, Verdana, Courier New, Helvetica; }\r\n");
 		theHTML += _T("#sec { color: #000000; font: bold 11pt/13pt Tahoma, Verdana, Courier New, Helvetica; }\r\n");
@@ -631,12 +629,8 @@ void CStatisticsTree::ExportHTML(bool onlyvisible)
 
 		htmlFileName = saveAsDlg.GetPathName();
 		htmlFile.Open(htmlFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite);
-#ifdef _UNICODE
 		CStringA strHtmlA(wc2utf8(theHTML));
 		htmlFile.Write(strHtmlA, strHtmlA.GetLength());
-#else
-		htmlFile.Write(theHTML.GetString(), strlen(theHTML.GetString()));
-#endif
 		htmlFile.Close();
 	}
 }

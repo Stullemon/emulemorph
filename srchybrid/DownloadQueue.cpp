@@ -2276,10 +2276,8 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 		return;
 	}
 
-#ifdef _UNICODE
 	// write Unicode byte-order mark 0xFEFF
 	fputwc(0xFEFF, file.m_pStream);
-#endif
 
 	try
 	{

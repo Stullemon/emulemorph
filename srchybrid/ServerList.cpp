@@ -665,30 +665,24 @@ bool CServerList::SaveServermetToFile()
 			servermet.WriteUInt32(uTagCount);
 
 			if (!nextserver->GetListName().IsEmpty()){
-#ifdef _UNICODE
 				if (WriteOptED2KUTF8Tag(&servermet, nextserver->GetListName(), ST_SERVERNAME))
 					uTagCount++;
-#endif
 				CTag servername( ST_SERVERNAME, nextserver->GetListName() );
 				servername.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (!nextserver->GetDynIP().IsEmpty()){
-#ifdef _UNICODE
 				if (WriteOptED2KUTF8Tag(&servermet, nextserver->GetDynIP(), ST_DYNIP))
 					uTagCount++;
-#endif
 				CTag serverdynip( ST_DYNIP, nextserver->GetDynIP() );
 				serverdynip.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (!nextserver->GetDescription().IsEmpty()){
-#ifdef _UNICODE
 				if (WriteOptED2KUTF8Tag(&servermet, nextserver->GetDescription(), ST_DESCRIPTION))
 					uTagCount++;
-#endif
 				CTag serverdesc( ST_DESCRIPTION, nextserver->GetDescription() );
 				serverdesc.WriteTagToFile(&servermet);
 				uTagCount++;

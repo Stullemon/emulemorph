@@ -29,6 +29,8 @@ public:
 	void LoadSettings(CPreferences::Table tID);
 	void LoadSettings(CIni* ini, LPCTSTR pszLVName);
 
+	DWORD SetExtendedStyle(DWORD dwNewStyle) { return CListCtrl::SetExtendedStyle(dwNewStyle | LVS_EX_HEADERDRAGDROP); }
+
 	// Hide the column
 	void HideColumn(int iColumn);
 
@@ -106,7 +108,10 @@ public:
 	void DoFindNext(BOOL bShowError);
 
 	void AutoSelectItem();
-
+	/*
+	int		GetNextSortOrder(int dwCurrentSortOrder) const;
+	void	UpdateSortHistory(int dwNewOrder, int dwInverseValue = 100);
+	*/
 protected:
 	virtual void PreSubclassWindow();
 	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
@@ -126,9 +131,6 @@ protected:
 	int          MoveItem(int iOldIndex, int iNewIndex);
 	// Update the colors
 	void         SetColors(LPCTSTR pszLvKey = NULL);
-	DWORD        SetExtendedStyle(DWORD dwNewStyle) {
-		return CListCtrl::SetExtendedStyle(dwNewStyle | LVS_EX_HEADERDRAGDROP);
-	}
 
 	CString          m_Name;
 	PFNLVCOMPARE     m_SortProc;
@@ -144,6 +146,9 @@ protected:
 	NMLVCUSTOMDRAW   m_lvcd;
 	bool             m_bCustomDraw;
 	CImageList		 m_imlHeaderCtrl;
+	/*
+	CList<int, int>	 m_liSortHistory;
+	*/
 
 	// General purpose listview find dialog+functions (optional)
 	bool m_bGeneralPurposeFind;
@@ -157,6 +162,7 @@ protected:
 
 private:
 	static int IndexToOrder(CHeaderCtrl* pHeader, int iIndex);
+
 
 	struct MULE_COLUMN {
 		int iWidth;

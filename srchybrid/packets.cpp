@@ -572,7 +572,6 @@ bool CTag::WriteNewEd2kTag(CFileDataIO* data, EUtf8Str eStrEncode) const
 	}
 	else if (IsStr())
 	{
-#ifdef _UNICODE
 		if (eStrEncode == utf8strRaw)
 		{
 			CUnicodeToUTF8 utf8(*m_pstrVal);
@@ -598,10 +597,6 @@ bool CTag::WriteNewEd2kTag(CFileDataIO* data, EUtf8Str eStrEncode) const
 		}
 		uStrValLen = pstrValA->GetLength();
 		pszValA = *pstrValA;
-#else
-		uStrValLen = m_pstrVal->GetLength();
-		pszValA = *m_pstrVal;
-#endif
 		if (uStrValLen >= 1 && uStrValLen <= 16)
 			uType = TAGTYPE_STR1 + uStrValLen - 1;
 		else
@@ -808,7 +803,6 @@ void CTag::Dump(CDumpContext& dc) const
 }
 #endif
 
-#ifdef _UNICODE
 bool WriteOptED2KUTF8Tag(CFileDataIO* data, LPCWSTR pwsz, uint8 uTagName)
 {
 	if (!NeedUTF8String(pwsz))
@@ -817,4 +811,3 @@ bool WriteOptED2KUTF8Tag(CFileDataIO* data, LPCWSTR pwsz, uint8 uTagName)
 	tag.WriteTagToFile(data, utf8strOptBOM);
 	return true;
 }
-#endif

@@ -135,6 +135,7 @@ BOOL CPPgDisplay::OnInitDialog()
 	slider3D->SetTicFreq(1);
 	DrawPreview();
 
+
 	LoadSettings();
 	Localize();
 

@@ -362,6 +362,7 @@ public:
 	static	TCHAR	statsExpandedTreeItems[256];
 
 	static	UINT	statsSaveInterval;
+	static  bool	m_bShowVerticalHourMarkers;
 	// <-----khaos- End Statistics Members
 
 

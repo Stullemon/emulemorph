@@ -37,26 +37,9 @@ static char THIS_FILE[] = __FILE__;
 #define MIIM_FTYPE       0x00000100
 #define HBMMENU_CALLBACK ((HBITMAP) -1)
 
-#define MIM_STYLE                   0x00000010
+#define MIM_STYLE           0x00000010
 #define MNS_CHECKORBMP      0x04000000
 
-#ifndef UNICODE
-typedef struct tagMENUITEMINFOAEX
-{
-    UINT     cbSize;
-    UINT     fMask;
-    UINT     fType;         // used if MIIM_TYPE (4.0) or MIIM_FTYPE (>4.0)
-    UINT     fState;        // used if MIIM_STATE
-    UINT     wID;           // used if MIIM_ID
-    HMENU    hSubMenu;      // used if MIIM_SUBMENU
-    HBITMAP  hbmpChecked;   // used if MIIM_CHECKMARKS
-    HBITMAP  hbmpUnchecked; // used if MIIM_CHECKMARKS
-    ULONG_PTR dwItemData;   // used if MIIM_DATA
-    LPSTR    dwTypeData;    // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
-    UINT     cch;           // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
-    HBITMAP  hbmpItem;      // used if MIIM_BITMAP
-}   MENUITEMINFOEX, FAR *LPMENUITEMINFOEX;
-#else
 typedef struct tagMENUITEMINFOWEX
 {
     UINT     cbSize;
@@ -72,7 +55,6 @@ typedef struct tagMENUITEMINFOWEX
     UINT     cch;           // used if MIIM_TYPE (4.0) or MIIM_STRING (>4.0)
     HBITMAP  hbmpItem;      // used if MIIM_BITMAP
 }   MENUITEMINFOEX, FAR *LPMENUITEMINFOEX;
-#endif // UNICODE
 
 TSetMenuInfo	CTitleMenu::SetMenuInfo;
 TGetMenuInfo	CTitleMenu::GetMenuInfo;

@@ -659,7 +659,7 @@ BEGIN
                     BS_MULTILINE | BS_FLAT | WS_TABSTOP,22,138,191,22
 END
 
-IDD_PPG_IRC DIALOGEX 0, 0, 229, 239
+IDD_PPG_IRC DIALOGEX 0, 0, 229, 243
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "IRC"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -681,9 +681,9 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,118,
                     202,10
     EDITTEXT        IDC_IRC_PERFORM_BOX,14,128,202,12,ES_AUTOHSCROLL
-    GROUPBOX        "Miscellaneous",IDC_IRC_MISC_FRM,7,148,215,84,BS_FLAT
+    GROUPBOX        "Miscellaneous",IDC_IRC_MISC_FRM,7,147,215,89,BS_FLAT
     CONTROL         "",IDC_MISC_IRC,"SysTreeView32",TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,14,158,202,69
+                    WS_BORDER | WS_TABSTOP,14,156,202,77
 END
 
 IDD_WIZARD DIALOGEX 0, 0, 263, 262
@@ -908,7 +908,7 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,22,107,256,8
 END
 
-IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 241
+IDD_PPG_DISPLAY DIALOGEX 0, 0, 230, 249
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Display"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -926,42 +926,42 @@ BEGIN
     EDITTEXT        IDC_TOOLTIPDELAY,122,28,28,12,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
     CONTROL         "Download list doubleclick to expand",IDC_DBLCLICK,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,46,216,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,54,216,
                     10
     CONTROL         "Indicate downloads with comments/rating by icon",
                     IDC_INDICATERATINGS,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
-                    WS_TABSTOP,7,57,216,10
+                    WS_TABSTOP,7,65,216,10
     CONTROL         "Show download percentage",IDC_SHOWDWLPERCENT,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,68,216,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,76,216,10
     CONTROL         "Show transfer rate on title",IDC_SHOWRATEONTITLE,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,79,216,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,87,216,10
     CONTROL         "CatInfo",IDC_SHOWCATINFO,"Button",BS_AUTOCHECKBOX | 
-                    BS_FLAT | WS_TABSTOP,7,90,216,10
+                    BS_FLAT | WS_TABSTOP,7,98,216,10
     CONTROL         "Minimize to trayicon",IDC_MINTRAY,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,101,216,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,43,216,10
     CONTROL         "Auto Clear Completed Downloads",IDC_CLEARCOMPL,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,113,216,10
-    GROUPBOX        "Lower CPU- && Memoryusage",IDC_STATIC_CPUMEM,7,124,216,
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,109,216,10
+    GROUPBOX        "Lower CPU- && Memoryusage",IDC_STATIC_CPUMEM,7,132,216,
                     60,BS_FLAT
     CONTROL         "Disable Known Clients list",IDC_DISABLEKNOWNLIST,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,136,202,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,144,202,10
     CONTROL         "Disable Queue List",IDC_DISABLEQUEUELIST,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,148,202,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,156,202,10
     CONTROL         "Keep queue list updated.",IDC_UPDATEQUEUE,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,160,202,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,168,202,10
     CONTROL         "Don't repaint graphs",IDC_REPAINT,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,172,202,10
-    PUSHBUTTON      "Select Font...",IDC_SELECT_HYPERTEXT_FONT,14,198,86,14,
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,180,202,10
+    PUSHBUTTON      "Select Font...",IDC_SELECT_HYPERTEXT_FONT,14,206,86,14,
                     BS_FLAT
     CONTROL         "Font for Server-, Message- and IRC-Window",
                     IDC_HYPERTEXT_FONT_HINT,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,7,188,216,8
+                    WS_GROUP,7,196,216,8
     CONTROL         "Reset all autocompletion histories (searchname, met-URL,...)",
                     IDC_RESETLABEL,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,7,
-                    217,216,8
+                    225,216,8
     CONTROL         "Check1",IDC_DISABLEHIST,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,14,227,86,11
-    PUSHBUTTON      "Reset",IDC_RESETHIST,114,225,48,14,BS_FLAT
+                    WS_TABSTOP,14,235,86,11
+    PUSHBUTTON      "Reset",IDC_RESETHIST,114,233,48,14,BS_FLAT
     LTEXT           "",IDC_PREVIEW,93,5,26,13
 END
 
@@ -991,9 +991,9 @@ BEGIN
     CONTROL         "Accept from friends only",IDC_MSGONLYFRIENDS,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,128,202,8
     CONTROL         "Only from valid senders",IDC_MSGONLYSEC,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,138,202,8
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,139,202,8
     CONTROL         "Advanced spamfilter",IDC_ADVSPAMFILTER,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,148,202,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,149,202,10
     GROUPBOX        "Comments",IDC_STATIC_COMMENTS,7,164,216,39,BS_FLAT
     LTEXT           "Ignore Comments containing: (Separator | )",
                     IDC_FILTERCOMMENTSLABEL,14,175,205,8
@@ -2130,7 +2130,7 @@ BEGIN
         VERTGUIDE, 100
         VERTGUIDE, 216
         TOPMARGIN, 7
-        BOTTOMMARGIN, 232
+        BOTTOMMARGIN, 236
     END
 
     IDD_WIZARD, DIALOG
@@ -2228,7 +2228,7 @@ BEGIN
         VERTGUIDE, 121
         VERTGUIDE, 216
         TOPMARGIN, 7
-        BOTTOMMARGIN, 234
+        BOTTOMMARGIN, 246
         HORZGUIDE, 33
         HORZGUIDE, 40
         HORZGUIDE, 47
@@ -3004,7 +3004,7 @@ BEGIN
                             "The file '%s' already exists.\nDo you want to replace it?"
     IDS_FD_RECOV            "Recovered"
     IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN 
-                            "An error occured while opening the file to be downloaded, Error:%s"
+                            "An error occurred while opening the file to be downloaded, Error:%s"
     IDS_HTTPDOWNLOAD_ABORTING_TRANSFER "Aborting transfer"
     IDS_FD_COMPR            "Compression"
     IDS_WIZARD_NETWORK      "Choose which network(s) you want to use."
@@ -3646,7 +3646,7 @@ BEGIN
     IDS_ADDED2SSF           "Added to static server list"
     IDS_STATICSERVER        "Static"
     IDS_ERROR_SSF           "Failed to open staticservers.dat"
-    IDS_ERR_PACKAGEERROR    "Critical error while processing datapacket for %s (wrong size) - datablock droped"
+    IDS_ERR_PACKAGEERROR    "Critical error while processing datapacket for %s (wrong size) - datablock dropped"
     IDS_SF_ACTIVECON        "Active Connections (estimate)"
     IDS_SF_MAXCONLIMITREACHED "Max Connection Limit Reached"
     IDS_SF_AVGCON           "Average Connections (estimate)"
@@ -4119,7 +4119,7 @@ BEGIN
     IDS_FIRSTSAFECON        "Enable this option if you want eMule to connect using Safe Connect.\n\nTurning this feature off allows eMule to connect to servers a little faster, but can cause you to get more false LowID connects. (Default: Disabled)"
     IDS_FIRSTRUNASSIST      "Do you want to run a first runtime wizard?"
     IDS_FIRSTAUTOCON        "Enable this option if you want eMule to connect at startup. (Default Disabled)"
-    IDS_FIRSTCOMPLETE       "You have now completed the first runtime wizard.\n\nAll these settings and more can be changed by clicking the preferences icon. For explainations and support check out the help by pressing F1 in eMule!"
+    IDS_FIRSTCOMPLETE       "You have now completed the first runtime wizard.\n\nAll these settings and more can be changed by clicking the preferences icon. For explanations and support check out the help by pressing F1 in eMule!"
 END
 
 STRINGTABLE 
@@ -4254,7 +4254,7 @@ BEGIN
     IDS_SHAREDREQDENIED     "User %s (%u) denied access to list of shared directories/files"
     IDS_AUTOCLEANUPFN       "Cleanup filenames"
     IDS_ONNEWDOWNLOAD       "Initialisations"
-    IDS_FILTERFILENAMEWORD  "Enter words to filter, seperated by |"
+    IDS_FILTERFILENAMEWORD  "Enter words to filter, separated by |"
     IDS_FNFILTERTITLE       "Edit filename wordfilter for name-cleanup"
     IDS_CHANGECATVIEW       "Select View Filter"
     IDS_STATUS_NOTCOMPLETED "Incomplete"
@@ -4354,7 +4354,7 @@ BEGIN
     IDS_STATS_TIMESTATS     "Time Statistics"
     IDS_STATS_AVGANDPROJ    "Projected Averages"
     IDS_STATS_TIMESINCERESET "Time Since Last Reset: %s"
-    IDS_CRYPT_INITFAILED    "Failed to initalize cryptokeys - secure ident disabled"
+    IDS_CRYPT_INITFAILED    "Failed to initialize cryptokeys - secure ident disabled"
     IDS_CD_IDENT            "Identification:"
     IDS_IDENTOK             "Successful"
     IDS_IDENTFAILED         "Invalid"
@@ -4401,7 +4401,7 @@ BEGIN
     IDS_A4AF                "Sources Handling (A4AF)"
     IDS_MOBILEMULE          "MobileMule"
     IDS_ENABLEMM            "Enable MobileMule"
-    IDS_AUTOCAT_LABEL       "Auto cat-assignment (pattern, seperated by |)"
+    IDS_AUTOCAT_LABEL       "Auto cat-assignment (pattern, separated by |)"
     IDS_SHOWEXTSETTINGS     "Show more controls (advanced mode controls)"
     IDS_TREEOPTIONS_TRUE    "True"
     IDS_TREEOPTIONS_FALSE   "False"
@@ -4483,12 +4483,12 @@ BEGIN
     IDS_WARNING             "Warning"
     IDS_IMPORTSPLPF         "Import Downloads (eM,eD,ON)"
     IDS_IMP_STEPREADPF      "Reading temp folder"
-    IDS_IMP_STEPBASICINF    "Retriving basic information from download info file"
+    IDS_IMP_STEPBASICINF    "Retrieving basic information from download info file"
     IDS_IMP_STEPCRDESTFILE  "Creating destination file"
     IDS_IMP_LOADDATA        "Loading data from old download file (%i of %i)"
     IDS_IMP_SAVEDATA        "Saving data block into new single download file(%i of %i)"
     IDS_IMP_IOERROR         "Fileerror while converting download"
-    IDS_IMP_GETPFINFO       "Retriving source downloadfile information"
+    IDS_IMP_GETPFINFO       "Retrieving source downloadfile information"
     IDS_IMP_ADDDWL          "Adding download and save new partfile"
 END
 
@@ -4639,7 +4639,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_IMP_ERR_BADFORMAT   "Unknown or bad tempfile format."
-    IDS_SEARCH_INVALIDCHAR  "Search expression contains invalid characters. You either entered a '?' character or entered characeters which can not be used in this network."
+    IDS_SEARCH_INVALIDCHAR  "Search expression contains invalid characters. You either entered a '?' character or entered characters which can not be used in this network."
     IDS_PORTSCON            "Ports and Connection"
     IDS_PORTINFO            "eMule uses two ports for communication with servers and clients. These ports must be free and available for remote clients. The TCP port must be available to ensure the main functionality of eMule. The UDP port is used for Kad (serverless network) and to reduce network usage (Overhead).\n\nYou can change the ports here while no network activities have started."
     IDS_STARTTEST           "Test ports"
@@ -4714,7 +4714,7 @@ BEGIN
     IDS_PERSEC              "/s"
     IDS_LD_ED2KLINK         "ED2K Link"
     IDS_LD_COPYCLIPBOARD    "Copy to Clipboard"
-    IDS_LD_HOSTNAME         "Use hostname (from peferences) instead of IP when creating a sourcelink"
+    IDS_LD_HOSTNAME         "Use hostname (from preferences) instead of IP when creating a sourcelink"
     IDS_SAVEACFAILED        "Failed to save AICH Hashset!"
 END
 

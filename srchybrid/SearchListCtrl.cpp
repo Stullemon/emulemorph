@@ -1433,21 +1433,22 @@ COLORREF CSearchListCtrl::GetSearchItemColor(/*const*/ CSearchFile* src)
 
 	if (pFile)
 	{
-		if (pFile->IsPartFile()) {
+		if (pFile->IsPartFile())
+		{
 			src->SetKnownType(CSearchFile::Downloading);
-			if ( ((CPartFile*)pFile)->GetStatus()==PS_PAUSED) {
+			if (((CPartFile*)pFile)->GetStatus() == PS_PAUSED)
 				return m_crSearchResultDownloadStopped;
+			return m_crSearchResultDownloading;
 			}
-			return m_crSearchResultDownloading;
-		} else {
+		else
+		{
 			src->SetKnownType(CSearchFile::Shared);
-			return m_crSearchResultDownloading;
+			return m_crSearchResultShareing;
 		}
 	}
 	else if (theApp.sharedfiles->GetFileByID(src->GetFileHash()))
 	{
 		src->SetKnownType(CSearchFile::Shared);
-
 		return m_crSearchResultShareing;
 	}
 	else if (theApp.knownfiles->FindKnownFileByID(src->GetFileHash()))
@@ -1673,11 +1674,17 @@ void CSearchListCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 void CSearchListCtrl::SetHighlightColors()
 {
+	// Default colors
+	// --------------
+	//	Blue:	User does not know that file; shades of blue are used to indicate availability of file
+	//  Red:	User already has the file; it is currently downloading or it is currently shared 
+	//			-> 'Red' means: User can not add this file
+	//	Green:	User 'knows' the file (it was already download once, but is currently not in share)
 	COLORREF crSearchResultAvblyBase = RGB(0,0,255);
 	m_crSearchResultDownloading	= RGB(255,0,0);
-	m_crSearchResultDownloadStopped = m_crSearchResultDownloading;
+	m_crSearchResultDownloadStopped = RGB(255,0,0);
+	m_crSearchResultShareing		= RGB(255,0,0);
 	m_crSearchResultKnown = RGB(0,128,0);
-	m_crSearchResultShareing = RGB(0,128,0);
 
 	theApp.LoadSkinColor(_T("SearchResultsLvFg_Downloading"), m_crSearchResultDownloading);
 	if (!theApp.LoadSkinColor(_T("SearchResultsLvFg_DownloadStopped"), m_crSearchResultDownloadStopped))

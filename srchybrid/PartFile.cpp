@@ -97,9 +97,7 @@ CPartFile::CPartFile(CSearchFile* searchresult)
 			case FT_FILENAME:{
 				ASSERT( pTag->IsStr() );
 				if (pTag->IsStr()){
-#ifdef _UNICODE
 					if (GetFileName().IsEmpty())
-#endif
 						SetFileName(pTag->GetStr(), true);
 				}
 				break;
@@ -614,9 +612,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 							delete newtag;
 							return false;
 						}
-#ifdef _UNICODE
 						if (GetFileName().IsEmpty())
-#endif
 							SetFileName(newtag->GetStr());
 						delete newtag;
 						break;
@@ -1252,10 +1248,8 @@ bool CPartFile::SavePartFile()
 		ULONG uTagCountFilePos = (ULONG)file.GetPosition();
 		file.WriteUInt32(uTagCount);
 
-#ifdef _UNICODE
 		if (WriteOptED2KUTF8Tag(&file, GetFileName(), FT_FILENAME))
 			uTagCount++;
-#endif
 		CTag nametag(FT_FILENAME, GetFileName());
 		nametag.WriteTagToFile(&file);
 		uTagCount++;
@@ -2494,7 +2488,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							// MORPH END   - Added by SiRoB, WebCache
 						}
 						else{
-							cur_src->socket->DisableDownloadLimit();
+							if (cur_src->socket) // MORPH - Added by SiRoB, WebCache
+								cur_src->socket->DisableDownloadLimit();
 							if (cur_src->IsDownloadingFromPeerCache() && cur_src->m_pPCDownSocket && cur_src->m_pPCDownSocket->IsConnected())
 								cur_src->m_pPCDownSocket->DisableDownloadLimit();
 							// MORPH START - Added by SiRoB, WebCache
@@ -2742,7 +2737,7 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 	if (stopped)
 	{
 		// since we may received multiple search source UDP results we have to "consume" all data of that packet
-		sources->Seek(count*(4+2), SEEK_SET);
+		sources->Seek(count*(4+2), SEEK_CUR);
 		return;
 	}
 
@@ -2797,7 +2792,7 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 		else
 		{
 			// since we may received multiple search source UDP results we have to "consume" all data of that packet
-			sources->Seek((count-i)*(4+2), SEEK_SET);
+			sources->Seek((count-i)*(4+2), SEEK_CUR);
 			if(GetKadFileSearchID())
 				Kademlia::CSearchManager::stopSearch(GetKadFileSearchID(), false);
 			break;
@@ -3639,8 +3634,7 @@ void CPartFile::PerformFileCompleteEnd(DWORD dwResult)
 		}
 	}
 
-	if (GetCategory())
-		theApp.downloadqueue->StartNextFileIfPrefs(GetCategory());
+	theApp.downloadqueue->StartNextFileIfPrefs(GetCategory());
 }
 
 void  CPartFile::RemoveAllSources(bool bTryToSwap){
@@ -4074,7 +4068,7 @@ int CPartFile::getPartfileStatusRang() const
 	switch (GetStatus()) {
 		case PS_HASHING: 
 		case PS_WAITINGFORHASH:
-			return 6;
+			return 7;
 
 		case PS_COMPLETING:
 			return 1;
@@ -4083,13 +4077,15 @@ int CPartFile::getPartfileStatusRang() const
 			return 0;
 
 		case PS_PAUSED:
-			return 5;
-
+			if (IsStopped())
+				return 6;
+			else
+				return 5;
 		case PS_INSUFFICIENT:
 			return 4;
 
 		case PS_ERROR:
-			return 7;
+			return 8;
 	}
 	if (GetSrcStatisticsValue(DS_DOWNLOADING) == 0)
 		return 3; // waiting?

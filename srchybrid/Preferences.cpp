@@ -344,6 +344,7 @@ __int64 CPreferences::stat_datetimeLastReset;
 uint8	CPreferences::statsConnectionsGraphRatio;
 UINT	CPreferences::statsSaveInterval;
 TCHAR	CPreferences::statsExpandedTreeItems[256];
+bool	CPreferences::m_bShowVerticalHourMarkers;
 uint64	CPreferences::totalDownloadedBytes;
 uint64	CPreferences::totalUploadedBytes;
 WORD	CPreferences::m_wLanguageID;
@@ -2060,11 +2061,10 @@ bool CPreferences::Save(){
 	if (sdirfile.Open(fullpath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite | CFile::typeBinary))
 	{
 		try{
-		#ifdef _UNICODE
 			// write Unicode byte-order mark 0xFEFF
 			WORD wBOM = 0xFEFF;
 			sdirfile.Write(&wBOM, sizeof(wBOM));
-		#endif
+
 			for (POSITION pos = shareddir_list.GetHeadPosition();pos != 0;){
 				sdirfile.WriteString(shareddir_list.GetNext(pos).GetBuffer());
 				sdirfile.Write(_T("\r\n"), sizeof(TCHAR)*2);
@@ -3758,6 +3758,7 @@ void CPreferences::LoadPreferences()
 		if (_stscanf(buffer, _T("%i"), &m_adwStatsColors[i]) != 1 || m_adwStatsColors[i] == 0)
 			ResetStatsColor(i);
 	}
+	m_bShowVerticalHourMarkers = ini.GetBool(_T("ShowVerticalHourMarkers"),true,_T("Statistics"));
 
 	// -khaos--+++> Load Stats
 	// I changed this to a seperate function because it is now also used

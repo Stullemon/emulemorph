@@ -2396,11 +2396,7 @@ bool ExpandEnvironmentStrings(CString& rstrStrings)
 
 	CString strExpanded;
 	DWORD dwCount = ExpandEnvironmentStrings(rstrStrings, strExpanded.GetBuffer(dwSize-1), dwSize);
-#ifdef _UNICODE
 	if (dwCount == 0 || dwCount != dwSize){
-#else
-	if (dwCount == 0 || dwCount != dwSize-1){
-#endif
 		ASSERT(0);
 		return false;
 	}

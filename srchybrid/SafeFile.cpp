@@ -64,7 +64,6 @@ void CFileDataIO::ReadHash16(uchar* pVal)
 
 CString CFileDataIO::ReadString(bool bOptUTF8, UINT uRawSize)
 {
-#ifdef _UNICODE
 	const UINT uMaxShortRawSize = SHORT_RAW_ED2K_UTF8_STR;
 	if (uRawSize <= uMaxShortRawSize)
 	{
@@ -108,12 +107,6 @@ CString CFileDataIO::ReadString(bool bOptUTF8, UINT uRawSize)
 		}
 		return CStringW(acRaw, uRawSize); // use local codepage
 	}
-#else
-	CStringA strA;
-	Read(strA.GetBuffer(uRawSize), uRawSize);
-	strA.ReleaseBuffer(uRawSize);
-	return strA;
-#endif
 }
 
 CString CFileDataIO::ReadString(bool bOptUTF8)
@@ -176,7 +169,6 @@ void CFileDataIO::WriteHash16(const uchar* pVal)
 void CFileDataIO::WriteString(const CString& rstr, EUtf8Str eEncode)
 {
 #define	WRITE_STR_LEN(n)	WriteUInt16(n)
-#ifdef _UNICODE
 	if (eEncode == utf8strRaw)
 	{
 		CUnicodeToUTF8 utf8(rstr);
@@ -204,37 +196,6 @@ void CFileDataIO::WriteString(const CString& rstr, EUtf8Str eEncode)
 		WRITE_STR_LEN(mb.GetLength());
 		Write((LPCSTR)mb, mb.GetLength());
 	}
-#else
-	if (eEncode == utf8strRaw)
-	{
-		CStringW wstr(rstr);
-		CUnicodeToUTF8 utf8(wstr);
-		WRITE_STR_LEN(utf8.GetLength());
-		Write((LPCSTR)utf8, utf8.GetLength());
-	}
-	else if (eEncode == utf8strOptBOM)
-	{
-		CStringW wstr(rstr);
-		if (NeedUTF8String(wstr))
-		{
-			CUnicodeToBOMUTF8 bomutf8(wstr);
-			WRITE_STR_LEN(bomutf8.GetLength());
-			Write((LPCSTR)bomutf8, bomutf8.GetLength());
-		}
-		else
-		{
-			CUnicodeToMultiByte mb(wstr);
-			WRITE_STR_LEN(mb.GetLength());
-			Write((LPCSTR)mb, mb.GetLength());
-		}
-	}
-	else
-	{
-		UINT uLen = rstr.GetLength();
-		WRITE_STR_LEN(uLen);
-		Write((LPCSTR)rstr, uLen);
-	}
-#endif
 #undef WRITE_STR_LEN
 }
 
@@ -248,7 +209,6 @@ void CFileDataIO::WriteString(LPCSTR psz)
 void CFileDataIO::WriteLongString(const CString& rstr, EUtf8Str eEncode)
 {
 #define	WRITE_STR_LEN(n)	WriteUInt32(n)
-#ifdef _UNICODE
 	if (eEncode == utf8strRaw)
 	{
 		CUnicodeToUTF8 utf8(rstr);
@@ -276,37 +236,6 @@ void CFileDataIO::WriteLongString(const CString& rstr, EUtf8Str eEncode)
 		WRITE_STR_LEN(mb.GetLength());
 		Write((LPCSTR)mb, mb.GetLength());
 	}
-#else
-	if (eEncode == utf8strRaw)
-	{
-		CStringW wstr(rstr);
-		CUnicodeToUTF8 utf8(wstr);
-		WRITE_STR_LEN(utf8.GetLength());
-		Write((LPCSTR)utf8, utf8.GetLength());
-	}
-	else if (eEncode == utf8strOptBOM)
-	{
-		CStringW wstr(rstr);
-		if (NeedUTF8String(wstr))
-		{
-			CUnicodeToBOMUTF8 bomutf8(wstr);
-			WRITE_STR_LEN(bomutf8.GetLength());
-			Write((LPCSTR)bomutf8, bomutf8.GetLength());
-		}
-		else
-		{
-			CUnicodeToMultiByte mb(wstr);
-			WRITE_STR_LEN(mb.GetLength());
-			Write((LPCSTR)mb, mb.GetLength());
-		}
-	}
-	else
-	{
-		UINT uLen = rstr.GetLength();
-		WRITE_STR_LEN(uLen);
-		Write((LPCSTR)rstr, uLen);
-	}
-#endif
 #undef WRITE_STR_LEN
 }
 

@@ -111,7 +111,7 @@
 #define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
 #define CONNECTION_LATENCY		22050	// latency for responces
 #define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   3000
-#define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
+#define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   3000
 #define CLIENTBANTIME			HR2MS(2)	// 2h
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
 #define KEEPTRACK_TIME			HR2MS(2)	// 2h	//how long to keep track of clients which were once in the uploadqueue

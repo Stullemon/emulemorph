@@ -557,10 +557,9 @@ bool CHTRichEditCtrl::SaveLog(LPCTSTR pszDefName)
 		FILE* fp = _tfsopen(dlg.GetPathName(), _T("wb"), _SH_DENYWR);
 		if (fp)
 		{
-#ifdef _UNICODE
 			// write Unicode byte-order mark 0xFEFF
 			fputwc(0xFEFF, fp);
-#endif
+
 			CString strText;
 			GetWindowText(strText);
 			fwrite(strText, sizeof(TCHAR), strText.GetLength(), fp);

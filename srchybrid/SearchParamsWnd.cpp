@@ -754,11 +754,7 @@ void CSearchParamsWnd::UpdateUnicodeCtrl()
 {
 	bool bUnicodeIsDisabled = m_ctlUnicode.IsWindowEnabled() && m_ctlUnicode.GetCheck() == 0;
 	bool bOfferUnicode = false;
-#ifdef _UNICODE
 	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeFileDonkey)
-#else
-	if ((ESearchType)m_ctlMethod.GetCurSel() == SearchTypeKademlia)
-#endif
 	{
 		CString strExpr;
 		m_ctlName.GetWindowText(strExpr);
@@ -888,11 +884,6 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 		AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDCHAR), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 		return NULL;
 	}
-
-#ifndef _UNICODE
-	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeKademlia)
-		m_ctlUnicode.SetCheck(0);
-#endif
 
 	bool bUnicode = m_ctlUnicode.IsWindowEnabled() && m_ctlUnicode.GetCheck();
 	if (!bUnicode)

@@ -54,9 +54,7 @@ static char THIS_FILE[]=__FILE__;
 
 extern int yyparse();
 extern int yyerror(const char* errstr);
-#ifdef _UNICODE
 extern int yyerror(LPCTSTR errstr);
-#endif
 extern LPCTSTR _aszInvKadKeywordChars;
 
 enum ESearchTimerID

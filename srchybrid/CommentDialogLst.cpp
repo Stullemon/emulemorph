@@ -105,14 +105,13 @@ BOOL CCommentDialogLst::OnInitDialog()
 	AddAnchor(IDC_SEARCHKAD,BOTTOM_RIGHT);
 	AddAnchor(IDC_CMSTATUS,BOTTOM_LEFT);
 
+	m_lstComments.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	m_lstComments.InsertColumn(0, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, 130, -1); 
 	m_lstComments.InsertColumn(1, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 130, -1); 
 	m_lstComments.InsertColumn(2, GetResString(IDS_QL_RATING), LVCFMT_LEFT, 80, 1); 
 	m_lstComments.InsertColumn(3, GetResString(IDS_COMMENT), LVCFMT_LEFT, 340, 1); 
 	m_lstComments.InsertColumn(4, GetResString(IDS_CLIENTSOFTWARE), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientSoftware Column
 	m_lstComments.InsertColumn(5, GetResString(IDS_COUNTRY), LVCFMT_LEFT, 130, 1); //Commander - Added: ClientCountry Column
-
-	m_lstComments.SetExtendedStyle(LVS_EX_FULLROWSELECT); //NoamSon: CopyComments
 
 	Localize(); 
 

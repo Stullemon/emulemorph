@@ -184,9 +184,7 @@ void CDirectoryTreeCtrl::OnTvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CDirectoryTreeCtrl::Init(void)
 {
-#ifdef _UNICODE
 	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
-#endif
 
 	ShowWindow(SW_HIDE);
 	DeleteAllItems();

@@ -55,8 +55,8 @@ CDeadSource::CDeadSource(const uchar* paucHash){
 }
 
 bool operator==(const CDeadSource& ds1,const CDeadSource& ds2){
-	ASSERT( ((ds1.m_dwID + ds1.m_dwServerIP) ^ isnulmd4(ds1.m_aucHash)) != 0 );
-	ASSERT( ((ds2.m_dwID + ds2.m_dwServerIP) ^ isnulmd4(ds2.m_aucHash)) != 0 );
+	//ASSERT( ((ds1.m_dwID + ds1.m_dwServerIP) ^ isnulmd4(ds1.m_aucHash)) != 0 );
+	//ASSERT( ((ds2.m_dwID + ds2.m_dwServerIP) ^ isnulmd4(ds2.m_aucHash)) != 0 );
 	return (
 		// lowid ed2k and highid kad + ed2k check
 		( (ds1.m_dwID != 0 && ds1.m_dwID == ds2.m_dwID) && ((ds1.m_nPort != 0 && ds1.m_nPort == ds2.m_nPort) || (ds1.m_nKadPort != 0 && ds1.m_nKadPort == ds2.m_nKadPort)) && (ds1.m_dwServerIP == ds2.m_dwServerIP || !IsLowID(ds1.m_dwID)) )
@@ -135,7 +135,7 @@ void CDeadSourceList::AddDeadSource(const CUpDownClient* pToAdd){
 			m_mapDeadSources.SetAt(CDeadSource(pToAdd->GetUserHash()), BLOCKTIMEFW);
 		}
 // WebCache - just a comment - if pToAdd points to a proxy-client bDbgCheck will be false
-		ASSERT( bDbgCheck );
+		//ASSERT( bDbgCheck );
 	}
 	if (::GetTickCount() - m_dwLastCleanUp  > CLEANUPTIME)
 		CleanUp();

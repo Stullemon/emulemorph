@@ -194,7 +194,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 	if (sender->GetConnectionState() == CS_WAITFORLOGIN)
 	{
 		AddLogLine(false,GetResString(IDS_CONNECTEDTOREQ),sender->cur_server->GetListName(),sender->cur_server->GetFullIP(),sender->cur_server->GetPort());
-		//send loginpacket
+
 		CServer* update = theApp.serverlist->GetServerByAddress( sender->cur_server->GetAddress(), sender->cur_server->GetPort() );
 		if (update){
 			update->ResetFailedCount();
@@ -225,9 +225,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		*/
 		CTag tagFlags(CT_SERVER_FLAGS,SRVCAP_ZLIB | SRVCAP_NEWTAGS | 0x00000004); // aux port compatable client
 		//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-#ifdef _UNICODE
 		tagFlags.SetInt(tagFlags.GetInt() | SRVCAP_UNICODE);
-#endif
 		tagFlags.WriteTagToFile(&data);
 
 		// eMule Version (14-Mar-2004: requested by lugdunummaster (need for LowID clients which have no chance 

@@ -874,7 +874,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			}
 		}
 
-        if(nNewState == DS_DOWNLOADING){
+        if(nNewState == DS_DOWNLOADING && socket){
 		    socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 

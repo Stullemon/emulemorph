@@ -242,7 +242,7 @@ bool CUDPSocket::ProcessPacket(uint8* packet, UINT size, UINT opcode, uint32 nIP
 					else{
 						// skip sources for that file
 						UINT count = data.ReadUInt8();
-						data.Seek(count*(4+2), SEEK_SET);
+						data.Seek(count*(4+2), SEEK_CUR);
 					}
 
 					// check if there is another source packet

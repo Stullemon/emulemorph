@@ -403,40 +403,42 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 			m_dcGrid.SetPixel(i, GridPos, m_crGridColor);
 	}
 	
-	// CB Mod ---> Vertical lines
-	  
-	// Add vertical reference lines in the graphs. Each line indicates an elapsed hour from the current
-	// time (extreme right of the graph).
-	// Lines are always right aligned and the gap scales accordingly to the user horizontal scale.
-	// Intervals of 10 hours are marked with slightly stronger lines that go beyond the bottom border.
-	int hourSize, partialSize, surplus=0, extra=0;
+	if (thePrefs.m_bShowVerticalHourMarkers) {
+		// CB Mod ---> Vertical lines
 
-	if (m_nXGrids > 0) {
-		hourSize = (3600*m_rectPlot.Width())/(3600*m_nXGrids + m_nXPartial); // Size of an hour in pixels
-		partialSize = m_rectPlot.Width() - hourSize*m_nXGrids;
-		if (partialSize >= hourSize) {
-		partialSize = (hourSize*m_nXPartial)/3600; // real partial size
-		surplus = m_rectPlot.Width() - hourSize*m_nXGrids - partialSize; // Pixel surplus
-		}
+		// Add vertical reference lines in the graphs. Each line indicates an elapsed hour from the current
+		// time (extreme right of the graph).
+		// Lines are always right aligned and the gap scales accordingly to the user horizontal scale.
+		// Intervals of 10 hours are marked with slightly stronger lines that go beyond the bottom border.
+		int hourSize, partialSize, surplus=0, extra=0;
 
-		GridPos = 0;
-		for(j = 1; j <= m_nXGrids; j++) {
-		extra = 0;
-		if (surplus) {
-			surplus--;
-			extra=1;
+		if (m_nXGrids > 0) {
+			hourSize = (3600*m_rectPlot.Width())/(3600*m_nXGrids + m_nXPartial); // Size of an hour in pixels
+			partialSize = m_rectPlot.Width() - hourSize*m_nXGrids;
+			if (partialSize >= hourSize) {
+			partialSize = (hourSize*m_nXPartial)/3600; // real partial size
+			surplus = m_rectPlot.Width() - hourSize*m_nXGrids - partialSize; // Pixel surplus
+			}
+
+			GridPos = 0;
+			for(j = 1; j <= m_nXGrids; j++) {
+			extra = 0;
+			if (surplus) {
+				surplus--;
+				extra=1;
+			}
+			GridPos += (hourSize+extra);
+			if ((m_nXGrids-j+1)%10 == 0) {
+				for(i = m_rectPlot.top; i < m_rectPlot.bottom; i += 2)
+				m_dcGrid.SetPixel(m_rectPlot.left + GridPos - hourSize + partialSize, i, m_crGridColor);
+			} else {
+				for(i = m_rectPlot.top; i < m_rectPlot.bottom; i += 4)
+				m_dcGrid.SetPixel(m_rectPlot.left + GridPos - hourSize + partialSize, i, m_crGridColor);
+			}
+			}
 		}
-		GridPos += (hourSize+extra);
-		if ((m_nXGrids-j+1)%10 == 0) {
-			for(i = m_rectPlot.top; i < m_rectPlot.bottom+10; i += 2)
-			m_dcGrid.SetPixel(m_rectPlot.left + GridPos - hourSize + partialSize, i, m_crGridColor);
-		} else {
-			for(i = m_rectPlot.top; i < m_rectPlot.bottom; i += 4)
-			m_dcGrid.SetPixel(m_rectPlot.left + GridPos - hourSize + partialSize, i, m_crGridColor);
-		}
-		}
+		// CB Mod <---
 	}
-	// CB Mod <---
 
 	// create some fonts (horizontal and vertical)
 	// ---

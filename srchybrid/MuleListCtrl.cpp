@@ -112,9 +112,7 @@ void CMuleListCtrl::PreSubclassWindow()
 {
 	SetColors();
 	CListCtrl::PreSubclassWindow();
-#ifdef _UNICODE
 	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
-#endif
 	ModifyStyle(LVS_SINGLESEL|LVS_LIST|LVS_ICON|LVS_SMALLICON,LVS_REPORT|LVS_SINGLESEL|LVS_REPORT);
 	SetExtendedStyle(LVS_EX_HEADERDRAGDROP);
 }
@@ -1405,3 +1403,37 @@ void CMuleListCtrl::AutoSelectItem()
 		}
 	}
 }
+
+/*
+void CMuleListCtrl::UpdateSortHistory(int dwNewOrder, int dwInverseValue){
+	int dwInverse = (dwNewOrder > dwInverseValue) ? (dwNewOrder-dwInverseValue) : (dwNewOrder+dwInverseValue);
+	// delete the value (or its inverse sorting value) if it appears already in the list
+	POSITION pos1, pos2;
+	for (pos1 = m_liSortHistory.GetHeadPosition();( pos2 = pos1 ) != NULL;)
+	{
+		m_liSortHistory.GetNext(pos1);
+		if (m_liSortHistory.GetAt(pos2) == dwNewOrder || m_liSortHistory.GetAt(pos2) == dwInverse)
+			m_liSortHistory.RemoveAt(pos2);
+	}
+	m_liSortHistory.AddHead(dwNewOrder);
+	// limit it to 4 entries for now, just for performance
+	if (m_liSortHistory.GetSize() > 4)
+		m_liSortHistory.RemoveTail();
+}
+
+int	CMuleListCtrl::GetNextSortOrder(int dwCurrentSortOrder) const{
+	POSITION pos1, pos2;
+	for (pos1 = m_liSortHistory.GetHeadPosition();( pos2 = pos1 ) != NULL;)
+	{
+		m_liSortHistory.GetNext(pos1);
+		if (m_liSortHistory.GetAt(pos2) == dwCurrentSortOrder){
+			if (pos1 == NULL)
+				return -1; // there is no further sortorder stored
+			else
+				return m_liSortHistory.GetAt(pos1);
+		}
+	}
+	// current one not found, shouldn't happen
+	ASSERT( false );
+	return -1;
+}*/

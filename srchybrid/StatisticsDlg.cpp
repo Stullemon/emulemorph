@@ -2528,7 +2528,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		CMap<uint32, uint32, uint32, uint32>	clientVersionEMule;
 		CMap<uint32, uint32, uint32, uint32>	clientVersionAMule;
 		uint32									totalclient;
-		int										myStats[19];
+		int										myStats[NUM_CLIENTLIST_STATS];
 
 		theApp.clientlist->GetStatistics(totalclient, myStats, 
 										 clientVersionEDonkey, 
@@ -2539,7 +2539,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 		cbuffer.Format(_T("%s: %u "), GetResString(IDS_CLIENTLIST), totalclient);
 		stattree.SetItemText(cligen[5], cbuffer);
 
-		cbuffer.Format(_T("%s: %u (%.1f%%) : %u (%.1f%%)"), GetResString(IDS_STATS_SECUREIDENT), myStats[12] , (myStats[2]>0)?((double)100*myStats[12] / myStats[2]):0, myStats[13] , (myStats[2]>0)?((double)100*myStats[13] / myStats[2] ):0);
+		int SIclients=myStats[12]+myStats[13];
+		cbuffer.Format(_T("%s: %u (%.1f%%) : %u (%.1f%%)"), GetResString(IDS_STATS_SECUREIDENT), myStats[12] , (SIclients>0)?((double)100*myStats[12] / SIclients):0, myStats[13] , (SIclients>0)?((double)100*myStats[13] / SIclients ):0);
 		stattree.SetItemText(cligen[3], cbuffer);
 
 		cbuffer.Format(_T("%s: %u (%.1f%%)"), GetResString(IDS_IDLOW), myStats[14] , (totalclient>0)?((double)100*myStats[14] / totalclient):0);
@@ -3504,6 +3505,7 @@ void CStatisticsDlg::CreateMyTree()
 
 	// End Tree Setup
 }
+
 void CStatisticsDlg::OnStnDblclickScopeD()
 {
 	theApp.emuledlg->ShowPreferences(IDD_PPG_STATS);

@@ -169,11 +169,7 @@ CString OptUtf8ToStr(const CStringA& rastr)
 	}
 	else
 		wstr.ReleaseBuffer(iWideChars);
-#ifdef _UNICODE
 	return wstr;					// just return the string
-#else
-	return CString(wstr);			// convert to local codepage
-#endif
 }
 
 CString OptUtf8ToStr(const CStringW& rwstr)
@@ -184,11 +180,7 @@ CString OptUtf8ToStr(const CStringW& rwstr)
 		if (rwstr[i] > 0xFF)
 		{
 			// this is no UTF8 string (it's already an Unicode string)...
-#ifdef _UNICODE
 			return rwstr;			// just return the string
-#else
-			return CString(rwstr);	// convert to local codepage
-#endif
 		}
 		astr += (BYTE)rwstr[i];
 	}
@@ -197,12 +189,7 @@ CString OptUtf8ToStr(const CStringW& rwstr)
 
 CStringA StrToUtf8(const CString& rstr)
 {
-#ifdef _UNICODE
 	return wc2utf8(rstr);
-#else
-	CStringW wstr(rstr);
-	return wc2utf8(wstr);
-#endif
 }
 
 bool IsValidEd2kString(LPCTSTR psz)

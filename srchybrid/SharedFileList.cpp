@@ -365,40 +365,36 @@ void CSharedFileList::FindSharedFiles()
 
 	// khaos::kmod+ Fix: Shared files loaded multiple times.
 	CStringList l_sAdded;
-	CString stemp;
 	CString tempDir;
 	CString ltempDir;
 	
-	stemp=thePrefs.GetIncomingDir();
-	stemp.MakeLower();
-	if (stemp.Right(1)!=_T("\\"))
-		stemp+=_T("\\");
+	tempDir=thePrefs.GetIncomingDir();
+	if (tempDir.Right(1)!=_T("\\"))
+		tempDir+=_T("\\");
+	AddFilesFromDirectory(tempDir);
+	tempDir.MakeLower();
+	l_sAdded.AddHead( tempDir );
 
-	l_sAdded.AddHead( stemp );
-	AddFilesFromDirectory(l_sAdded.GetHead());
-
-	if (thePrefs.GetCatCount()>1) {
-		for (int ix=1;ix<thePrefs.GetCatCount();ix++)
-		{
-			tempDir=CString( thePrefs.GetCatPath(ix) );
-			ltempDir=tempDir;ltempDir.MakeLower();
-			if (ltempDir.Right(1)!=_T("\\"))
-				ltempDir+=_T("\\");
-
-			if( l_sAdded.Find( ltempDir ) ==NULL ) {
-				l_sAdded.AddHead( ltempDir );
-				AddFilesFromDirectory(tempDir);
-			}
+	for (int ix=1;ix<thePrefs.GetCatCount();ix++)
+	{
+		tempDir=CString( thePrefs.GetCatPath(ix) );
+		if (tempDir.Right(1)!=_T("\\"))
+			tempDir+=_T("\\");
+		ltempDir=tempDir;
+		ltempDir.MakeLower();
+		if( l_sAdded.Find( ltempDir ) ==NULL ) {
+			l_sAdded.AddHead( ltempDir );
+			AddFilesFromDirectory(tempDir);
 		}
 	}
 
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;)
 	{
 		tempDir = thePrefs.shareddir_list.GetNext(pos);
+		if (tempDir.Right(1)!=_T("\\"))
+			tempDir+=_T("\\");
 		ltempDir= tempDir;
 		ltempDir.MakeLower();
-		if (ltempDir.Right(1)!=_T("\\"))
-			ltempDir+=_T("\\");
 
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
 			l_sAdded.AddHead( ltempDir );
@@ -932,7 +928,6 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 	}
 
 	EUtf8Str eStrEncode;
-#ifdef _UNICODE
 	if (pServer != NULL && (pServer->GetTCPFlags() & SRV_TCPFLG_UNICODE)){
 		// eserver doesn't properly support searching with ASCII-7 strings in BOM-UTF8 published strings
 		//eStrEncode = utf8strOptBOM;
@@ -942,9 +937,6 @@ void CSharedFileList::CreateOfferedFilePacket(const CKnownFile* cur_file, CSafeM
 		eStrEncode = utf8strNone;
 	else
 		eStrEncode = utf8strRaw;
-#else
-	eStrEncode = utf8strNone;
-#endif
 
 	files->WriteUInt32(tags.GetSize());
 	for (int i = 0; i < tags.GetSize(); i++)

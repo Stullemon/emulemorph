@@ -747,7 +747,7 @@ bool CIndexed::AddNotes(const CUInt128& keyID, const CUInt128& sourceID, Kademli
 			uint32 size = currNoteHash->m_Source_map.GetSize();
 			for(POSITION pos2 = currNoteHash->m_Source_map.GetHeadPosition(); pos2 != NULL; )
 			{
-				Source* currNote = currNoteHash->m_Source_map.GetHead();
+				Source* currNote = currNoteHash->m_Source_map.GetNext(pos2);
 				if( currNote->entryList.GetSize() )
 				{
 					CEntry* currEntry = currNote->entryList.GetHead();

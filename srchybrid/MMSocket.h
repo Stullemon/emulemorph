@@ -33,12 +33,10 @@ public:
 		WriteByte(len);
 		m_pBuffer->Write(write.GetBuffer(),len);
 	}
-#ifdef _UNICODE
 	void	WriteString(CString write){
 		CStringA strA(write);
 		WriteString(strA);
 	}
-#endif
 	CMemFile* m_pBuffer;
 	bool	  m_bSpecialHeader;
 };

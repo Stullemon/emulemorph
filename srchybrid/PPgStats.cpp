@@ -81,6 +81,8 @@ BOOL CPPgStats::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
+	((CSliderCtrl*)GetDlgItem(IDC_SLIDER))->SetRange(0, 200, TRUE);
+
 	m_ctlGraphsUpdate.SetPos(thePrefs.GetTrafficOMeterInterval());
 	m_ctlGraphsUpdate.SetTicFreq(10);
 	m_ctlGraphsUpdate.SetPageSize(10);
@@ -89,7 +91,6 @@ BOOL CPPgStats::OnInitDialog()
 	m_ctlStatsUpdate.SetTicFreq(10);
 	m_ctlStatsUpdate.SetPageSize(10);
 
-	((CSliderCtrl*)GetDlgItem(IDC_SLIDER))->SetRange(0, 200, TRUE);
 
 	m_ctlGraphsAvgTime.SetRange(0, 99);
 	m_ctlGraphsAvgTime.SetPos(thePrefs.GetStatsAverageMinutes() - 1);

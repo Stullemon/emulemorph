@@ -130,9 +130,7 @@ BOOL CServerWnd::OnInitDialog()
 		theApp.m_fontLog.CreateFontIndirect(&lf);
 	}
 
-#ifdef _UNICODE
 	ReplaceRichEditCtrl(GetDlgItem(IDC_MYINFOLIST), this, GetDlgItem(IDC_SSTATIC)->GetFont());
-#endif
 	CResizableDialog::OnInitDialog();
 
 	// using ES_NOHIDESEL is actually not needed, but it helps to get around a tricky window update problem!
@@ -1037,7 +1035,6 @@ void CServerWnd::DownloadFeed()
 	_tremove(szFilePath);
 
 	//Morph Start - added by AndCycle, XML news unicode hack
-#ifdef _UNICODE
 	FILE *tempFP = _tfopen(szTempFilePath, _T("r"));
 	FILE *targetFP = _tfopen(szFilePath, _T("wb"));
 	fputwc(0xFEFF, targetFP);
@@ -1049,9 +1046,6 @@ void CServerWnd::DownloadFeed()
 	fclose(tempFP);
 	fclose(targetFP);
 	_tremove(szTempFilePath);
-#else
-	_trename(szTempFilePath, szFilePath);
-#endif
 	//Morph End - added by AndCycle, XML news unicode hack
 
 	// Parse it
@@ -1085,7 +1079,6 @@ void CServerWnd::DownloadAllFeeds()
 		}
 		_tremove(szFilePath);
 		//Morph Start - added by AndCycle, XML news unicode hack
-#ifdef _UNICODE
 		FILE *tempFP = _tfopen(szTempFilePath, _T("r"));
 		FILE *targetFP = _tfopen(szFilePath, _T("wb"));
 		fputwc(0xFEFF, targetFP);
@@ -1097,9 +1090,6 @@ void CServerWnd::DownloadAllFeeds()
 		fclose(tempFP);
 		fclose(targetFP);
 		_tremove(szTempFilePath);
-#elif
-		_trename(szTempFilePath, szFilePath);
-#endif
 		//Morph End - added by AndCycle, XML news unicode hack
 		// Parse it
 		ParseNewsFile(szFilePath);
@@ -1124,11 +1114,7 @@ void CServerWnd::ParseNewsNode(pug::xml_node _node, CString _xmlbuffer) {
 			aXMLUrls.Add(sbuffer);
 			sbuffer = i->first_element_by_path(_T("./title")).child(0).value();
 			HTMLParse(sbuffer);
-			#ifdef _UNICODE
-				TCHAR symbol[4] = _T("\n\x2022 ");
-			#else
-				TCHAR symbol[2] = "o ";
-			#endif
+			TCHAR symbol[4] = _T("\n\x2022 ");
 			newsmsgbox->AppendText(symbol);
 			newsmsgbox->AppendHyperLink(_T(""),_T(""),sbuffer,_T(""),false);
 			aXMLNames.Add(sbuffer);

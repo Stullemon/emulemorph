@@ -129,18 +129,14 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 	case ST_SERVERNAME:
 		ASSERT( tag->IsStr() );
 		if (tag->IsStr()){
-#ifdef _UNICODE
 			if (m_strName.IsEmpty())
-#endif
 				m_strName = tag->GetStr();
 		}
 		break;
 	case ST_DESCRIPTION:
 		ASSERT( tag->IsStr() );
 		if (tag->IsStr()){
-#ifdef _UNICODE
 			if (m_strDescription.IsEmpty())
-#endif
 				m_strDescription = tag->GetStr();
 		}
 		break;
@@ -162,9 +158,7 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 	case ST_DYNIP:
 		ASSERT( tag->IsStr() );
 		if (tag->IsStr()){
-#ifdef _UNICODE
 			if (m_strDynIP.IsEmpty())
-#endif
 				m_strDynIP = tag->GetStr();
 		}
 		break;
@@ -190,9 +184,7 @@ bool CServer::AddTagFromFile(CFileDataIO* servermet)
 		break;
 	case ST_VERSION:
 		if (tag->IsStr()){
-#ifdef _UNICODE
 			if (m_strVersion.IsEmpty())
-#endif
 				m_strVersion = tag->GetStr();
 		}
 		else if (tag->IsInt())

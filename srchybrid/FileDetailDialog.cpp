@@ -540,6 +540,7 @@ BOOL CFileDetailDialogName::OnInitDialog()
 	AddAnchor(IDC_BUTTONSTRIP, BOTTOM_RIGHT);
 	AddAnchor(IDC_FILENAME, BOTTOM_LEFT, BOTTOM_RIGHT);
 
+	m_listFileNames.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	m_listFileNames.InsertColumn(0, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 380); 
 	m_listFileNames.InsertColumn(1, GetResString(IDS_DL_SOURCES), LVCFMT_LEFT, 80); 
 	ASSERT( (m_listFileNames.GetStyle() & LVS_SHAREIMAGELISTS) != 0 );

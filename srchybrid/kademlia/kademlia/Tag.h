@@ -170,13 +170,6 @@ public:
 		, m_value(value, len)
 	{ }
 
-#ifndef _UNICODE
-	CTagStr(LPCSTR name, const CString& rstr)
-		: CTag(TAGTYPE_STRING, name)
-		, m_value(rstr)
-	{ }
-#endif
-
 	CTagStr(LPCSTR name, const CStringW& rstr)
 		: CTag(TAGTYPE_STRING, name)
 		, m_value(rstr)

@@ -671,8 +671,8 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
         // debug info, will remove this when I'm done.
         //DebugLogError(_T("UploadQueue: Error! Throttler has more slots than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), theApp.uploadBandwidthThrottler->GetStandardListSize(), uploadinglist.GetSize(), ::GetTickCount());
 
-		if(tempHighest > (uint32)uploadinglist.GetSize()) {
-        	tempHighest = uploadinglist.GetSize();
+		if(tempHighest > (uint32)uploadinglist.GetSize()+1) {
+        	tempHighest = uploadinglist.GetSize()+1;
 		}
     }
 
@@ -765,12 +765,15 @@ void CUploadQueue::Process() {
 	
 	CheckForHighPrioClient();
 	
+	//MORPH START - Changed vy SiRoB, cache (uint32)uploadinglist.GetCount()
 	//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
 	/*
-	if(::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && GetEffectiveUploadListCount() > 0 && GetEffectiveUploadListCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(GetEffectiveUploadListCount()-1) == false) {
+	if(uploadinglist.GetSize() > 0 && (uint32)uploadinglist.GetCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(uploadinglist.GetSize()-1) == false) {
 	*/
-	if(thePrefs.DoRemoveSpareTrickleSlot() && ::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && uploadinglist.GetCount() > 0 && uploadinglist.GetCount() > m_MaxActiveClientsShortTime && AcceptNewClient(uploadinglist.GetCount()-1) == false) {
+	uint32 iCount = uploadinglist.GetCount();
+	if(thePrefs.DoRemoveSpareTrickleSlot() && iCount > 0 && iCount > m_MaxActiveClientsShortTime+1 && AcceptNewClient(iCount-1) == false) {
 	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
+	//MORPH END   - Changed by SiRoB, 
         // we need to close a trickle slot and put it back first on the queue
 
         POSITION lastpos = uploadinglist.GetTailPosition();
@@ -870,7 +873,16 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
 		MaxSpeed = thePrefs.GetMaxUpload();
 
 	if (curUploadSlots >= 4 &&
-         curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR)
+        (
+         /*curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||*/ //MORPH - Removed by SiRoB, 
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         (
+          thePrefs.GetMaxUpload() == UNLIMITED &&
+          !thePrefs.IsDynUpEnabled() &&
+          thePrefs.GetMaxGraphUploadRate() > 0 &&
+          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate())*1024/UPLOAD_CLIENT_DATARATE
+         )
+        )
     ) // max number of clients to allow for all circumstances
 	    return false;
 
@@ -1151,7 +1163,12 @@ double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
     bool result = false;
-    uint32 slotCounter = 0/*1*/; //MORPH - Changed by SiRoB, try to see if there is not mistake arround renumber mecanisme
+    //MORPH - Changed by SiRoB, try to see if there is not mistake arround renumber mecanisme
+	/**/
+	uint32 slotCounter = 1;
+	/*/
+	uint32 slotCounter = 0;
+	/**/
 	for (POSITION pos = uploadinglist.GetHeadPosition();pos != 0;){
         POSITION curPos = pos;
         CUpDownClient* curClient = uploadinglist.GetNext(pos);
@@ -1275,12 +1292,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			//MORPH END   - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 			result = true;
 		//MORPH START - Changed by SiRoB, try to see if there is not mistake arround renumber mecanisme
-		/*
+		/**/
 		} else{
-        */
+        /*/
 			slotCounter = client->GetSlotNumber();
      	} else if (slotCounter){
-        //MORPH END - Changed by SiRoB, try to see if there is not mistake arround renumber mecanisme
+        /**/
+		//MORPH END - Changed by SiRoB, try to see if there is not mistake arround renumber mecanisme
 			curClient->SetSlotNumber(slotCounter);
             slotCounter++;
         }

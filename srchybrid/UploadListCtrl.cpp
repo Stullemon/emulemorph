@@ -498,10 +498,19 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							Sbuffer = CastSecondsToHM(client->GetWaitTime()/1000);
 						break;
 					case 5:
-						Sbuffer = CastSecondsToHM(client->GetUpStartTimeDelay()/1000);
-						//MORPH START - Added by SiRoB, Right Justify
-						dcdttext |= DT_RIGHT;
-						//MORPH END   - Added by SiRoB, Right Justify
+						{//Morph - modified by AndCycle, upRemain
+							sint32 timeleft;
+							uint32 UpDatarate = client->GetDatarate();
+							// Mighty Knife: Check for credits!=NULL
+							if ((UpDatarate == 0) || (client->Credits()==NULL)) timeleft = -1;
+							else if(client->IsMoreUpThanDown() && client->GetQueueSessionUp() > SESSIONMAXTRANS)	timeleft = (float)(client->Credits()->GetDownloadedTotal() - client->Credits()->GetUploadedTotal())/UpDatarate;
+							// [end] Mighty Knife
+							else if(client->GetPowerShared() && client->GetQueueSessionUp() > SESSIONMAXTRANS) timeleft = -1; //(float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
+							else if(file)
+								if (file->GetFileSize() > SESSIONMAXTRANS)	timeleft = (float)(SESSIONMAXTRANS - client->GetQueueSessionUp())/UpDatarate;
+								else timeleft = (float)(file->GetFileSize() - client->GetQueueSessionUp())/UpDatarate;
+							Sbuffer.Format(_T("%s (+%s)"), CastSecondsToHM((client->GetUpStartTimeDelay())/1000), CastSecondsToHM(timeleft));
+						}//Morph - modified by AndCycle, upRemain
 						break;
 					case 6:
 						Sbuffer = client->GetUploadStateDisplayString();
