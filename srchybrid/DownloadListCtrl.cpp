@@ -826,6 +826,11 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 				case 2:
 					buffer = "Source Exchange";
 					break;
+				//MORPH START - Added by SiRoB, Source Loader Saver [SLS]
+				case 3:
+					buffer = "SLS";
+					break;
+				//MORPH END   - Added by SiRoB, Source Loader Saver [SLS]
 				default:
 					buffer = "Error";
 			}

@@ -16,14 +16,21 @@ m_dwLastTimeSaved = ::GetTickCount() + (rand() * 30000 / RAND_MAX) - 15000 - RES
 
 CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const char* exp) 
 {
-	sourceID = client->GetUserIDHybrid(); 
-	sourcePort = client->GetUserPort(); 
-	partsavailable = client->GetAvailablePartCount();
-	memcpy(expiration, exp, 7);
-	expiration[6] = 0;
 	// khaos::kmod+ Modified to Save Source Exchange Version
 	nSrcExchangeVer = client->GetSourceExchangeVersion();
 	// khaos::kmod-
+	if(nSrcExchangeVer > 2)
+		sourceID = client->GetUserIDHybrid();
+	else
+		sourceID = client->GetIP();
+	sourcePort = client->GetUserPort(); 
+	partsavailable = client->GetAvailablePartCount();
+	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//memcpy(expiration, exp, 7);
+	memcpy(expiration, exp, 11);
+	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//expiration[6] = 0;
+	expiration[10] = 0;
 }
 
 
@@ -36,7 +43,9 @@ bool CSourceSaver::Process(CPartFile* file, int maxSourcesToSave) // return fals
 	CString slsfilepath;
 	slsfilepath.Format("%s\\%s\\%s.txtsrc", theApp.glob_prefs->GetTempDir(), "Source Lists", file->GetPartMetFileName());
 
-	if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
+	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//if (file->GetAvailableSrcCount() > 100 && file->GetDownPriority() < PR_HIGH)
+	if (file->GetAvailableSrcCount() > 25)
 	{
 		if (PathFileExists(slsfilepath))
 			remove(slsfilepath);
@@ -125,8 +134,16 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 			return;
     
 		CSourceData* cur_src = sources->GetAt(pos);
-		CUpDownClient* newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, file);
-	 	theApp.downloadqueue->CheckAndAddSource(file, newclient);
+		CUpDownClient* newclient; 
+		//MORPH START - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+		//newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0);
+		if( cur_src->nSrcExchangeVer == 3 )
+				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, false);
+		else
+				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0, true);
+		newclient->SetSourceFrom(3);
+		//MORPH END   - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+		theApp.downloadqueue->CheckAndAddSource(file, newclient);
         
 	}
 	//theApp.emuledlg->AddLogLine(/*TBN_NONOTIFY, */false, "Loaded %i sources for file %s", sources->GetCount(), file->GetFileName());	
@@ -134,7 +151,9 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 }
 
 //#define SOURCESTOSAVE	10
-#define EXPIREIN		 3 //days
+//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+//#define EXPIREIN		3 //Day
+#define EXPIREIN		60 //Minute
 
 void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString& slsfile, int maxSourcesToSave)
 {
@@ -226,7 +245,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 	CStdioFile f;
 	if (!f.Open(slsfile, CFile::modeCreate | CFile::modeWrite | CFile::typeText))
 		return;
-	f.WriteString("#format: a.b.c.d:port,expirationdate(yymmdd);\r\n");
+	f.WriteString("#format: a.b.c.d:port,expirationdate(yymmddhhmm);\r\n");
 	f.WriteString("#" + theApp.CreateED2kLink(file) + "\r\n"); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
 	while (!srcstosave.IsEmpty()) {
 		CSourceData* cur_src = srcstosave.RemoveHead();
@@ -239,14 +258,20 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, CString
 	f.Close();
 }
 
-CString CSourceSaver::CalcExpiration(int nDays)
+//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce saved source and life time
+//CString CSourceSaver::CalcExpiration(int Days)
+CString CSourceSaver::CalcExpiration(int Minutes)
 {
 	CTime expiration = CTime::GetCurrentTime();
-	CTimeSpan timediff(nDays, 0, 0, 0);
+	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//CTimeSpan timediff(Days, 0, 0, 0);
+	CTimeSpan timediff(Minutes/1440, (Minutes/60) % 24, Minutes % 60, 0);
 	expiration += timediff;
     
 	CString strExpiration;
-	strExpiration.Format("%02i%02i%02i", (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay());
+	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//strExpiration.Format("%02i%02i%02i", (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay());
+	strExpiration.Format("%02i%02i%02i%02i%02i", (expiration.GetYear() % 100), expiration.GetMonth(), expiration.GetDay(), expiration.GetHour(),expiration.GetMinute());
 
 	return strExpiration;
 }
@@ -256,7 +281,12 @@ bool CSourceSaver::IsExpired(CString expirationdate)
 	int year = atoi(expirationdate.Mid(0, 2)) + 2000;
 	int month = atoi(expirationdate.Mid(2, 2));
 	int day = atoi(expirationdate.Mid(4, 2));
-
-	CTime expiration(year, month, day, 0, 0, 0);
+	//MORPH - Added by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	int hour = atoi(expirationdate.Mid(6, 2));
+	int minute = atoi(expirationdate.Mid(8, 2));
+	
+	//MORPH - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
+	//CTime expiration(year, month, day, 0, 0, 0);
+	CTime expiration(year, month, day, hour, minute, 0);
 	return (expiration < CTime::GetCurrentTime());
 }
