@@ -1,5 +1,4 @@
 #pragma once
-#include "afxwin.h"
 
 class CPPgBackup : public CPropertyPage
 {

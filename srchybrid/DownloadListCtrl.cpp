@@ -42,8 +42,6 @@
 #include "StringConversion.h"
 #include "AddSourceDlg.h"
 #include "SharedFileList.h" //MORPH - Added by SiRoB
-#include "version.h" //MORPH - Added by SiRoB
-#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 #include "MassRename.h" //SLAHAM: ADDED MassRename DownloadList
 
 #ifdef _DEBUG
@@ -519,10 +517,8 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 		CString buffer;
 		CPartFile *lpPartFile = (CPartFile*)lpCtrlItem->value;
 
-		//MORPH START - Added by SiRoB, Due to Don't draw hidden Rect
 		if (thePrefs.GetCatColor(lpPartFile->GetCategory()) > 0)
 			dc->SetTextColor(thePrefs.GetCatColor(lpPartFile->GetCategory()));
-		//MORPH END   - Added by SiRoB, Due to Don't draw hidden Rect
 		//MORPH START - Added by IceCream, show download in red
 		if(thePrefs.GetEnableDownloadInRed() && lpPartFile->GetTransferingSrcCount())
 			dc->SetTextColor(RGB(192,0,0));
@@ -1206,9 +1202,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 	RECT clientRect;
 	GetClientRect(&clientRect);
 	RECT cur_rec = lpDrawItemStruct->rcItem;
-	if ((cur_rec.top < clientRect.top || cur_rec.top > clientRect.bottom) 
-		&&
-		(cur_rec.bottom < clientRect.top || cur_rec.bottom > clientRect.bottom))
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
 		return;
 	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
@@ -1295,18 +1289,14 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct){
 				cur_rec.left = cur_rec.right + 1;
 				cur_rec.right = tree_start + cx - iTreeOffset;
 				//MORPH START - Added by SiRoB, Don't draw hidden columns
-				if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
-					||
-					cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+				if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 				//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				DrawFileItem(dc, 5, &cur_rec, content);
 				cur_rec.left = iNextLeft;
 			} else {
 				cur_rec.right += cx;
 				//MORPH START - Added by SiRoB, Don't draw hidden columns
-				if (cur_rec.left >= clientRect.left && cur_rec.left <= clientRect.right
-					||
-					cur_rec.right >= clientRect.left && cur_rec.right <= clientRect.right)
+				if (cur_rec.left < clientRect.right && cur_rec.right > clientRect.left)
 				//MORPH END   - Added by SiRoB, Don't draw hidden columns
 				DrawFileItem(dc, iColumn, &cur_rec, content);
 				cur_rec.left += cx;

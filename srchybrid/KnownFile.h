@@ -63,7 +63,12 @@ public:
 		m_dLastEqualChanceSemiValue = 0;
 		//Morph End - Added by AndCycle, Equal Chance For Each File
 	}
-
+	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
+	~CFileStatistic()
+	{
+		m_bitmapSpreadBar.DeleteObject();
+	}
+	//MORPH END   - Added by SiRoB, Reduce SpreadBar CPU consumption
 	void	MergeFileStats( CFileStatistic* toMerge );
 	void	AddRequest();
 	void	AddAccepted();
@@ -326,7 +331,7 @@ public:
 	void	SetPermissions(int iNewPermissions);
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-	void    SetPowerShared(int newValue);
+	void    SetPowerShared(int newValue) {m_powershared = newValue};
 	bool    GetPowerShared() const;
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, HIDEOS
@@ -398,9 +403,7 @@ private:
 
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;
-	CDC 	m_dcSharedStatusBar;
 	CBitmap m_bitmapSharedStatusBar;
-	CBitmap *m_pbitmapOldSharedStatusBar;
 	int	lastSize;
 	bool	lastonlygreyrect;
 	bool	lastbFlat;

@@ -72,8 +72,6 @@
 #include "StringConversion.h"
 
 #include "fakecheck.h" //MORPH - Added by SiRoB
-#include "IP2Country.h"//EastShare - added by AndCycle, IP to Country
-
 
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"

@@ -60,7 +60,6 @@
 #include "shahashset.h"
 
 #include "FunnyNick.h" //MORPH - Added by IceCream, xrmb FunnyNick
-#include "IP2Country.h" //EastShare - added by AndCycle, IP to Country
 
 #include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
 
@@ -127,7 +126,6 @@ void CUpDownClient::Init()
 	dataratems = 0;
 	m_nUpDatarate = 0;
 	m_pszUsername = 0;
-	m_structUserCountry = theApp.ip2country->GetDefaultIP2Country(); //EastShare - added by AndCycle, IP to Country
 	m_nUserIDHybrid = 0;
 	m_dwServerIP = 0;
 	m_nServerPort = 0;
@@ -2891,32 +2889,44 @@ void CUpDownClient::SetFriendSlot(bool bNV)
         theApp.uploadqueue->ReSortUploadSlots(true);
 }
 //MORPH END   - Added by SiRoB, ZZUL_20040904
+//MORPH START - Added by SiRoB, Show Requested Files
+void CUpDownClient::ShowRequestedFiles()
+{
+	CString fileList;
+	fileList += GetResString(IDS_LISTREQDL);
+	fileList += "\n--------------------------\n" ; 
+	if ( reqfile  && reqfile->IsPartFile())
+	{
+		fileList += reqfile->GetFileName(); 
+		for(POSITION pos = m_OtherRequests_list.GetHeadPosition();pos!=0;m_OtherRequests_list.GetNext(pos))
+		{
+			fileList += "\n" ; 
+			fileList += m_OtherRequests_list.GetAt(pos)->GetFileName(); 
+		}
+		for(POSITION pos = m_OtherNoNeeded_list.GetHeadPosition();pos!=0;m_OtherNoNeeded_list.GetNext(pos))
+		{
+			fileList += "\n" ;
+			fileList += m_OtherNoNeeded_list.GetAt(pos)->GetFileName();
+		}
+	}
+	else
+		fileList += GetResString(IDS_LISTREQNODL);
+	fileList += "\n\n\n";
+	fileList += GetResString(IDS_LISTREQUL);
+	fileList += "\n------------------------\n" ; 
+	CKnownFile* uploadfile = theApp.sharedfiles->GetFileByID((uchar*)requpfileid);
+	if(uploadfile)
+		fileList += uploadfile->GetFileName();
+	else
+		fileList += GetResString(IDS_LISTREQNOUL);
+	AfxMessageBox(fileList,MB_OK);
+}
+//MORPH END   - Added by SiRoB, Show Requested Files
 
 //EastShare Start - added by AndCycle, IP to Country
 // Superlexx - client's location
 CString	CUpDownClient::GetCountryName(bool longName) const {
-
-	//display in client detail
-	if(longName && theApp.ip2country->IsIP2Country() == false)	return GetResString(IDS_DISABLED);
-
-	if(theApp.ip2country->IsIP2Country() == false) return _T("");
-
-	if(longName) return m_structUserCountry->LongCountryName;
-
-	CString tempStr;
-
-	switch(thePrefs.GetIP2CountryNameMode()){
-		case IP2CountryName_SHORT:
-			tempStr.Format(_T("%s"),m_structUserCountry->ShortCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
-			return tempStr;
-		case IP2CountryName_MID:
-			tempStr.Format(_T("%s"),m_structUserCountry->MidCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
-			return tempStr;
-		case IP2CountryName_LONG:
-			tempStr.Format(_T("%s"),m_structUserCountry->LongCountryName); //Commander - Changed: Remove the <> because they are not longer needed -> column
-			return tempStr;
-	}
-	return _T("");
+	return theApp.ip2country->GetCountryNameFromRef(m_structUserCountry,longName);
 }
 
 int CUpDownClient::GetCountryFlagIndex() const {

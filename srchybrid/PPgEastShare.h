@@ -36,7 +36,7 @@ protected:
 	//EastShare - Added by Pretender, Option for ChunkDots
 
 	//EastShare - added by AndCycle, IP to Country
-	IP2CountryNameSelection	m_iIP2CountryName;
+	int	m_iIP2CountryName;
 	HTREEITEM m_htiIP2CountryName;
 	HTREEITEM m_htiIP2CountryName_DISABLE;
 	HTREEITEM m_htiIP2CountryName_SHORT;
@@ -47,7 +47,7 @@ protected:
 	//EastShare - added by AndCycle, IP to Country
 
 	// EastShare START - Added by linekin, new creditsystem by [lovelace]
-	CreditSystemSelection m_iCreditSystem;
+	int m_iCreditSystem;
 	HTREEITEM m_htiCreditSystem;
 	HTREEITEM m_htiOfficialCredit;
 	HTREEITEM m_htiLovelaceCredit;
