@@ -1,4 +1,12 @@
 ----------------------------------------
+Changelog for eMule 0.40e21 MorphKad 0.4
+----------------------------------------
+REMOVED: Useless CheckDiskSpace option in Morph Preferency [SiRoB]
+CHANGED: Use Official assigning category in the download popup [SiRoB]
+FIXED: Old MorphNext Modification arrond HideOS feature caused nasty thing on rare uploading files in some case [SiRoB]
+FIXED: Updated HideOS from Slugfiller to avoid exception [Wistily]
+
+----------------------------------------
 Changelog for eMule 0.40e21 MorphKad 0.3
 ----------------------------------------
 FIXED: HTTPDownload corrected to see download info [Yun.SF3]
