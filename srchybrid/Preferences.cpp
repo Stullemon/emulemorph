@@ -4225,7 +4225,7 @@ void CPreferences::LoadDynDNS() {
 
 	int max=DynDNSini.GetInt(_T("Count"),0,_T("General"));
 
-	for (int ix = 0; ix <= max; ix++)
+	for (int ix = 1; ix <= max; ix++)
 	{
 		ixStr.Format(_T("DynDNS#%i"),ix);
         DynDNSini.SetSection(ixStr);
