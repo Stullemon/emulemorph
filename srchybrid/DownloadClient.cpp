@@ -324,12 +324,12 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 			if (thisStatus==m_abyPartStatus)
 				m_abyPartStatus = NULL;
 			m_PartStatus_list.RemoveKey(reqfile);
+			if (m_abyPartStatus){
+				delete[] m_abyPartStatus;
+				m_abyPartStatus = NULL;
+			}
 		}
 		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+
-		if (m_abyPartStatus){
-			delete[] m_abyPartStatus;
-			m_abyPartStatus = NULL;
-		}
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by SiRoB, Hot Fix for m_PartStatus_list
@@ -378,13 +378,12 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 		if (thisStatus==m_abyPartStatus)
 			m_abyPartStatus = NULL;
 		m_PartStatus_list.RemoveKey(reqfile);
+		if (m_abyPartStatus){
+			delete[] m_abyPartStatus;
+			m_abyPartStatus = NULL;
+		}
 	}
 	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
-		
-	if (m_abyPartStatus){
-		delete[] m_abyPartStatus;
-		m_abyPartStatus = NULL;
-	}
 	bool bPartsNeeded = false;
 	if (!nED2KPartCount){
 		m_nPartCount = reqfile->GetPartCount();
