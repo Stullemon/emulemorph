@@ -3754,6 +3754,29 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
+                            "Import aborted: Can't import to a complete file."
+    IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
+                            "Import aborted: hashset incomplete for %s (%i hashes for %i parts)."
+    IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import aborted: Couldn't open %s."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART 
+                            "Importing %i parts (from 0 to %i) to %s."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
+                            "Part %i: skipped, already complete."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Part %i: imported."
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Part %i: imported for ICH handling."
+    IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
+                            "Part %i: skipped, doesn't match partially completed block."
+    IDS_SR13_IMPORTPARTS_IMPORTFINISH
+                            "Import finished. %i parts were imported to %s."
+    IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
+                            "%i bad parts were imported for A/ICH. Initiating rehash."
+    IDS_SR13_IMPORTPARTS_ERR_ALREADYINPROGRESS 
+                            "Another import is already in progress. Please wait until it is finished."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_PW_WEBCACHE         "WebCache"
 END
 
