@@ -490,8 +490,9 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
     	   uploadingClient->IsScheduledForRemoval() && uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && newclient->IsScheduledForRemoval() && newclient->GetScheduledUploadShouldKeepWaitingTime() == false ||
 		   uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
 		   (!uploadingClient->IsScheduledForRemoval() /*&& !newclient->IsScheduledForRemoval()*/ || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime()) &&
-		   (uploadingClient->IsScheduledForRemoval() && !uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && uploadingClient->GetQueueSessionPayloadUp() <= newclient->GetQueueSessionPayloadUp() || //Keep Order For completing scheduled slot
-			RightClientIsSuperior(newclient, uploadingClient) >= 0))
+		   (uploadingClient->IsScheduledForRemoval() && !uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && uploadingClient->GetScheduledForRemovalAtTick() >= newclient->GetScheduledForRemovalAtTick() || //Keep Order For completing scheduled slot
+			(!uploadingClient->IsScheduledForRemoval() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime()) && //Keep Order For completing scheduled slot
+			 RightClientIsSuperior(newclient, uploadingClient) >= 0))
 		{
 			foundposition = true;
 		} else {
@@ -819,10 +820,6 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 void CUploadQueue::Process() {
     DWORD curTick = ::GetTickCount();
 
-	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
-	UpdateDatarates();
-	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
-
 	UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -935,6 +932,27 @@ void CUploadQueue::Process() {
 		avarage_tick_list.RemoveHead();
 	}
 	//MORPH END  - Changed by SiRoB, Better datarate mesurement for low and high speed
+	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
+	if (avarage_tick_list.GetCount() > 1){
+		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
+		if ((curTick - avarage_tick_list.GetTail()) > (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp))
+			dwDuration += curTick - avarage_tick_list.GetTail() - (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp);
+		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
+		datarate = 1000 * (m_avarage_dr_sum-avarage_dr_list.GetHead()) / dwDuration;
+		friendDatarate = 1000 * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / dwDuration;
+	}else if (avarage_tick_list.GetCount() == 1){
+		DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
+		DWORD curTick = ::GetTickCount();
+		if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
+			dwDuration = curTick - avarage_tick_list.GetTail();
+		if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
+		datarate = 1000 * m_avarage_dr_sum / dwDuration;
+		friendDatarate = 0;
+	}else {
+		datarate = 0;
+		friendDatarate = 0;
+	}
+	//MORPH - Added By SiRoB, not needed call UpdateDatarate only once in the process
 };
 
 bool CUploadQueue::AcceptNewClient(){
@@ -1712,51 +1730,18 @@ CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 	else
 		return waitinglist.GetAt(pos);
 }
-
-//MORPH START - Added by SiRoB, ZZ Upload System 20030818-1923
-void CUploadQueue::UpdateDatarates() {
+//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+/*void CUploadQueue::UpdateDatarates() {
 	// Calculate average datarate
-	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
-	/*
 	if(::GetTickCount()-m_lastCalculatedDataRateTick > 500) {
-	m_lastCalculatedDataRateTick = ::GetTickCount();
-	*/
-		
-
-		//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
-		/*
+		m_lastCalculatedDataRateTick = ::GetTickCount();
 		if(avarage_dr_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
 			datarate = ((m_avarage_dr_sum-avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
 			friendDatarate = ((avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail()-avarage_tick_list.GetHead());
-
 		}
-		*/
-		if (avarage_tick_list.GetCount() > 1){
-			DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_list.GetHead();
-			DWORD curTick = ::GetTickCount();
-			if ((curTick - avarage_tick_list.GetTail()) > (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp))
-				dwDuration += curTick - avarage_tick_list.GetTail() - (avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp);
-			if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
-			datarate = 1000 * (m_avarage_dr_sum-avarage_dr_list.GetHead()) / dwDuration;
-			friendDatarate = 1000 * (avarage_friend_dr_list.GetTail()-avarage_friend_dr_list.GetHead()) / dwDuration;
-		}else if (avarage_tick_list.GetCount() == 1){
-			DWORD dwDuration = avarage_tick_list.GetTail() - avarage_tick_listPreviousAddedTimestamp;
-			DWORD curTick = ::GetTickCount();
-			if ((curTick - avarage_tick_list.GetTail()) > dwDuration)
-				dwDuration = curTick - avarage_tick_list.GetTail();
-			if (dwDuration < MAXAVERAGETIMEUPLOAD/2) dwDuration = MAXAVERAGETIMEUPLOAD/2;
-			datarate = 1000 * m_avarage_dr_sum / dwDuration;
-			friendDatarate = 0;
-		}else {
-			datarate = 0;
-			friendDatarate = 0;
-		}
-		//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
-	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
-	/*
 	}
-	*/
 }
+*/
 
 uint32 CUploadQueue::GetDatarate() {
 	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process

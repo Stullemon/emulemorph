@@ -15,6 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
+#include "UploadBandwidthThrottler.h"
 
 class CUpDownClient;
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
@@ -33,7 +34,10 @@ public:
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
 	bool	IsDownloading(CUpDownClient* client)	const {return (uploadinglist.Find(client) != 0);}
 
-    void    UpdateDatarates();
+    //MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	/*
+	void    UpdateDatarates();
+	*/
 	uint32	GetDatarate();
 	uint32  GetToNetworkDatarate();
 
@@ -144,14 +148,13 @@ private:
     float   m_fAverageCombinedFilePrioAndCredit;
 	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCall;
     //MORPH - Added by SiRoB, Upload Splitting Class
-	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[3/*NB_SPLITTING_CLASS*/];
+	uint32  m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[NB_SPLITTING_CLASS];
     //MORPH - Added by SiRoB, Upload Splitting Class
 	uint32  m_MaxActiveClients;
     uint32  m_MaxActiveClientsShortTime;
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	bool	m_abAddClientOfThisClass[3/*NB_SPLITTING_CLASS*/];
-	bool	m_abOnClientOverHideClientDatarate[3/*NB_SPLITTING_CLASS*/];
-	uint32	m_aiSlotCounter[3/*NB_SPLITTING_CLASS*/];
+	bool	m_abAddClientOfThisClass[NB_SPLITTING_CLASS];
+	uint32	m_aiSlotCounter[NB_SPLITTING_CLASS];
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 	DWORD   m_lastCalculatedDataRateTick;
     uint64  m_avarage_dr_sum;
