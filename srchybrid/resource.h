@@ -2591,7 +2591,6 @@
 #define IDC_BANNER                      5044
 #define IDC_STARTUPSOUNDON              5045
 #define IDS_MISSING_STARTUPSOUND        5046
-#define IDC_TREE1                       5046
 #define IDS_PW_STARTUPSOUND             5047
 #define IDC_FRIENDS_COUNTRY_EDIT        5115
 #define IDS_CHAT_COUNTRY                5115

@@ -1,5 +1,4 @@
 #pragma once
-
 #include "TreeOptionsCtrlEx.h"
 
 class CPPgMorph3 : public CPropertyPage
@@ -12,8 +11,11 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_PPG_MORPH3 };
+
+	void Localize(void);
+
 protected:
-        bool	m_bInitializedTreeOpts;
+    bool	m_bInitializedTreeOpts;
 	CTreeOptionsCtrlEx	m_ctrlTreeOptions;
 
 	// Added by MoNKi [ MoNKi: -Wap Server- ]
@@ -33,15 +35,12 @@ protected:
 	// End MoNKi
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	DECLARE_MESSAGE_MAP()
-        afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
-
-public:
-	virtual BOOL OnApply();
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnApply();
 	virtual BOOL OnKillActive();
-	void Localize(void);
-	void LoadSettings(void);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSettingsChange() {SetModified();}
-        afx_msg void OnDestroy();
+    afx_msg void OnDestroy();
 };

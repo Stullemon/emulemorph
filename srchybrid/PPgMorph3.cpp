@@ -21,7 +21,13 @@ static char THIS_FILE[]=__FILE__;
 // End MoNKi
 
 
-// Cuadro de diálogo de CPPgEmulespana
+///////////////////////////////////////////////////////////////////////////////
+// CPPgMorph3 dialog
+
+BEGIN_MESSAGE_MAP(CPPgMorph3, CPropertyPage)
+	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
+	ON_WM_DESTROY()
+END_MESSAGE_MAP()
 
 IMPLEMENT_DYNAMIC(CPPgMorph3, CPropertyPage)
 CPPgMorph3::CPPgMorph3()
@@ -97,12 +103,6 @@ void CPPgMorph3::DoDataExchange(CDataExchange* pDX)
 	// end MoNKi
 }
 
-BEGIN_MESSAGE_MAP(CPPgMorph3, CPropertyPage)
-	ON_MESSAGE(WM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
-	ON_WM_DESTROY()
-END_MESSAGE_MAP()
-
-
 // CPPgMorph3 message handlers
 
 BOOL CPPgMorph3::OnInitDialog()
@@ -119,16 +119,18 @@ BOOL CPPgMorph3::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	LoadSettings();
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CPPgMorph3::LoadSettings(void)
+BOOL CPPgMorph3::OnKillActive()
 {
-	
+	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
+	// data from an open edit control
+	m_ctrlTreeOptions.HandleChildControlLosingFocus();
+	return CPropertyPage::OnKillActive();
 }
 
 BOOL CPPgMorph3::OnApply()
@@ -163,8 +165,6 @@ BOOL CPPgMorph3::OnApply()
 	// End MoNKi
 	
 
-	LoadSettings();
-	
 	SetModified(FALSE);
 	return CPropertyPage::OnApply();
 }
@@ -172,28 +172,18 @@ void CPPgMorph3::Localize(void)
 {
 	if ( m_hWnd )
 	{
-		//SetWindowText(GetResString(IDS_PW_EMULESPANA));
+		SetWindowText(_T("Morph III"));
 
 		// Added by MoNKi [ MoNKi: -Wap Server- ]
-		if(m_htiWapRoot){
-			m_ctrlTreeOptions.SetItemText(m_htiWapRoot, GetResString(IDS_PW_WAP));
-			m_ctrlTreeOptions.SetItemText(m_htiWapEnable, GetResString(IDS_ENABLED));
-			m_ctrlTreeOptions.SetEditLabel(m_htiWapPort, GetResString(IDS_PORT));
-			m_ctrlTreeOptions.SetEditLabel(m_htiWapTemplate, GetResString(IDS_WS_RELOAD_TMPL));
-			m_ctrlTreeOptions.SetEditLabel(m_htiWapPass, GetResString(IDS_WS_PASS));
-			m_ctrlTreeOptions.SetItemText(m_htiWapLowEnable, GetResString(IDS_WEB_LOWUSER));
-			m_ctrlTreeOptions.SetEditLabel(m_htiWapLowPass, GetResString(IDS_WS_PASS));
-		}
+		if (m_htiWapRoot)		m_ctrlTreeOptions.SetItemText(m_htiWapRoot, GetResString(IDS_PW_WAP));
+		if (m_htiWapEnable)		m_ctrlTreeOptions.SetItemText(m_htiWapEnable, GetResString(IDS_ENABLED));
+		if (m_htiWapPort)		m_ctrlTreeOptions.SetEditLabel(m_htiWapPort, GetResString(IDS_PORT));
+		if (m_htiWapTemplate)	m_ctrlTreeOptions.SetEditLabel(m_htiWapTemplate, GetResString(IDS_WS_RELOAD_TMPL));
+		if (m_htiWapPass)		m_ctrlTreeOptions.SetEditLabel(m_htiWapPass, GetResString(IDS_WS_PASS));
+		if (m_htiWapLowEnable)	m_ctrlTreeOptions.SetItemText(m_htiWapLowEnable, GetResString(IDS_WEB_LOWUSER));
+		if (m_htiWapLowPass)	m_ctrlTreeOptions.SetEditLabel(m_htiWapLowPass, GetResString(IDS_WS_PASS));
 		// End MoNKi
 	}
-}
-
-BOOL CPPgMorph3::OnKillActive()
-{
-	// if prop page is closed by pressing VK_ENTER we have to explicitly commit any possibly pending
-	// data from an open edit control
-	m_ctrlTreeOptions.HandleChildControlLosingFocus();
-	return CPropertyPage::OnKillActive();
 }
 
 LRESULT CPPgMorph3::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
