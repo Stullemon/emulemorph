@@ -1004,24 +1004,24 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 						if (percent > 0.05f)
 						{
 							//Commander - Added: Draw Client Percentage xored, caching before draw - Start
-							COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
-							int iOMode = dc->SetBkMode(TRANSPARENT);
+							COLORREF oldclr = cdcStatus.SetTextColor(RGB(0,0,0));
+							int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
 							buffer.Format(_T("%.1f%%"), percent);
-							CFont *pOldFont = dc->SelectObject(&m_fontBold);
+							CFont *pOldFont = cdcStatus.SelectObject(&m_fontBold);
 							rec_status.left--;rec_status.top--;rec_status.right--;rec_status.top--;
-							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
 							rec_status.left+=2;rec_status.right+=2;
-							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
 							rec_status.top+=2;rec_status.bottom+=2;
-							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
 							rec_status.left-=2;rec_status.right-=2;
-							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
 							rec_status.left++;rec_status.top--;rec_status.right++;rec_status.bottom--;
-							dc->SetTextColor(RGB(255,255,255));
-							dc->DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
-							dc->SelectObject(&pOldFont);
-							dc->SetBkMode(iOMode);
-							dc->SetTextColor(oldclr);
+							cdcStatus.SetTextColor(RGB(255,255,255));
+							cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((DLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER);
+							cdcStatus.SelectObject(pOldFont);
+							cdcStatus.SetBkMode(iOMode);
+							cdcStatus.SetTextColor(oldclr);
 							//Commander - Added: Draw Client Percentage xored, caching before draw - End	
 						}
 					}
