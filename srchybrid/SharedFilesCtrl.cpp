@@ -42,7 +42,7 @@
 #include "ListViewWalkerPropertySheet.h"
 #include "UserMsgs.h"
 #include "uploadqueue.h" //MORPH - Added by SiRoB, 
-#include "Log.h"
+#include "Log.h" //MORPH
 // Mighty Knife: CRC32-Tag, Mass Rename
 #include "AddCRC32TagDialog.h"
 #include "MassRename.h"

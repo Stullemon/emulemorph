@@ -363,7 +363,9 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	*/
 	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
 
-	if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
+	if(client->IsScheduledForRemoval()) {
+		dc.SetTextColor(RGB(255,50,50));
+	} else if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount()) {
         dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
     }
 

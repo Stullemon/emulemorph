@@ -260,6 +260,7 @@ void CUpDownClient::Init()
 	m_fQueueRankPending = 0;
 	m_fUnaskQueueRankRecv = 0;
 	m_fFailedFileIdReqs = 0;
+
 	m_slotNumber = 0;
     lastSwapForSourceExchangeTick = 0;
 	m_pReqFileAICHHash = NULL;
@@ -268,6 +269,11 @@ void CUpDownClient::Init()
 	m_byKadVersion = 0;
 	SetLastBuddyPingPongTime();
 	m_fSentOutOfPartReqs = 0;
+	
+	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
+	m_bScheduledForRemoval = false;
+	m_bScheduledForRemovalWillKeepWaitingTimeIntact = false;
+	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
@@ -1110,7 +1116,6 @@ void CUpDownClient::ProcessMuleInfoPacket(char* pachPacket, uint32 nSize)
 	if (bDbgInfo && data.GetPosition() < data.GetLength()){
 		m_strMuleInfo.AppendFormat(_T("\n  ***AddData: %u bytes"), data.GetLength() - data.GetPosition());
 	}
-
 	ReGetClientSoft();
 	m_byInfopacketsReceived |= IP_EMULEPROTPACK;
 
@@ -1150,7 +1155,6 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	data->WriteHash16(thePrefs.GetUserHash());
 	uint32 clientid;
 	clientid = theApp.GetID();
-
 	data->WriteUInt32(clientid);
 	data->WriteUInt16(thePrefs.GetPort());
 
@@ -2468,7 +2472,6 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		//already deleted
 		return;
 	}
-
 	BYTE* pBuffer = NULL;
 	try{
 	for (int i = 0; i != nCount; i++){
@@ -2491,6 +2494,7 @@ void CUpDownClient::ProcessPreviewAnswer(char* pachPacket, uint32 nSize){
 		throw;
 	}
 	(new PreviewDlg())->SetFile(sfile);
+
 }
 
 // sends a packet, if needed it will establish a connection before
@@ -2868,7 +2872,9 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 			strState = GetResString(IDS_CONNVIASERVER);
 			break;
 		case US_UPLOADING:
-            if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount()) {
+            if(IsScheduledForRemoval()) {
+				strState = GetScheduledRemovalDisplayReason();
+            } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount()) {
 				strState = GetResString(IDS_TRANSFERRING);
             } else {
                 strState = GetResString(IDS_TRICKLING);

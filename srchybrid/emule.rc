@@ -4823,6 +4823,13 @@ END
 
 STRINGTABLE 
 BEGIN
+	IDS_UPLOAD_COMPLETED    "Completing"
+    IDS_UPLOAD_PREEMPTED    "Pre-empted by higher prio upload"
+    IDS_UPLOAD_TOO_MANY_SLOTS "Too many slots"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SF_TURN_PART        "File UL (part)"
     IDS_SF_TURN_SIMPLE      "File UL (simple)"
     IDS_SF_FULLUPLOAD       "File UL (full)"

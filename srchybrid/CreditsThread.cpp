@@ -437,11 +437,8 @@ void CCreditsThread::InitText()
 	sTmp += _T(" [") + theApp.m_strModLongVersion + _T("]");
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 
-#ifdef _UNICODE
-	sTmp += _T(" Unicode");
-#endif
 	m_arCredits.Add(sTmp);
-	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2004 Merkur"));
+	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2005 Merkur"));
 	m_arCredits.Add(_T("S:50"));
 
     //Commander - Added: MorphTeam - Start

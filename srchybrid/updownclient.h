@@ -391,6 +391,7 @@ public:
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
 						//m_nCurQueueSessionPayloadUp = 0;
 					}
+
 	uint32			GetQueueSessionUp() const
                     {
                         return m_nTransferredUp - m_nCurQueueSessionUp;
@@ -426,6 +427,31 @@ public:
 	float           GetCombinedFilePrioAndCredit();
 	*/
 	double			GetCombinedFilePrioAndCredit();
+	
+	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
+	void			ScheduleRemovalFromUploadQueue(LPCTSTR pszDebugReason, CString strDisplayReason, bool keepWaitingTimeIntact = false) {
+                        if(!m_bScheduledForRemoval) {
+						    m_bScheduledForRemoval = true;
+						    m_pszScheduledForRemovalDebugReason = pszDebugReason;
+						    m_strScheduledForRemovalDisplayReason = strDisplayReason;
+						    m_bScheduledForRemovalWillKeepWaitingTimeIntact = keepWaitingTimeIntact;
+						    m_bScheduledForRemovalAtTick = ::GetTickCount();
+                        }
+					}
+
+	void			UnscheduleForRemoval() {
+						m_bScheduledForRemoval = false;
+					}
+
+	bool			IsScheduledForRemoval() const { return m_bScheduledForRemoval; }
+
+	bool			GetScheduledUploadShouldKeepWaitingTime() { return m_bScheduledForRemovalWillKeepWaitingTimeIntact; }
+
+	LPCTSTR			GetScheduledRemovalDebugReason() const { return m_pszScheduledForRemovalDebugReason; }
+    CString         GetScheduledRemovalDisplayReason() const { return m_strScheduledForRemovalDisplayReason; }
+
+	bool			GetScheduledRemovalLimboComplete() { return m_bScheduledForRemoval && ::GetTickCount()-m_bScheduledForRemovalAtTick > SEC2MS(10); }
+	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	//download
 	uint32			GetAskedCountDown() const						{ return m_cDownAsked; }
@@ -1027,6 +1053,14 @@ protected:
 	CMap<CPartFile*, CPartFile*, uint16, uint16>	 m_nUpCompleteSourcesCount_list;
 	CMap<CPartFile*, CPartFile*, uint8*, uint8*>	 m_IncPartStatus_list; //MORPH - Added by AndCycle, ICS, Keep A4AF infos
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
+
+	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
+	LPCTSTR m_pszScheduledForRemovalDebugReason;
+    CString m_strScheduledForRemovalDisplayReason;
+	bool	m_bScheduledForRemoval;
+	bool	m_bScheduledForRemovalWillKeepWaitingTimeIntact;
+	DWORD	m_bScheduledForRemovalAtTick;
+	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 //EastShare Start - added by AndCycle, IP to Country
 public:

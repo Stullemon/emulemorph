@@ -2271,10 +2271,9 @@ void CClientReqSocket::OnConnect(int nErrorCode)
 	if (nErrorCode)
 	{
 	    CString strTCPError;
-		strTCPError = GetErrorMessage(nErrorCode, 1);
-
 		if (thePrefs.GetVerbose())
 		{
+		    strTCPError = GetErrorMessage(nErrorCode, 1);
 		    if (nErrorCode != WSAECONNREFUSED && nErrorCode != WSAETIMEDOUT)
 			    DebugLogError(_T("Client TCP socket error (OnConnect): %s; %s"), strTCPError, DbgGetClientInfo());
 		}
@@ -2631,9 +2630,6 @@ void CListenSocket::OnAccept(int nErrorCode){
 		uint32 nFataErrors = 0;
 		while( m_nPendingConnections )
 		{
-			m_nPendingConnections--;
-			AddConnection();
-			
 			CClientReqSocket* newclient = new CClientReqSocket();
 			SOCKADDR_IN SockAddr = {0};
 			int iSockAddrLen = sizeof SockAddr;
@@ -2662,6 +2658,9 @@ void CListenSocket::OnAccept(int nErrorCode){
 				}
 				continue;
 			}
+
+			m_nPendingConnections--;
+			AddConnection();
 
 			if (SockAddr.sin_addr.S_un.S_addr == 0) // for safety..
 			{

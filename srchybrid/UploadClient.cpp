@@ -19,7 +19,6 @@
 #include <zlib/zlib.h>
 #include "UpDownClient.h"
 #include "UrlClient.h"
-#include "Opcodes.h"
 #include "Packets.h"
 #include "UploadQueue.h"
 #include "Statistics.h"
@@ -975,12 +974,12 @@ uint32 CUpDownClient::SendBlockData(){
 
         if(GetUploadState() == US_UPLOADING) {
             bool wasRemoved = false;
-            if(GetQueueSessionPayloadUp() > SESSIONMAXTRANS+1*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
+            if(!IsScheduledForRemoval() && GetQueueSessionPayloadUp() > SESSIONMAXTRANS+1*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
                 m_dwLastCheckedForEvictTick = curTick;
                 wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
             }
 
-            if(wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+            if(!IsScheduledForRemoval() && wasRemoved == false && GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
                 // Should we end this upload?
 
 				//EastShare Start - added by AndCycle, Pay Back First
@@ -994,26 +993,20 @@ uint32 CUpDownClient::SendBlockData(){
                 // client must either be a high ID client, or a low ID
                 // client that is currently connected.
                 wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this);
+
 			    if(!wasRemoved) {
                     // It wasn't removed, so it is allowed to pass into the next amount.
                     m_curSessionAmountNumber++;
                 }
             }
+
 			if(wasRemoved) {
-				//OP_OUTOFPARTREQS will tell the downloading client to go back to OnQueue..
-				//The main reason for this is that if we put the client back on queue and it goes
-				//back to the upload before the socket times out... We get a situation where the
-				//downloader things it already send the requested blocks and the uploader thinks
-				//the downloader didn't send any reqeust blocks. Then the connection times out..
-				//I did some tests with eDonkey also and it seems to work well with them also..
 				//if (thePrefs.GetDebugClientTCPLevel() > 0)
 				//	DebugSend("OP__OutOfPartReqs", this);
 				//Packet* pCancelTransferPacket = new Packet(OP_OUTOFPARTREQS, 0);
 				//theStats.AddUpDataOverheadFileRequest(pCancelTransferPacket->size);
 				//socket->SendPacket(pCancelTransferPacket,true,true);
-            	//theApp.uploadqueue->AddClientToQueue(this,true);
-        	} 
-			else {
+			} else {
     	        // read blocks from file and put on socket
     	        CreateNextBlockPackage();
     	    }

@@ -1,8 +1,9 @@
 #pragma once
+#include "loggable.h"
 
 struct Status;
 
-class CKademliaMain
+class CKademliaMain : public CLoggable
 {
 	friend UINT AFX_CDECL KadStopFunc(LPVOID pvParams);
 public:

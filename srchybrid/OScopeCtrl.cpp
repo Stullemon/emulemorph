@@ -405,7 +405,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	
 	if (thePrefs.m_bShowVerticalHourMarkers) {
 		// CB Mod ---> Vertical lines
-
+		  
 		// Add vertical reference lines in the graphs. Each line indicates an elapsed hour from the current
 		// time (extreme right of the graph).
 		// Lines are always right aligned and the gap scales accordingly to the user horizontal scale.
@@ -449,7 +449,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	axisFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
 						 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
-	
+
 	// grab the horizontal font
 	oldFont = m_dcGrid.SelectObject(&axisFont);
 	
@@ -498,7 +498,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	m_dcGrid.TextOut ((m_rectClient.left+m_rectPlot.left+4)/2-rText.Height() / 2, 
 		((m_rectPlot.bottom+m_rectPlot.top)/2)-rText.Height()/2, m_str.YUnits) ;
 	m_dcGrid.SelectObject(oldFont);
-	
+
 	//  *)	Using "Arial" or "MS Sans Serif" gives a more accurate small font,
 	//		but does not work for Korean fonts.
 	//	*)	Using "MS Shell Dlg" gives somewhat less accurate small fonts, but
@@ -506,31 +506,31 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	LegendFont.CreatePointFont(8*10, _T("MS Shell Dlg")); // 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	oldFont = m_dcGrid.SelectObject(&LegendFont);
 	m_dcGrid.SetTextAlign(TA_LEFT | TA_TOP);
-	
+
 	int xpos = m_rectPlot.left + 2;
 	int ypos = m_rectPlot.bottom + 2;
-	for (i=0 ; i < m_NTrends; i++){
+	for (i = 0; i < m_NTrends; i++){
 		CSize sizeLabel = m_dcGrid.GetTextExtent(m_PlotData[i].LegendLabel);
 		if (xpos + 12 + sizeLabel.cx + 12 > m_rectPlot.right){
 			xpos = m_rectPlot.left + 2;
 			ypos = m_rectPlot.bottom + sizeLabel.cy;
 		}
-		CPen LegendPen(PS_SOLID, 3,m_PlotData[i].crPlotColor);
+		CPen LegendPen(PS_SOLID, 3, m_PlotData[i].crPlotColor);
 		oldPen = m_dcGrid.SelectObject(&LegendPen);
-		m_dcGrid.MoveTo(xpos, ypos+8);
-		m_dcGrid.LineTo(xpos + 8, ypos+4);
-		m_dcGrid.TextOut(xpos + 12 ,ypos, m_PlotData[i].LegendLabel);
+		m_dcGrid.MoveTo(xpos, ypos + 8);
+		m_dcGrid.LineTo(xpos + 8, ypos + 4);
+		m_dcGrid.TextOut(xpos + 12, ypos, m_PlotData[i].LegendLabel);
 		xpos += 12 + sizeLabel.cx + 12;
 		m_dcGrid.SelectObject(oldPen);
 	}
-	
+
 	m_dcGrid.SelectObject(oldFont);
 	
 	// at this point we are done filling the the grid bitmap, 
 	// no more drawing to this bitmap is needed until the setting are changed
 	
 	// if we don't have one yet, set up a memory dc for the plot
-	if(m_dcPlot.GetSafeHdc() == NULL)
+	if (m_dcPlot.GetSafeHdc() == NULL)
 	{
 		m_dcPlot.CreateCompatibleDC(&dc);
 		m_bitmapPlot.DeleteObject();
@@ -539,21 +539,21 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	}
 	
 	// make sure the plot bitmap is cleared
-	if(deleteGraph)
+	if (deleteGraph)
 	{
 		m_dcPlot.SetBkColor(m_crBackColor);
 		m_dcPlot.FillRect(m_rectClient, &m_brushBack);
 	}
 
 	int iNewSize = m_rectClient.Width() / m_nShiftPixels + 10;		// +10 just in case :)
-	if(m_nMaxPointCnt < iNewSize)
+	if (m_nMaxPointCnt < iNewSize)
 		m_nMaxPointCnt = iNewSize;									// keep the bigest value
 
 	if (theApp.emuledlg->IsRunning()) 
 	{
-			if (thePrefs.IsGraphRecreateDisabled() == false) {
-				// The timer will redraw the previous points in 200ms
-				m_bDoUpdate = false;
+		if (thePrefs.IsGraphRecreateDisabled() == false) {
+			// The timer will redraw the previous points in 200ms
+			m_bDoUpdate = false;
 			if(m_nRedrawTimer)
 				KillTimer(m_nRedrawTimer);
 			VERIFY( (m_nRedrawTimer = SetTimer(1612, 200, NULL)) != NULL ); // reduce flickering
@@ -762,47 +762,42 @@ void COScopeCtrl::DrawPoint()
 			// establish a rectangle over the right side of plot
 			// which now needs to be cleaned up proir to adding the new point
 			rectCleanUp = m_rectPlot;
-			rectCleanUp.left  = rectCleanUp.right - m_nShiftPixels + 1;
-			rectCleanUp.right ++;
-			rectCleanUp.bottom ++;
+			rectCleanUp.left = rectCleanUp.right - m_nShiftPixels + 1;
+			rectCleanUp.right++;
+			rectCleanUp.bottom++;
 			// fill the cleanup area with the background
 			m_dcPlot.FillRect(rectCleanUp, &m_brushBack);
 		}
 		
 		// draw the next line segement
-		for(iTrend = 0; iTrend < m_NTrends; iTrend ++)
+		for (iTrend = 0; iTrend < m_NTrends; iTrend ++)
 		{
 			// grab the plotting pen
 			oldPen = m_dcPlot.SelectObject(&m_PlotData[iTrend].penPlot);
 			
-			if(m_PlotData[iTrend].BarsPlot)
+			// move to the previous point
+			prevX = m_rectPlot.right - m_nShiftPixels;
+			if (m_PlotData[iTrend].nPrevY > 0)
 			{
-				currX = m_rectPlot.right;
-				currY = m_rectPlot.bottom -
-					(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
-				m_dcPlot.MoveTo(currX /*- 1*/, m_rectPlot.bottom); //MORPH - Changed by SiRoB, fix [apph]
-				m_dcPlot.LineTo(currX /*- 1*/, currY);//MORPH - Changed by SiRoB, fix [apph]
+				prevY = m_PlotData[iTrend].nPrevY;
 			}
 			else
 			{
-				// move to the previous point
-				prevX = m_rectPlot.right - m_nShiftPixels;
-				if(m_PlotData[iTrend].nPrevY > 0)
-				{
-					prevY = m_PlotData[iTrend].nPrevY;
-				}
-				else
-				{
-					prevY = m_rectPlot.bottom - 
+				prevY = m_rectPlot.bottom - 
 					(long)((m_PlotData[iTrend].dPreviousPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
-				}
+			}
+			if (!m_PlotData[iTrend].BarsPlot)
 				m_dcPlot.MoveTo(prevX, prevY);
-				// draw to the current point
-				currX = m_rectPlot.right;
-				currY = m_rectPlot.bottom -
-					(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
-				m_PlotData[iTrend].nPrevY = currY;
-				if(abs(prevX - currX) > abs(prevY - currY))
+			// draw to the current point
+			currX = m_rectPlot.right;
+			currY = m_rectPlot.bottom -
+				(long)((m_PlotData[iTrend].dCurrentPosition - m_PlotData[iTrend].dLowerLimit) * m_PlotData[iTrend].dVerticalFactor);
+			m_PlotData[iTrend].nPrevY = currY;
+			if (m_PlotData[iTrend].BarsPlot)
+				m_dcPlot.MoveTo(currX, m_rectPlot.bottom);
+			else
+			{
+				if (abs(prevX - currX) > abs(prevY - currY))
 				{
 					currX += prevX - currX>0 ? -1 : 1;
 				}
@@ -810,8 +805,8 @@ void COScopeCtrl::DrawPoint()
 				{
 					currY += prevY - currY>0 ? -1 : 1;
 				}
-				m_dcPlot.LineTo(currX, currY);
 			}
+			m_dcPlot.LineTo(currX, currY);
 			
 			// restore the pen 
 			m_dcPlot.SelectObject(oldPen);
@@ -820,9 +815,9 @@ void COScopeCtrl::DrawPoint()
 			// fill the upper and lower leakage with the background
 			// this will facilitate clipping on an as needed basis
 			// as opposed to always calling IntersectClipRect
-			if((prevY <= m_rectPlot.top) || (currY <= m_rectPlot.top))
+			if ((prevY <= m_rectPlot.top) || (currY <= m_rectPlot.top))
 				m_dcPlot.FillRect(CRect(prevX - 1, m_rectClient.top, currX + 5, m_rectPlot.top + 1), &m_brushBack);
-			if((prevY > m_rectPlot.bottom) || (currY > m_rectPlot.bottom))
+			if ((prevY > m_rectPlot.bottom) || (currY > m_rectPlot.bottom))
 				m_dcPlot.FillRect(CRect(prevX - 1, m_rectPlot.bottom + 1, currX + 5, m_rectClient.bottom + 1), &m_brushBack);
 			
 			// store the current point for connection to the next point

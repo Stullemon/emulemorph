@@ -874,7 +874,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			}
 		}
 
-        if(nNewState == DS_DOWNLOADING && socket){
+        if(nNewState == DS_DOWNLOADING){
 		    socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
@@ -2149,6 +2149,12 @@ void CUpDownClient::DontSwapTo(/*const*/ CPartFile* file)
 
 bool CUpDownClient::IsSwapSuspended(const CPartFile* file, const bool allowShortReaskTime, const bool fileIsNNP) // ZZ:DownloadManager
 {
+	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
+    if(file == reqfile) {
+        return false;
+    }
+	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
+
 // ZZ:DownloadManager -->
     // Don't swap if we have reasked this client too recently
     if(GetTimeUntilReask(file, allowShortReaskTime, true, fileIsNNP) > 0)
@@ -2225,7 +2231,6 @@ bool CUpDownClient::IsValidSource() const
 	}
 	return valid;
 }
-
 void CUpDownClient::StartDownload()
 {
 	SetDownloadState(DS_DOWNLOADING);

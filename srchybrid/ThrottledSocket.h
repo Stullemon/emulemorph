@@ -21,7 +21,7 @@ public:
     virtual DWORD GetLastCalledSend() = 0;
 	//MORPH START - Changed by SiRoB, Scale to lowspeed
 	/*
-	virtual uint32	GetNeededBytes(bool lowspeed) = 0;
+	virtual uint32	GetNeededBytes() = 0;
 	*/
 	virtual uint32	GetNeededBytes(bool lowspeed) = 0;
 	//MORPH START - Changed by SiRoB, Scale to lowspeed

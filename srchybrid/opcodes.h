@@ -101,7 +101,9 @@
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
 #define	UPLOAD_CLIENT_DATARATE	3072		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
+#define	MAX_UP_CLIENTS_ALLOWED	250			// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	2			// min. clients allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
+#define MINNUMBEROFTRICKLEUPLOADS 0			//MORPH  - Added By AndCycle, ZZUL_20050212-0200
 #define DOWNLOADTIMEOUT			SEC2MS(100)
 #define CONSERVTIMEOUT			SEC2MS(25)	// agelimit for pending connection attempts
 #define RARE_FILE				50
@@ -110,8 +112,8 @@
 #define	MAX_PURGEQUEUETIME		HR2MS(1) 
 #define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
 #define CONNECTION_LATENCY		22050	// latency for responces
-#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   3000
-#define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   3000
+#define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   1000
+#define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
 #define CLIENTBANTIME			HR2MS(2)	// 2h
 #define TRACKED_CLEANUP_TIME	HR2MS(1)	// 1 hour
 #define KEEPTRACK_TIME			HR2MS(2)	// 2h	//how long to keep track of clients which were once in the uploadqueue

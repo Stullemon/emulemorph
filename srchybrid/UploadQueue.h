@@ -27,6 +27,7 @@ public:
 
 	void	Process();
 	void	AddClientToQueue(CUpDownClient* client,bool bIgnoreTimelimit = false, bool addInFirstPlace = false);
+	void	ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR pszDebugReason, CString strDisplayReason, bool earlyabort = false); //MORPH - Added By AndCycle, ZZUL_20050212-0200
 	bool	RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason = NULL, bool updatewindow = true, bool earlyabort = false);
 	bool	RemoveFromWaitingQueue(CUpDownClient* client,bool updatewindow = true);
 	bool	IsOnUploadQueue(CUpDownClient* client)	const {return (waitinglist.Find(client) != 0);}
@@ -49,6 +50,7 @@ public:
 	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
 	uint32	GetActiveUploadsCount()					{return m_MaxActiveClientsShortTime;}
 	uint32	GetActiveUploadsCountLongPerspective()					{return m_MaxActiveClients;}
+    uint32 GetEffectiveUploadListCount(); //MORPH - Added By AndCycle, ZZUL_20050212-0200
 
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
@@ -89,7 +91,7 @@ protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
 	bool		AcceptNewClient();
 	bool		AcceptNewClient(uint32 curUploadSlots);
-	bool		ForceNewClient();
+	bool		ForceNewClient(bool simulateScheduledClosingOfSlot = false); //MORPH - Added By AndCycle, ZZUL_20050212-0200
 
 	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);
 	
@@ -102,7 +104,13 @@ private:
 
     void InsertInUploadingList(CUpDownClient* newclient);
     double GetAverageCombinedFilePrioAndCredit();
+	uint32 GetWantedNumberOfTrickleUploads(); //MORPH - Added By AndCycle, ZZUL_20050212-0200
 	void CheckForHighPrioClient();
+
+	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
+    CUpDownClient* FindLastUnScheduledForRemovalClientInUploadList();
+    CUpDownClient* FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated();
+    //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	CUpDownClientPtrList	waitinglist;
 	CUpDownClientPtrList	uploadinglist;
@@ -126,6 +134,7 @@ private:
 	uint32	successfullupcount;
 	uint32	failedupcount;
 	uint32	totaluploadtime;
+
 	uint32	m_nLastStartUpload;
 	uint32	m_dwRemovedClientByScore;
 

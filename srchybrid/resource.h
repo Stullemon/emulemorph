@@ -1452,6 +1452,9 @@
 #define IDS_NOTES                       1500
 #define IDS_KADSEARCHALREADY            1501
 #define IDS_ALPHABETIC2NDSORT           1502
+#define IDS_UPLOAD_COMPLETED            1510
+#define IDS_UPLOAD_PREEMPTED            1511
+#define IDS_UPLOAD_TOO_MANY_SLOTS       1512
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002

@@ -1489,10 +1489,8 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	ULONG uTagCountFilePos = (ULONG)file->GetPosition();
 	file->WriteUInt32(uTagCount);
 	
-#ifdef _UNICODE
 	if (WriteOptED2KUTF8Tag(file, GetFileName(), FT_FILENAME))
 		uTagCount++;
-#endif
 	CTag nametag(FT_FILENAME, GetFileName());
 	nametag.WriteTagToFile(file);
 	uTagCount++;

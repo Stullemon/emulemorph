@@ -40,7 +40,7 @@
 #include "TaskbarNotifier.h"
 #include "MenuCmds.h"
 #include "Log.h"
-#include "UploadQueue.h"
+#include "UploadQueue.h" //MORPH - ZZUL
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
