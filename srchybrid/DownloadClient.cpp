@@ -393,7 +393,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 	// know that the file is shared, we know also that the file is complete and don't need to request the file status.
 	if (reqfile->GetPartCount() == 1)
 	{
-		//MORPH START - Added by SiRoB, m_PartStatus_list
+		//MORPH START - Changed by SiRoB, m_PartStatus_list
 		/*
 		if (m_abyPartStatus)
 		{
@@ -401,13 +401,17 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			m_abyPartStatus = NULL;
 		}
 		*/
-		//MORPH   END - Added by SiRoB, m_PartStatus_list
+		uint8* thisStatus;
+		if(m_PartStatus_list.Lookup(reqfile, thisStatus))
+		{
+			delete[] thisStatus;
+			m_PartStatus_list.RemoveKey(reqfile);
+		}
+		m_abyPartStatus = NULL;
+		//MORPH   END - Changed by SiRoB, m_PartStatus_list
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
 		//MORPH START - Added by SiRoB, m_PartStatus_list
-		uint8* thisStatus;
-		if(m_PartStatus_list.Lookup(reqfile, thisStatus))
-			delete[] thisStatus;
 		m_PartStatus_list[reqfile] = m_abyPartStatus;
 		//MORPH END   - Added by SiRoB, Hot Fix for m_PartStatus_list
 		memset(m_abyPartStatus,1,m_nPartCount);
@@ -465,7 +469,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	}
 	uint16 nED2KPartCount = data->ReadUInt16();
 
-	//MORPH START - Added by SiRoB, m_PartStatusList
+	//MORPH START - Added by SiRoB, m_PartStatus_List
 	/*
 	if (m_abyPartStatus)
 	{
@@ -473,7 +477,15 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		m_abyPartStatus = NULL;
 	}
 	*/
-	//MORPH   END - Added by SiRoB, m_PartStatusList
+	uint8* thisStatus;
+	if(m_PartStatus_list.Lookup(reqfile, thisStatus))
+	{
+		delete[] thisStatus;
+		m_PartStatus_list.RemoveKey(reqfile);
+	}
+	m_abyPartStatus = NULL;
+	//MORPH   END - Added by SiRoB, m_PartStatus_List
+
 	bool bPartsNeeded = false;
 	int iNeeded = 0;
 	if (!nED2KPartCount)
@@ -538,9 +550,6 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	
 	
 	//MORPH START - Added by SiRoB, m_PartStatus_List
-	uint8* thisStatus;
-	if(m_PartStatus_list.Lookup(reqfile, thisStatus))
-		delete[] thisStatus;
 	m_PartStatus_list[reqfile] = m_abyPartStatus;
 	//MORPH   END - Added by SiRoB, m_PartStatus_List
 
