@@ -108,7 +108,7 @@ BOOL CPPgWebcachesettings::OnInitDialog()
 
 		URL += _T("&hostName=") + hostName + _T("&proxyName=") + proxyName + _T("&proxyPort=") + proxyPort;
 		m_wndSubmitWebcacheLink2.AppendText(GetResString(IDS_WC_LINK));
-		m_wndSubmitWebcacheLink2.AppendHyperLink(GetResString(IDS_WC_SUBMIT_WEB),0,CString(_T("http://ispcachingforemule.de.vu/submitproxy.html")),0,0);
+		m_wndSubmitWebcacheLink2.AppendHyperLink(GetResString(IDS_WC_SUBMIT_WEB),0,URL,0,0);
 	}
 
 	//JP hide advanced settings
@@ -346,7 +346,7 @@ void CPPgWebcachesettings::Localize(void)
 		GetDlgItem(IDC_PERSISTENT_PROXY_CONNS)->SetWindowText( GetResString(IDS_WC_PERSISTENT) );
 		GetDlgItem(IDC_ADVANCEDCONTROLS)->SetWindowText( GetResString(IDS_WC_ADVANCED) );
 		GetDlgItem(IDC_TestProxy)->SetWindowText( GetResString(IDS_WC_TEST) );
-		GetDlgItem(IDC_UPDATE_WCSETTINGS)->SetWindowText( GetResString(IDS_WC_TEST) );
+		GetDlgItem(IDC_UPDATE_WCSETTINGS)->SetWindowText( GetResString(IDS_WC_UPDATESETTING) );
 	}
 }
 void CPPgWebcachesettings::OnBnClickedDetectWebCache()
