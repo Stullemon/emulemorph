@@ -73,6 +73,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		if (piml){
 			iImgSFM = piml->Add(CTempIconLoader(_T("SHAREDFILES")));
 			iImgPS = piml->Add(CTempIconLoader(_T("PREF_FILES"))); //MORPH - Added by SiRoB, POWERSHARE Limit
+			iImgPerm = piml->Add(CTempIconLoader(_T("ClientCompatible"))); //MORPH - Added by SiRoB, Show Permission
 		}
 		
 		CString Buffer;
