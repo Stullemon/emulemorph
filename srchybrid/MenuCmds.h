@@ -22,10 +22,16 @@
 //MORPH END   - Added by SiRoB, Friend Addon
 
 //MORPH START - Added by SiRoB, ZZ Upload System
-#define MP_POWERSHARE_OFF       10161
-#define MP_POWERSHARE_ON        10162
-#define MP_POWERSHARE_AUTO      10163
-//MORPH END   - Added by SiRoB, ZZ Upload System
+#define MP_POWERSHARE_DEFAULT	10150
+#define MP_POWERSHARE_OFF       10151
+#define MP_POWERSHARE_ON        10152
+#define MP_POWERSHARE_AUTO      10153
+//MORPH START - Added by SiRoB, POWERSHARE Limit
+#define MP_POWERSHARE_LIMITED   10154
+#define MP_POWERSHARE_LIMIT     10155
+#define MP_POWERSHARE_LIMIT_SET 10156
+//MORPH END   - Added by SiRoB, POWERSHARE Limit
+
 //MORPH START - Added by SiRoB, Keep Permission flag
 #define MP_PERMDEFAULT			10165
 #define MP_PERMALL				10166
@@ -36,13 +42,8 @@
 // [end] Mighty Knife
 //MORPH END   - Added by SiRoB, Keep Permission flag
 //MORPH START - Added by SiRoB, HIDEOS
-#define MP_HIDEOS               10170
-#define MP_HIDEOS_0             10171
-#define MP_HIDEOS_1             10172
-#define MP_HIDEOS_2             10173
-#define MP_HIDEOS_3             10174
-#define MP_HIDEOS_4             10175
-#define MP_HIDEOS_5             10176
+#define MP_HIDEOS_DEFAULT       10170
+#define MP_HIDEOS_SET           10171
 #define MP_SELECTIVE_CHUNK      10180
 #define MP_SELECTIVE_CHUNK_0    10181
 #define MP_SELECTIVE_CHUNK_1    10182

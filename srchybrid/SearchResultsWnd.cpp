@@ -377,10 +377,8 @@ void CSearchResultsWnd::DownloadSelected(bool paused)
 			if (thePrefs.SmallFileDLPush() && cur_file->GetFileSize() < 154624)
 				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, 0);
 			else if (thePrefs.AutoSetResumeOrder())
-			{
 				useOrder++;
-				theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, useOrder);
-			}
+			theApp.downloadqueue->AddSearchToDownload(cur_file, paused, useCat, useOrder);
 			// khaos::categorymod-
 			if (cur_file->GetListParent()!=NULL)
 				cur_file=cur_file->GetListParent();

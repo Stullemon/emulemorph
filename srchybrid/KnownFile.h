@@ -282,7 +282,7 @@ public:
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 	void    SetPowerShared(int newValue) {m_powershared = newValue;};
-	bool    GetPowerShared() const {return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto)) && m_bPowerShareAuthorized;}
+	bool    GetPowerShared() const {return ((m_powershared == 1) || ((m_powershared == 2) && m_bPowerShareAuto) || ((m_powershared == 3) && m_bPowerShareLimited) && m_bPowerShareAuthorized);}
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, HIDEOS
 	void	SetHideOS(int newValue) {m_iHideOS = newValue;};
@@ -298,10 +298,13 @@ public:
 	int		GetPowerSharedMode() const {return m_powershared;}
 	bool	GetPowerShareAuthorized() const {return m_bPowerShareAuthorized;}
 	bool	GetPowerShareAuto() const {return m_bPowerShareAuto;}
-	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare) {m_bPowerShareAuthorized = authorizepowershare;m_bPowerShareAuto = autopowershare;}
-   	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	//MORPH END - Added by SiRoB, ZZ Upload System 20030723-0133
-
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	void	SetPowerShareLimit(int newValue) {m_iPowerShareLimit = newValue;};
+	int		GetPowerShareLimit() const {return m_iPowerShareLimit;}
+	bool	GetPowerShareLimited() const {return m_bPowerShareLimited;}
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	void	UpdatePowerShareLimit(bool authorizepowershare,bool autopowershare, bool limitedpowershare) {m_bPowerShareAuthorized = authorizepowershare;m_bPowerShareAuto = autopowershare;m_bPowerShareLimited = limitedpowershare;}
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	// Mighty Knife: CRC32-Tag
 	bool    IsCRC32Calculated () const			{return m_sCRC32[0]!='\0';}
 	CString GetLastCalculatedCRC32 () const		{return m_sCRC32;}
@@ -362,12 +365,17 @@ private:
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	int		m_iShareOnlyTheNeed;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
-
+	
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	int		m_powershared;
 	bool	m_bPowerShareAuthorized;
 	bool	m_bPowerShareAuto;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+	
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	int		m_iPowerShareLimit;
+	bool	m_bPowerShareLimited;
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 
 	// Mighty Knife: CRC32-Tag
 	char    m_sCRC32 [16];

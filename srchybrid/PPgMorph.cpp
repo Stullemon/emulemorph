@@ -65,7 +65,14 @@ CPPgMorph::CPPgMorph()
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	m_htiIsAutoPowershareNewDownloadFile = NULL; //MORPH - Added by SiRoB, Avoid misusing of powersharing	
+	m_htiPowerShareLimit = NULL; //MORPH - Added by SiRoB, POWERSHARE Limit
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing	
+	m_htiPowershareMode = NULL;
+	m_htiPowershareDisabled = NULL;
+	m_htiPowershareActivated = NULL;
+	m_htiPowershareAuto = NULL;
+	m_htiPowershareLimited = NULL;
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing	
 	//MORPH START - Added by SiRoB, Show Permission
 	m_htiPermissions = NULL;
 	m_htiPermAll = NULL;
@@ -122,6 +129,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		int iImgA4AF = 8;
 		int iImgTimeRem = 8;
 		//MORPH END - Added by SiRoB, khaos::categorymod+
+		int iImgPS = 8;
 		int iImgSecu = 8;
  		int iImgDisp = 8;
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
@@ -134,9 +142,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 			iImgSCC = piml->Add(CTempIconLoader("PREF_FOLDERS"));
 			iImgSAC = piml->Add(CTempIconLoader("ClientCompatible"));
 			iImgA4AF = piml->Add(CTempIconLoader("SERVERLIST"));
-			//MORPH START - Added by SiRoB, Show Permissions
-			iImgPerm = piml->Add(CTempIconLoader("ClientCompatible"));
-			//MORPH END   - Added by SiRoB, Show Permissions
+			iImgPerm = piml->Add(CTempIconLoader("ClientCompatible")); //MORPH - Added by SiRoB, Show Permissions
+			iImgPS = piml->Add(CTempIconLoader("PREF_FILES")); //MORPH - Added by SiRoB, POWERSHARE Limit
 			// khaos::accuratetimerem+
 			iImgTimeRem = piml->Add(CTempIconLoader("PREF_SCHEDULER"));
 			// khaos::accuratetimerem-
@@ -212,7 +219,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		// EastShare START - Added by TAHO, USS limit
 		m_htiUSSLimit = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_USEMAXPING), m_htiDynUpUSS, m_iUSSLimit);
 		//Buffer.Format("Max ping value (ms): ",800); //modified by Pretender
-		Buffer.Format(GetResString(IDS_USS_MAXPING),500); //Added by Pretender
+		Buffer.Format(GetResString(IDS_USS_MAXPING),200); //Added by Pretender
 		m_htiUSSPingLimit = m_ctrlTreeOptions.InsertItem(Buffer, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);
 		m_ctrlTreeOptions.AddEditBox(m_htiUSSPingLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		// EastShare END - Added by TAHO, USS limit
@@ -251,9 +258,21 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 		m_htiSFM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SFM), iImgSFM, TVI_ROOT);
 		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-		m_htiShareOnlyTheNeed = m_ctrlTreeOptions.InsertItem(GetResString(IDS_SHAREONLYTHENEEDDEFAULT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSFM);
-		m_ctrlTreeOptions.AddEditBox(m_htiShareOnlyTheNeed, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiShareOnlyTheNeed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHAREONLYTHENEED), m_htiSFM, m_iShareOnlyTheNeed);
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+
+		//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+		m_htiPowershareMode = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_POWERSHARE), iImgPS, m_htiSFM);
+		m_htiPowershareDisabled = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_POWERSHARE_DISABLED), m_htiPowershareMode, m_iPowershareMode == 0);
+		m_htiPowershareActivated =  m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_POWERSHARE_ACTIVATED), m_htiPowershareMode, m_iPowershareMode == 1);
+		m_htiPowershareAuto =  m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_POWERSHARE_AUTO), m_htiPowershareMode, m_iPowershareMode == 2);
+		//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		m_htiPowershareLimited =  m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_POWERSHARE_LIMITED), m_htiPowershareMode, m_iPowershareMode == 3);
+		m_htiPowerShareLimit = m_ctrlTreeOptions.InsertItem(GetResString(IDS_POWERSHARE_LIMIT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiPowershareLimited );
+		m_ctrlTreeOptions.AddEditBox(m_htiPowerShareLimit, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
+		
 		//MORPH START - Added by SiRoB, Show Permission
 		m_htiPermissions = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_PERMISSION), iImgPerm, m_htiSFM);
 		m_htiPermAll = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_FSTATUS_PUBLIC), m_htiPermissions, m_iPermissions == 0);
@@ -265,7 +284,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		// [end] Mighty Knife
 
 		//MORPH END   - Added by SiRoB, Show Permission
-		m_htiIsAutoPowershareNewDownloadFile = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE), m_htiDM, m_bIsAutoPowershareNewDownloadFile); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_iHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
@@ -315,8 +334,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiLeecher, m_bEnableAntiLeecher); //MORPH - Added by IceCream, enable Anti-leecher
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_iInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiIsAutoPowershareNewDownloadFile, m_bIsAutoPowershareNewDownloadFile);//MORPH - Added by SiRoB, Avoid misusing of powersharing
-
+	
 	// Mighty Knife: Community visualization
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCommunityName, m_sCommunityName);
 	// [end] Mighty Knife
@@ -327,9 +345,15 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSelectiveShare, m_iSelectiveShare);
 	//MORPH END - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiShareOnlyTheNeed, m_iShareOnlyTheNeed);
-	DDV_MinMaxInt(pDX, m_iShareOnlyTheNeed, 0, INT_MAX);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShareOnlyTheNeed, m_iShareOnlyTheNeed);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiPowerShareLimit, m_iPowerShareLimit);
+	DDV_MinMaxInt(pDX, m_iShareOnlyTheNeed, 0, INT_MAX);
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPowershareMode, m_iPowershareMode);
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Show Permission
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPermissions, m_iPermissions);
 	//MORPH END   - Added by SiRoB, Show Permission
@@ -388,11 +412,12 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableDownloadInBold = thePrefs.enableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
-	m_bIsAutoPowershareNewDownloadFile = thePrefs.m_bisautopowersharenewdownloadfile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	m_iPowershareMode = thePrefs.m_iPowershareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	m_iInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_iHideOS = thePrefs.hideOS; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iSelectiveShare = thePrefs.selectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_iShareOnlyTheNeed = thePrefs.ShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	m_iPowerShareLimit = thePrefs.PowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
 	m_iPermissions = thePrefs.permissions; //MORPH - Added by SiRoB, Show Permission
 	
 	// Mighty Knife: Community visualization
@@ -474,10 +499,12 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_iInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-	thePrefs.m_bisautopowersharenewdownloadfile = m_bIsAutoPowershareNewDownloadFile;//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	thePrefs.m_iPowershareMode = m_iPowershareMode;//MORPH - Added by SiRoB, Avoid misusing of powersharing
 	thePrefs.hideOS = m_iHideOS;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	thePrefs.selectiveShare = m_iSelectiveShare; //MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	thePrefs.ShareOnlyTheNeed = m_iShareOnlyTheNeed; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	thePrefs.PowerShareLimit = m_iPowerShareLimit; //MORPH - Added by SiRoB, POWERSHARE Limit
+	
 	thePrefs.permissions = m_iPermissions; //MORPH - Added by SiRoB, Show Permission
 	theApp.emuledlg->serverwnd->ToggleDebugWindow();
 	theApp.emuledlg->serverwnd->UpdateLogTabSelection();
@@ -586,8 +613,16 @@ void CPPgMorph::Localize(void)
 		if (m_htiInfiniteQueue) m_ctrlTreeOptions.SetItemText(m_htiInfiniteQueue, GetResString(IDS_INFINITEQUEUE));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		if (m_htiHideOS) m_ctrlTreeOptions.SetEditLabel(m_htiHideOS, GetResString(IDS_HIDEOVERSHARES));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 		if (m_htiSelectiveShare) m_ctrlTreeOptions.SetItemText(m_htiSelectiveShare, GetResString(IDS_SELECTIVESHARE));//MORPH - Added by SiRoB, SLUGFILLER: hideOS
-		if (m_htiShareOnlyTheNeed) m_ctrlTreeOptions.SetEditLabel(m_htiShareOnlyTheNeed, GetResString(IDS_SHAREONLYTHENEEDDEFAULT));//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-		if (m_htiIsAutoPowershareNewDownloadFile) m_ctrlTreeOptions.SetItemText(m_htiIsAutoPowershareNewDownloadFile, GetResString(IDS_POWERSHARE_AUTONEWDOWNLOADFILE)); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+		if (m_htiShareOnlyTheNeed) m_ctrlTreeOptions.SetItemText(m_htiShareOnlyTheNeed, GetResString(IDS_SHAREONLYTHENEED));//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+		//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+		if (m_htiPowershareMode) m_ctrlTreeOptions.SetItemText(m_htiPowershareMode, GetResString(IDS_POWERSHARE));
+		if (m_htiPowershareDisabled) m_ctrlTreeOptions.SetItemText(m_htiPowershareDisabled, GetResString(IDS_POWERSHARE_DISABLED));
+		if (m_htiPowershareActivated) m_ctrlTreeOptions.SetItemText(m_htiPowershareActivated, GetResString(IDS_POWERSHARE_ACTIVATED));
+		if (m_htiPowershareAuto) m_ctrlTreeOptions.SetItemText(m_htiPowershareAuto, GetResString(IDS_POWERSHARE_AUTO));
+		if (m_htiPowershareLimited) m_ctrlTreeOptions.SetItemText(m_htiPowershareLimited, GetResString(IDS_POWERSHARE_LIMITED));
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		if (m_htiPowerShareLimit) m_ctrlTreeOptions.SetEditLabel(m_htiPowerShareLimit, GetResString(IDS_POWERSHARE_LIMIT));
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
 		//MORPH START - Added by SiRoB, Show Permission
 		if (m_htiPermissions) m_ctrlTreeOptions.SetItemText(m_htiPermissions, GetResString(IDS_PERMISSION));
 		if (m_htiPermAll) m_ctrlTreeOptions.SetItemText(m_htiPermAll, GetResString(IDS_FSTATUS_PUBLIC));
@@ -685,7 +720,14 @@ void CPPgMorph::OnDestroy()
 	m_htiHideOS = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiSelectiveShare = NULL;	//MORPH - Added by SiRoB, SLUGFILLER: hideOS
 	m_htiShareOnlyTheNeed = NULL; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
-	m_htiIsAutoPowershareNewDownloadFile = NULL; //MORPH - Added by SiRoB, Avoid misusing of powersharing	
+	m_htiPowerShareLimit = NULL; //MORPH - Added by SiRoB, POWERSHARE Limit
+	//MORPH START - Added by SiRoB, Avoid misusing of powersharing	
+	m_htiPowershareMode = NULL;
+	m_htiPowershareDisabled = NULL;
+	m_htiPowershareActivated = NULL;
+	m_htiPowershareAuto = NULL;
+	m_htiPowershareLimited = NULL;
+	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing	
 	//MORPH START - Added by SiRoB, Show Permission
 	m_htiPermissions = NULL;
 	m_htiPermAll = NULL;

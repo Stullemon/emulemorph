@@ -575,7 +575,7 @@ public:
 	static EqualChanceForEachFileSelection equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
 	static bool	isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
-	static bool	m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	static uint8	m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	static uint16	maxconnectionsswitchborder;
 	//EastShare Start- Added by Pretender, TBH-AutoBackup
 	static bool	autobackup;
@@ -596,6 +596,10 @@ public:
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	static uint8	ShareOnlyTheNeed;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+	
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	static uint8	PowerShareLimit;
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	
 	//MORPH START - Added by SiRoB, Show Permissions
 	static uint8	permissions;
@@ -1348,7 +1352,7 @@ public:
 	static	bool	IsECFEFallTime()	{return m_bECFEFallTime;}//Morph - added by AndCycle, Equal Chance For Each File
 	static	int  GetKnownMetDays()	{return m_iKnownMetDays;} // EastShare - Added by TAHO, .met file control
 	static	bool IsAutoDynUpSwitching()	{return isautodynupswitching;}//MORPH - Added by Yun.SF3, Auto DynUp changing
-	static	bool IsAutoPowershareNewDownloadFile()	{return m_bisautopowersharenewdownloadfile;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	static	uint8  GetPowerShareMode()	{return m_iPowershareMode;} //MORPH - Added by SiRoB, Avoid misusing of powersharing
 	//EastShare START - Pretender, TBH-AutoBackup
 	static	bool    GetAutoBackup()	{ return autobackup;}
 	static	bool    GetAutoBackup2()	{ return autobackup2;}
@@ -1408,6 +1412,9 @@ public:
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	static	uint8	GetShareOnlyTheNeed()	{return ShareOnlyTheNeed;}
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	static	uint8	GetPowerShareLimit() {return PowerShareLimit;}
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
 	static	uint8	GetPermissions()	{return permissions;}
 	//MORPH END   - Added by SiRoB, Show Permissions

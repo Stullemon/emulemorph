@@ -1987,7 +1987,9 @@
 #define IDC_MINUPTXT                    3573
 #define IDC_MINUPKB                     3574
 #define IDS_POWERSHARE_ON               3576
+#define IDS_POWERSHARE_ACTIVATED        3576
 #define IDS_POWERSHARE_OFF              3577
+#define IDS_POWERSHARE_DISABLED         3577
 #define IDS_POWERSHARE_ON_LABEL         3578
 #define IDS_POWERSHARE_OFF_LABEL        3579
 #define IDS_POWERSHARE_COLUMN_LABEL     3580
@@ -2344,6 +2346,9 @@
 #define IDS_AUXPORTS                    5000
 #define IDC_SOLIDGRAPH                  5001
 #define IDS_SOLIDGRAPH                  5001
+#define IDS_POWERSHARE_LIMITED          5002
+#define IDS_POWERSHARE_LIMIT            5003
+#define IDS_STRING1353                  5004
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125

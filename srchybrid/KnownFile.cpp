@@ -390,11 +390,14 @@ CKnownFile::CKnownFile()
 	m_iShareOnlyTheNeed = -1;
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
-	m_powershared = thePrefs.IsAutoPowershareNewDownloadFile()?2:0;
+	m_powershared = -1;
 	m_bPowerShareAuthorized = true;
 	m_bPowerShareAuto = false;
 	m_nVirtualCompleteSourcesCount = 0;
 	//MORPH END   - Added by SiRoB, Avoid misusing of powershare
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	m_iPowerShareLimit = -1;
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBAr CPU consumption
 	InChangedSharedStatusBar = false;
 	m_pbitmapOldSharedStatusBar = NULL;
@@ -650,7 +653,7 @@ void CKnownFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_AvailPartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<51)?true:(m_nVirtualCompleteSourcesCount<11), m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1);
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 && m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, Reduce ShareStatusBar CPU consumption
 	InChangedSharedStatusBar = false;
@@ -1136,18 +1139,22 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 					else if(strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0)
 						//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
 						//SetPowerShared(newtag->tag.intvalue == 1);
-						SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
+						SetPowerShared((newtag->tag.intvalue<=3)?newtag->tag.intvalue:-1);
 						//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 					//MORPH END   - Added by SiRoB, ZZ Upload System
+					//MORPH START - Added by SiRoB, POWERSHARE Limit
+					else if(strcmp(newtag->tag.tagname, FT_POWERSHARE_LIMIT) == 0)
+						SetPowerShareLimit((newtag->tag.intvalue<=200)?newtag->tag.intvalue:-1);
+					//MORPH END   - Added by SiRoB, POWERSHARE Limit
 					//MORPH START - Added by SiRoB, HIDEOS
 					else if(strcmp(newtag->tag.tagname, FT_HIDEOS) == 0)
-						SetHideOS((newtag->tag.intvalue<=6)?newtag->tag.intvalue:-1);
+						SetHideOS((newtag->tag.intvalue<=10)?newtag->tag.intvalue:-1);
 					else if(strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0)
-						SetSelectiveChunk(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
+						SetSelectiveChunk(newtag->tag.intvalue<=1?newtag->tag.intvalue:-1);
 					//MORPH END   - Added by SiRoB, HIDEOS
 					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 					else if(strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0)
-						SetShareOnlyTheNeed(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
+						SetShareOnlyTheNeed(newtag->tag.intvalue<=1?newtag->tag.intvalue:-1);
 					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 					delete newtag;
 					break;
@@ -1220,7 +1227,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	for (UINT i = 0; i < parts; i++)
 		file->WriteHash16(hashlist[i]);
 	//tags
-	const int iFixedTags = 10 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 ZZ +1 EastShare - met control, known files expire tag[TAHO]
+	const int iFixedTags = 9 + (m_uMetaDataVer > 0 ? 1 : 0);//8 OFFICIAL +1 EastShare - met control, known files expire tag[TAHO]
 	uint32 tagcount = iFixedTags;
 	// Float meta tags are currently not written. All older eMule versions < 0.28a have 
 	// a bug in the meta tag reading+writing code. To achive maximum backward 
@@ -1240,16 +1247,13 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 		if (statistic.spreadlist.GetValueAt(pos))
 			tagcount += 3;
 	//MORPH END   - Added by IceCream, SLUGFILLER: Spreadbars
-	//MORPH START - Added by SiRoB, Show Permissions
-	if (GetPermissions()>=0) tagcount++;
-	//MORPH END   - Added by SiRoB, Show Permissions
-	//MORPH START - Added by SiRoB, HIDEOS
-	if (GetHideOS()>=0) tagcount++;
-	if (GetSelectiveChunk()>=0) tagcount++;
-	//MORPH END   - Added by SiRoB, HIDEOS
-	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	if (GetShareOnlyTheNeed()>=0) tagcount++;
-	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	
+	if (GetPermissions()>=0) tagcount++;		//MORPH - Added by SiRoB, Show Permissions
+	if (GetHideOS()>=0) tagcount++;				//MORPH - Added by SiRoB, HIDEOS
+	if (GetSelectiveChunk()>=0) tagcount++;		//MORPH - Added by SiRoB, HIDEOS
+	if (GetShareOnlyTheNeed()>=0) tagcount++;	//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+	if (GetPowerSharedMode()>=0) tagcount++;			//MORPH - Added by SiRoB, Avoid misusing of powersharing
+	if (GetPowerShareLimit()>=0) tagcount++;	//MORPH - Added by SiRoB, POWERSHARE Limit
 	
 	// standard tags
 	file->WriteUInt32(tagcount);
@@ -1325,10 +1329,17 @@ bool CKnownFile::WriteToFile(CFileDataIO* file){
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	CTag powersharetag(FT_POWERSHARE, GetPowerSharedMode());
-	powersharetag.WriteTagToFile(file);
+	if (GetPowerSharedMode()>=0){
+		CTag powersharetag(FT_POWERSHARE, GetPowerSharedMode());
+		powersharetag.WriteTagToFile(file);
+	}
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	if (GetPowerShareLimit()>=0){
+		CTag powersharelimittag(FT_POWERSHARE_LIMIT, GetPowerShareLimit());
+		powersharelimittag.WriteTagToFile(file);
+	}
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
 	char* namebuffer = new char[10];
 	char* number = &namebuffer[1];
@@ -2320,7 +2331,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 	if ((GetSelectiveChunk()>=0)?!GetSelectiveChunk():!thePrefs.IsSelectiveShareEnabled())
 		return parts;
 
-	uint8 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
+	uint8 hideOS = (GetHideOS()>=0)?GetHideOS():thePrefs.GetHideOvershares();
 	ASSERT(hideOS != 0);
 
 	bool resetSentCount = false;
@@ -2381,7 +2392,7 @@ uint16 CKnownFile::CalcPartSpread(CArray<uint32, uint32>& partspread, CUpDownCli
 };
 
 bool CKnownFile::HideOvershares(CSafeMemFile* file, CUpDownClient* client){
-	uint8 hideOS = GetHideOS()>=0?GetHideOS():thePrefs.GetHideOvershares();
+	uint8 hideOS = (GetHideOS()>=0)?GetHideOS():thePrefs.GetHideOvershares();
 
 	if (!hideOS)
 		return FALSE;
@@ -2420,7 +2431,7 @@ bool CKnownFile::ShareOnlyTheNeed(CSafeMemFile* file)
 {
 	UINT parts = GetED2KPartCount();
 	//SHARE_ONLY_THE_NEED
-	uint8 ShareOnlyTheNeed = GetShareOnlyTheNeed()==-1?thePrefs.GetShareOnlyTheNeed():GetShareOnlyTheNeed();
+	uint8 ShareOnlyTheNeed = (GetShareOnlyTheNeed()>=0)?GetShareOnlyTheNeed():thePrefs.GetShareOnlyTheNeed();
 	if (!parts || /*!m_bPowerShareAuto ||*/  ShareOnlyTheNeed==0)
 		return FALSE;
 		

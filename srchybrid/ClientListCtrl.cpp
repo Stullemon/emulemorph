@@ -93,11 +93,12 @@ void CClientListCtrl::Init()
 	SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
-
+/*
 	// Mighty Knife: Community affiliation
 	if (thePrefs.IsCommunityEnabled ()) ShowColumn (8);
 	else HideColumn (8);
 	// [end] Mighty Knife
+*/
 }
 
 CClientListCtrl::~CClientListCtrl()
@@ -474,7 +475,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-	
+/*	
 	// Mighty Knife: Community affiliation
 	// Show/Hide community column if changed in the preferences
 	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (8))
@@ -482,7 +483,7 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				ShowColumn (8);
 		else HideColumn (8);
 	// [end] Mighty Knife
-
+*/
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{

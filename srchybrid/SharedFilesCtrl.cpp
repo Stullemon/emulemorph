@@ -573,13 +573,28 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					//MORPH START - Added by SiRoB, ZZ Upload System
 					case 13:{
 						//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-						int powersharemode = file->GetPowerSharedMode();
+						int powersharemode;
 						bool powershared = file->GetPowerShared();
 						buffer = "[" + GetResString((powershared)?IDS_POWERSHARE_ON_LABEL:IDS_POWERSHARE_OFF_LABEL) + "] ";
+						if (file->GetPowerSharedMode()>=0)
+							powersharemode = file->GetPowerSharedMode();
+						else {
+							powersharemode = thePrefs.GetPowerShareMode();
+							buffer.Append(" " + ((CString)GetResString(IDS_DEFAULT)).Left(1) + ". ");
+						}
 						if(powersharemode == 2)
 							buffer.Append(GetResString(IDS_POWERSHARE_AUTO_LABEL));
 						else if (powersharemode == 1)
 							buffer.Append(GetResString(IDS_POWERSHARE_ACTIVATED_LABEL));
+						//MORPH START - Added by SiRoB, POWERSHARE Limit
+						else if (powersharemode == 3) {
+							buffer.Append(GetResString(IDS_POWERSHARE_LIMITED));
+							if (file->GetPowerShareLimit()<0)
+								buffer.AppendFormat(" %s. %i", ((CString)GetResString(IDS_DEFAULT)).Left(1), thePrefs.GetPowerShareLimit());
+							else
+								buffer.AppendFormat(" %i", file->GetPowerShareLimit());
+						}
+						//MORPH END   - Added by SiRoB, POWERSHARE Limit
 						else
 							buffer.Append(GetResString(IDS_POWERSHARE_DISABLED_LABEL));
 						buffer.Append(" (");
@@ -587,6 +602,10 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							buffer.Append(GetResString(IDS_POWERSHARE_ADVISED_LABEL));
 						else if (file->GetPowerShareAuthorized())
 							buffer.Append(GetResString(IDS_POWERSHARE_AUTHORIZED_LABEL));
+						//MORPH START - Added by SiRoB, POWERSHARE Limit
+						else if (file->GetPowerShareLimited() && (powersharemode == 3))
+							buffer.Append(GetResString(IDS_POWERSHARE_LIMITED));
+						//MORPH END   - Added by SiRoB, POWERSHARE Limit
 						else
 							buffer.Append(GetResString(IDS_POWERSHARE_DENIED_LABEL));
 						buffer.Append(")");
@@ -743,10 +762,14 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 	bool bFirstItem = true;
 	int iSelectedItems = GetSelectedCount();
 	int iCompleteFileSelected = -1;
-	
+	int iPowerShareLimit = -1; //MORPH - Added by SiRoB, POWERSHARE Limit
+	int iHideOS = -1; //MORPH - Added by SiRoB, HIDEOS
+
 	UINT uPrioMenuItem = 0;
 	UINT uPermMenuItem = 0; //MORPH - Added by SiRoB, showSharePermissions
 	UINT uPowershareMenuItem = 0; //MORPH - Added by SiRoB, Powershare
+	UINT uPowerShareLimitMenuItem = 0; //MORPH - Added by SiRoB, POWERSHARE Limit
+	
 	UINT uHideOSMenuItem = 0; //MORPH - Added by SiRoB, HIDEOS
 	UINT uSelectiveChunkMenuItem = 0; //MORPH - Added by SiRoB, HIDEOS
 	UINT uShareOnlyTheNeedMenuItem = 0; //MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
@@ -807,31 +830,54 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		//MORPH END   - Added by SiRoB, showSharePermissions
 		//MORPH START - Added by SiRoB, Avoid misusing of powershare
 		UINT uCurPowershareMenuItem = 0;
-		if (pFile->GetPowerSharedMode()==0)
-			uCurPowershareMenuItem = MP_POWERSHARE_OFF;
-		else if (pFile->GetPowerSharedMode() == 1)
-			uCurPowershareMenuItem = MP_POWERSHARE_ON;
-		else if (pFile->GetPowerSharedMode() == 2)
-			uCurPowershareMenuItem = MP_POWERSHARE_AUTO;
+		if (pFile->GetPowerSharedMode()==-1)
+			uCurPowershareMenuItem = MP_POWERSHARE_DEFAULT;
 		else
-			ASSERT(0);
-
+			uCurPowershareMenuItem = MP_POWERSHARE_DEFAULT+1 + pFile->GetPowerSharedMode();
+		
 		if (bFirstItem)
 			uPowershareMenuItem = uCurPowershareMenuItem;
 		else if (uPowershareMenuItem != uCurPowershareMenuItem)
 			uPowershareMenuItem = 0;
 		//MORPH END   - Added by SiRoB, Avoid misusing of powershare
 		
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		UINT uCurPowerShareLimitMenuItem = 0;
+		int iCurPowerShareLimit = pFile->GetPowerShareLimit();
+		if (iCurPowerShareLimit==-1)
+			uCurPowerShareLimitMenuItem = MP_POWERSHARE_LIMIT;
+		else
+			uCurPowerShareLimitMenuItem = MP_POWERSHARE_LIMIT_SET;
+		
+		if (bFirstItem)
+		{
+			uPowerShareLimitMenuItem = uCurPowerShareLimitMenuItem;
+			iPowerShareLimit = iCurPowerShareLimit;
+		}
+		else if (uPowerShareLimitMenuItem != uCurPowerShareLimitMenuItem || iPowerShareLimit != iCurPowerShareLimit)
+		{
+			uPowerShareLimitMenuItem = 0;
+			iPowerShareLimit = -1;
+		}
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
+		
 		//MORPH START - Added by SiRoB, HIDEOS
 		UINT uCurHideOSMenuItem = 0;
-		if (pFile->GetHideOS() == -1)
-			uCurHideOSMenuItem = MP_HIDEOS;
+		int iCurHideOS = pFile->GetHideOS();
+		if (iCurHideOS == -1)
+			uCurHideOSMenuItem = MP_HIDEOS_DEFAULT;
 		else
-			uCurHideOSMenuItem = MP_HIDEOS+1 + pFile->GetHideOS();
+			uCurHideOSMenuItem = MP_HIDEOS_SET;
 		if (bFirstItem)
+		{
 			uHideOSMenuItem = uCurHideOSMenuItem;
-		else if (uHideOSMenuItem != uCurHideOSMenuItem)
+			iHideOS = iCurHideOS;
+		}
+		else if (uHideOSMenuItem != uCurHideOSMenuItem || iHideOS != iCurHideOS)
+		{
 			uHideOSMenuItem = 0;
+			iHideOS = -1;
+		}
 		
 		UINT uCurSelectiveChunkMenuItem = 0;
 		if (pFile->GetSelectiveChunk() == -1)
@@ -840,7 +886,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			uCurSelectiveChunkMenuItem = MP_SELECTIVE_CHUNK+1 + pFile->GetSelectiveChunk();
 		if (bFirstItem)
 			uSelectiveChunkMenuItem = uCurSelectiveChunkMenuItem;
-		else if (uSelectiveChunkMenuItem != uCurSelectiveChunkMenuItem )
+		else if (uSelectiveChunkMenuItem != uCurSelectiveChunkMenuItem)
 			uSelectiveChunkMenuItem = 0;
 		//MORPH END   - Added by SiRoB, HIDEOS
 		
@@ -852,7 +898,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 			uCurShareOnlyTheNeedMenuItem = MP_SHAREONLYTHENEED+1 + pFile->GetShareOnlyTheNeed();
 		if (bFirstItem)
 			uShareOnlyTheNeedMenuItem = uCurShareOnlyTheNeedMenuItem ;
-		else if (uShareOnlyTheNeedMenuItem != uCurShareOnlyTheNeedMenuItem )
+		else if (uShareOnlyTheNeedMenuItem != uCurShareOnlyTheNeedMenuItem)
 			uShareOnlyTheNeedMenuItem = 0;
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
@@ -878,14 +924,21 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, iSelectedItems > 0 && uHideOSMenuItem>=MP_HIDEOS_1 && uHideOSMenuItem<=MP_HIDEOS_5 ? MF_ENABLED : MF_GRAYED);
+	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	CString buffer;
 	if (thePrefs.GetHideOvershares()==0)
 		buffer.Format(" (%s)",GetResString(IDS_DISABLED));
 	else
 		buffer.Format(" (%u)",thePrefs.GetHideOvershares());
-	m_HideOSMenu.ModifyMenu(MP_HIDEOS, MF_STRING,MP_HIDEOS, GetResString(IDS_DEFAULT) + buffer);
-	m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS, MP_HIDEOS_5, uHideOSMenuItem, 0);
+	m_HideOSMenu.ModifyMenu(MP_HIDEOS_DEFAULT, MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+	if (iHideOS==-1)
+		buffer = "Set";
+	else if (iHideOS==0)
+		buffer = GetResString(IDS_DISABLED);
+	else
+		buffer.Format("%i", iHideOS);
+	m_HideOSMenu.ModifyMenu(MP_HIDEOS_SET, MF_STRING,MP_HIDEOS_SET, buffer);
+	m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS_DEFAULT, MP_HIDEOS_SET, uHideOSMenuItem, 0);
 	buffer.Format(" (%s)",thePrefs.IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
 	m_SelectiveChunkMenu.ModifyMenu(MP_SELECTIVE_CHUNK, MF_STRING, MP_SELECTIVE_CHUNK, GetResString(IDS_DEFAULT) + buffer);
 	m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
@@ -926,9 +979,43 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 
 	//MORPH START - Added by SiRoB, Avoid misusing of powershare
 	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PowershareMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	m_PowershareMenu.CheckMenuRadioItem(MP_POWERSHARE_OFF, MP_POWERSHARE_AUTO, uPowershareMenuItem, 0);
-	//MORPH END  - Added by SiRoB, Avoid misusing of powershare
-
+	switch (thePrefs.GetPowerShareMode()){
+		case 0:
+			buffer.Format(" (%s)",GetResString(IDS_POWERSHARE_DISABLED));
+			break;
+		case 1:
+			buffer.Format(" (%s)",GetResString(IDS_POWERSHARE_ACTIVATED));
+			break;
+		case 2:
+			buffer.Format(" (%s)",GetResString(IDS_POWERSHARE_AUTO));
+			break;
+		case 3:
+			buffer.Format(" (%s)",GetResString(IDS_POWERSHARE_LIMITED));
+			break;
+		default:
+			buffer = " (?)";
+			break;
+	}
+	m_PowershareMenu.ModifyMenu(MP_POWERSHARE_DEFAULT, MF_STRING,MP_POWERSHARE_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+	m_PowershareMenu.CheckMenuRadioItem(MP_POWERSHARE_DEFAULT, MP_POWERSHARE_LIMITED, uPowershareMenuItem, 0);
+	//MORPH END   - Added by SiRoB, Avoid misusing of powershare
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	m_PowershareMenu.EnableMenuItem((UINT_PTR)m_PowerShareLimitMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+	if (iPowerShareLimit==0)
+		buffer.Format(" (%s)",GetResString(IDS_DISABLED));
+	else
+		buffer.Format(" (%u)",thePrefs.GetPowerShareLimit());
+	m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT, MF_STRING,MP_POWERSHARE_LIMIT, GetResString(IDS_DEFAULT) + buffer);
+	if (iPowerShareLimit==-1)
+		buffer = "Set";
+	else if (iPowerShareLimit==0)
+		buffer = GetResString(IDS_DISABLED);
+	else
+		buffer.Format("%i",iPowerShareLimit);
+	m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT_SET, MF_STRING,MP_POWERSHARE_LIMIT_SET, buffer);
+	m_PowerShareLimitMenu.CheckMenuRadioItem(MP_POWERSHARE_LIMIT, MP_POWERSHARE_LIMIT_SET, uPowerShareLimitMenuItem, 0);
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	
 	m_SharedFilesMenu.EnableMenuItem(MP_GETED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_GETHTMLED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_GETSOURCEED2KLINK, (iSelectedItems > 0 && theApp.IsConnected() && !theApp.IsFirewalled()) ? MF_ENABLED : MF_GRAYED);
@@ -1216,13 +1303,19 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 			case MP_POWERSHARE_ON:
 			case MP_POWERSHARE_OFF:
 			//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
+			case MP_POWERSHARE_DEFAULT:
 			case MP_POWERSHARE_AUTO:
+			case MP_POWERSHARE_LIMITED: //MORPH - Added by SiRoB, POWERSHARE Limit
 			{
 				POSITION pos = selectedList.GetHeadPosition();
 				while (pos != NULL)
 				{
 					file = selectedList.GetNext(pos);
 					switch (wParam) {
+						case MP_POWERSHARE_DEFAULT:
+							file->SetPowerShared(-1);
+							UpdateFile(file);
+							break;
 						case MP_POWERSHARE_ON:
 							file->SetPowerShared(1);
 							UpdateFile(file);
@@ -1235,12 +1328,78 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 							file->SetPowerShared(2);
 							UpdateFile(file);
 							break;
+						//MORPH START - Added by SiRoB, POWERSHARE Limit
+						case MP_POWERSHARE_LIMITED:
+							file->SetPowerShared(3);
+							UpdateFile(file);
+							break;
+						//MORPH END   - Added by SiRoB, POWERSHARE Limit
 					}
 				}
 				break;
 			}
 			//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 			//MORPH END   - Added by SiRoB, ZZ Upload System
+			//MORPH START - Added by SiRoB, POWERSHARE Limit
+			case MP_POWERSHARE_LIMIT:
+			case MP_POWERSHARE_LIMIT_SET:
+			{
+				POSITION pos = selectedList.GetHeadPosition();
+				int newPowerShareLimit = -1;
+				if (wParam==MP_POWERSHARE_LIMIT_SET)
+				{
+					InputBox inputbox;
+					CString title=GetResString(IDS_POWERSHARE);
+					CString currPowerShareLimit;
+					currPowerShareLimit.Format("%u", (file->GetPowerShareLimit()>=0)?file->GetPowerShareLimit():0);
+					inputbox.SetLabels(GetResString(IDS_POWERSHARE), GetResString(IDS_POWERSHARE_LIMIT), currPowerShareLimit);
+					inputbox.SetNumber(true);
+					int result = inputbox.DoModal();
+					if (result == IDCANCEL || (newPowerShareLimit = inputbox.GetInputInt()) < 0)
+						break;
+				}
+
+				while (pos != NULL)
+				{
+					file = selectedList.GetNext(pos);
+					if  (newPowerShareLimit == file->GetPowerShareLimit()) break;
+					file->SetPowerShareLimit(newPowerShareLimit);
+					UpdateFile(file);
+					break;
+				}
+				break;
+			}
+			//MORPH END   - Added by SiRoB, POWERSHARE Limit
+			//MORPH START - Added by SiRoB, HIDEOS
+			case MP_HIDEOS_DEFAULT:
+			case MP_HIDEOS_SET:
+			{
+				POSITION pos = selectedList.GetHeadPosition();
+				int newHideOS = -1;
+				if (wParam==MP_HIDEOS_SET)
+				{
+					InputBox inputbox;
+					CString title=GetResString(IDS_HIDEOS);
+					CString currHideOS;
+					currHideOS.Format("%u", (file->GetHideOS()>=0)?file->GetHideOS():0);
+					inputbox.SetLabels(GetResString(IDS_HIDEOS), GetResString(IDS_HIDEOVERSHARES), currHideOS);
+					inputbox.SetNumber(true);
+					int result = inputbox.DoModal();
+					if (result == IDCANCEL || (newHideOS = inputbox.GetInputInt()) < 0)
+						break;
+				}
+
+				while (pos != NULL)
+				{
+					file = selectedList.GetNext(pos);
+					if  (newHideOS == file->GetHideOS()) break;
+					file->SetHideOS(newHideOS);
+					UpdateFile(file);
+					break;
+				}
+				break;
+			}
+			//MORPH END   - Added by SiRoB, HIDEOS
 			// xMule_MOD: showSharePermissions
 			// with itsonlyme's sorting fix
 			case MP_PERMDEFAULT:
@@ -1428,10 +1587,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM lParam)
 						theWebServices.RunURL(file, wParam);
 					}
 					//MORPH START - Added by SiRoB, HIDEOS
-					else if (wParam>=MP_HIDEOS && wParam<=MP_HIDEOS_5){
-						file->SetHideOS(wParam==MP_HIDEOS?-1:wParam-MP_HIDEOS_0);
-						UpdateFile(file);
-					}else if (wParam>=MP_SELECTIVE_CHUNK && wParam<=MP_SELECTIVE_CHUNK_1){
+					else if (wParam>=MP_SELECTIVE_CHUNK && wParam<=MP_SELECTIVE_CHUNK_1){
 						file->SetSelectiveChunk(wParam==MP_SELECTIVE_CHUNK?-1:wParam-MP_SELECTIVE_CHUNK_0);
 						UpdateFile(file);
 					//MORPH END   - Added by SiRoB, HIDEOS
@@ -1719,12 +1875,8 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			else if (item1->GetPowerShared() == true && item2->GetPowerShared() == false)
 				return 1;
 			else
-				if (item1->GetPowerSharedMode() == 0 && item2->GetPowerSharedMode() != 0)
-					return -1;
-				else if (item1->GetPowerSharedMode() == 1 && item2->GetPowerSharedMode() != 1)
-					return 1;
-				else if (item1->GetPowerSharedMode() == 2 && item2->GetPowerSharedMode() != 2)
-					return 1-item2->GetPowerSharedMode();
+				if (item1->GetPowerSharedMode() != item2->GetPowerSharedMode())
+					return item1->GetPowerSharedMode() - item2->GetPowerSharedMode();
 				else
 					if (item1->GetPowerShareAuthorized() == false && item2->GetPowerShareAuthorized() == true)
 						return -1;
@@ -1736,7 +1888,14 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 						else if (item1->GetPowerShareAuto() == true && item2->GetPowerShareAuto() == false)
 							return 1;
 						else
-							return 0;
+							//MORPH START - Added by SiRoB, POWERSHARE Limit
+							if (item1->GetPowerShareLimited() == false && item2->GetPowerShareLimited() == true)
+								return -1;
+							else if (item1->GetPowerShareLimited() == true && item2->GetPowerShareLimited() == false)
+								return 1;
+							else
+							//MORPH END   - Added by SiRoB, POWERSHARE Limit
+								return 0;
 		case 43:
 			if (item2->GetPowerShared() == false && item1->GetPowerShared() == true)
 				return -1;
@@ -1760,7 +1919,14 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 						else if (item2->GetPowerShareAuto() == true && item1->GetPowerShareAuto() == false)
 							return 1;
 						else
-							return 0;
+							//MORPH START - Added by SiRoB, POWERSHARE Limit
+							if (item2->GetPowerShareLimited() == false && item1->GetPowerShareLimited() == true)
+								return -1;
+							else if (item2->GetPowerShareLimited() == true && item1->GetPowerShareLimited() == false)
+								return 1;
+							else
+							//MORPH END   - Added by SiRoB, POWERSHARE Limit
+								return 0;
 		//MORPH END - Added by SiRoB, ZZ Upload System
 		//MORPH END - Changed by SiRoB, Avoid misusing of powersharing
 		//MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
@@ -1897,6 +2063,9 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	if (m_PowershareMenu) VERIFY( m_PowershareMenu.DestroyMenu() );
 	//MORPH END - Added by SiRoB, ZZ Upload System
+	//MORPH START - Added by SiRoB, POWERSHARE LImit
+	if (m_PowerShareLimitMenu) VERIFY( m_PowerShareLimitMenu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, HIDEOS
 	if (m_HideOSMenu) VERIFY( m_HideOSMenu.DestroyMenu() );
 	if (m_SelectiveChunkMenu) VERIFY( m_SelectiveChunkMenu.DestroyMenu() );
@@ -1930,22 +2099,24 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	// add powershare switcher
 	m_PowershareMenu.CreateMenu();
+	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_DEFAULT,GetResString(IDS_DEFAULT));
 	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_OFF,GetResString(IDS_POWERSHARE_OFF));
 	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_ON,GetResString(IDS_POWERSHARE_ON));
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_AUTO,GetResString(IDS_POWERSHARE_AUTO));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	//MORPH END - Added by SiRoB, ZZ Upload System
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMITED,GetResString(IDS_POWERSHARE_LIMITED)); 
+	m_PowerShareLimitMenu.CreateMenu();
+	m_PowerShareLimitMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMIT,	GetResString(IDS_DEFAULT));
+	m_PowerShareLimitMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMIT_SET,	GetResString(IDS_DISABLED));
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	//MORPH END   - Added by SiRoB, ZZ Upload System
 
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_HideOSMenu.CreateMenu();
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS, GetResString(IDS_DEFAULT));
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_0, GetResString(IDS_DISABLED));
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_1, "1");
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_2, "2");
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_3, "3");
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_4, "4");
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_5, "5");
+	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT));
+	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_SET, GetResString(IDS_DISABLED));
 	m_SelectiveChunkMenu.CreateMenu();
 	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK,	GetResString(IDS_DEFAULT));
 	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_0,	GetResString(IDS_DISABLED));
@@ -1973,6 +2144,10 @@ void CSharedFilesCtrl::CreateMenues()
 	//MORPH START - Added by SiRoB, ZZ Upload System
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowershareMenu.m_hMenu, GetResString(IDS_POWERSHARE));
 	//MORPH END - Added by SiRoB, ZZ Upload System
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	m_PowershareMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
+	m_PowershareMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowerShareLimitMenu.m_hMenu, GetResString(IDS_POWERSHARE_LIMIT));
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, HIDEOS
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_HideOSMenu.m_hMenu, GetResString(IDS_HIDEOS));
 	m_HideOSMenu.AppendMenu(MF_STRING|MF_SEPARATOR);

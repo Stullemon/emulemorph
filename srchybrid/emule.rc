@@ -4093,8 +4093,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_POWERSHARE_ON       "Activated"
-    IDS_POWERSHARE_OFF      "Disabled"
+    IDS_POWERSHARE_ACTIVATED "Activated"
+    IDS_POWERSHARE_DISABLED "Disabled"
     IDS_POWERSHARE_ON_LABEL "On"
     IDS_POWERSHARE_OFF_LABEL "Off"
     IDS_POWERSHARE_COLUMN_LABEL "Powershare"
@@ -4136,8 +4136,6 @@ BEGIN
     IDS_ST_ULFRIEND         "friend slots only"
     IDS_POWERSHARE_DENIED_LABEL "Denied"
     IDS_POWERSHARE_ADVISED_LABEL "Advised"
-    IDS_POWERSHARE_AUTONEWDOWNLOADFILE 
-                            "New download files in auto powershare mode"
     IDS_POWERSHARE_AUTHORIZED_LABEL "Authorized"
     IDS_POWERSHARE_ACTIVATED_LABEL "Activated"
     IDS_POWERSHARE_DISABLED_LABEL "Disabled"
@@ -4424,7 +4422,6 @@ STRINGTABLE
 BEGIN
     IDS_HIDEOS              "Hide Over Share"
     IDS_SHAREONLYTHENEED    "Share Only The Need"
-    IDS_SHAREONLYTHENEEDDEFAULT "Share Only The Need (0 = Disabled)"
     IDS_SFM                 "Shared File Management"
     IDS_IP2COUNTRY          "IP2Country"
 END
@@ -4446,6 +4443,8 @@ STRINGTABLE
 BEGIN
     IDS_AUXPORTS            "Aux Ports"
     IDS_SOLIDGRAPH          "Show solid graph"
+    IDS_POWERSHARE_LIMITED  "Limited"
+    IDS_POWERSHARE_LIMIT    "Limit of complete source"
 END
 
 #endif    // Anglais (États-Unis) resources

@@ -103,12 +103,12 @@ void CQueueListCtrl::Init()
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
-
+/*
 	// Mighty Knife: Community affiliation
 	if (thePrefs.IsCommunityEnabled ()) ShowColumn (11);
 	else HideColumn (11);
 	// [end] Mighty Knife
-
+*/
 }
 
 CQueueListCtrl::~CQueueListCtrl()
@@ -546,7 +546,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-
+/*
 	// Mighty Knife: Community affiliation
 	// Show/Hide community column if changed in the preferences
 	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (11))
@@ -554,7 +554,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				ShowColumn (11);
 		else HideColumn (11);
 	// [end] Mighty Knife
-	
+*/	
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{

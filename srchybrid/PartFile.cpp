@@ -770,20 +770,25 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 					    	// End Changes by Slugfiller for better exception handling
 					    //MORPH START - Added by SiRoB, Avoid misusing of powersharing
 						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE) == 0) {
-							SetPowerShared((newtag->tag.intvalue<3)?newtag->tag.intvalue:2);
+							SetPowerShared((newtag->tag.intvalue<=3)?newtag->tag.intvalue:-1);
 							delete newtag;
 						//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+						//MORPH START - Added by SiRoB, POWERSHARE Limit
+						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_POWERSHARE_LIMIT) == 0) {
+							SetPowerShareLimit((newtag->tag.intvalue<=200)?newtag->tag.intvalue:-1);
+							delete newtag;
+						//MORPH END   - Added by SiRoB, POWERSHARE Limit
 						//MORPH START - Added by SiRoB, HIDEOS per file
 						} else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_HIDEOS) == 0) {
-							SetHideOS((newtag->tag.intvalue<=6)?newtag->tag.intvalue:-1);
+							SetHideOS((newtag->tag.intvalue<=10)?newtag->tag.intvalue:-1);
 							delete newtag;
 						} else if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SELECTIVE_CHUNK) == 0) {
-							SetSelectiveChunk(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
+							SetSelectiveChunk(newtag->tag.intvalue<=1?newtag->tag.intvalue:-1);
 							delete newtag;
 						//MORPH END   - Added by SiRoB, HIDEOS per file
 						//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 						} else	if((!newtag->tag.specialtag) && strcmp(newtag->tag.tagname, FT_SHAREONLYTHENEED) == 0) {
-							SetShareOnlyTheNeed(newtag->tag.intvalue<=2?newtag->tag.intvalue:-1);
+							SetShareOnlyTheNeed(newtag->tag.intvalue<=1?newtag->tag.intvalue:-1);
 							delete newtag;
 						//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 						}
@@ -1084,7 +1089,7 @@ bool CPartFile::SavePartFile()
 		for (UINT x = 0; x < parts; x++)
 			file.WriteHash16(hashlist[x]);
 		//tags
-		uint32 tagcount = 10/*Official*/ +5/*Khaos*/ +1/*ZZ*/ +(gaplist.GetCount()*2);
+		uint32 tagcount = 10/*Official*/ +5/*Khaos*/ +(gaplist.GetCount()*2);
 		// Float meta tags are currently not written. All older eMule versions < 0.28b have 
 		// a bug in the meta tag reading+writing code. To achive maximum backward 
 		// compatibility for met files with older eMule versions we just don't write float 
@@ -1099,16 +1104,12 @@ bool CPartFile::SavePartFile()
 				tagcount++;
 		}
 		
-		//MORPH START - Added by SiRoB, Show Permissions
-		if (GetPermissions()>=0) tagcount ++;
-		//MORPH END   - Added by SiRoB, Show Permissions
-		//MORPH START - Added by SiRoB, HIDEOS
-		if (GetHideOS()>=0) tagcount ++;
-		if (GetSelectiveChunk()>=0) tagcount ++;
-		//MORPH END   - Added by SiRoB, HIDEOS
-		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-		if (GetShareOnlyTheNeed()>=0) tagcount ++;
-		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+		if (GetPermissions()>=0) tagcount ++;		//MORPH - Added by SiRoB, Show Permissions
+		if (GetHideOS()>=0) tagcount ++;			//MORPH - Added by SiRoB, HIDEOS
+		if (GetSelectiveChunk()>=0) tagcount ++;	//MORPH - Added by SiRoB, HIDEOS
+		if (GetShareOnlyTheNeed()>=0) tagcount ++;	//MORPH - Added by SiRoB, SHARE_ONLY_THE_NEED
+		if (GetPowerSharedMode()>=0) tagcount ++;	//MORPH - Added by SiRoB, Avoid misusing of powersharing
+		if (GetPowerShareLimit()>=0) tagcount ++;	//MORPH - Added by SiRoB, POWERSHARE Limit
 
 		file.WriteUInt32(tagcount);
 
@@ -1170,10 +1171,17 @@ bool CPartFile::SavePartFile()
 		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
 		//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-		CTag powersharetag(FT_POWERSHARE, GetPowerSharedMode());
-		powersharetag.WriteTagToFile(&file);
+		if (GetPowerSharedMode()>=0){
+			CTag powersharetag(FT_POWERSHARE, GetPowerSharedMode());
+			powersharetag.WriteTagToFile(&file);
+		}
 		//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		if (GetPowerShareLimit()>=0){
+			CTag powersharelimittag(FT_POWERSHARE_LIMIT, GetPowerShareLimit());
+			powersharelimittag.WriteTagToFile(&file);
+		}
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
 		// khaos::categorymod+
 		CTag catresumetag(FT_CATRESUMEORDER, m_catResumeOrder );
 		catresumetag.WriteTagToFile(&file);
@@ -2500,7 +2508,7 @@ void CPartFile::UpdatePartsInfo()
 			m_nVirtualCompleteSourcesCount = m_SrcpartFrequency[i];
 	}
 
-	UpdatePowerShareLimit((m_nCompleteSourcesCountHi<21)?true:(m_nVirtualCompleteSourcesCount<11), m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0) || m_nVirtualCompleteSourcesCount==1);
+	UpdatePowerShareLimit(m_nCompleteSourcesCountHi<200, m_nCompleteSourcesCountHi==1 || (m_nCompleteSourcesCountHi==0 && m_nVirtualCompleteSourcesCount>0) || m_nVirtualCompleteSourcesCount==1,m_nCompleteSourcesCountHi>((GetPowerShareLimit()>=0)?GetPowerShareLimit():thePrefs.GetPowerShareLimit()));
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by Yun.SF3, ZZ Upload System
 	UpdateDisplayedInfo(true);

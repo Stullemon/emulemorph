@@ -504,7 +504,7 @@ CreditSystemSelection	CPreferences::creditSystemMode; // EastShare - Added by li
 EqualChanceForEachFileSelection CPreferences::equalChanceForEachFileMode;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::m_bECFEFallTime;//Morph - added by AndCycle, Equal Chance For Each File
 bool	CPreferences::isautodynupswitching;//MORPH - Added by Yun.SF3, Auto DynUp changing
-bool	CPreferences::m_bisautopowersharenewdownloadfile; //MORPH - Added by SiRoB, Avoid misusing of powersharing
+uint8	CPreferences::m_iPowershareMode; //MORPH - Added by SiRoB, Avoid misusing of powersharing
 uint16	CPreferences::maxconnectionsswitchborder;
 //EastShare Start- Added by Pretender, TBH-AutoBackup
 bool	CPreferences::autobackup;
@@ -525,6 +525,10 @@ bool	CPreferences::infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infin
 //MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
 uint8	CPreferences::ShareOnlyTheNeed;
 //MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED Wistily idea
+
+//MORPH START - Added by SiRoB, POWERSHARE Limit
+uint8	CPreferences::PowerShareLimit;
+//MORPH END   - Added by SiRoB, POWERSHARE Limit
 
 //MORPH START - Added by SiRoB, Show Permissions
 uint8	CPreferences::permissions;
@@ -926,7 +930,7 @@ uint16 CPreferences::GetMaxDownload(){
 	if (IsZZRatioDoesWork())
 		return maxdownload;
 	//MORPH END   - Added by SiRoB, ZZ Upload system
-	uint16 maxup=(GetMaxUpload()==UNLIMITED)?GetMaxGraphUploadRate():GetMaxUpload();
+	uint16 maxup=GetMaxUpload();
 	if( maxup < 4 )
 		return (( (maxup < 10) && (maxup*3 < maxdownload) )? maxup*3 : maxdownload);
 	return (( (maxup < 10) && (maxup*4 < maxdownload) )? maxup*4 : maxdownload);
@@ -2287,7 +2291,7 @@ void CPreferences::SavePreferences(){
 	ini.WriteBool("InfiniteQueue",infiniteQueue,"eMule");	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
 	ini.WriteBool("AutoDynUpSwitching",isautodynupswitching,"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteBool("AutoPowershareNewDownloadFile",m_bisautopowersharenewdownloadfile,"eMule"); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteInt("PowershareMode",m_iPowershareMode,"eMule"); //MORPH - Added by SiRoB, Avoid misusing of powersharing
 
 //MORPH START - Added by IceCream, Defeat 0-filled Part Senders from Maella
 	// Maella -Defeat 0-filled Part Senders- (Idea of xrmb)
@@ -2315,8 +2319,11 @@ void CPreferences::SavePreferences(){
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 	ini.WriteBool("ShareOnlyTheNeed",ShareOnlyTheNeed,"eMule");
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	ini.WriteInt("PowerShareLimit",PowerShareLimit,"eMule");
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
-	ini.WriteBool("ShowSharePermissions",permissions,"eMule");
+	ini.WriteInt("ShowSharePermissions",permissions,"eMule");
 	//MORPH END   - Added by SiRoB, Show Permissions
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
@@ -2836,8 +2843,11 @@ void CPreferences::LoadPreferences(){
 	selectiveShare=ini.GetBool("SelectiveShare",false);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	ShareOnlyTheNeed=ini.GetInt("ShareOnlyTheNeed",0);
+	ShareOnlyTheNeed=ini.GetBool("ShareOnlyTheNeed",false);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, POWERSHARE Limit
+	PowerShareLimit=ini.GetInt("PowerShareLimit",0);
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
 	permissions=ini.GetInt("ShowSharePermissions",0);
 	//MORPH END   - Added by SiRoB, Show Permissions
@@ -2848,7 +2858,7 @@ void CPreferences::LoadPreferences(){
 	m_bSolidGraph = ini.GetBool("SolidGraph", false); //MORPH - Added by SiRoB, New Graph
 	infiniteQueue=ini.GetBool("InfiniteQueue",false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	m_bisautopowersharenewdownloadfile=ini.GetBool("AutoPowershareNewDownloadFile",true);
+	m_iPowershareMode=ini.GetInt("PowershareMode",2);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	m_FakesDatVersion=ini.GetInt("FakesDatVersion",0);

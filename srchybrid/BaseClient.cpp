@@ -734,7 +734,13 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	CSafeMemFile data(128);
 	data.WriteUInt8(theApp.m_uCurVersionShort);
 	data.WriteUInt8(EMULE_PROTOCOL);
-	data.WriteUInt32(8/*7 OFFICIAL+1 ET_MOD_VERSION*/); // nr. of tags
+	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
+	if (bSendModVersion)
+		data.WriteUInt32(8/*7 OFFICIAL+1 ET_MOD_VERSION*/); // nr. of tags
+	else
+	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+		data.WriteUInt32(7); // nr. of tags
 	CTag tag(ET_COMPRESSION,1);
 	tag.WriteTagToFile(&data);
 	CTag tag2(ET_UDPVER,4);
@@ -753,17 +759,18 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 		dwTagValue |= 128;
 	CTag tag7(ET_FEATURES, dwTagValue);
 	tag7.WriteTagToFile(&data);
-	//MORPH START - Added by IceCream, Anti-leecher feature
-	if (StrStrI(m_strModVersion,"Mison")||StrStrI(m_strModVersion,"eVort")||StrStrI(m_strModVersion,"booster")||IsLeecher()){
-		CTag tag8(ET_MOD_VERSION, m_strModVersion);
-		tag8.WriteTagToFile(&data);
-	}
-	else{
-		CTag tag8(ET_MOD_VERSION, MOD_VERSION);
-		tag8.WriteTagToFile(&data);
-	}
-	//MORPH END   - Added by IceCream, Anti-leecher feature
-
+	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+		//MORPH START - Added by IceCream, Anti-leecher feature
+		if (StrStrI(m_strModVersion,"Mison")||StrStrI(m_strModVersion,"eVort")||StrStrI(m_strModVersion,"booster")||IsLeecher()){
+			CTag tag8(ET_MOD_VERSION, m_strModVersion);
+			tag8.WriteTagToFile(&data);
+		}
+		else{
+			CTag tag8(ET_MOD_VERSION, MOD_VERSION);
+			tag8.WriteTagToFile(&data);
+		}
+		//MORPH END   - Added by IceCream, Anti-leecher feature
+	}  //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	Packet* packet = new Packet(&data,OP_EMULEPROT);
 	if (!bAnswer)
 		packet->opcode = OP_EMULEINFO;
@@ -951,7 +958,11 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	data->WriteUInt32(clientid);
 	data->WriteUInt16(thePrefs.GetPort());
 
-	uint32 tagcount = 6/*5 OFFICIAL+1 MOD_VERSION*/;//MORPH - Changed by SiRoB
+	uint32 tagcount = 5;
+	//MORPH START - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	bool bSendModVersion = m_strModVersion.GetLength() || m_pszUsername==NULL;
+	if (bSendModVersion) ++tagcount;
+	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	data->WriteUInt32(tagcount);
 
 	// eD2K Name
@@ -1017,19 +1028,20 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 				);
 	tagMuleVersion.WriteTagToFile(data);
 
-	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-	//MORPH START - Added by SiRoB, Anti-leecher feature
-	if (StrStrI(m_strModVersion,"Mison")||StrStrI(m_strModVersion,"eVort")||StrStrI(m_strModVersion,"booster")||IsLeecher()){
-        CTag tagMODVersion(ET_MOD_VERSION, m_strModVersion);
-		tagMODVersion.WriteTagToFile(data);
-	}
-	else{
-		CTag tagMODVersion(ET_MOD_VERSION, MOD_VERSION);
-		tagMODVersion.WriteTagToFile(data);
-	}
-	//MORPH END   - Added by SiRoB, Anti-leecher feature
-	//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-
+	if (bSendModVersion) { //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+		//MORPH START - Added by SiRoB, Anti-leecher feature
+		if (StrStrI(m_strModVersion,"Mison")||StrStrI(m_strModVersion,"eVort")||StrStrI(m_strModVersion,"booster")||IsLeecher()){
+			CTag tagMODVersion(ET_MOD_VERSION, m_strModVersion);
+			tagMODVersion.WriteTagToFile(data);
+		}
+		else{
+			CTag tagMODVersion(ET_MOD_VERSION, MOD_VERSION);
+			tagMODVersion.WriteTagToFile(data);
+		}
+		//MORPH END   - Added by SiRoB, Anti-leecher feature
+		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
+	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 	uint32 dwIP;
 	uint16 nPort;
 	if (theApp.serverconnect->IsConnected()){

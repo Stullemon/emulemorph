@@ -323,6 +323,10 @@
 #define FT_POWERSHARE           "ZZUL_POWERSHARE"
 //MORPH END - Added by SiRoB, ZZ Upload System
 
+//MORPH START - Added by SiRoB, POWERSHARE Limit
+#define FT_POWERSHARE_LIMIT		"POWERSHARE_LIMIT"
+//MORPH END   - Added by SiRoB, POWERSHARE Limit
+
 //MORPH START - Added by SiRoB, HIDEOS
 #define FT_HIDEOS				"HIDEOS"
 #define FT_SELECTIVE_CHUNK		"SELECT_CHUNK"

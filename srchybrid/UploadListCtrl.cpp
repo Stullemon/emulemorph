@@ -114,12 +114,12 @@ void CUploadListCtrl::Init()
 		SortItems(SortProc, sortItem + (sortAscending ? 0:100));
 	}
 	// SLUGFILLER: multiSort
-
+/*
 	// Mighty Knife: Community affiliation
 	if (thePrefs.IsCommunityEnabled ()) ShowColumn (13);
 	else HideColumn (13);
 	// [end] Mighty Knife
-
+*/
 }
 
 CUploadListCtrl::~CUploadListCtrl(){
@@ -613,7 +613,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			cur_rec.left += GetColumnWidth(iColumn);
 		}
 	}
-
+/*
 	// Mighty Knife: Community affiliation
 	// Show/Hide community column if changed in the preferences
 	if (thePrefs.IsCommunityEnabled () != !IsColumnHidden (13))
@@ -621,7 +621,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				ShowColumn (13);
 		else HideColumn (13);
 	// [end] Mighty Knife
-
+*/
 	//draw rectangle around selected item(s)
 	if ((lpDrawItemStruct->itemAction | ODA_SELECT) && (lpDrawItemStruct->itemState & ODS_SELECTED))
 	{
