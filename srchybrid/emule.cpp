@@ -310,6 +310,7 @@ BOOL CemuleApp::InitInstance()
 	CemuleDlg dlg;
 	emuledlg = &dlg;
 	m_pMainWnd = &dlg;
+	OptimizerInfo();//Commander - Added: Optimizer [ePlus]
 
 	// Barry - Auto-take ed2k links
 	if (thePrefs.AutoTakeED2KLinks())
@@ -1416,3 +1417,32 @@ void CemuleApp::ClearLogQueue(bool bDebugPendingMsgs)
 	m_queueLock.Unlock();
 }
 // Elandal:ThreadSafeLogging <--
+//Commander - Added: Optimizer [ePlus] - Start
+void CemuleApp::OptimizerInfo(void)
+{
+if (!emuledlg)
+	return;
+	AddLogLine(false,_T("********Optimizer********"));
+	AddLogLine(false,_T("%s"),cpu.GetExtendedProcessorName());
+	switch (get_cpu_type())
+	{
+		case 1:
+			AddLogLine(false, GetResString(IDS_FPU_ACTIVE));
+			break;
+		case 2:
+			AddLogLine(false, GetResString(IDS_MMX_ACTIVE));
+			break;
+		case 3:
+			AddLogLine(false, GetResString(IDS_AMD_ACTIVE));
+			break;
+		case 4:
+		case 5:
+			AddLogLine(false, GetResString(IDS_SSE_ACTIVE));
+			break;
+		default:
+			AddLogLine(false, GetResString(IDS_OPTIMIZATIONS_DISABLED));
+			break;
+	}
+	AddLogLine(false,_T("********Optimizer********"));
+}
+//Commander - Added: Optimizer [ePlus] - End

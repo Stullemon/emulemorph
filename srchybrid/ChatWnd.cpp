@@ -28,6 +28,7 @@
 //MORPH END   - Changed by SiRoB, New friend message window [TPT]
 #include "friend.h"
 #include "ClientCredits.h"
+#include "IP2Country.h" //Commander - Added: IP2Country
 //MORPH END   - Changed by SiRoB, New friend message window [TPT]
 
 #ifdef _DEBUG
@@ -168,7 +169,21 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 	}
 	else
 		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(_T("?"));
-
+        //Commander - Added: IP2Country - Start
+	if (pFriend->GetLinkedClient())
+	{   
+		if(theApp.ip2country->IsIP2Country()){
+		    bool longCountryName = true;
+			GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(pFriend->GetLinkedClient()->GetCountryName(longCountryName));
+		}
+		else {
+			GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText(GetResString(IDS_DISABLED));
+		}
+		
+	}
+	else
+		GetDlgItem(IDC_FRIENDS_COUNTRY)->SetWindowText("?");
+        //Commander - Added: IP2Country - End
 	}
 }
 //MORPH END  - Added by SiRoB, New friend message window [TPT]
@@ -210,6 +225,12 @@ BOOL CChatWnd::OnInitDialog()
 	AddAnchor(IDC_FRIENDS_DOWNLOADED,CSize(0,100));
 	RemoveAnchor(IDC_FRIENDS_DESCARGADO_EDIT);
 	AddAnchor(IDC_FRIENDS_DESCARGADO_EDIT,CSize(0,100));
+	//Commander - Added: IP2Country - Start
+	RemoveAnchor(IDC_FRIENDS_STATIC_COUNTRY);
+	AddAnchor(IDC_FRIENDS_STATIC_COUNTRY,CSize(0,100));
+	RemoveAnchor(IDC_FRIENDS_COUNTRY);
+	AddAnchor(IDC_FRIENDS_COUNTRY,CSize(0,100));
+    //Commander - Added: IP2Country - End
 	//MORPH END   - Changed by SiRoB, Splitting Bar	[O²]
 
 	SetAllIcons();

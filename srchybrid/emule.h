@@ -18,6 +18,7 @@
 #ifndef __AFXWIN_H__
 	#error include 'stdafx.h' before including this file for PCH
 #endif
+#include ".\Optimizer\cpu_info.h" //Commander - Added: Optimizer [ePlus]
 #include "resource.h"
 #include "loggable.h"
 
@@ -63,12 +64,12 @@ class CemuleApp : public CWinApp, public CLoggable
 {
 public:
 	CemuleApp(LPCTSTR lpszAppName = NULL);
-
+    CPUInfo 		cpu; //Commander - Added: Optimizer [ePlus]	
 	//MORPH - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
 	UploadBandwidthThrottler* uploadBandwidthThrottler; 
 	LastCommonRouteFinder*    lastCommonRouteFinder; 
 	//MORPH - Added by SiRoB Yun.SF3, ZZ Upload system (USS)
-	CemuleDlg*			emuledlg;
+	CemuleDlg*		emuledlg;
 	CClientList*		clientlist;
 	CKnownFileList*		knownfiles;
 	CServerConnect*		serverconnect;
@@ -201,6 +202,8 @@ protected:
     // Elandal:ThreadSafeLogging <--
 
 	uint32 m_dwPublicIP;
+public:
+	void OptimizerInfo(void); // Commander - Added: Optimizer [ePlus]
 
 };
 

@@ -185,26 +185,28 @@ BEGIN
     PUSHBUTTON      "Close",IDC_CCLOSE,449,262,50,14,BS_FLAT
     CONTROL         "",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | 
                     LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | WS_TABSTOP,5,17,133,
-                    187,WS_EX_STATICEDGE
+                    173,WS_EX_STATICEDGE
     CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,160,6,236,8
     ICON            "",IDC_MESSAGEICON,147,5,20,20
     CONTROL         "Friends",IDC_FRIENDS_LBL,"Static",SS_LEFTNOWORDWRAP | 
                     WS_GROUP,18,6,93,8
     ICON            "",IDC_FRIENDSICON,5,5,20,20
-    GROUPBOX        "Info",IDC_FRIENDS_MSG,5,206,133,78
-    LTEXT           "Userhash:",IDC_FRIENDS_USERHASH,15,225,34,8
-    LTEXT           "Client:",IDC_FRIENDS_CLIENT,15,237,26,8
-    LTEXT           "Uploaded:",IDC_FRIENDS_UPLOADED,15,260,35,8
-    LTEXT           "Downloaded:",IDC_FRIENDS_DOWNLOADED,15,270,42,8
-    LTEXT           "ID:",IDC_FRIENDS_IDENT,15,249,48,8
-    LTEXT           "Name:",IDC_FRIENDS_NAME,15,215,28,8
-    LTEXT           "-",IDC_FRIENDS_NAME_EDIT,47,214,115,8
-    LTEXT           "-",IDC_FRIENDS_USERHASH_EDIT,51,225,112,8
-    LTEXT           "-",IDC_FRIENDS_CLIENTE_EDIT,44,237,115,8
-    LTEXT           "-",IDC_FRIENDS_IDENTIFICACION_EDIT,63,249,99,8
-    LTEXT           "-",IDC_FRIENDS_SUBIDO_EDIT,63,259,74,8
-    LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,63,270,71,8
+    GROUPBOX        "Info",IDC_FRIENDS_MSG,5,195,133,89
+    LTEXT           "Userhash:",IDC_FRIENDS_USERHASH,15,216,34,8
+    LTEXT           "Client:",IDC_FRIENDS_CLIENT,15,227,26,8
+    LTEXT           "Uploaded:",IDC_FRIENDS_UPLOADED,15,250,35,8
+    LTEXT           "Downloaded:",IDC_FRIENDS_DOWNLOADED,15,260,42,8
+    LTEXT           "ID:",IDC_FRIENDS_IDENT,15,239,48,8
+    LTEXT           "Name:",IDC_FRIENDS_NAME,15,205,28,8
+    LTEXT           "-",IDC_FRIENDS_NAME_EDIT,47,204,115,8
+    LTEXT           "-",IDC_FRIENDS_USERHASH_EDIT,51,217,118,8
+    LTEXT           "-",IDC_FRIENDS_CLIENTE_EDIT,44,227,115,8
+    LTEXT           "-",IDC_FRIENDS_IDENTIFICACION_EDIT,63,239,99,8
+    LTEXT           "-",IDC_FRIENDS_SUBIDO_EDIT,63,249,74,8
+    LTEXT           "-",IDC_FRIENDS_DESCARGADO_EDIT,63,260,71,8
+    LTEXT           "Country:",IDC_FRIENDS_STATIC_COUNTRY,15,271,42,8
+    LTEXT           "-",IDC_FRIENDS_COUNTRY,64,271,71,8
 END
 
 IDD_STATISTICS DIALOGEX 0, 35, 511, 290
@@ -4662,6 +4664,15 @@ BEGIN
     IDS_CTRLKEY             "CTRL"
     IDS_ALTKEY              "ALT"
     IDS_SHIFTKEY            "SHIFT"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_FPU_ACTIVE          "FPU optimizations active"
+    IDS_MMX_ACTIVE          "MMX optimizations active"
+    IDS_AMD_ACTIVE          "AMD optimizations active"
+    IDS_SSE_ACTIVE          "SSE optimizations active"
+    IDS_OPTIMIZATIONS_DISABLED "Optimizations disabled"
 END
 
 STRINGTABLE 

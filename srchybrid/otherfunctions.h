@@ -213,13 +213,15 @@ __inline void md4clr(const void* hash) {
 	((uint32*)hash)[0] = ((uint32*)hash)[1] = ((uint32*)hash)[2] = ((uint32*)hash)[3] = 0;
 }
 
+// Commander - Removed: Optimizer [ePlus] - Start
 // md4cpy -- replacement for memcpy(dst,src,16)
-__inline void md4cpy(void* dst, const void* src) {
+/*__inline void md4cpy(void* dst, const void* src) {
 	((uint32*)dst)[0] = ((uint32*)src)[0];
 	((uint32*)dst)[1] = ((uint32*)src)[1];
 	((uint32*)dst)[2] = ((uint32*)src)[2];
 	((uint32*)dst)[3] = ((uint32*)src)[3];
-}
+}*/
+// Commander - Removed: Optimizer [ePlus] - End
 
 #define	MAX_HASHSTR_SIZE (16*2+1)
 CString md4str(const uchar* hash);

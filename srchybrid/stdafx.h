@@ -51,6 +51,7 @@
 #include <atlcoll.h>
 #include <afxcoll.h>
 #include <afxtempl.h>
+#include ".\Optimizer\optimize.h" // Commander - Added: Optimizer [ePlus]
 
 //TODO: To be removed and properly resolved in the sources!!
 #pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union

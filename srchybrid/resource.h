@@ -2462,7 +2462,10 @@
 #define IDC_FRIENDS_DESCARGADO_EDIT     5113
 #define IDC_FRIENDS_MSG                 5114
 #define IDC_WINDOW1_STATIC              5115
+#define IDC_FRIENDS_STATIC_COUNTRY      5115
 #define IDC_SHOWCLIENTPERCENTAGE        5116
+#define IDC_FRIENDS_DESCARGADO_EDIT2    5116
+#define IDC_FRIENDS_COUNTRY             5116
 #define IDS_CTRLKEY                     5117
 #define IDS_ALTKEY                      5118
 #define IDS_SHIFTKEY                    5119
@@ -2471,6 +2474,13 @@
 #define IDS_INVMODE_HOTKEY              5122
 #define IDS_INVMODE_MODKEY              5123
 #define IDS_INVMODE_VKEY                5124
+//Commander - Added: Optimizer [ePlus] - Start
+#define IDS_FPU_ACTIVE			5125
+#define IDS_MMX_ACTIVE			5126
+#define IDS_AMD_ACTIVE			5127
+#define IDS_SSE_ACTIVE			5128
+#define IDS_OPTIMIZATIONS_DISABLED	5129
+//Commander - Added: Optimizer [ePlus] - End
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125
