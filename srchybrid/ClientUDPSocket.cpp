@@ -312,16 +312,22 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 							if(reqfile->IsPartFile()) //  enkeyDEV: ICS
 								((CPartFile*)reqfile)->NewSrcIncPartsInfo();
 							//Morph End - added by AndCycle, ICS
-							reqfile->UpdatePartsInfo();
+							//MORPH START - Added by SiRoB, -Fix-
+							if(reqfile->IsPartFile())
+								((CPartFile*)reqfile)->UpdatePartsInfo();
+							else
+							//MORPH END   - Added by SiRoB, -Fix-
+								reqfile->UpdatePartsInfo();
 						}
 					}
 					CSafeMemFile data_out(128);
 					if(sender->GetUDPVersion() > 3)
 					{
 						if (reqfile->IsPartFile())
-							((CPartFile*)reqfile)->WritePartStatus(&data_out);
-						else
-							data_out.WriteUInt16(0);
+							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
+						else if (!reqfile->ShareOnlyTheNeed(&data_out, sender)) //wistily SOTN
+							if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+								data_out.WriteUInt16(0);
 					}
 					data_out.WriteUInt16(theApp.uploadqueue->GetWaitingPosition(sender));
 					if (thePrefs.GetDebugClientUDPLevel() > 0)
