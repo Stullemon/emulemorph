@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.42e MorphXT v2.x
+Changelog for eMule 0.42e MorphXT v2.6
 --------------------------------------
 FIXED  : Invalide Parameter Message [SiRoB]
 FIXED  : Abnormal Know.met file growing [SiRoB]
