@@ -2044,7 +2044,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 				}
 			}
 		
-			completedsize = completedParts*PARTSIZE; //m_nFileSize - allgaps - 1;
+			completedsize = m_nFileSize - allgaps/* - 1*/;
 
 			percentcompleted = (float)completedsize/m_nFileSize*100;
 			percentconfirmed = (float)confirmedsize/m_nFileSize*100;
@@ -2366,15 +2366,15 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 
 			if (cur_src->GetServerIP() && cur_src->GetServerPort())
 			{
-				net_stats[0]++;
+				++net_stats[0];
 				if(cur_src->GetKadPort())
-					net_stats[2]++;
+					++net_stats[2];
 			}
 			if (cur_src->GetKadPort())
-				net_stats[1]++;
+				++net_stats[1];
 
 			ASSERT( nCountForState < sizeof(m_anStatesTemp)/sizeof(m_anStatesTemp[0]) );
-			m_anStatesTemp[nCountForState]++;
+			++m_anStatesTemp[nCountForState];
 			
 			switch (cur_src->GetDownloadState())
 			{
@@ -2577,11 +2577,17 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 	}
 
 	if ( GetSrcStatisticsValue(DS_DOWNLOADING) != nOldTransSourceCount ){
-		// khaos::categorymod+
-		//if (theApp.emuledlg->transferwnd->downloadlistctrl.curTab == 0)
-		theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->GetActiveCategory());
-		//else
-		//	UpdateDisplayedInfo(true);
+		//MORPH START - Changed by SiRoB, Khaos Categorie
+		/*
+		if (theApp.emuledlg->transferwnd->downloadlistctrl.curTab == 0)
+			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(0);
+		else
+		*/
+		if ((Category_Struct*)thePrefs.GetCategory(theApp.emuledlg->transferwnd->downloadlistctrl.curTab)->viewfilters.nFromCats == 0)
+			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->downloadlistctrl.curTab);
+		else
+		//MORPH END - Changed by SiRoB, Khaos Categorie
+			UpdateDisplayedInfo(true);
 		// khaos::categorymod-
 		if (thePrefs.ShowCatTabInfos())
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
@@ -5231,11 +5237,13 @@ void CPartFile::SetStatus(EPartFileStatus in)
 		/*
 		if (theApp.emuledlg->transferwnd->downloadlistctrl.curTab==0)
 			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(0);
-		//else
+		else
 		*/
-		theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->GetActiveCategory());
-		UpdateDisplayedInfo(true);
+		if ((Category_Struct*)thePrefs.GetCategory(theApp.emuledlg->transferwnd->downloadlistctrl.curTab)->viewfilters.nFromCats == 0)
+			theApp.emuledlg->transferwnd->downloadlistctrl.ChangeCategory(theApp.emuledlg->transferwnd->downloadlistctrl.curTab);
+		else
 		//MORPH END - Changed by SiRoB, Khaos Categorie
+			UpdateDisplayedInfo(true);
 		
 		if (thePrefs.ShowCatTabInfos())
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
