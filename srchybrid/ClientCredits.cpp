@@ -363,7 +363,66 @@ void CClientCreditsList::LoadList()
 	const int iOpenFlags = CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary;
 	CSafeBufferedFile file;
 	CFileException fexp;
-	if (!file.Open(strFileName, iOpenFlags, &fexp)){
+
+//Morph Start - added by AndCycle, SUQWT save in client.met.SUQWTv2.met
+
+	CString strSUQWTv2FileName;
+	strSUQWTv2FileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), m_pAppPrefs->GetConfigDir());
+
+	if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){
+		if (fexp.m_cause != CFileException::fileNotFound){
+			CString strError("Client.met.SUQWTv2.met not exist");
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			AddLogLine(true, _T("%s"), strError);
+		}
+
+		if(file.Open(strFileName, iOpenFlags, &fexp)){
+
+			file.Close(); // close the file before copying
+
+			//create client.met.SUQWTv2.met for SUQWTv2
+			if (!::CopyFile(strFileName, strSUQWTv2FileName, FALSE))
+				AddLogLine(false, "Failed to create SUQWTv2.met file");
+			else
+				AddLogLine(false, "Create client.met.SUQWTv2.met for SaveUploadQueueWaitTimeV2");
+
+			// reopen file
+			CFileException fexp;
+			if (!file.Open(strSUQWTv2FileName, iOpenFlags, &fexp)){
+				CString strError("Failed to open client.met.SUQWTv2.met");
+				TCHAR szError[MAX_CFEXP_ERRORMSG];
+				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+					strError += _T(" - ");
+					strError += szError;
+				}
+				AddLogLine(true, _T("%s"), strError);
+				return;
+			}
+			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+			file.Seek(1, CFile::begin); //set filepointer behind file version byte
+
+		}else{
+			if (fexp.m_cause != CFileException::fileNotFound){
+				CString strError("Client.met.SUQWTv2.met not exist");
+				TCHAR szError[MAX_CFEXP_ERRORMSG];
+				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+					strError += _T(" - ");
+					strError += szError;
+				}
+				AddLogLine(true, _T("%s"), strError);
+			}
+			return;
+		}
+	}	
+
+//Morph End - added by AndCycle, SUQWT save in client.met.SUQWTv2.met
+//original commented out
+/*
+	if(!file.Open(strFileName, iOpenFlags, &fexp)){
 		if (fexp.m_cause != CFileException::fileNotFound){
 			CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -373,8 +432,8 @@ void CClientCreditsList::LoadList()
 			}
 			AddLogLine(true, _T("%s"), strError);
 		}
-		return;
 	}
+*/
 	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 	
 	try{
@@ -442,6 +501,54 @@ void CClientCreditsList::LoadList()
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.Seek(1, CFile::begin); //set filepointer behind file version byte
 		}
+
+//Morph Start - added by AndCycle, separate the .bak for SUQWT
+		// everything is ok, lets see if the backup exist...
+		CString strSUQWTv2BakFileName;
+		strSUQWTv2BakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.BAK"), m_pAppPrefs->GetConfigDir());
+		
+		DWORD dwSUQWTv2BakFileSize = 0;
+		BOOL bCreateBackupSUQWTv2 = TRUE;
+
+		HANDLE hSUQWTv2BakFile = ::CreateFile(strSUQWTv2BakFileName, GENERIC_READ, FILE_SHARE_READ, NULL,
+										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hSUQWTv2BakFile != INVALID_HANDLE_VALUE)
+		{
+			// Ok, the backup exist, get the size
+			dwSUQWTv2BakFileSize = ::GetFileSize(hSUQWTv2BakFile, NULL); //debug
+			if (dwSUQWTv2BakFileSize > (DWORD)file.GetLength())
+			{
+				// the size of the backup was larger then the org. file, something is wrong here, don't overwrite old backup..
+				bCreateBackupSUQWTv2 = FALSE;
+			}
+			//else: backup is smaller or the same size as org. file, proceed with copying of file
+			::CloseHandle(hSUQWTv2BakFile);
+		}
+		//else: the backup doesn't exist, create it
+
+		if (bCreateBackupSUQWTv2)
+		{
+			file.Close(); // close the file before copying
+
+			if (!::CopyFile(strSUQWTv2FileName, strSUQWTv2BakFileName, FALSE))
+				AddLogLine(false, GetResString(IDS_ERR_MAKEBAKCREDITFILE));
+
+			// reopen file
+			CFileException fexp;
+			if (!file.Open(strFileName+".SUQWTv2.met", iOpenFlags, &fexp)){
+				CString strError(GetResString(IDS_ERR_LOADCREDITFILE));
+				TCHAR szError[MAX_CFEXP_ERRORMSG];
+				if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
+					strError += _T(" - ");
+					strError += szError;
+				}
+				AddLogLine(true, _T("%s"), strError);
+				return;
+			}
+			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+			file.Seek(1, CFile::begin); //set filepointer behind file version byte
+		}
+//Morph End - added by AndCycle, separate the .bak for SUQWT
 
 		uint32 count;
 		file.Read(&count, 4);
@@ -514,7 +621,7 @@ void CClientCreditsList::SaveList()
 	CString name = m_pAppPrefs->GetConfigDir() + CString(CLIENTS_MET_FILENAME);
 	CFile file;// no buffering needed here since we swap out the entire array
 	CFileException fexp;
-	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+	if (!file.Open(name+".SUQWTv2.met", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
@@ -527,7 +634,7 @@ void CClientCreditsList::SaveList()
 
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	CFile fileBack; // Moonlight: SUQWT - Also open a file to save original 30c format.
-	if (!fileBack.Open(name+".30c.bak", CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){
+	if (!fileBack.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary, &fexp)){//Morph - modified by AndCycle, SUQWT save in client.met.SUQWTv2.met
 		CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
 		if (fexp.GetErrorMessage(szError, ELEMENT_COUNT(szError))){
