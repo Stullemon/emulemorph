@@ -323,7 +323,7 @@ void CUpDownClient::ProcessFileInfo(char* packet,uint32 size){
 				delete[] thisStatus;
 				if (thisStatus==m_abyPartStatus)
 					m_abyPartStatus = NULL;
-				thisStatus = NULL;
+				m_PartStatus_list[reqfile] = NULL;
 			}
 		}
 		//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+
@@ -378,7 +378,7 @@ void CUpDownClient::ProcessFileStatus(char* packet,uint32 size){
 			delete[] thisStatus;
 			if (thisStatus==m_abyPartStatus)
 				m_abyPartStatus = NULL;
-			thisStatus = NULL;
+			m_PartStatus_list[reqfile] = NULL;
 		}
 	}
 	//MORPH   END - Added by SiRoB, HotFix related to khaos::kmod+ 
