@@ -1758,12 +1758,8 @@ uint32 CPartFile::Process(uint32 reducedownload, uint8 m_icounter/*in percent*/,
 							//if (theApp.serverconnect->IsConnected() && ((!cur_src->GetLastAskedTime()) || (dwCurTick - cur_src->GetLastAskedTime()) > FILEREASKTIME)){
 							if (theApp.IsConnected() && ((!cur_src->GetLastAskedTime()) || ((dwCurTick > (cur_src->GetLastAskedTime()+FILEREASKTIME)) &&  (dwCurTick % FILEREASKTIME > (UINT32)((FILEREASKTIME / AvailableSrcCount) * (srcPosReask++ % AvailableSrcCount)))))){
 							//MORPH END   - Changed by SiRoB, Spread Reask For Better SUC functioning and more
-								//MORPH START - Changed by SiRoB, Avoid deletion of source when not needed
-								/*cur_src->AskForDownload(); // NOTE: This may *delete* the client!!
-								cur_src = NULL; // TODO: implement some 'result' from 'AskForDownload' to know whether the client was deleted.*/
-								cur_src->AskForDownload();
-								if (!theApp.clientlist->IsValidClient(cur_src)){cur_src = NULL;}
-								//MORPH END - Changed by SiRoB, Avoid deletion of source when not needed
+								cur_src->AskForDownload(); // NOTE: This may *delete* the client!!
+								cur_src = NULL; // TODO: implement some 'result' from 'AskForDownload' to know whether the client was deleted.
 							}
 							break;
 					}
