@@ -619,20 +619,20 @@ void CStatisticsDlg::RepaintMeters()
 	CString Buffer;
 	m_DownloadOMeter.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_DownloadOMeter.SetGridColor(thePrefs.GetStatsColor(1)) ;
-	m_DownloadOMeter.SetPlotColor( thePrefs.GetStatsColor(4) ,0) ;
+	m_DownloadOMeter.SetPlotColor( thePrefs.GetStatsColor(4) ,2) ;
 	m_DownloadOMeter.SetPlotColor( thePrefs.GetStatsColor(3) ,1) ;
-	m_DownloadOMeter.SetPlotColor( thePrefs.GetStatsColor(2) ,2) ;
+	m_DownloadOMeter.SetPlotColor( thePrefs.GetStatsColor(2) ,0) ;
 
 	m_UploadOMeter.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_UploadOMeter.SetGridColor(thePrefs.GetStatsColor(1)) ;
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(7) ,0) ;
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(6) ,1) ;
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(5) ,2) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(7) ,4) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(6) ,3) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(5) ,0) ;
 
 	// friends line
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(13) ,4) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(13) ,2) ;
 	// current upload without overhead included
-	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(14) ,3) ;
+	m_UploadOMeter.SetPlotColor( thePrefs.GetStatsColor(14) ,1) ;
 	m_Statistics.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_Statistics.SetGridColor(thePrefs.GetStatsColor(1)) ;
 	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(8),0) ;
@@ -641,22 +641,22 @@ void CStatisticsDlg::RepaintMeters()
 	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(12),3) ;
 
 	m_DownloadOMeter.SetYUnits(GetResString(IDS_ST_DOWNLOAD));
-	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),0);
+	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),2);
 	Buffer.Format(_T(" (%u %s)"),thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
-	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT),2);
-	m_DownloadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),2);
+	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT),0);
+	m_DownloadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
 
 	m_UploadOMeter.SetYUnits(GetResString(IDS_ST_UPLOAD));
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),0);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),4);
 	Buffer.Format(_T(" (%u %s)"),thePrefs.GetStatsAverageMinutes(),GetResString(IDS_MINS));
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,1);
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),2);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_AVG)+Buffer,3);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT),0);
+	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),1);
+	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),1);
+	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),2);
 	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),2);
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),3);
-	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),3);
-	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND),4);
-	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),4);
 
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION));
 	Buffer.Format(_T("%s (1:%u)"), GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());
@@ -676,16 +676,16 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 		return;
 
 	// current rate
-	m_dPlotDataDown[2]=downloadrate;
+	m_dPlotDataDown[0]=downloadrate;
 
 	// current rate to network (standardPackets+controlPackets)
-	m_dPlotDataUp[2]=uploadrate;
+	m_dPlotDataUp[0]=uploadrate;
 	//float uploadtonetworkrate, float uploadrateControlPackets
 	// current rate (overhead excluded)
-	m_dPlotDataUp[3]=uploadrate-(float)(theStats.GetUpDatarateOverhead())/1024;
+	m_dPlotDataUp[1]=uploadrate-(float)(theStats.GetUpDatarateOverhead())/1024;
 	//TODO: TESTING!
 	// current rate to friends
-	m_dPlotDataUp[4]=uploadrate-(float)(theApp.uploadqueue->GetToNetworkDatarate())/1024;
+	m_dPlotDataUp[2]=uploadrate-(float)(theApp.uploadqueue->GetToNetworkDatarate())/1024;
 
 	// Websever
 	UpDown updown;
@@ -699,11 +699,11 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	// averages
-	m_dPlotDataDown[0]=	theStats.GetAvgDownloadRate(AVG_SESSION);
-	m_dPlotDataUp[0]=	theStats.GetAvgUploadRate(AVG_SESSION);
+	m_dPlotDataDown[2]=	theStats.GetAvgDownloadRate(AVG_SESSION);
+	m_dPlotDataUp[4]=	theStats.GetAvgUploadRate(AVG_SESSION);
 
 	m_dPlotDataDown[1]=	theStats.GetAvgDownloadRate(AVG_TIME);
-	m_dPlotDataUp[1]=	theStats.GetAvgUploadRate(AVG_TIME);
+	m_dPlotDataUp[3]=	theStats.GetAvgUploadRate(AVG_TIME);
 
 	// show
 	m_DownloadOMeter.AppendPoints(m_dPlotDataDown);
