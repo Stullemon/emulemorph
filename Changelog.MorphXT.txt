@@ -1,15 +1,20 @@
 --------------------------------------
-Changelog for eMule 0.45b MorphXT v6.x
+Changelog for eMule 0.45b MorphXT v6.5
 --------------------------------------
 FIXED  : USC: Reworked completly the per client datarate limit [SiRoB]
-FIXED  : USS: trouble arround unlimited maxupload setting [SiRoB]
+FIXED  : Proper fix arround AddSource memory execption [SiRoB]
 
 ADDED  : Safe .met replace [AndCycle]
 ADDED  : noNeededrequeue from SlugFiller [SiRoB]
 ADDED  : doubleLucas from SlugFiller [SiRoB]
+ADDED  : Updated Bad MODSTRING list [SiRoB]
 
 CHANGED: Updated Control Mod Tag [SiRoB]
 CHANGED: Finaly use full SafeHash from SlugFiller [SiRoB]
+CHANGED: Updated UPNP Support, this should fix various trouble (Big thx to MoNKi) [SiRoB]
+CHANGED: IPToCountry should load a bit faster [SiRoB]
+
+REMOVED: AddSource memory exception Official Bugfix by WiZaRd [SiRoB]
 
 --------------------------------------
 Changelog for eMule 0.45b MorphXT v6.4
