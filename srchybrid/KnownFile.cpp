@@ -43,6 +43,7 @@
 #include "Kademlia/Kademlia/SearchManager.h"
 #include "SafeFile.h"
 #include "shahashset.h"
+#include "UploadQueue.h"
 
 // id3lib
 #include <id3/tag.h>
@@ -2078,6 +2079,12 @@ void CKnownFile::SetUpPriority(uint8 iNewUpPriority, bool bSave)
 
 	if( IsPartFile() && bSave )
 		((CPartFile*)this)->SavePartFile();
+
+    //MORPH START - Added by SiRoB, Power Share
+	if(GetPowerShared()) {
+        theApp.uploadqueue->ReSortUploadSlots(true);
+	}
+	//MORPH END   - Added by SiRoB, Power Share
 }
 
 //MOPRH - Added by SiRoB, Keep Permission flag
@@ -2498,6 +2505,15 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 	delete[] imgResults;
 
 }
+
+//MORPH START - Added by SiRoB, Power Share
+void CKnownFile::SetPowerShared(int newValue) {
+    int oldValue = m_powershared;
+    m_powershared = newValue;
+    if(theApp.uploadqueue && oldValue != newValue)
+        theApp.uploadqueue->ReSortUploadSlots(true);
+}
+//MORPH END   - Added by SiRoB, Power Share
 
 /*// #zegzav:updcliuplst
 void CKnownFile::UpdateClientUploadList()

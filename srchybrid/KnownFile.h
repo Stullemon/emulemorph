@@ -331,7 +331,7 @@ public:
 	void	SetPermissions(int iNewPermissions);
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//MORPH START - Changed by SiRoB, Avoid misusing of powersharing
-	void    SetPowerShared(int newValue) {m_powershared = newValue;}
+	void    SetPowerShared(int newValue);
 	bool    GetPowerShared() const;
 	//MORPH END   - Changed by SiRoB, Avoid misusing of powersharing
 	//MORPH START - Added by SiRoB, HIDEOS
