@@ -416,6 +416,7 @@ int CFriendListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	switch (LOWORD(lParamSort))
 	{
 		case 0:
+			//TODO avoid crash here in some case
 			iResult = _tcsicmp(item1->m_strName, item2->m_strName);
 			break;
 		default:

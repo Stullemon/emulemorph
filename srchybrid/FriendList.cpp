@@ -307,3 +307,13 @@ void CFriendList::Process()
 	if (::GetTickCount() - m_nLastSaved > MIN2MS(19))
 		SaveList();
 }
+//MORPH - Added by SiRoB, There is one slot friend or more
+bool CFriendList::IsFriendSlot(){
+	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0; ){
+		CFriend* cur_friend = m_listFriends.GetNext(pos);
+		if (cur_friend->GetFriendSlot())
+			return true;
+	}
+	return false;
+}
+//MORPH - Added by SiRoB, There is one slot friend or more

@@ -47,7 +47,7 @@ friend class CQueueListCtrl;
 	void		RemoveAllFriendSlots();
 	void		Process();
 	uint16		GetCount()		{ return m_listFriends.GetCount(); }
-
+	bool		IsFriendSlot(); //MORPH - Added by SiRoB
 private:
 	CTypedPtrList<CPtrList, CFriend*>	m_listFriends;
 	CFriendListCtrl*					m_wndOutput;
