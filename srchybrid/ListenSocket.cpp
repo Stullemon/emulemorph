@@ -635,7 +635,7 @@ bool CClientReqSocket::ProcessPacket(char* packet, uint32 size, UINT opcode)
 						bool allowSwitch = false;
 
 	                    CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(reqfilehash);
-                        if(!currequpfile) {
+                        if(currequpfile != NULL) {
                             // save original file id asked for, to be able to log it
 							uchar uploadFileId[16];
 							md4cpy(uploadFileId, client->GetUploadFileID());
@@ -2014,7 +2014,12 @@ bool CClientReqSocket::ProcessExtPacket(char* packet, uint32 size, UINT opcode, 
 								sender->SetUpCompleteSourcesCount(nCompleteCountNew);
 								if (nCompleteCountLast != nCompleteCountNew)
 								{
-									reqfile->UpdatePartsInfo();
+									//MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
+									if(reqfile->IsPartFile())
+										((CPartFile*)reqfile)->UpdatePartsInfo();
+									else
+									//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
+										reqfile->UpdatePartsInfo();
 								}
 							}
 							CSafeMemFile data_out(128);

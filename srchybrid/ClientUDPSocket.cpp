@@ -312,6 +312,11 @@ bool CClientUDPSocket::ProcessPacket(BYTE* packet, uint16 size, uint8 opcode, ui
 							if(reqfile->IsPartFile()) //  enkeyDEV: ICS
 								((CPartFile*)reqfile)->NewSrcIncPartsInfo();
 							//Morph End - added by AndCycle, ICS
+							//MORPH START - Added by SiRoB, UpdatePartsInfo -Fix-
+							if(reqfile->IsPartFile())
+								((CPartFile*)reqfile)->UpdatePartsInfo();
+							else
+							//MORPH END   - Added by SiRoB, UpdatePartsInfo -Fix-
 								reqfile->UpdatePartsInfo();
 						}
 					}
