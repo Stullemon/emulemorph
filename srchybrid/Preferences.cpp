@@ -486,6 +486,7 @@ bool	CPreferences::autofilenamecleanup;
 // khaos::kmod+ Obsolete int		CPreferences::allcatType;
 bool	CPreferences::m_bUseAutocompl;
 bool	CPreferences::m_bShowDwlPercentage;
+bool    CPreferences::m_bShowClientPercentage;  //Commander - Added: Client Percentage
 bool	CPreferences::m_bRemoveFinishedDownloads;
 uint16	CPreferences::m_iMaxChatHistory;
 int		CPreferences::m_iSearchMethod;
@@ -2420,6 +2421,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt("SplitterbarPositionFriend",splitterbarPositionFriend+2,"eMule");
 	ini.WriteInt("SplitterbarPositionIRC",splitterbarPositionIRC+2,"eMule");
 	//MORPH END   - Added by SiRoB, Splitting Bar [O²]
+        ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 }
 
 void CPreferences::SaveCats(){
@@ -2831,7 +2833,8 @@ void CPreferences::LoadPreferences()
 	enableZeroFilledTest = ini.GetBool(_T("EnableZeroFilledTest"), false);
 	// Maella end
 	//MORPH END   - Added by IceCream, Defeat 0-filled Part Senders from Maella
-
+        
+        m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
 	enableDownloadInRed = ini.GetBool(_T("EnableDownloadInRed"), true); //MORPH - Added by IceCream, show download in red
 	enableDownloadInBold = ini.GetBool(_T("EnableDownloadInBold"), true); //MORPH - Added by SiRoB, show download in Bold
 	enableAntiLeecher = ini.GetBool(_T("EnableAntiLeecher"), true); //MORPH - Added by IceCream, enable AntiLeecher

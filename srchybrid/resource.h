@@ -2415,6 +2415,7 @@
 #define IDC_FEEDUPDATE                  5008
 #define IDS_CHAT_NAME                   5008
 #define IDC_SPLITTER_STAT               5009
+#define IDS_CLIENTPERCENTAGE            5009
 #define IDC_SPLITTER_FRIEND             5010
 #define IDC_SPLITTER_STAT_HL            5011
 #define IDC_SPLITTER_STAT_HR            5012
@@ -2433,6 +2434,7 @@
 #define IDC_FRIENDS_DESCARGADO_EDIT     5113
 #define IDC_FRIENDS_MSG                 5114
 #define IDC_WINDOW1_STATIC              5115
+#define IDC_SHOWCLIENTPERCENTAGE        5116
 #define IDC_AUTOBACKUP                  13324
 #define IDC_AUTOBACKUP2                 13325
 #define IDC_EDTINFO                     40125

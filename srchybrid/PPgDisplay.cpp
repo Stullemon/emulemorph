@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(CPPgDisplay, CPropertyPage)
 	ON_BN_CLICKED(IDC_DISABLEQUEUELIST, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWCATINFO, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SHOWDWLPERCENT, OnSettingsChange)
+	ON_BN_CLICKED(IDC_SHOWCLIENTPERCENTAGE, OnSettingsChange) //Commander - Added: Client Percentage
 	ON_BN_CLICKED(IDC_REPAINT,OnSettingsChange)
 	ON_BN_CLICKED(IDC_SELECT_HYPERTEXT_FONT, OnBnClickedSelectHypertextFont)
 	ON_BN_CLICKED(IDC_CLEARCOMPL,OnSettingsChange)
@@ -113,6 +114,7 @@ void CPPgDisplay::LoadSettings(void)
 	CheckDlgButton(IDC_SHOWCATINFO,(UINT)thePrefs.ShowCatTabInfos());
 	CheckDlgButton(IDC_REPAINT,(UINT)thePrefs.IsGraphRecreateDisabled() );
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
+	CheckDlgButton(IDC_SHOWCLIENTPERCENTAGE,(UINT)thePrefs.GetUseClientPercentage()); //Commander - Added: Client Percentage
 	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
 
 	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
@@ -152,6 +154,7 @@ BOOL CPPgDisplay::OnApply()
 	thePrefs.indicateratings= (uint8)IsDlgButtonChecked(IDC_INDICATERATINGS);
 	thePrefs.dontRecreateGraphs=(uint8)IsDlgButtonChecked(IDC_REPAINT);
 	thePrefs.m_bShowDwlPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWDWLPERCENT);
+	thePrefs.m_bShowClientPercentage=(uint8)IsDlgButtonChecked(IDC_SHOWCLIENTPERCENTAGE); //Commander - Added: Client Percentage
 	thePrefs.m_bRemoveFinishedDownloads=(uint8)IsDlgButtonChecked(IDC_CLEARCOMPL);
 	thePrefs.m_bUseAutocompl=(uint8)IsDlgButtonChecked(IDC_DISABLEHIST);
 
@@ -254,6 +257,7 @@ void CPPgDisplay::Localize(void)
 		SetDlgItemText(IDC_HYPERTEXT_FONT_HINT, GetResString(IDS_HYPERTEXT_FONT_HINT));
 		SetDlgItemText(IDC_SELECT_HYPERTEXT_FONT, GetResString(IDS_SELECT_FONT) + _T("..."));
 		SetDlgItemText(IDC_SHOWDWLPERCENT, GetResString(IDS_SHOWDWLPERCENTAGE));
+		SetDlgItemText(IDC_SHOWCLIENTPERCENTAGE, GetResString(IDS_CLIENTPERCENTAGE)); //Commander - Added: Client Percentage
 		GetDlgItem(IDC_CLEARCOMPL)->SetWindowText(GetResString(IDS_AUTOREMOVEFD));
 
 		GetDlgItem(IDC_RESETLABEL)->SetWindowText(GetResString(IDS_RESETLABEL));

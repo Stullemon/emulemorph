@@ -547,6 +547,7 @@ public:
 	// khaos::kmod+ Obsolete static	int		allcatType;
 	static	bool	m_bUseAutocompl;
 	static	bool	m_bShowDwlPercentage;
+	static	bool	m_bShowClientPercentage; //Commander - Added: Client Percentage
 	static	bool	m_bRemoveFinishedDownloads;
 	static	uint16	m_iMaxChatHistory;
 
@@ -1325,6 +1326,11 @@ public:
 	static	bool	GetUseAutocompletion()						{ return m_bUseAutocompl;}
 	static	bool	GetUseDwlPercentage()						{ return m_bShowDwlPercentage;}
 	static	void	SetUseDwlPercentage(bool in)				{ m_bShowDwlPercentage=in;}
+        
+        //Commander - Added: Client Percentage - Start
+	static	bool	GetUseClientPercentage()					{ return m_bShowClientPercentage;}
+	static	void	SetUseClientPercentage(bool in)				{ m_bShowClientPercentage=in;}
+	 //Commander - Added: Client Percentage - End
 
 	//Toolbar
 	static	CString GetToolbarSettings()						{ return m_sToolbarSettings; }

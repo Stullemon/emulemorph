@@ -1006,6 +1006,38 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPRECT lpRect, Ctrl
 					//lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(lpCtrlItem->type == UNAVAILABLE_SOURCE), thePrefs.UseFlatBar()); 
 					lpUpDownClient->DrawStatusBar(&cdcStatus,  &rec_status,(CPartFile*)lpCtrlItem->owner, thePrefs.UseFlatBar());
 					//MORPH END   - Changed by SiRoB, Advanced A4AF derivated from Khaos
+
+					//Commander - Added: Client percentage - Start
+					if (thePrefs.GetUseClientPercentage() && lpUpDownClient->GetPartStatus())
+					{
+						float percent = (float)lpUpDownClient->GetAvailablePartCount() / (float)lpUpDownClient->GetPartCount()* 100.0f;
+						if (percent > 0.05f)
+						{
+							//Commander - Added: Draw Client Percentage xored, caching before draw - Start
+							CDC cdcClientPercent;
+							cdcClientPercent.CreateCompatibleDC(dc);
+							CBitmap bmpClientPercent;
+							bmpClientPercent.CreateCompatibleBitmap(dc,  iWidth, iHeight);
+							bmpClientPercent.SetBitmapDimension(iWidth, iHeight);
+							HGDIOBJ hOldBmp = cdcClientPercent.SelectObject(bmpClientPercent);
+							COLORREF oldclr = cdcClientPercent.SetTextColor(RGB(255,255,255));
+							int iOMode = cdcClientPercent.SetBkMode(TRANSPARENT);
+							CString csClientPercent;
+							csClientPercent.Format("%.1f%%", percent);
+
+							cdcClientPercent.BitBlt(0, 0, iWidth, iHeight,  NULL, 0, 0, BLACKNESS);
+							cdcClientPercent.DrawText(csClientPercent, &rec_status, (DLC_DT_TEXT & ~DT_LEFT) | DT_CENTER);
+							cdcStatus.BitBlt(0, 0, iWidth, iHeight,  &cdcClientPercent, 0, 0, SRCINVERT);
+
+							cdcClientPercent.SetBkMode(iOMode);
+							cdcClientPercent.SetTextColor(oldclr);
+							cdcClientPercent.SelectObject(hOldBmp);
+							bmpClientPercent.DeleteObject();
+							//Commander - Added: Draw Client Percentage xored, caching before draw - End	
+						}
+					}
+					//Commander - Added: Client percentage - End
+
 					lpCtrlItem->dwUpdated = dwTicks + (rand() % 128); 
 				} else 
 					hOldBitmap = cdcStatus.SelectObject(lpCtrlItem->status); 
