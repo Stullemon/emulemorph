@@ -180,11 +180,11 @@ void CCatDialog::Localize(){
 	SetWindowText(GetResString(IDS_EDITCAT));
 
 	while (m_prio.GetCount()>0) m_prio.DeleteString(0);
-	m_prio.AddString(GetResString(IDS_DONTCHANGE));
+	//m_prio.AddString(GetResString(IDS_DONTCHANGE)); //ZZ:DownloadManager
 	m_prio.AddString(GetResString(IDS_PRIOLOW));
 	m_prio.AddString(GetResString(IDS_PRIONORMAL));
 	m_prio.AddString(GetResString(IDS_PRIOHIGH));
-	m_prio.AddString(GetResString(IDS_PRIOAUTO));
+	//m_prio.AddString(GetResString(IDS_PRIOAUTO)); //ZZ:DownloadManager
 	m_prio.SetCurSel(m_myCat->prio);
 }
 
