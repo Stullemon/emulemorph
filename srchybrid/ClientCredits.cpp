@@ -51,7 +51,7 @@ CClientCredits::CClientCredits(CreditStruct* in_credits)
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
 	m_fLastScoreRatio = 0;
-	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
+	m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
@@ -70,7 +70,7 @@ CClientCredits::CClientCredits(const uchar* key)
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
 	m_bCheckScoreRatio = true;
 	m_fLastScoreRatio = 0;
-	m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
+	m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
 	InitPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
 
@@ -128,8 +128,8 @@ uint64	CClientCredits::GetDownloadedTotal(){
 float CClientCredits::GetScoreRatio(uint32 dwForIP)
 {
 	//Morph Start - Added by AndCycle, reduce a little CPU usage for ratio count
-	if(m_cssCurrentCreditSystem != theApp.glob_prefs->GetCreditSystem()){
-		m_cssCurrentCreditSystem = theApp.glob_prefs->GetCreditSystem();
+	if(m_cssCurrentCreditSystem != thePrefs.GetCreditSystem()){
+		m_cssCurrentCreditSystem = thePrefs.GetCreditSystem();
 	}else if(m_bCheckScoreRatio == false){//only refresh ScoreRatio when really need
 		return m_fLastScoreRatio;
 	}

@@ -139,7 +139,7 @@ void CCatDialog::Localize(){
 
 	m_comboA4AF.EnableWindow(true);
 	while (m_comboA4AF.GetCount()>0) m_comboA4AF.DeleteString(0);
-	if (theApp.glob_prefs->AdvancedA4AFMode())
+	if (thePrefs.AdvancedA4AFMode())
 	{
 		m_comboA4AF.AddString(GetResString(IDS_DEFAULT));
 		m_comboA4AF.AddString(GetResString(IDS_A4AF_BALANCE));

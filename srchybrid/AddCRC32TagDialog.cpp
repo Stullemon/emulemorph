@@ -55,12 +55,12 @@ END_MESSAGE_MAP()
 void AddCRC32InputBox::OnOK()
 {	
 	GetDlgItem(IDC_CRC32PREFIX)->GetWindowText (m_CRC32Prefix);
-	theApp.glob_prefs->SetCRC32Prefix (m_CRC32Prefix);
+	thePrefs.SetCRC32Prefix (m_CRC32Prefix);
 
 	GetDlgItem(IDC_CRC32SUFFIX)->GetWindowText (m_CRC32Suffix);
-	theApp.glob_prefs->SetCRC32Suffix (m_CRC32Suffix);
+	thePrefs.SetCRC32Suffix (m_CRC32Suffix);
 	m_DontAddCRC32 = (bool)IsDlgButtonChecked(IDC_DONTADDCRC);
-	theApp.glob_prefs->SetDontAddCRCToFilename (m_DontAddCRC32);
+	thePrefs.SetDontAddCRCToFilename (m_DontAddCRC32);
 	CDialog::OnOK();
 }
 
@@ -74,9 +74,9 @@ BOOL AddCRC32InputBox::OnInitDialog(){
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
 
-	CheckDlgButton(IDC_DONTADDCRC,theApp.glob_prefs->GetDontAddCRCToFilename() ? BST_CHECKED : BST_UNCHECKED);
-	GetDlgItem(IDC_CRC32PREFIX)->SetWindowText (theApp.glob_prefs->GetCRC32Prefix ());
-	GetDlgItem(IDC_CRC32SUFFIX)->SetWindowText (theApp.glob_prefs->GetCRC32Suffix ());
+	CheckDlgButton(IDC_DONTADDCRC,thePrefs.GetDontAddCRCToFilename() ? BST_CHECKED : BST_UNCHECKED);
+	GetDlgItem(IDC_CRC32PREFIX)->SetWindowText (thePrefs.GetCRC32Prefix ());
+	GetDlgItem(IDC_CRC32SUFFIX)->SetWindowText (thePrefs.GetCRC32Suffix ());
 
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 

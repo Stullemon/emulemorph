@@ -626,7 +626,7 @@ bool CChatSelector::IsSpam(CString strMessage, CUpDownClient* client)
 		return true;
 
 	//MORPH - Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
-	if (theApp.glob_prefs->GetEnableAntiLeecher())
+	if (thePrefs.GetEnableAntiLeecher())
 		if ((client->IsLeecher()) /*client is already or was a leecher?*/ || (client->TestLeecher()) /*client is now a leecher?*/ || (strMessage.Find("leech") > (-1)) /*leecher client try to afraid users*/|| (strMessage.Find("ban") > (-1))/*leecher client try to afraid users*/)
 			return true;
 

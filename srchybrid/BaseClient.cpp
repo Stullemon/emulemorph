@@ -677,7 +677,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		//MORPH START - Added by SiRoB, Anti-leecher feature
 		bool bLeecher = false;
 		if(thePrefs.GetEnableAntiCreditHack())
-			if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, theApp.glob_prefs->GetUserHash(), 16)==0)
+			if (theApp.GetID()!=m_nUserIDHybrid && memcmp(m_achUserHash, thePrefs.GetUserHash(), 16)==0)
 				bLeecher = true;
 		if(thePrefs->GetEnableAntiLeecher())
 			if(TestLeecher())
@@ -996,7 +996,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	else if (StrStrI(m_pszUsername,"G@m3r")||StrStrI(m_pszUsername,"$WAREZ$")||StrStrI(m_pszUsername,"chief"))
 		strUsedName = m_pszUsername;
 	else
-		strUsedName = theApp.glob_prefs->GetUserNick();
+		strUsedName = thePrefs.GetUserNick();
 	CTag tagName(CT_NAME,strUsedName);
 	//MORPH END   - Added by IceCream, Anti-leecher feature
 	tagName.WriteTagToFile(data);
@@ -2251,7 +2251,7 @@ CString	CUpDownClient::GetCountryName(bool longName) const {
 
 	CString tempStr;
 
-	switch(theApp.glob_prefs->GetIP2CountryNameMode()){
+	switch(thePrefs.GetIP2CountryNameMode()){
 		case IP2CountryName_SHORT:
 			tempStr.Format("<%s>",m_structUserCountry->ShortCountryName);
 			return tempStr;

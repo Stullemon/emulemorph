@@ -62,7 +62,7 @@ UINT AFX_CDECL CArchiveRecovery::run(LPVOID lpParam)
 	ThreadParam *tp = (ThreadParam *)lpParam;
 	DbgSetThreadName("ArchiveRecovery");
 
-	//::SetThreadLocale(theApp.glob_prefs->GetLanguageID()); // 01.06.03 EC - ArchiveRecovery Thread wasn't localized
+	//::SetThreadLocale(thePrefs.GetLanguageID()); // 01.06.03 EC - ArchiveRecovery Thread wasn't localized
 
 	if (!performRecovery(tp->partFile, tp->filled, tp->preview))
 		AddLogLine(true, GetResString(IDS_RECOVERY_FAILED));
