@@ -44,6 +44,18 @@ CIPFilter::~CIPFilter()
 	RemoveAllIPFilters();
 }
 
+//MORPH - Added by SiRoB
+void CIPFilter::AddIP(uint32 IP, UINT level, const CString& desc)
+{
+	uint32 ip1;
+	((BYTE*)&ip1)[0] = ((BYTE*)&IP)[3];
+	((BYTE*)&ip1)[1] = ((BYTE*)&IP)[2];
+	((BYTE*)&ip1)[2] = ((BYTE*)&IP)[1];
+	((BYTE*)&ip1)[3] = ((BYTE*)&IP)[0];
+	AddIPRange(ip1, ip1, level, desc);
+}
+//MORPH - Added by SiRoB
+
 void CIPFilter::AddIPRange(uint32 start, uint32 end, UINT level, const CString& desc)
 {
 	SIPFilter* newFilter = new SIPFilter;

@@ -42,6 +42,7 @@ public:
 	CString GetDefaultFilePath() const;
 
 	void AddIPRange(uint32 IPfrom, uint32 IPto, UINT level, const CString& desc);
+	void AddIP(uint32 IP, UINT level, const CString& desc); //MORPH - Added by SiRoB
 	void RemoveAllIPFilters();
 	bool RemoveIPFilter(const SIPFilter* pFilter);
 
