@@ -129,11 +129,11 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	/*
 	CUpDownClient* newclient = FindBestClientInQueue(true, client);
 	*/
-	CUpDownClient* newclient = FindBestClientInQueue(true, client, onlyCheckForRemove);
+	CUpDownClient* newclient = FindBestClientInQueue(true, client, onlyCheckForRemove == false);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	
     if(newclient != NULL && // Only remove the client if there's someone to replace it
-		RightClientIsSuperior(client, newclient, onlyCheckForRemove) >= 0
+		RightClientIsSuperior(client, newclient, onlyCheckForRemove == false) >= 0
       ){
 
         // Remove client from ul list to make room for higher/same prio client
@@ -635,10 +635,18 @@ bool CUploadQueue::AddUpNextClient(CUpDownClient* directadd, bool highPrioCheck)
 	// khaos::kmod+ Show Compression by Tarod
 	newclient->ResetCompressionGain();
 	// khaos::kmod-
-
+		
 	InsertInUploadingList(newclient);
 	newclient->SetPendingUploadingConnection(false); //MORPH - Added by SiRoB,
-
+	
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+	if(thePrefs.GetLogUlDlEvents())
+		DebugLog(LOG_USC, _T("USC: Added new slot in class %i - [C0 %i/%i %i]-[C1 %i/%i %i]-[C2 %i/%i %i]"),newclient->GetClassID(), m_aiSlotCounter[0],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[0],m_abOnClientOverHideClientDatarate[0]
+																																	,m_aiSlotCounter[1],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[1],m_abOnClientOverHideClientDatarate[1]
+																																	,m_aiSlotCounter[2],m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[2],m_abOnClientOverHideClientDatarate[2]);
+	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate));
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
+	
 	m_nLastStartUpload = ::GetTickCount();
 
     if(newclient->GetQueueSessionUp() > 0) {
@@ -744,9 +752,8 @@ void CUploadQueue::Process() {
 	UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	memzero(m_abOnClientOverHideClientDatarate,sizeof(m_abOnClientOverHideClientDatarate));
-	memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
 	if (m_nLastStartUpload + 5000 < curTick){
+		memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter));
 		POSITION pos2 = uploadinglist.GetHeadPosition();
 		while(pos2 != NULL){
 			// Get the client. Note! Also updates pos as a side effect.
@@ -760,8 +767,8 @@ void CUploadQueue::Process() {
 			}
 			if (maxdatarate > 0 && cur_client->GetDatarate()*10 >= 11*maxdatarate)
 				m_abOnClientOverHideClientDatarate[classID] = true;
-			for (uint32 i = 0; i <= classID; i++)
-				++m_aiSlotCounter[i];
+			++m_aiSlotCounter[classID];
+			++m_aiSlotCounter[LAST_CLASS];
 		}
 	}
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
@@ -1707,7 +1714,6 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 				tempUploadinglist.AddTail(cur_client);
 			}
 
-			memzero(m_aiSlotCounter,sizeof(m_aiSlotCounter)); //MORPH - Added by SiRoB, Upload Splitting Class
 			// Remove one at a time from temp list and reinsert in correct position in uploading list
 			POSITION tempPos = tempUploadinglist.GetHeadPosition();
 			while(tempPos != NULL) {
