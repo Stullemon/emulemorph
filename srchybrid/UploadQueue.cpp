@@ -833,16 +833,17 @@ void CUploadQueue::Process() {
 		// Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(pos2);
 		uint32 classID = cur_client->GetClassID();
-		uint32 maxdatarate = thePrefs.GetMaxClientDataRate();
-		switch (classID){
-			case 0: maxdatarate = thePrefs.GetMaxClientDataRateFriend();break;
-			case 1: maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();break;
-			default: maxdatarate = thePrefs.GetMaxClientDataRate();break;
+		if (classID < NB_SPLITTING_CLASS){
+			uint32 maxdatarate = thePrefs.GetMaxClientDataRate();
+			switch (classID){
+				case 0: maxdatarate = thePrefs.GetMaxClientDataRateFriend();break;
+				case 1: maxdatarate = thePrefs.GetMaxClientDataRatePowerShare();break;
+			}
+			if (maxdatarate > 0 && m_nLastStartUpload + 10000 < curTick && cur_client->GetDatarate()*10 >= 11*maxdatarate)
+				m_abOnClientOverHideClientDatarate[classID] = true;
+			for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
+				++m_aiSlotCounter[i];
 		}
-		if (maxdatarate > 0 && m_nLastStartUpload + 10000 < curTick && cur_client->GetDatarate()*10 >= 11*maxdatarate)
-			m_abOnClientOverHideClientDatarate[classID] = true;
-		for (uint32 i = classID; i < NB_SPLITTING_CLASS; i++)
-			++m_aiSlotCounter[i];
 	}
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount();
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++)
