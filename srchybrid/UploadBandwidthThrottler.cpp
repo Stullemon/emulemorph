@@ -545,7 +545,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
      		for(uint32 slotCounter = 0; slotCounter < (uint32)m_StandardOrder_list.GetSize(); slotCounter++) {
                 ThrottledFileSocket* socket = m_StandardOrder_list.GetAt(slotCounter);
 				uint32 classID = m_StandardOrder_list_stat.GetAt(slotCounter)->classID;
-				
+				if (classID==SCHED_CLASS)
+					classID=LAST_CLASS;
      			if(socket != NULL) {
 				    if(thisLoopTick-socket->GetLastCalledSend() >= SEC2MS(1)) {
       	              // trickle
